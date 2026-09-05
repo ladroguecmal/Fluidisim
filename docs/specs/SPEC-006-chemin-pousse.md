@@ -517,3 +517,159 @@ autour d'un auditeur, pas une densité locale, et l'erreur donnerait un navire q
 qu'il y a de l'écume à deux cents mètres.
 
 Cette ligne est reprise dans le tableau des refus, §8.
+
+---
+
+## 5. Traversabilité
+
+Le canal qu'ADR-018 §1 exige, et le seul dont la valeur soit **autoritaire** au sens d'I-15. C'est
+ce qui en fait le plus contraint des quatre.
+
+### 5.1 L'échantillon
+
+```cpp
+struct TraversabilitySample {          // 20 octets
+    half   depth;               // profondeur d'eau au-dessus du sol
+    half   flow_speed;          // norme du COURANT de surface — jamais l'orbitale, cf. §5.5
+    half   hazard;              // HR = d·(v+0,5) — SPEC-002 §5, ADR-018 §3
+    half   ice_h;               // épaisseur de glace porteuse, 0 si absente
+    half   ice_capacity_kg;     // dérivé de `ice_h` — cf. la note ci-dessous
+    half   temp;                // hypothermie, gel
+    int8_t trend;               // −1 descend · 0 stable · +1 monte
+    uint8_t flags;              // bit 0 : sous-cellule disponible (§5.3)
+    float  t_next_cross;        // secondes avant le prochain franchissement de seuil
+    CrossCause t_next_cause;    // ce qui produirait ce franchissement — cf. §5.4
+};
+```
+
+> **Pourquoi `ice_capacity_kg` est publié alors qu'il se dérive de `ice_h`.** La charge admissible
+> suit `P ∝ h²` (Gold, SPEC-002 §4) : n'importe quel consommateur pourrait la recalculer. C'est
+> précisément le problème — l'IA, le gameplay et l'audio la recalculeraient avec trois constantes
+> légèrement différentes, et un agent traverserait une glace que le gameplay juge rompue. La
+> dérivation est donc faite **une fois, par le système d'eau**, et `ice_h` reste la source de vérité
+> dont elle sort (L25). Le champ vaut 0 tant que l'arbitrage n°2 n'a pas répondu que le projet veut
+> de la glace.
+
+### 5.2 Publication par tuiles, pas par région
+
+Republier une région entière parce qu'un compartiment s'inonde serait absurde. L'unité de
+publication est la **tuile** — un bloc de 16 × 16 cellules `HydroGrid`, soit 1 024 m de côté et
+5 Ko par instantané. Une zone de 4 km × 4 km tient en seize tuiles, ≈80 Ko.
+
+```cpp
+struct TileDesc {
+    FrameId    frame;
+    uint64_t   tile_morton;
+    CadenceClass cadence;      // Maree | Debit | NoeudV | Immediat — §2.3
+    uint8_t    subdivision;    // 0 = cellule HydroGrid ; >0 = sous-cellule, cf. §5.3
+    uint32_t   sequence;       // propre à la tuile
+};
+
+struct TraversabilityView {
+    SnapshotStamp                       stamp;
+    span<const TileDesc>                tiles;
+    span<const TraversabilitySample>    samples;   // concaténées, dans l'ordre des tuiles
+    span<const CrossingEvent>           crossings; // §5.4
+};
+```
+
+**Chaque tuile porte sa cadence, et non le canal.** Les quatre lignes de traversabilité d'ADR-018 §6
+— marée à 1/30 s, crue à 1/2 s, nœud V à 5 Hz, brèche immédiate — décrivent des *phénomènes*, pas
+des canaux. En faire quatre canaux obligerait l'IA à quatre abonnements et à les réconcilier pour
+répondre à une seule question : « puis-je passer ici ? ». Une tuile change de classe de cadence
+quand ce qui la gouverne change — une vanne s'ouvre en amont, la tuile passe de `Maree` à `Debit`.
+
+`sequence` est **par tuile** : un consommateur constate qu'une tuile précise a sauté des
+publications, et non que « quelque chose » a été manqué quelque part.
+
+### 5.3 La sous-cellule : réutiliser celle d'ADR-006, ne pas en inventer une
+
+ADR-018 §7.2 le dit sans détour : « la cellule `HydroGrid` de 64 m est trop grossière pour un gué ».
+Un gué fait quelques mètres de large ; publié à 64 m, il est soit absent, soit étalé sur toute une
+cellule.
+
+La subdivision employée est **celle qu'ADR-006 §2 porte déjà** depuis la revue croisée S05
+(écart R07, angle mort A58), et non une seconde. C'est la leçon L22 appliquée par anticipation :
+deux documents qui inventent séparément leur propre subdivision produisent deux découpages
+divergents, et l'on ne s'en aperçoit qu'à l'intégration.
+
+`subdivision > 0` sur les tuiles qui contiennent une rivière ou un trait de côte ; le nombre
+d'échantillons de la tuile est alors `(16 · 2^subdivision)²`. La liste des tuiles subdivisées est
+une donnée d'auteur dérivée du squelette hydrographique (SPEC-005 §2) : elle ne se décide pas à
+l'exécution, sans quoi la mémoire du canal ne serait pas dimensionnable au démarrage (I-06).
+
+### 5.4 `t_next_cross` : une prédiction sans son hypothèse est un piège
+
+ADR-018 §4 tire de l'analycité de B un bénéfice réel : `depth(x, t)` est calculable à l'avance, donc
+le système peut annoncer « ce gué se ferme dans quarante minutes ». C'est le genre de capacité
+qu'aucune simulation n'offrirait à ce prix (L13).
+
+**Ce qui n'apparaît qu'en écrivant le champ** : cette prédiction n'est vraie que *toutes choses
+égales par ailleurs*. Elle suppose que seule la marée agit. Qu'une vanne s'ouvre en amont, qu'un
+barrage cède, qu'une crue arrive — et la valeur publiée reste là, parfaitement fausse, jusqu'à la
+prochaine republication de la tuile, c'est-à-dire jusqu'à trente secondes plus tard pour une tuile
+de classe `Maree`. Un PNJ ayant planifié un trajet côtier sur cette valeur le maintiendra.
+
+Une prédiction se publie donc **avec la cause qu'elle suppose**, et s'invalide quand cette cause
+n'est plus seule :
+
+```cpp
+enum class CrossCause : uint8_t {
+    Aucune,      // t_next_cross non significatif
+    Maree,       // analytique, fiable à l'horizon publié
+    Debit,       // dérive d'un régime de rivière — valable tant que l'amont ne change pas
+    Commande     // conséquence d'une commande V déjà passée (vanne ouverte, porte fermée)
+};
+```
+
+**Règle.** Toute commande de la couche V — ouverture de vanne, rupture, brèche — invalide
+immédiatement les prédictions des tuiles situées à l'aval, qui repassent en classe `Immediat` le
+temps d'être recalculées et republient `CrossCause::Aucune` tant que la nouvelle valeur n'est pas
+établie. **Publier `Aucune` est un résultat**, pas un échec : c'est la seule façon de dire à l'IA
+« je ne sais plus », et l'absence de cette valeur est ce qui rend une prédiction dangereuse.
+
+Les **franchissements** effectifs, eux, sont des événements :
+
+```cpp
+struct CrossingEvent {
+    uint64_t   cell;            // morton, éventuellement sous-cellule
+    SimTime    t;
+    Threshold  crossed;         // seuils d'ADR-018 §2 : 0,15 / 0,50 / 1,00 / 1,30 m,
+                                // gué véhicule, tirant d'eau, charge de glace
+    int8_t     direction;       // +1 franchi vers le haut, −1 vers le bas
+};
+```
+
+Ils ne transitent **pas par le réseau**, et c'est une conséquence directe de §2.6 : toutes les
+entrées du signal étant répliquées ou cuites, chaque participant — serveur compris — dérive le
+même franchissement au même instant de simulation. Répliquer un `CrossingEvent` reviendrait à
+envoyer une donnée que le destinataire sait déjà calculer. C'est le même raisonnement qui a fait
+disparaître le chemin client → serveur en ADR-021 §3.
+
+### 5.5 `flow_speed` est un courant, et le nom le dit
+
+`hazard` applique `HR = d·(v + 0,5)` où `v` est un **courant** (SPEC-002 §5, ADR-018 §3). La
+vitesse de surface publiée par le chemin tiré, `WaterSample.u`, est explicitement « orbitale +
+courant » : calculé sur elle, `HR` oscillerait à la période de la houle, avec une amplitude
+`πHs/T` = **0,63 m/s à Hs = 1 m et T = 5 s** — le double du seuil qui sépare « faible » de
+« dangereux ». Un gué serait mortel une demi-période sur deux.
+
+`flow_speed` est donc la norme du seul courant : contributions de B, de W répliqué et des champs
+de courant C1 (ADR-011), **sans la composante orbitale et sans δ**. C'est la résolution de l'écart
+E05 de la revue S08 ; le champ correspondant de SPEC-004 est renommé `u_total` pour que le chemin
+tiré cesse de proposer une grandeur qu'on prendra pour l'autre.
+
+### 5.6 δ n'entre pas dans ce canal, et la portée de l'omission est bornée
+
+§2.6 l'impose : le signal est calculé depuis les seules couches répliquées. Une gerbe soulevée par
+une explosion proche ne modifie donc pas la traversabilité publiée, alors qu'elle est visible.
+
+L'écart est borné par l'argument de fermeture d'ADR-021 §3.2 : δ ne contient, par construction, que
+ce qui est plus court que `λ_cut` — du court, du local et du bref. Une perturbation capable de
+changer une décision de cheminement dépasserait `λ_cut` et appartiendrait donc à W, où elle est
+répliquée et prise en compte.
+
+Cette fermeture a la même condition de validité que celle d'ADR-021 : elle tient tant que `λ_cut`
+sépare effectivement les deux couches. Si le banc B2 conduisait à le relever, **ce canal serait à
+réexaminer en même temps qu'ADR-021 §3.2** — à ajouter au protocole de B2, qui porte déjà ce
+critère de recevabilité.

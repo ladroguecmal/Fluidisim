@@ -80,7 +80,7 @@ Objectif         : écrire le chemin poussé — SPEC-006. Débloque trois des q
 - [x] **P4** — SPEC-006 §4 : écume `F` et aération `A`. Deux publications d'un même champ.
   *Thèse : le rendu veut la texture, l'audio veut une intégrale. Publier la même chose aux deux
   impose un readback à celui qui n'en a pas besoin, ou une texture à celui qui n'en veut pas.*
-- [ ] **P5** — SPEC-006 §5 : traversabilité. Tuiles, quatre cadences, événements de franchissement,
+- [x] **P5** — SPEC-006 §5 : traversabilité. Tuiles, quatre cadences, événements de franchissement,
   et l'autorité du signal au titre d'I-15.
   *Thèse : le signal de navigation doit être calculé depuis les seules couches répliquées, sinon
   deux clients ne prennent pas la même décision de pathfinding.*
@@ -125,3 +125,13 @@ Occlusion acoustique : **16 secteurs azimutaux, ceux d'ADR-005 §3**, pas une no
 discrétisation — L22 évité en le voyant venir. Limite consignée : un secteur ne distingue pas un
 rideau de bulles proche d'un rideau lointain ; le raffinement (2 bandes radiales) double un agrégat
 minuscule et se tranche au banc.
+
+#### P5 — trouvaille : une prédiction publiée sans son hypothèse
+
+`t_next_cross` (« ce gué se ferme dans 40 minutes ») n'est vrai que si seule la marée agit. Une
+vanne ouverte en amont laisse la valeur en place, fausse, jusqu'à 30 s — et un PNJ maintient son
+plan. D'où `CrossCause`, et la règle qu'une commande V invalide les prédictions à l'aval.
+**Publier « je ne sais plus » est un résultat.**
+
+Autre point : les `CrossingEvent` ne transitent pas par le réseau — toutes leurs entrées étant
+répliquées, chaque participant les dérive. Même raisonnement qu'ADR-021 §3.
