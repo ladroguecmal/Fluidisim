@@ -73,7 +73,7 @@ Objectif         : écrire le chemin poussé — SPEC-006. Débloque trois des q
   et la règle d'autorité qui découle d'I-15.
   *Thèse : le chemin poussé n'est pas « l'inverse » du chemin tiré. Il a ses propres règles, et
   c'est de ne pas les avoir écrites que naissent trois implémentations divergentes.*
-- [ ] **P3** — SPEC-006 §3 : le bus d'événements. `WaveEvent` complet avec ses trois champs audio,
+- [x] **P3** — SPEC-006 §3 : le bus d'événements. `WaveEvent` complet avec ses trois champs audio,
   publication à N lecteurs, délai de propagation acoustique.
   *Thèse : `drain_outgoing_events()` de SPEC-004 est un canal à consommateur unique — le premier
   qui appelle vide la file pour les autres. C'est un défaut, pas un détail de nommage.*
@@ -104,3 +104,13 @@ Objectif         : écrire le chemin poussé — SPEC-006. Débloque trois des q
   d'écume `F` et le champ d'aération `A` (ADR-014 §2 et §5), le `TraversabilitySample` (ADR-018 §1),
   et — trouvé en relisant ADR-016 §2 — la **polyligne de déferlement**, qu'ADR-016 exige que le
   système publie et que SPEC-005 §2 liste déjà comme donnée dérivée à consommateurs multiples.
+
+#### P3 — deux trouvailles en écrivant la structure
+
+- `displaced_ml` est impossible sous ce nom : un `half` en millilitres sature à 65 L, dépassé par
+  toute claque de coque. Publié en **litres** — mêmes 2 octets, plafond 65 m³.
+- `drain_outgoing_events()` est un **résidu de la conception qu'ADR-021 §3 a remplacée**. Le chemin
+  δ→serveur n'existe plus depuis R03 ; la fonction qui le servait a survécu à la décision qui la
+  vidait de son objet. Supprimée, pas renommée.
+- Troisième point, trouvé en pensant aux consommateurs : l'anticipation locale d'ADR-009 §7.2 ferait
+  jouer deux fois le même impact à 100–300 ms d'intervalle. D'où le bit de **rétractation**.

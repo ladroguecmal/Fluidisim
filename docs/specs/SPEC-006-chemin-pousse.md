@@ -237,3 +237,145 @@ audio finira par lire depuis le fil de simulation « parce que ça marchait ».
 
 Aucune fonction de ce document n'est appelable depuis un fil qui détient un verrou du système
 d'eau : il n'y en a pas à détenir, et c'est voulu.
+
+---
+
+## 3. Le bus d'événements
+
+C'est le canal le plus partagé du système : l'audio en fait son bus (ADR-016 §2), le rendu y prend
+ses déclenchements de gerbe, le gameplay ses causes, et le réseau y voit passer ce qu'il a lui-même
+livré. C'est aussi celui dont l'écriture a fait remonter deux défauts qu'aucune relecture n'avait
+vus.
+
+### 3.1 `WaveEvent`, au complet
+
+`WaveEvent` vivait dans ADR-009 §2, c'est-à-dire dans un document de réseau, alors qu'il traverse
+trois frontières. Il est ici porté dans une spécification d'interface, avec les trois champs
+qu'ADR-016 §6 demande d'ajouter « avant de figer le format ».
+
+```cpp
+enum class EventKind : uint8_t {
+    Impact, Sillage, Explosion, Effondrement, Transduction,
+    Deferlement, Vanne, Fuite, Rupture
+};
+
+enum class EventOrigin : uint8_t {  // cf. §3.3
+    Serveur,              // répliqué, autoritaire
+    AnticipationLocale,   // prédit par le client, sera réconcilié par id
+    TransductionLocale    // W_local, cosmétique — ADR-005 §3, ADR-021 §3
+};
+
+struct WaveEvent {                       // 45 octets
+    uint64_t  id;                        // server_seq — ordre total, déduplication
+    uint32_t  frame_id;
+    f16vec3   origin_local;              // dans le référentiel de `cell`
+    uint64_t  cell;                      // morton 60 bits — HydroGrid
+    SimTime   t_birth;                   // µs, dans T_sim
+    EventKind kind;
+    half      energy;                    // J/m ou J selon kind
+    half      dir[2];
+    half      lambda;
+    half      ttl_hint;
+
+    // --- ajoutés en S09, demandés par ADR-016 §6 ---
+    uint16_t  material_id;               // coque métal, bois, roche, sable, chair
+    half      displaced_l;               // volume déplacé, en LITRES — cf. la note ci-dessous
+    uint8_t   flags;                     // bit 0 : above_surface · bits 1-2 : EventOrigin
+                                         // bit 3 : retraction — cf. §3.3
+};
+```
+
+> **`displaced_ml` ne peut pas exister sous ce nom.** ADR-016 §6 demande un `displaced_ml`, et
+> SPEC-004 §1.1 fixe la convention de volume à des millilitres. Mais un `half` en millilitres sature
+> à **65 504 ml, soit 65 litres** — dépassé par n'importe quelle claque de coque, et de trois ordres
+> de grandeur par une explosion. Le champ est donc publié en **litres** : mêmes deux octets,
+> plafond à 65 m³, et une précision relative de 0,1 % très au-delà de ce que « la taille perçue »
+> demande. La convention en millilitres reste celle de la couche V (ADR-010), qui compte des
+> volumes de contenants et non des volumes projetés.
+>
+> C'est L20 à l'œuvre : l'incompatibilité entre l'unité demandée et le type disponible n'apparaît
+> qu'en écrivant la structure.
+
+**Coût réseau, revérifié.** Les trois champs sont sur la structure **répliquée** — ils doivent
+l'être : le serveur émet l'événement depuis la cause (ADR-021 §3), et un client qui n'a pas
+assisté à la cause n'a aucun moyen de retrouver le matériau ou le volume déplacé. La structure
+passe donc de 40 à 45 octets, et le débit d'ADR-009 §2 de 800 à **900 o/s par joueur intéressé**
+dans une zone chargée à 20 événements/s. Toujours négligeable devant le trafic d'entités —
+vérification faite, pas supposée.
+
+### 3.2 Publication, et non drainage
+
+```cpp
+struct EventView {
+    SnapshotStamp        stamp;
+    span<const WaveEvent> events;   // triés par `id` croissant — ADR-009 §2
+};
+
+using IEventChannel = IChannel<EventView>;
+```
+
+**Trié par `id`**, ce qui rend la déduplication et la réconciliation possibles par simple parcours,
+et non par table de hachage chez chaque consommateur.
+
+> **Ce qui remplace `drain_outgoing_events()` (SPEC-004 §3).** Deux défauts distincts, tous deux
+> réels :
+>
+> 1. **Un drain a un consommateur unique.** Le premier qui appelle vide la file pour tous les
+>    autres. Tant que la transduction δ→W était le seul client, cela ne se voyait pas ; avec
+>    l'audio, le rendu et le gameplay sur le même flux, c'est soit un vol silencieux d'événements,
+>    soit une convention non écrite sur qui a le droit d'appeler.
+> 2. **Le mot « outgoing » est un résidu.** Il datait de la conception qu'ADR-021 §3 a remplacée,
+>    où les événements transduits par un client remontaient au serveur. Ce chemin **n'existe
+>    plus** : la transduction ne produit que du `W_local`, injecté dans W *à l'intérieur* du
+>    système. Plus rien n'a à sortir vers le réseau. La signature avait survécu à la décision qui
+>    la vidait de son objet — R03 avait supprimé le chemin de données, pas la fonction qui le
+>    servait.
+>
+> `drain_outgoing_events()` est donc **supprimée**, et non renommée : les événements de
+> transduction sont injectés en interne, et paraissent sur le bus comme les autres, marqués
+> `TransductionLocale`.
+
+### 3.3 Anticipation et rétractation — ce qu'un bus partagé oblige à traiter
+
+ADR-009 §7.2 autorise un client à émettre localement, par anticipation, l'événement que le serveur
+émettra ; les deux se réconcilient par `id`. C'est bon pour la latence et **audible si on n'en
+tire pas les conséquences** : l'anticipation locale et l'événement serveur arrivent séparés du
+temps d'aller-retour réseau, et l'audio jouerait deux fois le même impact à 100 à 300 ms
+d'intervalle. C'est un défaut qu'un testeur signale sans savoir le nommer — la famille exacte du
+décalage audiovisuel d'ADR-016 §3.
+
+Le bus publie donc, quand la réconciliation a lieu, un **événement de rétractation** : même `id`
+local, `flags` bit 3 armé. Un consommateur qui a déjà agi annule ; un consommateur qui n'avait rien
+fait l'ignore.
+
+Trois lignes de contrat, qui suffisent :
+
+- un consommateur **peut** agir sur un événement `AnticipationLocale`, à condition de savoir
+  annuler ;
+- un consommateur qui ne sait pas annuler **ignore** les `AnticipationLocale` et n'agit que sur
+  `Serveur` — c'est le comportement correct par défaut, et il coûte une comparaison ;
+- une rétractation arrive toujours **après** ce qu'elle rétracte, et jamais plus tard que le
+  `ttl_hint` de l'événement anticipé.
+
+### 3.4 Le délai de propagation appartient au consommateur
+
+Le son parcourt 343 m/s : un événement à 500 m s'entend 1,46 s plus tard, à 3 km 8,7 s plus tard
+(ADR-016 §3, SPEC-002 §6). Le système d'eau **n'applique pas ce retard** — il ne connaît ni la
+position de l'auditeur, ni le nombre d'auditeurs, ni ce que l'audio veut faire des sons dont la
+source a disparu entre-temps.
+
+Ce qu'il fournit, et qui suffit : `t_birth` en `T_sim` et `origin_local` avec sa cellule. Le retard
+est une soustraction chez le consommateur.
+
+**Conséquence de dimensionnement, non évidente.** Un consommateur cadencé plus lentement que le bus
+— l'audio à 10 Hz contre un bus à 30 Hz — doit lire **tous les instantanés depuis son dernier
+`sequence`**, et non le plus récent. La profondeur d'anneau du canal d'événements se dimensionne
+donc ainsi :
+
+```
+ring_slots ≥ (cadence_bus / cadence_du_consommateur_le_plus_lent) + 1
+```
+
+soit au moins 4 emplacements pour un consommateur à 10 Hz. Un anneau plus court fait perdre des
+événements silencieusement — sauf que `sequence` (§2.4) le rend constatable, ce qui est
+précisément son rôle.
