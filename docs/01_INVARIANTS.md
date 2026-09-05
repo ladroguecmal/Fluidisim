@@ -13,9 +13,15 @@ l'eau produite par un système unique. Tout consommateur passe par `EvalWater(x,
 disque, ni sur le réseau. Il est recalculé, jamais mémorisé.
 → ADR-004
 
-**I-03 — B et W répliqué sont déterministes.** Bit à bit, entre plateformes. Sémantique IEEE
+**I-03 — B, W répliqué et V sont déterministes.** Bit à bit, entre plateformes. Sémantique IEEE
 stricte, ordre de sommation fixé, PRNG entier. Vérifié en continu par hash.
 → ADR-003
+
+*Amendement S10 (ADR-022 §5.2) : la couche **V** a été ajoutée à l'énoncé. SPEC-003 §2 la plaçait
+dans le régime D1 — exact, inter-plateforme — depuis S03, et ADR-010 §4 avait pris toutes les
+dispositions pour cela (arithmétique entière, report de reste, ordre fixé) ; seul l'invariant ne le
+disait pas. Sans déterminisme inter-plateforme de V, un serveur et un client divergeraient sur le
+volume d'un compartiment, c'est-à-dire sur une issue de jeu.*
 
 **I-04 — δ n'a jamais d'autorité gameplay.** Aucune force capable de changer une issue de jeu ne
 provient du solveur volumétrique. δ n'agit que sur la pose de rendu, de façon bornée.
@@ -78,3 +84,11 @@ grandeur nouvelle se teste contre I-15 plutôt que de faire l'objet d'un arbitra
 inscrit — un nombre maximal d'objets, une portée — finit par contredire les ressources qui
 l'entourent. Elle se calcule à l'initialisation à partir de coûts mesurés.
 → ADR-012 §3, revue croisée R04
+
+**I-17 — Aucun état de la couche δ n'est jamais sérialisé.** Ni sur disque, ni sur le réseau, ni
+dans une sauvegarde, ni dans un mécanisme de repli hors caméra. Ce qui traverse une frontière de
+persistance est toujours l'un des trois : `T_sim`, un événement W, un volume entier. Une
+proposition qui demande à écrire un champ de δ quelque part est refusée sans discussion de détail —
+la restauration d'un domaine substitutif se fait depuis une **graine cuite** (`SeedState`), jamais
+depuis une capture d'exécution.
+→ ADR-022

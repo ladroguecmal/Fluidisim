@@ -16,7 +16,7 @@ CLAUDE.md              amorce : dirige toute session vers REPRISE.md
 REPRISE.md             passation : rôle, état, rituel de fin de session, jeton
 docs/
   00_INDEX.md          point d'entrée, état d'avancement, arbitrages en attente
-  01_INVARIANTS.md     les 16 règles non négociables
+  01_INVARIANTS.md     les 17 règles non négociables
   adr/                 décisions d'architecture, numérotées, jamais réécrites
   specs/               références chiffrées et signatures d'interfaces
   registres/           angles morts, traçabilité des questions sources

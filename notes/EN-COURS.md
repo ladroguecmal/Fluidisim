@@ -89,7 +89,7 @@ Objectif         : `CondensedState`, la persistance hors caméra, et sa confront
   démonstration de P2 tient.
 - [x] **P7** — répercussions : notes correctives dans SPEC-004 (§10.2 et les signatures),
   ADR-007 §7.3, renvoi depuis SPEC-005 §6.
-- [ ] **P8** — index, invariants, angles morts, README si nécessaire.
+- [x] **P8** — index, invariants, angles morts, README si nécessaire.
 - [ ] **P9** — rituel de fin (`REPRISE.md` §6) : journal S10, leçons, index, jeton libéré.
 
 ### Notes de reprise
@@ -212,3 +212,9 @@ une proposition. Un invariant incomplet finit par autoriser ce qu'il devait inte
 Et un bénéfice secondaire (L06) : I-17 rend possible un cas de non-régression **binaire** sur
 l'aller-retour de persistance (C19), exécutable en mode check. Avec un état δ dans la sauvegarde,
 l'assertion aurait dû être statistique.
+
+#### P8 — décomptes périmés, encore
+
+README et REPRISE annonçaient « 16 règles non négociables » et « 21 décisions ». Corrigés. C'est le
+même défaut que S07 avait trouvé sur le README, et il revient parce qu'un décompte recopié se
+périme en silence. À vérifier systématiquement dans le rituel de fin, pas au hasard d'un grep.

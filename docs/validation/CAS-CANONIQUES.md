@@ -35,6 +35,7 @@ les six premiers doivent passer avant qu'un solveur candidat soit admis en campa
 | C16 | Ballottement en repère accéléré | ADR-002 | **analytique** | `g_eff` non injectée |
 | C17 | Inondation limitée par l'air | ADR-015 | comparatif | arête d'évent absente |
 | C18 | Invariants du système | tous | binaire | hash, allocations, budget |
+| C19 | Aller-retour de persistance | B, W, V | **binaire** | sauvegarde, reconnexion, arrivée en cours de partie |
 
 ---
 
@@ -254,3 +255,30 @@ Batterie binaire, mode `check`, sans GPU, à chaque commit :
 La dernière ligne est la vérification mécanique de l'invariant central : **le même scénario, joué
 avec et sans solveur volumétrique, doit produire exactement les mêmes trajectoires d'objets.**
 Toute différence est une violation d'I-04, détectée automatiquement plutôt qu'en revue de code.
+
+
+---
+
+## C19 — Aller-retour de persistance
+
+*(Ajouté en S10, ADR-022 §6.1.)*
+
+**Montage.** Simuler `N` secondes. Écrire un `WaterPersistentState` (ADR-022 §4.2). Repartir d'un
+système neuf restauré depuis cet objet, et simuler `M` secondes de plus.
+
+**Assertion.** Le hash de B et de W répliqué à `t = N + M` est **identique** à celui d'une
+simulation continue de `N + M` secondes. Les volumes de tous les nœuds V le sont aussi, à
+l'entier près — ils sont entiers.
+
+**Ce que cela attrape.** Un descripteur de région oublié dans le format, un événement dont le `ttl`
+est mal recalculé au rechargement, un nœud V dont l'écart à la valeur d'auteur est mal appliqué, et
+surtout tout état qui aurait été omis du format sans qu'on s'en aperçoive.
+
+**Pourquoi le cas est binaire, et pourquoi c'est remarquable.** Le test est en régime **D1**
+(SPEC-003 §2), donc exécutable en mode `check` — moins de 60 s, à chaque commit. Il ne le serait
+pas si un état de δ figurait dans la sauvegarde : δ n'est jamais D1, et l'assertion aurait dû être
+statistique, c'est-à-dire faible. C'est un bénéfice secondaire direct de l'invariant **I-17**.
+
+**Portée non évidente.** Le fichier de sauvegarde et la charge utile d'une arrivée en cours de
+partie sont le **même objet** (ADR-022 §4.1). Ce cas unique couvre donc quatre situations :
+sauvegarde/rechargement, arrivée en cours de partie, reconnexion et redémarrage de serveur.

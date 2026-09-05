@@ -9,9 +9,9 @@ Sévérité : **1** = refonte d'architecture si découvert tard, **2** = refonte
 
 Historique : 28 recensés en S01, 12 ajoutés en S02 (phénomènes secondaires), 9 en S03 (harnais
 de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outillage auteur),
-6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé) — **74 au total**.
-**Quatorze ont été trouvés dans nos propres écrits**, pas dans les documents sources : A49, A56,
-A57, A58, puis A65 à A74. La proportion
+6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance) —
+**77 au total**. **Dix-sept ont été trouvés dans nos propres écrits**, pas dans les documents
+sources : A49, A56, A57, A58, puis A65 à A77. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -95,6 +95,9 @@ ce que les sources avaient omis.
 | **A72** | Un `half` se choisit sur l'étendue de la grandeur, pas sur la précision voulue | 3 | SPEC-006 §3.1 et §6 |
 | **A73** | L'anticipation locale fait jouer deux fois le même impact | 2 | SPEC-006 §3.3 |
 | **A74** | Une prédiction publiée sans son hypothèse reste crue après que l'hypothèse a cessé | 2 | SPEC-006 §5.4 |
+| **A75** | Un point inscrit dans « ce qui reste ouvert » échappe aux audits | 2 | ADR-022 §2.2 |
+| **A76** | Une dégradation plus rapide que la restauration de ce qu'elle détruit fait pomper | 2 | ADR-012 §4 rang 5, ADR-022 §2.6 |
+| **A77** | Le serveur charge des données cuites — il n'est pas « sans assets » | 2 | ADR-022 §5.1 |
 
 Soixante-quatre angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -279,3 +282,22 @@ pendant quatre sessions.
   d'être vraie. « Ce gué se ferme dans quarante minutes » suppose que seule la marée agit ; une
   vanne ouverte en amont laisse la valeur en place, fausse, jusqu'à la republication de la tuile.
   Vaut pour toute donnée prédictive publiée : elle porte sa cause, ou elle ment.
+
+**Ajoutés en S10, en écrivant la persistance**
+
+- **A75** — **Un point inscrit dans une liste « ce qui reste ouvert » échappe aux audits.** La
+  contradiction entre ADR-007 §3 (« persistance hors caméra ») et ADR-013 §6 (« il n'existe pas de
+  simulation ralentie hors caméra ») est interne à S01, visible en rapprochant deux paragraphes, et
+  a traversé la revue croisée des vingt ADR **et** celle des cinq SPEC. Motif : un audit vérifie ce
+  qui est *affirmé*, et un point reporté se lit comme une lacune connue et suivie. Personne ne va
+  vérifier qu'une question ouverte a encore un objet.
+- **A76** — Une dégradation dont la **fenêtre d'engagement** est plus courte que le **coût de
+  restauration** de ce qu'elle détruit est un générateur de pompage. Ici : 1 s d'engagement
+  (ADR-012 §5) contre 4,4 à 8 s de rétablissement d'un domaine substitutif. Le pompage est plus
+  visible que la dégradation qu'on cherchait à éviter — ADR-012 §5 le dit lui-même pour la manette
+  de qualité, sans avoir appliqué le raisonnement à ses propres rangs.
+- **A77** — **Le serveur charge des données cuites.** I-10 lui interdit d'exécuter W et δ, ce qui
+  fait facilement croire qu'il n'a besoin d'aucun actif. Mais il exécute V, et V a besoin des
+  `shape_lut` pour convertir un volume en hauteur — sans quoi il ne peut ni décider d'un
+  débordement ni évaluer une ligne de flottaison. Un serveur « sans assets » n'est pas une option,
+  et c'est une contrainte de déploiement à annoncer tôt.
