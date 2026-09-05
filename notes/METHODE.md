@@ -109,3 +109,34 @@ l'équipe ne peut pas vérifier que rien n'a été perdu, et le travail devient 
 - **Ne jamais présenter une estimation comme une mesure.** Les ordres de grandeur portent leur
   incertitude dans le texte.
 - **Concision.** Un paragraphe qui n'apporte ni contrainte, ni chiffre, ni décision est supprimé.
+
+
+## Phase 7 — Auditer les absences, pas seulement les affirmations
+
+*(ajoutée en S11)*
+
+Un audit vérifie ce qui est **affirmé**. Les listes « ce qui reste ouvert » n'affirment rien : elles
+déclarent des absences, et se lisent comme des lacunes connues et suivies. Personne ne va y vérifier
+qu'une question **a encore un objet**.
+
+En S11, sur 110 points ouverts, **un sur trois n'était pas dans l'état où son document le
+présentait** : trois dissous, huit répondus ailleurs sans être marqués, treize dupliqués, quinze à
+la formulation périmée. L'un d'eux réclamait un format pour un mécanisme qu'un autre document de la
+**même session** avait dissous, et avait traversé neuf sessions et deux revues croisées.
+
+Trois questions par point, dans cet ordre :
+
+1. **A-t-il encore un objet ?**
+2. **Sa formulation tient-elle encore ?** — chiffres périmés, renvois cassés, prémisse changée.
+3. **Qui attend, et quoi ?** — une mesure, une équipe, un arbitrage humain, du code, personne.
+
+Deux règles d'écriture en découlent, gratuites si on y pense au moment d'écrire :
+
+- **tout point ouvert nomme son porteur** quand un autre document pose la même question. SPEC-006 le
+  fait pour quatre de ses huit points ; c'est une ligne ;
+- **une session qui décide ou corrige quelque chose parcourt les points ouverts qui le citaient.**
+  C'est une recherche de texte, pas une relecture.
+
+La troisième question produit un livrable que rien d'autre ne produit : la liste de **qui attend
+quoi**. En S11, elle a fait apparaître sept destinataires extérieurs jamais listés, un cinquième
+arbitrage humain, et quatre travaux de conception que personne n'avait planifiés.

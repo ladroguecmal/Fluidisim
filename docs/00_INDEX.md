@@ -74,9 +74,10 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`specs/SPEC-004`](specs/SPEC-004-interfaces.md) | **signatures des interfaces** — solveurs, champ de fond, solides, services d'hôte, contrat de fils d'exécution |
 | [`specs/SPEC-005`](specs/SPEC-005-outillage-auteur.md) | **outillage auteur** — sources de vérité, inversion du pipeline eau/terrain, cuisson déterministe, obsolescence |
 | [`specs/SPEC-006`](specs/SPEC-006-chemin-pousse.md) | **le chemin poussé** — ce que le système *publie* : bus d'événements et `WaveEvent`, écume et aération, traversabilité, polyligne de déferlement |
-| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | 77 points, avec sévérité — dont 17 trouvés dans nos propres écrits |
+| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | 80 points, avec sévérité — dont 20 trouvés dans nos propres écrits |
 | [`registres/REVUE-CROISEE-S05.md`](registres/REVUE-CROISEE-S05.md) | **audit croisé des 20 ADR** — 12 écarts, dont 2 de gravité 1, et la liste des contrôles passés |
 | [`registres/REVUE-CROISEE-S08.md`](registres/REVUE-CROISEE-S08.md) | **audit croisé des 5 SPEC** — 10 écarts, dont 2 de gravité 1 ; l'arithmétique des fiches chiffrées revérifiée ligne à ligne |
+| [`registres/AUDIT-POINTS-OUVERTS-S11.md`](registres/AUDIT-POINTS-OUVERTS-S11.md) | **audit des 110 points ouverts** — un sur trois n'était pas dans l'état annoncé ; et le tableau **« qui attend quoi »**, bancs, équipes, arbitrages |
 | [`registres/QUESTIONS-OUVERTES.md`](registres/QUESTIONS-OUVERTES.md) | traçabilité section par section + verdict sur les 7 propositions antérieures |
 | [`validation/SPEC-003`](validation/SPEC-003-harnais-de-validation.md) | **harnais de validation** — régimes de déterminisme, scénarios, métriques, CI, pièges de mesure |
 | [`validation/CAS-CANONIQUES.md`](validation/CAS-CANONIQUES.md) | 19 montages de référence, dont 12 à solution analytique fermée |
@@ -135,9 +136,25 @@ sont posés. Ce qui reste est du code, des mesures et des réunions.
    abritée, jamais de haute mer : la réponse « oui » coûte moins cher que l'ADR ne le laisse
    craindre.
 3. **Qui porte le trait de côte mobile ?** → ADR-011 §6, ADR-018 §4. Engage terrain, IA, audio et
-   points d'apparition.
+   points d'apparition. Conditionne aussi le nombre d'états de la polyligne de déferlement publiée
+   (SPEC-006 §6).
+4. **Combien de temps vit un nœud V rattaché à l'objet d'un joueur absent depuis des mois ?**
+   → ADR-022 §7.2. Politique de monde, avec des conséquences de stockage et de gameplay. *(Ajouté
+   en S10.)*
+5. **Qui possède le harnais de validation ?** → SPEC-003 §11.4. Il ne doit appartenir ni à l'équipe
+   eau seule — juge et partie — ni à une équipe d'outillage détachée du domaine. *(Remonté au rang
+   d'arbitrage en S11 : SPEC-003 §1 pose que « la qualité des décisions qui suivent est plafonnée
+   par celle du harnais », et la question était rangée parmi des choix de format de fichier.)*
 
-### Interfaces à confirmer avant que l'autre équipe ne fige son format
+### Ce que d'autres équipes doivent fournir
+
+*(Section élargie en S11. Elle s'appelait « interfaces à confirmer » et n'en listait que quatre ;
+l'audit des points ouverts a trouvé **onze destinataires extérieurs distincts**. Les quatre premiers
+sont des négociations d'interface, les sept autres sont plus légers — une table de valeurs, un
+cadrage — mais ils ne se rattrapent pas tard davantage : un modèle de nageur décidé après que
+l'équipe personnage a figé sa machine à états coûte un recâblage, exactement comme un format audio.)*
+
+#### Les quatre interfaces — à confirmer avant que l'autre équipe ne fige son format
 
 > **Préalable levé en S09.** S08 avait constaté (écart E04, gravité 1) que trois de ces quatre
 > interfaces — audio, IA/navigation, part écume du rendu — n'avaient **aucune signature écrite** :
@@ -155,3 +172,18 @@ sont posés. Ce qui reste est du code, des mesures et des réunions.
 | IA / navigation | signal de traversabilité, surface navigable conditionnelle de la glace — **signatures à écrire (E04)** | un générateur de maillage qui ne sait qu'enlever des zones ; et un danger calculé sur une vitesse qui mêle orbitale et courant (E05) |
 | Terrain / outillage | **le géoïde dans l'outil** (70 m d'écart à 30 km), l'eau en amont du terrain, rivière source de vérité | côtes entières à resculpter ; rivières qui remontent leur lit — **le plus urgent des quatre** |
 | Rendu | modèle de diffusion sous-marine, caméra à demi immergée | ligne de flottaison instable, corrigée tard et mal |
+
+#### Les sept autres destinataires *(trouvés en S11)*
+
+| Destinataire | Attendu | Où | Nature |
+|---|---|---|---|
+| **Véhicules** | table `a_max` par archétype d'objet contrôlable | ADR-013 §7.2 | donnée à obtenir |
+| **Personnage** | modèle du nageur en surface — probablement cinématique contraint | ADR-008 §5.4 | cadrage |
+| **Gameplay spatial** | brèche vers le vide : `to_vacuum`, débit critique | ADR-015 §7.2 | cadrage |
+| **Gameplay survie** | air respirable — le système d'eau fournit `volume` et `pression`, rien de plus | ADR-015 §7.4 | cadrage |
+| **Réseau / physique solide** | `int64` ou `f64` pour les positions monde — décision partagée | ADR-002 §7.1 | décision partagée |
+| **Gameplay** | équilibrage de `K` et `E_cause` · `V_min` et les TTL de la couche V | ADR-021 §7.2 · ADR-010 §8.2 | équilibrage |
+| **Assurance qualité technique** | propriété du harnais de validation | SPEC-003 §11.4 | organisation |
+
+Le détail, avec les points ouverts correspondants, est dans
+[`AUDIT-POINTS-OUVERTS-S11.md`](registres/AUDIT-POINTS-OUVERTS-S11.md) §7.2.

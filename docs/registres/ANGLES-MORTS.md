@@ -9,9 +9,9 @@ Sévérité : **1** = refonte d'architecture si découvert tard, **2** = refonte
 
 Historique : 28 recensés en S01, 12 ajoutés en S02 (phénomènes secondaires), 9 en S03 (harnais
 de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outillage auteur),
-6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance) —
-**77 au total**. **Dix-sept ont été trouvés dans nos propres écrits**, pas dans les documents
-sources : A49, A56, A57, A58, puis A65 à A77. La proportion
+6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance),
+3 en S11 (audit des points ouverts) — **80 au total**. **Vingt ont été trouvés dans nos propres
+écrits**, pas dans les documents sources : A49, A56, A57, A58, puis A65 à A80. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -98,6 +98,9 @@ ce que les sources avaient omis.
 | **A75** | Un point inscrit dans « ce qui reste ouvert » échappe aux audits | 2 | ADR-022 §2.2 |
 | **A76** | Une dégradation plus rapide que la restauration de ce qu'elle détruit fait pomper | 2 | ADR-012 §4 rang 5, ADR-022 §2.6 |
 | **A77** | Le serveur charge des données cuites — il n'est pas « sans assets » | 2 | ADR-022 §5.1 |
+| **A78** | Une correction s'applique là où vit l'affirmation ; un point ouvert n'affirme rien | 2 | AUDIT-POINTS-OUVERTS-S11 §6.2 |
+| **A79** | Le corpus a onze destinataires extérieurs, la liste officielle en portait quatre | 2 | AUDIT-POINTS-OUVERTS-S11 §7.2 |
+| **A80** | Quatre points disent « à spécifier » sans qu'aucune session ne l'ait pris en charge | 2 | AUDIT-POINTS-OUVERTS-S11 §7.4 |
 
 Soixante-quatre angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -301,3 +304,20 @@ pendant quatre sessions.
   `shape_lut` pour convertir un volume en hauteur — sans quoi il ne peut ni décider d'un
   débordement ni évaluer une ligne de flottaison. Un serveur « sans assets » n'est pas une option,
   et c'est une contrainte de déploiement à annoncer tôt.
+
+**Ajoutés en S11, en auditant les listes « ce qui reste ouvert »**
+
+- **A78** — **Une correction s'applique là où vit l'affirmation qu'elle corrige.** Un point ouvert
+  n'affirme rien : il déclare une absence, et personne ne relit une liste d'absences en se demandant
+  si l'une d'elles a été comblée. Quatre instances trouvées — ADR-007 §5.3, ADR-006 §7.3,
+  ADR-017 §7.2, SPEC-004 §10.3 — dont la dernière a la correction et le point périmé **dans le même
+  document, à quatre sections d'écart** : ce n'est donc pas une affaire de distance.
+- **A79** — Le corpus adresse une demande à **onze destinataires extérieurs**, là où la liste
+  officielle en portait quatre. Les sept manquants — véhicules, personnage, gameplay spatial,
+  gameplay survie, réseau/physique solide, gameplay, assurance qualité — étaient chacun cités dans
+  un point ouvert, c'est-à-dire à l'endroit où personne ne va chercher une dépendance.
+- **A80** — Quatre points disent « à spécifier » et **aucune session ne l'a jamais pris en charge** :
+  le terme d'impact de flottabilité, le modèle du nageur en surface, le comportement des rochers
+  turbulents permanents, la coalescence de deux poches d'air. Ce n'est ni une mesure, ni un
+  arbitrage, ni une dépendance : c'est du travail de conception rendu invisible par l'endroit où il
+  est inscrit.

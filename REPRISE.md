@@ -138,7 +138,10 @@ Avant de rendre la main, dans cet ordre :
    silence : le défaut a été trouvé en S07, puis de nouveau en S10.
 5. **Corriger ce qui a été invalidé** : un ADR n'est jamais réécrit, mais une erreur factuelle
    reçoit une note corrective visible et datée, et une décision changée fait l'objet d'un nouvel
-   ADR qui remplace explicitement l'ancien.
+   ADR qui remplace explicitement l'ancien. **Et parcourir les listes « ce qui reste ouvert » qui
+   citaient ce qu'on vient de décider** — une correction se propage vers la prose qui l'explique,
+   jamais vers les points ouverts qui la réclamaient (S11 en a trouvé quatre instances ; c'est une
+   recherche de texte, pas une relecture).
 6. **Mettre à jour ce document** : jeton, numéro de session, état, session suivante.
 
 Une session qui n'exécute pas ce rituel laisse le projet dans un état où la suivante devra

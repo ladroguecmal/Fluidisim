@@ -84,7 +84,7 @@ avait dissous celui d'ADR-007 §5.3 sans que personne ne le voie pendant neuf se
 - [x] **P7** — rédiger `docs/registres/AUDIT-POINTS-OUVERTS-S11.md` : le verdict par point,
   la synthèse par catégorie, et **qui attend quoi**.
 - [x] **P8** — appliquer : clôtures marquées et notes correctives dans les documents concernés.
-- [ ] **P9** — index, angles morts, `METHODE.md` (la passe d'audit devient une phase du protocole).
+- [x] **P9** — index, angles morts, `METHODE.md` (la passe d'audit devient une phase du protocole).
 - [ ] **P10** — rituel de fin (`REPRISE.md` §6) : journal S11, leçons, index, jeton libéré.
 
 ### Notes de reprise
