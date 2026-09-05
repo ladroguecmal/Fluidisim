@@ -144,7 +144,12 @@ absence produit de l'eau qui coule paisiblement dans le vide — défaut immédi
 1. Calibration de la cavité d'entrée → banc B10.
 2. Débit critique et vitesse d'éjection pour `to_vacuum` : formule des gaz parfaits en col sonique,
    à confronter au ressenti gameplay plutôt qu'à la précision.
-3. Coalescence des poches T2 (deux compartiments qui communiquent) : règle de fusion à définir.
+3. ~~Coalescence des poches T2 (deux compartiments qui communiquent) : règle de fusion à définir.~~
+   **Spécifiée en S12 → [ADR-023](ADR-023-mecanismes-restes-a-specifier.md) §5.** La règle est
+   `n_fusion = n_a + n_b` — une addition, **parce que le §3 ci-dessus a stocké `n_moles`** et non
+   seulement pression et volume. Le volume résultant sort d'une dichotomie sur le `shape_lut`,
+   monotone par construction : six itérations. ADR-023 §5 ajoute la **scission** (moles au prorata
+   des volumes) et l'hystérésis d'ouverture, que ce point ne demandait pas.
 4. Air respirable : relève du gameplay survie, à cadrer avec l'équipe concernée. Le système d'eau
    fournit `volume` et `pression`, rien de plus.
 5. Vapeur au contact d'une source chaude (tuyère, coulée) : traitée comme un effet volumétrique de

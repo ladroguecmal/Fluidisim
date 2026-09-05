@@ -458,3 +458,46 @@ Deux limites, à écrire pour qu'on ne les demande pas :
   distincts ne fusionnent pas, même si leurs géométries se recouvrent : elles n'ont pas le même
   `g_eff` ni la même `FrameRef` (I-07), et un niveau libre commun n'aurait pas de sens. Le cas est
   refusé, pas approximé.
+
+---
+
+## 6. Bilan : quatre mécanismes, aucune interface nouvelle
+
+| § | Ferme | Mécanisme | Interface touchée |
+|---|---|---|---|
+| 2 | ADR-008 §5.3 | impulsion de masse ajoutée, intégrée analytiquement sur le tick | **aucune** |
+| 3 | ADR-008 §5.4 | seconde condition d'entrée au mode contraint | **aucune** |
+| 4 | ADR-013 §7.4 | terme stationnaire dérivé, publié comme `BreakerVertex` | SPEC-006 §6, **inchangée** |
+| 5 | ADR-015 §7.3 | `n_fusion = n_a + n_b`, niveau commun par dichotomie | **aucune**, interne à V |
+
+**Ni §2 ni §3 n'ajoutent d'interface**, et c'est une conséquence de la frontière posée par ADR-020 :
+la flottabilité est calculée **du côté hôte**, à partir de `EvalWaterBatch` (SPEC-004 §3) qui fournit
+déjà `eta`, `normal` et `u_total`. Le terme d'impact et le mode contraint sont des consommateurs de
+cette même donnée, au même titre que la poussée d'Archimède. Le système d'eau ne gagne aucune
+fonction ; il n'en perd aucune non plus.
+
+Cela vaut confirmation de la séparation d'ADR-008 §1 : `accumulate_force` (SPEC-004 §7.2) ne mène
+qu'à la pose de rendu et reste réservée à δ. Le terme d'impact, lui, est **autoritaire** (§2.4) et
+n'emprunte donc pas ce chemin — il n'aurait pas pu, ce qui est exactement l'effet recherché quand
+I-04 a été rendu mécanique.
+
+**Quatre mécanismes spécifiés, zéro interface nouvelle, deux mécanismes existants élargis.** C'est
+le rendement qu'un corpus arrivé à maturité doit donner, et c'est aussi ce qui rend ces quatre points
+peu coûteux à traiter aujourd'hui alors qu'ils l'auraient été davantage il y a huit sessions.
+
+---
+
+## 7. Ce qui reste ouvert
+
+1. **Relèvement `β` par archétype de coque et seuil de déclenchement de l'impact** (`v_rel·n > 2 m/s`
+   proposé) → banc **B6**, cas canonique **C20**. `β` est une propriété d'archétype à obtenir avec
+   les modèles de coques, comme le tenseur de masse ajoutée.
+2. **Vitesse de nage soutenue** — 0,7 m/s est une valeur de départ dont dépend le seuil de perte de
+   contrôle de §3.4. **Équipe personnage**, avec l'animation et le point d'attache de caméra.
+3. **`ε` de l'hystérésis de coalescence** — 5 cm proposé, à calibrer : au-dessus de l'amplitude du
+   clapot résiduel d'un compartiment, très en dessous de la hauteur d'une ouverture typique.
+4. **Critère de promotion d'un site turbulent par l'auteur** — la dérivation de §4.3 peut en retenir
+   des centaines ; ce qui distingue un site scéniquement utile d'un rocher quelconque relève de
+   l'outillage (SPEC-005), et non d'un seuil physique.
+5. **Mélange de gaz différents dans une poche fusionnée** — porté par **ADR-010 §8.4**, qui pose
+   déjà la question pour les liquides. La coalescence n'y ajoute rien et n'en dépend pas.

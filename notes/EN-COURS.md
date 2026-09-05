@@ -86,7 +86,7 @@ aussi une *cause*, ce qui n'est pas la même chose.
 - [x] **P5** — `ADR-023` §5 : la **coalescence des poches d'air T2**.
   *Thèse : la règle tient en une addition, parce qu'ADR-015 §3 a eu la bonne idée de stocker
   `n_moles` plutôt que seulement pression et volume.*
-- [ ] **P6** — `ADR-023` §6–7 : ce que chaque section ferme, ce qui reste ouvert ; puis les notes
+- [x] **P6** — `ADR-023` §6–7 : ce que chaque section ferme, ce qui reste ouvert ; puis les notes
   de clôture dans ADR-008 §5.3, §5.4, ADR-013 §7.4 et ADR-015 §7.3.
 - [ ] **P7** — index, angles morts, cas canoniques, registre S11 (statut des quatre points).
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6) : journal S12, leçons, index, jeton libéré.
@@ -164,3 +164,13 @@ usage gratuit d'une seule décision.
 Deux ajouts non demandés par le point ouvert : la **scission** (moles au prorata des volumes — toute
 autre répartition fait sauter la poussée d'une coque retournée quand une cloison émerge) et
 l'**hystérésis** sur la hauteur d'ouverture, ε = 5 cm, même parade qu'ADR-010 §5 pour les flaques.
+
+#### P6 — bilan : quatre mécanismes, zéro interface nouvelle
+
+Ni le terme d'impact ni le mode contraint n'ajoutent d'interface : la flottabilité est calculée
+**du côté hôte** à partir de `EvalWaterBatch`, qui fournit déjà `eta`, `normal` et `u_total`. Le site
+turbulent réutilise le canal de SPEC-006 §6 inchangé ; la coalescence est interne à V.
+
+Confirmation au passage de la séparation d'ADR-008 §1 : le terme d'impact étant **autoritaire**, il
+n'emprunte pas `accumulate_force`, qui ne mène qu'à la pose de rendu — il n'aurait pas pu, ce qui est
+exactement l'effet recherché quand I-04 a été rendu mécanique (L19).

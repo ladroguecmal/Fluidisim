@@ -110,8 +110,17 @@ la cuve — cas de gameplay intéressant et physiquement juste, obtenu pour un c
 
 1. Nombre et placement des points d'échantillon par archétype (20 à 60) → benchmark B6.
 2. Valeurs de `C_n`, `C_t` et du tenseur de masse ajoutée par archétype → calibration.
-3. Cas du corps qui sort entièrement de l'eau puis retombe (rentrée avec claquement) : la force
-   d'impact d'entrée (*slamming*) n'est pas capturée par l'intégration quasi-statique. Nécessite
-   un terme d'impact séparé, proportionnel à `ρ v² A`. À spécifier.
-4. Nageur / joueur en surface : modèle distinct, probablement cinématique contraint plutôt que
-   dynamique. À traiter avec l'équipe personnage.
+3. ~~Cas du corps qui sort entièrement de l'eau puis retombe : la force d'impact d'entrée
+   (*slamming*).~~ **Spécifié en S12 → [ADR-023](ADR-023-mecanismes-restes-a-specifier.md) §2.**
+   La grandeur retenue n'est pas la pression `∝ ρv²A` envisagée ici mais l'**impulsion de masse
+   ajoutée** `J = Δ(½πρc²)·v_rel` : la pression de pic diverge quand le relèvement de carène tend
+   vers zéro — on ne la connaît donc pas — alors que l'impulsion est un bilan de quantité de
+   mouvement. Elle réutilise le tenseur de masse ajoutée imposé au §2 ci-dessus, et elle est
+   **autoritaire** au titre d'I-15, ce qui permet qu'un claquement casse quelque chose.
+4. ~~Nageur / joueur en surface : modèle distinct, probablement cinématique contraint.~~
+   **Résolu en S12 → [ADR-023](ADR-023-mecanismes-restes-a-specifier.md) §3, et il n'y avait pas de
+   modèle à écrire.** Le mode contraint du §3 ci-dessus reçoit une **seconde condition d'entrée** :
+   *un corps contrôlé, en surface, y bascule quel que soit son `ω·dt`*. Le critère existant est un
+   critère de **stabilité numérique**, qu'un nageur passe sans difficulté (`ω·dt ≈ 0,14`) alors que
+   c'est bien ce mode qu'il lui faut — pour le contrôle et la caméra, non pour la stabilité.
+   Ce qui reste à l'équipe personnage est l'animation, la caméra et la vitesse de nage soutenue.
