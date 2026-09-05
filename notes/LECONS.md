@@ -356,3 +356,75 @@ par paires ne peut pas voir cela — il vérifie une relation, jamais une proven
 **Réflexe** : un audit de cohérence et un audit de provenance sont deux passes distinctes, et la
 seconde ne se déduit pas de la première. Même famille que L21 — vérifier deux termes à la fois
 laisse structurellement passer ce qui est faux en amont des deux.
+
+## L35 — Une décision qui supprime un mécanisme doit lister les signatures qu'elle périme
+
+*(S09)* La revue S05 avait supprimé le chemin d'énergie client → serveur. Elle avait corrigé les
+paragraphes concernés dans trois ADR. Mais la **fonction** qui servait ce chemin,
+`drain_outgoing_events()`, est restée dans la spécification d'interfaces — dont le statut est
+« dernier document avant l'écriture de code ». Elle aurait été implémentée, et personne n'aurait su
+dire à quoi elle servait.
+
+Une décision se propage naturellement vers la prose, qui l'explique, et pas vers les signatures, qui
+n'ont l'air de rien affirmer.
+
+**Réflexe** : après toute décision qui *retire* un mécanisme, parcourir les interfaces à la
+recherche de ce qui le servait. Une signature orpheline ne se signale jamais d'elle-même — elle
+compile.
+
+## L36 — Un flottant court se choisit sur l'étendue de la grandeur, jamais sur la précision voulue
+
+*(S09)* Deux fois dans un même document : un volume déplacé en millilitres sature un `half` à
+65 litres, dépassé par toute claque de coque ; un flux d'énergie en W/m le sature à 65 kW/m,
+dépassé dès une mer à `Hs = 4 m`. Dans les deux cas le raisonnement fautif était le même — « deux
+octets suffisent, on n'a pas besoin de plus de précision » — et il portait sur la mauvaise
+propriété.
+
+L'erreur est invisible en relecture et se manifeste comme une **saturation silencieuse au cas le
+plus spectaculaire** : la plus grosse explosion, la plus grosse tempête. C'est-à-dire au moment où
+elle se voit le plus et où on la remarquera le plus tard.
+
+**Réflexe** : avant de fixer l'unité d'un champ à format court, calculer le **cas extrême du
+projet** et choisir l'unité pour qu'il tienne. La précision se déduit ensuite ; elle est presque
+toujours surabondante.
+
+## L37 — Publier des réductions, jamais des champs, à travers une frontière lente
+
+*(S09)* L'audio veut savoir « combien d'écume autour de l'auditeur ». La réponse tient en
+45 octets. Le champ qui la contient pèse 4,2 Mo par cascade, et le rapatrier au CPU coûterait
+≈500 Mo/s et une à trois frames de latence — pour une question à laquelle une réduction GPU répond
+dans la passe qui produit déjà le champ.
+
+Vaut pour toute frontière lente : GPU → CPU, réseau, processus, disque. Et le corollaire est aussi
+utile : **un même champ peut avoir plusieurs publications de formes différentes**, une par classe de
+consommateur. Le rendu prend une poignée sans copie, l'audio prend une intégrale. Chercher une forme
+unique aurait fait payer à l'un ce dont l'autre a besoin.
+
+**Réflexe** : à chaque frontière lente, demander quelle *question* le consommateur pose, et non
+quelle *donnée* il croit vouloir. La réponse est souvent de plusieurs ordres de grandeur plus
+petite que la donnée.
+
+## L38 — Deux mécanismes corrects séparément produisent un défaut dont personne n'est propriétaire
+
+*(S09)* L'anticipation locale d'un événement est correcte : elle masque la latence réseau. Un bus
+d'événements partagé par plusieurs consommateurs est correct : il évite N interrogations. Ensemble,
+ils font jouer deux fois le même impact à 100–300 ms d'intervalle — un défaut qu'aucun des deux
+documents ne peut voir, parce qu'il n'appartient à aucun des deux.
+
+**Réflexe** : quand un **second consommateur** rejoint un canal existant, réexaminer les garanties
+du *canal*, pas la correction du consommateur. Les défauts de conjonction se trouvent là, et
+uniquement là — chacun des composants passe sa propre revue.
+
+## L39 — Une donnée prédictive porte sa cause, ou elle ment
+
+*(S09)* « Ce gué se ferme dans quarante minutes » est vrai *si seule la marée agit*. Cette clause
+n'était écrite nulle part. Une vanne ouverte en amont laisse la valeur publiée en place, fausse,
+jusqu'à la prochaine republication — et un consommateur qui a planifié dessus maintient son plan.
+
+La forme correcte publie la **cause supposée** à côté de la valeur, et sait publier « je ne sais
+plus » : c'est un résultat, pas un échec, et c'est la seule façon de dire à un consommateur que sa
+planification doit être refaite.
+
+**Réflexe** : toute valeur prédictive publiée s'accompagne de l'hypothèse sous laquelle elle vaut,
+et d'un mécanisme qui l'invalide quand l'hypothèse tombe. Sans quoi la prédiction survit à sa
+propre validité — et une prédiction périmée est plus nuisible qu'une absence de prédiction.

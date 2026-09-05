@@ -12,10 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-05
-Session en cours : S09 — 2026-09-05 — le chemin poussé (SPEC-006)
-Dernière session : S08 — 2026-09-05 — revue croisée des cinq SPEC
+Dernière session : S09 — 2026-09-05 — le chemin poussé (SPEC-006)
+Session suivante : S10 — `CondensedState`, la persistance hors caméra, et sa confrontation avec
+                   `CoastalState` : deux mécanismes pour un même problème (configuration L22)
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
@@ -74,7 +75,8 @@ docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en
 docs/01_INVARIANTS.md     ← 16 règles non négociables, à connaître avant toute proposition
 docs/adr/                 ← 21 décisions d'architecture, numérotées, jamais réécrites
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
-                            004 interfaces · 005 outillage auteur
+                            004 interfaces (chemin tiré) · 005 outillage auteur
+                            006 chemin poussé (ce que le système publie)
 docs/validation/          ← SPEC-003 harnais · CAS-CANONIQUES · PLAN-BENCHMARK
 docs/registres/           ← angles morts · questions ouvertes · revue croisée
 docs/sources/             ← documents d'intention d'origine, non modifiés
@@ -90,15 +92,19 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Huit sessions, 21 ADR, cinq spécifications, quatre registres. Les 30 sections du document de
+Neuf sessions, 21 ADR, **six spécifications**, quatre registres. Les 30 sections du document de
 questions ouvertes d'origine sont traitées. Les vingt premiers ADR ont été confrontés les uns aux
 autres en S05 (douze écarts, deux de gravité 1) et les cinq SPEC entre elles en S08 (dix écarts,
-deux de gravité 1). Tous résolus, sauf un qui demande de l'écriture : le **chemin poussé**.
+deux de gravité 1). Tous résolus — le dernier, le **chemin poussé**, par l'écriture de `SPEC-006`
+en S09.
 
-**Un document manque, et il bloque trois réunions.** SPEC-004 ne spécifie que le chemin *tiré* ; ce
-que le système d'eau **publie** de lui-même — champ d'écume, signal de traversabilité, bus audio —
-n'a de signature nulle part (SPEC-004 §10.6, écart E04). Trois des quatre interfaces inter-équipes
-n'ont donc rien à soumettre. Le reste est du code, des mesures et des réunions.
+**Il n'y a plus de document bloquant, et les quatre interfaces inter-équipes ont enfin quelque chose
+à soumettre.** Ce qui reste est du code, des mesures et des réunions.
+
+**Une urgence de format, la seule.** `WaveEvent` (SPEC-006 §3.1) est une structure **répliquée** qui
+porte trois champs demandés par l'équipe audio. Elle doit être arrêtée **avant** que le réseau ne
+fige son format ; l'élargir après coûtera une migration de protocole. C'est le seul point où
+attendre a un coût croissant.
 
 Chemin critique : `ADR-020 acté → H1 (cœur du harnais) → (C01, C02 → λ_cut → B2) et (H4 → B3) → B4`.
 **H1 doit précéder la première ligne du solveur** — c'est le seul élément du plan qui ne se

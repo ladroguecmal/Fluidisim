@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S09
-État             : en cours
+État             : terminée
 Battement        : 2026-09-05
 Objectif         : écrire le chemin poussé — SPEC-006. Débloque trois des quatre accords inter-équipes.
 ```
@@ -89,7 +89,7 @@ Objectif         : écrire le chemin poussé — SPEC-006. Débloque trois des q
 - [x] **P7** — SPEC-004 : migrer `WaveEvent` en §2 avec ses trois champs audio, renommer
   `WaterSample.u` en `u_total` (écart E05), enrichir §9, marquer le point ouvert n°6 résolu.
 - [x] **P8** — index, README, statut des actions du registre S08, angles morts trouvés en écrivant.
-- [ ] **P9** — rituel de fin (`REPRISE.md` §6) : journal S09, leçons, index, jeton libéré.
+- [x] **P9** — rituel de fin (`REPRISE.md` §6) : journal S09, leçons, index, jeton libéré.
 
 ### Notes de reprise
 

@@ -446,3 +446,115 @@ Second candidat, inchangé depuis S06 : `CondensedState` et la persistance hors 
 **Arbitrages en attente — rappel.** Les trois arbitrages de design et les quatre interfaces
 inter-équipes restent ouverts. L'arbitrage n°2 (la glace) est désormais accompagné du fetch maximal
 ci-dessus, qui en réduit nettement la portée.
+
+---
+
+## S09 — 2026-09-05 — Le chemin poussé
+
+**Consigne reçue.** « Enchaîne S09, écris le chemin poussé. » C'était l'objectif recommandé par S08,
+qui avait constaté (écart E04, gravité 1) que ce chemin n'existait dans aucun document.
+
+**Sorties.** [`specs/SPEC-006-chemin-pousse.md`](../docs/specs/SPEC-006-chemin-pousse.md) — neuf
+sections, quatre canaux spécifiés ; quatre corrections dans SPEC-004 ; registre porté à 74 angles
+morts ; leçons L35 à L39 ; index et registre S08 mis à jour.
+
+### Ce qui est spécifié
+
+Quatre canaux, et non trois : le bus d'événements avec `WaveEvent` enfin défini dans une
+spécification, les champs d'écume `F` et d'aération `A`, la traversabilité par tuiles, et — trouvée
+en relisant ADR-016 §2 — la **polyligne de déferlement**, qu'aucun ADR ne porte et que trois
+consommateurs attendent.
+
+Le document énonce d'abord ce qui distingue un chemin poussé d'un chemin tiré, parce que c'est de
+ne pas l'avoir écrit que sont nées trois publications divergentes. La ligne qui compte se chiffre :
+publier la traversabilité d'une zone de 4 km coûte **130 évaluations/s** contre 2 000 pour
+200 agents qui interrogeraient `EvalWater` à 10 Hz — quinze fois moins, mais surtout **un coût
+indépendant du nombre d'agents**. C'est la propriété que le chemin tiré ne peut structurellement
+pas offrir.
+
+### La règle qui a le plus de portée
+
+> **Le chemin poussé publie au CPU des réductions, jamais des champs.**
+
+Une cascade d'écume de 1024² en RG16F pèse 4,2 Mo ; quatre cascades à 30 Hz feraient ≈500 Mo/s de
+lecture arrière et une à trois frames de latence pour répondre à une question qui tient en
+45 octets — « combien d'écume autour de l'auditeur ». La réduction se fait donc dans la passe GPU
+qui produit déjà le champ, et seul l'agrégat traverse. Le rendu, lui, reçoit une poignée de texture
+sans copie. **Un même champ, deux publications de formes différentes** : c'est la décision
+structurante du document.
+
+L'occlusion acoustique par l'aération réutilise les **16 secteurs azimutaux d'ADR-005 §3** plutôt
+que d'inventer une seconde discrétisation — L22 évitée en la voyant venir, pour une fois, plutôt
+qu'en la corrigeant après.
+
+### Quatre défauts trouvés en écrivant les signatures
+
+Aucun n'était visible en relecture ; tous sont apparus au moment de poser une structure — L20, à
+quatre reprises dans une seule session.
+
+- **`drain_outgoing_events()` était un résidu.** La fonction servait le chemin δ→serveur qu'ADR-021
+  §3 a supprimé en S05. L'écart R03 avait retiré le chemin de données ; la signature qui le servait
+  a survécu, dans un document dont le statut est « dernier avant l'écriture de code ». Elle aurait
+  été implémentée. Supprimée, pas renommée — et par-dessus, un drain a un **consommateur unique**,
+  ce qui est intenable dès que l'audio, le rendu et le gameplay lisent le même flux.
+- **`displaced_ml` est impossible sous ce nom.** Un `half` en millilitres sature à 65 litres,
+  dépassé par n'importe quelle claque de coque. Publié en litres : mêmes deux octets, plafond
+  65 m³. **Le même piège s'est reproduit vingt pages plus loin** — un flux dissipé en W/m sature à
+  65 kW/m, dépassé dès `Hs = 4 m` (`P = E·c_g`, `E ∝ Hs²`). Publié en kW/m.
+- **L'anticipation locale ferait jouer deux fois le même impact.** ADR-009 §7.2 autorise un client à
+  émettre par anticipation l'événement que le serveur émettra ; les deux arrivent séparés du temps
+  d'aller-retour réseau, soit 100 à 300 ms. Chacun des deux mécanismes est correct seul ; c'est leur
+  conjonction qui produit le défaut, et personne n'en est propriétaire. D'où un bit de
+  **rétractation** sur le bus.
+- **`t_next_cross` publiait une prédiction sans son hypothèse.** « Ce gué se ferme dans quarante
+  minutes » n'est vrai que si seule la marée agit. Une vanne ouverte en amont laisse la valeur en
+  place, fausse, jusqu'à trente secondes — et un PNJ maintient son plan. La prédiction porte donc sa
+  cause (`CrossCause`), et une commande de la couche V invalide l'aval. **Publier « je ne sais
+  plus » est un résultat**, et son absence est ce qui rend une prédiction dangereuse.
+
+### Deux conséquences d'I-15 qui rapportent
+
+- **La traversabilité est calculée depuis les seules couches répliquées, δ exclu.** Sans quoi deux
+  clients ne prendraient pas la même décision de cheminement, et un PNJ traverserait un gué chez
+  l'un en se noyant chez l'autre — défaut rare, non reproductible, attribué au réseau. La portée de
+  l'omission est bornée par l'argument de fermeture d'ADR-021 §3.2 : δ ne contient que ce qui est
+  plus court que `λ_cut`.
+- **Les franchissements de seuil ne transitent pas par le réseau.** Toutes leurs entrées étant
+  répliquées ou cuites, chaque participant — serveur compris — dérive le même franchissement au
+  même instant. Le serveur peut donc rendre une décision autoritaire (« ce gué est fermé ») sans
+  simuler d'eau, ce qu'I-10 lui interdit. Même raisonnement qu'ADR-021 §3, même bénéfice : on
+  supprime un chemin de données au lieu d'ajouter un arbitre.
+
+### Dégradation
+
+Le chemin poussé **dégrade en cadence, jamais en contenu** : jamais d'instantané partiel, jamais de
+tuile à moitié remplie. Cinq rangs, cohérents avec ADR-012 §4 ; le rang 5 est la transposition
+exacte d'ADR-021 §4 — on élague les événements locaux et cosmétiques, **jamais un événement
+`Serveur`**. Et une ligne sans rang : brèche, franchissement de seuil et inondation de compartiment
+ne se dégradent sous aucun budget. Trois assertions correspondantes sont à ajouter au banc `starve`
+de SPEC-003 §9.1.
+
+### Effet sur l'état du projet
+
+Les quatre interfaces inter-équipes ont désormais un document à soumettre ; le préalable trouvé en
+S08 est levé. **Une urgence de format demeure** : `WaveEvent` est une structure **répliquée** et
+porte trois champs demandés par l'audio. Elle doit être arrêtée avant que le réseau ne fige son
+format — l'ajouter après coûtera une migration de protocole. Coût vérifié, pas supposé : 45 octets
+au lieu de 40, soit 900 o/s par joueur intéressé dans une zone à 20 événements/s, toujours
+négligeable devant le trafic d'entités.
+
+**Ce qui n'a pas été fait.** SPEC-006 n'a été croisée contre rien : elle est écrite, pas auditée.
+S08 a montré ce que ce type d'exercice rapporte sur un corpus qui vient de grossir.
+
+**Prochaine session recommandée.** S10 — `CondensedState` et la persistance hors caméra, seul point
+de SPEC-004 volontairement reporté depuis S04 (§10.2), **et sa confrontation avec `CoastalState`**
+(SPEC-005 §6). Les deux résolvent le même problème — amener un domaine dans un état non trivial
+sans le simuler depuis zéro — par deux mécanismes distincts, écrits à deux sessions d'intervalle.
+C'est la configuration exacte de L22, et il vaut mieux l'examiner **avant** d'écrire le second que
+de le découvrir à la revue croisée suivante.
+
+**Arbitrages en attente — rappel.** Les trois arbitrages de design restent ouverts. L'arbitrage n°3
+(qui porte le trait de côte mobile) conditionne directement le nombre d'états de la polyligne de
+déferlement publiée en SPEC-006 §6 ; l'arbitrage n°2 (la glace) conditionne deux champs de
+`TraversabilitySample`. Les quatre interfaces inter-équipes attendent désormais une réunion, non un
+document.
