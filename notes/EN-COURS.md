@@ -72,7 +72,7 @@ Objectif         : recroiser les cinq SPEC entre elles (S05 n'avait confronté q
   apparaissant dans deux documents doit y valoir la même chose, ou l'écart doit être motivé.
   *Thèse : les chiffres recopiés d'un document à l'autre se périment en silence — S07 en a déjà
   trouvé un cas dans le README.*
-- [ ] **P3** — croisement SPEC-004 × SPEC-001/002 : chaque grandeur que les fiches chiffrées
+- [x] **P3** — croisement SPEC-004 × SPEC-001/002 : chaque grandeur que les fiches chiffrées
   déclarent nécessaire doit être atteignable par une signature existante.
   *Thèse (L20) : une exigence qui n'a pas d'argument dans une signature n'est pas implémentable,
   et cela ne se voit qu'en confrontant les deux documents.*
@@ -117,3 +117,44 @@ plus bas portent sur la provenance et sur les croisements, jamais sur l'arithmé
   3 m/s. La glace en plaque est un phénomène de lac et de baie abritée, jamais de haute mer.
   Chiffre à porter à l'arbitrage n°2 (ADR-017, « le projet veut-il de la glace ? ») : il en réduit
   la portée à une classe de plans d'eau, ce qui change le coût de la réponse « oui ».
+
+#### P3 — croisement SPEC-004 × SPEC-001/002
+
+**Trouvaille structurante — le chemin manquant.** SPEC-004 spécifie deux chemins : le chemin
+**tiré** (`EvalWaterBatch`, `sample_batch`) et le chemin de **branchement de solveur**
+(`IFluidSolver`, `IWaveSolver`, services d'hôte). Trois documents en exigent un troisième, que
+personne ne porte : un chemin **poussé**, où le système d'eau *publie* par tick, à basse fréquence,
+des champs et des signaux que personne ne vient chercher point par point.
+
+- ADR-014 §2 — champ de moussage `F(x,t)`, deux canaux, texture 2D ancrée au monde ;
+- ADR-018 §1 — `TraversabilitySample` par cellule `HydroGrid`, publié « jamais en interrogation
+  continue, sans quoi la navigation devient un consommateur majeur de `EvalWater` » ;
+- ADR-016 §2 et §6 — bus d'événements audio, et trois champs à ajouter à `WaveEvent`.
+
+C'est L22 en clair : trois ADR ont chacun inventé sa propre publication parce que le document qui
+aurait dû fournir le mécanisme ne l'a pas. Écarts qui en découlent :
+
+- **E04, gravité 1** — trois des quatre interfaces inter-équipes en attente d'accord humain
+  (audio, IA/navigation, et la part écume du rendu) **n'ont aucune signature dans SPEC-004**, le
+  document dont le titre est « signatures des interfaces » et dont le statut est « dernier document
+  avant l'écriture de code ». On ne peut pas présenter à ces équipes le document censé porter leur
+  interface. Aggravant : `WaveEvent` n'est défini nulle part dans SPEC-004 — il vit dans ADR-009 §2
+  — alors qu'il traverse trois frontières (réseau, transduction δ→W, audio) et qu'ADR-016 §6
+  demande de l'élargir de trois champs « avant de figer le format ».
+- **E05, gravité 2** — SPEC-002 §5 : `HR = d·(v + 0,5)`, où `v` est un **courant**.
+  `WaterSample.u` de SPEC-004 §2 est explicitement « orbitale + courant », et aucun champ ne les
+  sépare. Un consommateur qui prend `u` obtient un danger qui **oscille à la période de la houle** :
+  à Hs = 1 m et T = 5 s, la vitesse orbitale de crête vaut `πHs/T ≈ 0,63 m/s`, du même ordre que le
+  courant qu'on cherche à mesurer. ADR-018 §1 fait le bon choix (`flow_speed` = courant de surface)
+  mais sa structure n'est pas dans SPEC-004 : le seul canal spécifié livre la mauvaise grandeur.
+  Même famille que L12 — le paramètre auquel on pense en premier n'est pas celui qui gouverne.
+- **E06, gravité 3, même cause que E04** — SPEC-002 §1 pose une écume résiduelle de demi-vie 30 s,
+  et ADR-016 §7 remplace les émetteurs audio lointains par le « lit d'écume ». `WaterSample` porte
+  `steepness` (le *déclencheur* instantané) et `aeration`, jamais la couverture accumulée. L'audio
+  ne peut donc pas lire ce dont ADR-016 dit qu'il dépend. Symptôme de E04, pas défaut distinct.
+
+**Contrôles passés.** `SampleHints` / LOD spectral ↔ ADR-004 §4 : cohérent. Séparation
+`WaterSample` (≈56 o) / `BackgroundSample` (≈80 o) ↔ SPEC-001 §2.4 (24–32 o par cellule) :
+les ordres de grandeur ne se contredisent pas. `steepness` ↔ SPEC-001 §3 (`H/λ ≈ 1/7`) et
+SPEC-002 §1 : le déclencheur d'écume est bien atteignable sans simulation. `aeration` ↔
+SPEC-002 §2 (`ρ_eff = (1−α)·ρ`) : la portance réduite est calculable par l'appelant.
