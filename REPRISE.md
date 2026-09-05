@@ -12,11 +12,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-05
+Session en cours : S09 — 2026-09-05 — le chemin poussé (SPEC-006)
 Dernière session : S08 — 2026-09-05 — revue croisée des cinq SPEC
-Session suivante : S09 — écrire le chemin poussé (SPEC-006 ou SPEC-004 §11) : il débloque trois
-                   des quatre accords inter-équipes
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
