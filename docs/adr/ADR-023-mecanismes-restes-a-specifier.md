@@ -354,3 +354,107 @@ La validation d'auteur mentionnée par SPEC-005 §2 garde son rôle : la dériva
 centaines de sites dont beaucoup sont sans intérêt scénique. L'auteur en promeut ou en écarte ; il
 ne les déplace pas et n'en crée pas — ce serait une retouche de donnée dérivée, ce que la règle de
 source de vérité unique interdit (SPEC-005 §1, L25).
+
+---
+
+## 5. Coalescence des poches d'air — une addition, parce que le bon état a été stocké
+
+ADR-015 §7.3 : « Coalescence des poches T2 (deux compartiments qui communiquent) : règle de fusion à
+définir. »
+
+### 5.1 La règle tient en une ligne, et on doit à ADR-015 qu'elle y tienne
+
+La structure `AirPocket` d'ADR-015 §3 porte `volume_ml`, `pressure_pa` **et `n_moles`**. C'est le
+dernier champ qui rend l'affaire triviale : les moles sont la grandeur conservée d'une fusion.
+
+```
+n_fusion = n_a + n_b
+```
+
+Rien d'autre n'est conservé. Ni le volume — l'eau se redistribue — ni la pression — elle s'égalise à
+une valeur qui n'est aucune des deux. Une structure qui n'aurait stocké que pression et volume
+aurait imposé de reconstituer les moles par une équation d'état à chaque fusion, avec une erreur qui
+s'accumule à chaque opération.
+
+**C'est L06 en petit** : une bonne représentation rend gratuite une opération qui aurait été
+coûteuse. Le champ `n_moles` n'avait pas été introduit pour la coalescence — il l'a rendue triviale
+huit sessions plus tard.
+
+### 5.2 Le volume fusionné se trouve par le `shape_lut`, en six itérations
+
+Après fusion, l'eau des deux compartiments se redistribue jusqu'à un **niveau libre commun**,
+perpendiculaire à `g_eff` (ADR-010 §2). Le volume d'air résultant en dépend, et la pression aussi :
+il faut résoudre un point fixe.
+
+```
+Trouver le niveau z tel que :
+
+    V_air(z)  =  n_fusion · R · T / P(z)          avec  P(z) = P_atm + ρ|g_eff|·profondeur(z)
+
+où V_air(z) est donné par le shape_lut du contenant fusionné.
+```
+
+`shape_lut` est **monotone par construction physique** — c'est ce qu'exploite déjà la validation
+d'étanchéité de SPEC-005 §9. Une fonction monotone se résout par dichotomie, et la table compte
+64 entrées (ADR-010 §2) : **six itérations suffisent**, sans dérivée, sans risque de divergence.
+
+Le coût est donc négligeable, et il l'est *parce que* la table est monotone. La même propriété sert
+ici et sert de test d'étanchéité là-bas ; c'est le second usage gratuit d'une même décision.
+
+### 5.3 Isotherme, et pourquoi ce n'est pas le même choix qu'à l'impact
+
+ADR-015 §3 donne deux lois d'état selon l'échelle de temps : `P·V^1,4 = cte` pour une compression
+rapide, `P·V = cte` pour une évolution lente.
+
+Une fusion est **lente** : deux compartiments se mettent à communiquer parce qu'une coque s'enfonce,
+qu'une cloison cède, qu'un niveau descend — des échelles de temps de la seconde ou plus. La loi
+isotherme s'applique, et la formulation en moles ci-dessus l'incorpore déjà.
+
+La loi adiabatique reste réservée à ce pour quoi elle a été posée : la compression d'une cavité
+d'impact, sur quelques dizaines de millisecondes.
+
+### 5.4 La scission, qui n'avait pas été demandée
+
+Le point ouvert ne parlait que de fusion. L'opération inverse existe et se produit tout autant : un
+niveau qui **monte** sépare une poche en deux. Sans règle, l'implémentation improvisera, et elle
+improvisera mal — le partage des moles est le piège.
+
+> **Règle.** À la scission, les moles se répartissent **au prorata des volumes** des deux poches
+> filles, évalués au niveau de séparation : `n_i = n · V_i / (V_1 + V_2)`. C'est la seule répartition
+> qui conserve la pression de part et d'autre à l'instant de la séparation, donc la seule qui ne
+> produise pas de discontinuité de flottabilité.
+
+Une répartition par moitiés, ou par contenance nominale, ferait sauter la poussée d'une coque
+retournée à l'instant où une cloison émerge — un défaut visible, attribué au hasard, et corrigé par
+un lissage qui masquerait la cause.
+
+### 5.5 Hystérésis : le même piège qu'aux flaques, la même parade
+
+Une ouverture qui oscille autour du niveau de l'eau ferait fusionner et scinder à chaque tick.
+ADR-010 §5 a rencontré exactement ce problème pour la création et la destruction des flaques, et l'a
+traité par une hystérésis sur le volume.
+
+Ici l'hystérésis porte sur la **hauteur de l'ouverture par rapport au niveau libre**, mesurée le long
+de `g_eff` :
+
+```
+fusion   si  d_ouverture  <  −ε        (l'ouverture est dégagée, l'air passe)
+scission si  d_ouverture  >  +ε        (l'ouverture est noyée)
+entre les deux : l'état précédent est conservé
+```
+
+Valeur de départ **`ε = 5 cm`**, à calibrer : elle doit dépasser l'amplitude du clapot résiduel dans
+un compartiment, et rester très inférieure à la hauteur d'une ouverture typique.
+
+### 5.6 Ce que la fusion ne fait pas
+
+Deux limites, à écrire pour qu'on ne les demande pas :
+
+- **la fusion n'est pas une simulation de mélange.** Deux poches de gaz différents — air et vapeur,
+  air et méthane — fusionnent en une poche dont le `liquid_id` est celui du contenant, et la
+  question du mélange de fluides reste celle qu'ADR-010 §8.4 laisse ouverte, sans que la coalescence
+  y ajoute quoi que ce soit ;
+- **la fusion ne franchit pas une frontière de référentiel.** Deux poches appartenant à deux solides
+  distincts ne fusionnent pas, même si leurs géométries se recouvrent : elles n'ont pas le même
+  `g_eff` ni la même `FrameRef` (I-07), et un niveau libre commun n'aurait pas de sens. Le cas est
+  refusé, pas approximé.

@@ -83,7 +83,7 @@ aussi une *cause*, ce qui n'est pas la même chose.
 - [x] **P4** — `ADR-023` §4 : les **sites turbulents permanents**.
   *Thèse : ce ne sont pas de nouveaux objets. Un site turbulent est une polyligne de déferlement
   dégénérée en un point, et il se dérive du critère `H/h = 0,78` déjà posé en SPEC-001 §3.*
-- [ ] **P5** — `ADR-023` §5 : la **coalescence des poches d'air T2**.
+- [x] **P5** — `ADR-023` §5 : la **coalescence des poches d'air T2**.
   *Thèse : la règle tient en une addition, parce qu'ADR-015 §3 a eu la bonne idée de stocker
   `n_moles` plutôt que seulement pression et volume.*
 - [ ] **P6** — `ADR-023` §6–7 : ce que chaque section ferme, ce qui reste ouvert ; puis les notes
@@ -150,3 +150,17 @@ proposait donc un second mécanisme sans le savoir.
 Critère de dérivation : `h < 1,28·H_local` (McCowan). Bénéfice non demandé : avec 4 m de marnage,
 un rocher à 3 m **brise à basse mer et pas à haute mer**, par mer de 2 m. Un récif qui gronde deux
 fois par jour à heure prévisible, sorti d'une inégalité.
+
+#### P5 — coalescence : `n_fusion = n_a + n_b`
+
+La règle tient en une addition **parce qu'ADR-015 §3 avait stocké `n_moles`** et pas seulement
+pression et volume. Le champ n'avait pas été introduit pour cela ; il rend l'opération triviale huit
+sessions plus tard. L06 en petit.
+
+Le volume fusionné sort d'une dichotomie sur le `shape_lut`, **monotone par construction** — six
+itérations pour 64 entrées. La même monotonie sert de test d'étanchéité en SPEC-005 §9 : second
+usage gratuit d'une seule décision.
+
+Deux ajouts non demandés par le point ouvert : la **scission** (moles au prorata des volumes — toute
+autre répartition fait sauter la poussée d'une coque retournée quand une cloison émerge) et
+l'**hystérésis** sur la hauteur d'ouverture, ε = 5 cm, même parade qu'ADR-010 §5 pour les flaques.
