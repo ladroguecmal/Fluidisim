@@ -779,3 +779,113 @@ disponible immédiatement.
 la glace, le trait de côte mobile, la durée de vie d'un nœud V d'un joueur absent, et la propriété
 du harnais. Les quatre interfaces attendent une réunion ; sept autres équipes doivent fournir une
 donnée ou un cadrage. `WaveEvent` reste l'urgence de format.
+
+---
+
+## S12 — 2026-09-05 — Les quatre mécanismes restés à spécifier
+
+**Consigne reçue.** « Enchaîne S12. » Objectif recommandé par S11 : les quatre points qui disaient
+« à spécifier » sans qu'aucune session ne l'ait jamais pris en charge.
+
+**Sorties.** [`adr/ADR-023-mecanismes-restes-a-specifier.md`](../docs/adr/ADR-023-mecanismes-restes-a-specifier.md) ;
+cas canonique **C20** ; quatre clôtures dans ADR-008, ADR-013 et ADR-015 ; registre porté à
+83 angles morts ; leçons L46 à L48.
+
+### Le résultat d'ensemble, et il dit quelque chose du corpus
+
+**Quatre mécanismes spécifiés, zéro interface nouvelle.** Deux se sont résolus en **élargissant un
+mécanisme existant**, un troisième en réutilisant un canal déjà spécifié, un seul a demandé un
+mécanisme neuf — et celui-là réutilise une grandeur déjà imposée par l'ADR qu'il complète.
+
+C'est la mesure la plus honnête de la maturité d'une conception : non pas ce qu'elle contient, mais
+la proportion d'exigences nouvelles qu'elle absorbe sans mécanisme nouveau. Ces quatre points
+auraient coûté plus cher il y a huit sessions.
+
+Une précision de méthode : les quatre ont une **origine** commune — l'audit — mais leur **cause** ne
+l'est qu'à moitié. Le terme d'impact et le nageur sont les deux frontières du domaine de validité
+d'ADR-008, l'une dans le temps, l'autre dans la nature du corps. Les deux autres n'ont de rapport ni
+avec eux ni entre eux, et il valait mieux l'écrire que de forcer une unification inexistante.
+
+### Terme d'impact : publier ce qu'on sait, pas ce qu'on veut
+
+`t_impact = 2b·tan β/(πv)` donne **73 ms** pour une étrave de vedette, **17 ms pour un corps humain
+tombant de trois mètres** — contre 33 ms de tick. L'impact est plus bref que le tick : une force
+échantillonnée le rate ou le double selon la phase, et la dispersion qui en résulte sur des entrées
+identiques est intermittente, donc introuvable.
+
+Le réflexe serait de publier la pression de pic, `C_p = 1 + (π/2tan β)²`. Deux enseignements
+contradictoires en sortent : **c'est l'angle qui domine** — 30° → 10° multiplie la pression par dix,
+doubler la vitesse ne la multiplie que par quatre — mais **la formule diverge quand `β → 0`**. On ne
+connaît donc pas la pression de pic, et un modèle qui la publie publie son incertitude.
+
+> **Décision : l'impulsion de masse ajoutée**, `J = Δ(½πρc²)·v_rel`. C'est un bilan de quantité de
+> mouvement, qui ne peut pas être faux ; c'est ce qu'un intégrateur de corps rigide applique
+> exactement ; et c'est le tenseur de masse ajoutée qu'ADR-008 §2 imposait déjà, exploité en régime
+> transitoire au lieu du régime établi.
+
+Contrôle croisé fait : 1,1 MN moyens sur 73 ms concordent avec 105 kPa de pic sur la surface
+mouillée. Et le terme est **autoritaire** (I-15) : ses entrées sont l'état du solide et B + W, jamais
+δ. C'est ce qui permet qu'un claquement de coque casse quelque chose.
+
+### Le nageur : il n'y avait pas de modèle à écrire
+
+Le mode cinématique contraint existe depuis S01, ADR-008 §3. Il lui manquait une **seconde condition
+d'entrée**. Le critère actuel mesure la **stabilité numérique**, et un nageur le passe largement —
+`A ≈ 0,25 m²`, `k ≈ 2 450 N/m`, `m + m_a ≈ 145 kg`, `ω·dt ≈ 0,14` — alors que c'est ce mode qu'il lui
+faut, pour le contrôle et la caméra. Le critère n'était pas faux : il était seul.
+
+Deux seuils **dérivés**, que le design n'aura pas à choisir :
+
+- `πH/T = 0,7 m/s` → **par mer de 1 à 2 m, un nageur ne va plus où il veut** ;
+- un nageur ne décolle de la surface que sous un **rouleau plongeant** — l'accélération descendante
+  de crête de SPEC-002 §1 vaut `g` en plongeant et `0,45 g` en glissant, ce qui est exactement le
+  critère de sortie, écrit trois sessions plus tôt pour tout autre chose.
+
+Contrôle fait avant d'accepter : les cinq effets qui comptent — emportement, eau blanche,
+déferlante, hypothermie, seuils de progression — passent tous par d'autres chemins déjà spécifiés.
+Le mode contraint ne coûte rien au gameplay.
+
+### Sites turbulents : le mot « émetteur » ne survit pas au chiffrage
+
+ADR-013 §7.4 proposait des « émetteurs W stationnaires ». Deux cents sites émettant un événement par
+seconde font **9 000 o/s par joueur intéressé — dix fois une bataille navale, en permanence, pour du
+décor** (ADR-009 §2 : 900 o/s à 20 événements/s). Et un phénomène stationnaire déterministe n'a
+aucune raison d'être répliqué.
+
+Un site est un **terme stationnaire dérivé**, re-calculé à la demande, publié comme `BreakerVertex`
+sur le canal existant de SPEC-006 §6 — une polyligne de déferlement dégénérée en un point. C'est
+exactement le mécanisme qu'ADR-014 §2.3 avait retenu pour l'écume permanente : ADR-013 en proposait
+un second sans le savoir.
+
+Sa liste se dérive de `h < 1,28·H_local` (McCowan, SPEC-001 §3). **Bénéfice non demandé** : avec 4 m
+de marnage, un rocher à 3 m sous le niveau moyen brise à basse mer et pas à haute mer par mer de 2 m.
+Un récif qui gronde deux fois par jour à heure prévisible, sorti d'une inégalité.
+
+### Coalescence : une addition, parce que le bon état avait été stocké
+
+`n_fusion = n_a + n_b`. La règle tient en une ligne **parce qu'ADR-015 §3 a stocké `n_moles`** et pas
+seulement pression et volume — le champ n'avait pas été introduit pour cela et rend l'opération
+triviale huit sessions plus tard (L06 en petit). Le volume résultant sort d'une dichotomie sur le
+`shape_lut`, monotone par construction : six itérations pour 64 entrées, et la même monotonie sert
+de test d'étanchéité en SPEC-005 §9.
+
+Deux ajouts que le point ouvert ne demandait pas : la **scission** — moles au prorata des volumes,
+toute autre répartition faisant sauter la poussée d'une coque retournée quand une cloison émerge — et
+l'**hystérésis** d'ouverture, `ε = 5 cm`, même parade qu'ADR-010 §5 pour les flaques.
+
+### Ce qui n'a pas été fait
+
+`ADR-023` n'a été croisé contre rien, et il rejoint `SPEC-006` et `ADR-022` dans le même cas : **trois
+documents structurants écrits en quatre sessions, aucun audité**. Les registres non plus n'ont pas
+été passés au filtre de S11 — un angle mort comblé y figure-t-il encore comme ouvert ?
+
+**Prochaine session recommandée.** S13 — **confronter SPEC-006, ADR-022 et ADR-023 au corpus**. La
+revue S05 a porté sur les vingt premiers ADR, la revue S08 sur les cinq premières SPEC ; ces trois
+documents-là n'ont jamais rencontré personne. S08 avait trouvé dix écarts dont deux de gravité 1 sur
+un corpus plus mûr et mieux relu que ces trois-là.
+
+Second candidat, moins urgent : l'audit des **registres**, que S11 avait explicitement laissé de côté.
+
+**Arbitrages en attente — rappel.** Cinq arbitrages humains, quatre interfaces à confirmer, sept
+autres destinataires extérieurs. L'entrée **personnage** est désormais exécutable — il y a un
+document à soumettre — et `WaveEvent` reste l'urgence de format.

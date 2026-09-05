@@ -526,3 +526,49 @@ ni une dépendance, ni une tâche, ni une décision à prendre.
 **Réflexe** : après tout audit de correction, faire une seconde passe qui ne demande plus « est-ce
 juste ? » mais « **qui est bloqué ?** ». Les deux passes lisent le même texte ; elles n'en tirent
 pas la même chose, et la seconde produit un document que quelqu'un peut utiliser tel quel.
+
+## L46 — Publier la grandeur qu'on sait, pas celle qu'on veut
+
+*(S12)* Le réflexe, pour un impact, est de publier la pression de pic : c'est ce qu'on voit, ce
+qu'on mesure en essai, ce qu'un artiste demande. Mais la théorie qui la donne **diverge** dans le
+régime limite — relèvement de carène tendant vers zéro — et ce que le coussin d'air et la
+compressibilité y font n'est pas modélisé. Un modèle qui publie cette grandeur publie son
+incertitude, et la publie précisément dans le cas le plus spectaculaire.
+
+L'impulsion, elle, est un **bilan de quantité de mouvement**. Elle est bornée par la masse d'eau
+réellement accélérée, elle ne peut pas être fausse d'un ordre de grandeur, et elle se trouve être ce
+que le consommateur — un intégrateur de corps rigide — sait appliquer exactement.
+
+**Réflexe** : devant une grandeur qui diverge ou s'effondre dans un régime limite, chercher
+**l'intégrale ou la quantité conservée dont elle dérive**. Elle est presque toujours plus robuste,
+souvent plus directement utilisable, et le passage de l'une à l'autre est un contrôle croisé gratuit
+— ici, 1,1 MN moyens sur 73 ms contre 105 kPa de pic sur la surface mouillée.
+
+## L47 — Un critère de bascule ne mesure qu'une chose, et l'on croit qu'il les couvre toutes
+
+*(S12)* Un mode cinématique contraint existait, avec un critère d'entrée fondé sur la **stabilité
+numérique** (`ω·dt > 1`). Il était juste. Le nageur, qui a besoin de ce mode exactement, passe le
+critère sans difficulté — parce qu'il en relève pour une autre raison : le contrôle et la caméra.
+
+Un mode a des effets ; un critère a un motif. Tant qu'il n'y a qu'un critère, on confond les deux, et
+tout cas qui aurait besoin du mode pour un autre motif passe au travers sans que rien ne signale
+l'omission.
+
+**Réflexe** : pour tout mécanisme à bascule, écrire séparément **ce que le mode fait** et **ce qui le
+déclenche**, puis se demander qui d'autre a besoin de ce que le mode fait. La réponse ajoute une
+condition d'entrée, pas un mode — et un mode de moins est toujours un gain.
+
+## L48 — Un phénomène permanent coûte en régime nominal, pas en pic
+
+*(S12)* On dimensionne spontanément un budget sur les pics : la bataille navale, l'explosion, la
+tempête. Un décor permanent — deux cents rochers qui brisent — modélisé par émission d'événements
+coûterait **dix fois le pic, en continu**, sans qu'aucun scénario de test conçu pour chercher des
+pics ne le révèle.
+
+Et le raisonnement mène plus loin que le budget : un phénomène **stationnaire et déterministe** n'a
+aucune raison d'être transmis, puisque chaque destinataire le dérive à l'identique. La question
+« combien cela coûte-t-il ? » et la question « pourquoi est-ce transmis ? » ont ici la même réponse.
+
+**Réflexe** : pour tout phénomène toujours actif, multiplier par son **nombre** et par sa
+**fréquence** avant de choisir sa représentation. Si le produit dépasse le pic qu'on avait budgété,
+la représentation est fausse — et c'est en général qu'on transmet ce qu'on pourrait dériver.
