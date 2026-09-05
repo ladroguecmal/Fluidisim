@@ -8,8 +8,11 @@ Sévérité : **1** = refonte d'architecture si découvert tard, **2** = refonte
 **3** = travail supplémentaire localisé.
 
 Historique : 28 recensés en S01, 12 ajoutés en S02 (phénomènes secondaires), 9 en S03 (harnais
-de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outillage auteur). Quatre ont été trouvés dans nos propres
-écrits, pas dans les documents sources.
+de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outillage auteur),
+6 en S08 (revue croisée des SPEC) — **70 au total**. **Dix ont été trouvés dans nos propres
+écrits**, pas dans les documents sources : A49, A56, A57, A58, puis A65 à A70. La proportion
+augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
+ce que les sources avaient omis.
 
 ---
 
@@ -81,6 +84,12 @@ de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outi
 | **A62** | L'obsolescence des données cuites est silencieuse | 2 | SPEC-005 §7.3 |
 | **A63** | Un état côtier stocké en 3D pèse 197 Mo par plage | 2 | SPEC-005 §6 |
 | **A64** | Le `shape_lut` détecte gratuitement les maillages non étanches | 3 | SPEC-005 §9 |
+| **A65** | Le chemin poussé n'existe dans aucun document d'interface | **1** | SPEC-004 §10.6, écart E04 |
+| **A66** | Une cuisson qui fait tourner δ ne peut pas être reproductible entre machines | **1** | SPEC-005 §7.2, écart E07 |
+| **A67** | Un facteur d'économie fondé sur un rapport d'échelles s'effondre là où le rapport change | 2 | SPEC-004 §6.2, écart E08 |
+| **A68** | La vitesse de surface mêle orbitale et courant ; un seuil de danger calculé dessus oscille | 2 | SPEC-002 §5, écart E05 |
+| **A69** | Une passe de validation logée dans le mode rapide lui fait lire ce que ce mode exclut | 2 | SPEC-005 §7.3, écart E10 |
+| **A70** | Un coût de cuisson chiffré en temps simulé se lit comme un temps de calcul | 3 | SPEC-005 §11.5, écart E09 |
 
 Soixante-quatre angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -220,3 +229,27 @@ pendant quatre sessions.
   déterminisme exige alors des points de reprise à stocker, répliquer et transmettre — le coût
   réseau qu'ADR-009 avait précisément supprimé. À intégrer au protocole de B2, faute de quoi la
   comparaison se fera sur la seule qualité visuelle.
+
+**Ajoutés en S08, tous trouvés dans nos propres écrits en les croisant**
+
+- **A65** *(sévérité 1)* — Une spécification d'interfaces écrite du point de vue du consommateur qui
+  *interroge* laisse passer tout ce que le système **publie** sans qu'on le lui demande. Trois ADR
+  ont alors décrit chacun sa propre publication — champ d'écume, signal de traversabilité, bus audio
+  — dans son propre vocabulaire, et trois interfaces inter-équipes se sont retrouvées sans aucun
+  document à soumettre. Le défaut ne se voit pas en relisant le document : il n'y a rien à y voir.
+- **A66** *(sévérité 1)* — Une chaîne d'outils entière peut être bâtie sur une exigence de
+  déterminisme **inatteignable par construction**. Ici : exiger une cuisson reproductible bit à bit
+  d'un pipeline qui fait tourner un solveur δ, dont un autre document dit qu'il n'est jamais D1.
+  Chaque phrase est juste dans son document ; leur conjonction est impossible.
+- **A67** — Un facteur d'économie justifié par « X est grand devant Y » s'effondre dans le régime,
+  déjà écrit ailleurs, où le rapport est le plus petit. L'échantillonnage grossier du champ de fond
+  passe de 10 à 4 points par longueur d'onde entre le scénario nominal et la zone de déferlement —
+  et c'est la zone de déferlement qui a 384 k cellules.
+- **A68** — La vitesse de surface publiée mêle **orbitale et courant**. Tout seuil calculé dessus —
+  danger d'emportement, traversabilité, IA — oscille à la période de la houle, avec une amplitude
+  (`πHs/T` = 0,63 m/s à Hs = 1 m, T = 5 s) du même ordre que la grandeur mesurée.
+- **A69** — Une passe de validation logée par commodité dans le mode le plus rapide de la CI lui
+  fait lire exactement ce que ce mode exclut par conception. L'intention — un seul système de
+  validation — était juste ; c'est la cadence qui était mal choisie.
+- **A70** — Un coût de cuisson chiffré en **temps simulé** se lit comme un temps de calcul, et
+  contredit silencieusement une autre phrase du même document.

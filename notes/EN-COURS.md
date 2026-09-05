@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S08
-État             : en cours
+État             : terminée
 Battement        : 2026-09-05
 Objectif         : recroiser les cinq SPEC entre elles (S05 n'avait confronté que les ADR)
 ```
@@ -84,7 +84,7 @@ Objectif         : recroiser les cinq SPEC entre elles (S05 n'avait confronté q
   et la liste des contrôles **passés sans écart** — sans elle la revue n'est pas vérifiable.
 - [x] **P6** — appliquer les résolutions : notes correctives datées dans les documents touchés,
   nouvel ADR si une décision change, angles morts enregistrés.
-- [ ] **P7** — rituel de fin (`REPRISE.md` §6) : journal S08, leçons, index, jeton libéré.
+- [x] **P7** — rituel de fin (`REPRISE.md` §6) : journal S08, leçons, index, jeton libéré.
 
 ### Notes de reprise
 

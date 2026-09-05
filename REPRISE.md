@@ -12,10 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-05
-Session en cours : S08 — 2026-09-05 — revue croisée des cinq SPEC
-Dernière session : S07 — 2026-09-05 — dispositif de reprise après interruption
+Dernière session : S08 — 2026-09-05 — revue croisée des cinq SPEC
+Session suivante : S09 — écrire le chemin poussé (SPEC-006 ou SPEC-004 §11) : il débloque trois
+                   des quatre accords inter-équipes
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
@@ -90,11 +91,15 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Six sessions, 21 ADR, cinq spécifications, trois registres. Les 30 sections du document de
+Huit sessions, 21 ADR, cinq spécifications, quatre registres. Les 30 sections du document de
 questions ouvertes d'origine sont traitées. Les vingt premiers ADR ont été confrontés les uns aux
-autres en S05 : douze écarts trouvés, dont deux de gravité 1, tous résolus.
+autres en S05 (douze écarts, deux de gravité 1) et les cinq SPEC entre elles en S08 (dix écarts,
+deux de gravité 1). Tous résolus, sauf un qui demande de l'écriture : le **chemin poussé**.
 
-**Il n'y a plus de document bloquant.** Ce qui reste est du code, des mesures et des réunions.
+**Un document manque, et il bloque trois réunions.** SPEC-004 ne spécifie que le chemin *tiré* ; ce
+que le système d'eau **publie** de lui-même — champ d'écume, signal de traversabilité, bus audio —
+n'a de signature nulle part (SPEC-004 §10.6, écart E04). Trois des quatre interfaces inter-équipes
+n'ont donc rien à soumettre. Le reste est du code, des mesures et des réunions.
 
 Chemin critique : `ADR-020 acté → H1 (cœur du harnais) → (C01, C02 → λ_cut → B2) et (H4 → B3) → B4`.
 **H1 doit précéder la première ligne du solveur** — c'est le seul élément du plan qui ne se

@@ -353,3 +353,96 @@ fusionner. À proposer à l'utilisateur.
 **Prochaine session recommandée.** S08 — recroiser les cinq spécifications entre elles, reporté
 depuis S06. SPEC-005 a ajouté des chiffres qui touchent SPEC-001 et ADR-013 ; le risque de
 contradiction est frais et la revue croisée des ADR a montré ce que ce type d'exercice rapporte.
+
+---
+
+## S08 — 2026-09-05 — Revue croisée des cinq spécifications
+
+**Consigne reçue.** « Reprends le projet. » Jeton `libre`, démarrage à froid ; session recommandée
+par S07 et reportée depuis S06 : recroiser les cinq SPEC entre elles, ce que la revue de S05 n'avait
+pas fait — elle avait confronté les vingt ADR, et SPEC-005 n'existait pas encore.
+
+**Sorties.** `registres/REVUE-CROISEE-S08.md` (dix écarts, deux de gravité 1, huit contrôles passés
+détaillés) ; six notes correctives datées dans SPEC-001, SPEC-004 et SPEC-005 ; registre porté à 70
+angles morts ; leçons L31 à L34.
+
+### Vérification préalable, avant tout croisement
+
+Une quarantaine de valeurs de SPEC-001 et SPEC-002 ont été **recalculées depuis leurs formules**
+avant de chercher la moindre contradiction : dispersion, CFL, `dx⁻⁴`, énergie, fetch, Kelvin, ulp
+du temps, Monahan, Weber, Stokes, Boyle, bilan du vide, Stefan, emportement, acoustique, optique.
+**Aucune erreur.** Les deux fiches chiffrées sont saines. C'était la vérification la moins
+intéressante à faire et la plus nécessaire : sans elle, tout écart trouvé plus loin aurait pu venir
+d'un chiffre faux plutôt que d'un désaccord entre documents.
+
+### Les deux écarts de gravité 1
+
+**E04 — le chemin poussé n'existe dans aucun document.** SPEC-004 spécifie le chemin *tiré*
+(`EvalWaterBatch`) et le chemin de *branchement de solveur*. Trois ADR exigent un troisième chemin,
+où le système d'eau **publie** à basse fréquence ce que personne ne vient chercher : champ de
+moussage (ADR-014 §2), `TraversabilitySample` par cellule à 5 Hz (ADR-018 §1), bus d'événements
+audio (ADR-016 §2). Aucun n'a de signature, et **`WaveEvent` n'est défini nulle part dans SPEC-004**
+alors qu'il traverse trois frontières et qu'ADR-016 demande de l'élargir « avant de figer le
+format ».
+
+Ce ne sont pas trois oublis : c'est un **mode de communication absent du modèle**. SPEC-004 a été
+écrite depuis le point de vue du consommateur qui interroge, et tout ce qui se publie sans être
+demandé est passé au travers — trois ADR ont alors chacun décrit sa propre publication dans son
+propre vocabulaire (L22, à trois exemplaires).
+
+La conséquence donne la gravité : **trois des quatre interfaces inter-équipes en attente d'accord
+humain n'ont aucun document à soumettre.** On demandait à l'audio, à l'IA et au rendu de confirmer
+une interface écrite nulle part sous forme de signature. Le risque annoncé dans l'index était donc
+sous-estimé : il ne s'agit pas d'obtenir un accord, il s'agit d'abord d'avoir quelque chose à
+présenter.
+
+**E07 — une cuisson « bit à bit » exigée d'un solveur qui n'est jamais D1.** SPEC-005 §7.2 exige
+qu'une cuisson soit reproductible à l'octet près entre machines. Or la bibliothèque côtière est
+produite en faisant tourner **δ** (§7.1 — c'est même l'argument central : l'état cuit est
+*exactement* ce que le jeu produirait), et SPEC-003 §2 pose qu'un solveur δ n'est **jamais D1**, au
+mieux D2 : même binaire, même machine. L'exigence est inatteignable par construction.
+
+Résolution par L24 — chercher l'hypothèse commune plutôt que départager. Les deux branches
+supposaient que la cuisson devait être *reproductible* ; elle n'a pas à l'être. Le motif exige
+seulement que **tous les participants chargent le même octet**, ce qui s'obtient par un **producteur
+unique**, pas par un calcul reproductible partout. Une cuisson livrable est donc **autoritaire, pas
+reproductible** ; le `bake_manifest` de §7.3 porte déjà tout ce qu'il faut. La correction retire une
+exigence et n'ajoute aucun mécanisme. Ce qui reste exigible, et l'était déjà : le régime **D2** de
+l'outil, sans lequel une cuisson n'est pas déboguable.
+
+### Chiffres qui ont orienté la conception
+
+- **4,4 à 8,0 s** — établissement de la structure verticale d'un train de houle (≈1 période,
+  λ = 30 à 100 m). SPEC-005 §6 annonçait « 2 à 3 s » sans provenance, et faisait reposer dessus la
+  faisabilité du précalcul côtier. Face aux **7,8 s** de fenêtre de préparation utile
+  (`√(2R/a_max)`, ADR-013 §2), la conclusion tient mais la marge disparaît.
+- **4 points par longueur d'onde** — ce que devient l'échantillonnage grossier du champ de fond
+  (SPEC-004 §6.2, facteur ×64) dans une zone de déferlement à `dx = 0,25` avec `λ_cut = 4 m`, contre
+  10 au scénario nominal à `dx = 0,10`. Deux fois Nyquist : l'économie s'effondre exactement dans le
+  domaine le plus gros, et le symptôme est celui que §6.1 décrit comme indiagnostiquable.
+- **0,63 m/s** — vitesse orbitale de crête à `Hs = 1 m`, `T = 5 s` (`πHs/T`). `WaterSample.u` mêle
+  orbitale et courant ; le produit d'emportement de SPEC-002 §5 attend un **courant**. Calculé sur
+  `u`, tout seuil de danger oscille à la période de la houle, à un ordre de grandeur qui vaut le
+  double du seuil « faible / dangereux ».
+- **3,4 km** — fetch maximal permettant la glace en plaque à `U10 = 5 m/s`
+  (`F_max = g·(0,15/(0,0016·U10))²`, croisement de SPEC-002 §4 et SPEC-001 §4). 0,86 km à 10 m/s.
+  Ce n'est pas un défaut mais une **dérivation nouvelle** : la glace en plaque est un phénomène de
+  lac et de baie, jamais de haute mer. Elle borne le coût de l'arbitrage n°2.
+
+### Ce qui n'a pas été fait
+
+**Les signatures du chemin poussé n'ont pas été écrites.** C'est un travail de session entière et
+non une note corrective : SPEC-004 §10 reçoit un point ouvert n°6 qui nomme le chemin manquant, ses
+trois consommateurs et les cinq contraintes déjà établies qu'il devra respecter. Écrire ce document
+est l'objectif recommandé pour S09.
+
+**Prochaine session recommandée.** S09 — écrire le chemin poussé (SPEC-006, ou un §11 de SPEC-004) :
+publication par tick à basse fréquence, instantané immuable à N lecteurs, anneau sans allocation,
+et migration de `WaveEvent` dans SPEC-004 avec ses trois champs audio **avant que le réseau ne fige
+le format**. C'est ce qui débloque trois des quatre accords inter-équipes.
+
+Second candidat, inchangé depuis S06 : `CondensedState` et la persistance hors caméra.
+
+**Arbitrages en attente — rappel.** Les trois arbitrages de design et les quatre interfaces
+inter-équipes restent ouverts. L'arbitrage n°2 (la glace) est désormais accompagné du fetch maximal
+ci-dessus, qui en réduit nettement la portée.

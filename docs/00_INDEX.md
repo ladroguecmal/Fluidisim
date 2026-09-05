@@ -67,8 +67,9 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`specs/SPEC-002`](specs/SPEC-002-phenomenes-secondaires.md) | écume, bulles, air, glace, danger, acoustique, optique sous-marine |
 | [`specs/SPEC-004`](specs/SPEC-004-interfaces.md) | **signatures des interfaces** — solveurs, champ de fond, solides, services d'hôte, contrat de fils d'exécution |
 | [`specs/SPEC-005`](specs/SPEC-005-outillage-auteur.md) | **outillage auteur** — sources de vérité, inversion du pipeline eau/terrain, cuisson déterministe, obsolescence |
-| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | 58 points, avec sévérité — dont 4 trouvés dans nos propres écrits |
+| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | 70 points, avec sévérité — dont 10 trouvés dans nos propres écrits |
 | [`registres/REVUE-CROISEE-S05.md`](registres/REVUE-CROISEE-S05.md) | **audit croisé des 20 ADR** — 12 écarts, dont 2 de gravité 1, et la liste des contrôles passés |
+| [`registres/REVUE-CROISEE-S08.md`](registres/REVUE-CROISEE-S08.md) | **audit croisé des 5 SPEC** — 10 écarts, dont 2 de gravité 1 ; l'arithmétique des fiches chiffrées revérifiée ligne à ligne |
 | [`registres/QUESTIONS-OUVERTES.md`](registres/QUESTIONS-OUVERTES.md) | traçabilité section par section + verdict sur les 7 propositions antérieures |
 | [`validation/SPEC-003`](validation/SPEC-003-harnais-de-validation.md) | **harnais de validation** — régimes de déterminisme, scénarios, métriques, CI, pièges de mesure |
 | [`validation/CAS-CANONIQUES.md`](validation/CAS-CANONIQUES.md) | 18 montages de référence, dont 12 à solution analytique fermée |
@@ -89,8 +90,8 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 ```
 Conception conceptuelle   ██████████████████████  100 %   les 30 sections sources sont traitées
 Chiffrage et contraintes  █████████████████░░░░░   75 %   formules posées, mesures à faire
-Spécification technique   ███████████████████░░░   85 %   interfaces posées ; restent CondensedState et IGpuBackend
-Cohérence interne         ███████████████████░░░   85 %   20 ADR confrontés, 12 écarts résolus ; SPEC non recroisées
+Spécification technique   ████████████████░░░░░░   72 %   chemin tiré posé ; le chemin poussé n'est pas écrit (E04)
+Cohérence interne         █████████████████████░   95 %   20 ADR + 5 SPEC confrontés, 22 écarts résolus
 Décisions expérimentales  ██░░░░░░░░░░░░░░░░░░░░   10 %   onze bancs définis, aucun exécuté
 Outillage et pipeline     ████████████░░░░░░░░░░   55 %   harnais et outillage auteur spécifiés, non écrits
 Accords inter-équipes     ██░░░░░░░░░░░░░░░░░░░░   10 %   interfaces proposées, non confirmées
@@ -121,14 +122,25 @@ sont posés. Ce qui reste est du code, des mesures et des réunions.
    cohérence multijoueur de la houle est perdue et l'océan concerné bascule en couche locale.
 2. **Le projet veut-il de la glace ?** → ADR-017. L'ADR est écrit pour être prêt, pas pour imposer
    le besoin. La réponse détermine si `liquid_id` porte une phase.
+   *Élément nouveau (S08, E03)* : croisées, SPEC-002 §4 (`Hs < 0,15 m`) et SPEC-001 §4
+   (`Hs(U10, F)`) **bornent la glace en plaque par le fetch** — `F_max = g·(0,15/(0,0016·U10))²`,
+   soit **3,4 km à U10 = 5 m/s** et 0,86 km à 10 m/s. C'est un phénomène de lac et de baie
+   abritée, jamais de haute mer : la réponse « oui » coûte moins cher que l'ADR ne le laisse
+   craindre.
 3. **Qui porte le trait de côte mobile ?** → ADR-011 §6, ADR-018 §4. Engage terrain, IA, audio et
    points d'apparition.
 
 ### Interfaces à confirmer avant que l'autre équipe ne fige son format
 
+> **Préalable trouvé en S08 (écart E04, gravité 1).** Trois de ces quatre interfaces — audio,
+> IA/navigation, et la part écume du rendu — **n'ont aucune signature écrite** : elles relèvent du
+> *chemin poussé*, absent de SPEC-004, qui ne spécifie que le chemin tiré et le branchement de
+> solveur. On ne peut donc pas encore demander à ces équipes de confirmer quoi que ce soit : il
+> faut d'abord écrire ce qu'on leur soumet. C'est l'objet de S09, et cela précède les réunions.
+
 | Équipe | Objet | Risque si tardif |
 |---|---|---|
-| Audio | consommation de `EvalWater` + bus d'événements, trois champs à ajouter à `WaveEvent` | LOD audio incohérent avec le visuel, recâblage complet |
-| IA / navigation | signal de traversabilité, surface navigable conditionnelle de la glace | un générateur de maillage qui ne sait qu'enlever des zones |
+| Audio | consommation de `EvalWater` + bus d'événements, trois champs à ajouter à `WaveEvent` — **signatures à écrire (E04)** | LOD audio incohérent avec le visuel, recâblage complet ; et `WaveEvent` figé par le réseau avant que l'audio ait pu demander ses champs |
+| IA / navigation | signal de traversabilité, surface navigable conditionnelle de la glace — **signatures à écrire (E04)** | un générateur de maillage qui ne sait qu'enlever des zones ; et un danger calculé sur une vitesse qui mêle orbitale et courant (E05) |
 | Terrain / outillage | **le géoïde dans l'outil** (70 m d'écart à 30 km), l'eau en amont du terrain, rivière source de vérité | côtes entières à resculpter ; rivières qui remontent leur lit — **le plus urgent des quatre** |
 | Rendu | modèle de diffusion sous-marine, caméra à demi immergée | ligne de flottaison instable, corrigée tard et mal |

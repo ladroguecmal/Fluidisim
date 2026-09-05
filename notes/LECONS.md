@@ -305,3 +305,54 @@ Aucun des deux n'était visible à la relecture. Tous deux sont apparus à la pr
 **Réflexe** : exécuter un protocole sur lui-même, ou sur un cas réel, avant de le publier. Même
 famille que L15 et L20 — c'est la contrainte d'exécution, jamais la relecture, qui produit
 l'information.
+
+## L31 — Le chemin tiré et le chemin poussé sont deux interfaces, pas une
+
+*(S08)* Une spécification d'interfaces écrite depuis le consommateur qui *interroge* laisse passer
+tout ce que le système **publie sans qu'on le lui demande**. Le défaut est invisible à la relecture
+— il n'y a rien à relire — et il se manifeste ailleurs : chaque consommateur décrit alors sa propre
+publication dans son propre vocabulaire. Ici trois ADR l'ont fait séparément, et trois interfaces
+inter-équipes se sont retrouvées sans document à soumettre.
+
+**Réflexe** : pour tout système, énumérer **séparément** ce qu'on vient lui demander et ce qu'il
+annonce de lui-même. Le second n'apparaît jamais en écrivant les signatures du premier. C'est L20
+poussé d'un cran — écrire les signatures révèle l'exigence, mais seulement des appels qu'on a pensé
+à écrire.
+
+## L32 — Une exigence de déterminisme doit nommer sa portée, ou elle est fausse
+
+*(S08)* « Reproductible bit à bit » sans dire *entre quoi et quoi* est soit trivial, soit
+inatteignable. Ici l'exigence portait sur une cuisson qui fait tourner un solveur dont un autre
+document dit qu'il n'est jamais déterministe entre machines. Chaque phrase était juste dans son
+document ; leur conjonction était impossible.
+
+Et quand une telle exigence est inatteignable, la question n'est pas comment l'atteindre mais **ce
+qu'elle protégeait**. Ici : que tous les participants chargent le même octet — obtenu par un
+producteur unique, pas par un calcul reproductible partout. La bonne résolution a retiré une
+exigence sans ajouter un mécanisme, comme en L24.
+
+**Réflexe** : derrière toute exigence de déterminisme, écrire la propriété observable qu'elle sert.
+Elle a souvent une réalisation beaucoup moins chère, et la portée non dite est l'endroit où
+l'exigence devient fausse.
+
+## L33 — Un facteur d'économie fondé sur un rapport d'échelles n'est jamais une constante
+
+*(S08)* Le ×64 de l'échantillonnage grossier tenait au rapport `λ_cut/dx`, qui varie d'un facteur
+2,5 entre deux régimes écrits dans les mêmes documents — 10 points par longueur d'onde au scénario
+nominal, 4 dans la zone de déferlement. L'optimisation s'effondrait donc précisément dans le
+domaine le plus gros, celui qu'elle devait rendre abordable.
+
+**Réflexe** : quand une optimisation est justifiée par « X est grand devant Y », écrire le rapport,
+chercher dans les documents déjà écrits le régime où il est le **plus petit**, et transformer le
+taux constant en **contrainte** (`dx ≤ λ_cut/N`). Un taux se copie ; une contrainte se vérifie.
+
+## L34 — Un contrôle de cohérence entre deux nombres ne voit pas que les deux sont mal fondés
+
+*(S08)* La revue S05 avait classé « cohérence mémoire de SPEC-001 §2.4 avec ADR-012 §3 » parmi les
+contrôles passés. Elle l'était : le rapprochement des deux budgets est juste. Mais les comptages de
+cellules dont ils dérivent appliquaient trois taux d'occupation différents sans le dire. Un audit
+par paires ne peut pas voir cela — il vérifie une relation, jamais une provenance.
+
+**Réflexe** : un audit de cohérence et un audit de provenance sont deux passes distinctes, et la
+seconde ne se déduit pas de la première. Même famille que L21 — vérifier deux termes à la fois
+laisse structurellement passer ce qui est faux en amont des deux.
