@@ -68,7 +68,7 @@ Objectif         : recroiser les cinq SPEC entre elles (S05 n'avait confronté q
 ### Plan
 
 - [ ] **P1** — déclarer le plan, prendre le jeton, mettre à jour le battement.
-- [ ] **P2** — croisement chiffré SPEC-001 × SPEC-002 × SPEC-005 : toute valeur numérique
+- [x] **P2** — croisement chiffré SPEC-001 × SPEC-002 × SPEC-005 : toute valeur numérique
   apparaissant dans deux documents doit y valoir la même chose, ou l'écart doit être motivé.
   *Thèse : les chiffres recopiés d'un document à l'autre se périment en silence — S07 en a déjà
   trouvé un cas dans le README.*
@@ -89,3 +89,31 @@ Objectif         : recroiser les cinq SPEC entre elles (S05 n'avait confronté q
 ### Notes de reprise
 
 *(Vide au démarrage. Y déposer au fil de l'eau ce qui n'est pas encore dans un fichier.)*
+
+#### P2 — croisement chiffré SPEC-001 × SPEC-002 × SPEC-005
+
+**Contrôle de fond effectué avant tout croisement** : une quarantaine de valeurs de SPEC-001 et
+SPEC-002 ont été recalculées depuis leurs formules — dispersion profonde et peu profonde, CFL et
+sous-pas à 30 Hz, loi `dx⁻⁴`, comptages de cellules, énergie `E = ρgHs²/16`, fetch SMB, Kelvin,
+`λ = 2πv²/g`, ulp `f32` du temps, Monahan, Weber, Stokes des bulles, Boyle, bilan du vide (14 % /
+86 %), Stefan `h ≈ 0,035√FDD`, produit d'emportement, transmission acoustique (−29,5 dB), Snell et
+atténuation optique. **Toutes justes.** Les deux fiches chiffrées sont saines ; les écarts trouvés
+plus bas portent sur la provenance et sur les croisements, jamais sur l'arithmétique.
+
+- **E01, gravité 3** — SPEC-001 §2.4. La colonne « cellules éparses » applique trois taux
+  d'occupation différents sans les nommer : bateau 432 k = 1,73 M ÷ 4 ; impact 1,15 M = comptage
+  **plein** (6×6×4 m à 0,05 = 1 152 000) ; déferlement 384 k = 768 k ÷ 2. §2.3 annonce « ≈4 » et un
+  lecteur l'applique partout. Deux consommateurs : le contrôle de cohérence du budget 384 Mo, et
+  SPEC-005 §6 (197 Mo par plage). Les deux conclusions tiennent, la provenance manque — I-14.
+- **E02, gravité 2** — SPEC-005 §6 : « le volume 3D est ré-établi en 2 à 3 secondes ». Aucune
+  provenance. La structure verticale d'un train de houle s'établit en ≈1 période, soit **4,4 à
+  8,0 s** pour λ = 30 à 100 m (SPEC-001 §1). Et ce n'est pas anodin : la fenêtre de préparation
+  utile vaut `t ≤ √(2·R/a_max)`, soit **7,8 s** pour R = 60 m (demi-longueur d'une zone de
+  120 m) et `a_max = 2 m/s²` (ADR-013 §2). À 2–3 s la marge est confortable, à 8 s elle est nulle.
+  Le chiffre doit être dérivé ou étiqueté « à calibrer ».
+- **E03, dérivation nouvelle, pas un écart** — SPEC-002 §4 exige `Hs < 0,15 m` pour une formation
+  en plaque ; SPEC-001 §4 donne `Hs(U10, F)`. Croisées, elles **bornent la glace par le fetch** :
+  `F_max = g·(0,15/(0,0016·U10))²`, soit **3,4 km à U10 = 5 m/s**, 0,86 km à 10 m/s, 9,6 km à
+  3 m/s. La glace en plaque est un phénomène de lac et de baie abritée, jamais de haute mer.
+  Chiffre à porter à l'arbitrage n°2 (ADR-017, « le projet veut-il de la glace ? ») : il en réduit
+  la portée à une classe de plans d'eau, ce qui change le coût de la réponse « oui ».
