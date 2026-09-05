@@ -12,10 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-05
-Session en cours : S11 — 2026-09-05 — audit des points ouverts
-Dernière session : S10 — 2026-09-05 — la persistance de l'eau (ADR-022)
+Dernière session : S11 — 2026-09-05 — audit des points ouverts
+Session suivante : S12 — les quatre points « à spécifier » que S11 a fait remonter : terme d'impact
+                   de flottabilité, modèle du nageur, rochers turbulents, coalescence des poches T2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
@@ -77,7 +78,7 @@ docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes second
                             004 interfaces (chemin tiré) · 005 outillage auteur
                             006 chemin poussé (ce que le système publie)
 docs/validation/          ← SPEC-003 harnais · CAS-CANONIQUES · PLAN-BENCHMARK
-docs/registres/           ← angles morts · questions ouvertes · revue croisée
+docs/registres/           ← angles morts · questions ouvertes · revues croisées · audit des points ouverts
 docs/sources/             ← documents d'intention d'origine, non modifiés
 notes/                    ← METHODE · LECONS · JOURNAL
 ```
@@ -91,7 +92,7 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Dix sessions, **22 ADR**, six spécifications, quatre registres. Les 30 sections du document de
+Onze sessions, **22 ADR**, six spécifications, **cinq registres**. Les 30 sections du document de
 questions ouvertes d'origine sont traitées. Les vingt premiers ADR ont été confrontés les uns aux
 autres en S05 (douze écarts, deux de gravité 1) et les cinq SPEC entre elles en S08 (dix écarts,
 deux de gravité 1). Tous résolus — le dernier, le **chemin poussé**, par l'écriture de `SPEC-006`
@@ -113,8 +114,10 @@ Détail à jour : `docs/00_INDEX.md`, section « État d'avancement ».
 
 ## 5. Ce qui n'est pas à toi de décider
 
-Trois arbitrages de design et quatre interfaces inter-équipes attendent une réponse humaine. Ils
-sont listés dans `docs/00_INDEX.md`, section « Ce qui attend une réponse humaine ».
+**Cinq** arbitrages de design, quatre interfaces inter-équipes et sept autres destinataires
+extérieurs attendent une réponse humaine. Ils sont listés dans `docs/00_INDEX.md`, section « Ce qui
+attend une réponse humaine », et détaillés dans
+`docs/registres/AUDIT-POINTS-OUVERTS-S11.md` §7.
 
 Les rappeler en fin de session tant qu'ils sont ouverts. Ne pas les trancher, ne pas les contourner
 par une hypothèse implicite.

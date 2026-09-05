@@ -474,3 +474,55 @@ l'autre côté, une fois la décomposition trouvée.
 
 **Réflexe** : après avoir conçu une réponse, compter combien de situations indépendantes elle
 couvre. C'est un test de justesse plus fort qu'un argument, et il est gratuit.
+
+## L43 — Une correction s'applique là où vit l'affirmation, jamais dans la liste des absences
+
+*(S11)* Quatre points ouverts réclamaient un mécanisme qui existait déjà, ou une décision déjà
+prise. Dans un cas, la correction et le point périmé étaient dans **le même document, à quatre
+sections d'écart** — l'hypothèse de la distance ne tient donc pas.
+
+La cause est de forme. Une correction se pose là où vit l'affirmation qu'elle corrige. **Un point
+ouvert n'affirme rien : il déclare une absence**, et personne ne relit une liste d'absences en se
+demandant si l'une d'elles a été comblée. C'est ce qui rend cette dette invisible aux audits de
+cohérence, qui comparent des affirmations entre elles.
+
+Généralisation de L35 (une signature survit à la décision qui la vide) et de L40 (un point reporté
+échappe aux audits) : les trois décrivent le même angle mort vu sous trois éclairages — **ce qui
+n'affirme rien ne se relit pas**.
+
+**Réflexe** : toute session qui décide ou corrige quelque chose termine par une **recherche de
+texte** sur ce quelque chose dans les listes de points ouverts. Pas une relecture — une recherche.
+Coût : une minute. En S11, quatre points sur 110 en dépendaient.
+
+## L44 — Un point ouvert qui se justifie par le fait que d'autres le posent ne devrait pas exister
+
+*(S11)* Trois documents posaient la même question, et deux le savaient : « non traitée ici **comme
+elle ne l'est pas dans SPEC-004** », « **comme partout**, dépend du langage ». Aucun ne désignait de
+porteur. Un doublon ne nuit que le jour où quelqu'un y répond — il tranche alors dans un document et
+pas dans l'autre — et c'est précisément ce jour-là qu'on ne le verra pas.
+
+La formulation qui reconnaît la répétition est le symptôme : elle prouve que l'auteur a vu le
+doublon et l'a traité comme une excuse au lieu d'un défaut.
+
+**Réflexe** : au moment d'écrire un point ouvert, chercher qui d'autre le pose et **nommer le
+porteur** — le document dont la question relève du *domaine*, pas celui qui l'a écrite en premier.
+Un renvoi tient en une ligne. Sur les huit points de la spécification la plus chargée du corpus, six
+nomment déjà leur porteur : le coût est nul quand on y pense à l'écriture, et il devient un audit
+quand on n'y pense pas.
+
+## L45 — « Qui attend quoi » est un livrable qu'aucun audit de cohérence ne produit
+
+*(S11)* Un audit demande d'ordinaire si les documents se contredisent. Ajouter une troisième
+question — *qui attend, et quoi ?* — a produit, sur le même passage et sans travail supplémentaire :
+sept destinataires extérieurs que la liste officielle des dépendances ne portait pas, un cinquième
+arbitrage humain rangé jusque-là parmi des choix de format, quatre travaux de conception que
+personne n'avait planifiés, et le classement des bancs de mesure par nombre de points débloqués —
+lequel a confirmé le chemin critique par une voie indépendante de celle qui l'avait établi.
+
+Aucun de ces éléments n'est une incohérence. Ils étaient tous **écrits, exacts et invisibles**,
+parce qu'ils vivaient chacun dans un point ouvert, c'est-à-dire dans l'endroit où l'on ne cherche
+ni une dépendance, ni une tâche, ni une décision à prendre.
+
+**Réflexe** : après tout audit de correction, faire une seconde passe qui ne demande plus « est-ce
+juste ? » mais « **qui est bloqué ?** ». Les deux passes lisent le même texte ; elles n'en tirent
+pas la même chose, et la seconde produit un document que quelqu'un peut utiliser tel quel.

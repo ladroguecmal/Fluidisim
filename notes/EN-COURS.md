@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S11
-État             : en cours
+État             : terminée
 Battement        : 2026-09-05
 Objectif         : auditer les listes « ce qui reste ouvert » de tous les documents (L40)
 ```
@@ -85,7 +85,7 @@ avait dissous celui d'ADR-007 §5.3 sans que personne ne le voie pendant neuf se
   la synthèse par catégorie, et **qui attend quoi**.
 - [x] **P8** — appliquer : clôtures marquées et notes correctives dans les documents concernés.
 - [x] **P9** — index, angles morts, `METHODE.md` (la passe d'audit devient une phase du protocole).
-- [ ] **P10** — rituel de fin (`REPRISE.md` §6) : journal S11, leçons, index, jeton libéré.
+- [x] **P10** — rituel de fin (`REPRISE.md` §6) : journal S11, leçons, index, jeton libéré.
 
 ### Notes de reprise
 
@@ -170,3 +170,9 @@ SPEC-003 §1 dit que la qualité de toutes les décisions à venir est plafonné
 
 8 clôtures (B), 15 notes correctives (C), 10 renvois de doublons avec porteur désigné (D),
 1 requalification (F). Les scripts rapportent les non-appliquées ; il n'y en a eu aucune.
+
+#### P10 — la nouvelle vérification a servi tout de suite
+
+Le contrôle des décomptes ajouté au rituel en S10 a attrapé `CLAUDE.md`, qui annonçait encore
+« trois arbitrages de design et quatre interfaces ». C'est le fichier d'amorce : une session neuve
+l'aurait lu en premier et aurait rappelé une liste fausse à l'utilisateur.

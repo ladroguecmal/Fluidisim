@@ -671,3 +671,111 @@ attend-il quelque chose dessus ? L'exercice couvre au passage SPEC-006 et ADR-02
 point demande une décision qui n'appartient pas à l'équipe eau : la durée de vie d'un nœud V
 rattaché à un objet d'un joueur absent depuis des mois (ADR-022 §7.2). Les quatre interfaces
 inter-équipes attendent toujours une réunion, et `WaveEvent` reste l'urgence de format.
+
+---
+
+## S11 — 2026-09-05 — Audit des points ouverts
+
+**Consigne reçue.** « Enchaîne S11. » Objectif recommandé par S10 : auditer les listes « ce qui
+reste ouvert » de tous les documents — l'axe que la leçon L40 venait de désigner comme aveugle.
+
+**Sorties.** [`registres/AUDIT-POINTS-OUVERTS-S11.md`](../docs/registres/AUDIT-POINTS-OUVERTS-S11.md) ;
+34 marques appliquées dans 15 documents ; `00_INDEX.md` élargi ; registre porté à 80 angles morts ;
+`METHODE.md` reçoit une **phase 7** ; leçons L43 à L45.
+
+### Le chiffre
+
+**110 points ouverts, 26 documents. Un sur trois n'était pas dans l'état où son document le
+présentait.**
+
+| Verdict | Nombre |
+|---|---|
+| **E** — valide | 69 (63 %) |
+| **C** — formulation périmée | 15 |
+| **D** — dupliqué | 13 |
+| **B** — clos ailleurs, jamais marqué | 8 |
+| **A** — dissous | 3 |
+| **F** — pas une question | 2 |
+
+Les 63 % de E sont eux aussi un résultat : la dette est réelle mais bornée, et les 41 points non-E
+représentent, pour la plupart, du travail que quelqu'un aurait refait.
+
+### La cause, et elle n'est pas celle qu'on croyait
+
+Quatre points réclamaient un mécanisme qui existait déjà : ADR-007 §5.3 (un format pour une
+persistance dissoute la même session), ADR-006 §7.3 (un nombre maximal de blocs dans un profil, ce
+qu'I-16 interdit depuis S05), ADR-017 §7.2 (une subdivision « dédiée » alors qu'ADR-006 §2 la porte
+depuis S05), SPEC-004 §10.3 (mesurer « un point sur quatre » alors que S08 a montré que le paramètre
+est `N`).
+
+L'hypothèse de la distance entre documents ne tient pas : **dans le dernier cas, la correction et le
+point périmé sont dans le même document, à quatre sections d'écart.**
+
+> **Une correction s'applique là où vit l'affirmation qu'elle corrige. Un point ouvert n'affirme
+> rien : il déclare une absence.** Personne ne relit une liste d'absences en se demandant si l'une
+> d'elles a été comblée.
+
+D'où la règle ajoutée au rituel de fin : une session qui décide ou corrige quelque chose parcourt
+les points ouverts qui le citaient. C'est une recherche de texte, pas une relecture.
+
+### Le livrable que l'audit produit en plus
+
+La troisième question — *qui attend, et quoi ?* — n'avait jamais été posée, et elle produit un
+tableau que rien d'autre ne produisait.
+
+- **Onze destinataires extérieurs**, là où `00_INDEX.md` en listait quatre. Les sept nouveaux —
+  véhicules, personnage, gameplay spatial, gameplay survie, réseau/physique solide, gameplay,
+  assurance qualité technique — étaient chacun cités **dans un point ouvert**, c'est-à-dire là où
+  personne ne cherche une dépendance. Ils sont plus légers que les quatre interfaces, et ils ne se
+  rattrapent pas mieux : un modèle de nageur décidé après que l'équipe personnage a figé sa machine
+  à états coûte un recâblage, exactement comme un format audio.
+- **B2 débloque quatre points ouverts**, plus que tout autre banc, et il porte désormais deux
+  critères de recevabilité de `λ_cut` et non un (l'autorité des ondes répliquées **et** la validité
+  du signal de navigation, SPEC-006 §5.6). C'est une confirmation indépendante du chemin critique,
+  établi jusqu'ici sur les dépendances et non sur un décompte.
+- **Un cinquième arbitrage humain** : qui possède le harnais de validation (SPEC-003 §11.4). Il
+  était rangé parmi des questions de format de fichier, alors que SPEC-003 §1 pose que la qualité
+  de toutes les décisions à venir est plafonnée par celle du harnais.
+- **Quatre points disent « à spécifier » et aucune session ne l'a jamais pris en charge** : le terme
+  d'impact de flottabilité (*slamming*), le modèle du nageur en surface, le comportement des rochers
+  turbulents permanents, la coalescence de deux poches d'air T2.
+
+### Deux symptômes à retenir
+
+- **« Comme partout, dépend du langage »** — ADR-022 §7.4, à propos de la représentation binaire,
+  posée par trois documents qui se justifiaient les uns par les autres. Un point ouvert qui se
+  justifie par le fait que d'autres le posent aussi ne devrait pas exister.
+- **SPEC-006 est la plus chargée du corpus et la plus propre** : six de ses huit points nomment leur
+  porteur dans leur énoncé même. Le coût est d'une ligne, à l'écriture.
+
+### Ce qui a changé dans les documents
+
+Huit clôtures, quinze notes correctives, dix renvois avec porteur désigné, une requalification. Les
+plus utiles : la bibliothèque côtière avait son format et ses volumes **depuis S06** et attendait
+encore un banc ; l'anticipation locale était traitée par deux documents qui ne s'étaient pas
+concertés ; le TTL de la couche V a cessé d'être une « calibration gameplay » pour devenir la borne
+supérieure de la persistance de l'eau ; et l'arbitrage sur la glace porte enfin son chiffre — la
+glace en plaque est bornée par le fetch, 3,4 km à 5 m/s de vent.
+
+Une précision d'invariant, aussi : **le critère d'I-16 n'était pas opérationnel**. « Ressource »
+contre « capacité dérivée » ne tranche pas le cas d'une taille de pool, qui est les deux. Le critère
+qui fonctionne : *une valeur peut figurer dans un profil si elle est allouée directement ; pas si
+elle doit être cohérente avec deux autres valeurs déjà déclarées.* C'est ce qui condamnait
+`domaines_max`, contradictoire à la fois avec la mémoire et avec le budget de temps.
+
+### Ce qui n'a pas été fait
+
+L'audit n'a porté que sur les listes de points ouverts. Les **registres** — angles morts, questions
+sources — n'ont pas été passés au même filtre : un angle mort comblé y figure-t-il encore comme
+ouvert ? La question se pose et n'a pas été traitée.
+
+**Prochaine session recommandée.** S12 — **les quatre points « à spécifier »** que l'audit a fait
+remonter (§7.4) : terme d'impact de flottabilité `∝ ρv²A`, modèle du nageur en surface, rochers
+turbulents permanents, coalescence des poches T2. Quatre sujets courts, indépendants, et sans
+dépendance à un banc — c'est du travail de conception pur, le premier depuis S10, et il est
+disponible immédiatement.
+
+**Arbitrages en attente — rappel.** Ils sont maintenant **cinq**, et non trois : l'échelle du temps,
+la glace, le trait de côte mobile, la durée de vie d'un nœud V d'un joueur absent, et la propriété
+du harnais. Les quatre interfaces attendent une réunion ; sept autres équipes doivent fournir une
+donnée ou un cadrage. `WaveEvent` reste l'urgence de format.
