@@ -296,3 +296,60 @@ chiffres qui touchent SPEC-001 et ADR-013 ; le risque de contradiction est frais
 
 Second candidat : `CondensedState` et la persistance hors caméra, seul point de SPEC-004
 volontairement reporté.
+
+---
+
+## S07 — 2026-09-05 — Gestion de version et reprise après interruption
+
+**Consigne reçue.** Faire le `git init`, puis construire un dispositif permettant à un compte qui
+reprend une requête interrompue par une limite d'usage de continuer proprement.
+
+**Sorties.** Dépôt git initialisé (`c6886a7`, 41 fichiers), `.gitignore`, `.gitattributes` ;
+`notes/EN-COURS.md` ; `REPRISE.md` §7 et jeton refondu ; README ; leçons L28 à L30.
+
+### Le raisonnement
+
+Une session coupée par une limite d'usage n'a **aucune occasion d'écrire qu'elle s'arrête**. Tout
+dispositif reposant sur une action au moment de l'arrêt — résumé final, mise à jour d'état — est
+inutile précisément dans le cas pour lequel on le conçoit. La seule information exploitable est
+antérieure.
+
+D'où le dispositif, en trois pièces :
+
+1. **Écriture anticipée.** Le plan complet est déclaré dans `notes/EN-COURS.md` et committé *seul*,
+   avant toute modification. Chaque étape porte sa **thèse** en une ligne — ce qu'elle doit
+   démontrer — et pas seulement son intitulé : une session qui reprend peut alors *finir
+   l'argument* au lieu d'en inventer un autre.
+2. **Git comme détecteur d'achèvement.** Ce qui est committé est fait ; ce qui est modifié non
+   committé appartient à l'étape marquée `[>]`, et à elle seule. Un commit par étape, aucune étape
+   dépassant une quinzaine de minutes — c'est la seule prophylaxie réelle contre une coupure.
+3. **Notes de reprise.** Un espace pour ce qui n'est encore dans aucun fichier : un chiffre
+   calculé, une décision prise, **une impasse explorée**. Git conserve les fichiers, jamais le
+   raisonnement ; ce qui disparaît d'abord dans une interruption n'est pas le travail produit mais
+   le « j'ai essayé X, ça ne marche pas parce que Y ».
+
+Le jeton passe à trois états — `libre`, `occupé` (battement < 2 h), `interrompu` — parce qu'avec
+deux états, personne n'ose reprendre : un jeton `occupé` est indiscernable d'un jeton abandonné.
+
+Le rituel de fin est désormais **une étape du plan** : interrompue, elle reste visiblement non
+cochée.
+
+### Le protocole appliqué à lui-même
+
+S07 a été conduite sous son propre protocole. Deux défauts en deux étapes :
+
+- l'étape qui *crée* le journal d'intention ne peut pas cocher sa propre case avant qu'il existe —
+  la première étape d'un protocole d'écriture anticipée n'est jamais protégée par ce protocole ;
+- la case doit être cochée **en dernière action avant le commit**, pas avant le travail, faute de
+  quoi l'historique ment dans l'autre sens et fera refaire du travail déjà fait.
+
+Aucun des deux n'était visible à la relecture. D'où la leçon L30 : un protocole qu'on n'a pas
+exécuté est un protocole faux.
+
+**Ce qui reste sans réponse.** Il n'y a pas de dépôt distant : la passation entre deux machines
+repose sur un dossier partagé, et deux sessions écrivant en parallèle n'auraient aucun moyen de
+fusionner. À proposer à l'utilisateur.
+
+**Prochaine session recommandée.** S08 — recroiser les cinq spécifications entre elles, reporté
+depuis S06. SPEC-005 a ajouté des chiffres qui touchent SPEC-001 et ADR-013 ; le risque de
+contradiction est frais et la revue croisée des ADR a montré ce que ce type d'exercice rapporte.

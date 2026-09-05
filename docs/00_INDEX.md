@@ -78,6 +78,8 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 
 | Document | Rôle |
 |---|---|
+| [`../REPRISE.md`](../REPRISE.md) | passation : rôle, jeton, rituel de fin, reprise après interruption |
+| [`../notes/EN-COURS.md`](../notes/EN-COURS.md) | journal d'intention de la session en cours + procédure de reprise à chaud |
 | [`../notes/METHODE.md`](../notes/METHODE.md) | protocole de conception, révisé à chaque session |
 | [`../notes/LECONS.md`](../notes/LECONS.md) | enseignements généralisables |
 | [`../notes/JOURNAL.md`](../notes/JOURNAL.md) | historique des sessions, points de reprise |

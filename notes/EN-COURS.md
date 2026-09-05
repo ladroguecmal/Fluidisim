@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S07
-État             : en cours
+État             : terminée
 Battement        : 2026-09-05
 Objectif         : dispositif de reprise propre après interruption par limite d'usage
 ```
@@ -74,7 +74,7 @@ Objectif         : dispositif de reprise propre après interruption par limite d
   *Thèse : le jeton doit distinguer « occupé » de « interrompu », sinon personne n'ose reprendre.*
 - [x] **P3** — `README.md` : mention du protocole dans les règles de tenue.
 - [x] **P4** — `notes/LECONS.md` : leçons généralisables de cette session.
-- [>] **P5** — rituel de fin : entrée de journal S07, index, jeton repassé à `libre`, ce fichier
+- [x] **P5** — rituel de fin : entrée de journal S07, index, jeton repassé à `libre`, ce fichier
   repassé à `terminée`.
 
 ### Notes de reprise
