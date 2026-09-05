@@ -1,0 +1,47 @@
+# Fluidisim — Système de gestion de l'eau
+
+Connaissance projet du système d'eau temps réel. Ce dépôt est la **mémoire** du système : il
+existe pour que le travail survive au changement de conversation, de session et de personne.
+
+## Entrer
+
+- **Vous reprenez le projet** (autre session, autre compte, autre personne) →
+  **[`REPRISE.md`](REPRISE.md)**, à lire en entier avant toute action.
+- **Vous cherchez une décision ou une donnée** → [`docs/00_INDEX.md`](docs/00_INDEX.md)
+
+## Organisation
+
+```
+REPRISE.md             passation : rôle, état, rituel de fin de session, jeton
+docs/
+  00_INDEX.md          point d'entrée, état d'avancement, arbitrages en attente
+  01_INVARIANTS.md     les 14 règles non négociables
+  adr/                 décisions d'architecture, numérotées, jamais réécrites
+  specs/               références chiffrées
+  registres/           angles morts, traçabilité des questions sources
+  validation/          plan de benchmark
+  sources/             documents d'intention d'origine, non modifiés
+notes/
+  METHODE.md           protocole de conception
+  LECONS.md            enseignements généralisables
+  JOURNAL.md           historique des sessions et points de reprise
+```
+
+## Règles de tenue
+
+- **Un ADR n'est jamais réécrit.** Une décision qui change fait l'objet d'un nouvel ADR qui
+  remplace explicitement le précédent. L'historique du raisonnement a autant de valeur que la
+  conclusion.
+- **Aucun nombre sans provenance** : formule citée dans `SPEC-001`, ou étiquette « à calibrer »
+  avec le banc qui le fixera.
+- **Les documents de `docs/sources/` ne sont pas modifiés.** Leur relecture critique vit dans
+  `registres/`.
+- Chaque session ajoute une entrée à `notes/JOURNAL.md` avant de se clore, et exécute le rituel de
+  fin décrit dans [`REPRISE.md`](REPRISE.md) §6.
+- **Une seule session travaille à la fois** : le jeton en tête de `REPRISE.md` en tient le compte.
+
+## Où en est le projet
+
+Voir la section « État d'avancement » de l'index. En une phrase : la conception conceptuelle est
+faite, les décisions restantes sont expérimentales, et le chemin critique passe par le harnais de
+validation.

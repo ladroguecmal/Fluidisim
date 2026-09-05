@@ -1,0 +1,222 @@
+# Registre des angles morts
+
+Points **absents des documents sources** et susceptibles de coûter cher s'ils sont découverts
+tard. Un angle mort n'est pas une question ouverte : une question ouverte est connue et suivie ;
+un angle mort ne l'était pas.
+
+Sévérité : **1** = refonte d'architecture si découvert tard, **2** = refonte d'un sous-système,
+**3** = travail supplémentaire localisé.
+
+Historique : 28 recensés en S01, 12 ajoutés en S02 (phénomènes secondaires), 9 en S03 (harnais
+de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outillage auteur). Quatre ont été trouvés dans nos propres
+écrits, pas dans les documents sources.
+
+---
+
+## Tableau général
+
+| Code | Titre | Sév. | Traité dans |
+|---|---|---|---|
+| A01 | Référentiels non inertiels | 1 | ADR-002 |
+| A02 | Planète sphérique, horizon, géoïde | 1 | ADR-002 |
+| A03 | Précision `f32` et origine flottante | 1 | ADR-002 |
+| A04 | Le sillage lointain n'est pas simulable | 1 | ADR-001, ADR-011 |
+| A05 | Sillage en eau peu profonde | 3 | ADR-011 |
+| A06 | Dispersion incohérente entre couches | 1 | ADR-001 |
+| A07 | Latence de lecture GPU | 1 | ADR-007, ADR-008 |
+| A08 | Non-déterminisme flottant | 1 | ADR-003 |
+| A09 | Coût réel du raffinement (`dx⁻⁴`) | 2 | SPEC-001 |
+| A10 | Vitesse de groupe = c/2 | 2 | SPEC-001, ADR-005 |
+| A11 | Interpolation de champs stochastiques | 2 | ADR-004 |
+| A12 | Audio | 2 | **ADR-016** *(S02)* |
+| A13 | Mouillage, ruissellement, séchage | 3 | ADR-010 |
+| A14 | Le serveur n'a pas de caméra | 2 | ADR-009 |
+| A15 | Persistance et propriété des volumes | 2 | ADR-010 |
+| A16 | Triche par injection d'énergie | 1 | **ADR-021** — supprimé, plus atténué |
+| A17 | Liquides ≠ eau | 2 | ADR-004, ADR-010 |
+| A18 | Eau et vide spatial | 3 | **ADR-015 §5** *(S02)* |
+| A19 | Glace et états thermiques | 2 | **ADR-017** *(S02)* |
+| A20 | Navigation IA et eau | 2 | **ADR-018** *(S02)* |
+| A21 | Battement d'allocation | 2 | ADR-006 |
+| A22 | Outillage auteur des rivières | 2 | ADR-011 |
+| A23 | Coriolis en station rotative | 3 | ADR-002 |
+| A24 | Marée et trait de côte mobile | 2 | ADR-011, ADR-018 |
+| A25 | Réflexion et résonance de bassin | 3 | ADR-011 |
+| A26 | Masse ajoutée | 2 | ADR-008 |
+| A27 | Vue sous-marine | 3 | **ADR-019** *(S02)* |
+| A28 | Horloge, arrivée en partie, temps accéléré | 2 | ADR-003 |
+| **A29** | L'inondation est limitée par l'air, pas par l'eau | 2 | ADR-015 §2 |
+| **A30** | Poche d'air d'une coque retournée, et son point de non-retour | 2 | ADR-015 §3 |
+| **A31** | L'aération réduit la densité effective | 3 | ADR-014 §5.2 |
+| **A32** | L'interface air/eau est un mur acoustique | 2 | ADR-016 §4.1 |
+| **A33** | L'écume doit être advectée par la vitesse orbitale | 3 | ADR-014 §2.1 |
+| **A34** | La couverture de moutons se compte en pour cent | 3 | ADR-014 §3.1 |
+| **A35** | La portance de la glace suit `h²`, pas la flottabilité | 3 | ADR-017 §3 |
+| **A36** | La marée est prédictible — capacité offerte, non exploitée | 3 | ADR-018 §4 |
+| **A37** | On est emporté bien avant de nager | 2 | ADR-018 §3 |
+| **A38** | Réflexion totale interne : la surface est un miroir | 3 | ADR-019 §2 |
+| **A39** | Une mer agitée ne gèle pas en plaque | 3 | ADR-017 §2.1 |
+| **A40** | Délai de propagation du son | 3 | ADR-016 §3 |
+| **A41** | Le harnais est une contrainte d'architecture, pas un outil de test | 1 | ADR-020 |
+| **A42** | Le régime D2 : reproductible sur la même machine | 2 | SPEC-003 §2 |
+| **A43** | Comparer des solveurs à `dx` égal désigne le mauvais | 1 | SPEC-003 §5.2 |
+| **A44** | Sans oracle indépendant, « différent » et « faux » se confondent | 2 | SPEC-003 §5.1 |
+| **A45** | La dérive lente est invisible aux seuils par commit | 2 | SPEC-003 §7.1 |
+| **A46** | Le chemin de dégradation est le moins testé et le plus exécuté | 2 | SPEC-003 §9.1 |
+| **A47** | Sans paire nulle, un jury perceptuel produit du bruit | 3 | SPEC-003 §5.3 |
+| **A48** | La version de pilote graphique doit être archivée avec la mesure | 3 | SPEC-003 §7.3 |
+| **A49** | Torricelli à charge variable : vidange deux fois plus longue | 3 | ADR-010, cas C12 |
+| **A50** | Le champ de fond doit fournir ses dérivées, sinon le terme source est faux | 1 | SPEC-004 §6.1 |
+| **A51** | W doit publier un instantané immuable par tick | 2 | SPEC-004 §1.2 |
+| **A52** | La pose du solide doit être interpolable dans le tick | 3 | SPEC-004 §7.1 |
+| **A53** | Une dégradation silencieuse est une dégradation non mesurable | 2 | SPEC-004 §4.1 |
+| **A54** | Un domaine ne doit jamais bloquer sur le streaming | 2 | SPEC-004 §8.3 |
+| **A55** | Un champ 2D intégré n'est pas dérivable d'un journal : coût réseau caché | 2 | SPEC-004 §5.1 |
+| **A56** | Budget mémoire et budget de temps fixés indépendamment | 1 | ADR-012 §3, écart R04 |
+| **A57** | La dégradation la moins chère coûte du travail au pire moment | 2 | ADR-012 §4, écart R06 |
+| **A58** | Deux ADR inventant la même parade signalent un concept manquant | 2 | ADR-006 §2, écart R07 |
+| **A59** | Le géoïde absent de l'outil de terrain : 70 m d'écart à 30 km | 1 | SPEC-005 §4 |
+| **A60** | Le cycle eau ↔ terrain bloque le pipeline | 2 | SPEC-005 §3 |
+| **A61** | Une retouche de bathymétrie invalide la réfraction sur des kilomètres | 2 | SPEC-005 §8 |
+| **A62** | L'obsolescence des données cuites est silencieuse | 2 | SPEC-005 §7.3 |
+| **A63** | Un état côtier stocké en 3D pèse 197 Mo par plage | 2 | SPEC-005 §6 |
+| **A64** | Le `shape_lut` détecte gratuitement les maillages non étanches | 3 | SPEC-005 §9 |
+
+Soixante-quatre angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
+propriétaire.
+
+**Quatre ont été trouvés dans nos propres écrits** — A49, A56, A57, A58 — et non dans les documents
+sources. A49 est apparu en écrivant le test qui devait le vérifier ; les trois autres en confrontant
+les ADR les uns aux autres (`REVUE-CROISEE-S05.md`). Aucun n'était visible en relisant le document
+qui le contenait : il fallait un second document pour les révéler.
+
+**A56 mérite d'être retenu au-delà de ce projet.** ADR-012 fixait `memoire_blocs = 384 Mo` et
+`domaines_max = 24`, chiffres vérifiés cohérents entre eux — mais le budget de temps du même profil
+n'autorisait qu'environ un sixième de ce nombre de domaines. Deux ressources vérifiées, une
+capacité dérivée déclarée comme si elle était libre, et la contradiction est restée invisible
+pendant quatre sessions.
+
+---
+
+## Les points à retenir, en une ligne chacun
+
+**Sévérité 1 — auraient imposé une refonte d'architecture**
+
+- **A01** — Rien n'est immobile : la surface s'oriente sur la gravité apparente. Un solveur qui
+  code `−9,81·Z` en dur est disqualifié.
+- **A02** — Depuis une passerelle à 30 m, l'horizon est à 19,6 km. Un océan plan fausse la
+  détection autant que le rendu.
+- **A03** — À 100 km de l'origine, l'ulp d'un `f32` vaut 12 mm.
+- **A04** — `λ = 2πv²/g` : un sillage à 10 m/s a des vagues de 64 m.
+- **A06** — Une vague qui traverse un domaine discret en ressort déphasée.
+- **A07** — Une force lue depuis un solveur GPU arrive 1 à 3 frames en retard.
+- **A08** — Sans sémantique IEEE stricte, deux clients ne voient pas la même mer.
+- **A16** — Un client modifié pouvait fabriquer un tsunami par la transduction. ADR-021 §3
+  supprime le chemin d'énergie client → serveur : l'angle mort n'est plus atténué, il n'existe plus.
+- **A59** — Un outil de terrain en plan tangent place une plage située à 30 km de l'ancre de région
+  **70 m** au-dessus ou au-dessous du niveau de la mer. À 3 km, l'erreur dépasse déjà le marnage.
+  Le « zéro » d'une scène est une distance au centre de la planète, pas une altitude.
+
+**Ajoutés en S06 — pipeline**
+
+- **A60** — Le graphe eau ↔ terrain contient un cycle : la rivière impose sa pente au terrain, le
+  trait de côte impose le fetch, la bathymétrie impose la zone de déferlement. Non brisé, il bloque
+  le pipeline. L'eau doit être déclarée **en amont** du terrain — l'inverse de la pratique courante.
+- **A61** — Une houle ne sent le fond qu'en deçà de `h = λ/2`. Retoucher un haut-fond invalide donc
+  la réfraction jusqu'à l'isobathe 50 m pour une houle de 100 m, soit **10 km au large** sur un
+  plateau à 1:200. Les partitions de cuisson suivent les isobathes, pas une grille carrée.
+- **A62** — Une donnée cuite ne se périme pas bruyamment : un rocher déplacé rend une polyligne de
+  déferlement fausse pendant des mois. Chaque artefact porte l'empreinte de ses entrées, et la
+  construction échoue s'il est périmé.
+- **A63** — Seize états côtiers stockés en volumes 3D pèsent 197 Mo par plage. Stockés en conditions
+  initiales 2D : 1,2 Mo, et le volume se ré-établit en 2 à 3 s au lieu de 40.
+- **A64** — La courbe volume → hauteur d'un contenant est monotone par construction physique. Si le
+  calcul ne l'est pas, le maillage fuit : la cuisson est un test d'étanchéité gratuit.
+
+**Sévérité 2 — refonte d'un sous-système**
+
+- **A09** — Halver `dx` coûte ×16, pas ×8.
+- **A10** — L'énergie voyage à `c/2`. Toute éponge, tout horizon, tout établissement s'en déduit.
+- **A11** — Mélanger deux champs de houle indépendants fait chuter `Hs` de 29 %.
+- **A12** — L'audio consomme les mêmes champs que le rendu ; câblé après coup, il aura son propre
+  LOD incohérent.
+- **A14** — Le serveur n'a pas de caméra : sa hiérarchie est l'intérêt, pas la visibilité.
+- **A17** — Ce n'est pas un système d'eau, c'est un système de liquides.
+- **A21** — Le battement qui tue n'est pas logique, il est allocatoire.
+- **A22** — Une rivière descend de 1,6 ‰ ; on ne la pose pas à plat sur un terrain existant.
+- **A24** — 3 m de marnage sur une pente 1:50 déplacent le rivage de 150 m.
+- **A26** — La masse ajoutée d'une coque vaut environ la masse déplacée.
+- **A28** — Un temps en `f32` a un ulp de 62 ms après 12 jours de session.
+- **A29** — Un compartiment fermé s'inonde à la vitesse à laquelle l'air sort, pas à celle de
+  Torricelli. Sans arête d'évent, tous les temps d'avarie sont trop rapides.
+- **A30** — Une coque retournée flotte grâce à sa poche d'air, qui perd la moitié de son volume à
+  10 m : il existe un point de non-retour.
+- **A32** — 0,11 % de l'énergie sonore traverse l'interface. Le mixage immergé n'est pas un
+  passe-bas, c'est une coupure et un lit distinct.
+- **A37** — 50 cm d'eau à 2 m/s emportent un adulte. Un critère fondé sur la seule profondeur fera
+  traverser des torrents aux PNJ.
+
+**Sévérité 3 — travail localisé**
+
+- **A05** — Au-delà de `Fr_h = 1`, le sillage devient un cône de Mach ; 19,47° codé en dur est
+  faux dans toutes les zones côtières.
+- **A13** — Le mouillage de surface est le puits universel de tout ce qui est trop petit pour être
+  un volume.
+- **A18** — Une brèche vers le vide évapore 14 % de l'eau et gèle les 86 % restants, ce qui obture
+  la brèche.
+- **A23** — Coriolis à 3 tr/min vaut 6,4 % de `g` ; un bassin de 20 m dans un anneau de 100 m a une
+  flèche de 50 cm.
+- **A25** — Un port a un mode propre de bassin ; une seiche de lac se compte en minutes.
+- **A31** — 10 % d'aération, c'est 10 % de portance en moins : on ne flotte pas dans l'eau blanche.
+- **A33** — Advectée par le seul courant moyen, l'écume reste uniforme et lit comme une texture.
+- **A34** — Une mer force 7 est blanche à 4 %, pas à 40 %.
+- **A35** — Doubler l'épaisseur de la glace quadruple sa charge admissible.
+- **A36** — B étant analytique, la marée est prédictible : « ce gué se ferme dans 40 minutes » est
+  une capacité offerte gratuitement, qu'il serait dommage de ne pas exploiter.
+- **A38** — Au-delà de 48,6°, la surface vue de dessous est un miroir. C'est la caractéristique la
+  plus reconnaissable d'une vue sous-marine et la plus souvent omise.
+- **A39** — La glace en plaque exige `Hs < 0,15 m` : elle apparaît d'abord dans les eaux abritées.
+- **A40** — Une explosion à 500 m s'entend 1,46 s après avoir été vue.
+- **A47** — Un jury motivé trouve des différences partout ; sans paire nulle on ne sait pas si
+  le résultat dépasse le bruit.
+- **A48** — La version de pilote explique la moitié des sauts de performance inexpliqués.
+- **A49** — Un temps de vidange calculé à charge constante est faux d'un facteur deux.
+
+**Ajoutés en S03, sévérité 1 et 2 — tous méthodologiques**
+
+- **A41** — Le harnais échoue non parce qu'il est mal écrit, mais parce que le système testé ne se
+  laisse pas instancier seul. Cela se décide au premier jour, pas au moment d'écrire les tests.
+- **A42** — Sans reproductibilité sur une même machine, un bug qui survient une fois sur cinquante
+  n'est jamais reproduit, donc jamais corrigé.
+- **A43** — Comparer deux solveurs à `dx` égal mesure leur coût par cellule, pas leur rendement.
+  Un candidat deux fois plus cher par cellule mais correct à `dx` double fait seize fois moins de
+  travail. Une campagne à `dx` fixe désignera le mauvais, et l'erreur sera défendue par des
+  chiffres.
+- **A44** — Comparer une version à la précédente ne dit jamais laquelle est juste. L'oracle est un
+  solveur délibérément lent, pas le build d'hier.
+- **A45** — 1 % de dégradation par semaine : invisible à chaque commit, **+14 % par trimestre**,
+  **+68 % sur un an**. C'est ainsi que les budgets se perdent.
+- **A46** — Le chemin de dégradation tourne sur la configuration minimale, donc chez la majorité
+  des joueurs, et n'est presque jamais testé.
+
+**Ajoutés en S04, trouvés en écrivant les signatures**
+
+- **A50** *(sévérité 1)* — En régime perturbatif, l'équation de la perturbation contient un terme
+  source `S = ∂U/∂t + (U·∇)U + ∇P/ρ − ν∇²U` qui n'est pas nul, parce que le fond résout les
+  équations d'ondes linéaires et non les équations discrètes du solveur. Un solveur qui ne reçoit
+  que hauteur et vitesse ne peut pas former `S` : le domaine dérive lentement par rapport au fond,
+  la frontière redevient visible, et **on conclut à tort qu'ADR-001 ne fonctionne pas**. Première
+  hypothèse à écarter si le banc B4 échoue.
+- **A51** — `EvalWater` est lue simultanément par les fils physique, audio et IA pendant que la
+  simulation avance. Sans instantané immuable publié par tick, un lecteur voit un jeu de paquets à
+  moitié mis à jour : défaut intermittent, rare, introuvable.
+- **A52** — Un solveur qui sous-cycle quatre fois en utilisant la pose de début de tick fait
+  avancer une coque à 10 m/s par sauts de 33 cm, soit plusieurs cellules à `dx = 0,10 m`.
+- **A53** — Un solveur qui coupe ses itérations de pression sans le dire rend l'ordonnanceur aveugle
+  et le banc de dégradation muet.
+- **A54** — Sans test d'admission sur la résidence des données, un domaine bloque sur le streaming
+  ou simule au-dessus d'un trou de bathymétrie.
+- **A55** — Un champ de hauteur 2D intégré n'est pas une fonction pure du journal d'événements. Le
+  déterminisme exige alors des points de reprise à stocker, répliquer et transmettre — le coût
+  réseau qu'ADR-009 avait précisément supprimé. À intégrer au protocole de B2, faute de quoi la
+  comparaison se fera sur la seule qualité visuelle.

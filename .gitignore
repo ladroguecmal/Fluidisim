@@ -1,0 +1,21 @@
+# Le dépôt ne contient que de la connaissance : Markdown, et plus tard du code source.
+# Rien de dérivé, rien de volumineux, rien de binaire (SPEC-005 §11.3).
+
+# Données cuites — ne se versionnent pas, seules leurs empreintes comptent
+bake/
+*.bake
+*.cache
+
+# Sorties du harnais de validation (SPEC-003)
+runs/
+captures/
+*.trace
+
+# Systèmes et éditeurs
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*~

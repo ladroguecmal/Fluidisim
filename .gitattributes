@@ -1,0 +1,4 @@
+# Fins de ligne normalisées en LF dans le dépôt, quelle que soit la machine.
+# Nécessaire pour la passation entre comptes : sans cela, deux postes produisent
+# des diffs entiers sur des fichiers identiques.
+* text=auto eol=lf
