@@ -267,3 +267,41 @@ machine ou une autre personne aurait dû tout reconstituer.
 passation ne se documente pas seulement, elle se **ritualise** : une liste de fin de session
 exécutée à chaque fois, faute de quoi la session suivante repart de la lecture du code source de
 la précédente — c'est-à-dire de rien.
+
+## L28 — Ce qui est déclaré avant survit ; ce qui est écrit après ne survit pas
+
+*(S07)* Une session coupée par une limite d'usage n'a aucune occasion d'écrire « je m'arrête ».
+Tout dispositif de passation qui suppose une action au moment de l'arrêt — un résumé final, une
+mise à jour d'état, un message de clôture — est inutile précisément dans le cas pour lequel on
+l'avait conçu.
+
+La seule information exploitable est **antérieure** : un plan déclaré avant le travail, et un
+journal de ce qui a été effectivement validé. L'écart entre les deux est exactement ce qui a été
+interrompu, et il se lit sans rien deviner.
+
+**Réflexe** : pour tout mécanisme de reprise, se demander *à quel moment il écrit*. S'il écrit à la
+fin, il ne protège que les cas où rien n'a mal tourné.
+
+## L29 — Une impasse explorée est un résultat, et c'est celui qu'on perd
+
+*(S07)* Un gestionnaire de version conserve les fichiers, jamais le raisonnement. Ce qui disparaît
+d'abord dans une interruption, ce n'est pas le travail produit — il est sur le disque — c'est
+*« j'ai essayé X, ça ne marche pas parce que Y »*. Sans cette phrase, la session suivante réexplore
+la même impasse intégralement, et peut fort bien s'y arrêter plus longtemps.
+
+**Réflexe** : consigner les chemins écartés avec leur motif, au même titre que les décisions
+prises. Un espace prévu pour cela dans le journal de travail coûte trois lignes et évite des
+heures.
+
+## L30 — Un protocole qu'on n'a pas exécuté est un protocole faux
+
+*(S07)* Le dispositif de reprise a été appliqué à sa propre écriture. Il a produit deux défauts en
+deux étapes : la première étape d'un protocole d'écriture anticipée ne peut pas être protégée par
+ce protocole, et la case d'avancement doit se cocher juste avant le commit et non avant le travail,
+faute de quoi l'historique ment.
+
+Aucun des deux n'était visible à la relecture. Tous deux sont apparus à la première exécution.
+
+**Réflexe** : exécuter un protocole sur lui-même, ou sur un cas réel, avant de le publier. Même
+famille que L15 et L20 — c'est la contrainte d'exécution, jamais la relecture, qui produit
+l'information.

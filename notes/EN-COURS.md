@@ -72,9 +72,9 @@ Objectif         : dispositif de reprise propre après interruption par limite d
 - [x] **P2** — `REPRISE.md` : jeton à trois états avec battement, §6 amendé, §7 reprise à chaud,
   §8 mis à jour (le dépôt est désormais sous git).
   *Thèse : le jeton doit distinguer « occupé » de « interrompu », sinon personne n'ose reprendre.*
-- [>] **P3** — `README.md` : mention du protocole dans les règles de tenue.
-- [ ] **P4** — `notes/LECONS.md` : leçons généralisables de cette session.
-- [ ] **P5** — rituel de fin : entrée de journal S07, index, jeton repassé à `libre`, ce fichier
+- [x] **P3** — `README.md` : mention du protocole dans les règles de tenue.
+- [x] **P4** — `notes/LECONS.md` : leçons généralisables de cette session.
+- [>] **P5** — rituel de fin : entrée de journal S07, index, jeton repassé à `libre`, ce fichier
   repassé à `terminée`.
 
 ### Notes de reprise
