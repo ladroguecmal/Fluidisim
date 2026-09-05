@@ -12,10 +12,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-05
+Session en cours : S08 — 2026-09-05 — revue croisée des cinq SPEC
 Dernière session : S07 — 2026-09-05 — dispositif de reprise après interruption
-Session suivante : S08 — recroiser les cinq SPEC entre elles (S05 n'a confronté que les ADR)
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :

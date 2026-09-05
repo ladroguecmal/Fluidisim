@@ -59,49 +59,33 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S07
-État             : terminée
+Session          : S08
+État             : en cours
 Battement        : 2026-09-05
-Objectif         : dispositif de reprise propre après interruption par limite d'usage
+Objectif         : recroiser les cinq SPEC entre elles (S05 n'avait confronté que les ADR)
 ```
 
 ### Plan
 
-- [x] **P1** — `notes/EN-COURS.md` : journal d'intention + procédure de reprise à chaud.
-  *Thèse : ce qui est déclaré avant survit à une coupure ; ce qui est écrit après ne survit pas.*
-- [x] **P2** — `REPRISE.md` : jeton à trois états avec battement, §6 amendé, §7 reprise à chaud,
-  §8 mis à jour (le dépôt est désormais sous git).
-  *Thèse : le jeton doit distinguer « occupé » de « interrompu », sinon personne n'ose reprendre.*
-- [x] **P3** — `README.md` : mention du protocole dans les règles de tenue.
-- [x] **P4** — `notes/LECONS.md` : leçons généralisables de cette session.
-- [x] **P5** — rituel de fin : entrée de journal S07, index, jeton repassé à `libre`, ce fichier
-  repassé à `terminée`.
-- [x] **P6** — `CLAUDE.md` à la racine : amorce automatique de la reprise.
-  *Thèse : le dispositif de passation ne doit dépendre ni de la mémoire d'un compte ni de ce que
-  l'utilisateur pense à taper. Une session qui ouvre ce dossier doit être dirigée vers `REPRISE.md`
-  sans que personne n'ait à le lui dire.*
+- [ ] **P1** — déclarer le plan, prendre le jeton, mettre à jour le battement.
+- [ ] **P2** — croisement chiffré SPEC-001 × SPEC-002 × SPEC-005 : toute valeur numérique
+  apparaissant dans deux documents doit y valoir la même chose, ou l'écart doit être motivé.
+  *Thèse : les chiffres recopiés d'un document à l'autre se périment en silence — S07 en a déjà
+  trouvé un cas dans le README.*
+- [ ] **P3** — croisement SPEC-004 × SPEC-001/002 : chaque grandeur que les fiches chiffrées
+  déclarent nécessaire doit être atteignable par une signature existante.
+  *Thèse (L20) : une exigence qui n'a pas d'argument dans une signature n'est pas implémentable,
+  et cela ne se voit qu'en confrontant les deux documents.*
+- [ ] **P4** — croisement SPEC-003 × SPEC-004/005 : le harnais peut-il instrumenter ce que les
+  interfaces exposent, et la cuisson réutilise-t-elle réellement le cœur qu'elle prétend réutiliser.
+  *Thèse : un harnais qui exige une observation que l'interface ne permet pas de nommer est un
+  harnais non écrivable (L19 pris à l'envers).*
+- [ ] **P5** — rédiger `docs/registres/REVUE-CROISEE-S08.md` : écarts trouvés, gravité, résolution,
+  et la liste des contrôles **passés sans écart** — sans elle la revue n'est pas vérifiable.
+- [ ] **P6** — appliquer les résolutions : notes correctives datées dans les documents touchés,
+  nouvel ADR si une décision change, angles morts enregistrés.
+- [ ] **P7** — rituel de fin (`REPRISE.md` §6) : journal S08, leçons, index, jeton libéré.
 
 ### Notes de reprise
 
 *(Vide au démarrage. Y déposer au fil de l'eau ce qui n'est pas encore dans un fichier.)*
-
-- Le dépôt a été mis sous git au début de S07, commit de base `c6886a7`. Avant lui, aucun
-  historique n'existe : ne pas chercher de trace des sessions S01 à S06 dans `git log`, elles sont
-  toutes dans ce seul commit et dans `notes/JOURNAL.md`.
-- Seuil de battement retenu pour présumer une interruption : **2 heures**. Choisi parce que les
-  limites d'usage se réinitialisent à cette échelle ; plus court, deux sessions se marchent
-  dessus ; plus long, on attend pour rien. Convention, pas mesure.
-- **Cas limite trouvé en appliquant le protocole à lui-même** : l'étape qui *crée* ce fichier ne
-  peut pas cocher sa propre case avant qu'il existe. P1 a donc été committée avec `[>]` et corrigée
-  dans le commit de P2. Sans conséquence, mais à savoir : la toute première étape d'un protocole
-  d'écriture anticipée ne peut jamais être protégée par ce protocole.
-- **Second cas limite, même origine** : P1 et P2 ont été committées avec leur case encore `[>]`,
-  parce que la case avait été basculée *avant* le travail au lieu d'*après*. Corrigé dans le commit
-  de P3, et la règle correspondante a été précisée. L'exécution du protocole sur lui-même a donc
-  trouvé deux défauts en deux étapes — argument suffisant pour ne jamais publier un protocole sans
-  l'avoir exécuté au moins une fois.
-- Le README annonçait encore « 14 règles » alors que les invariants sont 16 depuis S05 : corrigé.
-  Les décomptes recopiés d'un fichier à l'autre se périment en silence, comme les données cuites.
-- **Troisième trou, trouvé en préparant le test avec un autre compte** : rien ne garantissait
-  qu'une session ouvrant ce dossier lise `REPRISE.md`. Le dispositif reposait implicitement sur ce
-  que l'utilisateur pense à écrire dans son premier message. D'où P6.
