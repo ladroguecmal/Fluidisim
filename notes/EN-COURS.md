@@ -72,7 +72,7 @@ Quatre sujets courts et indépendants, sans dépendance à un banc. Forme retenu
 aussi une *cause*, ce qui n'est pas la même chose.
 
 - [ ] **P1** — déclarer le plan, prendre le jeton, mettre à jour le battement.
-- [ ] **P2** — `ADR-023` §1–2 : la décision d'ensemble, puis le **terme d'impact** (*slamming*).
+- [x] **P2** — `ADR-023` §1–2 : la décision d'ensemble, puis le **terme d'impact** (*slamming*).
   *Thèse : la grandeur à publier n'est pas la pression de pic mais l'**impulsion de masse ajoutée**.
   La pression de pic est ce qu'on ne sait pas (elle diverge quand l'angle de carène tend vers 0) ;
   l'impulsion est un bilan de quantité de mouvement, qui ne peut pas être faux.*
@@ -105,3 +105,18 @@ aussi une *cause*, ce qui n'est pas la même chose.
   `ω·dt ≈ 0,14` à 30 Hz, soit « intégration normale ». Le mode contraint ne se déclenche donc pas
   pour lui aujourd'hui, alors que c'est le mode qu'il lui faut. Le critère est bon, il est
   simplement le seul.
+
+#### P2 — terme d'impact
+
+Chiffres posés : `t_impact = 2b·tanβ/(πv)` donne **73 ms** pour une étrave de vedette (2,2 ticks) et
+**17 ms** pour un corps humain (0,5 tick). L'impact dure de l'ordre du tick ou moins — un terme
+échantillonné à 30 Hz le rate ou le double selon la phase.
+
+`C_p = 1 + (π/2tanβ)²` : **c'est l'angle qui domine**, pas la vitesse. 30° → 10° multiplie la
+pression par dix ; doubler la vitesse ne la multiplie que par quatre. Et la formule **diverge quand
+β → 0**, donc on ne connaît pas la pression de pic.
+
+D'où la décision : publier l'**impulsion de masse ajoutée** `J = Δ(½πρc²)·v_rel`, qui est un bilan
+de quantité de mouvement, que l'intégrateur du solide sait appliquer exactement, et qui réutilise le
+tenseur de masse ajoutée déjà imposé par ADR-008 §2. Contrôle croisé fait : 1,1 MN moyens sur 73 ms
+concordent avec les 105 kPa de pic sur la surface mouillée.
