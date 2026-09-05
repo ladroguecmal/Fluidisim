@@ -84,7 +84,7 @@ Objectif         : écrire le chemin poussé — SPEC-006. Débloque trois des q
   et l'autorité du signal au titre d'I-15.
   *Thèse : le signal de navigation doit être calculé depuis les seules couches répliquées, sinon
   deux clients ne prennent pas la même décision de pathfinding.*
-- [ ] **P6** — SPEC-006 §6 polyligne de déferlement · §7 dégradation du chemin poussé · §8 ce que
+- [x] **P6** — SPEC-006 §6 polyligne de déferlement · §7 dégradation du chemin poussé · §8 ce que
   l'interface rend impossible · §9 ce qui reste ouvert.
 - [ ] **P7** — SPEC-004 : migrer `WaveEvent` en §2 avec ses trois champs audio, renommer
   `WaterSample.u` en `u_total` (écart E05), enrichir §9, marquer le point ouvert n°6 résolu.
@@ -135,3 +135,13 @@ plan. D'où `CrossCause`, et la règle qu'une commande V invalide les prédictio
 
 Autre point : les `CrossingEvent` ne transitent pas par le réseau — toutes leurs entrées étant
 répliquées, chaque participant les dérive. Même raisonnement qu'ADR-021 §3.
+
+#### P6 — le piège du f16 s'est reproduit
+
+Deuxième occurrence dans le même document : le flux dissipé d'une polyligne vaut 15,3 kW/m à
+Hs = 2 m et dépasse 300 kW/m à Hs = 8 m (E prop Hs²), au-delà du plafond d'un half en W/m. Publié
+en kW/m. **Un half se choisit sur l'étendue de la grandeur, pas sur la précision voulue** — et le
+cas extrême du projet doit être calculé avant que l'unité ne soit fixée. Matière à leçon.
+
+Dégradation : le rang 5 (élaguer TransductionLocale puis AnticipationLocale, jamais Serveur) est la
+transposition exacte d'ADR-021 §4. Et trois assertions à ajouter au banc starve de SPEC-003 §9.1.

@@ -673,3 +673,136 @@ Cette fermeture a la même condition de validité que celle d'ADR-021 : elle tie
 sépare effectivement les deux couches. Si le banc B2 conduisait à le relever, **ce canal serait à
 réexaminer en même temps qu'ADR-021 §3.2** — à ajouter au protocole de B2, qui porte déjà ce
 critère de recevabilité.
+
+---
+
+## 6. La polyligne de déferlement
+
+Le quatrième objet publié, et celui qu'on oublie parce qu'aucun ADR ne lui est consacré : ADR-016 §2
+« exige que le système d'eau publie la polyligne de déferlement », SPEC-005 §2 la liste comme donnée
+dérivée à trois consommateurs — audio, ordonnanceur, rendu — et ADR-016 §8.2 laisse son format
+ouvert. Il est fermé ici.
+
+```cpp
+struct BreakerVertex {
+    FrameId  frame;
+    vec3     pos_local;
+    half     dissipated_kw_per_m;   // flux d'énergie dissipé — cf. la note d'unité
+    half     crest_dir[2];          // direction de propagation de la crête
+    half     surf_width_m;          // largeur de la zone de déferlement — ADR-005 §4.1
+};
+
+struct BreakerLineView {
+    SnapshotStamp                 stamp;
+    span<const RegionId>          regions;
+    span<const uint32_t>          first_vertex;   // index de début par région
+    span<const BreakerVertex>     vertices;
+};
+```
+
+> **Note d'unité, seconde occurrence du même piège.** Le flux d'énergie d'une houle vaut
+> `P = E·c_g` (SPEC-001 §3), soit 15,3 kW/m pour `Hs = 2 m`, `T = 8 s`. Comme `E ∝ Hs²`, une mer à
+> `Hs = 8 m` dépasse **300 kW/m** — au-delà du plafond d'un `half` exprimé en W/m (65 504). Le champ
+> est donc publié en **kW/m**. C'est exactement la même erreur que `displaced_ml` en §3.1, trouvée
+> pour la même raison et dans le même document : un `half` ne se choisit pas sur la précision voulue
+> mais sur l'**étendue** de la grandeur, et le cas extrême du projet doit être calculé avant que
+> l'unité ne soit fixée.
+
+**Ce n'est pas une donnée d'exécution, c'est une donnée cuite republiée.** La polyligne est dérivée
+hors ligne de la bathymétrie et de l'état de mer (SPEC-005 §2, ADR-005 §4.1) ; le chemin poussé la
+rend disponible à chaud pour les régions actives et la republie quand l'état de mer ou la phase de
+marée change d'état stocké. Elle n'est jamais retouchée à l'exécution — c'est la règle de source de
+vérité unique de SPEC-005 §1.
+
+**Contrainte d'ordonnancement.** L'ordonnanceur en est consommateur (SPEC-005 §2) : il s'en sert
+pour décider d'activer une plage. Elle doit donc être publiée **avant** que le domaine de
+déferlement n'existe, c'est-à-dire au moment de l'activation de la région et non à celui de la
+création du domaine. C'est la seule des quatre publications dont la cadence est gouvernée par
+l'ordonnanceur plutôt que par un phénomène physique.
+
+**Ce qui reste suspendu à un arbitrage humain.** Si le trait de côte est mobile — arbitrage n°3,
+ouvert, ADR-011 §6 et ADR-018 §4 — la polyligne se déplace avec la marée, et le nombre d'états
+stockés est celui de la bibliothèque côtière (16, SPEC-005 §6). S'il ne l'est pas, un seul état
+suffit. **Ce document ne tranche pas** : il publie une polyligne par phase de marée stockée, ce qui
+dégénère proprement au cas d'une seule phase si la réponse est « côte fixe ».
+
+---
+
+## 7. Dégradation : en cadence, jamais en contenu
+
+Un canal sous contrainte de budget **ralentit**. Il ne publie jamais un instantané partiel, jamais
+une tuile à moitié remplie, jamais une liste d'événements tronquée en son milieu. Un consommateur
+doit pouvoir croire ce qu'il lit ; ce dont il ne peut pas être sûr, c'est de **quand** il le lira,
+et `stamp.sequence` (§2.4) le lui dit.
+
+Ordre de dégradation, cohérent avec les rangs d'ADR-012 §4 :
+
+| Rang | Ce qui cède | Ce qui ne cède jamais |
+|---|---|---|
+| 1 | agrégats `F` et `A` : 10 Hz → 5 Hz → 2 Hz | — |
+| 2 | tuiles de classe `Maree` : 1/30 s → 1/60 s | — |
+| 3 | cascades `F` : la plus grossière est abandonnée | la plus fine — c'est le socle (ADR-014 §6) |
+| 4 | tuiles de classe `Debit` : 1/2 s → 1/4 s | |
+| 5 | bus : les événements `TransductionLocale` puis `AnticipationLocale` sont élagués | **les événements `Serveur`, jamais** |
+| — | *aucun rang* | tuiles `Immediat`, `CrossingEvent`, nœuds V à 5 Hz |
+
+Le rang 5 est la transposition exacte d'ADR-021 §4 : on élague ce qui est local et cosmétique,
+jamais ce qui porte une donnée répliquée. Élaguer un événement `Serveur` chez un joueur et pas chez
+un autre produirait deux mondes différents — et ici, en prime, deux bandes-son différentes.
+
+La ligne sans rang est celle qui compte : **une brèche, un franchissement de seuil et l'inondation
+d'un compartiment ne se dégradent sous aucun budget.** Ce sont des faits de jeu, pas des ornements ;
+s'ils ne tiennent plus, c'est une saturation à documenter (SPEC-003 §9.2), pas à absorber
+silencieusement.
+
+**Trois assertions à ajouter au banc `starve`** (SPEC-003 §9.1), sans lesquelles rien de ce qui
+précède n'est vérifié :
+
+1. aucun canal ne publie d'instantané dont le contenu soit incomplet, à aucun palier de budget ;
+2. aucun événement `Serveur` n'est absent d'un instantané, à aucun palier ;
+3. `sequence` reste strictement croissant par canal et par tuile — un saut est licite, un recul ou
+   une répétition ne l'est pas.
+
+---
+
+## 8. Ce que l'interface rend impossible — et pourquoi
+
+Même rôle qu'en SPEC-004 §9 : chaque ligne est une demande qui sera formulée pendant le
+développement, et qui doit être refusée avec son motif. Suivant L19, on cherche d'abord la forme
+d'interface qui rend la faute inexprimable ; la règle écrite n'est que le dernier recours.
+
+| Demande prévisible | Refus | Motif |
+|---|---|---|
+| « Vider la file d'événements, c'est plus simple » | il n'y a pas de drain | un drain a un consommateur unique — §3.2 |
+| « Lire la texture d'écume au CPU pour l'audio » | aucune fonction ne rend une texture au CPU | ≈500 Mo/s et trois frames de latence — §4.2 |
+| « Calculer une portance depuis `ListenerAggregate` » | le type ne porte aucune densité locale, seulement des intégrales | §4.5 ; la portance passe par `WaterSample.aeration` |
+| « Calculer un danger depuis la vitesse de surface » | `flow_speed` est sur ce canal ; l'autre s'appelle `u_total` | l'orbitale vaut 0,63 m/s à Hs = 1 m — §5.5 |
+| « Interroger la traversabilité en un point » | aucune fonction ponctuelle ; seulement des tuiles | c'est le retour à `EvalWater` qu'ADR-018 §1 refuse |
+| « Utiliser `t_next_cross` sans regarder la cause » | `CrossCause` est dans la structure, pas à côté | une prédiction sans son hypothèse — §5.4 |
+| « Mémoriser l'ancre d'une cascade une fois pour toutes » | l'ancre voyage dans chaque instantané | la cascade suit l'observateur — §4.1 |
+| « Attendre la prochaine publication » | `acquire` ne bloque jamais et renvoie l'invalide | §2.2, et un fil audio ne se bloque pas |
+| « Publier depuis un fil de travail » | `publish_*` n'est appelable que du fil de simulation | §2.7 |
+| « Ajouter un cinquième canal vite fait » | `ChannelDesc` exige cadence, forme, autorité, anneau | c'est ce vide de forme qui a produit E04 |
+
+---
+
+## 9. Ce qui reste ouvert
+
+1. **Résolution et nombre de cascades de `F`** — ouvert depuis ADR-014 §7.1, tranché au banc B9.
+   Le `FoamCascadeDesc` de §4.1 est écrit pour ne pas dépendre de la réponse.
+2. **Une ou deux bandes radiales pour l'occlusion par secteur** (§4.3). Le défaut connu — une source
+   placée entre l'auditeur et un rideau de bulles reçoit une occlusion qu'elle ne subit pas — est
+   décrit ; reste à savoir s'il s'entend. Mesure, pas arbitrage.
+3. **Rayons de l'agrégat d'écume** — 10, 50 et 200 m sont un point de départ, à calibrer avec
+   l'équipe audio contre les distances de coupure de son propre LOD (ADR-016 §7).
+4. **Le trait de côte mobile** conditionne le nombre d'états de la polyligne (§6). **Arbitrage n°3,
+   humain, non tranché ici.**
+5. **Visibilité sous-marine pour l'IA** — ADR-018 §7.4 pose la question, la donnée existe
+   (ADR-019 §3), l'usage est à confirmer avec l'équipe IA. Si elle est retenue, c'est un champ de
+   plus dans `TraversabilitySample`, pas un canal de plus.
+6. **Table des seuils par archétype d'agent et de véhicule** — ADR-018 §7.3, à obtenir des équipes
+   concernées. Ce document publie les grandeurs ; les seuils appartiennent à qui les applique.
+7. **Un canal de pluie sur l'eau ?** ADR-016 §8.3 le suggère. Il serait de forme `Agregat`, piloté
+   par les mêmes données. À trancher avec l'audio.
+8. **Représentation binaire d'échange** — boutisme, alignement, langage — non traitée ici comme elle
+   ne l'est pas dans SPEC-004 : elle dépend du langage retenu, encore ouvert.
