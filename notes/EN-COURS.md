@@ -86,7 +86,7 @@ Objectif         : écrire le chemin poussé — SPEC-006. Débloque trois des q
   deux clients ne prennent pas la même décision de pathfinding.*
 - [x] **P6** — SPEC-006 §6 polyligne de déferlement · §7 dégradation du chemin poussé · §8 ce que
   l'interface rend impossible · §9 ce qui reste ouvert.
-- [ ] **P7** — SPEC-004 : migrer `WaveEvent` en §2 avec ses trois champs audio, renommer
+- [x] **P7** — SPEC-004 : migrer `WaveEvent` en §2 avec ses trois champs audio, renommer
   `WaterSample.u` en `u_total` (écart E05), enrichir §9, marquer le point ouvert n°6 résolu.
 - [ ] **P8** — index, README, statut des actions du registre S08, angles morts trouvés en écrivant.
 - [ ] **P9** — rituel de fin (`REPRISE.md` §6) : journal S09, leçons, index, jeton libéré.
@@ -145,3 +145,10 @@ cas extrême du projet doit être calculé avant que l'unité ne soit fixée. Ma
 
 Dégradation : le rang 5 (élaguer TransductionLocale puis AnticipationLocale, jamais Serveur) est la
 transposition exacte d'ADR-021 §4. Et trois assertions à ajouter au banc starve de SPEC-003 §9.1.
+
+#### P7 — vérification faite
+
+Le `vec3 u` restant en SPEC-004 §2.1 appartient à `BackgroundSample` : c'est la vitesse du champ
+de fond U, pas la vitesse de surface. Correctement nommé, non touché.
+La référence à `WaterSample.u` dans REVUE-CROISEE-S08 est laissée telle quelle : un registre
+d'audit consigne ce qui a été constaté, il ne se réécrit pas.

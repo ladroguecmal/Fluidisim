@@ -4,6 +4,9 @@
 - **Session** : S04
 - **Dépend de** : ADR-007 (emplacements de solveur), ADR-020 (bibliothèque autonome), SPEC-003 (harnais)
 - **Détaille** : ADR-007 §2 et ADR-020 §2
+- **Complétée par** : [`SPEC-006`](SPEC-006-chemin-pousse.md) *(S09)* — le **chemin poussé**, c'est-à-dire
+  ce que le système publie de sa propre initiative. Ce document-ci ne couvre que le chemin **tiré**
+  et le **branchement**. Trois corrections de S09 y sont reportées ci-dessous.
 
 Les signatures sont données dans un pseudo-C++ qui se transpose sans perte en C++ ou en Rust. Le
 choix du langage reste ouvert et n'a aucune incidence ici.
@@ -87,7 +90,7 @@ struct LayerMask { uint8_t bits; };
 struct WaterSample {
     float eta;              // élévation le long du radial local
     vec3  displacement;     // déplacement de Gerstner
-    vec3  u;                // vitesse de surface (orbitale + courant)
+    vec3  u_total;          // vitesse de surface = ORBITALE + COURANT. Le nom le dit — cf. §9
     vec3  normal;
     float deta_dt;
     float steepness;        // pour écume et seuil de déferlement
@@ -113,6 +116,23 @@ struct BackgroundSample {
 fois plus cher (dérivées analytiques de toutes les composantes). Le fusionner ferait payer à
 chaque requête de flottabilité, d'audio et d'IA des dérivées dont elles n'ont aucun usage.
 
+> **Correction (S09, écart E05).** Le champ s'appelait `u`. Renommé **`u_total`** parce qu'un nom
+> court invitait à le prendre pour le courant : le produit d'emportement de SPEC-002 §5,
+> `HR = d·(v+0,5)`, attend un **courant**, et calculé sur la vitesse totale il oscillerait à la
+> période de la houle avec une amplitude `πHs/T` = 0,63 m/s à `Hs = 1 m`, `T = 5 s` — le double du
+> seuil qui sépare « faible » de « dangereux ».
+>
+> La grandeur juste, le courant seul, est publiée par le **chemin poussé** :
+> `TraversabilitySample.flow_speed` (SPEC-006 §5.5). Ce n'est pas un doublon : ce document sert
+> l'interrogation ponctuelle, l'autre sert la navigation, et ils n'ont ni la même cadence ni le
+> même régime d'autorité.
+
+> **`WaveEvent` — où il est défini (S09, écart E04).** Cette spécification l'employait sans le
+> définir ; il vivait dans ADR-009 §2, un document de réseau, alors qu'il traverse trois frontières.
+> Sa définition de référence, avec les trois champs demandés par ADR-016 §6, est désormais
+> **[`SPEC-006` §3.1](SPEC-006-chemin-pousse.md)**. Elle n'est pas recopiée ici : une donnée a une
+> seule source de vérité (SPEC-005 §1), et cela vaut aussi pour une déclaration de type.
+
 ---
 
 ## 3. Point d'entrée du système
@@ -131,9 +151,23 @@ public:
                                SimTime t, LayerMask, SampleHints,
                                span<WaterSample> out) const;
 
-    span<const WaveEvent> drain_outgoing_events();          // transduction δ→W — ADR-005 §3
+    const IEventChannel&  events() const;                   // bus à N lecteurs — SPEC-006 §3
     const Metrics&        metrics() const;                  // SPEC-003 §6
 };
+
+> **Correction (S09, écart E04).** `drain_outgoing_events()` figurait ici et a été **supprimée**,
+> pour deux motifs distincts et tous deux suffisants.
+>
+> 1. **Un drain a un consommateur unique** : le premier qui appelle vide la file pour les autres.
+>    Tolérable tant que la transduction δ→W était son seul client ; intenable dès qu'ADR-016 §2 fait
+>    du même flux le bus de l'audio, que le rendu y prend ses déclenchements et le gameplay ses
+>    causes.
+> 2. **Le mot « outgoing » était un résidu.** Il datait de la conception qu'ADR-021 §3 a remplacée,
+>    où un client remontait ses événements transduits au serveur. Ce chemin n'existe plus : la
+>    transduction ne produit que du `W_local`, injecté dans W *à l'intérieur* du système. L'écart
+>    R03 de S05 avait supprimé le chemin de données ; la fonction qui le servait avait survécu.
+>
+> Le remplacement est `events()`, publication immuable à N lecteurs — SPEC-006 §3.2.
 ```
 
 `SampleHints` porte le **LOD spectral par lot** (ADR-004 §4) : longueur d'onde minimale à sommer,
@@ -478,6 +512,9 @@ sera formulée pendant le développement, et qui doit être refusée avec son mo
 | « Que δ pousse une force sur le corps rigide » | `accumulate_force` ne va qu'au rendu | **I-04** |
 | « Un `dt` variable par domaine, décidé en interne » | `step` avance exactement `dt_target` | comparabilité, SPEC-003 §5.2 |
 | « Sommer en parallèle sans ordre, c'est plus rapide » | `parallel_reduce_ordered` seul | régime D2 |
+| « Vider la file d'événements pour la traiter » | il n'y a plus de drain | consommateur unique — SPEC-006 §3.2 |
+| « Calculer un danger d'emportement depuis la vitesse de surface » | elle s'appelle `u_total` | l'orbitale vaut 0,63 m/s à Hs = 1 m — SPEC-006 §5.5 |
+| « Faire interroger `EvalWater` par la navigation » | le signal est publié, pas interrogeable | 15× le coût, et croissant avec la population — SPEC-006 §1.1 |
 
 ---
 
@@ -496,7 +533,10 @@ sera formulée pendant le développement, et qui doit être refusée avec son mo
 5. **Budget d'instantanés W** — combien de poignées simultanées, et quelle politique si un lecteur
    lent en retient une trop longtemps ? Proposition : anneau de N instantanés, le plus ancien étant
    recyclé de force avec avertissement.
-6. **Le chemin poussé — absent de cette spécification** *(S08, écart E04, gravité 1)*. Cette
+6. **Le chemin poussé — RÉSOLU en S09 par [`SPEC-006`](SPEC-006-chemin-pousse.md).** Le constat qui
+   suit est conservé parce qu'il dit pourquoi le document existe ; les quatre canaux, leurs
+   cadences, leur contrat de fils, leur dégradation et leur régime d'autorité y sont spécifiés, et
+   `WaveEvent` y est défini avec ses trois champs audio. *(S08, écart E04, gravité 1)*. Cette
    spécification décrit deux chemins : le chemin **tiré** (`EvalWaterBatch`, `sample_batch`) et le
    chemin de **branchement de solveur**. Trois ADR en exigent un troisième, où le système d'eau
    *publie* par tick, à basse fréquence, ce que personne ne vient chercher point par point :
