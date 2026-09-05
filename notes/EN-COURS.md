@@ -100,6 +100,8 @@ Objectif         : dispositif de reprise propre après interruption par limite d
   de P3, et la règle correspondante a été précisée. L'exécution du protocole sur lui-même a donc
   trouvé deux défauts en deux étapes — argument suffisant pour ne jamais publier un protocole sans
   l'avoir exécuté au moins une fois.
+- Le README annonçait encore « 14 règles » alors que les invariants sont 16 depuis S05 : corrigé.
+  Les décomptes recopiés d'un fichier à l'autre se périment en silence, comme les données cuites.
 - **Troisième trou, trouvé en préparant le test avec un autre compte** : rien ne garantissait
   qu'une session ouvrant ce dossier lise `REPRISE.md`. Le dispositif reposait implicitement sur ce
   que l'utilisateur pense à écrire dans son premier message. D'où P6.
