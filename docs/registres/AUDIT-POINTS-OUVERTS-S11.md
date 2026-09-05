@@ -714,3 +714,10 @@ qu'aucune session n'a jamais pris en charge**. Ils sont restés invisibles parce
 des listes de points ouverts, c'est-à-dire là où l'on ne cherche pas ce qu'il reste à faire.
 
 Quatre points, quatre sujets courts et indépendants — c'est un objectif de session.
+
+> **Traités en S12** par [`ADR-023`](../adr/ADR-023-mecanismes-restes-a-specifier.md). Les quatre
+> sont fermés, et le résultat valide la manière dont ils avaient été groupés : **deux se sont
+> résolus en élargissant un mécanisme existant** plutôt qu'en en écrivant un nouveau, un troisième
+> en réutilisant un canal déjà spécifié, et l'ensemble n'a ajouté **aucune interface**. Deux
+> corrections en sont sorties : la grandeur à publier pour l'impact n'est pas la pression mais
+> l'impulsion, et un site turbulent n'est pas un émetteur mais un terme dérivé.

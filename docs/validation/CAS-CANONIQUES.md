@@ -36,6 +36,7 @@ les six premiers doivent passer avant qu'un solveur candidat soit admis en campa
 | C17 | Inondation limitée par l'air | ADR-015 | comparatif | arête d'évent absente |
 | C18 | Invariants du système | tous | binaire | hash, allocations, budget |
 | C19 | Aller-retour de persistance | B, W, V | **binaire** | sauvegarde, reconnexion, arrivée en cours de partie |
+| C20 | Impact d'entrée dans l'eau | flottabilité | **analytique** | impulsion de slamming, durée d'impact |
 
 ---
 
@@ -282,3 +283,35 @@ statistique, c'est-à-dire faible. C'est un bénéfice secondaire direct de l'in
 **Portée non évidente.** Le fichier de sauvegarde et la charge utile d'une arrivée en cours de
 partie sont le **même objet** (ADR-022 §4.1). Ce cas unique couvre donc quatre situations :
 sauvegarde/rechargement, arrivée en cours de partie, reconnexion et redémarrage de serveur.
+
+
+---
+
+## C20 — Impact d'entrée dans l'eau
+
+*(Ajouté en S12, ADR-023 §2.6.)*
+
+**Montage.** Un dièdre de relèvement `β` connu, de demi-largeur `b`, entrant verticalement dans une
+eau au repos à vitesse `v` imposée. Trois valeurs de `β` — 10°, 30°, 45° — et deux vitesses.
+
+**Deux références indépendantes, toutes deux fermées.**
+
+1. **Conservation de la quantité de mouvement.** L'impulsion verticale reçue par le solide vaut
+   `J = Δ(½·π·ρ·c²)·v_rel` par mètre de longueur mouillée, `c` étant la demi-largeur mouillée
+   finale. Assertion : écart < 5 % sur `J`, et **bilan eau + solide conservé à la précision de
+   l'intégrateur**. C'est l'assertion principale : elle ne dépend d'aucune théorie de la pression.
+2. **Décroissance de la durée d'impact.** `t_impact = 2·b·tan β/(π·v)` : la durée doit varier
+   **linéairement en `tan β`** et **en `1/v`**. Assertion sur la pente, pas sur la valeur absolue —
+   une pente juste avec un décalage constant révèle un défaut de détection de contact, une pente
+   fausse révèle un défaut de modèle.
+
+**Ce que le cas attrape.** Un terme d'impact échantillonné au tick au lieu d'être intégré
+analytiquement — il donnerait une impulsion qui dépend de la phase du tick, donc une dispersion
+sur des entrées identiques. C'est le défaut que §2.1 d'ADR-023 décrit comme intermittent et
+introuvable en jeu.
+
+**Ce que le cas ne cherche pas.** La pression de pic. Elle diverge quand `β → 0` (Wagner), le
+coussin d'air et la compressibilité l'écrêtent, et aucune référence fermée n'existe. Un banc qui
+l'assertait mesurerait sa propre incertitude — c'est pourquoi ADR-023 §2.3 publie l'impulsion.
+
+**Rattachement** : banc **B6** (flottabilité), batterie `physics`.

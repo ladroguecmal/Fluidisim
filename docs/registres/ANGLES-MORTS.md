@@ -10,8 +10,9 @@ Sévérité : **1** = refonte d'architecture si découvert tard, **2** = refonte
 Historique : 28 recensés en S01, 12 ajoutés en S02 (phénomènes secondaires), 9 en S03 (harnais
 de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outillage auteur),
 6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance),
-3 en S11 (audit des points ouverts) — **80 au total**. **Vingt ont été trouvés dans nos propres
-écrits**, pas dans les documents sources : A49, A56, A57, A58, puis A65 à A80. La proportion
+3 en S11 (audit des points ouverts), 3 en S12 (mécanismes de détail) — **83 au total**.
+**Vingt-trois ont été trouvés dans nos propres écrits**, pas dans les documents sources : A49, A56,
+A57, A58, puis A65 à A83. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -101,6 +102,9 @@ ce que les sources avaient omis.
 | **A78** | Une correction s'applique là où vit l'affirmation ; un point ouvert n'affirme rien | 2 | AUDIT-POINTS-OUVERTS-S11 §6.2 |
 | **A79** | Le corpus a onze destinataires extérieurs, la liste officielle en portait quatre | 2 | AUDIT-POINTS-OUVERTS-S11 §7.2 |
 | **A80** | Quatre points disent « à spécifier » sans qu'aucune session ne l'ait pris en charge | 2 | AUDIT-POINTS-OUVERTS-S11 §7.4 |
+| **A81** | L'impact d'entrée est plus bref que le tick : une force échantillonnée le rate ou le double | **1** | ADR-023 §2.1 |
+| **A82** | Un critère de bascule de mode ne mesure qu'une chose, et ce n'est pas toujours la bonne | 2 | ADR-023 §3.1 |
+| **A83** | Un phénomène permanent modélisé par émission d'événements sature le réseau en régime nominal | 2 | ADR-023 §4.1 |
 
 Soixante-quatre angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -321,3 +325,19 @@ pendant quatre sessions.
   turbulents permanents, la coalescence de deux poches d'air. Ce n'est ni une mesure, ni un
   arbitrage, ni une dépendance : c'est du travail de conception rendu invisible par l'endroit où il
   est inscrit.
+
+**Ajoutés en S12, en spécifiant les quatre mécanismes**
+
+- **A81** *(sévérité 1)* — **L'impact d'entrée dans l'eau est plus bref que le tick de simulation.**
+  73 ms pour une étrave de vedette, **17 ms pour un corps humain tombant de trois mètres**, contre
+  33 ms de tick. Une force échantillonnée à 30 Hz le rate ou le double selon la phase, et la
+  dispersion qui en résulte sur des entrées identiques est un défaut intermittent, donc introuvable.
+  Et le phénomène est **autoritaire** — c'est lui qui casse une coque ou fait tomber un personnage.
+- **A82** — Un critère de bascule de mode ne mesure **qu'une seule chose**, et l'on croit ensuite
+  qu'il les couvre toutes. Le mode contraint d'ADR-008 §3 se déclenche sur la **stabilité
+  numérique** ; un nageur le passe largement (`ω·dt ≈ 0,14`) alors que c'est ce mode qu'il lui faut,
+  pour le contrôle et la caméra. Le critère n'était pas faux, il était seul.
+- **A83** — Un phénomène **permanent** modélisé par émission d'événements sature le réseau en régime
+  nominal, pas en pic. Deux cents rochers émettant un événement par seconde font 9 000 o/s par
+  joueur intéressé, soit dix fois le débit d'une bataille navale — pour du décor, et en permanence.
+  Un phénomène stationnaire et déterministe se **dérive**, il ne s'émet pas.

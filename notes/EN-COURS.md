@@ -88,7 +88,7 @@ aussi une *cause*, ce qui n'est pas la même chose.
   `n_moles` plutôt que seulement pression et volume.*
 - [x] **P6** — `ADR-023` §6–7 : ce que chaque section ferme, ce qui reste ouvert ; puis les notes
   de clôture dans ADR-008 §5.3, §5.4, ADR-013 §7.4 et ADR-015 §7.3.
-- [ ] **P7** — index, angles morts, cas canoniques, registre S11 (statut des quatre points).
+- [x] **P7** — index, angles morts, cas canoniques, registre S11 (statut des quatre points).
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6) : journal S12, leçons, index, jeton libéré.
 
 ### Notes de reprise
