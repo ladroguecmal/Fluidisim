@@ -80,7 +80,7 @@ avait dissous celui d'ADR-007 §5.3 sans que personne ne le voie pendant neuf se
 - [x] **P3** — passe sur **ADR-001 à ADR-008** (socle).
 - [x] **P4** — passe sur **ADR-009 à ADR-013** (réseau, hydraulique, ordonnanceur, prédiction).
 - [x] **P5** — passe sur **ADR-014 à ADR-022** (phénomènes secondaires, construction, corrections).
-- [ ] **P6** — passe sur les **six SPEC** et le harnais.
+- [x] **P6** — passe sur les **six SPEC** et le harnais.
 - [ ] **P7** — rédiger `docs/registres/AUDIT-POINTS-OUVERTS-S11.md` : le verdict par point,
   la synthèse par catégorie, et **qui attend quoi**.
 - [ ] **P8** — appliquer : clôtures marquées et notes correctives dans les documents concernés.
@@ -138,3 +138,16 @@ document corrigé, jamais vers les points ouverts qui réclamaient la correction
 
 Symptôme à retenir, ADR-022 §7.4 : *« comme partout, dépend du langage »*. Quand un point ouvert se
 justifie par le fait que d'autres documents le posent aussi, il ne devrait pas exister.
+
+#### P6 — 16 E, 2 A, 2 C, 1 B, 1 D, 1 F. Total : 110 points, comptés.
+
+**Quatrième instance**, et c'est la plus instructive : SPEC-004 §10.3 propose encore « un point sur
+quatre » alors que la note corrective de S08 (écart E08) est dans **le même document**, quatre
+sections plus haut. Le défaut n'est donc pas une affaire de distance entre documents.
+
+**Délai le plus court observé** : SPEC-004 §10.5 était clos par SPEC-006 §2.5 au moment même où S09
+l'écrivait. Le défaut se produit à l'instant où la réponse est écrite ailleurs, pas avec le temps.
+
+*Correction apportée à ma propre section P3* : l'en-tête annonçait 31 points pour 30, et le bilan
+omettait le verdict B d'ADR-003 §3. Corrigé. Un décompte recopié se périme même dans le document
+qui le produit.

@@ -56,7 +56,7 @@ la dette de suivi s'accumule le plus vite.
 
 ---
 
-## Socle — ADR-001 à ADR-008 (31 points)
+## Socle — ADR-001 à ADR-008 (30 points)
 
 | Point | Verdict | Constat |
 |---|---|---|
@@ -84,7 +84,7 @@ la dette de suivi s'accumule le plus vite.
 | ADR-007 §4 | **D** | `SolidProxy` — doublon avec SPEC-004 §10.1, voir §2.7 |
 | ADR-008 §1 à §4 | **E** ×4 | points d'échantillon, coefficients, terme de *slamming*, modèle du nageur : tous valides, les deux derniers attendent une spécification qui n'a jamais été planifiée — voir la synthèse §7 |
 
-**Bilan du socle : 22 E, 4 C, 2 D, 1 A, 0 B, 0 F.** Le socle vieillit bien, ce qui était attendu :
+**Bilan du socle : 22 E, 4 C, 2 D, 1 B, 1 A, 0 F.** Le socle vieillit bien, ce qui était attendu :
 c'est la partie du corpus la plus relue, et ses points ouverts sont majoritairement des renvois à
 des bancs qui n'ont pas encore tourné.
 
@@ -478,3 +478,85 @@ posent — mais c'est aussi le signe qu'il manque un endroit où cette question 
 SPEC-006 §9.8 et ADR-022 §7.4 deviennent des renvois d'une ligne. La formulation d'ADR-022 §7.4,
 « comme partout », est le symptôme à retenir : quand un point ouvert se justifie par le fait que
 d'autres le posent aussi, il ne devrait pas exister.
+
+---
+
+## Les six spécifications (23 points)
+
+| Point | Verdict | Constat |
+|---|---|---|
+| SPEC-003 §1 | **E** | format du fichier de scénario, TOML proposé |
+| SPEC-003 §2 | **E** | rendu de référence pour le mode `capture` — **porteur** du doublon d'ADR-020 §3, qui y renvoie déjà |
+| SPEC-003 §3 | **E** | conservation des séries temporelles et des captures |
+| SPEC-003 §4 | **E** | **qui possède le harnais ?** — question d'organisation, pas de conception ; voir la synthèse §7 |
+| SPEC-004 §1 | **E** | langage et `ShapeKind` — **porteur** de deux doublons (ADR-007 §4, et la représentation binaire) |
+| SPEC-004 §2 | **A** | `CondensedState` — clos en S10, déjà marqué |
+| SPEC-004 §3 | **C** | granularité de `is_smooth_at` — **quatrième instance de la même classe**, voir §5.1 |
+| SPEC-004 §4 | **E** | `IGpuBackend` — **porteur**, et la seule interface encore à prototyper |
+| SPEC-004 §5 | **B** | budget d'instantanés W — **tranché par SPEC-006 §2.5**, voir §5.2 |
+| SPEC-004 §6 | **A** | le chemin poussé — clos en S09, déjà marqué |
+| SPEC-005 §1, §2, §4 | **E** ×3 | gravure automatique · bassin versant · format d'échange terrain |
+| SPEC-005 §3 | **C** | stockage des données cuites — le modèle a été décidé en S08, voir §5.3 |
+| SPEC-005 §5 | **F** | coût de cuisson — c'est un chiffrage assorti d'une note, pas une question |
+| SPEC-006 §1, §2, §3, §5, §6, §7 | **E** ×6 | tous renvoient correctement à leur porteur (ADR-014, ADR-016, ADR-018) ou sont neufs |
+| SPEC-006 §4 | **E** | trait de côte mobile — **arbitrage humain n°3**, correctement signalé et non tranché |
+| SPEC-006 §8 | **D** | représentation binaire — voir §4.7 |
+
+**Bilan : 16 E, 2 A, 2 C, 1 B, 1 D, 1 F.**
+
+SPEC-006, écrite en S09 et la plus chargée du corpus avec huit points, est aussi la plus propre :
+six de ses huit points **nomment leur porteur** dans leur énoncé même. C'est le comportement que le
+reste du corpus n'a pas, et il ne coûte rien à l'écriture.
+
+### 5.1 SPEC-004 §3 — la correction est dans le corps, pas dans le point *(C)*
+
+« Granularité de `is_smooth_at` — **un point d'échantillonnage sur quatre est une proposition** ; à
+mesurer au banc B4, dont c'est un paramètre direct. »
+
+La revue S08 (écart E08) a établi que le taux de décimation **n'est pas une constante** : c'est le
+rapport `λ_cut/dx` qui décide, et il passe de 40 à 16 entre le scénario nominal et une zone de
+déferlement, soit de 10 à 4 points par longueur d'onde après décimation — deux fois Nyquist. La
+contrainte s'écrit `dx ≤ λ_cut/N`.
+
+La note corrective correspondante a été posée en **SPEC-004 §6.2**, dans le corps du document. Le
+point ouvert de §10.3, lui, propose toujours « un point sur quatre » comme si c'était le paramètre à
+mesurer. Ce n'est plus lui : c'est `N`.
+
+**Quatrième instance de la même classe de défaut**, après ADR-007 §5.3, ADR-006 §7.3 et ADR-017 §7.2
+— et la première où la correction et le point périmé sont dans **le même document**, à quatre
+sections d'écart. Ce n'est donc pas un problème de distance entre documents.
+
+**Action** : reformuler le point sur `N`.
+
+### 5.2 SPEC-004 §5 — tranché par le document suivant, une session plus tard *(B)*
+
+« Budget d'instantanés W — combien de poignées simultanées, et quelle politique si un lecteur lent
+en retient une trop longtemps ? Proposition : anneau de N instantanés, le plus ancien recyclé de
+force avec avertissement. »
+
+SPEC-006 §2.5 le dit explicitement : « C'est la proposition que SPEC-004 §10.5 laissait ouverte pour
+les instantanés W. Elle est ici **tranchée pour tous les canaux, W compris** : une seule politique,
+faute de quoi chaque canal inventera la sienne. » Et `ring_slots` y est dérivé du profil selon I-16,
+ce que la proposition d'origine ne disait pas.
+
+Le point était donc clos au moment même où S09 l'écrivait, et il figure encore comme ouvert une
+session plus tard. C'est le délai le plus court observé dans cet audit — et il montre que le défaut
+n'est pas une question d'ancienneté : **il se produit à l'instant où la réponse est écrite ailleurs.**
+
+**Action** : clore, renvoyer à SPEC-006 §2.5.
+
+### 5.3 SPEC-005 §3 — un idéal devenu un modèle décidé *(C)*
+
+« Stockage des données cuites : elles sont binaires et volumineuses. Ne pas les versionner à côté
+des sources sans cache dédié ; **idéalement ne versionner que les empreintes**. »
+
+La résolution de l'écart E07 (S08) a décidé le modèle : la cuisson est **autoritaire, pas
+reproductible** — un producteur désigné, un artefact identifié par l'empreinte de son contenu, le
+`bake_manifest` de §7.3 comme porteur, une promotion explicite pour livrer. « Ne versionner que les
+empreintes » n'est donc plus un idéal, c'est le modèle retenu, et il a un mécanisme.
+
+Ce qui reste réellement ouvert est plus étroit et relève de l'infrastructure : **où vit le magasin
+d'artefacts**, et avec quelle politique de rétention.
+
+**Action** : note corrective. Le point se rétrécit au lieu de disparaître, ce qui est le résultat
+normal d'un audit bien mené — la plupart des points ne sont ni morts ni intacts.
