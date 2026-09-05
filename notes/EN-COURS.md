@@ -87,7 +87,7 @@ Objectif         : `CondensedState`, la persistance hors caméra, et sa confront
 - [x] **P6** — `ADR-022` §5 : la couche V, seule persistance vraie, dans un monde partagé ·
   §6 conséquences sur les interfaces · §7 ce qui reste ouvert. Invariant **I-17** si la
   démonstration de P2 tient.
-- [ ] **P7** — répercussions : notes correctives dans SPEC-004 (§10.2 et les signatures),
+- [x] **P7** — répercussions : notes correctives dans SPEC-004 (§10.2 et les signatures),
   ADR-007 §7.3, renvoi depuis SPEC-005 §6.
 - [ ] **P8** — index, invariants, angles morts, README si nécessaire.
 - [ ] **P9** — rituel de fin (`REPRISE.md` §6) : journal S10, leçons, index, jeton libéré.

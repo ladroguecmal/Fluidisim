@@ -225,9 +225,15 @@ public:
                                   span<DeltaSample> out) const = 0;   // renvoie l'âge en µs
 
     virtual span<const SectorFlux> drain_boundary_flux() = 0;
-    virtual Result condense(CondensedState* out) const = 0;
-    virtual Result restore(const CondensedState&) = 0;
+    virtual Result restore(const SeedState&) = 0;      // amorçage depuis une graine — ADR-022 §3
     virtual void   reset() = 0;
+};
+
+// Obtenue UNIQUEMENT par un hôte de cuisson (SPEC-005 §7.1).
+// Un hôte de jeu n'en reçoit jamais de pointeur : il ne peut donc pas condenser.
+class ISeedProducer {
+public:
+    virtual Result condense(SeedState* out) const = 0;
 };
 ```
 
@@ -245,6 +251,16 @@ peut rien constater.
 
 **`mass_drift_per_s` est rapporté à chaque pas, pas seulement en test.** C'est le capteur qui
 détecte un solveur qui fuit en production. Le coût est d'une soustraction.
+
+> **Correction (S10, [ADR-022](../adr/ADR-022-persistance-de-l-eau.md)).** `condense` figurait ici,
+> aux côtés de `restore`, avec `CondensedState`. Deux changements :
+>
+> - le type est désormais `SeedState` — une **condition initiale 2D cuite**, généralisation du
+>   `CoastalState` de SPEC-005 §6 — et non la sérialisation d'un état de solveur. Aucun état de δ
+>   n'est jamais sérialisé (**I-17**) ;
+> - `condense` **quitte cette interface** pour `ISeedProducer`, que seul un hôte de cuisson obtient.
+>   Laissée sur `IFluidSolver`, où tout hôte y accède, elle aurait fini par être appelée en jeu.
+>   Suivant L19, l'interdit est rendu inexprimable plutôt qu'écrit dans une consigne de revue.
 
 ---
 
@@ -523,9 +539,13 @@ sera formulée pendant le développement, et qui doit être refusée avec son mo
 1. **Langage et représentation des formes.** `ShapeKind` est volontairement ouvert ; la
    représentation retenue dépendra du solveur choisi en B3. Exigence minimale, non négociable :
    accepter une **frontière en mouvement avec sa vitesse**, pas seulement une géométrie.
-2. **`CondensedState`** — format de sérialisation pour la persistance hors caméra. Reporté : sa
-   forme dépend du solveur. Contrainte connue : il doit se relire sur une machine différente, donc
-   pas de disposition mémoire brute.
+2. **`CondensedState` — RÉSOLU en S10 par [ADR-022](../adr/ADR-022-persistance-de-l-eau.md), et la
+   question était mal posée.** Il n'existe pas de persistance hors caméra : ADR-013 §6 avait dissous
+   le mécanisme dès S01, et ces signatures lui avaient survécu. Le type qui subsiste est le
+   `SeedState` — une donnée **cuite**, pas une capture d'exécution.
+   *À noter : la contrainte énoncée ici — « il doit se relire sur une machine différente, donc pas
+   de disposition mémoire brute » — était exactement celle d'un actif cuit, et dépourvue de sens
+   pour une condensation en mémoire. Le point disait déjà ce qu'il était.*
 3. **Granularité de `is_smooth_at`** — un point d'échantillonnage sur quatre est une proposition ;
    à mesurer au banc B4, dont c'est un paramètre direct.
 4. **Surface minimale de `IGpuBackend`** — interface la plus risquée des six (ADR-020 §6.2). À

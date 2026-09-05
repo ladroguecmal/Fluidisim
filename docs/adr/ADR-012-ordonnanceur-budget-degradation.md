@@ -119,6 +119,26 @@ l'échantillonnage de flottabilité, la couche W répliquée. Ce sont les donné
 > à la question laissée ouverte en ADR-005 §7.4 : la transduction ne perd rien en régime normal,
 > et tout sous pression.
 >
+> **Rang 5 — il ne s'applique pas aux domaines substitutifs (S10, ADR-022 §2.6).** Détruire un
+> domaine **perturbatif** est visuellement gratuit (I-12) et le recréer l'est aussi : il renaît à
+> δ = 0. Un domaine **substitutif** ne renaît pas gratuitement — 4,4 à 8 s depuis une graine,
+> 40 s depuis rien (ADR-013 §4, SPEC-005 §6 corrigé en S08). Or §5 ci-dessous n'engage une décision
+> de dégradation que pour « au moins 30 frames », soit **1 s** :
+>
+> ```
+> fenêtre d'engagement                              :  1 s
+> restauration d'un domaine substitutif             :  4,4 à 8 s depuis une graine
+> ```
+>
+> Un déferlement non focal serait donc détruit puis redemandé quatre à huit fois plus vite qu'il ne
+> se rétablit, et le joueur qui balaie la caméra le long d'une côte verrait des plages apparaître
+> en retard ou à demi établies. **Le rang 5 ne porte que sur les domaines perturbatifs** ; si un
+> domaine substitutif doit céder, son hystérésis se dimensionne sur son temps de restauration.
+>
+> Règle générale : *une dégradation dont la fenêtre d'engagement est plus courte que le coût de
+> restauration de ce qu'elle détruit est un générateur de pompage* — et §5 dit déjà, pour la
+> manette de qualité, que le pompage est plus visible que la dégradation qu'on cherchait à éviter.
+>
 > **Rang 6 — l'élagage de W est restreint (écart R05).** « Réduire le nombre de paquets W » ne
 > s'applique qu'à `W_local` et aux paquets `W_rep` déjà passés sous le seuil de pertinence
 > gameplay. Un paquet répliqué au-dessus du seuil n'est **jamais** élagué, quel que soit le profil

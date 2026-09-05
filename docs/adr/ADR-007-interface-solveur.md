@@ -63,6 +63,17 @@ interface IFluidSolver {
 }
 ```
 
+> **Note corrective (S10, ADR-022).** Ces deux lignes servaient un mécanisme qui n'existait déjà
+> plus au moment où elles ont été écrites : ADR-013 §6, **de la même session**, a dissous la
+> question `architecture_globale §9` en établissant que le repli hors caméra n'est pas une
+> simulation ralentie mais une **destruction de domaine**. La décision s'est propagée vers la prose
+> qui l'explique, pas vers ces signatures (leçon L35).
+>
+> `condense` et `restore` gardent un objet, mais un autre : ils échangent une **graine**
+> (`SeedState`), `condense` étant une opération de l'outil de cuisson et `restore` une opération
+> d'exécution. Voir **[ADR-022](ADR-022-persistance-de-l-eau.md) §3**, qui remplace la fonction
+> assignée ici, et l'invariant **I-17** : aucun état de δ n'est jamais sérialisé.
+
 ### Points de conception non négociables
 
 - **`step()` reçoit un budget et doit le respecter**, quitte à sous-résoudre. Un solveur qui peut
@@ -133,7 +144,10 @@ défaire.
    grille + particules de surface, position-based fluids. Aucun n'est privilégié à ce stade.
 2. Candidats pour W (B2) : paquets d'ondes lagrangiens, équation d'onde 2D sur pyramide GPU,
    Boussinesq faible dispersion, hybride.
-3. Format exact de `CondensedState` → ADR à écrire (persistance hors caméra).
+3. ~~Format exact de `CondensedState` → ADR à écrire (persistance hors caméra).~~
+   **Clos en S10 par [ADR-022](ADR-022-persistance-de-l-eau.md)**, qui montre que la question était
+   mal posée : il n'y a pas de persistance hors caméra, donc pas de format à trouver. Le type qui
+   subsiste est le `SeedState`, et il décrit une donnée **cuite**, pas une capture d'exécution.
 4. `SolidProxy` : quelle représentation des solides — SDF, maillage, particules de frontière ?
    Fortement dépendante du solveur choisi ; laissée à `IFluidSolver`, avec une exigence : accepter
    une **frontière en mouvement** avec vitesse, pas seulement une géométrie statique.

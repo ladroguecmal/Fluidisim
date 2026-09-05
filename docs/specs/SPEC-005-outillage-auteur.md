@@ -167,6 +167,17 @@ CoastalState {                     // par plage, par état de mer, par phase de 
 }
 ```
 
+> **Note (S10, [ADR-022](../adr/ADR-022-persistance-de-l-eau.md) §3).** `CoastalState` est un cas
+> d'emploi d'un type plus général, le **`SeedState`** — `kind = Cotier`. La forme trouvée ici, une
+> condition initiale 2D plutôt qu'un volume figé, n'a en effet rien de côtier : elle vaut pour tout
+> domaine substitutif à long temps d'établissement, y compris un bassin intérieur ou une condition
+> initiale voulue par un concepteur.
+>
+> ADR-022 a par ailleurs constaté que ce type et le `CondensedState` de SPEC-004 §10.2 répondaient à
+> la même question — *comment amener un domaine dans un état non trivial sans le simuler depuis
+> zéro* — sous deux noms, à deux sessions d'intervalle. C'est ce document-ci qui avait la bonne
+> forme, et pour la bonne raison : un calcul de volume de données. Volumes et résolution inchangés.
+
 Pour 120 × 20 m à 0,5 m : 240 × 40 = 9 600 texels × 4 × `f16` = **77 Ko par état**, soit
 **1,2 Mo par plage** pour seize états. Cinquante plages tiennent dans 60 Mo, avant compression.
 
