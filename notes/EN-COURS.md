@@ -82,7 +82,7 @@ Objectif         : `CondensedState`, la persistance hors caméra, et sa confront
   *Thèse : `condense` est une opération **d'outil de cuisson**, pas d'exécution ; `restore` est une
   opération d'exécution. Ce sont les deux moitiés d'un même mécanisme, écrites à deux sessions
   d'intervalle sous deux noms — la configuration L22 exacte.*
-- [ ] **P5** — `ADR-022` §4 : ce que l'eau met dans une sauvegarde, et le rechargement, l'arrivée
+- [x] **P5** — `ADR-022` §4 : ce que l'eau met dans une sauvegarde, et le rechargement, l'arrivée
   en cours de partie, le redémarrage serveur.
 - [ ] **P6** — `ADR-022` §5 : la couche V, seule persistance vraie, dans un monde partagé ·
   §6 conséquences sur les interfaces · §7 ce qui reste ouvert. Invariant **I-17** si la
@@ -185,3 +185,16 @@ en S04, `CoastalState` en S06. La configuration L22, confirmée.
   rejoignent sans avoir été conçues ensemble.
 - Contraste noté avec ADR-013 §3 : la graine est **le seul endroit du système où un seuil de
   tolérance physique existe**, parce que c'est le seul précalcul qui contienne de la physique.
+
+#### P5 — deux résultats non prévus
+
+- **Le fichier de sauvegarde et la charge utile d'une arrivée en cours de partie sont le même
+  objet.** Conséquence d'ADR-003 : quand l'état du monde se réduit à un temps et à un journal, le
+  destinataire n'y change rien. Un seul format, et le harnais (SPEC-003 §8) le teste déjà sans
+  qu'aucun test de sauvegarde ne soit écrit.
+- **Le TTL d'ADR-010 §7 est la borne supérieure de la persistance de l'eau**, pas un nettoyage
+  cosmétique. Sans lui, chaque flaque jamais revisitée d'un monde persistant resterait dans l'état
+  du monde. À dire dans toute discussion qui proposerait de l'allonger.
+- Chiffres : événements vivants ≤ ≈180 Ko (borné par paquets_W_max) ; 100 000 nœuds V modifiés à
+  20 o = 2 Mo. Une sauvegarde d'eau est petite, et il faut le dire avant que quelqu'un ne conçoive
+  un découpage dont personne n'a besoin.

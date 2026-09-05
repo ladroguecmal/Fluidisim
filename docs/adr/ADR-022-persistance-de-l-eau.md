@@ -256,3 +256,121 @@ reçoit sa masse du nœud (ADR-010 §6, transfert explicite) ; la graine ne four
 l'écoulement, renormalisée sur `nominal_mass_t`. Sans cette règle, amorcer un compartiment depuis
 une graine créerait ou détruirait de l'eau — et la couche V est justement celle où la conservation
 est exacte et entière.
+
+---
+
+## 4. Ce que l'eau met dans une sauvegarde
+
+Personne n'avait posé la question, et elle sera posée — probablement tard, par l'équipe qui écrit
+le format de sauvegarde, et avec une échéance.
+
+### 4.1 Quatre situations, une seule réponse
+
+| Situation | Ce qu'il faut transmettre ou écrire |
+|---|---|
+| Sauvegarde / rechargement | `T_sim`, descripteurs de région, événements W vivants, nœuds V modifiés |
+| Arrivée en cours de partie | *idem* — ADR-003 §3 le disait déjà : « rien à transférer sinon `T_sim`, les descripteurs de région et la liste des événements W encore vivants » |
+| Reconnexion | *idem* |
+| Redémarrage de serveur | *idem* |
+
+**Le fichier de sauvegarde et la charge utile d'une arrivée en cours de partie sont le même objet.**
+Ce n'est pas une coïncidence heureuse mais une conséquence d'ADR-003 : dès lors que l'état du monde
+se réduit à un temps et à un journal, il n'y a qu'une manière de le transmettre, et le destinataire
+— disque, réseau, harnais — n'y change rien.
+
+Trois conséquences pratiques, toutes gratuites :
+
+- **un seul format à écrire, à versionner et à tester** ;
+- **un seul cas de non-régression** : le harnais rejoue déjà exactement cet objet (SPEC-003 §8), ce
+  qui teste la sauvegarde sans qu'aucun test de sauvegarde ne soit écrit ;
+- un défaut dans l'un est un défaut dans l'autre, donc il se trouve deux fois plus vite.
+
+### 4.2 La structure
+
+```cpp
+struct WaterPersistentState {
+    uint32_t   size;
+    uint32_t   format_version;
+
+    SimTime    t_sim;
+    span<const RegionDescriptor> regions;     // état de mer par région — ADR-004 §2.2
+    span<const WaveEvent>        events_alive; // ttl non échu — SPEC-006 §3.1, 45 o pièce
+    span<const VNodeDelta>       v_nodes;      // cf. §4.3
+};
+
+struct VNodeDelta {                 // 20 octets
+    uint64_t node_id;
+    int64_t  volume_ml;
+    uint8_t  liquid_id;
+    uint16_t flags;
+};
+```
+
+**Ordres de grandeur.** Les événements vivants sont bornés par le budget de paquets du profil
+(`paquets_W_max = 4096`, ADR-012 §3), un événement se développant en plusieurs paquets : au pire
+≈**180 Ko**, en pratique bien moins. Les nœuds V dominent donc, et à 20 octets pièce, cent mille
+nœuds modifiés font **2 Mo**. Une sauvegarde d'eau est un petit objet, et il faut le dire
+maintenant : sans ce chiffre, quelqu'un dimensionnera son format en supposant qu'un système d'eau
+coûte cher à sauvegarder, et concevra un mécanisme de découpage dont personne n'a besoin.
+
+### 4.3 On enregistre l'écart à la valeur d'auteur, jamais l'état complet
+
+Un nœud V d'auteur — une citerne, une piscine de niveau — a une valeur initiale qui vient des
+données du niveau. La sauvegarde n'écrit que les nœuds **dont le volume diffère de cette valeur**.
+
+C'est la règle de source de vérité unique de SPEC-005 §1 appliquée à la persistance, et le motif est
+le même que celui de **L25** : la donnée d'auteur reste la vérité, la sauvegarde est une **entrée
+supplémentaire** et jamais une retouche du produit. Écrire l'état complet ferait qu'une correction
+d'équilibrage sur le niveau — agrandir une citerne, déplacer une piscine — serait silencieusement
+écrasée par toutes les sauvegardes existantes.
+
+**Ce qui borne la taille d'une sauvegarde est le TTL d'ADR-010 §7**, et c'est là son rôle réel : les
+nœuds créés par le jeu (flaques, inondations sans conséquence) sont retirés après trente minutes
+sans visite et reconvertis en mouillage de surface. Sans ce mécanisme, chaque flaque jamais revisitée
+d'un monde persistant resterait dans l'état du monde indéfiniment. Le TTL n'est pas un nettoyage
+cosmétique : c'est **la borne supérieure de la persistance de l'eau**, et il devrait être présenté
+comme tel dans toute discussion d'équilibrage qui proposerait de l'allonger.
+
+### 4.4 Sauvegarder provoque un règlement δ→V
+
+Si un nœud est gelé et sa masse remise à un domaine substitutif au moment où l'on sauvegarde
+(ADR-010 §6), il n'y a **rien à écrire** : la masse n'est plus dans un entier, elle est dans un
+champ que I-17 interdit d'écrire.
+
+**Règle.** Une demande de persistance force le transfert δ→V avant d'écrire. Le domaine rend
+`M'`, l'écart `M' − M` est journalisé comme dans le cas normal, et ce qui est écrit est un entier.
+Un joueur qui sauvegarde pendant qu'une coursive s'inonde retrouve la coursive au même volume, à la
+perte contrôlée près — laquelle est mesurée, pas subie.
+
+Corollaire à ne pas manquer : **une sauvegarde est un point de synchronisation**, au même titre
+qu'un franchissement de frontière de domaine. Elle ne peut pas être prise à un instant arbitraire
+d'un tick ; elle se prend entre deux ticks, après `end_tick` (SPEC-004 §3).
+
+### 4.5 Ce qui n'est jamais écrit
+
+La liste est plus utile que son complément, parce que c'est elle qu'on essaiera d'allonger :
+
+| Jamais écrit | Pourquoi |
+|---|---|
+| Tout champ de δ | **I-17** |
+| L'état de B | I-02 — recalculé depuis `T_sim` |
+| Les paquets W | dérivés du journal d'événements par `advance(t)`, fonction pure — ADR-003 §3 |
+| Les champs `F` et `A` | cascades transitoires ; l'écume permanente est re-dérivée de W — ADR-014 §2.3 |
+| La polyligne de déferlement, les graines, la bibliothèque côtière | données **cuites**, identifiées par empreinte — SPEC-005 §7.3 ; elles appartiennent à la version du jeu, pas à la partie |
+| Le signal de traversabilité | entièrement dérivé de ce qui précède — SPEC-006 §2.6 |
+
+### 4.6 Monde persistant : le système d'eau ne décide pas de la propriété
+
+Dans un monde partagé et persistant, il n'y a pas de « fichier de sauvegarde » mais un état de monde
+tenu en continu. La réponse ne change pas — les trois mêmes choses — mais **qui les tient** est une
+question d'infrastructure, pas d'eau.
+
+Position du système d'eau, la même qu'ADR-018 §1 sur la navigation : il **publie et accepte** un
+`WaterPersistentState`, il n'a pas d'opinion sur qui le stocke, à quelle granularité de partition ni
+sous quelle politique de propriété. Il fournit en revanche ce qu'il faut pour que la question soit
+décidable : l'état est **additif par nœud et par événement**, donc partitionnable par région sans
+coordination.
+
+Ce qui relève réellement d'une décision humaine — et qui est signalé, non tranché : la durée de vie
+d'un nœud V rattaché à un objet appartenant à un joueur absent depuis des mois. C'est une politique
+de monde, avec des conséquences de stockage et de gameplay, et elle n'appartient pas à l'équipe eau.
