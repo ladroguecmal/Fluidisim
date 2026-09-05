@@ -77,7 +77,7 @@ Objectif         : `CondensedState`, la persistance hors caméra, et sa confront
 - [x] **P3** — `ADR-022` §1–2 : la décision, et la démonstration couche par couche.
   *Forme : un ADR, pas une note. ADR-007 §7.3 appelle explicitement « un ADR à écrire », et une
   décision qui en change une autre ne se corrige pas, elle se remplace.*
-- [ ] **P4** — `ADR-022` §3 : `SeedState` — ce que `condense`/`restore` échangent réellement, et
+- [x] **P4** — `ADR-022` §3 : `SeedState` — ce que `condense`/`restore` échangent réellement, et
   l'unification avec `CoastalState`.
   *Thèse : `condense` est une opération **d'outil de cuisson**, pas d'exécution ; `restore` est une
   opération d'exécution. Ce sont les deux moitiés d'un même mécanisme, écrites à deux sessions
@@ -174,3 +174,14 @@ cuisson** capture ce qu'il vient de simuler pour en faire une graine (SPEC-005 �
 l'opération par laquelle **l'exécution** amorce un domaine substitutif depuis cette graine. Les deux
 moitiés d'un même mécanisme, écrites à deux sessions d'intervalle sous deux noms — `CondensedState`
 en S04, `CoastalState` en S06. La configuration L22, confirmée.
+
+#### P4 — deux rapprochements non prévus
+
+- La contrainte que SPEC-004 §10.2 posait sur `CondensedState` (« se relire sur une machine
+  différente, donc pas de disposition mémoire brute ») est celle d'un **actif cuit**, et n'a aucun
+  sens pour une condensation en mémoire. Le document disait déjà ce qu'il était, dès S04.
+- La graine referme **E07** : produite par δ qui n'est jamais D1, elle n'a pas à être reproductible
+  puisqu'elle est identifiée par l'empreinte de son contenu. Les deux résolutions — S08 et S10 — se
+  rejoignent sans avoir été conçues ensemble.
+- Contraste noté avec ADR-013 §3 : la graine est **le seul endroit du système où un seuil de
+  tolérance physique existe**, parce que c'est le seul précalcul qui contienne de la physique.

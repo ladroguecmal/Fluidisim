@@ -143,3 +143,116 @@ céder, leur hystérésis se dimensionne sur **leur temps de restauration**, pas
 Cela ne contredit pas I-17 : la restauration se fait depuis une **graine cuite**, jamais depuis une
 capture d'exécution. Le cas qui résistait renforce la décision au lieu de l'affaiblir — il dit
 seulement que l'ordonnanceur doit connaître le coût de ce qu'il détruit.
+
+---
+
+## 3. `SeedState` : ce que `condense` et `restore` échangent réellement
+
+### 3.1 Deux noms pour un mécanisme
+
+| Écrit en | Sous le nom | Rôle décrit | Forme supposée |
+|---|---|---|---|
+| S04, SPEC-004 §10.2 | `CondensedState` | « persistance hors caméra », reporté | sérialisation d'un état de solveur |
+| S06, SPEC-005 §6 | `CoastalState` | amorcer une zone de déferlement sans attendre 40 s | **condition initiale 2D**, 77 Ko |
+
+Les deux répondent à la même question : *comment amener un domaine dans un état non trivial sans le
+simuler depuis zéro ?* Écrits à deux sessions d'intervalle, sous deux noms, dans deux documents.
+C'est la configuration de **L22**, et la résolution qu'elle prescrit est de ne pas arbitrer entre
+les deux mais de remonter au mécanisme manquant.
+
+Il est déjà à moitié écrit : SPEC-005 §6 a trouvé la bonne forme — **une condition initiale 2D, pas
+un volume 3D figé** — et l'a trouvée pour la bonne raison, un calcul de volume de données
+(197 Mo par plage contre 1,2 Mo). Ce qui manquait, c'est de voir que cette forme n'a rien de côtier.
+
+> **Décision.** Le type est **`SeedState`**. `CoastalState` en devient un cas d'emploi
+> (`kind = Cotier`) et `CondensedState` disparaît.
+
+### 3.2 La structure
+
+```cpp
+enum class SeedKind : uint8_t {
+    Cotier,     // zone de déferlement — SPEC-005 §6
+    Bassin,     // grand plan d'eau intérieur avec un état de ballottement établi
+    Auteur      // condition initiale voulue par un concepteur : une ruine inondée au chargement
+};
+
+struct SeedParams {                  // ce SOUS QUOI la graine a été cuite
+    half     hs, tp, theta;          // état de mer incident
+    uint8_t  tide_phase;             // index de phase, pas une valeur continue
+    vec3     g_eff_dir;  half g_eff_mag;
+    uint8_t  liquid_id;
+};
+
+struct SeedState {
+    uint32_t     size;               // extension par ajout — SPEC-004 §1.4
+    SeedId       id;                 // sha256 du contenu — SPEC-005 §7.3
+    SeedKind     kind;
+    SeedParams   params;
+
+    uint16_t     nx, ny;             // grille 2D
+    float        dx_seed;            // 0,5 m pour le côtier — SPEC-005 §6
+    half         nominal_mass_t;     // masse nominale, en tonnes — cf. §3.5
+
+    span<const half> h, u, v, roller;   // hauteur, vitesses, intensité de rouleau
+};
+```
+
+Volumes inchangés par rapport à SPEC-005 §6, la généralisation ne coûtant rien : **77 Ko par
+état**, 1,2 Mo par plage pour seize états, 60 Mo pour cinquante plages avant compression.
+
+### 3.3 `condense` est une opération d'outil, et l'interface doit l'empêcher d'être autre chose
+
+`condense` capture ce que l'outil de cuisson vient de simuler pour en faire une graine
+(SPEC-005 §7.1). Ce n'est **jamais** une opération d'exécution. La laisser sur `IFluidSolver`, où
+tout hôte y a accès, garantit qu'elle sera un jour appelée en jeu « juste pour essayer ».
+
+Suivant **L19** — rendre l'interdit inexprimable plutôt que l'interdire :
+
+```cpp
+// Obtenue UNIQUEMENT par un hôte de cuisson. Un hôte de jeu n'en reçoit jamais de pointeur.
+class ISeedProducer {
+public:
+    virtual Result condense(SeedState* out) const = 0;
+};
+
+// Sur IFluidSolver, il ne reste que la moitié qui a lieu à l'exécution :
+//   virtual Result restore(const SeedState&) = 0;
+```
+
+Un hôte de jeu ne peut pas condenser : il n'a pas le type. La règle n'a pas à être écrite dans une
+consigne de revue, ce qui est toujours le dernier recours et jamais le premier.
+
+### 3.4 Une graine est un actif cuit, et cela referme l'écart E07
+
+SPEC-004 §10.2 énonçait la contrainte suivante sur `CondensedState` : *« il doit se relire sur une
+machine différente, donc pas de disposition mémoire brute »*. Cette contrainte est exactement juste
+— **pour un actif cuit**, et dépourvue de sens pour une condensation en mémoire d'un domaine qui
+sort du champ de la caméra. Elle était le signe, écrit dès S04, que le champ décrivait une donnée de
+pipeline sans qu'on l'ait vu.
+
+Elle referme aussi l'écart **E07** de la revue S08. Une graine est produite en faisant tourner δ,
+qui n'est **jamais D1** (SPEC-003 §2) : deux machines ne produiront pas le même octet. Cela n'a
+aucune importance, parce qu'une graine n'est pas un calcul reproductible, c'est un **actif
+identifié par l'empreinte de son contenu** — un producteur désigné, un `bake_manifest`, une
+promotion explicite. Les deux résolutions se rejoignent sans avoir été conçues ensemble, ce qui est
+le meilleur indice qu'elles sont justes.
+
+### 3.5 Trois règles d'emploi
+
+**Interpoler les paramètres, jamais les champs (I-09).** Entre deux graines, on interpole `Hs`,
+`Tp` et la phase de marée, jamais `h`, `u`, `v`. SPEC-005 §6 le disait déjà pour le côtier : deux
+conditions initiales moyennées produisent une mer **plus calme que les deux**, exactement comme deux
+champs de houle indépendants font chuter `Hs` de 29 % (L05).
+
+**Une graine porte les paramètres sous lesquels elle a été cuite, et `restore` refuse au-delà d'un
+écart.** C'est le **seul endroit du système où un seuil de tolérance physique existe**, et le
+contraste avec ADR-013 §3 mérite d'être noté : là-bas, la question « quelle erreur de précalcul est
+acceptable ? » s'était **dissoute**, parce qu'un domaine préparé en palier T2 ne contient aucune
+information physique — δ y vaut identiquement 0, et il n'y a rien à transporter. Une graine, elle,
+en contient. Le seuil est donc réel, et il est à calibrer (banc B4).
+
+**La masse est autoritaire, la graine ne l'est pas.** Un domaine substitutif couplé à un nœud V
+reçoit sa masse du nœud (ADR-010 §6, transfert explicite) ; la graine ne fournit que la **forme** de
+l'écoulement, renormalisée sur `nominal_mass_t`. Sans cette règle, amorcer un compartiment depuis
+une graine créerait ou détruirait de l'eau — et la couche V est justement celle où la conservation
+est exacte et entière.
