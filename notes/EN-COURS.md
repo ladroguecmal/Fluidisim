@@ -59,162 +59,42 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S10
-État             : terminée
+Session          : S11
+État             : en cours
 Battement        : 2026-09-05
-Objectif         : `CondensedState`, la persistance hors caméra, et sa confrontation avec
-                   `CoastalState` — configuration L22 signalée par S09
+Objectif         : auditer les listes « ce qui reste ouvert » de tous les documents (L40)
 ```
 
 ### Plan
 
+Trois questions par point, toujours les mêmes :
+**(a) a-t-il encore un objet ?** — une décision ultérieure l'a-t-elle dissous, comme ADR-013 §6
+avait dissous celui d'ADR-007 §5.3 sans que personne ne le voie pendant neuf sessions.
+**(b) sa formulation tient-elle encore ?** — chiffres périmés, renvois cassés, prémisse changée.
+**(c) qui attend, et quoi ?** — une mesure, une réunion, une décision humaine, du code.
+
 - [ ] **P1** — déclarer le plan, prendre le jeton, mettre à jour le battement.
-- [x] **P2** — l'analyse, couche par couche : qu'est-ce qui doit réellement persister quand un
-  domaine quitte la caméra, quand la partie est sauvegardée, quand un joueur rejoint.
-  *Thèse (L03) : la question « quel format pour `CondensedState` » est probablement **mal posée**.
-  ADR-013 §6 a dissous la simulation hors caméra — le repli **est** la destruction du domaine. Si
-  c'est vrai, il n'y a rien à condenser, et le format cherché n'a pas d'objet.*
-- [x] **P3** — `ADR-022` §1–2 : la décision, et la démonstration couche par couche.
-  *Forme : un ADR, pas une note. ADR-007 §7.3 appelle explicitement « un ADR à écrire », et une
-  décision qui en change une autre ne se corrige pas, elle se remplace.*
-- [x] **P4** — `ADR-022` §3 : `SeedState` — ce que `condense`/`restore` échangent réellement, et
-  l'unification avec `CoastalState`.
-  *Thèse : `condense` est une opération **d'outil de cuisson**, pas d'exécution ; `restore` est une
-  opération d'exécution. Ce sont les deux moitiés d'un même mécanisme, écrites à deux sessions
-  d'intervalle sous deux noms — la configuration L22 exacte.*
-- [x] **P5** — `ADR-022` §4 : ce que l'eau met dans une sauvegarde, et le rechargement, l'arrivée
-  en cours de partie, le redémarrage serveur.
-- [x] **P6** — `ADR-022` §5 : la couche V, seule persistance vraie, dans un monde partagé ·
-  §6 conséquences sur les interfaces · §7 ce qui reste ouvert. Invariant **I-17** si la
-  démonstration de P2 tient.
-- [x] **P7** — répercussions : notes correctives dans SPEC-004 (§10.2 et les signatures),
-  ADR-007 §7.3, renvoi depuis SPEC-005 §6.
-- [x] **P8** — index, invariants, angles morts, README si nécessaire.
-- [x] **P9** — rituel de fin (`REPRISE.md` §6) : journal S10, leçons, index, jeton libéré.
+- [ ] **P2** — inventaire mécanique : extraire les ≈110 points des 26 documents, les numéroter,
+  produire la table brute. *Thèse : sans inventaire exhaustif écrit, l'audit portera sur ce qu'on
+  se rappelle, c'est-à-dire sur les documents récents — précisément ceux qui en ont le moins besoin.*
+- [ ] **P3** — passe sur **ADR-001 à ADR-008** (socle).
+- [ ] **P4** — passe sur **ADR-009 à ADR-013** (réseau, hydraulique, ordonnanceur, prédiction).
+- [ ] **P5** — passe sur **ADR-014 à ADR-022** (phénomènes secondaires, construction, corrections).
+- [ ] **P6** — passe sur les **six SPEC** et le harnais.
+- [ ] **P7** — rédiger `docs/registres/AUDIT-POINTS-OUVERTS-S11.md` : le verdict par point,
+  la synthèse par catégorie, et **qui attend quoi**.
+- [ ] **P8** — appliquer : clôtures marquées et notes correctives dans les documents concernés.
+- [ ] **P9** — index, angles morts, `METHODE.md` (la passe d'audit devient une phase du protocole).
+- [ ] **P10** — rituel de fin (`REPRISE.md` §6) : journal S11, leçons, index, jeton libéré.
 
 ### Notes de reprise
 
 *(Vide au démarrage. Y déposer au fil de l'eau ce qui n'est pas encore dans un fichier.)*
 
-- **Contradiction trouvée avant même d'ouvrir le sujet, et elle est interne à S01** : ADR-013 §6
-  pose que le hors caméra est une **destruction** de domaine (« il n'existe pas de simulation
-  ralentie hors caméra »), tandis qu'ADR-007 §7.3 réclame un format de `CondensedState` « pour la
-  persistance hors caméra ». Les deux ADR sont de la même session. La revue croisée S05 a confronté
-  les vingt ADR et ne l'a pas vue ; la revue S08 a confronté les cinq SPEC et ne l'a pas vue non
-  plus. Hypothèse à vérifier en P2 : **un point inscrit dans une liste « ce qui reste ouvert »
-  échappe aux audits**, parce qu'un audit vérifie ce qui est affirmé et qu'un point reporté se lit
-  comme une lacune connue, pas comme une contradiction.
-
-#### P2 — l'analyse
-
-**La contradiction est confirmée, et elle est textuelle.** Dans ADR-007, les deux signatures sont
-introduites par le commentaire `// persistance hors caméra (ADR-001, architecture_globale §9)`.
-Dans ADR-013 §6, écrit la même session : « Cela supprime toute la question §9 “quelle méthode
-mathématique pour la simulation hors caméra” ». Le mécanisme a été dissous ; la signature écrite
-pour lui est restée, et ADR-007 §5.3 a même inscrit « format exact de `CondensedState` → ADR à
-écrire » — une tâche créée pour servir un besoin qui n'existait déjà plus.
-
-C'est **L35 une seconde fois**, une session après avoir été écrite : une décision se propage vers
-la prose qui l'explique, pas vers les signatures qui n'ont l'air de rien affirmer.
-
-**Démonstration couche par couche.** Ce qui doit survivre à la destruction d'un domaine :
-
-| Couche | Ce qu'il faut conserver | Pourquoi |
-|---|---|---|
-| B | **rien** | I-02 — le fond ne stocke rien, il est recalculé |
-| W | le journal d'événements, 45 o pièce | ADR-003 §3 — `advance(t)` est fonction pure du journal |
-| δ perturbatif | **rien** | naît à δ = 0 (ADR-013 §3) · I-12 destruction gratuite · I-04 aucune autorité |
-| δ substitutif tenant la masse d'un nœud V | l'entier `i64`, rendu au nœud | ADR-010 §6 — le transfert δ→V est déjà spécifié |
-| δ substitutif établissant un train de vagues | **rien à capturer** — l'état vient d'une donnée cuite | ADR-013 §4, SPEC-005 §6 |
-| `F`, `A` | **rien** | ADR-014 §2.3 — ce qui sort de la cascade est perdu ; l'écume permanente est re-dérivée de W |
-| V | `volume_ml` des nœuds modifiés | ADR-010 §7 |
-
-**Quatre confirmations indépendantes** que rien de δ ne mérite d'être conservé :
-
-1. **I-04** — δ n'a aucune autorité gameplay. Le perdre ne coûte rien qui compte.
-2. **ADR-021 §3.2**, argument de fermeture — δ ne contient, par construction, que ce qui est plus
-   court que `λ_cut` : du court, du local et du bref.
-3. **I-12** — créer et détruire un domaine est visuellement gratuit. C'est la propriété que toute
-   l'architecture défend ; un état à sérialiser la contredirait.
-4. **SPEC-003 §8**, et c'est la plus convaincante parce qu'elle vient d'un document écrit pour
-   autre chose : le harnais rejoue **une session de jeu entière** à partir de
-   `(T_sim, descripteurs, journal d'événements)`. Si une session se rejoue sans état δ, l'état δ
-   ne fait pas partie de l'état du monde. Le rejeu est une preuve, pas une analogie.
-
-**Contre-épreuve — le cas qui ne passe pas, et il est réel.** Un domaine **substitutif** n'est pas
-gratuit à recréer : 40 s d'établissement, ou 4,4 à 8 s depuis une condition 2D (SPEC-005 §6 corrigé
-en S08). Or ADR-012 §4 **rang 5** détruit les domaines non focaux, et §5 engage toute décision de
-dégradation pour « au moins 30 frames », soit **1 s à 30 Hz**.
-
-```
-fenêtre d'engagement de la dégradation :   1 s
-coût de restauration d'un domaine substitutif : 4,4 à 8 s (depuis une graine)
-                                                40 s     (depuis rien)
-```
-
-Un déferlement non focal peut donc être détruit puis redemandé quatre à huit fois plus vite qu'il ne
-se rétablit. **Rang 5 ne s'applique pas aux domaines substitutifs**, ou leur hystérésis se
-dimensionne sur le temps de restauration et non sur 30 frames. C'est un écart nouveau, chiffré, et
-la règle qu'il produit se généralise : *une dégradation dont la fenêtre d'engagement est plus courte
-que le coût de restauration de ce qu'elle détruit est un générateur de pompage.*
-
-**Deux points que le corpus implique sans les dire.**
-
-- **V est la seule couche que le serveur exécute.** I-10 lui interdit nommément W et δ, pas V. Et V
-  porte du gameplay (une coursive qui s'inonde), est en arithmétique entière et déterministe à
-  10 Hz — c'est-à-dire exactement ce qu'il faut pour être autoritaire au sens d'I-15. La forme de la
-  couche V n'était pas un choix de commodité.
-- **La sauvegarde force un règlement δ→V.** Si un nœud est gelé et sa masse remise à un domaine
-  (ADR-010 §6) au moment où le joueur sauvegarde, il n'y a rien à écrire tant que le transfert
-  inverse n'a pas eu lieu. Sauvegarder **provoque** le règlement, l'écart `M' − M` est journalisé
-  comme d'habitude, et ce qui est écrit est un entier.
-
-**Ce que `condense`/`restore` deviennent** : `condense` est l'opération par laquelle **l'outil de
-cuisson** capture ce qu'il vient de simuler pour en faire une graine (SPEC-005 §7.1) ; `restore` est
-l'opération par laquelle **l'exécution** amorce un domaine substitutif depuis cette graine. Les deux
-moitiés d'un même mécanisme, écrites à deux sessions d'intervalle sous deux noms — `CondensedState`
-en S04, `CoastalState` en S06. La configuration L22, confirmée.
-
-#### P4 — deux rapprochements non prévus
-
-- La contrainte que SPEC-004 §10.2 posait sur `CondensedState` (« se relire sur une machine
-  différente, donc pas de disposition mémoire brute ») est celle d'un **actif cuit**, et n'a aucun
-  sens pour une condensation en mémoire. Le document disait déjà ce qu'il était, dès S04.
-- La graine referme **E07** : produite par δ qui n'est jamais D1, elle n'a pas à être reproductible
-  puisqu'elle est identifiée par l'empreinte de son contenu. Les deux résolutions — S08 et S10 — se
-  rejoignent sans avoir été conçues ensemble.
-- Contraste noté avec ADR-013 §3 : la graine est **le seul endroit du système où un seuil de
-  tolérance physique existe**, parce que c'est le seul précalcul qui contienne de la physique.
-
-#### P5 — deux résultats non prévus
-
-- **Le fichier de sauvegarde et la charge utile d'une arrivée en cours de partie sont le même
-  objet.** Conséquence d'ADR-003 : quand l'état du monde se réduit à un temps et à un journal, le
-  destinataire n'y change rien. Un seul format, et le harnais (SPEC-003 §8) le teste déjà sans
-  qu'aucun test de sauvegarde ne soit écrit.
-- **Le TTL d'ADR-010 §7 est la borne supérieure de la persistance de l'eau**, pas un nettoyage
-  cosmétique. Sans lui, chaque flaque jamais revisitée d'un monde persistant resterait dans l'état
-  du monde. À dire dans toute discussion qui proposerait de l'allonger.
-- Chiffres : événements vivants ≤ ≈180 Ko (borné par paquets_W_max) ; 100 000 nœuds V modifiés à
-  20 o = 2 Mo. Une sauvegarde d'eau est petite, et il faut le dire avant que quelqu'un ne conçoive
-  un découpage dont personne n'a besoin.
-
-#### P6 — écart trouvé sur un invariant
-
-I-03 dit « B et W répliqué sont déterministes » ; SPEC-003 §2 place **V** dans le régime D1 depuis
-S03. Les deux ne disent pas la même chose, et c'est SPEC-003 qui a raison — sans déterminisme
-inter-plateforme de V, un serveur et un client divergeraient sur le volume d'un compartiment,
-c'est-à-dire sur une issue de jeu. **I-03 amendé** par cet ADR.
-
-Gravité 3 en conséquences, mais il portait sur un invariant — le document qu'on cite pour refuser
-une proposition. Un invariant incomplet finit par autoriser ce qu'il devait interdire.
-
-Et un bénéfice secondaire (L06) : I-17 rend possible un cas de non-régression **binaire** sur
-l'aller-retour de persistance (C19), exécutable en mode check. Avec un état δ dans la sauvegarde,
-l'assertion aurait dû être statistique.
-
-#### P8 — décomptes périmés, encore
-
-README et REPRISE annonçaient « 16 règles non négociables » et « 21 décisions ». Corrigés. C'est le
-même défaut que S07 avait trouvé sur le README, et il revient parce qu'un décompte recopié se
-périme en silence. À vérifier systématiquement dans le rituel de fin, pas au hasard d'un grep.
+- **Volume mesuré avant de commencer** : ≈110 points répartis sur 26 documents. Aucun dans
+  SPEC-001, SPEC-002, `CAS-CANONIQUES`, `PLAN-BENCHMARK` ni les registres — ce sont des documents
+  de référence et d'audit, ils n'ont pas de dette de ce type. Les plus chargés sont SPEC-006 (8),
+  SPEC-004 (6), puis SPEC-005, ADR-014, ADR-015, ADR-017 et ADR-022 (5 chacun).
+- **Attente sur la répartition des verdicts** : la valeur de l'exercice est dans les catégories
+  (a) et (b). Si tout revient « encore valide », l'audit aura quand même produit une chose utile —
+  la liste de qui attend quoi, qui n'existe nulle part.

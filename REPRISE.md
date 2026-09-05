@@ -12,12 +12,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-05
+Session en cours : S11 — 2026-09-05 — audit des points ouverts
 Dernière session : S10 — 2026-09-05 — la persistance de l'eau (ADR-022)
-Session suivante : S11 — auditer les listes « ce qui reste ouvert » de tous les documents : un
-                   point reporté échappe aux audits, et l'un d'eux cachait la dissolution de son
-                   propre objet depuis neuf sessions (L40)
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
