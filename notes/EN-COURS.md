@@ -74,7 +74,7 @@ Objectif         : `CondensedState`, la persistance hors caméra, et sa confront
   *Thèse (L03) : la question « quel format pour `CondensedState` » est probablement **mal posée**.
   ADR-013 §6 a dissous la simulation hors caméra — le repli **est** la destruction du domaine. Si
   c'est vrai, il n'y a rien à condenser, et le format cherché n'a pas d'objet.*
-- [ ] **P3** — `ADR-022` §1–2 : la décision, et la démonstration couche par couche.
+- [x] **P3** — `ADR-022` §1–2 : la décision, et la démonstration couche par couche.
   *Forme : un ADR, pas une note. ADR-007 §7.3 appelle explicitement « un ADR à écrire », et une
   décision qui en change une autre ne se corrige pas, elle se remplace.*
 - [ ] **P4** — `ADR-022` §3 : `SeedState` — ce que `condense`/`restore` échangent réellement, et
