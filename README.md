@@ -38,7 +38,13 @@ notes/
   `registres/`.
 - Chaque session ajoute une entrée à `notes/JOURNAL.md` avant de se clore, et exécute le rituel de
   fin décrit dans [`REPRISE.md`](REPRISE.md) §6.
-- **Une seule session travaille à la fois** : le jeton en tête de `REPRISE.md` en tient le compte.
+- **Une seule session travaille à la fois** : le jeton en tête de `REPRISE.md` en tient le compte,
+  avec trois états — `libre`, `occupé`, `interrompu`.
+- **Le plan se déclare avant le travail**, dans [`notes/EN-COURS.md`](notes/EN-COURS.md), et se
+  commit seul. Une étape par commit, message `S<n> P<k> — …`. Une session coupée par une limite
+  d'usage n'a aucune occasion d'écrire qu'elle s'arrête : seule une déclaration antérieure survit.
+- **Reprendre après une interruption** : la procédure est en tête de `notes/EN-COURS.md`. Cinq
+  minutes, sans relire le dépôt.
 
 ## Où en est le projet
 

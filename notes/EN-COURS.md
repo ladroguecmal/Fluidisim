@@ -41,8 +41,10 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
   l'écriture anticipée : sans elle, une interruption ne laisse aucune trace d'intention.
 - **Aucune étape ne dépasse une quinzaine de minutes de travail.** Si elle est plus grosse, la
   découper. C'est la seule prophylaxie réelle contre une coupure — pas un confort d'organisation.
-- Marquer `[>]` **avant** de commencer une étape, `[x]` **seulement après** son commit. Un `[x]`
-  sans commit est un mensonge que la session suivante paiera.
+- Marquer `[>]` **avant** de commencer une étape. Basculer `[x]` **en dernière action avant le
+  commit de cette étape**, jamais après : le commit doit contenir à la fois le travail et la case
+  cochée, sinon l'historique ment dans un sens ou dans l'autre. Un `[x]` sans commit est un
+  mensonge que la session suivante paiera ; un commit sans `[x]` fera refaire du travail déjà fait.
 - **Un commit par étape**, message `S<n> P<k> — <description>`. Le plan et le journal git disent
   alors la même chose de deux façons indépendantes ; si l'un est faux, l'autre le révèle.
 - Déposer dans **Notes de reprise** tout ce qui n'est pas encore dans un fichier : un chiffre
@@ -67,10 +69,10 @@ Objectif         : dispositif de reprise propre après interruption par limite d
 
 - [x] **P1** — `notes/EN-COURS.md` : journal d'intention + procédure de reprise à chaud.
   *Thèse : ce qui est déclaré avant survit à une coupure ; ce qui est écrit après ne survit pas.*
-- [>] **P2** — `REPRISE.md` : jeton à trois états avec battement, §6 amendé, §7 reprise à chaud,
+- [x] **P2** — `REPRISE.md` : jeton à trois états avec battement, §6 amendé, §7 reprise à chaud,
   §8 mis à jour (le dépôt est désormais sous git).
   *Thèse : le jeton doit distinguer « occupé » de « interrompu », sinon personne n'ose reprendre.*
-- [ ] **P3** — `README.md` : mention du protocole dans les règles de tenue.
+- [>] **P3** — `README.md` : mention du protocole dans les règles de tenue.
 - [ ] **P4** — `notes/LECONS.md` : leçons généralisables de cette session.
 - [ ] **P5** — rituel de fin : entrée de journal S07, index, jeton repassé à `libre`, ce fichier
   repassé à `terminée`.
@@ -89,3 +91,8 @@ Objectif         : dispositif de reprise propre après interruption par limite d
   peut pas cocher sa propre case avant qu'il existe. P1 a donc été committée avec `[>]` et corrigée
   dans le commit de P2. Sans conséquence, mais à savoir : la toute première étape d'un protocole
   d'écriture anticipée ne peut jamais être protégée par ce protocole.
+- **Second cas limite, même origine** : P1 et P2 ont été committées avec leur case encore `[>]`,
+  parce que la case avait été basculée *avant* le travail au lieu d'*après*. Corrigé dans le commit
+  de P3, et la règle correspondante a été précisée. L'exécution du protocole sur lui-même a donc
+  trouvé deux défauts en deux étapes — argument suffisant pour ne jamais publier un protocole sans
+  l'avoir exécuté au moins une fois.
