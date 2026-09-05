@@ -76,7 +76,7 @@ Objectif         : recroiser les cinq SPEC entre elles (S05 n'avait confronté q
   déclarent nécessaire doit être atteignable par une signature existante.
   *Thèse (L20) : une exigence qui n'a pas d'argument dans une signature n'est pas implémentable,
   et cela ne se voit qu'en confrontant les deux documents.*
-- [ ] **P4** — croisement SPEC-003 × SPEC-004/005 : le harnais peut-il instrumenter ce que les
+- [x] **P4** — croisement SPEC-003 × SPEC-004/005 : le harnais peut-il instrumenter ce que les
   interfaces exposent, et la cuisson réutilise-t-elle réellement le cœur qu'elle prétend réutiliser.
   *Thèse : un harnais qui exige une observation que l'interface ne permet pas de nommer est un
   harnais non écrivable (L19 pris à l'envers).*
@@ -158,3 +158,70 @@ aurait dû fournir le mécanisme ne l'a pas. Écarts qui en découlent :
 les ordres de grandeur ne se contredisent pas. `steepness` ↔ SPEC-001 §3 (`H/λ ≈ 1/7`) et
 SPEC-002 §1 : le déclencheur d'écume est bien atteignable sans simulation. `aeration` ↔
 SPEC-002 §2 (`ρ_eff = (1−α)·ρ`) : la portance réduite est calculable par l'appelant.
+
+#### P4 — croisement SPEC-003 × SPEC-004/005
+
+- **E07, gravité 1** — SPEC-005 §7.2 exige qu'une cuisson soit « reproductible **bit à bit** :
+  mêmes entrées et même version d'outil doivent donner le même octet », et justifie l'exigence par
+  le fait que « le serveur et les clients peuvent charger des données divergentes ». Or la
+  bibliothèque côtière est produite en faisant tourner **δ** (SPEC-005 §7.1, ADR-020 §5), et
+  SPEC-003 §2 pose qu'« un solveur δ ne sera jamais D1 » — au mieux D2, c'est-à-dire *même binaire,
+  même machine, même graine*. Deux artistes sur deux machines ne peuvent donc pas produire le même
+  octet, et l'exigence est inatteignable par construction, pas par négligence d'implémentation.
+
+  **Résolution (L24 — chercher l'hypothèse commune, pas départager).** L'hypothèse commune est que
+  la cuisson devrait être *reproductible*. Elle n'a pas à l'être : elle doit être **autoritaire**.
+  Un producteur désigné cuit, l'artefact est versionné par son empreinte, et le `bake_manifest` de
+  §7.3 porte déjà exactement ce qu'il faut pour cela. Les postes d'artistes cuisent en local pour
+  l'itération, jamais pour la livraison. Cette branche est la seule compatible avec SPEC-003 §2,
+  elle supprime une exigence au lieu d'ajouter un mécanisme, et elle ne coûte rien.
+  Ce qui reste exigible, et qui l'était déjà : le **déterminisme D2** de l'outil de cuisson, sans
+  lequel une cuisson ne serait pas déboguable.
+
+- **E08, gravité 2** — SPEC-004 §6.2 fonde un **facteur d'économie 64** sur l'échantillonnage du
+  champ de fond « une cellule sur quatre par axe », au motif que le fond est lisse à l'échelle de
+  `dx` (ses longueurs d'onde valent au moins `λ_cut`). Le rapport `λ_cut/dx` décide, et il varie
+  d'un facteur 2,5 entre les régimes déjà écrits :
+
+  | Régime | `dx` | `λ_cut/dx` | échantillons par `λ_cut` après décimation ×4 |
+  |---|---|---|---|
+  | Scénario nominal, SPEC-003 §3 | 0,10 m | 40 | 10 — confortable |
+  | Zone de déferlement, SPEC-001 §2.4 | 0,25 m | 16 | **4 — deux fois Nyquist** |
+
+  (`λ_cut = 4 m`, valeur de départ d'ADR-005 §57.) À quatre points par longueur d'onde,
+  l'interpolation trilinéaire perd une fraction notable de l'amplitude du terme source `S`, et le
+  symptôme est précisément celui que SPEC-004 §6.1 décrit comme indiagnostiquable : le domaine
+  dérive par rapport au fond. L'économie s'effondre donc dans le type de domaine le plus gros —
+  384 k cellules, celui-là même qu'elle devait rendre abordable.
+  **Le taux de décimation n'est pas une constante** : c'est `dx ≤ λ_cut/N` avec `N` à fixer au
+  banc B4, comme SPEC-004 §10.3 le pressentait sans donner la forme de la contrainte.
+
+- **E09, gravité 3** — SPEC-005 §11.5 chiffre la cuisson à ≈9 h pour 50 plages en comptant
+  « 16 états × 40 s », c'est-à-dire du temps **simulé**, tandis que §7.1 affirme que l'outil tourne
+  « plus vite que le temps réel ». Une zone de déferlement de 384 k cellules à `dx = 0,25` tourne
+  plus probablement plus **lentement** que le temps réel sur un fil. Les deux phrases ne peuvent pas
+  être vraies ensemble : 9 h est un **plancher**, à présenter comme tel.
+
+- **E10, gravité 2** — SPEC-005 §7.3 place la passe d'obsolescence « dans le harnais de SPEC-003,
+  **mode `check`** ». SPEC-003 §4 définit `check` comme le seul mode dont la vitesse est un objectif
+  de conception : « ni GPU ni rendu ni **assets lourds** », moins de 60 s pour tout le lot, à chaque
+  commit. Recalculer le sha256 des entrées d'une cuisson, c'est lire la bathymétrie et les
+  maillages — les assets lourds nommément exclus.
+  **Résolution** : la vérification compare les empreintes **déjà inscrites** dans le `bake_manifest`
+  à celles inscrites dans le scénario ou l'index d'assets — SPEC-003 §3 référence déjà ses données
+  « par empreinte de contenu, jamais par chemin », le canal existe. Le **recalcul** effectif des
+  empreintes depuis les fichiers appartient à la cadence nocturne (SPEC-003 §7).
+
+**Contrôles passés — huit, sans écart.** `t_sim_debut` explicite (SPEC-003 §3) ↔ `begin_tick(SimTime)`
+poussé et absence d'horloge dans `HostServices` (SPEC-004 §3, §8) ↔ ADR-003 : le harnais peut
+piloter le temps, et le système ne peut pas le lire ailleurs. · `allocations = 0` (§6) ↔ `seal()`
+(§8.1) : métrique mécaniquement garantie, pas surveillée. · `gpu_p50/p99` par horodatage GPU (§6,
+piège 2) ↔ `begin_timer`/`poll_timer` (§8.4) : le canal existe et le timer CPU n'est pas exposé. ·
+Protocole iso-qualité (§5.2) ↔ « `step` avance exactement `dt_target` » (§4.1) : la condition de
+comparabilité est portée par la signature, pas par une consigne. · Batterie `starve` (§9.1) ↔
+`StepResult.Degrade` et `work_remaining` (§4) : la dégradation est observable. · Rejeu (§8, journal
+à 40 o pièce) ↔ `WaveEvent` 40 o (ADR-009 §2) ↔ `push_events` (§3) : cohérent au champ près. ·
+Régime D2 (§2) ↔ `parallel_reduce_ordered` (§8.2) : la seule primitive d'accumulation flottante. ·
+`latence_echantillon` « âge de la donnée au moment de son usage » (§6, piège 6) ↔ `sample_batch`
+qui renvoie l'âge en µs et `poll_readback` qui renvoie toujours l'âge (§4, §8.4) : la métrique est
+imposée par les signatures.
