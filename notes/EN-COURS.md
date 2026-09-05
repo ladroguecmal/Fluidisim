@@ -79,7 +79,7 @@ avait dissous celui d'ADR-007 §5.3 sans que personne ne le voie pendant neuf se
   se rappelle, c'est-à-dire sur les documents récents — précisément ceux qui en ont le moins besoin.*
 - [x] **P3** — passe sur **ADR-001 à ADR-008** (socle).
 - [x] **P4** — passe sur **ADR-009 à ADR-013** (réseau, hydraulique, ordonnanceur, prédiction).
-- [ ] **P5** — passe sur **ADR-014 à ADR-022** (phénomènes secondaires, construction, corrections).
+- [x] **P5** — passe sur **ADR-014 à ADR-022** (phénomènes secondaires, construction, corrections).
 - [ ] **P6** — passe sur les **six SPEC** et le harnais.
 - [ ] **P7** — rédiger `docs/registres/AUDIT-POINTS-OUVERTS-S11.md` : le verdict par point,
   la synthèse par catégorie, et **qui attend quoi**.
@@ -128,3 +128,13 @@ bibliothèque côtière — répondu par SPEC-005 §6 en S06, cinq sessions).
 Et une **cinquième dépendance inter-équipes découverte** : l'équipe gameplay spatial, citée deux
 fois pour `to_vacuum` (ADR-010 §8.3, ADR-015 §7.2) et absente de la liste des quatre interfaces de
 00_INDEX.md.
+
+#### P5 — 21 E, 7 D, 5 C, 4 B, 1 F
+
+**Troisième instance de la même classe de défaut** : ADR-017 §7.2 réclame encore « une subdivision
+dédiée » alors qu'ADR-006 §2 porte le mécanisme depuis S05 (écart R07) et que SPEC-006 §5.3 le
+réutilise explicitement. Après ADR-007 §5.3 et ADR-006 §7.3. Une correction se propage vers le
+document corrigé, jamais vers les points ouverts qui réclamaient la correction.
+
+Symptôme à retenir, ADR-022 §7.4 : *« comme partout, dépend du langage »*. Quand un point ouvert se
+justifie par le fait que d'autres documents le posent aussi, il ne devrait pas exister.

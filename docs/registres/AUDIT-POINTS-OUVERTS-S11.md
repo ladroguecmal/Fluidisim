@@ -334,3 +334,147 @@ d'un banc qui n'a pas tourné.
 
 **Action** : clore, renvoyer à SPEC-005 §6 et ADR-022 §3. Ce qui dépend réellement de B4 est le
 *seuil de tolérance sur les paramètres d'une graine* — et ce point-là existe déjà, ADR-022 §7.1.
+
+---
+
+## Phénomènes secondaires, construction, corrections — ADR-014 à ADR-022 (38 points)
+
+| Point | Verdict | Constat |
+|---|---|---|
+| ADR-014 §1 | **D** | cascades de `F` → B9 — SPEC-006 §9.1 reprend le point en le citant |
+| ADR-014 §2, §3, §4 | **E** ×3 | demi-vies par type d'eau · seuil goutte → événement W · représentation de `A` |
+| ADR-014 §5 | **B** | couplage `A` ↔ audio — traité par ADR-016 §4.3, spécifié par SPEC-006 §4.3 |
+| ADR-015 §1 | **E** | cavité d'entrée → B10 |
+| ADR-015 §2 | **E** | `to_vacuum` — **porteur** du doublon signalé en §3.5 |
+| ADR-015 §3, §4, §5 | **E** ×3 | coalescence des poches · air respirable · vapeur |
+| ADR-016 §1 | **C** | « validation avec l'équipe audio » — il y a désormais quelque chose à soumettre, voir §4.1 |
+| ADR-016 §2 | **B** | format de la polyligne de déferlement — **fermé par SPEC-006 §6** |
+| ADR-016 §3 | **D** | lit de pluie — doublon avec SPEC-006 §9.7 |
+| ADR-016 §4 | **B** | occlusion par aération — **tranché par SPEC-006 §4.3**, voir §4.2 |
+| ADR-017 §1 | **C** | arbitrage glace — un chiffre a changé son coût, voir §4.3 |
+| ADR-017 §2 | **C** | granularité de la plaque — **troisième subdivision inventée**, voir §4.4 |
+| ADR-017 §3, §4, §5 | **E** ×3 | neige sur glace · rendu de la glace · interaction glace ↔ navires |
+| ADR-018 §1 | **C** | « validation avec l'équipe IA » — même cas qu'ADR-016 §1, voir §4.1 |
+| ADR-018 §2 | **B** | granularité sous-cellule — **traité par SPEC-006 §5.3** |
+| ADR-018 §3, §4 | **D** ×2 | seuils par archétype · visibilité sous-marine — doublons avec SPEC-006 §9.6 et §9.5 |
+| ADR-019 §1 à §4 | **E** ×4 | diffusion, exposition, réfraction, sous-marins profonds — le document le plus propre du corpus |
+| ADR-020 §1 | **E** | langage et cible du cœur |
+| ADR-020 §2 | **D** | `IGpuBackend` — doublon avec SPEC-004 §10.4, **et « des sept » est périmé**, voir §4.5 |
+| ADR-020 §3 | **D** | rendu de référence du harnais — doublon avec SPEC-003 §11.2 |
+| ADR-021 §1, §2 | **E** ×2 | seuil de pertinence `W_rep` → B8 · `K` et `E_cause` (**porteur**, §3.1) |
+| ADR-021 §3 | **C** | recevabilité de `λ_cut` — le critère a désormais deux fondements, voir §4.6 |
+| ADR-022 §1, §2, §3 | **E** ×3 | tolérance de graine → B4 · durée de vie d'un nœud V (**humain**) · granularité de partition |
+| ADR-022 §4 | **D** | représentation binaire — **triplée**, voir §4.7 |
+| ADR-022 §5 | **F** | se déclare lui-même « une observation à confirmer, pas une question » |
+
+**Bilan : 21 E, 7 D, 5 C, 4 B, 1 F.**
+
+### 4.1 ADR-016 §1 et ADR-018 §1 — « valider avec l'équipe » n'était pas faisable, il l'est *(C)*
+
+Les deux points disent la même chose : « Validation de l'ensemble avec l'équipe audio / de
+l'interface avec l'équipe IA — cet ADR est une proposition d'interface, pas une conception. »
+
+Écrits en S02, ils étaient **inexécutables** : S08 a établi (écart E04) que ces interfaces n'avaient
+aucune signature écrite, et qu'on ne pouvait donc rien soumettre. S09 a écrit SPEC-006. Le point
+change alors de nature — il ne demande plus une conception, il demande une **réunion**, et il peut
+enfin nommer ce qu'on y apporte.
+
+**Action** : note corrective dans les deux, renvoyant à SPEC-006 §3 (audio) et §5 (IA), et rappelant
+l'urgence de format sur `WaveEvent` — trois champs sur une structure répliquée, à arrêter avant que
+le réseau ne fige le format.
+
+### 4.2 ADR-016 §4 — tranché, avec son reliquat déplacé *(B)*
+
+« Coût de l'occlusion par aération : approximation par intégrale de `A` le long du segment
+auditeur-source, ou tabulation grossière ? »
+
+SPEC-006 §4.3 a tranché pour la **tabulation azimutale en 16 secteurs**, et pour un motif que le
+point ne pouvait pas connaître : l'intégrale par segment est un chemin *tiré*, dont le coût croît
+avec le nombre de sources — le défaut même qui a motivé l'existence du chemin poussé.
+
+Le reliquat — une ou deux bandes radiales — vit désormais dans SPEC-006 §9.2, correctement posé
+comme une mesure et non un arbitrage. C'est le bon comportement : **une question tranchée dont il
+reste un paramètre se déplace vers le document qui l'a tranchée**, elle ne reste pas dans celui qui
+l'a posée. **Action** : clore ADR-016 §8.4, renvoyer.
+
+### 4.3 ADR-017 §1 — l'arbitrage n'a pas changé, son coût si *(C)*
+
+« Le projet veut-il de la glace ? Cet ADR est écrit pour être prêt, pas pour imposer le besoin. »
+
+La question reste entière et humaine. Mais S08 (dérivation E03) a croisé SPEC-002 §4 (`Hs < 0,15 m`
+pour une formation en plaque) et SPEC-001 §4 (`Hs(U10, F)`) et en a tiré un **fetch maximal** :
+`F_max = g·(0,15/(0,0016·U10))²`, soit **3,4 km à 5 m/s de vent**, 0,86 km à 10 m/s.
+
+La glace en plaque est donc un phénomène de lac et de baie abritée, jamais de haute mer. La surface
+concernée est bornée par la géométrie des plans d'eau et non par la météo — **la réponse « oui »
+coûte nettement moins que ce que l'ADR laisse craindre**. Un arbitrage se rend sur un coût ; le coût
+a changé et l'ADR ne le dit pas.
+
+**Action** : note corrective portant le chiffre dans l'ADR lui-même. L'index le porte déjà depuis
+S08 ; l'ADR, non — et c'est l'ADR qu'on lira pour décider.
+
+### 4.4 ADR-017 §2 — la troisième subdivision inventée séparément *(C)*
+
+« Granularité de la plaque : la cellule `HydroGrid` (64 m) est trop grossière pour une rupture
+crédible. Prévoir une **subdivision dédiée**, probablement 2 à 4 m. »
+
+C'est la **troisième fois** que le corpus rencontre le même obstacle :
+
+| Document | Ce qu'il a fait |
+|---|---|
+| ADR-006 §2 | porte la subdivision, ajoutée en S05 (écart R07, angle mort A58) — le mécanisme officiel |
+| ADR-018 §7.2 | avait demandé une sous-cellule ; SPEC-006 §5.3 la lui fournit **en réutilisant celle d'ADR-006**, explicitement |
+| ADR-017 §7.2 | demande encore « une subdivision **dédiée** » |
+
+L'écart R07 de S05 avait pourtant énoncé la leçon L22 sur exactement ce motif — deux ADR inventant
+la même parade signalent un concept manquant — et fait ajouter le mécanisme à ADR-006. La
+correction s'est propagée vers ADR-006 ; **le point ouvert d'ADR-017, qui réclamait la parade, ne
+l'a jamais su.** Troisième instance de la même classe de défaut, après ADR-007 §5.3 et ADR-006 §7.3.
+
+**Action** : note corrective renvoyant à ADR-006 §2. La question résiduelle — 2 à 4 m est-il le bon
+pas pour une rupture de glace — reste ouverte, mais elle porte sur un **paramètre** de la
+subdivision existante, pas sur un mécanisme à créer.
+
+### 4.5 ADR-020 §2 — « la plus risquée des sept » *(D + formulation périmée)*
+
+SPEC-004 §8 a établi que l'horloge n'est pas une interface — `T_sim` est un paramètre poussé à
+`begin_tick` — et que « la surface d'hébergement compte donc **six** interfaces et un paramètre ».
+SPEC-004 §10.4 dit d'ailleurs « la plus risquée des six ». ADR-020 §7.2 dit encore « des sept ».
+
+Deux documents, deux décomptes, sur le même objet. Le fond ne change pas — `IGpuBackend` reste
+l'interface la plus risquée — mais c'est exactement la classe de défaut que le rituel de fin
+surveille depuis S10 : **un décompte recopié se périme en silence**.
+
+**Action** : SPEC-004 §10.4 porte la question ; note corrective de décompte dans ADR-020 §7.2.
+
+### 4.6 ADR-021 §3 — le critère de recevabilité de `λ_cut` a maintenant deux fondements *(C)*
+
+« Recevabilité de `λ_cut` au regard de l'argument de fermeture §3.2 — à intégrer au protocole B2. »
+
+L'argument de fermeture d'ADR-021 §3.2 dit qu'aucun phénomène de conséquence gameplay ne peut naître
+exclusivement dans δ, *tant que* `λ_cut` sépare effectivement les deux couches. SPEC-006 §5.6 s'appuie
+sur **le même argument** pour justifier que le signal de traversabilité ignore δ — et le dit :
+« ce canal serait à réexaminer en même temps qu'ADR-021 §3.2 ».
+
+Le protocole de B2 doit donc porter **deux** conséquences d'un relèvement de `λ_cut`, et non une :
+l'autorité des ondes répliquées, et la validité du signal de navigation. Un banc qui n'en vérifierait
+qu'une laisserait passer l'autre.
+
+**Action** : note corrective dans ADR-021 §7.3, et le critère à ajouter au protocole B2 en porte deux.
+
+### 4.7 La représentation binaire, posée trois fois *(D)*
+
+- SPEC-004 §10.1 : « Langage et représentation des formes […] dépendra du solveur choisi en B3. »
+- SPEC-006 §9.8 : « Représentation binaire d'échange — boutisme, alignement, langage — non traitée
+  ici **comme elle ne l'est pas dans SPEC-004**. »
+- ADR-022 §7.4 : « Représentation binaire — boutisme, alignement, versionnement du format.
+  **Comme partout**, dépend du langage, encore ouvert. »
+
+Les deux derniers savent qu'ils répètent quelque chose ; aucun ne désigne de porteur. C'est le cas
+le plus bénin de doublon — personne ne tranchera par accident une question que trois documents
+posent — mais c'est aussi le signe qu'il manque un endroit où cette question vit.
+
+**Action** : **SPEC-004 §10.1 porte la question** (c'est la spécification d'interfaces racine) ;
+SPEC-006 §9.8 et ADR-022 §7.4 deviennent des renvois d'une ligne. La formulation d'ADR-022 §7.4,
+« comme partout », est le symptôme à retenir : quand un point ouvert se justifie par le fait que
+d'autres le posent aussi, il ne devrait pas exister.
