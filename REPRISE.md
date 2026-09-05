@@ -12,11 +12,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-05
+Session en cours : S12 — 2026-09-05 — les quatre mécanismes restés à spécifier (ADR-023)
 Dernière session : S11 — 2026-09-05 — audit des points ouverts
-Session suivante : S12 — les quatre points « à spécifier » que S11 a fait remonter : terme d'impact
-                   de flottabilité, modèle du nageur, rochers turbulents, coalescence des poches T2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :

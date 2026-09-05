@@ -59,120 +59,49 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S11
-État             : terminée
+Session          : S12
+État             : en cours
 Battement        : 2026-09-05
-Objectif         : auditer les listes « ce qui reste ouvert » de tous les documents (L40)
+Objectif         : les quatre points « à spécifier » remontés par l'audit S11 §7.4
 ```
 
 ### Plan
 
-Trois questions par point, toujours les mêmes :
-**(a) a-t-il encore un objet ?** — une décision ultérieure l'a-t-elle dissous, comme ADR-013 §6
-avait dissous celui d'ADR-007 §5.3 sans que personne ne le voie pendant neuf sessions.
-**(b) sa formulation tient-elle encore ?** — chiffres périmés, renvois cassés, prémisse changée.
-**(c) qui attend, et quoi ?** — une mesure, une réunion, une décision humaine, du code.
+Quatre sujets courts et indépendants, sans dépendance à un banc. Forme retenue : **un ADR unique**,
+`ADR-023`, parce qu'ils ont une origine commune — l'audit — et qu'il faut dire lesquels partagent
+aussi une *cause*, ce qui n'est pas la même chose.
 
 - [ ] **P1** — déclarer le plan, prendre le jeton, mettre à jour le battement.
-- [x] **P2** — inventaire mécanique : extraire les ≈110 points des 26 documents, les numéroter,
-  produire la table brute. *Thèse : sans inventaire exhaustif écrit, l'audit portera sur ce qu'on
-  se rappelle, c'est-à-dire sur les documents récents — précisément ceux qui en ont le moins besoin.*
-- [x] **P3** — passe sur **ADR-001 à ADR-008** (socle).
-- [x] **P4** — passe sur **ADR-009 à ADR-013** (réseau, hydraulique, ordonnanceur, prédiction).
-- [x] **P5** — passe sur **ADR-014 à ADR-022** (phénomènes secondaires, construction, corrections).
-- [x] **P6** — passe sur les **six SPEC** et le harnais.
-- [x] **P7** — rédiger `docs/registres/AUDIT-POINTS-OUVERTS-S11.md` : le verdict par point,
-  la synthèse par catégorie, et **qui attend quoi**.
-- [x] **P8** — appliquer : clôtures marquées et notes correctives dans les documents concernés.
-- [x] **P9** — index, angles morts, `METHODE.md` (la passe d'audit devient une phase du protocole).
-- [x] **P10** — rituel de fin (`REPRISE.md` §6) : journal S11, leçons, index, jeton libéré.
+- [ ] **P2** — `ADR-023` §1–2 : la décision d'ensemble, puis le **terme d'impact** (*slamming*).
+  *Thèse : la grandeur à publier n'est pas la pression de pic mais l'**impulsion de masse ajoutée**.
+  La pression de pic est ce qu'on ne sait pas (elle diverge quand l'angle de carène tend vers 0) ;
+  l'impulsion est un bilan de quantité de mouvement, qui ne peut pas être faux.*
+- [ ] **P3** — `ADR-023` §3 : le **nageur en surface**.
+  *Thèse (L03) : il n'y a pas de modèle à écrire. Le mode contraint d'ADR-008 §3 existe déjà ; il
+  lui manque une seconde condition d'entrée. Le critère actuel est de stabilité numérique, et le
+  nageur le passe — c'est pour une autre raison qu'il en relève.*
+- [ ] **P4** — `ADR-023` §4 : les **sites turbulents permanents**.
+  *Thèse : ce ne sont pas de nouveaux objets. Un site turbulent est une polyligne de déferlement
+  dégénérée en un point, et il se dérive du critère `H/h = 0,78` déjà posé en SPEC-001 §3.*
+- [ ] **P5** — `ADR-023` §5 : la **coalescence des poches d'air T2**.
+  *Thèse : la règle tient en une addition, parce qu'ADR-015 §3 a eu la bonne idée de stocker
+  `n_moles` plutôt que seulement pression et volume.*
+- [ ] **P6** — `ADR-023` §6–7 : ce que chaque section ferme, ce qui reste ouvert ; puis les notes
+  de clôture dans ADR-008 §5.3, §5.4, ADR-013 §7.4 et ADR-015 §7.3.
+- [ ] **P7** — index, angles morts, cas canoniques, registre S11 (statut des quatre points).
+- [ ] **P8** — rituel de fin (`REPRISE.md` §6) : journal S12, leçons, index, jeton libéré.
 
 ### Notes de reprise
 
 *(Vide au démarrage. Y déposer au fil de l'eau ce qui n'est pas encore dans un fichier.)*
 
-- **Volume mesuré avant de commencer** : ≈110 points répartis sur 26 documents. Aucun dans
-  SPEC-001, SPEC-002, `CAS-CANONIQUES`, `PLAN-BENCHMARK` ni les registres — ce sont des documents
-  de référence et d'audit, ils n'ont pas de dette de ce type. Les plus chargés sont SPEC-006 (8),
-  SPEC-004 (6), puis SPEC-005, ADR-014, ADR-015, ADR-017 et ADR-022 (5 chacun).
-- **Attente sur la répartition des verdicts** : la valeur de l'exercice est dans les catégories
-  (a) et (b). Si tout revient « encore valide », l'audit aura quand même produit une chose utile —
-  la liste de qui attend quoi, qui n'existe nulle part.
-
-#### P2 — inventaire, et un ajustement de plan déclaré
-
-**110 points, 26 documents.** Registre créé avec la méthode et les six verdicts (A dissous,
-B clos ailleurs, C formulation périmée, D dupliqué, E valide, F pas une question).
-
-*Ajustement du plan, déclaré avant le travail* : les passes P3 à P6 écrivent leurs verdicts
-**directement dans le registre**, section par section, plutôt que dans ces notes puis dans le
-registre. P7 devient la synthèse et le tableau « qui attend quoi ». Motif : recopier 110 verdicts
-d'un fichier à l'autre est exactement le geste qui périme les décomptes (leçon apprise deux fois,
-S07 et S10).
-
-#### P3 — socle : 22 E, 4 C, 2 D, 1 A
-
-Trouvaille la plus lourde : **le critère d'I-16 n'est pas opérationnel tel qu'il est écrit.**
-ADR-006 §7.3 demande « un nombre maximal de blocs par profil », ce que R04 a interdit — mais le
-profil d'ADR-012 §3 déclare encore `paquets_W_max` et `v_noeuds_actifs`, qui sont des tailles de
-pool, donc ressources ET capacités à la fois. Le critère qui marche : *une valeur peut figurer dans
-un profil si elle est allouée directement ; pas si elle doit être cohérente avec deux autres valeurs
-déjà déclarées.* C'est ce qui condamnait `domaines_max`, contradictoire avec la mémoire ET le temps.
-
-#### P4 — 10 E, 4 C, 3 D, 2 B
-
-Deux points **répondus depuis longtemps** et jamais marqués : ADR-009 §2 (anticipation locale —
-prémisse morte en S05, mécanisme spécifié en S09) et ADR-013 §3 (format et volume de la
-bibliothèque côtière — répondu par SPEC-005 §6 en S06, cinq sessions).
-
-Et une **cinquième dépendance inter-équipes découverte** : l'équipe gameplay spatial, citée deux
-fois pour `to_vacuum` (ADR-010 §8.3, ADR-015 §7.2) et absente de la liste des quatre interfaces de
-00_INDEX.md.
-
-#### P5 — 21 E, 7 D, 5 C, 4 B, 1 F
-
-**Troisième instance de la même classe de défaut** : ADR-017 §7.2 réclame encore « une subdivision
-dédiée » alors qu'ADR-006 §2 porte le mécanisme depuis S05 (écart R07) et que SPEC-006 §5.3 le
-réutilise explicitement. Après ADR-007 §5.3 et ADR-006 §7.3. Une correction se propage vers le
-document corrigé, jamais vers les points ouverts qui réclamaient la correction.
-
-Symptôme à retenir, ADR-022 §7.4 : *« comme partout, dépend du langage »*. Quand un point ouvert se
-justifie par le fait que d'autres documents le posent aussi, il ne devrait pas exister.
-
-#### P6 — 16 E, 2 A, 2 C, 1 B, 1 D, 1 F. Total : 110 points, comptés.
-
-**Quatrième instance**, et c'est la plus instructive : SPEC-004 §10.3 propose encore « un point sur
-quatre » alors que la note corrective de S08 (écart E08) est dans **le même document**, quatre
-sections plus haut. Le défaut n'est donc pas une affaire de distance entre documents.
-
-**Délai le plus court observé** : SPEC-004 §10.5 était clos par SPEC-006 §2.5 au moment même où S09
-l'écrivait. Le défaut se produit à l'instant où la réponse est écrite ailleurs, pas avec le temps.
-
-*Correction apportée à ma propre section P3* : l'en-tête annonçait 31 points pour 30, et le bilan
-omettait le verdict B d'ADR-003 §3. Corrigé. Un décompte recopié se périme même dans le document
-qui le produit.
-
-#### P7 — synthèse : trois résultats qui débordent l'audit
-
-1. **Onze destinataires extérieurs**, là où l'index en listait quatre. Les sept nouveaux sont plus
-   légers (une table de valeurs, un cadrage) mais ils ne se rattrapent pas tard non plus.
-2. **B2 débloque quatre points ouverts**, plus que tout autre banc — confirmation indépendante du
-   chemin critique, établi jusqu'ici sur les dépendances et non sur un décompte.
-3. **Quatre points disent « à spécifier » et aucune session ne l'a jamais pris en charge** :
-   terme de slamming, modèle du nageur, rochers turbulents, coalescence des poches T2. Quatre
-   sujets courts et indépendants — c'est un objectif de session, et probablement S12.
-
-Et un cinquième arbitrage humain remonté au même rang que les trois connus : **qui possède le
-harnais** (SPEC-003 §11.4), rangé jusqu'ici parmi des questions de format de fichier alors que
-SPEC-003 §1 dit que la qualité de toutes les décisions à venir est plafonnée par la sienne.
-
-#### P8 — 34 marques appliquées, aucun échec
-
-8 clôtures (B), 15 notes correctives (C), 10 renvois de doublons avec porteur désigné (D),
-1 requalification (F). Les scripts rapportent les non-appliquées ; il n'y en a eu aucune.
-
-#### P10 — la nouvelle vérification a servi tout de suite
-
-Le contrôle des décomptes ajouté au rituel en S10 a attrapé `CLAUDE.md`, qui annonçait encore
-« trois arbitrages de design et quatre interfaces ». C'est le fichier d'amorce : une session neuve
-l'aurait lu en premier et aurait rappelé une liste fausse à l'utilisateur.
+- **Cause commune cherchée avant d'écrire, trouvée pour deux des quatre.** Le terme d'impact et le
+  nageur sont les **deux frontières du domaine de validité d'ADR-008** : l'une dans le temps —
+  l'impact est plus bref que le tick — l'autre dans la nature du corps — un nageur n'est pas passif.
+  Les deux autres n'ont pas de cause commune avec eux, et il vaut mieux le dire que de forcer une
+  unification qui n'existe pas.
+- **Vérification faite avant de rédiger** : un nageur passe le critère de stabilité d'ADR-008 §3.
+  `A_flottaison ≈ 0,25 m²`, `k = ρgA ≈ 2 450 N/m`, `m + m_a ≈ 145 kg` → `ω ≈ 4,1 rad/s`,
+  `ω·dt ≈ 0,14` à 30 Hz, soit « intégration normale ». Le mode contraint ne se déclenche donc pas
+  pour lui aujourd'hui, alors que c'est le mode qu'il lui faut. Le critère est bon, il est
+  simplement le seul.
