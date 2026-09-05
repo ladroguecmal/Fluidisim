@@ -138,6 +138,10 @@ Une session coupée par une limite d'usage n'a aucune occasion d'écrire qu'elle
 dispositif ne repose donc **pas** sur une action au moment de l'arrêt, mais sur une déclaration
 faite avant le travail.
 
+Une session qui ouvre ce dossier est dirigée ici automatiquement par [`CLAUDE.md`](CLAUDE.md) : le
+dispositif ne dépend ni de la mémoire d'un compte, ni de ce que l'utilisateur pense à écrire dans
+son premier message.
+
 → **La procédure de reprise à chaud est dans [`notes/EN-COURS.md`](notes/EN-COURS.md)**, en tête du
 fichier, avec l'état et le plan de la session interrompue.
 

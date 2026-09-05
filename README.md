@@ -12,6 +12,7 @@ existe pour que le travail survive au changement de conversation, de session et 
 ## Organisation
 
 ```
+CLAUDE.md              amorce : dirige toute session vers REPRISE.md
 REPRISE.md             passation : rôle, état, rituel de fin de session, jeton
 docs/
   00_INDEX.md          point d'entrée, état d'avancement, arbitrages en attente
