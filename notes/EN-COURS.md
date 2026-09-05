@@ -65,9 +65,9 @@ Objectif         : dispositif de reprise propre après interruption par limite d
 
 ### Plan
 
-- [>] **P1** — `notes/EN-COURS.md` : journal d'intention + procédure de reprise à chaud.
+- [x] **P1** — `notes/EN-COURS.md` : journal d'intention + procédure de reprise à chaud.
   *Thèse : ce qui est déclaré avant survit à une coupure ; ce qui est écrit après ne survit pas.*
-- [ ] **P2** — `REPRISE.md` : jeton à trois états avec battement, §6 amendé, §7 reprise à chaud,
+- [>] **P2** — `REPRISE.md` : jeton à trois états avec battement, §6 amendé, §7 reprise à chaud,
   §8 mis à jour (le dépôt est désormais sous git).
   *Thèse : le jeton doit distinguer « occupé » de « interrompu », sinon personne n'ose reprendre.*
 - [ ] **P3** — `README.md` : mention du protocole dans les règles de tenue.
@@ -85,3 +85,7 @@ Objectif         : dispositif de reprise propre après interruption par limite d
 - Seuil de battement retenu pour présumer une interruption : **2 heures**. Choisi parce que les
   limites d'usage se réinitialisent à cette échelle ; plus court, deux sessions se marchent
   dessus ; plus long, on attend pour rien. Convention, pas mesure.
+- **Cas limite trouvé en appliquant le protocole à lui-même** : l'étape qui *crée* ce fichier ne
+  peut pas cocher sa propre case avant qu'il existe. P1 a donc été committée avec `[>]` et corrigée
+  dans le commit de P2. Sans conséquence, mais à savoir : la toute première étape d'un protocole
+  d'écriture anticipée ne peut jamais être protégée par ce protocole.

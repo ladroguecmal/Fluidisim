@@ -13,18 +13,30 @@ souvenir de conversation, **c'est lui qui fait foi**.
 
 ```
 JETON            : libre
-Dernière session : S06 — 2026-09-05 — outillage auteur + dispositif de passation
-Session suivante : S07 — recroiser les cinq SPEC entre elles (S05 n'a confronté que les ADR)
+Battement        : 2026-09-05
+Dernière session : S07 — 2026-09-05 — dispositif de reprise après interruption
+Session suivante : S08 — recroiser les cinq SPEC entre elles (S05 n'a confronté que les ADR)
 ```
 
-**Convention de passation.** Une seule session travaille à la fois sur le dépôt.
+**Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
 
-1. En commençant : passer `JETON` à `occupé — S<n>, <date>`, et écrire la ligne dans
-   `notes/JOURNAL.md`.
-2. En terminant : exécuter le rituel de fin (§6), puis repasser `JETON` à `libre`.
-3. Si le jeton est trouvé `occupé` avec une date ancienne, il est présumé abandonné : le signaler
-   dans le journal, le reprendre, et ne rien supprimer de ce que la session précédente avait
-   commencé.
+| État | Signification | Ce que fait la session qui le trouve |
+|---|---|---|
+| `libre` | personne ne travaille | le prendre, démarrage à froid |
+| `occupé` + battement récent (< 2 h) | une session travaille | **ne pas reprendre** ; signaler à l'utilisateur |
+| `occupé` + battement ancien (> 2 h) | session présumée interrompue | passer à `interrompu`, puis reprise à chaud (§7) |
+| `interrompu` | interruption constatée | reprise à chaud (§7) |
+
+Le seuil de deux heures est une convention, choisie parce que les limites d'usage se
+réinitialisent à cette échelle. Plus court, deux sessions se marchent dessus ; plus long, on
+attend pour rien.
+
+**En commençant** : passer le jeton à `occupé`, mettre à jour le battement, déclarer le plan dans
+`notes/EN-COURS.md` et le committer **avant toute autre modification**.
+**En terminant** : exécuter le rituel de fin (§6), repasser le jeton à `libre`.
+
+Le battement se met à jour à chaque commit d'étape. Il n'existe pas de processus d'arrière-plan :
+une session ne peut signaler sa présence qu'en travaillant.
 
 ---
 
@@ -100,6 +112,9 @@ par une hypothèse implicite.
 
 ## 6. Rituel de fin de session — obligatoire
 
+Il est **lui-même une étape du plan** déclaré dans `notes/EN-COURS.md`. Une session interrompue
+laisse ainsi cette étape visiblement non cochée, ce qui dit à la suivante exactement ce qui manque.
+
 Avant de rendre la main, dans cet ordre :
 
 1. **Écrire l'entrée de journal** dans `notes/JOURNAL.md` : entrées, sorties, décision
@@ -117,7 +132,23 @@ Avant de rendre la main, dans cet ordre :
 Une session qui n'exécute pas ce rituel laisse le projet dans un état où la suivante devra
 reconstituer ce qu'elle a fait — c'est-à-dire perdre l'essentiel de son apport.
 
-## 7. Règles de tenue du dépôt
+## 7. Si la session précédente a été interrompue
+
+Une session coupée par une limite d'usage n'a aucune occasion d'écrire qu'elle s'arrête. Le
+dispositif ne repose donc **pas** sur une action au moment de l'arrêt, mais sur une déclaration
+faite avant le travail.
+
+→ **La procédure de reprise à chaud est dans [`notes/EN-COURS.md`](notes/EN-COURS.md)**, en tête du
+fichier, avec l'état et le plan de la session interrompue.
+
+En deux lignes : *ce qui est committé est fait ; ce qui est modifié non committé appartient à
+l'étape marquée `[>]` et doit être soit complété soit annulé, jamais laissé en suspens.* Compter
+cinq minutes — la lecture complète du dépôt (§3) ne sert qu'au démarrage à froid.
+
+Prévenir aussi l'utilisateur : la session interrompue n'a probablement pas pu rendre compte de son
+travail, et il ne l'a peut-être jamais vu.
+
+## 8. Règles de tenue du dépôt
 
 - **Un ADR n'est jamais réécrit.** L'historique du raisonnement a autant de valeur que la
   conclusion. Une décision qui change fait l'objet d'un nouvel ADR.
@@ -128,17 +159,21 @@ reconstituer ce qu'elle a fait — c'est-à-dire perdre l'essentiel de son appor
 - **Distinguer les statuts** : résolu · dissous · partiel · ouvert par décision. « Ouvert par
   décision » est un statut légitime et doit être dit.
 
-## 8. Limites connues de ce dispositif
+## 9. Limites connues de ce dispositif
 
 À signaler à l'humain plutôt qu'à contourner :
 
-- **Le dépôt n'est pas sous gestion de version.** Pour une passation entre comptes, c'est un risque
-  réel : pas d'historique, pas de fusion, pas de récupération après écrasement. Un `git init` et un
-  dépôt distant partagé résoudraient les trois. **À proposer, pas à faire sans accord.**
-- **Le partage des fichiers entre comptes relève de l'infrastructure de l'utilisateur** (dossier
-  synchronisé, dépôt distant). Ce document ne peut pas y suppléer : si un autre compte ne voit pas
-  ces fichiers, il ne peut pas reprendre le projet, quelle que soit la qualité de la passation.
+- **Le dépôt est sous git depuis S07** (commit de base `c6886a7`). Les sessions S01 à S06 n'ont pas
+  d'historique : elles tiennent dans ce seul commit et dans `notes/JOURNAL.md`.
+- **Il n'y a pas de dépôt distant.** Sans lui, la passation entre deux machines repose sur un
+  dossier partagé, et deux sessions qui écriraient en parallèle n'auraient aucun moyen de
+  fusionner. **À proposer à l'utilisateur, pas à faire sans accord.**
+- **Le partage des fichiers entre comptes relève de l'infrastructure de l'utilisateur.** Ce
+  document ne peut pas y suppléer : si un autre compte ne voit pas ces fichiers, il ne peut pas
+  reprendre le projet, quelle que soit la qualité de la passation.
 - **Les mémoires privées d'un compte ne voyagent pas.** Rien d'important ne doit vivre uniquement
   là. En cas de contradiction, ce document et le journal font foi.
-- **Aucune session ne doit supposer que la précédente était la sienne.** Vérifier le journal plutôt
-  que se fier à un souvenir.
+- **Aucune session ne doit supposer que la précédente était la sienne.** Vérifier le journal et
+  `git log` plutôt que se fier à un souvenir.
+- **Le battement n'est pas une preuve de vie.** Une session peut être coupée juste après un commit
+  et paraître active pendant deux heures. Le seuil protège du conflit, il ne le supprime pas.
