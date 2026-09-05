@@ -74,7 +74,7 @@ avait dissous celui d'ADR-007 §5.3 sans que personne ne le voie pendant neuf se
 **(c) qui attend, et quoi ?** — une mesure, une réunion, une décision humaine, du code.
 
 - [ ] **P1** — déclarer le plan, prendre le jeton, mettre à jour le battement.
-- [ ] **P2** — inventaire mécanique : extraire les ≈110 points des 26 documents, les numéroter,
+- [x] **P2** — inventaire mécanique : extraire les ≈110 points des 26 documents, les numéroter,
   produire la table brute. *Thèse : sans inventaire exhaustif écrit, l'audit portera sur ce qu'on
   se rappelle, c'est-à-dire sur les documents récents — précisément ceux qui en ont le moins besoin.*
 - [ ] **P3** — passe sur **ADR-001 à ADR-008** (socle).
@@ -98,3 +98,14 @@ avait dissous celui d'ADR-007 §5.3 sans que personne ne le voie pendant neuf se
 - **Attente sur la répartition des verdicts** : la valeur de l'exercice est dans les catégories
   (a) et (b). Si tout revient « encore valide », l'audit aura quand même produit une chose utile —
   la liste de qui attend quoi, qui n'existe nulle part.
+
+#### P2 — inventaire, et un ajustement de plan déclaré
+
+**110 points, 26 documents.** Registre créé avec la méthode et les six verdicts (A dissous,
+B clos ailleurs, C formulation périmée, D dupliqué, E valide, F pas une question).
+
+*Ajustement du plan, déclaré avant le travail* : les passes P3 à P6 écrivent leurs verdicts
+**directement dans le registre**, section par section, plutôt que dans ces notes puis dans le
+registre. P7 devient la synthèse et le tableau « qui attend quoi ». Motif : recopier 110 verdicts
+d'un fichier à l'autre est exactement le geste qui périme les décomptes (leçon apprise deux fois,
+S07 et S10).
