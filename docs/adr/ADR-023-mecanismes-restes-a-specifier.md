@@ -255,3 +255,102 @@ grandeurs* sont fournies. Ce qui appartient à l'équipe personnage, et qu'il fa
 
 C'est la sixième entrée du tableau « ce que d'autres équipes doivent fournir »
 (`00_INDEX.md`), et elle est désormais **exécutable** : il y a quelque chose à soumettre.
+
+---
+
+## 4. Les sites turbulents permanents — dérivés, pas émis
+
+ADR-013 §7.4 proposait : « rochers turbulents permanents, traités comme **émetteurs W
+stationnaires** dépendant de la houle locale, sans coût quand personne n'est présent. À spécifier. »
+
+L'intention est juste — sans coût quand personne n'est là, et fonction de la houle locale. Le mot
+*émetteur*, en revanche, ne survit pas à l'écriture de la spécification.
+
+### 4.1 Pourquoi un émetteur d'événements est le mauvais mécanisme
+
+Un `WaveEvent` pèse 45 octets et il est **répliqué** (SPEC-006 §3.1). ADR-009 §2 chiffre le trafic
+d'une zone chargée — une bataille navale à 20 événements/s — à 900 o/s par joueur intéressé. Une
+côte rocheuse porte facilement deux cents sites actifs ; à un événement par seconde chacun :
+
+```
+200 sites × 1 év/s × 45 o  =  9 000 o/s par joueur intéressé
+                              soit dix fois la bataille navale, en permanence, pour du décor
+```
+
+Trois autres objections, chacune suffisante : les événements **s'accumulent** et devraient être
+élagués en permanence, ce qu'ADR-021 §4 interdit pour les paquets `W_rep` au-dessus du seuil de
+pertinence ; un phénomène **stationnaire et déterministe** n'a aucune raison d'être répliqué,
+puisque chaque client le dérive à l'identique (I-15) ; et cela contredirait l'esprit d'I-02 — ce qui
+est déterministe n'a pas à être mémorisé.
+
+> **Décision.** Un site turbulent permanent n'est pas un émetteur. C'est un **terme stationnaire
+> dérivé**, re-calculé à la demande depuis B, W et la bathymétrie, jamais stocké ni répliqué.
+
+C'est exactement le mécanisme qu'ADR-014 §2.3 avait déjà retenu pour l'écume permanente : « ligne de
+déferlement d'une plage, remous d'un rocher : **re-dérivée** du modèle de déferlement de W, jamais
+stockée ». Le mécanisme existait donc, sous un autre nom, dans un autre document — et ADR-013 §7.4 en
+proposait un second sans le savoir.
+
+### 4.2 Un site turbulent est une polyligne de déferlement dégénérée
+
+SPEC-006 §6 publie déjà la **polyligne de déferlement** : une suite de `BreakerVertex` portant
+position, direction de crête, flux dissipé en kW/m et largeur de zone de déferlement. Un rocher qui
+brise est le même objet avec une largeur de quelques mètres au lieu de quelques centaines.
+
+**Aucun type nouveau, aucun canal nouveau.** Le site est un `BreakerVertex` de `surf_width_m` petit,
+publié sur le canal existant, avec les mêmes consommateurs et pour les mêmes usages : l'audio y
+prend son lit de rivage (ADR-016 §2), le rendu son écume, l'ordonnanceur son critère d'activation.
+
+### 4.3 La liste des sites se dérive, elle ne s'écrit pas
+
+Une houle brise quand `H/h ≈ 0,78` (McCowan, SPEC-001 §3). Un haut-fond est donc un site actif
+lorsque la tranche d'eau au-dessus de lui satisfait :
+
+```
+h  <  H_local / 0,78  ≈  1,28 · H_local
+```
+
+| `Hs` local | Profondeur au-dessus du haut-fond en deçà de laquelle il brise |
+|---|---|
+| 0,5 m | 0,64 m |
+| 1 m | 1,28 m |
+| 2 m | **2,6 m** |
+| 4 m | 5,1 m |
+
+La passe de cuisson balaie donc la bathymétrie à la recherche des minima locaux et retient ceux dont
+le dégagement est inférieur à `1,28 · Hs_max` de la région. C'est la ligne « sites turbulents
+permanents — dérivé + validation auteur » de la table des données de SPEC-005 §2, et cela en donne
+enfin le critère.
+
+**Bénéfice non demandé : la marée allume et éteint les sites.** La tranche d'eau `h` varie du
+marnage. Un rocher à 3 m sous le niveau moyen, avec 4 m de marnage, voit `h` passer de 1 à 5 m ; par
+mer de 2 m — seuil à 2,6 m — **il brise à basse mer et pas à haute mer**. Un récif qui gronde deux
+fois par jour, à heure prévisible (ADR-018 §4), sort d'une inégalité et d'aucun réglage.
+
+### 4.4 Ce qu'un site produit, et à quel coût
+
+Le flux dissipé se calcule comme pour une ligne de déferlement : `P = E·c_g` avec `E = ρgH²/16`
+(SPEC-001 §3). Par mer de `Hs = 2 m`, `T = 8 s` : 15,3 kW/m, soit **≈77 kW** pour un rocher de 5 m
+de large. Cette valeur pilote directement l'intensité audio et le taux de dépôt d'écume
+(ADR-014 §3.2), sans réglage d'auteur.
+
+| Consommateur | Ce qu'il en fait | Coût quand personne n'est là |
+|---|---|---|
+| Audio | émetteur du lit de rivage, intensité `∝ P` | nul — pas d'auditeur enregistré (SPEC-006 §4.2) |
+| Rendu | source du champ d'écume, écume permanente re-dérivée | nul — hors cascade (ADR-014 §2.3) |
+| Ordonnanceur | candidat d'activation, priorité par surface écran | nul — `W_perception = 0` (ADR-012 §2) |
+
+**Le coût nul quand personne n'est présent n'est pas une optimisation à écrire : c'est une
+conséquence de n'avoir rien à faire tourner.** Un site est une entrée de table plus une formule ;
+sans consommateur, la formule n'est pas évaluée.
+
+### 4.5 Invalidation
+
+Un site dérive de la bathymétrie. Retoucher un haut-fond invalide donc la liste des sites
+localement — et le partitionnement de cuisson suit déjà les **isobathes** et non une grille carrée
+(SPEC-005 §8), ce qui est exactement le découpage dont cette dérivation a besoin. Rien à ajouter.
+
+La validation d'auteur mentionnée par SPEC-005 §2 garde son rôle : la dérivation peut retenir des
+centaines de sites dont beaucoup sont sans intérêt scénique. L'auteur en promeut ou en écarte ; il
+ne les déplace pas et n'en crée pas — ce serait une retouche de donnée dérivée, ce que la règle de
+source de vérité unique interdit (SPEC-005 §1, L25).

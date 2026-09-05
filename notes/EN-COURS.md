@@ -80,7 +80,7 @@ aussi une *cause*, ce qui n'est pas la même chose.
   *Thèse (L03) : il n'y a pas de modèle à écrire. Le mode contraint d'ADR-008 §3 existe déjà ; il
   lui manque une seconde condition d'entrée. Le critère actuel est de stabilité numérique, et le
   nageur le passe — c'est pour une autre raison qu'il en relève.*
-- [ ] **P4** — `ADR-023` §4 : les **sites turbulents permanents**.
+- [x] **P4** — `ADR-023` §4 : les **sites turbulents permanents**.
   *Thèse : ce ne sont pas de nouveaux objets. Un site turbulent est une polyligne de déferlement
   dégénérée en un point, et il se dérive du critère `H/h = 0,78` déjà posé en SPEC-001 §3.*
 - [ ] **P5** — `ADR-023` §5 : la **coalescence des poches d'air T2**.
@@ -136,3 +136,17 @@ Deux seuils **dérivés**, que le design n'aura pas à choisir :
 Contrôle fait : les cinq effets qui comptent (emportement, eau blanche, déferlante, hypothermie,
 seuils de progression) passent tous par d'autres chemins déjà spécifiés. Le mode contraint ne coûte
 rien au gameplay.
+
+#### P4 — la spécification corrige la proposition d'origine
+
+ADR-013 §7.4 disait « émetteurs W stationnaires ». Le mot *émetteur* ne survit pas au chiffrage :
+200 sites × 1 év/s × 45 o = **9 000 o/s par joueur, dix fois une bataille navale, en permanence,
+pour du décor**. Et un phénomène stationnaire déterministe n'a aucune raison d'être répliqué.
+
+Décision : **terme stationnaire dérivé**, re-calculé à la demande — exactement ce qu'ADR-014 §2.3
+avait déjà retenu pour l'écume permanente, dans un autre document et sous un autre nom. ADR-013 §7.4
+proposait donc un second mécanisme sans le savoir.
+
+Critère de dérivation : `h < 1,28·H_local` (McCowan). Bénéfice non demandé : avec 4 m de marnage,
+un rocher à 3 m **brise à basse mer et pas à haute mer**, par mer de 2 m. Un récif qui gronde deux
+fois par jour à heure prévisible, sorti d'une inégalité.
