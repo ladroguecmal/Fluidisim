@@ -59,8 +59,8 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S07
-État             : terminée
+Session          : S07 (rouverte pour un addendum)
+État             : en cours
 Battement        : 2026-09-05
 Objectif         : dispositif de reprise propre après interruption par limite d'usage
 ```
@@ -76,6 +76,10 @@ Objectif         : dispositif de reprise propre après interruption par limite d
 - [x] **P4** — `notes/LECONS.md` : leçons généralisables de cette session.
 - [x] **P5** — rituel de fin : entrée de journal S07, index, jeton repassé à `libre`, ce fichier
   repassé à `terminée`.
+- [>] **P6** — `CLAUDE.md` à la racine : amorce automatique de la reprise.
+  *Thèse : le dispositif de passation ne doit dépendre ni de la mémoire d'un compte ni de ce que
+  l'utilisateur pense à taper. Une session qui ouvre ce dossier doit être dirigée vers `REPRISE.md`
+  sans que personne n'ait à le lui dire.*
 
 ### Notes de reprise
 
@@ -96,3 +100,6 @@ Objectif         : dispositif de reprise propre après interruption par limite d
   de P3, et la règle correspondante a été précisée. L'exécution du protocole sur lui-même a donc
   trouvé deux défauts en deux étapes — argument suffisant pour ne jamais publier un protocole sans
   l'avoir exécuté au moins une fois.
+- **Troisième trou, trouvé en préparant le test avec un autre compte** : rien ne garantissait
+  qu'une session ouvrant ce dossier lise `REPRISE.md`. Le dispositif reposait implicitement sur ce
+  que l'utilisateur pense à écrire dans son premier message. D'où P6.
