@@ -179,7 +179,14 @@ que le document source identifiait comme un risque de rupture visible, deviennen
 
 1. Valeur de `λ_cut` → **à décider en premier**, benchmark B2/B3.
 2. Nombre de secteurs de transduction (16 proposé) et `E_seuil`.
+   → **S11** : les 16 secteurs ont désormais un **second consommateur** : SPEC-006 §4.3 les réutilise pour
+   l'occlusion acoustique par aération, explicitement pour ne pas inventer une seconde
+   discrétisation. Le nombre se tranche donc pour les deux usages à la fois.
 3. Estimation de la fréquence dominante par secteur : passages à zéro vs corrélation — la méthode
    par passages à zéro est bruitée à faible amplitude, prévoir un plancher.
 4. La transduction doit-elle conserver l'énergie exactement, ou volontairement en perdre 10–20 %
    pour éviter l'accumulation de paquets parasites ? Piste : perte volontaire, à mesurer.
+   → **S11** : **à moitié répondu, et ailleurs.** La correction S05 d'ADR-012 §4 rang 1 déclare répondre à ce
+   point : « la transduction ne perd rien en régime normal, et tout sous pression ». C'est une
+   réponse au **régime dégradé**. La question posée ici porte sur le régime **normal**, et elle
+   reste entière.

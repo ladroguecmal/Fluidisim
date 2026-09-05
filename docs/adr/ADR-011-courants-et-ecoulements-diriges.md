@@ -136,8 +136,13 @@ dépendance qui, découverte tard, coûte un trimestre.
 ## 7. Ce qui reste ouvert
 
 1. Résolution et format des textures C1, et leur mode de production (solveur hors ligne ? auteur ?).
+   → **S11** : le **mode de production est réglé** : SPEC-005 §2 le donne — « dérivé, ou auteur », à partir de
+   la bathymétrie et des apports, avec surcharge d'auteur comme pour les débits. Restent la
+   résolution et le format.
 2. Le lac comme nœud V grand format : passage à l'échelle du `shape_lut` pour un lac de 10 km².
-3. Modèle de marée : harmonique global (4–8 constituantes) vs table par région.
+3. ~~Modèle de marée : harmonique global (4–8 constituantes) vs table par région.~~
+   → **S11 : doublon.** La question est portée par **ADR-004 §7.4** — la marée appartient à B, dont
+   ADR-004 décrit l'état minimal. La nuance « table *par région* » y est reportée.
 4. Couplage courant ↔ houle (les vagues se raidissent contre le courant, s'aplatissent avec lui).
    Effet réel et spectaculaire dans les embouchures. Formule de décalage Doppler
    `ω_apparent = ω + k·U` disponible ; à activer si le rendu le justifie.

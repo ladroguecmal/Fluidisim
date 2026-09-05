@@ -116,8 +116,19 @@ Journaliser l'écart de masse au passage de phase, comme pour le couplage V ↔ 
 
 1. **Arbitrage humain requis** : le projet veut-il de la glace ? Cet ADR est écrit pour être prêt,
    pas pour imposer le besoin.
+   → **S11** : la question est inchangée, **son coût a baissé**. La dérivation E03 de la revue S08 croise
+   SPEC-002 §4 (`Hs < 0,15 m` pour une formation en plaque) et SPEC-001 §4 (`Hs(U10, F)`) et donne
+   un **fetch maximal** : `F_max = g·(0,15/(0,0016·U10))²`, soit **3,4 km à 5 m/s** de vent et
+   0,86 km à 10 m/s. La glace en plaque est un phénomène de lac et de baie abritée, jamais de haute
+   mer : la surface concernée est bornée par la géométrie des plans d'eau, pas par la météo. Un
+   arbitrage se rend sur un coût, et c'est le coût qui a changé.
 2. Granularité de la plaque : cellule `HydroGrid` (64 m) est trop grossière pour une rupture
    crédible. Prévoir une subdivision dédiée, probablement 2 à 4 m.
+   → **S11** : **pas une subdivision dédiée — celle d'ADR-006 §2**, ajoutée en S05 (écart R07, angle mort
+   A58) précisément parce que deux documents avaient inventé la leur. SPEC-006 §5.3 la réutilise
+   déjà pour la traversabilité. Ce point en était la **troisième** occurrence, et la seule restée
+   sans porteur. La question résiduelle — 2 à 4 m est-il le bon pas pour une rupture de glace —
+   porte donc sur un *paramètre* de la subdivision existante, pas sur un mécanisme à créer.
 3. Neige sur glace : isole et ralentit la croissance d'un facteur 2 à 3. À inclure ou à ignorer.
 4. Rendu de la glace (transparence, bulles emprisonnées, fractures) — équipe rendu.
 5. Interaction glace ↔ navires : brise-glace, coque prise dans les glaces. Ouvre un modèle de

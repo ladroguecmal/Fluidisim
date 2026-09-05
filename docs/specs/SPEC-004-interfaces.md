@@ -539,6 +539,10 @@ sera formulée pendant le développement, et qui doit être refusée avec son mo
 1. **Langage et représentation des formes.** `ShapeKind` est volontairement ouvert ; la
    représentation retenue dépendra du solveur choisi en B3. Exigence minimale, non négociable :
    accepter une **frontière en mouvement avec sa vitesse**, pas seulement une géométrie.
+   → **S11 : ce point porte deux questions** que d'autres documents posaient aussi — la
+   représentation des solides (ADR-007 §5.4 y renvoie) et la **représentation binaire d'échange**,
+   boutisme et alignement compris (SPEC-006 §9.8 et ADR-022 §7.4 y renvoient). Les deux dépendent
+   du langage, qui est le premier terme de ce point.
 2. **`CondensedState` — RÉSOLU en S10 par [ADR-022](../adr/ADR-022-persistance-de-l-eau.md), et la
    question était mal posée.** Il n'existe pas de persistance hors caméra : ADR-013 §6 avait dissous
    le mécanisme dès S01, et ces signatures lui avaient survécu. Le type qui subsiste est le
@@ -546,13 +550,19 @@ sera formulée pendant le développement, et qui doit être refusée avec son mo
    *À noter : la contrainte énoncée ici — « il doit se relire sur une machine différente, donc pas
    de disposition mémoire brute » — était exactement celle d'un actif cuit, et dépourvue de sens
    pour une condensation en mémoire. Le point disait déjà ce qu'il était.*
-3. **Granularité de `is_smooth_at`** — un point d'échantillonnage sur quatre est une proposition ;
-   à mesurer au banc B4, dont c'est un paramètre direct.
+3. **Granularité de `is_smooth_at`** — à mesurer au banc B4, dont c'est un paramètre direct.
+   → **S11** : ce point proposait de mesurer « un point sur quatre ». Ce n'est plus le paramètre :
+   la note corrective de §6.2 (S08, écart E08) a établi que le taux de décimation n'est pas une
+   constante mais une **contrainte, `dx ≤ λ_cut/N`**, parce que le rapport `λ_cut/dx` passe de 40 à
+   16 entre le scénario nominal et une zone de déferlement — soit de 10 à 4 points par longueur
+   d'onde après décimation, deux fois Nyquist. **Ce qui se mesure à B4 est `N`.**
 4. **Surface minimale de `IGpuBackend`** — interface la plus risquée des six (ADR-020 §6.2). À
    prototyper contre un candidat réel avant de la figer.
-5. **Budget d'instantanés W** — combien de poignées simultanées, et quelle politique si un lecteur
-   lent en retient une trop longtemps ? Proposition : anneau de N instantanés, le plus ancien étant
-   recyclé de force avec avertissement.
+5. ~~**Budget d'instantanés W**~~ — **tranché en S09 par [`SPEC-006`](SPEC-006-chemin-pousse.md)
+   §2.5**, et pour *tous* les canaux du chemin poussé, W compris : anneau dont la profondeur est
+   **dérivée du profil** selon I-16 (et non déclarée), le plus ancien emplacement recyclé de force
+   avec avertissement sur `ISink`, la poignée du retardataire devenant invalide à sa prochaine
+   lecture. Une seule politique, faute de quoi chaque canal aurait inventé la sienne.
 6. **Le chemin poussé — RÉSOLU en S09 par [`SPEC-006`](SPEC-006-chemin-pousse.md).** Le constat qui
    suit est conservé parce qu'il dit pourquoi le document existe ; les quatre canaux, leurs
    cadences, leur contrat de fils, leur dégradation et leur régime d'autorité y sont spécifiés, et

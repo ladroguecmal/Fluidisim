@@ -129,8 +129,19 @@ d'eau simultanés est plafonné par profil, comme les domaines.
 
 1. Validation de l'ensemble avec l'équipe audio — cet ADR est une proposition d'interface, pas une
    conception sonore.
-2. Format de la polyligne de déferlement publiée.
+   → **S11** : **ce point était inexécutable jusqu'en S09** : l'écart E04 de la revue S08 a montré qu'aucune
+   de ces interfaces n'avait de signature écrite, donc rien à soumettre. `SPEC-006` §3 (bus
+   d'événements, `WaveEvent` complet) et §4 (agrégats d'écume et d'aération) les portent désormais.
+   Ce qu'on apporte à la réunion existe. **Urgence de format** : les trois champs qu'ADR-016 §6
+   demande sont sur une structure **répliquée** — à arrêter avant que le réseau ne fige `WaveEvent`,
+   sans quoi les ajouter coûtera une migration de protocole.
+2. ~~Format de la polyligne de déferlement publiée.~~ **Clos.**
+   → **S11** : **SPEC-006 §6** : `BreakerVertex` et `BreakerLineView`, avec le flux dissipé en **kW/m** — et
+   non en W/m, qui saturerait un `half` dès `Hs = 4 m`.
 3. Faut-il un lit distinct pour la pluie sur l'eau ? Probablement oui : la signature est très
    différente de la pluie sur le sol, et elle est pilotée par les mêmes données.
-4. Coût de l'occlusion par aération : approximation par intégrale de `A` le long du segment
-   auditeur-source, ou tabulation grossière ?
+4. ~~Coût de l'occlusion par aération : intégrale le long du segment, ou tabulation grossière ?~~
+   **Tranché.**
+   → **S11** : **tabulation azimutale en 16 secteurs** (SPEC-006 §4.3). Motif que ce point ne pouvait pas
+   connaître : l'intégrale par segment est un chemin *tiré*, dont le coût croît avec le nombre de
+   sources. Reliquat — une ou deux bandes radiales — porté par SPEC-006 §9.2.

@@ -124,8 +124,16 @@ navigable dynamique à portance variable est cher.
 ## 7. Ce qui reste ouvert
 
 1. Validation de l'interface avec l'équipe IA.
-2. Granularité : la cellule `HydroGrid` de 64 m est trop grossière pour un gué. Prévoir une
-   publication à la sous-cellule le long des rivières et des rivages.
+   → **S11** : **inexécutable jusqu'en S09**, comme son homologue audio (écart E04 de la revue S08) :
+   l'interface n'avait aucune signature écrite. `SPEC-006` §5 la porte désormais — tuiles,
+   quatre cadences, `CrossingEvent`, et le régime d'autorité qui impose que le signal soit calculé
+   depuis les seules couches répliquées, sans quoi deux clients ne prendraient pas la même décision
+   de cheminement.
+2. ~~Granularité : la cellule `HydroGrid` de 64 m est trop grossière pour un gué.~~ **Clos.**
+   → **S11** : **SPEC-006 §5.3** : les tuiles portant une rivière ou un trait de côte déclarent
+   `subdivision > 0`, **en réutilisant la sous-cellule d'ADR-006 §2** plutôt qu'en inventant une
+   seconde. La liste des tuiles subdivisées est dérivée du squelette hydrographique (SPEC-005 §2),
+   donc connue au démarrage — sans quoi la mémoire du canal ne serait pas dimensionnable (I-06).
 3. Table des seuils par archétype d'agent et de véhicule — à obtenir des équipes concernées.
 4. Faut-il exposer aussi la **visibilité sous l'eau** pour l'IA (détection d'un nageur immergé) ?
    La donnée existe (ADR-019 §3) ; l'usage est à confirmer.

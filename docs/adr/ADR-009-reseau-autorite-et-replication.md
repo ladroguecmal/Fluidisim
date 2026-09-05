@@ -121,10 +121,25 @@ même B+W. Seuls leurs δ diffèrent, et δ n'a pas d'autorité. `zones_ouvertes
 
 ## 7. Ce qui reste ouvert
 
-1. Valeur de `K` et table `E_cause` par type d'objet.
-2. Faut-il autoriser un client à *anticiper* localement un événement qu'il vient de causer, avant
-   validation serveur ? Oui probablement (latence perçue), avec correction si le serveur borne
-   plus bas. Mécanisme de correction d'amplitude sans saut visible : à spécifier.
+1. ~~Valeur de `K` et table `E_cause` par type d'objet.~~
+   → **S11 : doublon, et sa nature a changé.** La question est portée par **ADR-021 §7.2**, qui dit
+   lui-même qu'elle « change de propriétaire : c'est désormais une donnée d'équilibrage gameplay ».
+   `K` n'est plus le garde-fou de sécurité décrit au §3 ci-dessus — ADR-021 §3 a supprimé le
+   plafonnement d'une demande client, faute de demande client. Un lecteur de cet ADR seul
+   planifierait un travail d'anti-triche là où il ne reste qu'un réglage.
+2. ~~Faut-il autoriser un client à *anticiper* localement un événement qu'il vient de causer, avant
+   validation serveur ?~~ **Clos.**
+   → **S11** : oui, et le mécanisme est spécifié. Deux choses ont changé : la **prémisse est morte** en S05 —
+   ADR-021 §3 a supprimé la validation serveur d'une demande client, le serveur ne « borne » donc
+   plus rien ; et le mécanisme demandé a été écrit en S09 — SPEC-006 §3.3 traite la réconciliation
+   par un **bit de rétractation**, non pour corriger une amplitude mais pour éviter qu'un impact
+   anticipé et sa version serveur ne soient joués deux fois à 100–300 ms d'intervalle.
 3. Nombre maximal d'événements W actifs par région (protection contre la saturation).
+   → **S11** : ce n'est pas une valeur à choisir mais une borne à **dériver** : elle doit s'accorder avec
+   `paquets_W_max` (ADR-012 §3, qui compte des *paquets*, pas des événements) et avec le nombre de
+   régions actives — donc I-16 interdit de la déclarer. Et le comportement à la borne est déjà
+   contraint : **ADR-021 §4** interdit d'élaguer un paquet `W_rep` au-dessus du seuil de pertinence
+   gameplay, quel que soit le profil. Une protection contre la saturation ne peut donc pas
+   consister à jeter des événements répliqués.
 4. Comportement en cas d'horloge client manifestement fausse (triche par décalage temporel) :
    la vérification par hash le détecte, la sanction relève de la politique anti-triche générale.

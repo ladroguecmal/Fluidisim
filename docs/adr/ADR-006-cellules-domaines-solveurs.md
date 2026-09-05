@@ -164,5 +164,14 @@ Ce que le rendu *peut* faire : **demander** un raffinement physique via une requ
    l'indirection. À mesurer (B5).
 2. Validation de la décomposition récursive δ_grossier + δ_fin (B5).
 3. Nombre maximal de blocs par profil de qualité (ADR-012).
+   → **S11** : **tel quel, ce point demande ce qu'I-16 interdit.** Un profil ne déclare pas un nombre maximal
+   d'objets ; ADR-012 §3 a précisément été corrigé en S05 (écart R04) pour en retirer
+   `domaines_max`. Le nombre de blocs se **calcule** à l'initialisation depuis la mémoire allouée
+   et le coût par bloc mesuré.
+   *Précision du critère, S11* : « ressource » contre « capacité dérivée » ne tranche pas le cas
+   d'une taille de pool, qui est les deux. Le critère qui fonctionne est : **une valeur peut
+   figurer dans un profil si elle est allouée directement ; pas si elle doit être cohérente avec
+   deux autres valeurs déjà déclarées.** C'est ce qui condamnait `domaines_max`, contradictoire à
+   la fois avec la mémoire et avec le budget de temps.
 4. Faut-il un `dx` anisotrope (par exemple plus fin en vertical près de la surface) ? Physiquement
    justifié, mais complique les blocs. Reporté après B3.

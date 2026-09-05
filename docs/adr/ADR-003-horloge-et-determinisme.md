@@ -99,4 +99,7 @@ C'est le seul mécanisme réseau permanent lié à la houle.
    contraire, la cohérence multijoueur de B est perdue et il faut basculer l'océan concerné en
    couche locale non répliquée. **Décision de design, à trancher par l'équipe gameplay.**
 2. Ordre de grandeur du nombre de composantes de B (64 / 128 / 256) → benchmark B1.
-3. Faut-il étendre le hash de conformité à W ? Probablement oui, mais après stabilisation de W.
+3. ~~Faut-il étendre le hash de conformité à W ?~~ **Clos.**
+   → **S11** : la réponse est « oui » depuis S03 : SPEC-003 §2 place W répliqué dans le régime D1 avec le hash
+   pour verdict, et depuis S10 l'invariant I-03 l'énonce lui-même. Répondu par supposition d'un
+   document ultérieur, jamais constaté ici.

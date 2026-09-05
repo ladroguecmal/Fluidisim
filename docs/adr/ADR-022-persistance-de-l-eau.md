@@ -472,8 +472,9 @@ propriété qui, autrement, ne l'aurait pas été.
 3. **Granularité de partition** de l'état persistant dans un monde à très grande échelle. L'état
    est additif par nœud et par événement, donc partitionnable par région sans coordination ; le
    découpage retenu relève de l'infrastructure.
-4. **Représentation binaire** — boutisme, alignement, versionnement du format. Comme partout,
-   dépend du langage, encore ouvert.
+4. ~~**Représentation binaire** — boutisme, alignement, versionnement du format.~~
+   → **S11 : doublon**, porté par [SPEC-004 §10.1](../specs/SPEC-004-interfaces.md). La formulation
+   d'origine — « comme partout » — était elle-même le symptôme.
 5. **Une observation à confirmer, pas une question.** Une sauvegarde survit à une mise à jour du
    jeu : ne contenant aucun état de δ ni aucune donnée cuite — seulement un temps, des événements
    et des entiers — elle se recharge sur une version où les graines et la bibliothèque côtière ont

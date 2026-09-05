@@ -131,4 +131,9 @@ ancre et un plan tangent.
    sur les positions d'objets, décision partagée avec l'équipe réseau/physique solide.
 2. Taille exacte des régions hydrographiques → dépend de la portée de visibilité maximale et du
    coût de streaming des descripteurs. Piste : 32 km, révisable.
+   → **S11** : deux contraintes se sont ajoutées depuis. **SPEC-005 §4** : l'écart entre le géoïde et le plan
+   tangent vaut `R(1−cos(d/R))`, soit 70,7 m à 30 km et **80 m au bord d'une région de 32 km** —
+   l'outil de terrain doit appliquer le géoïde. **I-08** : une région n'est pas un référentiel de
+   calcul, `|x_local| < 4096 m` ; c'est une ancre de repère, et il faut le dire pour que « 32 km »
+   ne se lise pas comme une contrainte de précision.
 3. Seuil de masse relative déclenchant la rétroaction ballottement → navire.

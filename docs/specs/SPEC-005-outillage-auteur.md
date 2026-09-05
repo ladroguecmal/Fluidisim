@@ -341,8 +341,14 @@ doit être écrite dans l'outil, faute de quoi quelqu'un les confondra.
    premier est plus cohérent, le second plus contrôlable. Probablement les deux, avec surcharge.
 3. **Stockage des données cuites** : elles sont binaires et volumineuses. Ne pas les versionner
    à côté des sources sans cache dédié ; idéalement ne versionner que les empreintes.
+   → **S11** : « ne versionner que les empreintes » n'est plus un idéal, c'est le **modèle retenu**
+   depuis la résolution de l'écart E07 (S08) — cuisson **autoritaire et non reproductible**, un
+   producteur désigné, un artefact identifié par l'empreinte de son contenu, le `bake_manifest` de
+   §7.3 comme porteur, une promotion explicite pour livrer. Ce qui reste ouvert est plus étroit et
+   relève de l'infrastructure : **où vit le magasin d'artefacts**, et avec quelle rétention.
 4. **Format d'échange** avec l'outil de terrain existant — dépend de l'équipe terrain.
-5. **Coût de cuisson de la bibliothèque côtière** : 16 états × 40 s d'établissement × N plages.
+5. **Coût de cuisson de la bibliothèque côtière** *(chiffrage, pas une question — requalifié en
+   S11)* : 16 états × 40 s d'établissement × N plages.
    Pour 50 plages, **au moins** ≈9 heures de calcul mono-fil, parallélisable trivialement.
    Acceptable en nocturne, pas en interactif — donc la boucle d'itération d'une plage doit pouvoir
    ne cuire qu'un état.

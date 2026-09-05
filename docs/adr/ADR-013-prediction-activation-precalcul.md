@@ -150,6 +150,14 @@ le risque, très réel, d'un budget consommé par des zones que personne ne rega
 
 1. Calibration de tous les seuils (B8).
 2. Table `a_max` par archétype d'objet contrôlable — à obtenir auprès de l'équipe véhicules.
-3. Format et volume exact de la bibliothèque d'états côtiers précalculés (§27) → dépend de B4.
+3. ~~Format et volume exact de la bibliothèque d'états côtiers précalculés (§27) → dépend de B4.~~
+   **Clos.**
+   → **S11** : répondu dès S06, sans banc : SPEC-005 §6 donne le format — condition initiale 2D à 0,5 m,
+   quatre champs `f16` — et les volumes : **77 Ko par état, 1,2 Mo par plage, 60 Mo pour cinquante
+   plages**. ADR-022 §3 a généralisé le type en `SeedState`. Ce qui dépend réellement de B4 est le
+   seuil de tolérance sur les paramètres d'une graine, et ce point existe : ADR-022 §7.1.
 4. Cas des rochers turbulents permanents (`§26`) : traités comme émetteurs W stationnaires
    dépendant de la houle locale, sans coût quand personne n'est présent. À spécifier.
+   → **S11** : la **source de données** est réglée — SPEC-005 §2 : « sites turbulents permanents, dérivés +
+   validation auteur ». Le **comportement** ne l'est pas, et aucune session ne l'a pris en charge.
+   Voir `AUDIT-POINTS-OUVERTS-S11.md` §7.4.

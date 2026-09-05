@@ -211,4 +211,6 @@ sans particules mais avec un champ d'écume correct reste crédible ; l'inverse 
 3. Seuil de volume pour le retour goutte → événement W.
 4. Représentation de `A` : texture volumique grossière vs colonnes 2,5 D. La seconde suffit
    probablement, sauf pour une cavité d'impact.
-5. Couplage `A` ↔ audio (une eau aérée est acoustiquement opaque) → ADR-016 §4.
+5. ~~Couplage `A` ↔ audio (une eau aérée est acoustiquement opaque) → ADR-016 §4.~~ **Clos.**
+   → **S11** : traité par ADR-016 §4.3 et **spécifié** par SPEC-006 §4.3 : `A` est publié par auditeur en
+   16 secteurs azimutaux — ceux d'ADR-005 §3 — et alimente le terme d'occlusion sous-marine.

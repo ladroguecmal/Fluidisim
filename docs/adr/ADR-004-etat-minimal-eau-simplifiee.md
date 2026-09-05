@@ -158,3 +158,4 @@ tenir un écoulement dirigé dans un modèle spectral, ce qui n'aurait pas fonct
 3. Pas de la grille `HydroSample` près des côtes — 10 km est probablement trop lâche là où la
    bathymétrie varie ; prévoir un raffinement côtier.
 4. Modèle de marée : global harmonique (quelques constituantes) vs table précalculée.
+   → **S11 : ce point porte la question** ; ADR-011 §7.3 posait la même et y renvoie désormais.

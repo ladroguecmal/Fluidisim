@@ -83,7 +83,7 @@ avait dissous celui d'ADR-007 §5.3 sans que personne ne le voie pendant neuf se
 - [x] **P6** — passe sur les **six SPEC** et le harnais.
 - [x] **P7** — rédiger `docs/registres/AUDIT-POINTS-OUVERTS-S11.md` : le verdict par point,
   la synthèse par catégorie, et **qui attend quoi**.
-- [ ] **P8** — appliquer : clôtures marquées et notes correctives dans les documents concernés.
+- [x] **P8** — appliquer : clôtures marquées et notes correctives dans les documents concernés.
 - [ ] **P9** — index, angles morts, `METHODE.md` (la passe d'audit devient une phase du protocole).
 - [ ] **P10** — rituel de fin (`REPRISE.md` §6) : journal S11, leçons, index, jeton libéré.
 
@@ -165,3 +165,8 @@ qui le produit.
 Et un cinquième arbitrage humain remonté au même rang que les trois connus : **qui possède le
 harnais** (SPEC-003 §11.4), rangé jusqu'ici parmi des questions de format de fichier alors que
 SPEC-003 §1 dit que la qualité de toutes les décisions à venir est plafonnée par la sienne.
+
+#### P8 — 34 marques appliquées, aucun échec
+
+8 clôtures (B), 15 notes correctives (C), 10 renvois de doublons avec porteur désigné (D),
+1 requalification (F). Les scripts rapportent les non-appliquées ; il n'y en a eu aucune.

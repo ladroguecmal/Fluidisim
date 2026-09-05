@@ -143,8 +143,15 @@ Un nœud V est un objet persistant du monde, indexé par cellule `HydroGrid`. Po
 
 1. Réseaux fermés sous pression (v2).
 2. `V_min` et les TTL → calibration gameplay.
-3. Comportement dans le vide (brèche vers l'espace) : ébullition explosive puis gel. Physiquement
-   il s'agit d'un débit critique et d'un changement d'état ; à traiter comme un type d'arête
-   spécial `to_vacuum` avec un débit forfaitaire. À spécifier avec l'équipe gameplay spatial.
+   → **S11** : l'enjeu a changé de nature. **ADR-022 §4.3** établit que le TTL des nœuds créés par le jeu est
+   **la borne supérieure de la persistance de l'eau** : sans lui, chaque flaque jamais revisitée
+   d'un monde persistant resterait dans l'état du monde. Ce n'est plus un réglage de confort mais
+   un paramètre de **volume de stockage à l'échelle du monde**, et il ne s'allonge pas sur un seul
+   argument de jeu.
+3. ~~Comportement dans le vide (brèche vers l'espace) : `to_vacuum`.~~
+   → **S11 : doublon.** La question est portée par **ADR-015 §7.2**, plus avancé — il nomme la
+   formule (gaz parfaits en col sonique). Le mécanisme reste celui décrit ici : un type d'arête
+   spécial `to_vacuum`. Dépendance inter-équipes : **gameplay spatial**, cinquième destinataire
+   extérieur, absent de la liste de `00_INDEX.md` jusqu'en S11.
 4. Mélange de liquides différents dans un même nœud (eau + carburant) : autorisé ou interdit ?
    Interdire est plus simple et probablement suffisant ; à confirmer.

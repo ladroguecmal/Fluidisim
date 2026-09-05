@@ -148,6 +148,7 @@ défaire.
    **Clos en S10 par [ADR-022](ADR-022-persistance-de-l-eau.md)**, qui montre que la question était
    mal posée : il n'y a pas de persistance hors caméra, donc pas de format à trouver. Le type qui
    subsiste est le `SeedState`, et il décrit une donnée **cuite**, pas une capture d'exécution.
-4. `SolidProxy` : quelle représentation des solides — SDF, maillage, particules de frontière ?
-   Fortement dépendante du solveur choisi ; laissée à `IFluidSolver`, avec une exigence : accepter
-   une **frontière en mouvement** avec vitesse, pas seulement une géométrie statique.
+4. ~~`SolidProxy` : quelle représentation des solides — SDF, maillage, particules de frontière ?~~
+   → **S11 : doublon.** La question est portée par **SPEC-004 §10.1**, où le type a un nom
+   (`ShapeKind`) et où l'exigence non négociable — accepter une **frontière en mouvement avec sa
+   vitesse**, pas seulement une géométrie — est reprise à l'identique.

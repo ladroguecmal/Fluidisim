@@ -94,8 +94,11 @@ Découverts en écrivant cet ADR, ils dépassent le motif initial :
 ## 6. Ce qui reste ouvert
 
 1. Langage et cible du cœur — décision de l'équipe technique, sans incidence sur cet ADR.
-2. `IGpuBackend` : quelle surface minimale pour permettre un solveur δ sur GPU sans importer
-   l'abstraction graphique du moteur ? C'est l'interface la plus risquée des sept ; à prototyper
-   avant B3.
-3. Le harnais doit-il pouvoir héberger un **rendu de référence** minimal pour les comparaisons
-   perceptuelles, ou celles-ci passent-elles par l'hôte moteur ? Voir `SPEC-003` §5.
+2. ~~`IGpuBackend` : quelle surface minimale […] ? L'interface la plus risquée des sept.~~
+   → **S11 : doublon, et décompte périmé.** La question est portée par **SPEC-004 §10.4**.
+   L'interface est la plus risquée des **six**, non des sept : SPEC-004 §8 a établi que l'horloge
+   n'en est pas une — `T_sim` est un paramètre poussé à `begin_tick`, ce qui est plus strict, un
+   système qui ne peut pas lire l'heure ne pouvant pas en dépendre par accident.
+3. ~~Le harnais doit-il héberger un **rendu de référence** minimal ?~~
+   → **S11 : doublon.** La question est portée par **SPEC-003 §11.2**, qui porte aussi la
+   proposition retenue : hôte moteur, avec un profil de capture figé et versionné.

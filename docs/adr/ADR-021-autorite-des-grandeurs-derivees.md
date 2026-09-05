@@ -157,3 +157,7 @@ même pour tous les joueurs. C'est nécessaire — c'est un événement de gamep
 2. Table `E_cause` par type d'objet et valeur de `K` — inchangée depuis ADR-009 §7.1, mais elle
    change de propriétaire : c'est désormais une donnée d'équilibrage gameplay.
 3. Recevabilité de `λ_cut` au regard de l'argument de fermeture §3.2 — à intégrer au protocole B2.
+   → **S11** : le critère porte désormais **deux** conséquences et non une. SPEC-006 §5.6 s'appuie sur le
+   même argument de fermeture pour justifier que le signal de traversabilité ignore δ. Un
+   relèvement de `λ_cut` remettrait donc en cause l'autorité des ondes répliquées **et** la validité
+   du signal de navigation. Un banc qui n'en vérifierait qu'une laisserait passer l'autre.

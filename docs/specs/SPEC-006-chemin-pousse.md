@@ -804,5 +804,7 @@ d'interface qui rend la faute inexprimable ; la règle écrite n'est que le dern
    concernées. Ce document publie les grandeurs ; les seuils appartiennent à qui les applique.
 7. **Un canal de pluie sur l'eau ?** ADR-016 §8.3 le suggère. Il serait de forme `Agregat`, piloté
    par les mêmes données. À trancher avec l'audio.
-8. **Représentation binaire d'échange** — boutisme, alignement, langage — non traitée ici comme elle
-   ne l'est pas dans SPEC-004 : elle dépend du langage retenu, encore ouvert.
+8. ~~**Représentation binaire d'échange**~~ → **S11 : doublon**, porté par
+   [SPEC-004 §10.1](SPEC-004-interfaces.md). Trois documents posaient la même question en se
+   justifiant les uns par les autres — le symptôme à retenir étant qu'un point ouvert qui se
+   justifie par le fait que d'autres le posent aussi ne devrait pas exister.
