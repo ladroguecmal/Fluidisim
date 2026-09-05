@@ -174,3 +174,7 @@ turbulent réutilise le canal de SPEC-006 §6 inchangé ; la coalescence est int
 Confirmation au passage de la séparation d'ADR-008 §1 : le terme d'impact étant **autoritaire**, il
 n'emprunte pas `accumulate_force`, qui ne mène qu'à la pose de rendu — il n'aurait pas pu, ce qui est
 exactement l'effet recherché quand I-04 a été rendu mécanique (L19).
+
+*Correctif P6* : la clôture d'ADR-013 §7.4 n'avait pas trouvé sa cible — le retour à la ligne de la
+note S11 différait de ce que le script supposait. Le script rapporte ses échecs, l'écart a été vu
+immédiatement et corrigé par un commit séparé plutôt qu'en réécrivant l'historique.

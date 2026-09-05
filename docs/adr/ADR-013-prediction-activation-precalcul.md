@@ -156,8 +156,11 @@ le risque, très réel, d'un budget consommé par des zones que personne ne rega
    quatre champs `f16` — et les volumes : **77 Ko par état, 1,2 Mo par plage, 60 Mo pour cinquante
    plages**. ADR-022 §3 a généralisé le type en `SeedState`. Ce qui dépend réellement de B4 est le
    seuil de tolérance sur les paramètres d'une graine, et ce point existe : ADR-022 §7.1.
-4. Cas des rochers turbulents permanents (`§26`) : traités comme émetteurs W stationnaires
-   dépendant de la houle locale, sans coût quand personne n'est présent. À spécifier.
-   → **S11** : la **source de données** est réglée — SPEC-005 §2 : « sites turbulents permanents, dérivés +
-   validation auteur ». Le **comportement** ne l'est pas, et aucune session ne l'a pris en charge.
-   Voir `AUDIT-POINTS-OUVERTS-S11.md` §7.4.
+4. ~~Cas des rochers turbulents permanents (`§26`) : traités comme **émetteurs W stationnaires**
+   dépendant de la houle locale.~~ *(S11 : source de données réglée par SPEC-005 §2, comportement
+   non spécifié.)* **Spécifié en S12 → [ADR-023](ADR-023-mecanismes-restes-a-specifier.md) §4, et
+   le mot « émetteur » a été écarté.** Deux cents sites émettant un événement par seconde feraient
+   9 000 o/s par joueur intéressé — dix fois une bataille navale, en permanence, pour du décor. Un
+   site est un **terme stationnaire dérivé**, re-calculé à la demande et jamais répliqué, publié
+   comme `BreakerVertex` sur le canal existant de SPEC-006 §6. Sa liste se dérive de
+   `h < 1,28·H_local` (McCowan) ; la marée l'allume et l'éteint sans réglage.
