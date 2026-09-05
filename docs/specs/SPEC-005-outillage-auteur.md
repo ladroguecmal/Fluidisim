@@ -170,10 +170,23 @@ CoastalState {                     // par plage, par état de mer, par phase de 
 Pour 120 × 20 m à 0,5 m : 240 × 40 = 9 600 texels × 4 × `f16` = **77 Ko par état**, soit
 **1,2 Mo par plage** pour seize états. Cinquante plages tiennent dans 60 Mo, avant compression.
 
-Le volume 3D est ensuite **ré-établi en 2 à 3 secondes** à partir de la condition 2D, au lieu de
+Le volume 3D est ensuite **ré-établi en quelques secondes** à partir de la condition 2D, au lieu de
 40 — parce que le train de vagues est déjà en place et qu'il ne reste que la structure verticale à
 former. C'est le facteur qui rend l'activation d'une plage possible dans une fenêtre de prédiction
 réaliste.
+
+> **Note corrective (S08, écart E02).** Ce paragraphe avançait « 2 à 3 secondes » sans provenance,
+> en violation d'I-14, alors que la faisabilité entière du précalcul côtier repose dessus. Valeur
+> **à calibrer, banc B4**, encadrée ainsi par les documents existants :
+>
+> - la structure verticale d'un train de houle s'établit en ≈1 période, soit **4,4 s** (λ = 30 m) à
+>   **8,0 s** (λ = 100 m) — SPEC-001 §1 ;
+> - la fenêtre de préparation utile vaut `t ≤ √(2·R/a_max)` = **7,8 s** pour R = 60 m et
+>   `a_max = 2 m/s²` — ADR-013 §2.
+>
+> La conclusion ne change pas : 8 s valent toujours mieux que 40, et la décision de stocker des
+> conditions 2D tient. C'est la **marge** qui change — à 2–3 s elle est confortable, à 8 s elle est
+> nulle et l'activation redevient un pari exigeant `p ≈ 0,8` sur un acteur manœuvrant.
 
 **Interpolation entre états** : sur les paramètres (Hs, Tp, phase de marée), jamais sur les champs
 — invariant I-09. Deux conditions initiales moyennées produiraient une mer plus calme que les deux.
@@ -201,6 +214,29 @@ Sans cela, deux artistes qui cuisent la même source produisent deux binaires di
 gestionnaire de version s'engorge de faux changements, et surtout **le serveur et les clients
 peuvent charger des données divergentes**.
 
+> **Note corrective (S08, écart E07, gravité 1).** L'exigence énoncée ci-dessus est inatteignable
+> par construction. La bibliothèque côtière est produite en faisant tourner **δ** (§7.1), et
+> SPEC-003 §2 pose qu'un solveur δ **n'est jamais D1** — au mieux D2, c'est-à-dire *même binaire,
+> même machine, même graine*. Deux artistes sur deux machines ne produiront jamais le même octet.
+>
+> L'hypothèse commune aux deux branches était que la cuisson devrait être *reproductible*. Elle n'a
+> pas à l'être. Le motif exige seulement que **tous les participants chargent le même octet**, ce
+> qui s'obtient par un producteur unique, pas par un calcul reproductible partout.
+>
+> **Une cuisson livrable est autoritaire, pas reproductible :**
+>
+> 1. un producteur désigné — la machine de construction — cuit les artefacts livrés ;
+> 2. l'artefact est identifié par l'empreinte de son contenu ; le `bake_manifest` de §7.3 porte
+>    déjà exactement ce qu'il faut, sans ajout ;
+> 3. les postes d'artistes cuisent en local pour itérer, jamais pour livrer ; une cuisson locale ne
+>    remplace un artefact livré que par une promotion explicite ;
+> 4. **le régime D2 de l'outil de cuisson reste exigible**, sans quoi une cuisson n'est pas
+>    déboguable. Les disciplines énumérées ci-dessus — PRNG entier, aucune horloge murale, aucun
+>    parcours de disque, réductions ordonnées — restent donc toutes en vigueur : elles étaient
+>    justes, c'est la conclusion qu'on en tirait qui était trop forte.
+>
+> La correction **retire** une exigence et n'ajoute aucun mécanisme.
+
 ### 7.3 L'obsolescence silencieuse est le vrai risque
 
 Une donnée cuite ne se périme pas bruyamment. Un designer déplace un rocher ; la polyligne de
@@ -217,9 +253,25 @@ bake_manifest {
 }
 ```
 
-Une passe de vérification recalcule les empreintes des entrées et **fait échouer la construction**
-si un artefact est périmé. Elle s'exécute dans le harnais de SPEC-003, mode `check`, avec le reste
-de la batterie déterministe — pas dans un second système de validation.
+Une passe de vérification compare les empreintes des entrées et **fait échouer la construction**
+si un artefact est périmé. Elle s'exécute dans le harnais de SPEC-003, avec le reste de la batterie
+déterministe — pas dans un second système de validation.
+
+> **Note corrective (S08, écart E10).** Ce paragraphe logeait la passe dans le mode `check`, que
+> SPEC-003 §4 définit comme « ni GPU ni rendu ni **assets lourds** », moins de 60 s pour tout le
+> lot, et dont la vitesse est le seul objectif de conception. Or *recalculer* le sha256 des entrées,
+> c'est lire la bathymétrie et les maillages — les assets lourds nommément exclus.
+>
+> **Séparer la comparaison du recalcul**, l'intention d'un système de validation unique étant
+> préservée par deux cadences du même harnais :
+>
+> - **mode `check`, à chaque commit** — comparer les empreintes *déjà inscrites* dans le
+>   `bake_manifest` à celles inscrites dans le scénario et l'index d'assets. SPEC-003 §3 référence
+>   déjà ses données « par empreinte de contenu, jamais par chemin » : le canal existe, et la
+>   comparaison coûte une lecture de manifeste. Attrape le cas fréquent — un artefact cuit depuis
+>   une version d'entrée qui n'est plus celle que le dépôt déclare ;
+> - **cadence nocturne** (SPEC-003 §7) — recalculer les empreintes depuis les fichiers eux-mêmes.
+>   Attrape le cas rare et grave — une entrée modifiée sans que son empreinte déclarée ait suivi.
 
 ---
 
@@ -280,6 +332,11 @@ doit être écrite dans l'outil, faute de quoi quelqu'un les confondra.
    à côté des sources sans cache dédié ; idéalement ne versionner que les empreintes.
 4. **Format d'échange** avec l'outil de terrain existant — dépend de l'équipe terrain.
 5. **Coût de cuisson de la bibliothèque côtière** : 16 états × 40 s d'établissement × N plages.
-   Pour 50 plages, ≈9 heures de calcul mono-fil, parallélisable trivialement. Acceptable en
-   nocturne, pas en interactif — donc la boucle d'itération d'une plage doit pouvoir ne cuire
-   qu'un état.
+   Pour 50 plages, **au moins** ≈9 heures de calcul mono-fil, parallélisable trivialement.
+   Acceptable en nocturne, pas en interactif — donc la boucle d'itération d'une plage doit pouvoir
+   ne cuire qu'un état.
+   *(Note S08, écart E09 : les 40 s sont du temps **simulé** (ADR-013 §4). Ce calcul suppose donc
+   implicitement une cuisson en temps réel, alors que §7.1 annonce « plus vite que le temps réel »
+   et qu'une zone de 384 k cellules à `dx = 0,25` tourne plus probablement plus lentement sur un
+   fil. Les 9 h sont un **plancher**, pas une estimation — ce qui ne fait que renforcer la
+   conclusion.)*

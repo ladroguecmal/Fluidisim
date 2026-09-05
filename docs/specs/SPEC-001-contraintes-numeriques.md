@@ -100,6 +100,14 @@ Cellule eulérienne typique : vitesse (3×f32) + pression (f32) + fonction de ni
 | Impact, dx = 0,05, 6×6×4 m | 1,15 M | ≈ 37 Mo |
 | Déferlement, dx = 0,25, 120×20×5 m | 384 k | ≈ 12 Mo |
 
+> **Note corrective (S08, écart E01).** La colonne « cellules éparses » ci-dessus n'applique pas
+> un taux unique, contrairement à ce que le « ≈4 » de §2.3 laisse croire : bateau **÷4**
+> (1,73 M → 432 k), impact **÷1** (le comptage donné *est* le comptage plein — une cavité d'impact
+> est presque pleine), déferlement **÷2** (768 k → 384 k, un rouleau occupe environ la moitié de sa
+> boîte). Les trois taux sont défendables, aucun n'était justifié. Le taux d'occupation est une
+> propriété du **phénomène**, pas de l'allocateur : il se déclare par cas, et le « ≈4 » de §2.3 ne
+> vaut que pour le domaine bateau qui l'accompagne.
+
 Le budget de 384 Mo d'ADR-012 §3 correspond donc à ≈24 domaines de type bateau, ou 10 domaines
 d'impact fin. **Cohérence vérifiée** — le budget n'a pas été choisi arbitrairement.
 

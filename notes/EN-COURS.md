@@ -82,7 +82,7 @@ Objectif         : recroiser les cinq SPEC entre elles (S05 n'avait confronté q
   harnais non écrivable (L19 pris à l'envers).*
 - [x] **P5** — rédiger `docs/registres/REVUE-CROISEE-S08.md` : écarts trouvés, gravité, résolution,
   et la liste des contrôles **passés sans écart** — sans elle la revue n'est pas vérifiable.
-- [ ] **P6** — appliquer les résolutions : notes correctives datées dans les documents touchés,
+- [x] **P6** — appliquer les résolutions : notes correctives datées dans les documents touchés,
   nouvel ADR si une décision change, angles morts enregistrés.
 - [ ] **P7** — rituel de fin (`REPRISE.md` §6) : journal S08, leçons, index, jeton libéré.
 

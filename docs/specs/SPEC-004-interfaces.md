@@ -307,6 +307,23 @@ Facteur d'économie : **64**. C'est ce qui fait passer le terme source de rédhi
 négligeable, et c'est le rôle de `is_smooth_at(dx)` que de garantir la validité de
 l'approximation.
 
+> **Note corrective (S08, écart E08).** « Une cellule sur quatre » n'est pas une constante : c'est
+> le rapport `λ_cut/dx` qui décide, et il varie d'un facteur 2,5 entre deux régimes déjà écrits.
+>
+> | Régime | `dx` | `λ_cut/dx` | points par `λ_cut` après décimation ×4 |
+> |---|---|---|---|
+> | Scénario nominal (SPEC-003 §3) | 0,10 m | 40 | 10 — confortable |
+> | Zone de déferlement (SPEC-001 §2.4) | 0,25 m | 16 | **4 — deux fois Nyquist** |
+>
+> (`λ_cut = 4 m`, valeur de départ proposée par ADR-005.) À quatre points par longueur d'onde,
+> l'interpolation trilinéaire perd une fraction notable de l'amplitude de `S` — et le symptôme est
+> précisément celui que §6.1 décrit comme indiagnostiquable. L'économie s'effondrerait donc dans le
+> type de domaine le plus gros, celui-là même qu'elle devait rendre abordable.
+>
+> **La contrainte s'écrit `dx ≤ λ_cut/N`**, `N` à fixer au banc B4 dont c'est déjà un paramètre
+> direct (§10.3). `is_smooth_at(dx)` renvoie faux quand elle n'est pas satisfaite, et le solveur
+> retombe sur un échantillonnage plein — plus cher, mais juste.
+
 ---
 
 ## 7. Solides
@@ -479,3 +496,26 @@ sera formulée pendant le développement, et qui doit être refusée avec son mo
 5. **Budget d'instantanés W** — combien de poignées simultanées, et quelle politique si un lecteur
    lent en retient une trop longtemps ? Proposition : anneau de N instantanés, le plus ancien étant
    recyclé de force avec avertissement.
+6. **Le chemin poussé — absent de cette spécification** *(S08, écart E04, gravité 1)*. Cette
+   spécification décrit deux chemins : le chemin **tiré** (`EvalWaterBatch`, `sample_batch`) et le
+   chemin de **branchement de solveur**. Trois ADR en exigent un troisième, où le système d'eau
+   *publie* par tick, à basse fréquence, ce que personne ne vient chercher point par point :
+
+   | Document | Ce qui doit être publié |
+   |---|---|
+   | ADR-014 §2 | champ de moussage `F(x,t)`, deux canaux, texture 2D ancrée au monde |
+   | ADR-018 §1 | `TraversabilitySample` par cellule `HydroGrid`, à 5 Hz (ADR-018 §6) |
+   | ADR-016 §2, §6 | bus d'événements audio ; trois champs à ajouter à `WaveEvent` |
+
+   Aucun n'a de signature ici, et **`WaveEvent` n'est défini nulle part dans ce document** alors
+   qu'il traverse trois frontières (réseau, transduction δ→W, audio). Conséquence : trois des
+   quatre interfaces inter-équipes en attente d'accord (audio, IA/navigation, part écume du rendu)
+   n'ont aucun document à soumettre.
+
+   Contraintes déjà établies que ce chemin devra respecter : instantané **immuable à N lecteurs**
+   (§1.2) ; aucune allocation (I-06), donc anneau dimensionné par profil (I-16) ; le champ d'écume
+   étant produit sur GPU, sa lecture retombe sur `poll_readback` et son âge (§8.4), jamais sur une
+   lecture bloquante ; `WaveEvent` migre en §2 avec ses trois champs audio **avant que le réseau ne
+   fige le format**.
+
+   C'est un travail de session entière, pas une note corrective.
