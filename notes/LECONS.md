@@ -428,3 +428,49 @@ planification doit être refaite.
 **Réflexe** : toute valeur prédictive publiée s'accompagne de l'hypothèse sous laquelle elle vaut,
 et d'un mécanisme qui l'invalide quand l'hypothèse tombe. Sans quoi la prédiction survit à sa
 propre validité — et une prédiction périmée est plus nuisible qu'une absence de prédiction.
+
+## L40 — Un point reporté échappe aux audits
+
+*(S10)* Une contradiction interne à une seule session — un ADR réclamant un format pour un
+mécanisme qu'un autre ADR de la même session venait de dissoudre — a traversé **neuf sessions, une
+revue croisée des vingt ADR et une revue croisée des cinq spécifications**. Elle était visible en
+rapprochant deux paragraphes.
+
+Le motif n'est pas l'inattention, il est de forme : le point vivait dans une liste « ce qui reste
+ouvert ». Un audit vérifie ce qui est **affirmé** ; un point reporté se lit comme une lacune connue
+et suivie, c'est-à-dire comme quelque chose dont on sait déjà qu'il n'est pas résolu. Personne ne va
+vérifier qu'une question ouverte **a encore un objet**.
+
+**Réflexe** : auditer les listes de points ouverts comme on audite les décisions. Trois questions
+par point — a-t-il encore un objet ? sa formulation tient-elle encore ? quelqu'un attend-il quelque
+chose dessus ? Un point reporté qui a perdu son objet est plus coûteux qu'une contradiction
+visible : il crée du travail futur pour rien, et il porte l'autorité d'une tâche planifiée.
+
+## L41 — Une dégradation plus rapide que la restauration de ce qu'elle détruit fait pomper
+
+*(S10)* Le mécanisme de dégradation détruisait des domaines en engageant sa décision pour une
+seconde, alors que certains de ces domaines demandent quatre à huit secondes pour se rétablir. Le
+résultat n'est pas une économie mais un battement, et le battement est **plus visible que la
+dégradation qu'on cherchait à éviter** — ce que le même document énonçait déjà pour un autre de ses
+mécanismes, sans l'avoir appliqué à celui-ci.
+
+**Réflexe** : dans tout système qui détruit puis recrée pour économiser — domaines, caches, tampons,
+connexions, processus — comparer explicitement la **fenêtre d'engagement** au **coût de
+restauration**. Ce sont deux nombres, ils vivent en général dans deux documents, et personne ne les
+met côte à côte.
+
+## L42 — Quand quatre situations indépendantes ont la même réponse, la réponse est la bonne
+
+*(S10)* Sauvegarde, rechargement, arrivée en cours de partie, reconnexion et redémarrage de serveur
+demandent exactement le même objet — un temps, un journal d'événements, des entiers. Ce n'est pas
+une coïncidence commode : c'est la conséquence d'une décision antérieure (l'état du monde se réduit
+à un temps et à un journal), et le fait que quatre chemins y mènent est ce qui donne confiance dans
+la décision.
+
+Le corollaire est la partie actionnable : **si quatre situations voisines demandent quatre
+réponses différentes, le mécanisme commun n'a probablement pas encore été trouvé.** C'est le même
+signal que L01 — plusieurs questions qui résistent séparément partagent une prémisse — vu depuis
+l'autre côté, une fois la décomposition trouvée.
+
+**Réflexe** : après avoir conçu une réponse, compter combien de situations indépendantes elle
+couvre. C'est un test de justesse plus fort qu'un argument, et il est gratuit.

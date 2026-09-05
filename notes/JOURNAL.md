@@ -558,3 +558,116 @@ de le découvrir à la revue croisée suivante.
 déferlement publiée en SPEC-006 §6 ; l'arbitrage n°2 (la glace) conditionne deux champs de
 `TraversabilitySample`. Les quatre interfaces inter-équipes attendent désormais une réunion, non un
 document.
+
+---
+
+## S10 — 2026-09-05 — La persistance de l'eau
+
+**Consigne reçue.** « Enchaîne S10. » Objectif recommandé par S09 : `CondensedState`, la persistance
+hors caméra, et sa confrontation avec `CoastalState` — une configuration L22 signalée mais non
+examinée.
+
+**Sorties.** [`adr/ADR-022-persistance-de-l-eau.md`](../docs/adr/ADR-022-persistance-de-l-eau.md) ;
+invariant **I-17** créé et **I-03** amendé ; cas canonique **C19** ; notes correctives dans ADR-007,
+ADR-012, SPEC-004 et SPEC-005 ; registre porté à 77 angles morts ; leçons L40 à L42.
+
+### La question était mal posée, et depuis neuf sessions
+
+`condense`/`restore` figurent dans ADR-007 §3 sous le commentaire
+`// persistance hors caméra (architecture_globale §9)`. ADR-013 §6, **écrit la même session**, dit
+de cette même question `§9` : « il n'existe pas de simulation ralentie hors caméra […] cela
+supprime toute la question ». Le mécanisme a été dissous ; **la signature écrite pour lui est
+restée**, et ADR-007 §5.3 a même créé une tâche — « format exact de `CondensedState` → ADR à
+écrire » — pour servir un besoin qui n'existait déjà plus.
+
+C'est **L35 une seconde fois**, une session après avoir été écrite pour un cas identique
+(`drain_outgoing_events`, S09). Une décision se propage vers la prose qui l'explique, pas vers les
+signatures, qui n'ont l'air de rien affirmer.
+
+**La démonstration, couche par couche.** Rien de δ ne mérite d'être conservé : B est recalculé
+(I-02), W se dérive de son journal d'événements (ADR-003 §3), un domaine perturbatif renaît à δ = 0
+(ADR-013 §3), un domaine substitutif couplé à V rend un **entier** (ADR-010 §6), un déferlement
+s'amorce depuis une donnée **cuite** (ADR-013 §4), les cascades d'écume sont transitoires par
+construction (ADR-014 §2.3). Quatre confirmations indépendantes, dont la plus forte vient d'un
+document écrit pour autre chose : **le harnais rejoue une session entière à partir de
+`(T_sim, descripteurs, journal)`** (SPEC-003 §8). Si une session se rejoue sans état δ, l'état δ ne
+fait pas partie de l'état du monde. C'était déjà écrit.
+
+D'où l'invariant **I-17 — aucun état de δ n'est jamais sérialisé**. L'invariant vaut mieux que la
+décision seule : sans lui, la demande reviendrait « juste pour ce cas-là », sous une forme qui aura
+l'air raisonnable.
+
+### `SeedState` : les deux moitiés d'un même mécanisme
+
+`CondensedState` (S04) et `CoastalState` (S06) répondaient à la même question — *amener un domaine
+dans un état non trivial sans le simuler depuis zéro* — sous deux noms, à deux sessions
+d'intervalle. SPEC-005 §6 avait déjà la bonne forme, une **condition initiale 2D** et non un volume
+figé, trouvée pour la bonne raison : 197 Mo contre 1,2 Mo par plage. Ce qui manquait était de voir
+que cette forme n'a rien de côtier.
+
+- **`condense` est une opération d'outil de cuisson**, `restore` une opération d'exécution. Suivant
+  L19, `condense` quitte `IFluidSolver` pour un `ISeedProducer` que seul un hôte de cuisson obtient :
+  un hôte de jeu ne peut pas condenser, faute d'avoir le type.
+- **Cela referme l'écart E07 de S08.** Une graine est produite par δ, qui n'est jamais D1 — sans
+  importance, puisqu'elle n'est pas un calcul reproductible mais un **actif identifié par
+  l'empreinte de son contenu**. Les deux résolutions se rejoignent sans avoir été conçues ensemble.
+- **Le document disait déjà ce qu'il était** : la contrainte inscrite en SPEC-004 §10.2 — « il doit
+  se relire sur une machine différente, donc pas de disposition mémoire brute » — est celle d'un
+  actif cuit, et dépourvue de sens pour une condensation en mémoire.
+
+### Ce que l'eau met dans une sauvegarde
+
+Personne n'avait posé la question ; elle l'aurait été tard, par l'équipe du format de sauvegarde,
+avec une échéance. Trois choses : `T_sim`, les événements W vivants, les volumes entiers des nœuds V
+**modifiés par rapport à leur valeur d'auteur**. Au pire ≈180 Ko d'événements et 2 Mo pour cent
+mille nœuds — une sauvegarde d'eau est un petit objet, et il fallait le chiffrer avant que quelqu'un
+ne conçoive un découpage dont personne n'a besoin.
+
+**Le fichier de sauvegarde et la charge utile d'une arrivée en cours de partie sont le même
+objet.** Conséquence d'ADR-003 : quand l'état du monde se réduit à un temps et à un journal, le
+destinataire — disque, réseau, harnais — n'y change rien. Un seul format à écrire et à versionner,
+et le harnais le teste déjà (SPEC-003 §8) sans qu'aucun test de sauvegarde ne soit écrit. D'où le
+cas canonique **C19**, binaire parce qu'en régime D1 — ce qu'il n'aurait pas pu être si un état de δ
+figurait dans la sauvegarde.
+
+Deux points que le corpus impliquait sans les dire : **le TTL d'ADR-010 §7 est la borne supérieure
+de la persistance de l'eau**, pas un nettoyage cosmétique ; et **sauvegarder force un règlement
+δ→V**, sans quoi la masse d'un compartiment en cours d'inondation vit dans un champ qu'I-17 interdit
+d'écrire.
+
+### Deux écarts trouvés en chemin
+
+- **ADR-012 rang 5 contre les domaines substitutifs.** La dégradation détruit les domaines non
+  focaux et engage sa décision pour « au moins 30 frames », soit 1 s. Un domaine substitutif se
+  rétablit en 4,4 à 8 s depuis une graine, 40 s depuis rien. Il serait donc détruit puis redemandé
+  **quatre à huit fois plus vite qu'il ne se rétablit**. Le rang 5 ne porte désormais que sur les
+  domaines perturbatifs.
+- **I-03 était incomplet.** Il énonçait « B et W répliqué sont déterministes » ; SPEC-003 §2 place
+  **V** dans le régime D1 depuis S03, et ADR-010 §4 avait pris toutes les dispositions pour cela.
+  Sans déterminisme inter-plateforme de V, un serveur et un client divergeraient sur le volume d'un
+  compartiment — sur une issue de jeu. Amendé. Gravité 3 en conséquences, mais il portait sur le
+  document qu'on cite pour refuser une proposition.
+
+Au passage, une closure que le corpus impliquait : **V est la seule couche que le serveur exécute**
+(I-10 ne lui interdit que W et δ), et sa forme — entiers, report de reste, 10 Hz — n'était pas une
+commodité d'implémentation mais la forme qu'une couche doit avoir pour être autoritaire au sens
+d'I-15. Corollaire à annoncer tôt : **le serveur charge des données cuites** (les `shape_lut`), il
+n'est pas « sans assets ».
+
+### Ce qui n'a pas été fait
+
+ADR-022 n'a été croisé contre rien, non plus que SPEC-006 en S09. Deux documents structurants
+écrits coup sur coup et non audités.
+
+**Prochaine session recommandée.** S11 — **auditer les listes « ce qui reste ouvert »**, de tous les
+documents. C'est l'axe d'audit que S10 vient de montrer productif et que personne n'a jamais
+parcouru : un audit vérifie ce qui est *affirmé*, et un point reporté se lit comme une lacune connue
+plutôt que comme une contradiction possible. Le corpus en compte de l'ordre de cent, répartis sur
+22 ADR et 6 SPEC, et l'un d'eux cachait la dissolution complète de son propre objet depuis neuf
+sessions. Pour chacun : a-t-il encore un objet, sa formulation tient-elle encore, et quelqu'un
+attend-il quelque chose dessus ? L'exercice couvre au passage SPEC-006 et ADR-022.
+
+**Arbitrages en attente — rappel.** Les trois arbitrages de design restent ouverts, et un quatrième
+point demande une décision qui n'appartient pas à l'équipe eau : la durée de vie d'un nœud V
+rattaché à un objet d'un joueur absent depuis des mois (ADR-022 §7.2). Les quatre interfaces
+inter-équipes attendent toujours une réunion, et `WaveEvent` reste l'urgence de format.

@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S10
-État             : en cours
+État             : terminée
 Battement        : 2026-09-05
 Objectif         : `CondensedState`, la persistance hors caméra, et sa confrontation avec
                    `CoastalState` — configuration L22 signalée par S09
@@ -90,7 +90,7 @@ Objectif         : `CondensedState`, la persistance hors caméra, et sa confront
 - [x] **P7** — répercussions : notes correctives dans SPEC-004 (§10.2 et les signatures),
   ADR-007 §7.3, renvoi depuis SPEC-005 §6.
 - [x] **P8** — index, invariants, angles morts, README si nécessaire.
-- [ ] **P9** — rituel de fin (`REPRISE.md` §6) : journal S10, leçons, index, jeton libéré.
+- [x] **P9** — rituel de fin (`REPRISE.md` §6) : journal S10, leçons, index, jeton libéré.
 
 ### Notes de reprise
 

@@ -12,10 +12,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-05
-Session en cours : S10 — 2026-09-05 — la persistance de l'eau (ADR-022)
-Dernière session : S09 — 2026-09-05 — le chemin poussé (SPEC-006)
+Dernière session : S10 — 2026-09-05 — la persistance de l'eau (ADR-022)
+Session suivante : S11 — auditer les listes « ce qui reste ouvert » de tous les documents : un
+                   point reporté échappe aux audits, et l'un d'eux cachait la dissolution de son
+                   propre objet depuis neuf sessions (L40)
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
@@ -132,7 +134,10 @@ Avant de rendre la main, dans cet ordre :
 2. **Enregistrer les angles morts trouvés** dans `docs/registres/ANGLES-MORTS.md`, avec sévérité.
 3. **Enregistrer les leçons généralisables** dans `notes/LECONS.md` — une leçon qui ne sert que
    dans son cas d'origine n'y a pas sa place.
-4. **Mettre à jour `docs/00_INDEX.md`** : nouveaux documents, avancement, arbitrages.
+4. **Mettre à jour `docs/00_INDEX.md`** : nouveaux documents, avancement, arbitrages. **Et vérifier
+   les décomptes recopiés** — nombre d'ADR, d'invariants, de spécifications, d'angles morts, de cas
+   canoniques — dans `README.md`, `REPRISE.md` et l'index. Un décompte recopié se périme en
+   silence : le défaut a été trouvé en S07, puis de nouveau en S10.
 5. **Corriger ce qui a été invalidé** : un ADR n'est jamais réécrit, mais une erreur factuelle
    reçoit une note corrective visible et datée, et une décision changée fait l'objet d'un nouvel
    ADR qui remplace explicitement l'ancien.
