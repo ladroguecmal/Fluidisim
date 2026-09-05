@@ -88,7 +88,7 @@ Objectif         : écrire le chemin poussé — SPEC-006. Débloque trois des q
   l'interface rend impossible · §9 ce qui reste ouvert.
 - [x] **P7** — SPEC-004 : migrer `WaveEvent` en §2 avec ses trois champs audio, renommer
   `WaterSample.u` en `u_total` (écart E05), enrichir §9, marquer le point ouvert n°6 résolu.
-- [ ] **P8** — index, README, statut des actions du registre S08, angles morts trouvés en écrivant.
+- [x] **P8** — index, README, statut des actions du registre S08, angles morts trouvés en écrivant.
 - [ ] **P9** — rituel de fin (`REPRISE.md` §6) : journal S09, leçons, index, jeton libéré.
 
 ### Notes de reprise
@@ -152,3 +152,9 @@ Le `vec3 u` restant en SPEC-004 §2.1 appartient à `BackgroundSample` : c'est l
 de fond U, pas la vitesse de surface. Correctement nommé, non touché.
 La référence à `WaterSample.u` dans REVUE-CROISEE-S08 est laissée telle quelle : un registre
 d'audit consigne ce qui a été constaté, il ne se réécrit pas.
+
+#### P8 — README non touché
+
+L'arborescence du README décrit `specs/` génériquement (« références chiffrées et signatures
+d'interfaces ») : toujours exact avec SPEC-006, et aucun décompte périmé à corriger. Vérifié, pas
+supposé — c'est le défaut qu'avait trouvé S07.

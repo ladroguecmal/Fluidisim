@@ -67,7 +67,8 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`specs/SPEC-002`](specs/SPEC-002-phenomenes-secondaires.md) | écume, bulles, air, glace, danger, acoustique, optique sous-marine |
 | [`specs/SPEC-004`](specs/SPEC-004-interfaces.md) | **signatures des interfaces** — solveurs, champ de fond, solides, services d'hôte, contrat de fils d'exécution |
 | [`specs/SPEC-005`](specs/SPEC-005-outillage-auteur.md) | **outillage auteur** — sources de vérité, inversion du pipeline eau/terrain, cuisson déterministe, obsolescence |
-| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | 70 points, avec sévérité — dont 10 trouvés dans nos propres écrits |
+| [`specs/SPEC-006`](specs/SPEC-006-chemin-pousse.md) | **le chemin poussé** — ce que le système *publie* : bus d'événements et `WaveEvent`, écume et aération, traversabilité, polyligne de déferlement |
+| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | 74 points, avec sévérité — dont 14 trouvés dans nos propres écrits |
 | [`registres/REVUE-CROISEE-S05.md`](registres/REVUE-CROISEE-S05.md) | **audit croisé des 20 ADR** — 12 écarts, dont 2 de gravité 1, et la liste des contrôles passés |
 | [`registres/REVUE-CROISEE-S08.md`](registres/REVUE-CROISEE-S08.md) | **audit croisé des 5 SPEC** — 10 écarts, dont 2 de gravité 1 ; l'arithmétique des fiches chiffrées revérifiée ligne à ligne |
 | [`registres/QUESTIONS-OUVERTES.md`](registres/QUESTIONS-OUVERTES.md) | traçabilité section par section + verdict sur les 7 propositions antérieures |
@@ -90,11 +91,11 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 ```
 Conception conceptuelle   ██████████████████████  100 %   les 30 sections sources sont traitées
 Chiffrage et contraintes  █████████████████░░░░░   75 %   formules posées, mesures à faire
-Spécification technique   ████████████████░░░░░░   72 %   chemin tiré posé ; le chemin poussé n'est pas écrit (E04)
-Cohérence interne         █████████████████████░   95 %   20 ADR + 5 SPEC confrontés, 22 écarts résolus
+Spécification technique   ███████████████████░░░   88 %   chemins tiré et poussé posés ; restent CondensedState et IGpuBackend
+Cohérence interne         █████████████████████░   95 %   20 ADR + 5 SPEC confrontés, 22 écarts résolus ; SPEC-006 non recroisée
 Décisions expérimentales  ██░░░░░░░░░░░░░░░░░░░░   10 %   onze bancs définis, aucun exécuté
 Outillage et pipeline     ████████████░░░░░░░░░░   55 %   harnais et outillage auteur spécifiés, non écrits
-Accords inter-équipes     ██░░░░░░░░░░░░░░░░░░░░   10 %   interfaces proposées, non confirmées
+Accords inter-équipes     ███░░░░░░░░░░░░░░░░░░░   15 %   les quatre interfaces sont écrites ; aucune confirmée
 ```
 
 **Chemin critique**
@@ -132,11 +133,15 @@ sont posés. Ce qui reste est du code, des mesures et des réunions.
 
 ### Interfaces à confirmer avant que l'autre équipe ne fige son format
 
-> **Préalable trouvé en S08 (écart E04, gravité 1).** Trois de ces quatre interfaces — audio,
-> IA/navigation, et la part écume du rendu — **n'ont aucune signature écrite** : elles relèvent du
-> *chemin poussé*, absent de SPEC-004, qui ne spécifie que le chemin tiré et le branchement de
-> solveur. On ne peut donc pas encore demander à ces équipes de confirmer quoi que ce soit : il
-> faut d'abord écrire ce qu'on leur soumet. C'est l'objet de S09, et cela précède les réunions.
+> **Préalable levé en S09.** S08 avait constaté (écart E04, gravité 1) que trois de ces quatre
+> interfaces — audio, IA/navigation, part écume du rendu — n'avaient **aucune signature écrite** :
+> elles relevaient du *chemin poussé*, absent de SPEC-004. [`SPEC-006`](specs/SPEC-006-chemin-pousse.md)
+> les spécifie désormais toutes les quatre. **Les réunions peuvent avoir lieu**, et ce qu'on y
+> soumet est un document, pas une intention.
+>
+> Une urgence de format demeure : `WaveEvent` porte trois champs demandés par l'audio
+> (SPEC-006 §3.1) et c'est une structure **répliquée**. Elle doit être arrêtée **avant** que le
+> réseau ne fige son format, faute de quoi les ajouter coûtera une migration de protocole.
 
 | Équipe | Objet | Risque si tardif |
 |---|---|---|

@@ -9,8 +9,9 @@ Sévérité : **1** = refonte d'architecture si découvert tard, **2** = refonte
 
 Historique : 28 recensés en S01, 12 ajoutés en S02 (phénomènes secondaires), 9 en S03 (harnais
 de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outillage auteur),
-6 en S08 (revue croisée des SPEC) — **70 au total**. **Dix ont été trouvés dans nos propres
-écrits**, pas dans les documents sources : A49, A56, A57, A58, puis A65 à A70. La proportion
+6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé) — **74 au total**.
+**Quatorze ont été trouvés dans nos propres écrits**, pas dans les documents sources : A49, A56,
+A57, A58, puis A65 à A74. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -90,6 +91,10 @@ ce que les sources avaient omis.
 | **A68** | La vitesse de surface mêle orbitale et courant ; un seuil de danger calculé dessus oscille | 2 | SPEC-002 §5, écart E05 |
 | **A69** | Une passe de validation logée dans le mode rapide lui fait lire ce que ce mode exclut | 2 | SPEC-005 §7.3, écart E10 |
 | **A70** | Un coût de cuisson chiffré en temps simulé se lit comme un temps de calcul | 3 | SPEC-005 §11.5, écart E09 |
+| **A71** | Une signature survit à la décision qui la vide de son objet | 2 | SPEC-004 §3, SPEC-006 §3.2 |
+| **A72** | Un `half` se choisit sur l'étendue de la grandeur, pas sur la précision voulue | 3 | SPEC-006 §3.1 et §6 |
+| **A73** | L'anticipation locale fait jouer deux fois le même impact | 2 | SPEC-006 §3.3 |
+| **A74** | Une prédiction publiée sans son hypothèse reste crue après que l'hypothèse a cessé | 2 | SPEC-006 §5.4 |
 
 Soixante-quatre angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -253,3 +258,24 @@ pendant quatre sessions.
   validation — était juste ; c'est la cadence qui était mal choisie.
 - **A70** — Un coût de cuisson chiffré en **temps simulé** se lit comme un temps de calcul, et
   contredit silencieusement une autre phrase du même document.
+
+**Ajoutés en S09, tous apparus en écrivant les signatures du chemin poussé**
+
+- **A71** — Une **signature survit à la décision qui la vide de son objet**.
+  `drain_outgoing_events()` servait le chemin δ→serveur qu'ADR-021 §3 a supprimé en S05 ; l'écart
+  R03 avait retiré le chemin de données, pas la fonction. Elle est restée neuf mois de conception
+  dans un document dont le statut est « dernier avant l'écriture de code », et elle aurait été
+  implémentée. Une décision qui supprime un mécanisme doit lister les **signatures** qu'elle
+  périme, pas seulement les paragraphes.
+- **A72** — Un `half` se choisit sur l'**étendue** de la grandeur, jamais sur la précision voulue.
+  Deux cas dans un seul document : `displaced_ml` sature à 65 litres, dépassé par toute claque de
+  coque ; un flux dissipé en W/m sature à 65 kW/m, dépassé dès `Hs = 4 m`. Dans les deux cas
+  l'erreur est invisible en relecture et se manifeste comme une saturation silencieuse au cas le
+  plus spectaculaire — celui qu'on remarquera le plus tard et qui compte le plus.
+- **A73** — L'**anticipation locale** d'ADR-009 §7.2 et le bus d'événements partagé, pris ensemble,
+  font jouer deux fois le même impact à 100–300 ms d'intervalle. Chacun des deux mécanismes est
+  correct seul. C'est leur conjonction qui produit le défaut, et personne n'en est propriétaire.
+- **A74** — Une **prédiction publiée sans son hypothèse** reste crue après que l'hypothèse a cessé
+  d'être vraie. « Ce gué se ferme dans quarante minutes » suppose que seule la marée agit ; une
+  vanne ouverte en amont laisse la valeur en place, fausse, jusqu'à la republication de la tuile.
+  Vaut pour toute donnée prédictive publiée : elle porte sa cause, ou elle ment.

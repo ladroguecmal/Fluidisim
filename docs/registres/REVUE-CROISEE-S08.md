@@ -302,7 +302,7 @@ et non par la météo. C'est un chiffre qui éclaire une décision humaine, pas 
 | Action | Où | Statut |
 |---|---|---|
 | Point ouvert n°6 — le chemin poussé | SPEC-004 §10 | appliqué |
-| Écriture des signatures du chemin poussé | SPEC-006, ou §11 de SPEC-004 | **objectif recommandé pour S09** |
+| Écriture des signatures du chemin poussé | [`SPEC-006`](../specs/SPEC-006-chemin-pousse.md) | **faite en S09** — quatre canaux, `WaveEvent` complet ; E05 et E06 résolus avec elle |
 | Note corrective — cuisson autoritaire, non reproductible | SPEC-005 §7.2 | appliquée |
 | Note corrective — obsolescence à deux cadences | SPEC-005 §7.3 | appliquée |
 | Note corrective — `dx ≤ λ_cut/N` | SPEC-004 §6.2 | appliquée |
