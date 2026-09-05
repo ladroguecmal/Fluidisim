@@ -78,7 +78,7 @@ avait dissous celui d'ADR-007 §5.3 sans que personne ne le voie pendant neuf se
   produire la table brute. *Thèse : sans inventaire exhaustif écrit, l'audit portera sur ce qu'on
   se rappelle, c'est-à-dire sur les documents récents — précisément ceux qui en ont le moins besoin.*
 - [x] **P3** — passe sur **ADR-001 à ADR-008** (socle).
-- [ ] **P4** — passe sur **ADR-009 à ADR-013** (réseau, hydraulique, ordonnanceur, prédiction).
+- [x] **P4** — passe sur **ADR-009 à ADR-013** (réseau, hydraulique, ordonnanceur, prédiction).
 - [ ] **P5** — passe sur **ADR-014 à ADR-022** (phénomènes secondaires, construction, corrections).
 - [ ] **P6** — passe sur les **six SPEC** et le harnais.
 - [ ] **P7** — rédiger `docs/registres/AUDIT-POINTS-OUVERTS-S11.md` : le verdict par point,
@@ -118,3 +118,13 @@ profil d'ADR-012 §3 déclare encore `paquets_W_max` et `v_noeuds_actifs`, qui s
 pool, donc ressources ET capacités à la fois. Le critère qui marche : *une valeur peut figurer dans
 un profil si elle est allouée directement ; pas si elle doit être cohérente avec deux autres valeurs
 déjà déclarées.* C'est ce qui condamnait `domaines_max`, contradictoire avec la mémoire ET le temps.
+
+#### P4 — 10 E, 4 C, 3 D, 2 B
+
+Deux points **répondus depuis longtemps** et jamais marqués : ADR-009 §2 (anticipation locale —
+prémisse morte en S05, mécanisme spécifié en S09) et ADR-013 §3 (format et volume de la
+bibliothèque côtière — répondu par SPEC-005 §6 en S06, cinq sessions).
+
+Et une **cinquième dépendance inter-équipes découverte** : l'équipe gameplay spatial, citée deux
+fois pour `to_vacuum` (ADR-010 §8.3, ADR-015 §7.2) et absente de la liste des quatre interfaces de
+00_INDEX.md.

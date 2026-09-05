@@ -194,3 +194,143 @@ soient dimensionnés par profil, I-16 interdit d'y déclarer un nombre maximal d
 
 Le second est le bon porteur — c'est la spécification d'interface, et le type y a désormais un nom
 (`ShapeKind`). **Action** : ADR-007 §5.4 devient un renvoi vers SPEC-004 §10.1.
+
+---
+
+## Réseau, hydraulique, ordonnanceur, prédiction — ADR-009 à ADR-013 (19 points)
+
+| Point | Verdict | Constat |
+|---|---|---|
+| ADR-009 §1 | **D** | `K` et table `E_cause` — ADR-021 §2 reprend le point et dit qu'il change de propriétaire ; deux porteurs, voir §3.1 |
+| ADR-009 §2 | **B** | anticipation locale — la prémisse est morte et la question est répondue, voir §3.2 |
+| ADR-009 §3 | **C** | nombre maximal d'événements W par région — c'est une borne dérivée, voir §3.3 |
+| ADR-009 §4 | **E** | horloge client manifestement fausse — renvoi à la politique anti-triche générale, toujours valide |
+| ADR-010 §1 | **E** | réseaux fermés sous pression, reporté en v2 — reporté explicitement, ce qui est un statut légitime |
+| ADR-010 §2 | **C** | `V_min` et les TTL — l'enjeu a changé de nature, voir §3.4 |
+| ADR-010 §3 | **D** | `to_vacuum` — doublon avec ADR-015 §2, voir §3.5 |
+| ADR-010 §4 | **E** | mélange de liquides dans un nœud |
+| ADR-011 §1 | **C** | textures C1 : le *mode de production* a été répondu par SPEC-005 §2, la résolution et le format restent — voir §3.6 |
+| ADR-011 §2 | **E** | passage à l'échelle du `shape_lut` pour un lac de 10 km² — valide, et son enjeu a grandi : voir §3.7 |
+| ADR-011 §3 | **D** | modèle de marée — doublon avec ADR-004 §4 (traité en §2.3) |
+| ADR-011 §4 | **E** | couplage courant ↔ houle, `ω_apparent = ω + k·U` |
+| ADR-012 §1 | **E** | toutes les valeurs numériques → B7 |
+| ADR-012 §2 | **E** | budget séparé par joueur en écran partagé — toujours ouvert ; SPEC-006 §4.2 a depuis introduit des auditeurs déclarés, ce qui règle la question côté *publication* mais pas côté *budget* |
+| ADR-012 §3 | **E** | politique de saturation — et SPEC-003 §9.2 est précisément le banc conçu pour trouver la falaise. Renvoi à ajouter, pas de changement de fond |
+| ADR-013 §1 | **E** | calibration des seuils → B8 |
+| ADR-013 §2 | **E** | table `a_max` par archétype — attend l'équipe véhicules |
+| ADR-013 §3 | **B** | format et volume de la bibliothèque côtière — **répondu depuis S06**, voir §3.8 |
+| ADR-013 §4 | **C** | rochers turbulents permanents — la source de données est réglée, le comportement non |
+
+**Bilan : 10 E, 4 C, 3 D, 2 B.**
+
+### 3.1 ADR-009 §1 et ADR-021 §2 — un doublon qui se sait *(D)*
+
+ADR-021 §7.2 dit lui-même : « Table `E_cause` par type d'objet et valeur de `K` — inchangée depuis
+ADR-009 §7.1, mais elle change de propriétaire : c'est désormais une donnée d'équilibrage
+gameplay. » Le doublon est donc conscient et documenté d'un côté ; il ne l'est pas de l'autre.
+
+ADR-009 §7.1 continue de présenter `K` comme le garde-fou de sécurité qu'ADR-021 §3 a supprimé
+(« le plafonnement n'a plus lieu d'être »). Un lecteur d'ADR-009 seul planifierait un travail
+d'anti-triche là où il ne reste qu'un réglage d'équilibrage.
+
+**Action** : ADR-021 §7.2 porte la question ; note corrective dans ADR-009 §7.1.
+
+### 3.2 ADR-009 §2 — la prémisse est morte, la question a été répondue ailleurs *(B)*
+
+« Faut-il autoriser un client à anticiper localement un événement qu'il vient de causer, avant
+validation serveur ? Oui probablement, **avec correction si le serveur borne plus bas**. Mécanisme
+de correction d'amplitude sans saut visible : à spécifier. »
+
+Deux choses ont changé, dans deux sessions différentes :
+
+- **la prémisse a disparu en S05.** ADR-021 §3 a supprimé la validation serveur d'une demande
+  client : le serveur émet depuis la cause. Il ne « borne » donc plus rien, et la correction
+  d'amplitude qu'on redoutait n'a plus lieu d'être ;
+- **le mécanisme demandé a été spécifié en S09.** SPEC-006 §3.3 traite la réconciliation par un
+  **bit de rétractation** sur le bus d'événements — non pas pour corriger une amplitude, mais pour
+  éviter qu'un impact anticipé et sa version serveur ne soient joués deux fois à 100–300 ms
+  d'intervalle.
+
+Le point est donc entièrement traité, par deux documents qui ne se sont pas concertés, et il figure
+toujours comme « à spécifier ». **Action** : clore, renvoyer à ADR-021 §3 et SPEC-006 §3.3.
+
+### 3.3 ADR-009 §3 — une borne qui ne se déclare pas *(C)*
+
+« Nombre maximal d'événements W actifs par région (protection contre la saturation). »
+
+Trois choses sont arrivées depuis :
+
+- ADR-012 §3 déclare `paquets_W_max = 4096` — des **paquets**, pas des événements, un événement se
+  développant en plusieurs paquets ;
+- **I-16** interdit d'inscrire une capacité dérivée dans un profil, et le critère affiné en §2.6
+  ci-dessus s'applique : un nombre maximal d'événements *par région* doit s'accorder avec le budget
+  de paquets **et** avec le nombre de régions actives — deux autres valeurs déjà déclarées ;
+- **ADR-021 §4** interdit d'élaguer un paquet `W_rep` au-dessus du seuil de pertinence gameplay,
+  quel que soit le profil. Une « protection contre la saturation » ne peut donc pas consister à
+  jeter des événements répliqués.
+
+Le point reste ouvert mais sa formulation est devenue trompeuse : ce n'est pas une valeur à choisir,
+c'est une borne à **dériver**, et le comportement à la borne est déjà contraint. **Action** : note
+corrective.
+
+### 3.4 ADR-010 §2 — l'enjeu du TTL a changé de nature *(C)*
+
+« `V_min` et les TTL → calibration gameplay. »
+
+ADR-022 §4.3 a établi que le TTL des nœuds créés par le jeu est **la borne supérieure de la
+persistance de l'eau** : sans lui, chaque flaque jamais revisitée d'un monde persistant resterait
+dans l'état du monde indéfiniment. Ce n'est plus un réglage de confort, c'est un paramètre de
+**volume de stockage à l'échelle du monde**.
+
+Un point ouvert qui annonce « calibration gameplay » sera traité par un concepteur de gameplay, seul,
+qui l'allongera pour de bonnes raisons de jeu sans savoir ce qu'il engage. **Action** : note
+corrective renvoyant à ADR-022 §4.3.
+
+### 3.5 ADR-010 §3 et ADR-015 §2 — le même `to_vacuum`, deux fois *(D)*
+
+- ADR-010 §8.3 : « à traiter comme un type d'arête spécial `to_vacuum` avec un débit forfaitaire.
+  À spécifier avec l'équipe gameplay spatial. »
+- ADR-015 §7.2 : « Débit critique et vitesse d'éjection pour `to_vacuum` : formule des gaz parfaits
+  en col sonique, à confronter au ressenti gameplay. »
+
+Le second est plus avancé — il nomme la formule. **Action** : ADR-015 §7.2 porte la question ;
+ADR-010 §8.3 devient un renvoi. À noter que les deux mentionnent l'équipe gameplay spatial : c'est
+une cinquième dépendance inter-équipes, absente de la liste de `00_INDEX.md`. Voir §7.
+
+### 3.6 ADR-011 §1 — la moitié de la question a été répondue par SPEC-005 *(C)*
+
+« Résolution et format des textures C1, **et leur mode de production** (solveur hors ligne ?
+auteur ?). »
+
+La table des données de SPEC-005 §2 répond au troisième terme : « Champs de courant C1 | dérivé, ou
+auteur | bathymétrie + apports ». Le mode de production est donc réglé — dérivation avec surcharge
+d'auteur, comme pour les débits. Restent la résolution et le format.
+
+**Action** : note corrective délimitant ce qui est acquis.
+
+### 3.7 ADR-011 §2 — le même point, avec un enjeu plus lourd qu'à l'écriture *(E)*
+
+« Le lac comme nœud V grand format : passage à l'échelle du `shape_lut` pour un lac de 10 km². »
+
+ADR-022 §5.1 a établi que **le serveur exécute la couche V**, et qu'il lui faut donc les `shape_lut`
+— « un serveur sans assets n'est pas une option ». Le passage à l'échelle du `shape_lut` d'un lac
+n'est donc plus seulement un problème de mémoire client : c'est un problème de mémoire **serveur**,
+sur une machine qui en héberge beaucoup.
+
+Le verdict reste **E** — la question est correctement posée et toujours ouverte — mais elle a changé
+de poids sans que personne l'ait su. **Action** : renvoi croisé, pas de correction.
+
+### 3.8 ADR-013 §3 — répondu depuis cinq sessions *(B)*
+
+« Format et volume exact de la bibliothèque d'états côtiers précalculés (§27) → dépend de B4. »
+
+- **SPEC-005 §6 (S06)** donne le format — une condition initiale 2D à 0,5 m, quatre champs en
+  `f16` — et les volumes : **77 Ko par état, 1,2 Mo par plage, 60 Mo pour cinquante plages.**
+- **ADR-022 §3 (S10)** généralise le type en `SeedState` et en fixe la structure complète.
+
+La réponse ne dépendait pas de B4 : elle est sortie d'un calcul de volume de données, en S06, deux
+sessions après que le point a été écrit. Cinq sessions plus tard, il figure toujours comme dépendant
+d'un banc qui n'a pas tourné.
+
+**Action** : clore, renvoyer à SPEC-005 §6 et ADR-022 §3. Ce qui dépend réellement de B4 est le
+*seuil de tolérance sur les paramètres d'une graine* — et ce point-là existe déjà, ADR-022 §7.1.
