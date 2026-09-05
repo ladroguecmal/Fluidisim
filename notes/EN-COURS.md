@@ -68,7 +68,7 @@ Objectif         : écrire le chemin poussé — SPEC-006. Débloque trois des q
 ### Plan
 
 - [ ] **P1** — déclarer le plan, prendre le jeton, mettre à jour le battement.
-- [ ] **P2** — SPEC-006 §1–2 : principe du chemin poussé et règles générales — cadences propres,
+- [x] **P2** — SPEC-006 §1–2 : principe du chemin poussé et règles générales — cadences propres,
   instantané immuable à N lecteurs, contrat de fils, anneau sans allocation, âge obligatoire,
   et la règle d'autorité qui découle d'I-15.
   *Thèse : le chemin poussé n'est pas « l'inverse » du chemin tiré. Il a ses propres règles, et
