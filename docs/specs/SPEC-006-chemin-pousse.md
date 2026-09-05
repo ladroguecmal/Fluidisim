@@ -379,3 +379,141 @@ ring_slots ≥ (cadence_bus / cadence_du_consommateur_le_plus_lent) + 1
 soit au moins 4 emplacements pour un consommateur à 10 Hz. Un anneau plus court fait perdre des
 événements silencieusement — sauf que `sequence` (§2.4) le rend constatable, ce qui est
 précisément son rôle.
+
+---
+
+## 4. Écume et aération : un champ, deux publications
+
+ADR-014 pose un champ de moussage `F` à deux canaux et un champ d'aération `A`, tous deux calculés
+sur GPU. Trois consommateurs les veulent, et **ils n'en veulent pas la même chose** :
+
+| Consommateur | Ce qu'il veut | Où il vit |
+|---|---|---|
+| Rendu | la texture, telle quelle | GPU |
+| Audio | l'intégrale de `F` autour de l'auditeur (ADR-016 §2), l'occlusion par `A` (§4.3) | CPU, fil audio |
+| Flottabilité | `A` **au point** du solide | CPU — et c'est le chemin **tiré**, cf. §4.5 |
+
+Publier une seule forme aux trois impose soit une lecture arrière de texture à qui n'en a pas
+besoin, soit une texture à qui ne sait qu'en faire. Le canal a donc **deux publications distinctes
+du même champ**, et c'est la décision structurante de cette section.
+
+### 4.1 Au rendu : une poignée, jamais une copie
+
+```cpp
+struct FoamCascadeDesc {
+    FrameId    frame;            // référentiel de l'ancre — I-07, I-08
+    vec3       anchor_local;     // |anchor_local| < 4096 m
+    float      extent_m;         // côté de la cascade, en mètres
+    uint16_t   texels;           // côté en texels ; résolution ouverte — ADR-014 §7.1, banc B9
+    uint8_t    level;            // 0 = la plus fine
+};
+
+struct FoamGpuView {
+    SnapshotStamp            stamp;
+    span<const FoamCascadeDesc> cascades;   // du plus fin au plus grossier
+    span<const BufferId>        textures;   // RG16F : canal actif, canal résiduel — ADR-014 §2.2
+};
+```
+
+Deux canaux dans une seule texture, parce qu'ADR-014 §2.2 en fait un vecteur à deux composantes et
+que les séparer doublerait les lectures pour rien.
+
+**Ce qui sort d'une cascade est perdu**, et c'est voulu (ADR-014 §2.3) : hors de vue. La conséquence
+d'interface est qu'une cascade **change d'ancre** quand l'observateur se déplace ; `anchor_local` et
+`frame` sont donc republiés à chaque instantané, et un consommateur qui aurait mémorisé une ancre
+lirait un champ décalé. C'est la raison pour laquelle la description voyage avec la texture au lieu
+d'être demandée une fois à l'initialisation.
+
+### 4.2 À l'audio : un agrégat minuscule, calculé là où il est déjà
+
+L'audio veut « la quantité d'écume réellement présente » autour de l'auditeur (ADR-016 §2). Ramener
+la texture au CPU pour l'intégrer serait absurde :
+
+```
+une cascade de 1024² en RG16F pèse 4,2 Mo   ·   quatre cascades, 30 fois par seconde
+   → ≈500 Mo/s de lecture arrière, plus une à trois frames de latence
+l'agrégat correspondant                      → quelques dizaines d'octets
+```
+
+La réduction se fait donc **sur le GPU, dans la passe qui produit déjà `F`**, et seul le résultat
+traverse. C'est la forme générale de la règle : *le chemin poussé publie au CPU des réductions,
+jamais des champs.*
+
+```cpp
+struct ListenerAggregate {
+    ListenerId id;
+    half  foam_active[3];        // intégrale du canal actif   sur r = 10, 50, 200 m
+    half  foam_residual[3];      // intégrale du canal résiduel, mêmes rayons
+    half  aeration_sector[16];   // cf. §4.3
+    half  immersion;             // fraction du volume de l'auditeur sous la surface
+};                               // 45 octets
+
+struct FoamAggregateView {
+    SnapshotStamp                  stamp;   // `readback_age_us` est ici toujours non nul
+    span<const ListenerAggregate>  listeners;
+};
+```
+
+Trois rayons plutôt qu'un, parce qu'un lit d'ambiance et un déferlement à trente mètres ne se
+dosent pas avec la même intégrale, et que le coût marginal d'un rayon supplémentaire dans une
+réduction GPU est nul.
+
+**Les auditeurs sont déclarés, pas devinés :**
+
+```cpp
+Result register_listener(ListenerId, FrameId, const vec3& pos_local);
+void   unregister_listener(ListenerId);
+void   update_listener(ListenerId, FrameId, const vec3& pos_local);   // par tick
+```
+
+Conformément à I-16, **le nombre maximal d'auditeurs ne se déclare pas dans un profil** : il se
+calcule à l'initialisation en divisant la mémoire allouée au canal par la taille d'un agrégat. Un
+profil qui écrirait `auditeurs_max = 8` finirait par contredire la mémoire qui l'entoure — c'est
+exactement le défaut R04.
+
+### 4.3 L'occlusion acoustique par l'aération, sans inventer une seconde discrétisation
+
+ADR-016 §4.3 établit qu'un rideau de bulles est acoustiquement opaque, et que « un sillage est une
+couverture acoustique ». ADR-016 §8.4 laissait ouvert le moyen : intégrale de `A` le long de chaque
+segment auditeur-source, ou tabulation grossière.
+
+L'intégrale par segment est un chemin **tiré**, dont le coût croît avec le nombre de sources — le
+défaut même qui a motivé ce document. La tabulation retenue est donc **azimutale, en 16 secteurs**,
+publiée par auditeur :
+
+```
+aeration_sector[j] = ∫ A dl  le long du rayon du secteur j, jusqu'à une portée de coupure
+```
+
+**Seize secteurs, et non un nouveau découpage** : c'est exactement la sectorisation azimutale
+qu'ADR-005 §3 emploie déjà pour mesurer le flux sortant d'un domaine. Inventer ici une seconde
+discrétisation aurait produit deux implémentations voisines et divergentes — le mécanisme de L22,
+qu'on évite en le voyant venir plutôt qu'en le corrigeant après.
+
+**Limite à dire, parce qu'elle se rencontrera.** Une intégrale par secteur ne distingue pas un
+rideau de bulles à 5 m d'un rideau à 50 m dans la même direction : deux sources alignées derrière
+le même sillage reçoivent la même occlusion, ce qui est juste, mais une source *entre* l'auditeur
+et le rideau reçoit une occlusion qu'elle ne devrait pas subir. Le raffinement — deux bandes
+radiales par secteur, soit 32 valeurs — double l'agrégat et reste minuscule. **À trancher au banc,
+pas maintenant** : la question est de savoir si le défaut s'entend, et cela se mesure (§9.3).
+
+### 4.4 Ce que le chemin poussé ne publie pas de `F`
+
+Le champ d'écume est d'autorité **locale** (§2.6) : il contient des sources δ (ADR-014 §3.3), qui
+ne sont ni répliquées ni reproductibles. Aucune décision de jeu ne s'en déduit.
+
+Si un besoin gameplay lui venait — repérer un navire à son sillage, par exemple — la réponse n'est
+pas de « rendre `F` déterministe », c'est de le **scinder à la source** en `F_rep` et `F_local`,
+exactement comme ADR-021 §5 l'a imposé au champ `A`. La part `F_rep`, issue de B et de W répliqué,
+est déjà identique chez tous les clients sans être répliquée (ADR-014 §2.3) : elle serait
+autoritaire au titre d'I-15 sans qu'aucun octet ne transite.
+
+### 4.5 L'aération pour la flottabilité reste sur le chemin tiré
+
+`WaterSample.aeration` (SPEC-004 §2) donne `A` au point, et c'est la bonne forme : la flottabilité
+interroge les points de sa coque, elle ne consomme pas un lit d'ambiance. Un lecteur ne doit
+**jamais** utiliser `ListenerAggregate` pour calculer une portance — l'agrégat est une intégrale
+autour d'un auditeur, pas une densité locale, et l'erreur donnerait un navire qui s'enfonce parce
+qu'il y a de l'écume à deux cents mètres.
+
+Cette ligne est reprise dans le tableau des refus, §8.

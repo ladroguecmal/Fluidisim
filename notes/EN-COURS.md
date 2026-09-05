@@ -77,7 +77,7 @@ Objectif         : écrire le chemin poussé — SPEC-006. Débloque trois des q
   publication à N lecteurs, délai de propagation acoustique.
   *Thèse : `drain_outgoing_events()` de SPEC-004 est un canal à consommateur unique — le premier
   qui appelle vide la file pour les autres. C'est un défaut, pas un détail de nommage.*
-- [ ] **P4** — SPEC-006 §4 : écume `F` et aération `A`. Deux publications d'un même champ.
+- [x] **P4** — SPEC-006 §4 : écume `F` et aération `A`. Deux publications d'un même champ.
   *Thèse : le rendu veut la texture, l'audio veut une intégrale. Publier la même chose aux deux
   impose un readback à celui qui n'en a pas besoin, ou une texture à celui qui n'en veut pas.*
 - [ ] **P5** — SPEC-006 §5 : traversabilité. Tuiles, quatre cadences, événements de franchissement,
@@ -114,3 +114,14 @@ Objectif         : écrire le chemin poussé — SPEC-006. Débloque trois des q
   vidait de son objet. Supprimée, pas renommée.
 - Troisième point, trouvé en pensant aux consommateurs : l'anticipation locale d'ADR-009 §7.2 ferait
   jouer deux fois le même impact à 100–300 ms d'intervalle. D'où le bit de **rétractation**.
+
+#### P4 — la règle qui sort de l'écriture
+
+*Le chemin poussé publie au CPU des réductions, jamais des champs.* Rapport : une cascade 1024² en
+RG16F pèse 4,2 Mo, quatre cascades à 30 Hz font ≈500 Mo/s de lecture arrière ; l'agrégat équivalent
+fait 45 octets par auditeur. La réduction se fait dans la passe GPU qui produit déjà F.
+
+Occlusion acoustique : **16 secteurs azimutaux, ceux d'ADR-005 §3**, pas une nouvelle
+discrétisation — L22 évité en le voyant venir. Limite consignée : un secteur ne distingue pas un
+rideau de bulles proche d'un rideau lointain ; le raffinement (2 bandes radiales) double un agrégat
+minuscule et se tranche au banc.
