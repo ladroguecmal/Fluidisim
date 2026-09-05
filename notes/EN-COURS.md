@@ -77,7 +77,7 @@ avait dissous celui d'ADR-007 §5.3 sans que personne ne le voie pendant neuf se
 - [x] **P2** — inventaire mécanique : extraire les ≈110 points des 26 documents, les numéroter,
   produire la table brute. *Thèse : sans inventaire exhaustif écrit, l'audit portera sur ce qu'on
   se rappelle, c'est-à-dire sur les documents récents — précisément ceux qui en ont le moins besoin.*
-- [ ] **P3** — passe sur **ADR-001 à ADR-008** (socle).
+- [x] **P3** — passe sur **ADR-001 à ADR-008** (socle).
 - [ ] **P4** — passe sur **ADR-009 à ADR-013** (réseau, hydraulique, ordonnanceur, prédiction).
 - [ ] **P5** — passe sur **ADR-014 à ADR-022** (phénomènes secondaires, construction, corrections).
 - [ ] **P6** — passe sur les **six SPEC** et le harnais.
@@ -109,3 +109,12 @@ B clos ailleurs, C formulation périmée, D dupliqué, E valide, F pas une quest
 registre. P7 devient la synthèse et le tableau « qui attend quoi ». Motif : recopier 110 verdicts
 d'un fichier à l'autre est exactement le geste qui périme les décomptes (leçon apprise deux fois,
 S07 et S10).
+
+#### P3 — socle : 22 E, 4 C, 2 D, 1 A
+
+Trouvaille la plus lourde : **le critère d'I-16 n'est pas opérationnel tel qu'il est écrit.**
+ADR-006 §7.3 demande « un nombre maximal de blocs par profil », ce que R04 a interdit — mais le
+profil d'ADR-012 §3 déclare encore `paquets_W_max` et `v_noeuds_actifs`, qui sont des tailles de
+pool, donc ressources ET capacités à la fois. Le critère qui marche : *une valeur peut figurer dans
+un profil si elle est allouée directement ; pas si elle doit être cohérente avec deux autres valeurs
+déjà déclarées.* C'est ce qui condamnait `domaines_max`, contradictoire avec la mémoire ET le temps.
