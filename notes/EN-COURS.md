@@ -59,102 +59,48 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S09
-État             : terminée
+Session          : S10
+État             : en cours
 Battement        : 2026-09-05
-Objectif         : écrire le chemin poussé — SPEC-006. Débloque trois des quatre accords inter-équipes.
+Objectif         : `CondensedState`, la persistance hors caméra, et sa confrontation avec
+                   `CoastalState` — configuration L22 signalée par S09
 ```
 
 ### Plan
 
 - [ ] **P1** — déclarer le plan, prendre le jeton, mettre à jour le battement.
-- [x] **P2** — SPEC-006 §1–2 : principe du chemin poussé et règles générales — cadences propres,
-  instantané immuable à N lecteurs, contrat de fils, anneau sans allocation, âge obligatoire,
-  et la règle d'autorité qui découle d'I-15.
-  *Thèse : le chemin poussé n'est pas « l'inverse » du chemin tiré. Il a ses propres règles, et
-  c'est de ne pas les avoir écrites que naissent trois implémentations divergentes.*
-- [x] **P3** — SPEC-006 §3 : le bus d'événements. `WaveEvent` complet avec ses trois champs audio,
-  publication à N lecteurs, délai de propagation acoustique.
-  *Thèse : `drain_outgoing_events()` de SPEC-004 est un canal à consommateur unique — le premier
-  qui appelle vide la file pour les autres. C'est un défaut, pas un détail de nommage.*
-- [x] **P4** — SPEC-006 §4 : écume `F` et aération `A`. Deux publications d'un même champ.
-  *Thèse : le rendu veut la texture, l'audio veut une intégrale. Publier la même chose aux deux
-  impose un readback à celui qui n'en a pas besoin, ou une texture à celui qui n'en veut pas.*
-- [x] **P5** — SPEC-006 §5 : traversabilité. Tuiles, quatre cadences, événements de franchissement,
-  et l'autorité du signal au titre d'I-15.
-  *Thèse : le signal de navigation doit être calculé depuis les seules couches répliquées, sinon
-  deux clients ne prennent pas la même décision de pathfinding.*
-- [x] **P6** — SPEC-006 §6 polyligne de déferlement · §7 dégradation du chemin poussé · §8 ce que
-  l'interface rend impossible · §9 ce qui reste ouvert.
-- [x] **P7** — SPEC-004 : migrer `WaveEvent` en §2 avec ses trois champs audio, renommer
-  `WaterSample.u` en `u_total` (écart E05), enrichir §9, marquer le point ouvert n°6 résolu.
-- [x] **P8** — index, README, statut des actions du registre S08, angles morts trouvés en écrivant.
-- [x] **P9** — rituel de fin (`REPRISE.md` §6) : journal S09, leçons, index, jeton libéré.
+- [ ] **P2** — l'analyse, couche par couche : qu'est-ce qui doit réellement persister quand un
+  domaine quitte la caméra, quand la partie est sauvegardée, quand un joueur rejoint.
+  *Thèse (L03) : la question « quel format pour `CondensedState` » est probablement **mal posée**.
+  ADR-013 §6 a dissous la simulation hors caméra — le repli **est** la destruction du domaine. Si
+  c'est vrai, il n'y a rien à condenser, et le format cherché n'a pas d'objet.*
+- [ ] **P3** — `ADR-022` §1–2 : la décision, et la démonstration couche par couche.
+  *Forme : un ADR, pas une note. ADR-007 §7.3 appelle explicitement « un ADR à écrire », et une
+  décision qui en change une autre ne se corrige pas, elle se remplace.*
+- [ ] **P4** — `ADR-022` §3 : `SeedState` — ce que `condense`/`restore` échangent réellement, et
+  l'unification avec `CoastalState`.
+  *Thèse : `condense` est une opération **d'outil de cuisson**, pas d'exécution ; `restore` est une
+  opération d'exécution. Ce sont les deux moitiés d'un même mécanisme, écrites à deux sessions
+  d'intervalle sous deux noms — la configuration L22 exacte.*
+- [ ] **P5** — `ADR-022` §4 : ce que l'eau met dans une sauvegarde, et le rechargement, l'arrivée
+  en cours de partie, le redémarrage serveur.
+- [ ] **P6** — `ADR-022` §5 : la couche V, seule persistance vraie, dans un monde partagé ·
+  §6 conséquences sur les interfaces · §7 ce qui reste ouvert. Invariant **I-17** si la
+  démonstration de P2 tient.
+- [ ] **P7** — répercussions : notes correctives dans SPEC-004 (§10.2 et les signatures),
+  ADR-007 §7.3, renvoi depuis SPEC-005 §6.
+- [ ] **P8** — index, invariants, angles morts, README si nécessaire.
+- [ ] **P9** — rituel de fin (`REPRISE.md` §6) : journal S10, leçons, index, jeton libéré.
 
 ### Notes de reprise
 
 *(Vide au démarrage. Y déposer au fil de l'eau ce qui n'est pas encore dans un fichier.)*
 
-- **Décision de forme prise avant d'écrire** : un document neuf, `SPEC-006`, plutôt qu'un §11 de
-  SPEC-004. Motif : SPEC-004 est déjà à 481 lignes et son unité de propos est « ce que l'hôte
-  branche et ce que l'appelant demande ». Le chemin poussé a d'autres consommateurs (audio, IA,
-  rendu) et d'autres règles (cadences, âge, dégradation en fréquence). Les mêler rendrait les deux
-  moins lisibles pour les équipes qui n'en lisent qu'un.
-- **Quatre objets publiés recensés**, pas trois : le bus d'événements (ADR-016 §2), le champ
-  d'écume `F` et le champ d'aération `A` (ADR-014 §2 et §5), le `TraversabilitySample` (ADR-018 §1),
-  et — trouvé en relisant ADR-016 §2 — la **polyligne de déferlement**, qu'ADR-016 exige que le
-  système publie et que SPEC-005 §2 liste déjà comme donnée dérivée à consommateurs multiples.
-
-#### P3 — deux trouvailles en écrivant la structure
-
-- `displaced_ml` est impossible sous ce nom : un `half` en millilitres sature à 65 L, dépassé par
-  toute claque de coque. Publié en **litres** — mêmes 2 octets, plafond 65 m³.
-- `drain_outgoing_events()` est un **résidu de la conception qu'ADR-021 §3 a remplacée**. Le chemin
-  δ→serveur n'existe plus depuis R03 ; la fonction qui le servait a survécu à la décision qui la
-  vidait de son objet. Supprimée, pas renommée.
-- Troisième point, trouvé en pensant aux consommateurs : l'anticipation locale d'ADR-009 §7.2 ferait
-  jouer deux fois le même impact à 100–300 ms d'intervalle. D'où le bit de **rétractation**.
-
-#### P4 — la règle qui sort de l'écriture
-
-*Le chemin poussé publie au CPU des réductions, jamais des champs.* Rapport : une cascade 1024² en
-RG16F pèse 4,2 Mo, quatre cascades à 30 Hz font ≈500 Mo/s de lecture arrière ; l'agrégat équivalent
-fait 45 octets par auditeur. La réduction se fait dans la passe GPU qui produit déjà F.
-
-Occlusion acoustique : **16 secteurs azimutaux, ceux d'ADR-005 §3**, pas une nouvelle
-discrétisation — L22 évité en le voyant venir. Limite consignée : un secteur ne distingue pas un
-rideau de bulles proche d'un rideau lointain ; le raffinement (2 bandes radiales) double un agrégat
-minuscule et se tranche au banc.
-
-#### P5 — trouvaille : une prédiction publiée sans son hypothèse
-
-`t_next_cross` (« ce gué se ferme dans 40 minutes ») n'est vrai que si seule la marée agit. Une
-vanne ouverte en amont laisse la valeur en place, fausse, jusqu'à 30 s — et un PNJ maintient son
-plan. D'où `CrossCause`, et la règle qu'une commande V invalide les prédictions à l'aval.
-**Publier « je ne sais plus » est un résultat.**
-
-Autre point : les `CrossingEvent` ne transitent pas par le réseau — toutes leurs entrées étant
-répliquées, chaque participant les dérive. Même raisonnement qu'ADR-021 §3.
-
-#### P6 — le piège du f16 s'est reproduit
-
-Deuxième occurrence dans le même document : le flux dissipé d'une polyligne vaut 15,3 kW/m à
-Hs = 2 m et dépasse 300 kW/m à Hs = 8 m (E prop Hs²), au-delà du plafond d'un half en W/m. Publié
-en kW/m. **Un half se choisit sur l'étendue de la grandeur, pas sur la précision voulue** — et le
-cas extrême du projet doit être calculé avant que l'unité ne soit fixée. Matière à leçon.
-
-Dégradation : le rang 5 (élaguer TransductionLocale puis AnticipationLocale, jamais Serveur) est la
-transposition exacte d'ADR-021 §4. Et trois assertions à ajouter au banc starve de SPEC-003 §9.1.
-
-#### P7 — vérification faite
-
-Le `vec3 u` restant en SPEC-004 §2.1 appartient à `BackgroundSample` : c'est la vitesse du champ
-de fond U, pas la vitesse de surface. Correctement nommé, non touché.
-La référence à `WaterSample.u` dans REVUE-CROISEE-S08 est laissée telle quelle : un registre
-d'audit consigne ce qui a été constaté, il ne se réécrit pas.
-
-#### P8 — README non touché
-
-L'arborescence du README décrit `specs/` génériquement (« références chiffrées et signatures
-d'interfaces ») : toujours exact avec SPEC-006, et aucun décompte périmé à corriger. Vérifié, pas
-supposé — c'est le défaut qu'avait trouvé S07.
+- **Contradiction trouvée avant même d'ouvrir le sujet, et elle est interne à S01** : ADR-013 §6
+  pose que le hors caméra est une **destruction** de domaine (« il n'existe pas de simulation
+  ralentie hors caméra »), tandis qu'ADR-007 §7.3 réclame un format de `CondensedState` « pour la
+  persistance hors caméra ». Les deux ADR sont de la même session. La revue croisée S05 a confronté
+  les vingt ADR et ne l'a pas vue ; la revue S08 a confronté les cinq SPEC et ne l'a pas vue non
+  plus. Hypothèse à vérifier en P2 : **un point inscrit dans une liste « ce qui reste ouvert »
+  échappe aux audits**, parce qu'un audit vérifie ce qui est affirmé et qu'un point reporté se lit
+  comme une lacune connue, pas comme une contradiction.

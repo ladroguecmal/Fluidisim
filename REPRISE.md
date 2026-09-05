@@ -12,11 +12,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-05
+Session en cours : S10 — 2026-09-05 — la persistance de l'eau (ADR-022)
 Dernière session : S09 — 2026-09-05 — le chemin poussé (SPEC-006)
-Session suivante : S10 — `CondensedState`, la persistance hors caméra, et sa confrontation avec
-                   `CoastalState` : deux mécanismes pour un même problème (configuration L22)
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
