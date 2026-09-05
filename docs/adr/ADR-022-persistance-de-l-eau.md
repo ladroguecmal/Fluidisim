@@ -374,3 +374,110 @@ coordination.
 Ce qui relève réellement d'une décision humaine — et qui est signalé, non tranché : la durée de vie
 d'un nœud V rattaché à un objet appartenant à un joueur absent depuis des mois. C'est une politique
 de monde, avec des conséquences de stockage et de gameplay, et elle n'appartient pas à l'équipe eau.
+
+---
+
+## 5. La couche V est la seule persistance vraie — et la seule que le serveur exécute
+
+### 5.1 Ce que le corpus impliquait sans le dire
+
+I-10 énonce : « Le serveur ne simule pas d'eau. Il tient des enregistrements d'événements dont il
+sait calculer analytiquement l'amplitude. **Il n'exécute ni W ni δ.** »
+
+W et δ, nommément. **Pas V.** Et l'omission n'est pas un oubli, elle est nécessaire : la couche V
+porte des conséquences de jeu directes — une coursive qui s'inonde, une citerne qui se vide, un
+compartiment qui fait chavirer un navire. Une donnée de cette nature ne peut pas être locale à un
+client.
+
+Rapprochons ce que V est, d'après ADR-010 : arithmétique **entière** en millilitres, pas fixe de
+100 ms, débits quantifiés avec report de reste, aucune masse créée ni perdue, résultat
+reproductible. C'est terme pour terme la définition d'une grandeur autoritaire au sens d'**I-15** :
+tous les participants peuvent la calculer à l'identique à partir de données répliquées.
+
+> La forme de la couche V n'était donc pas un choix de commodité d'implémentation. C'est la forme
+> qu'une couche doit avoir pour être **exécutée par le serveur et autoritaire**, et ADR-010 l'avait
+> trouvée sans énoncer cette raison-là.
+
+Conséquence pratique à signaler à l'équipe serveur : **le serveur charge des données cuites.** Il
+lui faut au minimum les `shape_lut` (ADR-010 §2) pour convertir un volume en hauteur, sans quoi il
+ne peut ni décider d'un débordement ni évaluer une ligne de flottaison. Un serveur « sans assets »
+n'est pas une option.
+
+### 5.2 Correction de l'invariant I-03
+
+I-03 énonce : « **B et W répliqué sont déterministes.** Bit à bit, entre plateformes. »
+
+Or SPEC-003 §2, écrite en S03, place explicitement **V** dans le régime **D1 — exact,
+inter-plateforme** :
+
+| Régime | Portée | Ce qu'on compare |
+|---|---|---|
+| **D1 — exact, inter-plateforme** | B, W répliqué, **V** | hash |
+
+Les deux documents ne disent pas la même chose, et c'est SPEC-003 qui a raison : sans déterminisme
+inter-plateforme de V, un serveur Linux et un client Windows divergeraient sur le volume d'un
+compartiment, c'est-à-dire sur une issue de jeu. ADR-010 §4 avait d'ailleurs pris toutes les
+dispositions nécessaires — entiers, report de reste, ordre fixé.
+
+> **I-03 est amendé pour inclure V.** Un invariant ne se change que par un ADR explicite ; c'en est
+> un. La formulation retenue est portée dans `01_INVARIANTS.md` avec la date et le renvoi ici.
+
+Écart de gravité 3, sans conséquence sur aucune décision — mais il portait sur un **invariant**,
+c'est-à-dire sur le document qu'on cite pour refuser une proposition. Un invariant incomplet finit
+par autoriser ce qu'il devait interdire.
+
+---
+
+## 6. Conséquences sur les documents existants
+
+| Document | Ce qui change |
+|---|---|
+| `01_INVARIANTS.md` | **I-17** ajouté ; **I-03** amendé pour inclure V |
+| ADR-007 §3, §5.3 | note corrective : `condense`/`restore` ne servent pas la persistance hors caméra ; la tâche « ADR à écrire » est close par celui-ci |
+| ADR-012 §4 | note corrective : le rang 5 ne s'applique pas aux domaines substitutifs (§2.6) |
+| SPEC-004 §4 | `condense` quitte `IFluidSolver` pour `ISeedProducer` ; `restore` prend un `SeedState` |
+| SPEC-004 §10.2 | point ouvert **résolu** |
+| SPEC-005 §6 | `CoastalState` devient `SeedState` de `kind = Cotier` ; renvoi ici |
+| SPEC-003 | un cas de non-régression à ajouter (§6.1) |
+| SPEC-006 | **rien** — et c'est un contrôle passé : aucun des quatre canaux poussés n'a d'état à persister, tous étant dérivés de ce qui précède |
+
+### 6.1 Le cas de non-régression que cette décision rend possible
+
+Puisque la sauvegarde et la charge utile d'arrivée en cours de partie sont le même objet (§4.1), une
+seule assertion couvre les deux :
+
+> **C19 — aller-retour de persistance.** Simuler `N` secondes, écrire un `WaterPersistentState`,
+> repartir d'un système neuf restauré depuis cet objet, simuler `M` secondes de plus. Le hash de B
+> et de W répliqué à `t = N + M` doit être **identique** à celui d'une simulation continue de
+> `N + M` secondes.
+
+Le test est en régime **D1**, donc binaire et exécutable en mode `check` — moins de 60 s, à chaque
+commit (SPEC-003 §4). Il n'aurait pas été possible si un état de δ figurait dans la sauvegarde :
+δ n'est jamais D1 (SPEC-003 §2), et l'assertion aurait dû être statistique, donc faible.
+
+**C'est le bénéfice secondaire d'I-17**, et il vaut d'être noté au titre de L06 : une bonne décision
+d'architecture rend gratuites des opérations qui étaient coûteuses. Ici, elle rend *vérifiable* une
+propriété qui, autrement, ne l'aurait pas été.
+
+---
+
+## 7. Ce qui reste ouvert
+
+1. **Seuil de tolérance sur les paramètres d'une graine** (§3.5) — jusqu'à quel écart de `Hs`, de
+   `Tp` ou de phase de marée un `restore` reste-t-il acceptable ? Banc **B4**. C'est le seul seuil
+   de tolérance physique du système, et il est réel parce qu'une graine contient de la physique.
+2. **Durée de vie d'un nœud V rattaché à un objet d'un joueur absent depuis des mois.** Politique de
+   monde, avec des conséquences de stockage et de gameplay. **N'appartient pas à l'équipe eau** —
+   signalé, non tranché.
+3. **Granularité de partition** de l'état persistant dans un monde à très grande échelle. L'état
+   est additif par nœud et par événement, donc partitionnable par région sans coordination ; le
+   découpage retenu relève de l'infrastructure.
+4. **Représentation binaire** — boutisme, alignement, versionnement du format. Comme partout,
+   dépend du langage, encore ouvert.
+5. **Une observation à confirmer, pas une question.** Une sauvegarde survit à une mise à jour du
+   jeu : ne contenant aucun état de δ ni aucune donnée cuite — seulement un temps, des événements
+   et des entiers — elle se recharge sur une version où les graines et la bibliothèque côtière ont
+   changé. Un **rejeu** de harnais, lui, ne le survit pas : il exige la même version d'actifs pour
+   être bit à bit. Les deux usages du même objet n'ont donc pas la même tolérance aux versions, et
+   il vaut mieux l'écrire maintenant que le découvrir quand une campagne de non-régression cassera
+   sur un changement de plage.

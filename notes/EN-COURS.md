@@ -84,7 +84,7 @@ Objectif         : `CondensedState`, la persistance hors caméra, et sa confront
   d'intervalle sous deux noms — la configuration L22 exacte.*
 - [x] **P5** — `ADR-022` §4 : ce que l'eau met dans une sauvegarde, et le rechargement, l'arrivée
   en cours de partie, le redémarrage serveur.
-- [ ] **P6** — `ADR-022` §5 : la couche V, seule persistance vraie, dans un monde partagé ·
+- [x] **P6** — `ADR-022` §5 : la couche V, seule persistance vraie, dans un monde partagé ·
   §6 conséquences sur les interfaces · §7 ce qui reste ouvert. Invariant **I-17** si la
   démonstration de P2 tient.
 - [ ] **P7** — répercussions : notes correctives dans SPEC-004 (§10.2 et les signatures),
@@ -198,3 +198,17 @@ en S04, `CoastalState` en S06. La configuration L22, confirmée.
 - Chiffres : événements vivants ≤ ≈180 Ko (borné par paquets_W_max) ; 100 000 nœuds V modifiés à
   20 o = 2 Mo. Une sauvegarde d'eau est petite, et il faut le dire avant que quelqu'un ne conçoive
   un découpage dont personne n'a besoin.
+
+#### P6 — écart trouvé sur un invariant
+
+I-03 dit « B et W répliqué sont déterministes » ; SPEC-003 §2 place **V** dans le régime D1 depuis
+S03. Les deux ne disent pas la même chose, et c'est SPEC-003 qui a raison — sans déterminisme
+inter-plateforme de V, un serveur et un client divergeraient sur le volume d'un compartiment,
+c'est-à-dire sur une issue de jeu. **I-03 amendé** par cet ADR.
+
+Gravité 3 en conséquences, mais il portait sur un invariant — le document qu'on cite pour refuser
+une proposition. Un invariant incomplet finit par autoriser ce qu'il devait interdire.
+
+Et un bénéfice secondaire (L06) : I-17 rend possible un cas de non-régression **binaire** sur
+l'aller-retour de persistance (C19), exécutable en mode check. Avec un état δ dans la sauvegarde,
+l'assertion aurait dû être statistique.
