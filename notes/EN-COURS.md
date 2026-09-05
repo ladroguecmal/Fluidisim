@@ -81,7 +81,7 @@ avait dissous celui d'ADR-007 §5.3 sans que personne ne le voie pendant neuf se
 - [x] **P4** — passe sur **ADR-009 à ADR-013** (réseau, hydraulique, ordonnanceur, prédiction).
 - [x] **P5** — passe sur **ADR-014 à ADR-022** (phénomènes secondaires, construction, corrections).
 - [x] **P6** — passe sur les **six SPEC** et le harnais.
-- [ ] **P7** — rédiger `docs/registres/AUDIT-POINTS-OUVERTS-S11.md` : le verdict par point,
+- [x] **P7** — rédiger `docs/registres/AUDIT-POINTS-OUVERTS-S11.md` : le verdict par point,
   la synthèse par catégorie, et **qui attend quoi**.
 - [ ] **P8** — appliquer : clôtures marquées et notes correctives dans les documents concernés.
 - [ ] **P9** — index, angles morts, `METHODE.md` (la passe d'audit devient une phase du protocole).
@@ -151,3 +151,17 @@ l'écrivait. Le défaut se produit à l'instant où la réponse est écrite aill
 *Correction apportée à ma propre section P3* : l'en-tête annonçait 31 points pour 30, et le bilan
 omettait le verdict B d'ADR-003 §3. Corrigé. Un décompte recopié se périme même dans le document
 qui le produit.
+
+#### P7 — synthèse : trois résultats qui débordent l'audit
+
+1. **Onze destinataires extérieurs**, là où l'index en listait quatre. Les sept nouveaux sont plus
+   légers (une table de valeurs, un cadrage) mais ils ne se rattrapent pas tard non plus.
+2. **B2 débloque quatre points ouverts**, plus que tout autre banc — confirmation indépendante du
+   chemin critique, établi jusqu'ici sur les dépendances et non sur un décompte.
+3. **Quatre points disent « à spécifier » et aucune session ne l'a jamais pris en charge** :
+   terme de slamming, modèle du nageur, rochers turbulents, coalescence des poches T2. Quatre
+   sujets courts et indépendants — c'est un objectif de session, et probablement S12.
+
+Et un cinquième arbitrage humain remonté au même rang que les trois connus : **qui possède le
+harnais** (SPEC-003 §11.4), rangé jusqu'ici parmi des questions de format de fichier alors que
+SPEC-003 §1 dit que la qualité de toutes les décisions à venir est plafonnée par la sienne.

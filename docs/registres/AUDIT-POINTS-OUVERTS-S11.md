@@ -560,3 +560,157 @@ d'artefacts**, et avec quelle politique de rétention.
 
 **Action** : note corrective. Le point se rétrécit au lieu de disparaître, ce qui est le résultat
 normal d'un audit bien mené — la plupart des points ne sont ni morts ni intacts.
+
+---
+
+## 6. Synthèse
+
+### 6.1 Répartition des 110 verdicts
+
+| Verdict | Nombre | Part |
+|---|---|---|
+| **E — valide** | 69 | 63 % |
+| **C — formulation périmée** | 15 | 14 % |
+| **D — dupliqué** | 13 | 12 % |
+| **B — clos ailleurs, non marqué** | 8 | 7 % |
+| **A — dissous** | 3 | 3 % |
+| **F — pas une question** | 2 | 2 % |
+
+**Un point ouvert sur trois n'est pas dans l'état où son document le présente.** Ce n'est pas un
+corpus mal tenu : c'est le taux naturel d'un ensemble de listes que personne n'a jamais relues,
+parce que personne ne relit une liste de choses qu'on sait ne pas avoir faites.
+
+Les 63 % de verdicts E sont eux aussi un résultat. Ils disent que la dette de suivi est réelle mais
+bornée, et qu'un audit de ce type se rentabilise en une session — les 41 points non-E représentent,
+pour la plupart, du travail que quelqu'un aurait refait.
+
+### 6.2 La classe de défaut dominante, et sa vraie cause
+
+Quatre points ouverts réclamaient un mécanisme qui existait déjà, ou une décision déjà prise :
+
+| Point | Réclamait | Existait depuis |
+|---|---|---|
+| ADR-007 §5.3 | un format pour la persistance hors caméra | ADR-013 §6 l'avait dissoute, **même session** (S01) |
+| ADR-006 §7.3 | un nombre maximal de blocs dans un profil | I-16 l'interdit depuis S05 (écart R04) |
+| ADR-017 §7.2 | une subdivision « dédiée » sous la cellule de 64 m | ADR-006 §2 la porte depuis S05 (écart R07) |
+| SPEC-004 §10.3 | de mesurer « un point sur quatre » | S08 (écart E08) a montré que le paramètre est `N` dans `dx ≤ λ_cut/N` |
+
+La première hypothèse — la distance entre documents — ne tient pas : dans le dernier cas, la
+correction et le point périmé sont dans **le même document, à quatre sections d'écart**.
+
+La cause est ailleurs, et elle est de forme. **Une correction s'applique là où vit l'affirmation
+qu'elle corrige.** Un point ouvert n'affirme rien : il déclare une absence. Personne ne relit une
+liste d'absences en se demandant si l'une d'elles a été comblée — c'est exactement L40, et cet
+audit en montre le rendement.
+
+Corollaire opérationnel, ajouté au rituel de fin : **une session qui corrige ou décide quelque
+chose parcourt les listes de points ouverts qui citaient ce quelque chose.** C'est une recherche de
+texte, pas une relecture.
+
+### 6.3 Les doublons, et le porteur désigné
+
+Treize points vivent en deux ou trois exemplaires. Aucun n'a causé de dégât — un doublon ne nuit
+que le jour où quelqu'un y répond, et il tranche alors dans un document et pas dans l'autre. Mais
+c'est précisément ce jour-là qu'on ne le verra pas.
+
+| Question | Porteur désigné | Deviennent des renvois |
+|---|---|---|
+| Modèle de marée | ADR-004 §7.4 | ADR-011 §7.3 |
+| Représentation des solides / `ShapeKind` | SPEC-004 §10.1 | ADR-007 §5.4 |
+| `to_vacuum` | ADR-015 §7.2 | ADR-010 §8.3 |
+| `K` et table `E_cause` | ADR-021 §7.2 | ADR-009 §7.1 |
+| `IGpuBackend` | SPEC-004 §10.4 | ADR-020 §7.2 |
+| Rendu de référence du harnais | SPEC-003 §11.2 | ADR-020 §7.3 |
+| Cascades de `F` | ADR-014 §7.1 | SPEC-006 §9.1 *(déjà un renvoi)* |
+| Lit de pluie | ADR-016 §8.3 | SPEC-006 §9.7 *(déjà un renvoi)* |
+| Seuils par archétype d'agent | ADR-018 §7.3 | SPEC-006 §9.6 *(déjà un renvoi)* |
+| Visibilité sous-marine pour l'IA | ADR-018 §7.4 | SPEC-006 §9.5 *(déjà un renvoi)* |
+| Représentation binaire d'échange | SPEC-004 §10.1 | SPEC-006 §9.8, ADR-022 §7.4 |
+
+**Règle retenue** : le porteur est le document dont le point relève du *domaine*, pas celui qui l'a
+écrit en premier. Et un renvoi tient en une ligne — SPEC-006 le fait déjà pour quatre de ses huit
+points, ce qui montre que le coût est nul quand on y pense à l'écriture.
+
+---
+
+## 7. Qui attend quoi
+
+Ce tableau n'existait nulle part. C'est, indépendamment des écarts trouvés, le livrable le plus
+directement utilisable de cet audit.
+
+### 7.1 Ce qu'un banc débloque
+
+| Banc | Points ouverts qu'il ferme | Poids |
+|---|---|---|
+| **B2** — couche W et `λ_cut` | ADR-001 §1 · ADR-005 §1 · ADR-007 §2 · ADR-021 §3 | **4 — et `λ_cut` est « à décider en premier »** |
+| **B3** — solveur δ | ADR-001 §2 · ADR-006 §4 · ADR-007 §1 · SPEC-004 §10.1 | 4 |
+| **B4** — juge d'ADR-001 | ADR-001 §3 · SPEC-004 §10.3 · ADR-022 §7.1 | 3 |
+| **B1** — champ de fond | ADR-003 §2 · ADR-004 §1 · ADR-004 §2 | 3 |
+| **B5** — blocs et décomposition | ADR-006 §1 · ADR-006 §2 | 2 |
+| **B8** — seuils de prédiction | ADR-013 §1 · ADR-021 §1 | 2 |
+| **B6**, **B7**, **B9**, **B10** | ADR-008 §1 · ADR-012 §1 · ADR-014 §1 · ADR-015 §1 | 1 chacun |
+
+Vingt-deux points, soit un cinquième du corpus, attendent une mesure. **B2 est le plus rentable**,
+et il porte désormais deux critères de recevabilité de `λ_cut` et non un (§4.6). Cela confirme le
+chemin critique de `00_INDEX.md` par une voie indépendante — il avait été établi sur les
+dépendances, il l'est ici sur le décompte des points débloqués.
+
+### 7.2 Ce qu'une équipe extérieure doit fournir
+
+`00_INDEX.md` liste **quatre** interfaces inter-équipes. L'audit en trouve **onze destinataires
+distincts** — les quatre connus, plus sept que personne n'a jamais listés.
+
+| Destinataire | Attendu | Points | Nature |
+|---|---|---|---|
+| **Audio** | confirmation de l'interface | ADR-016 §1, §3 | interface *(connue)* |
+| **IA / navigation** | confirmation + table de seuils | ADR-018 §1, §3, §4 | interface *(connue)* |
+| **Terrain / outillage** | le géoïde, l'eau en amont, format d'échange | SPEC-005 §4 | interface *(connue)* |
+| **Rendu** | diffusion, exposition, réfraction, frontière | ADR-019 §1–§4 · ADR-017 §4 | interface *(connue)* |
+| **Véhicules** | table `a_max` par archétype | ADR-013 §2 | **donnée à obtenir** |
+| **Personnage** | modèle du nageur en surface | ADR-008 §4 | **cadrage** |
+| **Gameplay spatial** | comportement d'une brèche vers le vide | ADR-010 §3 · ADR-015 §2 | **cadrage** |
+| **Gameplay survie** | air respirable | ADR-015 §4 | **cadrage** |
+| **Réseau / physique solide** | `int64` ou `f64` pour les positions monde | ADR-002 §1 | **décision partagée** |
+| **Gameplay** | échelle du temps · équilibrage `K` · `V_min` et TTL | ADR-003 §1 · ADR-021 §2 · ADR-010 §2 | **arbitrage et équilibrage** |
+| **Assurance qualité technique** | propriété du harnais | SPEC-003 §4 | **organisation** |
+
+Les sept nouveaux sont plus légers que les quatre premiers — une table de valeurs n'est pas une
+négociation d'interface — mais ils ont la même propriété : **ils ne se rattrapent pas tard**. Un
+modèle de nageur décidé après que l'équipe personnage a figé sa machine à états coûte un
+recâblage, exactement comme un format audio.
+
+**Action** : `00_INDEX.md` reçoit ce tableau. La section s'appelait « interfaces à confirmer » ; elle
+devient « ce que d'autres équipes doivent fournir », qui est plus large et plus juste.
+
+### 7.3 Ce qui attend un arbitrage humain
+
+Les trois arbitrages connus, plus deux que l'audit fait remonter au même rang :
+
+| # | Question | Où | Statut |
+|---|---|---|---|
+| 1 | Le temps du monde peut-il être mis à l'échelle par joueur ? | ADR-003 §4.1 | connu |
+| 2 | Le projet veut-il de la glace ? | ADR-017 | connu — **et son coût a baissé**, §4.3 |
+| 3 | Qui porte le trait de côte mobile ? | ADR-011 §6, ADR-018 §4, SPEC-006 §9.4 | connu |
+| 4 | Durée de vie d'un nœud V d'un joueur absent depuis des mois | ADR-022 §7.2 | **ajouté en S10** |
+| 5 | Qui possède le harnais de validation ? | SPEC-003 §11.4 | **jamais présenté comme un arbitrage** |
+
+Le cinquième mérite son rang : SPEC-003 §1 pose que « la qualité des décisions qui suivent est
+plafonnée par celle du harnais », et §11.4 note qu'il ne doit appartenir ni à l'équipe eau — juge et
+partie — ni à une équipe d'outillage détachée du domaine. C'est une décision d'organisation qui
+conditionne la crédibilité de toutes les mesures, et elle est rangée parmi des questions de format
+de fichier.
+
+### 7.4 Quatre points disent « à spécifier », et personne ne l'a planifié
+
+| Point | Ce qui manque |
+|---|---|
+| ADR-008 §3 | terme d'impact (*slamming*), `∝ ρv²A` — « nécessite un terme d'impact séparé. À spécifier. » |
+| ADR-008 §4 | modèle du nageur en surface — « probablement cinématique contraint. À traiter. » |
+| ADR-013 §4 | rochers turbulents permanents — « à spécifier » ; SPEC-005 §2 a réglé la *source de données*, pas le comportement |
+| ADR-015 §3 | coalescence de deux poches d'air T2 — « règle de fusion à définir » |
+
+Ce ne sont ni des mesures, ni des arbitrages, ni des dépendances : c'est **du travail de conception
+qu'aucune session n'a jamais pris en charge**. Ils sont restés invisibles parce qu'ils vivaient dans
+des listes de points ouverts, c'est-à-dire là où l'on ne cherche pas ce qu'il reste à faire.
+
+Quatre points, quatre sujets courts et indépendants — c'est un objectif de session.
