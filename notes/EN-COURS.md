@@ -76,7 +76,7 @@ aussi une *cause*, ce qui n'est pas la même chose.
   *Thèse : la grandeur à publier n'est pas la pression de pic mais l'**impulsion de masse ajoutée**.
   La pression de pic est ce qu'on ne sait pas (elle diverge quand l'angle de carène tend vers 0) ;
   l'impulsion est un bilan de quantité de mouvement, qui ne peut pas être faux.*
-- [ ] **P3** — `ADR-023` §3 : le **nageur en surface**.
+- [x] **P3** — `ADR-023` §3 : le **nageur en surface**.
   *Thèse (L03) : il n'y a pas de modèle à écrire. Le mode contraint d'ADR-008 §3 existe déjà ; il
   lui manque une seconde condition d'entrée. Le critère actuel est de stabilité numérique, et le
   nageur le passe — c'est pour une autre raison qu'il en relève.*
@@ -120,3 +120,19 @@ D'où la décision : publier l'**impulsion de masse ajoutée** `J = Δ(½πρc²
 de quantité de mouvement, que l'intégrateur du solide sait appliquer exactement, et qui réutilise le
 tenseur de masse ajoutée déjà imposé par ADR-008 §2. Contrôle croisé fait : 1,1 MN moyens sur 73 ms
 concordent avec les 105 kPa de pic sur la surface mouillée.
+
+#### P3 — le nageur : la question se dissout (L03)
+
+Pas de modèle à écrire. Le mode contraint d'ADR-008 §3 existe ; il lui manquait une seconde
+condition d'entrée — *un corps contrôlé, en surface, y bascule quel que soit son ω·dt*. Le critère
+existant mesure la stabilité numérique, et la stabilité n'est pas le problème du nageur : c'est le
+contrôle et la caméra.
+
+Deux seuils **dérivés**, que le design n'aura pas à choisir :
+- `πH/T = 0,7 m/s` → par mer de **1 à 2 m un nageur ne va plus où il veut** ;
+- un nageur ne décolle de la surface que sous un **rouleau plongeant** — l'accélération de crête de
+  SPEC-002 §1 (g en plongeant) est exactement le critère, écrit pour autre chose.
+
+Contrôle fait : les cinq effets qui comptent (emportement, eau blanche, déferlante, hypothermie,
+seuils de progression) passent tous par d'autres chemins déjà spécifiés. Le mode contraint ne coûte
+rien au gameplay.

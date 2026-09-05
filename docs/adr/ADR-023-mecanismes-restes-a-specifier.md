@@ -152,3 +152,106 @@ traite le cas sans mécanisme supplémentaire.
 À vérifier au banc **B6** (flottabilité), avec deux références analytiques : la conservation de la
 quantité de mouvement totale eau + solide, et la décroissance en `1/tan β` de la durée d'impact.
 Cas canonique **C20**, ajouté à `CAS-CANONIQUES.md`.
+
+---
+
+## 3. Le nageur — il n'y a pas de modèle à écrire
+
+ADR-008 §5.4 disait : « Nageur / joueur en surface : modèle distinct, **probablement cinématique
+contraint** plutôt que dynamique. À traiter avec l'équipe personnage. »
+
+L'intuition était juste et la conclusion était trop large : le mode cinématique contraint **existe
+déjà**, c'est celui d'ADR-008 §3, et il ne lui manque qu'une seconde condition d'entrée.
+
+### 3.1 Le critère existant est bon, il est seulement le seul
+
+ADR-008 §3 bascule un corps en mode contraint quand `ω·dt > 1,0`, avec `ω = √(k/(m + m_a))` et
+`k = ρ·g·A_flottaison`. Appliqué à un humain :
+
+```
+A_flottaison ≈ 0,25 m²   →   k = ρ g A ≈ 2 450 N/m
+m ≈ 75 kg,  m_a ≈ 70 kg  →   ω = √(2450/145) ≈ 4,1 rad/s
+ω·dt à 30 Hz ≈ 0,14      →   « intégration normale »
+```
+
+**Un nageur passe le critère de stabilité sans difficulté.** Le mode contraint ne se déclenche donc
+jamais pour lui, alors que c'est exactement le mode qu'il lui faut. Le critère n'est pas faux : il
+mesure la **stabilité numérique**, et la stabilité n'est pas le problème du nageur.
+
+### 3.2 Le vrai motif : un corps contrôlé n'est pas un corps passif
+
+Le modèle de flottabilité d'ADR-008 §2 décrit un solide **passif** soumis à une pression. Un joueur
+en surface n'en est pas un : il a une intention, et il a une caméra. Deux conséquences que la
+physique ne rattrape pas :
+
+- **une flottabilité dynamique se bat contre les commandes.** Le pilonnement d'un corps humain a une
+  période propre `T = 2π/ω ≈ 1,5 s`. Un joueur qui veut avancer subit un mouvement vertical du même
+  ordre de grandeur que son intention, et le contrôle devient mou sans que rien ne soit faux ;
+- **c'est le poste le plus exposé au mal des transports.** Une caméra attachée à un corps qui pilonne
+  et roule librement sur la houle est le cas d'école. Ce n'est pas un argument de confort : c'est une
+  contrainte de conception qui n'a pas de solution en aval.
+
+> **Décision.** Le mode contraint d'ADR-008 §3 reçoit une **seconde condition d'entrée** :
+> *un corps contrôlé par un joueur ou par une IA, en surface, y bascule quel que soit son `ω·dt`.*
+> Le mode lui-même est inchangé — projection sur la surface `z = η`, orientation alignée sur la
+> normale, vitesse horizontale amortie vers la vitesse orbitale — et la commande du joueur s'ajoute
+> dans le repère de la surface, non dans le repère du monde.
+
+### 3.3 Ce que le nageur perd, et ce qu'il ne perd pas
+
+Le mode contraint supprime la force de flottabilité, pas le rapport à l'eau. Tout ce qui compte pour
+le jeu passe par d'autres chemins, tous déjà spécifiés :
+
+| Effet | D'où il vient | Statut |
+|---|---|---|
+| Être emporté par un courant | `HR = d·(v+0,5)`, SPEC-002 §5 et ADR-018 §3 | déjà spécifié |
+| Ne plus flotter dans l'eau blanche | `ρ_eff = (1−α)·ρ`, ADR-014 §5.2 | déjà spécifié |
+| Être poussé par une déferlante | événement W, table d'autorité d'ADR-008 §1 | déjà spécifié |
+| Hypothermie, gel | `temp` du `TraversabilitySample`, SPEC-006 §5.1 | déjà spécifié |
+| Seuils de progression (0,15 / 0,50 / 1,00 / 1,30 m) | ADR-018 §2 | déjà spécifié |
+
+**Aucun de ces effets ne passait par la flottabilité dynamique.** Le mode contraint ne coûte donc
+rien au gameplay, et il enlève le seul mécanisme qui gênait.
+
+### 3.4 Deux seuils dérivés, que le design n'aura pas à choisir
+
+**Quand un nageur cesse de contrôler sa trajectoire.** La vitesse orbitale de surface vaut `πH/T`
+(SPEC-001 §1). Un adulte nage en soutenu à ≈0,7 m/s. L'égalité donne la mer où il ne fait plus
+route :
+
+| `T` | `H` telle que `πH/T = 0,7 m/s` |
+|---|---|
+| 4 s | 0,89 m |
+| 5 s | 1,11 m |
+| 8 s | **1,78 m** |
+
+Autrement dit : **par mer de 1 à 2 m, un nageur ne va plus où il veut.** Ce n'est pas un réglage,
+c'est une conséquence de deux nombres déjà écrits, et c'est le seuil qui rend une traversée à la
+nage dramatique au bon moment.
+
+**Quand un nageur décolle de la surface.** L'accélération verticale de la surface vaut `(H/2)·ω²`.
+Elle atteint `g` — le corps décolle — pour `H ≈ 12 m` à `T = 5 s`, `H ≈ 32 m` à `T = 8 s` : jamais,
+dans une houle ordinaire.
+
+**L'exception est déjà écrite.** SPEC-002 §1 donne l'accélération descendante d'une crête qui
+déferle : `0,45 g` en déferlement glissant, **`g` en déferlement plongeant**. Un nageur ne décolle
+donc de la surface que sous un **rouleau plongeant** — ce qui est précisément la scène qu'on veut,
+et dont la condition de déclenchement existait déjà sans avoir été écrite pour cela.
+
+La contrainte cinématique est donc valide sur tout le domaine ordinaire, et sa sortie a un critère
+physique, pas un seuil d'auteur.
+
+### 3.5 Ce qui reste à l'équipe personnage
+
+La décision ci-dessus est interne au système d'eau : elle dit *quel mode* s'applique et *quelles
+grandeurs* sont fournies. Ce qui appartient à l'équipe personnage, et qu'il faut lui porter :
+
+- l'animation et la machine à états de la nage — le système d'eau ne fournit que `η`, la normale, la
+  vitesse orbitale et les seuils d'ADR-018 §2 ;
+- le point d'attache de la caméra, sachant que le corps suit désormais la surface et non une
+  dynamique propre ;
+- la valeur de la vitesse de nage soutenue, dont dépend le seuil de §3.4 — 0,7 m/s est une valeur de
+  départ, pas une exigence.
+
+C'est la sixième entrée du tableau « ce que d'autres équipes doivent fournir »
+(`00_INDEX.md`), et elle est désormais **exécutable** : il y a quelque chose à soumettre.
