@@ -80,7 +80,7 @@ Objectif         : recroiser les cinq SPEC entre elles (S05 n'avait confronté q
   interfaces exposent, et la cuisson réutilise-t-elle réellement le cœur qu'elle prétend réutiliser.
   *Thèse : un harnais qui exige une observation que l'interface ne permet pas de nommer est un
   harnais non écrivable (L19 pris à l'envers).*
-- [ ] **P5** — rédiger `docs/registres/REVUE-CROISEE-S08.md` : écarts trouvés, gravité, résolution,
+- [x] **P5** — rédiger `docs/registres/REVUE-CROISEE-S08.md` : écarts trouvés, gravité, résolution,
   et la liste des contrôles **passés sans écart** — sans elle la revue n'est pas vérifiable.
 - [ ] **P6** — appliquer les résolutions : notes correctives datées dans les documents touchés,
   nouvel ADR si une décision change, angles morts enregistrés.
@@ -225,3 +225,10 @@ Régime D2 (§2) ↔ `parallel_reduce_ordered` (§8.2) : la seule primitive d'ac
 `latence_echantillon` « âge de la donnée au moment de son usage » (§6, piège 6) ↔ `sample_batch`
 qui renvoie l'âge en µs et `poll_readback` qui renvoie toujours l'âge (§4, §8.4) : la métrique est
 imposée par les signatures.
+
+#### P5 — registre
+
+`docs/registres/REVUE-CROISEE-S08.md` écrit. Dix écarts, deux de gravité 1 (E04 chemin poussé,
+E07 cuisson bit à bit), la liste des contrôles passés, et une dérivation nouvelle (E03).
+Note d'exécution : le heredoc bash a échoué sur le contenu accentué long — L09 confirmée une
+seconde fois, écrire ce type de fichier directement avec l'outil d'écriture.
