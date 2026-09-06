@@ -560,6 +560,240 @@ fn periode_moyenne(zeros: &[f64]) -> Option<f64> {
 ///
 /// Elle n'est appelée que par le test qui établit ce point. Ne pas s'en servir pour mesurer quoi
 /// que ce soit d'autre.
+/// Le montage de C05 : canal de 400 m, profondeur 2 m, paquet d'ondes lance vers la droite.
+///
+/// Les cotes sont figees ici parce qu'elles font partie des **conditions de mesure**, pas des
+/// parametres d'appel : jauge, fenetres temporelles et longueur de canal sont choisies pour que le
+/// train incident et le train reflechi passent devant la jauge **a des instants disjoints**, et que
+/// la reflexion parasite du mur amont arrive apres la fin de la mesure.
+pub struct MontageC05 {
+    pub h0: f64,
+    pub longueur: f64,
+    pub dx: f64,
+    pub x0: f64,
+    pub largeur_paquet: f64,
+    pub amplitude: f64,
+    pub x_jauge: f64,
+    pub t_fin: f64,
+    /// Fin de la fenetre du train incident, debut de celle du train reflechi.
+    pub t_coupure: (f64, f64),
+}
+
+/// Amplitudes du train incident et du train reflechi, mesurees a la jauge.
+///
+/// `sigma_max = 0` laisse la bande en place sans amortir : le bord redevient un mur parfait, et
+/// **c'est l'essai temoin**. Le rapport des deux essais elimine la dissipation numerique du trajet,
+/// qui sinon serait comptee comme de l'absorption — un biais de 20 % a cette maille, et il flatte
+/// l'eponge.
+impl Default for MontageC05 {
+    fn default() -> Self {
+        MontageC05 {
+            h0: 2.0,
+            longueur: 400.0,
+            dx: 0.125,
+            x0: 200.0,
+            largeur_paquet: 30.0,
+            amplitude: 0.02,
+            x_jauge: 280.0,
+            t_fin: 90.0,
+            t_coupure: (35.0, 50.0),
+        }
+    }
+}
+
+fn amplitudes_c05(m: &MontageC05, lambda: f64, l_s: f64, sigma_max: f64) -> (f64, f64) {
+    let n = (m.longueur / m.dx).round() as usize;
+    let mut alloc = ArenaAllocator::with_capacity(1 << 24);
+    let jobs = SequentialJobs;
+    let sink = StderrSink;
+    let mut host = HostServices {
+        alloc: &mut alloc,
+        jobs: &jobs,
+        sink: &sink,
+    };
+    let mut d = Shallow1D::configure_paquet(
+        &mut host,
+        n,
+        m.dx,
+        m.h0,
+        m.amplitude,
+        m.x0,
+        m.largeur_paquet,
+        lambda,
+    )
+    .expect("configuration");
+    d.regler_eponge(l_s, sigma_max, m.h0);
+
+    let i_jauge = d.maille_en(m.x_jauge);
+    let dt_e = 0.05f64;
+    let pas = (m.t_fin / dt_e).round() as usize;
+    let (mut inc, mut refl) = (0.0f64, 0.0f64);
+    for k in 0..=pas {
+        let t = k as f64 * dt_e;
+        d.avancer_jusqu_a(t, 0.45);
+        let eta = (d.surface(i_jauge) - m.h0).abs();
+        if t <= m.t_coupure.0 {
+            inc = inc.max(eta);
+        } else if t >= m.t_coupure.1 {
+            refl = refl.max(eta);
+        }
+    }
+    (inc, refl)
+}
+
+/// **C05 — absorption a la frontiere.**
+///
+/// Montage : paquet d'ondes entrant, eponge de largeur `L_s` au bord aval, mesure de l'amplitude
+/// reflechie. Assertion : **`R < 1 %`**.
+///
+/// # Conditions de mesure, ecrites avant la mesure
+///
+/// - **`R` est le rapport de deux maxima d'elevation a une jauge fixe**, sur deux fenetres
+///   temporelles disjointes — le train incident, puis le train reflechi. Separation **par le
+///   temps** et non par transformee : une analyse spectrale apporterait sa propre fenetre, donc son
+///   propre biais (A102).
+/// - **`R` est corrige par un essai temoin** a `σ_max = 0`, ou le bord est un mur parfait. Le
+///   rapport des deux elimine la dissipation numerique du trajet, qui serait sinon comptee comme de
+///   l'absorption. **Le temoin est rapporte** : s'il s'ecarte de 1, la maille est trop grossiere
+///   pour la mesure.
+/// - **Le solveur est non dispersif** (`c = √(gh)`), la ou ADR-005 raisonne en eau profonde
+///   (`c = √(gλ/2π)`). Le groupe sans dimension `σ_max·L_s/c` et le rapport `L_s/λ` se transposent ;
+///   **la valeur de `σ_max` en s⁻¹ ne se transpose pas.**
+/// - **L'amortissement est applique en decomposition d'operateurs**, donc a l'ordre un en temps,
+///   alors que le transport est a l'ordre deux.
+pub fn c05_absorption() -> Vec<Cas> {
+    let m = MontageC05::default();
+    let c = (G * m.h0).sqrt();
+    let lambda = 20.0f64;
+    let l_s = 0.5 * lambda;
+
+    // Temoin : bande en place, amortissement nul. Le bord est un mur.
+    let (inc0, refl0) = amplitudes_c05(&m, lambda, l_s, 0.0);
+    let temoin = refl0 / inc0;
+
+    println!("  C05 — absorption, λ = {lambda:.0} m, c = {c:.4} m/s, L_s = {l_s:.1} m :");
+    println!(
+        "      temoin (mur, σ_max = 0)   incident {inc0:.6e}   reflechi {refl0:.6e}   R_brut = {:.4}",
+        temoin
+    );
+    println!("      σ_max          R brut      R corrige     ADR-005 §2 : R ≈ exp(−2σ_max·L_s/3c)");
+    let mut r_adr = f64::NAN;
+    let mut r_retenu = f64::NAN;
+    for coef in [1.0f64, 2.0, 4.0, 6.9, 10.0, 20.0, 50.0] {
+        let sigma_max = coef * c / l_s;
+        let (inc, refl) = amplitudes_c05(&m, lambda, l_s, sigma_max);
+        let brut = refl / inc;
+        let corrige = brut / temoin;
+        let formule = (-2.0 * sigma_max * l_s / (3.0 * c)).exp();
+        println!(
+            "      {coef:>4.1}·c/L_s   {brut:>10.6}   {corrige:>10.6}     {:>10.6}",
+            formule
+        );
+        if (coef - 4.0).abs() < 1e-9 {
+            r_adr = corrige;
+        }
+        if (coef - 10.0).abs() < 1e-9 {
+            r_retenu = corrige;
+        }
+    }
+
+    // **La question de B2.** `L_s = λ_cut/2` est la borne dure qui plafonne `λ_cut`
+    // (DOSSIER-B2 §3.1) : a `λ_cut = 6 m`, un domaine d'impact n'a plus d'interieur. Si une eponge
+    // plus etroite tenait `R < 1 %`, cette borne bougerait — et rien dans le corpus ne dit ce qui
+    // se passe en dessous de `λ/2`, sinon qu'ADR-005 §2 y suspend la validite de sa formule.
+    //
+    // Le temoin ne depend que de `L_s` (le trajet change avec la position de l'eponge), pas de
+    // `σ_max` : il est donc calcule une fois par largeur.
+    println!("  C05 — le coefficient de reflexion selon la largeur d'eponge, λ = {lambda:.0} m :");
+    println!("      L_s / λ      L_s (m)     temoin    R à 6,9·c/L_s   R à 10·c/L_s   formule");
+    for frac in [1.0f64, 0.5, 1.0 / 3.0, 0.25, 1.0 / 6.0, 0.125] {
+        let ls = frac * lambda;
+        let (i0, r0) = amplitudes_c05(&m, lambda, ls, 0.0);
+        let t0 = r0 / i0;
+        let mut r = [0.0f64; 2];
+        for (k, coef) in [6.9f64, 10.0].into_iter().enumerate() {
+            let (i1, r1) = amplitudes_c05(&m, lambda, ls, coef * c / ls);
+            r[k] = (r1 / i1) / t0;
+        }
+        println!(
+            "      {frac:>6.3}     {ls:>7.2}   {t0:>8.4}      {:>10.6}    {:>10.6}   {:>10.6}",
+            r[0],
+            r[1],
+            (-2.0 * 6.9 / 3.0f64).exp()
+        );
+    }
+
+    // Si `R` ne depend pas de `L_s/λ`, qu'est-ce qui borne l'eponge par le bas ? La **maille**.
+    // Une bande de deux cellules ne peut pas porter un profil quadratique, quelle que soit la
+    // longueur d'onde. On balaie donc `L_s` en **nombre de mailles**, a `σ_max = 10·c/L_s`.
+    //
+    // **Et il faut surveiller `σ_max·dt`.** L'amortissement s'ecrit `×(1 − σ·dt)` : au-dela de
+    // `σ·dt = 1`, le facteur devient negatif, il est sature a zero, et **l'operateur cesse d'etre
+    // l'eponge d'ADR-005** — la maille est remise a l'etat de repos a chaque pas, ce qui est un
+    // puits, pas un amortissement. La colonne le rend visible plutot que de laisser lire un chiffre
+    // qui ne mesure plus la meme chose.
+    let dt_typ = {
+        let mut a = ArenaAllocator::with_capacity(1 << 24);
+        let j = SequentialJobs;
+        let k = StderrSink;
+        let mut hh = HostServices { alloc: &mut a, jobs: &j, sink: &k };
+        let n = (m.longueur / m.dx).round() as usize;
+        Shallow1D::configure_paquet(&mut hh, n, m.dx, m.h0, m.amplitude, m.x0, m.largeur_paquet, lambda)
+            .expect("configuration")
+            .dt_cfl(0.45)
+    };
+    println!("  C05 — le coefficient de reflexion selon la largeur d'eponge **en mailles** :");
+    println!("      mailles    L_s (m)    L_s / λ    σ_max·dt          R");
+    for mailles in [40usize, 20, 10, 5, 3, 2, 1] {
+        let ls = mailles as f64 * m.dx;
+        let sigma_max = 10.0 * c / ls;
+        let (i0, r0) = amplitudes_c05(&m, lambda, ls, 0.0);
+        let (i1, r1) = amplitudes_c05(&m, lambda, ls, sigma_max);
+        let sdt = sigma_max * dt_typ;
+        println!(
+            "      {mailles:>7}   {ls:>8.4}   {:>8.4}   {sdt:>8.3}{}   {:>10.6}",
+            ls / lambda,
+            if sdt > 1.0 { " !" } else { "  " },
+            (r1 / i1) / (r0 / i0)
+        );
+    }
+    println!("      ( ! : σ_max·dt > 1 — la maille est remise au repos a chaque pas ; ce n'est plus une eponge )");
+
+    vec![
+        Cas {
+            id: "C05-temoin",
+            grandeur: "essai temoin : reflexion sur mur parfait".into(),
+            mesure: temoin,
+            reference: 1.0,
+            tolerance_rel: 0.30,
+            source: "diagnostic : mesure la dissipation du trajet, pas l'eponge",
+        },
+        Cas {
+            // Le reglage retenu est celui d'ADR-042 D1. Celui d'ADR-005 §2 reste **imprime dans le
+            // balayage ci-dessus** — a 7,0 %, il rate son propre critere d'un facteur sept. Sans
+            // lui, C05 ne demontre plus qu'il elimine quelque chose (L123), et la ligne « 4,0·c/L_s »
+            // du tableau est exactement cette demonstration.
+            id: "C05-R",
+            grandeur: "coefficient de reflexion, σ_max = 10c/L_s (ADR-042 D1)".into(),
+            mesure: r_retenu,
+            reference: 0.0,
+            tolerance_rel: 0.01,
+            source: "CAS-CANONIQUES C05 — R < 1 % ; reglage d'ADR-042 D1",
+        },
+        Cas {
+            // Diagnostic, non probant au sens de L124 : il ne juge pas le solveur mais **le reglage
+            // qu'ADR-042 remplace**. Il doit rester rouge tant qu'ADR-005 §2 est cite quelque part
+            // comme s'il tenait.
+            id: "C05-ADR005",
+            grandeur: "le meme, au reglage d'ADR-005 §2 (σ_max = 4c/L_s)".into(),
+            mesure: r_adr,
+            reference: 0.0,
+            tolerance_rel: 1.0,
+            source: "diagnostic : mesure le reglage remplace, pas le solveur — 7 % contre 1 % promis",
+        },
+    ]
+}
+
 #[cfg(test)]
 fn erreur_l1_ritter_ponctuelle(n: usize, dx: f64, h0: f64, t_fin: f64, sc: Schema) -> f64 {
     let mut d = barrage(n, dx, h0, sc);
@@ -1180,6 +1414,109 @@ mod tests {
         assert!(
             (p_actuel - p_ancien).abs() > 1e-3,
             "les deux références devraient donner des ordres distincts"
+        );
+    }
+
+    /// **C05 — le seul des six que cette lignée n'avait jamais exécuté.**
+    ///
+    /// C'est le cas qui a **éliminé le réglage d'`ADR-005 §2`** : `σ_max = 4·c/L_s` promet `R < 1 %`
+    /// et rend **7 %**. `ADR-042` D1 le remplace par `10·c/L_s`.
+    ///
+    /// Les trois assertions du montage sont vérifiées ensemble, **témoin compris** : l'essai à
+    /// `σ_max = 0` rend au mur sa réflexion parfaite, et sans lui l'éponge serait créditée de la
+    /// dissipation numérique du trajet (**L136**). Le réglage éliminé reste mesuré à côté du réglage
+    /// retenu : sans lui, C05 ne démontre plus qu'il élimine quelque chose (**L123**).
+    ///
+    /// > **Pourquoi il est `ignore` par défaut.** Le montage de référence est un canal de 400 m à
+    /// > `dx = 0,125 m` — 3 200 mailles — sur 90 s, rejoué une vingtaine de fois pour les trois
+    /// > balayages d'`ADR-042`. En **debug** il dépasse dix minutes et sortirait la suite du budget
+    /// > de `SPEC-003 §1` ; en **release** il est praticable. La lignée B le mesurait en release
+    /// > (`code/README.md`). Le voisin [`c05_le_reglage_d_adr_005_rate_son_critere`] exerce le même
+    /// > mécanisme sur un montage réduit et **tourne, lui, à chaque commit** — sans quoi ce cas
+    /// > serait un contrôle que personne n'exécute (**L118**).
+    ///
+    /// ```bash
+    /// cargo test --release -p water-harness c05 -- --ignored --nocapture
+    /// ```
+    #[test]
+    #[ignore = "montage de référence : 3 200 mailles × 90 s × ~20 essais ; lancer en --release"]
+    fn c05_les_assertions_passent_temoin_compris() {
+        let cas = c05_absorption();
+        for c in &cas {
+            println!(
+                "C05 {:<12} mesuré {:>12.6}  référence {:>8.4}  écart {:>8.4}",
+                c.id, c.mesure, c.reference, c.ecart_rel()
+            );
+        }
+        for c in &cas {
+            assert!(c.passe(), "{} : {} = {:.6}", c.id, c.grandeur, c.mesure);
+        }
+    }
+
+    /// **Le réglage d'`ADR-005 §2` rate son propre critère, et celui d'`ADR-042` le tient.**
+    ///
+    /// Montage réduit — 100 m à `dx = 0,25 m`, un paquet de `λ = 10 m` — pour que ce résultat soit
+    /// exercé à **chaque commit** et non seulement en release. Les valeurs absolues de `R` dépendent
+    /// du montage ; **leur ordre ne dépend pas de lui**, et c'est lui qui est testé.
+    ///
+    /// `ADR-005 §2` promet `R < 1 %` à `σ_max = 4·c/L_s`. `ADR-042` §2 mesure **7 %** et retient
+    /// `10·c/L_s`. Chaque `R` est corrigé par son propre **témoin** à `σ_max = 0` : sans cela,
+    /// l'éponge serait créditée de la dissipation numérique du trajet (**L136**).
+    #[test]
+    fn c05_le_reglage_d_adr_005_rate_son_critere() {
+        let m = MontageC05 {
+            h0: 2.0,
+            longueur: 100.0,
+            dx: 0.25,
+            x0: 50.0,
+            largeur_paquet: 15.0,
+            amplitude: 0.02,
+            x_jauge: 70.0,
+            t_fin: 24.0,
+            t_coupure: (9.0, 13.0),
+        };
+        let lambda = 10.0f64;
+        let l_s = 0.5 * lambda;
+        let c = (G * m.h0).sqrt();
+
+        let (inc0, refl0) = amplitudes_c05(&m, lambda, l_s, 0.0);
+        assert!(inc0 > 0.0 && refl0 > 0.0, "le témoin doit voir passer puis revenir le train");
+        let temoin = refl0 / inc0;
+
+        let r = |coef: f64| {
+            let (i, rf) = amplitudes_c05(&m, lambda, l_s, coef * c / l_s);
+            (rf / i) / temoin
+        };
+        let r_adr005 = r(4.0);
+        let r_adr042 = r(10.0);
+        println!(
+            "C05 réduit — témoin {temoin:.4} | R à 4c/L_s : {:.4} % | R à 10c/L_s : {:.4} %",
+            r_adr005 * 100.0,
+            r_adr042 * 100.0
+        );
+        assert!(
+            r_adr042 < r_adr005,
+            "amortir plus fort doit réfléchir moins : 4c/L_s → {r_adr005:.4}, 10c/L_s → {r_adr042:.4}"
+        );
+        assert!(
+            r_adr005 > 0.01,
+            "ADR-042 §2 : le réglage d'ADR-005 doit rater le critère de 1 % ; obtenu {:.4} %",
+            r_adr005 * 100.0
+        );
+
+        // **Et un résultat que ce montage n'était pas censé donner.** `ADR-042` §2 mesure **7,0 %**
+        // sur son montage de référence — 400 m, `λ = 20 m`, `dx = 0,125 m`. Celui-ci fait le quart de
+        // la taille à la moitié de la longueur d'onde et le double de la maille, et rend **7,04 %**.
+        //
+        // C'est la réserve n° 2 d'`ADR-042` §6 vérifiée sans qu'on la cherche : *le groupe sans
+        // dimension `σ_max·L_s/c` se transpose, la valeur de `σ_max` en s⁻¹ ne se transpose pas.*
+        // Elle était écrite comme une supposition ; deux montages qui n'ont aucune dimension en
+        // commun donnent le même `R` à 0,6 % près. **Ce qui gouverne l'éponge est bien le groupe,
+        // pas la géométrie.**
+        assert!(
+            (r_adr005 - 0.070).abs() / 0.070 < 0.10,
+            "ADR-042 §2 annonce 7,0 % à 4c/L_s ; ce montage réduit rend {:.4} %",
+            r_adr005 * 100.0
         );
     }
 
