@@ -1460,3 +1460,87 @@ mesure, une métrique d'iso-qualité qui manquait, un scénario absent.
 
 **Ce qui attend encore une réponse humaine.** Quatorze demandes extérieures, en fiches présentables ;
 et les trois choses hors de portée ci-dessus. `WaveEvent` reste l'urgence de format, à 50 octets.
+
+---
+
+## S19 — 2026-09-05 — ADR-020 acté, et il n'y a pas d'autres équipes
+
+**Consigne reçue.** Trois informations : « J'acte ADR-020 » · « Tu es le seul à travailler sur le
+projet, les développeurs observent » · « Je ne sais pas », sur les positions monde et sur l'état réel
+du projet.
+
+**Sorties.** [`adr/ADR-028`](../docs/adr/ADR-028-il-n-y-a-pas-d-autres-equipes.md), six sections ;
+statut d'ADR-020 changé ; six répercussions dont `REPRISE.md` §1 et `CLAUDE.md` ; registre porté à
+97 angles morts ; leçons L63 et L64.
+
+### ADR-020 est acté
+
+Premier ADR du corpus à quitter le statut « proposée ». Conséquence unique et immédiate : **H1 est
+écrivable**. C'était le seul verrou du chemin critique, posé en S03 et tenu dix-sept sessions.
+
+### Il n'y a pas d'autres équipes — et c'est le vrai sujet
+
+Les onze destinataires extérieurs recensés en S11, mis en fiches en S17, **n'existent pas comme
+interlocuteurs**.
+
+**Ce que cela ne change pas** : aucune contrainte technique. Le géoïde décale toujours une plage de
+70,7 m à 30 km, que l'équipe terrain existe ou non.
+
+**Ce que cela change** : quatorze « demandes extérieures » ne sont pas des demandes. Ce sont **des
+décisions différées à personne**.
+
+C'est L61 — écrite la veille — à l'échelle du corpus, et amplifiée par un mécanisme de plus.
+L'étiquette « attend une autre équipe » ne dispensait pas seulement de répondre : **elle désignait un
+responsable**. Un report nominatif est plus confortable qu'un report simple, et surtout il ne se
+relit jamais — on ne vérifie pas qu'un tiers a répondu si l'on n'attend rien de précis de lui. C'est
+pourquoi l'audit des points ouverts de S11, qui cherchait exactement ce type de dette, est passé à
+côté : il vérifiait si un point avait encore un objet, pas s'il avait encore un destinataire.
+
+**Règle retenue** : on ne classe plus rien en « attend une autre équipe », mais en **« à trancher,
+sans interlocuteur »**. La première formulation sort la question du champ de travail, la seconde l'y
+laisse. Toute la différence est là.
+
+### Les positions monde, tranchées faute d'interlocuteur
+
+`int64` en virgule fixe, résolution **1/2048 m**, portée ±4,5·10¹⁵ m.
+
+**La résolution se dérive** : c'est exactement l'ulp d'un `f32` au rayon de référentiel
+(`4096 · 2⁻²³ = 2⁻¹¹ m`). Plus fine, elle transporterait une précision que la conversion détruit ;
+plus grossière, elle perdrait de l'information avant la conversion. Une seule valeur convient.
+
+**Le motif principal est ailleurs** : avec des entiers, le déterminisme inter-plateforme d'I-03
+devient **structurel** au lieu de disciplinaire. En `f64` il reste atteignable, mais il dépend d'une
+sémantique IEEE stricte, de l'absence de contraction FMA, de l'ordre des opérations — autant de
+choses qu'un drapeau de compilation change en silence. C'est L19 appliquée au déterminisme : on ne
+demande pas au compilateur de bien se conduire, on lui retire l'occasion de mal se conduire.
+
+### Le harnais : le conflit d'intérêt se contraint dans le temps
+
+ADR-027 §6, écrit la veille, confiait les seuils d'acceptation à une assurance qualité qui n'existe
+pas. Avec un acteur unique, la répartition ne peut plus supprimer le conflit — j'écrirais le solveur,
+le harnais, les scénarios **et** les seuils que mon propre travail doit franchir.
+
+> **Un seuil s'écrit avant la mesure qu'il juge, dans un commit qui la précède.**
+
+C'est l'écriture anticipée de S07 appliquée à la mesure, avec le même détecteur : **git**. L'ordre des
+commits se vérifie sans avoir assisté au travail — c'est précisément la propriété qu'on cherchait en
+confiant les seuils à un tiers. Moins fort qu'un second acteur, et il faut le dire.
+
+### Ce qui n'a pas été fait
+
+Le dossier B3, reporté depuis S17. Et rien n'a été écrit en code : la règle « Markdown uniquement » de
+`CLAUDE.md` date de S01 et visait les artefacts publiés, mais l'étendre ou la lever est un changement
+de nature du dépôt qui ne se décide pas seul.
+
+**Prochaine session recommandée.** S20 — **écrire H1**, si l'ajout de code est autorisé. C'est
+désormais le seul travail dont la valeur ne décroît pas : ADR-020 est acté, H1 est en tête du chemin
+critique depuis S03, il est spécifié section par section (SPEC-003 §10), et c'est **le seul moyen de
+convertir dix-neuf sessions de conception en quelque chose qui s'exécute et se vérifie**. Sa
+définition de fin est écrite : la batterie déterministe tourne en moins de 60 secondes, sans GPU, à
+chaque commit.
+
+À défaut d'autorisation : le dossier d'exécution du banc B3, dont la valeur est réelle mais
+décroissante — c'est le troisième document de préparation d'un travail qui ne peut pas commencer.
+
+**Ce qui attend encore l'utilisateur.** Trois choses, et elles ont rétréci : constater l'état réel du
+projet (il ne le sait pas), agir sur l'infrastructure, autoriser l'ajout de code.

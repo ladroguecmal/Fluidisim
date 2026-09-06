@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S19
-État             : en cours
+État             : terminée
 Battement        : 2026-09-05
 Objectif         : trois réponses de l'utilisateur, dont une qui change la nature du projet
 ```
@@ -93,10 +93,10 @@ catégorie « attend une réponse d'une autre équipe », qui structure le corpu
   temps — les seuils s'écrivent **avant** la mesure, dans un commit qui la précède. C'est l'écriture
   anticipée de S07 appliquée à la mesure.*
 - [x] **P5** — `ADR-028` §5–6 : le dossier de réunion requalifié · ce qui reste ouvert.
-- [ ] **P6** — répercussions : `REPRISE.md` §1 et §5, `CLAUDE.md`, `00_INDEX.md`,
+- [x] **P6** — répercussions : `REPRISE.md` §1 et §5, `CLAUDE.md`, `00_INDEX.md`,
   `DOSSIER-REUNIONS.md`, ADR-020, ADR-002 §7.1, SPEC-003 §11.4.
-- [ ] **P7** — angles morts, décomptes.
-- [ ] **P8** — rituel de fin.
+- [x] **P7** — angles morts, décomptes.
+- [x] **P8** — rituel de fin.
 
 ### Notes de reprise
 

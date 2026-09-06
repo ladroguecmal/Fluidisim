@@ -813,3 +813,40 @@ qu'on omet, et c'est la seule qui transforme une décision en décision *révisa
 
 **Réflexe** : à chaque décision prise à la place de quelqu'un, écrire son chemin de retour. Sans lui,
 la délégation devient un fait accompli — ce qui n'était pas ce qu'on demandait.
+
+## L63 — Reporter à quelqu'un est plus confortable que reporter, et bien plus durable
+
+*(S19)* Quatorze questions ont été classées « attend une réponse d'une autre équipe » sur seize
+sessions. Aucune n'avait de destinataire : les équipes n'existaient pas.
+
+L'étiquette faisait deux choses, et c'est la seconde qui coûte. Elle dispensait de répondre — c'est le
+report ordinaire, et un audit le trouve. **Mais elle désignait aussi un responsable**, et un report
+nominatif ne se relit pas : on ne vérifie pas qu'un tiers a répondu si l'on n'attend rien de précis
+de lui, et l'absence de réponse se lit comme une absence d'urgence plutôt que comme une absence
+d'interlocuteur.
+
+C'est pourquoi l'audit qui cherchait exactement cette dette est passé à côté : il vérifiait qu'un
+point ouvert avait encore un **objet**, jamais qu'il avait encore un **destinataire**.
+
+**Réflexe** : pour toute question reportée à un tiers, écrire **qui**, nommément, et **depuis
+quand**. Un nom absent ou un délai anormal sont deux signaux visibles ; « l'équipe X » n'en est pas
+un. Et préférer la formulation « à trancher, sans interlocuteur » à « attend l'équipe X » : la
+première laisse la question dans le champ de travail, la seconde l'en sort.
+
+## L64 — Une propriété garantie par un type vaut mieux qu'une propriété défendue par une règle
+
+*(S19)* Le déterminisme inter-plateforme peut s'obtenir en `f64` : sémantique IEEE stricte, pas de
+contraction FMA, pas d'arithmétique étendue, ordre des opérations fixé. Toutes ces conditions sont
+tenables, et **chacune se perd par un drapeau de compilation que personne ne relit**.
+
+En entiers, la même propriété ne dépend de rien : une addition d'entiers 64 bits donne le même
+résultat partout. Le choix ne portait donc pas sur la précision — les deux en ont largement assez —
+mais sur **ce qui garantit la propriété** : un type, ou une discipline.
+
+C'est L19 — rendre l'interdit inexprimable — transposé d'une interface vers une représentation. Et le
+critère de décision qui en découle est net : entre deux représentations également capables, choisir
+celle dont la propriété critique **survit à la négligence**.
+
+**Réflexe** : devant un choix de représentation, ne pas comparer les capacités mais demander *qu'est-ce
+qui casse la propriété que je tiens le plus à garder, et faut-il quelqu'un pour la casser ou suffit-il
+d'une distraction ?*

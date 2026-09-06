@@ -12,10 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-05
-Session en cours : S19 — 2026-09-05 — ADR-020 acté, et il n'y a pas d'autres équipes
-Dernière session : S18 — 2026-09-05 — les cinq arbitrages, tranchés sur délégation
+Dernière session : S19 — 2026-09-05 — ADR-020 acté, et il n'y a pas d'autres équipes
+Session suivante : S20 — **écrire H1**, si l'ajout de code est autorisé. ADR-020 étant acté, c'est
+                   le seul travail dont la valeur ne décroît pas
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
@@ -84,7 +85,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 17 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 27 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 28 décisions d'architecture, numérotées, jamais réécrites
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
                             006 chemin poussé (ce que le système publie)
@@ -103,7 +104,7 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Dix-huit sessions, **27 ADR**, six spécifications, huit registres. Les 30 sections du document de
+Dix-neuf sessions, **28 ADR** *(dont un acté)*, six spécifications, huit registres. Les 30 sections du document de
 questions ouvertes d'origine sont traitées. Les vingt premiers ADR ont été confrontés les uns aux
 autres en S05 (douze écarts, deux de gravité 1) et les cinq SPEC entre elles en S08 (dix écarts,
 deux de gravité 1). Tous résolus — le dernier, le **chemin poussé**, par l'écriture de `SPEC-006`
