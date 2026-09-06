@@ -12,10 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-05
-Session en cours : S13 — 2026-09-05 — revue croisée de SPEC-006, ADR-022 et ADR-023
-Dernière session : S12 — 2026-09-05 — les quatre mécanismes restés à spécifier (ADR-023)
+Dernière session : S13 — 2026-09-05 — revue croisée de SPEC-006, ADR-022 et ADR-023
+Session suivante : S14 — auditer les quinze autres invariants contre leurs ADR sources : le
+                   contrôle inverse, jamais fait, deux écarts sur deux tentatives en S13
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
@@ -72,7 +73,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 17 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 23 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 24 décisions d'architecture, numérotées, jamais réécrites
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
                             006 chemin poussé (ce que le système publie)
@@ -91,7 +92,7 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Douze sessions, **23 ADR**, six spécifications, cinq registres. Les 30 sections du document de
+Treize sessions, **24 ADR**, six spécifications, **six registres**. Les 30 sections du document de
 questions ouvertes d'origine sont traitées. Les vingt premiers ADR ont été confrontés les uns aux
 autres en S05 (douze écarts, deux de gravité 1) et les cinq SPEC entre elles en S08 (dix écarts,
 deux de gravité 1). Tous résolus — le dernier, le **chemin poussé**, par l'écriture de `SPEC-006`
@@ -144,6 +145,9 @@ Avant de rendre la main, dans cet ordre :
    citaient ce qu'on vient de décider** — une correction se propage vers la prose qui l'explique,
    jamais vers les points ouverts qui la réclamaient (S11 en a trouvé quatre instances ; c'est une
    recherche de texte, pas une relecture).
+   **Enfin, relire les invariants que la décision cite** et se demander si l'un d'eux devient faux.
+   Deux pages, trois minutes — S13 a trouvé deux invariants périmés sur dix-sept, dont un de
+   gravité 1, et ils avaient survécu à deux revues croisées et à un audit des points ouverts (L49).
 6. **Mettre à jour ce document** : jeton, numéro de session, état, session suivante.
 
 Une session qui n'exécute pas ce rituel laisse le projet dans un état où la suivante devra

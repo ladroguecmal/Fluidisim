@@ -572,3 +572,56 @@ aucune raison d'être transmis, puisque chaque destinataire le dérive à l'iden
 **Réflexe** : pour tout phénomène toujours actif, multiplier par son **nombre** et par sa
 **fréquence** avant de choisir sa représentation. Si le produit dépasse le pic qu'on avait budgété,
 la représentation est fausse — et c'est en général qu'on transmet ce qu'on pourrait dériver.
+
+## L49 — Un invariant ne s'audite jamais, parce qu'il n'est ni une affirmation ni une absence
+
+*(S13)* Deux invariants sur dix-sept se sont révélés faux à la première tentative : l'un exigeait un
+mécanisme aboli huit sessions plus tôt, l'autre était universel là où l'ADR qu'il cite en source le
+contredit pour la moitié des cas.
+
+Un audit a deux prises connues — les **affirmations**, qu'on confronte entre elles ; les
+**absences**, qu'on relit pour vérifier qu'elles ont encore un objet (L40). Un invariant n'est ni
+l'une ni l'autre : il se présente comme le **socle** contre lequel on vérifie le reste, et la
+référence qu'il porte se lit comme une provenance et non comme une dépendance à surveiller. On ne
+vérifie donc jamais le mètre étalon.
+
+Et l'erreur y coûte double. Un invariant faux ne produit pas une erreur mais deux, en sens
+contraires : quelqu'un l'applique, ou quelqu'un constate qu'il n'est pas tenu et « rétablit » ce
+qu'il décrit — c'est-à-dire rouvre ce qu'une décision avait fermé, **en obéissant à la règle**.
+
+**Réflexe** : toute session qui écrit une décision relit les règles fondamentales que cette décision
+cite, et se demande si l'une d'elles devient fausse. Le corpus des invariants est court par
+construction ; c'est une lecture de trois minutes, et c'est la seule occasion où quelqu'un les
+regarde autrement que comme un juge.
+
+## L50 — Ce qui n'a jamais été vérifié d'une certaine manière est faux de cette manière-là
+
+*(S13)* Trois structures sur trois portaient une taille fausse, et l'erreur d'origine s'était
+propagée dans six documents, chacun recalculant depuis le chiffre faux du précédent. Le corpus avait
+pourtant été audité deux fois : S05 a contrôlé les tables numériques dupliquées, S08 a recalculé une
+quarantaine de valeurs depuis leurs formules. **Personne n'avait additionné les champs d'un
+`struct`** — et le taux d'erreur dans cette classe non contrôlée a été de 100 %.
+
+Ce n'est pas un hasard : une classe de vérification qu'on n'a jamais faite ne bénéficie d'aucune
+correction accidentelle. Les valeurs vérifiées se corrigent au fil des relectures ; les autres
+dérivent librement, et rien ne signale leur âge.
+
+**Réflexe** : après tout audit, écrire **ce qu'il n'a pas regardé**. La liste des classes de contrôle
+non passées vaut mieux qu'un score : elle dit exactement où chercher la prochaine fois, et l'on peut
+parier sur son rendement.
+
+## L51 — Une correction crée un précédent, pas un réflexe
+
+*(S13)* La revue S05 avait trouvé que les poches d'air n'avaient pas de ligne dans la table
+d'autorité, et fait ajouter deux lignes à cette table. Sept sessions plus tard, une nouvelle force
+autoritaire a été spécifiée — et n'a pas eu de ligne. Le mécanisme d'ajout était connu, documenté,
+appliqué une fois, et non réappliqué.
+
+Une correction ponctuelle ne se généralise pas d'elle-même. Ce qui la généralise est soit un
+**invariant** — qui la rend refusable —, soit une **entrée de rituel** — qui la rend systématique.
+Sans l'un ou l'autre, elle reste un événement de l'historique, et l'historique ne se relit pas.
+
+**Réflexe** : en corrigeant un écart, se demander s'il appartient à une **classe**. Si oui, la
+correction ne suffit pas : il faut le mécanisme qui la reproduira sans qu'on y pense. Trois écarts de
+S13 — E08, E02, E04 — sont des récidives ou des premières d'une classe, et c'est ce qui justifie
+qu'ils aient produit des angles morts plutôt que de simples notes.

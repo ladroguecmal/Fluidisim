@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S13
-État             : en cours
+État             : terminée
 Battement        : 2026-09-05
 Objectif         : confronter SPEC-006, ADR-022 et ADR-023 au corpus — trois documents
                    structurants écrits en quatre sessions, jamais audités
@@ -94,7 +94,7 @@ l'intention.
 - [x] **P8** — appliquer les résolutions : notes correctives datées, nouvel ADR si une décision
   change.
 - [x] **P9** — index, angles morts, décomptes.
-- [ ] **P10** — rituel de fin (`REPRISE.md` §6) : journal S13, leçons, index, jeton libéré.
+- [x] **P10** — rituel de fin (`REPRISE.md` §6) : journal S13, leçons, index, jeton libéré.
 
 ### Notes de reprise
 

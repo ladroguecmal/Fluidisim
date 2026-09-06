@@ -889,3 +889,116 @@ Second candidat, moins urgent : l'audit des **registres**, que S11 avait explici
 **Arbitrages en attente — rappel.** Cinq arbitrages humains, quatre interfaces à confirmer, sept
 autres destinataires extérieurs. L'entrée **personnage** est désormais exécutable — il y a un
 document à soumettre — et `WaveEvent` reste l'urgence de format.
+
+---
+
+## S13 — 2026-09-05 — Revue croisée des documents récents
+
+**Consigne reçue.** « Reprends le projet. » Jeton `libre`, S12 close ; objectif recommandé :
+confronter SPEC-006, ADR-022 et ADR-023 au corpus — trois documents structurants écrits en quatre
+sessions et jamais audités.
+
+**Sorties.** [`registres/REVUE-CROISEE-S13.md`](../docs/registres/REVUE-CROISEE-S13.md) ;
+[`adr/ADR-024`](../docs/adr/ADR-024-amendement-des-invariants-I11-I12.md) ; **I-11 et I-12 amendés** ;
+dix notes correctives dans six documents ; registre porté à 86 angles morts ; leçons L49 à L51.
+
+**Douze écarts, un de gravité 1, six de gravité 2.** Et un résultat que je n'attendais pas :
+**aucun des trois documents audités ne viole un invariant. Ce sont deux invariants qui ont vieilli.**
+
+### La règle de conduite, et pourquoi elle a payé
+
+J'ai écrit les trois documents audités. Ce que je croyais y avoir mis n'est pas ce qui y est, et un
+audit mené de mémoire n'aurait trouvé que ce que j'attendais. Chaque contrôle est donc parti du
+**texte du corpus**. Le rendement le confirme : les deux écarts les plus coûteux — E01 sur un
+invariant, E11 sur la sauvegarde — sont exactement ceux qui n'étaient pas dans mes notes de plan.
+
+### E01 — un invariant exige un mécanisme aboli *(gravité 1)*
+
+I-11 énonçait : « Toute demande d'événement issue d'un client est **plafonnée** par une cause connue
+du serveur. » ADR-021 §3.1, en S05 : « Le chemin d'énergie client → serveur **disparaît** […] le
+mécanisme de plafonnement devient **sans objet**. »
+
+Un invariant est le seul document qu'on cite **pour refuser** une proposition. Un invariant faux
+produit donc deux erreurs en sens contraires : on implémente le plafonnement parce qu'un invariant
+l'exige ; ou, constatant qu'il n'existe pas, on « rétablit » le chemin client → serveur pour pouvoir
+le plafonner — c'est-à-dire qu'on **rouvre l'angle mort A16**, en obéissant à l'invariant.
+
+Le nouvel énoncé est strictement plus fort : non plus une porte gardée, mais l'absence de porte.
+
+### E07 — un invariant vrai pour une moitié des cas
+
+I-12 posait que « créer et détruire un domaine est visuellement gratuit », en citant ADR-013 — dont
+le §4 dit qu'un domaine **substitutif** met 40 s à s'établir. L'invariant faisait donc refuser le
+document qu'il citait en source, et ADR-022 §2.6 a dû redémontrer de son côté ce qu'un énoncé correct
+lui aurait donné. C'est le coût habituel d'un invariant trop large : il n'est pas seulement faux, **il
+empêche de voir ce qu'il masque**, puisqu'on ne cherche pas d'exception à ce qui est posé comme
+universel.
+
+### Ce que ces deux écarts disent, et qui déborde le cas
+
+Un audit a jusqu'ici deux prises : les **affirmations** qu'on confronte entre elles (S05, S08), et
+les **absences** qu'on relit pour vérifier qu'elles ont encore un objet (S11). Un invariant n'est ni
+l'un ni l'autre — il se présente comme le socle contre lequel on vérifie le reste, et la flèche
+`→ ADR-xxx` qu'il porte se lit comme une provenance, pas comme une dépendance à surveiller.
+
+Deux des dix-sept se sont révélés faux à la première tentative. D'où la règle ajoutée au rituel :
+**une session qui écrit un ADR relit les invariants que cet ADR cite.** Trois minutes ; cela aurait
+attrapé I-11 en S05 et I-12 en S01.
+
+### E11 — la sauvegarde casse le banc qui devait la prouver
+
+ADR-022 §4.2 fait figurer dans la sauvegarde un `span<const WaveEvent> events_alive` **sans filtre**,
+alors que SPEC-006 §3.1 — écrite une session plus tôt — a doté `WaveEvent` d'un `EventOrigin` dont
+deux valeurs sur trois sont locales et non répliquées.
+
+Conséquence la plus gênante : **le cas C19 en devient faux.** ADR-022 §6.1 exige un hash identique
+après aller-retour de persistance, en régime D1 donc binaire ; un événement `TransductionLocale`
+vient d'un solveur δ, qui n'est jamais D1. Le banc conçu comme l'argument phare d'I-17 aurait échoué
+par intermittence, pour une cause étrangère à I-17 — et un test juste qui échoue pour une cause
+fausse discrédite le test, pas la cause.
+
+Le document se contredisait lui-même : son §1 dit que l'état persistant tient en « `T_sim`, le
+journal des événements W encore vivants, et les volumes entiers », où « W » désigne depuis ADR-021 §3
+le seul `W_rep`. La correction **applique** le §1, elle n'ajoute rien.
+
+### E04 — la première erreur arithmétique du corpus
+
+Trois structures sur trois sont mal comptées. `WaveEvent` d'origine : 40 octets annoncés, **45** de
+champs. `WaveEvent` étendu : 45 annoncés, **50**. `ListenerAggregate` : 45 annoncés, **50**. SPEC-006
+avait ajouté cinq octets à une base fausse et retrouvé par coïncidence la taille réelle de l'original.
+
+Propagation : six documents, neuf endroits. Aucune conclusion ne change — 1 000 o/s au lieu de 900,
+≈205 Ko au lieu de 180, tout reste négligeable. **Ce qui compte est la classe de contrôle absente** :
+S05 a vérifié les tables dupliquées, S08 a recalculé quarante valeurs depuis leurs formules, personne
+n'a jamais additionné les champs d'un `struct`.
+
+### Les autres
+
+`ring_slots` avait deux règles de dérivation contradictoires **dans le même document, à une section
+d'écart** (E03) — tranché par `max()` et un renvoi à `validate_config`. Une cadence « par tick de
+rendu » contredisait la règle du diviseur énoncée une ligne plus haut, et aurait fait cinq fois le
+travail sur une machine à 144 Hz (E06). Deux échelles de rangs de dégradation portent les mêmes
+numéros dans deux documents qui se citent, et une règle de S12 s'y lit avec un contresens complet
+(E02). Le terme d'impact, autoritaire, n'avait pas de ligne dans la table d'autorité — **répétition
+exacte de l'écart R08 de S05**, dont la correction avait pourtant créé le précédent (E08). Un site
+turbulent publié en un seul sommet ne pouvait pas exprimer son étendue de crête (E09). Et l'équation
+de coalescence employait une **température que la structure ne porte pas** (E10) — corrigée en forme
+`P·V`, ce qui retire une grandeur au lieu d'en ajouter une.
+
+### Ce qui n'a pas été fait
+
+**Le contrôle inverse n'a jamais été fait** : pour chaque invariant, l'ADR qu'il cite dit-il encore
+ce que l'invariant résume ? S13 a vérifié que trois documents récents respectent les dix-sept
+invariants ; c'est un autre exercice. Le contrôle inverse vient de rapporter deux écarts sur deux
+tentatives, et il porte sur quinze invariants non examinés.
+
+**Prochaine session recommandée.** S14 — **auditer les quinze autres invariants contre leurs ADR
+sources**. C'est l'axe que S13 vient d'ouvrir sans le parcourir, il est court — deux pages
+d'invariants, une flèche `→ ADR-xxx` par ligne — et son rendement observé est de deux écarts sur deux,
+dont un de gravité 1.
+
+Second candidat, inchangé depuis S12 : l'audit des **registres**, que S11 avait laissé de côté.
+
+**Arbitrages en attente — rappel.** Cinq arbitrages humains, quatre interfaces à confirmer, sept
+autres destinataires extérieurs. `WaveEvent` reste l'urgence de format — et sa taille réelle est
+désormais **50 octets**.
