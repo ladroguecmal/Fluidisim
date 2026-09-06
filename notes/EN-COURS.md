@@ -76,14 +76,14 @@ qu'une décision ordinaire, pas moins, et **bon marché à défaire**. Chaque se
 motif, son chiffre, et ce qu'il faudrait changer si la réponse était l'inverse.
 
 - [ ] **P1** — déclarer le plan, prendre le jeton, mettre à jour le battement.
-- [ ] **P2** — `ADR-027` §1–2 : le cadre de la délégation · **arbitrage 1, l'échelle du temps**.
+- [x] **P2** — `ADR-027` §1–2 : le cadre de la délégation · **arbitrage 1, l'échelle du temps**.
   *Thèse : la question mêle trois besoins de design — voyage rapide, pause, mode photo — dont aucun
   n'exige de mettre à l'échelle le temps **par joueur**. La réponse est non, et elle ne coûte rien
   au design une fois les trois besoins traités séparément.*
-- [ ] **P3** — `ADR-027` §3–4 : **la glace** · **le trait de côte mobile**.
+- [x] **P3** — `ADR-027` §3–4 : **la glace** · **le trait de côte mobile**.
   *Thèse : le second se dissout. « Qui porte le trait de côte » suppose qu'il soit stocké ; il est
   dérivé de la marée analytique, donc personne ne le porte — au même titre que l'écume permanente.*
-- [ ] **P4** — `ADR-027` §5–7 : **la durée de vie d'un nœud V** · **la propriété du harnais** ·
+- [x] **P4** — `ADR-027` §5–7 : **la durée de vie d'un nœud V** · **la propriété du harnais** ·
   ce qui reste ouvert.
   *Thèse : le premier se dissout aussi — l'eau d'un objet suit la politique de cet objet, et n'a
   pas besoin d'une règle propre.*
@@ -106,3 +106,26 @@ motif, son chiffre, et ce qu'il faudrait changer si la réponse était l'inverse
   la prémisse est fausse. C'est la troisième fois que la méthode le produit (L03), et cela vaut
   d'être noté : un arbitrage qui traîne est souvent un arbitrage mal posé, et l'attente d'une
   réponse humaine masque le fait qu'il n'y a rien à trancher.
+
+#### P2 à P4 — ADR-027, sept sections
+
+Écrit d un tenant : les cinq décisions se tiennent par leur cadre commun, et le §1 (par quelle
+autorité, à quelles conditions) ne se sépare pas des décisions qu il encadre.
+
+**Deux se sont effectivement dissoutes**, comme la thèse du plan l anticipait.
+- *Trait de côte* : « qui le porte » suppose qu il soit stocké. Il est dérivé de la marée
+  analytique — même famille que l écume permanente et les sites turbulents. Ce qui est stocké, c est
+  la bibliothèque à 16 états : **45 Mo**, tout le prix de la décision.
+- *Nœud V* : 20 octets par nœud, **4 Ko pour la flotte d un joueur**. Une politique de rétention
+  propre à l eau coûterait plus en complexité qu elle n économiserait, et créerait un joueur qui
+  retrouve son navire intact mais asséché.
+
+**Le harnais s est dissous à moitié** : la question cherchait un propriétaire unique là où il en faut
+deux. Le code et les scénarios à l eau, **les seuils d acceptation à la qualité** — c est la seule
+barre qu on est tenté de déplacer quand on ne la passe pas. Les seuils vivent dans un fichier séparé
+qui exige une approbation ; ajouter un scénario ne passe par personne (L19).
+
+**Le temps** est le seul des cinq dont l inversion tardive détruirait du travail fait. La question
+mêlait trois besoins — voyage rapide, pause, mode photo — dont aucun n exige une échelle **par
+joueur**. L échelle **globale** reste disponible et ne coûte rien : c est un degré de liberté que
+personne n avait relevé.
