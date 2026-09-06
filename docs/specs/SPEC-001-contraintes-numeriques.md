@@ -158,7 +158,9 @@ Théorie de Wagner, pour une carène de **relèvement de fond** `β` entrant à 
 **Demi-largeur mouillée** : `c(t) = (π/2)·v·t / tan β`, d'où la **durée d'impact** pour mouiller une
 demi-largeur `b` :
 
-
+```
+t_impact = 2·b·tan β / (π·v)
+```
 
 | `b` | `β` | `v` | `t_impact` | à 30 Hz |
 |---|---|---|---|---|
@@ -179,7 +181,9 @@ piégé et la compressibilité l'écrêtent. La pression de pic n'est donc pas u
 
 **Masse ajoutée d'une plaque plane** de demi-largeur `c`, par mètre de longueur :
 
-
+```
+m_a = ½·π·ρ·c²            impulsion d'impact :  J = Δ(m_a) · v_rel
+```
 
 C'est cette dernière que le système publie (ADR-023 §2.3) : un bilan de quantité de mouvement, borné
 par la masse d'eau réellement accélérée, là où la pression de pic publierait son incertitude.

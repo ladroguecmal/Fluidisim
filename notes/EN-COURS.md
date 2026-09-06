@@ -257,3 +257,11 @@ règles. Les mêler aurait rendu les deux moins citables.
 **P6b** : 13 marques appliquées, aucun échec. Six invariants amendés, le renvoi croisé I-06 ↔ I-16
 posé, la note ADR-010 §6 → ADR-025, `extent_m` borné, `HydroSample` corrigé, et les trois formules
 de Wagner migrées d'ADR-023 vers **SPEC-001 §5 bis** — ce qui résout I-14 sans toucher à son énoncé.
+
+*Correctif P6b, vu en vérifiant.* Les deux blocs de formules de SPEC-001 §5 bis avaient été **mangés
+par bash** : les accents graves d'un bloc de code, dans un `python -c` passé à l'interpréteur, sont
+interprétés comme une substitution de commande. Le script a signalé une erreur de syntaxe et a
+poursuivi ; le contenu écrit était amputé sans que rien ne le dise.
+Extension de L09 : pour tout contenu portant des accents graves ou des accents français, écrire le
+script dans un fichier et l'exécuter — jamais le passer en ligne. Vérifié après coup, ce qui est la
+seule raison pour laquelle le défaut a été vu.
