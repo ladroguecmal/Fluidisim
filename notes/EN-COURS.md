@@ -357,3 +357,11 @@ en défaut ailleurs que dans des ADR et des spécifications.
 Constat qui vaut d'être noté : **aucun des trois documents audités ne viole un invariant.** Ce sont
 les invariants qui ont vieilli. Un document récent confronté à une règle ancienne révèle la règle
 autant que le document.
+
+#### P8 — coupé en deux, l'étape dépassait le quart d'heure
+
+**P8a** : `ADR-024` écrit, I-11 et I-12 amendés dans `01_INVARIANTS.md` avec la mention de
+l'amendement et sa date. **P8b** : les onze notes correctives.
+
+Découpage déclaré ici avant de le faire, conformément à la règle « aucune étape ne dépasse une
+quinzaine de minutes ; si elle est plus grosse, la découper ».

@@ -57,14 +57,29 @@ mélangent pas ; on mélange les paramètres qui les engendrent.
 calculer analytiquement l'amplitude. Il n'exécute ni W ni δ.
 → ADR-009
 
-**I-11 — Aucune énergie ne franchit la frontière client → serveur sans borne validée.** Toute
-demande d'événement issue d'un client est plafonnée par une cause connue du serveur.
-→ ADR-009
+**I-11 — Aucun chemin d'énergie ne va du client vers le monde répliqué.** Un client ne peut pas
+faire naître un événement W répliqué : le serveur les émet depuis leurs causes, qu'il possède. La
+transduction δ→W d'un client ne produit que du `W_local`, cosmétique et non répliqué. Il n'y a donc
+rien à plafonner et aucune borne à valider.
+→ ADR-009, ADR-021 §3, **ADR-024**
 
-**I-12 — Créer et détruire un domaine est visuellement gratuit.** C'est la propriété qui rend
-possibles l'ordonnancement, la dégradation, le repli hors caméra et le remplacement de solveur.
-Toute proposition qui la casse est refusée.
-→ ADR-005, ADR-007, ADR-012, ADR-013
+*Amendement S13 (ADR-024 §2, écart E01, gravité 1) : l'énoncé précédent exigeait que « toute demande
+d'événement issue d'un client soit plafonnée par une cause connue du serveur ». ADR-021 §3 avait
+supprimé ce chemin en S05, rendant le plafonnement sans objet — un invariant réclamait donc un
+mécanisme aboli depuis huit sessions. Le nouvel énoncé est strictement plus fort : non plus une porte
+gardée, mais l'absence de porte.*
+
+**I-12 — Créer et détruire un domaine *perturbatif* est visuellement gratuit.** C'est la propriété
+qui rend possibles l'ordonnancement, la dégradation, le repli hors caméra et le remplacement de
+solveur. Toute proposition qui la casse est refusée. Un domaine **substitutif** n'a pas cette
+propriété : son établissement se compte en secondes (ADR-013 §4 : 40 s depuis rien, 4,4 à 8 s depuis
+une graine), et toute dégradation qui le détruit doit dimensionner son hystérésis sur son temps de
+restauration (ADR-022 §2.6).
+→ ADR-005, ADR-007, ADR-012, ADR-013, **ADR-024**
+
+*Amendement S13 (ADR-024 §3, écart E07) : l'énoncé précédent était universel et faisait donc refuser
+ADR-013 §4, qu'il citait pourtant en source. ADR-022 §2.6 avait dû redémontrer de son côté qu'un
+domaine substitutif n'est pas gratuit à recréer.*
 
 **I-13 — Le rendu ne pilote pas la physique.** Il peut demander une priorité au `WaterManager` ;
 il ne peut jamais imposer un niveau de simulation ni partager les structures de calcul.
