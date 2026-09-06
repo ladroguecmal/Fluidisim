@@ -84,8 +84,8 @@ Rusanov porte une diffusion proportionnelle à `α·dx`, et un schéma d'ordre 1
 la thèse est juste, C03 devient un **troisième critère d'entrée à B3**, après l'équilibrage
 (ADR-030) et le front (ADR-031).
 
-- [ ] **P1** — plan, jeton.
-- [ ] **P2** — le montage : bassin fermé de 20 m, `h = 2 m`, surface initiale inclinée, murs aux
+- [x] **P1** — plan, jeton.
+- [x] **P2** — le montage : bassin fermé de 20 m, `h = 2 m`, surface initiale inclinée, murs aux
       deux bords. Vérifier le mode propre plutôt que le supposer : la période théorique est
       `T = 2L/√(gh) = 9,031 s`, et rien ne garantit que la surface inclinée n'excite pas aussi les
       harmoniques.

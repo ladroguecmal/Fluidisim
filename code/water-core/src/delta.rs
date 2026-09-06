@@ -74,6 +74,25 @@ pub enum EtatInitial {
         h_droite_m: f32,
         x_m: f32,
     },
+    /// Seiche : surface libre initiale déformée dans un bassin clos, vitesse nulle.
+    ///
+    /// Deux formes, et la distinction n'est pas cosmétique :
+    ///
+    /// - `mode_propre = false` — **rampe linéaire**, `η = a·(1 − 2x/L)`, la « surface inclinée » de
+    ///   l'énoncé de C03. Elle n'est pas un mode propre : sa décomposition sur les modes
+    ///   `cos(nπx/L)` donne des coefficients en `1/n²` pour `n` impair, donc le fondamental porte
+    ///   `8/π² ≈ 81 %` de l'amplitude et l'harmonique 3 en porte `1/9`. La mesure d'enveloppe s'en
+    ///   trouve modulée.
+    /// - `mode_propre = true` — **fondamental exact**, `η = a·cos(πx/L)`, qui oscille à `T` sans
+    ///   rien exciter d'autre.
+    ///
+    /// Les deux sont exécutées : la première est fidèle à l'énoncé, la seconde dit ce que la
+    /// première coûte en lisibilité.
+    Seiche {
+        amplitude_m: f32,
+        longueur_m: f32,
+        mode_propre: bool,
+    },
     /// Bosse gaussienne de faible amplitude sur une nappe au repos, vitesse nulle.
     ///
     /// Sa raison d'être est d'être **régulière** : indéfiniment dérivable, sans front ni
@@ -155,6 +174,38 @@ impl Bassin {
 }
 
 impl Bassin {
+    /// Le montage de C03 — `CAS-CANONIQUES` §C03, seiche en bassin clos.
+    ///
+    /// Bassin fermé de **20 m**, profondeur **2 m**, fond plat, murs aux deux bords. Période du
+    /// mode fondamental : `T = 2L/√(g·h) = 9,031 s`.
+    ///
+    /// # Ce que ce montage ne contient pas, et pourquoi
+    ///
+    /// **Aucune friction de fond.** C03 mesure la dissipation **numérique** — la demi-vie
+    /// d'amplitude. Une friction physique ajouterait une seconde source d'amortissement, et la
+    /// mesure ne dirait plus laquelle des deux éteint la vague. L'absence de friction n'est pas une
+    /// limite du véhicule ici : c'est une condition de la mesure.
+    ///
+    /// # Amplitude
+    ///
+    /// `2 cm` sur `2 m`, soit `a/h = 1 %` : le régime est linéaire, la célérité vaut `√(g·h)` sans
+    /// correction d'amplitude, et la référence `T = 2L/√(g·h)` s'applique sans réserve.
+    pub const fn c03(mode_propre: bool) -> Bassin {
+        Bassin {
+            longueur_m: 20.0,
+            origine_m: 0.0,
+            nx: 200,
+            profondeur_gauche_m: 2.0,
+            pente: 0.0,
+            eta0_m: 0.0,
+            etat_initial: EtatInitial::Seiche {
+                amplitude_m: 0.02,
+                longueur_m: 20.0,
+                mode_propre,
+            },
+        }
+    }
+
     /// Montage régulier pour C08 — bosse gaussienne de 1 cm sur 1 m d'eau, fond plat.
     ///
     /// # Pourquoi ce montage existe
@@ -248,6 +299,20 @@ impl Delta1D {
                     } else {
                         h_droite_m
                     }
+                }
+                EtatInitial::Seiche {
+                    amplitude_m,
+                    longueur_m,
+                    mode_propre,
+                } => {
+                    let base = (bassin.eta0_m - b[i]).max(0.0);
+                    let xi = ((x - bassin.origine_m) / longueur_m).clamp(0.0, 1.0);
+                    let eta = if mode_propre {
+                        amplitude_m * (core::f32::consts::PI * xi).cos()
+                    } else {
+                        amplitude_m * (1.0 - 2.0 * xi)
+                    };
+                    (base + eta).max(0.0)
                 }
                 EtatInitial::Bosse {
                     amplitude_m,
@@ -842,6 +907,37 @@ mod tests {
             println!(
                 "h_sec={h_sec:<10} front={mesure:8.4} / {refer:7.4} = {:6.2} %   volume={:.6}",
                 (mesure - refer) / refer * 100.0,
+                d.volume()
+            );
+        }
+    }
+
+    /// Le montage de C03 tient : volume conservé, et la surface part bien déformée.
+    ///
+    /// La référence de volume est fermée : `h·L = 2 × 20 = 40 m²`, et la déformation initiale est
+    /// **de moyenne nulle** dans les deux formes — une rampe comme un cosinus sur une demi-période.
+    /// Un volume initial différent de 40 dirait que la condition initiale ajoute ou retire de
+    /// l'eau, ce qui fausserait tout le reste.
+    #[test]
+    fn montage_c03_conserve_le_volume() {
+        for mode_propre in [false, true] {
+            let mut d = solveur(Bassin::c03(mode_propre));
+            assert!(
+                (d.volume() - 40.0).abs() < 1.0e-3,
+                "mode_propre={mode_propre} : volume initial {} pour 40 attendus",
+                d.volume()
+            );
+            // La surface est déformée : les deux bords ne sont pas au même niveau.
+            let (g, dr) = (d.eta(0), d.eta(d.nx() - 1));
+            assert!(
+                (g - dr).abs() > 0.01,
+                "mode_propre={mode_propre} : la surface initiale doit être inclinée ({g} vs {dr})"
+            );
+
+            d.avancer_equilibre(9.031);
+            assert!(
+                (d.volume() - 40.0).abs() < 2.0e-3,
+                "mode_propre={mode_propre} : volume après une période {} pour 40",
                 d.volume()
             );
         }
