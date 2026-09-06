@@ -61,6 +61,22 @@ trois** :
 > L'amortissement d'une onde, exprimé en périodes de cette onde, ne dépend **que** de sa résolution
 > et du nombre de Courant. Ni de sa longueur, ni de sa vitesse, ni de la profondeur.
 
+> **Note corrective S27 — cette loi a un domaine de validité en amplitude, qui n'est pas écrit
+> ci-dessus.** Le balayage qui l'établit était à `a/h = 1 %` **fixe** ; il n'était donc pas confondu
+> et sa conclusion tient. Mais la pente `k = demi-vie/N` n'est constante que dans ce régime :
+>
+> | `a/h` | N = 80 | N = 160 | N = 320 |
+> |---|---|---|---|
+> | **1 %** | k = 0,0635 | 0,0628 | 0,0616 — **constant** |
+> | **5 %** | k = 0,0608 | 0,0520 | **0,0373** — s'effondre de 39 % |
+>
+> **À `a/h = 5 %`, la loi est fausse.** Le raidissement transfère de l'énergie vers les harmoniques,
+> qui s'amortissent en `n²` (ADR-034) ; l'effet domine d'autant plus que `N` est grand, la
+> dissipation linéaire y devenant faible. Et `a/h = 5 %` est **ordinaire en eau peu profonde** : le
+> domaine de validité exclut une part des situations que la loi est censée dimensionner. Le
+> découpage exact n'est pas mesuré — angle mort **A127**. Voir
+> [`ADR-035`](ADR-035-le-nombre-de-courant-definition-borne-valeur.md) §5.
+
 **Vérification.** Prédit `0,06385·N` à `ν = 0,45` ; mesuré sur six grilles, de 20 à 640 points par
 longueur d'onde : `0,0640 · 0,0638 · 0,0635 · 0,0628 · 0,0616 · 0,0606`. **Écart de 0,2 %** au point
 le mieux résolu par la théorie, avec `R² > 0,999` sur chaque ajustement exponentiel.
