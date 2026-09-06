@@ -122,7 +122,7 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 |---|---|---|---|---|
 | S22-1 | Écrire **C01-bis**, à fond **courbe**, avant que B3 ne se serve de C01 pour éliminer | ADR-030 §6.1, **A105** | session | **ouverte** |
 | S22-2 | Donner une provenance aux seuils de C01 — `1 mm/s` et `1 mm`, sans formule ni banc, contre I-14 | ADR-030 §6.3, **A106** | session | **ouverte** |
-| S22-3 | Poser la **friction de fond** dans le véhicule δ, avant C03 | ADR-030 §6.4 | session | **ouverte** — *C04 retiré du périmètre en S23 : son énoncé pose « sans frottement »* |
+| S22-3 | Poser la **friction de fond** dans le véhicule δ | ADR-030 §6.4 | session | **close (S25) — par requalification** : C03 exige au contraire son *absence* (ADR-033 §1, A118). Elle n'a plus aucun cas qui la réclame ; reversée aux points ouverts sans échéance. |
 | S22-4 | Justifier ou mesurer le seuil de séchage `H_SEC`, posé sans provenance | `delta.rs` | session | **close (S23)** — ADR-031 §4 : mesuré sur six décades, 0,25 point d'effet ; ce n'est pas un paramètre physique |
 | S22-5 | Décider du sort du travail propre à `master` (S16-S17), hors de la ligne vivante | **A107** | **humain** | **ouverte** |
 
@@ -159,4 +159,20 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 > cinq, S23 quatre, S24 cinq ; six ont été closes en deux sessions. Les sessions de conception
 > fermaient des questions ; les sessions de mesure en ouvrent, parce qu'une mesure qui ne surprend
 > personne n'avait pas besoin d'être faite.
+
+## Actions relevées en séance — S25
+
+| # | Action | D'où elle vient | Qui la porte | État |
+|---|---|---|---|---|
+| S25-1 | Poser le **nombre de Courant** comme paramètre de conception : il ne figure dans aucun ADR, aucune SPEC, aucun banc, et il multiplie la portée des ondes par 4,5 | ADR-033 §2.3, **A117** | session | **ouverte** |
+| S25-2 | Exprimer les exigences de portée **en périodes**, jamais en mètres ni en secondes — seule formulation dont la réponse ne dépende pas de l'onde | ADR-033 §4.2 | session | **ouverte** |
+| S25-3 | Faire dire à `CAS-CANONIQUES` §C03 **sa résolution** : un cas dont le verdict dépend d'un paramètre tu mesure ce paramètre | ADR-033 §4.3, **A119** | session | **ouverte** |
+| S25-4 | Vérifier que l'**harmonique `n` s'amortit `n` fois plus vite**, ce que la loi prédit et que rien ne teste | ADR-033 §5.3 | session | **ouverte** |
+| S25-5 | Borner l'emploi de la loi près de `ν = 1`, ou lui donner un terme correctif — écart de 19 % à `ν = 0,9` | ADR-033 §5.2 | session | **ouverte** |
+
+> **Note S25 — deux cas sur trois du corpus δ sont plus faibles que leur réputation.** C01 est
+> presque équilibré par accident de géométrie (A105) ; C03 passe à une résolution qu'aucun domaine
+> n'aura (A119). Seul C04 discrimine vraiment. **Le point commun est que les trois montages ont été
+> choisis pour être lisibles**, ce qui est une qualité — mais la représentativité n'a jamais été un
+> critère explicite de leur écriture, et elle devrait l'être avant que B3 ne s'en serve.
 

@@ -12,9 +12,9 @@ de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outi
 6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance),
 3 en S11 (audit des points ouverts), 3 en S12 (mécanismes de détail), 3 en S13 (revue croisée des
 documents récents), 3 en S14 (audit inverse des invariants), 2 en S15 (audit des registres), 2 en S16 (dossier B2), 2 en S17
-(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques), 4 en S22 (C01 et le premier δ), 4 en S23 (C04 et le lit sec), 4 en S24 (C08 et l'oracle) — **116 au
-total**. **Cinquante-six ont été trouvés dans nos propres écrits**, pas dans les documents sources :
-A49, A56, A57, A58, puis A65 à A116. La proportion
+(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques), 4 en S22 (C01 et le premier δ), 4 en S23 (C04 et le lit sec), 4 en S24 (C08 et l'oracle), 4 en S25 (C03 et la dissipation) — **120 au
+total**. **Soixante ont été trouvés dans nos propres écrits**, pas dans les documents sources :
+A49, A56, A57, A58, puis A65 à A120. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -158,8 +158,12 @@ ce que les sources avaient omis.
 | **A114** | Avec un oracle, le triplet le plus fin est le moins fiable — la règle s'inverse | **1** | ADR-032 §4 |
 | **A115** | Un critère d'écart local ne distingue pas « a convergé » de « progresse lentement » | 2 | ADR-032 §5 |
 | **A116** | Une erreur d'hôte absorbée publie un résultat vide qui a l'air d'un résultat | 2 | ADR-032 §5, `physics.rs` |
+| **A117** | Le nombre de Courant commande la dissipation, et le corpus n'en parle nulle part | **1** | ADR-033 §2.3 |
+| **A118** | Un mot partagé — « dissipation » — a fait recommander l'inverse de ce qu'il fallait, trois sessions durant | 2 | ADR-033 §1 |
+| **A119** | Un cas passe parce que son montage n'est pas dans le régime où le système vivra | **1** | ADR-033 §2.1, C03 |
+| **A120** | Une conclusion juste peut ne pas épuiser la question qu'elle ferme | 2 | ADR-033 §3, ADR-030 §5 |
 
-Soixante-seize angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
+Quatre-vingts angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
 
 **Quatre ont été trouvés dans nos propres écrits** — A49, A56, A57, A58 — et non dans les documents
@@ -670,4 +674,40 @@ pendant quatre sessions.
   sans mention de la cause — l'arène était pleine. Le lecteur y voit un cas qui n'a rien trouvé, pas
   un cas qui n'a pas tourné. **Un harnais doit distinguer *indisponible* de *vide***, et l'erreur
   d'hôte existe précisément pour ça : elle était disponible et jetée.
+
+**Ajoutés en S25, à la mesure de la dissipation**
+
+- **A117** — **Le nombre de Courant commande la dissipation, et le corpus n'en parle nulle part.**
+  La loi mesurée en S25 — `demi-vie = ln2·N / (2π²(1−ν))` — fait de `1−ν` le facteur qui décide de
+  tout : passer de `ν = 0,45` à `ν = 0,9` multiplie la demi-vie par **4,5**, *et* double le pas de
+  temps. Moins de dissipation et moins de calcul, sur le même schéma et la même grille. Or `ν`
+  n'apparaît dans aucun ADR, aucune SPEC, aucun banc : il était implicitement rangé parmi les
+  réglages de stabilité. **C'est un paramètre de conception**, et il porte un arbitrage — marge de
+  stabilité contre portée des ondes — que personne n'a posé. Sévérité 1 : il commande le
+  dimensionnement de tout domaine δ.
+
+- **A118** — **Un mot partagé a fait recommander l'inverse de ce qu'il fallait, trois sessions
+  durant.** S22, S23 et S24 ont toutes recommandé « C03, avec la friction de fond ». C03 mesure la
+  dissipation **numérique** ; la friction est de la dissipation **physique** ; le raccourci s'est
+  fait tout seul, et personne — moi compris, trois fois — ne l'a rouvert. Une friction ajoutée
+  aurait donné deux sources d'amortissement et une mesure ininterprétable, **sans qu'aucun test
+  n'échoue** : la demi-vie aurait simplement été plus courte, et on l'aurait attribuée au schéma.
+  **Le danger d'une recommandation transmise est qu'elle se recopie sans être réexaminée** — et
+  qu'elle gagne en autorité à chaque recopie.
+
+- **A119** — **Un cas passe parce que son montage n'est pas dans le régime où le système vivra.**
+  C03 offre **400 points par longueur d'onde**. La demi-vie y vaut 20,7 périodes et le cas passe ;
+  à 20 points par longueur d'onde — l'ordre de grandeur d'un domaine réel — elle vaut **1,3
+  période**, et l'eau meurt en une oscillation. Le cas ne ment pas : il mesure ce qu'il mesure. Mais
+  **son verdict dépend d'un paramètre que son énoncé ne mentionne pas**, et un lecteur en conclut
+  que le solveur est bon. Même famille qu'A105 (C01 sur pente constante) : deux cas sur trois du
+  corpus δ sont plus faibles que leur réputation.
+
+- **A120** — **Une conclusion juste peut ne pas épuiser la question qu'elle ferme.** ADR-030 §5
+  établissait que `λ_cut` ne sortirait pas du véhicule Saint-Venant, faute de dispersion. C'est
+  exact. Mais `λ_cut` borne *« la plus petite longueur d'onde transportée correctement »*, et une
+  onde peut être mal transportée de deux façons indépendantes : arriver au mauvais moment
+  (dispersion) ou **ne pas arriver** (dissipation). La seconde moitié était mesurable depuis le
+  début. **Une question fermée par une réponse correcte ne se rouvre plus**, ce qui rend ce type
+  d'angle mort particulièrement durable.
 

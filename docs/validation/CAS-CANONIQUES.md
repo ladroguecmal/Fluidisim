@@ -37,7 +37,7 @@ les six premiers doivent passer avant qu'un solveur candidat soit admis en campa
 |---|---|---|---|---|
 | C01 | Repos hydrostatique sur pente | δ | **analytique exacte** | courants parasites — *exécuté depuis S22, sur le véhicule d'essai δ* |
 | C02 | Dispersion monochromatique | δ, W, **B** | **analytique** | erreur de célérité → fixe `λ_cut` — *trois assertions exécutées sur `B` depuis S21* |
-| C03 | Seiche en bassin clos | δ, W | **analytique** | dissipation numérique |
+| C03 | Seiche en bassin clos | δ, W | **analytique** | dissipation numérique — *exécuté depuis S25 ; **passe**, mais son montage offre 400 points par λ* |
 | C04 | Rupture de barrage (Ritter) | δ | **analytique** | fronts, mouillage/séchage — *exécuté depuis S23 ; **échoue**, et c'est la décision d'ADR-031* |
 | C05 | Absorption à la frontière | δ | cible < 1 % | réflexions de l'éponge |
 | C06 | Invariance galiléenne | δ, ADR-002 | **auto-référencée** | biais d'advection, référentiels |
@@ -105,6 +105,11 @@ du test**.
 > *numérique* du schéma, qui n'est pas la grandeur cherchée. **`λ_cut` demande une couche
 > dispersive** — `W`, ou un δ de famille différente. Le chemin critique en tient compte depuis S22 ;
 > voir ADR-030 §5.
+>
+> **Complément S25.** Cela reste vrai, et **ne concerne qu'une moitié de `λ_cut`**. Une onde peut
+> être mal transportée de deux façons : arriver au mauvais moment (dispersion — ce cas) ou **ne pas
+> arriver** (dissipation — C03, mesurable aujourd'hui). Voir
+> [`ADR-033`](../adr/ADR-033-lambda-cut-a-deux-definitions.md) §3 et l'angle mort **A120**.
 
 Ce cas ne valide pas seulement le solveur : il **produit `λ_cut`**. La plus petite longueur d'onde
 que δ transporte correctement, rapportée à `dx`, fixe la frontière W/δ, donc la largeur d'éponge et
@@ -120,6 +125,35 @@ dimensionnement.
 La demi-vie d'amplitude est la mesure directe de la dissipation numérique. C'est elle qui décide si
 une houle traverse un domaine ou s'y éteint — et c'est un chiffre qu'on ne pense presque jamais à
 mesurer, alors qu'il explique la majorité des « l'eau est molle ».
+
+> **Note S25 — exécuté, il passe, et le montage est en cause.** Période à **0,003 %**, demi-vie de
+> **20,7 périodes** (rampe) et **24,4** (mode propre) pour 15 exigées, `R² > 0,99`. Voir
+> [`ADR-033`](../adr/ADR-033-lambda-cut-a-deux-definitions.md).
+>
+> 1. **Aucune friction de fond, et c'est une condition de la mesure.** Trois sessions avaient
+>    recommandé le contraire : C03 mesure la dissipation *numérique*, une friction *physique* en
+>    ajouterait une seconde et la mesure ne dirait plus laquelle éteint la vague. Angle mort **A118**.
+> 2. **Le montage offre 400 points par longueur d'onde** — `λ = 2L = 40 m`, `dx = 0,1 m`. Aucun
+>    domaine de jeu n'aura cette résolution. **Le cas passe parce qu'il ne teste pas le régime dans
+>    lequel le système vivra.** Angle mort **A119**, même famille qu'A105 pour C01.
+> 3. **La demi-vie suit une loi fermée**, vérifiée à 0,2 % sur six grilles :
+>
+>    > `demi-vie (périodes) = ln 2 · N / (2π²(1−ν))`
+>
+>    où `N` est le nombre de points par longueur d'onde et `ν` le nombre de Courant. **La longueur
+>    d'onde, la célérité et la période disparaissent** : l'amortissement, compté en périodes, ne
+>    dépend que de la résolution et de `ν`.
+>
+> **Conséquence.** Tenir « 15 périodes » demande **235 points par longueur d'onde** à `ν = 0,45`. À
+> 20 points, la demi-vie vaut **1,3 période**. Et élever `ν` à 0,9 multiplie la demi-vie par 4,5
+> *en doublant le pas de temps* — un levier que le corpus ne mentionne nulle part (**A117**).
+>
+> **La rampe de l'énoncé n'est pas un mode propre** : elle excite les harmoniques impaires, plus
+> courtes donc plus amorties, d'où 20,7 périodes contre 24,4 pour le fondamental seul. Les deux
+> formes sont exécutées ; l'écart de 15 % est le prix mesuré de la fidélité à l'énoncé.
+>
+> **Le seuil « 15 périodes » reste sans provenance** au sens d'I-14 — comme ceux de C01 (A106) et de
+> C04. Il a désormais une *conséquence* chiffrée, ce qui permet enfin d'en discuter.
 
 ## C04 — Rupture de barrage (solution de Ritter)
 

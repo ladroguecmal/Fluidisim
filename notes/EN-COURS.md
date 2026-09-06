@@ -97,7 +97,7 @@ la thèse est juste, C03 devient un **troisième critère d'entrée à B3**, apr
       du schéma, pour que la demi-vie soit un nombre prédictible et non un constat. C'est ce qui
       permettrait de dire ce que coûte un domaine avant de l'écrire.
 - [x] **P6** — ADR-033 si la conclusion engage B3, note datée sinon.
-- [ ] **P7** — répercussions : `CAS-CANONIQUES`, index, angles morts, actions — dont le sort de
+- [x] **P7** — répercussions : `CAS-CANONIQUES`, index, angles morts, actions — dont le sort de
       **S22-3**, qui n'a plus de demandeur.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
