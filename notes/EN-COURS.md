@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S15
-État             : en cours
+État             : terminée
 Battement        : 2026-09-05
 Objectif         : auditer les registres — le dernier corpus jamais passé au filtre
 ```
@@ -86,8 +86,8 @@ exécutées — c'est l'angle mort A89, écrit en S14.
 - [x] **P6** — rédiger `docs/registres/AUDIT-REGISTRES-S15.md`.
 - [x] **P7** — appliquer : exécuter les actions retrouvées, corriger les statuts, corriger l'erreur
   factuelle de S14 sur A89.
-- [ ] **P8** — index, angles morts, décomptes.
-- [ ] **P9** — rituel de fin (`REPRISE.md` §6) : journal S15, leçons, index, jeton libéré.
+- [x] **P8** — index, angles morts, décomptes.
+- [x] **P9** — rituel de fin (`REPRISE.md` §6) : journal S15, leçons, index, jeton libéré.
 
 ### Notes de reprise
 

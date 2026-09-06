@@ -676,3 +676,42 @@ par quelqu'un qui essaie de l'appliquer.
 génération — **relire le résultat, pas le code de retour**. Et pour le contenu qui porte des
 caractères que l'outil pourrait interpréter, passer par un fichier plutôt que par une ligne de
 commande : c'est L09, dont ce cas est la troisième occurrence.
+
+## L55 — Une action n'est exécutée que si elle entre dans une liste que quelqu'un relit
+
+*(S15)* Sept actions du corpus annonçaient un ajout à un banc ou au harnais ; trois n'ont pas eu
+lieu. Ni le document cible ni le délai ne les distinguent : **les quatre exécutées l'ont été par la
+session qui les décidait, dans une étape inscrite à son plan**, et les trois perdues avaient été
+annoncées dans le corps d'un document.
+
+Cela vaut même à l'intérieur d'une seule session : une action décidée en écrivant un ADR, à l'étape
+6, meurt si l'étape 7 ne la prévoit pas. La distance n'y est pour rien ; ce qui compte est
+l'existence d'une liste qu'on relit avant de clore.
+
+Le décompte inverse le confirme : les quatre registres d'audit qui portent une table d'actions
+affichent **40 sur 40 exécutées**. Le dispositif fonctionne quand il existe.
+
+**Réflexe** : quand une décision en engendre une autre — « à ajouter au banc », « à porter à tel
+document » — **l'inscrire immédiatement dans le plan de la session**, ou la clore sur-le-champ. Une
+annonce en prose est une intention, pas une tâche. Et le rituel de fin doit relever les actions
+décidées en séance, faute de quoi elles ne survivent qu'au hasard.
+
+## L56 — Un registre dit où un point est discuté, jamais s'il est refermé
+
+*(S15)* Un registre d'angles morts a une colonne « traité dans » qui pointe vers un document. Elle
+mêlait trois situations : le point **supprimé** par une décision, le point **comblé**, et le point
+**décrit mais en attente d'un tiers** — une équipe, une mesure, un arbitrage. Rien ne les
+distinguait.
+
+Le coût est concret : le point de sévérité 1 le plus urgent du corpus — un outil qui place une plage
+soixante-dix mètres au-dessus du niveau de la mer — affichait exactement la même chose qu'un point
+réglé. Un lecteur en concluait qu'il était traité.
+
+Et un registre qui accumule sans jamais se vider cesse d'être lu : quatre-vingt-neuf points en quinze
+sessions, un seul portant une fermeture.
+
+**Réflexe** : tout registre a besoin de deux colonnes distinctes — **où** le point est traité, et
+**dans quel état** il est. La seconde ne s'invente pas à la fin : elle se remplit à chaque fois qu'une
+session touche le point. Et la valeur qui compte le plus n'est ni *ouvert* ni *clos*, c'est
+**« en attente de quelqu'un d'autre »** — la seule que personne ne pense à écrire, et la seule qui
+dise qu'il n'y a rien à attendre de nous.

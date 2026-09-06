@@ -1106,3 +1106,97 @@ que ces classes-là sont fausses à un taux voisin de 100 %.
 
 **Arbitrages en attente — rappel.** Cinq arbitrages humains, quatre interfaces à confirmer, sept
 autres destinataires extérieurs. `WaveEvent` reste l'urgence de format, à 50 octets.
+
+---
+
+## S15 — 2026-09-05 — Audit des registres
+
+**Consigne reçue.** « Enchaîne S15. » Objectif recommandé par S14 : auditer les registres, le dernier
+corpus jamais passé au filtre.
+
+**Sorties.** [`registres/AUDIT-REGISTRES-S15.md`](../docs/registres/AUDIT-REGISTRES-S15.md) ;
+trois actions de validation retrouvées et exécutées — dont le cas canonique **C21** ; table d'actions
+rétrospective pour le registre S11 ; A89 reformulé ; registre porté à 91 angles morts ; leçons L55 et
+L56.
+
+**Huit écarts, un de gravité 1.** Aucun ne porte sur une décision de conception : ce sont tous des
+défauts de **tenue**. C'est le propre d'un registre — il ne se trompe pas, il vieillit.
+
+### Le résultat n'est pas un écart, c'est une cause
+
+Sept actions du corpus annonçaient un ajout à un banc, au harnais ou à un cas canonique. **Trois
+n'avaient pas eu lieu.** La première explication — « les documents de validation n'appartiennent à
+personne » — ne résiste pas : quatre actions visant ces mêmes documents ont bien été faites.
+
+> Les quatre exécutées l'ont été **par la session qui les décidait, dans une étape inscrite à son
+> plan**. Les trois perdues avaient été **annoncées dans le corps d'un document**. Et cela vaut même
+> à l'intérieur d'une seule session : le cas canonique annoncé par ADR-025 §4 en S14 P6a n'a pas été
+> posé, parce que le plan de S14 ne prévoyait aucun cas canonique.
+
+**Le plan de `notes/EN-COURS.md` est la seule liste que quelqu'un relit.** Une annonce faite en prose
+est une intention, pas une tâche. C'est aussi ce que confirme le décompte inverse : les quatre
+registres qui portent une table « Suite » affichent **40 actions sur 40 exécutées**, et le seul qui
+n'en portait pas est celui dont une action s'est perdue neuf sessions.
+
+### Ce qui manquait, et qui a été posé
+
+- **Le second fondement de la recevabilité de `λ_cut`** au protocole B2 : un relèvement remettrait en
+  cause l'autorité des ondes répliquées **et** la validité du signal de navigation (SPEC-006 §5.6).
+  Un banc qui ne vérifierait que la première laisserait passer des PNJ qui traversent un gué chez un
+  joueur et se noient chez un autre.
+- **Trois assertions au banc `starve`** : aucun instantané au contenu incomplet, aucun événement
+  `Serveur` absent, `sequence` strictement croissant. Sans elles, la dégradation du chemin poussé
+  n'était vérifiée par rien — et c'est le chemin que SPEC-003 §9.1 dit « le moins testé et le plus
+  exécuté ».
+- **Le cas canonique C21** — la masse d'un compartiment est identique avec et sans domaine δ actif.
+  Sans lui, la décision la plus lourde de S14 n'avait aucun moyen d'être contrôlée. Il est binaire,
+  V étant entier et D1 : ce qui n'aurait pas été possible si la masse transitait par δ.
+
+### Deux registres qui mentaient dans les deux sens
+
+**Un statut périmé fait refaire un travail fait.** La table « Suite » de S05 annonçait « à ajouter au
+protocole » pour un critère que `PLAN-BENCHMARK` B1 porte depuis la même session. Faux depuis dix
+sessions, et dans le sens qui coûte. C'est l'inverse exact d'A89 — les deux erreurs cohabitent, ce
+qui interdit de croire un statut sans le vérifier.
+
+**Un registre dit où un point est discuté, jamais s'il est refermé.** La colonne « Traité dans »
+d'`ANGLES-MORTS` confondait *supprimé*, *comblé* et *en attente d'un tiers* : **A59**, sévérité 1 —
+le géoïde et ses 70 mètres — affichait la même chose qu'un point réglé.
+
+**Et une question dissoute est revenue.** « Quelle erreur de précalcul est acceptable ? » avait été
+dissoute à juste titre en S01 ; ADR-022 §3.5 a introduit en S10 une seconde forme de précalcul — la
+graine — qui, elle, porte un seuil de tolérance réel, « le seul du système ». Le registre annonçait
+toujours qu'il n'y avait rien à calibrer.
+
+### Deux erreurs de ma part, corrigées
+
+**Une erreur factuelle de S14**, propagée en trois endroits : l'action perdue sur I-16 n'était pas
+« inscrite dans une table Suite » — le registre S11 n'en a pas. A89 est reformulé, et le constat en
+sort renforcé plutôt qu'affaibli.
+
+**Une erreur de vérification, en séance.** Mon relevé annonçait quatre actions de validation perdues ;
+il y en avait trois. La commande de contrôle enchaînait plusieurs recherches par `&&`, l'une n'a rien
+trouvé, et la chaîne s'est interrompue avant la suivante : le résultat affiché — rien — était
+indiscernable d'une absence réelle. **C'est L54 une seconde fois, une session après l'avoir écrite.**
+
+### Ce qui n'a pas été fait
+
+La colonne `Statut` d'`ANGLES-MORTS` n'est renseignée que pour le point de sévérité 1 en attente
+(A59) et posée en règle pour la suite. Les 89 autres lignes se renseigneront au fil des sessions qui
+les touchent.
+
+**Prochaine session recommandée.** S16 — **le corpus n'a plus de classe de contrôle non passée.**
+Les ADR ont été confrontés entre eux (S05), les SPEC entre elles (S08), les points ouverts audités
+(S11), les documents récents confrontés (S13), les invariants audités dans les deux sens (S14), les
+registres audités (S15). Ce qui reste est ce que `REPRISE.md` §4 annonce depuis S06 : **du code, des
+mesures et des réunions**.
+
+Le travail de conception disponible sans mesure ni réunion est donc épuisé. Deux emplois utiles du
+temps, dans l'ordre :
+1. **préparer l'exécution de B2** — c'est le banc qui débloque le plus de points ouverts (S11 §7.1),
+   son protocole est complet depuis aujourd'hui, et `λ_cut` est « à décider en premier » depuis S01 ;
+2. **rédiger le dossier de réunion** des onze destinataires extérieurs, qui n'existe nulle part sous
+   forme présentable — l'index en donne la liste, pas le contenu.
+
+**Arbitrages en attente — rappel.** Cinq arbitrages humains, quatre interfaces à confirmer, sept
+autres destinataires. `WaveEvent` reste l'urgence de format, à 50 octets.

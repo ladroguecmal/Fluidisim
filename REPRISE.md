@@ -12,10 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-05
-Session en cours : S15 — 2026-09-05 — audit des registres
-Dernière session : S14 — 2026-09-05 — audit inverse des invariants
+Dernière session : S15 — 2026-09-05 — audit des registres
+Session suivante : S16 — le corpus n'a plus de classe de contrôle non passée. Préparer l'exécution
+                   de B2, ou rédiger le dossier de réunion des onze destinataires extérieurs
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
@@ -77,7 +78,7 @@ docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes second
                             004 interfaces (chemin tiré) · 005 outillage auteur
                             006 chemin poussé (ce que le système publie)
 docs/validation/          ← SPEC-003 harnais · CAS-CANONIQUES · PLAN-BENCHMARK
-docs/registres/           ← angles morts · questions ouvertes · revues croisées · audit des points ouverts
+docs/registres/           ← angles morts · questions ouvertes · revues croisées · trois audits
 docs/sources/             ← documents d'intention d'origine, non modifiés
 notes/                    ← METHODE · LECONS · JOURNAL
 ```
@@ -91,7 +92,7 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Quatorze sessions, **26 ADR**, six spécifications, **sept registres**. Les 30 sections du document de
+Quinze sessions, 26 ADR, six spécifications, **huit registres**. Les 30 sections du document de
 questions ouvertes d'origine sont traitées. Les vingt premiers ADR ont été confrontés les uns aux
 autres en S05 (douze écarts, deux de gravité 1) et les cinq SPEC entre elles en S08 (dix écarts,
 deux de gravité 1). Tous résolus — le dernier, le **chemin poussé**, par l'écriture de `SPEC-006`
@@ -134,7 +135,11 @@ Avant de rendre la main, dans cet ordre :
 2. **Enregistrer les angles morts trouvés** dans `docs/registres/ANGLES-MORTS.md`, avec sévérité.
 3. **Enregistrer les leçons généralisables** dans `notes/LECONS.md` — une leçon qui ne sert que
    dans son cas d'origine n'y a pas sa place.
-4. **Mettre à jour `docs/00_INDEX.md`** : nouveaux documents, avancement, arbitrages. **Et vérifier
+4. **Relever les actions décidées en séance** — « à ajouter au banc », « à porter à tel
+   document ». Celles qui n'ont pas été faites deviennent une étape du plan, ou un point ouvert
+   daté. Une annonce en prose est une intention, pas une tâche : S15 en a retrouvé trois, perdues
+   depuis six sessions (L55).
+5. **Mettre à jour `docs/00_INDEX.md`** : nouveaux documents, avancement, arbitrages. **Et vérifier
    les décomptes recopiés** — nombre d'ADR, d'invariants, de spécifications, d'angles morts, de cas
    canoniques — dans `README.md`, `REPRISE.md` et l'index. Un décompte recopié se périme en
    silence : le défaut a été trouvé en S07, puis de nouveau en S10.
