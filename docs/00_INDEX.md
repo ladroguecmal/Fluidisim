@@ -73,6 +73,20 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 | [036](adr/ADR-036-delta-ne-porte-pas-la-houle-il-porte-l-ecart.md) | **δ ne porte pas la houle, il porte l'écart** | proposée | **dissout A122** · la loi de dissipation change de sujet : le sillage · `λ² ≥ K·dx·D`, `λ_min` dépend de la **taille du domaine** |
 | [037](adr/ADR-037-la-dissipation-est-un-allie-pour-la-moitie-de-delta.md) | **La dissipation est un allié pour la moitié du contenu de δ** | proposée | **dissout A139** · partition entretenus/transitoires · `dx ≤ K·L^1,5/√(2h)` — une éclaboussure d'1 m demande **3,2 cm** · **§2.1 mesuré en S33**, `R²` = 1,0000 |
 
+### Réconciliation du second fork *(S35)* — importées de la lignée B
+
+> Ces cinq décisions ont été prises dans une histoire parallèle du dépôt, sous les numéros 030 à 034
+> — **déjà pris ici par d'autres sujets**. Carte : [`FORK-S22-S26`](registres/FORK-S22-S26.md).
+
+| ADR | Sujet | Statut | Traite |
+|---|---|---|---|
+| [038](adr/ADR-038-ce-que-les-deux-premiers-cas-de-solveur-ont-appris.md) *(ex-030 de B)* | **Ce que les deux premiers cas de solveur ont appris** | proposée | produit `shallow.rs` · deux filtres avant le banc B3 : équilibrage et ordre en espace · corrige `CAS-CANONIQUES` C04 (unités) |
+| [039](adr/ADR-039-un-cas-sans-conditions-de-mesure-ne-classe-personne.md) *(ex-031 de B)* | **Un cas sans conditions de mesure ne classe personne** | proposée | ajoute la rubrique **Conditions de mesure** · *deux implémenteurs qui ne se parlent pas obtiennent-ils le même nombre ?* · **A152**, sévérité 1 |
+| [040](adr/ADR-040-l-ordre-deux-et-ce-qu-il-deplace.md) *(ex-032 de B)* | **L'ordre deux, et ce qu'il déplace** | proposée | MUSCL + RK2 · **C04 et C08 passent au vert ensemble** · C01 reste exact (`5·10⁻¹⁵`) |
+| [041](adr/ADR-041-le-dernier-cas-rouge-etait-rouge-a-cause-de-sa-mesure.md) *(ex-033 de B)* | **Le dernier cas rouge était rouge à cause de sa mesure** | proposée | C04 vert à 0,74 % sur le front, seuil révisé · **non relu par cette lignée** |
+| [042](adr/ADR-042-l-eponge-mesuree-et-la-borne-de-lambda-cut-rouverte.md) *(ex-034 de B)* | **L'éponge mesurée, et la borne de `λ_cut` rouverte** | proposée | remplace le réglage d'ADR-005 §2, **faux d'un facteur 7** · `L_s ≥ 5·dx` et non `λ/2` · **rouvre** la borne haute de `λ_cut` |
+| [043](adr/ADR-043-deux-lignees-ont-ecrit-le-meme-solveur.md) | **Deux lignées ont écrit le même solveur le même jour** | proposée | le premier **oracle croisé** du projet · l'« éponge » est **trois** fonctions, une seule mesurée (**A161**) · l'ordre deux explique tout l'écart de verdicts |
+
 ### Nature du projet *(S19)*
 
 | ADR | Sujet | Statut | Traite |
@@ -121,7 +135,8 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`specs/SPEC-004`](specs/SPEC-004-interfaces.md) | **signatures des interfaces** — solveurs, champ de fond, solides, services d'hôte, contrat de fils d'exécution |
 | [`specs/SPEC-005`](specs/SPEC-005-outillage-auteur.md) | **outillage auteur** — sources de vérité, inversion du pipeline eau/terrain, cuisson déterministe, obsolescence |
 | [`specs/SPEC-006`](specs/SPEC-006-chemin-pousse.md) | **le chemin poussé** — ce que le système *publie* : bus d'événements et `WaveEvent`, écume et aération, traversabilité, polyligne de déferlement |
-| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | 148 points, avec sévérité — dont 88 trouvés dans nos propres écrits |
+| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **161 points**, avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
+| [`registres/FORK-S22-S26.md`](registres/FORK-S22-S26.md) | **le second fork** — constat, carte de renumérotation complète, la règle manquante, et ce qui reste à fusionner |
 | [`registres/AUDIT-ASSERTIONS-S29.md`](registres/AUDIT-ASSERTIONS-S29.md) | **ce que chaque assertion peut voir** — 23 cas classés, 5 fautifs, 1 mesure du harnais retirée ; **réécriture S30 sans aucun seuil inventé** |
 | [`registres/AUDIT-GARDE-FOUS-S34.md`](registres/AUDIT-GARDE-FOUS-S34.md) | **chacun a-t-il été vu refuser ?** — 10 garde-fous, 9 sains, 1 qui masquait ; la non-testabilité prédit la défaillance |
 | [`registres/REVUE-CROISEE-S05.md`](registres/REVUE-CROISEE-S05.md) | **audit croisé des 20 ADR** — 12 écarts, dont 2 de gravité 1, et la liste des contrôles passés |
@@ -132,7 +147,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`registres/AUDIT-REGISTRES-S15.md`](registres/AUDIT-REGISTRES-S15.md) | **audit des registres** — statuts périmés, actions perdues, et **la cause** : une action n'est exécutée que si elle entre dans un plan déclaré |
 | [`registres/QUESTIONS-OUVERTES.md`](registres/QUESTIONS-OUVERTES.md) | traçabilité section par section + verdict sur les 7 propositions antérieures |
 | [`validation/SPEC-003`](validation/SPEC-003-harnais-de-validation.md) | **harnais de validation** — régimes de déterminisme, scénarios, métriques, CI, pièges de mesure |
-| [`validation/CAS-CANONIQUES.md`](validation/CAS-CANONIQUES.md) | 21 montages de référence, dont 13 à solution analytique fermée — **12 assertions exécutées depuis S21** |
+| [`validation/CAS-CANONIQUES.md`](validation/CAS-CANONIQUES.md) | 21 montages de référence, dont 13 à solution analytique fermée — **25 assertions exécutées** ; et depuis S35, **deux colonnes de verdicts**, une par véhicule |
 | [`validation/PLAN-BENCHMARK.md`](validation/PLAN-BENCHMARK.md) | onze bancs, chacun produisant une décision |
 | [`validation/DOSSIER-B2.md`](validation/DOSSIER-B2.md) | **mode d'emploi du banc B2** — scénarios, iso-qualité, procédure de décision ; et l'**encadrement de `λ_cut` obtenu sans mesure** |
 
@@ -171,9 +186,9 @@ parfaitement stable ne pouvait pas distinguer.
 Conception conceptuelle   ██████████████████████  100 %   les 30 sections sources sont traitées
 Chiffrage et contraintes  █████████████████░░░░░   75 %   formules posées, mesures à faire
 Spécification technique   ████████████████████░░   92 %   chemins tiré et poussé posés, persistance tranchée ; reste IGpuBackend
-Cohérence interne         ██████████████████████  100 %   26 ADR + 6 SPEC confrontés, 45 écarts résolus ; les 17 invariants audités dans les deux sens
+Cohérence interne         ███████████████████░░░   88 %   26 ADR + 6 SPEC confrontés, 45 écarts résolus ; **les 6 ADR de S35 n'ont pas été confrontés au corpus**
 Décisions expérimentales  █████░░░░░░░░░░░░░░░░░   24 %   onze bancs définis, aucun exécuté ; **une moitié de `λ_cut` est mesurée** ; B3 a deux critères d'entrée
-Outillage et pipeline     ███████████████████░░░   85 %   **H1, H3, un δ d'essai, C08 amendé, C22 écrit** ; C01 et C03 passent, C04 échoue par décision ; H2, H4-H6 non écrits
+Outillage et pipeline     ███████████████████░░░   85 %   **H1, H3, deux δ d'essai**, 55 tests ; C01/C03 passent, C04 échoue à l'ordre un et **passe à l'ordre deux** ; H2, H4-H6 non écrits
 Accords inter-équipes     █████░░░░░░░░░░░░░░░░░   25 %   cinq arbitrages tranchés ; quatorze demandes extérieures en attente
 ```
 
@@ -201,6 +216,13 @@ pas : un système écrit sans harnais ne se laisse pas instrumenter ensuite (ADR
 **Il n'y a plus de document bloquant.** La conception, le chiffrage, la validation et les interfaces
 sont posés. Ce qui reste est du code, des mesures et des réunions.
 
+> **Note S35 — la cohérence interne redescend, et c'est normal.** Six ADR sont entrés d'un coup :
+> cinq importés d'une lignée parallèle, un écrit pour les confronter. **Aucun n'a été passé par une
+> revue croisée**, et cinq d'entre eux portent des angles morts de sévérité 1 que cette lignée n'a
+> jamais examinés. Le corpus a grandi de 16 % en une session sans que sa cohérence ait été
+> revérifiée : c'est la dette exacte que laisse une réconciliation de fork.
+> Voir [`FORK-S22-S26`](registres/FORK-S22-S26.md) §7 et les actions **S35-1** à **S35-8**.
+
 ## Ce qui attend une réponse humaine
 
 > **Requalifié en S19 ([ADR-028](adr/ADR-028-il-n-y-a-pas-d-autres-equipes.md) §2). Il n'y a pas
@@ -212,6 +234,14 @@ sont posés. Ce qui reste est du code, des mesures et des réunions.
 > (il ne le sait pas non plus), **agir sur l'infrastructure** (dépôt distant), et **autoriser
 > l'ajout de code** à ce dépôt maintenant qu'ADR-020 est acté — *autorisation donnée en S20 ; le
 > code existe*. Tout le reste est du travail.
+>
+> **S35 en ajoute une quatrième, et elle est nouvelle : le sort des branches.** Le dépôt a forké
+> deux fois — en S07 puis en S21 — parce que chaque worktree porte **son propre jeton**, le trouve
+> `libre`, et le prend de bonne foi. Trois worktrees restent ouverts sur trois branches divergentes,
+> et **aucun dispositif intérieur au dépôt ne peut empêcher un troisième fork** : décider quelles
+> branches vivent et lesquelles disparaissent appartient à l'utilisateur. C'est l'action **S35-7**,
+> la seule de sa liste que le projet ne peut pas exécuter lui-même. Voir
+> [`registres/FORK-S22-S26.md`](registres/FORK-S22-S26.md) §5.
 
 > **Le dossier de réunion est [`DOSSIER-REUNIONS.md`](DOSSIER-REUNIONS.md)** *(S17)*. Seize fiches,
 > chacune tenant seule, destinées à sortir du dépôt. Elles sont classées **par ce que la réponse

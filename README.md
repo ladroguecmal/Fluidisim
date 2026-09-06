@@ -26,6 +26,8 @@ notes/
   METHODE.md           protocole de conception
   LECONS.md            enseignements généralisables
   JOURNAL.md           historique des sessions et points de reprise
+  EN-COURS.md          plan de la session en cours, déclaré avant le travail
+code/                  le harnais et deux δ d'essai — Rust, sans dépendance moteur
 ```
 
 ## Règles de tenue
@@ -41,6 +43,11 @@ notes/
   fin décrit dans [`REPRISE.md`](REPRISE.md) §6.
 - **Une seule session travaille à la fois** : le jeton en tête de `REPRISE.md` en tient le compte,
   avec trois états — `libre`, `occupé`, `interrompu`.
+- **Avant de regarder le jeton : `git worktree list` et `git branch -a`.** Le jeton est un fichier
+  **versionné** : il est propre à une branche et à une copie de travail, et ne dit rien de ce qui
+  se passe ailleurs. Le dépôt a forké **deux fois** par ce mécanisme — voir
+  [`docs/registres/FORK-S22-S26.md`](docs/registres/FORK-S22-S26.md). Ces deux commandes sont le
+  seul dispositif qui ait tenu.
 - **Le plan se déclare avant le travail**, dans [`notes/EN-COURS.md`](notes/EN-COURS.md), et se
   commit seul. Une étape par commit, message `S<n> P<k> — …`. Une session coupée par une limite
   d'usage n'a aucune occasion d'écrire qu'elle s'arrête : seule une déclaration antérieure survit.

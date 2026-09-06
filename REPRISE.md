@@ -12,12 +12,22 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-06
-Session en cours : S35 — réconciliation du second fork (S22–S26 de la lignée B)
-Dernière session : S34 — 2026-09-06 — dix garde-fous mis à l'épreuve ; la non-testabilité prédit la défaillance
-Session suivante : S36 — les saturations de modèle (S34-1), reporté par la réconciliation
+Session en cours : —
+Dernière session : S35 — 2026-09-06 — le second fork réconcilié ; les deux lignées avaient écrit le même solveur
+Session suivante : S36 — `physics_shallow.rs` (S35-1) *(recommandé)*, ou les saturations de modèle (S34-1)
 ```
+
+> **Avant de regarder le jeton, exécuter `git worktree list` et `git branch -a`.** Le jeton est un
+> fichier **versionné** : il est propre à une branche et à une copie de travail. Une session
+> travaillant dans un worktree isolé possède son propre jeton, le trouve `libre`, et le prend — les
+> deux jetons disent alors `occupé` simultanément, chacun dans son univers.
+>
+> **Le projet a forké deux fois par ce mécanisme** : en S07, puis en S21 — deux histoires de 88 et
+> 35 commits, avec cinq identifiants d'ADR en collision. Voir
+> [`docs/registres/FORK-S22-S26.md`](docs/registres/FORK-S22-S26.md). Le second fork a eu lieu parce
+> que le correctif du premier avait été écrit **dans une seule branche** (**L137**).
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
 
@@ -105,11 +115,14 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Trente-quatre sessions, **37 ADR** *(dont un acté)*, six spécifications, **dix registres** — **et du
-code qui tourne** : `code/`, étages **H1 et H3** du harnais, un **δ d'essai** équilibré, 31 tests
-verts et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
-verdict** (C08). Quatre cas canoniques sur δ sont exécutés : **C01 et C03 passent**, C04 échoue,
-C08 ne conclut pas. Les 30 sections du document de
+Trente-cinq sessions ici, **plus cinq dans une lignée parallèle réconciliée en S35** (B-S22 à
+B-S26) — **43 ADR** *(dont un acté)*, six spécifications, **onze registres** — **et du code qui
+tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équilibrés, **55 tests
+verts** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
+verdict** (C08). Quatre cas canoniques sur δ sont exécutés ici : **C01 et C03 passent**, C04 échoue,
+C08 ne conclut pas. **La lignée réconciliée en donne d'autres verdicts, et l'écart a une cause
+unique** : elle est passée à l'ordre deux, et C04 comme C08 y sont verts (`CAS-CANONIQUES`, « deux
+véhicules, deux colonnes »). Les 30 sections du document de
 questions ouvertes d'origine sont traitées. Les vingt premiers ADR ont été confrontés les uns aux
 autres en S05 (douze écarts, deux de gravité 1) et les cinq SPEC entre elles en S08 (dix écarts,
 deux de gravité 1). Tous résolus — le dernier, le **chemin poussé**, par l'écriture de `SPEC-006`
@@ -117,6 +130,22 @@ en S09.
 
 **Il n'y a plus de document bloquant, et les quatre interfaces inter-équipes ont enfin quelque chose
 à soumettre.** Ce qui reste est du code, des mesures et des réunions.
+
+**Et S35 a réconcilié un fork que personne n'avait vu.** Le dépôt avait forké une **seconde** fois en
+S21, et les deux lignées avaient écrit **le même solveur** le même jour — Saint-Venant 1D, volumes
+finis, Rusanov, mêmes précautions dans l'en-tête, même phrase de `CAS-CANONIQUES` citée en
+justification. *C'est le corpus qui a dicté le solveur*, et c'est le plus fort témoignage de
+précision qu'il ait reçu. Cinq ADR ont été importés sous les numéros **038 à 042**, quinze leçons et
+douze angles morts renumérotés, et
+[`ADR-043`](docs/adr/ADR-043-deux-lignees-ont-ecrit-le-meme-solveur.md) tire ce que la confrontation
+apprend : deux implémentations du même modèle forment un **oracle d'implémentation** — pas une
+validation du modèle, dont elles partagent tous les angles morts — et le mot « éponge » recouvre
+**trois** fonctions dont une seule a jamais été mesurée (**A161**).
+
+**Ce que S35 laisse comme dette, et qu'il faut savoir avant de continuer** : les six ADR nouveaux
+n'ont **pas** été confrontés au corpus, cinq angles morts de sévérité 1 importés n'ont **pas** été
+relus, le **harnais n'est pas fusionné** (seul le solveur l'est), et l'oracle croisé n'a **jamais
+été exercé**. Huit actions, **S35-1** à **S35-8**, dans `QUESTIONS-OUVERTES`.
 
 **Et S27 a trouvé un trou que sept sessions n'avaient pas vu, grâce à une source extérieure.**
 SPEC-001 §2.1 borne le pas de temps par `u_max` **sans jamais définir `u_max`**, quand SPEC-004 §10.1

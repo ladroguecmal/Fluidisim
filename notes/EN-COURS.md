@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S35
-État             : en cours
+État             : terminée
 Battement        : 2026-09-06
 Objectif         : Réconcilier le second fork — la lignée S22–S26 dans la lignée S22–S34
 ```
@@ -112,7 +112,7 @@ et il faut dire laquelle.
       a été modifié des deux côtés (+1139 contre +1975). Constat et découpage du travail restant.
       **Aucun import à l'aveugle** — le code se fusionne en le compilant, pas en le recopiant.
 - [x] **P9a** — rituel : journal, leçons L137-L140, actions S35-1 à S35-8.
-- [ ] **P9b** — rituel : index, décomptes, jeton libéré.
+- [x] **P9b** — rituel : index, décomptes, jeton libéré.
 
 ### Notes de reprise
 
