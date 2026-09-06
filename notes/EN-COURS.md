@@ -59,129 +59,38 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S16
-État             : terminée
+Session          : S17
+État             : en cours
 Battement        : 2026-09-05
-Objectif         : préparer l'exécution de B2 — le banc qui fixe `λ_cut`, « à décider en premier »
-                   depuis S01 et qui débloque quatre points ouverts
+Objectif         : le dossier de réunion des onze destinataires extérieurs
 ```
 
 ### Plan
 
-Le corpus n'a plus de classe de contrôle non passée. Ce qui reste est du code, des mesures et des
-réunions. Le plus utile de ce que je peux encore produire est donc le **dossier d'exécution** du banc
-le plus rentable : tout ce qu'il faut pour le lancer le jour où le harnais existe, et surtout tout ce
-qu'on peut déjà savoir **sans mesurer**.
+Tout ce qu'on demande à l'extérieur existe — dispersé sur 26 ADR et 7 spécifications. Rien n'est
+présentable. C'est le dernier travail disponible qui ne demande ni mesure ni décision humaine
+préalable.
 
 - [ ] **P1** — déclarer le plan, prendre le jeton, mettre à jour le battement.
-- [x] **P2** — **encadrer `λ_cut` par le corpus seul**, sans aucune mesure.
-  *Thèse : ADR-005 §5 donne `L_s = λ_cut/2` et S08 (écart E08) donne une contrainte sur `λ_cut/dx`.
-  Les deux bornent `λ_cut` par le haut et par le bas. Si elles ne se croisent pas, B2 n'a pas de
-  réponse admissible sous l'hypothèse d'un `λ_cut` global — et il vaut mieux le savoir avant de
-  monter le banc que pendant.*
-- [x] **P3** — dossier `B2` §1–3 : ce que le banc décide et ce qui en dépend · les candidats et ce
-  qu'on sait déjà d'eux sans mesurer · l'encadrement de P2.
-- [x] **P4** — dossier `B2` §4–6 : les scénarios en fichiers concrets · le protocole iso-qualité
-  appliqué · les deux critères de recevabilité.
-- [x] **P5** — dossier `B2` §7–9 : la procédure de décision, les préalables, les pièges de mesure.
-- [x] **P6** — notes correctives dans les documents touchés, et les points ouverts que le dossier
-  ferme ou déplace.
-- [x] **P7** — index, angles morts, décomptes.
-- [x] **P8** — rituel de fin (`REPRISE.md` §6) : journal S16, leçons, index, jeton libéré.
+- [ ] **P2** — **classer par ce que la réponse débloque**, et non par l'importance du sujet.
+  *Thèse : l'ordre de `00_INDEX.md` classe par gravité de conséquence. Le bon critère est
+  l'irréversibilité — ce qui bloque la première ligne de code passe devant ce qui bloque le format
+  d'une autre équipe, qui passe devant ce qui bloque un banc. Je m'attends à ce que l'ordre change,
+  et notamment que « qui possède le harnais » remonte très haut : il conditionne H1, qui conditionne
+  la première ligne du solveur.*
+- [ ] **P3** — dossier §1–2 : comment le lire, et le tableau de synthèse ordonné.
+- [ ] **P4** — dossier §3 : les fiches de rang 1 et 2 — ce qui bloque du code, ce qui bloque un
+  format extérieur.
+- [ ] **P5** — dossier §4 : les fiches de rang 3 et 4 — données à obtenir, cadrages.
+- [ ] **P6** — dossier §5–6 : **ce que nous ne demandons pas** — la section qui évite les
+  malentendus coûteux — et ce qui reste ouvert.
+- [ ] **P7** — index, angles morts, décomptes.
+- [ ] **P8** — rituel de fin (`REPRISE.md` §6) : journal S17, leçons, index, jeton libéré.
 
 ### Notes de reprise
 
-- **Forme retenue** : un document de `docs/validation/`, `DOSSIER-B2.md`, et non un ADR. B2 ne décide
-  rien par lui-même : il produit une mesure. Le dossier est un mode d'emploi, pas une décision — et
-  `PLAN-BENCHMARK` reste la vue d'ensemble des onze bancs, qu'il ne remplace pas.
-- **Attente honnête** : si l'encadrement de P2 se referme proprement autour de la valeur proposée de
-  4 m, le dossier sera utile mais sans surprise. S'il ne se referme pas, c'est la trouvaille de la
-  session, et elle change le protocole du banc.
-
-#### P2 — l'encadrement de `λ_cut`, et il ne se referme pas
-
-**Borne haute — l'éponge.** ADR-005 §5 : « l'éponge est dimensionnée par `λ_cut` », avec
-`L_s = λ_cut/2` par face. Sur un domaine de largeur transverse `W`, l'intérieur utile vaut
-`W − λ_cut` (deux faces opposées). Appliqué aux trois domaines de référence de SPEC-001 §2.3 et
-§2.4 :
-
-| Domaine | Emprise | `λ_cut` = 3 m | 4 m | 6 m | 10 m |
-|---|---|---|---|---|---|
-| Impact | 6 × 6 m | intérieur 50 % | **33 %** | 0 % | — |
-| Bateau | 24 × 12 m | 75 % | 67 % | 50 % | 17 % |
-| Déferlement | 120 × 20 m | 85 % | 80 % | 70 % | 50 % |
-
-En surface au sol, c'est le carré de ces fractions : à `λ_cut = 4 m`, un domaine d'impact est
-**89 % d'éponge**. La borne haute est donc dictée par le **plus petit** domaine, et elle est serrée :
-`λ_cut ≤ 3 m` pour qu'un domaine d'impact garde la moitié de son emprise.
-
-**Borne basse — l'échantillonnage du champ de fond.** Écart E08 (S08) : le fond est échantillonné
-une cellule sur quatre puis interpolé, et la validité tient au rapport `λ_cut/dx`. À 40, dix points
-par longueur d'onde après décimation : confortable. À 16, quatre points : deux fois Nyquist, et
-l'interpolation perd une fraction notable de l'amplitude du terme source. Il faut donc `λ_cut`
-**grand devant `dx`**, et le `dx` le plus grossier est celui du déferlement, 0,25 m :
-
-| `dx` | `λ_cut` = 3 m | 4 m | 6 m | 10 m |
-|---|---|---|---|---|
-| 0,25 m (déferlement) | ratio 12 → **3 pts** | 16 → 4 pts | 24 → 6 pts | 40 → **10 pts** |
-| 0,10 m (bateau) | 30 → 7,5 pts | 40 → 10 pts | 60 → 15 pts | 100 → 25 pts |
-| 0,05 m (impact) | 60 → 15 pts | 80 → 20 pts | 120 → 30 pts | 200 → 50 pts |
-
-**Les deux bornes ne se croisent pas.** Le déferlement veut `λ_cut ≈ 10 m` pour que la décimation
-×4 reste valide ; l'impact veut `λ_cut ≤ 3 m` pour garder un intérieur utile. **Aucune valeur
-globale ne satisfait les deux**, et l'écart est d'un facteur trois.
-
-**Ce que cela ne signifie pas.** Ce n'est pas une impasse d'architecture. Les deux contraintes ne
-pèsent pas sur les mêmes domaines, et elles ne pèsent pas de la même façon :
-
-- l'éponge est une contrainte **dure** : à `λ_cut ≥ 6 m`, un domaine d'impact n'a **plus d'intérieur
-  du tout**. Il n'y a pas de compromis possible, seulement un domaine inutile ;
-- la décimation est une contrainte **de coût** : à quatre points par longueur d'onde, on n'a pas un
-  résultat faux, on a une économie qui s'effondre. C'est ce qu'E08 disait déjà — « l'économie
-  disparaît dans le type de domaine le plus gros ».
-
-**Résolution proposée, à porter au protocole de B2 : `λ_cut` reste global, c'est le taux de
-décimation qui s'adapte.** E08 avait écrit la contrainte sous la bonne forme — `dx ≤ λ_cut/N` — en
-laissant `N` libre. `N` est donc le paramètre, et non `λ_cut` :
-
-| Domaine | `λ_cut/dx` à 4 m | Décimation admissible | Facteur d'économie |
-|---|---|---|---|
-| Impact, `dx` 0,05 | 80 | ×4 par axe | **64** |
-| Bateau, `dx` 0,10 | 40 | ×4 par axe | **64** |
-| Déferlement, `dx` 0,25 | 16 | ×2 par axe, au mieux | **8** |
-
-**Conséquence directe sur le protocole du banc** : B2 doit mesurer le coût du terme source dans une
-zone de déferlement **à décimation réduite**, et non au facteur 64 nominal. Sans cela, le coût de δ
-en régime substitutif sera sous-estimé d'un facteur voisin de huit — sur le domaine qui compte
-384 000 cellules, c'est-à-dire le plus gros du corpus.
-
-**Et l'encadrement se referme, une fois `N` libéré** : `3 m ≥ λ_cut` par l'éponge sur le domaine
-d'impact, `λ_cut ≥ 2,5 m` pour que le déferlement garde seulement dix cellules par longueur d'onde
-avant décimation. La fenêtre est **2,5 à 3 m**, et la valeur proposée depuis S01 — **4 m** — est
-au-dessus. Ce n'est pas une réfutation : c'est une hypothèse chiffrée que le banc doit trancher, et
-c'est exactement ce qu'un dossier d'exécution doit apporter avant qu'on monte le banc.
-
-**Écart trouvé en chemin, à signaler.** ADR-005 §5 conclut que « l'éponge représente ≈2 m sur un
-domaine de 20 m, soit **≈27 % du volume en 3D** ». Ce chiffre n'est pas reproductible à partir de ce
-que le paragraphe donne : selon les faces qui portent l'éponge, la même géométrie donne **20 %**
-(deux faces), **36 %** (quatre faces) ou **49 %** (six faces). Le document ne dit pas lesquelles.
-La grandeur n'est pas anecdotique — c'est le coût d'entrée de tout domaine — et elle fonde la borne
-haute ci-dessus.
-
-#### P3 à P5 — dossier écrit d'un seul tenant
-
-`docs/validation/DOSSIER-B2.md`, dix sections. Le découpage du plan en trois étapes s'est révélé
-artificiel : les sections se tiennent, et couper au milieu aurait produit trois commits dont aucun
-n'était lisible seul. Fait en un, et déclaré ici.
-
-Trois apports que le protocole d'origine n'avait pas :
-- **B2-05**, scénario d'arrivée en cours de partie. L'ajout S04 de PLAN-BENCHMARK demandait de
-  mesurer le volume d'état à transmettre ; aucun des quatre scénarios existants ne l'exerce.
-- **La métrique d'iso-qualité est nommée** : l'erreur de célérité relative sur C02, intégrée sur
-  [λ_cut, 4·λ_cut]. SPEC-003 §5.2 imposait d'en choisir une ; B2 ne l'avait pas.
-- **B2 produit un couple, pas un nombre** : `λ_cut` **et** le tableau des décimations admissibles
-  par classe de domaine. L'un sans l'autre ne veut rien dire.
-
-Et une vérification faite plutôt que supposée : le plus court phénomène gameplay ondulatoire du
-corpus est le **sillage à 5 m/s, 16 m**. Le critère de fermeture d'ADR-021 §3.2 laisse donc de la
-marge jusqu'à λ_cut ≈ 6 m — ce n'est pas lui qui mord, c'est l'éponge du domaine d'impact.
+- **Forme** : `docs/DOSSIER-REUNIONS.md`, à la racine de `docs/` et non dans un sous-dossier — c'est
+  le seul document du corpus destiné à être **sorti du dépôt** et lu par quelqu'un qui n'y reviendra
+  pas. Une fiche par destinataire, tenant seule, sans renvoi obligatoire.
+- **Règle d'écriture propre à ce document** : chaque fiche porte **un chiffre**. Une demande sans
+  chiffre se discute ; une demande avec un chiffre se traite. C'est L14 appliquée à une réunion.

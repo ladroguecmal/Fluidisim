@@ -12,11 +12,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-05
+Session en cours : S17 — 2026-09-05 — dossier de réunion des destinataires extérieurs
 Dernière session : S16 — 2026-09-05 — dossier d'exécution du banc B2
-Session suivante : S17 — le dossier de réunion des onze destinataires extérieurs : tout existe,
-                   dispersé sur 26 ADR et 7 spécifications ; rien n'est présentable
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
