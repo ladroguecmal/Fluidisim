@@ -181,7 +181,17 @@ Et le même détecteur s'applique : **git**. L'ordre des commits est vérifiable
 pas assisté au travail — c'est précisément la propriété qu'on cherchait en confiant les seuils à un
 tiers.
 
-### 4.3 Ce que cela ne remplace pas
+### 4.3 Précision apportée par l'usage (S20)
+
+[ADR-029](ADR-029-ce-que-la-premiere-ligne-de-code-a-appris.md) §4 : la règle ci-dessus est **trop
+large**. Elle vaut pour un **seuil d'acceptation** — une barre que le travail doit franchir, et qu'on
+est tenté d'abaisser — mais pas pour une **référence de non-régression**, un hash de conformité par
+exemple, qui *est* la mesure et ne peut donc pas la précéder.
+
+Ce qui protège une référence n'est pas l'antériorité mais la **visibilité** : elle s'inscrit par un
+commit qui ne contient rien d'autre, et l'outil l'imprime sans jamais l'écrire lui-même.
+
+### 4.4 Ce que cela ne remplace pas
 
 Ce dispositif rend le déplacement d'une barre **visible**, pas impossible. C'est moins fort qu'un
 second acteur, et il faut le dire : le seul relecteur de dernier ressort est l'utilisateur, et il

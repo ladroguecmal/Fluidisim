@@ -106,6 +106,22 @@ C'est le seul mécanisme réseau permanent lié à la houle.
    contraire, la cohérence multijoueur de B est perdue et il faut basculer l'océan concerné en
    couche locale non répliquée. **Décision de design, à trancher par l'équipe gameplay.**
 2. Ordre de grandeur du nombre de composantes de B (64 / 128 / 256) → benchmark B1.
+
+   > **Note corrective (S20, [ADR-029](ADR-029-ce-que-la-premiere-ligne-de-code-a-appris.md) §2).**
+   > La liste des disciplines du §2 ci-dessus est **incomplète**, et l'omission n'est apparue qu'à
+   > la première ligne de code. `B` est une somme de sinusoïdes, et **`sin` n'est pas spécifié bit à
+   > bit** : IEEE 754 impose l'exactitude des quatre opérations et de la racine carrée, jamais celle
+   > des transcendantes. Deux `libm` — deux plateformes, ou deux versions de la même — diffèrent
+   > dans les derniers bits, et le hash de conformité les aurait distinguées à chaque frame.
+   >
+   > La correction n'invente rien : elle emploie les **phases repliées** que le §2.2 posait déjà.
+   > Phase en `u32` valant une fraction de tour, part temporelle entièrement entière, sinus
+   > polynomial à coefficients fixes n'employant que `+`, `−` et `×` — les trois opérations qui,
+   > elles, sont exactement spécifiées. Implémenté dans `code/water-core/src/phase.rs`, écart
+   > mesuré inférieur à 10⁻⁷.
+   >
+   > **La règle vaut pour toute transcendante entrant dans une grandeur répliquée**, pas seulement
+   > le sinus. L'invariant I-03 est inchangé : c'est sa mise en œuvre qui était incomplète.
 3. ~~Faut-il étendre le hash de conformité à W ?~~ **Clos.**
    → **S11** : la réponse est « oui » depuis S03 : SPEC-003 §2 place W répliqué dans le régime D1 avec le hash
    pour verdict, et depuis S10 l'invariant I-03 l'énonce lui-même. Répondu par supposition d'un

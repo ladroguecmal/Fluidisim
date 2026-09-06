@@ -471,6 +471,17 @@ disjointes.
 Corollaire imposé : **changer `worker_count` change la vitesse, jamais le résultat.** C'est une
 assertion du harnais, pas une intention.
 
+> **Note corrective (S20, [ADR-029](../adr/ADR-029-ce-que-la-premiere-ligne-de-code-a-appris.md)
+> §3).** Le corollaire est vrai **à condition que le découpage soit fixé**. L'addition flottante
+> n'étant pas associative, deux grains différents donnent deux sommes différentes — sur
+> `[1 ; 10¹⁶ ; −10¹⁶ ; 1]`, le grain 1 donne `1,0` et le grain 2 donne `0,0`. Un système de tâches
+> qui choisirait son grain d'après le nombre de fils — le réglage naturel — rendrait donc le
+> corollaire **faux silencieusement**.
+>
+> **`grain` est une donnée du contrat**, fixée par l'appelant et jamais dérivée de la machine.
+> L'assertion du harnais s'énonce : *à `n` et `grain` égaux, le résultat est identique quel que soit
+> `worker_count`*. Cas consigné sous forme exécutable dans `code/water-harness/src/host_impl.rs`.
+
 ### 8.3 `IBathymetryProvider` — un domaine ne bloque jamais
 
 ```cpp
