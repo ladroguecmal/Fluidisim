@@ -162,3 +162,8 @@ des commits illisibles seuls. Fait en un, déclaré ici.
 - **une section « ce que nous ne demandons pas »**, sept lignes. Elle évite qu une équipe se croie
   sollicitée ou nous attribue une intention — en particulier « attendre que l eau soit finie pour
   commencer », que seules les quatre premières fiches justifieraient.
+
+*Correctif P8.* Le contrôle des décomptes du rituel a attrapé `CLAUDE.md`, qui annonçait encore
+« quatre interfaces et sept autres destinataires » et renvoyait au registre S11. C est le fichier
+d amorce : une session neuve le lit en premier et aurait rappelé une liste périmée sans connaître le
+dossier de réunion. Deuxième fois que ce contrôle attrape ce fichier précis — après S11.

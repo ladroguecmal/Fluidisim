@@ -31,7 +31,7 @@ Ce dépôt est la connaissance projet du **système de gestion de l'eau** d'un j
 
 ## Ce que tu ne décides pas
 
-**Cinq** arbitrages de design, quatre interfaces inter-équipes et sept autres destinataires
-extérieurs attendent une réponse humaine. Ils sont listés dans `docs/00_INDEX.md`, section « Ce qui
-attend une réponse humaine », et détaillés dans `docs/registres/AUDIT-POINTS-OUVERTS-S11.md` §7.
+**Cinq** arbitrages de design et **quatorze demandes extérieures** attendent une réponse humaine.
+Elles sont rassemblées en fiches présentables dans **`docs/DOSSIER-REUNIONS.md`**, classées par ce
+que la réponse débloque ; `docs/00_INDEX.md` en donne la vue par sujet.
 Les rappeler, ne pas les trancher, ne pas les contourner par une hypothèse implicite.
