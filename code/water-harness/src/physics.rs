@@ -1643,104 +1643,21 @@ pub fn c03_pente_par_amplitude(
     sortie
 }
 
-/// Verdict de stabilité d'une exécution.
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub enum Stabilite {
-    /// L'exécution s'est terminée avec un état fini et un volume conservé.
-    Stable { volume_rel: f64, amplitude_rel: f64 },
-    /// Un `NaN` ou un infini est apparu.
-    NonFini,
-    /// L'état est resté fini mais a divergé — amplitude ou volume hors de toute tolérance.
-    Diverge { volume_rel: f64, amplitude_rel: f64 },
-}
-
-/// Stabilité effective du schéma en fonction du nombre de Courant — ADR-035 §4.
-///
-/// # Ce que la théorie dit, et ce qu'elle ne dit pas
-///
-/// Pour Saint-Venant en Euler explicite avec un flux de Rusanov, la condition est `ν < 1`. Mais
-/// cette borne suppose un problème **linéarisé, sans terme source et sans reconstruction**. Notre
-/// schéma a les trois : un terme de fond, une reconstruction hydrostatique, et un front sec sur
-/// C04. Chacun mange une marge que rien n'a chiffrée.
-///
-/// **La question n'est donc pas « la théorie autorise-t-elle `ν = 0,9` » mais « à partir de quel
-/// `ν` ce schéma-ci casse, et sur quel cas ».**
-///
-/// # Trois verdicts, pas deux
-///
-/// Un solveur ne passe pas de « stable » à « `NaN` » d'un coup : il diverge d'abord. Confondre les
-/// deux ferait croire la marge plus grande qu'elle n'est — le dernier `ν` sans `NaN` n'est pas le
-/// dernier `ν` utilisable.
-pub fn stabilite_par_courant(
-    host: &mut water_core::HostServices,
-    cas: &str,
-    courants: &[f32],
-) -> Vec<(f64, Stabilite)> {
-    use water_core::{Bassin, Delta1D};
-
-    let mut sortie = Vec::new();
-    for &nu in courants {
-        let (bassin, duree, volume_ref, amplitude_ref) = match cas {
-            "C04" => (Bassin::c04(), 2.0f64, 20.0f64, 1.0f64),
-            _ => (Bassin::c03(true), 20.0 * 9.0305f64, 40.0f64, 0.02f64),
-        };
-        let mut d = match Delta1D::configure(host, bassin) {
-            Ok(d) => d.avec_cfl(nu),
-            Err(_) => continue,
-        };
-
-        let mut t = 0.0f64;
-        let mut non_fini = false;
-        while t < duree {
-            let mut dt = d.dt_cfl();
-            if !dt.is_finite() || dt <= 0.0 {
-                non_fini = true;
-                break;
-            }
-            let reste = (duree - t) as f32;
-            if dt > reste {
-                dt = reste;
-            }
-            d.pas_equilibre(dt);
-            t += dt as f64;
-        }
-
-        let volume = d.volume();
-        let mut amplitude = 0.0f64;
-        for i in 0..d.nx() {
-            let v = (d.eta(i) as f64).abs();
-            if v.is_finite() && v > amplitude {
-                amplitude = v;
-            }
-            if !d.h(i).is_finite() {
-                non_fini = true;
-            }
-        }
-        if !volume.is_finite() {
-            non_fini = true;
-        }
-
-        let volume_rel = (volume - volume_ref).abs() / volume_ref;
-        let amplitude_rel = amplitude / amplitude_ref;
-        sortie.push((
-            nu as f64,
-            if non_fini {
-                Stabilite::NonFini
-            } else if volume_rel > 1.0e-2 || amplitude_rel > 3.0 {
-                Stabilite::Diverge {
-                    volume_rel,
-                    amplitude_rel,
-                }
-            } else {
-                Stabilite::Stable {
-                    volume_rel,
-                    amplitude_rel,
-                }
-            },
-        ));
-    }
-    sortie
-}
+// ---------------------------------------------------------------------------------------------
+// Ce qui a été retiré en S29, et pourquoi
+//
+// `Stabilite { Stable, Diverge, NonFini }` et `stabilite_par_courant` vivaient ici depuis S27.
+// Elles classaient une exécution par la survenue d'un accident, et ont répondu « OK partout » de
+// `ν = 0,45` à `0,99` — ce dont ADR-035 §4 a tiré une ligne.
+//
+// **Cette mesure était fausse au sens de l'audit S29 : catégorie B.** À `ν = 1,05`, le schéma
+// amplifie le mode de maille d'un facteur 7,5 en cent pas, et l'ancien critère l'aurait déclaré
+// `Stable` — l'amplitude finale valait 0,0075 m pour un seuil de divergence à 0,06 m.
+//
+// Elle est remplacée par `amplification_mode_maille`, qui mesure la grandeur que la théorie de von
+// Neumann gouverne. Retirée plutôt que conservée : un instrument qui ne peut pas voir ce qu'il
+// prétend mesurer n'est pas un témoin, c'est un faux positif en attente.
+// ---------------------------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------------------------
 // C23 — le nombre de Courant en présence d'une paroi mobile
@@ -1856,4 +1773,106 @@ pub fn c23_courant_paroi_mobile(
         });
     }
     sortie
+}
+
+/// Facteur d'amplification du **mode de maille**, en fonction du nombre de Courant — S29.
+///
+/// # Ce que cette mesure remplace
+///
+/// `stabilite_par_courant`, écrite en S27, classait une exécution en `Stable / Diverge / NonFini`.
+/// Elle a répondu « OK partout » de `ν = 0,45` à `0,99`, et **n'a rien prouvé** : elle ne pouvait
+/// échouer que sur une catastrophe. C'est la catégorie **B** de l'audit S29 — et à `ν = 1,05`, où
+/// le schéma amplifie réellement, elle aurait encore déclaré `Stable`.
+///
+/// # La grandeur que la théorie gouverne
+///
+/// L'analyse de von Neumann porte sur le **facteur d'amplification** `|G|` de chaque mode. Le mode
+/// le plus court représentable — `λ = 2·dx`, le damier — est celui qui devient instable en premier.
+/// Le rapport d'amplitude après `n` pas vaut `|G|ⁿ` : il est continu, il est mesurable, et il dit
+/// **de combien** le schéma est stable au lieu de dire s'il a cassé.
+///
+/// Renvoie `(ν, |G| par pas, amplitude finale / initiale, nombre de pas)`.
+pub fn amplification_mode_maille(
+    host: &mut water_core::HostServices,
+    courants: &[f32],
+    duree_s: f64,
+) -> Vec<(f64, f64, f64, u64)> {
+    use water_core::{Bassin, Delta1D, EtatInitial};
+
+    let montage = Bassin {
+        nx: 200,
+        longueur_m: 20.0,
+        origine_m: 0.0,
+        profondeur_gauche_m: 2.0,
+        pente: 0.0,
+        eta0_m: 0.0,
+        etat_initial: EtatInitial::Damier { amplitude_m: 0.001 },
+    };
+
+    let mut sortie = Vec::new();
+    for &nu in courants {
+        let mut d = match Delta1D::configure(host, montage) {
+            Ok(d) => d.avec_cfl(nu),
+            Err(_) => continue,
+        };
+        let a0 = d.amplitude_mode_maille();
+        let mut t = 0.0f64;
+        let mut pas = 0u64;
+        while t < duree_s {
+            let mut dt = d.dt_cfl();
+            if !dt.is_finite() || dt <= 0.0 {
+                break;
+            }
+            let reste = (duree_s - t) as f32;
+            if dt > reste {
+                dt = reste;
+            }
+            d.pas_equilibre(dt);
+            t += dt as f64;
+            pas += 1;
+        }
+        let a1 = d.amplitude_mode_maille();
+        let rapport = if a0 > 0.0 { a1 / a0 } else { f64::NAN };
+        let g = if pas > 0 && rapport.is_finite() && rapport > 0.0 {
+            rapport.powf(1.0 / pas as f64)
+        } else {
+            f64::NAN
+        };
+        sortie.push((nu as f64, g, rapport, pas));
+    }
+    sortie
+}
+
+#[cfg(test)]
+mod tests_amplification {
+    use super::*;
+    use crate::host_impl::{ArenaAllocator, SequentialJobs, StderrSink};
+    use water_core::HostServices;
+
+    /// La mesure **retrouve la borne théorique `ν = 1`**, et c'est ce qui la valide.
+    ///
+    /// L'analyse de von Neumann prédit `|G| ≤ 1` pour `ν ≤ 1` et `|G| > 1` au-delà. La mesure n'a
+    /// pas servi à établir cette borne : elle la retrouve. Une mesure de stabilité qui ne
+    /// retrouverait pas la frontière connue ne pourrait rien dire des frontières inconnues.
+    #[test]
+    fn la_mesure_retrouve_la_frontiere_theorique() {
+        let mut alloc = ArenaAllocator::with_capacity(8 << 20);
+        let jobs = SequentialJobs;
+        let sink = StderrSink;
+        let mut host = HostServices {
+            alloc: &mut alloc,
+            jobs: &jobs,
+            sink: &sink,
+        };
+
+        let r = amplification_mode_maille(&mut host, &[0.45, 0.9, 1.05, 1.5], 2.0);
+        assert_eq!(r.len(), 4, "les quatre points doivent être mesurés");
+        for (nu, g, _, _) in &r {
+            if *nu <= 1.0 {
+                assert!(*g < 1.0, "ν = {nu} : le schéma doit amortir, |G| = {g}");
+            } else {
+                assert!(*g > 1.0, "ν = {nu} : le schéma doit amplifier, |G| = {g}");
+            }
+        }
+    }
 }

@@ -98,7 +98,7 @@ Si la thèse est juste, l'audit doit commencer par mes propres mesures avant de 
 - [x] **P4** — inventaire des assertions **du code** — `physics.rs`, `delta.rs`, `main.rs`. C'est
       là qu'elles s'exécutent, et un énoncé correct implémenté en « ça n'a pas cassé » ne vaut pas
       mieux qu'un énoncé fautif.
-- [ ] **P5** — corriger ce qui peut l'être dans le code, et **mesurer** que la correction change
+- [x] **P5** — corriger ce qui peut l'être dans le code, et **mesurer** que la correction change
       quelque chose : une assertion durcie qui reste verte sans qu'on sache pourquoi n'a rien
       prouvé.
 - [ ] **P6** — registre `AUDIT-ASSERTIONS-S29`, et note datée sur les cas dont l'énoncé change.
@@ -205,3 +205,41 @@ réellement le verdict. La ligne de stabilité était décorative.
 une grandeur continue — le facteur d'amplification du mode le plus court représentable, `λ = 2·dx`.
 Au-dessus de 1, le schéma amplifie ; en dessous, il amortit. C'est exactement la grandeur dont
 « stable / instable » est le seuil, et elle se mesure sans attendre qu'un `NaN` apparaisse.
+
+#### P5 — la mesure corrigée retrouve la frontière théorique, et la mesure fautive aurait dit « stable »
+
+**La grandeur** : le facteur d'amplification `|G|` du **mode de maille** (`λ = 2·dx`, un damier),
+que l'analyse de von Neumann gouverne. Le rapport d'amplitude après `n` pas vaut `|G|ⁿ`.
+
+| `ν` | `|G|` par pas | amplitude finale/initiale | verdict |
+|---|---|---|---|
+| 0,45 | 0,9595 | 2,91e−4 | amortit |
+| 0,70 | 0,9401 | 3,94e−4 | amortit |
+| 0,90 | 0,9291 | 6,91e−4 | amortit |
+| 0,99 | 0,9355 | 2,48e−3 | amortit |
+| **1,05** | **1,0204** | **7,53e0** | **amplifie** |
+| 1,20 | 1,1182 | 4,99e19 | amplifie |
+| 1,50 | 1,7903 | 5,50e20 | amplifie |
+
+> **La transition est exactement à `ν = 1`**, où la théorie la place. La mesure n'a pas servi à
+> établir cette borne : **elle la retrouve**. Une mesure de stabilité incapable de retrouver la
+> frontière connue ne dirait rien des frontières inconnues — c'est le contrôle qui la valide, et il
+> est en test permanent.
+
+**Et la démonstration que la mesure fautive était vide.** À `ν = 1,05`, le schéma amplifie d'un
+facteur **7,5 en cent pas**. L'amplitude finale vaut 0,0075 m pour un seuil de divergence fixé à
+0,06 m : **l'ancien critère aurait répondu `Stable`**. Il n'aurait rien vu d'un schéma qui amplifie.
+
+`Stabilite` et `stabilite_par_courant` sont **retirées**, avec une note en place qui dit pourquoi.
+Conservées, elles seraient un faux positif en attente — un instrument qui ne peut pas voir ce qu'il
+prétend mesurer n'est pas un témoin.
+
+#### Et j'y suis retombé pendant l'audit
+
+Le premier balayage incluait `ν = 1,05` et a rendu **exactement le résultat de `ν = 0,99`**.
+`avec_cfl` bornait silencieusement à `[0,05 ; 0,99]` : l'instrument était **incapable de produire le
+résultat qu'il cherchait**, et rien ne le disait.
+
+C'est la même faute d'un cran plus haut — non pas une assertion qui ne peut pas échouer, mais un
+**réglage qui ne peut pas atteindre le régime testé**. La borne haute passe à 2,0 : au-delà de 1 le
+schéma n'a plus de garantie, et c'est précisément ce qu'on veut mesurer.

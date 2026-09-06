@@ -350,21 +350,15 @@ fn executer_physics_solveur() -> usize {
         println!();
     }
 
-    println!("  stabilité effective selon ν — la théorie donne ν < 1 ; le terme source et le front en mangent");
-    for cas in ["C03", "C04"] {
-        print!("    {cas} :");
-        for (nu, st) in
-            physics::stabilite_par_courant(&mut host, cas, &[0.45, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99])
-        {
-            match st {
-                physics::Stabilite::Stable { .. } => print!("  {nu:.2}:OK"),
-                physics::Stabilite::Diverge { volume_rel, .. } => {
-                    print!("  {nu:.2}:DIVERGE(vol {:.1}%)", volume_rel * 100.0)
-                }
-                physics::Stabilite::NonFini => print!("  {nu:.2}:NaN"),
-            }
-        }
-        println!();
+    println!("  amplification du mode de maille (λ = 2·dx) selon ν — la grandeur que von Neumann gouverne");
+    println!("       ν      |G| par pas   amplitude finale/initiale   pas");
+    for (nu, g, rapport, pas) in
+        physics::amplification_mode_maille(&mut host, &[0.45, 0.7, 0.9, 0.99, 1.05, 1.20, 1.50], 2.0)
+    {
+        println!(
+            "  {nu:>6.2}   {g:>11.6}   {rapport:>25.3e}   {pas:>5}{}",
+            if g > 1.0 { "  ← AMPLIFIE" } else { "" }
+        );
     }
 
     println!("  harmoniques à nx = 400, ν = 0,45 — la loi prédit /n en périodes propres, /n² en secondes");

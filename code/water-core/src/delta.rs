@@ -99,6 +99,14 @@ pub enum EtatInitial {
         /// puisque sa période est elle aussi divisée par `n`.
         mode: u32,
     },
+    /// Damier d'amplitude `a` : `η` alterne `+a`, `−a` d'une cellule à l'autre.
+    ///
+    /// C'est le **mode de maille**, de longueur d'onde `2·dx` — le plus court que la grille puisse
+    /// représenter, et celui dont l'analyse de von Neumann gouverne le facteur d'amplification.
+    /// Un schéma stable l'amortit, un schéma instable l'amplifie, et **le rapport d'amplitude après
+    /// N pas est une grandeur continue** : elle dit *de combien* le schéma est stable, là où
+    /// « aucune divergence observée » ne dit rien tant qu'aucun `NaN` n'apparaît.
+    Damier { amplitude_m: f32 },
     /// Bosse gaussienne de faible amplitude sur une nappe au repos, vitesse nulle.
     ///
     /// Sa raison d'être est d'être **régulière** : indéfiniment dérivable, sans front ni
@@ -368,6 +376,11 @@ impl Delta1D {
                     };
                     (base + eta).max(0.0)
                 }
+                EtatInitial::Damier { amplitude_m } => {
+                    let base = (bassin.eta0_m - b[i]).max(0.0);
+                    let signe = if i % 2 == 0 { 1.0 } else { -1.0 };
+                    (base + signe * amplitude_m).max(0.0)
+                }
                 EtatInitial::Bosse {
                     amplitude_m,
                     sigma_m,
@@ -406,8 +419,17 @@ impl Delta1D {
     /// Ce n'est pas un réglage de confort : `1 − ν` est le facteur qui commande la dissipation
     /// numérique du schéma (ADR-033 §3). Le monter réduit l'amortissement **et** le nombre de pas,
     /// donc le coût. La contrepartie est la marge de stabilité.
+    /// # Le bornage a été élargi en S29, et pour une raison de méthode
+    ///
+    /// Le premier jet bornait à `[0,05 ; 0,99]`. Une mesure d'amplification demandée à `ν = 1,05` —
+    /// destinée à observer un facteur `|G| > 1` — recevait donc **silencieusement** `0,99`, et
+    /// rendait le résultat de `0,99` comme s'il était celui de `1,05`. L'instrument était incapable
+    /// de produire le résultat qu'il cherchait, et rien ne le disait.
+    ///
+    /// La borne haute passe à **2,0** : au-delà de 1 le schéma n'a plus de garantie, et c'est
+    /// précisément ce qu'on veut pouvoir mesurer. La borne basse reste, elle protège d'un pas nul.
     pub fn avec_cfl(mut self, cfl: f32) -> Self {
-        self.cfl = cfl.clamp(0.05, 0.99);
+        self.cfl = cfl.clamp(0.05, 2.0);
         self
     }
 
@@ -490,6 +512,32 @@ impl Delta1D {
             }
         }
         None
+    }
+
+    /// Amplitude du **mode de maille** : la demi-différence moyenne entre cellules voisines.
+    ///
+    /// `η` alternant en damier, `(η_i − η_{i+1})/2` vaut l'amplitude au signe près. La moyenne sur
+    /// le domaine filtre les modes longs, qui ne contribuent presque rien à cette différence.
+    ///
+    /// C'est la grandeur dont « stable » et « instable » sont les deux côtés : son évolution donne
+    /// un **facteur d'amplification**, continu, mesurable bien avant qu'un `NaN` apparaisse.
+    pub fn amplitude_mode_maille(&self) -> f64 {
+        let mut somme = 0.0f64;
+        let mut n = 0usize;
+        for i in 0..self.nx.saturating_sub(1) {
+            let d = (self.eta(i) - self.eta(i + 1)) as f64;
+            if d.is_finite() {
+                somme += d.abs() * 0.5;
+                n += 1;
+            } else {
+                return f64::INFINITY;
+            }
+        }
+        if n == 0 {
+            0.0
+        } else {
+            somme / n as f64
+        }
     }
 
     /// `max |u|` sur le domaine de calcul — la grandeur mesurée par C01.
