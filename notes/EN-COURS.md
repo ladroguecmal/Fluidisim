@@ -188,14 +188,19 @@ de traversée, compté en périodes — soit `D/λ` :
 ln2·(λ/dx) / (2π²(1−ν))  ≥  D/λ        ⟹        λ²  ≥  K·dx·D
 ```
 
-avec `K = 2π²(1−ν)/ln2` : **28,5** à `ν = 0,45`, **8,54** à `ν = 0,70`.
+avec `K = 2π²(1−ν)/ln2` : **15,66** à `ν = 0,45`, **8,54** à `ν = 0,70`.
 
 | Domaine | `dx` | `λ_min` (`ν = 0,45`) | `λ_min` (`ν = 0,70`) |
 |---|---|---|---|
-| 50 m | 0,25 m | 18,9 m | 10,3 m |
-| 100 m | 0,50 m | 37,7 m | 20,7 m |
-| 200 m | 1,00 m | 75,5 m | 41,3 m |
-| 1 000 m | 2,00 m | 238,7 m | 130,7 m |
+| 50 m | 0,25 m | 14,0 m | 10,3 m |
+| 100 m | 0,50 m | 28,0 m | 20,7 m |
+| 200 m | 1,00 m | 56,0 m | 41,3 m |
+| 1 000 m | 2,00 m | 177,0 m | 130,7 m |
+
+> **Correction en séance.** La première rédaction de ce paragraphe portait `K = 28,5`, en omettant
+> le facteur `(1−ν)` — c'est `2π²/ln2` et non `2π²(1−ν)/ln2`. Les quatre `λ_min` en dépendaient et
+> ont été refaits. L'erreur a été prise par le calcul, pas par la relecture : le tableau avait été
+> écrit à la main à partir d'un facteur mémorisé de travers.
 
 > **La longueur d'onde minimale transportable dépend de la *taille du domaine*, en `√D`.** Le corpus
 > ne reliait `λ_cut` qu'à `dx` — ADR-005 §2.1, « la plus petite longueur d'onde que δ transporte
@@ -203,5 +208,5 @@ avec `K = 2π²(1−ν)/ln2` : **28,5** à `ν = 0,45`, **8,54** à `ν = 0,70`.
 > à résolution constante remonte `λ_min` de 41 %.
 
 **Et cela boucle avec le sillage.** Un bateau à 5 m/s produit `λ = 16 m` ; dans un domaine de 200 m
-à `dx = 1 m`, il faudrait `λ ≥ 75 m` pour que le sillage traverse. Il n'ira pas au bout — ce que la
+à `dx = 1 m`, il faudrait `λ ≥ 56 m` pour que le sillage traverse. Il n'ira pas au bout — ce que la
 mesure de P3 disait déjà en distance : 16 m derrière la coque.
