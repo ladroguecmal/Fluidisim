@@ -59,185 +59,61 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S32
-État             : terminée
+Session          : S33
+État             : en cours
 Battement        : 2026-09-06
-Objectif         : Où vit le sillage — et ce que δ porte vraiment
+Objectif         : Mesurer un phénomène entretenu — la conclusion la moins étayée
 ```
 
 ### Plan
 
-Action **S31-1**, angle mort **A139**, ouvert en S31 avec la mention « aucun document ne tranche ».
+Action **S32-2**, angle mort **A142**. ADR-037 §2.1 conclut que la dissipation numérique **produit
+gratuitement** la décroissance spatiale qu'ADR-001 exige de δ — 25,6 m pour le proche-coque, dans la
+portée voulue d'un domaine. C'est la conclusion la plus rassurante du corpus récent, et **elle est
+dérivée, jamais mesurée**.
 
-**C'est faux, et l'erreur est la mienne.** ADR-001 §2 tranche explicitement, depuis S01 :
+Elle suppose qu'une source constante et une dissipation exponentielle en temps produisent une
+décroissance exponentielle en espace. **C'est vrai en régime linéaire, et le solveur ne l'est pas.**
+Toutes les mesures de S25 à S32 portent sur des perturbations **relâchées** ; aucune sur une source
+**entretenue**.
 
-| Couche | Contenu, verbatim |
-|---|---|
-| **W** | « **sillages**, anneaux d'impact, ondes d'explosion, tsunamis, déferlement, réfraction bathymétrique » |
-| **δ** | « proche-coque, gerbe d'étrave, éclaboussure, cavité d'impact, poche d'air, remous sur rocher » |
+**La prédiction, et elle se simplifie une fois de plus.** Une onde émise en continu met `x/c` pour
+atteindre la distance `x`, et la demi-vie temporelle vaut `t½ = K·(λ/dx)·(λ/c)`. Donc :
 
-En S31 je n'avais lu qu'ADR-011 §4 — qui place le *générateur* de sillage dans W — et j'en avais
-conclu que deux documents se contredisaient. Ils ne se contredisent pas : ils disent la même chose,
-et le second n'était pas nécessaire.
+> ```
+> A(x) = A₀ · 2^(−x/L½)        avec       L½ = c·t½ = K·λ²/dx
+> ```
 
-**Deux sessions de suite, le même défaut.** A122 s'est dissoute en S31 en relisant ADR-001 ; A139 se
-dissout en S32 en relisant ADR-001. C'est le document fondateur du corpus, et il répond deux fois de
-suite à une question qualifiée d'ouverte.
+**`c` disparaît** — troisième annulation du projet, après celle de `λ`, `c` et `T` dans la loi de
+dissipation (S25) et celle de `g` dans le critère de transitoire (S32).
 
-*Thèse déclarée : ADR-036 §3 est sans objet pour le sillage, et le problème réel est plus grave.*
-δ porte des phénomènes **d'échelle métrique** — éclaboussure, gerbe d'étrave, cavité d'impact — donc
-encore plus courts qu'un sillage, donc encore plus vite effacés. Si la thèse tient, le chiffre à
-produire n'est pas une distance mais un **rapport** : durée de vie numérique contre durée de vie
-**physique attendue**.
+*Thèse déclarée : la décroissance sera exponentielle, et `L½` sera plus courte que prédit.* Le
+régime établi contient des harmoniques que le batteur engendre par non-linéarité, et elles meurent
+en `n²` (ADR-034) — elles ne devraient donc pas fausser l'enveloppe du fondamental. Mais rien ne le
+garantit, et c'est précisément ce qu'A142 reproche à la dérivation.
 
-**Et ADR-001 dit une seconde chose qui doit être lue avant de conclure** : *« δ tend vers 0 en
-s'éloignant de sa source. Ce n'est pas une contrainte imposée de l'extérieur : c'est la définition
-de la couche. »* La décroissance de δ est donc **voulue** — mais elle est voulue **en espace**, et
-la dissipation numérique agit **en temps**. Ce n'est pas la même chose, et la différence est
-probablement tout le sujet.
-
-- [x] **P1** — plan, jeton.
-- [x] **P2** — la dissolution d'A139, et la correction de ce que S31 a écrit.
-- [x] **P3** — la distinction **espace / temps** : ce que la définition de δ demande, ce que la
-      dissipation fait, et où les deux divergent.
-- [x] **P4** — la partition **entretenu / transitoire** du contenu de δ, et ce que chacune subit.
-- [x] **P5** — chiffrer : durée numérique contre durée physique attendue, pour chaque contenu.
-- [x] **P6** — **ADR-037**.
-- [x] **P7** — répercussions : ADR-036, index, angles morts, actions, décomptes.
-- [x] **P8** — rituel de fin (`REPRISE.md` §6).
+- [ ] **P1** — plan, jeton.
+- [ ] **P2** — le **batteur oscillant** : `ParoiMobile` reçoit une période. Vérifier qu'il produit
+      bien un train établi avant de mesurer quoi que ce soit.
+- [ ] **P3** — la mesure d'**enveloppe spatiale** : `max|η|` sur une période, en chaque `x`, en
+      régime établi et **avant tout retour de réflexion** — le domaine doit être assez long, et il
+      faut le vérifier plutôt que le supposer (A133).
+- [ ] **P4** — exécuter, ajuster `ln A` contre `x`, comparer `L½` mesurée à `K·λ²/dx`. Trois
+      longueurs d'onde au moins : une loi qui ne tiendrait qu'à un `λ` ne serait pas une loi.
+- [ ] **P5** — ce que le résultat fait à ADR-037 §2.1 : confirmation, correction, ou réfutation.
+- [ ] **P6** — note datée dans ADR-037, ou ADR-038 si la conclusion change.
+- [ ] **P7** — répercussions : index, angles morts, actions, décomptes.
+- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
-**Ce que S31 laisse et qui commande cette session.**
+**Ce que S32 laisse et qui commande cette session.**
 
-- **`K = 15,66` à `ν = 0,45`**, pas 28,5 — le facteur `(1−ν)` est dans la formule.
-- **La loi de dissipation a deux sujets distincts** : ce que δ porte, et ce que B+W portent. Le
-  tableau spectral d'ADR-034 §2.1 relève du second et est cité avec sa note corrective.
+- **Règle d'aiguillage** : toute question sur l'appartenance d'un phénomène à une couche se règle
+  dans **ADR-001 §2**, et nulle part ailleurs (A143).
+- **ADR-036 §3 est sans objet** — il porte sur le sillage, qui appartient à W. Ne pas citer sa
+  table des distances.
+- **`K = 0,06385`** est le coefficient de demi-vie à `ν = 0,45` ; `K = ln2/(2π²(1−ν))`.
 - **C04 en échec, `C01-jet` rouge, C08 sans verdict** : trois décisions.
 
 **Branche.** `claude/s22-suite`. `master` s'arrête à S17 (A107).
-
-#### P2-P3 — A139 se dissout, et la définition de δ retourne le problème
-
-**La réponse était dans ADR-001 §2 depuis S01, en toutes lettres** : W porte « **sillages**, anneaux
-d'impact, ondes d'explosion, tsunamis » ; δ porte « proche-coque, gerbe d'étrave, éclaboussure,
-cavité d'impact, poche d'air, remous sur rocher ».
-
-**ADR-011 §4 ne contredit rien** — il précise que le *générateur* de sillage, dans W, doit prendre la
-profondeur en entrée. En S31 je n'avais lu que lui, et j'ai écrit « aucun document ne tranche ».
-**C'était faux.**
-
-> **Deux sessions de suite, le même défaut, sur le même document.** A122 s'est dissoute en S31 en
-> relisant ADR-001 ; A139 se dissout en S32 en relisant ADR-001. Le document fondateur du corpus a
-> répondu deux fois de suite à une question qualifiée d'ouverte — et la seconde fois, c'est moi qui
-> avais posé la question.
-
-**Conséquence immédiate : ADR-036 §3 ne s'applique pas au sillage.** Les chiffres restent justes —
-un objet de longueur d'onde `λ` porté par δ meurt selon la loi — mais **le sillage n'est pas cet
-objet**. La table des distances (2,1 m derrière une barque) décrit un cas qui n'existe pas.
-
-#### Ce que la définition de δ demande, et où la dissipation la rejoint
-
-ADR-001 §2 ajoute une phrase que S31 n'avait pas lue non plus :
-
-> *« δ tend vers 0 en s'éloignant de sa source. Ce n'est pas une contrainte imposée de l'extérieur :
-> c'est la **définition de la couche**. »*
-
-**La décroissance de δ est donc voulue.** Mais elle est voulue **en espace** — loin de la source — et
-la dissipation numérique agit **en temps**. Ce n'est pas la même chose, et toute la question est là.
-
-| | Ce que la source fait | Ce que la dissipation fait | Résultat |
-|---|---|---|---|
-| **phénomène entretenu** — proche-coque, gerbe d'étrave, remous sur rocher | réalimente en permanence | atténue avec le temps de trajet | **équilibre spatial** : δ décroît en s'éloignant, exactement comme ADR-001 le demande |
-| **phénomène transitoire** — éclaboussure, cavité d'impact | n'existe qu'une fois | atténue avec le temps | **mort prématurée** : rien ne réalimente |
-
-> **La dissipation numérique *réalise* la définition de δ pour les phénomènes entretenus, et elle la
-> trahit pour les transitoires.** C'est le même mécanisme qui produit la propriété voulue d'un côté
-> et le défaut de l'autre.
-
-**Et la longueur de décroissance obtenue est du bon ordre.** Pour un entretenu, δ s'éteint sur
-`L_d = c · t_num` :
-
-| Phénomène | échelle | `L_d` à `dx = 0,25 m` |
-|---|---|---|
-| gerbe d'étrave | 2 m | **1,0 m** |
-| remous sur rocher | 5 m | **6,4 m** |
-| proche-coque | 10 m | **25,6 m** |
-
-ADR-001 donne à un domaine δ une portée de « **quelques dizaines de mètres** ». Le proche-coque
-s'éteint naturellement à 25,6 m : **la dissipation produit gratuitement la décroissance que la
-définition exige**, et à la bonne échelle. Ce n'est probablement pas une coïncidence — les deux
-dépendent de la même grandeur, la portée du domaine.
-
-#### P4-P5 — le chiffre est brutal, et la formule est élégante
-
-**Pour un transitoire, la durée numérique doit dépasser la durée physique.** Une éclaboussure
-d'échelle `L` retombe en `t_phys ≈ √(2L/g)` — le temps de chute gravitaire. La dissipation lui laisse
-`t_num = K·L²/(dx·c)`, avec `K = ln2/(2π²(1−ν))`.
-
-| `L` | `t_phys` | `t_num` à `dx = 0,25 m` | rapport |
-|---|---|---|---|
-| 0,5 m | 0,319 s | 0,014 s | **0,05** |
-| 1,0 m | 0,452 s | 0,058 s | **0,13** |
-| 2,0 m | 0,639 s | 0,231 s | 0,36 |
-| 3,0 m | 0,782 s | 0,519 s | 0,66 |
-| 5,0 m | 1,010 s | 1,441 s | **1,43** ✔ |
-
-**Une éclaboussure d'un mètre s'éteint huit fois trop tôt ; une de cinquante centimètres, vingt fois
-trop tôt.** Et le rapport croît comme `L^1,5/dx` : ce sont les **plus petits** phénomènes qui sont
-détruits, alors que ce sont eux que δ existe pour montrer.
-
-**La condition `t_num ≥ t_phys` se résout, et `g` disparaît :**
-
-```
-dx  ≤  K · L^1,5 / √(2h)
-```
-
-| `L` | `dx_max` à `ν = 0,45` | `dx_max` à `ν = 0,70` |
-|---|---|---|
-| 0,5 m | **1,1 cm** | 2,1 cm |
-| 1 m | **3,2 cm** | 5,9 cm |
-| 2 m | 9,0 cm | 16,6 cm |
-| 5 m | 35,7 cm | 65,5 cm |
-
-> **Une éclaboussure d'un mètre demande `dx = 3,2 cm`.** Sur un domaine de 20 m de côté, cela fait
-> 625 cellules par direction — et δ est un solveur **3D** (ADR-001 : « solveur 3D à surface libre »).
-
-**Et cela donne à ADR-035 un argument qu'il n'avait pas.** Passer de `ν = 0,45` à `0,70` multiplie
-`dx_max` par **1,83**, donc divise le nombre de cellules 3D par **6,1**. Le levier du nombre de
-Courant ne se mesure plus en portée d'onde : il se mesure en **taille de maille pour une fidélité
-de transitoire donnée**, et c'est la contrainte dimensionnante de δ.
-
-#### La partition, et ce qu'elle décide
-
-| | Phénomènes | Ce que la dissipation fait | Verdict |
-|---|---|---|---|
-| **entretenus** | proche-coque, gerbe d'étrave, remous sur rocher | produit la décroissance spatiale | **conforme à la définition d'ADR-001** ; `L_d = 25,6 m` pour le proche-coque, dans la portée voulue |
-| **transitoires** | éclaboussure, cavité d'impact, poche d'air libérée | tue avant la fin physique | **défaut**, d'autant plus grave que le phénomène est petit |
-
-> **δ n'a besoin d'être précis que pour ses transitoires.** Pour les entretenus, la dissipation est
-> un **allié** : elle produit gratuitement la décroissance qu'ADR-001 exige, à la bonne échelle, sans
-> qu'on ait à l'imposer par une éponge ou un masque.
-
-C'est un renversement complet du cadrage de S31, qui traitait la dissipation comme un défaut
-uniforme. **Elle est un défaut pour la moitié du contenu de δ, et un mécanisme voulu pour l'autre.**
-
-#### État à la fin de S32
-
-`cargo test` : **33 tests**. `water-harness check` : 2 scénarios, 0 échec, hashs **inchangés**.
-Session **sans code neuf** — le travail était de lecture et de conception. Jeton **libéré**.
-
-**Ce que S33 doit savoir avant de commencer, et qui n'est pas ailleurs :**
-
-- **Règle d'aiguillage, née de deux dissolutions consécutives** : *toute question sur
-  l'appartenance d'un phénomène à une couche se règle dans **ADR-001 §2**, et nulle part ailleurs.*
-  A122 et A139 y répondaient toutes deux depuis S01 (A143).
-- **ADR-036 §3 est sans objet** — il porte sur le sillage, qui n'appartient pas à δ. Ses chiffres
-  restent exacts pour un objet de δ de même longueur d'onde, mais **ne pas citer la table des
-  distances** : elle décrit un cas qui n'existe pas.
-- **La conclusion la plus rassurante du corpus récent est la moins étayée.** L'équilibre spatial du
-  proche-coque à 25,6 m est **dérivé**, jamais mesuré, sur un solveur non linéaire (A142). C'est
-  l'action S32-2, et c'est la session recommandée.
-- **Le critère `dx ≤ K·L^1,5/√(2h)`** suppose `t_phys = √(2L/g)`, qui ignore l'écume et le spray
-  d'ADR-014 — plus durables que la déformation de surface (A141).
-- **C04 en échec, `C01-jet` rouge, C08 sans verdict** : trois décisions, pas trois régressions.

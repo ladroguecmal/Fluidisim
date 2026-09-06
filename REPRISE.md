@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-06
-Session en cours : —
+Session en cours : S33 — mesurer un phénomène entretenu, la conclusion la moins étayée
 Dernière session : S32 — 2026-09-06 — la réponse était dans ADR-001, pour la deuxième fois de suite
-Session suivante : S33 — mesurer un phénomène entretenu (S32-2) *(recommandé)*, ou C24 (S31-2), ou H2
+Session suivante : S34 — C24 (S31-2) ou H2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
