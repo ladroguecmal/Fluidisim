@@ -3178,3 +3178,136 @@ Deux autres entrées : **S31-2**, écrire C24 (conservation de forme d'un paquet
 Inchangés. **A103** — la masse volumique de l'eau, douce ou de mer. **A107** — le sort du travail
 propre à `master`, S16-S17. Et les trois choses hors de portée d'une session : nommer les personnes,
 constater l'état réel du projet, agir sur l'infrastructure — dont le dépôt distant.
+
+---
+
+## S35 — 2026-09-06 — Le dépôt avait forké une seconde fois, et les deux lignées avaient écrit le même solveur
+
+**Consigne reçue.** « Reprends le projet », depuis un worktree positionné sur `master`.
+
+**Entrées.** Les deux commandes d'amorce de `CLAUDE.md` — `git worktree list`, `git branch -a` — et
+ce qu'elles ont montré : **trois lignées vivantes ou mortes, trois jetons tous `libre`**.
+
+**Sorties.** [`FORK-S22-S26`](../docs/registres/FORK-S22-S26.md) ; cinq ADR importés et renumérotés
+**038–042** ; [`ADR-043`](../docs/adr/ADR-043-deux-lignees-ont-ecrit-le-meme-solveur.md) ; leçons
+**L122–L136** reportées et **L137–L140** écrites ; angles morts **A149–A160** reportés et **A161**
+ouvert ; notes correctives portées dans `ADR-005`, `ADR-007`, `DOSSIER-B2`, `CAS-CANONIQUES` ;
+`shallow.rs` importé et compilé.
+
+**Ça tourne.** `cargo test` : **55 tests** au vert, contre 45 en début de session — les dix de
+`shallow.rs` passent sans retouche. `water-harness check` : 0 échec, **hashs inchangés**
+(`0x3e2c06a7b00e73e3`, `0x1a8b0629a9f51b6e`).
+
+### Ce qui a été trouvé au premier geste
+
+Le dépôt a forké **deux fois**. Le premier fork (S07) était documenté — mais dans une lignée qui
+n'est pas celle-ci : `FORK-S08-S15.md` vit sur `master`, qui n'est l'ancêtre d'aucune branche
+vivante. **Cette lignée n'a jamais su qu'elle était une branche**, et elle a reforké huit sessions
+plus tard, en S21.
+
+| lignée | dernier | ADR | code | sort |
+|---|---|---|---|---|
+| `claude/s22-suite` | S34, 19h14 | 37 | `delta.rs` | **lignée d'accueil** |
+| `claude/reprise-projet-5134cd` | S26, 17h12 | 34 | `shallow.rs` | fusionnée ici |
+| `master` | S17, 01h51 | 27 | aucun | morte, non traitée |
+
+Cinq identifiants d'ADR, quinze leçons et douze angles morts étaient en collision — deux documents
+différents sous le même numéro, selon la lignée du lecteur.
+
+### Le résultat de la session tient en une phrase
+
+**Les deux lignées avaient écrit le même solveur, le même jour, sans se voir.**
+
+`delta.rs` (1292 lignes) et `shallow.rs` (1070) résolvent les mêmes équations — Saint-Venant 1D,
+volumes finis, flux de Rusanov, terme de fond centré au premier jet — et s'ouvrent sur la même
+précaution et la même phrase de `CAS-CANONIQUES` à propos de C01. **Ce n'est pas une coïncidence :
+c'est le corpus qui a dicté le solveur.** Deux lecteurs indépendants, partis de la même page, ont
+écrit le même programme.
+
+### Ce que cela vaut, et ce que cela ne vaut pas
+
+**Cela ne vaut pas** une confirmation du modèle : les deux partagent une dimension, `c = √(g·h)` et
+l'absence de dispersion — donc **exactement les mêmes angles morts**. Deux erreurs identiques ne se
+corrigent pas en se répétant.
+
+**Cela vaut** un oracle contre la **faute d'implémentation** — l'indice décalé, le signe inversé, la
+condition de bord mal posée. Le projet n'avait aucun moyen de détecter cette classe de faute : un
+seul code, ses propres assertions, et un corpus qui les a écrites. C'est le premier bénéfice net du
+fork, et il disparaîtrait si l'on supprimait l'une des deux implémentations. **Les deux sont
+conservées.**
+
+### Les verdicts divergeaient sur deux cas, et l'écart a une cause unique
+
+| cas | `delta.rs` — ordre un | `shallow.rs` — ordre deux |
+|---|---|---|
+| **C04** | **échoue** *(S23)* | **vert** *(B-S25)*, 0,74 % sur le front |
+| **C08** | **sans verdict** *(S23-S24)* | rouge, puis **vert** *(B-S24)* : `p` = 1,003 |
+
+`ADR-031` de cette lignée conclut que **le front de mouillage élimine l'ordre un**. La lignée B a
+franchi ce pas — `ADR-040`, MUSCL + RK2 — et **C04 et C08 sont passés au vert ensemble**. Les deux
+résultats se complètent exactement : l'un dit ce qui échoue, l'autre ce qui réussit, et c'est le
+même seuil qui les sépare. **Ni l'une ni l'autre lignée ne pouvait l'établir seule.**
+
+### L'éponge est trois choses, et une seule a été mesurée
+
+Les deux lignées avaient attaqué la même contrainte dure du corpus — `λ_cut ≤ 3 m`, qui repose
+entièrement sur `L_s = λ_cut/2` — par deux chemins sans rapport. B a **mesuré l'absorbeur** : la
+largeur ne dépend pas de `λ` mais de la maille, huit fois plus étroit. L'accueil a **mesuré la
+dissipation** : elle produit gratuitement la décroissance que le masque devait imposer.
+
+Elles concordent. Mais la fusion révèle ce qu'aucune ne pouvait voir : **le corpus appelle
+« éponge » trois fonctions distinctes** — absorber, faire décroître, transduire — qui occupent la
+même bande de bord et se dimensionnent par des critères sans rapport. **Une seule des trois a été
+mesurée** (A161). Sans cette distinction, « la dissipation rend l'éponge inutile », vrai du masque,
+se lit comme « un domaine peut se passer d'absorbeur », qui est faux.
+
+### Le code : ce qui a résisté n'est pas ce qu'on croyait
+
+Le plan annonçait le code comme le morceau lourd. **Le solveur s'est importé en deux lignes** :
+`shallow.rs` ne dépend que de `crate::host`, dont l'API n'avait pas divergé. 55 tests verts, hashs
+inchangés, aucune retouche.
+
+**C'est le harnais qui résiste** — `physics.rs` porte des montages de même nom des deux côtés
+(`c03_seiche`, `ritter`, `c08_convergence`) avec des signatures différentes, parce que chacun est
+écrit contre son propre solveur. Le découpage retenu est **un module séparé**, `physics_shallow.rs`,
+et non une fusion : fusionner les montages détruirait exactement l'oracle qu'on cherche à garder.
+
+### Chiffres qui ont orienté la session
+
+- **195** commits de retard de `master` sur la lignée d'accueil — la branche depuis laquelle la
+  session a été ouverte.
+- **88 contre 35** commits depuis le fork de S21 : le critère du choix de lignée d'accueil, et rien
+  d'autre.
+- **6 ajouts, 14 modifications** : le diff documentaire de la lignée B. C'était peu, et c'est
+  pourquoi la fusion des documents a tenu dans une session.
+- **5 sévérité 1** sur les douze angles morts importés — une proportion élevée, et aucun n'a encore
+  été relu par cette lignée.
+
+### Ce qui n'a pas été fait
+
+- **Le harnais n'est pas fusionné**, ni le journal de la lignée B (cinq entrées). Découpage en
+  quatre sessions dans [`FORK-S22-S26`](../docs/registres/FORK-S22-S26.md) §7.
+- **L'oracle croisé n'a jamais été exercé.** Deux solveurs coexistent dans le même binaire ; aucun
+  cas ne les compare encore. Tant que ce n'est pas fait, ADR-043 §3 est une promesse.
+- **Rien n'a été réexécuté.** Les verdicts de la lignée B sont cités depuis ses documents, pas
+  reproduits ici.
+- **`master` n'est pas traitée.** Elle détient `FORK-S08-S15.md` et deux ADR — `ADR-026`,
+  `ADR-027` — dont il reste à établir s'ils ont un équivalent ici.
+- **Les cinq angles morts de sévérité 1 importés n'ont pas été relus.**
+
+### Session suivante recommandée
+
+**S36 — `physics_shallow.rs`** : les six montages de la lignée B sur `Shallow1D`, sans toucher à
+`physics.rs`. C'est le préalable à tout le reste, et notamment à l'exercice de l'oracle (S38).
+
+*Solutions de rechange* : les saturations de modèle (S34-1, A146), reportées par cette session ; ou
+la relecture des cinq angles morts de sévérité 1 importés.
+
+### Arbitrages en attente
+
+Inchangés — trois arbitrages de design et quatre interfaces inter-équipes, listés dans
+`docs/00_INDEX.md`. **Cette session n'en a tranché aucun et n'en a ouvert aucun.**
+
+Elle en ajoute cependant un de nature différente, qui appartient à l'utilisateur et non au projet :
+**trois worktrees restent ouverts sur trois branches divergentes**, et le dispositif du jeton ne
+protège d'aucun d'eux. Voir `FORK-S22-S26` §5.

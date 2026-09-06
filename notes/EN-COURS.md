@@ -111,7 +111,8 @@ et il faut dire laquelle.
 - [x] **P8** — le **code** : `shallow.rs` (1070 lignes) n'a pas d'équivalent ici, et `physics.rs`
       a été modifié des deux côtés (+1139 contre +1975). Constat et découpage du travail restant.
       **Aucun import à l'aveugle** — le code se fusionne en le compilant, pas en le recopiant.
-- [ ] **P9** — rituel de fin (`REPRISE.md` §6).
+- [x] **P9a** — rituel : journal, leçons L137-L140, actions S35-1 à S35-8.
+- [ ] **P9b** — rituel : index, décomptes, jeton libéré.
 
 ### Notes de reprise
 

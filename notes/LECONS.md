@@ -2137,3 +2137,77 @@ et la mesure principale ne veut plus rien dire.
 prévoir l'essai identique où le dispositif étudié est neutralisé. C'est la différence entre mesurer
 un effet et mesurer un effet **plus tout ce qui l'accompagne** — et le second est toujours plus
 flatteur.
+
+---
+
+## L137 — Un correctif de procédure écrit dans une seule branche ne protège que cette branche
+
+*(S35)* Le dépôt a forké deux fois. Le premier fork a été constaté, documenté dans un registre, et
+la procédure d'amorce a été corrigée pour qu'il ne se reproduise pas. **Tout cela a été écrit d'un
+seul côté du fork.** L'autre lignée, qui n'avait rien constaté, a reforké huit sessions plus tard
+par le même mécanisme — sans jamais savoir qu'elle était exposée.
+
+Le défaut a une forme générale, et elle est déplaisante : **le remède au fork est lui-même sujet au
+fork.** Il en va de même de tout correctif écrit dans un artefact que la divergence peut dupliquer —
+un fichier de configuration, une convention d'équipe, un fichier de règles, une page de wiki par
+projet.
+
+**Réflexe** : après avoir écrit un correctif de procédure, se demander *dans combien d'endroits ce
+texte doit exister pour faire son travail*, et l'y mettre le jour même. Un correctif qui vit à un
+seul endroit protège cet endroit. Le corollaire pratique : ce qui protège vraiment est ce qui
+s'exécute au démarrage — dans ce projet, deux commandes de `git` — et non ce qui se lit.
+
+## L138 — Deux implémentations du même modèle valent un oracle, et ne valident rien du modèle
+
+*(S35)* Deux lignées parallèles ont écrit indépendamment le même solveur : mêmes équations, même
+flux, même intégration. La tentation immédiate est d'y voir une confirmation croisée.
+
+**Elle n'en est pas une au niveau qui compte.** Les deux partagent le modèle, donc exactement les
+mêmes angles morts — une dimension, pas de dispersion. Ce que le modèle ne contient pas, aucune des
+deux ne peut le voir, et **deux erreurs identiques ne se corrigent pas en se répétant**.
+
+Ce que la concordance élimine, en revanche, est la **faute d'implémentation** : l'indice décalé, le
+signe inversé, la condition de bord mal posée. C'est la classe de faute qui produit les résultats
+les plus convaincants et les plus faux, et un projet à une seule implémentation n'a aucun moyen de
+la détecter — il n'a que ses propres assertions, écrites par ceux qui ont écrit le code.
+
+**Réflexe** : devant deux réalisations qui concordent, séparer ce qu'elles partagent de ce qu'elles
+ne partagent pas. La concordance ne certifie que la couche non partagée. Et le corollaire est
+d'action : **ne pas supprimer la seconde implémentation au motif qu'elle fait double emploi** —
+c'est précisément ce double emploi qui rend un désaccord informatif.
+
+## L139 — Ce qui résiste à une fusion n'est pas le gros morceau, c'est celui qui touche au reste
+
+*(S35)* Le plan annonçait le code comme la partie lourde : 1070 lignes de solveur d'un côté, 2431 de
+harnais modifiées des deux côtés. La prédiction était fausse dans les deux sens.
+
+**Le solveur s'est importé en deux lignes** et n'a demandé aucune retouche — parce qu'il ne dépend
+que d'une interface d'hôte qui n'avait pas divergé. **C'est le harnais qui résiste**, alors qu'il
+contient moins de code neuf : chaque montage y est écrit contre son propre solveur et porte les
+mêmes noms de fonction des deux côtés.
+
+La taille ne prédit rien ; **la surface de contact prédit tout**. Un fichier volumineux à interface
+étroite se transporte ; un fichier moyen qui nomme les mêmes choses que son homologue entre en
+collision sur chaque nom.
+
+**Réflexe** : avant d'estimer un travail de fusion, de migration ou d'extraction, compter les
+**dépendances** de chaque fichier, pas ses lignes. Et quand deux modules se disputent des noms, la
+bonne réponse est souvent de ne pas les fusionner du tout : deux modules côte à côte coûtent moins
+qu'un module réconcilié, et gardent la comparaison possible.
+
+## L140 — Un document se renumérote, un événement se préfixe
+
+*(S35)* Réconcilier deux histoires demandait de désambiguïser cinq identifiants d'ADR, quinze de
+leçons, douze d'angles morts — et cinq numéros de session. Les quatre premiers ont été renumérotés à
+la suite. **Les sessions ne l'ont pas été** : elles ont reçu un préfixe.
+
+La raison n'est pas esthétique. Un identifiant de document est une **étiquette** : elle désigne, elle
+ne prétend rien, et la changer ne coûte que des renvois à réécrire. Un numéro de session est un
+**événement daté** : il dit *ce qui s'est passé, quand, dans quel ordre*. Renuméroter S24 en S39
+placerait un travail de l'après-midi après un travail du soir et **mentirait sur la chronologie** —
+une falsification, pas une convention.
+
+**Réflexe** : devant une collision d'identifiants, trier d'abord les identifiants en deux tas — ceux
+qui *nomment* et ceux qui *datent*. Renuméroter les premiers, préfixer ou qualifier les seconds. La
+distinction vaut au-delà d'une fusion de dépôts : numéros de version, de ticket, de build, de
+migration.

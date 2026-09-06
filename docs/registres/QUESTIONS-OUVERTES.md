@@ -303,3 +303,24 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 > appeler. C'est un critère de revue plus efficace que la relecture — G10 avait survécu à plusieurs
 > relectures parce qu'il *a l'air correct*.
 
+
+## Actions relevées en séance — S35
+
+| # | Action | D'où elle vient | Qui la porte | État |
+|---|---|---|---|---|
+| S35-1 | **`physics_shallow.rs`** — les six montages de la lignée B (C01, C03, C04, C05, C06, C08) sur `Shallow1D`, dans un module séparé, sans toucher à `physics.rs` | `FORK-S22-S26` §7 | session | **ouverte** |
+| S35-2 | **Brancher** ces montages dans `main.rs`, avec le double format d'écart absolu / relatif de la lignée B — qui corrige un défaut d'affichage réel et vaut pour les deux jeux de montages | **A149** | session | **ouverte** |
+| S35-3 | **Exercer l'oracle croisé** : exécuter les cas communs sur `delta.rs` et `shallow.rs` et comparer. Tant que ce n'est pas fait, ADR-043 §3 est une promesse | `ADR-043` §7.2 | session | **ouverte** |
+| S35-4 | **Reporter les cinq entrées de journal** de la lignée B, sous préfixe `B-`, à leur date réelle | `FORK-S22-S26` §3.4 | session | **ouverte** |
+| S35-5 | **Relire les cinq angles morts de sévérité 1 importés** — A152, A155, A156, A157, A159. Aucun n'a été examiné par cette lignée ; ils sont reportés tels quels | `FORK-S22-S26` §4 | session | **ouverte** |
+| S35-6 | **Traiter `master`** (S17) : elle détient `FORK-S08-S15.md` et deux ADR — `ADR-026-quatre-mecanismes`, `ADR-027-graine-et-sauvegarde` — dont il reste à établir s'ils ont un équivalent ici | `FORK-S22-S26` §6 | session | **ouverte** |
+| S35-7 | **Répliquer `FORK-S22-S26` dans toutes les branches vivantes** le jour où l'une d'elles est reprise — c'est la règle que le premier fork n'a pas appliquée, et qui a coûté le second | **L137** | utilisateur | **ouverte** |
+| S35-8 | **Mesurer la transduction** d'ADR-005 §3 — la troisième fonction de la bande de bord, que personne n'a jamais mesurée | **A161** | session | **ouverte** |
+
+> **Note S35 — trois worktrees, trois jetons, tous libres.** La session a été ouverte depuis une
+> branche morte de 195 commits de retard, et n'a rien vu d'anormal jusqu'à `git worktree list`. Le
+> dispositif du jeton ne protège d'aucun fork : il dit qu'aucune session ne travaille *ici*. Les
+> deux commandes d'amorce de `CLAUDE.md` sont le seul dispositif qui ait tenu, et elles ont tenu
+> parfaitement — le fork a été vu au premier geste. **S35-7 est la seule action de cette liste que
+> le projet ne peut pas exécuter lui-même** : elle demande de décider du sort des branches, ce qui
+> appartient à l'utilisateur.
