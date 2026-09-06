@@ -82,7 +82,7 @@ l'intention.
   *Thèse : un document d'interface écrit vite viole d'abord les invariants de ressources — I-06
   allocation, I-16 profil — parce qu'ils ne se voient qu'en additionnant des tailles.*
 - [x] **P3** — SPEC-006 contre SPEC-001 à SPEC-005 : chiffres, cadences, unités, renvois.
-- [ ] **P4** — ADR-022 contre le corpus : I-17 tient-il partout, la couche V, le harnais, SPEC-005.
+- [x] **P4** — ADR-022 contre le corpus : I-17 tient-il partout, la couche V, le harnais, SPEC-005.
 - [ ] **P5** — ADR-023 contre le corpus : les quatre mécanismes contre ADR-008, ADR-010, ADR-013,
   ADR-015, et contre les chiffres de SPEC-001/002.
 - [ ] **P6** — les trois **entre eux** : ils se citent mutuellement (ADR-023 §4 publie sur
@@ -220,3 +220,35 @@ alignés à 20 : conforme à l'annonce, **mais** le document ne dit nulle part s
 supposés compactés ou alignés — convention absente, à écrire (cf. E04). Portées d'invalidation
 (§5.3 sous-cellule) ↔ ADR-006 §2 : réutilisation explicite, sans doublon. Polyligne de déferlement
 (§6) ↔ SPEC-005 §2 : la donnée est bien cuite et republiée, pas recalculée.
+
+#### P4 — ADR-022 contre le corpus
+
+**E07, gravité 2 — l'invariant I-12 est faux pour les domaines substitutifs, et il cite le document
+qui le contredit.**
+I-12 : « **Créer et détruire un domaine est visuellement gratuit.** […] Toute proposition qui la
+casse est refusée. → ADR-005, ADR-007, ADR-012, **ADR-013**. »
+Or ADR-013 §4 — cité par l'invariant — établit qu'un domaine **substitutif** met **40 s** à
+s'établir, et ADR-022 §2.6 a chiffré sa restauration depuis une graine à **4,4 à 8 s**. Créer un
+domaine substitutif n'a donc jamais été gratuit, depuis S01.
+L'invariant vaut pour les domaines **perturbatifs**, qui naissent à δ = 0 — c'est ce que dit
+ADR-013 §4 dans la même phrase. Tel qu'il est écrit, il ferait refuser ADR-013 §4 lui-même, et il a
+manqué à ADR-022 §2.6 : cette section a dû redémontrer que la restauration n'est pas gratuite alors
+qu'un invariant correctement formulé le lui aurait donné.
+**Deuxième invariant défectueux de la session, même classe qu'E01 → tous deux portés par ADR-024.**
+
+**Contrôles passés — cinq.**
+· **I-17 ↔ SPEC-005 §6** : le `SeedState` est bien une donnée cuite ; aucune capture d'exécution
+n'est demandée nulle part, y compris dans le chemin de sauvegarde de §4.2.
+· **ADR-022 §4.4 ↔ ADR-010 §6** : le règlement δ→V forcé à la sauvegarde emploie exactement le
+transfert déjà spécifié, avec sa perte contrôlée journalisée. Pas de second mécanisme.
+· **I-03 amendé ↔ SPEC-003 §2** : la couche V figurait dans le régime D1 depuis S03 ; l'amendement
+S10 rattrape l'invariant sur la spécification, dans le bon sens.
+· **C19 en mode `check`** : le cas ne mobilise que B, W et V — ni GPU, ni δ, ni assets lourds. Il
+tient donc dans les contraintes de SPEC-003 §4, comme ADR-022 §6.1 l'affirme. Vérifié, pas supposé.
+· **§4.1 — les quatre situations** (sauvegarde, arrivée en cours de partie, reconnexion, redémarrage
+serveur) : la citation d'ADR-003 §3 est exacte, et le rapprochement tient.
+
+**E05 confirmé et précisé** : ADR-022 §5.1 ne nomme que les `shape_lut`, alors que le serveur a
+besoin en plus de la **bathymétrie** et des **champs de courant C1** pour évaluer la traversabilité
+(SPEC-006 §2.6) et les franchissements de seuil qu'il rend autoritaires. La contrainte de
+déploiement A77 est donc sous-évaluée dans le document qui la porte.
