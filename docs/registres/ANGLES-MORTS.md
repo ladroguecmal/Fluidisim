@@ -12,9 +12,9 @@ de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outi
 6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance),
 3 en S11 (audit des points ouverts), 3 en S12 (mécanismes de détail), 3 en S13 (revue croisée des
 documents récents), 3 en S14 (audit inverse des invariants), 2 en S15 (audit des registres), 2 en S16 (dossier B2), 2 en S17
-(dossier de réunion), 1 en S18 (arbitrages) — **96 au total**. **Trente-six ont été trouvés dans nos
-propres écrits**, pas dans les documents sources : A49, A56, A57, A58, puis A65 à A96. La
-proportion
+(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet) — **97 au total**.
+**Trente-sept ont été trouvés dans nos propres écrits**, pas dans les documents sources : A49, A56,
+A57, A58, puis A65 à A97. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -138,6 +138,7 @@ ce que les sources avaient omis.
 | **A94** | Deux demandes bloquent la première ligne de code et n'étaient présentées nulle part comme urgentes | **1** | DOSSIER-REUNIONS §3 |
 | **A95** | Les deux demandes les plus bloquantes n'ont aucun destinataire nommé | **1** | DOSSIER-REUNIONS §7.2 |
 | **A96** | Un arbitrage qui traîne est souvent un arbitrage mal posé | 2 | ADR-027 §1 |
+| **A97** | Reporter à une équipe qui n'existe pas est plus confortable que reporter tout court | **1** | ADR-028 §2.2 |
 
 Soixante-quatre angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -483,3 +484,14 @@ pendant quatre sessions.
   qu'il n'y avait, dans trois cas sur cinq, rien à trancher — et personne ne relit une question qu'on
   a classée comme n'étant pas la sienne. C'est L03 rencontrée à un endroit nouveau : la liste des
   choses qu'on ne décide pas.
+
+**Ajouté en S19, en apprenant qu'il n'y a pas d'autres équipes**
+
+- **A97** *(sévérité 1)* — **Reporter à une équipe qui n'existe pas est plus confortable que reporter
+  tout court.** Quatorze questions ont été classées « attend une réponse d'une autre équipe » entre
+  S02 et S17. Aucune n'avait de destinataire. L'étiquette faisait deux choses à la fois : elle
+  dispensait de répondre, **et elle désignait un responsable** — ce qui est plus rassurant qu'un
+  simple report, et rend la question invisible à tout audit, y compris à celui de S11 qui cherchait
+  précisément les points ouverts périmés. C'est A78 et L61 combinés, et amplifiés par le fait qu'un
+  report **nominatif** ne se relit jamais : on ne vérifie pas qu'un tiers a répondu si l'on n'attend
+  rien de précis de lui.

@@ -50,7 +50,7 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 | ADR | Sujet | Statut | Traite |
 |---|---|---|---|
-| [020](adr/ADR-020-bibliotheque-sans-dependance-moteur.md) | Le système d'eau est une bibliothèque sans dépendance moteur | proposée — **bloquante, à acter avant la première ligne de code** | A41 |
+| [020](adr/ADR-020-bibliotheque-sans-dependance-moteur.md) | Le système d'eau est une bibliothèque sans dépendance moteur | **ACTÉE (S19)** — le blocage est levé, **H1 est écrivable** | A41 |
 
 ### Correction et amendement *(S14)*
 
@@ -58,6 +58,12 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 |---|---|---|---|
 | [025](adr/ADR-025-propriete-de-la-masse-entre-V-et-delta.md) | **La propriété de la masse ne quitte jamais la couche V** | proposée | remplace le transfert d'ADR-010 §6 ; rend I-04 vrai sans l'amender |
 | [026](adr/ADR-026-amendement-de-six-invariants.md) | Amendement de **I-01, I-02, I-03, I-10, I-13, I-16** | proposée | six des huit défauts de l'audit inverse S14 |
+
+### Nature du projet *(S19)*
+
+| ADR | Sujet | Statut | Traite |
+|---|---|---|---|
+| [028](adr/ADR-028-il-n-y-a-pas-d-autres-equipes.md) | **ADR-020 acté, et il n'y a pas d'autres équipes** | proposée | requalifie les 14 demandes extérieures · tranche les positions monde · révise ADR-027 §6 |
 
 ### Arbitrages *(S18)*
 
@@ -101,7 +107,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`specs/SPEC-004`](specs/SPEC-004-interfaces.md) | **signatures des interfaces** — solveurs, champ de fond, solides, services d'hôte, contrat de fils d'exécution |
 | [`specs/SPEC-005`](specs/SPEC-005-outillage-auteur.md) | **outillage auteur** — sources de vérité, inversion du pipeline eau/terrain, cuisson déterministe, obsolescence |
 | [`specs/SPEC-006`](specs/SPEC-006-chemin-pousse.md) | **le chemin poussé** — ce que le système *publie* : bus d'événements et `WaveEvent`, écume et aération, traversabilité, polyligne de déferlement |
-| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | 96 points, avec sévérité — dont 36 trouvés dans nos propres écrits |
+| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | 97 points, avec sévérité — dont 37 trouvés dans nos propres écrits |
 | [`registres/REVUE-CROISEE-S05.md`](registres/REVUE-CROISEE-S05.md) | **audit croisé des 20 ADR** — 12 écarts, dont 2 de gravité 1, et la liste des contrôles passés |
 | [`registres/REVUE-CROISEE-S08.md`](registres/REVUE-CROISEE-S08.md) | **audit croisé des 5 SPEC** — 10 écarts, dont 2 de gravité 1 ; l'arithmétique des fiches chiffrées revérifiée ligne à ligne |
 | [`registres/AUDIT-POINTS-OUVERTS-S11.md`](registres/AUDIT-POINTS-OUVERTS-S11.md) | **audit des 110 points ouverts** — un sur trois n'était pas dans l'état annoncé ; et le tableau **« qui attend quoi »**, bancs, équipes, arbitrages |
@@ -154,6 +160,15 @@ pas : un système écrit sans harnais ne se laisse pas instrumenter ensuite (ADR
 sont posés. Ce qui reste est du code, des mesures et des réunions.
 
 ## Ce qui attend une réponse humaine
+
+> **Requalifié en S19 ([ADR-028](adr/ADR-028-il-n-y-a-pas-d-autres-equipes.md) §2). Il n'y a pas
+> d'autres équipes** — une seule personne travaille sur ce système. Les destinataires listés
+> ci-dessous n'existent pas comme interlocuteurs, et **aucune de ces demandes ne recevra de réponse
+> par la voie prévue**. Les contraintes restent vraies ; c'est le destinataire qui manque.
+>
+> Ce qui reste réellement à l'utilisateur tient en trois lignes : **constater l'état réel du projet**
+> (il ne le sait pas non plus), **agir sur l'infrastructure** (dépôt distant), et **autoriser
+> l'ajout de code** à ce dépôt maintenant qu'ADR-020 est acté. Tout le reste est du travail.
 
 > **Le dossier de réunion est [`DOSSIER-REUNIONS.md`](DOSSIER-REUNIONS.md)** *(S17)*. Seize fiches,
 > chacune tenant seule, destinées à sortir du dépôt. Elles sont classées **par ce que la réponse
