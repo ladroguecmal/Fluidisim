@@ -718,6 +718,21 @@ pub struct Convergence {
     pub erreurs: Vec<(usize, f64)>,
     /// Plancher en dessous duquel une erreur n'est plus de la discrétisation mais de l'arrondi.
     pub plancher: f64,
+    /// D'où vient la référence. **Elle décide quel triplet retenir** — voir `ordre_final`.
+    pub reference: Reference,
+}
+
+/// La nature de la référence contre laquelle les erreurs ont été mesurées.
+///
+/// Ce n'est pas une étiquette documentaire : elle **change le triplet de grilles à retenir**, et
+/// dans un sens qui s'inverse d'un cas à l'autre. Voir `Convergence::ordre_final`.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Reference {
+    /// Solution analytique exacte. Son erreur propre est nulle.
+    Analytique,
+    /// Grille très fine. Elle porte sa **propre erreur**, et les grilles les plus fines sont donc
+    /// les plus contaminées.
+    Oracle,
 }
 
 /// Ce qu'un triplet de grilles permet de conclure — et ce qu'il ne permet pas.
@@ -770,12 +785,26 @@ impl Convergence {
             .collect()
     }
 
-    /// L'ordre à retenir : celui du triplet le plus fin, qui est le plus proche du régime
-    /// asymptotique.
+    /// L'ordre à retenir — et **le triplet à prendre dépend de la nature de la référence**.
+    ///
+    /// | Référence | Triplet retenu | Pourquoi |
+    /// |---|---|---|
+    /// | `Analytique` | **le plus fin** | l'erreur mesurée est l'erreur vraie ; le plus fin est le plus proche du régime asymptotique |
+    /// | `Oracle` | **le plus grossier** | l'oracle porte sa propre erreur, dont les grilles fines s'approchent — elles sont les plus contaminées |
+    ///
+    /// Le premier jet prenait toujours le plus fin, ce qui est juste pour C04 et **faux** pour C22 :
+    /// mesuré en S24, un ordre observé de **1,56 pour un schéma d'ordre 1**, impossible et donc
+    /// reconnaissable. La règle ne s'assouplit pas selon la référence — **elle s'inverse**.
+    ///
+    /// Le filtre de contamination appliqué en amont réduit le problème sans le supprimer : il
+    /// écarte les grilles franchement contaminées, il ne classe pas celles qui restent.
     pub fn ordre_final(&self) -> Ordre {
-        match self.erreurs.len().checked_sub(3) {
-            Some(i) => self.ordre(i),
-            None => Ordre::Indetermine,
+        if self.erreurs.len() < 3 {
+            return Ordre::Indetermine;
+        }
+        match self.reference {
+            Reference::Analytique => self.ordre(self.erreurs.len() - 3),
+            Reference::Oracle => self.ordre(0),
         }
     }
 
@@ -833,6 +862,7 @@ mod tests_convergence {
                 .map(|k| (200usize << k, e0 * 2f64.powf(-p * k as f64)))
                 .collect(),
             plancher: 1e-12,
+            reference: Reference::Analytique,
         }
     }
 
@@ -867,6 +897,7 @@ mod tests_convergence {
             grandeur: "au bruit".into(),
             erreurs: vec![(200, 7e-7), (400, 5e-7), (800, 1.2e-6), (1600, 4.8e-7)],
             plancher: 1e-5,
+            reference: Reference::Analytique,
         };
         assert_eq!(c.ordre_final(), Ordre::Plancher);
     }
@@ -878,6 +909,7 @@ mod tests_convergence {
             grandeur: "stagnante".into(),
             erreurs: vec![(200, 0.10), (400, 0.10), (800, 0.10), (1600, 0.10)],
             plancher: 1e-9,
+            reference: Reference::Analytique,
         };
         assert_eq!(c.ordre_final(), Ordre::Indetermine);
     }
@@ -893,6 +925,7 @@ mod tests_convergence {
             grandeur: "hors régime".into(),
             erreurs: vec![(200, 0.211), (400, 0.193), (800, 0.161), (1600, 0.125), (3200, 0.095)],
             plancher: 1e-9,
+            reference: Reference::Analytique,
         };
         assert_eq!(c.asymptotique(0.05), Some(false));
     }
@@ -957,21 +990,25 @@ pub fn c08_convergence_de_c04(
             grandeur: "erreur L1 relative sur h — globale".into(),
             erreurs: e_l1,
             plancher: PLANCHER,
+            reference: Reference::Analytique,
         },
         Convergence {
             grandeur: "h au droit du barrage — ponctuelle".into(),
             erreurs: e_h0,
             plancher: PLANCHER,
+            reference: Reference::Analytique,
         },
         Convergence {
             grandeur: "u au droit du barrage — ponctuelle".into(),
             erreurs: e_u0,
             plancher: PLANCHER,
+            reference: Reference::Analytique,
         },
         Convergence {
             grandeur: format!("position du front, ε = {eps:.0e} — locale"),
             erreurs: e_front,
             plancher: PLANCHER,
+            reference: Reference::Analytique,
         },
     ]
 }
@@ -1026,6 +1063,7 @@ pub fn c08_convergence_reguliere(
                     grandeur: format!("montage régulier — ORACLE INDISPONIBLE ({e:?})"),
                     erreurs: Vec::new(),
                     plancher: 1.0e-7,
+                    reference: Reference::Oracle,
                 };
             }
         }
@@ -1098,6 +1136,7 @@ pub fn c08_convergence_reguliere(
         // L'oracle porte sa propre erreur : sous 10⁻⁷ de L1 relative, on mesurerait l'oracle et non
         // le solveur. Le plancher est plus bas qu'en C04 : les grandeurs y sont mieux conditionnées.
         plancher: 1.0e-7,
+        reference: Reference::Oracle,
     }
 }
 
@@ -1379,4 +1418,54 @@ pub fn c03_dissipation_par_courant(
         }
     }
     sortie
+}
+
+#[cfg(test)]
+mod tests_reference {
+    use super::*;
+
+    /// La nature de la référence **inverse** le triplet retenu, elle ne l'assouplit pas.
+    ///
+    /// Les erreurs sont construites pour que les deux triplets donnent des ordres différents et
+    /// reconnaissables : un ordre sain sur les grilles grossières, un ordre absurde sur les fines —
+    /// exactement la signature d'une contamination par l'oracle.
+    #[test]
+    fn le_triplet_retenu_depend_de_la_reference() {
+        // Ordres par triplet : ≈1,0 puis ≈1,0 puis ≈1,58 (contaminé).
+        let erreurs = vec![
+            (100usize, 8.0e-5),
+            (200, 4.0e-5),
+            (400, 2.0e-5),
+            (800, 1.0e-5),
+            (1600, 6.0e-6),
+        ];
+        let analytique = Convergence {
+            grandeur: "analytique".into(),
+            erreurs: erreurs.clone(),
+            plancher: 1e-12,
+            reference: Reference::Analytique,
+        };
+        let oracle = Convergence {
+            grandeur: "oracle".into(),
+            erreurs,
+            plancher: 1e-12,
+            reference: Reference::Oracle,
+        };
+
+        let (a, o) = (analytique.ordre_final(), oracle.ordre_final());
+        match (a, o) {
+            (Ordre::Observe(pa), Ordre::Observe(po)) => {
+                assert!(
+                    (po - 1.0).abs() < 0.05,
+                    "avec un oracle, le triplet grossier doit donner ≈1,0 — obtenu {po}"
+                );
+                assert!(
+                    pa > 1.3,
+                    "avec une solution analytique, le triplet fin est retenu — obtenu {pa}"
+                );
+                assert!(pa != po, "les deux références ne doivent pas donner le même triplet");
+            }
+            autre => panic!("deux ordres observés attendus, obtenu {autre:?}"),
+        }
+    }
 }

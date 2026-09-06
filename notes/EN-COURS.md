@@ -95,7 +95,7 @@ compte. Si elle infirme, la loi est un ajustement et non une dérivation.
       concluant » comme verdict.
 - [x] **P3** — **amendement de C08** par note corrective datée : nommer la grandeur, exiger la
       régularité, exiger cinq grilles, distinguer trois verdicts.
-- [ ] **P4** — **S24-4** : `ordre_final()` reçoit la nature de la référence. Le triplet le plus fin
+- [x] **P4** — **S24-4** : `ordre_final()` reçoit la nature de la référence. Le triplet le plus fin
       est le meilleur avec une solution analytique et le pire avec un oracle ; la fonction choisit
       aujourd'hui sans le savoir.
 - [ ] **P5** — **S25-4** : dériver le facteur exact pour l'harmonique `n`, puis le mesurer. Note
