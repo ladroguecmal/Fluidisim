@@ -11,8 +11,9 @@ Historique : 28 recensés en S01, 12 ajoutés en S02 (phénomènes secondaires),
 de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outillage auteur),
 6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance),
 3 en S11 (audit des points ouverts), 3 en S12 (mécanismes de détail), 3 en S13 (revue croisée des
-documents récents) — **86 au total**. **Vingt-six ont été trouvés dans nos propres écrits**, pas dans
-les documents sources : A49, A56, A57, A58, puis A65 à A86. La proportion
+documents récents), 3 en S14 (audit inverse des invariants) — **89 au total**. **Vingt-neuf ont été
+trouvés dans nos propres écrits**, pas dans les documents sources : A49, A56, A57, A58, puis A65 à
+A89. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -108,6 +109,9 @@ ce que les sources avaient omis.
 | **A84** | Un invariant ne s'audite jamais : il n'est ni une affirmation datée ni une absence | **1** | ADR-024 §4, écarts E01 et E07 |
 | **A85** | Aucune taille de structure du corpus n'avait jamais été vérifiée | 3 | REVUE-CROISEE-S13, écart E04 |
 | **A86** | Deux échelles de rangs de dégradation portent les mêmes numéros | 2 | SPEC-006 §7, écart E02 |
+| **A87** | Un invariant qui nomme un mécanisme vieillit avec lui | **1** | ADR-026 §1, audit S14 |
+| **A88** | La masse d'un nœud V était transférée à un solveur jamais déterministe | **1** | ADR-025, audit S14 |
+| **A89** | Une action inscrite dans une table « Suite » d'audit n'est pas plus exécutée qu'un point ouvert | 2 | AUDIT-INVARIANTS-S14, I-16 |
 
 Soixante-quatre angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -366,3 +370,26 @@ pendant quatre sessions.
   qui se citent, et une règle écrite pour l'une se lit sans difficulté dans l'autre — avec un
   contresens complet. Vaut pour toute numérotation ordinale reprise d'un document à l'autre :
   préfixer coûte un caractère.
+
+**Ajoutés en S14, en auditant les invariants contre leurs ADR sources**
+
+- **A87** *(sévérité 1)* — **Un invariant qui nomme un mécanisme vieillit avec lui.** Dix invariants
+  sur dix-sept ne disaient plus ce que leur source dit, et le partage est net : ceux qui tiennent sont
+  ceux qu'une **signature rend mécaniques** (I-07, `g_eff` injecté dans `configure` ; I-08, aucun type
+  n'exprimant une coordonnée monde) ou ceux qui servent à **décider** plutôt qu'à refuser (I-09,
+  I-15). Ceux qui ont vieilli **nomment un mécanisme** : I-01 nommait une fonction, I-11 un
+  plafonnement, I-16 une catégorie de valeur. C'est une règle d'écriture, pas seulement un constat —
+  et elle est de sévérité 1 parce qu'un invariant faux fait refuser ce qu'il fallait accepter, ou
+  rétablir ce qu'une décision avait supprimé.
+- **A88** *(sévérité 1)* — **La masse d'un nœud V était transférée à un solveur qui n'est jamais
+  déterministe.** ADR-010 §6 « remettait » la masse d'un compartiment au domaine δ pendant tout un
+  épisode d'inondation : le volume qui décide d'un chavirement était donc produit par δ, que I-04
+  interdit comme source d'issue de jeu. Et le serveur, qui exécute V et jamais δ, ne pouvait ni geler
+  le nœud ni recevoir la masse en retour — il n'avait aucune histoire. Le défaut a survécu treize
+  sessions parce qu'ADR-010 ne cite pas I-04 et qu'I-04 ne cite pas ADR-010 : **les revues croisées
+  confrontent des documents qui se citent.**
+- **A89** — Une action inscrite dans la table « Suite » d'un registre d'audit **n'est pas plus
+  exécutée** qu'un point ouvert n'est relu. S11 avait décidé de préciser le critère d'I-16 dans
+  `01_INVARIANTS.md`, l'avait inscrit, et ne l'avait pas fait : la note était partie dans l'ADR
+  corrigé, pas dans l'invariant annoncé. C'est la classe A78 appliquée aux décisions d'audit
+  elles-mêmes.
