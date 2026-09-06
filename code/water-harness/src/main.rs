@@ -289,6 +289,15 @@ fn executer_physics_solveur() -> usize {
         println!("  {nu:>5.2}   {mes:>10.2}   {pred:>10.2}   {ecart:>6.2} %");
     }
 
+    println!("  harmoniques à nx = 400, ν = 0,45 — la loi prédit /n en périodes propres, /n² en secondes");
+    println!("   mode   demi-vie (périodes)  prédite    demi-vie (s)   prédite    écart");
+    for (n, dv_p, pr_p, dv_s, pr_s) in
+        physics::c03_dissipation_par_harmonique(&mut host, 400, &[1, 2, 3, 4])
+    {
+        let ecart = if pr_s > 0.0 { (dv_s - pr_s) / pr_s * 100.0 } else { 0.0 };
+        println!("   {n:>4}   {dv_p:>17.2}  {pr_p:>7.2}   {dv_s:>11.2}   {pr_s:>7.2}   {ecart:>6.2} %");
+    }
+
     // C08 — la convergence sous raffinement. Rapportée à part : ce n'est pas une assertion de plus
     // sur une exécution, c'est une propriété d'une **famille** d'exécutions.
     println!("

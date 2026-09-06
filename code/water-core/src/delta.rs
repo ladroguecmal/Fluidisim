@@ -91,7 +91,13 @@ pub enum EtatInitial {
     Seiche {
         amplitude_m: f32,
         longueur_m: f32,
-        mode_propre: bool,
+        /// `0` = rampe linéaire (l'énoncé de C03) ; `n ≥ 1` = mode propre `cos(nπx/L)`.
+        ///
+        /// Le mode `n` a pour longueur d'onde `λ_n = 2L/n` : à `dx` fixé, il est donc résolu par
+        /// `n` fois moins de points, et la loi de dissipation prédit qu'il s'éteint `n` fois plus
+        /// vite **en nombre de ses propres périodes** — donc `n²` fois plus vite en secondes,
+        /// puisque sa période est elle aussi divisée par `n`.
+        mode: u32,
     },
     /// Bosse gaussienne de faible amplitude sur une nappe au repos, vitesse nulle.
     ///
@@ -201,7 +207,7 @@ impl Bassin {
             etat_initial: EtatInitial::Seiche {
                 amplitude_m: 0.02,
                 longueur_m: 20.0,
-                mode_propre,
+                mode: if mode_propre { 1 } else { 0 },
             },
         }
     }
@@ -305,14 +311,14 @@ impl Delta1D {
                 EtatInitial::Seiche {
                     amplitude_m,
                     longueur_m,
-                    mode_propre,
+                    mode,
                 } => {
                     let base = (bassin.eta0_m - b[i]).max(0.0);
                     let xi = ((x - bassin.origine_m) / longueur_m).clamp(0.0, 1.0);
-                    let eta = if mode_propre {
-                        amplitude_m * (core::f32::consts::PI * xi).cos()
-                    } else {
+                    let eta = if mode == 0 {
                         amplitude_m * (1.0 - 2.0 * xi)
+                    } else {
+                        amplitude_m * (mode as f32 * core::f32::consts::PI * xi).cos()
                     };
                     (base + eta).max(0.0)
                 }

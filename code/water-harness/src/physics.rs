@@ -1374,7 +1374,7 @@ pub fn c03_dissipation_par_resolution(
             etat_initial: EtatInitial::Seiche {
                 amplitude_m: 0.02,
                 longueur_m: 20.0,
-                mode_propre: true,
+                mode: 1,
             },
             ..Bassin::c03(true)
         };
@@ -1468,4 +1468,68 @@ mod tests_reference {
             autre => panic!("deux ordres observés attendus, obtenu {autre:?}"),
         }
     }
+}
+
+/// Mise à l'épreuve de la loi de dissipation sur les **harmoniques** — S26, action S25-4.
+///
+/// # Pourquoi cette mesure et pas une de plus sur la résolution
+///
+/// La loi `demi-vie = ln2·N/(2π²(1−ν))` a été établie en S25 sur deux balayages — la résolution et
+/// le nombre de Courant — et vérifiée sur eux. **Une loi ajustée sur ses propres données n'est pas
+/// testée.** Elle fait pourtant une prédiction qu'aucune mesure de S25 n'a explorée.
+///
+/// Le mode `n` d'un bassin clos a pour longueur d'onde `λ_n = 2L/n`. À `dx` fixé, il est donc
+/// résolu par `N_n = N₁/n` points, et sa période vaut `T_n = T₁/n`. Les deux effets se composent :
+///
+/// ```text
+/// demi-vie en périodes propres  =  ln2·N₁ / (n · 2π²(1−ν))   →  divisée par n
+/// demi-vie en secondes          =  ci-dessus × T₁/n          →  divisée par n²
+/// ```
+///
+/// **C'est le `n²` qui rend la prédiction non triviale** : il ne se lit pas dans la formule, il
+/// sort de la composition. Une loi qui le retrouve a été dérivée ; une loi qui le manque était un
+/// ajustement.
+pub fn c03_dissipation_par_harmonique(
+    host: &mut water_core::HostServices,
+    nx: usize,
+    modes: &[u32],
+) -> Vec<(u32, f64, f64, f64, f64)> {
+    use water_core::{Bassin, EtatInitial};
+
+    let (l, h) = (20.0f64, 2.0f64);
+    let c = (G * h).sqrt();
+    let t1 = 2.0 * l / c;
+    let nu = 0.45f64;
+    let mut sortie = Vec::new();
+
+    for &n in modes {
+        let bassin = Bassin {
+            nx,
+            etat_initial: EtatInitial::Seiche {
+                amplitude_m: 0.02,
+                longueur_m: 20.0,
+                mode: n,
+            },
+            ..Bassin::c03(true)
+        };
+        let lambda_n = 2.0 * l / n as f64;
+        let t_n = lambda_n / c;
+        let n_pts = lambda_n / (l / nx as f64);
+        let predite_periodes = core::f64::consts::LN_2 * n_pts
+            / (2.0 * core::f64::consts::PI.powi(2) * (1.0 - nu));
+
+        // 20 périodes **propres** du mode : chaque mode est observé sur la même durée relative.
+        match mesurer_seiche(host, bassin, 20.0 * t_n) {
+            Some(s) => sortie.push((
+                n,
+                s.demi_vie_periodes,
+                predite_periodes,
+                s.demi_vie_periodes * s.periode_s,
+                predite_periodes * t_n,
+            )),
+            None => sortie.push((n, 0.0, predite_periodes, 0.0, predite_periodes * t_n)),
+        }
+        let _ = t1;
+    }
+    sortie
 }

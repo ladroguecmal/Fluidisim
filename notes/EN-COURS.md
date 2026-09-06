@@ -98,7 +98,7 @@ compte. Si elle infirme, la loi est un ajustement et non une dérivation.
 - [x] **P4** — **S24-4** : `ordre_final()` reçoit la nature de la référence. Le triplet le plus fin
       est le meilleur avec une solution analytique et le pire avec un oracle ; la fonction choisit
       aujourd'hui sans le savoir.
-- [ ] **P5** — **S25-4** : dériver le facteur exact pour l'harmonique `n`, puis le mesurer. Note
+- [x] **P5** — **S25-4** : dériver le facteur exact pour l'harmonique `n`, puis le mesurer. Note
       corrective sur ADR-033 §5.3 si l'énoncé y est ambigu ou faux.
 - [ ] **P6** — ce que la mise à l'épreuve a donné : ADR-034 si elle change une décision, note datée
       sinon.
@@ -117,3 +117,42 @@ compte. Si elle infirme, la loi est un ajustement et non une dérivation.
   régressions.
 
 **Branche.** `claude/s22-suite`. `master` s'arrête à S17 (A107). Vérifié à l'ouverture de S26.
+
+#### P5 — la loi passe une prédiction qu'elle n'a pas servi à produire
+
+**La thèse était juste, et l'énoncé d'ADR-033 §5.3 était faux dans sa lecture naturelle.** Il
+annonçait « l'harmonique `n` s'amortit `n` fois plus vite », sans dire en quoi. La dérivation :
+
+```
+mode n :  λ_n = 2L/n   ⇒   N_n = N₁/n        et        T_n = T₁/n
+demi-vie en périodes propres = ln2·N₁ / (n·2π²(1−ν))       →  divisée par n
+demi-vie en secondes         = ci-dessus × T₁/n            →  divisée par n²
+```
+
+**Le `n²` ne se lit pas dans la formule** — il sort de la composition de deux effets. C'est ce qui
+fait de cette mesure un test et non une répétition.
+
+**Mesuré**, à `nx = 400`, `ν = 0,45`, chaque mode observé sur 20 de ses propres périodes :
+
+| mode | demi-vie (périodes propres) | prédite | demi-vie (s) | prédite | écart |
+|---|---|---|---|---|---|
+| 1 | 48,65 | 51,08 | 439,33 | 461,25 | −4,75 % |
+| 2 | 24,41 | 25,54 | 110,23 | 115,31 | −4,40 % |
+| 3 | 16,50 | 17,03 | 49,66 | 51,25 | −3,11 % |
+| 4 | 12,49 | 12,77 | 28,19 | 28,83 | −2,21 % |
+
+**Rapports mesurés** : en périodes propres **1,99 · 2,95 · 3,90** pour 2 · 3 · 4 attendus ; en
+secondes **3,99 · 8,85 · 15,59** pour 4 · 9 · 16.
+
+> **La loi est dérivée, pas ajustée.** Elle retrouve un exposant qu'aucune des mesures ayant servi à
+> l'établir ne contenait.
+
+**Le biais résiduel, et son explication probable.** Les quatre écarts sont **du même signe** — le
+solveur dissipe un peu plus que la loi, ce qui est attendu des termes d'ordre supérieur négligés —
+mais ils **décroissent** avec `n`, alors qu'une erreur de troncature ferait l'inverse. L'explication
+n'est pas physique : à `n = 1`, la demi-vie vaut 48,65 périodes et la fenêtre d'observation 20 —
+l'ajustement exponentiel ne voit qu'un quart de la décroissance. À `n = 4`, il en voit une période
+et demie. **C'est la fenêtre qui est courte, pas la loi qui dérive**, et c'est le même mécanisme
+qu'A102, où une fenêtre trop brève avait faussé une restitution de `Hs` de 8,5 %.
+
+**Note corrective portée dans ADR-033 §5.3** — un ADR n'est jamais réécrit.

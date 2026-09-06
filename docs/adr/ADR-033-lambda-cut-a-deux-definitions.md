@@ -154,5 +154,12 @@ c'est un arbitrage de conception, pas un détail de réglage.
 3. **Aucune mesure n'a été faite sur un mode non fondamental.** La rampe de l'énoncé en excite, et
    l'écart de demi-vie entre rampe et mode propre — 20,7 contre 24,4 — le montre. La loi prédit que
    l'harmonique `n` s'amortit `n` fois plus vite ; ce n'est pas vérifié.
+
+   > **Note corrective S26.** *Cet énoncé était ambigu, et faux dans la lecture la plus naturelle.*
+   > « `n` fois plus vite » ne vaut qu'en **périodes propres de l'harmonique**. En **secondes**, le
+   > facteur est **`n²`** : le mode `n` a `N_n = N₁/n` points par longueur d'onde *et* une période
+   > `T_n = T₁/n`, et les deux effets se composent. Mesuré en S26 à `nx = 400`, `ν = 0,45` — rapports
+   > de demi-vie en secondes : **3,99 · 8,85 · 15,59** pour 4 · 9 · 16 attendus. Le point est clos
+   > par cette mesure ; voir [`ADR-034`](ADR-034-la-dissipation-est-un-filtre-passe-bas.md).
 4. **`λ_cut` dispersif reste bloqué** sur l'absence de couche dispersive (ADR-030 §5). La décision
    du §3 ne le débloque pas : elle établit que l'autre moitié de la question, elle, est ouverte.
