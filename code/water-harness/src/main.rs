@@ -196,7 +196,11 @@ fn executer_physics(sc: &Scenario, bg: &Background, t: SimTime) -> usize {
 /// la boucle des scénarios le referait à l'identique une fois par fichier, et trois lignes de
 /// rapport identiques se lisent comme trois vérifications. Il est donc exécuté **une fois**.
 fn executer_physics_solveur() -> usize {
-    let mut alloc = ArenaAllocator::with_capacity(1 << 20);
+    // 64 Mo. Le mode `physics` instancie une vingtaine de solveurs, dont un oracle à 51 200
+    // cellules ; l'arène ne libère rien avant `seal()` et cumule donc tout. Dimensionnée à 1 Mo, la
+    // première version épuisait l'arène en silence — voir la note sur `Err` ci-dessous. Ce budget
+    // n'est pas celui du jeu : il est celui d'un harnais, où l'oracle est délibérément coûteux.
+    let mut alloc = ArenaAllocator::with_capacity(64 << 20);
     let jobs = SequentialJobs;
     let sink = StderrSink;
     let mut host = HostServices {
@@ -310,6 +314,42 @@ fn executer_physics_solveur() -> usize {
         };
         println!("    → {verdict}");
     }
+    // Le même contrôle, sur un montage **régulier** : c'est lui qui dit si l'ordre réduit mesuré
+    // sur C04 vient du schéma ou de la solution.
+    {
+        let c = physics::c08_convergence_reguliere(&mut host, 1.0, &[100, 200, 400, 800, 1600, 3200], 51200);
+        total_c08 += 1;
+        println!("  {}", c.grandeur);
+        print!("    erreurs :");
+        for (nx, e) in &c.erreurs {
+            print!("  nx={nx}: {e:.3e}");
+        }
+        println!();
+        print!("    ordres  :");
+        for (nx, o) in c.ordres() {
+            match o {
+                physics::Ordre::Observe(p) => print!("  [{nx}…]: {p:+.3}"),
+                physics::Ordre::Plancher => print!("  [{nx}…]: plancher"),
+                physics::Ordre::Indetermine => print!("  [{nx}…]: —"),
+            }
+        }
+        println!();
+        match (c.ordre_final(), c.asymptotique(0.10)) {
+            (physics::Ordre::Observe(p), Some(true)) if p > 0.8 => {
+                println!("    → OK        p = {p:.2}, stabilisé")
+            }
+            (physics::Ordre::Observe(p), Some(false)) => {
+                non_concluants += 1;
+                println!("    → NON CONCLUANT  p = {p:.2}, l'ordre bouge encore")
+            }
+            (physics::Ordre::Observe(p), _) if p <= 0.8 => {
+                echecs += 1;
+                println!("    → ÉCHEC     p = {p:.2} ≤ 0,8")
+            }
+            (o, a) => println!("    → {o:?} / asymptotique {a:?}"),
+        }
+    }
+
     // Un « non concluant » n'est pas un échec, et ne doit pas non plus se lire comme un succès.
     // Le décompte est imprimé pour qu'un rapport sans échec ne se lise jamais comme une validation.
     if non_concluants > 0 {

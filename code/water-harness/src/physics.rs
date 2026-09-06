@@ -976,3 +976,128 @@ pub fn c08_convergence_de_c04(
         },
     ]
 }
+
+/// C08 sur un montage **régulier**, avec l'oracle pour référence — ADR-032.
+///
+/// # Ce que ce cas mesure et que la version sur C04 ne peut pas mesurer
+///
+/// Un ordre de convergence n'est défini que si la solution est assez régulière pour qu'un
+/// développement de Taylor ait un sens. C04 ne l'est pas : son front est une singularité, et la
+/// dérivée de sa solution est discontinue. Mesurer un ordre dessus donne un nombre — 0,73 à 0,80 —
+/// qui n'est l'ordre de rien.
+///
+/// Ici, une bosse gaussienne de 1 cm sur 1 m d'eau : lisse partout, régime linéaire, ni front ni
+/// séchage. Si le solveur y donne `p ≈ 1` stabilisé, alors l'ordre réduit mesuré sur C04 vient de
+/// la **solution**, pas du schéma — et c'est une propriété du cas, pas du candidat.
+///
+/// # L'oracle, et la comparaison entre grilles
+///
+/// Il n'y a pas de solution analytique. La référence est la grille la plus fine, et la comparaison
+/// se fait par **moyenne conservative** : chaque cellule grossière est comparée à la moyenne des
+/// `k` cellules fines qu'elle contient. Les grilles étant emboîtées par doublement, cette moyenne
+/// est exacte et n'introduit aucune interpolation.
+pub fn c08_convergence_reguliere(
+    host: &mut water_core::HostServices,
+    t_s: f64,
+    grilles: &[usize],
+    nx_oracle: usize,
+) -> Convergence {
+    use water_core::{Bassin, Delta1D};
+
+    let mut oracle_h: Vec<f64> = Vec::new();
+    {
+        let b = Bassin {
+            nx: nx_oracle,
+            ..Bassin::c08_regulier()
+        };
+        // Une allocation refusée **ne se traite pas par `continue`**. Le premier jet de cette
+        // fonction absorbait l'erreur, et le rapport affichait « 0 grille retenue » sans dire
+        // pourquoi : l'arène était pleine. Un harnais qui avale une erreur d'hôte publie un
+        // résultat vide qui a l'air d'un résultat.
+        match Delta1D::configure(host, b) {
+            Ok(mut d) => {
+                d.avancer_equilibre(t_s);
+                oracle_h = (0..d.nx()).map(|i| d.h(i) as f64).collect();
+            }
+            Err(e) => {
+                host.sink.warn(&format!(
+                    "C08 : l'oracle à {nx_oracle} cellules n'a pas pu être alloué ({e:?})"
+                ));
+                return Convergence {
+                    grandeur: format!("montage régulier — ORACLE INDISPONIBLE ({e:?})"),
+                    erreurs: Vec::new(),
+                    plancher: 1.0e-7,
+                };
+            }
+        }
+    }
+
+    let mut erreurs = Vec::new();
+    for &nx in grilles {
+        if nx_oracle % nx != 0 || oracle_h.is_empty() {
+            continue;
+        }
+        let k = nx_oracle / nx;
+        let b = Bassin {
+            nx,
+            ..Bassin::c08_regulier()
+        };
+        let mut d = match Delta1D::configure(host, b) {
+            Ok(d) => d,
+            Err(e) => {
+                host.sink
+                    .warn(&format!("C08 : grille {nx} non allouée ({e:?}), écartée"));
+                continue;
+            }
+        };
+        d.avancer_equilibre(t_s);
+
+        let (mut num, mut den) = (0.0f64, 0.0f64);
+        for i in 0..d.nx() {
+            let moyenne: f64 = oracle_h[i * k..(i + 1) * k].iter().sum::<f64>() / k as f64;
+            num += (d.h(i) as f64 - moyenne).abs();
+            den += moyenne;
+        }
+        erreurs.push((nx, num / den));
+    }
+
+    // ------------------------------------------------------------------------------------------
+    // Écarter les grilles **contaminées par l'oracle**.
+    //
+    // L'oracle n'est pas la solution : il porte sa propre erreur. Quand l'erreur d'une grille
+    // testée s'en approche, les deux se soustraient partiellement et l'ordre observé s'envole —
+    // mesuré ici : **1,56 pour un schéma d'ordre 1**, ce qui est impossible et donc reconnaissable.
+    //
+    // L'erreur de l'oracle s'estime par la loi qu'on vient de mesurer sur les grilles saines :
+    // `e_oracle ≈ e(nx_max) / (nx_oracle/nx_max)^p`. Une grille est conservée si son erreur vaut au
+    // moins **dix fois** cette estimation — seuil dérivé et non conventionnel : à un rapport de 10,
+    // la contamination de l'ordre est majorée par `log₂(1,1) ≈ 0,14`, soit moins que la tolérance
+    // d'asymptoticité elle-même.
+    //
+    // **La conséquence est contre-intuitive et vaut d'être dite** : avec un oracle, le triplet le
+    // plus fin est le **moins** fiable, alors qu'avec une solution analytique c'est le plus fiable.
+    let mut retenues = erreurs.clone();
+    if erreurs.len() >= 3 {
+        let p_grossier = {
+            let (e0, e1, e2) = (erreurs[0].1, erreurs[1].1, erreurs[2].1);
+            let (d0, d1) = ((e0 - e1).abs(), (e1 - e2).abs());
+            if d1 > 0.0 { (d0 / d1).log2() } else { 1.0 }
+        }
+        .clamp(0.3, 3.0);
+        let (nx_max, e_max) = *erreurs.last().unwrap();
+        let e_oracle = e_max / (nx_oracle as f64 / nx_max as f64).powf(p_grossier);
+        retenues.retain(|(_, e)| *e >= 30.0 * e_oracle);
+    }
+
+    Convergence {
+        grandeur: format!(
+            "erreur L1 relative sur h — montage régulier, oracle nx={nx_oracle} ({} grille(s) retenue(s) sur {})",
+            retenues.len(),
+            erreurs.len()
+        ),
+        erreurs: retenues,
+        // L'oracle porte sa propre erreur : sous 10⁻⁷ de L1 relative, on mesurerait l'oracle et non
+        // le solveur. Le plancher est plus bas qu'en C04 : les grandeurs y sont mieux conditionnées.
+        plancher: 1.0e-7,
+    }
+}

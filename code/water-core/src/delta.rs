@@ -74,6 +74,16 @@ pub enum EtatInitial {
         h_droite_m: f32,
         x_m: f32,
     },
+    /// Bosse gaussienne de faible amplitude sur une nappe au repos, vitesse nulle.
+    ///
+    /// Sa raison d'être est d'être **régulière** : indéfiniment dérivable, sans front ni
+    /// discontinuité, et d'amplitude assez faible pour rester dans le régime linéaire. C'est la
+    /// condition pour qu'un ordre de convergence théorique existe — voir ADR-032.
+    Bosse {
+        amplitude_m: f32,
+        sigma_m: f32,
+        x_m: f32,
+    },
 }
 
 /// Géométrie et état initial d'un bassin 1D.
@@ -144,6 +154,36 @@ impl Bassin {
     }
 }
 
+impl Bassin {
+    /// Montage régulier pour C08 — bosse gaussienne de 1 cm sur 1 m d'eau, fond plat.
+    ///
+    /// # Pourquoi ce montage existe
+    ///
+    /// C08 mesure un **ordre de convergence**, et un ordre n'est défini que si la solution est
+    /// assez régulière pour qu'un développement de Taylor ait un sens. Les trois cas que l'énoncé
+    /// désigne — C02, C04, C09 — n'en font pas partie : C04 a un front, C09 une perturbation
+    /// relâchée. Ce montage-ci est lisse partout et reste dans le régime linéaire
+    /// (`a/h₀ = 1 %`) : il n'y a ni déferlement, ni séchage, ni discontinuité.
+    ///
+    /// Il n'a pas de solution analytique — c'est l'oracle qui sert de référence, ce que C08 prévoit
+    /// explicitement (SPEC-003 §5.1).
+    pub const fn c08_regulier() -> Bassin {
+        Bassin {
+            longueur_m: 40.0,
+            origine_m: -20.0,
+            nx: 400,
+            profondeur_gauche_m: 1.0,
+            pente: 0.0,
+            eta0_m: 0.0,
+            etat_initial: EtatInitial::Bosse {
+                amplitude_m: 0.01,
+                sigma_m: 1.0,
+                x_m: 0.0,
+            },
+        }
+    }
+}
+
 /// Solveur δ 1D. Les tableaux portent deux cellules fantômes, une à chaque bord.
 pub struct Delta1D {
     nx: usize,
@@ -208,6 +248,15 @@ impl Delta1D {
                     } else {
                         h_droite_m
                     }
+                }
+                EtatInitial::Bosse {
+                    amplitude_m,
+                    sigma_m,
+                    x_m,
+                } => {
+                    let d = (x - x_m) / sigma_m;
+                    let base = (bassin.eta0_m - b[i]).max(0.0);
+                    base + amplitude_m * (-0.5 * d * d).exp()
                 }
             };
         }

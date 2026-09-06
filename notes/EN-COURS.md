@@ -88,7 +88,7 @@ produit plusieurs, et l'assertion `p > 0,8` n'a pas le même sens selon celle qu
 - [x] **P3** — appliquer à C04 sur quatre grandeurs : erreur L1, `h(0)`, `u(0)`, front.
 - [x] **P4** — exécuter, constater, et **balayer les triplets de grilles** : si `p` dépend du
       triplet, le rapporter comme tel plutôt que d'en publier un.
-- [ ] **P5** — **S23-2** : dériver le seuil `ε` du front au lieu de le conventionner. Piste : le
+- [x] **P5** — *(remplacée en séance)* **le cas régulier avec oracle**. S23-2 (dériver le seuil ε) est reportée : la mesure ci-dessous a montré qu'elle n'était pas le point bloquant. ~~**S23-2**~~ : dériver le seuil `ε` du front au lieu de le conventionner. Piste : le
       bon seuil est celui pour lequel l'ordre observé du front rejoint celui de la norme globale —
       en dessous, la mesure est dominée par la queue du profil. À vérifier, pas à supposer.
 - [ ] **P6** — ADR-032 si la conclusion engage le protocole des bancs, note datée sinon.
@@ -146,3 +146,59 @@ grilles, de 200 à 3200 cellules, **C08 ne peut rien conclure**. L'énoncé, lui
 du front n'est pas seulement non stabilisé, il est **négatif** sur les grilles grossières. Le chiffre
 de ×3·10⁵ reste une extrapolation, et l'action S23-1 se conclut par un « non » : cinq grilles ne
 suffisent pas.
+
+#### P5 — l'ordre réduit vient de la solution, pas du schéma. Et l'oracle a un prix caché.
+
+**L'étape déclarée était « dériver le seuil ε ». Elle a été remplacée en séance** par une mesure plus
+urgente : P4 venait de montrer que *toutes* les grandeurs de C04 convergent à ~0,75, y compris la
+norme globale. La question n'était donc plus le seuil du front, mais **si le solveur converge tout
+court**. S23-2 est reportée, et la raison est écrite ici plutôt que perdue.
+
+**Le montage.** Une bosse gaussienne de 1 cm sur 1 m d'eau, fond plat, domaine de 40 m, 1 s. Lisse
+partout, régime linéaire (`a/h₀ = 1 %`), ni front ni séchage. Pas de solution analytique : la
+référence est l'**oracle**, la grille la plus fine, comparée par **moyenne conservative** — chaque
+cellule grossière contre la moyenne des `k` cellules fines qu'elle contient, exacte puisque les
+grilles sont emboîtées.
+
+**Résultat.** Ordres observés : **+0,819 · +0,978** avant contamination. Le solveur est bien d'ordre
+≈ 1 sur une solution régulière.
+
+> **La conclusion tombe : l'ordre réduit mesuré sur C04 — 0,73 à 0,80, et 0,24 au front — vient de
+> la *solution*, pas du schéma.** Un schéma d'ordre 1 sur une solution à dérivée discontinue
+> converge à un ordre réduit ; c'est un résultat classique, et c'est une propriété du **couple**
+> (solveur, cas), pas du candidat. Aucun des trois cas que C08 désigne — C02, C04, C09 — n'est
+> régulier.
+
+**Le prix caché de l'oracle, et il est plus intéressant que le résultat.**
+
+L'oracle n'est pas la solution : il porte sa propre erreur. Quand l'erreur d'une grille testée s'en
+approche, les deux se soustraient et l'ordre observé **s'envole**. Mesuré, en affinant l'oracle :
+
+```
+oracle nx=12800  → ordres +0,889 · +0,945 · +1,087
+oracle nx=25600  → ordres +0,890 · +1,058 · +1,559   ← 1,56 pour un schéma d'ordre 1
+oracle nx=51200, filtre ×10  → +0,819 · +0,978 · +1,313
+oracle nx=51200, filtre ×30  → +0,819                 ← trois grilles saines seulement
+```
+
+**Affiner l'oracle a rendu le résultat *pire*** — parce que les grilles fines, elles, ne bougeaient
+pas. Le filtre écarte les grilles dont l'erreur vaut moins de trente fois l'erreur estimée de
+l'oracle (seuil dérivé : à ×30, la contamination de l'ordre est majorée par 0,09).
+
+> **Avec un oracle, le triplet le plus fin est le *moins* fiable** — alors qu'avec une solution
+> analytique c'est le plus fiable. Ma fonction `ordre_final()` prend le triplet le plus fin : c'est
+> juste pour C04, faux pour le cas régulier. **La règle dépend de la nature de la référence**, et
+> rien dans SPEC-003 §5.1 ne le dit.
+
+**Et les deux exigences se contredisent.** Pour conclure, C08 a besoin de grilles assez fines pour
+être asymptotiques **et** assez grossières pour ne pas être contaminées. La fenêtre est étroite : il
+faut `nx_oracle ≥ 30·nx_max` et `nx_max ≥ 16·nx_min` pour cinq grilles, soit un oracle à
+**480 fois** la grille la plus grossière. **L'oracle est le poste dominant du banc**, et « l'oracle
+lent » de SPEC-003 §5.1 ne dit pas à quel point.
+
+**Deux défauts trouvés au passage.**
+
+1. **L'arène du mode `physics` était dimensionnée à 1 Mo** et l'oracle à 51 200 cellules l'épuisait.
+2. **L'échec d'allocation était absorbé par un `Err(_) => continue`.** Le rapport affichait
+   « 0 grille retenue sur 0 » — un résultat vide qui a l'air d'un résultat. Corrigé : l'erreur
+   remonte au `Sink` et le cas se déclare indisponible au lieu de se déclarer vide.
