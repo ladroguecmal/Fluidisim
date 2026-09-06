@@ -52,7 +52,6 @@ impl Cas {
 /// Imprimé à chaque exécution : un rapport vert ne doit jamais se lire comme une couverture.
 pub fn cas_en_attente() -> &'static [(&'static str, &'static str, &'static str)] {
     &[
-        ("C01", "Repos hydrostatique sur pente", "attend δ"),
         ("C03", "Seiche en bassin clos", "attend δ ou W"),
         ("C04", "Rupture de barrage (Ritter)", "attend δ"),
         ("C05", "Absorption à la frontière", "attend δ"),
@@ -459,6 +458,79 @@ pub fn c10_cube_flottant(bg: &Background, t: SimTime) -> Vec<Cas> {
             reference: core::f64::consts::TAU * (cube.rho * cube.cote_m / (RHO_EAU * G)).sqrt(),
             tolerance_rel: 0.05,
             source: "CAS-CANONIQUES C10 — T = 2π·√(ρ_corps·H/(ρ_eau·g)), sans masse ajoutée",
+        },
+    ]
+}
+
+// ---------------------------------------------------------------------------------------------
+// C01 — repos hydrostatique sur fond en pente
+// ---------------------------------------------------------------------------------------------
+
+/// C01 — `CAS-CANONIQUES` §C01. Bassin de 40 m, fond en pente 1:20, eau au repos, 60 s.
+///
+/// # Pourquoi ce cas est le premier écrit
+///
+/// Sa référence est la plus forte qu'une validation puisse avoir : **`u ≡ 0` exactement**. Elle ne
+/// vient d'aucun calcul, d'aucune calibration et d'aucun paramètre — elle vient de ce que l'eau
+/// immobile sur un fond immobile n'a aucune raison de bouger. Rien de ce que le solveur fait ne
+/// peut l'influencer.
+///
+/// # Ce que le cas mesure
+///
+/// Trois grandeurs, prises **dans le champ** après 60 s de temps simulé :
+///
+/// - `max|u|`, contre `0`, tolérance **1 mm/s** ;
+/// - `max|η − η₀|`, contre `0`, tolérance **1 mm** ;
+/// - le volume, contre les **80 m²** par unité de largeur que la géométrie impose — profondeur
+///   moyenne de 2 m sur 40 m de long. Un solveur peut être au repos et fuir ; la troisième mesure
+///   sépare les deux défauts.
+///
+/// Le troisième cas n'est pas dans l'énoncé de `CAS-CANONIQUES`. Il y est ajouté ici parce qu'il
+/// coûte une ligne et qu'il distingue deux causes que les deux premiers confondraient.
+pub fn c01_repos_sur_pente(host: &mut water_core::HostServices, duree_s: f64) -> Vec<Cas> {
+    use water_core::{Bassin, Delta1D};
+
+    let bassin = Bassin::c01();
+    let mut d = match Delta1D::configure(host, bassin) {
+        Ok(d) => d,
+        Err(e) => {
+            return vec![Cas {
+                id: "C01",
+                grandeur: format!("configuration du solveur δ ({e:?})"),
+                mesure: 1.0,
+                reference: 0.0,
+                tolerance_rel: 0.0,
+                source: "delta.rs — l'allocation doit précéder seal(), I-06",
+            }]
+        }
+    };
+
+    let pas = d.avancer_naif(duree_s);
+
+    vec![
+        Cas {
+            id: "C01",
+            grandeur: format!("max|u| après {duree_s:.0} s, m/s ({pas} pas)"),
+            mesure: d.max_abs_u(),
+            reference: 0.0,
+            tolerance_rel: 1.0e-3,
+            source: "CAS-CANONIQUES §C01 — l'eau au repos reste au repos, u ≡ 0",
+        },
+        Cas {
+            id: "C01",
+            grandeur: "max|η − η₀|, m".to_string(),
+            mesure: d.max_ecart_eta(),
+            reference: 0.0,
+            tolerance_rel: 1.0e-3,
+            source: "CAS-CANONIQUES §C01 — la surface libre ne bouge pas",
+        },
+        Cas {
+            id: "C01",
+            grandeur: "volume conservé, m² par unité de largeur".to_string(),
+            mesure: d.volume(),
+            reference: 80.0,
+            tolerance_rel: 1.0e-6,
+            source: "géométrie du montage : profondeur moyenne 2 m sur 40 m",
         },
     ]
 }

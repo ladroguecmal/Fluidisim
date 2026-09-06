@@ -190,6 +190,48 @@ fn executer_physics(sc: &Scenario, bg: &Background, t: SimTime) -> usize {
     echecs
 }
 
+/// Cas canoniques qui ne dépendent **d'aucun scénario de houle** — mode `physics`.
+///
+/// C01 se joue sur un bassin au repos : ni houle, ni spectre, ni instant de départ. L'exécuter dans
+/// la boucle des scénarios le referait à l'identique une fois par fichier, et trois lignes de
+/// rapport identiques se lisent comme trois vérifications. Il est donc exécuté **une fois**.
+fn executer_physics_solveur() -> usize {
+    let mut alloc = ArenaAllocator::with_capacity(1 << 20);
+    let jobs = SequentialJobs;
+    let sink = StderrSink;
+    let mut host = HostServices {
+        alloc: &mut alloc,
+        jobs: &jobs,
+        sink: &sink,
+    };
+
+    let cas = physics::c01_repos_sur_pente(&mut host, 60.0);
+
+    println!("
+--- C01 — repos hydrostatique sur fond en pente (couche δ) ---");
+    let mut echecs = 0usize;
+    for c in &cas {
+        let etat = if c.passe() { "OK    " } else { "ÉCHEC " };
+        if !c.passe() {
+            echecs += 1;
+        }
+        println!(
+            "{etat} {:<12} {:<46} mesuré {:>12.6}  référence {:>12.6}  écart {:>7.3} %  (tol {:.1} %)",
+            c.id,
+            c.grandeur,
+            c.mesure,
+            c.reference,
+            c.ecart_rel() * 100.0,
+            c.tolerance_rel * 100.0
+        );
+        if !c.passe() {
+            println!("         → référence : {}", c.source);
+        }
+    }
+    println!("  {} cas exécutés, {} échec(s)", cas.len(), echecs);
+    echecs
+}
+
 fn lire(chemin: &str) -> Result<Scenario, String> {
     let src = std::fs::read_to_string(chemin).map_err(|e| format!("{chemin} : {e}"))?;
     Scenario::parse(&src).map_err(|e| format!("{chemin} : {e}"))
@@ -245,6 +287,10 @@ fn main() -> ExitCode {
                 return ExitCode::from(2);
             }
         }
+    }
+
+    if mode == "physics" {
+        echecs_total += executer_physics_solveur();
     }
 
     if mode == "check" {
