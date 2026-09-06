@@ -53,7 +53,6 @@ impl Cas {
 pub fn cas_en_attente() -> &'static [(&'static str, &'static str, &'static str)] {
     &[
         ("C03", "Seiche en bassin clos", "attend δ ou W"),
-        ("C04", "Rupture de barrage (Ritter)", "attend δ"),
         ("C05", "Absorption à la frontière", "attend δ"),
         ("C06", "Invariance galiléenne", "attend δ"),
         ("C07", "Sillage profond et peu profond", "attend W"),
@@ -566,4 +565,142 @@ fn echec_configuration(e: water_core::AllocError) -> Cas {
         tolerance_rel: 0.0,
         source: "delta.rs — l'allocation doit précéder seal(), I-06",
     }
+}
+
+// ---------------------------------------------------------------------------------------------
+// C04 — rupture de barrage, solution de Ritter
+// ---------------------------------------------------------------------------------------------
+
+/// Solution de Ritter en `(x, t)` — lit sec, canal plat, sans frottement.
+///
+/// `CAS-CANONIQUES` §C04, avec `c₀ = √(g·h₀)` :
+///
+/// ```text
+/// x/t ≤ −c₀        h = h₀                          u = 0
+/// −c₀ ≤ x/t ≤ 2c₀  h = (2c₀ − x/t)² / (9g)         u = (2/3)·(x/t + c₀)
+/// x/t ≥ 2c₀        h = 0                           u = 0
+/// ```
+///
+/// Renvoie `(h, u)`. Aucune constante de cette fonction ne vient du solveur : elle est écrite
+/// depuis l'énoncé, ce qui est la condition pour qu'elle puisse le contredire.
+pub fn ritter(h0: f64, x: f64, t: f64) -> (f64, f64) {
+    let c0 = (G * h0).sqrt();
+    if t <= 0.0 {
+        return if x < 0.0 { (h0, 0.0) } else { (0.0, 0.0) };
+    }
+    let xi = x / t;
+    if xi <= -c0 {
+        (h0, 0.0)
+    } else if xi >= 2.0 * c0 {
+        (0.0, 0.0)
+    } else {
+        let a = 2.0 * c0 - xi;
+        (a * a / (9.0 * G), (2.0 / 3.0) * (xi + c0))
+    }
+}
+
+/// Abscisse où la solution de Ritter vaut exactement `eps`, à l'instant `t`.
+///
+/// `(2c₀ − x/t)²/(9g) = ε  ⇒  x = t·(2c₀ − 3√(g·ε))`.
+///
+/// C'est la référence à laquelle comparer un front **mesuré au même seuil**. La comparer à
+/// `2c₀·t` — le front mathématique, où `h = 0` — mesurerait la convention de seuil et non le
+/// solveur : à `ε = 1 cm` l'écart entre les deux vaut **15 %**, cinq fois la tolérance de C04.
+pub fn ritter_front(h0: f64, t: f64, eps: f64) -> f64 {
+    let c0 = (G * h0).sqrt();
+    t * (2.0 * c0 - 3.0 * (G * eps).sqrt())
+}
+
+/// C04 — `CAS-CANONIQUES` §C04. Canal plat, `h₀ = 1 m`, lit sec à droite, lâcher à `t = 0`.
+///
+/// # Ce que ce cas attrape, et que C01 ne touchait pas
+///
+/// Le **front de mouillage sur lit sec**. C01 mesurait un solveur sur son état le plus trivial —
+/// rien ne bouge ; C04 le mesure sur le plus violent — une discontinuité relâchée, et une solution
+/// analytique complète pour toute la suite.
+///
+/// # Cinq mesures, dont une qui n'est pas dans l'énoncé
+///
+/// L'énoncé demande la position du front à ±3 % et `h(0)` à ±3 %. Sont ajoutés :
+///
+/// - **`u(0)`**, contre `(2/3)·c₀` — la référence est fermée et gratuite, et elle teste le champ de
+///   vitesse, que rien d'autre ne regarde ici ;
+/// - **l'erreur L1 relative** sur tout le domaine, contre Ritter — une mesure **globale**, qui ne
+///   dépend d'aucun seuil et qu'un solveur ne peut pas satisfaire par accident sur trois points ;
+/// - **le front mesuré contre `2c₀·t`**, en témoin, pour montrer l'ampleur de l'effet de définition.
+pub fn c04_rupture_de_barrage(host: &mut water_core::HostServices, t_s: f64) -> Vec<Cas> {
+    use water_core::{Bassin, Delta1D};
+
+    /// Seuil de détection du front. Voir la note de méthode ci-dessous et ADR-031 §2.
+    const EPS: f64 = 1.0e-3;
+
+    let bassin = Bassin::c04();
+    let h0 = 1.0f64;
+    let mut d = match Delta1D::configure(host, bassin) {
+        Ok(d) => d,
+        Err(e) => return vec![echec_configuration(e)],
+    };
+    let pas = d.avancer_equilibre(t_s);
+
+    // Erreur L1 relative sur le domaine entier, contre Ritter. Aucun seuil n'y intervient.
+    let (mut num, mut den) = (0.0f64, 0.0f64);
+    for i in 0..d.nx() {
+        let (h_ex, _) = ritter(h0, d.x(i) as f64, t_s);
+        num += (d.h(i) as f64 - h_ex).abs();
+        den += h_ex;
+    }
+    let l1 = if den > 0.0 { num / den } else { f64::NAN };
+
+    let front_mesure = d.front(EPS as f32).unwrap_or(f64::NAN as f32) as f64;
+
+    // `h` et `u` au droit du barrage : la cellule dont le centre est le plus proche de x = 0.
+    let mut i0 = 0usize;
+    for i in 0..d.nx() {
+        if d.x(i).abs() < d.x(i0).abs() {
+            i0 = i;
+        }
+    }
+
+    vec![
+        Cas {
+            id: "C04",
+            grandeur: format!("front à ε = 1 mm, m ({pas} pas)"),
+            mesure: front_mesure,
+            reference: ritter_front(h0, t_s, EPS),
+            tolerance_rel: 0.03,
+            source: "Ritter au même seuil : x = t·(2c₀ − 3√(g·ε)) — CAS-CANONIQUES §C04",
+        },
+        Cas {
+            id: "C04",
+            grandeur: "h au droit du barrage, m".to_string(),
+            mesure: d.h(i0) as f64,
+            reference: 4.0 * h0 / 9.0,
+            tolerance_rel: 0.03,
+            source: "Ritter en x = 0 : h = 4h₀/9 — CAS-CANONIQUES §C04",
+        },
+        Cas {
+            id: "C04",
+            grandeur: "u au droit du barrage, m/s".to_string(),
+            mesure: d.u(i0) as f64,
+            reference: (2.0 / 3.0) * (G * h0).sqrt(),
+            tolerance_rel: 0.03,
+            source: "Ritter en x = 0 : u = (2/3)·√(g·h₀)",
+        },
+        Cas {
+            id: "C04",
+            grandeur: "erreur L1 relative sur h, tout le domaine".to_string(),
+            mesure: l1,
+            reference: 0.0,
+            tolerance_rel: 0.03,
+            source: "Ritter sur les 800 cellules — mesure globale, sans seuil",
+        },
+        Cas {
+            id: "C04-jet",
+            grandeur: "front mesuré contre 2c₀·t, m — effet de définition".to_string(),
+            mesure: front_mesure,
+            reference: 2.0 * (G * h0).sqrt() * t_s,
+            tolerance_rel: 0.03,
+            source: "témoin : comparer un front à seuil au front mathématique mesure la convention, pas le solveur",
+        },
+    ]
 }

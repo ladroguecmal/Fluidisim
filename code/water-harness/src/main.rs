@@ -205,10 +205,11 @@ fn executer_physics_solveur() -> usize {
         sink: &sink,
     };
 
-    let cas = physics::c01_repos_sur_pente(&mut host, 60.0);
+    let mut cas = physics::c01_repos_sur_pente(&mut host, 60.0);
+    cas.extend(physics::c04_rupture_de_barrage(&mut host, 2.0));
 
     println!("
---- C01 — repos hydrostatique sur fond en pente (couche δ) ---");
+--- C01 · C04 — les deux extrémités de la couche δ : le repos, et la rupture ---");
     let mut echecs = 0usize;
     for c in &cas {
         // Les lignes `C01-jet` sont des **témoins** : le schéma au premier jet est conservé pour
@@ -241,18 +242,27 @@ fn executer_physics_solveur() -> usize {
         }
     }
 
-    // Le verdict du témoin est **agrégé**, jamais ligne à ligne : C01 porte deux assertions, et le
-    // premier jet en passe une. C'est le cas dans son ensemble qu'il doit échouer. S'il venait à
-    // les passer toutes, le montage aurait cessé d'être discriminant — et un montage qui ne
-    // discrimine plus est un test qui ne teste plus rien.
+    // Le verdict d'un témoin est **agrégé par cas**, jamais ligne à ligne : C01 porte deux
+    // assertions et son témoin en passe une. C'est le cas dans son ensemble qu'il doit échouer.
+    //
+    // L'agrégation est faite **par identifiant**, et non sur tous les témoins confondus. Le premier
+    // jet de ce bloc, écrit quand C01 était seul, agrégeait l'ensemble : l'arrivée de `C04-jet`
+    // l'aurait rendu silencieux dès qu'un seul témoin échouait, quel que soit le sort de l'autre.
+    // Un dispositif d'alerte qui s'affaiblit à chaque cas ajouté est pire que pas de dispositif.
     let temoins: Vec<&physics::Cas> = cas.iter().filter(|c| c.id.ends_with("-jet")).collect();
-    if !temoins.is_empty() && temoins.iter().all(|c| c.passe()) {
-        println!(
-            "ANOMAL C01-jet      le schéma au premier jet passe C01 sur ses {} assertions",
-            temoins.len()
-        );
-        println!("         → il devrait en échouer au moins une. Montage non discriminant, ou schéma modifié sans le dire — ADR-030 §2.");
-        echecs += 1;
+    let mut ids: Vec<&str> = temoins.iter().map(|c| c.id).collect();
+    ids.sort_unstable();
+    ids.dedup();
+    for id in ids {
+        let lignes: Vec<&&physics::Cas> = temoins.iter().filter(|c| c.id == id).collect();
+        if lignes.iter().all(|c| c.passe()) {
+            println!(
+                "ANOMAL {id:<12} ce témoin passe ses {} assertion(s) : il devrait en échouer au moins une",
+                lignes.len()
+            );
+            println!("         → montage non discriminant, ou schéma modifié sans le dire — ADR-030 §2.");
+            echecs += 1;
+        }
     }
 
     let executes = cas.len() - temoins.len();

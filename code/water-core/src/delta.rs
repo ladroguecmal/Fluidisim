@@ -246,6 +246,37 @@ impl Delta1D {
         }
     }
 
+    /// Abscisse du front de mouillage, définie comme le lieu où `h` franchit le seuil `eps`.
+    ///
+    /// Le franchissement est **interpolé linéairement** entre les deux cellules qui l'encadrent :
+    /// sans cela la mesure serait quantifiée à `dx`, et sa convergence sous raffinement
+    /// illisible.
+    ///
+    /// # Le seuil n'est pas un détail de mesure
+    ///
+    /// Il n'existe pas de « position du front » indépendante d'un seuil : la solution de Ritter
+    /// tend vers zéro de façon continue, et le lieu où l'eau « commence » est donc une convention.
+    /// Elle est lourde de conséquences — `eps = 1 cm` déplace la position exacte de **15 %**, cinq
+    /// fois la tolérance de C04. **Une position de front ne se compare qu'à une référence prise au
+    /// même seuil.**
+    pub fn front(&self, eps: f32) -> Option<f32> {
+        for i in (0..self.nx).rev() {
+            if self.h(i) > eps {
+                if i + 1 >= self.nx {
+                    return Some(self.x(i));
+                }
+                let (ha, hb) = (self.h(i), self.h(i + 1));
+                let f = if (ha - hb).abs() > f32::EPSILON {
+                    (ha - eps) / (ha - hb)
+                } else {
+                    0.0
+                };
+                return Some(self.x(i) + f.clamp(0.0, 1.0) * self.dx);
+            }
+        }
+        None
+    }
+
     /// `max |u|` sur le domaine de calcul — la grandeur mesurée par C01.
     pub fn max_abs_u(&self) -> f64 {
         let mut m = 0.0f64;

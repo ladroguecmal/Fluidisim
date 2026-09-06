@@ -85,7 +85,7 @@ provenance (`H_SEC = 10⁻⁶` est posé sans justification, action **S22-4**).
 - [x] **P2** — le montage : canal plat, lit sec à droite, marche à `t = 0`. Les murs sont hors de
       portée du signal à `t = 2 s` — le front avance de 12,5 m, la raréfaction remonte de 6,3 m —
       donc aucune condition transmissive n'est nécessaire, et c'est à vérifier plutôt qu'à supposer.
-- [ ] **P3** — la solution de Ritter comme référence, et **la définition du front** : à seuil `ε`
+- [x] **P3** — la solution de Ritter comme référence, et **la définition du front** : à seuil `ε`
       dans le champ, comparée à la position où Ritter vaut `ε` — et non à `2√(gh₀)·t`. Comparer une
       mesure à seuil contre une référence sans seuil mesurerait la définition, pas le schéma.
 - [ ] **P4** — exécuter, constater, mesurer la sensibilité de la position du front à `ε`.
