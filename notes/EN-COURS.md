@@ -81,7 +81,7 @@ exécutées — c'est l'angle mort A89, écrit en S14.
   aucune session — aucune n'a travaillé la validation depuis S03.*
 - [x] **P4** — `ANGLES-MORTS` : un angle mort comblé se distingue-t-il d'un angle mort ouvert ?
   Cas d'A16, explicitement **supprimé** par ADR-021.
-- [ ] **P5** — `QUESTIONS-OUVERTES` : la traçabilité des 30 sections et les sept verdicts tiennent-ils
+- [x] **P5** — `QUESTIONS-OUVERTES` : la traçabilité des 30 sections et les sept verdicts tiennent-ils
   encore, treize sessions plus tard ?
 - [ ] **P6** — rédiger `docs/registres/AUDIT-REGISTRES-S15.md`.
 - [ ] **P7** — appliquer : exécuter les actions retrouvées, corriger les statuts, corriger l'erreur
@@ -198,3 +198,36 @@ indistinctement « traités ». Un registre qui ne se vide jamais cesse d'être 
 **supprimé** — et une règle pour les entrées futures. Remplir les quatre-vingt-neuf lignes d'un coup
 n'est ni utile ni fiable : la proposition retenue est de renseigner **les sévérité 1** et de poser la
 règle, le reste se remplissant au fil des sessions qui touchent chaque point.
+
+#### P5 — `QUESTIONS-OUVERTES` : une question dissoute est revenue
+
+**R06 — §13 n'est plus dissous.** Le registre inscrit :
+« 13 | Erreur acceptable d'un précalcul | **Dissous** | ADR-013 §3 ».
+La dissolution était juste et bien argumentée : en palier T2, « δ vaut identiquement 0, le domaine
+préparé ne contient aucune information physique […] il n'existe **aucun seuil de tolérance physique
+à calibrer** ».
+
+Mais ADR-022 §3.5, en S10, a introduit une seconde forme de précalcul — la **graine** — et a écrit
+l'inverse pour elle : « une graine porte les paramètres sous lesquels elle a été cuite, et `restore`
+refuse au-delà d'un écart. C'est le **seul endroit du système où un seuil de tolérance physique
+existe** », à calibrer au banc B4. ADR-022 §7.1 le porte comme point ouvert.
+
+**La question ne s'est pas dé-dissoute : elle est revenue ailleurs.** Le statut « Dissous » est donc
+faux depuis cinq sessions, dans le sens dangereux — il dit qu'il n'y a rien à calibrer alors qu'un
+banc attend un seuil.
+
+**R07 — pointeur incomplet sur §10.** « 10 | Données conservées à la désactivation | Résolu |
+ADR-005 §3, ADR-009 §2 ». La réponse définitive est désormais **ADR-022** et l'invariant **I-17** :
+rien de δ n'est jamais sérialisé, et l'état persistant tient en trois choses. Les deux pointeurs
+d'origine restent justes mais mènent à la moitié de la réponse.
+
+**R08 — un décompte figé à S02.** L'en-tête annonce « État à l'issue de **S02** : 19 résolues ·
+6 dissoutes · 4 partielles · 1 ouverte par décision ». Treize sessions plus tard, il n'a jamais été
+revu, et rien ne dit au lecteur qu'il ne l'a pas été.
+
+**Contrôles passés.** §18 — « la seule question encore ouverte est le choix du solveur volumétrique,
+et elle le restera jusqu'au banc B3 » : toujours exact. §9 — « simulation hors caméra | Dissous |
+ADR-013 §6 » : confirmé indépendamment par ADR-022 §2.1, qui s'appuie dessus. Le réordonnancement de
+§32 place `λ_cut` au rang 1 : cohérent avec le chemin critique de `00_INDEX.md` et avec le décompte
+de S11 §7.1, où B2 débloque le plus de points ouverts. Les sept verdicts sur les propositions
+antérieures tiennent.
