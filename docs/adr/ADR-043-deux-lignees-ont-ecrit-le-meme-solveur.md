@@ -153,6 +153,21 @@ référence fermée. Sa mise en œuvre est un travail de code, non traité ici �
 2. **L'oracle croisé n'a jamais été exercé.** Tant qu'il ne l'est pas, l'affirmation du §3 est une
    promesse. Les deux codes peuvent diverger dès le premier cas commun, et ce serait le résultat le
    plus utile de la session qui les confrontera.
+
+   > **Note S37 — exercé, et le §3 était trop optimiste sur un point.** L'oracle est en place
+   > (`oracle.rs`) et a servi. Il n'a trouvé **aucune faute de calcul** : sur C04, à flux et ordre
+   > égaux, les deux hauteurs concordent à **0,065 %**. Mais deux corrections s'imposent au §3 :
+   >
+   > 1. **Sur un cas à solution exacte connue, l'oracle est redondant** — et pire, il dégénère. Les
+   >    deux véhicules ne calculent pas dans la même précision (`f32` contre `f64`, neuf ordres de
+   >    grandeur), et sur C01 l'écart croisé vaut **exactement** l'erreur du moins précis contre la
+   >    vérité. *Un oracle n'est symétrique que si les précisions le sont.*
+   > 2. **Ce qu'il détecte le mieux n'est pas la faute de calcul mais la convention non partagée.**
+   >    Il a trouvé deux seuils de sec incompatibles, `10⁻⁶` et `10⁻¹⁰` (**A163**, sévérité 1), que
+   >    ni les tests ni les assertions des deux côtés ne pouvaient signaler : chacun était cohérent
+   >    avec lui-même.
+   >
+   > Voir [`ADR-044`](ADR-044-ce-que-l-oracle-croise-peut-dire.md).
 3. **La réserve d'eau profonde** (ADR-042 §6.1) commande `λ_cut` et n'est mesurable sur aucun des
    deux véhicules, qui sont non dispersifs tous les deux. **Deux implémentations ne lèvent pas une
    limite de modèle.**

@@ -107,7 +107,7 @@ encore** : deux schémas réputés identiques ne le seraient pas, et il faudrait
       ambiguïté.
 - [x] **P6** — **C04 comparé**, montage aligné à 800 mailles de 5 cm : le cas où un désaccord serait
       **physique** et non arithmétique.
-- [ ] **P7** — le verdict, et un ADR : **ce que cet oracle peut dire, et ce qu'il ne peut pas**.
+- [x] **P7** — le verdict, et un ADR : **ce que cet oracle peut dire, et ce qu'il ne peut pas**.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise

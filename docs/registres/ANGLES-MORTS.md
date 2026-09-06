@@ -204,6 +204,8 @@ ce que les sources avaient omis.
 | **A160** | Un coefficient d'amortissement n'a de sens que tant que `σ·dt < 1` | 2 | ADR-042 §4.1 |
 | **A161** | Trois fonctions distinctes partagent le mot « éponge », et un résultat sur l'une se lit comme un résultat sur les autres | 2 | ADR-043 §5 |
 | **A162** | Corriger la référence d'une mesure périme en silence tous les chiffres qui en dérivent | 2 | ADR-040, note S36 |
+| **A163** | Deux implémentations du même modèle portent deux seuils de sec incompatibles, `10⁻⁶` et `10⁻¹⁰` | **1** | ADR-044 §5 |
+| **A164** | La précision arithmétique des véhicules n'est écrite nulle part : `f32` d'un côté, `f64` de l'autre | 2 | ADR-044 §2 |
 
 Cent huit angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -1028,6 +1030,26 @@ pendant quatre sessions.
   les décomptes recopiés de S07 et S10, sur un objet qu'on croyait à l'abri : **une mesure**.
   *Toute correction d'une référence, d'un seuil ou d'une norme oblige à rejouer les chiffres
   publiés qui en dépendent, ou à les marquer périmés le jour même.*
+
+- **A163** *(sévérité 1)* — **Deux seuils de sec incompatibles, et un seul a une provenance.**
+  `delta.rs` déclare une cellule sèche sous `H_SEC = 10⁻⁶ m`, dont `ADR-031` §5 donne l'origine ;
+  `shallow.rs` sous `10⁻¹⁰ m`, écrit **en dur** dans deux endroits, sans justification. **Quatre
+  ordres de grandeur.** Une cellule entre les deux est sèche pour l'un et mouillée pour l'autre, et
+  `hu/h` sur un film pareil rend n'importe quoi : la confrontation de S37 mesure **6,16 m/s**
+  d'écart sur une cellule, soit **98 % de la vitesse du front de Ritter**. Sévérité 1 parce que ce
+  seuil **déplace la position du front**, donc le verdict de C04, donc le critère d'entrée au banc
+  B3. Les deux lignées avaient identifié la question — `ADR-031`, et **A150** — et y ont répondu
+  différemment sans le savoir. **Ne pas aligner les deux valeurs par une retouche de constante** :
+  c'est une décision de conception (ADR-044 §7).
+
+- **A164** — **La précision arithmétique n'est écrite nulle part.** `delta.rs` calcule en `f32`,
+  `shallow.rs` en `f64`, et aucun document du corpus ne le mentionnait avant S37 — ni SPEC-001, ni
+  les ADR de solveur, ni `CAS-CANONIQUES`. Ce n'est pas un détail d'implémentation : c'est ce qui
+  décide de ce qu'une assertion peut affirmer. En `f32`, « bien équilibré » vaut **4,4 µm/s après
+  une minute**, pas l'arrondi machine — et l'erreur **croît** avec le temps simulé. Le seuil de C01
+  étant à 1 mm/s, la marge est de **×227**, ce qui est confortable et n'était pas connu. Pour un
+  jeu de très grande échelle, `f32` sera vraisemblablement imposé par la mémoire : **c'est ce
+  chiffre-là le plancher réel de la couche `δ`**.
 
 ---
 
