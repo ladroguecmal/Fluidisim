@@ -324,3 +324,21 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 > parfaitement — le fork a été vu au premier geste. **S35-7 est la seule action de cette liste que
 > le projet ne peut pas exécuter lui-même** : elle demande de décider du sort des branches, ce qui
 > appartient à l'utilisateur.
+
+## Actions relevées en séance — S36
+
+| # | Action | D'où elle vient | Qui la porte | État |
+|---|---|---|---|---|
+| S36-1 | **Rejouer les chiffres publiés** des ADR qui en portent, comme S36 l'a fait pour quatre d'entre eux. Un test vert ne dit pas qu'un chiffre est encore vrai — il dit qu'il est encore au-dessus du seuil | **A162**, **L141** | session | **ouverte** |
+| S36-2 | **Citer tout chiffre avec le paramètre qui le distingue** dans le tableau d'où il vient. Trois documents citent « 43,1 périodes » sans dire *à quel schéma* | **L142** | session | **ouverte** |
+| S36-3 | **Mettre C05 dans le mode `physics`** sans faire sauter le budget de `SPEC-003 §1` : montage intermédiaire, ou exécution conditionnelle. Il n'y est pas aujourd'hui | `physics_shallow.rs` | session | **ouverte** |
+| S36-4 | **Surveiller le budget du mode `physics`** : 31 s sur 60 s, dont 12,5 s pour le second véhicule. Le prochain ajout de cette taille le fait sortir | **A158** | session | **ouverte** |
+
+> **Note S36 — l'action S35-2 est close**, et l'action **S35-1** aussi. Le double format d'écart
+> absolu / relatif (**A149**) est en place dans `main.rs`, factorisé en `ligne_de_cas` et appliqué
+> aux trois blocs de rapport ; les six montages de la lignée B sont dans `physics_shallow.rs`.
+>
+> **S35-3 reste ouverte, et il faut être précis sur ce qui manque** : les deux solveurs coexistent
+> désormais dans le même binaire et exécutent chacun ses cas, mais **aucun cas ne compare leurs deux
+> sorties sur un même montage**. C'est cela que promet `ADR-043` §3, et c'est la session suivante
+> recommandée.

@@ -106,7 +106,8 @@ montage, soit une divergence entre les deux arbres que personne n'a vue.
 - [x] **P7** — branchement dans `main.rs`, et le **double format d'écart** absolu / relatif
       (**A149**, action S35-2) — qui vaut pour les deux jeux de montages.
 - [x] **P8** — **confronter les quatre chiffres** à ce qui est publié, et écrire le verdict.
-- [ ] **P9** — rituel de fin (`REPRISE.md` §6).
+- [x] **P9a** — rituel : journal, leçons L141-L143, actions S36-1 à S36-4.
+- [ ] **P9b** — rituel : index, décomptes, jeton libéré.
 
 ### Notes de reprise
 

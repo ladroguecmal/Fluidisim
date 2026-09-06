@@ -2211,3 +2211,56 @@ une falsification, pas une convention.
 qui *nomment* et ceux qui *datent*. Renuméroter les premiers, préfixer ou qualifier les seconds. La
 distinction vaut au-delà d'une fusion de dépôts : numéros de version, de ticket, de build, de
 migration.
+
+## L141 — Un test vert ne dit pas qu'un chiffre publié est encore vrai
+
+*(S36)* `p = 1,003` a été publié dans un ADR, puis périmé par une correction faite pour un autre cas
+une session plus tard. Le code rend désormais 0,9997. **Personne ne l'a vu, et personne ne pouvait
+le voir** : l'assertion qui protège cette grandeur est un **minorant** — `p > 0,8` — et trois
+millièmes ne la font pas broncher. Le cas est resté vert de bout en bout.
+
+C'est le défaut des décomptes recopiés — trouvé en S07, retrouvé en S10 — appliqué à un objet qu'on
+croyait à l'abri : **une mesure**. Un décompte se périme parce que personne ne le recompte ; un
+chiffre mesuré se périme parce que personne ne le remesure, et la suite de tests ne compense rien.
+Elle surveille des **seuils**, pas des **valeurs**.
+
+**Réflexe** : distinguer, dans ce qu'un test protège, la **décision** (le cas passe-t-il ?) et la
+**valeur** (combien vaut-il ?). Une assertion à seuil ne protège que la première. Pour la seconde,
+il faut soit un test qui compare au chiffre publié — c'est ce qui a révélé l'écart ici — soit
+l'acceptation explicite que tout chiffre cité dans un document est un instantané daté. Le choix se
+fait document par document ; l'omettre revient à choisir le second sans le dire.
+
+## L142 — Un chiffre cité hors du tableau qui le produit perd ce qui le rend vrai
+
+*(S36)* `ADR-040` §5 publie un tableau à **deux colonnes** — ordre un, ordre deux — et le chiffre
+« 43,1 périodes » y désigne la colonne de gauche. Ailleurs dans le corpus, dans un autre ADR et dans
+`CAS-CANONIQUES`, le même 43,1 circule **seul**. Une session l'a pris pour la valeur du cas, a
+mesuré 161,14 sur le montage courant, et a cru un instant que le chiffre ne se reproduisait pas.
+
+La citation n'était pas fausse : elle était **incomplète d'une dimension**. Le tableau d'origine
+énonçait la condition ; la citation ne l'a pas emportée avec elle. C'est la forme générale d'**A153**
+— *l'ordre d'un schéma est un couple (schéma, solution), pas un nombre* — et elle vaut pour toute
+grandeur qui dépend d'un réglage : une demi-vie, un temps de réponse, un taux d'erreur, un débit.
+
+**Réflexe** : citer un chiffre avec le paramètre qui le distingue de ses voisins dans le tableau
+d'où il vient, ou ne pas le citer du tout et renvoyer au tableau. La question à se poser est
+mécanique : *ce tableau a-t-il plus d'une ligne, ou plus d'une colonne ? Alors la citation doit dire
+laquelle.*
+
+## L143 — Reproduire un chiffre publié n'est pas la même opération que faire passer un test
+
+*(S36)* La session a transporté six montages d'une lignée à l'autre. Les faire compiler et passer
+n'a rien révélé : tout était vert du premier coup. Ce qui a révélé quelque chose, c'est d'avoir
+**confronté quatre grandeurs à ce que les documents en disaient** — dont une qui ne correspondait
+plus.
+
+Les deux opérations paraissent voisines et ne mesurent pas la même chose. Faire passer un test
+vérifie que le code satisfait ses propres critères. Reproduire un chiffre publié vérifie que **le
+code et sa documentation parlent encore du même objet** — et c'est la seule des deux qui puisse
+détecter que la documentation a vieilli sans que rien ne casse.
+
+**Réflexe** : à chaque reprise d'un travail écrit par d'autres — ou par soi, six mois plus tôt —
+lister d'abord les **chiffres publiés** et les rejouer, avant d'écrire quoi que ce soit de neuf.
+C'est court, c'est falsifiable, et l'écart trouvé est presque toujours plus intéressant que la
+concordance. Trois chiffres sur quatre se sont reproduits ici ; c'est le quatrième qui valait la
+session.

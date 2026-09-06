@@ -3313,3 +3313,135 @@ Inchangés — trois arbitrages de design et quatre interfaces inter-équipes, l
 Elle en ajoute cependant un de nature différente, qui appartient à l'utilisateur et non au projet :
 **trois worktrees restent ouverts sur trois branches divergentes**, et le dispositif du jeton ne
 protège d'aucun d'eux. Voir `FORK-S22-S26` §5.
+
+---
+
+## S36 — 2026-09-06 — L'oracle croisé a servi dès son premier usage, et pas comme prévu
+
+**Consigne reçue.** « Lance S36 ».
+
+**Entrées.** Action **S35-1**. S35 avait importé le *solveur* de la lignée B, `shallow.rs`, mais
+laissé dehors ses *montages* : six cas canoniques dont les verdicts étaient cités dans le corpus
+sans avoir jamais été exécutés ici. `CAS-CANONIQUES` le disait en toutes lettres — *un témoignage,
+pas une mesure*.
+
+**Sorties.** `code/water-harness/src/physics_shallow.rs` — six montages, treize tests ; le second
+véhicule branché au mode `physics` ; `demi_vie_seiche` extraite en fonction pure ; le **double
+format d'écart** absolu / relatif (**A149**, action S35-2) ; note corrective datée sur `ADR-040` ;
+angle mort **A162** ; réserve n°1 de `CAS-CANONIQUES` **levée**.
+
+**Ça tourne.** `cargo test` : **68 tests** au vert — 32 dans le cœur, 36 dans le harnais dont un
+`ignore` — contre 55 en début de session. `water-harness check` : 0 échec, **hashs inchangés**.
+Mode `physics` : **31 s** dont **12,5 s** pour le second véhicule, sur un budget de 60 s
+(`SPEC-003 §1`).
+
+### La thèse, et ce qu'elle a donné
+
+*Déclarée avant de commencer : les chiffres publiés par la lignée B se reproduisent dans cet arbre,
+au dernier chiffre significatif donné.*
+
+| grandeur | document | publié | mesuré | verdict |
+|---|---|---|---|---|
+| C01, courant parasite du schéma naïf | `ADR-038` §2 | 19,5 mm/s | **19,5083** | reproduit |
+| C04, écart sur le front | `ADR-041` | 0,74 % | **0,7365 %** | reproduit |
+| C03, quatre demi-vies de seiche | `ADR-040` §5 | 6,01 · 44,36 · 43,12 · 161,14 | **identiques** | reproduit à **0,00 %** |
+| C08, ordre de convergence | `ADR-040` §3 | `p` = 1,003 | **0,9997** | **périmé** |
+
+**Trois sur quatre, et le quatrième est le résultat de la session.**
+
+### Le résultat tient en une phrase
+
+**`p = 1,003` a été périmé par une correction faite pour un autre cas, une session plus tard, et
+rien ne l'a signalé — parce que le cas continuait de passer.**
+
+En **B-S25**, la référence de l'erreur `L¹` de Ritter est passée de la valeur **au centre de
+cellule** à la **moyenne sur la cellule**. La correction est juste : un schéma de volumes finis
+porte des moyennes, et les confronter à une valeur ponctuelle ajoute une erreur d'ordre un qui n'est
+pas celle du schéma. Elle a été faite pour C04. **Elle alimentait aussi le `p` de C08**, publié la
+session d'avant.
+
+La démonstration est un test qui rejoue les deux références côte à côte :
+
+```
+C08-p — publié 1,003 | référence ponctuelle (≤ B-S25) : 1,0030 | moyenne de cellule (≥ B-S25) : 0,9997
+```
+
+L'ancienne référence retrouve **1,0030 à la quatrième décimale**. Le chiffre était juste quand il a
+été écrit ; il ne décrit plus le code depuis une session.
+
+> **Ce qui rend cet écart invisible : rien ne casse.** L'assertion de C08 est un **minorant** —
+> `p > 0,8` — et trois millièmes ne la font pas broncher. Un test vert ne dit pas qu'un chiffre
+> publié est encore vrai ; il dit qu'il est encore **au-dessus du seuil**. Angle mort **A162**.
+
+### Et ce que l'oracle croisé n'a pas trouvé
+
+`ADR-043` §3 l'annonçait comme un détecteur de **fautes d'implémentation** : indice décalé, signe
+inversé, condition de bord mal posée. **Il n'en a trouvé aucune.** Les deux implémentations
+concordent partout où elles se recouvrent, ce qui est en soi le résultat le plus rassurant qu'ait
+reçu ce code.
+
+Ce qui a servi n'est donc pas la comparaison des deux codes, mais **le fait de rejouer des chiffres
+publiés**. Ce n'est pas ce qui était prévu, et cela ne s'oppose pas à `ADR-043` : cela ajoute un
+second usage à un instrument qui n'en annonçait qu'un.
+
+### Une erreur de lecture, et ce qu'elle a appris
+
+La première mesure de C03 a donné **161,1 périodes** contre 43,1 publiées, et la thèse a semblé
+tomber. Elle ne tombait pas : **`ADR-040` §5 publie deux colonnes**, ordre un et ordre deux, et le
+chiffre 43,1 est celui de l'ordre un — tandis que le montage courant est à l'ordre deux, qui donne
+exactement 161,14.
+
+Rien n'était faux dans le code. Ce qui a induit en erreur, c'est que **43,1 circule dans `ADR-039`
+et dans `CAS-CANONIQUES` sans mention du schéma**, alors que le tableau qui le produit en distingue
+deux. *Une demi-vie est un couple (schéma, maille), pas un nombre* — la même forme qu'**A153** pour
+l'ordre d'un schéma.
+
+Le test a été refait sur les **quatre** valeurs du tableau plutôt que sur une : elles se
+reproduisent toutes à 0,00 %.
+
+### Un résultat que la session ne cherchait pas
+
+C05 — le seul des six que cette lignée n'avait jamais exécuté — a son montage de référence à 3 200
+mailles × 90 s, une vingtaine d'essais : dix minutes en debug. Un montage **réduit** a donc été
+écrit pour que le mécanisme soit exercé à chaque commit : quatre fois plus court, moitié moins de
+longueur d'onde, maille double.
+
+Il rend **7,0414 %** au réglage d'`ADR-005 §2`, contre **7,0 %** publié sur le montage de
+référence — deux montages qui n'ont **aucune dimension en commun**, à 0,6 % l'un de l'autre.
+
+C'est la **réserve n° 2 d'`ADR-042` §6 vérifiée sans qu'on la cherche** : *le groupe sans dimension
+`σ_max·L_s/c` se transpose, la valeur de `σ_max` en s⁻¹ ne se transpose pas.* Elle était écrite
+comme une supposition.
+
+### Chiffres qui ont orienté la session
+
+- **12,5 s sur 31 s** : le coût du second véhicule dans le mode `physics`, rapporté par le harnais
+  lui-même. Un second jeu de montages est exactement le genre d'ajout qui grignote un budget sans
+  qu'on le voie (**A158**).
+- **×4,69** : le gain de l'ordre deux sur l'erreur `L¹` de C04, à maille égale.
+- **6,01 contre 44,36** périodes à 100 mailles/λ : le même cas, la même maille, deux schémas, deux
+  verdicts opposés autour du minorant de 15.
+
+### Ce qui n'a pas été fait
+
+- **L'oracle croisé n'est toujours pas *exercé* au sens strict** (action **S35-3**) : les deux
+  solveurs tournent dans le même binaire, mais **aucun cas ne compare leurs deux sorties**. Ce qui
+  a été fait est plus faible — vérifier que chacun retrouve ses propres chiffres publiés.
+- **C05 n'est pas dans le mode `physics`**, seulement dans les tests. Son montage de référence
+  dépasserait le budget de `SPEC-003 §1` à lui seul.
+- **Les cinq angles morts de sévérité 1 importés en S35 n'ont toujours pas été relus** (S35-5).
+- **Le journal de la lignée B n'est pas reporté** (S35-4), ni la lignée S08–S17 traitée (S35-6).
+
+### Session suivante recommandée
+
+**S37 — exercer l'oracle croisé** (S35-3) : un cas qui exécute `delta.rs` et `shallow.rs` sur le
+même montage et compare leurs sorties, plutôt que leurs verdicts. C'est ce que `ADR-043` §3 promet
+et que personne n'a encore fait. Le premier candidat est C01, dont les deux véhicules donnent
+l'arrondi machine — un désaccord y serait sans ambiguïté.
+
+*Solutions de rechange* : relire les cinq angles morts de sévérité 1 (S35-5) ; ou les saturations de
+modèle (S34-1), reportées deux fois.
+
+### Arbitrages en attente
+
+Inchangés. Cette session n'en a tranché aucun et n'en a ouvert aucun.
