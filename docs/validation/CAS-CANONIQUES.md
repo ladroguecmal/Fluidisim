@@ -413,6 +413,33 @@ les cas exotiques.
 > n'a produit **aucune** divergence sur le véhicule δ (A129). Une assertion « aucune divergence »
 > l'aurait certifié sain.
 
+> **Réécriture S30 — et aucun seuil n'a eu à être inventé.**
+>
+> **« Aucun tremblement visible » a une référence *exacte*.** ADR-008 §3 pose qu'en mode contraint
+> l'objet est **projeté sur la surface** — `z = η`, orientation alignée sur la normale — et qualifie
+> le résultat d'« **exactement stable** ». La grandeur est donc l'écart à la surface, et sa
+> référence est **zéro**, pas un seuil :
+>
+> > **`max|z_objet − η(x_objet)| = 0`** à la précision de la représentation, sur toute la durée du
+> > mode contraint.
+>
+> C'est la même forme que C01, et elle est bien plus forte qu'un seuil de visibilité : un écart de
+> `10⁻⁴ m` est invisible et signale pourtant que la projection n'est pas appliquée.
+>
+> **« Aucune divergence » devient un facteur d'amplification.** Hors mode contraint, l'oscillation
+> de pilonnement a pour pulsation `ω = √(ρgA/(m + m_a))`, et **rien n'injecte d'énergie** dans le
+> montage. Un système qui ne reçoit pas d'énergie ne peut pas amplifier :
+>
+> > **facteur d'amplification par période `|G| ≤ 1`**, mesuré sur l'enveloppe des extrema de `z`
+> > pendant 120 s.
+>
+> Le seuil `1` n'est pas choisi : c'est la frontière entre amortir et amplifier, et c'est la
+> physique qui la place. **La même grandeur, sur le même principe, a détecté en S29 un schéma que
+> « aucune divergence » déclarait stable** — à `ν = 1,05`, `|G| = 1,0204`.
+>
+> **Ce qui reste de l'énoncé d'origine** : « bascule en mode contraint effective dès `ω·dt > 1` »
+> était déjà recevable — grandeur et seuil, tous deux dans ADR-008 §3.
+
 ## C12 — Vidange d'un réservoir
 
 **Montage.** Réservoir de 1 m² de section, hauteur d'eau 1 m, orifice de 10 cm² à arête vive au

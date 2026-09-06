@@ -91,7 +91,7 @@ un nombre neuf, et c'est celui qu'il faudra peut-être marquer « à calibrer »
       et l'énoncé actuel y place pourtant son assertion.
 - [x] **P4** — **C15** et **C18**, les deux vacuités : un témoin chacune, et la grandeur qu'il doit
       faire bouger.
-- [ ] **P5** — **C11**, le seul qui demande un nombre neuf. Chercher d'abord s'il existe une
+- [x] **P5** — **C11**, ~~le seul qui demande un nombre neuf~~ — il n'en demandait pas. Chercher d'abord s'il existe une
       grandeur dont le seuil se dérive ; à défaut, « à calibrer » avec son banc, ce qui est un
       statut légitime et non un échec.
 - [ ] **P6** — notes correctives datées dans `CAS-CANONIQUES` pour les cinq, et mise à jour du
@@ -164,3 +164,44 @@ verte avant que la glace existe.
 > **Le tri de S29 s'est trompé une fois, et dans le sens le plus coûteux** : il a déclaré recevable
 > une assertion vide. Deux assertions négatives se ressemblent ; ce qui les sépare est l'existence
 > d'un **instrument**, pas leur formulation — et l'instrument ne se lit pas dans l'énoncé.
+
+#### P5 — C11 ne demandait pas de nombre neuf, et la thèse était fausse dans le bon sens
+
+Le plan annonçait : *« seul C11 demande vraiment un nombre neuf, et c'est celui qu'il faudra
+peut-être marquer à calibrer »*. **Les deux assertions se corrigent sans qu'aucun seuil ne soit
+inventé.**
+
+**« Aucun tremblement visible » a une référence *exacte*.** ADR-008 §3 pose qu'en mode contraint
+l'objet est **projeté sur la surface** — `z = η` — et qualifie le résultat d'« exactement stable ».
+La grandeur est l'écart à la surface, et sa référence est **zéro** :
+
+> `max|z_objet − η(x_objet)| = 0`, à la précision de la représentation.
+
+Même forme que C01, et **plus forte qu'un seuil de visibilité** : un écart de `10⁻⁴ m` est invisible
+et signale pourtant que la projection n'est pas appliquée. « Visible » n'était pas seulement flou —
+c'était une exigence *plus faible* que ce que la conception garantit déjà.
+
+**« Aucune divergence » devient un facteur d'amplification.** Rien n'injecte d'énergie dans le
+montage ; un système qui n'en reçoit pas ne peut pas amplifier. Donc **`|G| ≤ 1` par période**, et
+le seuil `1` n'est pas choisi : c'est la frontière entre amortir et amplifier, placée par la
+physique.
+
+> **C'est la même grandeur qu'en S29**, où elle a détecté à `ν = 1,05` un schéma que « aucune
+> divergence » déclarait stable. La correction d'un cas de conception et la correction d'une mesure
+> du harnais convergent sur le même objet — ce qui est le signe qu'il s'agit du bon.
+
+#### Bilan des cinq
+
+**Aucun seuil n'a été inventé.** Chacun sort d'une formule ou d'un document du corpus :
+
+| Cas | Origine du remplacement | Nombre neuf ? |
+|---|---|---|
+| **C07** | exposant `−½` du facteur de résonance, ADR-011 §4 | **non** |
+| **C10** | `√(1 + m_a/m)` avec `m_a ≈ m` (A26 + Archimède) → `√2` | **non** |
+| **C11** | `z = η` exact, ADR-008 §3 · `\|G\| ≤ 1`, conservation | **non** |
+| **C15** | `Hs < 0,15 m`, SPEC-002 §4 ; le témoin est neuf, pas le seuil | **non** |
+| **C18** | un décompte `≥ 1`, qui vaut zéro aujourd'hui | **non** |
+
+La thèse annonçait qu'un seuil au moins serait à calibrer. **Zéro.** Ce que l'audit S29 avait pris
+pour un manque de seuils était en réalité un manque de **lecture** : les grandeurs étaient dans le
+corpus, sous les assertions qui ne les nommaient pas.
