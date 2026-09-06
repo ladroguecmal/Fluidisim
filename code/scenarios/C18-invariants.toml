@@ -1,0 +1,28 @@
+# C18 — Invariants du système. CAS-CANONIQUES §C18.
+# Batterie binaire, mode `check`, sans GPU, à chaque commit.
+#
+# Les assertions vivent ici et non dans le code du harnais : ce fichier est auto-suffisant et
+# lisible par quelqu'un qui n'a pas le code sous les yeux (SPEC-003 §3).
+
+[scenario]
+id          = "C18-invariants"
+t_sim_debut = 1735689600000000   # µs — fixe, donc la houle est identique à chaque exécution
+graine      = 20260905
+
+[region]
+hs          = 1.2
+tp          = 6.0
+theta_turns = 0.0
+composantes = 32
+
+[check]
+grille_cote  = 64
+grille_pas_m = 4.0
+
+[assertions]
+# I-06 : aucune allocation ne doit réussir après `seal()`. Le harnais en tente une délibérément ;
+# elle doit être refusée, et le compteur de refus vaut alors 1, jamais davantage.
+allocations = 1
+# I-03 : hash de conformité de B. Inscrit à la main, dans un commit qui précède la mesure
+# qu'il juge — ADR-028 §4. Une divergence entre plateformes se voit ici.
+hash_b      = "0x0000000000000000"

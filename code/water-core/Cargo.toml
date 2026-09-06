@@ -1,0 +1,9 @@
+[package]
+name = "water-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "Systeme d'eau — bibliotheque sans dependance moteur (ADR-020)"
+
+# ADR-020 : aucune dependance. Ni ici, ni jamais.
+[dependencies]

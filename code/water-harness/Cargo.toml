@@ -1,0 +1,12 @@
+[package]
+name = "water-harness"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "Harnais de validation — SPEC-003, etage H1"
+
+[dependencies]
+water-core = { path = "../water-core" }
+
+# Aucune dependance externe : le lecteur de scenario est ecrit a la main sur le sous-ensemble
+# de TOML dont SPEC-003 §3 a besoin. La construction doit fonctionner sans reseau.

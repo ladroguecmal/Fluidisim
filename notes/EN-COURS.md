@@ -75,13 +75,13 @@ que moi**.
 60 secondes**, sans GPU, à chaque commit.
 
 - [ ] **P1** — plan, jeton, et lever la règle « Markdown uniquement » de `CLAUDE.md`.
-- [ ] **P2** — `water-core` : types, services d'hôte, **B minimal**, hash de conformité.
+- [x] **P2** — `water-core` : types, services d'hôte, **B minimal**, hash de conformité.
   *Thèse : le déterminisme bit à bit d'I-03 ne survit pas à un `sin()` de bibliothèque standard —
   les fonctions transcendantes ne sont pas spécifiées bit à bit et diffèrent entre plateformes.
   ADR-003 impose « sémantique IEEE stricte, ordre de sommation fixé » et ne dit rien des
   transcendantes. Si la thèse tient, c'est une découverte que dix-neuf sessions de conception n'ont
   pas faite, et elle sort à la première ligne de code.*
-- [ ] **P3** — `water-harness` : lecteur de scénario, hôte, allocateur compteur avec `seal()`,
+- [x] **P3** — `water-harness` : lecteur de scénario, hôte, allocateur compteur avec `seal()`,
   mode `check`.
 - [ ] **P4** — **compiler, exécuter, vérifier.** Un scénario réel, un hash, un compte
   d'allocations, un temps mesuré.
@@ -103,3 +103,22 @@ que moi**.
 - **Zéro dépendance.** `water-core` n'a aucune dépendance — c'est ADR-020. Le harnais non plus : le
   lecteur de scénario est écrit à la main sur le sous-ensemble de TOML dont SPEC-003 §3 a besoin.
   Motif secondaire mais réel : la construction doit marcher sans réseau.
+
+#### P2 et P3 — le code
+
+`code/water-core` (types, phases, hôte, B minimal, hash) et `code/water-harness` (scénario, hôte
+harnais, mode check). **Zéro dépendance**, ni dans l un ni dans l autre : le lecteur de scénario est
+écrit à la main. 14 tests, tous au vert. Le harnais échoue correctement tant qu aucune référence de
+hash n est inscrite — c est l état de ce commit.
+
+**La thèse de P2 est confirmée, et c est la trouvaille de la session.** `f32::sin` n est pas
+spécifié bit à bit : IEEE 754 impose l exactitude des quatre opérations et de la racine carrée,
+jamais celle des transcendantes. ADR-003 §2 énumère « sémantique IEEE stricte, ordre de sommation
+fixé, PRNG entier » — la liste est **incomplète**, et l omission ne se voit qu en écrivant le code.
+Corrigé sans rien inventer : ADR-003 §2.2 posait déjà que « seules des phases repliées passent au
+GPU ». Le même mécanisme sert ici — phase u32 en fraction de tour, part temporelle entièrement
+entière, polynôme à coefficients fixes n employant que +, − et ×.
+
+**Trois erreurs à moi, trouvées par les tests.** Logique de quadrant fausse (sin(90°) donnait 0) ;
+valeur de référence FNV inventée, recalculée indépendamment en Python ; et un test qui affirmait une
+propriété vraie avec des données incapables de la révéler.

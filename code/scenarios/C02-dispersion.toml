@@ -1,0 +1,22 @@
+# C02 — Dispersion monochromatique. CAS-CANONIQUES §C02.
+# Une seule composante : le cas le plus simple où un défaut de célérité se voit.
+# Ce cas **produit `λ_cut`** (CAS-CANONIQUES §C02) ; H1 n'en exerce que la partie déterministe.
+
+[scenario]
+id          = "C02-dispersion"
+t_sim_debut = 1735689600000000
+graine      = 1
+
+[region]
+hs          = 2.0
+tp          = 8.0
+theta_turns = 0.0
+composantes = 1
+
+[check]
+grille_cote  = 32
+grille_pas_m = 8.0
+
+[assertions]
+allocations = 1
+hash_b      = "0x0000000000000000"

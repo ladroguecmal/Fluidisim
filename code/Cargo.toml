@@ -1,0 +1,19 @@
+[workspace]
+resolver = "2"
+members = ["water-core", "water-harness"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+
+# ADR-020 : le cœur est une bibliothèque sans dépendance moteur.
+# Aucun membre de ce workspace n'a de dépendance externe — ni le cœur, ni le harnais.
+# La construction doit fonctionner sans réseau.
+
+[profile.release]
+# I-03 : déterminisme bit à bit entre plateformes.
+# Rust ne contracte pas les opérations flottantes (pas de FMA implicite) ; rien à désactiver.
+# Voir ADR-029 §3.
+overflow-checks = true
+debug-assertions = false
