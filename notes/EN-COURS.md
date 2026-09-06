@@ -93,9 +93,9 @@ Si la thèse est juste, l'audit doit commencer par mes propres mesures avant de 
 - [x] **P1** — plan, jeton.
 - [x] **P2** — le critère, posé et éprouvé sur trois cas connus avant d'être appliqué en série.
       Un critère qui classe mal un cas évident classera mal les autres en silence.
-- [ ] **P3** — inventaire des **23 cas** de `CAS-CANONIQUES` : forme d'assertion, verdict, et pour
+- [x] **P3** — inventaire des **23 cas** de `CAS-CANONIQUES` : forme d'assertion, verdict, et pour
       les cas disqualifiés, **la grandeur qu'il aurait fallu assertir**.
-- [ ] **P4** — inventaire des assertions **du code** — `physics.rs`, `delta.rs`, `main.rs`. C'est
+- [x] **P4** — inventaire des assertions **du code** — `physics.rs`, `delta.rs`, `main.rs`. C'est
       là qu'elles s'exécutent, et un énoncé correct implémenté en « ça n'a pas cassé » ne vaut pas
       mieux qu'un énoncé fautif.
 - [ ] **P5** — corriger ce qui peut l'être dans le code, et **mesurer** que la correction change
@@ -156,3 +156,52 @@ n'a rien à voir avec ce qu'elle teste :
 Le remède de C est déjà employé dans ce dépôt sans avoir été nommé : `C01-jet` est un témoin, et le
 harnais signale comme **anomalie** le jour où il cesserait d'échouer. Ce qui manquait était de voir
 que **le même dispositif répond à un problème général**, et pas seulement à C01.
+
+#### P3-P4 — la thèse est fausse pour le corpus, et juste pour moi
+
+**Le corpus tient mieux que prévu.** Sur les **23 cas** et leurs 47 assertions, **cinq cas** portent
+au moins une assertion fautive :
+
+| Cas | Assertion en cause | Catégorie | Ce qu'il faudrait assertir |
+|---|---|---|---|
+| **C07** | « amplitude **nettement supérieure** » en `Fr_h ≈ 1` | **B** | un rapport d'amplitude, avec un seuil |
+| **C10** | « période **sensiblement plus longue** » avec masse ajoutée | **B** | le rapport `T_avec/T_sans`, contre `√(1 + m_a/m)` |
+| **C11** | « **aucune divergence** sur 120 s » · « **aucun tremblement visible** » | **B** ×2 | l'amplitude de l'oscillation parasite, en fraction du rayon |
+| **C15** | « **aucune plaque** ne se forme tant que `Hs > 0,15 m` » | **C** | l'épaisseur mesurée, avec un **témoin** à `Hs < 0,15` qui doit en produire |
+| **C18** | « l'hôte serveur **compile et tourne** sans δ ni rendu » | **C** | passe tant que l'hôte serveur n'existe pas |
+
+**Dix-huit cas sur vingt-trois sont exempts**, et **C20 est exemplaire** : *« assertion sur la pente,
+pas sur la valeur absolue — une pente juste avec un décalage constant révèle un défaut de détection
+de contact, une pente fausse révèle un défaut de modèle »*. Il distingue deux défauts par la forme
+de sa mesure, ce qu'aucun seuil absolu ne permettrait.
+
+**Le code aussi tient**, et pour une raison qui mérite d'être notée : j'y ai écrit des **témoins
+anti-vacuité** sans les nommer.
+
+```
+assert!(d.pas_effectues() > 100, "le solveur doit avoir travaillé");
+assert!(u_fixe < 1e-5,  "témoin : sans paroi mobile l'eau doit rester au repos");
+assert!(mobile.max_abs_u() > 0.1, "la paroi doit mettre l'eau en mouvement");
+```
+
+Chacun garde un cas contre la catégorie C : il échoue si le mécanisme testé est absent. Le réflexe
+était bon ; il n'était pas systématique, et rien ne l'exigeait.
+
+#### La thèse était juste sur un point, et c'est le mien
+
+**`stabilite_par_courant`, écrite en S27, est de catégorie B.** Elle classe une exécution en
+`Stable / Diverge / NonFini` et a répondu **« OK partout »** de `ν = 0,45` à `ν = 0,99`. J'en ai
+tiré, dans ADR-035 §4, la ligne *« aucune divergence, aucun `NaN` »*.
+
+> **Cette mesure n'a rien prouvé.** Elle ne pouvait échouer que sur une catastrophe, et C23 a montré
+> depuis qu'un dépassement de la condition de stabilité d'un facteur 2,5 ne produit aucune
+> catastrophe sur ce schéma.
+
+**Ce qui sauve la conclusion d'ADR-035 est ailleurs** : la mesure de **justesse** — l'erreur de
+période, grandeur continue, 0,0008 % à 0,0136 % — est de catégorie A, et c'est elle qui porte
+réellement le verdict. La ligne de stabilité était décorative.
+
+**Remède, en P5 : mesurer l'amplification du mode de maille.** La théorie de von Neumann gouverne
+une grandeur continue — le facteur d'amplification du mode le plus court représentable, `λ = 2·dx`.
+Au-dessus de 1, le schéma amplifie ; en dessous, il amortit. C'est exactement la grandeur dont
+« stable / instable » est le seuil, et elle se mesure sans attendre qu'un `NaN` apparaisse.
