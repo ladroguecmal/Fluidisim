@@ -11,9 +11,9 @@ Historique : 28 recensés en S01, 12 ajoutés en S02 (phénomènes secondaires),
 de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outillage auteur),
 6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance),
 3 en S11 (audit des points ouverts), 3 en S12 (mécanismes de détail), 3 en S13 (revue croisée des
-documents récents), 3 en S14 (audit inverse des invariants) — **89 au total**. **Vingt-neuf ont été
-trouvés dans nos propres écrits**, pas dans les documents sources : A49, A56, A57, A58, puis A65 à
-A89. La proportion
+documents récents), 3 en S14 (audit inverse des invariants), 2 en S15 (audit des registres) — **91 au total**.
+**Trente et un ont été trouvés dans nos propres écrits**, pas dans les documents sources : A49, A56,
+A57, A58, puis A65 à A91. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -130,6 +130,8 @@ ce que les sources avaient omis.
 | **A87** | Un invariant qui nomme un mécanisme vieillit avec lui | **1** | ADR-026 §1, audit S14 |
 | **A88** | La masse d'un nœud V était transférée à un solveur jamais déterministe | **1** | ADR-025, audit S14 |
 | **A89** | Une action décidée qui n'entre dans aucune liste exécutable n'est pas exécutée | 2 | AUDIT-REGISTRES-S15 §R03 |
+| **A90** | Un registre dit où un point est discuté, jamais s'il est refermé | 2 | AUDIT-REGISTRES-S15 §R04 |
+| **A91** | Une question dissoute peut revenir sous une autre forme, sans que son statut bouge | 2 | AUDIT-REGISTRES-S15 §R06 |
 
 Soixante-quatre angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -416,3 +418,19 @@ pendant quatre sessions.
   Une annonce faite en prose est une intention, pas une tâche — et cela vaut même à l'intérieur
   d'une seule session : le cas canonique annoncé par ADR-025 §4 en S14 P6a n'a pas été posé, le plan
   de S14 ne prévoyant aucun cas canonique.
+
+**Ajoutés en S15, en auditant les registres**
+
+- **A90** — **Un registre dit où un point est discuté, jamais s'il est refermé.** La colonne
+  « Traité dans » d'`ANGLES-MORTS` portait trois situations que rien ne distinguait : *supprimé*,
+  *comblé*, et *en attente d'un tiers*. Conséquence mesurable : **A59**, sévérité 1 — le géoïde
+  absent de l'outil de terrain, 70 m d'écart à 30 km — affichait exactement la même chose qu'un point
+  réglé. Un lecteur en concluait que le problème était traité ; il est **décrit**, et le restera tant
+  que l'équipe terrain n'aura pas changé le référentiel de son outil. Vaut pour tout registre qui
+  accumule sans jamais se vider : 89 points en quinze sessions, un seul portant une fermeture.
+- **A91** — **Une question dissoute peut revenir sous une autre forme, sans que son statut bouge.**
+  « Quelle erreur de précalcul est acceptable ? » avait été dissoute à juste titre : un domaine
+  préparé ne contient aucune information physique. Cinq sessions plus tard, une **seconde forme de
+  précalcul** — la graine cuite — en contenait, et avec elle un seuil de tolérance réel, à calibrer
+  au banc. Le registre annonçait toujours qu'il n'y avait rien à calibrer. Une dissolution est
+  valide *pour un mécanisme donné* ; elle ne l'est pas pour la question.
