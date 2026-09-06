@@ -303,6 +303,21 @@ struct Interface {
     h_droite: f32,
 }
 
+/// Quelle vitesse la borne de pas de temps doit-elle majorer — ADR-035 §2.
+///
+/// Le drapeau gouverne **la borne et le compteur de violations à la fois**. Les découpler
+/// recréerait exactement le défaut qu'ADR-035 §3 interdit : un pas qui borne une quantité
+/// pendant qu'un compteur en surveille une autre, et un rapport vert sur une contrainte violée.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Definition {
+    /// La vitesse **absolue** du fluide. C'est ce que faisait ce module avant S28, et c'est le
+    /// mutant que C23 doit faire tomber.
+    Absolue,
+    /// La vitesse **gouvernante** d'ADR-035 §2 : relative à la paroi sur une face coupée,
+    /// absolue ailleurs.
+    Gouvernante,
+}
+
 impl Delta1D {
     /// Construit le solveur et l'initialise **au repos exact**.
     ///
@@ -511,23 +526,71 @@ impl Delta1D {
         s * self.dx as f64
     }
 
-    /// Pas de temps admissible, en secondes. `dt = CFL·dx / max(|u| + √(g·h))`.
-    pub fn dt_cfl(&self) -> f32 {
+    /// `u_max` selon la définition demandée, et l'indice de la face qui le porte.
+    ///
+    /// # Ce que « face coupée » veut dire ici
+    ///
+    /// Dans ce montage 1D à bord mobile, **une seule face est au contact de la paroi** : celle du
+    /// bord gauche. C'est la seule où la vitesse relative diffère de l'absolue, et c'est donc la
+    /// seule que les deux définitions traitent différemment.
+    pub fn u_max(&self, def: Definition) -> (f32, usize) {
         let mut vmax = 0.0f32;
+        let mut ou = 0usize;
+        let u_p = self.u_paroi();
         for i in 1..=self.nx {
             let h = self.h[i];
             if h <= self.h_sec {
                 continue;
             }
-            let v = (self.hu[i] / h).abs() + (G * h).sqrt();
+            let u = self.hu[i] / h;
+            // La face gauche du domaine est la face coupée : c'est là, et là seulement, que la
+            // paroi impose un référentiel.
+            let u_gouvernante = match def {
+                Definition::Absolue => u.abs(),
+                Definition::Gouvernante => {
+                    if i == 1 {
+                        (u - u_p).abs()
+                    } else {
+                        u.abs()
+                    }
+                }
+            };
+            let v = u_gouvernante + (G * h).sqrt();
             if v > vmax {
                 vmax = v;
+                ou = i;
             }
         }
+        (vmax, ou)
+    }
+
+    /// Pas de temps admissible, en secondes — **borne analytique, calculée en amont** (ADR-035 §3).
+    ///
+    /// `dt = ν·dx / u_max`, avec `u_max` pris selon la définition **gouvernante**. Le pas ne
+    /// s'asservit jamais sur une vitesse mesurée après coup : il majore, avant le pas, à partir de
+    /// l'état connu.
+    pub fn dt_cfl(&self) -> f32 {
+        self.dt_cfl_selon(Definition::Gouvernante)
+    }
+
+    /// La même borne, selon une définition imposée. Réservé à C23, qui compare les deux.
+    pub fn dt_cfl_selon(&self, def: Definition) -> f32 {
+        let (vmax, _) = self.u_max(def);
         if vmax <= 0.0 {
+            // Aucune inconnue mobile **et** aucune célérité : le domaine est sec. Un pas d'une
+            // seconde est arbitraire, et il n'est atteignable que dans ce cas.
             return 1.0;
         }
         self.cfl * self.dx / vmax
+    }
+
+    /// Le nombre de Courant **réalisé** par un pas `dt`, selon la définition demandée.
+    ///
+    /// C'est le compteur, et il dérive de la **même** fonction `u_max` que la borne — condition
+    /// posée par ADR-035 §3.
+    pub fn courant_realise(&self, dt: f32, def: Definition) -> f32 {
+        let (vmax, _) = self.u_max(def);
+        vmax * dt / self.dx
     }
 
     /// Remplit les cellules fantômes — murs verticaux aux deux bords.

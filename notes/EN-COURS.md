@@ -89,7 +89,7 @@ rares, et les cas rares sont ceux qu'on teste le moins.
 - [x] **P2** — la paroi mobile : bord gauche du domaine se déplaçant à `u_p`, condition
       d'imperméabilité en mouvement. Vérifier que l'eau est bien poussée avant de mesurer quoi que
       ce soit — une paroi qui glisse sans rien déplacer ne teste rien.
-- [ ] **P3** — les **deux** définitions d'`u_max`, dans le **même** code, et le compteur de
+- [x] **P3** — les **deux** définitions d'`u_max`, dans le **même** code, et le compteur de
       violations qui en dérive. ADR-035 §3 l'exige : les découpler recrée le défaut qu'on mesure.
 - [ ] **P4** — **C23** : balayer `u_p`, mesurer `C_relatif / C_absolu`, et le Courant réellement
       réalisé sous chaque borne.
