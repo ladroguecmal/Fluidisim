@@ -181,7 +181,7 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 | # | Action | D'où elle vient | Qui la porte | État |
 |---|---|---|---|---|
 | S26-1 | Vérifier qu'un **spectre** se comporte comme la somme de ses modes : toutes les mesures portent sur un mode unique, et le solveur n'est pas linéaire | ADR-034 §3.2, **A121** | session | **ouverte** |
-| S26-2 | Trancher si la **transition W→δ réinjecte** les composantes que δ efface, ou si l'effacement est voulu | ADR-034 §3.3, **A122** | session | **ouverte** |
+| S26-2 | Trancher si la **transition W→δ réinjecte** les composantes que δ efface | ADR-034 §3.3, **A122** | session | **close (S31) — par dissolution** : δ est additif, il ne porte pas la houle mais l'écart. ADR-036 §1 |
 | S26-3 | Porter dans le dimensionnement que le budget se pose sur la **composante la plus courte à conserver** — facteur trente en cellules | ADR-034 §2.2, **A123** | session | **ouverte** |
 | S26-4 | Ajouter au protocole de **B3** que la loi de dissipation se remesure par candidat : la forme se transporte, le coefficient non | ADR-034 §3.1 | session | **ouverte** |
 
@@ -246,4 +246,18 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 > S29 avait pris pour un manque de seuils était un manque de **lecture** : les grandeurs étaient
 > dans le corpus, sous les assertions qui ne les nommaient pas. Trois des cinq réécritures sont même
 > **plus fortes** que l'énoncé d'origine.
+
+## Actions relevées en séance — S31
+
+| # | Action | D'où elle vient | Qui la porte | État |
+|---|---|---|---|---|
+| S31-1 | **Trancher si le sillage est un objet de W ou de δ.** ADR-011 §4 place son générateur dans W ; ADR-036 §3 chiffre sa mort s'il est dans δ. La réponse décide si ce résultat est majeur ou sans objet | **A139** | session | **ouverte** |
+| S31-2 | Écrire **C24, « conservation de forme d'un paquet »** : référence `1` exactement, mesure de l'élargissement à mi-hauteur. Aucun seuil à inventer | **A138** | session | **ouverte** |
+| S31-3 | Porter dans ADR-005 §2.1 que `λ_cut` dépend de la **taille du domaine** en `√D`, et pas seulement de `dx` | ADR-036 §4 | session | **ouverte** |
+| S31-4 | **Relire la prémisse** des autres questions ouvertes de longue date avant de les traiter — A122 s'est dissoute en une lecture de deux documents antérieurs | **A140** | session | **ouverte** |
+
+> **Note S31 — A122 a été recommandée quatre fois avant d'être lue une fois.** S26, S28, S29 et S30
+> l'ont toutes désignée comme « la question la plus lourde ouverte ». Elle s'est dissoute en relisant
+> ADR-001 §2 et ADR-005 §1, deux documents **antérieurs à sa formulation**. Le statut « lourde » l'a
+> rendue chaque fois plus intimidante, donc chaque fois plus reportée.
 

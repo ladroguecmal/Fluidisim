@@ -12,9 +12,9 @@ de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outi
 6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance),
 3 en S11 (audit des points ouverts), 3 en S12 (mécanismes de détail), 3 en S13 (revue croisée des
 documents récents), 3 en S14 (audit inverse des invariants), 2 en S15 (audit des registres), 2 en S16 (dossier B2), 2 en S17
-(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques), 4 en S22 (C01 et le premier δ), 4 en S23 (C04 et le lit sec), 4 en S24 (C08 et l'oracle), 4 en S25 (C03 et la dissipation), 4 en S26 (les harmoniques), 4 en S27 (le nombre de Courant), 3 en S28 (la paroi mobile), 3 en S29 (l'audit des assertions), 3 en S30 (la réécriture) — **137 au
-total**. **Soixante-dix-sept ont été trouvés dans nos propres écrits**, pas dans les documents sources :
-A49, A56, A57, A58, puis A65 à A137. La proportion
+(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques), 4 en S22 (C01 et le premier δ), 4 en S23 (C04 et le lit sec), 4 en S24 (C08 et l'oracle), 4 en S25 (C03 et la dissipation), 4 en S26 (les harmoniques), 4 en S27 (le nombre de Courant), 3 en S28 (la paroi mobile), 3 en S29 (l'audit des assertions), 3 en S30 (la réécriture), 3 en S31 (la dissolution d'A122) — **140 au
+total**. **Quatre-vingts ont été trouvés dans nos propres écrits**, pas dans les documents sources :
+A49, A56, A57, A58, puis A65 à A140. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -179,8 +179,11 @@ ce que les sources avaient omis.
 | **A135** | L'instrument qui mesure une assertion ne se lit pas dans son énoncé | **1** | AUDIT-ASSERTIONS-S29 §5 bis, C18 |
 | **A136** | Une assertion floue peut être plus faible que ce que la conception garantit déjà | 2 | C11, ADR-008 §3 |
 | **A137** | Un montage du corpus saute le régime que son assertion vise | **1** | C07, ADR-011 §4 |
+| **A138** | Un solveur ne conserve pas la forme d'un paquet que son équation conserve exactement | **1** | ADR-036 §5 |
+| **A139** | Le sillage est peut-être un objet de W et non de δ, et rien ne le dit | **1** | ADR-036 §6.2, ADR-011 §4 |
+| **A140** | Une question ouverte peut rester lourde des sessions durant sans que sa prémisse soit relue | 2 | ADR-036 §1, A122 |
 
-Quatre-vingt-dix-sept angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
+Cent angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
 
 **Quatre ont été trouvés dans nos propres écrits** — A49, A56, A57, A58 — et non dans les documents
@@ -737,8 +740,8 @@ pendant quatre sessions.
   d'ADR-034 §2.1, qui applique la loi composante par composante à une mer de houle, **suppose donc
   ce qui n'est pas mesuré**. Il reste utile comme ordre de grandeur ; il n'est pas une prédiction.
 
-- **A122** — **Si δ mange les composantes courtes, personne n'a dit si la transition les
-  réinjecte.** ADR-005 pose une zone de transition W→δ pensée comme un raccord *spatial* : ce qui
+- **A122** — ~~**Si δ mange les composantes courtes, personne n'a dit si la transition les
+  réinjecte.**~~ **DISSOUS en S31** — voir [`ADR-036`](../adr/ADR-036-delta-ne-porte-pas-la-houle-il-porte-l-ecart.md) §1 : δ est additif, il ne porte pas la houle mais l'écart, et il n'y a rien à réinjecter. *Énoncé d'origine conservé ci-dessous.* ADR-005 pose une zone de transition W→δ pensée comme un raccord *spatial* : ce qui
   entre dans δ y continue sa vie. ADR-034 montre que δ **filtre** — une onde de 3 s meurt en trois
   secondes à `dx = 1 m`. La question est donc neuve : la transition doit-elle réinjecter
   continûment depuis W ce que δ efface, ou l'effacement est-il le comportement voulu ? Les deux
@@ -879,4 +882,34 @@ pendant quatre sessions.
   grandeur à l'assertion : tant qu'elle disait « nettement supérieure », rien n'obligeait à vérifier
   que le montage produisait le régime. **Une assertion sans grandeur masque un montage incapable**,
   et les deux défauts se protègent l'un l'autre.
+
+**Ajoutés en S31, à la dissolution d'A122**
+
+- **A138** — **Un solveur ne conserve pas la forme d'un paquet que son équation conserve
+  exactement.** Saint-Venant est **non dispersif** : une perturbation initiale s'y scinde en deux
+  trains qui se propagent à `±c` **sans déformation**. Mesuré sur le véhicule, un paquet gaussien de
+  `σ = 1 m` **quintuple sa largeur** en 20 s et perd 90 % de son amplitude ; à `σ = 4 m`, +74 % et
+  −68 %. **Tout cet étalement est un artefact numérique**, et rien n'en mesurait la quantité — la
+  forme se dégrade avant l'amplitude, ce qui est la signature d'un filtre passe-bas appliqué à un
+  spectre. Un cas canonique manque : **C24, conservation de forme d'un paquet**, dont la référence
+  est l'invariance, donc `1` exactement, sans aucun seuil à inventer. Sévérité 1 — un sillage, un
+  remous et une éclaboussure sont tous des paquets, et c'est ce que δ existe pour produire.
+
+- **A139** — **Le sillage est peut-être un objet de W et non de δ, et rien ne le dit.** ADR-036 §3
+  chiffre la mort d'un sillage porté par δ : deux mètres derrière une barque à 3 m/s, la distance
+  visible variant comme `v⁴/dx`. Mais **ADR-011 §4 place le générateur de sillage dans la couche
+  W** — *« le générateur de sillage de la couche W doit prendre `h` en entrée »*. Si le sillage est
+  un objet de W, il n'est pas discrétisé, il ne se dissipe pas, et tout le §3 tombe. **Aucun
+  document ne tranche**, et les deux lectures sont défendables : un sillage est une onde
+  (donc W) mais il est créé par un objet local en mouvement (donc δ). Sévérité 1 : la réponse
+  décide si le résultat le plus visible de S31 est un problème majeur ou sans objet.
+
+- **A140** — **Une question ouverte peut rester lourde des sessions durant sans que sa prémisse soit
+  relue.** A122 a été qualifiée de « question la plus lourde ouverte » en S26, S28, S29 et S30 —
+  quatre sessions, quatre recommandations. Elle s'est dissoute en une lecture d'ADR-001 §2 et
+  d'ADR-005 §1, deux documents antérieurs à sa formulation. **Ce qui manquait n'était pas un
+  travail, c'était une relecture** ; et le statut « ouverte, lourde » l'a rendue chaque fois plus
+  intimidante, donc chaque fois plus reportée. Réflexe : avant d'ouvrir une question difficile,
+  relire ce que le corpus dit déjà de sa **prémisse** — c'est le geste le moins cher et il n'était
+  fait par aucune des quatre sessions qui l'avaient recommandée.
 

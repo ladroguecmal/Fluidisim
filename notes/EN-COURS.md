@@ -99,7 +99,7 @@ secondes.
 - [x] **P5** — le critère général de survie à la traversée, en fonction de `λ`, `dx` et de la
       **taille du domaine** — trois grandeurs, là où le corpus n'en relie que deux.
 - [x] **P6** — **ADR-036** : ce que A122 devient.
-- [ ] **P7** — répercussions : ADR-005, ADR-034, index, angles morts, actions, décomptes.
+- [x] **P7** — répercussions : ADR-005, ADR-034, index, angles morts, actions, décomptes.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
