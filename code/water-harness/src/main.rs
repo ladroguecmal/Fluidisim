@@ -361,6 +361,22 @@ fn executer_physics_solveur() -> usize {
         );
     }
 
+    println!("  paquet localisé : ADR-034 prédit qu'il s'étale avant de s'éteindre");
+    for sigma in [1.0f32, 4.0] {
+        println!("    σ = {sigma} m, dx = 0,5 m");
+        println!("        t (s)   pic (m)   largeur à mi-hauteur (m)   pic/pic0   largeur/largeur0");
+        let r = physics::c31_paquet_localise(&mut host, sigma, 400, &[2.0, 5.0, 10.0, 20.0]);
+        if let Some((_, p0, l0)) = r.first().copied() {
+            for (t, p, l) in &r {
+                println!(
+                    "     {t:>8.2}   {p:>7.5}   {l:>22.2}   {:>8.3}   {:>16.3}",
+                    p / p0,
+                    l / l0
+                );
+            }
+        }
+    }
+
     println!("  harmoniques à nx = 400, ν = 0,45 — la loi prédit /n en périodes propres, /n² en secondes");
     println!("   mode   demi-vie (périodes)  prédite    demi-vie (s)   prédite    écart");
     for (n, dv_p, pr_p, dv_s, pr_s) in

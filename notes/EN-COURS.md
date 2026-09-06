@@ -94,9 +94,9 @@ secondes.
       donc ce que la loi de dissipation gouverne réellement.
 - [x] **P3** — le sillage : `λ = 2πv²/g`, la résolution qu'il reçoit, la demi-vie qui en découle.
       **Chiffrer avant de conclure** — l'ordre de grandeur peut démentir la thèse.
-- [ ] **P4** — **mesurer** sur le véhicule : une perturbation courte lâchée dans un domaine, et son
+- [x] **P4** — **mesurer** sur le véhicule : une perturbation courte lâchée dans un domaine, et son
       amplitude après une traversée. La loi prédit, la mesure vérifie.
-- [ ] **P5** — le critère général de survie à la traversée, en fonction de `λ`, `dx` et de la
+- [x] **P5** — le critère général de survie à la traversée, en fonction de `λ`, `dx` et de la
       **taille du domaine** — trois grandeurs, là où le corpus n'en relie que deux.
 - [ ] **P6** — **ADR-036** : ce que A122 devient.
 - [ ] **P7** — répercussions : ADR-005, ADR-034, index, angles morts, actions, décomptes.
@@ -153,3 +153,55 @@ et la période valant `T ∝ v`, la durée de vie va comme **`v³`** et la **dis
 barques, canoës, nageurs — n'auront **aucun sillage**, tandis que les navires rapides en auront un
 qui traverse le domaine. C'est probablement l'inverse de ce qu'on attend : une barque qui glisse sans
 laisser de trace se remarque immédiatement.
+
+#### P4 — le paquet s'étale, et tout l'étalement est un artefact
+
+`σ = 1 m` et `σ = 4 m`, même amplitude, `dx = 0,5 m`, fond plat :
+
+| | `σ = 1 m` | | `σ = 4 m` | |
+|---|---|---|---|---|
+| `t` | pic/pic₀ | largeur/largeur₀ | pic/pic₀ | largeur/largeur₀ |
+| 2 s | 0,276 | 2,00 | 0,466 | 1,16 |
+| 5 s | 0,193 | 2,80 | 0,425 | 1,26 |
+| 10 s | 0,142 | 3,60 | 0,376 | 1,37 |
+| **20 s** | **0,102** | **5,00** | **0,315** | **1,74** |
+
+**Le paquet fin perd 90 % de son amplitude et quintuple sa largeur ; le paquet large n'en perd que
+68 % et n'élargit que de 74 %.** C'est la prédiction d'ADR-034 : les composantes courtes meurent
+plus vite, donc un paquet riche en composantes courtes se dégrade davantage — et il se dégrade
+**en forme** avant de se dégrader en amplitude.
+
+> **Et l'étalement est intégralement un artefact.** Saint-Venant est **non dispersif** : une
+> perturbation initiale s'y scinde en deux trains qui se propagent à `±c` **sans déformation**. La
+> forme est conservée par l'équation que le solveur prétend résoudre. **Tout ce qui s'étale est donc
+> du numérique**, et rien n'en mesurait la quantité.
+
+C'est un cas canonique naturel, et il n'existe pas : *conservation de forme d'un paquet*, dont la
+référence analytique est l'invariance, et la mesure l'élargissement relatif.
+
+#### P5 — le critère de traversée relie trois grandeurs, là où le corpus n'en reliait que deux
+
+Une perturbation survit à la traversée d'un domaine de largeur `D` si sa demi-vie dépasse le temps
+de traversée, compté en périodes — soit `D/λ` :
+
+```
+ln2·(λ/dx) / (2π²(1−ν))  ≥  D/λ        ⟹        λ²  ≥  K·dx·D
+```
+
+avec `K = 2π²(1−ν)/ln2` : **28,5** à `ν = 0,45`, **8,54** à `ν = 0,70`.
+
+| Domaine | `dx` | `λ_min` (`ν = 0,45`) | `λ_min` (`ν = 0,70`) |
+|---|---|---|---|
+| 50 m | 0,25 m | 18,9 m | 10,3 m |
+| 100 m | 0,50 m | 37,7 m | 20,7 m |
+| 200 m | 1,00 m | 75,5 m | 41,3 m |
+| 1 000 m | 2,00 m | 238,7 m | 130,7 m |
+
+> **La longueur d'onde minimale transportable dépend de la *taille du domaine*, en `√D`.** Le corpus
+> ne reliait `λ_cut` qu'à `dx` — ADR-005 §2.1, « la plus petite longueur d'onde que δ transporte
+> correctement, rapportée à `dx` ». **Le rapport à `dx` seul est insuffisant** : doubler le domaine
+> à résolution constante remonte `λ_min` de 41 %.
+
+**Et cela boucle avec le sillage.** Un bateau à 5 m/s produit `λ = 16 m` ; dans un domaine de 200 m
+à `dx = 1 m`, il faudrait `λ ≥ 75 m` pour que le sillage traverse. Il n'ira pas au bout — ce que la
+mesure de P3 disait déjà en distance : 16 m derrière la coque.

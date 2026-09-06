@@ -1876,3 +1876,105 @@ mod tests_amplification {
         }
     }
 }
+
+/// Ce qu'une perturbation **localisée** devient dans un domaine δ — S31.
+///
+/// # Pourquoi cette mesure et pas une de plus sur un mode propre
+///
+/// Toutes les mesures de dissipation, de S25 à S26, portent sur des **modes propres** — une seule
+/// longueur d'onde à la fois. Or δ ne porte pas des modes propres : il porte des **perturbations
+/// locales**, sillage, impact, éclaboussure. C'est ce que l'additivité `B + W + δ` (ADR-001 §2)
+/// impose, et c'est ce que S31 a établi en dissolvant A122.
+///
+/// Un paquet localisé contient un **spectre**. ADR-034 prédit que ses composantes courtes meurent
+/// `n²` fois plus vite que les longues : le paquet ne doit donc pas s'éteindre uniformément —
+/// **il doit s'étaler**, perdant sa finesse avant son amplitude.
+///
+/// Renvoie `(t, amplitude du pic, largeur à mi-hauteur)`.
+pub fn c31_paquet_localise(
+    host: &mut water_core::HostServices,
+    sigma_m: f32,
+    nx: usize,
+    instants: &[f64],
+) -> Vec<(f64, f64, f64)> {
+    use water_core::{Bassin, Delta1D, EtatInitial};
+
+    let montage = Bassin {
+        nx,
+        longueur_m: 200.0,
+        origine_m: -100.0,
+        profondeur_gauche_m: 2.0,
+        pente: 0.0,
+        eta0_m: 0.0,
+        etat_initial: EtatInitial::Bosse {
+            amplitude_m: 0.02,
+            sigma_m,
+            x_m: 0.0,
+        },
+    };
+
+    let mut d = match Delta1D::configure(host, montage) {
+        Ok(d) => d,
+        Err(_) => return Vec::new(),
+    };
+
+    // Le paquet initial se scinde en deux trains qui partent en sens opposés : on suit celui de
+    // droite, dont le pic est le maximum de `η` sur la moitié droite du domaine.
+    let mesure = |d: &Delta1D| -> (f64, f64) {
+        let mut pic = 0.0f64;
+        let mut i_pic = 0usize;
+        for i in 0..d.nx() {
+            if d.x(i) < 0.0 {
+                continue;
+            }
+            let v = d.eta(i) as f64;
+            if v > pic {
+                pic = v;
+                i_pic = i;
+            }
+        }
+        if pic <= 0.0 {
+            return (0.0, f64::NAN);
+        }
+        // Largeur à mi-hauteur autour du pic.
+        let demi = pic * 0.5;
+        let mut gauche = d.x(i_pic) as f64;
+        for i in (0..i_pic).rev() {
+            if (d.eta(i) as f64) < demi {
+                gauche = d.x(i) as f64;
+                break;
+            }
+        }
+        let mut droite = d.x(i_pic) as f64;
+        for i in i_pic..d.nx() {
+            if (d.eta(i) as f64) < demi {
+                droite = d.x(i) as f64;
+                break;
+            }
+        }
+        (pic, droite - gauche)
+    };
+
+    let mut sortie = Vec::new();
+    let mut t = 0.0f64;
+    let (p0, l0) = mesure(&d);
+    sortie.push((0.0, p0, l0));
+
+    for &cible in instants {
+        while t < cible {
+            let mut dt = d.dt_cfl();
+            if !dt.is_finite() || dt <= 0.0 {
+                break;
+            }
+            let reste = (cible - t) as f32;
+            if dt > reste {
+                dt = reste;
+            }
+            d.pas_equilibre(dt);
+            t += dt as f64;
+        }
+        let (p, l) = mesure(&d);
+        sortie.push((t, p, l));
+    }
+    sortie
+}
