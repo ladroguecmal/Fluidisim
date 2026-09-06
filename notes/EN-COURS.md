@@ -81,7 +81,7 @@ l'intention.
   (ADR-012 budgets et dégradation, ADR-014, ADR-016, ADR-018, ADR-021 autorité).
   *Thèse : un document d'interface écrit vite viole d'abord les invariants de ressources — I-06
   allocation, I-16 profil — parce qu'ils ne se voient qu'en additionnant des tailles.*
-- [ ] **P3** — SPEC-006 contre SPEC-001 à SPEC-005 : chiffres, cadences, unités, renvois.
+- [x] **P3** — SPEC-006 contre SPEC-001 à SPEC-005 : chiffres, cadences, unités, renvois.
 - [ ] **P4** — ADR-022 contre le corpus : I-17 tient-il partout, la couche V, le harnais, SPEC-005.
 - [ ] **P5** — ADR-023 contre le corpus : les quatre mécanismes contre ADR-008, ADR-010, ADR-013,
   ADR-015, et contre les chiffres de SPEC-001/002.
@@ -176,3 +176,47 @@ mérite d'être écrite — quelqu'un invoquera I-13 pour refuser §4.1.
 1/30 s = 900. Vérifié une à une.
 · **ADR-021 §4** : le rang le plus bas de SPEC-006 §7 n'élague que `TransductionLocale` et
 `AnticipationLocale`, jamais `Serveur`. Transposition exacte, sans dérive.
+
+#### P3 — SPEC-006 contre SPEC-001 à SPEC-005
+
+**Arithmétique revérifiée, et elle tient sauf sur les structures.** Cascade 1024² en RG16F =
+**4,19 Mo** ; quatre cascades à 30 Hz = **503 Mo/s** ✓. Zone de 4 km à 64 m = **3 906** cellules,
+soit 130 évaluations/s contre 2 000 pour 200 agents à 10 Hz — rapport **15,4** ✓. Tuile de
+16×16 cellules = 1 024 m, 256 échantillons × 20 o = **5 Ko**, seize tuiles ≈ **78 Ko** ✓. Flux
+dissipé `P = E·c_g` : 15,3 kW/m à `Hs = 2 m`, et **337 kW/m à `Hs = 8 m`** — au-delà des 65 kW/m
+que saturerait un `half` en W/m, ce qui confirme le choix du kW/m ✓. Vitesse orbitale
+`πHs/T = 0,63 m/s` à `Hs = 1 m`, `T = 5 s` ✓.
+
+**E04 est plus large que je ne l'avais écrit.** La taille de `WaveEvent` est reprise dans **six
+documents et neuf endroits** — ADR-009 §2, ADR-021 §3.1, SPEC-003 §8, SPEC-006 §3.1 et §3.1 *(coût
+réseau)*, ADR-022 §2.3 et §4.2, ADR-023 §4.1, REVUE-CROISEE-S08 — et non quatre. Correction de ma
+propre note de P2.
+
+**E04 bis — la même erreur, une seconde fois dans SPEC-006.** `ListenerAggregate` (§4.2) est annoncé
+à **45 octets**. Somme des champs : `foam_active[3]` 6 + `foam_residual[3]` 6 +
+`aeration_sector[16]` 32 + `immersion` 2 = 46, plus `ListenerId` → **50 octets**. Deux structures
+sur deux mal comptées dans le même document. Ce n'est donc pas un accident : **aucune taille de
+structure du corpus n'a jamais été vérifiée**, et les deux revues croisées précédentes ont contrôlé
+des formules et des tables, jamais une somme de champs.
+
+**E06, gravité 2 — une cadence du chemin poussé n'est pas un diviseur du tick.**
+SPEC-006 §2.3 pose : « Chaque canal a sa cadence propre, **diviseur entier du tick de simulation**
+(30 Hz, ADR-012 §7). » Et la table qui suit immédiatement inscrit : « Champ `F`, poignée GPU |
+**par tick de rendu** ».
+Or ADR-012 §7 dit exactement le contraire du rendu : « Tick de simulation **fixe à 30 Hz,
+indépendant du taux d'images**. Le rendu interpole. » Le tick de rendu n'est pas un diviseur du tick
+de simulation ; il n'a aucun rapport fixe avec lui.
+Conséquences réelles : une publication cadencée sur le rendu n'est pas reproductible d'une exécution
+à l'autre, l'ordonnanceur ne peut pas la budgéter, et sur une machine à 144 Hz elle produirait
+presque cinq fois plus de travail que sur une machine à 30 Hz — pour un champ dont ADR-014 §6 dit
+qu'il est « toujours actif, c'est le socle ».
+**Résolution** : la poignée GPU d'écume est publiée sur le **tick de simulation** ou un diviseur, et
+le rendu interpole comme il le fait pour tout le reste (ADR-012 §7). Aucun mécanisme nouveau — la
+règle existait, la table l'a contredite une ligne plus bas.
+
+**Contrôles passés.** `flow_speed` (SPEC-006 §5.1) ↔ `u_total` (SPEC-004 §2, renommé en S09) :
+cohérent, et §5.5 porte le chiffre qui le motive. `TraversabilitySample` = 19 octets de champs
+alignés à 20 : conforme à l'annonce, **mais** le document ne dit nulle part si ses `struct` sont
+supposés compactés ou alignés — convention absente, à écrire (cf. E04). Portées d'invalidation
+(§5.3 sous-cellule) ↔ ADR-006 §2 : réutilisation explicite, sans doublon. Polyligne de déferlement
+(§6) ↔ SPEC-005 §2 : la donnée est bien cuite et republiée, pas recalculée.
