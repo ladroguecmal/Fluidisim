@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-06
-Session en cours : —
+Session en cours : S29 — audit des assertions : ce que chaque cas peut voir
 Dernière session : S28 — 2026-09-06 — C23 : la borne tient sa promesse, et le défaut ne casse rien
-Session suivante : S29 — réexaminer les assertions des cas (S28-3) *(recommandé)*, ou la réinjection W/δ (S26-2), ou H2
+Session suivante : S30 — la réinjection W/δ (S26-2) ou H2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
