@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-06
-Session en cours : —
+Session en cours : S25 — C03, la seiche, et la dissipation numérique
 Dernière session : S24 — 2026-09-06 — C08 : le test qui ne peut pas conclure, et l'oracle qui est le banc
-Session suivante : S25 — C03, la seiche *(recommandé)* — demande la friction, ou C22, ou H2
+Session suivante : S26 — C22 (formaliser le cas régulier) ou H2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
