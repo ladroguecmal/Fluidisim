@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-06
-Session en cours : —
+Session en cours : S28 — C23, le nombre de Courant en présence d'une paroi mobile
 Dernière session : S27 — 2026-09-06 — le nombre de Courant, et une marge qui protégeait d'un trou qu'elle ignorait
-Session suivante : S28 — C23, le Courant à paroi mobile *(recommandé, S27-1)*, ou la réinjection W/δ (S26-2), ou H2
+Session suivante : S29 — la réinjection W/δ (S26-2) ou H2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :

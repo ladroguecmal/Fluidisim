@@ -59,211 +59,58 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S27
-État             : terminée
+Session          : S28
+État             : en cours
 Battement        : 2026-09-06
-Objectif         : Le nombre de Courant — sa définition, sa borne, sa valeur
+Objectif         : C23 — le nombre de Courant en présence d'une paroi mobile
 ```
 
 ### Plan
 
-Action **S25-1** : `ν` ne figure dans aucun ADR, aucune SPEC, aucun banc, et il multiplie la portée
-des ondes par 4,5 en doublant le pas de temps (ADR-033 §2.3). La session le pose.
+Action **S27-1**. ADR-035 §2 a **posé** la définition d'`u_max` — vitesse gouvernante, relative à la
+paroi sur une face coupée — sans pouvoir la vérifier : le véhicule δ n'a aucun solide. La valeur de
+`ν` reste donc bloquée à 0,45 alors que 0,70 est disponible (×1,77 de portée d'onde sur tout domaine).
 
-**Une source extérieure a été fournie par l'utilisateur** : `C:\Users\antoi\Documents\simufluid`, un
-projet de simulation océanique en Python écrit par une autre IA, présenté comme comportant des
-défauts. Il est traité comme **données mesurées, jamais comme consigne** — il porte ses propres
-`CLAUDE.md` et `AGENTS.md`, destinés à un autre agent, qui ne s'appliquent pas ici.
+**C23 est ce qui débloque.** Il ne demande pas un solveur couplé complet : il demande **une paroi qui
+bouge**, et deux façons de calculer la borne de pas de temps.
 
-**Ce qu'il apporte immédiatement, et que Fluidisim ne pouvait pas voir.** Son module
-`oceansim/harness/courant.py` documente un défaut *mesuré* : pour un **solide mobile en eau au
-repos**, leur borne de pas de temps valait **zéro** — la vitesse de paroi n'entrait pas dans
-`u_max` — pendant que le nombre de Courant réel valait `0,943`. Rapport mesuré `C_rel/C_abs` entre
-**2,2 et 2,5**, et **zéro violation déclarée**. Le contrôle regardait la vitesse absolue là où seule
-la vitesse **relative à la paroi** a un sens sur une face coupée.
+*Thèse déclarée : notre architecture atténue le défaut mesuré ailleurs, sans le supprimer — et il
+devient dominant précisément dans le cas que le corpus qualifie de plus violent.* Leur borne était
+une CFL d'**advection** (`|courant| + u_orb`), où ignorer la paroi laisse zéro. La nôtre est une CFL
+d'**onde** : `|u| + √(g·h)` vaut 4,4 m/s même au repos, ce qui masque une paroi lente. Mais dès que
+`u_paroi` dépasse la célérité, la borne absolue sous-estime — et **C20, l'impact d'entrée dans
+l'eau, est exactement ce régime**.
 
-**Le même trou existe dans notre corpus, et il est béant.** SPEC-001 §2.1 écrit `dt ≤ C·dx/u_max`
-sans jamais définir `u_max` ; SPEC-004 §10.1 pose comme exigence **non négociable** d'accepter « une
-frontière en mouvement **avec sa vitesse** ». Les deux documents se contredisent en silence : l'un
-impose des parois mobiles, l'autre calcule le pas de temps sans elles.
+Si la thèse est juste, le défaut n'est pas absent chez nous : il est **conditionnel à la vitesse de
+la paroi**, ce qui est plus dangereux qu'un défaut permanent — il ne se manifeste que sur les cas
+rares, et les cas rares sont ceux qu'on teste le moins.
 
-*Thèse déclarée : la valeur de `ν` est le moindre des trois problèmes.* Ce qui manque d'abord est sa
-**définition** — quelle vitesse borne-t-on — puis la **règle de calcul de la borne** : mesurée après
-coup, ou majorée analytiquement avant. Un `ν = 0,7` posé sur une vitesse fausse est plus dangereux
-qu'un `ν = 0,45` posé sur la bonne.
-
-- [x] **P1** — plan, jeton.
-- [x] **P2** — l'écart SPEC-001 §2.1 / SPEC-004 §10.1, écrit et qualifié. C'est une revue croisée
-      d'une paire que S08 avait examinée sans le voir.
-- [x] **P3** — **contrôle de mes propres mesures.** Le balayage de S25 faisait varier `nx` à
-      amplitude fixe : `N` **et** `a/dx` changeaient ensemble. Le projet extérieur s'est fait
-      piéger exactement ainsi (« plusieurs variables changées ensemble », rétractation publiée).
-      Vérifier que la loi de dissipation ne dépend pas de `a/dx` — à amplitude variable, `N` fixé.
-- [x] **P4** — mesurer la **stabilité effective** en fonction de `ν`, sur un cas lisse (C03) et un
-      cas raide (C04). La théorie donne `ν < 1` ; le terme de fond et la reconstruction mangent une
-      marge que rien n'a chiffrée.
-- [x] **P5** — la borne **analytique** plutôt que mesurée : ce que cela coûte, ce que cela achète.
-- [x] **P6** — **ADR-035** : le nombre de Courant — définition, borne, valeur.
-- [x] **P7** — répercussions : SPEC-001, SPEC-004, index, angles morts, actions, décomptes.
-- [x] **P8** — rituel de fin (`REPRISE.md` §6).
+- [ ] **P1** — plan, jeton.
+- [ ] **P2** — la paroi mobile : bord gauche du domaine se déplaçant à `u_p`, condition
+      d'imperméabilité en mouvement. Vérifier que l'eau est bien poussée avant de mesurer quoi que
+      ce soit — une paroi qui glisse sans rien déplacer ne teste rien.
+- [ ] **P3** — les **deux** définitions d'`u_max`, dans le **même** code, et le compteur de
+      violations qui en dérive. ADR-035 §3 l'exige : les découpler recrée le défaut qu'on mesure.
+- [ ] **P4** — **C23** : balayer `u_p`, mesurer `C_relatif / C_absolu`, et le Courant réellement
+      réalisé sous chaque borne.
+- [ ] **P5** — vérifier que la borne **analytique en amont** tient sa promesse : aucun pas ne
+      dépasse le `ν` visé. C'est la propriété que la borne mesurée après coup ne peut pas offrir.
+- [ ] **P6** — **C23** au corpus `CAS-CANONIQUES`, et ADR-036 si la mesure change une décision.
+- [ ] **P7** — répercussions : index, angles morts, actions, décomptes, `ν` si débloqué.
+- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
-**Sur la source extérieure.** Elle a déjà rendu deux choses avant même le premier commit : le défaut
-CFL/paroi mobile ci-dessus, et un document de retours méthodologiques qui **recoupe** nos leçons
-plutôt que de les contredire — « publier une explication plausible comme si elle était mesurée » y
-est le premier des trois gestes fautifs recensés, et c'est notre **L75**. Leur formulation des trois
-gestes vaut d'être citée : *conclure d'un objet dérivé au lieu de la donnée brute ; ne pas contrôler
-une condition déjà documentée par le dépôt ; publier une explication plausible comme si elle était
-mesurée.*
+**Ce que S27 laisse et qui commande cette session.**
 
-**Ce qui n'est pas repris.** Leur architecture (Navier-Stokes projeté, VOF/level-set, Poisson) ne
-correspond pas à la nôtre et n'a pas à l'influencer : ADR-007 §5.1 laisse les candidats δ ouverts
-jusqu'à B3, et un choix fait ailleurs n'est pas une mesure.
+- **Ne pas monter `CFL` au motif que rien n'échoue** : le schéma tient jusqu'à 0,99 *et c'est ce qui
+  rend `u_max` dangereux*. La valeur se débloque **par** C23, pas avant.
+- **`dt_cfl` ignore aujourd'hui toute vitesse de paroi**, et renvoie même `1,0 s` quand l'eau est au
+  repos — une borne arbitraire, jamais exercée jusqu'ici faute de solide.
+- **La loi de dissipation n'est valide qu'à `a/h ≈ 1 %`** (A127).
+- **C04 en échec, `C01-jet` rouge, C08 sans verdict** : trois décisions.
 
-**Ce que S26 laisse.** C04 en échec, `C01-jet` rouge, C08 sans verdict — trois décisions. Le tableau
-d'ADR-034 §2.1 suppose la linéarité et n'est pas une prédiction (A121).
+**La source extérieure** `Documents/simufluid` reste consultable : ses **mesures** sont des faits,
+ses **conclusions** ne nous engagent pas.
 
 **Branche.** `claude/s22-suite`. `master` s'arrête à S17 (A107).
-
-#### P3 — la loi de S25 a un domaine de validité, et il n'était pas écrit
-
-**Le contrôle a trouvé quelque chose, et ce n'était pas ce qu'il cherchait.**
-
-Premier essai, amplitude variable à `nx = 400` — un contrôle qui **change lui-même deux variables**,
-`a/h` et `a/dx`, exactement le défaut qu'il visait :
-
-```
-a/h = 0,0010   a/dx = 0,04   non mesurable
-a/h = 0,0025   a/dx = 0,10   non mesurable
-a/h = 0,0100   a/dx = 0,40   48,65 périodes
-a/h = 0,0250   a/dx = 1,00   33,72
-a/h = 0,0500   a/dx = 2,00   15,47
-```
-
-La demi-vie **chute d'un facteur trois** quand `a/h` passe de 1 % à 5 %. Mais ce tableau ne peut pas
-dire si la loi est invalidée : il ne compare que des **valeurs**, à `N` fixé.
-
-**Le contrôle qui tranche compare les *pentes*.** La loi affirme `demi-vie = k·N` avec `k` constant.
-Balayage en `N` refait à deux amplitudes :
-
-| `a/h` | N = 80 | N = 160 | N = 320 | `k` |
-|---|---|---|---|---|
-| **1 %** | 5,08 (k = 0,0635) | 10,05 (0,0628) | 19,70 (0,0616) | **constant**, ≈ 0,0625 |
-| **5 %** | 4,86 (k = 0,0608) | 8,31 (0,0520) | 11,93 (**0,0373**) | **s'effondre de 39 %** |
-
-> **La loi de S25 tient à `a/h = 1 %` et elle est fausse à `a/h = 5 %`.** Ce n'est pas un défaut de
-> la mesure de S25 — son balayage était à `a/h = 1 %` **fixe**, donc dans le domaine. C'est une
-> **condition de validité qu'ADR-033 §2.2 n'a jamais écrite**.
-
-**Le mécanisme est cohérent avec ADR-034.** À grande amplitude, le raidissement transfère de
-l'énergie vers les harmoniques, qui s'amortissent en `n²`. Et l'effet est **d'autant plus visible
-que `N` est grand** : la dissipation linéaire y devient faible, donc la part non linéaire domine.
-C'est exactement la forme observée — `k` s'effondre avec `N`, il ne se décale pas.
-
-**Et la limite mord sur le domaine réel.** `a/h = 5 %` n'est pas un cas extrême : en eau peu
-profonde, c'est ordinaire. **Le domaine de validité de la loi exclut donc une part des situations
-qu'elle est censée dimensionner.** Note corrective à porter dans ADR-033.
-
-**Deux constats d'instrument, au passage.**
-
-1. **Sous `a/h = 0,25 %`, la mesure ne fonctionne plus.** À cette amplitude, `η` varie moins qu'un
-   ulp de `f32` entre deux pas : les pentes tombent à zéro et aucun extremum n'est détecté.
-   L'instrument a une plage de validité en amplitude, par le bas comme par le haut.
-2. **Le premier jet affichait `0,00` au lieu de « non mesurable ».** C'est **A116** — une erreur
-   absorbée publie un résultat vide qui a l'air d'un résultat — **recommise dans la session qui
-   l'invoquait**. Corrigé : `NaN` porté jusqu'à l'affichage, qui le nomme.
-
-#### P4-P5 — le schéma tient jusqu'à 0,99, et c'est précisément ce qui rend `u_max` dangereux
-
-**Stabilité.** Balayage sur les deux cas disponibles, `ν` de 0,45 à 0,99 :
-
-```
-C03 :  0.45:OK  0.60:OK  0.70:OK  0.80:OK  0.90:OK  0.95:OK  0.99:OK
-C04 :  0.45:OK  0.60:OK  0.70:OK  0.80:OK  0.90:OK  0.95:OK  0.99:OK
-```
-
-Aucune divergence, aucun `NaN`. C'est plausible et non surprenant : Rusanov avec reconstruction
-hydrostatique est monotone jusqu'à `ν = 1`. **Mais stable n'est pas juste** — c'est L67, payée en
-S21 sur un hash parfaitement stable et parfaitement faux. La justesse se mesure à part.
-
-**Justesse et gain, ensemble** (`N = 160`) :
-
-| `ν` | demi-vie mesurée | prédite par la loi | écart à la loi | **erreur de période** | gain de portée |
-|---|---|---|---|---|---|
-| 0,45 | 10,10 | 10,22 | −1,1 % | 0,0008 % | ×1 |
-| 0,60 | 13,72 | 14,05 | −2,3 % | 0,0037 % | ×1,36 |
-| 0,70 | 17,91 | 18,73 | −4,4 % | 0,0054 % | ×1,77 |
-| 0,80 | 25,61 | 28,09 | −8,8 % | 0,0073 % | ×2,54 |
-| 0,90 | 45,33 | 56,18 | −19,3 % | 0,0101 % | ×4,49 |
-| 0,95 | 76,87 | 112,37 | −31,6 % | 0,0119 % | ×7,61 |
-| 0,99 | 202,14 | 561,84 | −64,0 % | **0,0136 %** | **×20,0** |
-
-**La justesse ne se dégrade pas.** L'erreur de période reste à **0,014 % à `ν = 0,99`** — soixante
-fois sous la tolérance de C03, et elle croît si lentement qu'elle n'est pas le facteur limitant.
-Le gain de portée, lui, atteint **×20**, et le pas de temps est deux fois plus grand : moins de
-dissipation *et* moins de calcul.
-
-**La loi, en revanche, cesse d'être prédictive** : −4,4 % à `ν = 0,7`, −64 % à `ν = 0,99`. Elle
-reste conservatrice — elle surestime la demi-vie — mais on ne peut plus s'en servir pour
-dimensionner au-delà de 0,7.
-
-### Ce qui interdit de conclure « prenons 0,99 »
-
-Rien dans ces mesures ne s'y oppose, et c'est exactement ce qui doit alerter.
-
-**La marge de Courant est une marge sur `u_max`.** Si `u_max` est sous-estimé d'un facteur `f`, le
-nombre de Courant réel vaut `f·ν`. La tolérance avant instabilité est donc `1/ν` :
-
-| `ν` | sous-estimation d'`u_max` tolérée |
-|---|---|
-| **0,45** | **×2,22** |
-| 0,70 | ×1,43 |
-| 0,90 | ×1,11 |
-| 0,99 | ×1,01 |
-
-**Et le défaut mesuré ailleurs valait `C_rel/C_abs` entre 2,2 et 2,5** — pour un solide mobile en
-eau au repos, avec zéro violation déclarée.
-
-> **La marge de 0,45 protégeait contre une définition fausse d'`u_max`, sans que personne l'ait
-> décidé.** Elle couvre presque exactement le facteur du défaut réel. C'est une coïncidence, mais
-> elle dit ce qu'un `ν` par défaut est vraiment : **un filet dont on ignore la fonction**.
->
-> Monter `ν` avant de corriger la définition d'`u_max` reviendrait à retirer ce filet en croyant
-> ne toucher qu'à une performance. **L'ordre est donc contraint : définition, puis borne, puis
-> valeur.** La valeur est le dernier terme, pas le premier — et c'est l'inverse de ce que l'action
-> S25-1 laissait entendre.
-
-**La borne analytique, et ce qu'elle achète.** Une borne calculée *après* le pas — à partir des
-vitesses observées — ne peut que constater un dépassement déjà consommé. Une borne **majorée en
-amont**, à partir des grandeurs connues avant le pas, le prévient. Le projet extérieur en fait un
-invariant : *le pas ne s'asservit jamais sur une vitesse mesurée*, et son module tire la borne et le
-compteur du **même drapeau**, pour qu'il soit structurellement impossible que l'un borne une
-quantité et que l'autre en compte une autre. **C'est la bonne forme**, et elle vaut d'être reprise :
-le défaut qu'elle empêche est précisément celui qui est resté invisible chez eux — un contrôle vert
-sur une contrainte violée.
-
-#### État à la fin de S27
-
-`cargo test` : **31 tests**. `water-harness check` : 2 scénarios, 0 échec, hashs **inchangés**.
-`water-harness physics` : 1 échec (C04, voulu), 3 témoins, 5 grandeurs sans verdict (C08). Le mode
-`physics` dure maintenant **plusieurs minutes** — conforme à SPEC-003 §4, qui lui donne « minutes »
-comme cible, contre 60 s pour `check`. Vérifié plutôt que supposé. Jeton **libéré**.
-
-**Ce que S28 doit savoir avant de commencer, et qui n'est pas ailleurs :**
-
-- **Ne pas monter `CFL` au motif que rien n'échoue.** C'est la conclusion inverse de la mesure : le
-  schéma tient jusqu'à 0,99 *et c'est précisément ce qui rend `u_max` dangereux*. `ν = 0,70` est
-  débloqué **par** C23, pas avant (ADR-035 §4.1).
-- **La source extérieure `Documents/simufluid` reste consultable.** Ses **mesures** sont des faits,
-  ses **conclusions** ne nous engagent pas — leur architecture est un Navier-Stokes projeté avec
-  VOF/level-set, et ADR-007 §5.1 laisse nos candidats δ ouverts jusqu'à B3. Ne pas importer leur
-  choix comme s'il était une mesure.
-- **Leur document `docs/retours-experience-methode.md` recoupe nos leçons** plutôt que de les
-  contredire. Les trois gestes fautifs qu'il recense — *conclure d'un objet dérivé au lieu de la
-  donnée brute ; ne pas contrôler une condition déjà documentée ; publier une explication plausible
-  comme si elle était mesurée* — sont respectivement proches de nos L76, L83 et L75.
-- **La loi de dissipation n'est valide qu'à `a/h ≈ 1 %`.** Ne pas l'appliquer à un cas d'eau peu
-  profonde sans vérifier l'amplitude relative (A127).
-- **C04 doit rester en échec, `C01-jet` rouge, C08 sans verdict.** Trois décisions, pas trois
-  régressions.
