@@ -85,8 +85,8 @@ produit plusieurs, et l'assertion `p > 0,8` n'a pas le même sens selon celle qu
 - [x] **P2** — le mode `convergence` : Richardson à trois grilles, sur une grandeur quelconque,
       avec la référence exacte quand elle existe. Traiter honnêtement les deux cas dégénérés — une
       erreur au bruit d'arrondi (C01 équilibré) et un `p` calculé hors régime asymptotique.
-- [ ] **P3** — appliquer à C04 sur quatre grandeurs : erreur L1, `h(0)`, `u(0)`, front.
-- [ ] **P4** — exécuter, constater, et **balayer les triplets de grilles** : si `p` dépend du
+- [x] **P3** — appliquer à C04 sur quatre grandeurs : erreur L1, `h(0)`, `u(0)`, front.
+- [x] **P4** — exécuter, constater, et **balayer les triplets de grilles** : si `p` dépend du
       triplet, le rapporter comme tel plutôt que d'en publier un.
 - [ ] **P5** — **S23-2** : dériver le seuil `ε` du front au lieu de le conventionner. Piste : le
       bon seuil est celui pour lequel l'ordre observé du front rejoint celui de la norme globale —
@@ -106,3 +106,43 @@ produit plusieurs, et l'assertion `p > 0,8` n'a pas le même sens selon celle qu
 
 **Branche.** `claude/s22-suite`. `master` s'arrête à S17 (A107). Vérifié à l'ouverture de S24 : rien
 n'a bougé ailleurs.
+
+#### P3-P4 — la thèse est fausse, et ce qui la remplace est plus embêtant
+
+**Thèse déclarée : « `p` dépendra de la grandeur ». Réfutée.** Les trois grandeurs non locales
+convergent au même rythme, et ce rythme n'est pas 1 :
+
+| Grandeur | erreurs, nx = 200 → 3200 | ordres par triplet | dernier `p` |
+|---|---|---|---|
+| erreur L1 relative (globale) | 2,24e-2 → 2,86e-3 | +0,595 · +0,686 · +0,732 | **0,73** |
+| `h(0)` (ponctuelle) | 3,10e-2 → 3,39e-3 | +0,698 · +0,747 · +0,787 | **0,79** |
+| `u(0)` (ponctuelle) | 1,69e-1 → 1,81e-2 | +0,695 · +0,754 · +0,795 | **0,80** |
+| **front, ε = 1 mm (locale)** | 2,654 → 1,130 m | **−0,504 · −0,059 · +0,237** | **0,24** |
+
+Le front reste à part — il l'était déjà — mais **les trois autres sont groupées autour de 0,75, et
+non de 1**. Un schéma d'ordre 1 sur une solution dont la dérivée est discontinue *ne converge pas à
+l'ordre 1* : c'est un résultat classique, et personne dans le corpus ne l'avait écrit.
+
+**Le vrai résultat : aucune des quatre n'est en régime asymptotique.** Les ordres montent
+régulièrement — +0,595 → +0,686 → +0,732 — et le dernier n'est donc pas la limite. Sur cinq
+grilles, de 200 à 3200 cellules, **C08 ne peut rien conclure**. L'énoncé, lui, en demande trois.
+
+> **C08 n'est ni passé ni échoué sur ce montage : il n'est pas *exécutable*.** Et le rapport le dit
+> en ces termes, avec un décompte — un rapport sans échec ne doit pas se lire comme une validation.
+
+**Deux défauts de mon propre outil, trouvés par les données.**
+
+1. **Le critère d'asymptoticité comparait les deux derniers ordres.** Il déclarait stabilisée la
+   suite 0,595 → 0,686 → 0,732, dont les écarts sont petits **mais tous de même signe**. Un critère
+   d'écart local ne distingue pas « a convergé » de « progresse lentement ». Remplacé par un critère
+   **dérivé** : la progression est éteinte si les écarts changent de signe, ou décroissent d'un
+   facteur ≥ 4 — auquel cas la somme des écarts restants est majorée par `|d₁|/3`.
+2. **Le premier jet refusait les ordres négatifs** en les classant « indéterminé ». Or des
+   différences successives qui *grandissent* sont exactement la signature du pré-asymptotique, et
+   c'est ce que le front donne : −0,504 puis −0,059 puis +0,237. Les masquer retirait la seule
+   chose que le contrôle devait constater.
+
+**Conséquence pour ADR-031.** Sa prudence était justifiée, et plus qu'il n'y paraissait : l'exposant
+du front n'est pas seulement non stabilisé, il est **négatif** sur les grilles grossières. Le chiffre
+de ×3·10⁵ reste une extrapolation, et l'action S23-1 se conclut par un « non » : cinq grilles ne
+suffisent pas.

@@ -56,7 +56,7 @@ pub fn cas_en_attente() -> &'static [(&'static str, &'static str, &'static str)]
         ("C05", "Absorption à la frontière", "attend δ"),
         ("C06", "Invariance galiléenne", "attend δ"),
         ("C07", "Sillage profond et peu profond", "attend W"),
-        ("C08", "Convergence sous raffinement", "attend δ"),
+        ("C08", "Convergence sous raffinement", "**exécutable, sans verdict** : régime asymptotique non atteint — ADR-032"),
         ("C09", "Conservation masse et énergie", "attend δ et V"),
         (
             "C10*",
@@ -798,10 +798,27 @@ impl Convergence {
                 _ => None,
             })
             .collect();
-        if os.len() < 2 {
+        if os.len() < 3 {
             return None;
         }
-        Some((os[os.len() - 1] - os[os.len() - 2]).abs() <= tolerance)
+        // Deux conditions, et la seconde a été ajoutée après avoir vu les données de C04.
+        //
+        // Le premier jet ne comparait que les **deux derniers** ordres : il déclarait asymptotique
+        // une suite 0,595 → 0,686 → 0,732, dont les écarts sont petits mais tous de même signe.
+        // Une suite qui monte régulièrement n'est pas stabilisée — elle est encore en train de
+        // monter, et son dernier terme n'est pas sa limite. **Un critère d'écart local ne distingue
+        // pas « a convergé » de « progresse lentement ».**
+        //
+        // La seconde condition n'est pas un second seuil conventionnel, ce qui ne ferait que
+        // déplacer le problème (A106). Elle est **dérivée** : si les écarts décroissent d'un facteur
+        // au moins 4 à chaque étape, la somme des écarts restants est majorée par `|d₁|/3`, donc la
+        // limite est à moins d'un tiers du dernier écart. Un changement de signe suffit aussi — il
+        // encadre la limite au lieu de l'approcher par en dessous.
+        let n = os.len();
+        let (d0, d1) = (os[n - 2] - os[n - 3], os[n - 1] - os[n - 2]);
+        let ecart_petit = d1.abs() <= tolerance;
+        let progression_eteinte = d1 * d0 <= 0.0 || d1.abs() * 4.0 <= d0.abs();
+        Some(ecart_petit && progression_eteinte)
     }
 }
 
@@ -833,6 +850,9 @@ mod tests_convergence {
                 ),
                 autre => panic!("ordre {p} attendu, {autre:?} obtenu"),
             }
+            // Sur une loi pure, les ordres sont **identiques** : les écarts valent zéro, donc ne
+            // sont pas de même signe au sens strict. C'est bien le comportement voulu — une suite
+            // constante est stabilisée.
             assert_eq!(c.asymptotique(0.01), Some(true), "une loi pure est asymptotique");
         }
     }
@@ -877,4 +897,82 @@ mod tests_convergence {
         };
         assert_eq!(c.asymptotique(0.05), Some(false));
     }
+}
+
+/// C08 appliqué à C04 — l'ordre de convergence, grandeur par grandeur.
+///
+/// # Pourquoi quatre grandeurs et non une
+///
+/// L'énoncé de C08 dit « un cas de C02, C04 ou C09 », et jamais **sur quelle grandeur de ce cas**.
+/// Or C04 en produit quatre, et rien ne garantit qu'elles convergent au même rythme : S23 a mesuré
+/// 0,84 % d'erreur globale contre 16 % au front, sur la même exécution.
+///
+/// Les quatre sont donc mesurées séparément, et le rapport les donne côte à côte.
+pub fn c08_convergence_de_c04(
+    host: &mut water_core::HostServices,
+    t_s: f64,
+    grilles: &[usize],
+    eps: f64,
+) -> Vec<Convergence> {
+    use water_core::{Bassin, Delta1D};
+
+    let h0 = 1.0f64;
+    let (mut e_l1, mut e_h0, mut e_u0, mut e_front) = (vec![], vec![], vec![], vec![]);
+
+    for &nx in grilles {
+        let bassin = Bassin { nx, ..Bassin::c04() };
+        let mut d = match Delta1D::configure(host, bassin) {
+            Ok(d) => d,
+            Err(_) => continue,
+        };
+        d.avancer_equilibre(t_s);
+
+        let (mut num, mut den) = (0.0f64, 0.0f64);
+        for i in 0..d.nx() {
+            let (h_ex, _) = ritter(h0, d.x(i) as f64, t_s);
+            num += (d.h(i) as f64 - h_ex).abs();
+            den += h_ex;
+        }
+        e_l1.push((nx, num / den));
+
+        let mut i0 = 0usize;
+        for i in 0..d.nx() {
+            if d.x(i).abs() < d.x(i0).abs() {
+                i0 = i;
+            }
+        }
+        e_h0.push((nx, (d.h(i0) as f64 - 4.0 * h0 / 9.0).abs()));
+        e_u0.push((nx, (d.u(i0) as f64 - (2.0 / 3.0) * (G * h0).sqrt()).abs()));
+
+        let f = d.front(eps as f32).unwrap_or(f32::NAN) as f64;
+        e_front.push((nx, (f - ritter_front(h0, t_s, eps)).abs()));
+    }
+
+    // Plancher d'arrondi. `f32` porte ~7 chiffres significatifs ; sur des grandeurs de l'ordre du
+    // mètre, une erreur sous 10⁻⁵ n'est plus de la discrétisation. Choisi large à dessein : le
+    // risque à éviter est de lire un ordre dans du bruit, pas l'inverse.
+    const PLANCHER: f64 = 1.0e-5;
+
+    vec![
+        Convergence {
+            grandeur: "erreur L1 relative sur h — globale".into(),
+            erreurs: e_l1,
+            plancher: PLANCHER,
+        },
+        Convergence {
+            grandeur: "h au droit du barrage — ponctuelle".into(),
+            erreurs: e_h0,
+            plancher: PLANCHER,
+        },
+        Convergence {
+            grandeur: "u au droit du barrage — ponctuelle".into(),
+            erreurs: e_u0,
+            plancher: PLANCHER,
+        },
+        Convergence {
+            grandeur: format!("position du front, ε = {eps:.0e} — locale"),
+            erreurs: e_front,
+            plancher: PLANCHER,
+        },
+    ]
 }

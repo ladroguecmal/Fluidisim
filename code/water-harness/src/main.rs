@@ -265,6 +265,60 @@ fn executer_physics_solveur() -> usize {
         }
     }
 
+    // C08 — la convergence sous raffinement. Rapportée à part : ce n'est pas une assertion de plus
+    // sur une exécution, c'est une propriété d'une **famille** d'exécutions.
+    println!("
+--- C08 — convergence sous raffinement, sur C04 ---");
+    println!("  assertion : p > 0,8 (CAS-CANONIQUES §C08)");
+    let grilles = [200usize, 400, 800, 1600, 3200];
+    let mut non_concluants = 0usize;
+    let mut total_c08 = 0usize;
+    for c in physics::c08_convergence_de_c04(&mut host, 2.0, &grilles, 1.0e-3) {
+        total_c08 += 1;
+        println!("  {}", c.grandeur);
+        print!("    erreurs :");
+        for (nx, e) in &c.erreurs {
+            print!("  nx={nx}: {e:.3e}");
+        }
+        println!();
+        print!("    ordres  :");
+        for (nx, o) in c.ordres() {
+            match o {
+                physics::Ordre::Observe(p) => print!("  [{nx}…]: {p:+.3}"),
+                physics::Ordre::Plancher => print!("  [{nx}…]: plancher"),
+                physics::Ordre::Indetermine => print!("  [{nx}…]: —"),
+            }
+        }
+        println!();
+        let verdict = match (c.ordre_final(), c.asymptotique(0.10)) {
+            (physics::Ordre::Plancher, _) => {
+                "PLANCHER  l'erreur est au bruit d'arrondi : la discrétisation n'est plus mesurable"
+                    .to_string()
+            }
+            (physics::Ordre::Observe(p), Some(false)) => {
+                non_concluants += 1;
+                format!(
+                    "NON CONCLUANT  p = {p:.2} mais l'ordre bouge encore : régime asymptotique non atteint"
+                )
+            }
+            (physics::Ordre::Observe(p), _) if p > 0.8 => format!("OK        p = {p:.2}"),
+            (physics::Ordre::Observe(p), _) => {
+                echecs += 1;
+                format!("ÉCHEC     p = {p:.2} ≤ 0,8")
+            }
+            (physics::Ordre::Indetermine, _) => "INDÉTERMINÉ".to_string(),
+        };
+        println!("    → {verdict}");
+    }
+    // Un « non concluant » n'est pas un échec, et ne doit pas non plus se lire comme un succès.
+    // Le décompte est imprimé pour qu'un rapport sans échec ne se lise jamais comme une validation.
+    if non_concluants > 0 {
+        println!(
+            "  {non_concluants} grandeur(s) sur {total_c08} sans verdict : le régime asymptotique n'est pas atteint sur ces grilles."
+        );
+        println!("  C08 n'est donc ni passé ni échoué ici — il n'est **pas exécutable** sur ce montage. Voir ADR-032.");
+    }
+
     let executes = cas.len() - temoins.len();
     println!(
         "  {executes} cas exécutés, {echecs} échec(s), {} témoin(s)",
