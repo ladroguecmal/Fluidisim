@@ -211,10 +211,25 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 |---|---|---|---|---|
 | S28-1 | Porter dans le **budget d'un domaine δ** que le pas de temps dépend de ce qui tombe dedans : ×3,3 à `u_p = 10 m/s` — le régime de C20 | **A131**, C23 | session | **ouverte** |
 | S28-2 | Étendre C23 à une **paroi intérieure à cellules coupées**, et non seulement un batteur au bord — c'est la géométrie que SPEC-004 §10.1 impose réellement | C23, ADR-035 §6.4 | session | **ouverte** |
-| S28-3 | Réexaminer les **assertions des cas existants** qui exigent une divergence ou une explosion : A129 montre qu'une telle forme certifie l'absence d'un défaut présent | **A129** | session | **ouverte** |
+| S28-3 | Réexaminer les **assertions des cas existants** | **A129** | session | **close (S29)** — `AUDIT-ASSERTIONS-S29` : 18 cas sur 23 exempts, 5 fautifs, et une mesure du harnais retirée |
 | S28-4 | Mesurer la stabilité **en 2D** et avec déferlement avant de rouvrir `ν` au-delà de 0,70 | ADR-035 §6.4 | session | **ouverte** |
 
 > **Note S28 — deux actions closes en une session, et la valeur de `ν` a bougé.** S27-1 et S27-3
 > sont closes ; `ν = 0,70` est débloqué **pour le solveur du projet**, pas pour le véhicule d'essai,
 > dont la constante reste à 0,45 pour ne pas déplacer les références publiées.
+
+## Actions relevées en séance — S29
+
+| # | Action | D'où elle vient | Qui la porte | État |
+|---|---|---|---|---|
+| S29-1 | **Réécrire les cinq assertions fautives** — C07, C10, C11, C15, C18. Aucune n'est exécutable aujourd'hui : les corriger maintenant coûte peu, les corriger après qu'un candidat B3 les aura passées coûtera une campagne | `AUDIT-ASSERTIONS-S29` §6.1 | session | **ouverte** |
+| S29-2 | Rendre le **témoin systématique** : tout cas dont l'assertion peut être satisfaite par l'absence du mécanisme doit porter un montage qui la met en défaut | **A132** | session | **ouverte** |
+| S29-3 | Ajouter un **contrôle d'atteignabilité** à chaque balayage : vérifier que les bornes du montage permettent d'atteindre le régime visé | **A133** | session | **ouverte** |
+| S29-4 | Pour chaque conclusion publiée, identifier **laquelle** des mesures la porte, et vérifier qu'elle est de classe A | **A134** | session | **ouverte** |
+
+> **Note S29 — l'audit s'est trouvé lui-même deux fois.** La mesure de stabilité de S27 était de
+> classe B et portait une ligne d'ADR-035 ; et le balayage d'amplification écrit *pendant* l'audit
+> ne pouvait pas atteindre le régime qu'il visait. **Les deux ont été trouvées en mesurant, pas en
+> relisant** — ce qui est cohérent avec ce que l'audit établit : une assertion mal formée ne se
+> signale pas, elle reste verte.
 

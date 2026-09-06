@@ -12,9 +12,9 @@ de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outi
 6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance),
 3 en S11 (audit des points ouverts), 3 en S12 (mécanismes de détail), 3 en S13 (revue croisée des
 documents récents), 3 en S14 (audit inverse des invariants), 2 en S15 (audit des registres), 2 en S16 (dossier B2), 2 en S17
-(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques), 4 en S22 (C01 et le premier δ), 4 en S23 (C04 et le lit sec), 4 en S24 (C08 et l'oracle), 4 en S25 (C03 et la dissipation), 4 en S26 (les harmoniques), 4 en S27 (le nombre de Courant), 3 en S28 (la paroi mobile) — **131 au
-total**. **Soixante et onze ont été trouvés dans nos propres écrits**, pas dans les documents sources :
-A49, A56, A57, A58, puis A65 à A131. La proportion
+(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques), 4 en S22 (C01 et le premier δ), 4 en S23 (C04 et le lit sec), 4 en S24 (C08 et l'oracle), 4 en S25 (C03 et la dissipation), 4 en S26 (les harmoniques), 4 en S27 (le nombre de Courant), 3 en S28 (la paroi mobile), 3 en S29 (l'audit des assertions) — **134 au
+total**. **Soixante-quatorze ont été trouvés dans nos propres écrits**, pas dans les documents sources :
+A49, A56, A57, A58, puis A65 à A134. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -173,8 +173,11 @@ ce que les sources avaient omis.
 | **A129** | Un cas qui exigerait une explosion conclurait que le défaut n'existe pas | **1** | C23, ADR-035 note S28 |
 | **A130** | Le gain de portée et la fragilité à une définition fausse croissent ensemble | 2 | ADR-035 note S28 |
 | **A131** | Un objet rapide dans l'eau divise le pas de temps par trois, et rien ne le budgétait | 2 | C23, C20 |
+| **A132** | Une assertion peut être satisfaite parce que le mécanisme testé est absent | **1** | AUDIT-ASSERTIONS-S29 §1 |
+| **A133** | Un montage peut être incapable d'atteindre le régime où l'assertion échoue | **1** | AUDIT-ASSERTIONS-S29 §5 |
+| **A134** | Une mesure fautive peut porter une conclusion sans que la conclusion soit fausse | 2 | AUDIT-ASSERTIONS-S29 §4 |
 
-Quatre-vingt-onze angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
+Quatre-vingt-quatorze angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
 
 **Quatre ont été trouvés dans nos propres écrits** — A49, A56, A57, A58 — et non dans les documents
@@ -813,4 +816,34 @@ pendant quatre sessions.
   corpus décrit depuis S12 sans jamais mentionner son coût temporel. Le budget d'un domaine δ n'est
   donc pas une constante : il dépend de ce qui **tombe dedans**, et un ordonnanceur qui ne le sait
   pas se fera surprendre au moment le plus visible du jeu.
+
+**Ajoutés en S29, à l'audit des assertions**
+
+- **A132** — **Une assertion peut être satisfaite parce que le mécanisme testé est absent.** C'est
+  la **vacuité**, et elle est distincte du symptôme d'A129 : l'assertion peut porter sur une
+  grandeur parfaitement mesurable et rester verte parce que rien ne la produit. « Aucune plaque de
+  glace ne se forme tant que `Hs > 0,15 m` » (C15) passe avant que le modèle de glace existe ;
+  « zéro allocation » passe si la boucle ne tourne pas ; « l'hôte serveur compile et tourne » (C18)
+  passe tant qu'il n'y a pas d'hôte serveur. **Ces assertions sont vertes depuis leur écriture et le
+  resteront jusqu'au jour où elles devraient enfin dire quelque chose.** Le remède est le **témoin**
+  — un montage qui doit faire échouer l'assertion — et il existait déjà ici sans être nommé
+  (`C01-jet`). Sévérité 1 : une batterie verte dont une part est vide donne exactement la confiance
+  qu'elle ne mérite pas.
+
+- **A133** — **Un montage peut être incapable d'atteindre le régime où l'assertion échoue.** Trouvé
+  en se trompant : le balayage d'amplification demandait `ν = 1,05` et recevait **silencieusement**
+  `0,99`, `avec_cfl` bornant à `[0,05 ; 0,99]`. La mesure a rendu le résultat de 0,99 comme s'il
+  était celui de 1,05. Ce n'est pas une assertion qui ne peut pas échouer — c'est un **réglage qui
+  ne peut pas atteindre le régime testé**, et l'effet est le même : une assertion recevable retombe
+  en vacuité. **Une garde de sécurité posée sur un instrument de mesure l'empêche de mesurer**, et
+  c'est le genre de bornage qu'on écrit par prudence sans voir qu'il aveugle. Sévérité 1.
+
+- **A134** — **Une mesure fautive peut porter une conclusion sans que la conclusion soit fausse.**
+  `stabilite_par_courant` était de classe B et n'a rien prouvé ; ADR-035 §4 en a pourtant tiré une
+  ligne. **La conclusion de cet ADR tient quand même**, parce qu'une seconde mesure — l'erreur de
+  période, continue — la portait réellement. La ligne de stabilité était décorative.
+  **C'est la configuration la plus difficile à détecter** : rien n'est faux, donc rien n'alerte, et
+  la mesure vide reste dans le document où une session ultérieure la citera comme un fait établi.
+  Réflexe : pour chaque conclusion, identifier **laquelle** des mesures la porte, et vérifier que
+  celle-là est de classe A.
 

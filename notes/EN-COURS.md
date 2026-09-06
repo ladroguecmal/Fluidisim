@@ -102,7 +102,7 @@ Si la thèse est juste, l'audit doit commencer par mes propres mesures avant de 
       quelque chose : une assertion durcie qui reste verte sans qu'on sache pourquoi n'a rien
       prouvé.
 - [x] **P6** — registre `AUDIT-ASSERTIONS-S29`, et note datée sur les cas dont l'énoncé change.
-- [ ] **P7** — répercussions : index, angles morts, actions, décomptes.
+- [x] **P7** — répercussions : index, angles morts, actions, décomptes.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
