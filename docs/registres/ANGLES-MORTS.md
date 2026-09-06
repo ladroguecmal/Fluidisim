@@ -11,9 +11,9 @@ Historique : 28 recensés en S01, 12 ajoutés en S02 (phénomènes secondaires),
 de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outillage auteur),
 6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance),
 3 en S11 (audit des points ouverts), 3 en S12 (mécanismes de détail), 3 en S13 (revue croisée des
-documents récents), 3 en S14 (audit inverse des invariants), 2 en S15 (audit des registres) — **91 au total**.
-**Trente et un ont été trouvés dans nos propres écrits**, pas dans les documents sources : A49, A56,
-A57, A58, puis A65 à A91. La proportion
+documents récents), 3 en S14 (audit inverse des invariants), 2 en S15 (audit des registres), 2 en S16 (dossier B2) —
+**93 au total**. **Trente-trois ont été trouvés dans nos propres écrits**, pas dans les documents
+sources : A49, A56, A57, A58, puis A65 à A93. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -132,6 +132,8 @@ ce que les sources avaient omis.
 | **A89** | Une action décidée qui n'entre dans aucune liste exécutable n'est pas exécutée | 2 | AUDIT-REGISTRES-S15 §R03 |
 | **A90** | Un registre dit où un point est discuté, jamais s'il est refermé | 2 | AUDIT-REGISTRES-S15 §R04 |
 | **A91** | Une question dissoute peut revenir sous une autre forme, sans que son statut bouge | 2 | AUDIT-REGISTRES-S15 §R06 |
+| **A92** | La largeur d'éponge borne `λ_cut` par le haut, et c'est le plus petit domaine qui décide | **1** | ADR-005 §5, DOSSIER-B2 §3 |
+| **A93** | Un banc produit un couple de valeurs liées, jamais une valeur seule | 2 | DOSSIER-B2 §7 |
 
 Soixante-quatre angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -434,3 +436,18 @@ pendant quatre sessions.
   précalcul** — la graine cuite — en contenait, et avec elle un seuil de tolérance réel, à calibrer
   au banc. Le registre annonçait toujours qu'il n'y avait rien à calibrer. Une dissolution est
   valide *pour un mécanisme donné* ; elle ne l'est pas pour la question.
+
+**Ajoutés en S16, en préparant l'exécution du banc B2**
+
+- **A92** *(sévérité 1)* — **La largeur d'éponge borne `λ_cut` par le haut, et c'est le plus petit
+  domaine qui décide.** ADR-005 §5 pose `L_s = λ_cut/2` par face et conclut que `λ_cut` « fixe le
+  coût minimal d'un domaine » — sans jamais calculer ce que cela laisse. L'intérieur utile vaut
+  `W − λ_cut` : sur le domaine d'impact de référence, 6 × 6 m, la valeur proposée de 4 m ne laisse
+  que **11 % de surface au sol**, et à 6 m il ne reste **rien**. Personne n'avait rapproché la
+  formule d'éponge des emprises de SPEC-001 §2.4 — deux paragraphes distants de deux documents, et
+  l'un des deux nombres les plus structurants du projet en dépend.
+- **A93** — **Un banc produit un couple de valeurs liées, jamais une valeur seule.** B2 était écrit
+  pour trancher `λ_cut` ; il doit trancher `λ_cut` **et** le taux de décimation admissible par classe
+  de domaine, parce que les deux sont liés par `dx ≤ λ_cut/N` et qu'aucun des deux ne veut rien dire
+  sans l'autre. Un protocole qui ne publie qu'un des deux laisse le second se choisir plus tard, à
+  l'œil, par quelqu'un qui n'aura pas les mesures.

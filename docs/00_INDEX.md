@@ -95,7 +95,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`specs/SPEC-004`](specs/SPEC-004-interfaces.md) | **signatures des interfaces** — solveurs, champ de fond, solides, services d'hôte, contrat de fils d'exécution |
 | [`specs/SPEC-005`](specs/SPEC-005-outillage-auteur.md) | **outillage auteur** — sources de vérité, inversion du pipeline eau/terrain, cuisson déterministe, obsolescence |
 | [`specs/SPEC-006`](specs/SPEC-006-chemin-pousse.md) | **le chemin poussé** — ce que le système *publie* : bus d'événements et `WaveEvent`, écume et aération, traversabilité, polyligne de déferlement |
-| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | 91 points, avec sévérité — dont 31 trouvés dans nos propres écrits |
+| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | 93 points, avec sévérité — dont 33 trouvés dans nos propres écrits |
 | [`registres/REVUE-CROISEE-S05.md`](registres/REVUE-CROISEE-S05.md) | **audit croisé des 20 ADR** — 12 écarts, dont 2 de gravité 1, et la liste des contrôles passés |
 | [`registres/REVUE-CROISEE-S08.md`](registres/REVUE-CROISEE-S08.md) | **audit croisé des 5 SPEC** — 10 écarts, dont 2 de gravité 1 ; l'arithmétique des fiches chiffrées revérifiée ligne à ligne |
 | [`registres/AUDIT-POINTS-OUVERTS-S11.md`](registres/AUDIT-POINTS-OUVERTS-S11.md) | **audit des 110 points ouverts** — un sur trois n'était pas dans l'état annoncé ; et le tableau **« qui attend quoi »**, bancs, équipes, arbitrages |
@@ -106,6 +106,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`validation/SPEC-003`](validation/SPEC-003-harnais-de-validation.md) | **harnais de validation** — régimes de déterminisme, scénarios, métriques, CI, pièges de mesure |
 | [`validation/CAS-CANONIQUES.md`](validation/CAS-CANONIQUES.md) | 21 montages de référence, dont 13 à solution analytique fermée |
 | [`validation/PLAN-BENCHMARK.md`](validation/PLAN-BENCHMARK.md) | onze bancs, chacun produisant une décision |
+| [`validation/DOSSIER-B2.md`](validation/DOSSIER-B2.md) | **mode d'emploi du banc B2** — scénarios, iso-qualité, procédure de décision ; et l'**encadrement de `λ_cut` obtenu sans mesure** |
 
 ## Notes de travail
 
@@ -124,7 +125,7 @@ Conception conceptuelle   ██████████████████
 Chiffrage et contraintes  █████████████████░░░░░   75 %   formules posées, mesures à faire
 Spécification technique   ████████████████████░░   92 %   chemins tiré et poussé posés, persistance tranchée ; reste IGpuBackend
 Cohérence interne         ██████████████████████  100 %   26 ADR + 6 SPEC confrontés, 45 écarts résolus ; les 17 invariants audités dans les deux sens
-Décisions expérimentales  ██░░░░░░░░░░░░░░░░░░░░   10 %   onze bancs définis, aucun exécuté ; protocoles complets depuis S15
+Décisions expérimentales  ███░░░░░░░░░░░░░░░░░░░   15 %   onze bancs définis, aucun exécuté ; B2 a son dossier d'exécution
 Outillage et pipeline     ████████████░░░░░░░░░░   55 %   harnais et outillage auteur spécifiés, non écrits
 Accords inter-équipes     ███░░░░░░░░░░░░░░░░░░░   15 %   les quatre interfaces sont écrites ; aucune confirmée
 ```
