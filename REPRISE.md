@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-06
-Session en cours : —
+Session en cours : S24 — C08, la convergence sous raffinement, et l'ordre du front
 Dernière session : S23 — 2026-09-06 — C04 : le front de mouillage, et les deux causes qui n'en étaient pas
-Session suivante : S24 — C08, la convergence sous raffinement *(recommandé)*, ou C03, ou H2
+Session suivante : S25 — C03 (seiche, avec friction) ou H2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :

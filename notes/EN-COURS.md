@@ -59,160 +59,50 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S23
-État             : terminée
+Session          : S24
+État             : en cours
 Battement        : 2026-09-06
-Objectif         : C04 — la rupture de barrage (Ritter), et le lit sec
+Objectif         : C08 — la convergence sous raffinement, et l'ordre du front
 ```
 
 ### Plan
 
-C01 a testé le solveur sur son état le plus trivial : rien ne bouge. **C04 le teste sur le plus
-violent** — une colonne d'eau lâchée sur un lit sec, une discontinuité à `t = 0`, et une solution
-analytique complète pour toute la suite (Ritter). Entre les deux, il n'y a pas de degré : ce sont
-les deux extrémités de ce qu'un solveur d'eau peu profonde doit savoir faire.
+`CAS-CANONIQUES` §C08 : *« Un solveur qui ne converge pas ne résout pas l'équation qu'on croit : il
+est **faux**, pas imprécis. »* C'est le cas le plus sévère du corpus, et deux actions le réclament —
+**S23-1** (l'exposant du front n'est pas stabilisé) et **S23-3** (C08 n'est pas écrit).
 
-**Ce que C04 attaque et que C01 ne touchait pas** : le front de mouillage sur lit sec. C'est là que
-les schémas produisent une hauteur négative, un front trop lent, ou les deux.
+**Ce que S23 laisse et qui commande cette session.** L'ordre apparent du front vaut 0,13 · 0,27 ·
+0,36 · 0,41 sur quatre raffinements successifs : **il monte encore**. Un ordre qui n'a pas convergé
+n'est pas un ordre — c'est un chiffre qui dépend des grilles choisies. ADR-031 §2 s'appuie dessus en
+le disant, et cette session doit soit le stabiliser, soit établir qu'il ne l'est pas et jusqu'où.
 
-*Thèse déclarée avant l'exécution : le front sera trop lent, et la mesure de sa position dépendra
-du seuil qui la définit plus que du schéma.* La première moitié est un défaut connu des schémas
-d'ordre 1 ; la seconde est le vrai risque de la session — **mesurer la position d'un front, c'est
-choisir à quelle hauteur d'eau on décrète qu'il commence**, et ce choix n'a pour l'instant aucune
-provenance (`H_SEC = 10⁻⁶` est posé sans justification, action **S22-4**).
+*Thèse déclarée avant l'exécution : `p` dépendra de la grandeur mesurée plus que du solveur.*
+L'erreur L1 devrait donner `p ≈ 1`, le front bien moins. Si c'est le cas, l'énoncé de C08 a un trou :
+il dit « un cas de C02, C04 ou C09 » et jamais **sur quelle grandeur de ce cas**. Or un cas en
+produit plusieurs, et l'assertion `p > 0,8` n'a pas le même sens selon celle qu'on prend.
 
-- [x] **P1** — plan, jeton.
-- [x] **P2** — le montage : canal plat, lit sec à droite, marche à `t = 0`. Les murs sont hors de
-      portée du signal à `t = 2 s` — le front avance de 12,5 m, la raréfaction remonte de 6,3 m —
-      donc aucune condition transmissive n'est nécessaire, et c'est à vérifier plutôt qu'à supposer.
-- [x] **P3** — la solution de Ritter comme référence, et **la définition du front** : à seuil `ε`
-      dans le champ, comparée à la position où Ritter vaut `ε` — et non à `2√(gh₀)·t`. Comparer une
-      mesure à seuil contre une référence sans seuil mesurerait la définition, pas le schéma.
-- [x] **P4** — exécuter, constater, mesurer la sensibilité de la position du front à `ε`.
-- [x] **P5** — **S22-4** : donner une provenance à `H_SEC`, ou le remplacer. C04 est le cas qui le
-      met en jeu ; le laisser posé au jugé après l'avoir traversé serait la dette exacte que
-      décrit A106.
-- [x] **P6** — ce que la session a appris : ADR-031 si la conclusion engage B3, note datée sinon.
-- [x] **P7** — répercussions : `CAS-CANONIQUES`, `cas_en_attente()`, index, angles morts, décomptes.
-- [x] **P8** — rituel de fin (`REPRISE.md` §6).
+- [ ] **P1** — plan, jeton.
+- [ ] **P2** — le mode `convergence` : Richardson à trois grilles, sur une grandeur quelconque,
+      avec la référence exacte quand elle existe. Traiter honnêtement les deux cas dégénérés — une
+      erreur au bruit d'arrondi (C01 équilibré) et un `p` calculé hors régime asymptotique.
+- [ ] **P3** — appliquer à C04 sur quatre grandeurs : erreur L1, `h(0)`, `u(0)`, front.
+- [ ] **P4** — exécuter, constater, et **balayer les triplets de grilles** : si `p` dépend du
+      triplet, le rapporter comme tel plutôt que d'en publier un.
+- [ ] **P5** — **S23-2** : dériver le seuil `ε` du front au lieu de le conventionner. Piste : le
+      bon seuil est celui pour lequel l'ordre observé du front rejoint celui de la norme globale —
+      en dessous, la mesure est dominée par la queue du profil. À vérifier, pas à supposer.
+- [ ] **P6** — ADR-032 si la conclusion engage le protocole des bancs, note datée sinon.
+- [ ] **P7** — répercussions : `CAS-CANONIQUES` §C08, index, angles morts, actions, décomptes.
+- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
-**Ce que S22 laisse et qui vaut pour ici.** Le témoin `C01-jet` doit rester rouge — s'il passe, le
-harnais le signale comme anomalie. Le véhicule δ n'a pas de friction : sans effet sur C04, dont
-l'énoncé pose explicitement « canal plat **sans frottement** », donc l'action **S22-3** n'est pas un
-prérequis de cette session. Elle le redevient pour C03.
+**Ce que S23 laisse et qui vaut pour ici.**
 
-**Branche.** `claude/s22-suite`, issue de `a6cfe6f`. `master` s'arrête à S17 et diverge depuis
-`8fe1503` (S07) — voir A107. Vérifié à l'ouverture de S23 : rien n'a bougé ailleurs.
+- **La batterie `physics` sort en code 1** : C04 échoue par décision d'ADR-031. Ne pas « réparer ».
+- **Deux pistes sont mortes** sur le retard du front — vitesses d'onde au lit sec (0,15 point),
+  seuil de séchage (0,25 point sur six décades). Ne pas les refaire.
+- **Le témoin `C01-jet` doit rester rouge**, et l'agrégation des témoins est par identifiant.
 
-#### P4 — la thèse tenait des deux mains, et la seconde moitié est la plus intéressante
-
-**Le solveur est bon partout, sauf au front.** À `dx = 0,05 m`, `t = 2 s` :
-
-| Grandeur | Mesuré | Ritter | Écart | Tolérance |
-|---|---|---|---|---|
-| `h` au droit du barrage | 0,45466 m | 0,44444 m | **2,30 %** | 3 % |
-| `u` au droit du barrage | 2,0323 m/s | 2,0881 m/s | **2,67 %** | 3 % |
-| **erreur L1 sur tout le domaine** | — | — | **0,82 %** | 3 % |
-| **front, à `ε = 1 mm`** | 10,013 m | 11,934 m | **−16,09 %** | 3 % |
-
-L'erreur globale vaut **0,8 %** et l'erreur au front **16 %** : un facteur vingt. Le défaut est
-entièrement **local au front de mouillage** — ce que C04 est précisément fait pour attraper, et ce
-qu'aucune des trois autres mesures n'aurait révélé seule.
-
-**Balayage seuil × résolution** — `cargo test -p water-core retard_du_front -- --nocapture` :
-
-```
-nx=200   dx=0,2000  ε=1e-4 : −19,91 %   ε=1e-3 : −21,11 %   ε=1e-2 : −17,92 %
-nx=400   dx=0,1000  ε=1e-4 : −19,13 %   ε=1e-3 : −19,34 %   ε=1e-2 : −14,55 %
-nx=800   dx=0,0500  ε=1e-4 : −16,58 %   ε=1e-3 : −16,09 %   ε=1e-2 : −10,33 %
-nx=1600  dx=0,0250  ε=1e-4 : −13,48 %   ε=1e-3 : −12,54 %   ε=1e-2 :  −6,39 %
-nx=3200  dx=0,0125  ε=1e-4 : −10,83 %   ε=1e-3 :  −9,46 %   ε=1e-2 :  −3,46 %
-```
-
-**Trois lectures, et la troisième est celle qui compte.**
-
-1. **Le front est toujours en retard, jamais en avance.** C'est cohérent : dépasser `2c₀·t`
-   violerait la vitesse de propagation maximale du problème. Le test l'assure explicitement.
-2. **La convergence est là, mais elle est très lente.** À `ε = 10⁻³`, seize fois plus de cellules
-   font passer l'erreur de 21 % à 9,5 % — un facteur 2,2 pour un facteur 16. L'ordre apparent est
-   d'environ **0,3**, alors que le schéma est d'ordre 1 ailleurs et que l'erreur L1 globale, elle,
-   se comporte normalement. **Le front a son propre ordre de convergence, et il est mauvais.**
-3. **Le retard dépend du seuil**, et pas dans le sens qu'on croirait : il est *plus faible* à
-   `ε = 10⁻²` qu'à `ε = 10⁻⁴`. C'est la signature d'un front **étalé** : le profil numérique
-   rejoint Ritter dans son corps et traîne une queue mince. Mesurer haut sur le profil donne raison
-   au solveur, mesurer bas lui donne tort. **Le choix du seuil ne déplace donc pas seulement la
-   référence — il change le verdict**, et rien dans l'énoncé de C04 ne dit lequel prendre.
-
-**Ce que le témoin montre.** Le front mesuré comparé à `2c₀·t` donne −20,07 %, contre −16,09 % au
-même seuil. **Quatre points d'écart sont de la pure convention de mesure** — un quart du verdict.
-
-#### P5 — les deux causes évidentes sont réfutées, et c'est le résultat
-
-**Hypothèse 1 : l'estimation des vitesses d'onde au lit sec.** C'est le diagnostic classique. Quand
-un côté de l'interface est sec, l'onde de tête n'est pas `u ± c` mais l'invariant de Riemann
-`u + 2c` du côté mouillé (Toro) ; estimer `α = |u| + c` au contact du sec **borne la vitesse de
-propagation numérique en dessous de la vitesse physique du front**, et le front ne peut alors plus
-avancer assez vite. L'explication est juste, elle est dans la littérature, et **elle ne change rien
-ici** : −16,09 % avant, −16,24 % après. La formule correcte est conservée — c'est la bonne physique
-et elle vaudra ailleurs — mais **elle ne répond pas de ce défaut**.
-
-**Hypothèse 2 : le seuil de séchage `H_SEC`.** Balayé sur six ordres de grandeur, `10⁻⁹` à `10⁻³` :
-
-```
-h_sec = 1e-9 : −16,38 %     1e-7 : −16,31 %     1e-6 : −16,24 %
-h_sec = 1e-4 : −16,07 %     1e-3 : −16,13 %          volume = 20,000000 dans les cinq cas
-```
-
-**0,25 point d'effet sur seize.** C'est la réponse à l'action **S22-4**, et elle n'est pas celle
-qu'on cherchait : `H_SEC` **n'est pas un paramètre physique**. C'est un garde-fou contre une
-division par zéro, sa valeur est libre sur au moins six décades, et sa provenance est cette mesure.
-**Une constante dont l'effet est mesuré a une provenance, même quand l'effet est nul** — c'est ce
-qui la distingue de `ρ_eau` (A103), qui déplace des références de 2,5 %.
-
-**Ce qui reste, par élimination : la diffusion du schéma d'ordre 1, au front.** Elle est
-intrinsèque, et la convergence le montre — ordre apparent de **0,13 · 0,27 · 0,36 · 0,41** sur les
-quatre raffinements successifs, contre 1 attendu ailleurs et une erreur L1 globale qui, elle, se
-comporte normalement. Le front a son propre régime de convergence, et il est mauvais.
-
-**Le chiffre.** À l'ordre 0,4, atteindre les 3 % de C04 depuis `dx = 5 cm` demanderait `dx = 0,75 mm`
-— **×67 en résolution, ×3·10⁵ en coût 2D**. C'est le pendant exact du chiffre de C01 (×10 500), en
-trente fois pire.
-
-> **Conséquence, et c'est la décision de la session :** de même que C01 élimine les schémas non
-> équilibrés, **C04 élimine l'ordre 1 au front de mouillage**. Ce n'est pas un défaut à raffiner,
-> c'est une famille à écarter — un candidat B3 doit être d'ordre supérieur *là où l'eau rencontre le
-> sec*, ce qui n'est pas la même exigence que d'être d'ordre supérieur en général.
-
-**Prudence sur ce chiffre.** L'ordre apparent n'est pas stabilisé — il monte encore, de 0,13 à 0,41.
-S'il tendait vers 1, le facteur tomberait à ×3 200 en 2D, ce qui resterait éliminatoire. La
-conclusion est robuste ; l'exposant, lui, est une estimation sur cinq grilles et doit être présenté
-comme telle.
-
-**Et A106 revient, plus fort.** À `ε = 10⁻²`, le même solveur affiche **−3,46 %** à `nx = 3200` :
-à un point de la tolérance. À `ε = 10⁻⁴`, il affiche −10,83 %. **Le seuil ne change pas seulement
-l'ampleur du verdict, il peut le renverser.** C04 ne dit pas lequel prendre, et ce silence est
-maintenant chiffré.
-
-#### État à la fin de S23
-
-`cargo test` : **25 tests**. `water-harness check` : 2 scénarios, 0 échec, hashs de conformité
-**inchangés** — S23 n'a pas touché à la couche `B`. `water-harness physics` : **1 échec, C04, et il
-est voulu** ; 3 témoins ; douze cas canoniques imprimés comme non exécutés. Jeton **libéré**.
-
-**Ce que S24 doit savoir avant de commencer, et qui n'est pas ailleurs :**
-
-- **La batterie `physics` sort en code 1, et ce n'est pas une régression.** C04 échoue par décision
-  d'ADR-031. Ne pas « réparer » en desserrant la tolérance ou en montant le seuil `ε` : les deux
-  rendraient le cas vert sans rien changer au solveur, et c'est exactement ce qu'A110 décrit.
-- **Deux pistes sont déjà explorées et mortes** sur le retard du front : l'estimation des vitesses
-  d'onde au lit sec (0,15 point) et le seuil de séchage (0,25 point sur six décades). Ne pas les
-  refaire. La cause restante est la diffusion d'ordre 1 au front.
-- **L'ordre de convergence du front n'est pas stabilisé** — 0,13 · 0,27 · 0,36 · 0,41 sur quatre
-  raffinements. Tout chiffre qui en dépend doit être cité comme estimation, y compris le ×3·10⁵
-  d'ADR-031 §2.
-- **C08 est réclamé par deux actions** (S23-1 et S23-3) et donnerait aussi une provenance au seuil
-  `ε` (S23-2). C'est le plus rentable des cas restants.
-- **Le témoin `C01-jet` doit rester rouge**, et l'agrégation des témoins est désormais **par
-  identifiant** : ajouter un `Cxx-jet` ne dilue plus l'alerte des autres.
+**Branche.** `claude/s22-suite`. `master` s'arrête à S17 (A107). Vérifié à l'ouverture de S24 : rien
+n'a bougé ailleurs.
