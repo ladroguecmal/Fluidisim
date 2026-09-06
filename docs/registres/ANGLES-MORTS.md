@@ -206,6 +206,7 @@ ce que les sources avaient omis.
 | **A162** | Corriger la référence d'une mesure périme en silence tous les chiffres qui en dérivent | 2 | ADR-040, note S36 |
 | **A163** | Deux implémentations du même modèle portent deux seuils de sec incompatibles, `10⁻⁶` et `10⁻¹⁰` | **1** | ADR-044 §5 |
 | **A164** | La précision arithmétique des véhicules n'est écrite nulle part : `f32` d'un côté, `f64` de l'autre | 2 | ADR-044 §2 |
+| **A165** | Un seuil de sec coupe la vitesse mais pas le flux de masse : le film derrière le front n'est jamais vide | 2 | ADR-045 §6 |
 
 Cent huit angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -995,6 +996,19 @@ pendant quatre sessions.
   impossibles et qu'on maquille. **Les deux sont indiscernables aujourd'hui**, et le second cas est
   exactement ce que C04 pourrait cacher sur son lit sec.
 
+  > **Note S38 — mesuré, et requalifié.** L'inquiétude est levée **dans la forme où elle est
+  > posée ci-dessus** : en régime nominal, la saturation d'état ne se déclenche **jamais** — zéro
+  > sur C01, C03 et C04, sur les deux véhicules, y compris sur le lit sec nommément suspecté. Le
+  > flux de Rusanov préserve la positivité sous sa condition de Courant. **Il n'y a pas de
+  > maquillage.**
+  >
+  > Mais le danger existe, ailleurs : la saturation **mord** au-delà de la condition de Courant —
+  > la frontière mesurée tombe exactement dessus — et là elle ne rattrape rien. Elle transforme une
+  > divergence franche, qui aurait produit des `NaN` visibles, en une suite de nombres finis. **Ce
+  > n'est pas un filet, c'est un détecteur de divergence, et il était muet.** Voir
+  > [`ADR-045`](../adr/ADR-045-la-saturation-est-un-detecteur-pas-un-filet.md) et
+  > [`AUDIT-SATURATIONS-S38`](AUDIT-SATURATIONS-S38.md).
+
 - **A147** — **Un garde-fou non testable isolément est celui qui défaille.** Sur dix garde-fous
   audités, un seul masquait au lieu de refuser — et c'était **le seul qui n'était pas appelable
   seul** : il vivait en ligne dans une fonction lançant des simulations avec un oracle à 51 200
@@ -1050,6 +1064,15 @@ pendant quatre sessions.
   étant à 1 mm/s, la marge est de **×227**, ce qui est confortable et n'était pas connu. Pour un
   jeu de très grande échelle, `f32` sera vraisemblablement imposé par la mémoire : **c'est ce
   chiffre-là le plancher réel de la couche `δ`**.
+
+- **A165** — **Un seuil de sec coupe la vitesse, pas le flux de masse.** `u = 0` sous `h_sec`
+  empêche la cellule de **bouger** ; il n'empêche pas la diffusion de Rusanov, `α·(h_R − h_L)`, d'y
+  **déposer** de la matière — même quand les deux vitesses sont nulles. Derrière le front de C04,
+  `delta.rs` porte **3** cellules à `0 < h < h_sec` et `shallow.rs` **18**, dans le rapport qu'on
+  attend de seuils séparés par quatre ordres de grandeur. Conséquence : *un seuil de sec n'assèche
+  pas une cellule*, et toute mesure qui suppose un domaine proprement partitionné en sec et mouillé
+  — une position de front, un volume de zone humide, un bilan par région — travaille sur une
+  frontière floue dont la largeur dépend du seuil. Recoupe **A163**.
 
 ---
 
