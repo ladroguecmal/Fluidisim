@@ -96,7 +96,7 @@ un nombre neuf, et c'est celui qu'il faudra peut-être marquer « à calibrer »
       statut légitime et non un échec.
 - [x] **P6** — notes correctives datées dans `CAS-CANONIQUES` pour les cinq, et mise à jour du
       registre S29.
-- [ ] **P7** — répercussions : index, angles morts, actions, décomptes.
+- [x] **P7** — répercussions : index, angles morts, actions, décomptes.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise

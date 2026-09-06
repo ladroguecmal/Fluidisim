@@ -222,7 +222,7 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 
 | # | Action | D'où elle vient | Qui la porte | État |
 |---|---|---|---|---|
-| S29-1 | **Réécrire les cinq assertions fautives** — C07, C10, C11, C15, C18. Aucune n'est exécutable aujourd'hui : les corriger maintenant coûte peu, les corriger après qu'un candidat B3 les aura passées coûtera une campagne | `AUDIT-ASSERTIONS-S29` §6.1 | session | **ouverte** |
+| S29-1 | **Réécrire les cinq assertions fautives** | `AUDIT-ASSERTIONS-S29` §6.1 | session | **close (S30)** — les cinq réécrites, **zéro seuil inventé** ; registre §5 bis |
 | S29-2 | Rendre le **témoin systématique** : tout cas dont l'assertion peut être satisfaite par l'absence du mécanisme doit porter un montage qui la met en défaut | **A132** | session | **ouverte** |
 | S29-3 | Ajouter un **contrôle d'atteignabilité** à chaque balayage : vérifier que les bornes du montage permettent d'atteindre le régime visé | **A133** | session | **ouverte** |
 | S29-4 | Pour chaque conclusion publiée, identifier **laquelle** des mesures la porte, et vérifier qu'elle est de classe A | **A134** | session | **ouverte** |
@@ -232,4 +232,18 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 > ne pouvait pas atteindre le régime qu'il visait. **Les deux ont été trouvées en mesurant, pas en
 > relisant** — ce qui est cohérent avec ce que l'audit établit : une assertion mal formée ne se
 > signale pas, elle reste verte.
+
+## Actions relevées en séance — S30
+
+| # | Action | D'où elle vient | Qui la porte | État |
+|---|---|---|---|---|
+| S30-1 | **Corriger le montage de C07** : ajouter le balayage `Fr_h ∈ {0,3 ; 0,5 ; 0,7 ; 0,9}`, soit `v ∈ {2,10 ; 3,50 ; 4,90 ; 6,30} m/s` par 5 m de fond. Les quatre vitesses d'origine sautent le point critique | **A137** | session | **ouverte** |
+| S30-2 | **Nommer l'instrument** de chaque assertion du corpus, et vérifier qu'il existe — troisième contrôle après la grandeur et le témoin | **A135** | session | **ouverte** |
+| S30-3 | Doter d'un instrument « aucune capacité dérivée n'est lue depuis un profil de qualité » (C18) : elle demande une analyse statique, qui n'existe pas | **A135**, I-16 | session | **ouverte** |
+| S30-4 | **Relire les autres énoncés flous du corpus** dans le sens d'A136 : un flou déplace l'exigence vers le bas, et la conception garantit parfois davantage | **A136** | session | **ouverte** |
+
+> **Note S30 — la réécriture n'a demandé aucun seuil neuf, et c'est le résultat.** Ce que l'audit
+> S29 avait pris pour un manque de seuils était un manque de **lecture** : les grandeurs étaient
+> dans le corpus, sous les assertions qui ne les nommaient pas. Trois des cinq réécritures sont même
+> **plus fortes** que l'énoncé d'origine.
 

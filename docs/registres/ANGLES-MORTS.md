@@ -12,9 +12,9 @@ de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outi
 6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance),
 3 en S11 (audit des points ouverts), 3 en S12 (mécanismes de détail), 3 en S13 (revue croisée des
 documents récents), 3 en S14 (audit inverse des invariants), 2 en S15 (audit des registres), 2 en S16 (dossier B2), 2 en S17
-(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques), 4 en S22 (C01 et le premier δ), 4 en S23 (C04 et le lit sec), 4 en S24 (C08 et l'oracle), 4 en S25 (C03 et la dissipation), 4 en S26 (les harmoniques), 4 en S27 (le nombre de Courant), 3 en S28 (la paroi mobile), 3 en S29 (l'audit des assertions) — **134 au
-total**. **Soixante-quatorze ont été trouvés dans nos propres écrits**, pas dans les documents sources :
-A49, A56, A57, A58, puis A65 à A134. La proportion
+(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques), 4 en S22 (C01 et le premier δ), 4 en S23 (C04 et le lit sec), 4 en S24 (C08 et l'oracle), 4 en S25 (C03 et la dissipation), 4 en S26 (les harmoniques), 4 en S27 (le nombre de Courant), 3 en S28 (la paroi mobile), 3 en S29 (l'audit des assertions), 3 en S30 (la réécriture) — **137 au
+total**. **Soixante-dix-sept ont été trouvés dans nos propres écrits**, pas dans les documents sources :
+A49, A56, A57, A58, puis A65 à A137. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -176,8 +176,11 @@ ce que les sources avaient omis.
 | **A132** | Une assertion peut être satisfaite parce que le mécanisme testé est absent | **1** | AUDIT-ASSERTIONS-S29 §1 |
 | **A133** | Un montage peut être incapable d'atteindre le régime où l'assertion échoue | **1** | AUDIT-ASSERTIONS-S29 §5 |
 | **A134** | Une mesure fautive peut porter une conclusion sans que la conclusion soit fausse | 2 | AUDIT-ASSERTIONS-S29 §4 |
+| **A135** | L'instrument qui mesure une assertion ne se lit pas dans son énoncé | **1** | AUDIT-ASSERTIONS-S29 §5 bis, C18 |
+| **A136** | Une assertion floue peut être plus faible que ce que la conception garantit déjà | 2 | C11, ADR-008 §3 |
+| **A137** | Un montage du corpus saute le régime que son assertion vise | **1** | C07, ADR-011 §4 |
 
-Quatre-vingt-quatorze angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
+Quatre-vingt-dix-sept angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
 
 **Quatre ont été trouvés dans nos propres écrits** — A49, A56, A57, A58 — et non dans les documents
@@ -846,4 +849,34 @@ pendant quatre sessions.
   la mesure vide reste dans le document où une session ultérieure la citera comme un fait établi.
   Réflexe : pour chaque conclusion, identifier **laquelle** des mesures la porte, et vérifier que
   celle-là est de classe A.
+
+**Ajoutés en S30, à la réécriture des assertions**
+
+- **A135** — **L'instrument qui mesure une assertion ne se lit pas dans son énoncé.** C18 porte deux
+  assertions négatives de forme identique : « zéro allocation après initialisation » et « aucune
+  capacité dérivée n'est lue depuis un profil de qualité ». L'audit S29 a classé la première
+  recevable et **manqué la seconde**, par ressemblance. Ce qui les sépare n'est pas la formulation
+  mais l'existence d'un **instrument** : la première a son compteur, lu par le harnais depuis S20 ;
+  la seconde demanderait une analyse statique qui n'existe pas, et elle est donc **vide**.
+  **Conséquence de méthode** : classer une assertion sur son énoncé seul ne suffit pas ; il faut,
+  pour chacune, **nommer ce qui la mesure** et vérifier que cela existe. C'est un troisième contrôle,
+  après la grandeur et le témoin. Sévérité 1 — un audit qui se trompe déclare sain ce qui ne l'est
+  pas, et il le fait avec autorité.
+
+- **A136** — **Une assertion floue peut être plus faible que ce que la conception garantit déjà.**
+  « Aucun tremblement **visible** en mode contraint » (C11) tolère tout écart sous le seuil de
+  perception. Or ADR-008 §3 pose qu'en mode contraint l'objet est **projeté sur la surface**,
+  `z = η`, et qualifie le résultat d'« exactement stable » : la référence est **zéro**, pas un seuil.
+  L'énoncé demandait donc **moins** que ce que la conception promet, et un écart de `10⁻⁴ m` —
+  invisible, mais signalant que la projection n'est pas appliquée — l'aurait passé. **Le flou n'est
+  pas seulement imprécis : il déplace l'exigence vers le bas**, et toujours dans ce sens, parce
+  qu'un seuil perceptuel est plus permissif qu'une identité.
+
+- **A137** — **Un montage du corpus saute le régime que son assertion vise.** C07 assertit sur
+  `Fr_h ≈ 1` ; ses quatre vitesses donnent `0,71 · 1,14 · 1,43 · 2,14` par 5 m de fond. **Le point
+  critique n'est jamais atteint.** C'est A133 — trouvé en S29 dans le harnais — cette fois dans le
+  corpus, et il y était depuis l'écriture du cas. Il n'a été visible qu'**après** avoir donné une
+  grandeur à l'assertion : tant qu'elle disait « nettement supérieure », rien n'obligeait à vérifier
+  que le montage produisait le régime. **Une assertion sans grandeur masque un montage incapable**,
+  et les deux défauts se protègent l'un l'autre.
 
