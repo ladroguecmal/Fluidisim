@@ -86,10 +86,10 @@ un nombre neuf, et c'est celui qu'il faudra peut-être marquer « à calibrer »
 - [x] **P1** — plan, jeton.
 - [x] **P2** — **C10**, masse ajoutée : `T_avec/T_sans = √(1 + m_a/m)`. Référence fermée, et le cas
       est partiellement exécuté depuis S21 — donc vérifiable, pas seulement réécrit.
-- [ ] **P3** — **C07**, sillage transcritique : le facteur de résonance `1/√|1 − Fr_h²|` d'ADR-011
+- [x] **P3** — **C07**, sillage transcritique : le facteur de résonance `1/√|1 − Fr_h²|` d'ADR-011
       §4. Attention, il **diverge à `Fr_h = 1`** : la mesure ne peut pas se faire au point critique,
       et l'énoncé actuel y place pourtant son assertion.
-- [ ] **P4** — **C15** et **C18**, les deux vacuités : un témoin chacune, et la grandeur qu'il doit
+- [x] **P4** — **C15** et **C18**, les deux vacuités : un témoin chacune, et la grandeur qu'il doit
       faire bouger.
 - [ ] **P5** — **C11**, le seul qui demande un nombre neuf. Chercher d'abord s'il existe une
       grandeur dont le seuil se dérive ; à défaut, « à calibrer » avec son banc, ce qui est un
@@ -127,3 +127,40 @@ s'annule dans le quotient.
 `m_a/m ∈ [0,5 ; 1,5]` donne `[1,225 ; 1,581]`, soit −13 % à +12 %. **Contrôle indépendant** : le
 disque équivalent de même aire, `m_a = (8/3)ρR³` avec `R = a/√π`, donne **1,399**. Les deux voies
 concordent à 1 % sans rien partager.
+
+#### P3-P4 — C07 cumulait deux défauts, et C18 en cachait un second
+
+**C07 — le montage n'atteint jamais le régime que l'assertion vise.** Par 5 m de fond,
+`√(g·h) = 7,00 m/s` ; les quatre vitesses de l'énoncé — 5, 8, 10, 15 m/s — donnent
+`Fr_h = 0,71 · 1,14 · 1,43 · 2,14`. **Le point critique est sauté.** C'est **A133**, trouvé cette
+fois dans le corpus et non dans le harnais.
+
+La correction de l'assertion **oblige donc à corriger le montage** — et c'est le vrai apport : une
+assertion sans grandeur masquait un montage incapable. On ne pouvait pas voir le second défaut sans
+avoir corrigé le premier.
+
+**Assertion de remplacement, sur le modèle de C20 : la pente, pas la valeur.** La théorie linéaire
+donne un facteur de résonance `1/√|1 − Fr_h²|`, donc en log-log :
+
+> **pente de `log A` contre `log|1 − Fr_h²|` = `−½ ± 0,15`**, sur `Fr_h ∈ {0,3 ; 0,5 ; 0,7 ; 0,9}`,
+> soit `v ∈ {2,10 ; 3,50 ; 4,90 ; 6,30} m/s` par 5 m de fond.
+
+**Aucun seuil n'est inventé** — l'exposant `−½` est celui de la loi. Et `Fr_h = 0,9` et non 1,0 :
+le facteur **diverge** au point critique, où aucune valeur finie ne peut servir de référence.
+
+**C15 — le seuil avait sa provenance, c'est le témoin qui manquait.** `Hs < 0,15 m` vient de
+SPEC-002 §4. Trois assertions désormais, dont la première est neuve : à `Hs = 0,05 m`, l'épaisseur
+doit être **non nulle** et valoir `0,035·√FDD` à ±10 %. Sans elle, la ligne « aucune plaque » est
+verte avant que la glace existe.
+
+**C18 — une ligne vide, et une seconde que je n'avais pas vue en S29.**
+
+- « **l'hôte serveur compile et tourne** » → remplacée par un décompte,
+  `scénarios_exécutés ≥ 1`, qui vaut zéro aujourd'hui et fait donc **échouer** le cas.
+- « **aucune capacité dérivée n'est lue depuis un profil de qualité** » → **vide aussi**. Elle se
+  vérifierait par analyse statique, qui n'existe pas. S29 l'avait classée recevable en la confondant
+  avec « zéro allocation », qui, elle, **a** son compteur (`refused_after_seal`, lu depuis S20).
+
+> **Le tri de S29 s'est trompé une fois, et dans le sens le plus coûteux** : il a déclaré recevable
+> une assertion vide. Deux assertions négatives se ressemblent ; ce qui les sépare est l'existence
+> d'un **instrument**, pas leur formulation — et l'instrument ne se lit pas dans l'énoncé.

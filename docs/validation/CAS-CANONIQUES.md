@@ -227,6 +227,40 @@ supérieure au cas profond.
 
 Attrape l'angle de Kelvin codé en dur (angle mort A05).
 
+> **Note corrective S30 — la seconde assertion est un symptôme, et le montage ne peut pas
+> l'atteindre.** Deux défauts, pas un.
+>
+> **1. Le montage n'atteint jamais `Fr_h ≈ 1`.** Par 5 m de fond, `√(g·h) = 7,00 m/s`. Les quatre
+> vitesses de l'énoncé — 5, 8, 10, 15 m/s — donnent `Fr_h = 0,71 · 1,14 · 1,43 · 2,14`. **Le point
+> critique est sauté**, et l'assertion porte sur un régime que le montage ne produit pas. C'est
+> l'angle mort **A133** : un montage incapable d'atteindre le régime où l'assertion échouerait.
+>
+> **2. « Nettement supérieure » n'a pas de grandeur.** Et lui en donner une par un seuil choisi
+> serait échanger un symptôme contre un nombre inventé (I-14).
+>
+> **Ce qu'il faut assertir : la pente, pas la valeur — sur le modèle de C20.** ADR-011 §4 pose que
+> l'amplitude « explose » au voisinage de `Fr_h = 1` ; la théorie linéaire en donne la forme, un
+> facteur de résonance `1/√|1 − Fr_h²|`. En log-log :
+>
+> ```
+> log A = −½·log|1 − Fr_h²| + constante
+> ```
+>
+> > **Assertion de remplacement : la pente de `log A` contre `log|1 − Fr_h²|` vaut `−½ ± 0,15`**,
+> > mesurée sur un balayage `Fr_h ∈ {0,3 ; 0,5 ; 0,7 ; 0,9}` — soit, par 5 m de fond,
+> > `v ∈ {2,10 ; 3,50 ; 4,90 ; 6,30} m/s`.
+>
+> **Aucun seuil n'est inventé** : l'exposant `−½` est celui de la loi, et la tolérance porte sur
+> lui. Une pente juste avec un décalage constant révèle une amplitude mal calibrée ; une pente
+> fausse révèle que la résonance transcritique n'est pas modélisée du tout — c'est-à-dire
+> exactement le défaut que le cas cherche.
+>
+> **`Fr_h = 0,9` et non 1,0** : le facteur diverge au point critique, où aucune valeur finie ne peut
+> servir de référence. La mesure se fait donc **près** du critique, jamais dessus — et le balayage
+> traverse assez de décades de `|1 − Fr_h²|` (0,91 à 0,19) pour qu'une pente soit lisible.
+>
+> Les quatre vitesses d'origine restent utiles pour l'assertion d'angle, qui elle est recevable.
+
 ## C08 — Convergence sous raffinement
 
 **Montage.** Un cas de C02, C04 ou C09, exécuté à `dx`, `dx/2`, `dx/4`.
@@ -434,6 +468,25 @@ d'eau. Le défaut n'apparaît qu'après des dizaines d'heures de jeu.
 > fetch borne correctement la glace » de « il n'y a pas de glace ». Voir
 > [`AUDIT-ASSERTIONS-S29`](../registres/AUDIT-ASSERTIONS-S29.md) §1.
 
+> **Réécriture S30.** Le seuil `Hs < 0,15 m` vient de **SPEC-002 §4** — *« formation en plaque :
+> exige `Hs < 0,15 m` »* — et il a donc une provenance. Ce qui manquait était le **témoin**.
+>
+> > **Assertions de remplacement, en trois lignes dont la deuxième est nouvelle :**
+> >
+> > 1. à `Hs = 0,05 m` — **témoin** : l'épaisseur après 30 jours est **non nulle** et vaut
+> >    `0,035·√FDD` à ±10 % ;
+> > 2. à `Hs = 0,30 m` — l'épaisseur reste **nulle**, la plaque ne se formant pas ;
+> > 3. masse conservée sur un cycle gel/dégel complet.
+>
+> **La ligne 1 est ce qui manquait.** Sans elle, la ligne 2 est verte avant que la glace existe, et
+> le restera jusqu'au jour où elle devrait enfin dire quelque chose. Avec elle, le cas **échoue** si
+> le modèle de glace est absent — ce qui est le comportement voulu d'un cas qui n'a pas encore sa
+> couche.
+>
+> Le seuil est franchi de part et d'autre — 0,05 et 0,30 contre 0,15 — plutôt qu'approché : ce que
+> le cas vérifie est **l'existence de la borne**, pas sa position exacte, qui est déjà dans
+> SPEC-002.
+
 ## C16 — Ballottement en référentiel accéléré
 
 **Montage.** Cuve de 8 m, remplie à 1,5 m, embarquée dans un référentiel soumis à 0,3 g latéral
@@ -473,6 +526,27 @@ Batterie binaire, mode `check`, sans GPU, à chaque commit :
 La dernière ligne est la vérification mécanique de l'invariant central : **le même scénario, joué
 avec et sans solveur volumétrique, doit produire exactement les mêmes trajectoires d'objets.**
 Toute différence est une violation d'I-04, détectée automatiquement plutôt qu'en revue de code.
+
+> **Note corrective S30 — une ligne de ce tableau est vide, et deux autres ont besoin d'un
+> compteur.** Voir [`AUDIT-ASSERTIONS-S29`](../registres/AUDIT-ASSERTIONS-S29.md) §2.
+>
+> **« L'hôte serveur compile et tourne sans δ ni rendu » passe tant qu'il n'y a pas d'hôte
+> serveur.** C'est la **vacuité** : rien ne distingue « il tourne » de « il n'existe pas ». Aucun
+> hôte serveur n'existe aujourd'hui, et cette ligne est donc verte depuis S05.
+>
+> > **Remplacement : `scénarios_exécutés_par_l_hôte_serveur ≥ 1`.** La grandeur est un décompte, elle
+> > vaut zéro aujourd'hui, et le cas **échoue** — ce qui est le comportement voulu d'une assertion
+> > dont la couche n'existe pas. Une batterie qui passe sur une capacité absente donne exactement la
+> > confiance qu'elle ne mérite pas.
+>
+> **Deux autres lignes ne sont recevables que si leur compteur existe** : « zéro allocation après
+> initialisation » et « aucune capacité dérivée n'est lue depuis un profil de qualité ». La première
+> **a** son compteur — `AllocStats::refused_after_seal`, lu par le harnais depuis S20 — et elle est
+> recevable. La seconde n'en a pas : elle se vérifierait par analyse statique, qui n'existe pas.
+> Elle est donc **vide au même titre** que la ligne de l'hôte serveur, et attend son instrument.
+>
+> **Les trois lignes restantes sont recevables** : le hash est comparé, le budget est mesuré, et
+> l'écart de trajectoire entre deux exécutions est une grandeur continue.
 
 
 ---
