@@ -116,7 +116,7 @@ indiscernables tant que personne ne compte** (A146).
 - [x] **P6** — le résidu de `10⁻¹⁰ m` (**S37-3**) : la saturation en est-elle la cause ? Le test doit
       pouvoir répondre **non**.
 - [x] **P7** — l'ADR-045, A165, et la requalification datée d'A146.
-- [ ] **P7b** — exposer les compteurs au rapport du mode `physics` (décision D1).
+- [x] **P7b** — exposer les compteurs au rapport du mode `physics` (décision D1).
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise

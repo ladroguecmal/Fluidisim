@@ -198,6 +198,54 @@ fn executer_physics_shallow() -> usize {
     echecs
 }
 
+/// **Les saturations de modèle, rapportées** — `ADR-045` D1, angle mort **A146**.
+///
+/// Une saturation d'état ne se déclenche **jamais** en régime nominal : le flux de Rusanov préserve
+/// la positivité sous sa condition de Courant, et S38 l'a mesuré sur trois cas et deux véhicules.
+/// Elle mord au-delà de cette condition, et là **elle ne rattrape rien** : la masse créée dépasse le
+/// volume initial de dix-sept ordres de grandeur.
+///
+/// **Un compteur non nul est donc un échec, pas un avertissement.** Ce n'est pas une tolérance
+/// sévère : au-delà de la condition de Courant, aucune grandeur mesurée par le cas n'a de sens, et
+/// le rapport qui les afficherait serait vert sur un calcul divergent.
+fn executer_saturations() -> usize {
+    println!("
+--- Saturations de modèle — ADR-045, A146 ---");
+    let chrono = std::time::Instant::now();
+    let bilans = [
+        oracle::bilan_c01(60.0),
+        oracle::bilan_c03(20.0),
+        oracle::bilan_c04(2.0),
+    ];
+    let mut echecs = 0usize;
+    for b in &bilans {
+        b.rapporter();
+        for (v, s) in [("delta.rs", &b.delta), ("shallow.rs", &b.shallow)] {
+            if s.etat > 0 || s.etage_rk2 > 0 {
+                println!(
+                    "ÉCHEC  {} — {} : {} saturation(s) d'état, {} à l'étage RK2",
+                    b.cas, v, s.etat, s.etage_rk2
+                );
+                println!("         → ADR-045 D1 : au-delà de la condition de Courant, aucune grandeur du cas n'a de sens.");
+                echecs += 1;
+            }
+            if s.h_negatif_en_entree > 0 {
+                println!(
+                    "ÉCHEC  {} — {} : {} cellule(s) à h < 0 en entrée de pas ; la protection de racine masque",
+                    b.cas, v, s.h_negatif_en_entree
+                );
+                echecs += 1;
+            }
+        }
+    }
+    println!(
+        "  {} bilan(s), {echecs} échec(s) — {:.1} s",
+        bilans.len(),
+        chrono.elapsed().as_secs_f64()
+    );
+    echecs
+}
+
 /// **Une ligne de rapport pour un cas, avec le bon format d'écart.**
 ///
 /// Deux formats, et non un seul. Quand la référence d'un cas est **zéro** — `u ≡ 0` pour C01,
@@ -648,6 +696,7 @@ fn main() -> ExitCode {
     if mode == "physics" {
         echecs_total += executer_physics_solveur();
         echecs_total += executer_physics_shallow();
+        echecs_total += executer_saturations();
     }
 
     if mode == "check" {
