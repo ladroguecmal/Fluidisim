@@ -44,11 +44,29 @@ pub const CFL: f32 = 0.45;
 /// un, et ce seuil devra alors être justifié plutôt que posé.
 pub const H_SEC: f32 = 1.0e-6;
 
+/// Condition initiale du bassin.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum EtatInitial {
+    /// Surface libre plane à `eta0_m`, vitesse nulle. Le montage de C01.
+    Repos,
+    /// Marche d'eau à `x_m`, vitesse nulle de part et d'autre. Le montage de C04.
+    ///
+    /// `h_droite_m = 0` donne le **lit sec**, qui est le cas exigeant : c'est là que les schémas
+    /// produisent une hauteur négative ou un front trop lent.
+    Barrage {
+        h_gauche_m: f32,
+        h_droite_m: f32,
+        x_m: f32,
+    },
+}
+
 /// Géométrie et état initial d'un bassin 1D.
 #[derive(Clone, Copy, Debug)]
 pub struct Bassin {
     /// Longueur du bassin, en mètres.
     pub longueur_m: f32,
+    /// Abscisse du bord gauche, en mètres. Permet un domaine centré sur l'événement.
+    pub origine_m: f32,
     /// Nombre de cellules de calcul (hors cellules fantômes).
     pub nx: usize,
     /// Profondeur d'eau au bord gauche, au repos, en mètres.
@@ -57,6 +75,7 @@ pub struct Bassin {
     pub pente: f32,
     /// Élévation de la surface libre au repos, en mètres.
     pub eta0_m: f32,
+    pub etat_initial: EtatInitial,
 }
 
 impl Bassin {
@@ -68,10 +87,43 @@ impl Bassin {
     pub const fn c01() -> Bassin {
         Bassin {
             longueur_m: 40.0,
+            origine_m: 0.0,
             nx: 160,
             profondeur_gauche_m: 3.0,
             pente: 0.05,
             eta0_m: 0.0,
+            etat_initial: EtatInitial::Repos,
+        }
+    }
+
+    /// Le montage de C04 — `CAS-CANONIQUES` §C04, solution de Ritter.
+    ///
+    /// Canal **plat et sans frottement**, `h₀ = 1 m` à gauche de `x = 0`, **lit sec** à droite,
+    /// lâcher à `t = 0`.
+    ///
+    /// # Pourquoi le domaine va de −20 m à +20 m
+    ///
+    /// À `t = 2 s`, le front aval est à `2√(g h₀)·t = 12,52 m` et la queue de la raréfaction remonte
+    /// à `−√(g h₀)·t = −6,26 m`. Les deux murs sont donc **hors de portée du signal**, et aucune
+    /// condition transmissive n'est nécessaire — ce qui retire une source d'erreur du montage. Le
+    /// harnais le **vérifie** plutôt que de le supposer : il contrôle que les cellules de bord n'ont
+    /// pas bougé.
+    ///
+    /// `dx = 0,05 m`, soit 800 cellules : le front parcourt 250 cellules en 2 s, ce qui laisse de
+    /// quoi mesurer sa position autrement qu'à la cellule près.
+    pub const fn c04() -> Bassin {
+        Bassin {
+            longueur_m: 40.0,
+            origine_m: -20.0,
+            nx: 800,
+            profondeur_gauche_m: 0.0,
+            pente: 0.0,
+            eta0_m: 0.0,
+            etat_initial: EtatInitial::Barrage {
+                h_gauche_m: 1.0,
+                h_droite_m: 0.0,
+                x_m: 0.0,
+            },
         }
     }
 }
@@ -80,6 +132,7 @@ impl Bassin {
 pub struct Delta1D {
     nx: usize,
     dx: f32,
+    origine: f32,
     /// Cote du lit, en mètres, `nx + 2` valeurs.
     b: Vec<f32>,
     h: Vec<f32>,
@@ -123,14 +176,28 @@ impl Delta1D {
 
         for i in 0..n {
             // Centre de la cellule `i`, l'indice 0 étant la fantôme de gauche.
-            let x = (i as f32 - 0.5) * dx;
-            b[i] = -bassin.profondeur_gauche_m + bassin.pente * x;
-            h[i] = (bassin.eta0_m - b[i]).max(0.0);
+            let x = bassin.origine_m + (i as f32 - 0.5) * dx;
+            b[i] = -bassin.profondeur_gauche_m + bassin.pente * (x - bassin.origine_m);
+            h[i] = match bassin.etat_initial {
+                EtatInitial::Repos => (bassin.eta0_m - b[i]).max(0.0),
+                EtatInitial::Barrage {
+                    h_gauche_m,
+                    h_droite_m,
+                    x_m,
+                } => {
+                    if x < x_m {
+                        h_gauche_m
+                    } else {
+                        h_droite_m
+                    }
+                }
+            };
         }
 
         Ok(Delta1D {
             nx,
             dx,
+            origine: bassin.origine_m,
             h_suiv: h.clone(),
             hu_suiv: hu.clone(),
             b,
@@ -144,6 +211,14 @@ impl Delta1D {
 
     pub fn nx(&self) -> usize {
         self.nx
+    }
+    /// Abscisse du centre de la cellule de calcul `i`, en mètres.
+    pub fn x(&self, i: usize) -> f32 {
+        self.origine + (i as f32 + 0.5) * self.dx
+    }
+    /// Hauteur d'eau de la cellule de calcul `i`, en mètres.
+    pub fn h(&self, i: usize) -> f32 {
+        self.h[i + 1]
     }
     pub fn dx(&self) -> f32 {
         self.dx
@@ -573,6 +648,40 @@ mod tests {
                 "nx={nx} : le schéma au premier jet doit échouer C01, sinon le montage est trop facile"
             );
         }
+    }
+
+    /// Le montage de C04 est conforme à son énoncé, et le solveur y survit.
+    ///
+    /// Trois propriétés, avant toute comparaison à Ritter — un cas qui échouerait ici ne mesurerait
+    /// rien d'interprétable ensuite :
+    ///
+    /// - le volume initial vaut `h₀ × 20 m = 20 m²`, et il est **conservé** ;
+    /// - **aucune hauteur négative** n'apparaît, le défaut classique des schémas sur lit sec ;
+    /// - les cellules de bord **n'ont pas bougé**, ce qui justifie l'absence de condition
+    ///   transmissive au lieu de la supposer.
+    #[test]
+    fn montage_c04_tient_sur_lit_sec() {
+        let mut d = solveur(Bassin::c04());
+        assert!((d.volume() - 20.0).abs() < 1e-3, "volume initial {}", d.volume());
+
+        d.avancer_equilibre(2.0);
+
+        assert!(
+            (d.volume() - 20.0).abs() < 2.0e-3,
+            "volume après 2 s : {} pour 20 attendus",
+            d.volume()
+        );
+        for i in 0..d.nx() {
+            assert!(
+                d.h(i) >= 0.0,
+                "hauteur négative en x = {} : {}",
+                d.x(i),
+                d.h(i)
+            );
+        }
+        // Les murs sont hors de portée : le front va à 12,52 m, la raréfaction à −6,26 m.
+        assert_eq!(d.h(0), 1.0, "le bord amont a bougé : le domaine est trop court");
+        assert_eq!(d.h(d.nx() - 1), 0.0, "le bord aval a bougé : le domaine est trop court");
     }
 
     /// I-06 : après `seal()`, la configuration échoue au lieu d'allouer en silence.

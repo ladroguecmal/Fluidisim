@@ -81,8 +81,8 @@ d'ordre 1 ; la seconde est le vrai risque de la session — **mesurer la positio
 choisir à quelle hauteur d'eau on décrète qu'il commence**, et ce choix n'a pour l'instant aucune
 provenance (`H_SEC = 10⁻⁶` est posé sans justification, action **S22-4**).
 
-- [ ] **P1** — plan, jeton.
-- [ ] **P2** — le montage : canal plat, lit sec à droite, marche à `t = 0`. Les murs sont hors de
+- [x] **P1** — plan, jeton.
+- [x] **P2** — le montage : canal plat, lit sec à droite, marche à `t = 0`. Les murs sont hors de
       portée du signal à `t = 2 s` — le front avance de 12,5 m, la raréfaction remonte de 6,3 m —
       donc aucune condition transmissive n'est nécessaire, et c'est à vérifier plutôt qu'à supposer.
 - [ ] **P3** — la solution de Ritter comme référence, et **la définition du front** : à seuil `ε`
