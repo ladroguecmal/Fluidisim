@@ -195,9 +195,97 @@ pub fn plancher_c01(duree_s: f64) -> Plancher {
     }
 }
 
+/// Le résultat d'une confrontation croisée sur un montage donné.
+pub struct Confrontation {
+    pub nom: &'static str,
+    pub duree_s: f64,
+    pub hauteur: Ecart,
+    pub surface: Ecart,
+    pub vitesse: Ecart,
+    /// Nombre de pas effectués de chaque côté — ils diffèrent, et c'est attendu.
+    pub pas: (u64, u64),
+}
+
+impl Confrontation {
+    /// Imprime les trois écarts sur une ligne chacun.
+    pub fn rapporter(&self) {
+        println!(
+            "  {} à t = {:.1} s — pas : {} (f32) contre {} (f64)",
+            self.nom, self.duree_s, self.pas.0, self.pas.1
+        );
+        for (champ, e) in [
+            ("hauteur", &self.hauteur),
+            ("surface", &self.surface),
+            ("vitesse", &self.vitesse),
+        ] {
+            println!(
+                "      {champ:<8} L∞ = {:>11.4e}   L¹ = {:>11.4e}   (cellule {})",
+                e.linf, e.l1, e.i_max
+            );
+        }
+    }
+}
+
+/// **Confronte les deux véhicules sur C01**, au même temps final.
+///
+/// Les deux sont réglés **équilibrés** : c'est la propriété que C01 teste. Chacun avance à son
+/// propre pas de temps — `dt_cfl` est calculé dans deux précisions et diverge dès le premier pas —
+/// et seuls les **états à `duree_s`** sont comparés.
+pub fn confronter_c01(duree_s: f64) -> Confrontation {
+    let (mut d, mut s) = avec_hote(1 << 20, |h| montages_c01(h));
+    s.regler_equilibrage(true);
+    let pas_d = d.avancer_equilibre(duree_s);
+    let pas_s = s.avancer_jusqu_a(duree_s, 0.45);
+    let (cd, cs) = (champs_delta(&d), champs_shallow(&s));
+    Confrontation {
+        nom: "C01",
+        duree_s,
+        hauteur: Ecart::entre(&cd.hauteur, &cs.hauteur),
+        surface: Ecart::entre(&cd.surface, &cs.surface),
+        vitesse: Ecart::entre(&cd.vitesse, &cs.vitesse),
+        pas: (pas_d, pas_s),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// **P5 — C01 confronté : les deux véhicules disent-ils la même chose ?**
+    ///
+    /// C'est le premier usage réel de l'oracle croisé promis par `ADR-043` §3. Le cas est choisi
+    /// pour son absence d'ambiguïté : la solution exacte est `u ≡ 0`, `η ≡ η₀`, et les deux
+    /// schémas sont censés la reproduire **exactement** — à leur précision près.
+    ///
+    /// Le critère n'est donc pas une tolérance choisie : c'est le **plancher mesuré** par
+    /// [`plancher_c01`], majoré d'un facteur 2 pour ne pas transformer un test de concordance en
+    /// test de reproductibilité bit à bit. Au-dessus, un désaccord désignerait une faute
+    /// d'implémentation ; au-dessous, il ne dirait rien.
+    #[test]
+    fn c01_les_deux_vehicules_concordent_au_plancher() {
+        for duree in [1.0f64, 10.0, 60.0] {
+            let p = plancher_c01(duree);
+            let c = confronter_c01(duree);
+            c.rapporter();
+            println!(
+                "      plancher — borne_u = {:>11.4e}   borne_η = {:>11.4e}",
+                p.borne_u(),
+                p.borne_eta()
+            );
+            assert!(
+                c.vitesse.linf <= 2.0 * p.borne_u().max(1e-12),
+                "C01 à t={duree} s : les deux véhicules diffèrent de {:.4e} m/s en vitesse, au-dessus du plancher {:.4e}",
+                c.vitesse.linf,
+                p.borne_u()
+            );
+            assert!(
+                c.surface.linf <= 2.0 * p.borne_eta().max(1e-12),
+                "C01 à t={duree} s : écart de surface {:.4e} m, au-dessus du plancher {:.4e}",
+                c.surface.linf,
+                p.borne_eta()
+            );
+        }
+    }
 
     /// **P3 — quel est le plancher de cet oracle ?**
     ///

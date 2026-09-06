@@ -101,9 +101,9 @@ encore** : deux schémas réputés identiques ne le seraient pas, et il faudrait
       hauteur, grille. Sans cela, tout ce qui suit compare deux objets différents.
 - [x] **P3** — **établir le plancher de l'oracle** : ce que la seule différence `f32`/`f64` produit
       comme écart, et donc au-dessous de quoi un désaccord ne dit rien.
-- [ ] **P4** — le comparateur : même montage, même temps final, écarts champ à champ en `L∞` et
+- [x] **P4** — le comparateur : même montage, même temps final, écarts champ à champ en `L∞` et
       `L¹`. **Pas de comparaison pas à pas** : les deux ne partagent pas leurs pas de temps.
-- [ ] **P5** — **C01 comparé**, le cas où les deux sont exacts et où un désaccord serait sans
+- [x] **P5** — **C01 comparé**, le cas où les deux sont exacts et où un désaccord serait sans
       ambiguïté.
 - [ ] **P6** — **C04 comparé**, montage aligné à 800 mailles de 5 cm : le cas où un désaccord serait
       **physique** et non arithmétique.
