@@ -122,8 +122,8 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 |---|---|---|---|---|
 | S22-1 | Écrire **C01-bis**, à fond **courbe**, avant que B3 ne se serve de C01 pour éliminer | ADR-030 §6.1, **A105** | session | **ouverte** |
 | S22-2 | Donner une provenance aux seuils de C01 — `1 mm/s` et `1 mm`, sans formule ni banc, contre I-14 | ADR-030 §6.3, **A106** | session | **ouverte** |
-| S22-3 | Poser la **friction de fond** dans le véhicule δ, avant C03 et C04 | ADR-030 §6.4 | session | **ouverte** |
-| S22-4 | Justifier ou mesurer le seuil de séchage `H_SEC`, posé sans provenance | `delta.rs` | session | **ouverte** |
+| S22-3 | Poser la **friction de fond** dans le véhicule δ, avant C03 | ADR-030 §6.4 | session | **ouverte** — *C04 retiré du périmètre en S23 : son énoncé pose « sans frottement »* |
+| S22-4 | Justifier ou mesurer le seuil de séchage `H_SEC`, posé sans provenance | `delta.rs` | session | **close (S23)** — ADR-031 §4 : mesuré sur six décades, 0,25 point d'effet ; ce n'est pas un paramètre physique |
 | S22-5 | Décider du sort du travail propre à `master` (S16-S17), hors de la ligne vivante | **A107** | **humain** | **ouverte** |
 
 > **Note S22 sur le rang 1 du réordonnancement ci-dessus.** `λ_cut` y est donné comme dépendant de
@@ -131,4 +131,17 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 > exige une couche dispersive.** Saint-Venant — la famille du véhicule δ écrit pour C01 — est non
 > dispersif (`c = √(g·h)`, SPEC-001 §1) ; C02 y mesurerait la dispersion *numérique* du schéma, pas
 > celle du modèle. Voir ADR-030 §5.
+
+## Actions relevées en séance — S23
+
+| # | Action | D'où elle vient | Qui la porte | État |
+|---|---|---|---|---|
+| S23-1 | Mesurer proprement l'**ordre de convergence du front** — cinq grilles ne stabilisent pas l'exposant, qui monte encore de 0,13 à 0,41 | ADR-031 §2 | session, via **C08** | **ouverte** |
+| S23-2 | **Dériver le seuil `ε`** de mesure du front au lieu de le conventionner : le seuil juste est celui au-dessus duquel le profil n'est plus dominé par sa queue | ADR-031 §5.3, **A110** | session | **ouverte** |
+| S23-3 | Écrire **C08** (convergence sous raffinement), qui est le prérequis de S23-1 et que deux sessions ont maintenant réclamé | ADR-031 §2 | session | **ouverte** |
+| S23-4 | Porter les deux critères d'entrée d'ADR-030 et ADR-031 dans le **protocole de B3**, qui ne les connaît pas | ADR-031 §2 | session | **ouverte** |
+
+> **Note S23 — C04 reste rouge dans la batterie, et c'est voulu.** Le véhicule δ est d'ordre 1 et
+> ADR-031 décide que l'ordre 1 ne passe pas C04. Un harnais qui masquerait cet échec masquerait la
+> décision. La session qui rendra C04 vert devra le faire en changeant de schéma, pas de seuil.
 

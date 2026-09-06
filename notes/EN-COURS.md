@@ -93,7 +93,7 @@ provenance (`H_SEC = 10⁻⁶` est posé sans justification, action **S22-4**).
       met en jeu ; le laisser posé au jugé après l'avoir traversé serait la dette exacte que
       décrit A106.
 - [x] **P6** — ce que la session a appris : ADR-031 si la conclusion engage B3, note datée sinon.
-- [ ] **P7** — répercussions : `CAS-CANONIQUES`, `cas_en_attente()`, index, angles morts, décomptes.
+- [x] **P7** — répercussions : `CAS-CANONIQUES`, `cas_en_attente()`, index, angles morts, décomptes.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise

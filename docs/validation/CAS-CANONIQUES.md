@@ -38,7 +38,7 @@ les six premiers doivent passer avant qu'un solveur candidat soit admis en campa
 | C01 | Repos hydrostatique sur pente | δ | **analytique exacte** | courants parasites — *exécuté depuis S22, sur le véhicule d'essai δ* |
 | C02 | Dispersion monochromatique | δ, W, **B** | **analytique** | erreur de célérité → fixe `λ_cut` — *trois assertions exécutées sur `B` depuis S21* |
 | C03 | Seiche en bassin clos | δ, W | **analytique** | dissipation numérique |
-| C04 | Rupture de barrage (Ritter) | δ | **analytique** | fronts, mouillage/séchage |
+| C04 | Rupture de barrage (Ritter) | δ | **analytique** | fronts, mouillage/séchage — *exécuté depuis S23 ; **échoue**, et c'est la décision d'ADR-031* |
 | C05 | Absorption à la frontière | δ | cible < 1 % | réflexions de l'éponge |
 | C06 | Invariance galiléenne | δ, ADR-002 | **auto-référencée** | biais d'advection, référentiels |
 | C07 | Sillage profond et peu profond | W | **analytique** | angle de Kelvin, `Fr_h` |
@@ -137,6 +137,30 @@ en x = 0   : h = 4h₀/9 = 0,444 m ,  u = (2/3)√(g h₀) = 2,09 m/s
 
 Teste le front de mouillage sur lit sec, cas où beaucoup de solveurs produisent une hauteur
 négative ou un front trop lent.
+
+> **Note S23 — exécuté, et il échoue. C'est voulu.** Sur le véhicule d'essai δ (Saint-Venant 1D
+> équilibré, `dx = 5 cm`), à `t = 2 s` : `h(0)` à **2,40 %**, `u(0)` à **2,77 %**, erreur L1 sur tout
+> le domaine à **0,84 %** — et **front à −16,24 %** pour 3 % admis. Voir
+> [`ADR-031`](../adr/ADR-031-le-front-de-mouillage-elimine-l-ordre-un.md).
+>
+> 1. **Le défaut est entièrement local au front.** Un facteur vingt entre l'erreur globale et
+>    l'erreur de front. Une validation par norme globale seule aurait déclaré ce solveur excellent
+>    — angle mort **A111**.
+> 2. **Deux causes évidentes ont été testées et réfutées** : l'estimation des vitesses d'onde au
+>    lit sec (0,15 point d'effet) et le seuil de séchage (0,25 point sur six décades). Reste la
+>    diffusion du schéma d'ordre 1 au front, dont la convergence est d'ordre apparent **0,4**.
+> 3. **Le cas reste rouge dans la batterie, et doit le rester** tant que le véhicule est d'ordre 1.
+>    ADR-031 en fait un critère d'élimination pour B3 : masquer l'échec masquerait la décision.
+>
+> **Deux mesures ont été ajoutées à l'énoncé** : `u(0)` contre `(2/3)√(g·h₀)`, dont la référence est
+> fermée et gratuite, et une **erreur L1 sur tout le domaine**, qui ne dépend d'aucun seuil.
+>
+> **Et le front se compare au même seuil que celui qui le mesure.** La solution de Ritter tend vers
+> zéro continûment : il n'existe pas de position de front sans convention. Comparer un front mesuré
+> à `ε` au front mathématique `2c₀·t` ajoute jusqu'à **15 %** d'écart de pure définition — cinq fois
+> la tolérance. La référence retenue est `x = t·(2c₀ − 3√(g·ε))`, et le témoin `C04-jet` conserve
+> l'écart entre les deux. **Le seuil peut renverser le verdict** : −3,46 % à `ε = 10⁻²` contre
+> −10,83 % à `ε = 10⁻⁴`, sur la même grille. Angle mort **A110**.
 
 ## C05 — Absorption à la frontière
 

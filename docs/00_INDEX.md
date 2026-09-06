@@ -65,6 +65,7 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 |---|---|---|---|
 | [029](adr/ADR-029-ce-que-la-premiere-ligne-de-code-a-appris.md) | **Le langage, et ce que la première ligne de code a appris** | proposée | tranche ADR-020 §7.1 · corrige ADR-003 §2, SPEC-004 §8.2, ADR-028 §4 · **note S21** : le hash stable était faux |
 | [030](adr/ADR-030-l-equilibrage-est-un-critere-d-elimination.md) | **L'équilibrage sur fond variable est un critère d'élimination** | proposée | tranche ADR-007 §5.1 · produit `delta.rs` et l'exécution de **C01** · le raffinement qui rachèterait le défaut coûte ×10 500 |
+| [031](adr/ADR-031-le-front-de-mouillage-elimine-l-ordre-un.md) | **Le front de mouillage élimine l'ordre 1 ; un front n'existe pas sans seuil** | proposée | second critère d'entrée à B3 · produit l'exécution de **C04** · clôt S22-4 (`H_SEC`) |
 
 ### Nature du projet *(S19)*
 
@@ -114,7 +115,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`specs/SPEC-004`](specs/SPEC-004-interfaces.md) | **signatures des interfaces** — solveurs, champ de fond, solides, services d'hôte, contrat de fils d'exécution |
 | [`specs/SPEC-005`](specs/SPEC-005-outillage-auteur.md) | **outillage auteur** — sources de vérité, inversion du pipeline eau/terrain, cuisson déterministe, obsolescence |
 | [`specs/SPEC-006`](specs/SPEC-006-chemin-pousse.md) | **le chemin poussé** — ce que le système *publie* : bus d'événements et `WaveEvent`, écume et aération, traversabilité, polyligne de déferlement |
-| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | 108 points, avec sévérité — dont 48 trouvés dans nos propres écrits |
+| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | 112 points, avec sévérité — dont 52 trouvés dans nos propres écrits |
 | [`registres/REVUE-CROISEE-S05.md`](registres/REVUE-CROISEE-S05.md) | **audit croisé des 20 ADR** — 12 écarts, dont 2 de gravité 1, et la liste des contrôles passés |
 | [`registres/REVUE-CROISEE-S08.md`](registres/REVUE-CROISEE-S08.md) | **audit croisé des 5 SPEC** — 10 écarts, dont 2 de gravité 1 ; l'arithmétique des fiches chiffrées revérifiée ligne à ligne |
 | [`registres/AUDIT-POINTS-OUVERTS-S11.md`](registres/AUDIT-POINTS-OUVERTS-S11.md) | **audit des 110 points ouverts** — un sur trois n'était pas dans l'état annoncé ; et le tableau **« qui attend quoi »**, bancs, équipes, arbitrages |
@@ -163,8 +164,8 @@ Conception conceptuelle   ██████████████████
 Chiffrage et contraintes  █████████████████░░░░░   75 %   formules posées, mesures à faire
 Spécification technique   ████████████████████░░   92 %   chemins tiré et poussé posés, persistance tranchée ; reste IGpuBackend
 Cohérence interne         ██████████████████████  100 %   26 ADR + 6 SPEC confrontés, 45 écarts résolus ; les 17 invariants audités dans les deux sens
-Décisions expérimentales  ████░░░░░░░░░░░░░░░░░░   18 %   onze bancs définis, aucun exécuté ; B2 a son dossier, B3 un critère d'entrée
-Outillage et pipeline     █████████████████░░░░░   75 %   **H1 et H3 écrits et verts, un δ d'essai équilibré** ; H2, H4 à H6 non écrits
+Décisions expérimentales  ████░░░░░░░░░░░░░░░░░░   20 %   onze bancs définis, aucun exécuté ; B2 a son dossier, B3 **deux** critères d'entrée
+Outillage et pipeline     █████████████████░░░░░   78 %   **H1 et H3 verts, un δ d'essai** ; C01 passe, **C04 échoue par décision** ; H2, H4-H6 non écrits
 Accords inter-équipes     █████░░░░░░░░░░░░░░░░░   25 %   cinq arbitrages tranchés ; quatorze demandes extérieures en attente
 ```
 
@@ -173,7 +174,7 @@ Accords inter-équipes     █████░░░░░░░░░░░░�
 ```
 ADR-020 acté  →  SPEC-004 revue  →  H1 (cœur du harnais, mode check, CI par commit)
                                           │
-                                          ├→ H3 → C01 ✔ → (δ dispersif ou W) → C02 → λ_cut → B2 ─┐
+                                          ├→ H3 → C01 ✔ · C04 ✘ → (δ dispersif ou W) → C02 → λ_cut → B2 ─┐
                                           │                                                       ├→ B4 → B6 → B8
                                           └→ H4 (oracle, iso-qualité)  →  B3 ─────────────────────┘
                              H2 en continu (dérive)          H5, H6 après B3

@@ -12,9 +12,9 @@ de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outi
 6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance),
 3 en S11 (audit des points ouverts), 3 en S12 (mécanismes de détail), 3 en S13 (revue croisée des
 documents récents), 3 en S14 (audit inverse des invariants), 2 en S15 (audit des registres), 2 en S16 (dossier B2), 2 en S17
-(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques), 4 en S22 (C01 et le premier δ) — **108 au
-total**. **Quarante-huit ont été trouvés dans nos propres écrits**, pas dans les documents sources :
-A49, A56, A57, A58, puis A65 à A108. La proportion
+(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques), 4 en S22 (C01 et le premier δ), 4 en S23 (C04 et le lit sec) — **112 au
+total**. **Cinquante-deux ont été trouvés dans nos propres écrits**, pas dans les documents sources :
+A49, A56, A57, A58, puis A65 à A112. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -150,8 +150,12 @@ ce que les sources avaient omis.
 | **A106** | Une tolérance sans provenance traverse vingt-deux sessions sans être questionnée | 2 | ADR-030 §6.3, I-14 |
 | **A107** | Une fusion faite par import de contenu ne referme pas le fork qui l'a causée | **1** | `FORK-S08-S15.md`, S22 |
 | **A108** | Une propriété exacte vérifiée sur son intérieur seul ne dit rien de ses bords | 2 | ADR-030 §4, `delta.rs` |
+| **A109** | Une explication correcte et documentée peut n'expliquer aucune part du défaut observé | 2 | ADR-031 §1.1 |
+| **A110** | Un seuil de mesure ne déplace pas seulement un verdict, il peut le renverser | **1** | ADR-031 §3.1, C04 |
+| **A111** | Une erreur globale faible masque une erreur locale vingt fois plus grande | **1** | ADR-031 §1, C04 |
+| **A112** | Une constante sans effet mesurable a une provenance, et ce n'est pas une dette | 3 | ADR-031 §4, `H_SEC` |
 
-Soixante-huit angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
+Soixante-douze angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
 
 **Quatre ont été trouvés dans nos propres écrits** — A49, A56, A57, A58 — et non dans les documents
@@ -599,4 +603,37 @@ pendant quatre sessions.
   le défaut de schéma qu'il masquait.** Une propriété démontrée sur l'opérateur intérieur ne
   s'étend pas gratuitement aux conditions aux limites, et c'est le genre d'évidence qu'on n'écrit
   nulle part. Vaut pour l'éponge d'ADR-005, la frontière W/δ et tout raccord de domaines.
+
+**Ajoutés en S23, à la rupture de barrage**
+
+- **A109** — **Une explication correcte et documentée peut n'expliquer aucune part du défaut
+  observé.** Le front trop lent sur lit sec a une cause classique : l'estimation des vitesses
+  d'onde, qui vaut `u ± c` en régime mouillé et `u + 2c` au contact du sec. L'explication est
+  juste, elle est dans la littérature, et elle décrit un mécanisme réellement présent dans le code.
+  Corrigée, elle a déplacé le résultat de **0,15 point sur seize**. Le danger n'est pas de se
+  tromper : c'est qu'une explication plausible **arrête la recherche**. Elle aurait été écrite dans
+  un ADR comme la cause, avec une correction à l'appui, et personne n'aurait mesuré l'avant/après.
+  **Réflexe** : mesurer l'effet d'une correction séparément, avant de la présenter comme la cause.
+
+- **A110** — **Un seuil de mesure ne déplace pas seulement un verdict, il peut le renverser.** Le
+  même solveur, sur la même grille, affiche **−3,46 %** au seuil `10⁻²` et **−10,83 %** au seuil
+  `10⁻⁴` : le premier passe presque la tolérance de 3 %, le second échoue de trois fois. Rien dans
+  l'énoncé de C04 ne dit lequel prendre. On savait qu'un seuil déplace une mesure ; on n'avait pas
+  vu qu'il peut décider de l'issue. Sévérité 1 parce que C04 sert à **éliminer des candidats** : un
+  banc dont le verdict dépend d'une convention non écrite élimine au hasard.
+
+- **A111** — **Une erreur globale faible masque une erreur locale vingt fois plus grande.** L'erreur
+  L1 du solveur sur C04 vaut 0,84 % sur tout le domaine ; son erreur de front vaut 16 %. Une
+  validation qui n'aurait retenu que la norme globale — le réflexe naturel, et la mesure la plus
+  robuste — aurait déclaré le solveur excellent. **Les mesures globales et les mesures locales ne
+  se remplacent pas**, et c'est le front, pas la moyenne, qui décide de ce qu'on voit à l'écran :
+  une vague qui monte sur une plage *est* un front de mouillage.
+
+- **A112** — **Une constante sans effet mesurable a une provenance, et ce n'est pas une dette.**
+  `H_SEC` a été relevé en S22 comme un nombre posé au jugé, à justifier au titre d'I-14. Balayé sur
+  six décades, il déplace la grandeur la plus sensible du corpus de 0,25 point sur seize. La bonne
+  réponse n'était donc pas de lui trouver une justification physique — il n'en a pas — mais de
+  **mesurer ce qu'il commande**, et de constater qu'il ne commande rien. I-14 n'exige pas qu'un
+  nombre soit justifié : il exige qu'on sache ce qu'il commande, et « rien » est une réponse
+  valide. À distinguer de `ρ_eau` (A103), qui déplace 2,5 % de tout tirant d'eau.
 
