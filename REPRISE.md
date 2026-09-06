@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-07
-Session en cours : S37 — exercer l'oracle croisé, et d'abord le calibrer
-Dernière session : S36 — 2026-09-06 — les chiffres de la lignée B rejoués : trois reproduits, un périmé
-Session suivante : S37 — exercer l'oracle croisé (S35-3) *(recommandé)*, ou relire les cinq A de sévérité 1 (S35-5)
+Session en cours : —
+Dernière session : S37 — 2026-09-07 — l'oracle croisé exercé : pas de faute de calcul, deux conventions incompatibles
+Session suivante : S38 — les saturations de modèle (S34-1, A146) *(recommandé)*, ou confronter C06 et C08 (S37-4)
 ```
 
 > **Avant de regarder le jeton, exécuter `git worktree list` et `git branch -a`.** Le jeton est un
@@ -116,9 +116,9 @@ gaspillage le plus fréquent d'un projet de ce type.
 ## 4. Où en est le projet
 
 Trente-cinq sessions ici, **plus cinq dans une lignée parallèle réconciliée en S35** (B-S22 à
-B-S26) — **43 ADR** *(dont un acté)*, six spécifications, **onze registres** — **et du code qui
+B-S26) — **44 ADR** *(dont un acté)*, six spécifications, **onze registres** — **et du code qui
 tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équilibrés et **tous deux
-montés sur leurs cas** *(S36)*, **68 tests verts** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
+montés sur leurs cas et **confrontés l'un à l'autre** *(S37)*, **74 tests verts** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
 verdict** (C08). Quatre cas canoniques sur δ sont exécutés ici : **C01 et C03 passent**, C04 échoue,
 C08 ne conclut pas. **La lignée réconciliée en donne d'autres verdicts, et l'écart a une cause
 unique** : elle est passée à l'ordre deux, et C04 comme C08 y sont verts (`CAS-CANONIQUES`, « deux
@@ -160,6 +160,25 @@ L'oracle croisé d'`ADR-043` §3, lui, **n'a trouvé aucune faute d'implémentat
 concordent partout où ils se recouvrent. Et un montage réduit de C05 a vérifié par accident la
 réserve n° 2 d'`ADR-042` — deux montages sans aucune dimension commune rendent le même `R` à 0,6 %
 près : **c'est bien le groupe adimensionné qui gouverne l'éponge**.
+
+**Et S37 l'a exercé, ce qui a corrigé deux idées à la fois.** `oracle.rs` confronte les deux
+véhicules champ à champ sur le même montage. **Aucune faute de calcul** : sur C04, à flux et ordre
+égaux, les hauteurs concordent à **0,065 %** — vingt et une fois mieux qu'à flux différent, et c'est
+le résultat le plus fort qu'ait reçu ce code. **Mais la vitesse diverge de 98 % de `2c₀` sur trois
+cellules**, et la cause n'est pas un calcul : c'est un **mot**. `delta.rs` déclare une cellule sèche
+sous `10⁻⁶ m`, `shallow.rs` sous `10⁻¹⁰` — quatre ordres de grandeur, et **aucune des deux suites de
+tests ne pouvait le voir** (**A163**, sévérité 1 ; **L145**).
+
+Et l'oracle a montré une limite de lui-même : `delta.rs` calcule en **`f32`**, `shallow.rs` en
+**`f64`** — neuf ordres de grandeur, un fait qui n'était écrit nulle part (**A164**). Sur un cas à
+solution exacte connue, la comparaison croisée **dégénère** en mesure d'erreur du moins précis.
+*Un oracle n'est symétrique que si les précisions le sont* (**L144**).
+[`ADR-044`](docs/adr/ADR-044-ce-que-l-oracle-croise-peut-dire.md) pose ce qu'il peut dire.
+
+> **Ce que S37 a refusé de trancher, et qu'il faut savoir** : le **seuil de sec du projet**. Aligner
+> les deux valeurs déplace la position du front, donc le verdict de C04, donc le critère d'entrée au
+> banc B3 d'`ADR-031`. Ce serait changer une décision par une retouche de constante. Action
+> **S37-1**.
 
 **Et S27 a trouvé un trou que sept sessions n'avaient pas vu, grâce à une source extérieure.**
 SPEC-001 §2.1 borne le pas de temps par `u_max` **sans jamais définir `u_max`**, quand SPEC-004 §10.1

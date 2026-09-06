@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S37
-État             : en cours
+État             : terminée
 Battement        : 2026-09-07
 Objectif         : Exercer l'oracle croisé — et d'abord établir ce qu'il peut dire
 ```
@@ -109,7 +109,7 @@ encore** : deux schémas réputés identiques ne le seraient pas, et il faudrait
       **physique** et non arithmétique.
 - [x] **P7** — le verdict, et un ADR : **ce que cet oracle peut dire, et ce qu'il ne peut pas**.
 - [x] **P8a** — rituel : journal, leçons L144-L146, actions S37-1 à S37-5.
-- [ ] **P8b** — rituel : index, décomptes, jeton libéré.
+- [x] **P8b** — rituel : index, décomptes, jeton libéré.
 
 ### Notes de reprise
 
