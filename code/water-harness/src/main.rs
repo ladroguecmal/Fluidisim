@@ -289,6 +289,53 @@ fn executer_physics_solveur() -> usize {
         println!("  {nu:>5.2}   {mes:>10.2}   {pred:>10.2}   {ecart:>6.2} %");
     }
 
+    println!("  amplitude à nx = 400 (N = 800 fixé) — la demi-vie doit être indépendante de a");
+    println!("     a/h      a/dx     demi-vie (périodes)");
+    for (a_sur_h, a_sur_dx, dv) in physics::c03_dissipation_par_amplitude(
+        &mut host,
+        400,
+        &[0.002, 0.005, 0.02, 0.05, 0.1],
+    ) {
+        if dv.is_nan() {
+            println!("  {:>7.4}  {:>7.2}   {:>12}", a_sur_h, a_sur_dx, "non mesurable");
+        } else {
+            println!("  {:>7.4}  {:>7.2}   {dv:>12.2}", a_sur_h, a_sur_dx);
+        }
+    }
+
+    println!("  pente demi-vie/N à deux amplitudes — la loi prédit la MÊME pente");
+    for (a_sur_h, points) in
+        physics::c03_pente_par_amplitude(&mut host, &[40, 80, 160], &[0.02, 0.1])
+    {
+        print!("    a/h = {a_sur_h:.3} :");
+        let mut pentes = Vec::new();
+        for (n, dv) in &points {
+            print!("  N={n:.0}: {dv:.2} (k={:.5})", dv / n);
+            pentes.push(dv / n);
+        }
+        if let (Some(p0), Some(p1)) = (pentes.first(), pentes.last()) {
+            print!("   → k moyen {:.5}", (p0 + p1) / 2.0);
+        }
+        println!();
+    }
+
+    println!("  stabilité effective selon ν — la théorie donne ν < 1 ; le terme source et le front en mangent");
+    for cas in ["C03", "C04"] {
+        print!("    {cas} :");
+        for (nu, st) in
+            physics::stabilite_par_courant(&mut host, cas, &[0.45, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99])
+        {
+            match st {
+                physics::Stabilite::Stable { .. } => print!("  {nu:.2}:OK"),
+                physics::Stabilite::Diverge { volume_rel, .. } => {
+                    print!("  {nu:.2}:DIVERGE(vol {:.1}%)", volume_rel * 100.0)
+                }
+                physics::Stabilite::NonFini => print!("  {nu:.2}:NaN"),
+            }
+        }
+        println!();
+    }
+
     println!("  harmoniques à nx = 400, ν = 0,45 — la loi prédit /n en périodes propres, /n² en secondes");
     println!("   mode   demi-vie (périodes)  prédite    demi-vie (s)   prédite    écart");
     for (n, dv_p, pr_p, dv_s, pr_s) in

@@ -95,7 +95,7 @@ qu'un `ν = 0,45` posé sur la bonne.
 - [x] **P1** — plan, jeton.
 - [x] **P2** — l'écart SPEC-001 §2.1 / SPEC-004 §10.1, écrit et qualifié. C'est une revue croisée
       d'une paire que S08 avait examinée sans le voir.
-- [ ] **P3** — **contrôle de mes propres mesures.** Le balayage de S25 faisait varier `nx` à
+- [x] **P3** — **contrôle de mes propres mesures.** Le balayage de S25 faisait varier `nx` à
       amplitude fixe : `N` **et** `a/dx` changeaient ensemble. Le projet extérieur s'est fait
       piéger exactement ainsi (« plusieurs variables changées ensemble », rétractation publiée).
       Vérifier que la loi de dissipation ne dépend pas de `a/dx` — à amplitude variable, `N` fixé.
@@ -125,3 +125,51 @@ jusqu'à B3, et un choix fait ailleurs n'est pas une mesure.
 d'ADR-034 §2.1 suppose la linéarité et n'est pas une prédiction (A121).
 
 **Branche.** `claude/s22-suite`. `master` s'arrête à S17 (A107).
+
+#### P3 — la loi de S25 a un domaine de validité, et il n'était pas écrit
+
+**Le contrôle a trouvé quelque chose, et ce n'était pas ce qu'il cherchait.**
+
+Premier essai, amplitude variable à `nx = 400` — un contrôle qui **change lui-même deux variables**,
+`a/h` et `a/dx`, exactement le défaut qu'il visait :
+
+```
+a/h = 0,0010   a/dx = 0,04   non mesurable
+a/h = 0,0025   a/dx = 0,10   non mesurable
+a/h = 0,0100   a/dx = 0,40   48,65 périodes
+a/h = 0,0250   a/dx = 1,00   33,72
+a/h = 0,0500   a/dx = 2,00   15,47
+```
+
+La demi-vie **chute d'un facteur trois** quand `a/h` passe de 1 % à 5 %. Mais ce tableau ne peut pas
+dire si la loi est invalidée : il ne compare que des **valeurs**, à `N` fixé.
+
+**Le contrôle qui tranche compare les *pentes*.** La loi affirme `demi-vie = k·N` avec `k` constant.
+Balayage en `N` refait à deux amplitudes :
+
+| `a/h` | N = 80 | N = 160 | N = 320 | `k` |
+|---|---|---|---|---|
+| **1 %** | 5,08 (k = 0,0635) | 10,05 (0,0628) | 19,70 (0,0616) | **constant**, ≈ 0,0625 |
+| **5 %** | 4,86 (k = 0,0608) | 8,31 (0,0520) | 11,93 (**0,0373**) | **s'effondre de 39 %** |
+
+> **La loi de S25 tient à `a/h = 1 %` et elle est fausse à `a/h = 5 %`.** Ce n'est pas un défaut de
+> la mesure de S25 — son balayage était à `a/h = 1 %` **fixe**, donc dans le domaine. C'est une
+> **condition de validité qu'ADR-033 §2.2 n'a jamais écrite**.
+
+**Le mécanisme est cohérent avec ADR-034.** À grande amplitude, le raidissement transfère de
+l'énergie vers les harmoniques, qui s'amortissent en `n²`. Et l'effet est **d'autant plus visible
+que `N` est grand** : la dissipation linéaire y devient faible, donc la part non linéaire domine.
+C'est exactement la forme observée — `k` s'effondre avec `N`, il ne se décale pas.
+
+**Et la limite mord sur le domaine réel.** `a/h = 5 %` n'est pas un cas extrême : en eau peu
+profonde, c'est ordinaire. **Le domaine de validité de la loi exclut donc une part des situations
+qu'elle est censée dimensionner.** Note corrective à porter dans ADR-033.
+
+**Deux constats d'instrument, au passage.**
+
+1. **Sous `a/h = 0,25 %`, la mesure ne fonctionne plus.** À cette amplitude, `η` varie moins qu'un
+   ulp de `f32` entre deux pas : les pentes tombent à zéro et aucun extremum n'est détecté.
+   L'instrument a une plage de validité en amplitude, par le bas comme par le haut.
+2. **Le premier jet affichait `0,00` au lieu de « non mesurable ».** C'est **A116** — une erreur
+   absorbée publie un résultat vide qui a l'air d'un résultat — **recommise dans la session qui
+   l'invoquait**. Corrigé : `NaN` porté jusqu'à l'affichage, qui le nomme.

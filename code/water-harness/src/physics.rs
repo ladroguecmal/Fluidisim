@@ -1533,3 +1533,201 @@ pub fn c03_dissipation_par_harmonique(
     }
     sortie
 }
+
+/// Contrôle de confondant : la demi-vie dépend-elle de l'**amplitude** ? — S27.
+///
+/// # Pourquoi ce contrôle existe
+///
+/// Le balayage de S25 faisait varier `nx` à amplitude **fixe**. Deux grandeurs changeaient donc
+/// ensemble : le nombre de points par longueur d'onde `N`, et le rapport `a/dx` — d'un facteur 32
+/// entre les grilles extrêmes. Si la dissipation dépendait de l'amplitude, la loi
+/// `demi-vie ∝ N` serait un artefact de ce couplage.
+///
+/// Rien ne le laissait craindre : la loi est dérivée d'une diffusion **linéaire**. Mais « rien ne
+/// le laissait craindre » n'est pas une mesure, et un balayage où deux variables bougent ensemble
+/// ne peut conclure sur aucune des deux séparément.
+///
+/// Ici `nx` est **fixé** et seule l'amplitude varie. Une demi-vie constante confirme que le
+/// balayage de S25 mesurait bien `N` ; une demi-vie qui dérive dirait que la loi est incomplète.
+pub fn c03_dissipation_par_amplitude(
+    host: &mut water_core::HostServices,
+    nx: usize,
+    amplitudes: &[f32],
+) -> Vec<(f64, f64, f64)> {
+    use water_core::{Bassin, EtatInitial};
+
+    let (l, h) = (20.0f64, 2.0f64);
+    let t_ref = 2.0 * l / (G * h).sqrt();
+    let mut sortie = Vec::new();
+
+    for &a in amplitudes {
+        let bassin = Bassin {
+            nx,
+            etat_initial: EtatInitial::Seiche {
+                amplitude_m: a,
+                longueur_m: 20.0,
+                mode: 1,
+            },
+            ..Bassin::c03(true)
+        };
+        let dx = l / nx as f64;
+        // `NaN` et non `0.0` quand la mesure échoue. Le premier jet poussait zéro, ce qui affichait
+        // « demi-vie 0,00 » — une valeur qui se lit comme *mesurée et nulle*, alors qu'elle veut
+        // dire *pas mesurable*. C'est A116, recommis dans la session qui l'invoquait.
+        match mesurer_seiche(host, bassin, 20.0 * t_ref) {
+            Some(s) => sortie.push((a as f64 / h, a as f64 / dx, s.demi_vie_periodes)),
+            None => sortie.push((a as f64 / h, a as f64 / dx, f64::NAN)),
+        }
+    }
+    sortie
+}
+
+/// Le contrôle qui tranche : la **pente** de la loi dépend-elle de l'amplitude relative ? — S27.
+///
+/// # Ce que le premier contrôle ne pouvait pas dire
+///
+/// Faire varier l'amplitude à `nx` fixé change `a/h` **et** `a/dx` ensemble — le défaut même que
+/// le contrôle cherchait à écarter. Et il a montré une dépendance forte : la demi-vie passe de
+/// 48,7 à 15,5 périodes quand `a/h` va de 1 % à 5 %. Reste à savoir si cela **invalide la loi**.
+///
+/// # Ce que celui-ci mesure
+///
+/// La loi affirme `demi-vie = k·N` avec `k = ln2/(2π²(1−ν))`. Elle est **linéaire** : `k` ne doit
+/// pas dépendre de l'amplitude. Le balayage en `N` est donc refait à **deux amplitudes relatives**,
+/// et ce sont les deux **pentes** qu'on compare — pas deux valeurs.
+///
+/// - pentes égales → la loi tient ; l'amplitude ajoute un amortissement **séparé**, non linéaire ;
+/// - pentes différentes → la loi est incomplète et son coefficient dépend du régime.
+///
+/// Le balayage de S25 avait `a/h` **fixé à 1 %** — seul `a/dx` variait, et `a/dx` n'a pas de sens
+/// physique propre. Ce contrôle le vérifie plutôt que de l'affirmer.
+pub fn c03_pente_par_amplitude(
+    host: &mut water_core::HostServices,
+    grilles: &[usize],
+    amplitudes: &[f32],
+) -> Vec<(f64, Vec<(f64, f64)>)> {
+    use water_core::{Bassin, EtatInitial};
+
+    let (l, h) = (20.0f64, 2.0f64);
+    let t_ref = 2.0 * l / (G * h).sqrt();
+    let mut sortie = Vec::new();
+
+    for &a in amplitudes {
+        let mut points = Vec::new();
+        for &nx in grilles {
+            let bassin = Bassin {
+                nx,
+                etat_initial: EtatInitial::Seiche {
+                    amplitude_m: a,
+                    longueur_m: 20.0,
+                    mode: 1,
+                },
+                ..Bassin::c03(true)
+            };
+            if let Some(s) = mesurer_seiche(host, bassin, 20.0 * t_ref) {
+                points.push((2.0 * nx as f64, s.demi_vie_periodes));
+            }
+        }
+        sortie.push((a as f64 / h, points));
+    }
+    sortie
+}
+
+/// Verdict de stabilité d'une exécution.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Stabilite {
+    /// L'exécution s'est terminée avec un état fini et un volume conservé.
+    Stable { volume_rel: f64, amplitude_rel: f64 },
+    /// Un `NaN` ou un infini est apparu.
+    NonFini,
+    /// L'état est resté fini mais a divergé — amplitude ou volume hors de toute tolérance.
+    Diverge { volume_rel: f64, amplitude_rel: f64 },
+}
+
+/// Stabilité effective du schéma en fonction du nombre de Courant — ADR-035 §4.
+///
+/// # Ce que la théorie dit, et ce qu'elle ne dit pas
+///
+/// Pour Saint-Venant en Euler explicite avec un flux de Rusanov, la condition est `ν < 1`. Mais
+/// cette borne suppose un problème **linéarisé, sans terme source et sans reconstruction**. Notre
+/// schéma a les trois : un terme de fond, une reconstruction hydrostatique, et un front sec sur
+/// C04. Chacun mange une marge que rien n'a chiffrée.
+///
+/// **La question n'est donc pas « la théorie autorise-t-elle `ν = 0,9` » mais « à partir de quel
+/// `ν` ce schéma-ci casse, et sur quel cas ».**
+///
+/// # Trois verdicts, pas deux
+///
+/// Un solveur ne passe pas de « stable » à « `NaN` » d'un coup : il diverge d'abord. Confondre les
+/// deux ferait croire la marge plus grande qu'elle n'est — le dernier `ν` sans `NaN` n'est pas le
+/// dernier `ν` utilisable.
+pub fn stabilite_par_courant(
+    host: &mut water_core::HostServices,
+    cas: &str,
+    courants: &[f32],
+) -> Vec<(f64, Stabilite)> {
+    use water_core::{Bassin, Delta1D};
+
+    let mut sortie = Vec::new();
+    for &nu in courants {
+        let (bassin, duree, volume_ref, amplitude_ref) = match cas {
+            "C04" => (Bassin::c04(), 2.0f64, 20.0f64, 1.0f64),
+            _ => (Bassin::c03(true), 20.0 * 9.0305f64, 40.0f64, 0.02f64),
+        };
+        let mut d = match Delta1D::configure(host, bassin) {
+            Ok(d) => d.avec_cfl(nu),
+            Err(_) => continue,
+        };
+
+        let mut t = 0.0f64;
+        let mut non_fini = false;
+        while t < duree {
+            let mut dt = d.dt_cfl();
+            if !dt.is_finite() || dt <= 0.0 {
+                non_fini = true;
+                break;
+            }
+            let reste = (duree - t) as f32;
+            if dt > reste {
+                dt = reste;
+            }
+            d.pas_equilibre(dt);
+            t += dt as f64;
+        }
+
+        let volume = d.volume();
+        let mut amplitude = 0.0f64;
+        for i in 0..d.nx() {
+            let v = (d.eta(i) as f64).abs();
+            if v.is_finite() && v > amplitude {
+                amplitude = v;
+            }
+            if !d.h(i).is_finite() {
+                non_fini = true;
+            }
+        }
+        if !volume.is_finite() {
+            non_fini = true;
+        }
+
+        let volume_rel = (volume - volume_ref).abs() / volume_ref;
+        let amplitude_rel = amplitude / amplitude_ref;
+        sortie.push((
+            nu as f64,
+            if non_fini {
+                Stabilite::NonFini
+            } else if volume_rel > 1.0e-2 || amplitude_rel > 3.0 {
+                Stabilite::Diverge {
+                    volume_rel,
+                    amplitude_rel,
+                }
+            } else {
+                Stabilite::Stable {
+                    volume_rel,
+                    amplitude_rel,
+                }
+            },
+        ));
+    }
+    sortie
+}
