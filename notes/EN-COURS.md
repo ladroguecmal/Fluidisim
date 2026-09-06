@@ -96,8 +96,8 @@ chiffre significatif donné.* Les quatre à confronter, pris dans les ADR import
 plus que les quatre qui se reproduisent, parce qu'il désignera soit une dépendance non déclarée du
 montage, soit une divergence entre les deux arbres que personne n'a vue.
 
-- [>] **P1** — plan, jeton.
-- [ ] **P2** — `physics_shallow.rs` : squelette, déclaration dans `main.rs`, et **C01**. Compile et
+- [x] **P1** — plan, jeton.
+- [x] **P2** — `physics_shallow.rs` : squelette, déclaration dans `main.rs`, et **C01**. Compile et
       tourne avant d'aller plus loin.
 - [ ] **P3** — **C04** (Ritter) et ses références analytiques.
 - [ ] **P4** — **C03** (seiche) et la mesure de période.

@@ -23,6 +23,7 @@
 
 mod host_impl;
 mod physics;
+mod physics_shallow;
 mod scenario;
 
 use std::process::ExitCode;
