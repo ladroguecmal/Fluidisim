@@ -98,7 +98,7 @@ prudence sur un instrument l'empêche de mesurer* (**L99**).
 - [x] **P4** — exécuter, et classer : *se déclenche correctement* · *ne se déclenche jamais* ·
       *se déclenche sur la mauvaise condition* · *masque au lieu de refuser*.
 - [x] **P5** — corriger ce qui doit l'être, et **mesurer que la correction change quelque chose**.
-- [ ] **P6** — registre `AUDIT-GARDE-FOUS-S34`.
+- [x] **P6** — registre `AUDIT-GARDE-FOUS-S34`.
 - [ ] **P7** — répercussions : index, angles morts, actions, décomptes.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
