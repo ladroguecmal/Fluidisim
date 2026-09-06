@@ -74,7 +74,7 @@ le plus rentable : tout ce qu'il faut pour le lancer le jour où le harnais exis
 qu'on peut déjà savoir **sans mesurer**.
 
 - [ ] **P1** — déclarer le plan, prendre le jeton, mettre à jour le battement.
-- [ ] **P2** — **encadrer `λ_cut` par le corpus seul**, sans aucune mesure.
+- [x] **P2** — **encadrer `λ_cut` par le corpus seul**, sans aucune mesure.
   *Thèse : ADR-005 §5 donne `L_s = λ_cut/2` et S08 (écart E08) donne une contrainte sur `λ_cut/dx`.
   Les deux bornent `λ_cut` par le haut et par le bas. Si elles ne se croisent pas, B2 n'a pas de
   réponse admissible sous l'hypothèse d'un `λ_cut` global — et il vaut mieux le savoir avant de
@@ -97,3 +97,73 @@ qu'on peut déjà savoir **sans mesurer**.
 - **Attente honnête** : si l'encadrement de P2 se referme proprement autour de la valeur proposée de
   4 m, le dossier sera utile mais sans surprise. S'il ne se referme pas, c'est la trouvaille de la
   session, et elle change le protocole du banc.
+
+#### P2 — l'encadrement de `λ_cut`, et il ne se referme pas
+
+**Borne haute — l'éponge.** ADR-005 §5 : « l'éponge est dimensionnée par `λ_cut` », avec
+`L_s = λ_cut/2` par face. Sur un domaine de largeur transverse `W`, l'intérieur utile vaut
+`W − λ_cut` (deux faces opposées). Appliqué aux trois domaines de référence de SPEC-001 §2.3 et
+§2.4 :
+
+| Domaine | Emprise | `λ_cut` = 3 m | 4 m | 6 m | 10 m |
+|---|---|---|---|---|---|
+| Impact | 6 × 6 m | intérieur 50 % | **33 %** | 0 % | — |
+| Bateau | 24 × 12 m | 75 % | 67 % | 50 % | 17 % |
+| Déferlement | 120 × 20 m | 85 % | 80 % | 70 % | 50 % |
+
+En surface au sol, c'est le carré de ces fractions : à `λ_cut = 4 m`, un domaine d'impact est
+**89 % d'éponge**. La borne haute est donc dictée par le **plus petit** domaine, et elle est serrée :
+`λ_cut ≤ 3 m` pour qu'un domaine d'impact garde la moitié de son emprise.
+
+**Borne basse — l'échantillonnage du champ de fond.** Écart E08 (S08) : le fond est échantillonné
+une cellule sur quatre puis interpolé, et la validité tient au rapport `λ_cut/dx`. À 40, dix points
+par longueur d'onde après décimation : confortable. À 16, quatre points : deux fois Nyquist, et
+l'interpolation perd une fraction notable de l'amplitude du terme source. Il faut donc `λ_cut`
+**grand devant `dx`**, et le `dx` le plus grossier est celui du déferlement, 0,25 m :
+
+| `dx` | `λ_cut` = 3 m | 4 m | 6 m | 10 m |
+|---|---|---|---|---|
+| 0,25 m (déferlement) | ratio 12 → **3 pts** | 16 → 4 pts | 24 → 6 pts | 40 → **10 pts** |
+| 0,10 m (bateau) | 30 → 7,5 pts | 40 → 10 pts | 60 → 15 pts | 100 → 25 pts |
+| 0,05 m (impact) | 60 → 15 pts | 80 → 20 pts | 120 → 30 pts | 200 → 50 pts |
+
+**Les deux bornes ne se croisent pas.** Le déferlement veut `λ_cut ≈ 10 m` pour que la décimation
+×4 reste valide ; l'impact veut `λ_cut ≤ 3 m` pour garder un intérieur utile. **Aucune valeur
+globale ne satisfait les deux**, et l'écart est d'un facteur trois.
+
+**Ce que cela ne signifie pas.** Ce n'est pas une impasse d'architecture. Les deux contraintes ne
+pèsent pas sur les mêmes domaines, et elles ne pèsent pas de la même façon :
+
+- l'éponge est une contrainte **dure** : à `λ_cut ≥ 6 m`, un domaine d'impact n'a **plus d'intérieur
+  du tout**. Il n'y a pas de compromis possible, seulement un domaine inutile ;
+- la décimation est une contrainte **de coût** : à quatre points par longueur d'onde, on n'a pas un
+  résultat faux, on a une économie qui s'effondre. C'est ce qu'E08 disait déjà — « l'économie
+  disparaît dans le type de domaine le plus gros ».
+
+**Résolution proposée, à porter au protocole de B2 : `λ_cut` reste global, c'est le taux de
+décimation qui s'adapte.** E08 avait écrit la contrainte sous la bonne forme — `dx ≤ λ_cut/N` — en
+laissant `N` libre. `N` est donc le paramètre, et non `λ_cut` :
+
+| Domaine | `λ_cut/dx` à 4 m | Décimation admissible | Facteur d'économie |
+|---|---|---|---|
+| Impact, `dx` 0,05 | 80 | ×4 par axe | **64** |
+| Bateau, `dx` 0,10 | 40 | ×4 par axe | **64** |
+| Déferlement, `dx` 0,25 | 16 | ×2 par axe, au mieux | **8** |
+
+**Conséquence directe sur le protocole du banc** : B2 doit mesurer le coût du terme source dans une
+zone de déferlement **à décimation réduite**, et non au facteur 64 nominal. Sans cela, le coût de δ
+en régime substitutif sera sous-estimé d'un facteur voisin de huit — sur le domaine qui compte
+384 000 cellules, c'est-à-dire le plus gros du corpus.
+
+**Et l'encadrement se referme, une fois `N` libéré** : `3 m ≥ λ_cut` par l'éponge sur le domaine
+d'impact, `λ_cut ≥ 2,5 m` pour que le déferlement garde seulement dix cellules par longueur d'onde
+avant décimation. La fenêtre est **2,5 à 3 m**, et la valeur proposée depuis S01 — **4 m** — est
+au-dessus. Ce n'est pas une réfutation : c'est une hypothèse chiffrée que le banc doit trancher, et
+c'est exactement ce qu'un dossier d'exécution doit apporter avant qu'on monte le banc.
+
+**Écart trouvé en chemin, à signaler.** ADR-005 §5 conclut que « l'éponge représente ≈2 m sur un
+domaine de 20 m, soit **≈27 % du volume en 3D** ». Ce chiffre n'est pas reproductible à partir de ce
+que le paragraphe donne : selon les faces qui portent l'éponge, la même géométrie donne **20 %**
+(deux faces), **36 %** (quatre faces) ou **49 %** (six faces). Le document ne dit pas lesquelles.
+La grandeur n'est pas anecdotique — c'est le coût d'entrée de tout domaine — et elle fonde la borne
+haute ci-dessus.
