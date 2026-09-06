@@ -95,10 +95,10 @@ garantit, et c'est précisément ce qu'A142 reproche à la dérivation.
 - [x] **P1** — plan, jeton.
 - [x] **P2** — le **batteur oscillant** : `ParoiMobile` reçoit une période. Vérifier qu'il produit
       bien un train établi avant de mesurer quoi que ce soit.
-- [ ] **P3** — la mesure d'**enveloppe spatiale** : `max|η|` sur une période, en chaque `x`, en
+- [x] **P3** — la mesure d'**enveloppe spatiale** : `max|η|` sur une période, en chaque `x`, en
       régime établi et **avant tout retour de réflexion** — le domaine doit être assez long, et il
       faut le vérifier plutôt que le supposer (A133).
-- [ ] **P4** — exécuter, ajuster `ln A` contre `x`, comparer `L½` mesurée à `K·λ²/dx`. Trois
+- [x] **P4** — exécuter, ajuster `ln A` contre `x`, comparer `L½` mesurée à `K·λ²/dx`. Trois
       longueurs d'onde au moins : une loi qui ne tiendrait qu'à un `λ` ne serait pas une loi.
 - [ ] **P5** — ce que le résultat fait à ADR-037 §2.1 : confirmation, correction, ou réfutation.
 - [ ] **P6** — note datée dans ADR-037, ou ADR-038 si la conclusion change.
@@ -117,3 +117,45 @@ garantit, et c'est précisément ce qu'A142 reproche à la dérivation.
 - **C04 en échec, `C01-jet` rouge, C08 sans verdict** : trois décisions.
 
 **Branche.** `claude/s22-suite`. `master` s'arrête à S17 (A107).
+
+#### P3-P4 — A142 est levé, et le garde-fou a été rattrapé par une autre mesure
+
+**La conclusion d'ADR-037 §2.1 est confirmée**, et plus nettement que la thèse ne l'espérait :
+
+| `λ` | `L½` mesurée | `L½` prédite | écart | `R²` |
+|---|---|---|---|---|
+| 10 m | 27,03 m | 25,54 m | +5,9 % | 0,9990 |
+| 14 m | 51,40 m | 50,06 m | +2,7 % | 0,9990 |
+| 20 m | 101,81 m | 102,15 m | **−0,3 %** | **0,9999** |
+| 28 m | 195,34 m | 200,22 m | −2,4 % | **1,0000** |
+
+> **La décroissance spatiale d'un train entretenu est exponentielle pure** — `R²` atteint 1,0000 —
+> **et sa longueur de demi-décroissance suit `L½ = K·λ²/dx`** sur un facteur 8, de 25 à 200 m.
+
+**La thèse annonçait « `L½` sera plus courte que prédit ». Elle est fausse** : l'écart change de
+signe avec `λ` (+5,9 % à 10 m, −2,4 % à 28 m), ce qui est la signature des termes d'ordre supérieur
+en `k·dx`, non d'un biais systématique.
+
+**A142 est levé — dans le régime linéaire.** L'amplitude du batteur est faible (0,05 m/s), donc
+`a/h ≪ 1 %` : la mesure valide la dérivation **là où elle était supposée valide** (A127). Elle ne dit
+rien du régime non linéaire, et c'est exactement ce qu'il faut dire.
+
+#### Le garde-fou d'atteignabilité était incomplet, et j'y suis retombé
+
+Le premier passage donnait, pour `λ = 20 m` : `L½ = 105,82`, écart +3,6 %, et **`R² = 0,487`** là où
+les autres cas donnaient 0,999.
+
+**Le front était à 280 m dans un domaine de 200 m.** L'onde avait atteint le mur, s'était réfléchie,
+et revenait polluer la fenêtre — que mon contrôle déclarait saine, puisqu'il vérifiait qu'on mesurait
+*derrière le front* et non que le front *n'avait jamais atteint le mur*.
+
+> **C'est A133 — un montage incapable — commis dans la fonction écrite pour l'éviter**, et dans la
+> session qui l'invoquait au plan. Le contrôle portait sur la bonne idée et sur la mauvaise
+> condition.
+>
+> **Ce qui l'a rattrapé n'est pas le garde-fou, c'est le `R²`** — une seconde mesure, de nature
+> différente, qui n'était pas là pour ça. Un ajustement exponentiel dont le `R²` s'effondre dit que
+> la forme supposée est fausse, quelle qu'en soit la raison.
+
+Corrigé : `front > longueur_m` rejette désormais la mesure, et les domaines sont dimensionnés pour
+que le front n'atteigne jamais le mur.

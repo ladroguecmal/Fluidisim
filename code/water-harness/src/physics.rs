@@ -1978,3 +1978,166 @@ pub fn c31_paquet_localise(
     }
     sortie
 }
+
+/// Décroissance spatiale d'un train **entretenu** — S33, action S32-2, angle mort A142.
+///
+/// # Ce que cette mesure vérifie
+///
+/// ADR-037 §2.1 conclut que la dissipation numérique **produit** la décroissance spatiale
+/// qu'ADR-001 exige de δ. La conclusion est **dérivée** : elle suppose qu'une source constante et
+/// une dissipation exponentielle en temps donnent une décroissance exponentielle en espace, ce qui
+/// est vrai en régime linéaire — et le solveur ne l'est pas.
+///
+/// # La prédiction
+///
+/// Une onde émise met `x/c` pour atteindre `x`, et sa demi-vie temporelle vaut
+/// `t½ = K·(λ/dx)·(λ/c)`. Donc :
+///
+/// ```text
+/// A(x) = A₀ · 2^(−x/L½)        avec       L½ = c·t½ = K·λ²/dx
+/// ```
+///
+/// **`c` disparaît.** La longueur de demi-décroissance ne dépend que de `λ`, `dx` et `ν`.
+///
+/// # Le contrôle d'atteignabilité, qu'A133 impose
+///
+/// La mesure n'a de sens que **derrière le front et avant tout retour de réflexion**. La fonction
+/// renvoie donc aussi la position du front et celle du premier retour, pour que l'appelant vérifie
+/// que sa fenêtre est saine plutôt que de le supposer.
+pub struct DecroissanceSpatiale {
+    pub lambda_m: f64,
+    pub dx_m: f64,
+    /// `(x, amplitude)` relevés en régime établi.
+    pub profil: Vec<(f64, f64)>,
+    /// `L½` mesurée par régression de `log₂ A` sur `x`.
+    pub l_demi_mesuree: f64,
+    /// `L½` prédite par `K·λ²/dx`.
+    pub l_demi_predite: f64,
+    /// Coefficient de détermination de l'ajustement exponentiel.
+    pub r2: f64,
+    /// Position du front à l'instant de la mesure, et fenêtre effectivement utilisée.
+    pub front_m: f64,
+    pub fenetre: (f64, f64),
+}
+
+pub fn c33_decroissance_entretenue(
+    host: &mut water_core::HostServices,
+    lambda_m: f64,
+    nx: usize,
+    longueur_m: f64,
+    periodes: f64,
+) -> Option<DecroissanceSpatiale> {
+    use water_core::{Bassin, Delta1D, EtatInitial, ParoiMobile};
+
+    let h = 2.0f64;
+    let c = (G * h).sqrt();
+    let periode = lambda_m / c;
+    let dx = longueur_m / nx as f64;
+    let nu = 0.45f64;
+    let k = core::f64::consts::LN_2 / (2.0 * core::f64::consts::PI.powi(2) * (1.0 - nu));
+
+    let bassin = Bassin {
+        nx,
+        longueur_m: longueur_m as f32,
+        origine_m: 0.0,
+        profondeur_gauche_m: h as f32,
+        pente: 0.0,
+        eta0_m: 0.0,
+        etat_initial: EtatInitial::Repos,
+    };
+    let mut d = Delta1D::configure(host, bassin)
+        .ok()?
+        .avec_paroi(ParoiMobile {
+            // Amplitude faible : la loi n'est valide qu'à `a/h ≈ 1 %` (A127).
+            u_m_s: 0.05,
+            periode_s: periode as f32,
+        });
+
+    let duree = periodes * periode;
+    d.avancer_equilibre(duree);
+    let front = c * duree;
+
+    // Relever l'enveloppe sur une période supplémentaire, sans avancer le temps de mesure.
+    let mut enveloppe = vec![0.0f64; d.nx()];
+    let mut t = 0.0f64;
+    while t < periode {
+        let mut dt = d.dt_cfl();
+        if !dt.is_finite() || dt <= 0.0 {
+            break;
+        }
+        let reste = (periode - t) as f32;
+        if dt > reste {
+            dt = reste;
+        }
+        d.pas_equilibre(dt);
+        t += dt as f64;
+        for i in 0..d.nx() {
+            let v = (d.eta(i) as f64).abs();
+            if v.is_finite() && v > enveloppe[i] {
+                enveloppe[i] = v;
+            }
+        }
+    }
+
+    // Fenêtre saine : au-delà de deux longueurs d'onde du batteur (champ proche), et **en deçà** du
+    // front avec une marge d'une longueur d'onde.
+    //
+    // **Et surtout : aucune réflexion.** Le premier jet de ce contrôle vérifiait qu'on mesurait
+    // derrière le front, et **pas** que le front n'avait jamais atteint le mur du fond. À
+    // `λ = 20 m` sur 200 m, le front est à 280 m après 14 périodes : l'onde était revenue, la
+    // fenêtre entière était polluée, et le contrôle la déclarait saine.
+    //
+    // C'est **A133** — un montage incapable — commis dans la fonction écrite pour l'éviter. Le
+    // défaut a été pris par le `R²`, tombé à 0,487 là où les cas sains donnent 0,999 : une seconde
+    // mesure, de nature différente, a rattrapé le garde-fou.
+    if front > longueur_m {
+        return None;
+    }
+    let x0 = 2.0 * lambda_m;
+    let x1 = (front - lambda_m).min(longueur_m - lambda_m);
+    if x1 <= x0 + lambda_m {
+        return None;
+    }
+
+    let mut profil = Vec::new();
+    for i in 0..d.nx() {
+        let x = d.x(i) as f64;
+        if x >= x0 && x <= x1 && enveloppe[i] > 0.0 {
+            profil.push((x, enveloppe[i]));
+        }
+    }
+    if profil.len() < 10 {
+        return None;
+    }
+
+    // Régression de log₂ A sur x : pente = −1/L½.
+    let n = profil.len() as f64;
+    let (sx, sy): (f64, f64) = profil
+        .iter()
+        .fold((0.0, 0.0), |(a, b), (x, y)| (a + x, b + y.log2()));
+    let (mx, my) = (sx / n, sy / n);
+    let (mut sxy, mut sxx, mut syy) = (0.0f64, 0.0f64, 0.0f64);
+    for (x, y) in &profil {
+        let ly = y.log2();
+        sxy += (x - mx) * (ly - my);
+        sxx += (x - mx) * (x - mx);
+        syy += (ly - my) * (ly - my);
+    }
+    let pente = if sxx > 0.0 { sxy / sxx } else { 0.0 };
+    let r2 = if sxx > 0.0 && syy > 0.0 {
+        (sxy * sxy) / (sxx * syy)
+    } else {
+        0.0
+    };
+
+    Some(DecroissanceSpatiale {
+        lambda_m,
+        dx_m: dx,
+        profil,
+        l_demi_mesuree: if pente < 0.0 { -1.0 / pente } else { f64::INFINITY },
+        l_demi_predite: k * lambda_m * lambda_m / dx,
+        r2,
+        front_m: front,
+        fenetre: (x0, x1),
+    })
+}

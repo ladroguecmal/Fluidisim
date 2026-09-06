@@ -361,6 +361,32 @@ fn executer_physics_solveur() -> usize {
         );
     }
 
+    println!("  décroissance d'un train ENTRETENU — A142 : la conclusion d'ADR-037 §2.1, mesurée");
+    println!("      λ (m)   dx (m)   L½ mesurée   L½ prédite    écart      R²   front   fenêtre");
+    // Domaines dimensionnés pour qu'aucun front n'atteigne le mur : `c·T·périodes < longueur`.
+    for (lambda, nx, longueur) in [
+        (10.0f64, 800usize, 200.0f64),
+        (14.0, 800, 200.0),
+        (20.0, 1600, 400.0),
+        (28.0, 2400, 600.0),
+    ] {
+        match physics::c33_decroissance_entretenue(&mut host, lambda, nx, longueur, 14.0) {
+            Some(r) => println!(
+                "   {:>8.1} {:>8.3}  {:>11.2}  {:>11.2}  {:>7.1} %  {:>6.4}  {:>6.0}   {:.0}–{:.0}",
+                r.lambda_m,
+                r.dx_m,
+                r.l_demi_mesuree,
+                r.l_demi_predite,
+                (r.l_demi_mesuree - r.l_demi_predite) / r.l_demi_predite * 100.0,
+                r.r2,
+                r.front_m,
+                r.fenetre.0,
+                r.fenetre.1
+            ),
+            None => println!("   {lambda:>8.1}   fenêtre inexploitable — front trop proche ou profil trop court"),
+        }
+    }
+
     println!("  paquet localisé : ADR-034 prédit qu'il s'étale avant de s'éteindre");
     for sigma in [1.0f32, 4.0] {
         println!("    σ = {sigma} m, dx = 0,5 m");
