@@ -12,9 +12,9 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-07
-Session en cours : —
+Session en cours : S38 — les saturations de modèle : filet ou maquillage
 Dernière session : S37 — 2026-09-07 — l'oracle croisé exercé : pas de faute de calcul, deux conventions incompatibles
 Session suivante : S38 — les saturations de modèle (S34-1, A146) *(recommandé)*, ou confronter C06 et C08 (S37-4)
 ```

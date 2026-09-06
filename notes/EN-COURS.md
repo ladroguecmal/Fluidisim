@@ -59,80 +59,81 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S37
-État             : terminée
+Session          : S38
+État             : en cours
 Battement        : 2026-09-07
-Objectif         : Exercer l'oracle croisé — et d'abord établir ce qu'il peut dire
+Objectif         : Les saturations de modèle — filet ou maquillage, et combien de masse elles créent
 ```
 
 ### Plan
 
-Action **S35-3**. `ADR-043` §3 promet un **oracle croisé** : deux implémentations indépendantes du
-même modèle, dont le désaccord sur un cas sans solution analytique désigne une faute
-d'implémentation. S36 a monté les deux véhicules dans le même binaire, mais **aucun cas ne compare
-leurs deux sorties** : chacun rejoue ses propres chiffres. La promesse n'est pas tenue.
+Action **S34-1**, angle mort **A146**, **reportée quatre fois**. S34 a audité les **garde-fous du
+harnais** — chacun a-t-il été vu refuser ? Il a laissé dehors les **saturations du solveur**, qui
+sont d'une autre nature : elles ne refusent pas un montage, elles **corrigent un état physiquement
+impossible en cours de calcul**.
 
-> **Ce qui a été vérifié avant d'écrire ce plan, et qui le rend possible.** Les montages de C01
-> coïncident **rigoureusement** : même grille — centre de cellule à `(i+½)·dx` des deux côtés —
-> même fond `−3 + 0,05·x`, même `η₀`, même `dx = 0,25 m`, mêmes 160 cellules, même CFL de 0,45.
-> Rien n'a été à adapter. Ce n'est pas un hasard : les deux lignées lisaient le même
-> `CAS-CANONIQUES`.
+Les deux véhicules portent la même, écrite indépendamment — une convergence de plus entre les deux
+lignées (`ADR-043`) :
 
-**Mais un oracle non calibré ne dit rien, et celui-ci a un plancher qu'aucun document ne mentionne :
-`delta.rs` calcule en `f32`, `shallow.rs` en `f64`.** Sept ordres de grandeur séparent leurs
-arrondis. Un écart entre les deux n'est donc lisible **qu'au-dessus** d'un plancher qu'il faut
-mesurer d'abord — sans quoi on lirait la précision machine comme un défaut de schéma, ou l'inverse.
-C'est **L131** — *avant de corriger, vérifier qu'on mesure la bonne chose* — et **A157** : un seuil
-posé sans fondement est reproductible et dénué de sens.
+```rust
+if h < 0.0 { h = 0.0; hu = 0.0; }   // delta.rs, pas_naif et pas_equilibre
+fn saturer(h, hu) { if *h < 0.0 { *h = 0.0; *hu = 0.0; } }   // shallow.rs
+```
 
-*Thèse déclarée, en deux volets :*
+> **Ce que cette ligne fait vraiment, et que personne n'a chiffré.** Elle ne « corrige » pas : elle
+> **crée de la masse** — remonter `h` de `−5·10⁻⁷` à `0` ajoute de l'eau qui n'existait pas — et elle
+> **détruit de la quantité de mouvement** en remettant `hu` à zéro. Sur un schéma dont la
+> conservativité est un argument écrit (`ADR-038` §2, C01-volume), c'est une fuite non comptée.
 
-1. **Sur C01**, les deux concordent **au plancher `f32`** : l'écart mesuré est de l'ordre de
-   `ε_f32 × h`, soit quelques `10⁻⁷ m`, et **pas davantage**.
-2. **Sur C04**, où la solution n'est pas triviale, l'écart entre les deux reste **au niveau de la
-   troncature du schéma** — quelques pour mille sur le front — et non au-dessus.
+**Le critère de la session, en une ligne : une saturation rare est un filet, une saturation
+fréquente est un solveur qui produit des états impossibles et qu'on maquille — et les deux sont
+indiscernables tant que personne ne compte** (A146).
 
-**Si le volet 1 est faux, c'est une faute d'implémentation dans l'un des deux**, et l'oracle aura
-servi exactement comme `ADR-043` l'annonce. **Si le volet 2 est faux, c'est plus intéressant
-encore** : deux schémas réputés identiques ne le seraient pas, et il faudrait dire en quoi.
+*Thèse déclarée, en trois volets falsifiables :*
 
-- [x] **P1** — plan, jeton.
-- [x] **P2** — **vérifier que les deux montages sont le même**, à `t = 0`, champ à champ : fond,
-      hauteur, grille. Sans cela, tout ce qui suit compare deux objets différents.
-- [x] **P3** — **établir le plancher de l'oracle** : ce que la seule différence `f32`/`f64` produit
-      comme écart, et donc au-dessous de quoi un désaccord ne dit rien.
-- [x] **P4** — le comparateur : même montage, même temps final, écarts champ à champ en `L∞` et
-      `L¹`. **Pas de comparaison pas à pas** : les deux ne partagent pas leurs pas de temps.
-- [x] **P5** — **C01 comparé**, le cas où les deux sont exacts et où un désaccord serait sans
-      ambiguïté.
-- [x] **P6** — **C04 comparé**, montage aligné à 800 mailles de 5 cm : le cas où un désaccord serait
-      **physique** et non arithmétique.
-- [x] **P7** — le verdict, et un ADR : **ce que cet oracle peut dire, et ce qu'il ne peut pas**.
-- [x] **P8a** — rituel : journal, leçons L144-L146, actions S37-1 à S37-5.
-- [x] **P8b** — rituel : index, décomptes, jeton libéré.
+1. **C01 et C03 ne déclenchent jamais la saturation.** Domaine entièrement mouillé, régime
+   linéaire : un seul déclenchement y serait un défaut, pas un filet.
+2. **C04 la déclenche, et de façon localisée** — quelques cellules au voisinage du front sec, pas
+   une fraction notable du domaine. Si elle touchait des dizaines de cellules à chaque pas, le
+   « front » mesuré par C04 serait en partie un artefact de saturation.
+3. **Le résidu de `10⁻¹⁰ m` trouvé en S37 derrière le front de `shallow.rs` n'est pas produit par la
+   saturation**, qui écrit **zéro exactement**. Il vient donc du flux du pas suivant, et c'est une
+   autre affaire. *(Action S37-3.)*
+
+**Le volet 2 est celui qui décide.** S'il est faux, C04 — qui sert de critère d'entrée au banc B3
+(`ADR-031`) — mesure en partie son propre maquillage.
+
+- [>] **P1** — plan, jeton.
+- [ ] **P2** — **recensement écrit** des saturations des deux solveurs : où elles sont, ce qu'elles
+      empêchent, **ce qu'elles détruisent**. Distinguer l'initialisation, la protection de racine,
+      la reconstruction hydrostatique et la vraie saturation d'état.
+- [ ] **P3** — instrumenter `delta.rs` : **compteur de déclenchements** et **masse créée cumulée**.
+      Sans allocation (**I-06**), sans changer un seul résultat — **hashs de conformité vérifiés**.
+- [ ] **P4** — instrumenter `shallow.rs` de même.
+- [ ] **P5** — **mesurer sur C01, C03 et C04**, et classer chaque saturation : *filet* · *maquillage*
+      · *jamais déclenchée*. Une saturation jamais déclenchée n'est pas innocente : elle n'a pas été
+      testée (**L118**).
+- [ ] **P6** — le résidu de `10⁻¹⁰ m` (**S37-3**) : la saturation en est-elle la cause ? Le test doit
+      pouvoir répondre **non**.
+- [ ] **P7** — l'ADR, et les répercussions : `CAS-CANONIQUES`, angles morts, actions.
+- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
-**Ce que S36 laisse et qui commande cette session.**
+**Ce que S37 laisse et qui commande cette session.**
 
-- Les deux véhicules sont dans le même binaire : `water_core::{Delta1D, Bassin}` et
-  `water_core::{Shallow1D, Flux}`. Rien à importer.
-- **`delta.rs` est en `f32`, `shallow.rs` en `f64`.** `ε_f32 ≈ 1,19·10⁻⁷` ; sur une hauteur de 3 m,
-  l'arrondi vaut déjà `≈ 3,6·10⁻⁷ m`. C'est le fait central de la session et il n'est écrit nulle
-  part dans le corpus.
-- **Alignement des grilles, vérifié avant le plan** : `delta.rs` place le centre de la cellule
-  interne `i` à `origine + (i+½)·dx` (ses tableaux bruts portent deux cellules fantômes, `k = i+1`) ;
-  `shallow.rs` à `(i+½)·dx`, sans fantômes. **Les cellules internes coïncident.**
-- **Les temps de sortie doivent être comparés, pas les pas.** `delta.rs` avance par
-  `avancer_equilibre(duree_s)`, `shallow.rs` par `avancer_jusqu_a(t_fin, cfl)` ; leurs pas de temps
-  diffèrent dès le premier, puisque `dt_cfl` est calculé dans deux précisions.
-- **C01 des deux côtés** : `Bassin::c01()` et `montage_c01()` — 40 m, 160 cellules, `dx = 0,25 m`,
-  fond `−3 → −1`, `η₀ = 0`, repos.
-- **C04 demande un alignement** : `Bassin::c04()` est à 800 cellules de 5 cm sur `[−20, +20]`, tandis
-  que `c04_ritter` de la lignée B tourne à 1600 mailles de 2,5 cm sur `[0, 40]`. `barrage()` étant
-  paramétrique, l'aligner coûte un appel — mais **l'origine diffère de 20 m** et il faut en tenir
-  compte dans la comparaison des abscisses.
-- **État de départ** : `cargo test` = **68 tests** (32 cœur + 36 harnais, un `ignore`), `check` = 0
-  échec, hashs `0x3e2c06a7b00e73e3` et `0x1a8b0629a9f51b6e`. Mode `physics` : **31 s** sur 60 s de
-  budget, dont 12,5 s pour le second véhicule — **cette session doit surveiller ce qu'elle ajoute**
-  (S36-4, **A158**).
+- **Les deux solveurs saturent au même endroit et de la même façon**, sans s'être vus. C'est un
+  argument de plus pour `ADR-043` §1 — et cela veut dire que la mesure vaudra pour les deux.
+- **Le résidu de S37** : à la cellule 625 de C04, `delta.rs` porte `0` exactement et `shallow.rs`
+  `1,05·10⁻¹⁰ m`. Les deux saturent pourtant à zéro. **Donc l'un des deux écrit ce résidu après
+  avoir saturé** — c'est le flux, pas la saturation.
+- **Le témoin naturel existe déjà** : `C01-volume` mesure la dérive relative du volume et la
+  déclare *diagnostic, non probant*. Il devient probant le jour où une saturation se déclenche —
+  **et C04 n'a aucune assertion de ce genre**.
+- **Ce qu'il ne faut pas faire** : « corriger » une saturation trop fréquente en la retirant ou en
+  la déplaçant. Le mandat est de **compter**, puis de dire. Retirer un filet sans savoir ce qu'il
+  retient est le geste qui transforme un défaut visible en défaut invisible.
+- **Ne pas toucher au seuil de sec** (**A163**, **S37-1**) : c'est une décision de conception en
+  attente, et cette session la croisera sans la trancher.
+- **État de départ** : `cargo test` = **74 tests** (32 cœur + 42 harnais, un `ignore`), `check` = 0
+  échec, hashs `0x3e2c06a7b00e73e3` et `0x1a8b0629a9f51b6e`. Mode `physics` : **31 s** sur 60 s.
