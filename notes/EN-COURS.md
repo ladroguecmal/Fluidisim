@@ -90,7 +90,7 @@ est trop facile, pas le schéma qui est bon — et il faudra le dire.
       une impression.
 - [x] **P5** — reconstruction hydrostatique (Audusse) : le schéma équilibré. Réexécuter, comparer
       les deux chiffres dans le même rapport.
-- [ ] **P6** — **ADR-030** : ce que C01 a appris, et pourquoi « équilibré sur fond variable » est un
+- [x] **P6** — **ADR-030** : ce que C01 a appris, et pourquoi « équilibré sur fond variable » est un
       critère d'**élimination** pour B3, connu avant le banc et non découvert pendant.
 - [ ] **P7** — répercussions : `CAS-CANONIQUES`, `cas_en_attente()`, index, angles morts, notes
       correctives, décomptes.
