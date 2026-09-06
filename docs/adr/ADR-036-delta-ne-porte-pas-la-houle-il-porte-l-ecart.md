@@ -44,6 +44,24 @@ grandeur pour une perturbation** de longueur d'onde comparable, et c'est ainsi q
 
 ## 3. Le sillage, et il est le cas critique
 
+> **Note corrective S32 — ce paragraphe n'a pas d'objet : le sillage n'appartient pas à δ.**
+>
+> ADR-001 §2 range explicitement les **sillages** dans **W**, et donne à δ « proche-coque, gerbe
+> d'étrave, éclaboussure, cavité d'impact, poche d'air, remous sur rocher ». Le §6.2 ci-dessous
+> posait la question et la laissait ouverte (A139) ; **la réponse était dans ADR-001 depuis S01**, et
+> je ne l'avais pas lue — ADR-011 §4, que je citais, ne parle que du *générateur* de sillage dans W
+> et ne contredit rien.
+>
+> **Les chiffres restent exacts** — un objet de longueur d'onde `λ` porté par δ meurt bien selon la
+> loi — **mais le sillage n'est pas cet objet**, et la table des distances décrit un cas qui
+> n'existe pas.
+>
+> Ce que δ porte réellement est d'échelle **métrique**, donc pire : une éclaboussure d'un mètre
+> s'éteint **huit fois trop tôt**. Voir
+> [`ADR-037`](ADR-037-la-dissipation-est-un-allie-pour-la-moitie-de-delta.md), qui clôt A139 et
+> partitionne le contenu de δ en *entretenus* — pour lesquels la dissipation est un **mécanisme
+> voulu** — et *transitoires*, pour lesquels elle est le défaut dimensionnant.
+
 Un sillage de Kelvin a pour longueur d'onde `λ = 2πv²/g` et pour période `T = 2πv/g`. À `dx = 1 m`,
 `ν = 0,45` :
 

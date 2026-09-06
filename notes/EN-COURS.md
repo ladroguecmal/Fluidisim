@@ -102,7 +102,7 @@ probablement tout le sujet.
       dissipation fait, et où les deux divergent.
 - [x] **P4** — la partition **entretenu / transitoire** du contenu de δ, et ce que chacune subit.
 - [x] **P5** — chiffrer : durée numérique contre durée physique attendue, pour chaque contenu.
-- [ ] **P6** — **ADR-037**.
+- [x] **P6** — **ADR-037**.
 - [ ] **P7** — répercussions : ADR-036, index, angles morts, actions, décomptes.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
