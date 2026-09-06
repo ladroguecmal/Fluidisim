@@ -156,7 +156,12 @@ même pour tous les joueurs. C'est nécessaire — c'est un événement de gamep
    amplitude, comparée à une fraction de `Hs` local. À calibrer avec B8.
 2. Table `E_cause` par type d'objet et valeur de `K` — inchangée depuis ADR-009 §7.1, mais elle
    change de propriétaire : c'est désormais une donnée d'équilibrage gameplay.
-3. Recevabilité de `λ_cut` au regard de l'argument de fermeture §3.2 — à intégrer au protocole B2.
+3. Recevabilité de `λ_cut` au regard de l'argument de fermeture §3.2 — intégré au protocole B2
+   *(ajout S05, et second fondement ajouté en S15)*. **Le mode d'emploi est dans
+   [`DOSSIER-B2`](../validation/DOSSIER-B2.md) §6**, qui énumère les phénomènes gameplay ondulatoires
+   et leur longueur caractéristique : le plus court est le **sillage à 5 m/s, 16 m**, de sorte que le
+   critère de fermeture laisse de la marge jusqu'à `λ_cut ≈ 6 m`. Ce n'est donc pas lui qui borne
+   `λ_cut` — c'est l'éponge du domaine d'impact (ADR-005 §5, note S16).
    → **S11** : le critère porte désormais **deux** conséquences et non une. SPEC-006 §5.6 s'appuie sur le
    même argument de fermeture pour justifier que le signal de traversabilité ignore δ. Un
    relèvement de `λ_cut` remettrait donc en cause l'autorité des ondes répliquées **et** la validité

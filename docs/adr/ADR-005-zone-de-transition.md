@@ -62,6 +62,20 @@ Avec `λ_cut = 4 m` (valeur de départ proposée) :
 - l'éponge représente ≈2 m sur un domaine de 20 m, soit ≈27 % du volume en 3D. Coût réel, mais
   borné et indépendant de la scène.
 
+> **Note corrective (S16, dossier B2 §3.1 et §10.2).** Deux points sur ce paragraphe.
+>
+> **Le « ≈27 % » n'est pas reproductible** à partir de ce qui est donné : pour un domaine de 20 m
+> avec 2 m d'éponge, la fraction de volume vaut **20 %** si deux faces opposées la portent, **36 %**
+> si les quatre faces latérales la portent, **49 %** si les six faces la portent. Le paragraphe ne
+> dit pas lesquelles. La grandeur n'est pas anecdotique : c'est le **coût d'entrée de tout domaine**.
+>
+> **Et `L_s = λ_cut/2` borne `λ_cut` par le haut, ce qui n'avait pas été calculé.** L'intérieur utile
+> d'un domaine de largeur transverse `W` vaut `W − λ_cut`. Sur le domaine d'impact de référence,
+> 6 × 6 m (SPEC-001 §2.4) : à `λ_cut = 4 m` il reste **33 % d'emprise linéaire, soit 11 % de surface
+> au sol** ; à `λ_cut = 6 m`, **plus d'intérieur du tout**. La borne haute de `λ_cut` est donc dictée
+> par le plus **petit** domaine, et elle est serrée — `λ_cut ≤ 3 m` pour qu'un domaine d'impact garde
+> la moitié de son emprise, contre 4 m proposés ici. À trancher au banc B2.
+
 `λ_cut` devient donc un **paramètre d'architecture central** : il fixe simultanément la frontière
 W/δ, la largeur d'éponge, et le coût minimal d'un domaine. Il doit être choisi en premier lors du
 benchmark B2/B3.

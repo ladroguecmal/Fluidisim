@@ -67,6 +67,14 @@ conservation d'énergie sur 60 s ; coût pour 4096 paquets ; déterminisme crois
 **Décision.** Technologie de W, `λ_cut`, capacité maximale en paquets.
 **Priorité 1 du projet.**
 
+> **Mode d'emploi : [`DOSSIER-B2`](DOSSIER-B2.md) *(S16)*.** Scénarios en fichiers concrets, métrique
+> d'iso-qualité nommée, procédure de décision, préalables et pièges propres au banc. Trois points en
+> sortent qui changent ce protocole : un **cinquième scénario** (B2-05, arrivée en cours de partie,
+> que l'ajout S04 ci-dessus réclamait sans qu'aucun scénario ne l'exerce) ; la **métrique d'erreur
+> unique** exigée par SPEC-003 §5.2, qui manquait — l'erreur de célérité relative sur C02, intégrée
+> sur `[λ_cut, 4·λ_cut]` ; et le fait que **B2 produit un couple et non un nombre**, `λ_cut` avec le
+> tableau des taux de décimation admissibles par classe de domaine.
+
 > **Ajout S04 — coût réseau caché, à mesurer et non à supposer.** `advance(t)` doit être une
 > fonction pure du journal d'événements (SPEC-004 §5.1). Les paquets lagrangiens le sont ; un champ
 > 2D intégré ne l'est pas et impose des points de reprise à stocker, répliquer et transmettre à tout
