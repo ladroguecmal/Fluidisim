@@ -89,10 +89,10 @@ c'est-à-dire exactement ce pour quoi δ existe. Et un sillage de Kelvin a une l
 de l'ordre de **la période**. Si ce calcul tient, le sillage d'un bateau s'éteint en quelques
 secondes.
 
-- [ ] **P1** — plan, jeton.
-- [ ] **P2** — établir l'additivité et ses conséquences : ce que δ porte, ce qu'il ne porte pas, et
+- [x] **P1** — plan, jeton.
+- [x] **P2** — établir l'additivité et ses conséquences : ce que δ porte, ce qu'il ne porte pas, et
       donc ce que la loi de dissipation gouverne réellement.
-- [ ] **P3** — le sillage : `λ = 2πv²/g`, la résolution qu'il reçoit, la demi-vie qui en découle.
+- [x] **P3** — le sillage : `λ = 2πv²/g`, la résolution qu'il reçoit, la demi-vie qui en découle.
       **Chiffrer avant de conclure** — l'ordre de grandeur peut démentir la thèse.
 - [ ] **P4** — **mesurer** sur le véhicule : une perturbation courte lâchée dans un domaine, et son
       amplitude après une traversée. La loi prédit, la mesure vérifie.
@@ -113,3 +113,43 @@ secondes.
 - **C04 en échec, `C01-jet` rouge, C08 sans verdict** : trois décisions.
 
 **Branche.** `claude/s22-suite`. `master` s'arrête à S17 (A107).
+
+#### P2-P3 — A122 se dissout, et ce qui la remplace est bien pire
+
+**L'additivité règle la question posée.** ADR-001 §2 : `Surface_visible = B + W + δ`. ADR-005 §1 en
+tire que la « conversion onde analytique → état volumique » est **sans objet** — *« B+W est un terme
+de forçage lu par le solveur, pas une condition d'entrée à convertir »* — et que la somme est exacte
+partout, sans deux champs à mélanger.
+
+> **δ ne transporte pas la houle. Il transporte l'écart à la houle.** Une composante courte de W
+> traverse un domaine δ sans y être dissipée, puisqu'elle n'y est pas discrétisée. **Il n'y a rien à
+> réinjecter**, et A122 se dissout — comme deux des cinq arbitrages d'ADR-027 s'étaient dissous.
+
+**Mais la loi de dissipation ne disparaît pas : elle change de sujet.** Elle gouverne ce que δ porte
+réellement — les **perturbations locales**, sillage, impact, éclaboussure. C'est-à-dire exactement ce
+pour quoi δ existe.
+
+**Le sillage de Kelvin, chiffré.** `λ = 2πv²/g`, période `T = 2πv/g`, à `dx = 1 m` :
+
+| Vitesse | `λ` | `N = λ/dx` | demi-vie | **distance visible derrière le bateau** |
+|---|---|---|---|---|
+| 3 m/s | 5,8 m | 5,8 | 0,37 période | **2,1 m** |
+| 5 m/s | 16,0 m | 16,0 | 1,02 période | **16,4 m** |
+| 8 m/s | 41,0 m | 41,0 | 2,62 périodes | 68 m |
+| 10 m/s | 64,0 m | 64,0 | 4,09 périodes | **262 m** |
+| 15 m/s | 144,1 m | 144,1 | 9,20 périodes | 1 275 m |
+
+**Une barque à 3 m/s laisse un sillage de deux mètres** — moins que sa propre longueur. Un hors-bord
+à 10 m/s en laisse un de 262 m.
+
+**Et la loi d'échelle est brutale.** `λ ∝ v²` donne `N ∝ v²`, donc une demi-vie en périodes `∝ v²`,
+et la période valant `T ∝ v`, la durée de vie va comme **`v³`** et la **distance visible comme
+`v⁴/dx`**. Vérifié sur les chiffres : de 3 à 10 m/s, `(10/3)⁴ = 123` et le rapport mesuré vaut 125.
+
+> **δ dissipe le plus vite précisément ce qu'il existe pour produire, et d'autant plus que l'objet
+> est lent.** Un facteur 3 en vitesse fait deux ordres de grandeur sur la longueur du sillage.
+
+**Ce que cela dit du gameplay, et personne ne l'avait posé** : les petites embarcations lentes —
+barques, canoës, nageurs — n'auront **aucun sillage**, tandis que les navires rapides en auront un
+qui traverse le domaine. C'est probablement l'inverse de ce qu'on attend : une barque qui glisse sans
+laisser de trace se remarque immédiatement.
