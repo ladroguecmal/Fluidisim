@@ -12,11 +12,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-05
+Session en cours : S14 — 2026-09-05 — audit inverse des quinze invariants restants
 Dernière session : S13 — 2026-09-05 — revue croisée de SPEC-006, ADR-022 et ADR-023
-Session suivante : S14 — auditer les quinze autres invariants contre leurs ADR sources : le
-                   contrôle inverse, jamais fait, deux écarts sur deux tentatives en S13
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
