@@ -211,8 +211,20 @@ fn executer_physics_solveur() -> usize {
 --- C01 — repos hydrostatique sur fond en pente (couche δ) ---");
     let mut echecs = 0usize;
     for c in &cas {
-        let etat = if c.passe() { "OK    " } else { "ÉCHEC " };
-        if !c.passe() {
+        // Les lignes `C01-jet` sont des **témoins** : le schéma au premier jet est conservé pour
+        // mesurer ce que la reconstruction hydrostatique achète, et il est *attendu en échec*. Les
+        // compter comme des échecs rendrait la batterie rouge en régime nominal, donc illisible.
+        //
+        // La sémantique est inversée, pas suspendue : **un témoin qui passe est une anomalie**. Si
+        // le premier jet devenait conforme, ce serait que quelqu'un l'a rendu équilibré sans le
+        // dire, ou que le montage a cessé d'être discriminant — les deux méritent un arrêt.
+        let temoin = c.id.ends_with("-jet");
+        let etat = match (temoin, c.passe()) {
+            (true, _) => "TÉMOIN",
+            (false, true) => "OK    ",
+            (false, false) => "ÉCHEC ",
+        };
+        if !temoin && !c.passe() {
             echecs += 1;
         }
         println!(
@@ -228,7 +240,26 @@ fn executer_physics_solveur() -> usize {
             println!("         → référence : {}", c.source);
         }
     }
-    println!("  {} cas exécutés, {} échec(s)", cas.len(), echecs);
+
+    // Le verdict du témoin est **agrégé**, jamais ligne à ligne : C01 porte deux assertions, et le
+    // premier jet en passe une. C'est le cas dans son ensemble qu'il doit échouer. S'il venait à
+    // les passer toutes, le montage aurait cessé d'être discriminant — et un montage qui ne
+    // discrimine plus est un test qui ne teste plus rien.
+    let temoins: Vec<&physics::Cas> = cas.iter().filter(|c| c.id.ends_with("-jet")).collect();
+    if !temoins.is_empty() && temoins.iter().all(|c| c.passe()) {
+        println!(
+            "ANOMAL C01-jet      le schéma au premier jet passe C01 sur ses {} assertions",
+            temoins.len()
+        );
+        println!("         → il devrait en échouer au moins une. Montage non discriminant, ou schéma modifié sans le dire — ADR-030 §2.");
+        echecs += 1;
+    }
+
+    let executes = cas.len() - temoins.len();
+    println!(
+        "  {executes} cas exécutés, {echecs} échec(s), {} témoin(s)",
+        temoins.len()
+    );
     echecs
 }
 

@@ -93,6 +93,15 @@ pub struct Delta1D {
     pas: u64,
 }
 
+/// Ce qu'une interface reconstruite rend au schéma équilibré.
+struct Interface {
+    flux: [f32; 2],
+    /// Hauteur reconstruite du côté gauche — sert au recollement de pression de la cellule `i`.
+    h_gauche: f32,
+    /// Hauteur reconstruite du côté droit — sert à la cellule `i + 1`.
+    h_droite: f32,
+}
+
 impl Delta1D {
     /// Construit le solveur et l'initialise **au repos exact**.
     ///
@@ -217,13 +226,25 @@ impl Delta1D {
 
     /// Remplit les cellules fantômes — murs verticaux aux deux bords.
     ///
-    /// Le miroir porte sur `h` et **inverse** `hu` : c'est la condition de paroi imperméable. Le
-    /// lit, lui, est prolongé par symétrie pour que la reconstruction n'y voie pas de marche.
+    /// Le miroir porte sur la **surface libre**, pas sur la hauteur d'eau, et il inverse `hu` :
+    /// `h_fantôme = η_interne − b_fantôme`.
+    ///
+    /// # Pourquoi ce détail décide du résultat
+    ///
+    /// Le premier jet de ce module écrivait `h[0] = h[1]`, le miroir évident. Sur un fond en pente,
+    /// le lit de la cellule fantôme n'est pas à la même cote que celui de sa voisine : recopier la
+    /// **hauteur** y installe donc une surface libre plus haute ou plus basse d'exactement
+    /// `dx·pente`. Le bord devient une marche d'eau permanente, qui se vide dans le domaine dès le
+    /// premier pas.
+    ///
+    /// Mesuré : le schéma équilibré perdait **0,86 m³/m sur 80**, soit 1,1 % du volume, alors que
+    /// son intérieur était exact au bit près. **Un intérieur équilibré et un bord qui ne l'est pas
+    /// donnent un solveur non équilibré** — la propriété ne se découpe pas.
     fn bords(&mut self) {
         let n = self.nx;
-        self.h[0] = self.h[1];
+        self.h[0] = (self.h[1] + self.b[1] - self.b[0]).max(0.0);
         self.hu[0] = -self.hu[1];
-        self.h[n + 1] = self.h[n];
+        self.h[n + 1] = (self.h[n] + self.b[n] - self.b[n + 1]).max(0.0);
         self.hu[n + 1] = -self.hu[n];
     }
 
@@ -284,6 +305,117 @@ impl Delta1D {
             0.5 * (fl[0] + fr[0]) - 0.5 * alpha * (hr - hl),
             0.5 * (fl[1] + fr[1]) - 0.5 * alpha * (hur - hul),
         ]
+    }
+
+    /// Un pas de temps, **schéma équilibré** — reconstruction hydrostatique (Audusse).
+    ///
+    /// # L'idée, en une phrase
+    ///
+    /// Le schéma au premier jet diffuse le saut de hauteur `h_R − h_L` que la **pente** crée, en le
+    /// confondant avec un saut d'**écoulement**. La reconstruction hydrostatique retire la
+    /// géométrie avant de calculer le flux : les deux côtés de l'interface sont ramenés au même
+    /// niveau de lit `b* = max(b_L, b_R)`, et ce qui reste du saut est alors du vrai écoulement.
+    ///
+    /// ```text
+    /// b*     = max(b_L, b_R)
+    /// h*_L   = max(0, h_L + b_L − b*)          h*_R = max(0, h_R + b_R − b*)
+    /// F      = Rusanov(h*_L, h*_L·u_L ; h*_R, h*_R·u_R)
+    /// ```
+    ///
+    /// La pression est ensuite recollée cellule par cellule : la cellule `i` voit, à son interface
+    /// droite, `F + [0, g·h_i²/2 − g·(h*_L)²/2]`, et symétriquement à gauche.
+    ///
+    /// # Pourquoi le repos devient exact
+    ///
+    /// Au repos, `h + b = η₀` partout, donc `h*_L = η₀ − b* = h*_R` : les deux états reconstruits
+    /// sont **égaux**, la diffusion de Rusanov s'annule identiquement, et le flux vaut
+    /// `[0, g·(h*)²/2]`. Le recollement le remplace par `[0, g·h_i²/2]` des deux côtés — même
+    /// valeur à gauche et à droite. La différence est nulle, et l'eau ne bouge pas.
+    ///
+    /// Ce n'est pas une amélioration de précision : c'est une **identité algébrique**. Le repos est
+    /// préservé quelle que soit la grille, et il le serait encore sur une grille de trois cellules.
+    pub fn pas_equilibre(&mut self, dt: f32) {
+        self.bords();
+        let n = self.nx;
+        let lambda = dt / self.dx;
+
+        let mut prec = self.interface_reconstruite(0);
+        for i in 1..=n {
+            let cour = self.interface_reconstruite(i);
+            let p_i = 0.5 * G * self.h[i] * self.h[i];
+
+            // Quantité de mouvement : flux reconstruit, puis pression recollée de chaque côté.
+            let qm_droite = cour.flux[1] + p_i - 0.5 * G * cour.h_gauche * cour.h_gauche;
+            let qm_gauche = prec.flux[1] + p_i - 0.5 * G * prec.h_droite * prec.h_droite;
+
+            // Masse : le flux d'interface est unique, donc le schéma reste conservatif.
+            self.h_suiv[i] = self.h[i] - lambda * (cour.flux[0] - prec.flux[0]);
+            self.hu_suiv[i] = self.hu[i] - lambda * (qm_droite - qm_gauche);
+            if self.h_suiv[i] < 0.0 {
+                self.h_suiv[i] = 0.0;
+                self.hu_suiv[i] = 0.0;
+            }
+            prec = cour;
+        }
+
+        for i in 1..=n {
+            self.h[i] = self.h_suiv[i];
+            self.hu[i] = self.hu_suiv[i];
+        }
+        self.t_s += dt as f64;
+        self.pas += 1;
+    }
+
+    /// Flux de Rusanov à l'interface `i`, calculé sur les états **reconstruits**, et les deux
+    /// hauteurs reconstruites qui serviront au recollement de pression.
+    fn interface_reconstruite(&self, i: usize) -> Interface {
+        let (hl, hul) = (self.h[i], self.hu[i]);
+        let (hr, hur) = (self.h[i + 1], self.hu[i + 1]);
+        let ul = if hl > H_SEC { hul / hl } else { 0.0 };
+        let ur = if hr > H_SEC { hur / hr } else { 0.0 };
+
+        let b_etoile = self.b[i].max(self.b[i + 1]);
+        let hl_s = (hl + self.b[i] - b_etoile).max(0.0);
+        let hr_s = (hr + self.b[i + 1] - b_etoile).max(0.0);
+
+        // La **vitesse** est conservée par la reconstruction, pas le débit : c'est elle qui porte
+        // l'écoulement, et la hauteur qui porte la géométrie.
+        let (hul_s, hur_s) = (hl_s * ul, hr_s * ur);
+
+        let fl = [hul_s, hul_s * ul + 0.5 * G * hl_s * hl_s];
+        let fr = [hur_s, hur_s * ur + 0.5 * G * hr_s * hr_s];
+
+        let al = ul.abs() + (G * hl_s).sqrt();
+        let ar = ur.abs() + (G * hr_s).sqrt();
+        let alpha = al.max(ar);
+
+        Interface {
+            flux: [
+                0.5 * (fl[0] + fr[0]) - 0.5 * alpha * (hr_s - hl_s),
+                0.5 * (fl[1] + fr[1]) - 0.5 * alpha * (hur_s - hul_s),
+            ],
+            h_gauche: hl_s,
+            h_droite: hr_s,
+        }
+    }
+
+    /// Avance jusqu'à `duree_s` avec le schéma équilibré. Renvoie le nombre de pas.
+    pub fn avancer_equilibre(&mut self, duree_s: f64) -> u64 {
+        let cible = self.t_s + duree_s;
+        let mut n = 0u64;
+        while self.t_s < cible {
+            let mut dt = self.dt_cfl();
+            let reste = (cible - self.t_s) as f32;
+            if dt > reste {
+                dt = reste;
+            }
+            if dt <= 0.0 {
+                break;
+            }
+            self.pas_equilibre(dt);
+            n += 1;
+        }
+        n
     }
 
     /// Avance jusqu'à `duree_s`, en pas dictés par la CFL. Renvoie le nombre de pas.
@@ -418,14 +550,26 @@ mod tests {
         for nx in [40usize, 80, 160, 320, 640] {
             let mut d = solveur(Bassin { nx, ..Bassin::c01() });
             let pas = d.avancer_naif(60.0);
+            let mut e = solveur(Bassin { nx, ..Bassin::c01() });
+            e.avancer_equilibre(60.0);
             println!(
-                "nx={nx:<4} dx={:.4} m  max|u|={:.6} m/s  max|dη|={:.6} m  pas={pas}",
+                "nx={nx:<4} dx={:.4} m  jet: max|u|={:.6} m/s  max|dη|={:.6} m  pas={pas}",
                 d.dx(),
                 d.max_abs_u(),
                 d.max_ecart_eta()
             );
+            println!(
+                "          équilibré : max|u|={:.9} m/s  max|dη|={:.9} m  volume={:.6}",
+                e.max_abs_u(),
+                e.max_ecart_eta(),
+                e.volume()
+            );
+            // C01 porte **deux** assertions, et le premier jet ne tombe que sur la seconde :
+            // sa vitesse parasite passe le seuil (0,53 mm/s à nx = 160), sa surface libre non
+            // (21,6 mm pour 1 mm admis). Un cas qui n'aurait mesuré que `max|u|` aurait déclaré ce
+            // schéma conforme.
             assert!(
-                d.max_abs_u() > 1.0e-3,
+                d.max_ecart_eta() > 1.0e-3,
                 "nx={nx} : le schéma au premier jet doit échouer C01, sinon le montage est trop facile"
             );
         }

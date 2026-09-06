@@ -485,33 +485,55 @@ pub fn c10_cube_flottant(bg: &Background, t: SimTime) -> Vec<Cas> {
 ///   moyenne de 2 m sur 40 m de long. Un solveur peut être au repos et fuir ; la troisième mesure
 ///   sépare les deux défauts.
 ///
+/// **Les deux premières ne sont pas redondantes.** Le schéma au premier jet passe `max|u|`
+/// (0,53 mm/s) et échoue `max|η − η₀|` (21,6 mm) : mesurer la seule vitesse l'aurait déclaré
+/// conforme. Les deux grandeurs sont donc rapportées pour les deux schémas.
+///
 /// Le troisième cas n'est pas dans l'énoncé de `CAS-CANONIQUES`. Il y est ajouté ici parce qu'il
 /// coûte une ligne et qu'il distingue deux causes que les deux premiers confondraient.
 pub fn c01_repos_sur_pente(host: &mut water_core::HostServices, duree_s: f64) -> Vec<Cas> {
     use water_core::{Bassin, Delta1D};
 
     let bassin = Bassin::c01();
-    let mut d = match Delta1D::configure(host, bassin) {
+
+    // Deux solveurs identiques, deux schémas. Le premier jet n'est pas conservé par nostalgie :
+    // il est la **mesure de référence** de ce que la reconstruction hydrostatique achète, et sans
+    // lui « C01 passe » ne dirait pas si le cas est exigeant ou si le montage est facile.
+    let mut naif = match Delta1D::configure(host, bassin) {
         Ok(d) => d,
-        Err(e) => {
-            return vec![Cas {
-                id: "C01",
-                grandeur: format!("configuration du solveur δ ({e:?})"),
-                mesure: 1.0,
-                reference: 0.0,
-                tolerance_rel: 0.0,
-                source: "delta.rs — l'allocation doit précéder seal(), I-06",
-            }]
-        }
+        Err(e) => return vec![echec_configuration(e)],
+    };
+    let mut equi = match Delta1D::configure(host, bassin) {
+        Ok(d) => d,
+        Err(e) => return vec![echec_configuration(e)],
     };
 
-    let pas = d.avancer_naif(duree_s);
+    let pas = naif.avancer_naif(duree_s);
+    equi.avancer_equilibre(duree_s);
 
     vec![
+        // Le schéma au premier jet, mesuré et **attendu en échec**. Sa tolérance est celle de C01 :
+        // il n'a pas droit à un seuil plus doux sous prétexte qu'il est plus simple.
+        Cas {
+            id: "C01-jet",
+            grandeur: format!("max|u| — schéma au premier jet, m/s ({pas} pas)"),
+            mesure: naif.max_abs_u(),
+            reference: 0.0,
+            tolerance_rel: 1.0e-3,
+            source: "CAS-CANONIQUES §C01 — ce seuil-ci, il le passe : voir la ligne suivante",
+        },
+        Cas {
+            id: "C01-jet",
+            grandeur: "max|η − η₀| — schéma au premier jet, m".to_string(),
+            mesure: naif.max_ecart_eta(),
+            reference: 0.0,
+            tolerance_rel: 1.0e-3,
+            source: "CAS-CANONIQUES §C01 — attendu en échec, ADR-030 §2",
+        },
         Cas {
             id: "C01",
             grandeur: format!("max|u| après {duree_s:.0} s, m/s ({pas} pas)"),
-            mesure: d.max_abs_u(),
+            mesure: equi.max_abs_u(),
             reference: 0.0,
             tolerance_rel: 1.0e-3,
             source: "CAS-CANONIQUES §C01 — l'eau au repos reste au repos, u ≡ 0",
@@ -519,7 +541,7 @@ pub fn c01_repos_sur_pente(host: &mut water_core::HostServices, duree_s: f64) ->
         Cas {
             id: "C01",
             grandeur: "max|η − η₀|, m".to_string(),
-            mesure: d.max_ecart_eta(),
+            mesure: equi.max_ecart_eta(),
             reference: 0.0,
             tolerance_rel: 1.0e-3,
             source: "CAS-CANONIQUES §C01 — la surface libre ne bouge pas",
@@ -527,10 +549,21 @@ pub fn c01_repos_sur_pente(host: &mut water_core::HostServices, duree_s: f64) ->
         Cas {
             id: "C01",
             grandeur: "volume conservé, m² par unité de largeur".to_string(),
-            mesure: d.volume(),
+            mesure: equi.volume(),
             reference: 80.0,
             tolerance_rel: 1.0e-6,
             source: "géométrie du montage : profondeur moyenne 2 m sur 40 m",
         },
     ]
+}
+
+fn echec_configuration(e: water_core::AllocError) -> Cas {
+    Cas {
+        id: "C01",
+        grandeur: format!("configuration du solveur δ ({e:?})"),
+        mesure: 1.0,
+        reference: 0.0,
+        tolerance_rel: 0.0,
+        source: "delta.rs — l'allocation doit précéder seal(), I-06",
+    }
 }

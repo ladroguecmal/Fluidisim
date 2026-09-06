@@ -88,7 +88,7 @@ est trop facile, pas le schéma qui est bon — et il faudra le dire.
       `physics` : `max|u|` et `max|η − η₀|` mesurés sur le champ après 60 s.
 - [x] **P4** — exécuter, constater, **mesurer** l'amplitude du courant parasite. Un chiffre, pas
       une impression.
-- [ ] **P5** — reconstruction hydrostatique (Audusse) : le schéma équilibré. Réexécuter, comparer
+- [x] **P5** — reconstruction hydrostatique (Audusse) : le schéma équilibré. Réexécuter, comparer
       les deux chiffres dans le même rapport.
 - [ ] **P6** — **ADR-030** : ce que C01 a appris, et pourquoi « équilibré sur fond variable » est un
       critère d'**élimination** pour B3, connu avant le banc et non découvert pendant.
@@ -160,3 +160,59 @@ long d'une pente **même quand l'eau est parfaitement immobile**. Le schéma dif
 n'est pas un saut d'écoulement mais un saut de géométrie.
 
 C'est le point non anticipé de la session : j'attendais le terme source, et c'est le flux.
+
+#### P5 — deux défauts se superposaient, et le plus gros était dans la condition aux limites
+
+**Correction à porter sur ce qui est écrit plus haut : le diagnostic de P4 était faux.** Il
+attribuait les 19,6 mm/s à la diffusion de Rusanov. La vraie cause principale était ailleurs.
+
+`bords()` recopiait la **hauteur d'eau** dans la cellule fantôme — `h[0] = h[1]`, le miroir évident.
+Sur un fond en pente, le lit de la fantôme n'est pas à la cote de sa voisine : recopier la hauteur
+y installe une surface libre décalée de `dx·pente`, c'est-à-dire **une marche d'eau permanente
+contre chaque mur**, qui se vide dans le domaine dès le premier pas. Le miroir juste porte sur la
+**surface libre** : `h_fantôme = η_interne − b_fantôme`.
+
+Le symptôme qui l'a révélé n'était pas le courant : c'est le **schéma équilibré qui perdait 1,1 %
+de volume** alors que son intérieur est exact par construction. Une propriété exacte qui donne un
+résultat faux ne laisse qu'une possibilité — l'erreur est en dehors de ce qu'elle couvre.
+
+> **Un intérieur équilibré et un bord qui ne l'est pas donnent un solveur non équilibré.** La
+> propriété ne se découpe pas, et c'est le genre de chose qu'on n'écrit dans aucun ADR parce qu'elle
+> paraît évidente une fois dite.
+
+**Après correction du bord — les deux schémas, à 60 s :**
+
+| `dx` | jet : `max\|u\|` | jet : `max\|η−η₀\|` | équilibré : `max\|u\|` | équilibré : `max\|η−η₀\|` |
+|---|---|---|---|---|
+| 1,0000 m | 1,98 mm/s | 85,0 mm | 0,0018 mm/s | 0,00048 mm |
+| 0,5000 m | 1,04 mm/s | 43,0 mm | 0,0026 mm/s | 0,00048 mm |
+| **0,2500 m** | **0,53 mm/s** | **21,6 mm** | **0,0068 mm/s** | **0,00072 mm** |
+| 0,1250 m | 0,29 mm/s | 10,8 mm | 0,0062 mm/s | 0,00119 mm |
+| 0,0625 m | 0,10 mm/s | 5,5 mm | 0,0070 mm/s | 0,00131 mm |
+
+**Trois constats, dans l'ordre d'importance.**
+
+1. **Le premier jet passe `max|u|` et échoue `max|η−η₀|`.** 0,53 mm/s contre 1 mm/s admis — il
+   aurait été déclaré conforme par un cas qui n'aurait mesuré que la vitesse. C'est la seconde
+   assertion de C01 qui le fait tomber, avec 21,6 mm pour 1 mm. **Les deux assertions de C01 ne
+   sont pas redondantes**, et rien dans l'énoncé ne le disait.
+2. **Le défaut résiduel du premier jet est du premier ordre exact en `dx`** : `max|η−η₀|/dx` vaut
+   0,0850 · 0,0860 · 0,0864 · 0,0862 · 0,0875. Atteindre 1 mm par raffinement seul demanderait
+   `dx = 11,4 mm`, soit **×21,9**, soit **×10 500** en coût 2D. Le raffinement ne rachète pas
+   l'équilibrage — conclusion inchangée depuis P4, sur une autre grandeur.
+3. **L'erreur du schéma équilibré ne dépend pas de `dx`** : elle reste entre 0,0005 et 0,0013 mm,
+   et l'ulp d'un `f32` à 3 m vaut 0,00024 mm. **C'est le bruit d'arrondi, pas une erreur de
+   discrétisation.** Le repos est préservé algébriquement, et il le serait sur trois cellules.
+
+**Ce qui reste à savoir, et que cette session ne sait pas.** Le montage de C01 a un fond à pente
+**constante**. Sur un tel fond, `h` varie linéairement, le saut de hauteur aux interfaces est le
+même partout, et sa divergence est donc presque nulle — le premier jet y est *presque* équilibré
+par accident de géométrie. Un fond **courbe** (la bosse parabolique classique) le ferait tomber bien
+plus lourdement. **C01 tel qu'énoncé est moins discriminant qu'il n'en a l'air** : angle mort à
+enregistrer, et proposition d'un C01-bis à fond courbe.
+
+**Le témoin.** Le premier jet reste exécuté à chaque passage, sous le statut `TÉMOIN`, et **n'est
+pas compté dans les échecs** — une batterie rouge en régime nominal est une batterie que personne
+ne lit. Sa sémantique est inversée, pas suspendue : le verdict est **agrégé** — s'il venait à passer
+*toutes* les assertions de C01, la batterie le signale comme anomalie. C'est le seul moyen de savoir
+que le montage a cessé de discriminer.
