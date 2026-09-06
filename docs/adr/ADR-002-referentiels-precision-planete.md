@@ -127,8 +127,15 @@ ancre et un plan tangent.
 
 ## 4. Ce qui reste ouvert
 
-1. Point fixe `int64` vs `f64` pour les positions monde → dépend du besoin de déterminisme exact
-   sur les positions d'objets, décision partagée avec l'équipe réseau/physique solide.
+1. ~~Point fixe `int64` vs `f64` pour les positions monde~~ — **tranché en S19 par
+   [ADR-028](ADR-028-il-n-y-a-pas-d-autres-equipes.md) §3 : `int64` en virgule fixe, résolution
+   `1/2048 m`, portée ±4,5·10¹⁵ m.**
+   La résolution se **dérive** : c'est exactement l'ulp d'un `f32` au rayon de référentiel
+   (`4096 · 2⁻²³ = 2⁻¹¹ m`), donc la seule valeur qui ne perde rien à la conversion et n'en stocke pas
+   davantage. Motif principal : avec des entiers, le déterminisme inter-plateforme d'I-03 devient
+   **structurel** au lieu de dépendre d'une discipline de compilation qu'un drapeau peut casser en
+   silence. *(La « décision partagée avec l'équipe réseau » annoncée ici n'avait pas d'interlocuteur —
+   ADR-028 §2.)*
 2. Taille exacte des régions hydrographiques → dépend de la portée de visibilité maximale et du
    coût de streaming des descripteurs. Piste : 32 km, révisable.
    → **S11** : deux contraintes se sont ajoutées depuis. **SPEC-005 §4** : l'écart entre le géoïde et le plan

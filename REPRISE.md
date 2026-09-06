@@ -49,6 +49,18 @@ le code : aucune ligne n'a encore été écrite.
 Point de départ historique : deux documents d'intention, conservés non modifiés dans
 `docs/sources/`. Tout le reste a été produit depuis.
 
+> **À savoir avant de lire quoi que ce soit d'autre (S19).** **Il n'y a pas d'autres équipes.** Une
+> seule personne travaille sur ce système ; les développeurs observent. Les onze « destinataires
+> extérieurs » recensés dans le corpus — audio, IA, terrain, rendu, véhicules, personnage, réseau,
+> assurance qualité… — **n'existent pas comme interlocuteurs**.
+>
+> Les contraintes qu'ils portaient restent vraies ; c'est leur destinataire qui manque. Une question
+> classée « attend une autre équipe » est donc en réalité **une décision à trancher sans
+> interlocuteur** — et le corpus en comptait quatorze. Voir
+> [`ADR-028`](docs/adr/ADR-028-il-n-y-a-pas-d-autres-equipes.md) §2.
+>
+> **Ne pas reporter une question à une équipe.** Si elle relève de la conception, elle est à toi.
+
 ## 2. Ton rôle et la manière de travailler
 
 Tu es l'ordinateur central de l'équipe de développement. Les développeurs suivent le projet mais

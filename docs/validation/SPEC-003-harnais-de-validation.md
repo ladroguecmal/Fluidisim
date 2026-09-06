@@ -342,4 +342,10 @@ instrumenter ensuite (ADR-020 §1).
    Règle mécanique plutôt que consigne (L19) : **les seuils vivent dans un fichier séparé des
    scénarios**, dont la modification exige une approbation. Ajouter un scénario ne passe par
    personne ; déplacer une barre passe par quelqu'un dont ce n'est pas le travail de la passer.
-   *Reste ouvert* : nommer les personnes — c'est la fiche 2 du dossier de réunion.
+   *Révisé en S19* ([ADR-028](../adr/ADR-028-il-n-y-a-pas-d-autres-equipes.md) §4) : **il n'y a pas
+   d'assurance qualité technique**, ni aucune autre équipe. Le conflit d'intérêt ne peut donc pas
+   être supprimé par une répartition ; il est **contraint dans le temps**. **Un seuil d'acceptation
+   s'écrit avant la mesure qu'il juge, dans un commit qui la précède** ; un commit qui modifie un
+   seuil ne contient aucun résultat, et sa description dit pourquoi le seuil change. C'est l'écriture
+   anticipée de S07 (L28) appliquée à la mesure, avec le même détecteur — l'ordre des commits, qui se
+   vérifie sans avoir assisté au travail.

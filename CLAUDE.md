@@ -38,13 +38,22 @@ ADR-027 dit pour chacun ce qu'il faudrait changer pour l'inverser.
 **Ce qui reste hors de ta portée n'est pas de la conception** — ce sont des faits et des actions, et
 aucune quantité de raisonnement ne les produit :
 
-1. **Nommer des personnes.** Qui acte ADR-020, qui occupe les deux rôles du harnais (ADR-027 §6.3).
-   Fiches 1 et 2 de [`docs/DOSSIER-REUNIONS.md`](docs/DOSSIER-REUNIONS.md).
-2. **Constater l'état réel du projet.** Du terrain a-t-il été sculpté ? Un format réseau existe-t-il ?
-   Du code existe-t-il ? Tout le classement d'urgence du dossier de réunion suppose que rien n'est
-   figé. Demande-le plutôt que de le supposer.
-3. **Agir sur l'infrastructure de l'utilisateur** — dépôt distant notamment (`REPRISE.md` §9).
+1. **Constater l'état réel du projet.** Du terrain a-t-il été sculpté ? Un format réseau
+   existe-t-il ? Du code existe-t-il ? L'utilisateur ne le sait pas non plus (S19). L'inférence
+   raisonnable — personne d'autre ne travaillant sur le projet, rien n'est figé — est **probable et
+   non vérifiée**.
+2. **Agir sur l'infrastructure de l'utilisateur** — dépôt distant notamment (`REPRISE.md` §9).
+3. **Ajouter du code à ce dépôt.** ADR-020 étant acté (S19), **H1 est écrivable** — mais la règle
+   « Markdown uniquement » ci-dessus date de S01 et visait les artefacts publiés. Écrire du code
+   change la nature du dépôt : demande avant, ne le suppose pas.
 
-**Quatorze demandes extérieures** attendent par ailleurs une réponse, en fiches présentables dans
-`docs/DOSSIER-REUNIONS.md`, classées par ce que la réponse débloque. Les rappeler ; elles ne sont pas
-à trancher, elles sont à **poser** aux équipes concernées.
+*(Ce qui a disparu de cette liste en S19 : « nommer des personnes ». ADR-020 est acté, et il n'y a
+personne à nommer pour le reste — ce n'était pas une information manquante, c'était une question
+sans objet.)*
+
+**Il n'y a pas d'autres équipes** *(S19)*. Une seule personne travaille sur ce système ; les
+développeurs observent. Les quatorze « demandes extérieures » de `docs/DOSSIER-REUNIONS.md` ne sont
+donc pas des demandes : ce sont **des décisions à trancher sans interlocuteur**, ou des
+spécifications d'un travail dont l'auteur sera l'implémenteur. Le dossier garde sa valeur — il classe
+par ce que la réponse débloque — mais **ne reporte rien à une équipe**. Voir
+[`ADR-028`](docs/adr/ADR-028-il-n-y-a-pas-d-autres-equipes.md) §2.

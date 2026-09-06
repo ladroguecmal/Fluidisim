@@ -1,6 +1,8 @@
 # ADR-020 — Le système d'eau est une bibliothèque sans dépendance moteur
 
-- **Statut** : proposée — **contrainte bloquante, à acter avant la première ligne de code**
+- **Statut** : **ACTÉE** *(S19, par l'utilisateur — premier ADR du corpus à quitter le statut
+  proposé ; voir [ADR-028](ADR-028-il-n-y-a-pas-d-autres-equipes.md) §1)*. Conséquence unique et
+  immédiate : **H1 est écrivable**. — **contrainte bloquante, à acter avant la première ligne de code**
 - **Session** : S03
 - **Dépend de** : ADR-002, ADR-007, ADR-012
 - **Conditionne** : `SPEC-003` (harnais de validation) et les onze bancs
