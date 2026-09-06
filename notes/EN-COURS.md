@@ -103,8 +103,8 @@ indiscernables tant que personne ne compte** (A146).
 **Le volet 2 est celui qui décide.** S'il est faux, C04 — qui sert de critère d'entrée au banc B3
 (`ADR-031`) — mesure en partie son propre maquillage.
 
-- [>] **P1** — plan, jeton.
-- [ ] **P2** — **recensement écrit** des saturations des deux solveurs : où elles sont, ce qu'elles
+- [x] **P1** — plan, jeton.
+- [x] **P2** — **recensement écrit** des saturations des deux solveurs : où elles sont, ce qu'elles
       empêchent, **ce qu'elles détruisent**. Distinguer l'initialisation, la protection de racine,
       la reconstruction hydrostatique et la vraie saturation d'état.
 - [ ] **P3** — instrumenter `delta.rs` : **compteur de déclenchements** et **masse créée cumulée**.
