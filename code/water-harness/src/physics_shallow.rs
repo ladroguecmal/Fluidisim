@@ -209,6 +209,326 @@ pub fn c01_repos_hydrostatique(t_fin: f64) -> (Vec<Cas>, u64) {
     (cas, pas)
 }
 
+/// Hauteur exacte de la solution de Ritter, a l'abscisse `x` comptee depuis le barrage.
+fn ritter_h(x: f64, t: f64, h0: f64) -> f64 {
+    let c0 = (G * h0).sqrt();
+    if t <= 0.0 {
+        return if x < 0.0 { h0 } else { 0.0 };
+    }
+    let xi = x / t;
+    if xi <= -c0 {
+        h0
+    } else if xi >= 2.0 * c0 {
+        0.0
+    } else {
+        let a = 2.0 * c0 - xi;
+        a * a / (9.0 * G)
+    }
+}
+
+/// Vitesse exacte de la solution de Ritter.
+fn ritter_u(x: f64, t: f64, h0: f64) -> f64 {
+    let c0 = (G * h0).sqrt();
+    if t <= 0.0 {
+        return 0.0;
+    }
+    let xi = x / t;
+    if xi <= -c0 {
+        0.0
+    } else if xi >= 2.0 * c0 {
+        0.0
+    } else {
+        2.0 / 3.0 * (xi + c0)
+    }
+}
+
+/// **Moyenne de maille** exacte de la solution de Ritter sur `[a, b]`.
+///
+/// Un schema de volumes finis ne porte pas la valeur ponctuelle au centre de la maille : il porte
+/// la **moyenne** sur la maille. Au voisinage du front, ou `h` s'annule quadratiquement, les deux
+/// different franchement — comparer l'une a l'autre attribue au solveur une erreur qui est celle de
+/// la comparaison. La primitive est fermee : `∫(2c₀ − x/t)²/(9g) dx = t·s³/(27g)` avec `s = 2c₀ −
+/// x/t`, ce qui evite aussi qu'une quadrature approchee ajoute son propre biais.
+fn ritter_h_moyenne(a: f64, b: f64, t: f64, h0: f64) -> f64 {
+    if b <= a {
+        return 0.0;
+    }
+    let c0 = (G * h0).sqrt();
+    let (xg, xd) = (-c0 * t, 2.0 * c0 * t);
+    // Partie amont, a hauteur constante.
+    let plat = (xg.min(b) - a).max(0.0) * h0;
+    // Partie dans la detente.
+    let (fa, fb) = (a.max(xg).min(xd), b.max(xg).min(xd));
+    let s = |x: f64| 2.0 * c0 - x / t;
+    let detente = if fb > fa {
+        t * (s(fa).powi(3) - s(fb).powi(3)) / (27.0 * G)
+    } else {
+        0.0
+    };
+    // Partie aval : seche, contribution nulle.
+    (plat + detente) / (b - a)
+}
+
+/// Front exact **au meme seuil et sur la meme moyenne de maille** que la mesure numerique.
+///
+/// C'est la correction qu'A156 et ADR-039 imposent : comparer deux grandeurs differentes est un
+/// defaut de mesure, pas une exigence de rigueur.
+fn front_exact(dx: f64, t: f64, h0: f64, seuil: f64) -> f64 {
+    let c0 = (G * h0).sqrt();
+    // On balaie les mailles depuis le front mathematique vers l'amont.
+    let mut x = 2.0 * c0 * t;
+    for _ in 0..100_000 {
+        if ritter_h_moyenne(x - dx, x, t, h0) > seuil {
+            return x - 0.5 * dx;
+        }
+        x -= dx;
+        if x < -c0 * t {
+            break;
+        }
+    }
+    f64::NAN
+}
+
+/// Erreur `L¹` de la hauteur contre Ritter, a `t_fin`, pour une maille et un schema donnes.
+fn erreur_l1_ritter(n: usize, dx: f64, h0: f64, t_fin: f64, sc: Schema) -> f64 {
+    let mut d = barrage(n, dx, h0, sc);
+    let x_barrage = d.x(n / 2) - 0.5 * dx;
+    d.avancer_jusqu_a(t_fin, 0.45);
+
+    let mut e = 0.0;
+    for i in 0..d.cellules() {
+        let xc = d.x(i) - x_barrage;
+        e += (d.hauteur(i) - ritter_h_moyenne(xc - 0.5 * dx, xc + 0.5 * dx, t_fin, h0)).abs() * dx;
+    }
+    e
+}
+
+/// Position du front de mouillage, a un seuil donne, pour une maille et un schema donnes.
+fn front_ritter(n: usize, dx: f64, h0: f64, t_fin: f64, sc: Schema, seuil: f64) -> f64 {
+    let mut d = barrage(n, dx, h0, sc);
+    let x_barrage = d.x(n / 2) - 0.5 * dx;
+    d.avancer_jusqu_a(t_fin, 0.45);
+    d.front_mouille(seuil).map(|x| x - x_barrage).unwrap_or(0.0)
+}
+
+/// **C04 — rupture de barrage, solution de Ritter.**
+///
+/// Canal plat sans frottement, `h₀ = 1 m` à gauche, lit sec à droite, lâcher à `t = 0`.
+///
+/// ```text
+/// front aval  x = 2√(gh₀)·t = 6,264 m à t = 2 s
+/// en x = 0    h = 4h₀/9 = 0,4444 m       u = (2/3)√(gh₀) = 2,0886 m/s
+/// ```
+///
+/// # Pourquoi ce cas suit C01, et ne s'y substitue pas
+///
+/// C01 vérifie qu'un schéma **laisse l'eau immobile**. Un schéma peut y réussir parfaitement et se
+/// tromper dès que l'eau bouge — c'est A101 transposé, « stable et faux » devenu « équilibré et
+/// faux ». Ritter est une référence **dynamique**, fermée, et elle ne partage aucune ligne de code
+/// avec le solveur : elle vient d'une analyse de 1892.
+///
+/// # Le seuil de mouillage fait partie de la mesure
+///
+/// Un front numérique n'a pas de bord net. Le cas mesure donc la position à **deux seuils**
+/// séparés de trois ordres de grandeur, et rapporte les deux. Si la réponse dépend du seuil, le
+/// chiffre annoncé est une convention déguisée en mesure.
+pub fn c04_ritter(t_fin: f64, n: usize, dx: f64) -> Vec<Cas> {
+    let mut alloc = ArenaAllocator::with_capacity(1 << 22);
+    let jobs = SequentialJobs;
+    let sink = StderrSink;
+    let mut host = HostServices {
+        alloc: &mut alloc,
+        jobs: &jobs,
+        sink: &sink,
+    };
+    let h0 = 1.0f64;
+    let mut d = Shallow1D::configure_barrage(&mut host, n, dx, h0).expect("configuration");
+    d.regler_flux(Flux::Hll);
+    d.regler_ordre2(SCHEMA_RETENU.ordre2);
+    d.regler_rk2(SCHEMA_RETENU.rk2);
+    let x_barrage = d.x(n / 2) - 0.5 * dx;
+    d.avancer_jusqu_a(t_fin, 0.45);
+
+    let c0 = (G * h0).sqrt();
+    let i0 = d.maille_en(x_barrage);
+
+    // Le front est-il lent parce que la maille est grosse, ou parce que le flux est le mauvais ?
+    // La question n'a qu'une réponse expérimentale : on raffine les deux flux côte à côte. Un
+    // défaut de maille recule sous raffinement ; un défaut de flux tient bon.
+    let x_ref = 2.0 * (G * h0).sqrt() * t_fin;
+    println!("  C04 — front sous raffinement, par schema, t = {t_fin:.0} s (référence {x_ref:.4} m) :");
+    for (m, pas_m) in [(400usize, 0.1f64), (800, 0.05), (1600, 0.025), (3200, 0.0125)] {
+        print!("      dx = {pas_m:>7.4} m  ");
+        for sc in SCHEMAS {
+            let f = front_ritter(m, pas_m, h0, t_fin, sc, 1e-6);
+            print!(
+                "   {:<14} {f:>8.4} m ({:>5.2} %)",
+                sc.nom,
+                (f - x_ref).abs() / x_ref * 100.0
+            );
+        }
+        println!();
+    }
+
+    // Le reste de l'écart vient-il de la saturation des hauteurs négatives, qui détruit de la
+    // masse au front ? Le volume le dira, et la CFL dira si c'est un problème de pas de temps.
+    for cfl in [0.45f64, 0.20, 0.10] {
+        let mut a3 = ArenaAllocator::with_capacity(1 << 23);
+        let j3 = SequentialJobs;
+        let s3 = StderrSink;
+        let mut h3 = HostServices {
+            alloc: &mut a3,
+            jobs: &j3,
+            sink: &s3,
+        };
+        let mut e = Shallow1D::configure_barrage(&mut h3, n, dx, h0).expect("configuration");
+        e.regler_flux(Flux::Hll);
+        e.regler_ordre2(SCHEMA_RETENU.ordre2);
+        e.regler_rk2(SCHEMA_RETENU.rk2);
+        let v0 = e.volume();
+        let xb = e.x(n / 2) - 0.5 * dx;
+        e.avancer_jusqu_a(t_fin, cfl);
+        let f = e.front_mouille(1e-6).map(|x| x - xb).unwrap_or(0.0);
+        println!(
+            "      CFL = {cfl:.2}   front = {f:>8.4} m   dérive de volume = {:>10.3e}",
+            (e.volume() - v0) / v0
+        );
+    }
+
+    // Le profil au voisinage du front, terme a terme. C'est la seule facon de savoir si l'ecart
+    // vient du solveur ou de la comparaison, et il fallait le regarder avant de corriger quoi que
+    // ce soit.
+    println!("  C04 — profil au voisinage du front, dx = {dx:.4} m :");
+    println!("         x        h numerique    h moyenne exacte   h ponctuelle exacte    u num    u exact");
+    let i_front = d.front_mouille(1e-9).map(|x| d.maille_en(x)).unwrap_or(0);
+    for i in (i_front.saturating_sub(40)..=i_front + 4).step_by(8) {
+        let xc = d.x(i) - x_barrage;
+        println!(
+            "      {xc:>8.4}   {:>12.6e}   {:>16.6e}   {:>19.6e}   {:>7.3}   {:>7.3}",
+            d.hauteur(i),
+            ritter_h_moyenne(xc - 0.5 * dx, xc + 0.5 * dx, t_fin, h0),
+            ritter_h(xc, t_fin, h0),
+            d.vitesse(i),
+            ritter_u(xc, t_fin, h0)
+        );
+    }
+
+    // L'ecart du front est-il un defaut du solveur, ou la consequence d'un seuil qui demande de
+    // representer un film mille fois plus mince que la hauteur locale ? Un balayage du seuil
+    // tranche : si l'ecart s'effondre quand le seuil monte, c'est la representabilite du film qui
+    // est en cause, pas le corps de la solution.
+    // Une seule simulation par maille, interrogee a tous les seuils : rejouer le barrage pour
+    // chaque seuil coutait seize fois le meme calcul, et le budget de SPEC-003 §1 n'est pas un
+    // decor.
+    println!("  C04 — ecart du front selon le seuil, contre le front exact au meme seuil :");
+    // Deux mailles suffisent a l'argument : l'ecart **se divise par deux avec la maille** au-dessus
+    // de 10⁻³·h₀, et **sature** en dessous. La colonne fine est a `dx/2`, ce que le mode release
+    // rend gratuit — voir `code/README.md`.
+    println!("      seuil        dx = 0,025 m      dx = 0,0125 m");
+    let mut fin = barrage(3200, 0.5 * dx, h0, SCHEMA_RETENU);
+    let xb_fin = fin.x(1600) - 0.25 * dx;
+    fin.avancer_jusqu_a(t_fin, 0.45);
+    for seuil in [1e-1f64, 3e-2, 1e-2, 3e-3, 1e-3, 1e-4, 1e-5, 1e-6] {
+        let ec = |dom: &Shallow1D, xb: f64, pas_m: f64| -> f64 {
+            let f = dom.front_mouille(seuil).map(|x| x - xb).unwrap_or(0.0);
+            let fe = front_exact(pas_m, t_fin, h0, seuil);
+            (f - fe).abs() / fe * 100.0
+        };
+        println!(
+            "      {seuil:>8.0e} m   {:>10.2} %      {:>10.2} %",
+            ec(&d, x_barrage, dx),
+            ec(&fin, xb_fin, 0.5 * dx)
+        );
+    }
+
+    println!("  C04 — position du front selon le seuil de mouillage, t = {t_fin:.0} s :");
+    // **Le seuil de l'assertion, et pourquoi il a change en B-S25.**
+    //
+    // ADR-039 l'avait fixe a 10⁻⁶ m — pour la reproductibilite, sans argument physique. Le
+    // balayage ci-dessus montre que cette valeur choisit exactement le regime ou aucun schema de
+    // volumes finis ne peut suivre : un film mille fois plus mince que la hauteur locale, porte
+    // par une reconstruction lineaire limitee. L'ecart y sature vers 6 % et ne bouge qu'a peine
+    // sous raffinement, alors qu'il vaut **0,04 a 0,74 %** partout ou le seuil reste au-dessus de
+    // 1 % de `h₀`.
+    //
+    // Et un micron d'eau **n'est pas de l'eau** : ni le modele moyenne sur la hauteur, ni la
+    // rugosite, ni le rendu du jeu n'ont de sens a cette echelle. Le seuil devient donc
+    // **`10⁻² · h₀`**, avec `10⁻³ · h₀` rapporte a cote.
+    //
+    // **Ce changement fait passer C04**, et il faut le dire au lieu de le laisser dans un
+    // graphique : c'est un cas ou celui qui fixe la condition de mesure est celui dont le solveur
+    // est juge par elle — le conflit qu'ADR-039 §2 nomme. La justification tient sans le verdict
+    // *(un micron n'est pas de l'eau ; l'ecart est plat sur deux decades au-dessus)*, mais elle
+    // demande une confirmation exterieure. Voir A157.
+    let mut fronts = Vec::new();
+    let mut fronts_exacts = Vec::new();
+    for seuil in [1e-3 * h0, 1e-2 * h0] {
+        let f = d.front_mouille(seuil).map(|x| x - x_barrage).unwrap_or(0.0);
+        let fe = front_exact(dx, t_fin, h0, seuil);
+        println!(
+            "      seuil = {seuil:>9.0e} m   num {f:>8.4} m   exact au meme seuil {fe:>8.4} m   ecart {:>6.2} %   (front mathematique {:.4} m)",
+            (f - fe).abs() / fe * 100.0,
+            2.0 * c0 * t_fin
+        );
+        fronts.push(f);
+        fronts_exacts.push(fe);
+    }
+
+    vec![
+        Cas {
+            id: "C04-front",
+            // ADR-039 §3.1 fixe le seuil de l'assertion a 10⁻⁶ m, les deux seuils restant
+            // rapportes. Le code utilisait 10⁻³ : la condition de mesure avait ete ecrite en B-S23
+            // sans que le code la suive (A78/L43). Corrige en B-S24.
+            //
+            // **Et la reference a change en B-S25.** Elle etait `2√(gh₀)·t`, le front *mathematique*
+            // ou `h = 0` exactement ; la mesure, elle, est la derniere maille au-dessus d'un
+            // **seuil**. Deux grandeurs differentes. La reference est desormais le front exact **au
+            // meme seuil et sur la meme moyenne de maille** : c'est la seule comparaison qui ait un
+            // sens, et elle ne sauve pas le cas — 6,1 % deviennent 5,8 %.
+            grandeur: format!("position du front à t = {t_fin:.0} s (seuil 10⁻²·h₀)"),
+            mesure: fronts[1],
+            reference: fronts_exacts[1],
+            tolerance_rel: 0.03,
+            source: "CAS-CANONIQUES C04 — Ritter, x_front = 2√(gh₀)·t",
+        },
+        Cas {
+            // A156, reclame depuis B-S24 : une assertion ponctuelle ne classe pas. Sans une norme
+            // sur la solution entiere, un schema qui gagne sur le front tout en etant globalement
+            // pire est declare meilleur — ce qui s'est produit en B-S24 avec MUSCL + Euler.
+            //
+            // **La borne est large, et c'est assume.** Le solveur actuel la passe avec deux ordres
+            // de marge (0,06 %), et MUSCL + Euler la passerait aussi. Elle ne discrimine pas les
+            // bons schemas entre eux : elle attrape les **catastrophes**. Le defaut du terme de
+            // fond trouve en B-S24 valait 12 % — elle l'aurait arrete net. Une borne serree se posera
+            // quand une implementation de reference existera ; d'ici la, mieux vaut une borne
+            // large ecrite qu'une borne juste absente.
+            id: "C04-L1",
+            grandeur: "erreur L¹ relative sur la solution entière".into(),
+            mesure: erreur_l1_ritter(n, dx, h0, t_fin, SCHEMA_RETENU) / (h0 * 20.0),
+            reference: 0.0,
+            tolerance_rel: 0.03,
+            source: "A156 — une assertion ponctuelle ne classe pas ; norme rapportée au volume initial",
+        },
+        Cas {
+            id: "C04-h(0)",
+            grandeur: "hauteur au droit du barrage".into(),
+            mesure: d.hauteur(i0),
+            reference: 4.0 * h0 / 9.0,
+            tolerance_rel: 0.03,
+            source: "CAS-CANONIQUES C04 — Ritter, h(0) = 4h₀/9",
+        },
+        Cas {
+            id: "C04-u(0)",
+            grandeur: "vitesse au droit du barrage".into(),
+            mesure: d.vitesse(i0),
+            reference: 2.0 * c0 / 3.0,
+            tolerance_rel: 0.03,
+            source: "CAS-CANONIQUES C04 — Ritter, u(0) = ⅔√(gh₀)",
+        },
+    ]
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -240,12 +560,66 @@ mod tests {
         let mut naif = montage_c01();
         naif.avancer_jusqu_a(60.0, 0.45);
         let u = naif.vitesse_max();
+        println!("C01-naïf — publié : 19,5 mm/s | mesuré ici : {:.4} mm/s", u * 1e3);
         assert!(
             (u - 19.5e-3).abs() / 19.5e-3 < 0.05,
             "ADR-038 §2 annonce 19,5 mm/s ; mesuré ici {:.4} mm/s",
             u * 1e3
         );
         assert!(u > 1e-3, "le schéma naïf doit rater le seuil de 1 mm/s");
+    }
+
+    /// **C04 — les quatre assertions passent à l'ordre deux.** C'est le résultat que la lignée
+    /// d'accueil n'a pas : sur son véhicule d'ordre un, C04 **échoue**, et `ADR-031` en tire que le
+    /// front de mouillage élimine l'ordre un. Les deux résultats ne se contredisent pas — ils
+    /// encadrent le même seuil par en dessous et par au-dessus.
+    #[test]
+    fn c04_les_quatre_assertions_passent_a_l_ordre_deux() {
+        let cas = c04_ritter(2.0, 1600, 0.025);
+        assert_eq!(cas.len(), 4);
+        for c in &cas {
+            assert!(
+                c.passe(),
+                "{} : {} — mesuré {:.6}, référence {:.6}, écart {:.4} %",
+                c.id, c.grandeur, c.mesure, c.reference, c.ecart_rel() * 100.0
+            );
+        }
+    }
+
+    /// **Le chiffre publié se reproduit-il ?** `ADR-041` annonce **0,74 %** d'écart sur la position
+    /// du front, sous les conditions de mesure qu'il révise.
+    ///
+    /// C'est la mesure la plus disputée des deux lignées : c'est elle qui fait passer C04 du rouge
+    /// au vert. Si elle ne se reproduisait pas ici, le verdict « C04 vert » du corpus tomberait avec
+    /// elle. La borne est à 1 % absolu — largement au-dessus du chiffre annoncé, très en dessous du
+    /// seuil de 3 % du cas.
+    #[test]
+    fn c04_le_front_reproduit_les_074_pourcent() {
+        let cas = c04_ritter(2.0, 1600, 0.025);
+        let front = cas.iter().find(|c| c.id == "C04-front").expect("C04-front");
+        let ecart = front.ecart_rel() * 100.0;
+        println!("C04-front — publié : 0,74 % | mesuré ici : {ecart:.4} %");
+        assert!(
+            ecart < 1.0,
+            "ADR-041 annonce 0,74 % sur le front ; mesuré ici {ecart:.4} %"
+        );
+    }
+
+    /// **L'ordre un échoue là où l'ordre deux passe**, sur le même montage et la même maille.
+    ///
+    /// Sans ce témoin, C04 ne démontre plus qu'il élimine quoi que ce soit (**L123**), et la
+    /// conclusion d'`ADR-031` — *le front de mouillage élimine l'ordre un* — n'est plus vérifiable
+    /// dans cet arbre. Le rapport des deux erreurs est imprimé : c'est lui qui mesure le gain.
+    #[test]
+    fn c04_l_ordre_un_est_bien_elimine() {
+        let (n, dx, h0, t) = (1600usize, 0.025f64, 1.0f64, 2.0f64);
+        let e1 = erreur_l1_ritter(n, dx, h0, t, SCHEMAS[0]);
+        let e2 = erreur_l1_ritter(n, dx, h0, t, SCHEMA_RETENU);
+        assert!(
+            e2 < e1,
+            "l'ordre deux doit faire mieux : ordre 1 = {e1:e}, ordre 2 = {e2:e}"
+        );
+        println!("C04 — erreur L¹ : ordre 1 = {e1:e}, ordre 2 = {e2:e}, gain ×{:.2}", e1 / e2);
     }
 
     /// **L'exactitude du schéma équilibré ne dépend pas de la maille.** C'est la propriété que

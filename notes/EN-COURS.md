@@ -99,7 +99,7 @@ montage, soit une divergence entre les deux arbres que personne n'a vue.
 - [x] **P1** — plan, jeton.
 - [x] **P2** — `physics_shallow.rs` : squelette, déclaration dans `main.rs`, et **C01**. Compile et
       tourne avant d'aller plus loin.
-- [ ] **P3** — **C04** (Ritter) et ses références analytiques.
+- [x] **P3** — **C04** (Ritter) et ses références analytiques.
 - [ ] **P4** — **C03** (seiche) et la mesure de période.
 - [ ] **P5** — **C08** (convergence) et **C06** (Galilée, partiel).
 - [ ] **P6** — **C05** (absorption) — le seul des six que cette lignée n'a **jamais** exécuté.
