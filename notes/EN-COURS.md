@@ -90,8 +90,8 @@ de stabilité de S27 classe les exécutions en `Stable / Diverge / NonFini` et a
 de `ν = 0,45` à `0,99` — **c'est exactement la forme disqualifiée**, et j'en ai tiré une conclusion.
 Si la thèse est juste, l'audit doit commencer par mes propres mesures avant de juger le corpus.
 
-- [ ] **P1** — plan, jeton.
-- [ ] **P2** — le critère, posé et éprouvé sur trois cas connus avant d'être appliqué en série.
+- [x] **P1** — plan, jeton.
+- [x] **P2** — le critère, posé et éprouvé sur trois cas connus avant d'être appliqué en série.
       Un critère qui classe mal un cas évident classera mal les autres en silence.
 - [ ] **P3** — inventaire des **23 cas** de `CAS-CANONIQUES` : forme d'assertion, verdict, et pour
       les cas disqualifiés, **la grandeur qu'il aurait fallu assertir**.
@@ -116,3 +116,43 @@ Si la thèse est juste, l'audit doit commencer par mes propres mesures avant de 
 - **C04 en échec, `C01-jet` rouge, C08 sans verdict** : trois décisions.
 
 **Branche.** `claude/s22-suite`. `master` s'arrête à S17 (A107).
+
+#### P2 — le critère à deux catégories en cachait une troisième
+
+Le plan posait deux classes : **recevable** (une grandeur continue dont l'assertion est le seuil) et
+**symptôme** (ne peut échouer que sur un accident). L'épreuve sur trois cas connus les a validées —
+et en a fait apparaître une troisième, qu'aucune des deux ne couvre.
+
+**Épreuve 1 — C01, `max|u| < 1 mm/s`.** Grandeur continue, seuil dessus. **Recevable**, et la mesure
+de S22 l'a confirmé en pratique : le cas a éliminé un schéma sans qu'aucune exécution ne casse.
+
+**Épreuve 2 — C11, « aucune divergence sur 120 s ; aucun tremblement visible ».** Aucune grandeur.
+**Symptôme**, doublement : « divergence » n'a pas de seuil déclaré, et « visible » n'a même pas
+d'observateur défini.
+
+**Épreuve 3 — C18, « zéro allocation après initialisation, sur 10 000 ticks ».** Le premier réflexe
+est de la classer avec C11 : elle est négative, elle attend zéro. **C'est faux** — il existe un
+compteur d'allocations refusées, il est lu, et il vaudrait autre chose si le défaut était là. La
+grandeur est discrète mais elle est **mesurée**. **Recevable.**
+
+**Et c'est cette troisième épreuve qui a montré le trou.** Ce compteur vaut aussi zéro si rien ne
+tourne. Une assertion peut donc être parfaitement recevable **et** satisfaite pour une raison qui
+n'a rien à voir avec ce qu'elle teste :
+
+> **Catégorie C — vacuité : l'assertion est satisfaite parce que le mécanisme testé est absent.**
+>
+> « Aucune plaque de glace ne se forme tant que `Hs > 0,15 m` » (C15) passe avant même que le modèle
+> de glace existe. « Zéro allocation » passe si la boucle ne tourne pas. Ces assertions sont vertes
+> depuis toujours et le resteront jusqu'au jour où elles devraient enfin dire quelque chose.
+
+**Les trois catégories, et le remède propre à chacune :**
+
+| | Ce qui cloche | Remède |
+|---|---|---|
+| **A — recevable** | rien | — |
+| **B — symptôme** | ne peut échouer que sur un accident | assertir sur la **grandeur gouvernée**, pas sur ses conséquences visibles |
+| **C — vacuité** | satisfaite par l'absence du mécanisme | un **témoin** qui doit faire échouer l'assertion ; s'il ne la fait pas échouer, le cas ne teste rien |
+
+Le remède de C est déjà employé dans ce dépôt sans avoir été nommé : `C01-jet` est un témoin, et le
+harnais signale comme **anomalie** le jour où il cesserait d'échouer. Ce qui manquait était de voir
+que **le même dispositif répond à un problème général**, et pas seulement à C01.
