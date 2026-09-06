@@ -136,6 +136,98 @@ fn executer(sc: &Scenario) -> Rapport {
 /// Chaque cas confronte une grandeur **mesurée dans le champ** à une référence fermée. La liste des
 /// cas qui ne peuvent pas être exécutés est imprimée à la fin : un rapport vert ne doit jamais se
 /// lire comme une couverture complète.
+/// **Les mêmes cas canoniques, sur le second véhicule** — `shallow.rs`.
+///
+/// Six cas — C01, C03, C04, C05, C06, C08 — montés par la lignée B contre sa propre
+/// implémentation de Saint-Venant 1D. Ils ne doublonnent pas ceux de [`executer_physics_solveur`] :
+/// **deux implémentations indépendantes du même modèle forment un oracle** que le projet n'a nulle
+/// part ailleurs (`ADR-043` §3). Sur un cas sans solution analytique, leur désaccord désigne une
+/// faute d'implémentation dans l'une des deux.
+///
+/// # Ce que ce bloc n'est pas
+///
+/// Ce n'est **pas** une validation croisée de la physique : les deux solveurs partagent le modèle,
+/// donc tous ses angles morts — une dimension, `c = √(g·h)`, non dispersif (**L138**).
+///
+/// # C05 n'y est pas, et c'est délibéré
+///
+/// Son montage de référence — 3 200 mailles × 90 s, une vingtaine d'essais pour les balayages
+/// d'`ADR-042` — dépasserait à lui seul le budget de **60 s** de `SPEC-003 §1`. Il est exercé par
+/// les tests : `c05_le_reglage_d_adr_005_rate_son_critere` à chaque commit sur un montage réduit, et
+/// `c05_les_assertions_passent_temoin_compris` à la demande, en `--release`.
+fn executer_physics_shallow() -> usize {
+    use physics_shallow::*;
+
+    println!("
+--- C01 · C03 · C04 · C06 · C08 — second véhicule : `shallow.rs` (ADR-043) ---");
+    // Le coût de ce bloc est **rapporté**, pas supposé. `SPEC-003 §1` donne 60 s à la batterie
+    // entière, et un second véhicule est la sorte d'ajout qui grignote un budget sans que personne
+    // le voie — c'est **A158**, *le coût d'un instrument de mesure croît sans que personne le
+    // regarde*, importé de la lignée B et applicable ici même.
+    let chrono = std::time::Instant::now();
+
+    let (mut cas, pas_c01) = c01_repos_hydrostatique(60.0);
+    // 40 m de canal à 2,5 cm de maille : le front parcourt 6,3 m en 2 s, la détente en remonte
+    // autant, et les murs restent hors d'atteinte.
+    cas.extend(c04_ritter(2.0, 1600, 0.025));
+    // 400 mailles de 5 cm = 20 m, profondeur 2 m, 20 périodes — soit 800 mailles par longueur
+    // d'onde, la condition de mesure d'`ADR-039`.
+    cas.extend(c03_seiche(400, 0.05, 2.0, 0.02, 20.0));
+    cas.extend(c08_convergence(1.0, 2.0));
+    // 100 m de canal à 5 cm, bosse de 10 cm sur 2 m d'eau, boost de 10 m/s pendant 1 s — soit
+    // exactement 200 mailles de décalage.
+    cas.extend(c06_galilee(2000, 0.05, 2.0, 0.1, 10.0, 1.0));
+
+    let mut echecs = 0usize;
+    for c in &cas {
+        let etat = if c.passe() { "OK    " } else { "ÉCHEC " };
+        if !c.passe() {
+            echecs += 1;
+        }
+        ligne_de_cas(etat, c);
+        if !c.passe() {
+            println!("         → référence : {}", c.source);
+        }
+    }
+    println!(
+        "  {} cas exécutés sur `shallow.rs`, {echecs} échec(s), C01 en {pas_c01} pas — {:.1} s",
+        cas.len(),
+        chrono.elapsed().as_secs_f64()
+    );
+    echecs
+}
+
+/// **Une ligne de rapport pour un cas, avec le bon format d'écart.**
+///
+/// Deux formats, et non un seul. Quand la référence d'un cas est **zéro** — `u ≡ 0` pour C01,
+/// `η ≡ η₀`, une dérive de volume — l'écart relatif n'a pas de sens et [`physics::Cas::ecart_rel`]
+/// rend la **mesure elle-même**, dans l'unité de la grandeur. L'afficher suivi d'un `%` la ferait
+/// lire comme un écart relatif : un seuil de **1 mm** y apparaîtrait en « 0,1 % », et une mesure de
+/// 19,5 mm/s en « 1,951 % » — deux nombres qui ont l'air rassurants et qui décrivent un échec d'un
+/// facteur vingt.
+///
+/// C'est l'angle mort **A149**, trouvé par la lignée B et reporté ici en S36 (action **S35-2**) :
+/// *une unité qui disparaît de l'affichage ne disparaît pas de la grandeur — elle disparaît
+/// seulement de ce que le lecteur peut vérifier.*
+fn ligne_de_cas(etat: &str, c: &physics::Cas) {
+    if c.reference == 0.0 {
+        println!(
+            "{etat} {:<12} {:<46} mesuré {:>12.6}  référence {:>12.6}  écart {:>12.6} absolu (seuil {:.6})",
+            c.id, c.grandeur, c.mesure, c.reference, c.ecart_rel(), c.tolerance_rel
+        );
+    } else {
+        println!(
+            "{etat} {:<12} {:<46} mesuré {:>12.6}  référence {:>12.6}  écart {:>7.3} %  (tol {:.1} %)",
+            c.id,
+            c.grandeur,
+            c.mesure,
+            c.reference,
+            c.ecart_rel() * 100.0,
+            c.tolerance_rel * 100.0
+        );
+    }
+}
+
 fn executer_physics(sc: &Scenario, bg: &Background, t: SimTime) -> usize {
     use physics::*;
     let mut cas: Vec<Cas> = Vec::new();
@@ -170,15 +262,7 @@ fn executer_physics(sc: &Scenario, bg: &Background, t: SimTime) -> usize {
         if !c.passe() {
             echecs += 1;
         }
-        println!(
-            "{etat} {:<12} {:<46} mesuré {:>12.6}  référence {:>12.6}  écart {:>7.3} %  (tol {:.1} %)",
-            c.id,
-            c.grandeur,
-            c.mesure,
-            c.reference,
-            c.ecart_rel() * 100.0,
-            c.tolerance_rel * 100.0
-        );
+        ligne_de_cas(etat, c);
         if !c.passe() {
             println!("         → référence : {}", c.source);
         }
@@ -235,15 +319,7 @@ fn executer_physics_solveur() -> usize {
         if !temoin && !c.passe() {
             echecs += 1;
         }
-        println!(
-            "{etat} {:<12} {:<46} mesuré {:>12.6}  référence {:>12.6}  écart {:>7.3} %  (tol {:.1} %)",
-            c.id,
-            c.grandeur,
-            c.mesure,
-            c.reference,
-            c.ecart_rel() * 100.0,
-            c.tolerance_rel * 100.0
-        );
+        ligne_de_cas(etat, c);
         if !c.passe() {
             println!("         → référence : {}", c.source);
         }
@@ -570,6 +646,7 @@ fn main() -> ExitCode {
 
     if mode == "physics" {
         echecs_total += executer_physics_solveur();
+        echecs_total += executer_physics_shallow();
     }
 
     if mode == "check" {
