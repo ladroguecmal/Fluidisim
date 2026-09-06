@@ -93,8 +93,89 @@ modèle mental est faux* (**L125**).
 
 ## 6. Mesures
 
-*(Rempli en P5.)*
+### 6.1 Régime nominal — **aucune saturation, nulle part**
+
+Trois cas, deux véhicules, `CFL = 0,45` :
+
+| cas | cellules | pas (`f32` / `f64`) | **S7 / T4** | S5 (bord) | témoin S6 |
+|---|---|---|---|---|---|
+| **C01** — repos sur pente, 60 s | 160 | 2 891 / 2 891 | **0** | **0** | 0 |
+| **C03** — seiche, 20 périodes | 200 | 17 866 / 35 759 | **0** | **0** | 0 |
+| **C04** — rupture sur lit sec, 2 s | 800 | 475 / 454 | **0** | **0** | 0 |
+
+**Deux prédictions du §5 sur quatre sont fausses.**
+
+- *Volet 1 — C01 et C03 ne déclenchent jamais* : **vrai**.
+- *Volet 2 — C04 déclenche, localisé au front* : **faux**. Il ne déclenche **jamais**. Le lit sec ne
+  suffit pas à produire une hauteur négative : le flux de Rusanov préserve la positivité sous sa
+  condition de Courant, et `CFL = 0,45` est largement dedans.
+- *S5 sur C01 — une fois par pas* : **faux**, jamais. L'analyse était naïve : `h[n+1] = h[n] − dx·pente`
+  vaut `≈ 0,99 m` quand `h[n] ≈ 1 m`. Il aurait fallu un bord presque sec pour que la marche morde.
+- *S6 et T2 jamais déclenchées* : **vrai**, et démontré plutôt que supposé — le témoin
+  `h_negatif_en_entree` reste à zéro sur les trois cas.
+
+### 6.2 Hors condition de Courant — elle mord, et elle ne sauve rien
+
+*Un garde-fou qu'on n'a jamais vu déclencher n'a pas été testé* (**L118**). Le levier est physique :
+au-delà de sa condition de Courant, Rusanov cesse de préserver la positivité. C04, 0,5 s :
+
+| `CFL` | pas (`f32` / `f64`) | **S7** (`f32`) | **T4** (`f64`) | masse créée / volume (`f32`) | qdm détruite |
+|---|---|---|---|---|---|
+| 0,45 | 100 / 100 | 0 | 0 | 0 | 0 |
+| 0,95 | 50 / 49 | **0** | **0** | 0 | 0 |
+| **1,20** | 77 / **6 890** | **267** | **11 252** | **1,4·10¹⁷** | `NaN` |
+| **1,80** | 44 / 1 070 | **188** | **2 651** | **4,1·10¹⁷** | `NaN` |
+
+**Trois choses se lisent dans ce tableau, et la troisième est la plus importante.**
+
+1. **La saturation fonctionne.** Elle est vue mordre, elle n'est pas du code mort, et sa condition
+   n'est pas inatteignable. Elle a maintenant son **témoin** — à `CFL = 0,95`, elle ne mord pas —
+   sans quoi une condition « toujours vraie » passerait le même test (**L119**).
+2. **La frontière est nette et elle est à la bonne place** : rien à 0,95, tout à 1,20. C'est la
+   condition de Courant elle-même, retrouvée par un compteur qui ne la connaît pas.
+3. **Elle ne rattrape rien.** La masse créée dépasse le volume initial d'un facteur **10¹⁷** côté
+   `f32` et **10¹⁵⁰** côté `f64` ; la quantité de mouvement détruite déborde vers `NaN`. Le nombre
+   de pas explose — 6 890 au lieu de 100 pour la même demi-seconde — parce que `dt_cfl` se
+   recalcule sur des vitesses divergentes.
 
 ## 7. Verdict
 
-*(Rempli en P5.)*
+**Aucune des saturations recensées n'est un maquillage, et l'inquiétude d'A146 est levée dans la
+forme où elle était posée.** Il n'y a pas de solveur qui produirait des états impossibles à chaque
+pas derrière un filet complaisant : en régime nominal, le filet ne touche jamais rien.
+
+**Mais A146 avait raison sur le fond, et pour une autre raison que celle qu'il donnait.**
+
+> **La saturation d'état n'est pas un filet : c'est un détecteur de divergence, et il était muet.**
+> Elle ne se déclenche que lorsque le calcul a déjà cessé d'être valide — la frontière mesurée est
+> exactement la condition de Courant — et à ce moment-là elle ne répare rien : elle transforme une
+> divergence franche, qui aurait produit des `NaN` visibles, en une suite de nombres finis. **Un
+> premier déclenchement est l'événement le plus informatif que ce solveur puisse produire**, et
+> jusqu'à S38 personne ne pouvait le voir.
+
+Classement, selon la grille annoncée au §1 :
+
+| saturation | classement | ce qu'il faut en faire |
+|---|---|---|
+| **S7 / T4** (état) | **détecteur de divergence**, ni filet ni maquillage | l'exposer au rapport : un compteur non nul doit **rougir** le cas |
+| S5 (bord) | jamais déclenchée, condition atteignable en principe | garder, et lui écrire un cas de déclenchement |
+| **S6 / T2** (racine) | **jamais atteignable** — démontré par le témoin | garder : c'est une protection de type, pas un filet de modèle |
+| T3 (reconstruction) | **pas une saturation** — une étape du schéma d'Audusse | cesser de la compter comme telle |
+| Étage RK2 | jamais déclenchée sur les trois cas | garder, comptée à part depuis S38 |
+
+### 7.1 Ce que l'audit a trouvé par accident
+
+**Le recensement écrit du §4 avait manqué un point de saturation** : l'étage intermédiaire de RK2,
+dans `shallow.rs`. Il n'a été vu que parce que le compilateur a refusé l'appel restant après la
+transformation de `saturer` en méthode.
+
+*Un recensement à la lecture en manque.* Ce qui l'a rattrapé n'est pas une relecture plus attentive
+mais un **changement de signature qui oblige chaque appel à se déclarer**. C'est la même leçon que
+S34 sur G10 : ce qui n'est pas forcé de passer par un point unique échappe à l'inventaire.
+
+### 7.2 Une limite de l'instrument, à dire
+
+À `CFL = 1,2`, `masse_creee` vaut `10¹⁵¹` et `qdm_detruite` vaut `NaN`. **Les compteurs eux-mêmes
+débordent.** Ce n'est pas une faute de mesure — la grandeur mesurée est réellement absurde — mais
+cela veut dire que ces deux nombres ne servent qu'à **détecter**, jamais à quantifier une dérive
+modérée. Le compteur d'événements, lui, reste exact.

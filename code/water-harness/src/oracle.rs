@@ -338,9 +338,215 @@ pub fn champs_c04(duree_s: f64) -> (Champs, Champs) {
     (champs_delta(&d), champs_shallow(&s))
 }
 
+/// Ce que les deux véhicules ont saturé sur un même cas, avec le volume qui donne l'échelle.
+pub struct Bilan {
+    pub cas: &'static str,
+    pub delta: water_core::Saturations,
+    pub shallow: water_core::Saturations,
+    /// Volume initial, en m² — la référence à laquelle rapporter la masse créée.
+    pub volume0: f64,
+    pub pas: (u64, u64),
+    pub cellules: usize,
+}
+
+impl Bilan {
+    pub fn rapporter(&self) {
+        println!("  {} — {} cellules, {} / {} pas", self.cas, self.cellules, self.pas.0, self.pas.1);
+        for (nom, s, pas) in [
+            ("delta.rs  (f32)", &self.delta, self.pas.0),
+            ("shallow.rs (f64)", &self.shallow, self.pas.1),
+        ] {
+            let occasions = (pas as f64) * (self.cellules as f64);
+            println!(
+                "      {nom} — état {:>8}  ({:>9.3e} des occasions)   masse créée {:>11.4e} m² ({:>9.3e} du volume)   qdm {:>11.4e}   étage RK2 {:>6}   bord {:>8}   h<0 en entrée {}",
+                s.etat,
+                if occasions > 0.0 { s.etat as f64 / occasions } else { 0.0 },
+                s.masse_creee,
+                s.masse_creee / self.volume0,
+                s.qdm_detruite,
+                s.etage_rk2,
+                s.bord,
+                s.h_negatif_en_entree
+            );
+        }
+    }
+}
+
+/// Bilan des saturations sur **C01** — repos sur pente, domaine entièrement mouillé.
+pub fn bilan_c01(duree_s: f64) -> Bilan {
+    let (mut d, mut s) = avec_hote(1 << 20, |h| montages_c01(h));
+    s.regler_equilibrage(true);
+    let v0 = d.volume();
+    let pas_d = d.avancer_equilibre(duree_s);
+    let pas_s = s.avancer_jusqu_a(duree_s, 0.45);
+    Bilan {
+        cas: "C01 — repos sur pente",
+        delta: d.saturations(),
+        shallow: s.saturations(),
+        volume0: v0,
+        pas: (pas_d, pas_s),
+        cellules: d.nx(),
+    }
+}
+
+/// Bilan des saturations sur **C03** — seiche en bassin clos, fond plat, régime linéaire.
+pub fn bilan_c03(periodes: f64) -> Bilan {
+    let (mut d, mut s) = avec_hote(1 << 22, |h| {
+        let d = Delta1D::configure(h, Bassin::c03(false)).expect("delta");
+        let s = Shallow1D::configure_seiche(h, 400, 0.05, 2.0, 0.02).expect("shallow");
+        (d, s)
+    });
+    s.regler_equilibrage(true);
+    let v0 = d.volume();
+    let t = periodes * 2.0 * 20.0 / (G * 2.0f64).sqrt();
+    let pas_d = d.avancer_equilibre(t);
+    let pas_s = s.avancer_jusqu_a(t, 0.45);
+    Bilan {
+        cas: "C03 — seiche",
+        delta: d.saturations(),
+        shallow: s.saturations(),
+        volume0: v0,
+        pas: (pas_d, pas_s),
+        cellules: d.nx(),
+    }
+}
+
+/// Bilan des saturations sur **C04** — rupture de barrage sur lit sec. Le seul où la saturation
+/// d'état est **attendue**.
+pub fn bilan_c04(duree_s: f64) -> Bilan {
+    use water_core::Flux;
+    let (mut d, mut s) = avec_hote(1 << 22, |h| {
+        let d = Delta1D::configure(h, Bassin::c04()).expect("delta");
+        let s = Shallow1D::configure_barrage(h, 800, 0.05, 1.0).expect("shallow");
+        (d, s)
+    });
+    s.regler_flux(Flux::Rusanov);
+    let v0 = d.volume();
+    let pas_d = d.avancer_equilibre(duree_s);
+    let pas_s = s.avancer_jusqu_a(duree_s, 0.45);
+    Bilan {
+        cas: "C04 — rupture sur lit sec",
+        delta: d.saturations(),
+        shallow: s.saturations(),
+        volume0: v0,
+        pas: (pas_d, pas_s),
+        cellules: d.nx(),
+    }
+}
+
+/// **Le cas que la saturation doit attraper** — C04 mené au-delà de sa condition de stabilité.
+///
+/// Les mesures de P5 ne trouvent **aucun** déclenchement en régime nominal, sur aucun des trois cas.
+/// C'est rassurant — et c'est exactement la situation que S34 décrit comme la plus dangereuse :
+/// *un garde-fou qu'on n'a jamais vu déclencher n'a pas été testé* (**L118**). Rien ne dit qu'il
+/// protège de ce qu'il prétend protéger, ni même qu'il puisse s'activer.
+///
+/// Le flux de Rusanov préserve la positivité **sous** sa condition de Courant. Au-delà, il ne la
+/// préserve plus : c'est le levier, et il est physique plutôt qu'artificiel. `cfl` monte au-dessus
+/// de 1 ; la saturation doit alors mordre, et **elle doit être vue mordre**.
+pub fn declenchement_c04(cfl: f64, duree_s: f64) -> Bilan {
+    use water_core::Flux;
+    let (mut d, mut s) = avec_hote(1 << 22, |h| {
+        let d = Delta1D::configure(h, Bassin::c04()).expect("delta");
+        let s = Shallow1D::configure_barrage(h, 800, 0.05, 1.0).expect("shallow");
+        (d, s)
+    });
+    let mut d = d.avec_cfl(cfl as f32);
+    s.regler_flux(Flux::Rusanov);
+    let v0 = d.volume();
+    let pas_d = d.avancer_equilibre(duree_s);
+    let pas_s = s.avancer_jusqu_a(duree_s, cfl);
+    Bilan {
+        cas: "C04 hors CFL",
+        delta: d.saturations(),
+        shallow: s.saturations(),
+        volume0: v0,
+        pas: (pas_d, pas_s),
+        cellules: 800,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// **P5 — les saturations de modèle, comptées pour la première fois** (S34-1, **A146**).
+    ///
+    /// Trois cas, deux véhicules, et les prédictions écrites en P2 avant toute mesure :
+    /// C01 et C03 ne doivent **jamais** déclencher la saturation d'état ; C04 doit la déclencher,
+    /// mais de façon **localisée** au front.
+    #[test]
+    fn les_saturations_de_modele_comptees() {
+        let c01 = bilan_c01(60.0);
+        c01.rapporter();
+        let c03 = bilan_c03(20.0);
+        c03.rapporter();
+        let c04 = bilan_c04(2.0);
+        c04.rapporter();
+
+        // **Volet 1** : domaine entièrement mouillé, régime linéaire. Un seul déclenchement serait
+        // un défaut, pas un filet.
+        for b in [&c01, &c03] {
+            assert_eq!(b.delta.etat, 0, "{} : delta.rs a saturé {} fois", b.cas, b.delta.etat);
+            assert_eq!(b.shallow.etat, 0, "{} : shallow.rs a saturé {} fois", b.cas, b.shallow.etat);
+        }
+
+        // **Le témoin de la protection de racine (S6)** : si une cellule interne arrivait à `h < 0`
+        // en entrée de pas, le `(g·h)⁺` des flux mordrait. Il ne le doit jamais.
+        for b in [&c01, &c03, &c04] {
+            assert_eq!(
+                b.delta.h_negatif_en_entree, 0,
+                "{} : la protection de racine a mordu — elle n'est donc pas morte, et elle masque",
+                b.cas
+            );
+        }
+    }
+
+    /// **La saturation peut-elle seulement se déclencher ?**
+    ///
+    /// P5 n'a trouvé **aucun** déclenchement en régime nominal. Deux lectures sont alors possibles
+    /// et **indiscernables sans ce test** : soit le schéma ne produit jamais d'état impossible — et
+    /// la saturation est un filet qui ne sert jamais — soit elle est écrite avec une condition qui
+    /// ne peut pas être vraie, et elle ne protège de rien.
+    ///
+    /// Le test d'une saturation est **le cas qu'elle doit attraper**, jamais le cas nominal (L119).
+    /// Ici : au-delà de la condition de Courant, Rusanov cesse de préserver la positivité.
+    #[test]
+    fn la_saturation_est_vue_mordre_hors_cfl() {
+        let mut vue_delta = false;
+        let mut vue_shallow = false;
+        for cfl in [0.45f64, 0.95, 1.2, 1.8] {
+            let b = declenchement_c04(cfl, 0.5);
+            println!("  CFL = {cfl:.2}");
+            b.rapporter();
+            if cfl < 1.0 {
+                // **Le témoin.** Sous la condition de Courant, Rusanov préserve la positivité :
+                // aucun déclenchement ne doit avoir lieu. Sans ce volet, une saturation écrite
+                // « toujours vraie » passerait le test de déclenchement (L119).
+                assert_eq!(b.delta.etat, 0, "delta.rs sature à CFL = {cfl}, sous la condition");
+                assert_eq!(b.shallow.etat, 0, "shallow.rs sature à CFL = {cfl}, sous la condition");
+            } else {
+                vue_delta |= b.delta.etat > 0;
+                vue_shallow |= b.shallow.etat > 0;
+                // **Et ce que la saturation ne fait pas.** Elle mord, mais elle ne rattrape rien :
+                // la masse créée dépasse le volume initial de plusieurs ordres de grandeur. Un
+                // filet qui laisse passer `10¹⁷` fois le volume n'est pas un filet — c'est un
+                // témoin de divergence, et il est muet tant que personne ne le lit.
+                assert!(
+                    b.delta.masse_creee > b.volume0,
+                    "à CFL = {cfl}, la masse créée devrait dépasser le volume initial"
+                );
+            }
+        }
+        assert!(
+            vue_delta,
+            "la saturation de delta.rs n'a jamais été vue mordre, même hors CFL : elle est soit inatteignable, soit mal conditionnée"
+        );
+        assert!(
+            vue_shallow,
+            "la saturation de shallow.rs n'a jamais été vue mordre, même hors CFL"
+        );
+    }
 
     /// **Ce que l'oracle a trouvé : les deux véhicules ne définissent pas « sec » pareil.**
     ///
