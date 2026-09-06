@@ -12,11 +12,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-05
+Session en cours : S13 — 2026-09-05 — revue croisée de SPEC-006, ADR-022 et ADR-023
 Dernière session : S12 — 2026-09-05 — les quatre mécanismes restés à spécifier (ADR-023)
-Session suivante : S13 — confronter SPEC-006, ADR-022 et ADR-023 au corpus : trois documents
-                   structurants écrits en quatre sessions, aucun audité
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
