@@ -12,11 +12,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-05
+Session en cours : S21 — 2026-09-05 — H3, les cas canoniques analytiques
 Dernière session : S20 — 2026-09-05 — H1 écrit, compilé, vert
-Session suivante : S21 — **H3** : les cas canoniques analytiques et le mode `physics`. Le premier
-                   étage qui confronte le code à une référence extérieure
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
