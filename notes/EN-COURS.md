@@ -89,7 +89,7 @@ l'intention.
   SPEC-006 §6 ; ADR-022 §3 recoupe SPEC-005 §6 ; ADR-022 §4 recoupe SPEC-006 §2.6).
   *Thèse : le risque le plus élevé est là. Trois documents écrits par la même session-mère à quatre
   sessions d'écart se citent avec confiance et sans vérification.*
-- [ ] **P7** — rédiger `docs/registres/REVUE-CROISEE-S13.md` : écarts, gravité, résolution, et la
+- [x] **P7** — rédiger `docs/registres/REVUE-CROISEE-S13.md` : écarts, gravité, résolution, et la
   liste des contrôles passés — sans elle la revue n'est pas vérifiable.
 - [ ] **P8** — appliquer les résolutions : notes correctives datées, nouvel ADR si une décision
   change.
@@ -347,3 +347,13 @@ propriétés distinctes, et les deux documents ne les confondent pas.
 `push_events`, qui existe. La revendication tient.
 · **ADR-023 §4 ↔ SPEC-006 §6** : le canal est réutilisé sans modification de type — sous réserve de
 l'écart E09, qui porte sur l'expressivité de `BreakerVertex` et non sur le canal.
+
+#### P7 — registre écrit
+
+`docs/registres/REVUE-CROISEE-S13.md`. Douze écarts, un de gravité 1, six de gravité 2, cinq de
+gravité 3. **Deux portent sur des invariants** — c'est nouveau : le corpus n'avait jamais été trouvé
+en défaut ailleurs que dans des ADR et des spécifications.
+
+Constat qui vaut d'être noté : **aucun des trois documents audités ne viole un invariant.** Ce sont
+les invariants qui ont vieilli. Un document récent confronté à une règle ancienne révèle la règle
+autant que le document.
