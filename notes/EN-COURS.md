@@ -79,11 +79,11 @@ qu'on peut déjà savoir **sans mesurer**.
   Les deux bornent `λ_cut` par le haut et par le bas. Si elles ne se croisent pas, B2 n'a pas de
   réponse admissible sous l'hypothèse d'un `λ_cut` global — et il vaut mieux le savoir avant de
   monter le banc que pendant.*
-- [ ] **P3** — dossier `B2` §1–3 : ce que le banc décide et ce qui en dépend · les candidats et ce
+- [x] **P3** — dossier `B2` §1–3 : ce que le banc décide et ce qui en dépend · les candidats et ce
   qu'on sait déjà d'eux sans mesurer · l'encadrement de P2.
-- [ ] **P4** — dossier `B2` §4–6 : les scénarios en fichiers concrets · le protocole iso-qualité
+- [x] **P4** — dossier `B2` §4–6 : les scénarios en fichiers concrets · le protocole iso-qualité
   appliqué · les deux critères de recevabilité.
-- [ ] **P5** — dossier `B2` §7–9 : la procédure de décision, les préalables, les pièges de mesure.
+- [x] **P5** — dossier `B2` §7–9 : la procédure de décision, les préalables, les pièges de mesure.
 - [ ] **P6** — notes correctives dans les documents touchés, et les points ouverts que le dossier
   ferme ou déplace.
 - [ ] **P7** — index, angles morts, décomptes.
@@ -167,3 +167,21 @@ que le paragraphe donne : selon les faces qui portent l'éponge, la même géom�
 (deux faces), **36 %** (quatre faces) ou **49 %** (six faces). Le document ne dit pas lesquelles.
 La grandeur n'est pas anecdotique — c'est le coût d'entrée de tout domaine — et elle fonde la borne
 haute ci-dessus.
+
+#### P3 à P5 — dossier écrit d'un seul tenant
+
+`docs/validation/DOSSIER-B2.md`, dix sections. Le découpage du plan en trois étapes s'est révélé
+artificiel : les sections se tiennent, et couper au milieu aurait produit trois commits dont aucun
+n'était lisible seul. Fait en un, et déclaré ici.
+
+Trois apports que le protocole d'origine n'avait pas :
+- **B2-05**, scénario d'arrivée en cours de partie. L'ajout S04 de PLAN-BENCHMARK demandait de
+  mesurer le volume d'état à transmettre ; aucun des quatre scénarios existants ne l'exerce.
+- **La métrique d'iso-qualité est nommée** : l'erreur de célérité relative sur C02, intégrée sur
+  [λ_cut, 4·λ_cut]. SPEC-003 §5.2 imposait d'en choisir une ; B2 ne l'avait pas.
+- **B2 produit un couple, pas un nombre** : `λ_cut` **et** le tableau des décimations admissibles
+  par classe de domaine. L'un sans l'autre ne veut rien dire.
+
+Et une vérification faite plutôt que supposée : le plus court phénomène gameplay ondulatoire du
+corpus est le **sillage à 5 m/s, 16 m**. Le critère de fermeture d'ADR-021 §3.2 laisse donc de la
+marge jusqu'à λ_cut ≈ 6 m — ce n'est pas lui qui mord, c'est l'éponge du domaine d'impact.
