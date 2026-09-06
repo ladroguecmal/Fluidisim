@@ -81,8 +81,8 @@ L'erreur L1 devrait donner `p ≈ 1`, le front bien moins. Si c'est le cas, l'é
 il dit « un cas de C02, C04 ou C09 » et jamais **sur quelle grandeur de ce cas**. Or un cas en
 produit plusieurs, et l'assertion `p > 0,8` n'a pas le même sens selon celle qu'on prend.
 
-- [ ] **P1** — plan, jeton.
-- [ ] **P2** — le mode `convergence` : Richardson à trois grilles, sur une grandeur quelconque,
+- [x] **P1** — plan, jeton.
+- [x] **P2** — le mode `convergence` : Richardson à trois grilles, sur une grandeur quelconque,
       avec la référence exacte quand elle existe. Traiter honnêtement les deux cas dégénérés — une
       erreur au bruit d'arrondi (C01 équilibré) et un `p` calculé hors régime asymptotique.
 - [ ] **P3** — appliquer à C04 sur quatre grandeurs : erreur L1, `h(0)`, `u(0)`, front.

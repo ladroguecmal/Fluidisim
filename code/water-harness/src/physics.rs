@@ -704,3 +704,177 @@ pub fn c04_rupture_de_barrage(host: &mut water_core::HostServices, t_s: f64) -> 
         },
     ]
 }
+
+// ---------------------------------------------------------------------------------------------
+// C08 — convergence sous raffinement
+// ---------------------------------------------------------------------------------------------
+
+/// Une suite d'erreurs mesurées à résolution croissante, et les ordres qu'on en tire.
+///
+/// `CAS-CANONIQUES` §C08 : *« Un solveur qui ne converge pas ne résout pas l'équation qu'on croit :
+/// il est **faux**, pas imprécis. »*
+pub struct Convergence {
+    pub grandeur: String,
+    /// `(nx, erreur absolue)`, à résolution croissante.
+    pub erreurs: Vec<(usize, f64)>,
+    /// Plancher en dessous duquel une erreur n'est plus de la discrétisation mais de l'arrondi.
+    pub plancher: f64,
+}
+
+/// Ce qu'un triplet de grilles permet de conclure — et ce qu'il ne permet pas.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Ordre {
+    /// Ordre observé par extrapolation de Richardson.
+    Observe(f64),
+    /// Les erreurs sont sous le plancher d'arrondi : la discrétisation n'est plus ce qu'on mesure.
+    ///
+    /// Ce n'est **pas** un échec de convergence — c'est l'inverse. Rapporter `p = 0` ici serait
+    /// mentir dans le sens le plus coûteux : déclarer faux un solveur exact.
+    Plancher,
+    /// Les différences successives ne décroissent pas : rien n'est extrapolable.
+    Indetermine,
+}
+
+impl Convergence {
+    /// Ordre observé sur le triplet `(i, i+1, i+2)` des grilles enregistrées.
+    ///
+    /// ```text
+    /// p = log₂( |e_h − e_{h/2}| / |e_{h/2} − e_{h/4}| )
+    /// ```
+    ///
+    /// La formule est celle de l'énoncé de C08. Elle porte sur les **différences successives** et
+    /// non sur les erreurs elles-mêmes, ce qui la rend utilisable même quand la référence est un
+    /// oracle plutôt qu'une solution analytique.
+    pub fn ordre(&self, i: usize) -> Ordre {
+        if i + 2 >= self.erreurs.len() {
+            return Ordre::Indetermine;
+        }
+        let (e0, e1, e2) = (self.erreurs[i].1, self.erreurs[i + 1].1, self.erreurs[i + 2].1);
+        if e0.abs() < self.plancher && e1.abs() < self.plancher && e2.abs() < self.plancher {
+            return Ordre::Plancher;
+        }
+        let (d0, d1) = ((e0 - e1).abs(), (e1 - e2).abs());
+        if d1 <= self.plancher || d0 <= self.plancher {
+            return Ordre::Indetermine;
+        }
+        // `p` est rapporté **même s'il est négatif ou absurde**. Un ordre négatif signifie que les
+        // différences successives grandissent, ce qui est la signature du régime **pré**-asymptotique
+        // — le cas où la formule de Richardson produit un nombre dénué de sens. Le masquer derrière
+        // « indéterminé » retirerait précisément ce que `asymptotique()` doit pouvoir constater.
+        Ordre::Observe((d0 / d1).log2())
+    }
+
+    /// Les ordres de tous les triplets consécutifs.
+    pub fn ordres(&self) -> Vec<(usize, Ordre)> {
+        (0..self.erreurs.len().saturating_sub(2))
+            .map(|i| (self.erreurs[i].0, self.ordre(i)))
+            .collect()
+    }
+
+    /// L'ordre à retenir : celui du triplet le plus fin, qui est le plus proche du régime
+    /// asymptotique.
+    pub fn ordre_final(&self) -> Ordre {
+        match self.erreurs.len().checked_sub(3) {
+            Some(i) => self.ordre(i),
+            None => Ordre::Indetermine,
+        }
+    }
+
+    /// L'ordre observé a-t-il cessé de bouger ?
+    ///
+    /// # Pourquoi cette question vaut l'assertion elle-même
+    ///
+    /// L'extrapolation de Richardson suppose le **régime asymptotique** : que l'erreur soit
+    /// dominée par un unique terme en `dxᵖ`. Hors de ce régime, `p` existe toujours comme calcul,
+    /// et ne signifie rien — il dépend des grilles choisies. Un `p` qui bouge encore d'un triplet
+    /// au suivant est le signe que le régime n'est pas atteint, et **publier ce nombre sans le dire
+    /// est la faute que ce contrôle empêche**.
+    pub fn asymptotique(&self, tolerance: f64) -> Option<bool> {
+        let os: Vec<f64> = self
+            .ordres()
+            .iter()
+            .filter_map(|(_, o)| match o {
+                Ordre::Observe(p) => Some(*p),
+                _ => None,
+            })
+            .collect();
+        if os.len() < 2 {
+            return None;
+        }
+        Some((os[os.len() - 1] - os[os.len() - 2]).abs() <= tolerance)
+    }
+}
+
+#[cfg(test)]
+mod tests_convergence {
+    use super::*;
+
+    fn suite(p: f64, e0: f64, n: usize) -> Convergence {
+        // Erreur exactement en dxᵖ : e_k = e0 · 2^(−p·k).
+        Convergence {
+            grandeur: format!("synthétique, ordre {p}"),
+            erreurs: (0..n)
+                .map(|k| (200usize << k, e0 * 2f64.powf(-p * k as f64)))
+                .collect(),
+            plancher: 1e-12,
+        }
+    }
+
+    /// L'outil retrouve un ordre qu'on lui donne. Sans ce contrôle, un `p` mesuré sur le solveur
+    /// ne distinguerait pas un défaut du solveur d'un défaut de la mesure — A100.
+    #[test]
+    fn retrouve_les_ordres_connus() {
+        for p in [0.5f64, 1.0, 2.0] {
+            let c = suite(p, 0.1, 5);
+            match c.ordre_final() {
+                Ordre::Observe(q) => assert!(
+                    (q - p).abs() < 1e-9,
+                    "ordre {p} attendu, {q} mesuré"
+                ),
+                autre => panic!("ordre {p} attendu, {autre:?} obtenu"),
+            }
+            assert_eq!(c.asymptotique(0.01), Some(true), "une loi pure est asymptotique");
+        }
+    }
+
+    /// Une erreur entièrement sous le plancher d'arrondi ne se lit pas comme une non-convergence.
+    ///
+    /// C'est le cas de C01 avec le schéma équilibré : l'erreur ne décroît pas parce qu'elle a
+    /// atteint le bruit du `f32`, pas parce que le solveur stagne. Rapporter `p = 0` y déclarerait
+    /// faux un solveur exact.
+    #[test]
+    fn plancher_distingue_le_bruit_de_la_stagnation() {
+        let c = Convergence {
+            grandeur: "au bruit".into(),
+            erreurs: vec![(200, 7e-7), (400, 5e-7), (800, 1.2e-6), (1600, 4.8e-7)],
+            plancher: 1e-5,
+        };
+        assert_eq!(c.ordre_final(), Ordre::Plancher);
+    }
+
+    /// Des erreurs qui ne décroissent pas ne donnent pas un ordre : elles ne donnent rien.
+    #[test]
+    fn stagnation_hors_plancher_est_indeterminee() {
+        let c = Convergence {
+            grandeur: "stagnante".into(),
+            erreurs: vec![(200, 0.10), (400, 0.10), (800, 0.10), (1600, 0.10)],
+            plancher: 1e-9,
+        };
+        assert_eq!(c.ordre_final(), Ordre::Indetermine);
+    }
+
+    /// Un ordre qui bouge encore d'un triplet au suivant n'est pas asymptotique.
+    ///
+    /// Les valeurs sont celles mesurées en S23 sur le front de C04. Le premier triplet donne un
+    /// ordre **négatif** — les différences y grandissent — ce qui est la signature du régime
+    /// pré-asymptotique et non un défaut de la mesure.
+    #[test]
+    fn ordre_qui_bouge_n_est_pas_asymptotique() {
+        let c = Convergence {
+            grandeur: "hors régime".into(),
+            erreurs: vec![(200, 0.211), (400, 0.193), (800, 0.161), (1600, 0.125), (3200, 0.095)],
+            plancher: 1e-9,
+        };
+        assert_eq!(c.asymptotique(0.05), Some(false));
+    }
+}
