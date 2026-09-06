@@ -40,6 +40,7 @@ que le dispositif répond à un problème général.
 | **C11** | « **aucune divergence** sur 120 s » · « **aucun tremblement visible** » | **B** ×2 | l'amplitude de l'oscillation parasite, en fraction du rayon |
 | **C15** | « **aucune plaque** ne se forme tant que `Hs > 0,15 m` » | **C** | l'épaisseur mesurée, **plus** un témoin à `Hs < 0,15` qui doit en produire |
 | **C18** | « l'hôte serveur **compile et tourne** sans δ ni rendu » | **C** | passe tant que l'hôte serveur n'existe pas |
+| **C18** *(ajouté S30)* | « aucune capacité dérivée n'est lue depuis un **profil de qualité** » | **C** | demanderait une analyse statique, qui n'existe pas — voir §5 bis |
 
 **C11 est le cas le plus atteint** : deux de ses trois assertions sont de classe B, et « visible »
 n'a même pas d'observateur défini. C'est aussi, d'après sa propre note, *« le cas le plus petit et le
@@ -113,6 +114,46 @@ régime testé** — la même faute d'un cran plus haut, et invisible par la mê
 
 > **Corollaire à retenir : vérifier qu'un montage peut atteindre le régime où l'assertion échoue.**
 > Une assertion recevable sur un montage qui ne peut pas la mettre en défaut retombe en classe C.
+
+## 5 bis. Réécriture — S30, et une erreur de classement corrigée
+
+Les cinq cas ont été réécrits. **Aucun seuil n'a eu à être inventé** : chacun sort d'une formule ou
+d'un document déjà présent dans le corpus.
+
+| Cas | Assertion de remplacement | Origine | Nombre neuf ? |
+|---|---|---|---|
+| **C07** | pente de `log A` contre `log\|1 − Fr_h²\|` = **−½ ± 0,15** | facteur de résonance, ADR-011 §4 | non |
+| **C10** | `T_avec/T_sans = √2 ± 15 %` | `√(1 + m_a/m)` avec `m_a ≈ m` — A26 + Archimède | non |
+| **C11** | `max\|z − η\| = 0` (mode contraint) · `\|G\| ≤ 1` par période | ADR-008 §3, « exactement stable » · conservation | non |
+| **C15** | témoin à `Hs = 0,05 m` : épaisseur **non nulle**, `0,035·√FDD` ±10 % | SPEC-002 §4 | non |
+| **C18** | `scénarios_exécutés_par_l_hôte_serveur ≥ 1` | décompte ; vaut zéro aujourd'hui | non |
+
+> **Ce que l'audit avait pris pour un manque de seuils était un manque de lecture.** Les grandeurs
+> étaient dans le corpus, sous les assertions qui ne les nommaient pas. Trois d'entre elles sont même
+> **plus fortes** que ce que l'énoncé demandait : `max|z − η| = 0` est exact là où « aucun tremblement
+> visible » tolérait tout ce qui ne se voit pas.
+
+### Deux découvertes de la réécriture
+
+**1. C07 cumulait deux défauts, et le second n'était visible qu'après correction du premier.** Par
+5 m de fond, `√(g·h) = 7,00 m/s` ; les quatre vitesses de l'énoncé donnent
+`Fr_h = 0,71 · 1,14 · 1,43 · 2,14`. **Le point critique est sauté** — c'est **A133**, cette fois
+dans le corpus et non dans le harnais. Corriger l'assertion a obligé à corriger le montage.
+
+**2. Le classement du §2 s'est trompé une fois, dans le sens le plus coûteux.** C18 porte **deux**
+lignes vides, pas une :
+
+- « l'hôte serveur compile et tourne » — recensée ;
+- « **aucune capacité dérivée n'est lue depuis un profil de qualité** » — **manquée**, classée
+  recevable par confusion avec « zéro allocation ».
+
+Les deux sont des assertions négatives de forme identique. Ce qui les sépare est l'existence d'un
+**instrument** : « zéro allocation » a son compteur (`AllocStats::refused_after_seal`, lu par le
+harnais depuis S20) ; l'autre demanderait une analyse statique, qui n'existe pas.
+
+> **L'instrument ne se lit pas dans l'énoncé.** Classer une assertion sur sa formulation seule est
+> donc insuffisant — il faut, pour chacune, **nommer ce qui la mesure**, et vérifier que cela
+> existe. C'est un troisième contrôle, après la grandeur et le témoin.
 
 ## 6. Ce qui reste à faire
 

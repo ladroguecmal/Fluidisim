@@ -94,7 +94,7 @@ un nombre neuf, et c'est celui qu'il faudra peut-être marquer « à calibrer »
 - [x] **P5** — **C11**, ~~le seul qui demande un nombre neuf~~ — il n'en demandait pas. Chercher d'abord s'il existe une
       grandeur dont le seuil se dérive ; à défaut, « à calibrer » avec son banc, ce qui est un
       statut légitime et non un échec.
-- [ ] **P6** — notes correctives datées dans `CAS-CANONIQUES` pour les cinq, et mise à jour du
+- [x] **P6** — notes correctives datées dans `CAS-CANONIQUES` pour les cinq, et mise à jour du
       registre S29.
 - [ ] **P7** — répercussions : index, angles morts, actions, décomptes.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6).
