@@ -72,7 +72,7 @@ Sept registres, jamais audités : `ANGLES-MORTS` (89 points), `QUESTIONS-OUVERTE
 exécutées — c'est l'angle mort A89, écrit en S14.
 
 - [ ] **P1** — déclarer le plan, prendre le jeton, mettre à jour le battement.
-- [ ] **P2** — les **actions décidées** des cinq registres d'audit : exécutées ou non, et statut
+- [x] **P2** — les **actions décidées** des cinq registres d'audit : exécutées ou non, et statut
   à jour ou non. *Thèse : les deux échouent, et dans les deux sens — une action faite reste marquée
   « à faire », une action à faire reste non faite.*
 - [ ] **P3** — les actions qui visent la **validation** (`PLAN-BENCHMARK`, `SPEC-003`,
@@ -105,3 +105,32 @@ exécutées — c'est l'angle mort A89, écrit en S14.
   Le constat sous-jacent, lui, se renforce : **le seul registre d'audit dépourvu de table d'actions
   est celui dont les actions n'ont pas été exécutées.** C'est une meilleure formulation que celle
   de S14, et elle désigne une cause au lieu d'un symptôme.
+
+#### P2 — les actions décidées par les cinq registres d'audit
+
+| Registre | Table d'actions | Actions | Exécutées | Statut à jour |
+|---|---|---|---|---|
+| `REVUE-CROISEE-S05` | oui | 9 | **9** | **8** — la neuvième est faite et marquée « à ajouter » |
+| `REVUE-CROISEE-S08` | oui | 9 | 9 | 9 |
+| `AUDIT-POINTS-OUVERTS-S11` | **aucune** | ~14, en prose | ? — une perdue, trouvée en S14 | sans objet |
+| `REVUE-CROISEE-S13` | oui | 12 | 12 | 12 |
+| `AUDIT-INVARIANTS-S14` | oui | 10 | 10 | 10 |
+
+**R01 — un statut périmé fait refaire un travail déjà fait.** La table « Suite » de S05 inscrit
+« Critère de répétition de tuile FFT | B1 | **à ajouter au protocole** ». `PLAN-BENCHMARK` B1 porte
+l'ajout depuis S05 : « **Ajout S05 (écart R09).** Mesurer aussi la distance à partir de laquelle la
+répétition d'une tuile FFT devient perceptible ». Le statut est faux depuis **dix sessions**, dans
+le sens qui coûte : quelqu'un qui planifie sur ce registre refait le travail.
+C'est l'inverse exact d'A89, et il faut noter que les deux erreurs sont possibles simultanément dans
+la même table.
+
+**R02 — le seul registre sans table d'actions est celui dont une action s'est perdue.**
+`AUDIT-POINTS-OUVERTS-S11` n'a pas de section « Suite » : ses résolutions vivent dans le corps des
+quatorze sections, sous la forme « **Action** : … ». C'est de là que l'action sur I-16 a disparu —
+retrouvée en S14, neuf sessions plus tard.
+
+*Correction d'une erreur de S14.* S14 affirme en trois endroits que cette action était « inscrite
+dans une **table Suite** » de ce registre. **Elle ne l'était pas** : ce registre n'a pas de table.
+L'énoncé d'A89 est donc faux dans sa prémisse. Le constat sous-jacent en sort **renforcé** : ce n'est
+pas qu'une table « Suite » ne serait pas exécutée, c'est qu'**une action qui n'entre pas dans une
+liste exécutable n'est pas exécutée**. À corriger en P7.
