@@ -31,6 +31,45 @@ les six premiers doivent passer avant qu'un solveur candidat soit admis en campa
 
 ---
 
+## Deux véhicules, deux colonnes de verdicts *(S35, réconciliation du fork)*
+
+Le tableau ci-dessous porte les verdicts obtenus sur **`delta.rs`**, le véhicule d'essai de cette
+lignée. Une seconde implémentation du **même modèle** — Saint-Venant 1D, volumes finis, Rusanov —
+a été écrite le même jour dans une histoire parallèle du dépôt : **`shallow.rs`**. Voir
+[`ADR-043`](../adr/ADR-043-deux-lignees-ont-ecrit-le-meme-solveur.md) et le registre
+[`FORK-S22-S26`](../registres/FORK-S22-S26.md).
+
+**Les deux ne rendent pas les mêmes verdicts, et l'écart a une cause unique.**
+
+| cas | `delta.rs` — **ordre un** | `shallow.rs` — **ordre deux** *(MUSCL + RK2)* |
+|---|---|---|
+| **C01** | exécuté, vert *(S22)* | exécuté, vert *(B-S22)* ; **reste vert à l'ordre deux** *(B-S24)* |
+| **C03** | passe *(S25)*, montage à 400 pts/λ | vert *(B-S23)*, **≥ 250 mailles/λ** énoncé comme condition |
+| **C04** | **échoue** *(S23)* — décision d'ADR-031 | **vert** *(B-S25)*, 0,74 % sur le front, seuil révisé |
+| **C05** | non exécuté | exécuté *(B-S26)* — **a éliminé le réglage d'ADR-005 §2** |
+| **C06** | non exécuté | **partiel** *(B-S23)* — translation 1D seule |
+| **C08** | **sans verdict** *(S23-S24)* — ADR-032 | rouge *(B-S23)*, puis **vert** *(B-S24)* : `p` = 1,003 |
+
+> **Ce n'est pas une contradiction, c'est une complémentarité — et elle est instructive.**
+> `ADR-031` de cette lignée conclut que **le front de mouillage élimine l'ordre un**. La lignée B a
+> franchi ce pas : elle a implémenté l'ordre deux (`ADR-040`), et **C04 et C08 sont alors passes au
+> vert ensemble**. Les deux résultats se complètent exactement — l'un dit ce qui échoue, l'autre ce
+> qui réussit, et c'est le **même seuil** qui sépare les deux. Ce que ni l'une ni l'autre n'aurait pu
+> établir seule : *le passage à l'ordre deux suffit*, sans changer de famille de schéma.
+
+> **Deux réserves, et elles sont sérieuses.**
+>
+> 1. **Rien n'a été réexécuté.** Les verdicts de la colonne de droite sont **cités depuis les
+>    documents de la lignée B**, pas reproduits dans cet arbre : `shallow.rs` n'y est pas encore, et
+>    son import est un travail de code (ADR-043 §7.1). Tant qu'il n'est pas fait, cette colonne est
+>    un témoignage, pas une mesure.
+> 2. **Les verdicts « verts » de la colonne de droite ont chacun une condition de mesure révisée**
+>    — le seuil de C04, les 250 mailles/λ de C03. Une révision de seuil qui fait passer un cas au
+>    vert demande à être relue pour elle-même : c'est précisément l'objet d'`ADR-041`, *le dernier
+>    cas rouge était rouge à cause de sa mesure*, et cet ADR n'a pas été relu par cette lignée.
+
+---
+
 ## Tableau général
 
 | # | Cas | Couche | Référence | Ce qu'il attrape |
