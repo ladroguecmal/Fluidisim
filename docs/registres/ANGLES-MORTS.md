@@ -12,9 +12,9 @@ de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outi
 6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance),
 3 en S11 (audit des points ouverts), 3 en S12 (mécanismes de détail), 3 en S13 (revue croisée des
 documents récents), 3 en S14 (audit inverse des invariants), 2 en S15 (audit des registres), 2 en S16 (dossier B2), 2 en S17
-(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques), 4 en S22 (C01 et le premier δ), 4 en S23 (C04 et le lit sec), 4 en S24 (C08 et l'oracle), 4 en S25 (C03 et la dissipation), 4 en S26 (les harmoniques), 4 en S27 (le nombre de Courant), 3 en S28 (la paroi mobile), 3 en S29 (l'audit des assertions), 3 en S30 (la réécriture), 3 en S31 (la dissolution d'A122) — **140 au
-total**. **Quatre-vingts ont été trouvés dans nos propres écrits**, pas dans les documents sources :
-A49, A56, A57, A58, puis A65 à A140. La proportion
+(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques), 4 en S22 (C01 et le premier δ), 4 en S23 (C04 et le lit sec), 4 en S24 (C08 et l'oracle), 4 en S25 (C03 et la dissipation), 4 en S26 (les harmoniques), 4 en S27 (le nombre de Courant), 3 en S28 (la paroi mobile), 3 en S29 (l'audit des assertions), 3 en S30 (la réécriture), 3 en S31 (la dissolution d'A122), 3 en S32 (celle d'A139) — **143 au
+total**. **Quatre-vingt-trois ont été trouvés dans nos propres écrits**, pas dans les documents sources :
+A49, A56, A57, A58, puis A65 à A143. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -182,8 +182,11 @@ ce que les sources avaient omis.
 | **A138** | Un solveur ne conserve pas la forme d'un paquet que son équation conserve exactement | **1** | ADR-036 §5 |
 | **A139** | Le sillage est peut-être un objet de W et non de δ, et rien ne le dit | **1** | ADR-036 §6.2, ADR-011 §4 |
 | **A140** | Une question ouverte peut rester lourde des sessions durant sans que sa prémisse soit relue | 2 | ADR-036 §1, A122 |
+| **A141** | La durée « attendue » d'un phénomène dépend de ce qu'on regarde, et rien ne le fixe | 2 | ADR-037 §4.1 |
+| **A142** | L'équilibre spatial d'un phénomène entretenu est dérivé, jamais mesuré | 2 | ADR-037 §4.3 |
+| **A143** | Le même document fondateur a répondu deux fois de suite à une question dite ouverte | **1** | ADR-037 §1, A122 et A139 |
 
-Cent angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
+Cent trois angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
 
 **Quatre ont été trouvés dans nos propres écrits** — A49, A56, A57, A58 — et non dans les documents
@@ -895,7 +898,7 @@ pendant quatre sessions.
   est l'invariance, donc `1` exactement, sans aucun seuil à inventer. Sévérité 1 — un sillage, un
   remous et une éclaboussure sont tous des paquets, et c'est ce que δ existe pour produire.
 
-- **A139** — **Le sillage est peut-être un objet de W et non de δ, et rien ne le dit.** ADR-036 §3
+- **A139** — ~~**Le sillage est peut-être un objet de W et non de δ, et rien ne le dit.**~~ **DISSOUS en S32** — ADR-001 §2 range les sillages dans **W** depuis S01, en toutes lettres. La mention « rien ne le dit » était fausse : je n'avais lu qu'ADR-011 §4. Voir [`ADR-037`](../adr/ADR-037-la-dissipation-est-un-allie-pour-la-moitie-de-delta.md) §1. *Énoncé d'origine conservé ci-dessous.* ADR-036 §3
   chiffre la mort d'un sillage porté par δ : deux mètres derrière une barque à 3 m/s, la distance
   visible variant comme `v⁴/dx`. Mais **ADR-011 §4 place le générateur de sillage dans la couche
   W** — *« le générateur de sillage de la couche W doit prendre `h` en entrée »*. Si le sillage est
@@ -912,4 +915,32 @@ pendant quatre sessions.
   intimidante, donc chaque fois plus reportée. Réflexe : avant d'ouvrir une question difficile,
   relire ce que le corpus dit déjà de sa **prémisse** — c'est le geste le moins cher et il n'était
   fait par aucune des quatre sessions qui l'avaient recommandée.
+
+**Ajoutés en S32, à la dissolution d'A139**
+
+- **A141** — **La durée « attendue » d'un phénomène dépend de ce qu'on regarde, et rien ne le
+  fixe.** Le critère de dimensionnement d'ADR-037 §3 compare la durée numérique d'une éclaboussure à
+  sa durée physique, estimée par le temps de chute gravitaire `√(2L/g)`. Mais **la durée *perçue*
+  d'une éclaboussure inclut l'écume et le spray**, qui relèvent d'ADR-014 et survivent bien plus
+  longtemps que la déformation de surface. Selon ce qu'on décide de voir, le critère est
+  conservateur ou optimiste — et l'écart est d'un facteur qui n'a pas été estimé. **Une durée
+  attendue n'est pas une propriété du phénomène, c'est une propriété de ce qu'on en montre.**
+
+- **A142** — **L'équilibre spatial d'un phénomène entretenu est dérivé, jamais mesuré.** ADR-037
+  §2.1 conclut que le proche-coque s'éteint naturellement à 25,6 m, dans la portée qu'ADR-001 donne
+  à un domaine. Le raisonnement suppose qu'une source constante et une dissipation exponentielle
+  produisent une décroissance en `exp(−x/L_d)` — vrai en régime linéaire, **non vérifié ici**, et le
+  solveur n'est pas linéaire. Toutes les mesures de S25 à S32 portent sur des perturbations
+  **relâchées**, aucune sur une source **entretenue**. La conclusion la plus rassurante du corpus
+  récent est donc la moins étayée.
+
+- **A143** — **Le même document fondateur a répondu deux fois de suite à une question dite
+  ouverte.** A122 s'est dissoute en S31 en relisant ADR-001 ; A139 s'est dissoute en S32 en relisant
+  ADR-001. Dans les deux cas la réponse y était depuis S01, et dans le second c'est la session
+  précédente qui avait posé la question sans consulter le document. **Un corpus qui grandit rend son
+  propre socle moins consulté** : trente-six ADR se lisent moins qu'un, et le premier est celui
+  qu'on croit connaître. Sévérité 1 par ce que cela coûte — deux angles morts de gravité 1 ouverts,
+  quatre sessions de report, un ADR entier (036 §3) écrit sur un objet qui n'existait pas.
+  **Réflexe : toute question sur *l'appartenance d'un phénomène à une couche* se règle dans ADR-001
+  §2, et nulle part ailleurs.**
 

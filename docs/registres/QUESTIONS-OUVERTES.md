@@ -251,7 +251,7 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 
 | # | Action | D'où elle vient | Qui la porte | État |
 |---|---|---|---|---|
-| S31-1 | **Trancher si le sillage est un objet de W ou de δ.** ADR-011 §4 place son générateur dans W ; ADR-036 §3 chiffre sa mort s'il est dans δ. La réponse décide si ce résultat est majeur ou sans objet | **A139** | session | **ouverte** |
+| S31-1 | **Trancher si le sillage est un objet de W ou de δ** | **A139** | session | **close (S32) — par dissolution** : ADR-001 §2 le range dans **W** depuis S01. ADR-036 §3 est sans objet ; ADR-037 le remplace |
 | S31-2 | Écrire **C24, « conservation de forme d'un paquet »** : référence `1` exactement, mesure de l'élargissement à mi-hauteur. Aucun seuil à inventer | **A138** | session | **ouverte** |
 | S31-3 | Porter dans ADR-005 §2.1 que `λ_cut` dépend de la **taille du domaine** en `√D`, et pas seulement de `dx` | ADR-036 §4 | session | **ouverte** |
 | S31-4 | **Relire la prémisse** des autres questions ouvertes de longue date avant de les traiter — A122 s'est dissoute en une lecture de deux documents antérieurs | **A140** | session | **ouverte** |
@@ -260,4 +260,18 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 > l'ont toutes désignée comme « la question la plus lourde ouverte ». Elle s'est dissoute en relisant
 > ADR-001 §2 et ADR-005 §1, deux documents **antérieurs à sa formulation**. Le statut « lourde » l'a
 > rendue chaque fois plus intimidante, donc chaque fois plus reportée.
+
+## Actions relevées en séance — S32
+
+| # | Action | D'où elle vient | Qui la porte | État |
+|---|---|---|---|---|
+| S32-1 | **Porter la partition entretenus/transitoires dans ADR-001 §2**, qui liste six contenus de δ sans les distinguer — c'est une lecture, pas une décision nouvelle, mais elle change le dimensionnement | ADR-037 §4.2 | session | **ouverte** |
+| S32-2 | **Mesurer un phénomène entretenu** : l'équilibre spatial du proche-coque à 25,6 m est dérivé et jamais mesuré, sur un solveur non linéaire | **A142** | session | **ouverte** |
+| S32-3 | Fixer ce qu'on entend par **durée attendue** d'un transitoire : la déformation de surface seule, ou l'écume et le spray d'ADR-014 qui survivent plus longtemps | **A141** | session | **ouverte** |
+| S32-4 | Porter dans ADR-035 que le levier `ν` vaut **×6,1 en cellules 3D** pour une fidélité de transitoire donnée — il n'y était chiffré qu'en portée d'onde | ADR-037 §3.1 | session | **ouverte** |
+
+> **Note S32 — deux dissolutions consécutives, par le même document.** A122 en S31, A139 en S32,
+> toutes deux réglées par ADR-001 §2. **Un corpus qui grandit rend son propre socle moins consulté**
+> (A143). Réflexe désormais explicite : toute question sur *l'appartenance d'un phénomène à une
+> couche* se règle dans ADR-001 §2, et nulle part ailleurs.
 
