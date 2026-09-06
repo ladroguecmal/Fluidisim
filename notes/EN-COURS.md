@@ -89,7 +89,7 @@ provenance (`H_SEC = 10⁻⁶` est posé sans justification, action **S22-4**).
       dans le champ, comparée à la position où Ritter vaut `ε` — et non à `2√(gh₀)·t`. Comparer une
       mesure à seuil contre une référence sans seuil mesurerait la définition, pas le schéma.
 - [x] **P4** — exécuter, constater, mesurer la sensibilité de la position du front à `ε`.
-- [ ] **P5** — **S22-4** : donner une provenance à `H_SEC`, ou le remplacer. C04 est le cas qui le
+- [x] **P5** — **S22-4** : donner une provenance à `H_SEC`, ou le remplacer. C04 est le cas qui le
       met en jeu ; le laisser posé au jugé après l'avoir traversé serait la dette exacte que
       décrit A106.
 - [ ] **P6** — ce que la session a appris : ADR-031 si la conclusion engage B3, note datée sinon.
@@ -147,3 +147,50 @@ nx=3200  dx=0,0125  ε=1e-4 : −10,83 %   ε=1e-3 :  −9,46 %   ε=1e-2 :  −
 
 **Ce que le témoin montre.** Le front mesuré comparé à `2c₀·t` donne −20,07 %, contre −16,09 % au
 même seuil. **Quatre points d'écart sont de la pure convention de mesure** — un quart du verdict.
+
+#### P5 — les deux causes évidentes sont réfutées, et c'est le résultat
+
+**Hypothèse 1 : l'estimation des vitesses d'onde au lit sec.** C'est le diagnostic classique. Quand
+un côté de l'interface est sec, l'onde de tête n'est pas `u ± c` mais l'invariant de Riemann
+`u + 2c` du côté mouillé (Toro) ; estimer `α = |u| + c` au contact du sec **borne la vitesse de
+propagation numérique en dessous de la vitesse physique du front**, et le front ne peut alors plus
+avancer assez vite. L'explication est juste, elle est dans la littérature, et **elle ne change rien
+ici** : −16,09 % avant, −16,24 % après. La formule correcte est conservée — c'est la bonne physique
+et elle vaudra ailleurs — mais **elle ne répond pas de ce défaut**.
+
+**Hypothèse 2 : le seuil de séchage `H_SEC`.** Balayé sur six ordres de grandeur, `10⁻⁹` à `10⁻³` :
+
+```
+h_sec = 1e-9 : −16,38 %     1e-7 : −16,31 %     1e-6 : −16,24 %
+h_sec = 1e-4 : −16,07 %     1e-3 : −16,13 %          volume = 20,000000 dans les cinq cas
+```
+
+**0,25 point d'effet sur seize.** C'est la réponse à l'action **S22-4**, et elle n'est pas celle
+qu'on cherchait : `H_SEC` **n'est pas un paramètre physique**. C'est un garde-fou contre une
+division par zéro, sa valeur est libre sur au moins six décades, et sa provenance est cette mesure.
+**Une constante dont l'effet est mesuré a une provenance, même quand l'effet est nul** — c'est ce
+qui la distingue de `ρ_eau` (A103), qui déplace des références de 2,5 %.
+
+**Ce qui reste, par élimination : la diffusion du schéma d'ordre 1, au front.** Elle est
+intrinsèque, et la convergence le montre — ordre apparent de **0,13 · 0,27 · 0,36 · 0,41** sur les
+quatre raffinements successifs, contre 1 attendu ailleurs et une erreur L1 globale qui, elle, se
+comporte normalement. Le front a son propre régime de convergence, et il est mauvais.
+
+**Le chiffre.** À l'ordre 0,4, atteindre les 3 % de C04 depuis `dx = 5 cm` demanderait `dx = 0,75 mm`
+— **×67 en résolution, ×3·10⁵ en coût 2D**. C'est le pendant exact du chiffre de C01 (×10 500), en
+trente fois pire.
+
+> **Conséquence, et c'est la décision de la session :** de même que C01 élimine les schémas non
+> équilibrés, **C04 élimine l'ordre 1 au front de mouillage**. Ce n'est pas un défaut à raffiner,
+> c'est une famille à écarter — un candidat B3 doit être d'ordre supérieur *là où l'eau rencontre le
+> sec*, ce qui n'est pas la même exigence que d'être d'ordre supérieur en général.
+
+**Prudence sur ce chiffre.** L'ordre apparent n'est pas stabilisé — il monte encore, de 0,13 à 0,41.
+S'il tendait vers 1, le facteur tomberait à ×3 200 en 2D, ce qui resterait éliminatoire. La
+conclusion est robuste ; l'exposant, lui, est une estimation sur cinq grilles et doit être présenté
+comme telle.
+
+**Et A106 revient, plus fort.** À `ε = 10⁻²`, le même solveur affiche **−3,46 %** à `nx = 3200` :
+à un point de la tolérance. À `ε = 10⁻⁴`, il affiche −10,83 %. **Le seuil ne change pas seulement
+l'ampleur du verdict, il peut le renverser.** C04 ne dit pas lequel prendre, et ce silence est
+maintenant chiffré.

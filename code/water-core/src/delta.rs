@@ -40,8 +40,24 @@ pub const CFL: f32 = 0.45;
 
 /// Hauteur d'eau en deçà de laquelle une cellule est déclarée sèche.
 ///
-/// Sert à ne pas diviser par zéro dans `u = hu/h`. C01 n'a pas de front de séchage — C04 en aura
-/// un, et ce seuil devra alors être justifié plutôt que posé.
+/// Sert à ne pas diviser par zéro dans `u = hu/h`.
+///
+/// # Provenance — mesurée en S23, action S22-4
+///
+/// S22 avait laissé cette constante posée au jugé, et C04 est le cas qui la met en jeu. Elle a donc
+/// été **balayée sur six ordres de grandeur**, de `10⁻⁹` à `10⁻³`, sur la grandeur la plus sensible
+/// du corpus — la position du front de Ritter :
+///
+/// ```text
+/// h_sec = 1e-9 → −16,38 %      1e-6 → −16,24 %      1e-3 → −16,13 %
+/// ```
+///
+/// **Effet total : 0,25 point sur seize.** Le volume est conservé à l'identique dans les cinq cas.
+///
+/// Ce seuil **n'est donc pas un paramètre physique** et n'a pas à en avoir la justification : c'est
+/// un garde-fou contre une division par zéro, et sa valeur est libre sur au moins six décades. Sa
+/// provenance est cette mesure — une constante dont l'effet est mesuré en a une, même quand l'effet
+/// est nul. Voir ADR-031 §3 ; à distinguer de `ρ_eau` (A103), qui déplace des références.
 pub const H_SEC: f32 = 1.0e-6;
 
 /// Condition initiale du bassin.
@@ -133,6 +149,8 @@ pub struct Delta1D {
     nx: usize,
     dx: f32,
     origine: f32,
+    /// Seuil de cellule sèche. Voir `H_SEC` et ADR-031 §3.
+    h_sec: f32,
     /// Cote du lit, en mètres, `nx + 2` valeurs.
     b: Vec<f32>,
     h: Vec<f32>,
@@ -198,6 +216,7 @@ impl Delta1D {
             nx,
             dx,
             origine: bassin.origine_m,
+            h_sec: H_SEC,
             h_suiv: h.clone(),
             hu_suiv: hu.clone(),
             b,
@@ -211,6 +230,11 @@ impl Delta1D {
 
     pub fn nx(&self) -> usize {
         self.nx
+    }
+    /// Change le seuil de cellule sèche. Réservé aux mesures de sensibilité du harnais.
+    pub fn avec_h_sec(mut self, h_sec: f32) -> Self {
+        self.h_sec = h_sec;
+        self
     }
     /// Abscisse du centre de la cellule de calcul `i`, en mètres.
     pub fn x(&self, i: usize) -> f32 {
@@ -239,7 +263,7 @@ impl Delta1D {
     /// Vitesse de la cellule `i`. Nulle si la cellule est sèche.
     pub fn u(&self, i: usize) -> f32 {
         let k = i + 1;
-        if self.h[k] > H_SEC {
+        if self.h[k] > self.h_sec {
             self.hu[k] / self.h[k]
         } else {
             0.0
@@ -316,7 +340,7 @@ impl Delta1D {
         let mut vmax = 0.0f32;
         for i in 1..=self.nx {
             let h = self.h[i];
-            if h <= H_SEC {
+            if h <= self.h_sec {
                 continue;
             }
             let v = (self.hu[i] / h).abs() + (G * h).sqrt();
@@ -397,8 +421,8 @@ impl Delta1D {
     fn flux_rusanov(&self, i: usize) -> [f32; 2] {
         let (hl, hul) = (self.h[i], self.hu[i]);
         let (hr, hur) = (self.h[i + 1], self.hu[i + 1]);
-        let ul = if hl > H_SEC { hul / hl } else { 0.0 };
-        let ur = if hr > H_SEC { hur / hr } else { 0.0 };
+        let ul = if hl > self.h_sec { hul / hl } else { 0.0 };
+        let ur = if hr > self.h_sec { hur / hr } else { 0.0 };
 
         let fl = [hul, hul * ul + 0.5 * G * hl * hl];
         let fr = [hur, hur * ur + 0.5 * G * hr * hr];
@@ -477,8 +501,8 @@ impl Delta1D {
     fn interface_reconstruite(&self, i: usize) -> Interface {
         let (hl, hul) = (self.h[i], self.hu[i]);
         let (hr, hur) = (self.h[i + 1], self.hu[i + 1]);
-        let ul = if hl > H_SEC { hul / hl } else { 0.0 };
-        let ur = if hr > H_SEC { hur / hr } else { 0.0 };
+        let ul = if hl > self.h_sec { hul / hl } else { 0.0 };
+        let ur = if hr > self.h_sec { hur / hr } else { 0.0 };
 
         let b_etoile = self.b[i].max(self.b[i + 1]);
         let hl_s = (hl + self.b[i] - b_etoile).max(0.0);
@@ -491,9 +515,19 @@ impl Delta1D {
         let fl = [hul_s, hul_s * ul + 0.5 * G * hl_s * hl_s];
         let fr = [hur_s, hur_s * ur + 0.5 * G * hr_s * hr_s];
 
-        let al = ul.abs() + (G * hl_s).sqrt();
-        let ar = ur.abs() + (G * hr_s).sqrt();
-        let alpha = al.max(ar);
+        // Vitesses d'onde. Le cas du **lit sec** ne se déduit pas du cas mouillé par continuité :
+        // quand un côté est sec, l'onde de tête n'est pas `u ± c` mais l'invariant de Riemann
+        // `u ∓ 2c` du côté mouillé (Toro). Estimer `α = |u| + c` au contact du sec **borne la
+        // vitesse de propagation numérique en dessous de la vitesse physique du front**, et le
+        // front ne peut alors pas avancer assez vite, quelle que soit la finesse de grille.
+        let (cl, cr) = ((G * hl_s).sqrt(), (G * hr_s).sqrt());
+        let alpha = if hr_s <= self.h_sec && hl_s > self.h_sec {
+            (ul - cl).abs().max((ul + 2.0 * cl).abs())
+        } else if hl_s <= self.h_sec && hr_s > self.h_sec {
+            (ur - 2.0 * cr).abs().max((ur + cr).abs())
+        } else {
+            (ul.abs() + cl).max(ur.abs() + cr)
+        };
 
         Interface {
             flux: [
@@ -739,6 +773,28 @@ mod tests {
                 );
             }
             println!();
+        }
+    }
+
+    /// Sensibilité du front au seuil de cellule sèche `h_sec` — action **S22-4**.
+    ///
+    /// Une constante posée au jugé n'a pas de provenance ; une constante dont on a mesuré l'effet
+    /// en a une, même quand l'effet est nul — c'est alors la mesure qui la justifie.
+    #[test]
+    fn sensibilite_du_front_au_seuil_de_sechage() {
+        let g = G as f64;
+        let c0 = (g * 1.0f64).sqrt();
+        let t = 2.0f64;
+        let refer = t * (2.0 * c0 - 3.0 * (g * 1.0e-3f64).sqrt());
+        for h_sec in [1.0e-9f32, 1.0e-7, 1.0e-6, 1.0e-4, 1.0e-3] {
+            let mut d = solveur(Bassin::c04()).avec_h_sec(h_sec);
+            d.avancer_equilibre(t);
+            let mesure = d.front(1.0e-3).unwrap_or(f32::NAN) as f64;
+            println!(
+                "h_sec={h_sec:<10} front={mesure:8.4} / {refer:7.4} = {:6.2} %   volume={:.6}",
+                (mesure - refer) / refer * 100.0,
+                d.volume()
+            );
         }
     }
 
