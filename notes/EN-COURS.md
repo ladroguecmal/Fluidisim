@@ -91,9 +91,9 @@ rares, et les cas rares sont ceux qu'on teste le moins.
       ce soit — une paroi qui glisse sans rien déplacer ne teste rien.
 - [x] **P3** — les **deux** définitions d'`u_max`, dans le **même** code, et le compteur de
       violations qui en dérive. ADR-035 §3 l'exige : les découpler recrée le défaut qu'on mesure.
-- [ ] **P4** — **C23** : balayer `u_p`, mesurer `C_relatif / C_absolu`, et le Courant réellement
+- [x] **P4** — **C23** : balayer `u_p`, mesurer `C_relatif / C_absolu`, et le Courant réellement
       réalisé sous chaque borne.
-- [ ] **P5** — vérifier que la borne **analytique en amont** tient sa promesse : aucun pas ne
+- [x] **P5** — vérifier que la borne **analytique en amont** tient sa promesse : aucun pas ne
       dépasse le `ν` visé. C'est la propriété que la borne mesurée après coup ne peut pas offrir.
 - [ ] **P6** — **C23** au corpus `CAS-CANONIQUES`, et ADR-036 si la mesure change une décision.
 - [ ] **P7** — répercussions : index, angles morts, actions, décomptes, `ν` si débloqué.
@@ -114,3 +114,59 @@ rares, et les cas rares sont ceux qu'on teste le moins.
 ses **conclusions** ne nous engagent pas.
 
 **Branche.** `claude/s22-suite`. `master` s'arrête à S17 (A107).
+
+#### P4-P5 — la définition tient, la borne tient, et le solveur ne casse pas
+
+**Mesuré**, eau au repos, `h = 2 m`, `c = 4,43 m/s`, `ν = 0,45` :
+
+| `u_paroi` | `u_max` absolue | `u_max` gouvernante | rapport | **C sous borne absolue** | **C sous borne gouvernante** |
+|---|---|---|---|---|---|
+| 0,5 | 4,429 | 4,929 | 1,113 | 0,501 | **0,450** |
+| 1,0 | 4,429 | 5,429 | 1,226 | 0,552 | **0,450** |
+| 2,0 | 4,429 | 6,429 | 1,452 | 0,653 | **0,450** |
+| 5,0 | 4,429 | 9,429 | 2,129 | 0,958 | **0,450** |
+| 10,0 | 4,429 | 14,429 | **3,258** | **1,466** | **0,450** |
+| 20,0 | 4,429 | 24,429 | **5,515** | **2,482** | **0,450** |
+
+**Trois constats, et le troisième corrige la thèse.**
+
+1. **La borne gouvernante tient exactement sa promesse.** `C = 0,450` à toutes les vitesses de
+   paroi, de 0,5 à 20 m/s — le `ν` visé, au millième. C'est ce qu'une borne **analytique en amont**
+   achète, et qu'une borne mesurée après coup ne peut pas offrir. La définition d'ADR-035 §2 est
+   **vérifiée**, et non plus seulement posée.
+2. **La borne absolue sous-estime `u_max` jusqu'à ×5,5**, et le Courant réellement réalisé franchit
+   1 entre `u_p = 5` et `u_p = 10` m/s. Le seuil analytique est `u_p = c·(1/ν − 1)` :
+
+   | `ν` | vitesse de paroi qui fait franchir 1 | équivalent en chute libre |
+   |---|---|---|
+   | 0,45 | **5,41 m/s** | 1,49 m |
+   | 0,70 | **1,90 m/s** | 0,18 m |
+   | 0,90 | **0,49 m/s** | 1,2 cm |
+
+3. **Mais le solveur ne casse pas** — même à `C = 2,48`. La thèse annonçait un défaut « dominant
+   dès que `u_paroi` dépasse la célérité » ; il est bien **présent** et **chiffré**, il n'est pas
+   **destructeur** sur ce montage. Rusanov reste diffusif, et la diffusion absorbe le dépassement.
+
+> **Ce qui est perdu n'est donc pas la simulation, c'est la *garantie*.** Un solveur qui tourne
+> au-delà de sa condition de stabilité n'a plus de raison démontrée de rester borné : il tient
+> jusqu'à ce qu'il ne tienne plus, sur un cas que rien n'a testé. C'est exactement la forme du
+> défaut mesuré par le projet extérieur — **zéro violation déclarée**, et un contrôle vert.
+
+### Ce que la troisième ligne du tableau des seuils change
+
+**Monter `ν` réduit brutalement la vitesse de paroi admissible sous la mauvaise définition** :
+5,41 m/s à `ν = 0,45`, mais **1,90 m/s à 0,70** et 0,49 m/s à 0,90. Autrement dit, plus on serre le
+pas de temps pour gagner en portée d'onde, plus le trou d'`u_max` devient facile à toucher.
+
+**Avec la définition corrigée, la question disparaît** : la borne s'ajuste d'elle-même. Le prix est
+visible et légitime — à `u_p = 10 m/s`, le pas de temps est divisé par **3,26**. Un objet rapide
+dans l'eau coûte donc trois fois plus de pas, et c'est le régime de **C20, l'impact d'entrée dans
+l'eau**.
+
+### Le véhicule garde `ν = 0,45`, et ce n'est pas une hésitation
+
+La condition posée par ADR-035 §4.1 est remplie : `ν = 0,70` est **débloqué pour le solveur du
+projet**. Mais la constante du **véhicule d'essai** reste à 0,45, parce que le véhicule sert à
+mesurer : changer son `ν` déplacerait toutes les références publiées — demi-vies de C03, front de
+C04, ordres de C08 — sans qu'aucune mesure y gagne. La valeur est une **décision de conception**,
+pas un réglage d'instrument.

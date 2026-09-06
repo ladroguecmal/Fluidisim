@@ -271,6 +271,31 @@ fn executer_physics_solveur() -> usize {
         }
     }
 
+    // C23 — la définition d'`u_max`, exercée par une paroi mobile.
+    println!("
+--- C23 — nombre de Courant en présence d'une paroi mobile (couche δ) ---");
+    println!("  eau au repos, h = 2 m, c = 4,43 m/s, ν = 0,45");
+    println!("   u_paroi   u_max abs   u_max gouv   rapport   C sous borne absolue   C sous borne gouvernante   verdict");
+    for l in physics::c23_courant_paroi_mobile(&mut host, &[0.5, 1.0, 2.0, 5.0, 10.0, 20.0], 1.0) {
+        let rapport = l.u_max_gouvernante / l.u_max_absolue;
+        let verdict = match (l.diverge_sous_borne_absolue, l.diverge_sous_borne_gouvernante) {
+            (true, false) => "la borne absolue CASSE, la gouvernante tient",
+            (true, true) => "les deux cassent",
+            (false, false) if l.courant_realise > 1.0 => "C > 1 non détecté par la borne absolue",
+            (false, false) => "les deux tiennent",
+            (false, true) => "ANOMALIE : la gouvernante casse et pas l'absolue",
+        };
+        println!(
+            "  {:>7.1}   {:>9.3}   {:>10.3}   {:>7.3}   {:>20.3}   {:>24.3}   {verdict}",
+            l.u_paroi,
+            l.u_max_absolue,
+            l.u_max_gouvernante,
+            rapport,
+            l.courant_realise,
+            l.courant_sous_gouvernante
+        );
+    }
+
     // C03 — la dissipation en fonction de la résolution. C'est la loi, pas le point, qui dit ce
     // que coûte un domaine.
     println!("

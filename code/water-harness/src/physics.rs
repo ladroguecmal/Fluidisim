@@ -1741,3 +1741,119 @@ pub fn stabilite_par_courant(
     }
     sortie
 }
+
+// ---------------------------------------------------------------------------------------------
+// C23 — le nombre de Courant en présence d'une paroi mobile
+// ---------------------------------------------------------------------------------------------
+
+/// Une ligne de C23 : ce que chaque définition d'`u_max` donne pour une vitesse de paroi.
+pub struct LigneC23 {
+    pub u_paroi: f64,
+    pub u_max_absolue: f64,
+    pub u_max_gouvernante: f64,
+    /// Le nombre de Courant **réellement réalisé** quand le pas est borné par la définition
+    /// absolue — c'est-à-dire par le mutant.
+    pub courant_realise: f64,
+    /// Le Courant réalisé quand le pas est borné par la définition **gouvernante**. C'est la
+    /// promesse de la borne : il ne doit jamais dépasser `ν`.
+    pub courant_sous_gouvernante: f64,
+    /// L'exécution sous borne absolue a-t-elle produit un état non fini ou divergent ?
+    pub diverge_sous_borne_absolue: bool,
+    /// Et sous la borne gouvernante ?
+    pub diverge_sous_borne_gouvernante: bool,
+}
+
+/// C23 — `CAS-CANONIQUES` §C23. Vérifie la définition d'`u_max` posée par ADR-035 §2.
+///
+/// # Ce que le cas établit
+///
+/// ADR-035 §2 **pose** que `u_max` est la vitesse gouvernante — relative à la paroi sur une face
+/// coupée. La définition n'avait jamais été exercée : le véhicule δ n'avait pas de solide, et la
+/// valeur de `ν` restait bloquée à 0,45 en conséquence.
+///
+/// Le montage : eau **au repos**, `h = 2 m`, paroi mobile au bord gauche à `u_p`. La célérité vaut
+/// `√(g·h) = 4,43 m/s`, et c'est elle qui domine la borne absolue tant que la paroi est lente.
+///
+/// ```text
+/// u_max absolue      = |u_fluide| + c              = c            (eau au repos)
+/// u_max gouvernante  = |u_fluide − u_paroi| + c    = u_p + c
+/// ```
+///
+/// Le Courant réellement réalisé sous la borne absolue vaut donc `ν·(u_p + c)/c`, et il **franchit
+/// 1** dès que `u_p > c·(1/ν − 1)` — soit **5,41 m/s à `ν = 0,45`**, la vitesse d'un objet tombé de
+/// **1,5 m**.
+///
+/// # Pourquoi le cas exécute en plus de calculer
+///
+/// Une prédiction analytique dit qu'une borne est fausse ; elle ne dit pas que le solveur casse.
+/// Les deux bornes sont donc **réellement employées**, et le cas rapporte ce que chacune produit.
+pub fn c23_courant_paroi_mobile(
+    host: &mut water_core::HostServices,
+    vitesses: &[f32],
+    duree_s: f64,
+) -> Vec<LigneC23> {
+    use water_core::{Bassin, Definition, Delta1D, EtatInitial, ParoiMobile};
+
+    let montage = Bassin {
+        nx: 200,
+        longueur_m: 20.0,
+        origine_m: 0.0,
+        profondeur_gauche_m: 2.0,
+        pente: 0.0,
+        eta0_m: 0.0,
+        etat_initial: EtatInitial::Repos,
+    };
+
+    let mut sortie = Vec::new();
+    for &u_p in vitesses {
+        let mut mesure = |def: Definition| -> (f64, f64, bool) {
+            let mut d = match Delta1D::configure(host, montage) {
+                Ok(d) => d.avec_paroi(ParoiMobile { u_m_s: u_p }),
+                Err(_) => return (f64::NAN, f64::NAN, true),
+            };
+            let (u_max_initial, _) = d.u_max(def);
+            let mut courant_max = 0.0f64;
+            let mut t = 0.0f64;
+            let mut casse = false;
+            while t < duree_s {
+                // **La borne est prise selon `def`** — c'est le mutant quand `def` est `Absolue`.
+                let mut dt = d.dt_cfl_selon(def);
+                if !dt.is_finite() || dt <= 0.0 {
+                    casse = true;
+                    break;
+                }
+                let reste = (duree_s - t) as f32;
+                if dt > reste {
+                    dt = reste;
+                }
+                // Le compteur, lui, mesure toujours la **vérité** : la vitesse gouvernante.
+                let c = d.courant_realise(dt, Definition::Gouvernante) as f64;
+                if c > courant_max {
+                    courant_max = c;
+                }
+                d.pas_equilibre(dt);
+                t += dt as f64;
+            }
+            for i in 0..d.nx() {
+                if !d.h(i).is_finite() || d.h(i) > 100.0 {
+                    casse = true;
+                }
+            }
+            (u_max_initial as f64, courant_max, casse)
+        };
+
+        let (u_abs, courant_sous_abs, casse_abs) = mesure(Definition::Absolue);
+        let (u_gouv, courant_sous_gouv, casse_gouv) = mesure(Definition::Gouvernante);
+
+        sortie.push(LigneC23 {
+            u_paroi: u_p as f64,
+            u_max_absolue: u_abs,
+            u_max_gouvernante: u_gouv,
+            courant_realise: courant_sous_abs,
+            courant_sous_gouvernante: courant_sous_gouv,
+            diverge_sous_borne_absolue: casse_abs,
+            diverge_sous_borne_gouvernante: casse_gouv,
+        });
+    }
+    sortie
+}
