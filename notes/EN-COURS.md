@@ -107,7 +107,7 @@ indiscernables tant que personne ne compte** (A146).
 - [x] **P2** — **recensement écrit** des saturations des deux solveurs : où elles sont, ce qu'elles
       empêchent, **ce qu'elles détruisent**. Distinguer l'initialisation, la protection de racine,
       la reconstruction hydrostatique et la vraie saturation d'état.
-- [ ] **P3** — instrumenter `delta.rs` : **compteur de déclenchements** et **masse créée cumulée**.
+- [x] **P3** — instrumenter `delta.rs` : **compteur de déclenchements** et **masse créée cumulée**.
       Sans allocation (**I-06**), sans changer un seul résultat — **hashs de conformité vérifiés**.
 - [ ] **P4** — instrumenter `shallow.rs` de même.
 - [ ] **P5** — **mesurer sur C01, C03 et C04**, et classer chaque saturation : *filet* · *maquillage*

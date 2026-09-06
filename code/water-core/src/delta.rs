@@ -321,6 +321,36 @@ pub struct Delta1D {
     /// système — celle-ci est un entier de microsecondes (I-08).
     t_s: f64,
     pas: u64,
+    /// **Compteurs de saturation** — S38, action S34-1, angle mort A146.
+    ///
+    /// Une saturation ne refuse rien et ne rend la main à personne : elle remplace un état
+    /// impossible et le calcul continue. *Une saturation rare est un filet ; une saturation
+    /// fréquente est un solveur qu'on maquille*, et les deux étaient indiscernables tant que
+    /// personne ne comptait.
+    ///
+    /// Ces quatre champs ne participent à aucun calcul : les retirer ne changerait pas un bit de
+    /// résultat. I-06 est tenu — ce sont des scalaires, aucune allocation.
+    sat: Saturations,
+}
+
+/// Ce que les saturations du solveur ont fait, depuis la configuration.
+#[derive(Clone, Copy, Debug, Default)]
+pub struct Saturations {
+    /// **S7** — nombre de cellules remises à `h = 0` parce que le pas les avait rendues négatives.
+    pub etat: u64,
+    /// **S7** — masse **créée** par ces remises à zéro, cumulée, en m² (aire d'une tranche de
+    /// canal d'épaisseur unité). C'est la grandeur qui manquait : *combien de fois* ne dit pas
+    /// *combien*.
+    pub masse_creee: f64,
+    /// **S7** — quantité de mouvement **détruite** par la remise à zéro de `hu`, en valeur absolue
+    /// cumulée. Elle n'est transférée nulle part.
+    pub qdm_detruite: f64,
+    /// **S5** — cellules fantômes ramenées à `h = 0` par la condition de bord sur fond montant.
+    pub bord: u64,
+    /// **Témoin de S6** — cellules trouvées à `h < 0` **à l'entrée** d'un pas, là où la protection
+    /// de racine `(g·h)⁺` mordrait. Doit rester à zéro : S7 a agi à la fin du pas précédent. Un
+    /// compteur non nul dirait que la protection de racine n'est **pas** morte, et qu'elle masque.
+    pub h_negatif_en_entree: u64,
 }
 
 /// Ce qu'une interface reconstruite rend au schéma équilibré.
@@ -429,6 +459,7 @@ impl Delta1D {
             eta0: bassin.eta0_m,
             t_s: 0.0,
             pas: 0,
+            sat: Saturations::default(),
         })
     }
 
@@ -493,6 +524,10 @@ impl Delta1D {
     }
     pub fn dx(&self) -> f32 {
         self.dx
+    }
+    /// Ce que les saturations ont fait depuis la configuration — S38, A146.
+    pub fn saturations(&self) -> Saturations {
+        self.sat
     }
     pub fn pas_effectues(&self) -> u64 {
         self.pas
@@ -693,7 +728,19 @@ impl Delta1D {
     /// donnent un solveur non équilibré** — la propriété ne se découpe pas.
     fn bords(&mut self) {
         let n = self.nx;
-        self.h[0] = (self.h[1] + self.b[1] - self.b[0]).max(0.0);
+        // S38, témoin de la protection de racine (S6) : si une cellule interne arrivait ici à
+        // `h < 0`, le `(g·h)⁺` des flux mordrait. Il ne le doit jamais — S7 a saturé à la fin du
+        // pas précédent. Ce compteur est la seule façon de le savoir plutôt que de l'espérer.
+        for i in 1..=n {
+            if self.h[i] < 0.0 {
+                self.sat.h_negatif_en_entree += 1;
+            }
+        }
+        let h0_brut = self.h[1] + self.b[1] - self.b[0];
+        if h0_brut < 0.0 {
+            self.sat.bord += 1;
+        }
+        self.h[0] = h0_brut.max(0.0);
         // Paroi **mobile** : la condition d'imperméabilité impose que la vitesse normale du fluide
         // égale celle de la paroi *à la paroi*. Le miroir de vitesse devient donc
         // `u_fantôme = 2·u_paroi − u_interne`, qui redonne `−u_interne` quand la paroi est fixe.
@@ -707,7 +754,11 @@ impl Delta1D {
             0.0
         };
         self.hu[0] = self.h[0] * (2.0 * u_p - u1);
-        self.h[n + 1] = (self.h[n] + self.b[n] - self.b[n + 1]).max(0.0);
+        let hn_brut = self.h[n] + self.b[n] - self.b[n + 1];
+        if hn_brut < 0.0 {
+            self.sat.bord += 1;
+        }
+        self.h[n + 1] = hn_brut.max(0.0);
         self.hu[n + 1] = -self.hu[n];
     }
 
@@ -732,6 +783,12 @@ impl Delta1D {
             self.h_suiv[i] = self.h[i] - lambda * (f[0] - f_prec[0]);
             self.hu_suiv[i] = self.hu[i] - lambda * (f[1] - f_prec[1]) + dt * s_hu;
             if self.h_suiv[i] < 0.0 {
+                // S38 : ce qui est effacé ici est compté avant de l'être. `h` remonte à zéro,
+                // donc de la masse **apparaît** ; `hu` tombe à zéro, donc de la quantité de
+                // mouvement **disparaît** sans être transférée.
+                self.sat.etat += 1;
+                self.sat.masse_creee += -(self.h_suiv[i] as f64) * self.dx as f64;
+                self.sat.qdm_detruite += (self.hu_suiv[i] as f64).abs() * self.dx as f64;
                 self.h_suiv[i] = 0.0;
                 self.hu_suiv[i] = 0.0;
             }
@@ -815,6 +872,12 @@ impl Delta1D {
             self.h_suiv[i] = self.h[i] - lambda * (cour.flux[0] - prec.flux[0]);
             self.hu_suiv[i] = self.hu[i] - lambda * (qm_droite - qm_gauche);
             if self.h_suiv[i] < 0.0 {
+                // S38 : ce qui est effacé ici est compté avant de l'être. `h` remonte à zéro,
+                // donc de la masse **apparaît** ; `hu` tombe à zéro, donc de la quantité de
+                // mouvement **disparaît** sans être transférée.
+                self.sat.etat += 1;
+                self.sat.masse_creee += -(self.h_suiv[i] as f64) * self.dx as f64;
+                self.sat.qdm_detruite += (self.hu_suiv[i] as f64).abs() * self.dx as f64;
                 self.h_suiv[i] = 0.0;
                 self.hu_suiv[i] = 0.0;
             }

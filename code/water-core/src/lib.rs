@@ -36,7 +36,7 @@ pub mod types;
 
 pub use background::{Background, Component, SeaState};
 pub use body::{FloatingBox, RHO_EAU};
-pub use delta::{Bassin, Definition, Delta1D, EtatInitial, ParoiMobile};
+pub use delta::{Bassin, Definition, Delta1D, EtatInitial, ParoiMobile, Saturations};
 pub use hash::Hasher64;
 pub use host::{AllocError, AllocStats, Allocator, HostServices, JobSystem, Sink};
 pub use phase::PhaseQ32;
