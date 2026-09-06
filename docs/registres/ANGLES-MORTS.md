@@ -203,6 +203,7 @@ ce que les sources avaient omis.
 | **A159** | Une formule énoncée avec ses constantes n'invite pas à être recalculée | **1** | ADR-042 §2 |
 | **A160** | Un coefficient d'amortissement n'a de sens que tant que `σ·dt < 1` | 2 | ADR-042 §4.1 |
 | **A161** | Trois fonctions distinctes partagent le mot « éponge », et un résultat sur l'une se lit comme un résultat sur les autres | 2 | ADR-043 §5 |
+| **A162** | Corriger la référence d'une mesure périme en silence tous les chiffres qui en dérivent | 2 | ADR-040, note S36 |
 
 Cent huit angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -1017,6 +1018,16 @@ pendant quatre sessions.
   dissipation rend le **masque** inutile pour les phénomènes entretenus, ce qui se lirait sans
   effort comme « un domaine peut se passer d'**absorbeur** » — conclusion fausse que rien dans le
   vocabulaire n'empêche. ADR-043 D2 impose de nommer les fonctions séparément.
+
+- **A162** — **Corriger la référence d'une mesure périme en silence tous les chiffres qui en
+  dérivent.** En B-S25, la référence de l'erreur `L¹` de Ritter est passée du point à la moyenne de
+  cellule — une correction juste, faite pour C04. Elle alimentait aussi le `p` de C08, publié une
+  session plus tôt à **1,003** ; il vaut désormais **0,9997**, et rien ne l'a signalé. **Le cas
+  continuait de passer**, ce qui est exactement ce qui rend l'écart invisible : une assertion à
+  minorant (`p > 0,8`) ne bronche pas pour trois millièmes. Le défaut est de la même famille que
+  les décomptes recopiés de S07 et S10, sur un objet qu'on croyait à l'abri : **une mesure**.
+  *Toute correction d'une référence, d'un seuil ou d'une norme oblige à rejouer les chiffres
+  publiés qui en dépendent, ou à les marquer périmés le jour même.*
 
 ---
 

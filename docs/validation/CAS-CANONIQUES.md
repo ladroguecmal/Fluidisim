@@ -57,16 +57,41 @@ a été écrite le même jour dans une histoire parallèle du dépôt : **`shall
 > qui réussit, et c'est le **même seuil** qui sépare les deux. Ce que ni l'une ni l'autre n'aurait pu
 > établir seule : *le passage à l'ordre deux suffit*, sans changer de famille de schéma.
 
-> **Deux réserves, et elles sont sérieuses.**
+> **~~Deux réserves, et elles sont sérieuses.~~**
 >
-> 1. **Rien n'a été réexécuté.** Les verdicts de la colonne de droite sont **cités depuis les
->    documents de la lignée B**, pas reproduits dans cet arbre : `shallow.rs` n'y est pas encore, et
->    son import est un travail de code (ADR-043 §7.1). Tant qu'il n'est pas fait, cette colonne est
->    un témoignage, pas une mesure.
+> 1. ~~**Rien n'a été réexécuté.**~~ **Levée en S36.** Les six montages de la lignée B sont dans
+>    l'arbre (`physics_shallow.rs`), branchés au mode `physics`, et couverts par treize tests. **La
+>    colonne de droite est désormais une mesure**, et son coût est rapporté : 12,5 s des 31 s du
+>    mode `physics`, pour un budget de 60 s.
+>
+>    **La confrontation a tenu sur trois chiffres publiés et en a périmé un** — voir le tableau
+>    ci-dessous.
 > 2. **Les verdicts « verts » de la colonne de droite ont chacun une condition de mesure révisée**
 >    — le seuil de C04, les 250 mailles/λ de C03. Une révision de seuil qui fait passer un cas au
 >    vert demande à être relue pour elle-même : c'est précisément l'objet d'`ADR-041`, *le dernier
 >    cas rouge était rouge à cause de sa mesure*, et cet ADR n'a pas été relu par cette lignée.
+
+
+### Ce que la réexécution a donné *(S36)*
+
+Quatre grandeurs publiées par la lignée B, rejouées dans cet arbre :
+
+| grandeur | document | publié | mesuré en S36 | verdict |
+|---|---|---|---|---|
+| C01, `max\|u\|` du schéma naïf | `ADR-038` §2 | 19,5 mm/s | **19,5083 mm/s** | reproduit |
+| C04, écart sur le front | `ADR-041` | 0,74 % | **0,7365 %** | reproduit |
+| C03, quatre demi-vies | `ADR-040` §5 | 6,01 · 44,36 · 43,12 · 161,14 | **identiques** | reproduit à **0,00 %** |
+| C08, ordre de convergence | `ADR-040` §3 | `p` = 1,003 | **0,9997** | **périmé** |
+
+**Le seul écart n'est pas une divergence entre les deux arbres.** En B-S25, la référence de
+l'erreur `L¹` est passée du point à la **moyenne de cellule** — correction juste, faite pour C04 —
+et elle alimentait le `p` de C08 publié une session plus tôt. Avec l'ancienne référence, le code
+rend **1,0030**. Voir la note S36 d'`ADR-040` et l'angle mort **A162**.
+
+> **L'oracle croisé a servi dès son premier usage, et pas comme prévu.** `ADR-043` §3 l'annonçait
+> comme un détecteur de **fautes d'implémentation**. Il n'en a trouvé aucune — les deux
+> implémentations concordent — mais rejouer des chiffres publiés a trouvé un **chiffre périmé**,
+> que ni les tests ni les assertions ne pouvaient signaler puisque **le cas continuait de passer**.
 
 ---
 

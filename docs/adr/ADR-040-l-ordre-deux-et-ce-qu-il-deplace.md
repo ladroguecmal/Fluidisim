@@ -193,3 +193,44 @@ classement fondé sur un seul point d'une solution n'est pas un classement.
 2. **La 2D**, dont dépend l'extrapolation du §5 et que C06 ne peut pas exercer en 1D.
 3. **Le limiteur** : minmod par défaut, jamais comparé à superbee ni van Leer.
 4. **`ρ_eau`** attend toujours (A103, depuis S21).
+
+---
+
+## Note corrective — S36 : le tableau du §3 est périmé par une correction de B-S25
+
+**Le §5 se reproduit exactement ; le §3 ne se reproduit plus.** Les deux ont été rejoués en S36 dans
+l'arbre de la lignée d'accueil, après l'import des montages
+(`code/water-harness/src/physics_shallow.rs`).
+
+**Le §5 — les demi-vies de seiche — tient au centième** :
+
+| mailles/λ | schéma | publié | mesuré en S36 | écart |
+|---|---|---|---|---|
+| 100 | ordre 1 | 6,01 | **6,01** | 0,00 % |
+| 100 | MUSCL + RK2 | 44,36 | **44,36** | 0,00 % |
+| 800 | ordre 1 | 43,12 | **43,12** | 0,00 % |
+| 800 | MUSCL + RK2 | 161,14 | **161,14** | 0,00 % |
+
+**Le §3 — `p` = 1,003 — rend désormais `p` = 0,9997.** Ce n'est ni une divergence entre les deux
+arbres ni une erreur de ce document : **c'est une correction postérieure, faite pour un autre cas, et
+que personne n'a répercutée ici.** En **B-S25**, la référence de l'erreur `L¹` est passée de la valeur
+de Ritter **au centre de cellule** à sa **moyenne sur la cellule** (`ritter_h_moyenne`). La
+correction est juste — un schéma de volumes finis porte des moyennes, et les confronter à une valeur
+ponctuelle ajoute une erreur d'ordre un qui n'est pas celle du schéma — mais elle déplace le `p`
+qu'elle alimente.
+
+La démonstration est un test, `c08_l_ecart_au_p_publie_vient_du_changement_de_reference`, qui rejoue
+les deux références côte à côte :
+
+```
+C08-p — publié 1,003 | référence ponctuelle (≤ B-S25) : 1,0030 | moyenne de cellule (≥ B-S25) : 0,9997
+```
+
+**L'ancienne référence retrouve 1,0030 à la quatrième décimale.** Le chiffre de ce §3 était donc
+juste au moment où il a été écrit ; il ne décrit plus le code depuis une session.
+
+> **La conclusion du §3 n'est pas touchée.** `p = 0,9997` contre `p > 0,8` : **C08 passe toujours**,
+> et les deux estimateurs restent à 0,0015 l'un de l'autre. Ce qui est périmé est le **chiffre**,
+> pas la décision. C'est précisément ce qui rend ce genre d'écart difficile à voir : rien ne casse.
+
+Angle mort **A162**.

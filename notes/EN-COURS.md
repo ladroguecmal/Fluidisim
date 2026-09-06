@@ -105,7 +105,7 @@ montage, soit une divergence entre les deux arbres que personne n'a vue.
 - [x] **P6** — **C05** (absorption) — le seul des six que cette lignée n'a **jamais** exécuté.
 - [x] **P7** — branchement dans `main.rs`, et le **double format d'écart** absolu / relatif
       (**A149**, action S35-2) — qui vaut pour les deux jeux de montages.
-- [ ] **P8** — **confronter les quatre chiffres** à ce qui est publié, et écrire le verdict.
+- [x] **P8** — **confronter les quatre chiffres** à ce qui est publié, et écrire le verdict.
 - [ ] **P9** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
