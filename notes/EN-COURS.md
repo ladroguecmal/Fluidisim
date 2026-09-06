@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S33
-État             : en cours
+État             : terminée
 Battement        : 2026-09-06
 Objectif         : Mesurer un phénomène entretenu — la conclusion la moins étayée
 ```
@@ -103,7 +103,7 @@ garantit, et c'est précisément ce qu'A142 reproche à la dérivation.
 - [x] **P5** — ce que le résultat fait à ADR-037 §2.1 : confirmation, correction, ou réfutation.
 - [x] **P6** — note datée dans ADR-037, ou ADR-038 si la conclusion change.
 - [x] **P7** — répercussions : index, angles morts, actions, décomptes.
-- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
+- [x] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
@@ -170,3 +170,24 @@ réécrit pas, et il n'y avait pas de décision nouvelle à prendre.
 L'amplitude du batteur vaut 0,05 m/s, donc `a/h ≪ 1 %` — la mesure valide la dérivation là où elle
 était supposée valide (A127), et ne dit **rien** du régime non linéaire. Écrire « A142 levé » sans
 cette réserve rendrait la note plus forte que la mesure.
+
+#### État à la fin de S33
+
+`cargo test` : **34 tests**. `water-harness check` : 2 scénarios, 0 échec, hashs **inchangés**.
+`water-harness physics` : 1 échec (C04, voulu), 3 témoins, 5 grandeurs sans verdict (C08). Jeton
+**libéré**.
+
+**Ce que S34 doit savoir avant de commencer, et qui n'est pas ailleurs :**
+
+- **A144 est la trouvaille à exploiter** : un garde-fou peut porter sur la bonne idée et la mauvaise
+  condition, et il est alors **plus dangereux qu'aucun garde-fou** — on lui fait confiance. S29 a
+  audité les *assertions* ; les **contrôles de validité de montage** n'ont jamais été audités, et il
+  en existe maintenant plusieurs (fenêtre de mesure, plancher d'arrondi, filtre de contamination
+  d'oracle, bornes de `avec_cfl`, seuil de front). C'est la session recommandée.
+- **Le test d'un garde-fou est le cas qu'il doit *refuser***, jamais le cas nominal. Un garde-fou
+  qu'on n'a jamais vu déclencher n'a pas été testé.
+- **Publier un `R²` avec chaque régression** : c'est lui qui a rattrapé le défaut de S33, sans avoir
+  été écrit pour ça (S33-3).
+- **A142 est levé dans le régime linéaire seulement.** Ne pas citer « la décroissance spatiale est
+  vérifiée » sans la réserve — `a/h ≪ 1 %`, et A127 dit que la loi est fausse à 5 %.
+- **C04 en échec, `C01-jet` rouge, C08 sans verdict** : trois décisions, pas trois régressions.

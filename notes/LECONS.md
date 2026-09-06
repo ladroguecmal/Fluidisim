@@ -1714,3 +1714,73 @@ cellules ».
 **Réflexe** : dans un rapport qui contient une mauvaise et une bonne nouvelle, vérifier **l'étai de
 la bonne** avant de publier. Et l'écrire : si elle est dérivée et non mesurée, le dire à l'endroit
 même où elle rassure.
+
+## L114 — Écrire qu'une conclusion est dérivée est ce qui la fera vérifier
+
+*(S33)* Une session a produit une conclusion rassurante — un mécanisme indésirable produisait en fait
+une propriété exigée par la conception — et l'a écrite en signalant qu'elle était **dérivée, jamais
+mesurée**. La session suivante l'a mesurée : elle tient, à 0,3 % près, avec un `R²` de 1,0000.
+
+**Sans cette mention, personne ne serait allé vérifier.** La conclusion rassurait, elle était
+cohérente, elle occupait la même place typographique qu'un résultat — rien ne la distinguait d'un
+fait, et c'est exactement ce qui la rendait dangereuse.
+
+Le geste ne coûte rien : une phrase, à l'endroit même où la conclusion apparaît. Il ne s'agit pas de
+se dédire par avance, mais de **rendre visible le statut** de ce qu'on affirme — dérivé, mesuré,
+estimé, supposé.
+
+**Réflexe** : dans tout document qui mêle mesures et déductions, marquer chaque conclusion par son
+statut, à l'endroit où elle est énoncée et non dans une section « limites » qu'on ne lira pas. Une
+conclusion dérivée qui se sait dérivée finit mesurée ; les autres finissent citées.
+
+## L115 — Un garde-fou peut porter sur la bonne idée et la mauvaise condition
+
+*(S33)* Une mesure exigeait qu'aucune réflexion ne pollue la fenêtre d'observation, et le contrôle
+écrit pour cela vérifiait qu'on mesurait **derrière le front de l'onde**. C'est la bonne idée : la
+fenêtre doit être dans la zone atteinte. Mais la condition manquait l'essentiel — elle ne vérifiait
+pas que le front **n'avait jamais atteint le mur du fond**. L'onde était revenue ; le contrôle
+déclarait la fenêtre saine.
+
+Le défaut est plus dangereux qu'une absence de contrôle : **on fait confiance à ce qui existe**. Un
+montage sans garde-fou est examiné à chaque usage ; un montage qui en a un ne l'est plus.
+
+Et il est invisible par construction : une condition fausse ne se manifeste que **le jour où elle
+est franchie**, c'est-à-dire dans un régime qu'on n'avait pas prévu — donc jamais pendant l'écriture.
+
+**Réflexe** : pour tout garde-fou, écrire **le cas qu'il doit refuser**, et vérifier qu'il le refuse.
+Pas le cas nominal, qu'il accepte de toute façon. Un garde-fou qu'on n'a jamais vu déclencher n'a
+pas été testé.
+
+## L116 — Une sonde générique voit des défauts qu'aucun contrôle spécifique n'attend
+
+*(S33)* Le contrôle dédié n'a pas vu la réflexion. Ce qui l'a vue est le **coefficient de
+détermination** de l'ajustement — tombé à 0,487 là où les cas sains donnaient 0,999. Il n'était pas
+là pour ça : il était là pour dire si la décroissance est bien exponentielle.
+
+C'est précisément ce qui fait sa valeur. Un contrôle spécifique répond à une question qu'on a su
+poser ; une **sonde générique** — un `R²`, un résidu, un bilan de conservation — répond à la
+question *« la forme que je suppose est-elle celle que j'observe ? »*, et cette question attrape tout
+ce qui casse la forme, **y compris ce qu'on n'avait pas imaginé**.
+
+**Réflexe** : accompagner toute régression d'un indicateur d'ajustement **publié**, même quand la
+forme n'est pas en doute — surtout quand elle ne l'est pas. Trois lignes de code, et une sonde qui
+travaille pour des défauts futurs. De même : un bilan de masse à côté d'une mesure de vitesse, un
+résidu à côté d'un ajustement.
+
+## L117 — Un écart qui change de signe n'est pas un biais
+
+*(S33)* Quatre mesures comparées à une prédiction donnaient +5,9 %, +2,7 %, −0,3 %, −2,4 %. La
+tentation est de lire « environ 3 % d'erreur » et de passer.
+
+Le **signe** dit davantage que la taille. Un écart systématiquement de même signe est un **biais** —
+un terme manquant, une constante fausse, un instrument décalé. Un écart qui **change de signe de
+façon monotone avec un paramètre** est la signature d'un terme d'ordre supérieur négligé : la
+prédiction est correcte au premier ordre, et l'écart résiduel suit le paramètre.
+
+Le diagnostic est différent, et l'action aussi : un biais se corrige, un terme d'ordre supérieur se
+borne. Ici il fixait le domaine de validité de la loi plutôt que de la mettre en doute.
+
+**Réflexe** : devant une série d'écarts, regarder d'abord **la suite des signes**, puis la
+progression. C'est le complément de L88, qui disait qu'un biais variant à l'envers de la théorie
+désigne l'instrument ; ici, un biais qui change de signe désigne un terme négligé — et l'un comme
+l'autre se lisent dans la **structure** des écarts, jamais dans leur moyenne.

@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-06
-Session en cours : S33 — mesurer un phénomène entretenu, la conclusion la moins étayée
-Dernière session : S32 — 2026-09-06 — la réponse était dans ADR-001, pour la deuxième fois de suite
-Session suivante : S34 — C24 (S31-2) ou H2
+Session en cours : —
+Dernière session : S33 — 2026-09-06 — la conclusion la moins étayée devient la mieux mesurée
+Session suivante : S34 — relire les garde-fous du harnais (S33-2) *(recommandé)*, ou C24 (S31-2), ou H2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
@@ -105,7 +105,7 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Trente-deux sessions, **37 ADR** *(dont un acté)*, six spécifications, **neuf registres** — **et du
+Trente-trois sessions, **37 ADR** *(dont un acté)*, six spécifications, **neuf registres** — **et du
 code qui tourne** : `code/`, étages **H1 et H3** du harnais, un **δ d'essai** équilibré, 31 tests
 verts et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
 verdict** (C08). Quatre cas canoniques sur δ sont exécutés : **C01 et C03 passent**, C04 échoue,
@@ -168,6 +168,12 @@ pour les phénomènes **entretenus**, la dissipation **produit** la décroissanc
 exige — 25,6 m pour le proche-coque, dans la portée voulue ; pour les **transitoires**, elle les tue
 huit à vingt fois trop tôt. Le critère : `dx ≤ K·L^1,5/√(2h)` — **une éclaboussure d'un mètre demande
 3,2 cm**, sur un solveur 3D.
+
+**Et S33 a mesuré ce que S32 avait seulement dérivé.** La décroissance spatiale d'un phénomène
+**entretenu** est exponentielle pure — `R²` = **1,0000** — et suit `L½ = K·λ²/dx` sur un facteur 8,
+à **−0,3 %** au meilleur point. La dissipation numérique **produit** donc bien la décroissance
+qu'ADR-001 exige de δ, et il est inutile de l'imposer par une éponge. *Dans le régime linéaire
+seulement* : `a/h ≪ 1 %`, et A127 dit que la loi est fausse à 5 %.
 
 **Une urgence de format, la seule.** `WaveEvent` (SPEC-006 §3.1) est une structure **répliquée** qui
 porte trois champs demandés par l'équipe audio. Elle doit être arrêtée **avant** que le réseau ne

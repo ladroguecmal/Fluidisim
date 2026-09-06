@@ -2979,3 +2979,97 @@ est `1` exactement ; ou **H2**, non écrit après douze sessions où il est cit�
 Inchangés. **A103** — la masse volumique de l'eau, douce ou de mer. **A107** — le sort du travail
 propre à `master`, S16-S17. Et les trois choses hors de portée d'une session : nommer les personnes,
 constater l'état réel du projet, agir sur l'infrastructure — dont le dépôt distant.
+
+---
+
+## S33 — 2026-09-06 — La conclusion la moins étayée devient la mieux mesurée
+
+**Consigne reçue.** « Enchaîne S33 ».
+
+**Sorties.** Le **batteur oscillant** et la mesure de décroissance spatiale dans le harnais ; **note
+S33 datée** dans ADR-037 §2.1 ; registre porté à **145 angles morts** ; leçons L114 à L117 ; action
+**S32-2 close**, angle mort **A142 levé**.
+
+**Ça tourne.** `cargo test` : **34 tests** au vert. `water-harness check` : 0 échec, hashs inchangés.
+
+### Le résultat de la session tient en une phrase
+
+**La conclusion la plus rassurante du corpus récent, écrite en S32 comme *dérivée et jamais mesurée*,
+est devenue la mieux mesurée — `R²` = 1,0000.**
+
+| `λ` | `L½` mesurée | `L½` prédite par `K·λ²/dx` | écart | `R²` |
+|---|---|---|---|---|
+| 10 m | 27,03 m | 25,54 m | +5,9 % | 0,9990 |
+| 14 m | 51,40 m | 50,06 m | +2,7 % | 0,9990 |
+| 20 m | 101,81 m | 102,15 m | **−0,3 %** | **0,9999** |
+| 28 m | 195,34 m | 200,22 m | −2,4 % | **1,0000** |
+
+La décroissance spatiale d'un train **entretenu** est exponentielle pure, et sa longueur de
+demi-décroissance suit `L½ = K·λ²/dx` sur un facteur 8, de 25 à 200 m. **`c` disparaît** de la
+formule — troisième annulation du corpus, après celle de `λ`, `c` et `T` dans la loi de dissipation
+(S25) et celle de `g` dans le critère de transitoire (S32).
+
+**Ma thèse annonçait « `L½` sera plus courte que prédit ». Elle est fausse** : l'écart **change de
+signe** avec `λ`, ce qui est la signature des termes d'ordre supérieur en `k·dx`, non d'un biais.
+
+**A142 est levé — dans le régime linéaire**, et la note le dit à l'endroit où elle rassure :
+l'amplitude du batteur donne `a/h ≪ 1 %`, donc la mesure valide la dérivation **là où elle était
+supposée valide** (A127). Elle ne dit rien du régime non linéaire.
+
+### Ce qui a rendu la session possible
+
+Rien de particulier — **sinon d'avoir écrit en S32 que la conclusion était dérivée et non mesurée**.
+Sans cette phrase, personne ne serait allé la vérifier : elle rassurait, elle était cohérente, et
+elle occupait la même place typographique qu'un résultat.
+
+### Ce qui n'avait pas été anticipé
+
+**Le garde-fou d'atteignabilité était incomplet, et j'y suis retombé.** Le premier passage donnait,
+pour `λ = 20 m`, un `R²` de **0,487** là où les autres cas donnaient 0,999.
+
+Le front était à **280 m dans un domaine de 200 m** : l'onde avait atteint le mur, s'était réfléchie,
+et revenait polluer la fenêtre — que mon contrôle déclarait saine, puisqu'il vérifiait qu'on mesurait
+*derrière le front* et non que le front *n'avait jamais atteint le mur*.
+
+> **C'est A133 — un montage incapable — commis dans la fonction écrite pour l'éviter**, et dans la
+> session qui l'invoquait au plan. L'idée du garde-fou était juste, sa condition ne l'était pas — et
+> une condition fausse reste invisible tant qu'elle n'est pas franchie (**A144**).
+
+**Ce qui l'a rattrapé n'est pas le garde-fou, c'est le `R²`** — une mesure de qualité d'ajustement,
+qui n'était pas là pour détecter une réflexion mais pour dire si la décroissance est exponentielle.
+Elle a signalé que la forme supposée était fausse **sans avoir à connaître la raison**, ce qu'aucun
+garde-fou spécifique ne sait faire (**A145**).
+
+### Chiffres qui ont orienté la conception
+
+| Mesure | Valeur | Ce qu'elle dit |
+|---|---|---|
+| `R²` de la décroissance, `λ = 28 m` | **1,0000** | exponentielle pure |
+| écart `L½` mesurée/prédite, `λ = 20 m` | **−0,3 %** | la loi tient |
+| plage de `L½` couverte | **25 à 200 m** | un facteur 8, pas un point |
+| `R²` du cas pollué par réflexion | **0,487** | la sonde générique a vu ce que le garde-fou n'a pas vu |
+
+### Ce qui n'a pas été fait, et pourquoi
+
+- **Le régime non linéaire n'est pas mesuré.** L'amplitude du batteur est faible à dessein : A127
+  établit que la loi de dissipation est fausse à `a/h = 5 %`, et mesurer là demanderait de savoir ce
+  qu'on compare — la loi n'y prédit rien (S33-1).
+- **Les autres garde-fous du harnais n'ont pas été relus** dans le sens d'A144 (S33-2), et le `R²`
+  n'accompagne pas encore toutes les régressions (S33-3).
+- **La partition entretenus/transitoires n'est toujours pas dans ADR-001** (S32-1).
+
+### Session suivante recommandée
+
+**S34 — S33-2, relire les garde-fous du harnais.** A144 dit qu'un garde-fou peut porter sur la bonne
+idée et la mauvaise condition, et qu'il est alors **plus dangereux qu'aucun garde-fou** — on lui fait
+confiance. La session S29 a audité les *assertions* ; les *contrôles de validité de montage* n'ont
+jamais été audités, et il en existe maintenant plusieurs.
+
+Deux autres entrées : **S31-2**, écrire C24 (conservation de forme d'un paquet), dont la référence
+est `1` exactement ; ou **H2**, non écrit après treize sessions où il est cité.
+
+### Arbitrages en attente
+
+Inchangés. **A103** — la masse volumique de l'eau, douce ou de mer. **A107** — le sort du travail
+propre à `master`, S16-S17. Et les trois choses hors de portée d'une session : nommer les personnes,
+constater l'état réel du projet, agir sur l'infrastructure — dont le dépôt distant.
