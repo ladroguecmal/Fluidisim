@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-06
-Session en cours : —
+Session en cours : S27 — le nombre de Courant : sa définition, sa borne, sa valeur
 Dernière session : S26 — 2026-09-06 — la loi passe une épreuve qu'elle n'a pas produite ; δ est un filtre
-Session suivante : S27 — poser le nombre de Courant *(recommandé, S25-1)*, ou la réinjection W/δ (S26-2), ou H2
+Session suivante : S28 — la réinjection W/δ (S26-2) ou H2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
