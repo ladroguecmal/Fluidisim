@@ -92,7 +92,7 @@ provenance (`H_SEC = 10⁻⁶` est posé sans justification, action **S22-4**).
 - [x] **P5** — **S22-4** : donner une provenance à `H_SEC`, ou le remplacer. C04 est le cas qui le
       met en jeu ; le laisser posé au jugé après l'avoir traversé serait la dette exacte que
       décrit A106.
-- [ ] **P6** — ce que la session a appris : ADR-031 si la conclusion engage B3, note datée sinon.
+- [x] **P6** — ce que la session a appris : ADR-031 si la conclusion engage B3, note datée sinon.
 - [ ] **P7** — répercussions : `CAS-CANONIQUES`, `cas_en_attente()`, index, angles morts, décomptes.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
