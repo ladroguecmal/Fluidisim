@@ -12,9 +12,9 @@ de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outi
 6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance),
 3 en S11 (audit des points ouverts), 3 en S12 (mécanismes de détail), 3 en S13 (revue croisée des
 documents récents), 3 en S14 (audit inverse des invariants), 2 en S15 (audit des registres), 2 en S16 (dossier B2), 2 en S17
-(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques), 4 en S22 (C01 et le premier δ), 4 en S23 (C04 et le lit sec), 4 en S24 (C08 et l'oracle), 4 en S25 (C03 et la dissipation), 4 en S26 (les harmoniques) — **124 au
-total**. **Soixante-quatre ont été trouvés dans nos propres écrits**, pas dans les documents sources :
-A49, A56, A57, A58, puis A65 à A124. La proportion
+(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques), 4 en S22 (C01 et le premier δ), 4 en S23 (C04 et le lit sec), 4 en S24 (C08 et l'oracle), 4 en S25 (C03 et la dissipation), 4 en S26 (les harmoniques), 4 en S27 (le nombre de Courant) — **128 au
+total**. **Soixante-huit ont été trouvés dans nos propres écrits**, pas dans les documents sources :
+A49, A56, A57, A58, puis A65 à A128. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -166,8 +166,12 @@ ce que les sources avaient omis.
 | **A122** | Si δ mange les composantes courtes, personne n'a dit si la transition les réinjecte | **1** | ADR-034 §3.3, ADR-005 |
 | **A123** | Le budget de résolution se dimensionne sur la composante la plus courte à conserver, pas sur la dominante | **1** | ADR-034 §2.2 |
 | **A124** | Un cas qui vit dans le code et pas dans le corpus est introuvable pour la session suivante | 2 | C22, ADR-032 §6.4 |
+| **A125** | `u_max` de la CFL n'a jamais été défini, alors qu'une SPEC impose des parois mobiles | **1** | ADR-035 §2, SPEC-001 §2.1 |
+| **A126** | Une marge par défaut peut protéger d'un défaut que personne n'a identifié | **1** | ADR-035 §4.1 |
+| **A127** | Une loi mesurée sur un régime est publiée sans son domaine de validité | 2 | ADR-035 §5, ADR-033 §2.2 |
+| **A128** | Une source extérieure a rendu en une heure ce que sept sessions n'avaient pas vu | 3 | S27, journal |
 
-Quatre-vingt-quatre angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
+Quatre-vingt-huit angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
 
 **Quatre ont été trouvés dans nos propres écrits** — A49, A56, A57, A58 — et non dans les documents
@@ -745,4 +749,39 @@ pendant quatre sessions.
   validation sans lire cet ADR aurait conclu qu'aucun cas régulier n'existait, et l'aurait réécrit.
   **Le code n'est pas un lieu de publication** : il est lu par qui travaille dessus, pas par qui
   cherche ce qui existe. Formalisé en **C22** (S26).
+
+**Ajoutés en S27, en posant le nombre de Courant**
+
+- **A125** — **`u_max` de la CFL n'a jamais été défini, alors qu'une SPEC impose des parois
+  mobiles.** SPEC-001 §2.1 écrit `dt ≤ C·dx/u_max` depuis S02 sans qualifier `u_max` ;
+  SPEC-004 §10.1 pose comme exigence *non négociable* d'accepter « une frontière en mouvement avec
+  sa vitesse ». Les deux se contredisent **en silence**. Le défaut correspondant a été mesuré sur un
+  autre projet : eau au repos, solide mobile, **borne nulle** pendant que le Courant réel valait
+  0,943 — rapport 2,2 à 2,5, **zéro violation déclarée**. Un solveur peut violer sa condition de
+  stabilité d'un facteur deux en restant vert. **La revue croisée S08 avait examiné cette paire**
+  (E08) : son rapprochement portait sur le coût, et une variable non définie ne déclenche aucune
+  contradiction visible. Sévérité 1.
+
+- **A126** — **Une marge par défaut peut protéger d'un défaut que personne n'a identifié.**
+  `CFL = 0,45` a été posé sans justification écrite. La mesure montre que le schéma est stable
+  jusqu'à 0,99 et juste — l'erreur de période reste soixante fois sous la tolérance. **Rien ne
+  s'opposait donc à monter la valeur**, sauf ceci : la marge de Courant est une marge sur `u_max`,
+  et `1/0,45 = 2,22` couvre presque exactement le facteur du défaut d'A125. La valeur protégeait
+  d'un trou qu'elle ne connaissait pas. **Une marge dont on ignore la fonction se retire sans
+  bruit**, et le coût n'apparaît que plus tard. Réflexe : avant de resserrer un paramètre de
+  sécurité au motif que « rien n'échoue », chercher ce contre quoi il protégeait.
+
+- **A127** — **Une loi mesurée sur un régime est publiée sans son domaine de validité.** La loi de
+  dissipation d'ADR-033 §2.2 tient à `a/h = 1 %` et **est fausse à 5 %** — la pente `k` s'y effondre
+  de 39 % avec `N`. Le balayage d'origine était à amplitude relative fixe : il n'était pas confondu,
+  et sa conclusion tient. Mais **la condition n'était écrite nulle part**, et `a/h = 5 %` est
+  ordinaire en eau peu profonde. Une loi sans domaine déclaré est appliquée partout par défaut.
+
+- **A128** — **Une source extérieure a rendu en une heure ce que sept sessions n'avaient pas vu.**
+  Le défaut d'A125 a été trouvé parce que l'utilisateur a fourni un projet voisin, écrit ailleurs,
+  qui l'avait **mesuré**. Le corpus contenait pourtant les deux moitiés — SPEC-001 §2.1 et
+  SPEC-004 §10.1 — depuis S04. Ce qui manquait n'était pas l'information mais **la question**, et
+  une architecture différente la pose autrement. Sévérité 3 parce qu'il n'y a pas de correction à
+  appliquer, mais la conséquence de méthode est réelle : **un corpus fermé sur lui-même ne produit
+  que les questions qu'il sait déjà poser.**
 

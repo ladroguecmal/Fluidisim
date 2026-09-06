@@ -164,7 +164,7 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 
 | # | Action | D'où elle vient | Qui la porte | État |
 |---|---|---|---|---|
-| S25-1 | Poser le **nombre de Courant** comme paramètre de conception : il ne figure dans aucun ADR, aucune SPEC, aucun banc, et il multiplie la portée des ondes par 4,5 | ADR-033 §2.3, **A117** | session | **ouverte** |
+| S25-1 | Poser le **nombre de Courant** comme paramètre de conception | ADR-033 §2.3, **A117** | session | **close (S27) — mais pas comme elle le demandait** : ADR-035 pose la *définition* d'`u_max` d'abord, la *borne* ensuite, la valeur en dernier. `ν = 0,45` reste conditionnel |
 | S25-2 | Exprimer les exigences de portée **en périodes**, jamais en mètres ni en secondes — seule formulation dont la réponse ne dépende pas de l'onde | ADR-033 §4.2 | session | **ouverte** |
 | S25-3 | Faire dire à `CAS-CANONIQUES` §C03 **sa résolution** : un cas dont le verdict dépend d'un paramètre tu mesure ce paramètre | ADR-033 §4.3, **A119** | session | **ouverte** |
 | S25-4 | Vérifier le comportement des **harmoniques** | ADR-033 §5.3 | session | **close (S26)** — et l'énoncé de S25 était faux : `n` en périodes propres, **`n²` en secondes**. Vérifié à 2-5 % ; ADR-034 |
@@ -189,4 +189,19 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 > les quatre nouvelles viennent toutes de la même mesure. **La dernière — la réinjection à la
 > frontière W/δ — est la plus lourde** : elle touche la couture entre deux couches, et ADR-005 ne
 > l'avait pas prévue parce que rien ne disait encore que δ **filtre**.
+
+## Actions relevées en séance — S27
+
+| # | Action | D'où elle vient | Qui la porte | État |
+|---|---|---|---|---|
+| S27-1 | Écrire **C23**, « nombre de Courant en présence d'une paroi mobile » : aucune mesure à paroi mobile n'existe dans ce dépôt, et la définition d'`u_max` reste **posée sans être vérifiée** | ADR-035 §6.1, **A126** | session | **ouverte** |
+| S27-2 | **Borner le domaine de validité en amplitude** de la loi de dissipation : mesuré à 1 % (tient) et 5 % (faux), rien entre les deux | ADR-035 §6.3, **A127** | session | **ouverte** |
+| S27-3 | Implémenter la **borne analytique avec vitesse de paroi**, et la faire dériver du même code que le compteur de violations — les découpler recrée le défaut | ADR-035 §3 | session, après S27-1 | **ouverte** |
+| S27-4 | Mesurer la stabilité **en 2D** et sur un cas de déferlement avant de rouvrir la valeur de `ν` — le ×20 disponible n'est pas refusé, il n'est pas mérité | ADR-035 §6.4 | session | **ouverte** |
+
+> **Note S27 — sur l'apport d'une source extérieure.** Le défaut central de cette session (A125) a
+> été trouvé parce qu'un projet voisin, d'architecture différente, l'avait **mesuré**. Les deux
+> moitiés étaient dans notre corpus depuis S04 ; ce qui manquait était la **question**. Voir A128,
+> et la leçon **L91**. Ce n'est pas une invitation à importer des conclusions extérieures — leur
+> architecture ne nous engage pas — mais à traiter leurs **mesures** comme des faits.
 

@@ -104,7 +104,7 @@ qu'un `ν = 0,45` posé sur la bonne.
       marge que rien n'a chiffrée.
 - [x] **P5** — la borne **analytique** plutôt que mesurée : ce que cela coûte, ce que cela achète.
 - [x] **P6** — **ADR-035** : le nombre de Courant — définition, borne, valeur.
-- [ ] **P7** — répercussions : SPEC-001, SPEC-004, index, angles morts, actions, décomptes.
+- [x] **P7** — répercussions : SPEC-001, SPEC-004, index, angles morts, actions, décomptes.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
