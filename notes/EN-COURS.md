@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S20
-État             : en cours
+État             : terminée
 Battement        : 2026-09-05
 Objectif         : écrire H1 — le premier étage du harnais. Du code qui s'exécute.
 ```
@@ -83,11 +83,11 @@ que moi**.
   pas faite, et elle sort à la première ligne de code.*
 - [x] **P3** — `water-harness` : lecteur de scénario, hôte, allocateur compteur avec `seal()`,
   mode `check`.
-- [ ] **P4** — **compiler, exécuter, vérifier.** Un scénario réel, un hash, un compte
+- [x] **P4** — **compiler, exécuter, vérifier.** Un scénario réel, un hash, un compte
   d'allocations, un temps mesuré.
-- [ ] **P5** — `ADR-029` : le langage, et ce que l'écriture du code a appris.
-- [ ] **P6** — index, angles morts, décomptes.
-- [ ] **P7** — rituel de fin.
+- [x] **P5** — `ADR-029` : le langage, et ce que l'écriture du code a appris.
+- [x] **P6** — index, angles morts, décomptes.
+- [x] **P7** — rituel de fin.
 
 ### Notes de reprise
 

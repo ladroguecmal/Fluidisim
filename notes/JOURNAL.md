@@ -1544,3 +1544,82 @@ décroissante — c'est le troisième document de préparation d'un travail qui 
 
 **Ce qui attend encore l'utilisateur.** Trois choses, et elles ont rétréci : constater l'état réel du
 projet (il ne le sait pas), agir sur l'infrastructure, autoriser l'ajout de code.
+
+---
+
+## S20 — 2026-09-05 — H1 : la première ligne de code
+
+**Consigne reçue.** Autorisation d'ajouter du code, et « enchaîne avec S20 ».
+
+**Sorties.** `code/` — `water-core` et `water-harness`, en Rust, **sans aucune dépendance** ;
+[`ADR-029`](../docs/adr/ADR-029-ce-que-la-premiere-ligne-de-code-a-appris.md) ; trois notes
+correctives ; registre porté à **100 angles morts** ; leçons L65 et L66.
+
+**Ça tourne.** `cargo test` : 14 tests au vert. `water-harness check scenarios/*.toml` : deux
+scénarios, hash de conformité vérifié, allocations après scellement comptées, **0,04 s** contre un
+budget de 60.
+
+### Le langage se tranche empiriquement autant que techniquement
+
+`rustc` et `cargo` présents ; **aucun compilateur C++** — ni `cl`, ni `g++`, ni `clang`, ni `cmake`.
+Écrire le cœur en C++ aurait produit du code que je ne peux ni compiler ni exécuter, c'est-à-dire
+exactement ce que H1 doit cesser de produire.
+
+L'argument technique va dans le même sens et il est plus fort : **Rust ne contracte pas les
+opérations flottantes**, là où GCC et Clang fusionnent `a*b+c` en FMA **par défaut**. La propriété
+critique — le déterminisme d'I-03 — ne dépend donc de la vigilance de personne. C'est L64, écrite la
+veille, appliquée le lendemain.
+
+### La trouvaille : `sin` n'est pas déterministe
+
+ADR-003 §2 énumère les disciplines qui assurent le déterminisme bit à bit — réductions ordonnées,
+PRNG entier, nombre de fils sans effet. **La liste est incomplète.**
+
+> `B` est une somme de sinusoïdes, et **`sin` n'est pas spécifié bit à bit**. IEEE 754 impose
+> l'exactitude des quatre opérations et de la racine carrée, jamais celle des transcendantes.
+
+Le hash de conformité aurait distingué deux plateformes à chaque frame, et le défaut se serait
+présenté comme une divergence sans cause apparente — la catégorie la plus coûteuse à diagnostiquer.
+**Dix-neuf sessions de conception ne l'ont pas trouvé ; la première ligne de code l'a trouvé en une
+heure.**
+
+La correction n'invente rien : ADR-003 §2.2 posait déjà que « seules des **phases repliées** passent
+au GPU ». Phase en `u32` valant une fraction de tour — le repliement est le débordement de l'entier,
+exact et gratuit ; part temporelle **entièrement entière** depuis `SimTime` en microsecondes ; sinus
+polynomial à coefficients fixes n'employant que `+`, `−` et `×`, les trois opérations exactement
+spécifiées. Écart mesuré contre la référence `f64` : **moins de 10⁻⁷**.
+
+### Deux autres corrections nées de l'usage
+
+**Le grain appartient au contrat.** SPEC-004 §8.2 affirme que « changer `worker_count` change la
+vitesse, jamais le résultat ». Vrai **à condition que le découpage soit fixé** : sur
+`[1 ; 10¹⁶ ; −10¹⁶ ; 1]`, un grain de 1 donne `1,0` et un grain de 2 donne `0,0`. Un système de
+tâches qui choisirait son grain d'après le nombre de fils rendrait le corollaire faux en silence.
+
+**ADR-028 §4 était trop large.** La règle « un seuil s'écrit avant la mesure qu'il juge » vaut pour
+une **barre d'acceptation**, pas pour une **référence de non-régression** — un hash *est* la mesure
+et ne peut pas la précéder. Ce qui la protège est la visibilité : elle s'inscrit par un commit qui ne
+contient rien d'autre, et l'outil l'imprime sans jamais l'écrire. La session a suivi sa propre règle,
+et l'historique le montre — le code et la bénédiction sont deux commits.
+
+### Trois erreurs à moi, toutes trouvées par les tests
+
+Logique de quadrant fausse — `sin(90°)` donnait `0`. Valeur de référence FNV **inventée**, recalculée
+indépendamment en Python. Et un test qui affirmait une propriété vraie avec des données incapables de
+la révéler : il échouait en prétendant la propriété fausse, alors que les données étaient trop bien
+conditionnées. C'est l'angle mort **A100**, et c'est le plus inquiétant des trois — un tel test qui
+*passe* affirmerait une garantie inexistante.
+
+### Ce qu'il faut dire sur la marge
+
+0,04 s contre 60 est une marge réelle et une mesure petite : deux scénarios sans `W` ni `δ`
+n'annoncent rien de ce que coûteront seize cas canoniques. Et **le hash inter-plateformes n'est pas
+vérifié** — une seule machine a exécuté ce code. Déterministe *par construction* n'est pas identique
+*constaté ailleurs*, et c'est précisément ce que le cas C18 demande.
+
+**Prochaine session recommandée.** S21 — **H3**, les cas canoniques analytiques et le mode `physics`.
+C'est l'étage qui débloque B1, B2 et B9, et surtout le premier qui confronte le code à une
+**référence extérieure** : C01 repos hydrostatique, C02 dispersion monochromatique, C03 seiche, C04
+rupture de barrage — quatre solutions fermées que rien de ce que j'écris ne peut influencer.
+
+Second candidat : H2, métriques et séries temporelles, qui débloque la surveillance de dérive.

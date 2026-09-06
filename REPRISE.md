@@ -12,10 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-05
-Session en cours : S20 — 2026-09-05 — H1, le premier étage du harnais
-Dernière session : S19 — 2026-09-05 — ADR-020 acté, et il n'y a pas d'autres équipes
+Dernière session : S20 — 2026-09-05 — H1 écrit, compilé, vert
+Session suivante : S21 — **H3** : les cas canoniques analytiques et le mode `physics`. Le premier
+                   étage qui confronte le code à une référence extérieure
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
@@ -84,7 +85,8 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 17 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 28 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 29 décisions d'architecture, numérotées, jamais réécrites
+code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
                             006 chemin poussé (ce que le système publie)
@@ -103,7 +105,8 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Dix-neuf sessions, **28 ADR** *(dont un acté)*, six spécifications, huit registres. Les 30 sections du document de
+Vingt sessions, **29 ADR** *(dont un acté)*, six spécifications, huit registres — **et du code
+qui tourne** : `code/`, étage H1 du harnais, 14 tests au vert. Les 30 sections du document de
 questions ouvertes d'origine sont traitées. Les vingt premiers ADR ont été confrontés les uns aux
 autres en S05 (douze écarts, deux de gravité 1) et les cinq SPEC entre elles en S08 (dix écarts,
 deux de gravité 1). Tous résolus — le dernier, le **chemin poussé**, par l'écriture de `SPEC-006`

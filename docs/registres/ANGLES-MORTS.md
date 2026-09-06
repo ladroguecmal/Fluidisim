@@ -12,9 +12,9 @@ de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outi
 6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance),
 3 en S11 (audit des points ouverts), 3 en S12 (mécanismes de détail), 3 en S13 (revue croisée des
 documents récents), 3 en S14 (audit inverse des invariants), 2 en S15 (audit des registres), 2 en S16 (dossier B2), 2 en S17
-(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet) — **97 au total**.
-**Trente-sept ont été trouvés dans nos propres écrits**, pas dans les documents sources : A49, A56,
-A57, A58, puis A65 à A97. La proportion
+(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code) — **100 au
+total**. **Quarante ont été trouvés dans nos propres écrits**, pas dans les documents sources : A49,
+A56, A57, A58, puis A65 à A100. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -139,6 +139,9 @@ ce que les sources avaient omis.
 | **A95** | Les deux demandes les plus bloquantes n'ont aucun destinataire nommé | **1** | DOSSIER-REUNIONS §7.2 |
 | **A96** | Un arbitrage qui traîne est souvent un arbitrage mal posé | 2 | ADR-027 §1 |
 | **A97** | Reporter à une équipe qui n'existe pas est plus confortable que reporter tout court | **1** | ADR-028 §2.2 |
+| **A98** | `sin` n'est pas spécifié bit à bit : le déterminisme de B ne survit pas à un appel de bibliothèque | **1** | ADR-029 §2 |
+| **A99** | Le grain d'une réduction ordonnée change son résultat | 2 | ADR-029 §3 |
+| **A100** | Un test peut affirmer une propriété vraie avec des données incapables de la révéler | 2 | ADR-029 §3, `host_impl.rs` |
 
 Soixante-quatre angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -495,3 +498,21 @@ pendant quatre sessions.
   précisément les points ouverts périmés. C'est A78 et L61 combinés, et amplifiés par le fait qu'un
   report **nominatif** ne se relit jamais : on ne vérifie pas qu'un tiers a répondu si l'on n'attend
   rien de précis de lui.
+
+**Ajoutés en S20, à la première ligne de code**
+
+- **A98** *(sévérité 1)* — **`sin` n'est pas spécifié bit à bit.** IEEE 754 impose l'exactitude des
+  quatre opérations et de la racine carrée ; **jamais celle des transcendantes**. `B` étant une somme
+  de sinusoïdes, son déterminisme inter-plateforme — I-03 — ne survivait pas à un appel de
+  bibliothèque standard, et le défaut se serait présenté comme une divergence de plateforme sans
+  cause apparente. ADR-003 §2 énumérait trois disciplines et n'avait pas celle-là. **Dix-neuf
+  sessions de conception ne l'ont pas trouvé ; la première ligne de code l'a trouvé en une heure.**
+- **A99** — **Le grain d'une réduction ordonnée change son résultat.** L'addition flottante n'est pas
+  associative : sur `[1 ; 10¹⁶ ; −10¹⁶ ; 1]`, un grain de 1 donne `1,0` et un grain de 2 donne `0,0`.
+  Un système de tâches qui choisirait son grain d'après le nombre de fils — le réglage naturel —
+  rendrait faux, silencieusement, le corollaire « changer `worker_count` ne change pas le résultat ».
+- **A100** — **Un test peut affirmer une propriété vraie avec des données incapables de la
+  révéler.** Le premier test écrit pour A99 employait une suite arithmétique : les deux sommes
+  étaient égales, et le test échouait en prétendant que la propriété était fausse. Elle ne l'était
+  pas ; c'étaient les données qui étaient trop bien conditionnées. Un test qui passe sur des données
+  mal choisies est pire — il aurait affirmé une garantie inexistante.

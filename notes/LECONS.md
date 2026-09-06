@@ -850,3 +850,40 @@ celle dont la propriété critique **survit à la négligence**.
 **Réflexe** : devant un choix de représentation, ne pas comparer les capacités mais demander *qu'est-ce
 qui casse la propriété que je tiens le plus à garder, et faut-il quelqu'un pour la casser ou suffit-il
 d'une distraction ?*
+
+## L65 — Une heure de code trouve ce que dix-neuf sessions de conception n'ont pas trouvé
+
+*(S20)* Le corpus avait été audité six fois : ADR entre eux, spécifications entre elles, points
+ouverts, documents récents, invariants dans les deux sens, registres. Cent points d'attention
+recensés, trois erreurs arithmétiques débusquées, deux invariants réécrits.
+
+**La première heure de code a trouvé qu'une fonction sinus n'est pas déterministe** — c'est-à-dire
+qu'un invariant central du projet, vérifié et re-vérifié, était **inapplicable** sur le premier calcul
+qui l'aurait employé.
+
+La raison n'est pas que les audits étaient mauvais. C'est qu'un document affirme, et qu'un programme
+**s'exécute**. Un audit compare des affirmations entre elles ; il ne peut pas découvrir qu'une
+opération qu'aucun document ne mentionne — l'appel à `sin` — porte une propriété que tous supposaient.
+Ce qui n'est écrit nulle part n'est audité nulle part.
+
+**Réflexe** : dès qu'une propriété est revendiquée sur un calcul, écrire le calcul. Pas pour le
+livrer — pour voir de quoi il dépend. La liste des dépendances d'un calcul réel est toujours plus
+longue que celle de sa description, et l'écart est exactement là où vivent les défauts que la
+relecture ne trouve pas.
+
+## L66 — Un test peut affirmer une propriété vraie avec des données incapables de la révéler
+
+*(S20)* Un test écrit pour démontrer que l'addition flottante n'est pas associative employait une
+suite arithmétique. Les deux sommes étaient égales, et le test échouait — en prétendant que la
+propriété était fausse. Elle ne l'était pas : les données étaient trop bien conditionnées.
+
+Il a échoué, donc il a été corrigé. **Le cas inquiétant est l'autre** : le même test écrit dans
+l'autre sens — « les deux sommes sont égales » — serait passé, et aurait affirmé une garantie
+inexistante. Un test vert sur des données mal choisies est pire qu'un test absent, parce qu'il ferme
+la question.
+
+**Réflexe** : pour tout test qui démontre une propriété numérique, se demander **par quel mécanisme
+ces données-là peuvent la révéler**. Si la réponse n'est pas immédiate, les données sont mal choisies.
+Le corollaire tient en une ligne : un test de non-associativité a besoin d'ordres de grandeur
+hétérogènes, un test de précision a besoin de valeurs proches de l'ulp, un test de saturation a besoin
+du cas extrême du projet — et jamais de la valeur moyenne.
