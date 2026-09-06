@@ -12,9 +12,9 @@ de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outi
 6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance),
 3 en S11 (audit des points ouverts), 3 en S12 (mécanismes de détail), 3 en S13 (revue croisée des
 documents récents), 3 en S14 (audit inverse des invariants), 2 en S15 (audit des registres), 2 en S16 (dossier B2), 2 en S17
-(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques), 4 en S22 (C01 et le premier δ), 4 en S23 (C04 et le lit sec) — **112 au
-total**. **Cinquante-deux ont été trouvés dans nos propres écrits**, pas dans les documents sources :
-A49, A56, A57, A58, puis A65 à A112. La proportion
+(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques), 4 en S22 (C01 et le premier δ), 4 en S23 (C04 et le lit sec), 4 en S24 (C08 et l'oracle) — **116 au
+total**. **Cinquante-six ont été trouvés dans nos propres écrits**, pas dans les documents sources :
+A49, A56, A57, A58, puis A65 à A116. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -154,8 +154,12 @@ ce que les sources avaient omis.
 | **A110** | Un seuil de mesure ne déplace pas seulement un verdict, il peut le renverser | **1** | ADR-031 §3.1, C04 |
 | **A111** | Une erreur globale faible masque une erreur locale vingt fois plus grande | **1** | ADR-031 §1, C04 |
 | **A112** | Une constante sans effet mesurable a une provenance, et ce n'est pas une dette | 3 | ADR-031 §4, `H_SEC` |
+| **A113** | Un ordre de convergence est une propriété du couple (solveur, cas), pas du solveur | **1** | ADR-032 §3, C08 |
+| **A114** | Avec un oracle, le triplet le plus fin est le moins fiable — la règle s'inverse | **1** | ADR-032 §4 |
+| **A115** | Un critère d'écart local ne distingue pas « a convergé » de « progresse lentement » | 2 | ADR-032 §5 |
+| **A116** | Une erreur d'hôte absorbée publie un résultat vide qui a l'air d'un résultat | 2 | ADR-032 §5, `physics.rs` |
 
-Soixante-douze angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
+Soixante-seize angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
 
 **Quatre ont été trouvés dans nos propres écrits** — A49, A56, A57, A58 — et non dans les documents
@@ -636,4 +640,34 @@ pendant quatre sessions.
   **mesurer ce qu'il commande**, et de constater qu'il ne commande rien. I-14 n'exige pas qu'un
   nombre soit justifié : il exige qu'on sache ce qu'il commande, et « rien » est une réponse
   valide. À distinguer de `ρ_eau` (A103), qui déplace 2,5 % de tout tirant d'eau.
+
+**Ajoutés en S24, à la mesure de la convergence**
+
+- **A113** — **Un ordre de convergence est une propriété du couple (solveur, cas), pas du solveur.**
+  Le même solveur donne `p ≈ 0,98` sur une solution régulière, `0,73` à `0,80` sur C04, et `0,24`
+  sur la position du front de C04. Aucun de ces nombres n'est « l'ordre du solveur » : ils mesurent
+  trois choses différentes. L'énoncé de C08 pose une assertion absolue — `p > 0,8` — et désigne
+  trois cas dont **aucun n'est régulier**, donc aucun ne permet de l'appliquer. Sévérité 1 : C08 est
+  le test qui décide si un candidat « résout l'équation qu'on croit », et B3 s'apprête à s'en servir.
+
+- **A114** — **Avec un oracle, le triplet de grilles le plus fin est le *moins* fiable.** L'inverse
+  exact de ce qui vaut avec une solution analytique, où l'on prend toujours le plus fin. L'oracle
+  porte sa propre erreur ; dès qu'une grille testée s'en approche, les deux se soustraient et
+  l'ordre observé s'envole — mesuré : **1,56 pour un schéma d'ordre 1**. Affiner l'oracle a *dégradé*
+  le résultat, ce qui est le signe le plus contre-intuitif de la session. Conséquence chiffrée : il
+  faut un oracle **480 fois** plus fin que la grille la plus grossière pour cinq grilles saines,
+  donc l'oracle **est** le banc. SPEC-003 §5.1 le cite comme une référence disponible.
+
+- **A115** — **Un critère d'écart local ne distingue pas « a convergé » de « progresse lentement ».**
+  Le contrôle d'asymptoticité comparait les deux derniers ordres observés et déclarait stabilisée la
+  suite 0,595 → 0,686 → 0,732 : écarts petits, **mais tous de même signe**. Une suite qui monte
+  régulièrement n'a pas convergé, et son dernier terme n'est pas sa limite. Vaut pour tout critère
+  de stationnarité — seuils qui se stabilisent, budgets qui se tassent, mesures qui se répètent.
+  Le remède est de regarder la **structure** de la suite des écarts, pas leur taille.
+
+- **A116** — **Une erreur d'hôte absorbée publie un résultat vide qui a l'air d'un résultat.** Un
+  `Err(_) => continue` sur l'allocation de l'oracle produisait la ligne « 0 grille retenue sur 0 »,
+  sans mention de la cause — l'arène était pleine. Le lecteur y voit un cas qui n'a rien trouvé, pas
+  un cas qui n'a pas tourné. **Un harnais doit distinguer *indisponible* de *vide***, et l'erreur
+  d'hôte existe précisément pour ça : elle était disponible et jetée.
 

@@ -136,12 +136,27 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 
 | # | Action | D'où elle vient | Qui la porte | État |
 |---|---|---|---|---|
-| S23-1 | Mesurer proprement l'**ordre de convergence du front** — cinq grilles ne stabilisent pas l'exposant, qui monte encore de 0,13 à 0,41 | ADR-031 §2 | session, via **C08** | **ouverte** |
-| S23-2 | **Dériver le seuil `ε`** de mesure du front au lieu de le conventionner : le seuil juste est celui au-dessus duquel le profil n'est plus dominé par sa queue | ADR-031 §5.3, **A110** | session | **ouverte** |
-| S23-3 | Écrire **C08** (convergence sous raffinement), qui est le prérequis de S23-1 et que deux sessions ont maintenant réclamé | ADR-031 §2 | session | **ouverte** |
+| S23-1 | Mesurer proprement l'**ordre de convergence du front** | ADR-031 §2 | session, via **C08** | **close (S24) — par la négative** : l'exposant n'est pas stabilisable sur ces grilles, ADR-032 §2. Le ×3·10⁵ d'ADR-031 reste une extrapolation, comme il le disait. |
+| S23-2 | **Dériver le seuil `ε`** de mesure du front au lieu de le conventionner | ADR-031 §5.3, **A110** | session | **ouverte, dépriorisée (S24)** — S24 a montré que l'ordre est réduit sur *toutes* les grandeurs, pas seulement au front : le seuil n'est pas le point bloquant |
+| S23-3 | Écrire **C08** (convergence sous raffinement) | ADR-031 §2 | session | **close (S24)** — outillé et exécuté ; le résultat est que l'énoncé n'est pas exécutable, ADR-032 |
 | S23-4 | Porter les deux critères d'entrée d'ADR-030 et ADR-031 dans le **protocole de B3**, qui ne les connaît pas | ADR-031 §2 | session | **ouverte** |
 
 > **Note S23 — C04 reste rouge dans la batterie, et c'est voulu.** Le véhicule δ est d'ordre 1 et
 > ADR-031 décide que l'ordre 1 ne passe pas C04. Un harnais qui masquerait cet échec masquerait la
 > décision. La session qui rendra C04 vert devra le faire en changeant de schéma, pas de seuil.
+
+## Actions relevées en séance — S24
+
+| # | Action | D'où elle vient | Qui la porte | État |
+|---|---|---|---|---|
+| S24-1 | Écrire **C22**, « convergence sur solution régulière » : le montage lisse existe dans le code (`c08_regulier`) mais pas dans `CAS-CANONIQUES` | ADR-032 §6.4 | session | **ouverte** |
+| S24-2 | Amender l'énoncé de **C08** : nommer la grandeur, exiger la régularité, exiger cinq grilles, rapporter « non concluant » comme un état | ADR-032 §3.1 | session | **ouverte** |
+| S24-3 | Porter au **plan de benchmark** que l'oracle est le poste dominant — ×480 sur la grille la plus grossière, `nx²` en 1D et `nx³` en 2D | ADR-032 §4.1, **A114** | session | **ouverte** |
+| S24-4 | Donner à `ordre_final()` la **nature de la référence** : le triplet le plus fin est le meilleur avec une solution analytique, le pire avec un oracle | ADR-032 §6.3 | session | **ouverte** |
+| S24-5 | Compléter le montage régulier — trois grilles saines seulement, donc aucun verdict d'asymptoticité ; demande un oracle à `nx ≈ 100 000`, dont le coût est à mesurer avant d'être engagé | ADR-032 §6.1 | session | **ouverte** |
+
+> **Note S24 — le nombre d'actions ouvertes augmente, et c'est le signe attendu.** S22 en a ouvert
+> cinq, S23 quatre, S24 cinq ; six ont été closes en deux sessions. Les sessions de conception
+> fermaient des questions ; les sessions de mesure en ouvrent, parce qu'une mesure qui ne surprend
+> personne n'avait pas besoin d'être faite.
 

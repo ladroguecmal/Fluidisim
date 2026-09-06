@@ -42,7 +42,7 @@ les six premiers doivent passer avant qu'un solveur candidat soit admis en campa
 | C05 | Absorption à la frontière | δ | cible < 1 % | réflexions de l'éponge |
 | C06 | Invariance galiléenne | δ, ADR-002 | **auto-référencée** | biais d'advection, référentiels |
 | C07 | Sillage profond et peu profond | W | **analytique** | angle de Kelvin, `Fr_h` |
-| C08 | Convergence sous raffinement | δ | oracle / Richardson | solveur qui ne converge pas |
+| C08 | Convergence sous raffinement | δ | oracle / Richardson | solveur qui ne converge pas — *exécuté en S23-S24 ; **sans verdict**, voir ADR-032* |
 | C09 | Conservation masse et énergie | δ, V | **analytique** | fuites, instabilités |
 | C10 | Cube flottant | flottabilité | **analytique** | tirant d'eau, période, masse ajoutée — *statique exécutée depuis S21 ; la masse ajoutée attend* |
 | C11 | Petit objet léger | flottabilité | **analytique** | divergence, bascule en mode contraint |
@@ -202,6 +202,30 @@ Attrape l'angle de Kelvin codé en dur (angle mort A05).
 Un solveur qui ne converge pas ne résout pas l'équation qu'on croit : il est **faux**, pas
 imprécis. Aucun raffinement ne le sauvera, et aucune campagne de performance n'a de sens tant que
 ce test ne passe pas.
+
+> **Note corrective S24 — cet énoncé n'est pas exécutable en l'état.** Voir
+> [`ADR-032`](../adr/ADR-032-c08-n-est-pas-executable-tel-qu-enonce.md). Trois manques, mesurés :
+>
+> 1. **Il ne dit pas sur quelle grandeur `p` est mesuré.** C04 en produit quatre, et elles ne
+>    convergent pas au même rythme : 0,73 (L1 globale), 0,79 (`h(0)`), 0,80 (`u(0)`), **0,24** (front).
+> 2. **Il ne dit pas que le cas doit être régulier** — et **aucun** des trois qu'il désigne ne l'est.
+>    Un schéma d'ordre 1 sur une solution à dérivée discontinue converge à un ordre réduit ; le même
+>    solveur donne `p ≈ 0,98` sur une bosse gaussienne lisse. **L'ordre est une propriété du couple
+>    (solveur, cas)**, et l'assertion `p > 0,8` n'a de sens que sur un cas régulier. Angle mort A113.
+> 3. **Trois grilles ne suffisent pas.** Sur cinq grilles, de 200 à 3200 cellules, aucune des quatre
+>    grandeurs n'atteint le régime asymptotique : les ordres montent encore, et le dernier n'est
+>    donc pas la limite. Le front donne même des ordres **négatifs** sur les grilles grossières.
+>
+> **Le harnais rapporte donc « non concluant » comme un état distinct de « passé » et « échoué »**,
+> avec un décompte : un rapport sans échec ne doit pas se lire comme une validation.
+>
+> **Et l'oracle a un prix que SPEC-003 §5.1 ne dit pas.** Il porte sa propre erreur ; dès qu'une
+> grille testée s'en approche, l'ordre observé s'envole — mesuré, **1,56 pour un schéma d'ordre 1**.
+> Il faut un oracle **480 fois** plus fin que la grille la plus grossière pour cinq grilles saines.
+> **L'oracle est le banc.** Angle mort A114.
+>
+> **Proposition C22** — « convergence sur solution régulière » : le montage lisse existe dans le
+> code (`c08_regulier`) mais pas dans ce document. ADR-032 §6.4.
 
 ## C09 — Conservation de la masse et de l'énergie
 
