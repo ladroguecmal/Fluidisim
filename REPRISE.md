@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-06
-Session en cours : S25 — C03, la seiche, et la dissipation numérique
-Dernière session : S24 — 2026-09-06 — C08 : le test qui ne peut pas conclure, et l'oracle qui est le banc
-Session suivante : S26 — C22 (formaliser le cas régulier) ou H2
+Session en cours : —
+Dernière session : S25 — 2026-09-06 — C03 : la dissipation reçoit une formule, et λ_cut une moitié de réponse
+Session suivante : S26 — C22 et l'amendement de C08 *(recommandé)*, ou poser le nombre de Courant, ou H2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
@@ -105,10 +105,11 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Vingt-quatre sessions, **32 ADR** *(dont un acté)*, six spécifications, huit registres — **et du
-code qui tourne** : `code/`, étages **H1 et H3** du harnais, un **δ d'essai** équilibré, 29 tests
-verts et 19 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
-verdict** (C08). Les 30 sections du document de
+Vingt-cinq sessions, **33 ADR** *(dont un acté)*, six spécifications, huit registres — **et du
+code qui tourne** : `code/`, étages **H1 et H3** du harnais, un **δ d'essai** équilibré, 30 tests
+verts et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
+verdict** (C08). Quatre cas canoniques sur δ sont exécutés : **C01 et C03 passent**, C04 échoue,
+C08 ne conclut pas. Les 30 sections du document de
 questions ouvertes d'origine sont traitées. Les vingt premiers ADR ont été confrontés les uns aux
 autres en S05 (douze écarts, deux de gravité 1) et les cinq SPEC entre elles en S08 (dix écarts,
 deux de gravité 1). Tous résolus — le dernier, le **chemin poussé**, par l'écriture de `SPEC-006`
@@ -142,7 +143,16 @@ le cite comme une référence disponible.
 passe pas le front de mouillage. Un harnais qui masquerait cet échec masquerait la décision. **La
 session qui rendra C04 vert devra changer de schéma, pas de seuil.**
 
-**Un maillon s'est allongé en S22 :** `λ_cut` ne sortira pas de ce véhicule. Saint-Venant est non
+**Et S25 a rouvert `λ_cut` par l'autre côté.** Une onde peut être mal transportée de deux façons :
+arriver au mauvais moment — la **dispersion**, bloquée faute de couche dispersive — ou **ne pas
+arriver**, la **dissipation**, qui était mesurable depuis le début.
+[`ADR-033`](docs/adr/ADR-033-lambda-cut-a-deux-definitions.md) en tire une loi fermée, vérifiée à
+0,2 % : `demi-vie (périodes) = ln2·N / (2π²(1−ν))`, où `N` est le nombre de points par longueur
+d'onde et `ν` le nombre de Courant. **La longueur d'onde, la célérité et la période en
+disparaissent.** Tenir le seuil de C03 demande 235 points par longueur d'onde ; à 20 points, l'eau
+meurt en une oscillation.
+
+**Un maillon s'est allongé en S22 :** `λ_cut` *dispersif* ne sortira pas de ce véhicule. Saint-Venant est non
 dispersif, et C02 mesure une erreur de célérité **en fonction de λ** ; il faut une couche dispersive
 — `W`, ou un `δ` d'une autre famille. Ce n'est pas un retard de codage, c'est une dépendance qui
 n'était pas dans le graphe (ADR-030 §5).

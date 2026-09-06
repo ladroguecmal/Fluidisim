@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S25
-État             : en cours
+État             : terminée
 Battement        : 2026-09-06
 Objectif         : C03 — la seiche, et la dissipation numérique
 ```
@@ -99,7 +99,7 @@ la thèse est juste, C03 devient un **troisième critère d'entrée à B3**, apr
 - [x] **P6** — ADR-033 si la conclusion engage B3, note datée sinon.
 - [x] **P7** — répercussions : `CAS-CANONIQUES`, index, angles morts, actions — dont le sort de
       **S22-3**, qui n'a plus de demandeur.
-- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
+- [x] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
@@ -176,3 +176,23 @@ de Courant réduit la dissipation. Vérifié à `N = 160` :
 moins de dissipation *et* moins de calcul. La loi se dégrade près de `ν = 1` (−19 %), ce qui est
 attendu : elle néglige les termes d'ordre supérieur, et l'intégration d'Euler explicite y a sa
 propre erreur. **Prédictive à mieux que 5 % pour `ν ≤ 0,7`**, et c'est la plage utile.
+
+#### État à la fin de S25
+
+`cargo test` : **30 tests**. `water-harness check` : 2 scénarios, 0 échec, hashs **inchangés**.
+`water-harness physics` : 1 échec (C04, voulu), 3 témoins, 5 grandeurs sans verdict (C08). Jeton
+**libéré**.
+
+**Ce que S26 doit savoir avant de commencer, et qui n'est pas ailleurs :**
+
+- **La loi de dissipation est vérifiée, mais sur un seul schéma.** `demi-vie = ln2·N/(2π²(1−ν))`
+  vient de la diffusion de Rusanov. Ce qui se transporte à un autre solveur est la **forme** — la
+  proportionnalité à `N`, l'indépendance à `λ` et `c` — pas le coefficient.
+- **Ne pas ajouter de friction au véhicule pour « améliorer » C03.** C'est l'erreur qu'A118
+  documente, et elle a survécu à trois sessions. C03 exige l'absence de friction.
+- **Le nombre de Courant est réglable** (`avec_cfl`) et il commande la dissipation. C'est le levier
+  le moins cher du corpus — ×4,5 de portée en doublant le pas de temps — et personne ne l'a arbitré.
+- **Deux cas sur trois du corpus δ sont plus faibles que leur réputation** : C01 par la géométrie
+  de son fond (A105), C03 par sa résolution (A119). Seul C04 discrimine vraiment. En tenir compte
+  avant de s'en servir pour éliminer des candidats à B3.
+- **C04 doit rester en échec et `C01-jet` rouge.** Ce sont des décisions, pas des régressions.

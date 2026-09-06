@@ -2075,3 +2075,120 @@ Deux autres entrées possibles : **C22** (formaliser le cas régulier, S24-1), o
 Inchangés. **A103** — la masse volumique de l'eau, douce ou de mer. **A107** — le sort du travail
 propre à `master`, S16-S17. Et les trois choses hors de portée d'une session : nommer les personnes,
 constater l'état réel du projet, agir sur l'infrastructure — dont le dépôt distant.
+
+---
+
+## S25 — 2026-09-06 — C03 : la dissipation reçoit une formule, et `λ_cut` une moitié de réponse
+
+**Consigne reçue.** « Enchaîne sur S25 ».
+
+**Sorties.** C03 exécuté sous ses deux formes ; la mesure de seiche du harnais — période par
+passages à zéro, demi-vie par régression sur l'enveloppe ;
+[`ADR-033`](../docs/adr/ADR-033-lambda-cut-a-deux-definitions.md) ; note S25 sur C03 et complément
+sur C02 dans [`CAS-CANONIQUES`](../docs/validation/CAS-CANONIQUES.md) ; registre porté à **120 angles
+morts** ; leçons L83 à L86 ; action **S22-3 close par requalification**.
+
+**Ça tourne.** `cargo test` : **30 tests** au vert. `water-harness check` : 0 échec, hashs inchangés.
+`water-harness physics` : 1 échec (C04, voulu), 3 témoins, 5 grandeurs sans verdict.
+
+### D'abord : une recommandation que j'avais répétée trois fois était fausse
+
+S22, S23 et S24 ont toutes recommandé « C03, avec la friction de fond », et l'action S22-3 existait
+pour ça. **C'est l'inverse qu'il fallait faire.** C03 mesure la dissipation **numérique** ; une
+friction **physique** en ajoute une seconde, et la mesure ne dit plus laquelle des deux éteint la
+vague.
+
+Le raccourci est le même mot employé pour deux choses. Il s'est fait tout seul, et **personne — moi
+compris, trois fois — ne l'a rouvert**. Une friction ajoutée n'aurait fait échouer aucun test : la
+demi-vie aurait simplement été plus courte, et je l'aurais attribuée au schéma. Angle mort **A118**.
+
+### Le résultat de la session tient en une phrase
+
+**C03 passe largement — et il passe parce que son montage n'est pas dans le régime où le système
+vivra.** Demi-vie de 20,7 périodes pour 15 exigées, période à 0,003 %. Mais le montage pose
+`L = 20 m` et `dx = 0,1 m` : le fondamental a `λ = 2L = 40 m`, donc **400 points par longueur
+d'onde**. Aucun domaine de jeu n'aura cette résolution.
+
+Ma thèse annonçait l'inverse — « la période passera, la demi-vie échouera largement ». Elle était
+fausse, et la raison de son échec est plus utile que ne l'aurait été sa confirmation.
+
+### La formule
+
+En balayant la résolution, la demi-vie s'est révélée **exactement proportionnelle** au nombre de
+points par longueur d'onde, avec `R² > 0,999` sur chaque ajustement. La dérivation suit :
+
+```
+D = c·dx·(1−ν)/2                          diffusion numérique du flux de Rusanov
+D·k²·T avec k = 2π/λ et T = λ/c   ⇒   2π²(1−ν)/N        atténuation par période
+```
+
+> **demi-vie (périodes) = ln 2 · N / (2π²(1−ν))**
+
+**`c`, `λ` et `T` disparaissent tous les trois.** L'amortissement d'une onde, compté en périodes de
+cette onde, ne dépend que de sa résolution et du nombre de Courant. Prédit `0,06385·N` à
+`ν = 0,45` ; mesuré `0,0640·N` — **0,2 % d'écart**.
+
+C'est une provenance au sens d'I-14, là où il n'y avait qu'un constat possible.
+
+### Décision structurante
+
+[`ADR-033`](../docs/adr/ADR-033-lambda-cut-a-deux-definitions.md) : **`λ_cut` a deux définitions.**
+ADR-005 le pose comme « la plus petite longueur d'onde que δ transporte correctement », et une onde
+peut être mal transportée de deux façons indépendantes :
+
+| | Ce qu'elle borne | Mesure | État |
+|---|---|---|---|
+| `λ_cut` **dispersif** | l'onde arrive **au mauvais moment** | C02, sur une couche dispersive | **bloqué** (ADR-030 §5) |
+| `λ_cut` **dissipatif** | l'onde **n'arrive pas** | C03, formule ci-dessus | **mesurable aujourd'hui** |
+
+ADR-030 §5 disait vrai — `λ_cut` ne sort pas de ce véhicule — mais **n'épuisait pas la question
+qu'il fermait**. C'est l'angle mort **A120**, et le type le plus durable : une question close par
+une réponse correcte ne se rouvre plus.
+
+### Chiffres qui ont orienté la conception
+
+| Mesure | Valeur | Ce qu'elle dit |
+|---|---|---|
+| demi-vie / points par λ | **0,0640** mesuré, 0,06385 prédit | la loi tient à 0,2 % |
+| `N` pour tenir 15 périodes, `ν = 0,45` | **235 pts/λ** | le seuil de C03 est très exigeant |
+| demi-vie à 20 pts/λ | **1,3 période** | *l'eau meurt en une oscillation* |
+| demi-vie à `ν = 0,9` (160 pts/λ) | **45,3** contre 10,1 à `ν = 0,45` | ×4,5, avec un pas de temps double |
+| rampe contre mode propre | 20,7 contre 24,4 périodes | −15 %, le prix de la fidélité à l'énoncé |
+| `dx` pour `λ = 100 m`, 15 périodes | **0,43 m** — contre 1,28 m pour 5 périodes | ×3 en résolution, ×27 en coût 2D |
+
+### Ce qui n'avait pas été anticipé
+
+**Le nombre de Courant est un paramètre de conception, et le corpus n'en parle nulle part.** La
+formule fait de `1−ν` le facteur qui commande tout. Passer de 0,45 à 0,9 multiplie la demi-vie par
+4,5 **et double le pas de temps** : moins de dissipation *et* moins de calcul, sur le même schéma et
+la même grille. `ν` était implicitement rangé parmi les réglages de stabilité ; il porte en réalité
+un arbitrage — marge de stabilité contre portée des ondes — que personne n'a posé. Angle mort
+**A117**.
+
+La prédiction a été vérifiée plutôt qu'annoncée : −1,1 % à `ν = 0,45`, −4,4 % à 0,7, **−19,3 % à
+0,9**. La loi est fiable à mieux que 5 % pour `ν ≤ 0,7`, et se dégrade près de 1 — elle néglige les
+termes d'ordre supérieur, et Euler explicite y a sa propre erreur.
+
+### Ce qui n'a pas été fait, et pourquoi
+
+- **La loi n'est vérifiée que sur ce schéma.** `D = c·dx·(1−ν)/2` est la diffusion de Rusanov. Ce
+  qui se transporte est la **forme** — `demi-vie ∝ N`, indépendante de `λ` et de `c` — et la méthode.
+- **L'harmonique `n` devrait s'amortir `n` fois plus vite** : la loi le prédit, l'écart mesuré entre
+  rampe et mode propre le suggère, rien ne le teste (S25-4).
+- **Le régime `ν → 1` n'est pas couvert** (S25-5).
+
+### Session suivante recommandée
+
+**S26 — C22, formaliser le cas régulier**, et avec lui l'amendement de C08 (actions S24-1 et S24-2).
+Le montage existe dans le code depuis S24 mais pas dans le corpus de validation, et c'est le seul
+cas capable de porter une mesure d'ordre.
+
+Deux autres entrées possibles : **poser le nombre de Courant** comme paramètre de conception
+(S25-1), qui est un ADR court et à fort effet ; ou **H2**, toujours non écrit après six sessions où
+il est cité.
+
+### Arbitrages en attente
+
+Inchangés. **A103** — la masse volumique de l'eau, douce ou de mer. **A107** — le sort du travail
+propre à `master`, S16-S17. Et les trois choses hors de portée d'une session : nommer les personnes,
+constater l'état réel du projet, agir sur l'infrastructure — dont le dépôt distant.

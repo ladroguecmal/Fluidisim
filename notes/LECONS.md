@@ -1156,3 +1156,78 @@ alors en information**, et d'autant mieux que le reste du rapport est vert.
 **Réflexe** : dans un harnais, tout `Err` absorbé est un mensonge en puissance. Trois états au
 minimum — mesuré, sans signal, indisponible — et le troisième doit dire sa cause. Le corollaire vaut
 pour tout tableau de bord : une case vide et une case non alimentée ne se ressemblent que sur écran.
+
+## L83 — Une recommandation transmise gagne en autorité à chaque recopie, sans jamais être réexaminée
+
+*(S25)* Trois sessions consécutives — S22, S23, S24 — ont recommandé « C03, avec la friction de
+fond », et une action au registre existait pour ça. C'était l'inverse de ce qu'il fallait faire :
+C03 mesure la dissipation **numérique**, une friction **physique** en ajoute une seconde, et la
+mesure ne dit alors plus laquelle des deux éteint la vague.
+
+Le raccourci vient d'un mot employé pour deux choses. Il s'est fait tout seul en S22, et les deux
+sessions suivantes l'ont recopié — **moi compris, trois fois** — parce qu'une recommandation déjà
+écrite se lit comme un acquis, pas comme une hypothèse.
+
+Le pire est qu'elle n'aurait rien fait échouer. Avec la friction, la demi-vie aurait simplement été
+plus courte, et je l'aurais attribuée au schéma. **Une erreur de protocole ne se signale pas
+elle-même** : elle produit un résultat plausible.
+
+**Réflexe** : quand on s'apprête à exécuter une recommandation héritée, relire l'**énoncé** de ce
+qu'on va mesurer avant de relire la recommandation. Ici, deux phrases de C03 suffisaient.
+
+## L84 — Un cas de validation peut passer parce qu'il n'est pas dans le régime où le système vivra
+
+*(S25)* C03 offre **400 points par longueur d'onde**. Le solveur y tient 20,7 périodes de demi-vie
+pour 15 exigées : le cas passe, et un lecteur en conclut que le solveur est bon. À 20 points par
+longueur d'onde — l'ordre de grandeur d'un domaine réel — la demi-vie vaut **1,3 période** : l'eau
+meurt en une oscillation.
+
+Le cas ne ment pas ; il mesure ce qu'il mesure. Mais **son verdict dépend d'un paramètre que son
+énoncé ne mentionne pas**, et ce paramètre est justement celui qui sépare le montage du réel.
+
+C'est la deuxième occurrence dans le même corpus : C01 est presque équilibré *par accident de
+géométrie* sur son fond à pente constante (A105). **Le point commun est que ces montages ont été
+choisis pour être lisibles** — ce qui est une qualité — et que la représentativité n'a jamais été un
+critère explicite de leur écriture.
+
+**Réflexe** : pour tout cas de validation, écrire explicitement le régime qu'il place sous test —
+résolution, amplitude, rapport d'échelles — et le comparer au régime visé. L'écart est soit
+justifié, soit un angle mort.
+
+## L85 — Quand des grandeurs disparaissent d'une formule, ce qui reste est ce qu'il faut mesurer
+
+*(S25)* L'amortissement d'une onde par le schéma s'écrivait avec la célérité, la longueur d'onde, la
+période, le pas d'espace et le nombre de Courant. Après substitution :
+
+> `demi-vie (périodes) = ln 2 · N / (2π²(1−ν))`
+
+**`c`, `λ` et `T` ont disparu tous les trois.** Il ne reste que le nombre de points par longueur
+d'onde et le nombre de Courant.
+
+Ce n'est pas une simplification cosmétique : c'est la découverte de la **bonne variable**. Tant que
+la formule portait `λ` et `c`, la dissipation semblait dépendre du contenu de la mer, donc devoir
+être mesurée cas par cas. Une fois `N` isolé, une seule mesure vaut pour toutes les ondes — et la
+question « quelle résolution faut-il ? » devient une division.
+
+**Réflexe** : quand une expression se simplifie plus qu'attendu, ne pas passer à la suite. Regarder
+**ce qui reste** : c'est la variable dont le système dépend réellement, et c'est celle qu'il faut
+instrumenter, budgéter et exiger. Le corollaire pratique : exprimer les exigences dans ces
+variables-là — ici « survivre N périodes » plutôt que « survivre 40 secondes ».
+
+## L86 — Une conclusion correcte peut ne pas épuiser la question qu'elle ferme
+
+*(S25)* S22 avait établi que `λ_cut` ne sortirait pas du véhicule Saint-Venant, faute de dispersion.
+C'est exact, c'était bien argumenté, et cela a fermé la question pour trois sessions.
+
+Mais `λ_cut` borne « la plus petite longueur d'onde transportée correctement », et une onde peut
+être mal transportée de **deux façons indépendantes** : arriver au mauvais moment (dispersion), ou
+**ne pas arriver** (dissipation). La seconde était mesurable depuis le début, sur le véhicule
+existant, sans rien ajouter.
+
+Ce type d'angle mort est le plus durable qui soit. Une question laissée ouverte attire l'attention ;
+**une question fermée par une réponse correcte ne se rouvre plus** — et la qualité de la réponse est
+précisément ce qui la protège de l'examen.
+
+**Réflexe** : devant une conclusion qui bloque une question, vérifier qu'elle couvre toute la
+**définition** de ce qui était demandé, et pas seulement le chemin qu'on avait choisi pour y
+répondre. Relire la définition d'origine, pas le raisonnement qui vient d'être fait.
