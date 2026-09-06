@@ -1291,3 +1291,87 @@ Second candidat : le même exercice que S16 pour **B3**, le second banc du chemi
 
 **Arbitrages en attente — rappel.** Cinq arbitrages humains, quatre interfaces à confirmer, sept
 autres destinataires. `WaveEvent` reste l'urgence de format, à 50 octets.
+
+---
+
+## S17 — 2026-09-05 — Le dossier de réunion
+
+**Consigne reçue.** « Enchaîne S17. » Dernier travail disponible ne demandant ni mesure ni décision
+humaine préalable : rassembler ce que le système d'eau attend des autres équipes. Tout existait,
+dispersé sur 26 ADR et 7 spécifications ; rien n'était présentable.
+
+**Sorties.** [`docs/DOSSIER-REUNIONS.md`](../docs/DOSSIER-REUNIONS.md), seize fiches ; renvoi depuis
+`00_INDEX.md` ; registre porté à 95 angles morts ; leçons L59 et L60.
+
+### Le classement change, et c'est le résultat de la session
+
+L'index classait par **gravité de conséquence**. Le critère utile est l'**irréversibilité** : que
+débloque la réponse, et qu'est-ce qui devient irrattrapable si elle tarde ? Quatre rangs — ce qui
+bloque la première ligne de code, ce qui bloque le format d'une autre équipe, ce qui bloque un banc,
+ce qui est un cadrage.
+
+**Deux demandes remontent en tête, qu'aucun document ne présentait comme urgentes :**
+
+- **acter ADR-020** — la bibliothèque sans dépendance moteur. Signalé comme bloquant depuis S03, mais
+  absent de la liste des destinataires : personne n'était nommé pour l'acter ;
+- **désigner le propriétaire du harnais** — rangé depuis S03 parmi des questions de format de
+  fichier, alors que SPEC-003 §1 pose que « la qualité des décisions qui suivent est plafonnée par
+  celle du harnais » et que H1 doit précéder la première ligne du solveur.
+
+Et **les cinq arbitrages ne sont pas au même rang**. Celui sur l'échelle du temps est le plus lourd
+du projet : si la réponse est « oui », ce n'est pas un paramètre qui change, c'est le modèle de
+réplication qui tombe pour l'océan concerné — la cohérence de la houle, le modèle d'événements,
+l'écume identique entre joueurs, l'autorité du signal de navigation. Une cascade sur quatre
+documents, présentée jusqu'ici comme le premier item d'une liste de cinq.
+
+### Quatorze demandes, pas onze
+
+Le décompte de S11 comptait les *destinataires*. En écrivant les fiches, deux demandes distinctes
+sont apparues chez des destinataires que la liste ne nommait pas — acter ADR-020, et **ne pas figer
+`WaveEvent` avant que l'audio ait répondu**. Cette dernière est le seul endroit du dossier où
+**l'ordre entre deux équipes** compte : audio d'abord, réseau ensuite, une seule échéance pour deux.
+
+### Ce que chaque fiche porte
+
+Une règle d'écriture propre à ce document : **chaque fiche porte un chiffre**. Une demande sans
+chiffre se discute, une demande avec un chiffre se traite — L14 appliquée à une réunion.
+
+70,7 m d'écart à 30 km pour le terrain. 50 octets et 1 000 o/s par joueur pour `WaveEvent`.
+130 évaluations/s contre 2 000 pour l'IA. 0,63 m/s d'oscillation parasite si le danger est calculé sur
+la mauvaise vitesse. 1,78 m de mer au-delà de laquelle un nageur ne fait plus route. 1,4 s d'horizon
+de prédiction pour un avion de chasse. 14 % évaporé et 86 % gelé pour une brèche vers le vide. 3,4 km
+de fetch maximal pour la glace. 1,2 Mo contre 77 Ko par plage selon la réponse sur le trait de côte.
+
+### Une section qui manquait : ce que nous ne demandons pas
+
+Sept lignes, et elles évitent des malentendus coûteux — que le système d'eau veuille modifier un
+maillage de navigation, réclamer un budget de frame, faire simuler l'eau au serveur, ou qu'il faille
+« attendre que l'eau soit finie pour commencer », ce que seules les quatre premières fiches
+justifieraient.
+
+### Ce qui bloque le dossier lui-même
+
+**Les fiches 1 et 2 n'ont pas de destinataire nommé.** « Direction technique » et « assurance qualité
+technique » sont des rôles, pas des personnes. Personne n'est identifié pour acter ADR-020 ni pour
+arbitrer la propriété du harnais — et c'est la condition préalable à la tenue des réunions. Un
+dossier de demandes sans destinataire identifié est un dossier qui ne part pas.
+
+C'est le seul point de ce dossier que je ne peux pas résoudre : il demande de connaître
+l'organisation, ce que le dépôt ne contient pas.
+
+### Ce qui n'a pas été fait
+
+Aucune date. Le dossier classe par irréversibilité, faute de calendrier — celui-ci n'existe pas
+encore. Et le format des réunions n'est pas décidé : seize fiches ne se traitent pas en une séance.
+
+**Prochaine session recommandée.** S18 — **le dossier d'exécution du banc B3**, même exercice qu'en
+S16 pour le second banc du chemin critique. C'est ce qui reste de plus utile : B3 tranche le solveur
+volumétrique, ferme quatre points ouverts, et S16 a montré ce que ce type de dossier rapporte — un
+encadrement calculé sans mesure, une métrique d'iso-qualité qui manquait, et un scénario absent.
+
+Second candidat : le même exercice pour **B4**, juge d'ADR-001, dont le protocole porte déjà deux
+paramètres partagés avec B2.
+
+**Arbitrages en attente — rappel.** Cinq arbitrages humains et quatorze demandes extérieures, toutes
+désormais présentables. `WaveEvent` reste l'urgence de format, à 50 octets — et sa fiche dit
+maintenant à qui parler, dans quel ordre.

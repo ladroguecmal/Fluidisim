@@ -748,3 +748,35 @@ paraît acquise parce qu'elle figurait à côté d'une autre.
 **Réflexe** : pour tout banc, écrire **ce qu'il publie**, au pluriel, avant d'écrire comment il
 mesure. Si deux paramètres apparaissent ensemble dans une contrainte, ils sortent ensemble du banc
 ou ils n'en sortent pas.
+
+## L59 — Classer par ce que la réponse débloque, pas par la gravité du sujet
+
+*(S17)* Le corpus listait ses dépendances extérieures par **gravité de conséquence** : d'abord les
+interfaces dont un mauvais accord coûterait un recâblage, ensuite le reste. Reclassées par
+**irréversibilité** — que débloque la réponse, qu'est-ce qui devient irrattrapable si elle tarde ? —
+deux demandes remontent en tête que rien ne présentait comme urgentes, dont une rangée depuis quatorze
+sessions parmi des questions de format de fichier alors qu'elle conditionne le premier livrable du
+chemin critique.
+
+Les deux classements répondent à des questions différentes : « qu'est-ce qui ferait le plus de dégâts
+si c'était mal décidé » et « qu'est-ce qui ferait le plus de dégâts si c'était décidé tard ». Le
+second est le seul qui serve à établir un ordre d'action — et c'est presque toujours le premier qu'on
+écrit, parce qu'il se déduit du contenu au lieu de demander de penser au calendrier.
+
+**Réflexe** : devant toute liste de choses à obtenir de quelqu'un d'autre, la retrier une fois par
+« avant quoi ». L'ordre change, et ce qui remonte est en général ce que personne ne réclamait — parce
+qu'un bloqueur silencieux ne se signale pas, il attend.
+
+## L60 — Un dossier de demandes sans destinataire identifié ne part pas
+
+*(S17)* Seize fiches prêtes, chiffrées, tenant chacune seule. Les deux plus bloquantes s'adressent à
+« la direction technique » et à « l'assurance qualité technique » — des **rôles, pas des personnes**.
+Personne n'est identifié pour les recevoir.
+
+Le corpus pouvait tout produire sauf cela : la liste des demandes se déduit des documents, la liste
+des destinataires non. C'est une information d'organisation, et elle n'est ni dans les ADR ni dans les
+spécifications — elle n'y sera jamais.
+
+**Réflexe** : quand un livrable est destiné à quelqu'un d'extérieur, vérifier que ce quelqu'un a un
+**nom** avant de le déclarer prêt. Un document parfait adressé à une fonction reste dans le dépôt, et
+son absence de réponse se lit à tort comme un désaccord ou comme une absence d'urgence.

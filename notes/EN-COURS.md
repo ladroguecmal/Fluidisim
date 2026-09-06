@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S17
-État             : en cours
+État             : terminée
 Battement        : 2026-09-05
 Objectif         : le dossier de réunion des onze destinataires extérieurs
 ```
@@ -84,8 +84,8 @@ préalable.
 - [x] **P5** — dossier §4 : les fiches de rang 3 et 4 — données à obtenir, cadrages.
 - [x] **P6** — dossier §5–6 : **ce que nous ne demandons pas** — la section qui évite les
   malentendus coûteux — et ce qui reste ouvert.
-- [ ] **P7** — index, angles morts, décomptes.
-- [ ] **P8** — rituel de fin (`REPRISE.md` §6) : journal S17, leçons, index, jeton libéré.
+- [x] **P7** — index, angles morts, décomptes.
+- [x] **P8** — rituel de fin (`REPRISE.md` §6) : journal S17, leçons, index, jeton libéré.
 
 ### Notes de reprise
 

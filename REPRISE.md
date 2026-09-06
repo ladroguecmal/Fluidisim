@@ -12,10 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-05
-Session en cours : S17 — 2026-09-05 — dossier de réunion des destinataires extérieurs
-Dernière session : S16 — 2026-09-05 — dossier d'exécution du banc B2
+Dernière session : S17 — 2026-09-05 — dossier de réunion des destinataires extérieurs
+Session suivante : S18 — dossier d'exécution du banc B3, même exercice qu'en S16 pour le second
+                   banc du chemin critique
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
@@ -91,7 +92,7 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Seize sessions, 26 ADR, six spécifications, huit registres. Les 30 sections du document de
+Dix-sept sessions, 26 ADR, six spécifications, huit registres. Les 30 sections du document de
 questions ouvertes d'origine sont traitées. Les vingt premiers ADR ont été confrontés les uns aux
 autres en S05 (douze écarts, deux de gravité 1) et les cinq SPEC entre elles en S08 (dix écarts,
 deux de gravité 1). Tous résolus — le dernier, le **chemin poussé**, par l'écriture de `SPEC-006`
@@ -113,10 +114,9 @@ Détail à jour : `docs/00_INDEX.md`, section « État d'avancement ».
 
 ## 5. Ce qui n'est pas à toi de décider
 
-**Cinq** arbitrages de design, quatre interfaces inter-équipes et sept autres destinataires
-extérieurs attendent une réponse humaine. Ils sont listés dans `docs/00_INDEX.md`, section « Ce qui
-attend une réponse humaine », et détaillés dans
-`docs/registres/AUDIT-POINTS-OUVERTS-S11.md` §7.
+**Cinq** arbitrages de design et **quatorze demandes extérieures** attendent une réponse humaine.
+Elles sont rassemblées en fiches présentables dans **`docs/DOSSIER-REUNIONS.md`** (S17), classées par
+ce que la réponse débloque ; `docs/00_INDEX.md` en donne la vue par sujet.
 
 Les rappeler en fin de session tant qu'ils sont ouverts. Ne pas les trancher, ne pas les contourner
 par une hypothèse implicite.
