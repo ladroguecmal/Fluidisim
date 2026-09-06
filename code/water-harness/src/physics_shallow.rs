@@ -529,6 +529,236 @@ pub fn c04_ritter(t_fin: f64, n: usize, dx: f64) -> Vec<Cas> {
     ]
 }
 
+/// Instants des passages a zero **montants** d'un signal echantillonne, par interpolation lineaire.
+fn passages_a_zero(t: &[f64], y: &[f64]) -> Vec<f64> {
+    let mut v = Vec::new();
+    for k in 1..y.len() {
+        if y[k - 1] <= 0.0 && y[k] > 0.0 {
+            let f = -y[k - 1] / (y[k] - y[k - 1]);
+            v.push(t[k - 1] + f * (t[k] - t[k - 1]));
+        }
+    }
+    v
+}
+
+/// Periode moyenne deduite d'une suite de passages a zero. `None` s'il y en a moins de deux.
+fn periode_moyenne(zeros: &[f64]) -> Option<f64> {
+    if zeros.len() < 2 {
+        return None;
+    }
+    Some((zeros[zeros.len() - 1] - zeros[0]) / (zeros.len() - 1) as f64)
+}
+
+/// **Demi-vie d'amplitude d'une seiche, en périodes** — fonction pure, exerçable seule.
+///
+/// Extraite en S36 de la fermeture qui vivait dans [`c03_seiche`]. Le motif est celui de **L118** :
+/// *un garde-fou qu'on ne peut pas exercer isolément est un garde-fou qu'on n'exercera pas* — et il
+/// vaut pour une **mesure** autant que pour un contrôle. Tant que cette grandeur ne se calculait
+/// qu'en lançant `c03_seiche`, le tableau d'`ADR-040` §5 n'était vérifiable par personne : il fallait
+/// relire une sortie imprimée.
+///
+/// La méthode : enveloppe par le pic de `|mode fondamental|` sur chaque demi-période, puis
+/// régression linéaire de `ln(amplitude)` sur le temps. `ln(2)` divisé par le taux donne la demi-vie,
+/// rapportée à la période de référence `T = 2L/√(gh₀)`. Une pente positive rend `INFINITY` — le
+/// schéma n'amortit pas, et aucune demi-vie n'a de sens.
+pub fn demi_vie_seiche(m: usize, pas_m: f64, h0: f64, eta_bord: f64, periodes: f64, sc: Schema) -> f64 {
+    let l = m as f64 * pas_m;
+    let t_ref = 2.0 * l / (G * h0).sqrt();
+    let echantillons = (periodes * 64.0) as usize;
+    let dt_e = periodes * t_ref / echantillons as f64;
+
+    let mut a2 = ArenaAllocator::with_capacity(1 << 22);
+    let j2 = SequentialJobs;
+    let s2 = StderrSink;
+    let mut h2 = HostServices {
+        alloc: &mut a2,
+        jobs: &j2,
+        sink: &s2,
+    };
+    let mut e = Shallow1D::configure_seiche(&mut h2, m, pas_m, h0, eta_bord).expect("configuration");
+    e.regler_ordre2(sc.ordre2);
+    e.regler_rk2(sc.rk2);
+
+    let (mut tx, mut ly) = (Vec::new(), Vec::new());
+    let mut pics: Vec<(f64, f64)> = Vec::new();
+    for k in 0..=echantillons {
+        e.avancer_jusqu_a(k as f64 * dt_e, 0.45);
+        pics.push((e.temps(), e.mode_fondamental(h0).abs()));
+    }
+    let mut j = 0usize;
+    while j + 32 <= pics.len() {
+        let (mut pic, mut tp) = (0.0f64, pics[j].0);
+        for q in j..j + 32 {
+            if pics[q].1 > pic {
+                pic = pics[q].1;
+                tp = pics[q].0;
+            }
+        }
+        if pic > 0.0 {
+            tx.push(tp);
+            ly.push(pic.ln());
+        }
+        j += 32;
+    }
+    let mm = tx.len() as f64;
+    let (sx, sy): (f64, f64) = (tx.iter().sum(), ly.iter().sum());
+    let sxx: f64 = tx.iter().map(|x| x * x).sum();
+    let sxy: f64 = tx.iter().zip(ly.iter()).map(|(x, y)| x * y).sum();
+    let tau = (mm * sxy - sx * sy) / (mm * sxx - sx * sx);
+    if tau < 0.0 {
+        (2.0f64).ln() / -tau / t_ref
+    } else {
+        f64::INFINITY
+    }
+}
+
+/// **C03 — seiche en bassin clos.**
+///
+/// Bassin rectangulaire ferme, `L = 20 m`, `h = 2 m`, surface initiale inclinee, 20 periodes.
+/// Reference `T = 2L/√(gh) = 9,03 s` ; periode a ±1 % ; **demi-vie d'amplitude > 15 periodes**.
+///
+/// # Deux facons de mesurer une periode, et elles ne donnent pas la meme
+///
+/// Le signal le plus evident est l'elevation **au mur**. C'est aussi le plus contamine : une
+/// surface inclinee contient les harmoniques impaires en `1/n²`, et le mur est precisement l'endroit
+/// ou elles sont toutes en phase. Le troisieme mode, qui pese `1/9` en amplitude, y oscille **trois
+/// fois plus vite** et deplace les passages a zero.
+///
+/// La projection sur `cos(πx/L)` isole le fondamental. Les deux mesures sont rapportees : si elles
+/// different, ce n'est pas le solveur qui est en cause mais la definition de la grandeur — la meme
+/// famille de piege qu'A150, ou la position d'un front depend du seuil qui la definit.
+///
+/// # La demi-vie est la mesure de la dissipation numerique
+///
+/// `CAS-CANONIQUES` le dit sans detour : c'est elle qui decide si une houle traverse un domaine ou
+/// s'y eteint, et « c'est un chiffre qu'on ne pense presque jamais a mesurer ». Elle est mesuree ici
+/// sur l'enveloppe du fondamental, par regression exponentielle plutot que par un seuil unique —
+/// un seuil unique dependrait du hasard de l'echantillonnage au voisinage du croisement.
+pub fn c03_seiche(n: usize, dx: f64, h0: f64, eta_bord: f64, periodes: f64) -> Vec<Cas> {
+    let mut alloc = ArenaAllocator::with_capacity(1 << 22);
+    let jobs = SequentialJobs;
+    let sink = StderrSink;
+    let mut host = HostServices {
+        alloc: &mut alloc,
+        jobs: &jobs,
+        sink: &sink,
+    };
+    let mut d = Shallow1D::configure_seiche(&mut host, n, dx, h0, eta_bord).expect("configuration");
+    d.regler_ordre2(SCHEMA_RETENU.ordre2);
+    d.regler_rk2(SCHEMA_RETENU.rk2);
+
+    let l = d.longueur();
+    let t_ref = 2.0 * l / (G * h0).sqrt();
+    let echantillons = (periodes * 64.0) as usize;
+    let dt_e = t_ref / 64.0;
+
+    let (mut ts, mut mur, mut mode) = (Vec::new(), Vec::new(), Vec::new());
+    for k in 0..=echantillons {
+        d.avancer_jusqu_a(k as f64 * dt_e, 0.45);
+        ts.push(d.temps());
+        mur.push(d.surface(0) - h0);
+        mode.push(d.mode_fondamental(h0));
+    }
+
+    let t_mur = periode_moyenne(&passages_a_zero(&ts, &mur)).unwrap_or(f64::NAN);
+    let t_mode = periode_moyenne(&passages_a_zero(&ts, &mode)).unwrap_or(f64::NAN);
+
+    // Enveloppe : le maximum de |mode| sur chaque demi-periode, puis regression de ln(amplitude)
+    // sur le temps. La demi-vie vaut ln(2) / taux de decroissance.
+    let par_demi = 32.max(1);
+    let (mut te, mut ae) = (Vec::new(), Vec::new());
+    let mut k = 0usize;
+    while k + par_demi <= mode.len() {
+        let mut pic = 0.0f64;
+        let mut t_pic = ts[k];
+        for j in k..k + par_demi {
+            if mode[j].abs() > pic {
+                pic = mode[j].abs();
+                t_pic = ts[j];
+            }
+        }
+        if pic > 0.0 {
+            te.push(t_pic);
+            ae.push(pic.ln());
+        }
+        k += par_demi;
+    }
+    let taux = {
+        let m = te.len() as f64;
+        let (sx, sy): (f64, f64) = (te.iter().sum(), ae.iter().sum());
+        let sxx: f64 = te.iter().map(|x| x * x).sum();
+        let sxy: f64 = te.iter().zip(ae.iter()).map(|(x, y)| x * y).sum();
+        (m * sxy - sx * sy) / (m * sxx - sx * sx)
+    };
+    let demi_vie_s = if taux < 0.0 {
+        (2.0f64).ln() / -taux
+    } else {
+        f64::INFINITY
+    };
+    let demi_vie_periodes = demi_vie_s / t_ref;
+
+    println!("  C03 — seiche, L = {l:.1} m, h = {h0:.1} m, {periodes:.0} periodes simulees :");
+    println!("      periode de reference  2L/√(gh)          = {t_ref:>9.4} s");
+    println!("      periode au mur                          = {t_mur:>9.4} s   ecart {:>6.3} %",
+             (t_mur - t_ref).abs() / t_ref * 100.0);
+    println!("      periode du mode fondamental             = {t_mode:>9.4} s   ecart {:>6.3} %",
+             (t_mode - t_ref).abs() / t_ref * 100.0);
+    println!("      amplitude : {:.6} m au depart, {:.6} m a la fin",
+             ae.first().map(|x| x.exp()).unwrap_or(0.0),
+             ae.last().map(|x| x.exp()).unwrap_or(0.0));
+    println!("      demi-vie d'amplitude                    = {demi_vie_periodes:>9.3} periodes");
+
+    // La demi-vie depend-elle de la maille ? Si oui, ce n'est pas une propriete du schema mais du
+    // rapport entre la maille et la longueur d'onde — et l'enonce de B-S22 sur l'ordre un doit etre
+    // borne en consequence.
+    // La fermeture d'origine est devenue [`demi_vie_seiche`], fonction pure (S36) : la mesure
+    // qu'elle porte est citée dans `ADR-040` §5 et n'était exerçable qu'en lançant ce cas entier.
+    let demi_vie = |m: usize, pas_m: f64, sc: Schema| -> f64 {
+        demi_vie_seiche(m, pas_m, h0, eta_bord, periodes, sc)
+    };
+
+    println!("  C03 — demi-vie selon la finesse de maille (λ = 2L = {:.0} m) :", 2.0 * l);
+    println!("      dx        mailles/λ    ordre 1     MUSCL + RK2");
+    for (m, pas_m) in [(25usize, 0.8f64), (50, 0.4), (100, 0.2), (200, 0.1), (400, 0.05)] {
+        println!(
+            "      {pas_m:>6.3} m   {:>7.0}      {:>8.2}      {:>8.2}   periodes",
+            2.0 * l / pas_m,
+            demi_vie(m, pas_m, SCHEMAS[0]),
+            demi_vie(m, pas_m, SCHEMA_RETENU)
+        );
+    }
+
+    vec![
+        Cas {
+            id: "C03-T",
+            grandeur: "periode de seiche, mode fondamental isole".into(),
+            mesure: t_mode,
+            reference: t_ref,
+            tolerance_rel: 0.01,
+            source: "CAS-CANONIQUES C03 — T = 2L/√(gh)",
+        },
+        Cas {
+            id: "C03-T-mur",
+            grandeur: "periode lue au mur (contaminee par les harmoniques)".into(),
+            mesure: t_mur,
+            reference: t_ref,
+            tolerance_rel: 0.01,
+            source: "meme reference, autre definition de la grandeur — voir le module",
+        },
+        Cas {
+            id: "C03-demi-vie",
+            grandeur: "demi-vie d'amplitude, en periodes".into(),
+            mesure: demi_vie_periodes.min(1e6),
+            // Un minorant se compare mal avec une tolerance relative : on le pose en reference et
+            // on tolere 100 % **en dessous**, ce qui revient a exiger `mesure ≥ 0`. Le cas est donc
+            // juge a la main ci-dessous, et cette ligne sert a afficher les deux nombres.
+            reference: 15.0,
+            tolerance_rel: if demi_vie_periodes >= 15.0 { 1e9 } else { 0.0 },
+            source: "CAS-CANONIQUES C03 — demi-vie > 15 periodes (minorant, pas une egalite)",
+        },
+    ]
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -620,6 +850,68 @@ mod tests {
             "l'ordre deux doit faire mieux : ordre 1 = {e1:e}, ordre 2 = {e2:e}"
         );
         println!("C04 — erreur L¹ : ordre 1 = {e1:e}, ordre 2 = {e2:e}, gain ×{:.2}", e1 / e2);
+    }
+
+    /// **C03 — les assertions passent au montage de la lignée B** : 400 mailles de 5 cm sur 20 m,
+    /// soit **800 mailles par longueur d'onde** (`λ = 2L = 40 m`), 20 périodes simulées.
+    #[test]
+    fn c03_les_assertions_passent() {
+        let cas = c03_seiche(400, 0.05, 2.0, 0.02, 20.0);
+        for c in &cas {
+            assert!(
+                c.passe(),
+                "{} : {} — mesuré {:.6}, référence {:.6}",
+                c.id, c.grandeur, c.mesure, c.reference
+            );
+        }
+    }
+
+    /// **Le tableau d'`ADR-040` §5 se reproduit-il ?** C'est la confrontation la plus exigeante de
+    /// la session : quatre valeurs, deux schémas, deux finesses, au centième de période.
+    ///
+    /// | mailles/λ | ordre 1 | ordre 2 |
+    /// |---|---|---|
+    /// | 100 | 6,01 | 44,36 |
+    /// | 800 | 43,12 | 161,14 |
+    ///
+    /// > **La première lecture de S36 s'est trompée ici, et l'erreur vaut d'être dite.** Le chiffre
+    /// > **43,1** circule dans `ADR-039` et dans `CAS-CANONIQUES` **sans mention du schéma**, et il a
+    /// > été pris pour la valeur du cas ; le montage courant étant à l'ordre deux, il rend 161,14.
+    /// > Rien n'était faux dans le code. **Une demi-vie est un couple (schéma, maille), pas un
+    /// > nombre** — la même forme qu'**A153** pour l'ordre d'un schéma.
+    #[test]
+    fn c03_le_tableau_des_demi_vies_se_reproduit() {
+        let attendu = [
+            (50usize, 0.4f64, SCHEMAS[0], 6.01, "100 mailles/λ, ordre 1"),
+            (50, 0.4, SCHEMA_RETENU, 44.36, "100 mailles/λ, ordre 2"),
+            (400, 0.05, SCHEMAS[0], 43.12, "800 mailles/λ, ordre 1"),
+            (400, 0.05, SCHEMA_RETENU, 161.14, "800 mailles/λ, ordre 2"),
+        ];
+        for (m, pas, sc, publie, quoi) in attendu {
+            let mesure = demi_vie_seiche(m, pas, 2.0, 0.02, 20.0, sc);
+            let ecart = (mesure - publie).abs() / publie * 100.0;
+            println!("C03 {quoi:<22} — publié {publie:>7.2} | mesuré {mesure:>7.2} | écart {ecart:.2} %");
+            assert!(
+                ecart < 1.0,
+                "ADR-040 §5 annonce {publie} périodes pour {quoi} ; mesuré {mesure:.3}"
+            );
+        }
+    }
+
+    /// **Le seuil de C03 sépare bien les deux schémas à maille grossière.** À 100 mailles/λ,
+    /// l'ordre un rate le minorant de 15 périodes et l'ordre deux le franchit largement.
+    ///
+    /// C'est le témoin d'`ADR-039` : *un cas sans conditions de mesure ne classe personne*
+    /// (**A152**, sévérité 1). Le même code, le même cas, la même maille — et deux verdicts
+    /// opposés selon le seul schéma. Sans ce témoin, la ligne « ≥ 250 mailles/λ » de
+    /// `CAS-CANONIQUES` se lirait comme une précaution d'auteur.
+    #[test]
+    fn c03_a_maille_grossiere_le_schema_decide_du_verdict() {
+        let o1 = demi_vie_seiche(50, 0.4, 2.0, 0.02, 20.0, SCHEMAS[0]);
+        let o2 = demi_vie_seiche(50, 0.4, 2.0, 0.02, 20.0, SCHEMA_RETENU);
+        println!("C03 à 100 mailles/λ — ordre 1 : {o1:.2} périodes (échec) | ordre 2 : {o2:.2} (succès)");
+        assert!(o1 < 15.0, "l'ordre un doit rater le minorant de 15 ; mesuré {o1:.3}");
+        assert!(o2 > 15.0, "l'ordre deux doit le franchir ; mesuré {o2:.3}");
     }
 
     /// **L'exactitude du schéma équilibré ne dépend pas de la maille.** C'est la propriété que
