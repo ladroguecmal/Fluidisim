@@ -12,11 +12,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-05
+Session en cours : S18 — 2026-09-05 — les cinq arbitrages, tranchés sur délégation
 Dernière session : S17 — 2026-09-05 — dossier de réunion des destinataires extérieurs
-Session suivante : S18 — dossier d'exécution du banc B3, même exercice qu'en S16 pour le second
-                   banc du chemin critique
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :

@@ -59,111 +59,50 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S17
-État             : terminée
+Session          : S18
+État             : en cours
 Battement        : 2026-09-05
-Objectif         : le dossier de réunion des onze destinataires extérieurs
+Objectif         : trancher les cinq arbitrages, sur délégation explicite de l'utilisateur
 ```
 
 ### Plan
 
-Tout ce qu'on demande à l'extérieur existe — dispersé sur 26 ADR et 7 spécifications. Rien n'est
-présentable. C'est le dernier travail disponible qui ne demande ni mesure ni décision humaine
-préalable.
+**Changement de mandat.** `CLAUDE.md` et `REPRISE.md` §5 posent depuis S06 que les arbitrages de
+design ne sont pas à moi. L'utilisateur les délègue explicitement — « prends les décisions ». Cette
+règle vient de lui ; il peut la lever, et il la lève.
+
+**Conduite adoptée pour une décision prise par délégation** : elle doit être **plus argumentée**
+qu'une décision ordinaire, pas moins, et **bon marché à défaire**. Chaque section porte donc son
+motif, son chiffre, et ce qu'il faudrait changer si la réponse était l'inverse.
 
 - [ ] **P1** — déclarer le plan, prendre le jeton, mettre à jour le battement.
-- [x] **P2** — **classer par ce que la réponse débloque**, et non par l'importance du sujet.
-  *Thèse : l'ordre de `00_INDEX.md` classe par gravité de conséquence. Le bon critère est
-  l'irréversibilité — ce qui bloque la première ligne de code passe devant ce qui bloque le format
-  d'une autre équipe, qui passe devant ce qui bloque un banc. Je m'attends à ce que l'ordre change,
-  et notamment que « qui possède le harnais » remonte très haut : il conditionne H1, qui conditionne
-  la première ligne du solveur.*
-- [x] **P3** — dossier §1–2 : comment le lire, et le tableau de synthèse ordonné.
-- [x] **P4** — dossier §3 : les fiches de rang 1 et 2 — ce qui bloque du code, ce qui bloque un
-  format extérieur.
-- [x] **P5** — dossier §4 : les fiches de rang 3 et 4 — données à obtenir, cadrages.
-- [x] **P6** — dossier §5–6 : **ce que nous ne demandons pas** — la section qui évite les
-  malentendus coûteux — et ce qui reste ouvert.
-- [x] **P7** — index, angles morts, décomptes.
-- [x] **P8** — rituel de fin (`REPRISE.md` §6) : journal S17, leçons, index, jeton libéré.
+- [ ] **P2** — `ADR-027` §1–2 : le cadre de la délégation · **arbitrage 1, l'échelle du temps**.
+  *Thèse : la question mêle trois besoins de design — voyage rapide, pause, mode photo — dont aucun
+  n'exige de mettre à l'échelle le temps **par joueur**. La réponse est non, et elle ne coûte rien
+  au design une fois les trois besoins traités séparément.*
+- [ ] **P3** — `ADR-027` §3–4 : **la glace** · **le trait de côte mobile**.
+  *Thèse : le second se dissout. « Qui porte le trait de côte » suppose qu'il soit stocké ; il est
+  dérivé de la marée analytique, donc personne ne le porte — au même titre que l'écume permanente.*
+- [ ] **P4** — `ADR-027` §5–7 : **la durée de vie d'un nœud V** · **la propriété du harnais** ·
+  ce qui reste ouvert.
+  *Thèse : le premier se dissout aussi — l'eau d'un objet suit la politique de cet objet, et n'a
+  pas besoin d'une règle propre.*
+- [ ] **P5** — notes correctives dans ADR-003, ADR-010, ADR-011, ADR-017, ADR-018, SPEC-003,
+  SPEC-006.
+- [ ] **P6** — `CLAUDE.md`, `REPRISE.md`, `00_INDEX.md`, `DOSSIER-REUNIONS.md` : le mandat a changé,
+  et ce qui reste non décidable doit être dit précisément.
+- [ ] **P7** — angles morts, décomptes.
+- [ ] **P8** — rituel de fin (`REPRISE.md` §6) : journal S18, leçons, index, jeton libéré.
 
 ### Notes de reprise
 
-- **Forme** : `docs/DOSSIER-REUNIONS.md`, à la racine de `docs/` et non dans un sous-dossier — c'est
-  le seul document du corpus destiné à être **sorti du dépôt** et lu par quelqu'un qui n'y reviendra
-  pas. Une fiche par destinataire, tenant seule, sans renvoi obligatoire.
-- **Règle d'écriture propre à ce document** : chaque fiche porte **un chiffre**. Une demande sans
-  chiffre se discute ; une demande avec un chiffre se traite. C'est L14 appliquée à une réunion.
-
-#### P2 — le classement change, et il change beaucoup
-
-`00_INDEX.md` classe en deux groupes — quatre interfaces, sept autres destinataires — et désigne le
-terrain comme « le plus urgent des quatre ». C'est un classement par **gravité de conséquence**.
-
-Le critère utile est autre : **qu'est-ce que la réponse débloque, et qu'est-ce qui devient
-irréversible si elle tarde ?** Appliqué, il donne quatre rangs, et l'ordre n'est pas celui de
-l'index.
-
-**Rang 1 — bloque la première ligne de code.** Trois demandes, dont deux que l'index ne présentait
-pas comme urgentes :
-
-- **`int64` ou `f64` pour les positions monde** (ADR-002 §7.1). Décision partagée avec le réseau et
-  la physique solide. Elle précède tout code qui manipule une position, c'est-à-dire tout code.
-- **Qui possède le harnais de validation** (SPEC-003 §11.4). SPEC-003 §1 pose que « la qualité des
-  décisions qui suivent est plafonnée par la sienne », et §10 que **H1 doit exister avant la première
-  ligne du solveur**. Une question de propriété rangée jusqu'en S11 parmi des choix de format de
-  fichier conditionne donc le premier livrable du chemin critique.
-- **ADR-020 acté** — la bibliothèque sans dépendance moteur. Déjà signalé comme « bloquant, à acter
-  avant la première ligne de code », mais absent de la liste des destinataires : personne n'est nommé
-  pour l'acter.
-
-**Rang 2 — bloque le format d'une autre équipe, et le retard se paie en migration.**
-
-- **Le géoïde dans l'outil de terrain** — avant qu'un mètre carré de côte ne soit sculpté.
-- **Les trois champs de `WaveEvent`** — avant que le réseau ne fige le format. Et l'audio doit donc
-  répondre **avant** le réseau : deux destinataires, une seule échéance, ce que l'index ne dit pas.
-- **Le signal de traversabilité** — avant que l'IA ne fige son format de maillage de navigation.
-- **Le modèle du nageur** — avant que l'équipe personnage ne fige sa machine à états.
-
-**Rang 3 — bloque un banc.** La table `a_max` par archétype (véhicules) conditionne B8 ; le modèle de
-diffusion sous-marine (rendu) conditionne B11.
-
-**Rang 4 — cadrages, sans échéance dure.** Air respirable, brèche vers le vide, équilibrage de `K`,
-`V_min` et les TTL.
-
-**Et les cinq arbitrages ne sont pas au même rang.** L'index les présente comme une liste homogène ;
-ils ne le sont pas :
-
-| Arbitrage | Ce que « oui » invalide | Rang |
-|---|---|---|
-| **Temps mis à l'échelle par joueur** | la cohérence multijoueur de B, donc ADR-009 en entier pour l'océan concerné, l'écume cohérente entre joueurs (ADR-014 §2.3) et l'autorité du signal de traversabilité (SPEC-006 §2.6) | **1** — cascade sur quatre documents |
-| Propriété du harnais | rien, mais bloque H1 | **1** |
-| Trait de côte mobile | le nombre d'états de la bibliothèque côtière et de la polyligne | 2 |
-| Glace | deux champs de `TraversabilitySample` ; **coût désormais borné** — fetch max 3,4 km à 5 m/s | 3 |
-| Durée de vie d'un nœud V | le volume de stockage du monde | 3 |
-
-**L'arbitrage n°1 est le plus lourd du projet et il est présenté comme le premier d'une liste de
-cinq.** Si la réponse est « oui », ce n'est pas un paramètre qui change : c'est le modèle de
-réplication qui tombe pour l'océan concerné. Le dossier doit le dire ainsi.
-
-#### P3 à P6 — dossier écrit d un tenant
-
-`docs/DOSSIER-REUNIONS.md`, seize fiches et sept sections. Comme en S16, le découpage du plan s est
-révélé artificiel : les fiches se tiennent par leur classement, et couper au milieu aurait produit
-des commits illisibles seuls. Fait en un, déclaré ici.
-
-**Trois choses que le dossier fait apparaître et que l index ne portait pas :**
-- **quatorze demandes, pas onze.** Acter ADR-020 et figer `WaveEvent` après l audio sont deux
-  demandes distinctes, adressées à deux destinataires que la liste ne nommait pas ;
-- **les fiches 1 et 2 n ont pas de destinataire nommé** — « direction technique » et « assurance
-  qualité technique » sont des rôles, pas des personnes. Personne n est identifié pour acter ADR-020
-  ni pour arbitrer la propriété du harnais. C est la condition préalable à la tenue des réunions
-  elles-mêmes, et cela n était écrit nulle part ;
-- **une section « ce que nous ne demandons pas »**, sept lignes. Elle évite qu une équipe se croie
-  sollicitée ou nous attribue une intention — en particulier « attendre que l eau soit finie pour
-  commencer », que seules les quatre premières fiches justifieraient.
-
-*Correctif P8.* Le contrôle des décomptes du rituel a attrapé `CLAUDE.md`, qui annonçait encore
-« quatre interfaces et sept autres destinataires » et renvoyait au registre S11. C est le fichier
-d amorce : une session neuve le lit en premier et aurait rappelé une liste périmée sans connaître le
-dossier de réunion. Deuxième fois que ce contrôle attrape ce fichier précis — après S11.
+- **Ce que je ne peux toujours pas décider, et qui n'est pas un arbitrage** : nommer les personnes
+  (fiches 1 et 2 du dossier de réunion), constater l'état réel du projet — du terrain a-t-il été
+  sculpté, un format réseau existe-t-il, du code existe-t-il — et créer un dépôt distant. Ce sont
+  des **faits** et des **actions sur l'infrastructure**, pas des décisions de conception. La
+  distinction doit être écrite dans `CLAUDE.md`, sans quoi une session suivante croira que tout a
+  été délégué.
+- **Deux des cinq se dissolvent.** Le trait de côte et le nœud V posaient chacun une question dont
+  la prémisse est fausse. C'est la troisième fois que la méthode le produit (L03), et cela vaut
+  d'être noté : un arbitrage qui traîne est souvent un arbitrage mal posé, et l'attente d'une
+  réponse humaine masque le fait qu'il n'y a rien à trancher.
