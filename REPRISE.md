@@ -12,11 +12,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-05
+Session en cours : S20 — 2026-09-05 — H1, le premier étage du harnais
 Dernière session : S19 — 2026-09-05 — ADR-020 acté, et il n'y a pas d'autres équipes
-Session suivante : S20 — **écrire H1**, si l'ajout de code est autorisé. ADR-020 étant acté, c'est
-                   le seul travail dont la valeur ne décroît pas
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :

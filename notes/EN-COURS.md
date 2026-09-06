@@ -59,71 +59,47 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S19
-État             : terminée
+Session          : S20
+État             : en cours
 Battement        : 2026-09-05
-Objectif         : trois réponses de l'utilisateur, dont une qui change la nature du projet
+Objectif         : écrire H1 — le premier étage du harnais. Du code qui s'exécute.
 ```
 
 ### Plan
 
-Trois informations reçues, d'importance très inégale :
+Dix-neuf sessions de conception, rien qui tourne. ADR-020 est acté et l'ajout de code est autorisé :
+H1 est le premier étage du chemin critique, et le seul livrable **vérifiable par quelqu'un d'autre
+que moi**.
 
-1. **ADR-020 est acté.** Le premier ADR à quitter le statut « proposée ». Le blocage n°1 du dossier
-   de réunion tombe, et avec lui l'obstacle à l'écriture du harnais.
-2. **Il n'y a pas d'autres équipes.** Je suis seul à travailler sur le projet ; les développeurs
-   observent. **Les onze destinataires extérieurs n'existent pas.**
-3. **« Je ne sais pas »** sur `int64`/`f64` et sur l'état réel du projet.
+**Définition de fin, non négociable** (SPEC-003 §1) : la batterie déterministe tourne en **moins de
+60 secondes**, sans GPU, à chaque commit.
 
-Le second point est de loin le plus lourd, et il n'est pas de la logistique : il invalide la
-catégorie « attend une réponse d'une autre équipe », qui structure le corpus depuis S02.
-
-- [ ] **P1** — déclarer le plan, prendre le jeton, mettre à jour le battement.
-- [x] **P2** — `ADR-028` §1–2 : ADR-020 acté · **ce que « il n'y a pas d'autres équipes » change**.
-  *Thèse : quatorze « demandes extérieures » ne sont pas des demandes. Ce sont des **décisions
-  différées à personne**. C'est L61 à l'échelle du corpus — l'étiquette « attend un tiers » a protégé
-  quatorze questions de l'examen qui les aurait tranchées.*
-- [x] **P3** — `ADR-028` §3 : **les positions monde**, tranchées faute d'interlocuteur.
-  *Thèse : le choix se dérive au lieu de se choisir. La résolution du point fixe se déduit de l'ulp
-  d'un `f32` au rayon de référentiel — 4096 m — et le déterminisme devient structurel au lieu d'être
-  disciplinaire.*
-- [x] **P4** — `ADR-028` §4 : **la propriété du harnais, révisée**. ADR-027 §6 confiait les seuils à
-  une assurance qualité qui n'existe pas.
-  *Thèse : avec un acteur unique, le conflit d'intérêt ne se supprime pas, il se contraint dans le
-  temps — les seuils s'écrivent **avant** la mesure, dans un commit qui la précède. C'est l'écriture
-  anticipée de S07 appliquée à la mesure.*
-- [x] **P5** — `ADR-028` §5–6 : le dossier de réunion requalifié · ce qui reste ouvert.
-- [x] **P6** — répercussions : `REPRISE.md` §1 et §5, `CLAUDE.md`, `00_INDEX.md`,
-  `DOSSIER-REUNIONS.md`, ADR-020, ADR-002 §7.1, SPEC-003 §11.4.
-- [x] **P7** — angles morts, décomptes.
-- [x] **P8** — rituel de fin.
+- [ ] **P1** — plan, jeton, et lever la règle « Markdown uniquement » de `CLAUDE.md`.
+- [ ] **P2** — `water-core` : types, services d'hôte, **B minimal**, hash de conformité.
+  *Thèse : le déterminisme bit à bit d'I-03 ne survit pas à un `sin()` de bibliothèque standard —
+  les fonctions transcendantes ne sont pas spécifiées bit à bit et diffèrent entre plateformes.
+  ADR-003 impose « sémantique IEEE stricte, ordre de sommation fixé » et ne dit rien des
+  transcendantes. Si la thèse tient, c'est une découverte que dix-neuf sessions de conception n'ont
+  pas faite, et elle sort à la première ligne de code.*
+- [ ] **P3** — `water-harness` : lecteur de scénario, hôte, allocateur compteur avec `seal()`,
+  mode `check`.
+- [ ] **P4** — **compiler, exécuter, vérifier.** Un scénario réel, un hash, un compte
+  d'allocations, un temps mesuré.
+- [ ] **P5** — `ADR-029` : le langage, et ce que l'écriture du code a appris.
+- [ ] **P6** — index, angles morts, décomptes.
+- [ ] **P7** — rituel de fin.
 
 ### Notes de reprise
 
-- **Ce que « il n'y a pas d'autres équipes » ne change pas** : les contraintes restent vraies. Le
-  géoïde décale toujours une plage de 70,7 m à 30 km, que l'équipe terrain existe ou non. Ce qui
-  change est **qui répond** — et la réponse est : moi, sous la délégation déjà donnée en S18.
-- **Ce que cela change pour la suite** : le blocage n'est plus « obtenir des réponses ». ADR-020
-  étant acté, **H1 est écrivable**. C'est le premier élément du chemin critique, et le seul moyen de
-  convertir dix-huit sessions de conception en quelque chose qui s'exécute et se vérifie.
-  Une réserve à lever avant : `CLAUDE.md` pose « **Markdown uniquement** ». Écrire H1 ajoute du code
-  à un dépôt qui n'en contient pas — c'est un changement de nature, et il se demande.
-
-#### P2 à P5 — ADR-028, six sections
-
-**La requalification est le fond de la session.** Quatorze demandes extérieures deviennent : une
-actée, une décision technique tranchée, une décision d organisation sans objet, sept spécifications
-d un travail à faire, trois questions de design de jeu sans jeu, trois déjà tranchées en S18.
-
-**Règle retenue** : une session ne classe plus rien en « attend une autre équipe ». Elle classe en
-« à trancher, sans interlocuteur ». La première formulation ferme la question, la seconde la laisse
-dans le champ de travail — et c est exactement la différence qui a coûté dix-sept sessions.
-
-**Les positions monde se dérivent.** Résolution 1/2048 m = l ulp exact d un f32 à 4096 m, le rayon de
-référentiel d I-08. Seule valeur qui ne perde rien à la conversion et n en stocke pas davantage.
-Motif principal : le déterminisme d I-03 devient **structurel** — un entier se comporte pareil
-partout, sans dépendre d un drapeau de compilation. L19 appliquée au déterminisme.
-
-**Le harnais** : le conflit d intérêt ne se supprime pas faute de second acteur, il se contraint dans
-le temps. Un seuil s écrit **avant** la mesure qu il juge, dans un commit qui la précède. C est
-l écriture anticipée de S07 appliquée à la mesure, avec le même détecteur — git.
+- **Le langage se tranche empiriquement autant que techniquement.** Inventaire de la machine :
+  `rustc 1.97` et `cargo` présents ; **aucun compilateur C++** — ni `cl`, ni `g++`, ni `clang`, ni
+  `cmake`. Écrire le cœur en C++ produirait du code que je ne peux **ni compiler ni exécuter**,
+  c'est-à-dire exactement ce que H1 doit cesser de produire.
+  L'argument technique va dans le même sens, et il est plus fort : **Rust ne contracte pas les
+  opérations flottantes** (`a*b+c` n'est jamais fusionné en FMA sans appel explicite), là où GCC et
+  Clang le font **par défaut** — `-ffp-contract=fast`. C'est L64 écrite hier : entre deux
+  représentations également capables, choisir celle dont la propriété critique survit à la
+  négligence.
+- **Zéro dépendance.** `water-core` n'a aucune dépendance — c'est ADR-020. Le harnais non plus : le
+  lecteur de scénario est écrit à la main sur le sous-ensemble de TOML dont SPEC-003 §3 a besoin.
+  Motif secondaire mais réel : la construction doit marcher sans réseau.

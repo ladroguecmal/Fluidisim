@@ -21,7 +21,10 @@ Ce dépôt est la connaissance projet du **système de gestion de l'eau** d'un j
 ## Les cinq règles qui ne se négocient pas
 
 - **Français**, réponses courtes et factuelles. Le fond va dans les fichiers, pas dans le message.
-- **Markdown uniquement.** Pas de page HTML, pas d'artefact publié.
+- **Markdown pour la conception, code pour le code** *(S20)*. La règle d'origine — « Markdown
+  uniquement » — visait les artefacts publiés et les pages HTML ; elle reste vraie pour eux. Depuis
+  que ADR-020 est acté et que l'utilisateur a autorisé l'ajout de code (S20), le dépôt contient un
+  arbre `code/` en Rust. Toujours pas de page HTML, pas d'artefact publié.
 - **Le plan se déclare avant le travail** dans `notes/EN-COURS.md`, et se commit seul. Une étape
   par commit, message `S<n> P<k> — …`, aucune étape de plus d'un quart d'heure.
 - **Un ADR n'est jamais réécrit.** Une erreur factuelle reçoit une note corrective datée ; une
