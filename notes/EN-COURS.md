@@ -79,7 +79,7 @@ exécutées — c'est l'angle mort A89, écrit en S14.
   `CAS-CANONIQUES`), recensées dans tout le corpus et non dans les seuls registres.
   *Thèse : c'est là que le taux d'exécution s'effondre, parce que ces documents n'appartiennent à
   aucune session — aucune n'a travaillé la validation depuis S03.*
-- [ ] **P4** — `ANGLES-MORTS` : un angle mort comblé se distingue-t-il d'un angle mort ouvert ?
+- [x] **P4** — `ANGLES-MORTS` : un angle mort comblé se distingue-t-il d'un angle mort ouvert ?
   Cas d'A16, explicitement **supprimé** par ADR-021.
 - [ ] **P5** — `QUESTIONS-OUVERTES` : la traçabilité des 30 sections et les sept verdicts tiennent-ils
   encore, treize sessions plus tard ?
@@ -168,3 +168,33 @@ canonique.
 Le corollaire est utile et immédiat : **le rituel de fin doit relever les actions décidées en cours
 de session** et, si elles ne sont pas faites, les inscrire quelque part d'exécutable — un point
 ouvert daté, à défaut d'une étape.
+
+#### P4 — `ANGLES-MORTS` : une colonne, trois significations
+
+L'en-tête est `| Code | Titre | Sév. | Traité dans |`. La quatrième colonne porte **trois choses
+différentes**, et rien ne les distingue :
+
+| Sens réel | Exemple | Ce que la colonne affiche |
+|---|---|---|
+| **supprimé** — l'angle mort n'existe plus | A16, triche par injection d'énergie | « **ADR-021** — supprimé, plus atténué » *(le seul qui le dise)* |
+| **documenté** — une décision le traite | A63, état côtier 3D à 197 Mo | « SPEC-005 §6 » |
+| **en attente d'un tiers** — rien n'est fait | A59, le géoïde absent de l'outil de terrain | « SPEC-005 §4 » |
+
+**R04 — un angle mort de sévérité 1 en attente se lit comme réglé.** A59 — « un artiste qui place
+une plage à 30 km la place 70 m au-dessus ou au-dessous du niveau de la mer » — affiche
+« SPEC-005 §4 » exactement comme A63 affiche « SPEC-005 §6 ». Or A63 **est** résolu (la décision de
+stocker des conditions 2D a été prise et appliquée), tandis qu'A59 **ne le sera pas** tant que
+l'équipe terrain n'aura pas modifié le référentiel de son outil. Un lecteur du registre conclut que
+le problème des 70 mètres est traité. Il est **décrit**.
+
+Le cas se répète pour tout ce qui attend un tiers : A12 et A20 (audio, IA), A77 (le serveur charge
+des données cuites), A79 (onze destinataires extérieurs).
+
+**R05 — aucun angle mort n'est jamais clos.** Quatre-vingt-neuf points se sont accumulés en quinze
+sessions, et un seul porte un statut de fermeture — A16, en prose. Les autres restent
+indistinctement « traités ». Un registre qui ne se vide jamais cesse d'être lu.
+
+**Proposition** : une colonne `Statut` à quatre valeurs — **ouvert** · **documenté** · **comblé** ·
+**supprimé** — et une règle pour les entrées futures. Remplir les quatre-vingt-neuf lignes d'un coup
+n'est ni utile ni fiable : la proposition retenue est de renseigner **les sévérité 1** et de poser la
+règle, le reste se remplissant au fil des sessions qui touchent chaque point.
