@@ -100,8 +100,8 @@ garantit, et c'est précisément ce qu'A142 reproche à la dérivation.
       faut le vérifier plutôt que le supposer (A133).
 - [x] **P4** — exécuter, ajuster `ln A` contre `x`, comparer `L½` mesurée à `K·λ²/dx`. Trois
       longueurs d'onde au moins : une loi qui ne tiendrait qu'à un `λ` ne serait pas une loi.
-- [ ] **P5** — ce que le résultat fait à ADR-037 §2.1 : confirmation, correction, ou réfutation.
-- [ ] **P6** — note datée dans ADR-037, ou ADR-038 si la conclusion change.
+- [x] **P5** — ce que le résultat fait à ADR-037 §2.1 : confirmation, correction, ou réfutation.
+- [x] **P6** — note datée dans ADR-037, ou ADR-038 si la conclusion change.
 - [ ] **P7** — répercussions : index, angles morts, actions, décomptes.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
@@ -159,3 +159,14 @@ et revenait polluer la fenêtre — que mon contrôle déclarait saine, puisqu'i
 
 Corrigé : `front > longueur_m` rejette désormais la mesure, et les domaines sont dimensionnés pour
 que le front n'atteigne jamais le mur.
+
+#### P5-P6 — une note datée suffit, et c'est le bon geste
+
+ADR-037 §2.1 est **confirmé**, pas corrigé : la conclusion ne change pas, son statut si. Elle passe
+de *dérivée* à *mesurée*, et c'est exactement ce qu'une note datée doit porter — un ADR ne se
+réécrit pas, et il n'y avait pas de décision nouvelle à prendre.
+
+**Ce que la note dit, et qui ne doit pas se perdre** : A142 est levé **dans le régime linéaire**.
+L'amplitude du batteur vaut 0,05 m/s, donc `a/h ≪ 1 %` — la mesure valide la dérivation là où elle
+était supposée valide (A127), et ne dit **rien** du régime non linéaire. Écrire « A142 levé » sans
+cette réserve rendrait la note plus forte que la mesure.

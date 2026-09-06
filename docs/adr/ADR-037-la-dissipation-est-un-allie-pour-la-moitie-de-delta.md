@@ -7,6 +7,7 @@
   [`ADR-036`](ADR-036-delta-ne-porte-pas-la-houle-il-porte-l-ecart.md) §3 reçoit une note corrective
   datée — son objet, le sillage, n'appartient pas à δ.
 - **Produit** : la partition entretenu/transitoire, et le critère `dx ≤ K·L^1,5/√(2h)`
+- **Vérifié** : §2.1 mesuré en **S33** — `L½ = K·λ²/dx`, `R²` jusqu'à 1,0000, A142 levé
 - **Clôt** : action **S31-1** et angle mort **A139** — par dissolution
 
 ---
@@ -72,6 +73,32 @@ donc pas fortuite, mais elle n'avait pas été remarquée.
 **Conséquence pratique** : il n'est pas nécessaire d'imposer la décroissance de δ par une éponge ou
 un masque de bord pour les phénomènes entretenus. Elle est déjà là.
 
+> **Note S33 — mesuré, et confirmé.** Le §2.1 était **dérivé** : il supposait qu'une source
+> constante et une dissipation exponentielle en temps donnent une décroissance exponentielle en
+> espace, ce qui est vrai en régime linéaire — et le solveur ne l'est pas. C'était l'angle mort
+> **A142**, et il portait la conclusion la plus rassurante du corpus récent.
+>
+> Un **batteur oscillant** au bord d'un domaine long produit un train entretenu ; l'enveloppe relevée
+> en régime établi, hors champ proche et avant toute réflexion, donne :
+>
+> | `λ` | `L½` mesurée | `L½` prédite par `K·λ²/dx` | écart | `R²` |
+> |---|---|---|---|---|
+> | 10 m | 27,03 m | 25,54 m | +5,9 % | 0,9990 |
+> | 14 m | 51,40 m | 50,06 m | +2,7 % | 0,9990 |
+> | 20 m | 101,81 m | 102,15 m | **−0,3 %** | **0,9999** |
+> | 28 m | 195,34 m | 200,22 m | −2,4 % | **1,0000** |
+>
+> **La décroissance est exponentielle pure** — `R²` atteint 1,0000 — et la loi tient sur un facteur
+> 8 en `L½`. L'écart **change de signe** avec `λ`, ce qui est la signature des termes d'ordre
+> supérieur en `k·dx` et non d'un biais.
+>
+> **`L½ = K·λ²/dx`, et `c` disparaît** : la longueur de demi-décroissance ne dépend que de la
+> longueur d'onde, du pas d'espace et du nombre de Courant. C'est la troisième annulation du corpus.
+>
+> **A142 est levé — dans le régime linéaire.** L'amplitude du batteur est faible et `a/h ≪ 1 %` : la
+> mesure valide la dérivation **là où elle était supposée valide** (A127), et ne dit rien du régime
+> non linéaire.
+
 ## 3. Le critère de dimensionnement, pour les transitoires
 
 Une éclaboussure d'échelle `L` retombe en `t_phys ≈ √(2L/g)` — le temps de chute gravitaire. La
@@ -117,9 +144,8 @@ Passer de `ν = 0,45` à `ν = 0,70` multiplie `dx_max` par **1,83**, donc divis
 2. **La partition entretenu/transitoire n'est pas dans ADR-001**, qui liste six contenus sans les
    distinguer. Elle est proposée ici et devrait y être portée — c'est une lecture, pas une décision
    nouvelle, mais elle change le dimensionnement.
-3. **Aucune mesure n'a été faite sur un phénomène entretenu.** L'équilibre spatial du §2.1 est
-   dérivé, pas mesuré : il suppose qu'une source constante et une dissipation exponentielle donnent
-   une décroissance en `exp(−x/L_d)`, ce qui est vrai en linéaire et non vérifié ici. Angle mort
-   **A142**.
+3. ~~**Aucune mesure n'a été faite sur un phénomène entretenu.**~~ **Fait en S33** — voir la note du
+   §2.1. `L½ = K·λ²/dx` vérifiée sur quatre longueurs d'onde, `R²` jusqu'à 1,0000, A142 levé **dans
+   le régime linéaire**. Le régime non linéaire reste non mesuré.
 4. **δ est 3D et toutes les mesures sont 1D.** Le critère du §3 se transporte en forme ; le
    coefficient `K` est celui du véhicule 1D.
