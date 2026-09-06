@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S31
-État             : en cours
+État             : terminée
 Battement        : 2026-09-06
 Objectif         : La réinjection W→δ — et la prémisse de la question
 ```
@@ -100,7 +100,7 @@ secondes.
       **taille du domaine** — trois grandeurs, là où le corpus n'en relie que deux.
 - [x] **P6** — **ADR-036** : ce que A122 devient.
 - [x] **P7** — répercussions : ADR-005, ADR-034, index, angles morts, actions, décomptes.
-- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
+- [x] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
@@ -210,3 +210,24 @@ avec `K = 2π²(1−ν)/ln2` : **15,66** à `ν = 0,45`, **8,54** à `ν = 0,70`
 **Et cela boucle avec le sillage.** Un bateau à 5 m/s produit `λ = 16 m` ; dans un domaine de 200 m
 à `dx = 1 m`, il faudrait `λ ≥ 56 m` pour que le sillage traverse. Il n'ira pas au bout — ce que la
 mesure de P3 disait déjà en distance : 16 m derrière la coque.
+
+#### État à la fin de S31
+
+`cargo test` : **33 tests**. `water-harness check` : 2 scénarios, 0 échec, hashs **inchangés**.
+`water-harness physics` : 1 échec (C04, voulu), 3 témoins, 5 grandeurs sans verdict (C08). Jeton
+**libéré**.
+
+**Ce que S32 doit savoir avant de commencer, et qui n'est pas ailleurs :**
+
+- **A139 conditionne tout ADR-036 §3.** Si le sillage est un objet de **W** — ce qu'ADR-011 §4
+  laisse entendre — il n'est pas discrétisé, il ne se dissipe pas, et le résultat le plus visible de
+  S31 est **sans objet**. Trancher cela **avant** d'en tirer quoi que ce soit. Les deux lectures se
+  défendent, et aucune n'est écrite.
+- **La loi de dissipation a maintenant deux sujets distincts** : ce qu'elle gouverne (les
+  perturbations portées par δ) et ce qu'elle ne gouverne pas (la houle de B+W). Le tableau spectral
+  d'ADR-034 §2.1 relève du second — il est cité avec sa note corrective, ne pas le reprendre nu.
+- **`λ_min` dépend de `√(dx·D)`**, donc de la **taille du domaine**. ADR-005 §2.1 ne rapporte
+  `λ_cut` qu'à `dx` et n'a pas encore été amendé (S31-3).
+- **`K = 15,66` à `ν = 0,45`**, et non 28,5 : le facteur `(1−ν)` est dans la formule. L'erreur a été
+  faite puis corrigée en séance, et elle est facile à refaire de mémoire.
+- **C04 en échec, `C01-jet` rouge, C08 sans verdict** : trois décisions, pas trois régressions.

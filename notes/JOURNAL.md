@@ -2753,3 +2753,121 @@ Deux autres entrées : **S30-2**, nommer l'instrument de chaque assertion — co
 Inchangés. **A103** — la masse volumique de l'eau, douce ou de mer. **A107** — le sort du travail
 propre à `master`, S16-S17. Et les trois choses hors de portée d'une session : nommer les personnes,
 constater l'état réel du projet, agir sur l'infrastructure — dont le dépôt distant.
+
+---
+
+## S31 — 2026-09-06 — La question la plus lourde se dissout, et ce qui la remplace est pire
+
+**Consigne reçue.** « Enchaîne S31 ».
+
+**Sorties.** [`ADR-036`](../docs/adr/ADR-036-delta-ne-porte-pas-la-houle-il-porte-l-ecart.md) ; note
+corrective datée dans ADR-034 §3.3 ; la mesure d'**étalement d'un paquet localisé** dans le harnais ;
+registre porté à **140 angles morts** — dont le centième point ; leçons L106 à L109 ; action
+**S26-2 close par dissolution**.
+
+**Ça tourne.** `cargo test` : **33 tests** au vert. `water-harness check` : 0 échec, hashs inchangés.
+
+### Le résultat de la session tient en une phrase
+
+**A122 n'avait pas d'objet, et elle a été recommandée quatre fois avant d'être lue une fois.**
+
+S26, S28, S29 et S30 l'ont toutes désignée comme « la question la plus lourde ouverte ». Elle s'est
+dissoute en relisant ADR-001 §2 et ADR-005 §1 — **deux documents antérieurs à sa formulation**.
+
+### La dissolution
+
+ADR-001 §2 : `Surface_visible = B + W + δ`. ADR-005 §1 en tire déjà que la « conversion onde
+analytique → état volumique » est *sans objet — B+W est un terme de forçage lu par le solveur, pas
+une condition d'entrée à convertir*.
+
+> **δ ne transporte pas la houle : il transporte l'*écart* à la houle.** Une composante courte de W
+> traverse un domaine δ sans y être dissipée, puisqu'elle n'y est pas discrétisée. **Il n'y a rien à
+> réinjecter.**
+
+C'est la troisième dissolution du corpus, après les deux d'ADR-027 §1 — et comme elles, elle vient
+d'une relecture de prémisse, pas d'une astuce.
+
+### Ce qui la remplace, et qui est pire
+
+**La loi de dissipation ne disparaît pas : elle change de sujet.** Elle gouverne ce que δ porte
+réellement — les **perturbations locales** : sillage, impact, éclaboussure. C'est-à-dire exactement
+ce pour quoi δ existe.
+
+Un sillage de Kelvin a `λ = 2πv²/g`. À `dx = 1 m`, `ν = 0,45` :
+
+| Vitesse | `λ` | demi-vie | **distance visible derrière le bateau** |
+|---|---|---|---|
+| 3 m/s | 5,8 m | 0,37 période | **2,1 m** |
+| 5 m/s | 16,0 m | 1,02 période | **16,4 m** |
+| 10 m/s | 64,0 m | 4,09 périodes | **262 m** |
+
+**Une barque à 3 m/s laisse un sillage plus court qu'elle-même.** Et la loi d'échelle est brutale :
+la durée de vie va comme `v³`, la distance visible comme **`v⁴/dx`** — vérifié, `(10/3)⁴ = 123`
+contre 125 mesuré.
+
+> **δ dissipe le plus vite précisément ce qu'il existe pour produire, et d'autant plus que l'objet
+> est lent.** Barques, canoës et nageurs n'auront aucun sillage ; les navires rapides en auront un
+> qui traverse le domaine. C'est probablement l'inverse de l'attendu.
+
+### La mesure : le paquet s'étale, et l'étalement est un artefact
+
+Bosse gaussienne, `dx = 0,5 m`, après 20 s :
+
+| | `σ = 1 m` | `σ = 4 m` |
+|---|---|---|
+| pic / pic₀ | **0,102** | 0,315 |
+| largeur / largeur₀ | **5,00** | 1,74 |
+
+Le paquet fin **quintuple sa largeur** ; il se dégrade **en forme avant de se dégrader en
+amplitude**, signature d'un filtre passe-bas appliqué à un spectre.
+
+> **Et tout cet étalement est un artefact.** Saint-Venant est non dispersif : une perturbation s'y
+> scinde en deux trains qui se propagent **sans déformation**. La forme est conservée exactement par
+> l'équation que le solveur prétend résoudre, et **rien n'en mesurait la perte** (A138).
+
+D'où **C24, « conservation de forme d'un paquet »** — référence `1` exactement, aucun seuil à
+inventer.
+
+### Le critère de traversée, et ce qu'il ajoute à ADR-005
+
+Une perturbation survit à la traversée d'un domaine de largeur `D` si `λ² ≥ K·dx·D`, avec
+`K = 2π²(1−ν)/ln2` = **15,66** à `ν = 0,45`.
+
+| Domaine | `dx` | `λ_min` |
+|---|---|---|
+| 50 m | 0,25 m | 14,0 m |
+| 200 m | 1,00 m | 56,0 m |
+| 1 000 m | 2,00 m | 177,0 m |
+
+> **`λ_min` dépend de la taille du domaine, en `√D`.** ADR-005 §2.1 ne rapporte `λ_cut` qu'à `dx` :
+> **c'est insuffisant**. Doubler le domaine à résolution constante remonte `λ_min` de 41 %.
+
+**Correction en séance** : la première rédaction portait `K = 28,5`, en omettant le facteur `(1−ν)`.
+Les quatre `λ_min` en dépendaient. L'erreur a été prise **par le calcul, pas par la relecture** — le
+tableau avait été écrit à la main à partir d'un facteur mémorisé de travers.
+
+### Ce qui n'a pas été fait, et qui décide de la gravité du reste
+
+**Le sillage est peut-être un objet de W et non de δ.** ADR-011 §4 place son générateur dans **W** —
+*« le générateur de sillage de la couche W doit prendre `h` en entrée »*. S'il est dans W, il n'est
+pas discrétisé, il ne se dissipe pas, et tout le §3 d'ADR-036 tombe.
+
+**Aucun document ne tranche**, et les deux lectures se défendent : un sillage est une onde (donc W),
+mais il est créé par un objet local en mouvement (donc δ). **C'est l'angle mort A139, sévérité 1**,
+et il décide si le résultat le plus visible de cette session est un problème majeur ou sans objet.
+Je ne le tranche pas : c'est une décision de conception que la session n'a pas les moyens d'appuyer
+sur une mesure.
+
+### Session suivante recommandée
+
+**S32 — S31-1, trancher où vit le sillage.** C'est court, c'est de la conception pure, et cela
+détermine la portée d'ADR-036 §3. Les deux ADR qui se contredisent sont identifiés ; il reste à
+choisir, et à dire ce que le choix impose.
+
+Deux autres entrées : **S31-2**, écrire C24 ; ou **S30-2**, nommer l'instrument de chaque assertion.
+
+### Arbitrages en attente
+
+Inchangés. **A103** — la masse volumique de l'eau, douce ou de mer. **A107** — le sort du travail
+propre à `master`, S16-S17. Et les trois choses hors de portée d'une session : nommer les personnes,
+constater l'état réel du projet, agir sur l'infrastructure — dont le dépôt distant.

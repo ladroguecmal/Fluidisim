@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-06
-Session en cours : S31 — la réinjection W→δ, et la prémisse de la question
-Dernière session : S30 — 2026-09-06 — les cinq assertions réécrites, et aucun seuil inventé
-Session suivante : S32 — nommer les instruments (S30-2) ou H2
+Session en cours : —
+Dernière session : S31 — 2026-09-06 — la question la plus lourde se dissout, et ce qui la remplace est pire
+Session suivante : S32 — trancher où vit le sillage, W ou δ (S31-1) *(recommandé)*, ou C24 (S31-2), ou H2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
@@ -105,7 +105,7 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Trente sessions, **35 ADR** *(dont un acté)*, six spécifications, **neuf registres** — **et du
+Trente et une sessions, **36 ADR** *(dont un acté)*, six spécifications, **neuf registres** — **et du
 code qui tourne** : `code/`, étages **H1 et H3** du harnais, un **δ d'essai** équilibré, 31 tests
 verts et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
 verdict** (C08). Quatre cas canoniques sur δ sont exécutés : **C01 et C03 passent**, C04 échoue,
@@ -147,6 +147,15 @@ dans le corpus, sous les assertions qui ne les nommaient pas — un facteur de r
 une masse ajoutée dans un angle mort, une projection « exactement stable » dans une décision. Trois
 des cinq réécritures sont même **plus fortes** que l'énoncé d'origine : un flou déplace toujours
 l'exigence vers le bas.
+
+**Et S31 a dissous la question qu'on disait la plus lourde.** `δ` est **additif** — `B + W + δ` — donc
+il ne porte pas la houle mais l'**écart** à la houle : rien ne se perd à la traversée, rien n'est à
+réinjecter. **Mais la loi de dissipation change de sujet** et gouverne ce que δ porte réellement, les
+perturbations locales : un sillage de barque à 3 m/s est long de **deux mètres**, et la distance
+visible varie comme `v⁴/dx`. Voir
+[`ADR-036`](docs/adr/ADR-036-delta-ne-porte-pas-la-houle-il-porte-l-ecart.md) — et **A139**, qui
+décide de la portée de tout cela : ADR-011 §4 place le générateur de sillage dans **W**, ce qui
+rendrait le §3 sans objet. Personne ne l'a tranché.
 
 **Une urgence de format, la seule.** `WaveEvent` (SPEC-006 §3.1) est une structure **répliquée** qui
 porte trois champs demandés par l'équipe audio. Elle doit être arrêtée **avant** que le réseau ne

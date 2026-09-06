@@ -1568,3 +1568,72 @@ montage incapable ne pouvait pas faire échouer une assertion qui ne mesurait ri
 **Réflexe** : quand une correction en révèle une seconde, noter l'**ordre** qui l'a rendue visible —
 c'est lui qui se réutilise. Ici : *donner une grandeur, puis vérifier que le montage atteint le
 régime où elle varie.* L'inverse n'aurait rien produit.
+
+## L106 — Une question qualifiée de lourde se reporte d'autant plus qu'elle est qualifiée ainsi
+
+*(S31)* Un angle mort a été désigné « la question la plus lourde ouverte » par quatre sessions
+consécutives, chacune le recommandant à la suivante. Il s'est dissous en relisant deux documents
+**antérieurs à sa formulation** : sa prémisse était fausse, et elle l'était depuis le début.
+
+Le statut n'a pas seulement décrit la difficulté — **il l'a produite**. Une question étiquetée
+lourde appelle une session entière, donc un moment où l'on aura du temps ; et comme on ne l'ouvre
+pas, on ne découvre pas qu'elle est légère. Chaque report renforce l'étiquette, qui justifie le
+report suivant.
+
+**Réflexe** : avant de reporter une question difficile, lui consacrer **dix minutes** — le temps de
+relire ce que le corpus dit déjà de sa **prémisse**, pas de sa réponse. C'est le geste le moins cher
+du répertoire, et aucune des quatre sessions qui recommandaient celle-ci ne l'avait fait.
+
+## L107 — Ce qu'un système dissipe le plus vite est souvent ce pour quoi il existe
+
+*(S31)* Une couche de simulation a été introduite pour produire les perturbations locales — sillages,
+impacts, remous. La loi de dissipation, établie sur des ondes longues, s'y applique à ce qu'elle
+porte réellement : ces perturbations. Or elles sont **courtes**, donc mal résolues, donc les
+premières effacées.
+
+Le résultat est chiffré et contre-intuitif : la distance sur laquelle un sillage reste visible varie
+comme la **puissance quatrième** de la vitesse de l'objet. Un facteur 3 en vitesse fait deux ordres
+de grandeur. Les objets lents — les plus nombreux dans une scène — n'en produisent aucun.
+
+La coïncidence n'est pas fortuite. Un système est dimensionné sur son cas nominal, et les phénomènes
+qu'il **ajoute** sont par construction plus fins que ceux qu'il transporte déjà. **La finesse est ce
+qui justifie la couche, et c'est ce que la discrétisation détruit en premier.**
+
+**Réflexe** : après avoir mesuré une dissipation, une latence ou une perte sur un cas de référence,
+la recalculer sur ce que le système **apporte de spécifique**. Les deux réponses diffèrent souvent
+d'un ordre de grandeur, et c'est la seconde qui décide de l'intérêt du système.
+
+## L108 — Un solveur peut détruire une propriété que son équation conserve exactement
+
+*(S31)* L'équation résolue est non dispersive : une perturbation s'y scinde en deux trains qui se
+propagent **sans déformation**. La forme est un invariant exact du modèle.
+
+Mesuré sur le solveur : un paquet fin **quintuple sa largeur** en vingt secondes, en perdant 90 % de
+son amplitude. **Tout cet étalement est numérique** — il n'a aucune contrepartie dans le modèle, et
+rien n'en mesurait la quantité.
+
+Le point n'est pas qu'un schéma soit imprécis : c'est que **les invariants exacts d'une équation
+sont les meilleures références de validation qui existent**, et qu'ils sont faciles à ne pas voir.
+La forme conservée ne figure dans aucune formule ; elle est une propriété de la solution, pas un
+terme du système.
+
+**Réflexe** : pour toute équation résolue, dresser la liste de ce qu'elle **conserve exactement** —
+masse, énergie, forme, symétries, états d'équilibre. Chaque item est un cas de validation dont la
+référence vaut `0` ou `1`, sans aucun seuil à inventer. C'est la famille dont C01 fait déjà partie.
+
+## L109 — Deux documents peuvent se contredire sans qu'aucun ne soit faux, et personne ne le voit
+
+*(S31)* Un ADR place le générateur de sillage dans une couche ; un autre, écrit plus tard, décrit une
+dissipation qui ne s'applique qu'à une **autre** couche. Les deux sont corrects dans leur propre
+cadre. Ensemble, ils laissent une question sans réponse : **où vit le sillage ?** — et de cette
+réponse dépend l'existence même du problème que la session venait de chiffrer.
+
+Ce type de contradiction ne se voit dans aucune revue croisée, parce que les deux textes ne parlent
+pas du même objet : l'un parle d'un générateur, l'autre d'un amortissement. Il n'y a pas de phrase à
+opposer à une autre. **Ce qui manque est un troisième énoncé, jamais écrit** — celui qui dirait à
+quelle couche appartient le phénomène.
+
+**Réflexe** : quand un résultat dépend de la couche à laquelle un phénomène appartient, vérifier que
+cette appartenance est **écrite quelque part**. Si elle ne l'est qu'implicitement, dans deux
+documents qui n'en parlent pas ensemble, elle n'est pas décidée — et le résultat qui en dépend est
+suspendu à une décision que personne n'a prise.
