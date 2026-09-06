@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-06
-Session en cours : —
+Session en cours : S32 — où vit le sillage, et ce que δ porte vraiment
 Dernière session : S31 — 2026-09-06 — la question la plus lourde se dissout, et ce qui la remplace est pire
-Session suivante : S32 — trancher où vit le sillage, W ou δ (S31-1) *(recommandé)*, ou C24 (S31-2), ou H2
+Session suivante : S33 — C24 (S31-2) ou H2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :

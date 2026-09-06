@@ -59,175 +59,60 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S31
-État             : terminée
+Session          : S32
+État             : en cours
 Battement        : 2026-09-06
-Objectif         : La réinjection W→δ — et la prémisse de la question
+Objectif         : Où vit le sillage — et ce que δ porte vraiment
 ```
 
 ### Plan
 
-Action **S26-2**, angle mort **A122**, ouvert depuis S26 et qualifié depuis lors de « question la
-plus lourde ouverte » : *si δ efface les composantes courtes (ADR-034), la zone de transition
-doit-elle les réinjecter depuis W, ou l'effacement est-il voulu ?*
+Action **S31-1**, angle mort **A139**, ouvert en S31 avec la mention « aucun document ne tranche ».
 
-**La première chose à faire est de vérifier que la question a un objet.** ADR-001 §2 pose
-`Surface_visible = B + W + δ`, et ADR-005 §1 tire de cette additivité que cinq des dix
-sous-problèmes de la zone de transition **n'existent pas** — dont « conversion onde analytique →
-état volumique », *« sans objet : B+W est un terme de forçage lu par le solveur, pas une condition
-d'entrée à convertir »*.
+**C'est faux, et l'erreur est la mienne.** ADR-001 §2 tranche explicitement, depuis S01 :
 
-*Thèse déclarée : A122 se dissout, et ce qui la remplace est pire.* Si δ est **additif**, il ne
-transporte pas la houle de fond — il transporte l'**écart** à la houle. Une composante courte de W
-traverse donc le domaine δ sans être dissipée, puisqu'elle n'y est pas discrétisée. Il n'y a rien à
-réinjecter.
+| Couche | Contenu, verbatim |
+|---|---|
+| **W** | « **sillages**, anneaux d'impact, ondes d'explosion, tsunamis, déferlement, réfraction bathymétrique » |
+| **δ** | « proche-coque, gerbe d'étrave, éclaboussure, cavité d'impact, poche d'air, remous sur rocher » |
 
-**Mais alors la loi de dissipation d'ADR-033 ne s'applique pas à ce qu'on croyait.** Elle s'applique
-à ce que δ porte réellement : les **perturbations locales** — sillage, impact, éclaboussure —
-c'est-à-dire exactement ce pour quoi δ existe. Et un sillage de Kelvin a une longueur d'onde
-`λ = 2πv²/g` : **16 m à 5 m/s**, donc 16 points par longueur d'onde à `dx = 1 m`, donc une demi-vie
-de l'ordre de **la période**. Si ce calcul tient, le sillage d'un bateau s'éteint en quelques
-secondes.
+En S31 je n'avais lu qu'ADR-011 §4 — qui place le *générateur* de sillage dans W — et j'en avais
+conclu que deux documents se contredisaient. Ils ne se contredisent pas : ils disent la même chose,
+et le second n'était pas nécessaire.
 
-- [x] **P1** — plan, jeton.
-- [x] **P2** — établir l'additivité et ses conséquences : ce que δ porte, ce qu'il ne porte pas, et
-      donc ce que la loi de dissipation gouverne réellement.
-- [x] **P3** — le sillage : `λ = 2πv²/g`, la résolution qu'il reçoit, la demi-vie qui en découle.
-      **Chiffrer avant de conclure** — l'ordre de grandeur peut démentir la thèse.
-- [x] **P4** — **mesurer** sur le véhicule : une perturbation courte lâchée dans un domaine, et son
-      amplitude après une traversée. La loi prédit, la mesure vérifie.
-- [x] **P5** — le critère général de survie à la traversée, en fonction de `λ`, `dx` et de la
-      **taille du domaine** — trois grandeurs, là où le corpus n'en relie que deux.
-- [x] **P6** — **ADR-036** : ce que A122 devient.
-- [x] **P7** — répercussions : ADR-005, ADR-034, index, angles morts, actions, décomptes.
-- [x] **P8** — rituel de fin (`REPRISE.md` §6).
+**Deux sessions de suite, le même défaut.** A122 s'est dissoute en S31 en relisant ADR-001 ; A139 se
+dissout en S32 en relisant ADR-001. C'est le document fondateur du corpus, et il répond deux fois de
+suite à une question qualifiée d'ouverte.
+
+*Thèse déclarée : ADR-036 §3 est sans objet pour le sillage, et le problème réel est plus grave.*
+δ porte des phénomènes **d'échelle métrique** — éclaboussure, gerbe d'étrave, cavité d'impact — donc
+encore plus courts qu'un sillage, donc encore plus vite effacés. Si la thèse tient, le chiffre à
+produire n'est pas une distance mais un **rapport** : durée de vie numérique contre durée de vie
+**physique attendue**.
+
+**Et ADR-001 dit une seconde chose qui doit être lue avant de conclure** : *« δ tend vers 0 en
+s'éloignant de sa source. Ce n'est pas une contrainte imposée de l'extérieur : c'est la définition
+de la couche. »* La décroissance de δ est donc **voulue** — mais elle est voulue **en espace**, et
+la dissipation numérique agit **en temps**. Ce n'est pas la même chose, et la différence est
+probablement tout le sujet.
+
+- [ ] **P1** — plan, jeton.
+- [ ] **P2** — la dissolution d'A139, et la correction de ce que S31 a écrit.
+- [ ] **P3** — la distinction **espace / temps** : ce que la définition de δ demande, ce que la
+      dissipation fait, et où les deux divergent.
+- [ ] **P4** — la partition **entretenu / transitoire** du contenu de δ, et ce que chacune subit.
+- [ ] **P5** — chiffrer : durée numérique contre durée physique attendue, pour chaque contenu.
+- [ ] **P6** — **ADR-037**.
+- [ ] **P7** — répercussions : ADR-036, index, angles morts, actions, décomptes.
+- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
-**Ce que S30 laisse et qui vaut pour ici.**
+**Ce que S31 laisse et qui commande cette session.**
 
-- **Trois questions à toute assertion nouvelle** : quelle grandeur ? quel témoin la fait échouer ?
-  qu'est-ce qui la mesure, et est-ce que ça existe ?
-- **La loi de dissipation n'est valide qu'à `a/h ≈ 1 %`** (A127) — un sillage proche d'un bateau ne
-  l'est pas forcément.
+- **`K = 15,66` à `ν = 0,45`**, pas 28,5 — le facteur `(1−ν)` est dans la formule.
+- **La loi de dissipation a deux sujets distincts** : ce que δ porte, et ce que B+W portent. Le
+  tableau spectral d'ADR-034 §2.1 relève du second et est cité avec sa note corrective.
 - **C04 en échec, `C01-jet` rouge, C08 sans verdict** : trois décisions.
 
 **Branche.** `claude/s22-suite`. `master` s'arrête à S17 (A107).
-
-#### P2-P3 — A122 se dissout, et ce qui la remplace est bien pire
-
-**L'additivité règle la question posée.** ADR-001 §2 : `Surface_visible = B + W + δ`. ADR-005 §1 en
-tire que la « conversion onde analytique → état volumique » est **sans objet** — *« B+W est un terme
-de forçage lu par le solveur, pas une condition d'entrée à convertir »* — et que la somme est exacte
-partout, sans deux champs à mélanger.
-
-> **δ ne transporte pas la houle. Il transporte l'écart à la houle.** Une composante courte de W
-> traverse un domaine δ sans y être dissipée, puisqu'elle n'y est pas discrétisée. **Il n'y a rien à
-> réinjecter**, et A122 se dissout — comme deux des cinq arbitrages d'ADR-027 s'étaient dissous.
-
-**Mais la loi de dissipation ne disparaît pas : elle change de sujet.** Elle gouverne ce que δ porte
-réellement — les **perturbations locales**, sillage, impact, éclaboussure. C'est-à-dire exactement ce
-pour quoi δ existe.
-
-**Le sillage de Kelvin, chiffré.** `λ = 2πv²/g`, période `T = 2πv/g`, à `dx = 1 m` :
-
-| Vitesse | `λ` | `N = λ/dx` | demi-vie | **distance visible derrière le bateau** |
-|---|---|---|---|---|
-| 3 m/s | 5,8 m | 5,8 | 0,37 période | **2,1 m** |
-| 5 m/s | 16,0 m | 16,0 | 1,02 période | **16,4 m** |
-| 8 m/s | 41,0 m | 41,0 | 2,62 périodes | 68 m |
-| 10 m/s | 64,0 m | 64,0 | 4,09 périodes | **262 m** |
-| 15 m/s | 144,1 m | 144,1 | 9,20 périodes | 1 275 m |
-
-**Une barque à 3 m/s laisse un sillage de deux mètres** — moins que sa propre longueur. Un hors-bord
-à 10 m/s en laisse un de 262 m.
-
-**Et la loi d'échelle est brutale.** `λ ∝ v²` donne `N ∝ v²`, donc une demi-vie en périodes `∝ v²`,
-et la période valant `T ∝ v`, la durée de vie va comme **`v³`** et la **distance visible comme
-`v⁴/dx`**. Vérifié sur les chiffres : de 3 à 10 m/s, `(10/3)⁴ = 123` et le rapport mesuré vaut 125.
-
-> **δ dissipe le plus vite précisément ce qu'il existe pour produire, et d'autant plus que l'objet
-> est lent.** Un facteur 3 en vitesse fait deux ordres de grandeur sur la longueur du sillage.
-
-**Ce que cela dit du gameplay, et personne ne l'avait posé** : les petites embarcations lentes —
-barques, canoës, nageurs — n'auront **aucun sillage**, tandis que les navires rapides en auront un
-qui traverse le domaine. C'est probablement l'inverse de ce qu'on attend : une barque qui glisse sans
-laisser de trace se remarque immédiatement.
-
-#### P4 — le paquet s'étale, et tout l'étalement est un artefact
-
-`σ = 1 m` et `σ = 4 m`, même amplitude, `dx = 0,5 m`, fond plat :
-
-| | `σ = 1 m` | | `σ = 4 m` | |
-|---|---|---|---|---|
-| `t` | pic/pic₀ | largeur/largeur₀ | pic/pic₀ | largeur/largeur₀ |
-| 2 s | 0,276 | 2,00 | 0,466 | 1,16 |
-| 5 s | 0,193 | 2,80 | 0,425 | 1,26 |
-| 10 s | 0,142 | 3,60 | 0,376 | 1,37 |
-| **20 s** | **0,102** | **5,00** | **0,315** | **1,74** |
-
-**Le paquet fin perd 90 % de son amplitude et quintuple sa largeur ; le paquet large n'en perd que
-68 % et n'élargit que de 74 %.** C'est la prédiction d'ADR-034 : les composantes courtes meurent
-plus vite, donc un paquet riche en composantes courtes se dégrade davantage — et il se dégrade
-**en forme** avant de se dégrader en amplitude.
-
-> **Et l'étalement est intégralement un artefact.** Saint-Venant est **non dispersif** : une
-> perturbation initiale s'y scinde en deux trains qui se propagent à `±c` **sans déformation**. La
-> forme est conservée par l'équation que le solveur prétend résoudre. **Tout ce qui s'étale est donc
-> du numérique**, et rien n'en mesurait la quantité.
-
-C'est un cas canonique naturel, et il n'existe pas : *conservation de forme d'un paquet*, dont la
-référence analytique est l'invariance, et la mesure l'élargissement relatif.
-
-#### P5 — le critère de traversée relie trois grandeurs, là où le corpus n'en reliait que deux
-
-Une perturbation survit à la traversée d'un domaine de largeur `D` si sa demi-vie dépasse le temps
-de traversée, compté en périodes — soit `D/λ` :
-
-```
-ln2·(λ/dx) / (2π²(1−ν))  ≥  D/λ        ⟹        λ²  ≥  K·dx·D
-```
-
-avec `K = 2π²(1−ν)/ln2` : **15,66** à `ν = 0,45`, **8,54** à `ν = 0,70`.
-
-| Domaine | `dx` | `λ_min` (`ν = 0,45`) | `λ_min` (`ν = 0,70`) |
-|---|---|---|---|
-| 50 m | 0,25 m | 14,0 m | 10,3 m |
-| 100 m | 0,50 m | 28,0 m | 20,7 m |
-| 200 m | 1,00 m | 56,0 m | 41,3 m |
-| 1 000 m | 2,00 m | 177,0 m | 130,7 m |
-
-> **Correction en séance.** La première rédaction de ce paragraphe portait `K = 28,5`, en omettant
-> le facteur `(1−ν)` — c'est `2π²/ln2` et non `2π²(1−ν)/ln2`. Les quatre `λ_min` en dépendaient et
-> ont été refaits. L'erreur a été prise par le calcul, pas par la relecture : le tableau avait été
-> écrit à la main à partir d'un facteur mémorisé de travers.
-
-> **La longueur d'onde minimale transportable dépend de la *taille du domaine*, en `√D`.** Le corpus
-> ne reliait `λ_cut` qu'à `dx` — ADR-005 §2.1, « la plus petite longueur d'onde que δ transporte
-> correctement, rapportée à `dx` ». **Le rapport à `dx` seul est insuffisant** : doubler le domaine
-> à résolution constante remonte `λ_min` de 41 %.
-
-**Et cela boucle avec le sillage.** Un bateau à 5 m/s produit `λ = 16 m` ; dans un domaine de 200 m
-à `dx = 1 m`, il faudrait `λ ≥ 56 m` pour que le sillage traverse. Il n'ira pas au bout — ce que la
-mesure de P3 disait déjà en distance : 16 m derrière la coque.
-
-#### État à la fin de S31
-
-`cargo test` : **33 tests**. `water-harness check` : 2 scénarios, 0 échec, hashs **inchangés**.
-`water-harness physics` : 1 échec (C04, voulu), 3 témoins, 5 grandeurs sans verdict (C08). Jeton
-**libéré**.
-
-**Ce que S32 doit savoir avant de commencer, et qui n'est pas ailleurs :**
-
-- **A139 conditionne tout ADR-036 §3.** Si le sillage est un objet de **W** — ce qu'ADR-011 §4
-  laisse entendre — il n'est pas discrétisé, il ne se dissipe pas, et le résultat le plus visible de
-  S31 est **sans objet**. Trancher cela **avant** d'en tirer quoi que ce soit. Les deux lectures se
-  défendent, et aucune n'est écrite.
-- **La loi de dissipation a maintenant deux sujets distincts** : ce qu'elle gouverne (les
-  perturbations portées par δ) et ce qu'elle ne gouverne pas (la houle de B+W). Le tableau spectral
-  d'ADR-034 §2.1 relève du second — il est cité avec sa note corrective, ne pas le reprendre nu.
-- **`λ_min` dépend de `√(dx·D)`**, donc de la **taille du domaine**. ADR-005 §2.1 ne rapporte
-  `λ_cut` qu'à `dx` et n'a pas encore été amendé (S31-3).
-- **`K = 15,66` à `ν = 0,45`**, et non 28,5 : le facteur `(1−ν)` est dans la formule. L'erreur a été
-  faite puis corrigée en séance, et elle est facile à refaire de mémoire.
-- **C04 en échec, `C01-jet` rouge, C08 sans verdict** : trois décisions, pas trois régressions.
