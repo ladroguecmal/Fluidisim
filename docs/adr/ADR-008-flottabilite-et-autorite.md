@@ -29,6 +29,7 @@ benchmark. Elle ne l'est pas au niveau de l'architecture : le benchmark ne peut 
 | Flottabilité dans une citerne, une piscine, une cale | V | serveur | état V |
 | **Poussée d'une poche d'air piégée** *(ajouté S05, écart R08)* | V + pose du solide | serveur | état V |
 | **Perte de portance en eau aérée** *(ajouté S05, écart R02)* | `A_rep` (B, W_rep, vent) | serveur | aucune (recalculée identiquement) |
+| **Impact d'entrée dans l'eau (*slamming*)** *(ajouté S13, écart E08)* | B + W + état du solide | serveur / propriétaire | aucune (recalculée identiquement) |
 | Secousse haute fréquence, gerbe qui frappe la coque, tremblement | δ, `A_local` | **aucune** | aucune |
 
 La contribution de δ s'applique sur la **transformation de rendu**, jamais sur la transformation

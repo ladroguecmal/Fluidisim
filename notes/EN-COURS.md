@@ -91,7 +91,7 @@ l'intention.
   sessions d'écart se citent avec confiance et sans vérification.*
 - [x] **P7** — rédiger `docs/registres/REVUE-CROISEE-S13.md` : écarts, gravité, résolution, et la
   liste des contrôles passés — sans elle la revue n'est pas vérifiable.
-- [ ] **P8** — appliquer les résolutions : notes correctives datées, nouvel ADR si une décision
+- [x] **P8** — appliquer les résolutions : notes correctives datées, nouvel ADR si une décision
   change.
 - [ ] **P9** — index, angles morts, décomptes.
 - [ ] **P10** — rituel de fin (`REPRISE.md` §6) : journal S13, leçons, index, jeton libéré.
@@ -365,3 +365,8 @@ l'amendement et sa date. **P8b** : les onze notes correctives.
 
 Découpage déclaré ici avant de le faire, conformément à la règle « aucune étape ne dépasse une
 quinzaine de minutes ; si elle est plus grosse, la découper ».
+
+**P8b** : 18 marques appliquées, aucun échec. Les douze écarts sont traités — deux par ADR-024, dix
+par notes correctives datées. `ADR-021 §3.1` et `REVUE-CROISEE-S08` gardent leur « 40 octets » : ce
+sont des textes historiques (un raisonnement de S05, une table de contrôles de S08), et un registre
+d'audit ne se réécrit pas. La correction vit dans ADR-009 §2, qui porte la structure.

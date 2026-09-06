@@ -134,6 +134,12 @@ L'impact est détecté quand la vitesse normale relative d'un point d'échantill
 vers le bas au-delà d'un seuil. Valeur de départ **`v_rel·n > 2 m/s`**, à calibrer : en deçà,
 l'impulsion est inférieure au bruit de la flottabilité quasi-statique elle-même.
 
+> **Note corrective (S13, écart E12).** Ce seuil est une **donnée répliquée**, au même titre que `K`
+> et la table `E_cause` (ADR-021 §7.2). Motif : le terme d'impact est autoritaire (§2.4) et le
+> serveur émet l'événement correspondant depuis la cause (ADR-021 §3), puisqu'il possède la physique
+> des objets. Si le seuil différait des deux côtés, un client verrait un choc sans qu'aucun son ne
+> parte — par intermittence, et près du seuil.
+
 L'impulsion est intégrée **analytiquement sur le tick** à partir de `t_impact` (§2.1) et de la
 vitesse d'entrée, sans sous-cyclage du solveur : les deux grandeurs sont connues en forme fermée,
 et sous-cycler ne ferait qu'échantillonner plus finement une courbe qu'on sait intégrer.
@@ -297,9 +303,19 @@ SPEC-006 §6 publie déjà la **polyligne de déferlement** : une suite de `Brea
 position, direction de crête, flux dissipé en kW/m et largeur de zone de déferlement. Un rocher qui
 brise est le même objet avec une largeur de quelques mètres au lieu de quelques centaines.
 
-**Aucun type nouveau, aucun canal nouveau.** Le site est un `BreakerVertex` de `surf_width_m` petit,
-publié sur le canal existant, avec les mêmes consommateurs et pour les mêmes usages : l'audio y
-prend son lit de rivage (ADR-016 §2), le rendu son écume, l'ordonnanceur son critère d'activation.
+**Aucun type nouveau, aucun canal nouveau.** Le site est publié sur le canal existant, avec les
+mêmes consommateurs et pour les mêmes usages : l'audio y prend son lit de rivage (ADR-016 §2), le
+rendu son écume, l'ordonnanceur son critère d'activation.
+
+> **Note corrective (S13, écart E09).** Ce paragraphe publiait le site comme **un** `BreakerVertex`
+> de `surf_width_m` petit. Or SPEC-006 §6 définit `surf_width_m` comme la largeur de la **zone de
+> déferlement**, dimension perpendiculaire à la côte (ADR-005 §4.1), et non l'étendue du site le long
+> de la crête. Le flux étant publié en **kW/m de crête**, un consommateur ne pouvait pas retrouver
+> les ≈77 kW annoncés au §4.4 pour un rocher de 5 m.
+>
+> **Un site est publié comme deux sommets** encadrant son étendue — une polyligne dégénérée à deux
+> points, que `BreakerLineView` accepte déjà telle quelle. Le champ garde son sens et le consommateur
+> intègre entre deux sommets comme sur n'importe quel segment.
 
 ### 4.3 La liste des sites se dérive, elle ne s'écrit pas
 
@@ -389,10 +405,18 @@ il faut résoudre un point fixe.
 ```
 Trouver le niveau z tel que :
 
-    V_air(z)  =  n_fusion · R · T / P(z)          avec  P(z) = P_atm + ρ|g_eff|·profondeur(z)
+    V_air(z)  =  ( P_a·V_a + P_b·V_b ) / P(z)     avec  P(z) = P_atm + ρ|g_eff|·profondeur(z)
 
 où V_air(z) est donné par le shape_lut du contenant fusionné.
 ```
+
+> **Note corrective (S13, écart E10).** Cette équation s'écrivait `V_air(z) = n_fusion·R·T/P(z)` et
+> employait une **température que la structure `AirPocket` d'ADR-015 §3 ne porte pas** — elle n'était
+> donc pas évaluable avec l'état dont le corpus dispose. L'hypothèse isotherme du §5.3 posant que les
+> deux poches sont à la même température, `T` s'élimine : la forme ci-dessus n'emploie que
+> `pressure_pa` et `volume_ml`, tous deux présents. `n_fusion = n_a + n_b` reste vrai comme énoncé de
+> conservation, et la dichotomie est inchangée. **La correction retire une grandeur au lieu d'en
+> ajouter une.**
 
 `shape_lut` est **monotone par construction physique** — c'est ce qu'exploite déjà la validation
 d'étanchéité de SPEC-005 §9. Une fonction monotone se résout par dichotomie, et la table compte

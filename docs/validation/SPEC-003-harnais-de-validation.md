@@ -249,7 +249,7 @@ ADR-003 et ADR-009 ont une conséquence que personne n'avait cherchée : **l'ét
 d'une session de jeu tient dans presque rien.**
 
 ```
-T_sim initial + descripteurs de région + journal d'événements W (40 o pièce)
+T_sim initial + descripteurs de région + journal d'événements W (50 o pièce — corrigé en S13, E04)
 + trajectoires des acteurs + trajectoire de caméra
 ```
 

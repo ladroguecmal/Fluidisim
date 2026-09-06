@@ -138,7 +138,7 @@ rend une interface inutilisable dès qu'on veut économiser.
 | Canal | Cadence nominale | Origine de la valeur |
 |---|---|---|
 | Bus d'événements | **par tick**, 30 Hz | un événement retardé est un son en retard (ADR-016 §3) |
-| Champ `F`, poignée GPU | par tick de rendu | 1 à 2 passes GPU par cascade (ADR-014 §6) |
+| Champ `F`, poignée GPU | **tick de simulation** ou diviseur *(corrigé en S13, E06)* | 1 à 2 passes GPU par cascade (ADR-014 §6) |
 | Champ `F`, agrégat CPU | 10 Hz | l'audio dose un lit, il ne suit pas une crête |
 | Champ `A`, agrégat CPU | 10 Hz | occlusion acoustique (ADR-016 §4.3) |
 | Traversabilité — marée | **1 / 30 s** + événements de seuil | ADR-018 §6 |
@@ -146,6 +146,14 @@ rend une interface inutilisable dès qu'on veut économiser.
 | Traversabilité — nœud V | 5 Hz | ADR-018 §6 |
 | Traversabilité — brèche | **événement immédiat** | ADR-018 §6 |
 | Polyligne de déferlement | à l'activation d'une région, puis sur changement d'état de mer | SPEC-005 §2 |
+
+> **Note corrective (S13, écart E06).** Cette ligne portait « par tick de rendu », en contradiction
+> avec la règle énoncée juste au-dessus — toute cadence est un diviseur entier du tick de simulation
+> — et avec ADR-012 §7, qui pose que le rendu est « indépendant du taux d'images » et « interpole ».
+> Une publication cadencée sur le rendu n'est pas reproductible, l'ordonnanceur ne peut pas la
+> budgéter, et sur une machine à 144 Hz elle ferait près de cinq fois le travail d'une machine à
+> 30 Hz — pour un champ qu'ADR-014 §6 déclare « toujours actif, c'est le socle ». Le rendu interpole
+> la poignée comme il interpole tout le reste.
 
 Les quatre lignes de traversabilité ne sont pas quatre canaux : c'est **un canal dont les tuiles ont
 des cadences différentes** selon le phénomène qui les gouverne. Une tuile de haute mer se republie
@@ -186,7 +194,15 @@ faire tomber la simulation ; il ne se pénalise que lui-même, et le journal dit
 
 C'est la proposition que SPEC-004 §10.5 laissait ouverte pour les instantanés W. Elle est ici
 tranchée pour tous les canaux, W compris : **une seule politique**, faute de quoi chaque canal
-inventera la sienne — c'est exactement le mécanisme qui a produit E04.
+inventera la sienne — c'est exactement le mécanisme qui a produit l'écart E04 de la revue S08.
+
+> **Note corrective (S13, écart E03).** Ce paragraphe dérive `ring_slots` de la mémoire allouée,
+> tandis que §3.4 le dérive du rapport de cadences (« au moins 4 emplacements pour un consommateur à
+> 10 Hz »). Deux règles pour un même champ, à une section d'écart, sans dire laquelle l'emporte.
+> **La règle est `ring_slots = max(règle de cadence de §3.4, 2)`**, et la mémoire du canal doit le
+> permettre. Si elle ne le permet pas, c'est une **mauvaise configuration** — détectée par
+> `validate_config()` au chargement et jamais à l'exécution (SPEC-004 §1.3). Le mécanisme existait ;
+> il suffisait de l'invoquer.
 
 ### 2.6 Autorité : ce qu'I-15 impose à une donnée publiée
 
@@ -265,7 +281,7 @@ enum class EventOrigin : uint8_t {  // cf. §3.3
     TransductionLocale    // W_local, cosmétique — ADR-005 §3, ADR-021 §3
 };
 
-struct WaveEvent {                       // 45 octets
+struct WaveEvent {                       // 50 octets — corrigé en S13, écart E04
     uint64_t  id;                        // server_seq — ordre total, déduplication
     uint32_t  frame_id;
     f16vec3   origin_local;              // dans le référentiel de `cell`
@@ -299,9 +315,16 @@ struct WaveEvent {                       // 45 octets
 **Coût réseau, revérifié.** Les trois champs sont sur la structure **répliquée** — ils doivent
 l'être : le serveur émet l'événement depuis la cause (ADR-021 §3), et un client qui n'a pas
 assisté à la cause n'a aucun moyen de retrouver le matériau ou le volume déplacé. La structure
-passe donc de 40 à 45 octets, et le débit d'ADR-009 §2 de 800 à **900 o/s par joueur intéressé**
-dans une zone chargée à 20 événements/s. Toujours négligeable devant le trafic d'entités —
-vérification faite, pas supposée.
+passe donc de 45 à **50 octets**, et le débit d'ADR-009 §2 de 900 à **1 000 o/s par joueur
+intéressé** dans une zone chargée à 20 événements/s. Toujours négligeable devant le trafic
+d'entités.
+
+> **Note corrective (S13, écart E04).** Ce paragraphe annonçait « de 40 à 45 octets ». Les deux
+> chiffres étaient faux : la structure d'origine d'ADR-009 §2 en sommait **45** et non 40, et
+> l'étendue en somme **50**. Cinq octets avaient été ajoutés à une base fausse, retrouvant par
+> coïncidence la taille réelle de l'original. `ListenerAggregate` (§4.2) portait la même erreur —
+> deux structures sur deux dans ce document. Aucune conclusion ne change ; c'est la **classe de
+> contrôle** qui manquait, personne n'ayant jamais additionné les champs d'un `struct`.
 
 ### 3.2 Publication, et non drainage
 
@@ -418,6 +441,13 @@ struct FoamGpuView {
 Deux canaux dans une seule texture, parce qu'ADR-014 §2.2 en fait un vecteur à deux composantes et
 que les séparer doublerait les lectures pour rien.
 
+> **Clarification (S13).** Remettre au rendu une poignée de texture GPU n'enfreint pas **I-13**
+> (« le rendu ne pilote pas la physique […] ne peut jamais partager les structures de calcul »). La
+> texture est un **produit publié**, immuable sur le tick : le rendu ne peut ni y écrire, ni
+> influencer la simulation par elle. Ce qu'I-13 protège est le tableau de blocs de δ (ADR-006 §5),
+> pas les champs que le système publie. La clarification est écrite parce que quelqu'un invoquera
+> I-13 pour refuser cette section.
+
 **Ce qui sort d'une cascade est perdu**, et c'est voulu (ADR-014 §2.3) : hors de vue. La conséquence
 d'interface est qu'une cascade **change d'ancre** quand l'observateur se déplace ; `anchor_local` et
 `frame` sont donc republiés à chaque instantané, et un consommateur qui aurait mémorisé une ancre
@@ -446,7 +476,7 @@ struct ListenerAggregate {
     half  foam_residual[3];      // intégrale du canal résiduel, mêmes rayons
     half  aeration_sector[16];   // cf. §4.3
     half  immersion;             // fraction du volume de l'auditeur sous la surface
-};                               // 45 octets
+};                               // 50 octets — corrigé en S13, écart E04
 
 struct FoamAggregateView {
     SnapshotStamp                  stamp;   // `readback_age_us` est ici toujours non nul
@@ -735,7 +765,15 @@ une tuile à moitié remplie, jamais une liste d'événements tronquée en son m
 doit pouvoir croire ce qu'il lit ; ce dont il ne peut pas être sûr, c'est de **quand** il le lira,
 et `stamp.sequence` (§2.4) le lui dit.
 
-Ordre de dégradation, cohérent avec les rangs d'ADR-012 §4 :
+Ordre de dégradation. **Les rangs de ce document sont notés `P1` à `P5` et ne se confondent pas
+avec les sept rangs d'ADR-012 §4**, qui portent sur les domaines et les paquets W.
+
+> **Note corrective (S13, écart E02).** Ce paragraphe disait « cohérent avec les rangs d'ADR-012 §4 »
+> en réutilisant leur numérotation. Deux échelles indépendantes portaient donc les mêmes numéros dans
+> deux documents qui se citent — et depuis S12, ADR-022 §2.6 a posé que « le rang 5 ne s'applique pas
+> aux domaines substitutifs », règle qui vise l'échelle d'ADR-012. Rapportée à celle-ci, elle se
+> lirait « on n'élague pas les événements de transduction dans un déferlement » : contresens complet
+> et parfaitement plausible.
 
 | Rang | Ce qui cède | Ce qui ne cède jamais |
 |---|---|---|

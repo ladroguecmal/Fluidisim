@@ -294,7 +294,8 @@ struct WaterPersistentState {
 
     SimTime    t_sim;
     span<const RegionDescriptor> regions;     // état de mer par région — ADR-004 §2.2
-    span<const WaveEvent>        events_alive; // ttl non échu — SPEC-006 §3.1, 45 o pièce
+    span<const WaveEvent>        events_alive; // ttl non échu, ORIGINE `Serveur` UNIQUEMENT
+                                                 // SPEC-006 §3.1, 50 o pièce — cf. note S13
     span<const VNodeDelta>       v_nodes;      // cf. §4.3
 };
 
@@ -305,6 +306,19 @@ struct VNodeDelta {                 // 20 octets
     uint16_t flags;
 };
 ```
+
+> **Note corrective (S13, écarts E11 et E04).** Ce champ n'était pas filtré. `WaveEvent` porte
+> depuis SPEC-006 §3.1 un `EventOrigin` à trois valeurs, dont deux — `AnticipationLocale` et
+> `TransductionLocale` — sont **locales, cosmétiques et non répliquées** (ADR-021 §3). Les écrire
+> aurait trois effets : emporter des événements que le serveur n'a jamais eus ; mêler au tri par `id`
+> des identifiants qui ne sont pas des `server_seq` ; et surtout **rendre le cas C19 faux**, puisque
+> ces événements viennent d'un solveur δ, qui n'est jamais D1 — le hash différerait par intermittence
+> et le banc conçu comme l'argument phare d'I-17 échouerait pour une cause étrangère à I-17.
+>
+> `events_alive` ne retient donc que l'origine `Serveur`. Ce n'est pas une restriction ajoutée mais
+> **appliquée** : le §1 de cet ADR l'imposait déjà, en désignant par « W » ce qui est répliqué.
+> *(La taille unitaire passe par ailleurs de 45 à **50 octets**, écart E04 : ≈205 Ko au pire au lieu
+> de 180.)*
 
 **Ordres de grandeur.** Les événements vivants sont bornés par le budget de paquets du profil
 (`paquets_W_max = 4096`, ADR-012 §3), un événement se développant en plusieurs paquets : au pire
@@ -402,6 +416,12 @@ Conséquence pratique à signaler à l'équipe serveur : **le serveur charge des
 lui faut au minimum les `shape_lut` (ADR-010 §2) pour convertir un volume en hauteur, sans quoi il
 ne peut ni décider d'un débordement ni évaluer une ligne de flottaison. Un serveur « sans assets »
 n'est pas une option.
+
+> **Note corrective (S13, écart E05).** Cette liste est incomplète. SPEC-006 §2.6 fait en outre
+> évaluer au serveur le **signal de traversabilité** et rendre autoritaires les franchissements de
+> seuil, ce qui exige la **bathymétrie** et les **champs de courant C1 cuits** en plus des
+> `shape_lut`. Chacun des deux documents était juste, aucun n'était complet, et c'est une contrainte
+> de déploiement (angle mort A77) qu'une équipe serveur lira dans l'un **ou** dans l'autre.
 
 ### 5.2 Correction de l'invariant I-03
 

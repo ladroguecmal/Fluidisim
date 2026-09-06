@@ -24,7 +24,7 @@ Tout le reste est **dérivé identiquement** chez chaque participant.
 ## 2. Événement W
 
 ```
-struct WaveEvent {                  // 40 octets
+struct WaveEvent {                  // 45 octets — cf. note S13 sous ce bloc
     id           : u64              // (server_seq) — ordre total, déduplication
     frame_id     : u32
     origin_local : vec3<f16>  + cell : u60 morton   // position via HydroGrid
@@ -39,6 +39,15 @@ struct WaveEvent {                  // 40 octets
 
 Chaque client développe l'événement en paquets d'ondes par une fonction **pure et déterministe**
 `expand(WaveEvent, T_sim) → paquets`. Aucun état de paquet ne transite jamais sur le réseau.
+
+> **Note corrective (S13, écart E04).** Ce bloc annonçait **40 octets** ; la somme des champs
+> déclarés en vaut **45** (8 + 4 + 6 + 8 + 8 + 1 + 2 + 4 + 2 + 2). L'erreur a été recopiée dans cinq
+> autres documents avant d'être trouvée en S13 — première erreur *arithmétique* du corpus, et elle
+> est dans une structure : les deux revues croisées précédentes avaient vérifié des formules et des
+> tables, jamais une somme de champs. **Convention, désormais explicite** : les tailles annoncées
+> sont des sommes de champs **compactés** ; l'alignement relève du langage, encore ouvert
+> (SPEC-004 §10.1). La structure étendue de SPEC-006 §3.1 pèse **50 octets**, et le débit ci-dessous
+> **1 000 o/s** — toujours négligeable devant le trafic d'entités.
 
 **Débit attendu** dans une zone chargée (combat naval, 20 événements/s) : 800 o/s par joueur
 intéressé. Négligeable devant le trafic d'entités.
