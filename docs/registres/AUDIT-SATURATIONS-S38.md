@@ -179,3 +179,38 @@ S34 sur G10 : ce qui n'est pas forcé de passer par un point unique échappe à 
 débordent.** Ce n'est pas une faute de mesure — la grandeur mesurée est réellement absurde — mais
 cela veut dire que ces deux nombres ne servent qu'à **détecter**, jamais à quantifier une dérive
 modérée. Le compteur d'événements, lui, reste exact.
+
+## 8. Le résidu de S37 : la saturation est mise hors de cause
+
+Action **S37-3**. S37 avait trouvé qu'à la cellule fautive de C04, `delta.rs` porte **zéro
+exactement** et `shallow.rs` un film de `1,05·10⁻¹⁰ m`. La saturation était le suspect naturel : c'est
+elle qui écrit des zéros.
+
+**Ce n'est pas elle.** Les compteurs du §6.1 donnent **zéro déclenchement** sur C04 en régime
+nominal, des deux côtés. Ni le zéro de `delta.rs` ni le film de `shallow.rs` n'ont été écrits par
+une saturation.
+
+La cause est ailleurs, et c'est encore **A163** — le seuil de sec :
+
+| à `t = 2 s`, 800 cellules | `delta.rs` (`h_sec = 10⁻⁶`) | `shallow.rs` (`10⁻¹⁰`) |
+|---|---|---|
+| cellules à `0 < h < 10⁻⁶` (le film) | **3** | **18** |
+| cellules à `h = 0` exactement | 182 | 169 |
+
+Le film de `shallow.rs` est **six fois plus long**, dans le rapport qu'on attend de seuils séparés
+par quatre ordres de grandeur.
+
+### 8.1 Et une prédiction de plus qui tombe
+
+L'analyse annonçait que `delta.rs` n'aurait **aucune** cellule sous son propre seuil : il en a
+**trois**.
+
+> **Un seuil de sec n'assèche pas une cellule : il l'empêche seulement de bouger.** Le seuil coupe
+> la **vitesse** — `u = 0` sous `h_sec` — et non le **flux de masse**. La diffusion de Rusanov,
+> `α·(h_R − h_L)`, continue à déposer de la matière dans une cellule déclarée sèche, même quand
+> les deux vitesses sont nulles.
+
+C'est la **troisième** prédiction de cette session à être fausse, et les trois le sont pour la même
+raison : une lecture du code qui suppose qu'un test conditionnel gouverne plus qu'il ne gouverne.
+Elles ont toutes coûté une ligne de mesure, et chacune a rapporté un fait que personne n'aurait
+cherché.

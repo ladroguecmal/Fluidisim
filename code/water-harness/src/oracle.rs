@@ -548,6 +548,61 @@ mod tests {
         );
     }
 
+    /// **P6 — le résidu de `10⁻¹⁰ m` vient-il de la saturation ?** (action **S37-3**)
+    ///
+    /// S37 a trouvé qu'à la cellule fautive de C04, `delta.rs` porte **zéro exactement** et
+    /// `shallow.rs` un film de `1,05·10⁻¹⁰ m`. La saturation était le suspect naturel : c'est elle qui
+    /// écrit des zéros.
+    ///
+    /// **La réponse est non, et elle est nette** : les compteurs de S38 montrent **zéro
+    /// déclenchement** sur C04 en régime nominal, des deux côtés. Aucune des deux valeurs n'a été
+    /// écrite par une saturation — ni le zéro de `delta.rs`, ni le film de `shallow.rs`.
+    ///
+    /// Ce test établit la vraie cause à la place : **le seuil de sec gouverne aussi le flux**. Une
+    /// cellule à `h = 5·10⁻⁷` est sèche pour `delta.rs`, qui lui donne `u = 0` et cesse donc de
+    /// transporter ; elle est mouillée pour `shallow.rs`, qui continue à pousser de la matière dans
+    /// le film. Le résidu n'est pas un déchet laissé derrière le front : **c'est du transport que
+    /// l'autre véhicule a déjà arrêté**. Encore **A163**.
+    #[test]
+    fn le_residu_ne_vient_pas_de_la_saturation_mais_du_seuil() {
+        let b = bilan_c04(2.0);
+        assert_eq!(b.delta.etat, 0, "C04 nominal : delta.rs ne doit pas saturer");
+        assert_eq!(b.shallow.etat, 0, "C04 nominal : shallow.rs ne doit pas saturer");
+
+        let (cd, cs) = champs_c04(2.0);
+        let compte = |c: &Champs, bas: f64, haut: f64| {
+            c.hauteur.iter().filter(|&&h| h > bas && h < haut).count()
+        };
+        let film_delta = compte(&cd, 0.0, SEC_DELTA);
+        let film_shallow = compte(&cs, 0.0, SEC_DELTA);
+        let secs_delta = cd.hauteur.iter().filter(|&&h| h == 0.0).count();
+        let secs_shallow = cs.hauteur.iter().filter(|&&h| h == 0.0).count();
+        println!(
+            "C04 à t=2 s — cellules à `0 < h < 10⁻⁶` : delta.rs {film_delta}, shallow.rs {film_shallow}  |  cellules à h = 0 exactement : delta.rs {secs_delta}, shallow.rs {secs_shallow}"
+        );
+
+        // **Le film existe des deux côtés, et c'est un troisième résultat que la session n'attendait
+        // pas.** La prédiction était que `delta.rs` n'aurait **aucune** cellule sous son propre
+        // seuil : il en a **trois**. Le seuil de sec ne coupe que la **vitesse** — `u = 0` sous
+        // `h_sec` — et non le **flux de masse** : la diffusion de Rusanov, `α·(h_R − h_L)`, continue
+        // à déposer de la matière dans une cellule déclarée sèche, même quand les deux vitesses sont
+        // nulles.
+        //
+        // *Un seuil de sec ne assèche pas une cellule : il l'empêche seulement de bouger.*
+        //
+        // Ce qui reste vrai, et qui suffit à établir la cause : le film de `shallow.rs` est **six
+        // fois plus long**, dans le rapport qu'on attend de seuils séparés par quatre ordres de
+        // grandeur.
+        assert!(
+            film_shallow > 3 * film_delta,
+            "le film de shallow.rs devrait être nettement plus long : {film_shallow} contre {film_delta}"
+        );
+        assert!(
+            film_delta > 0,
+            "delta.rs porte lui aussi un film : son seuil coupe la vitesse, pas le flux de masse"
+        );
+    }
+
     /// **Ce que l'oracle a trouvé : les deux véhicules ne définissent pas « sec » pareil.**
     ///
     /// Sur C04 à flux et ordre égaux, la **hauteur** concorde à `6,5·10⁻⁴ m` sur `h₀ = 1 m` — six

@@ -113,7 +113,7 @@ indiscernables tant que personne ne compte** (A146).
 - [x] **P5** — **mesurer sur C01, C03 et C04**, et classer chaque saturation : *filet* · *maquillage*
       · *jamais déclenchée*. Une saturation jamais déclenchée n'est pas innocente : elle n'a pas été
       testée (**L118**).
-- [ ] **P6** — le résidu de `10⁻¹⁰ m` (**S37-3**) : la saturation en est-elle la cause ? Le test doit
+- [x] **P6** — le résidu de `10⁻¹⁰ m` (**S37-3**) : la saturation en est-elle la cause ? Le test doit
       pouvoir répondre **non**.
 - [ ] **P7** — l'ADR, et les répercussions : `CAS-CANONIQUES`, angles morts, actions.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6).
