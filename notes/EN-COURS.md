@@ -75,7 +75,7 @@ exécutées — c'est l'angle mort A89, écrit en S14.
 - [x] **P2** — les **actions décidées** des cinq registres d'audit : exécutées ou non, et statut
   à jour ou non. *Thèse : les deux échouent, et dans les deux sens — une action faite reste marquée
   « à faire », une action à faire reste non faite.*
-- [ ] **P3** — les actions qui visent la **validation** (`PLAN-BENCHMARK`, `SPEC-003`,
+- [x] **P3** — les actions qui visent la **validation** (`PLAN-BENCHMARK`, `SPEC-003`,
   `CAS-CANONIQUES`), recensées dans tout le corpus et non dans les seuls registres.
   *Thèse : c'est là que le taux d'exécution s'effondre, parce que ces documents n'appartiennent à
   aucune session — aucune n'a travaillé la validation depuis S03.*
@@ -134,3 +134,37 @@ dans une **table Suite** » de ce registre. **Elle ne l'était pas** : ce regist
 L'énoncé d'A89 est donc faux dans sa prémisse. Le constat sous-jacent en sort **renforcé** : ce n'est
 pas qu'une table « Suite » ne serait pas exécutée, c'est qu'**une action qui n'entre pas dans une
 liste exécutable n'est pas exécutée**. À corriger en P7.
+
+#### P3 — les actions qui visent la validation
+
+Recensement dans **tout le corpus**, et non dans les seuls registres : sept formulations du type
+« à ajouter au banc / au protocole / au cas », dont cinq portent réellement sur la validation.
+
+| Origine | Cible | Exécutée ? |
+|---|---|---|
+| ADR-021 §4 | cas **C18** — le nombre de paquets `W_rep` au-dessus du seuil est identique sur tous les clients | **non** |
+| ADR-021 §7.3 | protocole **B2** — recevabilité de `λ_cut` | **oui**, ajout S05 présent |
+| SPEC-006 §5.6 | protocole **B2** — second fondement : la validité du signal de traversabilité | **non** |
+| SPEC-006 §7 | banc **`starve`**, SPEC-003 §9.1 — trois assertions | **non** |
+| ADR-022 §6.1 | cas **C19** | **oui**, S10 |
+| ADR-023 §2.6 | cas **C20** | **oui**, S12 |
+| ADR-025 §4 | un cas canonique — compartiment inondé, avec et sans domaine δ | **non**, et il date de **S14** |
+
+**Quatre sur sept non exécutées.** Mais la première explication — « les documents de validation
+n'appartiennent à personne » — ne résiste pas : trois actions visant ces mêmes documents ont bien
+été faites.
+
+**R03 — la cause est le plan, pas le document cible.** Les trois exécutées l'ont été **par la
+session qui les décidait, dans une étape inscrite à son plan** : C19 décidé en ADR-022 §6.1 (S10 P6)
+et ajouté à S10 P8 ; C20 décidé en ADR-023 §2.6 (S12 P2) et ajouté à S12 P7 ; l'ajout B2 décidé et
+posé dans la même session S05. Les quatre perdues ont été **annoncées sans entrer dans un plan** —
+y compris celle d'ADR-025 §4, écrite en S14 P6a alors que le plan de S14 ne prévoyait pas de cas
+canonique.
+
+> **Une action décidée en cours de session n'est exécutée que si elle entre dans le plan déclaré
+> de `notes/EN-COURS.md`.** Ce n'est pas une affaire de distance ni de document : c'est que le plan
+> est la seule liste que quelqu'un relit.
+
+Le corollaire est utile et immédiat : **le rituel de fin doit relever les actions décidées en cours
+de session** et, si elles ne sont pas faites, les inscrire quelque part d'exécutable — un point
+ouvert daté, à défaut d'une étape.
