@@ -81,8 +81,8 @@ terme de fond sont deux discrétisations différentes de la même quantité ; su
 ne s'annulent pas, et l'eau au repos se met à couler. Si la thèse est fausse, c'est mon montage qui
 est trop facile, pas le schéma qui est bon — et il faudra le dire.
 
-- [ ] **P1** — plan, jeton.
-- [ ] **P2** — `delta.rs` : grille 1D, état conservatif `(h, hu)`, flux de Rusanov, pas de temps
+- [x] **P1** — plan, jeton.
+- [x] **P2** — `delta.rs` : grille 1D, état conservatif `(h, hu)`, flux de Rusanov, pas de temps
       CFL. Fond plat d'abord, où le repos est trivialement exact. Test de repos sur fond plat.
 - [ ] **P3** — le terme de fond au premier jet, la pente 1:20, et C01 branché dans le mode
       `physics` : `max|u|` et `max|η − η₀|` mesurés sur le champ après 60 s.

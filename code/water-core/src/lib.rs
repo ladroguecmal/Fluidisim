@@ -7,8 +7,11 @@
 //! # Ce que contient H1
 //!
 //! Le premier étage du harnais (SPEC-003 §10) : les types fondamentaux, les services d'hôte, une
-//! couche `B` minimale et le hash de conformité. Ni `W`, ni `δ`, ni `V` — ils viennent après, et
-//! chacun attend un banc.
+//! couche `B` minimale et le hash de conformité.
+//!
+//! **S22 y ajoute un `δ`** — `delta.rs`, Saint-Venant 1D — qui est un **véhicule d'essai** et non
+//! le solveur du projet : ce choix appartient au banc B3 (ADR-007 §5). Ni `W`, ni `V` n'existent
+//! encore, et chacun attend son banc.
 //!
 //! # Zéro dépendance
 //!
@@ -19,6 +22,7 @@
 
 pub mod background;
 pub mod body;
+pub mod delta;
 pub mod hash;
 pub mod host;
 pub mod phase;
@@ -26,6 +30,7 @@ pub mod types;
 
 pub use background::{Background, Component, SeaState};
 pub use body::{FloatingBox, RHO_EAU};
+pub use delta::{Bassin, Delta1D};
 pub use hash::Hasher64;
 pub use host::{AllocError, AllocStats, Allocator, HostServices, JobSystem, Sink};
 pub use phase::PhaseQ32;
