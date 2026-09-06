@@ -246,3 +246,10 @@ mécaniques (I-07, I-08) ou ceux qui servent à décider plutôt qu'à refuser (
 vieilli sont ceux qui nomment un mécanisme** — I-01 nomme une fonction, I-11 nommait un plafonnement,
 I-16 nomme une catégorie. Un invariant qui nomme un mécanisme vieillit avec lui ; un invariant qui
 énonce une propriété ne vieillit pas. C'est une règle d'écriture, pas seulement un constat.
+
+#### P6 — coupé en deux, comme S13
+
+**P6a** : `ADR-025` (la masse ne quitte jamais V) et `ADR-026` (amendement de six invariants).
+Deux ADR plutôt qu'un : le premier est une décision de conception, le second une correction de
+règles. Les mêler aurait rendu les deux moins citables.
+**P6b** : les amendements dans `01_INVARIANTS.md` et les notes correctives.
