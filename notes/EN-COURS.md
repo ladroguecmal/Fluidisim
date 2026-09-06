@@ -59,170 +59,57 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S30
-État             : terminée
+Session          : S31
+État             : en cours
 Battement        : 2026-09-06
-Objectif         : Réécrire les cinq assertions fautives — et leur donner une provenance
+Objectif         : La réinjection W→δ — et la prémisse de la question
 ```
 
 ### Plan
 
-Action **S29-1**. L'audit S29 a recensé six assertions fautives sur cinq cas et dit, pour chacune,
-**ce qu'il faudrait mesurer à la place**. Il n'a pas dit **avec quel seuil** — et c'est là que se
-trouve le travail : un seuil sans provenance viole I-14, et le corpus en compte déjà trois qui
-traînent depuis leur écriture (A106).
+Action **S26-2**, angle mort **A122**, ouvert depuis S26 et qualifié depuis lors de « question la
+plus lourde ouverte » : *si δ efface les composantes courtes (ADR-034), la zone de transition
+doit-elle les réinjecter depuis W, ou l'effacement est-il voulu ?*
 
-**Ce que la session ne doit pas faire.** Remplacer « aucune divergence » par « divergence < 5 % »
-serait un progrès de forme et une régression de fond : on aurait échangé un symptôme contre un
-nombre inventé. **Chaque seuil doit sortir d'une formule du corpus ou être marqué « à calibrer »
-avec le banc qui le fixera** — c'est I-14, et c'est la seule sortie honnête.
+**La première chose à faire est de vérifier que la question a un objet.** ADR-001 §2 pose
+`Surface_visible = B + W + δ`, et ADR-005 §1 tire de cette additivité que cinq des dix
+sous-problèmes de la zone de transition **n'existent pas** — dont « conversion onde analytique →
+état volumique », *« sans objet : B+W est un terme de forçage lu par le solveur, pas une condition
+d'entrée à convertir »*.
 
-*Thèse déclarée : les cinq cas ne se ressemblent pas, et deux d'entre eux n'ont pas besoin d'un
-seuil du tout.* « Nettement supérieure » (C07) et « sensiblement plus longue » (C10) décrivent des
-**rapports** dont la théorie donne la valeur — il n'y a pas de seuil à choisir, il y a une formule à
-retrouver. Les vacuités (C15, C18) demandent un **témoin**, pas un seuil. Seul C11 demande vraiment
-un nombre neuf, et c'est celui qu'il faudra peut-être marquer « à calibrer ».
+*Thèse déclarée : A122 se dissout, et ce qui la remplace est pire.* Si δ est **additif**, il ne
+transporte pas la houle de fond — il transporte l'**écart** à la houle. Une composante courte de W
+traverse donc le domaine δ sans être dissipée, puisqu'elle n'y est pas discrétisée. Il n'y a rien à
+réinjecter.
 
-- [x] **P1** — plan, jeton.
-- [x] **P2** — **C10**, masse ajoutée : `T_avec/T_sans = √(1 + m_a/m)`. Référence fermée, et le cas
-      est partiellement exécuté depuis S21 — donc vérifiable, pas seulement réécrit.
-- [x] **P3** — **C07**, sillage transcritique : le facteur de résonance `1/√|1 − Fr_h²|` d'ADR-011
-      §4. Attention, il **diverge à `Fr_h = 1`** : la mesure ne peut pas se faire au point critique,
-      et l'énoncé actuel y place pourtant son assertion.
-- [x] **P4** — **C15** et **C18**, les deux vacuités : un témoin chacune, et la grandeur qu'il doit
-      faire bouger.
-- [x] **P5** — **C11**, ~~le seul qui demande un nombre neuf~~ — il n'en demandait pas. Chercher d'abord s'il existe une
-      grandeur dont le seuil se dérive ; à défaut, « à calibrer » avec son banc, ce qui est un
-      statut légitime et non un échec.
-- [x] **P6** — notes correctives datées dans `CAS-CANONIQUES` pour les cinq, et mise à jour du
-      registre S29.
-- [x] **P7** — répercussions : index, angles morts, actions, décomptes.
-- [x] **P8** — rituel de fin (`REPRISE.md` §6).
+**Mais alors la loi de dissipation d'ADR-033 ne s'applique pas à ce qu'on croyait.** Elle s'applique
+à ce que δ porte réellement : les **perturbations locales** — sillage, impact, éclaboussure —
+c'est-à-dire exactement ce pour quoi δ existe. Et un sillage de Kelvin a une longueur d'onde
+`λ = 2πv²/g` : **16 m à 5 m/s**, donc 16 points par longueur d'onde à `dx = 1 m`, donc une demi-vie
+de l'ordre de **la période**. Si ce calcul tient, le sillage d'un bateau s'éteint en quelques
+secondes.
+
+- [ ] **P1** — plan, jeton.
+- [ ] **P2** — établir l'additivité et ses conséquences : ce que δ porte, ce qu'il ne porte pas, et
+      donc ce que la loi de dissipation gouverne réellement.
+- [ ] **P3** — le sillage : `λ = 2πv²/g`, la résolution qu'il reçoit, la demi-vie qui en découle.
+      **Chiffrer avant de conclure** — l'ordre de grandeur peut démentir la thèse.
+- [ ] **P4** — **mesurer** sur le véhicule : une perturbation courte lâchée dans un domaine, et son
+      amplitude après une traversée. La loi prédit, la mesure vérifie.
+- [ ] **P5** — le critère général de survie à la traversée, en fonction de `λ`, `dx` et de la
+      **taille du domaine** — trois grandeurs, là où le corpus n'en relie que deux.
+- [ ] **P6** — **ADR-036** : ce que A122 devient.
+- [ ] **P7** — répercussions : ADR-005, ADR-034, index, angles morts, actions, décomptes.
+- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
-**Ce que S29 laisse et qui commande cette session.**
+**Ce que S30 laisse et qui vaut pour ici.**
 
-- **Les trois classes** — recevable · symptôme · vacuité — s'appliquent à toute assertion nouvelle.
-  Celles écrites ici doivent y être soumises **avant** d'être publiées.
-- **Le corollaire d'atteignabilité (A133)** : vérifier qu'un montage peut atteindre le régime où
-  l'assertion échoue. C'est directement en jeu pour C07, dont le point critique est singulier.
-- **`avec_cfl` borne à 2,0**, délibérément. Ne pas resserrer.
+- **Trois questions à toute assertion nouvelle** : quelle grandeur ? quel témoin la fait échouer ?
+  qu'est-ce qui la mesure, et est-ce que ça existe ?
+- **La loi de dissipation n'est valide qu'à `a/h ≈ 1 %`** (A127) — un sillage proche d'un bateau ne
+  l'est pas forcément.
 - **C04 en échec, `C01-jet` rouge, C08 sans verdict** : trois décisions.
 
 **Branche.** `claude/s22-suite`. `master` s'arrête à S17 (A107).
-
-#### P2 — C10 : le rapport ne dépend de rien, et c'est ce qui le rend assertable
-
-`T = 2π·√((m + m_a)/(ρ_eau·g·A))` donne `T_avec/T_sans = √(1 + m_a/m)`.
-
-**A26** pose que la masse ajoutée d'une coque vaut **environ la masse déplacée**. Et un corps qui
-flotte déplace, par Archimède, **exactement sa propre masse**. Donc `m_a ≈ m`, et le rapport vaut
-**√2 ≈ 1,414** — sans dépendre de la taille du cube, de sa densité ni de la profondeur : tout
-s'annule dans le quotient.
-
-> **Il n'y avait pas de seuil à choisir. Il y avait une formule à retrouver.**
-
-**Assertion : `T_avec/T_sans = 1,414 ± 15 %`**, la tolérance encodant le mot « environ » d'A26 —
-`m_a/m ∈ [0,5 ; 1,5]` donne `[1,225 ; 1,581]`, soit −13 % à +12 %. **Contrôle indépendant** : le
-disque équivalent de même aire, `m_a = (8/3)ρR³` avec `R = a/√π`, donne **1,399**. Les deux voies
-concordent à 1 % sans rien partager.
-
-#### P3-P4 — C07 cumulait deux défauts, et C18 en cachait un second
-
-**C07 — le montage n'atteint jamais le régime que l'assertion vise.** Par 5 m de fond,
-`√(g·h) = 7,00 m/s` ; les quatre vitesses de l'énoncé — 5, 8, 10, 15 m/s — donnent
-`Fr_h = 0,71 · 1,14 · 1,43 · 2,14`. **Le point critique est sauté.** C'est **A133**, trouvé cette
-fois dans le corpus et non dans le harnais.
-
-La correction de l'assertion **oblige donc à corriger le montage** — et c'est le vrai apport : une
-assertion sans grandeur masquait un montage incapable. On ne pouvait pas voir le second défaut sans
-avoir corrigé le premier.
-
-**Assertion de remplacement, sur le modèle de C20 : la pente, pas la valeur.** La théorie linéaire
-donne un facteur de résonance `1/√|1 − Fr_h²|`, donc en log-log :
-
-> **pente de `log A` contre `log|1 − Fr_h²|` = `−½ ± 0,15`**, sur `Fr_h ∈ {0,3 ; 0,5 ; 0,7 ; 0,9}`,
-> soit `v ∈ {2,10 ; 3,50 ; 4,90 ; 6,30} m/s` par 5 m de fond.
-
-**Aucun seuil n'est inventé** — l'exposant `−½` est celui de la loi. Et `Fr_h = 0,9` et non 1,0 :
-le facteur **diverge** au point critique, où aucune valeur finie ne peut servir de référence.
-
-**C15 — le seuil avait sa provenance, c'est le témoin qui manquait.** `Hs < 0,15 m` vient de
-SPEC-002 §4. Trois assertions désormais, dont la première est neuve : à `Hs = 0,05 m`, l'épaisseur
-doit être **non nulle** et valoir `0,035·√FDD` à ±10 %. Sans elle, la ligne « aucune plaque » est
-verte avant que la glace existe.
-
-**C18 — une ligne vide, et une seconde que je n'avais pas vue en S29.**
-
-- « **l'hôte serveur compile et tourne** » → remplacée par un décompte,
-  `scénarios_exécutés ≥ 1`, qui vaut zéro aujourd'hui et fait donc **échouer** le cas.
-- « **aucune capacité dérivée n'est lue depuis un profil de qualité** » → **vide aussi**. Elle se
-  vérifierait par analyse statique, qui n'existe pas. S29 l'avait classée recevable en la confondant
-  avec « zéro allocation », qui, elle, **a** son compteur (`refused_after_seal`, lu depuis S20).
-
-> **Le tri de S29 s'est trompé une fois, et dans le sens le plus coûteux** : il a déclaré recevable
-> une assertion vide. Deux assertions négatives se ressemblent ; ce qui les sépare est l'existence
-> d'un **instrument**, pas leur formulation — et l'instrument ne se lit pas dans l'énoncé.
-
-#### P5 — C11 ne demandait pas de nombre neuf, et la thèse était fausse dans le bon sens
-
-Le plan annonçait : *« seul C11 demande vraiment un nombre neuf, et c'est celui qu'il faudra
-peut-être marquer à calibrer »*. **Les deux assertions se corrigent sans qu'aucun seuil ne soit
-inventé.**
-
-**« Aucun tremblement visible » a une référence *exacte*.** ADR-008 §3 pose qu'en mode contraint
-l'objet est **projeté sur la surface** — `z = η` — et qualifie le résultat d'« exactement stable ».
-La grandeur est l'écart à la surface, et sa référence est **zéro** :
-
-> `max|z_objet − η(x_objet)| = 0`, à la précision de la représentation.
-
-Même forme que C01, et **plus forte qu'un seuil de visibilité** : un écart de `10⁻⁴ m` est invisible
-et signale pourtant que la projection n'est pas appliquée. « Visible » n'était pas seulement flou —
-c'était une exigence *plus faible* que ce que la conception garantit déjà.
-
-**« Aucune divergence » devient un facteur d'amplification.** Rien n'injecte d'énergie dans le
-montage ; un système qui n'en reçoit pas ne peut pas amplifier. Donc **`|G| ≤ 1` par période**, et
-le seuil `1` n'est pas choisi : c'est la frontière entre amortir et amplifier, placée par la
-physique.
-
-> **C'est la même grandeur qu'en S29**, où elle a détecté à `ν = 1,05` un schéma que « aucune
-> divergence » déclarait stable. La correction d'un cas de conception et la correction d'une mesure
-> du harnais convergent sur le même objet — ce qui est le signe qu'il s'agit du bon.
-
-#### Bilan des cinq
-
-**Aucun seuil n'a été inventé.** Chacun sort d'une formule ou d'un document du corpus :
-
-| Cas | Origine du remplacement | Nombre neuf ? |
-|---|---|---|
-| **C07** | exposant `−½` du facteur de résonance, ADR-011 §4 | **non** |
-| **C10** | `√(1 + m_a/m)` avec `m_a ≈ m` (A26 + Archimède) → `√2` | **non** |
-| **C11** | `z = η` exact, ADR-008 §3 · `\|G\| ≤ 1`, conservation | **non** |
-| **C15** | `Hs < 0,15 m`, SPEC-002 §4 ; le témoin est neuf, pas le seuil | **non** |
-| **C18** | un décompte `≥ 1`, qui vaut zéro aujourd'hui | **non** |
-
-La thèse annonçait qu'un seuil au moins serait à calibrer. **Zéro.** Ce que l'audit S29 avait pris
-pour un manque de seuils était en réalité un manque de **lecture** : les grandeurs étaient dans le
-corpus, sous les assertions qui ne les nommaient pas.
-
-#### État à la fin de S30
-
-`cargo test` : **33 tests**. `water-harness check` : 2 scénarios, 0 échec, hashs **inchangés**.
-Session **sans code neuf** — le travail était de conception. Jeton **libéré**.
-
-**Ce que S31 doit savoir avant de commencer, et qui n'est pas ailleurs :**
-
-- **Les cinq assertions sont réécrites mais aucune n'est exécutable** : les cas attendent leur
-  couche. C'est le principe de S29 — la forme se corrige avant que la couche existe, et c'est ce qui
-  rend la correction bon marché. Ne pas les prendre pour des cas prêts.
-- **Le montage de C07 n'est pas corrigé, seulement son assertion.** Les quatre vitesses d'origine
-  sautent `Fr_h = 1` ; le balayage `{2,10 ; 3,50 ; 4,90 ; 6,30} m/s` est écrit dans la note mais
-  n'a pas remplacé l'énoncé du montage (S30-1).
-- **Trois questions à poser à toute assertion nouvelle**, dans cet ordre : *quelle grandeur ?* —
-  *quel témoin la fait échouer ?* — *qu'est-ce qui la mesure, et est-ce que ça existe ?* La
-  troisième est celle que S29 a oubliée, et elle lui a fait déclarer recevable une assertion vide.
-- **`√2` pour C10 ne dépend d'aucun paramètre du cube** — ni taille, ni densité, ni profondeur. Si
-  une future mesure le fait dépendre de l'un des trois, c'est le modèle de masse ajoutée qu'il faut
-  suspecter, pas la référence.
-- **C04 en échec, `C01-jet` rouge, C08 sans verdict** : trois décisions, pas trois régressions.
