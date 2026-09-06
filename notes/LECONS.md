@@ -1423,3 +1423,75 @@ concerner le même paramètre et n'ont pas à prendre la même valeur.
 mesures publiées en dépendent. Si la réponse n'est pas « aucune », la valeur reste dans la décision
 et l'instrument garde la sienne — en disant pourquoi, sans quoi la prochaine session le prendra pour
 un oubli.
+
+## L98 — Une assertion peut être verte parce que le mécanisme qu'elle teste n'existe pas encore
+
+*(S29)* « Aucune plaque de glace ne se forme tant que `Hs > 0,15 m` » est une assertion recevable :
+elle porte sur une grandeur mesurable, l'épaisseur, et elle a un seuil. **Elle passe pourtant depuis
+le jour où elle a été écrite, et passera jusqu'à ce que le modèle de glace existe** — parce qu'aucune
+plaque ne se forme quand rien ne fabrique de plaques.
+
+C'est distinct du symptôme : l'assertion n'est pas mal formée, elle est **vide**. Et une batterie
+verte dont une part est vide donne exactement la confiance qu'elle ne mérite pas.
+
+Le remède est le **témoin** : un montage qui doit faire échouer l'assertion. S'il ne la fait pas
+échouer, le cas ne teste rien. Ce dépôt en employait déjà un — un schéma volontairement fautif,
+conservé, dont le harnais signale comme *anomalie* le jour où il cesserait d'échouer — sans avoir vu
+que le dispositif répondait à un problème général.
+
+**Réflexe** : pour toute assertion, se demander *« qu'est-ce qui la ferait échouer aujourd'hui ? »*.
+Si la réponse est « rien, parce que la chose testée n'existe pas », il faut un témoin, ou l'assertion
+est un décor.
+
+## L99 — Une garde de sécurité posée sur un instrument l'empêche de mesurer
+
+*(S29)* Un balayage devait observer un facteur d'amplification supérieur à 1, en demandant un nombre
+de Courant de 1,05. La fonction de réglage bornait à `[0,05 ; 0,99]`, par prudence. **La mesure a
+rendu le résultat de 0,99 comme s'il était celui de 1,05**, sans rien signaler.
+
+Le bornage était raisonnable là où il avait été écrit — il protège d'un pas de temps nul. Sur un
+**instrument de mesure**, il devient un aveuglement : l'appareil ne peut plus atteindre le régime
+qu'il est censé caractériser, et il renvoie une valeur plausible.
+
+C'est la même faute qu'une assertion qui ne peut pas échouer, d'un cran plus haut : ce n'est pas le
+test qui est incapable de voir, c'est le **montage** qui est incapable d'atteindre l'endroit où il y
+aurait quelque chose à voir.
+
+**Réflexe** : avant tout balayage, vérifier que les bornes du montage permettent d'**atteindre le
+régime où l'assertion échoue**. Et faire dire à un réglage bridé qu'il a bridé — un `clamp`
+silencieux dans un instrument transforme une question en réponse.
+
+## L100 — Une mesure vide peut porter une conclusion sans la rendre fausse, et c'est le cas le plus dur à voir
+
+*(S29)* Une mesure de stabilité classait les exécutions en « stable / diverge / non fini » et
+répondait « stable partout ». Elle ne pouvait échouer que sur une catastrophe ; elle n'a rien prouvé.
+Un ADR en a pourtant tiré une ligne.
+
+**Et la conclusion de cet ADR tient quand même** — parce qu'une seconde mesure, continue celle-là,
+la portait réellement. La ligne fautive était décorative.
+
+C'est la configuration la plus difficile à détecter : **rien n'est faux, donc rien n'alerte**. La
+mesure vide reste dans le document, indiscernable des autres, et une session ultérieure la citera
+comme un fait établi — d'autant plus volontiers qu'elle est simple et catégorique.
+
+**Réflexe** : pour chaque conclusion publiée, nommer **laquelle** des mesures la porte, et vérifier
+que celle-là est recevable. Les autres sont du contexte, et doivent être présentées comme tel. Une
+conclusion adossée à trois mesures dont une seule est valide n'est pas trois fois étayée.
+
+## L101 — Un critère se vérifie sur des cas dont on connaît la réponse, et c'est là qu'il se complète
+
+*(S29)* Le critère de tri — *une assertion est recevable s'il existe une grandeur continue dont elle
+est le seuil* — a été éprouvé sur trois cas connus avant d'être appliqué en série, par prudence : un
+critère qui classe mal un cas évident classera mal les autres en silence.
+
+Les deux premiers ont confirmé le critère. **Le troisième l'a fait éclater** : « zéro allocation »
+est recevable au sens du critère, et pourtant satisfaite si rien ne tourne. Une classe entière
+manquait, et elle ne se serait pas vue en série — elle aurait produit des « recevable » corrects et
+inutiles.
+
+L'épreuve préalable n'a donc pas servi à valider le critère : elle a servi à le **compléter**, et
+c'est un usage plus rentable que celui pour lequel elle était prévue.
+
+**Réflexe** : éprouver un critère de classement sur trois cas dont on connaît déjà le verdict, en
+choisissant le troisième **le moins ressemblant aux deux autres**. Le coût est de quelques minutes ;
+le gain est de ne pas produire un inventaire entier qui range mal.

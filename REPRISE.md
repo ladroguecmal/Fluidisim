@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-06
-Session en cours : S29 — audit des assertions : ce que chaque cas peut voir
-Dernière session : S28 — 2026-09-06 — C23 : la borne tient sa promesse, et le défaut ne casse rien
-Session suivante : S30 — la réinjection W/δ (S26-2) ou H2
+Session en cours : —
+Dernière session : S29 — 2026-09-06 — l'audit des assertions, qui s'est trouvé lui-même deux fois
+Session suivante : S30 — réécrire les cinq assertions fautives (S29-1) *(recommandé)*, ou la réinjection W/δ (S26-2), ou H2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
@@ -105,7 +105,7 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Vingt-huit sessions, **35 ADR** *(dont un acté)*, six spécifications, huit registres — **et du
+Vingt-neuf sessions, **35 ADR** *(dont un acté)*, six spécifications, **neuf registres** — **et du
 code qui tourne** : `code/`, étages **H1 et H3** du harnais, un **δ d'essai** équilibré, 31 tests
 verts et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
 verdict** (C08). Quatre cas canoniques sur δ sont exécutés : **C01 et C03 passent**, C04 échoue,
@@ -135,6 +135,12 @@ l'absence d'un défaut présent (**A129**). Ce qui est perdu au-delà d'une cond
 n'est pas la simulation, c'est la **garantie**. Sous la définition corrigée, la borne tient `ν` au
 millième pour une paroi de 0,5 à 20 m/s : **`ν = 0,70` est débloqué pour le solveur du projet**, le
 véhicule d'essai gardant 0,45 pour ne pas déplacer ses références.
+
+**Et S29 a audité la *forme* des assertions elles-mêmes.** Une assertion ne voit que ce que sa forme
+lui permet de voir, et trois classes se distinguent : recevable, **symptôme** (ne peut échouer que
+sur un accident), **vacuité** (satisfaite parce que le mécanisme testé est absent). Dix-huit cas sur
+vingt-trois sont exempts ; les deux fautes les plus instructives étaient dans le **harnais**, pas
+dans le corpus. Voir [`AUDIT-ASSERTIONS-S29`](docs/registres/AUDIT-ASSERTIONS-S29.md).
 
 **Une urgence de format, la seule.** `WaveEvent` (SPEC-006 §3.1) est une structure **répliquée** qui
 porte trois champs demandés par l'équipe audio. Elle doit être arrêtée **avant** que le réseau ne

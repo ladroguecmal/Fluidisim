@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S29
-État             : en cours
+État             : terminée
 Battement        : 2026-09-06
 Objectif         : Audit des assertions — ce que chaque cas peut voir
 ```
@@ -103,7 +103,7 @@ Si la thèse est juste, l'audit doit commencer par mes propres mesures avant de 
       prouvé.
 - [x] **P6** — registre `AUDIT-ASSERTIONS-S29`, et note datée sur les cas dont l'énoncé change.
 - [x] **P7** — répercussions : index, angles morts, actions, décomptes.
-- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
+- [x] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
@@ -243,3 +243,25 @@ résultat qu'il cherchait**, et rien ne le disait.
 C'est la même faute d'un cran plus haut — non pas une assertion qui ne peut pas échouer, mais un
 **réglage qui ne peut pas atteindre le régime testé**. La borne haute passe à 2,0 : au-delà de 1 le
 schéma n'a plus de garantie, et c'est précisément ce qu'on veut mesurer.
+
+#### État à la fin de S29
+
+`cargo test` : **33 tests**. `water-harness check` : 2 scénarios, 0 échec, hashs **inchangés**.
+`water-harness physics` : 1 échec (C04, voulu), 3 témoins, 5 grandeurs sans verdict (C08). Jeton
+**libéré**.
+
+**Ce que S30 doit savoir avant de commencer, et qui n'est pas ailleurs :**
+
+- **Les trois classes d'assertion sont le produit durable de S29**, pas l'inventaire. Recevable ·
+  symptôme · vacuité, et le remède de la troisième est un **témoin**. À appliquer à toute assertion
+  nouvelle, sans attendre S29-2.
+- **`avec_cfl` borne désormais à 2,0 et non 0,99**, délibérément : au-delà de 1 le schéma n'a plus
+  de garantie et c'est ce qu'on veut mesurer. Ne pas « resserrer par prudence » — c'est ce bornage
+  qui avait aveuglé la mesure (A133).
+- **`amplification_mode_maille` est en test permanent** : elle doit retrouver la frontière `ν = 1`.
+  Si ce test tombe, c'est la mesure qu'il faut suspecter avant le solveur.
+- **`stabilite_par_courant` a été retirée**, pas déplacée. Une note en place dit pourquoi. Ne pas la
+  réintroduire au motif qu'elle « donnait une vue d'ensemble ».
+- **Les cinq assertions fautives attendent des seuils**, donc des provenances (I-14) : c'est le
+  travail de S29-1, et c'est de la conception, pas de la réécriture.
+- **C04 en échec, `C01-jet` rouge, C08 sans verdict** : trois décisions, pas trois régressions.

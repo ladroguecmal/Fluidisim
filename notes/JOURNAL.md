@@ -2524,3 +2524,127 @@ lourde ouverte ; ou **H2**, non écrit après neuf sessions où il est cité.
 Inchangés. **A103** — la masse volumique de l'eau, douce ou de mer. **A107** — le sort du travail
 propre à `master`, S16-S17. Et les trois choses hors de portée d'une session : nommer les personnes,
 constater l'état réel du projet, agir sur l'infrastructure — dont le dépôt distant.
+
+---
+
+## S29 — 2026-09-06 — L'audit des assertions, qui s'est trouvé lui-même deux fois
+
+**Consigne reçue.** « Enchaîne S29 ».
+
+**Sorties.** [`AUDIT-ASSERTIONS-S29`](../docs/registres/AUDIT-ASSERTIONS-S29.md) — les 23 cas
+classés ; **notes correctives datées** sur C11 et C15 ; la mesure d'**amplification du mode de
+maille** dans le harnais, et le retrait de `stabilite_par_courant` ; registre porté à **134 angles
+morts** ; leçons L98 à L101 ; action **S28-3 close**.
+
+**Ça tourne.** `cargo test` : **33 tests** au vert. `water-harness check` : 0 échec, hashs inchangés.
+
+### Le résultat de la session tient en une phrase
+
+**Le corpus tient mieux que ma thèse ne le craignait — dix-huit cas sur vingt-trois sont exempts —
+et les deux fautes trouvées étaient les miennes.**
+
+### Le critère, et la catégorie qu'il a fait apparaître
+
+> **Une assertion est recevable s'il existe une grandeur continue dont elle est le seuil.**
+
+Éprouvé sur trois cas connus avant d'être appliqué en série, il a révélé une troisième classe que le
+plan ne prévoyait pas :
+
+| Classe | Ce qui cloche | Remède |
+|---|---|---|
+| **A — recevable** | rien | — |
+| **B — symptôme** | ne peut échouer que sur un accident | assertir sur la grandeur gouvernée |
+| **C — vacuité** | satisfaite parce que le mécanisme testé est **absent** | un **témoin** qui doit la faire échouer |
+
+**La classe C vient de C18**, « zéro allocation après initialisation ». Le réflexe est de la ranger
+avec les assertions négatives : c'est faux, il existe un compteur, il est lu, elle est **recevable**.
+Mais elle vaut aussi zéro **si rien ne tourne** — et c'est une seconde façon d'être verte sans rien
+dire. Angle mort **A132**.
+
+Le remède existait déjà ici **sans avoir été nommé** : `C01-jet` est un témoin, et le harnais signale
+comme anomalie le jour où il cesserait d'échouer.
+
+### Le corpus
+
+Cinq cas portent au moins une assertion fautive : **C07** et **C10** (« nettement supérieure »,
+« sensiblement plus longue » — aucun seuil), **C11** (« aucune divergence », « aucun tremblement
+visible » — et « visible » n'a pas d'observateur défini), **C15** et **C18** (vacuité).
+
+**Et C20 est exemplaire** : *« assertion sur la pente, pas sur la valeur absolue — une pente juste
+avec un décalage constant révèle un défaut de détection de contact, une pente fausse révèle un défaut
+de modèle »*. Il **distingue deux défauts par la forme de sa mesure**. Écrit en S12, sans que le
+principe soit énoncé.
+
+### La première faute était la mienne, et elle portait une conclusion
+
+`stabilite_par_courant`, écrite en S27, classait une exécution en `Stable / Diverge / NonFini`. Elle
+a répondu **« OK partout »** de `ν = 0,45` à `0,99`, et ADR-035 §4 en a tiré une ligne.
+
+**Classe B, et la mesure de remplacement le démontre.** Le facteur d'amplification du mode de maille
+(`λ = 2·dx`), la grandeur que von Neumann gouverne :
+
+| `ν` | `\|G\|` par pas | amplitude finale/initiale |
+|---|---|---|
+| 0,45 | 0,9595 | 2,91e−4 |
+| 0,90 | 0,9291 | 6,91e−4 |
+| 0,99 | 0,9355 | 2,48e−3 |
+| **1,05** | **1,0204** | **7,53e0** |
+| 1,50 | 1,7903 | 5,50e20 |
+
+> **La transition est exactement à `ν = 1`.** La mesure n'a pas servi à établir cette borne : elle la
+> **retrouve** — et c'est ce qui la valide. Une mesure de stabilité incapable de retrouver la
+> frontière connue ne dirait rien des frontières inconnues.
+
+**À `ν = 1,05`, le schéma amplifie d'un facteur 7,5 en cent pas, et l'ancien critère aurait répondu
+`Stable`** : amplitude finale 0,0075 m pour un seuil de divergence fixé à 0,06 m.
+
+**Ce qui sauve ADR-035** est ailleurs : la mesure de justesse — erreur de période, continue — porte
+réellement la conclusion. La ligne de stabilité était décorative. C'est **A134**, la configuration la
+plus difficile à détecter : rien n'est faux, donc rien n'alerte.
+
+### La seconde faute a été commise pendant l'audit
+
+Le premier balayage d'amplification incluait `ν = 1,05` et a rendu **exactement le résultat de
+`ν = 0,99`**. `avec_cfl` bornait silencieusement à `[0,05 ; 0,99]`.
+
+**L'instrument était incapable de produire le résultat qu'il cherchait, et rien ne le disait.** Ce
+n'est pas une assertion qui ne peut pas échouer, c'est un **réglage qui ne peut pas atteindre le
+régime testé** — la même faute d'un cran plus haut, et invisible par la même mécanique. Une garde de
+sécurité posée sur un instrument de mesure l'empêche de mesurer. Angle mort **A133**.
+
+La borne haute passe à 2,0 : au-delà de 1 le schéma n'a plus de garantie, et c'est précisément ce
+qu'on veut pouvoir observer.
+
+### Chiffres qui ont orienté la conception
+
+| Mesure | Valeur | Ce qu'elle dit |
+|---|---|---|
+| cas exempts / total | **18 / 23** | le corpus tient |
+| assertions fautives | **6**, réparties sur 5 cas | dont 4 de classe B, 2 de classe C |
+| `\|G\|` à `ν = 0,99` puis 1,05 | **0,9355 → 1,0204** | la frontière théorique est retrouvée |
+| amplification à `ν = 1,05` sur 100 pas | **×7,5** | et l'ancien critère disait `Stable` |
+| mesures du harnais retirées | **1** | un faux positif en attente |
+
+### Ce qui n'a pas été fait, et pourquoi
+
+- **Les cinq assertions fautives ne sont pas réécrites.** Aucune n'est exécutable aujourd'hui — elles
+  attendent des couches qui n'existent pas — et les réécrire demande de choisir des seuils, donc des
+  provenances. C'est l'action **S29-1**, et le registre dit ce qu'il faut assertir à la place.
+- **Le témoin n'est pas systématique** (S29-2), ni le contrôle d'atteignabilité (S29-3).
+- **L'audit porte sur la *forme* des assertions, pas sur leur résultat.** La plupart n'ont jamais été
+  exécutées. C'est délibéré : la forme est ce qui peut être corrigé avant que la couche existe.
+
+### Session suivante recommandée
+
+**S30 — S29-1, réécrire les cinq assertions fautives.** Le registre dit pour chacune ce qu'il faut
+mesurer ; il reste à choisir les seuils et leur provenance, ce qui est le travail de conception que
+S29 a délibérément laissé. C'est court, et cela ferme proprement ce que cet audit a ouvert.
+
+Deux autres entrées : **S26-2**, la réinjection à la frontière W/δ — toujours la question la plus
+lourde ouverte ; ou **H2**, non écrit après dix sessions où il est cité.
+
+### Arbitrages en attente
+
+Inchangés. **A103** — la masse volumique de l'eau, douce ou de mer. **A107** — le sort du travail
+propre à `master`, S16-S17. Et les trois choses hors de portée d'une session : nommer les personnes,
+constater l'état réel du projet, agir sur l'infrastructure — dont le dépôt distant.
