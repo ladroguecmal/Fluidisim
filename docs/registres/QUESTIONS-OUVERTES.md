@@ -313,7 +313,7 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 | S35-3 | **Exercer l'oracle croisé** : exécuter les cas communs sur `delta.rs` et `shallow.rs` et comparer. Tant que ce n'est pas fait, ADR-043 §3 est une promesse | `ADR-043` §7.2 | session | **ouverte** |
 | S35-4 | **Reporter les cinq entrées de journal** de la lignée B, sous préfixe `B-`, à leur date réelle | `FORK-S22-S26` §3.4 | session | **ouverte** |
 | S35-5 | **Relire les cinq angles morts de sévérité 1 importés** — A152, A155, A156, A157, A159. Aucun n'a été examiné par cette lignée ; ils sont reportés tels quels | `FORK-S22-S26` §4 | session | **ouverte** |
-| S35-6 | **Traiter `master`** (S17) : elle détient `FORK-S08-S15.md` et deux ADR — `ADR-026-quatre-mecanismes`, `ADR-027-graine-et-sauvegarde` — dont il reste à établir s'ils ont un équivalent ici | `FORK-S22-S26` §6 | session | **ouverte** |
+| S35-6 | **Traiter la lignée S08–S17**, désormais sous l'étiquette **`archive/lignee-S08-S17`** *(et non plus `master`)* : elle détient `FORK-S08-S15.md` et deux ADR — `ADR-026-quatre-mecanismes`, `ADR-027-graine-et-sauvegarde` — dont il reste à établir s'ils ont un équivalent ici. **Ne pas supprimer l'étiquette avant** | `FORK-S22-S26` §6 | session | **ouverte** |
 | S35-7 | **Répliquer `FORK-S22-S26` dans toutes les branches vivantes** le jour où l'une d'elles est reprise — c'est la règle que le premier fork n'a pas appliquée, et qui a coûté le second | **L137** | utilisateur | **ouverte** |
 | S35-8 | **Mesurer la transduction** d'ADR-005 §3 — la troisième fonction de la bande de bord, que personne n'a jamais mesurée | **A161** | session | **ouverte** |
 

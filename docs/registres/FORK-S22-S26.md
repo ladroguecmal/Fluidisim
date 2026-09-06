@@ -135,9 +135,17 @@ Ce qui aurait fonctionné, et qui est désormais exigé :
 - Il ne fusionne pas le **code**. `physics.rs` et `main.rs` ont été modifiés lourdement des deux
   côtés (+1139 lignes contre +1975). Le code se fusionne en le compilant et en l'exécutant, pas en
   le recopiant : voir la session en cours, P8, et les points ouverts.
-- Il ne traite pas `master` **(S17)**, la lignée morte du premier fork. Elle détient
+- Il ne traite pas la lignée **S08–S17**, la lignée morte du premier fork. Elle détient
   `FORK-S08-S15.md` et deux ADR — `ADR-026-quatre-mecanismes`, `ADR-027-graine-et-sauvegarde` —
   dont il reste à établir s'ils ont un équivalent ici.
+
+  > **Correctif du 2026-09-06, après la clôture de S35.** L'utilisateur a fusionné cette branche,
+  > fait pointer `master` sur la lignée vivante et supprimé les branches mortes. La lignée S08–S17
+  > n'a donc **plus aucune branche** : elle survit sous l'étiquette **`archive/lignee-S08-S17`**
+  > (`8a6900d`), créée pour que l'action **S35-6** reste exécutable. `git show
+  > archive/lignee-S08-S17:docs/registres/FORK-S08-S15.md` en lit le contenu sans rien extraire.
+  > **Supprimer cette étiquette avant la clôture de S35-6 rendrait ces trois documents
+  > irrécupérables.**
 - Il ne décide d'aucune question de conception. Les contradictions éventuelles entre les deux
   lignées sont tranchées par des ADR, avec notes correctives datées, jamais par une renumérotation.
 

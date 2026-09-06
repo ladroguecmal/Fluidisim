@@ -3291,8 +3291,10 @@ et non une fusion : fusionner les montages détruirait exactement l'oracle qu'on
   cas ne les compare encore. Tant que ce n'est pas fait, ADR-043 §3 est une promesse.
 - **Rien n'a été réexécuté.** Les verdicts de la lignée B sont cités depuis ses documents, pas
   reproduits ici.
-- **`master` n'est pas traitée.** Elle détient `FORK-S08-S15.md` et deux ADR — `ADR-026`,
-  `ADR-027` — dont il reste à établir s'ils ont un équivalent ici.
+- **La lignée S08–S17 n'est pas traitée.** Elle détient `FORK-S08-S15.md` et deux ADR — `ADR-026`,
+  `ADR-027` — dont il reste à établir s'ils ont un équivalent ici. *Après la clôture de la session,
+  l'utilisateur a fusionné S35 dans `s22-suite`, fait pointer `master` dessus et supprimé les
+  branches mortes : cette lignée n'existe plus que sous l'étiquette `archive/lignee-S08-S17`.*
 - **Les cinq angles morts de sévérité 1 importés n'ont pas été relus.**
 
 ### Session suivante recommandée
