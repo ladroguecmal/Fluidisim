@@ -242,6 +242,8 @@ pub struct Delta1D {
     origine: f32,
     /// Seuil de cellule sèche. Voir `H_SEC` et ADR-031 §3.
     h_sec: f32,
+    /// Nombre de Courant effectif. Voir `CFL` et ADR-033 §3 — il commande la dissipation.
+    cfl: f32,
     /// Cote du lit, en mètres, `nx + 2` valeurs.
     b: Vec<f32>,
     h: Vec<f32>,
@@ -331,6 +333,7 @@ impl Delta1D {
             dx,
             origine: bassin.origine_m,
             h_sec: H_SEC,
+            cfl: CFL,
             h_suiv: h.clone(),
             hu_suiv: hu.clone(),
             b,
@@ -345,6 +348,16 @@ impl Delta1D {
     pub fn nx(&self) -> usize {
         self.nx
     }
+    /// Change le nombre de Courant.
+    ///
+    /// Ce n'est pas un réglage de confort : `1 − ν` est le facteur qui commande la dissipation
+    /// numérique du schéma (ADR-033 §3). Le monter réduit l'amortissement **et** le nombre de pas,
+    /// donc le coût. La contrepartie est la marge de stabilité.
+    pub fn avec_cfl(mut self, cfl: f32) -> Self {
+        self.cfl = cfl.clamp(0.05, 0.99);
+        self
+    }
+
     /// Change le seuil de cellule sèche. Réservé aux mesures de sensibilité du harnais.
     pub fn avec_h_sec(mut self, h_sec: f32) -> Self {
         self.h_sec = h_sec;
@@ -465,7 +478,7 @@ impl Delta1D {
         if vmax <= 0.0 {
             return 1.0;
         }
-        CFL * self.dx / vmax
+        self.cfl * self.dx / vmax
     }
 
     /// Remplit les cellules fantômes — murs verticaux aux deux bords.

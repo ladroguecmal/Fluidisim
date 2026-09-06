@@ -52,7 +52,6 @@ impl Cas {
 /// Imprimé à chaque exécution : un rapport vert ne doit jamais se lire comme une couverture.
 pub fn cas_en_attente() -> &'static [(&'static str, &'static str, &'static str)] {
     &[
-        ("C03", "Seiche en bassin clos", "attend δ ou W"),
         ("C05", "Absorption à la frontière", "attend δ"),
         ("C06", "Invariance galiléenne", "attend δ"),
         ("C07", "Sillage profond et peu profond", "attend W"),
@@ -1100,4 +1099,284 @@ pub fn c08_convergence_reguliere(
         // le solveur. Le plancher est plus bas qu'en C04 : les grandeurs y sont mieux conditionnées.
         plancher: 1.0e-7,
     }
+}
+
+// ---------------------------------------------------------------------------------------------
+// C03 — seiche en bassin clos
+// ---------------------------------------------------------------------------------------------
+
+/// Ce qu'une simulation de seiche donne à mesurer.
+pub struct Seiche {
+    /// Période mesurée sur l'ensemble des passages à zéro, en secondes.
+    pub periode_s: f64,
+    /// Nombre de périodes observées.
+    pub periodes_vues: usize,
+    /// Demi-vie d'amplitude, en **périodes** — la grandeur de C03.
+    pub demi_vie_periodes: f64,
+    /// Coefficient de détermination de l'ajustement exponentiel. Sous 0,9, la décroissance n'est
+    /// pas exponentielle et la demi-vie n'a pas le sens qu'on lui prête.
+    pub r2: f64,
+    /// Amplitude du premier et du dernier extremum, en mètres.
+    pub amplitude_debut: f64,
+    pub amplitude_fin: f64,
+}
+
+/// Exécute une seiche et en extrait période et demi-vie.
+///
+/// # Deux mesures, deux méthodes, et c'est voulu
+///
+/// - **La période** se lit sur les **passages à zéro**, du premier au dernier, divisés par leur
+///   nombre. C'est la mesure la moins sensible à l'amortissement : un zéro reste un zéro quelle que
+///   soit l'amplitude, alors qu'un extremum se déplace quand l'enveloppe décroît.
+/// - **La demi-vie** se lit sur l'**enveloppe des extrema**, par régression de `ln|η|` sur `t`.
+///   Prendre le rapport de deux amplitudes séparées de `n` périodes donnerait le même nombre si la
+///   décroissance est exponentielle — et un nombre faux sinon, sans le dire. La régression fournit
+///   en plus un `R²`, qui est précisément ce qui manque au rapport ponctuel.
+pub fn mesurer_seiche(
+    host: &mut water_core::HostServices,
+    bassin: water_core::Bassin,
+    duree_s: f64,
+) -> Option<Seiche> {
+    mesurer_seiche_cfl(host, bassin, duree_s, None)
+}
+
+/// Comme `mesurer_seiche`, avec un nombre de Courant imposé — ADR-033 §3.
+pub fn mesurer_seiche_cfl(
+    host: &mut water_core::HostServices,
+    bassin: water_core::Bassin,
+    duree_s: f64,
+    cfl: Option<f32>,
+) -> Option<Seiche> {
+    use water_core::Delta1D;
+
+    let mut d = Delta1D::configure(host, bassin).ok()?;
+    if let Some(c) = cfl {
+        d = d.avec_cfl(c);
+    }
+
+    // Point de mesure : la cellule du bord gauche, qui est un ventre du fondamental.
+    let mut t = 0.0f64;
+    let mut eta_prec = d.eta(0) as f64;
+    let mut pente_prec = 0.0f64;
+    let mut zeros: Vec<f64> = Vec::new();
+    let mut extrema: Vec<(f64, f64)> = Vec::new();
+
+    while t < duree_s {
+        let mut dt = d.dt_cfl();
+        let reste = (duree_s - t) as f32;
+        if dt > reste {
+            dt = reste;
+        }
+        if dt <= 0.0 {
+            break;
+        }
+        d.pas_equilibre(dt);
+        t += dt as f64;
+
+        let eta = d.eta(0) as f64;
+        let pente = eta - eta_prec;
+
+        // Passage à zéro **descendant** : un seul par période, donc aucun risque de compter deux
+        // fois. Interpolé linéairement pour ne pas quantifier la mesure au pas de temps.
+        if eta_prec > 0.0 && eta <= 0.0 {
+            let f = eta_prec / (eta_prec - eta);
+            zeros.push(t - dt as f64 * (1.0 - f));
+        }
+        // Extremum : la pente change de signe.
+        if pente_prec != 0.0 && pente * pente_prec < 0.0 {
+            extrema.push((t, eta_prec.abs()));
+        }
+        pente_prec = pente;
+        eta_prec = eta;
+    }
+
+    if zeros.len() < 3 || extrema.len() < 6 {
+        return None;
+    }
+
+    let periode_s = (zeros[zeros.len() - 1] - zeros[0]) / (zeros.len() - 1) as f64;
+
+    // Régression de ln|η| sur t, sur les extrema d'amplitude non négligeable. Les extrema très
+    // amortis sont écartés : leur `ln` est dominé par le bruit d'arrondi, et ils tireraient la
+    // pente sans porter d'information.
+    let a0 = extrema[0].1;
+    let points: Vec<(f64, f64)> = extrema
+        .iter()
+        .filter(|(_, a)| *a > a0 * 1.0e-3 && *a > 0.0)
+        .map(|(t, a)| (*t, a.ln()))
+        .collect();
+    if points.len() < 4 {
+        return None;
+    }
+    let n = points.len() as f64;
+    let (sx, sy): (f64, f64) = points.iter().fold((0.0, 0.0), |(x, y), p| (x + p.0, y + p.1));
+    let (mx, my) = (sx / n, sy / n);
+    let (mut sxy, mut sxx, mut syy) = (0.0f64, 0.0f64, 0.0f64);
+    for (x, y) in &points {
+        sxy += (x - mx) * (y - my);
+        sxx += (x - mx) * (x - mx);
+        syy += (y - my) * (y - my);
+    }
+    let pente = if sxx > 0.0 { sxy / sxx } else { 0.0 };
+    let r2 = if sxx > 0.0 && syy > 0.0 {
+        (sxy * sxy) / (sxx * syy)
+    } else {
+        0.0
+    };
+
+    // `A(t) = A₀·e^{pente·t}` ; la demi-vie est `ln2 / |pente|`.
+    let demi_vie_s = if pente < 0.0 {
+        core::f64::consts::LN_2 / -pente
+    } else {
+        f64::INFINITY
+    };
+
+    Some(Seiche {
+        periode_s,
+        periodes_vues: zeros.len() - 1,
+        demi_vie_periodes: demi_vie_s / periode_s,
+        r2,
+        amplitude_debut: extrema[0].1,
+        amplitude_fin: extrema[extrema.len() - 1].1,
+    })
+}
+
+/// C03 — `CAS-CANONIQUES` §C03. Bassin clos de 20 m, 2 m de fond, 20 périodes.
+///
+/// **Aucune friction de fond.** C03 mesure la dissipation *numérique* ; une friction physique
+/// ajouterait une seconde source d'amortissement et la mesure ne dirait plus laquelle des deux
+/// éteint la vague. Trois sessions ont recommandé le contraire — voir ADR-033 §1.
+pub fn c03_seiche(host: &mut water_core::HostServices, mode_propre: bool) -> Vec<Cas> {
+    use water_core::Bassin;
+
+    let bassin = Bassin::c03(mode_propre);
+    let (l, h) = (20.0f64, 2.0f64);
+    let t_ref = 2.0 * l / (G * h).sqrt();
+    let suffixe = if mode_propre { " (mode propre)" } else { "" };
+    let id = if mode_propre { "C03-mode" } else { "C03" };
+
+    let s = match mesurer_seiche(host, bassin, 20.0 * t_ref) {
+        Some(s) => s,
+        None => {
+            return vec![Cas {
+                id,
+                grandeur: format!("seiche{suffixe} — mesure impossible"),
+                mesure: 1.0,
+                reference: 0.0,
+                tolerance_rel: 0.0,
+                source: "trop peu d'oscillations détectées : la vague s'est éteinte avant d'être mesurable",
+            }]
+        }
+    };
+
+    vec![
+        Cas {
+            id,
+            grandeur: format!("période{suffixe}, s ({} vues)", s.periodes_vues),
+            mesure: s.periode_s,
+            reference: t_ref,
+            tolerance_rel: 0.01,
+            source: "T = 2L/√(g·h) — CAS-CANONIQUES §C03",
+        },
+        // `Cas` compare une **égalité** à une tolérance près, et l'assertion de C03 est un
+        // **minimum** : « demi-vie > 15 périodes ». Les deux ne s'expriment pas l'une par l'autre —
+        // avec `référence = 15` et une tolérance de 100 %, une demi-vie de 0,1 période « passerait »
+        // à 99 % d'écart. Le seuil est donc exprimé en **déficit** : `max(0, 15 − mesure)/15`, nul
+        // dès que l'assertion est tenue, et croissant avec ce qui manque.
+        //
+        // La grandeur mesurée reste lisible : elle est nommée dans le libellé.
+        Cas {
+            id,
+            grandeur: format!(
+                "déficit de demi-vie{suffixe} — mesurée {:.2} périodes pour 15 exigées",
+                s.demi_vie_periodes
+            ),
+            mesure: (15.0 - s.demi_vie_periodes).max(0.0) / 15.0,
+            reference: 0.0,
+            tolerance_rel: 0.0,
+            source: "CAS-CANONIQUES §C03 — demi-vie d'amplitude > 15 périodes",
+        },
+        Cas {
+            id,
+            grandeur: format!("déficit de R²{suffixe} — ajustement à {:.4}", s.r2),
+            mesure: (0.9 - s.r2).max(0.0),
+            reference: 0.0,
+            tolerance_rel: 0.0,
+            source: "sous R² = 0,9, la décroissance n'est pas exponentielle et la demi-vie n'a pas ce sens",
+        },
+    ]
+}
+
+/// Demi-vie d'amplitude en fonction de la **résolution par longueur d'onde** — ADR-033.
+///
+/// # Pourquoi cette courbe et pas le seul montage de C03
+///
+/// Le montage de C03 pose `L = 20 m` et `dx = 0,1 m`. Le fondamental d'une seiche a pour longueur
+/// d'onde `λ = 2L = 40 m` : le montage offre donc **400 points par longueur d'onde**, une
+/// résolution qu'aucun domaine de jeu n'aura jamais. Le cas passe, et ne dit rien du régime réel.
+///
+/// La grandeur qui décide « si une houle traverse un domaine ou s'y éteint » n'est pas la demi-vie
+/// à une résolution donnée : c'est la **loi** qui relie l'une à l'autre.
+pub fn c03_dissipation_par_resolution(
+    host: &mut water_core::HostServices,
+    grilles: &[usize],
+) -> Vec<(f64, f64, f64)> {
+    use water_core::{Bassin, EtatInitial};
+
+    let (l, h) = (20.0f64, 2.0f64);
+    let t_ref = 2.0 * l / (G * h).sqrt();
+    let mut sortie = Vec::new();
+
+    for &nx in grilles {
+        // Mode propre : la rampe excite des harmoniques dont les longueurs d'onde sont plus
+        // courtes, donc plus amorties — l'enveloppe mêlerait alors deux régimes de dissipation.
+        let bassin = Bassin {
+            nx,
+            etat_initial: EtatInitial::Seiche {
+                amplitude_m: 0.02,
+                longueur_m: 20.0,
+                mode_propre: true,
+            },
+            ..Bassin::c03(true)
+        };
+        // λ = 2L, et `dx = L/nx`, donc `points par λ = 2·nx`.
+        let pts_par_lambda = 2.0 * nx as f64;
+        if let Some(s) = mesurer_seiche(host, bassin, 20.0 * t_ref) {
+            sortie.push((pts_par_lambda, s.demi_vie_periodes, s.r2));
+        } else {
+            sortie.push((pts_par_lambda, 0.0, 0.0));
+        }
+    }
+    sortie
+}
+
+/// Demi-vie en fonction du **nombre de Courant**, à résolution fixée — ADR-033 §3.
+///
+/// La loi dérivée en S25 donne `demi-vie(périodes) = ln2·N / (2π²(1−ν))`, où `ν` est le nombre de
+/// Courant. Elle prédit qu'**élever `ν` réduit la dissipation**, et le prédit quantitativement :
+/// passer de 0,45 à 0,9 doit multiplier la demi-vie par `0,55/0,10 = 5,5`.
+///
+/// C'est une prédiction, donc elle se vérifie. Une loi qui n'a servi qu'à expliquer ce qu'on avait
+/// déjà mesuré n'a pas été testée.
+pub fn c03_dissipation_par_courant(
+    host: &mut water_core::HostServices,
+    nx: usize,
+    courants: &[f32],
+) -> Vec<(f64, f64, f64)> {
+    use water_core::Bassin;
+
+    let (l, h) = (20.0f64, 2.0f64);
+    let t_ref = 2.0 * l / (G * h).sqrt();
+    let n_pts = 2.0 * nx as f64;
+    let mut sortie = Vec::new();
+    for &nu in courants {
+        let bassin = Bassin { nx, ..Bassin::c03(true) };
+        let predite = core::f64::consts::LN_2 * n_pts
+            / (2.0 * core::f64::consts::PI.powi(2) * (1.0 - nu as f64));
+        match mesurer_seiche_cfl(host, bassin, 40.0 * t_ref, Some(nu)) {
+            Some(s) => sortie.push((nu as f64, s.demi_vie_periodes, predite)),
+            None => sortie.push((nu as f64, 0.0, predite)),
+        }
+    }
+    sortie
 }

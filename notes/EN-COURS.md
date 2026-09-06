@@ -89,11 +89,11 @@ la thèse est juste, C03 devient un **troisième critère d'entrée à B3**, apr
       deux bords. Vérifier le mode propre plutôt que le supposer : la période théorique est
       `T = 2L/√(gh) = 9,031 s`, et rien ne garantit que la surface inclinée n'excite pas aussi les
       harmoniques.
-- [ ] **P3** — les deux mesures : période par passages à zéro en un point fixe, et **enveloppe
+- [x] **P3** — les deux mesures : période par passages à zéro en un point fixe, et **enveloppe
       d'amplitude** par extrema successifs. La demi-vie se lit sur l'enveloppe, pas sur un rapport
       entre deux instants — un rapport ponctuel confondrait l'amortissement et la phase.
-- [ ] **P4** — exécuter, constater, balayer en `dx`.
-- [ ] **P5** — donner une **provenance** au chiffre : relier l'amortissement mesuré à la diffusion
+- [x] **P4** — exécuter, constater, balayer en `dx`.
+- [x] **P5** — donner une **provenance** au chiffre : relier l'amortissement mesuré à la diffusion
       du schéma, pour que la demi-vie soit un nombre prédictible et non un constat. C'est ce qui
       permettrait de dire ce que coûte un domaine avant de l'écrire.
 - [ ] **P6** — ADR-033 si la conclusion engage B3, note datée sinon.
@@ -112,3 +112,67 @@ la thèse est juste, C03 devient un **troisième critère d'entrée à B3**, apr
 - **C04 doit rester en échec et `C01-jet` rouge** : ce sont des décisions, pas des régressions.
 
 **Branche.** `claude/s22-suite`. `master` s'arrête à S17 (A107). Vérifié à l'ouverture de S25.
+
+#### P3-P5 — la thèse est fausse, C03 passe, et c'est le montage qui est trop facile
+
+**C03 passe largement**, sur les deux formes de surface initiale :
+
+| Mesure | Rampe (énoncé) | Mode propre | Seuil |
+|---|---|---|---|
+| période | 9,0302 s | 9,0302 s | 9,0305 s ± 1 % → **0,003 %** |
+| demi-vie d'amplitude | **20,7 périodes** | **24,4 périodes** | > 15 |
+| R² de l'ajustement exponentiel | 0,9920 | 0,9998 | > 0,9 |
+
+La rampe donne une demi-vie plus courte que le mode propre — 20,7 contre 24,4 — parce qu'elle excite
+les harmoniques impaires, plus courtes donc plus amorties. L'écart de 15 % est exactement le prix de
+la fidélité à l'énoncé, et il est mesuré plutôt que supposé.
+
+**Pourquoi la thèse était fausse, et c'est le résultat de la session.** Le montage de C03 pose
+`L = 20 m` et `dx = 0,1 m`. Le fondamental d'une seiche a pour longueur d'onde `λ = 2L = 40 m` : le
+montage offre donc **400 points par longueur d'onde**. Aucun domaine de jeu n'aura jamais cette
+résolution. **C03 passe parce qu'il ne teste pas le régime dans lequel le système vivra.**
+
+**La loi.** Demi-vie contre points par longueur d'onde `N`, à `ν = 0,45` :
+
+```
+N =  20 → 1,28 période      N = 160 → 10,05
+N =  40 → 2,55              N = 320 → 19,70
+N =  80 → 5,08              N = 640 → 38,81
+```
+
+**Exactement proportionnelle**, `R² > 0,999` à chaque point. Le rapport `demi-vie/N` vaut 0,0640 ·
+0,0638 · 0,0635 · 0,0628 · 0,0616 · 0,0606.
+
+**Et la formule fermée tombe.** Pour un flux de Rusanov, la diffusion numérique vaut
+`D = c·dx·(1−ν)/2`. L'atténuation sur une période `T = λ/c` est `D·k²·T` avec `k = 2π/λ` :
+
+```
+D·k²·T = [c·(λ/N)(1−ν)/2]·(2π/λ)²·(λ/c) = 2π²(1−ν)/N
+```
+
+**`c`, `λ` et `T` disparaissent tous les trois.** L'amortissement par période ne dépend que de `N`
+et du nombre de Courant :
+
+> **demi-vie (périodes) = ln2 · N / (2π²(1−ν))**
+
+À `ν = 0,45` : **0,06385·N** prédit, **0,0640·N** mesuré — **0,2 % d'écart**. C'est une provenance au
+sens d'I-14, et non plus un constat.
+
+**Le chiffre qui compte.** Tenir l'assertion de C03 — demi-vie > 15 périodes — demande
+**N ≥ 235 points par longueur d'onde**. Le montage en offre 400, d'où le succès. Dans un domaine
+réel à 20 points par longueur d'onde, la demi-vie tombe à **1,3 période** : *l'eau meurt en une
+oscillation*. C'est le « l'eau est molle » du corpus, enfin chiffré.
+
+**Le levier, prédit puis vérifié.** La formule dit que `1−ν` commande tout, donc qu'élever le nombre
+de Courant réduit la dissipation. Vérifié à `N = 160` :
+
+| `ν` | demi-vie mesurée | prédite | écart |
+|---|---|---|---|
+| 0,45 | 10,10 | 10,22 | −1,1 % |
+| 0,70 | 17,91 | 18,73 | −4,4 % |
+| 0,90 | **45,33** | 56,18 | −19,3 % |
+
+**×4,5 de demi-vie entre `ν = 0,45` et `ν = 0,9`**, et le pas de temps double au passage — donc
+moins de dissipation *et* moins de calcul. La loi se dégrade près de `ν = 1` (−19 %), ce qui est
+attendu : elle néglige les termes d'ordre supérieur, et l'intégration d'Euler explicite y a sa
+propre erreur. **Prédictive à mieux que 5 % pour `ν ≤ 0,7`**, et c'est la plage utile.

@@ -211,9 +211,11 @@ fn executer_physics_solveur() -> usize {
 
     let mut cas = physics::c01_repos_sur_pente(&mut host, 60.0);
     cas.extend(physics::c04_rupture_de_barrage(&mut host, 2.0));
+    cas.extend(physics::c03_seiche(&mut host, false));
+    cas.extend(physics::c03_seiche(&mut host, true));
 
     println!("
---- C01 · C04 — les deux extrémités de la couche δ : le repos, et la rupture ---");
+--- C01 · C03 · C04 — la couche δ : le repos, la seiche, la rupture ---");
     let mut echecs = 0usize;
     for c in &cas {
         // Les lignes `C01-jet` sont des **témoins** : le schéma au premier jet est conservé pour
@@ -267,6 +269,24 @@ fn executer_physics_solveur() -> usize {
             println!("         → montage non discriminant, ou schéma modifié sans le dire — ADR-030 §2.");
             echecs += 1;
         }
+    }
+
+    // C03 — la dissipation en fonction de la résolution. C'est la loi, pas le point, qui dit ce
+    // que coûte un domaine.
+    println!("
+--- C03 — demi-vie d'amplitude selon la résolution ---");
+    println!("  points/λ    demi-vie (périodes)      R²");
+    for (pts, dv, r2) in
+        physics::c03_dissipation_par_resolution(&mut host, &[10, 20, 40, 80, 160, 320])
+    {
+        println!("  {pts:>8.0}    {dv:>12.2}         {r2:.4}");
+    }
+
+    println!("  nombre de Courant à nx = 80 (160 points/λ) — mesuré contre la loi ln2·N/(2π²(1−ν))");
+    println!("     ν       mesurée      prédite     écart");
+    for (nu, mes, pred) in physics::c03_dissipation_par_courant(&mut host, 80, &[0.45, 0.7, 0.9]) {
+        let ecart = if pred > 0.0 { (mes - pred) / pred * 100.0 } else { 0.0 };
+        println!("  {nu:>5.2}   {mes:>10.2}   {pred:>10.2}   {ecart:>6.2} %");
     }
 
     // C08 — la convergence sous raffinement. Rapportée à part : ce n'est pas une assertion de plus
