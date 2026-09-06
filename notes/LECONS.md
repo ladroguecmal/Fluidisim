@@ -1368,3 +1368,58 @@ question d'origine ne mentionnait pas.
 contrôle qui sépare proprement des variables produit de l'information sur **chacune** — y compris
 celles dont on ne se méfiait pas. Le corollaire : quand un contrôle « ne trouve rien », vérifier
 qu'on a bien regardé toutes les sorties, et pas seulement celle qu'on attendait.
+
+## L95 — La forme d'une assertion décide de ce qu'un cas peut voir, et « ça marche encore » ne voit rien
+
+*(S28)* C23 mesure une borne de pas de temps fausse : sous la mauvaise définition, `u_max` est
+sous-estimé jusqu'à **×5,5**, et le nombre de Courant réellement réalisé atteint **2,48** — plus du
+double de la condition de stabilité.
+
+**Et le solveur ne casse pas.** Le schéma est diffusif, il absorbe le dépassement, l'état reste fini
+et le volume conservé. Un cas dont l'assertion aurait été « le solveur diverge » serait donc
+**passé**, et aurait certifié l'absence d'un défaut parfaitement présent.
+
+Ce qui est perdu au-delà d'une condition de stabilité n'est pas la simulation : c'est la
+**garantie**. Le solveur tient jusqu'à ce qu'il ne tienne plus, sur un cas que rien n'a testé — et
+le jour où il cassera, ce sera attribué à autre chose.
+
+**Réflexe** : assertir sur la **grandeur** que la propriété gouverne, jamais sur ses conséquences
+visibles. Ici, le nombre de Courant réalisé — pas la présence d'un `NaN`. Le corollaire est général :
+« aucune erreur observée » n'est une mesure de rien, et une assertion qui ne peut échouer que sur une
+catastrophe ne détecte que les catastrophes.
+
+## L96 — Deux décisions sûres séparément peuvent se renforcer en un défaut
+
+*(S28)* Sous une définition d'`u_max` qui ignore les parois mobiles, la vitesse de paroi qui fait
+franchir `C = 1` vaut 5,41 m/s à `ν = 0,45`, **1,90 m/s à `ν = 0,70`**, et 0,49 m/s à `ν = 0,90`.
+
+Chacune des deux décisions se défend seule. Monter `ν` est une optimisation légitime, mesurée, qui
+achète de la portée d'onde et du pas de temps. Laisser `u_max` sans définition est un oubli qui n'a
+rien cassé pendant vingt-sept sessions. **Ensemble, elles rendent atteignable un trou qui ne l'était
+pas** — et c'est l'optimisation qui déplace le seuil, pas l'oubli.
+
+Le piège est que le lien ne se voit dans aucune des deux revues : celle du paramètre conclut « rien
+n'échoue », celle de la définition conclut « aucun cas ne l'exerce ».
+
+**Réflexe** : quand une optimisation resserre une marge, chercher **ce que cette marge couvrait
+d'autre**. Une marge a rarement une seule fonction, et les fonctions non écrites sont celles qui
+disparaissent en silence.
+
+## L97 — Un instrument qui change de réglage cesse d'être comparable à lui-même
+
+*(S28)* `ν = 0,70` a été débloqué pour le solveur du projet. Le réflexe suivant est de le poser aussi
+dans le véhicule d'essai — c'est la même grandeur, et la nouvelle valeur est meilleure.
+
+**Ce serait une erreur.** Le véhicule sert à *mesurer* : demi-vies de C03, position du front de C04,
+ordres de convergence de C08. Toutes ces références ont été publiées à `ν = 0,45`. Changer la
+constante les déplacerait d'un coup, sans qu'aucune mesure y gagne — et les comparaisons entre
+sessions deviendraient fausses sans que rien ne le signale.
+
+La distinction à tenir est entre une **décision de conception**, qui porte sur le système à
+construire, et un **réglage d'instrument**, qui porte sur ce avec quoi on l'observe. Les deux peuvent
+concerner le même paramètre et n'ont pas à prendre la même valeur.
+
+**Réflexe** : avant de propager une valeur nouvellement décidée dans le harnais, se demander quelles
+mesures publiées en dépendent. Si la réponse n'est pas « aucune », la valeur reste dans la décision
+et l'instrument garde la sienne — en disant pourquoi, sans quoi la prochaine session le prendra pour
+un oubli.

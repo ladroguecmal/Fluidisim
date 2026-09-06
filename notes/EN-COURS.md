@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S28
-État             : en cours
+État             : terminée
 Battement        : 2026-09-06
 Objectif         : C23 — le nombre de Courant en présence d'une paroi mobile
 ```
@@ -97,7 +97,7 @@ rares, et les cas rares sont ceux qu'on teste le moins.
       dépasse le `ν` visé. C'est la propriété que la borne mesurée après coup ne peut pas offrir.
 - [x] **P6** — **C23** au corpus `CAS-CANONIQUES`, et ADR-036 si la mesure change une décision.
 - [x] **P7** — répercussions : index, angles morts, actions, décomptes, `ν` si débloqué.
-- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
+- [x] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
@@ -170,3 +170,24 @@ projet**. Mais la constante du **véhicule d'essai** reste à 0,45, parce que le
 mesurer : changer son `ν` déplacerait toutes les références publiées — demi-vies de C03, front de
 C04, ordres de C08 — sans qu'aucune mesure y gagne. La valeur est une **décision de conception**,
 pas un réglage d'instrument.
+
+#### État à la fin de S28
+
+`cargo test` : **32 tests**. `water-harness check` : 2 scénarios, 0 échec, hashs **inchangés**.
+`water-harness physics` : 1 échec (C04, voulu), 3 témoins, 5 grandeurs sans verdict (C08). Jeton
+**libéré**.
+
+**Ce que S29 doit savoir avant de commencer, et qui n'est pas ailleurs :**
+
+- **`ν = 0,70` est débloqué pour le solveur du projet, pas pour le véhicule.** La constante de
+  `delta.rs` reste à 0,45, délibérément (L97) : changer le réglage d'un instrument déplace toutes
+  ses références publiées. Ne pas le « corriger ».
+- **`dt_cfl` emploie désormais la définition gouvernante par défaut.** Sans paroi, elle coïncide
+  avec l'ancienne, et les 32 tests comme les hashs le confirment. `dt_cfl_selon` permet de
+  retrouver le mutant absolu — il sert à C23 et ne doit pas devenir un réglage.
+- **A129 est la trouvaille à exploiter en premier** : une assertion de la forme « le solveur casse »
+  certifie l'absence d'un défaut présent. Combien de cas du corpus sont écrits ainsi ? C'est
+  l'action S28-3, et c'est la session recommandée.
+- **La paroi de C23 est un batteur au bord**, pas une paroi intérieure à cellules coupées. La
+  grandeur mesurée est la bonne ; la géométrie que SPEC-004 §10.1 impose reste à exercer (S28-2).
+- **C04 en échec, `C01-jet` rouge, C08 sans verdict** : trois décisions, pas trois régressions.

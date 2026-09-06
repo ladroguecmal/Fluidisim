@@ -2420,3 +2420,107 @@ lourde ; ou **H2**, non écrit après huit sessions où il est cité.
 Inchangés. **A103** — la masse volumique de l'eau, douce ou de mer. **A107** — le sort du travail
 propre à `master`, S16-S17. Et les trois choses hors de portée d'une session : nommer les personnes,
 constater l'état réel du projet, agir sur l'infrastructure — dont le dépôt distant.
+
+---
+
+## S28 — 2026-09-06 — C23 : la borne tient sa promesse, et le défaut ne casse rien
+
+**Consigne reçue.** « Enchaîne sur S28 ».
+
+**Sorties.** **C23** dans `CAS-CANONIQUES` ; la paroi mobile et les deux définitions d'`u_max` dans
+le cœur ; note S28 dans
+[`ADR-035`](../docs/adr/ADR-035-le-nombre-de-courant-definition-borne-valeur.md) §4.1 — **`ν = 0,70`
+débloqué** ; registre porté à **131 angles morts** ; leçons L95 à L97 ; actions **S27-1 et S27-3
+closes**.
+
+**Ça tourne.** `cargo test` : **32 tests** au vert. `water-harness check` : 0 échec, hashs inchangés.
+
+### Le résultat de la session tient en une phrase
+
+**La borne gouvernante tient exactement sa promesse — `C = 0,450` au millième, pour une paroi de 0,5
+à 20 m/s — et la borne absolue se trompe d'un facteur 5,5 sans que rien n'explose.**
+
+### Ce que C23 a mesuré
+
+Eau au repos, `h = 2 m`, `c = 4,43 m/s`, `ν = 0,45` :
+
+| `u_paroi` | rapport `u_max` gouv./abs. | C sous borne absolue | C sous borne gouvernante |
+|---|---|---|---|
+| 0,5 | 1,113 | 0,501 | **0,450** |
+| 5,0 | 2,129 | 0,958 | **0,450** |
+| 10,0 | 3,258 | **1,466** | **0,450** |
+| 20,0 | **5,515** | **2,482** | **0,450** |
+
+La définition posée par ADR-035 §2 n'est plus posée : elle est **vérifiée**. Et la borne analytique
+en amont fait ce qu'une borne mesurée après coup ne peut pas faire — elle **tient** `ν`, elle ne le
+constate pas.
+
+Seuil de franchissement, `u_p = c·(1/ν − 1)` : **5,41 m/s à `ν = 0,45`**, soit une chute de 1,49 m.
+
+### Ce qui n'avait pas été anticipé
+
+**Ma thèse était juste sur le mécanisme et fausse sur les conséquences.** Elle annonçait un défaut
+« dominant dès que `u_paroi` dépasse la célérité ». Il est bien présent, chiffré, et il franchit la
+condition de stabilité — **mais le solveur ne casse pas**, même à `C = 2,48`. Rusanov reste diffusif
+et absorbe le dépassement.
+
+> **Ce qui est perdu n'est pas la simulation, c'est la *garantie*.** Un solveur au-delà de sa
+> condition de stabilité tient jusqu'à ce qu'il ne tienne plus, sur un cas que rien n'a testé.
+
+**La conséquence de méthode est la plus importante de la session.** Un cas dont l'assertion aurait
+été « le solveur casse » serait **passé** — et aurait certifié l'absence d'un défaut présent.
+**La forme de l'assertion décide de ce que le cas peut voir**, et « ça marche encore » est la plus
+trompeuse de toutes. Angle mort **A129**, sévérité 1.
+
+**Et un couplage que personne n'avait vu.** Sous une définition d'`u_max` fausse, la vitesse de paroi
+qui fait franchir `C = 1` vaut 5,41 m/s à `ν = 0,45` mais **1,90 m/s à `ν = 0,70`** et 0,49 m/s à
+0,90. **Serrer le pas de temps pour gagner en portée d'onde rapproche du trou** au lieu de s'en
+éloigner : les deux effets se renforcent, et aucune des deux décisions ne paraît risquée isolément
+(**A130**).
+
+### Décision
+
+La condition posée par ADR-035 §4.1 est remplie : **`ν = 0,70` est débloqué pour le solveur du
+projet** — ×1,77 de portée d'onde, ×1,55 de pas de temps, et une marge qui absorbe encore 43 %
+d'erreur sur `u_max`.
+
+**La constante du véhicule d'essai reste à 0,45**, et ce n'est pas une hésitation : le véhicule sert
+à mesurer, et changer son `ν` déplacerait toutes les références publiées — demi-vies de C03, front
+de C04, ordres de C08 — sans qu'aucune mesure y gagne.
+
+### Chiffres qui ont orienté la conception
+
+| Mesure | Valeur | Ce qu'elle dit |
+|---|---|---|
+| C sous borne gouvernante, 0,5 à 20 m/s | **0,450 partout** | la borne analytique tient au millième |
+| sous-estimation d'`u_max` sous borne absolue | **jusqu'à ×5,5** | le défaut est réel et chiffré |
+| C réalisé sous borne absolue à `u_p = 20` | **2,482** | la condition est franchie |
+| divergence observée | **aucune** | ce qui est perdu est la garantie, pas la simulation |
+| seuil de paroi à `ν = 0,70` | **1,90 m/s** | monter `ν` rapproche du trou |
+| coût en pas de temps à `u_p = 10 m/s` | **×3,26** | un objet rapide triple le coût d'un domaine |
+
+### Ce qui n'a pas été fait, et pourquoi
+
+- **La paroi est un batteur au bord, pas une paroi intérieure à cellules coupées.** Dans un maillage
+  fixe, la condition injecte du volume — c'est correct pour un batteur, et le code le dit. La
+  grandeur mesurée, `|u_fluide − u_paroi|` sur la face au contact, est la même dans les deux
+  montages, mais la géométrie que SPEC-004 §10.1 impose réellement reste à exercer (S28-2).
+- **Aucune mesure en 2D ni avec déferlement** : `ν` au-delà de 0,70 reste fermé (S28-4).
+- **Le budget d'un domaine δ ne tient pas compte de ce qui tombe dedans** — ×3,3 à 10 m/s, et C20
+  décrit ce régime depuis S12 sans mentionner son coût (S28-1).
+
+### Session suivante recommandée
+
+**S29 — S28-3, réexaminer les assertions des cas existants.** A129 montre qu'une assertion de la
+forme « le solveur casse » certifie l'absence d'un défaut présent ; il faut savoir combien de cas du
+corpus sont écrits ainsi. C'est une revue courte, à fort rendement, et elle touche ce sur quoi B3
+s'apprête à s'appuyer.
+
+Deux autres entrées : **S26-2**, la réinjection à la frontière W/δ — toujours la question la plus
+lourde ouverte ; ou **H2**, non écrit après neuf sessions où il est cité.
+
+### Arbitrages en attente
+
+Inchangés. **A103** — la masse volumique de l'eau, douce ou de mer. **A107** — le sort du travail
+propre à `master`, S16-S17. Et les trois choses hors de portée d'une session : nommer les personnes,
+constater l'état réel du projet, agir sur l'infrastructure — dont le dépôt distant.

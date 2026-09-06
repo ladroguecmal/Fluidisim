@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-06
-Session en cours : S28 — C23, le nombre de Courant en présence d'une paroi mobile
-Dernière session : S27 — 2026-09-06 — le nombre de Courant, et une marge qui protégeait d'un trou qu'elle ignorait
-Session suivante : S29 — la réinjection W/δ (S26-2) ou H2
+Session en cours : —
+Dernière session : S28 — 2026-09-06 — C23 : la borne tient sa promesse, et le défaut ne casse rien
+Session suivante : S29 — réexaminer les assertions des cas (S28-3) *(recommandé)*, ou la réinjection W/δ (S26-2), ou H2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
@@ -105,7 +105,7 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Vingt-sept sessions, **35 ADR** *(dont un acté)*, six spécifications, huit registres — **et du
+Vingt-huit sessions, **35 ADR** *(dont un acté)*, six spécifications, huit registres — **et du
 code qui tourne** : `code/`, étages **H1 et H3** du harnais, un **δ d'essai** équilibré, 31 tests
 verts et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
 verdict** (C08). Quatre cas canoniques sur δ sont exécutés : **C01 et C03 passent**, C04 échoue,
@@ -127,6 +127,14 @@ stabilité d'un facteur deux en restant vert.
 [`ADR-035`](docs/adr/ADR-035-le-nombre-de-courant-definition-borne-valeur.md) pose l'ordre :
 **définition, puis borne, puis valeur** — et `CFL = 0,45` reste en place, parce que sa marge (×2,22)
 couvrait précisément ce défaut sans que personne l'ait décidé.
+
+**Et S28 a vérifié la définition, avec une leçon sur la forme des assertions.** C23 mesure une
+borne fausse — `u_max` sous-estimé jusqu'à **×5,5**, nombre de Courant réalisé à **2,48** — et **le
+solveur ne casse pas**. Un cas qui aurait exigé une divergence serait passé, et aurait certifié
+l'absence d'un défaut présent (**A129**). Ce qui est perdu au-delà d'une condition de stabilité
+n'est pas la simulation, c'est la **garantie**. Sous la définition corrigée, la borne tient `ν` au
+millième pour une paroi de 0,5 à 20 m/s : **`ν = 0,70` est débloqué pour le solveur du projet**, le
+véhicule d'essai gardant 0,45 pour ne pas déplacer ses références.
 
 **Une urgence de format, la seule.** `WaveEvent` (SPEC-006 §3.1) est une structure **répliquée** qui
 porte trois champs demandés par l'équipe audio. Elle doit être arrêtée **avant** que le réseau ne
