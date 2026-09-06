@@ -12,9 +12,9 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-06
-Session en cours : —
+JETON            : occupé
+Battement        : 2026-09-07
+Session en cours : S37 — exercer l'oracle croisé, et d'abord le calibrer
 Dernière session : S36 — 2026-09-06 — les chiffres de la lignée B rejoués : trois reproduits, un périmé
 Session suivante : S37 — exercer l'oracle croisé (S35-3) *(recommandé)*, ou relire les cinq A de sévérité 1 (S35-5)
 ```

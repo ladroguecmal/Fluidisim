@@ -59,74 +59,79 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S36
-État             : terminée
-Battement        : 2026-09-06
-Objectif         : `physics_shallow.rs` — les six montages de la lignée B, et la reproduction de ses chiffres
+Session          : S37
+État             : en cours
+Battement        : 2026-09-07
+Objectif         : Exercer l'oracle croisé — et d'abord établir ce qu'il peut dire
 ```
 
 ### Plan
 
-Action **S35-1**. La réconciliation de S35 a importé le **solveur** de la lignée B, `shallow.rs`, qui
-compile et passe ses dix tests dans cet arbre. **Ses montages de cas sont restés dehors** : six cas
-canoniques — C01, C03, C04, C05, C06, C08 — vivent dans un `physics.rs` que S35 n'a pas fusionné,
-parce que les deux lignées y ont des fonctions de même nom (`c03_seiche`, `ritter`,
-`c08_convergence`) écrites chacune contre son propre solveur.
+Action **S35-3**. `ADR-043` §3 promet un **oracle croisé** : deux implémentations indépendantes du
+même modèle, dont le désaccord sur un cas sans solution analytique désigne une faute
+d'implémentation. S36 a monté les deux véhicules dans le même binaire, mais **aucun cas ne compare
+leurs deux sorties** : chacun rejoue ses propres chiffres. La promesse n'est pas tenue.
 
-**Le découpage est décidé et il n'est pas une fusion** : un module neuf, `physics_shallow.rs`, et
-`physics.rs` n'est pas touché. Deux jeux de montages, deux véhicules, aucun conflit de noms — et
-l'oracle croisé d'`ADR-043` §3 devient exerçable (`FORK-S22-S26` §7).
+> **Ce qui a été vérifié avant d'écrire ce plan, et qui le rend possible.** Les montages de C01
+> coïncident **rigoureusement** : même grille — centre de cellule à `(i+½)·dx` des deux côtés —
+> même fond `−3 + 0,05·x`, même `η₀`, même `dx = 0,25 m`, mêmes 160 cellules, même CFL de 0,45.
+> Rien n'a été à adapter. Ce n'est pas un hasard : les deux lignées lisaient le même
+> `CAS-CANONIQUES`.
 
-> **Ce n'est pas un transport de code, c'est une reproduction.** Les verdicts de la lignée B sont
-> cités dans le corpus depuis S35 **sans avoir jamais été exécutés ici** — `CAS-CANONIQUES`, « deux
-> véhicules, deux colonnes », le dit en toutes lettres et appelle cette colonne *un témoignage, pas
-> une mesure*. Cette session la transforme en mesure, ou montre qu'elle ne l'est pas.
+**Mais un oracle non calibré ne dit rien, et celui-ci a un plancher qu'aucun document ne mentionne :
+`delta.rs` calcule en `f32`, `shallow.rs` en `f64`.** Sept ordres de grandeur séparent leurs
+arrondis. Un écart entre les deux n'est donc lisible **qu'au-dessus** d'un plancher qu'il faut
+mesurer d'abord — sans quoi on lirait la précision machine comme un défaut de schéma, ou l'inverse.
+C'est **L131** — *avant de corriger, vérifier qu'on mesure la bonne chose* — et **A157** : un seuil
+posé sans fondement est reproductible et dénué de sens.
 
-*Thèse déclarée : les chiffres publiés par la lignée B se reproduisent dans cet arbre, au dernier
-chiffre significatif donné.* Les quatre à confronter, pris dans les ADR importés :
+*Thèse déclarée, en deux volets :*
 
-| cas | grandeur | valeur annoncée | document |
-|---|---|---|---|
-| **C01** | `max|u|` du schéma naïf | **19,5 mm/s** pour un seuil de 1 | `ADR-038` §2 |
-| **C03** | demi-vie à 800 mailles/λ | **43,1 périodes** | `ADR-039`, `ADR-040` |
-| **C04** | erreur sur le front, ordre deux | **0,74 %** | `ADR-041` |
-| **C08** | ordre de convergence mesuré | **`p` = 1,003** | `ADR-040` |
+1. **Sur C01**, les deux concordent **au plancher `f32`** : l'écart mesuré est de l'ordre de
+   `ε_f32 × h`, soit quelques `10⁻⁷ m`, et **pas davantage**.
+2. **Sur C04**, où la solution n'est pas triviale, l'écart entre les deux reste **au niveau de la
+   troncature du schéma** — quelques pour mille sur le front — et non au-dessus.
 
-**Si un seul de ces quatre ne se reproduit pas, c'est le résultat de la session** — et il vaudra
-plus que les quatre qui se reproduisent, parce qu'il désignera soit une dépendance non déclarée du
-montage, soit une divergence entre les deux arbres que personne n'a vue.
+**Si le volet 1 est faux, c'est une faute d'implémentation dans l'un des deux**, et l'oracle aura
+servi exactement comme `ADR-043` l'annonce. **Si le volet 2 est faux, c'est plus intéressant
+encore** : deux schémas réputés identiques ne le seraient pas, et il faudrait dire en quoi.
 
-- [x] **P1** — plan, jeton.
-- [x] **P2** — `physics_shallow.rs` : squelette, déclaration dans `main.rs`, et **C01**. Compile et
-      tourne avant d'aller plus loin.
-- [x] **P3** — **C04** (Ritter) et ses références analytiques.
-- [x] **P4** — **C03** (seiche) et la mesure de période.
-- [x] **P5** — **C08** (convergence) et **C06** (Galilée, partiel).
-- [x] **P6** — **C05** (absorption) — le seul des six que cette lignée n'a **jamais** exécuté.
-- [x] **P7** — branchement dans `main.rs`, et le **double format d'écart** absolu / relatif
-      (**A149**, action S35-2) — qui vaut pour les deux jeux de montages.
-- [x] **P8** — **confronter les quatre chiffres** à ce qui est publié, et écrire le verdict.
-- [x] **P9a** — rituel : journal, leçons L141-L143, actions S36-1 à S36-4.
-- [x] **P9b** — rituel : index, décomptes, jeton libéré.
+- [>] **P1** — plan, jeton.
+- [ ] **P2** — **vérifier que les deux montages sont le même**, à `t = 0`, champ à champ : fond,
+      hauteur, grille. Sans cela, tout ce qui suit compare deux objets différents.
+- [ ] **P3** — **établir le plancher de l'oracle** : ce que la seule différence `f32`/`f64` produit
+      comme écart, et donc au-dessous de quoi un désaccord ne dit rien.
+- [ ] **P4** — le comparateur : même montage, même temps final, écarts champ à champ en `L∞` et
+      `L¹`. **Pas de comparaison pas à pas** : les deux ne partagent pas leurs pas de temps.
+- [ ] **P5** — **C01 comparé**, le cas où les deux sont exacts et où un désaccord serait sans
+      ambiguïté.
+- [ ] **P6** — **C04 comparé**, montage aligné à 800 mailles de 5 cm : le cas où un désaccord serait
+      **physique** et non arithmétique.
+- [ ] **P7** — le verdict, et un ADR : **ce que cet oracle peut dire, et ce qu'il ne peut pas**.
+- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
-**Ce que S35 laisse et qui commande cette session.**
+**Ce que S36 laisse et qui commande cette session.**
 
-- `shallow.rs` est **déjà dans l'arbre** et exporté (`water_core::{Flux, Shallow1D}`). Rien à
-  importer côté solveur.
-- Le bloc de montages de la lignée B fait **1132 lignes** et ne dépend que de `Cas`, `Shallow1D`,
-  `Flux`, `G` et `crate::host_impl` — dont les trois types (`ArenaAllocator::with_capacity`,
-  `SequentialJobs`, `StderrSink`) existent ici à l'identique. **Aucune adaptation d'API attendue.**
-- Il se lit dans la branche conservée :
-  `git diff a6cfe6f claude/reprise-projet-5134cd -- code/water-harness/src/physics.rs`
-- `Shallow1D` porte tout ce qu'il faut : `regler_ordre2`, `regler_rk2`, `regler_eponge`,
-  `regler_flux`, `regler_equilibrage`, et quatre `configure_*` (barrage, seiche, bosse, paquet).
-- **État de départ à ne pas perdre de vue** : `cargo test` = **55 tests verts**, `water-harness
-  check` = 2 scénarios, 0 échec, hashs `0x3e2c06a7b00e73e3` et `0x1a8b0629a9f51b6e`. Tout écart sur
-  ces deux hashs serait un défaut de cette session, pas un résultat.
-- **C05 n'a jamais tourné ici** : la lignée d'accueil ne l'a pas exécuté, et c'est lui qui a
-  éliminé le réglage d'`ADR-005 §2`. Son montage porte des **conditions de mesure révisées**
-  (`ADR-042` §7) — témoin à `σ_max = 0`, `σ_max·dt` rapporté. Les reprendre telles quelles.
-- **Ne pas toucher à `physics.rs`.** C'est la condition qui rend l'oracle croisé possible ; la
-  violer ferait perdre à la session son objet.
+- Les deux véhicules sont dans le même binaire : `water_core::{Delta1D, Bassin}` et
+  `water_core::{Shallow1D, Flux}`. Rien à importer.
+- **`delta.rs` est en `f32`, `shallow.rs` en `f64`.** `ε_f32 ≈ 1,19·10⁻⁷` ; sur une hauteur de 3 m,
+  l'arrondi vaut déjà `≈ 3,6·10⁻⁷ m`. C'est le fait central de la session et il n'est écrit nulle
+  part dans le corpus.
+- **Alignement des grilles, vérifié avant le plan** : `delta.rs` place le centre de la cellule
+  interne `i` à `origine + (i+½)·dx` (ses tableaux bruts portent deux cellules fantômes, `k = i+1`) ;
+  `shallow.rs` à `(i+½)·dx`, sans fantômes. **Les cellules internes coïncident.**
+- **Les temps de sortie doivent être comparés, pas les pas.** `delta.rs` avance par
+  `avancer_equilibre(duree_s)`, `shallow.rs` par `avancer_jusqu_a(t_fin, cfl)` ; leurs pas de temps
+  diffèrent dès le premier, puisque `dt_cfl` est calculé dans deux précisions.
+- **C01 des deux côtés** : `Bassin::c01()` et `montage_c01()` — 40 m, 160 cellules, `dx = 0,25 m`,
+  fond `−3 → −1`, `η₀ = 0`, repos.
+- **C04 demande un alignement** : `Bassin::c04()` est à 800 cellules de 5 cm sur `[−20, +20]`, tandis
+  que `c04_ritter` de la lignée B tourne à 1600 mailles de 2,5 cm sur `[0, 40]`. `barrage()` étant
+  paramétrique, l'aligner coûte un appel — mais **l'origine diffère de 20 m** et il faut en tenir
+  compte dans la comparaison des abscisses.
+- **État de départ** : `cargo test` = **68 tests** (32 cœur + 36 harnais, un `ignore`), `check` = 0
+  échec, hashs `0x3e2c06a7b00e73e3` et `0x1a8b0629a9f51b6e`. Mode `physics` : **31 s** sur 60 s de
+  budget, dont 12,5 s pour le second véhicule — **cette session doit surveiller ce qu'elle ajoute**
+  (S36-4, **A158**).
