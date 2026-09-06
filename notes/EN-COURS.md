@@ -105,7 +105,7 @@ encore** : deux schémas réputés identiques ne le seraient pas, et il faudrait
       `L¹`. **Pas de comparaison pas à pas** : les deux ne partagent pas leurs pas de temps.
 - [x] **P5** — **C01 comparé**, le cas où les deux sont exacts et où un désaccord serait sans
       ambiguïté.
-- [ ] **P6** — **C04 comparé**, montage aligné à 800 mailles de 5 cm : le cas où un désaccord serait
+- [x] **P6** — **C04 comparé**, montage aligné à 800 mailles de 5 cm : le cas où un désaccord serait
       **physique** et non arithmétique.
 - [ ] **P7** — le verdict, et un ADR : **ce que cet oracle peut dire, et ce qu'il ne peut pas**.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6).
