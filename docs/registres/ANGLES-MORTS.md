@@ -11,9 +11,9 @@ Historique : 28 recensés en S01, 12 ajoutés en S02 (phénomènes secondaires),
 de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outillage auteur),
 6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance),
 3 en S11 (audit des points ouverts), 3 en S12 (mécanismes de détail), 3 en S13 (revue croisée des
-documents récents), 3 en S14 (audit inverse des invariants), 2 en S15 (audit des registres), 2 en S16 (dossier B2) —
-**93 au total**. **Trente-trois ont été trouvés dans nos propres écrits**, pas dans les documents
-sources : A49, A56, A57, A58, puis A65 à A93. La proportion
+documents récents), 3 en S14 (audit inverse des invariants), 2 en S15 (audit des registres), 2 en S16 (dossier B2), 2 en S17
+(dossier de réunion) — **95 au total**. **Trente-cinq ont été trouvés dans nos propres écrits**, pas
+dans les documents sources : A49, A56, A57, A58, puis A65 à A95. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -134,6 +134,8 @@ ce que les sources avaient omis.
 | **A91** | Une question dissoute peut revenir sous une autre forme, sans que son statut bouge | 2 | AUDIT-REGISTRES-S15 §R06 |
 | **A92** | La largeur d'éponge borne `λ_cut` par le haut, et c'est le plus petit domaine qui décide | **1** | ADR-005 §5, DOSSIER-B2 §3 |
 | **A93** | Un banc produit un couple de valeurs liées, jamais une valeur seule | 2 | DOSSIER-B2 §7 |
+| **A94** | Deux demandes bloquent la première ligne de code et n'étaient présentées nulle part comme urgentes | **1** | DOSSIER-REUNIONS §3 |
+| **A95** | Les deux demandes les plus bloquantes n'ont aucun destinataire nommé | **1** | DOSSIER-REUNIONS §7.2 |
 
 Soixante-quatre angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -451,3 +453,18 @@ pendant quatre sessions.
   de domaine, parce que les deux sont liés par `dx ≤ λ_cut/N` et qu'aucun des deux ne veut rien dire
   sans l'autre. Un protocole qui ne publie qu'un des deux laisse le second se choisir plus tard, à
   l'œil, par quelqu'un qui n'aura pas les mesures.
+
+**Ajoutés en S17, en rassemblant le dossier de réunion**
+
+- **A94** *(sévérité 1)* — **Deux demandes bloquent la première ligne de code et n'étaient présentées
+  nulle part comme urgentes.** Le corpus classait ses dépendances extérieures par **gravité de
+  conséquence** ; le critère utile est l'**irréversibilité** — ce que la réponse débloque. Reclassé
+  ainsi, « acter ADR-020 » et « qui possède le harnais de validation » passent devant les quatre
+  interfaces inter-équipes que l'index mettait en tête. La seconde était rangée depuis S03 parmi des
+  questions de format de fichier, alors que H1 doit précéder la première ligne du solveur et que la
+  qualité de toutes les décisions à venir est plafonnée par celle du harnais.
+- **A95** *(sévérité 1)* — **Les deux demandes les plus bloquantes n'ont aucun destinataire nommé.**
+  « Direction technique » et « assurance qualité technique » sont des rôles, pas des personnes.
+  Personne n'est aujourd'hui identifié pour acter ADR-020 ni pour arbitrer la propriété du harnais —
+  et c'est la condition préalable à la tenue même des réunions. Un dossier de demandes sans
+  destinataire identifié est un dossier qui ne part pas.

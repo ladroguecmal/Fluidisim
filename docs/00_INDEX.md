@@ -95,7 +95,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`specs/SPEC-004`](specs/SPEC-004-interfaces.md) | **signatures des interfaces** — solveurs, champ de fond, solides, services d'hôte, contrat de fils d'exécution |
 | [`specs/SPEC-005`](specs/SPEC-005-outillage-auteur.md) | **outillage auteur** — sources de vérité, inversion du pipeline eau/terrain, cuisson déterministe, obsolescence |
 | [`specs/SPEC-006`](specs/SPEC-006-chemin-pousse.md) | **le chemin poussé** — ce que le système *publie* : bus d'événements et `WaveEvent`, écume et aération, traversabilité, polyligne de déferlement |
-| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | 93 points, avec sévérité — dont 33 trouvés dans nos propres écrits |
+| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | 95 points, avec sévérité — dont 35 trouvés dans nos propres écrits |
 | [`registres/REVUE-CROISEE-S05.md`](registres/REVUE-CROISEE-S05.md) | **audit croisé des 20 ADR** — 12 écarts, dont 2 de gravité 1, et la liste des contrôles passés |
 | [`registres/REVUE-CROISEE-S08.md`](registres/REVUE-CROISEE-S08.md) | **audit croisé des 5 SPEC** — 10 écarts, dont 2 de gravité 1 ; l'arithmétique des fiches chiffrées revérifiée ligne à ligne |
 | [`registres/AUDIT-POINTS-OUVERTS-S11.md`](registres/AUDIT-POINTS-OUVERTS-S11.md) | **audit des 110 points ouverts** — un sur trois n'était pas dans l'état annoncé ; et le tableau **« qui attend quoi »**, bancs, équipes, arbitrages |
@@ -127,7 +127,7 @@ Spécification technique   █████████████████�
 Cohérence interne         ██████████████████████  100 %   26 ADR + 6 SPEC confrontés, 45 écarts résolus ; les 17 invariants audités dans les deux sens
 Décisions expérimentales  ███░░░░░░░░░░░░░░░░░░░   15 %   onze bancs définis, aucun exécuté ; B2 a son dossier d'exécution
 Outillage et pipeline     ████████████░░░░░░░░░░   55 %   harnais et outillage auteur spécifiés, non écrits
-Accords inter-équipes     ███░░░░░░░░░░░░░░░░░░░   15 %   les quatre interfaces sont écrites ; aucune confirmée
+Accords inter-équipes     ████░░░░░░░░░░░░░░░░░░   20 %   seize fiches prêtes à soumettre ; aucune réponse reçue
 ```
 
 **Chemin critique**
@@ -148,6 +148,14 @@ pas : un système écrit sans harnais ne se laisse pas instrumenter ensuite (ADR
 sont posés. Ce qui reste est du code, des mesures et des réunions.
 
 ## Ce qui attend une réponse humaine
+
+> **Le dossier de réunion est [`DOSSIER-REUNIONS.md`](DOSSIER-REUNIONS.md)** *(S17)*. Seize fiches,
+> chacune tenant seule, destinées à sortir du dépôt. Elles sont classées **par ce que la réponse
+> débloque** — la première ligne de code, puis le format d'une autre équipe, puis un banc, puis un
+> cadrage — et non par gravité du sujet. Ce classement diffère de celui des sections ci-dessous, et
+> il fait remonter deux demandes que rien ne présentait comme urgentes : **acter ADR-020** et
+> **désigner le propriétaire du harnais**, qui conditionnent l'une et l'autre la première ligne de
+> code. Les sections ci-dessous restent la vue par sujet.
 
 ### Arbitrages de design
 
