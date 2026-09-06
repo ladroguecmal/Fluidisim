@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-06
-Session en cours : S27 — le nombre de Courant : sa définition, sa borne, sa valeur
-Dernière session : S26 — 2026-09-06 — la loi passe une épreuve qu'elle n'a pas produite ; δ est un filtre
-Session suivante : S28 — la réinjection W/δ (S26-2) ou H2
+Session en cours : —
+Dernière session : S27 — 2026-09-06 — le nombre de Courant, et une marge qui protégeait d'un trou qu'elle ignorait
+Session suivante : S28 — C23, le Courant à paroi mobile *(recommandé, S27-1)*, ou la réinjection W/δ (S26-2), ou H2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
@@ -105,7 +105,7 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Vingt-six sessions, **34 ADR** *(dont un acté)*, six spécifications, huit registres — **et du
+Vingt-sept sessions, **35 ADR** *(dont un acté)*, six spécifications, huit registres — **et du
 code qui tourne** : `code/`, étages **H1 et H3** du harnais, un **δ d'essai** équilibré, 31 tests
 verts et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
 verdict** (C08). Quatre cas canoniques sur δ sont exécutés : **C01 et C03 passent**, C04 échoue,
@@ -117,6 +117,16 @@ en S09.
 
 **Il n'y a plus de document bloquant, et les quatre interfaces inter-équipes ont enfin quelque chose
 à soumettre.** Ce qui reste est du code, des mesures et des réunions.
+
+**Et S27 a trouvé un trou que sept sessions n'avaient pas vu, grâce à une source extérieure.**
+SPEC-001 §2.1 borne le pas de temps par `u_max` **sans jamais définir `u_max`**, quand SPEC-004 §10.1
+impose d'accepter « une frontière en mouvement avec sa vitesse ». Un projet voisin a mesuré le
+défaut correspondant : solide mobile en eau au repos, **borne de pas de temps nulle** pendant que le
+Courant réel valait 0,943 — **zéro violation déclarée**. Un solveur peut violer sa condition de
+stabilité d'un facteur deux en restant vert.
+[`ADR-035`](docs/adr/ADR-035-le-nombre-de-courant-definition-borne-valeur.md) pose l'ordre :
+**définition, puis borne, puis valeur** — et `CFL = 0,45` reste en place, parce que sa marge (×2,22)
+couvrait précisément ce défaut sans que personne l'ait décidé.
 
 **Une urgence de format, la seule.** `WaveEvent` (SPEC-006 §3.1) est une structure **répliquée** qui
 porte trois champs demandés par l'équipe audio. Elle doit être arrêtée **avant** que le réseau ne

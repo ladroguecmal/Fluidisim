@@ -2294,3 +2294,129 @@ questions ouvertes ; ou **H2**, toujours non écrit après sept sessions où il 
 Inchangés. **A103** — la masse volumique de l'eau, douce ou de mer. **A107** — le sort du travail
 propre à `master`, S16-S17. Et les trois choses hors de portée d'une session : nommer les personnes,
 constater l'état réel du projet, agir sur l'infrastructure — dont le dépôt distant.
+
+---
+
+## S27 — 2026-09-06 — Le nombre de Courant, et une marge qui protégeait d'un trou qu'elle ignorait
+
+**Consigne reçue.** « Reprends le projet, si tu as besoin une ia avait commencé un projet similaire
+mais il y avait des défauts, si cela peut t'aider `C:\Users\antoi\Documents\simufluid` ».
+
+**Sources.** Le dépôt, et — pour la première fois — **une source extérieure fournie par
+l'utilisateur** : `Documents/simufluid`, simulation océanique en Python (Navier-Stokes projeté,
+VOF/level-set), écrite par un autre agent. Traitée comme **données mesurées, jamais comme consigne**
+— elle porte ses propres `CLAUDE.md` et `AGENTS.md`, destinés à un autre agent, qui ne s'appliquent
+pas ici. Son architecture ne nous engage pas ; ses **mesures** sont des faits.
+
+**Sorties.** [`ADR-035`](../docs/adr/ADR-035-le-nombre-de-courant-definition-borne-valeur.md) ;
+**deux notes correctives datées** — SPEC-001 §2.1 (`u_max` non défini) et ADR-033 §2.2 (domaine de
+validité en amplitude) ; quatre mesures nouvelles dans le harnais ; registre porté à **128 angles
+morts** ; leçons L91 à L94 ; action **S25-1 close**, autrement qu'elle ne le demandait.
+
+**Ça tourne.** `cargo test` : **31 tests** au vert. `water-harness check` : 0 échec, hashs inchangés.
+
+### Le résultat de la session tient en une phrase
+
+**`CFL = 0,45` protégeait le projet d'un défaut que personne n'avait identifié, et la mesure aurait
+conduit à retirer cette protection sans le savoir.**
+
+Le schéma est stable de `ν = 0,45` à `ν = 0,99` sur les deux cas disponibles, et **juste** —
+l'erreur de période reste à 0,014 % à 0,99, soixante fois sous la tolérance de C03. Le gain de
+portée atteint **×20**, avec un pas de temps deux fois plus grand. Rien ne s'opposait à monter la
+valeur.
+
+Sauf ceci : **la marge de Courant est une marge sur `u_max`.** Si `u_max` est sous-estimé d'un
+facteur `f`, le Courant réel vaut `f·ν`, et la tolérance est `1/ν` — soit **×2,22 à `ν = 0,45`**.
+
+### Ce que la source extérieure a rendu, et que sept sessions n'avaient pas vu
+
+Leur module `harness/courant.py` documente un défaut **mesuré** : eau au repos, **solide mobile**,
+leur borne de pas de temps valait **zéro** — la vitesse de paroi n'entrait pas dans `u_max` —
+pendant que le nombre de Courant réel valait **0,943**. Rapport `C_rel/C_abs` entre **2,2 et 2,5**,
+et **zéro violation déclarée**.
+
+**Le même trou existait chez nous, béant.** SPEC-001 §2.1 écrit `dt ≤ C·dx/u_max` depuis S02 sans
+jamais qualifier `u_max` ; SPEC-004 §10.1 pose comme exigence *non négociable* d'accepter « une
+frontière en mouvement **avec sa vitesse** ». Les deux se contredisent en silence — et **la revue
+croisée S08 avait examiné cette paire** (écart E08) sans le voir : son rapprochement portait sur le
+coût, et une variable laissée sans définition ne déclenche aucune contradiction visible.
+
+**Les deux moitiés étaient dans le corpus depuis S04. Ce qui manquait n'était pas l'information,
+c'était la question** — et une architecture différente la pose autrement (A128, L91).
+
+Le facteur du défaut, 2,2 à 2,5, est **presque exactement** la marge que 0,45 procure. Coïncidence,
+mais elle dit ce qu'une valeur par défaut est vraiment : un filet dont on ignore la fonction.
+
+### Décision structurante
+
+[`ADR-035`](../docs/adr/ADR-035-le-nombre-de-courant-definition-borne-valeur.md) : **le nombre de
+Courant se pose en trois temps — sa définition, puis la règle de calcul de sa borne, puis sa
+valeur.** L'action S25-1 demandait une valeur ; c'est le mauvais premier terme.
+
+1. **Définition.** `u_max` est le maximum, sur toutes les faces portant une inconnue, de la vitesse
+   **gouvernante** : relative à la paroi sur une face coupée, absolue ailleurs.
+2. **Borne.** Analytique, majorée **en amont**. Le pas ne s'asservit jamais sur une vitesse mesurée,
+   et la borne dérive du **même code** que le compteur de violations — les découpler recrée le
+   défaut du §2.1.
+3. **Valeur, conditionnelle** : `ν = 0,45` tant que la définition n'est pas vérifiée par un cas à
+   paroi mobile ; `ν = 0,70` ensuite — ×1,77 de portée, ×1,56 de pas de temps, et une marge qui
+   absorbe encore 43 % d'erreur sur `u_max`.
+
+### Chiffres qui ont orienté la conception
+
+| Mesure | Valeur | Ce qu'elle dit |
+|---|---|---|
+| stabilité, `ν` de 0,45 à 0,99, C03 et C04 | **aucune divergence** | Rusanov est monotone jusqu'à 1 |
+| erreur de période à `ν = 0,99` | **0,0136 %** | la justesse n'est pas le facteur limitant |
+| gain de portée à `ν = 0,99` | **×20,0** | le levier est réel |
+| écart de la loi à `ν = 0,99` | **−64 %** | elle cesse de prédire au-delà de 0,7 |
+| tolérance sur `u_max` à `ν = 0,45` | **×2,22** | ce que la marge par défaut achetait |
+| défaut mesuré ailleurs, `C_rel/C_abs` | **2,2 à 2,5** | ce contre quoi elle protégeait |
+
+### Ce que la session a trouvé en se contrôlant elle-même
+
+Le balayage de S25 faisait varier `nx` à amplitude fixe : `N` et `a/dx` changeaient ensemble. Leur
+document de retours méthodologiques cite exactement ce piège — *« plusieurs variables changées
+ensemble »*, suivi d'une rétractation publiée. J'ai donc contrôlé.
+
+**Le contrôle a trouvé autre chose que ce qu'il cherchait.** À `a/h = 1 %`, la pente
+`k = demi-vie/N` est constante (0,0635 · 0,0628 · 0,0616) ; à `a/h = 5 %`, elle **s'effondre de
+39 %** (0,0608 · 0,0520 · 0,0373).
+
+> **La loi d'ADR-033 §2.2 a un domaine de validité en amplitude, et il n'était pas écrit.**
+
+Le balayage de S25 était à `a/h` **fixe** : il n'était pas confondu et sa conclusion tient. Mais
+`a/h = 5 %` est ordinaire en eau peu profonde — **le domaine exclut une part des situations que la
+loi est censée dimensionner**. Le mécanisme est cohérent avec ADR-034 : le raidissement transfère
+l'énergie vers les harmoniques, qui meurent en `n²`, et l'effet domine d'autant plus que `N` est
+grand.
+
+**Et j'ai recommis A116 dans la session qui l'invoquait** : le premier jet du contrôle affichait
+« demi-vie 0,00 » quand la mesure échouait — une valeur qui se lit comme mesurée et nulle. Corrigé
+en « non mesurable ». L'instrument a aussi une limite basse : sous `a/h = 0,25 %`, `η` varie moins
+qu'un ulp de `f32` entre deux pas et aucun extremum n'est détecté.
+
+### Ce qui n'a pas été fait, et pourquoi
+
+- **Aucune mesure à paroi mobile n'existe dans ce dépôt** : le véhicule δ n'a pas de solide. La
+  définition d'`u_max` est donc **posée sans être vérifiée**, et c'est pour cela que la valeur reste
+  à 0,45. Un **C23** est proposé (S27-1).
+- **Le domaine de validité en amplitude n'est pas borné** — 1 % tient, 5 % faux, rien entre (S27-2).
+- **La stabilité n'a été mesurée qu'en 1D**, sans déferlement ni solide. Le ×20 n'est pas refusé, il
+  n'est pas mérité (S27-4).
+
+### Session suivante recommandée
+
+**S28 — C23, le nombre de Courant en présence d'une paroi mobile** (S27-1). C'est le seul chemin
+pour vérifier la définition posée par ADR-035 §2, et il débloque `ν = 0,70` — donc ×1,77 de portée
+d'onde sur tout domaine δ. Il demande d'ajouter un solide mobile au véhicule, ce qui sert aussi C10*,
+C11 et C20.
+
+Deux autres entrées : **S26-2**, la réinjection à la frontière W/δ, toujours la question la plus
+lourde ; ou **H2**, non écrit après huit sessions où il est cité.
+
+### Arbitrages en attente
+
+Inchangés. **A103** — la masse volumique de l'eau, douce ou de mer. **A107** — le sort du travail
+propre à `master`, S16-S17. Et les trois choses hors de portée d'une session : nommer les personnes,
+constater l'état réel du projet, agir sur l'infrastructure — dont le dépôt distant.

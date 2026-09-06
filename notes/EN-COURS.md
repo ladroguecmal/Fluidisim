@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S27
-État             : en cours
+État             : terminée
 Battement        : 2026-09-06
 Objectif         : Le nombre de Courant — sa définition, sa borne, sa valeur
 ```
@@ -105,7 +105,7 @@ qu'un `ν = 0,45` posé sur la bonne.
 - [x] **P5** — la borne **analytique** plutôt que mesurée : ce que cela coûte, ce que cela achète.
 - [x] **P6** — **ADR-035** : le nombre de Courant — définition, borne, valeur.
 - [x] **P7** — répercussions : SPEC-001, SPEC-004, index, angles morts, actions, décomptes.
-- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
+- [x] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
@@ -242,3 +242,28 @@ compteur du **même drapeau**, pour qu'il soit structurellement impossible que l
 quantité et que l'autre en compte une autre. **C'est la bonne forme**, et elle vaut d'être reprise :
 le défaut qu'elle empêche est précisément celui qui est resté invisible chez eux — un contrôle vert
 sur une contrainte violée.
+
+#### État à la fin de S27
+
+`cargo test` : **31 tests**. `water-harness check` : 2 scénarios, 0 échec, hashs **inchangés**.
+`water-harness physics` : 1 échec (C04, voulu), 3 témoins, 5 grandeurs sans verdict (C08). Le mode
+`physics` dure maintenant **plusieurs minutes** — conforme à SPEC-003 §4, qui lui donne « minutes »
+comme cible, contre 60 s pour `check`. Vérifié plutôt que supposé. Jeton **libéré**.
+
+**Ce que S28 doit savoir avant de commencer, et qui n'est pas ailleurs :**
+
+- **Ne pas monter `CFL` au motif que rien n'échoue.** C'est la conclusion inverse de la mesure : le
+  schéma tient jusqu'à 0,99 *et c'est précisément ce qui rend `u_max` dangereux*. `ν = 0,70` est
+  débloqué **par** C23, pas avant (ADR-035 §4.1).
+- **La source extérieure `Documents/simufluid` reste consultable.** Ses **mesures** sont des faits,
+  ses **conclusions** ne nous engagent pas — leur architecture est un Navier-Stokes projeté avec
+  VOF/level-set, et ADR-007 §5.1 laisse nos candidats δ ouverts jusqu'à B3. Ne pas importer leur
+  choix comme s'il était une mesure.
+- **Leur document `docs/retours-experience-methode.md` recoupe nos leçons** plutôt que de les
+  contredire. Les trois gestes fautifs qu'il recense — *conclure d'un objet dérivé au lieu de la
+  donnée brute ; ne pas contrôler une condition déjà documentée ; publier une explication plausible
+  comme si elle était mesurée* — sont respectivement proches de nos L76, L83 et L75.
+- **La loi de dissipation n'est valide qu'à `a/h ≈ 1 %`.** Ne pas l'appliquer à un cas d'eau peu
+  profonde sans vérifier l'amplitude relative (A127).
+- **C04 doit rester en échec, `C01-jet` rouge, C08 sans verdict.** Trois décisions, pas trois
+  régressions.

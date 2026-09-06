@@ -1297,3 +1297,74 @@ daté, il raconte une décision, il n'est pas l'index de ce qui est disponible.
 prochaine session tombera dessus si elle ne lit pas ce que je viens d'écrire*. Si la réponse est
 « elle ne tombera pas dessus », l'inscrire dans le document qui fait office d'index — et l'y
 inscrire dans la même session, pas dans les actions ouvertes.
+
+## L91 — Un corpus fermé sur lui-même ne produit que les questions qu'il sait déjà poser
+
+*(S27)* Le défaut central de cette session — `u_max` non défini alors qu'une SPEC impose des parois
+mobiles — était **entièrement contenu dans le corpus depuis S04**. Les deux moitiés y étaient,
+SPEC-001 §2.1 et SPEC-004 §10.1. Une revue croisée systématique avait même confronté cette paire, et
+ne l'avait pas vu : son rapprochement portait sur le coût, et **une variable laissée sans définition
+ne déclenche aucune contradiction visible** — il n'y a rien à comparer.
+
+Ce qui a manqué pendant sept sessions n'était pas l'information, c'était la **question**. Elle est
+venue d'un projet voisin, d'architecture différente, qui avait rencontré le défaut et l'avait
+mesuré.
+
+**Réflexe** : traiter les **mesures** d'un travail extérieur comme des faits, et ses **conclusions**
+comme ne nous engageant pas. Un projet qui a choisi une autre architecture ne dit rien de la nôtre,
+mais ce qu'il a *cassé* est un fait sur le monde. Et le corollaire est plus large : une relecture
+interne, si systématique soit-elle, ne trouve pas les angles morts qui viennent d'une question
+jamais posée — il faut une source qui pose les questions autrement.
+
+## L92 — Une marge par défaut peut protéger d'un défaut que personne n'a identifié
+
+*(S27)* `CFL = 0,45` a été posé sans justification écrite. La mesure a montré que le schéma est
+stable jusqu'à 0,99 **et juste** — l'erreur de période y reste soixante fois sous la tolérance — et
+que monter la valeur achèterait ×20 de portée d'onde et un pas de temps double.
+
+**Rien ne s'opposait à la monter.** Sauf que la marge de Courant est une marge sur `u_max` : à
+`ν = 0,45` elle absorbe une sous-estimation de ×2,22, et le défaut réel, mesuré ailleurs, valait
+×2,2 à ×2,5. La valeur protégeait d'un trou dont elle ignorait l'existence.
+
+Le danger est asymétrique : une marge qu'on retire ne fait rien échouer **tout de suite**. Le coût
+apparaît quand le défaut qu'elle couvrait se manifeste, et il est alors attribué à autre chose.
+
+**Réflexe** : avant de resserrer un paramètre de sécurité au motif que « rien n'échoue », chercher
+**contre quoi il protégeait**. Si la réponse n'est écrite nulle part, c'est une raison de plus de
+ne pas y toucher — pas une raison de moins.
+
+## L93 — L'ordre des questions vaut souvent plus que leur réponse
+
+*(S27)* L'action ouverte demandait « poser le nombre de Courant comme paramètre de conception », et
+son motif était le gain de performance. Répondre à cette question-là aurait donné une valeur — et
+une valeur posée sur une définition fausse est plus dangereuse qu'une valeur prudente posée sur la
+bonne.
+
+Le bon ordre s'est révélé être : **définition** de la grandeur bornée, puis **règle de calcul** de
+la borne, puis **valeur**. Chacun des deux premiers termes change le troisième ; l'inverse n'est pas
+vrai. Une session qui aurait livré « `ν = 0,9` » aurait clos l'action en laissant le vrai problème
+intact, et en supprimant la marge qui le masquait.
+
+**Réflexe** : devant une question qui demande un nombre, vérifier d'abord que la grandeur à laquelle
+il s'applique est **définie**, et que la règle qui l'emploie est **écrite**. Si l'un des deux
+manque, le nombre n'est pas la réponse — c'est le troisième terme d'une suite dont les deux premiers
+sont vides.
+
+## L94 — Un contrôle bien conçu trouve autre chose que ce qu'il cherchait
+
+*(S27)* Le contrôle visait un confondant précis : le balayage de S25 faisait varier `N` et `a/dx`
+ensemble, et un piège documenté ailleurs disait ce que cela coûte. **Ce confondant-là n'existait
+pas** — l'amplitude relative était fixe, et `a/dx` n'a pas de sens physique propre.
+
+Mais en séparant les variables, le contrôle a exhibé une **dépendance en amplitude** que personne
+n'avait cherchée : la loi de dissipation tient à `a/h = 1 %` et est fausse à 5 %. La conclusion de
+S25 reste vraie ; c'est son **domaine de validité** qui manquait, et il exclut une part des cas
+réels.
+
+Le contrôle n'a donc pas confirmé ni infirmé ce qu'il visait : il a rendu une propriété que la
+question d'origine ne mentionnait pas.
+
+**Réflexe** : ne pas juger un contrôle à sa capacité de confirmer le soupçon qui l'a motivé. Un
+contrôle qui sépare proprement des variables produit de l'information sur **chacune** — y compris
+celles dont on ne se méfiait pas. Le corollaire : quand un contrôle « ne trouve rien », vérifier
+qu'on a bien regardé toutes les sorties, et pas seulement celle qu'on attendait.
