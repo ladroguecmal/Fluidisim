@@ -142,6 +142,12 @@ défaire.
 
 1. Candidats à évaluer pour δ (B3) : FLIP/APIC, MPM, eulérien avec advection semi-lagrangienne,
    grille + particules de surface, position-based fluids. Aucun n'est privilégié à ce stade.
+
+   > **Renvoi S22.** Aucun n'est privilégié, mais l'un d'eux peut désormais être **éliminé sans être
+   > mesuré** : [`ADR-030`](ADR-030-l-equilibrage-est-un-critere-d-elimination.md) fait de
+   > l'équilibrage sur fond variable un critère d'entrée au banc, mesure à l'appui — le raffinement
+   > qui rachèterait le défaut coûte ×10 500 en 2D. Le candidat doit passer C01 **avec ses
+   > conditions aux limites** : le bord fait partie de la propriété (ADR-030 §4).
 2. Candidats pour W (B2) : paquets d'ondes lagrangiens, équation d'onde 2D sur pyramide GPU,
    Boussinesq faible dispersion, hybride.
 3. ~~Format exact de `CondensedState` → ADR à écrire (persistance hors caméra).~~

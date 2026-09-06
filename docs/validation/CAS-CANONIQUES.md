@@ -35,7 +35,7 @@ les six premiers doivent passer avant qu'un solveur candidat soit admis en campa
 
 | # | Cas | Couche | Référence | Ce qu'il attrape |
 |---|---|---|---|---|
-| C01 | Repos hydrostatique sur pente | δ | **analytique exacte** | courants parasites |
+| C01 | Repos hydrostatique sur pente | δ | **analytique exacte** | courants parasites — *exécuté depuis S22, sur le véhicule d'essai δ* |
 | C02 | Dispersion monochromatique | δ, W, **B** | **analytique** | erreur de célérité → fixe `λ_cut` — *trois assertions exécutées sur `B` depuis S21* |
 | C03 | Seiche en bassin clos | δ, W | **analytique** | dissipation numérique |
 | C04 | Rupture de barrage (Ritter) | δ | **analytique** | fronts, mouillage/séchage |
@@ -73,6 +73,25 @@ bas d'une plage.
 C'est le test le moins spectaculaire, le plus rapide, et celui qui élimine le plus de candidats.
 Il doit être le premier écrit.
 
+> **Note S22 — exécuté, et trois choses apprises.** Le cas tourne dans le mode `physics`, sur le
+> véhicule d'essai `delta.rs` (Saint-Venant 1D). Il a fait ce qu'on attendait de lui : **éliminer un
+> schéma**. Voir [`ADR-030`](../adr/ADR-030-l-equilibrage-est-un-critere-d-elimination.md).
+>
+> 1. **Les deux assertions ne sont pas redondantes.** Le schéma au premier jet passe
+>    `max|u| < 1 mm/s` (0,53 mm/s) et échoue `max|η − η₀| < 1 mm` (21,6 mm). Un harnais qui n'aurait
+>    mesuré que la vitesse — la grandeur que le nom « courants parasites » désigne pourtant —
+>    l'aurait déclaré conforme. **Les deux sont exécutées et rapportées.**
+> 2. **Une troisième mesure a été ajoutée** : le volume, contre les 80 m² par unité de largeur que
+>    la géométrie impose. Elle coûte une ligne et sépare deux défauts que les deux premières
+>    confondent — un solveur peut être au repos et fuir. C'est elle qui a localisé un défaut de
+>    condition aux limites (ADR-030 §4).
+> 3. **Le montage est moins discriminant que son énoncé.** Le fond est à pente *constante*, où un
+>    schéma non équilibré est presque équilibré par accident de géométrie. Un **C01-bis à fond
+>    courbe** est proposé, à écrire avant que B3 ne s'en serve — angle mort **A105**.
+>
+> Les seuils `1 mm/s` et `1 mm` restent **sans provenance** au sens d'I-14 : ni formule, ni banc.
+> Angle mort **A106**.
+
 ## C02 — Dispersion d'une onde monochromatique
 
 **Montage.** Canal périodique, onde de faible cambrure, λ balayé, `dx` fixé. Mesure de la célérité
@@ -80,6 +99,12 @@ sur 10 périodes.
 **Référence.** `c = √(gλ/2π)` (SPEC-001 §1).
 **Assertion.** erreur de célérité < 2 % pour λ ≥ N·dx, avec **N à déterminer — c'est le résultat
 du test**.
+
+> **Note S22 — ce cas ne se mesure pas sur le véhicule δ.** Saint-Venant est **non dispersif** :
+> `c = √(g·h)`, indépendant de λ (SPEC-001 §1). Exécuter C02 dessus ne mesurerait que la dispersion
+> *numérique* du schéma, qui n'est pas la grandeur cherchée. **`λ_cut` demande une couche
+> dispersive** — `W`, ou un δ de famille différente. Le chemin critique en tient compte depuis S22 ;
+> voir ADR-030 §5.
 
 Ce cas ne valide pas seulement le solveur : il **produit `λ_cut`**. La plus petite longueur d'onde
 que δ transporte correctement, rapportée à `dx`, fixe la frontière W/δ, donc la largeur d'éponge et

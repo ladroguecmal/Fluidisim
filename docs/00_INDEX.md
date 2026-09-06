@@ -64,6 +64,7 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 | ADR | Sujet | Statut | Traite |
 |---|---|---|---|
 | [029](adr/ADR-029-ce-que-la-premiere-ligne-de-code-a-appris.md) | **Le langage, et ce que la première ligne de code a appris** | proposée | tranche ADR-020 §7.1 · corrige ADR-003 §2, SPEC-004 §8.2, ADR-028 §4 · **note S21** : le hash stable était faux |
+| [030](adr/ADR-030-l-equilibrage-est-un-critere-d-elimination.md) | **L'équilibrage sur fond variable est un critère d'élimination** | proposée | tranche ADR-007 §5.1 · produit `delta.rs` et l'exécution de **C01** · le raffinement qui rachèterait le défaut coûte ×10 500 |
 
 ### Nature du projet *(S19)*
 
@@ -113,7 +114,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`specs/SPEC-004`](specs/SPEC-004-interfaces.md) | **signatures des interfaces** — solveurs, champ de fond, solides, services d'hôte, contrat de fils d'exécution |
 | [`specs/SPEC-005`](specs/SPEC-005-outillage-auteur.md) | **outillage auteur** — sources de vérité, inversion du pipeline eau/terrain, cuisson déterministe, obsolescence |
 | [`specs/SPEC-006`](specs/SPEC-006-chemin-pousse.md) | **le chemin poussé** — ce que le système *publie* : bus d'événements et `WaveEvent`, écume et aération, traversabilité, polyligne de déferlement |
-| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | 104 points, avec sévérité — dont 44 trouvés dans nos propres écrits |
+| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | 108 points, avec sévérité — dont 48 trouvés dans nos propres écrits |
 | [`registres/REVUE-CROISEE-S05.md`](registres/REVUE-CROISEE-S05.md) | **audit croisé des 20 ADR** — 12 écarts, dont 2 de gravité 1, et la liste des contrôles passés |
 | [`registres/REVUE-CROISEE-S08.md`](registres/REVUE-CROISEE-S08.md) | **audit croisé des 5 SPEC** — 10 écarts, dont 2 de gravité 1 ; l'arithmétique des fiches chiffrées revérifiée ligne à ligne |
 | [`registres/AUDIT-POINTS-OUVERTS-S11.md`](registres/AUDIT-POINTS-OUVERTS-S11.md) | **audit des 110 points ouverts** — un sur trois n'était pas dans l'état annoncé ; et le tableau **« qui attend quoi »**, bancs, équipes, arbitrages |
@@ -162,8 +163,8 @@ Conception conceptuelle   ██████████████████
 Chiffrage et contraintes  █████████████████░░░░░   75 %   formules posées, mesures à faire
 Spécification technique   ████████████████████░░   92 %   chemins tiré et poussé posés, persistance tranchée ; reste IGpuBackend
 Cohérence interne         ██████████████████████  100 %   26 ADR + 6 SPEC confrontés, 45 écarts résolus ; les 17 invariants audités dans les deux sens
-Décisions expérimentales  ███░░░░░░░░░░░░░░░░░░░   15 %   onze bancs définis, aucun exécuté ; B2 a son dossier d'exécution
-Outillage et pipeline     ████████████████░░░░░░   70 %   **H1 et H3 écrits et verts** ; H2, H4 à H6 spécifiés, non écrits
+Décisions expérimentales  ████░░░░░░░░░░░░░░░░░░   18 %   onze bancs définis, aucun exécuté ; B2 a son dossier, B3 un critère d'entrée
+Outillage et pipeline     █████████████████░░░░░   75 %   **H1 et H3 écrits et verts, un δ d'essai équilibré** ; H2, H4 à H6 non écrits
 Accords inter-équipes     █████░░░░░░░░░░░░░░░░░   25 %   cinq arbitrages tranchés ; quatorze demandes extérieures en attente
 ```
 
@@ -172,11 +173,17 @@ Accords inter-équipes     █████░░░░░░░░░░░░�
 ```
 ADR-020 acté  →  SPEC-004 revue  →  H1 (cœur du harnais, mode check, CI par commit)
                                           │
-                                          ├→ H3 → C01 · C02  →  λ_cut  →  B2 ─┐
-                                          │                                    ├→ B4 → B6 → B8
-                                          └→ H4 (oracle, iso-qualité)  →  B3 ─┘
+                                          ├→ H3 → C01 ✔ → (δ dispersif ou W) → C02 → λ_cut → B2 ─┐
+                                          │                                                       ├→ B4 → B6 → B8
+                                          └→ H4 (oracle, iso-qualité)  →  B3 ─────────────────────┘
                              H2 en continu (dérive)          H5, H6 après B3
 ```
+
+**Un maillon s'est allongé en S22.** C01 est **fait**. C02, en revanche, ne se mesure pas sur le
+véhicule δ écrit pour C01 : Saint-Venant est non dispersif (`c = √(g·h)`, SPEC-001 §1) et C02 mesure
+une erreur de célérité **en fonction de λ**. **`λ_cut` demande donc une couche dispersive** — `W`,
+ou un δ d'une autre famille. Ce n'est pas un contretemps de codage : c'est une dépendance qui
+n'était pas dans le graphe. Voir ADR-030 §5.
 
 **H1 doit précéder la première ligne du solveur.** C'est le seul élément du plan qui ne se rattrape
 pas : un système écrit sans harnais ne se laisse pas instrumenter ensuite (ADR-020 §1).
@@ -225,7 +232,7 @@ sont posés. Ce qui reste est du code, des mesures et des réunions.
 ### Ouvert depuis S21 — une constante, et elle déplace des références
 
 **La masse volumique de l'eau : douce (1000) ou de mer (1025) ?** Aucun document du corpus ne la
-fixait — vingt-et-une sessions, six SPEC, vingt-neuf ADR. `code/water-core/src/body.rs` la pose à
+fixait — vingt-et-une sessions, six SPEC, vingt-neuf ADR à l'époque. `code/water-core/src/body.rs` la pose à
 **1000**, parce que c'est la seule valeur avec laquelle les références fermées du cas C10 se
 referment ; le fichier le dit explicitement comme une convention, pas comme une mesure.
 

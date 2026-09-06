@@ -12,9 +12,9 @@ de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outi
 6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance),
 3 en S11 (audit des points ouverts), 3 en S12 (mécanismes de détail), 3 en S13 (revue croisée des
 documents récents), 3 en S14 (audit inverse des invariants), 2 en S15 (audit des registres), 2 en S16 (dossier B2), 2 en S17
-(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques) — **104 au
-total**. **Quarante-quatre ont été trouvés dans nos propres écrits**, pas dans les documents sources :
-A49, A56, A57, A58, puis A65 à A104. La proportion
+(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques), 4 en S22 (C01 et le premier δ) — **108 au
+total**. **Quarante-huit ont été trouvés dans nos propres écrits**, pas dans les documents sources :
+A49, A56, A57, A58, puis A65 à A108. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -146,8 +146,12 @@ ce que les sources avaient omis.
 | **A102** | Une mesure statistique a besoin d'une fenêtre de plusieurs fois la plus longue onde | 2 | ADR-029, note S21 |
 | **A103** | Le corpus n'a jamais fixé la masse volumique de l'eau, dont dépendent des références | 2 | `body.rs`, C10 |
 | **A104** | Une règle énoncée dans un fichier n'empêche pas sa violation dans le même fichier | 2 | `physics.rs`, C10 |
+| **A105** | Un cas canonique peut être moins discriminant que son énoncé ne le laisse croire | **1** | ADR-030 §6.1, C01 |
+| **A106** | Une tolérance sans provenance traverse vingt-deux sessions sans être questionnée | 2 | ADR-030 §6.3, I-14 |
+| **A107** | Une fusion faite par import de contenu ne referme pas le fork qui l'a causée | **1** | `FORK-S08-S15.md`, S22 |
+| **A108** | Une propriété exacte vérifiée sur son intérieur seul ne dit rien de ses bords | 2 | ADR-030 §4, `delta.rs` |
 
-Soixante-quatre angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
+Soixante-huit angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
 
 **Quatre ont été trouvés dans nos propres écrits** — A49, A56, A57, A58 — et non dans les documents
@@ -556,3 +560,43 @@ pendant quatre sessions.
   un résultat à encaisser** — il signifie souvent que la mesure et la référence partagent une
   ligne de code. Conséquence portée dans le module : chaque cas de C10 y est classé par degré
   d'indépendance.
+
+**Ajoutés en S22, à la première exécution d'un solveur**
+
+- **A105** — **Un cas canonique peut être moins discriminant que son énoncé ne le laisse croire.**
+  C01 impose un fond « en pente 1:20 », donc à pente **constante**. Sur un tel fond, la hauteur
+  d'eau au repos varie linéairement, le saut de hauteur aux interfaces est le même partout, et sa
+  divergence est presque nulle : un schéma non équilibré y est *presque* équilibré **par accident de
+  géométrie**. Mesuré : le schéma au premier jet passe `max|u|` avec 0,53 mm/s pour 1 mm/s admis. Un
+  fond courbe le ferait tomber d'un ordre de grandeur. Le cas reste utile — il a bien éliminé le
+  schéma, par son autre assertion — mais **il est plus faible que sa réputation**, et B3 s'apprête à
+  s'en servir pour éliminer des candidats. Un C01-bis à fond courbe est proposé (ADR-030 §6.1).
+  Sévérité 1 par ce que le cas commande : le protocole d'un banc.
+
+- **A106** — **Une tolérance sans provenance traverse vingt-deux sessions sans être questionnée.**
+  `max|u| < 1 mm/s` et `max|η−η₀| < 1 mm` sont dans `CAS-CANONIQUES` depuis son écriture. I-14 exige
+  qu'aucun nombre ne vive sans formule ni banc ; ces deux-là n'ont ni l'une ni l'autre, et ont
+  survécu à deux revues croisées, un audit des points ouverts et deux audits d'invariants. **Un
+  seuil se lit comme une décision déjà prise**, alors qu'une constante physique se lit comme une
+  valeur à justifier — c'est la même dette, et une seule des deux se fait attraper. S22 en donne une
+  lecture physique (21,6 mm de surface = 43 cm de trait de côte sur une pente 1:20) ; une lecture
+  n'est pas une justification.
+
+- **A107** — **Une fusion faite par import de contenu ne referme pas le fork qui l'a causée.**
+  S16 a fusionné les deux lignes du fork S08-S15 en **recopiant les documents** de l'une dans
+  l'autre. Le contenu a bien été réuni ; l'historique git, lui, est resté divergent — et la ligne
+  source, n'ayant rien reçu, a continué seule pendant **quatre sessions** (S18 à S21, dont ADR-027 à
+  ADR-029 et tout le code). Le fork était donc réputé clos et ne l'était pas. **Une réconciliation
+  qui ne passe pas par l'outil qui a créé la divergence ne la supprime pas, elle la masque** — et
+  elle la masque d'autant mieux qu'elle produit un dépôt qui a l'air complet. `CLAUDE.md` impose
+  déjà `git worktree list` et `git branch -a` à l'amorce : c'est ce qui l'a fait voir en S22, à la
+  seconde commande. Le dispositif a fonctionné ; c'est la fusion qui était incomplète.
+
+- **A108** — **Une propriété exacte vérifiée sur son intérieur seul ne dit rien de ses bords.**
+  La reconstruction hydrostatique préserve le repos par identité algébrique. Le solveur qui
+  l'implémentait perdait pourtant 1,1 % de son volume en 60 s, parce que la condition de mur
+  recopiait la hauteur d'eau au lieu de la surface libre. **Le défaut de bord pesait quarante fois
+  le défaut de schéma qu'il masquait.** Une propriété démontrée sur l'opérateur intérieur ne
+  s'étend pas gratuitement aux conditions aux limites, et c'est le genre d'évidence qu'on n'écrit
+  nulle part. Vaut pour l'éponge d'ADR-005, la frontière W/δ et tout raccord de domaines.
+
