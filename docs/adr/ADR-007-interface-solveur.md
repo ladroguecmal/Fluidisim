@@ -148,6 +148,17 @@ défaire.
    > l'équilibrage sur fond variable un critère d'entrée au banc, mesure à l'appui — le raffinement
    > qui rachèterait le défaut coûte ×10 500 en 2D. Le candidat doit passer C01 **avec ses
    > conditions aux limites** : le bord fait partie de la propriété (ADR-030 §4).
+
+   > **Renvoi B-S22** *(lignée B, reporté en S35).* La lignée B a atteint le même constat
+   > séparément, et en nomme **deux** filtres au lieu d'un : l'équilibrage, qui recoupe le renvoi
+   > ci-dessus, et **l'ordre en espace**, qui est nouveau.
+   >
+   > **Complété en B-S22 par [ADR-038](ADR-038-ce-que-les-deux-premiers-cas-de-solveur-ont-appris.md)
+   > §4** : deux filtres se passent désormais *avant* le banc, parce qu'ils coûtent quelques minutes
+   > et qu'ils éliminent — le candidat est-il **bien équilibré** (sinon C01 le rejette, et aucun
+   > budget de calcul ne le rattrape), et de quel **ordre en espace** est-il (un ordre un ne passe
+   > pas C04, à aucune résolution praticable). Les deux ont été exercés sur du code réel, et chacun a
+   > éliminé un premier jet écrit de bonne foi.
 2. Candidats pour W (B2) : paquets d'ondes lagrangiens, équation d'onde 2D sur pyramide GPU,
    Boussinesq faible dispersion, hybride.
 3. ~~Format exact de `CondensedState` → ADR à écrire (persistance hors caméra).~~

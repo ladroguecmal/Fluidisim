@@ -86,6 +86,57 @@ validité tient au rapport `λ_cut/dx`.
 | 0,10 m (bateau) | 30 → 7,5 pts | 40 → 10 pts | 60 → 15 pts | 100 → 25 pts |
 | 0,05 m (impact) | 60 → 15 pts | 80 → 20 pts | 120 → 30 pts | 200 → 50 pts |
 
+### 3.1 bis — La borne haute est ROUVERTE *(B-S26, reporté en S35)*
+
+> *Une **seconde voie** rouvre la même borne, indépendamment : la dissipation produit déjà la
+> décroissance que l'éponge devait imposer (ADR-037), de sorte que la bande de bord perd l'une de
+> ses deux raisons d'exister. Voir [`ADR-043`](../adr/ADR-043-deux-lignees-ont-ecrit-le-meme-solveur.md) §4.*
+
+Le §3.1 ci-dessus tient `L_s = λ_cut/2` pour une contrainte **dure**, et en tire `λ_cut ≤ 3 m`. Cette
+largeur vient d'`ADR-005 §2`. **Elle a été mesurée en B-S26, et la mesure ne trouve pas sa trace** :
+à `σ_max` proportionnel à `c/L_s`, le coefficient de réflexion ne bouge pas quand l'éponge passe
+d'une longueur d'onde entière à un huitième. Ce qui la borne est `σ_max·dt < 1`, soit
+**`L_s ≳ 5·dx`** — la maille et le pas de temps.
+
+| | ADR-005 §2 | mesuré *(B-S26)* |
+|---|---|---|
+| domaine d'impact, `dx = 0,05 m` | `L_s = λ_cut/2 = 2 m` | `L_s ≈ 0,25 m` — **8× plus étroit** |
+| intérieur utile d'un domaine de 6 m | 2 m sur 6 | **5,5 m sur 6** |
+
+**Si cela tient hors de l'eau peu profonde, l'éponge cesse d'être ce qui plafonne `λ_cut`** — et le
+§3.3 ci-dessous, « les deux bornes ne se croisent pas », perd l'une de ses deux bornes.
+
+**Ne pas s'en servir tel quel.** Le solveur de B-S26 est non dispersif ; une éponge d'eau profonde doit
+absorber une **bande** de célérités, et la règle `λ/2` protégeait peut-être exactement de cela.
+**C'est le premier essai à ajouter au banc B2**, et il précède désormais tous les autres, puisqu'il
+décide de la borne dont tout le reste dépend. Voir
+[ADR-042](../adr/ADR-042-l-eponge-mesuree-et-la-borne-de-lambda-cut-rouverte.md) §6.
+
+### 3.2 bis — Une troisième borne, mesurée en B-S24 : la dissipation *(reporté en S35)*
+
+Les deux bornes ci-dessus sont géométriques : l'éponge occupe de la place, la décimation demande des
+points. **Une troisième vient d'être mesurée, et elle est d'une autre nature** — elle ne dit pas
+combien de mailles tiennent dans un domaine, elle dit **combien il en faut pour qu'une onde y
+survive**.
+
+Sur une seiche de 40 m de longueur d'onde, avec le solveur de B-S22-B-S24 ([ADR-040](../adr/ADR-040-l-ordre-deux-et-ce-qu-il-deplace.md) §5), le
+seuil de C03 — une demi-vie d'amplitude supérieure à 15 périodes — est franchi vers :
+
+| Schéma | mailles par longueur d'onde | `dx` pour `λ = 40 m` |
+|---|---|---|
+| ordre un | **≈ 250** | 16 cm |
+| ordre deux (MUSCL + RK2) | **≈ 55** | 75 cm |
+
+**Ce chiffre borne `λ_cut` par le bas d'une façon que §3.2 ne voyait pas.** La décimation demandait
+un nombre de points pour que l'*interpolation* du fond reste valide ; la dissipation en demande un
+pour que l'*onde* ne s'éteigne pas. Les deux se lisent en points par longueur d'onde, mais l'une
+protège une économie et **l'autre protège le résultat**.
+
+Deux réserves, toutes deux dans le document qui produit le chiffre : le solveur est **1D**, et la
+mesure est faite sur `δ`, pas sur `W`. Elle n'en fixe donc pas `λ_cut` — mais elle donne à B2 une
+grandeur qu'aucune des deux bornes précédentes ne contenait, et **elle indique que l'ordre du schéma
+pèse sur la maille utile plus lourd que tout le reste**.
+
 ### 3.3 Les deux bornes ne se croisent pas — et ce que cela veut dire
 
 Le déferlement voudrait `λ_cut ≈ 10 m` pour que la décimation ×4 reste confortable ; l'impact exige
