@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-06
-Session en cours : —
+Session en cours : S34 — audit des garde-fous : chacun doit être vu refuser
 Dernière session : S33 — 2026-09-06 — la conclusion la moins étayée devient la mieux mesurée
-Session suivante : S34 — relire les garde-fous du harnais (S33-2) *(recommandé)*, ou C24 (S31-2), ou H2
+Session suivante : S35 — C24 (S31-2) ou H2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :

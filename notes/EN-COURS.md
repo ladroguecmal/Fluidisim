@@ -59,135 +59,57 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S33
-État             : terminée
+Session          : S34
+État             : en cours
 Battement        : 2026-09-06
-Objectif         : Mesurer un phénomène entretenu — la conclusion la moins étayée
+Objectif         : Audit des garde-fous — chacun doit être vu refuser
 ```
 
 ### Plan
 
-Action **S32-2**, angle mort **A142**. ADR-037 §2.1 conclut que la dissipation numérique **produit
-gratuitement** la décroissance spatiale qu'ADR-001 exige de δ — 25,6 m pour le proche-coque, dans la
-portée voulue d'un domaine. C'est la conclusion la plus rassurante du corpus récent, et **elle est
-dérivée, jamais mesurée**.
+Action **S33-2**, angle mort **A144** : *un garde-fou peut porter sur la bonne idée et la mauvaise
+condition*. Le cas qui l'a produit : un contrôle de réflexion qui vérifiait qu'on mesurait **derrière
+le front** et non que le front **n'avait jamais atteint le mur**. L'idée était juste, la condition
+non — et le contrôle déclarait saine une fenêtre polluée.
 
-Elle suppose qu'une source constante et une dissipation exponentielle en temps produisent une
-décroissance exponentielle en espace. **C'est vrai en régime linéaire, et le solveur ne l'est pas.**
-Toutes les mesures de S25 à S32 portent sur des perturbations **relâchées** ; aucune sur une source
-**entretenue**.
+**Un garde-fou en qui l'on a confiance est plus dangereux qu'aucun garde-fou.** Un montage sans
+contrôle est réexaminé à chaque usage ; un montage qui en a un ne l'est plus.
 
-**La prédiction, et elle se simplifie une fois de plus.** Une onde émise en continu met `x/c` pour
-atteindre la distance `x`, et la demi-vie temporelle vaut `t½ = K·(λ/dx)·(λ/c)`. Donc :
+> **Le critère de cette session, en une ligne : un garde-fou qu'on n'a jamais vu déclencher n'a pas
+> été testé.** Le test d'un garde-fou est **le cas qu'il doit refuser**, jamais le cas nominal —
+> celui-ci passe de toute façon.
 
-> ```
-> A(x) = A₀ · 2^(−x/L½)        avec       L½ = c·t½ = K·λ²/dx
-> ```
+**Douze garde-fous recensés**, entre `delta.rs` et `physics.rs` : le pas de temps sur domaine sec,
+le bornage de `ν`, le plancher d'arrondi de la convergence, le filtre de contamination d'oracle, le
+bornage de l'ordre grossier, le refus de mesure de seiche, la détection d'extrema, l'interpolation
+de front, la référence nulle d'un `Cas`, le contrôle de réflexion, et les deux refus de longueur
+minimale de série.
 
-**`c` disparaît** — troisième annulation du projet, après celle de `λ`, `c` et `T` dans la loi de
-dissipation (S25) et celle de `g` dans le critère de transitoire (S32).
+*Thèse déclarée : au moins un de ces douze masque un cas réel plutôt que de le refuser.* Le plus
+suspect est le `clamp(0,3 ; 3,0)` sur l'ordre grossier estimé — **S24 a mesuré des ordres
+négatifs**, signature du régime pré-asymptotique, et ce bornage les remonterait silencieusement à
+0,3. Ce serait la même faute que le bornage de `ν` à 0,99, corrigé en S29 : *un bornage posé par
+prudence sur un instrument l'empêche de mesurer* (**L99**).
 
-*Thèse déclarée : la décroissance sera exponentielle, et `L½` sera plus courte que prédit.* Le
-régime établi contient des harmoniques que le batteur engendre par non-linéarité, et elles meurent
-en `n²` (ADR-034) — elles ne devraient donc pas fausser l'enveloppe du fondamental. Mais rien ne le
-garantit, et c'est précisément ce qu'A142 reproche à la dérivation.
-
-- [x] **P1** — plan, jeton.
-- [x] **P2** — le **batteur oscillant** : `ParoiMobile` reçoit une période. Vérifier qu'il produit
-      bien un train établi avant de mesurer quoi que ce soit.
-- [x] **P3** — la mesure d'**enveloppe spatiale** : `max|η|` sur une période, en chaque `x`, en
-      régime établi et **avant tout retour de réflexion** — le domaine doit être assez long, et il
-      faut le vérifier plutôt que le supposer (A133).
-- [x] **P4** — exécuter, ajuster `ln A` contre `x`, comparer `L½` mesurée à `K·λ²/dx`. Trois
-      longueurs d'onde au moins : une loi qui ne tiendrait qu'à un `λ` ne serait pas une loi.
-- [x] **P5** — ce que le résultat fait à ADR-037 §2.1 : confirmation, correction, ou réfutation.
-- [x] **P6** — note datée dans ADR-037, ou ADR-038 si la conclusion change.
-- [x] **P7** — répercussions : index, angles morts, actions, décomptes.
-- [x] **P8** — rituel de fin (`REPRISE.md` §6).
+- [ ] **P1** — plan, jeton.
+- [ ] **P2** — l'inventaire, et pour chacun **le cas qu'il doit refuser**, écrit avant tout code.
+      Un garde-fou dont on ne sait pas énoncer le cas refusé n'a pas de raison d'être.
+- [ ] **P3** — écrire les tests de **déclenchement** : chaque garde-fou doit être vu refuser.
+- [ ] **P4** — exécuter, et classer : *se déclenche correctement* · *ne se déclenche jamais* ·
+      *se déclenche sur la mauvaise condition* · *masque au lieu de refuser*.
+- [ ] **P5** — corriger ce qui doit l'être, et **mesurer que la correction change quelque chose**.
+- [ ] **P6** — registre `AUDIT-GARDE-FOUS-S34`.
+- [ ] **P7** — répercussions : index, angles morts, actions, décomptes.
+- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
-**Ce que S32 laisse et qui commande cette session.**
+**Ce que S33 laisse et qui commande cette session.**
 
-- **Règle d'aiguillage** : toute question sur l'appartenance d'un phénomène à une couche se règle
-  dans **ADR-001 §2**, et nulle part ailleurs (A143).
-- **ADR-036 §3 est sans objet** — il porte sur le sillage, qui appartient à W. Ne pas citer sa
-  table des distances.
-- **`K = 0,06385`** est le coefficient de demi-vie à `ν = 0,45` ; `K = ln2/(2π²(1−ν))`.
+- **Le `R²` est une sonde générique** : il a rattrapé le défaut de S33 sans avoir été écrit pour ça
+  (L116, action S33-3). À garder à l'esprit — certains garde-fous sont peut-être remplaçables par
+  une sonde plus générale.
+- **A142 est levé dans le régime linéaire seulement** — ne pas citer sans la réserve.
 - **C04 en échec, `C01-jet` rouge, C08 sans verdict** : trois décisions.
 
 **Branche.** `claude/s22-suite`. `master` s'arrête à S17 (A107).
-
-#### P3-P4 — A142 est levé, et le garde-fou a été rattrapé par une autre mesure
-
-**La conclusion d'ADR-037 §2.1 est confirmée**, et plus nettement que la thèse ne l'espérait :
-
-| `λ` | `L½` mesurée | `L½` prédite | écart | `R²` |
-|---|---|---|---|---|
-| 10 m | 27,03 m | 25,54 m | +5,9 % | 0,9990 |
-| 14 m | 51,40 m | 50,06 m | +2,7 % | 0,9990 |
-| 20 m | 101,81 m | 102,15 m | **−0,3 %** | **0,9999** |
-| 28 m | 195,34 m | 200,22 m | −2,4 % | **1,0000** |
-
-> **La décroissance spatiale d'un train entretenu est exponentielle pure** — `R²` atteint 1,0000 —
-> **et sa longueur de demi-décroissance suit `L½ = K·λ²/dx`** sur un facteur 8, de 25 à 200 m.
-
-**La thèse annonçait « `L½` sera plus courte que prédit ». Elle est fausse** : l'écart change de
-signe avec `λ` (+5,9 % à 10 m, −2,4 % à 28 m), ce qui est la signature des termes d'ordre supérieur
-en `k·dx`, non d'un biais systématique.
-
-**A142 est levé — dans le régime linéaire.** L'amplitude du batteur est faible (0,05 m/s), donc
-`a/h ≪ 1 %` : la mesure valide la dérivation **là où elle était supposée valide** (A127). Elle ne dit
-rien du régime non linéaire, et c'est exactement ce qu'il faut dire.
-
-#### Le garde-fou d'atteignabilité était incomplet, et j'y suis retombé
-
-Le premier passage donnait, pour `λ = 20 m` : `L½ = 105,82`, écart +3,6 %, et **`R² = 0,487`** là où
-les autres cas donnaient 0,999.
-
-**Le front était à 280 m dans un domaine de 200 m.** L'onde avait atteint le mur, s'était réfléchie,
-et revenait polluer la fenêtre — que mon contrôle déclarait saine, puisqu'il vérifiait qu'on mesurait
-*derrière le front* et non que le front *n'avait jamais atteint le mur*.
-
-> **C'est A133 — un montage incapable — commis dans la fonction écrite pour l'éviter**, et dans la
-> session qui l'invoquait au plan. Le contrôle portait sur la bonne idée et sur la mauvaise
-> condition.
->
-> **Ce qui l'a rattrapé n'est pas le garde-fou, c'est le `R²`** — une seconde mesure, de nature
-> différente, qui n'était pas là pour ça. Un ajustement exponentiel dont le `R²` s'effondre dit que
-> la forme supposée est fausse, quelle qu'en soit la raison.
-
-Corrigé : `front > longueur_m` rejette désormais la mesure, et les domaines sont dimensionnés pour
-que le front n'atteigne jamais le mur.
-
-#### P5-P6 — une note datée suffit, et c'est le bon geste
-
-ADR-037 §2.1 est **confirmé**, pas corrigé : la conclusion ne change pas, son statut si. Elle passe
-de *dérivée* à *mesurée*, et c'est exactement ce qu'une note datée doit porter — un ADR ne se
-réécrit pas, et il n'y avait pas de décision nouvelle à prendre.
-
-**Ce que la note dit, et qui ne doit pas se perdre** : A142 est levé **dans le régime linéaire**.
-L'amplitude du batteur vaut 0,05 m/s, donc `a/h ≪ 1 %` — la mesure valide la dérivation là où elle
-était supposée valide (A127), et ne dit **rien** du régime non linéaire. Écrire « A142 levé » sans
-cette réserve rendrait la note plus forte que la mesure.
-
-#### État à la fin de S33
-
-`cargo test` : **34 tests**. `water-harness check` : 2 scénarios, 0 échec, hashs **inchangés**.
-`water-harness physics` : 1 échec (C04, voulu), 3 témoins, 5 grandeurs sans verdict (C08). Jeton
-**libéré**.
-
-**Ce que S34 doit savoir avant de commencer, et qui n'est pas ailleurs :**
-
-- **A144 est la trouvaille à exploiter** : un garde-fou peut porter sur la bonne idée et la mauvaise
-  condition, et il est alors **plus dangereux qu'aucun garde-fou** — on lui fait confiance. S29 a
-  audité les *assertions* ; les **contrôles de validité de montage** n'ont jamais été audités, et il
-  en existe maintenant plusieurs (fenêtre de mesure, plancher d'arrondi, filtre de contamination
-  d'oracle, bornes de `avec_cfl`, seuil de front). C'est la session recommandée.
-- **Le test d'un garde-fou est le cas qu'il doit *refuser***, jamais le cas nominal. Un garde-fou
-  qu'on n'a jamais vu déclencher n'a pas été testé.
-- **Publier un `R²` avec chaque régression** : c'est lui qui a rattrapé le défaut de S33, sans avoir
-  été écrit pour ça (S33-3).
-- **A142 est levé dans le régime linéaire seulement.** Ne pas citer « la décroissance spatiale est
-  vérifiée » sans la réserve — `a/h ≪ 1 %`, et A127 dit que la loi est fausse à 5 %.
-- **C04 en échec, `C01-jet` rouge, C08 sans verdict** : trois décisions, pas trois régressions.
