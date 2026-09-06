@@ -88,7 +88,7 @@ provenance (`H_SEC = 10⁻⁶` est posé sans justification, action **S22-4**).
 - [x] **P3** — la solution de Ritter comme référence, et **la définition du front** : à seuil `ε`
       dans le champ, comparée à la position où Ritter vaut `ε` — et non à `2√(gh₀)·t`. Comparer une
       mesure à seuil contre une référence sans seuil mesurerait la définition, pas le schéma.
-- [ ] **P4** — exécuter, constater, mesurer la sensibilité de la position du front à `ε`.
+- [x] **P4** — exécuter, constater, mesurer la sensibilité de la position du front à `ε`.
 - [ ] **P5** — **S22-4** : donner une provenance à `H_SEC`, ou le remplacer. C04 est le cas qui le
       met en jeu ; le laisser posé au jugé après l'avoir traversé serait la dette exacte que
       décrit A106.
@@ -105,3 +105,45 @@ prérequis de cette session. Elle le redevient pour C03.
 
 **Branche.** `claude/s22-suite`, issue de `a6cfe6f`. `master` s'arrête à S17 et diverge depuis
 `8fe1503` (S07) — voir A107. Vérifié à l'ouverture de S23 : rien n'a bougé ailleurs.
+
+#### P4 — la thèse tenait des deux mains, et la seconde moitié est la plus intéressante
+
+**Le solveur est bon partout, sauf au front.** À `dx = 0,05 m`, `t = 2 s` :
+
+| Grandeur | Mesuré | Ritter | Écart | Tolérance |
+|---|---|---|---|---|
+| `h` au droit du barrage | 0,45466 m | 0,44444 m | **2,30 %** | 3 % |
+| `u` au droit du barrage | 2,0323 m/s | 2,0881 m/s | **2,67 %** | 3 % |
+| **erreur L1 sur tout le domaine** | — | — | **0,82 %** | 3 % |
+| **front, à `ε = 1 mm`** | 10,013 m | 11,934 m | **−16,09 %** | 3 % |
+
+L'erreur globale vaut **0,8 %** et l'erreur au front **16 %** : un facteur vingt. Le défaut est
+entièrement **local au front de mouillage** — ce que C04 est précisément fait pour attraper, et ce
+qu'aucune des trois autres mesures n'aurait révélé seule.
+
+**Balayage seuil × résolution** — `cargo test -p water-core retard_du_front -- --nocapture` :
+
+```
+nx=200   dx=0,2000  ε=1e-4 : −19,91 %   ε=1e-3 : −21,11 %   ε=1e-2 : −17,92 %
+nx=400   dx=0,1000  ε=1e-4 : −19,13 %   ε=1e-3 : −19,34 %   ε=1e-2 : −14,55 %
+nx=800   dx=0,0500  ε=1e-4 : −16,58 %   ε=1e-3 : −16,09 %   ε=1e-2 : −10,33 %
+nx=1600  dx=0,0250  ε=1e-4 : −13,48 %   ε=1e-3 : −12,54 %   ε=1e-2 :  −6,39 %
+nx=3200  dx=0,0125  ε=1e-4 : −10,83 %   ε=1e-3 :  −9,46 %   ε=1e-2 :  −3,46 %
+```
+
+**Trois lectures, et la troisième est celle qui compte.**
+
+1. **Le front est toujours en retard, jamais en avance.** C'est cohérent : dépasser `2c₀·t`
+   violerait la vitesse de propagation maximale du problème. Le test l'assure explicitement.
+2. **La convergence est là, mais elle est très lente.** À `ε = 10⁻³`, seize fois plus de cellules
+   font passer l'erreur de 21 % à 9,5 % — un facteur 2,2 pour un facteur 16. L'ordre apparent est
+   d'environ **0,3**, alors que le schéma est d'ordre 1 ailleurs et que l'erreur L1 globale, elle,
+   se comporte normalement. **Le front a son propre ordre de convergence, et il est mauvais.**
+3. **Le retard dépend du seuil**, et pas dans le sens qu'on croirait : il est *plus faible* à
+   `ε = 10⁻²` qu'à `ε = 10⁻⁴`. C'est la signature d'un front **étalé** : le profil numérique
+   rejoint Ritter dans son corps et traîne une queue mince. Mesurer haut sur le profil donne raison
+   au solveur, mesurer bas lui donne tort. **Le choix du seuil ne déplace donc pas seulement la
+   référence — il change le verdict**, et rien dans l'énoncé de C04 ne dit lequel prendre.
+
+**Ce que le témoin montre.** Le front mesuré comparé à `2c₀·t` donne −20,07 %, contre −16,09 % au
+même seuil. **Quatre points d'écart sont de la pure convention de mesure** — un quart du verdict.

@@ -715,6 +715,33 @@ mod tests {
         assert_eq!(d.h(d.nx() - 1), 0.0, "le bord aval a bougé : le domaine est trop court");
     }
 
+    /// Le retard du front de C04, en fonction du seuil de détection et de la finesse de grille.
+    ///
+    /// Balayage imprimé avec `cargo test -- --nocapture`. L'assertion ne porte que sur le fait que
+    /// le front est **en retard**, jamais en avance : un front qui dépasserait `2c₀·t` violerait la
+    /// vitesse de propagation maximale du problème, ce qui serait un défaut d'une autre nature.
+    #[test]
+    fn retard_du_front_de_c04() {
+        let g = G as f64;
+        let c0 = (g * 1.0f64).sqrt();
+        let t = 2.0f64;
+        for nx in [200usize, 400, 800, 1600, 3200] {
+            let mut d = solveur(Bassin { nx, ..Bassin::c04() });
+            d.avancer_equilibre(t);
+            print!("nx={nx:<5} dx={:.4} m ", d.dx());
+            for eps in [1.0e-4f64, 1.0e-3, 1.0e-2] {
+                let mesure = d.front(eps as f32).unwrap_or(f32::NAN) as f64;
+                let refer = t * (2.0 * c0 - 3.0 * (g * eps).sqrt());
+                print!(" | ε={eps:<7}: {mesure:7.4} / {refer:7.4} = {:6.2} %", (mesure - refer) / refer * 100.0);
+                assert!(
+                    mesure <= 2.0 * c0 * t + 1.0e-6,
+                    "front au-delà de 2c₀·t : vitesse de propagation violée"
+                );
+            }
+            println!();
+        }
+    }
+
     /// I-06 : après `seal()`, la configuration échoue au lieu d'allouer en silence.
     #[test]
     fn allocation_refusee_apres_seal() {
