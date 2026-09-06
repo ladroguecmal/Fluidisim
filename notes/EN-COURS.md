@@ -92,8 +92,8 @@ régime établi contient des harmoniques que le batteur engendre par non-linéar
 en `n²` (ADR-034) — elles ne devraient donc pas fausser l'enveloppe du fondamental. Mais rien ne le
 garantit, et c'est précisément ce qu'A142 reproche à la dérivation.
 
-- [ ] **P1** — plan, jeton.
-- [ ] **P2** — le **batteur oscillant** : `ParoiMobile` reçoit une période. Vérifier qu'il produit
+- [x] **P1** — plan, jeton.
+- [x] **P2** — le **batteur oscillant** : `ParoiMobile` reçoit une période. Vérifier qu'il produit
       bien un train établi avant de mesurer quoi que ce soit.
 - [ ] **P3** — la mesure d'**enveloppe spatiale** : `max|η|` sur une période, en chaque `x`, en
       régime établi et **avant tout retour de réflexion** — le domaine doit être assez long, et il

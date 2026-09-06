@@ -275,7 +275,28 @@ impl Bassin {
 #[derive(Clone, Copy, Debug)]
 pub struct ParoiMobile {
     /// Vitesse de la paroi, en m/s. Positive vers la droite — elle pousse l'eau.
+    ///
+    /// Si `periode_s > 0`, c'est l'**amplitude** de la vitesse : `u(t) = u_m_s · sin(2πt/T)`.
     pub u_m_s: f32,
+    /// Période d'oscillation, en secondes. `0` = vitesse constante, le montage de C23.
+    ///
+    /// Non nulle, la paroi devient un **batteur** : une source **entretenue**, qui émet un train
+    /// d'ondes continu. C'est le montage qu'A142 réclame — toutes les mesures antérieures portent
+    /// sur des perturbations **relâchées**, et la décroissance spatiale d'un phénomène entretenu
+    /// n'avait jamais été observée.
+    pub periode_s: f32,
+}
+
+impl ParoiMobile {
+    /// Vitesse de la paroi à l'instant `t`.
+    pub fn vitesse(&self, t_s: f64) -> f32 {
+        if self.periode_s <= 0.0 {
+            self.u_m_s
+        } else {
+            let phase = core::f64::consts::TAU * t_s / self.periode_s as f64;
+            self.u_m_s * phase.sin() as f32
+        }
+    }
 }
 
 /// Solveur δ 1D. Les tableaux portent deux cellules fantômes, une à chaque bord.
@@ -439,9 +460,22 @@ impl Delta1D {
         self
     }
 
-    /// Vitesse de la paroi, ou zéro s'il n'y en a pas.
+    /// Vitesse de la paroi **à l'instant courant**, ou zéro s'il n'y en a pas.
     pub fn u_paroi(&self) -> f32 {
-        self.paroi.map(|p| p.u_m_s).unwrap_or(0.0)
+        self.paroi.map(|p| p.vitesse(self.t_s)).unwrap_or(0.0)
+    }
+
+    /// Élévation maximale sur une fenêtre spatiale, en valeur absolue. Sert à relever l'enveloppe
+    /// d'un train établi.
+    pub fn eta_max_abs(&self, i0: usize, i1: usize) -> f64 {
+        let mut m = 0.0f64;
+        for i in i0..i1.min(self.nx) {
+            let v = (self.eta(i) as f64).abs();
+            if v.is_finite() && v > m {
+                m = v;
+            }
+        }
+        m
     }
 
     /// Change le seuil de cellule sèche. Réservé aux mesures de sensibilité du harnais.
@@ -666,7 +700,7 @@ impl Delta1D {
         //
         // C'est exact, et c'est ce qui fait que la paroi **pousse réellement l'eau** : sans ce
         // terme, elle glisserait sans rien déplacer, et C23 ne mesurerait rien.
-        let u_p = self.paroi.map(|p| p.u_m_s).unwrap_or(0.0);
+        let u_p = self.paroi.map(|p| p.vitesse(self.t_s)).unwrap_or(0.0);
         let u1 = if self.h[1] > self.h_sec {
             self.hu[1] / self.h[1]
         } else {
@@ -1146,7 +1180,7 @@ mod tests {
         fixe.avancer_equilibre(0.5);
         let u_fixe = fixe.max_abs_u();
 
-        let mut mobile = solveur(bassin).avec_paroi(ParoiMobile { u_m_s: 1.0 });
+        let mut mobile = solveur(bassin).avec_paroi(ParoiMobile { u_m_s: 1.0, periode_s: 0.0 });
         mobile.avancer_equilibre(0.5);
 
         assert!(
@@ -1164,6 +1198,54 @@ mod tests {
             "le batteur injecte du volume : {} contre {}",
             mobile.volume(),
             fixe.volume()
+        );
+    }
+
+    /// Le batteur produit un train **établi**, et le front avance à la célérité attendue.
+    ///
+    /// Contrôle préalable à toute mesure d'enveloppe : un batteur qui n'émettrait pas, ou dont le
+    /// front n'irait pas à `√(g·h)`, rendrait la mesure ininterprétable — et elle aurait l'air
+    /// d'un résultat.
+    #[test]
+    fn le_batteur_produit_un_train_etabli() {
+        let c = (G * 2.0f32).sqrt();
+        let lambda = 10.0f32;
+        let periode = lambda / c;
+
+        let bassin = Bassin {
+            nx: 800,
+            longueur_m: 200.0,
+            origine_m: 0.0,
+            profondeur_gauche_m: 2.0,
+            pente: 0.0,
+            eta0_m: 0.0,
+            etat_initial: EtatInitial::Repos,
+        };
+        let mut d = solveur(bassin).avec_paroi(ParoiMobile {
+            u_m_s: 0.2,
+            periode_s: periode,
+        });
+
+        let duree = 10.0 * periode as f64;
+        d.avancer_equilibre(duree);
+
+        // Le front a parcouru c·t ; l'onde doit être présente bien avant, et absente bien après.
+        let front = c as f64 * duree;
+        let i = |x: f64| ((x / d.dx() as f64) as usize).min(d.nx() - 1);
+
+        assert!(
+            d.eta_max_abs(i(5.0), i(15.0)) > 1.0e-3,
+            "le batteur doit avoir émis un train à 10 m ({} m)",
+            d.eta_max_abs(i(5.0), i(15.0))
+        );
+        assert!(
+            d.eta_max_abs(i(front + 20.0), d.nx()) < 1.0e-5,
+            "rien ne doit avoir dépassé le front à {front:.1} m"
+        );
+        // Le front est bien à `c·t` et non ailleurs : la célérité du train est celle du modèle.
+        assert!(
+            d.eta_max_abs(i(front - 15.0), i(front - 5.0)) > 1.0e-5,
+            "le front doit être arrivé vers {front:.1} m"
         );
     }
 

@@ -1725,7 +1725,7 @@ pub fn c23_courant_paroi_mobile(
     for &u_p in vitesses {
         let mut mesure = |def: Definition| -> (f64, f64, bool) {
             let mut d = match Delta1D::configure(host, montage) {
-                Ok(d) => d.avec_paroi(ParoiMobile { u_m_s: u_p }),
+                Ok(d) => d.avec_paroi(ParoiMobile { u_m_s: u_p, periode_s: 0.0 }),
                 Err(_) => return (f64::NAN, f64::NAN, true),
             };
             let (u_max_initial, _) = d.u_max(def);
