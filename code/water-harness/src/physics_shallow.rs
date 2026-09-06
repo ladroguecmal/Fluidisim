@@ -549,6 +549,29 @@ fn periode_moyenne(zeros: &[f64]) -> Option<f64> {
     Some((zeros[zeros.len() - 1] - zeros[0]) / (zeros.len() - 1) as f64)
 }
 
+/// **La référence *ponctuelle* de l'erreur `L¹`** — celle qu'utilisait la lignée B jusqu'en
+/// **B-S24**, conservée ici pour un usage unique : montrer pourquoi le `p` publié dans `ADR-040`
+/// n'est plus celui que le code rend.
+///
+/// B-S25 l'a remplacée par [`ritter_h_moyenne`], la **moyenne sur la cellule**, ce qui est
+/// correct : un schéma de volumes finis porte des moyennes de cellule, et les confronter à une
+/// valeur au centre ajoute une erreur d'ordre un qui n'est pas celle du schéma. **La correction
+/// est bonne. Ce qu'elle a déplacé sans le dire, c'est `C08-p`.**
+///
+/// Elle n'est appelée que par le test qui établit ce point. Ne pas s'en servir pour mesurer quoi
+/// que ce soit d'autre.
+#[cfg(test)]
+fn erreur_l1_ritter_ponctuelle(n: usize, dx: f64, h0: f64, t_fin: f64, sc: Schema) -> f64 {
+    let mut d = barrage(n, dx, h0, sc);
+    let x_barrage = d.x(n / 2) - 0.5 * dx;
+    d.avancer_jusqu_a(t_fin, 0.45);
+    let mut e = 0.0;
+    for i in 0..d.cellules() {
+        e += (d.hauteur(i) - ritter_h(d.x(i) - x_barrage, t_fin, h0)).abs() * dx;
+    }
+    e
+}
+
 /// **Demi-vie d'amplitude d'une seiche, en périodes** — fonction pure, exerçable seule.
 ///
 /// Extraite en S36 de la fermeture qui vivait dans [`c03_seiche`]. Le motif est celui de **L118** :
@@ -759,6 +782,195 @@ pub fn c03_seiche(n: usize, dx: f64, h0: f64, eta_bord: f64, periodes: f64) -> V
     ]
 }
 
+/// **C08 — convergence sous raffinement.**
+///
+/// `p = log₂( |e_h − e_{h/2}| / |e_{h/2} − e_{h/4}| )`, assertion `p > 0,8`.
+///
+/// # Pourquoi ce cas existe, et ce qu'il remplace
+///
+/// `CAS-CANONIQUES` est direct : *« un solveur qui ne converge pas ne resout pas l'equation qu'on
+/// croit : il est **faux**, pas imprecis »*. B-S22 a deduit l'ordre a la main, deux fois, en regardant
+/// des colonnes de chiffres et en calculant des rapports de tete. C08 est l'instrument qui le
+/// mesure, et un instrument vaut mieux qu'un coup d'œil repete.
+///
+/// # Le cas support, et ce que ce choix impose
+///
+/// Le document propose C02, C04 ou C09. **Seul C04 est disponible** : C02 demande de coupler `δ` a
+/// `B`, C09 demande `V`. Or C04 porte une **discontinuite** — un front sec — et l'ordre observe sur
+/// une solution discontinue est structurellement inferieur a l'ordre du schema sur une solution
+/// lisse. Le chiffre rendu ici est donc un **minorant** de l'ordre du schema, pas sa mesure.
+///
+/// La mesure sur solution lisse existe pourtant, et elle vient d'ailleurs : la demi-vie de C03 double
+/// exactement a chaque division par deux de la maille, ce qui donne `p ≈ 0,95` sur une seiche bien
+/// resolue. Deux observables, deux regimes ; les confondre serait une erreur.
+///
+/// # La norme fait partie de la mesure
+///
+/// L'erreur est mesuree en `L¹` — l'integrale de `|h − h_exact|`. C'est la norme qui a un sens pour
+/// une solution discontinue : en `L∞`, l'erreur est celle de la maille qui chevauche le front, elle
+/// ne decroit pas, et l'ordre observe serait nul quel que soit le schema. **Le meme solveur peut
+/// donc avoir un ordre 1 et un ordre 0 selon la norme choisie, sans qu'aucune des deux mesures ne
+/// soit fausse.**
+pub fn c08_convergence(h0: f64, t_fin: f64) -> Vec<Cas> {
+    let grilles = [(400usize, 0.1f64), (800, 0.05), (1600, 0.025)];
+    let (mut p_richardson, mut p_direct2) = (f64::NAN, f64::NAN);
+
+    println!("  C08 — erreur L¹ contre Ritter a t = {t_fin:.0} s, par schema :");
+    println!("      schema            e(0,100)      e(0,050)      e(0,025)     p Richardson   p direct");
+    for sc in SCHEMAS {
+        let mut e = [0.0f64; 3];
+        for (k, (n, dx)) in grilles.into_iter().enumerate() {
+            e[k] = erreur_l1_ritter(n, dx, h0, t_fin, sc);
+        }
+        let pr = ((e[0] - e[1]).abs() / (e[1] - e[2]).abs()).log2();
+        // L'ordre direct, disponible seulement parce qu'une solution exacte existe. Il n'est pas
+        // l'assertion du cas : il sert a verifier que la forme de Richardson dit la meme chose.
+        let pd = (e[1] / e[2]).log2();
+        println!(
+            "      {:<14} {:>12.6e}  {:>12.6e}  {:>12.6e}      {pr:>6.3}       {pd:>6.3}",
+            sc.nom, e[0], e[1], e[2]
+        );
+        if sc.nom == SCHEMA_RETENU.nom {
+            p_richardson = pr;
+            p_direct2 = pd;
+        }
+    }
+
+    vec![
+        Cas {
+            id: "C08-p",
+            grandeur: format!("ordre par Richardson, Ritter (L¹), {}", SCHEMA_RETENU.nom),
+            mesure: p_richardson,
+            reference: 0.8,
+            tolerance_rel: if p_richardson >= 0.8 { 1e9 } else { 0.0 },
+            source: "CAS-CANONIQUES C08 — p > 0,8 (minorant, pas une egalite)",
+        },
+        Cas {
+            id: "C08-coherence",
+            grandeur: "ecart entre Richardson et l'ordre direct".into(),
+            mesure: (p_richardson - p_direct2).abs(),
+            reference: 0.0,
+            tolerance_rel: 0.25,
+            source: "diagnostic : deux estimateurs du meme ordre doivent se rejoindre",
+        },
+    ]
+}
+
+/// **C06 — invariance galileenne, version 1D.**
+///
+/// Une bosse gaussienne dans un canal plat, evoluee une fois dans un repere au repos et une fois
+/// dans un repere en translation uniforme a `u0`. La seconde est recalee de `u0·t` et comparee a la
+/// premiere.
+///
+/// # Ce que cette version ne teste pas, et il faut le lire avant le verdict
+///
+/// `CAS-CANONIQUES` decrit C06 avec **un impact sur un solide**, **trois reperes** dont un **en
+/// rotation**, et deux assertions dont l'une porte sur les **forces integrees sur le solide**. Rien
+/// de tout cela n'existe :
+///
+/// - **pas de solide**, donc pas de forces integrees — la seconde assertion du cas n'est pas
+///   evaluee ;
+/// - **pas de rotation**, donc `g_eff` et le referentiel non galileen d'ADR-002 et d'I-07 ne sont
+///   pas exerces — or `CAS-CANONIQUES` dit que c'est **la** raison d'etre du cas ;
+/// - **une dimension**, donc aucun biais directionnel de l'advection ne peut apparaitre — or c'est
+///   l'autre raison d'etre du cas.
+///
+/// **Ce qui reste est le tiers le plus facile.** Un vert ici ne dit rien des deux autres tiers, et
+/// le declarer sans cette phrase serait exactement A100 : une assertion vraie sur des donnees
+/// incapables de reveler ce qu'elle pretend couvrir. Le cas reste donc marque comme partiel dans la
+/// liste d'attente.
+///
+/// # Le decalage est entier, exprès
+///
+/// `u0·t / dx` vaut exactement 200 mailles. Comparer sans interpolation evite qu'une erreur
+/// d'interpolation — qui n'a rien a voir avec l'invariance — domine la mesure.
+///
+/// # « Ecart RMS < 2 % » : deux pour cent de quoi ?
+///
+/// Le document ne le dit pas, et le choix change le verdict d'un facteur vingt : rapportee a
+/// l'amplitude de la bosse (0,1 m) ou a la profondeur (2 m), la meme erreur absolue donne deux
+/// nombres tres differents. Les trois normalisations sont rapportees ; **l'assertion porte sur la
+/// plus severe**, celle par l'amplitude — c'est la seule qui mesure la deformation du signal plutot
+/// que sa petitesse devant le fond.
+pub fn c06_galilee(n: usize, dx: f64, h0: f64, amp: f64, u0: f64, t_fin: f64) -> Vec<Cas> {
+    let (x0, sigma) = (30.0f64, 2.0f64);
+    let construire = |vitesse: f64| -> Shallow1D {
+        let mut alloc = ArenaAllocator::with_capacity(1 << 23);
+        let jobs = SequentialJobs;
+        let sink = StderrSink;
+        let mut host = HostServices {
+            alloc: &mut alloc,
+            jobs: &jobs,
+            sink: &sink,
+        };
+        Shallow1D::configure_bosse(&mut host, n, dx, h0, amp, x0, sigma, vitesse)
+            .expect("configuration")
+    };
+
+    let mut repos = construire(0.0);
+    let mut mobile = construire(u0);
+    repos.avancer_jusqu_a(t_fin, 0.45);
+    mobile.avancer_jusqu_a(t_fin, 0.45);
+
+    let decalage = (u0 * t_fin / dx).round() as usize;
+    assert!(
+        ((u0 * t_fin / dx) - decalage as f64).abs() < 1e-9,
+        "le decalage doit tomber sur un nombre entier de mailles"
+    );
+
+    // Fenetre de comparaison : autour de la bosse, largement a l'ecart des murs.
+    let i_deb = ((x0 - 8.0 * sigma) / dx) as usize;
+    let i_fin = ((x0 + 8.0 * sigma) / dx) as usize;
+    let (mut somme, mut compte) = (0.0f64, 0u64);
+    let mut ecart_max = 0.0f64;
+    for i in i_deb..i_fin {
+        let d = mobile.hauteur(i + decalage) - repos.hauteur(i);
+        somme += d * d;
+        compte += 1;
+        if d.abs() > ecart_max {
+            ecart_max = d.abs();
+        }
+    }
+    let rms = (somme / compte as f64).sqrt();
+
+    println!("  C06 — invariance galileenne 1D, u0 = {u0:.1} m/s, t = {t_fin:.1} s :");
+    println!("      decalage exact                      = {decalage} mailles");
+    println!("      ecart RMS absolu                    = {rms:>12.6e} m");
+    println!("      ecart max absolu                    = {ecart_max:>12.6e} m");
+    println!(
+        "      rapporte a l'amplitude ({amp:.2} m)      = {:>8.4} %",
+        rms / amp * 100.0
+    );
+    println!(
+        "      rapporte a la profondeur ({h0:.2} m)     = {:>8.4} %",
+        rms / h0 * 100.0
+    );
+    println!(
+        "      rapporte a la hauteur totale ({:.2} m)  = {:>8.4} %",
+        h0 + amp,
+        rms / (h0 + amp) * 100.0
+    );
+
+    vec![
+        Cas {
+            id: "C06-RMS",
+            grandeur: "ecart RMS de hauteur, rapporte a l'amplitude".into(),
+            mesure: rms / amp,
+            reference: 0.0,
+            tolerance_rel: 0.02,
+            source: "CAS-CANONIQUES C06 — ecart RMS < 2 % ; normalisation choisie par ce module",
+        },
+        Cas {
+            id: "C06-max",
+            grandeur: "ecart maximal, rapporte a l'amplitude (diagnostic)".into(),
+            mesure: ecart_max / amp,
+            reference: 0.0,
+            tolerance_rel: 0.10,
+            source: "diagnostic : un RMS faible peut cacher un ecart local fort",
+        },
+    ]
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -912,6 +1124,83 @@ mod tests {
         println!("C03 à 100 mailles/λ — ordre 1 : {o1:.2} périodes (échec) | ordre 2 : {o2:.2} (succès)");
         assert!(o1 < 15.0, "l'ordre un doit rater le minorant de 15 ; mesuré {o1:.3}");
         assert!(o2 > 15.0, "l'ordre deux doit le franchir ; mesuré {o2:.3}");
+    }
+
+    /// **Le chiffre publié se reproduit-il ?** `ADR-040` annonce **`p` = 1,003** pour l'ordre mesuré
+    /// par Richardson sur Ritter, en norme `L¹`, avec MUSCL + RK2.
+    ///
+    /// C'est le chiffre qui fait passer C08 du **sans verdict** au **vert**. Sur le véhicule de
+    /// cette lignée, `ADR-032` conclut que *C08 n'est pas exécutable tel qu'énoncé* — les deux
+    /// résultats portent sur des schémas différents et ne se contredisent pas.
+    #[test]
+    fn c08_reproduit_l_ordre_1_003() {
+        let cas = c08_convergence(1.0, 2.0);
+        let p = cas.iter().find(|c| c.id == "C08-p").expect("C08-p");
+        println!("C08-p — publié : 1,003 | mesuré ici : {:.4}", p.mesure);
+        assert!(
+            (p.mesure - 1.003).abs() < 0.01,
+            "ADR-040 annonce p = 1,003 ; mesuré ici {:.4}",
+            p.mesure
+        );
+        for c in &cas {
+            assert!(c.passe(), "{} : {} = {:.6}", c.id, c.grandeur, c.mesure);
+        }
+    }
+
+    /// **`C08-p` ne se reproduit pas, et ce n'est pas une divergence entre les deux arbres.**
+    ///
+    /// `ADR-040` (B-S24) publie **`p` = 1,003**. Le code rend **0,9997**. La cause est datée : en
+    /// **B-S25**, la référence de l'erreur `L¹` est passée de la valeur **au centre de cellule** à la
+    /// **moyenne sur la cellule** ([`ritter_h_moyenne`]) — une correction juste, faite pour C04, et
+    /// **qui a déplacé `C08-p` sans que personne le note**.
+    ///
+    /// Ce test rejoue le calcul avec l'ancienne référence. S'il retrouve 1,003, l'explication tient
+    /// et le chiffre du corpus est simplement **périmé**, pas faux au moment où il a été écrit.
+    ///
+    /// > *Une correction se propage vers la prose qui l'explique, jamais vers les chiffres qu'elle
+    /// > périme.* C'est le même défaut que S07 et S10 ont trouvé sur les décomptes recopiés, sur un
+    /// > objet qu'on croyait à l'abri : une mesure.
+    #[test]
+    fn c08_l_ecart_au_p_publie_vient_du_changement_de_reference() {
+        let (h0, t_fin) = (1.0f64, 2.0f64);
+        let grilles = [(400usize, 0.1f64), (800, 0.05), (1600, 0.025)];
+        let p = |f: &dyn Fn(usize, f64) -> f64| -> f64 {
+            let e: Vec<f64> = grilles.iter().map(|&(n, dx)| f(n, dx)).collect();
+            ((e[0] - e[1]).abs() / (e[1] - e[2]).abs()).log2()
+        };
+        let p_ancien = p(&|n, dx| erreur_l1_ritter_ponctuelle(n, dx, h0, t_fin, SCHEMA_RETENU));
+        let p_actuel = p(&|n, dx| erreur_l1_ritter(n, dx, h0, t_fin, SCHEMA_RETENU));
+        println!(
+            "C08-p — publié 1,003 | référence ponctuelle (≤ B-S24) : {p_ancien:.4} | moyenne de cellule (≥ B-S25) : {p_actuel:.4}"
+        );
+        assert!(
+            (p_ancien - 1.003).abs() < 0.01,
+            "l'ancienne référence devrait retrouver 1,003 ; obtenu {p_ancien:.4}"
+        );
+        assert!(
+            (p_actuel - p_ancien).abs() > 1e-3,
+            "les deux références devraient donner des ordres distincts"
+        );
+    }
+
+    /// **C06 est partiel, et le reste.** `ADR-039` le classe **PARTIEL** : la translation 1D passe,
+    /// le solide et la rotation manquent. Ce test vérifie que ce qui est couvert passe — il ne
+    /// transforme pas un partiel en complet.
+    ///
+    /// C'est l'objet d'**A154** : *un cas partiel qui s'affiche vert ne se distingue pas d'un cas
+    /// complet*. Le partiel est porté par `cas_en_attente()` côté rapport ; ici, il l'est par ce
+    /// commentaire et par le nom du test.
+    #[test]
+    fn c06_la_translation_1d_passe_et_le_reste_manque() {
+        let cas = c06_galilee(2000, 0.05, 2.0, 0.1, 10.0, 1.0);
+        assert!(!cas.is_empty());
+        for c in &cas {
+            assert!(
+                c.passe(),
+                "{} : {} — mesuré {:.6}, référence {:.6}",
+                c.id, c.grandeur, c.mesure, c.reference
+            );
+        }
     }
 
     /// **L'exactitude du schéma équilibré ne dépend pas de la maille.** C'est la propriété que

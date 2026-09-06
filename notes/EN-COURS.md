@@ -101,7 +101,7 @@ montage, soit une divergence entre les deux arbres que personne n'a vue.
       tourne avant d'aller plus loin.
 - [x] **P3** — **C04** (Ritter) et ses références analytiques.
 - [x] **P4** — **C03** (seiche) et la mesure de période.
-- [ ] **P5** — **C08** (convergence) et **C06** (Galilée, partiel).
+- [x] **P5** — **C08** (convergence) et **C06** (Galilée, partiel).
 - [ ] **P6** — **C05** (absorption) — le seul des six que cette lignée n'a **jamais** exécuté.
 - [ ] **P7** — branchement dans `main.rs`, et le **double format d'écart** absolu / relatif
       (**A149**, action S35-2) — qui vaut pour les deux jeux de montages.
