@@ -89,11 +89,11 @@ périodes, donc `n²` fois plus vite en **secondes**.* Si la mesure confirme le 
 validée sur une prédiction qu'elle n'a pas servi à produire — c'est la seule forme de validation qui
 compte. Si elle infirme, la loi est un ajustement et non une dérivation.
 
-- [ ] **P1** — plan, jeton.
-- [ ] **P2** — **C22** dans `CAS-CANONIQUES` : montage, référence par oracle, assertions, et le
+- [x] **P1** — plan, jeton.
+- [x] **P2** — **C22** dans `CAS-CANONIQUES` : montage, référence par oracle, assertions, et le
       protocole de grilles qu'ADR-032 impose — cinq grilles, filtre de contamination, « non
       concluant » comme verdict.
-- [ ] **P3** — **amendement de C08** par note corrective datée : nommer la grandeur, exiger la
+- [x] **P3** — **amendement de C08** par note corrective datée : nommer la grandeur, exiger la
       régularité, exiger cinq grilles, distinguer trois verdicts.
 - [ ] **P4** — **S24-4** : `ordre_final()` reçoit la nature de la référence. Le triplet le plus fin
       est le meilleur avec une solution analytique et le pire avec un oracle ; la fonction choisit

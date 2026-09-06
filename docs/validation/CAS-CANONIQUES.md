@@ -56,6 +56,7 @@ les six premiers doivent passer avant qu'un solveur candidat soit admis en campa
 | C19 | Aller-retour de persistance | B, W, V | **binaire** | sauvegarde, reconnexion, arrivée en cours de partie |
 | C20 | Impact d'entrée dans l'eau | flottabilité | **analytique** | impulsion de slamming, durée d'impact |
 | C21 | Masse d'un compartiment avec et sans δ | V, δ | **binaire** | propriété de la masse, forçage V→δ |
+| C22 | Convergence sur solution régulière | δ | oracle / Richardson | l'ordre du schéma, séparé de celui du cas — *exécuté depuis S24, formalisé en S26* |
 
 ---
 
@@ -258,8 +259,30 @@ ce test ne passe pas.
 > Il faut un oracle **480 fois** plus fin que la grille la plus grossière pour cinq grilles saines.
 > **L'oracle est le banc.** Angle mort A114.
 >
-> **Proposition C22** — « convergence sur solution régulière » : le montage lisse existe dans le
-> code (`c08_regulier`) mais pas dans ce document. ADR-032 §6.4.
+> **C22 est écrit** — « convergence sur solution régulière », plus bas dans ce document *(S26)*.
+
+### Énoncé amendé — S26
+
+L'énoncé d'origine est conservé ci-dessus ; celui-ci le **remplace pour toute exécution**. Les
+quatre changements viennent chacun d'une mesure de S24, et non d'un avis.
+
+**Montage.** Le cas **C22** — une solution **régulière**. C08 ne s'exécute plus sur C02, C04 ou C09 :
+aucun des trois n'est régulier, et l'ordre y mesure la solution autant que le schéma.
+**Grandeur.** **Nommée explicitement** à chaque exécution. Un cas en produit plusieurs et elles ne
+convergent pas au même rythme — sur C04 : 0,73 en norme L1, 0,79 sur `h(0)`, 0,80 sur `u(0)`, 0,24
+sur la position du front.
+**Grilles.** **Cinq au moins**, en doublement. Trois ne donnent qu'un ordre, donc aucun moyen de
+constater que le régime asymptotique est atteint.
+**Référence.** Solution analytique si elle existe, sinon l'oracle — avec le **filtre de
+contamination** de C22 et la règle qui l'accompagne : *avec un oracle, le triplet le plus fin est le
+moins fiable*, l'inverse d'une solution analytique.
+**Verdicts.** **Trois, pas deux** : `ordre observé` · `plancher` (l'erreur est au bruit d'arrondi) ·
+`non concluant` (l'ordre bouge encore). Le décompte des non-concluants est imprimé.
+**Assertion.** `p > 0,8` **et** régime asymptotique atteint. Sur un cas **singulier**, l'assertion ne
+s'applique pas : la mesure y compare des candidats **entre eux**, sans seuil absolu.
+
+*Ce qui n'a pas changé : la phrase qui justifie le cas.* Un solveur qui ne converge pas est **faux**,
+pas imprécis — et aucune campagne de performance n'a de sens tant que ce test ne passe pas.
 
 ## C09 — Conservation de la masse et de l'énergie
 
@@ -486,3 +509,60 @@ Cette partie relève de la batterie `physics`, pas du mode `check`.
 
 **Rattachement** : banc **B3** (solveur δ, scénario 4 — compartiment inondé en référentiel accéléré),
 batterie `check` pour l'assertion principale.
+
+## C22 — Convergence sur solution régulière
+
+*(Ajouté en S26. Le montage existait dans le code depuis S24 — `Bassin::c08_regulier` — sans figurer
+ici, ce qui le rendait introuvable pour une session qui n'aurait pas lu `ADR-032`.)*
+
+**Montage.** Bosse gaussienne d'amplitude `a = 1 cm` et d'écart-type `σ = 1 m`, sur une nappe au
+repos de `h₀ = 1 m`, fond plat, domaine de 40 m, murs aux deux bords, `t = 1 s`.
+**Référence.** L'**oracle** — la même simulation à `nx = 51 200` — comparée par **moyenne
+conservative** : chaque cellule grossière contre la moyenne des `k` cellules fines qu'elle contient.
+Les grilles étant emboîtées par doublement, cette moyenne est exacte et n'introduit aucune
+interpolation.
+**Mesure.** Erreur L1 relative sur `h`, puis ordre observé par extrapolation de Richardson.
+**Assertion.** `p > 0,8`, **et** régime asymptotique atteint.
+
+### Pourquoi ce cas existe séparément de C08
+
+C08 mesure un ordre de convergence sur « un cas de C02, C04 ou C09 ». **Aucun des trois n'est
+régulier** : C04 a un front, C09 une perturbation relâchée. Or un ordre n'est défini que si la
+solution est assez régulière pour qu'un développement de Taylor ait un sens.
+
+Mesuré en S24 : le même solveur donne `p ≈ 0,98` ici, `0,73` à `0,80` sur C04, et `0,24` sur la
+position de son front. **Ces nombres ne se contredisent pas — ils mesurent trois choses.** L'ordre
+est une propriété du **couple** (solveur, cas), et l'assertion absolue `p > 0,8` ne s'applique qu'à
+un cas régulier. Voir [`ADR-032`](../adr/ADR-032-c08-n-est-pas-executable-tel-qu-enonce.md) §3.
+
+C22 est donc le seul cas du corpus où « l'ordre du schéma » veut dire quelque chose.
+
+### Le protocole, qui fait partie du cas
+
+Trois exigences, chacune payée par une mesure de S24 :
+
+1. **Cinq grilles au moins**, en doublement. Trois ne permettent qu'un seul ordre, donc aucun moyen
+   de constater que le régime asymptotique est atteint.
+2. **Écarter les grilles contaminées par l'oracle.** L'oracle porte sa propre erreur ; quand celle
+   d'une grille testée s'en approche, les deux se soustraient et l'ordre observé s'envole — mesuré :
+   **1,56 pour un schéma d'ordre 1**, ce qui est impossible et donc reconnaissable. Une grille est
+   retenue si son erreur vaut au moins **trente fois** l'erreur estimée de l'oracle.
+3. **Trois verdicts, pas deux** : *ordre observé*, *plancher* (l'erreur est au bruit d'arrondi, la
+   discrétisation n'est plus mesurable), *non concluant* (l'ordre bouge encore). Un rapport sans
+   échec ne doit pas se lire comme une validation.
+
+> **Conséquence de coût, à connaître avant d'engager le banc.** Ces exigences se contredisent : il
+> faut des grilles assez fines pour être asymptotiques et assez grossières pour ne pas être
+> contaminées. Pour cinq grilles saines, `nx_oracle ≥ 30·nx_max` et `nx_max ≥ 16·nx_min`, soit un
+> oracle **480 fois** plus fin que la grille la plus grossière. En 1D son coût va comme `nx²`, en 2D
+> comme `nx³` : **l'oracle est le banc**, et non une référence disponible à côté.
+
+### État à l'écriture
+
+Sur le véhicule δ, avec un oracle à `nx = 51 200` et le filtre à ×30, **trois grilles saines
+seulement** subsistent — donc un seul ordre observé, `p = 0,819`, et **aucun verdict
+d'asymptoticité**. Le cas est exécutable et son résultat est partiel ; le compléter demande un
+oracle à `nx ≈ 100 000`, dont le coût est à mesurer avant d'être engagé (action **S24-5**).
+
+**Rattachement** : banc **B3** (solveur δ), batterie `physics` — le cas instancie un oracle et
+ne tient pas dans le budget de 60 s du mode `check`.
