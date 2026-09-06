@@ -72,7 +72,7 @@ présentable. C'est le dernier travail disponible qui ne demande ni mesure ni d�
 préalable.
 
 - [ ] **P1** — déclarer le plan, prendre le jeton, mettre à jour le battement.
-- [ ] **P2** — **classer par ce que la réponse débloque**, et non par l'importance du sujet.
+- [x] **P2** — **classer par ce que la réponse débloque**, et non par l'importance du sujet.
   *Thèse : l'ordre de `00_INDEX.md` classe par gravité de conséquence. Le bon critère est
   l'irréversibilité — ce qui bloque la première ligne de code passe devant ce qui bloque le format
   d'une autre équipe, qui passe devant ce qui bloque un banc. Je m'attends à ce que l'ordre change,
@@ -94,3 +94,54 @@ préalable.
   pas. Une fiche par destinataire, tenant seule, sans renvoi obligatoire.
 - **Règle d'écriture propre à ce document** : chaque fiche porte **un chiffre**. Une demande sans
   chiffre se discute ; une demande avec un chiffre se traite. C'est L14 appliquée à une réunion.
+
+#### P2 — le classement change, et il change beaucoup
+
+`00_INDEX.md` classe en deux groupes — quatre interfaces, sept autres destinataires — et désigne le
+terrain comme « le plus urgent des quatre ». C'est un classement par **gravité de conséquence**.
+
+Le critère utile est autre : **qu'est-ce que la réponse débloque, et qu'est-ce qui devient
+irréversible si elle tarde ?** Appliqué, il donne quatre rangs, et l'ordre n'est pas celui de
+l'index.
+
+**Rang 1 — bloque la première ligne de code.** Trois demandes, dont deux que l'index ne présentait
+pas comme urgentes :
+
+- **`int64` ou `f64` pour les positions monde** (ADR-002 §7.1). Décision partagée avec le réseau et
+  la physique solide. Elle précède tout code qui manipule une position, c'est-à-dire tout code.
+- **Qui possède le harnais de validation** (SPEC-003 §11.4). SPEC-003 §1 pose que « la qualité des
+  décisions qui suivent est plafonnée par la sienne », et §10 que **H1 doit exister avant la première
+  ligne du solveur**. Une question de propriété rangée jusqu'en S11 parmi des choix de format de
+  fichier conditionne donc le premier livrable du chemin critique.
+- **ADR-020 acté** — la bibliothèque sans dépendance moteur. Déjà signalé comme « bloquant, à acter
+  avant la première ligne de code », mais absent de la liste des destinataires : personne n'est nommé
+  pour l'acter.
+
+**Rang 2 — bloque le format d'une autre équipe, et le retard se paie en migration.**
+
+- **Le géoïde dans l'outil de terrain** — avant qu'un mètre carré de côte ne soit sculpté.
+- **Les trois champs de `WaveEvent`** — avant que le réseau ne fige le format. Et l'audio doit donc
+  répondre **avant** le réseau : deux destinataires, une seule échéance, ce que l'index ne dit pas.
+- **Le signal de traversabilité** — avant que l'IA ne fige son format de maillage de navigation.
+- **Le modèle du nageur** — avant que l'équipe personnage ne fige sa machine à états.
+
+**Rang 3 — bloque un banc.** La table `a_max` par archétype (véhicules) conditionne B8 ; le modèle de
+diffusion sous-marine (rendu) conditionne B11.
+
+**Rang 4 — cadrages, sans échéance dure.** Air respirable, brèche vers le vide, équilibrage de `K`,
+`V_min` et les TTL.
+
+**Et les cinq arbitrages ne sont pas au même rang.** L'index les présente comme une liste homogène ;
+ils ne le sont pas :
+
+| Arbitrage | Ce que « oui » invalide | Rang |
+|---|---|---|
+| **Temps mis à l'échelle par joueur** | la cohérence multijoueur de B, donc ADR-009 en entier pour l'océan concerné, l'écume cohérente entre joueurs (ADR-014 §2.3) et l'autorité du signal de traversabilité (SPEC-006 §2.6) | **1** — cascade sur quatre documents |
+| Propriété du harnais | rien, mais bloque H1 | **1** |
+| Trait de côte mobile | le nombre d'états de la bibliothèque côtière et de la polyligne | 2 |
+| Glace | deux champs de `TraversabilitySample` ; **coût désormais borné** — fetch max 3,4 km à 5 m/s | 3 |
+| Durée de vie d'un nœud V | le volume de stockage du monde | 3 |
+
+**L'arbitrage n°1 est le plus lourd du projet et il est présenté comme le premier d'une liste de
+cinq.** Si la réponse est « oui », ce n'est pas un paramètre qui change : c'est le modèle de
+réplication qui tombe pour l'océan concerné. Le dossier doit le dire ainsi.
