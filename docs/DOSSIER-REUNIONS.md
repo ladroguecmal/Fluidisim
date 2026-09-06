@@ -70,6 +70,11 @@ commit. C'est irréalisable si l'instanciation passe par le moteur.
 
 ### Fiche 2 — Assurance qualité technique : qui possède le harnais
 
+> **Répartition tranchée en S18** (ADR-027 §6) : le code et les scénarios à l'équipe eau, **les
+> seuils d'acceptation et les résultats archivés à la qualité technique**, dans un fichier séparé
+> dont la modification exige une approbation. **Ce qui reste à décider est humain : qui occupe les
+> deux rôles.**
+
 **Ce qu'on demande.** Désigner le propriétaire du harnais de validation. Il ne doit appartenir **ni à
 l'équipe eau seule** — juge et partie — **ni à une équipe d'outillage détachée du domaine**.
 Proposition : propriété eau, revue par l'assurance qualité technique.
@@ -100,6 +105,11 @@ positions **monde**, partagé avec vous.
 **Ce qu'on fournit.** ADR-002 §2.3 et l'invariant I-08.
 
 ### Fiche 4 — Gameplay : le temps du monde peut-il être mis à l'échelle par joueur ?
+
+> **Tranché en S18** par [ADR-027](adr/ADR-027-les-cinq-arbitrages-tranches.md) §2 : **non**, jamais
+> par joueur ; **oui** globalement, ce qui suffit aux trois besoins cités. Cette fiche reste ici pour
+> être **présentée**, pas pour être posée : si le design conteste, ADR-027 §2.4 dit ce que
+> l'inversion coûte.
 
 **Ce qu'on demande.** Une réponse binaire : un joueur peut-il vivre le temps du monde à une vitesse
 différente des autres — voyage rapide, pause, mode photo ?
@@ -294,6 +304,10 @@ avec la profondeur, elle passe un point de non-retour et **coule d'un coup**.
 
 ### Fiche 14 — Monde et live ops : la durée de vie d'un nœud V
 
+> **Tranché en S18** (ADR-027 §5) : **la question se dissout** — l'eau d'un objet suit la politique
+> de cet objet, 4 Ko par joueur. Ce qui reste nôtre est le TTL des nœuds **sans propriétaire**, borne
+> supérieure de la persistance de l'eau. Fiche à présenter, non à poser.
+
 **Ce qu'on demande.** Combien de temps l'eau rattachée à l'objet d'un joueur absent depuis des mois
 doit-elle persister.
 
@@ -303,6 +317,9 @@ total est le délai au bout duquel une flaque non revisitée est retirée — pr
 Ce n'est pas un nettoyage cosmétique, c'est **la borne supérieure de la persistance de l'eau**.
 
 ### Fiche 15 — Direction de projet : le projet veut-il de la glace ?
+
+> **Tranché en S18** (ADR-027 §3) : **oui**, bornée au fetch — lacs et baies abritées, activée par
+> plan d'eau. Fiche à présenter, non à poser.
 
 **Ce qu'on demande.** Une réponse binaire. L'ADR est écrit pour être prêt, pas pour imposer le besoin.
 
@@ -322,6 +339,10 @@ conditionnelle : doubler l'épaisseur quadruple la charge admissible — 10 cm p
 30 cm une voiture légère.
 
 ### Fiche 16 — Direction de projet : qui porte le trait de côte mobile ?
+
+> **Tranché en S18** (ADR-027 §4) : **personne — la question se dissout.** Le trait de côte est
+> mobile et dérivé de la marée analytique, jamais stocké. Ce qui est stocké est la bibliothèque à
+> seize états, 45 Mo de plus qu'une côte fixe. Fiche à présenter, non à poser.
 
 **Ce qu'on demande.** La marée déplace-t-elle le trait de côte, et qui en est propriétaire ?
 

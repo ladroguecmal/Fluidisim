@@ -12,8 +12,9 @@ de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outi
 6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance),
 3 en S11 (audit des points ouverts), 3 en S12 (mécanismes de détail), 3 en S13 (revue croisée des
 documents récents), 3 en S14 (audit inverse des invariants), 2 en S15 (audit des registres), 2 en S16 (dossier B2), 2 en S17
-(dossier de réunion) — **95 au total**. **Trente-cinq ont été trouvés dans nos propres écrits**, pas
-dans les documents sources : A49, A56, A57, A58, puis A65 à A95. La proportion
+(dossier de réunion), 1 en S18 (arbitrages) — **96 au total**. **Trente-six ont été trouvés dans nos
+propres écrits**, pas dans les documents sources : A49, A56, A57, A58, puis A65 à A96. La
+proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -136,6 +137,7 @@ ce que les sources avaient omis.
 | **A93** | Un banc produit un couple de valeurs liées, jamais une valeur seule | 2 | DOSSIER-B2 §7 |
 | **A94** | Deux demandes bloquent la première ligne de code et n'étaient présentées nulle part comme urgentes | **1** | DOSSIER-REUNIONS §3 |
 | **A95** | Les deux demandes les plus bloquantes n'ont aucun destinataire nommé | **1** | DOSSIER-REUNIONS §7.2 |
+| **A96** | Un arbitrage qui traîne est souvent un arbitrage mal posé | 2 | ADR-027 §1 |
 
 Soixante-quatre angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -468,3 +470,16 @@ pendant quatre sessions.
   Personne n'est aujourd'hui identifié pour acter ADR-020 ni pour arbitrer la propriété du harnais —
   et c'est la condition préalable à la tenue même des réunions. Un dossier de demandes sans
   destinataire identifié est un dossier qui ne part pas.
+
+**Ajouté en S18, en tranchant les arbitrages**
+
+- **A96** — **Un arbitrage qui traîne est souvent un arbitrage mal posé.** Sur les cinq questions
+  réputées « en attente d'une réponse humaine » depuis S06, **deux se sont dissoutes** dès qu'on a
+  cherché à y répondre : « qui porte le trait de côte mobile » supposait qu'il soit stocké — il est
+  dérivé, donc personne ne le porte ; « combien de temps l'eau d'un joueur absent persiste-t-elle »
+  supposait que l'eau ait besoin d'une politique propre — elle pèse 4 Ko par joueur, elle suit celle
+  de l'objet. Une troisième, la propriété du harnais, cherchait **un** propriétaire là où il en faut
+  deux. L'étiquette « attend une décision humaine » avait donc masqué pendant douze sessions le fait
+  qu'il n'y avait, dans trois cas sur cinq, rien à trancher — et personne ne relit une question qu'on
+  a classée comme n'étant pas la sienne. C'est L03 rencontrée à un endroit nouveau : la liste des
+  choses qu'on ne décide pas.

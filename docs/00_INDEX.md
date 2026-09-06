@@ -59,6 +59,12 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 | [025](adr/ADR-025-propriete-de-la-masse-entre-V-et-delta.md) | **La propriété de la masse ne quitte jamais la couche V** | proposée | remplace le transfert d'ADR-010 §6 ; rend I-04 vrai sans l'amender |
 | [026](adr/ADR-026-amendement-de-six-invariants.md) | Amendement de **I-01, I-02, I-03, I-10, I-13, I-16** | proposée | six des huit défauts de l'audit inverse S14 |
 
+### Arbitrages *(S18)*
+
+| ADR | Sujet | Statut | Traite |
+|---|---|---|---|
+| [027](adr/ADR-027-les-cinq-arbitrages-tranches.md) | **Les cinq arbitrages en attente, tranchés** — sur délégation explicite | proposée | échelle du temps · glace · trait de côte · nœud V · propriété du harnais |
+
 ### Amendement *(S13)*
 
 | ADR | Sujet | Statut | Traite |
@@ -95,7 +101,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`specs/SPEC-004`](specs/SPEC-004-interfaces.md) | **signatures des interfaces** — solveurs, champ de fond, solides, services d'hôte, contrat de fils d'exécution |
 | [`specs/SPEC-005`](specs/SPEC-005-outillage-auteur.md) | **outillage auteur** — sources de vérité, inversion du pipeline eau/terrain, cuisson déterministe, obsolescence |
 | [`specs/SPEC-006`](specs/SPEC-006-chemin-pousse.md) | **le chemin poussé** — ce que le système *publie* : bus d'événements et `WaveEvent`, écume et aération, traversabilité, polyligne de déferlement |
-| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | 95 points, avec sévérité — dont 35 trouvés dans nos propres écrits |
+| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | 96 points, avec sévérité — dont 36 trouvés dans nos propres écrits |
 | [`registres/REVUE-CROISEE-S05.md`](registres/REVUE-CROISEE-S05.md) | **audit croisé des 20 ADR** — 12 écarts, dont 2 de gravité 1, et la liste des contrôles passés |
 | [`registres/REVUE-CROISEE-S08.md`](registres/REVUE-CROISEE-S08.md) | **audit croisé des 5 SPEC** — 10 écarts, dont 2 de gravité 1 ; l'arithmétique des fiches chiffrées revérifiée ligne à ligne |
 | [`registres/AUDIT-POINTS-OUVERTS-S11.md`](registres/AUDIT-POINTS-OUVERTS-S11.md) | **audit des 110 points ouverts** — un sur trois n'était pas dans l'état annoncé ; et le tableau **« qui attend quoi »**, bancs, équipes, arbitrages |
@@ -127,7 +133,7 @@ Spécification technique   █████████████████�
 Cohérence interne         ██████████████████████  100 %   26 ADR + 6 SPEC confrontés, 45 écarts résolus ; les 17 invariants audités dans les deux sens
 Décisions expérimentales  ███░░░░░░░░░░░░░░░░░░░   15 %   onze bancs définis, aucun exécuté ; B2 a son dossier d'exécution
 Outillage et pipeline     ████████████░░░░░░░░░░   55 %   harnais et outillage auteur spécifiés, non écrits
-Accords inter-équipes     ████░░░░░░░░░░░░░░░░░░   20 %   seize fiches prêtes à soumettre ; aucune réponse reçue
+Accords inter-équipes     █████░░░░░░░░░░░░░░░░░   25 %   cinq arbitrages tranchés ; quatorze demandes extérieures en attente
 ```
 
 **Chemin critique**
@@ -157,7 +163,27 @@ sont posés. Ce qui reste est du code, des mesures et des réunions.
 > **désigner le propriétaire du harnais**, qui conditionnent l'une et l'autre la première ligne de
 > code. Les sections ci-dessous restent la vue par sujet.
 
-### Arbitrages de design
+### Arbitrages de design — **tous tranchés en S18**
+
+> Les cinq arbitrages ci-dessous ont été tranchés par
+> [`ADR-027`](adr/ADR-027-les-cinq-arbitrages-tranches.md), sur délégation explicite de
+> l'utilisateur. **Deux se sont dissous** plutôt que choisis. Les énoncés sont conservés avec leur
+> réponse ; ADR-027 dit pour chacun ce qu'il faudrait changer pour l'inverser.
+>
+> | # | Question | Réponse |
+> |---|---|---|
+> | 1 | Le temps du monde peut-il être mis à l'échelle par joueur ? | **Non** — global oui, par joueur jamais |
+> | 2 | Le projet veut-il de la glace ? | **Oui**, bornée au fetch : lacs et baies, 3,4 km à 5 m/s |
+> | 3 | Qui porte le trait de côte mobile ? | **Personne — la question se dissout.** Il est dérivé, jamais stocké ; 45 Mo pour 50 plages |
+> | 4 | Durée de vie d'un nœud V d'un joueur absent | **Celle de l'objet — la question se dissout.** 4 Ko par joueur |
+> | 5 | Qui possède le harnais ? | **Deux propriétaires** : le code à l'eau, les seuils à la qualité |
+>
+> **Reste humain** : nommer les personnes (fiches 1 et 2 du dossier de réunion), constater l'état
+> réel du projet, agir sur l'infrastructure.
+
+*Énoncés d'origine, conservés :*
+
+### Arbitrages de design *(historique)*
 
 1. **Le temps du monde peut-il être mis à l'échelle par joueur ?** → ADR-003 §4.1. Si oui, la
    cohérence multijoueur de la houle est perdue et l'océan concerné bascule en couche locale.
