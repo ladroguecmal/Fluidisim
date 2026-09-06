@@ -12,9 +12,9 @@ de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outi
 6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance),
 3 en S11 (audit des points ouverts), 3 en S12 (mécanismes de détail), 3 en S13 (revue croisée des
 documents récents), 3 en S14 (audit inverse des invariants), 2 en S15 (audit des registres), 2 en S16 (dossier B2), 2 en S17
-(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques), 4 en S22 (C01 et le premier δ), 4 en S23 (C04 et le lit sec), 4 en S24 (C08 et l'oracle), 4 en S25 (C03 et la dissipation), 4 en S26 (les harmoniques), 4 en S27 (le nombre de Courant), 3 en S28 (la paroi mobile), 3 en S29 (l'audit des assertions), 3 en S30 (la réécriture), 3 en S31 (la dissolution d'A122), 3 en S32 (celle d'A139), 2 en S33 (le train entretenu) — **145 au
-total**. **Quatre-vingt-cinq ont été trouvés dans nos propres écrits**, pas dans les documents sources :
-A49, A56, A57, A58, puis A65 à A145. La proportion
+(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques), 4 en S22 (C01 et le premier δ), 4 en S23 (C04 et le lit sec), 4 en S24 (C08 et l'oracle), 4 en S25 (C03 et la dissipation), 4 en S26 (les harmoniques), 4 en S27 (le nombre de Courant), 3 en S28 (la paroi mobile), 3 en S29 (l'audit des assertions), 3 en S30 (la réécriture), 3 en S31 (la dissolution d'A122), 3 en S32 (celle d'A139), 2 en S33 (le train entretenu), 3 en S34 (l'audit des garde-fous) — **148 au
+total**. **Quatre-vingt-huit ont été trouvés dans nos propres écrits**, pas dans les documents sources :
+A49, A56, A57, A58, puis A65 à A148. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -187,8 +187,11 @@ ce que les sources avaient omis.
 | **A143** | Le même document fondateur a répondu deux fois de suite à une question dite ouverte | **1** | ADR-037 §1, A122 et A139 |
 | **A144** | Un garde-fou peut porter sur la bonne idée et la mauvaise condition | **1** | S33, contrôle de réflexion |
 | **A145** | Une mesure de qualité d'ajustement rattrape des défauts qu'elle n'était pas censée voir | 3 | S33, le `R²` à 0,487 |
+| **A146** | Les saturations de modèle ne sont comptées nulle part, et une saturation fréquente est un défaut | 2 | AUDIT-GARDE-FOUS-S34 §5.1 |
+| **A147** | Un garde-fou non testable isolément est celui qui défaille | **1** | AUDIT-GARDE-FOUS-S34 §3.2 |
+| **A148** | Aucun garde-fou ne compte ses déclenchements : on ignore lesquels travaillent | 2 | AUDIT-GARDE-FOUS-S34 §5.2 |
 
-Cent cinq angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
+Cent huit angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
 
 **Quatre ont été trouvés dans nos propres écrits** — A49, A56, A57, A58 — et non dans les documents
@@ -964,4 +967,31 @@ pendant quatre sessions.
   sans avoir à connaître la raison** — ce qu'aucun garde-fou spécifique ne sait faire.
   **Réflexe** : accompagner toute régression d'un `R²` publié, même quand la forme n'est pas en
   doute. C'est une sonde générique, et elle coûte trois lignes.
+
+**Ajoutés en S34, à l'audit des garde-fous**
+
+- **A146** — **Les saturations de modèle ne sont comptées nulle part, et une saturation fréquente
+  est un défaut.** `delta.rs` en contient une douzaine — `h.max(0.0)` après un pas, la
+  reconstruction hydrostatique, l'état initial. Elles relèvent d'une autre famille que les contrôles
+  de validité de montage : ce sont des **rattrapages de physique**, qui empêchent une hauteur d'eau
+  négative de se propager. **Aucune n'est comptée.** Or une saturation qui se déclenche rarement est
+  un filet ; une saturation qui se déclenche à chaque pas est un solveur qui produit des états
+  impossibles et qu'on maquille. **Les deux sont indiscernables aujourd'hui**, et le second cas est
+  exactement ce que C04 pourrait cacher sur son lit sec.
+
+- **A147** — **Un garde-fou non testable isolément est celui qui défaille.** Sur dix garde-fous
+  audités, un seul masquait au lieu de refuser — et c'était **le seul qui n'était pas appelable
+  seul** : il vivait en ligne dans une fonction lançant des simulations avec un oracle à 51 200
+  cellules. La chaîne est mécanique : *emplacement en ligne → non testable isolément → jamais testé
+  → jamais vu refuser → défaut invisible*. Les neuf autres, appelables directement, avaient été
+  éprouvés au fil des sessions sans que ce soit délibéré. Sévérité 1 : la non-testabilité **prédit**
+  la défaillance, ce qui en fait un critère de revue plus efficace que la relecture du code — G10 a
+  survécu à plusieurs relectures parce qu'il *a l'air correct*.
+
+- **A148** — **Aucun garde-fou ne compte ses déclenchements.** L'audit S34 établit que les dix
+  *peuvent* refuser ; il ne dit pas s'ils refusent **en usage réel**, ni à quelle fréquence. Un
+  garde-fou qui ne se déclenche jamais en production est soit inutile, soit mal conditionné — et
+  rien ne permet de distinguer les deux. Un compteur par garde-fou coûterait quelques octets et
+  dirait lesquels travaillent. C'est le même manque qu'A146 sur les saturations, et il a la même
+  cause : **on écrit un garde-fou pour empêcher, jamais pour mesurer**.
 

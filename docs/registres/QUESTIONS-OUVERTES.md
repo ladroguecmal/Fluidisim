@@ -280,11 +280,26 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 | # | Action | D'où elle vient | Qui la porte | État |
 |---|---|---|---|---|
 | S33-1 | **Mesurer la décroissance entretenue en régime non linéaire** (`a/h ≈ 5 %`) : S33 ne valide la loi qu'à `a/h ≪ 1 %`, et A127 dit que la loi y est fausse | S33, **A127** | session | **ouverte** |
-| S33-2 | **Relire les autres garde-fous du harnais** dans le sens d'A144 : porter sur la bonne idée ne suffit pas, il faut la bonne condition | **A144** | session | **ouverte** |
+| S33-2 | **Relire les autres garde-fous du harnais** | **A144** | session | **close (S34)** — `AUDIT-GARDE-FOUS-S34` : 10 audités, 9 sains, G10 corrigé et rendu testable |
 | S33-3 | **Publier un `R²` avec chaque régression** du harnais, même quand la forme n'est pas en doute — c'est une sonde générique à trois lignes | **A145** | session | **ouverte** |
 
 > **Note S33 — la conclusion la moins étayée du corpus est devenue la mieux mesurée.** `R²` atteint
 > **1,0000**, et l'écart à la prédiction descend à **−0,3 %**. Ce qui l'a rendue possible n'est pas
 > un effort particulier : c'est d'avoir écrit, en S32, **qu'elle était dérivée et non mesurée** —
 > sans quoi personne ne serait allé la vérifier.
+
+## Actions relevées en séance — S34
+
+| # | Action | D'où elle vient | Qui la porte | État |
+|---|---|---|---|---|
+| S34-1 | **Compter les saturations de modèle** de `delta.rs` — une saturation rare est un filet, une saturation à chaque pas est un solveur qu'on maquille, et les deux sont indiscernables aujourd'hui | **A146** | session | **ouverte** |
+| S34-2 | **Compter les déclenchements** de chaque garde-fou en usage réel : on sait qu'ils peuvent refuser, pas s'ils refusent | **A148** | session | **ouverte** |
+| S34-3 | Faire remonter le déclenchement de **G10** dans le **verdict** et non seulement dans le `Sink` et le libellé, comme les témoins de C01 et C04 | `AUDIT-GARDE-FOUS-S34` §5.3 | session | **ouverte** |
+| S34-4 | Poser en règle que **tout garde-fou nouveau s'écrit appelable seul**, et que son premier usage est son test de déclenchement | **A147** | session | **ouverte** |
+
+> **Note S34 — la non-testabilité prédit la défaillance.** Sur dix garde-fous, le seul qui masquait
+> était le seul non appelable isolément. Ce n'est pas une coïncidence : les neuf autres avaient été
+> éprouvés au fil des sessions **sans que ce soit délibéré**, simplement parce qu'on pouvait les
+> appeler. C'est un critère de revue plus efficace que la relecture — G10 avait survécu à plusieurs
+> relectures parce qu'il *a l'air correct*.
 
