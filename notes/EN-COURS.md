@@ -99,10 +99,10 @@ qu'un `ν = 0,45` posé sur la bonne.
       amplitude fixe : `N` **et** `a/dx` changeaient ensemble. Le projet extérieur s'est fait
       piéger exactement ainsi (« plusieurs variables changées ensemble », rétractation publiée).
       Vérifier que la loi de dissipation ne dépend pas de `a/dx` — à amplitude variable, `N` fixé.
-- [ ] **P4** — mesurer la **stabilité effective** en fonction de `ν`, sur un cas lisse (C03) et un
+- [x] **P4** — mesurer la **stabilité effective** en fonction de `ν`, sur un cas lisse (C03) et un
       cas raide (C04). La théorie donne `ν < 1` ; le terme de fond et la reconstruction mangent une
       marge que rien n'a chiffrée.
-- [ ] **P5** — la borne **analytique** plutôt que mesurée : ce que cela coûte, ce que cela achète.
+- [x] **P5** — la borne **analytique** plutôt que mesurée : ce que cela coûte, ce que cela achète.
 - [ ] **P6** — **ADR-035** : le nombre de Courant — définition, borne, valeur.
 - [ ] **P7** — répercussions : SPEC-001, SPEC-004, index, angles morts, actions, décomptes.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6).
@@ -173,3 +173,72 @@ qu'elle est censée dimensionner.** Note corrective à porter dans ADR-033.
 2. **Le premier jet affichait `0,00` au lieu de « non mesurable ».** C'est **A116** — une erreur
    absorbée publie un résultat vide qui a l'air d'un résultat — **recommise dans la session qui
    l'invoquait**. Corrigé : `NaN` porté jusqu'à l'affichage, qui le nomme.
+
+#### P4-P5 — le schéma tient jusqu'à 0,99, et c'est précisément ce qui rend `u_max` dangereux
+
+**Stabilité.** Balayage sur les deux cas disponibles, `ν` de 0,45 à 0,99 :
+
+```
+C03 :  0.45:OK  0.60:OK  0.70:OK  0.80:OK  0.90:OK  0.95:OK  0.99:OK
+C04 :  0.45:OK  0.60:OK  0.70:OK  0.80:OK  0.90:OK  0.95:OK  0.99:OK
+```
+
+Aucune divergence, aucun `NaN`. C'est plausible et non surprenant : Rusanov avec reconstruction
+hydrostatique est monotone jusqu'à `ν = 1`. **Mais stable n'est pas juste** — c'est L67, payée en
+S21 sur un hash parfaitement stable et parfaitement faux. La justesse se mesure à part.
+
+**Justesse et gain, ensemble** (`N = 160`) :
+
+| `ν` | demi-vie mesurée | prédite par la loi | écart à la loi | **erreur de période** | gain de portée |
+|---|---|---|---|---|---|
+| 0,45 | 10,10 | 10,22 | −1,1 % | 0,0008 % | ×1 |
+| 0,60 | 13,72 | 14,05 | −2,3 % | 0,0037 % | ×1,36 |
+| 0,70 | 17,91 | 18,73 | −4,4 % | 0,0054 % | ×1,77 |
+| 0,80 | 25,61 | 28,09 | −8,8 % | 0,0073 % | ×2,54 |
+| 0,90 | 45,33 | 56,18 | −19,3 % | 0,0101 % | ×4,49 |
+| 0,95 | 76,87 | 112,37 | −31,6 % | 0,0119 % | ×7,61 |
+| 0,99 | 202,14 | 561,84 | −64,0 % | **0,0136 %** | **×20,0** |
+
+**La justesse ne se dégrade pas.** L'erreur de période reste à **0,014 % à `ν = 0,99`** — soixante
+fois sous la tolérance de C03, et elle croît si lentement qu'elle n'est pas le facteur limitant.
+Le gain de portée, lui, atteint **×20**, et le pas de temps est deux fois plus grand : moins de
+dissipation *et* moins de calcul.
+
+**La loi, en revanche, cesse d'être prédictive** : −4,4 % à `ν = 0,7`, −64 % à `ν = 0,99`. Elle
+reste conservatrice — elle surestime la demi-vie — mais on ne peut plus s'en servir pour
+dimensionner au-delà de 0,7.
+
+### Ce qui interdit de conclure « prenons 0,99 »
+
+Rien dans ces mesures ne s'y oppose, et c'est exactement ce qui doit alerter.
+
+**La marge de Courant est une marge sur `u_max`.** Si `u_max` est sous-estimé d'un facteur `f`, le
+nombre de Courant réel vaut `f·ν`. La tolérance avant instabilité est donc `1/ν` :
+
+| `ν` | sous-estimation d'`u_max` tolérée |
+|---|---|
+| **0,45** | **×2,22** |
+| 0,70 | ×1,43 |
+| 0,90 | ×1,11 |
+| 0,99 | ×1,01 |
+
+**Et le défaut mesuré ailleurs valait `C_rel/C_abs` entre 2,2 et 2,5** — pour un solide mobile en
+eau au repos, avec zéro violation déclarée.
+
+> **La marge de 0,45 protégeait contre une définition fausse d'`u_max`, sans que personne l'ait
+> décidé.** Elle couvre presque exactement le facteur du défaut réel. C'est une coïncidence, mais
+> elle dit ce qu'un `ν` par défaut est vraiment : **un filet dont on ignore la fonction**.
+>
+> Monter `ν` avant de corriger la définition d'`u_max` reviendrait à retirer ce filet en croyant
+> ne toucher qu'à une performance. **L'ordre est donc contraint : définition, puis borne, puis
+> valeur.** La valeur est le dernier terme, pas le premier — et c'est l'inverse de ce que l'action
+> S25-1 laissait entendre.
+
+**La borne analytique, et ce qu'elle achète.** Une borne calculée *après* le pas — à partir des
+vitesses observées — ne peut que constater un dépassement déjà consommé. Une borne **majorée en
+amont**, à partir des grandeurs connues avant le pas, le prévient. Le projet extérieur en fait un
+invariant : *le pas ne s'asservit jamais sur une vitesse mesurée*, et son module tire la borne et le
+compteur du **même drapeau**, pour qu'il soit structurellement impossible que l'un borne une
+quantité et que l'autre en compte une autre. **C'est la bonne forme**, et elle vaut d'être reprise :
+le défaut qu'elle empêche est précisément celui qui est resté invisible chez eux — un contrôle vert
+sur une contrainte violée.

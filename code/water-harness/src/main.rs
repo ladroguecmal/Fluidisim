@@ -283,10 +283,16 @@ fn executer_physics_solveur() -> usize {
     }
 
     println!("  nombre de Courant à nx = 80 (160 points/λ) — mesuré contre la loi ln2·N/(2π²(1−ν))");
-    println!("     ν       mesurée      prédite     écart");
-    for (nu, mes, pred) in physics::c03_dissipation_par_courant(&mut host, 80, &[0.45, 0.7, 0.9]) {
+    println!("     ν       mesurée      prédite     écart      erreur de période");
+    for (nu, mes, pred, err_t) in
+        physics::c03_dissipation_par_courant(&mut host, 80, &[0.45, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99])
+    {
         let ecart = if pred > 0.0 { (mes - pred) / pred * 100.0 } else { 0.0 };
-        println!("  {nu:>5.2}   {mes:>10.2}   {pred:>10.2}   {ecart:>6.2} %");
+        println!(
+            "  {nu:>5.2}   {mes:>10.2}   {pred:>10.2}   {ecart:>6.2} %   {:>8.4} %{}",
+            err_t * 100.0,
+            if err_t > 0.01 { "  ← hors tolérance C03 (1 %)" } else { "" }
+        );
     }
 
     println!("  amplitude à nx = 400 (N = 800 fixé) — la demi-vie doit être indépendante de a");

@@ -1397,11 +1397,16 @@ pub fn c03_dissipation_par_resolution(
 ///
 /// C'est une prédiction, donc elle se vérifie. Une loi qui n'a servi qu'à expliquer ce qu'on avait
 /// déjà mesuré n'a pas été testée.
+///
+/// **Renvoie aussi l'erreur de période** *(S27)*. La stabilité et la justesse sont deux propriétés
+/// sans rapport — c'est la leçon **L67**, payée en S21 sur un hash stable et faux. Un `ν` élevé qui
+/// ne produit pas de `NaN` peut parfaitement transporter les ondes à la mauvaise vitesse, et c'est
+/// la période qui le dit.
 pub fn c03_dissipation_par_courant(
     host: &mut water_core::HostServices,
     nx: usize,
     courants: &[f32],
-) -> Vec<(f64, f64, f64)> {
+) -> Vec<(f64, f64, f64, f64)> {
     use water_core::Bassin;
 
     let (l, h) = (20.0f64, 2.0f64);
@@ -1413,8 +1418,13 @@ pub fn c03_dissipation_par_courant(
         let predite = core::f64::consts::LN_2 * n_pts
             / (2.0 * core::f64::consts::PI.powi(2) * (1.0 - nu as f64));
         match mesurer_seiche_cfl(host, bassin, 40.0 * t_ref, Some(nu)) {
-            Some(s) => sortie.push((nu as f64, s.demi_vie_periodes, predite)),
-            None => sortie.push((nu as f64, 0.0, predite)),
+            Some(s) => sortie.push((
+                nu as f64,
+                s.demi_vie_periodes,
+                predite,
+                (s.periode_s - t_ref).abs() / t_ref,
+            )),
+            None => sortie.push((nu as f64, f64::NAN, predite, f64::NAN)),
         }
     }
     sortie
