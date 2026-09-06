@@ -100,7 +100,7 @@ compte. Si elle infirme, la loi est un ajustement et non une dérivation.
       aujourd'hui sans le savoir.
 - [x] **P5** — **S25-4** : dériver le facteur exact pour l'harmonique `n`, puis le mesurer. Note
       corrective sur ADR-033 §5.3 si l'énoncé y est ambigu ou faux.
-- [ ] **P6** — ce que la mise à l'épreuve a donné : ADR-034 si elle change une décision, note datée
+- [x] **P6** — ce que la mise à l'épreuve a donné : ADR-034 si elle change une décision, note datée
       sinon.
 - [ ] **P7** — répercussions : index, angles morts, actions, décomptes.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6).
