@@ -108,7 +108,8 @@ encore** : deux schémas réputés identiques ne le seraient pas, et il faudrait
 - [x] **P6** — **C04 comparé**, montage aligné à 800 mailles de 5 cm : le cas où un désaccord serait
       **physique** et non arithmétique.
 - [x] **P7** — le verdict, et un ADR : **ce que cet oracle peut dire, et ce qu'il ne peut pas**.
-- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
+- [x] **P8a** — rituel : journal, leçons L144-L146, actions S37-1 à S37-5.
+- [ ] **P8b** — rituel : index, décomptes, jeton libéré.
 
 ### Notes de reprise
 

@@ -342,3 +342,22 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 > désormais dans le même binaire et exécutent chacun ses cas, mais **aucun cas ne compare leurs deux
 > sorties sur un même montage**. C'est cela que promet `ADR-043` §3, et c'est la session suivante
 > recommandée.
+
+## Actions relevées en séance — S37
+
+| # | Action | D'où elle vient | Qui la porte | État |
+|---|---|---|---|---|
+| S37-1 | **Trancher le seuil de sec du projet** — `10⁻⁶` (`delta.rs`, provenance dans ADR-031 §5) ou `10⁻¹⁰` (`shallow.rs`, en dur). Il déplace la position du front, donc le verdict de C04, donc le critère d'entrée au banc B3 : **c'est une décision de conception, pas une retouche de constante** | **A163** *(sév. 1)* | session, par ADR | **ouverte** |
+| S37-2 | **Écrire la précision arithmétique dans le corpus** : `f32` pour `delta.rs`, `f64` pour `shallow.rs`, et ce que cela implique — « bien équilibré » vaut 4,4 µm/s en `f32`, pas l'arrondi machine | **A164** | session | **ouverte** |
+| S37-3 | **Expliquer le résidu de `10⁻¹⁰ m`** que `shallow.rs` laisse derrière le front, là où `delta.rs` porte zéro. Très probablement une saturation de modèle non comptée — recoupe **S34-1** | `ADR-044` §8.3 | session | **ouverte** |
+| S37-4 | **Confronter C06 et C08** sur l'oracle croisé. Ce sont les deux autres cas sans référence analytique du schéma, où l'oracle est utile par construction | `ADR-044` §8.2 | session | **ouverte** |
+| S37-5 | **Attribuer l'écart résiduel de 1,8 % de `2c₀`** hors zone litigieuse. De l'ordre de la troncature de deux schémas d'ordre un près d'un front, mais rien ne le démontre | `ADR-044` §8.4 | session | **ouverte** |
+
+> **Note S37 — l'action S35-3 est close.** L'oracle croisé promis par `ADR-043` §3 est exercé
+> (`oracle.rs`, six tests). Il n'a trouvé **aucune faute de calcul** — les deux hauteurs concordent
+> à 0,065 % sur C04, à flux et ordre égaux — mais il a trouvé **deux conventions incompatibles**, ce
+> qu'aucune des deux suites de tests ne pouvait signaler.
+>
+> **Et il a montré une limite de lui-même** : sur un cas à solution exacte connue, il est redondant,
+> et il dégénère quand les précisions diffèrent. `ADR-043` §7.2 reçoit une note corrective datée ;
+> `ADR-044` pose ce qu'il peut dire et ce qu'il ne peut pas.

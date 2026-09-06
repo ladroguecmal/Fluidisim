@@ -2264,3 +2264,63 @@ lister d'abord les **chiffres publiés** et les rejouer, avant d'écrire quoi qu
 C'est court, c'est falsifiable, et l'écart trouvé est presque toujours plus intéressant que la
 concordance. Trois chiffres sur quatre se sont reproduits ici ; c'est le quatrième qui valait la
 session.
+
+## L144 — Comparer deux mesures de précisions différentes revient à mesurer la moins précise
+
+*(S37)* Deux implémentations du même modèle ont été confrontées pour la première fois. Sur le cas où
+la solution exacte est connue, leur écart s'est révélé **exactement égal** à l'erreur de l'une des
+deux contre la vérité — au chiffre près, à toutes les durées. Ce n'était pas une coïncidence : l'une
+calcule en simple précision, l'autre en double, et **neuf ordres de grandeur** les séparent. La plus
+exacte tient lieu de vérité, et la comparaison n'apprend rien de plus que la mesure directe.
+
+**Un instrument de comparaison a un plancher, et sous ce plancher il ne mesure que lui-même.** La
+conséquence pratique n'est pas qu'il faille des précisions égales — c'est qu'il faut **mesurer le
+plancher avant de lire le résultat**, faute de quoi on ne sait pas si un écart parle du sujet ou de
+l'instrument.
+
+**Réflexe** : avant toute comparaison A contre B — deux implémentations, deux versions, deux
+environnements, un avant et un après — chercher la grandeur qui borne ce que la comparaison peut
+distinguer, et la **mesurer** plutôt que l'estimer. Quand un cas de référence exact existe, il la
+donne gratuitement : confronter chaque côté à la vérité avant de les confronter l'un à l'autre. Un
+écart rapporté sans son plancher n'est pas un résultat.
+
+## L145 — Deux codes chacun cohérent peuvent être incompatibles sur une convention qu'aucun test ne voit
+
+*(S37)* Deux solveurs écrits séparément se sont révélés porter deux définitions du mot « sec » —
+`10⁻⁶ m` d'un côté, `10⁻¹⁰ m` de l'autre, quatre ordres de grandeur. Une cellule entre les deux est
+sèche pour l'un et mouillée pour l'autre. Sur le front d'une rupture de barrage, l'écart de vitesse
+atteint **98 % de la vitesse maximale du montage**.
+
+**Les deux suites de tests étaient vertes, et aucune ne pouvait voir le problème.** Un test vérifie
+qu'un code est cohérent **avec lui-même** : ses assertions sont écrites dans la même convention que
+son implémentation. Une convention n'a pas de contraire interne — elle n'a qu'un contraire *chez le
+voisin*. Le seul instrument qui la révèle est une seconde implémentation, ou un consommateur qui
+attend autre chose.
+
+Le plus instructif est que **les deux lignées avaient identifié la question** — chacune a un
+document qui dit que la position d'un front dépend du seuil qui la définit. Elles y ont répondu
+différemment sans le savoir. *Savoir qu'un choix existe ne protège pas de diverger sur ce choix.*
+
+**Réflexe** : à toute frontière entre deux composants écrits séparément — deux services, deux
+équipes, un producteur et son consommateur — lister les **seuils, unités, arrondis et conventions de
+nommage** avant de comparer les comportements. Ce sont eux qui divergent en silence, et ils ne
+laissent aucune trace dans les suites de tests de part et d'autre.
+
+## L146 — Aligner avant de comparer, et chiffrer ce que l'alignement déplace
+
+*(S37)* La confrontation de deux solveurs a d'abord donné un écart de 1,4 %, jugé grand. Un réglage
+n'était pas le même des deux côtés — le flux numérique, choisi différemment et pour de bonnes
+raisons dans chaque lignée. Une fois aligné, l'écart tombe à **0,065 %** : **vingt et une fois
+moins**.
+
+Sans l'alignement, la comparaison mesurait la différence entre deux *choix de méthode*, pas entre
+deux *implémentations* — deux questions sans rapport, et l'une des deux ne se posait pas.
+
+Mais l'alignement seul n'aurait pas suffi : **c'est le facteur 21, mesuré exprès, qui donne son sens
+au 0,065 %**. Sans échelle, un petit nombre ne dit rien — il pourrait être petit parce que les deux
+codes se ressemblent, ou parce que la grandeur est intrinsèquement peu sensible.
+
+**Réflexe** : avant une comparaison, énumérer les réglages qui doivent être identiques et le dire
+explicitement dans le compte rendu. Puis mesurer **une fois** avec un réglage volontairement
+désaligné : ce contre-exemple donne l'échelle, et transforme « ils concordent » en « ils concordent
+vingt et une fois mieux que s'ils différaient d'un choix de méthode ».

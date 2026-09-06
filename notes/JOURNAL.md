@@ -3445,3 +3445,136 @@ modèle (S34-1), reportées deux fois.
 ### Arbitrages en attente
 
 Inchangés. Cette session n'en a tranché aucun et n'en a ouvert aucun.
+
+---
+
+## S37 — 2026-09-07 — L'oracle croisé exercé : il n'a pas trouvé de faute de calcul, il a trouvé un désaccord de vocabulaire
+
+**Consigne reçue.** « Lance S37 ».
+
+**Entrées.** Action **S35-3**, promise par `ADR-043` §3 et repoussée deux fois. S36 avait monté les
+deux véhicules dans le même binaire, mais aucun code ne comparait leurs sorties.
+
+**Sorties.** `code/water-harness/src/oracle.rs` — le comparateur, le plancher mesuré, six tests ;
+[`ADR-044`](../docs/adr/ADR-044-ce-que-l-oracle-croise-peut-dire.md) ; angles morts **A163**
+*(sévérité 1)* et **A164** ; note corrective datée sur `ADR-043` §7.2 ; leçons **L144–L146**.
+
+**Ça tourne.** `cargo test` : **74 tests** au vert — 32 dans le cœur, 42 dans le harnais dont un
+`ignore` — contre 68 en début de session. `water-harness check` : 0 échec, hashs inchangés.
+
+### Ce que la session devait faire, et ce qu'elle a dû faire d'abord
+
+Le plan annonçait deux volets. Le premier n'était pas prévu comme un résultat : **calibrer
+l'instrument avant de le lire**.
+
+`delta.rs` calcule en **`f32`**, `shallow.rs` en **`f64`**, et aucun document du corpus ne le disait.
+Sur C01 au repos — solution exacte connue, `u ≡ 0` — chaque solveur a une erreur mesurable contre la
+vérité :
+
+| durée | `f32` | `f64` | rapport |
+|---|---|---|---|
+| 1 s | 1,88·10⁻⁶ | 9,48·10⁻¹⁶ | 2·10⁹ |
+| 60 s | **4,40·10⁻⁶** | 2,72·10⁻¹⁵ | 1,6·10⁹ |
+
+**Neuf ordres de grandeur**, et l'erreur `f32` **croît** avec le temps simulé.
+
+> **Ce que cela dit à la conception.** « Bien équilibré » n'est pas binaire : en `f32`, la propriété
+> vaut **4,4 µm/s après une minute**. Le seuil de C01 étant de 1 mm/s, la marge est de **×227** —
+> confortable, et personne ne le savait. Un jeu de très grande échelle imposera vraisemblablement
+> `f32` : **c'est ce chiffre-là le plancher réel de la couche δ**, pas celui que `shallow.rs`
+> affiche. Angle mort **A164**.
+
+### Le premier résultat : sur C01, l'oracle n'apprend rien
+
+L'écart croisé vaut **exactement** le plancher, à chaque durée. C'est mécanique : `shallow.rs` est
+si exact que `|u_delta − u_shallow|` se confond avec `|u_delta − 0|`, l'erreur que C01 mesurait déjà
+seul.
+
+> **Quand deux précisions diffèrent de neuf ordres de grandeur, la comparaison croisée dégénère en
+> mesure d'erreur du moins précis.** Un oracle n'est symétrique que si les précisions le sont.
+
+Ce n'est pas un échec — `ADR-043` situait sa valeur sur les cas **sans** référence analytique — mais
+le §3 était trop optimiste, et il reçoit une note corrective datée.
+
+*Un fait contraire à ce que le plan supposait* : les deux véhicules font **exactement le même nombre
+de pas** sur C01 — 49, 482, 2891. Les `dt_cfl` calculés dans deux précisions ne divergent jamais
+assez pour franchir une frontière de pas.
+
+### Le deuxième résultat : sur C04, deux codes écrits sans se voir concordent à 0,065 %
+
+C04 n'a pas de solution analytique **du schéma**. C'est le terrain de l'oracle — mais il a fallu
+aligner d'abord : la lignée B monte C04 avec le flux **HLL**, `delta.rs` n'a que **Rusanov**.
+
+| comparaison | écart `L∞` sur la hauteur | rapporté à `h₀` |
+|---|---|---|
+| **même flux** | 6,48·10⁻⁴ m | **0,065 %** |
+| flux différents | 1,37·10⁻² m | 1,4 % — **×21** |
+
+**Deux implémentations écrites indépendamment concordent à six pour dix mille sur un front de
+rupture de barrage.** C'est le résultat le plus fort qu'ait reçu ce code, et rien d'autre que cet
+oracle ne pouvait le donner.
+
+### Le résultat de la session
+
+**La vitesse, elle, diverge de 6,16 m/s sur une cellule — 98 % de la vitesse du front de Ritter.**
+Son écart *moyen* reste à 7·10⁻² : le désaccord est concentré sur **trois cellules**.
+
+La cause n'est pas un calcul, c'est un **mot** :
+
+| | seuil de sec | où | justification |
+|---|---|---|---|
+| `delta.rs` | `10⁻⁶ m` | constante publique | `ADR-031` §5 |
+| `shallow.rs` | `10⁻¹⁰ m` | **en dur**, à deux endroits | aucune |
+
+Quatre ordres de grandeur. Une cellule entre les deux est sèche pour l'un, mouillée pour l'autre, et
+`hu/h` sur un tel film rend n'importe quoi. **En écartant les cellules litigieuses, l'écart retombe
+de 98 % à 1,8 % de `2c₀`** — la démonstration est un test, pas une affirmation.
+
+Et sous ce désaccord, un second : à la cellule fautive, `delta.rs` porte **zéro exactement**,
+`shallow.rs` un film de **1,05·10⁻¹⁰ m** — moins qu'un atome. Le premier porte sur la *lecture* de
+la vitesse, celui-ci sur ce que le schéma *laisse derrière le front*.
+
+> **Les deux lignées avaient identifié la question et y avaient répondu différemment sans le
+> savoir.** `ADR-031` s'intitule *« une position de front n'existe pas sans seuil »* ; **A150**, de
+> la lignée B, dit *« la position d'un front dépend du seuil qui la définit »*. Chacune avait
+> raison, chacune était cohérente avec elle-même, et **aucun test des deux côtés ne pouvait le
+> voir** : un test vérifie une cohérence interne, jamais une convention partagée. Angle mort
+> **A163**, sévérité 1.
+
+### Ce que la session n'a pas décidé, et pourquoi
+
+**Le seuil de sec du projet n'est pas tranché.** Aligner les deux valeurs déplace la position du
+front, donc le verdict de C04, donc le critère d'entrée au banc B3 d'`ADR-031`. Ce serait changer
+une décision par une retouche de constante. La question va aux points ouverts.
+
+### Chiffres qui ont orienté la session
+
+- **×227** : la marge de `delta.rs` sur le seuil de C01, en `f32`.
+- **×21** : ce que le seul changement de flux déplace — l'échelle qui donne son sens au 0,065 %.
+- **3 cellules** sur 800 : l'étendue du désaccord de vitesse.
+- **475 contre 454** pas sur C04, contre un nombre identique sur C01 : les précisions divergent là
+  où le front sec fait varier `vmax`.
+
+### Ce qui n'a pas été fait
+
+- **C06 et C08 n'ont pas été confrontés.** Ce sont les deux autres cas sans référence analytique du
+  schéma, et l'oracle y est utile par construction.
+- **Le résidu de `10⁻¹⁰ m` derrière le front n'est pas expliqué**, seulement constaté. C'est très
+  probablement une **saturation de modèle** non comptée — action **S34-1**, reportée trois fois.
+- **L'écart résiduel de 1,8 % de `2c₀`** hors zone litigieuse n'est pas attribué.
+- **Les cinq angles morts de sévérité 1 importés en S35 ne sont toujours pas relus** (S35-5), ni le
+  journal de la lignée B reporté (S35-4), ni la lignée S08–S17 traitée (S35-6).
+
+### Session suivante recommandée
+
+**S38 — les saturations de modèle** (S34-1, **A146**), qui devient la suite naturelle : le résidu de
+`10⁻¹⁰ m` trouvé ici en est très probablement une, et l'action attend depuis quatre sessions. Elle
+répond en même temps au §8.3 d'`ADR-044`.
+
+*Solutions de rechange* : confronter C06 et C08 sur l'oracle ; ou relire les cinq angles morts de
+sévérité 1 (S35-5).
+
+### Arbitrages en attente
+
+Inchangés. Cette session n'en a tranché aucun, et **elle a refusé d'en trancher un par effet de
+bord** — le seuil de sec, qui appartient à la conception et non à une session de code.
