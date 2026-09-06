@@ -13,12 +13,17 @@ les six premiers doivent passer avant qu'un solveur candidat soit admis en campa
 
 > **État d'exécution — S21, étage H3.** Le mode `physics` existe et tourne
 > (`code/water-harness`, `water-harness physics scenarios/*.toml`). Sur les vingt-et-un cas,
-> **huit assertions analytiques s'exécutent aujourd'hui** — celles que la couche `B` permet :
-> dispersion mesurée dans le champ *(trois assertions de C02)*, restitution de `Hs` par la variance,
-> identité de la vitesse orbitale, pente maximale, homogénéité spatiale, et la borne de référentiel
-> d'I-08. **Treize cas attendent la couche qu'ils testent** — δ, W, V ou un intégrateur de corps
-> rigide — et le harnais **imprime cette liste à chaque exécution**, pour qu'un rapport vert ne se
-> lise jamais comme une couverture complète.
+> **douze assertions analytiques s'exécutent aujourd'hui** — celles que la couche `B` et la statique
+> de flottaison permettent : dispersion mesurée dans le champ *(trois assertions de C02)*,
+> restitution de `Hs` par la variance, identité de la vitesse orbitale, pente maximale, homogénéité
+> spatiale, borne de référentiel d'I-08, et **les quatre grandeurs statiques de C10** — tirant,
+> force résiduelle, raideur, période impliquée. **Douze cas attendent la couche qu'ils testent** —
+> δ, W, V ou un intégrateur de corps rigide — et le harnais **imprime cette liste à chaque
+> exécution**, pour qu'un rapport vert ne se lise jamais comme une couverture complète.
+>
+> Les douze ne se valent pas. Sur les quatre de C10, **deux sont quasi tautologiques** — la référence
+> partage une ligne de code avec la mesure — et le module les classe par degré d'indépendance plutôt
+> que de les compter comme égaux. Angle mort A104.
 >
 > Ces huit assertions ont trouvé, au premier passage, un défaut que dix-neuf sessions de conception
 > et un hash de conformité stable n'avaient pas vu : la vitesse orbitale était en quadrature au lieu
@@ -39,7 +44,7 @@ les six premiers doivent passer avant qu'un solveur candidat soit admis en campa
 | C07 | Sillage profond et peu profond | W | **analytique** | angle de Kelvin, `Fr_h` |
 | C08 | Convergence sous raffinement | δ | oracle / Richardson | solveur qui ne converge pas |
 | C09 | Conservation masse et énergie | δ, V | **analytique** | fuites, instabilités |
-| C10 | Cube flottant | flottabilité | **analytique** | tirant d'eau, période, masse ajoutée |
+| C10 | Cube flottant | flottabilité | **analytique** | tirant d'eau, période, masse ajoutée — *statique exécutée depuis S21 ; la masse ajoutée attend* |
 | C11 | Petit objet léger | flottabilité | **analytique** | divergence, bascule en mode contraint |
 | C12 | Vidange d'un réservoir | V | **analytique** | intégration à charge variable |
 | C13 | Remontée de bulle | ADR-014 | **analytique** | traînée, vitesse terminale |
@@ -174,6 +179,19 @@ sensiblement plus longue** dans la variante avec masse ajoutée.
 
 L'écart entre les deux variantes *est* le test de la masse ajoutée (angle mort A26). S'il est nul,
 elle n'est pas implémentée.
+
+> **Note corrective — S21.** Les deux références ci-dessus dépendent d'une valeur que **le montage ne
+> donne pas** : la masse volumique de l'eau. `d = 0,25 m` et `T = 1,00 s` ne se referment qu'avec
+> `ρ_eau = 1000 kg/m³` — de l'eau douce. Le projet parle de mer ouverte, où la valeur usuelle est
+> 1025, et l'écart vaut 2,5 % sur le tirant, soit **deux fois et demie la tolérance de ±1 %** que ce
+> cas exige. Aucun document du corpus ne fixait cette constante ; `code/water-core/src/body.rs` la
+> pose à 1000 pour que C10 se referme, en signalant que c'est une convention et non une mesure.
+> **La valeur du projet reste à arbitrer** — angle mort A103.
+>
+> **Trois des quatre grandeurs de C10 sont mesurables sans intégrateur**, et le sont depuis S21 : le
+> tirant, par bissection sur la force ; la raideur `k = ρ·g·A`, par différence centrée ; et la période
+> **qu'implique cette raideur**, qui n'est pas une oscillation observée. La variante à masse ajoutée
+> — la seule qui teste A26 — reste entièrement en attente.
 
 ## C11 — Petit objet léger
 

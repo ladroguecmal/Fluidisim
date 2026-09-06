@@ -157,6 +157,9 @@ fn executer_physics(sc: &Scenario, bg: &Background, t: SimTime) -> usize {
     // au-delà `eval` renvoie `None` — ce que le cas `I-08` ci-dessous vérifie explicitement.
     cas.push(homogeneite(bg, t, 48, 3.0, 3000.0));
     cas.push(borne_referentiel(bg, t));
+    // C10 ne dépend pas du spectre : la flottaison se mesure contre la surface libre, quelle que
+    // soit la mer qui la produit.
+    cas.extend(c10_cube_flottant(bg, t));
 
     let mut echecs = 0usize;
     println!("

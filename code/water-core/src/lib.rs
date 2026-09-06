@@ -18,12 +18,14 @@
 #![forbid(unsafe_code)]
 
 pub mod background;
+pub mod body;
 pub mod hash;
 pub mod host;
 pub mod phase;
 pub mod types;
 
 pub use background::{Background, Component, SeaState};
+pub use body::{FloatingBox, RHO_EAU};
 pub use hash::Hasher64;
 pub use host::{AllocError, AllocStats, Allocator, HostServices, JobSystem, Sink};
 pub use phase::PhaseQ32;

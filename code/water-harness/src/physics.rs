@@ -22,7 +22,7 @@
 //! n'existent pas. Voir `cas_en_attente()` : la liste est imprimée à chaque exécution, pour qu'un
 //! rapport vert ne se lise jamais comme une couverture complète.
 
-use water_core::{Background, SimTime, WorldPos};
+use water_core::{Background, FloatingBox, SimTime, WorldPos, RHO_EAU};
 
 pub const G: f64 = 9.81;
 
@@ -60,6 +60,11 @@ pub fn cas_en_attente() -> &'static [(&'static str, &'static str, &'static str)]
         ("C07", "Sillage profond et peu profond", "attend W"),
         ("C08", "Convergence sous raffinement", "attend δ"),
         ("C09", "Conservation masse et énergie", "attend δ et V"),
+        (
+            "C10*",
+            "Cube flottant — variante avec masse ajoutée",
+            "attend la masse ajoutée (A26) ; la statique est couverte",
+        ),
         ("C11", "Petit objet léger", "attend un intégrateur de corps rigide"),
         ("C12", "Vidange par orifice", "attend V"),
         ("C19", "Aller-retour de persistance", "attend W et V"),
@@ -352,4 +357,108 @@ pub fn borne_referentiel(bg: &Background, t: SimTime) -> Cas {
         tolerance_rel: 0.0,
         source: "I-08 — |x_local| < 4096 m, violation détectée et non subie",
     }
+}
+
+/// **C10 — le cube flottant.** Quatre grandeurs, quatre références fermées.
+///
+/// Cube de 0,5 m, `ρ = 500 kg/m³` (CAS-CANONIQUES, C10) :
+///
+/// ```text
+/// tirant d'eau     d = (ρ_corps/ρ_eau)·H            = 0,25 m
+/// force résiduelle F(z_équilibre)                    = 0
+/// raideur          k = ρ_eau·g·A                     = 2452,5 N/m
+/// période          T = 2π·√(ρ_corps·H/(ρ_eau·g))     = 1,003 s
+/// ```
+///
+/// **Ce que ces quatre cas testent vraiment.** Le tirant est mesuré **au point d'élévation maximale
+/// du champ**, pas à `η = 0` : la référence de C10 est relative à la surface libre, et un montage
+/// qui n'interroge qu'une eau à l'altitude zéro ne peut pas distinguer les deux. C'est l'angle mort
+/// A100 appliqué à son propre remède.
+///
+/// **Ce qu'ils ne testent pas.** La période est **celle qu'implique la raideur mesurée**, pas une
+/// oscillation observée : il n'y a pas d'intégrateur. Et il n'y a pas de masse ajoutée, donc la
+/// troisième assertion de C10 — la variante avec masse ajoutée doit donner une période
+/// **sensiblement plus longue** — reste dans `cas_en_attente()`. C'est elle qui teste A26 ; celle-ci
+/// ne la remplace pas.
+///
+/// # Ces quatre cas ne se valent pas, et il faut le dire
+///
+/// L'en-tête de ce module pose une règle : *une référence tirée des paramètres ne prouve rien*. Les
+/// quatre cas ci-dessous s'y conforment à des degrés très inégaux, et les quatre affichent
+/// **0,000 %** — ce qui est un signal, pas un résultat :
+///
+/// - **`C10-tirant`** est le seul vraiment indépendant : la valeur est trouvée par **bissection sur
+///   la force**, quatre-vingts itérations, et comparée à une formule fermée que le solveur ignore.
+///   Un signe inversé, une saturation manquante ou une confusion entre centre et carène le font
+///   tomber ;
+/// - **`C10-force`** en est le corollaire direct : il vérifie la convergence de la bissection, pas la
+///   physique ;
+/// - **`C10-raideur`** et **`C10-période`** sont **quasi tautologiques** : la force est construite
+///   comme `ρ·g·A·d`, donc en mesurer la dérivée et la comparer à `ρ·g·A` ne teste guère que la
+///   différence finie. Ils gardent une utilité — ils tomberont le jour où la force cessera d'être
+///   linéaire, masse ajoutée ou Froude-Krylov — mais ils ne prouvent rien aujourd'hui.
+///
+/// Aucun des quatre n'interroge sérieusement `B` : la surface libre n'y entre que par une valeur de
+/// `η` lue en un point. **Le vrai C10 attend l'intégrateur** ; celui-ci pose la force et vérifie que
+/// sa statique se referme. Voir angle mort A104.
+pub fn c10_cube_flottant(bg: &Background, t: SimTime) -> Vec<Cas> {
+    let cube = FloatingBox {
+        cote_m: 0.5,
+        rho: 500.0,
+    };
+
+    // Point d'élévation maximale : on veut une surface libre franchement décalée de zéro.
+    let mut e_max = 0.0f64;
+    for i in 0..512 {
+        let x = i as f64 * 0.37;
+        let e = eta(bg, x, 0.0, t);
+        if e.abs() > e_max.abs() {
+            e_max = e;
+        }
+    }
+
+    let z_eq = cube.equilibre(e_max).expect("le cube flotte");
+    let poids = cube.masse() * G;
+    let aire = cube.aire();
+
+    // Raideur par différence centrée sur ±1 mm, bien à l'intérieur de la plage linéaire.
+    let h = 1e-3;
+    let k_mesuree =
+        -(cube.force_verticale(z_eq + h, e_max) - cube.force_verticale(z_eq - h, e_max)) / (2.0 * h);
+    let t_impliquee = core::f64::consts::TAU * (cube.masse() / k_mesuree).sqrt();
+
+    vec![
+        Cas {
+            id: "C10-tirant",
+            grandeur: format!("tirant d'eau, surface libre à η = {e_max:.3} m"),
+            mesure: cube.tirant(e_max).expect("le cube flotte"),
+            reference: (cube.rho / RHO_EAU) * cube.cote_m,
+            tolerance_rel: 0.01,
+            source: "CAS-CANONIQUES C10 — d = (ρ_corps/ρ_eau)·H",
+        },
+        Cas {
+            id: "C10-force",
+            grandeur: "force verticale résiduelle / poids".into(),
+            mesure: cube.force_verticale(z_eq, e_max).abs() / poids,
+            reference: 0.0,
+            tolerance_rel: 1e-6,
+            source: "équilibre statique — poussée = poids",
+        },
+        Cas {
+            id: "C10-raideur",
+            grandeur: "raideur hydrostatique −∂F/∂z".into(),
+            mesure: k_mesuree,
+            reference: RHO_EAU * G * aire,
+            tolerance_rel: 0.01,
+            source: "ADR-008 §3 — k = ρ·g·A",
+        },
+        Cas {
+            id: "C10-période",
+            grandeur: "période de pilonnement impliquée par la raideur".into(),
+            mesure: t_impliquee,
+            reference: core::f64::consts::TAU * (cube.rho * cube.cote_m / (RHO_EAU * G)).sqrt(),
+            tolerance_rel: 0.05,
+            source: "CAS-CANONIQUES C10 — T = 2π·√(ρ_corps·H/(ρ_eau·g)), sans masse ajoutée",
+        },
+    ]
 }

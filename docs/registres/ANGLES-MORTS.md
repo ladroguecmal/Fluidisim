@@ -12,9 +12,9 @@ de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outi
 6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance),
 3 en S11 (audit des points ouverts), 3 en S12 (mécanismes de détail), 3 en S13 (revue croisée des
 documents récents), 3 en S14 (audit inverse des invariants), 2 en S15 (audit des registres), 2 en S16 (dossier B2), 2 en S17
-(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 2 en S21 (cas analytiques) — **102 au
-total**. **Quarante-deux ont été trouvés dans nos propres écrits**, pas dans les documents sources :
-A49, A56, A57, A58, puis A65 à A102. La proportion
+(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques) — **104 au
+total**. **Quarante-quatre ont été trouvés dans nos propres écrits**, pas dans les documents sources :
+A49, A56, A57, A58, puis A65 à A104. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -144,6 +144,8 @@ ce que les sources avaient omis.
 | **A100** | Un test peut affirmer une propriété vraie avec des données incapables de la révéler | 2 | ADR-029 §3, `host_impl.rs` |
 | **A101** | Un champ reproductible peut être reproductiblement faux | **1** | ADR-029, note S21 |
 | **A102** | Une mesure statistique a besoin d'une fenêtre de plusieurs fois la plus longue onde | 2 | ADR-029, note S21 |
+| **A103** | Le corpus n'a jamais fixé la masse volumique de l'eau, dont dépendent des références | 2 | `body.rs`, C10 |
+| **A104** | Une règle énoncée dans un fichier n'empêche pas sa violation dans le même fichier | 2 | `physics.rs`, C10 |
 
 Soixante-quatre angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -534,3 +536,23 @@ pendant quatre sessions.
   1,7 longueur d'onde de la plus longue composante. Le champ est juste ; c'est la mesure qui est
   trop courte. Vaut pour toute estimation spectrale — et le piège est d'autant plus sûr que la
   fenêtre est dimensionnée sur la longueur d'onde *moyenne*, qui est la valeur qui vient à l'esprit.
+
+**Ajoutés en S21, au premier calcul de force**
+
+- **A103** — **Le corpus n'a jamais fixé la masse volumique de l'eau.** Vingt-et-une sessions, six
+  SPEC, vingt-neuf ADR : `ρ_eau` n'apparaît nulle part. Les documents citent `ρ_glace = 917` et le
+  `ρ = 500` du cube de C10, mais jamais la valeur à laquelle ils se rapportent. La référence de C10
+  ne se referme qu'avec **1000** — l'eau douce — alors que le projet parle de mer ouverte, où la
+  valeur usuelle est 1025. L'écart est de 2,5 % sur tout tirant d'eau. **Une constante qu'aucun
+  document ne fixe finit par être choisie par le premier code qui en a besoin**, et ce choix ne
+  ressemble alors pas à une décision. Elle est posée dans `body.rs` avec sa justification et son
+  alternative ; elle reste à arbitrer.
+- **A104** — **Une règle énoncée dans un fichier n'empêche pas sa violation dans le même fichier.**
+  L'en-tête de `physics.rs` pose que *une référence tirée des paramètres ne prouve rien*. Deux des
+  quatre cas de C10, écrits sous cet en-tête, comparent une force construite comme `ρ·g·A·d` à la
+  référence `ρ·g·A` : ils ne testent que la différence finie. Ils affichent **0,000 %**, comme les
+  deux autres — et c'est précisément ce qui les rend indiscernables dans le rapport. Le défaut a
+  été vu à la relecture du résultat, pas à l'écriture. **Un écart nul est un signal à examiner, pas
+  un résultat à encaisser** — il signifie souvent que la mesure et la référence partagent une
+  ligne de code. Conséquence portée dans le module : chaque cas de C10 y est classé par degré
+  d'indépendance.
