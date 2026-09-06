@@ -85,7 +85,7 @@ l'intention.
 - [x] **P4** — ADR-022 contre le corpus : I-17 tient-il partout, la couche V, le harnais, SPEC-005.
 - [x] **P5** — ADR-023 contre le corpus : les quatre mécanismes contre ADR-008, ADR-010, ADR-013,
   ADR-015, et contre les chiffres de SPEC-001/002.
-- [ ] **P6** — les trois **entre eux** : ils se citent mutuellement (ADR-023 §4 publie sur
+- [x] **P6** — les trois **entre eux** : ils se citent mutuellement (ADR-023 §4 publie sur
   SPEC-006 §6 ; ADR-022 §3 recoupe SPEC-005 §6 ; ADR-022 §4 recoupe SPEC-006 §2.6).
   *Thèse : le risque le plus élevé est là. Trois documents écrits par la même session-mère à quatre
   sessions d'écart se citent avec confiance et sans vérification.*
@@ -299,3 +299,51 @@ son amortissement vers la vitesse orbitale — pas de variante, une condition d'
 l'écume permanente, cité et non réinventé.
 · **§5 ↔ ADR-010 §5** : l'hystérésis d'ouverture reprend la forme de celle des flaques, avec un
 seuil propre. Cohérent.
+
+#### P6 — les trois documents entre eux
+
+C'est là que j'attendais le plus, et c'est là que se trouve l'écart le plus coûteux.
+
+**E11, gravité 2 — la sauvegarde emporte des événements non répliqués, et cela casse C19.**
+ADR-022 §4.2 fait figurer dans `WaterPersistentState` un `span<const WaveEvent> events_alive`, sans
+filtre. Or SPEC-006 §3.1 — écrite **une session plus tôt** — a doté `WaveEvent` d'un `EventOrigin` à
+trois valeurs : `Serveur`, `AnticipationLocale`, `TransductionLocale`. Les deux dernières sont
+locales, cosmétiques et non répliquées (ADR-021 §3).
+
+Trois conséquences, la troisième étant la plus gênante :
+
+1. une sauvegarde emporterait des événements que le serveur n'a jamais eus, et qu'elle réinjecterait
+   au rechargement comme s'ils étaient autoritaires ;
+2. leurs `id` ne sont pas des `server_seq` : l'ordre total et la déduplication d'ADR-009 §2 ne
+   valent pas pour eux, et le tri par `id` de SPEC-006 §3.2 les mêlerait aux autres ;
+3. **le cas canonique C19 en serait faux.** ADR-022 §6.1 exige que le hash après aller-retour de
+   persistance soit **identique** à celui d'une simulation continue, et le revendique en régime D1,
+   donc binaire. Un événement `TransductionLocale` provient de la transduction d'un solveur δ, qui
+   n'est jamais D1 : le hash différerait par intermittence, et le banc conçu comme l'argument phare
+   d'I-17 échouerait sans que sa cause soit dans I-17.
+
+**Résolution.** `events_alive` ne retient que les événements d'origine `Serveur`. Ce n'est pas une
+restriction ajoutée : c'est la stricte application d'ADR-022 §1, dont le troisième énoncé dit que
+l'état persistant tient en « `T_sim`, le journal des événements W encore vivants, et les volumes
+entiers » — le mot *W* y désignant, depuis ADR-021 §3, le seul `W_rep`. Le document se contredisait
+entre son §1 et son §4.2.
+
+**E12, gravité 3 — le critère de déclenchement de l'impact n'est pas déclaré répliqué.**
+ADR-023 §2.5 pose `v_rel·n > 2 m/s`, « à calibrer ». Le terme d'impact est autoritaire (§2.4) et le
+serveur émet l'événement correspondant depuis la cause (ADR-021 §3), puisqu'il possède la physique
+des objets. Il faut donc que **le même seuil soit appliqué des deux côtés**, faute de quoi un client
+verrait une gerbe et un choc sans qu'aucun son ne parte, par intermittence et près du seuil.
+Le point n'est pas faux ; il lui manque une ligne disant que ce seuil est une **donnée répliquée**,
+au même titre que `E_cause` et `K` (ADR-021 §7.2).
+
+**Contrôles passés — quatre, et ce sont les rapprochements que je me méfiais le plus de croire.**
+· **ADR-022 §3 `SeedState` ↔ SPEC-005 §6 `CoastalState`** : la généralisation est fidèle, les
+volumes sont repris sans dérive (77 Ko par état, 1,2 Mo par plage), et le `kind = Cotier` couvre
+exactement l'usage d'origine.
+· **ADR-022 §4.5 ↔ SPEC-006 §2.6** : « le signal de traversabilité n'est jamais écrit, il est
+entièrement dérivé » est cohérent avec « autoritaire » — autoritaire et persistant sont deux
+propriétés distinctes, et les deux documents ne les confondent pas.
+· **ADR-023 §6 « aucune interface nouvelle » ↔ SPEC-004 §3** : l'événement d'impact emprunte
+`push_events`, qui existe. La revendication tient.
+· **ADR-023 §4 ↔ SPEC-006 §6** : le canal est réutilisé sans modification de type — sous réserve de
+l'écart E09, qui porte sur l'expressivité de `BreakerVertex` et non sur le canal.
