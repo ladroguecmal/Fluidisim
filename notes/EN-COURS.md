@@ -79,7 +79,7 @@ I-11 et I-12 ont été traités en S13 par ADR-024. Restent **quinze**.
 - [x] **P3** — **I-06 à I-10** contre ADR-006, ADR-002, ADR-003, ADR-004 et ADR-009.
 - [x] **P4** — **I-13 à I-17** contre ADR-006, ADR-012, ADR-021, ADR-022, et le cas particulier
   d'I-14, qui ne cite aucun ADR.
-- [ ] **P5** — rédiger `docs/registres/AUDIT-INVARIANTS-S14.md` : le verdict par invariant, et la
+- [x] **P5** — rédiger `docs/registres/AUDIT-INVARIANTS-S14.md` : le verdict par invariant, et la
   liste de ceux qui tiennent — sans elle le contrôle n'est pas vérifiable.
 - [ ] **P6** — appliquer : notes correctives, amendements, et un ADR si une décision change.
 - [ ] **P7** — index, angles morts, décomptes.
@@ -235,3 +235,14 @@ qu'elle corrige, pas vers celui qu'elle avait annoncé corriger.
 **I-17 — tient.** Confirmé indépendamment par S13 : aucune capture d'exécution n'est demandée nulle
 part, le `SeedState` est bien une donnée cuite, et la restriction d'`events_alive` trouvée en S13
 (écart E11) **renforce** l'invariant au lieu de l'entamer.
+
+#### P5 — registre écrit, et un motif se dégage
+
+`docs/registres/AUDIT-INVARIANTS-S14.md`. Sept tiennent, huit en défaut, plus les deux de S13 :
+**dix invariants sur dix-sept ne disaient plus ce que leur source dit.**
+
+Le motif vaut mieux que le décompte : **les invariants qui tiennent sont ceux qu'une signature rend
+mécaniques (I-07, I-08) ou ceux qui servent à décider plutôt qu'à refuser (I-09, I-15). Ceux qui ont
+vieilli sont ceux qui nomment un mécanisme** — I-01 nomme une fonction, I-11 nommait un plafonnement,
+I-16 nomme une catégorie. Un invariant qui nomme un mécanisme vieillit avec lui ; un invariant qui
+énonce une propriété ne vieillit pas. C'est une règle d'écriture, pas seulement un constat.
