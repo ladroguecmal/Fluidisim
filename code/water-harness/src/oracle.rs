@@ -142,9 +142,92 @@ pub fn avec_hote<T>(octets: usize, f: impl FnOnce(&mut HostServices) -> T) -> T 
     f(&mut host)
 }
 
+/// **Le plancher de l'oracle** — ce que la seule différence de précision produit comme écart.
+///
+/// C01 au repos est le seul montage où la solution exacte est connue **et triviale** : `u ≡ 0`,
+/// `η ≡ η₀`. Chaque solveur y a donc une erreur **mesurable contre la vérité**, sans oracle ni
+/// référence intermédiaire. Le plancher de la comparaison croisée est borné par la somme des deux :
+/// deux solveurs exacts à `ε₁` et `ε₂` près ne peuvent pas différer de plus de `ε₁ + ε₂`.
+///
+/// **Au-dessous de ce plancher, un désaccord ne dit rien** — il mesure l'arithmétique. Au-dessus,
+/// il dit quelque chose sur les schémas. C'est la seule ligne qui rend cet oracle lisible, et elle
+/// se **mesure** au lieu de se supposer.
+pub struct Plancher {
+    /// Erreur de `delta.rs` (`f32`) contre la solution exacte : `max|u|`.
+    pub delta_u: f64,
+    /// Erreur de `shallow.rs` (`f64`) contre la solution exacte : `max|u|`.
+    pub shallow_u: f64,
+    /// Erreur de `delta.rs` sur la surface libre : `max|η − η₀|`.
+    pub delta_eta: f64,
+    /// Erreur de `shallow.rs` sur la surface libre.
+    pub shallow_eta: f64,
+    /// Durée simulée, en secondes.
+    pub duree_s: f64,
+}
+
+impl Plancher {
+    /// La borne sur la vitesse : aucun désaccord en `u` sous cette valeur n'est interprétable.
+    pub fn borne_u(&self) -> f64 {
+        self.delta_u + self.shallow_u
+    }
+    /// La même, sur la surface libre.
+    pub fn borne_eta(&self) -> f64 {
+        self.delta_eta + self.shallow_eta
+    }
+}
+
+/// Mesure le plancher sur C01 au repos, après `duree_s` de simulation.
+///
+/// Les deux schémas sont réglés **équilibrés** — c'est la propriété que C01 teste, et le seul
+/// réglage où la solution exacte est censée être reproduite. Le schéma naïf, lui, s'écarte de 19,5 mm/s
+/// (`ADR-038` §2) : il ne mesurerait pas un plancher, il mesurerait son propre défaut.
+pub fn plancher_c01(duree_s: f64) -> Plancher {
+    let (mut d, mut s) = avec_hote(1 << 20, |h| montages_c01(h));
+    s.regler_equilibrage(true);
+    d.avancer_equilibre(duree_s);
+    s.avancer_jusqu_a(duree_s, 0.45);
+    Plancher {
+        delta_u: d.max_abs_u(),
+        shallow_u: s.vitesse_max(),
+        delta_eta: d.max_ecart_eta(),
+        shallow_eta: s.ecart_surface_max(0.0),
+        duree_s,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// **P3 — quel est le plancher de cet oracle ?**
+    ///
+    /// Sur C01 au repos, chaque solveur est confronté à la **solution exacte** — `u ≡ 0`,
+    /// `η ≡ η₀` — et non l'un à l'autre. La somme des deux erreurs borne ce que leur comparaison
+    /// croisée peut distinguer.
+    ///
+    /// Ce test n'affirme pas une valeur : il **la rapporte**, et vérifie seulement que le plancher
+    /// est dominé par le côté `f32` — sans quoi la lecture « l'écart vient de la précision » serait
+    /// fausse, et il faudrait chercher ailleurs.
+    #[test]
+    fn le_plancher_de_l_oracle_est_domine_par_le_f32() {
+        for duree in [1.0f64, 10.0, 60.0] {
+            let p = plancher_c01(duree);
+            println!(
+                "plancher C01 à t={:>5.1} s — u : f32 {:>11.4e} | f64 {:>11.4e}   η : f32 {:>11.4e} | f64 {:>11.4e}   borne_u {:>11.4e}",
+                p.duree_s, p.delta_u, p.shallow_u, p.delta_eta, p.shallow_eta, p.borne_u()
+            );
+            assert!(
+                p.shallow_u <= p.delta_u,
+                "le côté f64 devrait être le plus exact : f32 {:.4e}, f64 {:.4e}",
+                p.delta_u, p.shallow_u
+            );
+            assert!(
+                p.delta_u < 1e-3,
+                "C01 exige max|u| < 1 mm/s ; delta.rs rend {:.4e} à t={duree} s",
+                p.delta_u
+            );
+        }
+    }
 
     /// **P2 — les deux montages de C01 sont-ils le même ?**
     ///

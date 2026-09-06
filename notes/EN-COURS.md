@@ -99,7 +99,7 @@ encore** : deux schémas réputés identiques ne le seraient pas, et il faudrait
 - [x] **P1** — plan, jeton.
 - [x] **P2** — **vérifier que les deux montages sont le même**, à `t = 0`, champ à champ : fond,
       hauteur, grille. Sans cela, tout ce qui suit compare deux objets différents.
-- [ ] **P3** — **établir le plancher de l'oracle** : ce que la seule différence `f32`/`f64` produit
+- [x] **P3** — **établir le plancher de l'oracle** : ce que la seule différence `f32`/`f64` produit
       comme écart, et donc au-dessous de quoi un désaccord ne dit rien.
 - [ ] **P4** — le comparateur : même montage, même temps final, écarts champ à champ en `L∞` et
       `L¹`. **Pas de comparaison pas à pas** : les deux ne partagent pas leurs pas de temps.
