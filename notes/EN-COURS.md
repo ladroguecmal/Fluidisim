@@ -96,8 +96,8 @@ posé sans fondement est reproductible et dénué de sens.
 servi exactement comme `ADR-043` l'annonce. **Si le volet 2 est faux, c'est plus intéressant
 encore** : deux schémas réputés identiques ne le seraient pas, et il faudrait dire en quoi.
 
-- [>] **P1** — plan, jeton.
-- [ ] **P2** — **vérifier que les deux montages sont le même**, à `t = 0`, champ à champ : fond,
+- [x] **P1** — plan, jeton.
+- [x] **P2** — **vérifier que les deux montages sont le même**, à `t = 0`, champ à champ : fond,
       hauteur, grille. Sans cela, tout ce qui suit compare deux objets différents.
 - [ ] **P3** — **établir le plancher de l'oracle** : ce que la seule différence `f32`/`f64` produit
       comme écart, et donc au-dessous de quoi un désaccord ne dit rien.

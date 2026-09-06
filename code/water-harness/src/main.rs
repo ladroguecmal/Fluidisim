@@ -22,6 +22,7 @@
 //! coûterait exactement la propriété qu'on cherche.
 
 mod host_impl;
+mod oracle;
 mod physics;
 mod physics_shallow;
 mod scenario;
