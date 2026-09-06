@@ -83,7 +83,7 @@ exécutées — c'est l'angle mort A89, écrit en S14.
   Cas d'A16, explicitement **supprimé** par ADR-021.
 - [x] **P5** — `QUESTIONS-OUVERTES` : la traçabilité des 30 sections et les sept verdicts tiennent-ils
   encore, treize sessions plus tard ?
-- [ ] **P6** — rédiger `docs/registres/AUDIT-REGISTRES-S15.md`.
+- [x] **P6** — rédiger `docs/registres/AUDIT-REGISTRES-S15.md`.
 - [ ] **P7** — appliquer : exécuter les actions retrouvées, corriger les statuts, corriger l'erreur
   factuelle de S14 sur A89.
 - [ ] **P8** — index, angles morts, décomptes.
@@ -231,3 +231,19 @@ ADR-013 §6 » : confirmé indépendamment par ADR-022 §2.1, qui s'appuie dessu
 §32 place `λ_cut` au rang 1 : cohérent avec le chemin critique de `00_INDEX.md` et avec le décompte
 de S11 §7.1, où B2 débloque le plus de points ouverts. Les sept verdicts sur les propositions
 antérieures tiennent.
+
+#### P6 — registre écrit
+
+`docs/registres/AUDIT-REGISTRES-S15.md`. Huit écarts, un de gravité 1. Aucun ne porte sur une
+décision de conception : ce sont tous des défauts de **tenue**. Un registre ne se trompe pas, il
+vieillit.
+
+Le résultat qui vaut plus que les écarts : **quarante actions sur quarante sont exécutées dans les
+quatre registres qui portent une table Suite.** Le dispositif marche quand il existe ; c'est son
+absence qui coûte, et c'est ce qui désigne la cause — une action décidée n'est exécutée que si elle
+entre dans une liste que quelqu'un relit.
+
+*Écart de conduite à signaler.* Les quatre commits P2 à P5 portent un message générique
+(« audit des registres ») et ont perdu la signature de co-auteur. La convention du dépôt veut un
+message qui dise ce que l'étape a produit. Non réécrit — l'historique dit la vérité, y compris sur
+mes propres relâchements — et corrigé à partir d'ici.
