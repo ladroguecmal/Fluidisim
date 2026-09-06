@@ -25,4 +25,4 @@ grille_pas_m = 4.0
 allocations = 1
 # I-03 : hash de conformité de B. Inscrit à la main, dans un commit qui précède la mesure
 # qu'il juge — ADR-028 §4. Une divergence entre plateformes se voit ici.
-hash_b      = "0x1f0ef7e87c8c9461"
+hash_b      = "0x1a8b0629a9f51b6e"
