@@ -101,7 +101,7 @@ et il faut dire laquelle.
       règle qui aurait évité le fork. Écrit **avant** tout déplacement de document.
 - [x] **P3** — import des cinq ADR de la lignée B, renumérotés **038–042**, renvois internes
       réécrits, en-tête de provenance daté sur chacun.
-- [ ] **P4** — report des quinze leçons **L71–L85 → L122–L136**.
+- [x] **P4** — report des quinze leçons **L71–L85 → L122–L136**.
 - [ ] **P5** — report des douze angles morts **A105–A116 → A149–A160**, sévérités conservées.
 - [ ] **P6** — l'éponge et `λ_cut` : confronter `ADR-041` (ex-034 de B) à `ADR-037` et à S33.
       Convergence ou contradiction — et une note corrective datée du côté qui a tort.

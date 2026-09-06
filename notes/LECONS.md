@@ -1860,3 +1860,280 @@ et non « instrumentation ».
 **Réflexe** : tout garde-fou et toute saturation portent un compteur. Ce sont les capteurs les moins
 chers du système, ils sont déjà placés exactement là où les choses tournent mal, et leur fréquence de
 déclenchement est une mesure de santé qu'aucun test ne donne.
+
+---
+
+> **Leçons importées de la lignée B le 2026-09-06 (S35).** Les quinze suivantes ont été écrites
+> dans une histoire parallèle du dépôt (sessions **B-S22** à **B-S26**), où elles portaient les
+> numéros `L71` à `L85` — déjà pris ici par d'autres leçons. Carte de renumérotation :
+> [`FORK-S22-S26`](../docs/registres/FORK-S22-S26.md). **Leur texte n'a pas été modifié** ; seuls
+> leurs renvois l'ont été.
+
+## L122 — Certaines propriétés ne s'obtiennent pas en raffinant
+
+*(B-S22)* Le premier schéma de solveur produisait 19,5 mm/s de courant parasite sur une pente au
+repos, pour un seuil de 1. En divisant la maille par deux, l'erreur tombait d'un facteur 1,8. La
+réaction naturelle est d'en conclure « il faut raffiner » — et de chiffrer : il aurait fallu
+`dx ≈ 7 mm`, six mille mailles pour quarante mètres **en une dimension**, le cube de cela en trois.
+
+Le schéma corrigé, lui, ne donne pas une petite erreur : il donne **1,5·10⁻¹⁵ m/s à toutes les
+finesses de maille**. Ce n'est pas treize ordres de grandeur de mieux, c'est autre chose — l'arrondi
+machine, c'est-à-dire l'absence d'erreur. La différence entre les deux colonnes n'est pas
+quantitative.
+
+**Réflexe** : devant une erreur qui décroît avec la résolution, ne pas se demander « à quelle
+résolution devient-elle acceptable » mais **« existe-t-il une formulation où elle est exactement
+nulle »**. Quand la réponse est oui — et pour tout ce qui relève d'un équilibre, d'une symétrie ou
+d'une loi de conservation, elle l'est souvent — chercher cette formulation coûte moins cher que
+n'importe quel budget de calcul, et le raffinement devient un choix de qualité au lieu d'un rattrapage.
+
+## L123 — Un cas qui élimine doit garder en vie ce qu'il élimine
+
+*(B-S22)* Deux fois dans la même session, un cas canonique a rejeté un premier jet : C01 a rejeté le
+terme de fond centré, C04 a rejeté le flux de Rusanov. Dans les deux cas, la tentation était de
+remplacer le fautif et de passer.
+
+Les deux ont été **conservés**, derrière un interrupteur, avec un test qui **verrouille leur
+échec**. Le motif n'est pas la nostalgie : `CAS-CANONIQUES` affirmait de C01 qu'il était « celui qui
+élimine le plus de candidats », et cette affirmation n'avait jamais été démontrée faute d'un seul
+code qui l'exerce. Le jour où le schéma naïf disparaît, C01 redevient un paragraphe qui l'affirme.
+Pire : une retouche future pourrait l'équilibrer par accident, et personne ne s'apercevrait que le
+cas ne discrimine plus rien.
+
+**Réflexe** : quand un test rejette une implémentation, se demander si le test tire sa valeur de ce
+rejet. Si oui, garder l'implémentation rejetée et **tester qu'elle échoue toujours**. Un test
+d'élimination sans contre-exemple vivant est un test dont personne ne peut plus vérifier qu'il
+mesure quelque chose.
+
+## L124 — Un cas diagnostic ne prouve rien seul, et rend un échec attribuable
+
+*(B-S22)* À côté des deux assertions de C01 — vitesse et surface — une troisième mesurait la
+conservation du volume, avec cette mention explicite : *non probant*. Le schéma est conservatif par
+construction, la maille perd exactement ce que sa voisine gagne ; ce cas ne pouvait pas échouer pour
+une raison de physique.
+
+Il a pourtant décidé de la suite. Quand C01 est tombé, le volume était conservé **exactement**, ce
+qui écartait d'un coup la comptabilité du schéma et désignait l'équilibre hydrostatique. Sans lui,
+l'échec aurait ouvert deux pistes au lieu d'une, et la mauvaise coûte une demi-journée.
+
+**Réflexe** : à côté d'un cas qui peut échouer, prévoir un cas qui **ne peut pas** échouer pour la
+même raison. Il ne compte pas dans la couverture — le dire dans le cas lui-même, sinon il gonfle un
+décompte de vérifications (A104) — mais il partitionne les causes. Un échec attribuable vaut
+plusieurs échecs constatés.
+
+## L125 — Une thèse fausse écrite avant la mesure vaut mieux qu'une intuition juste écrite après
+
+*(B-S23)* Le plan déclarait, avant d'écrire une ligne : *« la période de C03 passe, la demi-vie
+échoue »*. Le raisonnement était solide — C04 venait d'établir que le schéma est d'ordre un, et un
+schéma d'ordre un est diffusif. La demi-vie a donné **43 périodes** pour un minorant de 15.
+
+La thèse était fausse, et c'est ce qui l'a rendue utile. En cherchant *pourquoi*, il a fallu
+trouver le terme manquant : la diffusion numérique n'est pas une propriété du schéma, c'est une
+propriété du schéma **et de la maille rapportée à ce qu'on transporte**. Sans la thèse écrite
+d'avance, le résultat aurait été enregistré comme « C03 passe » et rangé — et la loi qui l'explique,
+avec son balayage propre en ordre un, n'aurait jamais été cherchée.
+
+**Réflexe** : écrire la prédiction **avant** la mesure, en une phrase, avec sa raison. Une
+prédiction qui se réalise coûte une ligne ; une prédiction qui échoue désigne précisément l'endroit
+où le modèle mental est faux, et c'est l'information la plus chère du métier. La règle vaut pour
+tout ce qui se mesure — un profilage, une migration, une estimation de charge — pas seulement pour
+un cas de test.
+
+## L126 — Un paramètre qu'un énoncé ne fixe pas est tranché par le premier qui l'exécute
+
+*(B-S23)* Cinq des sept cas canoniques exécutés portaient un paramètre libre dont le verdict dépend :
+une résolution, un seuil de détection, une normalisation, une norme, une constante physique. Aucun
+n'était signalé. Chacun a été tranché par la personne qui écrivait le code, **au moment de le
+faire**, sur le critère le plus local, et sans que rien dans le résultat n'en garde trace.
+
+Ce n'est pas une négligence d'auteur : c'est mécanique. **Tant qu'un énoncé n'est pas exécuté, son
+paramètre manquant n'existe pas** — il n'y a rien pour le révéler, et aucune relecture ne le fera
+apparaître, parce que relire consiste à reconstruire le sens, et que reconstruire le sens comble les
+trous sans les signaler.
+
+Le coût n'est pas l'imprécision, c'est **l'incomparabilité** : deux implémentations peuvent
+satisfaire le même énoncé chacune sous ses propres conditions et n'être jamais comparées. Un critère
+qui ne discrimine pas ne sert à rien, même quand il est vrai.
+
+**Réflexe** : pour tout énoncé destiné à être vérifié — cas de test, critère d'acceptation, seuil
+d'alerte, clause de contrat — appliquer le test des deux implémenteurs : *deux personnes qui ne se
+parlent pas obtiennent-elles le même nombre ?* Si la réponse dépend d'un choix qu'aucune des deux
+n'a écrit, l'énoncé est incomplet, **quelle que soit sa précision apparente**.
+
+## L127 — Ce qu'un test ne couvre pas doit être imprimé par le test
+
+*(B-S23)* Un cas canonique a été exécuté amputé de ses deux tiers : ni solide, ni rotation, en une
+seule dimension — c'est-à-dire privé des deux raisons d'être que son propre énoncé lui donnait. Le
+tiers restant passe confortablement.
+
+Rien dans un rapport ne distingue « ce cas passe » de « le tiers de ce cas que j'ai su écrire
+passe ». Et l'écrire dans un document ne suffit pas : le document se lit une fois, le rapport se lit
+à chaque exécution, et c'est le rapport qui sera regardé le jour où quelqu'un décidera sur la foi
+d'une colonne de verts.
+
+**Réflexe** : la couverture manquante appartient à la **sortie** de l'outil, pas à sa documentation.
+Faire imprimer, à chaque exécution, la liste de ce qui n'est pas couvert et de ce qui l'est
+partiellement — avec la raison. Le coût est de quelques lignes ; il achète qu'un rapport vert ne
+puisse jamais se lire comme une couverture complète.
+
+## L128 — Une simplification algébrique efface le domaine où elle est valide
+
+*(B-S24)* Le terme de fond d'un schéma s'écrit avec les hauteurs reconstruites aux **deux bords** d'une
+maille. À l'ordre un, les deux valent la même chose, l'expression se réduit à une forme deux fois
+plus courte, et c'est cette forme courte qui a été écrite — correctement. Étendue à l'ordre deux, où
+les deux bords diffèrent, elle injectait une force parasite là où la source devait être exactement
+nulle : **quinze fois l'erreur du schéma précédent, et croissante sous raffinement**.
+
+Le point n'est pas qu'une simplification soit dangereuse — elle est juste dans son domaine. C'est que
+**la forme simplifiée ne porte plus la trace de ce qui l'autorise**. Les deux termes qui s'annulaient
+ont disparu, et avec eux la seule chose qui rappelait qu'ils s'annulaient *sous condition*. Le code
+suivant hérite d'une expression correcte et d'aucun avertissement.
+
+**Réflexe** : quand une expression se simplifie parce que deux grandeurs sont égales, écrire
+l'hypothèse à côté de la forme courte — pas la démonstration, l'hypothèse, en une ligne. C'est le
+seul endroit où elle sera lue au moment où quelqu'un la généralisera. La règle vaut hors des
+mathématiques : toute abstraction qui « marche parce que, ici, X = Y » se casse au premier contexte
+où X ≠ Y, et c'est toujours le contexte suivant.
+
+## L129 — Un scalaire ne classe pas
+
+*(B-S24)* Trois schémas numériques, comparés sur la position d'un front : le classement obtenu est
+**inverse** du classement réel. Le schéma qui gagne sur ce chiffre est 2,2 fois pire sur l'erreur
+globale, et son front dépasse la référence au raffinement suivant — ce n'est pas de la précision,
+c'est une traînée parasite que le critère compte comme un succès.
+
+Réduire un objet riche à un nombre est ce qui rend une comparaison possible ; c'est aussi ce qui
+permet à un candidat de bien figurer **sur le nombre** sans être meilleur. Et le défaut est
+invisible : le tableau de comparaison est parfaitement lisible, les chiffres sont exacts, la
+conclusion est fausse.
+
+**Réflexe** : un critère de classement doit inclure au moins une mesure **globale** — une norme, une
+intégrale, une agrégation sur tout l'objet — à côté des mesures ponctuelles. Quand un candidat gagne
+sur un point et perd sur la norme, c'est presque toujours qu'il triche sans le savoir. Cela vaut pour
+les benchmarks de performance, les métriques produit, et toute note unique attribuée à quelque chose
+qui a plusieurs dimensions.
+
+## L130 — Améliorer la constante et améliorer le taux sont deux choses, et on les confond
+
+*(B-S24)* Passer un schéma à l'ordre deux **en espace seulement** a divisé son erreur par 2,2 — un gain
+franc, visible dès la première mesure. Et l'ordre observé n'a **pas bougé** : 0,725 contre 0,742. Le
+gain était entièrement dans la constante.
+
+Les deux se ressemblent sur une mesure isolée et n'ont rien à voir sur trois. Une constante divisée
+par deux est un gain **acquis une fois** ; un exposant amélioré est un gain qui **croît avec la
+taille du problème**. Ici, il fallait aussi l'ordre deux en temps — et c'est l'étape intermédiaire,
+mesurée séparément *exprès*, qui l'a montré.
+
+**Réflexe** : ne jamais conclure sur un ordre, un exposant ou une complexité à partir d'un seul point
+de mesure — il faut au minimum trois tailles, et regarder le **rapport des rapports**. Et lorsqu'une
+amélioration est censée changer le régime et non le facteur, exiger cette vérification avant de la
+déclarer acquise : en optimisation comme en analyse numérique, un facteur deux est souvent tout ce
+qu'on obtient d'un changement annoncé comme structurel.
+
+## L131 — Avant de corriger, vérifier qu'on mesure la bonne chose
+
+*(B-S25)* Un cas de validation était rouge depuis trois sessions. Son obstacle avait été nommé,
+chiffré, et la session devait le corriger dans le code. **Aucune ligne de code n'a été touchée, et le
+cas est passé au vert** : la référence et la mesure n'étaient pas la même grandeur, et le seuil de
+détection choisissait un régime que rien ne pouvait satisfaire.
+
+L'ordre des opérations n'est pas un détail de méthode, c'est ce qui a évité de « corriger » un
+solveur qui suivait sa référence à 0,7 %. Une correction faite pour satisfaire une mesure fausse
+**dégrade le code et rend le test vert** — le pire des deux mondes, et il ne laisse aucune trace.
+
+**Deux corollaires**, tous deux vérifiés dans la même séance :
+
+- **la mesure est un suspect au même titre que le code.** Trois défauts de mesure ont été
+  soupçonnés ; un était réel, un était nul, un était réel mais sans effet sur le verdict. Aucun
+  n'était devinable — il a fallu imprimer le profil terme à terme ;
+- **une précaution correcte peut être sans effet.** L'un des trois — comparer une moyenne de maille
+  à une moyenne de maille plutôt qu'à une valeur ponctuelle — était fondé, et les deux quantités
+  coïncidaient à cinq chiffres. Le garder coûte peu ; l'annoncer comme une correction aurait été
+  faux.
+
+**Réflexe** : devant un écart persistant entre une mesure et une référence, écrire d'abord la
+comparaison **terme à terme**, et se demander de chaque colonne si elle représente bien la même
+grandeur que celle d'à côté. Cela prend un quart d'heure et arrive régulièrement avant le débogage.
+
+## L132 — Un critère qu'aucun candidat ne peut satisfaire est aussi inutile qu'un critère que tous satisfont
+
+*(B-S25)* Un seuil de détection avait été fixé à une valeur parfaitement reproductible — et il
+désignait un régime où **aucune** implémentation possible ne pouvait passer. Le critère était donc
+exact, stable, vérifiable… et incapable de distinguer un bon candidat d'un mauvais, puisqu'il les
+recalait tous.
+
+C'est le symétrique du défaut évident. Un critère trop laxiste ne trie pas ; on le sait. **Un critère
+trop exigeant ne trie pas non plus**, et cela se voit beaucoup moins, parce qu'un critère sévère a
+l'apparence de la rigueur. Dans les deux cas, la question à poser est la même : *si deux candidats
+diffèrent, ce critère les sépare-t-il ?*
+
+**Réflexe** : pour tout seuil, tout SLA, toute exigence chiffrée, vérifier qu'il existe **au moins un
+comportement réaliste qui le passe et au moins un qui le rate**. Sinon ce n'est pas une exigence,
+c'est une décoration — et elle coûtera du temps à quelqu'un qui la prendra au sérieux.
+
+## L133 — Le coût de l'instrument croît sans que personne le regarde
+
+*(B-S25)* La batterie de validation valait quatre centièmes de seconde à sa création. Cinq sessions
+plus tard, elle en valait **soixante-quatorze** — chacune n'y ayant ajouté « qu'un balayage » de
+plus. Personne ne mesure le temps de l'outil qui mesure, et il n'existe aucun seuil qui déclenche.
+
+La dérive est indolore parce que chaque incrément est justifié : le balayage ajouté répond à une
+vraie question. C'est l'accumulation qui ne l'est pas, et elle n'apparaît qu'au moment où l'outil
+devient assez pénible pour qu'on cesse de le lancer — c'est-à-dire trop tard, puisque sa valeur
+tient à ce qu'on le lance souvent.
+
+**Réflexe** : donner à l'instrument son propre budget, et le lui faire afficher à chaque exécution,
+comme il affiche ses résultats. La comparaison à ce budget doit être **dans la sortie**, pas dans la
+tête de celui qui l'exécute.
+
+## L134 — Une formule énoncée avec ses constantes se cite ; elle ne se recalcule pas
+
+*(B-S26)* Un document de conception posait une formule, un profil, une constante, et concluait sur une
+valeur. La vérification tenait en une multiplication : l'intégrale valait le tiers de ce que la
+conclusion supposait, et **la valeur annoncée était fausse d'un facteur sept**. L'erreur a survécu
+vingt et une sessions, six audits, deux revues croisées — et un dossier de banc entier qui s'appuyait
+dessus pour fixer une borne.
+
+Le mécanisme n'est pas l'inattention. **Un énoncé qui a la forme d'un résultat désactive la
+vérification** : on ne recalcule pas un résultat, on le cite. Une formule accompagnée de ses
+constantes ressemble à un aboutissement, alors qu'elle est un raisonnement — et un raisonnement se
+refait.
+
+**Réflexe** : repérer les formules **dont dépend une décision** — pas toutes, celles-là — et les
+refaire une fois, avec leurs constantes, en écrivant le calcul intermédiaire. Le coût est de quelques
+minutes par formule. Le signe qu'il faut le faire : la formule est citée ailleurs que là où elle a
+été écrite.
+
+## L135 — Un opérateur peut changer de nature sans erreur, et continuer à produire des nombres plausibles
+
+*(B-S26)* Un amortissement s'écrivait `×(1 − σ·dt)`. Au-delà de `σ·dt = 1` le facteur devient négatif ;
+une saturation à zéro l'en empêche, et la maille cesse d'être amortie : elle est **écrasée** à l'état
+de repos à chaque pas. L'opérateur est devenu autre chose — sans plantage, sans avertissement, et en
+rendant des valeurs qui avaient l'air meilleures que les précédentes.
+
+C'est le cas dangereux. Un opérateur qui explose se signale ; un opérateur qui **dégénère** continue
+de fonctionner, et ce qu'il mesure n'a plus le sens qu'on lui prête. Les protections écrites pour la
+robustesse — saturations, valeurs de repli, bornes de sécurité — sont précisément les endroits où
+cela se produit, parce qu'elles sont conçues pour que rien ne se voie.
+
+**Réflexe** : à côté de chaque saturation ou repli, se demander *dans quel régime il s'active*, et
+**faire afficher ce régime dans la sortie**. Ici, une colonne `σ·dt` avec un marqueur au-delà de 1 a
+suffi : sans elle, trois lignes d'un tableau auraient été lues comme mesurant ce que les autres
+mesuraient.
+
+## L136 — Un témoin sépare ce qu'on mesure de ce qui traîne avec
+
+*(B-S26)* Il fallait mesurer ce qu'une frontière absorbante réfléchit. Le train d'ondes parcourt deux
+cents mètres avant de revenir à la jauge, et **il perd 10 % de son amplitude en route**, par
+dissipation du schéma. Sans précaution, ces 10 % sont comptés comme de l'absorption : le dispositif
+est crédité d'une qualité qui appartient à la route.
+
+La parade a coûté un essai de plus — le même montage avec l'absorption **désactivée**, où le bord
+redevient un mur parfait. Le rapport des deux élimine tout ce qui est commun aux deux trajets. Et le
+témoin lui-même est une mesure utile : s'il s'écarte trop de 1, c'est la résolution qui est en cause,
+et la mesure principale ne veut plus rien dire.
+
+**Réflexe** : dès qu'une grandeur se mesure **après un trajet, un délai ou une chaîne de traitement**,
+prévoir l'essai identique où le dispositif étudié est neutralisé. C'est la différence entre mesurer
+un effet et mesurer un effet **plus tout ce qui l'accompagne** — et le second est toujours plus
+flatteur.
