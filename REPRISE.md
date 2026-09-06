@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-05
-Session en cours : —
+JETON            : occupé
+Battement        : 2026-09-06
+Session en cours : S22 — C01, le repos hydrostatique sur pente, et le premier δ
 Dernière session : S21 — 2026-09-05 — H3 : le cas analytique trouve le premier vrai bug
-Session suivante : S22 — C01 et le premier solveur *(recommandé)*, ou H2
+Session suivante : S23 — C02 sur δ et λ_cut, ou H2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :

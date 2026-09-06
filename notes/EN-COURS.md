@@ -59,89 +59,62 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S21
-État             : terminée
-Battement        : 2026-09-05
-Objectif         : H3 — les cas canoniques analytiques et le mode `physics`
+Session          : S22
+État             : en cours
+Battement        : 2026-09-06
+Objectif         : C01 — le repos hydrostatique sur pente, et le premier δ
 ```
 
 ### Plan
 
-H1 vérifie que le code est **reproductible**. Il ne vérifie pas qu il est **juste** : un hash stable
-peut être stable et faux. H3 est le premier étage qui confronte le code à des références
-**extérieures** — des solutions fermées que rien de ce que j écris ne peut influencer.
+C01 est décrit dans `CAS-CANONIQUES` comme « le test le moins spectaculaire, le plus rapide, et
+celui qui élimine le plus de candidats ». Il n'a besoin d'aucune houle, d'aucun corps, d'aucun
+réseau : de l'eau au repos sur un fond incliné, et la question de savoir si elle y reste.
 
-- [x] **P1** — plan, jeton.
-- [x] **P2** — mode `physics` : cadre d assertions, mesure contre référence, tolérance déclarée.
-- [x] **P3** — les cas analytiques que `B` seul permet, et ils sont plus nombreux qu il n y paraît :
-  dispersion **mesurée sur le champ** et non lue dans la configuration, restitution de `Hs` par la
-  variance, identité de la vitesse orbitale, pente maximale, homogénéité spatiale.
-  *Thèse : au moins un de ces cas va échouer. Une référence analytique n a d intérêt que si elle
-  peut me contredire, et je n ai jamais vérifié la cinématique de `B` autrement qu en la relisant.*
-- [x] **P4** — exécuter, constater, corriger.
-- [x] **P5** — **C10, le cube flottant** : premier calcul de force, et première référence fermée sur
-  autre chose que la cinématique — tirant d eau `d = m/(ρA)`.
-  *Fait après P6, l'ordre des commits le montre — sans conséquence, mais dit ici plutôt que tu.*
-- [x] **P6** — notes correctives, index, angles morts.
-- [x] **P7** — rituel de fin.
+**Ce que cette session ne fait pas.** Elle ne choisit pas le solveur δ du projet — ce choix est le
+banc **B3**, et ADR-007 §5 liste cinq candidats sans en privilégier aucun. Ce qui est écrit ici est
+un **véhicule d'essai**, étiqueté comme tel, exactement comme `background.rs` l'est pour `B` : il
+donne à C01 quelque chose à faire tomber. Le livrable durable est le **cas**, pas le solveur.
+
+*Thèse déclarée avant l'exécution : le schéma évident échoue C01.* Le gradient de pression et le
+terme de fond sont deux discrétisations différentes de la même quantité ; sur un fond incliné elles
+ne s'annulent pas, et l'eau au repos se met à couler. Si la thèse est fausse, c'est mon montage qui
+est trop facile, pas le schéma qui est bon — et il faudra le dire.
+
+- [ ] **P1** — plan, jeton.
+- [ ] **P2** — `delta.rs` : grille 1D, état conservatif `(h, hu)`, flux de Rusanov, pas de temps
+      CFL. Fond plat d'abord, où le repos est trivialement exact. Test de repos sur fond plat.
+- [ ] **P3** — le terme de fond au premier jet, la pente 1:20, et C01 branché dans le mode
+      `physics` : `max|u|` et `max|η − η₀|` mesurés sur le champ après 60 s.
+- [ ] **P4** — exécuter, constater, **mesurer** l'amplitude du courant parasite. Un chiffre, pas
+      une impression.
+- [ ] **P5** — reconstruction hydrostatique (Audusse) : le schéma équilibré. Réexécuter, comparer
+      les deux chiffres dans le même rapport.
+- [ ] **P6** — **ADR-030** : ce que C01 a appris, et pourquoi « équilibré sur fond variable » est un
+      critère d'**élimination** pour B3, connu avant le banc et non découvert pendant.
+- [ ] **P7** — répercussions : `CAS-CANONIQUES`, `cas_en_attente()`, index, angles morts, notes
+      correctives, décomptes.
+- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
-- **Ce que H3 ne couvrira pas, et pourquoi.** Douze des seize cas canoniques ont une référence
-  fermée ; la plupart demandent `W` ou `δ`, qui n existent pas. H3 livre donc les cas que la couche
-  `B` permet, et **dit lesquels attendent quoi**. Un H3 qui prétendrait couvrir C04 sans solveur
-  serait un H3 qui ment.
-- **Le cas le plus fort est la dispersion mesurée sur le champ**, et non lue dans les paramètres :
-  `configure` calcule `k = ω²/g`, donc vérifier `k` contre les paramètres ne prouverait que ma
-  propre arithmétique. Mesurer une longueur d onde et une période **dans le champ échantillonné**,
-  puis vérifier `λ = gT²/2π`, teste l implémentation entière — phases, sinus, conversion de
-  position.
+#### Le dépôt a forké une seconde fois — constaté à l'ouverture de S22
 
-#### P2 à P4 — la thèse était juste, et le cas analytique a trouvé le bug
+`git worktree list` et `git branch -a`, les deux commandes qu'`CLAUDE.md` impose, ont montré ceci :
 
-**Quatre échecs au premier passage. Un seul venait du cœur.**
+| Ligne | Sessions | Contenu propre |
+|---|---|---|
+| `master` (et `claude/reprise-projet-s22-715339`) | S08 → **S17** | la fusion S16, qui a importé l'autre ligne jusqu'à S15 |
+| `claude/reprise-projet-5134cd` | S08 → **S21** | ADR-027 à ADR-029, `code/`, H1 et H3 |
 
-**Le bug du cœur** : la vitesse orbitale était **en quadrature au lieu d en phase** avec
-l élévation. Airy en eau profonde donne u = a·ω·sin(φ) — en phase avec η — et w = a·ω·cos(φ). Mes
-deux lignes étaient inversées. Conséquence physique : **sous une crête, l eau n avançait pas**, elle
-montait. Le cas `u/η = ω` l a fait tomber au premier passage ; la relecture ne l avait jamais vu, et
-le hash de H1 était parfaitement stable — stable et faux, ce que H1 ne peut pas distinguer.
+Point de divergence commun : `8fe1503` (S07) — **le même fork que `FORK-S08-S15.md` décrit**, jamais
+refermé du côté git. La fusion de S16 a été faite **par import de contenu**, pas par un merge : la
+ligne source ne l'a donc jamais reçue et a continué seule pendant quatre sessions.
 
-**Deux bugs de mes tests** : un temps renvoyé en secondes et réadditionné à l instant de départ
-(période mesurée : 10¹⁵ s) ; et un contrôle d homogénéité échantillonnant à 5 000 m, au-delà du rayon
-de référentiel. **Le champ avait raison** — I-08 refuse au-delà de 4096 m, et `eval` renvoyait
-`None`. La propriété révélée par mon erreur méritait son propre cas : elle en a un.
+**Ce que S22 a fait :** repartir de `a6cfe6f` (S21, la ligne la plus avancée et la seule dont le
+`REPRISE.md` annonce S22) sur une branche `claude/s22-suite`, **sans rien réécrire**. `master` est
+intact.
 
-Après correction, **8 cas sur 8** sur le scénario monochromatique. La dispersion, mesurée entièrement
-dans le champ — longueur d onde par passages à zéro, période par passages à zéro en un point fixe —
-retrouve λ = gT²/2π **à 0,000 %**.
-
-**Et le mécanisme de non-régression a fonctionné** : le champ ayant changé, les deux hashs de
-conformité sont tombés. C est l effet recherché, et la bénédiction se fait dans un commit séparé.
-
-**Limite de mesure à consigner** : sur le scénario à 32 composantes, la restitution de Hs par la
-variance donne 8,5 % d écart. Ce n est pas un défaut du champ mais de la **fenêtre** — la plus longue
-composante fait 225 m de long et la fenêtre 384 m, soit 1,7 longueur d onde. Une estimation de
-variance a besoin de plusieurs longueurs d onde de la **plus longue** composante.
-
-#### P5 — C10, et ce qu'il faut savoir avant de le prolonger
-
-- **`ρ_eau` n'était fixée nulle part** dans le corpus. `body.rs` la pose à **1000** parce que c'est la
-  seule valeur avec laquelle les deux références de C10 se referment. L'eau de mer vaut ≈**1025** et
-  déplacerait tout tirant d'eau de 2,5 %, contre une tolérance de 1 %. **À arbitrer** — A103.
-- **Deux des quatre cas de C10 sont quasi tautologiques** : la référence `ρ·g·A` sort de la même
-  ligne que la mesure. Ils sont conservés — ils tomberont dès que la force cessera d'être linéaire,
-  masse ajoutée ou Froude-Krylov — mais classés comme tels dans le module. Ne pas les compter
-  comme des vérifications de plus.
-- **La bissection est le seul élément réellement indépendant** du cas : quatre-vingts itérations sur
-  la force, comparées à une formule que le solveur ignore. C'est elle qui tomberait sur un signe
-  inversé ou une saturation manquante.
-- **Le modèle suppose la ligne de flottaison plane** — valable pour `H ≪ λ`, soit 1 pour 50 dans le
-  montage de C10. Le jour où un corps approche la longueur d'onde, ce modèle n'est plus le bon, et
-  ce n'est pas un raffinement : c'est une intégration de pression sur la carène.
-
-#### État à la fin de S21
-
-`cargo test` : **18 tests**. `water-harness check` : 2 scénarios, 0 échec, **0,03 s** / 60.
-`water-harness physics` : **12 assertions**, 0 échec, et douze cas canoniques imprimés comme
-non exécutés. Jeton **libéré**.
+**Ce qui reste à trancher, et qui n'est pas à moi :** que faire du travail propre à `master`,
+S16-S17 — la carte de renumérotation, la revue de cadence sur les documents importés. Il n'est pas
+perdu ; il n'est pas non plus dans la ligne vivante. Angle mort à enregistrer en P7.
