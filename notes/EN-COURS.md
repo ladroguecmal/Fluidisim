@@ -83,8 +83,8 @@ seuil du tout.* « Nettement supérieure » (C07) et « sensiblement plus longue
 retrouver. Les vacuités (C15, C18) demandent un **témoin**, pas un seuil. Seul C11 demande vraiment
 un nombre neuf, et c'est celui qu'il faudra peut-être marquer « à calibrer ».
 
-- [ ] **P1** — plan, jeton.
-- [ ] **P2** — **C10**, masse ajoutée : `T_avec/T_sans = √(1 + m_a/m)`. Référence fermée, et le cas
+- [x] **P1** — plan, jeton.
+- [x] **P2** — **C10**, masse ajoutée : `T_avec/T_sans = √(1 + m_a/m)`. Référence fermée, et le cas
       est partiellement exécuté depuis S21 — donc vérifiable, pas seulement réécrit.
 - [ ] **P3** — **C07**, sillage transcritique : le facteur de résonance `1/√|1 − Fr_h²|` d'ADR-011
       §4. Attention, il **diverge à `Fr_h = 1`** : la mesure ne peut pas se faire au point critique,
@@ -111,3 +111,19 @@ un nombre neuf, et c'est celui qu'il faudra peut-être marquer « à calibrer »
 - **C04 en échec, `C01-jet` rouge, C08 sans verdict** : trois décisions.
 
 **Branche.** `claude/s22-suite`. `master` s'arrête à S17 (A107).
+
+#### P2 — C10 : le rapport ne dépend de rien, et c'est ce qui le rend assertable
+
+`T = 2π·√((m + m_a)/(ρ_eau·g·A))` donne `T_avec/T_sans = √(1 + m_a/m)`.
+
+**A26** pose que la masse ajoutée d'une coque vaut **environ la masse déplacée**. Et un corps qui
+flotte déplace, par Archimède, **exactement sa propre masse**. Donc `m_a ≈ m`, et le rapport vaut
+**√2 ≈ 1,414** — sans dépendre de la taille du cube, de sa densité ni de la profondeur : tout
+s'annule dans le quotient.
+
+> **Il n'y avait pas de seuil à choisir. Il y avait une formule à retrouver.**
+
+**Assertion : `T_avec/T_sans = 1,414 ± 15 %`**, la tolérance encodant le mot « environ » d'A26 —
+`m_a/m ∈ [0,5 ; 1,5]` donne `[1,225 ; 1,581]`, soit −13 % à +12 %. **Contrôle indépendant** : le
+disque équivalent de même aire, `m_a = (8/3)ρR³` avec `R = a/√π`, donne **1,399**. Les deux voies
+concordent à 1 % sans rien partager.

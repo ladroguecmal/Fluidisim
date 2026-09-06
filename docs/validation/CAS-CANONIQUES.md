@@ -308,6 +308,35 @@ T = 2π·√(ρ_corps·H / (ρ_eau·g)) = 1,00 s
 **Assertions.** tirant à ±1 % ; période à ±5 % dans la variante sans masse ajoutée ; **période
 sensiblement plus longue** dans la variante avec masse ajoutée.
 
+> **Note corrective S30 — « sensiblement plus longue » n'a pas de seuil, et il n'y en a pas besoin :
+> la théorie donne le rapport, et il ne dépend de rien.**
+>
+> La période de pilonnement vaut `T = 2π·√((m + m_a)/(ρ_eau·g·A))`, donc :
+>
+> ```
+> T_avec / T_sans = √(1 + m_a/m)
+> ```
+>
+> **A26 pose que la masse ajoutée d'une coque vaut environ la masse déplacée.** Or un corps qui
+> flotte déplace, par Archimède, **exactement sa propre masse** — donc `m_a ≈ m`, et :
+>
+> > **`T_avec / T_sans = √2 ≈ 1,414`**
+>
+> **Ce rapport ne dépend ni de la taille du cube, ni de sa densité, ni de la profondeur.** Il
+> s'annule dans le quotient. C'est une référence fermée là où l'énoncé n'attendait qu'une
+> impression.
+>
+> **Assertion de remplacement : `T_avec/T_sans = 1,414 ± 15 %`.** La tolérance n'est pas choisie :
+> elle encode le mot « environ » d'A26. Un coefficient de masse ajoutée `m_a/m ∈ [0,5 ; 1,5]` —
+> l'écart usuel pour un corps flottant, la masse ajoutée en pilonnement étant dépendante de la
+> fréquence — donne un rapport dans `[1,225 ; 1,581]`, soit −13 % à +12 %.
+>
+> **Contrôle indépendant** : le modèle du disque équivalent de même aire — `m_a = (8/3)·ρ·R³` avec
+> `R = a/√π` — donne `m_a = 59,9 kg` pour `m = 62,5 kg`, soit un rapport de **1,399**. Les deux
+> chemins concordent à 1 %, par des voies qui ne partagent rien.
+>
+> Voir [`AUDIT-ASSERTIONS-S29`](../registres/AUDIT-ASSERTIONS-S29.md) §2.
+
 L'écart entre les deux variantes *est* le test de la masse ajoutée (angle mort A26). S'il est nul,
 elle n'est pas implémentée.
 
