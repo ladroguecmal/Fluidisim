@@ -79,20 +79,20 @@ Le second point est de loin le plus lourd, et il n'est pas de la logistique : il
 catégorie « attend une réponse d'une autre équipe », qui structure le corpus depuis S02.
 
 - [ ] **P1** — déclarer le plan, prendre le jeton, mettre à jour le battement.
-- [ ] **P2** — `ADR-028` §1–2 : ADR-020 acté · **ce que « il n'y a pas d'autres équipes » change**.
+- [x] **P2** — `ADR-028` §1–2 : ADR-020 acté · **ce que « il n'y a pas d'autres équipes » change**.
   *Thèse : quatorze « demandes extérieures » ne sont pas des demandes. Ce sont des **décisions
   différées à personne**. C'est L61 à l'échelle du corpus — l'étiquette « attend un tiers » a protégé
   quatorze questions de l'examen qui les aurait tranchées.*
-- [ ] **P3** — `ADR-028` §3 : **les positions monde**, tranchées faute d'interlocuteur.
+- [x] **P3** — `ADR-028` §3 : **les positions monde**, tranchées faute d'interlocuteur.
   *Thèse : le choix se dérive au lieu de se choisir. La résolution du point fixe se déduit de l'ulp
   d'un `f32` au rayon de référentiel — 4096 m — et le déterminisme devient structurel au lieu d'être
   disciplinaire.*
-- [ ] **P4** — `ADR-028` §4 : **la propriété du harnais, révisée**. ADR-027 §6 confiait les seuils à
+- [x] **P4** — `ADR-028` §4 : **la propriété du harnais, révisée**. ADR-027 §6 confiait les seuils à
   une assurance qualité qui n'existe pas.
   *Thèse : avec un acteur unique, le conflit d'intérêt ne se supprime pas, il se contraint dans le
   temps — les seuils s'écrivent **avant** la mesure, dans un commit qui la précède. C'est l'écriture
   anticipée de S07 appliquée à la mesure.*
-- [ ] **P5** — `ADR-028` §5–6 : le dossier de réunion requalifié · ce qui reste ouvert.
+- [x] **P5** — `ADR-028` §5–6 : le dossier de réunion requalifié · ce qui reste ouvert.
 - [ ] **P6** — répercussions : `REPRISE.md` §1 et §5, `CLAUDE.md`, `00_INDEX.md`,
   `DOSSIER-REUNIONS.md`, ADR-020, ADR-002 §7.1, SPEC-003 §11.4.
 - [ ] **P7** — angles morts, décomptes.
@@ -108,3 +108,22 @@ catégorie « attend une réponse d'une autre équipe », qui structure le corpu
   convertir dix-huit sessions de conception en quelque chose qui s'exécute et se vérifie.
   Une réserve à lever avant : `CLAUDE.md` pose « **Markdown uniquement** ». Écrire H1 ajoute du code
   à un dépôt qui n'en contient pas — c'est un changement de nature, et il se demande.
+
+#### P2 à P5 — ADR-028, six sections
+
+**La requalification est le fond de la session.** Quatorze demandes extérieures deviennent : une
+actée, une décision technique tranchée, une décision d organisation sans objet, sept spécifications
+d un travail à faire, trois questions de design de jeu sans jeu, trois déjà tranchées en S18.
+
+**Règle retenue** : une session ne classe plus rien en « attend une autre équipe ». Elle classe en
+« à trancher, sans interlocuteur ». La première formulation ferme la question, la seconde la laisse
+dans le champ de travail — et c est exactement la différence qui a coûté dix-sept sessions.
+
+**Les positions monde se dérivent.** Résolution 1/2048 m = l ulp exact d un f32 à 4096 m, le rayon de
+référentiel d I-08. Seule valeur qui ne perde rien à la conversion et n en stocke pas davantage.
+Motif principal : le déterminisme d I-03 devient **structurel** — un entier se comporte pareil
+partout, sans dépendre d un drapeau de compilation. L19 appliquée au déterminisme.
+
+**Le harnais** : le conflit d intérêt ne se supprime pas faute de second acteur, il se contraint dans
+le temps. Un seuil s écrit **avant** la mesure qu il juge, dans un commit qui la précède. C est
+l écriture anticipée de S07 appliquée à la mesure, avec le même détecteur — git.
