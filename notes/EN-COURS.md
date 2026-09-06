@@ -77,7 +77,7 @@ je crois y avoir mis n'est pas ce qui y est. Chaque contrôle part du texte du c
 l'intention.
 
 - [ ] **P1** — déclarer le plan, prendre le jeton, mettre à jour le battement.
-- [ ] **P2** — SPEC-006 contre les **17 invariants** et contre les ADR qu'il sert
+- [x] **P2** — SPEC-006 contre les **17 invariants** et contre les ADR qu'il sert
   (ADR-012 budgets et dégradation, ADR-014, ADR-016, ADR-018, ADR-021 autorité).
   *Thèse : un document d'interface écrit vite viole d'abord les invariants de ressources — I-06
   allocation, I-16 profil — parce qu'ils ne se voient qu'en additionnant des tailles.*
@@ -105,3 +105,74 @@ l'intention.
 - **Attente** : S08 avait trouvé dix écarts dont deux de gravité 1 sur un corpus plus relu que
   celui-ci. Si cette session en trouve nettement moins, la première hypothèse à écarter est que
   l'audit a été mené de mémoire.
+
+#### P2 — SPEC-006 contre les 17 invariants et les ADR qu'il sert
+
+**E01, gravité 1 — l'invariant I-11 décrit un mécanisme supprimé depuis S05.**
+I-11 énonce : « Aucune énergie ne franchit la frontière client → serveur sans borne validée. **Toute
+demande d'événement issue d'un client est plafonnée par une cause connue du serveur.** »
+Or ADR-021 §3.1 : « Le chemin d'énergie client → serveur **disparaît**. […] Le mécanisme de
+plafonnement d'ADR-009 §3 devient **sans objet**. »
+La seconde phrase de l'invariant décrit donc un plafonnement qui n'existe plus. L'intention est
+mieux servie qu'avant — il n'y a plus de chemin du tout — mais l'énoncé impose un mécanisme aboli.
+Trouvé en confrontant la table d'autorité de SPEC-006 §2.6 aux invariants.
+C'est la **troisième instance** de la classe A78 : la correction s'est propagée vers ADR-005 et
+ADR-009, pas vers l'invariant qui les citait. Et un invariant est le document qu'on cite pour
+refuser une proposition. Ni S05 — qui a pourtant produit ADR-021 — ni S08 ni S11 ne l'ont vu : S11
+auditait les points ouverts, et un invariant n'en est pas un.
+**Un invariant ne se change que par un ADR explicite → ADR-024.**
+
+**E02, gravité 2 — deux échelles de rangs de dégradation partagent une numérotation.**
+ADR-012 §4 numérote sept rangs (rang 5 = détruire les domaines non focaux). SPEC-006 §7 en numérote
+cinq (rang 5 = élaguer les événements locaux du bus) et se dit « cohérent avec les rangs
+d'ADR-012 §4 ». Deux échelles indépendantes, mêmes numéros, dans deux documents qui se citent.
+Aggravant depuis S12 : ADR-022 §2.6 a ajouté « **le rang 5 ne s'applique pas aux domaines
+substitutifs** », règle qui porte sur l'échelle d'ADR-012. Un lecteur qui la rapporte à SPEC-006
+comprendrait qu'on n'élague pas les événements de transduction dans un déferlement — contresens
+complet.
+
+**E03, gravité 2 — `ring_slots` a deux règles de dérivation qui peuvent se contredire.**
+SPEC-006 §2.5 : « `ring_slots` se calcule à l'initialisation à partir du **coût mesuré d'un
+instantané et de la mémoire allouée** au canal ».
+SPEC-006 §3.4 : « `ring_slots ≥ (cadence_bus / cadence_du_consommateur_le_plus_lent) + 1`, soit au
+moins **4 emplacements** pour un consommateur à 10 Hz ».
+Les deux règles sont dans le même document, à une section d'écart, et rien ne dit laquelle l'emporte
+si la mémoire n'en autorise que deux. Le défaut se manifesterait par des pertes d'événements
+silencieuses — que `sequence` rend constatables, ce qui est une consolation et non une réponse.
+
+**E04, gravité 3, mais il a traversé quatre documents — `WaveEvent` ne fait pas 45 octets.**
+Somme des champs déclarés en SPEC-006 §3.1 : `id` 8 + `frame_id` 4 + `origin_local` 6 + `cell` 8 +
+`t_birth` 8 + `kind` 1 + `energy` 2 + `dir` 4 + `lambda` 2 + `ttl_hint` 2 = **45**, puis
+`material_id` 2 + `displaced_l` 2 + `flags` 1 = **50 octets**, et non 45.
+En remontant : la structure d'origine d'ADR-009 §2, annoncée à **40 octets**, en sommait déjà **45**.
+SPEC-006 a donc ajouté 5 octets à une base fausse et retrouvé par coïncidence la taille réelle de
+l'original.
+Propagation : ADR-009 §2 (40 o, 800 o/s) → SPEC-003 §8 (« 40 o pièce ») → SPEC-006 §3.1 (45 o,
+900 o/s) → ADR-022 §4.2 (« 45 o pièce », ≈180 Ko). Valeurs justes : **50 o**, 1 000 o/s, ≈205 Ko.
+**Aucune conclusion ne change** — tout reste négligeable — mais c'est la première erreur
+*arithmétique* trouvée dans le corpus, et elle est dans une structure. S08 avait revérifié les
+formules et les tables ; personne n'avait additionné les champs d'un `struct`.
+
+**E05, gravité 3 — la charge d'actifs du serveur est énoncée en deux moitiés.**
+SPEC-006 §2.6 : le serveur peut évaluer la traversabilité, « toutes les entrées sont analytiques ou
+cuites » — ce qui suppose bathymétrie et courants C1 chargés, sans le dire.
+ADR-022 §5.1 : « le serveur charge des données cuites », mais ne nomme que les `shape_lut`.
+Chacun est juste, aucun n'est complet, et c'est une contrainte de déploiement (A77) qu'une équipe
+serveur lira dans l'un ou dans l'autre.
+
+**Contrôles passés — six, sans écart.**
+· **I-06 et I-16** : `ring_slots` et le nombre d'auditeurs sont tous deux *dérivés* du profil et non
+déclarés (§2.5, §4.2), et §4.2 nomme R04 pour dire pourquoi. Exemplaire.
+· **I-15** : la table d'autorité de §2.6 est complète et chaque ligne est justifiée par ses entrées ;
+la contrainte « δ exclu » sur la traversabilité est posée comme conception, pas comme observation.
+· **I-04** : aucun canal ne fait remonter δ vers une décision ; le champ `F` est déclaré d'autorité
+locale et §4.4 dit ce qu'il faudrait faire si un besoin gameplay lui venait — scinder à la source,
+jamais moyenner.
+· **I-13** : §4.1 remet au rendu une poignée de texture GPU. Ce n'est **pas** un partage de structure
+de calcul au sens d'ADR-006 §5 : la texture est un produit publié, immuable sur le tick, et le rendu
+ne peut rien y écrire ni influencer la simulation par elle. Contrôle passé, mais la clarification
+mérite d'être écrite — quelqu'un invoquera I-13 pour refuser §4.1.
+· **Cadences** : toutes diviseurs entiers du tick à 30 Hz — 10 Hz = 3 ticks, 5 Hz = 6, 1/2 s = 60,
+1/30 s = 900. Vérifié une à une.
+· **ADR-021 §4** : le rang le plus bas de SPEC-006 §7 n'élague que `TransductionLocale` et
+`AnticipationLocale`, jamais `Serveur`. Transposition exacte, sans dérive.
