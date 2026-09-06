@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-07
-Session en cours : S38 — les saturations de modèle : filet ou maquillage
-Dernière session : S37 — 2026-09-07 — l'oracle croisé exercé : pas de faute de calcul, deux conventions incompatibles
-Session suivante : S38 — les saturations de modèle (S34-1, A146) *(recommandé)*, ou confronter C06 et C08 (S37-4)
+Session en cours : —
+Dernière session : S38 — 2026-09-07 — les saturations comptées : zéro en régime nominal, un détecteur muet en régime dégradé
+Session suivante : S39 — **trancher le seuil de sec** (S37-1, A163, sév. 1) *(recommandé)*, ou relire les cinq A de sévérité 1 (S35-5)
 ```
 
 > **Avant de regarder le jeton, exécuter `git worktree list` et `git branch -a`.** Le jeton est un
@@ -116,9 +116,9 @@ gaspillage le plus fréquent d'un projet de ce type.
 ## 4. Où en est le projet
 
 Trente-cinq sessions ici, **plus cinq dans une lignée parallèle réconciliée en S35** (B-S22 à
-B-S26) — **44 ADR** *(dont un acté)*, six spécifications, **onze registres** — **et du code qui
+B-S26) — **45 ADR** *(dont un acté)*, six spécifications, **douze registres** — **et du code qui
 tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équilibrés et **tous deux
-montés sur leurs cas et **confrontés l'un à l'autre** *(S37)*, **74 tests verts** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
+montés sur leurs cas, **confrontés l'un à l'autre et instrumentés** *(S38)*, **77 tests verts** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
 verdict** (C08). Quatre cas canoniques sur δ sont exécutés ici : **C01 et C03 passent**, C04 échoue,
 C08 ne conclut pas. **La lignée réconciliée en donne d'autres verdicts, et l'écart a une cause
 unique** : elle est passée à l'ordre deux, et C04 comme C08 y sont verts (`CAS-CANONIQUES`, « deux
@@ -179,6 +179,23 @@ solution exacte connue, la comparaison croisée **dégénère** en mesure d'erre
 > les deux valeurs déplace la position du front, donc le verdict de C04, donc le critère d'entrée au
 > banc B3 d'`ADR-031`. Ce serait changer une décision par une retouche de constante. Action
 > **S37-1**.
+
+**Et S38 a compté les saturations du solveur, reportées quatre fois.** Le soupçon d'`A146` — un
+solveur qui produirait des états impossibles derrière un `h.max(0)` complaisant — **tombe** : zéro
+déclenchement en régime nominal, sur trois cas, deux véhicules, cinquante mille pas. Mais le
+compteur qui l'établit dit autre chose : la saturation **mord** dès qu'on sort de la condition de
+Courant — la frontière mesurée tombe exactement dessus — et là elle ne rattrape rien : masse créée
+à **10¹⁷ fois le volume**, quantité de mouvement débordant vers `NaN`.
+
+> **Ce n'est pas un filet, c'est un détecteur de divergence, et il était muet.** Il convertit une
+> divergence franche — qui aurait produit des `NaN` visibles — en une suite de nombres finis qui
+> ressemblent à un résultat. Le danger n'est pas la fréquence, c'est le silence (**L147**).
+> [`ADR-045`](docs/adr/ADR-045-la-saturation-est-un-detecteur-pas-un-filet.md) le requalifie et
+> expose le compteur : **un déclenchement est désormais un échec du cas**.
+
+Et le résidu que S37 avait laissé ouvert est élucidé : ce n'est pas la saturation, c'est encore le
+seuil de sec — *un seuil de sec n'assèche pas une cellule, il l'empêche seulement de bouger*
+(**A165**, **L148**). **Trois sessions de suite ont maintenant croisé ce seuil sans le trancher.**
 
 **Et S27 a trouvé un trou que sept sessions n'avaient pas vu, grâce à une source extérieure.**
 SPEC-001 §2.1 borne le pas de temps par `u_max` **sans jamais définir `u_max`**, quand SPEC-004 §10.1

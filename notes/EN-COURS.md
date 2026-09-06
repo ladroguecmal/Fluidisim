@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S38
-État             : en cours
+État             : terminée
 Battement        : 2026-09-07
 Objectif         : Les saturations de modèle — filet ou maquillage, et combien de masse elles créent
 ```
@@ -118,7 +118,7 @@ indiscernables tant que personne ne compte** (A146).
 - [x] **P7** — l'ADR-045, A165, et la requalification datée d'A146.
 - [x] **P7b** — exposer les compteurs au rapport du mode `physics` (décision D1).
 - [x] **P8a** — rituel : journal, leçons L147-L149, actions S38-1 à S38-4.
-- [ ] **P8b** — rituel : index, décomptes, jeton libéré.
+- [x] **P8b** — rituel : index, décomptes, jeton libéré.
 
 ### Notes de reprise
 
