@@ -78,11 +78,11 @@ préalable.
   d'une autre équipe, qui passe devant ce qui bloque un banc. Je m'attends à ce que l'ordre change,
   et notamment que « qui possède le harnais » remonte très haut : il conditionne H1, qui conditionne
   la première ligne du solveur.*
-- [ ] **P3** — dossier §1–2 : comment le lire, et le tableau de synthèse ordonné.
-- [ ] **P4** — dossier §3 : les fiches de rang 1 et 2 — ce qui bloque du code, ce qui bloque un
+- [x] **P3** — dossier §1–2 : comment le lire, et le tableau de synthèse ordonné.
+- [x] **P4** — dossier §3 : les fiches de rang 1 et 2 — ce qui bloque du code, ce qui bloque un
   format extérieur.
-- [ ] **P5** — dossier §4 : les fiches de rang 3 et 4 — données à obtenir, cadrages.
-- [ ] **P6** — dossier §5–6 : **ce que nous ne demandons pas** — la section qui évite les
+- [x] **P5** — dossier §4 : les fiches de rang 3 et 4 — données à obtenir, cadrages.
+- [x] **P6** — dossier §5–6 : **ce que nous ne demandons pas** — la section qui évite les
   malentendus coûteux — et ce qui reste ouvert.
 - [ ] **P7** — index, angles morts, décomptes.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6) : journal S17, leçons, index, jeton libéré.
@@ -145,3 +145,20 @@ ils ne le sont pas :
 **L'arbitrage n°1 est le plus lourd du projet et il est présenté comme le premier d'une liste de
 cinq.** Si la réponse est « oui », ce n'est pas un paramètre qui change : c'est le modèle de
 réplication qui tombe pour l'océan concerné. Le dossier doit le dire ainsi.
+
+#### P3 à P6 — dossier écrit d un tenant
+
+`docs/DOSSIER-REUNIONS.md`, seize fiches et sept sections. Comme en S16, le découpage du plan s est
+révélé artificiel : les fiches se tiennent par leur classement, et couper au milieu aurait produit
+des commits illisibles seuls. Fait en un, déclaré ici.
+
+**Trois choses que le dossier fait apparaître et que l index ne portait pas :**
+- **quatorze demandes, pas onze.** Acter ADR-020 et figer `WaveEvent` après l audio sont deux
+  demandes distinctes, adressées à deux destinataires que la liste ne nommait pas ;
+- **les fiches 1 et 2 n ont pas de destinataire nommé** — « direction technique » et « assurance
+  qualité technique » sont des rôles, pas des personnes. Personne n est identifié pour acter ADR-020
+  ni pour arbitrer la propriété du harnais. C est la condition préalable à la tenue des réunions
+  elles-mêmes, et cela n était écrit nulle part ;
+- **une section « ce que nous ne demandons pas »**, sept lignes. Elle évite qu une équipe se croie
+  sollicitée ou nous attribue une intention — en particulier « attendre que l eau soit finie pour
+  commencer », que seules les quatre premières fiches justifieraient.
