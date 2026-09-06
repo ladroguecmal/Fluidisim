@@ -887,3 +887,67 @@ ces données-là peuvent la révéler**. Si la réponse n'est pas immédiate, le
 Le corollaire tient en une ligne : un test de non-associativité a besoin d'ordres de grandeur
 hétérogènes, un test de précision a besoin de valeurs proches de l'ulp, un test de saturation a besoin
 du cas extrême du projet — et jamais de la valeur moyenne.
+
+## L67 — Le déterminisme et la justesse sont deux propriétés sans rapport
+
+*(S21)* La couche `B` produisait un champ dont le hash de conformité était parfaitement stable d'une
+exécution à l'autre, d'une construction à l'autre, au bit près. Il l'était : le champ était
+**reproductible**. Il était aussi **faux** — la vitesse orbitale en quadrature au lieu d'en phase,
+c'est-à-dire de l'eau qui n'avance pas sous une crête.
+
+Le point n'est pas qu'un test de déterminisme soit insuffisant : c'est qu'**aucun raffinement d'un
+test de déterminisme ne s'approche de la justesse**. Plus de points d'échantillonnage, plus de
+grandeurs hachées, plus de plateformes comparées : rien de tout cela ne rapproche d'un défaut de
+physique, parce que ce n'est pas la même dimension. Un projet peut donc accumuler une couverture
+déterministe impressionnante et n'avoir vérifié aucune équation.
+
+**Réflexe** : pour toute batterie de tests, se demander laquelle des deux questions elle répond —
+*« le même deux fois ? »* ou *« le bon ? »* — et vérifier qu'il existe des tests de l'autre famille.
+Si la réponse est « les tests sont verts », la question n'a pas été comprise.
+
+## L68 — Un écart nul est un signal à examiner, pas un résultat à encaisser
+
+*(S21)* Quatre cas de C10 affichaient tous **0,000 %**. Deux étaient de vrais succès ; les deux
+autres comparaient une force construite comme `ρ·g·A·d` à la référence `ρ·g·A` — la mesure et la
+référence partageaient une ligne de code. Ils ne pouvaient pas échouer.
+
+Un écart nul parfait, sur une grandeur qui traverse un calcul numérique, est rare et donc suspect :
+il signifie le plus souvent que la référence n'est pas indépendante de la mesure. Un vrai succès
+laisse une trace d'arrondi. Et le rapport ne distingue pas les deux : **la tautologie et la
+démonstration s'y affichent identiques**, ce qui rend le défaut invisible à la lecture du résultat.
+
+**Réflexe** : devant un `0,000 %`, remonter à la référence et se demander de quelle ligne de code
+elle sort. Si c'est de la même que la mesure, le cas ne prouve rien — le dire dans le cas lui-même,
+pas dans un registre séparé, et classer les cas d'une batterie par degré d'indépendance plutôt que de
+les compter comme égaux.
+
+## L69 — Une constante qu'aucun document ne fixe est choisie par le premier code qui en a besoin
+
+*(S21)* Vingt-et-une sessions, six spécifications, vingt-neuf ADR : la masse volumique de l'eau
+n'apparaissait nulle part. Le corpus citait `ρ_glace = 917`, le `ρ = 500` d'un cube de test, et les
+formules qui s'y rapportent — jamais la valeur à laquelle elles se rapportent. Elle a été fixée par
+le premier fichier qui a dû calculer une poussée, à la valeur qui faisait se refermer le cas de test.
+
+C'est le mécanisme qui compte, pas la constante : **une décision jamais posée n'est pas une décision
+en attente, c'est une décision qui sera prise par accident**, et par le code le plus tardif, à
+l'endroit le moins visible, sur le critère le plus local. Elle ne ressemblera alors pas à un choix, et
+personne ne pensera à la rouvrir.
+
+**Réflexe** : quand une référence numérique se referme sur une valeur, vérifier que **chaque**
+constante qu'elle emploie est écrite quelque part dans le corpus. Celles qui manquent sont à poser
+explicitement, avec leur alternative et la conséquence chiffrée du choix — ici 2,5 % sur tout tirant
+d'eau, contre une tolérance de 1 %.
+
+## L70 — Une erreur de test qui révèle une propriété mérite que cette propriété devienne un cas
+
+*(S21)* Un contrôle d'homogénéité échantillonnait par erreur à 5 000 m, au-delà du rayon de
+référentiel de 4096 m. Le test échouait. Mais **le code avait raison** : `eval` refusait le point,
+conformément à I-08, et c'est le test qui en faisait un NaN.
+
+La réaction naturelle est de corriger la distance et de passer. C'est une perte : l'erreur venait de
+révéler qu'une propriété du système — le refus hors référentiel — n'était couverte par **aucun** cas,
+et personne ne l'aurait cherchée. Le bogue de test avait fait gratuitement le travail d'une revue.
+
+**Réflexe** : après avoir corrigé un test fautif, se demander *pourquoi il a échoué plutôt que de
+mal passer*. Quand la réponse est « parce que le code a correctement refusé », il y a là une
+propriété active que rien ne teste : lui donner son propre cas, avant de corriger l'original.

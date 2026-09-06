@@ -1623,3 +1623,119 @@ C'est l'étage qui débloque B1, B2 et B9, et surtout le premier qui confronte l
 rupture de barrage — quatre solutions fermées que rien de ce que j'écris ne peut influencer.
 
 Second candidat : H2, métriques et séries temporelles, qui débloque la surveillance de dérive.
+
+---
+
+## S21 — 2026-09-05 — H3 : le premier cas analytique trouve le premier vrai bug
+
+**Consigne reçue.** « Enchaîne avec S21 ».
+
+**Sorties.** `code/water-harness/src/physics.rs` — le mode `physics`, douze assertions analytiques ;
+`code/water-core/src/body.rs` — la flottaison statique, première **force** du cœur ; **une correction
+du cœur** dans `background.rs` ; note S21 dans
+[`ADR-029`](../docs/adr/ADR-029-ce-que-la-premiere-ligne-de-code-a-appris.md) ; note corrective datée
+sur C10 dans [`CAS-CANONIQUES`](../docs/validation/CAS-CANONIQUES.md) ; registre porté à **104 angles
+morts** ; leçons L67 à L70.
+
+**Ça tourne.** `cargo test` : 18 tests au vert. `water-harness check` : deux scénarios, **0,03 s**
+contre 60. `water-harness physics` : **12 assertions**, 0 échec — et la liste des douze cas
+canoniques qui attendent leur couche, imprimée à chaque exécution.
+
+### Le résultat de la session tient en une phrase
+
+**La vitesse orbitale de la couche `B` était en quadrature au lieu d'être en phase avec l'élévation.**
+Airy en eau profonde donne `u = a·ω·sin(φ)` et `w = a·ω·cos(φ)` ; mes deux lignes étaient inversées.
+Conséquence physique, immédiate et visible : **sous une crête, l'eau n'avançait pas**, elle montait.
+Un bateau posé sur ce champ aurait été soulevé sans être entraîné — exactement le défaut qu'ADR-008
+§2 qualifie d'« immédiatement perceptible ».
+
+**Ce qui ne l'avait pas trouvé** : dix-neuf sessions de conception, six audits du corpus, deux revues
+croisées, et un hash de conformité H1 parfaitement stable — parce qu'il l'était. Le champ était
+reproductible, et faux.
+
+**Ce qui l'a trouvé, au premier passage** : une identité fermée qui ne dépend d'aucun paramètre du
+code, `u_horizontal = ω·η`. Écart mesuré : 100 %, le maximum qu'une telle comparaison puisse
+produire. Après correction : 0,000 %.
+
+La thèse déclarée en tête du plan — « au moins un de ces cas va échouer » — était donc juste, et pour
+une raison qui vaut d'être notée : **je n'avais jamais vérifié la cinématique de `B` autrement qu'en
+la relisant.** Une propriété qu'on n'a que relue n'est pas vérifiée.
+
+### Chiffres qui ont orienté la conception
+
+| Grandeur | Mesuré | Référence | Écart |
+|---|---|---|---|
+| Longueur d'onde, par passages à zéro dans le champ | 24,980957 m | 24,980960 m | **0,000 %** |
+| λ prédite par la période mesurée, `λ = gT²/2π` | 24,980960 m | 24,980957 m | **0,000 %** |
+| `u/η` au point d'élévation maximale | 1,570796 | `ω` = 1,570796 | **0,000 %** |
+| `Hs` par la variance — 1 composante | 1,9939 m | 2,0000 m | 0,305 % |
+| `Hs` par la variance — 32 composantes | 1,0977 m | 1,2000 m | **8,53 %** |
+| Tirant du cube de C10, par bissection | 0,250000 m | 0,250000 m | 0,000 % |
+
+**La ligne à retenir est la cinquième.** Le champ n'y est pour rien : la fenêtre d'échantillonnage
+fait 384 m et la plus longue composante 225 m, soit **1,7 longueur d'onde**. Une estimation de
+variance a besoin de plusieurs longueurs d'onde de la **plus longue** composante, pas de la moyenne —
+et c'est la moyenne qui vient à l'esprit quand on dimensionne la fenêtre. Piège de mesure, de la même
+famille que les six de SPEC-003 §6 ; angle mort A102.
+
+### Deux des quatre échecs venaient de mes tests, et le second était instructif
+
+Un temps rendu en secondes puis réadditionné à un instant absolu en microsecondes — période mesurée :
+10¹⁵ s. Et un contrôle d'homogénéité échantillonnant à 5 000 m, **au-delà du rayon de référentiel**.
+Sur celui-là, **le champ avait raison** : I-08 borne à 4096 m, `eval` renvoyait `None`, et mon test
+en faisait un NaN. Une erreur de test qui révèle une propriété mérite que cette propriété devienne un
+cas : elle en a un, et il passe.
+
+### C10 : la première force, et son honnêteté
+
+`body.rs` pose la flottaison statique — volume immergé saturé aux deux bouts, force verticale,
+équilibre par **bissection** sur quatre-vingts itérations. Quatre grandeurs de C10 deviennent
+mesurables **sans intégrateur** : tirant, force résiduelle, raideur `k = ρgA`, et la période
+qu'implique cette raideur, 1,003 s contre la référence 1,003 s.
+
+Les quatre affichent 0,000 %, et **c'est un signal, pas un résultat**. Seul le tirant est vraiment
+indépendant : trouvé numériquement, comparé à une formule que le solveur ignore. La raideur et la
+période sont quasi tautologiques — la force est construite comme `ρ·g·A·d`, en mesurer la dérivée ne
+teste guère que la différence finie. Le module les classe désormais par degré d'indépendance.
+L'en-tête de `physics.rs` posait pourtant la règle qui l'interdit, six cents lignes plus haut, dans
+le même fichier. Angle mort **A104**.
+
+### Une constante que vingt-et-une sessions n'avaient pas fixée
+
+`ρ_eau` n'apparaît **nulle part** dans le corpus. Six SPEC, vingt-neuf ADR, huit registres : la
+masse volumique de la glace est citée, celle du cube de C10 aussi, jamais celle de l'eau à laquelle
+elles se rapportent. Or les deux références de C10 ne se referment qu'avec **1000** — l'eau douce —
+alors que le projet parle de mer ouverte, où la valeur usuelle est 1025. L'écart vaut 2,5 % sur tout
+tirant d'eau, soit **deux fois et demie la tolérance de ±1 %** que C10 exige.
+
+`body.rs` la pose à 1000, avec sa justification et son alternative, en disant que c'est une
+convention et non une mesure. **Mais le fait notable n'est pas la valeur : c'est qu'une constante
+qu'aucun document ne fixe finit par être choisie par le premier code qui en a besoin** — et que ce
+choix ne ressemble alors pas à une décision. Angle mort A103, à arbitrer.
+
+### Ce qui n'a pas été fait
+
+- **Le hash inter-plateformes n'est toujours pas vérifié.** Une seule machine a exécuté ce code.
+  C'est le trou de S20, il est intact, et il est ce que C18 demande vraiment.
+- **La masse ajoutée n'existe pas**, donc la troisième assertion de C10 — la variante avec masse
+  ajoutée doit donner une période sensiblement plus longue — reste entièrement en attente. C'est
+  elle, et elle seule, qui teste A26.
+- **Douze cas canoniques sur vingt-et-un** attendent δ, W, V ou un intégrateur. Le harnais imprime
+  la liste à chaque exécution ; c'est la seule protection contre un rapport vert lu comme une
+  couverture.
+
+**Prochaine session recommandée.** **S22 — C01 et le premier solveur, ou H2.** Deux candidats, et
+l'argument penche :
+
+- **C01, repos hydrostatique sur pente** *(recommandé)* — c'est le premier cas qui demande `δ`, donc
+  le premier qui force à écrire un solveur, si minuscule soit-il. S21 vient de démontrer ce que vaut
+  une référence fermée confrontée à du code réel ; les onze cas restants attendent tous la même
+  chose, et aucun raffinement de `B` ne les approche. C'est aussi la porte de **B2**, dont le
+  dossier est écrit depuis S16 et n'attend que de quoi mesurer.
+- **H2, métriques et séries temporelles** — débloque la surveillance de dérive, mais surveille un
+  système qui n'a encore qu'une couche.
+
+**Arbitrages en attente.** Inchangés depuis S18-S19, plus un : **A103, la masse volumique de l'eau**
+— douce ou de mer. La question est petite, la réponse tient en un mot, et elle déplace toutes les
+références de flottabilité du projet de 2,5 %.
+

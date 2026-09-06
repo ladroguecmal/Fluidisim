@@ -12,10 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-05
-Session en cours : S21 — 2026-09-05 — H3, les cas canoniques analytiques
-Dernière session : S20 — 2026-09-05 — H1 écrit, compilé, vert
+Session en cours : —
+Dernière session : S21 — 2026-09-05 — H3 : le cas analytique trouve le premier vrai bug
+Session suivante : S22 — C01 et le premier solveur *(recommandé)*, ou H2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
@@ -104,8 +105,9 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Vingt sessions, **29 ADR** *(dont un acté)*, six spécifications, huit registres — **et du code
-qui tourne** : `code/`, étage H1 du harnais, 14 tests au vert. Les 30 sections du document de
+Vingt-et-une sessions, **29 ADR** *(dont un acté)*, six spécifications, huit registres — **et du
+code qui tourne** : `code/`, étages **H1 et H3** du harnais, 18 tests et 12 assertions analytiques
+au vert. Les 30 sections du document de
 questions ouvertes d'origine sont traitées. Les vingt premiers ADR ont été confrontés les uns aux
 autres en S05 (douze écarts, deux de gravité 1) et les cinq SPEC entre elles en S08 (dix écarts,
 deux de gravité 1). Tous résolus — le dernier, le **chemin poussé**, par l'écriture de `SPEC-006`
@@ -119,9 +121,15 @@ porte trois champs demandés par l'équipe audio. Elle doit être arrêtée **av
 fige son format ; l'élargir après coûtera une migration de protocole. C'est le seul point où
 attendre a un coût croissant.
 
-Chemin critique : `ADR-020 acté → H1 (cœur du harnais) → (C01, C02 → λ_cut → B2) et (H4 → B3) → B4`.
-**H1 doit précéder la première ligne du solveur** — c'est le seul élément du plan qui ne se
-rattrape pas.
+Chemin critique : `ADR-020 acté → H1 → H3 → (C01, C02 → λ_cut → B2) et (H4 → B3) → B4`. Les deux
+premiers maillons sont **faits** ; le suivant est C01, qui demande un `δ` si minuscule soit-il.
+
+**Et S21 a montré pourquoi cet ordre n'était pas une précaution.** Le harnais déterministe H1 était
+vert sur un champ **faux** : la vitesse orbitale était en quadrature au lieu d'être en phase avec
+l'élévation, donc l'eau n'avançait pas sous une crête. Dix-neuf sessions de conception et six audits
+ne l'avaient pas vu ; une identité fermée, `u = ω·η`, l'a fait tomber au premier passage. **Le
+déterminisme et la justesse sont deux propriétés sans rapport** (leçon L67) : un solveur écrit sans
+H3 aurait hérité du défaut, et le harnais l'aurait certifié stable.
 
 Détail à jour : `docs/00_INDEX.md`, section « État d'avancement ».
 

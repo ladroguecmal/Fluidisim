@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S21
-État             : en cours
+État             : terminée
 Battement        : 2026-09-05
 Objectif         : H3 — les cas canoniques analytiques et le mode `physics`
 ```
@@ -71,7 +71,7 @@ H1 vérifie que le code est **reproductible**. Il ne vérifie pas qu il est **ju
 peut être stable et faux. H3 est le premier étage qui confronte le code à des références
 **extérieures** — des solutions fermées que rien de ce que j écris ne peut influencer.
 
-- [ ] **P1** — plan, jeton.
+- [x] **P1** — plan, jeton.
 - [x] **P2** — mode `physics` : cadre d assertions, mesure contre référence, tolérance déclarée.
 - [x] **P3** — les cas analytiques que `B` seul permet, et ils sont plus nombreux qu il n y paraît :
   dispersion **mesurée sur le champ** et non lue dans la configuration, restitution de `Hs` par la
@@ -79,10 +79,11 @@ peut être stable et faux. H3 est le premier étage qui confronte le code à des
   *Thèse : au moins un de ces cas va échouer. Une référence analytique n a d intérêt que si elle
   peut me contredire, et je n ai jamais vérifié la cinématique de `B` autrement qu en la relisant.*
 - [x] **P4** — exécuter, constater, corriger.
-- [ ] **P5** — **C10, le cube flottant** : premier calcul de force, et première référence fermée sur
+- [x] **P5** — **C10, le cube flottant** : premier calcul de force, et première référence fermée sur
   autre chose que la cinématique — tirant d eau `d = m/(ρA)`.
-- [ ] **P6** — notes correctives, index, angles morts.
-- [ ] **P7** — rituel de fin.
+  *Fait après P6, l'ordre des commits le montre — sans conséquence, mais dit ici plutôt que tu.*
+- [x] **P6** — notes correctives, index, angles morts.
+- [x] **P7** — rituel de fin.
 
 ### Notes de reprise
 
@@ -122,3 +123,25 @@ conformité sont tombés. C est l effet recherché, et la bénédiction se fait 
 variance donne 8,5 % d écart. Ce n est pas un défaut du champ mais de la **fenêtre** — la plus longue
 composante fait 225 m de long et la fenêtre 384 m, soit 1,7 longueur d onde. Une estimation de
 variance a besoin de plusieurs longueurs d onde de la **plus longue** composante.
+
+#### P5 — C10, et ce qu'il faut savoir avant de le prolonger
+
+- **`ρ_eau` n'était fixée nulle part** dans le corpus. `body.rs` la pose à **1000** parce que c'est la
+  seule valeur avec laquelle les deux références de C10 se referment. L'eau de mer vaut ≈**1025** et
+  déplacerait tout tirant d'eau de 2,5 %, contre une tolérance de 1 %. **À arbitrer** — A103.
+- **Deux des quatre cas de C10 sont quasi tautologiques** : la référence `ρ·g·A` sort de la même
+  ligne que la mesure. Ils sont conservés — ils tomberont dès que la force cessera d'être linéaire,
+  masse ajoutée ou Froude-Krylov — mais classés comme tels dans le module. Ne pas les compter
+  comme des vérifications de plus.
+- **La bissection est le seul élément réellement indépendant** du cas : quatre-vingts itérations sur
+  la force, comparées à une formule que le solveur ignore. C'est elle qui tomberait sur un signe
+  inversé ou une saturation manquante.
+- **Le modèle suppose la ligne de flottaison plane** — valable pour `H ≪ λ`, soit 1 pour 50 dans le
+  montage de C10. Le jour où un corps approche la longueur d'onde, ce modèle n'est plus le bon, et
+  ce n'est pas un raffinement : c'est une intégration de pression sur la carène.
+
+#### État à la fin de S21
+
+`cargo test` : **18 tests**. `water-harness check` : 2 scénarios, 0 échec, **0,03 s** / 60.
+`water-harness physics` : **12 assertions**, 0 échec, et douze cas canoniques imprimés comme
+non exécutés. Jeton **libéré**.

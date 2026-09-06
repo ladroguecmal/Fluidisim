@@ -63,7 +63,7 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 | ADR | Sujet | Statut | Traite |
 |---|---|---|---|
-| [029](adr/ADR-029-ce-que-la-premiere-ligne-de-code-a-appris.md) | **Le langage, et ce que la première ligne de code a appris** | proposée | tranche ADR-020 §7.1 · corrige ADR-003 §2, SPEC-004 §8.2, ADR-028 §4 |
+| [029](adr/ADR-029-ce-que-la-premiere-ligne-de-code-a-appris.md) | **Le langage, et ce que la première ligne de code a appris** | proposée | tranche ADR-020 §7.1 · corrige ADR-003 §2, SPEC-004 §8.2, ADR-028 §4 · **note S21** : le hash stable était faux |
 
 ### Nature du projet *(S19)*
 
@@ -131,12 +131,12 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | Chemin | Rôle |
 |---|---|
 | [`code/`](../code/README.md) | **le système d'eau et son harnais**, en Rust, sans aucune dépendance |
-| `code/water-core` | la bibliothèque sans dépendance moteur — ADR-020 |
-| `code/water-harness` | l'instrument de mesure, étage **H1** — SPEC-003 §10 |
+| `code/water-core` | la bibliothèque sans dépendance moteur — ADR-020 ; couche `B`, et la flottaison statique de C10 |
+| `code/water-harness` | l'instrument de mesure, étages **H1** et **H3** — SPEC-003 §10 |
 | `code/scenarios` | les scénarios du mode `check`, assertions comprises |
 
 ```
-cargo test --offline                                  # 14 tests
+cargo test --offline                                  # 18 tests
 water-harness check   scenarios/*.toml                # H1 — déterminisme, 0,04 s / budget 60 s
 water-harness physics scenarios/*.toml                # H3 — 12 assertions analytiques
 ```
@@ -193,7 +193,8 @@ sont posés. Ce qui reste est du code, des mesures et des réunions.
 >
 > Ce qui reste réellement à l'utilisateur tient en trois lignes : **constater l'état réel du projet**
 > (il ne le sait pas non plus), **agir sur l'infrastructure** (dépôt distant), et **autoriser
-> l'ajout de code** à ce dépôt maintenant qu'ADR-020 est acté. Tout le reste est du travail.
+> l'ajout de code** à ce dépôt maintenant qu'ADR-020 est acté — *autorisation donnée en S20 ; le
+> code existe*. Tout le reste est du travail.
 
 > **Le dossier de réunion est [`DOSSIER-REUNIONS.md`](DOSSIER-REUNIONS.md)** *(S17)*. Seize fiches,
 > chacune tenant seule, destinées à sortir du dépôt. Elles sont classées **par ce que la réponse
@@ -220,6 +221,17 @@ sont posés. Ce qui reste est du code, des mesures et des réunions.
 >
 > **Reste humain** : nommer les personnes (fiches 1 et 2 du dossier de réunion), constater l'état
 > réel du projet, agir sur l'infrastructure.
+
+### Ouvert depuis S21 — une constante, et elle déplace des références
+
+**La masse volumique de l'eau : douce (1000) ou de mer (1025) ?** Aucun document du corpus ne la
+fixait — vingt-et-une sessions, six SPEC, vingt-neuf ADR. `code/water-core/src/body.rs` la pose à
+**1000**, parce que c'est la seule valeur avec laquelle les références fermées du cas C10 se
+referment ; le fichier le dit explicitement comme une convention, pas comme une mesure.
+
+La réponse tient en un mot, et elle **déplace de 2,5 % tout tirant d'eau du projet** — contre une
+tolérance de ±1 % dans C10. Angle mort **A103**, leçon **L69**. À défaut de réponse, la valeur
+retenue reste 1000 et le restera par défaut, ce qui est exactement le mécanisme que L69 décrit.
 
 *Énoncés d'origine, conservés :*
 

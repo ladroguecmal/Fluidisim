@@ -8,7 +8,7 @@ ensuite**, donc le harnais vient en premier.
 
 ```bash
 cd code
-cargo test --offline                      # 14 tests
+cargo test --offline                      # 18 tests
 cargo build --offline --release
 ./target/release/water-harness check scenarios/*.toml
 ```

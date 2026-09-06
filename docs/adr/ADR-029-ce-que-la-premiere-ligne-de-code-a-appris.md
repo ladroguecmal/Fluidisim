@@ -195,6 +195,11 @@ il faut dire les deux.
 
 ## Note S21 — ce que le premier cas analytique a trouvé
 
+**Ce que cette note ferme dans le §6.** Le point **4** — « H2 à H6 » — perd **H3** : le mode
+`physics` existe, douze assertions analytiques tournent. H2, H4, H5 et H6 restent ouverts, et le
+point **3**, le hash inter-plateformes, est **intact** : une seule machine a exécuté ce code.
+Le point **1**, le `B` de B1, est confirmé dans son statut — et corrigé dans son contenu.
+
 Le tableau du §5 énumère six propriétés vérifiées par H1. **Les six portent sur la
 reproductibilité et sur la discipline d'exécution ; aucune ne porte sur la justesse du champ.** Cette
 absence n'était pas énoncée comme une limite — le « ne fait pas » du §5 parlait des couches manquantes,

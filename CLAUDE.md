@@ -46,9 +46,15 @@ aucune quantité de raisonnement ne les produit :
    raisonnable — personne d'autre ne travaillant sur le projet, rien n'est figé — est **probable et
    non vérifiée**.
 2. **Agir sur l'infrastructure de l'utilisateur** — dépôt distant notamment (`REPRISE.md` §9).
-3. **Ajouter du code à ce dépôt.** ADR-020 étant acté (S19), **H1 est écrivable** — mais la règle
-   « Markdown uniquement » ci-dessus date de S01 et visait les artefacts publiés. Écrire du code
-   change la nature du dépôt : demande avant, ne le suppose pas.
+3. ~~**Ajouter du code à ce dépôt.**~~ **Autorisé en S20**, explicitement. Le dépôt contient
+   désormais `code/` — Rust, sans aucune dépendance, étages **H1** et **H3** du harnais. La règle
+   « Markdown uniquement » reste vraie pour ce qu'elle visait : la **conception** s'écrit en
+   Markdown, jamais en page HTML ni en artefact publié. Ne redemande pas cette autorisation.
+
+   *Et une chose que S21 a apprise, qui vaut consigne :* le code n'est pas qu'un livrable, c'est un
+   **instrument de mesure de la conception**. Un cas analytique a trouvé en un passage un défaut de
+   physique que dix-neuf sessions de conception, six audits et deux revues croisées n'avaient pas
+   vu. **Quand une propriété numérique est revendiquée, l'écrire coûte moins cher que la relire.**
 
 *(Ce qui a disparu de cette liste en S19 : « nommer des personnes ». ADR-020 est acté, et il n'y a
 personne à nommer pour le reste — ce n'était pas une information manquante, c'était une question
