@@ -83,7 +83,7 @@ l'intention.
   allocation, I-16 profil — parce qu'ils ne se voient qu'en additionnant des tailles.*
 - [x] **P3** — SPEC-006 contre SPEC-001 à SPEC-005 : chiffres, cadences, unités, renvois.
 - [x] **P4** — ADR-022 contre le corpus : I-17 tient-il partout, la couche V, le harnais, SPEC-005.
-- [ ] **P5** — ADR-023 contre le corpus : les quatre mécanismes contre ADR-008, ADR-010, ADR-013,
+- [x] **P5** — ADR-023 contre le corpus : les quatre mécanismes contre ADR-008, ADR-010, ADR-013,
   ADR-015, et contre les chiffres de SPEC-001/002.
 - [ ] **P6** — les trois **entre eux** : ils se citent mutuellement (ADR-023 §4 publie sur
   SPEC-006 §6 ; ADR-022 §3 recoupe SPEC-005 §6 ; ADR-022 §4 recoupe SPEC-006 §2.6).
@@ -252,3 +252,50 @@ serveur) : la citation d'ADR-003 §3 est exacte, et le rapprochement tient.
 besoin en plus de la **bathymétrie** et des **champs de courant C1** pour évaluer la traversabilité
 (SPEC-006 §2.6) et les franchissements de seuil qu'il rend autoritaires. La contrainte de
 déploiement A77 est donc sous-évaluée dans le document qui la porte.
+
+#### P5 — ADR-023 contre le corpus
+
+**E08, gravité 3, mais c'est la deuxième fois — une force autoritaire nouvelle n'a pas de ligne dans
+la table d'autorité.**
+ADR-023 §2.4 établit que le terme d'impact est **autoritaire** au titre d'I-15 et dit qu'il « relève
+de la ligne *poussée d'Archimède* » de la table d'ADR-008 §1. Il n'y a pas de ligne pour lui, et la
+table est ce qu'on lit pour savoir ce qui peut changer une issue de jeu.
+C'est **exactement l'écart R08 de la revue S05** — « les poches d'air n'ont pas de ligne dans la
+table d'autorité » — qui avait justement fait ajouter deux lignes à cette même table. Le mécanisme
+d'ajout est donc connu, appliqué une fois, et non réappliqué la fois suivante.
+
+**E09, gravité 2 — `BreakerVertex` ne peut pas exprimer l'étendue d'un site ponctuel.**
+ADR-023 §4.2 publie un site turbulent comme un `BreakerVertex` de `surf_width_m` petit. Mais
+SPEC-006 §6 définit `surf_width_m` comme la **largeur de la zone de déferlement** — la dimension
+perpendiculaire à la côte (ADR-005 §4.1) — et non l'étendue du site le long de la crête. Or le flux
+publié est en **kW/m de crête** : sans étendue de crête, un consommateur ne peut pas retrouver les
+77 kW qu'ADR-023 §4.4 annonce pour un rocher de 5 m.
+**Résolution sans changer de type** : un site est publié comme **deux sommets** encadrant son
+étendue — une polyligne dégénérée à deux points — ce que la structure `BreakerLineView` accepte déjà
+telle quelle (`first_vertex` par région, sommets consécutifs). Le champ `surf_width_m` garde son
+sens, et le consommateur intègre entre les deux sommets comme pour n'importe quel segment.
+
+**E10, gravité 2 — l'équation de coalescence emploie une grandeur qui n'existe pas.**
+ADR-023 §5.2 écrit `V_air(z) = n_fusion·R·T / P(z)`. La structure `AirPocket` d'ADR-015 §3 porte
+`node`, `volume_ml`, `n_moles`, `pressure_pa`, `centroid` — **aucune température**. L'équation n'est
+donc pas évaluable avec l'état dont le corpus dispose.
+**Résolution, et elle simplifie** : l'hypothèse isotherme de §5.3 dit que les deux poches sont à la
+même température. On peut donc éliminer `T` entièrement :
+
+```
+P_fusion · V_fusion  =  P_a·V_a + P_b·V_b        →     V_air(z) = (P_a·V_a + P_b·V_b) / P(z)
+```
+
+Mêmes champs, aucune constante physique à introduire, et `n_fusion = n_a + n_b` reste vrai comme
+énoncé de conservation. La dichotomie sur le `shape_lut` est inchangée. **La correction retire une
+grandeur au lieu d'en ajouter une** — même forme que la résolution d'E07 en S08.
+
+**Contrôles passés — quatre.**
+· **§2 ↔ I-15** : les entrées du terme d'impact sont l'état du solide et B + W ; aucune ne vient de
+δ. L'autorité est correctement justifiée, seul le tableau manque (E08).
+· **§3 ↔ ADR-008 §3** : le mode contraint est employé tel quel, avec sa projection sur la surface et
+son amortissement vers la vitesse orbitale — pas de variante, une condition d'entrée de plus.
+· **§4 ↔ ADR-014 §2.3** : le « terme stationnaire dérivé » est bien le mécanisme déjà retenu pour
+l'écume permanente, cité et non réinventé.
+· **§5 ↔ ADR-010 §5** : l'hystérésis d'ouverture reprend la forme de celle des flaques, avec un
+seuil propre. Cohérent.
