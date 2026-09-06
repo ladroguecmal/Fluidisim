@@ -1114,23 +1114,39 @@ pub fn c08_convergence_reguliere(
     // **La conséquence est contre-intuitive et vaut d'être dite** : avec un oracle, le triplet le
     // plus fin est le **moins** fiable, alors qu'avec une solution analytique c'est le plus fiable.
     let mut retenues = erreurs.clone();
+    let mut douteux = false;
     if erreurs.len() >= 3 {
-        let p_grossier = {
-            let (e0, e1, e2) = (erreurs[0].1, erreurs[1].1, erreurs[2].1);
-            let (d0, d1) = ((e0 - e1).abs(), (e1 - e2).abs());
-            if d1 > 0.0 { (d0 / d1).log2() } else { 1.0 }
+        let (p_brut, _) = ordre_grossier_estime(&erreurs);
+        // **Garde-fou G10, revu en S34.** Le premier jet bornait `p` à `[0,3 ; 3,0]` et poursuivait
+        // en silence. Or un `p` **hors de ces bornes n'est pas une valeur à corriger** : c'est le
+        // signe que les grilles grossières ne sont pas en régime asymptotique — S24 a mesuré des
+        // ordres **négatifs** dans ce cas — et l'estimation de l'erreur d'oracle qui en dépend n'a
+        // alors aucun fondement.
+        //
+        // Le bornage reste, parce qu'il faut bien un nombre pour filtrer, et il est conservateur :
+        // un `p` bas surestime l'erreur d'oracle, donc écarte **plus** de grilles. Mais il est
+        // désormais **signalé** — au `Sink` et dans le libellé — au lieu d'être invisible. Un
+        // garde-fou qui corrige sans le dire transforme une anomalie en résultat (**A144**).
+        let (_, borne) = ordre_grossier_estime(&erreurs);
+        let p_grossier = borne;
+        let estimation_douteuse = (p_brut - p_grossier).abs() > 1.0e-9;
+        if estimation_douteuse {
+            host.sink.warn(&format!(
+                "C22 : ordre grossier estimé à {p_brut:.3}, hors de [0,3 ; 3,0] — les grilles                  grossières ne sont pas asymptotiques, le filtre d'oracle est appliqué au borné                  {p_grossier:.3} et son résultat est indicatif"
+            ));
         }
-        .clamp(0.3, 3.0);
         let (nx_max, e_max) = *erreurs.last().unwrap();
         let e_oracle = e_max / (nx_oracle as f64 / nx_max as f64).powf(p_grossier);
         retenues.retain(|(_, e)| *e >= 30.0 * e_oracle);
+        douteux = estimation_douteuse;
     }
 
     Convergence {
         grandeur: format!(
-            "erreur L1 relative sur h — montage régulier, oracle nx={nx_oracle} ({} grille(s) retenue(s) sur {})",
+            "erreur L1 relative sur h — montage régulier, oracle nx={nx_oracle} ({} grille(s) retenue(s) sur {}){}",
             retenues.len(),
-            erreurs.len()
+            erreurs.len(),
+            if douteux { " — ORDRE GROSSIER HORS BORNES, filtre indicatif" } else { "" }
         ),
         erreurs: retenues,
         // L'oracle porte sa propre erreur : sous 10⁻⁷ de L1 relative, on mesurerait l'oracle et non
@@ -1775,6 +1791,35 @@ pub fn c23_courant_paroi_mobile(
     sortie
 }
 
+/// Ordre estimé sur les **trois grilles les plus grossières**, brut puis borné — S34, garde-fou G10.
+///
+/// # Pourquoi cette fonction existe séparément
+///
+/// Elle vivait en ligne dans `c08_convergence_reguliere`, donc **untestable** : la vérifier
+/// demandait de lancer une simulation. Un garde-fou qu'on ne peut pas exercer isolément est un
+/// garde-fou qu'on n'exercera pas (**A144**).
+///
+/// # Ce que le bornage veut dire, et ce qu'il ne veut pas dire
+///
+/// Le bornage à `[0,3 ; 3,0]` n'est **pas une correction de valeur**. Un ordre hors de ces bornes —
+/// S24 en a mesuré de **négatifs** — signale que les grilles grossières ne sont pas en régime
+/// asymptotique, et l'estimation d'erreur d'oracle qui en dépend n'a alors aucun fondement.
+///
+/// Le borné reste utilisé, parce qu'il faut un nombre pour filtrer et qu'il est conservateur : un
+/// `p` bas surestime l'erreur d'oracle, donc écarte **plus** de grilles. Mais l'appelant reçoit le
+/// brut, et doit le signaler.
+///
+/// Renvoie `(brut, borné)`.
+pub fn ordre_grossier_estime(erreurs: &[(usize, f64)]) -> (f64, f64) {
+    if erreurs.len() < 3 {
+        return (1.0, 1.0);
+    }
+    let (e0, e1, e2) = (erreurs[0].1, erreurs[1].1, erreurs[2].1);
+    let (d0, d1) = ((e0 - e1).abs(), (e1 - e2).abs());
+    let brut = if d1 > 0.0 { (d0 / d1).log2() } else { 1.0 };
+    (brut, brut.clamp(0.3, 3.0))
+}
+
 /// Facteur d'amplification du **mode de maille**, en fonction du nombre de Courant — S29.
 ///
 /// # Ce que cette mesure remplace
@@ -2140,4 +2185,247 @@ pub fn c33_decroissance_entretenue(
         front_m: front,
         fenetre: (x0, x1),
     })
+}
+
+#[cfg(test)]
+mod tests_garde_fous {
+    //! Audit S34 — **chaque garde-fou doit être vu refuser**.
+    //!
+    //! Le test d'un garde-fou est le cas qu'il doit **refuser**, jamais le cas nominal : celui-ci
+    //! passe de toute façon. Un garde-fou qu'on n'a jamais vu déclencher n'a pas été testé, et il
+    //! est alors plus dangereux qu'aucun garde-fou — on lui fait confiance (**A144**).
+
+    use super::*;
+    use crate::host_impl::{ArenaAllocator, SequentialJobs, StderrSink};
+    use water_core::{Bassin, Definition, Delta1D, EtatInitial, HostServices, ParoiMobile};
+
+    fn arene(mo: usize) -> (ArenaAllocator, SequentialJobs, StderrSink) {
+        (
+            ArenaAllocator::with_capacity(mo << 20),
+            SequentialJobs,
+            StderrSink,
+        )
+    }
+
+    /// **G1 — `dt_cfl` sur domaine entièrement sec.** Doit rendre le pas de repli, pas `0` ni `NaN`.
+    ///
+    /// Cas refusé : un domaine où aucune cellule ne porte d'eau. Sans ce garde-fou, `vmax = 0`
+    /// donnerait une division par zéro.
+    #[test]
+    fn g1_pas_de_temps_sur_domaine_sec() {
+        let (mut a, j, s) = arene(4);
+        let mut host = HostServices {
+            alloc: &mut a,
+            jobs: &j,
+            sink: &s,
+        };
+        let sec = Bassin {
+            nx: 50,
+            longueur_m: 10.0,
+            origine_m: 0.0,
+            profondeur_gauche_m: 0.0,
+            pente: 0.0,
+            eta0_m: 0.0,
+            etat_initial: EtatInitial::Repos,
+        };
+        let d = Delta1D::configure(&mut host, sec).unwrap();
+        let dt = d.dt_cfl();
+        assert!(
+            dt.is_finite() && dt > 0.0,
+            "le pas de repli doit être fini et positif : {dt}"
+        );
+        assert_eq!(dt, 1.0, "et c'est le pas de repli documenté");
+    }
+
+    /// **G2 — le bornage de `ν` laisse atteindre le régime instable.**
+    ///
+    /// Cas refusé : que `ν = 1,5` soit ramené sous 1. C'est le régime que S29 devait mesurer et que
+    /// l'ancien bornage à 0,99 rendait inatteignable (**L99**).
+    #[test]
+    fn g2_le_bornage_de_nu_n_aveugle_pas_la_mesure() {
+        let (mut a, j, s) = arene(4);
+        let mut host = HostServices {
+            alloc: &mut a,
+            jobs: &j,
+            sink: &s,
+        };
+        let b = Bassin {
+            nx: 50,
+            ..Bassin::c03(true)
+        };
+        let dt_instable = Delta1D::configure(&mut host, b).unwrap().avec_cfl(1.5).dt_cfl();
+        let dt_stable = Delta1D::configure(&mut host, b).unwrap().avec_cfl(0.45).dt_cfl();
+        assert!(
+            dt_instable > dt_stable * 3.0,
+            "ν = 1,5 doit donner un pas trois fois plus grand : {dt_instable} contre {dt_stable}"
+        );
+    }
+
+    /// **G3 — le plancher d'arrondi refuse de lire un ordre dans du bruit.**
+    #[test]
+    fn g3_le_plancher_refuse_le_bruit() {
+        let c = Convergence {
+            grandeur: "bruit".into(),
+            erreurs: vec![(100, 3e-7), (200, 8e-7), (400, 2e-7), (800, 6e-7)],
+            plancher: 1e-5,
+            reference: Reference::Analytique,
+        };
+        assert_eq!(c.ordre_final(), Ordre::Plancher, "le plancher doit refuser ce cas");
+    }
+
+    /// **G4 — une série trop courte ne rend pas d'ordre.**
+    #[test]
+    fn g4_serie_trop_courte_refusee() {
+        let c = Convergence {
+            grandeur: "trop court".into(),
+            erreurs: vec![(100, 1e-2), (200, 5e-3)],
+            plancher: 1e-12,
+            reference: Reference::Analytique,
+        };
+        assert_eq!(c.ordre_final(), Ordre::Indetermine);
+        assert_eq!(c.asymptotique(0.1), None, "et aucun verdict d'asymptoticité");
+    }
+
+    /// **G5 — `mesurer_seiche` refuse une amplitude qu'elle ne peut pas voir.**
+    ///
+    /// Cas refusé : une amplitude si faible que `η` varie moins qu'un ulp de `f32` entre deux pas.
+    /// C'est le cas mesuré en S27, sous `a/h = 0,25 %`.
+    #[test]
+    fn g5_seiche_trop_faible_refusee() {
+        let (mut a, j, s) = arene(8);
+        let mut host = HostServices {
+            alloc: &mut a,
+            jobs: &j,
+            sink: &s,
+        };
+        let b = Bassin {
+            nx: 400,
+            etat_initial: EtatInitial::Seiche {
+                amplitude_m: 1.0e-6,
+                longueur_m: 20.0,
+                mode: 1,
+            },
+            ..Bassin::c03(true)
+        };
+        assert!(
+            mesurer_seiche(&mut host, b, 60.0).is_none(),
+            "une amplitude sous le bruit du f32 doit être refusée, pas mesurée"
+        );
+    }
+
+    /// **G6 — le contrôle de réflexion refuse un front qui a touché le mur.**
+    ///
+    /// Cas refusé : le montage même qui a produit `R² = 0,487` en S33.
+    #[test]
+    fn g6_reflexion_refusee() {
+        let (mut a, j, s) = arene(32);
+        let mut host = HostServices {
+            alloc: &mut a,
+            jobs: &j,
+            sink: &s,
+        };
+        assert!(
+            c33_decroissance_entretenue(&mut host, 20.0, 800, 200.0, 14.0).is_none(),
+            "le front atteint 280 m dans un domaine de 200 : la mesure doit être refusée"
+        );
+        assert!(
+            c33_decroissance_entretenue(&mut host, 20.0, 1600, 400.0, 14.0).is_some(),
+            "dans 400 m le front reste dans le domaine : la mesure doit passer"
+        );
+    }
+
+    /// **G7 — `front` refuse un seuil qu'aucune cellule n'atteint.**
+    #[test]
+    fn g7_front_sans_seuil_atteint() {
+        let (mut a, j, s) = arene(8);
+        let mut host = HostServices {
+            alloc: &mut a,
+            jobs: &j,
+            sink: &s,
+        };
+        let d = Delta1D::configure(&mut host, Bassin::c04()).unwrap();
+        assert!(d.front(10.0).is_none(), "aucune cellule n'atteint 10 m d'eau");
+        assert!(d.front(0.5).is_some(), "et le seuil nominal doit être trouvé");
+    }
+
+    /// **G8 — un `Cas` de référence nulle mesure l'écart absolu.**
+    #[test]
+    fn g8_reference_nulle() {
+        let c = Cas {
+            id: "test",
+            grandeur: "référence nulle".into(),
+            mesure: 0.003,
+            reference: 0.0,
+            tolerance_rel: 1.0e-3,
+            source: "—",
+        };
+        assert!(
+            (c.ecart_rel() - 0.003).abs() < 1e-12,
+            "l'écart doit être l'écart absolu"
+        );
+        assert!(!c.passe());
+    }
+
+    /// **G9 — `u_max` gouvernante et absolue diffèrent en présence d'une paroi.**
+    #[test]
+    fn g9_definition_de_u_max() {
+        let (mut a, j, s) = arene(8);
+        let mut host = HostServices {
+            alloc: &mut a,
+            jobs: &j,
+            sink: &s,
+        };
+        let b = Bassin {
+            nx: 100,
+            ..Bassin::c03(true)
+        };
+        let sans = Delta1D::configure(&mut host, b).unwrap();
+        assert_eq!(
+            sans.u_max(Definition::Absolue).0,
+            sans.u_max(Definition::Gouvernante).0,
+            "témoin : sans paroi, les deux définitions coïncident"
+        );
+        let avec = Delta1D::configure(&mut host, b).unwrap().avec_paroi(ParoiMobile {
+            u_m_s: 10.0,
+            periode_s: 0.0,
+        });
+        assert!(
+            avec.u_max(Definition::Gouvernante).0 > avec.u_max(Definition::Absolue).0 * 2.0,
+            "avec une paroi à 10 m/s, la gouvernante doit dépasser l'absolue d'un facteur 2"
+        );
+    }
+}
+
+#[cfg(test)]
+mod tests_g10 {
+    use super::*;
+
+    /// **G10 — le bornage de l'ordre grossier ne doit pas passer pour une mesure.**
+    ///
+    /// Cas refusé : une série pré-asymptotique, dont les différences successives **grandissent** et
+    /// dont l'ordre brut est donc **négatif**. C'est le régime que S24 a mesuré sur le front de C04
+    /// (−0,504 puis −0,059). Le borné vaut alors 0,3, et l'appelant doit savoir que ce 0,3 n'est
+    /// pas un ordre observé.
+    #[test]
+    fn g10_ordre_grossier_hors_bornes_est_signale() {
+        // d0 = 1e-5, d1 = 2e-5 : les différences grandissent, l'ordre brut vaut log2(0,5) = −1.
+        let pre_asymptotique = vec![(100usize, 1.0e-4f64), (200, 9.0e-5), (400, 7.0e-5)];
+        let (brut, borne) = ordre_grossier_estime(&pre_asymptotique);
+        assert!(brut < 0.0, "l'ordre brut doit être négatif : {brut}");
+        assert_eq!(borne, 0.3, "le borné est la valeur de repli");
+        assert!(
+            (brut - borne).abs() > 1.0e-9,
+            "et l'écart entre brut et borné est ce qui déclenche le signalement"
+        );
+    }
+
+    /// Le témoin : une série saine ne déclenche rien.
+    #[test]
+    fn g10_temoin_serie_saine() {
+        // Ordre 1 exact : les erreurs sont divisées par deux à chaque raffinement.
+        let saine = vec![(100usize, 8.0e-5f64), (200, 4.0e-5), (400, 2.0e-5)];
+        let (brut, borne) = ordre_grossier_estime(&saine);
+        assert!((brut - 1.0).abs() < 1e-9, "ordre 1 attendu, {brut} obtenu");
+        assert_eq!(brut, borne, "une série saine n'est jamais bornée");
+    }
 }

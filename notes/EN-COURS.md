@@ -92,12 +92,12 @@ négatifs**, signature du régime pré-asymptotique, et ce bornage les remontera
 prudence sur un instrument l'empêche de mesurer* (**L99**).
 
 - [ ] **P1** — plan, jeton.
-- [ ] **P2** — l'inventaire, et pour chacun **le cas qu'il doit refuser**, écrit avant tout code.
+- [x] **P2** — l'inventaire, et pour chacun **le cas qu'il doit refuser**, écrit avant tout code.
       Un garde-fou dont on ne sait pas énoncer le cas refusé n'a pas de raison d'être.
-- [ ] **P3** — écrire les tests de **déclenchement** : chaque garde-fou doit être vu refuser.
-- [ ] **P4** — exécuter, et classer : *se déclenche correctement* · *ne se déclenche jamais* ·
+- [x] **P3** — écrire les tests de **déclenchement** : chaque garde-fou doit être vu refuser.
+- [x] **P4** — exécuter, et classer : *se déclenche correctement* · *ne se déclenche jamais* ·
       *se déclenche sur la mauvaise condition* · *masque au lieu de refuser*.
-- [ ] **P5** — corriger ce qui doit l'être, et **mesurer que la correction change quelque chose**.
+- [x] **P5** — corriger ce qui doit l'être, et **mesurer que la correction change quelque chose**.
 - [ ] **P6** — registre `AUDIT-GARDE-FOUS-S34`.
 - [ ] **P7** — répercussions : index, angles morts, actions, décomptes.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6).
@@ -113,3 +113,48 @@ prudence sur un instrument l'empêche de mesurer* (**L99**).
 - **C04 en échec, `C01-jet` rouge, C08 sans verdict** : trois décisions.
 
 **Branche.** `claude/s22-suite`. `master` s'arrête à S17 (A107).
+
+#### P2-P5 — dix garde-fous mis à l'épreuve, un seul masquait
+
+**Neuf sur dix refusent correctement ce qu'ils doivent refuser.** Chacun a désormais son test de
+**déclenchement**, et non son test de cas nominal :
+
+| | Garde-fou | Cas qu'il doit refuser | Verdict |
+|---|---|---|---|
+| **G1** | pas de temps sur domaine sec | aucune cellule ne porte d'eau | refuse — pas de repli fini |
+| **G2** | bornage de `ν` | que `ν = 1,5` soit ramené sous 1 | **laisse passer**, comme corrigé en S29 |
+| **G3** | plancher d'arrondi | trois erreurs sous le plancher | refuse — `Plancher` |
+| **G4** | longueur de série | deux points pour Richardson | refuse — `Indetermine`, et `None` |
+| **G5** | amplitude de seiche | `a` sous l'ulp du `f32` | refuse — `None` |
+| **G6** | réflexion | le montage à `R² = 0,487` de S33 | refuse, **et laisse passer le domaine long** |
+| **G7** | seuil de front | un seuil qu'aucune cellule n'atteint | refuse — `None` |
+| **G8** | référence nulle | la division par zéro de C01 | refuse — écart absolu |
+| **G9** | définition d'`u_max` | confondre absolue et gouvernante | distingue, **et coïncide sans paroi** |
+| **G10** | bornage de l'ordre grossier | un ordre **négatif** (pré-asymptotique) | **masquait** |
+
+**Trois d'entre eux portent leur propre témoin** — G2, G6, G9 vérifient aussi que le cas *sain*
+passe. Sans quoi un garde-fou qui refuserait tout passerait le test.
+
+#### G10 masquait, et la thèse était juste
+
+Le bornage `clamp(0,3 ; 3,0)` sur l'ordre estimé aux grilles grossières corrigeait **en silence**.
+Or S24 a mesuré des ordres **négatifs** — −0,504 puis −0,059 sur le front de C04 — signature du
+régime pré-asymptotique. Un ordre hors bornes n'est donc **pas une valeur à corriger** : c'est le
+signe que les grilles grossières ne sont pas asymptotiques, et que l'estimation d'erreur d'oracle
+qui en dépend n'a **aucun fondement**.
+
+**Correction, en trois gestes.**
+
+1. Le bornage **reste** — il faut un nombre pour filtrer, et il est conservateur : un `p` bas
+   surestime l'erreur d'oracle, donc écarte *plus* de grilles.
+2. Il est **signalé** : au `Sink`, et dans le libellé de la grandeur — « ORDRE GROSSIER HORS BORNES,
+   filtre indicatif ».
+3. L'estimation est **extraite** en fonction pure `ordre_grossier_estime`, qui rend le brut **et** le
+   borné.
+
+> **Le troisième geste est le plus important.** L'estimation vivait en ligne dans une fonction qui
+> lance des simulations : la vérifier demandait d'en exécuter une. **Un garde-fou qu'on ne peut pas
+> exercer isolément est un garde-fou qu'on n'exercera pas** — c'est pourquoi G10 était le seul des
+> dix sans test, et le seul défaillant. Ce n'est probablement pas une coïncidence.
+
+**43 tests au vert**, contre 34 en début de session.
