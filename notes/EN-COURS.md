@@ -76,7 +76,7 @@ I-11 et I-12 ont été traités en S13 par ADR-024. Restent **quinze**.
 
 - [ ] **P1** — déclarer le plan, prendre le jeton, mettre à jour le battement.
 - [x] **P2** — **I-01 à I-05** contre ADR-001, ADR-004, ADR-003, ADR-008, ADR-007 et ADR-012.
-- [ ] **P3** — **I-06 à I-10** contre ADR-006, ADR-002, ADR-003, ADR-004 et ADR-009.
+- [x] **P3** — **I-06 à I-10** contre ADR-006, ADR-002, ADR-003, ADR-004 et ADR-009.
 - [ ] **P4** — **I-13 à I-17** contre ADR-006, ADR-012, ADR-021, ADR-022, et le cas particulier
   d'I-14, qui ne cite aucun ADR.
 - [ ] **P5** — rédiger `docs/registres/AUDIT-INVARIANTS-S14.md` : le verdict par invariant, et la
@@ -159,3 +159,38 @@ que l'invariant exige, et §4.1 en fait un point de contrat non négociable.
 la flottabilité (ADR-008 §2) et depuis S12 le terme d'impact (ADR-023 §6) — et n'entre pas dans le
 budget que I-05 protège. L'invariant parle des solveurs, et il a raison de s'y tenir ; mais
 « l'eau ne peut structurellement pas provoquer un pic de frame » se lit plus large qu'il n'est vrai.
+
+#### P3 — I-06 à I-10
+
+**I-06 — tient.** Pools dimensionnés au démarrage : blocs et domaines (ADR-006), paquets
+(ADR-012 §3), nœuds V (ADR-010), et depuis S09 les anneaux d'instantanés (SPEC-006 §2.5). `seal()`
+de SPEC-004 §8.1 en fait une propriété mécanique. Aucune dérive.
+*Manque, gravité 3* : I-06 dit « dimensionnés par profil » et I-16 dit qu'un profil ne déclare que
+des ressources — deux invariants sur le même objet, aucun ne cite l'autre, et c'est précisément à
+leur frontière que le cas des tailles de pool est resté ambigu (cf. I-16).
+
+**I-07 — tient.** « Tout domaine appartient à un référentiel, il reçoit `g_eff` par injection » ↔
+`configure(const DomainConfig&, IBackgroundField*, IGravityField*)` (SPEC-004 §4). L'injection est
+dans la signature, donc l'invariant est mécanique et non déclaratif. Rien à corriger.
+
+**I-08 — tient.** `f32` local, `|x_local| < 4096 m`, temps jamais en `f32` ↔ SPEC-004 §1.1, qui
+ajoute qu'aucune fonction n'accepte de coordonnée monde — « le type ne l'exprime pas ». L'invariant
+est renforcé par sa spécification, cas rare et à signaler.
+*Défaut côté SPEC-006, gravité 3, pas côté invariant* : `FoamCascadeDesc` (§4.1) porte
+`anchor_local` borné à 4096 m mais un `extent_m` **non borné**. Une cascade grossière de plus de
+4 km — la résolution et le nombre de cascades sont ouverts depuis ADR-014 §7.1 — sortirait du
+domaine de validité d'I-08 sans que rien ne le signale.
+
+**I-09 — tient, et il travaille.** « On interpole des paramètres, jamais des réalisations » a été
+appliqué correctement et **cité** dans deux documents postérieurs à sa source : SPEC-005 §6
+(interpolation entre états côtiers) et ADR-022 §3.5 (entre graines). C'est le seul invariant du lot
+qu'on voit invoqué pour trancher, plutôt que pour refuser.
+
+**I-10 — défaut, gravité 2.** « Le serveur ne simule pas d'eau […] Il n'exécute ni W ni δ. »
+L'énoncé ne dit que ce que le serveur **ne fait pas**. ADR-022 §5.1 a dû établir positivement, neuf
+sessions plus tard, qu'il **exécute la couche V** — I-10 ne l'excluant pas — et qu'il **charge des
+données cuites** : « un serveur sans assets n'est pas une option ». S13 a ajouté qu'il lui faut en
+outre bathymétrie et courants C1 pour le signal de traversabilité (écart E05).
+Un lecteur d'I-10 seul conclut « aucune eau sur le serveur », et dimensionne un serveur sans assets.
+C'est l'angle mort **A77**, et sa cause est ici : un invariant formulé uniquement en négatif laisse
+croire que le complément est vide.
