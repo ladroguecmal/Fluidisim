@@ -12,11 +12,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-05
+Session en cours : S16 — 2026-09-05 — dossier d'exécution du banc B2
 Dernière session : S15 — 2026-09-05 — audit des registres
-Session suivante : S16 — le corpus n'a plus de classe de contrôle non passée. Préparer l'exécution
-                   de B2, ou rédiger le dossier de réunion des onze destinataires extérieurs
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
