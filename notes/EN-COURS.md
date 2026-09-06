@@ -75,7 +75,7 @@ n'a jamais été fait, et il a rapporté deux écarts sur deux tentatives, dont 
 I-11 et I-12 ont été traités en S13 par ADR-024. Restent **quinze**.
 
 - [ ] **P1** — déclarer le plan, prendre le jeton, mettre à jour le battement.
-- [ ] **P2** — **I-01 à I-05** contre ADR-001, ADR-004, ADR-003, ADR-008, ADR-007 et ADR-012.
+- [x] **P2** — **I-01 à I-05** contre ADR-001, ADR-004, ADR-003, ADR-008, ADR-007 et ADR-012.
 - [ ] **P3** — **I-06 à I-10** contre ADR-006, ADR-002, ADR-003, ADR-004 et ADR-009.
 - [ ] **P4** — **I-13 à I-17** contre ADR-006, ADR-012, ADR-021, ADR-022, et le cas particulier
   d'I-14, qui ne cite aucun ADR.
@@ -103,3 +103,59 @@ I-11 et I-12 ont été traités en S13 par ADR-024. Restent **quinze**.
 - **`HydroSample` est une quatrième structure mal dimensionnée** : annoncée à 40 octets, ses champs
   en somment **34** (onze `f16` = 22, deux `f16[2]` = 8, deux `u8` = 2, `_pad[6]` = 6). L'angle mort
   A85 devient quatre structures sur quatre.
+
+#### P2 — I-01 à I-05
+
+**I-01 — défaut, gravité 2.** « Tout consommateur passe par `EvalWater(x, t, LayerMask)`. »
+C'est faux depuis S09, et faux **par décision** : ADR-018 §1 interdit nommément à la navigation
+d'interroger `EvalWater` (« sans quoi la navigation devient un consommateur majeur »), l'audio lit
+des agrégats (SPEC-006 §4.2), le rendu reçoit une poignée de texture (§4.1). SPEC-006 §1.1 chiffre
+même l'écart : 130 évaluations/s publiées contre 2 000 interrogées.
+Le principe — il n'existe pas « la » surface produite par un système unique — tient entièrement. Le
+**mécanisme nommé** est devenu l'un des deux, et l'invariant ne connaît que l'autre.
+
+**I-02 — défaut, gravité 2.** « B n'a aucune représentation par cellule, ni en mémoire, ni **sur
+disque**, ni sur le réseau. »
+Contredit par son propre ADR source : ADR-004 §2.2 définit la grille `HydroSample`, **par nœud**,
+que SPEC-005 §2 range parmi les données d'auteur et de cuisson. Et ADR-022 §4.2 l'**écrit dans la
+sauvegarde** sous le nom de `RegionDescriptor` — un document que j'ai écrit en S10 en citant I-02
+approbativement trois sections plus haut.
+La distinction voulue est celle entre un **état** et des **paramètres** — c'est exactement I-09, qui
+la formule proprement. I-02 ne la dit pas, et sans elle son énoncé est faux au pied de la lettre.
+
+**I-03 — défaut, gravité 3.** Amendé en S10 pour inclure la couche V, mais sa flèche ne cite
+qu'ADR-003, qui ne traite ni de V ni de son arithmétique entière. La source du déterminisme de V est
+ADR-010 §4 (« débits quantifiés en millilitres avec report de reste […] le résultat est
+reproductible »). L'invariant couvre une couche dont il ne cite pas la source.
+
+**I-04 — défaut, gravité 1, et il ne vient pas de l'invariant.**
+I-04 tient contre ADR-008, ADR-014 §5.2, ADR-021 §5 et ADR-023 §2.4 : vérifié un à un, aucune force
+de gameplay ne vient de δ. **Mais ADR-010 §6 le contredit**, et personne ne l'avait rapproché :
+
+```
+V → δ :   le nœud est gelé, sa masse M est remise au domaine […]
+δ → V :   le domaine rend M' = masse mesurée ; l'écart M' − M est reporté comme perte contrôlée
+```
+
+C'est un **transfert de propriété de masse** vers δ, et ADR-010 §6 le dit ainsi. Trois conséquences :
+
+1. pendant l'épisode, **la masse d'eau d'un compartiment est déterminée par δ** — donc par un
+   solveur non déterministe (SPEC-003 §2 : δ n'est jamais D1). Le volume d'une cale décide d'un
+   chavirement : c'est une issue de jeu, et I-04 l'interdit ;
+2. **le serveur n'a pas d'histoire.** Il exécute V (ADR-022 §5.1) et n'exécute jamais δ (I-10). Il
+   ne peut donc ni geler le nœud, ni recevoir `M'`. Serveur et client divergent pendant toute la
+   durée de l'épisode, et rien ne les réconcilie ;
+3. l'écart `M' − M` est journalisé comme diagnostic — ce qui est juste — **et** appliqué comme perte
+   de masse réelle — ce qui ne l'est pas.
+
+ADR-010 §6 date de S01, avant qu'I-10 n'ait ses conséquences travaillées et huit sessions avant
+qu'ADR-022 §5.1 n'établisse que le serveur exécute V. Aucune revue ne l'a rapproché d'I-04 parce que
+les revues confrontent des documents entre eux, jamais un invariant à un ADR qui ne le cite pas.
+**Résolution → ADR-025**, en P6.
+
+**I-05 — tient.** `step(dt_target, budget_ms)` et `StepResult` de SPEC-004 §4 portent exactement ce
+que l'invariant exige, et §4.1 en fait un point de contrat non négociable.
+*Observation de portée, sans défaut* : une part croissante du coût lié à l'eau vit **côté hôte** —
+la flottabilité (ADR-008 §2) et depuis S12 le terme d'impact (ADR-023 §6) — et n'entre pas dans le
+budget que I-05 protège. L'invariant parle des solveurs, et il a raison de s'y tenir ; mais
+« l'eau ne peut structurellement pas provoquer un pic de frame » se lit plus large qu'il n'est vrai.
