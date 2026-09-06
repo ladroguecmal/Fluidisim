@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S18
-État             : en cours
+État             : terminée
 Battement        : 2026-09-05
 Objectif         : trancher les cinq arbitrages, sur délégation explicite de l'utilisateur
 ```
@@ -91,8 +91,8 @@ motif, son chiffre, et ce qu'il faudrait changer si la réponse était l'inverse
   SPEC-006.
 - [x] **P6** — `CLAUDE.md`, `REPRISE.md`, `00_INDEX.md`, `DOSSIER-REUNIONS.md` : le mandat a changé,
   et ce qui reste non décidable doit être dit précisément.
-- [ ] **P7** — angles morts, décomptes.
-- [ ] **P8** — rituel de fin (`REPRISE.md` §6) : journal S18, leçons, index, jeton libéré.
+- [x] **P7** — angles morts, décomptes.
+- [x] **P8** — rituel de fin (`REPRISE.md` §6) : journal S18, leçons, index, jeton libéré.
 
 ### Notes de reprise
 

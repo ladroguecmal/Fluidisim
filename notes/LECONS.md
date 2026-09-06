@@ -780,3 +780,36 @@ spécifications — elle n'y sera jamais.
 **Réflexe** : quand un livrable est destiné à quelqu'un d'extérieur, vérifier que ce quelqu'un a un
 **nom** avant de le déclarer prêt. Un document parfait adressé à une fonction reste dans le dépôt, et
 son absence de réponse se lit à tort comme un désaccord ou comme une absence d'urgence.
+
+## L61 — Un arbitrage qui traîne est souvent un arbitrage mal posé
+
+*(S18)* Cinq questions étaient classées « en attente d'une réponse humaine » depuis douze sessions.
+Mises en demeure d'être répondues, **trois n'étaient pas des arbitrages** : deux posaient une question
+dont la prémisse était fausse — « qui porte le trait de côte » suppose qu'il soit stocké, « combien de
+temps l'eau persiste » suppose qu'elle ait une politique propre — et la troisième cherchait **un**
+propriétaire là où il en faut deux.
+
+Le mécanisme est celui de L03, rencontré à un endroit nouveau : **la liste des choses qu'on ne décide
+pas**. Une question qu'on a classée comme n'étant pas la sienne n'est plus interrogée — ni sur sa
+réponse, ce qui est normal, ni sur sa **formulation**, ce qui ne l'est pas. L'étiquette protège la
+question de l'examen qui l'aurait dissoute.
+
+**Réflexe** : avant de porter une question à quelqu'un d'autre, l'examiner comme si on devait y
+répondre soi-même — au moins jusqu'à savoir de quel type de réponse elle relève. Une question bien
+posée qu'on transmet est un service ; une question mal posée qu'on transmet est une charge, et elle
+revient.
+
+## L62 — Une décision prise par délégation s'écrit pour être défaite
+
+*(S18)* Quand quelqu'un délègue un arbitrage, il ne délègue pas son autorité : il délègue le travail
+de l'instruire. La décision qui en sort doit donc être **plus argumentée** qu'une décision ordinaire,
+et surtout **bon marché à inverser** — parce que celui qui a délégué reste le seul à pouvoir juger si
+elle sert son projet, et qu'il jugera plus tard, avec des informations que je n'ai pas.
+
+Trois choses le rendent possible, et elles tiennent en une ligne chacune : le **motif**, écrit pour
+qu'on puisse le contester sans reconstituer le raisonnement ; le **chiffre** qui rend la décision
+vérifiable ; et **ce qu'il faudrait changer si la réponse était l'inverse**. La troisième est celle
+qu'on omet, et c'est la seule qui transforme une décision en décision *révisable*.
+
+**Réflexe** : à chaque décision prise à la place de quelqu'un, écrire son chemin de retour. Sans lui,
+la délégation devient un fait accompli — ce qui n'était pas ce qu'on demandait.

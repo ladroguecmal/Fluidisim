@@ -1375,3 +1375,88 @@ paramètres partagés avec B2.
 **Arbitrages en attente — rappel.** Cinq arbitrages humains et quatorze demandes extérieures, toutes
 désormais présentables. `WaveEvent` reste l'urgence de format, à 50 octets — et sa fiche dit
 maintenant à qui parler, dans quel ordre.
+
+---
+
+## S18 — 2026-09-05 — Les cinq arbitrages, tranchés
+
+**Consigne reçue.** « Prends les décisions. » L'utilisateur lève explicitement la règle qu'il avait
+posée en S06 : les arbitrages de design ne sont plus hors de ma portée.
+
+**Sorties.** [`adr/ADR-027`](../docs/adr/ADR-027-les-cinq-arbitrages-tranches.md), sept sections ;
+sept notes correctives ; `CLAUDE.md` et `REPRISE.md` §5 réécrits ; quatre fiches du dossier de réunion
+requalifiées ; registre porté à 96 angles morts ; leçons L61 et L62.
+
+### Conduite adoptée
+
+Une décision prise **par délégation** doit être plus argumentée qu'une décision ordinaire, pas moins,
+et **bon marché à défaire**. Chaque section porte son motif, son chiffre, et **ce qu'il faudrait
+changer si la réponse était l'inverse** — pour que revenir dessus coûte une lecture et non une
+enquête.
+
+### Trois des cinq n'étaient pas des arbitrages
+
+C'est le résultat de la session, et il était invisible tant que les questions restaient classées
+« pas à moi ».
+
+- **Le trait de côte mobile se dissout.** « Qui le porte ? » suppose qu'il soit stocké. Il est dérivé
+  de la marée analytique, donc **personne ne le porte** — même famille que l'écume permanente
+  (ADR-014 §2.3) et les sites turbulents (ADR-023 §4). Ce qui est stocké est la bibliothèque à seize
+  états : **45 Mo pour cinquante plages**, tout le prix de la décision. Et une côte fixe supprimerait
+  la prédictibilité de la marée — « ce gué se ferme dans quarante minutes » — pour économiser cela.
+- **La durée de vie d'un nœud V se dissout.** La question supposait que l'eau ait besoin d'une
+  politique de rétention propre. Elle pèse **20 octets par nœud, 4 Ko pour la flotte entière d'un
+  joueur** : négligeable devant l'état du navire lui-même. L'eau suit la politique de l'objet. Ce qui
+  reste nôtre est le TTL des nœuds **sans propriétaire**, qui borne la persistance de l'eau à
+  l'échelle du monde — et c'est celui-là qu'il faut défendre.
+- **La propriété du harnais se dissout à moitié.** La question cherchait **un** propriétaire là où il
+  en faut deux : le code et les scénarios à l'équipe eau, **les seuils d'acceptation à la qualité
+  technique** — c'est la seule barre qu'on est tenté de déplacer quand on ne la passe pas. Règle
+  mécanique plutôt que consigne (L19) : les seuils vivent dans un fichier séparé dont la modification
+  exige une approbation ; ajouter un scénario ne passe par personne.
+
+### Les deux vrais choix
+
+**L'échelle du temps : non par joueur, oui globalement.** La question mêlait trois besoins de design
+— voyage rapide, pause, mode photo — dont **aucun n'exige de mettre le temps à l'échelle par
+joueur** une fois traités séparément : le voyage rapide est un déplacement dans l'espace, la pause en
+solo arrête l'horloge pour tout le monde, le mode photo fige le rendu. Et l'échelle **globale** reste
+disponible — un serveur peut accélérer son cycle jour/nuit sans que rien ne casse. C'est un degré de
+liberté que personne n'avait relevé, et il coûte zéro.
+
+C'est la seule des cinq dont l'inversion tardive détruirait du travail fait : quatre propriétés
+tomberaient pour l'océan concerné, dont la cohérence de la houle entre joueurs. Le chiffre : une
+composante de période 8 s déphasée de **4 secondes** place une crête chez l'un là où l'autre voit un
+creux. Il n'y a pas de tolérance intermédiaire.
+
+**La glace : oui, bornée par le fetch.** `F_max = g·(0,15/(0,0016·U10))²` — **3,4 km à 5 m/s**. La
+question se posait comme si « oui » engageait un océan gelé ; il n'engage que des plans d'eau de
+quelques kilomètres. La glace s'active **par plan d'eau**, jamais comme état météorologique global,
+ce qui **borne** au passage le travail de l'IA au lieu de l'étendre.
+
+### Le point le plus important pour les sessions suivantes
+
+`CLAUDE.md` et `REPRISE.md` §5 disaient depuis S06 « cinq arbitrages attendent, les rappeler, ne pas
+les trancher ». Sans réécriture, la session suivante les aurait rappelés comme si rien n'avait été
+décidé. Le nouveau texte distingue ce qui est **tranché** de ce qui reste **hors de portée d'une
+session**, et cette seconde liste n'est pas de la conception :
+
+1. **nommer des personnes** — qui acte ADR-020, qui occupe les deux rôles du harnais ;
+2. **constater l'état réel du projet** — terrain sculpté ? format réseau figé ? code écrit ? Tout le
+   classement d'urgence du dossier de réunion suppose que non ;
+3. **agir sur l'infrastructure** — le dépôt distant, signalé depuis S07.
+
+Aucune quantité de raisonnement ne produit ces trois-là.
+
+### Ce qui n'a pas été fait
+
+Le dossier d'exécution de B3, recommandé par S17, est reporté.
+
+**Prochaine session recommandée.** S19 — **dossier d'exécution du banc B3**, même exercice qu'en S16.
+B3 tranche le solveur volumétrique, ferme quatre points ouverts, et son protocole porte quatre
+scénarios dont un — le compartiment inondé en référentiel accéléré — vient de recevoir un cas
+canonique en S15 (C21). S16 a montré ce que ce type de dossier rapporte : un encadrement calculé sans
+mesure, une métrique d'iso-qualité qui manquait, un scénario absent.
+
+**Ce qui attend encore une réponse humaine.** Quatorze demandes extérieures, en fiches présentables ;
+et les trois choses hors de portée ci-dessus. `WaveEvent` reste l'urgence de format, à 50 octets.
