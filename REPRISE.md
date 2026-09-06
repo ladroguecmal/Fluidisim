@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-06
-Session en cours : —
+Session en cours : S23 — C04, la rupture de barrage (Ritter), et le lit sec
 Dernière session : S22 — 2026-09-06 — C01 : le premier δ, et le fork qu'on croyait clos
-Session suivante : S23 — C04, la rupture de barrage *(recommandé)*, ou C03, ou H2
+Session suivante : S24 — C03 (seiche, avec friction) ou H2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :

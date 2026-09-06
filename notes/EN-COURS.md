@@ -59,180 +59,49 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S22
-État             : terminée
+Session          : S23
+État             : en cours
 Battement        : 2026-09-06
-Objectif         : C01 — le repos hydrostatique sur pente, et le premier δ
+Objectif         : C04 — la rupture de barrage (Ritter), et le lit sec
 ```
 
 ### Plan
 
-C01 est décrit dans `CAS-CANONIQUES` comme « le test le moins spectaculaire, le plus rapide, et
-celui qui élimine le plus de candidats ». Il n'a besoin d'aucune houle, d'aucun corps, d'aucun
-réseau : de l'eau au repos sur un fond incliné, et la question de savoir si elle y reste.
+C01 a testé le solveur sur son état le plus trivial : rien ne bouge. **C04 le teste sur le plus
+violent** — une colonne d'eau lâchée sur un lit sec, une discontinuité à `t = 0`, et une solution
+analytique complète pour toute la suite (Ritter). Entre les deux, il n'y a pas de degré : ce sont
+les deux extrémités de ce qu'un solveur d'eau peu profonde doit savoir faire.
 
-**Ce que cette session ne fait pas.** Elle ne choisit pas le solveur δ du projet — ce choix est le
-banc **B3**, et ADR-007 §5 liste cinq candidats sans en privilégier aucun. Ce qui est écrit ici est
-un **véhicule d'essai**, étiqueté comme tel, exactement comme `background.rs` l'est pour `B` : il
-donne à C01 quelque chose à faire tomber. Le livrable durable est le **cas**, pas le solveur.
+**Ce que C04 attaque et que C01 ne touchait pas** : le front de mouillage sur lit sec. C'est là que
+les schémas produisent une hauteur négative, un front trop lent, ou les deux.
 
-*Thèse déclarée avant l'exécution : le schéma évident échoue C01.* Le gradient de pression et le
-terme de fond sont deux discrétisations différentes de la même quantité ; sur un fond incliné elles
-ne s'annulent pas, et l'eau au repos se met à couler. Si la thèse est fausse, c'est mon montage qui
-est trop facile, pas le schéma qui est bon — et il faudra le dire.
+*Thèse déclarée avant l'exécution : le front sera trop lent, et la mesure de sa position dépendra
+du seuil qui la définit plus que du schéma.* La première moitié est un défaut connu des schémas
+d'ordre 1 ; la seconde est le vrai risque de la session — **mesurer la position d'un front, c'est
+choisir à quelle hauteur d'eau on décrète qu'il commence**, et ce choix n'a pour l'instant aucune
+provenance (`H_SEC = 10⁻⁶` est posé sans justification, action **S22-4**).
 
-- [x] **P1** — plan, jeton.
-- [x] **P2** — `delta.rs` : grille 1D, état conservatif `(h, hu)`, flux de Rusanov, pas de temps
-      CFL. Fond plat d'abord, où le repos est trivialement exact. Test de repos sur fond plat.
-- [x] **P3** — le terme de fond au premier jet, la pente 1:20, et C01 branché dans le mode
-      `physics` : `max|u|` et `max|η − η₀|` mesurés sur le champ après 60 s.
-- [x] **P4** — exécuter, constater, **mesurer** l'amplitude du courant parasite. Un chiffre, pas
-      une impression.
-- [x] **P5** — reconstruction hydrostatique (Audusse) : le schéma équilibré. Réexécuter, comparer
-      les deux chiffres dans le même rapport.
-- [x] **P6** — **ADR-030** : ce que C01 a appris, et pourquoi « équilibré sur fond variable » est un
-      critère d'**élimination** pour B3, connu avant le banc et non découvert pendant.
-- [x] **P7** — répercussions : `CAS-CANONIQUES`, `cas_en_attente()`, index, angles morts, notes
-      correctives, décomptes.
-- [x] **P8** — rituel de fin (`REPRISE.md` §6).
+- [ ] **P1** — plan, jeton.
+- [ ] **P2** — le montage : canal plat, lit sec à droite, marche à `t = 0`. Les murs sont hors de
+      portée du signal à `t = 2 s` — le front avance de 12,5 m, la raréfaction remonte de 6,3 m —
+      donc aucune condition transmissive n'est nécessaire, et c'est à vérifier plutôt qu'à supposer.
+- [ ] **P3** — la solution de Ritter comme référence, et **la définition du front** : à seuil `ε`
+      dans le champ, comparée à la position où Ritter vaut `ε` — et non à `2√(gh₀)·t`. Comparer une
+      mesure à seuil contre une référence sans seuil mesurerait la définition, pas le schéma.
+- [ ] **P4** — exécuter, constater, mesurer la sensibilité de la position du front à `ε`.
+- [ ] **P5** — **S22-4** : donner une provenance à `H_SEC`, ou le remplacer. C04 est le cas qui le
+      met en jeu ; le laisser posé au jugé après l'avoir traversé serait la dette exacte que
+      décrit A106.
+- [ ] **P6** — ce que la session a appris : ADR-031 si la conclusion engage B3, note datée sinon.
+- [ ] **P7** — répercussions : `CAS-CANONIQUES`, `cas_en_attente()`, index, angles morts, décomptes.
+- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
-#### Le dépôt a forké une seconde fois — constaté à l'ouverture de S22
+**Ce que S22 laisse et qui vaut pour ici.** Le témoin `C01-jet` doit rester rouge — s'il passe, le
+harnais le signale comme anomalie. Le véhicule δ n'a pas de friction : sans effet sur C04, dont
+l'énoncé pose explicitement « canal plat **sans frottement** », donc l'action **S22-3** n'est pas un
+prérequis de cette session. Elle le redevient pour C03.
 
-`git worktree list` et `git branch -a`, les deux commandes qu'`CLAUDE.md` impose, ont montré ceci :
-
-| Ligne | Sessions | Contenu propre |
-|---|---|---|
-| `master` (et `claude/reprise-projet-s22-715339`) | S08 → **S17** | la fusion S16, qui a importé l'autre ligne jusqu'à S15 |
-| `claude/reprise-projet-5134cd` | S08 → **S21** | ADR-027 à ADR-029, `code/`, H1 et H3 |
-
-Point de divergence commun : `8fe1503` (S07) — **le même fork que `FORK-S08-S15.md` décrit**, jamais
-refermé du côté git. La fusion de S16 a été faite **par import de contenu**, pas par un merge : la
-ligne source ne l'a donc jamais reçue et a continué seule pendant quatre sessions.
-
-**Ce que S22 a fait :** repartir de `a6cfe6f` (S21, la ligne la plus avancée et la seule dont le
-`REPRISE.md` annonce S22) sur une branche `claude/s22-suite`, **sans rien réécrire**. `master` est
-intact.
-
-**Ce qui reste à trancher, et qui n'est pas à moi :** que faire du travail propre à `master`,
-S16-S17 — la carte de renumérotation, la revue de cadence sur les documents importés. Il n'est pas
-perdu ; il n'est pas non plus dans la ligne vivante. Angle mort à enregistrer en P7.
-
-#### P4 — la thèse était juste, et le défaut est du premier ordre exact
-
-**C01 tombe au premier passage**, sur le montage nominal `dx = 0,25 m` :
-
-| Grandeur | Mesure | Tolérance | Dépassement |
-|---|---|---|---|
-| `max\|u\|` après 60 s | **19,6 mm/s** | 1 mm/s | **×20** |
-| `max\|η − η₀\|` | **7,3 mm** | 1 mm | **×7** |
-| volume | 80,000003 m² | 80 m² | passe à 4·10⁻⁸ près |
-
-**Le volume passe, et c'est ce qui rend le diagnostic sûr** : le solveur ne fuit pas, il *remue*.
-L'eau est déplacée d'un bout du bassin à l'autre par un courant qui n'a aucune cause physique.
-C'est exactement le symptôme décrit dans `CAS-CANONIQUES` — « un lac qui frissonne sans raison ».
-
-**Balayage en résolution** — `cargo test -p water-core courant_parasite -- --nocapture` :
-
-```
-dx = 1,0000 m   max|u| = 0,076033 m/s
-dx = 0,5000 m   max|u| = 0,038771 m/s
-dx = 0,2500 m   max|u| = 0,019581 m/s
-dx = 0,1250 m   max|u| = 0,009799 m/s
-dx = 0,0625 m   max|u| = 0,004895 m/s
-```
-
-`max|u| / dx` vaut 0,0760 · 0,0775 · **0,0783 · 0,0784 · 0,0783** — constant sur les trois grilles
-fines. **Le courant parasite est du premier ordre exact en `dx`**, et le coefficient a une valeur :
-`C ≈ 0,0783 s⁻¹`.
-
-**Le chiffre qui décide.** Atteindre 1 mm/s par raffinement seul demanderait
-`dx = 10⁻³ / 0,0783 = 12,8 mm`, soit **19,6 fois plus fin** que le montage nominal. En 2D, le coût
-va comme `dx⁻²` en cellules et `dx⁻¹` en pas de temps (CFL) : **×7 500**. Il n'y a pas de
-raffinement qui rachète un schéma non équilibré — c'est un défaut de *nature*, pas de *finesse*.
-
-**Ce que la cause n'est pas.** Le terme de fond centré n'est pas coupable ici. Sur un fond
-**linéaire** et une surface plane, `h` varie linéairement, et la différence centrée du flux de
-pression `g·h²/2` égale exactement `g·h·∂b/∂x` — les deux se compensent par construction. Le
-coupable est la **diffusion de Rusanov** : `−α/2·(h_R − h_L)` porte sur la hauteur, qui varie le
-long d'une pente **même quand l'eau est parfaitement immobile**. Le schéma diffuse un saut qui
-n'est pas un saut d'écoulement mais un saut de géométrie.
-
-C'est le point non anticipé de la session : j'attendais le terme source, et c'est le flux.
-
-#### P5 — deux défauts se superposaient, et le plus gros était dans la condition aux limites
-
-**Correction à porter sur ce qui est écrit plus haut : le diagnostic de P4 était faux.** Il
-attribuait les 19,6 mm/s à la diffusion de Rusanov. La vraie cause principale était ailleurs.
-
-`bords()` recopiait la **hauteur d'eau** dans la cellule fantôme — `h[0] = h[1]`, le miroir évident.
-Sur un fond en pente, le lit de la fantôme n'est pas à la cote de sa voisine : recopier la hauteur
-y installe une surface libre décalée de `dx·pente`, c'est-à-dire **une marche d'eau permanente
-contre chaque mur**, qui se vide dans le domaine dès le premier pas. Le miroir juste porte sur la
-**surface libre** : `h_fantôme = η_interne − b_fantôme`.
-
-Le symptôme qui l'a révélé n'était pas le courant : c'est le **schéma équilibré qui perdait 1,1 %
-de volume** alors que son intérieur est exact par construction. Une propriété exacte qui donne un
-résultat faux ne laisse qu'une possibilité — l'erreur est en dehors de ce qu'elle couvre.
-
-> **Un intérieur équilibré et un bord qui ne l'est pas donnent un solveur non équilibré.** La
-> propriété ne se découpe pas, et c'est le genre de chose qu'on n'écrit dans aucun ADR parce qu'elle
-> paraît évidente une fois dite.
-
-**Après correction du bord — les deux schémas, à 60 s :**
-
-| `dx` | jet : `max\|u\|` | jet : `max\|η−η₀\|` | équilibré : `max\|u\|` | équilibré : `max\|η−η₀\|` |
-|---|---|---|---|---|
-| 1,0000 m | 1,98 mm/s | 85,0 mm | 0,0018 mm/s | 0,00048 mm |
-| 0,5000 m | 1,04 mm/s | 43,0 mm | 0,0026 mm/s | 0,00048 mm |
-| **0,2500 m** | **0,53 mm/s** | **21,6 mm** | **0,0068 mm/s** | **0,00072 mm** |
-| 0,1250 m | 0,29 mm/s | 10,8 mm | 0,0062 mm/s | 0,00119 mm |
-| 0,0625 m | 0,10 mm/s | 5,5 mm | 0,0070 mm/s | 0,00131 mm |
-
-**Trois constats, dans l'ordre d'importance.**
-
-1. **Le premier jet passe `max|u|` et échoue `max|η−η₀|`.** 0,53 mm/s contre 1 mm/s admis — il
-   aurait été déclaré conforme par un cas qui n'aurait mesuré que la vitesse. C'est la seconde
-   assertion de C01 qui le fait tomber, avec 21,6 mm pour 1 mm. **Les deux assertions de C01 ne
-   sont pas redondantes**, et rien dans l'énoncé ne le disait.
-2. **Le défaut résiduel du premier jet est du premier ordre exact en `dx`** : `max|η−η₀|/dx` vaut
-   0,0850 · 0,0860 · 0,0864 · 0,0862 · 0,0875. Atteindre 1 mm par raffinement seul demanderait
-   `dx = 11,4 mm`, soit **×21,9**, soit **×10 500** en coût 2D. Le raffinement ne rachète pas
-   l'équilibrage — conclusion inchangée depuis P4, sur une autre grandeur.
-3. **L'erreur du schéma équilibré ne dépend pas de `dx`** : elle reste entre 0,0005 et 0,0013 mm,
-   et l'ulp d'un `f32` à 3 m vaut 0,00024 mm. **C'est le bruit d'arrondi, pas une erreur de
-   discrétisation.** Le repos est préservé algébriquement, et il le serait sur trois cellules.
-
-**Ce qui reste à savoir, et que cette session ne sait pas.** Le montage de C01 a un fond à pente
-**constante**. Sur un tel fond, `h` varie linéairement, le saut de hauteur aux interfaces est le
-même partout, et sa divergence est donc presque nulle — le premier jet y est *presque* équilibré
-par accident de géométrie. Un fond **courbe** (la bosse parabolique classique) le ferait tomber bien
-plus lourdement. **C01 tel qu'énoncé est moins discriminant qu'il n'en a l'air** : angle mort à
-enregistrer, et proposition d'un C01-bis à fond courbe.
-
-**Le témoin.** Le premier jet reste exécuté à chaque passage, sous le statut `TÉMOIN`, et **n'est
-pas compté dans les échecs** — une batterie rouge en régime nominal est une batterie que personne
-ne lit. Sa sémantique est inversée, pas suspendue : le verdict est **agrégé** — s'il venait à passer
-*toutes* les assertions de C01, la batterie le signale comme anomalie. C'est le seul moyen de savoir
-que le montage a cessé de discriminer.
-
-#### État à la fin de S22
-
-`cargo test` : **22 tests**. `water-harness check` : 2 scénarios, 0 échec, **0,05 s** / 60, hashs de
-conformité **inchangés** — S22 n'a pas touché à la couche `B`. `water-harness physics` :
-**15 assertions**, 0 échec, **2 témoins**, et treize cas canoniques imprimés comme non exécutés.
-Jeton **libéré**.
-
-**Ce que S23 doit savoir avant de commencer, et qui n'est pas ailleurs :**
-
-- **La branche.** Le travail vit sur `claude/s22-suite`, issue de `a6cfe6f`. `master` s'arrête à S17
-  et diverge depuis `8fe1503` (S07). **Faire `git branch -a` avant de croire quoi que ce soit** —
-  c'est ce qui a évité à S22 de repartir quatre sessions en arrière.
-- **Le véhicule δ n'a pas de friction et son seuil de séchage est posé sans provenance.** C04 touche
-  aux deux. Les traiter avant, pas pendant : un front de Ritter qui déraille laisserait trois causes
-  possibles au lieu d'une.
-- **Le témoin `C01-jet` doit rester rouge.** S'il passe toutes les assertions, le harnais le signale
-  comme anomalie. Ce n'est pas un test cassé : c'est le montage qui aurait cessé de discriminer.
-- **Ne pas chercher `λ_cut` sur ce solveur.** Non dispersif par construction ; la mesure serait un
-  artefact numérique. Vérifié, pas supposé.
+**Branche.** `claude/s22-suite`, issue de `a6cfe6f`. `master` s'arrête à S17 et diverge depuis
+`8fe1503` (S07) — voir A107. Vérifié à l'ouverture de S23 : rien n'a bougé ailleurs.
