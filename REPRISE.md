@@ -12,10 +12,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-05
+Session en cours : S19 — 2026-09-05 — ADR-020 acté, et il n'y a pas d'autres équipes
 Dernière session : S18 — 2026-09-05 — les cinq arbitrages, tranchés sur délégation
-Session suivante : S19 — dossier d'exécution du banc B3, reporté depuis S17
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
