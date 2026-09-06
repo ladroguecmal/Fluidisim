@@ -2871,3 +2871,111 @@ Deux autres entrées : **S31-2**, écrire C24 ; ou **S30-2**, nommer l'instrumen
 Inchangés. **A103** — la masse volumique de l'eau, douce ou de mer. **A107** — le sort du travail
 propre à `master`, S16-S17. Et les trois choses hors de portée d'une session : nommer les personnes,
 constater l'état réel du projet, agir sur l'infrastructure — dont le dépôt distant.
+
+---
+
+## S32 — 2026-09-06 — La réponse était dans ADR-001, pour la deuxième fois de suite
+
+**Consigne reçue.** « Enchaîne S32 ».
+
+**Sorties.** [`ADR-037`](../docs/adr/ADR-037-la-dissipation-est-un-allie-pour-la-moitie-de-delta.md) ;
+note corrective datée dans ADR-036 §3 — dont l'objet n'existe pas ; registre porté à **143 angles
+morts** ; leçons L110 à L113 ; action **S31-1 close par dissolution**.
+
+**Ça tourne.** `cargo test` : **33 tests** au vert. `water-harness check` : 0 échec, hashs inchangés.
+Session sans code neuf.
+
+### Le résultat de la session tient en une phrase
+
+**A139 était fausse, l'erreur était la mienne, et ADR-001 §2 y répondait depuis S01.**
+
+| Couche | Contenu, verbatim |
+|---|---|
+| **W** | « **sillages**, anneaux d'impact, ondes d'explosion, tsunamis, déferlement, réfraction bathymétrique » |
+| **δ** | « proche-coque, gerbe d'étrave, éclaboussure, cavité d'impact, poche d'air, remous sur rocher » |
+
+En S31 j'avais écrit « aucun document ne tranche » après n'avoir lu qu'ADR-011 §4 — qui parle du
+*générateur* de sillage dans W et ne contredit rien. **Tout ADR-036 §3, et son chiffre le plus
+frappant — deux mètres de sillage derrière une barque — porte sur un objet que δ ne contient pas.**
+
+> **Deux sessions de suite, le même défaut, sur le même document.** A122 dissoute en S31 en relisant
+> ADR-001 ; A139 dissoute en S32 en relisant ADR-001. Le socle du corpus a répondu deux fois à une
+> question dite ouverte, et la seconde fois c'est la session précédente qui l'avait posée sans le
+> consulter. Angle mort **A143**, sévérité 1 : **un corpus qui grandit rend son propre socle moins
+> consulté** — trente-sept ADR se lisent moins qu'un, et le premier est celui qu'on croit connaître.
+
+### Ce qu'ADR-001 dit d'autre, et que S31 n'avait pas lu non plus
+
+> *« δ tend vers 0 en s'éloignant de sa source. Ce n'est pas une contrainte imposée de l'extérieur :
+> c'est la **définition de la couche**. »*
+
+**La décroissance de δ est voulue** — mais **en espace**, alors que la dissipation numérique agit
+**en temps**. Toute la question tient dans cet écart, et il partitionne le contenu de δ :
+
+| | Phénomènes | Ce que la dissipation fait | Statut |
+|---|---|---|---|
+| **entretenus** | proche-coque, gerbe d'étrave, remous sur rocher | la source réalimente, la dissipation atténue avec le trajet → **équilibre spatial** | **mécanisme voulu** |
+| **transitoires** | éclaboussure, cavité d'impact, poche d'air libérée | rien ne réalimente → **mort avant la fin physique** | **défaut dimensionnant** |
+
+> **La dissipation réalise la définition de δ pour les entretenus et la trahit pour les
+> transitoires.** C'est un renversement complet du cadrage de S31, qui la traitait comme un défaut
+> uniforme.
+
+**Et la longueur de décroissance tombe juste** : le proche-coque s'éteint naturellement à **25,6 m**,
+quand ADR-001 donne au domaine « quelques dizaines de mètres ». Il n'est donc pas nécessaire
+d'imposer cette décroissance par une éponge — elle est déjà là.
+
+### Le critère de dimensionnement, et il est brutal
+
+`t_num = K·L²/(dx·c)` contre `t_phys ≈ √(2L/g)`. La condition se résout, et **`g` disparaît** :
+
+> ```
+> dx ≤ K · L^1,5 / √(2h)
+> ```
+
+| `L` | `dx_max` à `ν = 0,45` | `dx_max` à `ν = 0,70` |
+|---|---|---|
+| 0,5 m | **1,1 cm** | 2,1 cm |
+| 1 m | **3,2 cm** | 5,9 cm |
+| 2 m | 9,0 cm | 16,6 cm |
+| 5 m | 35,7 cm | 65,5 cm |
+
+**Une éclaboussure d'un mètre demande `dx = 3,2 cm`, sur un solveur 3D.** À `dx = 0,25 m`, elle
+s'éteint **huit fois trop tôt** ; une de cinquante centimètres, **vingt fois**. Le rapport croît
+comme `L^1,5/dx` : ce sont les plus petits phénomènes qui sont détruits, et ce sont eux que δ existe
+pour montrer.
+
+### Ce que cela ajoute à ADR-035
+
+Passer de `ν = 0,45` à `0,70` multiplie `dx_max` par **1,83**, donc divise le nombre de cellules 3D
+par **6,1**. Le levier du nombre de Courant ne se mesure plus en portée d'onde — il se mesure en
+**taille de maille pour une fidélité de transitoire donnée**, et c'est la contrainte dimensionnante
+de δ.
+
+### Ce qui n'a pas été fait, et pourquoi
+
+- **La conclusion la plus rassurante est la moins étayée.** L'équilibre spatial du proche-coque à
+  25,6 m est **dérivé**, jamais mesuré : il suppose qu'une source constante et une dissipation
+  exponentielle donnent `exp(−x/L_d)`, vrai en linéaire, et le solveur ne l'est pas. Toutes les
+  mesures de S25 à S32 portent sur des perturbations **relâchées**, aucune sur une source
+  **entretenue** (A142, action S32-2).
+- **`t_phys = √(2L/g)` est une estimation.** La durée *perçue* d'une éclaboussure inclut l'écume et
+  le spray d'ADR-014, qui survivent plus longtemps que la déformation de surface. Le critère est
+  conservateur ou optimiste selon ce qu'on décide de voir (A141).
+- **La partition entretenus/transitoires n'est pas dans ADR-001**, qui liste six contenus sans les
+  distinguer. Elle devrait y être portée (S32-1).
+
+### Session suivante recommandée
+
+**S33 — S32-2, mesurer un phénomène entretenu.** C'est la seule des quatre actions qui produise une
+**mesure**, et elle porte sur la conclusion la moins étayée du corpus récent. Le véhicule sait déjà
+imposer une paroi mobile (C23) : une source entretenue est à portée.
+
+Deux autres entrées : **S31-2**, écrire C24 (conservation de forme d'un paquet), dont la référence
+est `1` exactement ; ou **H2**, non écrit après douze sessions où il est cité.
+
+### Arbitrages en attente
+
+Inchangés. **A103** — la masse volumique de l'eau, douce ou de mer. **A107** — le sort du travail
+propre à `master`, S16-S17. Et les trois choses hors de portée d'une session : nommer les personnes,
+constater l'état réel du projet, agir sur l'infrastructure — dont le dépôt distant.

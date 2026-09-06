@@ -1637,3 +1637,80 @@ quelle couche appartient le phénomène.
 cette appartenance est **écrite quelque part**. Si elle ne l'est qu'implicitement, dans deux
 documents qui n'en parlent pas ensemble, elle n'est pas décidée — et le résultat qui en dépend est
 suspendu à une décision que personne n'a prise.
+
+## L110 — Un corpus qui grandit rend son propre socle moins consulté
+
+*(S32)* Deux sessions consécutives ont ouvert une question qualifiée de grave, l'ont reportée, puis
+l'ont dissoute en relisant **le même document** — le premier ADR du corpus, celui qui définit les
+couches. La réponse y était depuis la première session. La seconde fois, c'est la session
+**précédente** qui avait posé la question sans le consulter.
+
+Le mécanisme est mécanique : trente-sept documents se lisent moins qu'un, et celui qu'on saute est
+**celui qu'on croit connaître**. Un socle est relu au démarrage d'un projet, puis jamais — alors
+qu'il est précisément l'endroit où les définitions vivent, et que les questions difficiles portent
+presque toujours sur des définitions.
+
+Le coût mesuré ici : deux angles morts de gravité 1 ouverts pour rien, quatre sessions de report, et
+un document entier écrit sur un objet qui n'appartenait pas à la couche qu'il étudiait.
+
+**Réflexe** : rattacher explicitement une **famille de questions** au document qui en décide, et
+l'écrire dans le registre. Ici : *toute question sur l'appartenance d'un phénomène à une couche se
+règle dans ADR-001 §2, et nulle part ailleurs.* Une règle d'aiguillage coûte une ligne et remplace
+une relecture.
+
+## L111 — Le même mécanisme peut réaliser une exigence et en trahir une autre
+
+*(S32)* La dissipation numérique efface les perturbations avec le temps. Le document fondateur exige
+par ailleurs que la couche concernée « tende vers 0 en s'éloignant de sa source ».
+
+Pour un phénomène **entretenu** — une source qui réalimente en permanence — les deux se rejoignent :
+la dissipation atténue avec le temps de trajet, ce qui produit exactement la décroissance **spatiale**
+demandée, et à la bonne échelle. Pour un phénomène **transitoire**, rien ne réalimente : la même
+dissipation le tue avant sa fin physique.
+
+**Un défaut et une propriété voulue, produits par le même mécanisme, séparés par la seule présence
+d'une source.** Traiter la dissipation comme un défaut uniforme — ce que faisait la session
+précédente — conduisait à vouloir la corriger partout, donc à détruire la propriété.
+
+**Réflexe** : avant de corriger un mécanisme jugé nuisible, énumérer **ce qu'il produit d'autre**.
+S'il réalise une exigence ailleurs, ce n'est pas le mécanisme qu'il faut changer, c'est le périmètre
+où il s'applique — et la partition qui en résulte est souvent la vraie décision de conception.
+
+## L112 — Quand une grandeur disparaît d'un critère, le critère devient transportable
+
+*(S32)* La condition « un transitoire doit survivre à sa durée physique » s'écrivait avec la durée
+numérique, la durée de chute gravitaire, la célérité, la profondeur et la résolution. Après
+résolution, l'accélération de la pesanteur **disparaît** :
+
+> `dx ≤ K · L^1,5 / √(2h)`
+
+Ce n'est pas une simplification cosmétique. Tant que `g` figurait dans la formule, le critère
+paraissait attaché à un contexte gravitaire particulier. Une fois `g` éliminé, il ne reste que la
+taille du phénomène, la profondeur et le nombre de Courant — **trois grandeurs qu'un concepteur
+choisit**, là où `g` est subi.
+
+C'est la deuxième fois dans ce projet qu'une élimination révèle la bonne variable ; la première
+avait fait disparaître la longueur d'onde, la célérité et la période d'une loi de dissipation.
+
+**Réflexe** : après avoir établi un critère, chercher activement ce qui s'y **annule**. Ce qui reste
+est ce sur quoi on peut agir, et c'est la forme dans laquelle le critère doit être publié.
+
+## L113 — La conclusion la plus rassurante est celle qu'il faut vérifier en premier
+
+*(S32)* Une session a produit deux résultats : un défaut chiffré et brutal — les petites
+perturbations meurent huit à vingt fois trop tôt — et une bonne nouvelle : la décroissance spatiale
+exigée par la conception se produit toute seule, à la bonne échelle.
+
+Le défaut est **mesuré**. La bonne nouvelle est **dérivée** : elle suppose qu'une source constante
+et une dissipation exponentielle donnent une décroissance exponentielle en espace, ce qui est vrai
+en régime linéaire — et le solveur ne l'est pas. Aucune mesure du corpus ne porte sur une source
+entretenue ; toutes portent sur des perturbations relâchées.
+
+**La conclusion la moins étayée est donc celle qui rassure**, et c'est un ordre naturel : on cherche
+à confirmer ce qui inquiète, et on accepte ce qui soulage. Un raisonnement qui aboutit à « tout va
+bien » sollicite moins de vérification que celui qui aboutit à « il faut trente fois plus de
+cellules ».
+
+**Réflexe** : dans un rapport qui contient une mauvaise et une bonne nouvelle, vérifier **l'étai de
+la bonne** avant de publier. Et l'écrire : si elle est dérivée et non mesurée, le dire à l'endroit
+même où elle rassure.

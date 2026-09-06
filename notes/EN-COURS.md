@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S32
-État             : en cours
+État             : terminée
 Battement        : 2026-09-06
 Objectif         : Où vit le sillage — et ce que δ porte vraiment
 ```
@@ -104,7 +104,7 @@ probablement tout le sujet.
 - [x] **P5** — chiffrer : durée numérique contre durée physique attendue, pour chaque contenu.
 - [x] **P6** — **ADR-037**.
 - [x] **P7** — répercussions : ADR-036, index, angles morts, actions, décomptes.
-- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
+- [x] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
@@ -221,3 +221,23 @@ de transitoire donnée**, et c'est la contrainte dimensionnante de δ.
 
 C'est un renversement complet du cadrage de S31, qui traitait la dissipation comme un défaut
 uniforme. **Elle est un défaut pour la moitié du contenu de δ, et un mécanisme voulu pour l'autre.**
+
+#### État à la fin de S32
+
+`cargo test` : **33 tests**. `water-harness check` : 2 scénarios, 0 échec, hashs **inchangés**.
+Session **sans code neuf** — le travail était de lecture et de conception. Jeton **libéré**.
+
+**Ce que S33 doit savoir avant de commencer, et qui n'est pas ailleurs :**
+
+- **Règle d'aiguillage, née de deux dissolutions consécutives** : *toute question sur
+  l'appartenance d'un phénomène à une couche se règle dans **ADR-001 §2**, et nulle part ailleurs.*
+  A122 et A139 y répondaient toutes deux depuis S01 (A143).
+- **ADR-036 §3 est sans objet** — il porte sur le sillage, qui n'appartient pas à δ. Ses chiffres
+  restent exacts pour un objet de δ de même longueur d'onde, mais **ne pas citer la table des
+  distances** : elle décrit un cas qui n'existe pas.
+- **La conclusion la plus rassurante du corpus récent est la moins étayée.** L'équilibre spatial du
+  proche-coque à 25,6 m est **dérivé**, jamais mesuré, sur un solveur non linéaire (A142). C'est
+  l'action S32-2, et c'est la session recommandée.
+- **Le critère `dx ≤ K·L^1,5/√(2h)`** suppose `t_phys = √(2L/g)`, qui ignore l'écume et le spray
+  d'ADR-014 — plus durables que la déformation de surface (A141).
+- **C04 en échec, `C01-jet` rouge, C08 sans verdict** : trois décisions, pas trois régressions.

@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-06
-Session en cours : S32 — où vit le sillage, et ce que δ porte vraiment
-Dernière session : S31 — 2026-09-06 — la question la plus lourde se dissout, et ce qui la remplace est pire
-Session suivante : S33 — C24 (S31-2) ou H2
+Session en cours : —
+Dernière session : S32 — 2026-09-06 — la réponse était dans ADR-001, pour la deuxième fois de suite
+Session suivante : S33 — mesurer un phénomène entretenu (S32-2) *(recommandé)*, ou C24 (S31-2), ou H2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
@@ -105,7 +105,7 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Trente et une sessions, **36 ADR** *(dont un acté)*, six spécifications, **neuf registres** — **et du
+Trente-deux sessions, **37 ADR** *(dont un acté)*, six spécifications, **neuf registres** — **et du
 code qui tourne** : `code/`, étages **H1 et H3** du harnais, un **δ d'essai** équilibré, 31 tests
 verts et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
 verdict** (C08). Quatre cas canoniques sur δ sont exécutés : **C01 et C03 passent**, C04 échoue,
@@ -156,6 +156,18 @@ visible varie comme `v⁴/dx`. Voir
 [`ADR-036`](docs/adr/ADR-036-delta-ne-porte-pas-la-houle-il-porte-l-ecart.md) — et **A139**, qui
 décide de la portée de tout cela : ADR-011 §4 place le générateur de sillage dans **W**, ce qui
 rendrait le §3 sans objet. Personne ne l'a tranché.
+
+**Et S32 a corrigé S31 : le sillage appartient à W, pas à δ** — ADR-001 §2 le dit depuis S01, et
+deux sessions de suite ont posé une question à laquelle ce document répondait (**A143**). *Toute
+question sur l'appartenance d'un phénomène à une couche se règle dans ADR-001 §2, et nulle part
+ailleurs.*
+
+Ce que δ porte est d'échelle **métrique**, et
+[`ADR-037`](docs/adr/ADR-037-la-dissipation-est-un-allie-pour-la-moitie-de-delta.md) le partitionne :
+pour les phénomènes **entretenus**, la dissipation **produit** la décroissance spatiale qu'ADR-001
+exige — 25,6 m pour le proche-coque, dans la portée voulue ; pour les **transitoires**, elle les tue
+huit à vingt fois trop tôt. Le critère : `dx ≤ K·L^1,5/√(2h)` — **une éclaboussure d'un mètre demande
+3,2 cm**, sur un solveur 3D.
 
 **Une urgence de format, la seule.** `WaveEvent` (SPEC-006 §3.1) est une structure **répliquée** qui
 porte trois champs demandés par l'équipe audio. Elle doit être arrêtée **avant** que le réseau ne
