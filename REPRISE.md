@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-06
-Session en cours : S22 — C01, le repos hydrostatique sur pente, et le premier δ
-Dernière session : S21 — 2026-09-05 — H3 : le cas analytique trouve le premier vrai bug
-Session suivante : S23 — C02 sur δ et λ_cut, ou H2
+Session en cours : —
+Dernière session : S22 — 2026-09-06 — C01 : le premier δ, et le fork qu'on croyait clos
+Session suivante : S23 — C04, la rupture de barrage *(recommandé)*, ou C03, ou H2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
@@ -105,9 +105,9 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Vingt-et-une sessions, **29 ADR** *(dont un acté)*, six spécifications, huit registres — **et du
-code qui tourne** : `code/`, étages **H1 et H3** du harnais, 18 tests et 12 assertions analytiques
-au vert. Les 30 sections du document de
+Vingt-deux sessions, **30 ADR** *(dont un acté)*, six spécifications, huit registres — **et du
+code qui tourne** : `code/`, étages **H1 et H3** du harnais, un **δ d'essai** équilibré, 22 tests et
+15 assertions analytiques au vert. Les 30 sections du document de
 questions ouvertes d'origine sont traitées. Les vingt premiers ADR ont été confrontés les uns aux
 autres en S05 (douze écarts, deux de gravité 1) et les cinq SPEC entre elles en S08 (dix écarts,
 deux de gravité 1). Tous résolus — le dernier, le **chemin poussé**, par l'écriture de `SPEC-006`
@@ -121,8 +121,21 @@ porte trois champs demandés par l'équipe audio. Elle doit être arrêtée **av
 fige son format ; l'élargir après coûtera une migration de protocole. C'est le seul point où
 attendre a un coût croissant.
 
-Chemin critique : `ADR-020 acté → H1 → H3 → (C01, C02 → λ_cut → B2) et (H4 → B3) → B4`. Les deux
-premiers maillons sont **faits** ; le suivant est C01, qui demande un `δ` si minuscule soit-il.
+Chemin critique : `ADR-020 acté → H1 → H3 → C01 → (couche dispersive → C02 → λ_cut → B2) et
+(H4 → B3) → B4`. **C01 est fait**, et il a coûté un `δ` d'essai — Saint-Venant 1D, `delta.rs`, un
+véhicule et non le solveur du projet, qui reste le banc B3.
+
+**Un maillon s'est allongé en S22 :** `λ_cut` ne sortira pas de ce véhicule. Saint-Venant est non
+dispersif, et C02 mesure une erreur de célérité **en fonction de λ** ; il faut une couche dispersive
+— `W`, ou un `δ` d'une autre famille. Ce n'est pas un retard de codage, c'est une dépendance qui
+n'était pas dans le graphe (ADR-030 §5).
+
+**Et S22 a confirmé S21 par un autre chemin.** Le schéma de solveur qu'on écrit sans y penser échoue
+C01 — mais **pas par la grandeur que le nom du cas désigne** : il passe le seuil de courant
+(0,53 mm/s pour 1 admis) et échoue celui de surface libre (21,6 mm pour 1 admis). Mieux : son défaut
+principal n'était pas dans le schéma mais dans la **condition aux limites**, et c'est le schéma
+*exact* qui l'a révélé, en perdant du volume là où il ne peut pas en perdre. Une identité fermée ne
+sert pas seulement à valider, elle **localise** (leçon L72).
 
 **Et S21 a montré pourquoi cet ordre n'était pas une précaution.** Le harnais déterministe H1 était
 vert sur un champ **faux** : la vitesse orbitale était en quadrature au lieu d'être en phase avec
@@ -144,6 +157,12 @@ chacun ce qu'il faudrait changer pour l'inverser.
 dans **`docs/DOSSIER-REUNIONS.md`** (S17), classées par ce que la réponse débloque. Et **trois choses
 restent hors de portée d'une session** : nommer les personnes, constater l'état réel du projet, agir
 sur l'infrastructure. Voir `CLAUDE.md`.
+
+**Deux points attendent en plus, et le second est nouveau.** **A103** — la masse volumique de l'eau,
+douce (1000) ou de mer (1025) : `body.rs` retient 1000 par défaut, et 2,5 % de tirant d'eau en
+dépendent. **A107** — le dépôt avait forké une seconde fois, et S22 l'a constaté à l'amorce : la
+ligne `master` s'arrête à S17 et porte seule la fusion S16 et la cadence S17, quand la ligne vivante
+est allée jusqu'à S22. Que faire de ce travail resté de côté n'est pas une décision de session.
 
 Les rappeler en fin de session tant qu'ils sont ouverts. Ne pas les trancher, ne pas les contourner
 par une hypothèse implicite.

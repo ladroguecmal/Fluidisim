@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S22
-État             : en cours
+État             : terminée
 Battement        : 2026-09-06
 Objectif         : C01 — le repos hydrostatique sur pente, et le premier δ
 ```
@@ -94,7 +94,7 @@ est trop facile, pas le schéma qui est bon — et il faudra le dire.
       critère d'**élimination** pour B3, connu avant le banc et non découvert pendant.
 - [x] **P7** — répercussions : `CAS-CANONIQUES`, `cas_en_attente()`, index, angles morts, notes
       correctives, décomptes.
-- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
+- [x] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
@@ -216,3 +216,23 @@ pas compté dans les échecs** — une batterie rouge en régime nominal est une
 ne lit. Sa sémantique est inversée, pas suspendue : le verdict est **agrégé** — s'il venait à passer
 *toutes* les assertions de C01, la batterie le signale comme anomalie. C'est le seul moyen de savoir
 que le montage a cessé de discriminer.
+
+#### État à la fin de S22
+
+`cargo test` : **22 tests**. `water-harness check` : 2 scénarios, 0 échec, **0,05 s** / 60, hashs de
+conformité **inchangés** — S22 n'a pas touché à la couche `B`. `water-harness physics` :
+**15 assertions**, 0 échec, **2 témoins**, et treize cas canoniques imprimés comme non exécutés.
+Jeton **libéré**.
+
+**Ce que S23 doit savoir avant de commencer, et qui n'est pas ailleurs :**
+
+- **La branche.** Le travail vit sur `claude/s22-suite`, issue de `a6cfe6f`. `master` s'arrête à S17
+  et diverge depuis `8fe1503` (S07). **Faire `git branch -a` avant de croire quoi que ce soit** —
+  c'est ce qui a évité à S22 de repartir quatre sessions en arrière.
+- **Le véhicule δ n'a pas de friction et son seuil de séchage est posé sans provenance.** C04 touche
+  aux deux. Les traiter avant, pas pendant : un front de Ritter qui déraille laisserait trois causes
+  possibles au lieu d'une.
+- **Le témoin `C01-jet` doit rester rouge.** S'il passe toutes les assertions, le harnais le signale
+  comme anomalie. Ce n'est pas un test cassé : c'est le montage qui aurait cessé de discriminer.
+- **Ne pas chercher `λ_cut` sur ce solveur.** Non dispersif par construction ; la mesure serait un
+  artefact numérique. Vérifié, pas supposé.

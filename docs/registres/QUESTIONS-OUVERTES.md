@@ -110,3 +110,25 @@ utile change : les décisions structurantes restantes sont **expérimentales**, 
 | 6 | Décomposition récursive δ_grossier + δ_fin | débloque les résolutions mixtes | B5 |
 | 7 | Calibration flottabilité | dépend de 4 | B6 |
 | 8 | Seuils d'activation et de prédiction | dépend de 4 et 7 | B8 |
+
+---
+
+## Actions relevées en séance — S22
+
+Le rituel de fin (`REPRISE.md` §6.4) demande que toute action annoncée en prose devienne une tâche
+datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici celles de S22.
+
+| # | Action | D'où elle vient | Qui la porte | État |
+|---|---|---|---|---|
+| S22-1 | Écrire **C01-bis**, à fond **courbe**, avant que B3 ne se serve de C01 pour éliminer | ADR-030 §6.1, **A105** | session | **ouverte** |
+| S22-2 | Donner une provenance aux seuils de C01 — `1 mm/s` et `1 mm`, sans formule ni banc, contre I-14 | ADR-030 §6.3, **A106** | session | **ouverte** |
+| S22-3 | Poser la **friction de fond** dans le véhicule δ, avant C03 et C04 | ADR-030 §6.4 | session | **ouverte** |
+| S22-4 | Justifier ou mesurer le seuil de séchage `H_SEC`, posé sans provenance | `delta.rs` | session | **ouverte** |
+| S22-5 | Décider du sort du travail propre à `master` (S16-S17), hors de la ligne vivante | **A107** | **humain** | **ouverte** |
+
+> **Note S22 sur le rang 1 du réordonnancement ci-dessus.** `λ_cut` y est donné comme dépendant de
+> B2 + B3. S22 ajoute une dépendance qui n'était pas dans le graphe : **la mesure de `λ_cut` par C02
+> exige une couche dispersive.** Saint-Venant — la famille du véhicule δ écrit pour C01 — est non
+> dispersif (`c = √(g·h)`, SPEC-001 §1) ; C02 y mesurerait la dispersion *numérique* du schéma, pas
+> celle du modèle. Voir ADR-030 §5.
+

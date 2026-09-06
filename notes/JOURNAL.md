@@ -1739,3 +1739,115 @@ l'argument penche :
 — douce ou de mer. La question est petite, la réponse tient en un mot, et elle déplace toutes les
 références de flottabilité du projet de 2,5 %.
 
+
+---
+
+## S22 — 2026-09-06 — C01 : le premier δ, et le fork qu'on croyait clos
+
+**Consigne reçue.** « Reprends le projet, enchaîne sur S22 ».
+
+**Sorties.** `code/water-core/src/delta.rs` — un solveur δ d'essai, Saint-Venant 1D, deux schémas ;
+**C01 exécuté**, cinq lignes dans le mode `physics` dont deux témoins ;
+[`ADR-030`](../docs/adr/ADR-030-l-equilibrage-est-un-critere-d-elimination.md) ; notes S22 sur C01 et
+C02 dans [`CAS-CANONIQUES`](../docs/validation/CAS-CANONIQUES.md) ; renvoi daté dans ADR-007 §5.1 ;
+registre porté à **108 angles morts** ; leçons L71 à L74.
+
+**Ça tourne.** `cargo test` : **22 tests** au vert. `water-harness check` : deux scénarios,
+**0,05 s** contre 60, hashs de conformité inchangés. `water-harness physics` : **15 assertions**,
+0 échec, 2 témoins.
+
+### Avant tout : le dépôt avait forké une seconde fois
+
+`git worktree list` et `git branch -a` — les deux commandes que `CLAUDE.md` impose et qualifie de
+« non facultatives » — ont montré deux lignes vivantes :
+
+| Ligne | Sessions | Ce qu'elle porte seule |
+|---|---|---|
+| `master` | S08 → **S17** | la fusion S16, la carte de renumérotation, la cadence S17 |
+| `claude/reprise-projet-5134cd` | S08 → **S21** | ADR-027 à ADR-029, `code/`, H1 et H3 |
+
+Point de divergence : `8fe1503` (S07) — **le fork de `FORK-S08-S15.md`, réputé clos**. Il ne l'était
+pas. La fusion de S16 avait réuni le **contenu** par recopie de documents, sans jamais passer par
+git : la ligne source n'a donc rien reçu et a continué seule pendant quatre sessions.
+
+S22 est repartie de `a6cfe6f`, la ligne la plus avancée et la seule dont le `REPRISE.md` annonçait
+S22, sur une branche neuve — **sans rien réécrire**. `master` est intact et son travail propre
+récupérable. **Ce qu'il faut en faire n'est pas à moi.** Angle mort **A107**.
+
+### Le résultat de la session tient en une phrase
+
+**Le schéma de solveur qu'on écrit sans y penser échoue C01, mais pas par la grandeur que le nom du
+cas désigne.** Il passe `max|u| < 1 mm/s` avec 0,53 mm/s, et échoue `max|η − η₀| < 1 mm` avec
+21,6 mm. Un harnais qui n'aurait mesuré que les « courants parasites » — le symptôme que l'énoncé de
+C01 met en avant — l'aurait déclaré conforme.
+
+### Décision structurante
+
+[`ADR-030`](../docs/adr/ADR-030-l-equilibrage-est-un-critere-d-elimination.md) : **un candidat δ qui
+ne préserve pas exactement l'eau au repos sur un fond variable est éliminé avant d'entrer au banc
+B3**, quel que soit son coût par cellule. C'est un critère d'entrée, pas une pénalité.
+
+Le mot « éliminé » est justifié par un chiffre : le défaut est du **premier ordre exact** en `dx`
+(`max|η−η₀|/dx` constant à 0,086 sur cinq grilles), donc l'atteindre par raffinement seul demande
+`dx = 11,4 mm` au lieu de 250, soit **×21,9**, soit **×10 500** en coût 2D. Quatre ordres de grandeur
+pour obtenir par la force ce qu'une reconstruction hydrostatique donne gratuitement.
+
+### Chiffres qui ont orienté la conception
+
+| Grandeur, à `dx = 0,25 m`, après 60 s | Premier jet | Équilibré | Seuil C01 |
+|---|---|---|---|
+| `max\|u\|` | 0,53 mm/s | **0,0068 mm/s** | 1 mm/s |
+| `max\|η − η₀\|` | **21,6 mm** | **0,00072 mm** | 1 mm |
+| volume, m²/m | — | 80,000001 | 80 |
+| ordre du défaut en `dx` | **1 exact** | aucun — bruit d'arrondi `f32` | — |
+| coût du raffinement qui rachèterait le défaut | **×10 500** en 2D | — | — |
+
+L'erreur du schéma équilibré **ne dépend pas de `dx`** : entre 0,0005 et 0,0013 mm sur cinq grilles,
+quand l'ulp d'un `f32` à 3 m vaut 0,00024 mm. Le repos y est préservé par identité algébrique, pas
+par finesse.
+
+### Ce qui n'avait pas été anticipé
+
+**Le défaut principal n'était pas dans le schéma, mais dans la condition aux limites.** Le premier
+diagnostic — écrit, committé, puis corrigé — attribuait 19,6 mm/s à la diffusion de Rusanov. La vraie
+cause était le miroir de mur : il recopiait la **hauteur d'eau** dans la cellule fantôme au lieu de
+la **surface libre**, installant une marche d'eau permanente de `dx·pente` contre chaque paroi. Le
+miroir juste est `h_fantôme = η_interne − b_fantôme`.
+
+**Ce qui l'a révélé** : le schéma équilibré perdait 1,1 % de son volume alors que son intérieur le
+conserve *par construction*. Une propriété démontrée qui donne un résultat faux ne laisse qu'une
+possibilité — l'erreur est en dehors de ce qu'elle couvre. Même mécanisme qu'en S21 avec `u = ω·η` :
+**une identité fermée ne sert pas seulement à valider, elle localise.**
+
+Le défaut de bord pesait **quarante fois** le défaut de schéma qu'il masquait.
+
+### Ce qui n'a pas été fait, et pourquoi
+
+- **C02 n'a pas été exécuté, et ne peut pas l'être sur ce véhicule.** Saint-Venant est non
+  dispersif : `c = √(g·h)`, indépendant de λ. C02 y mesurerait la dispersion *numérique* du schéma,
+  pas celle qu'on cherche. **`λ_cut` demande une couche dispersive** — `W`, ou un δ d'une autre
+  famille. Le chemin critique de `00_INDEX.md` a été corrigé : un maillon y manquait.
+- **C01-bis à fond courbe** — le montage de C01 est à pente *constante*, où un schéma non équilibré
+  est presque équilibré par accident de géométrie. Le cas est plus faible que sa réputation, et B3
+  s'apprête à s'en servir pour éliminer. **A105**, à écrire avant B3.
+- **La friction de fond** n'existe pas dans le véhicule. Sans effet sur C01, dont la référence est le
+  repos ; indispensable à C03 et C04.
+
+### Session suivante recommandée
+
+**S23 — C04, la rupture de barrage (Ritter).** C'est le cas que le véhicule actuel peut porter, sa
+référence est fermée et exigeante, et il attaque ce que C01 n'a pas touché : le front de mouillage
+sur lit sec, où beaucoup de schémas produisent une hauteur négative. Il demande d'abord le seuil de
+séchage, aujourd'hui posé sans justification.
+
+Deux autres entrées possibles : **C03** (seiche — mesure la dissipation numérique, « le chiffre qu'on
+ne pense jamais à mesurer »), ou **H2** (dérive en continu), toujours non écrit.
+
+### Arbitrages en attente
+
+Rappelés tant qu'ils sont ouverts. **A103** — la masse volumique de l'eau, douce (1000) ou de mer
+(1025) : `body.rs` retient 1000 par défaut, et 2,5 % de tirant d'eau en dépendent. **A107** — que
+faire du travail propre à `master`, S16-S17, resté hors de la ligne vivante. Et les trois choses hors
+de portée d'une session : nommer les personnes, constater l'état réel du projet, agir sur
+l'infrastructure — dont un **dépôt distant**, dont l'absence est exactement ce qui a permis les deux
+forks.

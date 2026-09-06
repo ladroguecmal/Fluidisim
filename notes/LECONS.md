@@ -951,3 +951,67 @@ et personne ne l'aurait cherchée. Le bogue de test avait fait gratuitement le t
 **Réflexe** : après avoir corrigé un test fautif, se demander *pourquoi il a échoué plutôt que de
 mal passer*. Quand la réponse est « parce que le code a correctement refusé », il y a là une
 propriété active que rien ne teste : lui donner son propre cas, avant de corriger l'original.
+
+## L71 — Quand un cas porte plusieurs assertions, l'une d'elles travaille et le nom du cas désigne souvent l'autre
+
+*(S22)* C01 s'intitule « repos hydrostatique » et son symptôme annoncé est « les courants
+parasites ». Il porte deux seuils : `max|u| < 1 mm/s` et `max|η − η₀| < 1 mm`. Le schéma mis à
+l'épreuve **passe le premier** (0,53 mm/s) et **échoue le second** (21,6 mm pour 1 mm).
+
+La raison est physique et se généralise : un déséquilibre **stationnaire** installe un écart
+permanent avec un courant presque nul — l'eau s'est déplacée une fois, puis s'est arrêtée dans sa
+mauvaise position. Le nom du cas, lui, décrit le régime **transitoire**, celui qu'on imagine en
+lisant l'énoncé.
+
+**Réflexe** : exécuter et rapporter **toutes** les assertions d'un cas, même celles qui paraissent
+impliquées par une autre, et se méfier particulièrement de celle que le titre met en avant — c'est
+statistiquement celle qui a été choisie pour l'intuition, pas pour son pouvoir de discrimination.
+
+## L72 — Une propriété exacte qui donne un résultat faux localise l'erreur hors de son périmètre
+
+*(S22)* La reconstruction hydrostatique préserve l'eau au repos par **identité algébrique** : ce
+n'est pas une bonne approximation, c'est une égalité. Le solveur qui l'implémentait perdait pourtant
+1,1 % de son volume en 60 s.
+
+Il n'y avait donc rien à chercher dans l'opérateur intérieur — la démonstration ne laissait pas de
+place au doute. L'erreur était nécessairement dans ce que la démonstration **ne couvrait pas** : les
+conditions aux limites, qui recopiaient la hauteur d'eau au lieu de la surface libre.
+
+C'est le même mécanisme qu'en S21, où l'identité `u = ω·η` a fait tomber la vitesse orbitale (L67) :
+**une identité fermée ne sert pas seulement à valider, elle localise**. Sa valeur de diagnostic est
+proportionnelle à la rigueur avec laquelle on sait ce qu'elle couvre.
+
+**Réflexe** : devant un résultat faux là où une propriété est démontrée, ne pas relire la
+démonstration — énumérer ce qu'elle **exclut**. Bords, cas dégénérés, initialisation, transitions.
+
+## L73 — Un critère qualitatif devient un critère d'élimination dès qu'on mesure son ordre
+
+*(S22)* « Ce solveur est mal équilibré » est une remarque de méthode : elle invite à préférer, pas à
+exclure. Deux mesures la transforment en décision.
+
+La première est l'**ordre** du défaut en `dx` — ici 1, exact, constaté sur cinq grilles. La seconde
+est le **coût du raffinement** qui l'amènerait sous le seuil : `dx` divisé par 21,9, donc `×10 500`
+en 2D une fois comptés les cellules (`dx⁻²`) et les pas de temps (`dx⁻¹`).
+
+Un facteur dix mille n'est plus une préférence. Il autorise à **éliminer un candidat avant de le
+mesurer**, ce qu'aucun jugement qualitatif ne permet — et il rend l'élimination défendable devant
+quelqu'un qui ne partage pas l'intuition de départ.
+
+**Réflexe** : devant un défaut qu'on s'apprête à qualifier de « connu, on fera avec », mesurer son
+ordre, en déduire le raffinement requis, et l'élever au cube. Le résultat range le défaut dans l'une
+des deux seules catégories utiles : réglage, ou disqualification.
+
+## L74 — Une réconciliation qui n'emprunte pas l'outil de la divergence la masque au lieu de la fermer
+
+*(S22)* Le fork S08-S15 a été « fusionné » en S16 par **recopie de documents** d'une ligne vers
+l'autre. Le contenu a bien été réuni, un registre l'a acté, et le dépôt avait l'air complet. Mais
+l'historique git est resté divergent : la ligne source n'a rien reçu et a continué seule **quatre
+sessions de plus**, produisant trois ADR et tout le code.
+
+Le fork était donc doublement dangereux : ouvert *et* réputé clos. Une divergence signalée fait
+l'objet de vérifications ; une divergence déclarée résolue n'en fait plus l'objet d'aucune.
+
+**Réflexe** : une réconciliation se fait dans le système qui a créé la divergence, ou elle ne se fait
+pas. Si la fusion de contenu est le seul moyen disponible, alors **le registre doit dire que
+l'historique reste divergent** — et la ligne source doit être marquée, dans son propre jeton, comme
+abandonnée au profit de l'autre. Sans quoi la prochaine session lira « fusion close » et croira.
