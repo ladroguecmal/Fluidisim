@@ -101,7 +101,7 @@ Si la thèse est juste, l'audit doit commencer par mes propres mesures avant de 
 - [x] **P5** — corriger ce qui peut l'être dans le code, et **mesurer** que la correction change
       quelque chose : une assertion durcie qui reste verte sans qu'on sache pourquoi n'a rien
       prouvé.
-- [ ] **P6** — registre `AUDIT-ASSERTIONS-S29`, et note datée sur les cas dont l'énoncé change.
+- [x] **P6** — registre `AUDIT-ASSERTIONS-S29`, et note datée sur les cas dont l'énoncé change.
 - [ ] **P7** — répercussions : index, angles morts, actions, décomptes.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 

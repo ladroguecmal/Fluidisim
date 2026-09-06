@@ -334,6 +334,22 @@ elle n'est pas implémentée.
 Le cas le plus petit est le plus dur (leçon L07). Il doit être dans la batterie de base, pas dans
 les cas exotiques.
 
+> **Note corrective S29 — deux de ces trois assertions ne peuvent rien voir.** Voir
+> [`AUDIT-ASSERTIONS-S29`](../registres/AUDIT-ASSERTIONS-S29.md).
+>
+> « **Aucune divergence sur 120 s** » et « **aucun tremblement visible** » ne peuvent échouer que sur
+> un accident : elles restent vertes sur tout défaut qui n'en produit pas. Et « visible » n'a même
+> pas d'observateur défini. La troisième — « bascule en mode contraint effective dès `ω·dt > 1` » —
+> est recevable : elle porte sur une grandeur et un seuil.
+>
+> **Ce qu'il faut assertir à la place** : l'**amplitude de l'oscillation parasite**, en fraction du
+> rayon de l'objet, avec un seuil. C'est la grandeur dont « tremblement » est le symptôme, et elle
+> est mesurable bien avant qu'un observateur la remarque.
+>
+> Le précédent est mesuré : en S28, un dépassement de la condition de stabilité d'un facteur **2,5**
+> n'a produit **aucune** divergence sur le véhicule δ (A129). Une assertion « aucune divergence »
+> l'aurait certifié sain.
+
 ## C12 — Vidange d'un réservoir
 
 **Montage.** Réservoir de 1 m² de section, hauteur d'eau 1 m, orifice de 10 cm² à arête vive au
@@ -379,6 +395,15 @@ conservée sur un cycle gel/dégel complet.
 
 Le dernier point est le plus important : un lac qui gèle puis dégèle ne doit ni gagner ni perdre
 d'eau. Le défaut n'apparaît qu'après des dizaines d'heures de jeu.
+
+> **Note corrective S29 — « aucune plaque ne se forme tant que `Hs > 0,15 m` » passe avant que le
+> modèle de glace existe.** C'est la **vacuité** : l'assertion est satisfaite par l'absence du
+> mécanisme, et elle est verte depuis l'écriture du cas.
+>
+> **Remède** : mesurer l'**épaisseur**, qui est déjà la grandeur du premier point, et adjoindre un
+> **témoin** à `Hs < 0,15 m` qui doit produire une plaque. Sans témoin, le cas ne distingue pas « le
+> fetch borne correctement la glace » de « il n'y a pas de glace ». Voir
+> [`AUDIT-ASSERTIONS-S29`](../registres/AUDIT-ASSERTIONS-S29.md) §1.
 
 ## C16 — Ballottement en référentiel accéléré
 
