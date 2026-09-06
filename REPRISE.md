@@ -12,11 +12,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-05
+Session en cours : S15 — 2026-09-05 — audit des registres
 Dernière session : S14 — 2026-09-05 — audit inverse des invariants
-Session suivante : S15 — auditer les registres : 89 angles morts, la traçabilité des sections
-                   sources, et les tables « Suite » de cinq registres d'audit (angle mort A89)
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
