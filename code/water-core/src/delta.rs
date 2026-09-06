@@ -407,6 +407,30 @@ mod tests {
         assert_eq!(d.max_ecart_eta(), 0.0, "la surface libre ne doit pas bouger");
     }
 
+    /// Le courant parasite du schéma au premier jet, en fonction de la finesse de grille.
+    ///
+    /// Balayage imprimé avec `cargo test -- --nocapture` ; l'assertion, elle, porte sur le fait
+    /// que le défaut **existe** à toutes les résolutions. Un test qui verrouillerait sa valeur
+    /// serait un test qui protège un bogue ; celui-ci protège la raison d'exister du schéma
+    /// équilibré, et il tombera le jour où quelqu'un rendra `pas_naif` équilibré sans le dire.
+    #[test]
+    fn courant_parasite_du_schema_naif_a_toutes_les_resolutions() {
+        for nx in [40usize, 80, 160, 320, 640] {
+            let mut d = solveur(Bassin { nx, ..Bassin::c01() });
+            let pas = d.avancer_naif(60.0);
+            println!(
+                "nx={nx:<4} dx={:.4} m  max|u|={:.6} m/s  max|dη|={:.6} m  pas={pas}",
+                d.dx(),
+                d.max_abs_u(),
+                d.max_ecart_eta()
+            );
+            assert!(
+                d.max_abs_u() > 1.0e-3,
+                "nx={nx} : le schéma au premier jet doit échouer C01, sinon le montage est trop facile"
+            );
+        }
+    }
+
     /// I-06 : après `seal()`, la configuration échoue au lieu d'allouer en silence.
     #[test]
     fn allocation_refusee_apres_seal() {

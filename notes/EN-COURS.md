@@ -86,7 +86,7 @@ est trop facile, pas le schéma qui est bon — et il faudra le dire.
       CFL. Fond plat d'abord, où le repos est trivialement exact. Test de repos sur fond plat.
 - [x] **P3** — le terme de fond au premier jet, la pente 1:20, et C01 branché dans le mode
       `physics` : `max|u|` et `max|η − η₀|` mesurés sur le champ après 60 s.
-- [ ] **P4** — exécuter, constater, **mesurer** l'amplitude du courant parasite. Un chiffre, pas
+- [x] **P4** — exécuter, constater, **mesurer** l'amplitude du courant parasite. Un chiffre, pas
       une impression.
 - [ ] **P5** — reconstruction hydrostatique (Audusse) : le schéma équilibré. Réexécuter, comparer
       les deux chiffres dans le même rapport.
@@ -118,3 +118,45 @@ intact.
 **Ce qui reste à trancher, et qui n'est pas à moi :** que faire du travail propre à `master`,
 S16-S17 — la carte de renumérotation, la revue de cadence sur les documents importés. Il n'est pas
 perdu ; il n'est pas non plus dans la ligne vivante. Angle mort à enregistrer en P7.
+
+#### P4 — la thèse était juste, et le défaut est du premier ordre exact
+
+**C01 tombe au premier passage**, sur le montage nominal `dx = 0,25 m` :
+
+| Grandeur | Mesure | Tolérance | Dépassement |
+|---|---|---|---|
+| `max\|u\|` après 60 s | **19,6 mm/s** | 1 mm/s | **×20** |
+| `max\|η − η₀\|` | **7,3 mm** | 1 mm | **×7** |
+| volume | 80,000003 m² | 80 m² | passe à 4·10⁻⁸ près |
+
+**Le volume passe, et c'est ce qui rend le diagnostic sûr** : le solveur ne fuit pas, il *remue*.
+L'eau est déplacée d'un bout du bassin à l'autre par un courant qui n'a aucune cause physique.
+C'est exactement le symptôme décrit dans `CAS-CANONIQUES` — « un lac qui frissonne sans raison ».
+
+**Balayage en résolution** — `cargo test -p water-core courant_parasite -- --nocapture` :
+
+```
+dx = 1,0000 m   max|u| = 0,076033 m/s
+dx = 0,5000 m   max|u| = 0,038771 m/s
+dx = 0,2500 m   max|u| = 0,019581 m/s
+dx = 0,1250 m   max|u| = 0,009799 m/s
+dx = 0,0625 m   max|u| = 0,004895 m/s
+```
+
+`max|u| / dx` vaut 0,0760 · 0,0775 · **0,0783 · 0,0784 · 0,0783** — constant sur les trois grilles
+fines. **Le courant parasite est du premier ordre exact en `dx`**, et le coefficient a une valeur :
+`C ≈ 0,0783 s⁻¹`.
+
+**Le chiffre qui décide.** Atteindre 1 mm/s par raffinement seul demanderait
+`dx = 10⁻³ / 0,0783 = 12,8 mm`, soit **19,6 fois plus fin** que le montage nominal. En 2D, le coût
+va comme `dx⁻²` en cellules et `dx⁻¹` en pas de temps (CFL) : **×7 500**. Il n'y a pas de
+raffinement qui rachète un schéma non équilibré — c'est un défaut de *nature*, pas de *finesse*.
+
+**Ce que la cause n'est pas.** Le terme de fond centré n'est pas coupable ici. Sur un fond
+**linéaire** et une surface plane, `h` varie linéairement, et la différence centrée du flux de
+pression `g·h²/2` égale exactement `g·h·∂b/∂x` — les deux se compensent par construction. Le
+coupable est la **diffusion de Rusanov** : `−α/2·(h_R − h_L)` porte sur la hauteur, qui varie le
+long d'une pente **même quand l'eau est parfaitement immobile**. Le schéma diffuse un saut qui
+n'est pas un saut d'écoulement mais un saut de géométrie.
+
+C'est le point non anticipé de la session : j'attendais le terme source, et c'est le flux.
