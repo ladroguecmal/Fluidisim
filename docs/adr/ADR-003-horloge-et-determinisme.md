@@ -93,7 +93,14 @@ C'est le seul mécanisme réseau permanent lié à la houle.
 
 ## 4. Ce qui reste ouvert
 
-1. **Dilatation ou accélération du temps** (voyage rapide, pause, mode photo). Position proposée :
+1. ~~**Dilatation ou accélération du temps**~~ — **tranché en S18 par
+   [ADR-027](ADR-027-les-cinq-arbitrages-tranches.md) §2 : `T_sim` peut être arrêté ou avancé
+   **globalement**, jamais mis à l'échelle **par joueur**.** Les trois besoins cités — voyage rapide,
+   pause, mode photo — n'en demandent aucun une fois traités séparément : le voyage rapide
+   est un déplacement dans l'espace, la pause en solo arrête l'horloge pour tout le monde, le mode
+   photo fige le rendu. L'échelle globale reste disponible et ne coûte rien. Si un effet temporel par
+   joueur devenait indispensable, il s'appliquerait à un plan d'eau **local déclaré non répliqué**,
+   jamais à l'océan. *Position d'origine, conservée pour l'historique :*
    `T_sim` est le temps du monde et n'est **jamais** mis à l'échelle par joueur. Un joueur en
    accélération temporelle voit un océan qui avance à la vitesse du monde. Si le design impose le
    contraire, la cohérence multijoueur de B est perdue et il faut basculer l'océan concerné en

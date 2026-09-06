@@ -87,9 +87,9 @@ motif, son chiffre, et ce qu'il faudrait changer si la réponse était l'inverse
   ce qui reste ouvert.
   *Thèse : le premier se dissout aussi — l'eau d'un objet suit la politique de cet objet, et n'a
   pas besoin d'une règle propre.*
-- [ ] **P5** — notes correctives dans ADR-003, ADR-010, ADR-011, ADR-017, ADR-018, SPEC-003,
+- [x] **P5** — notes correctives dans ADR-003, ADR-010, ADR-011, ADR-017, ADR-018, SPEC-003,
   SPEC-006.
-- [ ] **P6** — `CLAUDE.md`, `REPRISE.md`, `00_INDEX.md`, `DOSSIER-REUNIONS.md` : le mandat a changé,
+- [x] **P6** — `CLAUDE.md`, `REPRISE.md`, `00_INDEX.md`, `DOSSIER-REUNIONS.md` : le mandat a changé,
   et ce qui reste non décidable doit être dit précisément.
 - [ ] **P7** — angles morts, décomptes.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6) : journal S18, leçons, index, jeton libéré.
@@ -129,3 +129,18 @@ qui exige une approbation ; ajouter un scénario ne passe par personne (L19).
 mêlait trois besoins — voyage rapide, pause, mode photo — dont aucun n exige une échelle **par
 joueur**. L échelle **globale** reste disponible et ne coûte rien : c est un degré de liberté que
 personne n avait relevé.
+
+#### P5 et P6 — répercussions et changement de mandat
+
+Sept notes correctives : ADR-003 §4.1, ADR-010 §7, ADR-011 §6, ADR-017 §7.1, ADR-018 §5,
+SPEC-003 §11.4, SPEC-006 §9.4. Un ancrage manqué au premier passage (ADR-018), rattrapé — le script
+rapporte ses échecs, c est pour cela qu il en a un.
+Et une phrase laissée cassée dans la note ADR-003 (« n exigent aucun ne le demande »), vue en
+relisant. Corrigée. L54 : relire le résultat, pas le code de retour.
+
+**CLAUDE.md et REPRISE.md §5 réécrits.** C est le point le plus important de la session pour les
+sessions suivantes : sans cela, la prochaine lirait « cinq arbitrages en attente » et les rappellerait
+comme si rien n avait été décidé. Le nouveau texte distingue ce qui a été **tranché** de ce qui reste
+**hors de portée d une session** — nommer des personnes, constater l état réel du projet, agir sur
+l infrastructure. Trois choses qui ne sont pas des décisions de conception et qu aucun raisonnement
+ne produit.

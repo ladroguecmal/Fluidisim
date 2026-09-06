@@ -154,6 +154,18 @@ Un nœud V est un objet persistant du monde, indexé par cellule `HydroGrid`. Po
 | Nœud créé par le jeu (flaque, inondation) | TTL de 30 min sans visite, puis converti en mouillage puis supprimé |
 | Nœud créé par le jeu avec conséquence gameplay (compartiment inondé d'un navire joueur) | persistant, rattaché au propriétaire de l'objet |
 
+> **Note corrective (S18, [ADR-027](ADR-027-les-cinq-arbitrages-tranches.md) §5).** La troisième
+> ligne était l'arbitrage n°4 en attente — combien de temps l'eau d'un joueur absent persiste-t-elle ?
+> **La question se dissout** : un nœud rattaché à un objet persiste exactement aussi longtemps que
+> cet objet, sans règle propre à l'eau. Le chiffre le justifie — 20 octets par nœud, soit **4 Ko pour
+> la flotte entière d'un joueur**, négligeable devant l'état du navire lui-même. Une politique
+> propre coûterait plus en complexité qu'elle n'économiserait, et produirait un joueur qui retrouve
+> son navire intact mais asséché.
+>
+> **La deuxième ligne reste la nôtre**, et c'est celle qu'il faut défendre : le TTL des nœuds sans
+> propriétaire est la **borne supérieure de la persistance de l'eau à l'échelle du monde**
+> (ADR-022 §4.3), et il ne s'allonge pas sur un seul argument de jeu.
+
 ## 8. Ce qui reste ouvert
 
 1. Réseaux fermés sous pression (v2).

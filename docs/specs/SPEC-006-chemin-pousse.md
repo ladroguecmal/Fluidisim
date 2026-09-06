@@ -833,8 +833,11 @@ d'interface qui rend la faute inexprimable ; la règle écrite n'est que le dern
    décrit ; reste à savoir s'il s'entend. Mesure, pas arbitrage.
 3. **Rayons de l'agrégat d'écume** — 10, 50 et 200 m sont un point de départ, à calibrer avec
    l'équipe audio contre les distances de coupure de son propre LOD (ADR-016 §7).
-4. **Le trait de côte mobile** conditionne le nombre d'états de la polyligne (§6). **Arbitrage n°3,
-   humain, non tranché ici.**
+4. ~~**Le trait de côte mobile** conditionne le nombre d'états de la polyligne (§6).~~ **Tranché en
+   S18 par [ADR-027](../adr/ADR-027-les-cinq-arbitrages-tranches.md) §4 : le trait de côte est
+   mobile.** La polyligne est donc publiée **par phase de marée**, seize états stockés par plage
+   comme la bibliothèque côtière — ce que §6 prévoyait déjà comme cas nominal. Le cas dégénéré à une
+   seule phase n'a plus lieu d'être.
 5. **Visibilité sous-marine pour l'IA** — ADR-018 §7.4 pose la question, la donnée existe
    (ADR-019 §3), l'usage est à confirmer avec l'équipe IA. Si elle est retenue, c'est un champ de
    plus dans `TraversabilitySample`, pas un canal de plus.

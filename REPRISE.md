@@ -113,9 +113,15 @@ Détail à jour : `docs/00_INDEX.md`, section « État d'avancement ».
 
 ## 5. Ce qui n'est pas à toi de décider
 
-**Cinq** arbitrages de design et **quatorze demandes extérieures** attendent une réponse humaine.
-Elles sont rassemblées en fiches présentables dans **`docs/DOSSIER-REUNIONS.md`** (S17), classées par
-ce que la réponse débloque ; `docs/00_INDEX.md` en donne la vue par sujet.
+**Les cinq arbitrages de design ont été tranchés en S18** par
+[`ADR-027`](docs/adr/ADR-027-les-cinq-arbitrages-tranches.md), sur délégation explicite. Deux des
+cinq se sont **dissous** plutôt que choisis. Ne pas les rouvrir sans demande ; ADR-027 dit pour
+chacun ce qu'il faudrait changer pour l'inverser.
+
+**Quatorze demandes extérieures** attendent en revanche toujours une réponse, en fiches présentables
+dans **`docs/DOSSIER-REUNIONS.md`** (S17), classées par ce que la réponse débloque. Et **trois choses
+restent hors de portée d'une session** : nommer les personnes, constater l'état réel du projet, agir
+sur l'infrastructure. Voir `CLAUDE.md`.
 
 Les rappeler en fin de session tant qu'ils sont ouverts. Ne pas les trancher, ne pas les contourner
 par une hypothèse implicite.

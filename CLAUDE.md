@@ -31,7 +31,20 @@ Ce dépôt est la connaissance projet du **système de gestion de l'eau** d'un j
 
 ## Ce que tu ne décides pas
 
-**Cinq** arbitrages de design et **quatorze demandes extérieures** attendent une réponse humaine.
-Elles sont rassemblées en fiches présentables dans **`docs/DOSSIER-REUNIONS.md`**, classées par ce
-que la réponse débloque ; `docs/00_INDEX.md` en donne la vue par sujet.
-Les rappeler, ne pas les trancher, ne pas les contourner par une hypothèse implicite.
+**Les cinq arbitrages de design ont été tranchés en S18** ([`ADR-027`](docs/adr/ADR-027-les-cinq-arbitrages-tranches.md)),
+sur délégation explicite de l'utilisateur. Ne les rouvre pas sans qu'il le demande ; s'il les rouvre,
+ADR-027 dit pour chacun ce qu'il faudrait changer pour l'inverser.
+
+**Ce qui reste hors de ta portée n'est pas de la conception** — ce sont des faits et des actions, et
+aucune quantité de raisonnement ne les produit :
+
+1. **Nommer des personnes.** Qui acte ADR-020, qui occupe les deux rôles du harnais (ADR-027 §6.3).
+   Fiches 1 et 2 de [`docs/DOSSIER-REUNIONS.md`](docs/DOSSIER-REUNIONS.md).
+2. **Constater l'état réel du projet.** Du terrain a-t-il été sculpté ? Un format réseau existe-t-il ?
+   Du code existe-t-il ? Tout le classement d'urgence du dossier de réunion suppose que rien n'est
+   figé. Demande-le plutôt que de le supposer.
+3. **Agir sur l'infrastructure de l'utilisateur** — dépôt distant notamment (`REPRISE.md` §9).
+
+**Quatorze demandes extérieures** attendent par ailleurs une réponse, en fiches présentables dans
+`docs/DOSSIER-REUNIONS.md`, classées par ce que la réponse débloque. Les rappeler ; elles ne sont pas
+à trancher, elles sont à **poser** aux équipes concernées.

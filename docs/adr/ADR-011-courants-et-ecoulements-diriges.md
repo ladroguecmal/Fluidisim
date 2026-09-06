@@ -144,5 +144,13 @@ dépendance qui, découverte tard, coûte un trimestre.
    → **S11 : doublon.** La question est portée par **ADR-004 §7.4** — la marée appartient à B, dont
    ADR-004 décrit l'état minimal. La nuance « table *par région* » y est reportée.
 4. Couplage courant ↔ houle (les vagues se raidissent contre le courant, s'aplatissent avec lui).
+
+   > **Note S18 — le trait de côte mobile est tranché.**
+   > [ADR-027](ADR-027-les-cinq-arbitrages-tranches.md) §4 : **la question se dissout.** Le trait de
+   > côte est mobile parce que la marée l'est, et il n'est **porté par personne** — il est dérivé de
+   > `B`, jamais stocké, au même titre que l'écume permanente (ADR-014 §2.3). Ce qui est stocké est
+   > la bibliothèque d'états côtiers : **16 états par plage, 60 Mo pour cinquante plages**, soit
+   > 45 Mo de plus qu'une côte fixe. C'est tout le prix de la décision.
+
    Effet réel et spectaculaire dans les embouchures. Formule de décalage Doppler
    `ω_apparent = ω + k·U` disponible ; à activer si le rendu le justifie.

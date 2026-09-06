@@ -114,8 +114,12 @@ Journaliser l'écart de masse au passage de phase, comme pour le couplage V ↔ 
 
 ## 7. Ce qui reste ouvert
 
-1. **Arbitrage humain requis** : le projet veut-il de la glace ? Cet ADR est écrit pour être prêt,
-   pas pour imposer le besoin.
+1. ~~**Arbitrage humain requis** : le projet veut-il de la glace ?~~ **Tranché en S18 par
+   [ADR-027](ADR-027-les-cinq-arbitrages-tranches.md) §3 : oui, comme phénomène de lac et de baie
+   abritée — pas de banquise, pas d'icebergs, pas d'océan polaire.** Le motif est le fetch maximal
+   dérivé en S08 : `F_max = g·(0,15/(0,0016·U10))²`, soit **3,4 km à 5 m/s** de vent. La glace
+   s'active **par plan d'eau**, à la création, et non comme état météorologique global — ce qui borne
+   aussi le travail de l'IA à ces plans d'eau. *(Point d'origine conservé pour l'historique :)*
    → **S11** : la question est inchangée, **son coût a baissé**. La dérivation E03 de la revue S08 croise
    SPEC-002 §4 (`Hs < 0,15 m` pour une formation en plaque) et SPEC-001 §4 (`Hs(U10, F)`) et donne
    un **fetch maximal** : `F_max = g·(0,15/(0,0016·U10))²`, soit **3,4 km à 5 m/s** de vent et

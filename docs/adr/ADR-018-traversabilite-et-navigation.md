@@ -108,6 +108,12 @@ la glace cède.
 À porter à l'équipe IA **avant** qu'elle ne fige son format de maillage : rétroporter une surface
 navigable dynamique à portance variable est cher.
 
+> **Note S18 ([ADR-027](ADR-027-les-cinq-arbitrages-tranches.md) §3).** La glace est retenue, mais
+> **bornée** : c'est un phénomène de lac et de baie abritée — fetch maximal **3,4 km à 5 m/s** de
+> vent — activé **par plan d'eau** à la création, jamais comme état météorologique global. La surface
+> navigable conditionnelle n'est donc nécessaire que sur les plans d'eau marqués gelables, ce qui
+> **borne** le travail de l'IA au lieu de l'étendre à toute étendue d'eau.
+
 ---
 
 ## 6. Fréquences de publication

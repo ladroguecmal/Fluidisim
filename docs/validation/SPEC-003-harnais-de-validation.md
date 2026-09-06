@@ -332,6 +332,14 @@ instrumenter ensuite (ADR-020 §1).
    celui-ci passe-t-il par l'hôte moteur ? Le second est plus fidèle, le premier plus rapide et
    plus stable. Proposition : hôte moteur, avec un profil de capture figé et versionné.
 3. Politique de conservation des séries temporelles et des captures (volume de stockage).
-4. Qui possède le harnais ? Il ne doit appartenir ni à l'équipe eau seule — juge et partie — ni à
-   une équipe d'outillage détachée du domaine. Proposition : propriété eau, revue par
-   l'assurance qualité technique.
+4. ~~Qui possède le harnais ?~~ **Tranché en S18 par
+   [ADR-027](../adr/ADR-027-les-cinq-arbitrages-tranches.md) §6, et la question cherchait un
+   propriétaire unique là où il en faut deux.**
+   L'**équipe eau** possède le code, les scénarios et les cas canoniques — il faut connaître le
+   domaine pour les écrire. L'**assurance qualité technique** possède les **seuils d'acceptation** et
+   les résultats archivés : c'est la seule barre qu'on est tenté de déplacer quand on ne la passe
+   pas.
+   Règle mécanique plutôt que consigne (L19) : **les seuils vivent dans un fichier séparé des
+   scénarios**, dont la modification exige une approbation. Ajouter un scénario ne passe par
+   personne ; déplacer une barre passe par quelqu'un dont ce n'est pas le travail de la passer.
+   *Reste ouvert* : nommer les personnes — c'est la fiche 2 du dossier de réunion.
