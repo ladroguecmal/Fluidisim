@@ -109,7 +109,7 @@ indiscernables tant que personne ne compte** (A146).
       la reconstruction hydrostatique et la vraie saturation d'état.
 - [x] **P3** — instrumenter `delta.rs` : **compteur de déclenchements** et **masse créée cumulée**.
       Sans allocation (**I-06**), sans changer un seul résultat — **hashs de conformité vérifiés**.
-- [ ] **P4** — instrumenter `shallow.rs` de même.
+- [x] **P4** — instrumenter `shallow.rs` de même.
 - [ ] **P5** — **mesurer sur C01, C03 et C04**, et classer chaque saturation : *filet* · *maquillage*
       · *jamais déclenchée*. Une saturation jamais déclenchée n'est pas innocente : elle n'a pas été
       testée (**L118**).

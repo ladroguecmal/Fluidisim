@@ -36,9 +36,9 @@ pub mod types;
 
 pub use background::{Background, Component, SeaState};
 pub use body::{FloatingBox, RHO_EAU};
-pub use delta::{Bassin, Definition, Delta1D, EtatInitial, ParoiMobile, Saturations};
+pub use delta::{Bassin, Definition, Delta1D, EtatInitial, ParoiMobile};
 pub use hash::Hasher64;
 pub use host::{AllocError, AllocStats, Allocator, HostServices, JobSystem, Sink};
 pub use phase::PhaseQ32;
 pub use shallow::{Flux, Shallow1D};
-pub use types::{FrameId, LayerMask, SimTime, WaterSample, WorldPos, WORLD_UNITS_PER_METRE};
+pub use types::{Saturations, FrameId, LayerMask, SimTime, WaterSample, WorldPos, WORLD_UNITS_PER_METRE};

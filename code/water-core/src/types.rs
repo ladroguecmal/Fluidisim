@@ -148,3 +148,36 @@ mod tests {
         assert!(loin.to_local(anchor).is_none());
     }
 }
+
+/// **Ce que les saturations d'un solveur ont fait** — S38, action S34-1, angle mort A146.
+///
+/// Ce type vit ici, et non dans l'un des deux solveurs, parce qu'il est un **type de rapport** :
+/// `delta.rs` et `shallow.rs` le remplissent tous les deux et ne se connaissent pas. Les coupler
+/// pour partager ce compteur détruirait l'indépendance sur laquelle repose l'oracle croisé
+/// (`ADR-043` §3).
+#[derive(Clone, Copy, Debug, Default)]
+pub struct Saturations {
+    /// **S7** — nombre de cellules remises à `h = 0` parce que le pas les avait rendues négatives.
+    pub etat: u64,
+    /// **S7** — masse **créée** par ces remises à zéro, cumulée, en m² (aire d'une tranche de
+    /// canal d'épaisseur unité). C'est la grandeur qui manquait : *combien de fois* ne dit pas
+    /// *combien*.
+    pub masse_creee: f64,
+    /// **S7** — quantité de mouvement **détruite** par la remise à zéro de `hu`, en valeur absolue
+    /// cumulée. Elle n'est transférée nulle part.
+    pub qdm_detruite: f64,
+    /// **Étage intermédiaire de RK2** — saturations subies par l'état provisoire `U₁`, qui n'est
+    /// pas un état publié. Compté à part : une saturation à l'étage dit que le **demi-pas** a
+    /// produit un état impossible, ce qui n'implique pas que le pas complet en produise un. Reste
+    /// à zéro pour un solveur sans RK2.
+    ///
+    /// *Ce point de saturation avait échappé au recensement écrit en P2 : il n'a été vu que parce
+    /// que le compilateur a refusé l'appel restant. Un recensement à la lecture en manque.*
+    pub etage_rk2: u64,
+    /// **S5** — cellules fantômes ramenées à `h = 0` par la condition de bord sur fond montant.
+    pub bord: u64,
+    /// **Témoin de S6** — cellules trouvées à `h < 0` **à l'entrée** d'un pas, là où la protection
+    /// de racine `(g·h)⁺` mordrait. Doit rester à zéro : S7 a agi à la fin du pas précédent. Un
+    /// compteur non nul dirait que la protection de racine n'est **pas** morte, et qu'elle masque.
+    pub h_negatif_en_entree: u64,
+}

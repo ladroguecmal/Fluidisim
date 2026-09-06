@@ -39,6 +39,7 @@
 //! les produits-sommes (ADR-029 §1) et l'ordre de parcours est fixé.
 
 use crate::host::{AllocError, HostServices};
+use crate::types::Saturations;
 
 /// Pesanteur, en m/s². Même valeur que `background.rs` et `body.rs`.
 pub const G: f64 = 9.81;
@@ -89,6 +90,8 @@ pub struct Shallow1D {
     dhu: Vec<f64>,
     h1: Vec<f64>,
     hu1: Vec<f64>,
+    /// **Compteurs de saturation** — S38, A146. Ne participent à aucun calcul.
+    sat: Saturations,
 }
 
 impl Shallow1D {
@@ -135,6 +138,7 @@ impl Shallow1D {
             dhu: vec![0.0; n],
             h1: vec![0.0; n],
             hu1: vec![0.0; n],
+            sat: Saturations::default(),
         })
     }
 
@@ -174,6 +178,7 @@ impl Shallow1D {
             dhu: vec![0.0; n],
             h1: vec![0.0; n],
             hu1: vec![0.0; n],
+            sat: Saturations::default(),
         })
     }
 
@@ -220,6 +225,7 @@ impl Shallow1D {
             dhu: vec![0.0; n],
             h1: vec![0.0; n],
             hu1: vec![0.0; n],
+            sat: Saturations::default(),
         })
     }
 
@@ -266,6 +272,7 @@ impl Shallow1D {
             dhu: vec![0.0; n],
             h1: vec![0.0; n],
             hu1: vec![0.0; n],
+            sat: Saturations::default(),
         })
     }
 
@@ -319,6 +326,7 @@ impl Shallow1D {
             dhu: vec![0.0; n],
             h1: vec![0.0; n],
             hu1: vec![0.0; n],
+            sat: Saturations::default(),
         })
     }
 
@@ -763,11 +771,34 @@ impl Shallow1D {
     }
 
     /// Une hauteur negative n'a pas de sens physique. Elle est saturee, ainsi que son debit.
-    fn saturer(h: &mut f64, hu: &mut f64) {
-        if *h < 0.0 {
-            *h = 0.0;
-            *hu = 0.0;
+    ///
+    /// **S38 : ce qui est effacé ici est compté avant de l'être.** `h` remonte à zéro, donc de la
+    /// masse **apparaît** ; `hu` tombe à zéro, donc de la quantité de mouvement **disparaît** sans
+    /// être transférée. Une saturation rare est un filet, une saturation fréquente est un solveur
+    /// qu'on maquille — et les deux étaient indiscernables tant que personne ne comptait (A146).
+    fn saturer(&mut self, i: usize) {
+        if self.h_new[i] < 0.0 {
+            self.sat.etat += 1;
+            self.sat.masse_creee += -self.h_new[i] * self.dx;
+            self.sat.qdm_detruite += self.hu_new[i].abs() * self.dx;
+            self.h_new[i] = 0.0;
+            self.hu_new[i] = 0.0;
         }
+    }
+
+    /// Sature l'état **intermédiaire** de RK2. Compté séparément : `U₁` n'est pas un état publié,
+    /// et une saturation à l'étage n'implique pas que le pas complet en produise une.
+    fn saturer_etage(&mut self, i: usize) {
+        if self.h1[i] < 0.0 {
+            self.sat.etage_rk2 += 1;
+            self.h1[i] = 0.0;
+            self.hu1[i] = 0.0;
+        }
+    }
+
+    /// Ce que les saturations ont fait depuis la configuration — S38, A146.
+    pub fn saturations(&self) -> Saturations {
+        self.sat
     }
 
     /// Avance d'un pas de temps : Euler explicite, ou **SSP-RK2** si `regler_rk2(true)`.
@@ -794,7 +825,7 @@ impl Shallow1D {
             for i in 0..n {
                 self.h1[i] = self.h[i] + dt * self.dh[i];
                 self.hu1[i] = self.hu[i] + dt * self.dhu[i];
-                Self::saturer(&mut self.h1[i], &mut self.hu1[i]);
+                self.saturer_etage(i);
             }
             Self::residu(
                 self.dx,
@@ -812,13 +843,13 @@ impl Shallow1D {
             for i in 0..n {
                 self.h_new[i] = 0.5 * (self.h[i] + self.h1[i] + dt * self.dh[i]);
                 self.hu_new[i] = 0.5 * (self.hu[i] + self.hu1[i] + dt * self.dhu[i]);
-                Self::saturer(&mut self.h_new[i], &mut self.hu_new[i]);
+                self.saturer(i);
             }
         } else {
             for i in 0..n {
                 self.h_new[i] = self.h[i] + dt * self.dh[i];
                 self.hu_new[i] = self.hu[i] + dt * self.dhu[i];
-                Self::saturer(&mut self.h_new[i], &mut self.hu_new[i]);
+                self.saturer(i);
             }
         }
 

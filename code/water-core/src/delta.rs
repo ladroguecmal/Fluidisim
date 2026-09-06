@@ -30,6 +30,7 @@
 //! (well-balanced), et C01 ne teste rien d'autre.
 
 use crate::host::{AllocError, HostServices};
+use crate::types::Saturations;
 
 /// Accélération de la pesanteur, en m/s². SPEC-001 §1.
 pub const G: f32 = 9.81;
@@ -333,25 +334,6 @@ pub struct Delta1D {
     sat: Saturations,
 }
 
-/// Ce que les saturations du solveur ont fait, depuis la configuration.
-#[derive(Clone, Copy, Debug, Default)]
-pub struct Saturations {
-    /// **S7** — nombre de cellules remises à `h = 0` parce que le pas les avait rendues négatives.
-    pub etat: u64,
-    /// **S7** — masse **créée** par ces remises à zéro, cumulée, en m² (aire d'une tranche de
-    /// canal d'épaisseur unité). C'est la grandeur qui manquait : *combien de fois* ne dit pas
-    /// *combien*.
-    pub masse_creee: f64,
-    /// **S7** — quantité de mouvement **détruite** par la remise à zéro de `hu`, en valeur absolue
-    /// cumulée. Elle n'est transférée nulle part.
-    pub qdm_detruite: f64,
-    /// **S5** — cellules fantômes ramenées à `h = 0` par la condition de bord sur fond montant.
-    pub bord: u64,
-    /// **Témoin de S6** — cellules trouvées à `h < 0` **à l'entrée** d'un pas, là où la protection
-    /// de racine `(g·h)⁺` mordrait. Doit rester à zéro : S7 a agi à la fin du pas précédent. Un
-    /// compteur non nul dirait que la protection de racine n'est **pas** morte, et qu'elle masque.
-    pub h_negatif_en_entree: u64,
-}
 
 /// Ce qu'une interface reconstruite rend au schéma équilibré.
 struct Interface {
