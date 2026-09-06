@@ -10,9 +10,9 @@ Sévérité : **1** = refonte d'architecture si découvert tard, **2** = refonte
 Historique : 28 recensés en S01, 12 ajoutés en S02 (phénomènes secondaires), 9 en S03 (harnais
 de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outillage auteur),
 6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance),
-3 en S11 (audit des points ouverts), 3 en S12 (mécanismes de détail) — **83 au total**.
-**Vingt-trois ont été trouvés dans nos propres écrits**, pas dans les documents sources : A49, A56,
-A57, A58, puis A65 à A83. La proportion
+3 en S11 (audit des points ouverts), 3 en S12 (mécanismes de détail), 3 en S13 (revue croisée des
+documents récents) — **86 au total**. **Vingt-six ont été trouvés dans nos propres écrits**, pas dans
+les documents sources : A49, A56, A57, A58, puis A65 à A86. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -105,6 +105,9 @@ ce que les sources avaient omis.
 | **A81** | L'impact d'entrée est plus bref que le tick : une force échantillonnée le rate ou le double | **1** | ADR-023 §2.1 |
 | **A82** | Un critère de bascule de mode ne mesure qu'une chose, et ce n'est pas toujours la bonne | 2 | ADR-023 §3.1 |
 | **A83** | Un phénomène permanent modélisé par émission d'événements sature le réseau en régime nominal | 2 | ADR-023 §4.1 |
+| **A84** | Un invariant ne s'audite jamais : il n'est ni une affirmation datée ni une absence | **1** | ADR-024 §4, écarts E01 et E07 |
+| **A85** | Aucune taille de structure du corpus n'avait jamais été vérifiée | 3 | REVUE-CROISEE-S13, écart E04 |
+| **A86** | Deux échelles de rangs de dégradation portent les mêmes numéros | 2 | SPEC-006 §7, écart E02 |
 
 Soixante-quatre angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -341,3 +344,25 @@ pendant quatre sessions.
   nominal, pas en pic. Deux cents rochers émettant un événement par seconde font 9 000 o/s par
   joueur intéressé, soit dix fois le débit d'une bataille navale — pour du décor, et en permanence.
   Un phénomène stationnaire et déterministe se **dérive**, il ne s'émet pas.
+
+**Ajoutés en S13, en confrontant les documents récents au corpus**
+
+- **A84** *(sévérité 1)* — **Un invariant ne s'audite jamais.** Il n'est ni une affirmation datée
+  qu'on confronte à d'autres — c'est le rôle des revues croisées — ni une absence qu'on relit pour
+  vérifier qu'elle a encore un objet — c'est l'audit des points ouverts. Il se présente comme un
+  **socle**, c'est-à-dire comme ce contre quoi on vérifie le reste, et la flèche `→ ADR-xxx` qu'il
+  porte se lit comme une provenance et non comme une dépendance à surveiller. Deux des dix-sept se
+  sont révélés faux à la première tentative : I-11 exigeait un mécanisme aboli en S05, I-12 était
+  universel là où ADR-013 §4 — qu'il cite en source — le contredit pour la moitié des cas. Et un
+  invariant faux ne produit pas une erreur mais deux, en sens contraires : on l'applique, ou on
+  « rétablit » ce qu'il décrit.
+- **A85** — **Aucune taille de structure du corpus n'avait jamais été vérifiée.** S05 a contrôlé les
+  tables numériques dupliquées, S08 a recalculé une quarantaine de valeurs depuis leurs formules ;
+  personne n'a additionné les champs d'un `struct`. Trois structures sur trois étaient fausses, et
+  l'erreur d'origine — 40 octets annoncés pour 45 — s'est propagée dans six documents, chacun
+  recalculant depuis le chiffre faux du précédent. Sans conséquence ici ; c'est la classe de contrôle
+  absente qui compte.
+- **A86** — Deux **échelles de rangs de dégradation** portent les mêmes numéros dans deux documents
+  qui se citent, et une règle écrite pour l'une se lit sans difficulté dans l'autre — avec un
+  contresens complet. Vaut pour toute numérotation ordinale reprise d'un document à l'autre :
+  préfixer coûte un caractère.

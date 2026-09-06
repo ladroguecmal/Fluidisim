@@ -6,7 +6,8 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Lire dans cet ordre
 
-1. [`01_INVARIANTS.md`](01_INVARIANTS.md) — les 17 règles non négociables. Cinq minutes.
+1. [`01_INVARIANTS.md`](01_INVARIANTS.md) — les 17 règles non négociables, dont deux amendées en
+   S13 (I-11, I-12). Cinq minutes.
 2. [`adr/ADR-001`](adr/ADR-001-decomposition-en-couches.md) — la décision qui commande tout le reste.
 3. [`specs/SPEC-001`](specs/SPEC-001-contraintes-numeriques.md) et
    [`SPEC-002`](specs/SPEC-002-phenomenes-secondaires.md) — les fiches chiffrées à citer plutôt
@@ -50,6 +51,12 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 |---|---|---|---|
 | [020](adr/ADR-020-bibliotheque-sans-dependance-moteur.md) | Le système d'eau est une bibliothèque sans dépendance moteur | proposée — **bloquante, à acter avant la première ligne de code** | A41 |
 
+### Amendement *(S13)*
+
+| ADR | Sujet | Statut | Traite |
+|---|---|---|---|
+| [024](adr/ADR-024-amendement-des-invariants-I11-I12.md) | Amendement des invariants **I-11** et **I-12** | proposée | écarts E01 (gravité 1) et E07 de la revue S13 |
+
 ### Mécanismes de détail *(S12)*
 
 | ADR | Sujet | Statut | Traite |
@@ -80,10 +87,11 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`specs/SPEC-004`](specs/SPEC-004-interfaces.md) | **signatures des interfaces** — solveurs, champ de fond, solides, services d'hôte, contrat de fils d'exécution |
 | [`specs/SPEC-005`](specs/SPEC-005-outillage-auteur.md) | **outillage auteur** — sources de vérité, inversion du pipeline eau/terrain, cuisson déterministe, obsolescence |
 | [`specs/SPEC-006`](specs/SPEC-006-chemin-pousse.md) | **le chemin poussé** — ce que le système *publie* : bus d'événements et `WaveEvent`, écume et aération, traversabilité, polyligne de déferlement |
-| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | 83 points, avec sévérité — dont 23 trouvés dans nos propres écrits |
+| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | 86 points, avec sévérité — dont 26 trouvés dans nos propres écrits |
 | [`registres/REVUE-CROISEE-S05.md`](registres/REVUE-CROISEE-S05.md) | **audit croisé des 20 ADR** — 12 écarts, dont 2 de gravité 1, et la liste des contrôles passés |
 | [`registres/REVUE-CROISEE-S08.md`](registres/REVUE-CROISEE-S08.md) | **audit croisé des 5 SPEC** — 10 écarts, dont 2 de gravité 1 ; l'arithmétique des fiches chiffrées revérifiée ligne à ligne |
 | [`registres/AUDIT-POINTS-OUVERTS-S11.md`](registres/AUDIT-POINTS-OUVERTS-S11.md) | **audit des 110 points ouverts** — un sur trois n'était pas dans l'état annoncé ; et le tableau **« qui attend quoi »**, bancs, équipes, arbitrages |
+| [`registres/REVUE-CROISEE-S13.md`](registres/REVUE-CROISEE-S13.md) | **audit de SPEC-006, ADR-022 et ADR-023** — 12 écarts, dont **deux portant sur des invariants** ; première erreur arithmétique du corpus |
 | [`registres/QUESTIONS-OUVERTES.md`](registres/QUESTIONS-OUVERTES.md) | traçabilité section par section + verdict sur les 7 propositions antérieures |
 | [`validation/SPEC-003`](validation/SPEC-003-harnais-de-validation.md) | **harnais de validation** — régimes de déterminisme, scénarios, métriques, CI, pièges de mesure |
 | [`validation/CAS-CANONIQUES.md`](validation/CAS-CANONIQUES.md) | 20 montages de référence, dont 13 à solution analytique fermée |
@@ -105,7 +113,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 Conception conceptuelle   ██████████████████████  100 %   les 30 sections sources sont traitées
 Chiffrage et contraintes  █████████████████░░░░░   75 %   formules posées, mesures à faire
 Spécification technique   ████████████████████░░   92 %   chemins tiré et poussé posés, persistance tranchée ; reste IGpuBackend
-Cohérence interne         █████████████████████░   95 %   20 ADR + 5 SPEC confrontés, 22 écarts résolus ; SPEC-006 non recroisée
+Cohérence interne         █████████████████████░   97 %   24 ADR + 6 SPEC confrontés, 34 écarts résolus ; invariants audités contre 3 documents
 Décisions expérimentales  ██░░░░░░░░░░░░░░░░░░░░   10 %   onze bancs définis, aucun exécuté
 Outillage et pipeline     ████████████░░░░░░░░░░   55 %   harnais et outillage auteur spécifiés, non écrits
 Accords inter-équipes     ███░░░░░░░░░░░░░░░░░░░   15 %   les quatre interfaces sont écrites ; aucune confirmée

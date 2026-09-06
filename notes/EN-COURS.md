@@ -93,7 +93,7 @@ l'intention.
   liste des contrôles passés — sans elle la revue n'est pas vérifiable.
 - [x] **P8** — appliquer les résolutions : notes correctives datées, nouvel ADR si une décision
   change.
-- [ ] **P9** — index, angles morts, décomptes.
+- [x] **P9** — index, angles morts, décomptes.
 - [ ] **P10** — rituel de fin (`REPRISE.md` §6) : journal S13, leçons, index, jeton libéré.
 
 ### Notes de reprise
