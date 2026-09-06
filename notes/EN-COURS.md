@@ -103,7 +103,7 @@ et il faut dire laquelle.
       réécrits, en-tête de provenance daté sur chacun.
 - [x] **P4** — report des quinze leçons **L71–L85 → L122–L136**.
 - [x] **P5** — report des douze angles morts **A105–A116 → A149–A160**, sévérités conservées.
-- [ ] **P6** — l'éponge et `λ_cut` : confronter `ADR-041` (ex-034 de B) à `ADR-037` et à S33.
+- [x] **P6** — l'éponge et `λ_cut` : confronter `ADR-041` (ex-034 de B) à `ADR-037` et à S33.
       Convergence ou contradiction — et une note corrective datée du côté qui a tort.
 - [ ] **P7** — ce que la lignée B a corrigé dans les documents **partagés** : `ADR-005`, `ADR-007`,
       `CAS-CANONIQUES`, `DOSSIER-B2`. Notes correctives datées, jamais de réécriture.

@@ -202,6 +202,7 @@ ce que les sources avaient omis.
 | **A158** | Le coût d'un instrument de mesure croît sans que personne le regarde | 3 | ADR-041 §5 |
 | **A159** | Une formule énoncée avec ses constantes n'invite pas à être recalculée | **1** | ADR-042 §2 |
 | **A160** | Un coefficient d'amortissement n'a de sens que tant que `σ·dt < 1` | 2 | ADR-042 §4.1 |
+| **A161** | Trois fonctions distinctes partagent le mot « éponge », et un résultat sur l'une se lit comme un résultat sur les autres | 2 | ADR-043 §5 |
 
 Cent huit angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -1006,6 +1007,16 @@ pendant quatre sessions.
   rien ne permet de distinguer les deux. Un compteur par garde-fou coûterait quelques octets et
   dirait lesquels travaillent. C'est le même manque qu'A146 sur les saturations, et il a la même
   cause : **on écrit un garde-fou pour empêcher, jamais pour mesurer**.
+
+- **A161** — **Trois fonctions distinctes partagent le mot « éponge ».** La même bande de bord
+  d'un domaine δ doit **absorber** (ne pas réfléchir, ADR-005 §2), **faire décroître** (ne pas laisser
+  δ persister jusqu'au bord, ADR-001) et **transduire** (rendre l'énergie à `W` au lieu de la
+  détruire, ADR-005 §3). Leurs critères de dimensionnement n'ont rien en commun — un taux de
+  réflexion, une longueur de décroissance, un bilan d'énergie — et **une seule des trois a été
+  mesurée**. Le risque est concret et a failli se produire à la fusion : ADR-037 conclut que la
+  dissipation rend le **masque** inutile pour les phénomènes entretenus, ce qui se lirait sans
+  effort comme « un domaine peut se passer d'**absorbeur** » — conclusion fausse que rien dans le
+  vocabulaire n'empêche. ADR-043 D2 impose de nommer les fonctions séparément.
 
 ---
 
