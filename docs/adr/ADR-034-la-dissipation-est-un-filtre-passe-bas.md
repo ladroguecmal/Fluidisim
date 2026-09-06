@@ -117,5 +117,19 @@ de le poser en chiffres.
 3. **L'interaction avec la frontière W/δ n'est pas traitée.** Si δ mange les composantes courtes, la
    zone de transition doit-elle les réinjecter depuis W, ou les considérer comme perdues ? La
    question est nouvelle et n'est pas dans ADR-005. Angle mort **A122**.
+
+   > **Note corrective S31 — cette question était mal posée, et elle se dissout.** `δ` est
+   > **additif** : `Surface_visible = B + W + δ` (ADR-001 §2). Il ne transporte donc pas la houle,
+   > il transporte l'**écart** à la houle — une composante courte de `W` traverse un domaine δ sans
+   > y être dissipée, puisqu'elle n'y est pas discrétisée. **Il n'y a rien à réinjecter.**
+   >
+   > **Mais la loi ne disparaît pas : elle change de sujet.** Elle gouverne les **perturbations
+   > locales** — sillage, impact, éclaboussure — c'est-à-dire exactement ce pour quoi δ existe. Le
+   > **tableau du §2.1 ci-dessus, qui applique la loi à une mer de houle, décrit donc un régime que
+   > δ ne rencontre pas** ; il reste valable comme ordre de grandeur pour une *perturbation* de
+   > longueur d'onde comparable, et doit être cité ainsi.
+   >
+   > Voir [`ADR-036`](ADR-036-delta-ne-porte-pas-la-houle-il-porte-l-ecart.md), qui clôt A122 par
+   > dissolution et chiffre ce qui la remplace : un sillage de barque long de **deux mètres**.
 4. **`λ_cut` dispersif reste bloqué** (ADR-030 §5). Cet ADR ne le débloque pas ; il change la forme
    de la moitié qui est mesurable.
