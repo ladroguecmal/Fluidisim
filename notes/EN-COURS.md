@@ -85,8 +85,8 @@ Si la thèse est juste, le défaut n'est pas absent chez nous : il est **conditi
 la paroi**, ce qui est plus dangereux qu'un défaut permanent — il ne se manifeste que sur les cas
 rares, et les cas rares sont ceux qu'on teste le moins.
 
-- [ ] **P1** — plan, jeton.
-- [ ] **P2** — la paroi mobile : bord gauche du domaine se déplaçant à `u_p`, condition
+- [x] **P1** — plan, jeton.
+- [x] **P2** — la paroi mobile : bord gauche du domaine se déplaçant à `u_p`, condition
       d'imperméabilité en mouvement. Vérifier que l'eau est bien poussée avant de mesurer quoi que
       ce soit — une paroi qui glisse sans rien déplacer ne teste rien.
 - [ ] **P3** — les **deux** définitions d'`u_max`, dans le **même** code, et le compteur de

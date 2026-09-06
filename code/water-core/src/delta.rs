@@ -241,6 +241,35 @@ impl Bassin {
     }
 }
 
+/// Une paroi mobile : le bord gauche du domaine, se déplaçant à vitesse imposée.
+///
+/// # Pourquoi le bord et non un obstacle intérieur
+///
+/// C23 mesure la **borne de pas de temps** en présence d'une paroi qui bouge, pas la physique d'un
+/// couplage fluide-solide. Un bord mobile suffit : il impose une vitesse de paroi et il pousse
+/// réellement l'eau. Un obstacle intérieur demanderait des cellules coupées, donc une géométrie
+/// partielle, donc une seconde source d'erreur entre la mesure et ce qu'elle prétend mesurer.
+///
+/// La face au contact de la paroi est **coupée** au sens d'ADR-035 §2 : c'est la seule du domaine
+/// où la vitesse relative diffère de la vitesse absolue.
+///
+/// # Ce que ce montage est exactement, et ce qu'il n'est pas
+///
+/// **C'est un batteur, pas une paroi imperméable stricte.** Une paroi imperméable en mouvement
+/// déplace le domaine ; ici le maillage est fixe, donc la condition injecte du flux à travers la
+/// première face — le volume du domaine **augmente**, et c'est correct pour un batteur.
+///
+/// Représenter une vraie paroi imperméable mobile demanderait des cellules coupées, et c'est
+/// précisément ce que le §2 d'ADR-035 décrit. **Le montage ne prétend donc pas être ce cas-là** : il
+/// exerce la seule chose que C23 doit vérifier — l'existence d'une vitesse de paroi non nulle sur
+/// une face, et son effet sur la borne de pas de temps. La grandeur mesurée, `|u_fluide − u_paroi|`,
+/// est la même dans les deux montages.
+#[derive(Clone, Copy, Debug)]
+pub struct ParoiMobile {
+    /// Vitesse de la paroi, en m/s. Positive vers la droite — elle pousse l'eau.
+    pub u_m_s: f32,
+}
+
 /// Solveur δ 1D. Les tableaux portent deux cellules fantômes, une à chaque bord.
 pub struct Delta1D {
     nx: usize,
@@ -250,6 +279,8 @@ pub struct Delta1D {
     h_sec: f32,
     /// Nombre de Courant effectif. Voir `CFL` et ADR-033 §3 — il commande la dissipation.
     cfl: f32,
+    /// Paroi mobile au bord gauche, si le montage en a une. ADR-035 §2.
+    paroi: Option<ParoiMobile>,
     /// Cote du lit, en mètres, `nx + 2` valeurs.
     b: Vec<f32>,
     h: Vec<f32>,
@@ -340,6 +371,7 @@ impl Delta1D {
             origine: bassin.origine_m,
             h_sec: H_SEC,
             cfl: CFL,
+            paroi: None,
             h_suiv: h.clone(),
             hu_suiv: hu.clone(),
             b,
@@ -362,6 +394,17 @@ impl Delta1D {
     pub fn avec_cfl(mut self, cfl: f32) -> Self {
         self.cfl = cfl.clamp(0.05, 0.99);
         self
+    }
+
+    /// Installe une paroi mobile au bord gauche — C23, ADR-035 §2.
+    pub fn avec_paroi(mut self, paroi: ParoiMobile) -> Self {
+        self.paroi = Some(paroi);
+        self
+    }
+
+    /// Vitesse de la paroi, ou zéro s'il n'y en a pas.
+    pub fn u_paroi(&self) -> f32 {
+        self.paroi.map(|p| p.u_m_s).unwrap_or(0.0)
     }
 
     /// Change le seuil de cellule sèche. Réservé aux mesures de sensibilité du harnais.
@@ -506,7 +549,19 @@ impl Delta1D {
     fn bords(&mut self) {
         let n = self.nx;
         self.h[0] = (self.h[1] + self.b[1] - self.b[0]).max(0.0);
-        self.hu[0] = -self.hu[1];
+        // Paroi **mobile** : la condition d'imperméabilité impose que la vitesse normale du fluide
+        // égale celle de la paroi *à la paroi*. Le miroir de vitesse devient donc
+        // `u_fantôme = 2·u_paroi − u_interne`, qui redonne `−u_interne` quand la paroi est fixe.
+        //
+        // C'est exact, et c'est ce qui fait que la paroi **pousse réellement l'eau** : sans ce
+        // terme, elle glisserait sans rien déplacer, et C23 ne mesurerait rien.
+        let u_p = self.paroi.map(|p| p.u_m_s).unwrap_or(0.0);
+        let u1 = if self.h[1] > self.h_sec {
+            self.hu[1] / self.h[1]
+        } else {
+            0.0
+        };
+        self.hu[0] = self.h[0] * (2.0 * u_p - u1);
         self.h[n + 1] = (self.h[n] + self.b[n] - self.b[n + 1]).max(0.0);
         self.hu[n + 1] = -self.hu[n];
     }
@@ -960,6 +1015,45 @@ mod tests {
                 d.volume()
             );
         }
+    }
+
+    /// La paroi mobile pousse réellement l'eau — sans quoi C23 ne mesurerait rien.
+    ///
+    /// Contrôle préalable à toute mesure : une paroi qui glisserait sans déplacer d'eau donnerait
+    /// une vitesse relative sans conséquence, et le cas serait vide.
+    #[test]
+    fn la_paroi_mobile_pousse_l_eau() {
+        let bassin = Bassin {
+            nx: 200,
+            profondeur_gauche_m: 2.0,
+            pente: 0.0,
+            etat_initial: EtatInitial::Repos,
+            ..Bassin::c03(true)
+        };
+
+        let mut fixe = solveur(bassin);
+        fixe.avancer_equilibre(0.5);
+        let u_fixe = fixe.max_abs_u();
+
+        let mut mobile = solveur(bassin).avec_paroi(ParoiMobile { u_m_s: 1.0 });
+        mobile.avancer_equilibre(0.5);
+
+        assert!(
+            u_fixe < 1.0e-5,
+            "témoin : sans paroi mobile l'eau doit rester au repos ({u_fixe} m/s)"
+        );
+        assert!(
+            mobile.max_abs_u() > 0.1,
+            "la paroi doit mettre l'eau en mouvement ({} m/s)",
+            mobile.max_abs_u()
+        );
+        // Batteur, pas paroi imperméable : le maillage est fixe, donc du volume entre.
+        assert!(
+            mobile.volume() > fixe.volume(),
+            "le batteur injecte du volume : {} contre {}",
+            mobile.volume(),
+            fixe.volume()
+        );
     }
 
     /// I-06 : après `seal()`, la configuration échoue au lieu d'allouer en silence.
