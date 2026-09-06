@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-06
-Session en cours : S36 — `physics_shallow.rs`, les six montages de la lignée B
-Dernière session : S35 — 2026-09-06 — le second fork réconcilié ; les deux lignées avaient écrit le même solveur
-Session suivante : S36 — `physics_shallow.rs` (S35-1) *(recommandé)*, ou les saturations de modèle (S34-1)
+Session en cours : —
+Dernière session : S36 — 2026-09-06 — les chiffres de la lignée B rejoués : trois reproduits, un périmé
+Session suivante : S37 — exercer l'oracle croisé (S35-3) *(recommandé)*, ou relire les cinq A de sévérité 1 (S35-5)
 ```
 
 > **Avant de regarder le jeton, exécuter `git worktree list` et `git branch -a`.** Le jeton est un
@@ -117,8 +117,8 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 Trente-cinq sessions ici, **plus cinq dans une lignée parallèle réconciliée en S35** (B-S22 à
 B-S26) — **43 ADR** *(dont un acté)*, six spécifications, **onze registres** — **et du code qui
-tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équilibrés, **55 tests
-verts** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
+tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équilibrés et **tous deux
+montés sur leurs cas** *(S36)*, **68 tests verts** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
 verdict** (C08). Quatre cas canoniques sur δ sont exécutés ici : **C01 et C03 passent**, C04 échoue,
 C08 ne conclut pas. **La lignée réconciliée en donne d'autres verdicts, et l'écart a une cause
 unique** : elle est passée à l'ordre deux, et C04 comme C08 y sont verts (`CAS-CANONIQUES`, « deux
@@ -146,6 +146,20 @@ validation du modèle, dont elles partagent tous les angles morts — et le mot 
 n'ont **pas** été confrontés au corpus, cinq angles morts de sévérité 1 importés n'ont **pas** été
 relus, le **harnais n'est pas fusionné** (seul le solveur l'est), et l'oracle croisé n'a **jamais
 été exercé**. Huit actions, **S35-1** à **S35-8**, dans `QUESTIONS-OUVERTES`.
+
+**Et S36 a rejoué les chiffres de la lignée B, ce qui a servi autrement que prévu.** Les six montages
+de la lignée B sont désormais dans l'arbre (`physics_shallow.rs`, treize tests) et branchés au mode
+`physics` : la colonne de verdicts que `CAS-CANONIQUES` appelait *un témoignage* est devenue une
+**mesure**. Sur quatre grandeurs publiées confrontées, **trois se reproduisent** — dont les quatre
+demi-vies du tableau d'`ADR-040` §5 à **0,00 %** — et **une était périmée** : le `p = 1,003` de C08,
+déplacé à 0,9997 par une correction de référence faite pour un autre cas une session plus tard.
+**Rien ne l'avait signalé, parce que le cas continuait de passer** — l'assertion est un minorant
+(**A162**, **L141**).
+
+L'oracle croisé d'`ADR-043` §3, lui, **n'a trouvé aucune faute d'implémentation** : les deux codes
+concordent partout où ils se recouvrent. Et un montage réduit de C05 a vérifié par accident la
+réserve n° 2 d'`ADR-042` — deux montages sans aucune dimension commune rendent le même `R` à 0,6 %
+près : **c'est bien le groupe adimensionné qui gouverne l'éponge**.
 
 **Et S27 a trouvé un trou que sept sessions n'avaient pas vu, grâce à une source extérieure.**
 SPEC-001 §2.1 borne le pas de temps par `u_max` **sans jamais définir `u_max`**, quand SPEC-004 §10.1

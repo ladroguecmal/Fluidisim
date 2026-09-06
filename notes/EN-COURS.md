@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S36
-État             : en cours
+État             : terminée
 Battement        : 2026-09-06
 Objectif         : `physics_shallow.rs` — les six montages de la lignée B, et la reproduction de ses chiffres
 ```
@@ -107,7 +107,7 @@ montage, soit une divergence entre les deux arbres que personne n'a vue.
       (**A149**, action S35-2) — qui vaut pour les deux jeux de montages.
 - [x] **P8** — **confronter les quatre chiffres** à ce qui est publié, et écrire le verdict.
 - [x] **P9a** — rituel : journal, leçons L141-L143, actions S36-1 à S36-4.
-- [ ] **P9b** — rituel : index, décomptes, jeton libéré.
+- [x] **P9b** — rituel : index, décomptes, jeton libéré.
 
 ### Notes de reprise
 
