@@ -190,6 +190,18 @@ ce que les sources avaient omis.
 | **A146** | Les saturations de modèle ne sont comptées nulle part, et une saturation fréquente est un défaut | 2 | AUDIT-GARDE-FOUS-S34 §5.1 |
 | **A147** | Un garde-fou non testable isolément est celui qui défaille | **1** | AUDIT-GARDE-FOUS-S34 §3.2 |
 | **A148** | Aucun garde-fou ne compte ses déclenchements : on ignore lesquels travaillent | 2 | AUDIT-GARDE-FOUS-S34 §5.2 |
+| **A149** | Un seuil absolu affiché en pourcentage se lit comme un écart relatif | 3 | `main.rs`, C01 |
+| **A150** | La position d'un front numérique dépend du seuil qui la définit | 2 | ADR-038 §5, C04 |
+| **A151** | Le corpus ne nomme nulle part le modèle dont C01 est le test canonique | 3 | ADR-038 §6 |
+| **A152** | Un paramètre qu'un énoncé ne fixe pas est tranché en silence par le premier qui mesure | **1** | ADR-039 §1 |
+| **A153** | L'ordre d'un schéma est un couple (schéma, solution), pas un nombre | 2 | ADR-039 §4.1 |
+| **A154** | Un cas partiel qui s'affiche vert ne se distingue pas d'un cas complet | 2 | ADR-039 §5 |
+| **A155** | Une simplification algébrique efface le domaine où elle est valide | **1** | ADR-040 §2 |
+| **A156** | Un cas qui réduit une solution à un scalaire peut classer deux candidats à l'envers | **1** | ADR-040 §8 |
+| **A157** | Un seuil choisi pour la reproductibilité seule peut être reproductible et dénué de sens | **1** | ADR-041 §4 |
+| **A158** | Le coût d'un instrument de mesure croît sans que personne le regarde | 3 | ADR-041 §5 |
+| **A159** | Une formule énoncée avec ses constantes n'invite pas à être recalculée | **1** | ADR-042 §2 |
+| **A160** | Un coefficient d'amortissement n'a de sens que tant que `σ·dt < 1` | 2 | ADR-042 §4.1 |
 
 Cent huit angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -995,3 +1007,111 @@ pendant quatre sessions.
   dirait lesquels travaillent. C'est le même manque qu'A146 sur les saturations, et il a la même
   cause : **on écrit un garde-fou pour empêcher, jamais pour mesurer**.
 
+---
+
+### Angles morts importés de la lignée B (2026-09-06, S35)
+
+> Les douze suivants ont été ouverts dans une histoire parallèle du dépôt (sessions **B-S22**
+> à **B-S26**), où ils portaient les numéros `A105` à `A116` — déjà pris ici. Carte de
+> renumérotation : [`FORK-S22-S26`](FORK-S22-S26.md). **Cinq sont de sévérité 1**, et aucun n'a
+> été relu par cette lignée : ils sont reportés tels quels, sévérités comprises.
+
+- **A149** — **Un seuil absolu affiché en pourcentage se lit comme un écart relatif.** Quand la
+  référence d'un cas est **zéro** — `u ≡ 0` pour C01 — l'écart relatif n'a pas de sens et le
+  rapport affichait la mesure elle-même suivie d'un signe `%`. Un seuil de **1 mm** y apparaissait
+  comme « 0,1 % », et une mesure de 19,5 mm/s comme « 1,951 % » : deux nombres qui ont l'air
+  rassurants et qui décrivent un échec d'un facteur vingt. Le rapport distingue désormais les deux
+  formats. **Une unité qui disparaît de l'affichage ne disparaît pas de la grandeur** — elle
+  disparaît seulement de ce que le lecteur peut vérifier.
+- **A150** — **La position d'un front numérique dépend du seuil qui la définit.** Un front n'a pas
+  de bord net : la hauteur décroît continûment vers zéro. Mesurée à 1 mm, la position du front de
+  Ritter est 10,84 m ; à 1 µm, 11,39 m — **5 % d'écart pour trois ordres de grandeur de seuil**,
+  quand la tolérance du cas est de 3 %. Le seuil n'est donc pas un détail d'implémentation : il
+  fait partie de la définition de la grandeur, et un cas qui ne le fixe pas laisse **le candidat
+  choisir sa propre note**. La batterie en mesure deux et rapporte les deux.
+- **A151** — **Le corpus ne nomme nulle part le modèle dont C01 est le test canonique.** Ni
+  Saint-Venant, ni « shallow water » : six spécifications, vingt-neuf ADR — tout le corpus
+  antérieur à ADR-038 — et la seule occurrence
+  d'« eau peu profonde » sert à un critère de déferlement. Le projet a hérité du test sans hériter
+  du cadre qui lui donne son sens. Le test reste valide — l'équilibre hydrostatique n'est pas une
+  propriété de la dimension — mais **un énoncé privé de son cadre est plus difficile à interpréter
+  qu'il n'aurait dû l'être**, et c'est ainsi qu'une erreur d'unités comme celle de C04 survit à
+  vingt-et-une sessions de relecture.
+
+**Ajoutés en B-S23, en exécutant trois cas de plus**
+- **A152** *(sévérité 1)* — **Un paramètre qu'un énoncé ne fixe pas est tranché en silence par le
+  premier qui mesure.** Cinq des sept cas canoniques exécutés à ce jour portent un tel paramètre, et
+  chacun déplace le verdict **au-delà de sa propre tolérance** : la maille de C03 (6,0 ou 43,1
+  périodes de demi-vie — échec ou succès), le seuil de mouillage de C04 (5 % pour une tolérance de
+  3 %), la normalisation du « 2 % » de C06 (facteur 20), le support et la norme de C08 (`p` de 0,95
+  à 0), la masse volumique de C10 (2,5 % pour une tolérance de 1 %). **Ce n'est pas une série
+  d'inattentions** : tant que personne n'exécute un cas, le paramètre manquant n'existe pas — rien
+  ne peut le révéler. Le coût est précis : **deux candidats peuvent passer le même cas chacun sous
+  ses propres conditions, et n'être jamais comparés.** Un banc bâti sur des cas sous-spécifiés ne
+  classe personne. Voir ADR-039.
+- **A153** — **L'ordre d'un schéma est un couple (schéma, solution), pas un nombre.** Le même code
+  donne 0,95 sur une seiche bien résolue et 0,66 sur un front discontinu — et 0 si on change de
+  norme. Aucune des trois mesures n'est fausse. Conséquence directe : un énoncé de la forme
+  « ce solveur est d'ordre un » n'est pas vérifiable, et un cas qui compare deux candidats doit
+  fixer le support avant de comparer les nombres.
+- **A154** — **Un cas partiel qui s'affiche vert ne se distingue pas d'un cas complet.** C06 a été
+  exécuté sans solide, sans rotation et en une dimension — c'est-à-dire privé des deux raisons
+  d'être que son propre énoncé lui donne. Le tiers exécuté passe à 0,76 %. Rien dans un rapport de
+  cas ne distingue « ce cas passe » de « le tiers de ce cas que j'ai su écrire passe », et c'est le
+  rapport qui doit le dire — à chaque exécution, pas une fois dans un document. Le harnais imprime
+  désormais `C06*` et `C10*` comme partiels.
+
+**Ajoutés en B-S24, en passant à l'ordre deux**
+- **A155** *(sévérité 1)* — **Une simplification algébrique efface le domaine où elle est valide.**
+  Le terme de fond d'Audusse s'écrit avec les hauteurs reconstruites aux **deux bords** de la maille.
+  À l'ordre un les deux valent `h_i`, l'expression se réduit à une forme plus courte, et c'est cette
+  forme courte qui a été écrite en B-S22 — correctement. Étendue à l'ordre deux, où les deux bords
+  diffèrent, elle injectait une force `−g·h·σ` **sur fond plat**, là où la source doit être
+  exactement nulle : quinze fois l'erreur du schéma d'ordre un, et croissante sous raffinement.
+  **Rien dans l'écriture de la forme courte ne rappelait l'hypothèse qui l'autorise.** C'est A78/L43
+  transposé au code : une simplification est une perte d'information sur son propre domaine de
+  validité, et elle se paie au premier changement de contexte. *Trouvé par le cas diagnostic de C08
+  (L124), pas par la relecture.*
+- **A156** *(sévérité 1)* — **Un cas qui réduit une solution à un scalaire peut classer deux
+  candidats à l'envers.** Mesuré sur la seule position du front de Ritter, MUSCL + Euler paraît le
+  meilleur des trois schémas — 0,87 % contre 6,11 % — alors qu'il est **2,2 fois pire en `L¹`** et
+  que son front **dépasse** la référence à la maille suivante. Ce n'est pas de la précision, c'est
+  une traîne parasite qu'un seuil de détection compte comme du front. **Un classement fondé sur un
+  point d'une solution n'est pas un classement** — et c'est précisément ce à quoi servent les cas
+  canoniques. Conséquence portée dans C04 : toute assertion ponctuelle doit être accompagnée d'une
+  norme sur la solution entière.
+
+**Ajoutés en B-S25, en disculpant le solveur**
+- **A157** *(sévérité 1)* — **Un seuil choisi pour la reproductibilité seule peut être reproductible
+  et dénué de sens.** ADR-039 avait posé le test des deux implémenteurs : *deux personnes qui ne se
+  parlent pas obtiennent-elles le même nombre ?* Le seuil de mouillage de 10⁻⁶ m le satisfaisait
+  parfaitement — et il désignait un **micron d'eau**, épaisseur à laquelle ni le modèle moyenné sur
+  la hauteur, ni la rugosité d'un fond, ni le rendu du jeu n'ont de sens. Pire : il choisissait
+  exactement le régime où **aucun** schéma de volumes finis ne peut suivre, donc un critère
+  qu'aucun candidat ne satisfait, donc qui n'élimine personne. Le solveur a été suspecté trois
+  sessions durant alors qu'il suivait le front à 0,7 %. **Le test des deux implémenteurs est
+  nécessaire et non suffisant : une condition de mesure doit être reproductible *et* physiquement
+  interprétable.** Et le cas est aggravé par le fait que celui qui fixe le seuil est celui dont le
+  code est jugé par lui — **la révision demande une confirmation extérieure**.
+- **A158** — **Le coût d'un instrument de mesure croît sans que personne le regarde.** La batterie
+  analytique valait 0,04 s en S20 ; elle a atteint **74 secondes** en B-S25, chaque session n'y ayant
+  ajouté « qu'un balayage ». Personne ne mesure le temps de l'outil qui mesure. *(Le remède ici a
+  été trouvé en passant : le mode release rend 11,7 s, et le hash de conformité y est **identique**
+  — ce qui vérifie enfin, plutôt qu'affirme, la propriété pour laquelle Rust avait été retenu.)*
+
+**Ajoutés en B-S26, en mesurant l'éponge**
+- **A159** *(sévérité 1)* — **Une formule énoncée avec ses constantes n'invite pas à être
+  recalculée.** ADR-005 §2 pose `R ≈ exp(−2∫σ/c ds)`, un profil quadratique, et conclut que
+  `σ_max ≈ 4·c/L_s` donne `R < 1 %`. L'intégrale vaut `σ_max·L_s/3`, donc `R = exp(−8/3) = 6,95 %` —
+  **un facteur sept**. La vérification tient en une multiplication, et l'erreur a survécu **depuis
+  S05** : six audits, deux revues croisées, et un dossier de banc qui s'appuie dessus pour fixer la
+  borne haute du paramètre le plus connecté du corpus. **Un énoncé qui a la forme d'un résultat se
+  cite ; il ne se recalcule pas.** Le remède n'est pas de tout revérifier mais de repérer les
+  formules **dont dépend une décision** et de les refaire, une fois, avec leurs constantes.
+- **A160** — **Un coefficient d'amortissement n'a de sens que tant que `σ·dt < 1`.** Écrit
+  `×(1 − σ·dt)`, il devient négatif au-delà, et une saturation à zéro le transforme en **remise à
+  l'état de repos** : la maille n'est plus amortie, elle est écrasée. L'opérateur change de nature
+  **sans erreur, sans avertissement, et en continuant à produire des nombres plausibles** — les
+  éponges d'une à trois mailles réfléchissent peu, et ne mesurent pourtant plus une éponge. C'est
+  l'analogue, pour un terme source, de la condition CFL sur le transport ; le corpus posait la
+  seconde et ignorait la première.
