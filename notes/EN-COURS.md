@@ -77,7 +77,7 @@ I-11 et I-12 ont été traités en S13 par ADR-024. Restent **quinze**.
 - [ ] **P1** — déclarer le plan, prendre le jeton, mettre à jour le battement.
 - [x] **P2** — **I-01 à I-05** contre ADR-001, ADR-004, ADR-003, ADR-008, ADR-007 et ADR-012.
 - [x] **P3** — **I-06 à I-10** contre ADR-006, ADR-002, ADR-003, ADR-004 et ADR-009.
-- [ ] **P4** — **I-13 à I-17** contre ADR-006, ADR-012, ADR-021, ADR-022, et le cas particulier
+- [x] **P4** — **I-13 à I-17** contre ADR-006, ADR-012, ADR-021, ADR-022, et le cas particulier
   d'I-14, qui ne cite aucun ADR.
 - [ ] **P5** — rédiger `docs/registres/AUDIT-INVARIANTS-S14.md` : le verdict par invariant, et la
   liste de ceux qui tiennent — sans elle le contrôle n'est pas vérifiable.
@@ -194,3 +194,44 @@ outre bathymétrie et courants C1 pour le signal de traversabilité (écart E05)
 Un lecteur d'I-10 seul conclut « aucune eau sur le serveur », et dimensionne un serveur sans assets.
 C'est l'angle mort **A77**, et sa cause est ici : un invariant formulé uniquement en négatif laisse
 croire que le complément est vide.
+
+#### P4 — I-13 à I-17
+
+**I-13 — défaut, gravité 3.** « Il peut demander une priorité au `WaterManager` ». Cet objet
+n'existe pas : SPEC-004 §3 nomme la classe **`WaterSystem`**, et `WaterManager` n'apparaît nulle
+part ailleurs dans le corpus. Le fond est juste — ADR-012 §2 prévoit bien que le rendu contribue à
+`W_perception` sans imposer de niveau — seul le nom est mort.
+*Contrôle passé au passage* : la clarification S13 sur la poignée de texture (SPEC-006 §4.1) est
+cohérente avec I-13, qui vise le tableau de blocs de δ (ADR-006 §5) et non les champs publiés.
+
+**I-14 — défaut, gravité 2.** « Toute valeur numérique est ou bien dérivée d'une formule citée
+**dans SPEC-001 ou SPEC-002**, ou bien marquée à calibrer. »
+ADR-023 §2 introduit trois formules qui ne sont dans ni l'une ni l'autre : la durée d'impact de
+Wagner `t = 2b·tanβ/(πv)`, le coefficient de pression `C_p = 1 + (π/2tanβ)²`, et la masse ajoutée
+d'une plaque `m_a = ½πρc²`. Elles sont citées, sourcées et vérifiées — mais elles vivent dans un ADR,
+c'est-à-dire à un endroit où l'invariant ne va pas les chercher.
+Deux issues. Élargir l'invariant à « une SPEC de référence » affaiblirait la propriété qui en fait le
+prix : **un seul endroit où chercher un nombre**. Migrer les formules vers SPEC-001, dont c'est le
+rôle, la conserve. C'est la seconde qui est retenue.
+
+**I-15 — tient.** Le test « toute grandeur nouvelle se teste contre I-15 plutôt que de faire l'objet
+d'un arbitrage » a effectivement été appliqué à chaque grandeur introduite depuis : les quatre canaux
+de SPEC-006 §2.6, l'état persistant d'ADR-022 §1, le terme d'impact d'ADR-023 §2.4. Trois documents,
+trois applications, aucune exception revendiquée. C'est l'invariant le plus productif du corpus.
+
+**I-16 — défaut, gravité 2, et le défaut est une action non exécutée.**
+S11 a conclu, registre `AUDIT-POINTS-OUVERTS-S11` §2.6, que « le critère d'I-16 **n'est pas
+opérationnel tel qu'il est écrit** » — « ressource » contre « capacité dérivée » ne tranche pas le
+cas d'une taille de pool, qui est les deux — et a formulé le critère qui fonctionne : *une valeur
+peut figurer dans un profil si elle est **allouée directement** ; pas si elle doit être **cohérente
+avec deux autres valeurs déjà déclarées***. La table « Suite » du même registre inscrit l'action
+« précision du critère d'I-16 dans `01_INVARIANTS.md` ».
+**Elle n'a jamais été appliquée.** La note a été posée dans ADR-006 §7.3 ; l'invariant est resté
+intact. Conséquence concrète : `paquets_W_max = 4096` et `v_noeuds_actifs = 2048` figurent toujours
+dans le profil d'ADR-012 §3 sans qu'on sache les justifier au regard d'I-16.
+C'est la classe **A78** appliquée à une décision d'audit : une correction se propage vers le document
+qu'elle corrige, pas vers celui qu'elle avait annoncé corriger.
+
+**I-17 — tient.** Confirmé indépendamment par S13 : aucune capture d'exécution n'est demandée nulle
+part, le `SeedState` est bien une donnée cuite, et la restriction d'`events_alive` trouvée en S13
+(écart E11) **renforce** l'invariant au lieu de l'entamer.
