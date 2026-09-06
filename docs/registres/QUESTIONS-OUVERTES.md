@@ -194,9 +194,9 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 
 | # | Action | D'où elle vient | Qui la porte | État |
 |---|---|---|---|---|
-| S27-1 | Écrire **C23**, « nombre de Courant en présence d'une paroi mobile » : aucune mesure à paroi mobile n'existe dans ce dépôt, et la définition d'`u_max` reste **posée sans être vérifiée** | ADR-035 §6.1, **A126** | session | **ouverte** |
+| S27-1 | Écrire **C23**, « nombre de Courant en présence d'une paroi mobile » | ADR-035 §6.1, **A126** | session | **close (S28)** — `CAS-CANONIQUES` §C23 ; la définition est vérifiée et `ν = 0,70` est débloqué pour le solveur du projet |
 | S27-2 | **Borner le domaine de validité en amplitude** de la loi de dissipation : mesuré à 1 % (tient) et 5 % (faux), rien entre les deux | ADR-035 §6.3, **A127** | session | **ouverte** |
-| S27-3 | Implémenter la **borne analytique avec vitesse de paroi**, et la faire dériver du même code que le compteur de violations — les découpler recrée le défaut | ADR-035 §3 | session, après S27-1 | **ouverte** |
+| S27-3 | Implémenter la **borne analytique avec vitesse de paroi** | ADR-035 §3 | session | **close (S28)** — un seul `enum Definition` gouverne la borne et le compteur ; le Courant réalisé vaut `ν` au millième de 0,5 à 20 m/s de paroi |
 | S27-4 | Mesurer la stabilité **en 2D** et sur un cas de déferlement avant de rouvrir la valeur de `ν` — le ×20 disponible n'est pas refusé, il n'est pas mérité | ADR-035 §6.4 | session | **ouverte** |
 
 > **Note S27 — sur l'apport d'une source extérieure.** Le défaut central de cette session (A125) a
@@ -204,4 +204,17 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 > moitiés étaient dans notre corpus depuis S04 ; ce qui manquait était la **question**. Voir A128,
 > et la leçon **L91**. Ce n'est pas une invitation à importer des conclusions extérieures — leur
 > architecture ne nous engage pas — mais à traiter leurs **mesures** comme des faits.
+
+## Actions relevées en séance — S28
+
+| # | Action | D'où elle vient | Qui la porte | État |
+|---|---|---|---|---|
+| S28-1 | Porter dans le **budget d'un domaine δ** que le pas de temps dépend de ce qui tombe dedans : ×3,3 à `u_p = 10 m/s` — le régime de C20 | **A131**, C23 | session | **ouverte** |
+| S28-2 | Étendre C23 à une **paroi intérieure à cellules coupées**, et non seulement un batteur au bord — c'est la géométrie que SPEC-004 §10.1 impose réellement | C23, ADR-035 §6.4 | session | **ouverte** |
+| S28-3 | Réexaminer les **assertions des cas existants** qui exigent une divergence ou une explosion : A129 montre qu'une telle forme certifie l'absence d'un défaut présent | **A129** | session | **ouverte** |
+| S28-4 | Mesurer la stabilité **en 2D** et avec déferlement avant de rouvrir `ν` au-delà de 0,70 | ADR-035 §6.4 | session | **ouverte** |
+
+> **Note S28 — deux actions closes en une session, et la valeur de `ν` a bougé.** S27-1 et S27-3
+> sont closes ; `ν = 0,70` est débloqué **pour le solveur du projet**, pas pour le véhicule d'essai,
+> dont la constante reste à 0,45 pour ne pas déplacer les références publiées.
 

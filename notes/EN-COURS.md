@@ -96,7 +96,7 @@ rares, et les cas rares sont ceux qu'on teste le moins.
 - [x] **P5** — vérifier que la borne **analytique en amont** tient sa promesse : aucun pas ne
       dépasse le `ν` visé. C'est la propriété que la borne mesurée après coup ne peut pas offrir.
 - [x] **P6** — **C23** au corpus `CAS-CANONIQUES`, et ADR-036 si la mesure change une décision.
-- [ ] **P7** — répercussions : index, angles morts, actions, décomptes, `ν` si débloqué.
+- [x] **P7** — répercussions : index, angles morts, actions, décomptes, `ν` si débloqué.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise

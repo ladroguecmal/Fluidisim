@@ -12,9 +12,9 @@ de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outi
 6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance),
 3 en S11 (audit des points ouverts), 3 en S12 (mécanismes de détail), 3 en S13 (revue croisée des
 documents récents), 3 en S14 (audit inverse des invariants), 2 en S15 (audit des registres), 2 en S16 (dossier B2), 2 en S17
-(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques), 4 en S22 (C01 et le premier δ), 4 en S23 (C04 et le lit sec), 4 en S24 (C08 et l'oracle), 4 en S25 (C03 et la dissipation), 4 en S26 (les harmoniques), 4 en S27 (le nombre de Courant) — **128 au
-total**. **Soixante-huit ont été trouvés dans nos propres écrits**, pas dans les documents sources :
-A49, A56, A57, A58, puis A65 à A128. La proportion
+(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques), 4 en S22 (C01 et le premier δ), 4 en S23 (C04 et le lit sec), 4 en S24 (C08 et l'oracle), 4 en S25 (C03 et la dissipation), 4 en S26 (les harmoniques), 4 en S27 (le nombre de Courant), 3 en S28 (la paroi mobile) — **131 au
+total**. **Soixante et onze ont été trouvés dans nos propres écrits**, pas dans les documents sources :
+A49, A56, A57, A58, puis A65 à A131. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -170,8 +170,11 @@ ce que les sources avaient omis.
 | **A126** | Une marge par défaut peut protéger d'un défaut que personne n'a identifié | **1** | ADR-035 §4.1 |
 | **A127** | Une loi mesurée sur un régime est publiée sans son domaine de validité | 2 | ADR-035 §5, ADR-033 §2.2 |
 | **A128** | Une source extérieure a rendu en une heure ce que sept sessions n'avaient pas vu | 3 | S27, journal |
+| **A129** | Un cas qui exigerait une explosion conclurait que le défaut n'existe pas | **1** | C23, ADR-035 note S28 |
+| **A130** | Le gain de portée et la fragilité à une définition fausse croissent ensemble | 2 | ADR-035 note S28 |
+| **A131** | Un objet rapide dans l'eau divise le pas de temps par trois, et rien ne le budgétait | 2 | C23, C20 |
 
-Quatre-vingt-huit angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
+Quatre-vingt-onze angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
 
 **Quatre ont été trouvés dans nos propres écrits** — A49, A56, A57, A58 — et non dans les documents
@@ -784,4 +787,30 @@ pendant quatre sessions.
   une architecture différente la pose autrement. Sévérité 3 parce qu'il n'y a pas de correction à
   appliquer, mais la conséquence de méthode est réelle : **un corpus fermé sur lui-même ne produit
   que les questions qu'il sait déjà poser.**
+
+**Ajoutés en S28, en exerçant la définition d'`u_max`**
+
+- **A129** — **Un cas qui exigerait une explosion conclurait que le défaut n'existe pas.** C23
+  mesure une borne de pas de temps fausse : sous la définition absolue, `u_max` est sous-estimé
+  jusqu'à **×5,5** et le Courant réalisé atteint **2,48**. **Et le solveur ne diverge pas** — Rusanov
+  reste diffusif et absorbe le dépassement. Un cas dont l'assertion aurait été « le solveur casse »
+  serait donc **passé**, et aurait certifié l'absence d'un défaut présent. Ce qui est perdu au-delà
+  de la condition de stabilité n'est pas la simulation, c'est la **garantie** : le solveur tient
+  jusqu'à ce qu'il ne tienne plus, sur un cas que rien n'a testé. Sévérité 1 — la forme d'assertion
+  décide de ce que le cas peut voir, et « ça marche encore » est la plus trompeuse de toutes.
+
+- **A130** — **Le gain de portée et la fragilité à une définition fausse croissent ensemble.** Sous
+  une définition d'`u_max` qui ignore les parois, la vitesse de paroi qui fait franchir `C = 1` vaut
+  5,41 m/s à `ν = 0,45`, **1,90 m/s à `ν = 0,70`**, et 0,49 m/s à `ν = 0,90`. Serrer le pas de temps
+  pour gagner en portée d'onde **rapproche du trou** au lieu de s'en éloigner. Les deux effets vont
+  dans le même sens et se renforcent : c'est la configuration où une optimisation légitime rend un
+  défaut latent soudainement atteignable, sans qu'aucune des deux décisions ne paraisse risquée
+  isolément.
+
+- **A131** — **Un objet rapide dans l'eau divise le pas de temps par trois, et rien ne le
+  budgétait.** Avec la définition correcte, `u_max = u_p + c` : à `u_p = 10 m/s` et `h = 2 m`, le pas
+  est divisé par **3,26**. C'est le régime de **C20**, l'impact d'entrée dans l'eau — un cas que le
+  corpus décrit depuis S12 sans jamais mentionner son coût temporel. Le budget d'un domaine δ n'est
+  donc pas une constante : il dépend de ce qui **tombe dedans**, et un ordonnanceur qui ne le sait
+  pas se fera surprendre au moment le plus visible du jeu.
 
