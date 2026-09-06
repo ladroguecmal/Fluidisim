@@ -59,121 +59,83 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S34
-État             : terminée
+Session          : S35
+État             : en cours
 Battement        : 2026-09-06
-Objectif         : Audit des garde-fous — chacun doit être vu refuser
+Objectif         : Réconcilier le second fork — la lignée S22–S26 dans la lignée S22–S34
 ```
 
 ### Plan
 
-Action **S33-2**, angle mort **A144** : *un garde-fou peut porter sur la bonne idée et la mauvaise
-condition*. Le cas qui l'a produit : un contrôle de réflexion qui vérifiait qu'on mesurait **derrière
-le front** et non que le front **n'avait jamais atteint le mur**. L'idée était juste, la condition
-non — et le contrôle déclarait saine une fenêtre polluée.
+**Le dépôt a forké une seconde fois, et personne ne l'avait vu.** Le premier fork (S07→S15) est
+documenté dans une lignée qui n'est pas celle-ci : `docs/registres/FORK-S08-S15.md` n'existe pas
+ici. **Cette lignée ignore qu'elle est une branche.** Le second fork est parti de S21
+(`a6cfe6f`, 2026-09-06 11h35) et a produit deux histoires parallèles dans la même journée :
 
-**Un garde-fou en qui l'on a confiance est plus dangereux qu'aucun garde-fou.** Un montage sans
-contrôle est réexaminé à chaque usage ; un montage qui en a un ne l'est plus.
+| | commits depuis S21 | dernier | ADR | leçons | angles morts |
+|---|---|---|---|---|---|
+| **cette lignée** (`claude/s22-suite`) | 88 | S34, 19h14 | 37 | L121 | A148 |
+| **lignée B** (`claude/reprise-projet-5134cd`) | 35 | S26, 17h12 | 34 | L85 | A116 |
 
-> **Le critère de cette session, en une ligne : un garde-fou qu'on n'a jamais vu déclencher n'a pas
-> été testé.** Le test d'un garde-fou est **le cas qu'il doit refuser**, jamais le cas nominal —
-> celui-ci passe de toute façon.
+Une troisième lignée, `master`, est morte à **S17** — 195 commits de retard, sans code. Elle
+détient le registre du **premier** fork. Hors mandat de cette session ; voir les points ouverts.
 
-**Douze garde-fous recensés**, entre `delta.rs` et `physics.rs` : le pas de temps sur domaine sec,
-le bornage de `ν`, le plancher d'arrondi de la convergence, le filtre de contamination d'oracle, le
-bornage de l'ordre grossier, le refus de mesure de seiche, la détection d'extrema, l'interpolation
-de front, la référence nulle d'un `Cas`, le contrôle de réflexion, et les deux refus de longueur
-minimale de série.
+**Cinq identifiants d'ADR sont en collision** — 030 à 034 existent des deux côtés, avec des sujets
+différents. Quinze leçons (L71–L85) et douze angles morts (A105–A116) le sont aussi. Et les deux
+lignées ont numéroté leurs sessions S22 à S26.
 
-*Thèse déclarée : au moins un de ces douze masque un cas réel plutôt que de le refuser.* Le plus
-suspect est le `clamp(0,3 ; 3,0)` sur l'ordre grossier estimé — **S24 a mesuré des ordres
-négatifs**, signature du régime pré-asymptotique, et ce bornage les remonterait silencieusement à
-0,3. Ce serait la même faute que le bornage de `ν` à 0,99, corrigé en S29 : *un bornage posé par
-prudence sur un instrument l'empêche de mesurer* (**L99**).
+> **La lignée d'accueil est celle-ci**, parce qu'elle est la plus avancée et la plus récente. Ce
+> n'est pas un jugement de valeur sur le travail de la lignée B : c'est le choix qui déplace le
+> moins de documents.
 
-- [ ] **P1** — plan, jeton.
-- [x] **P2** — l'inventaire, et pour chacun **le cas qu'il doit refuser**, écrit avant tout code.
-      Un garde-fou dont on ne sait pas énoncer le cas refusé n'a pas de raison d'être.
-- [x] **P3** — écrire les tests de **déclenchement** : chaque garde-fou doit être vu refuser.
-- [x] **P4** — exécuter, et classer : *se déclenche correctement* · *ne se déclenche jamais* ·
-      *se déclenche sur la mauvaise condition* · *masque au lieu de refuser*.
-- [x] **P5** — corriger ce qui doit l'être, et **mesurer que la correction change quelque chose**.
-- [x] **P6** — registre `AUDIT-GARDE-FOUS-S34`.
-- [x] **P7** — répercussions : index, angles morts, actions, décomptes.
-- [x] **P8** — rituel de fin (`REPRISE.md` §6).
+*Thèse déclarée : les deux lignées ont travaillé sur le même sujet sans le savoir, et leurs
+conclusions ne concordent pas.* Le point de contact est **l'éponge et la borne de `λ_cut`** :
+côté B, `ADR-034` s'intitule « l'éponge mesurée, et la borne de λ_cut rouverte » ; ici, S33 conclut
+qu'il est **inutile d'imposer la décroissance par une éponge**, la dissipation la produisant seule.
+Deux sessions ont mesuré la même chose le même jour sans se voir. Si elles convergent, c'est une
+réplication indépendante — la seule qu'ait ce projet. Si elles divergent, l'une des deux se trompe,
+et il faut dire laquelle.
+
+- [>] **P1** — plan, jeton.
+- [ ] **P2** — registre `FORK-S22-S26` : le constat, la carte de renumérotation complète, et la
+      règle qui aurait évité le fork. Écrit **avant** tout déplacement de document.
+- [ ] **P3** — import des cinq ADR de la lignée B, renumérotés **038–042**, renvois internes
+      réécrits, en-tête de provenance daté sur chacun.
+- [ ] **P4** — report des quinze leçons **L71–L85 → L122–L136**.
+- [ ] **P5** — report des douze angles morts **A105–A116 → A149–A160**, sévérités conservées.
+- [ ] **P6** — l'éponge et `λ_cut` : confronter `ADR-041` (ex-034 de B) à `ADR-037` et à S33.
+      Convergence ou contradiction — et une note corrective datée du côté qui a tort.
+- [ ] **P7** — ce que la lignée B a corrigé dans les documents **partagés** : `ADR-005`, `ADR-007`,
+      `CAS-CANONIQUES`, `DOSSIER-B2`. Notes correctives datées, jamais de réécriture.
+- [ ] **P8** — le **code** : `shallow.rs` (1070 lignes) n'a pas d'équivalent ici, et `physics.rs`
+      a été modifié des deux côtés (+1139 contre +1975). Constat et découpage du travail restant.
+      **Aucun import à l'aveugle** — le code se fusionne en le compilant, pas en le recopiant.
+- [ ] **P9** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
-**Ce que S33 laisse et qui commande cette session.**
+**Ce qui a déclenché cette session.** L'utilisateur a demandé « reprends le projet » depuis un
+worktree positionné sur `master` (S17). Les deux commandes d'amorce de `CLAUDE.md` —
+`git worktree list` et `git branch -a` — ont révélé le fork immédiatement. **Elles ont fonctionné.**
+Le dispositif d'amorce n'est pas en cause ; ce qui manquait, c'est que la lignée d'accueil n'a
+jamais reçu le registre du premier fork et ne savait donc pas qu'elle était exposée au second.
 
-- **Le `R²` est une sonde générique** : il a rattrapé le défaut de S33 sans avoir été écrit pour ça
-  (L116, action S33-3). À garder à l'esprit — certains garde-fous sont peut-être remplaçables par
-  une sonde plus générale.
-- **A142 est levé dans le régime linéaire seulement** — ne pas citer sans la réserve.
-- **C04 en échec, `C01-jet` rouge, C08 sans verdict** : trois décisions.
+**Repères de fusion, pour ne pas les recalculer :**
 
-**Branche.** `claude/s22-suite`. `master` s'arrête à S17 (A107).
+- Point de fork : `a6cfe6f` — *S21 P7 — rituel de fin : journal, leçons L67-L70, index, A103
+  arbitrable, jeton libéré*. Les deux lignées en descendent directement.
+- Diff de la lignée B depuis le fork : **6 ajouts, 14 modifications**. C'est peu — la fusion des
+  documents est faisable ; c'est le code qui est lourd.
+- Fichiers partagés modifiés des deux côtés : `REPRISE.md`, `docs/00_INDEX.md`,
+  `notes/JOURNAL.md`, `notes/LECONS.md`, `docs/registres/ANGLES-MORTS.md`,
+  `code/water-harness/src/physics.rs`, `code/water-harness/src/main.rs`, `code/README.md`,
+  `code/water-core/src/lib.rs`.
+- Fichiers partagés modifiés **par B seule** — donc reportables sans conflit de fond :
+  `docs/adr/ADR-005-zone-de-transition.md`, `docs/adr/ADR-007-interface-solveur.md`,
+  `docs/validation/CAS-CANONIQUES.md`, `docs/validation/DOSSIER-B2.md`.
+- `shallow.rs` est un **fichier neuf** côté B : aucun conflit de nom, mais il dépend de
+  modifications de `lib.rs` et de `physics.rs` qui, elles, entrent en conflit.
 
-#### P2-P5 — dix garde-fous mis à l'épreuve, un seul masquait
-
-**Neuf sur dix refusent correctement ce qu'ils doivent refuser.** Chacun a désormais son test de
-**déclenchement**, et non son test de cas nominal :
-
-| | Garde-fou | Cas qu'il doit refuser | Verdict |
-|---|---|---|---|
-| **G1** | pas de temps sur domaine sec | aucune cellule ne porte d'eau | refuse — pas de repli fini |
-| **G2** | bornage de `ν` | que `ν = 1,5` soit ramené sous 1 | **laisse passer**, comme corrigé en S29 |
-| **G3** | plancher d'arrondi | trois erreurs sous le plancher | refuse — `Plancher` |
-| **G4** | longueur de série | deux points pour Richardson | refuse — `Indetermine`, et `None` |
-| **G5** | amplitude de seiche | `a` sous l'ulp du `f32` | refuse — `None` |
-| **G6** | réflexion | le montage à `R² = 0,487` de S33 | refuse, **et laisse passer le domaine long** |
-| **G7** | seuil de front | un seuil qu'aucune cellule n'atteint | refuse — `None` |
-| **G8** | référence nulle | la division par zéro de C01 | refuse — écart absolu |
-| **G9** | définition d'`u_max` | confondre absolue et gouvernante | distingue, **et coïncide sans paroi** |
-| **G10** | bornage de l'ordre grossier | un ordre **négatif** (pré-asymptotique) | **masquait** |
-
-**Trois d'entre eux portent leur propre témoin** — G2, G6, G9 vérifient aussi que le cas *sain*
-passe. Sans quoi un garde-fou qui refuserait tout passerait le test.
-
-#### G10 masquait, et la thèse était juste
-
-Le bornage `clamp(0,3 ; 3,0)` sur l'ordre estimé aux grilles grossières corrigeait **en silence**.
-Or S24 a mesuré des ordres **négatifs** — −0,504 puis −0,059 sur le front de C04 — signature du
-régime pré-asymptotique. Un ordre hors bornes n'est donc **pas une valeur à corriger** : c'est le
-signe que les grilles grossières ne sont pas asymptotiques, et que l'estimation d'erreur d'oracle
-qui en dépend n'a **aucun fondement**.
-
-**Correction, en trois gestes.**
-
-1. Le bornage **reste** — il faut un nombre pour filtrer, et il est conservateur : un `p` bas
-   surestime l'erreur d'oracle, donc écarte *plus* de grilles.
-2. Il est **signalé** : au `Sink`, et dans le libellé de la grandeur — « ORDRE GROSSIER HORS BORNES,
-   filtre indicatif ».
-3. L'estimation est **extraite** en fonction pure `ordre_grossier_estime`, qui rend le brut **et** le
-   borné.
-
-> **Le troisième geste est le plus important.** L'estimation vivait en ligne dans une fonction qui
-> lance des simulations : la vérifier demandait d'en exécuter une. **Un garde-fou qu'on ne peut pas
-> exercer isolément est un garde-fou qu'on n'exercera pas** — c'est pourquoi G10 était le seul des
-> dix sans test, et le seul défaillant. Ce n'est probablement pas une coïncidence.
-
-**43 tests au vert**, contre 34 en début de session.
-
-#### État à la fin de S34
-
-`cargo test` : **45 tests**, contre 34 en début de session. `water-harness check` : 2 scénarios,
-0 échec, hashs **inchangés**. Jeton **libéré**.
-
-**Ce que S35 doit savoir avant de commencer, et qui n'est pas ailleurs :**
-
-- **Deux tests par garde-fou, pas un** : le cas qu'il doit **refuser**, et le **témoin** qu'il ne
-  doit pas refuser. Séparément, chacun se satisfait d'une condition fausse — « toujours vrai » passe
-  le témoin, « toujours faux » passe le déclenchement (L119).
-- **Tout garde-fou nouveau s'écrit appelable seul**, et son premier usage est son test de
-  déclenchement (A147, action S34-4). C'est la règle que S34 établit et qu'aucune session n'avait.
-- **G10 signale désormais**, au `Sink` et dans le libellé — mais **pas dans le verdict**. Un
-  déclenchement reste donc invisible pour qui lit le résumé (S34-3).
-- **Les saturations de modèle ne sont pas des garde-fous de montage** et n'ont pas été auditées.
-  C'est la session recommandée : `h.max(0.0)` sur le lit sec de C04 pourrait se déclencher à chaque
-  pas, et rien ne le distinguerait d'un filet qui ne sert jamais (A146).
-- **C04 en échec, `C01-jet` rouge, C08 sans verdict** : trois décisions, pas trois régressions.
+**Carte de renumérotation** — la référence est le registre `FORK-S22-S26` produit en P2. Les
+numéros de session de la lignée B ne sont **pas** renumérotés : ils sont préfixés `B-` (B-S22 à
+B-S26), parce qu'une session est un événement daté, pas un identifiant de document.

@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-06
-Session en cours : —
+Session en cours : S35 — réconciliation du second fork (S22–S26 de la lignée B)
 Dernière session : S34 — 2026-09-06 — dix garde-fous mis à l'épreuve ; la non-testabilité prédit la défaillance
-Session suivante : S35 — compter les saturations de modèle (S34-1) *(recommandé)*, ou C24 (S31-2), ou H2
+Session suivante : S36 — les saturations de modèle (S34-1), reporté par la réconciliation
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
