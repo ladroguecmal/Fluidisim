@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-06
-Session en cours : S26 — C22, l'amendement de C08, et la mise à l'épreuve de la loi de dissipation
-Dernière session : S25 — 2026-09-06 — C03 : la dissipation reçoit une formule, et λ_cut une moitié de réponse
-Session suivante : S27 — poser le nombre de Courant (S25-1) ou H2
+Session en cours : —
+Dernière session : S26 — 2026-09-06 — la loi passe une épreuve qu'elle n'a pas produite ; δ est un filtre
+Session suivante : S27 — poser le nombre de Courant *(recommandé, S25-1)*, ou la réinjection W/δ (S26-2), ou H2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
@@ -105,8 +105,8 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Vingt-cinq sessions, **33 ADR** *(dont un acté)*, six spécifications, huit registres — **et du
-code qui tourne** : `code/`, étages **H1 et H3** du harnais, un **δ d'essai** équilibré, 30 tests
+Vingt-six sessions, **34 ADR** *(dont un acté)*, six spécifications, huit registres — **et du
+code qui tourne** : `code/`, étages **H1 et H3** du harnais, un **δ d'essai** équilibré, 31 tests
 verts et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
 verdict** (C08). Quatre cas canoniques sur δ sont exécutés : **C01 et C03 passent**, C04 échoue,
 C08 ne conclut pas. Les 30 sections du document de
@@ -151,6 +151,14 @@ arriver**, la **dissipation**, qui était mesurable depuis le début.
 d'onde et `ν` le nombre de Courant. **La longueur d'onde, la célérité et la période en
 disparaissent.** Tenir le seuil de C03 demande 235 points par longueur d'onde ; à 20 points, l'eau
 meurt en une oscillation.
+
+**Et S26 a montré que ce n'est pas une coupure mais un filtre.** L'amortissement varie continûment :
+une composante deux fois plus courte ne disparaît pas, elle vit **quatre fois moins longtemps**
+([`ADR-034`](docs/adr/ADR-034-la-dissipation-est-un-filtre-passe-bas.md), prédiction en `n²` vérifiée
+à 2-5 %). **Le spectre ne s'atténue pas, il se déforme** : à `dx = 1 m`, une houle de 12 s tient
+trois minutes, le clapot de 3 s trois secondes. D'où la règle de dimensionnement — **le budget se
+pose sur la composante la plus courte à conserver, pas sur la dominante**, et l'écart vaut trente en
+nombre de cellules.
 
 **Un maillon s'est allongé en S22 :** `λ_cut` *dispersif* ne sortira pas de ce véhicule. Saint-Venant est non
 dispersif, et C02 mesure une erreur de célérité **en fonction de λ** ; il faut une couche dispersive

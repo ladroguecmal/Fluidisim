@@ -2192,3 +2192,105 @@ il est cité.
 Inchangés. **A103** — la masse volumique de l'eau, douce ou de mer. **A107** — le sort du travail
 propre à `master`, S16-S17. Et les trois choses hors de portée d'une session : nommer les personnes,
 constater l'état réel du projet, agir sur l'infrastructure — dont le dépôt distant.
+
+---
+
+## S26 — 2026-09-06 — La loi passe une épreuve qu'elle n'a pas produite, et δ se révèle être un filtre
+
+**Consigne reçue.** « Enchaîne sur S26 ».
+
+**Sorties.** **C22** dans `CAS-CANONIQUES` — le cas régulier, avec son protocole ; **énoncé amendé
+de C08**, daté, sous l'énoncé d'origine conservé ;
+[`ADR-034`](../docs/adr/ADR-034-la-dissipation-est-un-filtre-passe-bas.md) ; **note corrective sur
+ADR-033 §5.3** ; `Reference::{Analytique, Oracle}` dans le harnais ; registre porté à **124 angles
+morts** ; leçons L87 à L90. **Quatre actions closes** : S24-1, S24-2, S24-4, S25-4.
+
+**Ça tourne.** `cargo test` : **31 tests** au vert. `water-harness check` : 0 échec, hashs inchangés.
+`water-harness physics` : 1 échec (C04, voulu), 3 témoins, 5 grandeurs sans verdict.
+
+### Le résultat de la session tient en une phrase
+
+**La loi de dissipation de S25 a retrouvé un exposant qu'aucune des mesures ayant servi à l'établir
+ne contenait.** Elle est donc dérivée, et non ajustée sur ses propres données.
+
+### La mise à l'épreuve
+
+Le mode `n` d'un bassin clos a `λ_n = 2L/n`, donc `N_n = N₁/n` points par longueur d'onde — **et**
+une période `T_n = T₁/n`. Les deux effets se composent : la demi-vie est divisée par `n` en périodes
+propres, et par **`n²` en secondes**. Le `n²` ne se lit pas dans la formule ; il sort de la
+composition.
+
+| mode | demi-vie (périodes propres) | prédite | demi-vie (s) | prédite | écart |
+|---|---|---|---|---|---|
+| 1 | 48,65 | 51,08 | 439,33 | 461,25 | −4,75 % |
+| 2 | 24,41 | 25,54 | 110,23 | 115,31 | −4,40 % |
+| 3 | 16,50 | 17,03 | 49,66 | 51,25 | −3,11 % |
+| 4 | 12,49 | 12,77 | 28,19 | 28,83 | −2,21 % |
+
+Rapports mesurés : **1,99 · 2,95 · 3,90** en périodes propres pour 2 · 3 · 4 ; **3,99 · 8,85 ·
+15,59** en secondes pour 4 · 9 · 16.
+
+**Et l'énoncé de S25 était faux.** ADR-033 §5.3 annonçait « l'harmonique `n` s'amortit `n` fois plus
+vite » sans dire en quoi — vrai en périodes propres, faux en temps. Note corrective datée ; un ADR
+n'est jamais réécrit.
+
+**Le biais résiduel est instrumental.** Les quatre écarts sont du même signe mais **décroissent**
+avec `n`, alors qu'une erreur de troncature ferait l'inverse. À `n = 1`, la fenêtre d'observation
+couvre un quart de la décroissance. C'est le mécanisme d'A102, et non une dérive de la loi.
+
+### Décision structurante
+
+[`ADR-034`](../docs/adr/ADR-034-la-dissipation-est-un-filtre-passe-bas.md) : **la dissipation de δ
+est un filtre passe-bas, pas une longueur d'onde de coupure.** ADR-005 parle d'une « frontière »
+W/δ ; la mesure dit que l'amortissement varie continûment, et en `n²`. Une composante deux fois plus
+courte ne disparaît pas — elle vit quatre fois moins longtemps.
+
+Toute exigence prend donc la forme *« telle composante doit survivre `X` périodes »*, et la loi donne
+`N_min`. **La frontière W/δ se déduit de l'exigence la plus contraignante, elle ne la précède pas.**
+
+### Ce qui n'avait pas été anticipé
+
+**Le spectre ne s'atténue pas : il se déforme.** À `dx = 1 m`, une houle de 12 s traverse le domaine
+presque intacte pendant trois minutes, tandis que le clapot de 3 s a disparu en **trois secondes**.
+L'eau perd ses composantes courtes et garde ses longues : elle devient lisse et lente — la
+description exacte de « l'eau est molle » que `CAS-CANONIQUES` §C03 attribuait à la dissipation sans
+pouvoir la chiffrer.
+
+**Conséquence de dimensionnement, et elle porte un facteur trente.** Une mer de `Tp = 8 s` a son
+énergie autour de 100 m de longueur d'onde ; à `dx = 1 m` elle survit 6,4 périodes, ce qui paraît
+confortable. Mais son **aspect** vit dans le clapot de 2 à 4 s, qui meurt en moins d'une seconde.
+Conserver ce dernier sur 5 périodes demande `dx = 0,18 m`, soit **trente fois plus de cellules en
+2D**. Angle mort **A123** : *le budget de résolution se dimensionne sur la composante la plus courte
+à conserver, pas sur la dominante* — et c'est la dominante qui vient à l'esprit.
+
+**Et une question neuve à la couture des couches.** Si δ efface les composantes courtes, la zone de
+transition doit-elle les réinjecter continûment depuis W, ou l'effacement est-il le comportement
+voulu ? ADR-005 ne l'avait pas prévue, parce que rien ne disait encore que δ **filtre**. Angle mort
+**A122**, sévérité 1.
+
+### Les deux dettes de validation, closes
+
+- **C22 entre au corpus.** Le montage régulier existait dans le code depuis S24, exécuté et
+  mentionné dans ADR-032, mais absent de `CAS-CANONIQUES` — une session qui aurait lu le corpus sans
+  lire cet ADR l'aurait réécrit. **Le code n'est pas un lieu de publication** (A124).
+- **C08 reçoit son énoncé amendé** : grandeur nommée, régularité exigée, cinq grilles au moins,
+  trois verdicts. Chaque changement vient d'une mesure de S24, pas d'un avis.
+- **`ordre_final()` connaît sa référence.** Le triplet le plus fin est le meilleur avec une solution
+  analytique et le **pire** avec un oracle : la règle s'inverse, elle ne s'assouplit pas.
+
+### Session suivante recommandée
+
+**S27 — poser le nombre de Courant comme paramètre de conception** (action S25-1). C'est un ADR
+court à fort effet : `ν` ne figure dans aucun document, il multiplie la portée des ondes par 4,5 en
+doublant le pas de temps, et il porte un arbitrage — marge de stabilité contre portée — que personne
+n'a posé. Il se combine naturellement avec **S26-3**, le dimensionnement sur la composante la plus
+courte.
+
+Deux autres entrées : **S26-2**, la réinjection à la frontière W/δ, qui est la plus lourde des
+questions ouvertes ; ou **H2**, toujours non écrit après sept sessions où il est cité.
+
+### Arbitrages en attente
+
+Inchangés. **A103** — la masse volumique de l'eau, douce ou de mer. **A107** — le sort du travail
+propre à `master`, S16-S17. Et les trois choses hors de portée d'une session : nommer les personnes,
+constater l'état réel du projet, agir sur l'infrastructure — dont le dépôt distant.

@@ -1231,3 +1231,69 @@ précisément ce qui la protège de l'examen.
 **Réflexe** : devant une conclusion qui bloque une question, vérifier qu'elle couvre toute la
 **définition** de ce qui était demandé, et pas seulement le chemin qu'on avait choisi pour y
 répondre. Relire la définition d'origine, pas le raisonnement qui vient d'être fait.
+
+## L87 — Une loi n'est testée que par une prédiction qui n'a pas servi à l'établir
+
+*(S26)* La loi de dissipation de S25 avait été vérifiée à 0,2 % — sur les deux balayages qui avaient
+servi à la construire. C'est un accord d'ajustement, pas une validation : une formule à un paramètre
+retrouve toujours les données dont on a tiré ce paramètre.
+
+Elle faisait pourtant une prédiction qu'aucune de ces mesures ne contenait. Le mode `n` d'un bassin
+clos a moins de points par longueur d'onde **et** une période plus courte ; les deux effets se
+composent en un **`n²`** qui ne se lit pas dans la formule. Mesuré : rapports 3,99 · 8,85 · 15,59
+pour 4 · 9 · 16.
+
+**Réflexe** : après avoir établi une relation, chercher ce qu'elle implique **ailleurs que là où on
+l'a mesurée** — un autre régime, une autre variable, un exposant composé. Si rien ne vient, la
+relation est une interpolation et doit être présentée comme telle. Le bon signe est qu'on puisse se
+tromper : une prédiction qui ne peut pas échouer ne teste rien.
+
+## L88 — Un biais qui varie à l'envers de ce que la théorie prédit désigne l'instrument
+
+*(S26)* Les quatre mesures d'harmoniques présentaient un écart systématique de −2 à −5 % : le
+solveur dissipait un peu plus que la loi. Un écart de troncature aurait grandi avec `n`, puisque les
+modes courts sont moins bien résolus. **Il décroissait.**
+
+Le sens de variation, et non sa taille, désignait la cause : à `n = 1` la demi-vie vaut 48 périodes
+et la fenêtre d'observation 20 — l'ajustement exponentiel ne voyait qu'un quart de la décroissance.
+Le biais venait de la **mesure**, pas du solveur, et le même mécanisme avait faussé une restitution
+de `Hs` de 8,5 % en S21 (A102).
+
+**Réflexe** : devant un biais systématique, regarder d'abord **comment il varie**, pas combien il
+vaut. Un biais qui suit la théorie est physique ; un biais qui va à contresens est instrumental — et
+il désigne alors la fenêtre, la résolution de mesure ou le protocole, jamais l'objet mesuré.
+
+## L89 — Une frontière et un filtre ne se dimensionnent pas de la même façon
+
+*(S26)* Le corpus parlait d'une « frontière W/δ » et d'une longueur d'onde de coupure `λ_cut` : une
+grandeur unique, au-dessus de laquelle l'onde passe et en dessous de laquelle elle est perdue. La
+mesure dit autre chose. L'amortissement varie **continûment**, et la composante deux fois plus courte
+ne disparaît pas — elle vit **quatre fois moins longtemps**.
+
+La différence n'est pas terminologique. Une frontière se dimensionne par un seuil, qu'on peut poser
+une fois. Un filtre se dimensionne par une **exigence de survie** — « telle composante doit tenir
+`X` périodes » — dont découle la résolution. Le seuil précède le calcul ; l'exigence en découle.
+
+Et la conséquence pratique est un facteur trente : le budget se pose sur la composante la plus
+**courte** qu'on veut conserver, jamais sur la **dominante**, qui est pourtant celle qui vient à
+l'esprit et celle qui donne son nom à l'état de mer.
+
+**Réflexe** : quand une grandeur est décrite comme un seuil, vérifier si le phénomène sous-jacent
+est vraiment discontinu. S'il est continu, le seuil cache une loi — et cette loi porte des arbitrages
+que le seuil rendait invisibles.
+
+## L90 — Le code n'est pas un lieu de publication
+
+*(S26)* Le cas régulier a été écrit en S24 dans `Bassin::c08_regulier`, exécuté, et mentionné dans
+l'ADR de la session. Il n'était pas dans `CAS-CANONIQUES`. Une session ouvrant le corpus de
+validation — le lieu prévu pour ça — aurait conclu qu'aucun cas régulier n'existait, et l'aurait
+réécrit.
+
+Le code est lu par qui travaille **dessus**, pas par qui cherche **ce qui existe**. Un artefact n'est
+publié que là où on le cherchera sans savoir qu'il est là. Un ADR ne suffit pas non plus : il est
+daté, il raconte une décision, il n'est pas l'index de ce qui est disponible.
+
+**Réflexe** : après avoir créé quelque chose de réutilisable, se demander *par quel chemin la
+prochaine session tombera dessus si elle ne lit pas ce que je viens d'écrire*. Si la réponse est
+« elle ne tombera pas dessus », l'inscrire dans le document qui fait office d'index — et l'y
+inscrire dans la même session, pas dans les actions ouvertes.

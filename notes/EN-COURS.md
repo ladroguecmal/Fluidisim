@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S26
-État             : en cours
+État             : terminée
 Battement        : 2026-09-06
 Objectif         : C22, l'amendement de C08, et la mise à l'épreuve de la loi de dissipation
 ```
@@ -103,7 +103,7 @@ compte. Si elle infirme, la loi est un ajustement et non une dérivation.
 - [x] **P6** — ce que la mise à l'épreuve a donné : ADR-034 si elle change une décision, note datée
       sinon.
 - [x] **P7** — répercussions : index, angles morts, actions, décomptes.
-- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
+- [x] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
@@ -156,3 +156,25 @@ et demie. **C'est la fenêtre qui est courte, pas la loi qui dérive**, et c'est
 qu'A102, où une fenêtre trop brève avait faussé une restitution de `Hs` de 8,5 %.
 
 **Note corrective portée dans ADR-033 §5.3** — un ADR n'est jamais réécrit.
+
+#### État à la fin de S26
+
+`cargo test` : **31 tests**. `water-harness check` : 2 scénarios, 0 échec, hashs **inchangés**.
+`water-harness physics` : 1 échec (C04, voulu), 3 témoins, 5 grandeurs sans verdict (C08). Jeton
+**libéré**.
+
+**Ce que S27 doit savoir avant de commencer, et qui n'est pas ailleurs :**
+
+- **La loi de dissipation a passé une prédiction indépendante** — le `n²` sur les harmoniques. Elle
+  peut désormais servir de base à un dimensionnement, ce qui n'était pas le cas en S25 : une loi
+  vérifiée sur ses seules données d'ajustement n'aurait pas dû porter d'ADR de coût.
+- **Le tableau d'ADR-034 §2.1 suppose la linéarité** — il applique la loi composante par composante
+  à un spectre, alors que toutes les mesures portent sur un mode unique. C'est un ordre de grandeur,
+  **pas une prédiction** (A121, action S26-1). Ne pas le citer comme mesuré.
+- **A122 est la question la plus lourde ouverte à ce jour** : si δ filtre, la transition W→δ
+  doit-elle réinjecter ce que δ efface ? Elle touche la couture entre deux couches, et ADR-005 ne
+  l'a pas prévue. Elle est probablement plus structurante que le nombre de Courant.
+- **Le nombre de Courant reste réglable et non arbitré** (`avec_cfl`). C'est le levier le moins cher
+  du corpus et l'action S25-1 l'attend.
+- **C04 doit rester en échec, `C01-jet` rouge, C08 sans verdict.** Trois décisions, pas trois
+  régressions.
