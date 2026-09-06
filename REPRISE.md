@@ -12,9 +12,9 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-06
-Session en cours : —
+Session en cours : S36 — `physics_shallow.rs`, les six montages de la lignée B
 Dernière session : S35 — 2026-09-06 — le second fork réconcilié ; les deux lignées avaient écrit le même solveur
 Session suivante : S36 — `physics_shallow.rs` (S35-1) *(recommandé)*, ou les saturations de modèle (S34-1)
 ```
