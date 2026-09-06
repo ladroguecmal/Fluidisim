@@ -91,7 +91,7 @@ produit plusieurs, et l'assertion `p > 0,8` n'a pas le même sens selon celle qu
 - [x] **P5** — *(remplacée en séance)* **le cas régulier avec oracle**. S23-2 (dériver le seuil ε) est reportée : la mesure ci-dessous a montré qu'elle n'était pas le point bloquant. ~~**S23-2**~~ : dériver le seuil `ε` du front au lieu de le conventionner. Piste : le
       bon seuil est celui pour lequel l'ordre observé du front rejoint celui de la norme globale —
       en dessous, la mesure est dominée par la queue du profil. À vérifier, pas à supposer.
-- [ ] **P6** — ADR-032 si la conclusion engage le protocole des bancs, note datée sinon.
+- [x] **P6** — ADR-032 si la conclusion engage le protocole des bancs, note datée sinon.
 - [ ] **P7** — répercussions : `CAS-CANONIQUES` §C08, index, angles morts, actions, décomptes.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
