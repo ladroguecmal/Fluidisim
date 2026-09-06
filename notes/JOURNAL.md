@@ -1002,3 +1002,107 @@ Second candidat, inchangé depuis S12 : l'audit des **registres**, que S11 avait
 **Arbitrages en attente — rappel.** Cinq arbitrages humains, quatre interfaces à confirmer, sept
 autres destinataires extérieurs. `WaveEvent` reste l'urgence de format — et sa taille réelle est
 désormais **50 octets**.
+
+---
+
+## S14 — 2026-09-05 — Audit inverse des invariants
+
+**Consigne reçue.** « Enchaîne S14. » Objectif recommandé par S13 : le contrôle inverse — pour
+chacun des quinze invariants restants, l'ADR qu'il cite dit-il encore ce que l'invariant résume ?
+
+**Sorties.** [`registres/AUDIT-INVARIANTS-S14.md`](../docs/registres/AUDIT-INVARIANTS-S14.md) ;
+[`ADR-025`](../docs/adr/ADR-025-propriete-de-la-masse-entre-V-et-delta.md) et
+[`ADR-026`](../docs/adr/ADR-026-amendement-de-six-invariants.md) ; **six invariants amendés** ;
+`SPEC-001 §5 bis` ; registre porté à 89 angles morts ; leçons L52 à L54.
+
+### Le chiffre
+
+**Sept invariants tiennent, huit sont en défaut.** Avec les deux de S13 : **dix sur dix-sept ne
+disaient plus ce que leur source dit.** Le corpus qu'on cite pour refuser une proposition était le
+moins vérifié de tous.
+
+### Le motif, qui vaut mieux que le chiffre
+
+> Les invariants qui tiennent sont ceux qu'une **signature rend mécaniques** — I-07, où `g_eff` est
+> injecté dans `configure` ; I-08, où aucun type n'exprime une coordonnée monde — ou ceux qui servent
+> à **décider** plutôt qu'à refuser : I-09 et I-15, invoqués pour trancher *comment* faire.
+>
+> Ceux qui ont vieilli **nomment un mécanisme**. I-01 nommait une fonction, I-11 nommait un
+> plafonnement, I-16 nomme une catégorie de valeur. **Un invariant qui nomme un mécanisme vieillit
+> avec lui ; un invariant qui énonce une propriété ne vieillit pas.**
+
+C'est une règle d'écriture, et les six amendements d'ADR-026 la suivent : chacun remplace la
+désignation d'un mécanisme par l'énoncé de la propriété qu'il servait.
+
+### L'écart de gravité 1 — et il ne vient pas d'un invariant
+
+I-04 tient partout où on l'a confronté : ADR-008, ADR-014 §5.2, ADR-021 §5, ADR-023 §2.4. **C'est
+ADR-010 §6 qui le contredit**, depuis S01 :
+
+```
+V → δ : le nœud est gelé, sa masse M est remise au domaine
+δ → V : le domaine rend M' ; l'écart M' − M est reporté comme perte contrôlée
+```
+
+Trois conséquences. **δ détermine la masse finale d'un compartiment** — donc un chavirement, une
+ligne de flottaison — alors que δ n'est jamais D1. **Le serveur n'a pas d'histoire** : il exécute V
+(ADR-022 §5.1) et jamais δ (I-10), il ne peut ni geler le nœud ni recevoir `M'` ; pendant l'épisode,
+serveur et client tiennent deux valeurs du même volume. Et **le même écart sert deux fois**, comme
+diagnostic de fuite *et* comme perte réelle — une grandeur ne peut pas être l'erreur qu'on mesure et
+l'effet qu'on applique.
+
+Le défaut a survécu treize sessions parce qu'**ADR-010 ne cite pas I-04 et I-04 ne cite pas
+ADR-010** : les revues croisées confrontent des documents qui se citent.
+
+**ADR-025** retire le transfert. La masse appartient au nœud en permanence ; δ est amorcé depuis
+`shape_lut(volume)` puis **forcé** vers le nœud par une relaxation lente (`τ ≈ 1 s`) ; `M' − M`
+redevient un pur diagnostic. Aucun message n'est échangé — V étant D1, chaque participant intègre la
+même valeur, exactement le bénéfice qu'ADR-021 §3 avait obtenu par le même raisonnement.
+
+Et la correction **rapporte un critère que le banc n'avait pas** : l'écart de niveau résiduel vaut
+`dérive_par_s · τ · h`, soit 1 cm pour 1 %/s sur une tranche d'un mètre. D'où un seuil d'admission en
+régime substitutif — 1 %/s, à calibrer à B3 — là où ADR-010 §6 se contentait de remarquer qu'un
+solveur perdant 3 %/s « est inutilisable ».
+
+### Les sept autres défauts
+
+**I-01** citait `EvalWater` comme passage obligé de tout consommateur — faux depuis S09 **par
+décision**, ADR-018 §1 l'interdisant nommément à la navigation. **I-02** était contredit par son
+propre ADR source, la grille `HydroSample` étant une représentation par nœud, sur disque, et écrite
+dans la sauvegarde ; la distinction manquante — état contre paramètres — était déjà dans I-09.
+**I-10** ne disait que ce que le serveur ne fait pas, d'où l'angle mort A77 : un lecteur en conclut
+« aucune eau sur le serveur » et dimensionne un serveur sans assets. **I-14** ne connaît que SPEC-001
+et SPEC-002 comme sources de formules, et ADR-023 en avait introduit trois ailleurs — résolu en
+**migrant les formules de Wagner vers SPEC-001 §5 bis** plutôt qu'en élargissant l'invariant : son
+prix est qu'il n'existe qu'un seul endroit où chercher un nombre. **I-16** attendait depuis S11 une
+précision décidée, inscrite dans une table « Suite », et **jamais appliquée**. **I-03** couvrait la
+couche V sans citer sa source. **I-13** renvoyait à un `WaterManager` qui n'existe nulle part.
+
+### Et une quatrième structure mal dimensionnée
+
+`HydroSample` (ADR-004 §2.2) est annoncée à 40 octets et en somme **34**. Après les trois de S13, le
+taux d'erreur de cette classe de contrôle — jamais passée avant la revue précédente — est de
+**quatre sur quatre**.
+
+### Une erreur d'outil, vue parce que vérifiée
+
+Les deux blocs de formules migrés vers SPEC-001 ont d'abord été **mangés par bash** : les accents
+graves d'un bloc de code, dans un `python -c` passé à l'interpréteur, sont interprétés comme une
+substitution de commande. Le script a signalé une erreur de syntaxe et a **poursuivi** ; le contenu
+écrit était amputé sans que rien ne le dise. Corrigé par un commit séparé. C'est L09 étendue, et le
+seul motif pour lequel le défaut a été vu est qu'on relit ce qu'on vient d'écrire.
+
+### Ce qui n'a pas été fait
+
+Les **registres** n'ont toujours pas été audités — un angle mort comblé y figure-t-il encore comme
+ouvert ? C'est le candidat laissé de côté depuis S11.
+
+**Prochaine session recommandée.** S15 — **auditer les registres**. C'est le dernier corpus jamais
+passé au filtre : 89 angles morts, la traçabilité des 30 sections sources, et les tables « Suite » de
+cinq registres d'audit — dont S14 vient de montrer (angle mort A89) qu'elles ne sont pas plus
+exécutées qu'un point ouvert n'est relu. Le rendement attendu est élevé pour la même raison qu'en S11
+et S14 : c'est une classe de contrôle qui n'a jamais été passée, et le corpus a montré quatre fois
+que ces classes-là sont fausses à un taux voisin de 100 %.
+
+**Arbitrages en attente — rappel.** Cinq arbitrages humains, quatre interfaces à confirmer, sept
+autres destinataires extérieurs. `WaveEvent` reste l'urgence de format, à 50 octets.

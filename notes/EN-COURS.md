@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S14
-État             : en cours
+État             : terminée
 Battement        : 2026-09-05
 Objectif         : le contrôle inverse — pour chacun des quinze invariants restants, l'ADR qu'il
                    cite dit-il encore ce que l'invariant résume ?
@@ -82,8 +82,8 @@ I-11 et I-12 ont été traités en S13 par ADR-024. Restent **quinze**.
 - [x] **P5** — rédiger `docs/registres/AUDIT-INVARIANTS-S14.md` : le verdict par invariant, et la
   liste de ceux qui tiennent — sans elle le contrôle n'est pas vérifiable.
 - [x] **P6** — appliquer : notes correctives, amendements, et un ADR si une décision change.
-- [ ] **P7** — index, angles morts, décomptes.
-- [ ] **P8** — rituel de fin (`REPRISE.md` §6) : journal S14, leçons, index, jeton libéré.
+- [x] **P7** — index, angles morts, décomptes.
+- [x] **P8** — rituel de fin (`REPRISE.md` §6) : journal S14, leçons, index, jeton libéré.
 
 ### Notes de reprise
 

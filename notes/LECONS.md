@@ -625,3 +625,54 @@ Sans l'un ou l'autre, elle reste un événement de l'historique, et l'historique
 correction ne suffit pas : il faut le mécanisme qui la reproduira sans qu'on y pense. Trois écarts de
 S13 — E08, E02, E04 — sont des récidives ou des premières d'une classe, et c'est ce qui justifie
 qu'ils aient produit des angles morts plutôt que de simples notes.
+
+## L52 — Un invariant qui nomme un mécanisme vieillit avec lui
+
+*(S14)* Dix invariants sur dix-sept ne disaient plus ce que leur source dit, et le partage est net.
+Tiennent : ceux qu'une **signature rend mécaniques** — `g_eff` injecté dans la signature de
+configuration, aucun type n'exprimant une coordonnée monde — et ceux qui servent à **décider**
+plutôt qu'à refuser, invoqués pour trancher *comment* faire. Ont vieilli : ceux qui **nomment un
+mécanisme** — une fonction, un plafonnement, une catégorie de valeur.
+
+La raison est simple une fois vue : un mécanisme est remplaçable, une propriété ne l'est pas. Une
+règle qui désigne le moyen devient fausse dès qu'on change de moyen, alors même que l'intention
+qu'elle servait n'a pas bougé — et elle devient fausse **en silence**, puisque personne ne relit le
+socle.
+
+**Réflexe** : en écrivant une règle fondamentale, la formuler comme une **propriété observable** et
+non comme un passage obligé. « Aucun code ne reconstruit la surface par ses propres moyens » survit ;
+« tout consommateur passe par telle fonction » ne survit pas à l'ajout d'un second chemin. Et quand
+la propriété peut être rendue **inexprimable par une signature**, c'est encore mieux : ce sont
+exactement les invariants qui ont tenu.
+
+## L53 — Les revues croisées ne confrontent que des documents qui se citent
+
+*(S14)* Le défaut le plus grave du corpus a survécu treize sessions : un ADR transférait la masse
+d'un compartiment à un solveur non déterministe, ce qu'un invariant interdit explicitement. Deux
+revues croisées et deux audits ne l'avaient pas vu.
+
+La cause est mécanique. Une revue croisée part des renvois : on confronte A et B parce que A cite B.
+Or **cet ADR ne cite pas l'invariant, et l'invariant ne cite pas cet ADR** — leur seul point de
+contact était un mot, « masse », qui n'apparaît dans aucune des deux listes de dépendances. Le graphe
+des citations a des composantes non connexes, et une revue qui le suit ne visite jamais l'arête
+manquante.
+
+**Réflexe** : au moins un passage d'audit doit ignorer les renvois et parcourir **chaque règle contre
+tout le corpus**, pas contre ses sources déclarées. C'est plus long, cela ne se fait pas à chaque
+session — mais c'est le seul passage qui trouve ce que le graphe des citations ne relie pas.
+
+## L54 — Un outil qui échoue à moitié est pire qu'un outil qui échoue
+
+*(S14)* Deux blocs de formules ont été silencieusement amputés parce que des accents graves, passés
+à un interpréteur de commandes, y ont été lus comme une substitution de commande. L'outil a **signalé
+une erreur de syntaxe et a poursuivi** : le fichier a été écrit, tronqué, et le script a annoncé sa
+réussite.
+
+Un échec franc se voit. Un échec partiel produit un artefact plausible, et il ne se voit que si l'on
+relit. Ici il a été vu ; il aurait pu ne pas l'être, et la formule manquante aurait été découverte
+par quelqu'un qui essaie de l'appliquer.
+
+**Réflexe** : après toute écriture produite par un outil de transformation — script, gabarit,
+génération — **relire le résultat, pas le code de retour**. Et pour le contenu qui porte des
+caractères que l'outil pourrait interpréter, passer par un fichier plutôt que par une ligne de
+commande : c'est L09, dont ce cas est la troisième occurrence.

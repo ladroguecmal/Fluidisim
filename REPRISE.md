@@ -12,10 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-05
-Session en cours : S14 — 2026-09-05 — audit inverse des quinze invariants restants
-Dernière session : S13 — 2026-09-05 — revue croisée de SPEC-006, ADR-022 et ADR-023
+Dernière session : S14 — 2026-09-05 — audit inverse des invariants
+Session suivante : S15 — auditer les registres : 89 angles morts, la traçabilité des sections
+                   sources, et les tables « Suite » de cinq registres d'audit (angle mort A89)
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
@@ -72,7 +73,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 17 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 24 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 26 décisions d'architecture, numérotées, jamais réécrites
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
                             006 chemin poussé (ce que le système publie)
@@ -91,7 +92,7 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Treize sessions, **24 ADR**, six spécifications, **six registres**. Les 30 sections du document de
+Quatorze sessions, **26 ADR**, six spécifications, **sept registres**. Les 30 sections du document de
 questions ouvertes d'origine sont traitées. Les vingt premiers ADR ont été confrontés les uns aux
 autres en S05 (douze écarts, deux de gravité 1) et les cinq SPEC entre elles en S08 (dix écarts,
 deux de gravité 1). Tous résolus — le dernier, le **chemin poussé**, par l'écriture de `SPEC-006`
