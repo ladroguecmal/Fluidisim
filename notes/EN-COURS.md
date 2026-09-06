@@ -59,140 +59,61 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S25
-État             : terminée
+Session          : S26
+État             : en cours
 Battement        : 2026-09-06
-Objectif         : C03 — la seiche, et la dissipation numérique
+Objectif         : C22, l'amendement de C08, et la mise à l'épreuve de la loi de dissipation
 ```
 
 ### Plan
 
-C03 mesure la **demi-vie d'amplitude** — *« un chiffre qu'on ne pense presque jamais à mesurer,
-alors qu'il explique la majorité des "l'eau est molle" »*. C'est la troisième et dernière épreuve
-que le véhicule δ peut porter, après C01 (le repos) et C04 (la rupture).
+Deux dettes de validation et une vérification.
 
-**Une correction avant de commencer.** Trois sessions ont recommandé C03 « avec la friction de fond »
-(action **S22-3**). **C'est faux.** C03 mesure la dissipation **numérique** : ajouter une friction
-**physique** ajouterait une seconde source d'amortissement et rendrait la mesure ininterprétable —
-on ne saurait plus laquelle des deux éteint la vague. L'énoncé ne demande pas de friction, et la
-grandeur qu'il mesure exige qu'il n'y en ait pas. S22-3 n'est donc pas un prérequis de C03 : elle
-n'a plus de cas qui la réclame, et son état doit être revu plutôt que reporté une fois de plus.
+**Les dettes.** S24 a écrit un montage régulier dans le code sans l'inscrire au corpus (action
+S24-1), et a établi que l'énoncé de C08 n'était pas exécutable sans l'amender (S24-2). Un cas qui
+vit dans le code et pas dans `CAS-CANONIQUES` est un cas que la prochaine session ne trouvera pas.
 
-*Thèse déclarée avant l'exécution : la période passera, la demi-vie échouera largement.* Le schéma
-est équilibré et d'ordre 1 sur une solution lisse — la célérité devrait être bonne. Mais le flux de
-Rusanov porte une diffusion proportionnelle à `α·dx`, et un schéma d'ordre 1 amortit fortement. Si
-la thèse est juste, C03 devient un **troisième critère d'entrée à B3**, après l'équilibrage
-(ADR-030) et le front (ADR-031).
+**La vérification, et c'est le cœur.** S25 a produit la première loi fermée du projet —
+`demi-vie (périodes) = ln2·N / (2π²(1−ν))` — vérifiée à 0,2 %. Mais elle n'a été confrontée qu'aux
+mesures **qui ont servi à l'établir** : un balayage en résolution et un en nombre de Courant. Une loi
+ajustée sur ses propres données n'est pas testée.
 
-- [x] **P1** — plan, jeton.
-- [x] **P2** — le montage : bassin fermé de 20 m, `h = 2 m`, surface initiale inclinée, murs aux
-      deux bords. Vérifier le mode propre plutôt que le supposer : la période théorique est
-      `T = 2L/√(gh) = 9,031 s`, et rien ne garantit que la surface inclinée n'excite pas aussi les
-      harmoniques.
-- [x] **P3** — les deux mesures : période par passages à zéro en un point fixe, et **enveloppe
-      d'amplitude** par extrema successifs. La demi-vie se lit sur l'enveloppe, pas sur un rapport
-      entre deux instants — un rapport ponctuel confondrait l'amortissement et la phase.
-- [x] **P4** — exécuter, constater, balayer en `dx`.
-- [x] **P5** — donner une **provenance** au chiffre : relier l'amortissement mesuré à la diffusion
-      du schéma, pour que la demi-vie soit un nombre prédictible et non un constat. C'est ce qui
-      permettrait de dire ce que coûte un domaine avant de l'écrire.
-- [x] **P6** — ADR-033 si la conclusion engage B3, note datée sinon.
-- [x] **P7** — répercussions : `CAS-CANONIQUES`, index, angles morts, actions — dont le sort de
-      **S22-3**, qui n'a plus de demandeur.
-- [x] **P8** — rituel de fin (`REPRISE.md` §6).
+Elle fait pourtant une prédiction qu'aucune mesure de S25 n'a explorée : le comportement des
+**harmoniques**. ADR-033 §5.3 l'énonce comme « l'harmonique `n` s'amortit `n` fois plus vite ».
+**Cette formulation est ambiguë et probablement fausse en temps absolu** — à vérifier avant de la
+tester, puisque `λ_n = λ₁/n` réduit `N` d'un facteur `n`, mais que la période de l'harmonique est
+elle aussi divisée par `n`. Les deux effets se composent.
+
+*Thèse déclarée : l'harmonique `n` s'amortit `n` fois plus vite en nombre de **ses propres**
+périodes, donc `n²` fois plus vite en **secondes**.* Si la mesure confirme le `n²`, la loi est
+validée sur une prédiction qu'elle n'a pas servi à produire — c'est la seule forme de validation qui
+compte. Si elle infirme, la loi est un ajustement et non une dérivation.
+
+- [ ] **P1** — plan, jeton.
+- [ ] **P2** — **C22** dans `CAS-CANONIQUES` : montage, référence par oracle, assertions, et le
+      protocole de grilles qu'ADR-032 impose — cinq grilles, filtre de contamination, « non
+      concluant » comme verdict.
+- [ ] **P3** — **amendement de C08** par note corrective datée : nommer la grandeur, exiger la
+      régularité, exiger cinq grilles, distinguer trois verdicts.
+- [ ] **P4** — **S24-4** : `ordre_final()` reçoit la nature de la référence. Le triplet le plus fin
+      est le meilleur avec une solution analytique et le pire avec un oracle ; la fonction choisit
+      aujourd'hui sans le savoir.
+- [ ] **P5** — **S25-4** : dériver le facteur exact pour l'harmonique `n`, puis le mesurer. Note
+      corrective sur ADR-033 §5.3 si l'énoncé y est ambigu ou faux.
+- [ ] **P6** — ce que la mise à l'épreuve a donné : ADR-034 si elle change une décision, note datée
+      sinon.
+- [ ] **P7** — répercussions : index, angles morts, actions, décomptes.
+- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
-**Ce que S24 laisse et qui vaut pour ici.**
+**Ce que S25 laisse et qui vaut pour ici.**
 
-- **« Non concluant » est un état à part** dans le rapport, ni succès ni échec, et compté.
-- **Ne pas affiner l'oracle pour améliorer C08** — le geste dégrade la mesure (A114).
-- **L'arène du mode `physics` est à 64 Mo** à cause de l'oracle ; un « ORACLE INDISPONIBLE » se
-  regarde là, pas dans la physique.
-- **C04 doit rester en échec et `C01-jet` rouge** : ce sont des décisions, pas des régressions.
+- **Ne pas ajouter de friction au véhicule** pour « améliorer » C03 — A118, l'erreur qui a survécu à
+  trois sessions.
+- **La loi vient de la diffusion de Rusanov.** Ce qui se transporte à un autre solveur est la forme,
+  pas le coefficient.
+- **C04 doit rester en échec, `C01-jet` rouge, C08 sans verdict.** Trois décisions, pas trois
+  régressions.
 
-**Branche.** `claude/s22-suite`. `master` s'arrête à S17 (A107). Vérifié à l'ouverture de S25.
-
-#### P3-P5 — la thèse est fausse, C03 passe, et c'est le montage qui est trop facile
-
-**C03 passe largement**, sur les deux formes de surface initiale :
-
-| Mesure | Rampe (énoncé) | Mode propre | Seuil |
-|---|---|---|---|
-| période | 9,0302 s | 9,0302 s | 9,0305 s ± 1 % → **0,003 %** |
-| demi-vie d'amplitude | **20,7 périodes** | **24,4 périodes** | > 15 |
-| R² de l'ajustement exponentiel | 0,9920 | 0,9998 | > 0,9 |
-
-La rampe donne une demi-vie plus courte que le mode propre — 20,7 contre 24,4 — parce qu'elle excite
-les harmoniques impaires, plus courtes donc plus amorties. L'écart de 15 % est exactement le prix de
-la fidélité à l'énoncé, et il est mesuré plutôt que supposé.
-
-**Pourquoi la thèse était fausse, et c'est le résultat de la session.** Le montage de C03 pose
-`L = 20 m` et `dx = 0,1 m`. Le fondamental d'une seiche a pour longueur d'onde `λ = 2L = 40 m` : le
-montage offre donc **400 points par longueur d'onde**. Aucun domaine de jeu n'aura jamais cette
-résolution. **C03 passe parce qu'il ne teste pas le régime dans lequel le système vivra.**
-
-**La loi.** Demi-vie contre points par longueur d'onde `N`, à `ν = 0,45` :
-
-```
-N =  20 → 1,28 période      N = 160 → 10,05
-N =  40 → 2,55              N = 320 → 19,70
-N =  80 → 5,08              N = 640 → 38,81
-```
-
-**Exactement proportionnelle**, `R² > 0,999` à chaque point. Le rapport `demi-vie/N` vaut 0,0640 ·
-0,0638 · 0,0635 · 0,0628 · 0,0616 · 0,0606.
-
-**Et la formule fermée tombe.** Pour un flux de Rusanov, la diffusion numérique vaut
-`D = c·dx·(1−ν)/2`. L'atténuation sur une période `T = λ/c` est `D·k²·T` avec `k = 2π/λ` :
-
-```
-D·k²·T = [c·(λ/N)(1−ν)/2]·(2π/λ)²·(λ/c) = 2π²(1−ν)/N
-```
-
-**`c`, `λ` et `T` disparaissent tous les trois.** L'amortissement par période ne dépend que de `N`
-et du nombre de Courant :
-
-> **demi-vie (périodes) = ln2 · N / (2π²(1−ν))**
-
-À `ν = 0,45` : **0,06385·N** prédit, **0,0640·N** mesuré — **0,2 % d'écart**. C'est une provenance au
-sens d'I-14, et non plus un constat.
-
-**Le chiffre qui compte.** Tenir l'assertion de C03 — demi-vie > 15 périodes — demande
-**N ≥ 235 points par longueur d'onde**. Le montage en offre 400, d'où le succès. Dans un domaine
-réel à 20 points par longueur d'onde, la demi-vie tombe à **1,3 période** : *l'eau meurt en une
-oscillation*. C'est le « l'eau est molle » du corpus, enfin chiffré.
-
-**Le levier, prédit puis vérifié.** La formule dit que `1−ν` commande tout, donc qu'élever le nombre
-de Courant réduit la dissipation. Vérifié à `N = 160` :
-
-| `ν` | demi-vie mesurée | prédite | écart |
-|---|---|---|---|
-| 0,45 | 10,10 | 10,22 | −1,1 % |
-| 0,70 | 17,91 | 18,73 | −4,4 % |
-| 0,90 | **45,33** | 56,18 | −19,3 % |
-
-**×4,5 de demi-vie entre `ν = 0,45` et `ν = 0,9`**, et le pas de temps double au passage — donc
-moins de dissipation *et* moins de calcul. La loi se dégrade près de `ν = 1` (−19 %), ce qui est
-attendu : elle néglige les termes d'ordre supérieur, et l'intégration d'Euler explicite y a sa
-propre erreur. **Prédictive à mieux que 5 % pour `ν ≤ 0,7`**, et c'est la plage utile.
-
-#### État à la fin de S25
-
-`cargo test` : **30 tests**. `water-harness check` : 2 scénarios, 0 échec, hashs **inchangés**.
-`water-harness physics` : 1 échec (C04, voulu), 3 témoins, 5 grandeurs sans verdict (C08). Jeton
-**libéré**.
-
-**Ce que S26 doit savoir avant de commencer, et qui n'est pas ailleurs :**
-
-- **La loi de dissipation est vérifiée, mais sur un seul schéma.** `demi-vie = ln2·N/(2π²(1−ν))`
-  vient de la diffusion de Rusanov. Ce qui se transporte à un autre solveur est la **forme** — la
-  proportionnalité à `N`, l'indépendance à `λ` et `c` — pas le coefficient.
-- **Ne pas ajouter de friction au véhicule pour « améliorer » C03.** C'est l'erreur qu'A118
-  documente, et elle a survécu à trois sessions. C03 exige l'absence de friction.
-- **Le nombre de Courant est réglable** (`avec_cfl`) et il commande la dissipation. C'est le levier
-  le moins cher du corpus — ×4,5 de portée en doublant le pas de temps — et personne ne l'a arbitré.
-- **Deux cas sur trois du corpus δ sont plus faibles que leur réputation** : C01 par la géométrie
-  de son fond (A105), C03 par sa résolution (A119). Seul C04 discrimine vraiment. En tenir compte
-  avant de s'en servir pour éliminer des candidats à B3.
-- **C04 doit rester en échec et `C01-jet` rouge.** Ce sont des décisions, pas des régressions.
+**Branche.** `claude/s22-suite`. `master` s'arrête à S17 (A107). Vérifié à l'ouverture de S26.

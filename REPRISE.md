@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-06
-Session en cours : —
+Session en cours : S26 — C22, l'amendement de C08, et la mise à l'épreuve de la loi de dissipation
 Dernière session : S25 — 2026-09-06 — C03 : la dissipation reçoit une formule, et λ_cut une moitié de réponse
-Session suivante : S26 — C22 et l'amendement de C08 *(recommandé)*, ou poser le nombre de Courant, ou H2
+Session suivante : S27 — poser le nombre de Courant (S25-1) ou H2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
