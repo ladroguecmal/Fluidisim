@@ -100,8 +100,8 @@ probablement tout le sujet.
 - [x] **P2** — la dissolution d'A139, et la correction de ce que S31 a écrit.
 - [x] **P3** — la distinction **espace / temps** : ce que la définition de δ demande, ce que la
       dissipation fait, et où les deux divergent.
-- [ ] **P4** — la partition **entretenu / transitoire** du contenu de δ, et ce que chacune subit.
-- [ ] **P5** — chiffrer : durée numérique contre durée physique attendue, pour chaque contenu.
+- [x] **P4** — la partition **entretenu / transitoire** du contenu de δ, et ce que chacune subit.
+- [x] **P5** — chiffrer : durée numérique contre durée physique attendue, pour chaque contenu.
 - [ ] **P6** — **ADR-037**.
 - [ ] **P7** — répercussions : ADR-036, index, angles morts, actions, décomptes.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6).
@@ -168,3 +168,56 @@ ADR-001 donne à un domaine δ une portée de « **quelques dizaines de mètres*
 s'éteint naturellement à 25,6 m : **la dissipation produit gratuitement la décroissance que la
 définition exige**, et à la bonne échelle. Ce n'est probablement pas une coïncidence — les deux
 dépendent de la même grandeur, la portée du domaine.
+
+#### P4-P5 — le chiffre est brutal, et la formule est élégante
+
+**Pour un transitoire, la durée numérique doit dépasser la durée physique.** Une éclaboussure
+d'échelle `L` retombe en `t_phys ≈ √(2L/g)` — le temps de chute gravitaire. La dissipation lui laisse
+`t_num = K·L²/(dx·c)`, avec `K = ln2/(2π²(1−ν))`.
+
+| `L` | `t_phys` | `t_num` à `dx = 0,25 m` | rapport |
+|---|---|---|---|
+| 0,5 m | 0,319 s | 0,014 s | **0,05** |
+| 1,0 m | 0,452 s | 0,058 s | **0,13** |
+| 2,0 m | 0,639 s | 0,231 s | 0,36 |
+| 3,0 m | 0,782 s | 0,519 s | 0,66 |
+| 5,0 m | 1,010 s | 1,441 s | **1,43** ✔ |
+
+**Une éclaboussure d'un mètre s'éteint huit fois trop tôt ; une de cinquante centimètres, vingt fois
+trop tôt.** Et le rapport croît comme `L^1,5/dx` : ce sont les **plus petits** phénomènes qui sont
+détruits, alors que ce sont eux que δ existe pour montrer.
+
+**La condition `t_num ≥ t_phys` se résout, et `g` disparaît :**
+
+```
+dx  ≤  K · L^1,5 / √(2h)
+```
+
+| `L` | `dx_max` à `ν = 0,45` | `dx_max` à `ν = 0,70` |
+|---|---|---|
+| 0,5 m | **1,1 cm** | 2,1 cm |
+| 1 m | **3,2 cm** | 5,9 cm |
+| 2 m | 9,0 cm | 16,6 cm |
+| 5 m | 35,7 cm | 65,5 cm |
+
+> **Une éclaboussure d'un mètre demande `dx = 3,2 cm`.** Sur un domaine de 20 m de côté, cela fait
+> 625 cellules par direction — et δ est un solveur **3D** (ADR-001 : « solveur 3D à surface libre »).
+
+**Et cela donne à ADR-035 un argument qu'il n'avait pas.** Passer de `ν = 0,45` à `0,70` multiplie
+`dx_max` par **1,83**, donc divise le nombre de cellules 3D par **6,1**. Le levier du nombre de
+Courant ne se mesure plus en portée d'onde : il se mesure en **taille de maille pour une fidélité
+de transitoire donnée**, et c'est la contrainte dimensionnante de δ.
+
+#### La partition, et ce qu'elle décide
+
+| | Phénomènes | Ce que la dissipation fait | Verdict |
+|---|---|---|---|
+| **entretenus** | proche-coque, gerbe d'étrave, remous sur rocher | produit la décroissance spatiale | **conforme à la définition d'ADR-001** ; `L_d = 25,6 m` pour le proche-coque, dans la portée voulue |
+| **transitoires** | éclaboussure, cavité d'impact, poche d'air libérée | tue avant la fin physique | **défaut**, d'autant plus grave que le phénomène est petit |
+
+> **δ n'a besoin d'être précis que pour ses transitoires.** Pour les entretenus, la dissipation est
+> un **allié** : elle produit gratuitement la décroissance qu'ADR-001 exige, à la bonne échelle, sans
+> qu'on ait à l'imposer par une éponge ou un masque.
+
+C'est un renversement complet du cadrage de S31, qui traitait la dissipation comme un défaut
+uniforme. **Elle est un défaut pour la moitié du contenu de δ, et un mécanisme voulu pour l'autre.**
