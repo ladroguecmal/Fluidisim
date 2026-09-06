@@ -96,9 +96,9 @@ de la couche. »* La décroissance de δ est donc **voulue** — mais elle est v
 la dissipation numérique agit **en temps**. Ce n'est pas la même chose, et la différence est
 probablement tout le sujet.
 
-- [ ] **P1** — plan, jeton.
-- [ ] **P2** — la dissolution d'A139, et la correction de ce que S31 a écrit.
-- [ ] **P3** — la distinction **espace / temps** : ce que la définition de δ demande, ce que la
+- [x] **P1** — plan, jeton.
+- [x] **P2** — la dissolution d'A139, et la correction de ce que S31 a écrit.
+- [x] **P3** — la distinction **espace / temps** : ce que la définition de δ demande, ce que la
       dissipation fait, et où les deux divergent.
 - [ ] **P4** — la partition **entretenu / transitoire** du contenu de δ, et ce que chacune subit.
 - [ ] **P5** — chiffrer : durée numérique contre durée physique attendue, pour chaque contenu.
@@ -116,3 +116,55 @@ probablement tout le sujet.
 - **C04 en échec, `C01-jet` rouge, C08 sans verdict** : trois décisions.
 
 **Branche.** `claude/s22-suite`. `master` s'arrête à S17 (A107).
+
+#### P2-P3 — A139 se dissout, et la définition de δ retourne le problème
+
+**La réponse était dans ADR-001 §2 depuis S01, en toutes lettres** : W porte « **sillages**, anneaux
+d'impact, ondes d'explosion, tsunamis » ; δ porte « proche-coque, gerbe d'étrave, éclaboussure,
+cavité d'impact, poche d'air, remous sur rocher ».
+
+**ADR-011 §4 ne contredit rien** — il précise que le *générateur* de sillage, dans W, doit prendre la
+profondeur en entrée. En S31 je n'avais lu que lui, et j'ai écrit « aucun document ne tranche ».
+**C'était faux.**
+
+> **Deux sessions de suite, le même défaut, sur le même document.** A122 s'est dissoute en S31 en
+> relisant ADR-001 ; A139 se dissout en S32 en relisant ADR-001. Le document fondateur du corpus a
+> répondu deux fois de suite à une question qualifiée d'ouverte — et la seconde fois, c'est moi qui
+> avais posé la question.
+
+**Conséquence immédiate : ADR-036 §3 ne s'applique pas au sillage.** Les chiffres restent justes —
+un objet de longueur d'onde `λ` porté par δ meurt selon la loi — mais **le sillage n'est pas cet
+objet**. La table des distances (2,1 m derrière une barque) décrit un cas qui n'existe pas.
+
+#### Ce que la définition de δ demande, et où la dissipation la rejoint
+
+ADR-001 §2 ajoute une phrase que S31 n'avait pas lue non plus :
+
+> *« δ tend vers 0 en s'éloignant de sa source. Ce n'est pas une contrainte imposée de l'extérieur :
+> c'est la **définition de la couche**. »*
+
+**La décroissance de δ est donc voulue.** Mais elle est voulue **en espace** — loin de la source — et
+la dissipation numérique agit **en temps**. Ce n'est pas la même chose, et toute la question est là.
+
+| | Ce que la source fait | Ce que la dissipation fait | Résultat |
+|---|---|---|---|
+| **phénomène entretenu** — proche-coque, gerbe d'étrave, remous sur rocher | réalimente en permanence | atténue avec le temps de trajet | **équilibre spatial** : δ décroît en s'éloignant, exactement comme ADR-001 le demande |
+| **phénomène transitoire** — éclaboussure, cavité d'impact | n'existe qu'une fois | atténue avec le temps | **mort prématurée** : rien ne réalimente |
+
+> **La dissipation numérique *réalise* la définition de δ pour les phénomènes entretenus, et elle la
+> trahit pour les transitoires.** C'est le même mécanisme qui produit la propriété voulue d'un côté
+> et le défaut de l'autre.
+
+**Et la longueur de décroissance obtenue est du bon ordre.** Pour un entretenu, δ s'éteint sur
+`L_d = c · t_num` :
+
+| Phénomène | échelle | `L_d` à `dx = 0,25 m` |
+|---|---|---|
+| gerbe d'étrave | 2 m | **1,0 m** |
+| remous sur rocher | 5 m | **6,4 m** |
+| proche-coque | 10 m | **25,6 m** |
+
+ADR-001 donne à un domaine δ une portée de « **quelques dizaines de mètres** ». Le proche-coque
+s'éteint naturellement à 25,6 m : **la dissipation produit gratuitement la décroissance que la
+définition exige**, et à la bonne échelle. Ce n'est probablement pas une coïncidence — les deux
+dépendent de la même grandeur, la portée du domaine.
