@@ -45,6 +45,32 @@ plutôt que réinventer un chiffre.
 `dt ≤ C·dx / u_max`, avec `C ≈ 1` pour une advection explicite, `C ≈ 3–5` pour une advection
 semi-lagrangienne (au prix de diffusion).
 
+> **Note corrective S27 — `u_max` n'est pas défini, et le manque n'est pas cosmétique.**
+>
+> Cette formule est écrite depuis S02 sans que `u_max` soit qualifié. Or **SPEC-004 §10.1** pose
+> comme exigence *non négociable* d'accepter « une frontière en mouvement **avec sa vitesse** ».
+> Les deux documents se contredisent en silence : l'un impose des parois mobiles, l'autre calcule
+> le pas de temps comme si elles n'existaient pas.
+>
+> **Sur une face au contact d'une paroi mobile, la vitesse qui transporte l'information à travers la
+> face est celle du fluide *relative à la paroi*.** C'est elle que le pas doit borner. Ailleurs —
+> face pleine, loin de tout solide — la vitesse absolue reste la bonne, faute de paroi par rapport à
+> laquelle se déplacer.
+>
+> **Ce défaut a été mesuré**, sur un autre projet et une autre architecture *(source citée dans le
+> journal S27)* : eau au repos, solide mobile, **borne de pas de temps nulle** pendant que le nombre
+> de Courant réel valait **0,943**. Rapport `C_relatif / C_absolu` mesuré entre **2,2 et 2,5**, et
+> **zéro violation déclarée** — le contrôle de stabilité comparait la vitesse absolue au budget.
+> Un solveur peut donc violer sa condition de stabilité d'un facteur deux **en restant vert**.
+>
+> **Définition retenue** (ADR-035 §2) : `u_max` est le maximum, sur toutes les faces portant une
+> inconnue, de la **vitesse gouvernante** — relative à la paroi sur une face coupée, absolue
+> ailleurs. Le mot « max » ne se lit pas sur le champ de vitesse seul.
+>
+> **Et la revue croisée S08 avait examiné cette paire** (écart E08, `004 §6.2 ↔ 001 §2.4`) sans la
+> voir : le rapprochement portait sur le coût, pas sur la définition d'une variable non définie.
+> Angle mort **A125**.
+
 | dx (m) | u_max = 5 m/s | u_max = 15 m/s | sous-pas à 30 Hz (u=15, C=3) |
 |---|---|---|---|
 | 0,50 | 100 ms | 33 ms | 1 |

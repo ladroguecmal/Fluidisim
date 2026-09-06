@@ -92,8 +92,8 @@ impose des parois mobiles, l'autre calcule le pas de temps sans elles.
 coup, ou majorée analytiquement avant. Un `ν = 0,7` posé sur une vitesse fausse est plus dangereux
 qu'un `ν = 0,45` posé sur la bonne.
 
-- [ ] **P1** — plan, jeton.
-- [ ] **P2** — l'écart SPEC-001 §2.1 / SPEC-004 §10.1, écrit et qualifié. C'est une revue croisée
+- [x] **P1** — plan, jeton.
+- [x] **P2** — l'écart SPEC-001 §2.1 / SPEC-004 §10.1, écrit et qualifié. C'est une revue croisée
       d'une paire que S08 avait examinée sans le voir.
 - [ ] **P3** — **contrôle de mes propres mesures.** Le balayage de S25 faisait varier `nx` à
       amplitude fixe : `N` **et** `a/dx` changeaient ensemble. Le projet extérieur s'est fait
