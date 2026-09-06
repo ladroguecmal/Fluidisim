@@ -266,7 +266,7 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 | # | Action | D'où elle vient | Qui la porte | État |
 |---|---|---|---|---|
 | S32-1 | **Porter la partition entretenus/transitoires dans ADR-001 §2**, qui liste six contenus de δ sans les distinguer — c'est une lecture, pas une décision nouvelle, mais elle change le dimensionnement | ADR-037 §4.2 | session | **ouverte** |
-| S32-2 | **Mesurer un phénomène entretenu** : l'équilibre spatial du proche-coque à 25,6 m est dérivé et jamais mesuré, sur un solveur non linéaire | **A142** | session | **ouverte** |
+| S32-2 | **Mesurer un phénomène entretenu** | **A142** | session | **close (S33)** — `L½ = K·λ²/dx` vérifiée sur quatre λ, `R²` jusqu'à 1,0000, écart −0,3 % au meilleur point. **Dans le régime linéaire seulement** |
 | S32-3 | Fixer ce qu'on entend par **durée attendue** d'un transitoire : la déformation de surface seule, ou l'écume et le spray d'ADR-014 qui survivent plus longtemps | **A141** | session | **ouverte** |
 | S32-4 | Porter dans ADR-035 que le levier `ν` vaut **×6,1 en cellules 3D** pour une fidélité de transitoire donnée — il n'y était chiffré qu'en portée d'onde | ADR-037 §3.1 | session | **ouverte** |
 
@@ -274,4 +274,17 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 > toutes deux réglées par ADR-001 §2. **Un corpus qui grandit rend son propre socle moins consulté**
 > (A143). Réflexe désormais explicite : toute question sur *l'appartenance d'un phénomène à une
 > couche* se règle dans ADR-001 §2, et nulle part ailleurs.
+
+## Actions relevées en séance — S33
+
+| # | Action | D'où elle vient | Qui la porte | État |
+|---|---|---|---|---|
+| S33-1 | **Mesurer la décroissance entretenue en régime non linéaire** (`a/h ≈ 5 %`) : S33 ne valide la loi qu'à `a/h ≪ 1 %`, et A127 dit que la loi y est fausse | S33, **A127** | session | **ouverte** |
+| S33-2 | **Relire les autres garde-fous du harnais** dans le sens d'A144 : porter sur la bonne idée ne suffit pas, il faut la bonne condition | **A144** | session | **ouverte** |
+| S33-3 | **Publier un `R²` avec chaque régression** du harnais, même quand la forme n'est pas en doute — c'est une sonde générique à trois lignes | **A145** | session | **ouverte** |
+
+> **Note S33 — la conclusion la moins étayée du corpus est devenue la mieux mesurée.** `R²` atteint
+> **1,0000**, et l'écart à la prédiction descend à **−0,3 %**. Ce qui l'a rendue possible n'est pas
+> un effort particulier : c'est d'avoir écrit, en S32, **qu'elle était dérivée et non mesurée** —
+> sans quoi personne ne serait allé la vérifier.
 

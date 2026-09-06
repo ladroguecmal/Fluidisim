@@ -102,7 +102,7 @@ garantit, et c'est précisément ce qu'A142 reproche à la dérivation.
       longueurs d'onde au moins : une loi qui ne tiendrait qu'à un `λ` ne serait pas une loi.
 - [x] **P5** — ce que le résultat fait à ADR-037 §2.1 : confirmation, correction, ou réfutation.
 - [x] **P6** — note datée dans ADR-037, ou ADR-038 si la conclusion change.
-- [ ] **P7** — répercussions : index, angles morts, actions, décomptes.
+- [x] **P7** — répercussions : index, angles morts, actions, décomptes.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise

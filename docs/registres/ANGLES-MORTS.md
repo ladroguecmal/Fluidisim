@@ -12,9 +12,9 @@ de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outi
 6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance),
 3 en S11 (audit des points ouverts), 3 en S12 (mécanismes de détail), 3 en S13 (revue croisée des
 documents récents), 3 en S14 (audit inverse des invariants), 2 en S15 (audit des registres), 2 en S16 (dossier B2), 2 en S17
-(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques), 4 en S22 (C01 et le premier δ), 4 en S23 (C04 et le lit sec), 4 en S24 (C08 et l'oracle), 4 en S25 (C03 et la dissipation), 4 en S26 (les harmoniques), 4 en S27 (le nombre de Courant), 3 en S28 (la paroi mobile), 3 en S29 (l'audit des assertions), 3 en S30 (la réécriture), 3 en S31 (la dissolution d'A122), 3 en S32 (celle d'A139) — **143 au
-total**. **Quatre-vingt-trois ont été trouvés dans nos propres écrits**, pas dans les documents sources :
-A49, A56, A57, A58, puis A65 à A143. La proportion
+(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques), 4 en S22 (C01 et le premier δ), 4 en S23 (C04 et le lit sec), 4 en S24 (C08 et l'oracle), 4 en S25 (C03 et la dissipation), 4 en S26 (les harmoniques), 4 en S27 (le nombre de Courant), 3 en S28 (la paroi mobile), 3 en S29 (l'audit des assertions), 3 en S30 (la réécriture), 3 en S31 (la dissolution d'A122), 3 en S32 (celle d'A139), 2 en S33 (le train entretenu) — **145 au
+total**. **Quatre-vingt-cinq ont été trouvés dans nos propres écrits**, pas dans les documents sources :
+A49, A56, A57, A58, puis A65 à A145. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -185,8 +185,10 @@ ce que les sources avaient omis.
 | **A141** | La durée « attendue » d'un phénomène dépend de ce qu'on regarde, et rien ne le fixe | 2 | ADR-037 §4.1 |
 | **A142** | L'équilibre spatial d'un phénomène entretenu est dérivé, jamais mesuré | 2 | ADR-037 §4.3 |
 | **A143** | Le même document fondateur a répondu deux fois de suite à une question dite ouverte | **1** | ADR-037 §1, A122 et A139 |
+| **A144** | Un garde-fou peut porter sur la bonne idée et la mauvaise condition | **1** | S33, contrôle de réflexion |
+| **A145** | Une mesure de qualité d'ajustement rattrape des défauts qu'elle n'était pas censée voir | 3 | S33, le `R²` à 0,487 |
 
-Cent trois angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
+Cent cinq angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
 
 **Quatre ont été trouvés dans nos propres écrits** — A49, A56, A57, A58 — et non dans les documents
@@ -926,7 +928,7 @@ pendant quatre sessions.
   conservateur ou optimiste — et l'écart est d'un facteur qui n'a pas été estimé. **Une durée
   attendue n'est pas une propriété du phénomène, c'est une propriété de ce qu'on en montre.**
 
-- **A142** — **L'équilibre spatial d'un phénomène entretenu est dérivé, jamais mesuré.** ADR-037
+- **A142** — ~~**L'équilibre spatial d'un phénomène entretenu est dérivé, jamais mesuré.**~~ **LEVÉ en S33**, dans le régime linéaire : `L½ = K·λ²/dx` vérifiée sur quatre longueurs d'onde, écart de −0,3 % au meilleur point, `R²` jusqu'à **1,0000**. Le régime non linéaire reste non mesuré. Voir [`ADR-037`](../adr/ADR-037-la-dissipation-est-un-allie-pour-la-moitie-de-delta.md) §2.1, note S33. *Énoncé d'origine conservé ci-dessous.* ADR-037
   §2.1 conclut que le proche-coque s'éteint naturellement à 25,6 m, dans la portée qu'ADR-001 donne
   à un domaine. Le raisonnement suppose qu'une source constante et une dissipation exponentielle
   produisent une décroissance en `exp(−x/L_d)` — vrai en régime linéaire, **non vérifié ici**, et le
@@ -943,4 +945,23 @@ pendant quatre sessions.
   quatre sessions de report, un ADR entier (036 §3) écrit sur un objet qui n'existait pas.
   **Réflexe : toute question sur *l'appartenance d'un phénomène à une couche* se règle dans ADR-001
   §2, et nulle part ailleurs.**
+
+**Ajoutés en S33, à la mesure du train entretenu**
+
+- **A144** — **Un garde-fou peut porter sur la bonne idée et la mauvaise condition.** La mesure de
+  décroissance spatiale exigeait qu'aucune réflexion ne pollue la fenêtre, et le contrôle écrit pour
+  cela vérifiait qu'on mesurait **derrière le front** — pas que le front **n'avait jamais atteint le
+  mur**. À `λ = 20 m` sur 200 m, le front était à 280 m : l'onde était revenue, et le contrôle
+  déclarait la fenêtre saine. **C'est A133 commis dans la fonction écrite pour l'éviter**, et dans
+  la session qui l'invoquait au plan. L'idée était juste, la condition ne l'était pas — et une
+  condition fausse est invisible tant qu'elle n'est pas franchie. Sévérité 1 : un garde-fou en qui
+  l'on a confiance est plus dangereux qu'aucun garde-fou.
+
+- **A145** — **Une mesure de qualité d'ajustement rattrape des défauts qu'elle n'était pas censée
+  voir.** Le `R²` de l'ajustement exponentiel est tombé à **0,487** sur le cas pollué, là où les cas
+  sains donnaient 0,999 à 1,000. Il n'était pas là pour détecter une réflexion : il était là pour
+  dire si la décroissance est bien exponentielle. **Il a signalé que la forme supposée était fausse,
+  sans avoir à connaître la raison** — ce qu'aucun garde-fou spécifique ne sait faire.
+  **Réflexe** : accompagner toute régression d'un `R²` publié, même quand la forme n'est pas en
+  doute. C'est une sonde générique, et elle coûte trois lignes.
 
