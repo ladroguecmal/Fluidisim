@@ -149,10 +149,10 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 
 | # | Action | D'où elle vient | Qui la porte | État |
 |---|---|---|---|---|
-| S24-1 | Écrire **C22**, « convergence sur solution régulière » : le montage lisse existe dans le code (`c08_regulier`) mais pas dans `CAS-CANONIQUES` | ADR-032 §6.4 | session | **ouverte** |
-| S24-2 | Amender l'énoncé de **C08** : nommer la grandeur, exiger la régularité, exiger cinq grilles, rapporter « non concluant » comme un état | ADR-032 §3.1 | session | **ouverte** |
+| S24-1 | Écrire **C22**, « convergence sur solution régulière » | ADR-032 §6.4 | session | **close (S26)** — `CAS-CANONIQUES` §C22, avec son protocole ; angle mort **A124** ouvert au passage |
+| S24-2 | Amender l'énoncé de **C08** | ADR-032 §3.1 | session | **close (S26)** — énoncé amendé daté sous l'énoncé d'origine, qui est conservé |
 | S24-3 | Porter au **plan de benchmark** que l'oracle est le poste dominant — ×480 sur la grille la plus grossière, `nx²` en 1D et `nx³` en 2D | ADR-032 §4.1, **A114** | session | **ouverte** |
-| S24-4 | Donner à `ordre_final()` la **nature de la référence** : le triplet le plus fin est le meilleur avec une solution analytique, le pire avec un oracle | ADR-032 §6.3 | session | **ouverte** |
+| S24-4 | Donner à `ordre_final()` la **nature de la référence** | ADR-032 §6.3 | session | **close (S26)** — `Reference::{Analytique, Oracle}` ; la règle s'inverse, elle ne s'assouplit pas |
 | S24-5 | Compléter le montage régulier — trois grilles saines seulement, donc aucun verdict d'asymptoticité ; demande un oracle à `nx ≈ 100 000`, dont le coût est à mesurer avant d'être engagé | ADR-032 §6.1 | session | **ouverte** |
 
 > **Note S24 — le nombre d'actions ouvertes augmente, et c'est le signe attendu.** S22 en a ouvert
@@ -167,7 +167,7 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 | S25-1 | Poser le **nombre de Courant** comme paramètre de conception : il ne figure dans aucun ADR, aucune SPEC, aucun banc, et il multiplie la portée des ondes par 4,5 | ADR-033 §2.3, **A117** | session | **ouverte** |
 | S25-2 | Exprimer les exigences de portée **en périodes**, jamais en mètres ni en secondes — seule formulation dont la réponse ne dépende pas de l'onde | ADR-033 §4.2 | session | **ouverte** |
 | S25-3 | Faire dire à `CAS-CANONIQUES` §C03 **sa résolution** : un cas dont le verdict dépend d'un paramètre tu mesure ce paramètre | ADR-033 §4.3, **A119** | session | **ouverte** |
-| S25-4 | Vérifier que l'**harmonique `n` s'amortit `n` fois plus vite**, ce que la loi prédit et que rien ne teste | ADR-033 §5.3 | session | **ouverte** |
+| S25-4 | Vérifier le comportement des **harmoniques** | ADR-033 §5.3 | session | **close (S26)** — et l'énoncé de S25 était faux : `n` en périodes propres, **`n²` en secondes**. Vérifié à 2-5 % ; ADR-034 |
 | S25-5 | Borner l'emploi de la loi près de `ν = 1`, ou lui donner un terme correctif — écart de 19 % à `ν = 0,9` | ADR-033 §5.2 | session | **ouverte** |
 
 > **Note S25 — deux cas sur trois du corpus δ sont plus faibles que leur réputation.** C01 est
@@ -175,4 +175,18 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 > n'aura (A119). Seul C04 discrimine vraiment. **Le point commun est que les trois montages ont été
 > choisis pour être lisibles**, ce qui est une qualité — mais la représentativité n'a jamais été un
 > critère explicite de leur écriture, et elle devrait l'être avant que B3 ne s'en serve.
+
+## Actions relevées en séance — S26
+
+| # | Action | D'où elle vient | Qui la porte | État |
+|---|---|---|---|---|
+| S26-1 | Vérifier qu'un **spectre** se comporte comme la somme de ses modes : toutes les mesures portent sur un mode unique, et le solveur n'est pas linéaire | ADR-034 §3.2, **A121** | session | **ouverte** |
+| S26-2 | Trancher si la **transition W→δ réinjecte** les composantes que δ efface, ou si l'effacement est voulu | ADR-034 §3.3, **A122** | session | **ouverte** |
+| S26-3 | Porter dans le dimensionnement que le budget se pose sur la **composante la plus courte à conserver** — facteur trente en cellules | ADR-034 §2.2, **A123** | session | **ouverte** |
+| S26-4 | Ajouter au protocole de **B3** que la loi de dissipation se remesure par candidat : la forme se transporte, le coefficient non | ADR-034 §3.1 | session | **ouverte** |
+
+> **Note S26 — quatre actions closes, quatre ouvertes.** S24-1, S24-2, S24-4 et S25-4 sont closes ;
+> les quatre nouvelles viennent toutes de la même mesure. **La dernière — la réinjection à la
+> frontière W/δ — est la plus lourde** : elle touche la couture entre deux couches, et ADR-005 ne
+> l'avait pas prévue parce que rien ne disait encore que δ **filtre**.
 

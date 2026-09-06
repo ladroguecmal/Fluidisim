@@ -102,7 +102,7 @@ compte. Si elle infirme, la loi est un ajustement et non une dérivation.
       corrective sur ADR-033 §5.3 si l'énoncé y est ambigu ou faux.
 - [x] **P6** — ce que la mise à l'épreuve a donné : ADR-034 si elle change une décision, note datée
       sinon.
-- [ ] **P7** — répercussions : index, angles morts, actions, décomptes.
+- [x] **P7** — répercussions : index, angles morts, actions, décomptes.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise

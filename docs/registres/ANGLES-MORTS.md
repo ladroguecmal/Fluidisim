@@ -12,9 +12,9 @@ de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outi
 6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance),
 3 en S11 (audit des points ouverts), 3 en S12 (mécanismes de détail), 3 en S13 (revue croisée des
 documents récents), 3 en S14 (audit inverse des invariants), 2 en S15 (audit des registres), 2 en S16 (dossier B2), 2 en S17
-(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques), 4 en S22 (C01 et le premier δ), 4 en S23 (C04 et le lit sec), 4 en S24 (C08 et l'oracle), 4 en S25 (C03 et la dissipation) — **120 au
-total**. **Soixante ont été trouvés dans nos propres écrits**, pas dans les documents sources :
-A49, A56, A57, A58, puis A65 à A120. La proportion
+(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques), 4 en S22 (C01 et le premier δ), 4 en S23 (C04 et le lit sec), 4 en S24 (C08 et l'oracle), 4 en S25 (C03 et la dissipation), 4 en S26 (les harmoniques) — **124 au
+total**. **Soixante-quatre ont été trouvés dans nos propres écrits**, pas dans les documents sources :
+A49, A56, A57, A58, puis A65 à A124. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -162,8 +162,12 @@ ce que les sources avaient omis.
 | **A118** | Un mot partagé — « dissipation » — a fait recommander l'inverse de ce qu'il fallait, trois sessions durant | 2 | ADR-033 §1 |
 | **A119** | Un cas passe parce que son montage n'est pas dans le régime où le système vivra | **1** | ADR-033 §2.1, C03 |
 | **A120** | Une conclusion juste peut ne pas épuiser la question qu'elle ferme | 2 | ADR-033 §3, ADR-030 §5 |
+| **A121** | Rien n'a vérifié qu'un spectre se comporte comme la somme de ses modes pris séparément | 2 | ADR-034 §3.2 |
+| **A122** | Si δ mange les composantes courtes, personne n'a dit si la transition les réinjecte | **1** | ADR-034 §3.3, ADR-005 |
+| **A123** | Le budget de résolution se dimensionne sur la composante la plus courte à conserver, pas sur la dominante | **1** | ADR-034 §2.2 |
+| **A124** | Un cas qui vit dans le code et pas dans le corpus est introuvable pour la session suivante | 2 | C22, ADR-032 §6.4 |
 
-Quatre-vingts angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
+Quatre-vingt-quatre angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
 
 **Quatre ont été trouvés dans nos propres écrits** — A49, A56, A57, A58 — et non dans les documents
@@ -710,4 +714,35 @@ pendant quatre sessions.
   (dispersion) ou **ne pas arriver** (dissipation). La seconde moitié était mesurable depuis le
   début. **Une question fermée par une réponse correcte ne se rouvre plus**, ce qui rend ce type
   d'angle mort particulièrement durable.
+
+**Ajoutés en S26, à la mise à l'épreuve de la loi de dissipation**
+
+- **A121** — **Rien n'a vérifié qu'un spectre se comporte comme la somme de ses modes pris
+  séparément.** Toutes les mesures de S25 et S26 portent sur un **mode unique**, ou sur une rampe
+  dont on connaît la décomposition. Or le solveur n'est pas linéaire : les termes convectifs
+  couplent les modes, et rien ne dit que la loi `n²` survive à un spectre réel. Le tableau
+  d'ADR-034 §2.1, qui applique la loi composante par composante à une mer de houle, **suppose donc
+  ce qui n'est pas mesuré**. Il reste utile comme ordre de grandeur ; il n'est pas une prédiction.
+
+- **A122** — **Si δ mange les composantes courtes, personne n'a dit si la transition les
+  réinjecte.** ADR-005 pose une zone de transition W→δ pensée comme un raccord *spatial* : ce qui
+  entre dans δ y continue sa vie. ADR-034 montre que δ **filtre** — une onde de 3 s meurt en trois
+  secondes à `dx = 1 m`. La question est donc neuve : la transition doit-elle réinjecter
+  continûment depuis W ce que δ efface, ou l'effacement est-il le comportement voulu ? Les deux
+  réponses sont défendables et elles n'ont pas le même coût. Sévérité 1 : elle touche la couture
+  entre deux couches, c'est-à-dire l'endroit où une erreur est la plus chère à défaire.
+
+- **A123** — **Le budget de résolution se dimensionne sur la composante la plus courte à conserver,
+  pas sur la dominante.** C'est la grandeur dominante qui vient à l'esprit — une mer de `Tp = 8 s`
+  « fait » 100 m de longueur d'onde. Mais son **aspect** vit dans le clapot de 2 à 4 s. À
+  `dx = 1 m`, la houle dominante survit 6,4 périodes et le clapot **moins d'une seconde**.
+  Conserver ce dernier sur 5 périodes demande `dx = 0,18 m`, soit **trente fois plus de cellules**.
+  L'arbitrage n'existait pas avant d'être chiffré, et il porte un facteur trente.
+
+- **A124** — **Un cas qui vit dans le code et pas dans le corpus est introuvable pour la session
+  suivante.** Le montage régulier a été écrit en S24 dans `Bassin::c08_regulier`, exécuté, et
+  mentionné dans ADR-032 — mais absent de `CAS-CANONIQUES`. Une session qui aurait lu le corpus de
+  validation sans lire cet ADR aurait conclu qu'aucun cas régulier n'existait, et l'aurait réécrit.
+  **Le code n'est pas un lieu de publication** : il est lu par qui travaille dessus, pas par qui
+  cherche ce qui existe. Formalisé en **C22** (S26).
 
