@@ -12,9 +12,9 @@ de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outi
 6 en S08 (revue croisée des SPEC), 4 en S09 (écriture du chemin poussé), 3 en S10 (persistance),
 3 en S11 (audit des points ouverts), 3 en S12 (mécanismes de détail), 3 en S13 (revue croisée des
 documents récents), 3 en S14 (audit inverse des invariants), 2 en S15 (audit des registres), 2 en S16 (dossier B2), 2 en S17
-(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code) — **100 au
-total**. **Quarante ont été trouvés dans nos propres écrits**, pas dans les documents sources : A49,
-A56, A57, A58, puis A65 à A100. La proportion
+(dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 2 en S21 (cas analytiques) — **102 au
+total**. **Quarante-deux ont été trouvés dans nos propres écrits**, pas dans les documents sources :
+A49, A56, A57, A58, puis A65 à A102. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.
 
@@ -142,6 +142,8 @@ ce que les sources avaient omis.
 | **A98** | `sin` n'est pas spécifié bit à bit : le déterminisme de B ne survit pas à un appel de bibliothèque | **1** | ADR-029 §2 |
 | **A99** | Le grain d'une réduction ordonnée change son résultat | 2 | ADR-029 §3 |
 | **A100** | Un test peut affirmer une propriété vraie avec des données incapables de la révéler | 2 | ADR-029 §3, `host_impl.rs` |
+| **A101** | Un champ reproductible peut être reproductiblement faux | **1** | ADR-029, note S21 |
+| **A102** | Une mesure statistique a besoin d'une fenêtre de plusieurs fois la plus longue onde | 2 | ADR-029, note S21 |
 
 Soixante-quatre angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -516,3 +518,19 @@ pendant quatre sessions.
   étaient égales, et le test échouait en prétendant que la propriété était fausse. Elle ne l'était
   pas ; c'étaient les données qui étaient trop bien conditionnées. Un test qui passe sur des données
   mal choisies est pire — il aurait affirmé une garantie inexistante.
+
+**Ajoutés en S21, au premier cas analytique**
+
+- **A101** *(sévérité 1)* — **Un champ reproductible peut être reproductiblement faux.** La vitesse
+  orbitale de `B` était en quadrature au lieu d'être en phase avec l'élévation : **sous une crête,
+  l'eau n'avançait pas**, elle montait. Le hash de conformité était parfaitement stable — parce qu'il
+  l'était : le champ était reproductible, et faux. Dix-neuf sessions de conception, six audits du
+  corpus et un étage de harnais complet n'ont pas pu faire la différence ; une identité fermée qui ne
+  dépend d'aucun paramètre du code — `u = ω·η` — l'a faite en un passage. **Le déterminisme et la
+  justesse sont deux propriétés sans rapport, et aucun raffinement de la première n'approche la
+  seconde.**
+- **A102** — **Une mesure statistique a besoin d'une fenêtre de plusieurs fois la plus longue onde.**
+  La restitution de `Hs` par la variance donne 8,5 % d'écart quand la fenêtre ne fait que
+  1,7 longueur d'onde de la plus longue composante. Le champ est juste ; c'est la mesure qui est
+  trop courte. Vaut pour toute estimation spectrale — et le piège est d'autant plus sûr que la
+  fenêtre est dimensionnée sur la longueur d'onde *moyenne*, qui est la valeur qui vient à l'esprit.

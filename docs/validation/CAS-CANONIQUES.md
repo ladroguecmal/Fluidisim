@@ -11,6 +11,19 @@ simplement *différent*.
 Chaque cas est un fichier de scénario (SPEC-003 §3). Ils constituent la batterie `physics`, et
 les six premiers doivent passer avant qu'un solveur candidat soit admis en campagne B3.
 
+> **État d'exécution — S21, étage H3.** Le mode `physics` existe et tourne
+> (`code/water-harness`, `water-harness physics scenarios/*.toml`). Sur les vingt-et-un cas,
+> **huit assertions analytiques s'exécutent aujourd'hui** — celles que la couche `B` permet :
+> dispersion mesurée dans le champ *(trois assertions de C02)*, restitution de `Hs` par la variance,
+> identité de la vitesse orbitale, pente maximale, homogénéité spatiale, et la borne de référentiel
+> d'I-08. **Treize cas attendent la couche qu'ils testent** — δ, W, V ou un intégrateur de corps
+> rigide — et le harnais **imprime cette liste à chaque exécution**, pour qu'un rapport vert ne se
+> lise jamais comme une couverture complète.
+>
+> Ces huit assertions ont trouvé, au premier passage, un défaut que dix-neuf sessions de conception
+> et un hash de conformité stable n'avaient pas vu : la vitesse orbitale était en quadrature au lieu
+> d'être en phase avec l'élévation. Voir ADR-029, note S21.
+
 ---
 
 ## Tableau général
@@ -18,7 +31,7 @@ les six premiers doivent passer avant qu'un solveur candidat soit admis en campa
 | # | Cas | Couche | Référence | Ce qu'il attrape |
 |---|---|---|---|---|
 | C01 | Repos hydrostatique sur pente | δ | **analytique exacte** | courants parasites |
-| C02 | Dispersion monochromatique | δ, W | **analytique** | erreur de célérité → fixe `λ_cut` |
+| C02 | Dispersion monochromatique | δ, W, **B** | **analytique** | erreur de célérité → fixe `λ_cut` — *trois assertions exécutées sur `B` depuis S21* |
 | C03 | Seiche en bassin clos | δ, W | **analytique** | dissipation numérique |
 | C04 | Rupture de barrage (Ritter) | δ | **analytique** | fronts, mouillage/séchage |
 | C05 | Absorption à la frontière | δ | cible < 1 % | réflexions de l'éponge |

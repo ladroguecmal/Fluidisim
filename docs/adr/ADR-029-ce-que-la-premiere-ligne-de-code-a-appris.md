@@ -189,3 +189,56 @@ il faut dire les deux.
    `capture`, `replay` et `starve`. H1 débloque la CI par commit, rien de plus.
 5. **La frontière C** de §1.4 n'est pas écrite. Elle n'a pas d'objet tant qu'aucun moteur n'intègre
    le cœur.
+
+
+---
+
+## Note S21 — ce que le premier cas analytique a trouvé
+
+Le tableau du §5 énumère six propriétés vérifiées par H1. **Les six portent sur la
+reproductibilité et sur la discipline d'exécution ; aucune ne porte sur la justesse du champ.** Cette
+absence n'était pas énoncée comme une limite — le « ne fait pas » du §5 parlait des couches manquantes,
+`W`, `δ`, `V`, pas de ce que H1 laisse passer sur la couche qu'il couvre. S21 l'a rendue explicite, à
+ses dépens.
+
+**Le défaut.** Dans `background.rs`, la vitesse orbitale de surface était calculée **en quadrature**
+avec l'élévation :
+
+```text
+écrit    :  u = a·ω·cos(φ)   w = a·ω·sin(φ)
+correct  :  u = a·ω·sin(φ)   w = a·ω·cos(φ)      (Airy, eau profonde, avec η = a·sin(φ))
+```
+
+Conséquence physique : **sous une crête, l'eau n'avançait pas**, elle montait. Un bateau posé sur ce
+champ aurait été soulevé sans être entraîné — précisément le défaut qu'ADR-008 §2 signale comme
+« immédiatement perceptible » et que la vitesse orbitale existe pour éviter.
+
+**Ce qui ne l'a pas trouvé.** Dix-neuf sessions de conception. Six audits du corpus. Le hash de
+conformité de H1, parfaitement stable d'une exécution à l'autre — parce qu'il l'était : le champ
+était reproductible, et faux.
+
+**Ce qui l'a trouvé, en un passage.** Une identité fermée qui ne dépend d'aucun paramètre du code :
+pour une composante unique en eau profonde, `u_horizontal = ω · η` **en tout point**. Le cas mesure
+le rapport au point d'élévation maximale et le compare à `ω`. Sous une crête, `sin(φ) = 1` et donc
+`cos(φ) = 0` : le code inversé rendait une vitesse horizontale **nulle** là où la référence vaut `ω`.
+L'écart mesuré était de 100 %, soit l'écart maximal qu'une telle comparaison puisse produire. Après
+correction : **0,000 %**.
+
+**Ce que cela ajoute au §5.** Le tableau des propriétés vérifiées doit se lire avec sa ligne
+manquante : **rien dans H1 ne juge la physique**. La frontière entre H1 et H3 n'est pas une gradation
+de rigueur mais une séparation de nature — aucun raffinement du premier n'approche ce que fait le
+second. À rajouter au « ne fait pas » du §5, qui ne nommait que les couches absentes.
+
+**Trois autres enseignements du même passage**, plus modestes :
+
+- **deux des quatre échecs venaient de mes tests, pas du champ** — un temps rendu dans la mauvaise
+  unité, et un échantillonnage au-delà du rayon de référentiel. Le second est instructif : le champ
+  refusait correctement, `eval` renvoyant `None` conformément à I-08. **Une erreur de test qui
+  révèle une propriété mérite que cette propriété devienne un cas** ; elle en a un ;
+- **une référence tirée des paramètres ne prouve rien.** `configure` calcule `k = ω²/g` ; comparer
+  `k` aux paramètres n'aurait vérifié que ma propre arithmétique. Les cas mesurent donc des
+  longueurs d'onde, des périodes et des variances **dans le champ échantillonné** ;
+- **une mesure statistique a besoin de sa fenêtre.** La restitution de `Hs` par la variance donne
+  8,5 % d'écart sur le scénario à 32 composantes : la plus longue fait 225 m et la fenêtre 384 m,
+  soit 1,7 longueur d'onde. Ce n'est pas un défaut du champ mais un piège de mesure, de la même
+  famille que les six de SPEC-003 §6.
