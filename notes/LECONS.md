@@ -2324,3 +2324,58 @@ codes se ressemblent, ou parce que la grandeur est intrinsèquement peu sensible
 explicitement dans le compte rendu. Puis mesurer **une fois** avec un réglage volontairement
 désaligné : ce contre-exemple donne l'échelle, et transforme « ils concordent » en « ils concordent
 vingt et une fois mieux que s'ils différaient d'un choix de méthode ».
+
+## L147 — Un rattrapage qui ne se déclenche jamais n'est pas inoffensif : c'est un détecteur muet
+
+*(S38)* Une saturation remettait à zéro les hauteurs d'eau négatives dans deux solveurs. On la
+soupçonnait de maquiller un défaut à chaque pas. Mesure : **elle ne se déclenche jamais** en régime
+nominal — zéro sur trois cas, deux implémentations, cinquante mille pas. Le soupçon tombe.
+
+Mais le compteur qui l'établit dit aussi autre chose. Elle **mord** dès qu'on sort de la condition de
+stabilité du schéma, et là **elle ne rattrape rien** : la masse créée dépasse le volume total de
+dix-sept ordres de grandeur. Elle ne convertit pas une divergence en résultat acceptable — elle la
+convertit en **suite de nombres finis**, c'est-à-dire en quelque chose qui ressemble à un résultat
+et que rien n'arrête.
+
+**Le danger n'est donc pas la fréquence, c'est le silence.** Un rattrapage qui ne se déclenche jamais
+est le meilleur détecteur possible de l'événement rare qu'il rattrape : le jour où il mord, c'est
+l'information la plus utile que le système puisse produire. Tant qu'il est muet, elle est perdue.
+
+**Réflexe** : devant tout `clamp`, `max`, valeur de repli, `catch` qui avale, retry silencieux —
+poser deux questions dans cet ordre. *À quelle fréquence se déclenche-t-il ?* — et si la réponse est
+« jamais », ne pas s'arrêter là. *Que vaut le système au moment où il se déclenchera ?* Si la
+réponse est « il est déjà perdu », alors ce n'est pas un filet : c'est une alarme, et il faut la
+brancher.
+
+## L148 — Un seuil coupe ce qu'il nomme, jamais ce qu'on croit qu'il nomme
+
+*(S38)* Deux solveurs déclarent une cellule « sèche » sous un seuil de hauteur, et lui donnent alors
+une vitesse nulle. On en concluait naturellement que rien n'entre plus dans une cellule sèche.
+**Faux** : le seuil coupe la **vitesse**, pas le **flux de masse**. Le terme de diffusion du schéma
+continue à y déposer de la matière, même quand les deux vitesses voisines sont nulles. Les deux
+solveurs traînent un film derrière leur front, de longueur proportionnelle à leur seuil.
+
+L'erreur de lecture est banale et se reproduit partout : un test conditionnel est lu comme s'il
+gouvernait **l'objet**, alors qu'il ne gouverne qu'**une expression**. « Sec » nommait une propriété
+physique ; le code n'en implémentait qu'une conséquence parmi trois.
+
+**Réflexe** : quand un seuil porte un nom qui décrit un **état** — sec, vide, inactif, expiré,
+déconnecté — chercher toutes les conséquences que cet état devrait avoir, et vérifier laquelle le
+code applique réellement. Puis renommer le seuil d'après ce qu'il fait, ou compléter le code d'après
+ce qu'il nomme. Un nom d'état sur un seuil d'expression est une promesse que personne ne tient.
+
+## L149 — Un inventaire fait à la lecture manque un point ; un changement de signature les trouve tous
+
+*(S38)* Un recensement écrit, relu, mis en tableau, avait manqué un point de saturation sur cinq. Il
+n'a été trouvé que parce que la fonction concernée est passée de fonction libre à méthode : le
+compilateur a refusé l'appel restant et l'a désigné.
+
+La relecture ne pouvait pas le trouver, et pas par inattention — l'appel manquant était dans une
+branche conditionnelle d'un étage intermédiaire d'intégrateur, à trente lignes de ses jumeaux et
+d'apparence identique. **La lecture cherche ce qu'elle sait chercher.**
+
+**Réflexe** : pour recenser tous les usages de quelque chose, ne pas lire — **forcer chaque usage à
+se déclarer**. Changer une signature, ajouter un paramètre obligatoire, rendre un type non
+copiable, retirer une valeur par défaut : le compilateur, le typeur ou l'éditeur de liens énumère
+alors ce que la lecture aurait manqué. Cela vaut aussi pour un `grep` : il ne trouve que les
+formulations auxquelles on a pensé.

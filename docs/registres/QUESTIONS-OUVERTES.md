@@ -361,3 +361,28 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 > **Et il a montré une limite de lui-même** : sur un cas à solution exacte connue, il est redondant,
 > et il dégénère quand les précisions diffèrent. `ADR-043` §7.2 reçoit une note corrective datée ;
 > `ADR-044` pose ce qu'il peut dire et ce qu'il ne peut pas.
+
+## Actions relevées en séance — S38
+
+| # | Action | D'où elle vient | Qui la porte | État |
+|---|---|---|---|---|
+| S38-1 | **Écrire le cas de déclenchement de S5**, la saturation de bord — un bord presque sec sur fond montant. Sa condition est atteignable en principe et n'a jamais été exercée : c'est exactement la situation que S38 vient de montrer indécidable sans test | `ADR-045` §7.1 | session | **ouverte** |
+| S38-2 | **Mesurer la conservation de la quantité de mouvement.** C01 mesure la dérive du volume ; rien ne surveille `hu`, que la saturation détruit sans transfert | `ADR-045` §7.3 | session | **ouverte** |
+| S38-3 | **Donner à C04 une assertion de conservation**, comme C01 en a une. Aujourd'hui, une saturation qui s'y déclencherait ne serait reflétée par aucune grandeur du cas | `ADR-045` §7.4 | session | **ouverte** |
+| S38-4 | **Renommer `h_sec` d'après ce qu'il fait**, ou compléter le code d'après ce qu'il nomme — il coupe la vitesse, pas le flux de masse. À traiter **avec** S37-1, jamais séparément | **A165**, **L148** | session, par ADR | **ouverte** |
+
+> **Note S38 — les actions S34-1 et S37-3 sont closes.**
+>
+> **S34-1** : les saturations sont comptées, sur les deux véhicules, et leurs compteurs sont exposés
+> au rapport du mode `physics` — un déclenchement y est un **échec**, non un avertissement.
+> **A146 est requalifié** par note datée : il n'y a pas de maquillage en régime nominal, mais la
+> saturation est un **détecteur de divergence muet**, ce qui est un autre danger et un plus sérieux.
+>
+> **S37-3** : le résidu de `10⁻¹⁰ m` derrière le front de `shallow.rs` **ne vient pas de la
+> saturation** — ses compteurs sont à zéro sur C04. Il vient du seuil de sec, par un chemin que
+> personne n'avait vu : *un seuil de sec n'assèche pas une cellule, il l'empêche seulement de
+> bouger* (**A165**).
+>
+> **Trois prédictions écrites avant mesure se sont révélées fausses**, toutes de la même façon :
+> elles supposaient qu'un test conditionnel gouverne plus qu'il ne gouverne. Chacune a coûté une
+> ligne de mesure et rapporté un fait que personne n'aurait cherché (**L125**).

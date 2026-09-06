@@ -3578,3 +3578,141 @@ sévérité 1 (S35-5).
 
 Inchangés. Cette session n'en a tranché aucun, et **elle a refusé d'en trancher un par effet de
 bord** — le seuil de sec, qui appartient à la conception et non à une session de code.
+
+---
+
+## S38 — 2026-09-07 — Les saturations ne maquillent rien, et c'est pour cela qu'elles sont dangereuses
+
+**Consigne reçue.** « Enchaîne sur S38 ».
+
+**Entrées.** Action **S34-1**, angle mort **A146**, **reportés quatre fois** ; action **S37-3**.
+
+**Sorties.** Les compteurs de saturation des deux solveurs — sans allocation, sans changer un bit de
+résultat ; [`AUDIT-SATURATIONS-S38`](../docs/registres/AUDIT-SATURATIONS-S38.md) ;
+[`ADR-045`](../docs/adr/ADR-045-la-saturation-est-un-detecteur-pas-un-filet.md) ; angle mort
+**A165** ; **A146 requalifié** par note datée ; les compteurs exposés au rapport du mode `physics`.
+
+**Ça tourne.** `cargo test` : **77 tests** au vert — 32 dans le cœur, 45 dans le harnais dont un
+`ignore` — contre 74 en début de session. `check` : 0 échec, **hashs inchangés**. Mode `physics` :
+**33,7 s** sur 60 s, dont 1,1 s pour le bilan des saturations.
+
+### Le résultat tient en une phrase
+
+**La saturation d'état n'est pas un filet : c'est un détecteur de divergence, et il était muet.**
+
+### Ce qui était craint, et ce qui a été mesuré
+
+`A146` soupçonnait un solveur qui produirait des états impossibles à chaque pas derrière un
+`h.max(0)` complaisant — le lit sec de C04 était nommément visé.
+
+| cas | pas (`f32` / `f64`) | déclenchements |
+|---|---|---|
+| C01 — repos, 60 s | 2 891 / 2 891 | **0** |
+| C03 — seiche, 20 périodes | 17 866 / 35 759 | **0** |
+| **C04 — lit sec**, 2 s | 475 / 454 | **0** |
+
+**Zéro, partout, y compris là où le soupçon portait.** Rusanov préserve la positivité sous sa
+condition de Courant, et `0,45` est largement dedans.
+
+### Mais une saturation jamais vue mordre n'a pas été testée
+
+Deux lectures restaient indiscernables : soit le schéma ne produit jamais d'état impossible, soit la
+condition est écrite de telle façon qu'elle ne peut pas être vraie. Le test d'une saturation est **le
+cas qu'elle doit attraper** (L119) ; le levier est physique — au-delà de sa condition de Courant,
+Rusanov cesse de préserver la positivité.
+
+| `CFL` | déclenchements (`f32` / `f64`) | masse créée / volume | qdm |
+|---|---|---|---|
+| **0,95** | **0 / 0** | 0 | 0 |
+| **1,20** | **267 / 11 252** | **1,4·10¹⁷** | `NaN` |
+
+**Elle fonctionne, elle a son témoin, et la frontière tombe exactement sur la condition de Courant**
+— retrouvée par un compteur qui ne la connaît pas.
+
+### Ce qu'elle fait quand elle mord : rien de bon
+
+Masse créée à **10¹⁷** fois le volume côté `f32`, **10¹⁵⁰** côté `f64` ; quantité de mouvement
+débordant vers `NaN` ; nombre de pas multiplié par 69 pour la même demi-seconde, parce que `dt_cfl`
+se recalcule sur des vitesses divergentes.
+
+> **Elle ne convertit pas une instabilité en résultat acceptable.** Elle convertit une divergence
+> franche — qui aurait produit des `NaN` visibles et arrêté tout le monde — en une suite de nombres
+> finis qui ressemblent à un résultat. Le danger n'est donc pas une saturation *fréquente* en régime
+> nominal : c'est **une seule** en régime dégradé, que rien ne signalait.
+
+`A146` est requalifié, pas retiré : il avait raison de s'inquiéter et tort sur la raison. Le compteur
+est désormais exposé, et **un déclenchement est un échec du cas**, pas un avertissement.
+
+### Trois prédictions écrites avant la mesure, trois fausses
+
+| prédiction | mesure |
+|---|---|
+| C04 déclenche, localisé au front | **jamais** |
+| S5 (bord) déclenche une fois par pas sur C01 | **jamais** — `h[n+1] ≈ 0,99 m`, l'analyse était naïve |
+| `delta.rs` n'a aucune cellule sous son propre seuil de sec | **trois** |
+
+Les trois se trompent de la même façon : elles supposent qu'un test conditionnel gouverne plus qu'il
+ne gouverne. Chacune a coûté une ligne de mesure et rapporté un fait que personne n'aurait cherché.
+
+### Le résidu de S37 : la saturation est mise hors de cause
+
+S37 avait trouvé un film de `1,05·10⁻¹⁰ m` derrière le front de `shallow.rs`, là où `delta.rs` porte
+zéro. La saturation était le suspect naturel — c'est elle qui écrit des zéros. **Les compteurs sont à
+zéro sur C04 : ce n'est pas elle.**
+
+La cause est encore le seuil de sec (**A163**), et le chemin n'était pas celui qu'on croyait :
+
+> **Un seuil de sec n'assèche pas une cellule : il l'empêche seulement de bouger.** Il coupe la
+> **vitesse** — `u = 0` sous `h_sec` — et non le **flux de masse** : la diffusion de Rusanov,
+> `α·(h_R − h_L)`, continue à déposer de la matière dans une cellule déclarée sèche, même quand les
+> deux vitesses sont nulles.
+
+`delta.rs` porte **3** cellules de film, `shallow.rs` **18** — le rapport qu'on attend de seuils
+séparés par quatre ordres de grandeur. Angle mort **A165**.
+
+### Ce que l'audit a trouvé par accident
+
+**Le recensement écrit avait manqué un point de saturation** : l'étage intermédiaire de RK2 dans
+`shallow.rs`. Il n'a été vu que parce que le compilateur a refusé l'appel restant après la
+transformation de `saturer` en méthode.
+
+*Un recensement à la lecture en manque.* Ce qui l'a rattrapé n'est pas une relecture plus attentive
+mais un **changement de signature qui oblige chaque appel à se déclarer** — même conclusion que S34
+sur G10.
+
+### Chiffres qui ont orienté la session
+
+- **0 / 0 / 0** : les déclenchements en régime nominal, sur trois cas et deux véhicules. C'est le
+  chiffre qui a fait basculer la session de « mesurer une fréquence » à « chercher le cas qui
+  déclenche ».
+- **0,95 contre 1,20** : la frontière, et elle n'a pas été choisie — elle est tombée sur la condition
+  de Courant.
+- **6 890 pas au lieu de 100** pour la même demi-seconde à `CFL = 1,2`.
+- **1,1 s sur 33,7 s** : ce que le bilan des saturations ajoute au mode `physics`, budget 60 s.
+
+### Ce qui n'a pas été fait
+
+- **S5, la saturation de bord, n'a pas de cas de déclenchement.** Sa condition est atteignable en
+  principe — un bord presque sec sur fond montant — mais personne ne l'a exercée. C'est exactement
+  la situation dont cette session vient de montrer qu'elle est indécidable sans test.
+- **La conservation de la quantité de mouvement n'est mesurée par aucun cas canonique.** C01 mesure
+  la dérive du volume ; rien ne surveille `hu`.
+- **C04 n'a pas d'assertion de conservation**, contrairement à C01.
+- **Le seuil de sec n'est toujours pas tranché** (A163, S37-1) — croisé trois fois cette session,
+  touché zéro fois.
+- **Les cinq angles morts de sévérité 1 importés en S35 ne sont toujours pas relus** (S35-5), ni le
+  journal de la lignée B reporté (S35-4), ni la lignée S08–S17 traitée (S35-6).
+
+### Session suivante recommandée
+
+**S39 — trancher le seuil de sec** (**S37-1**, **A163**, sévérité 1). Trois sessions l'ont croisé
+sans le toucher, et chacune a ajouté une raison de le décider : il déplace la position du front
+(S37), il gouverne la longueur du film derrière lui (S38), et il sépare deux véhicules qui doivent
+rester comparables. C'est un ADR, pas un patch.
+
+*Solutions de rechange* : relire les cinq angles morts de sévérité 1 (S35-5) ; ou écrire le cas de
+déclenchement de S5.
+
+### Arbitrages en attente
+
+Inchangés. Cette session n'en a tranché aucun.

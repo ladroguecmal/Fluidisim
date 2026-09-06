@@ -117,7 +117,8 @@ indiscernables tant que personne ne compte** (A146).
       pouvoir répondre **non**.
 - [x] **P7** — l'ADR-045, A165, et la requalification datée d'A146.
 - [x] **P7b** — exposer les compteurs au rapport du mode `physics` (décision D1).
-- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
+- [x] **P8a** — rituel : journal, leçons L147-L149, actions S38-1 à S38-4.
+- [ ] **P8b** — rituel : index, décomptes, jeton libéré.
 
 ### Notes de reprise
 
