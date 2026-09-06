@@ -715,3 +715,36 @@ sessions, un seul portant une fermeture.
 session touche le point. Et la valeur qui compte le plus n'est ni *ouvert* ni *clos*, c'est
 **« en attente de quelqu'un d'autre »** — la seule que personne ne pense à écrire, et la seule qui
 dise qu'il n'y a rien à attendre de nous.
+
+## L57 — Deux paragraphes qui ne se citent pas peuvent borner le même nombre
+
+*(S16)* La largeur d'éponge est donnée par une formule dans un ADR ; les emprises des domaines de
+référence sont données par un tableau dans une fiche chiffrée. Aucun des deux ne cite l'autre. Mis
+côte à côte, ils **bornent par le haut le paramètre le plus connecté du projet** — et la borne tombe
+en dessous de la valeur proposée depuis la première session.
+
+Personne ne l'avait vu parce que personne n'avait de raison de rapprocher les deux : l'un parle de
+zone d'absorption, l'autre de comptage de cellules. C'est le même angle mort que L53 — les revues
+croisées ne confrontent que des documents qui se citent — mais vu depuis un autre côté : ici il ne
+s'agit pas d'une contradiction à trouver, mais d'une **contrainte à calculer**, qui n'existe dans
+aucun des deux documents et seulement dans leur produit.
+
+**Réflexe** : avant d'exécuter une mesure, chercher ce que le corpus **impose déjà** au résultat.
+Un banc qui balaie un paramètre doit d'abord savoir dans quel intervalle la réponse est admissible ;
+cet intervalle est souvent calculable, et le calculer coûte une heure quand la mesure coûte des
+semaines. Si l'intervalle est vide, on l'apprend avant de monter le banc et non pendant.
+
+## L58 — Un banc produit un couple de valeurs liées, jamais une valeur seule
+
+*(S16)* Le banc central du projet était écrit pour trancher une longueur d'onde de coupure. Il doit
+en réalité trancher cette longueur **et** le taux d'échantillonnage du champ de fond, parce que les
+deux sont liés par une même inégalité et qu'aucun ne veut rien dire sans l'autre.
+
+Un protocole qui ne publie qu'une des deux valeurs ne laisse pas la seconde indéterminée : il la
+laisse **se choisir plus tard, à l'œil, par quelqu'un qui n'aura pas les mesures**. C'est le pire des
+trois cas — mieux vaut une valeur mesurée, ou une valeur explicitement ouverte, qu'une valeur qui
+paraît acquise parce qu'elle figurait à côté d'une autre.
+
+**Réflexe** : pour tout banc, écrire **ce qu'il publie**, au pluriel, avant d'écrire comment il
+mesure. Si deux paramètres apparaissent ensemble dans une contrainte, ils sortent ensemble du banc
+ou ils n'en sortent pas.

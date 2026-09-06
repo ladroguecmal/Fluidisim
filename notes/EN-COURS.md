@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S16
-État             : en cours
+État             : terminée
 Battement        : 2026-09-05
 Objectif         : préparer l'exécution de B2 — le banc qui fixe `λ_cut`, « à décider en premier »
                    depuis S01 et qui débloque quatre points ouverts
@@ -84,10 +84,10 @@ qu'on peut déjà savoir **sans mesurer**.
 - [x] **P4** — dossier `B2` §4–6 : les scénarios en fichiers concrets · le protocole iso-qualité
   appliqué · les deux critères de recevabilité.
 - [x] **P5** — dossier `B2` §7–9 : la procédure de décision, les préalables, les pièges de mesure.
-- [ ] **P6** — notes correctives dans les documents touchés, et les points ouverts que le dossier
+- [x] **P6** — notes correctives dans les documents touchés, et les points ouverts que le dossier
   ferme ou déplace.
-- [ ] **P7** — index, angles morts, décomptes.
-- [ ] **P8** — rituel de fin (`REPRISE.md` §6) : journal S16, leçons, index, jeton libéré.
+- [x] **P7** — index, angles morts, décomptes.
+- [x] **P8** — rituel de fin (`REPRISE.md` §6) : journal S16, leçons, index, jeton libéré.
 
 ### Notes de reprise
 

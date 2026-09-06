@@ -12,10 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-05
-Session en cours : S16 — 2026-09-05 — dossier d'exécution du banc B2
-Dernière session : S15 — 2026-09-05 — audit des registres
+Dernière session : S16 — 2026-09-05 — dossier d'exécution du banc B2
+Session suivante : S17 — le dossier de réunion des onze destinataires extérieurs : tout existe,
+                   dispersé sur 26 ADR et 7 spécifications ; rien n'est présentable
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
@@ -91,7 +92,7 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Quinze sessions, 26 ADR, six spécifications, **huit registres**. Les 30 sections du document de
+Seize sessions, 26 ADR, six spécifications, huit registres. Les 30 sections du document de
 questions ouvertes d'origine sont traitées. Les vingt premiers ADR ont été confrontés les uns aux
 autres en S05 (douze écarts, deux de gravité 1) et les cinq SPEC entre elles en S08 (dix écarts,
 deux de gravité 1). Tous résolus — le dernier, le **chemin poussé**, par l'écriture de `SPEC-006`

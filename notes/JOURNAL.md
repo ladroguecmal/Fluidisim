@@ -1200,3 +1200,94 @@ temps, dans l'ordre :
 
 **Arbitrages en attente — rappel.** Cinq arbitrages humains, quatre interfaces à confirmer, sept
 autres destinataires. `WaveEvent` reste l'urgence de format, à 50 octets.
+
+---
+
+## S16 — 2026-09-05 — Dossier d'exécution du banc B2
+
+**Consigne reçue.** « Continue. » S15 avait constaté que le corpus n'a plus de classe de contrôle non
+passée et proposé deux emplois du temps ; le premier était de préparer B2, sur le chemin critique
+depuis S01.
+
+**Sorties.** [`validation/DOSSIER-B2.md`](../docs/validation/DOSSIER-B2.md), dix sections ; notes
+correctives dans ADR-005 §5, ADR-021 §7.3 et `PLAN-BENCHMARK` B2 ; registre porté à 93 angles morts ;
+leçons L57 et L58.
+
+### Ce que le corpus savait déjà de `λ_cut`, sans aucune mesure
+
+C'est la trouvaille de la session, et elle sort de deux paragraphes que personne n'avait rapprochés.
+
+**Borne haute — l'éponge.** ADR-005 §5 pose `L_s = λ_cut/2` par face et conclut que `λ_cut` « fixe le
+coût minimal d'un domaine ». Il ne calcule jamais ce que cela laisse. L'intérieur utile d'un domaine
+de largeur `W` vaut `W − λ_cut`, et le domaine d'impact de référence fait **6 × 6 m**
+(SPEC-001 §2.4) :
+
+| `λ_cut` | 3 m | **4 m** | 6 m |
+|---|---|---|---|
+| Intérieur utile, linéaire | 50 % | **33 %** | **0 %** |
+| Intérieur utile, en surface | 25 % | **11 %** | 0 % |
+
+À la valeur proposée depuis S01, **un domaine d'impact est à 89 % d'éponge**. À 6 m il n'a plus
+d'intérieur du tout. **C'est le plus petit domaine qui borne `λ_cut`**, et la borne est `≤ 3 m`.
+
+**Borne basse — l'échantillonnage du fond.** L'écart E08 de S08 fait dépendre la validité de la
+décimation du rapport `λ_cut/dx`. Au `dx` le plus grossier — 0,25 m, le déferlement — `λ_cut = 4 m`
+donne quatre points par longueur d'onde après décimation ×4, et il en faudrait dix, soit
+`λ_cut ≈ 10 m`.
+
+**Les deux bornes ne se croisent pas**, à un facteur trois près. Mais elles ne sont pas de même
+nature : l'éponge est une contrainte **dure** — à 6 m le domaine n'existe plus — tandis que la
+décimation est une contrainte **de coût** : quatre points ne donnent pas un résultat faux, ils
+donnent une économie qui s'effondre, ce qu'E08 disait déjà.
+
+> **D'où la résolution portée au protocole : `λ_cut` reste global, c'est le taux de décimation qui
+> s'adapte.** E08 avait écrit la contrainte sous la bonne forme — `dx ≤ λ_cut/N` — en laissant `N`
+> libre. `N` est le paramètre, pas `λ_cut`. Le facteur d'économie passe de 64 à **8** dans une zone
+> de déferlement, et B2 doit mesurer le coût du terme source **à décimation réduite** : sans cela le
+> coût de δ en régime substitutif est sous-estimé d'un facteur voisin de huit, sur le domaine qui
+> compte 384 000 cellules.
+
+Fenêtre restante : **2,5 à 3 m**, contre 4 m proposés depuis S01. Ce n'est pas une réfutation, c'est
+une hypothèse chiffrée — et le banc doit donc **balayer 2 à 6 m**, pas confirmer 4.
+
+### Trois apports au protocole du banc
+
+- **Un cinquième scénario, B2-05** — arrivée en cours de partie à `t` = 30 s. L'ajout S04 de
+  `PLAN-BENCHMARK` demandait de mesurer « la taille d'un point de reprise, sa fréquence, et le volume
+  à transmettre » ; aucun des quatre scénarios existants ne l'exerçait.
+- **La métrique d'iso-qualité, nommée.** SPEC-003 §5.2 impose de régler chaque candidat jusqu'à une
+  qualité cible commune, ce qui suppose une métrique d'erreur **unique** — B2 n'en avait pas. Retenue :
+  l'**erreur de célérité relative** sur le cas C02, intégrée sur `[λ_cut, 4·λ_cut]`. Motif : référence
+  analytique fermée, et c'est la grandeur qui gouverne le défaut visible d'un candidat de W — un train
+  de vagues qui se désynchronise du fond en quelques dizaines de secondes.
+- **B2 produit un couple, pas un nombre** : `λ_cut` **et** le tableau des décimations admissibles par
+  classe de domaine. Un protocole qui n'en publie qu'un laisse l'autre se choisir plus tard, à l'œil,
+  par quelqu'un qui n'aura pas les mesures.
+
+### Deux vérifications faites plutôt que supposées
+
+**Le critère de fermeture n'est pas ce qui borne `λ_cut`.** ADR-021 §3.2 exige qu'aucun phénomène
+gameplay ne puisse naître exclusivement dans δ. En énumérant les phénomènes ondulatoires du corpus,
+le plus court est le **sillage à 5 m/s, `λ = 2πv²/g` = 16 m** : le critère laisse de la marge jusqu'à
+`λ_cut ≈ 6 m`. Ce n'est donc pas lui qui mord — c'est l'éponge.
+
+**Le « ≈27 % » d'ADR-005 §5 n'est pas reproductible.** Pour un domaine de 20 m avec 2 m d'éponge, la
+fraction de volume vaut 20 % (deux faces), 36 % (quatre faces) ou 49 % (six faces) ; le paragraphe ne
+dit pas lesquelles. La grandeur est le coût d'entrée de tout domaine, et elle fonde la borne haute.
+Note corrective posée ; le choix des faces reste à trancher avant B2.
+
+### Ce qui n'a pas été fait
+
+Le **dossier de réunion des onze destinataires extérieurs** — le second emploi que S15 proposait —
+n'existe toujours nulle part sous forme présentable. L'index en donne la liste, pas le contenu.
+
+**Prochaine session recommandée.** S17 — **le dossier de réunion**. C'est désormais le seul travail
+de conception disponible qui ne demande ni mesure ni décision humaine préalable : il consiste à
+rassembler, pour chacun des onze destinataires, ce qu'on lui demande, ce qu'on lui fournit, ce qu'il
+risque s'il répond tard, et le chiffre qui rend la demande concrète. Tout existe dans le corpus,
+dispersé sur vingt-six ADR et sept spécifications ; rien n'est présentable.
+
+Second candidat : le même exercice que S16 pour **B3**, le second banc du chemin critique.
+
+**Arbitrages en attente — rappel.** Cinq arbitrages humains, quatre interfaces à confirmer, sept
+autres destinataires. `WaveEvent` reste l'urgence de format, à 50 octets.
