@@ -81,7 +81,7 @@ I-11 et I-12 ont été traités en S13 par ADR-024. Restent **quinze**.
   d'I-14, qui ne cite aucun ADR.
 - [x] **P5** — rédiger `docs/registres/AUDIT-INVARIANTS-S14.md` : le verdict par invariant, et la
   liste de ceux qui tiennent — sans elle le contrôle n'est pas vérifiable.
-- [ ] **P6** — appliquer : notes correctives, amendements, et un ADR si une décision change.
+- [x] **P6** — appliquer : notes correctives, amendements, et un ADR si une décision change.
 - [ ] **P7** — index, angles morts, décomptes.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6) : journal S14, leçons, index, jeton libéré.
 
@@ -253,3 +253,7 @@ I-16 nomme une catégorie. Un invariant qui nomme un mécanisme vieillit avec lu
 Deux ADR plutôt qu'un : le premier est une décision de conception, le second une correction de
 règles. Les mêler aurait rendu les deux moins citables.
 **P6b** : les amendements dans `01_INVARIANTS.md` et les notes correctives.
+
+**P6b** : 13 marques appliquées, aucun échec. Six invariants amendés, le renvoi croisé I-06 ↔ I-16
+posé, la note ADR-010 §6 → ADR-025, `extent_m` borné, `HydroSample` corrigé, et les trois formules
+de Wagner migrées d'ADR-023 vers **SPEC-001 §5 bis** — ce qui résout I-14 sans toucher à son énoncé.

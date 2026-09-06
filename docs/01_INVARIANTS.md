@@ -6,16 +6,29 @@ détail ; un invariant ne se change que par un ADR explicite qui le remplace.
 ---
 
 **I-01 — L'eau est une somme de couches.** Aucun code ne suppose qu'il existe « la » surface de
-l'eau produite par un système unique. Tout consommateur passe par `EvalWater(x, t, LayerMask)`.
-→ ADR-001
+l'eau produite par un système unique. Un consommateur obtient l'eau **soit** en l'interrogeant par
+lot avec un masque de couches (chemin tiré, SPEC-004 §3), **soit** en lisant ce que le système
+publie (chemin poussé, SPEC-006). Aucun ne reconstruit la surface par ses propres moyens.
+→ ADR-001, SPEC-006, **ADR-026**
 
-**I-02 — Le fond ne stocke rien.** B n'a aucune représentation par cellule, ni en mémoire, ni sur
-disque, ni sur le réseau. Il est recalculé, jamais mémorisé.
-→ ADR-004
+*Amendement S14 (ADR-026 §2.1) : l'énoncé précédent imposait que « tout consommateur passe par
+`EvalWater` ». C'était faux depuis S09, et faux par décision — ADR-018 §1 interdit nommément à la
+navigation d'interroger `EvalWater`.*
+
+**I-02 — Le fond ne stocke pas son état.** B n'a aucune représentation de son **état** par cellule,
+ni en mémoire, ni sur disque, ni sur le réseau : il est recalculé à partir de `T_sim`, jamais
+mémorisé. Ses **paramètres** — état de mer, marée, courant — vivent en revanche dans la grille
+`HydroSample` (ADR-004 §2.2), donnée d'auteur et de cuisson. La distinction est celle d'I-09 : on
+stocke et on interpole des paramètres, jamais des réalisations.
+→ ADR-004, **ADR-026**
+
+*Amendement S14 (ADR-026 §2.2) : l'énoncé précédent — « aucune représentation par cellule, ni sur
+disque » — était contredit par son propre ADR source, ADR-004 §2.2 définissant la grille
+`HydroSample` par nœud, et par ADR-022 §4.2 qui l'écrit dans la sauvegarde.*
 
 **I-03 — B, W répliqué et V sont déterministes.** Bit à bit, entre plateformes. Sémantique IEEE
 stricte, ordre de sommation fixé, PRNG entier. Vérifié en continu par hash.
-→ ADR-003
+→ ADR-003, **ADR-010 §4** *(source du déterminisme de V — flèche complétée en S14, ADR-026 §2.3)*
 
 *Amendement S10 (ADR-022 §5.2) : la couche **V** a été ajoutée à l'énoncé. SPEC-003 §2 la plaçait
 dans le régime D1 — exact, inter-plateforme — depuis S03, et ADR-010 §4 avait pris toutes les
@@ -36,8 +49,9 @@ l'exception.*
 respecte, quitte à sous-résoudre. L'eau ne peut structurellement pas provoquer un pic de frame.
 → ADR-007, ADR-012
 
-**I-06 — Aucune allocation à l'exécution.** Blocs, domaines, paquets et nœuds viennent de pools
-dimensionnés par profil au démarrage. Le battement coûte des indices, jamais de la mémoire.
+**I-06 — Aucune allocation à l'exécution.** Blocs, domaines, paquets, nœuds et anneaux
+d'instantanés viennent de pools dimensionnés par profil au démarrage. Le battement coûte des indices,
+jamais de la mémoire. *(Ce qu'un profil a le droit de déclarer est fixé par **I-16**.)*
 → ADR-006
 
 **I-07 — Tout domaine appartient à un référentiel.** Il reçoit `g_eff` par injection. Une constante
@@ -53,9 +67,16 @@ au GPU.
 mélangent pas ; on mélange les paramètres qui les engendrent.
 → ADR-004
 
-**I-10 — Le serveur ne simule pas d'eau.** Il tient des enregistrements d'événements dont il sait
-calculer analytiquement l'amplitude. Il n'exécute ni W ni δ.
-→ ADR-009
+**I-10 — Le serveur n'exécute que la couche V.** Il n'exécute ni W ni δ : il tient des
+enregistrements d'événements dont il sait calculer analytiquement l'amplitude. Il **exécute en
+revanche la couche V**, en arithmétique entière et à 10 Hz (ADR-010 §4, ADR-022 §5.1), parce qu'elle
+porte des conséquences de jeu. Il charge donc des données cuites — `shape_lut`, bathymétrie, champs
+de courant : **un serveur sans assets n'est pas une option**.
+→ ADR-009, ADR-022 §5.1, **ADR-026**
+
+*Amendement S14 (ADR-026 §2.4) : l'énoncé précédent ne disait que ce que le serveur ne fait pas. Un
+lecteur en concluait « aucune eau sur le serveur » et dimensionnait un serveur sans assets — angle
+mort A77, dont la cause était cette formulation en négatif.*
 
 **I-11 — Aucun chemin d'énergie ne va du client vers le monde répliqué.** Un client ne peut pas
 faire naître un événement W répliqué : le serveur les émet depuis leurs causes, qu'il possède. La
@@ -81,9 +102,14 @@ restauration (ADR-022 §2.6).
 ADR-013 §4, qu'il citait pourtant en source. ADR-022 §2.6 avait dû redémontrer de son côté qu'un
 domaine substitutif n'est pas gratuit à recréer.*
 
-**I-13 — Le rendu ne pilote pas la physique.** Il peut demander une priorité au `WaterManager` ;
+**I-13 — Le rendu ne pilote pas la physique.** Il peut demander une priorité au `WaterSystem` ;
 il ne peut jamais imposer un niveau de simulation ni partager les structures de calcul.
-→ ADR-006
+→ ADR-006, **ADR-026**
+
+*Correction S14 (ADR-026 §2.5) : l'énoncé citait un `WaterManager` qui n'existe nulle part ; la
+classe se nomme `WaterSystem` (SPEC-004 §3). Ce qu'I-13 protège est le tableau de blocs de δ
+(ADR-006 §5), et non les champs que le système publie — une poignée de texture d'écume
+(SPEC-006 §4.1) est un produit publié et immuable, pas une structure de calcul partagée.*
 
 **I-14 — Toute valeur numérique est ou bien dérivée d'une formule citée dans SPEC-001 ou SPEC-002,
 ou bien marquée « à calibrer » avec le benchmark qui la fixera.** Aucun nombre magique sans
@@ -95,10 +121,19 @@ autoritaire parce que ses entrées ne sont pas répliquées et son calcul pas re
 grandeur nouvelle se teste contre I-15 plutôt que de faire l'objet d'un arbitrage.
 → ADR-021
 
-**I-16 — Un profil de qualité ne déclare que des ressources.** Toute capacité dérivée qu'on y
-inscrit — un nombre maximal d'objets, une portée — finit par contredire les ressources qui
-l'entourent. Elle se calcule à l'initialisation à partir de coûts mesurés.
-→ ADR-012 §3, revue croisée R04
+**I-16 — Un profil de qualité ne déclare que ce qui est alloué directement.** Une valeur peut y
+figurer si elle correspond à une **allocation** — des octets, des emplacements de pool. Elle ne le
+peut pas si elle doit être **cohérente avec deux autres valeurs déjà déclarées** : une telle capacité
+se calcule à l'initialisation à partir de coûts mesurés. C'est ce qui condamnait `domaines_max`,
+contradictoire à la fois avec le budget mémoire et avec le budget de temps, d'un facteur six.
+*(Renvoi croisé : **I-06** impose que les pools soient dimensionnés par profil ; c'est I-16 qui dit ce
+qu'un profil a le droit de déclarer.)*
+→ ADR-012 §3, revue croisée R04, **ADR-026**
+
+*Amendement S14 (ADR-026 §2.6) : l'énoncé précédent opposait « ressource » et « capacité dérivée »,
+opposition qui ne tranche pas le cas d'une taille de pool — laquelle est les deux. La précision avait
+été décidée en S11 (`AUDIT-POINTS-OUVERTS-S11` §2.6) et inscrite dans sa table « Suite », mais jamais
+appliquée à l'invariant.*
 
 **I-17 — Aucun état de la couche δ n'est jamais sérialisé.** Ni sur disque, ni sur le réseau, ni
 dans une sauvegarde, ni dans un mécanisme de repli hors caméra. Ce qui traverse une frontière de

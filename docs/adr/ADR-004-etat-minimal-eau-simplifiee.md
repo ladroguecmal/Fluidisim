@@ -47,7 +47,7 @@ sont **les mêmes partout sur la planète**. Seules leurs *amplitudes* varient s
 Une grille 2D lâche sur la planète (pas ≈ 10 km), streamée avec le terrain :
 
 ```
-struct HydroSample {                 // 40 octets par nœud
+struct HydroSample {                 // 34 octets de champs — cf. note S14 sous ce bloc
     Hs          : f16       // hauteur significative                    [m]
     Tp          : f16       // période de pic                           [s]
     theta_mean  : f16       // direction moyenne                        [rad]
@@ -63,7 +63,15 @@ struct HydroSample {                 // 40 octets par nœud
     flags       : u8
     _pad        : u8[6]
 }
-```
+
+
+> **Note corrective (S14, angle mort A85).** Ce bloc annonçait **40 octets par nœud** ; la somme des
+> champs déclarés en vaut **34** — onze `f16` (22 o), deux `f16[2]` (8 o), deux `u8` (2 o) et
+> `_pad[6]`. Soit `_pad` devait valoir 12 octets pour atteindre 40, soit la taille annoncée était
+> fausse ; dans les deux cas le document se contredisait. **Quatrième structure du corpus trouvée mal
+> dimensionnée**, après les trois de la revue S13 — le taux d'erreur de cette classe de contrôle,
+> qui n'avait jamais été passée, est de quatre sur quatre. Convention retenue : les tailles annoncées
+> sont des **sommes de champs compactés**.```
 
 Une région de 32 km avec un pas de 10 km tient dans **quelques kilo-octets**.
 

@@ -147,6 +147,45 @@ n'est pas laissé à l'appréciation d'un auteur.
 - Nombre de Froude de profondeur : `Fr_h = v/√(gh)`. Au-delà de 1, le sillage devient un cône de
   demi-angle `arcsin(1/Fr_h)` et les vagues transverses disparaissent. Voir ADR-011 §4.
 
+## 5 bis. Impact d'entrée dans l'eau
+
+*(Section ajoutée en S14. Ces trois relations vivaient dans ADR-023 §2, c'est-à-dire hors des deux
+documents qu'I-14 désigne comme seules sources de formules. Migrées ici plutôt que d'élargir
+l'invariant : le prix d'I-14 est qu'il n'existe qu'un seul endroit où chercher un nombre.)*
+
+Théorie de Wagner, pour une carène de **relèvement de fond** `β` entrant à la vitesse `v`.
+
+**Demi-largeur mouillée** : `c(t) = (π/2)·v·t / tan β`, d'où la **durée d'impact** pour mouiller une
+demi-largeur `b` :
+
+
+
+| `b` | `β` | `v` | `t_impact` | à 30 Hz |
+|---|---|---|---|---|
+| 1,0 m | 30° | 5 m/s | 73 ms | 2,2 ticks |
+| 0,20 m | 45° | 7,7 m/s | 17 ms | 0,5 tick |
+| 2,0 m | 10° | 4 m/s | 56 ms | 1,7 tick |
+
+**Coefficient de pression maximal** : `C_p = 1 + (π / (2·tan β))²`, `p_max = C_p · ½ρv²`.
+
+| `β` | 45° | 30° | 20° | 10° | 5° |
+|---|---|---|---|---|---|
+| `C_p` | 3,5 | 8,4 | 19,6 | 80,4 | 323 |
+| `p_max` à 5 m/s | 43 kPa | 105 kPa | 245 kPa | 1,0 MPa | 4,0 MPa |
+
+**C'est l'angle qui domine, pas la vitesse** : 30° → 10° multiplie la pression par dix, doubler la
+vitesse ne la multiplie que par quatre. Et **la formule diverge quand `β → 0`** — le coussin d'air
+piégé et la compressibilité l'écrêtent. La pression de pic n'est donc pas une grandeur connue.
+
+**Masse ajoutée d'une plaque plane** de demi-largeur `c`, par mètre de longueur :
+
+
+
+C'est cette dernière que le système publie (ADR-023 §2.3) : un bilan de quantité de mouvement, borné
+par la masse d'eau réellement accélérée, là où la pression de pic publierait son incertitude.
+
+---
+
 ## 6. Hydraulique (couche V)
 
 - Orifice : `Q = C_d·A·√(2·g·Δh)`, `C_d ≈ 0,62` (arête vive), `0,82` (ajutage).
@@ -168,6 +207,7 @@ n'est pas laissé à l'appréciation d'un auteur.
 ## 8. Sources des formules
 
 Théorie linéaire des vagues (Airy), McCowan pour le déferlement, Stokes pour la cambrure limite,
+Wagner et von Karman pour l'impact d'entrée et la masse ajoutée,
 relations JONSWAP/SMB pour le fetch, Kelvin pour le sillage, Manning et Torricelli pour
 l'hydraulique. Toutes classiques, aucune n'est spécifique au projet ; leur intérêt ici est d'être
 **réunies avec les ordres de grandeur du projet**.

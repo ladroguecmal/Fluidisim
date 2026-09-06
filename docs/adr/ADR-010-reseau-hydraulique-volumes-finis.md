@@ -129,6 +129,21 @@ Le journal d'écart de masse est un **outil de diagnostic**, pas une formalité 
 perd 3 % de masse par seconde est inutilisable en régime substitutif, et le défaut serait
 autrement invisible pendant des mois.
 
+> **Note corrective (S14, [ADR-025](ADR-025-propriete-de-la-masse-entre-V-et-delta.md)).** Le
+> **transfert de propriété de masse** décrit ci-dessus est remplacé. Il contredisait **I-04** — la
+> masse finale d'un compartiment, donc un chavirement, était déterminée par un solveur δ jamais D1 —
+> et il n'avait **aucune histoire côté serveur**, celui-ci exécutant V (ADR-022 §5.1) et jamais δ
+> (I-10) : il ne pouvait ni geler le nœud ni recevoir `M'`.
+>
+> **La masse appartient au nœud en permanence.** Le domaine δ est amorcé depuis `shape_lut(volume)`
+> — la partie ci-dessus qui était juste — puis **forcé** vers le volume autoritaire du nœud par une
+> relaxation lente (`τ ≈ 1 s`). Il ne rend aucune valeur autoritaire. `M' − M` reste mesuré et
+> journalisé, **uniquement comme diagnostic** — ce que ce paragraphe disait déjà être son intérêt
+> principal — et devient un critère d'admission en régime substitutif (ADR-025 §3.3).
+>
+> Aucun message n'est échangé : V étant déterministe bit à bit (I-03), chaque participant intègre la
+> même valeur.
+
 ## 7. Persistance
 
 Un nœud V est un objet persistant du monde, indexé par cellule `HydroGrid`. Politique proposée :

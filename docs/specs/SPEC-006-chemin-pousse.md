@@ -426,7 +426,7 @@ du même champ**, et c'est la décision structurante de cette section.
 struct FoamCascadeDesc {
     FrameId    frame;            // référentiel de l'ancre — I-07, I-08
     vec3       anchor_local;     // |anchor_local| < 4096 m
-    float      extent_m;         // côté de la cascade, en mètres
+    float      extent_m;         // côté de la cascade, en mètres — **< 4096 m** (I-08), cf. S14
     uint16_t   texels;           // côté en texels ; résolution ouverte — ADR-014 §7.1, banc B9
     uint8_t    level;            // 0 = la plus fine
 };
