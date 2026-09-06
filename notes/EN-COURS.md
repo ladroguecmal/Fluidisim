@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S24
-État             : en cours
+État             : terminée
 Battement        : 2026-09-06
 Objectif         : C08 — la convergence sous raffinement, et l'ordre du front
 ```
@@ -93,7 +93,7 @@ produit plusieurs, et l'assertion `p > 0,8` n'a pas le même sens selon celle qu
       en dessous, la mesure est dominée par la queue du profil. À vérifier, pas à supposer.
 - [x] **P6** — ADR-032 si la conclusion engage le protocole des bancs, note datée sinon.
 - [x] **P7** — répercussions : `CAS-CANONIQUES` §C08, index, angles morts, actions, décomptes.
-- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
+- [x] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
@@ -202,3 +202,24 @@ lent » de SPEC-003 §5.1 ne dit pas à quel point.
 2. **L'échec d'allocation était absorbé par un `Err(_) => continue`.** Le rapport affichait
    « 0 grille retenue sur 0 » — un résultat vide qui a l'air d'un résultat. Corrigé : l'erreur
    remonte au `Sink` et le cas se déclare indisponible au lieu de se déclarer vide.
+
+#### État à la fin de S24
+
+`cargo test` : **29 tests**. `water-harness check` : 2 scénarios, 0 échec, hashs **inchangés** — S24
+n'a pas touché à la couche `B`. `water-harness physics` : 1 échec (C04, voulu), 3 témoins,
+**5 grandeurs sans verdict**, douze cas canoniques imprimés comme non exécutés. Jeton **libéré**.
+
+**Ce que S25 doit savoir avant de commencer, et qui n'est pas ailleurs :**
+
+- **« Non concluant » n'est ni un succès ni un échec, et le rapport le compte à part.** Ne pas
+  chercher à le faire disparaître : cinq grandeurs sur cinq sont dans cet état parce que le régime
+  asymptotique n'est pas atteint, pas parce que la mesure est cassée.
+- **Ne pas affiner l'oracle pour « améliorer » C08.** C'est le geste naturel et il dégrade le
+  résultat : à `nx = 25 600` l'ordre observé monte à 1,56, ce qui est impossible pour un schéma
+  d'ordre 1. Le filtre de contamination est à ×30 et il est dérivé, pas conventionnel.
+- **L'arène du mode `physics` est à 64 Mo** parce que l'oracle à 51 200 cellules la remplit. Si un
+  cas se déclare « ORACLE INDISPONIBLE », c'est là qu'il faut regarder — et non dans la physique.
+- **C03 demande la friction de fond** (action S22-3), le dernier prérequis non tenu du véhicule.
+  C'est la seule chose à écrire avant de commencer S25 si l'on suit la recommandation.
+- **Le témoin `C01-jet` doit rester rouge** ; C04 doit rester en échec. Les deux sont des décisions,
+  pas des régressions.

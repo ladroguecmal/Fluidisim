@@ -1965,3 +1965,113 @@ douce (1000) ou de mer (1025). **A107** — le sort du travail propre à `master
 de la ligne vivante. Et les trois choses hors de portée d'une session : nommer les personnes,
 constater l'état réel du projet, agir sur l'infrastructure — dont le **dépôt distant**, dont
 l'absence a produit les deux forks.
+
+---
+
+## S24 — 2026-09-06 — C08 : le test qui ne peut pas conclure, et l'oracle qui est le banc
+
+**Consigne reçue.** « Enchaîne sur S24 ».
+
+**Sorties.** Le contrôle de convergence du mode `physics` — Richardson à trois grilles, trois
+verdicts, filtre de contamination ; le montage régulier `c08_regulier` ;
+[`ADR-032`](../docs/adr/ADR-032-c08-n-est-pas-executable-tel-qu-enonce.md) ; **note corrective datée
+sur `CAS-CANONIQUES` §C08** ; registre porté à **116 angles morts** ; leçons L79 à L82 ; actions
+**S23-1 et S23-3 closes**, S23-2 dépriorisée avec son motif.
+
+**Ça tourne.** `cargo test` : **29 tests** au vert. `water-harness check` : deux scénarios, 0 échec,
+hashs inchangés. `water-harness physics` : 1 échec (C04, voulu), 3 témoins, **5 grandeurs sans
+verdict**.
+
+### Le résultat de la session tient en une phrase
+
+**C08 ne peut pas conclure — ni passer, ni échouer — et ce n'est pas le solveur qui est en cause,
+c'est l'énoncé du test.** Sur cinq grilles, de 200 à 3200 cellules, aucune des quatre grandeurs de
+C04 n'atteint le régime asymptotique : les ordres montent encore, donc le dernier n'est pas la
+limite. L'énoncé, lui, en demande trois.
+
+### Décision structurante
+
+[`ADR-032`](../docs/adr/ADR-032-c08-n-est-pas-executable-tel-qu-enonce.md) : **l'ordre de convergence
+est une propriété du couple (solveur, cas), jamais du solveur seul.** Le même solveur donne
+`p ≈ 0,98` sur une bosse gaussienne lisse, `0,73` à `0,80` sur C04, et `0,24` sur la position de son
+front. Aucun de ces nombres n'est « l'ordre du solveur ».
+
+C08 pose pourtant une assertion **absolue** — `p > 0,8` — et désigne trois cas, C02, C04 et C09,
+dont **aucun n'est régulier**. L'assertion ne s'applique donc à aucun d'eux. Sur un cas singulier,
+la mesure reste utile mais change de nature : elle compare des candidats **entre eux**, sans seuil.
+
+### Ce qui n'avait pas été anticipé
+
+**Affiner l'oracle a rendu le résultat pire.**
+
+L'oracle n'est pas la solution : il porte sa propre erreur. Dès que l'erreur d'une grille testée s'en
+approche, les deux se soustraient et l'ordre observé s'envole.
+
+| Oracle | ordres observés |
+|---|---|
+| `nx = 12 800` | +0,889 · +0,945 · +1,087 |
+| `nx = 25 600` | +0,890 · +1,058 · **+1,559** |
+| `nx = 51 200`, filtre ×30 | +0,819 — *trois grilles saines seulement* |
+
+**1,56 pour un schéma d'ordre 1 est impossible**, et c'est ce qui rend la contamination
+reconnaissable. La conséquence est contre-intuitive : **avec un oracle, le triplet le plus fin est le
+*moins* fiable**, exactement l'inverse de ce qui vaut avec une solution analytique.
+
+Et les deux exigences de C08 se contredisent — grilles assez fines pour être asymptotiques, assez
+grossières pour ne pas être contaminées. Pour cinq grilles saines il faut un oracle **480 fois** plus
+fin que la plus grossière. En 1D son coût va comme `nx²`, en 2D comme `nx³` : **l'oracle est le
+banc**, et SPEC-003 §5.1 le cite comme une simple référence disponible.
+
+### Chiffres qui ont orienté la conception
+
+| Mesure | Valeur | Ce qu'elle dit |
+|---|---|---|
+| `p` sur montage **régulier** | +0,819 · **+0,978** | le solveur est bien d'ordre ≈ 1 |
+| `p` sur C04, erreur L1 globale | +0,595 · +0,686 · **+0,732** | ordre réduit par la **solution**, pas le schéma |
+| `p` sur C04, `h(0)` et `u(0)` | **0,79** et **0,80** | même régime que la norme globale |
+| `p` sur C04, **position du front** | **−0,504 · −0,059 · +0,237** | pré-asymptotique : les écarts grandissent d'abord |
+| oracle requis / grille la plus grossière | **×480** | l'oracle est le poste dominant du banc |
+| ordre observé sous contamination | **1,56** | impossible, donc détectable |
+
+### Deux défauts de mon propre outil, trouvés par les données
+
+1. **Le critère d'asymptoticité comparait les deux derniers ordres.** Il déclarait stabilisée la
+   suite 0,595 → 0,686 → 0,732 : écarts petits, **mais tous de même signe**. Un critère d'écart
+   local ne distingue pas « a convergé » de « progresse lentement ». Remplacé par un critère
+   **dérivé** — la progression est éteinte si les écarts changent de signe ou décroissent d'un
+   facteur ≥ 4, auquel cas la somme des écarts restants est majorée par `|d₁|/3`.
+2. **Les ordres négatifs étaient classés « indéterminé ».** Or des différences successives qui
+   grandissent sont exactement la signature du pré-asymptotique — ce que le front donne. Les
+   masquer retirait la seule chose que le contrôle devait constater.
+
+Et un troisième, d'une autre nature : **l'échec d'allocation de l'oracle était absorbé** par un
+`Err(_) => continue`. Le rapport affichait « 0 grille retenue sur 0 » — un résultat vide qui a l'air
+d'un résultat. L'arène du mode `physics` faisait 1 Mo et l'oracle à 51 200 cellules l'épuisait.
+
+### Ce qui n'a pas été fait, et pourquoi
+
+- **Le seuil `ε` du front n'a pas été dérivé** (action S23-2). L'étape était au plan ; elle a été
+  remplacée en séance quand P4 a montré que l'ordre est réduit sur *toutes* les grandeurs, pas
+  seulement au front — le seuil n'était donc pas le point bloquant. Dépriorisée, pas oubliée.
+- **Le montage régulier n'a que trois grilles saines**, donc un seul ordre et aucun verdict
+  d'asymptoticité. Le compléter demande un oracle à `nx ≈ 100 000`, dont le coût est à mesurer avant
+  d'être engagé (S24-5).
+- **`ordre_final()` prend toujours le triplet le plus fin** — juste avec une solution analytique,
+  faux avec un oracle. Le filtre de contamination masque le problème sans le résoudre (S24-4).
+
+### Session suivante recommandée
+
+**S25 — C03, la seiche en bassin clos.** C'est le dernier cas que le véhicule peut porter, sa
+référence est fermée (`T = 2L/√(gh) = 9,03 s`), et il mesure la **demi-vie d'amplitude** — la
+dissipation numérique, « le chiffre qu'on ne pense presque jamais à mesurer, alors qu'il explique la
+majorité des *l'eau est molle* ». Il demande d'abord la friction de fond (action S22-3), qui est le
+dernier prérequis non tenu du véhicule.
+
+Deux autres entrées possibles : **C22** (formaliser le cas régulier, S24-1), ou **H2**, toujours non
+écrit après cinq sessions où il est cité.
+
+### Arbitrages en attente
+
+Inchangés. **A103** — la masse volumique de l'eau, douce ou de mer. **A107** — le sort du travail
+propre à `master`, S16-S17. Et les trois choses hors de portée d'une session : nommer les personnes,
+constater l'état réel du projet, agir sur l'infrastructure — dont le dépôt distant.

@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-06
-Session en cours : S24 — C08, la convergence sous raffinement, et l'ordre du front
-Dernière session : S23 — 2026-09-06 — C04 : le front de mouillage, et les deux causes qui n'en étaient pas
-Session suivante : S25 — C03 (seiche, avec friction) ou H2
+Session en cours : —
+Dernière session : S24 — 2026-09-06 — C08 : le test qui ne peut pas conclure, et l'oracle qui est le banc
+Session suivante : S25 — C03, la seiche *(recommandé)* — demande la friction, ou C22, ou H2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
@@ -105,9 +105,10 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Vingt-trois sessions, **31 ADR** *(dont un acté)*, six spécifications, huit registres — **et du
-code qui tourne** : `code/`, étages **H1 et H3** du harnais, un **δ d'essai** équilibré, 25 tests
-verts et 19 assertions analytiques — dont **une en échec, par décision** : C04. Les 30 sections du document de
+Vingt-quatre sessions, **32 ADR** *(dont un acté)*, six spécifications, huit registres — **et du
+code qui tourne** : `code/`, étages **H1 et H3** du harnais, un **δ d'essai** équilibré, 29 tests
+verts et 19 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
+verdict** (C08). Les 30 sections du document de
 questions ouvertes d'origine sont traitées. Les vingt premiers ADR ont été confrontés les uns aux
 autres en S05 (douze écarts, deux de gravité 1) et les cinq SPEC entre elles en S08 (dix écarts,
 deux de gravité 1). Tous résolus — le dernier, le **chemin poussé**, par l'écriture de `SPEC-006`
@@ -124,6 +125,17 @@ attendre a un coût croissant.
 Chemin critique : `ADR-020 acté → H1 → H3 → C01 → (couche dispersive → C02 → λ_cut → B2) et
 (H4 → B3) → B4`. **C01 est fait**, et il a coûté un `δ` d'essai — Saint-Venant 1D, `delta.rs`, un
 véhicule et non le solveur du projet, qui reste le banc B3.
+
+**C08 est outillé depuis S24, et il ne conclut pas — ce n'est pas le solveur, c'est l'énoncé.**
+[`ADR-032`](docs/adr/ADR-032-c08-n-est-pas-executable-tel-qu-enonce.md) : un ordre de convergence est
+une propriété du **couple (solveur, cas)**, jamais du solveur seul, et l'assertion `p > 0,8` ne vaut
+que sur un cas **régulier** — or aucun des trois que C08 désigne ne l'est. Le harnais rapporte donc
+« non concluant » comme un état distinct de « passé » et « échoué », avec un décompte : **un rapport
+sans échec ne doit pas se lire comme une validation.**
+
+**Et l'oracle est le banc.** Il faut le prendre **480 fois** plus fin que la grille la plus
+grossière pour que cinq grilles soient exploitables ; en 2D son coût va comme `nx³`. SPEC-003 §5.1
+le cite comme une référence disponible.
 
 **C04 est exécuté depuis S23, et il échoue — c'est voulu.** Le véhicule δ est d'ordre 1, et
 [`ADR-031`](docs/adr/ADR-031-le-front-de-mouillage-elimine-l-ordre-un.md) décide que l'ordre 1 ne

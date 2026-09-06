@@ -1088,3 +1088,71 @@ ferme la question définitivement, là où une justification physique reste disc
 **balayer sa valeur sur plusieurs décades et mesurer**. Le résultat range la constante en deux
 catégories : celles qui commandent quelque chose, qui méritent un arbitrage, et les autres, qui
 méritent une ligne de documentation.
+
+## L79 — Une propriété qu'on attribue à un objet appartient souvent au couple (objet, épreuve)
+
+*(S24)* « L'ordre de convergence du solveur » n'existe pas. Le même solveur, sans une ligne de
+changement, donne `p ≈ 0,98` sur une solution régulière, `0,73` sur la norme globale de C04, et
+`0,24` sur la position du front de ce même C04. Ces trois nombres ne se contredisent pas : ils
+mesurent trois choses.
+
+La formulation « ordre du solveur » est ce qui rend l'erreur invisible — elle nomme une propriété
+d'un objet là où il y a une propriété d'un couple, et une assertion absolue (`p > 0,8`) devient
+alors naturelle à écrire.
+
+**Le test est linguistique et il est rapide** : quand une propriété est énoncée sans mentionner
+l'épreuve qui la révèle, demander si elle changerait avec une autre épreuve. Si oui, l'épreuve fait
+partie de la propriété et doit être nommée avec elle. Vaut pour « ce solveur est stable », « ce
+format est compact », « cette approche est rapide » — et pour tout seuil du corpus.
+
+## L80 — Améliorer la référence peut dégrader la mesure
+
+*(S24)* Pour mesurer un ordre de convergence sans solution analytique, on prend pour référence une
+grille très fine — l'oracle. Le réflexe est de la vouloir la plus fine possible. **Affiner l'oracle
+a dégradé le résultat** : de 12 800 à 25 600 cellules, l'ordre observé est passé de 1,09 à **1,56**,
+pour un schéma d'ordre 1 où plus de 1 est impossible.
+
+La raison est que l'oracle porte sa propre erreur. Tant que l'erreur mesurée la domine largement, on
+mesure le solveur ; quand elles se rapprochent, les deux se soustraient et le résultat n'a plus de
+sens — et il n'a pas l'air d'en manquer.
+
+Conséquence contre-intuitive : **avec un oracle, le triplet de grilles le plus fin est le moins
+fiable**, l'inverse exact de ce qui vaut avec une solution analytique. La règle de sélection dépend
+de la **nature de la référence**, pas de la finesse.
+
+**Réflexe** : devant toute mesure relative à une référence imparfaite, écrire l'erreur de la
+référence elle-même, et écarter les points où la mesure n'en est pas séparée par au moins un ordre
+de grandeur. Et se méfier du résultat qui *s'améliore* quand on affine : un ordre qui monte au-delà
+de ce que la théorie permet ne dit pas que le solveur est meilleur, il dit qu'on a cessé de le
+mesurer.
+
+## L81 — Un critère d'écart local ne distingue pas « a convergé » de « progresse lentement »
+
+*(S24)* Le contrôle d'asymptoticité comparait les deux derniers ordres observés : si l'écart était
+petit, la suite était déclarée stabilisée. Il a déclaré stabilisée la suite
+**0,595 → 0,686 → 0,732**, dont les écarts valent 0,091 puis 0,046 — petits, et **tous de même
+signe**. Une suite qui monte régulièrement n'a pas convergé : son dernier terme n'est pas sa limite.
+
+Ce qu'il faut regarder n'est pas la **taille** des écarts mais la **structure** de leur suite :
+changent-ils de signe, ou s'éteignent-ils assez vite pour que le reste soit borné ? Le remède écrit
+ici est dérivé plutôt que conventionnel — si les écarts décroissent d'un facteur ≥ 4, la somme des
+écarts restants est majorée par `|d₁|/3` — ce qui évite d'ajouter un second seuil arbitraire au
+premier (A106).
+
+**Réflexe** : tout critère de la forme « la valeur ne bouge presque plus » doit regarder au moins
+trois points et le signe des variations. Vaut pour les seuils qui se stabilisent, les budgets qui se
+tassent, les métriques qui se répètent — partout où l'on décide qu'une chose a fini de changer.
+
+## L82 — Un dispositif de mesure doit distinguer *indisponible* de *vide*
+
+*(S24)* L'allocation de l'oracle échouait — arène pleine — et l'erreur était absorbée par un
+`Err(_) => continue`. Le rapport affichait alors « 0 grille retenue sur 0 » : un résultat vide, qui
+se lit comme un cas ayant tourné et n'ayant rien trouvé, et non comme un cas n'ayant pas tourné.
+
+Le coût de cette confusion est asymétrique. Un cas *indisponible* appelle une correction immédiate ;
+un cas *vide* appelle une interprétation, et se range dans « pas de signal ». **La panne se déguise
+alors en information**, et d'autant mieux que le reste du rapport est vert.
+
+**Réflexe** : dans un harnais, tout `Err` absorbé est un mensonge en puissance. Trois états au
+minimum — mesuré, sans signal, indisponible — et le troisième doit dire sa cause. Le corollaire vaut
+pour tout tableau de bord : une case vide et une case non alimentée ne se ressemblent que sur écran.
