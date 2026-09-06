@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S23
-État             : en cours
+État             : terminée
 Battement        : 2026-09-06
 Objectif         : C04 — la rupture de barrage (Ritter), et le lit sec
 ```
@@ -94,7 +94,7 @@ provenance (`H_SEC = 10⁻⁶` est posé sans justification, action **S22-4**).
       décrit A106.
 - [x] **P6** — ce que la session a appris : ADR-031 si la conclusion engage B3, note datée sinon.
 - [x] **P7** — répercussions : `CAS-CANONIQUES`, `cas_en_attente()`, index, angles morts, décomptes.
-- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
+- [x] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
@@ -194,3 +194,25 @@ comme telle.
 à un point de la tolérance. À `ε = 10⁻⁴`, il affiche −10,83 %. **Le seuil ne change pas seulement
 l'ampleur du verdict, il peut le renverser.** C04 ne dit pas lequel prendre, et ce silence est
 maintenant chiffré.
+
+#### État à la fin de S23
+
+`cargo test` : **25 tests**. `water-harness check` : 2 scénarios, 0 échec, hashs de conformité
+**inchangés** — S23 n'a pas touché à la couche `B`. `water-harness physics` : **1 échec, C04, et il
+est voulu** ; 3 témoins ; douze cas canoniques imprimés comme non exécutés. Jeton **libéré**.
+
+**Ce que S24 doit savoir avant de commencer, et qui n'est pas ailleurs :**
+
+- **La batterie `physics` sort en code 1, et ce n'est pas une régression.** C04 échoue par décision
+  d'ADR-031. Ne pas « réparer » en desserrant la tolérance ou en montant le seuil `ε` : les deux
+  rendraient le cas vert sans rien changer au solveur, et c'est exactement ce qu'A110 décrit.
+- **Deux pistes sont déjà explorées et mortes** sur le retard du front : l'estimation des vitesses
+  d'onde au lit sec (0,15 point) et le seuil de séchage (0,25 point sur six décades). Ne pas les
+  refaire. La cause restante est la diffusion d'ordre 1 au front.
+- **L'ordre de convergence du front n'est pas stabilisé** — 0,13 · 0,27 · 0,36 · 0,41 sur quatre
+  raffinements. Tout chiffre qui en dépend doit être cité comme estimation, y compris le ×3·10⁵
+  d'ADR-031 §2.
+- **C08 est réclamé par deux actions** (S23-1 et S23-3) et donnerait aussi une provenance au seuil
+  `ε` (S23-2). C'est le plus rentable des cas restants.
+- **Le témoin `C01-jet` doit rester rouge**, et l'agrégation des témoins est désormais **par
+  identifiant** : ajouter un `Cxx-jet` ne dilue plus l'alerte des autres.

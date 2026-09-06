@@ -1851,3 +1851,117 @@ faire du travail propre à `master`, S16-S17, resté hors de la ligne vivante. E
 de portée d'une session : nommer les personnes, constater l'état réel du projet, agir sur
 l'infrastructure — dont un **dépôt distant**, dont l'absence est exactement ce qui a permis les deux
 forks.
+
+---
+
+## S23 — 2026-09-06 — C04 : le front de mouillage, et les deux causes qui n'en étaient pas
+
+**Consigne reçue.** « Enchaîne sur S23 ».
+
+**Sorties.** C04 exécuté — cinq mesures, dont deux ajoutées à l'énoncé ;
+[`ADR-031`](../docs/adr/ADR-031-le-front-de-mouillage-elimine-l-ordre-un.md) ; la solution de Ritter
+et la détection de front dans le harnais ; `EtatInitial` dans `delta.rs` ; **provenance mesurée pour
+`H_SEC`** (action S22-4 close) ; note S23 sur C04 dans
+[`CAS-CANONIQUES`](../docs/validation/CAS-CANONIQUES.md) ; registre porté à **112 angles morts** ;
+leçons L75 à L78.
+
+**Ça tourne.** `cargo test` : **25 tests** au vert. `water-harness check` : deux scénarios, 0 échec,
+hashs inchangés. `water-harness physics` : **1 échec — C04, et il est voulu.**
+
+### Le résultat de la session tient en une phrase
+
+**Le solveur est excellent partout et mauvais au seul endroit qui compte.** Erreur L1 sur tout le
+domaine : **0,84 %**. Erreur sur la position du front de mouillage : **16,24 %**. Un facteur vingt.
+Une validation par norme globale — le réflexe naturel, et la mesure la plus robuste — l'aurait
+déclaré excellent, alors qu'une vague qui monte sur une plage *est* un front de mouillage.
+
+### Ce qui n'avait pas été anticipé
+
+**Les deux explications évidentes du défaut sont fausses, et l'une des deux est une explication
+correcte.**
+
+La première est le diagnostic classique : au contact d'une cellule sèche, l'onde de tête n'est pas
+`u ± c` mais l'invariant de Riemann `u + 2c` (Toro), et l'estimer trop bas borne la vitesse de
+propagation numérique sous la vitesse physique du front. **C'est vrai, le mécanisme est réellement
+présent dans le code, et le corriger déplace le résultat de 0,15 point sur seize.** Écrite sans
+mesure avant/après, cette correction serait entrée dans un ADR comme *la* cause, avec une
+justification théorique impeccable — et la recherche se serait arrêtée là.
+
+La seconde est le seuil de séchage `H_SEC`, que S22 avait relevé comme une dette. Balayé sur six
+décades : **0,25 point d'effet.**
+
+Reste, par élimination, la diffusion du schéma d'ordre 1 au front — dont la convergence a son propre
+régime, d'ordre apparent **0,4**, quand le reste du domaine se comporte à l'ordre 1.
+
+### Décision structurante
+
+[`ADR-031`](../docs/adr/ADR-031-le-front-de-mouillage-elimine-l-ordre-un.md), second critère d'entrée
+à B3 après ADR-030 : **un candidat δ qui n'est pas d'ordre supérieur *au front de mouillage* est
+éliminé avant le banc.** L'exigence n'est pas « être d'ordre 2 en général » — beaucoup de schémas
+d'ordre élevé retombent à l'ordre 1 sur les cellules partiellement mouillées, précisément là où C04
+mesure.
+
+Justification chiffrée : à l'ordre 0,4, atteindre les 3 % de C04 depuis `dx = 5 cm` demanderait
+`dx = 0,75 mm`, soit **×67 en résolution et ×3·10⁵ en coût 2D**. Le pendant du chiffre de C01
+(×10 500), **en trente fois pire**. L'exposant n'est pas stabilisé et est cité comme estimation ;
+même à l'ordre 1, le facteur resterait de ×3 200, donc éliminatoire.
+
+### Le résultat de méthode : une position de front n'existe pas sans seuil
+
+La solution de Ritter tend vers zéro continûment. Il n'y a **aucune** abscisse où l'eau commence :
+toute mesure de front est le lieu où `h` franchit un seuil `ε`, et ce seuil est une convention.
+
+| `ε` | position exacte | écart au front mathématique `2c₀·t` |
+|---|---|---|
+| 10⁻⁴ | 12,340 m | −1,50 % |
+| 10⁻³ | 11,934 m | −4,74 % |
+| 10⁻² | 10,649 m | **−15,00 %** |
+
+**Comparer un front mesuré à seuil au front mathématique ajoute jusqu'à 15 % d'écart de pure
+définition — cinq fois la tolérance de C04.** La référence retenue est donc prise au même seuil, et
+le témoin `C04-jet` conserve l'écart entre les deux : il affiche −20,21 % là où la comparaison
+correcte donne −16,24 %. **Un cinquième du verdict était de la convention.**
+
+**Pire, et c'est A110** : le seuil peut *renverser* le verdict. Le même solveur, sur la même grille,
+donne **−3,46 % à `ε = 10⁻²`** — à un point de passer — et **−10,83 % à `ε = 10⁻⁴`**. Rien dans
+l'énoncé de C04 ne dit lequel prendre.
+
+### Chiffres qui ont orienté la conception
+
+| Grandeur, `dx = 5 cm`, `t = 2 s` | Mesuré | Ritter | Écart | Tolérance |
+|---|---|---|---|---|
+| `h` au droit du barrage | 0,4551 m | 0,4444 m | 2,40 % | 3 % |
+| `u` au droit du barrage | 2,0302 m/s | 2,0881 m/s | 2,77 % | 3 % |
+| erreur L1, tout le domaine | — | — | **0,84 %** | 3 % |
+| **front, `ε = 1 mm`** | 9,996 m | 11,934 m | **−16,24 %** | 3 % |
+| ordre de convergence du front | **≈ 0,4** | 1 attendu | — | — |
+| effet de `H_SEC` sur six décades | **0,25 pt** | — | — | — |
+| effet des vitesses d'onde au lit sec | **0,15 pt** | — | — | — |
+
+### Ce qui n'a pas été fait, et pourquoi
+
+- **C04 n'est pas passé, et ne le sera pas par ce véhicule.** Il reste **rouge** dans la batterie :
+  c'est le comportement voulu, puisque ADR-031 décide que l'ordre 1 ne passe pas. Masquer l'échec
+  masquerait la décision. La session qui le rendra vert devra changer de schéma, pas de seuil.
+- **L'ordre de convergence du front n'est pas mesuré proprement** — cinq grilles ne stabilisent pas
+  un exposant qui monte encore. Cela demande **C08**, qui n'est pas écrit : actions S23-1 et S23-3.
+- **La friction de fond** reste absente (S22-3). Sans objet pour C04, dont l'énoncé pose « canal
+  sans frottement » ; prérequis pour C03.
+
+### Session suivante recommandée
+
+**S24 — C08, la convergence sous raffinement.** Deux sessions l'ont maintenant réclamé : S23 pour
+stabiliser l'ordre du front, et ADR-031 §2 pour rendre son chiffre défendable. C08 est aussi le cas
+qui donnerait enfin une provenance au seuil `ε` (S23-2), en le dérivant du profil au lieu de le
+conventionner.
+
+Deux autres entrées possibles : **C03** (seiche — demande d'abord la friction, S22-3), ou **H2**
+(dérive en continu), toujours non écrit.
+
+### Arbitrages en attente
+
+Inchangés depuis S22, et rappelés tant qu'ils sont ouverts. **A103** — la masse volumique de l'eau,
+douce (1000) ou de mer (1025). **A107** — le sort du travail propre à `master`, S16-S17, resté hors
+de la ligne vivante. Et les trois choses hors de portée d'une session : nommer les personnes,
+constater l'état réel du projet, agir sur l'infrastructure — dont le **dépôt distant**, dont
+l'absence a produit les deux forks.

@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-06
-Session en cours : S23 — C04, la rupture de barrage (Ritter), et le lit sec
-Dernière session : S22 — 2026-09-06 — C01 : le premier δ, et le fork qu'on croyait clos
-Session suivante : S24 — C03 (seiche, avec friction) ou H2
+Session en cours : —
+Dernière session : S23 — 2026-09-06 — C04 : le front de mouillage, et les deux causes qui n'en étaient pas
+Session suivante : S24 — C08, la convergence sous raffinement *(recommandé)*, ou C03, ou H2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
@@ -105,9 +105,9 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Vingt-deux sessions, **30 ADR** *(dont un acté)*, six spécifications, huit registres — **et du
-code qui tourne** : `code/`, étages **H1 et H3** du harnais, un **δ d'essai** équilibré, 22 tests et
-15 assertions analytiques au vert. Les 30 sections du document de
+Vingt-trois sessions, **31 ADR** *(dont un acté)*, six spécifications, huit registres — **et du
+code qui tourne** : `code/`, étages **H1 et H3** du harnais, un **δ d'essai** équilibré, 25 tests
+verts et 19 assertions analytiques — dont **une en échec, par décision** : C04. Les 30 sections du document de
 questions ouvertes d'origine sont traitées. Les vingt premiers ADR ont été confrontés les uns aux
 autres en S05 (douze écarts, deux de gravité 1) et les cinq SPEC entre elles en S08 (dix écarts,
 deux de gravité 1). Tous résolus — le dernier, le **chemin poussé**, par l'écriture de `SPEC-006`
@@ -125,10 +125,22 @@ Chemin critique : `ADR-020 acté → H1 → H3 → C01 → (couche dispersive �
 (H4 → B3) → B4`. **C01 est fait**, et il a coûté un `δ` d'essai — Saint-Venant 1D, `delta.rs`, un
 véhicule et non le solveur du projet, qui reste le banc B3.
 
+**C04 est exécuté depuis S23, et il échoue — c'est voulu.** Le véhicule δ est d'ordre 1, et
+[`ADR-031`](docs/adr/ADR-031-le-front-de-mouillage-elimine-l-ordre-un.md) décide que l'ordre 1 ne
+passe pas le front de mouillage. Un harnais qui masquerait cet échec masquerait la décision. **La
+session qui rendra C04 vert devra changer de schéma, pas de seuil.**
+
 **Un maillon s'est allongé en S22 :** `λ_cut` ne sortira pas de ce véhicule. Saint-Venant est non
 dispersif, et C02 mesure une erreur de célérité **en fonction de λ** ; il faut une couche dispersive
 — `W`, ou un `δ` d'une autre famille. Ce n'est pas un retard de codage, c'est une dépendance qui
 n'était pas dans le graphe (ADR-030 §5).
+
+**Et S23 a montré ce qu'une norme globale ne voit pas.** Sur C04, l'erreur du solveur vaut **0,84 %**
+sur tout le domaine et **16 %** sur la position du front — un facteur vingt. Une validation par norme
+globale, le réflexe naturel, l'aurait déclaré excellent ; or une vague qui monte sur une plage *est*
+un front de mouillage (leçon L76). Deux explications correctes de ce défaut ont par ailleurs été
+testées et n'expliquent rien : **une explication juste n'est pas une cause tant que son effet n'a
+pas été mesuré** (L75).
 
 **Et S22 a confirmé S21 par un autre chemin.** Le schéma de solveur qu'on écrit sans y penser échoue
 C01 — mais **pas par la grandeur que le nom du cas désigne** : il passe le seuil de courant

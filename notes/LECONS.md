@@ -1015,3 +1015,76 @@ l'objet de vérifications ; une divergence déclarée résolue n'en fait plus l'
 pas. Si la fusion de contenu est le seul moyen disponible, alors **le registre doit dire que
 l'historique reste divergent** — et la ligne source doit être marquée, dans son propre jeton, comme
 abandonnée au profit de l'autre. Sans quoi la prochaine session lira « fusion close » et croira.
+
+## L75 — Une explication correcte n'est pas une cause tant que son effet n'a pas été mesuré séparément
+
+*(S23)* Le front trop lent sur lit sec a une explication classique et juste : au contact d'une
+cellule sèche, l'onde de tête est l'invariant de Riemann `u + 2c` et non `u ± c`, et l'estimer trop
+bas borne la vitesse de propagation numérique sous la vitesse physique du front. Le mécanisme est
+réellement présent dans le code. Corriger l'estimation a déplacé le résultat de **0,15 point sur
+seize**.
+
+Le danger n'est pas de se tromper — l'explication n'est pas fausse. Le danger est qu'une explication
+plausible **arrête la recherche**. Écrite sans mesure avant/après, elle serait entrée dans un ADR
+comme *la* cause, avec une correction à l'appui et une justification théorique impeccable ; le vrai
+défaut serait resté, et l'aurait fait passer pour résolu.
+
+**Réflexe** : mesurer l'effet d'une correction **isolément**, avant de la présenter comme la cause.
+Deux exécutions, un chiffre. Le coût est nul et il tranche entre « j'ai compris » et « j'ai une
+histoire cohérente ».
+
+## L76 — Une erreur globale faible peut masquer une erreur locale d'un ordre de grandeur
+
+*(S23)* Sur C04, l'erreur L1 du solveur vaut **0,84 %** sur les huit cents cellules du domaine, et
+son erreur de position de front **16,24 %**. Un facteur vingt.
+
+La norme globale est la mesure la plus robuste, la plus facile à défendre et celle qui vient en
+premier — et c'est exactement ce qui la rend dangereuse : elle **moyenne le défaut sur le domaine où
+il n'est pas**. Un front occupe quelques cellules sur huit cents ; son erreur, si grande soit-elle,
+disparaît dans une moyenne.
+
+Le corollaire est ce qui rend la leçon utile hors du numérique : **la grandeur qui décide de ce qu'on
+voit n'est presque jamais une moyenne.** Une vague qui monte sur une plage *est* un front de
+mouillage ; un joueur ne regarde pas la norme L1 du champ.
+
+**Réflexe** : pour toute validation par norme globale, se demander quelle est la **structure fine**
+qui porte le phénomène, et lui donner sa propre mesure. Fronts, discontinuités, extrema, bords.
+
+## L77 — Une grandeur mesurée à seuil ne se compare qu'à une référence prise au même seuil
+
+*(S23)* La position d'un front n'existe pas indépendamment d'une convention : la solution tend vers
+zéro continûment, et « où l'eau commence » est un choix, pas un fait. Comparer un front mesuré au
+seuil `ε` à la position mathématique où `h = 0` mesure donc **la convention avant le solveur** : à
+`ε = 1 cm`, l'écart de définition vaut 15 %, cinq fois la tolérance du cas.
+
+La règle vaut pour toute grandeur définie par franchissement : durée d'un impact, largeur d'une
+zone, portée d'une onde, temps de montée. Elle est simple et systématiquement oubliée parce que la
+référence analytique, elle, s'écrit sans seuil — et paraît donc plus pure.
+
+**Et le seuil peut renverser un verdict, pas seulement le déplacer** : le même solveur, sur la même
+grille, échoue de trois fois la tolérance à `ε = 10⁻⁴` et la manque d'un point à `ε = 10⁻²`. Quand
+c'est le cas, le seuil doit être **dérivé** du phénomène — le point au-dessus duquel le profil n'est
+plus dominé par sa queue — et non conventionné.
+
+**Réflexe** : écrire la référence **avec** le seuil dedans, et conserver l'écart à la version sans
+seuil comme témoin. Si les deux verdicts diffèrent, c'est la définition qu'il faut d'abord régler.
+
+## L78 — « Sans provenance » et « sans effet » sont deux dettes différentes, et la seconde n'en est pas une
+
+*(S23)* `H_SEC` avait été relevé en S22 comme un nombre posé au jugé, à justifier au titre d'I-14.
+La réponse attendue était une justification physique. La bonne réponse était un balayage : six
+décades, **0,25 point d'effet** sur la grandeur la plus sensible du corpus.
+
+`H_SEC` n'est donc pas un paramètre physique et n'a pas à en recevoir la justification — c'est un
+garde-fou contre une division par zéro, libre sur au moins six ordres de grandeur. **Sa provenance
+est cette mesure.** À comparer à `ρ_eau` (A103), autre constante relevée comme non fixée, qui
+déplace 2,5 % de tout tirant d'eau du projet : la même dette apparente, deux natures opposées.
+
+Ce que cela dit d'I-14 : l'invariant n'exige pas qu'un nombre soit *justifié*, il exige qu'on sache
+**ce qu'il commande**. « Rien » est une réponse valide, et c'est même la plus économique — elle
+ferme la question définitivement, là où une justification physique reste discutable.
+
+**Réflexe** : devant une constante sans provenance, ne pas chercher d'abord sa justification —
+**balayer sa valeur sur plusieurs décades et mesurer**. Le résultat range la constante en deux
+catégories : celles qui commandent quelque chose, qui méritent un arbitrage, et les autres, qui
+méritent une ligne de documentation.
