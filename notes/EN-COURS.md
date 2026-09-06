@@ -72,13 +72,13 @@ peut être stable et faux. H3 est le premier étage qui confronte le code à des
 **extérieures** — des solutions fermées que rien de ce que j écris ne peut influencer.
 
 - [ ] **P1** — plan, jeton.
-- [ ] **P2** — mode `physics` : cadre d assertions, mesure contre référence, tolérance déclarée.
-- [ ] **P3** — les cas analytiques que `B` seul permet, et ils sont plus nombreux qu il n y paraît :
+- [x] **P2** — mode `physics` : cadre d assertions, mesure contre référence, tolérance déclarée.
+- [x] **P3** — les cas analytiques que `B` seul permet, et ils sont plus nombreux qu il n y paraît :
   dispersion **mesurée sur le champ** et non lue dans la configuration, restitution de `Hs` par la
   variance, identité de la vitesse orbitale, pente maximale, homogénéité spatiale.
   *Thèse : au moins un de ces cas va échouer. Une référence analytique n a d intérêt que si elle
   peut me contredire, et je n ai jamais vérifié la cinématique de `B` autrement qu en la relisant.*
-- [ ] **P4** — exécuter, constater, corriger.
+- [x] **P4** — exécuter, constater, corriger.
 - [ ] **P5** — **C10, le cube flottant** : premier calcul de force, et première référence fermée sur
   autre chose que la cinématique — tirant d eau `d = m/(ρA)`.
 - [ ] **P6** — notes correctives, index, angles morts.
@@ -95,3 +95,30 @@ peut être stable et faux. H3 est le premier étage qui confronte le code à des
   propre arithmétique. Mesurer une longueur d onde et une période **dans le champ échantillonné**,
   puis vérifier `λ = gT²/2π`, teste l implémentation entière — phases, sinus, conversion de
   position.
+
+#### P2 à P4 — la thèse était juste, et le cas analytique a trouvé le bug
+
+**Quatre échecs au premier passage. Un seul venait du cœur.**
+
+**Le bug du cœur** : la vitesse orbitale était **en quadrature au lieu d en phase** avec
+l élévation. Airy en eau profonde donne u = a·ω·sin(φ) — en phase avec η — et w = a·ω·cos(φ). Mes
+deux lignes étaient inversées. Conséquence physique : **sous une crête, l eau n avançait pas**, elle
+montait. Le cas `u/η = ω` l a fait tomber au premier passage ; la relecture ne l avait jamais vu, et
+le hash de H1 était parfaitement stable — stable et faux, ce que H1 ne peut pas distinguer.
+
+**Deux bugs de mes tests** : un temps renvoyé en secondes et réadditionné à l instant de départ
+(période mesurée : 10¹⁵ s) ; et un contrôle d homogénéité échantillonnant à 5 000 m, au-delà du rayon
+de référentiel. **Le champ avait raison** — I-08 refuse au-delà de 4096 m, et `eval` renvoyait
+`None`. La propriété révélée par mon erreur méritait son propre cas : elle en a un.
+
+Après correction, **8 cas sur 8** sur le scénario monochromatique. La dispersion, mesurée entièrement
+dans le champ — longueur d onde par passages à zéro, période par passages à zéro en un point fixe —
+retrouve λ = gT²/2π **à 0,000 %**.
+
+**Et le mécanisme de non-régression a fonctionné** : le champ ayant changé, les deux hashs de
+conformité sont tombés. C est l effet recherché, et la bénédiction se fait dans un commit séparé.
+
+**Limite de mesure à consigner** : sur le scénario à 32 composantes, la restitution de Hs par la
+variance donne 8,5 % d écart. Ce n est pas un défaut du champ mais de la **fenêtre** — la plus longue
+composante fait 225 m de long et la fenêtre 384 m, soit 1,7 longueur d onde. Une estimation de
+variance a besoin de plusieurs longueurs d onde de la **plus longue** composante.

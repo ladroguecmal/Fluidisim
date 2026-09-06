@@ -134,12 +134,19 @@ impl Background {
 
             s.eta += c.amplitude * sn;
 
-            // Vitesse orbitale de surface : a·ω, en phase avec la pente.
+            // Vitesse orbitale de surface, théorie d'Airy en eau profonde.
+            //
+            // Avec `η = a·sin(φ)`, le potentiel donne `u = a·ω·sin(φ)` — **en phase avec
+            // l'élévation** — et `w = a·ω·cos(φ)`, en quadrature. La conséquence physique est
+            // directe : **sous une crête, l'eau avance**.
+            //
+            // Ces deux lignes étaient inversées jusqu'en S21. La relecture ne l'avait pas vu ; le
+            // cas analytique `u/η = ω` l'a fait tomber au premier passage.
             let omega = (c.freq_q32 as f64 / 4_294_967_296.0 * core::f64::consts::TAU) as f32;
             let uo = c.amplitude * omega;
-            s.u_total[0] += uo * cs * c.dir[0];
-            s.u_total[1] += uo * cs * c.dir[1];
-            s.u_total[2] += uo * sn;
+            s.u_total[0] += uo * sn * c.dir[0];
+            s.u_total[1] += uo * sn * c.dir[1];
+            s.u_total[2] += uo * cs;
 
             // Pente locale : ∂η/∂x = a·k·cos(φ), avec k en radians par mètre.
             let k_rad = c.k_turns_per_m * core::f32::consts::TAU;

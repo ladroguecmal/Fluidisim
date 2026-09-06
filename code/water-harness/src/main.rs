@@ -22,6 +22,7 @@
 //! coûterait exactement la propriété qu'on cherche.
 
 mod host_impl;
+mod physics;
 mod scenario;
 
 use std::process::ExitCode;
@@ -129,6 +130,63 @@ fn executer(sc: &Scenario) -> Rapport {
     }
 }
 
+/// Exécute la batterie analytique — mode `physics`, SPEC-003 §4.
+///
+/// Chaque cas confronte une grandeur **mesurée dans le champ** à une référence fermée. La liste des
+/// cas qui ne peuvent pas être exécutés est imprimée à la fin : un rapport vert ne doit jamais se
+/// lire comme une couverture complète.
+fn executer_physics(sc: &Scenario, bg: &Background, t: SimTime) -> usize {
+    use physics::*;
+    let mut cas: Vec<Cas> = Vec::new();
+
+    // Les cas à composante unique n'ont de sens que sur un scénario monochromatique.
+    if sc.composantes == 1 {
+        let periode = sc.tp as f64 * 0.5;
+        let omega = std::f64::consts::TAU / periode;
+        let k_rad = omega * omega / G;
+        let lambda = std::f64::consts::TAU / k_rad;
+        let a = sc.hs as f64 / (2.0 * 2f64.sqrt());
+
+        cas.extend(c02_dispersion(bg, t, lambda));
+        cas.push(orbitale_en_phase(bg, t, omega));
+        cas.push(pente_maximale(bg, t, a, k_rad));
+    }
+
+    cas.push(hs_restitue(bg, t, sc.hs as f64, 128, 3.0));
+    // 3 000 m : à l'intérieur du rayon de référentiel. I-08 borne `|x_local| < 4096 m`, et
+    // au-delà `eval` renvoie `None` — ce que le cas `I-08` ci-dessous vérifie explicitement.
+    cas.push(homogeneite(bg, t, 48, 3.0, 3000.0));
+    cas.push(borne_referentiel(bg, t));
+
+    let mut echecs = 0usize;
+    println!("
+--- {} — batterie analytique ---", sc.id);
+    for c in &cas {
+        let etat = if c.passe() { "OK    " } else { "ÉCHEC " };
+        if !c.passe() {
+            echecs += 1;
+        }
+        println!(
+            "{etat} {:<12} {:<46} mesuré {:>12.6}  référence {:>12.6}  écart {:>7.3} %  (tol {:.1} %)",
+            c.id,
+            c.grandeur,
+            c.mesure,
+            c.reference,
+            c.ecart_rel() * 100.0,
+            c.tolerance_rel * 100.0
+        );
+        if !c.passe() {
+            println!("         → référence : {}", c.source);
+        }
+    }
+    println!("  {} cas exécutés, {} échec(s)", cas.len(), echecs);
+    println!("  cas canoniques non exécutés, faute de la couche qu'ils testent :");
+    for (id, nom, attente) in cas_en_attente() {
+        println!("    {id:<5} {nom:<46} {attente}");
+    }
+    echecs
+}
+
 fn lire(chemin: &str) -> Result<Scenario, String> {
     let src = std::fs::read_to_string(chemin).map_err(|e| format!("{chemin} : {e}"))?;
     Scenario::parse(&src).map_err(|e| format!("{chemin} : {e}"))
@@ -137,7 +195,7 @@ fn lire(chemin: &str) -> Result<Scenario, String> {
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
     if args.len() < 2 {
-        eprintln!("usage : water-harness <check|bless> <scenario.toml> [...]");
+        eprintln!("usage : water-harness <check|physics|bless> <scenario.toml> [...]");
         return ExitCode::from(2);
     }
     let mode = args[0].as_str();
@@ -172,6 +230,12 @@ fn main() -> ExitCode {
                     println!("         → {e}");
                 }
                 echecs_total += r.echecs.len();
+            }
+            "physics" => {
+                let (bg, _) = construire(&sc);
+                let t = SimTime::from_micros(sc.t_sim_debut_us);
+                let n = executer_physics(&sc, &bg, t);
+                echecs_total += n;
             }
             autre => {
                 eprintln!("mode inconnu : {autre}");
