@@ -81,6 +81,15 @@ conservation d'énergie sur 60 s ; coût pour 4096 paquets ; déterminisme crois
 > W. **Une valeur de `λ_cut` qui laisserait tomber un phénomène gameplay dans δ est irrecevable**,
 > quelles que soient ses qualités de coût. À vérifier explicitement avant de retenir une valeur.
 
+> **Ajout S15 — le critère de recevabilité porte deux conséquences, pas une.** SPEC-006 §5.6
+> s'appuie sur **le même argument de fermeture** pour justifier que le signal de traversabilité
+> ignore δ : une perturbation capable de changer une décision de cheminement dépasserait `λ_cut` et
+> appartiendrait donc à W, où elle est répliquée. Un relèvement de `λ_cut` remettrait ainsi en cause
+> **l'autorité des ondes répliquées et la validité du signal de navigation**. Un banc qui ne
+> vérifierait que la première laisserait passer la seconde — et le défaut se manifesterait par des
+> PNJ qui traversent un gué chez un joueur et se noient chez un autre.
+> *(Action annoncée par SPEC-006 §5.6 en S09, retrouvée non exécutée par l'audit des registres.)*
+
 ## B3 — Couche δ : technologie, coût et latence
 
 **Question.** Quel solveur volumétrique ?

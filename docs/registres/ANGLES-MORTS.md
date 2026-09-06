@@ -21,6 +21,24 @@ ce que les sources avaient omis.
 
 ## Tableau général
 
+> **Ce que dit la colonne « Traité dans » — précision S15.** Elle indique **où le point est
+> discuté**, et non s'il est refermé. Trois situations s'y confondaient ; elles se distinguent
+> désormais ainsi :
+>
+> - **supprimé** — l'angle mort n'existe plus, la décision l'a fait disparaître. Marqué en toutes
+>   lettres dans la cellule *(seul cas à ce jour : A16)*.
+> - **comblé** — une décision le traite complètement, rien n'est en attente.
+> - **en attente d'un tiers** — le point est **décrit, pas réglé** : il attend une équipe, une
+>   mesure ou un arbitrage. Marqué **`⏳`** dans la cellule.
+>
+> La distinction n'était pas faite, et elle coûte : **A59** — le géoïde absent de l'outil de terrain,
+> 70 m d'écart à 30 km, sévérité 1 — affichait « SPEC-005 §4 » exactement comme A63, qui est réglé.
+> Un lecteur en concluait que le problème des 70 mètres était traité. Il est décrit, et le restera
+> tant que l'équipe terrain n'aura pas changé le référentiel de son outil.
+>
+> Les sévérité 1 en attente sont marquées ci-dessous. Les autres lignes se renseigneront au fil des
+> sessions qui les touchent : remplir 89 lignes d'un coup ne serait ni utile ni fiable.
+
 | Code | Titre | Sév. | Traité dans |
 |---|---|---|---|
 | A01 | Référentiels non inertiels | 1 | ADR-002 |
@@ -81,7 +99,7 @@ ce que les sources avaient omis.
 | **A56** | Budget mémoire et budget de temps fixés indépendamment | 1 | ADR-012 §3, écart R04 |
 | **A57** | La dégradation la moins chère coûte du travail au pire moment | 2 | ADR-012 §4, écart R06 |
 | **A58** | Deux ADR inventant la même parade signalent un concept manquant | 2 | ADR-006 §2, écart R07 |
-| **A59** | Le géoïde absent de l'outil de terrain : 70 m d'écart à 30 km | 1 | SPEC-005 §4 |
+| **A59** | Le géoïde absent de l'outil de terrain : 70 m d'écart à 30 km | 1 | **⏳** SPEC-005 §4 — attend l'équipe terrain |
 | **A60** | Le cycle eau ↔ terrain bloque le pipeline | 2 | SPEC-005 §3 |
 | **A61** | Une retouche de bathymétrie invalide la réfraction sur des kilomètres | 2 | SPEC-005 §8 |
 | **A62** | L'obsolescence des données cuites est silencieuse | 2 | SPEC-005 §7.3 |
@@ -111,7 +129,7 @@ ce que les sources avaient omis.
 | **A86** | Deux échelles de rangs de dégradation portent les mêmes numéros | 2 | SPEC-006 §7, écart E02 |
 | **A87** | Un invariant qui nomme un mécanisme vieillit avec lui | **1** | ADR-026 §1, audit S14 |
 | **A88** | La masse d'un nœud V était transférée à un solveur jamais déterministe | **1** | ADR-025, audit S14 |
-| **A89** | Une action inscrite dans une table « Suite » d'audit n'est pas plus exécutée qu'un point ouvert | 2 | AUDIT-INVARIANTS-S14, I-16 |
+| **A89** | Une action décidée qui n'entre dans aucune liste exécutable n'est pas exécutée | 2 | AUDIT-REGISTRES-S15 §R03 |
 
 Soixante-quatre angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -388,8 +406,13 @@ pendant quatre sessions.
   le nœud ni recevoir la masse en retour — il n'avait aucune histoire. Le défaut a survécu treize
   sessions parce qu'ADR-010 ne cite pas I-04 et qu'I-04 ne cite pas ADR-010 : **les revues croisées
   confrontent des documents qui se citent.**
-- **A89** — Une action inscrite dans la table « Suite » d'un registre d'audit **n'est pas plus
-  exécutée** qu'un point ouvert n'est relu. S11 avait décidé de préciser le critère d'I-16 dans
-  `01_INVARIANTS.md`, l'avait inscrit, et ne l'avait pas fait : la note était partie dans l'ADR
-  corrigé, pas dans l'invariant annoncé. C'est la classe A78 appliquée aux décisions d'audit
-  elles-mêmes.
+- **A89** — Une action décidée **qui n'entre dans aucune liste exécutable n'est pas exécutée.**
+  *(Reformulé en S15 : l'énoncé d'origine attribuait le défaut aux tables « Suite » des registres
+  d'audit. C'était faux dans sa prémisse — le registre concerné, `AUDIT-POINTS-OUVERTS-S11`, n'avait
+  pas de table, et les quatre registres qui en portent une affichent **40 actions sur 40 exécutées**.)*
+  Le partage observé est net : **sept actions du corpus visaient un banc ou le harnais ; les quatre
+  exécutées l'ont été par la session qui les décidait, dans une étape inscrite à son plan
+  (`notes/EN-COURS.md`), et les trois perdues avaient été annoncées dans le corps d'un document.**
+  Une annonce faite en prose est une intention, pas une tâche — et cela vaut même à l'intérieur
+  d'une seule session : le cas canonique annoncé par ADR-025 §4 en S14 P6a n'a pas été posé, le plan
+  de S14 ne prévoyant aucun cas canonique.

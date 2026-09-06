@@ -721,3 +721,56 @@ Quatre points, quatre sujets courts et indépendants — c'est un objectif de se
 > en réutilisant un canal déjà spécifié, et l'ensemble n'a ajouté **aucune interface**. Deux
 > corrections en sont sorties : la grandeur à publier pour l'impact n'est pas la pression mais
 > l'impulsion, et un site turbulent n'est pas un émetteur mais un terme dérivé.
+
+---
+
+## 8. Suite — table d'actions
+
+*(Ajoutée rétrospectivement en S15. Ce registre était le seul des cinq à ne pas en porter : ses
+résolutions vivaient dans le corps de ses quatorze sections, sous la forme « **Action** : … ».
+L'audit S15 a établi que c'est de là qu'une action a disparu — la précision du critère d'I-16,
+retrouvée neuf sessions plus tard — tandis que les quatre registres pourvus d'une table affichent
+40 actions sur 40 exécutées.)*
+
+| Action | Où | Statut |
+|---|---|---|
+| Note corrective — taille des régions liée au géoïde et à I-08 | ADR-002 §7.2 | appliquée S11 |
+| Clôture — hash de conformité de W, déjà répondu | ADR-003 §4.3 | appliquée S11 |
+| Porteur désigné — modèle de marée | ADR-004 §7.4 | appliquée S11 |
+| Note corrective — les 16 secteurs ont un second consommateur | ADR-005 §7.2 | appliquée S11 |
+| Note corrective — perte de transduction, à moitié répondue | ADR-005 §7.4 | appliquée S11 |
+| Note corrective — nombre de blocs, contredit I-16 | ADR-006 §7.3 | appliquée S11 |
+| **Précision du critère d'I-16** | `01_INVARIANTS.md` | **non appliquée en S11** — faite en S14 par ADR-026 §2.6 |
+| Renvoi — `SolidProxy` vers SPEC-004 §10.1 | ADR-007 §5.4 | appliquée S11 |
+| Renvoi — `K` et `E_cause` vers ADR-021 §7.2 | ADR-009 §7.1 | appliquée S11 |
+| Clôture — anticipation locale | ADR-009 §7.2 | appliquée S11 |
+| Note corrective — borne d'événements à dériver | ADR-009 §7.3 | appliquée S11 |
+| Note corrective — le TTL borne la persistance | ADR-010 §8.2 | appliquée S11 |
+| Renvoi — `to_vacuum` vers ADR-015 §7.2 | ADR-010 §8.3 | appliquée S11 |
+| Note corrective — mode de production de C1 réglé | ADR-011 §7.1 | appliquée S11 |
+| Clôture — format de la bibliothèque côtière | ADR-013 §7.3 | appliquée S11 |
+| Note corrective — rochers turbulents, comportement non réglé | ADR-013 §7.4 | appliquée S11, puis close en S12 |
+| Clôture — couplage `A` ↔ audio | ADR-014 §7.5 | appliquée S11 |
+| Note corrective — validation audio désormais exécutable | ADR-016 §8.1 | appliquée S11 |
+| Clôture — format de la polyligne de déferlement | ADR-016 §8.2 | appliquée S11 |
+| Clôture — occlusion par aération, tranchée | ADR-016 §8.4 | appliquée S11 |
+| Note corrective — le coût de l'arbitrage glace a baissé | ADR-017 §7.1 | appliquée S11 |
+| Note corrective — pas de subdivision dédiée | ADR-017 §7.2 | appliquée S11 |
+| Note corrective — validation IA désormais exécutable | ADR-018 §7.1 | appliquée S11 |
+| Clôture — granularité sous-cellule | ADR-018 §7.2 | appliquée S11 |
+| Renvoi — `IGpuBackend` vers SPEC-004 §10.4 | ADR-020 §7.2 | appliquée S11 |
+| Renvoi — rendu de référence vers SPEC-003 §11.2 | ADR-020 §7.3 | appliquée S11 |
+| Note corrective — `λ_cut` porte deux conséquences | ADR-021 §7.3 | appliquée S11 |
+| Renvoi — représentation binaire vers SPEC-004 §10.1 | ADR-022 §7.4 | appliquée S11 |
+| Note corrective — `is_smooth_at`, le paramètre est `N` | SPEC-004 §10.3 | appliquée S11 |
+| Clôture — budget d'instantanés W | SPEC-004 §10.5 | appliquée S11 |
+| Note corrective — stockage des données cuites | SPEC-005 §11.3 | appliquée S11 |
+| Requalification — coût de cuisson, chiffrage et non question | SPEC-005 §11.5 | appliquée S11 |
+| Renvoi — représentation binaire | SPEC-006 §9.8 | appliquée S11 |
+| Tableau « ce que d'autres équipes doivent fournir » | `00_INDEX.md` | appliquée S11 |
+| Arbitrages 4 et 5 ajoutés | `00_INDEX.md` | appliquée S11 |
+| Phase 7 du protocole | `METHODE.md` | appliquée S11 |
+
+**Trente-six actions, trente-cinq exécutées en S11**, la trente-sixième neuf sessions plus tard.
+C'est le taux qu'on attend d'une session qui travaille ; ce qui manquait n'était pas la rigueur mais
+**l'endroit où vérifier**.

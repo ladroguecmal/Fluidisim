@@ -237,5 +237,5 @@ Un audit qui ne rapporte que des défauts n'est pas vérifiable. Contrôles pass
 | Renvoi ADR-005 §3 → ADR-021 | ADR-005 | appliqué |
 | Reformulation aération | ADR-014 §5.2 | appliquée |
 | Clarification I-04 | `01_INVARIANTS.md` | appliquée |
-| Critère de répétition de tuile FFT | B1 | à ajouter au protocole |
+| Critère de répétition de tuile FFT | B1 | **appliquée en S05** *(statut corrigé en S15 : il annonçait « à ajouter » depuis dix sessions alors que `PLAN-BENCHMARK` B1 porte l'ajout)* |
 | `lambda_cut()` vers `WaterConfig` | SPEC-004 | appliqué |

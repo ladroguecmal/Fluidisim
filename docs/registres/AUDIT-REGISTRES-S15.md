@@ -9,8 +9,8 @@ constaté qu'une action décidée n'avait jamais été exécutée.
 revenue. C'est le propre d'un registre : il ne se trompe pas, il vieillit.
 
 > **Le résultat le plus utile n'est pas un écart, c'est une cause.** Sur sept actions du corpus qui
-> visaient un banc ou le harnais, quatre n'ont pas été exécutées — et l'explication n'est ni le
-> document cible ni le délai. **Les trois exécutées l'ont été par la session qui les décidait, dans
+> visaient un banc ou le harnais, trois n'ont pas été exécutées — et l'explication n'est ni le
+> document cible ni le délai. **Les quatre exécutées l'ont été par la session qui les décidait, dans
 > une étape inscrite à son plan.** Le plan de `notes/EN-COURS.md` est la seule liste que quelqu'un
 > relit ; ce qui n'y entre pas n'existe pas.
 
@@ -22,7 +22,7 @@ revenue. C'est le propre d'un registre : il ne se trompe pas, il vieillit.
 |---|---|---|---|---|
 | R01 | Une action faite, toujours marquée « à ajouter » | S05 | 2 | statut corrigé |
 | R02 | Le seul registre sans table d'actions est celui dont une action s'est perdue | S11 | 2 | table ajoutée |
-| R03 | **Quatre actions visant la validation, jamais exécutées** | corpus | **1** | exécutées en P7 |
+| R03 | **Trois actions visant la validation, jamais exécutées** | corpus | **1** | exécutées en P7 |
 | R04 | Un angle mort de sévérité 1 en attente se lit comme réglé | `ANGLES-MORTS` | 2 | colonne `Statut` |
 | R05 | Aucun angle mort n'est jamais clos — 89 accumulés, un seul fermé | `ANGLES-MORTS` | 3 | règle d'entrée |
 | R06 | **Une question « dissoute » est revenue ailleurs** | `QUESTIONS-OUVERTES` | 2 | statut corrigé |
@@ -31,14 +31,14 @@ revenue. C'est le propre d'un registre : il ne se trompe pas, il vieillit.
 
 ---
 
-## R03 — Quatre actions visant la validation, jamais exécutées *(gravité 1)*
+## R03 — Trois actions visant la validation, jamais exécutées *(gravité 1)*
 
 **Constat.** Sept formulations du corpus annoncent un ajout à un banc, au harnais ou à un cas
-canonique. Quatre n'ont pas eu lieu.
+canonique. **Trois** n'ont pas eu lieu.
 
 | Origine | Cible | Exécutée ? |
 |---|---|---|
-| ADR-021 §4 | cas **C18** — le nombre de paquets `W_rep` au-dessus du seuil est identique sur tous les clients | **non** |
+| ADR-021 §4 | cas **C18** — le nombre de paquets `W_rep` au-dessus du seuil | **oui**, S05 — *voir la correction ci-dessous* |
 | ADR-021 §7.3 | protocole **B2** — recevabilité de `λ_cut` | oui, S05 |
 | SPEC-006 §5.6 | protocole **B2** — second fondement : validité du signal de traversabilité | **non** |
 | SPEC-006 §7 | banc **`starve`** (SPEC-003 §9.1) — trois assertions | **non** |
@@ -46,11 +46,23 @@ canonique. Quatre n'ont pas eu lieu.
 | ADR-023 §2.6 | cas **C20** | oui, S12 |
 | ADR-025 §4 | cas canonique — compartiment inondé, avec et sans domaine δ | **non**, et il date de S14 |
 
-**Pourquoi c'est de gravité 1.** Ce ne sont pas des oublis documentaires. Chacune de ces quatre
+> **Correction, faite en cours de session.** Ce tableau comptait d'abord **quatre** actions perdues,
+> dont l'assertion d'ADR-021 §4 sur le cas C18. Elle **avait été exécutée en S05** : `CAS-CANONIQUES`
+> C18 porte la ligne « le nombre de paquets `W_rep` au-dessus du seuil est identique sur deux profils
+> de qualité différents *(S05)* ».
+>
+> L'erreur vient de la **vérification, pas de l'analyse** : la commande de contrôle enchaînait
+> plusieurs recherches par `&&`, l'une d'elles n'a rien trouvé, et la chaîne s'est interrompue avant
+> d'exécuter la suivante. Le résultat affiché — rien — était **indiscernable d'une absence réelle**.
+>
+> C'est **L54 une seconde fois**, une session après avoir été écrite : un outil qui échoue à moitié
+> produit un résultat plausible. La leçon disait de relire le résultat plutôt que le code de retour ;
+> il faut y ajouter qu'**une vérification négative doit être obtenue isolément**, jamais au bout
+> d'une chaîne conditionnelle.
+
+**Pourquoi c'est de gravité 1.** Ce ne sont pas des oublis documentaires. Chacune de ces trois
 assertions manquantes est le **moyen de vérifier une décision structurante** :
 
-- sans l'assertion sur C18, rien ne vérifie que deux joueurs voient le même sillage — la propriété
-  qu'ADR-021 §4 a établie contre l'élagage des paquets répliqués, et dont dépend la détection ;
 - sans le second fondement dans B2, un relèvement de `λ_cut` serait jugé recevable alors qu'il
   invaliderait le signal de navigation (SPEC-006 §5.6) ;
 - sans les trois assertions du banc `starve`, la dégradation du chemin poussé n'est vérifiée par
@@ -61,9 +73,10 @@ assertions manquantes est le **moyen de vérifier une décision structurante** :
 **La cause n'est ni le document cible ni le délai.** Trois actions visant ces mêmes documents ont
 bien été faites. Ce qui les sépare :
 
-> Les trois exécutées l'ont été **par la session qui les décidait, dans une étape inscrite à son
+> Les quatre exécutées l'ont été **par la session qui les décidait, dans une étape inscrite à son
 > plan** — C19 décidé en S10 P6 et posé en S10 P8, C20 décidé en S12 P2 et posé en S12 P7, l'ajout
-> B2 décidé et posé dans S05. Les quatre perdues ont été **annoncées sans entrer dans un plan**, y
+> B2 et l'assertion C18 décidés et posés dans S05. Les trois perdues ont été **annoncées sans entrer
+> dans un plan**, y
 > compris celle d'ADR-025 §4, écrite en S14 P6a alors que le plan de S14 ne prévoyait aucun cas
 > canonique.
 
@@ -71,7 +84,7 @@ bien été faites. Ce qui les sépare :
 Le plan est la seule liste que quelqu'un relit — c'est même toute la raison d'être du dispositif de
 S07. Une annonce faite dans le corps d'un document est une intention, pas une tâche.
 
-**Résolution.** Les quatre actions sont exécutées en P7. Et le rituel de fin reçoit une entrée :
+**Résolution.** Les trois actions sont exécutées en P7. Et le rituel de fin reçoit une entrée :
 **relever les actions décidées en cours de session et vérifier qu'elles ont été faites** ; celles qui
 ne l'ont pas été deviennent un point ouvert daté, à défaut d'une étape.
 
@@ -188,7 +201,6 @@ manque, pas sa rigueur.
 
 | Action | Où | Statut |
 |---|---|---|
-| Assertion `W_rep` identique sur tous les clients | `CAS-CANONIQUES` C18 | à exécuter en P7 |
 | Second fondement de la recevabilité de `λ_cut` | `PLAN-BENCHMARK` B2 | à exécuter en P7 |
 | Trois assertions de dégradation du chemin poussé | `SPEC-003` §9.1 | à exécuter en P7 |
 | Cas canonique **C21** — masse d'un compartiment avec et sans δ | `CAS-CANONIQUES` | à exécuter en P7 |

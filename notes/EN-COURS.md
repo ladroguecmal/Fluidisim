@@ -84,7 +84,7 @@ exécutées — c'est l'angle mort A89, écrit en S14.
 - [x] **P5** — `QUESTIONS-OUVERTES` : la traçabilité des 30 sections et les sept verdicts tiennent-ils
   encore, treize sessions plus tard ?
 - [x] **P6** — rédiger `docs/registres/AUDIT-REGISTRES-S15.md`.
-- [ ] **P7** — appliquer : exécuter les actions retrouvées, corriger les statuts, corriger l'erreur
+- [x] **P7** — appliquer : exécuter les actions retrouvées, corriger les statuts, corriger l'erreur
   factuelle de S14 sur A89.
 - [ ] **P8** — index, angles morts, décomptes.
 - [ ] **P9** — rituel de fin (`REPRISE.md` §6) : journal S15, leçons, index, jeton libéré.
@@ -247,3 +247,14 @@ entre dans une liste que quelqu'un relit.
 (« audit des registres ») et ont perdu la signature de co-auteur. La convention du dépôt veut un
 message qui dise ce que l'étape a produit. Non réécrit — l'historique dit la vérité, y compris sur
 mes propres relâchements — et corrigé à partir d'ici.
+
+#### P7 — application, et une correction de mon propre constat
+
+**Erreur trouvée en appliquant.** Mon relevé annonçait quatre actions de validation perdues ; il y
+en a **trois**. L'assertion d'ADR-021 §4 sur le cas C18 avait bien été posée en S05.
+La faute est dans la **vérification** : la commande de contrôle enchaînait plusieurs recherches par
+`&&`, l'une n'a rien trouvé, et la chaîne s'est interrompue avant d'exécuter la suivante. Le
+résultat affiché — rien — était indiscernable d'une absence réelle.
+**L54 une seconde fois, une session après avoir été écrite.** À la leçon « relire le résultat, pas
+le code de retour », il faut ajouter : *une vérification négative doit être obtenue isolément*,
+jamais au bout d'une chaîne conditionnelle.

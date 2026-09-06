@@ -37,6 +37,7 @@ les six premiers doivent passer avant qu'un solveur candidat soit admis en campa
 | C18 | Invariants du système | tous | binaire | hash, allocations, budget |
 | C19 | Aller-retour de persistance | B, W, V | **binaire** | sauvegarde, reconnexion, arrivée en cours de partie |
 | C20 | Impact d'entrée dans l'eau | flottabilité | **analytique** | impulsion de slamming, durée d'impact |
+| C21 | Masse d'un compartiment avec et sans δ | V, δ | **binaire** | propriété de la masse, forçage V→δ |
 
 ---
 
@@ -315,3 +316,35 @@ coussin d'air et la compressibilité l'écrêtent, et aucune référence fermée
 l'assertait mesurerait sa propre incertitude — c'est pourquoi ADR-023 §2.3 publie l'impulsion.
 
 **Rattachement** : banc **B6** (flottabilité), batterie `physics`.
+
+---
+
+## C21 — Masse d'un compartiment avec et sans domaine δ
+
+*(Ajouté en S15. Action annoncée par [ADR-025](../adr/ADR-025-propriete-de-la-masse-entre-V-et-delta.md)
+§4 en S14 et retrouvée non exécutée par l'audit des registres.)*
+
+**Montage.** Un compartiment s'inonde par un orifice, en référentiel fixe puis accéléré. Le scénario
+est joué **deux fois** : une fois sans domaine δ, une fois avec un domaine substitutif actif au-dessus
+du nœud pendant toute la durée de l'inondation.
+
+**Assertion.** `volume_ml` du nœud est **identique à l'entier près, à tout instant**, dans les deux
+exécutions.
+
+**Ce que le cas attrape.** Toute réapparition du transfert de propriété de masse qu'ADR-025 a retiré.
+Si un solveur δ rendait sa masse au nœud, les deux exécutions divergeraient de sa dérive — et la
+divergence serait d'autant plus grande que le solveur fuit. C'est la vérification mécanique de
+l'invariant **I-04** appliqué à la couche V : *aucune force ni aucune quantité capable de changer une
+issue de jeu ne provient de δ*.
+
+**Pourquoi le cas est binaire.** V est en arithmétique **entière** et en régime **D1** (I-03, amendé
+en S10) : l'égalité est exacte, pas approchée. Le cas tourne donc en mode `check`, à chaque commit,
+sans GPU — ce qui n'aurait pas été possible si la masse transitait par δ, jamais D1.
+
+**Contrôle complémentaire, non binaire.** Le forçage d'ADR-025 §3.2 ramène la masse du domaine δ vers
+celle du nœud avec une relaxation `τ ≈ 1 s`. L'écart de niveau résiduel — `dérive_par_s · τ · h` —
+est mesuré et comparé au seuil d'admission en régime substitutif (ADR-025 §3.3, 1 %/s à calibrer).
+Cette partie relève de la batterie `physics`, pas du mode `check`.
+
+**Rattachement** : banc **B3** (solveur δ, scénario 4 — compartiment inondé en référentiel accéléré),
+batterie `check` pour l'assertion principale.

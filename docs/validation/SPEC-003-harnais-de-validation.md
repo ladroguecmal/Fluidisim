@@ -283,6 +283,21 @@ Chaque scénario est rejoué à **100 %, 50 %, 25 % et 10 %** du budget nominal.
 - la surface reste continue : aucune discontinuité de hauteur au-delà d'un seuil entre deux
   frames consécutives.
 
+**Ajout S15 — la dégradation du chemin poussé.** SPEC-006 §7 impose que les canaux publiés dégradent
+**en cadence, jamais en contenu**. Trois assertions le vérifient, sans lesquelles rien ne le
+contrôle — et c'est le chemin dont le §9.1 ci-dessus dit qu'il est « le moins testé et le plus
+exécuté » :
+
+- **aucun canal ne publie d'instantané dont le contenu soit incomplet**, à aucun palier de budget :
+  jamais de tuile à moitié remplie, jamais de liste d'événements tronquée en son milieu ;
+- **aucun événement d'origine `Serveur` n'est absent d'un instantané**, à aucun palier. L'élagage ne
+  porte que sur `TransductionLocale` et `AnticipationLocale` (SPEC-006 §7, transposition
+  d'ADR-021 §4) ;
+- **`sequence` reste strictement croissant** par canal et par tuile. Un saut est licite — il signale
+  une publication manquée, ce qui est le rôle du champ ; un recul ou une répétition ne l'est pas.
+
+*(Action annoncée par SPEC-006 §7 en S09, retrouvée non exécutée par l'audit des registres S15.)*
+
 ### 9.2 Saturation
 
 Tempêtes d'événements aléatoires, tous les acteurs au même endroit, création et destruction

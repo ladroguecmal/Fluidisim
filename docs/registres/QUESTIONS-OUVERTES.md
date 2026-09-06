@@ -10,6 +10,18 @@ nouvelle architecture) · **Partiel** (structure décidée, valeurs à calibrer)
 La seule question encore ouverte est le choix du solveur volumétrique (§18), et elle le restera
 jusqu'au banc B3 : c'est une décision de mesure, pas de conception.
 
+> **Revue S15.** Ce décompte datait de S02 et n'avait jamais été revu — treize sessions. Il a été
+> confronté au corpus : **§18 tient** (le solveur reste la seule question ouverte par décision), les
+> six dissolutions tiennent **sauf une**, et deux pointeurs étaient incomplets.
+>
+> **§13 est le cas à connaître.** La question « quelle erreur de précalcul est acceptable ? » avait
+> été *dissoute* par ADR-013 §3, à juste titre : en palier T2, un domaine préparé ne contient aucune
+> information physique, donc aucun seuil de tolérance. Mais ADR-022 §3.5 a introduit en S10 une
+> **seconde forme de précalcul** — la graine — qui, elle, en contient : « le seul endroit du système
+> où un seuil de tolérance physique existe », à calibrer au banc B4 (ADR-022 §7.1).
+> **La question ne s'est pas dé-dissoute : elle est revenue ailleurs.** Un statut « Dissous » annonce
+> qu'il n'y a rien à calibrer ; il était faux depuis cinq sessions, dans ce sens-là.
+
 | § source | Sujet | Statut | Traité dans |
 |---|---|---|---|
 | 2 | Répartition serveur / client des subdivisions | **Résolu** | ADR-006 §2, ADR-009 §1 |
@@ -20,10 +32,10 @@ jusqu'au banc B3 : c'est une décision de mesure, pas de conception.
 | 7 | Orchestrateur global ou hybride | **Résolu** | ADR-012 §1 |
 | 8 | Seuils d'activation et d'arrêt | **Partiel** | ADR-013 §5 |
 | 9 | Simulation hors caméra | **Dissous** | ADR-013 §6 |
-| 10 | Données conservées à la désactivation | **Résolu** | ADR-005 §3, ADR-009 §2 |
+| 10 | Données conservées à la désactivation | **Résolu** | ADR-005 §3, ADR-009 §2 · **ADR-022, invariant I-17** *(réponse complète, S10)* |
 | 11 | Filtre de prédiction des objets | **Résolu** | ADR-013 §1 |
 | 12 | Paliers de confiance | **Résolu** | ADR-013 §2 |
-| 13 | Erreur acceptable d'un précalcul | **Dissous** | ADR-013 §3 |
+| 13 | Erreur acceptable d'un précalcul | **Dissous, puis rouvert ailleurs** *(S15)* | ADR-013 §3 · **ADR-022 §3.5 et §7.1** |
 | 14 | Précalcul : préparation ou avance physique | **Résolu** | ADR-013 §1, §4 |
 | 15 | Modèle exact des courants | **Résolu** | ADR-011 |
 | 16 | Modèles mer / lac / rivière / canal | **Résolu** | ADR-011, ADR-004 §5 |
