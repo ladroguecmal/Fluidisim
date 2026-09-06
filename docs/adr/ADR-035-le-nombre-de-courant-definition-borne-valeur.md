@@ -125,6 +125,32 @@ Le défaut du §2.1 valait **×2,2 à ×2,5**.
 **`ν = 0,70` n'est pas un compromis mou** : il achète `×1,77` de portée d'onde et `×1,55` de pas de
 temps, en conservant une marge qui absorbe une erreur de 43 % sur `u_max`.
 
+> **Note S28 — la condition est remplie, et `ν = 0,70` est débloqué.**
+>
+> **C23** existe et a été exécuté (`CAS-CANONIQUES` §C23). La définition du §2 n'est plus posée :
+> elle est **vérifiée**. Sous la borne gouvernante, le Courant réalisé vaut **0,450 au millième**,
+> pour une paroi de 0,5 à 20 m/s ; sous la borne absolue, il atteint **2,482** et `u_max` est
+> sous-estimé jusqu'à **×5,5**.
+>
+> **Deux précisions que la mesure ajoute, et qui n'étaient pas dans le §4.1.**
+>
+> 1. **Monter `ν` resserre le seuil de paroi sous la mauvaise définition.** `u_p = c·(1/ν − 1)` vaut
+>    5,41 m/s à `ν = 0,45`, **1,90 m/s à 0,70**, 0,49 m/s à 0,90. Le gain de portée et la fragilité
+>    à une définition fausse croissent ensemble — raison de plus pour que la définition précède la
+>    valeur, comme le §1 le pose.
+> 2. **Le solveur ne diverge pas** même à `C = 2,48`. Ce qui est perdu au-delà de la condition de
+>    stabilité n'est pas la simulation, c'est la **garantie**. Un cas qui aurait exigé une explosion
+>    aurait conclu que le défaut n'existe pas.
+>
+> **La constante du véhicule d'essai reste à 0,45**, et ce n'est pas une hésitation : le véhicule
+> sert à mesurer, et changer son `ν` déplacerait toutes les références publiées — demi-vies de C03,
+> front de C04, ordres de C08 — sans qu'aucune mesure y gagne. `ν = 0,70` est une décision pour le
+> **solveur du projet**, que B3 choisira.
+>
+> **Ce qui reste non vérifié**, et borne encore la valeur : le montage est **1D**, la paroi est un
+> **batteur au bord** et non une paroi intérieure à cellules coupées, et rien n'a été mesuré en
+> présence d'un **déferlement**. Le §6.4 reste ouvert.
+
 ## 5. Ce que la session a trouvé en se contrôlant elle-même
 
 Le balayage de S25 faisait varier `nx` à amplitude fixe : `N` et `a/dx` changeaient ensemble. Le

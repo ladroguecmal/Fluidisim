@@ -57,6 +57,7 @@ les six premiers doivent passer avant qu'un solveur candidat soit admis en campa
 | C20 | Impact d'entrée dans l'eau | flottabilité | **analytique** | impulsion de slamming, durée d'impact |
 | C21 | Masse d'un compartiment avec et sans δ | V, δ | **binaire** | propriété de la masse, forçage V→δ |
 | C22 | Convergence sur solution régulière | δ | oracle / Richardson | l'ordre du schéma, séparé de celui du cas — *exécuté depuis S24, formalisé en S26* |
+| C23 | Nombre de Courant à paroi mobile | δ, flottabilité | **analytique** | une borne de pas de temps qui ignore les parois — *exécuté et formalisé en S28* |
 
 ---
 
@@ -566,3 +567,74 @@ oracle à `nx ≈ 100 000`, dont le coût est à mesurer avant d'être engagé (
 
 **Rattachement** : banc **B3** (solveur δ), batterie `physics` — le cas instancie un oracle et
 ne tient pas dans le budget de 60 s du mode `check`.
+
+## C23 — Nombre de Courant en présence d'une paroi mobile
+
+*(Ajouté en S28. Il vérifie la définition d'`u_max` **posée sans être exercée** par
+[ADR-035](../adr/ADR-035-le-nombre-de-courant-definition-borne-valeur.md) §2, et il a été rendu
+nécessaire par un défaut mesuré sur un projet extérieur — voir le journal S27.)*
+
+**Montage.** Eau **au repos**, fond plat, `h = 2 m`, domaine de 20 m, `dx = 0,1 m`. Une **paroi
+mobile** au bord gauche, de vitesse `u_p` imposée, balayée de 0,5 à 20 m/s.
+**Référence analytique.** La célérité vaut `c = √(g·h) = 4,43 m/s`, et l'eau étant au repos :
+
+```
+u_max absolue      = |u_fluide| + c            = c
+u_max gouvernante  = |u_fluide − u_p| + c      = u_p + c
+```
+
+Le Courant réellement réalisé sous une borne **absolue** vaut donc `ν·(u_p + c)/c`, et il franchit
+**1** dès que `u_p > c·(1/ν − 1)`.
+
+**Assertions.**
+
+1. sous la borne **gouvernante**, le Courant réalisé vaut `ν` — à toutes les vitesses de paroi ;
+2. sous la borne **absolue**, il dépasse 1 au-delà du seuil analytique ;
+3. la borne et le compteur de violations dérivent du **même** code (ADR-035 §3).
+
+### Ce que le cas attrape
+
+**Une borne de pas de temps qui ignore les parois mobiles.** SPEC-001 §2.1 écrit `dt ≤ C·dx/u_max`
+sans définir `u_max` ; SPEC-004 §10.1 impose d'accepter « une frontière en mouvement avec sa
+vitesse ». Rien ne reliait les deux avant S27.
+
+### Mesuré en S28
+
+| `u_paroi` | rapport `u_max` gouv./abs. | C sous borne absolue | C sous borne gouvernante |
+|---|---|---|---|
+| 0,5 | 1,113 | 0,501 | **0,450** |
+| 5,0 | 2,129 | 0,958 | **0,450** |
+| 10,0 | 3,258 | **1,466** | **0,450** |
+| 20,0 | **5,515** | **2,482** | **0,450** |
+
+**La borne gouvernante tient exactement `ν`**, au millième, quelle que soit la paroi. La borne
+absolue sous-estime `u_max` jusqu'à ×5,5.
+
+**Seuils de franchissement**, `u_p = c·(1/ν − 1)` :
+
+| `ν` | vitesse de paroi | équivalent en chute libre |
+|---|---|---|
+| 0,45 | 5,41 m/s | **1,49 m** |
+| 0,70 | 1,90 m/s | 0,18 m |
+| 0,90 | 0,49 m/s | 1,2 cm |
+
+**Le solveur ne diverge pas** pour autant, même à `C = 2,48` : Rusanov reste diffusif et absorbe le
+dépassement. **Ce qui est perdu n'est pas la simulation, c'est la garantie** — un solveur au-delà de
+sa condition de stabilité tient jusqu'à ce qu'il ne tienne plus, sur un cas que rien n'a testé.
+
+> **Le cas doit donc être lu pour ce qu'il mesure : une *borne*, pas une *explosion*.** Un cas qui
+> aurait exigé une divergence serait passé, et aurait conclu que le défaut n'existe pas.
+
+### Ce que le montage est, et ce qu'il n'est pas
+
+La paroi est le **bord gauche du domaine**, avec `u_fantôme = 2·u_p − u_interne`. Dans un maillage
+fixe, cette condition est un **batteur** et non une paroi imperméable stricte : du volume entre. Une
+vraie paroi mobile intérieure demanderait des cellules coupées.
+
+**Cela ne change pas ce que le cas mesure** — `|u_fluide − u_paroi|` sur la face au contact est la
+même grandeur dans les deux montages — mais il faut le dire, sans quoi le cas paraîtrait valider un
+couplage fluide-solide qu'il ne touche pas.
+
+**Rattachement** : banc **B3** (solveur δ) et **B6** (flottabilité) ; batterie `physics`. Le cas est
+lié à **C20**, l'impact d'entrée dans l'eau, qui est précisément le régime `u_paroi ≫ c` — et où le
+pas de temps est divisé par 3,3 à `u_p = 10 m/s`.
