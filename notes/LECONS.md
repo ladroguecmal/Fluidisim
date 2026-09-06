@@ -1495,3 +1495,76 @@ c'est un usage plus rentable que celui pour lequel elle était prévue.
 **Réflexe** : éprouver un critère de classement sur trois cas dont on connaît déjà le verdict, en
 choisissant le troisième **le moins ressemblant aux deux autres**. Le coût est de quelques minutes ;
 le gain est de ne pas produire un inventaire entier qui range mal.
+
+## L102 — Un manque de seuils est souvent un manque de lecture
+
+*(S30)* Cinq assertions du corpus étaient floues — « nettement supérieure », « sensiblement plus
+longue », « aucun tremblement visible ». Le réflexe est d'y voir des seuils manquants, donc un
+travail de calibration : choisir des nombres, les justifier, les marquer « à calibrer » à défaut.
+
+**Aucun n'a eu à être inventé.** Chacune des cinq grandeurs était déjà dans le corpus, sous
+l'assertion qui ne la nommait pas : un facteur de résonance dans un ADR, une masse ajoutée dans un
+angle mort, une projection « exactement stable » dans une décision, un seuil de formation dans une
+SPEC.
+
+Le flou n'était pas une lacune de mesure. C'était **une lacune de rapprochement** : la personne qui
+écrivait le cas et celle qui écrivait la formule n'étaient pas au même endroit du corpus, et rien ne
+les reliait.
+
+**Réflexe** : devant une assertion floue, ne pas commencer par chercher un seuil. Chercher d'abord
+**la grandeur**, puis **où le corpus en parle**. La calibration est le dernier recours, pas le
+premier geste — et un seuil inventé ferme la question que la lecture aurait ouverte.
+
+## L103 — Un énoncé flou déplace l'exigence vers le bas, jamais vers le haut
+
+*(S30)* « Aucun tremblement **visible** » tolère tout écart sous le seuil de perception. La
+conception, elle, garantissait davantage : l'objet est **projeté sur la surface**, `z = η`,
+« exactement stable ». La référence est zéro.
+
+L'assertion floue demandait donc **moins** que ce que le système promet — et un écart de `10⁻⁴ m`,
+invisible mais révélateur d'une projection non appliquée, l'aurait passée.
+
+Ce n'est pas un hasard de rédaction. Un flou se résout toujours dans le sens du permissif : un seuil
+perceptuel, un « raisonnable », un « acceptable » sont plus larges qu'une identité, et celui qui
+lira l'assertion plus tard choisira l'interprétation qui passe. **Le flou n'est pas neutre, il est
+orienté.**
+
+**Réflexe** : quand une assertion est floue, chercher ce que la conception **garantit** sur la même
+grandeur. Il arrive que la garantie soit exacte, et alors l'assertion précise est plus simple *et*
+plus forte que celle qu'on allait écrire.
+
+## L104 — L'instrument qui mesure une assertion ne se lit pas dans son énoncé
+
+*(S30)* Deux assertions de forme identique, dans le même tableau : « zéro allocation après
+initialisation » et « aucune capacité dérivée n'est lue depuis un profil de qualité ». Un audit les
+a séparées — la première recevable, la seconde manquée — puis s'est aperçu qu'elles avaient le même
+défaut potentiel et pas le même sort.
+
+Ce qui les distingue n'est **pas dans le texte** : la première a un compteur, lu par le harnais
+depuis dix sessions ; la seconde demanderait une analyse statique qui n'existe pas. La première
+mesure quelque chose, la seconde est un vœu.
+
+Classer des assertions sur leur formulation revient donc à classer des promesses sur leur ton. Il
+faut, pour chacune, **nommer ce qui la mesure** — et vérifier que cela existe aujourd'hui.
+
+**Réflexe** : à côté de chaque assertion, écrire l'instrument. Trois questions, dans cet ordre :
+*quelle grandeur ?* — *quel témoin la fait échouer ?* — *qu'est-ce qui la mesure, et est-ce que ça
+existe ?* La troisième est celle qu'on oublie, parce que la réponse paraît évidente quand on vient
+d'écrire la première.
+
+## L105 — Deux défauts qui se protègent l'un l'autre ne se trouvent que dans l'ordre
+
+*(S30)* Un cas assertait sur un régime — la résonance transcritique — que son propre montage
+n'atteignait jamais : ses quatre vitesses sautaient le point critique. Le défaut était là depuis
+l'écriture du cas.
+
+Il n'a été visible qu'**après** avoir donné une grandeur à l'assertion. Tant qu'elle disait
+« amplitude nettement supérieure », rien n'obligeait à calculer les nombres de Froude du montage :
+une phrase qualitative se lit sans vérifier qu'elle est atteignable.
+
+Les deux défauts se couvraient mutuellement. L'assertion floue dispensait d'examiner le montage ; le
+montage incapable ne pouvait pas faire échouer une assertion qui ne mesurait rien.
+
+**Réflexe** : quand une correction en révèle une seconde, noter l'**ordre** qui l'a rendue visible —
+c'est lui qui se réutilise. Ici : *donner une grandeur, puis vérifier que le montage atteint le
+régime où elle varie.* L'inverse n'aurait rien produit.

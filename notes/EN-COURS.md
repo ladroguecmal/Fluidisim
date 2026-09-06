@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S30
-État             : en cours
+État             : terminée
 Battement        : 2026-09-06
 Objectif         : Réécrire les cinq assertions fautives — et leur donner une provenance
 ```
@@ -97,7 +97,7 @@ un nombre neuf, et c'est celui qu'il faudra peut-être marquer « à calibrer »
 - [x] **P6** — notes correctives datées dans `CAS-CANONIQUES` pour les cinq, et mise à jour du
       registre S29.
 - [x] **P7** — répercussions : index, angles morts, actions, décomptes.
-- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
+- [x] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
@@ -205,3 +205,24 @@ physique.
 La thèse annonçait qu'un seuil au moins serait à calibrer. **Zéro.** Ce que l'audit S29 avait pris
 pour un manque de seuils était en réalité un manque de **lecture** : les grandeurs étaient dans le
 corpus, sous les assertions qui ne les nommaient pas.
+
+#### État à la fin de S30
+
+`cargo test` : **33 tests**. `water-harness check` : 2 scénarios, 0 échec, hashs **inchangés**.
+Session **sans code neuf** — le travail était de conception. Jeton **libéré**.
+
+**Ce que S31 doit savoir avant de commencer, et qui n'est pas ailleurs :**
+
+- **Les cinq assertions sont réécrites mais aucune n'est exécutable** : les cas attendent leur
+  couche. C'est le principe de S29 — la forme se corrige avant que la couche existe, et c'est ce qui
+  rend la correction bon marché. Ne pas les prendre pour des cas prêts.
+- **Le montage de C07 n'est pas corrigé, seulement son assertion.** Les quatre vitesses d'origine
+  sautent `Fr_h = 1` ; le balayage `{2,10 ; 3,50 ; 4,90 ; 6,30} m/s` est écrit dans la note mais
+  n'a pas remplacé l'énoncé du montage (S30-1).
+- **Trois questions à poser à toute assertion nouvelle**, dans cet ordre : *quelle grandeur ?* —
+  *quel témoin la fait échouer ?* — *qu'est-ce qui la mesure, et est-ce que ça existe ?* La
+  troisième est celle que S29 a oubliée, et elle lui a fait déclarer recevable une assertion vide.
+- **`√2` pour C10 ne dépend d'aucun paramètre du cube** — ni taille, ni densité, ni profondeur. Si
+  une future mesure le fait dépendre de l'un des trois, c'est le modèle de masse ajoutée qu'il faut
+  suspecter, pas la référence.
+- **C04 en échec, `C01-jet` rouge, C08 sans verdict** : trois décisions, pas trois régressions.

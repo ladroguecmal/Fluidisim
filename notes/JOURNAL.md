@@ -2648,3 +2648,108 @@ lourde ouverte ; ou **H2**, non écrit après dix sessions où il est cité.
 Inchangés. **A103** — la masse volumique de l'eau, douce ou de mer. **A107** — le sort du travail
 propre à `master`, S16-S17. Et les trois choses hors de portée d'une session : nommer les personnes,
 constater l'état réel du projet, agir sur l'infrastructure — dont le dépôt distant.
+
+---
+
+## S30 — 2026-09-06 — Les cinq assertions réécrites, et aucun seuil inventé
+
+**Consigne reçue.** « Enchaîne S30 ».
+
+**Sorties.** Les **cinq assertions fautives réécrites**, avec notes correctives datées dans
+`CAS-CANONIQUES` — C07, C10, C11, C15, C18 ; §5 bis ajouté au registre
+[`AUDIT-ASSERTIONS-S29`](../docs/registres/AUDIT-ASSERTIONS-S29.md), **dont la correction de son
+propre classement** ; registre porté à **137 angles morts** ; leçons L102 à L105 ; action **S29-1
+close**.
+
+**Ça tourne.** `cargo test` : **33 tests** au vert. `water-harness check` : 0 échec, hashs inchangés.
+Session sans code neuf : le travail était de conception.
+
+### Le résultat de la session tient en une phrase
+
+**Aucun seuil n'a eu à être inventé — ce que l'audit S29 avait pris pour un manque de seuils était
+un manque de lecture.**
+
+| Cas | Assertion de remplacement | Origine | Nombre neuf ? |
+|---|---|---|---|
+| **C07** | pente de `log A` contre `log\|1 − Fr_h²\|` = **−½ ± 0,15** | facteur de résonance, ADR-011 §4 | non |
+| **C10** | `T_avec/T_sans = √2 ± 15 %` | `√(1 + m_a/m)` avec `m_a ≈ m` — A26 + Archimède | non |
+| **C11** | `max\|z − η\| = 0` · `\|G\| ≤ 1` par période | ADR-008 §3, « exactement stable » · conservation | non |
+| **C15** | témoin à `Hs = 0,05 m` : épaisseur **non nulle** | SPEC-002 §4 | non |
+| **C18** | `scénarios_exécutés_par_l_hôte_serveur ≥ 1` | décompte ; vaut zéro aujourd'hui | non |
+
+Les grandeurs étaient dans le corpus, **sous les assertions qui ne les nommaient pas**.
+
+### Le plus joli des cinq : C10
+
+`T = 2π·√((m + m_a)/(ρ_eau·g·A))` donne `T_avec/T_sans = √(1 + m_a/m)`. **A26** pose que la masse
+ajoutée d'une coque vaut environ la masse déplacée ; et un corps qui flotte déplace, par Archimède,
+**exactement sa propre masse**. Donc `m_a ≈ m`, et le rapport vaut **√2 ≈ 1,414** — sans dépendre de
+la taille du cube, de sa densité ni de la profondeur : tout s'annule dans le quotient.
+
+> **Il n'y avait pas de seuil à choisir. Il y avait une formule à retrouver.**
+
+La tolérance de ±15 % n'est pas choisie non plus : elle encode le mot « environ » d'A26, un
+coefficient `m_a/m ∈ [0,5 ; 1,5]` donnant `[1,225 ; 1,581]`. **Contrôle indépendant** : le disque
+équivalent de même aire, `m_a = (8/3)ρR³`, donne **1,399** — les deux voies concordent à 1 % sans
+rien partager.
+
+### Ce qui n'avait pas été anticipé
+
+**Ma thèse annonçait qu'un seuil au moins serait à calibrer. Zéro.** Et trois des cinq réécritures
+sont **plus fortes** que l'énoncé d'origine.
+
+**C11 en est l'exemple net.** « Aucun tremblement **visible** » tolère tout écart sous le seuil de
+perception. Or ADR-008 §3 pose qu'en mode contraint l'objet est projeté sur la surface — `z = η` — et
+qualifie le résultat d'« **exactement stable** ». La référence est **zéro**, pas un seuil.
+**L'énoncé demandait donc moins que ce que la conception promet**, et un écart de `10⁻⁴ m` — invisible,
+mais signalant que la projection n'est pas appliquée — l'aurait passé. Le flou ne rend pas seulement
+imprécis : **il déplace l'exigence vers le bas**, et toujours dans ce sens (**A136**).
+
+**Et C07 cumulait deux défauts, dont le second n'était visible qu'après correction du premier.** Par
+5 m de fond, `√(g·h) = 7,00 m/s` ; les quatre vitesses de l'énoncé donnent
+`Fr_h = 0,71 · 1,14 · 1,43 · 2,14`. **Le point critique est sauté** — l'assertion vise un régime que
+le montage ne produit pas. C'est A133, trouvé en S29 dans le harnais, cette fois dans le corpus.
+
+> **Une assertion sans grandeur masque un montage incapable**, et les deux défauts se protègent l'un
+> l'autre : tant que l'assertion disait « nettement supérieure », rien n'obligeait à vérifier que le
+> montage produisait le régime (**A137**).
+
+### L'audit de S29 s'est trompé une fois, dans le sens le plus coûteux
+
+C18 porte **deux** lignes vides, pas une. « L'hôte serveur compile et tourne » avait été recensée ;
+« aucune capacité dérivée n'est lue depuis un profil de qualité » avait été **classée recevable**,
+par ressemblance avec « zéro allocation ».
+
+Les deux ont la même forme. Ce qui les sépare est l'existence d'un **instrument** : « zéro
+allocation » a son compteur — `AllocStats::refused_after_seal`, lu par le harnais depuis S20 —
+l'autre demanderait une analyse statique, qui n'existe pas.
+
+> **L'instrument ne se lit pas dans l'énoncé.** Classer une assertion sur sa formulation seule est
+> insuffisant : il faut, pour chacune, **nommer ce qui la mesure** et vérifier que cela existe. C'est
+> un troisième contrôle, après la grandeur et le témoin (**A135**).
+
+### Ce qui n'a pas été fait, et pourquoi
+
+- **Le montage de C07 n'est pas corrigé**, seulement l'assertion : ajouter les quatre vitesses du
+  balayage est une modification d'énoncé qui mérite sa propre étape (S30-1).
+- **Les instruments ne sont pas nommés** pour les 47 assertions (S30-2), et « aucune capacité dérivée
+  lue depuis un profil de qualité » reste sans le sien (S30-3).
+- **Aucune des réécritures n'est exécutable aujourd'hui** — les cinq cas attendent leur couche. C'est
+  le principe posé en S29 : la **forme** se corrige avant que la couche existe, et c'est ce qui rend
+  la correction bon marché.
+
+### Session suivante recommandée
+
+**S31 — S26-2, la réinjection à la frontière W/δ.** C'est la question la plus lourde ouverte depuis
+S26, et la seule qui touche la couture entre deux couches : si δ filtre les composantes courtes
+(ADR-034), la transition doit-elle les réinjecter depuis W, ou l'effacement est-il voulu ? ADR-005 ne
+l'a pas prévue.
+
+Deux autres entrées : **S30-2**, nommer l'instrument de chaque assertion — court et mécanique ; ou
+**H2**, non écrit après onze sessions où il est cité.
+
+### Arbitrages en attente
+
+Inchangés. **A103** — la masse volumique de l'eau, douce ou de mer. **A107** — le sort du travail
+propre à `master`, S16-S17. Et les trois choses hors de portée d'une session : nommer les personnes,
+constater l'état réel du projet, agir sur l'infrastructure — dont le dépôt distant.

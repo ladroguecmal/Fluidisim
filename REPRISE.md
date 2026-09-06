@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-06
-Session en cours : S30 — réécrire les cinq assertions fautives, et leur donner une provenance
-Dernière session : S29 — 2026-09-06 — l'audit des assertions, qui s'est trouvé lui-même deux fois
-Session suivante : S31 — la réinjection W/δ (S26-2) ou H2
+Session en cours : —
+Dernière session : S30 — 2026-09-06 — les cinq assertions réécrites, et aucun seuil inventé
+Session suivante : S31 — la réinjection W/δ (S26-2) *(recommandé)*, ou nommer les instruments (S30-2), ou H2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
@@ -105,7 +105,7 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Vingt-neuf sessions, **35 ADR** *(dont un acté)*, six spécifications, **neuf registres** — **et du
+Trente sessions, **35 ADR** *(dont un acté)*, six spécifications, **neuf registres** — **et du
 code qui tourne** : `code/`, étages **H1 et H3** du harnais, un **δ d'essai** équilibré, 31 tests
 verts et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
 verdict** (C08). Quatre cas canoniques sur δ sont exécutés : **C01 et C03 passent**, C04 échoue,
@@ -141,6 +141,12 @@ lui permet de voir, et trois classes se distinguent : recevable, **symptôme** (
 sur un accident), **vacuité** (satisfaite parce que le mécanisme testé est absent). Dix-huit cas sur
 vingt-trois sont exempts ; les deux fautes les plus instructives étaient dans le **harnais**, pas
 dans le corpus. Voir [`AUDIT-ASSERTIONS-S29`](docs/registres/AUDIT-ASSERTIONS-S29.md).
+
+**Et S30 a réécrit les cinq assertions fautives sans inventer un seul seuil.** Les grandeurs étaient
+dans le corpus, sous les assertions qui ne les nommaient pas — un facteur de résonance dans un ADR,
+une masse ajoutée dans un angle mort, une projection « exactement stable » dans une décision. Trois
+des cinq réécritures sont même **plus fortes** que l'énoncé d'origine : un flou déplace toujours
+l'exigence vers le bas.
 
 **Une urgence de format, la seule.** `WaveEvent` (SPEC-006 §3.1) est une structure **répliquée** qui
 porte trois champs demandés par l'équipe audio. Elle doit être arrêtée **avant** que le réseau ne
