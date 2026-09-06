@@ -108,7 +108,7 @@ et il faut dire laquelle.
 - [x] **P7** — documents partagés modifiés par la lignée B seule : `ADR-005`, `ADR-007`,
       `DOSSIER-B2`. Notes correctives datées, jamais de réécriture.
 - [x] **P7b** — `CAS-CANONIQUES`, modifié **des deux côtés** : confronter avant de reporter.
-- [ ] **P8** — le **code** : `shallow.rs` (1070 lignes) n'a pas d'équivalent ici, et `physics.rs`
+- [x] **P8** — le **code** : `shallow.rs` (1070 lignes) n'a pas d'équivalent ici, et `physics.rs`
       a été modifié des deux côtés (+1139 contre +1975). Constat et découpage du travail restant.
       **Aucun import à l'aveugle** — le code se fusionne en le compilant, pas en le recopiant.
 - [ ] **P9** — rituel de fin (`REPRISE.md` §6).

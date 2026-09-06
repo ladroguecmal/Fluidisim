@@ -136,6 +136,20 @@ référence fermée. Sa mise en œuvre est un travail de code, non traité ici �
    été exécuté dans le même arbre : **les chiffres des deux lignées sont cités depuis leurs
    documents respectifs, pas reproduits**. C'est la première chose à faire, et D3 en dépend
    entièrement.
+
+   > **Note S35 P8 — le solveur est importé, ses montages ne le sont pas.** Le §7.1 ci-dessus a
+   > été écrit avant d'essayer. `shallow.rs` ne dépend que de `crate::host`, exactement comme
+   > `delta.rs`, et l'API d'hôte n'a **pas** divergé entre les deux lignées : l'import se réduit au
+   > fichier et à deux lignes de `lib.rs`. **55 tests verts** contre 45, les dix tests de
+   > `shallow.rs` passant sans retouche dans cet arbre, et les deux hashs de conformité **inchangés**
+   > (`0x3e2c06a7b00e73e3`, `0x1a8b0629a9f51b6e`).
+   >
+   > Ce qui reste conflictuel est le **harnais**, pas le solveur : `physics.rs` porte des montages
+   > de même nom des deux côtés (`c03_seiche`, `ritter`, `c08_convergence`) avec des signatures
+   > différentes. Le découpage est dans [`FORK-S22-S26`](../registres/FORK-S22-S26.md) §7.
+   >
+   > *Le §7.2 reste vrai : l'oracle n'a toujours pas été exercé. Deux solveurs coexistent dans le
+   > même binaire ; aucun cas ne les compare encore.*
 2. **L'oracle croisé n'a jamais été exercé.** Tant qu'il ne l'est pas, l'affirmation du §3 est une
    promesse. Les deux codes peuvent diverger dès le premier cas commun, et ce serait le résultat le
    plus utile de la session qui les confrontera.

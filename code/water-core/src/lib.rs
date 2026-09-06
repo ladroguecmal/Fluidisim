@@ -13,6 +13,11 @@
 //! le solveur du projet : ce choix appartient au banc B3 (ADR-007 §5). Ni `W`, ni `V` n'existent
 //! encore, et chacun attend son banc.
 //!
+//! **S35 y ajoute `shallow.rs`**, une **seconde implémentation du même modèle**, écrite
+//! indépendamment dans une histoire parallèle du dépôt et importée à la réconciliation du fork.
+//! Elle n'est pas redondante : deux implémentations du même modèle forment le seul **oracle
+//! croisé** dont le projet dispose hors des cas à référence fermée (ADR-043 §3).
+//!
 //! # Zéro dépendance
 //!
 //! Ce module n'a aucune dépendance externe, et n'en aura pas. C'est ADR-020, et c'est aussi ce qui
@@ -26,6 +31,7 @@ pub mod delta;
 pub mod hash;
 pub mod host;
 pub mod phase;
+pub mod shallow;
 pub mod types;
 
 pub use background::{Background, Component, SeaState};
@@ -34,4 +40,5 @@ pub use delta::{Bassin, Definition, Delta1D, EtatInitial, ParoiMobile};
 pub use hash::Hasher64;
 pub use host::{AllocError, AllocStats, Allocator, HostServices, JobSystem, Sink};
 pub use phase::PhaseQ32;
+pub use shallow::{Flux, Shallow1D};
 pub use types::{FrameId, LayerMask, SimTime, WaterSample, WorldPos, WORLD_UNITS_PER_METRE};

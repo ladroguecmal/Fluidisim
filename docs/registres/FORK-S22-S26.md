@@ -140,3 +140,39 @@ Ce qui aurait fonctionné, et qui est désormais exigé :
   dont il reste à établir s'ils ont un équivalent ici.
 - Il ne décide d'aucune question de conception. Les contradictions éventuelles entre les deux
   lignées sont tranchées par des ADR, avec notes correctives datées, jamais par une renumérotation.
+
+## 7. Ce qui reste à fusionner, et dans quel ordre
+
+État au terme de S35. **Les documents sont fusionnés ; le harnais ne l'est pas.**
+
+| | état | reste |
+|---|---|---|
+| cinq ADR | **fait** — importés, renumérotés 038–042 | — |
+| quinze leçons, douze angles morts | **fait** — L122–L136, A149–A160 | — |
+| `ADR-005`, `ADR-007`, `DOSSIER-B2` | **fait** — notes correctives reportées | — |
+| `CAS-CANONIQUES` | **fait** — confrontation des deux colonnes de verdicts | réexécuter |
+| `code/water-core/src/shallow.rs` | **fait** — importé, compile, 10 tests verts | — |
+| `code/water-harness/src/physics.rs` | **à faire** | les six montages de la lignée B |
+| `code/water-harness/src/main.rs` | **à faire** | leur branchement, et le double format d'écart |
+| `notes/JOURNAL.md` de la lignée B | **à faire** | cinq entrées, sous préfixe `B-` |
+
+**Pourquoi le harnais résiste alors que le solveur n'a pas résisté.** `shallow.rs` ne dépend que de
+`crate::host`, dont l'API n'a pas divergé : il s'importe tel quel. `physics.rs`, lui, porte des
+montages de **même nom** des deux côtés — `c03_seiche`, `ritter`, `c08_convergence` — avec des
+signatures différentes, parce que chacun est écrit contre son propre solveur.
+
+> **Le découpage recommandé : un module séparé, pas une fusion.** Les montages de la lignée B vont
+> dans un `physics_shallow.rs` neuf, et `physics.rs` n'est pas touché. Deux jeux de montages, deux
+> véhicules, aucun conflit de noms — et l'oracle croisé d'ADR-043 §3 devient exerçable : le même
+> cas, deux implémentations, deux nombres à comparer. Fusionner les montages détruirait précisément
+> ce qu'on cherche à garder.
+
+Dans l'ordre, une session par ligne :
+
+1. **`physics_shallow.rs`** — les six montages de B (C01, C03, C04, C05, C06, C08) sur `Shallow1D`,
+   avec leurs conditions de mesure. Aucune modification de `physics.rs`.
+2. **Le branchement** dans `main.rs`, et le double format d'écart absolu / relatif de la lignée B
+   (A149) — qui corrige un défaut d'affichage réel et vaut pour les deux jeux de montages.
+3. **Exercer l'oracle** : exécuter les cas communs sur les deux solveurs et comparer. C'est la
+   session qui rend son sens à tout ce qui précède, et **son résultat n'est pas prévisible**.
+4. **Le journal de la lignée B** — cinq entrées à reporter sous préfixe, à leur date réelle.
