@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S34
-État             : en cours
+État             : terminée
 Battement        : 2026-09-06
 Objectif         : Audit des garde-fous — chacun doit être vu refuser
 ```
@@ -100,7 +100,7 @@ prudence sur un instrument l'empêche de mesurer* (**L99**).
 - [x] **P5** — corriger ce qui doit l'être, et **mesurer que la correction change quelque chose**.
 - [x] **P6** — registre `AUDIT-GARDE-FOUS-S34`.
 - [x] **P7** — répercussions : index, angles morts, actions, décomptes.
-- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
+- [x] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
@@ -158,3 +158,22 @@ qui en dépend n'a **aucun fondement**.
 > dix sans test, et le seul défaillant. Ce n'est probablement pas une coïncidence.
 
 **43 tests au vert**, contre 34 en début de session.
+
+#### État à la fin de S34
+
+`cargo test` : **45 tests**, contre 34 en début de session. `water-harness check` : 2 scénarios,
+0 échec, hashs **inchangés**. Jeton **libéré**.
+
+**Ce que S35 doit savoir avant de commencer, et qui n'est pas ailleurs :**
+
+- **Deux tests par garde-fou, pas un** : le cas qu'il doit **refuser**, et le **témoin** qu'il ne
+  doit pas refuser. Séparément, chacun se satisfait d'une condition fausse — « toujours vrai » passe
+  le témoin, « toujours faux » passe le déclenchement (L119).
+- **Tout garde-fou nouveau s'écrit appelable seul**, et son premier usage est son test de
+  déclenchement (A147, action S34-4). C'est la règle que S34 établit et qu'aucune session n'avait.
+- **G10 signale désormais**, au `Sink` et dans le libellé — mais **pas dans le verdict**. Un
+  déclenchement reste donc invisible pour qui lit le résumé (S34-3).
+- **Les saturations de modèle ne sont pas des garde-fous de montage** et n'ont pas été auditées.
+  C'est la session recommandée : `h.max(0.0)` sur le lit sec de C04 pourrait se déclencher à chaque
+  pas, et rien ne le distinguerait d'un filet qui ne sert jamais (A146).
+- **C04 en échec, `C01-jet` rouge, C08 sans verdict** : trois décisions, pas trois régressions.

@@ -3073,3 +3073,108 @@ est `1` exactement ; ou **H2**, non écrit après treize sessions où il est cit
 Inchangés. **A103** — la masse volumique de l'eau, douce ou de mer. **A107** — le sort du travail
 propre à `master`, S16-S17. Et les trois choses hors de portée d'une session : nommer les personnes,
 constater l'état réel du projet, agir sur l'infrastructure — dont le dépôt distant.
+
+---
+
+## S34 — 2026-09-06 — Dix garde-fous mis à l'épreuve, et la non-testabilité prédit la défaillance
+
+**Consigne reçue.** « Enchaîne S34 ».
+
+**Sorties.** [`AUDIT-GARDE-FOUS-S34`](../docs/registres/AUDIT-GARDE-FOUS-S34.md) ; **onze tests de
+déclenchement** dans le harnais ; le garde-fou G10 corrigé et **extrait en fonction pure** ; registre
+porté à **148 angles morts** ; leçons L118 à L121 ; action **S33-2 close**.
+
+**Ça tourne.** `cargo test` : **45 tests** au vert, contre 34 en début de session. `water-harness
+check` : 0 échec, hashs inchangés.
+
+### Le résultat de la session tient en une phrase
+
+**Sur dix garde-fous, un seul masquait au lieu de refuser — et c'était le seul qui n'était pas
+appelable isolément.**
+
+### Le critère, et son corollaire
+
+> **Un garde-fou qu'on n'a jamais vu déclencher n'a pas été testé.** Le test d'un garde-fou est
+> **le cas qu'il doit refuser**, jamais le cas nominal — celui-ci passe de toute façon.
+
+**Corollaire apparu en cours d'audit** : il faut aussi son **témoin**, le cas sain qu'il ne doit
+*pas* refuser. Sans lui, un contrôle qui refuserait tout passerait son propre test. Trois des dix en
+ont reçu un — G2, G6, G9.
+
+### L'inventaire
+
+| | Garde-fou | Cas qu'il doit refuser | Verdict |
+|---|---|---|---|
+| **G1** | pas de temps sur domaine sec | `vmax = 0` | refuse |
+| **G2** | bornage de `ν` | que `ν = 1,5` soit ramené sous 1 | laisse passer, comme corrigé en S29 |
+| **G3** | plancher d'arrondi | trois erreurs sous le plancher | refuse |
+| **G4** | longueur de série | deux points pour Richardson | refuse |
+| **G5** | amplitude de seiche | `a` sous l'ulp du `f32` | refuse |
+| **G6** | réflexion | le montage à `R² = 0,487` de S33 | refuse, et laisse passer le domaine long |
+| **G7** | seuil de front | un seuil qu'aucune cellule n'atteint | refuse |
+| **G8** | référence nulle | la division par zéro de C01 | refuse |
+| **G9** | définition d'`u_max` | confondre absolue et gouvernante | distingue, et coïncide sans paroi |
+| **G10** | bornage de l'ordre grossier | un ordre **négatif** | **masquait** |
+
+### G10, et pourquoi c'était lui
+
+Le `clamp(0,3 ; 3,0)` sur l'ordre estimé aux grilles grossières corrigeait **en silence**. Or S24 a
+mesuré des ordres **négatifs** — −0,504 puis −0,059 sur le front de C04 — signature du régime
+pré-asymptotique.
+
+> **Un ordre hors bornes n'est pas une valeur à corriger : c'est le signe que les grilles grossières
+> ne sont pas asymptotiques**, donc que l'estimation d'erreur d'oracle qui en dépend n'a aucun
+> fondement. Le borner revient à répondre à une question dont on vient d'apprendre qu'elle n'a pas
+> de réponse.
+
+**Trois gestes.** Le bornage **reste** — il faut un nombre pour filtrer, et il est conservateur. Il
+est **signalé**, au `Sink` et dans le libellé. Et l'estimation est **extraite** en fonction pure
+`ordre_grossier_estime → (brut, borné)`.
+
+**Le troisième geste est le plus important**, et il porte la leçon de la session : l'estimation
+vivait **en ligne** dans une fonction qui lance des simulations avec un oracle à 51 200 cellules. La
+vérifier demandait d'en exécuter une.
+
+> **Un garde-fou qu'on ne peut pas exercer isolément est un garde-fou qu'on n'exercera pas.**
+>
+> G10 était le **seul des dix sans test**, et le **seul défaillant**. Les neuf autres, appelables
+> directement, avaient été éprouvés au fil des sessions **sans que ce soit délibéré**. La chaîne est
+> mécanique : *emplacement en ligne → non testable isolément → jamais testé → jamais vu refuser →
+> défaut invisible* (**A147**).
+
+### Ce que l'audit dit de la méthode
+
+**Le critère « l'a-t-on vu refuser ? » est plus discriminant que la relecture.** Les dix garde-fous
+ont été relus plusieurs fois au fil des sessions, et G10 y a survécu parce qu'il **a l'air correct** :
+borner une estimation entre deux valeurs raisonnables est un geste ordinaire, et rien dans sa
+formulation ne dit qu'il masque.
+
+**Ce qui l'a désigné n'est pas sa forme, c'est son absence de test.**
+
+### Ce qui n'a pas été fait, et pourquoi
+
+- **Les saturations de modèle n'ont pas été auditées.** `delta.rs` en contient une douzaine —
+  `h.max(0.0)` après un pas, la reconstruction hydrostatique. Elles relèvent d'une autre famille :
+  ce sont des rattrapages de **physique**, pas des contrôles de montage. **Aucune n'est comptée**, et
+  une saturation rare est un filet quand une saturation à chaque pas est un solveur qu'on maquille —
+  les deux sont indiscernables aujourd'hui (**A146**, action S34-1).
+- **Aucun garde-fou ne compte ses déclenchements** : on sait qu'ils *peuvent* refuser, pas s'ils
+  refusent en usage réel (**A148**).
+- **Le signalement de G10 passe par le `Sink` et le libellé**, que personne ne lit
+  automatiquement. Il devrait remonter dans le **verdict**, comme les témoins de C01 et C04 (S34-3).
+
+### Session suivante recommandée
+
+**S35 — S34-1, compter les saturations de modèle.** C'est la suite naturelle et elle produit une
+**mesure** : combien de fois `h.max(0.0)` sauve un pas dans C04 ? Si c'est souvent, le lit sec est
+maquillé plutôt que résolu, et le résultat d'ADR-031 change de nature. Le compteur coûte quelques
+lignes et il est immédiatement exploitable.
+
+Deux autres entrées : **S31-2**, écrire C24 (conservation de forme d'un paquet) ; ou **H2**, non
+écrit après quatorze sessions où il est cité.
+
+### Arbitrages en attente
+
+Inchangés. **A103** — la masse volumique de l'eau, douce ou de mer. **A107** — le sort du travail
+propre à `master`, S16-S17. Et les trois choses hors de portée d'une session : nommer les personnes,
+constater l'état réel du projet, agir sur l'infrastructure — dont le dépôt distant.

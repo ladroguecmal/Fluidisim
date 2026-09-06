@@ -1784,3 +1784,79 @@ borne. Ici il fixait le domaine de validité de la loi plutôt que de la mettre 
 progression. C'est le complément de L88, qui disait qu'un biais variant à l'envers de la théorie
 désigne l'instrument ; ici, un biais qui change de signe désigne un terme négligé — et l'un comme
 l'autre se lisent dans la **structure** des écarts, jamais dans leur moyenne.
+
+## L118 — La non-testabilité prédit la défaillance
+
+*(S34)* Sur dix garde-fous audités, un seul masquait au lieu de refuser. C'était **le seul qui
+n'était pas appelable isolément** : il vivait en ligne dans une fonction lançant des simulations
+coûteuses, et le vérifier demandait d'en exécuter une.
+
+Ce n'est pas une coïncidence, et la chaîne est mécanique :
+
+> emplacement en ligne → non testable isolément → jamais testé → jamais vu déclencher → défaut
+> invisible
+
+Les neuf autres avaient été éprouvés au fil des sessions **sans que ce soit délibéré** — simplement
+parce qu'on pouvait les appeler, et qu'on finit par le faire.
+
+**La conséquence de méthode est forte** : la testabilité isolée est un **prédicteur de défaut**, donc
+un critère de revue plus efficace que la relecture. Chercher ce qui n'est pas appelable seul coûte
+une recherche textuelle ; relire tout le code coûte une session et laisse passer ce qui a l'air
+correct.
+
+**Réflexe** : écrire tout contrôle comme une fonction appelable seule, et faire de son **premier
+usage** son test de déclenchement. Le coût est de quelques lignes ; le gain est qu'il existera un
+endroit où lui poser la question.
+
+## L119 — Le test d'un garde-fou est le cas qu'il refuse, et il lui faut aussi un témoin
+
+*(S34)* Un contrôle qui n'a jamais été vu refuser n'a pas été testé : le cas nominal passe de toute
+façon, et son succès ne dit rien de la condition écrite. Le seul test qui informe est **celui qui
+déclenche**.
+
+Mais l'audit a fait apparaître la moitié manquante : un garde-fou qui refuserait **tout** passerait
+aussi ce test-là. Il lui faut donc un **témoin** — le cas sain qu'il ne doit *pas* refuser.
+
+Les deux ensemble encadrent la condition : l'un montre qu'elle attrape ce qu'elle vise, l'autre
+qu'elle ne va pas au-delà. Séparément, chacun se satisfait d'une condition fausse — un contrôle
+« toujours vrai » passe le témoin, un contrôle « toujours faux » passe le déclenchement.
+
+**Réflexe** : deux tests par garde-fou, et pas un. Le second coûte trois lignes, et c'est lui qui
+distingue un contrôle d'un refus systématique.
+
+## L120 — Borner une estimation aberrante répond à une question qui n'en a plus
+
+*(S34)* Une estimation d'ordre de convergence était bornée entre deux valeurs raisonnables, par
+prudence. Le geste paraît anodin — on évite qu'un nombre absurde se propage.
+
+Mais un ordre hors de ces bornes **n'est pas une valeur à corriger** : c'est le signe que les données
+d'entrée ne sont pas dans le régime supposé. Le borner revient à répondre à une question dont on
+vient d'apprendre qu'elle n'a pas de réponse, et à rendre le résultat **indiscernable** d'un cas
+sain.
+
+La correction n'est pas de supprimer le bornage — il faut bien un nombre pour continuer, et un
+bornage conservateur est préférable à un nombre absurde. Elle est de **le signaler** : le résultat
+reste utilisable, et son statut change.
+
+**Réflexe** : devant tout `clamp`, `max`, `min` ou valeur de repli, se demander si la valeur écartée
+était une **erreur de calcul** ou une **information**. Dans le second cas, la borne reste et le
+signalement s'ajoute. Un garde-fou qui corrige sans le dire transforme une anomalie en résultat.
+
+## L121 — On écrit un garde-fou pour empêcher, jamais pour mesurer
+
+*(S34)* L'audit a établi que dix garde-fous *peuvent* refuser. Il n'a pas pu dire s'ils refusent
+**en usage réel**, ni à quelle fréquence : aucun ne compte ses déclenchements.
+
+Le même manque touche les saturations de modèle — les `max(0)` qui empêchent une hauteur d'eau
+négative de se propager. Une saturation qui se déclenche rarement est un filet ; une saturation qui
+se déclenche à chaque pas est un solveur qui produit des états impossibles et qu'on maquille.
+**Les deux sont indiscernables** tant que personne ne compte.
+
+L'omission a une cause commune, et elle est dans l'intention : **un garde-fou est écrit pour
+empêcher quelque chose**, et une fois qu'il empêche, on passe à autre chose. L'idée qu'il puisse
+aussi *renseigner* sur la santé du système ne vient pas — il est rangé dans la catégorie « sécurité »
+et non « instrumentation ».
+
+**Réflexe** : tout garde-fou et toute saturation portent un compteur. Ce sont les capteurs les moins
+chers du système, ils sont déjà placés exactement là où les choses tournent mal, et leur fréquence de
+déclenchement est une mesure de santé qu'aucun test ne donne.

@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-06
-Session en cours : S34 — audit des garde-fous : chacun doit être vu refuser
-Dernière session : S33 — 2026-09-06 — la conclusion la moins étayée devient la mieux mesurée
-Session suivante : S35 — C24 (S31-2) ou H2
+Session en cours : —
+Dernière session : S34 — 2026-09-06 — dix garde-fous mis à l'épreuve ; la non-testabilité prédit la défaillance
+Session suivante : S35 — compter les saturations de modèle (S34-1) *(recommandé)*, ou C24 (S31-2), ou H2
 ```
 
 **Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
@@ -105,7 +105,7 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Trente-trois sessions, **37 ADR** *(dont un acté)*, six spécifications, **neuf registres** — **et du
+Trente-quatre sessions, **37 ADR** *(dont un acté)*, six spécifications, **dix registres** — **et du
 code qui tourne** : `code/`, étages **H1 et H3** du harnais, un **δ d'essai** équilibré, 31 tests
 verts et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
 verdict** (C08). Quatre cas canoniques sur δ sont exécutés : **C01 et C03 passent**, C04 échoue,
@@ -174,6 +174,12 @@ huit à vingt fois trop tôt. Le critère : `dx ≤ K·L^1,5/√(2h)` — **une 
 à **−0,3 %** au meilleur point. La dissipation numérique **produit** donc bien la décroissance
 qu'ADR-001 exige de δ, et il est inutile de l'imposer par une éponge. *Dans le régime linéaire
 seulement* : `a/h ≪ 1 %`, et A127 dit que la loi est fausse à 5 %.
+
+**Et S34 a mis les garde-fous eux-mêmes à l'épreuve.** *Un garde-fou qu'on n'a jamais vu déclencher
+n'a pas été testé* — son test est **le cas qu'il doit refuser**, et il lui faut aussi un **témoin**,
+sans quoi un contrôle qui refuserait tout passerait. Sur dix, **un seul masquait**, et c'était le
+seul **non appelable isolément** : la non-testabilité prédit la défaillance (**A147**). Voir
+[`AUDIT-GARDE-FOUS-S34`](docs/registres/AUDIT-GARDE-FOUS-S34.md).
 
 **Une urgence de format, la seule.** `WaveEvent` (SPEC-006 §3.1) est une structure **répliquée** qui
 porte trois champs demandés par l'équipe audio. Elle doit être arrêtée **avant** que le réseau ne
