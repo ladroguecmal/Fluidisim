@@ -99,7 +99,7 @@ et il faut dire laquelle.
 - [x] **P1** — plan, jeton.
 - [x] **P2** — registre `FORK-S22-S26` : le constat, la carte de renumérotation complète, et la
       règle qui aurait évité le fork. Écrit **avant** tout déplacement de document.
-- [ ] **P3** — import des cinq ADR de la lignée B, renumérotés **038–042**, renvois internes
+- [x] **P3** — import des cinq ADR de la lignée B, renumérotés **038–042**, renvois internes
       réécrits, en-tête de provenance daté sur chacun.
 - [ ] **P4** — report des quinze leçons **L71–L85 → L122–L136**.
 - [ ] **P5** — report des douze angles morts **A105–A116 → A149–A160**, sévérités conservées.
