@@ -96,8 +96,8 @@ Deux sessions ont mesuré la même chose le même jour sans se voir. Si elles co
 réplication indépendante — la seule qu'ait ce projet. Si elles divergent, l'une des deux se trompe,
 et il faut dire laquelle.
 
-- [>] **P1** — plan, jeton.
-- [ ] **P2** — registre `FORK-S22-S26` : le constat, la carte de renumérotation complète, et la
+- [x] **P1** — plan, jeton.
+- [x] **P2** — registre `FORK-S22-S26` : le constat, la carte de renumérotation complète, et la
       règle qui aurait évité le fork. Écrit **avant** tout déplacement de document.
 - [ ] **P3** — import des cinq ADR de la lignée B, renumérotés **038–042**, renvois internes
       réécrits, en-tête de provenance daté sur chacun.

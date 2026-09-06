@@ -1,0 +1,142 @@
+# Registre du second fork — la lignée B, S22 à S26
+
+**Constaté le 2026-09-06, en S35.** Ce document est le compte rendu d'une divergence du dépôt et la
+référence de la renumérotation qui la referme. Il n'est pas un ADR : il ne décide rien de la
+conception. Il décide seulement **quel identifiant désigne quoi**.
+
+---
+
+## 1. Ce qui s'est passé
+
+Le dépôt a forké **deux fois**.
+
+Le premier fork est parti de `8fe1503` (*S07 — README : décomptes périmés corrigés*) et a produit
+deux histoires de 39 et 44 commits. Il est documenté — mais **dans l'autre lignée** : le fichier
+`FORK-S08-S15.md` vit sur `master`, qui n'est pas un ancêtre d'ici. *Cette lignée-ci n'a jamais su
+qu'elle était une branche.* C'est le fait le plus important de ce registre, et le §5 en tire la
+règle.
+
+Le second fork est parti de `a6cfe6f` (*S21 P7 — rituel de fin*, 2026-09-06 11h35) et a produit
+deux histoires **dans la même journée** :
+
+| | branche | commits depuis S21 | dernier commit | ADR | leçons | angles morts | code |
+|---|---|---|---|---|---|---|---|
+| **lignée d'accueil** | `claude/s22-suite` | 88 | S34, 19h14 | 37 | L121 | A148 | `delta.rs` |
+| **lignée B** | `claude/reprise-projet-5134cd` | 35 | S26, 17h12 | 34 | L85 | A116 | `shallow.rs` |
+
+Une troisième branche, `master`, est morte à **S17** (2026-09-06 01h51) : 195 commits de retard,
+aucun code. Elle détient le registre du premier fork. Sa réconciliation n'est pas traitée ici.
+
+**Le mécanisme est celui que `REPRISE.md` décrit et contre lequel il avertit qu'il ne protège
+pas.** Le jeton de session est un fichier versionné : il est propre à une branche et à une copie de
+travail. Trois worktrees, trois jetons, tous trois `libre`. Chaque session a pris le sien de bonne
+foi.
+
+## 2. Pourquoi cette lignée est la lignée d'accueil
+
+Parce qu'elle est la plus avancée (88 commits contre 35) et la plus récente (19h14 contre 17h12).
+Le critère est **le nombre de documents à déplacer**, rien d'autre. Ce n'est pas un jugement sur la
+qualité du travail de la lignée B — dont deux résultats, §4, sont parmi les plus solides du projet.
+
+## 3. Carte de renumérotation
+
+**Règle générale.** Un identifiant de *document* ou de *fiche* est renuméroté ; un identifiant
+d'*événement daté* ne l'est pas. Une session a eu lieu : la renommer serait mentir sur l'histoire.
+Les sessions de la lignée B sont donc **préfixées**, pas renumérotées.
+
+### 3.1 Décisions (ADR) — les cinq collisions
+
+| lignée B | session B | titre | **devient ici** |
+|---|---|---|---|
+| ADR-030 | B-S22 | Ce que les deux premiers cas de solveur ont appris | **ADR-038** |
+| ADR-031 | B-S23 | Un cas sans conditions de mesure ne classe personne | **ADR-039** |
+| ADR-032 | B-S24 | L'ordre deux, et ce qu'il déplace | **ADR-040** |
+| ADR-033 | B-S25 | Le dernier cas rouge était rouge à cause de sa mesure | **ADR-041** |
+| ADR-034 | B-S26 | L'éponge mesurée, et la borne de λ_cut rouverte | **ADR-042** |
+
+Les ADR-030 à ADR-034 **de cette lignée** gardent leurs numéros et leurs sujets, qui sont autres :
+l'équilibrage comme critère d'élimination, le front de mouillage, C08 non exécutable, les deux
+définitions de λ_cut, la dissipation comme filtre passe-bas.
+
+> **Toute citation de « ADR-03x » écrite avant le 2026-09-06 est ambiguë.** Elle désigne l'un ou
+> l'autre selon la lignée de son auteur. Les renvois internes aux cinq documents importés sont
+> réécrits en P3 ; ceux qui figurent dans le journal et les leçons de la lignée B sont réécrits
+> avec eux.
+
+### 3.2 Leçons — quinze collisions
+
+`L71` à `L85` de la lignée B deviennent **`L122` à `L136`**, dans l'ordre, sans exception :
+
+| B | ici | | B | ici | | B | ici |
+|---|---|---|---|---|---|---|---|
+| L71 | **L122** | | L76 | **L127** | | L81 | **L132** |
+| L72 | **L123** | | L77 | **L128** | | L82 | **L133** |
+| L73 | **L124** | | L78 | **L129** | | L83 | **L134** |
+| L74 | **L125** | | L79 | **L130** | | L84 | **L135** |
+| L75 | **L126** | | L80 | **L131** | | L85 | **L136** |
+
+### 3.3 Angles morts — douze collisions
+
+`A105` à `A116` de la lignée B deviennent **`A149` à `A160`**, dans l'ordre, sévérités conservées :
+
+| B | ici | sévérité | | B | ici | sévérité |
+|---|---|---|---|---|---|---|
+| A105 | **A149** | 3 | | A111 | **A155** | **1** |
+| A106 | **A150** | 2 | | A112 | **A156** | **1** |
+| A107 | **A151** | 3 | | A113 | **A157** | **1** |
+| A108 | **A152** | **1** | | A114 | **A158** | 3 |
+| A109 | **A153** | 2 | | A115 | **A159** | **1** |
+| A110 | **A154** | 2 | | A116 | **A160** | 2 |
+
+`A104` est **commun aux deux lignées** : il est antérieur au fork. Ne pas le renuméroter.
+
+### 3.4 Sessions
+
+`S22` à `S26` de la lignée B deviennent **`B-S22`** à **`B-S26`**. Les sessions S22 à S26 sans
+préfixe restent celles de cette lignée. Le journal reçoit les entrées de B sous leur préfixe, à
+leur date réelle, et non à la suite de S34.
+
+## 4. Ce que la lignée B apporte, et le seul point de contact
+
+Cinq décisions, quinze leçons, douze angles morts — dont **cinq de sévérité 1**, ce qui est une
+proportion élevée. Et un fichier de code neuf, `shallow.rs`, 1070 lignes, sans équivalent ici.
+
+**Un seul sujet a été travaillé des deux côtés sans que personne le sache : l'éponge et la borne de
+`λ_cut`.** Côté B, B-S26 mesure l'éponge et **rouvre** la borne de `λ_cut` (ADR-042 ici). Ici, S33
+mesure la décroissance spatiale d'un phénomène entretenu et conclut qu'il est **inutile d'imposer
+cette décroissance par une éponge**, la dissipation numérique la produisant seule.
+
+Deux sessions ont mesuré le même objet le même jour, sans se voir. **C'est la seule réplication
+indépendante que ce projet possède.** Elle est traitée en P6, et son verdict n'est pas anticipé
+ici.
+
+## 5. La règle qui aurait évité ce fork
+
+Le premier fork avait produit une leçon et une correction de la procédure d'amorce — **dans la
+lignée qui l'a constaté, et nulle part ailleurs**. La lignée d'accueil a donc reforké huit sessions
+plus tard, en ignorant qu'elle était exposée.
+
+> **Un correctif de procédure écrit dans une seule branche ne protège que cette branche.** C'est la
+> forme générale du défaut : le remède au fork est lui-même sujet au fork.
+
+Ce qui aurait fonctionné, et qui est désormais exigé :
+
+1. **Les deux commandes d'amorce sont obligatoires** — `git worktree list` et `git branch -a`,
+   avant de regarder le jeton. En S35 elles ont fonctionné : le fork a été vu au premier geste.
+   `CLAUDE.md` les impose déjà ; c'est le seul dispositif qui ait réellement tenu.
+2. **Un registre de fork se réplique dans toutes les branches vivantes le jour où il est écrit.**
+   Un registre qui décrit un fork et qui vit d'un seul côté du fork est inutile là où il compte.
+3. **Une session qui ouvre un worktree neuf vérifie que sa branche est à jour** de la branche la
+   plus avancée, et non seulement que son jeton est libre. Le jeton dit qu'aucune session ne
+   travaille *ici* ; il ne dit rien de ce qui se passe ailleurs.
+
+## 6. Ce que ce registre ne fait pas
+
+- Il ne fusionne pas le **code**. `physics.rs` et `main.rs` ont été modifiés lourdement des deux
+  côtés (+1139 lignes contre +1975). Le code se fusionne en le compilant et en l'exécutant, pas en
+  le recopiant : voir la session en cours, P8, et les points ouverts.
+- Il ne traite pas `master` **(S17)**, la lignée morte du premier fork. Elle détient
+  `FORK-S08-S15.md` et deux ADR — `ADR-026-quatre-mecanismes`, `ADR-027-graine-et-sauvegarde` —
+  dont il reste à établir s'ils ont un équivalent ici.
+- Il ne décide d'aucune question de conception. Les contradictions éventuelles entre les deux
+  lignées sont tranchées par des ADR, avec notes correctives datées, jamais par une renumérotation.
