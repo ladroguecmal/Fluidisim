@@ -592,15 +592,19 @@ fn lire(chemin: &str) -> Result<Scenario, String> {
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
     if matches!(args.first().map(String::as_str), Some("c22-shallow" | "c22-shallow-fenetres" | "c22-shallow-fin")) {
-        let n = match args.get(1).map(|v| v.parse::<usize>()).unwrap_or(Ok(if args[0] == "c22-shallow-fin" { 51200 } else { 12800 })) {
+        let n = match args.get(1).filter(|v| !v.starts_with("--")).map(|v| v.parse::<usize>()).unwrap_or(Ok(if args[0] == "c22-shallow-fin" { 51200 } else { 12800 })) {
             Ok(n) => n,
             Err(_) => { eprintln!("taille d'oracle invalide"); return ExitCode::FAILURE; }
         };
+        // `--annonce` dit ce que la campagne pourra admettre, et s'arrête là — ADR-050, S61-1.
+        // Une campagne fine coûte un quart d'heure ; son résultat d'admission se lit d'avance sur
+        // le rapport oracle/grille, et le découvrir après coup a coûté quatre campagnes.
+        let sec = args.iter().any(|a| a == "--annonce");
         let resultat = if args[0] == "c22-shallow-fenetres" {
-            c22_shallow::fenetres(n)
+            c22_shallow::fenetres(n, sec)
         } else if args[0] == "c22-shallow-fin" {
-            c22_shallow::fine(n)
-        } else { c22_shallow::campagne(n) };
+            c22_shallow::fine(n, sec)
+        } else { c22_shallow::campagne(n, sec) };
         return match resultat {
             Ok(0) => ExitCode::SUCCESS,
             Ok(_) => ExitCode::FAILURE,
@@ -608,7 +612,7 @@ fn main() -> ExitCode {
         };
     }
     if args.len() < 2 {
-        eprintln!("usage : water-harness <check|physics|bless> <scenario.toml> [...] | <c22-shallow|c22-shallow-fenetres|c22-shallow-fin> [nx_oracle]");
+        eprintln!("usage : water-harness <check|physics|bless> <scenario.toml> [...] | <c22-shallow|c22-shallow-fenetres|c22-shallow-fin> [nx_oracle] [--annonce]");
         return ExitCode::from(2);
     }
     let mode = args[0].as_str();

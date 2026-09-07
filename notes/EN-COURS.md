@@ -72,7 +72,7 @@ Objectif         : S60-1 — atteindre le régime où l'erreur d'une grille pass
 - [x] **P2** — chiffrer l'expérience prescrite avant de la lancer, et établir si le régime visé est atteignable dans ce dispositif.
 - [x] **P3** — si non : dériver ce que le filtre ×30 exige réellement, et **le vérifier contre les cinq campagnes historiques**, dont les refus sont connus.
 - [x] **P4** — conclure : note corrective datée sur ADR-049 D4, et ce qui remplace l'expérience impossible.
-- [ ] **P5** — appliquer au code ce qui doit l'être, avec essais de refus et témoins.
+- [x] **P5** — appliquer au code ce qui doit l'être, avec essais de refus et témoins.
 - [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
 
 ### Notes de reprise
@@ -113,3 +113,14 @@ P4 : ADR-050. D1 le filtre x30 equivaut a k >= 6 environ, condition geometrique 
 tout calcul ; D2 le seuil d admission d une mesure d ordre est fonction de l ordre — A183 ;
 D3 filtre conserve, description completee sans reecriture. S60-1 dissoute. Note corrective datee
 sur ADR-049 D4, dont le reste tient sans changement.
+
+P5 : annonce d admissibilite affichee avant chaque campagne, et mode --annonce qui n en affiche
+que la prevision sans rien calculer. A oracle 51200 elle prevoit la grille 12800 refusee avec un
+ratio de 15,0 ; S56 avait mesure 14,81. Trois classes seulement — admise, refusee, et **a la
+frontiere** entre k=5 et k=7, ou le modele avoue qu il ne tranche pas : a k=6 il annoncerait 31,6
+contre 28,7 mesures, du mauvais cote du seuil. Test qui retrouve l historique 2, 4, 6, 7. Le
+mode sec ne contourne aucun refus de taille. 129 tests reussis, deux ignores ; hashs inchanges.
+
+Note d honnetete : deux campagnes ont ete lancees par distraction pendant cette etape, faute
+d avoir ce mode sec — l une de 14 min interrompue, l autre de 6 min. Aucun resultat n en depend.
+C est exactement le besoin auquel --annonce repond, rencontre en le construisant.

@@ -90,16 +90,40 @@ fn erreur(h: &[f64], oracle: &[f64]) -> Result<f64, String> {
     Ok(e)
 }
 
-pub fn campagne(nx_oracle: usize) -> Result<usize, String> {
-    mesurer(nx_oracle, 1)
+pub fn campagne(nx_oracle: usize, sec: bool) -> Result<usize, String> {
+    mesurer(nx_oracle, 1, sec)
 }
 
-pub fn fenetres(nx_oracle: usize) -> Result<usize, String> {
-    mesurer(nx_oracle, 3)
+pub fn fenetres(nx_oracle: usize, sec: bool) -> Result<usize, String> {
+    mesurer(nx_oracle, 3, sec)
 }
 
-pub fn fine(nx_oracle: usize) -> Result<usize, String> {
-    mesurer(nx_oracle, 4)
+pub fn fine(nx_oracle: usize, sec: bool) -> Result<usize, String> {
+    mesurer(nx_oracle, 4, sec)
+}
+
+/// Ce que la campagne pourra admettre, **dit avant de la payer** — ADR-050, action S61-1.
+///
+/// Le filtre ×30 est une condition **géométrique** : pour un schéma d'ordre `p`, le rapport entre
+/// l'erreur d'une grille et l'écart des deux oracles vaut `k^p / (1 − 2^-p)` où `k = oracle/grille`.
+/// Il ne dépend donc presque pas de la taille de l'oracle — ajusté sur treize couples de cinq
+/// campagnes : `2,011·k^1,902·o^-0,058`, écart maximal 23,5 %.
+///
+/// **Cette annonce ne commande rien** : le verdict reste celui du filtre mesuré, plus bas. Et elle
+/// **suppose l'ordre deux** — c'est A183, et c'est exactement ce que la campagne cherche à établir.
+/// Sur un schéma d'ordre un, il faudrait `k ≥ 15` là où l'ordre deux demande `k ≥ 4,7`.
+fn annoncer_admissibilite(grilles: &[usize], nx_oracle: usize) {
+    println!("Admissibilité prévue (ADR-050, suppose l'ordre deux ; n'engage aucun verdict) :");
+    for &n in grilles {
+        let k = nx_oracle as f64 / n as f64;
+        let ratio = 2.011 * k.powf(1.902) * (nx_oracle as f64).powf(-0.058);
+        // La frontière mesurée est à k ≈ 6, et le modèle s'écarte de 23,5 % : entre 5 et 7, il ne
+        // sait pas. Annoncer un verdict là où le modèle hésite serait pire que se taire.
+        let avis = if k >= 7.0 { "prévue admise" }
+            else if k <= 5.0 { "prévue refusée" }
+            else { "À LA FRONTIÈRE — le modèle ne tranche pas" };
+        println!("  nx={n:5}  k={k:7.2}  ratio prévu {ratio:9.1}  {avis}");
+    }
 }
 
 fn famille(mesures: &[(usize, f64)], seuil: f64, debut: usize) -> Vec<(usize, f64)> {
@@ -107,7 +131,7 @@ fn famille(mesures: &[(usize, f64)], seuil: f64, debut: usize) -> Vec<(usize, f6
         .take_while(|(_, e)| e.is_finite() && *e >= seuil).collect()
 }
 
-fn mesurer(nx_oracle: usize, fenetres: usize) -> Result<usize, String> {
+fn mesurer(nx_oracle: usize, fenetres: usize, sec: bool) -> Result<usize, String> {
     let grilles = [100, 200, 400, 800, 1600, 3200, 6400, 12800];
     if fenetres == 4 {
         // Borne relevée de 76800 à 89600 en S59 (action S57-1). Comme la précédente, c'est une
@@ -122,6 +146,12 @@ fn mesurer(nx_oracle: usize, fenetres: usize) -> Result<usize, String> {
     }
     if fenetres > 1 && (nx_oracle <= 6400 || nx_oracle % 6400 != 0) {
         return Err("fenêtres : oracle multiple de 6400, strictement supérieur à 6400".into());
+    }
+    annoncer_admissibilite(&grilles[..fenetres + 4], nx_oracle);
+    if sec {
+        println!("--annonce : rien n'est calculé. Coût évité, à titre indicatif : environ {:.0} s.",
+            1143.284 * (nx_oracle as f64 / 89600.0).powi(2));
+        return Ok(0);
     }
     let debut = std::time::Instant::now();
     println!("Calcul oracle {nx_oracle}...");
@@ -324,18 +354,44 @@ mod tests {
         assert!(ecart > 1e-3, "un biais hétérogène est passé inaperçu : écart {ecart}");
     }
 
+    /// L'annonce d'admissibilité doit retrouver l'historique de C22 — S61, ADR-050.
+    ///
+    /// Elle ne commande rien, donc rien ne la vérifierait si ce test ne le faisait pas. Les quatre
+    /// campagnes réelles sont ses seules données de contrôle : `k` valait 2, 4, 6 puis 7 pour la
+    /// grille 12800, et l'admission a basculé entre 6 et 7.
+    #[test]
+    fn l_annonce_retrouve_l_historique_de_c22() {
+        let classe = |o: usize, n: usize| -> &'static str {
+            let k = o as f64 / n as f64;
+            if k >= 7.0 { "admise" } else if k <= 5.0 { "refusée" } else { "frontière" }
+        };
+        // S48 : oracle 25600, grille 12800 refusée. S49 et S56 : 51200, refusée.
+        assert_eq!(classe(25600, 12800), "refusée");
+        assert_eq!(classe(51200, 12800), "refusée");
+        // S57 : 76800, refusée — mais à 4,4 % du seuil. Le modèle doit avouer qu'il ne tranche pas.
+        assert_eq!(classe(76800, 12800), "frontière");
+        // S59 : 89600, admise avec 22,4 % de marge.
+        assert_eq!(classe(89600, 12800), "admise");
+        // Et les grilles grossières de S59, toutes admises.
+        for n in [100, 200, 400, 800, 1600, 3200, 6400] {
+            assert_eq!(classe(89600, n), "admise", "grille {n}");
+        }
+    }
+
     #[test]
     fn fenetre_coupee_sans_recoudre_les_grilles() {
         let m = [(100,8.0),(200,4.0),(400,2.0),(800,0.5),(1600,1.5),(3200,1.1),(6400,1.0)];
         assert_eq!(famille(&m,1.0,0),m[..3]);
         assert_eq!(famille(&m,1.0,2),m[2..3]);
         assert_eq!(famille(&m,0.0,2),m[2..]);
-        assert!(fenetres(9600).is_err());
-        assert!(fenetres(6400).is_err());
+        assert!(fenetres(9600, false).is_err());
+        assert!(fenetres(6400, false).is_err());
         // Refus : nul, égal à la grille fine, non multiple, **au-dessus de la borne de campagne**
         // (102400 est bien un multiple de 12800 : c'est la borne qui le refuse, pas l'emboîtement),
         // et le débordement. 89600 n'est plus dans cette liste depuis S59 — il est admis.
-        for n in [0, 12800, 32000, 102_400, usize::MAX] { assert!(fine(n).is_err()); }
+        for n in [0, 12800, 32000, 102_400, usize::MAX] { assert!(fine(n, false).is_err()); }
+        // --annonce ne contourne aucun refus : une taille invalide reste invalide.
+        for n in [0, 12800, 102_400] { assert!(fine(n, true).is_err()); }
     }
     #[test]
     fn projection_conservative_et_refus() {
