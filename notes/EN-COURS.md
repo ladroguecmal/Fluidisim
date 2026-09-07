@@ -69,8 +69,8 @@ Objectif         : Diagnostiquer le nouvel échec d’homogénéité (S65-1).
 
 - [x] **P1** — état réel, passation, jeton et plan seul.
 - [x] **P2** — diagnostic à phases spatiales et sommation f64 sur les mêmes composantes ; fenêtres 144/576/1536 m, six graines, translation 3000 m.
-- [>] **P3** — confronter les mesures, ajouter un témoin de causalité et documenter la portée ; aucun seuil modifié.
-- [ ] **P4** — rituel : journal, actions, angles/leçons si établis, index, corrections datées et jeton libre.
+- [x] **P3** — confronter les mesures, ajouter un témoin de causalité et documenter la portée ; aucun seuil modifié.
+- [>] **P4** — rituel : journal, actions, angles/leçons si établis, index, corrections datées et jeton libre.
 
 ### Notes de reprise
 
@@ -85,3 +85,8 @@ production 1,397506641, référence spatiale f64 1,397506306 ; somme des varianc
 ratio 0,979715316. Écart interférences : cross_p=0,006459304, cross_l=0,046176100 m².
 Fenêtre nominale 144 m, 576 m -> 1,079318732, 1536 m -> 0,943614087. Aucune correction
 production ; contrôler par un témoin monochromatique et conserver le verdict en P3.
+
+P3 : test de causalité et témoin monochromatique verts ; 134 tests réussis, quatre ignorés.
+Check inchangé. HOMOGENEITE-S66 contient les 18 ratios et la décomposition. Aucun chemin de
+production ni seuil modifié ; commentaire du contrôle corrigé. S65-1 peut être close,
+S66-1 portera la décision de séparer contrôle de précision et diagnostic statistique.

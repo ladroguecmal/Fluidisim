@@ -299,6 +299,25 @@ mod diagnostic_homogeneite_s66 {
     }
 
     #[test]
+    fn interferences_distinguees_de_la_precision() {
+        let bg = fond(20260905,32);
+        let p = variances(&bg,48,3.0,0.0);
+        let l = variances(&bg,48,3.0,3000.0);
+        let ratio = l[0]/p[0];
+        let reference = l[1]/p[1];
+        assert!((ratio-reference).abs() < 1e-4,
+            "la précision ne doit pas expliquer cet écart de variance");
+        assert!(reference > 1.3); // Refus nominal présent aussi en f64.
+        assert!((l[2]/p[2]-1.0).abs() < 0.03); // Sans termes croisés, écart sous 3 %.
+        // Témoin sans interférence : variance de la somme = variance de la seule composante.
+        let mono = fond(20260905,1);
+        for ox in [0.0,3000.0] {
+            let v = variances(&mono,48,3.0,ox);
+            assert_eq!(v[1],v[2]);
+        }
+    }
+
+    #[test]
     #[ignore = "diagnostic S66 : six graines, trois fenêtres ; lancer en release"]
     fn balayer_homogeneite() {
         for graine in [0,1,2,3,20260905,u64::MAX] {

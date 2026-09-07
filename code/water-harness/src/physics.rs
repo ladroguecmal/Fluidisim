@@ -503,6 +503,10 @@ pub fn pente_maximale(bg: &Background, t: SimTime, a: f64, k_rad: f64) -> Cas {
 /// distance**. `PhaseQ32::from_distance` multiplie un `f32` par une distance ; à quelques
 /// kilomètres, la partie fractionnaire perd des bits, et la mer se dégraderait sans que rien ne le
 /// signale.
+///
+/// Note S66 : ce rapport ne permet pas d'attribuer un échec à la précision. Le nominal
+/// 1,397507 est reproduit en f64 et dominé par les covariances entre composantes sur la
+/// fenêtre de 144 m. Voir HOMOGENEITE-S66 ; seuil et verdict conservés en attente de décision.
 pub fn homogeneite(bg: &Background, t: SimTime, cote: u32, pas_m: f64, decalage_m: f64) -> Cas {
     let var = |ox: f64| {
         let (mut s, mut s2, mut n) = (0.0f64, 0.0f64, 0u64);
