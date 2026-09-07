@@ -68,6 +68,27 @@ a été écrite le même jour dans une histoire parallèle du dépôt : **`shall
 | **C06** | non exécuté | **partiel** *(B-S23)* — translation 1D seule |
 | **C08** | **sans verdict** *(S23-S24)* — ADR-032 | rouge *(B-S23)*, puis **vert** *(B-S24)* : `p` = 1,003 |
 
+> **Note S41 — l'attribution ci-dessous était juste à moitié.** Le paragraphe qui suit dit que le
+> passage à l'ordre deux explique l'écart de verdicts sur C04. **Trois choses changent pourtant
+> entre les deux colonnes**, et une seule y est nommée : le schéma, mais aussi le **seuil** de
+> mesure du front (`10⁻³ m` contre `10⁻²·h₀`) et la **référence** (front ponctuel de Ritter contre
+> front moyenné sur la maille).
+>
+> Mesuré **à ordre un des deux côtés**, donc à schéma égal :
+>
+> | même solveur, ordre un | écart au front |
+> |---|---|
+> | mesure d'accueil — seuil `10⁻³`, référence ponctuelle | **20,4 %** |
+> | mesure de la lignée B — seuil `10⁻²·h₀`, référence moyennée | **10,2 %** |
+> | *(publié, ordre deux, mesure de la lignée B)* | *0,74 %* |
+>
+> **La révision de la mesure retire dix points sur vingt ; l'ordre deux retire les neuf et demi qui
+> restent** — 52 % contre 48 %. Aucun des deux seul ne fait franchir la tolérance de 3 %.
+>
+> Et à **seuil égal**, les deux véhicules donnent le même front à la quatrième décimale : 9,9750 m
+> à `10⁻³`, 9,5250 m à `10⁻²`. **Le désaccord n'était pas entre les solveurs.** Angle mort
+> **A157**, relu en S41 ; le calcul est le test `a157_ce_que_l_ordre_deux_explique_vraiment`.
+
 > **Ce n'est pas une contradiction, c'est une complémentarité — et elle est instructive.**
 > `ADR-031` de cette lignée conclut que **le front de mouillage élimine l'ordre un**. La lignée B a
 > franchi ce pas : elle a implémenté l'ordre deux (`ADR-040`), et **C04 et C08 sont alors passes au

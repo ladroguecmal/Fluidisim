@@ -249,7 +249,7 @@ fn ritter_u(x: f64, t: f64, h0: f64) -> f64 {
 /// different franchement — comparer l'une a l'autre attribue au solveur une erreur qui est celle de
 /// la comparaison. La primitive est fermee : `∫(2c₀ − x/t)²/(9g) dx = t·s³/(27g)` avec `s = 2c₀ −
 /// x/t`, ce qui evite aussi qu'une quadrature approchee ajoute son propre biais.
-fn ritter_h_moyenne(a: f64, b: f64, t: f64, h0: f64) -> f64 {
+pub fn ritter_h_moyenne(a: f64, b: f64, t: f64, h0: f64) -> f64 {
     if b <= a {
         return 0.0;
     }
@@ -273,7 +273,7 @@ fn ritter_h_moyenne(a: f64, b: f64, t: f64, h0: f64) -> f64 {
 ///
 /// C'est la correction qu'A156 et ADR-039 imposent : comparer deux grandeurs differentes est un
 /// defaut de mesure, pas une exigence de rigueur.
-fn front_exact(dx: f64, t: f64, h0: f64, seuil: f64) -> f64 {
+pub fn front_exact(dx: f64, t: f64, h0: f64, seuil: f64) -> f64 {
     let c0 = (G * h0).sqrt();
     // On balaie les mailles depuis le front mathematique vers l'amont.
     let mut x = 2.0 * c0 * t;

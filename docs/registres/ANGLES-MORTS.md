@@ -1177,6 +1177,17 @@ pendant quatre sessions.
   nécessaire et non suffisant : une condition de mesure doit être reproductible *et* physiquement
   interprétable.** Et le cas est aggravé par le fait que celui qui fixe le seuil est celui dont le
   code est jugé par lui — **la révision demande une confirmation extérieure**.
+
+  > **Note S41 — relu, et l'énoncé est incomplet.** Le fait est exact, et le remède — *une
+  > condition de mesure doit être reproductible **et** physiquement interprétable* — tient. Mais la
+  > fiche ne dit pas que **deux mesures reproductibles peuvent être incomparables entre elles**, et
+  > c'est le cas ici : les deux véhicules mesurent le front à des seuils **et des références**
+  > différents — `10⁻³` contre front ponctuel, `10⁻²·h₀` contre front moyenné sur la maille — et
+  > `CAS-CANONIQUES` les met côte à côte depuis S36.
+  >
+  > **À seuil égal, les deux fronts sont identiques à la quatrième décimale.** L'écart de verdicts
+  > vient pour **52 %** de la mesure et pour 48 % du schéma. Voir
+  > [`AUDIT-ANGLES-IMPORTES-S41`](AUDIT-ANGLES-IMPORTES-S41.md) §6.
 - **A158** — **Le coût d'un instrument de mesure croît sans que personne le regarde.** La batterie
   analytique valait 0,04 s en S20 ; elle a atteint **74 secondes** en B-S25, chaque session n'y ayant
   ajouté « qu'un balayage ». Personne ne mesure le temps de l'outil qui mesure. *(Le remède ici a

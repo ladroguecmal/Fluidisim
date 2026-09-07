@@ -815,6 +815,183 @@ mod tests {
         );
     }
 
+    /// **A157 — un seuil reproductible peut être dénué de sens, et deux seuils incomparables
+    /// peuvent être mis côte à côte.**
+    ///
+    /// La fiche importée critique le seuil de mouillage de `10⁻⁶ m` — *un micron d'eau*, épaisseur
+    /// à laquelle ni le modèle moyenné sur la hauteur, ni la rugosité d'un fond, ni le rendu n'ont
+    /// de sens. Elle porte sur le **seuil de mesure du front**, et non sur le seuil du solveur que
+    /// `ADR-047` a tranché : deux objets, deux noms (**L148**).
+    ///
+    /// # Ce que la relecture trouve ici, et qui n'était pas dans la fiche
+    ///
+    /// Les deux véhicules ne mesurent pas le front de la même façon — **ni au même seuil, ni contre
+    /// la même référence** :
+    ///
+    /// | | seuil | référence |
+    /// |---|---|---|
+    /// | `physics.rs` *(accueil)* | `10⁻³ m` | front **ponctuel** de Ritter au même seuil |
+    /// | `physics_shallow.rs` *(lignée B)* | `10⁻²·h₀` | front de Ritter **moyenné sur la maille** |
+    ///
+    /// Et `CAS-CANONIQUES` les met **côte à côte** depuis S36, dans le tableau « deux véhicules,
+    /// deux colonnes », sans dire que ce ne sont pas les mêmes mesures.
+    #[test]
+    fn a157_les_deux_fronts_ne_sont_pas_comparables() {
+        let (cd, cs) = champs_c04(2.0);
+        // **Chaque véhicule a son barrage.** Les origines diffèrent de 20 m — `[−20, +20]` d'un
+        // côté, `[0, 40]` de l'autre — et seuls les **indices** se correspondent. Prendre une seule
+        // abscisse de barrage pour les deux décale l'un de 20 m ; l'en-tête de ce module le dit, et
+        // ce test l'a fait quand même à sa première écriture.
+        let front = |c: &Champs, seuil: f64| {
+            let x_barrage = c.x[400] - 0.5 * 0.05;
+            c.hauteur
+                .iter()
+                .enumerate()
+                .filter(|(_, &h)| h > seuil)
+                .map(|(i, _)| c.x[i] - x_barrage)
+                .fold(f64::NEG_INFINITY, f64::max)
+        };
+        // Front mathématique de Ritter au même seuil : `h(x,t) = (2c₀ − x/t)²/(9g)`.
+        let c0 = (G * 1.0f64).sqrt();
+        let ritter = |seuil: f64| {
+            let mut x = 2.0 * c0 * 2.0;
+            let mut pas = 1e-4;
+            while pas > 1e-9 {
+                let h = (2.0 * c0 - x / 2.0).max(0.0).powi(2) / (9.0 * G);
+                if h > seuil {
+                    x += pas;
+                } else {
+                    x -= pas;
+                    pas *= 0.5;
+                }
+            }
+            x
+        };
+
+        println!("C04 à t = 2 s — position du front, par seuil et par véhicule :");
+        for seuil in [1e-3f64, 1e-2] {
+            let (fd, fs, fr) = (front(&cd, seuil), front(&cs, seuil), ritter(seuil));
+            println!(
+                "      seuil {seuil:>8.0e} m : delta.rs {fd:>7.4} m ({:>7.2} %) | shallow.rs {fs:>7.4} m ({:>7.2} %) | Ritter ponctuel {fr:>7.4} m",
+                (fd - fr) / fr * 100.0,
+                (fs - fr) / fr * 100.0
+            );
+        }
+
+        // **Ce qui est vérifié** : à seuil égal et contre la même référence, les deux véhicules
+        // s'accordent. Le désaccord de seize points qui traverse le corpus vient de la **méthode de
+        // mesure**, pas des solveurs.
+        for seuil in [1e-3f64, 1e-2] {
+            let (fd, fs) = (front(&cd, seuil), front(&cs, seuil));
+            let ecart = (fd - fs).abs() / fs * 100.0;
+            assert!(
+                ecart < 1.0,
+                "à seuil {seuil:.0e} les deux fronts devraient s'accorder : {fd:.4} contre {fs:.4} ({ecart:.2} %)"
+            );
+        }
+
+        // **Et ce qui ne l'est pas** : changer de seuil déplace le front bien plus que le désaccord
+        // entre véhicules. C'est A157 — le seuil ne décrit pas le solveur, il décrit la mesure.
+        let d3 = front(&cd, 1e-3);
+        let d2 = front(&cd, 1e-2);
+        println!(
+            "      → changer de seuil déplace le front de {:.2} % ; changer de véhicule, de moins de 1 %",
+            (d3 - d2).abs() / d2 * 100.0
+        );
+        assert!(
+            (d3 - d2).abs() / d2 * 100.0 > 1.0,
+            "le seuil devrait déplacer le front plus que le choix du véhicule"
+        );
+    }
+
+    /// **Ce que S36 avait attribué à l'ordre deux, et qui vient surtout d'ailleurs.**
+    ///
+    /// `CAS-CANONIQUES` porte depuis S36 un tableau « deux véhicules, deux colonnes » où C04
+    /// **échoue** d'un côté et vaut **0,74 %** de l'autre, avec cette explication : *la lignée B est
+    /// passée à l'ordre deux, et C04 comme C08 sont passés au vert ensemble.*
+    ///
+    /// **Trois choses changent en même temps entre les deux colonnes**, et le tableau n'en nomme
+    /// qu'une :
+    ///
+    /// | | `physics.rs` | `physics_shallow.rs` |
+    /// |---|---|---|
+    /// | schéma | ordre un | **ordre deux** ← la seule que S36 nomme |
+    /// | seuil de mesure | `10⁻³ m` | `10⁻²·h₀` |
+    /// | **référence** | front **ponctuel** de Ritter | front **moyenné sur la maille** |
+    ///
+    /// Ce test décompose. Il tourne **à ordre un des deux côtés** : tout écart qui subsiste vient
+    /// donc de la mesure, pas du schéma.
+    #[test]
+    fn a157_ce_que_l_ordre_deux_explique_vraiment() {
+        use crate::physics_shallow::front_exact;
+        let (cd, _) = champs_c04(2.0);
+        let x_barrage = cd.x[400] - 0.5 * 0.05;
+        let dx = 0.05f64;
+        let front = |seuil: f64| {
+            cd.hauteur
+                .iter()
+                .enumerate()
+                .filter(|(_, &h)| h > seuil)
+                .map(|(i, _)| cd.x[i] - x_barrage)
+                .fold(f64::NEG_INFINITY, f64::max)
+        };
+        let c0 = (G * 1.0f64).sqrt();
+        let ritter_ponctuel = |seuil: f64| {
+            let (mut x, mut pas) = (2.0 * c0 * 2.0, 1e-4);
+            while pas > 1e-9 {
+                let h = (2.0 * c0 - x / 2.0).max(0.0).powi(2) / (9.0 * G);
+                if h > seuil { x += pas } else { x -= pas; pas *= 0.5 }
+            }
+            x
+        };
+
+        println!("C04, `delta.rs` à l'ORDRE UN — le même front, contre deux références :");
+        for seuil in [1e-3f64, 1e-2] {
+            let f = front(seuil);
+            let (rp, rm) = (ritter_ponctuel(seuil), front_exact(dx, 2.0, 1.0, seuil));
+            println!(
+                "      seuil {seuil:>8.0e} : front {f:.4} m | ponctuel {rp:.4} ({:>7.2} %) | moyenné maille {rm:.4} ({:>6.2} %)",
+                (f - rp) / rp * 100.0,
+                (f - rm) / rm * 100.0
+            );
+        }
+
+        // **Le résultat, et il dément la thèse écrite avant de mesurer.** Je m'attendais à ce que
+        // la seule révision de la mesure fasse passer C04 sous les 3 %. Elle n'y suffit pas.
+        //
+        // | même solveur, ordre un | écart au front |
+        // |---|---|
+        // | mesure d'accueil — seuil `10⁻³`, référence ponctuelle | **20,4 %** |
+        // | mesure de la lignée B — seuil `10⁻²·h₀`, référence moyennée | **10,2 %** |
+        // | *(publié à l'ordre deux, mesure de la lignée B)* | *0,74 %* |
+        //
+        // **La révision de la mesure retire dix points sur vingt ; l'ordre deux retire les neuf et
+        // demi qui restent.** Aucun des deux seul ne fait franchir la tolérance de 3 %.
+        //
+        // Ce que S36 écrivait — *l'ordre deux explique tout l'écart de verdicts* — était donc une
+        // attribution **non démontrée**, et elle est fausse de moitié. Ce qui reste vrai : c'est
+        // bien l'ordre deux qui fait franchir le seuil, parce qu'il agit en dernier.
+        let f = front(1e-2);
+        let rm = front_exact(dx, 2.0, 1.0, 1e-2);
+        let ecart_mesure_b = (f - rm).abs() / rm * 100.0;
+        let rp = ritter_ponctuel(1e-3);
+        let ecart_mesure_accueil = (front(1e-3) - rp).abs() / rp * 100.0;
+        println!(
+            "      → même solveur, même pas de temps : {ecart_mesure_accueil:.2} % avec la mesure d'accueil, \
+{ecart_mesure_b:.2} % avec celle de la lignée B — la mesure explique {:.0} % de l'écart, le schéma le reste",
+            (ecart_mesure_accueil - ecart_mesure_b) / (ecart_mesure_accueil - 0.74) * 100.0
+        );
+        assert!(
+            ecart_mesure_b < ecart_mesure_accueil / 1.5,
+            "la mesure de la lignée B devrait retirer une part notable de l'écart : \
+{ecart_mesure_accueil:.2} % → {ecart_mesure_b:.2} %"
+        );
+        assert!(
+            ecart_mesure_b > 3.0,
+            "mais elle ne devrait pas suffire à passer la tolérance de C04 : {ecart_mesure_b:.2} %"
+        );
+    }
+
     /// **A159 — refaire une formule publiée, avec ses constantes.**
     ///
     /// L'angle mort importé dit : *une formule énoncée avec ses constantes n'invite pas à être

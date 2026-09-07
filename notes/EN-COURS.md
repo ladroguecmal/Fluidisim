@@ -109,12 +109,12 @@ de `FORK-S22-S26` §4 devrait le dire.
       portent sur `CAS-CANONIQUES`, et se vérifient en le lisant cas par cas.
 - [x] **P3** — **A155**, **A159** : les deux défauts d'écriture — une simplification dans le code,
       une formule dans le corpus. **Q3 se vérifie sur `delta.rs` et sur les ADR à constantes.**
-- [ ] **P4** — **A157**, **A166** : les deux limites de méthode. A157 recoupe `ADR-047` ; A166 dit
+- [x] **P4** — **A157**, **A166** : les deux limites de méthode. A157 recoupe `ADR-047` ; A166 dit
       qu'une mesure ne peut pas dire de quel cadre elle dépend — **lesquelles des nôtres sont dans
       ce cas ?**
-- [ ] **P5** — **A167** : l'essai à zéro. **Compter combien de nos montages en ont un**, et écrire
+- [x] **P5** — **A167** : l'essai à zéro. **Compter combien de nos montages en ont un**, et écrire
       celui qui manque au plus exposé.
-- [ ] **P6** — le registre `AUDIT-ANGLES-IMPORTES-S41`, et les requalifications s'il y en a.
+- [x] **P6** — le registre `AUDIT-ANGLES-IMPORTES-S41`, et les requalifications s'il y en a.
 - [ ] **P7** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
