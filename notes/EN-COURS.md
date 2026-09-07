@@ -59,27 +59,21 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S52
-État             : terminée
+Session          : S53
+État             : en cours
 Agent            : Codex (git et cargo disponibles)
-Objectif         : Partager la régression centrée et examiner les projections C22 (S51-1).
+Objectif         : Contrôler les grilles et préserver les refus C22 delta (S52-1).
 ```
 
 ### Plan
 
 - [x] **P1** — reprise, copies, jeton et plan seul.
-- [x] **P2** — extraire pente/R² avec refus et témoins ; raccorder les deux appelants sans changer fenêtres, logarithmes ni unités.
-- [x] **P3** — examiner les contrats de projection, trancher le périmètre ; tests et comparaison des rapports, documentation des limites.
-- [x] **P4** — rituel : journal, enseignements, actions, index/décomptes, passation et jeton libre.
+- [ ] **P2** — reproduire familles irrégulières, grille nulle et allocation refusée ; corriger admission et calcul d'ordre, préserver les trous.
+- [ ] **P3** — tester filtre de contamination, refus et témoins ; vérifier les résultats nominaux et documenter la portée.
+- [ ] **P4** — rituel : journal, enseignements, actions, index/décomptes, passation et jeton libre.
 
 ### Notes de reprise
 
-Master 50e952d propre, copies anciennes propres. REPRISE et socle lus dans cette conversation ;
-jeton et nouveautés S51 relus. Deux régressions centrées dans physics.rs, la régression
-non centrée shallow reste distincte. Aucun changement de solveur ni seuil de validation.
-
-P2 : regression::centree appelée par les deux mesures ; trois tests ciblés passent. Refus Option des séries dégénérées/non finies, fenêtres et unités conservées ; libellés None élargis aux causes réelles.
-
-P3 : projections conservées après comparaison des contrats ; S52-1 portera les grilles absentes/non emboîtées du montage delta. 111 tests verts, deux ignorés ; rapport inchangé sauf quatre durées, check et hashs inchangés. MESURES-PARTAGEES-S52 documente limites et décision.
-
-P4 : journal et inventaire complétés ; S51-1 close, S52-1 ouverte. Aucun nouvel angle ou leçon. Passation S53 et index actualisés, jeton libre. Décomptes inchangés : 47 ADR, 17 invariants, 6 SPEC, 14 registres, 23 cas, 176 angles.
+Master 348f5f5 propre, copies anciennes propres. REPRISE et socle lus dans cette conversation,
+état S52 et ses résultats relus. Ne pas changer les seuils ni les solveurs. Admission des
+tailles avant modulo/allocation ; la référence exige des grilles doublant successivement.
