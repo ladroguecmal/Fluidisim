@@ -211,6 +211,7 @@ ce que les sources avaient omis.
 | **A167** | Un défaut de montage peut ne pas se voir dans le résultat qu'il menace | **1** | ADR-046 §3 |
 | **A168** | Écrire une distinction ne suffit pas à s'en servir : `ADR-043` §6 ignore le §5 du même document | 2 | ADR-043, note S39 |
 | **A169** | Une prudence justifiée par une mauvaise raison se défend mal et se reporte longtemps | 2 | ADR-047 §6 |
+| **A170** | Une saturation d'affichage transforme un refus en la meilleure mesure possible | **1** | S42, `c03_seiche` |
 
 Cent huit angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -1232,6 +1233,17 @@ pendant quatre sessions.
   *Une raison fausse donnée à l'appui d'une bonne décision la rend indéfendable au moment de
   l'exécuter : personne ne peut estimer ce qu'elle coûte.*
 
+- **A170** *(sévérité 1)* — **Une saturation d'affichage transforme un refus en la meilleure
+  mesure possible.** `C03-demi-vie` saturait sa valeur à `10⁶` périodes, pour afficher proprement
+  une demi-vie infinie. Sur un bassin **sans seiche**, la régression ne trouve aucun point et rend
+  `NaN` — mais **`f64::min` avale les `NaN`** : `NaN.min(10⁶)` rend `10⁶`. Le refus devenait donc
+  la plus grande valeur du domaine, c'est-à-dire le **meilleur score** face à un minorant de 15.
+  Le cas échouait par ailleurs — la tolérance conditionnelle testait `NaN >= 15`, faux — mais
+  **l'assertion qui porte le résultat publié déclarait le néant excellent**, et le rapport affichait
+  `1000000` là où la mesure valait `NaN` (**A149**). *Toute valeur de repli appliquée **après** une
+  mesure doit préserver ce que la mesure a refusé : un refus qui traverse une saturation devient un
+  résultat.* Trouvé par l'essai à zéro de S42, pas par la relecture.
+
 ---
 
 ### Angles morts importés de la lignée B — B-S27 (2026-09-07, S39)
@@ -1261,3 +1273,11 @@ pendant quatre sessions.
   valide**, et la stabilité est même ce qui endort : elle ressemble à de la robustesse. Le corollaire
   est opérationnel : *tout montage de mesure doit venir avec un essai dont le résultat attendu est
   zéro.*
+
+  > **Note S42 — appliqué à C03 et C06, et il a payé sur le premier.** L'essai à zéro de C03 —
+  > le même montage sans excitation — a montré que `C03-demi-vie` **déclarait le néant conforme**,
+  > avec le meilleur score possible (**A170**). Celui de C06 — le même montage sans boost — rend
+  > **exactement zéro** : le montage était sain, et on le sait maintenant.
+  >
+  > *Un essai à zéro qui réussit du premier coup n'est pas du travail perdu : c'est la seule façon
+  > de distinguer un montage sain d'un montage jamais interrogé.* Restent **C08** et **C02**.
