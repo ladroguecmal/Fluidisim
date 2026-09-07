@@ -5209,3 +5209,59 @@ une tolérance inchangée. Ce qui change est ce qu'on en dit.
 antérieurs — A181 en a coûté une, personne ne sait combien il en reste. Puis **S62-1** et
 **S58-1**. A103 close en S58 ; l'état réel et l'infrastructure restent hors de portée.
 
+## S63 — 2026-09-08 — Le banc décisif était lisible comme hors d'atteinte
+
+**Agent : Claude Code (Opus 5)**, git et cargo disponibles. Départ 5aac200. Entrée : **S59-1**,
+recenser les prescriptions non éprouvées — les consignes écrites par une session qui ne subissait
+pas encore le cas. Aucun calcul lancé : la session est documentaire.
+
+**Sorties.** [`PRESCRIPTIONS-S63`](../docs/registres/PRESCRIPTIONS-S63.md), le tableau des
+préalables de B2 corrigé et daté, une règle ajoutée au rituel de fin, **A185**, **L181**.
+**S59-1 close.**
+
+**Le premier apport est un tri, et il corrige l'énoncé de l'action.** Trois genres de texte se
+ressemblent et ne se valent pas. Une **condition de réversibilité** — *« si la réponse était
+l'inverse, il faudrait rouvrir X »*, cinq dans ADR-027, une dans ADR-048 — n'est pas une recette :
+il n'y a rien à exécuter, et c'est un dispositif voulu (**L155**). Une **anticipation de
+conception** ne se donne pas pour vérifiée. Seule la **recette procédurale** se vérifie, et
+S59-1 les confondait.
+
+**Le recensement rassure et inquiète à la fois.** Il existe **peu** de recettes, et aucune autre
+que les trois connues n'annonce une action conditionnelle non éprouvée. Mais **les trois recettes
+que le projet a effectivement mises à l'épreuve étaient fautives**, par trois mécanismes
+différents : fausse dès l'écriture (A181, le découpage temporel), prescrite sans être chiffrée
+(S60-1, le régime impossible), et — nouveau — **périmée en silence**.
+
+**Le troisième mécanisme est le résultat de la séance.** `DOSSIER-B2` §8, *« ce qui doit être vrai
+avant de lancer »*, datait de S14 et annonçait cinq blocages. **Quatre étaient levés depuis une
+quarantaine de sessions** : H1 et H3 écrits en S20, C01 passé en S22 et S36, ADR-020 **actée en
+S19**. Rien ne l'avait signalé. Une session qui aurait lu ce tableau pour décider s'il faut lancer
+le banc décisif de `λ_cut` aurait conclu qu'il est hors d'atteinte — **alors qu'il ne manque
+qu'une pièce** (**A185**).
+
+**Et la cinquième ligne était mal qualifiée, ce qui compte davantage.** C02 n'est pas « non
+exécuté » : il est **inexécutable** avec ce que le projet possède. Les deux `δ` d'essai sont
+Saint-Venant, non dispersifs ; et le milieu à dispersion exacte de S39 ne convient pas non plus —
+son en-tête pose qu'il n'est pas un solveur `δ`, et sa dispersion étant exacte, son erreur serait
+nulle. *« Non exécuté » invite à exécuter ; « inexécutable » dit qu'il manque une pièce de
+conception* (**L181**). Ce qui manque est une couche dispersive du projet.
+
+**La règle, et elle est bon marché.** Le rituel fait vérifier les **décomptes** recopiés depuis
+S07 et S10. Il ne faisait pas vérifier les **états** recopiés, qui se périment identiquement. Le
+remède n'est pas de tout relire à chaque session — c'est de **dater** : *un état sans date se lit
+au présent, et il ne l'est plus.* Le tableau de B2 porte désormais une colonne « constaté » par
+ligne et un encadré de vérification daté.
+
+**Ce qui n'a pas été fait.** `PLAN-BENCHMARK` n'est pas corrigé : ses prescriptions sont des
+anticipations de conception, pas des recettes, et elles n'annoncent aucun état vérifié. Le journal
+n'a pas été passé au peigne : il raconte au lieu de prescrire, et **L55** avait déjà établi qu'une
+annonce en prose n'est pas une tâche.
+
+**Validation.** Aucun code modifié, aucun calcul lancé. 130 tests réussis, deux ignorés, inchangés
+depuis S62 ; hashs `check` inchangés.
+
+**Suite S64 : S62-1**, trancher la fenêtre d'échantillonnage de `Hs` par ADR, après avoir corrigé
+la sommation de variance. Puis **S58-1**. Et une question que ce recensement met en avant sans la
+trancher : **le seul blocage réel de B2 est une couche dispersive**, qui n'a jamais été planifiée.
+A103 close en S58 ; l'état réel et l'infrastructure restent hors de portée.
+

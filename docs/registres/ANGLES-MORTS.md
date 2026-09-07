@@ -1459,3 +1459,15 @@ pendant quatre sessions.
   **Corrigé** : `physics.fenetre_cote` et `physics.fenetre_pas_m`, défauts inchangés, mesures et
   hashs inchangés. Instance littérale d'**A104**. Voir AUDIT-REFERENCES-S62 §3.4 et **L180**.
 
+- **A185** *(sévérité 2, corrigé S63)* — **Un état recopié se périme comme un décompte, et rien ne
+  le signale.** `DOSSIER-B2` §8, *« ce qui doit être vrai avant de lancer »*, datait de S14 et
+  annonçait cinq blocages : H1 non écrit, H3 non écrit, C01 et C02 non exécutés, ADR-020 proposé.
+  **Quatre étaient levés depuis une quarantaine de sessions** — H1 et H3 en S20, C01 en S22 et S36,
+  ADR-020 **actée en S19**. Une session lisant ce tableau pour décider du lancement du banc décisif
+  de `λ_cut` en aurait conclu qu'il est hors d'atteinte, alors qu'il ne manque qu'une pièce.
+  Le rituel de fin fait vérifier les **décomptes** recopiés depuis S07 et S10 ; il ne faisait rien
+  pour les **états**, qui se périment de la même façon et pour la même raison.
+  **Corrigé** : le tableau porte une colonne « constaté » par ligne et un encadré daté, et le
+  rituel (`REPRISE.md` §6, point 5) porte la règle — *un état sans date se lit au présent, et il ne
+  l'est plus*. Voir PRESCRIPTIONS-S63 §3 et **L181**.
+

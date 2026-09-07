@@ -142,8 +142,9 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`specs/SPEC-004`](specs/SPEC-004-interfaces.md) | **signatures des interfaces** — solveurs, champ de fond, solides, services d'hôte, contrat de fils d'exécution |
 | [`specs/SPEC-005`](specs/SPEC-005-outillage-auteur.md) | **outillage auteur** — sources de vérité, inversion du pipeline eau/terrain, cuisson déterministe, obsolescence |
 | [`specs/SPEC-006`](specs/SPEC-006-chemin-pousse.md) | **le chemin poussé** — ce que le système *publie* : bus d'événements et `WaveEvent`, écume et aération, traversabilité, polyligne de déferlement |
+| [`registres/PRESCRIPTIONS-S63.md`](registres/PRESCRIPTIONS-S63.md) | **les prescriptions non éprouvées** — trois genres, dont un seul se vérifie ; **trois recettes mises à l'épreuve, trois fautives** ; les préalables de B2 périmés depuis quarante sessions (**A185**) |
 | [`registres/AUDIT-REFERENCES-S62.md`](registres/AUDIT-REFERENCES-S62.md) | **ce qu'une référence peut voir bouger** — 41 références, trois degrés, **une seule tautologie** ; `Hs` aveugle à `hs` et gouverné par sa fenêtre, première mesure d'**A102** ; la fenêtre était hors du scénario (**A184**) |
-| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **184 points**, avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
+| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **185 points**, avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
 | [`registres/FORK-S22-S26.md`](registres/FORK-S22-S26.md) | **le second fork** — constat, carte de renumérotation complète, la règle manquante, et ce qui reste à fusionner |
 | [`registres/AUDIT-ASSERTIONS-S29.md`](registres/AUDIT-ASSERTIONS-S29.md) | **ce que chaque assertion peut voir** — 23 cas classés, 5 fautifs, 1 mesure du harnais retirée ; **réécriture S30 sans aucun seuil inventé** |
 | [`registres/AUDIT-REPLIS-S44.md`](registres/AUDIT-REPLIS-S44.md) | **les valeurs de repli, inventoriées** — 49 recensées, deux fautives ; *quand la grandeur est un écart, zéro est son meilleur point* |
@@ -204,6 +205,14 @@ parfaitement stable ne pouvait pas distinguer.
 | [`../notes/JOURNAL.md`](../notes/JOURNAL.md) | historique des sessions, points de reprise |
 
 ## État d'avancement
+
+**S63 :** **S59-1 close.** Trois genres de prescriptions séparés ; **peu de recettes** dans le
+corpus, mais **les trois mises à l'épreuve étaient fautives** — dont une **périmée en silence** :
+`DOSSIER-B2` §8 annonçait cinq blocages, **quatre levés depuis quarante sessions**. Le banc décisif
+de `λ_cut` se lisait comme hors d'atteinte alors qu'il ne manque qu'une pièce — et la cinquième
+ligne était mal qualifiée : C02 n'est pas *non exécuté* mais **inexécutable**, faute d'une couche
+dispersive (**S63-1**). **A185**, **L181** ; règle ajoutée au rituel : *un état sans date se lit au
+présent*. Voir docs/registres/PRESCRIPTIONS-S63.md. Aucun code modifié. Suite S64 : S62-1.
 
 **S62 :** **S58-2 close** — 41 références classées en trois degrés, **une seule tautologie** dans
 le corpus (C10, déjà connue). Mais `Hs` est **aveugle à `hs`** — rapport 0,914723 sur un facteur 8

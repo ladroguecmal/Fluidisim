@@ -18,12 +18,16 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 09:10 +02:00
+JETON            : libre
+Battement        : 2026-09-08 09:55 +02:00
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Session en cours : S63 — S59-1, recenser les prescriptions non éprouvées
-Dernière session : S62 — 2026-09-08 — Hs est aveugle à hs et gouverné par sa fenêtre ; A184, L180
-Session suivante : selon le résultat de S63
+Session en cours : aucune
+Dernière session : S63 — 2026-09-08 — les préalables de B2 étaient périmés ; A185, L181
+Session suivante : S64 — S62-1, la fenêtre d'échantillonnage de Hs, par ADR
+
+À signaler à l'humain : **le seul blocage réel du banc B2 est une couche dispersive**, constatée
+nécessaire en S22 et jamais planifiée depuis. C'est l'action **S63-1**, et elle est plus lourde
+que tout ce qui est ouvert par ailleurs.
 
 Le dossier C22 est fermé : un verdict (S59), un critère compris (S60, S61), quatre angles morts.
 Ce qui reste ouvert du côté de la convergence n'est plus une mesure mais **A114**.
@@ -148,6 +152,21 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S63 :** **le banc décisif était lisible comme hors d'atteinte.** Le recensement des
+prescriptions sépare d'abord trois genres — une *condition de réversibilité* n'est pas une recette,
+et la compter comme une dette découragerait le meilleur dispositif du dépôt (**L155**). Il reste
+**peu** de recettes, mais **les trois que le projet a mises à l'épreuve étaient fautives**, par
+trois mécanismes : fausse dès l'écriture (**A181**), prescrite sans être chiffrée (S60-1), et
+**périmée en silence** — nouveau. `DOSSIER-B2` §8 datait de S14 et annonçait cinq blocages :
+**quatre étaient levés depuis quarante sessions** — H1 et H3 en S20, C01 en S22 et S36, ADR-020
+actée en S19. Une session lisant ce tableau aurait cru le banc de `λ_cut` hors d'atteinte.
+**Et la cinquième ligne était mal qualifiée** : C02 n'est pas *non exécuté*, il est
+**inexécutable** — les deux δ sont non dispersifs, et le milieu à dispersion exacte de S39 n'est
+pas un δ. *« Non exécuté » invite à exécuter ; « inexécutable » dit qu'il manque une pièce de
+conception* (**A185**, **L181**). Le seul blocage réel de B2 est donc une **couche dispersive
+jamais planifiée** — action **S63-1**. Règle ajoutée au rituel §6 : *un état sans date se lit au
+présent, et il ne l'est plus*. Aucun code modifié ; 130 tests, deux ignorés, inchangés.
 
 **S62 :** **le cas qui mesurait la taille de sa fenêtre.** Le recensement d'A104 rassure — 41
 références, trois degrés, **une seule tautologie** dans tout le corpus, celle de C10 déjà trouvée
@@ -287,7 +306,7 @@ le cas régulier p = 0,82 dont la stabilité n'est pas établie. Mesures et hash
 S45-1 close ; S47 recommandée : portée de la paire héritée C08-p/C08-coherence (S46-1).
 
 Quarante-huit sessions ici, **plus cinq dans une lignée parallèle réconciliée en S35** (B-S22 à
-B-S27) — **50 ADR** *(dont un acté)*, six spécifications, **quinze registres** — **et du code qui
+B-S27) — **50 ADR** *(dont un acté)*, six spécifications, **seize registres** — **et du code qui
 tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équilibrés et **tous deux
 montés sur leurs cas, confrontés l'un à l'autre et instrumentés, **plus un milieu à dispersion
 exacte** *(S39)*, **130 tests verts, deux ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **trois sans

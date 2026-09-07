@@ -672,7 +672,7 @@ l'est pas du tout.
 
 | # | Action | Origine | Porteur | État |
 |---|---|---|---|---|
-| S59-1 | Reprendre les prescriptions non éprouvées laissées par les rapports antérieurs — les consignes « à faire si… » écrites par une session qui ne subissait pas encore le cas. **A181 en a coûté une** ; personne ne sait combien il en reste | **A181**, **L177** | session ultérieure | ouverte |
+| S59-1 *(close en S63)* | Reprendre les prescriptions non éprouvées laissées par les rapports antérieurs — les consignes « à faire si… » écrites par une session qui ne subissait pas encore le cas. **A181 en a coûté une** ; personne ne sait combien il en reste | **A181**, **L177** | session ultérieure | **close en S63 — PRESCRIPTIONS-S63** |
 
 > **Ordre recommandé : S57-2, puis S58-2, puis S59-1.** S57-2 clôt le dossier C22 ; S58-2 et
 > S59-1 sont deux recensements du même genre — des fautes déjà identifiées dont on ignore le
@@ -730,4 +730,20 @@ cette fenêtre était un littéral hors du scénario (**A184**). Voir
 > **S62-1 après S59-1.** S59-1 est un recensement, il ne se périme pas mais il est bon marché ;
 > S62-1 demande une correction numérique puis un arbitrage sur un chiffre publié, et rien ne
 > presse : le cas est vert, sa condition de mesure est désormais écrite dans son libellé.
+
+## Actions relevées en séance — S63
+
+**S59-1 close.** Trois genres séparés — condition de réversibilité, anticipation de conception,
+recette procédurale — et seule la dernière se vérifie. **Peu de recettes dans le corpus, et les
+trois qui ont été mises à l'épreuve étaient fautives**, par trois mécanismes dont un nouveau :
+la péremption silencieuse (**A185**). Voir [`PRESCRIPTIONS-S63`](PRESCRIPTIONS-S63.md).
+
+| # | Action | Origine | Porteur | État |
+|---|---|---|---|---|
+| S63-1 | **Planifier la couche dispersive**, ou acter qu'elle ne viendra pas. C'est le **seul** blocage réel de B2 depuis que les quatre autres sont levés, et elle n'a jamais figuré dans un plan : ni `W`, ni un `δ` d'une autre famille n'est engagé. Tant qu'elle manque, C02 est inexécutable et `λ_cut` dispersif n'a pas de source | **A185** §4, **L181**, ADR-030 §5 | session, par ADR | ouverte |
+
+> **S63-1 est plus lourde que les actions qui la précèdent, et plus ancienne qu'elle n'en a
+> l'air** : la dépendance a été constatée en S22 (ADR-030 §5), le dossier B2 la portait sous la
+> mention « non exécuté », et personne ne l'a jamais planifiée. Elle ne se traite pas dans une
+> session de mesure.
 

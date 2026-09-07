@@ -2939,3 +2939,21 @@ figé une mer particulière en croyant figer une loi.
 référence. Et quand un balayage ne déplace rien, ne pas recommencer plus fort — **chercher le
 chemin par lequel le paramètre est censé arriver**, et vérifier qu'il existe.
 
+## L181 — « Pas encore fait » et « ne peut pas être fait » n'envoient pas au même endroit
+
+*(S63)* Un dossier de préparation listait cinq préalables au banc décisif du projet. Quatre étaient
+levés depuis quarante sessions sans que rien ne l'ait dit ; le cinquième était marqué **« non
+exécuté »**. Il était en réalité **inexécutable** : le cas demande la mesure d'une erreur de
+célérité en fonction de la longueur d'onde, et les deux véhicules disponibles sont non dispersifs
+— cette erreur n'existe pas chez eux. Le milieu à dispersion exacte écrit plus tard ne convient pas
+davantage, pour la raison inverse : son erreur est nulle par construction.
+
+Les deux formulations coûtent le même nombre de mots. **« Non exécuté » invite à exécuter, et
+promet donc du travail de routine. « Inexécutable » dit qu'il manque une pièce de conception**, et
+envoie la session vers un tout autre geste. Une ligne de tableau mal qualifiée peut ainsi cacher,
+pendant des années, la seule vraie question d'un dossier.
+
+**Réflexe :** dans un tableau d'état, distinguer *pas encore fait*, *inexécutable en l'état* et
+*sans objet*, et écrire pour la seconde **ce qui manque**. Et se méfier des états les plus anciens
+d'un dossier : ce sont ceux qu'on relit le moins, parce qu'ils ont l'air acquis.
+

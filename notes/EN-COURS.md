@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S63
-État             : en cours
+État             : terminée
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
 Objectif         : S59-1 — recenser les prescriptions non éprouvées, celles qu'une session a
                    écrites pour une situation qu'elle ne subissait pas encore.
@@ -73,7 +73,7 @@ Objectif         : S59-1 — recenser les prescriptions non éprouvées, celles 
 - [x] **P3** — recenser les recettes du corpus et établir, pour chacune, si elle a été exécutée et ce qu'elle a donné.
 - [x] **P4** — éprouver celles qui sont vérifiables à bas coût, en commençant par les plus engageantes.
 - [x] **P5** — rapport, marquage des prescriptions non éprouvées, et la règle d'écriture qui en découle.
-- [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
+- [x] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
 
 ### Notes de reprise
 
@@ -124,3 +124,8 @@ mecanismes : fausse des l ecriture (A181), prescrite sans etre chiffree (S60-1),
 silence** (A185, nouveau). Aucune autre recette non eprouvee dans le corpus. Regle ajoutee au
 rituel REPRISE par.6 point 5 : un etat recopie se perime comme un decompte, et le remede n est pas
 de tout relire mais de **dater**. Colonne *constate* ajoutee au tableau de B2.
+
+P6 : rituel exécuté. Journal S63, A185 (sévérité 2, corrigé), L181, S59-1 close, S63-1 ouverte
+et signalée comme la plus lourde. Index et REPRISE : angles 184 vers 185, registres 15 vers 16.
+Tests inchangés a 130, aucun code modifié. Règle ajoutée au rituel REPRISE par.6 point 5.
+Jeton libre. Reste la fusion dans master.
