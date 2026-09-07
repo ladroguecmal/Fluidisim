@@ -59,32 +59,22 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S46
-État             : terminée
+Session          : S47
+État             : en cours
 Agent            : Codex (git et cargo disponibles)
-Objectif         : Refus explicites et décompte exhaustif de C08 (S45-1).
+Objectif         : Distinguer le diagnostic Ritter hérité de la validation C08 (S46-1).
 ```
 
 ### Plan
 
-- [x] **P1** — reprise, contrôles des copies, jeton et plan seul.
-- [x] **P2** — reproduire les refus NaN/infini, borner le contrat de verdict et corriger estimation, classification et décompte avec témoins.
-- [x] **P3** — suite complète, check et comparaison physics ; documenter la portée et les limites.
-- [x] **P4** — rituel : journal, angles morts, leçons, actions, index/décomptes et passation, jeton libre.
+- [x] **P1** — reprise et jeton, plan seul ; contrôles des copies et branches.
+- [ ] **P2** — retirer le verdict de validation du diagnostic hérité, garder mesures et refus visibles, tester la portée du rapport.
+- [ ] **P3** — suite complète et références ; corriger les affirmations courantes et annoter les ADR concernés sans réécriture.
+- [ ] **P4** — rituel : journal, leçons/angles morts, actions, index et décomptes, passation et jeton libre.
 
 ### Notes de reprise
 
-Départ master 53ded2b propre ; copie c107bf propre à S44, lignée B archivée. Aucun travail
-parallèle constaté. Lectures socle déjà effectuées dans cette conversation, fichiers inchangés
-hors mises à jour S45 relues. ADR-032 impose un régime asymptotique établi avant verdict.
-Deux branches de rapport C08 appliquent des critères différents ; Indetermine n'est pas compté.
-Préserver les mesures et le rouge de C04 ; un statut corrigé peut changer à mesure constante.
-P2 ne doit pas supprimer les ordres négatifs finis : ADR-032 §5 les demande explicitement.
-P2 : deux tests échouent avant correction (Observe(NaN), stabilité reconstruite après retrait
-des trous). Sept tests ciblés verts ensuite ; dix familles synthétiques classées et comptées.
-
-P3 : 101 succès, 2 ignorés ; check sans échec, hashs inchangés. 56 lignes de mesures
-identiques ; 5/5 familles principales sans verdict, contre 4 comptées auparavant.
-
-P4 : A174, L168, S45-1 close, S46-1 ouverte. Décomptes : 47 ADR, 17 invariants,
-6 SPEC, 14 registres, 23 cas canoniques et 174 angles morts. Jeton libéré.
+Départ master 7b0f1ec propre ; c107bf à S44 propre, lignée B archivée. Socle lu dans cette
+conversation, inchangé. S46 a corrigé le rapport principal, pas c08_convergence de shallow.
+Contrat C08 amendé S26 : support régulier, cinq grilles et stabilité. Ritter sur trois grilles
+ne valide pas C08, quel que soit p. Conserver p = 0,999745 et la différence des estimateurs.
