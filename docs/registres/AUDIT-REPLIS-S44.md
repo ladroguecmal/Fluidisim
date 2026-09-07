@@ -137,3 +137,26 @@ Et son corollaire, qui est ce que cet audit a réellement coûté à trouver :
    front au barrage. Action **S44-1**.
 3. **Les treize `unwrap_or(NaN)` n'ont pas tous été suivis jusqu'à leur assertion.** Trois l'ont
    été, parce que trois défauts y menaient. Action **S44-2**.
+
+## 7. Suivi exhaustif de l'aval — S45, 2026-09-07
+
+Recensement sur `b521129` : **13 occurrences dans code/, dont 11 dans le harnais et
+2 dans les tests du cœur**. Les numéros de ligne ci-dessous sont ceux de cette révision.
+
+| # | Origine | Consommation finale et sort du refus |
+|---|---|---|
+| 1 | `delta.rs:1159`, front | affichage puis `mesure <= borne` : NaN fait échouer le test |
+| 2 | `delta.rs:1184`, front | différence relative imprimée : NaN reste visible, aucune assertion |
+| 3–4 | `oracle.rs:512,538`, front | `rapporter_sensibilite`, soustraction/abs/division : NaN imprimé |
+| 5 | `physics.rs:75`, eta | Hs et homogénéité : sommes/variance/racine ou refus explicite, puis `Cas::passe` faux. **C02 : les passages absents suppriment les assertions. C10 : la comparaison du maximum ignore NaN et conserve zéro.** |
+| 6 | `physics.rs:653`, front | mesure de C04, écart relatif puis comparaison : échec |
+| 7 | `physics.rs:979`, front | erreur absolue → `Convergence::ordre` → `Observe(NaN)` ; asymptotique faux si trois ordres disponibles, donc non concluant ; sinon comparaison p > 0,8 fausse, échec. Aucun succès, mais statut Observe trompeur |
+| 8 | `physics_dispersif.rs:84`, période | Cas de dispersion, écart relatif : échec |
+| 9–10 | `physics_dispersif.rs:347,377`, réflexion | Cas B-S27-plancher et B-S27-R, référence zéro → abs → comparaison : échec |
+| 11 | `physics_shallow.rs:967`, période au mur | différence relative imprimée seulement : NaN visible |
+| 12 | `physics_shallow.rs:968`, période du mode | C03-T, écart relatif : échec |
+| 13 | `physics_shallow.rs:1102`, ordre | C08-p : NaN donne tolérance zéro, puis échec ; C08-coherence : différence/abs, échec |
+
+**Deux défauts candidats sur une même origine**, à reproduire en P3. Aucun `min/max`
+supplémentaire n'est nécessaire : une branche conditionnelle peut ignorer une mesure, ou
+supprimer l'assertion entière. Le chemin C02 couvre aussi l'essai à zéro S43-3.

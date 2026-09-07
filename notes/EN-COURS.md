@@ -68,7 +68,7 @@ Objectif         : Suivre les treize replis NaN jusqu'à leur consommation (S44-
 ### Plan
 
 - [x] **P1** — vérifier les copies et branches, prendre le jeton et committer ce plan seul.
-- [ ] **P2** — tracer les treize chemins dans un complément à AUDIT-REPLIS-S44 ; identifier les transformations qui avalent un refus.
+- [x] **P2** — tracer les treize chemins dans un complément à AUDIT-REPLIS-S44 ; identifier les transformations qui avalent un refus.
 - [ ] **P3** — vérifier les chemins suspects par essais avec refus et témoins ; corriger les défauts constatés, rejouer tests et références.
 - [ ] **P4** — rituel de fin : journal, leçons et angles morts si nouveaux, actions, index et décomptes, jeton libre.
 
