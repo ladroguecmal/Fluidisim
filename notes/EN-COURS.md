@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S39
-État             : en cours
+État             : terminée
 Battement        : 2026-09-07
 Objectif         : Réconcilier B-S27 — et surtout : mon corpus affirme quelque chose qui a été mesuré faux
 ```
@@ -114,7 +114,7 @@ donnait 1,5 pour mille.
 - [x] **P7** — **le procédé** : trois épisodes du même fork, et le remède écrit à chaque fois dans
       une seule branche. Écrire ce qui aurait marché, **et le répliquer des deux côtés le jour même**.
 - [x] **P8a** — rituel : journal, leçons L153-L155, actions S39-1 à S39-4.
-- [ ] **P8b** — rituel : index, décomptes, jeton libéré.
+- [x] **P8b** — rituel : index, décomptes, jeton libéré.
 
 ### Notes de reprise
 

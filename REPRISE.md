@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-07
-Session en cours : S39 — réconcilier B-S27 : une conclusion importée a été mesurée fausse
-Dernière session : S38 — 2026-09-07 — les saturations comptées : zéro en régime nominal, un détecteur muet en régime dégradé
-Session suivante : S39 — **trancher le seuil de sec** (S37-1, A163, sév. 1) *(recommandé)*, ou relire les cinq A de sévérité 1 (S35-5)
+Session en cours : —
+Dernière session : S39 — 2026-09-07 — troisième fork réconcilié ; ADR-042 rétracté, et ADR-043 D1 avait une voie de trop
+Session suivante : S40 — **trancher le seuil de sec** (S37-1, A163, sév. 1) *(recommandé, reporté quatre fois)*
 ```
 
 > **Avant de regarder le jeton, exécuter `git worktree list` et `git branch -a`.** Le jeton est un
@@ -124,9 +124,10 @@ gaspillage le plus fréquent d'un projet de ce type.
 ## 4. Où en est le projet
 
 Trente-cinq sessions ici, **plus cinq dans une lignée parallèle réconciliée en S35** (B-S22 à
-B-S26) — **45 ADR** *(dont un acté)*, six spécifications, **douze registres** — **et du code qui
+B-S27) — **46 ADR** *(dont un acté)*, six spécifications, **douze registres** — **et du code qui
 tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équilibrés et **tous deux
-montés sur leurs cas, **confrontés l'un à l'autre et instrumentés** *(S38)*, **77 tests verts** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
+montés sur leurs cas, confrontés l'un à l'autre et instrumentés, **plus un milieu à dispersion
+exacte** *(S39)*, **84 tests verts** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
 verdict** (C08). Quatre cas canoniques sur δ sont exécutés ici : **C01 et C03 passent**, C04 échoue,
 C08 ne conclut pas. **La lignée réconciliée en donne d'autres verdicts, et l'écart a une cause
 unique** : elle est passée à l'ordre deux, et C04 comme C08 y sont verts (`CAS-CANONIQUES`, « deux
@@ -204,6 +205,30 @@ Courant — la frontière mesurée tombe exactement dessus — et là elle ne ra
 Et le résidu que S37 avait laissé ouvert est élucidé : ce n'est pas la saturation, c'est encore le
 seuil de sec — *un seuil de sec n'assèche pas une cellule, il l'empêche seulement de bouger*
 (**A165**, **L148**). **Trois sessions de suite ont maintenant croisé ce seuil sans le trancher.**
+
+**Et S39 a réconcilié un troisième fork — celui-là né d'une conservation délibérée.** La branche de
+la lignée B, gardée en S35 pour son seul historique, a été rouverte : **B-S27**, à 01h23 contre S38
+à 00h37. *Une branche conservée pour son historique est un point de départ pour qui l'ouvre, et
+aucune propriété de git ne sépare les deux.*
+
+**Son contenu retourne une décision du corpus.** `ADR-042` §6 posait sa propre réserve — *le solveur
+est non dispersif, et la règle `λ/2` protège peut-être exactement de cela ; c'est la première chose
+à mesurer*. Elle a été mesurée dans un milieu à **dispersion exacte** : `R` vaut **22,7 %** à
+`L_s = λ/2`. La règle devient **`L_s ≥ 2λ_δ`**, et la borne haute de `λ_cut` est **refermée, deux à
+quatre fois plus serrée qu'avant** — l'éponge coûte plus cher, pas moins
+([`ADR-046`](docs/adr/ADR-046-l-eponge-en-eau-dispersive-retracte-ADR-042.md)). *Un document qui dit
+comment l'infirmer vaut mieux qu'un document qui a raison* (**L155**).
+
+**Et relire ce qui s'appuyait dessus a trouvé autre chose** : `ADR-043` D1 rouvrait cette borne « par
+deux voies », dont la seconde était mal fondée. Elle comptait `ADR-037` — un résultat sur le
+**masque de décroissance** — comme desserrant une borne qui vient de l'**absorbeur de bord**. Ce
+sont les deux objets que le **§5 du même document** sépare, trois paragraphes plus haut (**A168**,
+**L154**).
+
+> **Le procédé, enfin corrigé des deux côtés.** Le jeton a un **quatrième état**, `archivé` (§1), et
+> la branche de la lignée B le porte désormais, avec l'amorce qui lui manquait depuis S35 — commit
+> `5d9bf2f`. L'action S35-7 était portée par « l'utilisateur », c'est-à-dire par personne au moment
+> d'agir, et le fork s'est reproduit pour cette raison exacte (**L153**).
 
 **Et S27 a trouvé un trou que sept sessions n'avaient pas vu, grâce à une source extérieure.**
 SPEC-001 §2.1 borne le pas de temps par `u_max` **sans jamais définir `u_max`**, quand SPEC-004 §10.1
