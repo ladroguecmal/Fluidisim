@@ -5318,3 +5318,23 @@ multiples possibles — ce qui débloque **S64-2**, la tolérance. Puis **A187**
 surtout **S63-1** : la couche dispersive, seul blocage réel de B2. A103 close en S58 ; l'état réel
 et l'infrastructure restent hors de portée.
 
+
+## S65 — 2026-09-08 — La graine produit enfin une autre mer
+
+Agent Codex, git/cargo disponibles. Départ 6a128e7, S64 achevée par Claude Code ; copie 29ef50
+propre, avancée à chaque étape vers master. Horloge locale antérieure au battement S64 : jeton
+libre et git terminé vérifiés. S64-1 réalisée : SeaState.graine, raccord scénario, phases
+SplitMix64 indexées sans état partagé. Formule, source et mesures dans GRAINES-S65.
+
+133 tests passent (41 cœur + 92 harnais), trois ignorés. Diagnostic explicitement exécuté :
+douze réalisations finies. Hs nominal +1,38833 %, six graines : −2,435 à +1,388 % ; à 256
+composantes : −7,270 à +5,844 %. A187 reste ouvert, aucune calibration de tolérance effectuée.
+Nouvel échec homogénéité : ratio 1,397507 face à 15 %, conservé. C04 ordre un reste en échec.
+Check vert après inscription des hashs dans 7723ab8 : C02 0x9babd7e12935c263 et C18
+0xd57d81f47d9f8611. Reproductibilité locale vérifiée, conformité interplateforme non mesurée.
+
+A186 corrigé pour le paramètre mort ; aucune preuve statistique tirée de six graines. Aucun
+nouvel angle ni leçon : application de L180/L182 et ADR-003. Invariants préservés ; notes
+correctives datées, aucun ADR réécrit. 51 ADR, six SPEC, seize registres, 187 angles, L182.
+Suite S66 : S65-1, diagnostic homogénéité, puis S64-3 et S64-2 par ADR. S63-1, couche
+dispersive, reste le seul blocage réel de B2. A103 et C22 clos ; aucun distant créé.

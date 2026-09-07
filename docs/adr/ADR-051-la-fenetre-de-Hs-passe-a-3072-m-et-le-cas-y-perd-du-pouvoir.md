@@ -99,3 +99,9 @@ intactes.
 |---|---|
 | **D1** (revenir à 384 m) | que le coût de `physics` devienne critique — il est aujourd'hui de +6 % — ou qu'un usage exige une fenêtre courte. À `tp ≥ 9 s`, revenir en arrière **rouvrirait un échec**. |
 | **D2** (resserrer la tolérance) | élucider A187, **ou** brancher la graine et mesurer la dispersion sur des réalisations indépendantes. C'est l'ordre naturel : S64-1 puis S64-2. |
+
+> **Note corrective S65 — 2026-09-08.** La graine commande désormais les phases. Les valeurs
+> S64 décrivent la réalisation historique : au nominal courant Hs vaut 1,216660 m (+1,388 %),
+> et six graines à 256 composantes donnent −7,270 à +5,844 %. A186 corrigé pour le paramètre
+> mort ; calibration et A187 restent ouverts. Fenêtre et tolérance inchangées.
+> Voir [GRAINES-S65](../validation/GRAINES-S65.md).

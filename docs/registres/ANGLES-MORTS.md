@@ -1495,3 +1495,7 @@ pendant quatre sessions.
   Tant que la cause est inconnue, la tolérance de `Hs` ne peut pas descendre sous 7 % sans exclure
   une configuration que rien ne permet de déclarer invalide. Voir ADR-051 §2 D2.
 
+
+**Suivi A186 — S65, 2026-09-08.** Paramètre mort corrigé : graine transmise aux phases,
+réalisations distinctes et reproductibles vérifiées. GRAINES-S65. Barres d’erreur encore
+à établir ; A187 reste ouvert. Six graines ne prouvent pas leur indépendance statistique.

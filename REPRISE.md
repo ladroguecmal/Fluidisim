@@ -18,17 +18,14 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 00:53 +02:00
+JETON            : libre
+Battement        : 2026-09-08 01:01 +02:00
 Agent            : Codex (git et cargo disponibles)
-Session en cours : S65
-Dernière session : S64 — 2026-09-08 — fenêtre de Hs à 3072 m ; A186, A187, L182
-Session suivante : S65 — S64-1, brancher la graine sur les phases
+Session en cours : aucune
+Dernière session : S65 — 2026-09-08 — graines effectives
+Session suivante : S66 — S65-1, diagnostic homogeneite
 
-À signaler à l'humain, et c'est en plus de S63-1 : **aucune mesure statistique du corpus n'a de
-barre d'erreur**, parce qu'il n'existe qu'une réalisation par état de mer (**A186**). Ce n'est pas
-un défaut de mesure mais une pièce manquante du générateur, et elle bloque toute calibration de
-tolérance.
+S65 : les ensembles sont possibles, mais les barres statistiques restent à établir ; A187 reste ouvert.
 
 À signaler à l'humain : **le seul blocage réel du banc B2 est une couche dispersive**, constatée
 nécessaire en S22 et jamais planifiée depuis. C'est l'action **S63-1**, et elle est plus lourde
@@ -157,6 +154,11 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S65 — 2026-09-08 :** graine raccordée aux phases, réalisations distinctes et reproductibles.
+133 tests réussis, trois ignorés ; nouveaux hashs vérifiés. Hs nominal +1,388 %, nouvel échec
+d’homogénéité conservé (ratio 1,397507). Voir docs/validation/GRAINES-S65.md. S64-1 close ;
+suite S66 : S65-1, puis S64-3. Tolérance et A187 restent ouverts ; S63-1 inchangée.
 
 **S64 :** **une action, deux motifs techniques, tous deux faux.** S62-1 différait l'élargissement
 de la fenêtre de `Hs` en avançant qu'il fallait d'abord corriger la sommation, et que le coût
@@ -330,7 +332,7 @@ Quarante-huit sessions ici, **plus cinq dans une lignée parallèle réconcilié
 B-S27) — **51 ADR** *(dont un acté)*, six spécifications, **seize registres** — **et du code qui
 tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équilibrés et **tous deux
 montés sur leurs cas, confrontés l'un à l'autre et instrumentés, **plus un milieu à dispersion
-exacte** *(S39)*, **131 tests verts, deux ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **trois sans
+exacte** *(S39)*, **133 tests verts, trois ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **trois sans
 verdict** (C08), **un succès depuis S59** : la fenêtre C22 800–12800 conclut à `p = 1,96`
 stabilisé, contre un oracle du même schéma. Quatre cas canoniques sur δ sont exécutés ici :
 **C01 et C03 passent**, C04 échoue, C08 ne conclut pas. **Le second véhicule passe C04 sur un montage dont le schéma et la mesure

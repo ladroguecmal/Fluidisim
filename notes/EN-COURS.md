@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S65
-État             : en cours
+État             : terminée
 Agent            : Codex (git et cargo disponibles)
 Objectif         : Brancher la graine sur les phases (S64-1), conserver la reproductibilité.
 ```
@@ -71,7 +71,7 @@ Objectif         : Brancher la graine sur les phases (S64-1), conserver la repro
 - [x] **P2** — fonction entière indexée par graine/composante, raccord scénario ; tests de reproductibilité et sensibilité.
 - [x] **P3** — mesurer les déplacements nominaux et plusieurs graines ; consigner puis committer les nouveaux hashs avant leur vérification.
 - [x] **P4** — vérifier tests et scénarios sur références committées ; documenter portée statistique et limites.
-- [>] **P5** — rituel : journal, actions, index/décomptes, corrections datées, passation et jeton libre.
+- [x] **P5** — rituel : journal, actions, index/décomptes, corrections datées, passation et jeton libre.
 
 ### Notes de reprise
 

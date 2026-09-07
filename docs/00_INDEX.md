@@ -207,6 +207,11 @@ parfaitement stable ne pouvait pas distinguer.
 
 ## État d'avancement
 
+**S65 — 2026-09-08 :** graine raccordée aux phases, réalisations distinctes et reproductibles.
+133 tests réussis, trois ignorés ; nouveaux hashs vérifiés. Hs nominal +1,388 %, nouvel échec
+d’homogénéité conservé (ratio 1,397507). Voir docs/validation/GRAINES-S65.md. S64-1 close ;
+suite S66 : S65-1, puis S64-3. Tolérance et A187 restent ouverts ; S63-1 inchangée.
+
 **S64 :** **S62-1 close, et ses deux motifs de report étaient faux.** Le `NaN` venait de la portée
 de l'ancre (±4096 m, mesuré à six mètres près) et non de la sommation ; le coût est de **+6 %** et
 non ×64. Fenêtre portée à **3072 m** (**ADR-051**) : chiffre publié 8,528 % → **0,282 %**, et le
@@ -333,7 +338,7 @@ Chiffrage et contraintes  █████████████████░
 Spécification technique   ████████████████████░░   92 %   chemins tiré et poussé posés, persistance tranchée ; reste IGpuBackend
 Cohérence interne         █████████████████░░░░░   80 %   26 ADR + 6 SPEC confrontés, 45 écarts résolus ; **les 6 ADR de S35 n'ont pas été confrontés au corpus**
 Décisions expérimentales  █████░░░░░░░░░░░░░░░░░   24 %   onze bancs définis, aucun exécuté ; **une moitié de `λ_cut` est mesurée** ; B3 a deux critères d'entrée
-Outillage et pipeline     ████████████████████░░   90 %   **H1, H3, deux δ et un milieu dispersif**, **131 tests exécutés, 2 ignorés** ; C01/C03 passent, C04 échoue à l'ordre un et **passe à l'ordre deux** ; H2, H4-H6 non écrits
+Outillage et pipeline     ████████████████████░░   90 %   **H1, H3, deux δ et un milieu dispersif**, **133 tests exécutés, 3 ignorés** ; C01/C03 passent, C04 échoue à l'ordre un et **passe à l'ordre deux** ; H2, H4-H6 non écrits
 Accords inter-équipes     █████░░░░░░░░░░░░░░░░░   25 %   cinq arbitrages tranchés ; quatorze demandes extérieures en attente
 ```
 

@@ -756,10 +756,20 @@ venait de la portée de l'ancre et non de la sommation, et le coût est de +6 % 
 
 | # | Action | Origine | Porteur | État |
 |---|---|---|---|---|
-| S64-1 | **Brancher `scenario.graine` sur les phases des composantes.** Le déterminisme est conservé — même graine, même mer — et les mesures statistiques deviennent répétables sur des réalisations indépendantes. Sans cela, aucune tolérance du corpus ne peut recevoir de provenance statistique | **A186** | session | ouverte |
+| S64-1 | **Brancher `scenario.graine` sur les phases des composantes.** Le déterminisme est conservé — même graine, même mer — et les mesures statistiques deviennent répétables sur des réalisations indépendantes. Sans cela, aucune tolérance du corpus ne peut recevoir de provenance statistique | **A186** | session | **close en S65** |
 | S64-2 | **Resserrer la tolérance de `Hs`**, aujourd'hui à 10 % pour un écart de 0,28 %. Bloquée par S64-1 *et* par A187 : les deux doivent être levées d'abord | **A106**, ADR-051 D2 | session, par ADR | ouverte, bloquée |
 | S64-3 | **Élucider l'écart de 6,6 % à 256 composantes**, qui n'est ni la fenêtre ni le pas. Piste non vérifiée : la corrélation entre composantes, toutes dans un cône de 30 degrés | **A187** | session | ouverte |
 
 > **Ordre : S64-1, puis S64-3, puis S64-2.** Les deux premières sont indépendantes et débloquent
 > la troisième ; S64-1 est aussi la moins chère et sert au-delà de `Hs`.
 
+
+## Actions relevées en séance — S65
+
+S64-1 close : GRAINES-S65. S64-2 reste bloquée par A187 et la calibration statistique.
+
+| # | Action | Origine | Porteur | État |
+|---|---|---|---|---|
+| S65-1 | Diagnostiquer le nouvel échec d’homogénéité (ratio 1,397507) sur plusieurs graines et fenêtres ; distinguer fluctuation de réalisation et défaut de phase avant toute modification du contrôle | GRAINES-S65, tolérance 15 % inchangée | session S66 | ouverte |
+
+Ordre recommandé : S65-1, S64-3, puis S64-2 par ADR. S63-1 reste à planifier séparément.

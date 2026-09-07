@@ -1074,3 +1074,9 @@ sans changement de solveur ni de seuil : demi-vies nominales rampe **21,20** et 
 **24,45 périodes**, R² rampe **0,9924**. Les chiffres historiques 20,7/24,4 ci-dessus sont
 supplantés par cette mesure ; verdicts conservés. Le témoin nx=400 sur 60 s est désormais
 mesurable. Voir [EXTREMA-SEICHE-S55](EXTREMA-SEICHE-S55.md), notamment les limites physiques.
+
+### Suivi S65 — 2026-09-08 : phases issues de la graine
+
+C18 : Hs nominal +1,388 %, homogénéité ratio 1,397507, **échec** face à 15 % conservé et suivi
+S65-1. Hashs C02/C18 remplacés avant vérification. Mesures et limites :
+[GRAINES-S65](GRAINES-S65.md). Valeurs antérieures liées aux phases historiques ; seuils inchangés.
