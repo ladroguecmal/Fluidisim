@@ -176,7 +176,7 @@ fn executer_physics_shallow() -> usize {
     // 400 mailles de 5 cm = 20 m, profondeur 2 m, 20 périodes — soit 800 mailles par longueur
     // d'onde, la condition de mesure d'`ADR-039`.
     cas.extend(c03_seiche(400, 0.05, 2.0, 0.02, 20.0));
-    cas.extend(c08_convergence(1.0, 2.0));
+    let diagnostic_c08 = c08_convergence(1.0, 2.0);
     // 100 m de canal à 5 cm, bosse de 10 cm sur 2 m d'eau, boost de 10 m/s pendant 1 s — soit
     // exactement 200 mailles de décalage.
     cas.extend(c06_galilee(2000, 0.05, 2.0, 0.1, 10.0, 1.0));
@@ -192,8 +192,13 @@ fn executer_physics_shallow() -> usize {
             println!("         → référence : {}", c.source);
         }
     }
+    println!("  {}", diagnostic_c08.rapport_ordre());
+    let controle_ok = diagnostic_c08.coherence.passe();
+    ligne_de_cas(if controle_ok { "CONTROLE OK " } else { "CONTROLE ÉCHEC " }, &diagnostic_c08.coherence);
+    if !controle_ok { echecs += 1; }
+    println!("  C08 herite : 1 diagnostic sans verdict de validation, 1 controle de coherence, {} echec(s) de controle.", usize::from(!controle_ok));
     println!(
-        "  {} cas exécutés sur `shallow.rs`, {echecs} échec(s), C01 en {pas_c01} pas — {:.1} s",
+        "  {} cas exécutés sur `shallow.rs` et 1 controle diagnostic, {echecs} échec(s), C01 en {pas_c01} pas — {:.1} s",
         cas.len(),
         chrono.elapsed().as_secs_f64()
     );

@@ -68,7 +68,7 @@ Objectif         : Distinguer le diagnostic Ritter hérité de la validation C08
 ### Plan
 
 - [x] **P1** — reprise et jeton, plan seul ; contrôles des copies et branches.
-- [ ] **P2** — retirer le verdict de validation du diagnostic hérité, garder mesures et refus visibles, tester la portée du rapport.
+- [x] **P2** — retirer le verdict de validation du diagnostic hérité, garder mesures et refus visibles, tester la portée du rapport.
 - [ ] **P3** — suite complète et références ; corriger les affirmations courantes et annoter les ADR concernés sans réécriture.
 - [ ] **P4** — rituel : journal, leçons/angles morts, actions, index et décomptes, passation et jeton libre.
 
@@ -78,3 +78,6 @@ Départ master 7b0f1ec propre ; c107bf à S44 propre, lignée B archivée. Socle
 conversation, inchangé. S46 a corrigé le rapport principal, pas c08_convergence de shallow.
 Contrat C08 amendé S26 : support régulier, cinq grilles et stabilité. Ritter sur trois grilles
 ne valide pas C08, quel que soit p. Conserver p = 0,999745 et la différence des estimateurs.
+P2 : DiagnosticRitter remplace Vec<Cas> ; aucun seuil sur p, refus Option explicite.
+Controle de coherence conserve (0,25), y compris son echec a 0,83 et sur non-finis.
+Quatre tests C08 verts ; mesure nominale 0,999745 conservee.

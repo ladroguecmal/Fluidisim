@@ -1044,36 +1044,37 @@ pub fn c03_seiche(n: usize, dx: f64, h0: f64, eta_bord: f64, periodes: f64) -> V
     ]
 }
 
-/// **C08 — convergence sous raffinement.**
-///
-/// `p = log₂( |e_h − e_{h/2}| / |e_{h/2} − e_{h/4}| )`, assertion `p > 0,8`.
-///
-/// # Pourquoi ce cas existe, et ce qu'il remplace
-///
-/// `CAS-CANONIQUES` est direct : *« un solveur qui ne converge pas ne resout pas l'equation qu'on
-/// croit : il est **faux**, pas imprecis »*. B-S22 a deduit l'ordre a la main, deux fois, en regardant
-/// des colonnes de chiffres et en calculant des rapports de tete. C08 est l'instrument qui le
-/// mesure, et un instrument vaut mieux qu'un coup d'œil repete.
-///
-/// # Le cas support, et ce que ce choix impose
-///
-/// Le document propose C02, C04 ou C09. **Seul C04 est disponible** : C02 demande de coupler `δ` a
-/// `B`, C09 demande `V`. Or C04 porte une **discontinuite** — un front sec — et l'ordre observe sur
-/// une solution discontinue est structurellement inferieur a l'ordre du schema sur une solution
-/// lisse. Le chiffre rendu ici est donc un **minorant** de l'ordre du schema, pas sa mesure.
-///
-/// La mesure sur solution lisse existe pourtant, et elle vient d'ailleurs : la demi-vie de C03 double
-/// exactement a chaque division par deux de la maille, ce qui donne `p ≈ 0,95` sur une seiche bien
-/// resolue. Deux observables, deux regimes ; les confondre serait une erreur.
-///
-/// # La norme fait partie de la mesure
-///
-/// L'erreur est mesuree en `L¹` — l'integrale de `|h − h_exact|`. C'est la norme qui a un sens pour
-/// une solution discontinue : en `L∞`, l'erreur est celle de la maille qui chevauche le front, elle
-/// ne decroit pas, et l'ordre observe serait nul quel que soit le schema. **Le meme solveur peut
-/// donc avoir un ordre 1 et un ordre 0 selon la norme choisie, sans qu'aucune des deux mesures ne
-/// soit fausse.**
-pub fn c08_convergence(h0: f64, t_fin: f64) -> Vec<Cas> {
+/// Diagnostic historique sur Ritter, trois grilles. ADR-032 et C08 amendé S26 :
+/// ce support singulier ne valide pas l'ordre sur cas régulier. Le contrôle de cohérence
+/// reste actif : il a trouvé le défaut de terme de fond d'ADR-040 §2.
+pub struct DiagnosticRitter {
+    pub ordre: Option<f64>,
+    pub coherence: Cas,
+}
+
+impl DiagnosticRitter {
+    fn depuis_ordres(pr: f64, pd: f64) -> Self {
+        Self {
+            ordre: if pr.is_finite() { Some(pr) } else { None },
+            coherence: Cas {
+                id: "C08-coherence",
+                grandeur: "ecart entre Richardson et l'ordre direct (controle diagnostic)".into(),
+                mesure: if pr.is_finite() && pd.is_finite() { (pr - pd).abs() } else { f64::NAN },
+                reference: 0.0,
+                tolerance_rel: 0.25,
+                source: "ADR-040 §2 — controle de coherence, sans validation de C08",
+            },
+        }
+    }
+
+    pub fn rapport_ordre(&self) -> String {
+        match self.ordre {
+            Some(p) => format!("DIAGNOSTIC C08-p : {p:.6}, Ritter L1 sur trois grilles ; sans verdict de validation (ADR-032)"),
+            None => "INDÉTERMINÉ C08-p : mesure refusée ; sans verdict de validation".into(),
+        }
+    }
+}
+pub fn c08_convergence(h0: f64, t_fin: f64) -> DiagnosticRitter {
     let grilles = [(400usize, 0.1f64), (800, 0.05), (1600, 0.025)];
     let (mut p_richardson, mut p_direct2) = (f64::NAN, f64::NAN);
 
@@ -1113,24 +1114,7 @@ pub fn c08_convergence(h0: f64, t_fin: f64) -> Vec<Cas> {
         }
     }
 
-    vec![
-        Cas {
-            id: "C08-p",
-            grandeur: format!("ordre par Richardson, Ritter (L¹), {}", SCHEMA_RETENU.nom),
-            mesure: p_richardson,
-            reference: 0.8,
-            tolerance_rel: if p_richardson >= 0.8 { 1e9 } else { 0.0 },
-            source: "CAS-CANONIQUES C08 — p > 0,8 (minorant, pas une egalite)",
-        },
-        Cas {
-            id: "C08-coherence",
-            grandeur: "ecart entre Richardson et l'ordre direct".into(),
-            mesure: (p_richardson - p_direct2).abs(),
-            reference: 0.0,
-            tolerance_rel: 0.25,
-            source: "diagnostic : deux estimateurs du meme ordre doivent se rejoindre",
-        },
-    ]
+    DiagnosticRitter::depuis_ordres(p_richardson, p_direct2)
 }
 
 /// **C06 — invariance galileenne, version 1D.**
@@ -1406,24 +1390,36 @@ mod tests {
     /// **Le chiffre publié se reproduit-il ?** `ADR-040` annonce **`p` = 1,003** pour l'ordre mesuré
     /// par Richardson sur Ritter, en norme `L¹`, avec MUSCL + RK2.
     ///
-    /// C'est le chiffre qui fait passer C08 du **sans verdict** au **vert**. Sur le véhicule de
-    /// cette lignée, `ADR-032` conclut que *C08 n'est pas exécutable tel qu'énoncé* — les deux
-    /// résultats portent sur des schémas différents et ne se contredisent pas.
+    /// S47 : reproduction du diagnostic historique, pas validation C08. Ritter est singulier,
+    /// trois grilles ne prouvent pas la stabilité ; le seuil absolu d'ADR-032 ne s'applique pas.
     #[test]
     fn c08_reproduit_l_ordre_1_003() {
-        let cas = c08_convergence(1.0, 2.0);
-        let p = cas.iter().find(|c| c.id == "C08-p").expect("C08-p");
-        println!("C08-p — publié : 1,003 | mesuré ici : {:.4}", p.mesure);
-        assert!(
-            (p.mesure - 1.003).abs() < 0.01,
-            "ADR-040 annonce p = 1,003 ; mesuré ici {:.4}",
-            p.mesure
-        );
-        for c in &cas {
-            assert!(c.passe(), "{} : {} = {:.6}", c.id, c.grandeur, c.mesure);
-        }
+        let diagnostic = c08_convergence(1.0, 2.0);
+        let p = diagnostic.ordre.expect("ordre mesurable");
+        println!("C08-p historique — publié : 1,003 | mesuré ici : {p:.6}");
+        assert!((p - 0.999745).abs() < 1e-6, "mesure S36 déplacée : {p}");
+        assert!(diagnostic.coherence.passe());
+        assert!(diagnostic.rapport_ordre().contains("sans verdict de validation"));
     }
 
+    #[test]
+    fn le_diagnostic_ne_valide_pas_c08_et_son_controle_reste_actif() {
+        for p in [0.5, 1.0, 2.0] {
+            let d = DiagnosticRitter::depuis_ordres(p, p);
+            assert!(d.rapport_ordre().starts_with("DIAGNOSTIC"));
+            assert!(d.rapport_ordre().contains("sans verdict de validation"));
+            assert!(d.coherence.passe());
+        }
+        let incoherent = DiagnosticRitter::depuis_ordres(1.0, 0.17);
+        assert!(!incoherent.coherence.passe(), "conserver le détecteur d'ADR-040 §2");
+        for v in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY] {
+            let d = DiagnosticRitter::depuis_ordres(v, 1.0);
+            assert!(d.ordre.is_none());
+            assert!(d.rapport_ordre().starts_with("INDÉTERMINÉ"));
+            assert!(!d.coherence.passe());
+            assert!(!DiagnosticRitter::depuis_ordres(1.0, v).coherence.passe());
+        }
+    }
     /// **`C08-p` ne se reproduit pas, et ce n'est pas une divergence entre les deux arbres.**
     ///
     /// `ADR-040` (B-S24) publie **`p` = 1,003**. Le code rend **0,9997**. La cause est datée : en
