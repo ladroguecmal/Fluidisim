@@ -107,6 +107,17 @@ mais trois points ne font pas une loi, et le facteur varie d'un ordre de grandeu
 
 ### D4 — Le remplacement du critère reste **ouvert par décision**, et l'expérience qui manque est nommée
 
+> **Note corrective — 2026-09-08, S61.** *L'expérience nommée ci-dessous n'existe pas.* Le régime
+> `erreur < écart des oracles` demande un rapport oracle/grille `k ≈ 1`, alors que l'emboîtement
+> impose `k ≥ 2` : les deux quantités ont la même origine, et leur rapport est borné en dessous
+> par `2^p/(1 − 2^-p)`, soit **5,3 à l'ordre deux** — 4,75 mesuré. Aucune taille d'oracle n'y
+> change rien, la dépendance mesurée étant en `o^-0,058`. **S60-1 est dissoute**, et l'hypothèse
+> d'uniformité qu'elle devait éprouver est établie autrement, par la platitude de la colonne
+> « variation » sur un facteur 256 en erreur. Voir
+> [`ADR-050`](ADR-050-le-filtre-de-contamination-est-une-condition-geometrique.md) et
+> [`GEOMETRIE-DU-FILTRE-S61`](../validation/GEOMETRIE-DU-FILTRE-S61.md). Le reste de cette
+> décision — D1, D2, D3, et le refus de remplacer le critère — **tient sans changement**.
+
 Aucune mesure de ce dépôt n'a atteint le régime décisif : celui où **l'erreur d'une grille passe
 sous l'écart des oracles**. Même à oracle 3200, l'erreur de la grille 1600 vaut encore 4,8 fois
 cet écart. Tant que ce régime n'est pas observé, **rien ne dit que la contamination y reste

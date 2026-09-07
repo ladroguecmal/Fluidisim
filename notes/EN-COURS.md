@@ -71,7 +71,7 @@ Objectif         : S60-1 — atteindre le régime où l'erreur d'une grille pass
 - [x] **P1** — passation, jeton, plan seul.
 - [x] **P2** — chiffrer l'expérience prescrite avant de la lancer, et établir si le régime visé est atteignable dans ce dispositif.
 - [x] **P3** — si non : dériver ce que le filtre ×30 exige réellement, et **le vérifier contre les cinq campagnes historiques**, dont les refus sont connus.
-- [ ] **P4** — conclure : note corrective datée sur ADR-049 D4, et ce qui remplace l'expérience impossible.
+- [x] **P4** — conclure : note corrective datée sur ADR-049 D4, et ce qui remplace l'expérience impossible.
 - [ ] **P5** — appliquer au code ce qui doit l'être, avec essais de refus et témoins.
 - [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
 
@@ -108,3 +108,8 @@ Mon propre chiffrage de P1 (72 h) etait faux — exposant local 1,596 extrapole 
 alors que le global vaut 1,9 ; la conclusion se durcit, impossible et non couteux. A183 :
 le seuil d admission d une mesure d ordre est fonction de l ordre. L uniformite du biais, elle,
 est etablie sans regime extreme : colonne variation plate a 2 pour cent sur un facteur 256.
+
+P4 : ADR-050. D1 le filtre x30 equivaut a k >= 6 environ, condition geometrique lisible avant
+tout calcul ; D2 le seuil d admission d une mesure d ordre est fonction de l ordre — A183 ;
+D3 filtre conserve, description completee sans reecriture. S60-1 dissoute. Note corrective datee
+sur ADR-049 D4, dont le reste tient sans changement.
