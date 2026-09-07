@@ -68,7 +68,7 @@ Objectif         : Raffiner les fenêtres C22 shallow avec réutilisation des or
 ### Plan
 
 - [x] **P1** — reprise, copies, jeton et plan seul.
-- [ ] **P2** — fenêtres prédéclarées 100–1600, 200–3200, 400–6400 ; réutilisation en mémoire des oracles et mesures ; tests du filtrage.
+- [x] **P2** — fenêtres prédéclarées 100–1600, 200–3200, 400–6400 ; réutilisation en mémoire des oracles et mesures ; tests du filtrage.
 - [ ] **P3** — mesurer avec deux oracles suffisamment fins, vérifier stabilité et coût, documenter les limites et tester.
 - [ ] **P4** — rituel de fin : journal, leçons, actions, index, décomptes, passation et jeton libre.
 
@@ -77,3 +77,5 @@ Objectif         : Raffiner les fenêtres C22 shallow avec réutilisation des or
 Départ master 8395ca0 propre. Copies anciennes contrôlées ; aucun travail concurrent détecté.
 Socle lu dans cette conversation ; S48 et son registre de mesures relus. Aucun seuil changé.
 Les champs restent en mémoire, sans sérialisation (I17). Toutes les fenêtres seront rapportées.
+
+P2 : mode c22-shallow-fenetres, trois fenêtres fixes, sept champs et deux oracles calculés une fois en mémoire. Trois tests ciblés verts, compilation release réussie.

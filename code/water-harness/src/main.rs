@@ -590,19 +590,22 @@ fn lire(chemin: &str) -> Result<Scenario, String> {
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    if args.first().map(String::as_str) == Some("c22-shallow") {
+    if matches!(args.first().map(String::as_str), Some("c22-shallow" | "c22-shallow-fenetres")) {
         let n = match args.get(1).map(|v| v.parse::<usize>()).unwrap_or(Ok(12800)) {
             Ok(n) => n,
             Err(_) => { eprintln!("taille d'oracle invalide"); return ExitCode::FAILURE; }
         };
-        return match c22_shallow::campagne(n) {
+        let resultat = if args[0] == "c22-shallow-fenetres" {
+            c22_shallow::fenetres(n)
+        } else { c22_shallow::campagne(n) };
+        return match resultat {
             Ok(0) => ExitCode::SUCCESS,
             Ok(_) => ExitCode::FAILURE,
             Err(e) => { eprintln!("C22 indisponible : {e}"); ExitCode::FAILURE }
         };
     }
     if args.len() < 2 {
-        eprintln!("usage : water-harness <check|physics|bless> <scenario.toml> [...] | c22-shallow [nx_oracle]");
+        eprintln!("usage : water-harness <check|physics|bless> <scenario.toml> [...] | <c22-shallow|c22-shallow-fenetres> [nx_oracle]");
         return ExitCode::from(2);
     }
     let mode = args[0].as_str();

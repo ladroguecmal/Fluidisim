@@ -48,9 +48,25 @@ fn erreur(h: &[f64], oracle: &[f64]) -> Result<f64, String> {
 }
 
 pub fn campagne(nx_oracle: usize) -> Result<usize, String> {
-    let grilles = [100, 200, 400, 800, 1600];
+    mesurer(nx_oracle, false)
+}
+
+pub fn fenetres(nx_oracle: usize) -> Result<usize, String> {
+    mesurer(nx_oracle, true)
+}
+
+fn famille(mesures: &[(usize, f64)], seuil: f64, debut: usize) -> Vec<(usize, f64)> {
+    mesures.iter().copied().skip(debut).take(5)
+        .take_while(|(_, e)| e.is_finite() && *e >= seuil).collect()
+}
+
+fn mesurer(nx_oracle: usize, plusieurs: bool) -> Result<usize, String> {
+    let grilles = [100, 200, 400, 800, 1600, 3200, 6400];
     if nx_oracle < 3200 || nx_oracle > 51200 || nx_oracle % 1600 != 0 {
         return Err("oracle attendu : multiple de 1600, entre 3200 et 51200".into());
+    }
+    if plusieurs && (nx_oracle <= 6400 || nx_oracle % 6400 != 0) {
+        return Err("fenêtres : oracle multiple de 6400, strictement supérieur à 6400".into());
     }
     let debut = std::time::Instant::now();
     let o1 = champ(nx_oracle, 0.01, 1.0)?;
@@ -58,27 +74,31 @@ pub fn campagne(nx_oracle: usize) -> Result<usize, String> {
     let ecart_oracles = erreur(&o1, &o2)?;
     // Plancher de sommation conservateur en f64 : n opérations, erreur relative n*epsilon.
     let plancher = o2.len() as f64 * f64::EPSILON;
-    let mut c = Convergence { grandeur: "C22 shallow, HLL MUSCL+RK2, deux oracles".into(),
-        erreurs: Vec::new(), plancher, reference: Reference::Oracle };
     println!("C22 shallow : a=0.01 m, sigma=1 m, h0=1 m, L=40 m, t=1 s, CFL=0.45");
     println!("oracles {nx_oracle}/{} : écart L1 = {ecart_oracles:.9e}", 2*nx_oracle);
-    println!(" nx       erreur/oracle1   erreur/oracle2    variation       retenue");
-    let mut prefixe_sain = true;
-    for n in grilles {
+    println!(" nx       erreur/oracle1   erreur/oracle2    variation       séparée");
+    let mut mesures = Vec::new();
+    for n in grilles.into_iter().take(if plusieurs { 7 } else { 5 }) {
         let h = champ(n, 0.01, 1.0)?;
         let e1 = erreur(&h, &o1)?;
         let e2 = erreur(&h, &o2)?;
         // Facteur 30 de C22 ; ici l'écart mesuré des oracles remplace l'extrapolation en p.
         // C'est un indicateur empirique, pas une borne prouvée de l'erreur commune aux oracles.
         // Une grille retirée coupe la famille : ne pas reconstruire des triplets non emboîtés.
-        prefixe_sain &= e2 >= 30.0*ecart_oracles;
-        let retenue = prefixe_sain;
+        let retenue = e2 >= 30.0*ecart_oracles;
         println!("{n:5} {e1:18.9e} {e2:18.9e} {:14.6e} {retenue}", (e1-e2).abs());
-        if retenue { c.erreurs.push((n,e2)); }
+        mesures.push((n,e2));
     }
-    for (n,o) in c.ordres() { println!("triplet {n} : {o:?}"); }
     let mut bilan = Bilan::default();
-    println!("{}", bilan.ajouter(&c,true));
+    // Fenêtres fixées avant mesure ; champs/oracles calculés une seule fois, sans fichier.
+    for debut in 0..if plusieurs { 3 } else { 1 } {
+        let c = Convergence { grandeur: "C22 shallow, HLL MUSCL+RK2, deux oracles".into(),
+            erreurs: famille(&mesures, 30.0*ecart_oracles, debut), plancher,
+            reference: Reference::Oracle };
+        println!("Fenêtre {}–{} : {}/5 retenues", grilles[debut], grilles[debut+4], c.erreurs.len());
+        for (n,o) in c.ordres() { println!("triplet {n} : {o:?}"); }
+        println!("{}", bilan.ajouter(&c,true));
+    }
     println!("{}", bilan.resume());
     println!("Portée : oracle numérique du même schéma ; filtre empirique, erreur commune non bornée.");
     println!("Coût C22 : {:.3} s", debut.elapsed().as_secs_f64());
@@ -88,6 +108,15 @@ pub fn campagne(nx_oracle: usize) -> Result<usize, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn fenetre_coupee_sans_recoudre_les_grilles() {
+        let m = [(100,8.0),(200,4.0),(400,2.0),(800,0.5),(1600,1.5),(3200,1.1),(6400,1.0)];
+        assert_eq!(famille(&m,1.0,0),m[..3]);
+        assert_eq!(famille(&m,1.0,2),m[2..3]);
+        assert_eq!(famille(&m,0.0,2),m[2..]);
+        assert!(fenetres(9600).is_err());
+        assert!(fenetres(6400).is_err());
+    }
     #[test]
     fn projection_conservative_et_refus() {
         assert_eq!(erreur(&[2.0,6.0], &[1.0,3.0,5.0,7.0]).unwrap(),0.0);
