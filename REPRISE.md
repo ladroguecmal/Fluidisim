@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-07 14:10 +02:00
+JETON            : libre
+Battement        : 2026-09-07 14:11 +02:00
 Agent            : Codex (git et cargo disponibles)
-Session en cours : S47
-Dernière session : S46 — 2026-09-07 — les refus restent dans la famille et dans le bilan
-Session suivante : S47 — portée du C08 hérité de shallow (S46-1)
+Session en cours : —
+Dernière session : S47 — 2026-09-07 — mesure conservée, portée du verdict corrigée
+Session suivante : S48 — C22 régulier sur shallow (S47-1)
 ```
 
 > **Avant de regarder le jeton, exécuter `git worktree list` et `git branch -a`.** Le jeton est un
@@ -140,16 +140,20 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
+**S47 :** C08 hérité de shallow est un diagnostic sans verdict de validation. p = 0,999745
+inchangé ; contrôle de cohérence conservé (écart 0,001459). 102 tests verts, deux ignorés.
+S46-1 close ; suite S48 : construire C22 régulier sur shallow (S47-1).
+
 **S46 :** refus non finis explicites dans Convergence, aucune suppression des triplets refusés
 pour établir la stabilité. Le rapport principal compte cinq familles sans verdict, y compris
 le cas régulier p = 0,82 dont la stabilité n'est pas établie. Mesures et hashs inchangés.
 S45-1 close ; S47 recommandée : portée de la paire héritée C08-p/C08-coherence (S46-1).
 
-Quarante-six sessions ici, **plus cinq dans une lignée parallèle réconciliée en S35** (B-S22 à
+Quarante-sept sessions ici, **plus cinq dans une lignée parallèle réconciliée en S35** (B-S22 à
 B-S27) — **47 ADR** *(dont un acté)*, six spécifications, **quatorze registres** — **et du code qui
 tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équilibrés et **tous deux
 montés sur leurs cas, confrontés l'un à l'autre et instrumentés, **plus un milieu à dispersion
-exacte** *(S39)*, **101 tests verts, deux ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
+exacte** *(S39)*, **102 tests verts, deux ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
 verdict** (C08). Quatre cas canoniques sur δ sont exécutés ici : **C01 et C03 passent**, C04 échoue,
 C08 ne conclut pas. **Le second véhicule passe C04 sur un montage dont le schéma et la mesure
 diffèrent** (S41). Son ancien C08 vert est requalifié en S47 : diagnostic sur Ritter, trois

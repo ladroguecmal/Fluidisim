@@ -216,6 +216,7 @@ ce que les sources avaient omis.
 | **A172** | Quand la grandeur est un écart, zéro est son meilleur point — aucun repli n'y est acceptable | **1** | AUDIT-REPLIS-S44 §4 |
 | **A173** | Un refus peut supprimer son assertion ou être ignoré par une sélection — corrigé S45 | **1** | AUDIT-REPLIS-S44 §7 |
 | **A174** | Filtrer les refus change la famille mesurée ; omettre les indéterminés fausse le bilan — corrigé S46 | **1** | AUDIT-REPLIS-S44 §8 |
+| **A175** | Un chiffre reproductible peut porter un verdict hors contrat — corrigé S47 | **1** | AUDIT-REPLIS-S44 §9 |
 
 Cent huit angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -1341,3 +1342,9 @@ pendant quatre sessions.
   la stabilité est exigée sur le cas régulier, chaque famille est comptée. Le cas régulier
   nominal p = 0,82 rejoint les quatre autres sans-verdict : 5/5 au lieu de 4/5. La paire
   héritée shallow reste à confronter au même contrat (S46-1). AUDIT-REPLIS-S44 §8.
+
+- **A175** *(sévérité 1, corrigé S47)* — **Des nombres comparables peuvent porter des verdicts
+  incompatibles.** Le C08 hérité validait p > 0,8 sur Ritter et trois grilles ; le contrat courant
+  exige un cas régulier et un régime asymptotique établi. L'import conservait les chiffres et
+  le mot « vert », sans confronter leurs conditions d'emploi. Diagnostic requalifié, contrôle
+  de cohérence conservé et compté séparément ; notes ADR-040/043. S47-1 porte la mesure régulière.

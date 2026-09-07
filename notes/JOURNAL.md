@@ -4549,3 +4549,37 @@ clarifier leur portée. S44-1, S43-2 et S42-3 restent ouverts.
 
 **Arbitrages.** A103 (masse volumique), état réel et infrastructure inchangés ; aucun distant
 créé. A107 réconcilié historiquement ; copies anciennes conservées et contrôlées au démarrage.
+
+## S47 — 2026-09-07 — La mesure se conserve, sa portée se corrige
+
+**Agent : Codex**, git et cargo disponibles. Master 7b0f1ec propre ; copies et branches
+contrôlées, aucun travail parallèle constaté. Action S46-1.
+
+**Sorties.** Le C08 hérité de shallow est DiagnosticRitter, séparé des assertions : p sans
+seuil absolu, refus Option explicite, contrôle C08-coherence conservé à 0,25. Le contrôle
+signale toujours une incohérence ou une entrée non finie et affecte le code de sortie.
+Notes correctives datées dans ADR-040 et ADR-043 ; tableau des verdicts et résumés corrigés.
+AUDIT-REPLIS-S44 §9, A175 et L169. S46-1 close.
+
+**Constat.** Un p = 0,999745 sur trois grilles de Ritter ne valide pas C08 amendé : le support
+est singulier et la stabilité n'est pas établie. Le chiffre reste utile pour comparer les
+schémas ; le contrôle de cohérence a trouvé un défaut de fond en B-S24 et ne doit pas disparaître.
+La mesure était reproductible ; c'est la portée du mot « vert » qui était fausse.
+
+**Validation.** 102 tests réussis (38 cœur + 64 harnais), deux ignorés. Quatre tests ciblés C08 :
+valeurs sous/au-dessus de l'ancien seuil, incohérence 0,83, refus NaN/infinis, mesure historique.
+57 lignes de mesures/assertions/suites inchangées ; p = 0,999745, écart = 0,001459.
+check : zéro échec, hashs 0x3e2c06a7b00e73e3 et 0x1a8b0629a9f51b6e.
+physics sortie 1 attendue, C04 ordre un toujours rouge. Second véhicule : 12 assertions,
+un contrôle de cohérence et un diagnostic sans verdict de validation. Aucun solveur modifié.
+
+**Décision structurante.** Appliquer le contrat existant n'exige ni nouvelle décision physique,
+ni effacement des chiffres historiques. Le diagnostic et son contrôle ont des rôles distincts.
+Invariants relus dans le socle de cette conversation : aucun n'est modifié ou invalidé.
+
+**Suite recommandée.** S48 — construire C22 régulier sur shallow avec au moins cinq grilles,
+mesurer l'ordre et sa stabilité, conserver coûts et refus (S47-1). S44-1, S43-2 et S42-3 restent
+ouverts ; ce travail ne remplace pas le banc B3 ni un solveur de production.
+
+**Arbitrages inchangés.** A103 (masse volumique), constat d'état réel et infrastructure ; aucun
+nouveau distant. A107 historiquement réconcilié, anciennes copies conservées et contrôlées.

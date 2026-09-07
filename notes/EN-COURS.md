@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S47
-État             : en cours
+État             : terminée
 Agent            : Codex (git et cargo disponibles)
 Objectif         : Distinguer le diagnostic Ritter hérité de la validation C08 (S46-1).
 ```
@@ -70,7 +70,7 @@ Objectif         : Distinguer le diagnostic Ritter hérité de la validation C08
 - [x] **P1** — reprise et jeton, plan seul ; contrôles des copies et branches.
 - [x] **P2** — retirer le verdict de validation du diagnostic hérité, garder mesures et refus visibles, tester la portée du rapport.
 - [x] **P3** — suite complète et références ; corriger les affirmations courantes et annoter les ADR concernés sans réécriture.
-- [ ] **P4** — rituel : journal, leçons/angles morts, actions, index et décomptes, passation et jeton libre.
+- [x] **P4** — rituel : journal, leçons/angles morts, actions, index et décomptes, passation et jeton libre.
 
 ### Notes de reprise
 
@@ -84,3 +84,6 @@ Quatre tests C08 verts ; mesure nominale 0,999745 conservee.
 
 P3 : 102 tests verts, 2 ignores, check et hashs inchanges. 57 lignes comparees identiques.
 Notes correctives ajoutees a ADR-040/043, tableau courant et resume corriges.
+
+P4 : journal, A175, L169, S46-1 close et S47-1 ouverte ; jeton libre.
+Decomptes : 47 ADR, 17 invariants, 6 SPEC, 14 registres, 23 cas, 175 angles morts.

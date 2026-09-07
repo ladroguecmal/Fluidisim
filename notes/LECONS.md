@@ -2747,3 +2747,13 @@ Le filtrage présentait une propriété du sous-ensemble comme celle de l'ensemb
 sélection et sa portée doivent être explicites. Au bilan, compter chaque objet attendu une
 fois : succès, échec ou absence de verdict. Un affichage « indéterminé » sans incrément de
 compteur laisse la mesure visible et son absence de conclusion invisible dans la synthèse.
+
+## L169 — La reproductibilité d'un chiffre ne reproduit pas la portée de son verdict
+
+*(S47)* Un résultat importé se reproduisait exactement et restait déclaré vert. Les deux
+branches n'appliquaient pourtant pas le même contrat : support singulier et trois grilles
+contre cas régulier et stabilité établie. Rejouer les nombres ne pouvait pas résoudre cet écart.
+
+**Réflexe :** comparer aussi les conditions qui autorisent le verdict. Quand elles manquent,
+conserver le diagnostic et ses contrôles utiles, mais retirer la validation qu'ils ne prouvent
+pas. Une requalification ne doit ni déplacer la mesure ni neutraliser son détecteur de défaut.

@@ -540,3 +540,12 @@ unique et décompte exhaustif du rapport principal. Cinq familles sans verdict, 
 | # | Action | Origine | Porteur | État |
 |---|---|---|---|---|
 | S46-1 | Confronter la paire héritée C08-p/C08-coherence de physics_shallow au contrat C08 amendé : Ritter singulier, trois grilles, seuil absolu ; distinguer diagnostic historique et validation sans déplacer les mesures | AUDIT-REPLIS-S44 §8, ADR-032 et CAS-CANONIQUES C08 amendé S26 | session S47 recommandée | ouverte |
+
+## Actions relevées en séance — S47
+
+**S46-1 close.** Le C08 hérité de shallow devient un diagnostic sur Ritter, sans seuil de
+validation ; son contrôle de cohérence reste actif. Chiffres et références conservés.
+
+| # | Action | Origine | Porteur | État |
+|---|---|---|---|---|
+| S47-1 | Construire le montage C22 régulier sur shallow avec au moins cinq grilles ; mesurer ordre, stabilité et coût, garder les refus et ne pas préjuger du verdict | C08 amendé S26, ADR-032, requalification S47 | session S48 recommandée | ouverte |
