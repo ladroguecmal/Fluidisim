@@ -815,6 +815,127 @@ mod tests {
         );
     }
 
+    /// **A159 — refaire une formule publiée, avec ses constantes.**
+    ///
+    /// L'angle mort importé dit : *une formule énoncée avec ses constantes n'invite pas à être
+    /// recalculée ; elle a l'apparence d'un résultat, et on ne vérifie pas un résultat, on le cite.*
+    /// Son remède : **repérer les formules dont dépend une décision et les refaire, une fois.**
+    /// Personne ne l'avait fait dans cette lignée — c'est Q4 de la relecture de S41.
+    ///
+    /// Ce test refait `ADR-037` §3, dont dépend le dimensionnement de `δ` pour les transitoires :
+    ///
+    /// ```text
+    /// t_phys = √(2L/g)                     temps de chute gravitaire
+    /// t_num  = K·L²/(dx·c),  K = ln2/(2π²(1−ν)),  c = √(gh)
+    /// t_num ≥ t_phys   ⟺   dx ≤ K·L^1,5/√(2h)      — `g` disparaît
+    /// ```
+    ///
+    /// **La dérivation est juste** — `g` disparaît bien — et les huit valeurs du tableau se
+    /// recalculent, à `h = 2 m`.
+    ///
+    /// # Le critère, et pourquoi il n'a pas de tolérance
+    ///
+    /// Comparer à « 1 % près » ou « 0,05 cm près » demanderait de choisir un nombre, et le choisir
+    /// trop large reviendrait à ajuster l'instrument sur ce qu'il mesure (**L152**). La question
+    /// exacte est : **la valeur publiée est-elle l'arrondi correct de la valeur recalculée, à la
+    /// précision où elle est écrite ?** Elle se pose sans tolérance, et elle se répond par oui ou
+    /// par non.
+    #[test]
+    fn adr_037_le_critere_de_dimensionnement_se_recalcule() {
+        let k = |nu: f64| 2.0f64.ln() / (2.0 * std::f64::consts::PI.powi(2) * (1.0 - nu));
+        let dx_max = |nu: f64, l: f64, h: f64| k(nu) * l.powf(1.5) / (2.0 * h).sqrt();
+        let h = 2.0f64;
+
+        // `dx` en centimètres, tel que le tableau d'ADR-037 §3 les publie — une décimale.
+        let publie = [
+            (0.45f64, 0.5f64, 1.1f64),
+            (0.45, 1.0, 3.2),
+            (0.45, 2.0, 9.0),
+            (0.45, 5.0, 35.7),
+            (0.70, 0.5, 2.1),
+            (0.70, 1.0, 5.9),
+            (0.70, 2.0, 16.6),
+            (0.70, 5.0, 65.5),
+        ];
+        let mut mal_arrondis = Vec::new();
+        for (nu, l, cm) in publie {
+            let calcule = dx_max(nu, l, h) * 100.0;
+            let arrondi = (calcule * 10.0).round() / 10.0;
+            let verdict = if (arrondi - cm).abs() < 1e-9 { "ok" } else { "MAL ARRONDI" };
+            println!(
+                "ADR-037 §3 — ν = {nu:.2}, L = {l:.1} m : publié {cm:.1} | recalculé {calcule:.3} \
+→ arrondi {arrondi:.1}   {verdict}"
+            );
+            if verdict != "ok" {
+                mal_arrondis.push((nu, l, cm, arrondi, calcule));
+            }
+            // Le garde-fou de fond : au-delà de 5 %, ce n'est plus un arrondi, c'est une erreur.
+            assert!(
+                (calcule - cm).abs() / cm < 0.05,
+                "ADR-037 §3 : {cm} cm publié pour ν = {nu}, L = {l} m, recalculé {calcule:.3} — \
+ce n'est plus un arrondi"
+            );
+        }
+
+        // Le levier du nombre de Courant : ×1,83 sur `dx`, donc ÷6,1 sur les cellules 3D.
+        let levier = k(0.70) / k(0.45);
+        println!(
+            "ADR-037 §3.1 — levier de ν : publié ×1,83 | recalculé ×{levier:.4} ; cellules 3D ÷{:.2} (publié 6,1)",
+            levier.powi(3)
+        );
+        assert!((levier - 1.83).abs() < 0.005, "levier recalculé {levier:.4}");
+
+        // **Et une seconde valeur mal arrondie**, trouvée par le même critère : `1,8333³ = 6,163`,
+        // dont l'arrondi au dixième est **6,2** et non 6,1. Le §3.1 publie 6,1.
+        let cellules = levier.powi(3);
+        let arrondi_cellules = (cellules * 10.0).round() / 10.0;
+        if (arrondi_cellules - 6.1).abs() > 1e-9 {
+            mal_arrondis.push((0.70, 0.0, 6.1, arrondi_cellules, cellules));
+        }
+        assert!(
+            (cellules - 6.1).abs() / 6.1 < 0.05,
+            "cellules 3D ÷{cellules:.3} — ce n'est plus un arrondi"
+        );
+
+        // « À `dx = 0,25 m`, une éclaboussure d'un mètre s'éteint huit fois trop tôt. »
+        let rapport = |l: f64, dx: f64| k(0.45) * l.powf(1.5) / (dx * (2.0 * h).sqrt());
+        println!(
+            "ADR-037 §3 — à dx = 0,25 m : L = 1 m s'éteint {:.1}× trop tôt (publié : huit), \
+L = 0,5 m {:.1}× (publié : vingt)",
+            1.0 / rapport(1.0, 0.25),
+            1.0 / rapport(0.5, 0.25)
+        );
+        assert!((1.0 / rapport(1.0, 0.25) - 8.0).abs() < 0.5);
+
+        // **Le résultat de cette vérification, et il n'est pas nul : deux chiffres sur neuf sont
+        // mal arrondis** — `65,5` pour 65,4 et `÷6,1` pour 6,2. C'est minuscule, et c'est
+        // exactement ce qu'A159 demande de trouver : *les formules dont dépend une décision se
+        // refont une fois, avec leurs constantes.* La décision, ici, est le dimensionnement de δ
+        // pour les transitoires.
+        //
+        // Ni l'une ni l'autre ne change quoi que ce soit à la conclusion d'ADR-037. C'est bien le
+        // sujet : **une vérification qui ne trouve que des broutilles est une vérification qui a
+        // réussi**, et elle ne pouvait pas le dire avant d'avoir été faite.
+        for (nu, l, cm, arrondi, calcule) in &mal_arrondis {
+            if *l > 0.0 {
+                println!(
+                    "  → §3 publie {cm:.1} cm pour ν = {nu:.2}, L = {l:.1} m ; \
+l'arrondi correct de {calcule:.3} est {arrondi:.1}"
+                );
+            } else {
+                println!(
+                    "  → §3.1 publie ÷{cm:.1} ; l'arrondi correct de {calcule:.3} est {arrondi:.1}"
+                );
+            }
+        }
+        assert_eq!(
+            mal_arrondis.len(),
+            2,
+            "**deux** chiffres mal arrondis sont connus et documentés par la note S41 d'ADR-037 : \
+`65,5` pour 65,4 et `÷6,1` pour 6,2. Un autre compte veut dire que le §3 a changé."
+        );
+    }
+
     /// **P3–P5 — de quoi ce seuil décide-t-il ?**
     ///
     /// Sept décades, de `10⁻³` à `10⁻¹⁰`, sur les **deux** véhicules. `ADR-031` §4 s'arrêtait à

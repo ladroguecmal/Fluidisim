@@ -847,6 +847,20 @@ impl Delta1D {
             let p_i = 0.5 * G * self.h[i] * self.h[i];
 
             // Quantité de mouvement : flux reconstruit, puis pression recollée de chaque côté.
+            //
+            // **Forme générale, et il faut qu'elle le reste** (S41, angle mort **A155**). Les deux
+            // hauteurs reconstruites — `cour.h_gauche` à droite de la maille, `prec.h_droite` à
+            // gauche — sont écrites séparément. À l'ordre un elles valent toutes deux `h[i]`, et
+            // l'expression **se réduit** à une forme plus courte qu'il serait tentant d'écrire.
+            //
+            // La lignée B l'a fait, correctement, tant qu'elle était à l'ordre un ; étendue à
+            // l'ordre deux où les deux bords diffèrent, la forme courte injectait une force
+            // `−g·h·σ` **sur fond plat** — quinze fois l'erreur du schéma, et croissante sous
+            // raffinement. *Rien dans l'écriture courte ne rappelait l'hypothèse qui l'autorise.*
+            //
+            // Ce solveur est à l'ordre un aujourd'hui : la forme courte y serait **exacte**. Elle
+            // n'est pas écrite quand même, parce que le piège ne se voit qu'au moment où il se
+            // referme.
             let qm_droite = cour.flux[1] + p_i - 0.5 * G * cour.h_gauche * cour.h_gauche;
             let qm_gauche = prec.flux[1] + p_i - 0.5 * G * prec.h_droite * prec.h_droite;
 

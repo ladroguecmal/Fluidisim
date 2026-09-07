@@ -107,7 +107,7 @@ de `FORK-S22-S26` §4 devrait le dire.
 - [x] **P1** — plan, jeton.
 - [x] **P2** — **A152**, **A156** : les conditions de mesure et le classement par scalaire. Les deux
       portent sur `CAS-CANONIQUES`, et se vérifient en le lisant cas par cas.
-- [ ] **P3** — **A155**, **A159** : les deux défauts d'écriture — une simplification dans le code,
+- [x] **P3** — **A155**, **A159** : les deux défauts d'écriture — une simplification dans le code,
       une formule dans le corpus. **Q3 se vérifie sur `delta.rs` et sur les ADR à constantes.**
 - [ ] **P4** — **A157**, **A166** : les deux limites de méthode. A157 recoupe `ADR-047` ; A166 dit
       qu'une mesure ne peut pas dire de quel cadre elle dépend — **lesquelles des nôtres sont dans

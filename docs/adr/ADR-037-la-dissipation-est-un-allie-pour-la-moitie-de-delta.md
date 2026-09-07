@@ -149,3 +149,28 @@ Passer de `ν = 0,45` à `ν = 0,70` multiplie `dx_max` par **1,83**, donc divis
    le régime linéaire**. Le régime non linéaire reste non mesuré.
 4. **δ est 3D et toutes les mesures sont 1D.** Le critère du §3 se transporte en forme ; le
    coefficient `K` est celui du véhicule 1D.
+
+---
+
+## Note corrective — S41 : deux arrondis, et la dérivation refaite
+
+**A159** — *une formule énoncée avec ses constantes n'invite pas à être recalculée* — demande de
+**refaire une fois les formules dont dépend une décision**. Le §3 de cet ADR dimensionne `δ` pour les
+transitoires : il en est une.
+
+**La dérivation est juste.** `t_num ≥ t_phys` avec `t_phys = √(2L/g)`, `t_num = K·L²/(dx·√(gh))` et
+`K = ln2/(2π²(1−ν))` donne bien `dx ≤ K·L^1,5/√(2h)`, et `g` disparaît bien.
+
+**Les neuf valeurs publiées se recalculent, et deux sont mal arrondies :**
+
+| endroit | publié | recalculé | arrondi correct |
+|---|---|---|---|
+| §3, `ν = 0,70`, `L = 5 m` | 65,5 cm | 65,433 | **65,4** |
+| §3.1, cellules 3D | ÷6,1 | 6,162 | **÷6,2** |
+
+Les sept autres sont exactes. **Aucune des deux ne change quoi que ce soit à la conclusion** — et
+c'est le sujet : *une vérification qui ne trouve que des broutilles est une vérification qui a
+réussi, et elle ne pouvait pas le dire avant d'avoir été faite.*
+
+Le calcul est désormais un test, `adr_037_le_critere_de_dimensionnement_se_recalcule`, qui échouera
+si l'un de ces chiffres bouge — ce qu'aucune relecture ne garantit (**L141**).
