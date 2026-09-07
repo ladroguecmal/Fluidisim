@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S48
-État             : en cours
+État             : terminée
 Agent            : Codex (git et cargo disponibles)
 Objectif         : Construire et mesurer C22 régulier sur shallow (S47-1).
 ```
@@ -70,7 +70,7 @@ Objectif         : Construire et mesurer C22 régulier sur shallow (S47-1).
 - [x] **P1** — reprise, contrôles des copies, jeton et plan seul.
 - [x] **P2** — montage gaussien C22, comparaison conservative aux oracles emboîtés, essais nul/refus ; première mesure et coût.
 - [x] **P3** — campagne de raffinement et stabilité, branchement au rapport adapté au coût, tests et documentation des résultats/limites.
-- [ ] **P4** — rituel : journal, leçons/angles morts, actions, index/décomptes et passation, jeton libre.
+- [x] **P4** — rituel : journal, leçons/angles morts, actions, index/décomptes et passation, jeton libre.
 
 ### Notes de reprise
 
@@ -86,3 +86,6 @@ p=1,63758 et 1,63170 ; non concluant, cout release 5,416 s. Commande c22-shallow
 P3 : trois campagnes jusqu'a 25600/51200 ; cinq grilles retenues, p=1,637646 /
 1,631733 / 1,849841, non concluant. Cout final 102,612 s avec charge concurrente signalee.
 104 tests verts, deux ignores, check sans echec et hashs inchanges. Taille invalide refusee.
+
+P4 : journal, L170, aucun nouvel angle mort (175), S47-1 close, S48-1 ouverte.
+Decomptes inchanges : 47 ADR, 17 invariants, 6 SPEC, 14 registres, 23 cas. Jeton libre.

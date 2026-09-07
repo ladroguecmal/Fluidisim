@@ -2757,3 +2757,14 @@ contre cas régulier et stabilité établie. Rejouer les nombres ne pouvait pas 
 **Réflexe :** comparer aussi les conditions qui autorisent le verdict. Quand elles manquent,
 conserver le diagnostic et ses contrôles utiles, mais retirer la validation qu'ils ne prouvent
 pas. Une requalification ne doit ni déplacer la mesure ni neutraliser son détecteur de défaut.
+
+## L170 — Raffiner la référence et raffiner l'objet mesuré répondent à deux questions distinctes
+
+*(S48)* Une suite de cinq grilles donnait des ordres non stabilisés. Doubler deux fois les
+oracles a rendu les nombres presque invariants sans changer le verdict. La sensibilité à la
+référence avait diminué ; le régime asymptotique des grilles étudiées n'avait pas progressé.
+
+**Réflexe :** identifier quel axe de raffinement traite l'incertitude observée. Une référence
+plus coûteuse ne rend pas les points de mesure plus fins. Rapporter séparément l'influence
+de l'oracle et l'évolution de l'ordre ; leur confusion peut consommer le budget sans tester
+l'hypothèse qui bloque la conclusion.

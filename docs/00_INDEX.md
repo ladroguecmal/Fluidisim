@@ -180,7 +180,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | `code/scenarios` | les scénarios du mode `check`, assertions comprises |
 
 ```
-cargo test --offline                                  # 102 succès, 2 ignorés
+cargo test --offline                                  # 104 succès, 2 ignorés
 water-harness check   scenarios/*.toml                # H1 — déterminisme, 0,04 s / budget 60 s
 water-harness physics scenarios/*.toml                # H3 — assertions analytiques et diagnostics
 ```
@@ -201,6 +201,11 @@ parfaitement stable ne pouvait pas distinguer.
 
 ## État d'avancement
 
+**S48 :** [C22 régulier sur shallow](validation/MESURES-C22-S48.md) exécuté avec cinq
+grilles et oracles jusqu'à 51200 cellules. Ordres 1,638 / 1,632 / 1,850 : non stabilisés,
+malgré une faible sensibilité à l'oracle. Mode dédié c22-shallow ; 104 tests verts, deux
+ignorés. Suite S49 : raffiner la fenêtre des grilles mesurées (S48-1).
+
 **S47 :** C08 de shallow est requalifié en diagnostic sur Ritter, sans validation ; contrôle
 de cohérence conservé. 102 tests verts, deux ignorés, mesures inchangées. Suite S48 : C22
 régulier sur shallow (S47-1). Notes correctives ADR-040/043, A175 et L169.
@@ -219,7 +224,7 @@ Chiffrage et contraintes  █████████████████░
 Spécification technique   ████████████████████░░   92 %   chemins tiré et poussé posés, persistance tranchée ; reste IGpuBackend
 Cohérence interne         █████████████████░░░░░   80 %   26 ADR + 6 SPEC confrontés, 45 écarts résolus ; **les 6 ADR de S35 n'ont pas été confrontés au corpus**
 Décisions expérimentales  █████░░░░░░░░░░░░░░░░░   24 %   onze bancs définis, aucun exécuté ; **une moitié de `λ_cut` est mesurée** ; B3 a deux critères d'entrée
-Outillage et pipeline     ████████████████████░░   90 %   **H1, H3, deux δ et un milieu dispersif**, **102 tests exécutés, 2 ignorés** ; C01/C03 passent, C04 échoue à l'ordre un et **passe à l'ordre deux** ; H2, H4-H6 non écrits
+Outillage et pipeline     ████████████████████░░   90 %   **H1, H3, deux δ et un milieu dispersif**, **104 tests exécutés, 2 ignorés** ; C01/C03 passent, C04 échoue à l'ordre un et **passe à l'ordre deux** ; H2, H4-H6 non écrits
 Accords inter-équipes     █████░░░░░░░░░░░░░░░░░   25 %   cinq arbitrages tranchés ; quatorze demandes extérieures en attente
 ```
 

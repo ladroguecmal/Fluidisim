@@ -549,3 +549,12 @@ validation ; son contrôle de cohérence reste actif. Chiffres et références c
 | # | Action | Origine | Porteur | État |
 |---|---|---|---|---|
 | S47-1 | Construire le montage C22 régulier sur shallow avec au moins cinq grilles ; mesurer ordre, stabilité et coût, garder les refus et ne pas préjuger du verdict | C08 amendé S26, ADR-032, requalification S47 | session S48 recommandée | ouverte |
+
+## Actions relevées en séance — S48
+
+**S47-1 close.** Montage C22 régulier shallow construit, cinq grilles, deux oracles, trois
+campagnes et coût mesuré. Verdict non concluant, documenté dans MESURES-C22-S48.
+
+| # | Action | Origine | Porteur | État |
+|---|---|---|---|---|
+| S48-1 | Déplacer la fenêtre C22 shallow vers des grilles plus fines, garder cinq grilles non contaminées et mesurer stabilité/coût ; prévoir une réutilisation explicite des oracles pour éviter de les recalculer à chaque fenêtre | MESURES-C22-S48 : oracle affiné sans stabilisation de la famille 100–1600 | session S49 recommandée | ouverte |

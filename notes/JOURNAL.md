@@ -4583,3 +4583,39 @@ ouverts ; ce travail ne remplace pas le banc B3 ni un solveur de production.
 
 **Arbitrages inchangés.** A103 (masse volumique), constat d'état réel et infrastructure ; aucun
 nouveau distant. A107 historiquement réconcilié, anciennes copies conservées et contrôlées.
+
+## S48 — 2026-09-07 — Affiner la référence ne stabilise pas les grilles mesurées
+
+**Agent : Codex**, git et cargo disponibles. Master 5795f05 propre à la reprise, anciennes
+copies contrôlées. Action S47-1. P3 achevée après la relance « reprends » de l'utilisateur.
+
+**Sorties.** Nouveau mode c22-shallow [nx_oracle], montage gaussien C22 à cinq grilles,
+HLL/MUSCL/RK2, deux oracles et projection conservative. MESURES-C22-S48 documente conditions,
+chiffres, coûts et limites. S47-1 close. Aucun solveur existant modifié.
+
+**Mesures.** Oracles 6400/12800 : quatre grilles retenues, stabilité inconnue, 5,416 s.
+12800/25600 : cinq retenues, p = 1,637633 / 1,631728 / 1,849853, non asymptotique, 22,159 s.
+25600/51200 : cinq retenues, p = 1,637646 / 1,631733 / 1,849841, même verdict, 102,612 s.
+La dernière durée inclut une charge concurrente de tests : coût local, pas benchmark contrôlé.
+L'écart entre oracles tombe à 1,717298105e-9 ; les ordres bougent de moins de 0,000013.
+
+**Portée.** Affiner l'oracle seul ne résout pas la non-stabilisation de la famille 100–1600.
+L'écart des deux oracles sert au filtre empirique ×30 de C22 ; il ne borne pas leur erreur
+commune. Le résultat n'est ni une validation C08 ni un échec physique du solveur. La campagne
+coûte assez pour rester dans un mode dédié, en dehors du rapport physics courant.
+
+**Validation.** 104 tests réussis (38 cœur + 66 harnais), deux ignorés. Projection conservative,
+champ sans excitation exactement constant, largeur gaussienne, refus de tailles/non-finis/norme
+nulle. Les champs doivent atteindre le temps final et ne pas saturer. check : zéro échec,
+hashs 0x3e2c06a7b00e73e3 et 0x1a8b0629a9f51b6e. Taille d'oracle invalide : sortie 1.
+Les anciennes mesures sont protégées par leurs tests ; physics complet non relancé cette session.
+
+**Enseignements / angles morts.** Aucun nouvel angle mort enregistré : coût d'oracle A114/A116
+et dépendance au montage A153 déjà connus. La largeur de configure_bosse désigne exp(-d²),
+celle de C22 exp(-d²/2) : conversion sqrt(2) testée, pas changement de cas. L170 ci-dessous.
+Invariants inchangés, aucun ADR réécrit ni nouvelle décision d'architecture.
+
+**Suite recommandée : S49.** Déplacer la fenêtre de grilles vers les plus fines, conserver au
+moins cinq grilles non contaminées, réutiliser explicitement les oracles si possible, mesurer
+stabilité et coût (S48-1). Ne pas assouplir le critère pour conclure. S44-1, S43-2, S42-3 restent
+ouverts. A103, constat d'état réel et infrastructure inchangés ; aucun distant créé.
