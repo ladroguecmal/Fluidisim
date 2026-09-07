@@ -59,27 +59,21 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S50
-État             : terminée
+Session          : S51
+État             : en cours
 Agent            : Codex (git et cargo disponibles)
-Objectif         : Préserver le refus de front absent dans C04 shallow (S44-1).
+Objectif         : Inventorier les mesures dupliquées et leurs appelants (S42-3).
 ```
 
 ### Plan
 
 - [x] **P1** — reprise, copies, jeton et plan seul.
-- [x] **P2** — tracer les usages, conserver Option jusqu'aux sorties, refuser le profil absent ; tests absence/témoin et assertion.
-- [x] **P3** — tests complets, comparaison nominale avant/après, documentation du suivi des refus.
-- [x] **P4** — rituel : journal, enseignements, actions, index, décomptes et passation ; jeton libre.
+- [ ] **P2** — inventorier les estimateurs, rechercher leurs formules et tracer assertions/diagnostics/tests ; distinguer mesures distinctes et copies.
+- [ ] **P3** — traiter les duplications avérées dans le périmètre, vérifier les résultats et documenter les limites et suites.
+- [ ] **P4** — rituel : journal, enseignements, actions, index et décomptes, passation et jeton libre.
 
 ### Notes de reprise
 
-Master 7a33d95 propre, anciennes copies propres. Socle déjà lu dans cette conversation,
-REPRISE et dernière entrée du journal relues. Le détecteur du cœur renvoie déjà Option ;
-le défaut est dans ses appelants. Aucun seuil ou solveur à modifier.
-
-P2 : cinq sites de repli corrigés (quatre positions, un indice), détecteur du cœur déjà Option. Deux tests nouveaux ; sept tests ciblés passent, dont C04 nominal. Compilation release réussie.
-
-P3 : 107 tests réussis, deux ignorés. Rapport physics inchangé sauf quatre lignes de durées ; sortie 1 attendue. check vert, hashs inchangés. AUDIT-REPLIS-S44 §10 documenté.
-
-P4 : journal et audit actualisés, S44-1 close ; aucune nouvelle leçon ou angle (175). Index et passation S51 mis à jour, jeton libre. Décomptes inchangés : 47 ADR, 17 invariants, 6 SPEC, 14 registres, 23 cas.
+Master 8fc8a65 propre, copies anciennes propres. REPRISE entière et dernière entrée du
+journal relues, socle connu dans cette conversation. Ne pas fusionner les deux solveurs
+ou leurs montages indépendants (ADR-043). Audit des mesures, pas réduction des lignes.

@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-07 16:07 +02:00
+JETON            : occupé
+Battement        : 2026-09-07 16:09 +02:00
 Agent            : Codex (git et cargo disponibles)
-Session en cours : —
+Session en cours : S51
 Dernière session : S50 — 2026-09-07 — refus des fronts absents conservé
 Session suivante : S51 — inventorier les mesures dupliquées (S42-3)
 ```
