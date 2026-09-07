@@ -5464,3 +5464,41 @@ défaut* — c'est ce qui s'est produit pendant vingt-deux sessions.
 recommandation du bilan est **B1** avant toute nouvelle session de raffinement, et **S63-1** pour
 débloquer B2. A103 close en S58 ; l'état réel et l'infrastructure restent hors de portée.
 
+## S70 — 2026-09-08 — La construction est décidée, et elle commence par W
+
+**Agent : Claude Code (Opus 5)**. Départ 1afbb3a. Entrée : **arbitrage de l'utilisateur**, rendu
+le jour même en réponse au point 4 de `BILAN-S69` §6 — *« Je ne savais pas, donc on passe à la
+construction. »*
+
+**Sortie.** [`ADR-053`](../docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **ACTÉE** —
+le deuxième ADR acté du dépôt après ADR-020. Aucun code écrit dans cette session : elle
+enregistre une décision.
+
+**Ce qui est tranché.** Le projet construit le système. La réserve que chaque module de `code/`
+porte depuis S20 — *ceci n'est pas le système* — tombe pour les couches du projet : ce qui sera
+écrit désormais est jugé par les cas canoniques, pas par sa ressemblance à un véhicule d'essai.
+
+**Par quelle couche, et pourquoi ce n'était pas un choix ouvert.** `W` est désignée par **quatre
+besoins sans rapport entre eux** : elle est la couche dispersive que **S63-1** cherche depuis S22
+— donc elle débloque C02, `λ_cut` et **B2** ; elle débloque **C07** et **C19** ; elle est
+**analytique**, des paquets dérivés d'événements horodatés, quand `δ` est un solveur 3D et la
+pièce la plus lourde du projet ; et son format réseau **`WaveEvent`** est *la seule urgence de
+format du corpus*, qu'écrire `W` force à trancher. C'est le seul point du graphe où quatre besoins
+indépendants tombent sur la même pièce.
+
+**Et B1 passe devant, pour une raison de dépendance.** `W` se superpose à `B`, dont le nombre de
+composantes conditionne le coût d'évaluation que `W` paiera à chaque point — question devenue de
+**justesse** et non de coût depuis **A187**. B1 reste le seul banc exécutable sans écrire une
+ligne de couche, et il n'a jamais été lancé.
+
+**Ce que la décision ne dit pas.** Aucune technologie pour `W` : paquets lagrangiens, champ 2D
+GPU, ou les deux — ADR-001 §2 laisse les deux ouverts et **B2 est le banc qui tranche**. Écrire
+`W` commence donc par ce que B2 exige de comparable, pas par un choix d'implémentation. Et aucun
+calendrier : l'état réel du projet reste hors de portée d'une session.
+
+**Validation.** Aucun code modifié, aucun calcul. 137 tests, cinq ignorés, inchangés depuis S68.
+
+**Suite S71 : B1**, le banc du champ de fond — nombre de composantes et coût d'évaluation. Puis
+arrêter `WaveEvent`, puis écrire `W`. A103 close en S58 ; l'état réel et l'infrastructure restent
+hors de portée, aucun distant créé.
+

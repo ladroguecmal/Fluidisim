@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S70
-État             : en cours
+État             : terminée
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
 Objectif         : Enregistrer l'arbitrage de l'utilisateur — le projet passe à la construction —
                    et en tirer l'ordre de construction.
@@ -69,8 +69,8 @@ Objectif         : Enregistrer l'arbitrage de l'utilisateur — le projet passe 
 ### Plan
 
 - [x] **P1** — passation, jeton, plan seul.
-- [ ] **P2** — ADR-053 : la décision, ce qu'elle ne change pas, et par quelle couche on commence.
-- [ ] **P3** — rituel : journal, index, actions, jeton, **fusion dans master**.
+- [x] **P2** — ADR-053 : la décision, ce qu'elle ne change pas, et par quelle couche on commence.
+- [x] **P3** — rituel : journal, index, actions, jeton, **fusion dans master**.
 
 ### Notes de reprise
 
@@ -93,3 +93,7 @@ indépendants la désignent —
    force à la trancher.
 
 `δ` reste la pièce la plus lourde et ne commence pas ici. `B` existe déjà.
+
+P2/P3 : ADR-053 ACTEE — deuxieme ADR acte du depot apres ADR-020. Trajectoire B1, WaveEvent, W.
+S63-1 absorbee : la couche dispersive cherchee depuis S22 est W. Actions S70-1, S70-2, S70-3.
+Journal, index et jeton a jour. Aucun code ecrit : la session enregistre une decision.

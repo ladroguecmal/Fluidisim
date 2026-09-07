@@ -18,12 +18,18 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 12:45 +02:00
+JETON            : libre
+Battement        : 2026-09-08 13:05 +02:00
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Session en cours : S70 — enregistrer l'arbitrage : le projet passe à la construction
-Dernière session : S69 — 2026-09-08 — bilan d'avancement (BILAN-S69)
-Session suivante : selon ADR-053
+Session en cours : aucune
+Dernière session : S70 — 2026-09-08 — ADR-053 actée : le projet passe à la construction
+Session suivante : S71 — **B1**, le banc du champ de fond (S70-1)
+
+**Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
+[`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
+**B1 → arrêter `WaveEvent` → écrire `W`** → C02, `λ_cut`, **B2**. `W` est la couche dispersive
+que S63-1 cherchait depuis S22 ; quatre besoins indépendants la désignent. `δ`, solveur 3D, reste
+la pièce la plus lourde et ne commence pas ici.
 
 **Bilan S69, et il change l'ordre des priorités.** ~85 % comme corpus de conception, **~15 %
 comme système** : `δ`, `W` et `V` n'existent pas. **Onze cas sur 23 et onze bancs sur onze

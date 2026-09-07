@@ -793,3 +793,23 @@ S66-1 est la suite S68 recommandée. Aucun nouvel engagement différé ; S63-1 t
 
 S66-1 close par ADR-052 : statistique diagnostique, précision directement contrôlée.
 S64-2 est la suite S69 recommandée ; aucune calibration de Hs effectuée ici. S63-1 ouverte.
+
+## Actions relevées en séance — S70
+
+**Le projet passe à la construction**, sur arbitrage de l'utilisateur du 2026-09-08 —
+[`ADR-053`](../adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. C'était le point 4 de
+`BILAN-S69` §6, remonté comme hors de portée d'une session.
+
+**S63-1 n'est pas close, elle est absorbée** : la couche dispersive cherchée depuis S22 **est**
+`W`, et son écriture est désormais la trajectoire du projet et non une action isolée.
+
+| # | Action | Origine | Porteur | État |
+|---|---|---|---|---|
+| S70-1 | **Lancer B1** — nombre de composantes de `B` et coût d'évaluation. Seul banc exécutable sans écrire de couche, jamais lancé, et devenu une question de **justesse** depuis **A187**. Il conditionne le coût que `W` paiera à chaque point | ADR-053 D4, `PLAN-BENCHMARK` §B1 | session S71 | ouverte |
+| S70-2 | **Arrêter `WaveEvent`** (SPEC-006 §3.1) — structure répliquée, seule urgence de format du corpus, à figer avant le protocole réseau. Prérequis d'écriture de `W` | ADR-053 D2, SPEC-006 §3.1 | session, par ADR | ouverte |
+| S70-3 | **Écrire `W`**, en commençant par ce que **B2** exige de comparable — la technologie n'est pas choisie, et c'est B2 qui tranche entre paquets lagrangiens et champ 2D | ADR-053 D2, ADR-001 §2 | plusieurs sessions | ouverte |
+
+> **Ordre : S70-1, S70-2, S70-3.** Les deux premières sont courtes et conditionnent la troisième.
+> Les actions de harnais encore ouvertes ne disparaissent pas — elles cessent d'être prioritaires
+> (ADR-053 D4).
+
