@@ -103,9 +103,9 @@ l'autre non — encore une divergence que l'oracle croisé n'a pas cherchée par
       refuser *et* le cas qu'il ne doit pas refuser (**L119**).
 - [x] **P4** — vérifier que le refus ne change **aucun** chiffre publié : les quatre demi-vies du
       tableau d'`ADR-040` §5 doivent se reproduire à l'identique.
-- [ ] **P5** — **C06 et C08** : ont-ils un essai à zéro possible, et lequel ? Écrire au moins le
+- [x] **P5** — **C06 et C08** : ont-ils un essai à zéro possible, et lequel ? Écrire au moins le
       plus court des deux.
-- [ ] **P6** — répercussions : `CAS-CANONIQUES` — l'essai à zéro devient une condition de mesure ;
+- [x] **P6** — répercussions : `CAS-CANONIQUES` — l'essai à zéro devient une condition de mesure ;
       **A167** relu ; ce que l'inventaire des témoins doit devenir.
 - [ ] **P7** — rituel de fin (`REPRISE.md` §6).
 

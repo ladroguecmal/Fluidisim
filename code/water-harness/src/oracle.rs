@@ -923,6 +923,38 @@ mod tests {
         );
     }
 
+    /// **P5 — l'essai à zéro de C06** (**A167**).
+    ///
+    /// C06 mesure l'invariance galiléenne : une bosse advectée à `u₀` doit être, au décalage près,
+    /// la même que la bosse au repos. Son essai à zéro s'écrit en changeant **un** paramètre :
+    /// `u₀ = 0`. Les deux simulations sont alors **le même calcul**, et l'écart doit être
+    /// exactement nul — pas petit, **nul**.
+    ///
+    /// C'est le meilleur genre d'essai à zéro : il n'exerce pas une tolérance, il exerce
+    /// l'**identité**. Un écart non nul y dirait que le montage compare deux choses qui diffèrent
+    /// avant même qu'on ait bougé.
+    #[test]
+    fn c06_essai_a_zero_sans_boost_l_ecart_est_nul() {
+        use crate::physics_shallow::c06_galilee;
+        let cas = c06_galilee(2000, 0.05, 2.0, 0.1, 0.0, 1.0);
+        for c in &cas {
+            println!(
+                "C06 essai à zéro — {:<10} mesuré {:>14.6e}  {}",
+                c.id,
+                c.mesure,
+                if c.passe() { "passe" } else { "ÉCHOUE" }
+            );
+        }
+        for c in &cas {
+            assert_eq!(
+                c.mesure, 0.0,
+                "{} : sans boost, les deux simulations sont le même calcul — l'écart doit être \
+exactement nul, pas {:.3e}",
+                c.id, c.mesure
+            );
+        }
+    }
+
     /// **A157 — un seuil reproductible peut être dénué de sens, et deux seuils incomparables
     /// peuvent être mis côte à côte.**
     ///

@@ -234,6 +234,14 @@ dimensionnement.
 
 **Conditions de mesure** *(B-S23)*.
 
+> **Essai à zéro** *(S42, **A167**)* : le même montage **sans excitation** (`η_bord = 0`). Les
+> trois assertions doivent échouer — il n'y a pas de seiche, donc rien à mesurer.
+>
+> **Il ne l'a pas toujours fait.** Avant S42, `C03-demi-vie` rendait `10⁶` périodes sur un bassin
+> vide et **passait**, avec le meilleur score possible : la régression sans point rend `NaN`, dont
+> `min(10⁶)` rend `10⁶`. Les deux autres assertions échouaient, donc le cas était rouge — mais
+> **l'assertion qui porte le résultat publié déclarait le néant excellent**.
+
 - **≥ 250 mailles par longueur d'onde du fondamental** (`λ = 2L = 40 m`). Sans cette ligne,
   l'assertion de demi-vie mesure la maille et non le schéma : le solveur de B-S22 donne **6,0
   périodes à 100 mailles/λ** — échec — et **43,1 à 800** — succès confortable. Même code, même
@@ -393,6 +401,11 @@ translation uniforme à 10 m/s, une fois dans un repère en rotation.
 **Assertion.** écart RMS de hauteur < 2 % ; forces intégrées sur le solide < 2 %.
 
 **Conditions de mesure** *(B-S23)*.
+
+> **Essai à zéro** *(S42, **A167**)* : le même montage **sans boost** (`u₀ = 0`). Les deux
+> simulations comparées sont alors **le même calcul**, et l'écart doit être **exactement nul** —
+> pas petit. C'est le meilleur genre d'essai à zéro : il exerce une **identité**, pas une
+> tolérance. **Vérifié : `0,0` sur les deux assertions.**
 
 - **L'écart RMS est rapporté à l'amplitude de la perturbation**, non à la profondeur. Le document
   disait « < 2 % » sans dire de quoi : entre les deux normalisations, il y a un **facteur 20**.
