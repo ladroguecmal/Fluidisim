@@ -73,3 +73,6 @@ demi-vies, longueurs de décroissance, R² et verdicts imprimés restent inchang
 attendue pour C04 ordre un. check : zéro échec, hashs 0x3e2c06a7b00e73e3 et
 0x1a8b0629a9f51b6e inchangés. Les durées ont été mesurées sous charge concurrente de tests,
 ce ne sont pas des benchmarks. Aucun nouvel essai de production ou de validation 3D.
+
+**Suite exécutée S53 :** [GRILLES-C22-S53](GRILLES-C22-S53.md). Les défauts d'admission
+et de conservation des grilles sont reproduits et corrigés ; S52-1 close.

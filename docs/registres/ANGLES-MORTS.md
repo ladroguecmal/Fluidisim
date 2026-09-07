@@ -1355,3 +1355,10 @@ pendant quatre sessions.
   Les deux chemins partagent désormais le calcul de Richardson, en conservant leurs
   planchers et catégories. Aucun succès nominal indu démontré, mais le filtre pouvait
   recevoir NaN au lieu de sa valeur de secours. Voir AUDIT-MESURES-S51 et L172.
+
+- **A177** *(sévérité 1, corrigé S53)* — **Un contrôle de convergence peut valider les nombres
+  sans vérifier leurs grilles.** Une suite aux erreurs divisées par deux et aux tailles
+  100,200,800,1600,3200 donnait une stabilité vraie : le calcul ignorait les tailles.
+  Le montage C22 supprimait aussi une allocation refusée avant le contrôle. Doublements
+  désormais vérifiés, refus conservés et filtre limité au préfixe ; grille nulle refusée
+  avant modulo. Reproductions et témoins dans GRILLES-C22-S53. Rapport nominal inchangé.

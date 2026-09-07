@@ -2789,3 +2789,13 @@ non-finis : corriger un rapport ne corrigeait pas le filtre utilisant la seconde
 **Réflexe :** isoler le calcul commun et laisser les choix de seuil, de fenêtre et de statut
 aux appelants. Vérifier leurs usages réels ; une ressemblance de formule ne justifie pas
 de fusionner des mesures portant sur des supports ou des unités différents.
+
+## L173 — Les coordonnées d'une mesure font partie de ses conditions de validité
+
+*(S53)* Une suite de valeurs avait la forme d'une convergence parfaite, mais les grilles
+associées ne suivaient pas le raffinement supposé par la formule. Le validateur les utilisait
+comme étiquettes et déclarait la suite stable. Un retrait en amont pouvait produire le même trou.
+
+**Réflexe :** vérifier le support de la mesure avec ses valeurs : tailles, espacements ou
+instants selon la formule. Préserver les absences jusqu'au contrôle ; après suppression,
+la régularité apparente des valeurs ne permet pas de reconstruire le support perdu.

@@ -4750,3 +4750,34 @@ L172 dernière leçon. Invariants inchangés, aucun ADR réécrit.
 **Suite S53 : S52-1**, vérifier les tailles et conserver les grilles refusées avant le calcul
 d'ordre C22 delta. S43-2 et S49-1 restent ouvertes. A103, état réel et infrastructure inchangés ;
 aucun distant créé. A107 historiquement réconcilié, anciennes copies conservées.
+
+## S53 — 2026-09-07 — Une famille de valeurs n'est pas une famille de grilles
+
+**Agent : Codex**, git et cargo disponibles. Master 348f5f5 propre, copies anciennes
+contrôlées. S52-1 exécutée. Socle connu dans cette conversation, état et journal S52 relus.
+
+**Défauts reproduits.** Une grille nulle provoque un modulo zéro. Une allocation refusée
+transforme 4,8,16,32,64 en 4,16,32 après filtre. Une suite artificielle aux erreurs divisées
+par deux mais aux tailles 100,200,800,1600,3200 est déclarée stable. Ce dernier test isole
+le défaut du validateur ; il ne représente pas une nouvelle mesure physique.
+
+**Sorties.** Admission des tailles avant allocation/modulo ; doublements vérifiés dans
+Convergence::ordre et ordre_grossier_estime. Grilles refusées conservées avec NaN, filtre
+suspendu sur famille incomplète. Filtration des familles exploitables limitée au préfixe.
+GRILLES-C22-S53, correctif de portée AUDIT-REPLIS-S44 §12, A177 et L173.
+Aucun seuil ni solveur modifié ; projections delta/shallow encore séparées.
+
+**Validation.** Quatre tests ciblés : trois reproductions, témoins réguliers, tailles
+répétées/décroissantes/débordantes, oracle indisponible, préfixe avec trou. 115 tests réussis
+(38 cœur + 77 harnais), deux ignorés. Rapport physics identique à S52 sauf trois durées,
+sortie 1 attendue pour C04 ordre un. check : zéro échec, hashs 0x3e2c06a7b00e73e3 et
+0x1a8b0629a9f51b6e inchangés. Campagne coûteuse shallow non répétée.
+
+**Portée.** Le contrat de Richardson suppose un doublement ; les tailles ne peuvent pas
+rester de simples étiquettes. S46 protégeait les trous déjà représentés, pas les grilles
+retirées en amont. Aucun changement d'invariant ou d'ADR ; pas de validation 3D.
+
+**Suite S54 : S43-2**, confronter les garde-fous existants à une entrée vide de l'objet
+mesuré, avec refus et témoin. S49-1 reste ouverte pour le raffinement C22 plus coûteux.
+A103, état réel et infrastructure inchangés ; aucun distant créé. A107 historiquement
+réconcilié, anciennes copies conservées.

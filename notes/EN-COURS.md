@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S53
-État             : en cours
+État             : terminée
 Agent            : Codex (git et cargo disponibles)
 Objectif         : Contrôler les grilles et préserver les refus C22 delta (S52-1).
 ```
@@ -70,7 +70,7 @@ Objectif         : Contrôler les grilles et préserver les refus C22 delta (S52
 - [x] **P1** — reprise, copies, jeton et plan seul.
 - [x] **P2** — reproduire familles irrégulières, grille nulle et allocation refusée ; corriger admission et calcul d'ordre, préserver les trous.
 - [x] **P3** — tester filtre de contamination, refus et témoins ; vérifier les résultats nominaux et documenter la portée.
-- [ ] **P4** — rituel : journal, enseignements, actions, index/décomptes, passation et jeton libre.
+- [x] **P4** — rituel : journal, enseignements, actions, index/décomptes, passation et jeton libre.
 
 ### Notes de reprise
 
@@ -81,3 +81,5 @@ tailles avant modulo/allocation ; la référence exige des grilles doublant succ
 P2 : trois défauts reproduits puis corrigés : modulo zéro, grille non allouée supprimée, stabilité Some(true) sur tailles irrégulières. Admission avant allocation, doublement contrôlé, refus conservés ; trois tests ciblés passent. Filtre désormais limité au préfixe.
 
 P3 : quatre tests ciblés, 115 tests complets réussis et deux ignorés. Trois lignes de durées seules diffèrent du rapport S52 ; physics sortie 1 attendue, check et hashs inchangés. GRILLES-C22-S53 et complément audit §12 écrits.
+
+P4 : journal, A177 et L173 enregistrés ; S52-1 close, suite S54 S43-2. Index et passation actualisés, jeton libre. Décomptes : 47 ADR, 17 invariants, 6 SPEC, 14 registres, 23 cas, 177 angles.

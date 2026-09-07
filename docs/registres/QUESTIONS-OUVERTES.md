@@ -592,4 +592,10 @@ comparées et conservées séparées avec motifs dans MESURES-PARTAGEES-S52.
 
 | # | Action | Origine | Porteur | État |
 |---|---|---|---|---|
-| S52-1 | Tester la famille C22 delta avec une grille absente, non emboîtée ou nulle ; contrôler les tailles utilisées par Richardson et préserver les refus en amont avant un éventuel partage de projection | MESURES-PARTAGEES-S52 : continue/retain avant Convergence, qui suppose un doublement | session S53 recommandée | ouverte |
+| S52-1 | Tester la famille C22 delta avec une grille absente, non emboîtée ou nulle ; contrôler les tailles utilisées par Richardson et préserver les refus en amont avant un éventuel partage de projection | MESURES-PARTAGEES-S52 : continue/retain avant Convergence, qui suppose un doublement | session S53 recommandée | close en S53 |
+
+## Actions relevées en séance — S53
+
+**S52-1 close.** Tailles et emboîtements vérifiés avant calcul ; grille nulle, allocation
+refusée et famille irrégulière reproduites puis corrigées. Voir GRILLES-C22-S53.
+Pas de nouvelle action différée : suite recommandée S54 sur S43-2, toujours ouverte.
