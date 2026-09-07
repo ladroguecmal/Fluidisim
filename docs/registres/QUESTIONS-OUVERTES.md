@@ -725,7 +725,7 @@ cette fenêtre était un littéral hors du scénario (**A184**). Voir
 
 | # | Action | Origine | Porteur | État |
 |---|---|---|---|---|
-| S62-1 | **Trancher la fenêtre d'échantillonnage de `Hs`** : la nominale rend 8,53 % d'écart pour une tolérance de 10 %, et 54,7 λ la rendraient juste à 0,28 % — mais pour 64 fois le coût, et à 12288 m la variance en une passe rend `NaN`. Corriger d'abord la sommation (Welford), puis décider la fenêtre **par ADR** : cela déplace un chiffre publié | **A102** mesuré, **A184**, AUDIT-REFERENCES-S62 §3 | session, par ADR | ouverte |
+| S62-1 *(close en S64)* | **Trancher la fenêtre d'échantillonnage de `Hs`** : la nominale rend 8,53 % d'écart pour une tolérance de 10 %, et 54,7 λ la rendraient juste à 0,28 % — mais pour 64 fois le coût, et à 12288 m la variance en une passe rend `NaN`. Corriger d'abord la sommation (Welford), puis décider la fenêtre **par ADR** : cela déplace un chiffre publié | **A102** mesuré, **A184**, AUDIT-REFERENCES-S62 §3 | session, par ADR | **close en S64 — ADR-051** |
 
 > **S62-1 après S59-1.** S59-1 est un recensement, il ne se périme pas mais il est bon marché ;
 > S62-1 demande une correction numérique puis un arbitrage sur un chiffre publié, et rien ne
@@ -746,4 +746,20 @@ la péremption silencieuse (**A185**). Voir [`PRESCRIPTIONS-S63`](PRESCRIPTIONS-
 > l'air** : la dépendance a été constatée en S22 (ADR-030 §5), le dossier B2 la portait sous la
 > mention « non exécuté », et personne ne l'a jamais planifiée. Elle ne se traite pas dans une
 > session de mesure.
+
+## Actions relevées en séance — S64
+
+**S62-1 close par [`ADR-051`](../adr/ADR-051-la-fenetre-de-Hs-passe-a-3072-m-et-le-cas-y-perd-du-pouvoir.md).**
+Fenêtre portée à 3072 m ; chiffre publié 8,528 % → 0,282 %, et le cas qui échouait à `tp = 9 s`
+passe désormais. **Les deux motifs que l'action avançait pour différer étaient faux** : le `NaN`
+venait de la portée de l'ancre et non de la sommation, et le coût est de +6 % et non ×64.
+
+| # | Action | Origine | Porteur | État |
+|---|---|---|---|---|
+| S64-1 | **Brancher `scenario.graine` sur les phases des composantes.** Le déterminisme est conservé — même graine, même mer — et les mesures statistiques deviennent répétables sur des réalisations indépendantes. Sans cela, aucune tolérance du corpus ne peut recevoir de provenance statistique | **A186** | session | ouverte |
+| S64-2 | **Resserrer la tolérance de `Hs`**, aujourd'hui à 10 % pour un écart de 0,28 %. Bloquée par S64-1 *et* par A187 : les deux doivent être levées d'abord | **A106**, ADR-051 D2 | session, par ADR | ouverte, bloquée |
+| S64-3 | **Élucider l'écart de 6,6 % à 256 composantes**, qui n'est ni la fenêtre ni le pas. Piste non vérifiée : la corrélation entre composantes, toutes dans un cône de 30 degrés | **A187** | session | ouverte |
+
+> **Ordre : S64-1, puis S64-3, puis S64-2.** Les deux premières sont indépendantes et débloquent
+> la troisième ; S64-1 est aussi la moins chère et sert au-delà de `Hs`.
 

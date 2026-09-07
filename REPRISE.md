@@ -18,12 +18,17 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 10:05 +02:00
+JETON            : libre
+Battement        : 2026-09-08 11:20 +02:00
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Session en cours : S64 — S62-1, la fenêtre d'échantillonnage de Hs
-Dernière session : S63 — 2026-09-08 — les préalables de B2 étaient périmés ; A185, L181
-Session suivante : selon le résultat de S64
+Session en cours : aucune
+Dernière session : S64 — 2026-09-08 — fenêtre de Hs à 3072 m ; A186, A187, L182
+Session suivante : S65 — S64-1, brancher la graine sur les phases
+
+À signaler à l'humain, et c'est en plus de S63-1 : **aucune mesure statistique du corpus n'a de
+barre d'erreur**, parce qu'il n'existe qu'une réalisation par état de mer (**A186**). Ce n'est pas
+un défaut de mesure mais une pièce manquante du générateur, et elle bloque toute calibration de
+tolérance.
 
 À signaler à l'humain : **le seul blocage réel du banc B2 est une couche dispersive**, constatée
 nécessaire en S22 et jamais planifiée depuis. C'est l'action **S63-1**, et elle est plus lourde
@@ -152,6 +157,22 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S64 :** **une action, deux motifs techniques, tous deux faux.** S62-1 différait l'élargissement
+de la fenêtre de `Hs` en avançant qu'il fallait d'abord corriger la sommation, et que le coût
+serait multiplié par 64. Le `NaN` invoqué venait en réalité de `to_local`, qui refuse tout point à
+plus de **4096 m de l'ancre** — mesuré à six mètres près — et le coût vaut **+6 %** sur le mode
+complet, où cette mesure ne pèse rien. *Une raison de s'abstenir reçoit moins d'examen qu'une
+affirmation positive, parce que rien ne vient la démentir* (**L182**).
+La fenêtre passe donc à **3072 m** ([`ADR-051`](docs/adr/ADR-051-la-fenetre-de-Hs-passe-a-3072-m-et-le-cas-y-perd-du-pouvoir.md)) :
+le chiffre publié va de **8,528 % à 0,282 %**, et **le cas qui échouait à `tp = 9 s` passe**.
+**Mais la tolérance reste à 10 %, et le cas y perd du pouvoir de détection** — la marge réelle
+passe de 1,5 point à 9,7, ce qui est écrit plutôt que découvert plus tard. Deux faits mesurés
+l'interdisent de resserrer : **A187**, un écart de 6,6 % à 256 composantes qui n'est ni la fenêtre
+ni le pas et dont la cause est inconnue ; et **A186**, plus lourd — **il n'existe qu'une
+réalisation par état de mer**, le déphasage étant dérivé de l'indice et le paramètre `graine` du
+scénario, obligatoire, n'étant utilisé nulle part. Aucune mesure statistique du corpus n'a donc de
+barre d'erreur. 131 tests réussis, deux ignorés ; hashs inchangés. Suite S65 : **S64-1**.
 
 **S63 :** **le banc décisif était lisible comme hors d'atteinte.** Le recensement des
 prescriptions sépare d'abord trois genres — une *condition de réversibilité* n'est pas une recette,
@@ -306,10 +327,10 @@ le cas régulier p = 0,82 dont la stabilité n'est pas établie. Mesures et hash
 S45-1 close ; S47 recommandée : portée de la paire héritée C08-p/C08-coherence (S46-1).
 
 Quarante-huit sessions ici, **plus cinq dans une lignée parallèle réconciliée en S35** (B-S22 à
-B-S27) — **50 ADR** *(dont un acté)*, six spécifications, **seize registres** — **et du code qui
+B-S27) — **51 ADR** *(dont un acté)*, six spécifications, **seize registres** — **et du code qui
 tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équilibrés et **tous deux
 montés sur leurs cas, confrontés l'un à l'autre et instrumentés, **plus un milieu à dispersion
-exacte** *(S39)*, **130 tests verts, deux ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **trois sans
+exacte** *(S39)*, **131 tests verts, deux ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **trois sans
 verdict** (C08), **un succès depuis S59** : la fenêtre C22 800–12800 conclut à `p = 1,96`
 stabilisé, contre un oracle du même schéma. Quatre cas canoniques sur δ sont exécutés ici :
 **C01 et C03 passent**, C04 échoue, C08 ne conclut pas. **Le second véhicule passe C04 sur un montage dont le schéma et la mesure

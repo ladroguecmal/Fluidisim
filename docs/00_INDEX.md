@@ -90,6 +90,7 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 | [045](adr/ADR-045-la-saturation-est-un-detecteur-pas-un-filet.md) | **La saturation d'état est un détecteur de divergence, pas un filet** | proposée | **zéro déclenchement** en régime nominal · la frontière tombe sur la **condition de Courant** · un seuil de sec ne coupe pas le flux de masse (**A165**) · clôt S34-1 et S37-3, **requalifie A146** |
 | [048](adr/ADR-048-la-masse-volumique-est-une-propriete-du-milieu.md) | **La masse volumique est une propriété du milieu** | proposée | tranche **A103** sur délégation, ouvert depuis S21 · la valeur du projet est **1025** · la constante globale devient `Milieu` — l'estuaire est le cas qu'elle rendait inexprimable · **C10 est aveugle à `ρ` : quatre assertions vertes aux deux valeurs** · ouvre **A180** |
 | [050](adr/ADR-050-le-filtre-de-contamination-est-une-condition-geometrique.md) | **Le filtre de contamination est une condition géométrique** | proposée | `ratio = k^p/(1 − 2^-p)` — le filtre ×30 équivaut à **`k ≥ 6`**, lisible avant tout calcul · **dissout S60-1** : le régime visé demande `k ≈ 1`, l'emboîtement impose `k ≥ 2` · ouvre **A183** : le seuil d'admission d'une mesure d'ordre est fonction de l'ordre |
+| [051](adr/ADR-051-la-fenetre-de-Hs-passe-a-3072-m-et-le-cas-y-perd-du-pouvoir.md) | **La fenêtre de `Hs` passe à 3072 m, et le cas y perd du pouvoir** | proposée | clôt **S62-1**, dont **les deux motifs de report étaient faux** · 8,528 % → **0,282 %**, et le cas qui échouait à `tp = 9 s` passe · tolérance conservée, **marge réelle de 1,5 à 9,7 points** · ouvre **A186** et **A187** |
 | [049](adr/ADR-049-le-filtre-de-contamination-n-est-pas-mal-calibre-il-est-mal-attribue.md) | **Le filtre de contamination est mal attribué, pas mal calibré** | proposée | clôt **S57-2** **sans changer le critère** · l'invariance à l'oracle ne refuse pas une contamination flagrante — 5,1e-3 pour des erreurs fausses de 5,2 % · mais l'ordre de S59 était mesurable en S56 à **3,29e-5** près, 1987,7 s plus tôt · requalifie **A179**, ouvre **A182** |
 | [047](adr/ADR-047-le-seuil-de-sec-ne-decide-de-rien-de-publiable.md) | **Le seuil de sec ne décide de rien de publiable** | proposée | sept décades, deux véhicules : le front bouge de **0,148 %** pour une tolérance de 3 % · `max\|u\|` dépasse la borne physique — **ce n'est pas une grandeur** · les deux valeurs **ne sont pas alignées** · clôt S37-1, **requalifie A163** |
 | [046](adr/ADR-046-l-eponge-en-eau-dispersive-retracte-ADR-042.md) *(ex-035 de B, B-S27)* | **L'éponge en eau dispersive, et la rétractation d'ADR-042** | proposée | **rétracte ADR-042 D2 et D4**, confirme D1 et D3 · `R` = **22,7 %** à `L_s = λ/2` · la règle devient **`L_s ≥ 2λ_δ`** · la borne de `λ_cut` est **refermée et resserrée** · `c` est la vitesse de **groupe** |
@@ -144,7 +145,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`specs/SPEC-006`](specs/SPEC-006-chemin-pousse.md) | **le chemin poussé** — ce que le système *publie* : bus d'événements et `WaveEvent`, écume et aération, traversabilité, polyligne de déferlement |
 | [`registres/PRESCRIPTIONS-S63.md`](registres/PRESCRIPTIONS-S63.md) | **les prescriptions non éprouvées** — trois genres, dont un seul se vérifie ; **trois recettes mises à l'épreuve, trois fautives** ; les préalables de B2 périmés depuis quarante sessions (**A185**) |
 | [`registres/AUDIT-REFERENCES-S62.md`](registres/AUDIT-REFERENCES-S62.md) | **ce qu'une référence peut voir bouger** — 41 références, trois degrés, **une seule tautologie** ; `Hs` aveugle à `hs` et gouverné par sa fenêtre, première mesure d'**A102** ; la fenêtre était hors du scénario (**A184**) |
-| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **185 points**, avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
+| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **187 points**, avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
 | [`registres/FORK-S22-S26.md`](registres/FORK-S22-S26.md) | **le second fork** — constat, carte de renumérotation complète, la règle manquante, et ce qui reste à fusionner |
 | [`registres/AUDIT-ASSERTIONS-S29.md`](registres/AUDIT-ASSERTIONS-S29.md) | **ce que chaque assertion peut voir** — 23 cas classés, 5 fautifs, 1 mesure du harnais retirée ; **réécriture S30 sans aucun seuil inventé** |
 | [`registres/AUDIT-REPLIS-S44.md`](registres/AUDIT-REPLIS-S44.md) | **les valeurs de repli, inventoriées** — 49 recensées, deux fautives ; *quand la grandeur est un écart, zéro est son meilleur point* |
@@ -205,6 +206,15 @@ parfaitement stable ne pouvait pas distinguer.
 | [`../notes/JOURNAL.md`](../notes/JOURNAL.md) | historique des sessions, points de reprise |
 
 ## État d'avancement
+
+**S64 :** **S62-1 close, et ses deux motifs de report étaient faux.** Le `NaN` venait de la portée
+de l'ancre (±4096 m, mesuré à six mètres près) et non de la sommation ; le coût est de **+6 %** et
+non ×64. Fenêtre portée à **3072 m** (**ADR-051**) : chiffre publié 8,528 % → **0,282 %**, et le
+cas qui **échouait à `tp = 9 s`** passe désormais. Mais la tolérance reste à 10 % et **le cas y
+perd du pouvoir de détection** — dit explicitement. Deux faits l'interdisent : **A187** (6,6 % à
+256 composantes, cause inconnue) et **A186** (une seule réalisation par état de mer, la `graine`
+du scénario ne commande rien). 131 tests réussis, deux ignorés ; hashs inchangés. **L182**.
+Suite S65 : S64-1.
 
 **S63 :** **S59-1 close.** Trois genres de prescriptions séparés ; **peu de recettes** dans le
 corpus, mais **les trois mises à l'épreuve étaient fautives** — dont une **périmée en silence** :
@@ -323,7 +333,7 @@ Chiffrage et contraintes  █████████████████░
 Spécification technique   ████████████████████░░   92 %   chemins tiré et poussé posés, persistance tranchée ; reste IGpuBackend
 Cohérence interne         █████████████████░░░░░   80 %   26 ADR + 6 SPEC confrontés, 45 écarts résolus ; **les 6 ADR de S35 n'ont pas été confrontés au corpus**
 Décisions expérimentales  █████░░░░░░░░░░░░░░░░░   24 %   onze bancs définis, aucun exécuté ; **une moitié de `λ_cut` est mesurée** ; B3 a deux critères d'entrée
-Outillage et pipeline     ████████████████████░░   90 %   **H1, H3, deux δ et un milieu dispersif**, **130 tests exécutés, 2 ignorés** ; C01/C03 passent, C04 échoue à l'ordre un et **passe à l'ordre deux** ; H2, H4-H6 non écrits
+Outillage et pipeline     ████████████████████░░   90 %   **H1, H3, deux δ et un milieu dispersif**, **131 tests exécutés, 2 ignorés** ; C01/C03 passent, C04 échoue à l'ordre un et **passe à l'ordre deux** ; H2, H4-H6 non écrits
 Accords inter-équipes     █████░░░░░░░░░░░░░░░░░   25 %   cinq arbitrages tranchés ; quatorze demandes extérieures en attente
 ```
 

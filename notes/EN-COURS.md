@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S64
-État             : en cours
+État             : terminée
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
 Objectif         : S62-1 — corriger la sommation de variance, puis trancher par ADR la fenêtre
                    d'échantillonnage de Hs.
@@ -73,7 +73,7 @@ Objectif         : S62-1 — corriger la sommation de variance, puis trancher pa
 - [x] **P3** — corriger ce que le diagnostic désigne, avec témoin et essai de refus ; vérifier que les valeurs nominales ne bougent pas.
 - [x] **P4** — mesurer la loi complète, jusqu'aux fenêtres qui étaient hors d'atteinte.
 - [x] **P5** — ADR : trancher la fenêtre, ou dire pourquoi elle ne se tranche pas.
-- [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
+- [x] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
 
 ### Notes de reprise
 
@@ -135,3 +135,9 @@ pour cent, et le cas qui echouait a tp=9 passe desormais. D2 tolerance conservee
 plutot que decouvert plus tard. Resserrer est bloque par deux faits mesures, A187 (6,6 pour cent a
 256 composantes, cause inconnue) et A186 (une seule realisation par etat de mer). D3 hashs et
 autres mesures inchanges. Section 3 : ce qu il faudrait pour inverser D1 et D2.
+
+P6 : rituel exécuté. Journal S64, A186 et A187 (sévérité 2, ouverts), L182, S62-1 close,
+S64-1 / S64-2 / S64-3 ouvertes avec leur ordre. Index et REPRISE : ADR 50 vers 51, angles 185
+vers 187, tests 130 vers 131. Aucun invariant invalidé, aucun ADR réécrit ; un chiffre publié
+déplacé, par ADR, avec sa mesure et ses réserves.
+Jeton libre. Reste la fusion dans master.

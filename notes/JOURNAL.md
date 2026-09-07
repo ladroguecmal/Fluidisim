@@ -5265,3 +5265,56 @@ la sommation de variance. Puis **S58-1**. Et une question que ce recensement met
 trancher : **le seul blocage réel de B2 est une couche dispersive**, qui n'a jamais été planifiée.
 A103 close en S58 ; l'état réel et l'infrastructure restent hors de portée.
 
+## S64 — 2026-09-08 — Une action, deux motifs techniques, tous deux faux
+
+**Agent : Claude Code (Opus 5)**, git et cargo disponibles. Départ eacd9d9. Entrée : **S62-1**,
+corriger la sommation de variance puis trancher la fenêtre d'échantillonnage de `Hs`.
+
+**Sorties.** ADR-051, la fenêtre portée à 3072 m dans le scénario, le comptage des points hors de
+portée de l'ancre, **A186**, **A187**, **L182**, actions **S64-1** et **S64-2**. **S62-1 close.**
+
+**Le premier geste a été de refuser l'explication non mesurée**, et il a payé. S62 attribuait le
+`NaN` à l'annulation catastrophique de la variance en une passe, et prescrivait donc Welford. **Le
+`NaN` vient de `to_local`**, qui refuse tout point à plus de **4096 m de l'ancre** — mesuré à six
+mètres près : demi-fenêtre 4092 m rend 0,505 %, demi-fenêtre 4098 m rend `NaN`. La correction
+prescrite n'avait pas lieu d'être.
+
+**Le second motif de l'action était faux aussi.** « 64 fois le coût » : mode `physics` complet,
+**33,9 s** au nominal contre **35,9 s** avec la fenêtre 64 fois plus grande — **+6 %**.
+L'échantillonnage de `Hs` est marginal devant les solveurs. *Une action, deux raisons techniques,
+aucune éprouvée, toutes deux fausses* — le défaut que **S63** venait de recenser (**A181**,
+**L177**), commis par la session immédiatement précédente, dans l'action même que celle-ci
+exécutait.
+
+**Décision structurante.** La fenêtre passe à **3072 m**, soit 54,7 longueurs d'onde de pic. Le
+chiffre publié pour `Hs` passe de **8,528 %** à **0,282 %**, et surtout : à `tp = 9 s`, le cas
+**échouait** à l'ancienne fenêtre — 15,58 % — et rend 0,184 % à la nouvelle. **La correction répare
+un cas qui échouait ailleurs.**
+
+**Et la conséquence gênante, écrite plutôt que découverte plus tard** : la tolérance de 10 %
+restant inchangée, **le cas devient plus juste et moins sévère**. Avant, une erreur de chaîne de
+2 % portait l'écart à 10,5 % et le faisait tomber ; désormais elle le porte à 2,3 % et il passe.
+La marge réelle passe de 1,5 point à 9,7.
+
+**Deux faits mesurés interdisent de resserrer la tolérance.** À **256 composantes**, l'écart vaut
+**6,612 %** — et ce n'est ni la fenêtre ni le pas : 6,612 / 6,614 / 6,615 % à pas 3,0 / 1,5 / 1,0 m
+à fenêtre égale. **Cause non identifiée** (**A187**). Et aucune barre d'erreur n'est mesurable :
+**il n'existe qu'une réalisation par état de mer**. Le déphasage est dérivé de l'indice, sans PRNG,
+et le paramètre `graine` du scénario, **obligatoire**, n'est utilisé **nulle part** — six graines
+rendent six fois le même chiffre à la sixième décimale (**A186**). Une tolérance calibrée sur un
+échantillon unique n'aurait pas de provenance (**A106**).
+
+**Le refus, lui, est complété.** Les points hors de portée sont **comptés** et le motif est écrit
+dans le libellé du cas. La mesure reste refusée : écarter les points invalides et mesurer sur le
+reste fabriquerait une variance sur un domaine amputé — la faute corrigée en S45 sur C10
+(**A173**, **L166**).
+
+**Validation.** **131 tests réussis** (40 cœur + 91 harnais), deux ignorés. Release compilée ;
+hashs `check` **inchangés**. Campagne `physics` inchangée par ailleurs : seul C04 à l'ordre un
+échoue, comme voulu.
+
+**Suite S65 : S64-1**, brancher la graine sur les phases — déterminisme conservé, réalisations
+multiples possibles — ce qui débloque **S64-2**, la tolérance. Puis **A187**. Reste **S58-1**, et
+surtout **S63-1** : la couche dispersive, seul blocage réel de B2. A103 close en S58 ; l'état réel
+et l'infrastructure restent hors de portée.
+

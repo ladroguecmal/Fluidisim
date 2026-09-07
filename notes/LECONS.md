@@ -2957,3 +2957,23 @@ pendant des années, la seule vraie question d'un dossier.
 *sans objet*, et écrire pour la seconde **ce qui manque**. Et se méfier des états les plus anciens
 d'un dossier : ce sont ceux qu'on relit le moins, parce qu'ils ont l'air acquis.
 
+## L182 — Une raison de ne pas faire quelque chose se vérifie comme un résultat
+
+*(S64)* Une action différait un changement en avançant deux motifs techniques : *il faut d'abord
+corriger la sommation*, et *le coût serait multiplié par 64*. Les deux étaient précis, plausibles,
+et **faux**. Le `NaN` invoqué ne venait pas de la sommation mais d'une limite de portée du repère
+local ; et le facteur 64, exact sur la mesure isolée, valait **+6 %** sur le mode complet, où cette
+mesure ne pèse rien.
+
+Le motif d'un refus reçoit moins d'examen qu'une affirmation positive, parce qu'il ne débouche sur
+rien qu'on puisse vérifier tout de suite : on ne fait pas la chose, donc on ne voit pas que la
+raison était fausse. Une prescription positive finit par être exécutée et se corrige ; **une raison
+de s'abstenir peut survivre indéfiniment.**
+
+**Réflexe :** quand une session antérieure explique pourquoi elle n'a pas fait quelque chose,
+traiter ses motifs comme des mesures à refaire, et les refaire **avant** d'accepter le report. Les
+deux d'ici ont coûté quatre minutes à démentir.
+
+**Corollaire, vérifié trois sessions de suite** : un balayage qui ne déplace rien désigne un
+paramètre qui n'atteint pas le code — la fenêtre en S62, la graine en S64. Voir **L180**.
+

@@ -1471,3 +1471,27 @@ pendant quatre sessions.
   rituel (`REPRISE.md` §6, point 5) porte la règle — *un état sans date se lit au présent, et il ne
   l'est plus*. Voir PRESCRIPTIONS-S63 §3 et **L181**.
 
+- **A186** *(sévérité 2, ouvert, S64)* — **Il n'existe qu'une réalisation par état de mer, et un
+  paramètre obligatoire du scénario laisse croire le contraire.** Le déphasage des composantes est
+  dérivé de leur indice, sans PRNG — le commentaire l'assume : *reproductible, sans PRNG et sans
+  horloge*. Mais `scenario.graine` est **lue, obligatoire, et utilisée nulle part** ; `SeaState`
+  n'a pas de champ correspondant. Six graines rendent six fois le même chiffre à la sixième
+  décimale. **Conséquence, et elle dépasse le paramètre mort** : aucune mesure statistique du
+  corpus — `Hs`, homogénéité, toute grandeur d'ensemble — ne peut être répétée sur une autre
+  réalisation. Leur écart n'a donc **aucune barre d'erreur mesurable**, et aucune tolérance ne se
+  calibre (**A106**, I-14). Déterminisme et réalisation unique sont deux choses distinctes : une
+  graine branchée les concilierait. Action **S64-1**, qui débloque **S64-2**.
+  Voir ADR-051 §2 D2 et **L182**.
+
+- **A187** *(sévérité 2, ouvert, S64)* — **À spectre dense, `Hs` s'écarte de 6,6 % pour une cause
+  qui n'est ni la fenêtre ni le pas.** À 256 composantes et fenêtre 3072 m, l'écart vaut 6,612 % —
+  contre 0,282 % à 32 composantes et 0,367 % à 64. Et il ne bouge pas quand on raffine
+  l'échantillonnage : 6,612 / 6,614 / 6,615 % à pas 3,0 / 1,5 / 1,0 m, fenêtre égale. Ce n'est donc
+  pas un défaut de mesure. Pistes écartées : la borne du spectre est `[Tp/2, 2Tp]` **quel que soit
+  le nombre de composantes**, donc la plus grande longueur d'onde ne croît pas ; et l'amplitude par
+  composante est choisie pour que `m0` vaille `Hs²/16` **exactement**, par construction. Reste la
+  corrélation entre composantes — toutes dans un cône de 30 degrés, de plus en plus voisines quand
+  leur nombre croît — qui invaliderait l'hypothèse d'indépendance sous-jacente. **Non vérifié.**
+  Tant que la cause est inconnue, la tolérance de `Hs` ne peut pas descendre sous 7 % sans exclure
+  une configuration que rien ne permet de déclarer invalide. Voir ADR-051 §2 D2.
+
