@@ -622,4 +622,21 @@ avec 51200/102400, grille finale rejetée par le filtre ; quatre familles sans v
 
 | # | Action | Origine | Porteur | État |
 |---|---|---|---|---|
-| S56-1 | Mesurer C22 avec oracles 76800/153600 et les huit grilles ; vérifier le filtre avant la stabilité, conserver le refus si 12800 reste contaminée ; aucun doublement automatique | REFERENCE-C22-S56, budget estimé 827 s, admission incertaine | session S57 | ouverte |
+| S56-1 | Mesurer C22 avec oracles 76800/153600 et les huit grilles ; vérifier le filtre avant la stabilité, conserver le refus si 12800 reste contaminée ; aucun doublement automatique | REFERENCE-C22-S56, budget estimé 827 s, admission incertaine | session S57 | **close en S57 — 12800 refusée à 0,9556 du seuil** |
+
+## Actions relevées en séance — S57
+
+**S56-1 close.** Couple 76800/153600 mesuré en 844,433 s (+2,05 % du budget annoncé) ;
+écart d'oracles 2,709078717e-10, grille 12800 à 0,9556 du seuil, **refus maintenu**.
+Quatre familles sans verdict, sortie 0. Voir MESURES-C22-S57. Aucun doublement automatique.
+
+| # | Action | Origine | Porteur | État |
+|---|---|---|---|---|
+| S57-1 | Relever la borne du mode `c22-shallow-fin` à 89600, **déclarer et tester le découpage du calcul en tranches gardées en mémoire** exigé au-delà du quart d'heure, puis mesurer 89600/179200 — étape de code et étape de mesure séparées | MESURES-C22-S57 : oracle requis ≈ 79 000, admission prévue avec 20 à 30 % de marge, coût projeté 19 min 07 s | session S58 | ouverte |
+| S57-2 | Éprouver la loi de biais d'oracle `c(n) ∝ n^-1,879` sur un troisième couple, et décider si le filtre de contamination doit comparer l'erreur au **biais de l'oracle de mesure** plutôt qu'à l'écart des deux oracles. **Par ADR** : cela change un critère d'admission, pas une constante | **A179** *(sév. 2)*, MESURES-C22-S57 §3 | session, par ADR | ouverte |
+
+> **Ne pas traiter S57-2 en même temps que S57-1.** S57-1 mesure sous le critère actuel ;
+> S57-2 discute le critère. Les mélanger produirait une admission dont on ne saurait pas si
+> elle vient de la référence plus fine ou du critère assoupli — et le filtre ×30 n'a jamais
+> admis à tort, donc rien n'oblige à se presser.
+

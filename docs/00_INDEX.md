@@ -139,7 +139,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`specs/SPEC-004`](specs/SPEC-004-interfaces.md) | **signatures des interfaces** — solveurs, champ de fond, solides, services d'hôte, contrat de fils d'exécution |
 | [`specs/SPEC-005`](specs/SPEC-005-outillage-auteur.md) | **outillage auteur** — sources de vérité, inversion du pipeline eau/terrain, cuisson déterministe, obsolescence |
 | [`specs/SPEC-006`](specs/SPEC-006-chemin-pousse.md) | **le chemin poussé** — ce que le système *publie* : bus d'événements et `WaveEvent`, écume et aération, traversabilité, polyligne de déferlement |
-| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **178 points**, avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
+| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **179 points**, avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
 | [`registres/FORK-S22-S26.md`](registres/FORK-S22-S26.md) | **le second fork** — constat, carte de renumérotation complète, la règle manquante, et ce qui reste à fusionner |
 | [`registres/AUDIT-ASSERTIONS-S29.md`](registres/AUDIT-ASSERTIONS-S29.md) | **ce que chaque assertion peut voir** — 23 cas classés, 5 fautifs, 1 mesure du harnais retirée ; **réécriture S30 sans aucun seuil inventé** |
 | [`registres/AUDIT-REPLIS-S44.md`](registres/AUDIT-REPLIS-S44.md) | **les valeurs de repli, inventoriées** — 49 recensées, deux fautives ; *quand la grandeur est un écart, zéro est son meilleur point* |
@@ -200,6 +200,14 @@ parfaitement stable ne pouvait pas distinguer.
 | [`../notes/JOURNAL.md`](../notes/JOURNAL.md) | historique des sessions, points de reprise |
 
 ## État d'avancement
+
+**S57 :** couple d'oracles 76800/153600 mesuré en 844,433 s ; grille 12800 refusée à
+**0,9556 fois le seuil**, quatre familles sans verdict. Les deux extrapolations de S56
+sous-estimaient la contamination, mais le déficit tombe à 4,44 % et les quatre exposants
+candidats s'accordent à 0,8 % sur l'oracle requis (≈ 79 000) — **L175**. Le déplacement des
+erreurs révèle que le filtre est piloté par le biais de l'oracle **auxiliaire** — **A179**,
+sévérité 2, rien modifié. Voir docs/validation/MESURES-C22-S57.md. 123 tests réussis, deux
+ignorés ; aucun code modifié. S56-1 close ; suite S58 : S57-1, borne à 89600 et découpage.
 
 **S56 :** fenêtre C22 800–12800 mesurée ; grille fine rejetée par le filtre de contamination,
 quatre familles sans verdict. Anciennes mesures reproduites ; coût 371,116 s. S49-1 close

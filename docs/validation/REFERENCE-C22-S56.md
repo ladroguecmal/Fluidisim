@@ -1,5 +1,13 @@
 # C22 — référence de la fenêtre fine, S56, 2026-09-07
 
+> **Note corrective — 2026-09-07, S57.** Le couple 76800/153600 a été mesuré
+> ([MESURES-C22-S57](MESURES-C22-S57.md)) : **les deux seuils extrapolés ci-dessous sont
+> tous deux trop bas**. L'écart réel des oracles vaut 2,709078717e-10, contre 2,3145e-10
+> prévu en n⁻² et 2,5912e-10 avec l'exposant empirique 1,72145 ; le seuil ×30 réel est
+> **8,127236151e-9**, et la grille 12800 est **refusée** à 0,9556 du seuil. L'exposant local
+> a encore baissé, à 1,61233. Le budget, lui, s'est vérifié à +2,05 %. Rien n'est réécrit
+> ici : les chiffres de S56 restent ce qu'ils étaient au moment où ils ont été produits.
+
 Suite de [S49](MESURES-C22-S49.md), action S49-1. Objectif : dimensionner la prochaine
 référence par une mesure de contamination et un budget, avant toute conclusion de convergence.
 

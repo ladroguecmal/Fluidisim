@@ -18,12 +18,16 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-07 22:10 +02:00
-Agent            : Claude Code (Opus 5 ; git et cargo disponibles) — worktree isolé claude/reprise-projet-29ef50, à fusionner dans master
-Session en cours : S57 — mesurer C22 sur oracles 76800/153600 (S56-1)
-Dernière session : S56 — 2026-09-07 — référence et budget C22 dimensionnés
-Session suivante : selon le résultat de S57
+JETON            : libre
+Battement        : 2026-09-07 22:52 +02:00
+Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
+Session en cours : aucune
+Dernière session : S57 — 2026-09-07 — 12800 refusée à 0,9556 du seuil ; A179, L175
+Session suivante : S58 — borne du mode à 89600, découpage, puis 89600/179200 (S57-1)
+
+/!\ S57 a travaillé dans le worktree claude/reprise-projet-29ef50, tête 13851c1 de master.
+    La branche N'EST PAS fusionnée dans master : c'est le mécanisme des trois forks (L137).
+    Fusionner avant d'ouvrir S58, ou travailler sur cette branche en connaissance de cause.
 ```
 
 > **Avant de regarder le jeton, exécuter `git worktree list` et `git branch -a`.** Le jeton est un
@@ -139,6 +143,18 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S57 :** couple d'oracles 76800/153600 mesuré en 844,433 s (+2,05 % du budget annoncé) ;
+grille 12800 refusée à **0,9556 fois le seuil**, quatre familles sans verdict, sortie 0.
+Les deux extrapolations de S56 sous-estimaient la contamination — exposant local tombé de
+1,72145 à 1,61233 — mais le déficit n'est plus que de 4,44 %, et les quatre exposants
+candidats s'accordent à **0,8 %** sur l'oracle requis, environ 79 000 : *une extrapolation
+n'est incertaine qu'en proportion de sa portée* (**L175**). Le déplacement des erreurs entre
+les deux campagnes est **additif et constant**, ce qui rend le biais d'oracle mesurable :
+le filtre ×30 est piloté par celui de l'oracle **auxiliaire**, dont aucune erreur publiée ne
+dépend (**A179**, sévérité 2 — rien modifié, refus maintenu). Voir
+docs/validation/MESURES-C22-S57.md. 123 tests réussis, deux ignorés ; aucun code modifié.
+S56-1 close ; suite S58 : S57-1, borne du mode à 89600 et découpage du calcul.
 
 **S56 :** fenêtre C22 800–12800 mesurée ; grille fine rejetée par le filtre de contamination,
 quatre familles sans verdict. Anciennes mesures reproduites ; coût 371,116 s. S49-1 close

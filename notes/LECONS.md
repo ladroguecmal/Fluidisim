@@ -2810,3 +2810,22 @@ la descente. Raffiner la grille a ainsi rendu une oscillation nominale non mesur
 Conserver le dernier sens observé jusqu'au retournement, sans fabriquer un événement sur
 un plateau final. Rejouer aussi les témoins déjà acceptés : rétablir des observations
 manquantes change leur estimation même lorsque leur verdict reste le même.
+
+## L175 — Une extrapolation n'est incertaine qu'en proportion de ce qu'elle fait franchir
+
+*(S57)* S56 s'était arrêtée sur un partage : deux modèles d'extrapolation encadraient
+l'erreur mesurée, si bien que **le choix du modèle, et non la mesure, aurait décidé du sort
+de la grille**. La session suivante a mesuré, et le pire des deux modèles s'est encore
+dégradé — l'exposant local est tombé de 1,72145 à 1,61233. Pourtant la question a cessé
+d'être ouverte : le déficit d'admission n'étant plus que de 4,44 %, les quatre exposants
+candidats, de 1,5 à 2,0, s'accordent à **0,8 %** sur la taille de référence requise.
+
+Ce ne sont pas les modèles qui se sont améliorés, c'est la **portée** qui a été raccourcie :
+d'un facteur 1,5 en taille à un facteur 1,03. La même incertitude d'exposant devient
+indifférente quand la distance extrapolée est courte, et décisive quand elle est longue.
+
+**Réflexe :** quand une extrapolation décide d'un verdict, ne pas chercher un meilleur
+modèle — **raccourcir sa portée jusqu'à ce que le choix du modèle devienne indifférent**,
+quitte à mesurer une fois de plus. Et vérifier la direction de l'erreur des modèles écartés :
+ici les deux sous-estimaient, ce qu'aucun encadrement ne laissait prévoir.
+

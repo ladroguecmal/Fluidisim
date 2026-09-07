@@ -1368,3 +1368,19 @@ pendant quatre sessions.
   détectés au lieu de treize, donc refus au seuil de six. La même faute biaisait la sélection
   des extrema sur les montages acceptés. Sens conservé au travers des plateaux ; seuils
   inchangés, tests analytiques et physiques. Voir EXTREMA-SEICHE-S55 et L174.
+
+- **A179** *(sévérité 2, ouvert, S57)* — **Un filtre de contamination peut être piloté par
+  la qualité de l'oracle dont on ne se sert pas.** Le filtre ×30 de C22 compare l'erreur
+  d'une grille à l'**écart L1 entre les deux oracles**, quantité dominée par le biais du plus
+  **grossier** des deux — l'auxiliaire, dont aucune erreur publiée ne dépend. Mesure : le
+  déplacement des erreurs entre S56 et S57 est additif et constant (5,587e-11 dès nx=800) ;
+  ajusté avec la colonne « variation » (1,310e-10) il donne `c(n) ∝ n^-1,879`, soit 4,9e-11
+  pour l'oracle de mesure 153600 contre 1,80e-10 pour 76800. L'erreur de la grille 12800
+  dépasse alors le biais qui la contamine d'un facteur **159**, quand l'indicateur employé
+  n'en vaut que **5,5** fois — et elle est refusée à 0,9556 du seuil.
+  **Aucun chiffre faux n'en découle** : le filtre est conservateur, il refuse et n'a jamais
+  admis à tort. Le coût est ailleurs — trois campagnes « sans verdict » et vingt-six minutes
+  de calcul pour un déficit final de 4,4 %. Loi ajustée sur deux différences, biais additif
+  uniforme supposé et non établi : **rien n'est modifié**, le refus est maintenu.
+  Voir MESURES-C22-S57 §3 et L175. Action S57-1.
+

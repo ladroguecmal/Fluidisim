@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S57
-État             : en cours
+État             : terminée
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
 Objectif         : Exécuter le couple d'oracles 76800/153600 selon REFERENCE-C22-S56 (S56-1).
 ```
@@ -71,7 +71,7 @@ Objectif         : Exécuter le couple d'oracles 76800/153600 selon REFERENCE-C2
 - [x] **P2** — vérifier les tests et compiler en release avant toute mesure ; aucun changement de montage.
 - [x] **P3** — exécuter `c22-shallow-fin 76800`, consigner erreurs, écart d'oracles, temps ; appliquer le filtre ×30 sans l'assouplir.
 - [x] **P4** — rédiger MESURES-C22-S57 : admission de 12800, verdict des quatre fenêtres, déplacement éventuel des sept anciennes grilles, budget révisé.
-- [ ] **P5** — rituel : journal, angles, leçons, actions, index, décomptes, passation et jeton.
+- [x] **P5** — rituel : journal, angles, leçons, actions, index, décomptes, passation et jeton.
 
 ### Notes de reprise
 
@@ -105,3 +105,10 @@ deplacement des erreurs entre S56 et S57 est additif et constant (5,587e-11 des 
 biais de l oracle de mesure s estime a 4,9e-11, soit 159 fois moins que l erreur de 12800,
 quand l indicateur du filtre en vaut 5,5 fois. A179, severite 2. Rien modifie, refus maintenu.
 Suite S57-1 : relever la borne du mode a 89600, decouper le calcul, 19 min projetees.
+
+P5 : rituel exécuté. Journal S57, A179 (sévérité 2, ouvert), L175, S56-1 close,
+S57-1 et S57-2 ouvertes avec consigne de ne pas les mélanger. Index et REPRISE à jour,
+décompte d angles porté de 178 à 179 ; 47 ADR, 14 registres, 17 invariants inchangés.
+Note corrective datée en tête de REFERENCE-C22-S56 : ses deux extrapolations sont infirmées,
+son budget vérifié à +2,05 pour cent. Aucun invariant invalidé, aucun ADR réécrit.
+Jeton libre. **Branche non fusionnée dans master — geste de l utilisateur.**

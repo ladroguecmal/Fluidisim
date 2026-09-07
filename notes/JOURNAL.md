@@ -4879,3 +4879,56 @@ Aucun invariant invalidé ni ADR réécrit ; les mesures historiques restent val
 **Suite S57 : S56-1**, exécuter le couple 76800/153600 selon REFERENCE-C22-S56.
 S49-1 close pour la stratégie et le budget. A103, état réel et infrastructure inchangés ;
 aucun distant créé. A107 historiquement réconcilié, anciennes copies conservées.
+
+## S57 — 2026-09-07 — Une extrapolation n'est incertaine qu'en proportion de sa portée
+
+**Agent : Claude Code (Opus 5)**, git et cargo disponibles. Départ 13851c1, identique à
+master, dans le worktree isolé claude/reprise-projet-29ef50 ; les trois autres copies sont
+en retard ou archivées, aucune session concurrente. Entrée : S56-1, exécuter le couple
+d'oracles 76800/153600 selon REFERENCE-C22-S56.
+
+**Sorties.** MESURES-C22-S57 : mesure, admission, biais d'oracle estimé, budget révisé.
+A179, L175, action S57-1. Aucun fichier de code modifié : la campagne est une exécution
+du binaire construit sur 13851c1, sans changement de montage, de seuil ni de critère.
+
+**Mesure.** 844,433 s contre 827,467 s estimés (+2,05 %) ; oracles 165,833 et 672,560 s,
+reste 6,040 s comme en S56. Écart d'oracles 2,709078717e-10, seuil ×30 8,127236151e-9.
+La grille 12800 rend 7,766762184e-9, soit **0,9556 fois le seuil : encore refusée**, contre
+0,494 en S56. Fenêtre 800–12800 à 4/5, deux ordres ; quatre familles sans verdict, sortie 0.
+Les sept anciennes grilles conservent leurs ordres aux chiffres imprimés depuis S48.
+
+**Décision structurante.** Aucune. Le refus est maintenu, le filtre garde sa définition,
+et aucun doublement n'a été lancé automatiquement — le protocole de S56 l'interdisait.
+
+**Chiffres qui ont orienté.** Les deux extrapolations de S56 sous-estiment la contamination
+de 14,6 % (n⁻²) et 4,6 % (empirique) ; l'exposant local tombe de 1,72145 à 1,61233. Mais le
+déficit final n'est que de **4,44 %**, et les quatre exposants candidats s'accordent à 0,8 %
+sur l'oracle requis — environ **79 000**. En S56 le modèle décidait du verdict ; ici il ne
+décide plus de rien, parce que la portée extrapolée est passée d'un facteur 1,5 à 1,03 (L175).
+
+Et le déplacement des erreurs entre S56 et S57, sur les mêmes grilles, est **additif et
+constant** : 5,587e-11 dès nx=800. Ajusté avec la colonne « variation » (1,310e-10), il donne
+un biais d'oracle en n^-1,879, soit **4,9e-11 pour 153600** contre **1,80e-10 pour 76800**.
+L'erreur de 12800 dépasse alors le biais de l'oracle qui la mesure d'un facteur 159, quand
+l'indicateur du filtre n'en vaut que 5,5 fois : **le filtre est piloté par le biais de
+l'oracle auxiliaire, dont aucune erreur publiée ne dépend** (A179, sévérité 2).
+
+**Ce qui n'a pas été fait.** Le filtre n'est pas modifié et la loi de biais n'est pas
+validée : deux différences, un modèle additif uniforme non établi. La borne du mode n'est
+pas relevée — c'est une modification de code, elle se déclare et se teste à part. Aucune
+mesure à 89600.
+
+**Validation.** 123 tests réussis (38 cœur + 85 harnais), deux ignorés, avant la mesure ;
+release compilée ; check vert, hashs 0x3e2c06a7b00e73e3 et 0x1a8b0629a9f51b6e inchangés.
+Aucun test lancé pendant la campagne. Aucun champ sur disque (I-17).
+
+**Suite S58 : S57-1**, relever la borne du mode à 89600, déclarer le découpage du calcul
+exigé au-delà du quart d'heure, puis mesurer 89600/179200 — environ 19 min 07 s projetées,
+admission prévue avec 20 à 30 % de marge, **sans promesse de verdict** : la fenêtre n'aurait
+que trois ordres, et la stabilité reste à établir. A103, état réel et infrastructure
+inchangés ; aucun distant créé. A107 historiquement réconcilié.
+
+**Point de procédure à signaler.** Cette session a travaillé dans un worktree isolé sur
+claude/reprise-projet-29ef50 : c'est exactement le mécanisme des trois forks (L137). La
+branche doit être fusionnée dans master, et ce geste appartient à l'utilisateur.
+
