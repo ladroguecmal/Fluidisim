@@ -68,8 +68,8 @@ Objectif         : S57-2 — éprouver le critère d'admission de C22, et le dé
 ### Plan
 
 - [x] **P1** — passation, jeton, plan seul.
-- [ ] **P2** — poser ce que le filtre protège, et instrumenter : calculer les ordres contre **chacun** des deux oracles, sans toucher à aucun critère.
-- [ ] **P3** — contre-épreuve rétrospective sur 51200/102400, la campagne que le filtre a fait refuser en S56 ; et essai de refus sur un oracle franchement trop grossier.
+- [x] **P2** — poser ce que le filtre protège, et instrumenter : calculer les ordres contre **chacun** des deux oracles, sans toucher à aucun critère.
+- [x] **P3** — contre-épreuve rétrospective sur 51200/102400, la campagne que le filtre a fait refuser en S56 ; et essai de refus sur un oracle franchement trop grossier.
 - [ ] **P4** — ADR-049 : trancher au vu des deux mesures, ou refuser de trancher en disant ce qui manque.
 - [ ] **P5** — appliquer la décision au code, avec ses essais de refus et ses témoins.
 - [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
@@ -104,3 +104,19 @@ modèle. Mais il faut d'abord répondre à deux questions, et par la mesure :
 Réserve à garder au chaud : deux oracles du même schéma partagent leur erreur de modèle. Le
 critère proposé n'y remédie pas — il ne la voit pas davantage que le filtre actuel (A114,
 ADR-043 §3). Ce serait à écrire dans la décision, pas à passer sous silence.
+
+P2 : invariance a l'oracle mesuree et affichee, y compris hors filtre. Aucun critere touche.
+Test synthetique : un biais uniforme mille fois l'erreur la plus fine ne deplace pas l'ordre ;
+un biais heterogene cent fois plus petit le deplace. Le critere ne voit que l'heterogeneite.
+
+P3, deux mesures, et elles vont en sens contraire.
+ (a) Essai de refus, oracle 3200/6400 : contamination flagrante — e(1600) sous-estimee de 5,2 %,
+     deux grilles refusees — et l'invariance ne vaut que 5,1e-3. **Elle ne refuse pas ce qu'elle
+     devrait refuser** : deux oracles voisins partagent leur erreur (A114). Elle ne peut pas
+     remplacer le filtre. Mais elle **majore** l'erreur reelle sur l'ordre d'un facteur 31,5 ;
+     a 51200 d'un facteur 3,1. Majorant conservateur, dans l'unite de la grandeur publiee.
+ (b) Contre-epreuve retrospective, 51200/102400 en 371,972 s : le triplet du verdict rend
+     **1,997566515**, contre 1,997599436 en S59 — **ecart 3,29e-5**. L'ordre publie par S59
+     etait deja mesurable en S56. Entre les deux, 1987,7 s de calcul (33 min 08 s) et deux
+     sessions, pour deplacer un ordre de trois centiemes de millieme.
+ 88 tests harnais, 40 coeur, deux ignores.

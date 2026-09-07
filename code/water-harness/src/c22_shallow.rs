@@ -1,6 +1,6 @@
 //! C22, second véhicule : gaussienne régulière et deux oracles emboîtés.
 use crate::host_impl::{ArenaAllocator, SequentialJobs, StderrSink};
-use crate::physics::{Convergence, Reference};
+use crate::physics::{self, Convergence, Reference};
 use crate::rapport_convergence::Bilan;
 use water_core::{Flux, HostServices, Shallow1D};
 
@@ -137,10 +137,12 @@ fn mesurer(nx_oracle: usize, fenetres: usize) -> Result<usize, String> {
     println!("oracles {nx_oracle}/{} : écart L1 = {ecart_oracles:.9e}", 2*nx_oracle);
     println!(" nx       erreur/oracle1   erreur/oracle2    variation       séparée");
     let mut mesures = Vec::new();
+    let mut mesures_o1 = Vec::new();
     for n in grilles.into_iter().take(fenetres + 4) {
         let h = champ(n, 0.01, 1.0)?;
         let e1 = erreur(&h, &o1)?;
         let e2 = erreur(&h, &o2)?;
+        mesures_o1.push((n, e1));
         // Facteur 30 de C22 ; ici l'écart mesuré des oracles remplace l'extrapolation en p.
         // C'est un indicateur empirique, pas une borne prouvée de l'erreur commune aux oracles.
         // Une grille retirée coupe la famille : ne pas reconstruire des triplets non emboîtés.
@@ -156,6 +158,55 @@ fn mesurer(nx_oracle: usize, fenetres: usize) -> Result<usize, String> {
             reference: Reference::Oracle };
         println!("Fenêtre {}–{} : {}/5 retenues", grilles[debut], grilles[debut+4], c.erreurs.len());
         for (n,o) in c.ordres() { println!("triplet {n} : {o:?}"); }
+        // **Mesure d'invariance — S60, action S57-2. Ne commande rien.** Les mêmes grilles, les
+        // mêmes triplets, mais les erreurs relevées contre l'oracle *grossier* : si l'ordre publié
+        // dépendait du choix de l'oracle, il faudrait le savoir. La sélection des grilles reste
+        // celle du filtre en vigueur, sur les erreurs contre l'oracle fin — comparer à familles
+        // différentes ne dirait rien.
+        let retenues: Vec<usize> = c.erreurs.iter().map(|(n, _)| *n).collect();
+        let c_o1 = Convergence {
+            grandeur: "C22 shallow, mêmes grilles, erreurs contre l'oracle grossier".into(),
+            erreurs: mesures_o1.iter().copied().filter(|(n, _)| retenues.contains(n)).collect(),
+            plancher, reference: Reference::Oracle };
+        let mut ecart_max: f64 = 0.0;
+        let mut compares = 0usize;
+        for ((n, a), (_, b)) in c.ordres().into_iter().zip(c_o1.ordres()) {
+            if let (physics::Ordre::Observe(pa), physics::Ordre::Observe(pb)) = (a, b) {
+                ecart_max = ecart_max.max((pa - pb).abs());
+                compares += 1;
+                let _ = n;
+            }
+        }
+        if compares > 0 {
+            println!("invariance à l'oracle : max |p(o1) − p(o2)| = {ecart_max:.3e} sur {compares} triplet(s)");
+        } else {
+            println!("invariance à l'oracle : aucun triplet comparable");
+        }
+        // La même mesure sur la fenêtre **entière**, filtre ignoré. C'est la contre-épreuve de
+        // S60 : elle seule dit si une grille refusée pour contamination portait néanmoins un ordre
+        // insensible à l'oracle. Observation pure — elle n'entre dans aucun verdict.
+        let bornes = |v: &[(usize, f64)]| -> Vec<(usize, f64)> {
+            v.iter().copied().skip(debut).take(5).collect()
+        };
+        let (pleine2, pleine1) = (
+            Convergence { grandeur: "fenêtre entière, oracle fin".into(),
+                erreurs: bornes(&mesures), plancher, reference: Reference::Oracle },
+            Convergence { grandeur: "fenêtre entière, oracle grossier".into(),
+                erreurs: bornes(&mesures_o1), plancher, reference: Reference::Oracle },
+        );
+        let mut hors_filtre: f64 = 0.0;
+        let mut vus = 0usize;
+        for ((n, a), (_, b)) in pleine2.ordres().into_iter().zip(pleine1.ordres()) {
+            if let (physics::Ordre::Observe(pa), physics::Ordre::Observe(pb)) = (a, b) {
+                hors_filtre = hors_filtre.max((pa - pb).abs());
+                vus += 1;
+                println!("  hors filtre, triplet {n} : p(o2)={pa:.9} p(o1)={pb:.9} écart {:.3e}",
+                    (pa - pb).abs());
+            }
+        }
+        if vus > 0 {
+            println!("  hors filtre, {vus} triplet(s), écart max {hors_filtre:.3e}");
+        }
         println!("{}", bilan.ajouter(&c,true));
     }
     println!("{}", bilan.resume());
@@ -230,6 +281,41 @@ mod tests {
         d0.avancer_jusqu_a_observe(1.0, 0.45, 0, &mut |_, _| jamais += 1);
         assert_eq!(jamais, 0);
         assert_eq!(continu, relever(&d0, 200, 1.0).expect("champ sans observateur"));
+    }
+
+    /// **Ce que l'invariance à l'oracle voit, et ce qu'elle ne voit pas** — S60, action S57-2.
+    ///
+    /// L'ordre est estimé sur des différences successives d'erreurs. Un biais **uniforme** s'y
+    /// annule exactement, si grand soit-il : deux oracles également faux rendent deux ordres
+    /// également faux, et leur écart reste nul. Le critère est donc aveugle à la contamination
+    /// commune — c'est **A114** appliqué à lui-même, et la raison pour laquelle il ne peut pas
+    /// remplacer le filtre d'admission. Ce qu'il détecte est l'**hétérogénéité** du biais.
+    #[test]
+    fn l_invariance_ne_voit_qu_un_biais_heterogene() {
+        let plancher = 1e-18;
+        let grilles = [100usize, 200, 400, 800, 1600];
+        // Erreurs exactes d'un schéma d'ordre deux : e = 1/n².
+        let vraies: Vec<(usize, f64)> =
+            grilles.iter().map(|&n| (n, 1.0 / (n as f64).powi(2))).collect();
+        let ordre = |e: &[(usize, f64)]| {
+            let c = Convergence { grandeur: "essai".into(), erreurs: e.to_vec(),
+                plancher, reference: Reference::Oracle };
+            match c.ordre(0) { physics::Ordre::Observe(p) => p, o => panic!("{o:?}") }
+        };
+        let p0 = ordre(&vraies);
+        assert!((p0 - 2.0).abs() < 1e-12, "ordre de référence {p0}");
+
+        // Biais uniforme, **mille fois** l'erreur de la grille la plus fine : ordre inchangé.
+        let uniforme: Vec<(usize, f64)> =
+            vraies.iter().map(|&(n, e)| (n, e + 1000.0 / 1600f64.powi(2))).collect();
+        assert!((ordre(&uniforme) - p0).abs() < 1e-9, "un biais uniforme a déplacé l'ordre");
+
+        // Biais hétérogène, **cent fois plus petit** : l'ordre bouge, et bien davantage.
+        let heterogene: Vec<(usize, f64)> = vraies.iter().enumerate()
+            .map(|(i, &(n, e))| (n, e + (1.0 + i as f64) * 10.0 / 1600f64.powi(2)))
+            .collect();
+        let ecart = (ordre(&heterogene) - p0).abs();
+        assert!(ecart > 1e-3, "un biais hétérogène est passé inaperçu : écart {ecart}");
     }
 
     #[test]
