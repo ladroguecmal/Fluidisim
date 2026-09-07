@@ -58,23 +58,18 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S71 — terminée
+Session : S72 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : valider ou rejeter ADR-053 sur délégation explicite de l’utilisateur,
-et rendre la trajectoire de construction concrète, avec critères de réception.
+Objectif : construire la première tranche WaveEvent, impact versionné et validé.
 
 ### Plan
 
-- [x] **P1** — lire la passation, vérifier les copies, prendre le jeton et committer le plan seul.
-- [x] **P2** — décision ADR-054 : construction confirmée, dépendances corrigées et lots W recevables.
-- [x] **P3** — rituel : journal, leçon, angle mort, actions, index, passation et copies synchronisées.
+- [x] **P1** — passation, état réel, jeton et plan seul.
+- [ ] **P2** — ADR-055 et codec Impact V1 ; contrat explicite, refus et vecteur de référence.
+- [ ] **P3** — vérifier les tests, publier limites et résultats, rituel et synchronisation.
 
 ### Notes de reprise
 
-Départ 14b4b7a ; master et reprise-projet-29ef50 identiques et propres.
-Demande actuelle : examiner le choix, avec autonomie technique complète renouvelée.
-B1 complet exige LOD, rendu et évaluation perceptuelle ; coût CPU seul est une mesure partielle.
-ADR-001 autorise plusieurs représentations W. C12 dépend de V seul.
-Une dispersion analytique exacte ne mesure pas la coupure numérique de δ.
-A187 a été expliqué en S67, et ne prouve pas que 256 composantes sont physiquement fausses.
-P2 doit livrer une décision et des lots de construction, pas déclarer le système implémenté.
+Départ 399830b, deux copies actives identiques. SPEC-006 propose des half sans protocole.
+La première tranche prend Impact seul ; les autres kinds restent refusés jusqu’à leur contrat.
+Pas de prétention à W1 complet ni à une couche W propagative cette session.
