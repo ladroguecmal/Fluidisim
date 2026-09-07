@@ -27,7 +27,7 @@ grille_pas_m = 4.0
 # 1024 × 3 m = 3072 m, soit 54,7 longueurs d'onde de pic à `tp = 6 s`. À la fenêtre précédente —
 # 384 m, 6,8 λ — `Hs` rendait 8,53 % d'écart pour une tolérance de 10 %, et **échouait à
 # `tp = 9 s`** ; elle mesurait sa propre taille plus que la chaîne d'amplitude (A102, mesuré S62).
-# Ici : 0,282 %. Coût du changement sur `physics` complet : +6 % (33,9 s → 35,9 s).
+# S64, phases historiques : 0,282 %. S65, graine effective : 1,388 %. Coût du changement sur `physics` complet : +6 % (33,9 s → 35,9 s).
 #
 # **Borne dure** : la fenêtre ne peut pas dépasser ±4096 m autour de l'ancre — `to_local` refuse
 # au-delà, et le cas compte alors les points perdus et refuse de mesurer (S64).
@@ -41,4 +41,4 @@ fenetre_pas_m = 3.0
 allocations = 1
 # I-03 : hash de conformité de B. Inscrit à la main, dans un commit qui précède la mesure
 # qu'il juge — ADR-028 §4. Une divergence entre plateformes se voit ici.
-hash_b      = "0x1a8b0629a9f51b6e"
+hash_b      = "0xd57d81f47d9f8611"

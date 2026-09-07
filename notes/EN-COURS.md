@@ -69,8 +69,8 @@ Objectif         : Brancher la graine sur les phases (S64-1), conserver la repro
 
 - [x] **P1** — état réel, lectures de reprise, jeton et plan seul.
 - [x] **P2** — fonction entière indexée par graine/composante, raccord scénario ; tests de reproductibilité et sensibilité.
-- [>] **P3** — mesurer les déplacements nominaux et plusieurs graines ; consigner puis committer les nouveaux hashs avant leur vérification.
-- [ ] **P4** — vérifier tests et scénarios sur références committées ; documenter portée statistique et limites.
+- [x] **P3** — mesurer les déplacements nominaux et plusieurs graines ; consigner puis committer les nouveaux hashs avant leur vérification.
+- [>] **P4** — vérifier tests et scénarios sur références committées ; documenter portée statistique et limites.
 - [ ] **P5** — rituel : journal, actions, index/décomptes, corrections datées, passation et jeton libre.
 
 ### Notes de reprise
@@ -86,3 +86,7 @@ P2 : SeaState.graine raccordée au scénario ; SplitMix64 indexé, 32 bits hauts
 Vecteurs graine zéro et accès direct, six graines distinctes répétées, témoin mer plate.
 Suite initiale (avant test intégration ajouté) verte ; test intégration ciblé vert ; release
 compilée. Diagnostic ignoré ajouté pour six graines x 32/256 composantes, à lancer en P3.
+
+P3 : diagnostic six graines terminé (111,12 s), 32 et 256 composantes. Hs nominal 1,216660011,
+écart +1,38833 %. Nouvel échec homogénéité : ratio 1,397507, tolérance 15 % conservée.
+Hashs nouveaux C02 0x9babd7e12935c263, C18 0xd57d81f47d9f8611 ; inscription avant check.

@@ -19,4 +19,4 @@ grille_pas_m = 8.0
 
 [assertions]
 allocations = 1
-hash_b      = "0x3e2c06a7b00e73e3"
+hash_b      = "0x9babd7e12935c263"
