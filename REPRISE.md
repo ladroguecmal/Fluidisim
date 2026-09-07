@@ -12,9 +12,9 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-07
-Session en cours : —
+Session en cours : S39 — réconcilier B-S27 : une conclusion importée a été mesurée fausse
 Dernière session : S38 — 2026-09-07 — les saturations comptées : zéro en régime nominal, un détecteur muet en régime dégradé
 Session suivante : S39 — **trancher le seuil de sec** (S37-1, A163, sév. 1) *(recommandé)*, ou relire les cinq A de sévérité 1 (S35-5)
 ```

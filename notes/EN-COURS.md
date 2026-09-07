@@ -59,83 +59,81 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S38
-État             : terminée
+Session          : S39
+État             : en cours
 Battement        : 2026-09-07
-Objectif         : Les saturations de modèle — filet ou maquillage, et combien de masse elles créent
+Objectif         : Réconcilier B-S27 — et surtout : mon corpus affirme quelque chose qui a été mesuré faux
 ```
 
 ### Plan
 
-Action **S34-1**, angle mort **A146**, **reportée quatre fois**. S34 a audité les **garde-fous du
-harnais** — chacun a-t-il été vu refuser ? Il a laissé dehors les **saturations du solveur**, qui
-sont d'une autre nature : elles ne refusent pas un montage, elles **corrigent un état physiquement
-impossible en cours de calcul**.
+**Le fork a repris.** Une session a travaillé sur `claude/reprise-projet-5134cd` **après** S38 : son
+dernier commit est à **01h23**, le mien à **00h37**. C'est le troisième épisode du même mécanisme, et
+il était prévu — l'action **S35-7** le nommait, et elle n'appartenait pas à une session.
 
-Les deux véhicules portent la même, écrite indépendamment — une convergence de plus entre les deux
-lignées (`ADR-043`) :
+Huit commits, un ADR, deux fichiers de code, trois leçons, **deux angles morts de sévérité 1**. C'est
+petit : la fusion de S35 en portait trente-cinq.
 
-```rust
-if h < 0.0 { h = 0.0; hu = 0.0; }   // delta.rs, pas_naif et pas_equilibre
-fn saturer(h, hu) { if *h < 0.0 { *h = 0.0; *hu = 0.0; } }   // shallow.rs
-```
+> **Mais ce n'est pas la taille qui commande cette session.** B-S27 s'intitule *l'éponge en eau
+> dispersive **rétracte** ADR-034* — et ADR-034 de la lignée B, c'est **mon `ADR-042`**, importé en
+> S35. **Mon corpus porte donc une conclusion qui vient d'être mesurée fausse.**
 
-> **Ce que cette ligne fait vraiment, et que personne n'a chiffré.** Elle ne « corrige » pas : elle
-> **crée de la masse** — remonter `h` de `−5·10⁻⁷` à `0` ajoute de l'eau qui n'existait pas — et elle
-> **détruit de la quantité de mouvement** en remettant `hu` à zéro. Sur un schéma dont la
-> conservativité est un argument écrit (`ADR-038` §2, C01-volume), c'est une fuite non comptée.
+`ADR-042` §6 posait sa propre réserve n° 1 en toutes lettres : *le solveur est non dispersif ; une
+éponge d'eau profonde doit absorber une **bande** de célérités, et la règle `λ/2` protège peut-être
+exactement de cela ; c'est la première chose à mesurer.* **Elle a été mesurée, et la réponse est
+que la réserve était fondée** — `R` vaut **24 %** en milieu dispersif là où le non dispersif
+donnait 1,5 pour mille.
 
-**Le critère de la session, en une ligne : une saturation rare est un filet, une saturation
-fréquente est un solveur qui produit des états impossibles et qu'on maquille — et les deux sont
-indiscernables tant que personne ne compte** (A146).
+*Thèse déclarée, en deux volets :*
 
-*Thèse déclarée, en trois volets falsifiables :*
+1. **La rétractation s'applique intégralement à mon corpus.** `ADR-042` D2 et D4 tombent ; D1 et D3
+   tiennent. C'est mécanique, puisque le document est le même.
+2. **Mais `ADR-043` D1 ne tombe pas avec.** Il rouvrait la borne haute de `λ_cut` **par deux voies
+   indépendantes** : l'absorbeur mesuré (ADR-042 D4) et la dissipation qui rend le masque inutile
+   (ADR-037). *La première voie tombe ; la seconde porte sur un autre objet et n'est pas touchée.*
+   **Si ce volet est faux, c'est la distinction absorbeur/masque d'`ADR-043` §5 qui était mal
+   posée**, et il faudrait le dire.
 
-1. **C01 et C03 ne déclenchent jamais la saturation.** Domaine entièrement mouillé, régime
-   linéaire : un seul déclenchement y serait un défaut, pas un filet.
-2. **C04 la déclenche, et de façon localisée** — quelques cellules au voisinage du front sec, pas
-   une fraction notable du domaine. Si elle touchait des dizaines de cellules à chaque pas, le
-   « front » mesuré par C04 serait en partie un artefact de saturation.
-3. **Le résidu de `10⁻¹⁰ m` trouvé en S37 derrière le front de `shallow.rs` n'est pas produit par la
-   saturation**, qui écrit **zéro exactement**. Il vient donc du flux du pas suivant, et c'est une
-   autre affaire. *(Action S37-3.)*
+**Nouvelles collisions d'identifiants**, la carte de `FORK-S22-S26` est à étendre :
 
-**Le volet 2 est celui qui décide.** S'il est faux, C04 — qui sert de critère d'entrée au banc B3
-(`ADR-031`) — mesure en partie son propre maquillage.
+| identifiant côté B | ce qu'il désigne ici | devient |
+|---|---|---|
+| `ADR-035` | le nombre de Courant *(S25)* | **ADR-046** |
+| `L86`–`L88` | trois leçons de S07-S08 | **L150**–**L152** |
+| `A117`–`A118` | deux angles morts antérieurs | **A166**–**A167** |
+| `S27` | ma session S27 n'existe pas | **B-S27** |
 
-- [x] **P1** — plan, jeton.
-- [x] **P2** — **recensement écrit** des saturations des deux solveurs : où elles sont, ce qu'elles
-      empêchent, **ce qu'elles détruisent**. Distinguer l'initialisation, la protection de racine,
-      la reconstruction hydrostatique et la vraie saturation d'état.
-- [x] **P3** — instrumenter `delta.rs` : **compteur de déclenchements** et **masse créée cumulée**.
-      Sans allocation (**I-06**), sans changer un seul résultat — **hashs de conformité vérifiés**.
-- [x] **P4** — instrumenter `shallow.rs` de même.
-- [x] **P5** — **mesurer sur C01, C03 et C04**, et classer chaque saturation : *filet* · *maquillage*
-      · *jamais déclenchée*. Une saturation jamais déclenchée n'est pas innocente : elle n'a pas été
-      testée (**L118**).
-- [x] **P6** — le résidu de `10⁻¹⁰ m` (**S37-3**) : la saturation en est-elle la cause ? Le test doit
-      pouvoir répondre **non**.
-- [x] **P7** — l'ADR-045, A165, et la requalification datée d'A146.
-- [x] **P7b** — exposer les compteurs au rapport du mode `physics` (décision D1).
-- [x] **P8a** — rituel : journal, leçons L147-L149, actions S38-1 à S38-4.
-- [x] **P8b** — rituel : index, décomptes, jeton libéré.
+- [>] **P1** — plan, jeton.
+- [ ] **P2** — étendre la carte de `FORK-S22-S26` à B-S27, et **dater le troisième épisode**.
+- [ ] **P3** — import d'`ADR-035` de B sous **ADR-046**, renvois renumérotés, en-tête de provenance.
+- [ ] **P4** — leçons **L150–L152**, angles morts **A166–A167** *(deux de sévérité 1)*.
+- [ ] **P5** — **ce que la rétractation déplace chez moi** : note corrective datée sur `ADR-042`,
+      vérification de `ADR-043` D1, et `DOSSIER-B2` §3.1 bis qui s'appuyait dessus.
+- [ ] **P6** — le code : `dispersif.rs` et `eponge.rs`. **Attention** : `eponge.rs` factorise le
+      profil qui vit dans `shallow.rs`, que S38 a instrumenté. Compiler, puis les 77 tests.
+- [ ] **P7** — **le procédé** : trois épisodes du même fork, et le remède écrit à chaque fois dans
+      une seule branche. Écrire ce qui aurait marché, **et le répliquer des deux côtés le jour même**.
+- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
-**Ce que S37 laisse et qui commande cette session.**
+**Ce que l'amorce a montré, et qui n'était dans aucun jeton.**
 
-- **Les deux solveurs saturent au même endroit et de la même façon**, sans s'être vus. C'est un
-  argument de plus pour `ADR-043` §1 — et cela veut dire que la mesure vaudra pour les deux.
-- **Le résidu de S37** : à la cellule 625 de C04, `delta.rs` porte `0` exactement et `shallow.rs`
-  `1,05·10⁻¹⁰ m`. Les deux saturent pourtant à zéro. **Donc l'un des deux écrit ce résidu après
-  avoir saturé** — c'est le flux, pas la saturation.
-- **Le témoin naturel existe déjà** : `C01-volume` mesure la dérive relative du volume et la
-  déclare *diagnostic, non probant*. Il devient probant le jour où une saturation se déclenche —
-  **et C04 n'a aucune assertion de ce genre**.
-- **Ce qu'il ne faut pas faire** : « corriger » une saturation trop fréquente en la retirant ou en
-  la déplaçant. Le mandat est de **compter**, puis de dire. Retirer un filet sans savoir ce qu'il
-  retient est le geste qui transforme un défaut visible en défaut invisible.
-- **Ne pas toucher au seuil de sec** (**A163**, **S37-1**) : c'est une décision de conception en
-  attente, et cette session la croisera sans la trancher.
-- **État de départ** : `cargo test` = **74 tests** (32 cœur + 42 harnais, un `ignore`), `check` = 0
-  échec, hashs `0x3e2c06a7b00e73e3` et `0x1a8b0629a9f51b6e`. Mode `physics` : **31 s** sur 60 s.
+- Un worktree **nouveau**, `friendly-bhabha-6da427`, sur `claude/reprise-projet-5134cd`. Les deux
+  jetons disent `libre`, chacun dans son univers — exactement le mécanisme décrit dans
+  `FORK-S22-S26` §1. **Les deux commandes d'amorce ont encore fonctionné** : le fork a été vu au
+  premier geste, pour la troisième fois.
+- **B-S27 a du contenu solide** : un milieu à dispersion exacte vérifié avant usage (écart de
+  0,001 % sur trois modes), et un cas de garde qui a **refusé deux montages** avant d'en accepter un.
+  Ce n'est pas un travail à recevoir avec réserve.
+- **Deux divergences de spécification à signaler, pas à trancher** : côté B, le budget de la
+  batterie `physics` est de **120 s** et il est dépassé (167 s, A114) ; ici, `SPEC-003 §1` dit
+  **60 s** et le mode tourne en 33,7 s. Les deux lignées ont fait diverger la même contrainte.
+- **`eponge.rs` est un refactor**, pas seulement un ajout : il extrait de `shallow.rs` le profil
+  d'éponge pour le partager avec `dispersif.rs`. C'est le seul point du code où un conflit réel est
+  possible avec l'instrumentation de S38.
+- **État de départ** : `cargo test` = **77 tests** (32 cœur + 45 harnais, un `ignore`), `check` = 0
+  échec, hashs `0x3e2c06a7b00e73e3` et `0x1a8b0629a9f51b6e`. Mode `physics` : 33,7 s sur 60 s.
+- **Ce que cette session ne fait pas** : trancher le seuil de sec (**S37-1**, **A163**), qui était la
+  session recommandée. Elle est reportée d'un cran, pour une raison qui se dit en une ligne :
+  *un corpus qui affirme faux est plus urgent qu'un corpus qui laisse une question ouverte.*
