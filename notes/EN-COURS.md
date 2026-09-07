@@ -112,10 +112,10 @@ valeur.
 - [x] **P1** — plan, jeton.
 - [x] **P2** — rendre le seuil de `shallow.rs` **paramétrable**. Il est en dur à deux endroits ;
       sans cela, rien ne se balaie de ce côté et l'oracle ne sert pas.
-- [ ] **P3** — **rejouer le balayage d'`ADR-031` §4** dans cet arbre, étendu à `10⁻¹⁰`, et sur les
+- [x] **P3** — **rejouer le balayage d'`ADR-031` §4** dans cet arbre, étendu à `10⁻¹⁰`, et sur les
       **deux** véhicules. Un chiffre publié se rejoue avant de servir (**L143**).
-- [ ] **P4** — mesurer ce que le seuil déplace sur **chaque grandeur publiée** de C04.
-- [ ] **P5** — et sur celles que rien ne publie : `max|u|`, la longueur du film, le compte de
+- [x] **P4** — mesurer ce que le seuil déplace sur **chaque grandeur publiée** de C04.
+- [x] **P5** — et sur celles que rien ne publie : `max|u|`, la longueur du film, le compte de
       cellules litigieuses. C'est là que la sensibilité vit.
 - [ ] **P6** — **la décision**, en ADR. Elle porte sur ce que le seuil gouverne, pas sur un nombre.
 - [ ] **P7** — répercussions : `ADR-031` §4 reçoit ce que S40 ajoute, `A163` est tranché ou

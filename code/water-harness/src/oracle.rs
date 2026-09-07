@@ -466,6 +466,100 @@ pub fn declenchement_c04(cfl: f64, duree_s: f64) -> Bilan {
     }
 }
 
+/// **Ce qu'un seuil de sec déplace, grandeur par grandeur** — S40, angle mort **A163**.
+///
+/// `ADR-031` §4 avait balayé `H_SEC` sur six décades côté `delta.rs` et conclu que **la valeur est
+/// libre** : 0,25 point d'effet sur seize, sur la position du front. S37 a mesuré, sur le même cas,
+/// **6,16 m/s** d'écart de vitesse imputable à ce même seuil.
+///
+/// **Les deux sont vraies et ne parlent pas de la même grandeur.** Ce relevé les met côte à côte :
+/// pour un seuil donné, ce que voient les grandeurs **publiées** de C04, et ce que voit `max|u|`,
+/// que rien ne publie.
+pub struct Sensibilite {
+    pub seuil: f64,
+    /// Position du front, mesurée au seuil **de mesure** de C04 — `10⁻²·h₀`, sans rapport avec le
+    /// seuil du solveur. Deux objets, deux noms (**L148**).
+    pub front: f64,
+    /// Hauteur au droit du barrage.
+    pub h0: f64,
+    /// Volume total — la conservation, que rien ne devrait toucher.
+    pub volume: f64,
+    /// `max|u|` sur tout le domaine. **Aucun cas canonique ne la publie.**
+    pub u_max: f64,
+    /// Longueur du film : cellules à `0 < h < 10⁻⁶`.
+    pub film: usize,
+}
+
+/// Balaie le seuil de sec sur `delta.rs`, montage C04.
+pub fn sensibilite_delta(seuils: &[f64], duree_s: f64) -> Vec<Sensibilite> {
+    seuils
+        .iter()
+        .map(|&sec| {
+            let mut d = avec_hote(1 << 22, |h| {
+                Delta1D::configure(h, Bassin::c04()).expect("delta")
+            })
+            .avec_h_sec(sec as f32);
+            d.avancer_equilibre(duree_s);
+            let c = champs_delta(&d);
+            let x_barrage = c.x[400] - 0.5 * 0.05;
+            Sensibilite {
+                seuil: sec,
+                front: d.front(1e-2).map(|x| x as f64 - x_barrage).unwrap_or(f64::NAN),
+                h0: c.hauteur[400],
+                volume: d.volume(),
+                u_max: c.vitesse.iter().fold(0.0f64, |a, b| a.max(b.abs())),
+                film: c.hauteur.iter().filter(|&&h| h > 0.0 && h < SEC_DELTA).count(),
+            }
+        })
+        .collect()
+}
+
+/// Le même balayage sur `shallow.rs`, seuil paramétrable depuis S40.
+pub fn sensibilite_shallow(seuils: &[f64], duree_s: f64) -> Vec<Sensibilite> {
+    use water_core::Flux;
+    seuils
+        .iter()
+        .map(|&sec| {
+            let mut s = avec_hote(1 << 22, |h| {
+                Shallow1D::configure_barrage(h, 800, 0.05, 1.0).expect("shallow")
+            });
+            s.regler_flux(Flux::Rusanov);
+            s.regler_h_sec(sec);
+            s.avancer_jusqu_a(duree_s, 0.45);
+            let c = champs_shallow(&s);
+            let x_barrage = c.x[400] - 0.5 * 0.05;
+            Sensibilite {
+                seuil: sec,
+                front: s.front_mouille(1e-2).map(|x| x - x_barrage).unwrap_or(f64::NAN),
+                h0: c.hauteur[400],
+                volume: s.volume(),
+                u_max: c.vitesse.iter().fold(0.0f64, |a, b| a.max(b.abs())),
+                film: c.hauteur.iter().filter(|&&h| h > 0.0 && h < SEC_DELTA).count(),
+            }
+        })
+        .collect()
+}
+
+/// Imprime un balayage, avec l'écart relatif de chaque grandeur à sa valeur au seuil de référence.
+pub fn rapporter_sensibilite(nom: &str, v: &[Sensibilite]) {
+    println!("  {nom} — C04 à t = 2 s, balayage du seuil de sec du solveur :");
+    println!("      seuil        front (m)    Δfront     h(0) (m)     volume       Δvolume      max|u| (m/s)   film");
+    let r = &v[0];
+    for s in v {
+        println!(
+            "      {:>8.0e}   {:>9.5}   {:>8.4} %   {:>8.5}   {:>10.6}   {:>9.2e}   {:>11.4}   {:>4}",
+            s.seuil,
+            s.front,
+            (s.front - r.front).abs() / r.front.abs() * 100.0,
+            s.h0,
+            s.volume,
+            (s.volume - r.volume).abs() / r.volume.abs(),
+            s.u_max,
+            s.film
+        );
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -714,6 +808,78 @@ mod tests {
             meme_flux.hauteur.linf,
             autre_flux.hauteur.linf
         );
+    }
+
+    /// **P3–P5 — de quoi ce seuil décide-t-il ?**
+    ///
+    /// Sept décades, de `10⁻³` à `10⁻¹⁰`, sur les **deux** véhicules. `ADR-031` §4 s'arrêtait à
+    /// `10⁻⁹` et ne regardait que le front ; ici, chaque grandeur publiée de C04 est relevée à côté
+    /// de `max|u|`, que **rien ne publie**.
+    #[test]
+    fn ce_que_le_seuil_de_sec_deplace() {
+        let seuils = [1e-3f64, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8, 1e-9, 1e-10];
+        let d = sensibilite_delta(&seuils, 2.0);
+        rapporter_sensibilite("delta.rs  (f32)", &d);
+        let s = sensibilite_shallow(&seuils, 2.0);
+        rapporter_sensibilite("shallow.rs (f64)", &s);
+
+        // **Volet 1 — les grandeurs publiées sont insensibles.**
+        //
+        // La tolérance sur le volume est à `10⁻⁶` relatif et non à l'arrondi : `delta.rs` calcule en
+        // `f32`, où la somme de 800 cellules porte déjà quelques `10⁻⁸` de bruit (**A164**). Une
+        // borne à `10⁻⁹` mesurerait la précision, pas la conservation — c'est le plancher de S37,
+        // sur un autre objet.
+        for (nom, v) in [("delta.rs", &d), ("shallow.rs", &s)] {
+            let r = &v[0];
+            for x in v.iter() {
+                let e = (x.front - r.front).abs() / r.front.abs() * 100.0;
+                assert!(
+                    e < 1.0,
+                    "{nom} : le front bouge de {e:.3} % entre 10⁻³ et {:.0e} — la thèse tombe",
+                    x.seuil
+                );
+                assert!(
+                    (x.volume - r.volume).abs() / r.volume < 1e-6,
+                    "{nom} : le volume n'est pas conservé à travers le balayage"
+                );
+                assert!(
+                    (x.h0 - r.h0).abs() / r.h0 < 1e-3,
+                    "{nom} : h(0) bouge avec le seuil"
+                );
+            }
+        }
+
+        // **Volet 2 — et `max|u|` n'est pas une grandeur, c'est du bruit.**
+        //
+        // Le critère n'est pas une tolérance : `2c₀ = 2√(g·h₀) = 6,264 m/s` est **la vitesse
+        // maximale que la solution de Ritter contient**. Une valeur au-dessus ne décrit aucun
+        // écoulement — elle décrit `hu/h` sur un film dont l'épaisseur est un réglage.
+        let c2 = 2.0 * (G * 1.0f64).sqrt();
+        for (nom, v) in [("delta.rs", &d), ("shallow.rs", &s)] {
+            let umax = v.iter().fold(0.0f64, |a, x| a.max(x.u_max));
+            let umin = v.iter().fold(f64::INFINITY, |a, x| a.min(x.u_max));
+            println!(
+                "{nom} — max|u| sur le balayage : de {umin:.4} à {umax:.4} m/s, pour une borne physique de {c2:.3}"
+            );
+            assert!(
+                umax > c2,
+                "{nom} : max|u| devrait dépasser la vitesse du front de Ritter — c'est ce qui montre que la grandeur n'est pas physique"
+            );
+            assert!(
+                umax / umin > 1.5,
+                "{nom} : max|u| devrait varier d'un facteur notable avec le seuil — mesuré {:.2}",
+                umax / umin
+            );
+        }
+
+        // **Volet 3 — le film s'allonge quand le seuil baisse**, régulièrement, des deux côtés.
+        // C'est **A165** : le seuil coupe la vitesse, pas le flux de masse.
+        for (nom, v) in [("delta.rs", &d), ("shallow.rs", &s)] {
+            assert!(
+                v.last().unwrap().film > v[0].film,
+                "{nom} : le film devrait s'allonger quand le seuil baisse"
+            );
+        }
     }
 
     /// **P5 — C01 confronté : les deux véhicules disent-ils la même chose ?**
