@@ -88,6 +88,7 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 | [043](adr/ADR-043-deux-lignees-ont-ecrit-le-meme-solveur.md) | **Deux lignées ont écrit le même solveur le même jour** | proposée | le premier **oracle croisé** du projet · l'« éponge » est **trois** fonctions, une seule mesurée (**A161**) · l'ordre deux explique tout l'écart de verdicts · **note S37** sur le §7.2 |
 | [044](adr/ADR-044-ce-que-l-oracle-croise-peut-dire.md) | **Ce que l'oracle croisé peut dire, et ce qu'il ne peut pas** | proposée | **aucune faute de calcul** : 0,065 % sur C04 · mais **deux seuils de sec incompatibles** (**A163**, sév. 1) · `f32` contre `f64`, neuf ordres de grandeur (**A164**) · clôt S35-3 |
 | [045](adr/ADR-045-la-saturation-est-un-detecteur-pas-un-filet.md) | **La saturation d'état est un détecteur de divergence, pas un filet** | proposée | **zéro déclenchement** en régime nominal · la frontière tombe sur la **condition de Courant** · un seuil de sec ne coupe pas le flux de masse (**A165**) · clôt S34-1 et S37-3, **requalifie A146** |
+| [047](adr/ADR-047-le-seuil-de-sec-ne-decide-de-rien-de-publiable.md) | **Le seuil de sec ne décide de rien de publiable** | proposée | sept décades, deux véhicules : le front bouge de **0,148 %** pour une tolérance de 3 % · `max\|u\|` dépasse la borne physique — **ce n'est pas une grandeur** · les deux valeurs **ne sont pas alignées** · clôt S37-1, **requalifie A163** |
 | [046](adr/ADR-046-l-eponge-en-eau-dispersive-retracte-ADR-042.md) *(ex-035 de B, B-S27)* | **L'éponge en eau dispersive, et la rétractation d'ADR-042** | proposée | **rétracte ADR-042 D2 et D4**, confirme D1 et D3 · `R` = **22,7 %** à `L_s = λ/2` · la règle devient **`L_s ≥ 2λ_δ`** · la borne de `λ_cut` est **refermée et resserrée** · `c` est la vitesse de **groupe** |
 
 ### Nature du projet *(S19)*
@@ -138,7 +139,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`specs/SPEC-004`](specs/SPEC-004-interfaces.md) | **signatures des interfaces** — solveurs, champ de fond, solides, services d'hôte, contrat de fils d'exécution |
 | [`specs/SPEC-005`](specs/SPEC-005-outillage-auteur.md) | **outillage auteur** — sources de vérité, inversion du pipeline eau/terrain, cuisson déterministe, obsolescence |
 | [`specs/SPEC-006`](specs/SPEC-006-chemin-pousse.md) | **le chemin poussé** — ce que le système *publie* : bus d'événements et `WaveEvent`, écume et aération, traversabilité, polyligne de déferlement |
-| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **168 points**, avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
+| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **169 points**, avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
 | [`registres/FORK-S22-S26.md`](registres/FORK-S22-S26.md) | **le second fork** — constat, carte de renumérotation complète, la règle manquante, et ce qui reste à fusionner |
 | [`registres/AUDIT-ASSERTIONS-S29.md`](registres/AUDIT-ASSERTIONS-S29.md) | **ce que chaque assertion peut voir** — 23 cas classés, 5 fautifs, 1 mesure du harnais retirée ; **réécriture S30 sans aucun seuil inventé** |
 | [`registres/AUDIT-SATURATIONS-S38.md`](registres/AUDIT-SATURATIONS-S38.md) | **les saturations du solveur, comptées** — zéro en régime nominal, la frontière est la condition de Courant ; trois prédictions fausses sur quatre |
@@ -204,7 +205,7 @@ Chiffrage et contraintes  █████████████████░
 Spécification technique   ████████████████████░░   92 %   chemins tiré et poussé posés, persistance tranchée ; reste IGpuBackend
 Cohérence interne         █████████████████░░░░░   80 %   26 ADR + 6 SPEC confrontés, 45 écarts résolus ; **les 6 ADR de S35 n'ont pas été confrontés au corpus**
 Décisions expérimentales  █████░░░░░░░░░░░░░░░░░   24 %   onze bancs définis, aucun exécuté ; **une moitié de `λ_cut` est mesurée** ; B3 a deux critères d'entrée
-Outillage et pipeline     ████████████████████░░   90 %   **H1, H3, deux δ et un milieu dispersif**, **84 tests** ; C01/C03 passent, C04 échoue à l'ordre un et **passe à l'ordre deux** ; H2, H4-H6 non écrits
+Outillage et pipeline     ████████████████████░░   90 %   **H1, H3, deux δ et un milieu dispersif**, **85 tests** ; C01/C03 passent, C04 échoue à l'ordre un et **passe à l'ordre deux** ; H2, H4-H6 non écrits
 Accords inter-équipes     █████░░░░░░░░░░░░░░░░░   25 %   cinq arbitrages tranchés ; quatorze demandes extérieures en attente
 ```
 

@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S40
-État             : en cours
+État             : terminée
 Battement        : 2026-09-07
 Objectif         : Trancher le seuil de sec — et d'abord établir de quoi il décide
 ```
@@ -121,7 +121,7 @@ valeur.
 - [x] **P7** — répercussions : `ADR-031` §4 reçoit ce que S40 ajoute, `A163` est tranché ou
       requalifié, `oracle.rs` cesse de porter deux constantes en dur.
 - [x] **P8a** — rituel : journal, leçons L156-L157, actions S40-1 à S40-4.
-- [ ] **P8b** — rituel : index, décomptes, jeton libéré.
+- [x] **P8b** — rituel : index, décomptes, jeton libéré.
 
 ### Notes de reprise
 
