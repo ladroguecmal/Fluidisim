@@ -68,7 +68,7 @@ Objectif         : S57-1 — découpage du calcul, borne du mode à 89600, mesur
 ### Plan
 
 - [x] **P1** — passation, jeton, plan seul.
-- [ ] **P2** — éprouver le découpage que S56 prescrit : mesurer s'il change le champ, avant de l'implémenter.
+- [x] **P2** — éprouver le découpage que S56 prescrit : mesurer s'il change le champ, avant de l'implémenter.
 - [ ] **P3** — implémenter le découpage retenu et relever la borne du mode à 89600 ; tests d'identité, d'admission et de refus.
 - [ ] **P4** — mesurer 89600/179200 selon le critère **inchangé** ; consigner erreurs, écart, temps.
 - [ ] **P5** — rapport MESURES-C22-S59 : admission de 12800, verdict des quatre fenêtres, apport au dossier A179 sans trancher S57-2.
@@ -97,3 +97,13 @@ Interdits inchangés : pas de champ sur disque (I-17), pas d'extrapolation de Ri
 champ, aucun changement de CFL, d'amplitude, de temps final ou d'initialisation, pas
 d'assouplissement du filtre ×30 ni du test de stabilité. **Ne pas traiter S57-2 ici** : cette
 session mesure sous le critère actuel ; discuter le critère est un autre travail, par ADR.
+
+P2 : la réserve est confirmée par la mesure. le_decoupage_temporel_n_est_pas_neutre passe :
+découper 0-1 s en quatre appels change le champ bit à bit, parce que chaque borne insère un pas
+tronqué par min(t_fin - t). Le remède prescrit par REFERENCE-C22-S56 par.5 aurait invalidé
+la comparaison avec S48, S49, S56, S57. Retenu à la place : découpage d observation.
+avancer_jusqu_a_observe porte désormais la seule boucle, avancer_jusqu_a n en est qu un appel
+avec observateur vide — identité structurelle, pas seulement testée.
+Le second test a d abord échoué en trouvant une vraie faute de sa propre écriture : cadence 50
+pour 35 pas, observateur jamais appelé, champ pourtant identique — un témoin muet aurait passé
+pour neutre. Compte de rendus désormais vérifié contre le nombre de pas. 127 tests, deux ignorés.

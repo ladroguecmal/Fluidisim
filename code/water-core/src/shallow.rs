@@ -907,6 +907,30 @@ impl Shallow1D {
 
     /// Avance jusqu'à `t_fin` en respectant la CFL. Renvoie le nombre de pas effectués.
     pub fn avancer_jusqu_a(&mut self, t_fin: f64, cfl: f64) -> u64 {
+        self.avancer_jusqu_a_observe(t_fin, cfl, 0, &mut |_, _| {})
+    }
+
+    /// Comme `avancer_jusqu_a`, en rendant compte de l'avancement tous les `chaque` pas
+    /// (`0` : jamais). L'observateur reçoit le nombre de pas faits et le temps atteint.
+    ///
+    /// # Le seul découpage licite d'une intégration à pas adaptatif — S59
+    ///
+    /// `dt` vaut `dt_cfl(cfl).min(t_fin − t)` : le dernier pas est **tronqué** pour atterrir
+    /// exactement sur `t_fin`. Découper une intégration en plusieurs appels insère donc un pas
+    /// tronqué à chaque borne, change la séquence de pas, et **déplace le champ** — mesuré dans
+    /// `c22_shallow`, test `le_decoupage_temporel_n_est_pas_neutre`.
+    ///
+    /// Une campagne longue a pourtant besoin de dire où elle en est. Elle l'obtient ici, sans
+    /// toucher au calcul : **c'est la même boucle**, et `avancer_jusqu_a` n'en est qu'un appel
+    /// avec un observateur vide. L'identité n'est pas une promesse à retester après chaque
+    /// modification — il n'y a qu'un chemin (**L162**, **A176**).
+    pub fn avancer_jusqu_a_observe(
+        &mut self,
+        t_fin: f64,
+        cfl: f64,
+        chaque: u64,
+        observer: &mut dyn FnMut(u64, f64),
+    ) -> u64 {
         let mut pas = 0u64;
         while self.t < t_fin {
             let dt = self.dt_cfl(cfl).min(t_fin - self.t);
@@ -915,6 +939,9 @@ impl Shallow1D {
             }
             self.pas(dt);
             pas += 1;
+            if chaque != 0 && pas % chaque == 0 {
+                observer(pas, self.t);
+            }
         }
         pas
     }

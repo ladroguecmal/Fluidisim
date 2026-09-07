@@ -4,10 +4,8 @@ use crate::physics::{Convergence, Reference};
 use crate::rapport_convergence::Bilan;
 use water_core::{Flux, HostServices, Shallow1D};
 
-fn champ(n: usize, amplitude: f64, temps: f64) -> Result<Vec<f64>, String> {
-    if n < 4 || !amplitude.is_finite() || !temps.is_finite() || temps < 0.0 {
-        return Err("montage invalide".into());
-    }
+/// Le montage de C22, en un seul endroit — le témoin de S59 doit monter *le même*.
+fn monter(n: usize, amplitude: f64) -> Result<Shallow1D, String> {
     let mut alloc = ArenaAllocator::with_capacity(n.checked_mul(128).ok_or("taille excessive")?);
     let jobs = SequentialJobs;
     let sink = StderrSink;
@@ -18,7 +16,11 @@ fn champ(n: usize, amplitude: f64, temps: f64) -> Result<Vec<f64>, String> {
     d.regler_flux(Flux::Hll);
     d.regler_ordre2(true);
     d.regler_rk2(true);
-    d.avancer_jusqu_a(temps, 0.45);
+    Ok(d)
+}
+
+/// Relève le champ et refuse tout ce qu'ADR-045 refuse.
+fn relever(d: &Shallow1D, n: usize, temps: f64) -> Result<Vec<f64>, String> {
     if d.temps() != temps { return Err("temps final non atteint".into()); }
     let h: Vec<_> = (0..n).map(|i| d.hauteur(i)).collect();
     if h.iter().any(|v| !v.is_finite()) { return Err("champ non fini".into()); }
@@ -28,6 +30,47 @@ fn champ(n: usize, amplitude: f64, temps: f64) -> Result<Vec<f64>, String> {
     }
     Ok(h)
 }
+
+/// Le champ de C22, en **une seule** intégration.
+///
+/// # Pourquoi il n'y a pas de variante « en tranches »
+///
+/// `REFERENCE-C22-S56` §5 prescrivait, au-delà du quart d'heure, « un découpage de calcul en
+/// tranches temporelles gardées en mémoire ». **Ce découpage n'est pas neutre** : `avancer_jusqu_a`
+/// prend `dt = dt_cfl.min(t_fin − t)`, donc chaque borne de tranche insère un pas tronqué qui
+/// n'existe pas dans le calcul continu. La séquence de pas change, et le champ avec elle — mesuré
+/// en S59, test `le_decoupage_temporel_n_est_pas_neutre`. Un découpage pareil aurait invalidé
+/// toute comparaison avec S48, S49, S56 et S57.
+///
+/// Le découpage licite est celui de l'**observation** : `avancer_jusqu_a_observe` rend compte de
+/// l'avancement sans toucher à la séquence, et `avancer_jusqu_a` n'est plus qu'un appel à cette
+/// boucle avec un observateur vide — l'identité est structurelle, pas seulement testée.
+fn champ(n: usize, amplitude: f64, temps: f64) -> Result<Vec<f64>, String> {
+    if n < 4 || !amplitude.is_finite() || !temps.is_finite() || temps < 0.0 {
+        return Err("montage invalide".into());
+    }
+    let mut d = monter(n, amplitude)?;
+    // Rendre compte de l'avancement des seuls champs coûteux, environ dix fois chacun. La cadence
+    // se déduit du premier `dt` : à taille fixée le pas varie peu, mais il varie d'un facteur 900
+    // entre la plus petite grille et le plus gros oracle — une cadence en nombre de pas fixe ne
+    // conviendrait à aucune des deux. Un compte de pas ne pilote rien : il est **observé**.
+    let cadence = if n >= SEUIL_PROGRES {
+        let dt0 = d.dt_cfl(0.45);
+        if dt0.is_finite() && dt0 > 0.0 { (((temps / dt0) / 10.0) as u64).max(1) } else { 0 }
+    } else {
+        0
+    };
+    let debut = std::time::Instant::now();
+    d.avancer_jusqu_a_observe(temps, 0.45, cadence, &mut |pas, t| {
+        eprintln!("    n={n} : {:5.1} % — {pas} pas, t={t:.4} s, {:.1} s",
+            100.0 * t / temps, debut.elapsed().as_secs_f64());
+    });
+    relever(&d, n, temps)
+}
+
+/// Au-dessus de cette taille, un champ rend compte de son avancement. En dessous il est
+/// instantané, et l'affichage ne ferait que brouiller la sortie mesurée.
+const SEUIL_PROGRES: usize = 20_000;
 
 fn erreur(h: &[f64], oracle: &[f64]) -> Result<f64, String> {
     if h.is_empty() || oracle.len() < h.len() || oracle.len() % h.len() != 0 {
@@ -120,6 +163,71 @@ fn mesurer(nx_oracle: usize, fenetres: usize) -> Result<usize, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Le champ obtenu en découpant l'intégration, **le remède que S56 prescrivait**.
+    /// N'existe que pour être refusé : aucun chemin de production ne l'appelle.
+    fn champ_en_tranches(n: usize, amplitude: f64, temps: f64, tranches: usize)
+        -> Result<Vec<f64>, String> {
+        let mut d = monter(n, amplitude)?;
+        for k in 1..=tranches {
+            d.avancer_jusqu_a(temps * k as f64 / tranches as f64, 0.45);
+        }
+        relever(&d, n, temps)
+    }
+
+    /// **Découper une intégration à pas adaptatif n'est pas neutre** — S59, action S57-1.
+    ///
+    /// Le protocole de S56 demandait ce découpage pour rendre supportable une campagne de plus
+    /// d'un quart d'heure. Il aurait changé les chiffres qu'il devait permettre de comparer.
+    #[test]
+    fn le_decoupage_temporel_n_est_pas_neutre() {
+        let continu = champ(200, 0.01, 1.0).expect("champ continu");
+        let decoupe = champ_en_tranches(200, 0.01, 1.0, 4).expect("champ découpé");
+        assert_eq!(continu.len(), decoupe.len());
+        assert!(
+            continu.iter().zip(&decoupe).any(|(a, b)| a != b),
+            "le découpage a rendu le champ bit à bit identique : la thèse de S59 est fausse,              relire REFERENCE-C22-S56 §5 avant d'en tirer quoi que ce soit"
+        );
+        // Et l'écart n'est pas un bruit d'arrondi isolé : il porte sur la grandeur mesurée.
+        let e = erreur(&continu, &decoupe).unwrap_or(0.0);
+        assert!(e > 0.0, "écart L1 nul entre continu et découpé");
+    }
+
+    /// L'observation, elle, ne touche à rien — et l'identité est structurelle : `avancer_jusqu_a`
+    /// **est** `avancer_jusqu_a_observe` avec un observateur vide. Ce test le confirme de bout en
+    /// bout, et compte les rendus pour qu'un observateur muet ne passe pas pour neutre.
+    #[test]
+    fn l_observation_ne_change_pas_le_champ() {
+        let continu = champ(200, 0.01, 1.0).expect("champ continu");
+
+        let mut d = monter(200, 0.01).expect("montage");
+        let mut vus = 0u64;
+        let mut dernier_pas = 0u64;
+        let mut dernier_t = 0.0;
+        let pas = d.avancer_jusqu_a_observe(1.0, 0.45, 5, &mut |p, t| {
+            vus += 1;
+            dernier_pas = p;
+            dernier_t = t;
+        });
+        let observe = relever(&d, 200, 1.0).expect("champ observé");
+
+        assert_eq!(continu, observe, "l'observation a déplacé le champ");
+        // Un observateur qu'on n'appelle jamais passerait pour neutre. C'est la faute que la
+        // première écriture de ce test a commise — cadence 50 pour trente-cinq pas — et c'est
+        // pourquoi le compte est vérifié contre le nombre de pas réellement faits.
+        assert_eq!(vus, pas / 5, "rendus {vus} pour {pas} pas à la cadence 5");
+        assert!(vus > 0, "aucun rendu d'avancement : l'observateur n'a rien vu");
+        assert_eq!(dernier_pas, (pas / 5) * 5);
+        assert!(dernier_t > 0.0 && dernier_t <= 1.0, "temps rapporté hors du calcul");
+
+        // Cadence nulle : aucun rendu, et le champ ne bouge pas davantage.
+        let mut d0 = monter(200, 0.01).expect("montage");
+        let mut jamais = 0u64;
+        d0.avancer_jusqu_a_observe(1.0, 0.45, 0, &mut |_, _| jamais += 1);
+        assert_eq!(jamais, 0);
+        assert_eq!(continu, relever(&d0, 200, 1.0).expect("champ sans observateur"));
+    }
+
     #[test]
     fn fenetre_coupee_sans_recoudre_les_grilles() {
         let m = [(100,8.0),(200,4.0),(400,2.0),(800,0.5),(1600,1.5),(3200,1.1),(6400,1.0)];
