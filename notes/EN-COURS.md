@@ -69,7 +69,7 @@ Objectif         : S57-1 — découpage du calcul, borne du mode à 89600, mesur
 
 - [x] **P1** — passation, jeton, plan seul.
 - [x] **P2** — éprouver le découpage que S56 prescrit : mesurer s'il change le champ, avant de l'implémenter.
-- [ ] **P3** — implémenter le découpage retenu et relever la borne du mode à 89600 ; tests d'identité, d'admission et de refus.
+- [x] **P3** — implémenter le découpage retenu et relever la borne du mode à 89600 ; tests d'identité, d'admission et de refus.
 - [ ] **P4** — mesurer 89600/179200 selon le critère **inchangé** ; consigner erreurs, écart, temps.
 - [ ] **P5** — rapport MESURES-C22-S59 : admission de 12800, verdict des quatre fenêtres, apport au dossier A179 sans trancher S57-2.
 - [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, passation, jeton, **fusion dans master**.
@@ -107,3 +107,8 @@ avec observateur vide — identité structurelle, pas seulement testée.
 Le second test a d abord échoué en trouvant une vraie faute de sa propre écriture : cadence 50
 pour 35 pas, observateur jamais appelé, champ pourtant identique — un témoin muet aurait passé
 pour neutre. Compte de rendus désormais vérifié contre le nombre de pas. 127 tests, deux ignorés.
+
+P3 : borne du mode portée de 76800 à 89600, décrite comme limite de campagne. Refus vérifiés :
+0, 12800, 32000, 102400 (multiple de 12800, refusé par la borne seule) et usize::MAX ; 89601
+refusé aussi. 127 tests réussis, deux ignorés ; hashs check inchangés. Mesure P4 lancée sans
+test concurrent.

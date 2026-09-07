@@ -110,8 +110,12 @@ fn famille(mesures: &[(usize, f64)], seuil: f64, debut: usize) -> Vec<(usize, f6
 fn mesurer(nx_oracle: usize, fenetres: usize) -> Result<usize, String> {
     let grilles = [100, 200, 400, 800, 1600, 3200, 6400, 12800];
     if fenetres == 4 {
-        if nx_oracle <= 12800 || nx_oracle > 76800 || nx_oracle % 12800 != 0 {
-            return Err("fenêtre fine : oracle multiple de 12800, entre 25600 et 76800".into());
+        // Borne relevée de 76800 à 89600 en S59 (action S57-1). Comme la précédente, c'est une
+        // limite de **campagne** — elle borne le temps machine, pas la physique. S57 a mesuré que
+        // l'admission de la grille 12800 demande un premier oracle d'environ 79 000, et 89600 est
+        // le premier multiple de 12800 au-dessus.
+        if nx_oracle <= 12800 || nx_oracle > 89600 || nx_oracle % 12800 != 0 {
+            return Err("fenêtre fine : oracle multiple de 12800, entre 25600 et 89600".into());
         }
     } else if nx_oracle < 3200 || nx_oracle > 51200 || nx_oracle % 1600 != 0 {
         return Err("oracle attendu : multiple de 1600, entre 3200 et 51200".into());
@@ -236,7 +240,10 @@ mod tests {
         assert_eq!(famille(&m,0.0,2),m[2..]);
         assert!(fenetres(9600).is_err());
         assert!(fenetres(6400).is_err());
-        for n in [0, 12800, 32000, 89600, usize::MAX] { assert!(fine(n).is_err()); }
+        // Refus : nul, égal à la grille fine, non multiple, **au-dessus de la borne de campagne**
+        // (102400 est bien un multiple de 12800 : c'est la borne qui le refuse, pas l'emboîtement),
+        // et le débordement. 89600 n'est plus dans cette liste depuis S59 — il est admis.
+        for n in [0, 12800, 32000, 102_400, usize::MAX] { assert!(fine(n).is_err()); }
     }
     #[test]
     fn projection_conservative_et_refus() {
