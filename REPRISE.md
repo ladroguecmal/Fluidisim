@@ -18,12 +18,18 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 12:05 +02:00
+JETON            : libre
+Battement        : 2026-09-08 12:30 +02:00
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Session en cours : S69 — bilan d'avancement, demandé par l'utilisateur
-Dernière session : S68 — 2026-09-08 — ADR-052, contrats separes
-Session suivante : S70 — S64-2, calibration statistique Hs par ADR (décalée d'une session)
+Session en cours : aucune
+Dernière session : S69 — 2026-09-08 — bilan d'avancement (BILAN-S69)
+Session suivante : S70 — **B1**, le seul banc exécutable, recommandé par le bilan ; ou S64-2
+
+**Bilan S69, et il change l'ordre des priorités.** ~85 % comme corpus de conception, **~15 %
+comme système** : `δ`, `W` et `V` n'existent pas. **Onze cas sur 23 et onze bancs sur onze
+attendent une couche non écrite** — le projet ne peut plus progresser par la mesure. De S47 à
+S68, **aucune session n'a produit de conception du système d'eau**. Voir
+[`BILAN-S69`](docs/registres/BILAN-S69.md) §5 pour l'ordre recommandé.
 
 S68 : A187 expliqué et S66-1 close ; calibration statistique S64-2 reste à instruire.
 

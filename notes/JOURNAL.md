@@ -5420,3 +5420,47 @@ aucun état sérialisé. Hs, sa fenêtre et sa tolérance restent sous ADR-051.
 
 Suite S69 : S64-2, instruire calibration statistique et décision de tolérance par ADR.
 S63-1 demeure le blocage B2 : couche dispersive à planifier. A103/C22 clos, aucun distant créé.
+
+## S69 — 2026-09-08 — Vingt-deux sessions sur l'instrument, zéro sur l'eau
+
+**Agent : Claude Code (Opus 5)**. Départ e839c77 ; S65 à S68 conduites par Codex, fusionnées,
+rien en cours. Entrée : **demande de l'utilisateur** — évaluer le taux de progression et les
+étapes futures. S64-2 est décalée à S70.
+
+**Sortie.** [`BILAN-S69`](../docs/registres/BILAN-S69.md). Aucun code modifié, aucun calcul lancé.
+
+**Précaution de méthode.** Les colonnes « État » des tableaux d'actions antérieurs à S45 disent
+« ouverte » pour des actions closes par une note en prose (S35-1, S35-2). **A185** interdisait de
+s'y fier ; le bilan s'appuie sur les compteurs de fichiers, la sortie du harnais et le chemin
+critique.
+
+**Le chiffre dépend de ce qu'on appelle le projet.** Comme corpus de conception — ce que le dépôt
+dit être — **~85 %**. Comme système utilisable dans un jeu — **~15 %**. Le harnais est solide, la
+conception est mûre, et **rien de ce qui doit tourner dans le jeu n'est écrit** : `δ`, `W` et `V`
+n'existent pas, et les deux véhicules 1D ne sont pas le système.
+
+**Le fait central, et il est vérifiable dans le journal.** De **S47 à S68, aucune session n'a
+produit de conception du système d'eau** : quinze sur le dossier C22, sept sur `Hs`, la graine et
+le spectre dense. Ce travail n'est pas perdu — il a fait conclure C22, mesuré A102 après quarante
+sessions, réconcilié quatre forks, et surtout construit la fiabilité de l'instrument. Mais son
+rendement se dégrade, et le corpus le mesure lui-même : S61 a établi que quatre campagnes avaient
+mesuré ce qu'un rapport d'entiers donnait, S64 que deux motifs de report étaient faux, S63 que les
+préalables du banc décisif étaient périmés depuis quarante sessions.
+
+**Le goulot.** *Le projet ne peut plus progresser par la mesure, parce que ce qu'il faudrait
+mesurer n'existe pas.* Le harnais l'imprime à chaque exécution : **onze cas sur 23** et **onze
+bancs sur onze** attendent une couche non écrite.
+
+**Ce que le bilan trouve, et qui est actionnable tout de suite** : **B1 est le seul des onze bancs
+exécutable en l'état** — `B` existe, le harnais mesure, et depuis S65 la graine produit des
+réalisations indépendantes. Il n'a jamais été lancé. Et **A187** vient de le rendre urgent : le
+nombre de composantes n'est plus seulement une question de coût mais de **justesse**.
+
+**Ce qui n'est pas de ma portée**, et qui est remonté à l'humain : décider si le projet passe à la
+construction ou reste un corpus de conception. *Ne pas choisir revient à choisir le second par
+défaut* — c'est ce qui s'est produit pendant vingt-deux sessions.
+
+**Suite S70 : S64-2**, la calibration statistique, comme prévu avant ce bilan. Mais la
+recommandation du bilan est **B1** avant toute nouvelle session de raffinement, et **S63-1** pour
+débloquer B2. A103 close en S58 ; l'état réel et l'infrastructure restent hors de portée.
+

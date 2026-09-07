@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S69
-État             : en cours
+État             : terminée
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
 Objectif         : Bilan d'avancement — taux de progression, goulot réel, étapes futures.
                    Demandé par l'utilisateur ; S64-2 est décalée à S70.
@@ -69,8 +69,8 @@ Objectif         : Bilan d'avancement — taux de progression, goulot réel, ét
 ### Plan
 
 - [x] **P1** — passation, jeton, plan seul.
-- [ ] **P2** — établir le bilan sur des compteurs vérifiés, pas sur les colonnes d'état des vieux tableaux (**A185**).
-- [ ] **P3** — rituel : journal, index, jeton, **fusion dans master**.
+- [x] **P2** — établir le bilan sur des compteurs vérifiés, pas sur les colonnes d'état des vieux tableaux (**A185**).
+- [x] **P3** — rituel : journal, index, jeton, **fusion dans master**.
 
 ### Notes de reprise
 
@@ -83,3 +83,8 @@ notes en prose sous les tableaux les closent (S35-1 et S35-2 closes par une note
 exemple). **Ne pas compter les actions ouvertes à partir de ces colonnes.** Le bilan s'appuie sur
 ce qui se vérifie : le nombre de fichiers, les compteurs de l'index tenus à jour par le rituel, la
 sortie du harnais, et le chemin critique de `REPRISE.md` §4.
+
+P2/P3 : BILAN-S69 écrit et indexé, entrée de journal, jeton rendu. Aucun code, aucun calcul.
+Trois recommandations remontées : lancer B1 (seul banc exécutable, jamais lancé), trancher S63-1
+(seul verrou de B2), et **décider si le projet passe à la construction** — ce dernier point hors
+de portée d une session.
