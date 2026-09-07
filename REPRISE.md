@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-08 01:26 +02:00
-Agent            : Codex (git et cargo disponibles)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-08 12:05 +02:00
+Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
+Session en cours : S69 — bilan d'avancement, demandé par l'utilisateur
 Dernière session : S68 — 2026-09-08 — ADR-052, contrats separes
-Session suivante : S69 — S64-2, calibration statistique Hs par ADR
+Session suivante : S70 — S64-2, calibration statistique Hs par ADR (décalée d'une session)
 
 S68 : A187 expliqué et S66-1 close ; calibration statistique S64-2 reste à instruire.
 

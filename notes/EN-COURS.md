@@ -59,34 +59,27 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S68
-État             : terminée
-Agent            : Codex (git et cargo disponibles)
-Objectif         : S66-1, séparer précision spatiale et diagnostic statistique par ADR.
+Session          : S69
+État             : en cours
+Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
+Objectif         : Bilan d'avancement — taux de progression, goulot réel, étapes futures.
+                   Demandé par l'utilisateur ; S64-2 est décalée à S70.
 ```
 
 ### Plan
 
-- [x] **P1** — état réel, passation et plan seul.
-- [x] **P2** — contrôle direct de phase avec borne dérivée de l’arithmétique ; témoin, défaut injecté et refus.
-- [x] **P3** — ADR-052, raccord au rapport, homogénéité diagnostique comptée ; tests et campagne.
-- [x] **P4** — rituel de passation, journal, actions, index et décomptes, jeton libre.
+- [x] **P1** — passation, jeton, plan seul.
+- [ ] **P2** — établir le bilan sur des compteurs vérifiés, pas sur les colonnes d'état des vieux tableaux (**A185**).
+- [ ] **P3** — rituel : journal, index, jeton, **fusion dans master**.
 
 ### Notes de reprise
 
-Master 3734fa4 propre, 29ef50 identique. REPRISE et socle lus dans cette conversation.
-S66/S67 ont isolé les covariances, pas un défaut de phase. Ne pas élargir la tolérance 15 %
-pour faire passer la statistique ; conserver le chiffre en diagnostic explicite. Le nouveau
-contrôle doit exercer le calcul réellement appelé par eval et refuser une phase dégradée.
-Borne d’arrondi à dériver avant observation ; calibration Hs S64-2 séparée, S63-1 ouverte.
+Départ e839c77, master et worktree confondus. Les sessions S65 à S68 ont été conduites par Codex
+et sont fusionnées ; rien n'était en cours.
 
-P2 : primitive de phase partagée entre eval et audit ; erreur circulaire / borne gamma3
-sur produit scalaire fois k, plus u et 2^-32. Échantillons invalides ou borne non informative
-refusés. Témoin 256 composantes et défaut injecté (phase sur quatre bits) : test vert.
-
-P3 : ADR-052 et CONTROLES-S68. Scores 0,227536/0,650281, seuil dérivé 1 ; diagnostics
-0,979548732/1,397506641 inchangés, sans verdict. Refus statistique non fini compté en échec.
-137 tests verts, cinq ignorés ; check inchangé, physics seulement C04 en échec. Aucun seuil
-Hs changé. Suite S69 S64-2, calibration à instruire par ADR.
-
-P4 : rituel terminé, S66-1 close, suite S69 S64-2. Aucun calcul en cours, jeton libre.
+**Une précaution de méthode, et elle vient d'A185.** Les colonnes « État » des tableaux d'actions
+antérieurs à S45 ne sont pas fiables : plusieurs actions y sont marquées « ouverte » alors que des
+notes en prose sous les tableaux les closent (S35-1 et S35-2 closes par une note de S36, par
+exemple). **Ne pas compter les actions ouvertes à partir de ces colonnes.** Le bilan s'appuie sur
+ce qui se vérifie : le nombre de fichiers, les compteurs de l'index tenus à jour par le rituel, la
+sortie du harnais, et le chemin critique de `REPRISE.md` §4.
