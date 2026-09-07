@@ -68,7 +68,7 @@ Objectif         : Expliquer le refus de seiche à 400 cellules et 60 s (S54-1).
 ### Plan
 
 - [x] **P1** — reprise, état réel, jeton et plan seul.
-- [ ] **P2** — instrumenter les étapes de mesure et reproduire refus/témoin ; isoler une cause vérifiable.
+- [x] **P2** — instrumenter les étapes de mesure et reproduire refus/témoin ; isoler une cause vérifiable.
 - [ ] **P3** — corriger la cause si démontrée, tests analytiques et campagne nominale ; documenter chiffres déplacés et portée.
 - [ ] **P4** — rituel : journal, enseignements, actions, index/décomptes, passation et jeton libre.
 
@@ -77,3 +77,8 @@ Objectif         : Expliquer le refus de seiche à 400 cellules et 60 s (S54-1).
 Master e55582a propre. Socle et REPRISE lus dans cette conversation ; S54 relue.
 Hypothèse à tester : les plateaux de quantification f32 effacent les changements de pente.
 Ne pas réduire le minimum de six extrema pour faire passer le témoin.
+
+P2 : sept passages à zéro aux deux résolutions sur 60 s. Détecteur courant : huit extrema
+à nx=200, cinq à nx=400 ; en conservant le dernier sens non nul : treize aux deux.
+Avant correction nx=200 T=9,0301704179, demi-vie=25,2378474365 périodes, R²=0,9996929481 ;
+nx=400 refus. Instrumentation temporaire cfg(test) à retirer en P3, cause des plateaux isolée.

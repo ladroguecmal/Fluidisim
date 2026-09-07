@@ -1427,6 +1427,8 @@ pub fn mesurer_seiche_cfl(
     let mut pente_prec = 0.0f64;
     let mut zeros: Vec<f64> = Vec::new();
     let mut extrema: Vec<(f64, f64)> = Vec::new();
+    #[cfg(test)]
+    let (mut derniere_non_nulle, mut extrema_plateaux) = (0.0f64, 0usize);
 
     while t < duree_s {
         let mut dt = d.dt_cfl();
@@ -1442,6 +1444,11 @@ pub fn mesurer_seiche_cfl(
 
         let eta = d.eta(0) as f64;
         let pente = eta - eta_prec;
+        #[cfg(test)]
+        if pente != 0.0 {
+            if derniere_non_nulle * pente < 0.0 { extrema_plateaux += 1; }
+            derniere_non_nulle = pente;
+        }
 
         // Passage à zéro **descendant** : un seul par période, donc aucun risque de compter deux
         // fois. Interpolé linéairement pour ne pas quantifier la mesure au pas de temps.
@@ -1457,6 +1464,8 @@ pub fn mesurer_seiche_cfl(
         eta_prec = eta;
     }
 
+    #[cfg(test)]
+    eprintln!("S55 nx={} durée={duree_s} zéros={} extrema={} avec_plateaux={extrema_plateaux}", bassin.nx, zeros.len(), extrema.len());
     if zeros.len() < 3 || extrema.len() < 6 {
         return None;
     }
@@ -2734,6 +2743,16 @@ mod tests_garde_fous_vide {
         let mut a = ArenaAllocator::with_capacity(1 << 24);
         let mut host = HostServices { alloc: &mut a, jobs: &SequentialJobs, sink: &StderrSink };
         f(&mut host);
+    }
+
+    #[test]
+    fn diagnostic_s55_seiche_excitee() {
+        avec_hote(|host| {
+            for nx in [200,400] {
+                let r = mesurer_seiche(host, Bassin { nx, ..Bassin::c03(true) }, 60.0);
+                eprintln!("S55 nx={nx} résultat={:?}", r.map(|s| (s.periode_s,s.demi_vie_periodes,s.r2)));
+            }
+        });
     }
 
     #[test]
