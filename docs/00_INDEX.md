@@ -352,7 +352,16 @@ sont posés. Ce qui reste est du code, des mesures et des réunions.
 > **Reste humain** : nommer les personnes (fiches 1 et 2 du dossier de réunion), constater l'état
 > réel du projet, agir sur l'infrastructure.
 
-### Ouvert depuis S21 — une constante, et elle déplace des références
+### Tranché en S58, ouvert depuis S21 — une constante, et le cas qui devait l'arbitrer était aveugle
+
+> **Clos par [`ADR-048`](adr/ADR-048-la-masse-volumique-est-une-propriete-du-milieu.md), 2026-09-07,
+> sur délégation explicite.** La valeur du projet est **1025** — l'eau de mer — et elle cesse d'être
+> une constante globale : c'est une propriété du **milieu**, parce que le monde contient aussi des
+> eaux intérieures. **Et le motif du blocage n'existait pas** : mesuré à 1025, C10 rend quatre
+> assertions vertes à écart 0,000 %, parce que ses trois références sont construites avec la
+> constante. La tolérance de ±1 % opposée aux 2,5 % porte sur un écart structurellement nul.
+> Voir [`RHO-EAU-S58`](validation/RHO-EAU-S58.md) et **A180**. *Le texte d'origine est conservé
+> ci-dessous.*
 
 **La masse volumique de l'eau : douce (1000) ou de mer (1025) ?** Aucun document du corpus ne la
 fixait — vingt-et-une sessions, six SPEC, vingt-neuf ADR à l'époque. `code/water-core/src/body.rs` la pose à

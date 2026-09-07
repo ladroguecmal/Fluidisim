@@ -634,6 +634,17 @@ elle n'est pas implémentée.
 > pose à 1000 pour que C10 se referme, en signalant que c'est une convention et non une mesure.
 > **La valeur du projet reste à arbitrer** — angle mort A103.
 >
+> **Note corrective — 2026-09-07, S58.** *La note ci-dessus est exacte sur ses nombres et fausse
+> sur sa conséquence, et le corpus l'a recopiée trente-sept sessions durant.* Les littéraux
+> `0,25 m` et `1,003 s` ne se retrouvent bien qu'avec `ρ_eau = 1000` ; mais **le cas exécuté ne
+> les contient pas** : ses trois références sont construites *avec* la constante, donc l'écart
+> mesure-référence est nul pour **toute** valeur. Mesuré à 1025 : tirant 0,243902 m, raideur
+> 2513,8125 N/m, période 0,990726 s — **quatre assertions vertes, écart 0,000 %**. La tolérance
+> de ±1 % qu'oppose la note porte sur cet écart, pas sur la valeur : **C10 n'arbitre pas `ρ_eau`
+> et ne l'a jamais fait**. Voir [`RHO-EAU-S58`](RHO-EAU-S58.md), **A180**, et
+> [`ADR-048`](../adr/ADR-048-la-masse-volumique-est-une-propriete-du-milieu.md), qui tranche A103
+> sur délégation : la valeur du projet est **1025**, et elle devient une propriété du milieu.
+>
 > **Trois des quatre grandeurs de C10 sont mesurables sans intégrateur**, et le sont depuis S21 : le
 > tirant, par bissection sur la force ; la raideur `k = ρ·g·A`, par différence centrée ; et la période
 > **qu'implique cette raideur**, qui n'est pas une oscillation observée. La variante à masse ajoutée

@@ -71,7 +71,7 @@ Objectif         : Trancher A103 — la masse volumique de l'eau — sur délég
 - [x] **P1** — passation, jeton, plan seul.
 - [x] **P2** — recenser tous les emplois de la masse volumique dans le code et dans le corpus ; établir ce qui en dépend et ce qui n'en dépend pas.
 - [x] **P3** — balayer la constante et mesurer, pour chaque grandeur publiée, l'écart ET la valeur absolue ; figer le constat par un test.
-- [ ] **P4** — ADR-048 : trancher, dire ce qu'il faudrait pour inverser, et corriger la justification fautive de body.rs sans réécrire d'ADR.
+- [x] **P4** — ADR-048 : trancher, dire ce qu'il faudrait pour inverser, et corriger la justification fautive de body.rs sans réécrire d'ADR.
 - [ ] **P5** — appliquer la décision au code ; vérifier les 123 tests, la campagne physics et les deux hashs.
 - [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, passation et jeton.
 
@@ -100,3 +100,9 @@ valeurs, parce que les trois références sont construites AVEC la constante. Le
 publiées bougent (tirant -2,439, raideur +2,500, période -1,227 pour cent) sans verdict.
 Hashs check inchangés. Les seuls contrôles qui échouent sont deux tests unitaires de body.rs
 comparant le tirant au littéral 0,25 : A180. Constante restaurée à 1000 avant commit.
+
+P4 : ADR-048 écrit. D1 valeur 1025 (mer ouverte, ADR-001) ; D2 la constante devient une
+propriété du milieu, type Milieu avec MER et EAU_DOUCE, motif estuaire ; D3 la référence C10
+reste construite avec la constante — pas de littéral inventé — et sa cécité est écrite (A180).
+Section 4 : ce qu il faudrait pour inverser chacune des trois. Notes correctives datées dans
+CAS-CANONIQUES et 00_INDEX, sans réécriture. Reste P5 : appliquer au code.
