@@ -148,6 +148,16 @@ un **choix de conception** : il déplace la position du front, donc le verdict d
 critère d'entrée au banc B3 d'`ADR-031`. Une session qui les alignerait au passage changerait une
 décision par une retouche de constante.
 
+> **Note S40 — la prudence était bonne, sa raison était fausse.** Ce §7 annonçait qu'aligner les
+> deux seuils *déplacerait la position du front, donc le verdict de C04, donc le critère d'entrée au
+> banc B3*. Mesuré sur sept décades et deux véhicules : **le front bouge de 0,148 %** au pire, pour
+> une tolérance de 3 %. Le verdict de C04 ne bouge pas.
+>
+> Ce qui justifiait vraiment de ne pas trancher à la légère était qu'une des deux valeurs n'avait
+> **aucune provenance** — un défaut d'ignorance, pas d'écart. Le coût annoncé, trop lourd, a fait
+> **reporter l'action quatre fois** (**A169**). Voir
+> [`ADR-047`](ADR-047-le-seuil-de-sec-ne-decide-de-rien-de-publiable.md).
+
 Ce qui est acquis, et suffit pour aujourd'hui : **les deux valeurs sont incompatibles, l'écart est
 mesuré, et sa conséquence est chiffrée.** La question va aux points ouverts (**A163**).
 

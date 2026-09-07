@@ -117,8 +117,8 @@ valeur.
 - [x] **P4** — mesurer ce que le seuil déplace sur **chaque grandeur publiée** de C04.
 - [x] **P5** — et sur celles que rien ne publie : `max|u|`, la longueur du film, le compte de
       cellules litigieuses. C'est là que la sensibilité vit.
-- [ ] **P6** — **la décision**, en ADR. Elle porte sur ce que le seuil gouverne, pas sur un nombre.
-- [ ] **P7** — répercussions : `ADR-031` §4 reçoit ce que S40 ajoute, `A163` est tranché ou
+- [x] **P6** — **la décision**, en ADR. Elle porte sur ce que le seuil gouverne, pas sur un nombre.
+- [x] **P7** — répercussions : `ADR-031` §4 reçoit ce que S40 ajoute, `A163` est tranché ou
       requalifié, `oracle.rs` cesse de porter deux constantes en dur.
 - [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 

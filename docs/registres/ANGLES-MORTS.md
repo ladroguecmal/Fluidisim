@@ -210,6 +210,7 @@ ce que les sources avaient omis.
 | **A166** | Une mesure peut être juste et sans portée, et rien dans la mesure ne le dit | **1** | ADR-046 §4.1 |
 | **A167** | Un défaut de montage peut ne pas se voir dans le résultat qu'il menace | **1** | ADR-046 §3 |
 | **A168** | Écrire une distinction ne suffit pas à s'en servir : `ADR-043` §6 ignore le §5 du même document | 2 | ADR-043, note S39 |
+| **A169** | Une prudence justifiée par une mauvaise raison se défend mal et se reporte longtemps | 2 | ADR-047 §6 |
 
 Cent huit angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -1059,6 +1060,19 @@ pendant quatre sessions.
   différemment sans le savoir. **Ne pas aligner les deux valeurs par une retouche de constante** :
   c'est une décision de conception (ADR-044 §7).
 
+  > **Note S40 — requalifié : l'incompatibilité n'existe pas, l'ignorance existait.** Le seuil a
+  > été balayé sur **sept décades** et sur les **deux** véhicules : le front bouge de **0,148 %** au
+  > pire pour une tolérance de 3 %, `h(0)` de deux pour cent mille, le volume pas du tout. **Aucune
+  > grandeur publiée ne dépend de ce seuil.** Le désaccord de 6,16 m/s trouvé en S37 portait sur
+  > `max|u|`, qui dépasse la vitesse du front de Ritter et varie d'un facteur 2,5 sans tendance :
+  > ce n'est pas une grandeur (**A166**).
+  >
+  > **Les deux valeurs ne sont pas alignées** — une différence sans conséquence se documente au lieu
+  > de se corriger, et aligner coûterait la reproductibilité des chiffres de la lignée B. Ce qui
+  > justifiait la sévérité 1 demeure et est levé : **une des deux valeurs n'avait aucune
+  > provenance**, écrite en dur à huit endroits. Elle en a une maintenant, et elle est réglable.
+  > Voir [`ADR-047`](../adr/ADR-047-le-seuil-de-sec-ne-decide-de-rien-de-publiable.md).
+
 - **A164** — **La précision arithmétique n'est écrite nulle part.** `delta.rs` calcule en `f32`,
   `shallow.rs` en `f64`, et aucun document du corpus ne le mentionnait avant S37 — ni SPEC-001, ni
   les ADR de solveur, ni `CAS-CANONIQUES`. Ce n'est pas un détail d'implémentation : c'est ce qui
@@ -1195,6 +1209,17 @@ pendant quatre sessions.
   *Une distinction neuve ne devient opérante qu'après avoir été passée sur les conclusions
   déjà écrites, y compris celles du document qui la pose.* Relevé en S39, quatre sessions plus
   tard, et seulement parce qu'une rétractation extérieure a forcé à relire D1.
+
+- **A169** — **Une prudence justifiée par une mauvaise raison se défend mal et se reporte
+  longtemps.** `ADR-044` §7 refusait d'aligner les deux seuils de sec, et donnait pour raison qu'un
+  alignement *déplacerait la position du front, donc le verdict de C04, donc le critère d'entrée au
+  banc B3*. **La prudence était bonne ; sa justification était fausse** — le front bouge de 0,148 %
+  sur sept décades, pour une tolérance de 3 %. La vraie raison de ne pas trancher à la légère était
+  qu'une des deux valeurs n'avait **aucune provenance**, ce qui est un défaut d'ignorance et non
+  d'écart. Conséquence pratique : **l'action a été reportée quatre fois**, parce que le coût
+  annoncé — rouvrir un critère de banc — la faisait paraître plus lourde qu'elle n'était.
+  *Une raison fausse donnée à l'appui d'une bonne décision la rend indéfendable au moment de
+  l'exécuter : personne ne peut estimer ce qu'elle coûte.*
 
 ---
 
