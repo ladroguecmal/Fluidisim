@@ -1129,12 +1129,30 @@ pub fn c08_convergence_reguliere(
         // garde-fou qui corrige sans le dire transforme une anomalie en résultat (**A144**).
         let (_, borne) = ordre_grossier_estime(&erreurs);
         let p_grossier = borne;
-        let estimation_douteuse = (p_brut - p_grossier).abs() > 1.0e-9;
-        if estimation_douteuse {
-            host.sink.warn(&format!(
-                "C22 : ordre grossier estimé à {p_brut:.3}, hors de [0,3 ; 3,0] — les grilles                  grossières ne sont pas asymptotiques, le filtre d'oracle est appliqué au borné                  {p_grossier:.3} et son résultat est indicatif"
-            ));
-        }
+        // **Deux anomalies distinctes, et une seule était signalée** (S43).
+        //
+        // L'ancienne comparait `p_brut` au borné : elle voyait un ordre *hors* de `[0,3 ; 3,0]`.
+        // Elle ne pouvait pas voir le cas où **il n'y a pas d'ordre du tout** — le repli rendait
+        // alors `1.0`, dans les bornes, donc `p_brut == p_grossier` et rien ne bronchait.
+        let estimation_douteuse = match p_brut {
+            None => {
+                host.sink.warn(
+                    "C22 : aucun ordre mesurable — moins de trois grilles, ou deux grilles \
+                     successives de même erreur (le solveur ne converge pas). Le filtre d'oracle \
+                     est appliqué à la valeur conservatrice 1,0 et son résultat n'a pas de fondement",
+                );
+                true
+            }
+            Some(p) => {
+                let hors_bornes = (p - p_grossier).abs() > 1.0e-9;
+                if hors_bornes {
+                    host.sink.warn(&format!(
+                        "C22 : ordre grossier estimé à {p:.3}, hors de [0,3 ; 3,0] — les grilles                  grossières ne sont pas asymptotiques, le filtre d'oracle est appliqué au borné                  {p_grossier:.3} et son résultat est indicatif"
+                    ));
+                }
+                hors_bornes
+            }
+        };
         let (nx_max, e_max) = *erreurs.last().unwrap();
         let e_oracle = e_max / (nx_oracle as f64 / nx_max as f64).powf(p_grossier);
         retenues.retain(|(_, e)| *e >= 30.0 * e_oracle);
@@ -1810,14 +1828,34 @@ pub fn c23_courant_paroi_mobile(
 /// brut, et doit le signaler.
 ///
 /// Renvoie `(brut, borné)`.
-pub fn ordre_grossier_estime(erreurs: &[(usize, f64)]) -> (f64, f64) {
+pub fn ordre_grossier_estime(erreurs: &[(usize, f64)]) -> (Option<f64>, f64) {
+    // **Trois façons de n'avoir aucun ordre à mesurer, et elles rendaient toutes `1.0`** — S43,
+    // essai à zéro de C08 (**A167**, **A170**).
+    //
+    // Le premier jet répondait `1.0` à chacune : moins de trois grilles, une erreur **constante**
+    // d'une grille à l'autre, ou des erreurs toutes nulles. `1.0` est **l'ordre nominal du schéma**,
+    // c'est-à-dire exactement la valeur qu'on espère lire — et le garde-fou **G10**, qui signale un
+    // ordre hors de `[0,3 ; 3,0]`, ne bronchait pas puisque `1,0` est dedans. *Le repli était
+    // silencieux par construction.*
+    //
+    // Une erreur constante entre deux grilles successives veut dire que **le solveur ne converge
+    // pas**. C'est le résultat le plus important que ce cas puisse produire, et il était indiscernable
+    // du cas nominal.
+    //
+    // **Le refus est désormais dans le type** : `None` pour le brut. L'appelant ne peut pas
+    // l'ignorer, et le compilateur énumère les usages (**L149**). Le second membre reste un nombre
+    // utilisable — il faut bien filtrer — et il vaut `1.0` par défaut, ce qui est conservateur :
+    // un `p` bas surestime l'erreur d'oracle, donc écarte **plus** de grilles.
     if erreurs.len() < 3 {
-        return (1.0, 1.0);
+        return (None, 1.0);
     }
     let (e0, e1, e2) = (erreurs[0].1, erreurs[1].1, erreurs[2].1);
     let (d0, d1) = ((e0 - e1).abs(), (e1 - e2).abs());
-    let brut = if d1 > 0.0 { (d0 / d1).log2() } else { 1.0 };
-    (brut, brut.clamp(0.3, 3.0))
+    if d1 <= 0.0 || d0 <= 0.0 {
+        return (None, 1.0);
+    }
+    let brut = (d0 / d1).log2();
+    (Some(brut), brut.clamp(0.3, 3.0))
 }
 
 /// Facteur d'amplification du **mode de maille**, en fonction du nombre de Courant — S29.
@@ -2411,6 +2449,7 @@ mod tests_g10 {
         // d0 = 1e-5, d1 = 2e-5 : les différences grandissent, l'ordre brut vaut log2(0,5) = −1.
         let pre_asymptotique = vec![(100usize, 1.0e-4f64), (200, 9.0e-5), (400, 7.0e-5)];
         let (brut, borne) = ordre_grossier_estime(&pre_asymptotique);
+        let brut = brut.expect("une série pré-asymptotique a un ordre, même absurde — le refus est réservé aux séries qui n'en ont aucun (S43)");
         assert!(brut < 0.0, "l'ordre brut doit être négatif : {brut}");
         assert_eq!(borne, 0.3, "le borné est la valeur de repli");
         assert!(
@@ -2425,7 +2464,36 @@ mod tests_g10 {
         // Ordre 1 exact : les erreurs sont divisées par deux à chaque raffinement.
         let saine = vec![(100usize, 8.0e-5f64), (200, 4.0e-5), (400, 2.0e-5)];
         let (brut, borne) = ordre_grossier_estime(&saine);
+        let brut = brut.expect("une série saine a un ordre");
         assert!((brut - 1.0).abs() < 1e-9, "ordre 1 attendu, {brut} obtenu");
         assert_eq!(brut, borne, "une série saine n'est jamais bornée");
+    }
+
+    /// **G10, second volet — une série sans ordre du tout est refusée** (S43).
+    ///
+    /// Les deux tests ci-dessus couvrent l'ordre **absurde** (négatif) et l'ordre **sain**. Aucun ne
+    /// couvrait le cas où il n'y a **rien à mesurer** — et c'est celui que le premier jet traitait
+    /// le plus mal : il rendait `1.0`, l'ordre nominal du schéma, dans les bornes de G10, donc
+    /// **sans aucun signalement**.
+    ///
+    /// *Un garde-fou testé sur ce qu'on a pensé à lui donner n'est pas un garde-fou testé.*
+    #[test]
+    fn g10_serie_sans_ordre_est_refusee() {
+        // Le solveur ne converge pas : la même erreur à toutes les grilles.
+        let constante = vec![(100usize, 1.0e-3f64), (200, 1.0e-3), (400, 1.0e-3)];
+        let (brut, borne) = ordre_grossier_estime(&constante);
+        assert!(brut.is_none(), "une erreur constante n'a pas d'ordre : {brut:?}");
+        assert_eq!(borne, 1.0, "le borné reste conservateur");
+
+        // Moins de trois grilles : le triplet de Richardson est incomplet.
+        let (brut, _) = ordre_grossier_estime(&[(100usize, 1.0e-3f64), (200, 5.0e-4)]);
+        assert!(brut.is_none(), "deux grilles ne font pas un triplet");
+
+        // Et le témoin, pour que ce refus ne soit pas « toujours vrai » (**L119**).
+        let saine = vec![(100usize, 8.0e-5f64), (200, 4.0e-5), (400, 2.0e-5)];
+        assert!(
+            ordre_grossier_estime(&saine).0.is_some(),
+            "une série saine ne doit pas être refusée"
+        );
     }
 }

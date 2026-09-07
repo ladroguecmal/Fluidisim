@@ -99,10 +99,10 @@ n'était.*
 **sur la ligne juste au-dessus du clamp**. L'audit a regardé le `clamp` et pas le `if`. Si la thèse
 tient, c'est une leçon sur ce que voit un audit de garde-fous.
 
-- [>] **P1** — plan, jeton.
-- [ ] **P2** — **l'essai à zéro de l'estimateur**, sur des suites synthétiques : `e_k = C·dx_k^p`
+- [x] **P1** — plan, jeton.
+- [x] **P2** — **l'essai à zéro de l'estimateur**, sur des suites synthétiques : `e_k = C·dx_k^p`
       doit rendre `p` **exactement** ; une suite **constante** doit être refusée. Constater d'abord.
-- [ ] **P3** — remplacer les replis par un refus, **avec leur témoin** (**L119**) — et vérifier
+- [x] **P3** — remplacer les replis par un refus, **avec leur témoin** (**L119**) — et vérifier
       que le signalement se déclenche, ce que `1,0` empêchait.
 - [ ] **P4** — **les trois estimateurs refusent-ils pareil ?** Le corpus contient déjà la bonne
       solution, `Ordre::Indetermine` ; les deux autres l'ignorent (**S42-3**, **L162**).

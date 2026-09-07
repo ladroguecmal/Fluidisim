@@ -955,6 +955,60 @@ exactement nul, pas {:.3e}",
         }
     }
 
+    /// **P2 — l'essai à zéro de C08** (**A167**, action S42-1).
+    ///
+    /// S42 laissait la question ouverte : *que veut dire « résultat attendu zéro » pour une mesure
+    /// d'ordre de convergence ?* La réponse est que l'essai ne porte pas sur le solveur mais sur
+    /// **l'estimateur**, et qu'un montage sans objet à mesurer est ici une suite d'erreurs qui **ne
+    /// converge pas** — trois grilles, trois erreurs identiques. Il n'y a pas d'ordre.
+    ///
+    /// L'estimateur se teste alors sur des suites **synthétiques**, sans lancer une simulation :
+    /// c'est le sens de l'extraction faite en S34.
+    ///
+    /// Ce test **constate**, avant toute correction.
+    #[test]
+    fn c08_essai_a_zero_ce_que_l_estimateur_rend() {
+        use crate::physics::ordre_grossier_estime;
+        let dire = |o: Option<f64>| match o {
+            Some(p) => format!("{p:>8.4}"),
+            None => "  REFUS ".to_string(),
+        };
+        // `e_k = C·dx_k^p` sur trois grilles en raffinement ×2 : l'estimateur doit rendre `p`.
+        let suite = |p: f64| -> Vec<(usize, f64)> {
+            (0..3).map(|k| (100usize << k, 1.0 / (2.0f64.powi(k)).powf(p))).collect()
+        };
+        println!("C08 — l'estimateur d'ordre, sur des suites dont la réponse est connue :");
+        for p in [1.0f64, 2.0, 0.5] {
+            let (brut, borne) = ordre_grossier_estime(&suite(p));
+            println!("      e ∝ dx^{p:.1}  → brut {}, borné {borne:>8.4}   (attendu {p:.1})", dire(brut));
+            assert!(
+                brut.map(|b| (b - p).abs() < 1e-9).unwrap_or(false),
+                "l'estimateur doit rendre {p} exactement sur une suite construite pour"
+            );
+        }
+
+        // **L'essai à zéro**, sous ses trois formes. Aucune n'a d'ordre à mesurer, et **toutes
+        // rendaient `1.0`** avant S43 — l'ordre nominal du schéma, dans les bornes de G10, donc
+        // silencieux.
+        let cas: [(&str, Vec<(usize, f64)>); 3] = [
+            (
+                "e constante (le solveur NE CONVERGE PAS)",
+                (0..3).map(|k| (100usize << k, 1.0e-3)).collect(),
+            ),
+            ("deux grilles seulement (triplet incomplet)", vec![(100, 1e-3), (200, 5e-4)]),
+            ("erreurs toutes nulles", (0..3).map(|k| (100usize << k, 0.0)).collect()),
+        ];
+        for (nom, e) in &cas {
+            let (brut, borne) = ordre_grossier_estime(e);
+            println!("      {nom:<44} → brut {}, borné {borne:>8.4}", dire(brut));
+            assert!(
+                brut.is_none(),
+                "{nom} : il n'y a aucun ordre à mesurer, l'estimateur doit refuser"
+            );
+            assert_eq!(borne, 1.0, "{nom} : le borné reste conservateur pour que le filtre marche");
+        }
+    }
+
     /// **A157 — un seuil reproductible peut être dénué de sens, et deux seuils incomparables
     /// peuvent être mis côte à côte.**
     ///
