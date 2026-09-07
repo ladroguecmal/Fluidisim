@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-07
-Agent            : Claude Code
-Session en cours : S44 — inventaire des valeurs de repli
-Dernière session : S43 — 2026-09-07 — un solveur qui ne converge pas recevait l'ordre 1
-Session suivante : S44 — **inventorier les valeurs de repli après mesure** (S43-1) *(recommandé)* — deux trouvées par hasard, sévérité 1 chacune
+Agent            : —
+Session en cours : —
+Dernière session : S44 — 2026-09-07 — quand la grandeur est un écart, zéro est le succès parfait
+Session suivante : S45 — **suivre les treize `unwrap_or(NaN)` jusqu'à leur assertion** (S44-2) *(recommandé)*
 ```
 
 > **Avant de regarder le jeton, exécuter `git worktree list` et `git branch -a`.** Le jeton est un
@@ -144,7 +144,7 @@ Trente-cinq sessions ici, **plus cinq dans une lignée parallèle réconciliée 
 B-S27) — **47 ADR** *(dont un acté)*, six spécifications, **treize registres** — **et du code qui
 tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équilibrés et **tous deux
 montés sur leurs cas, confrontés l'un à l'autre et instrumentés, **plus un milieu à dispersion
-exacte** *(S39)*, **95 tests verts** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
+exacte** *(S39)*, **96 tests verts** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
 verdict** (C08). Quatre cas canoniques sur δ sont exécutés ici : **C01 et C03 passent**, C04 échoue,
 C08 ne conclut pas. **La lignée réconciliée en donne d'autres verdicts, et l'écart a une cause
 unique** : elle est passée à l'ordre deux, et C04 comme C08 y sont verts (`CAS-CANONIQUES`, « deux
@@ -308,6 +308,25 @@ Richardson dans le harnais. Il n'y en a plus qu'un, et **aucun chiffre publié n
 *Et une leçon sur les audits* : S34 avait examiné ce garde-fou et corrigé son bornage. **Le repli
 était sur la ligne juste au-dessus du `clamp`.** Ses deux tests donnaient une série absurde et une
 série saine — jamais une série **vide de l'objet mesuré** (**L164**).
+
+**Et S44 a inventorié les valeurs de repli, pour cesser de les trouver par hasard.** Quarante-neuf
+recensées. **Les huit que la thèse visait sont innocentes** ; les deux fautives sont des `max(0, …)`
+qui bornent un **déficit**, sur des assertions publiées de C03 — et `(15 − NaN).max(0)` vaut **0**,
+c'est-à-dire le déficit nul, **le succès parfait**.
+
+| | forme | valeur rendue | position dans le domaine |
+|---|---|---|---|
+| S42 | `NaN.min(10⁶)` | `10⁶` | **hors** du plausible |
+| S43 | `else { 1.0 }` | `1,0` | **dans** le nominal |
+| S44 | `(15 − NaN).max(0)` | `0` | **le meilleur point** |
+
+> **Trois défauts, trois formes, une cause — et la visibilité décroît avec la gravité.** Quand la
+> grandeur mesurée est un écart, zéro est son meilleur point : aucun repli n'y est acceptable, le
+> refus va dans le type (**A172**, **L165**).
+
+*Et le corollaire, qui est ce que l'audit a coûté à trouver* : les treize `unwrap_or(NaN)` sont
+irréprochables et **ont produit les trois défauts**, parce que `min`, `max` et une soustraction
+suivie d'un `max` avalent tous le `NaN`. **C'est l'aval qu'il faut suivre** (**L166**).
 
 **Et S27 a trouvé un trou que sept sessions n'avaient pas vu, grâce à une source extérieure.**
 SPEC-001 §2.1 borne le pas de temps par `u_max` **sans jamais définir `u_max`**, quand SPEC-004 §10.1

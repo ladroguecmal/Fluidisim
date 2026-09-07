@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S44
-État             : en cours
+État             : terminée
 Battement        : 2026-09-07
 Agent            : Claude Code
 Objectif         : Inventorier les valeurs de repli — que devient un refus qui les traverse ?
@@ -110,7 +110,7 @@ faire, faute d'inventaire.
       publié ne bouge.
 - [x] **P5** — le registre `AUDIT-REPLIS-S44`, et la règle qui évite le prochain.
 - [x] **P6a** — rituel : journal, leçons L165-L166, actions S44-1 et S44-2.
-- [ ] **P6b** — rituel : index, décomptes, jeton libéré.
+- [x] **P6b** — rituel : index, décomptes, jeton libéré.
 
 ### Notes de reprise
 
