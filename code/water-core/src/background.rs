@@ -65,6 +65,29 @@ pub struct Background {
     anchor: WorldPos,
 }
 
+fn phase_spatiale(c: &Component, local: [f32;2]) -> PhaseQ32 {
+    let d = local[0] * c.dir[0] + local[1] * c.dir[1];
+    PhaseQ32::from_distance(c.k_turns_per_m, d)
+}
+
+// Erreur circulaire en tours / budget d'arrondi : trois opérations sur chaque terme
+// du produit scalaire multiplié par k, puis repliement et troncature Q32. ADR-052.
+fn erreur_phase(c: &Component, p: [f32;2], obtenue: PhaseQ32) -> Option<f64> {
+    let x = p[0] as f64*c.dir[0] as f64*c.k_turns_per_m as f64;
+    let y = p[1] as f64*c.dir[1] as f64*c.k_turns_per_m as f64;
+    let tours = x+y;
+    if !tours.is_finite() { return None; }
+    let reference = tours-tours.floor();
+    let ecart = (obtenue.0 as f64/4_294_967_296.0-reference).abs();
+    let circulaire = ecart.min(1.0-ecart);
+    let u = 2.0f64.powi(-24);
+    let gamma3 = 3.0*u/(1.0-3.0*u);
+    let borne = gamma3*(x.abs()+y.abs()) + u + 2.0f64.powi(-32);
+    // Une borne supérieure à un demi-tour n'apporte plus d'information.
+    if !borne.is_finite() || borne >= 0.5 { return None; }
+    Some(circulaire/borne)
+}
+
 impl Background {
     /// Construit le champ de fond. **À l'initialisation uniquement**, avant `seal()`.
     ///
@@ -124,6 +147,22 @@ impl Background {
         self.components.len()
     }
 
+    /// Diagnostic numérique sur la même primitive que eval, borne ADR-052.
+    /// Ne certifie que les composantes et positions échantillonnées ; aucune allocation.
+    pub fn audit_phase_spatiale(&self, points: &[[f32;2]]) -> Option<f64> {
+        if points.is_empty() || self.components.is_empty() { return None; }
+        let mut max = 0.0f64;
+        for &p in points {
+            if p.iter().any(|v| !v.is_finite() || v.abs() >= 4096.0) { return None; }
+            for c in &self.components {
+                let e = erreur_phase(c,p,phase_spatiale(c,p))?;
+                if !e.is_finite() { return None; }
+                max = max.max(e);
+            }
+        }
+        Some(max)
+    }
+
     /// Évalue le champ de fond en un point, à un instant. **Fonction pure — I-02.**
     ///
     /// L'ordre de sommation est celui du tableau, fixé à la configuration : c'est ce qu'exige
@@ -134,8 +173,7 @@ impl Background {
         let mut steep = 0.0f32;
 
         for c in &self.components {
-            let d = local[0] * c.dir[0] + local[1] * c.dir[1];
-            let phase = PhaseQ32::from_distance(c.k_turns_per_m, d)
+            let phase = phase_spatiale(c, [local[0],local[1]])
                 .wrapping_add(PhaseQ32(c.phase0.0.wrapping_sub(
                     PhaseQ32::from_time(c.freq_q32, t).0,
                 )));
@@ -414,6 +452,26 @@ mod diagnostic_homogeneite_s66 {
             let v = variances(&mono,48,3.0,ox);
             assert_eq!(v[1],v[2]);
         }
+    }
+
+    #[test]
+    fn audit_phase_temoin_defaut_et_refus() {
+        let bg = fond(20260905,256);
+        let points = [[0.,0.],[-4095.,4095.],[3000.,-3000.],[12.5,-7.25]];
+        assert!(bg.audit_phase_spatiale(&points).unwrap() <= 1.0);
+        // Dégradation injectée : seulement quatre bits de phase spatiale conservés.
+        let mut defaut = 0.0f64;
+        for p in points { for c in &bg.components {
+            let q = PhaseQ32(phase_spatiale(c,p).0 & 0xF000_0000);
+            defaut = defaut.max(erreur_phase(c,p,q).unwrap());
+        }}
+        assert!(defaut > 1.0, "le contrôle doit voir la phase quantifiée : {defaut}");
+        assert!(bg.audit_phase_spatiale(&[]).is_none());
+        assert!(bg.audit_phase_spatiale(&[[f32::NAN,0.]]).is_none());
+        assert!(bg.audit_phase_spatiale(&[[4096.,0.]]).is_none());
+        let mut invalide = fond(0,1);
+        invalide.components[0].k_turns_per_m = f32::NAN;
+        assert!(invalide.audit_phase_spatiale(&points).is_none());
     }
 
     #[test]
