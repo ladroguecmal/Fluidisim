@@ -37,6 +37,14 @@ Session suivante : S39 — **trancher le seuil de sec** (S37-1, A163, sév. 1) *
 | `occupé` + battement récent (< 2 h) | une session travaille | **ne pas reprendre** ; signaler à l'utilisateur |
 | `occupé` + battement ancien (> 2 h) | session présumée interrompue | passer à `interrompu`, puis reprise à chaud (§7) |
 | `interrompu` | interruption constatée | reprise à chaud (§7) |
+| `archivé` | **branche conservée pour son historique**, réconciliée ailleurs | **ne pas travailler ici** ; le jeton dit où est la branche vivante |
+
+**L'état `archivé` a été ajouté en S39, après le troisième épisode du même fork.** Les deux premiers
+venaient d'une ignorance ; le troisième est venu d'une **conservation délibérée** — une branche
+gardée exprès pour son historique, et que rien ne distinguait d'un point de départ. *Aucune
+propriété de git ne sépare les deux ; seul un marqueur dans le contenu peut le faire, et il doit
+être lisible **avant** que le travail commence.* Voir
+[`FORK-S22-S26`](docs/registres/FORK-S22-S26.md) §9.
 
 Le seuil de deux heures est une convention, choisie parce que les limites d'usage se
 réinitialisent à cette échelle. Plus court, deux sessions se marchent dessus ; plus long, on

@@ -29,12 +29,19 @@ harnais de validation et deux δ d'essai, en Rust, sans aucune dépendance.
    de travail. Une session travaillant dans un worktree isolé possède son propre jeton, le trouve
    `libre`, et le prend — deux jetons disent alors `occupé` simultanément, chacun dans son univers.
 
-   **Le projet a effectivement forké deux fois par ce mécanisme** — en S07, puis en S21, avec des
-   identifiants d'ADR en collision les deux fois. Voir
+   **Le projet a forké trois fois par ce mécanisme** — S07, S21, et **B-S27 le 2026-09-07**, avec
+   des identifiants en collision à chaque fois. Voir
    [`docs/registres/FORK-S22-S26.md`](docs/registres/FORK-S22-S26.md). Le second fork s'est produit
    parce que le correctif du premier avait été écrit **dans une seule branche** (**L137**) : ce
-   fichier-ci ne l'avait jamais reçu. **Si tu corriges cette procédure, réplique la correction dans
-   toutes les branches vivantes le jour même.**
+   fichier-ci ne l'avait jamais reçu. Le troisième pour la même raison, une session après que
+   **L137** ait été écrite. **Si tu corriges cette procédure, réplique la correction dans toutes les
+   branches vivantes le jour même** — et si tu n'y arrives pas, dis-le à l'utilisateur plutôt que
+   de laisser une action sans porteur.
+
+   **Un jeton `archivé` termine la lecture.** Une branche conservée pour son historique porte
+   désormais cet état : ne travaille pas dessus, rejoins la branche que son jeton désigne. C'est le
+   seul marqueur qui distingue *garder un historique* de *garder un point de départ* — git ne les
+   distingue pas.
 
    Ce qui est committé est fait ; ce qui est modifié non committé appartient à l'étape interrompue.
 
