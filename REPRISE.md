@@ -12,9 +12,9 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-07
-Session en cours : —
+Session en cours : S41 — relire les sept angles morts de sévérité 1 importés
 Dernière session : S40 — 2026-09-07 — le seuil de sec ne décide de rien de publiable ; A163 requalifié
 Session suivante : S41 — relire les **sept angles morts de sévérité 1 importés** (S35-5, S39-3) *(recommandé)*
 ```
