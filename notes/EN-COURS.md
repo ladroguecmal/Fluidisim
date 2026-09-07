@@ -59,37 +59,23 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S67
-État             : terminée
+Session          : S68
+État             : en cours
 Agent            : Codex (git et cargo disponibles)
-Objectif         : Expliquer A187, écart de Hs à 256 composantes (S64-3).
+Objectif         : S66-1, séparer précision spatiale et diagnostic statistique par ADR.
 ```
 
 ### Plan
 
-- [x] **P1** — reprise, état réel, jeton et plan seul.
-- [x] **P2** — décomposer exactement les moments sur la grille par sommes trigonométriques ; vérifier contre le diagnostic point par point et le témoin monochromatique.
-- [x] **P3** — mesurer spectres 32/256, phases historiques et six graines ; isoler les termes croisés et les échelles de battement, documenter sans resserrer de tolérance.
-- [x] **P4** — rituel : journal, actions, angles/leçons éventuels, corrections datées, index/décomptes, jeton libre.
+- [x] **P1** — état réel, passation et plan seul.
+- [>] **P2** — contrôle direct de phase avec borne dérivée de l’arithmétique ; témoin, défaut injecté et refus.
+- [ ] **P3** — ADR-052, raccord au rapport, homogénéité diagnostique comptée ; tests et campagne.
+- [ ] **P4** — rituel de passation, journal, actions, index et décomptes, jeton libre.
 
 ### Notes de reprise
 
-Master 87d3186 et copie 29ef50 propres et identiques. REPRISE/socle lus dans cette conversation,
-passation S66 relue. Le résultat à 32 composantes ne clôt pas A187 : mesurer à 256 et restaurer
-les seules phases historiques dans le diagnostic pour reproduire les 6,612 % de S64.
-Fenêtres centrées à zéro : 3072 et 6144 m, pas 3 m, dans la portée 4096 m. Formule exacte
-sur la grille, pas une limite de fenêtre infinie. Aucun calcul ni paramètre de production modifié.
-S66-1 puis S64-2 restent des décisions par ADR ; S63-1 reste le blocage B2.
-
-P2 : moyenne trigonométrique sur grille finie (somme géométrique), moments via sin(a)sin(b).
-Test contre sommation directe à 1/32/256 composantes et cas fréquence nulle/alias exact : vert.
-Diagnostic P3 lancé : phases historiques n=256 donnent Hs=1,279349889, partie individuelle
-Hs=1,200001971 ; covariance=0,012295713 m², voisins immédiats=0,008987660 m².
-
-P3 : diagnostic 28 montages et deux comparaisons directes dense terminé (49,40 s). Historique
-Hs_prod=1,279349902 contre 1,279349889 analytique ; variance individuelle -> Hs=1,200001971.
-Fenêtre doublée 6144 m -> Hs=1,218126498. Battements voisins jusqu’à 20208,431 m.
-A187 expliqué par covariances de fenêtre ; S64-3 close possible. 135 tests verts, cinq ignorés,
-check inchangé. SPECTRE-DENSE-S67 documente formule, valeurs et limites, aucun seuil changé.
-
-P4 : rituel terminé, S64-3 close, L184, suite S68 S66-1. Aucun calcul en cours, jeton libre.
+Master 3734fa4 propre, 29ef50 identique. REPRISE et socle lus dans cette conversation.
+S66/S67 ont isolé les covariances, pas un défaut de phase. Ne pas élargir la tolérance 15 %
+pour faire passer la statistique ; conserver le chiffre en diagnostic explicite. Le nouveau
+contrôle doit exercer le calcul réellement appelé par eval et refuser une phase dégradée.
+Borne d’arrondi à dériver avant observation ; calibration Hs S64-2 séparée, S63-1 ouverte.

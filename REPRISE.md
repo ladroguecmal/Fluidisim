@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-08 01:13 +02:00
+JETON            : occupé
+Battement        : 2026-09-08 01:21 +02:00
 Agent            : Codex (git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S68
 Dernière session : S67 — 2026-09-08 — A187 explique par les battements
 Session suivante : S68 — S66-1, separer precision et diagnostic statistique par ADR
 
