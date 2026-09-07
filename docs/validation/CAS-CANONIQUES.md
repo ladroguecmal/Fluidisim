@@ -920,6 +920,12 @@ batterie `check` pour l'assertion principale.
 
 ## C22 — Convergence sur solution régulière
 
+> **Exécuté sur shallow en S48.** Montage et campagnes dans
+> [`MESURES-C22-S48`](MESURES-C22-S48.md). Cinq grilles, deux oracles emboîtés, HLL/MUSCL/RK2 ;
+> verdict non concluant sur la stabilité, sans modification du seuil. Le contrôle de contamination
+> utilise ici l'écart mesuré de deux oracles, indicateur empirique distinct de l'extrapolation
+> du premier véhicule. La largeur gaussienne est convertie pour représenter le même écart-type.
+
 *(Ajouté en S26. Le montage existait dans le code depuis S24 — `Bassin::c08_regulier` — sans figurer
 ici, ce qui le rendait introuvable pour une session qui n'aurait pas lu `ADR-032`.)*
 

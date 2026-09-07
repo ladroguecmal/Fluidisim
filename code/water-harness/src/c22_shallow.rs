@@ -19,9 +19,13 @@ fn champ(n: usize, amplitude: f64, temps: f64) -> Result<Vec<f64>, String> {
     d.regler_ordre2(true);
     d.regler_rk2(true);
     d.avancer_jusqu_a(temps, 0.45);
+    if d.temps() != temps { return Err("temps final non atteint".into()); }
     let h: Vec<_> = (0..n).map(|i| d.hauteur(i)).collect();
     if h.iter().any(|v| !v.is_finite()) { return Err("champ non fini".into()); }
-    if d.saturations().etat != 0 { return Err("saturation d'état (ADR-045)".into()); }
+    let sat = d.saturations();
+    if sat.etat != 0 || sat.etage_rk2 != 0 || sat.bord != 0 || sat.h_negatif_en_entree != 0 {
+        return Err("saturation du solveur (ADR-045)".into());
+    }
     Ok(h)
 }
 
@@ -38,7 +42,9 @@ fn erreur(h: &[f64], oracle: &[f64]) -> Result<f64, String> {
         den += moyenne.abs();
     }
     if den <= 0.0 { return Err("norme de référence nulle".into()); }
-    Ok(num/den)
+    let e = num/den;
+    if !e.is_finite() { return Err("erreur relative non finie".into()); }
+    Ok(e)
 }
 
 pub fn campagne(nx_oracle: usize) -> Result<usize, String> {
@@ -57,13 +63,16 @@ pub fn campagne(nx_oracle: usize) -> Result<usize, String> {
     println!("C22 shallow : a=0.01 m, sigma=1 m, h0=1 m, L=40 m, t=1 s, CFL=0.45");
     println!("oracles {nx_oracle}/{} : écart L1 = {ecart_oracles:.9e}", 2*nx_oracle);
     println!(" nx       erreur/oracle1   erreur/oracle2    variation       retenue");
+    let mut prefixe_sain = true;
     for n in grilles {
         let h = champ(n, 0.01, 1.0)?;
         let e1 = erreur(&h, &o1)?;
         let e2 = erreur(&h, &o2)?;
         // Facteur 30 de C22 ; ici l'écart mesuré des oracles remplace l'extrapolation en p.
         // C'est un indicateur empirique, pas une borne prouvée de l'erreur commune aux oracles.
-        let retenue = e2 >= 30.0*ecart_oracles;
+        // Une grille retirée coupe la famille : ne pas reconstruire des triplets non emboîtés.
+        prefixe_sain &= e2 >= 30.0*ecart_oracles;
+        let retenue = prefixe_sain;
         println!("{n:5} {e1:18.9e} {e2:18.9e} {:14.6e} {retenue}", (e1-e2).abs());
         if retenue { c.erreurs.push((n,e2)); }
     }

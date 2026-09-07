@@ -602,7 +602,7 @@ fn main() -> ExitCode {
         };
     }
     if args.len() < 2 {
-        eprintln!("usage : water-harness <check|physics|bless> <scenario.toml> [...]");
+        eprintln!("usage : water-harness <check|physics|bless> <scenario.toml> [...] | c22-shallow [nx_oracle]");
         return ExitCode::from(2);
     }
     let mode = args[0].as_str();

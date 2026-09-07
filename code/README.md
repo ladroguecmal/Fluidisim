@@ -6,6 +6,11 @@ ensuite**, donc le harnais vient en premier.
 
 ## Construire et vérifier
 
+**S48 — C22 régulier sur shallow :** `cargo run --offline --release -- c22-shallow 12800`.
+Deux oracles (12800 et 25600 cellules), cinq grilles, coût et bilan explicites ; le résultat
+peut être sans verdict. Campagne séparée de physics : voir
+[`MESURES-C22-S48`](../docs/validation/MESURES-C22-S48.md).
+
 ```bash
 cd code
 cargo test --offline                      # 18 tests
