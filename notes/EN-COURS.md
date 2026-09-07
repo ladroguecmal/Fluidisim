@@ -59,69 +59,72 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S42
-État             : terminée
+Session          : S43
+État             : en cours
 Battement        : 2026-09-07
-Objectif         : L'essai à zéro de C03 — un montage sans seiche ne doit pas rendre de demi-vie
+Objectif         : L'essai à zéro de C08 — un solveur qui ne converge pas reçoit l'ordre 1
 ```
 
 ### Plan
 
-Action **S41-4**, angle mort **A167** : *tout montage de mesure doit venir avec un essai dont le
-résultat attendu est zéro.* L'inventaire de S41 a trouvé **un seul** essai de ce genre dans tout le
-harnais — `B-S27-garde` — et c'est celui que la lignée B a apporté.
+Action **S42-1**. C08 mesure un **ordre de convergence** par Richardson, `p = log₂(|e₀−e₁|/|e₁−e₂|)`.
+S42 laissait la question ouverte : *que veut dire « résultat attendu zéro » pour une mesure d'ordre ?*
 
-**C03 est le plus exposé des montages qui n'en ont pas.** Sa demi-vie d'amplitude ne se lit nulle
-part : elle vient d'une **régression linéaire de `ln(pic)` sur le temps**, sur une enveloppe
-reconstruite par recherche de maxima sur des demi-périodes. C'est la mesure la plus indirecte du
-corpus, et A167 dit exactement ce qui arrive à ces mesures-là : *`R` valait 0,18 à 0,32 dans les trois
-montages, faux comme juste.*
+**La réponse est que l'essai à zéro de C08 ne porte pas sur le solveur mais sur l'estimateur.** Un
+montage sans objet à mesurer, ici, c'est une suite d'erreurs qui **ne converge pas** : trois grilles,
+trois erreurs identiques. Il n'y a pas d'ordre. L'estimateur doit le dire.
 
-> **L'essai à zéro de C03 s'écrit tout seul** : le même montage, **sans excitation** (`eta_bord = 0`).
-> Le bassin est plat et au repos ; la jauge ne doit rien voir, et **aucune demi-vie ne doit pouvoir
-> être calculée**.
+**L'inspection préalable a trouvé le défaut avant d'écrire une ligne**, et il est du même genre que
+celui de S42 — c'est l'action **S42-2**, arrivée un jour plus tôt que prévu.
 
-*Thèse déclarée : `demi_vie_seiche` rend un nombre fini et plausible sur un bassin au repos.* Elle
-régresse `ln(pic)` sans jamais demander si les pics sont autre chose que de l'arrondi ; une pente
-négative dans le bruit rend `ln2/(−τ)/T`, un nombre qui n'a aucune raison d'être absurde.
+**Le harnais porte TROIS estimateurs d'ordre**, et ils ne refusent pas pareil :
 
-**Si la thèse est vraie, le défaut est du même ordre que celui qu'A167 décrit** : la mesure ne
-distingue pas un signal d'un bruit, et **le corpus publie 161,14 périodes** sur cette base. Si elle
-est fausse — si la fonction refuse déjà — alors le garde-fou existe sans avoir jamais été vu
-refuser, ce qui est le sujet de **L118** et se corrige par le même test.
+| | où | ce qu'il fait quand `d₁ = 0` |
+|---|---|---|
+| `Convergence::ordre()` | `physics.rs` | **`Ordre::Indetermine`** — un refus typé, avec plancher |
+| `ordre_grossier_estime` | `physics.rs` | **rend `1.0`** |
+| `c08_convergence` | `physics_shallow.rs` | **`log₂(0/0)`**, aucun garde |
 
-**Un point de comparaison existe et il est instructif** : le véhicule d'accueil a déjà un garde-fou
-d'amplitude — **G5**, *`mesurer_seiche` refuse une amplitude qu'elle ne peut pas voir*, audité en
-S34. **Le véhicule importé n'en a aucun.** Deux implémentations de la même mesure, une protégée,
-l'autre non — encore une divergence que l'oracle croisé n'a pas cherchée parce qu'elle est dans le
-**harnais**, pas dans les solveurs.
+> **Le repli à `1.0` est le pire des trois, et pas parce qu'il est faux.** `d₁ = 0` veut dire que
+> deux grilles successives donnent **la même erreur** — le solveur ne converge pas. L'estimateur
+> répond alors « ordre 1 », **c'est-à-dire exactement l'ordre nominal du schéma**, la valeur qu'on
+> espère lire. Et le garde-fou **G10**, qui signale un ordre hors de `[0,3 ; 3,0]`, ne bronche pas :
+> `1,0` est dedans. **Le repli est silencieux par construction.**
 
-- [x] **P1** — plan, jeton.
-- [x] **P2** — **l'essai à zéro** : `demi_vie_seiche` sur un bassin au repos. Mesurer ce qu'elle
-      rend, sans rien corriger encore.
-- [x] **P3** — selon le résultat : écrire le refus, **avec son témoin** — le cas qu'il doit
-      refuser *et* le cas qu'il ne doit pas refuser (**L119**).
-- [x] **P4** — vérifier que le refus ne change **aucun** chiffre publié : les quatre demi-vies du
-      tableau d'`ADR-040` §5 doivent se reproduire à l'identique.
-- [x] **P5** — **C06 et C08** : ont-ils un essai à zéro possible, et lequel ? Écrire au moins le
-      plus court des deux.
-- [x] **P6** — répercussions : `CAS-CANONIQUES` — l'essai à zéro devient une condition de mesure ;
-      **A167** relu ; ce que l'inventaire des témoins doit devenir.
-- [x] **P7a** — rituel : journal, leçons L161-L162, actions S42-1 à S42-3.
-- [x] **P7b** — rituel : index, décomptes, jeton libéré.
+*Thèse déclarée : sur une suite d'erreurs constante — aucune convergence — `ordre_grossier_estime`
+rend `1,0` sans aucun signalement, et le filtre d'oracle qui en dépend s'applique comme si de rien
+n'était.*
+
+**Et une observation sur l'audit de S34**, qui a examiné G10 et corrigé son bornage : le repli est
+**sur la ligne juste au-dessus du clamp**. L'audit a regardé le `clamp` et pas le `if`. Si la thèse
+tient, c'est une leçon sur ce que voit un audit de garde-fous.
+
+- [>] **P1** — plan, jeton.
+- [ ] **P2** — **l'essai à zéro de l'estimateur**, sur des suites synthétiques : `e_k = C·dx_k^p`
+      doit rendre `p` **exactement** ; une suite **constante** doit être refusée. Constater d'abord.
+- [ ] **P3** — remplacer les replis par un refus, **avec leur témoin** (**L119**) — et vérifier
+      que le signalement se déclenche, ce que `1,0` empêchait.
+- [ ] **P4** — **les trois estimateurs refusent-ils pareil ?** Le corpus contient déjà la bonne
+      solution, `Ordre::Indetermine` ; les deux autres l'ignorent (**S42-3**, **L162**).
+- [ ] **P5** — vérifier qu'**aucun chiffre publié ne bouge** : `p = 0,9997` (S36), les ordres du
+      tableau de `ADR-040` §3, et les deux hashs.
+- [ ] **P6** — répercussions : `A170` étendu ou confirmé, `CAS-CANONIQUES` C08, et ce que S34
+      n'avait pas vu.
+- [ ] **P7** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
 **Ce qui commande cette session.**
 
-- **`demi_vie_seiche` est exerçable seule depuis S36** (extraite de la fermeture de `c03_seiche`,
-  précisément pour qu'on puisse la tester). C'est ce qui rend cette session courte.
-- **La signature** : `demi_vie_seiche(m, pas_m, h0, eta_bord, periodes, sc)`. `eta_bord = 0` donne le
-  bassin plat au repos — l'essai à zéro, sans une ligne de montage nouvelle.
-- **Elle rend `f64::INFINITY`** si la pente de régression est positive. C'est le seul refus existant,
-  et il ne couvre pas le cas d'un bruit **décroissant**.
-- **Les chiffres à ne pas casser** : 6,01 · 44,36 · 43,12 · 161,14 périodes (`ADR-040` §5), rejoués
-  en S36 à **0,00 %**. Un refus mal placé les ferait disparaître.
-- **G5 existe côté accueil** et a été vu refuser en S34. Le comparer plutôt que le réinventer.
-- **État de départ** : `cargo test` = **88 tests** (38 cœur + 50 harnais, deux `ignore`), `check` = 0
+- **`ordre_grossier_estime` est déjà une fonction pure**, extraite en S34 pour être testable, et
+  elle **a déjà deux tests** (`pre_asymptotique`, `saine`). Aucun ne lui donne une suite qui ne
+  converge pas. *Un garde-fou testé sur ce qu'on a pensé à lui donner n'est pas un garde-fou testé.*
+- **Elle a deux replis, pas un** : `if erreurs.len() < 3 { return (1.0, 1.0) }` en plus du
+  `else { 1.0 }`. Les deux rendent l'ordre nominal.
+- **Le chemin du défaut** : `p_brut` → `p_grossier` → `e_oracle = e_max / ratio^p` → filtre
+  `retain(|e| e >= 30·e_oracle)`. Un `p` faux déplace le seuil de filtrage des grilles.
+- **`Ordre::Indetermine` existe et fonctionne** — c'est le modèle à suivre plutôt qu'à réinventer.
+- **Ne pas casser** : `p = 0,9997` (C08 sur `shallow.rs`, S36), et le tableau d'ordres d'`ADR-040`
+  §3 — 0,654 / 0,621 / 1,000 pour les trois schémas.
+- **État de départ** : `cargo test` = **93 tests** (38 cœur + 55 harnais, deux `ignore`), `check` = 0
   échec, hashs `0x3e2c06a7b00e73e3` et `0x1a8b0629a9f51b6e`.

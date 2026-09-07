@@ -12,9 +12,9 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-07
-Session en cours : —
+Session en cours : S43 — l'essai à zéro de C08 : trois estimateurs, trois refus différents
 Dernière session : S42 — 2026-09-07 — C03 déclarait le néant conforme, avec le meilleur score possible
 Session suivante : S43 — **l'essai à zéro de C08** (S42-1) *(recommandé)*, ou les valeurs de repli après mesure (S42-2)
 ```
