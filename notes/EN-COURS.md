@@ -68,7 +68,7 @@ Objectif         : Contrôler les grilles et préserver les refus C22 delta (S52
 ### Plan
 
 - [x] **P1** — reprise, copies, jeton et plan seul.
-- [ ] **P2** — reproduire familles irrégulières, grille nulle et allocation refusée ; corriger admission et calcul d'ordre, préserver les trous.
+- [x] **P2** — reproduire familles irrégulières, grille nulle et allocation refusée ; corriger admission et calcul d'ordre, préserver les trous.
 - [ ] **P3** — tester filtre de contamination, refus et témoins ; vérifier les résultats nominaux et documenter la portée.
 - [ ] **P4** — rituel : journal, enseignements, actions, index/décomptes, passation et jeton libre.
 
@@ -77,3 +77,5 @@ Objectif         : Contrôler les grilles et préserver les refus C22 delta (S52
 Master 348f5f5 propre, copies anciennes propres. REPRISE et socle lus dans cette conversation,
 état S52 et ses résultats relus. Ne pas changer les seuils ni les solveurs. Admission des
 tailles avant modulo/allocation ; la référence exige des grilles doublant successivement.
+
+P2 : trois défauts reproduits puis corrigés : modulo zéro, grille non allouée supprimée, stabilité Some(true) sur tailles irrégulières. Admission avant allocation, doublement contrôlé, refus conservés ; trois tests ciblés passent. Filtre désormais limité au préfixe.

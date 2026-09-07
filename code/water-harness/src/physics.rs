@@ -833,9 +833,10 @@ impl Convergence {
     /// non sur les erreurs elles-mêmes, ce qui la rend utilisable même quand la référence est un
     /// oracle plutôt qu'une solution analytique.
     pub fn ordre(&self, i: usize) -> Ordre {
-        if i + 2 >= self.erreurs.len() {
+        if self.erreurs.len().saturating_sub(i) < 3 {
             return Ordre::Indetermine;
         }
+        if !triplet_double(&self.erreurs[i..i+3]) { return Ordre::Indetermine; }
         let (e0, e1, e2) = (self.erreurs[i].1, self.erreurs[i + 1].1, self.erreurs[i + 2].1);
         if ![e0, e1, e2].iter().all(|e| e.is_finite()) {
             return Ordre::Indetermine;
@@ -922,6 +923,63 @@ impl Convergence {
         let ecart_petit = d1.abs() <= tolerance;
         let progression_eteinte = d1 * d0 <= 0.0 || d1.abs() * 4.0 <= d0.abs();
         Some(ecart_petit && progression_eteinte)
+    }
+}
+
+#[cfg(test)]
+mod tests_admission_c22 {
+    use super::*;
+    use crate::host_impl::{ArenaAllocator, SequentialJobs, StderrSink};
+    use water_core::{Allocator, AllocError, AllocStats, HostServices};
+
+    #[test]
+    fn tailles_irregulieres_ne_valident_pas_un_ordre() {
+        let mut c = Convergence { grandeur: "témoin".into(),
+            erreurs: [(100,1.0),(200,0.5),(800,0.25),(1600,0.125),(3200,0.0625)].to_vec(),
+            plancher: 1e-12, reference: Reference::Oracle };
+        assert_eq!(c.asymptotique(0.1), None);
+        assert_eq!(ordre_grossier_estime(&c.erreurs), (None, 1.0));
+        let mut bilan = crate::rapport_convergence::Bilan::default();
+        bilan.ajouter(&c, true);
+        assert_eq!(bilan.succes, 0);
+        for (i, e) in c.erreurs.iter_mut().enumerate() { e.0 = 100 << i; }
+        assert_eq!(c.asymptotique(0.1), Some(true));
+        assert_eq!(ordre_grossier_estime(&c.erreurs), (Some(1.0), 1.0));
+    }
+
+    #[test]
+    fn admission_refuse_zero_et_non_emboite_sans_perdre_les_tailles() {
+        for grilles in [vec![0,4,8], vec![4,12,24], vec![4,8,16,32,128]] {
+            let mut a = ArenaAllocator::with_capacity(1 << 20);
+            let mut host = HostServices { alloc: &mut a, jobs: &SequentialJobs, sink: &StderrSink };
+            let c = c08_convergence_reguliere(&mut host, 0.0, &grilles, 64);
+            assert_eq!(c.erreurs.iter().map(|p| p.0).collect::<Vec<_>>(), grilles);
+            assert!(c.erreurs.iter().all(|p| p.1.is_nan()));
+            assert_eq!(a.stats().persistent_calls, 0);
+        }
+    }
+
+    struct RefuseUneFois { arene: ArenaAllocator, appels: usize }
+    impl Allocator for RefuseUneFois {
+        fn alloc_persistent(&mut self, bytes: usize) -> Result<usize, AllocError> {
+            self.appels += 1;
+            if self.appels == 3 { Err(AllocError::OutOfArena) }
+            else { self.arene.alloc_persistent(bytes) }
+        }
+        fn seal(&mut self) { self.arene.seal(); }
+        fn is_sealed(&self) -> bool { self.arene.is_sealed() }
+        fn stats(&self) -> AllocStats { self.arene.stats() }
+    }
+
+    #[test]
+    fn allocation_refusee_reste_dans_la_famille() {
+        let mut a = RefuseUneFois { arene: ArenaAllocator::with_capacity(1 << 20), appels: 0 };
+        let mut host = HostServices { alloc: &mut a, jobs: &SequentialJobs, sink: &StderrSink };
+        let c = c08_convergence_reguliere(&mut host, 0.0, &[4,8,16,32,64], 128);
+        assert_eq!(c.erreurs.iter().map(|p| p.0).collect::<Vec<_>>(), [4,8,16,32,64]);
+        assert!(c.erreurs[1].1.is_nan());
+        assert!(c.erreurs[2..].iter().all(|p| p.1.is_finite()));
+        assert_eq!(c.asymptotique(0.1), None);
     }
 }
 
@@ -1140,6 +1198,20 @@ pub fn c08_convergence_reguliere(
 ) -> Convergence {
     use water_core::{Bassin, Delta1D};
 
+    // Valider avant modulo et avant allocation ; le refus garde toutes les tailles demandées.
+    let refuse = |raison: String| Convergence {
+        grandeur: format!("montage régulier — {raison}"),
+        erreurs: grilles.iter().map(|&n| (n, f64::NAN)).collect(),
+        plancher: 1.0e-7, reference: Reference::Oracle,
+    };
+    if grilles.is_empty() || !t_s.is_finite() || t_s < 0.0 || nx_oracle == 0
+        || nx_oracle.checked_add(2).and_then(|n| n.checked_mul(20)).is_none()
+        || grilles.iter().any(|&n| n == 0 || n >= nx_oracle || nx_oracle % n != 0)
+        || grilles.windows(2).any(|w| !doublement(w[0], w[1])) {
+        host.sink.warn("C22 : famille invalide — tailles positives doublées, emboîtées dans un oracle plus fin, temps fini positif ou nul requis");
+        return refuse("FAMILLE INVALIDE".into());
+    }
+
     let mut oracle_h: Vec<f64> = Vec::new();
     {
         let b = Bassin {
@@ -1159,21 +1231,13 @@ pub fn c08_convergence_reguliere(
                 host.sink.warn(&format!(
                     "C08 : l'oracle à {nx_oracle} cellules n'a pas pu être alloué ({e:?})"
                 ));
-                return Convergence {
-                    grandeur: format!("montage régulier — ORACLE INDISPONIBLE ({e:?})"),
-                    erreurs: Vec::new(),
-                    plancher: 1.0e-7,
-                    reference: Reference::Oracle,
-                };
+                return refuse(format!("ORACLE INDISPONIBLE ({e:?})"));
             }
         }
     }
 
     let mut erreurs = Vec::new();
     for &nx in grilles {
-        if nx_oracle % nx != 0 || oracle_h.is_empty() {
-            continue;
-        }
         let k = nx_oracle / nx;
         let b = Bassin {
             nx,
@@ -1183,7 +1247,8 @@ pub fn c08_convergence_reguliere(
             Ok(d) => d,
             Err(e) => {
                 host.sink
-                    .warn(&format!("C08 : grille {nx} non allouée ({e:?}), écartée"));
+                    .warn(&format!("C08 : grille {nx} non allouée ({e:?}), refus conservé"));
+                erreurs.push((nx, f64::NAN));
                 continue;
             }
         };
@@ -1215,7 +1280,10 @@ pub fn c08_convergence_reguliere(
     // plus fin est le **moins** fiable, alors qu'avec une solution analytique c'est le plus fiable.
     let mut retenues = erreurs.clone();
     let mut douteux = false;
-    if erreurs.len() >= 3 {
+    let incomplet = erreurs.iter().any(|(_, e)| !e.is_finite());
+    if incomplet {
+        host.sink.warn("C22 : grille ou mesure indisponible ; filtre suspendu, famille conservée avec ses refus");
+    } else if erreurs.len() >= 3 {
         let (p_brut, _) = ordre_grossier_estime(&erreurs);
         // **Garde-fou G10, revu en S34.** Le premier jet bornait `p` à `[0,3 ; 3,0]` et poursuivait
         // en silence. Or un `p` **hors de ces bornes n'est pas une valeur à corriger** : c'est le
@@ -1255,7 +1323,7 @@ pub fn c08_convergence_reguliere(
         };
         let (nx_max, e_max) = *erreurs.last().unwrap();
         let e_oracle = e_max / (nx_oracle as f64 / nx_max as f64).powf(p_grossier);
-        retenues.retain(|(_, e)| *e >= 30.0 * e_oracle);
+        retenues = prefixe_non_contamine(&erreurs, 30.0 * e_oracle);
         douteux = estimation_douteuse;
     }
 
@@ -1264,7 +1332,8 @@ pub fn c08_convergence_reguliere(
             "erreur L1 relative sur h — montage régulier, oracle nx={nx_oracle} ({} grille(s) retenue(s) sur {}){}",
             retenues.len(),
             erreurs.len(),
-            if douteux { " — ORDRE GROSSIER HORS BORNES, filtre indicatif" } else { "" }
+            if incomplet { " — GRILLE OU MESURE INDISPONIBLE, filtre suspendu" }
+            else if douteux { " — ORDRE GROSSIER HORS BORNES, filtre indicatif" } else { "" }
         ),
         erreurs: retenues,
         // L'oracle porte sa propre erreur : sous 10⁻⁷ de L1 relative, on mesurerait l'oracle et non
@@ -1272,6 +1341,10 @@ pub fn c08_convergence_reguliere(
         plancher: 1.0e-7,
         reference: Reference::Oracle,
     }
+}
+
+fn prefixe_non_contamine(erreurs: &[(usize, f64)], seuil: f64) -> Vec<(usize, f64)> {
+    erreurs.iter().copied().take_while(|(_, e)| e.is_finite() && *e >= seuil).collect()
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -1956,12 +2029,20 @@ pub fn ordre_grossier_estime(erreurs: &[(usize, f64)]) -> (Option<f64>, f64) {
     // l'ignorer, et le compilateur énumère les usages (**L149**). Le second membre reste un nombre
     // utilisable — il faut bien filtrer — et il vaut `1.0` par défaut, ce qui est conservateur :
     // un `p` bas surestime l'erreur d'oracle, donc écarte **plus** de grilles.
-    if erreurs.len() < 3 {
+    if erreurs.len() < 3 || !triplet_double(&erreurs[..3]) {
         return (None, 1.0);
     }
     let (e0, e1, e2) = (erreurs[0].1, erreurs[1].1, erreurs[2].1);
     let brut = ordre_richardson(e0, e1, e2, 0.0);
     (brut, brut.map(|p| p.clamp(0.3, 3.0)).unwrap_or(1.0))
+}
+
+fn doublement(n0: usize, n1: usize) -> bool {
+    n0 > 0 && n0.checked_mul(2) == Some(n1)
+}
+
+fn triplet_double(erreurs: &[(usize, f64)]) -> bool {
+    doublement(erreurs[0].0, erreurs[1].0) && doublement(erreurs[1].0, erreurs[2].0)
 }
 
 /// Algèbre commune au rapport et au filtre ; chaque appelant garde son plancher et son statut.
