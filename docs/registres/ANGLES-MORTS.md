@@ -213,6 +213,7 @@ ce que les sources avaient omis.
 | **A169** | Une prudence justifiée par une mauvaise raison se défend mal et se reporte longtemps | 2 | ADR-047 §6 |
 | **A170** | Une saturation d'affichage transforme un refus en la meilleure mesure possible | **1** | S42, `c03_seiche` |
 | **A171** | Une valeur de repli qui coïncide avec la valeur nominale est invisible à tout contrôle | **1** | S43, `ordre_grossier_estime` |
+| **A172** | Quand la grandeur est un écart, zéro est son meilleur point — aucun repli n'y est acceptable | **1** | AUDIT-REPLIS-S44 §4 |
 
 Cent huit angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -1262,6 +1263,27 @@ pendant quatre sessions.
   *Une valeur de repli doit être choisie hors du domaine des valeurs valides, ou ne pas exister :
   le refus va dans le type.* Et l'audit de S34, qui a examiné G10 et corrigé son bornage, n'a pas
   vu ce repli — **il était sur la ligne juste au-dessus du `clamp`**.
+
+- **A172** *(sévérité 1)* — **Quand la grandeur mesurée est un écart, zéro est son meilleur point,
+  et aucune valeur de repli n'y est acceptable.** Trois défauts en trois sessions, trois formes
+  différentes, une seule cause :
+
+  | | forme | valeur rendue | position dans le domaine |
+  |---|---|---|---|
+  | S42 | `NaN.min(10⁶)` | `10⁶` | **hors** du plausible |
+  | S43 | `else { 1.0 }` | `1,0` | **dans** le nominal (**A171**) |
+  | S44 | `(15 − NaN).max(0)` | `0` | **le meilleur point** |
+
+  **La gravité croît et la visibilité décroît dans le même ordre.** Un `10⁶` finit par se faire
+  remarquer ; un `1,0` au milieu des ordres attendus, jamais ; un `0` sur un déficit **est le
+  résultat qu'on espère**. Et le motif ne tient pas au repli mais à la **grandeur** : dès qu'une
+  mesure est un écart, une erreur ou un déficit, toute opération capable de produire zéro à partir
+  d'un refus le transforme en succès parfait — `unwrap_or(0.0)`, `max(0.0)`, une soustraction de
+  deux valeurs égales par défaut. *Le refus doit aller dans le **type**.*
+
+  **Corollaire, et c'est ce que l'audit a coûté à trouver** : un repli ne s'inspecte jamais seul.
+  `unwrap_or(NaN)` est irréprochable, et il a produit les trois défauts — parce que `min`, `max`
+  et une soustraction suivie d'un `max` avalent tous le `NaN`. **C'est l'aval qu'il faut suivre.**
 
 ---
 

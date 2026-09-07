@@ -108,7 +108,7 @@ faire, faute d'inventaire.
       **sur le chemin d'une grandeur lue**, et le distinguer demande de suivre chaque valeur.
 - [x] **P4** — corriger les fautifs, **avec leur témoin** (**L119**), et vérifier qu'aucun chiffre
       publié ne bouge.
-- [ ] **P5** — le registre `AUDIT-REPLIS-S44`, et la règle qui évite le prochain.
+- [x] **P5** — le registre `AUDIT-REPLIS-S44`, et la règle qui évite le prochain.
 - [ ] **P6** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
