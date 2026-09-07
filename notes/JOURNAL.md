@@ -5338,3 +5338,31 @@ nouvel angle ni leçon : application de L180/L182 et ADR-003. Invariants préser
 correctives datées, aucun ADR réécrit. 51 ADR, six SPEC, seize registres, 187 angles, L182.
 Suite S66 : S65-1, diagnostic homogénéité, puis S64-3 et S64-2 par ADR. S63-1, couche
 dispersive, reste le seul blocage réel de B2. A103 et C22 clos ; aucun distant créé.
+
+## S66 — 2026-09-08 — Le refus était une interférence, pas une perte de précision
+
+Agent Codex, git/cargo disponibles. Départ master 25d3a9e propre ; copie 29ef50 identique,
+avancée à chaque étape. Entrée S65-1 : homogénéité nominale en échec après graine effective.
+
+Diagnostic de test sur les mêmes composantes : calcul spatial et sommation f64, variance totale
+et somme des variances individuelles. Six graines, trois fenêtres 144/576/1536 m, deux positions
+0/3000 m, dix-huit couples ; 9,46 s en release. Les fenêtres restent dans la portée 4096 m.
+Au nominal : ratio 1,397506641 en production, 1,397506306 en f64. La contribution croisée passe
+de 0,006459304 à 0,046176100 m² ; elle explique la hausse de variance. La somme des variances
+individuelles baisse légèrement, ratio 0,979715316. La précision ne cause pas le refus.
+
+Quatre graines sur six échouent à 144 m, trois à 576 m, aucune à 1536 m ; effet non monotone
+par graine, aucune calibration déduite. Test ordinaire de causalité, témoin monochromatique à
+covariance nulle. 134 tests réussis, quatre ignorés ; diagnostic ignoré exécuté séparément.
+Check : hashs inchangés 0x9babd7e12935c263 / 0xd57d81f47d9f8611. Production inchangée :
+C04 et homogénéité restent en échec, campagne générale non répétée. HOMOGENEITE-S66 consigne
+montage, résultats et limites de la référence partageant la table spectrale.
+
+A188 (sévérité 2), attribution causale corrigée ; L183, propriété d’ensemble contre réalisation
+finie. S65-1 close ; S66-1 ouverte pour décider la séparation contrôle de précision / diagnostic
+statistique. Aucun seuil ni invariant modifié, aucune API publique nouvelle, aucun ADR réécrit.
+51 ADR, 17 invariants, six SPEC, seize registres, 23 cas, 188 angles ; dernière leçon L183.
+
+Suite S67 : S64-3, expliquer A187 à 256 composantes avec la décomposition mesurée, sans
+supposer que le résultat à 32 composantes suffit. Puis instruire S66-1 et S64-2 par ADR.
+S63-1, couche dispersive, demeure le blocage B2. A103 et C22 clos ; aucun distant créé.

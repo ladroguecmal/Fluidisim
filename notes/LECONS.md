@@ -2977,3 +2977,15 @@ deux d'ici ont coûté quatre minutes à démentir.
 **Corollaire, vérifié trois sessions de suite** : un balayage qui ne déplace rien désigne un
 paramètre qui n'atteint pas le code — la fenêtre en S62, la graine en S64. Voir **L180**.
 
+
+## L183 — Une propriété d’ensemble ne devient pas une égalité entre deux fenêtres
+
+*(S66)* Un contrôle attribuait la variation de variance spatiale à la perte de précision.
+Une référence plus précise rendait le même refus. Les termes croisés entre composantes,
+qui ne disparaissent pas sur une petite fenêtre finie, expliquaient presque tout l’écart.
+La mer statistiquement homogène ne promet pas la même variance sur chaque portion observée.
+
+**Réflexe :** avant de transformer une propriété statistique en assertion locale, nommer le
+support sur lequel elle est vraie : ensemble, limite de fenêtre, durée ou réalisation.
+Décomposer le résidu et modifier le mécanisme suspecté seul. Un contrôle sensible à un défaut
+peut aussi réagir à autre chose ; son nom ne suffit pas à attribuer la cause d’un refus.

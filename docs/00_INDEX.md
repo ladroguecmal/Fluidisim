@@ -145,7 +145,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`specs/SPEC-006`](specs/SPEC-006-chemin-pousse.md) | **le chemin poussé** — ce que le système *publie* : bus d'événements et `WaveEvent`, écume et aération, traversabilité, polyligne de déferlement |
 | [`registres/PRESCRIPTIONS-S63.md`](registres/PRESCRIPTIONS-S63.md) | **les prescriptions non éprouvées** — trois genres, dont un seul se vérifie ; **trois recettes mises à l'épreuve, trois fautives** ; les préalables de B2 périmés depuis quarante sessions (**A185**) |
 | [`registres/AUDIT-REFERENCES-S62.md`](registres/AUDIT-REFERENCES-S62.md) | **ce qu'une référence peut voir bouger** — 41 références, trois degrés, **une seule tautologie** ; `Hs` aveugle à `hs` et gouverné par sa fenêtre, première mesure d'**A102** ; la fenêtre était hors du scénario (**A184**) |
-| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **187 points**, avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
+| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **188 points**, avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
 | [`registres/FORK-S22-S26.md`](registres/FORK-S22-S26.md) | **le second fork** — constat, carte de renumérotation complète, la règle manquante, et ce qui reste à fusionner |
 | [`registres/AUDIT-ASSERTIONS-S29.md`](registres/AUDIT-ASSERTIONS-S29.md) | **ce que chaque assertion peut voir** — 23 cas classés, 5 fautifs, 1 mesure du harnais retirée ; **réécriture S30 sans aucun seuil inventé** |
 | [`registres/AUDIT-REPLIS-S44.md`](registres/AUDIT-REPLIS-S44.md) | **les valeurs de repli, inventoriées** — 49 recensées, deux fautives ; *quand la grandeur est un écart, zéro est son meilleur point* |
@@ -206,6 +206,11 @@ parfaitement stable ne pouvait pas distinguer.
 | [`../notes/JOURNAL.md`](../notes/JOURNAL.md) | historique des sessions, points de reprise |
 
 ## État d'avancement
+
+**S66 — 2026-09-08 :** refus d’homogénéité expliqué par les interférences sur la fenêtre,
+reproduit en f64 ; seuil et verdict conservés. Voir docs/validation/HOMOGENEITE-S66.md.
+134 tests réussis, quatre ignorés ; hashs inchangés. A188, L183 ; S65-1 close.
+Suite S67 : S64-3 (A187 à 256 composantes), puis décision du contrôle S66-1.
 
 **S65 — 2026-09-08 :** graine raccordée aux phases, réalisations distinctes et reproductibles.
 133 tests réussis, trois ignorés ; nouveaux hashs vérifiés. Hs nominal +1,388 %, nouvel échec
@@ -338,7 +343,7 @@ Chiffrage et contraintes  █████████████████░
 Spécification technique   ████████████████████░░   92 %   chemins tiré et poussé posés, persistance tranchée ; reste IGpuBackend
 Cohérence interne         █████████████████░░░░░   80 %   26 ADR + 6 SPEC confrontés, 45 écarts résolus ; **les 6 ADR de S35 n'ont pas été confrontés au corpus**
 Décisions expérimentales  █████░░░░░░░░░░░░░░░░░   24 %   onze bancs définis, aucun exécuté ; **une moitié de `λ_cut` est mesurée** ; B3 a deux critères d'entrée
-Outillage et pipeline     ████████████████████░░   90 %   **H1, H3, deux δ et un milieu dispersif**, **133 tests exécutés, 3 ignorés** ; C01/C03 passent, C04 échoue à l'ordre un et **passe à l'ordre deux** ; H2, H4-H6 non écrits
+Outillage et pipeline     ████████████████████░░   90 %   **H1, H3, deux δ et un milieu dispersif**, **134 tests exécutés, 4 ignorés** ; C01/C03 passent, C04 échoue à l'ordre un et **passe à l'ordre deux** ; H2, H4-H6 non écrits
 Accords inter-équipes     █████░░░░░░░░░░░░░░░░░   25 %   cinq arbitrages tranchés ; quatorze demandes extérieures en attente
 ```
 

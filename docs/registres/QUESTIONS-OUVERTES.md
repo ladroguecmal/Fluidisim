@@ -770,6 +770,15 @@ S64-1 close : GRAINES-S65. S64-2 reste bloquée par A187 et la calibration stati
 
 | # | Action | Origine | Porteur | État |
 |---|---|---|---|---|
-| S65-1 | Diagnostiquer le nouvel échec d’homogénéité (ratio 1,397507) sur plusieurs graines et fenêtres ; distinguer fluctuation de réalisation et défaut de phase avant toute modification du contrôle | GRAINES-S65, tolérance 15 % inchangée | session S66 | ouverte |
+| S65-1 | Diagnostiquer le nouvel échec d’homogénéité (ratio 1,397507) sur plusieurs graines et fenêtres ; distinguer fluctuation de réalisation et défaut de phase avant toute modification du contrôle | GRAINES-S65, tolérance 15 % inchangée | session S66 | **close en S66** |
 
 Ordre recommandé : S65-1, S64-3, puis S64-2 par ADR. S63-1 reste à planifier séparément.
+
+## Actions relevées en séance — S66
+
+S65-1 close : le refus est reproduit en f64 et expliqué par les covariances de fenêtre.
+HOMOGENEITE-S66. Aucun seuil changé ; A187 reste ouvert, suite prioritaire S67 : S64-3.
+
+| # | Action | Origine | Porteur | État |
+|---|---|---|---|---|
+| S66-1 | Décider par ADR comment séparer le diagnostic statistique d’homogénéité et le contrôle de précision ; éprouver un défaut injecté avant toute nouvelle assertion, conserver le refus actuel jusque-là | A188, HOMOGENEITE-S66 | session après diagnostic S64-3 | ouverte |

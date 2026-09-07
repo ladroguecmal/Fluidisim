@@ -1499,3 +1499,10 @@ pendant quatre sessions.
 **Suivi A186 — S65, 2026-09-08.** Paramètre mort corrigé : graine transmise aux phases,
 réalisations distinctes et reproductibles vérifiées. GRAINES-S65. Barres d’erreur encore
 à établir ; A187 reste ouvert. Six graines ne prouvent pas leur indépendance statistique.
+
+- **A188** *(sévérité 2, S66 ; attribution corrigée, contrôle à instruire)* — **Un écart de
+  variance entre deux fenêtres ne désigne pas sa cause.** Le contrôle prétend surveiller la
+  précision spatiale ; son échec nominal à 39,75 % subsiste en f64, avec différence du ratio
+  de 3,35e-7. Les covariances entre composantes sur 144 m expliquent la hausse. Aucune perte
+  de précision causant ce refus établie. Commentaire corrigé, verdict et seuil conservés ;
+  S66-1 porte le devenir du contrôle. HOMOGENEITE-S66, L183.

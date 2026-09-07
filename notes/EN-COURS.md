@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S66
-État             : en cours
+État             : terminée
 Agent            : Codex (git et cargo disponibles)
 Objectif         : Diagnostiquer le nouvel échec d’homogénéité (S65-1).
 ```
@@ -70,7 +70,7 @@ Objectif         : Diagnostiquer le nouvel échec d’homogénéité (S65-1).
 - [x] **P1** — état réel, passation, jeton et plan seul.
 - [x] **P2** — diagnostic à phases spatiales et sommation f64 sur les mêmes composantes ; fenêtres 144/576/1536 m, six graines, translation 3000 m.
 - [x] **P3** — confronter les mesures, ajouter un témoin de causalité et documenter la portée ; aucun seuil modifié.
-- [>] **P4** — rituel : journal, actions, angles/leçons si établis, index, corrections datées et jeton libre.
+- [x] **P4** — rituel : journal, actions, angles/leçons si établis, index, corrections datées et jeton libre.
 
 ### Notes de reprise
 
@@ -90,3 +90,6 @@ P3 : test de causalité et témoin monochromatique verts ; 134 tests réussis, q
 Check inchangé. HOMOGENEITE-S66 contient les 18 ratios et la décomposition. Aucun chemin de
 production ni seuil modifié ; commentaire du contrôle corrigé. S65-1 peut être close,
 S66-1 portera la décision de séparer contrôle de précision et diagnostic statistique.
+
+P4 : A188/L183 consignés, S65-1 close, S66-1 ouverte. Suite S67 S64-3. Aucun calcul en cours,
+jeton libre, copie 29ef50 à avancer comme aux étapes précédentes.

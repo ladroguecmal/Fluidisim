@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 01:06 +02:00
+JETON            : libre
+Battement        : 2026-09-08 01:07 +02:00
 Agent            : Codex (git et cargo disponibles)
-Session en cours : S66
-Dernière session : S65 — 2026-09-08 — graines effectives
-Session suivante : S66 — S65-1, diagnostic homogeneite
+Session en cours : aucune
+Dernière session : S66 — 2026-09-08 — interferences de fenetre mesurees
+Session suivante : S67 — S64-3, expliquer A187 a 256 composantes
 
 S65 : les ensembles sont possibles, mais les barres statistiques restent à établir ; A187 reste ouvert.
 
@@ -154,6 +154,11 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S66 — 2026-09-08 :** refus d’homogénéité expliqué par les interférences sur la fenêtre,
+reproduit en f64 ; seuil et verdict conservés. Voir docs/validation/HOMOGENEITE-S66.md.
+134 tests réussis, quatre ignorés ; hashs inchangés. A188, L183 ; S65-1 close.
+Suite S67 : S64-3 (A187 à 256 composantes), puis décision du contrôle S66-1.
 
 **S65 — 2026-09-08 :** graine raccordée aux phases, réalisations distinctes et reproductibles.
 133 tests réussis, trois ignorés ; nouveaux hashs vérifiés. Hs nominal +1,388 %, nouvel échec
@@ -332,7 +337,7 @@ Quarante-huit sessions ici, **plus cinq dans une lignée parallèle réconcilié
 B-S27) — **51 ADR** *(dont un acté)*, six spécifications, **seize registres** — **et du code qui
 tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équilibrés et **tous deux
 montés sur leurs cas, confrontés l'un à l'autre et instrumentés, **plus un milieu à dispersion
-exacte** *(S39)*, **133 tests verts, trois ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **trois sans
+exacte** *(S39)*, **134 tests verts, quatre ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **trois sans
 verdict** (C08), **un succès depuis S59** : la fenêtre C22 800–12800 conclut à `p = 1,96`
 stabilisé, contre un oracle du même schéma. Quatre cas canoniques sur δ sont exécutés ici :
 **C01 et C03 passent**, C04 échoue, C08 ne conclut pas. **Le second véhicule passe C04 sur un montage dont le schéma et la mesure

@@ -1080,3 +1080,8 @@ mesurable. Voir [EXTREMA-SEICHE-S55](EXTREMA-SEICHE-S55.md), notamment les limit
 C18 : Hs nominal +1,388 %, homogénéité ratio 1,397507, **échec** face à 15 % conservé et suivi
 S65-1. Hashs C02/C18 remplacés avant vérification. Mesures et limites :
 [GRAINES-S65](GRAINES-S65.md). Valeurs antérieures liées aux phases historiques ; seuils inchangés.
+
+**Suivi S66 — 2026-09-08.** Le ratio d’homogénéité 1,397507 subsiste en f64 ; les termes
+croisés entre composantes sur 144 m expliquent la hausse, sans défaut de précision causant
+ce refus établi. Seuil et verdict conservés ; S65-1 close, décision du contrôle suivie S66-1.
+[HOMOGENEITE-S66](HOMOGENEITE-S66.md). Ne pas assimiler cette mesure à la résolution d’A187.
