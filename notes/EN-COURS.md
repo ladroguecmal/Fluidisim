@@ -68,7 +68,7 @@ Objectif         : Préserver le refus de front absent dans C04 shallow (S44-1).
 ### Plan
 
 - [x] **P1** — reprise, copies, jeton et plan seul.
-- [ ] **P2** — tracer les usages, conserver Option jusqu'aux sorties, refuser le profil absent ; tests absence/témoin et assertion.
+- [x] **P2** — tracer les usages, conserver Option jusqu'aux sorties, refuser le profil absent ; tests absence/témoin et assertion.
 - [ ] **P3** — tests complets, comparaison nominale avant/après, documentation du suivi des refus.
 - [ ] **P4** — rituel : journal, enseignements, actions, index, décomptes et passation ; jeton libre.
 
@@ -77,3 +77,5 @@ Objectif         : Préserver le refus de front absent dans C04 shallow (S44-1).
 Master 7a33d95 propre, anciennes copies propres. Socle déjà lu dans cette conversation,
 REPRISE et dernière entrée du journal relues. Le détecteur du cœur renvoie déjà Option ;
 le défaut est dans ses appelants. Aucun seuil ou solveur à modifier.
+
+P2 : cinq sites de repli corrigés (quatre positions, un indice), détecteur du cœur déjà Option. Deux tests nouveaux ; sept tests ciblés passent, dont C04 nominal. Compilation release réussie.

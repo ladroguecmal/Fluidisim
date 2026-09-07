@@ -304,11 +304,35 @@ fn erreur_l1_ritter(n: usize, dx: f64, h0: f64, t_fin: f64, sc: Schema) -> f64 {
 }
 
 /// Position du front de mouillage, a un seuil donne, pour une maille et un schema donnes.
-fn front_ritter(n: usize, dx: f64, h0: f64, t_fin: f64, sc: Schema, seuil: f64) -> f64 {
+fn front_ritter(n: usize, dx: f64, h0: f64, t_fin: f64, sc: Schema, seuil: f64) -> Option<f64> {
     let mut d = barrage(n, dx, h0, sc);
     let x_barrage = d.x(n / 2) - 0.5 * dx;
     d.avancer_jusqu_a(t_fin, 0.45);
-    d.front_mouille(seuil).map(|x| x - x_barrage).unwrap_or(0.0)
+    d.front_mouille(seuil).map(|x| x - x_barrage)
+}
+
+// Conversion réservée aux diagnostics imprimés ; NaN reste visible dans les écarts.
+fn front_diagnostic(front: Option<f64>) -> f64 {
+    if front.is_none() { print!(" [front introuvable] "); }
+    front.unwrap_or(f64::NAN)
+}
+
+fn cas_front(front: Option<f64>, reference: f64, t_fin: f64) -> Cas {
+    Cas {
+        id: "C04-front",
+        grandeur: if front.is_none() { "front introuvable au seuil 10⁻²·h₀".into() }
+            else { format!("position du front à t = {t_fin:.0} s (seuil 10⁻²·h₀)") },
+        // NaN reste NaN dans Cas::ecart_rel et fait échouer Cas::passe ; aucun min/max en aval.
+        mesure: front.unwrap_or(f64::NAN),
+        reference,
+        tolerance_rel: 0.03,
+        source: "CAS-CANONIQUES C04 — Ritter, x_front = 2√(gh₀)·t",
+    }
+}
+
+fn profil_front(d: &Shallow1D, seuil: f64) -> Option<Vec<usize>> {
+    let i = d.maille_en(d.front_mouille(seuil)?);
+    Some((i.saturating_sub(40)..=(i + 4).min(d.cellules()-1)).step_by(8).collect())
 }
 
 /// **C04 — rupture de barrage, solution de Ritter.**
@@ -360,7 +384,7 @@ pub fn c04_ritter(t_fin: f64, n: usize, dx: f64) -> Vec<Cas> {
     for (m, pas_m) in [(400usize, 0.1f64), (800, 0.05), (1600, 0.025), (3200, 0.0125)] {
         print!("      dx = {pas_m:>7.4} m  ");
         for sc in SCHEMAS {
-            let f = front_ritter(m, pas_m, h0, t_fin, sc, 1e-6);
+            let f = front_diagnostic(front_ritter(m, pas_m, h0, t_fin, sc, 1e-6));
             print!(
                 "   {:<14} {f:>8.4} m ({:>5.2} %)",
                 sc.nom,
@@ -388,7 +412,7 @@ pub fn c04_ritter(t_fin: f64, n: usize, dx: f64) -> Vec<Cas> {
         let v0 = e.volume();
         let xb = e.x(n / 2) - 0.5 * dx;
         e.avancer_jusqu_a(t_fin, cfl);
-        let f = e.front_mouille(1e-6).map(|x| x - xb).unwrap_or(0.0);
+        let f = front_diagnostic(e.front_mouille(1e-6).map(|x| x - xb));
         println!(
             "      CFL = {cfl:.2}   front = {f:>8.4} m   dérive de volume = {:>10.3e}",
             (e.volume() - v0) / v0
@@ -400,18 +424,19 @@ pub fn c04_ritter(t_fin: f64, n: usize, dx: f64) -> Vec<Cas> {
     // ce soit.
     println!("  C04 — profil au voisinage du front, dx = {dx:.4} m :");
     println!("         x        h numerique    h moyenne exacte   h ponctuelle exacte    u num    u exact");
-    let i_front = d.front_mouille(1e-9).map(|x| d.maille_en(x)).unwrap_or(0);
-    for i in (i_front.saturating_sub(40)..=i_front + 4).step_by(8) {
-        let xc = d.x(i) - x_barrage;
-        println!(
-            "      {xc:>8.4}   {:>12.6e}   {:>16.6e}   {:>19.6e}   {:>7.3}   {:>7.3}",
-            d.hauteur(i),
-            ritter_h_moyenne(xc - 0.5 * dx, xc + 0.5 * dx, t_fin, h0),
-            ritter_h(xc, t_fin, h0),
-            d.vitesse(i),
-            ritter_u(xc, t_fin, h0)
-        );
-    }
+    if let Some(indices) = profil_front(&d, 1e-9) {
+        for i in indices {
+            let xc = d.x(i) - x_barrage;
+            println!(
+                "      {xc:>8.4}   {:>12.6e}   {:>16.6e}   {:>19.6e}   {:>7.3}   {:>7.3}",
+                d.hauteur(i),
+                ritter_h_moyenne(xc - 0.5 * dx, xc + 0.5 * dx, t_fin, h0),
+                ritter_h(xc, t_fin, h0),
+                d.vitesse(i),
+                ritter_u(xc, t_fin, h0)
+            );
+        }
+        } else { println!("      profil indisponible : front introuvable"); }
 
     // L'ecart du front est-il un defaut du solveur, ou la consequence d'un seuil qui demande de
     // representer un film mille fois plus mince que la hauteur locale ? Un balayage du seuil
@@ -430,7 +455,7 @@ pub fn c04_ritter(t_fin: f64, n: usize, dx: f64) -> Vec<Cas> {
     fin.avancer_jusqu_a(t_fin, 0.45);
     for seuil in [1e-1f64, 3e-2, 1e-2, 3e-3, 1e-3, 1e-4, 1e-5, 1e-6] {
         let ec = |dom: &Shallow1D, xb: f64, pas_m: f64| -> f64 {
-            let f = dom.front_mouille(seuil).map(|x| x - xb).unwrap_or(0.0);
+            let f = front_diagnostic(dom.front_mouille(seuil).map(|x| x - xb));
             let fe = front_exact(pas_m, t_fin, h0, seuil);
             (f - fe).abs() / fe * 100.0
         };
@@ -463,20 +488,20 @@ pub fn c04_ritter(t_fin: f64, n: usize, dx: f64) -> Vec<Cas> {
     let mut fronts = Vec::new();
     let mut fronts_exacts = Vec::new();
     for seuil in [1e-3 * h0, 1e-2 * h0] {
-        let f = d.front_mouille(seuil).map(|x| x - x_barrage).unwrap_or(0.0);
+        let front = d.front_mouille(seuil).map(|x| x - x_barrage);
+        let f = front_diagnostic(front);
         let fe = front_exact(dx, t_fin, h0, seuil);
         println!(
             "      seuil = {seuil:>9.0e} m   num {f:>8.4} m   exact au meme seuil {fe:>8.4} m   ecart {:>6.2} %   (front mathematique {:.4} m)",
             (f - fe).abs() / fe * 100.0,
             2.0 * c0 * t_fin
         );
-        fronts.push(f);
+        fronts.push(front);
         fronts_exacts.push(fe);
     }
 
     vec![
-        Cas {
-            id: "C04-front",
+        {
             // ADR-039 §3.1 fixe le seuil de l'assertion a 10⁻⁶ m, les deux seuils restant
             // rapportes. Le code utilisait 10⁻³ : la condition de mesure avait ete ecrite en B-S23
             // sans que le code la suive (A78/L43). Corrige en B-S24.
@@ -486,11 +511,7 @@ pub fn c04_ritter(t_fin: f64, n: usize, dx: f64) -> Vec<Cas> {
             // **seuil**. Deux grandeurs differentes. La reference est desormais le front exact **au
             // meme seuil et sur la meme moyenne de maille** : c'est la seule comparaison qui ait un
             // sens, et elle ne sauve pas le cas — 6,1 % deviennent 5,8 %.
-            grandeur: format!("position du front à t = {t_fin:.0} s (seuil 10⁻²·h₀)"),
-            mesure: fronts[1],
-            reference: fronts_exacts[1],
-            tolerance_rel: 0.03,
-            source: "CAS-CANONIQUES C04 — Ritter, x_front = 2√(gh₀)·t",
+            cas_front(fronts[1], fronts_exacts[1], t_fin)
         },
         Cas {
             // A156, reclame depuis B-S24 : une assertion ponctuelle ne classe pas. Sans une norme
@@ -1235,6 +1256,34 @@ pub fn c06_galilee(n: usize, dx: f64, h0: f64, amp: f64, u0: f64, t_fin: f64) ->
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn front_absent_ne_devient_ni_position_ni_profil() {
+        let sec = barrage(80, 0.5, 0.0, SCHEMA_RETENU);
+        assert_eq!(sec.front_mouille(1e-2), None);
+        assert_eq!(profil_front(&sec, 1e-2), None);
+        assert_eq!(front_ritter(80, 0.5, 0.0, 0.0, SCHEMA_RETENU, 1e-2), None);
+        let humide = barrage(80, 0.5, 1.0, SCHEMA_RETENU);
+        assert_eq!(humide.front_mouille(1e-2), Some(19.75));
+        assert!(profil_front(&humide, 1e-2).unwrap().iter().all(|&i| i < 80));
+        assert_eq!(front_ritter(80, 0.5, 1.0, 0.0, SCHEMA_RETENU, 1e-2), Some(-0.25));
+        assert_eq!(humide.front_mouille(1.0), None);
+    }
+
+    #[test]
+    fn refus_front_echoue_aussi_contre_reference_nulle() {
+        for reference in [0.0, 10.6] {
+            let c = cas_front(None, reference, 2.0);
+            assert!(c.mesure.is_nan());
+            assert!(c.ecart_rel().is_nan());
+            assert!(!c.passe());
+            assert!(c.grandeur.contains("introuvable"));
+        }
+        assert!(cas_front(Some(0.0), 0.0, 2.0).passe());
+        assert!(cas_front(Some(10.6), 10.6, 2.0).passe());
+        assert!(front_diagnostic(None).is_nan());
+        assert_eq!(front_diagnostic(Some(0.0)), 0.0);
+    }
 
     /// **C01 — les trois assertions passent sur le schéma équilibré.**
     ///
