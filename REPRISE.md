@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-08 13:05 +02:00
-Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-08 01:52 +02:00
+Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
+Session en cours : S71
 Dernière session : S70 — 2026-09-08 — ADR-053 actée : le projet passe à la construction
 Session suivante : S71 — **B1**, le banc du champ de fond (S70-1)
 

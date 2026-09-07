@@ -58,42 +58,23 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-```
-Session          : S70
-État             : terminée
-Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Objectif         : Enregistrer l'arbitrage de l'utilisateur — le projet passe à la construction —
-                   et en tirer l'ordre de construction.
-```
+Session : S71 — en cours
+Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
+Objectif : valider ou rejeter ADR-053 sur délégation explicite de l’utilisateur,
+et rendre la trajectoire de construction concrète, avec critères de réception.
 
 ### Plan
 
-- [x] **P1** — passation, jeton, plan seul.
-- [x] **P2** — ADR-053 : la décision, ce qu'elle ne change pas, et par quelle couche on commence.
-- [x] **P3** — rituel : journal, index, actions, jeton, **fusion dans master**.
+- [x] **P1** — lire la passation, vérifier les copies, prendre le jeton et committer le plan seul.
+- [ ] **P2** — décision ADR-054 : construction confirmée, dépendances corrigées et lots W recevables.
+- [ ] **P3** — rituel : journal, leçon, angle mort, actions, index, passation et copies synchronisées.
 
 ### Notes de reprise
 
-Départ 1afbb3a. **Arbitrage rendu par l'utilisateur le 2026-09-08**, en réponse au point 4 de
-`BILAN-S69` §6 : *« Je ne savais pas, donc on passe à la construction. »* C'était la question que
-le bilan avait remontée comme hors de portée d'une session — décider si le projet reste un corpus
-de conception ou devient un système. **Elle est tranchée : construction.**
-
-**Par quelle couche commencer.** ADR-001 §2 définit B, W, δ et V. Le choix n'est pas ouvert : il
-converge. **W** est *« des perturbations propagatives à dispersion correcte »*, et quatre besoins
-indépendants la désignent —
-
-1. **S63-1** cherche une couche dispersive depuis S22 ; W en est une par définition. Elle
-   débloque C02, donc `λ_cut`, donc **B2**, le banc décisif.
-2. Elle débloque aussi **C07** et **C19**, deux des onze cas en attente.
-3. Elle est **analytique** — des paquets dérivés d'événements horodatés, au déterminisme exact —
-   et non un solveur libre : bien moins lourde que `δ`, qui est un solveur 3D à surface libre.
-4. Son format réseau, **`WaveEvent`** (SPEC-006 §3.1), est **la seule urgence de format du
-   corpus** : structure répliquée à arrêter avant que le réseau ne fige son protocole. L'écrire
-   force à la trancher.
-
-`δ` reste la pièce la plus lourde et ne commence pas ici. `B` existe déjà.
-
-P2/P3 : ADR-053 ACTEE — deuxieme ADR acte du depot apres ADR-020. Trajectoire B1, WaveEvent, W.
-S63-1 absorbee : la couche dispersive cherchee depuis S22 est W. Actions S70-1, S70-2, S70-3.
-Journal, index et jeton a jour. Aucun code ecrit : la session enregistre une decision.
+Départ 14b4b7a ; master et reprise-projet-29ef50 identiques et propres.
+Demande actuelle : examiner le choix, avec autonomie technique complète renouvelée.
+B1 complet exige LOD, rendu et évaluation perceptuelle ; coût CPU seul est une mesure partielle.
+ADR-001 autorise plusieurs représentations W. C12 dépend de V seul.
+Une dispersion analytique exacte ne mesure pas la coupure numérique de δ.
+A187 a été expliqué en S67, et ne prouve pas que 256 composantes sont physiquement fausses.
+P2 doit livrer une décision et des lots de construction, pas déclarer le système implémenté.
