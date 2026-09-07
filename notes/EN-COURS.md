@@ -109,8 +109,8 @@ confusion est déjà dans le corpus :
 **A163 porte sur le premier.** `ADR-041` a révisé le deuxième. Le troisième est un manque, pas une
 valeur.
 
-- [>] **P1** — plan, jeton.
-- [ ] **P2** — rendre le seuil de `shallow.rs` **paramétrable**. Il est en dur à deux endroits ;
+- [x] **P1** — plan, jeton.
+- [x] **P2** — rendre le seuil de `shallow.rs` **paramétrable**. Il est en dur à deux endroits ;
       sans cela, rien ne se balaie de ce côté et l'oracle ne sert pas.
 - [ ] **P3** — **rejouer le balayage d'`ADR-031` §4** dans cet arbre, étendu à `10⁻¹⁰`, et sur les
       **deux** véhicules. Un chiffre publié se rejoue avant de servir (**L143**).

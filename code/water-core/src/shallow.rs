@@ -44,6 +44,20 @@ use crate::types::Saturations;
 /// Pesanteur, en m/s². Même valeur que `background.rs` et `body.rs`.
 pub const G: f64 = 9.81;
 
+/// **Seuil de cellule sèche par défaut.** Sous cette hauteur, `u` est lu comme nul plutôt que
+/// `hu/h`, et le flux HLL traite l'interface comme un contact sec.
+///
+/// # Pourquoi il est paramétrable depuis S40
+///
+/// Cette valeur était écrite **en dur à huit endroits**, sans justification, tandis que `delta.rs`
+/// porte `H_SEC = 10⁻⁶` avec une provenance mesurée (`ADR-031` §4). Quatre ordres de grandeur
+/// séparaient deux implémentations du même modèle — angle mort **A163**, sévérité 1, trouvé par
+/// l'oracle croisé en S37.
+///
+/// **La valeur n'est pas changée ici** : la rendre réglable est ce qui permet de la mesurer, et la
+/// mesure précède la décision (`ADR-044` §7).
+pub const H_SEC_DEFAUT: f64 = 1.0e-10;
+
 /// Le flux numérique employé aux interfaces.
 ///
 /// **Les deux sont conservés parce que C04 élimine le premier.** Un cas canonique qui ne peut plus
@@ -90,6 +104,8 @@ pub struct Shallow1D {
     dhu: Vec<f64>,
     h1: Vec<f64>,
     hu1: Vec<f64>,
+    /// Seuil de cellule sèche. Voir [`H_SEC_DEFAUT`] et **A163**.
+    h_sec: f64,
     /// **Compteurs de saturation** — S38, A146. Ne participent à aucun calcul.
     sat: Saturations,
 }
@@ -138,6 +154,7 @@ impl Shallow1D {
             dhu: vec![0.0; n],
             h1: vec![0.0; n],
             hu1: vec![0.0; n],
+            h_sec: H_SEC_DEFAUT,
             sat: Saturations::default(),
         })
     }
@@ -178,6 +195,7 @@ impl Shallow1D {
             dhu: vec![0.0; n],
             h1: vec![0.0; n],
             hu1: vec![0.0; n],
+            h_sec: H_SEC_DEFAUT,
             sat: Saturations::default(),
         })
     }
@@ -225,6 +243,7 @@ impl Shallow1D {
             dhu: vec![0.0; n],
             h1: vec![0.0; n],
             hu1: vec![0.0; n],
+            h_sec: H_SEC_DEFAUT,
             sat: Saturations::default(),
         })
     }
@@ -272,6 +291,7 @@ impl Shallow1D {
             dhu: vec![0.0; n],
             h1: vec![0.0; n],
             hu1: vec![0.0; n],
+            h_sec: H_SEC_DEFAUT,
             sat: Saturations::default(),
         })
     }
@@ -326,6 +346,7 @@ impl Shallow1D {
             dhu: vec![0.0; n],
             h1: vec![0.0; n],
             hu1: vec![0.0; n],
+            h_sec: H_SEC_DEFAUT,
             sat: Saturations::default(),
         })
     }
@@ -457,7 +478,7 @@ impl Shallow1D {
     }
     /// Vitesse. Nulle sur une maille sèche, plutôt qu'infinie.
     pub fn vitesse(&self, i: usize) -> f64 {
-        if self.h[i] > 1e-10 {
+        if self.h[i] > self.h_sec {
             self.hu[i] / self.h[i]
         } else {
             0.0
@@ -486,8 +507,8 @@ impl Shallow1D {
     }
 
     /// Flux physique de Saint-Venant : `(hu, hu² + ½gh²)`.
-    fn flux_physique(h: f64, hu: f64) -> (f64, f64) {
-        let u = if h > 1e-10 { hu / h } else { 0.0 };
+    fn flux_physique(h: f64, hu: f64, sec: f64) -> (f64, f64) {
+        let u = if h > sec { hu / h } else { 0.0 };
         (hu, hu * u + 0.5 * G * h * h)
     }
 
@@ -497,11 +518,11 @@ impl Shallow1D {
     /// le flux décentré le plus simple qui soit stable, et sa dissipation est **proportionnelle au
     /// saut des variables conservées** — ce qui, sur un fond en pente, n'est pas anodin : au repos,
     /// `h` saute d'une maille à l'autre alors même que rien ne bouge.
-    fn rusanov(hl: f64, hul: f64, hr: f64, hur: f64) -> (f64, f64) {
-        let (fl0, fl1) = Self::flux_physique(hl, hul);
-        let (fr0, fr1) = Self::flux_physique(hr, hur);
-        let ul = if hl > 1e-10 { hul / hl } else { 0.0 };
-        let ur = if hr > 1e-10 { hur / hr } else { 0.0 };
+    fn rusanov(hl: f64, hul: f64, hr: f64, hur: f64, sec: f64) -> (f64, f64) {
+        let (fl0, fl1) = Self::flux_physique(hl, hul, sec);
+        let (fr0, fr1) = Self::flux_physique(hr, hur, sec);
+        let ul = if hl > sec { hul / hl } else { 0.0 };
+        let ur = if hr > sec { hur / hr } else { 0.0 };
         let a = (ul.abs() + (G * hl.max(0.0)).sqrt()).max(ur.abs() + (G * hr.max(0.0)).sqrt());
         (
             0.5 * (fl0 + fr0) - 0.5 * a * (hr - hl),
@@ -515,8 +536,7 @@ impl Shallow1D {
     /// Le point qui décide de C04 tient en une ligne : **quand la droite est sèche, l'onde de
     /// droite va à `u_G + 2√(gh_G)`**, et non à `u_G + √(gh_G)`. Ce facteur deux est toute la
     /// différence entre un front qui suit Ritter et un front qui traîne de 17 %.
-    fn hll(hl: f64, hul: f64, hr: f64, hur: f64) -> (f64, f64) {
-        let sec = 1e-10;
+    fn hll(hl: f64, hul: f64, hr: f64, hur: f64, sec: f64) -> (f64, f64) {
         if hl <= sec && hr <= sec {
             return (0.0, 0.0);
         }
@@ -540,8 +560,8 @@ impl Shallow1D {
             )
         };
 
-        let (fl0, fl1) = Self::flux_physique(hl, hul);
-        let (fr0, fr1) = Self::flux_physique(hr, hur);
+        let (fl0, fl1) = Self::flux_physique(hl, hul, sec);
+        let (fr0, fr1) = Self::flux_physique(hr, hur, sec);
         if sl >= 0.0 {
             (fl0, fl1)
         } else if sr <= 0.0 {
@@ -556,10 +576,10 @@ impl Shallow1D {
     }
 
     /// Aiguillage vers le flux choisi.
-    fn flux_num(f: Flux, hl: f64, hul: f64, hr: f64, hur: f64) -> (f64, f64) {
+    fn flux_num(f: Flux, hl: f64, hul: f64, hr: f64, hur: f64, sec: f64) -> (f64, f64) {
         match f {
-            Flux::Rusanov => Self::rusanov(hl, hul, hr, hur),
-            Flux::Hll => Self::hll(hl, hul, hr, hur),
+            Flux::Rusanov => Self::rusanov(hl, hul, hr, hur, sec),
+            Flux::Hll => Self::hll(hl, hul, hr, hur, sec),
         }
     }
 
@@ -598,13 +618,14 @@ impl Shallow1D {
         hr: f64,
         hur: f64,
         br: f64,
+        sec: f64,
     ) -> (f64, f64, f64, f64) {
         let b_star = bl.max(br);
         let hsl = (hl + bl - b_star).max(0.0);
         let hsr = (hr + br - b_star).max(0.0);
-        let ul = if hl > 1e-10 { hul / hl } else { 0.0 };
-        let ur = if hr > 1e-10 { hur / hr } else { 0.0 };
-        let (f0, f1) = Self::flux_num(flux, hsl, hsl * ul, hsr, hsr * ur);
+        let ul = if hl > sec { hul / hl } else { 0.0 };
+        let ur = if hr > sec { hur / hr } else { 0.0 };
+        let (f0, f1) = Self::flux_num(flux, hsl, hsl * ul, hsr, hsr * ur, sec);
         (f0, f1, hsl, hsr)
     }
 
@@ -646,10 +667,11 @@ impl Shallow1D {
         s_u: &mut [f64],
         dh: &mut [f64],
         dhu: &mut [f64],
+        sec: f64,
     ) {
         let n = h.len();
         let inv_dx = 1.0 / dx;
-        let vitesse = |i: usize| if h[i] > 1e-10 { hu[i] / h[i] } else { 0.0 };
+        let vitesse = |i: usize| if h[i] > sec { hu[i] / h[i] } else { 0.0 };
         let surface = |i: usize| b[i] + h[i];
 
         if ordre2 {
@@ -708,9 +730,9 @@ impl Shallow1D {
                 };
 
                 let (fg0, fg1, _, hs_g_droite) =
-                    Self::interface_ordre2(flux, eta_gg, u_gg, bg, eta_gd, u_gd, b[i]);
+                    Self::interface_ordre2(flux, eta_gg, u_gg, bg, eta_gd, u_gd, b[i], sec);
                 let (fd0, fd1, hs_d_gauche, _) =
-                    Self::interface_ordre2(flux, eta_dg, u_dg, b[i], eta_dd, u_dd, bd);
+                    Self::interface_ordre2(flux, eta_dg, u_dg, b[i], eta_dd, u_dd, bd, sec);
 
                 // Terme de fond d'Audusse, **forme generale**. A l'ordre un, les hauteurs
                 // reconstruites aux deux bords valent toutes deux `h_i` et cette expression se
@@ -727,9 +749,9 @@ impl Shallow1D {
                 dhu[i] = -(fd1 - fg1 - source) * inv_dx;
             } else if bien_equilibre {
                 let (fg0, fg1, _, hs_g_droite) =
-                    Self::interface_equilibree(flux, hl, hul, bg, h[i], hu[i], b[i]);
+                    Self::interface_equilibree(flux, hl, hul, bg, h[i], hu[i], b[i], sec);
                 let (fd0, fd1, hs_d_gauche, _) =
-                    Self::interface_equilibree(flux, h[i], hu[i], b[i], hr, hur, bd);
+                    Self::interface_equilibree(flux, h[i], hu[i], b[i], hr, hur, bd, sec);
 
                 // Les contributions de fond d'Audusse sont `½g·h_i² − ½g·h*²` de chaque cote ; le
                 // terme `½g·h_i²` est **le meme des deux cotes** et se simplifie exactement. On
@@ -739,8 +761,8 @@ impl Shallow1D {
                 dh[i] = -(fd0 - fg0) * inv_dx;
                 dhu[i] = -(fd1 - fg1 + source_wb) * inv_dx;
             } else {
-                let (fg0, fg1) = Self::flux_num(flux, hl, hul, h[i], hu[i]);
-                let (fd0, fd1) = Self::flux_num(flux, h[i], hu[i], hr, hur);
+                let (fg0, fg1) = Self::flux_num(flux, hl, hul, h[i], hu[i], sec);
+                let (fd0, fd1) = Self::flux_num(flux, h[i], hu[i], hr, hur, sec);
 
                 // Terme de fond, difference centree au centre de maille. Naif, et c'est le sujet.
                 let source = -G * h[i] * (bd - bg) * 0.5 * inv_dx;
@@ -762,11 +784,12 @@ impl Shallow1D {
         eta_r: f64,
         u_r: f64,
         b_r: f64,
+        sec: f64,
     ) -> (f64, f64, f64, f64) {
         let b_star = b_l.max(b_r);
         let hl = (eta_l - b_star).max(0.0);
         let hr = (eta_r - b_star).max(0.0);
-        let (f0, f1) = Self::flux_num(flux, hl, hl * u_l, hr, hr * u_r);
+        let (f0, f1) = Self::flux_num(flux, hl, hl * u_l, hr, hr * u_r, sec);
         (f0, f1, hl, hr)
     }
 
@@ -796,6 +819,18 @@ impl Shallow1D {
         }
     }
 
+    /// Change le seuil de cellule sèche. Sert au balayage de S40 ; en usage normal, la valeur par
+    /// défaut suffit — et le fait qu'elle soit **libre sur plusieurs décades** est précisément ce
+    /// que ce balayage établit.
+    pub fn regler_h_sec(&mut self, h_sec: f64) {
+        self.h_sec = h_sec;
+    }
+
+    /// Le seuil courant.
+    pub fn h_sec(&self) -> f64 {
+        self.h_sec
+    }
+
     /// Ce que les saturations ont fait depuis la configuration — S38, A146.
     pub fn saturations(&self) -> Saturations {
         self.sat
@@ -819,6 +854,7 @@ impl Shallow1D {
             &mut self.s_u,
             &mut self.dh,
             &mut self.dhu,
+            self.h_sec,
         );
 
         if self.rk2 {
@@ -839,6 +875,7 @@ impl Shallow1D {
                 &mut self.s_u,
                 &mut self.dh,
                 &mut self.dhu,
+                self.h_sec,
             );
             for i in 0..n {
                 self.h_new[i] = 0.5 * (self.h[i] + self.h1[i] + dt * self.dh[i]);
