@@ -2543,3 +2543,62 @@ que pour une décision positive, et la formuler comme *ce qui manque* plutôt qu
 casserait*. Un coût surestimé dans un document ne se corrige jamais tout seul : il est cité,
 respecté, et il repousse l'action jusqu'à ce que quelqu'un mesure. **La prudence se justifie par une
 ignorance, pas par une catastrophe supposée.**
+
+## L158 — Reprendre un travail extérieur prend ses conclusions et laisse ses dispositifs
+
+*(S41)* Deux réconciliations ont importé d'une lignée parallèle ses décisions, ses leçons et ses
+angles morts — dont un qui disait : *un paramètre qu'un énoncé ne fixe pas est tranché en silence par
+le premier qui mesure*. **Elles ont laissé le remède que cette lignée avait construit contre lui** :
+une rubrique de spécification ajoutée à chaque fiche de cas, neuf occurrences là-bas, zéro ici.
+
+Le mécanisme est banal et il n'a rien d'une négligence. Un import se guide sur une liste de
+**documents modifiés** ; il voit un fichier changé des deux côtés, en réconcilie le contenu visible —
+et ne voit pas qu'une **rubrique** a été ajoutée à l'intérieur, parce qu'une rubrique n'est pas un
+document. Les conclusions sont des objets nommés, faciles à énumérer ; les dispositifs sont diffus.
+
+**Réflexe** : en reprenant le travail de quelqu'un d'autre — une branche, un fork, une équipe
+dissoute, un projet repris — lister séparément ce qu'il a **conclu** et ce qu'il a **mis en place**.
+Pour la seconde liste, la question qui fonctionne est : *contre chacun des problèmes qu'ils ont
+nommés, qu'ont-ils construit ?* Un angle mort importé sans son remède est une dette qu'on croit
+avoir payée.
+
+## L159 — Un défaut absent mais armé se documente là où il se refermerait
+
+*(S41)* Une lignée voisine avait payé cher une simplification algébrique : correcte tant que le
+schéma était d'ordre un, fausse dès l'ordre deux, et **rien dans l'écriture courte ne rappelait
+l'hypothèse qui l'autorisait**.
+
+Le même code, ici, portait la **forme générale** — donc le défaut n'existait pas. La tentation était
+de classer l'angle mort « sans objet ici » et de passer. Mais le solveur est d'ordre un : la forme
+courte y serait **exacte**, et un lecteur qui simplifierait aurait raison sur le moment et armerait
+le piège pour plus tard.
+
+Le commentaire écrit ne corrige rien — il n'y a rien à corriger. Il dit **pourquoi la forme longue
+est là**, à l'endroit précis où quelqu'un voudrait la raccourcir.
+
+**Réflexe** : quand une vérification conclut « ce défaut n'existe pas chez nous », se demander
+*qu'est-ce qui le ferait apparaître ?* Si la réponse est un changement plausible — passer à l'ordre
+supérieur, généraliser un cas, lever une contrainte — alors écrire la raison **au point de
+modification**, pas dans un registre. Un registre se lit quand on cherche ; un commentaire se lit
+quand on touche.
+
+## L160 — Attribuer un effet à une cause quand trois ont changé est faux par construction
+
+*(S41)* Un document notait qu'un cas de validation échouait sur un véhicule et passait sur l'autre,
+et donnait l'explication : *l'autre est passé à l'ordre deux.* C'était plausible, c'était la
+différence la plus visible, et c'était **la moitié de la vérité**.
+
+Trois choses différaient en réalité : l'ordre du schéma, le seuil de détection, et la référence à
+laquelle on comparait. Mesuré à schéma égal, la seule révision de la mesure retirait **la moitié** de
+l'écart. Aucun des deux facteurs seul ne franchissait la tolérance.
+
+L'erreur ne vient pas d'un défaut d'attention : elle vient de ce qu'**une seule des trois différences
+avait un nom**. « Passer à l'ordre deux » est un événement, il a une date et un ADR ; « la référence
+a changé de ponctuelle à moyennée » était une ligne dans une fonction. On attribue à ce qu'on peut
+nommer.
+
+**Réflexe** : avant d'écrire *A explique B*, énumérer **tout** ce qui diffère entre les deux
+situations comparées — y compris ce qui n'a pas de nom : un seuil, une version de dépendance, une
+machine, un jeu de données, une façon de mesurer. Puis neutraliser les facteurs un par un. Si c'est
+trop coûteux, écrire *A et le reste expliquent B* plutôt qu'une attribution qu'on n'a pas faite. Une
+attribution non démontrée se cite ensuite comme un fait.

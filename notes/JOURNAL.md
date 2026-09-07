@@ -3988,3 +3988,136 @@ incompatibilité qui n'existe pas, alors que le défaut réel — l'absence de p
 
 Inchangés. Cette session a **tranché une question qui attendait depuis S37** sans avoir eu à choisir
 un nombre, ce qui est le résultat le plus économique qu'elle pouvait produire.
+
+---
+
+## S41 — 2026-09-07 — Cinq angles morts importés sur sept désignaient un défaut présent ici
+
+**Consigne reçue.** « Enchaîne sur S41 ».
+
+**Entrées.** Actions **S35-5** et **S39-3**. Sept angles morts de sévérité 1 entrés par deux
+réconciliations, aucun relu par cette lignée.
+
+**Sorties.** [`AUDIT-ANGLES-IMPORTES-S41`](../docs/registres/AUDIT-ANGLES-IMPORTES-S41.md) ; **neuf
+rubriques « Conditions de mesure »** reportées dans `CAS-CANONIQUES` ; deux tests de vérification
+(`a157_*`, `adr_037_*`) ; notes correctives datées sur `ADR-037` et sur le tableau de S36 ;
+`A157` complété ; leçons **L158–L160**.
+
+**Ça tourne.** `cargo test` : **88 tests** au vert — 38 dans le cœur, 50 dans le harnais dont deux
+`ignore` — contre 85 en début de session. `check` : 0 échec, hashs inchangés.
+
+### La méthode, et pourquoi elle ne pouvait pas être une lecture
+
+S40 avait montré le risque sur `A163` : un angle mort importé, de sévérité 1, dont l'énoncé désignait
+une incompatibilité **qui n'existe pas**. Le fait était exact, le défaut nommé était à côté, et cela
+a coûté quatre reports.
+
+Chaque fiche a donc reçu quatre questions, dont **trois se vérifient** — la troisième étant *le
+défaut existe-t-il ici, aujourd'hui, dans le code et le corpus d'accueil ?*
+
+| | Q1 exact | Q2 bien nommé | **Q3 présent ici** | Q4 action |
+|---|---|---|---|---|
+| **A152** | oui | oui | **OUI — le remède manquait** | faite |
+| **A155** | oui | oui | **latent** — désamorcé | faite |
+| **A156** | oui | oui | non — déjà traité | — |
+| **A157** | oui | **incomplet** | **OUI, et pire** | S41-1 |
+| **A159** | oui | oui | **OUI** — deux arrondis | faite + S41-2 |
+| **A166** | oui | oui | **OUI, structurel** | S41-3 |
+| **A167** | oui | oui | **OUI** | S41-4 |
+
+**Cinq sur sept.** La thèse déclarée avant la relecture en prévoyait deux ; elle sous-estimait.
+
+### Le trou de la réconciliation elle-même
+
+**A152 avait un remède, et il n'avait pas été importé.** La lignée B avait construit contre lui une
+rubrique **Conditions de mesure** dans `CAS-CANONIQUES` — *tout paramètre dont dépend la valeur
+mesurée et que le montage ne fixe pas*.
+
+| | rubriques |
+|---|---|
+| lignée B | **neuf** |
+| ici, avant S41 | **zéro** |
+
+S35 et S39 ont importé le constat et laissé le dispositif. Le registre du fork listait les documents
+modifiés ; il ne listait pas les **rubriques ajoutées à l'intérieur** d'un document déjà modifié des
+deux côtés. Les neuf sont reportées.
+
+### Le résultat de la session : une attribution fausse de moitié
+
+`CAS-CANONIQUES` porte depuis S36 un tableau où C04 **échoue** sur un véhicule et vaut **0,74 %** sur
+l'autre, avec cette explication : *la lignée B est passée à l'ordre deux, et C04 comme C08 sont
+passés au vert ensemble.*
+
+**Trois choses changent entre les deux colonnes, et une seule était nommée** : le schéma, mais aussi
+le **seuil** de mesure du front (`10⁻³ m` contre `10⁻²·h₀`) et la **référence** (front ponctuel de
+Ritter contre front moyenné sur la maille).
+
+Mesuré à **ordre un des deux côtés**, donc à schéma égal :
+
+| même solveur, ordre un | écart au front |
+|---|---|
+| mesure d'accueil | **20,4 %** |
+| mesure de la lignée B | **10,2 %** |
+| *(publié, ordre deux, mesure de B)* | *0,74 %* |
+
+**La révision de la mesure retire dix points sur vingt ; l'ordre deux retire les neuf et demi qui
+restent** — 52 % contre 48 %. Aucun des deux seul ne franchit la tolérance de 3 %.
+
+Et à **seuil égal**, les deux véhicules donnent le même front **à la quatrième décimale** : 9,9750 m
+à `10⁻³`, 9,5250 m à `10⁻²`. *Le désaccord n'était pas entre les solveurs.*
+
+### A159 exercé : deux broutilles, et c'est un bon résultat
+
+La fiche prescrivait de *refaire une fois les formules dont dépend une décision, avec leurs
+constantes*. Personne ne l'avait fait ici. `ADR-037` §3, qui dimensionne δ pour les transitoires :
+
+- **la dérivation est juste** — `dx ≤ K·L^1,5/√(2h)`, et `g` disparaît bien ;
+- **sept valeurs sur neuf sont exactes** ;
+- **deux sont mal arrondies** : `65,5` pour 65,43 et `÷6,1` pour 6,16.
+
+Aucune ne change la conclusion. **C'est le sujet** : *une vérification qui ne trouve que des
+broutilles est une vérification qui a réussi, et elle ne pouvait pas le dire avant d'avoir été
+faite.* Le calcul est désormais un test.
+
+### Ce que A166 coûte réellement, chiffré pour la première fois
+
+La fiche énonce une limite de méthode : *une mesure ne peut pas dire de quel cadre elle dépend.* La
+relecture ajoute la **liste de ce qui est exposé ici** — toute conclusion mesurée sur `delta.rs` ou
+`shallow.rs` l'a été en **1D, non dispersif, Saint-Venant, sans friction** : `ADR-037`, `ADR-044`,
+`ADR-045`, `ADR-047`. Aucune n'est fausse ; **aucune ne peut dire qu'elle vaut au-delà**.
+
+### A167 : un seul essai à zéro, et c'est celui qui a été importé
+
+*Tout montage doit venir avec un essai dont le résultat attendu est zéro.* Inventaire : `B-S27-garde`
+est le seul. `C05-temoin` attend 1, `C01-jet` et `C04-jet` attendent un échec. C03, C06, C08 et C02
+n'ont rien — et C03 est le plus exposé, sa demi-vie venant d'une régression sur une enveloppe.
+
+### Deux erreurs commises en séance, et ce qu'elles ont appris
+
+- **J'ai comparé les deux fronts avec un seul barrage**, alors que les origines diffèrent de 20 m —
+  ce que l'en-tête d'`oracle.rs` dit explicitement. L'écart de 20 m m'a sauté aux yeux ; s'il avait
+  valu 2 cm, il serait passé.
+- **J'ai corrompu l'encodage d'`oracle.rs`** avec un `unicode_escape` mal placé, et j'ai dû restaurer
+  depuis git. Deux minutes perdues, aucune conséquence — le fichier était committé.
+
+### Ce qui n'a pas été fait
+
+- **Les autres formules à constantes** n'ont pas été refaites — `ADR-033`, `ADR-036`, `ADR-046`
+  (S41-2).
+- **La réserve de cadre n'est pas portée** dans les quatre ADR exposés (S41-3).
+- **Aucun essai à zéro n'a été écrit** pour C03, C06, C08 (S41-4).
+- **Les deux budgets de batterie divergent toujours** — 60 s ici, 120 s côté lignée B (S39-2).
+- **La distinction absorbeur / masque / transducteur** n'a pas été passée sur les conclusions déjà
+  écrites (S39-1).
+
+### Session suivante recommandée
+
+**S42 — écrire l'essai à zéro de C03** (S41-4). C'est le montage le plus exposé au motif d'A167, la
+mesure la plus indirecte du corpus, et l'action la plus courte des quatre ouvertes.
+
+*Solutions de rechange* : refaire les formules restantes (S41-2) ; ou porter la réserve de cadre
+(S41-3).
+
+### Arbitrages en attente
+
+Inchangés.

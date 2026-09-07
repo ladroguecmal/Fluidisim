@@ -432,3 +432,26 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 > **Ce qui justifiait la sévérité 1 demeure et est levé** : une des deux valeurs n'avait aucune
 > provenance et vivait en dur à huit endroits. Elle est désormais réglable, rapportée, et sa
 > provenance est le balayage de cette session.
+
+## Actions relevées en séance — S41
+
+| # | Action | D'où elle vient | Qui la porte | État |
+|---|---|---|---|---|
+| S41-1 | **Rendre comparables les deux mesures de front**, ou dire explicitement qu'elles ne le sont pas. Les deux véhicules mesurent à des seuils *et des références* différents, et `CAS-CANONIQUES` les met côte à côte | **A157**, relu | session | **ouverte** |
+| S41-2 | **Refaire les formules à constantes restantes** — la loi de dissipation d'`ADR-033`, `λ² ≥ K·dx·D` d'`ADR-036`, le réglage d'éponge d'`ADR-046`. `ADR-037` §3 l'a été en S41 et a rendu deux arrondis fautifs | **A159**, son propre remède | session | **ouverte** |
+| S41-3 | **Porter la réserve de cadre** dans les quatre ADR mesurés en 1D non dispersif — `ADR-037`, `ADR-044`, `ADR-045`, `ADR-047`. Aucune n'est fausse ; aucune ne peut dire qu'elle vaut au-delà | **A166** | session | **ouverte** |
+| S41-4 | **Écrire l'essai à zéro de C03**, puis de C06 et C08. Un seul de nos montages en a un — `B-S27-garde` — et c'est celui qui a été importé | **A167** | session | **ouverte** |
+
+> **Note S41 — les actions S35-5 et S39-3 sont closes, et le résultat dépasse la thèse.**
+>
+> Les sept angles morts de sévérité 1 importés ont été relus, chacun sous quatre questions dont
+> trois se vérifient. **Les sept énoncés sont exacts** ; **cinq désignent un défaut présent ici**,
+> dont deux ont été corrigés en séance — les neuf rubriques « Conditions de mesure » manquantes
+> (**A152**) et l'avertissement au point de simplification de `delta.rs` (**A155**).
+>
+> **Un seul énoncé est incomplet** : **A157** ne dit pas que deux mesures reproductibles peuvent
+> être incomparables entre elles, et c'est exactement le cas ici. Il reçoit une note datée.
+>
+> **Et la relecture a corrigé une attribution du corpus** : l'écart de verdicts de C04 entre les
+> deux véhicules vient pour **52 %** de la méthode de mesure et pour 48 % du schéma, là où S36
+> l'attribuait entièrement au passage à l'ordre deux (**L160**).

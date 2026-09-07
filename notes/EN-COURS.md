@@ -115,7 +115,8 @@ de `FORK-S22-S26` §4 devrait le dire.
 - [x] **P5** — **A167** : l'essai à zéro. **Compter combien de nos montages en ont un**, et écrire
       celui qui manque au plus exposé.
 - [x] **P6** — le registre `AUDIT-ANGLES-IMPORTES-S41`, et les requalifications s'il y en a.
-- [ ] **P7** — rituel de fin (`REPRISE.md` §6).
+- [x] **P7a** — rituel : journal, leçons L158-L160, actions S41-1 à S41-4.
+- [ ] **P7b** — rituel : index, décomptes, jeton libéré.
 
 ### Notes de reprise
 
