@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S55
-État             : en cours
+État             : terminée
 Agent            : Codex (git et cargo disponibles)
 Objectif         : Expliquer le refus de seiche à 400 cellules et 60 s (S54-1).
 ```
@@ -70,7 +70,7 @@ Objectif         : Expliquer le refus de seiche à 400 cellules et 60 s (S54-1).
 - [x] **P1** — reprise, état réel, jeton et plan seul.
 - [x] **P2** — instrumenter les étapes de mesure et reproduire refus/témoin ; isoler une cause vérifiable.
 - [x] **P3** — corriger la cause si démontrée, tests analytiques et campagne nominale ; documenter chiffres déplacés et portée.
-- [ ] **P4** — rituel : journal, enseignements, actions, index/décomptes, passation et jeton libre.
+- [x] **P4** — rituel : journal, enseignements, actions, index/décomptes, passation et jeton libre.
 
 ### Notes de reprise
 
@@ -82,3 +82,7 @@ P2 : sept passages à zéro aux deux résolutions sur 60 s. Détecteur courant :
 à nx=200, cinq à nx=400 ; en conservant le dernier sens non nul : treize aux deux.
 Avant correction nx=200 T=9,0301704179, demi-vie=25,2378474365 périodes, R²=0,9996929481 ;
 nx=400 refus. Instrumentation temporaire cfg(test) à retirer en P3, cause des plateaux isolée.
+
+P3 : correction validée, rapport EXTREMA-SEICHE-S55 et notes ADR-033/034. 123 tests verts,
+deux ignorés ; campagne nominale et check effectués. P4 : passation terminée ; S56 reprend
+S49-1, stratégie de référence C22. Pas de calcul coûteux en cours.

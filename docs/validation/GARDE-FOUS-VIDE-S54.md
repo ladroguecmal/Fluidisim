@@ -63,3 +63,6 @@ Les saturations ont leur instrumentation propre depuis S38. Aucun résultat de v
 compilation release réussie. Rapport physics comparé à S53 : seules trois lignes de durées
 diffèrent, mesures et verdicts inchangés. Sortie 1 attendue pour C04 ordre un. check :
 zéro échec, hashs 0x3e2c06a7b00e73e3 et 0x1a8b0629a9f51b6e inchangés.
+
+**Suivi S55 — 2026-09-07.** S54-1 close : le détecteur perdait les extrema sur les plateaux
+f32. Correction et témoins nx=200/400 dans [EXTREMA-SEICHE-S55](EXTREMA-SEICHE-S55.md).

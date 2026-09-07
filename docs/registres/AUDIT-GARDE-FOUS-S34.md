@@ -112,3 +112,6 @@ Les dix contrôles ont été confrontés à leur absence pertinente, avec témoi
 aucun faux succès supplémentaire trouvé sur ces entrées. G1 couvrait déjà le domaine sec.
 Une fenêtre sans réflexion ne prouve pas la présence de l'onde : batteur arrêté, le montage
 C33 refuse par absence de profil. S43-2 close ; refus du premier témoin G5 suivi en S54-1.
+
+**Suivi S55 — 2026-09-07.** Le refus du témoin G5 est expliqué et corrigé : les plateaux
+faisaient perdre des extrema. S54-1 close ; voir [EXTREMA-SEICHE-S55](../validation/EXTREMA-SEICHE-S55.md).

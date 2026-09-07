@@ -4814,3 +4814,33 @@ Aucun calcul de solveur ni seuil modifié. Paramètres invalides autres que le v
 **Suite S55 : S54-1**, expliquer le refus de la seiche excitée à 400 cellules et 60 s.
 S49-1 reste ouverte pour le raffinement C22. A103, état réel et infrastructure inchangés ;
 aucun distant créé. A107 historiquement réconcilié, anciennes copies conservées.
+
+## S55 — 2026-09-07 — Un plateau ne supprime pas un extremum
+
+**Agent : Codex**, git et cargo disponibles. Départ master e55582a propre, autres copies
+contrôlées. Entrée : S54-1, seiche excitée refusée à nx=400 sur 60 s.
+
+**Cause et sortie.** La pente nulle effaçait le sens précédent : huit extrema à nx=200,
+cinq à nx=400, pour sept passages à zéro aux deux. Conserver la dernière pente non nulle
+retrouve treize extrema aux deux. Aucun seuil diminué, aucun calcul de solveur modifié.
+Instrumentation temporaire retirée ; deux tests ajoutés (signaux analytiques et deux témoins).
+Rapport EXTREMA-SEICHE-S55 ; notes correctives datées ADR-033/034 et C03 canonique.
+
+**Chiffres.** Sur 60 s : demi-vie nx=200 de 25,23785 à 25,08627 périodes ; nx=400 devient
+mesurable à 50,34245, R² 0,99964488. Dans la campagne de vingt périodes, C03 rampe passe
+de 20,69 à 21,20 ; mode propre de 24,40 à 24,45. Les tableaux de résolution, Courant,
+amplitude et harmoniques sont corrigés dans le rapport. Les petites amplitudes deviennent
+mesurables mais restent différentes : la cause de leur biais physique n'est pas établie.
+
+**Validation.** 123 tests réussis (38 cœur + 85 harnais), deux ignorés ; release compilée.
+Campagne nominale : verdicts inchangés, seule sortie 1 de C04 ordre un attendue ; changements
+numériques limités aux mesures des extrema, hors durées machine. check : zéro échec, hashs
+0x3e2c06a7b00e73e3 et 0x1a8b0629a9f51b6e inchangés. C22 coûteux non relancé.
+
+**Portée.** A178 corrigé, L174 ; S54-1 close. Aucun invariant invalidé, aucune décision
+physique modifiée. La position exacte de l'extremum dans un plateau reste non résolue par
+l'échantillonnage ; pas de revendication nouvelle sur la précision des demi-vies.
+
+**Suite S56 : S49-1**, stratégie de référence et budget pour une fenêtre C22 plus fine,
+avec contrôle de contamination conservé. A103, état réel et infrastructure inchangés ;
+aucun distant créé. A107 historiquement réconcilié, anciennes copies conservées.

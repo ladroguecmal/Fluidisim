@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-07 20:54 +02:00
+JETON            : libre
+Battement        : 2026-09-07 20:55 +02:00
 Agent            : Codex (git et cargo disponibles)
-Session en cours : S55
-Dernière session : S54 — 2026-09-07 — dix garde-fous éprouvés à vide
-Session suivante : S55 — expliquer le refus de seiche à nx=400 (S54-1)
+Session en cours : aucune
+Dernière session : S55 — 2026-09-07 — extrema sur plateaux corrigés
+Session suivante : S56 — stratégie de référence et budget C22 (S49-1)
 ```
 
 > **Avant de regarder le jeton, exécuter `git worktree list` et `git branch -a`.** Le jeton est un
@@ -140,6 +140,11 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
+**S55 :** extrema conservés au travers des plateaux f32 ; S54-1 close. Seiche nx=400 sur
+60 s désormais mesurable ; demi-vies nominales et harmoniques révisées sans changement
+de verdict. Voir docs/validation/EXTREMA-SEICHE-S55.md, A178 et L174. 123 tests réussis,
+deux ignorés. Suite S56 : stratégie de référence et budget C22 (S49-1).
+
 **S54 :** dix garde-fous éprouvés sur leur absence et leur témoin ; six tests ajoutés,
 aucun faux succès supplémentaire sur ces entrées. docs/validation/GARDE-FOUS-VIDE-S54.md.
 121 tests réussis, deux ignorés ; mesures nominales et hashs inchangés. S43-2 close ;
@@ -187,7 +192,7 @@ Quarante-huit sessions ici, **plus cinq dans une lignée parallèle réconcilié
 B-S27) — **47 ADR** *(dont un acté)*, six spécifications, **quatorze registres** — **et du code qui
 tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équilibrés et **tous deux
 montés sur leurs cas, confrontés l'un à l'autre et instrumentés, **plus un milieu à dispersion
-exacte** *(S39)*, **121 tests verts, deux ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
+exacte** *(S39)*, **123 tests verts, deux ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
 verdict** (C08). Quatre cas canoniques sur δ sont exécutés ici : **C01 et C03 passent**, C04 échoue,
 C08 ne conclut pas. **Le second véhicule passe C04 sur un montage dont le schéma et la mesure
 diffèrent** (S41). Son ancien C08 vert est requalifié en S47 : diagnostic sur Ritter, trois

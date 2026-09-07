@@ -607,4 +607,10 @@ table et limites dans GARDE-FOUS-VIDE-S54. Aucun faux succès supplémentaire é
 
 | # | Action | Origine | Porteur | État |
 |---|---|---|---|---|
-| S54-1 | Localiser le refus de mesurer_seiche sur Bassin::c03(true), nx=400, durée=60 s ; distinguer insuffisance de données et défaut du détecteur, comparer au témoin publié avant correction | premier témoin G5 de S54 refusé, témoin nx=200 sur 20 périodes accepté | session S55 recommandée | ouverte |
+| S54-1 | Localiser le refus de mesurer_seiche sur Bassin::c03(true), nx=400, durée=60 s ; distinguer insuffisance de données et défaut du détecteur, comparer au témoin publié avant correction | premier témoin G5 de S54 refusé, témoin nx=200 sur 20 périodes accepté | session S55 recommandée | **close en S55** |
+
+## Actions relevées en séance — S55
+
+S54-1 close : perte des extrema sur plateau corrigée, sans assouplir le seuil de six.
+Voir EXTREMA-SEICHE-S55 et corrections ADR-033/034. Aucun nouvel engagement différé.
+Suite recommandée S56 : S49-1, stratégie de référence C22 et budget du raffinement suivant.

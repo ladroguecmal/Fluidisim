@@ -1362,3 +1362,9 @@ pendant quatre sessions.
   Le montage C22 supprimait aussi une allocation refusée avant le contrôle. Doublements
   désormais vérifiés, refus conservés et filtre limité au préfixe ; grille nulle refusée
   avant modulo. Reproductions et témoins dans GRILLES-C22-S53. Rapport nominal inchangé.
+
+- **A178** *(sévérité 2, corrigé S55)* — **Un plateau de quantification efface des extrema
+  si le détecteur oublie le dernier sens non nul.** Seiche excitée nx=400, 60 s : cinq extrema
+  détectés au lieu de treize, donc refus au seuil de six. La même faute biaisait la sélection
+  des extrema sur les montages acceptés. Sens conservé au travers des plateaux ; seuils
+  inchangés, tests analytiques et physiques. Voir EXTREMA-SEICHE-S55 et L174.

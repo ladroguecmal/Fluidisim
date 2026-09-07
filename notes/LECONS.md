@@ -2799,3 +2799,14 @@ comme étiquettes et déclarait la suite stable. Un retrait en amont pouvait pro
 **Réflexe :** vérifier le support de la mesure avec ses valeurs : tailles, espacements ou
 instants selon la formule. Préserver les absences jusqu'au contrôle ; après suppression,
 la régularité apparente des valeurs ne permet pas de reconstruire le support perdu.
+
+## L174 — Une valeur répétée ne dit pas que le signal a perdu son sens de variation
+
+*(S55)* Un détecteur de retournement comparait seulement deux différences consécutives.
+La quantification introduisait une différence nulle au sommet, qui effaçait la montée avant
+la descente. Raffiner la grille a ainsi rendu une oscillation nominale non mesurable.
+
+**Réflexe :** tester les plateaux quand un événement dépend du signe des variations.
+Conserver le dernier sens observé jusqu'au retournement, sans fabriquer un événement sur
+un plateau final. Rejouer aussi les témoins déjà acceptés : rétablir des observations
+manquantes change leur estimation même lorsque leur verdict reste le même.
