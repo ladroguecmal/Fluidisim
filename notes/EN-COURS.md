@@ -69,8 +69,8 @@ Objectif         : Expliquer A187, écart de Hs à 256 composantes (S64-3).
 
 - [x] **P1** — reprise, état réel, jeton et plan seul.
 - [x] **P2** — décomposer exactement les moments sur la grille par sommes trigonométriques ; vérifier contre le diagnostic point par point et le témoin monochromatique.
-- [>] **P3** — mesurer spectres 32/256, phases historiques et six graines ; isoler les termes croisés et les échelles de battement, documenter sans resserrer de tolérance.
-- [ ] **P4** — rituel : journal, actions, angles/leçons éventuels, corrections datées, index/décomptes, jeton libre.
+- [x] **P3** — mesurer spectres 32/256, phases historiques et six graines ; isoler les termes croisés et les échelles de battement, documenter sans resserrer de tolérance.
+- [>] **P4** — rituel : journal, actions, angles/leçons éventuels, corrections datées, index/décomptes, jeton libre.
 
 ### Notes de reprise
 
@@ -85,3 +85,9 @@ P2 : moyenne trigonométrique sur grille finie (somme géométrique), moments vi
 Test contre sommation directe à 1/32/256 composantes et cas fréquence nulle/alias exact : vert.
 Diagnostic P3 lancé : phases historiques n=256 donnent Hs=1,279349889, partie individuelle
 Hs=1,200001971 ; covariance=0,012295713 m², voisins immédiats=0,008987660 m².
+
+P3 : diagnostic 28 montages et deux comparaisons directes dense terminé (49,40 s). Historique
+Hs_prod=1,279349902 contre 1,279349889 analytique ; variance individuelle -> Hs=1,200001971.
+Fenêtre doublée 6144 m -> Hs=1,218126498. Battements voisins jusqu’à 20208,431 m.
+A187 expliqué par covariances de fenêtre ; S64-3 close possible. 135 tests verts, cinq ignorés,
+check inchangé. SPECTRE-DENSE-S67 documente formule, valeurs et limites, aucun seuil changé.
