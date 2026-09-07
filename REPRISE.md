@@ -19,7 +19,7 @@ souvenir de conversation, **c'est lui qui fait foi**.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-07 14:05 +02:00
+Battement        : 2026-09-07 14:10 +02:00
 Agent            : Codex (git et cargo disponibles)
 Session en cours : S47
 Dernière session : S46 — 2026-09-07 — les refus restent dans la famille et dans le bilan
@@ -151,9 +151,9 @@ tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équili
 montés sur leurs cas, confrontés l'un à l'autre et instrumentés, **plus un milieu à dispersion
 exacte** *(S39)*, **101 tests verts, deux ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
 verdict** (C08). Quatre cas canoniques sur δ sont exécutés ici : **C01 et C03 passent**, C04 échoue,
-C08 ne conclut pas. **La lignée réconciliée en donne d'autres verdicts, et l'écart a une cause
-unique** : elle est passée à l'ordre deux, et C04 comme C08 y sont verts (`CAS-CANONIQUES`, « deux
-véhicules, deux colonnes »). Les 30 sections du document de
+C08 ne conclut pas. **Le second véhicule passe C04 sur un montage dont le schéma et la mesure
+diffèrent** (S41). Son ancien C08 vert est requalifié en S47 : diagnostic sur Ritter, trois
+grilles, sans validation du contrat C08 amendé. Les 30 sections du document de
 questions ouvertes d'origine sont traitées. Les vingt premiers ADR ont été confrontés les uns aux
 autres en S05 (douze écarts, deux de gravité 1) et les cinq SPEC entre elles en S08 (dix écarts,
 deux de gravité 1). Tous résolus — le dernier, le **chemin poussé**, par l'écriture de `SPEC-006`

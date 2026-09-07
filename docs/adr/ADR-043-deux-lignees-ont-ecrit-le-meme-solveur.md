@@ -190,3 +190,12 @@ référence fermée. Sa mise en œuvre est un travail de code, non traité ici �
    deux véhicules, qui sont non dispersifs tous les deux. **Deux implémentations ne lèvent pas une
    limite de modèle.**
 4. **La transduction** (ADR-005 §3) n'est mesurée par personne.
+
+## Note corrective S47 — 2026-09-07 : deux règles de verdict ne forment pas un oracle
+
+L'attribution de tout l'écart des verdicts au seul ordre du schéma était trop forte : S41 a
+mesuré la part de la méthode de front dans C04. Pour C08, les règles elles-mêmes différaient :
+le montage hérité appliquait p > 0,8 à Ritter sur trois grilles, quand ADR-032 et C08 amendé
+exigent un cas régulier et un régime asymptotique établi. S47 retire cette validation indue,
+conserve les chiffres et le contrôle de cohérence. L'oracle croisé des champs reste valable ;
+la paire historique de verdicts C08 n'était pas une comparaison à contrat égal.

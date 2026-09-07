@@ -221,3 +221,27 @@ inchangés. Comparaison avant/après : 56 lignes de mesures, assertions et suite
 Le bilan principal passe à **5 grandeurs, 0 succès, 0 échec, 5 sans verdict** : le cas régulier
 (p = 0,82, stabilité inconnue) n'était pas compté parmi les quatre sans verdict antérieurs.
 La sortie physics reste 1, avec le même échec attendu de C04 ordre un.
+
+## 9. La portée du C08 hérité — S47, 2026-09-07
+
+**S46-1 close.** c08_convergence de shallow renvoie désormais DiagnosticRitter : un ordre
+optionnel et un contrôle de cohérence, sans assertion de validation sur p. Le rapport garde
+C08-p, ses six décimales et son refus explicite ; il affiche le contrôle séparément.
+Le seuil 0,25 de ce contrôle est conservé : il a trouvé un défaut de terme de fond (ADR-040 §2).
+Les douze autres assertions du second véhicule restent dans leur bilan ; un contrôle incohérent
+ou non fini augmente toujours le compteur d'échecs et affecte le code de sortie.
+
+Le type empêche de remettre tout le diagnostic dans la liste des Cas par un simple extend.
+Le test vérifie p sous et au-dessus de l'ancien seuil, incohérence de 0,83, NaN et infinis.
+Le test numérique conserve p = 0,999745 à 10^-6 près, issu de la mesure S36, et le témoin
+historique à référence ponctuelle reste exécuté. Aucune grille, aucun schéma modifié.
+
+Il manque encore un montage C22 régulier sur shallow pour valider sa convergence selon le
+contrat courant. Cette absence est désormais visible et suivie par S47-1 ; elle n'est pas
+remplacée par l'accord de deux estimateurs sur un cas singulier.
+
+**Validation S47 :** 102 succès (38 cœur + 64 harnais), deux ignorés. check sans échec,
+hashs inchangés. 57 lignes de mesures/assertions/suites identiques avant/après hors les deux
+lignes requalifiées ; p = 0,999745 et écart des estimateurs = 0,001459 conservés.
+physics garde la sortie 1 attendue (C04 ordre un). Second véhicule : 12 assertions,
+1 contrôle de cohérence sans échec et 1 diagnostic sans verdict de validation.

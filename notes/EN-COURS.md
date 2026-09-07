@@ -69,7 +69,7 @@ Objectif         : Distinguer le diagnostic Ritter hérité de la validation C08
 
 - [x] **P1** — reprise et jeton, plan seul ; contrôles des copies et branches.
 - [x] **P2** — retirer le verdict de validation du diagnostic hérité, garder mesures et refus visibles, tester la portée du rapport.
-- [ ] **P3** — suite complète et références ; corriger les affirmations courantes et annoter les ADR concernés sans réécriture.
+- [x] **P3** — suite complète et références ; corriger les affirmations courantes et annoter les ADR concernés sans réécriture.
 - [ ] **P4** — rituel : journal, leçons/angles morts, actions, index et décomptes, passation et jeton libre.
 
 ### Notes de reprise
@@ -81,3 +81,6 @@ ne valide pas C08, quel que soit p. Conserver p = 0,999745 et la différence des
 P2 : DiagnosticRitter remplace Vec<Cas> ; aucun seuil sur p, refus Option explicite.
 Controle de coherence conserve (0,25), y compris son echec a 0,83 et sur non-finis.
 Quatre tests C08 verts ; mesure nominale 0,999745 conservee.
+
+P3 : 102 tests verts, 2 ignores, check et hashs inchanges. 57 lignes comparees identiques.
+Notes correctives ajoutees a ADR-040/043, tableau courant et resume corriges.

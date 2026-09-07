@@ -234,3 +234,13 @@ juste au moment où il a été écrit ; il ne décrit plus le code depuis une se
 > pas la décision. C'est précisément ce qui rend ce genre d'écart difficile à voir : rien ne casse.
 
 Angle mort **A162**.
+
+## Note corrective S47 — 2026-09-07 : portée du verdict C08
+
+Les occurrences « C08 passe » de cet ADR décrivent le seuil du montage historique de la lignée B.
+Elles ne constituent pas une validation du contrat C08 amendé en S26 (ADR-032) : le support est
+Ritter, singulier, et trois grilles ne permettent pas de prouver le régime asymptotique.
+Le diagnostic est conservé, p actuel = 0,999745 (correction de référence S36), et le contrôle
+C08-coherence reste actif à son seuil existant de 0,25. Son succès signifie accord des deux
+estimateurs, pas validation de la convergence sur cas régulier. Aucun résultat numérique de
+cet ADR n'est recalculé par cette requalification. S46-1 close ; montage régulier shallow à faire.

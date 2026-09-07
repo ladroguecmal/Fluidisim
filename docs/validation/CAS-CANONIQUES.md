@@ -66,7 +66,7 @@ a été écrite le même jour dans une histoire parallèle du dépôt : **`shall
 | **C04** | **échoue** *(S23)* — décision d'ADR-031 | **vert** *(B-S25)*, 0,74 % sur le front, seuil révisé |
 | **C05** | non exécuté | exécuté *(B-S26)* — **a éliminé le réglage d'ADR-005 §2** |
 | **C06** | non exécuté | **partiel** *(B-S23)* — translation 1D seule |
-| **C08** | **sans verdict** *(S23-S24)* — ADR-032 | rouge *(B-S23)*, puis **vert** *(B-S24)* : `p` = 1,003 |
+| **C08** | **sans verdict** *(S23-S24)* — ADR-032 | **diagnostic sans validation (S47)** : p = 0,999745 sur Ritter, trois grilles ; ancien verdict vert requalifié |
 
 > **Note S41 — l'attribution ci-dessous était juste à moitié.** Le paragraphe qui suit dit que le
 > passage à l'ordre deux explique l'écart de verdicts sur C04. **Trois choses changent pourtant
@@ -89,12 +89,10 @@ a été écrite le même jour dans une histoire parallèle du dépôt : **`shall
 > à `10⁻³`, 9,5250 m à `10⁻²`. **Le désaccord n'était pas entre les solveurs.** Angle mort
 > **A157**, relu en S41 ; le calcul est le test `a157_ce_que_l_ordre_deux_explique_vraiment`.
 
-> **Ce n'est pas une contradiction, c'est une complémentarité — et elle est instructive.**
-> `ADR-031` de cette lignée conclut que **le front de mouillage élimine l'ordre un**. La lignée B a
-> franchi ce pas : elle a implémenté l'ordre deux (`ADR-040`), et **C04 et C08 sont alors passes au
-> vert ensemble**. Les deux résultats se complètent exactement — l'un dit ce qui échoue, l'autre ce
-> qui réussit, et c'est le **même seuil** qui sépare les deux. Ce que ni l'une ni l'autre n'aurait pu
-> établir seule : *le passage à l'ordre deux suffit*, sans changer de famille de schéma.
+> **Correction S47.** C04 passe sur le montage de la lignée B (avec les différences de mesure
+> précisées en S41). L'ordre de Richardson sur Ritter reste un diagnostic : un support singulier
+> et trois grilles ne satisfont pas C08 amendé. Le passage à l'ordre deux améliore la mesure,
+> mais ne suffit pas à prouver une convergence sur cas régulier en régime asymptotique.
 
 > **~~Deux réserves, et elles sont sérieuses.~~**
 >
@@ -540,6 +538,11 @@ ce test ne passe pas.
 > **C22 est écrit** — « convergence sur solution régulière », plus bas dans ce document *(S26)*.
 
 ### Énoncé amendé — S26
+
+> **S47 — paire héritée requalifiée.** C08-p de shallow est un diagnostic sans seuil absolu,
+> avec refus explicite. C08-coherence reste un contrôle de l'accord des estimateurs (écart
+> maximal 0,25, hérité d'ADR-040 §2), compté séparément ; son succès ne valide pas C08.
+> Les chiffres historiques sont conservés. S46-1 close ; un C22 régulier sur shallow reste à construire.
 
 > **Application S46 au rapport principal :** les mesures non finies deviennent indéterminées ;
 > une famille contenant un triplet refusé ne prouve pas sa stabilité. Le bilan compte toutes
