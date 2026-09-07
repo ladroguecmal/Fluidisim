@@ -59,56 +59,36 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S57
-État             : terminée
+Session          : S58
+État             : en cours
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Objectif         : Exécuter le couple d'oracles 76800/153600 selon REFERENCE-C22-S56 (S56-1).
+Objectif         : Trancher A103 — la masse volumique de l'eau — sur délégation explicite de
+                   l'utilisateur, en mesurant d'abord ce que la constante commande réellement.
 ```
 
 ### Plan
 
-- [x] **P1** — état réel, prise du jeton, plan seul.
-- [x] **P2** — vérifier les tests et compiler en release avant toute mesure ; aucun changement de montage.
-- [x] **P3** — exécuter `c22-shallow-fin 76800`, consigner erreurs, écart d'oracles, temps ; appliquer le filtre ×30 sans l'assouplir.
-- [x] **P4** — rédiger MESURES-C22-S57 : admission de 12800, verdict des quatre fenêtres, déplacement éventuel des sept anciennes grilles, budget révisé.
-- [x] **P5** — rituel : journal, angles, leçons, actions, index, décomptes, passation et jeton.
+- [x] **P1** — passation, jeton, plan seul.
+- [ ] **P2** — recenser tous les emplois de la masse volumique dans le code et dans le corpus ; établir ce qui en dépend et ce qui n'en dépend pas.
+- [ ] **P3** — balayer la constante et mesurer, pour chaque grandeur publiée, l'écart ET la valeur absolue ; figer le constat par un test.
+- [ ] **P4** — ADR-048 : trancher, dire ce qu'il faudrait pour inverser, et corriger la justification fautive de body.rs sans réécrire d'ADR.
+- [ ] **P5** — appliquer la décision au code ; vérifier les 123 tests, la campagne physics et les deux hashs.
+- [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, passation et jeton.
 
 ### Notes de reprise
 
-Départ 13851c1, identique à master, dans le worktree claude/reprise-projet-29ef50. Les trois
-autres copies sont en retard ou archivées ; aucune session concurrente. **La branche devra être
-fusionnée dans master en fin de session** — c'est le mécanisme de fork L137/S39.
+Délégation : l'utilisateur a demandé en conversation, le 2026-09-07, que les points laissés
+« pour lui » soient réalisés par la session. Le premier — fusionner S57 dans master — est fait
+(avance rapide vers bd9f087). Le second est A103, ouvert depuis S21 et rappelé en fin de
+chaque session depuis. Précédent de forme : ADR-027, cinq arbitrages tranchés sur délégation.
 
-Attendu avant mesure : coût ~827 s (13 min 47 s) estimé par S56, sans garantie. Seuils extrapolés
-pour l'admission de 12800 : 6,94346e-9 en n⁻², 7,77366e-9 avec l'exposant empirique 1,72145,
-qui encadrent presque l'erreur mesurée en S56 (7,710700097e-9). Le modèle choisi changerait donc
-le verdict d'admission : c'est précisément ce que cette mesure tranche.
+**Thèse à mesurer, pas à supposer.** `body.rs` justifie `RHO_EAU = 1000` par « la valeur avec
+laquelle la référence de C10 se referme ». Or les trois références de C10 sont écrites *en
+fonction de* `RHO_EAU` (physics.rs : `(cube.rho / RHO_EAU) * cote`, `RHO_EAU * G * aire`,
+`TAU * (rho * cote / (RHO_EAU * G)).sqrt()`). Si c'est exact, **C10 se referme pour toute
+valeur** et ne contraint rien : la justification serait une instance d'A104, jamais reliée à
+A103. À vérifier par balayage avant d'en tirer quoi que ce soit (L75).
 
-Interdits rappelés par le protocole : pas de doublement automatique si 12800 est refusée,
-pas de champ sur disque (I-17), pas d'extrapolation de Richardson du champ, aucun changement
-de CFL, amplitude, temps final ou initialisation.
-
-P2 : socle vérifié avant mesure, aucun fichier de code touché. 123 tests réussis
-(38 cœur + 85 harnais), deux ignorés ; release compilée. check vert, hashs
-0x3e2c06a7b00e73e3 et 0x1a8b0629a9f51b6e inchangés. Mesure P3 lancée sans test concurrent.
-
-P3 : campagne 844,433 s (estimation S56 : 827,467 s, +2,05 %) ; oracles 165,833 et 672,560 s,
-reste 6,040 s. Écart d oracles 2,709078717e-10, seuil 8,127236151e-9. Grille 12800 :
-7,766762184e-9, soit 0,9556 fois le seuil — **encore refusée**, à 4,4 pour cent près.
-Quatre familles sans verdict, sortie 0. Aucun code modifié.
-
-P4 : rapport MESURES-C22-S57 complété. Trois résultats. (1) Les deux extrapolations de S56
-sous-estiment la contamination de 14,6 et 4,6 pour cent ; exposant local tombé de 1,72145 a
-1,61233. (2) Le deficit n est que de 4,44 pour cent : les quatre exposants s accordent a 0,8
-pour cent sur l oracle requis, environ 79000 — le choix du modele a cesse de decider. (3) Le
-deplacement des erreurs entre S56 et S57 est additif et constant (5,587e-11 des nx=800) : le
-biais de l oracle de mesure s estime a 4,9e-11, soit 159 fois moins que l erreur de 12800,
-quand l indicateur du filtre en vaut 5,5 fois. A179, severite 2. Rien modifie, refus maintenu.
-Suite S57-1 : relever la borne du mode a 89600, decouper le calcul, 19 min projetees.
-
-P5 : rituel exécuté. Journal S57, A179 (sévérité 2, ouvert), L175, S56-1 close,
-S57-1 et S57-2 ouvertes avec consigne de ne pas les mélanger. Index et REPRISE à jour,
-décompte d angles porté de 178 à 179 ; 47 ADR, 14 registres, 17 invariants inchangés.
-Note corrective datée en tête de REFERENCE-C22-S56 : ses deux extrapolations sont infirmées,
-son budget vérifié à +2,05 pour cent. Aucun invariant invalidé, aucun ADR réécrit.
-Jeton libre. **Branche non fusionnée dans master — geste de l utilisateur.**
+Attendu à contrôler aussi : ρ apparaît-il dans l'hydrodynamique ? Saint-Venant s'écrit en
+h et u, ρ s'y simplifie ; si c'est le cas ici, la portée de la décision est bornée aux forces
+sur les corps. Ne pas le supposer non plus.

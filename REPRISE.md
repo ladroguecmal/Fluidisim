@@ -18,16 +18,16 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-07 22:52 +02:00
+JETON            : occupé
+Battement        : 2026-09-07 23:05 +02:00
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S58 — trancher A103, la masse volumique de l'eau, sur délégation explicite
 Dernière session : S57 — 2026-09-07 — 12800 refusée à 0,9556 du seuil ; A179, L175
-Session suivante : S58 — borne du mode à 89600, découpage, puis 89600/179200 (S57-1)
+Session suivante : S59 — S57-1, borne du mode à 89600, découpage, puis 89600/179200
 
-/!\ S57 a travaillé dans le worktree claude/reprise-projet-29ef50, tête 13851c1 de master.
-    La branche N'EST PAS fusionnée dans master : c'est le mécanisme des trois forks (L137).
-    Fusionner avant d'ouvrir S58, ou travailler sur cette branche en connaissance de cause.
+Note S58 : le travail de S57 a été fusionné dans master en avance rapide (bd9f087) avant
+l'ouverture de cette session. Les deux copies coïncident de nouveau ; S58 travaille dans le
+worktree claude/reprise-projet-29ef50 et devra être fusionnée de la même façon.
 ```
 
 > **Avant de regarder le jeton, exécuter `git worktree list` et `git branch -a`.** Le jeton est un
