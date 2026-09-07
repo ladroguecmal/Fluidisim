@@ -75,19 +75,69 @@ fn eta(bg: &Background, x: f64, y: f64, t: SimTime) -> f64 {
     bg.eval(p, t).map(|s| s.eta as f64).unwrap_or(f64::NAN)
 }
 
+#[cfg(test)]
+mod tests_refus_s45 {
+    use super::*;
+    use crate::host_impl::{ArenaAllocator, SequentialJobs, StderrSink};
+    use water_core::{HostServices, SeaState};
+
+    fn fond(hs: f32, ancre: f64) -> Background {
+        let mut alloc = ArenaAllocator::with_capacity(4096);
+        let jobs = SequentialJobs;
+        let sink = StderrSink;
+        let mut host = HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink };
+        Background::configure(&mut host, SeaState {
+            hs, tp: 8.0, theta_turns: 0.0, components: 1,
+        }, WorldPos::from_metres(ancre, 0.0, 0.0)).unwrap()
+    }
+
+    #[test]
+    fn c02_refus_et_temoin() {
+        let t = SimTime::from_micros(0);
+        let lambda = G * 16.0 / std::f64::consts::TAU;
+        for bg in [fond(0.0, 0.0), fond(2.0, 10000.0)] {
+            let cas = c02_dispersion(&bg, t, lambda);
+            assert_eq!(cas.len(), 3, "une mesure absente ne supprime pas une assertion");
+            assert!(cas.iter().all(|c| !c.passe()));
+        }
+        let cas = c02_dispersion(&fond(2.0, 0.0), t, lambda);
+        assert_eq!(cas.len(), 3);
+        assert!(cas.iter().all(Cas::passe));
+    }
+
+    #[test]
+    fn c10_refus_et_temoins() {
+        let t = SimTime::from_micros(0);
+        // Tous les points invalides, puis une fenêtre partiellement hors référentiel.
+        for ancre in [10000.0, -4000.0] {
+            let cas = c10_cube_flottant(&fond(2.0, ancre), t);
+            assert_eq!(cas.len(), 4);
+            assert!(cas.iter().all(|c| !c.passe()), "le maximum ne doit pas ignorer un refus");
+        }
+        // L'eau plate est valide pour la statique, mais sans période mesurable pour C02.
+        for hs in [0.0, 2.0] {
+            assert!(c10_cube_flottant(&fond(hs, 0.0), t).iter().all(Cas::passe));
+        }
+    }
+}
+
 /// Position du premier passage par zéro **montant** au-delà de `x0`, par bissection.
 fn zero_montant(bg: &Background, x0: f64, x_max: f64, pas: f64, y: f64, t: SimTime) -> Option<f64> {
     let mut xa = x0;
     let mut va = eta(bg, xa, y, t);
+    if !va.is_finite() { return None; }
     let mut x = x0 + pas;
     while x < x_max {
         let v = eta(bg, x, y, t);
+        if !v.is_finite() { return None; }
         if va <= 0.0 && v > 0.0 {
             // Bissection sur [xa, x].
             let (mut lo, mut hi) = (xa, x);
             for _ in 0..60 {
                 let mid = 0.5 * (lo + hi);
-                if eta(bg, mid, y, t) <= 0.0 {
+                let vm = eta(bg, mid, y, t);
+                if !vm.is_finite() { return None; }
+                if vm <= 0.0 {
                     lo = mid;
                 } else {
                     hi = mid;
@@ -111,9 +161,11 @@ fn zero_montant_temps(bg: &Background, x: f64, y: f64, t0: SimTime, pas_us: u64,
     let e = |us: u64| eta(bg, x, y, SimTime::from_micros(us));
     let mut ta = t0.micros();
     let mut va = e(ta);
+    if !va.is_finite() { return None; }
     for i in 1..n as u64 {
         let tb = t0.micros() + i * pas_us;
         let v = e(tb);
+        if !v.is_finite() { return None; }
         if va <= 0.0 && v > 0.0 {
             let (mut lo, mut hi) = (ta, tb);
             for _ in 0..48 {
@@ -121,7 +173,9 @@ fn zero_montant_temps(bg: &Background, x: f64, y: f64, t0: SimTime, pas_us: u64,
                 if hi - lo <= 1 {
                     break;
                 }
-                if e(mid) <= 0.0 {
+                let vm = e(mid);
+                if !vm.is_finite() { return None; }
+                if vm <= 0.0 {
                     lo = mid;
                 } else {
                     hi = mid;
@@ -195,6 +249,19 @@ pub fn c02_dispersion(bg: &Background, t: SimTime, lambda_attendu: f64) -> Vec<C
                 reference: c_ref,
                 tolerance_rel: 0.02,
                 source: "SPEC-001 §1 — c = √(gλ/2π)",
+            });
+        }
+    }
+    // S45 : une mesure absente doit rester une assertion visible et en échec.
+    for id in ["C02-λ", "C02-disp", "C02-c"] {
+        if !out.iter().any(|c| c.id == id) {
+            out.push(Cas {
+                id,
+                grandeur: "mesure refusée : passages par zéro insuffisants ou champ invalide".into(),
+                mesure: f64::NAN,
+                reference: 0.0,
+                tolerance_rel: 0.0,
+                source: "CAS-CANONIQUES C02 — une dispersion exige une longueur et une période mesurables",
             });
         }
     }
@@ -409,6 +476,12 @@ pub fn c10_cube_flottant(bg: &Background, t: SimTime) -> Vec<Cas> {
     for i in 0..512 {
         let x = i as f64 * 0.37;
         let e = eta(bg, x, 0.0, t);
+        // S45 : ne pas réduire silencieusement la fenêtre aux seuls points valides.
+        // NaN se propage dans les quatre mesures de statique, jusqu'à Cas::passe.
+        if !e.is_finite() {
+            e_max = f64::NAN;
+            break;
+        }
         if e.abs() > e_max.abs() {
             e_max = e;
         }

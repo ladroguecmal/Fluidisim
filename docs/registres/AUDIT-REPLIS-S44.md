@@ -160,3 +160,24 @@ Recensement sur `b521129` : **13 occurrences dans code/, dont 11 dans le harnais
 **Deux défauts candidats sur une même origine**, à reproduire en P3. Aucun `min/max`
 supplémentaire n'est nécessaire : une branche conditionnelle peut ignorer une mesure, ou
 supprimer l'assertion entière. Le chemin C02 couvre aussi l'essai à zéro S43-3.
+
+### Résultat P3
+
+Les deux tests échouent avant correction et passent après, avec leurs témoins :
+
+- C02 sans excitation produisait **0 assertion sur 3** ; le champ entièrement hors référentiel
+  suit la même branche. Les trois assertions sont désormais présentes et en échec. Les recherches
+  de zéro refusent immédiatement un échantillon non fini, y compris pendant la bissection.
+- C10 ignorait les refus pendant la recherche du maximum : une fenêtre entièrement invalide
+  conservait η = 0 et passait les quatre assertions. Un seul point invalide invalide désormais
+  les quatre mesures. Essais entièrement et partiellement hors référentiel ; témoins à Hs = 0 et 2 m.
+- Le témoin monochromatique C02 conserve ses trois succès. L'eau plate est recevable pour la
+  statique C10 et ne contient aucune période mesurable pour C02 : le refus dépend de la grandeur.
+
+`cargo test --offline` : **98 succès, 2 tests ignorés** (38 cœur + 60 harnais exécutés).
+`check` : deux scénarios, zéro échec, hashs inchangés. Le rapport `physics` nominal est comparé
+avant/après sur les deux scénarios, hors durées : résultats inchangés, sortie 1 attendue pour
+les échecs déjà présents (dont C04 ordre un). Aucun solveur ni seuil modifié.
+
+**S44-2 est close.** Le statut `Observe(NaN)` de C08 reste une dette de représentation,
+sans succès indu sur ce chemin ; son traitement est porté par S45-1.
