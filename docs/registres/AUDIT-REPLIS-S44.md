@@ -285,3 +285,12 @@ mais ordre_grossier_estime avait une seconde formule et rendait encore Some(NaN)
 Le test S51 le reproduit. Les deux chemins partagent désormais ordre_richardson ; leurs
 planchers et catégories restent distincts. Inventaire, appelants et limites dans
 [ AUDIT-MESURES-S51 ](../validation/AUDIT-MESURES-S51.md). A176.
+
+## 12. Les grilles retirées avant le contrôle — S53, 2026-09-07
+
+Complément de portée au §8 : conserver les triplets refusés dans Convergence ne protégeait
+pas contre une grille supprimée par le montage C22. Trois défauts reproduits et corrigés :
+modulo zéro, allocation refusée effacée, stabilité acceptée sur tailles irrégulières.
+Voir [GRILLES-C22-S53](../validation/GRILLES-C22-S53.md), A177. Le montage conserve les
+refus ; le calcul vérifie les doublements ; le filtre sain ne recolle plus de trou.
+Les résultats nominaux du rapport restent inchangés.

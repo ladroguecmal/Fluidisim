@@ -945,6 +945,14 @@ mod tests_admission_c22 {
         for (i, e) in c.erreurs.iter_mut().enumerate() { e.0 = 100 << i; }
         assert_eq!(c.asymptotique(0.1), Some(true));
         assert_eq!(ordre_grossier_estime(&c.erreurs), (Some(1.0), 1.0));
+        assert_eq!(c.ordre(usize::MAX), Ordre::Indetermine);
+        for tailles in [[0,0,0], [100,100,200], [400,200,100], [usize::MAX,2,4]] {
+            let mut invalide = Convergence { grandeur: c.grandeur.clone(),
+                erreurs: c.erreurs.clone(), plancher: c.plancher, reference: c.reference };
+            for (e, n) in invalide.erreurs.iter_mut().zip(tailles) { e.0 = n; }
+            assert_eq!(invalide.ordre(0), Ordre::Indetermine);
+            assert_eq!(ordre_grossier_estime(&invalide.erreurs), (None,1.0));
+        }
     }
 
     #[test]
@@ -980,6 +988,19 @@ mod tests_admission_c22 {
         assert!(c.erreurs[1].1.is_nan());
         assert!(c.erreurs[2..].iter().all(|p| p.1.is_finite()));
         assert_eq!(c.asymptotique(0.1), None);
+    }
+
+    #[test]
+    fn filtre_ne_recolle_pas_les_grilles_et_oracle_absent_est_visible() {
+        let e = [(4,8.0),(8,4.0),(16,0.5),(32,2.0),(64,1.0)];
+        assert_eq!(prefixe_non_contamine(&e, 1.0), e[..2]);
+        assert_eq!(prefixe_non_contamine(&e, 0.0), e);
+        let mut a = ArenaAllocator::with_capacity(0);
+        let mut host = HostServices { alloc: &mut a, jobs: &SequentialJobs, sink: &StderrSink };
+        let c = c08_convergence_reguliere(&mut host, 0.0, &[4,8,16], 32);
+        assert_eq!(c.erreurs.iter().map(|p| p.0).collect::<Vec<_>>(), [4,8,16]);
+        assert!(c.erreurs.iter().all(|p| p.1.is_nan()));
+        assert!(c.grandeur.contains("ORACLE INDISPONIBLE"));
     }
 }
 
