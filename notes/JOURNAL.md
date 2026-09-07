@@ -4781,3 +4781,36 @@ retirées en amont. Aucun changement d'invariant ou d'ADR ; pas de validation 3D
 mesuré, avec refus et témoin. S49-1 reste ouverte pour le raffinement C22 plus coûteux.
 A103, état réel et infrastructure inchangés ; aucun distant créé. A107 historiquement
 réconcilié, anciennes copies conservées.
+
+## S54 — 2026-09-07 — Le vide ne demande pas toujours un refus
+
+**Agent : Codex**, git et cargo disponibles. Départ master 91e26df propre, copies anciennes
+contrôlées. P3/P4 achevées après relance utilisateur ; travaux précédents conservés.
+
+**Sorties.** Six tests complémentaires couvrent G1–G10 avec absence et témoin. Aucun faux
+succès supplémentaire observé sur ces entrées. C33 possède un montage interne à batteur
+réglable pour injecter zéro ; API publique et amplitude nominale 0,05 inchangées.
+GARDE-FOUS-VIDE-S54 et complément audit S34 §6 ; référence G9 erronée de S51 corrigée en G6.
+S43-2 close pour les dix garde-fous inventoriés.
+
+**Constat.** Absence physique valide (domaine sec), défaut de configuration optionnelle
+(CFL non réglée) et absence de mesure demandent trois réponses différentes. G1 testait déjà
+un domaine sec : la formulation S43 « aucun » était trop générale. La géométrie saine de G6
+ne prouve pas la présence de la source : le batteur arrêté est refusé par le profil vide.
+
+**Observation à suivre.** Le premier témoin G5, 400 cellules et 60 s, est refusé malgré une
+excitation nominale. Le témoin publié, 200 cellules et 20 périodes, passe ; c'est celui retenu
+pour le test à vide. S54-1 conserve le premier constat et demande sa cause, sans préjuger
+qu'il s'agit d'un défaut ni assouplir les conditions de mesure.
+
+**Validation.** 121 tests réussis (38 cœur + 83 harnais), deux ignorés. Compilation release
+réussie. Rapport physics identique à S53 sauf trois durées, sortie 1 attendue pour C04 ordre un.
+check : zéro échec ; hashs 0x3e2c06a7b00e73e3 et 0x1a8b0629a9f51b6e inchangés.
+Aucun calcul de solveur ni seuil modifié. Paramètres invalides autres que le vide hors périmètre.
+
+**Enseignements / angles morts.** Aucun nouvel identifiant : application de L164, L169 et L172.
+177 angles, L173 dernière leçon. Aucun invariant invalidé, aucun ADR réécrit.
+
+**Suite S55 : S54-1**, expliquer le refus de la seiche excitée à 400 cellules et 60 s.
+S49-1 reste ouverte pour le raffinement C22. A103, état réel et infrastructure inchangés ;
+aucun distant créé. A107 historiquement réconcilié, anciennes copies conservées.

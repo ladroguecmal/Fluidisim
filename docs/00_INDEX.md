@@ -201,6 +201,11 @@ parfaitement stable ne pouvait pas distinguer.
 
 ## État d'avancement
 
+**S54 :** dix garde-fous éprouvés sur leur absence et leur témoin ; six tests ajoutés,
+aucun faux succès supplémentaire sur ces entrées. docs/validation/GARDE-FOUS-VIDE-S54.md.
+121 tests réussis, deux ignorés ; mesures nominales et hashs inchangés. S43-2 close ;
+suite S55 : expliquer le refus d'une seiche excitée à nx=400, t=60 s (S54-1).
+
 **S53 :** admission C22 delta et doublements de Richardson contrôlés ; refus conservés,
 filtre limité au préfixe. Voir docs/validation/GRILLES-C22-S53.md, A177 et L173.
 115 tests réussis, deux ignorés ; rapport nominal et hashs inchangés. S52-1 close ;
@@ -248,7 +253,7 @@ Chiffrage et contraintes  █████████████████░
 Spécification technique   ████████████████████░░   92 %   chemins tiré et poussé posés, persistance tranchée ; reste IGpuBackend
 Cohérence interne         █████████████████░░░░░   80 %   26 ADR + 6 SPEC confrontés, 45 écarts résolus ; **les 6 ADR de S35 n'ont pas été confrontés au corpus**
 Décisions expérimentales  █████░░░░░░░░░░░░░░░░░   24 %   onze bancs définis, aucun exécuté ; **une moitié de `λ_cut` est mesurée** ; B3 a deux critères d'entrée
-Outillage et pipeline     ████████████████████░░   90 %   **H1, H3, deux δ et un milieu dispersif**, **115 tests exécutés, 2 ignorés** ; C01/C03 passent, C04 échoue à l'ordre un et **passe à l'ordre deux** ; H2, H4-H6 non écrits
+Outillage et pipeline     ████████████████████░░   90 %   **H1, H3, deux δ et un milieu dispersif**, **121 tests exécutés, 2 ignorés** ; C01/C03 passent, C04 échoue à l'ordre un et **passe à l'ordre deux** ; H2, H4-H6 non écrits
 Accords inter-équipes     █████░░░░░░░░░░░░░░░░░   25 %   cinq arbitrages tranchés ; quatorze demandes extérieures en attente
 ```
 

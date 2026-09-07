@@ -482,7 +482,7 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 | # | Action | D'où elle vient | Qui la porte | État |
 |---|---|---|---|---|
 | S43-1 | **Inventorier les valeurs de repli placées après une mesure** — `min`, `max`, `unwrap_or`, `clamp`, `else` d'un test de validité — et vérifier pour chacune : *que devient un refus qui passe là-dedans ?* Deux sessions de suite en ont trouvé une **par hasard**, chacune sévérité 1. C'est **S42-2**, dont l'urgence a doublé | **A170**, **A171** | session | **ouverte** |
-| S43-2 | **Ajouter le troisième cas aux contrôles existants** : chaque garde-fou a son cas refusé et son témoin, aucun n'a **l'entrée vide de ce qu'il examine**. C'est ce cas-là qui a révélé le défaut de G10, neuf sessions après son audit | **L164** | session | **ouverte** |
+| S43-2 | **Ajouter le troisième cas aux contrôles existants** : chaque garde-fou a son cas refusé et son témoin, aucun n'a **l'entrée vide de ce qu'il examine**. C'est ce cas-là qui a révélé le défaut de G10, neuf sessions après son audit | **L164** | session | **close en S54** |
 | S43-3 | **L'essai à zéro de C02**, dernier des quatre montages sans témoin nul | **A167** | session | **ouverte** |
 
 > **Note S43 — l'action S42-1 est close, et elle a répondu à sa propre question.**
@@ -599,3 +599,12 @@ comparées et conservées séparées avec motifs dans MESURES-PARTAGEES-S52.
 **S52-1 close.** Tailles et emboîtements vérifiés avant calcul ; grille nulle, allocation
 refusée et famille irrégulière reproduites puis corrigées. Voir GRILLES-C22-S53.
 Pas de nouvelle action différée : suite recommandée S54 sur S43-2, toujours ouverte.
+
+## Actions relevées en séance — S54
+
+**S43-2 close.** Dix garde-fous exercés avec absence et témoin, six tests complémentaires,
+table et limites dans GARDE-FOUS-VIDE-S54. Aucun faux succès supplémentaire établi.
+
+| # | Action | Origine | Porteur | État |
+|---|---|---|---|---|
+| S54-1 | Localiser le refus de mesurer_seiche sur Bassin::c03(true), nx=400, durée=60 s ; distinguer insuffisance de données et défaut du détecteur, comparer au témoin publié avant correction | premier témoin G5 de S54 refusé, témoin nx=200 sur 20 périodes accepté | session S55 recommandée | ouverte |

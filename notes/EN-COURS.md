@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S54
-État             : en cours
+État             : terminée
 Agent            : Codex (git et cargo disponibles)
 Objectif         : Éprouver les dix garde-fous sur leur entrée vide (S43-2).
 ```
@@ -70,7 +70,7 @@ Objectif         : Éprouver les dix garde-fous sur leur entrée vide (S43-2).
 - [x] **P1** — reprise, copies, jeton et plan seul.
 - [x] **P2** — définir absence/témoin pour G1–G10, ajouter les essais manquants ; rendre le batteur C33 désactivable dans le montage de test.
 - [x] **P3** — corriger tout défaut reproduit dans ce périmètre, tests et comparaison nominale ; table des résultats et limites.
-- [ ] **P4** — rituel : journal, enseignements, actions, index/décomptes, passation et jeton libre.
+- [x] **P4** — rituel : journal, enseignements, actions, index/décomptes, passation et jeton libre.
 
 ### Notes de reprise
 
@@ -83,3 +83,5 @@ batteur ; public inchangé à 0,05. G5 sans excitation refuse, témoin nominal 2
 périodes passe. Premier témoin 400 cellules/60 s refusé : fait conservé, cause à examiner S54-1.
 
 P3 : 121 tests réussis, deux ignorés ; comparaison physics sans changement hors trois durées, sortie 1 attendue. check et hashs inchangés. Table G1–G10 et limites documentées ; référence erronée G9 corrigée en G6 dans inventaire S51.
+
+P4 : journal et passation S55 actualisés ; S43-2 close, S54-1 ouverte. Aucun nouvel angle/leçon. Décomptes inchangés : 47 ADR, 17 invariants, 6 SPEC, 14 registres, 23 cas, 177 angles. Jeton libre.
