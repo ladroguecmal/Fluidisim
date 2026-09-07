@@ -657,6 +657,10 @@ Avant de rendre la main, dans cet ordre :
    les décomptes recopiés** — nombre d'ADR, d'invariants, de spécifications, d'angles morts, de cas
    canoniques — dans `README.md`, `REPRISE.md` et l'index. Un décompte recopié se périme en
    silence : le défaut a été trouvé en S07, puis de nouveau en S10.
+   **Et un état recopié se périme de la même façon** *(S63)* : `DOSSIER-B2` §8 annonçait cinq
+   blocages dont **quatre étaient levés depuis quarante sessions**, ce qui rendait le banc décisif
+   illisible. Ne pas relire tous les états à chaque session — **les dater**. *Un état sans date se
+   lit au présent, et il ne l'est plus* (**A185**, `PRESCRIPTIONS-S63`).
 5. **Corriger ce qui a été invalidé** : un ADR n'est jamais réécrit, mais une erreur factuelle
    reçoit une note corrective visible et datée, et une décision changée fait l'objet d'un nouvel
    ADR qui remplace explicitement l'ancien. **Et parcourir les listes « ce qui reste ouvert » qui

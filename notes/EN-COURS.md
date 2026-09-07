@@ -72,7 +72,7 @@ Objectif         : S59-1 — recenser les prescriptions non éprouvées, celles 
 - [x] **P2** — séparer les genres : une condition de réversibilité n'est pas une recette, et seules les recettes se vérifient.
 - [x] **P3** — recenser les recettes du corpus et établir, pour chacune, si elle a été exécutée et ce qu'elle a donné.
 - [x] **P4** — éprouver celles qui sont vérifiables à bas coût, en commençant par les plus engageantes.
-- [ ] **P5** — rapport, marquage des prescriptions non éprouvées, et la règle d'écriture qui en découle.
+- [x] **P5** — rapport, marquage des prescriptions non éprouvées, et la règle d'écriture qui en découle.
 - [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
 
 ### Notes de reprise
@@ -118,3 +118,9 @@ il est **inexecutable** — les deux delta d essai sont non dispersifs, et le mi
 exacte de S39 declare lui-meme ne pas etre un solveur delta, sa dispersion etant exacte par
 construction. Ce qui manque est une couche dispersive du projet, une dependance de conception.
 Tableau corrige, avec une colonne *constate* qui date chaque ligne.
+
+P5 : PRESCRIPTIONS-S63 ecrit. Trois recettes confrontees a l execution, trois fautives, par trois
+mecanismes : fausse des l ecriture (A181), prescrite sans etre chiffree (S60-1), **perimee en
+silence** (A185, nouveau). Aucune autre recette non eprouvee dans le corpus. Regle ajoutee au
+rituel REPRISE par.6 point 5 : un etat recopie se perime comme un decompte, et le remede n est pas
+de tout relire mais de **dater**. Colonne *constate* ajoutee au tableau de B2.
