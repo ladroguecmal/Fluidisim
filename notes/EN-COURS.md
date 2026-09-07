@@ -70,8 +70,8 @@ Objectif         : Brancher la graine sur les phases (S64-1), conserver la repro
 - [x] **P1** — état réel, lectures de reprise, jeton et plan seul.
 - [x] **P2** — fonction entière indexée par graine/composante, raccord scénario ; tests de reproductibilité et sensibilité.
 - [x] **P3** — mesurer les déplacements nominaux et plusieurs graines ; consigner puis committer les nouveaux hashs avant leur vérification.
-- [>] **P4** — vérifier tests et scénarios sur références committées ; documenter portée statistique et limites.
-- [ ] **P5** — rituel : journal, actions, index/décomptes, corrections datées, passation et jeton libre.
+- [x] **P4** — vérifier tests et scénarios sur références committées ; documenter portée statistique et limites.
+- [>] **P5** — rituel : journal, actions, index/décomptes, corrections datées, passation et jeton libre.
 
 ### Notes de reprise
 
