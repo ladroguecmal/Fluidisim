@@ -68,7 +68,7 @@ Objectif         : Éprouver les dix garde-fous sur leur entrée vide (S43-2).
 ### Plan
 
 - [x] **P1** — reprise, copies, jeton et plan seul.
-- [ ] **P2** — définir absence/témoin pour G1–G10, ajouter les essais manquants ; rendre le batteur C33 désactivable dans le montage de test.
+- [x] **P2** — définir absence/témoin pour G1–G10, ajouter les essais manquants ; rendre le batteur C33 désactivable dans le montage de test.
 - [ ] **P3** — corriger tout défaut reproduit dans ce périmètre, tests et comparaison nominale ; table des résultats et limites.
 - [ ] **P4** — rituel : journal, enseignements, actions, index/décomptes, passation et jeton libre.
 
@@ -77,3 +77,7 @@ Objectif         : Éprouver les dix garde-fous sur leur entrée vide (S43-2).
 Master 91e26df propre, copies anciennes propres. Socle et REPRISE lus dans cette conversation,
 état S53 et audit S34 relus. G1 teste déjà un domaine sans eau ; distinguer absence physique
 valide, absence de configuration optionnelle et absence de mesure. Aucun refus universel supposé.
+
+P2 : six tests couvrent G1–G10, tous passent. C33 expose seulement en interne la vitesse du
+batteur ; public inchangé à 0,05. G5 sans excitation refuse, témoin nominal 200 cellules/20
+périodes passe. Premier témoin 400 cellules/60 s refusé : fait conservé, cause à examiner S54-1.

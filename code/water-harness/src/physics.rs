@@ -2327,6 +2327,18 @@ pub fn c33_decroissance_entretenue(
     longueur_m: f64,
     periodes: f64,
 ) -> Option<DecroissanceSpatiale> {
+    c33_avec_batteur(host, lambda_m, nx, longueur_m, periodes, 0.05)
+}
+
+// Même montage, source désactivable pour vérifier qu'une fenêtre saine ne crée pas une mesure.
+fn c33_avec_batteur(
+    host: &mut water_core::HostServices,
+    lambda_m: f64,
+    nx: usize,
+    longueur_m: f64,
+    periodes: f64,
+    vitesse_batteur: f32,
+) -> Option<DecroissanceSpatiale> {
     use water_core::{Bassin, Delta1D, EtatInitial, ParoiMobile};
 
     let h = 2.0f64;
@@ -2349,7 +2361,7 @@ pub fn c33_decroissance_entretenue(
         .ok()?
         .avec_paroi(ParoiMobile {
             // Amplitude faible : la loi n'est valide qu'à `a/h ≈ 1 %` (A127).
-            u_m_s: 0.05,
+            u_m_s: vitesse_batteur,
             periode_s: periode as f32,
         });
 
@@ -2709,5 +2721,106 @@ mod tests_g10 {
             ordre_grossier_estime(&saine).0.is_some(),
             "une série saine ne doit pas être refusée"
         );
+    }
+}
+
+#[cfg(test)]
+mod tests_garde_fous_vide {
+    use super::*;
+    use crate::host_impl::{ArenaAllocator, SequentialJobs, StderrSink};
+    use water_core::{Bassin, Definition, Delta1D, EtatInitial, HostServices};
+
+    fn avec_hote(f: impl FnOnce(&mut HostServices)) {
+        let mut a = ArenaAllocator::with_capacity(1 << 24);
+        let mut host = HostServices { alloc: &mut a, jobs: &SequentialJobs, sink: &StderrSink };
+        f(&mut host);
+    }
+
+    #[test]
+    fn g1_g7_g9_sans_eau_ne_fabriquent_ni_front_ni_vitesse() {
+        avec_hote(|host| {
+            let b = Bassin { nx: 50, longueur_m: 10.0, origine_m: 0.0,
+                profondeur_gauche_m: 0.0, pente: 0.0, eta0_m: 0.0, etat_initial: EtatInitial::Repos };
+            let mut sec = Delta1D::configure(host, b).unwrap();
+            assert_eq!(sec.dt_cfl(), 1.0);
+            assert_eq!(sec.front(1e-3), None);
+            assert_eq!(sec.u_max(Definition::Absolue).0, 0.0);
+            assert_eq!(sec.u_max(Definition::Gouvernante).0, 0.0);
+            sec.avancer_equilibre(2.0);
+            assert_eq!(sec.volume(), 0.0);
+            assert_eq!(sec.front(1e-3), None);
+            let humide = Delta1D::configure(host, Bassin { profondeur_gauche_m: 1.0, ..b }).unwrap();
+            assert!(humide.dt_cfl() > 0.0 && humide.dt_cfl() < 1.0);
+            assert!(humide.front(1e-3).is_some());
+            assert!(humide.u_max(Definition::Gouvernante).0 > 0.0);
+        });
+    }
+
+    #[test]
+    fn g2_sans_reglage_explicitement_le_defaut() {
+        avec_hote(|host| {
+            let b = Bassin { nx: 50, ..Bassin::c03(true) };
+            let par_defaut = Delta1D::configure(host, b).unwrap().dt_cfl();
+            let explicite = Delta1D::configure(host, b).unwrap().avec_cfl(0.45).dt_cfl();
+            assert_eq!(par_defaut, explicite);
+            let nul = Delta1D::configure(host, b).unwrap().avec_cfl(0.0).dt_cfl();
+            let minimum = Delta1D::configure(host, b).unwrap().avec_cfl(0.05).dt_cfl();
+            assert_eq!(nul, minimum);
+            assert!(nul > 0.0 && nul < par_defaut);
+        });
+    }
+
+    #[test]
+    fn g3_g4_g10_absence_erreur_nulle_et_mesure_valide_distinctes() {
+        let mut c = Convergence { grandeur: "vide".into(), erreurs: vec![],
+            plancher: 1e-12, reference: Reference::Oracle };
+        assert_eq!(c.ordre_final(), Ordre::Indetermine);
+        assert_eq!(c.asymptotique(0.1), None);
+        assert_eq!(ordre_grossier_estime(&c.erreurs), (None,1.0));
+        c.erreurs = (0..5).map(|i| (100 << i, 0.0)).collect();
+        assert_eq!(c.ordre_final(), Ordre::Plancher);
+        assert_eq!(c.asymptotique(0.1), None);
+        assert_eq!(ordre_grossier_estime(&c.erreurs), (None,1.0));
+        for (i,e) in c.erreurs.iter_mut().enumerate() { e.1 = 1.0 / (1 << i) as f64; }
+        assert_eq!(c.ordre_final(), Ordre::Observe(1.0));
+        assert_eq!(c.asymptotique(0.1), Some(true));
+        assert_eq!(ordre_grossier_estime(&c.erreurs), (Some(1.0),1.0));
+    }
+
+    #[test]
+    fn g5_sans_excitation_aucune_seiche() {
+        avec_hote(|host| {
+            let b = Bassin { etat_initial: EtatInitial::Seiche {
+                amplitude_m: 0.0, longueur_m: 20.0, mode: 1 }, ..Bassin::c03(true) };
+            let duree = 20.0 * 40.0 / (G*2.0).sqrt();
+            assert!(mesurer_seiche(host, b, duree).is_none());
+            assert!(mesurer_seiche(host, Bassin::c03(true), duree).is_some());
+        });
+    }
+
+    #[test]
+    fn g6_fenetre_geometrique_saine_sans_batteur_pas_de_decroissance() {
+        avec_hote(|host| {
+            // Front théorique 280 m dans 400 m, même fenêtre que le témoin nominal de G6.
+            assert!(c33_avec_batteur(host, 20.0, 1600, 400.0, 14.0, 0.0).is_none());
+            assert!(c33_decroissance_entretenue(host, 20.0, 1600, 400.0, 14.0).is_some());
+        });
+    }
+
+    #[test]
+    fn g8_mesure_absente_distincte_du_zero_valide() {
+        let mut c = Cas { id: "vide", grandeur: "vide".into(), mesure: f64::NAN,
+            reference: 0.0, tolerance_rel: 0.01, source: "test" };
+        assert!(c.ecart_rel().is_nan());
+        assert!(!c.passe());
+        c.reference = 1.0;
+        assert!(!c.passe());
+        c.mesure = 1.0;
+        assert!(c.passe());
+        c.mesure = 0.0;
+        c.reference = 0.0;
+        assert!(c.passe());
+        c.reference = f64::NAN;
+        assert!(!c.passe());
     }
 }
