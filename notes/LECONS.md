@@ -2436,3 +2436,65 @@ il dit ce qu'on a. Et un seuil qui suit la mesure ne peut plus la contredire, do
 **assumer le dépassement en le laissant visible**. Desserrer est une troisième option qui ressemble
 aux deux premières et n'en est aucune. Le corollaire vaut pour tout seuil qu'on s'impose — délai,
 taille, latence, dette : *le moment où il gêne est le seul moment où il travaille.*
+
+## L153 — Une action confiée à « l'utilisateur » n'a pas de porteur
+
+*(S39)* Le dépôt a forké trois fois par le même mécanisme. Après le deuxième, une action a été
+relevée qui disait exactement quoi faire pour empêcher le troisième : *répliquer le registre dans
+toutes les branches vivantes le jour où l'une d'elles est reprise*. Elle a été inscrite au registre
+des actions, avec pour porteur « l'utilisateur ». **Quatre sessions plus tard, le troisième fork
+s'est produit, pour exactement la raison que l'action nommait.**
+
+L'action n'était pas mauvaise, et l'utilisateur n'a rien manqué : **elle n'avait simplement pas de
+moment d'exécution**. Une action portée par quelqu'un qui n'est pas dans la boucle de travail
+n'est jamais en tête de file de personne. Elle est lue à chaque session par quelqu'un qui la
+reconnaît comme n'étant pas la sienne, et elle survit intacte jusqu'à ce que le défaut se
+reproduise.
+
+**Réflexe** : à toute action relevée, se demander *qui l'exécutera, et à quel moment précis*. Si la
+réponse n'est pas « la prochaine session qui rencontre telle condition », alors soit la faire
+maintenant, soit la transformer en **règle vérifiée au démarrage** — dans le fichier d'amorce, dans
+un test, dans un contrôle automatique. Une action dont le porteur est extérieur au travail doit être
+signalée comme telle à chaque fois qu'on la lit, ou elle ne sera jamais faite.
+
+## L154 — Une distinction neuve doit d'abord être passée sur le document qui la pose
+
+*(S39)* Un ADR établit que le corpus appelle du même mot trois objets distincts, et met en garde en
+toutes lettres : *tant qu'ils partagent le mot, un résultat sur l'un se lit comme un résultat sur
+l'autre*. **Trois paragraphes plus bas, dans sa section de décisions, il commet exactement cette
+erreur** — il compte comme desserrant une contrainte un résultat qui porte sur le mauvais des trois
+objets.
+
+L'erreur a survécu quatre sessions et n'a été trouvée que parce qu'une rétractation extérieure a
+forcé à relire cette décision. Rien dans le document ne signalait la contradiction : les deux
+passages sont justes séparément.
+
+Le motif est mécanique. Une distinction s'énonce dans un paragraphe, mais elle **invalide des
+raisonnements écrits ailleurs** — y compris ceux qu'on vient d'écrire, dans l'élan de la même
+session, avec l'ancienne façon de penser encore active.
+
+**Réflexe** : après avoir posé une distinction — deux sens d'un mot, deux cas d'un type, deux
+régimes d'un système — relire immédiatement **les conclusions du document qui la pose**, puis celles
+des documents voisins, en se demandant de laquelle des deux choses chacune parle. C'est un balayage
+de dix minutes, et c'est le seul moment où l'on a la distinction fraîche et les conclusions sous la
+main.
+
+## L155 — Un document qui dit comment l'infirmer vaut mieux qu'un document qui a raison
+
+*(S39)* Un ADR a été rétracté sur deux de ses quatre décisions, quatre sessions après avoir été
+écrit. Il ne s'en trouve pas diminué — il s'en trouve **validé**.
+
+Son §6 énonçait sa propre réserve : *le milieu où cette mesure a été faite n'a pas la propriété qui
+compte ; la règle que je retire protégeait peut-être exactement de cela ; **c'est la première chose
+à mesurer**.* Une session suivante a construit l'instrument, fait la mesure, et la réserve était
+fondée. Le résultat a coûté une session — pas une refonte, pas une enquête, pas la découverte
+tardive d'un défaut en aval.
+
+**Comparer avec l'alternative** : le même ADR sans sa réserve aurait été juste dans son domaine et
+faux hors de lui, sans que rien dans le texte ne dise lequel des deux on lisait. Il aurait fallu que
+le défaut se manifeste ailleurs, plus tard, sans étiquette.
+
+**Réflexe** : à chaque conclusion, écrire la phrase *« ceci serait faux si… »* et la rendre
+**exécutable** — quelle mesure, quel montage, quel régime. Ce n'est pas une précaution rhétorique :
+c'est ce qui transforme une conclusion en instrument. Un document qui a raison rend service une
+fois ; un document qui dit comment l'infirmer rend service jusqu'à ce qu'on l'infirme.

@@ -3716,3 +3716,145 @@ déclenchement de S5.
 ### Arbitrages en attente
 
 Inchangés. Cette session n'en a tranché aucun.
+
+---
+
+## S39 — 2026-09-07 — Le fork a repris, et une conclusion importée a été mesurée fausse
+
+**Consigne reçue.** « Reprends le projet ».
+
+**Entrées.** L'amorce. `git worktree list` a montré un worktree neuf, `friendly-bhabha-6da427`, sur
+`claude/reprise-projet-5134cd` — la branche de la lignée B, conservée en S35 pour son historique.
+Une session y a travaillé : **B-S27, à 01h23**, contre ma S38 à **00h37**.
+
+**Sorties.** [`ADR-046`](../docs/adr/ADR-046-l-eponge-en-eau-dispersive-retracte-ADR-042.md) importé ;
+`dispersif.rs`, `eponge.rs`, `physics_dispersif.rs` ; leçons **L150–L152** reportées et
+**L153–L155** écrites ; angles morts **A166–A168** ; la rétractation portée dans `ADR-042`,
+`ADR-005`, `ADR-043` et `DOSSIER-B2` ; le **quatrième état du jeton**, `archivé` ; et le marqueur
+écrit **des deux côtés**.
+
+**Ça tourne.** `cargo test` : **84 tests** au vert — 38 dans le cœur, 46 dans le harnais dont deux
+`ignore` — contre 77 en début de session. `check` : 0 échec, **hashs inchangés**.
+
+### Le troisième fork, et ce qu'il apprend de neuf
+
+Les deux premiers venaient d'une **ignorance** : personne ne savait que la branche voisine existait.
+Celui-ci vient d'une **conservation délibérée**. En S35, la branche B avait été gardée exprès — elle
+portait le seul historique de la lignée — et c'était le bon choix.
+
+> **Une branche conservée pour son historique est un point de départ pour qui l'ouvre.** Aucune
+> propriété de git ne sépare les deux ; seul un marqueur dans le contenu peut le faire, et il doit
+> être lisible **avant** que le travail commence.
+
+Les deux commandes d'amorce ont encore fonctionné : le fork a été vu au **premier geste**, pour la
+troisième fois. C'est le seul dispositif du dépôt qui ait tenu trois fois.
+
+### Ce que la session a dû faire avant tout le reste
+
+**Mon corpus affirmait quelque chose qui venait d'être mesuré faux.** B-S27 s'intitule *l'éponge en
+eau dispersive rétracte ADR-034* — et ADR-034 de la lignée B, c'est mon `ADR-042`, importé en S35.
+
+C'est pourquoi le seuil de sec (S37-1), qui était la session recommandée, a été reporté d'un cran :
+*un corpus qui affirme faux est plus urgent qu'un corpus qui laisse une question ouverte.*
+
+### La réserve était fondée, et le document qui la portait s'en trouve grandi
+
+`ADR-042` §6 posait sa propre réserve n° 1 en toutes lettres : *le solveur est non dispersif ; une
+éponge d'eau profonde doit absorber une bande de célérités, et la règle `λ/2` protège peut-être
+exactement de cela ; **c'est la première chose à mesurer**.*
+
+Elle a été mesurée, dans un milieu à dispersion exacte écrit pour cela :
+
+| `L_s/λ` | 0,125 | 0,25 | **0,5** | 1,0 | 2,0 |
+|---|---|---|---|---|---|
+| `R` | 0,669 | 0,515 | **0,227** | 0,0098 | 0,00144 |
+
+**La règle `L_s ≥ λ/2` d'ADR-005 est du bon genre et de la mauvaise constante** : elle donne 23 %
+pour un critère à 1 %. `ADR-046` retient **`L_s ≥ λ_δ`**, et **`L_s ≥ 2·λ_δ` dès que δ porte un
+spectre** — le cas normal. La borne haute de `λ_cut` est **refermée, et deux à quatre fois plus
+serrée qu'avant** : l'éponge coûte plus cher, pas moins.
+
+Deux choses de plus, tranchées au passage : le réglage `σ_max = 10·c/L_s` d'`ADR-042` D1 est
+**confirmé** — c'est un minimum franc en dispersif, pas un plancher — et le `c` ambigu d'ADR-005 est
+la vitesse de **groupe**, ce qui vaut un facteur deux.
+
+> **`ADR-042` n'est pas déshonoré par sa rétractation, il est validé comme instrument.** Il disait
+> exactement quoi mesurer pour l'infirmer, et il a suffi de le lire. **L155**.
+
+### Le résultat propre à cette session : `ADR-043` D1 avait une voie de trop
+
+La rétractation force à relire ce qui s'appuyait dessus. `ADR-043` D1 rouvrait la borne de `λ_cut`
+**par deux voies indépendantes** : l'absorbeur mesuré (`ADR-042` D4) et la dissipation qui rend le
+masque inutile (`ADR-037`).
+
+La voie 1 est rétractée. **Et la voie 2 était mal fondée depuis le début.** La borne de
+`DOSSIER-B2 §3.1` vient de `L_s = λ_cut/2`, la largeur exigée par l'**absorbeur de bord** ;
+`ADR-037` retire sa raison d'exister au **masque de décroissance**. Ce sont les deux objets que le
+**§5 du même document** sépare, en mettant en garde : *tant qu'ils partagent le mot, un résultat sur
+l'un se lit comme un résultat sur l'autre.*
+
+**Le §6 a commis, trois paragraphes plus bas, l'erreur exacte contre laquelle son §5 mettait en
+garde.** Angle mort **A168**. Il n'y avait qu'une voie, et elle est refermée.
+
+### Le procédé, pour la troisième et dernière fois
+
+**L137** — *un correctif de procédure écrit dans une seule branche ne protège que cette branche* — a
+été écrite en S35. Le troisième fork s'est produit **pour exactement cette raison**, quatre sessions
+plus tard : le `CLAUDE.md` corrigé vivait d'un seul côté.
+
+L'action **S35-7** disait quoi faire. Elle était portée par « l'utilisateur », c'est-à-dire par
+personne au moment où il fallait agir.
+
+Cette fois le marqueur est écrit **des deux côtés, le jour même** :
+
+| côté | ce qui a été écrit |
+|---|---|
+| lignée vivante | le quatrième état du jeton, **`archivé`**, dans `REPRISE.md` et `CLAUDE.md` |
+| **lignée B** | jeton `archivé`, encadré en tête de son `REPRISE.md`, et **l'amorce qui lui manquait depuis S35** — commit `5d9bf2f` |
+
+La branche B reste entière : rien n'est supprimé, son historique est son seul rôle. Mais **elle dit
+maintenant ce qu'elle est** à qui l'ouvre.
+
+### Les chiffres rejoués
+
+L'instrument d'abord — une mesure faite avec un instrument non vérifié ne vaut rien :
+
+| `λ` | `T` mesurée ici | `T = 2π/ω` | écart |
+|---|---|---|---|
+| 32 m | 4,52894 s | 4,52897 s | **0,0005 %** |
+| 16 m | 3,20125 s | 3,20122 s | **0,0009 %** |
+| 8 m | 2,26361 s | 2,26360 s | **0,0004 %** |
+
+Puis les deux `R` : **0,2306** et **0,003885**, contre 0,227 et 0,00393 publiés — à 1,6 % et 1,2 %.
+
+**Et le piège de L142 s'est représenté.** Le tableau `L_s/λ` de la note d'`ADR-005` est en bande
+**étroite** ; ce montage mesure en bande **large**. Comparer 0,2306 à 0,227 revenait à confronter
+deux conditions différentes. *Un chiffre cité hors du tableau qui le produit perd ce qui le rend
+vrai* — leçon écrite en S36, piège retrouvé trois sessions plus tard sur un autre document.
+
+### Ce qui n'a pas été fait
+
+- **Le seuil de sec n'est toujours pas tranché** (S37-1, A163, sévérité 1). Quatre sessions l'ont
+  maintenant croisé.
+- **Les montages dispersifs ne sont pas dans le mode `physics`**, seulement dans les tests, dont un
+  `ignore`. Le budget est à 33,7 s sur 60 ; côté B, la batterie **dépassait** le sien — 167 s pour
+  120 (**A158**, **L152**). Le même arbitrage n'a pas été repris avec le code.
+- **Deux spécifications ont divergé sans que personne le décide** : le budget de la batterie vaut
+  60 s ici et 120 s côté B. Signalé, pas tranché.
+- **Les angles morts de sévérité 1 importés ne sont pas relus** — ils sont maintenant **sept**
+  (S35-5, plus A166 et A167).
+
+### Session suivante recommandée
+
+**S40 — trancher le seuil de sec** (S37-1, A163). Quatre sessions de suite l'ont croisé sans le
+toucher, et chacune a ajouté une raison : il déplace la position du front, il gouverne la longueur
+du film derrière lui, il sépare deux véhicules qui doivent rester comparables.
+
+*Solutions de rechange* : relire les sept angles morts de sévérité 1 (S35-5) ; ou réconcilier les
+deux budgets de batterie.
+
+### Arbitrages en attente
+
+Inchangés côté conception. **Un arbitrage d'infrastructure est en revanche résolu** : la branche B
+est marquée archivée des deux côtés, et le mécanisme qui a produit trois forks porte enfin un
+marqueur lisible avant le travail.

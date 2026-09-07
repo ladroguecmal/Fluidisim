@@ -113,7 +113,8 @@ donnait 1,5 pour mille.
       profil qui vit dans `shallow.rs`, que S38 a instrumenté. Compiler, puis les 77 tests.
 - [x] **P7** — **le procédé** : trois épisodes du même fork, et le remède écrit à chaque fois dans
       une seule branche. Écrire ce qui aurait marché, **et le répliquer des deux côtés le jour même**.
-- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
+- [x] **P8a** — rituel : journal, leçons L153-L155, actions S39-1 à S39-4.
+- [ ] **P8b** — rituel : index, décomptes, jeton libéré.
 
 ### Notes de reprise
 

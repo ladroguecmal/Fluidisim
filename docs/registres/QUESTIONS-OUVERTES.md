@@ -386,3 +386,26 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 > **Trois prédictions écrites avant mesure se sont révélées fausses**, toutes de la même façon :
 > elles supposaient qu'un test conditionnel gouverne plus qu'il ne gouverne. Chacune a coûté une
 > ligne de mesure et rapporté un fait que personne n'aurait cherché (**L125**).
+
+## Actions relevées en séance — S39
+
+| # | Action | D'où elle vient | Qui la porte | État |
+|---|---|---|---|---|
+| S39-1 | **Passer la distinction absorbeur / masque / transducteur sur toutes les conclusions déjà écrites** qui parlent d'« éponge ». `ADR-043` §6 en portait une fausse pendant quatre sessions ; rien ne dit qu'elle était seule | **A168**, **L154** | session | **ouverte** |
+| S39-2 | **Réconcilier les deux budgets de batterie** : `SPEC-003 §1` dit **60 s** ici, **120 s** côté lignée B — et le sien était dépassé à 167 s. Deux lignées ont fait diverger la même contrainte sans que personne le décide | **A158**, **L152** | session | **ouverte** |
+| S39-3 | **Relire les sept angles morts de sévérité 1 importés** — A152, A155, A156, A157, A159, et désormais **A166** et **A167**. Aucun n'a été examiné par cette lignée | `FORK-S22-S26` §4 | session | **ouverte** |
+| S39-4 | **Décider si les montages dispersifs entrent au mode `physics`.** Ils n'y sont pas : le budget est à 33,7 s sur 60 et le montage de référence coûte cher. Ils sont exercés par les tests, dont un `ignore` | `physics_dispersif.rs` | session | **ouverte** |
+
+> **Note S39 — l'action S35-7 est close, et sa clôture est le sujet de la session.**
+>
+> Elle demandait de *répliquer le registre du fork dans toutes les branches vivantes le jour où
+> l'une d'elles est reprise*. Elle était portée par « l'utilisateur ». **Elle n'a pas été faite, et
+> le troisième fork s'est produit pour exactement la raison qu'elle nommait** (**L153**).
+>
+> Elle est close cette fois par un geste et non par une intention : le jeton de la lignée B est
+> passé à **`archivé`**, un encadré ouvre son `REPRISE.md`, et l'amorce qui lui manquait depuis S35
+> ouvre son `CLAUDE.md` — commit `5d9bf2f` sur `claude/reprise-projet-5134cd`. Côté vivant,
+> `REPRISE.md` §1 et `CLAUDE.md` décrivent le quatrième état du jeton.
+>
+> **Toute action de réplication future est portée par la session qui constate**, jamais par
+> l'utilisateur : c'est la seule façon qu'elle ait un moment d'exécution.
