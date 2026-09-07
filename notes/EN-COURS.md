@@ -72,7 +72,7 @@ Objectif         : S62-1 — corriger la sommation de variance, puis trancher pa
 - [x] **P2** — **diagnostiquer le `NaN` avant de le corriger** : S62 l'a attribué à l'annulation catastrophique sans le vérifier.
 - [x] **P3** — corriger ce que le diagnostic désigne, avec témoin et essai de refus ; vérifier que les valeurs nominales ne bougent pas.
 - [x] **P4** — mesurer la loi complète, jusqu'aux fenêtres qui étaient hors d'atteinte.
-- [ ] **P5** — ADR : trancher la fenêtre, ou dire pourquoi elle ne se tranche pas.
+- [x] **P5** — ADR : trancher la fenêtre, ou dire pourquoi elle ne se tranche pas.
 - [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
 
 ### Notes de reprise
@@ -128,3 +128,10 @@ P4, et il a corrige deux affirmations de S62-1 puis en a produit une troisieme.
      mer**, donc aucune barre d erreur n est mesurable et aucune tolerance ne se calibre. A186.
  (d) L ecart a 256 composantes ne vient ni de la fenetre ni du pas : 6,614 et 6,615 pour cent a
      pas 1,5 et 1,0 m, fenetre egale. Cause **non identifiee** — A187, et elle borne D2.
+
+P5 : ADR-051. D1 fenetre a 3072 m, declaree dans le scenario ; chiffre publie 8,528 vers 0,282
+pour cent, et le cas qui echouait a tp=9 passe desormais. D2 tolerance conservee a 10 pour cent,
+**et le cas y perd du pouvoir de detection** — marge reelle de 1,5 point a 9,7 : dit explicitement
+plutot que decouvert plus tard. Resserrer est bloque par deux faits mesures, A187 (6,6 pour cent a
+256 composantes, cause inconnue) et A186 (une seule realisation par etat de mer). D3 hashs et
+autres mesures inchanges. Section 3 : ce qu il faudrait pour inverser D1 et D2.
