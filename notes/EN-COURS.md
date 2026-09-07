@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S50
-État             : en cours
+État             : terminée
 Agent            : Codex (git et cargo disponibles)
 Objectif         : Préserver le refus de front absent dans C04 shallow (S44-1).
 ```
@@ -70,7 +70,7 @@ Objectif         : Préserver le refus de front absent dans C04 shallow (S44-1).
 - [x] **P1** — reprise, copies, jeton et plan seul.
 - [x] **P2** — tracer les usages, conserver Option jusqu'aux sorties, refuser le profil absent ; tests absence/témoin et assertion.
 - [x] **P3** — tests complets, comparaison nominale avant/après, documentation du suivi des refus.
-- [ ] **P4** — rituel : journal, enseignements, actions, index, décomptes et passation ; jeton libre.
+- [x] **P4** — rituel : journal, enseignements, actions, index, décomptes et passation ; jeton libre.
 
 ### Notes de reprise
 
@@ -81,3 +81,5 @@ le défaut est dans ses appelants. Aucun seuil ou solveur à modifier.
 P2 : cinq sites de repli corrigés (quatre positions, un indice), détecteur du cœur déjà Option. Deux tests nouveaux ; sept tests ciblés passent, dont C04 nominal. Compilation release réussie.
 
 P3 : 107 tests réussis, deux ignorés. Rapport physics inchangé sauf quatre lignes de durées ; sortie 1 attendue. check vert, hashs inchangés. AUDIT-REPLIS-S44 §10 documenté.
+
+P4 : journal et audit actualisés, S44-1 close ; aucune nouvelle leçon ou angle (175). Index et passation S51 mis à jour, jeton libre. Décomptes inchangés : 47 ADR, 17 invariants, 6 SPEC, 14 registres, 23 cas.

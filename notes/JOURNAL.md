@@ -4652,3 +4652,34 @@ SPEC ou cas. Ce travail ne valide ni B3 ni la physique 3D.
 puis propagation aux six replis. S49-1 attend une stratégie et un budget adaptés à des
 oracles plus fins ; S43-2 et S42-3 restent ouverts. A103, état réel du projet et infrastructure
 inchangés ; aucun distant créé. A107 historiquement réconcilié, copies conservées.
+
+## S50 — 2026-09-07 — Le front absent ne devient plus une position
+
+**Agent : Codex**, git et cargo disponibles. Départ master 7a33d95 propre, anciennes
+copies contrôlées. REPRISE et S49 relus ; socle déjà lu dans cette conversation.
+
+**Sorties.** S44-1 close. Cinq sites corrigés dans physics_shallow : quatre positions
+et un indice de profil. front_ritter conserve Option ; cas_front distingue absence et
+position zéro. Le profil absent est annoncé, sans première cellule de remplacement.
+AUDIT-REPLIS-S44 §10 suit les conversions terminales et leurs usages jusqu'au verdict.
+
+**Correction du diagnostic initial.** Le détecteur front_mouille du cœur refusait déjà.
+Ce sont ses appelants qui effaçaient le refus ; le compte de six replis annoncé par S44
+était inexact. Aucun solveur ni seuil modifié. Pas de nouvel ADR ou invariant.
+
+**Validation.** 107 tests réussis (38 cœur + 69 harnais), deux ignorés. Sept tests ciblés,
+dont deux nouveaux : bassin sec/seuil non atteint et témoin humide ; absence face à une
+référence nulle ou non nulle, position zéro valide, profil indisponible. Comparaison des
+rapports physics avant/après : seules quatre lignes de durées diffèrent. Front shallow
+10,562500 m contre 10,640868 m, écart 0,736 %, inchangé. physics sort à 1 pour C04 ordre un,
+comme attendu. check : zéro échec, hashs 0x3e2c06a7b00e73e3 et 0x1a8b0629a9f51b6e.
+
+**Enseignements / angles morts.** Aucun nouveau : application du suivi de refus de L166
+et de la règle du §5 de l'audit. Le risque déjà anticipé — zéro pourrait devenir favorable
+si la référence change — est désormais couvert par un test. Total inchangé : 175 angles,
+L171 dernière leçon. Aucun invariant invalidé par cette correction du harnais.
+
+**Suite S51 : S42-3**, inventorier les mesures écrites plusieurs fois et vérifier leurs
+appelants avant toute extraction. S43-2 (troisième cas des garde-fous) et S49-1 (budget de
+raffinement C22) restent ouverts. A103, état réel du projet et infrastructure inchangés ;
+aucun distant créé. A107 historiquement réconcilié, copies conservées.

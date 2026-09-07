@@ -503,7 +503,7 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 
 | # | Action | D'où elle vient | Qui la porte | État |
 |---|---|---|---|---|
-| S44-1 | **Faire refuser `front_mouille`** quand aucune cellule n'atteint le seuil, au lieu de rendre `0`. Un front introuvable n'est pas un front au barrage — l'écart de 100 % qui en résulte fait échouer le cas, mais pour la mauvaise raison, et six replis en dépendent | `AUDIT-REPLIS-S44` §6.2 | session | **ouverte** |
+| S44-1 | **Faire refuser `front_mouille`** quand aucune cellule n'atteint le seuil, au lieu de rendre `0`. Un front introuvable n'est pas un front au barrage — l'écart de 100 % qui en résulte fait échouer le cas, mais pour la mauvaise raison, et six replis en dépendent | `AUDIT-REPLIS-S44` §6.2 | session | **close en S50** |
 | S44-2 | **Suivre les treize `unwrap_or(NaN)` jusqu'à leur assertion.** Trois l'ont été, parce que trois défauts y menaient ; les dix autres n'ont été classés que sur leur écriture. *Un repli ne s'inspecte pas seul* (**L166**) | `AUDIT-REPLIS-S44` §6.3 | session | **ouverte** |
 
 > **Note S44 — les actions S42-2 et S43-1 sont closes.**
@@ -530,7 +530,7 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 corrigés sur eta() : assertions C02 omises et maximum C10 ignorant le refus.
 **S43-3 close en S45** : essai C02 sans excitation, trois assertions en échec ; témoin
 monochromatique vert. S41-4 est donc couverte pour les quatre montages C02/C03/C06/C08,
-avec l'essai d'estimateur défini en S43 pour C08. S44-1 reste ouverte.
+avec l'essai d'estimateur défini en S43 pour C08. S44-1 close en S50 (AUDIT-REPLIS-S44 §10).
 
 ## Actions relevées en séance — S46
 
@@ -567,4 +567,10 @@ la tâche de mesure est achevée. Voir MESURES-C22-S49.
 
 | # | Action | Origine | Porteur | État |
 |---|---|---|---|---|
-| S49-1 | Établir une stratégie de référence et un budget permettant de tester une fenêtre C22 encore plus fine ; contrôler la contamination avant de conclure, conserver les critères actuels | MESURES-C22-S49 : ordre final 2,0117, ralentissement insuffisant, marge ×30 réduite à deux sur 6400 | session ultérieure ; priorité S50 à S44-1 | ouverte |
+| S49-1 | Établir une stratégie de référence et un budget permettant de tester une fenêtre C22 encore plus fine ; contrôler la contamination avant de conclure, conserver les critères actuels | MESURES-C22-S49 : ordre final 2,0117, ralentissement insuffisant, marge ×30 réduite à deux sur 6400 | session ultérieure ; priorité S51 à S42-3 | ouverte |
+
+## Actions relevées en séance — S50
+
+**S44-1 close.** Le détecteur renvoyait déjà Option ; cinq appelants remplaçaient le refus.
+Corrections, tests et suivi jusqu'aux sorties dans AUDIT-REPLIS-S44 §10. Pas de nouvelle
+action : suite recommandée S51 sur S42-3 ; S43-2 et S49-1 restent ouvertes.
