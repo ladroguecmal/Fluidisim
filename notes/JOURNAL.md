@@ -4121,3 +4121,124 @@ mesure la plus indirecte du corpus, et l'action la plus courte des quatre ouvert
 ### Arbitrages en attente
 
 Inchangés.
+
+---
+
+## S42 — 2026-09-07 — C03 déclarait le néant conforme, avec le meilleur score possible
+
+**Consigne reçue.** « Enchaîne sur S42 ».
+
+**Entrées.** Action **S41-4**, angle mort **A167** : *tout montage de mesure doit venir avec un essai
+dont le résultat attendu est zéro.* L'inventaire de S41 en avait trouvé **un seul** dans tout le
+harnais, et c'était celui que la lignée B avait apporté.
+
+**Sorties.** L'essai à zéro de **C03** et celui de **C06** ; deux refus dans la mesure de demi-vie,
+avec leur témoin ; **une seule implémentation** de la régression là où il y en avait deux ; angle
+mort **A170** *(sévérité 1)* ; `A167` relu ; conditions de mesure de C03 et C06 complétées.
+
+**Ça tourne.** `cargo test` : **93 tests** au vert — 38 dans le cœur, 55 dans le harnais dont deux
+`ignore` — contre 88 en début de session. `check` : 0 échec, hashs inchangés. Le chiffre publié
+**161,138607 périodes** est intact.
+
+### La thèse était fausse, et le vrai défaut était plus bas
+
+*Thèse déclarée : `demi_vie_seiche` rend un nombre fini et plausible sur un bassin au repos.*
+
+Elle rend **`INFINITY`** — le filtre `pic > 0` ne laisse passer aucun point, la régression sur zéro
+point rend `NaN`, et `NaN < 0` est faux. Un refus, mais **par accident**.
+
+**Le défaut était juste après.** `c03_seiche` sature cette valeur pour l'affichage :
+
+```rust
+mesure: demi_vie_periodes.min(1e6)
+```
+
+**`f64::min` avale les `NaN`** : `NaN.min(1e6)` rend `1e6`. Le refus devenait donc **la plus grande
+valeur du domaine**, face à un minorant de 15 périodes — c'est-à-dire **le meilleur score
+possible**.
+
+| C03 sur un bassin **sans seiche**, avant S42 | |
+|---|---|
+| `C03-T` | `NaN` — échoue |
+| `C03-T-mur` | `NaN` — échoue |
+| **`C03-demi-vie`** | **`10⁶` — PASSE** |
+
+Le cas entier était rouge, les deux autres assertions y veillaient. Mais **l'assertion qui porte le
+résultat publié déclarait le néant excellent**, et le rapport affichait `1000000` là où la mesure
+valait `NaN`. Angle mort **A170**.
+
+### Le refus, et une correction qui n'en était pas une
+
+Deux refus ajoutés, **dérivés et non choisis** — le corpus a déjà payé un seuil posé au jugé
+(**A157**) :
+
+1. **moins de trois points** — une régression sur deux points passe exactement par eux ;
+2. **une amplitude sous `ε·h₀`** — `η` ne peut pas varier moins qu'un ulp de la hauteur d'eau sans
+   que la variation soit un artefact. C'est le pendant `f64` de **G5**, que le véhicule d'accueil
+   porte depuis S27 et que celui-ci n'avait pas.
+
+**Le refus est `NaN`, pas une valeur de repli** — une valeur de repli aurait été relue comme une
+mesure, ce qui est précisément le défaut qu'on corrige.
+
+> **Et il n'a d'abord rien corrigé.** Après l'avoir écrit, le cas continuait de déclarer le néant
+> conforme. La régression était écrite **deux fois dans le même fichier** — une fois en ligne dans
+> `c03_seiche`, une fois dans `demi_vie_seiche`, la fonction extraite en S36 précisément pour être
+> testable. **J'avais corrigé celle qui alimente le tableau, pas celle qui alimente l'assertion.**
+> Les deux sont désormais la même fonction.
+
+### Le témoin
+
+*Le test d'un garde-fou est le cas qu'il doit refuser, et il lui faut aussi son témoin* (**L119**).
+
+| | attendu | obtenu |
+|---|---|---|
+| bassin sans seiche | refus | **`NaN`** aux deux ordres |
+| bassin excité, ordre deux | pas de refus, valeur publiée | **161,14 périodes** |
+
+Un refus mal placé aurait fait disparaître le chiffre du corpus sans que rien ne le dise.
+
+### C06 passe son essai à zéro, exactement
+
+Le même montage **sans boost** (`u₀ = 0`) : les deux simulations comparées sont alors **le même
+calcul**, et l'écart doit être **nul**, pas petit. Mesuré : **`0,0`** sur les deux assertions.
+
+C'est le meilleur genre d'essai à zéro — il exerce une **identité**, pas une tolérance.
+
+> *Un essai à zéro qui réussit du premier coup n'est pas du travail perdu : c'est la seule façon de
+> distinguer un montage sain d'un montage jamais interrogé.*
+
+### Chiffres qui ont orienté la session
+
+- **`NaN.min(1e6) = 1e6`** : une ligne de langage, et tout le défaut.
+- **2 implémentations** de la même régression dans le même fichier ; **1** après.
+- **161,14 périodes** avant et après : le refus ne déplace aucun chiffre publié.
+- **0,0** exactement pour C06 : ni tolérance ni interprétation.
+
+### Ce qui n'a pas été fait
+
+- **C08 et C02 n'ont pas d'essai à zéro.** C08 est le moins évident des quatre : l'essai naturel —
+  une solution représentée exactement, dont l'erreur serait nulle à toutes les grilles — rendrait un
+  ordre **indéfini**, pas zéro. Il demande d'être pensé, pas seulement écrit.
+- **Les autres formules à constantes** ne sont pas refaites (S41-2).
+- **La réserve de cadre** n'est pas portée dans les quatre ADR exposés (S41-3).
+- **Les deux mesures de front ne sont toujours pas comparables** (S41-1).
+- **Les deux budgets de batterie divergent** — 60 s ici, 120 s côté lignée B (S39-2).
+
+### Une erreur de conduite, à noter
+
+**J'ai committé un message qui décrivait plus que ce que le commit contenait.** Un script a échoué à
+mi-parcours ; `CAS-CANONIQUES` était écrit, les angles morts non, et j'ai committé sans le vérifier.
+Le commit suivant porte `(correctif)`. Le défaut n'est pas dans le script — il est d'avoir fait
+confiance à un enchaînement dont une étape avait affiché une exception.
+
+### Session suivante recommandée
+
+**S43 — l'essai à zéro de C08** (S41-4, reliquat). C'est le seul des quatre qui demande de
+**concevoir** ce que « résultat attendu zéro » veut dire pour une mesure d'ordre de convergence.
+
+*Solutions de rechange* : refaire les formules restantes (S41-2) ; ou rendre les deux mesures de
+front comparables (S41-1).
+
+### Arbitrages en attente
+
+Inchangés.

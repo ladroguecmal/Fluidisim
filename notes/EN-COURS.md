@@ -107,7 +107,8 @@ l'autre non — encore une divergence que l'oracle croisé n'a pas cherchée par
       plus court des deux.
 - [x] **P6** — répercussions : `CAS-CANONIQUES` — l'essai à zéro devient une condition de mesure ;
       **A167** relu ; ce que l'inventaire des témoins doit devenir.
-- [ ] **P7** — rituel de fin (`REPRISE.md` §6).
+- [x] **P7a** — rituel : journal, leçons L161-L162, actions S42-1 à S42-3.
+- [ ] **P7b** — rituel : index, décomptes, jeton libéré.
 
 ### Notes de reprise
 

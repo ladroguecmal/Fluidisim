@@ -2602,3 +2602,42 @@ situations comparées — y compris ce qui n'a pas de nom : un seuil, une versio
 machine, un jeu de données, une façon de mesurer. Puis neutraliser les facteurs un par un. Si c'est
 trop coûteux, écrire *A et le reste expliquent B* plutôt qu'une attribution qu'on n'a pas faite. Une
 attribution non démontrée se cite ensuite comme un fait.
+
+## L161 — Une valeur de repli placée après une mesure efface le refus de cette mesure
+
+*(S42)* Une mesure rendait `NaN` sur un montage vide — un refus correct, même s'il venait d'un
+accident de calcul plutôt que d'une intention. La ligne suivante saturait la valeur pour l'affichage,
+`valeur.min(1e6)`. **En Rust, `f64::min` propage le non-`NaN`** : `NaN.min(1e6)` rend `1e6`.
+
+Le refus s'est donc transformé en **la plus grande valeur du domaine**, comparée à un minorant —
+c'est-à-dire en le **meilleur score possible**. Un montage sans rien à mesurer était déclaré
+excellent par l'assertion qui portait le résultat publié.
+
+Le motif n'a rien de spécifique à `NaN` ni à Rust. Toute étape placée **après** une mesure et conçue
+pour « présenter proprement » — saturation, valeur par défaut, `unwrap_or`, `coalesce`, `try/catch`
+qui rend une constante, arrondi qui ramène dans une plage — travaille sur un canal qui transporte
+aussi les **refus**, et les traite comme des valeurs.
+
+**Réflexe** : pour toute mesure qui peut refuser, écrire le refus dans un canal que la mise en forme
+**ne peut pas** traverser — un type somme, une exception, une valeur qui reste manifestement absente.
+Et si le refus voyage dans le même canal que les valeurs, vérifier **chaque** transformation en aval
+en lui donnant le refus à manger. La question tient en une ligne : *que devient mon refus s'il passe
+là-dedans ?*
+
+## L162 — Corriger une mesure écrite deux fois ne corrige rien tant qu'on n'a pas trouvé la seconde
+
+*(S42)* La même régression était écrite à deux endroits du même fichier : en ligne dans le cas, et
+dans une fonction extraite une session plus tôt **précisément pour être testable**. J'ai ajouté le
+refus dans la fonction extraite, relancé l'essai — et le cas continuait de déclarer le néant
+conforme. L'assertion passait par l'autre copie.
+
+L'extraction de la session précédente était bonne et n'était pas allée au bout : elle avait créé la
+fonction et **branché le tableau de diagnostic dessus**, en laissant l'assertion sur le code
+d'origine. Rien ne le signalait — les deux copies donnaient les mêmes nombres, ce qui est exactement
+la condition pour qu'un duplicata survive.
+
+**Réflexe** : quand on extrait une fonction pour la rendre testable, la seule fin acceptable est
+qu'il **ne reste aucun appelant de l'ancien code** — vérifié en le supprimant, pas en le relisant. Et
+quand on corrige une mesure, chercher d'abord *combien de fois est-elle écrite ?* avant de chercher
+*où est le défaut ?* Une correction validée par un test qui passe par la mauvaise copie est pire
+qu'une absence de correction : elle est écrite, elle est relue, et elle ne fait rien.

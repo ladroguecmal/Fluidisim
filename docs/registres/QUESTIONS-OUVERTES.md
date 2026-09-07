@@ -455,3 +455,24 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 > **Et la relecture a corrigé une attribution du corpus** : l'écart de verdicts de C04 entre les
 > deux véhicules vient pour **52 %** de la méthode de mesure et pour 48 % du schéma, là où S36
 > l'attribuait entièrement au passage à l'ordre deux (**L160**).
+
+## Actions relevées en séance — S42
+
+| # | Action | D'où elle vient | Qui la porte | État |
+|---|---|---|---|---|
+| S42-1 | **Concevoir l'essai à zéro de C08**, puis de C02. C08 est le seul des quatre qui demande de penser ce que « résultat attendu zéro » veut dire pour une mesure d'**ordre de convergence** : une solution représentée exactement rendrait un ordre **indéfini**, pas zéro | **A167** | session | **ouverte** |
+| S42-2 | **Chercher les autres valeurs de repli placées après une mesure** — `min`, `max`, `unwrap_or`, saturations d'affichage — et vérifier ce qu'elles font d'un refus. `C03-demi-vie` en portait une qui transformait `NaN` en meilleur score | **A170**, **L161** | session | **ouverte** |
+| S42-3 | **Vérifier qu'aucune autre mesure n'est écrite deux fois.** La régression de demi-vie l'était, et corriger une copie n'a rien corrigé. Une extraction pour testabilité n'est finie que lorsque l'ancien code n'a plus d'appelant | **L162** | session | **ouverte** |
+
+> **Note S42 — l'action S41-4 est close pour C03 et C06, ouverte pour C08 et C02.**
+>
+> **C03 avait le défaut qu'A167 prédit** : sur un bassin sans seiche, `C03-demi-vie` rendait `10⁶`
+> périodes et **passait**, avec le meilleur score possible face à un minorant de 15. Deux refus
+> dérivés — moins de trois points, amplitude sous `ε·h₀` — et le cas échoue désormais des trois
+> assertions. **Le chiffre publié, 161,14 périodes, est intact.**
+>
+> **C06 était sain**, et son essai à zéro rend **exactement `0,0`**. Ce n'est pas du travail perdu :
+> c'est la seule façon de distinguer un montage sain d'un montage jamais interrogé.
+>
+> **Et le refus n'a d'abord rien corrigé** : la régression était écrite deux fois dans le même
+> fichier, et l'assertion passait par la copie que je n'avais pas touchée (**L162**).
