@@ -920,6 +920,10 @@ batterie `check` pour l'assertion principale.
 
 ## C22 — Convergence sur solution régulière
 
+> **Suite S49 :** [trois fenêtres jusqu'à 6400 cellules](MESURES-C22-S49.md), oracles
+> 51200/102400 réutilisés en mémoire. La plus fine donne 1,849839 / 1,960632 / 2,011665,
+> encore non stabilisés selon le critère existant. Sept grilles passent le filtre empirique.
+
 > **Exécuté sur shallow en S48.** Montage et campagnes dans
 > [`MESURES-C22-S48`](MESURES-C22-S48.md). Cinq grilles, deux oracles emboîtés, HLL/MUSCL/RK2 ;
 > verdict non concluant sur la stabilité, sans modification du seuil. Le contrôle de contamination
