@@ -2379,3 +2379,60 @@ se déclarer**. Changer une signature, ajouter un paramètre obligatoire, rendre
 copiable, retirer une valeur par défaut : le compilateur, le typeur ou l'éditeur de liens énumère
 alors ce que la lecture aurait manqué. Cela vaut aussi pour un `grep` : il ne trouve que les
 formulations auxquelles on a pensé.
+
+---
+
+> **Leçons importées de la lignée B le 2026-09-07 (S39).** Les trois suivantes ont été écrites en
+> **B-S27**, où elles portaient les numéros `L86` à `L88` — déjà pris ici par des leçons de S07-S08.
+> Carte : [`FORK-S22-S26`](../docs/registres/FORK-S22-S26.md) §3.2 bis.
+
+## L150 — Une mesure ne peut pas dire de quel cadre elle dépend
+
+*(B-S27)* Une session avait mesuré qu'un dispositif d'absorption réfléchissait `1,6·10⁻³` **quelle que
+soit sa largeur**, et en avait tiré une règle de dimensionnement qui déplaçait un paramètre central.
+La mesure était exacte, reproductible, corrigée de son biais de trajet, balayée sur deux décades.
+**Elle ne décrivait pourtant pas le dispositif : elle décrivait le milieu.** Changé le milieu, le
+même dispositif réfléchit **67 %**.
+
+Ce qui rend l'épisode instructif, ce n'est pas l'erreur — c'est qu'**aucune vérification interne à la
+mesure ne pouvait la révéler**. Ni un raffinement, ni un témoin, ni un balayage de paramètre, ni un
+second estimateur : tous restent dans le cadre où la mesure est faite, et c'est le cadre qui portait
+l'hypothèse. Une mesure établit une relation **entre ses variables** ; elle est muette sur ce qu'elle
+tient fixe.
+
+**Réflexe** : avant de tirer une règle générale d'une mesure, écrire la liste de ce que le montage
+tient fixe **et qui n'apparaît nulle part dans le résultat** — le milieu, le régime, l'échelle, la
+linéarité. Chaque entrée de cette liste est une réserve à nommer dans la conclusion, avec la mesure
+qui la lèverait. Nommer la réserve ne la lève pas ; mais **c'est ce qui transforme une rétractation
+en étape prévue plutôt qu'en démenti**, et c'est la seule protection connue.
+
+## L151 — Tout montage de mesure doit venir avec un essai dont le résultat attendu est zéro
+
+*(B-S27)* Le montage d'une mesure de réflexion a été faux deux fois : la fenêtre d'observation était
+contaminée, d'abord par un retour périodique, ensuite par la queue du signal incident. **Le résultat
+mesuré valait 0,18 à 0,32 dans les trois montages** — les deux faux et le bon.
+
+Un résultat stable au travers d'erreurs de montage n'est pas rassurant : c'est la situation la plus
+dangereuse, parce que la stabilité **ressemble à de la robustesse**. Les deux défauts n'ont été vus
+que par un essai construit pour rendre **zéro** : le même montage avec le dispositif étudié
+neutralisé, et une fenêtre qui doit ne rien contenir. Il a rendu 5,1 %, puis 3,4 %, enfin `4·10⁻¹⁷`.
+
+**Réflexe** : pour tout dispositif de mesure, écrire l'essai nul **avant** l'essai réel — celui dont
+on sait ce qu'il doit rendre, et dont l'écart à zéro n'a aucune interprétation possible sinon un
+défaut de montage. Un test qui peut échouer pour une seule raison vaut dix tests qui peuvent échouer
+pour dix.
+
+## L152 — Un budget qu'on desserre quand il gêne ne mesure plus rien
+
+*(B-S27)* La batterie de validation, à laquelle chaque session ajoute « un balayage », a dépassé son
+budget de temps. Le réflexe naturel — porter le budget de 120 à 180 secondes — aurait fait
+disparaître l'avertissement sans rien changer au problème, et aurait garanti qu'il revienne.
+
+C'est la version coûteuse de baisser une tolérance pour faire passer un test. Dans les deux cas, le
+seuil cesse d'être une **contrainte** pour devenir une **description** : il ne dit plus ce qu'on veut,
+il dit ce qu'on a. Et un seuil qui suit la mesure ne peut plus la contredire, donc ne sert plus.
+
+**Réflexe** : quand un budget est dépassé, les seules réponses sont **réduire la consommation** ou
+**assumer le dépassement en le laissant visible**. Desserrer est une troisième option qui ressemble
+aux deux premières et n'en est aucune. Le corollaire vaut pour tout seuil qu'on s'impose — délai,
+taille, latence, dette : *le moment où il gêne est le seul moment où il travaille.*

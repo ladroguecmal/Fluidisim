@@ -207,6 +207,8 @@ ce que les sources avaient omis.
 | **A163** | Deux implémentations du même modèle portent deux seuils de sec incompatibles, `10⁻⁶` et `10⁻¹⁰` | **1** | ADR-044 §5 |
 | **A164** | La précision arithmétique des véhicules n'est écrite nulle part : `f32` d'un côté, `f64` de l'autre | 2 | ADR-044 §2 |
 | **A165** | Un seuil de sec coupe la vitesse mais pas le flux de masse : le film derrière le front n'est jamais vide | 2 | ADR-045 §6 |
+| **A166** | Une mesure peut être juste et sans portée, et rien dans la mesure ne le dit | **1** | ADR-046 §4.1 |
+| **A167** | Un défaut de montage peut ne pas se voir dans le résultat qu'il menace | **1** | ADR-046 §3 |
 
 Cent huit angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -1182,3 +1184,33 @@ pendant quatre sessions.
   éponges d'une à trois mailles réfléchissent peu, et ne mesurent pourtant plus une éponge. C'est
   l'analogue, pour un terme source, de la condition CFL sur le transport ; le corpus posait la
   seconde et ignorait la première.
+
+---
+
+### Angles morts importés de la lignée B — B-S27 (2026-09-07, S39)
+
+> Les deux suivants ont été ouverts en **B-S27**, où ils portaient les numéros `A117` et `A118`.
+> **Tous deux de sévérité 1**, et aucun n'a été relu par cette lignée.
+
+- **A166** *(sévérité 1)* — **Une mesure peut être juste et sans portée, et rien dans la mesure ne le
+  dit.** B-S26 avait mesuré qu'une éponge réfléchit `1,6·10⁻³` quelle que soit sa largeur, et en avait
+  tiré que la largeur ne dépend pas de la longueur d'onde. La mesure était **exacte**. Elle ne
+  décrivait pourtant pas l'éponge mais **le milieu** : en eau peu profonde linéaire, une onde droite
+  vérifie `u = c·η/h₀`, et multiplier `η` et `u` par un même facteur préserve cette relation —
+  l'amortissement ponctuel y est sans réflexion **par accident algébrique**. En milieu dispersif, la
+  relation est non locale, elle n'est pas préservée, et `R` atteint **67 %**.
+  **Aucune vérification interne à la mesure n'aurait révélé cela** : ni un raffinement, ni un témoin,
+  ni un balayage de paramètre. Il fallait **changer de milieu**, c'est-à-dire sortir du cadre où la
+  mesure était faite. C'est la limite de la méthode que ces sessions emploient, et elle mérite d'être
+  écrite : *une mesure ne peut pas dire de quel cadre elle dépend.* Le seul remède connu est de
+  **nommer la réserve avant de conclure**, ce que B-S26 avait fait — et c'est ce qui a rendu la
+  rétractation prévisible au lieu d'être un démenti.
+- **A167** *(sévérité 1)* — **Un défaut de montage peut ne pas se voir dans le résultat qu'il
+  menace.** Le montage de B-S27 a été faux deux fois : la fenêtre de mesure était contaminée par
+  l'enroulement périodique, puis par la queue du train incident. **`R` valait 0,18 à 0,32 dans les
+  trois montages**, faux comme juste. Seul un essai **construit pour être vide** — le même montage
+  sans éponge, dont la fenêtre réfléchie doit ne rien contenir — a signalé les deux erreurs, à 5,1 %
+  puis 3,4 % contre 4·10⁻¹⁷ pour le montage retenu. **Un résultat stable n'est pas un résultat
+  valide**, et la stabilité est même ce qui endort : elle ressemble à de la robustesse. Le corollaire
+  est opérationnel : *tout montage de mesure doit venir avec un essai dont le résultat attendu est
+  zéro.*
