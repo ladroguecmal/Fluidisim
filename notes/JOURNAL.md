@@ -4716,3 +4716,37 @@ Aucun invariant invalidé ; 47 ADR, 17 invariants, 6 SPEC, 14 registres, 23 cas 
 tester refus/témoins ; examiner séparément le contrat de projection des deux C22 avant
 une extraction. S43-2 et S49-1 restent ouvertes. A103, état réel et infrastructure inchangés ;
 aucun distant créé. A107 historiquement réconcilié, anciennes copies conservées.
+
+## S52 — 2026-09-07 — Partager le calcul, préserver les conditions de mesure
+
+**Agent : Codex**, git et cargo disponibles. Master 50e952d propre, copies anciennes
+contrôlées. S51-1 exécutée : régression partagée et projections C22 examinées.
+
+**Sorties.** regression::centree remplace les deux boucles pente/R² dans physics.rs.
+Fenêtres, logarithmes ln/log2, minima de points et conversions temporelle/spatiale restent
+chez les appelants. Option refuse les séries dégénérées, les non-finis et les débordements.
+Les libellés de refus incluent la régression, sans attribuer tous les refus à une onde éteinte.
+MESURES-PARTAGEES-S52 documente les contrats, limites et tests. Aucun solveur ni seuil changé.
+
+**Distinction utile.** Une série horizontale a une pente mais pas de R² : le couple demandé
+est refusé. Une covariance nulle avec variances positives rend bien pente=0 et R²=0.
+Les anciennes boucles ne distinguaient pas ces cas. Le contrôle reste borné aux points
+reçus : il ne prouve pas que la sélection amont a conservé toutes les données nécessaires.
+
+**Projections.** Elles sont conservées après examen : norme signée/absolue, refus, évolution
+et filtration diffèrent. Le montage delta peut retirer des grilles avant Convergence,
+qui suppose ensuite un doublement sans vérifier les tailles. S52-1 exige un essai de
+ce chemin amont avant extraction. Aucun verdict nominal faux démontré par cette lecture.
+
+**Validation.** 111 tests réussis (38 cœur + 73 harnais), deux ignorés. Trois tests nouveaux :
+droite/résidus connus, séries inexploitables, logarithmes et unités. Rapport physics identique
+à S51 sauf quatre lignes de durées ; sortie 1 attendue pour C04 ordre un. check sans échec,
+hashs 0x3e2c06a7b00e73e3 et 0x1a8b0629a9f51b6e inchangés. C22 coûteux non répété.
+
+**Enseignements / angles morts.** Application de L172 et du risque de trous déjà identifié
+par A174 ; aucun nouvel identifiant attribué sans essai supplémentaire. Total 176 angles,
+L172 dernière leçon. Invariants inchangés, aucun ADR réécrit.
+
+**Suite S53 : S52-1**, vérifier les tailles et conserver les grilles refusées avant le calcul
+d'ordre C22 delta. S43-2 et S49-1 restent ouvertes. A103, état réel et infrastructure inchangés ;
+aucun distant créé. A107 historiquement réconcilié, anciennes copies conservées.

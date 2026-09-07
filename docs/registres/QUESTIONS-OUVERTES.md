@@ -583,4 +583,13 @@ Voir AUDIT-MESURES-S51 : le relevé manuel ne prouve pas une absence générale 
 
 | # | Action | Origine | Porteur | État |
 |---|---|---|---|---|
-| S51-1 | Partager la régression centrée pente/R² en préservant fenêtres et unités, avec refus et témoins ; examiner séparément les contrats des projections conservatives C22 avant de décider une extraction | AUDIT-MESURES-S51, copies dans mesurer_seiche_cfl et c33_decroissance_entretenue | session S52 recommandée | ouverte |
+| S51-1 | Partager la régression centrée pente/R² en préservant fenêtres et unités, avec refus et témoins ; examiner séparément les contrats des projections conservatives C22 avant de décider une extraction | AUDIT-MESURES-S51, copies dans mesurer_seiche_cfl et c33_decroissance_entretenue | session S52 recommandée | close en S52 |
+
+## Actions relevées en séance — S52
+
+**S51-1 close.** Régression centrée partagée, refus et témoins testés ; projections C22
+comparées et conservées séparées avec motifs dans MESURES-PARTAGEES-S52.
+
+| # | Action | Origine | Porteur | État |
+|---|---|---|---|---|
+| S52-1 | Tester la famille C22 delta avec une grille absente, non emboîtée ou nulle ; contrôler les tailles utilisées par Richardson et préserver les refus en amont avant un éventuel partage de projection | MESURES-PARTAGEES-S52 : continue/retain avant Convergence, qui suppose un doublement | session S53 recommandée | ouverte |

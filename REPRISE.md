@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-07 19:15 +02:00
+JETON            : libre
+Battement        : 2026-09-07 19:16 +02:00
 Agent            : Codex (git et cargo disponibles)
-Session en cours : S52
-Dernière session : S51 — 2026-09-07 — mesures inventoriées, Richardson partagé
-Session suivante : S52 — régression centrée et projections C22 (S51-1)
+Session en cours : —
+Dernière session : S52 — 2026-09-07 — régression centrée partagée
+Session suivante : S53 — admission des grilles C22 delta (S52-1)
 ```
 
 > **Avant de regarder le jeton, exécuter `git worktree list` et `git branch -a`.** Le jeton est un
@@ -140,6 +140,11 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
+**S52 :** régression pente/R² partagée, fenêtres et unités conservées.
+Voir docs/validation/MESURES-PARTAGEES-S52.md. 111 tests verts, deux ignorés ; mesures et
+hashs inchangés. Projections C22 conservées après examen. S51-1 close ; suite S53 :
+admission des grilles C22 delta et conservation des refus (S52-1).
+
 **S51 :** inventaire des mesures dupliquées dans docs/validation/AUDIT-MESURES-S51.md.
 Richardson partagé entre rapport et filtre : refus non finis corrigé, A176 et L172.
 108 tests réussis, deux ignorés ; mesures nominales et hashs inchangés. S42-3 close ;
@@ -172,7 +177,7 @@ Quarante-huit sessions ici, **plus cinq dans une lignée parallèle réconcilié
 B-S27) — **47 ADR** *(dont un acté)*, six spécifications, **quatorze registres** — **et du code qui
 tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équilibrés et **tous deux
 montés sur leurs cas, confrontés l'un à l'autre et instrumentés, **plus un milieu à dispersion
-exacte** *(S39)*, **108 tests verts, deux ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
+exacte** *(S39)*, **111 tests verts, deux ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
 verdict** (C08). Quatre cas canoniques sur δ sont exécutés ici : **C01 et C03 passent**, C04 échoue,
 C08 ne conclut pas. **Le second véhicule passe C04 sur un montage dont le schéma et la mesure
 diffèrent** (S41). Son ancien C08 vert est requalifié en S47 : diagnostic sur Ritter, trois

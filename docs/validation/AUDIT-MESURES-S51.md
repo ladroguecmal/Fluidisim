@@ -66,3 +66,7 @@ son algèbre de rapport est couverte ici ; aucun montage numérique modifié.
 
 S42-3 close comme inventaire exécuté avec correction du défaut reproduit ; S51-1 porte
 les duplications restantes identifiées, sans prétendre les avoir supprimées.
+
+**Suite exécutée S52.** Régression centrée partagée et projections examinées :
+[MESURES-PARTAGEES-S52](MESURES-PARTAGEES-S52.md). S51-1 close ; admission des familles
+C22 delta à tester avant extraction des projections (S52-1).

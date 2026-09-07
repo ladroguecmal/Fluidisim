@@ -201,6 +201,11 @@ parfaitement stable ne pouvait pas distinguer.
 
 ## État d'avancement
 
+**S52 :** régression pente/R² partagée, fenêtres et unités conservées.
+Voir docs/validation/MESURES-PARTAGEES-S52.md. 111 tests verts, deux ignorés ; mesures et
+hashs inchangés. Projections C22 conservées après examen. S51-1 close ; suite S53 :
+admission des grilles C22 delta et conservation des refus (S52-1).
+
 **S51 :** inventaire des mesures dupliquées dans docs/validation/AUDIT-MESURES-S51.md.
 Richardson partagé entre rapport et filtre : refus non finis corrigé, A176 et L172.
 108 tests réussis, deux ignorés ; mesures nominales et hashs inchangés. S42-3 close ;
@@ -238,7 +243,7 @@ Chiffrage et contraintes  █████████████████░
 Spécification technique   ████████████████████░░   92 %   chemins tiré et poussé posés, persistance tranchée ; reste IGpuBackend
 Cohérence interne         █████████████████░░░░░   80 %   26 ADR + 6 SPEC confrontés, 45 écarts résolus ; **les 6 ADR de S35 n'ont pas été confrontés au corpus**
 Décisions expérimentales  █████░░░░░░░░░░░░░░░░░   24 %   onze bancs définis, aucun exécuté ; **une moitié de `λ_cut` est mesurée** ; B3 a deux critères d'entrée
-Outillage et pipeline     ████████████████████░░   90 %   **H1, H3, deux δ et un milieu dispersif**, **108 tests exécutés, 2 ignorés** ; C01/C03 passent, C04 échoue à l'ordre un et **passe à l'ordre deux** ; H2, H4-H6 non écrits
+Outillage et pipeline     ████████████████████░░   90 %   **H1, H3, deux δ et un milieu dispersif**, **111 tests exécutés, 2 ignorés** ; C01/C03 passent, C04 échoue à l'ordre un et **passe à l'ordre deux** ; H2, H4-H6 non écrits
 Accords inter-équipes     █████░░░░░░░░░░░░░░░░░   25 %   cinq arbitrages tranchés ; quatorze demandes extérieures en attente
 ```
 
