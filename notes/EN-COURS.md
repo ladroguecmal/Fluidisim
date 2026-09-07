@@ -59,30 +59,31 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S56
-État             : terminée
-Agent            : Codex (git et cargo disponibles)
-Objectif         : Stratégie de référence et budget pour la fenêtre C22 800–12800 (S49-1).
+Session          : S57
+État             : en cours
+Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
+Objectif         : Exécuter le couple d'oracles 76800/153600 selon REFERENCE-C22-S56 (S56-1).
 ```
 
 ### Plan
 
-- [x] **P1** — état réel, passation et plan seul.
-- [x] **P2** — ajouter une fenêtre fine dédiée sans changer les modes existants ; vérifier les admissions et compiler.
-- [x] **P3** — mesurer 800–12800 avec les références 51200/102400, filtre inchangé ; établir le budget du couple suivant et ses critères de passage.
-- [x] **P4** — rituel : journal, actions, enseignements éventuels, index, passation et jeton libre.
+- [x] **P1** — état réel, prise du jeton, plan seul.
+- [ ] **P2** — vérifier les tests et compiler en release avant toute mesure ; aucun changement de montage.
+- [ ] **P3** — exécuter `c22-shallow-fin 76800`, consigner erreurs, écart d'oracles, temps ; appliquer le filtre ×30 sans l'assouplir.
+- [ ] **P4** — rédiger MESURES-C22-S57 : admission de 12800, verdict des quatre fenêtres, déplacement éventuel des sept anciennes grilles, budget révisé.
+- [ ] **P5** — rituel : journal, angles, leçons, actions, index, décomptes, passation et jeton.
 
 ### Notes de reprise
 
-Départ master d8e952a propre, autres copies anciennes propres. Socle lu dans cette conversation,
-REPRISE relu, dernier journal S55 et mesure S49 connus. S49-1 demande une stratégie et un budget,
-pas une promesse de convergence. Aucun champ δ sur disque ; mesures scalaires seules conservées.
-Fenêtre supplémentaire fixée avant calcul ; ne pas assouplir le filtre ×30 ni la stabilité.
+Départ 13851c1, identique à master, dans le worktree claude/reprise-projet-29ef50. Les trois
+autres copies sont en retard ou archivées ; aucune session concurrente. **La branche devra être
+fusionnée dans master en fin de session** — c'est le mécanisme de fork L137/S39.
 
-P3 : campagne 371,116 s ; oracles 72,727/292,354 s ; erreur 12800 = 7,710700097e-9,
-seuil = 1,562278094e-8 : grille rejetée, fenêtre 4/5, quatre familles sans verdict.
-Sept anciennes grilles identiques à S49. Budget suivant 76800/153600 ~827 s estimés,
-admission incertaine. 123 tests verts, deux ignorés ; rapport REFERENCE-C22-S56.
+Attendu avant mesure : coût ~827 s (13 min 47 s) estimé par S56, sans garantie. Seuils extrapolés
+pour l'admission de 12800 : 6,94346e-9 en n⁻², 7,77366e-9 avec l'exposant empirique 1,72145,
+qui encadrent presque l'erreur mesurée en S56 (7,710700097e-9). Le modèle choisi changerait donc
+le verdict d'admission : c'est précisément ce que cette mesure tranche.
 
-P4 : journal et actions consignés, S49-1 close, S56-1 ouverte pour S57. Aucun calcul en cours.
-Jeton libre ; aucun nouvel ADR, angle ou leçon, décomptes inchangés.
+Interdits rappelés par le protocole : pas de doublement automatique si 12800 est refusée,
+pas de champ sur disque (I-17), pas d'extrapolation de Richardson du champ, aucun changement
+de CFL, amplitude, temps final ou initialisation.

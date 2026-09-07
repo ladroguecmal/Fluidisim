@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-07 21:07 +02:00
-Agent            : Codex (git et cargo disponibles)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-07 22:10 +02:00
+Agent            : Claude Code (Opus 5 ; git et cargo disponibles) — worktree isolé claude/reprise-projet-29ef50, à fusionner dans master
+Session en cours : S57 — mesurer C22 sur oracles 76800/153600 (S56-1)
 Dernière session : S56 — 2026-09-07 — référence et budget C22 dimensionnés
-Session suivante : S57 — mesurer C22 sur oracles 76800/153600 (S56-1)
+Session suivante : selon le résultat de S57
 ```
 
 > **Avant de regarder le jeton, exécuter `git worktree list` et `git branch -a`.** Le jeton est un
