@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 02:50 +02:00
+JETON            : libre
+Battement        : 2026-09-08 03:30 +02:00
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Session en cours : S62 — S58-2, recenser les instances d'A104
-Dernière session : S61 — 2026-09-08 — le filtre est géométrique, S60-1 dissoute ; A183, L179
-Session suivante : selon le résultat de S62
+Session en cours : aucune
+Dernière session : S62 — 2026-09-08 — Hs est aveugle à hs et gouverné par sa fenêtre ; A184, L180
+Session suivante : S63 — S59-1, les prescriptions non éprouvées des rapports antérieurs
 
 Le dossier C22 est fermé : un verdict (S59), un critère compris (S60, S61), quatre angles morts.
 Ce qui reste ouvert du côté de la convergence n'est plus une mesure mais **A114**.
@@ -149,6 +149,20 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
+**S62 :** **le cas qui mesurait la taille de sa fenêtre.** Le recensement d'A104 rassure — 41
+références, trois degrés, **une seule tautologie** dans tout le corpus, celle de C10 déjà trouvée
+en S58. Mais le balayage a trouvé autre chose : `Hs` est **aveugle au paramètre qu'il nomme**
+(rapport 0,914723 pour `hs` = 0,6 à 4,8) et **gouverné par un qu'il ne nomme pas**, la fenêtre
+rapportée à la longueur d'onde de pic — **8,53 % à 6,8 λ, 0,28 % à 54,7 λ**. C'est la première
+mesure d'**A102**, énoncé en S21 : *« plusieurs fois la plus longue onde »* est insuffisant, il en
+faut une cinquantaine. À `tp = 9 s` le cas **échoue**, et raffiner le spectre le fait échouer
+aussi. *La chaîne d'amplitude, elle, est juste à 0,28 %* — et sans le témoin à grande fenêtre, qui
+manquait, les 8,53 % nominaux étaient indiscernables d'un défaut.
+Et cette fenêtre était un **littéral dans `main.rs`**, invisible depuis le scénario qui affirme en
+en-tête être auto-suffisant : **A184**, A104 dans sa forme littérale, corrigé sans déplacer aucune
+valeur. **L180** : *un balayage qui ne déplace rien est un résultat* — c'est un balayage sans effet
+sur un facteur 16 qui a révélé le littéral. 130 tests réussis, deux ignorés. Suite S63 : S59-1.
+
 **S61 :** **la frontière que quatre campagnes cherchaient se calculait.** L'erreur d'une grille
 et l'écart de deux oracles ont la **même origine** — l'erreur du schéma — donc leur rapport vaut
 `k^p/(1 − 2^-p)`, où `k = oracle/grille`. Ajusté sur treize couples issus de cinq campagnes,
@@ -273,10 +287,10 @@ le cas régulier p = 0,82 dont la stabilité n'est pas établie. Mesures et hash
 S45-1 close ; S47 recommandée : portée de la paire héritée C08-p/C08-coherence (S46-1).
 
 Quarante-huit sessions ici, **plus cinq dans une lignée parallèle réconciliée en S35** (B-S22 à
-B-S27) — **50 ADR** *(dont un acté)*, six spécifications, **quatorze registres** — **et du code qui
+B-S27) — **50 ADR** *(dont un acté)*, six spécifications, **quinze registres** — **et du code qui
 tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équilibrés et **tous deux
 montés sur leurs cas, confrontés l'un à l'autre et instrumentés, **plus un milieu à dispersion
-exacte** *(S39)*, **129 tests verts, deux ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **trois sans
+exacte** *(S39)*, **130 tests verts, deux ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **trois sans
 verdict** (C08), **un succès depuis S59** : la fenêtre C22 800–12800 conclut à `p = 1,96`
 stabilisé, contre un oracle du même schéma. Quatre cas canoniques sur δ sont exécutés ici :
 **C01 et C03 passent**, C04 échoue, C08 ne conclut pas. **Le second véhicule passe C04 sur un montage dont le schéma et la mesure

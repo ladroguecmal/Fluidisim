@@ -2920,3 +2920,22 @@ exposant mesuré entre deux tailles voisines, extrapolé sur cinq décades — i
 là où la réponse était « impossible ». **Un exposant local n'est pas une loi**, et c'est L175 que
 la session précédente venait d'écrire.
 
+## L180 — Un balayage qui ne déplace rien est un résultat, pas un échec de manipulation
+
+*(S62)* Pour savoir de quoi dépendait une mesure statistique, la session a fait varier la taille de
+sa fenêtre dans le scénario : **un facteur 16, et l'écart n'a pas bougé d'un chiffre**. La réaction
+naturelle est de se croire maladroit. C'était la mesure la plus informative de la séance : le
+paramètre du scénario n'atteignait pas le code, et la vraie fenêtre était un littéral dans
+`main.rs`. Un balayage sans effet **prouve une absence de lien**, et cette absence est parfois le
+défaut cherché.
+
+**Et le corollaire, sur ce qu'un test a le droit de figer.** Le premier test écrit dans la foulée
+figeait le rapport mesure/référence à sa valeur nominale, `0,914723`. Il a échoué aussitôt : dans
+un montage voisin — autre instant, autre graine — il vaut `0,688`. Le chiffre n'était pas une
+propriété du système mais **de la réalisation échantillonnée**. Un test qui l'aurait accepté aurait
+figé une mer particulière en croyant figer une loi.
+
+**Réflexe :** devant un chiffre stable, demander *stable sur quoi ?* avant d'en faire une
+référence. Et quand un balayage ne déplace rien, ne pas recommencer plus fort — **chercher le
+chemin par lequel le paramètre est censé arriver**, et vérifier qu'il existe.
+

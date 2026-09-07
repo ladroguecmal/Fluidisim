@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S62
-État             : en cours
+État             : terminée
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
 Objectif         : S58-2 — recenser les instances d'A104 : pour chaque constante partagée entre
                    une mesure et sa référence, vérifier qu'un cas la discrimine.
@@ -73,7 +73,7 @@ Objectif         : S58-2 — recenser les instances d'A104 : pour chaque constan
 - [x] **P3** — balayer les paramètres balayables et **mesurer** le degré au lieu de le déduire ; le scénario est en TOML, aucun code n'est à recompiler.
 - [x] **P4** — rapport AUDIT-REFERENCES-S62 : les cas aveugles, ceux qui ne le sont pas, et ce que chacun teste réellement.
 - [x] **P5** — appliquer ce qui doit l'être, avec essais de refus et témoins.
-- [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
+- [x] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
 
 ### Notes de reprise
 
@@ -129,3 +129,8 @@ fenetre dans son libelle. Test hs_est_aveugle_a_hs_et_gouverne_par_sa_fenetre : 
 ne fige aucun chiffre dependant de la realisation — la premiere version le faisait et a echoue,
 0,688 dans le montage du test contre 0,9147 dans le scenario. 130 tests reussis, deux ignores ;
 hashs et mesures nominales inchanges.
+
+P6 : rituel exécuté. Journal S62, A184 (sévérité 2, corrigé), L180, S58-2 close, S62-1 ouverte.
+Index et REPRISE : angles 183 vers 184, tests 129 vers 130, registres 14 vers 15, trois audits
+vers quatre. Aucun invariant invalidé, aucun ADR réécrit, aucune valeur nominale déplacée.
+Jeton libre. Reste la fusion dans master.

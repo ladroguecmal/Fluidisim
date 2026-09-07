@@ -5151,3 +5151,61 @@ hashs `check` inchangés ; aucun verdict déplacé, aucun résultat rouvert.
 d'instances, et qui ne se périment pas. Puis **S58-1**. A103 close en S58 ; l'état réel et
 l'infrastructure restent hors de portée, aucun distant créé.
 
+## S62 — 2026-09-08 — Le cas qui mesurait la taille de sa fenêtre
+
+**Agent : Claude Code (Opus 5)**, git et cargo disponibles. Départ 92042b4. Entrée : **S58-2**,
+recenser les instances d'**A104** — les cas dont la référence est construite avec ce qu'ils
+devraient contrôler.
+
+**Sorties.** [`AUDIT-REFERENCES-S62`](../docs/registres/AUDIT-REFERENCES-S62.md), la fenêtre
+statistique rendue déclarable, **A184**, **L180**, action **S62-1**. **S58-2 close.**
+
+**Le recensement d'abord, et il rassure.** Quarante et une références, trois degrés — tautologie,
+aller-retour, indépendance — et **un seul est une faute**. Vingt-quatre références valent `0` ou
+`1` et ne peuvent rien tirer d'un paramètre ; `C04` et `C03` se comparent à des solutions fermées
+que le solveur ignore ; `C02-c` confronte deux **mesures**, `λ` et `T` relevés dans le champ, à la
+relation de dispersion. La faute de S58 sur C10 (**A180**) reste la seule tautologie du corpus.
+
+**Mais le balayage de `Hs` a trouvé autre chose que ce qu'il cherchait.**
+
+*Aveugle à ce qu'il nomme* : sur `hs` = 0,6 · 1,2 · 2,4 · 4,8, le rapport mesure/référence vaut
+**0,914723 à chaque fois**. La mer est engendrée d'après `hs` et la mesure le reconstruit — le cas
+teste une chaîne, jamais une valeur.
+
+*Gouverné par ce qu'il ne nomme pas* : la fenêtre rapportée à la longueur d'onde de pic. C'est
+**A102**, énoncé en S21 et **jamais mesuré**. Le voici — 8,53 % à 6,8 λ, 2,43 % à 27,3 λ,
+**0,28 % à 54,7 λ**. *« Plusieurs fois la plus longue onde » est insuffisant : il en faut une
+cinquantaine.* Par `tp`, à fenêtre nominale : 0,018 % à 4 s, 8,53 % à 6 s, **15,58 % à 9 s —
+échec**. Et par nombre de composantes, rien ne converge : 1,42 · 10,24 · 8,53 · 12,83 · 6,53 ·
+**26,30 %** de 8 à 256. **Raffiner la configuration fait échouer le cas.**
+
+**Ce que cela change.** Le cas est décrit comme *« le contrôle de bout en bout de toute la chaîne
+d'amplitude »* ; à sa fenêtre nominale il consomme **85 % de sa tolérance**, et ce qu'il mesure là
+est la taille de sa fenêtre. *La chaîne, elle, est juste à 0,28 %* — et **sans le témoin à grande
+fenêtre, les 8,53 % nominaux étaient indiscernables d'un défaut de sommation**. Ce témoin manquait.
+
+**Et la fenêtre n'était pas dans le scénario.** `main.rs` passait `128` et `3.0` en dur : les deux
+nombres qui gouvernent la mesure la plus fragile du harnais étaient invisibles depuis le fichier
+qui affirme, dans son en-tête, être *auto-suffisant et lisible sans le code sous les yeux*.
+**C'est A104 dans sa forme littérale** — une règle violée dans le fichier qui l'énonce — et c'est
+**A184**. Corrigé : `physics.fenetre_cote` et `physics.fenetre_pas_m` sont déclarables, défauts
+inchangés ; nommer une constante ne la déplace pas.
+
+**Une erreur de méthode, corrigée en séance.** Le premier test figeait le rapport à 0,914723. Il a
+échoué : dans le montage du test — autre instant, autre graine — il vaut **0,688**. *Le rapport
+n'est pas une constante du système, c'est une propriété de l'échantillonnage d'une réalisation*
+(**L180**). Le test est devenu structurel : invariance en `hs`, et division de l'écart par plus de
+quatre quand la fenêtre s'élargit.
+
+**Ce qui n'a pas été fait.** La fenêtre à retenir n'est pas tranchée : l'élargir rendrait `Hs`
+juste à 0,28 % mais multiplierait son coût par 64, et à 12288 m la variance en une passe rend
+`NaN` — le cas échoue alors correctement, sans faux succès. C'est **S62-1**.
+
+**Validation.** **130 tests réussis** (40 cœur + 90 harnais), deux ignorés. Release compilée ;
+hashs `check` inchangés ; **aucune valeur nominale déplacée** — les 8,528 % restent publiés sous
+une tolérance inchangée. Ce qui change est ce qu'on en dit.
+
+**Suite S63 : S59-1**, reprendre les prescriptions non éprouvées laissées par les rapports
+antérieurs — A181 en a coûté une, personne ne sait combien il en reste. Puis **S62-1** et
+**S58-1**. A103 close en S58 ; l'état réel et l'infrastructure restent hors de portée.
+

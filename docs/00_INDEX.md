@@ -142,7 +142,8 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`specs/SPEC-004`](specs/SPEC-004-interfaces.md) | **signatures des interfaces** — solveurs, champ de fond, solides, services d'hôte, contrat de fils d'exécution |
 | [`specs/SPEC-005`](specs/SPEC-005-outillage-auteur.md) | **outillage auteur** — sources de vérité, inversion du pipeline eau/terrain, cuisson déterministe, obsolescence |
 | [`specs/SPEC-006`](specs/SPEC-006-chemin-pousse.md) | **le chemin poussé** — ce que le système *publie* : bus d'événements et `WaveEvent`, écume et aération, traversabilité, polyligne de déferlement |
-| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **183 points**, avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
+| [`registres/AUDIT-REFERENCES-S62.md`](registres/AUDIT-REFERENCES-S62.md) | **ce qu'une référence peut voir bouger** — 41 références, trois degrés, **une seule tautologie** ; `Hs` aveugle à `hs` et gouverné par sa fenêtre, première mesure d'**A102** ; la fenêtre était hors du scénario (**A184**) |
+| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **184 points**, avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
 | [`registres/FORK-S22-S26.md`](registres/FORK-S22-S26.md) | **le second fork** — constat, carte de renumérotation complète, la règle manquante, et ce qui reste à fusionner |
 | [`registres/AUDIT-ASSERTIONS-S29.md`](registres/AUDIT-ASSERTIONS-S29.md) | **ce que chaque assertion peut voir** — 23 cas classés, 5 fautifs, 1 mesure du harnais retirée ; **réécriture S30 sans aucun seuil inventé** |
 | [`registres/AUDIT-REPLIS-S44.md`](registres/AUDIT-REPLIS-S44.md) | **les valeurs de repli, inventoriées** — 49 recensées, deux fautives ; *quand la grandeur est un écart, zéro est son meilleur point* |
@@ -203,6 +204,13 @@ parfaitement stable ne pouvait pas distinguer.
 | [`../notes/JOURNAL.md`](../notes/JOURNAL.md) | historique des sessions, points de reprise |
 
 ## État d'avancement
+
+**S62 :** **S58-2 close** — 41 références classées en trois degrés, **une seule tautologie** dans
+le corpus (C10, déjà connue). Mais `Hs` est **aveugle à `hs`** — rapport 0,914723 sur un facteur 8
+— et **gouverné par sa fenêtre** : 8,53 % d'écart à 6,8 λ, **0,28 % à 54,7 λ**. Première mesure
+d'**A102**, énoncé en S21. La fenêtre était un littéral hors du scénario qui se déclare
+auto-suffisant : **A184**, corrigé. 130 tests réussis, deux ignorés ; aucune valeur nominale
+déplacée. Voir docs/registres/AUDIT-REFERENCES-S62.md et **L180**. Suite S63 : S59-1.
 
 **S61 :** **quatre campagnes ont mesuré ce qu'un rapport d'entiers donnait.** Le rapport
 erreur/écart-d'oracles vaut `k^p/(1 − 2^-p)` avec `k = oracle/grille` — ajusté sur treize couples
@@ -306,7 +314,7 @@ Chiffrage et contraintes  █████████████████░
 Spécification technique   ████████████████████░░   92 %   chemins tiré et poussé posés, persistance tranchée ; reste IGpuBackend
 Cohérence interne         █████████████████░░░░░   80 %   26 ADR + 6 SPEC confrontés, 45 écarts résolus ; **les 6 ADR de S35 n'ont pas été confrontés au corpus**
 Décisions expérimentales  █████░░░░░░░░░░░░░░░░░   24 %   onze bancs définis, aucun exécuté ; **une moitié de `λ_cut` est mesurée** ; B3 a deux critères d'entrée
-Outillage et pipeline     ████████████████████░░   90 %   **H1, H3, deux δ et un milieu dispersif**, **129 tests exécutés, 2 ignorés** ; C01/C03 passent, C04 échoue à l'ordre un et **passe à l'ordre deux** ; H2, H4-H6 non écrits
+Outillage et pipeline     ████████████████████░░   90 %   **H1, H3, deux δ et un milieu dispersif**, **130 tests exécutés, 2 ignorés** ; C01/C03 passent, C04 échoue à l'ordre un et **passe à l'ordre deux** ; H2, H4-H6 non écrits
 Accords inter-équipes     █████░░░░░░░░░░░░░░░░░   25 %   cinq arbitrages tranchés ; quatorze demandes extérieures en attente
 ```
 

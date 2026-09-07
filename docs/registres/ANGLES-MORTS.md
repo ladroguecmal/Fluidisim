@@ -1447,3 +1447,15 @@ pendant quatre sessions.
   admettre, avant de la payer, avec l'hypothèse d'ordre écrite sur la même ligne.
   Voir ADR-050, GEOMETRIE-DU-FILTRE-S61 et **L179**.
 
+- **A184** *(sévérité 2, corrigé S62)* — **La condition de validité d'une assertion peut vivre
+  ailleurs que l'assertion, et le fichier qui l'affirme auto-suffisant ne s'en aperçoit pas.**
+  `main.rs` appelait `hs_restitue(bg, t, sc.hs, 128, 3.0)` : la fenêtre d'échantillonnage — les
+  deux nombres qui gouvernent la mesure la plus fragile du harnais — était **littérale**, invisible
+  depuis le scénario. Or `C18-invariants.toml` déclare en en-tête que *« les assertions vivent ici
+  et non dans le code du harnais : ce fichier est auto-suffisant »*, et SPEC-003 §3 l'exige.
+  L'écart de `Hs` passe de **0,018 % à 15,58 %** selon cette fenêtre, et le lecteur du scénario
+  n'avait aucun moyen de le savoir. Le défaut s'est révélé par un balayage **qui ne déplaçait
+  rien** : `grille_cote` varié d'un facteur 16 laissait l'écart au chiffre près.
+  **Corrigé** : `physics.fenetre_cote` et `physics.fenetre_pas_m`, défauts inchangés, mesures et
+  hashs inchangés. Instance littérale d'**A104**. Voir AUDIT-REFERENCES-S62 §3.4 et **L180**.
+

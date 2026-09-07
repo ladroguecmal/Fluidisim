@@ -652,7 +652,7 @@ constante, ses quatre assertions passent à écart nul aux deux valeurs (RHO-EAU
 | # | Action | Origine | Porteur | État |
 |---|---|---|---|---|
 | S58-1 | Donner à `C10-tirant` une référence indépendante de `ρ_eau`, ou **acter que le projet n'en aura pas** et le dire dans le rapport plutôt que dans un registre — le cas s'annonce aujourd'hui comme un contrôle qu'il n'est pas | **A180**, ADR-048 D3 | session, par ADR si la réponse est « pas de source » | ouverte |
-| S58-2 | Passer les autres cas au même balayage : pour chaque constante partagée entre une mesure et sa référence, vérifier qu'un cas la discrimine. **A104 recense la faute, personne n'a recensé ses instances** | **A180**, généralisation de **L176** | session ultérieure | ouverte |
+| S58-2 *(close en S62)* | Passer les autres cas au même balayage : pour chaque constante partagée entre une mesure et sa référence, vérifier qu'un cas la discrimine. **A104 recense la faute, personne n'a recensé ses instances** | **A180**, généralisation de **L176** | session ultérieure | **close en S62 — AUDIT-REFERENCES-S62** |
 
 > **S58-2 avant S58-1.** La première question porte sur un cas ; la seconde demande combien il y
 > en a. Un recensement qui trouverait trois autres cas aveugles changerait la forme de la réponse
@@ -714,4 +714,20 @@ chaque campagne, et `--annonce` la donne sans rien calculer.
 > quatre angles morts — A179, A182, A183, plus A181 sur son protocole. Ce qui reste ouvert du
 > côté de la convergence n'est plus une mesure mais **A114** : l'oracle est du même schéma, et
 > aucune campagne de ce dispositif ne peut en sortir.
+
+## Actions relevées en séance — S62
+
+**S58-2 close.** Quarante et une références classées en trois degrés ; **une seule tautologie**
+dans tout le corpus, celle de C10 déjà trouvée en S58. Mais le balayage a établi qu'`Hs` est
+aveugle à `hs` et gouverné par sa fenêtre — première mesure d'**A102**, énoncé en S21 — et que
+cette fenêtre était un littéral hors du scénario (**A184**). Voir
+[`AUDIT-REFERENCES-S62`](AUDIT-REFERENCES-S62.md).
+
+| # | Action | Origine | Porteur | État |
+|---|---|---|---|---|
+| S62-1 | **Trancher la fenêtre d'échantillonnage de `Hs`** : la nominale rend 8,53 % d'écart pour une tolérance de 10 %, et 54,7 λ la rendraient juste à 0,28 % — mais pour 64 fois le coût, et à 12288 m la variance en une passe rend `NaN`. Corriger d'abord la sommation (Welford), puis décider la fenêtre **par ADR** : cela déplace un chiffre publié | **A102** mesuré, **A184**, AUDIT-REFERENCES-S62 §3 | session, par ADR | ouverte |
+
+> **S62-1 après S59-1.** S59-1 est un recensement, il ne se périme pas mais il est bon marché ;
+> S62-1 demande une correction numérique puis un arbitrage sur un chiffre publié, et rien ne
+> presse : le cas est vert, sa condition de mesure est désormais écrite dans son libellé.
 
