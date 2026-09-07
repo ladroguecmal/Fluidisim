@@ -2874,3 +2874,26 @@ déplace, avant de l'implémenter. Corollaire : en écrivant une consigne pour l
 **dire ce qu'on n'a pas vérifié** — le coût d'une prescription non éprouvée est payé plus tard,
 par quelqu'un qui la croira mesurée.
 
+## L178 — Avant de recalibrer un critère, demander sur quelle grandeur il porte
+
+*(S60)* Un filtre d'admission était soupçonné d'être trop strict : il refusait des mesures, il
+avait retardé un verdict de trois sessions, et un angle mort documentait qu'il se réglait sur une
+quantité mal choisie. Tout invitait à le recalibrer.
+
+**Les deux mesures ont donné des réponses opposées, et c'est leur désaccord qui a instruit.** Un
+essai de refus a montré que le remplaçant envisagé ne refusait pas une contamination flagrante —
+donc il ne pouvait pas prendre la place. Une contre-épreuve rétrospective a montré que le filtre
+avait bien bloqué un résultat déjà atteignable, à trois centièmes de millième près. Les deux sont
+vraies parce qu'elles ne parlent pas de la même grandeur : le critère est **juste pour les
+erreurs** et **sans rapport avec l'ordre**, et le dispositif ne les distinguait pas.
+
+**Réflexe :** devant un critère suspect, ne pas commencer par sa valeur. Demander d'abord **ce
+qu'il protège** et **ce qu'il commande** — s'il y a plus d'une grandeur publiée, vérifier qu'un
+seul critère ne décide pas des deux. Un critère bien réglé pour une grandeur peut être arbitraire
+pour la voisine, et le symptôme est trompeur : il ressemble à un mauvais calibrage.
+
+**Et le corollaire, sur la conduite :** un critère qu'on rouvre juste après en avoir obtenu un
+résultat favorable doit être instruit à charge. La sortie honnête est souvent de **ne pas
+changer** et de nommer l'expérience qui manque — ici, un régime jamais observé, que sept minutes
+de calcul suffiront à atteindre.
+

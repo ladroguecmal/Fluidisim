@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S60
-État             : en cours
+État             : terminée
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
 Objectif         : S57-2 — éprouver le critère d'admission de C22, et le décider par ADR.
 ```
@@ -72,7 +72,7 @@ Objectif         : S57-2 — éprouver le critère d'admission de C22, et le dé
 - [x] **P3** — contre-épreuve rétrospective sur 51200/102400, la campagne que le filtre a fait refuser en S56 ; et essai de refus sur un oracle franchement trop grossier.
 - [x] **P4** — ADR-049 : trancher au vu des deux mesures, ou refuser de trancher en disant ce qui manque.
 - [x] **P5** — appliquer la décision au code, avec ses essais de refus et ses témoins.
-- [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
+- [x] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
 
 ### Notes de reprise
 
@@ -131,3 +131,8 @@ P5 : sortie renommee en diagnostic sans verdict, avec renvoi a ADR-049 D3 sur la
 synthese — une valeur publiee sans etre admissible doit le dire sur la ligne qui la porte.
 128 tests reussis (40 coeur + 88 harnais), deux ignores ; hashs check inchanges. Aucun verdict
 deplace : le filtre, les seuils et les familles sont ceux de S59.
+
+P6 : rituel exécuté. Journal S60, A182 (sévérité 2, ouvert par décision), L178, S57-2 close,
+S60-1 ouverte et prioritaire. Index et REPRISE : ADR 48 vers 49, angles 181 vers 182, tests
+127 vers 128. Aucun invariant invalidé, aucun ADR réécrit, aucun verdict déplacé.
+Jeton libre. Reste la fusion dans master.

@@ -5040,3 +5040,57 @@ ouverte du dossier C22, et S59 lui apporte un troisième point et un argument ne
 S58-2 puis S58-1 sur les cas aveugles à leurs paramètres. A103 close en S58 ; l'état réel et
 l'infrastructure restent hors de portée, aucun distant créé.
 
+## S60 — 2026-09-08 — Un seul critère d'admission pour deux grandeurs de nature différente
+
+**Agent : Claude Code (Opus 5)**, git et cargo disponibles. Départ 283e82a. Entrée : **S57-2**,
+décider si le filtre de contamination de C22 doit comparer l'erreur au biais de l'oracle de
+mesure plutôt qu'à l'écart des deux oracles.
+
+**Sorties.** [`ADR-049`](../docs/adr/ADR-049-le-filtre-de-contamination-n-est-pas-mal-calibre-il-est-mal-attribue.md),
+la mesure d'invariance à l'oracle publiée comme diagnostic, l'essai de refus à oracle grossier,
+la contre-épreuve rétrospective de 51200/102400, **A182**, **L178**, action **S60-1**.
+**S57-2 close.**
+
+**Décision structurante — et c'est une décision de ne pas changer.** Le filtre ×30 est conservé
+sans aucune modification. Rouvrir un critère juste après le premier succès de C22 était le piège
+de la session, et il était nommé dans le plan avant la première mesure.
+
+**Les deux mesures vont en sens contraire, et c'est ce qui tranche.**
+
+*L'invariance ne peut pas remplacer le filtre.* Essai de refus à oracle 3200/6400, contamination
+flagrante — erreur de la grille 1600 fausse de **5,2 %**, deux grilles refusées : l'invariance ne
+vaut que **5,1e-3**, soit 0,3 % d'un ordre de 1,85. Aucun seuil raisonnable ne l'aurait refusée.
+Deux oracles emboîtés d'un facteur deux partagent leur erreur, donc leurs ordres sont également
+faux et leur écart reste petit — **A114 appliqué au critère lui-même**. Le test synthétique cerne
+le domaine : un biais uniforme mille fois l'erreur la plus fine ne déplace pas l'ordre ; un biais
+hétérogène cent fois plus petit le déplace. *L'invariance ne mesure pas la contamination, elle
+mesure son hétérogénéité.*
+
+*Mais le filtre a bloqué trois sessions un verdict déjà atteignable.* Contre-épreuve : la campagne
+51200/102400, celle que le filtre a fait refuser en S56, rejouée en **371,972 s**. Le triplet du
+verdict rend **1,997566515**, contre **1,997599436** publié par S59 — **écart 3,29e-5**. Entre les
+deux, **1987,7 s de calcul, 33 min 08 s, et deux sessions**, pour déplacer un ordre de trois
+centièmes de millième.
+
+**Ce que la décision retient.** A179 est **requalifié** : son constat est exact, sa conclusion
+implicite ne l'est pas. Le filtre n'est pas mal calibré — il protège très bien ce qu'il protège,
+les **erreurs** publiées, et à oracle 3200 il refuse à bon droit une erreur fausse de 5,2 %. Il
+est **mal attribué** : C22 publie deux grandeurs de nature différente, des erreurs et un ordre,
+sous **un seul** critère d'admission, et une grille refusée coupe la famille donc supprime des
+triplets dont l'ordre était juste (**A182**, **L178**).
+
+**Ce qui n'a pas été fait, et pourquoi.** Le critère n'est pas remplacé : aucune mesure de ce
+dépôt n'a atteint le régime décisif, celui où l'erreur d'une grille passe **sous** l'écart des
+oracles — même à oracle 3200, elle vaut encore 4,8 fois cet écart. Tant qu'on ne l'a pas observé,
+rien ne dit que la contamination y reste uniforme, et changer le critère serait extrapoler hors
+du domaine mesuré (**L175**). L'expérience manquante est nommée dans **S60-1**.
+
+**Validation.** **128 tests réussis** (40 cœur + 88 harnais), deux ignorés — deux ajoutés.
+Release compilée ; hashs `check` inchangés, `0x3e2c06a7b00e73e3` et `0x1a8b0629a9f51b6e`.
+**Aucun verdict n'a bougé** : filtre, seuils et familles sont ceux de S59.
+
+**Suite S61 : S60-1**, mesurer une grille dont l'erreur passe sous l'écart des oracles — 25600
+contre 51200/102400, où l'erreur attendue vaut environ 3,7 fois l'écart. C'est le seul point qui
+manque pour décider du critère, et il coûte moins de sept minutes. Restent S58-2, S59-1 et S58-1.
+A103 close en S58 ; l'état réel et l'infrastructure restent hors de portée, aucun distant créé.
+

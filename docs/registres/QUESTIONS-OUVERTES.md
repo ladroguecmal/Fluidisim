@@ -633,7 +633,7 @@ Quatre familles sans verdict, sortie 0. Voir MESURES-C22-S57. Aucun doublement a
 | # | Action | Origine | Porteur | État |
 |---|---|---|---|---|
 | S57-1 *(close en S59)* | Relever la borne du mode `c22-shallow-fin` à 89600, **déclarer et tester le découpage du calcul en tranches gardées en mémoire** exigé au-delà du quart d'heure, puis mesurer 89600/179200 — étape de code et étape de mesure séparées | MESURES-C22-S57 : oracle requis ≈ 79 000, admission prévue avec 20 à 30 % de marge, coût projeté 19 min 07 s | session S58 | ouverte |
-| S57-2 | Éprouver la loi de biais d'oracle `c(n) ∝ n^-1,879` sur un troisième couple, et décider si le filtre de contamination doit comparer l'erreur au **biais de l'oracle de mesure** plutôt qu'à l'écart des deux oracles. **Par ADR** : cela change un critère d'admission, pas une constante | **A179** *(sév. 2)*, MESURES-C22-S57 §3 | session, par ADR | ouverte |
+| S57-2 *(close en S60)* | Éprouver la loi de biais d'oracle `c(n) ∝ n^-1,879` sur un troisième couple, et décider si le filtre de contamination doit comparer l'erreur au **biais de l'oracle de mesure** plutôt qu'à l'écart des deux oracles. **Par ADR** : cela change un critère d'admission, pas une constante | **A179** *(sév. 2)*, MESURES-C22-S57 §3 | session, par ADR | ouverte |
 
 > **Ne pas traiter S57-2 en même temps que S57-1.** S57-1 mesure sous le critère actuel ;
 > S57-2 discute le critère. Les mélanger produirait une admission dont on ne saurait pas si
@@ -677,4 +677,21 @@ l'est pas du tout.
 > **Ordre recommandé : S57-2, puis S58-2, puis S59-1.** S57-2 clôt le dossier C22 ; S58-2 et
 > S59-1 sont deux recensements du même genre — des fautes déjà identifiées dont on ignore le
 > nombre d'instances — et ils ne se périment pas.
+
+## Actions relevées en séance — S60
+
+**S57-2 close par [`ADR-049`](../adr/ADR-049-le-filtre-de-contamination-n-est-pas-mal-calibre-il-est-mal-attribue.md).**
+Le filtre ×30 est **conservé sans modification**. A179 est requalifié : mal attribué, pas mal
+calibré. L'invariance à l'oracle est publiée comme diagnostic et **disqualifiée comme critère** —
+essai de refus à oracle 3200 : 5,1e-3 seulement pour des erreurs fausses de 5,2 %. Contre-épreuve :
+l'ordre publié par S59 était mesurable en S56, à **3,29e-5** près, pour 1987,7 s de moins.
+
+| # | Action | Origine | Porteur | État |
+|---|---|---|---|---|
+| S60-1 | **Mesurer une grille dont l'erreur passe sous l'écart des oracles** — 25600 contre 51200/102400, erreur attendue à environ 3,7 fois l'écart, puis plus bas si le montage le permet. C'est le régime où l'on saura si la contamination reste additive et uniforme, et **le seul point qui manque pour attribuer un critère propre à l'ordre** | **A182**, ADR-049 D4 | session S61 | ouverte |
+
+> **S60-1 est peu chère et bloque tout le reste du dossier** : moins de sept minutes de calcul,
+> et sans elle aucun critère d'admission de l'ordre ne peut être proposé sans extrapoler hors du
+> domaine mesuré (**L175**). Elle passe avant S58-2, S59-1 et S58-1, qui sont des recensements
+> et ne se périment pas.
 

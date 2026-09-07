@@ -1420,3 +1420,16 @@ pendant quatre sessions.
   conservé comme témoin dans `le_decoupage_temporel_n_est_pas_neutre`.
   Voir MESURES-C22-S59 et **L177**.
 
+- **A182** *(sévérité 2, ouvert par décision, S60)* — **Un seul critère d'admission peut gouverner
+  deux grandeurs de nature différente, et être juste pour l'une seulement.** C22 publie des
+  **erreurs** et un **ordre**. Le filtre ×30 protège la fiabilité des erreurs, et il le fait bien :
+  à oracle 3200/6400 il refuse une grille dont l'erreur est fausse de 5,2 %. Mais une grille
+  refusée **coupe la famille**, donc supprime tous les triplets qui la contiennent — et l'ordre,
+  estimé sur des différences successives, est insensible à la contamination additive qui motive
+  le refus. Mesuré : le triplet écarté en S56 valait **1,997566515**, contre **1,997599436**
+  publié par S59 après deux campagnes et **33 min 08 s** de calcul. Le filtre n'est pas mal
+  calibré, il est **mal attribué** — voir ADR-049, qui requalifie **A179** et le conserve intact.
+  **Ouvert par décision** : le régime où l'erreur d'une grille passe sous l'écart des oracles n'a
+  jamais été observé, donc rien ne permet encore d'attribuer un critère propre à l'ordre.
+  Action **S60-1**. Voir **L178**.
+

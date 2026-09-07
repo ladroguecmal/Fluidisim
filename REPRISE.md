@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 01:00 +02:00
+JETON            : libre
+Battement        : 2026-09-08 01:42 +02:00
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Session en cours : S60 — S57-2, éprouver le critère d'admission de C22 (par ADR)
-Dernière session : S59 — 2026-09-08 — C22 conclut : p = 1,96 stabilisé ; A181, L177
-Session suivante : selon le résultat de S60
+Session en cours : aucune
+Dernière session : S60 — 2026-09-08 — filtre conservé, A179 requalifié ; A182, L178
+Session suivante : S61 — S60-1, la grille dont l'erreur passe sous l'écart des oracles
 
 Note S58 : S57 puis S58 ont travaillé dans le worktree claude/reprise-projet-29ef50, et **les
 deux ont été fusionnées dans master en avance rapide** — bd9f087 puis 531491f. Les deux copies
@@ -146,6 +146,21 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
+**S60 :** **le critère de C22 est rouvert, instruit, et conservé.** Rouvrir un filtre juste
+après le succès qu'il avait retardé était le piège de la session ; il a été nommé dans le plan
+avant la première mesure, et **rien n'a été assoupli**. Deux mesures, en sens contraire. L'essai
+de refus disqualifie le remplaçant envisagé : à oracle 3200/6400, avec des erreurs fausses de
+**5,2 %**, l'invariance à l'oracle ne vaut que **5,1e-3** — deux oracles voisins partagent leur
+erreur, donc leurs ordres sont également faux (**A114** appliqué au critère). Mais la
+contre-épreuve rétrospective montre que l'ordre publié par S59 était **déjà mesurable en S56**, à
+**3,29e-5** près : entre les deux, 1987,7 s de calcul et deux sessions pour trois centièmes de
+millième. [`ADR-049`](docs/adr/ADR-049-le-filtre-de-contamination-n-est-pas-mal-calibre-il-est-mal-attribue.md)
+requalifie **A179** — le filtre protège très bien les **erreurs**, et il est **mal attribué** au
+verdict d'**ordre** : C22 publie deux grandeurs de nature différente sous un seul critère
+(**A182**, **L178**). Le remplacement reste **ouvert par décision**, avec l'expérience manquante
+nommée : un régime où l'erreur d'une grille passe **sous** l'écart des oracles, jamais observé.
+128 tests réussis, deux ignorés ; aucun verdict déplacé. Suite S61 : **S60-1**, sept minutes.
+
 **S59 :** **C22 a son premier verdict positif.** Couple d'oracles 89600/179200, 1143,284 s
 (−0,34 % de la projection) : la grille 12800 est **admise** avec 22,40 % de marge, et la fenêtre
 800–12800 conclut — 5/5 grilles, ordres 1,960625 · 2,011671 · 1,997599, **`p = 1,96`,
@@ -239,10 +254,10 @@ le cas régulier p = 0,82 dont la stabilité n'est pas établie. Mesures et hash
 S45-1 close ; S47 recommandée : portée de la paire héritée C08-p/C08-coherence (S46-1).
 
 Quarante-huit sessions ici, **plus cinq dans une lignée parallèle réconciliée en S35** (B-S22 à
-B-S27) — **48 ADR** *(dont un acté)*, six spécifications, **quatorze registres** — **et du code qui
+B-S27) — **49 ADR** *(dont un acté)*, six spécifications, **quatorze registres** — **et du code qui
 tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équilibrés et **tous deux
 montés sur leurs cas, confrontés l'un à l'autre et instrumentés, **plus un milieu à dispersion
-exacte** *(S39)*, **127 tests verts, deux ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **trois sans
+exacte** *(S39)*, **128 tests verts, deux ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **trois sans
 verdict** (C08), **un succès depuis S59** : la fenêtre C22 800–12800 conclut à `p = 1,96`
 stabilisé, contre un oracle du même schéma. Quatre cas canoniques sur δ sont exécutés ici :
 **C01 et C03 passent**, C04 échoue, C08 ne conclut pas. **Le second véhicule passe C04 sur un montage dont le schéma et la mesure
