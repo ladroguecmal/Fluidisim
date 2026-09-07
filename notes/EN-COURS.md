@@ -59,34 +59,23 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S65
-État             : terminée
+Session          : S66
+État             : en cours
 Agent            : Codex (git et cargo disponibles)
-Objectif         : Brancher la graine sur les phases (S64-1), conserver la reproductibilité.
+Objectif         : Diagnostiquer le nouvel échec d’homogénéité (S65-1).
 ```
 
 ### Plan
 
-- [x] **P1** — état réel, lectures de reprise, jeton et plan seul.
-- [x] **P2** — fonction entière indexée par graine/composante, raccord scénario ; tests de reproductibilité et sensibilité.
-- [x] **P3** — mesurer les déplacements nominaux et plusieurs graines ; consigner puis committer les nouveaux hashs avant leur vérification.
-- [x] **P4** — vérifier tests et scénarios sur références committées ; documenter portée statistique et limites.
-- [x] **P5** — rituel : journal, actions, index/décomptes, corrections datées, passation et jeton libre.
+- [x] **P1** — état réel, passation, jeton et plan seul.
+- [>] **P2** — diagnostic à phases spatiales et sommation f64 sur les mêmes composantes ; fenêtres 144/576/1536 m, six graines, translation 3000 m.
+- [ ] **P3** — confronter les mesures, ajouter un témoin de causalité et documenter la portée ; aucun seuil modifié.
+- [ ] **P4** — rituel : journal, actions, angles/leçons si établis, index, corrections datées et jeton libre.
 
 ### Notes de reprise
 
-Départ master 6a128e7, copie reprise-projet-29ef50 au même commit et propre. S57–S64 réalisées
-par Claude Code : C22 clos, A103 close. Suite prioritaire S64-1 puis S64-3, puis S64-2 par ADR.
-S63-1 (couche dispersive) reste ouverte. Aucun seuil de Hs resserré ici.
-Les références H1 devront changer puisque les phases changent ; inscription dans un commit
-précédant le check qui les juge. Pas de mode compatible caché pour une graine particulière.
-La copie 29ef50 sera avancée vers master à chaque étape pour conserver une passation commune.
-
-P2 : SeaState.graine raccordée au scénario ; SplitMix64 indexé, 32 bits hauts vers PhaseQ32.
-Vecteurs graine zéro et accès direct, six graines distinctes répétées, témoin mer plate.
-Suite initiale (avant test intégration ajouté) verte ; test intégration ciblé vert ; release
-compilée. Diagnostic ignoré ajouté pour six graines x 32/256 composantes, à lancer en P3.
-
-P3 : diagnostic six graines terminé (111,12 s), 32 et 256 composantes. Hs nominal 1,216660011,
-écart +1,38833 %. Nouvel échec homogénéité : ratio 1,397507, tolérance 15 % conservée.
-Hashs nouveaux C02 0x9babd7e12935c263, C18 0xd57d81f47d9f8611 ; inscription avant check.
+Départ master 25d3a9e propre ; copie 29ef50 identique et propre. REPRISE et socle lus dans
+cette conversation, dernière entrée S65 relue. Ordre prévu S65-1 puis S64-3 puis S64-2.
+La fenêtre homogénéité vaut 48*3=144 m, distincte du Hs à 3072 m. À 3000 m, la fenêtre
+1536 m reste dans le rayon 4096 m ; celle de 3072 m dépasserait ce rayon. Ne pas la copier.
+S63-1 reste le blocage B2. Tolérance 15 % conservée ; aucun choix de graine pour rendre vert.

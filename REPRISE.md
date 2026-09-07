@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-08 01:01 +02:00
+JETON            : occupé
+Battement        : 2026-09-08 01:02 +02:00
 Agent            : Codex (git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S66
 Dernière session : S65 — 2026-09-08 — graines effectives
 Session suivante : S66 — S65-1, diagnostic homogeneite
 
