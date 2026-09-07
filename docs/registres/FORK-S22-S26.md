@@ -54,9 +54,11 @@ Les sessions de la lignée B sont donc **préfixées**, pas renumérotées.
 | ADR-033 | B-S25 | Le dernier cas rouge était rouge à cause de sa mesure | **ADR-041** |
 | ADR-034 | B-S26 | L'éponge mesurée, et la borne de λ_cut rouverte | **ADR-042** |
 
-Les ADR-030 à ADR-034 **de cette lignée** gardent leurs numéros et leurs sujets, qui sont autres :
+| ADR-035 | B-S27 | L'éponge en eau dispersive, et la rétractation d'ADR-034 | **ADR-046** *(S39)* |
+
+Les ADR-030 à ADR-035 **de cette lignée** gardent leurs numéros et leurs sujets, qui sont autres :
 l'équilibrage comme critère d'élimination, le front de mouillage, C08 non exécutable, les deux
-définitions de λ_cut, la dissipation comme filtre passe-bas.
+définitions de λ_cut, la dissipation comme filtre passe-bas, et le nombre de Courant.
 
 > **Toute citation de « ADR-03x » écrite avant le 2026-09-06 est ambiguë.** Elle désigne l'un ou
 > l'autre selon la lignée de son auteur. Les renvois internes aux cinq documents importés sont
@@ -75,6 +77,11 @@ définitions de λ_cut, la dissipation comme filtre passe-bas.
 | L74 | **L125** | | L79 | **L130** | | L84 | **L135** |
 | L75 | **L126** | | L80 | **L131** | | L85 | **L136** |
 
+### 3.2 bis Leçons — trois collisions de plus *(B-S27, reportées en S39)*
+
+`L86` à `L88` de la lignée B deviennent **`L150` à `L152`**. Ce ne sont **pas** les mêmes que
+`L86`–`L88` d'ici, qui datent de S07-S08.
+
 ### 3.3 Angles morts — douze collisions
 
 `A105` à `A116` de la lignée B deviennent **`A149` à `A160`**, dans l'ordre, sévérités conservées :
@@ -90,9 +97,12 @@ définitions de λ_cut, la dissipation comme filtre passe-bas.
 
 `A104` est **commun aux deux lignées** : il est antérieur au fork. Ne pas le renuméroter.
 
+**Trois collisions de plus, de B-S27** *(reportées en S39)* : `A117` et `A118` de la lignée B
+deviennent **`A166`** et **`A167`**, tous deux de **sévérité 1**.
+
 ### 3.4 Sessions
 
-`S22` à `S26` de la lignée B deviennent **`B-S22`** à **`B-S26`**. Les sessions S22 à S26 sans
+`S22` à `S27` de la lignée B deviennent **`B-S22`** à **`B-S27`**. Les sessions S22 à S26 sans
 préfixe restent celles de cette lignée. Le journal reçoit les entrées de B sous leur préfixe, à
 leur date réelle, et non à la suite de S34.
 
@@ -184,3 +194,45 @@ Dans l'ordre, une session par ligne :
 3. **Exercer l'oracle** : exécuter les cas communs sur les deux solveurs et comparer. C'est la
    session qui rend son sens à tout ce qui précède, et **son résultat n'est pas prévisible**.
 4. **Le journal de la lignée B** — cinq entrées à reporter sous préfixe, à leur date réelle.
+
+## 9. Troisième épisode — B-S27, constaté le 2026-09-07 en S39
+
+**Le fork a repris.** Après la réconciliation de S35, `master` et `claude/s22-suite` ont été amenées
+sur la lignée d'accueil et les worktrees morts supprimés — mais la branche `reprise-projet-5134cd`
+avait été **conservée délibérément**, parce qu'elle portait le seul historique de la lignée B.
+
+Un worktree neuf a été ouvert dessus, et une session y a travaillé :
+
+| | dernière session | commit | horodatage |
+|---|---|---|---|
+| lignée d'accueil | **S38** | `9b5faab` | 2026-09-07 **00h37** |
+| lignée B | **B-S27** | `37b654e` | 2026-09-07 **01h23** |
+
+Huit commits, un ADR, deux fichiers de code, trois leçons, deux angles morts de sévérité 1.
+
+### 9.1 Ce que le troisième épisode apprend, et que les deux premiers n'avaient pas dit
+
+Les deux premiers forks venaient d'une **ignorance** : personne ne savait que la branche voisine
+existait. Celui-ci vient d'une **conservation délibérée** — la branche a été gardée exprès, pour
+une bonne raison, et rien n'a distingué *garder un historique* de *garder un point de départ*.
+
+> **Une branche conservée pour son historique est un point de départ pour qui l'ouvre.** Aucune
+> propriété de git ne sépare les deux ; seul un marqueur dans le contenu peut le faire, et il doit
+> être lisible **avant** que le travail commence — c'est-à-dire dans le jeton et dans l'amorce.
+
+### 9.2 Ce qui a fonctionné, pour la troisième fois
+
+`git worktree list` et `git branch -a`, exécutées avant de regarder le jeton. Le fork a été vu au
+**premier geste**, chaque fois. C'est le seul dispositif du dépôt qui ait tenu trois fois de suite.
+
+### 9.3 Ce qui n'a pas fonctionné
+
+**Le correctif de la procédure d'amorce, écrit en S35 dans `CLAUDE.md` — celui de la lignée
+d'accueil uniquement.** La lignée B ne l'a jamais reçu. C'est **L137** mot pour mot, une session
+après l'avoir écrite : *un correctif de procédure écrit dans une seule branche ne protège que cette
+branche.* Le remède au fork est sujet au fork, et le savoir ne suffit pas à s'en protéger.
+
+L'action **S35-7** disait exactement quoi faire — *répliquer ce registre dans toutes les branches
+vivantes le jour où l'une d'elles est reprise* — et elle était portée par l'utilisateur, donc par
+personne au moment où il fallait agir. **Une action dont le porteur n'est pas la session suivante
+n'a pas de porteur.**

@@ -103,8 +103,8 @@ donnait 1,5 pour mille.
 | `A117`–`A118` | deux angles morts antérieurs | **A166**–**A167** |
 | `S27` | ma session S27 n'existe pas | **B-S27** |
 
-- [>] **P1** — plan, jeton.
-- [ ] **P2** — étendre la carte de `FORK-S22-S26` à B-S27, et **dater le troisième épisode**.
+- [x] **P1** — plan, jeton.
+- [x] **P2** — étendre la carte de `FORK-S22-S26` à B-S27, et **dater le troisième épisode**.
 - [ ] **P3** — import d'`ADR-035` de B sous **ADR-046**, renvois renumérotés, en-tête de provenance.
 - [ ] **P4** — leçons **L150–L152**, angles morts **A166–A167** *(deux de sévérité 1)*.
 - [ ] **P5** — **ce que la rétractation déplace chez moi** : note corrective datée sur `ADR-042`,
