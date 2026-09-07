@@ -59,82 +59,83 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S39
-État             : terminée
+Session          : S40
+État             : en cours
 Battement        : 2026-09-07
-Objectif         : Réconcilier B-S27 — et surtout : mon corpus affirme quelque chose qui a été mesuré faux
+Objectif         : Trancher le seuil de sec — et d'abord établir de quoi il décide
 ```
 
 ### Plan
 
-**Le fork a repris.** Une session a travaillé sur `claude/reprise-projet-5134cd` **après** S38 : son
-dernier commit est à **01h23**, le mien à **00h37**. C'est le troisième épisode du même mécanisme, et
-il était prévu — l'action **S35-7** le nommait, et elle n'appartenait pas à une session.
+Action **S37-1**, angle mort **A163** *(sévérité 1)*, **reportée quatre fois**. Deux valeurs
+coexistent : `H_SEC = 10⁻⁶ m` dans `delta.rs`, dont `ADR-031` §4 donne la provenance, et `10⁻¹⁰` en
+dur dans `shallow.rs`, sans justification. Quatre ordres de grandeur.
 
-Huit commits, un ADR, deux fichiers de code, trois leçons, **deux angles morts de sévérité 1**. C'est
-petit : la fusion de S35 en portait trente-cinq.
+> **Mais le corpus contient déjà deux mesures qui semblent se contredire, et c'est là qu'est la
+> vraie question.**
+>
+> - **`ADR-031` §4** a balayé `H_SEC` sur **six décades** — `10⁻⁹` à `10⁻³` — et mesuré **0,25 point
+>   d'effet sur seize** sur la position du front, volume identique dans tous les cas. Conclusion
+>   écrite : *`H_SEC` n'est pas un paramètre physique, sa valeur est libre sur au moins six décades.*
+> - **S37** a mesuré, sur le même cas, **6,16 m/s** d'écart de vitesse entre les deux véhicules —
+>   **98 % de la vitesse du front de Ritter** — imputable à ce même seuil.
 
-> **Mais ce n'est pas la taille qui commande cette session.** B-S27 s'intitule *l'éponge en eau
-> dispersive **rétracte** ADR-034* — et ADR-034 de la lignée B, c'est **mon `ADR-042`**, importé en
-> S35. **Mon corpus porte donc une conclusion qui vient d'être mesurée fausse.**
+**Les deux sont vraies, et elles ne parlent pas de la même grandeur.** L'une mesure une **position de
+front**, robuste ; l'autre une **vitesse dans le film**, où `hu/h` sur un dixième de nanomètre rend
+n'importe quoi. La question n'est donc pas *quelle valeur choisir* — `ADR-031` a déjà répondu que la
+valeur est libre — mais **de quoi ce seuil décide réellement**.
 
-`ADR-042` §6 posait sa propre réserve n° 1 en toutes lettres : *le solveur est non dispersif ; une
-éponge d'eau profonde doit absorber une **bande** de célérités, et la règle `λ/2` protège peut-être
-exactement de cela ; c'est la première chose à mesurer.* **Elle a été mesurée, et la réponse est
-que la réserve était fondée** — `R` vaut **24 %** en milieu dispersif là où le non dispersif
-donnait 1,5 pour mille.
+*Thèse déclarée, falsifiable en une mesure :*
 
-*Thèse déclarée, en deux volets :*
+> **Aucune grandeur publiée de C04 ne bouge de plus de 1 % quand le seuil varie de `10⁻³` à
+> `10⁻¹⁰` — front, erreur `L¹`, `h(0)`, `u(0)`, volume. Seule `max|u|`, que rien ne publie, explose.**
 
-1. **La rétractation s'applique intégralement à mon corpus.** `ADR-042` D2 et D4 tombent ; D1 et D3
-   tiennent. C'est mécanique, puisque le document est le même.
-2. **Mais `ADR-043` D1 ne tombe pas avec.** Il rouvrait la borne haute de `λ_cut` **par deux voies
-   indépendantes** : l'absorbeur mesuré (ADR-042 D4) et la dissipation qui rend le masque inutile
-   (ADR-037). *La première voie tombe ; la seconde porte sur un autre objet et n'est pas touchée.*
-   **Si ce volet est faux, c'est la distinction absorbeur/masque d'`ADR-043` §5 qui était mal
-   posée**, et il faudrait le dire.
+**Si la thèse tient, la décision n'est pas de choisir un nombre** : c'est de dire que la vitesse dans
+le film n'est pas une grandeur publiable, et d'aligner les deux valeurs pour une raison de
+**comparabilité** et non de physique. **Si elle est fausse**, une grandeur du corpus dépend d'une
+constante posée au jugé d'un côté, et il faut vraiment trancher.
 
-**Nouvelles collisions d'identifiants**, la carte de `FORK-S22-S26` est à étendre :
+### Trois objets portent le même nom, et c'est à clarifier avant tout
 
-| identifiant côté B | ce qu'il désigne ici | devient |
-|---|---|---|
-| `ADR-035` | le nombre de Courant *(S25)* | **ADR-046** |
-| `L86`–`L88` | trois leçons de S07-S08 | **L150**–**L152** |
-| `A117`–`A118` | deux angles morts antérieurs | **A166**–**A167** |
-| `S27` | ma session S27 n'existe pas | **B-S27** |
+C'est **L148** — *un seuil coupe ce qu'il nomme, jamais ce qu'on croit qu'il nomme* — et la
+confusion est déjà dans le corpus :
 
-- [x] **P1** — plan, jeton.
-- [x] **P2** — étendre la carte de `FORK-S22-S26` à B-S27, et **dater le troisième épisode**.
-- [x] **P3** — import d'`ADR-035` de B sous **ADR-046**, renvois renumérotés, en-tête de provenance.
-- [x] **P4** — leçons **L150–L152**, angles morts **A166–A167** *(deux de sévérité 1)*.
-- [x] **P5** — **ce que la rétractation déplace chez moi** : note corrective datée sur `ADR-042`,
-      vérification de `ADR-043` D1, et `DOSSIER-B2` §3.1 bis qui s'appuyait dessus.
-- [x] **P6** — le code : `dispersif.rs` et `eponge.rs`. **Attention** : `eponge.rs` factorise le
-      profil qui vit dans `shallow.rs`, que S38 a instrumenté. Compiler, puis les 77 tests.
-- [x] **P7** — **le procédé** : trois épisodes du même fork, et le remède écrit à chaque fois dans
-      une seule branche. Écrire ce qui aurait marché, **et le répliquer des deux côtés le jour même**.
-- [x] **P8a** — rituel : journal, leçons L153-L155, actions S39-1 à S39-4.
-- [x] **P8b** — rituel : index, décomptes, jeton libéré.
+| | ce que c'est | où | valeur |
+|---|---|---|---|
+| **seuil du solveur** | sous lui, `u = 0` — garde-fou de division | `delta.rs`, `shallow.rs` | `10⁻⁶` / `10⁻¹⁰` |
+| **seuil de mesure du front** | ce qui compte comme « mouillé » pour situer le front | `physics.rs`, `physics_shallow.rs` | `10⁻²·h₀` *(révisé en B-S25)* |
+| **seuil de flux** | *n'existe pas* — la diffusion dépose sous les deux autres | — | **A165** |
+
+**A163 porte sur le premier.** `ADR-041` a révisé le deuxième. Le troisième est un manque, pas une
+valeur.
+
+- [>] **P1** — plan, jeton.
+- [ ] **P2** — rendre le seuil de `shallow.rs` **paramétrable**. Il est en dur à deux endroits ;
+      sans cela, rien ne se balaie de ce côté et l'oracle ne sert pas.
+- [ ] **P3** — **rejouer le balayage d'`ADR-031` §4** dans cet arbre, étendu à `10⁻¹⁰`, et sur les
+      **deux** véhicules. Un chiffre publié se rejoue avant de servir (**L143**).
+- [ ] **P4** — mesurer ce que le seuil déplace sur **chaque grandeur publiée** de C04.
+- [ ] **P5** — et sur celles que rien ne publie : `max|u|`, la longueur du film, le compte de
+      cellules litigieuses. C'est là que la sensibilité vit.
+- [ ] **P6** — **la décision**, en ADR. Elle porte sur ce que le seuil gouverne, pas sur un nombre.
+- [ ] **P7** — répercussions : `ADR-031` §4 reçoit ce que S40 ajoute, `A163` est tranché ou
+      requalifié, `oracle.rs` cesse de porter deux constantes en dur.
+- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
-**Ce que l'amorce a montré, et qui n'était dans aucun jeton.**
+**Ce que les sessions précédentes laissent et qui commande celle-ci.**
 
-- Un worktree **nouveau**, `friendly-bhabha-6da427`, sur `claude/reprise-projet-5134cd`. Les deux
-  jetons disent `libre`, chacun dans son univers — exactement le mécanisme décrit dans
-  `FORK-S22-S26` §1. **Les deux commandes d'amorce ont encore fonctionné** : le fork a été vu au
-  premier geste, pour la troisième fois.
-- **B-S27 a du contenu solide** : un milieu à dispersion exacte vérifié avant usage (écart de
-  0,001 % sur trois modes), et un cas de garde qui a **refusé deux montages** avant d'en accepter un.
-  Ce n'est pas un travail à recevoir avec réserve.
-- **Deux divergences de spécification à signaler, pas à trancher** : côté B, le budget de la
-  batterie `physics` est de **120 s** et il est dépassé (167 s, A114) ; ici, `SPEC-003 §1` dit
-  **60 s** et le mode tourne en 33,7 s. Les deux lignées ont fait diverger la même contrainte.
-- **`eponge.rs` est un refactor**, pas seulement un ajout : il extrait de `shallow.rs` le profil
-  d'éponge pour le partager avec `dispersif.rs`. C'est le seul point du code où un conflit réel est
-  possible avec l'instrumentation de S38.
-- **État de départ** : `cargo test` = **77 tests** (32 cœur + 45 harnais, un `ignore`), `check` = 0
-  échec, hashs `0x3e2c06a7b00e73e3` et `0x1a8b0629a9f51b6e`. Mode `physics` : 33,7 s sur 60 s.
-- **Ce que cette session ne fait pas** : trancher le seuil de sec (**S37-1**, **A163**), qui était la
-  session recommandée. Elle est reportée d'un cran, pour une raison qui se dit en une ligne :
-  *un corpus qui affirme faux est plus urgent qu'un corpus qui laisse une question ouverte.*
+- **`ADR-031` §4 a déjà fait la moitié du travail**, et sa conclusion est à relire avant de
+  mesurer : *une constante dont l'effet a été mesuré a une provenance, même quand l'effet est nul.*
+  Le balayage s'arrêtait à `10⁻⁹` ; `shallow.rs` est à `10⁻¹⁰`, juste en dessous.
+- **`delta.rs` a `avec_h_sec`** — le seuil y est déjà paramétrable. **`shallow.rs` ne l'a pas** :
+  `1e-10` est écrit dans `vitesse()` et dans le flux HLL, plus six autres endroits (`> 1e-10`).
+- **`oracle.rs` porte `SEC_DELTA` et `SEC_SHALLOW` en dur**, recopiées des solveurs en S37. Deux
+  copies d'une constante qui doit devenir paramètre : à nettoyer en P7, sinon elles se périment en
+  silence (**L141**).
+- **Ce que cette session ne doit pas faire** : aligner les deux valeurs « au passage ». C'est
+  précisément ce que `ADR-044` §7 interdit — *une session qui les alignerait au passage changerait
+  une décision par une retouche de constante.* La décision se prend en ADR, après mesure.
+- **État de départ** : `cargo test` = **84 tests** (38 cœur + 46 harnais, deux `ignore`), `check` = 0
+  échec, hashs `0x3e2c06a7b00e73e3` et `0x1a8b0629a9f51b6e`. Mode `physics` : 33,7 s sur 60.

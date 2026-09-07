@@ -12,9 +12,9 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-07
-Session en cours : —
+Session en cours : S40 — trancher le seuil de sec : de quoi décide-t-il ?
 Dernière session : S39 — 2026-09-07 — troisième fork réconcilié ; ADR-042 rétracté, et ADR-043 D1 avait une voie de trop
 Session suivante : S40 — **trancher le seuil de sec** (S37-1, A163, sév. 1) *(recommandé, reporté quatre fois)*
 ```
