@@ -1364,7 +1364,7 @@ pub fn c03_seiche(host: &mut water_core::HostServices, mode_propre: bool) -> Vec
                 "déficit de demi-vie{suffixe} — mesurée {:.2} périodes pour 15 exigées",
                 s.demi_vie_periodes
             ),
-            mesure: (15.0 - s.demi_vie_periodes).max(0.0) / 15.0,
+            mesure: deficit(15.0, s.demi_vie_periodes, 15.0),
             reference: 0.0,
             tolerance_rel: 0.0,
             source: "CAS-CANONIQUES §C03 — demi-vie d'amplitude > 15 périodes",
@@ -1372,12 +1372,36 @@ pub fn c03_seiche(host: &mut water_core::HostServices, mode_propre: bool) -> Vec
         Cas {
             id,
             grandeur: format!("déficit de R²{suffixe} — ajustement à {:.4}", s.r2),
-            mesure: (0.9 - s.r2).max(0.0),
+            mesure: deficit(0.9, s.r2, 1.0),
             reference: 0.0,
             tolerance_rel: 0.0,
             source: "sous R² = 0,9, la décroissance n'est pas exponentielle et la demi-vie n'a pas ce sens",
         },
     ]
+}
+
+/// **Un déficit qui ne mange pas les refus** — S44, angles morts **A170** et **A171**.
+///
+/// Un minorant *« la grandeur doit dépasser `seuil` »* s'exprime mal avec une tolérance relative :
+/// avec `référence = 15` et 100 % de tolérance, une demi-vie de 0,1 période « passerait ». Le
+/// **déficit** — `max(0, seuil − mesure)` — est la bonne forme : nul dès que le minorant est tenu,
+/// croissant avec ce qui manque.
+///
+/// **Mais `f64::max` propage le non-`NaN`.** `(15 − NaN).max(0)` vaut `0`, c'est-à-dire le déficit
+/// nul — **le meilleur score possible**, rendu à une mesure qui n'a rien mesuré. C'est le même
+/// mécanisme qu'en S42 (`NaN.min(10⁶)`) et en S43 (`else { 1.0 }`), sur une troisième forme.
+///
+/// Les deux cas que le `max` confondait sont ici **séparés** :
+///
+/// | entrée | ce que ça veut dire | rendu |
+/// |---|---|---|
+/// | `+∞` | le schéma n'amortit pas | **0** — le minorant est tenu, et c'est juste |
+/// | `NaN` | il n'y avait **rien à mesurer** | **`NaN`** — qui échoue toute comparaison |
+pub fn deficit(seuil: f64, mesure: f64, echelle: f64) -> f64 {
+    if mesure.is_nan() {
+        return f64::NAN;
+    }
+    (seuil - mesure).max(0.0) / echelle
 }
 
 /// Demi-vie d'amplitude en fonction de la **résolution par longueur d'onde** — ADR-033.

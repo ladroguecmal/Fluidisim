@@ -1009,6 +1009,60 @@ exactement nul, pas {:.3e}",
         }
     }
 
+    /// **P2–P3 — les deux assertions en « déficit » avalent-elles un refus ?**
+    ///
+    /// `physics.rs` exprime les deux minorants de C03 sous forme de **déficit** — une formulation
+    /// juste, et bien meilleure qu'une tolérance relative sur un minorant :
+    ///
+    /// ```text
+    /// déficit de demi-vie = max(0, 15 − mesure) / 15      référence 0, tolérance 0
+    /// déficit de R²       = max(0, 0,9 − mesure)          référence 0, tolérance 0
+    /// ```
+    ///
+    /// Le `max(0, …)` est ce qui rend le déficit nul dès que le minorant est tenu. **Et c'est aussi
+    /// ce qui avale les `NaN`** : `f64::max` propage le non-`NaN`, donc `(15 − NaN).max(0)` vaut
+    /// `0` — le **déficit nul**, c'est-à-dire le meilleur score possible face à une tolérance de
+    /// zéro.
+    ///
+    /// Ce test sépare les deux cas que le `max` confond :
+    ///
+    /// | entrée | ce que ça veut dire | attendu |
+    /// |---|---|---|
+    /// | `+∞` | le schéma **n'amortit pas** | déficit nul — **le cas passe**, et c'est juste |
+    /// | `NaN` | il n'y avait **rien à mesurer** | le cas doit **échouer** |
+    #[test]
+    fn les_deux_deficits_de_c03_ne_doivent_pas_avaler_un_refus() {
+        // Les deux expressions telles que `physics.rs` les calcule désormais — par `deficit()`,
+        // qui sépare le minorant tenu du refus.
+        use crate::physics::deficit;
+        let deficit_demi_vie = |x: f64| deficit(15.0, x, 15.0);
+        let deficit_r2 = |x: f64| deficit(0.9, x, 1.0);
+        // `passe()` de `Cas` avec référence 0 et tolérance 0 : la mesure elle-même doit valoir 0.
+        let passe = |m: f64| m.abs() <= 0.0;
+
+        for (nom, f) in [
+            ("déficit de demi-vie", &deficit_demi_vie as &dyn Fn(f64) -> f64),
+            ("déficit de R²", &deficit_r2),
+        ] {
+            let sur_inf = f(f64::INFINITY);
+            let sur_nan = f(f64::NAN);
+            println!(
+                "{nom:<22} — sur +∞ : {sur_inf:>6.3} ({}) | sur NaN : {sur_nan:>6.3} ({})",
+                if passe(sur_inf) { "passe" } else { "échoue" },
+                if passe(sur_nan) { "PASSE" } else { "échoue" }
+            );
+            assert!(
+                passe(sur_inf),
+                "{nom} : une valeur infinie satisfait le minorant, le cas doit passer"
+            );
+            assert!(
+                !passe(sur_nan),
+                "{nom} : un refus ne doit pas devenir un déficit nul — c'est le meilleur score \
+possible, rendu à une mesure qui n'a rien mesuré"
+            );
+        }
+    }
+
     /// **A157 — un seuil reproductible peut être dénué de sens, et deux seuils incomparables
     /// peuvent être mis côte à côte.**
     ///

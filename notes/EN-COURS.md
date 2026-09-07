@@ -101,12 +101,12 @@ résultat aussi, et le premier depuis trois sessions qui dirait que ce motif est
 il faudra le **montrer**, pas le supposer : c'est ce que les deux sessions précédentes n'ont pas pu
 faire, faute d'inventaire.
 
-- [>] **P1** — plan, jeton.
-- [ ] **P2** — **l'inventaire complet**, un tableau : chaque repli, ce qu'il rend, et **ce que
+- [x] **P1** — plan, jeton.
+- [x] **P2** — **l'inventaire complet**, un tableau : chaque repli, ce qu'il rend, et **ce que
       devient la valeur** — assertion publiée, diagnostic imprimé, ou calcul interne.
-- [ ] **P3** — classer : *sain* · *inoffensif ici* · **fautif**. Un repli n'est fautif que s'il est
+- [x] **P3** — classer : *sain* · *inoffensif ici* · **fautif**. Un repli n'est fautif que s'il est
       **sur le chemin d'une grandeur lue**, et le distinguer demande de suivre chaque valeur.
-- [ ] **P4** — corriger les fautifs, **avec leur témoin** (**L119**), et vérifier qu'aucun chiffre
+- [x] **P4** — corriger les fautifs, **avec leur témoin** (**L119**), et vérifier qu'aucun chiffre
       publié ne bouge.
 - [ ] **P5** — le registre `AUDIT-REPLIS-S44`, et la règle qui évite le prochain.
 - [ ] **P6** — rituel de fin (`REPRISE.md` §6).
