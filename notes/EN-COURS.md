@@ -59,73 +59,73 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S43
-État             : terminée
+Session          : S44
+État             : en cours
 Battement        : 2026-09-07
-Objectif         : L'essai à zéro de C08 — un solveur qui ne converge pas reçoit l'ordre 1
+Agent            : Claude Code
+Objectif         : Inventorier les valeurs de repli — que devient un refus qui les traverse ?
 ```
 
 ### Plan
 
-Action **S42-1**. C08 mesure un **ordre de convergence** par Richardson, `p = log₂(|e₀−e₁|/|e₁−e₂|)`.
-S42 laissait la question ouverte : *que veut dire « résultat attendu zéro » pour une mesure d'ordre ?*
+Action **S43-1**, qui reprend **S42-2**. **Deux sessions de suite ont trouvé par hasard un repli de
+sévérité 1**, chacune en cherchant autre chose :
 
-**La réponse est que l'essai à zéro de C08 ne porte pas sur le solveur mais sur l'estimateur.** Un
-montage sans objet à mesurer, ici, c'est une suite d'erreurs qui **ne converge pas** : trois grilles,
-trois erreurs identiques. Il n'y a pas d'ordre. L'estimateur doit le dire.
+| | repli | ce qu'il rendait | pourquoi c'était grave |
+|---|---|---|---|
+| **S42** | `NaN.min(10⁶)` | `10⁶` périodes | le **meilleur score** face à un minorant de 15 |
+| **S43** | `else { 1.0 }` | l'ordre `1,0` | **l'ordre nominal du schéma**, dans les bornes de G10 |
 
-**L'inspection préalable a trouvé le défaut avant d'écrire une ligne**, et il est du même genre que
-celui de S42 — c'est l'action **S42-2**, arrivée un jour plus tôt que prévu.
+**La troisième ne doit pas être trouvée par hasard.** La recherche est mécanique et son critère
+tient en une question : *que devient un refus qui passe là-dedans ?*
 
-**Le harnais porte TROIS estimateurs d'ordre**, et ils ne refusent pas pareil :
+**Le recensement préalable donne l'ordre de grandeur** — 25 `unwrap_or` et 24 `min`/`max` dans le
+harnais :
 
-| | où | ce qu'il fait quand `d₁ = 0` |
+| repli | nombre | première lecture |
 |---|---|---|
-| `Convergence::ordre()` | `physics.rs` | **`Ordre::Indetermine`** — un refus typé, avec plancher |
-| `ordre_grossier_estime` | `physics.rs` | **rend `1.0`** |
-| `c08_convergence` | `physics_shallow.rs` | **`log₂(0/0)`**, aucun garde |
+| `unwrap_or(f64::NAN)` et variantes | **13** | le refus **survit** — a priori sains |
+| **`unwrap_or(0.0)`** | **8** | **suspects** |
+| `unwrap_or(4.0)`, `unwrap_or(64)`, `unwrap_or(0)`, `unwrap_or(false)` | 4 | à regarder un par un |
 
-> **Le repli à `1.0` est le pire des trois, et pas parce qu'il est faux.** `d₁ = 0` veut dire que
-> deux grilles successives donnent **la même erreur** — le solveur ne converge pas. L'estimateur
-> répond alors « ordre 1 », **c'est-à-dire exactement l'ordre nominal du schéma**, la valeur qu'on
-> espère lire. Et le garde-fou **G10**, qui signale un ordre hors de `[0,3 ; 3,0]`, ne bronche pas :
-> `1,0` est dedans. **Le repli est silencieux par construction.**
+> **Les huit `unwrap_or(0.0)` sont le cœur de la session.** Pour un **écart**, une **erreur**, une
+> **dérive** ou une **vitesse parasite**, **zéro est la meilleure valeur possible** — pas une valeur
+> neutre. C'est **A171** porté à son extrême : un repli qui ne vaut pas seulement le nominal, mais
+> le **parfait**.
 
-*Thèse déclarée : sur une suite d'erreurs constante — aucune convergence — `ordre_grossier_estime`
-rend `1,0` sans aucun signalement, et le filtre d'oracle qui en dépend s'applique comme si de rien
-n'était.*
+*Thèse déclarée : au moins un `unwrap_or(0.0)` se trouve sur le chemin d'une grandeur publiée, et y
+transforme un refus en résultat parfait.*
 
-**Et une observation sur l'audit de S34**, qui a examiné G10 et corrigé son bornage : le repli est
-**sur la ligne juste au-dessus du clamp**. L'audit a regardé le `clamp` et pas le `if`. Si la thèse
-tient, c'est une leçon sur ce que voit un audit de garde-fous.
+**Si elle est fausse** — si les huit sont sur des chemins de diagnostic ou d'affichage — c'est un
+résultat aussi, et le premier depuis trois sessions qui dirait que ce motif est sous contrôle. Mais
+il faudra le **montrer**, pas le supposer : c'est ce que les deux sessions précédentes n'ont pas pu
+faire, faute d'inventaire.
 
-- [x] **P1** — plan, jeton.
-- [x] **P2** — **l'essai à zéro de l'estimateur**, sur des suites synthétiques : `e_k = C·dx_k^p`
-      doit rendre `p` **exactement** ; une suite **constante** doit être refusée. Constater d'abord.
-- [x] **P3** — remplacer les replis par un refus, **avec leur témoin** (**L119**) — et vérifier
-      que le signalement se déclenche, ce que `1,0` empêchait.
-- [x] **P4** — **les trois estimateurs refusent-ils pareil ?** Le corpus contient déjà la bonne
-      solution, `Ordre::Indetermine` ; les deux autres l'ignorent (**S42-3**, **L162**).
-- [x] **P5** — vérifier qu'**aucun chiffre publié ne bouge** : `p = 0,9997` (S36), les ordres du
-      tableau de `ADR-040` §3, et les deux hashs.
-- [x] **P6** — répercussions : `A170` étendu ou confirmé, `CAS-CANONIQUES` C08, et ce que S34
-      n'avait pas vu.
-- [x] **P7a** — rituel : journal, leçons L163-L164, actions S43-1 à S43-3.
-- [x] **P7b** — rituel : index, décomptes, jeton libéré.
+- [>] **P1** — plan, jeton.
+- [ ] **P2** — **l'inventaire complet**, un tableau : chaque repli, ce qu'il rend, et **ce que
+      devient la valeur** — assertion publiée, diagnostic imprimé, ou calcul interne.
+- [ ] **P3** — classer : *sain* · *inoffensif ici* · **fautif**. Un repli n'est fautif que s'il est
+      **sur le chemin d'une grandeur lue**, et le distinguer demande de suivre chaque valeur.
+- [ ] **P4** — corriger les fautifs, **avec leur témoin** (**L119**), et vérifier qu'aucun chiffre
+      publié ne bouge.
+- [ ] **P5** — le registre `AUDIT-REPLIS-S44`, et la règle qui évite le prochain.
+- [ ] **P6** — rituel de fin (`REPRISE.md` §6).
 
 ### Notes de reprise
 
 **Ce qui commande cette session.**
 
-- **`ordre_grossier_estime` est déjà une fonction pure**, extraite en S34 pour être testable, et
-  elle **a déjà deux tests** (`pre_asymptotique`, `saine`). Aucun ne lui donne une suite qui ne
-  converge pas. *Un garde-fou testé sur ce qu'on a pensé à lui donner n'est pas un garde-fou testé.*
-- **Elle a deux replis, pas un** : `if erreurs.len() < 3 { return (1.0, 1.0) }` en plus du
-  `else { 1.0 }`. Les deux rendent l'ordre nominal.
-- **Le chemin du défaut** : `p_brut` → `p_grossier` → `e_oracle = e_max / ratio^p` → filtre
-  `retain(|e| e >= 30·e_oracle)`. Un `p` faux déplace le seuil de filtrage des grilles.
-- **`Ordre::Indetermine` existe et fonctionne** — c'est le modèle à suivre plutôt qu'à réinventer.
-- **Ne pas casser** : `p = 0,9997` (C08 sur `shallow.rs`, S36), et le tableau d'ordres d'`ADR-040`
-  §3 — 0,654 / 0,621 / 1,000 pour les trois schémas.
-- **État de départ** : `cargo test` = **93 tests** (38 cœur + 55 harnais, deux `ignore`), `check` = 0
+- **Le critère n'est pas « le repli est-il correct »** mais *que devient un refus qui le traverse*.
+  Un `unwrap_or(0.0)` sur une somme vide est juste ; le même sur une mesure qui a refusé est un
+  mensonge. **Seul le chemin de la valeur les distingue.**
+- **Les 13 `unwrap_or(NaN)` ne sont pas automatiquement sains** : `NaN` survit aux comparaisons, mais
+  **pas à `min`/`max`** — c'est exactement ce qui a mordu en S42. Il faut vérifier ce qui suit.
+- **Ne pas corriger un repli sans savoir ce qu'il portait.** Retirer un filet sans savoir ce qu'il
+  retient est le geste qui transforme un défaut visible en défaut invisible (note de S38).
+- **Chiffres à ne pas casser** : `C08-p = 0,999745`, les demi-vies 6,01 / 44,36 / 43,12 / 161,14, le
+  front à 0,7365 %, les ordres 0,654 / 0,621 / 1,000, et les deux hashs.
+- **État de départ** : `cargo test` = **95 tests** (38 cœur + 57 harnais, deux `ignore`), `check` = 0
   échec, hashs `0x3e2c06a7b00e73e3` et `0x1a8b0629a9f51b6e`.
+- **Hors session, juste avant** : l'amorce a été déplacée dans `AGENTS.md` et le jeton a reçu une
+  ligne `Agent`, sur demande de l'utilisateur — voir `FORK-S22-S26` §9.5. Cette session est la
+  première à renseigner cette ligne.

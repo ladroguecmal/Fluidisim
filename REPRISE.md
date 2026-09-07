@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-07
-Agent            : —
-Session en cours : —
+Agent            : Claude Code
+Session en cours : S44 — inventaire des valeurs de repli
 Dernière session : S43 — 2026-09-07 — un solveur qui ne converge pas recevait l'ordre 1
 Session suivante : S44 — **inventorier les valeurs de repli après mesure** (S43-1) *(recommandé)* — deux trouvées par hasard, sévérité 1 chacune
 ```
