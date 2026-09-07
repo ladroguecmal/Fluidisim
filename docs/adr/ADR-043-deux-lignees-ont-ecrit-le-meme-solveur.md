@@ -119,6 +119,24 @@ datée. **Rouverte, pas retirée** : la réserve n°1 d'ADR-042 §6 — une épo
 absorber une **bande** de célérités, et la règle `λ/2` protège peut-être exactement de cela — n'est
 levée par aucune des deux mesures, toutes deux faites en eau peu profonde non dispersive.
 
+> **Note S39 — D1 tombe, et pas seulement parce qu'une de ses voies a été rétractée.**
+>
+> La **voie 1**, `ADR-042` D4, est rétractée par [`ADR-046`](ADR-046-l-eponge-en-eau-dispersive-retracte-ADR-042.md) :
+> mesurée en milieu dispersif, la borne haute de `λ_cut` est **refermée**, et deux à quatre fois
+> **plus serrée** qu'avant. C'était prévisible — D1 le disait lui-même, *« rouverte, pas retirée »*,
+> à cause de cette réserve exactement.
+>
+> **La voie 2 était mal fondée, et ce document contenait de quoi le voir.** D1 comptait `ADR-037`
+> comme un second desserrage indépendant de la même borne. Or la borne de `DOSSIER-B2 §3.1` vient
+> de `L_s = λ_cut/2`, la largeur exigée par l'**absorbeur de bord** ; `ADR-037` retire sa raison
+> d'exister au **masque de décroissance**. **Ce sont les deux objets que le §5 ci-dessus sépare** —
+> et le §6 ne s'est pas appliqué sa propre distinction, trois paragraphes plus bas.
+>
+> Retirer au masque sa raison d'exister ne raccourcit pas la bande de bord tant que l'absorbeur en
+> demande la même largeur. **Il n'y avait qu'une voie, et elle est refermée.** Le §5 et D2 ne sont
+> pas touchés : la distinction reste juste, et cet épisode en est la meilleure démonstration —
+> *écrire une distinction ne suffit pas à s'en servir* (**A168**).
+
 **D2 — les deux fonctions sont nommées séparément dans tout écrit ultérieur** : *absorbeur de bord*
 et *masque de décroissance*. Le mot « éponge » seul est désormais insuffisant. Ce n'est pas une
 réécriture des documents existants — ils ne sont pas réécrits — mais la règle vaut pour ce qui

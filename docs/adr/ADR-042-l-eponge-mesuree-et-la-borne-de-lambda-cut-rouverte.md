@@ -5,6 +5,19 @@
 > renumérotés selon la carte de [`FORK-S22-S26`](../registres/FORK-S22-S26.md) ; **son texte n'a
 > pas été modifié autrement**.
 
+
+> **Note S39 — D2 et D4 sont RÉTRACTÉS ; D1 et D3 tiennent.**
+>
+> La réserve n° 1 du §6 ci-dessous — *le solveur est non dispersif, et la règle `λ/2` protège
+> peut-être exactement de cela* — **a été mesurée, et elle était fondée**. En milieu à dispersion
+> exacte, `R` vaut **22,7 %** à `L_s = λ/2` et **0,144 %** à `L_s = 2λ` : la largeur est bien
+> commandée par la longueur d'onde, et la constante d'ADR-005 était deux à quatre fois trop petite.
+> La borne haute de `λ_cut` est **refermée**, et plus serrée qu'avant.
+>
+> **Ce document n'est pas réécrit** — son §6 disait exactement ce qu'il fallait mesurer, et il a
+> été lu. Voir [`ADR-046`](ADR-046-l-eponge-en-eau-dispersive-retracte-ADR-042.md), qui le rétracte
+> point par point, et le registre [`FORK-S22-S26`](../registres/FORK-S22-S26.md) §9 pour la
+> provenance.
 - **Statut** : proposée
 - **Session** : B-S26
 - **Remplace** : `ADR-005 §2` — le réglage `σ_max ≈ 4·c/L_s` et la condition `L_s ≥ λ_δ/2`

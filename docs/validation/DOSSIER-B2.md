@@ -86,11 +86,23 @@ validité tient au rapport `λ_cut/dx`.
 | 0,10 m (bateau) | 30 → 7,5 pts | 40 → 10 pts | 60 → 15 pts | 100 → 25 pts |
 | 0,05 m (impact) | 60 → 15 pts | 80 → 20 pts | 120 → 30 pts | 200 → 50 pts |
 
-### 3.1 bis — La borne haute est ROUVERTE *(B-S26, reporté en S35)*
+### 3.1 bis — La borne haute est ~~ROUVERTE~~ **REFERMÉE, et resserrée** *(B-S26, reporté en
+S35 ; **rétracté en S39**)*
 
-> *Une **seconde voie** rouvre la même borne, indépendamment : la dissipation produit déjà la
-> décroissance que l'éponge devait imposer (ADR-037), de sorte que la bande de bord perd l'une de
-> ses deux raisons d'exister. Voir [`ADR-043`](../adr/ADR-043-deux-lignees-ont-ecrit-le-meme-solveur.md) §4.*
+> **Note S39 — ce qui suit est rétracté.** La réouverture ci-dessous reposait sur une mesure faite
+> en eau **non dispersive**, et sa propre réserve n° 1 disait de ne pas s'en servir avant de mesurer
+> en dispersif. Ça a été fait : `R` vaut **22,7 %** à `L_s = λ/2` et il faut **`L_s ≥ 2λ`** pour un
+> critère à 1 %. **La borne haute de `λ_cut` est refermée, et deux à quatre fois plus serrée
+> qu'avant — l'éponge coûte plus cher, pas moins.** Voir
+> [`ADR-046`](../adr/ADR-046-l-eponge-en-eau-dispersive-retracte-ADR-042.md).
+>
+> *Le paragraphe est conservé tel quel : il dit ce qui a été cru pendant trois sessions, et
+> pourquoi.*
+
+> *~~Une **seconde voie** rouvre la même borne, indépendamment~~ — **faux, corrigé en S39** : la
+> dissipation retire sa raison d'exister au **masque de décroissance** (ADR-037), pas à
+> l'**absorbeur de bord**, d'où vient cette borne. `ADR-043` §5 pose la distinction que son §6
+> n'a pas appliquée. Il n'y avait qu'une voie.*
 
 Le §3.1 ci-dessus tient `L_s = λ_cut/2` pour une contrainte **dure**, et en tire `λ_cut ≤ 3 m`. Cette
 largeur vient d'`ADR-005 §2`. **Elle a été mesurée en B-S26, et la mesure ne trouve pas sa trace** :

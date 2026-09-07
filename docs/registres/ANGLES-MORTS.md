@@ -209,6 +209,7 @@ ce que les sources avaient omis.
 | **A165** | Un seuil de sec coupe la vitesse mais pas le flux de masse : le film derrière le front n'est jamais vide | 2 | ADR-045 §6 |
 | **A166** | Une mesure peut être juste et sans portée, et rien dans la mesure ne le dit | **1** | ADR-046 §4.1 |
 | **A167** | Un défaut de montage peut ne pas se voir dans le résultat qu'il menace | **1** | ADR-046 §3 |
+| **A168** | Écrire une distinction ne suffit pas à s'en servir : `ADR-043` §6 ignore le §5 du même document | 2 | ADR-043, note S39 |
 
 Cent huit angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -1184,6 +1185,16 @@ pendant quatre sessions.
   éponges d'une à trois mailles réfléchissent peu, et ne mesurent pourtant plus une éponge. C'est
   l'analogue, pour un terme source, de la condition CFL sur le transport ; le corpus posait la
   seconde et ignorait la première.
+
+- **A168** — **Écrire une distinction ne suffit pas à s'en servir.** `ADR-043` §5 établit que le
+  corpus appelle « éponge » trois fonctions distinctes, et met en garde : *tant qu'elles partagent
+  le mot, un résultat sur l'une se lit comme un résultat sur l'autre*. **Trois paragraphes plus
+  bas, son propre §6 compte comme un desserrage de la borne de `λ_cut` un résultat qui porte sur
+  le masque, alors que la borne vient de l'absorbeur.** L'erreur exacte contre laquelle le §5
+  mettait en garde, commise par le document qui l'écrit, dans la même session.
+  *Une distinction neuve ne devient opérante qu'après avoir été passée sur les conclusions
+  déjà écrites, y compris celles du document qui la pose.* Relevé en S39, quatre sessions plus
+  tard, et seulement parce qu'une rétractation extérieure a forcé à relire D1.
 
 ---
 
