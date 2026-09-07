@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-07 14:01 +02:00
+JETON            : libre
+Battement        : 2026-09-07 14:03 +02:00
 Agent            : Codex (git et cargo disponibles)
-Session en cours : S46
-Dernière session : S45 — 2026-09-07 — un refus peut supprimer son assertion
-Session suivante : S46 — statuts et décompte des refus C08 (S45-1)
+Session en cours : —
+Dernière session : S46 — 2026-09-07 — les refus restent dans la famille et dans le bilan
+Session suivante : S47 — portée du C08 hérité de shallow (S46-1)
 ```
 
 > **Avant de regarder le jeton, exécuter `git worktree list` et `git branch -a`.** Le jeton est un
@@ -36,7 +36,7 @@ Session suivante : S46 — statuts et décompte des refus C08 (S45-1)
 > [`docs/registres/FORK-S22-S26.md`](docs/registres/FORK-S22-S26.md). Le second fork a eu lieu parce
 > que le correctif du premier avait été écrit **dans une seule branche** (**L137**).
 
-**Une seule session travaille à la fois.** Le jeton a trois états, et non deux :
+**Une seule session travaille à la fois.** Le jeton a quatre états :
 
 | État | Signification | Ce que fait la session qui le trouve |
 |---|---|---|
@@ -79,8 +79,8 @@ une session ne peut signaler sa présence qu'en travaillant.
 ## 1. Ce qu'est ce projet
 
 Conception du **système général de gestion de l'eau** d'un jeu vidéo de très grande échelle
-(référence citée par l'équipe : Star Citizen, en plus grand). Le dépôt contient la conception, pas
-le code : aucune ligne n'a encore été écrite.
+(référence citée par l'équipe : Star Citizen, en plus grand). Le dépôt contient la conception
+et, depuis S20, le harnais et des véhicules d'essai en Rust.
 
 Point de départ historique : deux documents d'intention, conservés non modifiés dans
 `docs/sources/`. Tout le reste a été produit depuis.
@@ -120,7 +120,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 17 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 37 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 47 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -140,11 +140,16 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Quarante-cinq sessions ici, **plus cinq dans une lignée parallèle réconciliée en S35** (B-S22 à
+**S46 :** refus non finis explicites dans Convergence, aucune suppression des triplets refusés
+pour établir la stabilité. Le rapport principal compte cinq familles sans verdict, y compris
+le cas régulier p = 0,82 dont la stabilité n'est pas établie. Mesures et hashs inchangés.
+S45-1 close ; S47 recommandée : portée de la paire héritée C08-p/C08-coherence (S46-1).
+
+Quarante-six sessions ici, **plus cinq dans une lignée parallèle réconciliée en S35** (B-S22 à
 B-S27) — **47 ADR** *(dont un acté)*, six spécifications, **quatorze registres** — **et du code qui
 tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équilibrés et **tous deux
 montés sur leurs cas, confrontés l'un à l'autre et instrumentés, **plus un milieu à dispersion
-exacte** *(S39)*, **98 tests verts, deux ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
+exacte** *(S39)*, **101 tests verts, deux ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
 verdict** (C08). Quatre cas canoniques sur δ sont exécutés ici : **C01 et C03 passent**, C04 échoue,
 C08 ne conclut pas. **La lignée réconciliée en donne d'autres verdicts, et l'écart a une cause
 unique** : elle est passée à l'ordre deux, et C04 comme C08 y sont verts (`CAS-CANONIQUES`, « deux

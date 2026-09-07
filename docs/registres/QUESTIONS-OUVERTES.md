@@ -531,3 +531,12 @@ corrigés sur eta() : assertions C02 omises et maximum C10 ignorant le refus.
 **S43-3 close en S45** : essai C02 sans excitation, trois assertions en échec ; témoin
 monochromatique vert. S41-4 est donc couverte pour les quatre montages C02/C03/C06/C08,
 avec l'essai d'estimateur défini en S43 pour C08. S44-1 reste ouverte.
+
+## Actions relevées en séance — S46
+
+**S45-1 close.** Refus non finis explicites, trous conservés pour la stabilité, classification
+unique et décompte exhaustif du rapport principal. Cinq familles sans verdict, mesures inchangées.
+
+| # | Action | Origine | Porteur | État |
+|---|---|---|---|---|
+| S46-1 | Confronter la paire héritée C08-p/C08-coherence de physics_shallow au contrat C08 amendé : Ritter singulier, trois grilles, seuil absolu ; distinguer diagnostic historique et validation sans déplacer les mesures | AUDIT-REPLIS-S44 §8, ADR-032 et CAS-CANONIQUES C08 amendé S26 | session S47 recommandée | ouverte |

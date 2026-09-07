@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S46
-État             : en cours
+État             : terminée
 Agent            : Codex (git et cargo disponibles)
 Objectif         : Refus explicites et décompte exhaustif de C08 (S45-1).
 ```
@@ -70,7 +70,7 @@ Objectif         : Refus explicites et décompte exhaustif de C08 (S45-1).
 - [x] **P1** — reprise, contrôles des copies, jeton et plan seul.
 - [x] **P2** — reproduire les refus NaN/infini, borner le contrat de verdict et corriger estimation, classification et décompte avec témoins.
 - [x] **P3** — suite complète, check et comparaison physics ; documenter la portée et les limites.
-- [ ] **P4** — rituel : journal, angles morts, leçons, actions, index/décomptes et passation, jeton libre.
+- [x] **P4** — rituel : journal, angles morts, leçons, actions, index/décomptes et passation, jeton libre.
 
 ### Notes de reprise
 
@@ -85,3 +85,6 @@ des trous). Sept tests ciblés verts ensuite ; dix familles synthétiques class�
 
 P3 : 101 succès, 2 ignorés ; check sans échec, hashs inchangés. 56 lignes de mesures
 identiques ; 5/5 familles principales sans verdict, contre 4 comptées auparavant.
+
+P4 : A174, L168, S45-1 close, S46-1 ouverte. Décomptes : 47 ADR, 17 invariants,
+6 SPEC, 14 registres, 23 cas canoniques et 174 angles morts. Jeton libéré.

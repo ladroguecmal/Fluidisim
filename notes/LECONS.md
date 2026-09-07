@@ -2736,3 +2736,14 @@ verdict sur une entrée sans mesure. Une branche qui saute un échantillon peut 
 silencieusement les seules données valides : tester une fenêtre partiellement invalide, pas
 seulement une fenêtre entièrement vide. Le témoin valide reste nécessaire : une eau plate est
 sans période et pourtant parfaitement recevable pour une mesure de flottabilité statique.
+
+## L168 — Retirer les refus change l'objet qu'on prétend valider
+
+*(S46)* Un contrôle de stabilité retirait les triplets non mesurables puis comparait les ordres
+restants. Ceux-ci pouvaient être stables, mais ce n'était plus la famille de grilles fournie.
+Le filtrage présentait une propriété du sous-ensemble comme celle de l'ensemble.
+
+**Réflexe :** conserver les absences jusqu'au verdict. Si un sous-ensemble est recevable, sa
+sélection et sa portée doivent être explicites. Au bilan, compter chaque objet attendu une
+fois : succès, échec ou absence de verdict. Un affichage « indéterminé » sans incrément de
+compteur laisse la mesure visible et son absence de conclusion invisible dans la synthèse.

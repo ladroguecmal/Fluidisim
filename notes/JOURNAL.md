@@ -4515,3 +4515,37 @@ S43-2 (entrées vides des autres contrôles), S42-3 (mesures dupliquées) resten
 (S45-1), avec témoins finis et refus. Arbitrages inchangés : masse volumique A103, état réel
 et infrastructure ; aucun dépôt distant créé. A107 est historiquement réconcilié en S35,
 les branches conservées restent soumises au contrôle de reprise.
+
+## S46 — 2026-09-07 — Un bilan doit compter ce qui ne conclut pas
+
+**Agent : Codex**, git et cargo disponibles. Départ master 53ded2b propre ; copies parallèles
+vérifiées, aucune plus avancée ou modifiée. Action S45-1.
+
+**Sorties.** Convergence::ordre refuse NaN, infinis et résultats non finis ; les ordres négatifs
+finis restent visibles. Le contrôle de stabilité ne retire plus les triplets inexploitables.
+Le rapport principal utilise une seule classification, appliquant C08 amendé : cas régulier,
+stabilité établie, puis seuil. Toutes les familles comptent dans succès/échec/sans-verdict.
+AUDIT-REPLIS-S44 §8, note sur CAS-CANONIQUES C08, A174, L168. Aucun ADR ni seuil modifié.
+
+**Constats.** Deux tests rouges avant correction : Observe(NaN), puis stabilité artificielle
+obtenue en retirant des triplets refusés. Le rapport possédait deux règles différentes ; la
+branche singulière pouvait réussir sans preuve de stabilité, la régulière pouvait échouer
+sans cette preuve. Indéterminé et plancher manquaient dans le décompte.
+
+**Validation.** 101 tests exécutés réussis (38 cœur + 63 harnais), deux longs ignorés.
+Sept tests ciblés ; dix familles synthétiques classées jusque dans le texte du bilan.
+check : deux scénarios, zéro échec, hashs 0x3e2c06a7b00e73e3 et 0x1a8b0629a9f51b6e.
+physics avant/après : 56 lignes de mesures/assertions/suites C08 identiques ; sortie 1
+attendue, C04 ordre un reste rouge. Le bilan C08 compte désormais cinq sans-verdict au lieu
+de quatre : p = 0,82 du cas régulier existait mais sa stabilité inconnue échappait au compteur.
+
+**Décision structurante.** Un refus est conservé dans toute la famille de mesure ; le bilan
+compte chaque famille une fois, même quand elle n'établit rien. Invariants inchangés.
+
+**Non fait / suite recommandée.** S47 : confronter la paire héritée C08-p/C08-coherence de
+physics_shallow au contrat amendé C08 (S46-1). Elle reste sur Ritter avec trois grilles et un
+seuil absolu, séparée des cinq familles corrigées ici. Préserver les mesures historiques,
+clarifier leur portée. S44-1, S43-2 et S42-3 restent ouverts.
+
+**Arbitrages.** A103 (masse volumique), état réel et infrastructure inchangés ; aucun distant
+créé. A107 réconcilié historiquement ; copies anciennes conservées et contrôlées au démarrage.

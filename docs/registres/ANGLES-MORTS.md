@@ -215,6 +215,7 @@ ce que les sources avaient omis.
 | **A171** | Une valeur de repli qui coïncide avec la valeur nominale est invisible à tout contrôle | **1** | S43, `ordre_grossier_estime` |
 | **A172** | Quand la grandeur est un écart, zéro est son meilleur point — aucun repli n'y est acceptable | **1** | AUDIT-REPLIS-S44 §4 |
 | **A173** | Un refus peut supprimer son assertion ou être ignoré par une sélection — corrigé S45 | **1** | AUDIT-REPLIS-S44 §7 |
+| **A174** | Filtrer les refus change la famille mesurée ; omettre les indéterminés fausse le bilan — corrigé S46 | **1** | AUDIT-REPLIS-S44 §8 |
 
 Cent huit angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -1331,3 +1332,12 @@ pendant quatre sessions.
   sans excitation. Corrigé avec conservation des trois assertions C02 et propagation du refus
   aux quatre mesures C10. Témoins nominal et statique sans houle préservés.
   Voir AUDIT-REPLIS-S44 §7. Aucun succès indu supplémentaire trouvé sur les douze autres origines.
+
+- **A174** *(sévérité 1, corrigé en S46 sur le rapport principal)* — **Filtrer les refus fabrique
+  une famille qui peut sembler stable ; omettre les indéterminés fabrique un bilan incomplet.**
+  asymptotique retirait les triplets non observables et pouvait rendre Some(true) sur la suite
+  restante, reproduit par test. Deux branches de verdict C08 appliquaient ensuite des règles
+  différentes et ne comptaient pas tous les sans-verdict. Désormais les trous sont conservés,
+  la stabilité est exigée sur le cas régulier, chaque famille est comptée. Le cas régulier
+  nominal p = 0,82 rejoint les quatre autres sans-verdict : 5/5 au lieu de 4/5. La paire
+  héritée shallow reste à confronter au même contrat (S46-1). AUDIT-REPLIS-S44 §8.
