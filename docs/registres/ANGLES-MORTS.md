@@ -1348,3 +1348,10 @@ pendant quatre sessions.
   exige un cas régulier et un régime asymptotique établi. L'import conservait les chiffres et
   le mot « vert », sans confronter leurs conditions d'emploi. Diagnostic requalifié, contrôle
   de cohérence conservé et compté séparément ; notes ADR-040/043. S47-1 porte la mesure régulière.
+
+- **A176** *(sévérité 2, corrigé S51)* — **Une formule dupliquée peut conserver un refus
+  obsolète après correction de son autre copie.** Convergence::ordre refusait les non-finis
+  depuis S46 ; ordre_grossier_estime rendait encore Some(NaN), reproduit par test.
+  Les deux chemins partagent désormais le calcul de Richardson, en conservant leurs
+  planchers et catégories. Aucun succès nominal indu démontré, mais le filtre pouvait
+  recevoir NaN au lieu de sa valeur de secours. Voir AUDIT-MESURES-S51 et L172.

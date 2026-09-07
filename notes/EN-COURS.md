@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S51
-État             : en cours
+État             : terminée
 Agent            : Codex (git et cargo disponibles)
 Objectif         : Inventorier les mesures dupliquées et leurs appelants (S42-3).
 ```
@@ -70,7 +70,7 @@ Objectif         : Inventorier les mesures dupliquées et leurs appelants (S42-3
 - [x] **P1** — reprise, copies, jeton et plan seul.
 - [x] **P2** — inventorier les estimateurs, rechercher leurs formules et tracer assertions/diagnostics/tests ; distinguer mesures distinctes et copies.
 - [x] **P3** — traiter les duplications avérées dans le périmètre, vérifier les résultats et documenter les limites et suites.
-- [ ] **P4** — rituel : journal, enseignements, actions, index et décomptes, passation et jeton libre.
+- [x] **P4** — rituel : journal, enseignements, actions, index et décomptes, passation et jeton libre.
 
 ### Notes de reprise
 
@@ -81,3 +81,5 @@ ou leurs montages indépendants (ADR-043). Audit des mesures, pas réduction des
 P2 : dix familles inventoriées dans AUDIT-MESURES-S51. Deux copies de Richardson ont divergé ; test ajouté reproduit (Some(NaN), NaN) au lieu du refus. Régression centrée dupliquée, action de suite S51-1. Test volontairement rouge jusqu'à P3.
 
 P3 : Richardson partagé, refus non finis réparé ; 108 tests réussis, deux ignorés. Rapport physics inchangé sauf trois durées, sortie 1 attendue ; check et hashs inchangés. Audit final et correctif de portée S46 écrits.
+
+P4 : journal, A176 et L172 enregistrés ; S42-3 close, suite S51-1 ouverte. Index et passation S52 à jour, jeton libre. Décomptes : 47 ADR, 17 invariants, 6 SPEC, 14 registres, 23 cas, 176 angles.

@@ -4683,3 +4683,36 @@ L171 dernière leçon. Aucun invariant invalidé par cette correction du harnais
 appelants avant toute extraction. S43-2 (troisième cas des garde-fous) et S49-1 (budget de
 raffinement C22) restent ouverts. A103, état réel du projet et infrastructure inchangés ;
 aucun distant créé. A107 historiquement réconcilié, copies conservées.
+
+## S51 — 2026-09-07 — Deux formules identiques avaient des refus différents
+
+**Agent : Codex**, git et cargo disponibles. Départ master 8fc8a65 propre, copies anciennes
+contrôlées. P4 reprise après la relance utilisateur ; P1–P3 déjà committées, non refaites.
+
+**Sorties.** AUDIT-MESURES-S51 inventorie dix familles et leurs appelants, en distinguant
+les mesures différentes des copies algébriques. S42-3 close comme inventaire exécuté.
+La formule de Richardson utilisée par Convergence::ordre et ordre_grossier_estime est
+partagée ; catégories, planchers et valeur bornée de secours restent propres aux appelants.
+
+**Défaut reproduit.** Le refus ajouté au rapport en S46 ne protégeait pas le filtre :
+ordre_grossier_estime rendait encore (Some(NaN), NaN). Le test échoue avant correction,
+passe ensuite pour NaN, infinis et débordement du rapport depuis des entrées finies.
+Aucun succès nominal indu établi ; aucun seuil ni solveur modifié. Correctif de portée
+ajouté à AUDIT-REPLIS-S44 §11, sans réécriture d'ADR. A176, sévérité 2, corrigé ; L172.
+
+**Validation.** 108 tests réussis (38 cœur + 70 harnais), deux ignorés. Tests ciblés verts,
+compilation release réussie. Rapport physics comparé au résultat S50 : trois lignes de
+durées différentes, aucune mesure ou assertion déplacée. Sortie 1 attendue pour C04 ordre un.
+check : zéro échec, hashs 0x3e2c06a7b00e73e3 et 0x1a8b0629a9f51b6e inchangés.
+C22 coûteux non rejoué ; son calcul de rapport est testé sans nouvelle simulation.
+
+**Limites.** Inventaire manuel, pas preuve d'absence de toute duplication sémantique.
+Régression centrée et projection conservative restent identifiées, non supprimées.
+Les mesures de période, les références Ritter et les montages des deux véhicules ne sont
+pas fusionnés ; leur indépendance et leurs différences de support sont utiles (ADR-043).
+Aucun invariant invalidé ; 47 ADR, 17 invariants, 6 SPEC, 14 registres, 23 cas inchangés.
+
+**Suite S52 : S51-1.** Partager la régression centrée en préservant fenêtres et unités,
+tester refus/témoins ; examiner séparément le contrat de projection des deux C22 avant
+une extraction. S43-2 et S49-1 restent ouvertes. A103, état réel et infrastructure inchangés ;
+aucun distant créé. A107 historiquement réconcilié, anciennes copies conservées.

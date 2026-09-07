@@ -462,7 +462,7 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 |---|---|---|---|---|
 | S42-1 | **Concevoir l'essai à zéro de C08**, puis de C02. C08 est le seul des quatre qui demande de penser ce que « résultat attendu zéro » veut dire pour une mesure d'**ordre de convergence** : une solution représentée exactement rendrait un ordre **indéfini**, pas zéro | **A167** | session | **ouverte** |
 | S42-2 | **Chercher les autres valeurs de repli placées après une mesure** — `min`, `max`, `unwrap_or`, saturations d'affichage — et vérifier ce qu'elles font d'un refus. `C03-demi-vie` en portait une qui transformait `NaN` en meilleur score | **A170**, **L161** | session | **ouverte** |
-| S42-3 | **Vérifier qu'aucune autre mesure n'est écrite deux fois.** La régression de demi-vie l'était, et corriger une copie n'a rien corrigé. Une extraction pour testabilité n'est finie que lorsque l'ancien code n'a plus d'appelant | **L162** | session | **ouverte** |
+| S42-3 | **Vérifier qu'aucune autre mesure n'est écrite deux fois.** La régression de demi-vie l'était, et corriger une copie n'a rien corrigé. Une extraction pour testabilité n'est finie que lorsque l'ancien code n'a plus d'appelant | **L162** | session | **close en S51, suite S51-1** |
 
 > **Note S42 — l'action S41-4 est close pour C03 et C06, ouverte pour C08 et C02.**
 >
@@ -574,3 +574,13 @@ la tâche de mesure est achevée. Voir MESURES-C22-S49.
 **S44-1 close.** Le détecteur renvoyait déjà Option ; cinq appelants remplaçaient le refus.
 Corrections, tests et suivi jusqu'aux sorties dans AUDIT-REPLIS-S44 §10. Pas de nouvelle
 action : suite recommandée S51 sur S42-3 ; S43-2 et S49-1 restent ouvertes.
+
+## Actions relevées en séance — S51
+
+**S42-3 close comme inventaire exécuté.** Dix familles examinées, duplication de Richardson
+corrigée et refus testé ; deux autres duplications identifiées restent tracées ci-dessous.
+Voir AUDIT-MESURES-S51 : le relevé manuel ne prouve pas une absence générale de copies.
+
+| # | Action | Origine | Porteur | État |
+|---|---|---|---|---|
+| S51-1 | Partager la régression centrée pente/R² en préservant fenêtres et unités, avec refus et témoins ; examiner séparément les contrats des projections conservatives C22 avant de décider une extraction | AUDIT-MESURES-S51, copies dans mesurer_seiche_cfl et c33_decroissance_entretenue | session S52 recommandée | ouverte |

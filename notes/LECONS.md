@@ -2779,3 +2779,13 @@ en validation, sans modifier un seul chiffre.
 **Réflexe :** séparer la proximité de la cible et la stabilité de la suite. Rapporter
 quelle condition manque et conserver le critère déclaré avant mesure. Des fenêtres
 chevauchantes peuvent montrer une tendance ; elles ne multiplient pas les preuves indépendantes.
+
+## L172 — Partager le calcul ne demande pas de partager tout le contrat
+
+*(S51)* Deux estimateurs appliquaient Richardson avec des planchers et des catégories
+légitimement différents. La formule copiée avait pourtant laissé diverger le refus des
+non-finis : corriger un rapport ne corrigeait pas le filtre utilisant la seconde copie.
+
+**Réflexe :** isoler le calcul commun et laisser les choix de seuil, de fenêtre et de statut
+aux appelants. Vérifier leurs usages réels ; une ressemblance de formule ne justifie pas
+de fusionner des mesures portant sur des supports ou des unités différents.
