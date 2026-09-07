@@ -91,6 +91,60 @@ mod tests_refus_s45 {
         }, WorldPos::from_metres(ancre, 0.0, 0.0)).unwrap()
     }
 
+    /// Le montage complet du scénario nominal, pour interroger `Hs` — S62.
+    fn mer(hs: f32, tp: f32, composantes: usize) -> Background {
+        let mut alloc = ArenaAllocator::with_capacity(1 << 20);
+        let jobs = SequentialJobs;
+        let sink = StderrSink;
+        let mut host = HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink };
+        Background::configure(&mut host, SeaState {
+            hs, tp, theta_turns: 0.0, components: composantes,
+        }, WorldPos::from_metres(0.0, 0.0, 0.0)).unwrap()
+    }
+
+    /// **`Hs` est aveugle au paramètre qu'il nomme, et gouverné par un qu'il ne nomme pas** — S62,
+    /// action S58-2, instance d'**A104** et première mesure d'**A102**.
+    ///
+    /// Deux faits, et le second est la raison du premier. La mer est engendrée d'après `hs`, donc
+    /// le rapport mesure/référence ne dépend pas de `hs` : c'est un **aller-retour**, il teste une
+    /// chaîne et jamais une valeur. Et ce que ce rapport vaut réellement dépend de la **fenêtre**
+    /// d'échantillonnage rapportée à la longueur d'onde de pic.
+    #[test]
+    fn hs_est_aveugle_a_hs_et_gouverne_par_sa_fenetre() {
+        let t = SimTime::from_micros(0);
+
+        // 1. Aveugle à `hs` : le rapport est le même sur un facteur 8.
+        let rapports: Vec<f64> = [0.6f32, 1.2, 2.4, 4.8].iter()
+            .map(|&h| {
+                let c = hs_restitue(&mer(h, 6.0, 32), t, h as f64, 128, 3.0);
+                c.mesure / c.reference
+            })
+            .collect();
+        for r in &rapports {
+            assert!((r - rapports[0]).abs() < 1e-9,
+                "le rapport devrait être invariant en hs : {rapports:?}");
+        }
+        // Et il ne vaut pas 1. **Sa valeur n'est pas une constante du système** : elle vaut
+        // 0,9147 sur la mer du scénario nominal et 0,688 sur celle-ci, qui n'a ni le même instant
+        // ni la même graine. C'est le fait décisif — ce que le cas mesure est une propriété de
+        // l'échantillonnage d'une réalisation, pas une propriété de la chaîne d'amplitude. Un test
+        // qui figerait le chiffre figerait la réalisation, et non ce qui est vrai.
+        assert!(rapports[0] < 0.95, "rapport nominal trop proche de 1 : {}", rapports[0]);
+
+        // 2. Gouverné par la fenêtre. Le témoin à grande fenêtre est ce qui **innocente** la
+        // chaîne d'amplitude : sans lui, les 8,5 % nominaux seraient indiscernables d'un défaut.
+        let nominal = hs_restitue(&mer(1.2, 6.0, 32), t, 1.2, 128, 3.0);
+        let large = hs_restitue(&mer(1.2, 6.0, 32), t, 1.2, 1024, 3.0);
+        assert!(nominal.ecart_rel() > 0.05, "écart à 6,8 λ : {}", nominal.ecart_rel());
+        // Le témoin à grande fenêtre est ce qui **innocente** la chaîne d'amplitude : sans lui,
+        // l'écart nominal serait indiscernable d'un défaut de répartition ou de sommation.
+        assert!(large.ecart_rel() < 0.02,
+            "à 55 λ la chaîne doit être juste à 2 % : {}", large.ecart_rel());
+        assert!(large.ecart_rel() * 4.0 < nominal.ecart_rel(),
+            "élargir la fenêtre doit diviser l'écart : {} puis {}",
+            nominal.ecart_rel(), large.ecart_rel());
+    }
+
     #[test]
     fn c02_refus_et_temoin() {
         let t = SimTime::from_micros(0);
@@ -273,6 +327,29 @@ pub fn c02_dispersion(bg: &Background, t: SimTime, lambda_attendu: f64) -> Vec<C
 /// `Hs = 4·√m0`, où `m0` est la variance de l'élévation (SPEC-001 §3, définition spectrale). On
 /// échantillonne `η` sur une grande fenêtre et on remonte à `Hs`. C'est le contrôle de bout en bout
 /// de toute la chaîne d'amplitude : répartition entre composantes, sommation, sinus.
+///
+/// # Ce que ce cas ne voit pas, et ce qu'il voit à sa place — S62
+///
+/// **Il est aveugle à `hs`.** Mesuré sur un facteur 8 — `hs` = 0,6 · 1,2 · 2,4 · 4,8 — le rapport
+/// mesure/référence vaut **0,914723 à chaque fois**. La mer est engendrée d'après `hs` et la mesure
+/// le reconstruit : ce qui est testé est un facteur de chaîne, jamais une valeur.
+///
+/// **Ce qui gouverne son écart est la fenêtre rapportée à la longueur d'onde de pic** — c'est
+/// **A102**, énoncé en S21 et jamais mesuré avant S62 :
+///
+/// ```text
+/// fenêtre / λ_pic     6,8      13,7     27,3     54,7     109,3
+/// écart              8,53 %   9,34 %   2,43 %   0,28 %    0,28 %
+/// ```
+///
+/// La configuration nominale tient **6,8 longueurs d'onde** et rend **8,53 %** pour une tolérance
+/// de 10 % : le cas passe à 85 % de sa marge, et ce qu'il mesure là est la taille de sa fenêtre.
+/// À `tp = 9 s` il **échoue** (15,58 %), et raffiner le spectre le fait échouer aussi — 26,3 % à
+/// 256 composantes. *La chaîne d'amplitude, elle, est juste à 0,28 %*, ce que seul le témoin à
+/// grande fenêtre établit.
+///
+/// La tolérance de 10 % reste ce qu'elle était, mais **elle n'absorbe pas ce qu'on croyait** : pas
+/// une erreur de la chaîne, un artefact d'échantillonnage. Voir `AUDIT-REFERENCES-S62`.
 pub fn hs_restitue(bg: &Background, t: SimTime, hs_config: f64, cote: u32, pas_m: f64) -> Cas {
     let mut somme = 0.0f64;
     let mut somme2 = 0.0f64;
@@ -291,11 +368,14 @@ pub fn hs_restitue(bg: &Background, t: SimTime, hs_config: f64, cote: u32, pas_m
     let m0 = somme2 / n as f64 - moyenne * moyenne;
     Cas {
         id: "Hs",
-        grandeur: "hauteur significative restituée par la variance".into(),
+        grandeur: format!(
+            "Hs restituée par la variance, fenêtre {} m",
+            (cote as f64 * pas_m).round()
+        ),
         mesure: 4.0 * m0.sqrt(),
         reference: hs_config,
         tolerance_rel: 0.10,
-        source: "SPEC-001 §3 — Hs = 4√m₀",
+        source: "SPEC-001 §3 — Hs = 4√m₀ ; condition de mesure : fenêtre ≫ λ_pic (A102, S62)",
     }
 }
 

@@ -71,8 +71,8 @@ Objectif         : S58-2 — recenser les instances d'A104 : pour chaque constan
 - [x] **P1** — passation, jeton, plan seul.
 - [x] **P2** — inventorier les 41 références des deux jeux de cas et les classer par **degré de dépendance**, pas par présence d'un paramètre commun.
 - [x] **P3** — balayer les paramètres balayables et **mesurer** le degré au lieu de le déduire ; le scénario est en TOML, aucun code n'est à recompiler.
-- [ ] **P4** — rapport AUDIT-REFERENCES-S62 : les cas aveugles, ceux qui ne le sont pas, et ce que chacun teste réellement.
-- [ ] **P5** — appliquer ce qui doit l'être, avec essais de refus et témoins.
+- [x] **P4** — rapport AUDIT-REFERENCES-S62 : les cas aveugles, ceux qui ne le sont pas, et ce que chacun teste réellement.
+- [x] **P5** — appliquer ce qui doit l'être, avec essais de refus et témoins.
 - [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
 
 ### Notes de reprise
@@ -120,3 +120,12 @@ P3, et le balayage a trouve trois choses au lieu d une.
      grille_cote et grille_pas_m du scenario ne l atteignent jamais : mon balayage de la fenetre
      n a rien deplace sur un facteur 16, et c est ainsi que le litteral s est fait voir.
      Or l en-tete du scenario affirme *ce fichier est auto-suffisant*, et SPEC-003 par.3 l exige.
+
+P4/P5 : fenetre rendue declarable (physics.fenetre_cote / fenetre_pas_m), defauts inchanges a
+128 et 3.0 ; A184. Loi mesuree : 8,53 / 9,34 / 2,43 / 0,28 / 0,28 pour cent a 6,8 / 13,7 / 27,3 /
+54,7 / 109,3 longueurs d onde. A 12288 m la variance en une passe rend NaN — le cas echoue
+correctement, pas de faux succes. AUDIT-REFERENCES-S62 ecrit. Le cas Hs annonce desormais sa
+fenetre dans son libelle. Test hs_est_aveugle_a_hs_et_gouverne_par_sa_fenetre : structurel, il
+ne fige aucun chiffre dependant de la realisation — la premiere version le faisait et a echoue,
+0,688 dans le montage du test contre 0,9147 dans le scenario. 130 tests reussis, deux ignores ;
+hashs et mesures nominales inchanges.

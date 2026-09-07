@@ -37,6 +37,14 @@ pub struct Scenario {
     pub allocations_max: Option<u32>,
     pub grille_cote: u32,
     pub grille_pas_m: f64,
+    /// Côté de la fenêtre d'échantillonnage statistique de `physics`, en points — **distinct de
+    /// `grille_cote`, qui sert au hash de `check`**. Il était en dur dans `main.rs` jusqu'à S62,
+    /// alors que ce fichier se déclare auto-suffisant (SPEC-003 §3) et que la mesure la plus
+    /// fragile du harnais en dépend : `Hs` passe de 0,018 % à 15,6 % d'écart selon le rapport
+    /// entre cette fenêtre et la longueur d'onde de pic (**A102**, mesuré en S62).
+    pub fenetre_cote: u32,
+    /// Pas de cette fenêtre, en mètres.
+    pub fenetre_pas_m: f64,
 }
 
 #[derive(Debug)]
@@ -163,6 +171,10 @@ impl Scenario {
             allocations_max: num_opt(&f, "assertions.allocations")?,
             grille_cote: num_opt(&f, "check.grille_cote")?.unwrap_or(64),
             grille_pas_m: num_opt(&f, "check.grille_pas_m")?.unwrap_or(4.0),
+            // Défauts : les valeurs que `main.rs` portait en dur avant S62. Les changer
+            // déplacerait les mesures publiées ; les nommer ne les déplace pas.
+            fenetre_cote: num_opt(&f, "physics.fenetre_cote")?.unwrap_or(128),
+            fenetre_pas_m: num_opt(&f, "physics.fenetre_pas_m")?.unwrap_or(3.0),
         })
     }
 }
@@ -199,6 +211,9 @@ allocations = 0
         assert_eq!(s.allocations_max, Some(0));
         // Valeurs par défaut, non déclarées dans l'exemple.
         assert_eq!(s.grille_cote, 64);
+        // La fenêtre statistique garde ses valeurs historiques quand le scénario se tait.
+        assert_eq!(s.fenetre_cote, 128);
+        assert_eq!(s.fenetre_pas_m, 3.0);
     }
 
     #[test]

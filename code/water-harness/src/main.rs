@@ -303,7 +303,7 @@ fn executer_physics(sc: &Scenario, bg: &Background, t: SimTime) -> usize {
         cas.push(pente_maximale(bg, t, a, k_rad));
     }
 
-    cas.push(hs_restitue(bg, t, sc.hs as f64, 128, 3.0));
+    cas.push(hs_restitue(bg, t, sc.hs as f64, sc.fenetre_cote, sc.fenetre_pas_m));
     // 3 000 m : à l'intérieur du rayon de référentiel. I-08 borne `|x_local| < 4096 m`, et
     // au-delà `eval` renvoie `None` — ce que le cas `I-08` ci-dessous vérifie explicitement.
     cas.push(homogeneite(bg, t, 48, 3.0, 3000.0));
