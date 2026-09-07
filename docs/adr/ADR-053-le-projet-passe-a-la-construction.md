@@ -11,6 +11,12 @@
 
 ---
 
+> **Note corrective S71 — 2026-09-08.** [ADR-054](ADR-054-construire-w-sans-faux-prealable.md)
+> confirme la construction et W en priorité, mais remplace les motifs et l’ordre technique
+> D2/D4, §3 et §4. B1 complet manque de LOD/rendu ; C12 porte V seul ; A187 est expliqué
+> depuis S67. Une référence dispersive exacte ne valide pas la coupure d’un autre solveur.
+> Le contrat WaveEvent commence sans attendre la clôture de B1. Texte historique conservé.
+
 ## 1. La question, et qui l'a tranchée
 
 `BILAN-S69` a mesuré un écart que soixante-huit sessions avaient laissé implicite : le dépôt est à

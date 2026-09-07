@@ -66,7 +66,7 @@ et rendre la trajectoire de construction concrète, avec critères de réception
 ### Plan
 
 - [x] **P1** — lire la passation, vérifier les copies, prendre le jeton et committer le plan seul.
-- [ ] **P2** — décision ADR-054 : construction confirmée, dépendances corrigées et lots W recevables.
+- [x] **P2** — décision ADR-054 : construction confirmée, dépendances corrigées et lots W recevables.
 - [ ] **P3** — rituel : journal, leçon, angle mort, actions, index, passation et copies synchronisées.
 
 ### Notes de reprise
