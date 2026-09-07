@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-07
-Session en cours : S41 — relire les sept angles morts de sévérité 1 importés
-Dernière session : S40 — 2026-09-07 — le seuil de sec ne décide de rien de publiable ; A163 requalifié
-Session suivante : S41 — relire les **sept angles morts de sévérité 1 importés** (S35-5, S39-3) *(recommandé)*
+Session en cours : —
+Dernière session : S41 — 2026-09-07 — cinq des sept angles morts importés désignaient un défaut présent ici
+Session suivante : S42 — **écrire l'essai à zéro de C03** (S41-4) *(recommandé)*, ou refaire les formules restantes (S41-2)
 ```
 
 > **Avant de regarder le jeton, exécuter `git worktree list` et `git branch -a`.** Le jeton est un
@@ -124,10 +124,10 @@ gaspillage le plus fréquent d'un projet de ce type.
 ## 4. Où en est le projet
 
 Trente-cinq sessions ici, **plus cinq dans une lignée parallèle réconciliée en S35** (B-S22 à
-B-S27) — **47 ADR** *(dont un acté)*, six spécifications, **douze registres** — **et du code qui
+B-S27) — **47 ADR** *(dont un acté)*, six spécifications, **treize registres** — **et du code qui
 tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équilibrés et **tous deux
 montés sur leurs cas, confrontés l'un à l'autre et instrumentés, **plus un milieu à dispersion
-exacte** *(S39)*, **85 tests verts** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
+exacte** *(S39)*, **88 tests verts** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
 verdict** (C08). Quatre cas canoniques sur δ sont exécutés ici : **C01 et C03 passent**, C04 échoue,
 C08 ne conclut pas. **La lignée réconciliée en donne d'autres verdicts, et l'écart a une cause
 unique** : elle est passée à l'ordre deux, et C04 comme C08 y sont verts (`CAS-CANONIQUES`, « deux
@@ -245,6 +245,21 @@ vitesse du front de Ritter** et varie d'un facteur 2,5 sans tendance.
 *Et une leçon sur la conduite du projet* : `ADR-044` §7 avait refusé de trancher pour une bonne
 raison mal écrite — un coût annoncé qui n'existait pas. **C'est ce qui a fait reporter l'action
 quatre fois** (**A169**, **L157**).
+
+**Et S41 a relu les sept angles morts de sévérité 1 importés, que deux réconciliations avaient
+reportés tels quels.** Chacun sous quatre questions, dont trois se vérifient — la décisive étant *le
+défaut existe-t-il ici, aujourd'hui ?* **Les sept énoncés sont exacts ; cinq désignent un défaut
+présent**, dont deux corrigés en séance.
+
+Le plus instructif est **A152** : la lignée B avait construit contre lui une rubrique
+« Conditions de mesure », **neuf occurrences là-bas, zéro ici**. *Une réconciliation prend les
+conclusions et laisse les dispositifs* (**L158**) — les neuf sont reportées.
+
+> **Et la relecture a corrigé une attribution du corpus.** `CAS-CANONIQUES` disait depuis S36 que
+> l'écart de verdicts de C04 entre les deux véhicules venait du passage à l'ordre deux. **Trois
+> choses différaient**, et une seule avait un nom : mesuré à schéma égal, la méthode de mesure
+> explique **52 %** de l'écart. À seuil égal, les deux fronts sont identiques à la quatrième
+> décimale — *le désaccord n'était pas entre les solveurs* (**L160**).
 
 **Et S27 a trouvé un trou que sept sessions n'avaient pas vu, grâce à une source extérieure.**
 SPEC-001 §2.1 borne le pas de temps par `u_max` **sans jamais définir `u_max`**, quand SPEC-004 §10.1

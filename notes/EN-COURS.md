@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S41
-État             : en cours
+État             : terminée
 Battement        : 2026-09-07
 Objectif         : Relire les sept angles morts de sévérité 1 importés — et vérifier, pas commenter
 ```
@@ -116,7 +116,7 @@ de `FORK-S22-S26` §4 devrait le dire.
       celui qui manque au plus exposé.
 - [x] **P6** — le registre `AUDIT-ANGLES-IMPORTES-S41`, et les requalifications s'il y en a.
 - [x] **P7a** — rituel : journal, leçons L158-L160, actions S41-1 à S41-4.
-- [ ] **P7b** — rituel : index, décomptes, jeton libéré.
+- [x] **P7b** — rituel : index, décomptes, jeton libéré.
 
 ### Notes de reprise
 
