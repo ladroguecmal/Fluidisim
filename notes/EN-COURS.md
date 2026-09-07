@@ -68,7 +68,7 @@ Objectif         : Construire et mesurer C22 régulier sur shallow (S47-1).
 ### Plan
 
 - [x] **P1** — reprise, contrôles des copies, jeton et plan seul.
-- [ ] **P2** — montage gaussien C22, comparaison conservative aux oracles emboîtés, essais nul/refus ; première mesure et coût.
+- [x] **P2** — montage gaussien C22, comparaison conservative aux oracles emboîtés, essais nul/refus ; première mesure et coût.
 - [ ] **P3** — campagne de raffinement et stabilité, branchement au rapport adapté au coût, tests et documentation des résultats/limites.
 - [ ] **P4** — rituel : journal, leçons/angles morts, actions, index/décomptes et passation, jeton libre.
 
@@ -79,3 +79,6 @@ effectuées dans cette conversation. Aucun verdict présupposé : cinq grilles s
 pas suffisantes. C22 impose une gaussienne de 1 cm sur 1 m, domaine 40 m, t = 1 s.
 Vérifier la convention de largeur de configure_bosse. Tester l'oracle à deux résolutions et
 mesurer son influence au lieu de présumer une erreur nulle. Préserver les mesures historiques.
+P2 : montage sigma converti par sqrt(2), projection conservative et refus testes (2 tests).
+Premiere mesure 6400/12800 : ecart oracle 2,520893353e-8, quatre grilles retenues sur cinq,
+p=1,63758 et 1,63170 ; non concluant, cout release 5,416 s. Commande c22-shallow dediee.

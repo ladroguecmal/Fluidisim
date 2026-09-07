@@ -22,6 +22,7 @@
 //! coûterait exactement la propriété qu'on cherche.
 
 mod host_impl;
+mod c22_shallow;
 mod oracle;
 mod physics;
 mod physics_dispersif;
@@ -589,6 +590,17 @@ fn lire(chemin: &str) -> Result<Scenario, String> {
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
+    if args.first().map(String::as_str) == Some("c22-shallow") {
+        let n = match args.get(1).map(|v| v.parse::<usize>()).unwrap_or(Ok(12800)) {
+            Ok(n) => n,
+            Err(_) => { eprintln!("taille d'oracle invalide"); return ExitCode::FAILURE; }
+        };
+        return match c22_shallow::campagne(n) {
+            Ok(0) => ExitCode::SUCCESS,
+            Ok(_) => ExitCode::FAILURE,
+            Err(e) => { eprintln!("C22 indisponible : {e}"); ExitCode::FAILURE }
+        };
+    }
     if args.len() < 2 {
         eprintln!("usage : water-harness <check|physics|bless> <scenario.toml> [...]");
         return ExitCode::from(2);
