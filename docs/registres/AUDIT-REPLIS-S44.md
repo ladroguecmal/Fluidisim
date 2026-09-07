@@ -245,3 +245,35 @@ hashs inchangés. 57 lignes de mesures/assertions/suites identiques avant/après
 lignes requalifiées ; p = 0,999745 et écart des estimateurs = 0,001459 conservés.
 physics garde la sortie 1 attendue (C04 ordre un). Second véhicule : 12 assertions,
 1 contrôle de cohérence sans échec et 1 diagnostic sans verdict de validation.
+
+## 10. Le front absent reste absent — S50, 2026-09-07
+
+**S44-1 close. Correction du diagnostic de départ :** front_mouille renvoyait déjà
+Option dans le cœur. Les appelants de physics_shallow remplaçaient None par zéro.
+Le recensement réel sur 7a33d95 donne **cinq sites** : quatre positions et un indice de
+profil ; la mention « six replis » du §6 et de la fiche S44-1 était inexacte.
+
+| Chemin | Traitement S50 | Aval vérifié |
+|---|---|---|
+| front_ritter / raffinement | Option conservée ; conversion au diagnostic seulement | mention front introuvable, NaN et écart NaN imprimés |
+| balayage CFL | absence conservée jusqu'au diagnostic | aucun front zéro fabriqué ; volume toujours imprimé |
+| balayage des seuils | absence conservée jusqu'au diagnostic | soustraction, abs et division conservent NaN |
+| position / C04-front | Option transmise à cas_front | grandeur front introuvable, mesure NaN ; ecart_rel reste NaN, passe est faux |
+| profil autour du front | Option de liste d'indices | absence annoncée, aucune cellule de remplacement ; borne haute limitée au domaine |
+
+Les autres appels du détecteur dans oracle.rs conservaient déjà le refus en NaN ;
+ils ne sont pas modifiés. Les deux replis d'amplitude ne concernent pas un front.
+Aucun seuil changé, aucun calcul de flux ou de hauteur modifié, aucun ADR réécrit.
+
+Deux tests nouveaux : bassin sec et seuil non atteint, témoin humide au front connu ;
+refus jusqu'à l'assertion avec référence 10,6 puis zéro, et témoins valides correspondants.
+Le témoin Some(0) face à zéro passe ; None face à zéro échoue. Le profil absent est None.
+Ce cas couvre le risque anticipé par S44 : changer la référence ne peut plus rendre
+le remplacement zéro favorable. C'est une application de L166, sans nouvel angle mort.
+
+**Validation S50 :** 107 tests réussis (38 cœur + 69 harnais), deux ignorés. Sept tests
+ciblés passent, dont la reproduction du front historique. Rapport physics avant/après :
+seules quatre lignes de durées diffèrent ; mesures, assertions et profils nominaux inchangés.
+C04-front shallow : 10,562500 m contre 10,640868 m, écart 0,736 %. Sortie physics 1
+attendue pour C04 ordre un. check : zéro échec, hashs 0x3e2c06a7b00e73e3 et
+0x1a8b0629a9f51b6e inchangés. Aucun nouveau résultat de validation physique revendiqué.
