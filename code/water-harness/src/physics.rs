@@ -2365,6 +2365,19 @@ mod tests_garde_fous {
     use crate::host_impl::{ArenaAllocator, SequentialJobs, StderrSink};
     use water_core::{Bassin, Definition, Delta1D, EtatInitial, HostServices, ParoiMobile};
 
+    #[test]
+    fn ordre_grossier_refuse_non_finis_et_debordement() {
+        for e in [
+            [f64::NAN, 0.5, 0.25],
+            [1.0, f64::INFINITY, 0.25],
+            [1.0, 0.5, f64::NEG_INFINITY],
+            [f64::MAX, 1e-300, 0.0],
+        ] {
+            let erreurs = [(100, e[0]), (200, e[1]), (400, e[2])];
+            assert_eq!(ordre_grossier_estime(&erreurs), (None, 1.0));
+        }
+    }
+
     fn arene(mo: usize) -> (ArenaAllocator, SequentialJobs, StderrSink) {
         (
             ArenaAllocator::with_capacity(mo << 20),
