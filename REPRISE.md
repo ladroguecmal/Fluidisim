@@ -25,10 +25,11 @@ Session en cours : aucune
 Dernière session : S58 — 2026-09-07 — A103 close : ρ = 1025, propriété du milieu ; A180, L176
 Session suivante : S59 — S57-1, borne du mode à 89600, découpage, puis 89600/179200
 
-Note S58 : S57 puis S58 ont travaillé dans le worktree claude/reprise-projet-29ef50. S57 a été
-fusionnée dans master en avance rapide (bd9f087) ; **S58 reste à fusionner de la même façon** —
-`git -C <racine> merge --ff-only claude/reprise-projet-29ef50`. Tant que ce n'est pas fait, les
-deux copies portent deux jetons, et c'est le mécanisme des trois forks (L137).
+Note S58 : S57 puis S58 ont travaillé dans le worktree claude/reprise-projet-29ef50, et **les
+deux ont été fusionnées dans master en avance rapide** — bd9f087 puis 531491f. Les deux copies
+coïncident ; il n'y a qu'un jeton. Toute session qui rouvre ce worktree doit refusionner de la
+même façon en terminant : `git -C <racine> merge --ff-only claude/reprise-projet-29ef50`.
+Deux copies qui divergent portent deux jetons, et c'est le mécanisme des trois forks (L137).
 ```
 
 > **Avant de regarder le jeton, exécuter `git worktree list` et `git branch -a`.** Le jeton est un
