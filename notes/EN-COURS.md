@@ -69,7 +69,7 @@ Objectif         : Partager la régression centrée et examiner les projections 
 
 - [x] **P1** — reprise, copies, jeton et plan seul.
 - [x] **P2** — extraire pente/R² avec refus et témoins ; raccorder les deux appelants sans changer fenêtres, logarithmes ni unités.
-- [ ] **P3** — examiner les contrats de projection, trancher le périmètre ; tests et comparaison des rapports, documentation des limites.
+- [x] **P3** — examiner les contrats de projection, trancher le périmètre ; tests et comparaison des rapports, documentation des limites.
 - [ ] **P4** — rituel : journal, enseignements, actions, index/décomptes, passation et jeton libre.
 
 ### Notes de reprise
@@ -79,3 +79,5 @@ jeton et nouveautés S51 relus. Deux régressions centrées dans physics.rs, la 
 non centrée shallow reste distincte. Aucun changement de solveur ni seuil de validation.
 
 P2 : regression::centree appelée par les deux mesures ; trois tests ciblés passent. Refus Option des séries dégénérées/non finies, fenêtres et unités conservées ; libellés None élargis aux causes réelles.
+
+P3 : projections conservées après comparaison des contrats ; S52-1 portera les grilles absentes/non emboîtées du montage delta. 111 tests verts, deux ignorés ; rapport inchangé sauf quatre durées, check et hashs inchangés. MESURES-PARTAGEES-S52 documente limites et décision.
