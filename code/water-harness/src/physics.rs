@@ -843,16 +843,12 @@ impl Convergence {
         if e0.abs() < self.plancher && e1.abs() < self.plancher && e2.abs() < self.plancher {
             return Ordre::Plancher;
         }
-        let (d0, d1) = ((e0 - e1).abs(), (e1 - e2).abs());
-        if d1 <= self.plancher || d0 <= self.plancher {
-            return Ordre::Indetermine;
-        }
         // `p` est rapporté **même s'il est négatif ou absurde**. Un ordre négatif signifie que les
         // différences successives grandissent, ce qui est la signature du régime **pré**-asymptotique
         // — le cas où la formule de Richardson produit un nombre dénué de sens. Le masquer derrière
         // « indéterminé » retirerait précisément ce que `asymptotique()` doit pouvoir constater.
-        let p = (d0 / d1).log2();
-        if p.is_finite() { Ordre::Observe(p) } else { Ordre::Indetermine }
+        ordre_richardson(e0, e1, e2, self.plancher)
+            .map(Ordre::Observe).unwrap_or(Ordre::Indetermine)
     }
 
     /// Les ordres de tous les triplets consécutifs.
@@ -1978,12 +1974,17 @@ pub fn ordre_grossier_estime(erreurs: &[(usize, f64)]) -> (Option<f64>, f64) {
         return (None, 1.0);
     }
     let (e0, e1, e2) = (erreurs[0].1, erreurs[1].1, erreurs[2].1);
+    let brut = ordre_richardson(e0, e1, e2, 0.0);
+    (brut, brut.map(|p| p.clamp(0.3, 3.0)).unwrap_or(1.0))
+}
+
+/// Algèbre commune au rapport et au filtre ; chaque appelant garde son plancher et son statut.
+fn ordre_richardson(e0: f64, e1: f64, e2: f64, plancher: f64) -> Option<f64> {
+    if ![e0, e1, e2].iter().all(|e| e.is_finite()) { return None; }
     let (d0, d1) = ((e0 - e1).abs(), (e1 - e2).abs());
-    if d1 <= 0.0 || d0 <= 0.0 {
-        return (None, 1.0);
-    }
-    let brut = (d0 / d1).log2();
-    (Some(brut), brut.clamp(0.3, 3.0))
+    if d0 <= plancher || d1 <= plancher { return None; }
+    let p = (d0 / d1).log2();
+    if p.is_finite() { Some(p) } else { None }
 }
 
 /// Facteur d'amplification du **mode de maille**, en fonction du nombre de Courant — S29.

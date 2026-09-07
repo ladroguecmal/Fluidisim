@@ -17,7 +17,7 @@ Ce relevé manuel n'est pas une preuve d'absence de toute duplication sémantiqu
 | Régression shallow | demi_vie_depuis_enveloppe | sommes non centrées et pics par blocs de 32, période de référence ; distincte de la régression delta sur extrema et période mesurée ; ne pas changer silencieusement la mesure |
 | Période | passages_a_zero/periode_moyenne → shallow C03 et dispersion exacte ; mesurer_seiche_cfl → delta C03 ; zéro_montant/temps → C02 analytique | montants échantillonnés, descendants en intégration, recherche spatiale/temporelle : supports et refus différents, pas une extraction oubliée |
 | Ritter et L1 | ritter ponctuel delta ; ritter_h_moyenne → shallow C04/C08/front_exact ; erreur_l1_ritter_ponctuelle → seul test historique | comparaison aux centres et comparaison aux moyennes sont distinctes ; le témoin ponctuel explique une ancienne publication, il ne doit pas remplacer la référence actuelle |
-| Projection oracle | c08_convergence_reguliere delta ; erreur dans c22_shallow | même moyenne conservative, mais norme delta pondérée par dx contre norme relative shallow ; contrôles de fin de calcul et contamination distincts ; montages conservés |
+| Projection oracle | c08_convergence_reguliere delta ; erreur dans c22_shallow | même moyenne conservative et norme relative sur les hauteurs positives ; dénominateur signé côté delta, absolu côté shallow, refus des entrées et contrôle de contamination différents ; montages conservés |
 | Comparaison croisée | Ecart::entre → confronter_c01/c04, vitesse hors zone sèche et tests | fonction partagée déjà appelée ; normes de comparaison champ à champ différentes des assertions analytiques |
 | Front et bilan | front_mouille → sorties shallow ; Cas::passe et Bilan::ajouter → main | refus traité en S50 ; classification C08 unifiée en S46, diagnostic Ritter séparé en S47 ; pas de seconde classification de validation retrouvée |
 | Absorption | amplitudes_c05 shallow ; energies_dispersif/trace_jauge | amplitude à jauge contre énergie et fenêtres dispersives : mesures distinctes, pas de substitution entre elles |
@@ -38,3 +38,31 @@ l'absence. Aucun succès nominal indu n'est établi par cet audit.
 S51 partage le calcul de Richardson entre les deux chemins, en conservant leurs
 contrats : plancher configuré et catégorie Plancher dans Convergence, plancher zéro
 et valeur bornée de secours 1 pour le filtre. Les valeurs nominales doivent rester intactes.
+
+**Précisions de portée.** Le test historique c08_l_ecart_au_p_publie_vient_du_changement_de_reference
+recalcule Richardson pour comparer les anciennes et nouvelles références ; il ne fournit
+aucune mesure au rapport. Le quotient direct e1/e2 de DiagnosticRitter est son contrôle de
+cohérence, pas une copie de Richardson (qui utilise des différences de trois erreurs).
+La formule de Richardson n'a plus qu'un corps utilisé par les chemins de rapport/filtre.
+
+La projection conservative des deux C22 reste une duplication algébrique identifiée, mais
+avec des contrats de refus et de contamination différents. S51-1 doit décider explicitement
+si son partage améliore le suivi des refus avant de la modifier. Le relevé ne justifie pas
+une fusion automatique de toutes les opérations ressemblantes.
+
+## Vérification finale
+
+Le test ajouté échouait avant correction avec (Some(NaN), NaN) ; il passe après correction
+pour NaN, les deux infinis et un débordement du rapport à partir de nombres finis.
+Les tests existants couvrent valeurs positives, négatives, séries constantes, plancher et
+stabilité : leurs contrats restent inchangés. Suite complète : 108 tests réussis
+(38 cœur + 70 harnais), deux ignorés. Compilation release réussie.
+
+Rapport physics comparé au rapport final S50 : seules trois lignes de durées diffèrent.
+Cinq familles C08 principales restent sans verdict ; diagnostic Ritter inchangé.
+Sortie physics 1 attendue pour C04 ordre un. check : zéro échec, hashs
+0x3e2c06a7b00e73e3 et 0x1a8b0629a9f51b6e inchangés. C22 à 102400 cellules non relancé :
+son algèbre de rapport est couverte ici ; aucun montage numérique modifié.
+
+S42-3 close comme inventaire exécuté avec correction du défaut reproduit ; S51-1 porte
+les duplications restantes identifiées, sans prétendre les avoir supprimées.

@@ -277,3 +277,11 @@ seules quatre lignes de durées diffèrent ; mesures, assertions et profils nomi
 C04-front shallow : 10,562500 m contre 10,640868 m, écart 0,736 %. Sortie physics 1
 attendue pour C04 ordre un. check : zéro échec, hashs 0x3e2c06a7b00e73e3 et
 0x1a8b0629a9f51b6e inchangés. Aucun nouveau résultat de validation physique revendiqué.
+
+## 11. La formule d'ordre restait dupliquée — S51, 2026-09-07
+
+Correction de portée du §8 : le refus non fini de S46 protégeait Convergence::ordre,
+mais ordre_grossier_estime avait une seconde formule et rendait encore Some(NaN).
+Le test S51 le reproduit. Les deux chemins partagent désormais ordre_richardson ; leurs
+planchers et catégories restent distincts. Inventaire, appelants et limites dans
+[ AUDIT-MESURES-S51 ](../validation/AUDIT-MESURES-S51.md). A176.
