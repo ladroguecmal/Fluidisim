@@ -69,8 +69,8 @@ Objectif         : S58-2 — recenser les instances d'A104 : pour chaque constan
 ### Plan
 
 - [x] **P1** — passation, jeton, plan seul.
-- [ ] **P2** — inventorier les 41 références des deux jeux de cas et les classer par **degré de dépendance**, pas par présence d'un paramètre commun.
-- [ ] **P3** — balayer les paramètres balayables et **mesurer** le degré au lieu de le déduire ; le scénario est en TOML, aucun code n'est à recompiler.
+- [x] **P2** — inventorier les 41 références des deux jeux de cas et les classer par **degré de dépendance**, pas par présence d'un paramètre commun.
+- [x] **P3** — balayer les paramètres balayables et **mesurer** le degré au lieu de le déduire ; le scénario est en TOML, aucun code n'est à recompiler.
 - [ ] **P4** — rapport AUDIT-REFERENCES-S62 : les cas aveugles, ceux qui ne le sont pas, et ce que chacun teste réellement.
 - [ ] **P5** — appliquer ce qui doit l'être, avec essais de refus et témoins.
 - [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
@@ -102,3 +102,21 @@ aucune recompilation, sur une copie hors du dépôt.
 symptôme et vacuité — c'est une autre question, celle de ce qu'une assertion peut voir échouer.
 Ici la question est ce que sa **référence** peut voir bouger. Lire S29 avant de conclure, et dire
 où les deux classements se recouvrent.
+
+P2 : 41 references inventoriees. Trois degres, et la plupart des cas sont sains : les references
+a 0 ou 1 ne peuvent rien tirer des parametres ; C04 se compare a Ritter, C02-c confronte lambda/T
+mesures a racine(g lambda / 2pi) — independance reelle. Restent le groupe tautologique deja
+etabli en S58 (C10, A180) et un groupe aller-retour : Hs, orbitale, pente.
+
+P3, et le balayage a trouve trois choses au lieu d une.
+ (a) **Hs est exactement proportionnel a hs** : rapport mesure/reference = 0,914723 pour
+     hs = 0,6 / 1,2 / 2,4 / 4,8. Ecart 8,528 pour cent, invariant sur un facteur 8. Le cas est
+     aveugle au parametre qu il nomme ; il ne mesure qu un facteur de chaine, faux de 8,5 pour cent.
+ (b) **Il est gouverne par tp, qu il ne nomme pas** : 0,018 pour cent a tp=4, 8,528 a tp=6,
+     15,576 a tp=9 — echec. Et par le nombre de composantes, sans convergence : 1,42 / 10,24 /
+     8,53 / 12,83 / 6,53 / 26,30 pour cent de 8 a 256. **Raffiner la configuration le fait echouer.**
+     Cause : A102, la fenetre doit couvrir plusieurs fois la plus longue onde ; jamais mesure.
+ (c) **La fenetre est en dur dans main.rs:306** — hs_restitue(bg, t, sc.hs, 128, 3.0), soit 384 m.
+     grille_cote et grille_pas_m du scenario ne l atteignent jamais : mon balayage de la fenetre
+     n a rien deplace sur un facteur 16, et c est ainsi que le litteral s est fait voir.
+     Or l en-tete du scenario affirme *ce fichier est auto-suffisant*, et SPEC-003 par.3 l exige.
