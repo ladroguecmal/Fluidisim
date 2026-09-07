@@ -69,8 +69,8 @@ Objectif         : S66-1, séparer précision spatiale et diagnostic statistique
 
 - [x] **P1** — état réel, passation et plan seul.
 - [x] **P2** — contrôle direct de phase avec borne dérivée de l’arithmétique ; témoin, défaut injecté et refus.
-- [>] **P3** — ADR-052, raccord au rapport, homogénéité diagnostique comptée ; tests et campagne.
-- [ ] **P4** — rituel de passation, journal, actions, index et décomptes, jeton libre.
+- [x] **P3** — ADR-052, raccord au rapport, homogénéité diagnostique comptée ; tests et campagne.
+- [>] **P4** — rituel de passation, journal, actions, index et décomptes, jeton libre.
 
 ### Notes de reprise
 
@@ -83,3 +83,8 @@ Borne d’arrondi à dériver avant observation ; calibration Hs S64-2 séparée
 P2 : primitive de phase partagée entre eval et audit ; erreur circulaire / borne gamma3
 sur produit scalaire fois k, plus u et 2^-32. Échantillons invalides ou borne non informative
 refusés. Témoin 256 composantes et défaut injecté (phase sur quatre bits) : test vert.
+
+P3 : ADR-052 et CONTROLES-S68. Scores 0,227536/0,650281, seuil dérivé 1 ; diagnostics
+0,979548732/1,397506641 inchangés, sans verdict. Refus statistique non fini compté en échec.
+137 tests verts, cinq ignorés ; check inchangé, physics seulement C04 en échec. Aucun seuil
+Hs changé. Suite S69 S64-2, calibration à instruire par ADR.

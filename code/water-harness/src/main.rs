@@ -307,7 +307,8 @@ fn executer_physics(sc: &Scenario, bg: &Background, t: SimTime) -> usize {
     cas.push(hs_restitue(bg, t, sc.hs as f64, sc.fenetre_cote, sc.fenetre_pas_m));
     // 3 000 m : à l'intérieur du rayon de référentiel. I-08 borne `|x_local| < 4096 m`, et
     // au-delà `eval` renvoie `None` — ce que le cas `I-08` ci-dessous vérifie explicitement.
-    cas.push(homogeneite(bg, t, 48, 3.0, 3000.0));
+    let statistique = homogeneite(bg, t, 48, 3.0, 3000.0);
+    cas.push(precision_phase_spatiale(bg));
     cas.push(borne_referentiel(bg, t));
     // C10 ne dépend pas du spectre : la flottaison se mesure contre la surface libre, quelle que
     // soit la mer qui la produit.
@@ -326,12 +327,26 @@ fn executer_physics(sc: &Scenario, bg: &Background, t: SimTime) -> usize {
             println!("         → référence : {}", c.source);
         }
     }
-    println!("  {} cas exécutés, {} échec(s)", cas.len(), echecs);
+    let refus_statistique = diagnostic_statistique(&statistique);
+    echecs += refus_statistique;
+    println!("  {} assertions, 1 diagnostic statistique ({} refus), {} échec(s)",
+        cas.len(), refus_statistique, echecs);
     println!("  cas canoniques non exécutés, faute de la couche qu'ils testent :");
     for (id, nom, attente) in cas_en_attente() {
         println!("    {id:<5} {nom:<46} {attente}");
     }
     echecs
+}
+
+// La statistique est comptée sans être validée ; une mesure absente reste un refus visible.
+fn diagnostic_statistique(c: &physics::Cas) -> usize {
+    if c.mesure.is_finite() {
+        println!("DIAG   {} : {:.9} ; sans verdict statistique (ADR-052)",c.id,c.mesure);
+        0
+    } else {
+        println!("REFUS  {} : mesure statistique indisponible (ADR-052)",c.id);
+        1
+    }
 }
 
 /// Cas canoniques qui ne dépendent **d'aucun scénario de houle** — mode `physics`.
@@ -692,6 +707,18 @@ fn main() -> ExitCode {
 #[cfg(test)]
 mod tests_graine_s65 {
     use super::*;
+
+    #[test]
+    fn diagnostic_statistique_ne_valide_pas_et_ne_masque_pas_le_refus() {
+        let mut c = physics::Cas { id: "homogénéité", grandeur: "témoin".into(),
+            mesure: 1.397507, reference: 1.0, tolerance_rel: 0.15, source: "ADR-052" };
+        assert!(!c.passe()); // Ancien contrat : échec ; ce nombre reste un diagnostic.
+        assert_eq!(diagnostic_statistique(&c),0);
+        c.mesure = f64::NAN;
+        assert_eq!(diagnostic_statistique(&c),1);
+        let (bg,_) = construire(&scenario(20260905));
+        assert!(physics::precision_phase_spatiale(&bg).passe());
+    }
 
     fn scenario(graine: u64) -> Scenario {
         let texte = include_str!("../../scenarios/C18-invariants.toml");

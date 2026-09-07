@@ -493,20 +493,10 @@ pub fn pente_maximale(bg: &Background, t: SimTime, a: f64, k_rad: f64) -> Cas {
     }
 }
 
-/// **Homogénéité spatiale de la statistique.**
-///
-/// La variance de `η` ne doit pas dépendre de l'endroit où on la mesure. Deux fenêtres disjointes,
-/// dont l'une éloignée de l'ancre, doivent donner la même variance à la fluctuation
-/// d'échantillonnage près.
-///
-/// Ce cas surveille une chose précise : la **perte de précision de la phase spatiale à grande
-/// distance**. `PhaseQ32::from_distance` multiplie un `f32` par une distance ; à quelques
-/// kilomètres, la partie fractionnaire perd des bits, et la mer se dégraderait sans que rien ne le
-/// signale.
-///
-/// Note S66 : ce rapport ne permet pas d'attribuer un échec à la précision. Le nominal
-/// 1,397507 est reproduit en f64 et dominé par les covariances entre composantes sur la
-/// fenêtre de 144 m. Voir HOMOGENEITE-S66 ; seuil et verdict conservés en attente de décision.
+/// Diagnostic de variance locale entre deux fenêtres disjointes (ADR-052).
+/// S66 a reproduit le refus nominal en f64 et isolé les covariances sur 144 m.
+/// Ce ratio ne juge plus la précision ; precision_phase_spatiale porte ce contrat.
+/// Le seuil historique demeure disponible dans Cas, mais le rapport ne le valide pas.
 pub fn homogeneite(bg: &Background, t: SimTime, cote: u32, pas_m: f64, decalage_m: f64) -> Cas {
     let var = |ox: f64| {
         let (mut s, mut s2, mut n) = (0.0f64, 0.0f64, 0u64);
@@ -531,7 +521,20 @@ pub fn homogeneite(bg: &Background, t: SimTime, cote: u32, pas_m: f64, decalage_
         mesure: if proche > 1e-12 { loin / proche } else { f64::NAN },
         reference: 1.0,
         tolerance_rel: 0.15,
-        source: "statistique invariante par translation — surveille la précision de phase",
+        source: "ADR-052 — diagnostic de variance locale, sans verdict de précision",
+    }
+}
+
+pub fn precision_phase_spatiale(bg: &Background) -> Cas {
+    let axe = [-4095.0,-3000.0,-72.0,0.0,72.0,3000.0,4095.0];
+    let points: [[f32;2];49] = std::array::from_fn(|i| [axe[i%7],axe[i/7]]);
+    Cas {
+        id: "phase-spatiale",
+        grandeur: "erreur circulaire / borne arithmétique, 49 positions".into(),
+        mesure: bg.audit_phase_spatiale(&points).unwrap_or(f64::NAN),
+        reference: 0.0,
+        tolerance_rel: 1.0, // Borne normalisée absolue, dérivée et non calibrée.
+        source: "ADR-052 — gamma3 Σ|k·x·dir| + 2^-24 + 2^-32 tours",
     }
 }
 
