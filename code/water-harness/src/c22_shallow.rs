@@ -182,9 +182,15 @@ fn mesurer(nx_oracle: usize, fenetres: usize) -> Result<usize, String> {
         } else {
             println!("invariance à l'oracle : aucun triplet comparable");
         }
-        // La même mesure sur la fenêtre **entière**, filtre ignoré. C'est la contre-épreuve de
-        // S60 : elle seule dit si une grille refusée pour contamination portait néanmoins un ordre
-        // insensible à l'oracle. Observation pure — elle n'entre dans aucun verdict.
+        // La même mesure sur la fenêtre **entière**, filtre ignoré — ADR-049 D3.
+        //
+        // Elle seule dit si une grille refusée pour contamination portait néanmoins un ordre
+        // insensible à l'oracle, et la réponse mesurée en S60 est oui : l'ordre du triplet écarté
+        // en S56 valait 1,997566515, contre 1,997599436 publié par S59 après deux campagnes et
+        // 33 minutes de calcul. **Ces valeurs sont des diagnostics sans verdict** : elles ne sont
+        // pas admissibles, parce que l'invariance ne refuse pas une contamination flagrante
+        // (essai à oracle 3200 : 5,1e-3 seulement, pour des erreurs fausses de 5,2 %). Les
+        // publier n'en fait pas des résultats ; les cacher a coûté trois sessions.
         let bornes = |v: &[(usize, f64)]| -> Vec<(usize, f64)> {
             v.iter().copied().skip(debut).take(5).collect()
         };
@@ -200,12 +206,12 @@ fn mesurer(nx_oracle: usize, fenetres: usize) -> Result<usize, String> {
             if let (physics::Ordre::Observe(pa), physics::Ordre::Observe(pb)) = (a, b) {
                 hors_filtre = hors_filtre.max((pa - pb).abs());
                 vus += 1;
-                println!("  hors filtre, triplet {n} : p(o2)={pa:.9} p(o1)={pb:.9} écart {:.3e}",
+                println!("  diagnostic sans verdict, triplet {n} : p(o2)={pa:.9} p(o1)={pb:.9} écart {:.3e}",
                     (pa - pb).abs());
             }
         }
         if vus > 0 {
-            println!("  hors filtre, {vus} triplet(s), écart max {hors_filtre:.3e}");
+            println!("  diagnostic sans verdict, {vus} triplet(s) de la fenêtre entière, écart max {hors_filtre:.3e} — ADR-049 D3 : l'invariance ne commande aucune admission");
         }
         println!("{}", bilan.ajouter(&c,true));
     }

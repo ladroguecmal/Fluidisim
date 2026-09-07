@@ -71,7 +71,7 @@ Objectif         : S57-2 — éprouver le critère d'admission de C22, et le dé
 - [x] **P2** — poser ce que le filtre protège, et instrumenter : calculer les ordres contre **chacun** des deux oracles, sans toucher à aucun critère.
 - [x] **P3** — contre-épreuve rétrospective sur 51200/102400, la campagne que le filtre a fait refuser en S56 ; et essai de refus sur un oracle franchement trop grossier.
 - [x] **P4** — ADR-049 : trancher au vu des deux mesures, ou refuser de trancher en disant ce qui manque.
-- [ ] **P5** — appliquer la décision au code, avec ses essais de refus et ses témoins.
+- [x] **P5** — appliquer la décision au code, avec ses essais de refus et ses témoins.
 - [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
 
 ### Notes de reprise
@@ -126,3 +126,8 @@ et non mal calibre, C22 publie deux grandeurs de nature differente sous un seul 
 D3 invariance publiee comme diagnostic, y compris hors filtre, et disqualifiee comme critere ;
 D4 remplacement ouvert par decision, avec l experience manquante nommee (S60-1 : une grille dont
 l erreur passe sous l ecart des oracles). Aucun verdict ne change, aucun resultat n est rouvert.
+
+P5 : sortie renommee en diagnostic sans verdict, avec renvoi a ADR-049 D3 sur la ligne de
+synthese — une valeur publiee sans etre admissible doit le dire sur la ligne qui la porte.
+128 tests reussis (40 coeur + 88 harnais), deux ignores ; hashs check inchanges. Aucun verdict
+deplace : le filtre, les seuils et les familles sont ceux de S59.
