@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-08 03:30 +02:00
+JETON            : occupé
+Battement        : 2026-09-08 09:10 +02:00
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S63 — S59-1, recenser les prescriptions non éprouvées
 Dernière session : S62 — 2026-09-08 — Hs est aveugle à hs et gouverné par sa fenêtre ; A184, L180
-Session suivante : S63 — S59-1, les prescriptions non éprouvées des rapports antérieurs
+Session suivante : selon le résultat de S63
 
 Le dossier C22 est fermé : un verdict (S59), un critère compris (S60, S61), quatre angles morts.
 Ce qui reste ouvert du côté de la convergence n'est plus une mesure mais **A114**.

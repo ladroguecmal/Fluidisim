@@ -59,78 +59,45 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S62
-État             : terminée
+Session          : S63
+État             : en cours
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Objectif         : S58-2 — recenser les instances d'A104 : pour chaque constante partagée entre
-                   une mesure et sa référence, vérifier qu'un cas la discrimine.
+Objectif         : S59-1 — recenser les prescriptions non éprouvées, celles qu'une session a
+                   écrites pour une situation qu'elle ne subissait pas encore.
 ```
 
 ### Plan
 
 - [x] **P1** — passation, jeton, plan seul.
-- [x] **P2** — inventorier les 41 références des deux jeux de cas et les classer par **degré de dépendance**, pas par présence d'un paramètre commun.
-- [x] **P3** — balayer les paramètres balayables et **mesurer** le degré au lieu de le déduire ; le scénario est en TOML, aucun code n'est à recompiler.
-- [x] **P4** — rapport AUDIT-REFERENCES-S62 : les cas aveugles, ceux qui ne le sont pas, et ce que chacun teste réellement.
-- [x] **P5** — appliquer ce qui doit l'être, avec essais de refus et témoins.
-- [x] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
+- [ ] **P2** — séparer les genres : une condition de réversibilité n'est pas une recette, et seules les recettes se vérifient.
+- [ ] **P3** — recenser les recettes du corpus et établir, pour chacune, si elle a été exécutée et ce qu'elle a donné.
+- [ ] **P4** — éprouver celles qui sont vérifiables à bas coût, en commençant par les plus engageantes.
+- [ ] **P5** — rapport, marquage des prescriptions non éprouvées, et la règle d'écriture qui en découle.
+- [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
 
 ### Notes de reprise
 
-Départ 92042b4. **A104 est ouvert depuis S21** — *une règle énoncée dans un fichier n'empêche pas
-sa violation dans le même fichier* — et S58 en a trouvé une instance coûteuse : trois références
-de C10 construites avec la constante qu'elles devaient contrôler, un arbitrage bloqué
-trente-sept sessions par un argument faux (**A180**). Personne n'a compté les autres.
+Départ 5aac200. **Deux instances connues, et elles sont toutes deux fautives.**
+**A181** (S59) : `REFERENCE-C22-S56` §5 prescrivait un découpage temporel au-delà du quart
+d'heure — il changeait le champ bit à bit et aurait invalidé la campagne. **ADR-049 D4** (S60) :
+l'expérience nommée en S60-1 était impossible, pas coûteuse ; S61 l'a dissoute.
 
-**Le critère de classement n'est pas « partage un paramètre ».** Inventaire fait : trois degrés
-apparaissent, et seul le premier est une faute.
+**La thèse à éprouver, et elle est inconfortable** : *les deux seules prescriptions du corpus
+qui aient été mises à l'épreuve se sont révélées fautives*. Si c'est exact, le taux n'est pas
+anecdotique — il dit que la prescription non exécutée est un genre de texte dont la fiabilité
+n'a jamais été établie, et le corpus en contient beaucoup.
 
-1. **Tautologie** — la référence recalcule la mesure. `C10-raideur` compare la dérivée de
-   `ρ·g·A·d` à `ρ·g·A`. Écart identiquement nul pour toute valeur du paramètre.
-2. **Aller-retour** — la référence est un paramètre d'entrée que la mesure reconstruit par une
-   chaîne réelle. `Hs` génère une mer d'après `hs`, la mesure par la variance, et compare à `hs`.
-   La chaîne est testée ; ce qui ne l'est pas est une **convention partagée** entre les deux bouts.
-3. **Indépendance** — la référence vient d'une solution analytique ou d'une autre mesure.
-   `C04` contre Ritter ; `C02-c` confronte `λ/T` mesurés à `√(gλ/2π)`.
+**Premier tri, fait à l'ouverture.** Le grep sépare trois genres, et un seul est en cause :
 
-**Ces degrés se mesurent, ils ne se déduisent pas** (L75, et S58 l'a payé) : balayer le paramètre
-et regarder l'écart. Identiquement nul → tautologie. Stable et non nul → aller-retour. Variable
-→ indépendance. `hs`, `tp` et `composantes` sont dans le scénario TOML : le balayage ne demande
-aucune recompilation, sur une copie hors du dépôt.
+1. **Condition de réversibilité** — *« si la réponse était l'inverse, il faudrait rouvrir X »*.
+   ADR-027 en a cinq, ADR-048 une. **Ce n'est pas une recette** : rien à exécuter, rien à
+   éprouver, et c'est un dispositif voulu. Hors sujet.
+2. **Anticipation de conception** — *« prévoir un raffinement côtier »*, *« probablement 2 à 4 m »*.
+   Non éprouvées par nature, mais elles ne se donnent pas pour vérifiées.
+3. **Recette procédurale** — *« si X, faire Y »*, avec une action technique. **C'est là que les
+   deux fautes se logent**, et c'est ce qu'il faut recenser.
 
-**Ne pas refaire S29.** `AUDIT-ASSERTIONS-S29` a déjà classé ces mêmes assertions en recevable,
-symptôme et vacuité — c'est une autre question, celle de ce qu'une assertion peut voir échouer.
-Ici la question est ce que sa **référence** peut voir bouger. Lire S29 avant de conclure, et dire
-où les deux classements se recouvrent.
-
-P2 : 41 references inventoriees. Trois degres, et la plupart des cas sont sains : les references
-a 0 ou 1 ne peuvent rien tirer des parametres ; C04 se compare a Ritter, C02-c confronte lambda/T
-mesures a racine(g lambda / 2pi) — independance reelle. Restent le groupe tautologique deja
-etabli en S58 (C10, A180) et un groupe aller-retour : Hs, orbitale, pente.
-
-P3, et le balayage a trouve trois choses au lieu d une.
- (a) **Hs est exactement proportionnel a hs** : rapport mesure/reference = 0,914723 pour
-     hs = 0,6 / 1,2 / 2,4 / 4,8. Ecart 8,528 pour cent, invariant sur un facteur 8. Le cas est
-     aveugle au parametre qu il nomme ; il ne mesure qu un facteur de chaine, faux de 8,5 pour cent.
- (b) **Il est gouverne par tp, qu il ne nomme pas** : 0,018 pour cent a tp=4, 8,528 a tp=6,
-     15,576 a tp=9 — echec. Et par le nombre de composantes, sans convergence : 1,42 / 10,24 /
-     8,53 / 12,83 / 6,53 / 26,30 pour cent de 8 a 256. **Raffiner la configuration le fait echouer.**
-     Cause : A102, la fenetre doit couvrir plusieurs fois la plus longue onde ; jamais mesure.
- (c) **La fenetre est en dur dans main.rs:306** — hs_restitue(bg, t, sc.hs, 128, 3.0), soit 384 m.
-     grille_cote et grille_pas_m du scenario ne l atteignent jamais : mon balayage de la fenetre
-     n a rien deplace sur un facteur 16, et c est ainsi que le litteral s est fait voir.
-     Or l en-tete du scenario affirme *ce fichier est auto-suffisant*, et SPEC-003 par.3 l exige.
-
-P4/P5 : fenetre rendue declarable (physics.fenetre_cote / fenetre_pas_m), defauts inchanges a
-128 et 3.0 ; A184. Loi mesuree : 8,53 / 9,34 / 2,43 / 0,28 / 0,28 pour cent a 6,8 / 13,7 / 27,3 /
-54,7 / 109,3 longueurs d onde. A 12288 m la variance en une passe rend NaN — le cas echoue
-correctement, pas de faux succes. AUDIT-REFERENCES-S62 ecrit. Le cas Hs annonce desormais sa
-fenetre dans son libelle. Test hs_est_aveugle_a_hs_et_gouverne_par_sa_fenetre : structurel, il
-ne fige aucun chiffre dependant de la realisation — la premiere version le faisait et a echoue,
-0,688 dans le montage du test contre 0,9147 dans le scenario. 130 tests reussis, deux ignores ;
-hashs et mesures nominales inchanges.
-
-P6 : rituel exécuté. Journal S62, A184 (sévérité 2, corrigé), L180, S58-2 close, S62-1 ouverte.
-Index et REPRISE : angles 183 vers 184, tests 129 vers 130, registres 14 vers 15, trois audits
-vers quatre. Aucun invariant invalidé, aucun ADR réécrit, aucune valeur nominale déplacée.
-Jeton libre. Reste la fusion dans master.
+**Où chercher.** Les rapports de mesure finissent tous par une section « suite ». Et surtout
+`DOSSIER-B2` et `PLAN-BENCHMARK` sont **entièrement** faits de recettes écrites pour un travail
+qui n'a jamais eu lieu — c'est le gisement principal, et personne ne l'a confronté à l'exécution
+parce que l'exécution n'a pas commencé.
