@@ -214,6 +214,7 @@ ce que les sources avaient omis.
 | **A170** | Une saturation d'affichage transforme un refus en la meilleure mesure possible | **1** | S42, `c03_seiche` |
 | **A171** | Une valeur de repli qui coïncide avec la valeur nominale est invisible à tout contrôle | **1** | S43, `ordre_grossier_estime` |
 | **A172** | Quand la grandeur est un écart, zéro est son meilleur point — aucun repli n'y est acceptable | **1** | AUDIT-REPLIS-S44 §4 |
+| **A173** | Un refus peut supprimer son assertion ou être ignoré par une sélection — corrigé S45 | **1** | AUDIT-REPLIS-S44 §7 |
 
 Cent huit angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -1322,3 +1323,11 @@ pendant quatre sessions.
   >
   > *Un essai à zéro qui réussit du premier coup n'est pas du travail perdu : c'est la seule façon
   > de distinguer un montage sain d'un montage jamais interrogé.* Restent **C08** et **C02**.
+
+- **A173** *(sévérité 1, corrigé en S45)* — **Le refus peut retirer l'assertion ou être ignoré
+  par une sélection.** C02 produisait zéro assertion lorsque sa mesure de période/longueur
+  échouait ; C10 ignorait les NaN pendant la recherche d'une crête et validait quatre grandeurs
+  sur une surface supposée nulle. Reproduit avec un champ hors référentiel ; C02 également
+  sans excitation. Corrigé avec conservation des trois assertions C02 et propagation du refus
+  aux quatre mesures C10. Témoins nominal et statique sans houle préservés.
+  Voir AUDIT-REPLIS-S44 §7. Aucun succès indu supplémentaire trouvé sur les douze autres origines.

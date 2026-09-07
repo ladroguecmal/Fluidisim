@@ -519,3 +519,15 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 > **Et le corollaire, qui est ce que l'audit a coûté à trouver** : les treize `unwrap_or(NaN)` sont
 > irréprochables et **ont produit les trois défauts**, parce que `min`, `max` et une soustraction
 > suivie d'un `max` avalent tous le `NaN`. *C'est l'aval qu'il faut suivre* (**L166**).
+
+## Actions relevées en séance — S45
+
+| # | Action | Origine | Porteur | État |
+|---|---|---|---|---|
+| S45-1 | Rendre explicite le refus dans Convergence::ordre et compter les verdicts indéterminés de C08, avec essais NaN/infini et témoins finis ; vérifier le rapport final | AUDIT-REPLIS-S44 §7 : Observe(NaN), sans succès indu sur le chemin actuel | session S46 recommandée | ouverte |
+
+**S44-2 close en S45** : les treize chemins ont été suivis. Deux défauts supplémentaires
+corrigés sur eta() : assertions C02 omises et maximum C10 ignorant le refus.
+**S43-3 close en S45** : essai C02 sans excitation, trois assertions en échec ; témoin
+monochromatique vert. S41-4 est donc couverte pour les quatre montages C02/C03/C06/C08,
+avec l'essai d'estimateur défini en S43 pour C08. S44-1 reste ouverte.

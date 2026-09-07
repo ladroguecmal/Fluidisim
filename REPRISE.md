@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-07 12:40 +02:00
+JETON            : libre
+Battement        : 2026-09-07 13:55 +02:00
 Agent            : Codex (git et cargo disponibles)
-Session en cours : S45
-Dernière session : S44 — 2026-09-07 — quand la grandeur est un écart, zéro est le succès parfait
-Session suivante : S45 — **suivre les treize `unwrap_or(NaN)` jusqu'à leur assertion** (S44-2) *(recommandé)*
+Session en cours : —
+Dernière session : S45 — 2026-09-07 — un refus peut supprimer son assertion
+Session suivante : S46 — statuts et décompte des refus C08 (S45-1)
 ```
 
 > **Avant de regarder le jeton, exécuter `git worktree list` et `git branch -a`.** Le jeton est un
@@ -140,11 +140,11 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-Trente-cinq sessions ici, **plus cinq dans une lignée parallèle réconciliée en S35** (B-S22 à
-B-S27) — **47 ADR** *(dont un acté)*, six spécifications, **treize registres** — **et du code qui
+Quarante-cinq sessions ici, **plus cinq dans une lignée parallèle réconciliée en S35** (B-S22 à
+B-S27) — **47 ADR** *(dont un acté)*, six spécifications, **quatorze registres** — **et du code qui
 tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équilibrés et **tous deux
 montés sur leurs cas, confrontés l'un à l'autre et instrumentés, **plus un milieu à dispersion
-exacte** *(S39)*, **96 tests verts** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
+exacte** *(S39)*, **98 tests verts, deux ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
 verdict** (C08). Quatre cas canoniques sur δ sont exécutés ici : **C01 et C03 passent**, C04 échoue,
 C08 ne conclut pas. **La lignée réconciliée en donne d'autres verdicts, et l'écart a une cause
 unique** : elle est passée à l'ordre deux, et C04 comme C08 y sont verts (`CAS-CANONIQUES`, « deux
@@ -462,6 +462,11 @@ H3 aurait hérité du défaut, et le harnais l'aurait certifié stable.
 Détail à jour : `docs/00_INDEX.md`, section « État d'avancement ».
 
 ## 5. Ce qui n'est pas à toi de décider
+
+**Mise à jour S45 :** les treize chemins de refus sont suivis. C02 conservait zéro assertion
+sans passages par zéro ; C10 ignorait les points invalides dans son maximum. Ces deux défauts
+sont corrigés, avec essais de refus et témoins. Résultats nominaux et hashs inchangés.
+Voir AUDIT-REPLIS-S44 §7, A173 et L167. S44-2 et S43-3 closes ; suite S45-1.
 
 **Les cinq arbitrages de design ont été tranchés en S18** par
 [`ADR-027`](docs/adr/ADR-027-les-cinq-arbitrages-tranches.md), sur délégation explicite. Deux des

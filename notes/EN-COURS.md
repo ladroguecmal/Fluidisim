@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S45
-État             : en cours
+État             : terminée
 Agent            : Codex (git et cargo disponibles)
 Objectif         : Suivre les treize replis NaN jusqu'à leur consommation (S44-2).
 ```
@@ -70,10 +70,14 @@ Objectif         : Suivre les treize replis NaN jusqu'à leur consommation (S44-
 - [x] **P1** — vérifier les copies et branches, prendre le jeton et committer ce plan seul.
 - [x] **P2** — tracer les treize chemins dans un complément à AUDIT-REPLIS-S44 ; identifier les transformations qui avalent un refus.
 - [x] **P3** — vérifier les chemins suspects par essais avec refus et témoins ; corriger les défauts constatés, rejouer tests et références.
-- [ ] **P4** — rituel de fin : journal, leçons et angles morts si nouveaux, actions, index et décomptes, jeton libre.
+- [x] **P4** — rituel de fin : journal, leçons et angles morts si nouveaux, actions, index et décomptes, jeton libre.
 
 ### Notes de reprise
 
 Départ : master b521129, propre. Copie reprise-projet-c107bf au même commit, propre et jeton libre ; friendly-bhabha-6da427 explicitement archivée. Pas de branche plus avancée. Travail dans la copie principale, sans nouvelle branche.
 S44 recommande S44-2. Le recensement réel trouve treize occurrences dans code/, dont deux dans les tests de water-core (pas treize dans le harnais).
 Références à préserver : les deux hashs et les verdicts canoniques, notamment C04 volontairement rouge sur delta.
+
+P3 : deux tests rouges avant correction, verts après ; 98 succès et deux ignorés.
+P4 : journal, A173, L167, actions et index actualisés. S46 recommandée : S45-1.
+Décomptes vérifiés : 47 ADR, 17 invariants, 6 SPEC, 14 registres, 23 cas canoniques.

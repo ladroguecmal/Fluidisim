@@ -4482,3 +4482,36 @@ actions ouvertes dont cette session ait montré qu'elle trouve quelque chose : t
 ### Arbitrages en attente
 
 Inchangés.
+
+## S45 — 2026-09-07 — Un refus peut supprimer son assertion
+
+**Agent : Codex**, git et cargo disponibles. Reprise demandée par l'utilisateur ; travail sur
+master, après contrôle des trois copies. Aucun travail parallèle constaté.
+
+**Entrées.** S44-2 et AUDIT-REPLIS-S44. Treize replis NaN recensés : onze dans le harnais,
+deux dans les tests du cœur. Le suivi complet est au §7 du registre existant.
+
+**Sorties.** Deux défauts sur la même origine eta() : C02 omettait ses trois assertions quand
+aucun passage par zéro n'était trouvé ; C10 ignorait les points invalides dans son maximum et
+pouvait valider une surface à zéro sans mesure. Les tests échouent avant correction, passent
+après avec témoins. C02 garde trois assertions en échec ; C10 propage le refus aux quatre mesures.
+A173, L167 ; S44-2 et S43-3 closes. Aucun ADR ni seuil physique changé ; I-08 reste vrai.
+
+**Validation.** cargo test --offline : 38 + 60 = 98 succès, deux tests longs ignorés.
+check : deux scénarios, zéro échec ; hashs 0x3e2c06a7b00e73e3 et 0x1a8b0629a9f51b6e.
+physics : 267 lignes comparées avant/après, seules les durées et les coûts par pas changent.
+Sortie 1 attendue : C04 ordre un reste en échec. Les quatre avertissements de compilation
+préexistants ne sont pas traités. Aucun résultat nominal déplacé.
+
+**Décision structurante.** La liste des assertions ne dépend pas de la réussite des mesures.
+L'eau plate refuse une mesure de période mais convient à la statique : le témoin vide dépend
+de la grandeur observée.
+
+**Non fait.** C08 peut encore représenter un refus par Observe(NaN) ; il ne devient pas un
+succès sur le chemin audité, mais son statut est trompeur. Action S45-1. S44-1 (front absent),
+S43-2 (entrées vides des autres contrôles), S42-3 (mesures dupliquées) restent ouvertes.
+
+**Suite recommandée : S46 — rendre explicites et compter les verdicts indéterminés de C08**
+(S45-1), avec témoins finis et refus. Arbitrages inchangés : masse volumique A103, état réel
+et infrastructure ; aucun dépôt distant créé. A107 est historiquement réconcilié en S35,
+les branches conservées restent soumises au contrôle de reprise.

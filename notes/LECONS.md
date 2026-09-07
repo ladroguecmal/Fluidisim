@@ -2724,3 +2724,15 @@ personne n'aurait classée comme « valeur de repli » — un `max(0, …)` qui 
 valeur publiée et remonter** — quelle expression la calcule, qu'est-ce qui entre dedans, et que
 devient un refus à chaque étape. C'est plus long qu'un `grep`, et c'est la seule chose qui trouve. Le
 `grep` sert à borner le travail, pas à le faire.
+
+## L167 — Vérifier aussi que l'assertion existe quand la mesure échoue
+
+*(S45)* Un cas de dispersion ne construisait ses assertions qu'après avoir trouvé des passages
+par zéro. Sans onde, il ne produisait ni mesure fausse ni verdict rouge : il produisait une liste
+vide. Un audit des seules valeurs publiées ne pouvait voir cette disparition.
+
+**Réflexe :** vérifier ensemble le nombre et l'identité des assertions attendues, puis leur
+verdict sur une entrée sans mesure. Une branche qui saute un échantillon peut aussi sélectionner
+silencieusement les seules données valides : tester une fenêtre partiellement invalide, pas
+seulement une fenêtre entièrement vide. Le témoin valide reste nécessaire : une eau plate est
+sans période et pourtant parfaitement recevable pour une mesure de flottabilité statique.

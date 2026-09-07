@@ -43,14 +43,14 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 - Chaque session ajoute une entrée à `notes/JOURNAL.md` avant de se clore, et exécute le rituel de
   fin décrit dans [`REPRISE.md`](REPRISE.md) §6.
 - **Une seule session travaille à la fois** : le jeton en tête de `REPRISE.md` en tient le compte,
-  avec trois états — `libre`, `occupé`, `interrompu`.
+  avec quatre états — `libre`, `occupé`, `interrompu`, `archivé`.
 - **Une seule amorce, [`AGENTS.md`](AGENTS.md)**, quel que soit l'agent — Claude, ChatGPT, Codex,
   un autre modèle, ou une personne. Les autres noms de fichier d'amorce sont des **renvois d'une
   ligne**, jamais des copies : deux amorces qui se ressemblent divergeront, et chaque agent suivra
   alors la sienne (**L137**).
 - **Avant de regarder le jeton : `git worktree list` et `git branch -a`.** Le jeton est un fichier
   **versionné** : il est propre à une branche et à une copie de travail, et ne dit rien de ce qui
-  se passe ailleurs. Le dépôt a forké **deux fois** par ce mécanisme — voir
+  se passe ailleurs. Le dépôt a forké **trois fois** par ce mécanisme — voir
   [`docs/registres/FORK-S22-S26.md`](docs/registres/FORK-S22-S26.md). Ces deux commandes sont le
   seul dispositif qui ait tenu.
 - **Le plan se déclare avant le travail**, dans [`notes/EN-COURS.md`](notes/EN-COURS.md), et se
