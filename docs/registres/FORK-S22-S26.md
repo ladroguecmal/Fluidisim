@@ -236,3 +236,22 @@ L'action **S35-7** disait exactement quoi faire — *répliquer ce registre dans
 vivantes le jour où l'une d'elles est reprise* — et elle était portée par l'utilisateur, donc par
 personne au moment où il fallait agir. **Une action dont le porteur n'est pas la session suivante
 n'a pas de porteur.**
+
+### 9.4 Ce que S39 a fait, et qui n'avait jamais été fait
+
+**Le marqueur a été écrit des deux côtés le jour même.** C'est ce que **L137** prescrit depuis S35
+et que personne n'avait exécuté — l'action S35-7 était portée par l'utilisateur, donc par personne
+au moment où il fallait agir.
+
+| côté | ce qui a été écrit |
+|---|---|
+| lignée vivante | le quatrième état du jeton, **`archivé`**, dans `REPRISE.md` §1 et dans `CLAUDE.md` |
+| **lignée B** | son jeton passé à `archivé`, un encadré en tête de son `REPRISE.md`, et **l'amorce qui lui manquait depuis S35** en tête de son `CLAUDE.md` |
+
+Le commit côté B est `5d9bf2f`. La branche reste entière — rien n'est supprimé, son historique est
+son seul rôle — mais **elle dit maintenant ce qu'elle est** à qui l'ouvre.
+
+> **La leçon de procédure, pour la troisième et dernière fois** : un correctif de procédure n'est
+> pas écrit tant qu'il n'est pas écrit **partout où il doit être lu**. Et une action de réplication
+> confiée à « l'utilisateur » n'a pas de porteur : c'est la session qui constate le fork qui doit la
+> faire, dans la même séance, ou dire explicitement qu'elle ne l'a pas faite.
