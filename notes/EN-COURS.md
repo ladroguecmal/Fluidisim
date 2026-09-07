@@ -59,80 +59,42 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S60
-État             : terminée
+Session          : S61
+État             : en cours
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Objectif         : S57-2 — éprouver le critère d'admission de C22, et le décider par ADR.
+Objectif         : S60-1 — atteindre le régime où l'erreur d'une grille passe sous l'écart des
+                   oracles, ou établir qu'il est hors d'atteinte et dire ce qui le remplace.
 ```
 
 ### Plan
 
 - [x] **P1** — passation, jeton, plan seul.
-- [x] **P2** — poser ce que le filtre protège, et instrumenter : calculer les ordres contre **chacun** des deux oracles, sans toucher à aucun critère.
-- [x] **P3** — contre-épreuve rétrospective sur 51200/102400, la campagne que le filtre a fait refuser en S56 ; et essai de refus sur un oracle franchement trop grossier.
-- [x] **P4** — ADR-049 : trancher au vu des deux mesures, ou refuser de trancher en disant ce qui manque.
-- [x] **P5** — appliquer la décision au code, avec ses essais de refus et ses témoins.
-- [x] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
+- [ ] **P2** — chiffrer l'expérience prescrite avant de la lancer, et établir si le régime visé est atteignable dans ce dispositif.
+- [ ] **P3** — si non : dériver ce que le filtre ×30 exige réellement, et **le vérifier contre les cinq campagnes historiques**, dont les refus sont connus.
+- [ ] **P4** — conclure : note corrective datée sur ADR-049 D4, et ce qui remplace l'expérience impossible.
+- [ ] **P5** — appliquer au code ce qui doit l'être, avec essais de refus et témoins.
+- [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
 
 ### Notes de reprise
 
-Départ 283e82a, master et worktree confondus.
+Départ 9f63f2c. **Le premier geste est celui que S59 a appris (L177) : éprouver la prescription
+avant de l'exécuter.** S60 a nommé une expérience — « une grille dont l'erreur passe sous l'écart
+des oracles, 25600 contre 51200/102400, moins de sept minutes » — sans la chiffrer.
 
-**Le piège de cette session est nommé d'avance.** Un critère d'admission qu'on rouvre après
-avoir obtenu un succès, c'est le geste que le dépôt refuse ailleurs — *« la session qui rendra
-C04 vert devra changer de schéma, pas de seuil »*. **Rien ne sera assoupli pour obtenir un
-résultat.** Si la mesure ne tranche pas, la sortie légitime est de ne pas trancher et de dire
-ce qui manque.
+**Premier calcul, avant toute exécution.** La grille la plus fine possible vaut `o1/2`. Si le
+schéma est d'ordre 2, `e(o1/2) ≈ 4C/o1²` tandis que `écart(o1, 2o1) ≈ C/o1² − C/4o1² = 0,75 C/o1²`
+— les deux quantités ont **la même origine**, l'erreur du schéma, et leur rapport vaut **16/3 ≈ 5,3
+indépendamment de la taille de l'oracle**. Mesuré : 4,97 à o1 = 25600, 3,73 attendu à 51200,
+3,00 à 89600 — la lente décroissance vient de l'exposant 1,596 de l'écart, pas de l'ordre.
 
-**Ce que le filtre veut protéger** : que l'erreur mesurée d'une grille soit dominée par sa
-propre erreur de discrétisation, et non par celle de l'oracle. Le filtre actuel en est un
-**proxy global** — `e(n) ≥ 30 × ‖o1 − o2‖` — et A179 a mesuré qu'il est piloté par le biais du
-plus **grossier** des deux oracles, dont aucune erreur publiée ne dépend.
+Extrapolé, `ratio < 1` demande **o1 ≈ 1 355 000** et **72,3 h** de calcul. **L'expérience prescrite
+est hors budget de trois ordres de grandeur**, et la grille 25600 nommée dans l'action n'atteint
+que 3,73 — plus mal que le 4,97 que S48 avait déjà obtenu sans le voir.
 
-**La piste, et sa contre-épreuve.** L'ordre est estimé sur des **différences successives**, où
-une contamination additive uniforme s'annule : mesuré en S59, les ordres calculés contre les
-deux oracles coïncident à 1e-5 sur les six triplets. Un critère direct serait donc l'**invariance
-de la grandeur publiée au choix de l'oracle**, qui porte sur ce qu'on publie et se lit sans
-modèle. Mais il faut d'abord répondre à deux questions, et par la mesure :
+À vérifier avant d'en tirer quoi que ce soit : ces chiffres sont extrapolés d'un calage sur S59.
+La mesure `fine 25600` coûte environ 95 s et donne le point réel à `o1/2`.
 
-1. **Aurait-il conclu en S56**, avec 51200/102400 — la campagne que le filtre a refusée ? Si oui
-   avec la même valeur d'ordre, le filtre a coûté 32 minutes pour rien. Si avec une valeur
-   différente, il protégeait, et la piste tombe.
-2. **Refuse-t-il ce qu'il doit refuser ?** Un oracle franchement trop grossier doit faire
-   diverger les deux ordres. Un critère qu'on n'a jamais vu refuser n'a pas été testé (S34).
-
-Réserve à garder au chaud : deux oracles du même schéma partagent leur erreur de modèle. Le
-critère proposé n'y remédie pas — il ne la voit pas davantage que le filtre actuel (A114,
-ADR-043 §3). Ce serait à écrire dans la décision, pas à passer sous silence.
-
-P2 : invariance a l'oracle mesuree et affichee, y compris hors filtre. Aucun critere touche.
-Test synthetique : un biais uniforme mille fois l'erreur la plus fine ne deplace pas l'ordre ;
-un biais heterogene cent fois plus petit le deplace. Le critere ne voit que l'heterogeneite.
-
-P3, deux mesures, et elles vont en sens contraire.
- (a) Essai de refus, oracle 3200/6400 : contamination flagrante — e(1600) sous-estimee de 5,2 %,
-     deux grilles refusees — et l'invariance ne vaut que 5,1e-3. **Elle ne refuse pas ce qu'elle
-     devrait refuser** : deux oracles voisins partagent leur erreur (A114). Elle ne peut pas
-     remplacer le filtre. Mais elle **majore** l'erreur reelle sur l'ordre d'un facteur 31,5 ;
-     a 51200 d'un facteur 3,1. Majorant conservateur, dans l'unite de la grandeur publiee.
- (b) Contre-epreuve retrospective, 51200/102400 en 371,972 s : le triplet du verdict rend
-     **1,997566515**, contre 1,997599436 en S59 — **ecart 3,29e-5**. L'ordre publie par S59
-     etait deja mesurable en S56. Entre les deux, 1987,7 s de calcul (33 min 08 s) et deux
-     sessions, pour deplacer un ordre de trois centiemes de millieme.
- 88 tests harnais, 40 coeur, deux ignores.
-
-P4 : ADR-049. D1 filtre conserve sans aucune modification ; D2 A179 requalifie — mal attribue
-et non mal calibre, C22 publie deux grandeurs de nature differente sous un seul critere (A182) ;
-D3 invariance publiee comme diagnostic, y compris hors filtre, et disqualifiee comme critere ;
-D4 remplacement ouvert par decision, avec l experience manquante nommee (S60-1 : une grille dont
-l erreur passe sous l ecart des oracles). Aucun verdict ne change, aucun resultat n est rouvert.
-
-P5 : sortie renommee en diagnostic sans verdict, avec renvoi a ADR-049 D3 sur la ligne de
-synthese — une valeur publiee sans etre admissible doit le dire sur la ligne qui la porte.
-128 tests reussis (40 coeur + 88 harnais), deux ignores ; hashs check inchanges. Aucun verdict
-deplace : le filtre, les seuils et les familles sont ceux de S59.
-
-P6 : rituel exécuté. Journal S60, A182 (sévérité 2, ouvert par décision), L178, S57-2 close,
-S60-1 ouverte et prioritaire. Index et REPRISE : ADR 48 vers 49, angles 181 vers 182, tests
-127 vers 128. Aucun invariant invalidé, aucun ADR réécrit, aucun verdict déplacé.
-Jeton libre. Reste la fusion dans master.
+Piste ouverte par le même calcul : si le rapport `e/écart` ne dépend que du **rapport
+oracle/grille**, alors le filtre ×30 équivaut à une condition **géométrique**, connue d'avance et
+sans aucune mesure — et les quatre campagnes de S48 à S57 auraient pu savoir leur résultat avant
+de calculer. À vérifier contre les refus réellement observés, qui sont tous consignés.

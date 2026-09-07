@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-08 01:42 +02:00
+JETON            : occupé
+Battement        : 2026-09-08 02:00 +02:00
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S61 — S60-1, et d'abord vérifier que l'expérience prescrite est réalisable
 Dernière session : S60 — 2026-09-08 — filtre conservé, A179 requalifié ; A182, L178
-Session suivante : S61 — S60-1, la grille dont l'erreur passe sous l'écart des oracles
+Session suivante : selon le résultat de S61
 
 Note S58 : S57 puis S58 ont travaillé dans le worktree claude/reprise-projet-29ef50, et **les
 deux ont été fusionnées dans master en avance rapide** — bd9f087 puis 531491f. Les deux copies
