@@ -59,27 +59,21 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S51
-État             : terminée
+Session          : S52
+État             : en cours
 Agent            : Codex (git et cargo disponibles)
-Objectif         : Inventorier les mesures dupliquées et leurs appelants (S42-3).
+Objectif         : Partager la régression centrée et examiner les projections C22 (S51-1).
 ```
 
 ### Plan
 
 - [x] **P1** — reprise, copies, jeton et plan seul.
-- [x] **P2** — inventorier les estimateurs, rechercher leurs formules et tracer assertions/diagnostics/tests ; distinguer mesures distinctes et copies.
-- [x] **P3** — traiter les duplications avérées dans le périmètre, vérifier les résultats et documenter les limites et suites.
-- [x] **P4** — rituel : journal, enseignements, actions, index et décomptes, passation et jeton libre.
+- [ ] **P2** — extraire pente/R² avec refus et témoins ; raccorder les deux appelants sans changer fenêtres, logarithmes ni unités.
+- [ ] **P3** — examiner les contrats de projection, trancher le périmètre ; tests et comparaison des rapports, documentation des limites.
+- [ ] **P4** — rituel : journal, enseignements, actions, index/décomptes, passation et jeton libre.
 
 ### Notes de reprise
 
-Master 8fc8a65 propre, copies anciennes propres. REPRISE entière et dernière entrée du
-journal relues, socle connu dans cette conversation. Ne pas fusionner les deux solveurs
-ou leurs montages indépendants (ADR-043). Audit des mesures, pas réduction des lignes.
-
-P2 : dix familles inventoriées dans AUDIT-MESURES-S51. Deux copies de Richardson ont divergé ; test ajouté reproduit (Some(NaN), NaN) au lieu du refus. Régression centrée dupliquée, action de suite S51-1. Test volontairement rouge jusqu'à P3.
-
-P3 : Richardson partagé, refus non finis réparé ; 108 tests réussis, deux ignorés. Rapport physics inchangé sauf trois durées, sortie 1 attendue ; check et hashs inchangés. Audit final et correctif de portée S46 écrits.
-
-P4 : journal, A176 et L172 enregistrés ; S42-3 close, suite S51-1 ouverte. Index et passation S52 à jour, jeton libre. Décomptes : 47 ADR, 17 invariants, 6 SPEC, 14 registres, 23 cas, 176 angles.
+Master 50e952d propre, copies anciennes propres. REPRISE et socle lus dans cette conversation ;
+jeton et nouveautés S51 relus. Deux régressions centrées dans physics.rs, la régression
+non centrée shallow reste distincte. Aucun changement de solveur ni seuil de validation.

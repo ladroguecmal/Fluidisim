@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-07 19:10 +02:00
+JETON            : occupé
+Battement        : 2026-09-07 19:12 +02:00
 Agent            : Codex (git et cargo disponibles)
-Session en cours : —
+Session en cours : S52
 Dernière session : S51 — 2026-09-07 — mesures inventoriées, Richardson partagé
 Session suivante : S52 — régression centrée et projections C22 (S51-1)
 ```
