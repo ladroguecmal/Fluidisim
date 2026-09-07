@@ -59,73 +59,46 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S61
-État             : terminée
+Session          : S62
+État             : en cours
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Objectif         : S60-1 — atteindre le régime où l'erreur d'une grille passe sous l'écart des
-                   oracles, ou établir qu'il est hors d'atteinte et dire ce qui le remplace.
+Objectif         : S58-2 — recenser les instances d'A104 : pour chaque constante partagée entre
+                   une mesure et sa référence, vérifier qu'un cas la discrimine.
 ```
 
 ### Plan
 
 - [x] **P1** — passation, jeton, plan seul.
-- [x] **P2** — chiffrer l'expérience prescrite avant de la lancer, et établir si le régime visé est atteignable dans ce dispositif.
-- [x] **P3** — si non : dériver ce que le filtre ×30 exige réellement, et **le vérifier contre les cinq campagnes historiques**, dont les refus sont connus.
-- [x] **P4** — conclure : note corrective datée sur ADR-049 D4, et ce qui remplace l'expérience impossible.
-- [x] **P5** — appliquer au code ce qui doit l'être, avec essais de refus et témoins.
-- [x] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
+- [ ] **P2** — inventorier les 41 références des deux jeux de cas et les classer par **degré de dépendance**, pas par présence d'un paramètre commun.
+- [ ] **P3** — balayer les paramètres balayables et **mesurer** le degré au lieu de le déduire ; le scénario est en TOML, aucun code n'est à recompiler.
+- [ ] **P4** — rapport AUDIT-REFERENCES-S62 : les cas aveugles, ceux qui ne le sont pas, et ce que chacun teste réellement.
+- [ ] **P5** — appliquer ce qui doit l'être, avec essais de refus et témoins.
+- [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
 
 ### Notes de reprise
 
-Départ 9f63f2c. **Le premier geste est celui que S59 a appris (L177) : éprouver la prescription
-avant de l'exécuter.** S60 a nommé une expérience — « une grille dont l'erreur passe sous l'écart
-des oracles, 25600 contre 51200/102400, moins de sept minutes » — sans la chiffrer.
+Départ 92042b4. **A104 est ouvert depuis S21** — *une règle énoncée dans un fichier n'empêche pas
+sa violation dans le même fichier* — et S58 en a trouvé une instance coûteuse : trois références
+de C10 construites avec la constante qu'elles devaient contrôler, un arbitrage bloqué
+trente-sept sessions par un argument faux (**A180**). Personne n'a compté les autres.
 
-**Premier calcul, avant toute exécution.** La grille la plus fine possible vaut `o1/2`. Si le
-schéma est d'ordre 2, `e(o1/2) ≈ 4C/o1²` tandis que `écart(o1, 2o1) ≈ C/o1² − C/4o1² = 0,75 C/o1²`
-— les deux quantités ont **la même origine**, l'erreur du schéma, et leur rapport vaut **16/3 ≈ 5,3
-indépendamment de la taille de l'oracle**. Mesuré : 4,97 à o1 = 25600, 3,73 attendu à 51200,
-3,00 à 89600 — la lente décroissance vient de l'exposant 1,596 de l'écart, pas de l'ordre.
+**Le critère de classement n'est pas « partage un paramètre ».** Inventaire fait : trois degrés
+apparaissent, et seul le premier est une faute.
 
-Extrapolé, `ratio < 1` demande **o1 ≈ 1 355 000** et **72,3 h** de calcul. **L'expérience prescrite
-est hors budget de trois ordres de grandeur**, et la grille 25600 nommée dans l'action n'atteint
-que 3,73 — plus mal que le 4,97 que S48 avait déjà obtenu sans le voir.
+1. **Tautologie** — la référence recalcule la mesure. `C10-raideur` compare la dérivée de
+   `ρ·g·A·d` à `ρ·g·A`. Écart identiquement nul pour toute valeur du paramètre.
+2. **Aller-retour** — la référence est un paramètre d'entrée que la mesure reconstruit par une
+   chaîne réelle. `Hs` génère une mer d'après `hs`, la mesure par la variance, et compare à `hs`.
+   La chaîne est testée ; ce qui ne l'est pas est une **convention partagée** entre les deux bouts.
+3. **Indépendance** — la référence vient d'une solution analytique ou d'une autre mesure.
+   `C04` contre Ritter ; `C02-c` confronte `λ/T` mesurés à `√(gλ/2π)`.
 
-À vérifier avant d'en tirer quoi que ce soit : ces chiffres sont extrapolés d'un calage sur S59.
-La mesure `fine 25600` coûte environ 95 s et donne le point réel à `o1/2`.
+**Ces degrés se mesurent, ils ne se déduisent pas** (L75, et S58 l'a payé) : balayer le paramètre
+et regarder l'écart. Identiquement nul → tautologie. Stable et non nul → aller-retour. Variable
+→ indépendance. `hs`, `tp` et `composantes` sont dans le scénario TOML : le balayage ne demande
+aucune recompilation, sur une copie hors du dépôt.
 
-Piste ouverte par le même calcul : si le rapport `e/écart` ne dépend que du **rapport
-oracle/grille**, alors le filtre ×30 équivaut à une condition **géométrique**, connue d'avance et
-sans aucune mesure — et les quatre campagnes de S48 à S57 auraient pu savoir leur résultat avant
-de calculer. À vérifier contre les refus réellement observés, qui sont tous consignés.
-
-P2/P3 : GEOMETRIE-DU-FILTRE-S61. Treize points de cinq campagnes, oracles de 3200 a 89600 :
-ratio = 2,011 k^1,902 o^-0,058, ecart max 23,5 pour cent. La taille d oracle ne compte presque
-pas. Identite sous-jacente : ratio = k^p / (1 - 2^-p). Le filtre x30 equivaut a k >= 5,6 a 6,0,
-soit un oracle six fois plus fin que la grille la plus fine ; l historique 2, 4, 6, 7 s y range
-sans exception. **S60-1 est dissoute** : ratio < 1 demande k = 1, l emboitement exige k >= 2.
-Mon propre chiffrage de P1 (72 h) etait faux — exposant local 1,596 extrapole sur cinq decades,
-alors que le global vaut 1,9 ; la conclusion se durcit, impossible et non couteux. A183 :
-le seuil d admission d une mesure d ordre est fonction de l ordre. L uniformite du biais, elle,
-est etablie sans regime extreme : colonne variation plate a 2 pour cent sur un facteur 256.
-
-P4 : ADR-050. D1 le filtre x30 equivaut a k >= 6 environ, condition geometrique lisible avant
-tout calcul ; D2 le seuil d admission d une mesure d ordre est fonction de l ordre — A183 ;
-D3 filtre conserve, description completee sans reecriture. S60-1 dissoute. Note corrective datee
-sur ADR-049 D4, dont le reste tient sans changement.
-
-P5 : annonce d admissibilite affichee avant chaque campagne, et mode --annonce qui n en affiche
-que la prevision sans rien calculer. A oracle 51200 elle prevoit la grille 12800 refusee avec un
-ratio de 15,0 ; S56 avait mesure 14,81. Trois classes seulement — admise, refusee, et **a la
-frontiere** entre k=5 et k=7, ou le modele avoue qu il ne tranche pas : a k=6 il annoncerait 31,6
-contre 28,7 mesures, du mauvais cote du seuil. Test qui retrouve l historique 2, 4, 6, 7. Le
-mode sec ne contourne aucun refus de taille. 129 tests reussis, deux ignores ; hashs inchanges.
-
-Note d honnetete : deux campagnes ont ete lancees par distraction pendant cette etape, faute
-d avoir ce mode sec — l une de 14 min interrompue, l autre de 6 min. Aucun resultat n en depend.
-C est exactement le besoin auquel --annonce repond, rencontre en le construisant.
-
-P6 : rituel exécuté. Journal S61, A183 (sévérité 2, ouvert par décision), L179, S60-1 dissoute,
-S61-1 close par construction. Index et REPRISE : ADR 49 vers 50, angles 182 vers 183, tests 128
-vers 129. Aucun invariant invalidé, aucun ADR réécrit, aucun verdict déplacé.
-Jeton libre. Reste la fusion dans master.
+**Ne pas refaire S29.** `AUDIT-ASSERTIONS-S29` a déjà classé ces mêmes assertions en recevable,
+symptôme et vacuité — c'est une autre question, celle de ce qu'une assertion peut voir échouer.
+Ici la question est ce que sa **référence** peut voir bouger. Lire S29 avant de conclure, et dire
+où les deux classements se recouvrent.

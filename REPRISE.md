@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-08 02:38 +02:00
+JETON            : occupé
+Battement        : 2026-09-08 02:50 +02:00
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S62 — S58-2, recenser les instances d'A104
 Dernière session : S61 — 2026-09-08 — le filtre est géométrique, S60-1 dissoute ; A183, L179
-Session suivante : S62 — S58-2, recenser les cas aveugles à leurs paramètres
+Session suivante : selon le résultat de S62
 
 Le dossier C22 est fermé : un verdict (S59), un critère compris (S60, S61), quatre angles morts.
 Ce qui reste ouvert du côté de la convergence n'est plus une mesure mais **A114**.
