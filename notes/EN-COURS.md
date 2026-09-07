@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S42
-État             : en cours
+État             : terminée
 Battement        : 2026-09-07
 Objectif         : L'essai à zéro de C03 — un montage sans seiche ne doit pas rendre de demi-vie
 ```
@@ -108,7 +108,7 @@ l'autre non — encore une divergence que l'oracle croisé n'a pas cherchée par
 - [x] **P6** — répercussions : `CAS-CANONIQUES` — l'essai à zéro devient une condition de mesure ;
       **A167** relu ; ce que l'inventaire des témoins doit devenir.
 - [x] **P7a** — rituel : journal, leçons L161-L162, actions S42-1 à S42-3.
-- [ ] **P7b** — rituel : index, décomptes, jeton libéré.
+- [x] **P7b** — rituel : index, décomptes, jeton libéré.
 
 ### Notes de reprise
 

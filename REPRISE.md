@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-07
-Session en cours : S42 — l'essai à zéro de C03
-Dernière session : S41 — 2026-09-07 — cinq des sept angles morts importés désignaient un défaut présent ici
-Session suivante : S42 — **écrire l'essai à zéro de C03** (S41-4) *(recommandé)*, ou refaire les formules restantes (S41-2)
+Session en cours : —
+Dernière session : S42 — 2026-09-07 — C03 déclarait le néant conforme, avec le meilleur score possible
+Session suivante : S43 — **l'essai à zéro de C08** (S42-1) *(recommandé)*, ou les valeurs de repli après mesure (S42-2)
 ```
 
 > **Avant de regarder le jeton, exécuter `git worktree list` et `git branch -a`.** Le jeton est un
@@ -127,7 +127,7 @@ Trente-cinq sessions ici, **plus cinq dans une lignée parallèle réconciliée 
 B-S27) — **47 ADR** *(dont un acté)*, six spécifications, **treize registres** — **et du code qui
 tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équilibrés et **tous deux
 montés sur leurs cas, confrontés l'un à l'autre et instrumentés, **plus un milieu à dispersion
-exacte** *(S39)*, **88 tests verts** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
+exacte** *(S39)*, **93 tests verts** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
 verdict** (C08). Quatre cas canoniques sur δ sont exécutés ici : **C01 et C03 passent**, C04 échoue,
 C08 ne conclut pas. **La lignée réconciliée en donne d'autres verdicts, et l'écart a une cause
 unique** : elle est passée à l'ordre deux, et C04 comme C08 y sont verts (`CAS-CANONIQUES`, « deux
@@ -260,6 +260,20 @@ conclusions et laisse les dispositifs* (**L158**) — les neuf sont reportées.
 > choses différaient**, et une seule avait un nom : mesuré à schéma égal, la méthode de mesure
 > explique **52 %** de l'écart. À seuil égal, les deux fronts sont identiques à la quatrième
 > décimale — *le désaccord n'était pas entre les solveurs* (**L160**).
+
+**Et S42 a écrit le premier essai à zéro que ce dépôt se soit donné** — *tout montage de mesure doit
+venir avec un essai dont le résultat attendu est zéro* (**A167**). Sur un bassin **sans seiche**,
+`C03-demi-vie` rendait `10⁶` périodes et **passait**, avec le meilleur score possible face à un
+minorant de 15 : la régression sans point rend `NaN`, et **`NaN.min(10⁶)` rend `10⁶`** (**A170**,
+**L161**). Deux refus dérivés plus tard, le cas échoue de ses trois assertions — et le chiffre
+publié, **161,14 périodes**, est intact.
+
+> **Le refus n'a d'abord rien corrigé.** La régression était écrite **deux fois dans le même
+> fichier**, et l'assertion passait par la copie non touchée. *Une extraction pour testabilité n'est
+> finie que lorsque l'ancien code n'a plus d'appelant* (**L162**).
+
+C06, lui, passe son essai à zéro **exactement** — `0,0`, une identité et non une tolérance. *Un
+essai à zéro qui réussit du premier coup distingue un montage sain d'un montage jamais interrogé.*
 
 **Et S27 a trouvé un trou que sept sessions n'avaient pas vu, grâce à une source extérieure.**
 SPEC-001 §2.1 borne le pas de temps par `u_max` **sans jamais définir `u_max`**, quand SPEC-004 §10.1
