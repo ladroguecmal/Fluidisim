@@ -290,18 +290,23 @@ pub fn confronter_c04(duree_s: f64, hll: bool) -> Confrontation {
 
 /// **La zone où les deux véhicules ne s'accordent pas sur le sens du mot « sec ».**
 ///
-/// `delta.rs` déclare une cellule sèche sous `H_SEC = 10⁻⁶ m` et rend alors `u = 0` ; `shallow.rs`
-/// fait de même sous `10⁻¹⁰ m`. **Quatre ordres de grandeur les séparent**, et une cellule dont la
-/// hauteur tombe entre les deux est sèche pour l'un et mouillée pour l'autre — avec une vitesse
-/// `hu/h` qui, sur un film de cette épaisseur, peut valoir plusieurs mètres par seconde.
+/// `delta.rs` déclare une cellule sèche sous [`water_core::delta::H_SEC`], `shallow.rs` sous
+/// [`water_core::shallow::H_SEC_DEFAUT`]. **Quatre ordres de grandeur les séparent**, et une cellule
+/// dont la hauteur tombe entre les deux est sèche pour l'un et mouillée pour l'autre.
 ///
-/// Aucun des deux seuils n'est faux. `ADR-031` §5 donne la provenance de `H_SEC` ; le `10⁻¹⁰` de
-/// `shallow.rs` est écrit en dur, sans justification. **Ce qui est faux, c'est de comparer les deux
-/// vitesses sans le savoir.**
-pub const SEC_DELTA: f64 = 1.0e-6;
+/// **S40 a mesuré ce que cet écart déplace : rien de publiable.** Le front bouge de 0,148 % sur
+/// sept décades, le volume pas du tout. Ce qui diverge est `hu/h` dans le film — une quantité qui
+/// dépasse la vitesse du front de Ritter et varie d'un facteur 2,5 avec le seuil. `ADR-047` D3 :
+/// **`u` sous le seuil n'est pas une grandeur publiable**, et D4 fait de l'exclusion ci-dessous la
+/// règle plutôt qu'un correctif d'enquête.
+///
+/// Les deux valeurs sont **lues chez leurs propriétaires** et non recopiées : deux copies d'une
+/// constante se périment en silence (**L141**), et celle de `shallow.rs` est réglable depuis S40.
+pub const SEC_DELTA: f64 = water_core::delta::H_SEC as f64;
 
-/// Le seuil de `shallow.rs`, écrit en dur dans `vitesse()` et dans le flux HLL.
-pub const SEC_SHALLOW: f64 = 1.0e-10;
+/// Le seuil par défaut de `shallow.rs`. Réglable par cellule d'essai depuis S40 — c'est ce qui a
+/// rendu le balayage possible.
+pub const SEC_SHALLOW: f64 = water_core::shallow::H_SEC_DEFAUT;
 
 /// Écart de vitesse restreint aux cellules **franchement mouillées des deux côtés**.
 ///
