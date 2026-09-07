@@ -2768,3 +2768,14 @@ référence avait diminué ; le régime asymptotique des grilles étudiées n'av
 plus coûteuse ne rend pas les points de mesure plus fins. Rapporter séparément l'influence
 de l'oracle et l'évolution de l'ordre ; leur confusion peut consommer le budget sans tester
 l'hypothèse qui bloque la conclusion.
+
+## L171 — Être proche de la valeur attendue ne prouve pas la stabilisation
+
+*(S49)* Les ordres mesurés finissent à 2,0117, avec une dernière variation inférieure
+à la tolérance. Pourtant la dérive ne ralentit pas assez pour satisfaire le critère
+préétabli. Arrêter le raisonnement à « proche de deux » aurait transformé une tendance
+en validation, sans modifier un seul chiffre.
+
+**Réflexe :** séparer la proximité de la cible et la stabilité de la suite. Rapporter
+quelle condition manque et conserver le critère déclaré avant mesure. Des fenêtres
+chevauchantes peuvent montrer une tendance ; elles ne multiplient pas les preuves indépendantes.

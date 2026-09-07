@@ -4619,3 +4619,36 @@ Invariants inchangés, aucun ADR réécrit ni nouvelle décision d'architecture.
 moins cinq grilles non contaminées, réutiliser explicitement les oracles si possible, mesurer
 stabilité et coût (S48-1). Ne pas assouplir le critère pour conclure. S44-1, S43-2, S42-3 restent
 ouverts. A103, constat d'état réel et infrastructure inchangés ; aucun distant créé.
+
+## S49 — 2026-09-07 — L'ordre approche deux, la stabilité reste à établir
+
+**Agent : Codex**, git et cargo disponibles. Master 8395ca0 propre à la reprise,
+copies anciennes contrôlées. Action S48-1 exécutée, sans changer schéma ni critères.
+
+**Sorties.** Mode c22-shallow-fenetres : trois fenêtres fixées avant mesure, sept champs
+et deux oracles réutilisés en mémoire (I-17 relu et respecté). MESURES-C22-S49 conserve
+les nombres, le coût et les limites ; C22 canonique pointe vers ce complément.
+
+**Mesures.** Oracles 51200/102400, écart 5,207593646e-10. Sept grilles passent le filtre
+empirique ×30. Fenêtres 100–1600, 200–3200 et 400–6400 : toutes sans verdict.
+La dernière donne p=1,849839 / 1,960632 / 2,011665 ; d1=0,051033 < 0,10, mais
+4*d1=0,204132 > d0=0,110793. Le critère de ralentissement de la dérive refuse encore.
+Coût local release : 382,716 s, sans suite de tests concurrente. La grille 6400 conserve
+une marge de deux seulement au filtre ; affiner sans revoir la référence serait injustifié.
+
+**Décision structurante.** Une proximité de l'ordre nominal ne remplace pas le test de
+stabilité convenu. Aucun seuil assoupli. Les trois fenêtres partagent des points ; ce ne
+sont pas trois confirmations indépendantes. S48-1 close, extension coûteuse S49-1 ouverte.
+
+**Validation.** 105 tests réussis (38 cœur + 67 harnais), deux ignorés. Test du filtrage
+avec trou, refus des tailles incompatibles, vérification CLI (sortie 1), mode historique
+rejoué. Aucun solveur modifié ; mesures historiques protégées par leurs tests.
+Les campagnes physics/check complètes ne sont pas répétées pour ce mode dédié.
+
+**Enseignements.** L171 ; aucun nouvel angle mort (175). Pas de nouvel ADR, invariant,
+SPEC ou cas. Ce travail ne valide ni B3 ni la physique 3D.
+
+**Suite recommandée S50 : S44-1**, refus explicite de front_mouille sans cellule au seuil,
+puis propagation aux six replis. S49-1 attend une stratégie et un budget adaptés à des
+oracles plus fins ; S43-2 et S42-3 restent ouverts. A103, état réel du projet et infrastructure
+inchangés ; aucun distant créé. A107 historiquement réconcilié, copies conservées.

@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S49
-État             : en cours
+État             : terminée
 Agent            : Codex (git et cargo disponibles)
 Objectif         : Raffiner les fenêtres C22 shallow avec réutilisation des oracles (S48-1).
 ```
@@ -70,7 +70,7 @@ Objectif         : Raffiner les fenêtres C22 shallow avec réutilisation des or
 - [x] **P1** — reprise, copies, jeton et plan seul.
 - [x] **P2** — fenêtres prédéclarées 100–1600, 200–3200, 400–6400 ; réutilisation en mémoire des oracles et mesures ; tests du filtrage.
 - [x] **P3** — mesurer avec deux oracles suffisamment fins, vérifier stabilité et coût, documenter les limites et tester.
-- [ ] **P4** — rituel de fin : journal, leçons, actions, index, décomptes, passation et jeton libre.
+- [x] **P4** — rituel de fin : journal, leçons, actions, index, décomptes, passation et jeton libre.
 
 ### Notes de reprise
 
@@ -84,3 +84,7 @@ P3 : oracles 51200/102400, écart 5,207593646e-10 ; sept grilles séparées.
 Fenêtre 400–6400 : p=1,849839 / 1,960632 / 2,011665, toujours non stable car
 4*d1>d0. Trois fenêtres sans verdict, 382,716 s sans tests concurrents. 105 tests
 réussis, deux ignorés. Refus CLI et mode historique vérifiés. MESURES-C22-S49 écrit.
+
+P4 : journal, L171, aucun nouvel angle mort (175), S48-1 close, S49-1 ouverte.
+Index et passation à jour : suite S50 S44-1. Décomptes inchangés : 47 ADR, 17 invariants,
+6 SPEC, 14 registres, 23 cas. Jeton libre.

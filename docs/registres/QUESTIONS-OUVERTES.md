@@ -557,4 +557,14 @@ campagnes et coût mesuré. Verdict non concluant, documenté dans MESURES-C22-S
 
 | # | Action | Origine | Porteur | État |
 |---|---|---|---|---|
-| S48-1 | Déplacer la fenêtre C22 shallow vers des grilles plus fines, garder cinq grilles non contaminées et mesurer stabilité/coût ; prévoir une réutilisation explicite des oracles pour éviter de les recalculer à chaque fenêtre | MESURES-C22-S48 : oracle affiné sans stabilisation de la famille 100–1600 | session S49 recommandée | ouverte |
+| S48-1 | Déplacer la fenêtre C22 shallow vers des grilles plus fines, garder cinq grilles non contaminées et mesurer stabilité/coût ; prévoir une réutilisation explicite des oracles pour éviter de les recalculer à chaque fenêtre | MESURES-C22-S48 : oracle affiné sans stabilisation de la famille 100–1600 | session S49 recommandée | close en S49 |
+
+## Actions relevées en séance — S49
+
+**S48-1 close.** Trois fenêtres exécutées jusqu'à 6400 cellules avec cinq grilles chacune,
+deux oracles réutilisés en mémoire, stabilité et coût mesurés. Le résultat reste non concluant ;
+la tâche de mesure est achevée. Voir MESURES-C22-S49.
+
+| # | Action | Origine | Porteur | État |
+|---|---|---|---|---|
+| S49-1 | Établir une stratégie de référence et un budget permettant de tester une fenêtre C22 encore plus fine ; contrôler la contamination avant de conclure, conserver les critères actuels | MESURES-C22-S49 : ordre final 2,0117, ralentissement insuffisant, marge ×30 réduite à deux sur 6400 | session ultérieure ; priorité S50 à S44-1 | ouverte |
