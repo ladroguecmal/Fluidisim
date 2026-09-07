@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S43
-État             : en cours
+État             : terminée
 Battement        : 2026-09-07
 Objectif         : L'essai à zéro de C08 — un solveur qui ne converge pas reçoit l'ordre 1
 ```
@@ -111,7 +111,7 @@ tient, c'est une leçon sur ce que voit un audit de garde-fous.
 - [x] **P6** — répercussions : `A170` étendu ou confirmé, `CAS-CANONIQUES` C08, et ce que S34
       n'avait pas vu.
 - [x] **P7a** — rituel : journal, leçons L163-L164, actions S43-1 à S43-3.
-- [ ] **P7b** — rituel : index, décomptes, jeton libéré.
+- [x] **P7b** — rituel : index, décomptes, jeton libéré.
 
 ### Notes de reprise
 

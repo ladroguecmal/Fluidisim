@@ -12,11 +12,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-07
-Session en cours : S43 — l'essai à zéro de C08 : trois estimateurs, trois refus différents
-Dernière session : S42 — 2026-09-07 — C03 déclarait le néant conforme, avec le meilleur score possible
-Session suivante : S43 — **l'essai à zéro de C08** (S42-1) *(recommandé)*, ou les valeurs de repli après mesure (S42-2)
+Session en cours : —
+Dernière session : S43 — 2026-09-07 — un solveur qui ne converge pas recevait l'ordre 1
+Session suivante : S44 — **inventorier les valeurs de repli après mesure** (S43-1) *(recommandé)* — deux trouvées par hasard, sévérité 1 chacune
 ```
 
 > **Avant de regarder le jeton, exécuter `git worktree list` et `git branch -a`.** Le jeton est un
@@ -127,7 +127,7 @@ Trente-cinq sessions ici, **plus cinq dans une lignée parallèle réconciliée 
 B-S27) — **47 ADR** *(dont un acté)*, six spécifications, **treize registres** — **et du code qui
 tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équilibrés et **tous deux
 montés sur leurs cas, confrontés l'un à l'autre et instrumentés, **plus un milieu à dispersion
-exacte** *(S39)*, **93 tests verts** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
+exacte** *(S39)*, **95 tests verts** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
 verdict** (C08). Quatre cas canoniques sur δ sont exécutés ici : **C01 et C03 passent**, C04 échoue,
 C08 ne conclut pas. **La lignée réconciliée en donne d'autres verdicts, et l'écart a une cause
 unique** : elle est passée à l'ordre deux, et C04 comme C08 y sont verts (`CAS-CANONIQUES`, « deux
@@ -274,6 +274,23 @@ publié, **161,14 périodes**, est intact.
 
 C06, lui, passe son essai à zéro **exactement** — `0,0`, une identité et non une tolérance. *Un
 essai à zéro qui réussit du premier coup distingue un montage sain d'un montage jamais interrogé.*
+
+**Et S43 a trouvé le même motif, en pire.** L'essai à zéro de C08 ne porte pas sur le solveur mais
+sur l'**estimateur d'ordre** : une suite d'erreurs constante n'a aucun ordre — le solveur ne converge
+pas. `ordre_grossier_estime` rendait **`1,0`**, et pour **trois** formes distinctes de « rien à
+mesurer ».
+
+> **`1,0` est l'ordre nominal du schéma**, et le garde-fou G10 ne signale que les ordres hors de
+> `[0,3 ; 3,0]`. *Le repli était silencieux par construction : la valeur choisie pour « ne rien
+> dire » était celle qui dit tout va bien* (**A171**, **L163**). C03 saturait à `10⁶`, une valeur
+> qui finit par paraître suspecte ; celle-ci ne le paraîtra jamais.
+
+Le refus est passé **dans le type**, et le compilateur a révélé un **troisième** estimateur de
+Richardson dans le harnais. Il n'y en a plus qu'un, et **aucun chiffre publié n'a bougé**.
+
+*Et une leçon sur les audits* : S34 avait examiné ce garde-fou et corrigé son bornage. **Le repli
+était sur la ligne juste au-dessus du `clamp`.** Ses deux tests donnaient une série absurde et une
+série saine — jamais une série **vide de l'objet mesuré** (**L164**).
 
 **Et S27 a trouvé un trou que sept sessions n'avaient pas vu, grâce à une source extérieure.**
 SPEC-001 §2.1 borne le pas de temps par `u_max` **sans jamais définir `u_max`**, quand SPEC-004 §10.1
