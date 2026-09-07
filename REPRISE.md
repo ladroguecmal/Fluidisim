@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-07 23:48 +02:00
+JETON            : occupé
+Battement        : 2026-09-08 00:05 +02:00
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S59 — S57-1, découpage, borne à 89600, puis mesurer 89600/179200
 Dernière session : S58 — 2026-09-07 — A103 close : ρ = 1025, propriété du milieu ; A180, L176
-Session suivante : S59 — S57-1, borne du mode à 89600, découpage, puis 89600/179200
+Session suivante : selon le résultat de S59
 
 Note S58 : S57 puis S58 ont travaillé dans le worktree claude/reprise-projet-29ef50, et **les
 deux ont été fusionnées dans master en avance rapide** — bd9f087 puis 531491f. Les deux copies

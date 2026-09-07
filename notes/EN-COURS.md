@@ -59,64 +59,41 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S58
-État             : terminée
+Session          : S59
+État             : en cours
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Objectif         : Trancher A103 — la masse volumique de l'eau — sur délégation explicite de
-                   l'utilisateur, en mesurant d'abord ce que la constante commande réellement.
+Objectif         : S57-1 — découpage du calcul, borne du mode à 89600, mesure 89600/179200.
 ```
 
 ### Plan
 
 - [x] **P1** — passation, jeton, plan seul.
-- [x] **P2** — recenser tous les emplois de la masse volumique dans le code et dans le corpus ; établir ce qui en dépend et ce qui n'en dépend pas.
-- [x] **P3** — balayer la constante et mesurer, pour chaque grandeur publiée, l'écart ET la valeur absolue ; figer le constat par un test.
-- [x] **P4** — ADR-048 : trancher, dire ce qu'il faudrait pour inverser, et corriger la justification fautive de body.rs sans réécrire d'ADR.
-- [x] **P5** — appliquer la décision au code ; vérifier les 123 tests, la campagne physics et les deux hashs.
-- [x] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, passation et jeton.
+- [ ] **P2** — éprouver le découpage que S56 prescrit : mesurer s'il change le champ, avant de l'implémenter.
+- [ ] **P3** — implémenter le découpage retenu et relever la borne du mode à 89600 ; tests d'identité, d'admission et de refus.
+- [ ] **P4** — mesurer 89600/179200 selon le critère **inchangé** ; consigner erreurs, écart, temps.
+- [ ] **P5** — rapport MESURES-C22-S59 : admission de 12800, verdict des quatre fenêtres, apport au dossier A179 sans trancher S57-2.
+- [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, passation, jeton, **fusion dans master**.
 
 ### Notes de reprise
 
-Délégation : l'utilisateur a demandé en conversation, le 2026-09-07, que les points laissés
-« pour lui » soient réalisés par la session. Le premier — fusionner S57 dans master — est fait
-(avance rapide vers bd9f087). Le second est A103, ouvert depuis S21 et rappelé en fin de
-chaque session depuis. Précédent de forme : ADR-027, cinq arbitrages tranchés sur délégation.
+Départ ae93fd0, master et worktree confondus. Attendu de S57 : admission de 12800 prévue avec
+20 à 30 % de marge selon l'exposant retenu, coût projeté 1147 s (19 min 07 s). **Une admission
+ne vaut pas un verdict** : la fenêtre 800–12800 n'aurait alors que trois ordres, et la stabilité
+n'a jamais été établie sur 1,961 / 2,012.
 
-**Thèse à mesurer, pas à supposer.** `body.rs` justifie `RHO_EAU = 1000` par « la valeur avec
-laquelle la référence de C10 se referme ». Or les trois références de C10 sont écrites *en
-fonction de* `RHO_EAU` (physics.rs : `(cube.rho / RHO_EAU) * cote`, `RHO_EAU * G * aire`,
-`TAU * (rho * cote / (RHO_EAU * G)).sqrt()`). Si c'est exact, **C10 se referme pour toute
-valeur** et ne contraint rien : la justification serait une instance d'A104, jamais reliée à
-A103. À vérifier par balayage avant d'en tirer quoi que ce soit (L75).
+**Réserve à lever d'abord, et elle est sérieuse.** REFERENCE-C22-S56 §5 prescrit, au-delà du
+quart d'heure, « un découpage de calcul en tranches temporelles gardées en mémoire ». Or
+`avancer_jusqu_a(t_fin, cfl)` choisit `dt = dt_cfl.min(t_fin − t)` : **découper l'intégration en
+deux appels insère un pas tronqué au point de coupure**, qui n'existe pas dans le calcul
+monolithique. La séquence de pas change, donc le champ change, donc toute comparaison avec
+S48, S49, S56 et S57 tombe. Le remède prescrit invaliderait la mesure qu'il doit rendre
+possible. À **mesurer** avant de conclure (L75), pas à supposer.
 
-Attendu à contrôler aussi : ρ apparaît-il dans l'hydrodynamique ? Saint-Venant s'écrit en
-h et u, ρ s'y simplifie ; si c'est le cas ici, la portée de la décision est bornée aux forces
-sur les corps. Ne pas le supposer non plus.
+Voie envisagée si la mesure confirme : découpage d'**observation** — même boucle, mêmes `dt`,
+même séquence exacte, avec un rendu de progression tous les N pas — et identité **bit à bit**
+vérifiée par un test contre le chemin monolithique.
 
-P2/P3 : recensement et balayage faits, RHO-EAU-S58. RHO_EAU vit à cinq endroits, aucun dans
-un solveur : la portée est bornée aux forces sur les corps. Balayage 1000 vers 1025 par
-recompilation : les quatre cas C10 passent identiquement, écart 0,000 pour cent aux deux
-valeurs, parce que les trois références sont construites AVEC la constante. Les valeurs
-publiées bougent (tirant -2,439, raideur +2,500, période -1,227 pour cent) sans verdict.
-Hashs check inchangés. Les seuls contrôles qui échouent sont deux tests unitaires de body.rs
-comparant le tirant au littéral 0,25 : A180. Constante restaurée à 1000 avant commit.
-
-P4 : ADR-048 écrit. D1 valeur 1025 (mer ouverte, ADR-001) ; D2 la constante devient une
-propriété du milieu, type Milieu avec MER et EAU_DOUCE, motif estuaire ; D3 la référence C10
-reste construite avec la constante — pas de littéral inventé — et sa cécité est écrite (A180).
-Section 4 : ce qu il faudrait pour inverser chacune des trois. Notes correctives datées dans
-CAS-CANONIQUES et 00_INDEX, sans réécriture. Reste P5 : appliquer au code.
-
-P5 : Milieu introduit dans water-core (MER 1025 par defaut, EAU_DOUCE 1000) ; RHO_EAU retiree
-de l export. force_verticale, equilibre et tirant prennent le milieu. physics.rs C10 utilise
-Milieu::default(). Tests de body.rs transposes : le litteral devient 0,243902439, avec mention
-qu il decoule d ADR-048 D1 et non d une mesure ; deux tests ajoutes (sensibilite reelle au
-milieu, et un corps a 1010 qui coule en eau douce mais flotte en mer). 125 tests reussis
-(40 coeur + 85 harnais), deux ignores. Hashs check inchanges. Campagne physics identique :
-seul C04 ordre un echoue comme voulu, C08 sans verdict. C10 vert aux nouvelles valeurs.
-
-P6 : rituel exécuté. Journal S58, A180 (sévérité 2, ouvert par décision), L176, A103 close
-dans le tableau et par note corrective datée, actions S58-1 et S58-2 (S58-2 avant S58-1).
-Index et REPRISE : ADR portés de 47 à 48, angles de 179 à 180, tests de 123 à 125 ;
-A103 retirée des rappels de fin de session. Aucun invariant ne cite la masse volumique.
-Jeton libre. **Branche S58 non fusionnée dans master.**
+Interdits inchangés : pas de champ sur disque (I-17), pas d'extrapolation de Richardson du
+champ, aucun changement de CFL, d'amplitude, de temps final ou d'initialisation, pas
+d'assouplissement du filtre ×30 ni du test de stabilité. **Ne pas traiter S57-2 ici** : cette
+session mesure sous le critère actuel ; discuter le critère est un autre travail, par ADR.
