@@ -104,3 +104,11 @@ est qu'il existera un endroit où l'on peut lui poser la question.
 3. **Le signalement de G10 passe par le `Sink` et le libellé**, qui ne sont lus par personne
    automatiquement. Il faudrait qu'un déclenchement se voie dans le **verdict**, comme les témoins
    de C01 et C04.
+
+## 6. Complément S54 — l'entrée vide
+
+Les dix contrôles ont été confrontés à leur absence pertinente, avec témoin :
+[GARDE-FOUS-VIDE-S54](../validation/GARDE-FOUS-VIDE-S54.md). Six tests complémentaires,
+aucun faux succès supplémentaire trouvé sur ces entrées. G1 couvrait déjà le domaine sec.
+Une fenêtre sans réflexion ne prouve pas la présence de l'onde : batteur arrêté, le montage
+C33 refuse par absence de profil. S43-2 close ; refus du premier témoin G5 suivi en S54-1.
