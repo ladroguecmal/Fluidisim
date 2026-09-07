@@ -59,25 +59,24 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S45
-État             : terminée
+Session          : S46
+État             : en cours
 Agent            : Codex (git et cargo disponibles)
-Objectif         : Suivre les treize replis NaN jusqu'à leur consommation (S44-2).
+Objectif         : Refus explicites et décompte exhaustif de C08 (S45-1).
 ```
 
 ### Plan
 
-- [x] **P1** — vérifier les copies et branches, prendre le jeton et committer ce plan seul.
-- [x] **P2** — tracer les treize chemins dans un complément à AUDIT-REPLIS-S44 ; identifier les transformations qui avalent un refus.
-- [x] **P3** — vérifier les chemins suspects par essais avec refus et témoins ; corriger les défauts constatés, rejouer tests et références.
-- [x] **P4** — rituel de fin : journal, leçons et angles morts si nouveaux, actions, index et décomptes, jeton libre.
+- [x] **P1** — reprise, contrôles des copies, jeton et plan seul.
+- [ ] **P2** — reproduire les refus NaN/infini, borner le contrat de verdict et corriger estimation, classification et décompte avec témoins.
+- [ ] **P3** — suite complète, check et comparaison physics ; documenter la portée et les limites.
+- [ ] **P4** — rituel : journal, angles morts, leçons, actions, index/décomptes et passation, jeton libre.
 
 ### Notes de reprise
 
-Départ : master b521129, propre. Copie reprise-projet-c107bf au même commit, propre et jeton libre ; friendly-bhabha-6da427 explicitement archivée. Pas de branche plus avancée. Travail dans la copie principale, sans nouvelle branche.
-S44 recommande S44-2. Le recensement réel trouve treize occurrences dans code/, dont deux dans les tests de water-core (pas treize dans le harnais).
-Références à préserver : les deux hashs et les verdicts canoniques, notamment C04 volontairement rouge sur delta.
-
-P3 : deux tests rouges avant correction, verts après ; 98 succès et deux ignorés.
-P4 : journal, A173, L167, actions et index actualisés. S46 recommandée : S45-1.
-Décomptes vérifiés : 47 ADR, 17 invariants, 6 SPEC, 14 registres, 23 cas canoniques.
+Départ master 53ded2b propre ; copie c107bf propre à S44, lignée B archivée. Aucun travail
+parallèle constaté. Lectures socle déjà effectuées dans cette conversation, fichiers inchangés
+hors mises à jour S45 relues. ADR-032 impose un régime asymptotique établi avant verdict.
+Deux branches de rapport C08 appliquent des critères différents ; Indetermine n'est pas compté.
+Préserver les mesures et le rouge de C04 ; un statut corrigé peut changer à mesure constante.
+P2 ne doit pas supprimer les ordres négatifs finis : ADR-032 §5 les demande explicitement.
