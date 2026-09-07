@@ -640,3 +640,21 @@ Quatre familles sans verdict, sortie 0. Voir MESURES-C22-S57. Aucun doublement a
 > elle vient de la référence plus fine ou du critère assoupli — et le filtre ×30 n'a jamais
 > admis à tort, donc rien n'oblige à se presser.
 
+## Actions relevées en séance — S58
+
+**A103 close par [`ADR-048`](../adr/ADR-048-la-masse-volumique-est-une-propriete-du-milieu.md)**,
+sur délégation explicite de l'utilisateur (2026-09-07). La masse volumique du projet est **1025**
+et devient une propriété du milieu. **Le motif du blocage n'existait pas** : C10 est aveugle à la
+constante, ses quatre assertions passent à écart nul aux deux valeurs (RHO-EAU-S58, **A180**).
+
+**S57-1 n'a pas été entamée** et reste la suite recommandée.
+
+| # | Action | Origine | Porteur | État |
+|---|---|---|---|---|
+| S58-1 | Donner à `C10-tirant` une référence indépendante de `ρ_eau`, ou **acter que le projet n'en aura pas** et le dire dans le rapport plutôt que dans un registre — le cas s'annonce aujourd'hui comme un contrôle qu'il n'est pas | **A180**, ADR-048 D3 | session, par ADR si la réponse est « pas de source » | ouverte |
+| S58-2 | Passer les autres cas au même balayage : pour chaque constante partagée entre une mesure et sa référence, vérifier qu'un cas la discrimine. **A104 recense la faute, personne n'a recensé ses instances** | **A180**, généralisation de **L176** | session ultérieure | ouverte |
+
+> **S58-2 avant S58-1.** La première question porte sur un cas ; la seconde demande combien il y
+> en a. Un recensement qui trouverait trois autres cas aveugles changerait la forme de la réponse
+> à donner au premier.
+

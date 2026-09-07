@@ -2829,3 +2829,28 @@ modèle — **raccourcir sa portée jusqu'à ce que le choix du modèle devienne
 quitte à mesurer une fois de plus. Et vérifier la direction de l'erreur des modèles écartés :
 ici les deux sous-estimaient, ce qu'aucun encadrement ne laissait prévoir.
 
+## L176 — Un blocage qui dure se vérifie avant de se trancher : son motif peut ne pas exister
+
+*(S58)* Un arbitrage attendait depuis trente-sept sessions, rappelé à chaque fin de session avec
+le même argument : un cas de validation exigeait une valeur, le domaine du jeu en appelait une
+autre, et l'écart valait deux fois et demie la tolérance du cas. Trancher demandait donc de
+choisir entre une mesure et une intention.
+
+**La mesure n'existait pas.** Les trois références du cas étaient construites *avec* la constante
+en litige : elles la suivaient, l'écart était structurellement nul, et le cas restait vert pour
+n'importe quelle valeur. La tolérance opposée portait sur cet écart, jamais sur la valeur.
+L'argument était faux dès son écriture, et il a été recopié dans trois documents.
+
+Deux choses l'ont rendu invisible. Il était **exact sur ses nombres** — les littéraux cités ne se
+retrouvent bien qu'avec l'ancienne valeur — et faux seulement sur leur conséquence. Et il avait
+été formulé par la session qui posait la constante, donc au moment où personne ne pouvait encore
+le contredire par une mesure.
+
+**Réflexe :** devant un point ouvert de longue date, **rejouer son motif avant de le trancher**,
+et le rejouer par une exécution, pas par une relecture — ici, recompiler avec l'autre valeur et
+regarder les verdicts a coûté quatre minutes. Un blocage ancien a été formulé une fois, tôt, et
+recopié depuis ; sa charge de vérité est celle du jour où il a été écrit. Corollaire de forme :
+**si un balayage ne fait tomber que des tests unitaires et aucun cas de validation, ce sont les
+tests unitaires qui tenaient la propriété** — et le cas de validation est à requalifier, pas à
+créditer.
+

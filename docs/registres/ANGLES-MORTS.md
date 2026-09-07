@@ -144,7 +144,7 @@ ce que les sources avaient omis.
 | **A100** | Un test peut affirmer une propriété vraie avec des données incapables de la révéler | 2 | ADR-029 §3, `host_impl.rs` |
 | **A101** | Un champ reproductible peut être reproductiblement faux | **1** | ADR-029, note S21 |
 | **A102** | Une mesure statistique a besoin d'une fenêtre de plusieurs fois la plus longue onde | 2 | ADR-029, note S21 |
-| **A103** | Le corpus n'a jamais fixé la masse volumique de l'eau, dont dépendent des références | 2 | `body.rs`, C10 |
+| **A103** *(clos S58)* | Le corpus n'a jamais fixé la masse volumique de l'eau, dont dépendent des références | 2 | `body.rs`, C10 → **ADR-048** |
 | **A104** | Une règle énoncée dans un fichier n'empêche pas sa violation dans le même fichier | 2 | `physics.rs`, C10 |
 | **A105** | Un cas canonique peut être moins discriminant que son énoncé ne le laisse croire | **1** | ADR-030 §6.1, C01 |
 | **A106** | Une tolérance sans provenance traverse vingt-deux sessions sans être questionnée | 2 | ADR-030 §6.3, I-14 |
@@ -618,6 +618,13 @@ pendant quatre sessions.
   document ne fixe finit par être choisie par le premier code qui en a besoin**, et ce choix ne
   ressemble alors pas à une décision. Elle est posée dans `body.rs` avec sa justification et son
   alternative ; elle reste à arbitrer.
+
+  > **Note corrective — 2026-09-07, S58. Clos par ADR-048, et l'énoncé ci-dessus était faux sur
+  > un point.** *« La référence de C10 ne se referme qu'avec 1000 »* : les nombres cités sont
+  > exacts, la conséquence ne l'est pas. Les trois références du cas sont construites **avec** la
+  > constante, donc C10 passe à écart 0,000 % pour toute valeur — mesuré à 1025 dans RHO-EAU-S58.
+  > **Ce n'est pas C10 qui contraignait la valeur, mais deux assertions de test unitaire** ; voir
+  > **A180**. La décision : **1025**, et une propriété du milieu plutôt qu'une constante globale.
 - **A104** — **Une règle énoncée dans un fichier n'empêche pas sa violation dans le même fichier.**
   L'en-tête de `physics.rs` pose que *une référence tirée des paramètres ne prouve rien*. Deux des
   quatre cas de C10, écrits sous cet en-tête, comparent une force construite comme `ρ·g·A·d` à la
@@ -1383,4 +1390,19 @@ pendant quatre sessions.
   de calcul pour un déficit final de 4,4 %. Loi ajustée sur deux différences, biais additif
   uniforme supposé et non établi : **rien n'est modifié**, le refus est maintenu.
   Voir MESURES-C22-S57 §3 et L175. Action S57-1.
+
+- **A180** *(sévérité 2, ouvert par décision, S58)* — **Un cas peut être indépendant par sa
+  méthode et aveugle à ses paramètres, et c'est la première propriété qu'on lui prête.** Les
+  quatre assertions de C10 passent à écart **0,000 %** avec `ρ_eau = 1000` **comme** avec 1025,
+  parce que leurs trois références sont construites avec la constante qu'elles sont censées
+  contrôler. `C10-tirant` est pourtant décrit dans le harnais comme *« le seul vraiment
+  indépendant »* — et il l'est, mais **du chemin de calcul** : la bissection sur la force contre
+  une formule fermée. Cela ne lui donne aucune prise sur la **valeur** de la constante.
+  Le corpus a présenté ce cas pendant **trente-sept sessions** comme celui qui arbitrait `ρ_eau`,
+  en lui opposant une tolérance de ±1 % qui porte sur un écart structurellement nul.
+  **Les seuls contrôles réels étaient deux assertions de test unitaire** comparant le tirant à un
+  littéral — les seules à tomber au balayage. **Ouvert par décision** : ADR-048 D3 refuse de
+  mettre un littéral dans la référence de C10, faute d'une source de tirant indépendante de la
+  formule vérifiée. Inventer cette source serait fabriquer la mesure qui manque.
+  Voir RHO-EAU-S58, ADR-048 et L176. Instance d'**A104**, jamais reliée à **A103**.
 

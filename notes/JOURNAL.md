@@ -4932,3 +4932,53 @@ inchangés ; aucun distant créé. A107 historiquement réconcilié.
 claude/reprise-projet-29ef50 : c'est exactement le mécanisme des trois forks (L137). La
 branche doit être fusionnée dans master, et ce geste appartient à l'utilisateur.
 
+## S58 — 2026-09-07 — Le cas qui devait arbitrer la constante ne pouvait pas la voir
+
+**Agent : Claude Code (Opus 5)**, git et cargo disponibles. Départ bd9f087 ; le travail de S57
+avait été fusionné dans master en avance rapide juste avant l'ouverture. Entrée : **délégation
+explicite de l'utilisateur**, le 2026-09-07, pour réaliser les points laissés « pour lui ».
+
+**Sorties.** [`ADR-048`](../docs/adr/ADR-048-la-masse-volumique-est-une-propriete-du-milieu.md),
+[`RHO-EAU-S58`](../docs/validation/RHO-EAU-S58.md), le type `Milieu` dans `water-core`, A180,
+L176, notes correctives datées dans `CAS-CANONIQUES` et `00_INDEX`. **A103 est close.**
+
+**Décision structurante.** La masse volumique de l'eau du projet est **1025** — l'eau de mer —
+et elle **cesse d'être une constante globale** : c'est une propriété du milieu, `Milieu::MER`
+et `Milieu::EAU_DOUCE`, la mer par défaut. Motif : le monde contient des eaux intérieures, et
+l'estuaire est l'endroit où un même corps change de tirant en avançant — une constante globale
+rend ce phénomène inexprimable, et le rend inexprimable *silencieusement*. ADR-048 §4 dit ce
+qu'il faudrait pour inverser chacune des trois décisions.
+
+**Chiffres qui ont orienté.** Le balayage, et non le raisonnement. Constante portée à 1025 par
+recompilation : tirant 0,250000 → **0,243902 m** (−2,439 %), raideur 2452,5 → **2513,8125 N/m**
+(+2,500 %), période 1,003033 → **0,990726 s** (−1,227 %) — et **les quatre assertions de C10
+restent vertes à écart 0,000 %**, aux deux valeurs. Les trois références sont construites *avec*
+la constante ; la tolérance de ±1 % que le corpus opposait aux 2,5 % porte sur un écart
+structurellement nul.
+
+**Ce que cela retourne.** L'argument qui bloquait A103 depuis S21 — *« C10 exige 1000, la mer
+demande 1025, et l'écart vaut deux fois et demie la tolérance »* — est faux dans sa conséquence,
+et il a été recopié dans trois documents et rappelé en fin de **trente-sept** sessions. Les seules
+choses du projet qui échouent quand la constante bouge sont **deux assertions de test unitaire**
+de `body.rs`, qui comparent le tirant à un littéral. **Le seul contrôle réel était le petit ; le
+cas canonique, qui porte la tolérance et le verdict, était aveugle** (**A180**, sévérité 2).
+
+Et la faute avait un nom depuis S21 : **A104**, *une référence tirée des paramètres ne prouve
+rien*, énoncée dans l'en-tête du module qui l'a commise. Personne n'avait relié A104 à A103.
+
+**Ce qui n'a pas été fait.** Aucune mesure indépendante du tirant n'a été créée — il n'en existe
+pas de source, et en inventer une aurait été fabriquer la mesure qui manque. C10 reste donc
+aveugle à `ρ`, par décision et non par oubli (ADR-048 D3). La masse ajoutée (A26) reste en
+attente, et S57-1 n'a pas été entamée.
+
+**Validation.** **125 tests réussis** (40 cœur + 85 harnais), deux ignorés — deux de plus qu'en
+S57, tous deux sur le milieu. Release compilée. Les deux hashs `check` sont **inchangés**,
+`0x3e2c06a7b00e73e3` et `0x1a8b0629a9f51b6e` : la constante ne touche pas l'état scellé.
+Campagne `physics` complète identique — seul C04 à l'ordre un échoue, comme voulu, et C08 reste
+sans verdict. `RHO_EAU` n'apparaissait dans aucun solveur : la portée est bornée aux corps.
+
+**Suite S59 : S57-1**, relever la borne du mode `c22-shallow-fin` à 89600, déclarer le découpage
+du calcul exigé au-delà du quart d'heure, puis mesurer 89600/179200 (≈ 19 min projetées).
+**A103 est close** et sort des rappels de fin de session. Restent : l'état réel du projet et
+l'infrastructure — aucun distant créé. A107 historiquement réconcilié.
+

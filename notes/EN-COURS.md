@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S58
-État             : en cours
+État             : terminée
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
 Objectif         : Trancher A103 — la masse volumique de l'eau — sur délégation explicite de
                    l'utilisateur, en mesurant d'abord ce que la constante commande réellement.
@@ -73,7 +73,7 @@ Objectif         : Trancher A103 — la masse volumique de l'eau — sur délég
 - [x] **P3** — balayer la constante et mesurer, pour chaque grandeur publiée, l'écart ET la valeur absolue ; figer le constat par un test.
 - [x] **P4** — ADR-048 : trancher, dire ce qu'il faudrait pour inverser, et corriger la justification fautive de body.rs sans réécrire d'ADR.
 - [x] **P5** — appliquer la décision au code ; vérifier les 123 tests, la campagne physics et les deux hashs.
-- [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, passation et jeton.
+- [x] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, passation et jeton.
 
 ### Notes de reprise
 
@@ -114,3 +114,9 @@ qu il decoule d ADR-048 D1 et non d une mesure ; deux tests ajoutes (sensibilite
 milieu, et un corps a 1010 qui coule en eau douce mais flotte en mer). 125 tests reussis
 (40 coeur + 85 harnais), deux ignores. Hashs check inchanges. Campagne physics identique :
 seul C04 ordre un echoue comme voulu, C08 sans verdict. C10 vert aux nouvelles valeurs.
+
+P6 : rituel exécuté. Journal S58, A180 (sévérité 2, ouvert par décision), L176, A103 close
+dans le tableau et par note corrective datée, actions S58-1 et S58-2 (S58-2 avant S58-1).
+Index et REPRISE : ADR portés de 47 à 48, angles de 179 à 180, tests de 123 à 125 ;
+A103 retirée des rappels de fin de session. Aucun invariant ne cite la masse volumique.
+Jeton libre. **Branche S58 non fusionnée dans master.**

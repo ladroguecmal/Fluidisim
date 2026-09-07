@@ -18,16 +18,17 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-07 23:05 +02:00
+JETON            : libre
+Battement        : 2026-09-07 23:48 +02:00
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Session en cours : S58 — trancher A103, la masse volumique de l'eau, sur délégation explicite
-Dernière session : S57 — 2026-09-07 — 12800 refusée à 0,9556 du seuil ; A179, L175
+Session en cours : aucune
+Dernière session : S58 — 2026-09-07 — A103 close : ρ = 1025, propriété du milieu ; A180, L176
 Session suivante : S59 — S57-1, borne du mode à 89600, découpage, puis 89600/179200
 
-Note S58 : le travail de S57 a été fusionné dans master en avance rapide (bd9f087) avant
-l'ouverture de cette session. Les deux copies coïncident de nouveau ; S58 travaille dans le
-worktree claude/reprise-projet-29ef50 et devra être fusionnée de la même façon.
+Note S58 : S57 puis S58 ont travaillé dans le worktree claude/reprise-projet-29ef50. S57 a été
+fusionnée dans master en avance rapide (bd9f087) ; **S58 reste à fusionner de la même façon** —
+`git -C <racine> merge --ff-only claude/reprise-projet-29ef50`. Tant que ce n'est pas fait, les
+deux copies portent deux jetons, et c'est le mécanisme des trois forks (L137).
 ```
 
 > **Avant de regarder le jeton, exécuter `git worktree list` et `git branch -a`.** Le jeton est un
@@ -144,6 +145,19 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
+**S58 :** **A103 close sur délégation explicite**, après trente-sept sessions de rappel.
+La masse volumique du projet est **1025** — l'eau de mer — et elle **cesse d'être une constante
+globale** : `Milieu::MER` et `Milieu::EAU_DOUCE`, la mer par défaut, parce que le monde contient
+des eaux intérieures et que l'estuaire est l'endroit où un même corps change de tirant en
+avançant ([`ADR-048`](docs/adr/ADR-048-la-masse-volumique-est-une-propriete-du-milieu.md)).
+**Et le motif du blocage n'existait pas.** Balayée à 1025, la constante déplace les valeurs
+publiées — tirant −2,44 %, raideur +2,50 %, période −1,23 % — et **les quatre assertions de C10
+restent vertes à écart 0,000 %** : leurs références sont construites *avec* elle. La tolérance
+de ±1 % que le corpus opposait aux 2,5 % porte sur un écart structurellement nul. Les seules
+choses qui tombent au balayage sont **deux assertions de test unitaire** (**A180**, **L176** —
+*un blocage ancien se vérifie avant de se trancher*). 125 tests réussis, deux ignorés ; hashs
+et campagne physics inchangés. Voir docs/validation/RHO-EAU-S58.md. Suite S59 : S57-1.
+
 **S57 :** couple d'oracles 76800/153600 mesuré en 844,433 s (+2,05 % du budget annoncé) ;
 grille 12800 refusée à **0,9556 fois le seuil**, quatre familles sans verdict, sortie 0.
 Les deux extrapolations de S56 sous-estimaient la contamination — exposant local tombé de
@@ -210,10 +224,10 @@ le cas régulier p = 0,82 dont la stabilité n'est pas établie. Mesures et hash
 S45-1 close ; S47 recommandée : portée de la paire héritée C08-p/C08-coherence (S46-1).
 
 Quarante-huit sessions ici, **plus cinq dans une lignée parallèle réconciliée en S35** (B-S22 à
-B-S27) — **47 ADR** *(dont un acté)*, six spécifications, **quatorze registres** — **et du code qui
+B-S27) — **48 ADR** *(dont un acté)*, six spécifications, **quatorze registres** — **et du code qui
 tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équilibrés et **tous deux
 montés sur leurs cas, confrontés l'un à l'autre et instrumentés, **plus un milieu à dispersion
-exacte** *(S39)*, **123 tests verts, deux ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
+exacte** *(S39)*, **125 tests verts, deux ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
 verdict** (C08). Quatre cas canoniques sur δ sont exécutés ici : **C01 et C03 passent**, C04 échoue,
 C08 ne conclut pas. **Le second véhicule passe C04 sur un montage dont le schéma et la mesure
 diffèrent** (S41). Son ancien C08 vert est requalifié en S47 : diagnostic sur Ritter, trois
@@ -547,9 +561,11 @@ dans **`docs/DOSSIER-REUNIONS.md`** (S17), classées par ce que la réponse déb
 restent hors de portée d'une session** : nommer les personnes, constater l'état réel du projet, agir
 sur l'infrastructure. Voir `CLAUDE.md`.
 
-**Deux points attendent en plus, et le second est nouveau.** **A103** — la masse volumique de l'eau,
-douce (1000) ou de mer (1025) : `body.rs` retient 1000 par défaut, et 2,5 % de tirant d'eau en
-dépendent. **A107** — le dépôt avait forké une seconde fois, et S22 l'a constaté à l'amorce : la
+**Deux points attendaient en plus. ~~A103~~ est close** — la masse volumique de l'eau a été
+tranchée en **S58** sur délégation explicite : **1025**, et une propriété du milieu plutôt qu'une
+constante (`ADR-048`). *Ne plus la rappeler en fin de session.* Le motif qui la bloquait — « C10
+exige 1000 » — était faux, et vérifiable en quatre minutes de recompilation (**L176**).
+**A107** — le dépôt avait forké une seconde fois, et S22 l'a constaté à l'amorce : la
 ligne `master` s'arrête à S17 et porte seule la fusion S16 et la cadence S17, quand la ligne vivante
 est allée jusqu'à S22. Que faire de ce travail resté de côté n'est pas une décision de session.
 
