@@ -1381,21 +1381,7 @@ pub fn mesurer_seiche_cfl(
     if points.len() < 4 {
         return None;
     }
-    let n = points.len() as f64;
-    let (sx, sy): (f64, f64) = points.iter().fold((0.0, 0.0), |(x, y), p| (x + p.0, y + p.1));
-    let (mx, my) = (sx / n, sy / n);
-    let (mut sxy, mut sxx, mut syy) = (0.0f64, 0.0f64, 0.0f64);
-    for (x, y) in &points {
-        sxy += (x - mx) * (y - my);
-        sxx += (x - mx) * (x - mx);
-        syy += (y - my) * (y - my);
-    }
-    let pente = if sxx > 0.0 { sxy / sxx } else { 0.0 };
-    let r2 = if sxx > 0.0 && syy > 0.0 {
-        (sxy * sxy) / (sxx * syy)
-    } else {
-        0.0
-    };
+    let (pente, r2) = crate::regression::centree(&points)?;
 
     // `A(t) = A₀·e^{pente·t}` ; la demi-vie est `ln2 / |pente|`.
     let demi_vie_s = if pente < 0.0 {
@@ -1437,7 +1423,7 @@ pub fn c03_seiche(host: &mut water_core::HostServices, mode_propre: bool) -> Vec
                 mesure: 1.0,
                 reference: 0.0,
                 tolerance_rel: 0.0,
-                source: "trop peu d'oscillations détectées : la vague s'est éteinte avant d'être mesurable",
+                source: "montage indisponible, oscillations insuffisantes ou régression inexploitable",
             }]
         }
     };
@@ -2323,24 +2309,8 @@ pub fn c33_decroissance_entretenue(
     }
 
     // Régression de log₂ A sur x : pente = −1/L½.
-    let n = profil.len() as f64;
-    let (sx, sy): (f64, f64) = profil
-        .iter()
-        .fold((0.0, 0.0), |(a, b), (x, y)| (a + x, b + y.log2()));
-    let (mx, my) = (sx / n, sy / n);
-    let (mut sxy, mut sxx, mut syy) = (0.0f64, 0.0f64, 0.0f64);
-    for (x, y) in &profil {
-        let ly = y.log2();
-        sxy += (x - mx) * (ly - my);
-        sxx += (x - mx) * (x - mx);
-        syy += (ly - my) * (ly - my);
-    }
-    let pente = if sxx > 0.0 { sxy / sxx } else { 0.0 };
-    let r2 = if sxx > 0.0 && syy > 0.0 {
-        (sxy * sxy) / (sxx * syy)
-    } else {
-        0.0
-    };
+    let points: Vec<_> = profil.iter().map(|&(x, y)| (x, y.log2())).collect();
+    let (pente, r2) = crate::regression::centree(&points)?;
 
     Some(DecroissanceSpatiale {
         lambda_m,

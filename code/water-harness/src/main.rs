@@ -29,6 +29,7 @@ mod physics_dispersif;
 mod physics_shallow;
 mod scenario;
 mod rapport_convergence;
+mod regression;
 
 use std::process::ExitCode;
 use std::time::Instant;
@@ -517,7 +518,7 @@ fn executer_physics_solveur() -> usize {
                 r.fenetre.0,
                 r.fenetre.1
             ),
-            None => println!("   {lambda:>8.1}   fenêtre inexploitable — front trop proche ou profil trop court"),
+            None => println!("   {lambda:>8.1}   mesure inexploitable — montage, fenêtre ou régression"),
         }
     }
 

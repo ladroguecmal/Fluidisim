@@ -68,7 +68,7 @@ Objectif         : Partager la régression centrée et examiner les projections 
 ### Plan
 
 - [x] **P1** — reprise, copies, jeton et plan seul.
-- [ ] **P2** — extraire pente/R² avec refus et témoins ; raccorder les deux appelants sans changer fenêtres, logarithmes ni unités.
+- [x] **P2** — extraire pente/R² avec refus et témoins ; raccorder les deux appelants sans changer fenêtres, logarithmes ni unités.
 - [ ] **P3** — examiner les contrats de projection, trancher le périmètre ; tests et comparaison des rapports, documentation des limites.
 - [ ] **P4** — rituel : journal, enseignements, actions, index/décomptes, passation et jeton libre.
 
@@ -77,3 +77,5 @@ Objectif         : Partager la régression centrée et examiner les projections 
 Master 50e952d propre, copies anciennes propres. REPRISE et socle lus dans cette conversation ;
 jeton et nouveautés S51 relus. Deux régressions centrées dans physics.rs, la régression
 non centrée shallow reste distincte. Aucun changement de solveur ni seuil de validation.
+
+P2 : regression::centree appelée par les deux mesures ; trois tests ciblés passent. Refus Option des séries dégénérées/non finies, fenêtres et unités conservées ; libellés None élargis aux causes réelles.
