@@ -781,10 +781,15 @@ HOMOGENEITE-S66. Aucun seuil changé ; A187 reste ouvert, suite prioritaire S67 
 
 | # | Action | Origine | Porteur | État |
 |---|---|---|---|---|
-| S66-1 | Décider par ADR comment séparer le diagnostic statistique d’homogénéité et le contrôle de précision ; éprouver un défaut injecté avant toute nouvelle assertion, conserver le refus actuel jusque-là | A188, HOMOGENEITE-S66 | session après diagnostic S64-3 | ouverte |
+| S66-1 | Décider par ADR comment séparer le diagnostic statistique d’homogénéité et le contrôle de précision ; éprouver un défaut injecté avant toute nouvelle assertion, conserver le refus actuel jusque-là | A188, HOMOGENEITE-S66 | session après diagnostic S64-3 | **close en S68 — ADR-052** |
 
 ## Actions relevées en séance — S67
 
 S64-3 close, A187 expliqué : SPECTRE-DENSE-S67. La graine fonctionne et la cause est connue ;
 S64-2 reste à instruire par ADR et campagne statistique, sans resserrement automatique.
 S66-1 est la suite S68 recommandée. Aucun nouvel engagement différé ; S63-1 toujours ouverte.
+
+## Actions relevées en séance — S68
+
+S66-1 close par ADR-052 : statistique diagnostique, précision directement contrôlée.
+S64-2 est la suite S69 recommandée ; aucune calibration de Hs effectuée ici. S63-1 ouverte.

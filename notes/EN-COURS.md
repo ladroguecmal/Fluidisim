@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S68
-État             : en cours
+État             : terminée
 Agent            : Codex (git et cargo disponibles)
 Objectif         : S66-1, séparer précision spatiale et diagnostic statistique par ADR.
 ```
@@ -70,7 +70,7 @@ Objectif         : S66-1, séparer précision spatiale et diagnostic statistique
 - [x] **P1** — état réel, passation et plan seul.
 - [x] **P2** — contrôle direct de phase avec borne dérivée de l’arithmétique ; témoin, défaut injecté et refus.
 - [x] **P3** — ADR-052, raccord au rapport, homogénéité diagnostique comptée ; tests et campagne.
-- [>] **P4** — rituel de passation, journal, actions, index et décomptes, jeton libre.
+- [x] **P4** — rituel de passation, journal, actions, index et décomptes, jeton libre.
 
 ### Notes de reprise
 
@@ -88,3 +88,5 @@ P3 : ADR-052 et CONTROLES-S68. Scores 0,227536/0,650281, seuil dérivé 1 ; diag
 0,979548732/1,397506641 inchangés, sans verdict. Refus statistique non fini compté en échec.
 137 tests verts, cinq ignorés ; check inchangé, physics seulement C04 en échec. Aucun seuil
 Hs changé. Suite S69 S64-2, calibration à instruire par ADR.
+
+P4 : rituel terminé, S66-1 close, suite S69 S64-2. Aucun calcul en cours, jeton libre.

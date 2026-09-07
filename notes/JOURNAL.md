@@ -5393,3 +5393,30 @@ registre et cas canoniques ; I-08 respecté, aucun invariant invalidé, aucun AD
 Suite S68 : S66-1, décider par ADR la séparation du contrôle de précision et du diagnostic
 statistique ; puis S64-2, désormais à instruire avec une cause connue et des ensembles possibles.
 S63-1 demeure le seul blocage B2 : couche dispersive à planifier. A103/C22 clos, aucun distant créé.
+
+## S68 — 2026-09-08 — Deux contrats au lieu d’une attribution
+
+Agent Codex, git/cargo disponibles. Départ master 3734fa4 propre, copie 29ef50 identique,
+avancée à chaque étape. S66-1 : décider le devenir du contrôle après S66/S67.
+
+ADR-052 sépare une assertion directe de précision spatiale et un diagnostic statistique
+sans verdict. Le ratio reste affiché et compté, un NaN reste un refus compté en échec.
+La primitive spatiale appelée par eval est partagée avec l’audit ; score erreur circulaire
+sur borne gamma3 Σ|k·coord·direction| + u + 2^-32, seuil dérivé 1 avant mesure. 49 positions,
+toutes les composantes ; témoin 256 composantes et phase dégradée à quatre bits éprouvés.
+Le contrôle ne prouve ni le spectre partagé ni la phase temporelle ni toute la chaîne.
+
+C02/C18 : scores 0,227536 / 0,650281, diagnostics 0,979548732 / 1,397506641 inchangés.
+Le second ne devient pas une statistique validée. 137 tests passent (44 cœur + 93 harnais),
+cinq ignorés ; release compilée. Check : hashs inchangés 0x9babd7e12935c263 /
+0xd57d81f47d9f8611. Physics terminé avec sortie 1 pour C04 ordre un seulement ; nombre
+d’assertions conservé par substitution et un diagnostic explicite ajouté par scénario.
+CONTROLES-S68 contient portée et reproduction ; tests de refus et défaut injecté réussis.
+
+S66-1 close, A188 traité. Aucun nouvel angle ni leçon : application de L183, contrat séparé.
+52 ADR, 17 invariants, six SPEC, seize registres, 23 cas, 188 angles ; L184 dernière leçon.
+I-02/I-03/I-06/I-08 relus, pas de changement de leurs exigences ; aucune allocation dans audit,
+aucun état sérialisé. Hs, sa fenêtre et sa tolérance restent sous ADR-051.
+
+Suite S69 : S64-2, instruire calibration statistique et décision de tolérance par ADR.
+S63-1 demeure le blocage B2 : couche dispersive à planifier. A103/C22 clos, aucun distant créé.

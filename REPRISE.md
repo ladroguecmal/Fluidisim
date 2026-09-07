@@ -18,14 +18,14 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 01:25 +02:00
+JETON            : libre
+Battement        : 2026-09-08 01:26 +02:00
 Agent            : Codex (git et cargo disponibles)
-Session en cours : S68
-Dernière session : S67 — 2026-09-08 — A187 explique par les battements
-Session suivante : S68 — S66-1, separer precision et diagnostic statistique par ADR
+Session en cours : aucune
+Dernière session : S68 — 2026-09-08 — ADR-052, contrats separes
+Session suivante : S69 — S64-2, calibration statistique Hs par ADR
 
-S67 : ensembles possibles, A187 expliqué ; calibration statistique et décision S66-1 restent à faire.
+S68 : A187 expliqué et S66-1 close ; calibration statistique S64-2 reste à instruire.
 
 À signaler à l'humain : **le seul blocage réel du banc B2 est une couche dispersive**, constatée
 nécessaire en S22 et jamais planifiée depuis. C'est l'action **S63-1**, et elle est plus lourde
@@ -135,7 +135,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 17 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 47 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 52 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -154,6 +154,11 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S68 — 2026-09-08 :** ADR-052 sépare précision spatiale et diagnostic statistique.
+Scores phase 0,227536/0,650281, diagnostics inchangés et sans verdict. S66-1 close ;
+137 tests réussis, cinq ignorés, hashs conservés ; physics ne garde que C04 en échec.
+Voir docs/validation/CONTROLES-S68.md. Suite S69 : calibration Hs S64-2 par ADR.
 
 **S67 — 2026-09-08 :** A187 expliqué par les covariances sur la fenêtre ; 6,612 % reproduits,
 battements voisins jusqu’à 20,208 km. Voir docs/validation/SPECTRE-DENSE-S67.md. S64-3 close,
@@ -339,10 +344,10 @@ le cas régulier p = 0,82 dont la stabilité n'est pas établie. Mesures et hash
 S45-1 close ; S47 recommandée : portée de la paire héritée C08-p/C08-coherence (S46-1).
 
 Quarante-huit sessions ici, **plus cinq dans une lignée parallèle réconciliée en S35** (B-S22 à
-B-S27) — **51 ADR** *(dont un acté)*, six spécifications, **seize registres** — **et du code qui
+B-S27) — **52 ADR** *(dont un acté)*, six spécifications, **seize registres** — **et du code qui
 tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équilibrés et **tous deux
 montés sur leurs cas, confrontés l'un à l'autre et instrumentés, **plus un milieu à dispersion
-exacte** *(S39)*, **135 tests verts, cinq ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **trois sans
+exacte** *(S39)*, **137 tests verts, cinq ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **trois sans
 verdict** (C08), **un succès depuis S59** : la fenêtre C22 800–12800 conclut à `p = 1,96`
 stabilisé, contre un oracle du même schéma. Quatre cas canoniques sur δ sont exécutés ici :
 **C01 et C03 passent**, C04 échoue, C08 ne conclut pas. **Le second véhicule passe C04 sur un montage dont le schéma et la mesure

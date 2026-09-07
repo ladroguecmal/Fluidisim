@@ -1089,3 +1089,9 @@ ce refus établi. Seuil et verdict conservés ; S65-1 close, décision du contr�
 **Suivi S67 — 2026-09-08.** A187 expliqué : Hs historique à 256 composantes reproduit par
 les moments finis ; interférences sur 3072 m, battements voisins jusqu’à 20,208 km. Aucun
 changement de tolérance, fenêtre ni verdict. [SPECTRE-DENSE-S67](SPECTRE-DENSE-S67.md).
+
+**Suivi S68 — 2026-09-08, ADR-052.** Homogénéité est un diagnostic sans verdict statistique,
+ratio inchangé et refus non fini compté. Une assertion de phase spatiale prend sa place :
+score erreur/borne ≤ 1, 49 positions et toutes les composantes, témoin et défaut injecté.
+C02/C18 : 0,227536 / 0,650281 ; seul C04 ordre un reste en échec dans physics.
+[CONTROLES-S68](CONTROLES-S68.md). Ce passage ne valide pas les statistiques d’ensemble.

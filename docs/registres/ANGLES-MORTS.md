@@ -1513,3 +1513,8 @@ individuelles rend Hs 1,200001971 m. À 6144 m, Hs vaut 1,218126498 : « ni la f
 était trop fort, seul le défaut de pas avait été écarté. Les battements voisins atteignent
 20,208 km à 256 composantes. S64-3 close ; calibration toujours à faire, aucune tolérance
 resserrée. Voir SPECTRE-DENSE-S67 et L184. Le présent suivi supplante la cause inconnue ci-dessus.
+
+**Suivi A188 — S68, 2026-09-08 : traité par ADR-052.** Le rapport sépare désormais le ratio
+statistique sans verdict et la précision spatiale directement bornée, avec défaut injecté.
+Refus statistique non fini conservé. Les mesures statistiques ne sont pas déclarées validées.
+S66-1 close ; voir CONTROLES-S68.
