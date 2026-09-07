@@ -59,31 +59,23 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S47
-État             : terminée
+Session          : S48
+État             : en cours
 Agent            : Codex (git et cargo disponibles)
-Objectif         : Distinguer le diagnostic Ritter hérité de la validation C08 (S46-1).
+Objectif         : Construire et mesurer C22 régulier sur shallow (S47-1).
 ```
 
 ### Plan
 
-- [x] **P1** — reprise et jeton, plan seul ; contrôles des copies et branches.
-- [x] **P2** — retirer le verdict de validation du diagnostic hérité, garder mesures et refus visibles, tester la portée du rapport.
-- [x] **P3** — suite complète et références ; corriger les affirmations courantes et annoter les ADR concernés sans réécriture.
-- [x] **P4** — rituel : journal, leçons/angles morts, actions, index et décomptes, passation et jeton libre.
+- [x] **P1** — reprise, contrôles des copies, jeton et plan seul.
+- [ ] **P2** — montage gaussien C22, comparaison conservative aux oracles emboîtés, essais nul/refus ; première mesure et coût.
+- [ ] **P3** — campagne de raffinement et stabilité, branchement au rapport adapté au coût, tests et documentation des résultats/limites.
+- [ ] **P4** — rituel : journal, leçons/angles morts, actions, index/décomptes et passation, jeton libre.
 
 ### Notes de reprise
 
-Départ master 7b0f1ec propre ; c107bf à S44 propre, lignée B archivée. Socle lu dans cette
-conversation, inchangé. S46 a corrigé le rapport principal, pas c08_convergence de shallow.
-Contrat C08 amendé S26 : support régulier, cinq grilles et stabilité. Ritter sur trois grilles
-ne valide pas C08, quel que soit p. Conserver p = 0,999745 et la différence des estimateurs.
-P2 : DiagnosticRitter remplace Vec<Cas> ; aucun seuil sur p, refus Option explicite.
-Controle de coherence conserve (0,25), y compris son echec a 0,83 et sur non-finis.
-Quatre tests C08 verts ; mesure nominale 0,999745 conservee.
-
-P3 : 102 tests verts, 2 ignores, check et hashs inchanges. 57 lignes comparees identiques.
-Notes correctives ajoutees a ADR-040/043, tableau courant et resume corriges.
-
-P4 : journal, A175, L169, S46-1 close et S47-1 ouverte ; jeton libre.
-Decomptes : 47 ADR, 17 invariants, 6 SPEC, 14 registres, 23 cas, 175 angles morts.
+Départ master 5795f05 propre, copies anciennes sans modification détectée. Lectures socle
+effectuées dans cette conversation. Aucun verdict présupposé : cinq grilles sont nécessaires,
+pas suffisantes. C22 impose une gaussienne de 1 cm sur 1 m, domaine 40 m, t = 1 s.
+Vérifier la convention de largeur de configure_bosse. Tester l'oracle à deux résolutions et
+mesurer son influence au lieu de présumer une erreur nulle. Préserver les mesures historiques.
