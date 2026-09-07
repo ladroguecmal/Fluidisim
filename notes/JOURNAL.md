@@ -3858,3 +3858,133 @@ deux budgets de batterie.
 Inchangés côté conception. **Un arbitrage d'infrastructure est en revanche résolu** : la branche B
 est marquée archivée des deux côtés, et le mécanisme qui a produit trois forks porte enfin un
 marqueur lisible avant le travail.
+
+---
+
+## S40 — 2026-09-07 — Le seuil de sec ne décide de rien de publiable, et la question était mal posée
+
+**Consigne reçue.** « Enchaîne sur S40 ».
+
+**Entrées.** Action **S37-1**, angle mort **A163** *(sévérité 1)*, **reportée quatre fois**. Deux
+valeurs de seuil coexistaient : `10⁻⁶` dans `delta.rs`, `10⁻¹⁰` dans `shallow.rs`.
+
+**Sorties.** Le seuil de `shallow.rs` rendu **réglable** — il était en dur à huit endroits ; le
+balayage sur sept décades et deux véhicules ;
+[`ADR-047`](../docs/adr/ADR-047-le-seuil-de-sec-ne-decide-de-rien-de-publiable.md) ; **A163
+requalifié**, **A169** ouvert ; note corrective datée sur `ADR-044` §7 ; `oracle.rs` cesse de
+recopier deux constantes.
+
+**Ça tourne.** `cargo test` : **85 tests** au vert — 38 dans le cœur, 47 dans le harnais dont deux
+`ignore` — contre 84 en début de session. `check` : 0 échec, hashs inchangés.
+
+### Deux mesures du corpus semblaient se contredire
+
+C'est ce qui a donné sa forme à la session, et c'était visible avant de mesurer quoi que ce soit :
+
+| | ce qui était mesuré | résultat |
+|---|---|---|
+| `ADR-031` §4 *(S23)* | position du front, `H_SEC` sur six décades | **0,25 point sur seize** — *« la valeur est libre »* |
+| `ADR-044` §5 *(S37)* | vitesse dans une cellule du film | **6,16 m/s**, soit **98 % de `2c₀`** |
+
+Les deux sont justes. **Elles ne parlent pas de la même grandeur.** La question n'était donc pas
+*quelle valeur choisir* — `ADR-031` avait déjà répondu — mais **de quoi ce seuil décide**.
+
+### La mesure
+
+Sept décades, `10⁻³` à `10⁻¹⁰`, sur les deux véhicules, C04 à `t = 2 s` :
+
+| | `delta.rs` (`f32`) | `shallow.rs` (`f64`) |
+|---|---|---|
+| **front** | 9,5416 → 9,5274 m — **0,148 %** | 9,52500 → 9,52500 — **0,000 %** |
+| **`h(0)`** | 0,45165 → 0,45166 | 0,45118 → 0,45119 |
+| **volume** | 20,000000 partout | 20,000000 partout |
+| **film** | 3 → **15** cellules | 7 → **18** cellules |
+| **`max\|u\|`** | **5,18 à 11,06 m/s** | **5,10 à 12,86 m/s** |
+
+**Toutes les grandeurs publiées de C04 sont insensibles** — 0,148 % au pire pour une tolérance de
+3 %. La thèse déclarée avant la mesure tient.
+
+**Et `max|u|` dépasse `2c₀ = 6,264 m/s`**, la vitesse du front de Ritter, la plus grande que cette
+solution contienne. Elle varie d'un facteur 2,1 à 2,5 avec le seuil, **sans tendance monotone**.
+
+> **Une quantité qui dépasse la borne physique de son propre montage et qui varie sans tendance avec
+> un réglage arbitraire n'est pas une mesure.** C'est `hu/h` sur un film dont l'épaisseur est un
+> paramètre.
+
+### La décision, et pourquoi elle n'est pas un nombre
+
+**Les deux valeurs ne sont pas alignées.** Aligner coûterait la reproductibilité de tous les chiffres
+publiés par la lignée B, mesurés à `10⁻¹⁰`, et n'achèterait rien puisque l'écart ne déplace aucune
+grandeur publiable. *Une différence sans conséquence se documente au lieu de se corriger.*
+
+Ce qui est décidé à la place : **`u` dans une cellule sous le seuil n'est pas une grandeur
+publiable** — aucune assertion, aucun rapport, aucun oracle ne doit la lire. La règle vaut au-delà de
+ce seuil : *une grandeur définie par une division dont le dénominateur est un réglage n'est pas
+mesurable.*
+
+### Ce qui justifiait la sévérité 1, et qui demeure
+
+**Ce n'était pas la différence, c'était l'ignorance.** Un des deux véhicules portait une constante
+posée au jugé, en dur, à huit endroits, sans que rien ne dise ce qu'elle commandait.
+
+> *Ce qui rendait ce seuil dangereux n'est pas qu'il valait `10⁻¹⁰` plutôt que `10⁻⁶`, c'est que
+> personne ne pouvait dire ce qui changerait s'il valait autre chose.*
+
+Le défaut est levé par la mesure, pas par un alignement. Le seuil est réglable, rapporté, et sa
+provenance est ce balayage.
+
+### Ce que la session a corrigé dans ce qu'elle a lu
+
+`ADR-044` §7 refusait d'aligner les deux seuils, et donnait pour raison qu'un alignement
+*« déplace la position du front, donc le verdict de C04, donc le critère d'entrée au banc B3 »*.
+**La prudence était bonne ; sa justification était fausse** — le front bouge de 0,148 %.
+
+Et cela a coûté : **l'action a été reportée quatre fois**, parce que le prix annoncé — rouvrir un
+critère de banc — la faisait paraître plus lourde qu'elle n'était. Angle mort **A169** : *une raison
+fausse donnée à l'appui d'une bonne décision la rend indéfendable au moment de l'exécuter, parce que
+personne ne peut estimer ce qu'elle coûte.*
+
+### Ce que la session a dû faire pour pouvoir mesurer
+
+Le seuil de `shallow.rs` était **en dur à huit endroits**, dont cinq dans des fonctions statiques.
+Le rendre réglable a demandé de propager un paramètre à travers `flux_physique`, `rusanov`, `hll`,
+`flux_num`, les deux reconstructions et `residu`. **Le compilateur a énuméré chaque point** — c'est
+**L149**, et c'est la deuxième fois en trois sessions qu'un changement de signature trouve ce qu'une
+lecture aurait manqué.
+
+Les 84 tests sont restés verts après la propagation : la valeur par défaut est inchangée, et le
+comportement aussi.
+
+### Chiffres qui ont orienté la session
+
+- **0,148 %** contre une tolérance de **3 %** : le rapport qui rend la décision facile.
+- **12,86 m/s** pour une borne physique de **6,26** : ce qui prouve que `max|u|` n'est pas une
+  grandeur.
+- **Huit endroits en dur**, dont cinq inaccessibles à `self` : le coût réel de la mesure.
+- **Quatre reports** : ce qu'a coûté une bonne prudence mal justifiée.
+
+### Ce qui n'a pas été fait
+
+- **Le seuil de mesure du front** — `10⁻²·h₀` — n'est pas celui-ci et n'a pas été réexaminé.
+  `ADR-031` §5.3 demandait qu'il soit *fixé par C04 lui-même* (**A154**). Toujours ouvert.
+- **`hu` dans le film** n'a pas été regardé. Si `u` n'y est pas publiable, `hu` non plus.
+- **`max|u|` sert de borne interne** au pas de temps (`ADR-035`). Le §2 dit qu'elle n'est pas
+  publiable ; il ne dit pas qu'elle est inutilisable comme borne, et la différence n'est pas
+  instruite.
+- **Les sept angles morts de sévérité 1 importés ne sont pas relus** (S35-5, S39-3).
+- **Les deux budgets de batterie divergent toujours** — 60 s ici, 120 s côté lignée B (S39-2).
+
+### Session suivante recommandée
+
+**S41 — relire les sept angles morts de sévérité 1 importés** (S35-5, S39-3). Ils sont entrés par
+deux réconciliations, aucun n'a été examiné par cette lignée, et cette session vient de montrer sur
+`A163` qu'un angle mort importé peut être **juste et mal formulé** : son énoncé désignait une
+incompatibilité qui n'existe pas, alors que le défaut réel — l'absence de provenance — était à côté.
+
+*Solutions de rechange* : le seuil de mesure du front (A154) ; ou réconcilier les deux budgets
+(S39-2).
+
+### Arbitrages en attente
+
+Inchangés. Cette session a **tranché une question qui attendait depuis S37** sans avoir eu à choisir
+un nombre, ce qui est le résultat le plus économique qu'elle pouvait produire.

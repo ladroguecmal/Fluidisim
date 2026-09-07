@@ -120,7 +120,8 @@ valeur.
 - [x] **P6** — **la décision**, en ADR. Elle porte sur ce que le seuil gouverne, pas sur un nombre.
 - [x] **P7** — répercussions : `ADR-031` §4 reçoit ce que S40 ajoute, `A163` est tranché ou
       requalifié, `oracle.rs` cesse de porter deux constantes en dur.
-- [ ] **P8** — rituel de fin (`REPRISE.md` §6).
+- [x] **P8a** — rituel : journal, leçons L156-L157, actions S40-1 à S40-4.
+- [ ] **P8b** — rituel : index, décomptes, jeton libéré.
 
 ### Notes de reprise
 

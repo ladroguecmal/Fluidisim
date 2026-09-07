@@ -409,3 +409,26 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 >
 > **Toute action de réplication future est portée par la session qui constate**, jamais par
 > l'utilisateur : c'est la seule façon qu'elle ait un moment d'exécution.
+
+## Actions relevées en séance — S40
+
+| # | Action | D'où elle vient | Qui la porte | État |
+|---|---|---|---|---|
+| S40-1 | **Réexaminer le seuil de mesure du front** — `10⁻²·h₀`, conventionnel. `ADR-031` §5.3 demandait qu'il soit *fixé par C04 lui-même*, comme C02 « produit `λ_cut` ». Ce n'est **pas** le seuil tranché par S40 | **A154** | session | **ouverte** |
+| S40-2 | **Statuer sur `hu` dans le film.** `ADR-047` D3 retire `u` des grandeurs publiables ; `hu` est dans le même cas et rien ne le dit | `ADR-047` §7.2 | session | **ouverte** |
+| S40-3 | **Instruire la différence entre grandeur publiable et borne interne.** `max|u|` sert de borne au pas de temps (`ADR-035`) tout en n'étant pas publiable (`ADR-047` D3). Les deux usages ne demandent pas la même chose, et personne ne l'a écrit | `ADR-047` §7.3 | session | **ouverte** |
+| S40-4 | **Écrire ce qu'il faudra faire le jour où un cas mesurera dans le film** — plage, mouillage, ressuyage. Aujourd'hui aucun cas canonique n'y mesure quoi que ce soit, ce qui rend `ADR-047` D3 sans coût ; ce ne sera pas toujours vrai | `ADR-047` §7.4 | session | **ouverte** |
+
+> **Note S40 — l'action S37-1 est close, et A163 est requalifié plutôt que tranché.**
+>
+> La question posée était *quelle valeur choisir*. Elle était mal posée : `ADR-031` §4 avait déjà
+> établi que la valeur est libre, et S40 l'étend à sept décades et aux deux véhicules. **Aucune
+> grandeur publiée ne dépend de ce seuil** — le front bouge de 0,148 % pour une tolérance de 3 %.
+>
+> **Les deux valeurs ne sont pas alignées** : une différence sans conséquence se documente au lieu
+> de se corriger, et aligner coûterait la reproductibilité des chiffres de la lignée B. Ce qui est
+> décidé à la place est que **`u` sous le seuil n'est pas une grandeur publiable** (`ADR-047` D3).
+>
+> **Ce qui justifiait la sévérité 1 demeure et est levé** : une des deux valeurs n'avait aucune
+> provenance et vivait en dur à huit endroits. Elle est désormais réglable, rapportée, et sa
+> provenance est le balayage de cette session.

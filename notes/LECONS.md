@@ -2498,3 +2498,48 @@ le défaut se manifeste ailleurs, plus tard, sans étiquette.
 **exécutable** — quelle mesure, quel montage, quel régime. Ce n'est pas une précaution rhétorique :
 c'est ce qui transforme une conclusion en instrument. Un document qui a raison rend service une
 fois ; un document qui dit comment l'infirmer rend service jusqu'à ce qu'on l'infirme.
+
+## L156 — Une grandeur dont le dénominateur est un réglage n'est pas mesurable
+
+*(S40)* Deux implémentations du même modèle divergeaient de 98 % de la vitesse maximale de leur
+montage sur une cellule. La cause : un seuil qui décide à partir de quelle hauteur d'eau on calcule
+`u = hu/h`. Sous ce seuil la vitesse est lue nulle, au-dessus elle est lue comme le quotient — et sur
+un film d'un dixième de nanomètre, le quotient rend n'importe quoi.
+
+Le balayage l'a établi sans ambiguïté : la quantité **dépasse la borne physique de son propre
+montage** — la vitesse maximale que la solution exacte contient — et **varie d'un facteur deux et
+demi avec le réglage, sans tendance monotone**. Deux signes qui, ensemble, ne laissent aucune lecture
+alternative.
+
+**La conclusion n'est pas qu'il faut mieux régler le seuil**, c'est que cette quantité n'a pas de
+valeur à publier. Toutes les grandeurs que le corpus mesure vraiment — position du front, hauteur,
+volume — se sont révélées insensibles au même réglage sur sept décades.
+
+**Réflexe** : devant une grandeur dérivée par division, regarder **qui décide du dénominateur**. Si
+c'est un seuil, une valeur de repli, un compteur qui peut valoir zéro, un intervalle de temps
+configurable — alors la grandeur existe dans la plage où le dénominateur est franc, et **nulle part
+ailleurs**. Deux tests le montrent : *dépasse-t-elle une borne physique connue du montage ?* et
+*varie-t-elle sans tendance quand on bouge le réglage ?* Une réponse positive à l'une des deux suffit
+à retirer la grandeur des rapports.
+
+## L157 — Une raison fausse à l'appui d'une bonne décision la fait reporter indéfiniment
+
+*(S40)* Une session avait refusé de trancher une question, à juste titre, et avait écrit pourquoi :
+*« cela déplacerait la position du front, donc le verdict d'un cas, donc un critère d'entrée de
+banc »*. Le refus était sage. **La raison était fausse** : mesuré, le front bouge de 0,148 % pour une
+tolérance de 3 %.
+
+L'effet n'a pas été de tromper qui que ce soit — personne n'a pris de mauvaise décision. L'effet a
+été que **l'action a été reportée quatre fois de suite**. Chaque session la lisait, voyait un coût
+annoncé considérable — rouvrir un critère de banc — et choisissait autre chose. La bonne prudence
+était devenue un épouvantail.
+
+Le vrai motif de prudence existait pourtant, et il était plus simple : *une des deux valeurs n'avait
+aucune provenance*. Écrit ainsi, il désignait le travail à faire — mesurer — au lieu d'un risque à
+éviter.
+
+**Réflexe** : quand on décide de **ne pas** faire quelque chose, écrire la raison avec autant de soin
+que pour une décision positive, et la formuler comme *ce qui manque* plutôt que comme *ce que ça
+casserait*. Un coût surestimé dans un document ne se corrige jamais tout seul : il est cité,
+respecté, et il repousse l'action jusqu'à ce que quelqu'un mesure. **La prudence se justifie par une
+ignorance, pas par une catastrophe supposée.**
