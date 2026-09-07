@@ -818,7 +818,7 @@ pub enum Ordre {
     /// Ce n'est **pas** un échec de convergence — c'est l'inverse. Rapporter `p = 0` ici serait
     /// mentir dans le sens le plus coûteux : déclarer faux un solveur exact.
     Plancher,
-    /// Les différences successives ne décroissent pas : rien n'est extrapolable.
+    /// Mesure non finie, triplet absent ou différences sous le plancher : rien d'extrapolable.
     Indetermine,
 }
 
@@ -837,6 +837,9 @@ impl Convergence {
             return Ordre::Indetermine;
         }
         let (e0, e1, e2) = (self.erreurs[i].1, self.erreurs[i + 1].1, self.erreurs[i + 2].1);
+        if ![e0, e1, e2].iter().all(|e| e.is_finite()) {
+            return Ordre::Indetermine;
+        }
         if e0.abs() < self.plancher && e1.abs() < self.plancher && e2.abs() < self.plancher {
             return Ordre::Plancher;
         }
@@ -848,7 +851,8 @@ impl Convergence {
         // différences successives grandissent, ce qui est la signature du régime **pré**-asymptotique
         // — le cas où la formule de Richardson produit un nombre dénué de sens. Le masquer derrière
         // « indéterminé » retirerait précisément ce que `asymptotique()` doit pouvoir constater.
-        Ordre::Observe((d0 / d1).log2())
+        let p = (d0 / d1).log2();
+        if p.is_finite() { Ordre::Observe(p) } else { Ordre::Indetermine }
     }
 
     /// Les ordres de tous les triplets consécutifs.
@@ -891,14 +895,16 @@ impl Convergence {
     /// au suivant est le signe que le régime n'est pas atteint, et **publier ce nombre sans le dire
     /// est la faute que ce contrôle empêche**.
     pub fn asymptotique(&self, tolerance: f64) -> Option<bool> {
+        // S46 : retirer les refus recollerait des triplets non consécutifs et pourrait
+        // fabriquer une preuve de stabilité. La famille complète doit être mesurable.
         let os: Vec<f64> = self
             .ordres()
             .iter()
-            .filter_map(|(_, o)| match o {
+            .map(|(_, o)| match o {
                 Ordre::Observe(p) => Some(*p),
                 _ => None,
             })
-            .collect();
+            .collect::<Option<Vec<_>>>()?;
         if os.len() < 3 {
             return None;
         }
@@ -926,6 +932,31 @@ impl Convergence {
 #[cfg(test)]
 mod tests_convergence {
     use super::*;
+
+    #[test]
+    fn refus_non_finis_et_debordement() {
+        for valeur in [f64::NAN, f64::INFINITY, f64::NEG_INFINITY] {
+            for i in 0..5 {
+                let mut c = suite(1.0, 0.1, 5);
+                c.erreurs[i].1 = valeur;
+                assert_eq!(c.ordre(i.min(2)), Ordre::Indetermine);
+                assert_eq!(c.asymptotique(0.1), None);
+            }
+        }
+        let mut c = suite(1.0, 0.1, 3);
+        c.erreurs = vec![(200, f64::MAX), (400, 1e-100), (800, 0.0)];
+        c.plancher = 0.0;
+        assert_eq!(c.ordre_final(), Ordre::Indetermine, "le rapport peut déborder avec des entrées finies");
+        assert!(matches!(suite(-1.0, 0.1, 5).ordre_final(), Ordre::Observe(p) if p < 0.0));
+    }
+
+    #[test]
+    fn les_trous_ne_sont_pas_recolles_pour_prouver_la_stabilite() {
+        let mut c = suite(1.0, 0.1, 8);
+        c.erreurs[3].1 = c.erreurs[2].1;
+        assert_eq!(c.asymptotique(0.1), None);
+        assert_eq!(suite(1.0, 0.1, 5).asymptotique(0.1), Some(true));
+    }
 
     fn suite(p: f64, e0: f64, n: usize) -> Convergence {
         // Erreur exactement en dxᵖ : e_k = e0 · 2^(−p·k).

@@ -27,6 +27,7 @@ mod physics;
 mod physics_dispersif;
 mod physics_shallow;
 mod scenario;
+mod rapport_convergence;
 
 use std::process::ExitCode;
 use std::time::Instant;
@@ -543,17 +544,17 @@ fn executer_physics_solveur() -> usize {
     // sur une exécution, c'est une propriété d'une **famille** d'exécutions.
     println!("
 --- C08 — convergence sous raffinement, sur C04 ---");
-    println!("  assertion : p > 0,8 (CAS-CANONIQUES §C08)");
+    println!("  diagnostic sur C04 ; p > 0,8 et stabilité exigés sur le cas régulier (ADR-032)");
     let grilles = [200usize, 400, 800, 1600, 3200];
-    let mut non_concluants = 0usize;
-    let mut total_c08 = 0usize;
-    for c in physics::c08_convergence_de_c04(&mut host, 2.0, &grilles, 1.0e-3) {
-        total_c08 += 1;
+    let mut bilan_c08 = rapport_convergence::Bilan::default();
+    let mut familles: Vec<_> = physics::c08_convergence_de_c04(&mut host, 2.0, &grilles, 1.0e-3)
+        .into_iter().map(|c| (c, false)).collect();
+    familles.push((physics::c08_convergence_reguliere(
+        &mut host, 1.0, &[100, 200, 400, 800, 1600, 3200], 51200), true));
+    for (c, regulier) in familles {
         println!("  {}", c.grandeur);
         print!("    erreurs :");
-        for (nx, e) in &c.erreurs {
-            print!("  nx={nx}: {e:.3e}");
-        }
+        for (nx, e) in &c.erreurs { print!("  nx={nx}: {e:.3e}"); }
         println!();
         print!("    ordres  :");
         for (nx, o) in c.ordres() {
@@ -564,71 +565,10 @@ fn executer_physics_solveur() -> usize {
             }
         }
         println!();
-        let verdict = match (c.ordre_final(), c.asymptotique(0.10)) {
-            (physics::Ordre::Plancher, _) => {
-                "PLANCHER  l'erreur est au bruit d'arrondi : la discrétisation n'est plus mesurable"
-                    .to_string()
-            }
-            (physics::Ordre::Observe(p), Some(false)) => {
-                non_concluants += 1;
-                format!(
-                    "NON CONCLUANT  p = {p:.2} mais l'ordre bouge encore : régime asymptotique non atteint"
-                )
-            }
-            (physics::Ordre::Observe(p), _) if p > 0.8 => format!("OK        p = {p:.2}"),
-            (physics::Ordre::Observe(p), _) => {
-                echecs += 1;
-                format!("ÉCHEC     p = {p:.2} ≤ 0,8")
-            }
-            (physics::Ordre::Indetermine, _) => "INDÉTERMINÉ".to_string(),
-        };
-        println!("    → {verdict}");
+        println!("    → {}", bilan_c08.ajouter(&c, regulier));
     }
-    // Le même contrôle, sur un montage **régulier** : c'est lui qui dit si l'ordre réduit mesuré
-    // sur C04 vient du schéma ou de la solution.
-    {
-        let c = physics::c08_convergence_reguliere(&mut host, 1.0, &[100, 200, 400, 800, 1600, 3200], 51200);
-        total_c08 += 1;
-        println!("  {}", c.grandeur);
-        print!("    erreurs :");
-        for (nx, e) in &c.erreurs {
-            print!("  nx={nx}: {e:.3e}");
-        }
-        println!();
-        print!("    ordres  :");
-        for (nx, o) in c.ordres() {
-            match o {
-                physics::Ordre::Observe(p) => print!("  [{nx}…]: {p:+.3}"),
-                physics::Ordre::Plancher => print!("  [{nx}…]: plancher"),
-                physics::Ordre::Indetermine => print!("  [{nx}…]: —"),
-            }
-        }
-        println!();
-        match (c.ordre_final(), c.asymptotique(0.10)) {
-            (physics::Ordre::Observe(p), Some(true)) if p > 0.8 => {
-                println!("    → OK        p = {p:.2}, stabilisé")
-            }
-            (physics::Ordre::Observe(p), Some(false)) => {
-                non_concluants += 1;
-                println!("    → NON CONCLUANT  p = {p:.2}, l'ordre bouge encore")
-            }
-            (physics::Ordre::Observe(p), _) if p <= 0.8 => {
-                echecs += 1;
-                println!("    → ÉCHEC     p = {p:.2} ≤ 0,8")
-            }
-            (o, a) => println!("    → {o:?} / asymptotique {a:?}"),
-        }
-    }
-
-    // Un « non concluant » n'est pas un échec, et ne doit pas non plus se lire comme un succès.
-    // Le décompte est imprimé pour qu'un rapport sans échec ne se lise jamais comme une validation.
-    if non_concluants > 0 {
-        println!(
-            "  {non_concluants} grandeur(s) sur {total_c08} sans verdict : le régime asymptotique n'est pas atteint sur ces grilles."
-        );
-        println!("  C08 n'est donc ni passé ni échoué ici — il n'est **pas exécutable** sur ce montage. Voir ADR-032.");
-    }
-
+    println!("  {}", bilan_c08.resume());
+    echecs += bilan_c08.echecs;
     let executes = cas.len() - temoins.len();
     println!(
         "  {executes} cas exécutés, {echecs} échec(s), {} témoin(s)",
