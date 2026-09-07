@@ -298,6 +298,105 @@ mod diagnostic_homogeneite_s66 {
         [carres[0]/n-(somme[0]/n).powi(2), carres[1]/n-(somme[1]/n).powi(2), diag,max_ecart]
     }
 
+    // Moyenne de exp(i*2pi*(k.x+phase)) sur la grille centrée comme variances().
+    // Réduction de l'incrément modulo un tour, puis somme géométrique finie.
+    fn moyenne_cos(k: [f64;2], phase: f64, cote: usize, pas: f64) -> f64 {
+        let mut centre = phase;
+        let mut facteur = 1.0;
+        for v in k {
+            let a = v*pas;
+            let r = a-a.round();
+            centre += -a*cote as f64*0.5 + r*(cote-1) as f64*0.5;
+            if r != 0.0 {
+                facteur *= (core::f64::consts::PI*cote as f64*r).sin()
+                    / (cote as f64*(core::f64::consts::PI*r).sin());
+            }
+        }
+        facteur*(core::f64::consts::TAU*centre).cos()
+    }
+
+    // Var totale, somme des variances individuelles, contribution croisée des voisins i,i+1.
+    fn moments_exacts(bg: &Background, cote: usize, pas: f64) -> [f64;3] {
+        let t = SimTime::from_micros(1_735_689_600_000_000);
+        let c: Vec<_> = bg.components.iter().map(|c| {
+            let k = [c.k_turns_per_m as f64*c.dir[0] as f64,
+                c.k_turns_per_m as f64*c.dir[1] as f64];
+            let p = c.phase0.0.wrapping_sub(PhaseQ32::from_time(c.freq_q32,t).0) as f64
+                / 4_294_967_296.0;
+            let a = c.amplitude as f64;
+            (k,p,a,a*moyenne_cos(k,p-0.25,cote,pas))
+        }).collect();
+        let (mut diag,mut croise,mut voisins) = (0.0,0.0,0.0);
+        for (i,&(ki,pi,ai,mi)) in c.iter().enumerate() {
+            for (j,&(kj,pj,aj,mj)) in c.iter().enumerate().skip(i) {
+                let diff = [ki[0]-kj[0],ki[1]-kj[1]];
+                let sum = [ki[0]+kj[0],ki[1]+kj[1]];
+                let cov = ai*aj*0.5*(moyenne_cos(diff,pi-pj,cote,pas)
+                    - moyenne_cos(sum,pi+pj,cote,pas))-mi*mj;
+                if i==j { diag+=cov; } else {
+                    croise+=2.0*cov;
+                    if j==i+1 { voisins+=2.0*cov; }
+                }
+            }
+        }
+        [diag+croise,diag,voisins]
+    }
+
+    #[test]
+    fn moments_finits_contre_sommation_et_alias() {
+        for (k,p) in [([0.,0.],0.1),([1.0/3.0,0.],0.3),([0.023,-0.015],0.7)] {
+            let mut somme = 0.0;
+            for y in 0..16 { for x in 0..16 {
+                somme += (core::f64::consts::TAU*(p+k[0]*(x as f64-8.0)*3.0
+                    +k[1]*(y as f64-8.0)*3.0)).cos();
+            }}
+            assert!((moyenne_cos(k,p,16,3.0)-somme/256.0).abs()<1e-12);
+        }
+        for n in [1,32,256] {
+            let bg = fond(20260905,n);
+            let direct = variances(&bg,48,3.0,0.0);
+            let exact = moments_exacts(&bg,48,3.0);
+            assert!((direct[1]-exact[0]).abs()<1e-12);
+            assert!((direct[2]-exact[1]).abs()<1e-12);
+            if n==1 { assert_eq!(exact[0],exact[1]); assert_eq!(exact[2],0.0); }
+        }
+    }
+
+    #[test]
+    #[ignore = "diagnostic S67 : spectre dense, phases historiques et six graines ; release"]
+    fn spectre_dense_s67() {
+        for n in [32,256] {
+            for g in [None,Some(0),Some(1),Some(2),Some(3),Some(20260905),Some(u64::MAX)] {
+                let mut bg = fond(g.unwrap_or(0),n);
+                if g.is_none() { for (i,c) in bg.components.iter_mut().enumerate() {
+                    c.phase0 = PhaseQ32((i as u32).wrapping_mul(0x9E37_79B9));
+                }}
+                for cote in [1024,2048] {
+                    let v = moments_exacts(&bg,cote,3.0);
+                    println!("S67 n={n} g={g:?} cote={cote} Hs={:.9} diag_Hs={:.9} cross={:.9} voisins={:.9}",
+                        4.0*v[0].sqrt(),4.0*v[1].sqrt(),v[0]-v[1],v[2]);
+                    if n==256 && cote==1024 && (g.is_none() || g==Some(20260905)) {
+                        let d = variances(&bg,cote,3.0,0.0);
+                        println!("S67 direct g={g:?} Hs_prod={:.9} Hs_f64={:.9} erreur_var={:.9e}",
+                            4.0*d[0].sqrt(),4.0*d[1].sqrt(),d[1]-v[0]);
+                        assert!((d[1]-v[0]).abs()<1e-10);
+                    }
+                }
+                if g.is_none() {
+                    let mut beats: Vec<_> = bg.components.windows(2).map(|p| {
+                        let dx=p[1].k_turns_per_m as f64*p[1].dir[0] as f64
+                            -p[0].k_turns_per_m as f64*p[0].dir[0] as f64;
+                        let dy=p[1].k_turns_per_m as f64*p[1].dir[1] as f64
+                            -p[0].k_turns_per_m as f64*p[0].dir[1] as f64;
+                        1.0/(dx*dx+dy*dy).sqrt()
+                    }).collect();
+                    beats.sort_by(|a,b| a.partial_cmp(b).unwrap());
+                    println!("S67 n={n} battements_voisins min={:.3} max={:.3} m",beats[0],beats[beats.len()-1]);
+                }
+            }
+        }
+    }
+
     #[test]
     fn interferences_distinguees_de_la_precision() {
         let bg = fond(20260905,32);

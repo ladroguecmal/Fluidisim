@@ -68,8 +68,8 @@ Objectif         : Expliquer A187, écart de Hs à 256 composantes (S64-3).
 ### Plan
 
 - [x] **P1** — reprise, état réel, jeton et plan seul.
-- [>] **P2** — décomposer exactement les moments sur la grille par sommes trigonométriques ; vérifier contre le diagnostic point par point et le témoin monochromatique.
-- [ ] **P3** — mesurer spectres 32/256, phases historiques et six graines ; isoler les termes croisés et les échelles de battement, documenter sans resserrer de tolérance.
+- [x] **P2** — décomposer exactement les moments sur la grille par sommes trigonométriques ; vérifier contre le diagnostic point par point et le témoin monochromatique.
+- [>] **P3** — mesurer spectres 32/256, phases historiques et six graines ; isoler les termes croisés et les échelles de battement, documenter sans resserrer de tolérance.
 - [ ] **P4** — rituel : journal, actions, angles/leçons éventuels, corrections datées, index/décomptes, jeton libre.
 
 ### Notes de reprise
@@ -80,3 +80,8 @@ les seules phases historiques dans le diagnostic pour reproduire les 6,612 % de 
 Fenêtres centrées à zéro : 3072 et 6144 m, pas 3 m, dans la portée 4096 m. Formule exacte
 sur la grille, pas une limite de fenêtre infinie. Aucun calcul ni paramètre de production modifié.
 S66-1 puis S64-2 restent des décisions par ADR ; S63-1 reste le blocage B2.
+
+P2 : moyenne trigonométrique sur grille finie (somme géométrique), moments via sin(a)sin(b).
+Test contre sommation directe à 1/32/256 composantes et cas fréquence nulle/alias exact : vert.
+Diagnostic P3 lancé : phases historiques n=256 donnent Hs=1,279349889, partie individuelle
+Hs=1,200001971 ; covariance=0,012295713 m², voisins immédiats=0,008987660 m².
