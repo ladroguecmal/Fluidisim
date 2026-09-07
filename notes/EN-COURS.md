@@ -104,8 +104,8 @@ dans le code ou le corpus d'accueil et non traité**.* Les deux plus probables :
 voudrait dire qu'un angle mort trouvé sur un véhicule ne se transporte pas, et la procédure d'import
 de `FORK-S22-S26` §4 devrait le dire.
 
-- [>] **P1** — plan, jeton.
-- [ ] **P2** — **A152**, **A156** : les conditions de mesure et le classement par scalaire. Les deux
+- [x] **P1** — plan, jeton.
+- [x] **P2** — **A152**, **A156** : les conditions de mesure et le classement par scalaire. Les deux
       portent sur `CAS-CANONIQUES`, et se vérifient en le lisant cas par cas.
 - [ ] **P3** — **A155**, **A159** : les deux défauts d'écriture — une simplification dans le code,
       une formule dans le corpus. **Q3 se vérifie sur `delta.rs` et sur les ADR à constantes.**

@@ -29,6 +29,24 @@ les six premiers doivent passer avant qu'un solveur candidat soit admis en campa
 > et un hash de conformité stable n'avaient pas vu : la vitesse orbitale était en quadrature au lieu
 > d'être en phase avec l'élévation. Voir ADR-029, note S21.
 
+
+> **Conditions de mesure — rubrique ajoutée en B-S23 ([ADR-039](../adr/ADR-039-un-cas-sans-conditions-de-mesure-ne-classe-personne.md)).** Une fiche complète en
+> porte quatre : **Montage**, **Référence**, **Assertions**, et **Conditions de mesure** — tout
+> paramètre dont dépend la valeur mesurée et que le montage ne fixe pas : résolution, seuils de
+> détection, normalisation des écarts, norme d'erreur, support, constantes physiques.
+>
+> **Le test qui dit si la rubrique est complète** : *deux implémenteurs qui ne se parlent pas
+> obtiennent-ils le même nombre ?* Sinon, il manque une ligne. **Une condition de mesure n'est pas
+> une tolérance** : la tolérance dit ce qui est acceptable, la condition dit ce qu'on mesure.
+>
+> Les six cas exercés en S21 et B-S22–B-S23 l'ont reçue. **Les quinze autres ne l'ont pas**, et rien ne dit
+> qu'ils en ont besoin : la sous-spécification ne se détecte pas à la lecture, seulement à
+> l'exécution — c'est tout le sujet d'ADR-039.
+>
+> *Rubrique **reportée de la lignée B en S41**. Elle avait été manquée par les réconciliations de
+> S35 et S39, qui ont importé l'angle mort **A152** — *un paramètre qu'un énoncé ne fixe pas est
+> tranché en silence par le premier qui mesure* — **sans importer le remède que la lignée B avait
+> construit contre lui**. Neuf rubriques existaient là-bas, zéro ici.*
 ---
 
 ## Deux véhicules, deux colonnes de verdicts *(S35, réconciliation du fork)*
@@ -131,6 +149,11 @@ rend **1,0030**. Voir la note S36 d'`ADR-040` et l'angle mort **A162**.
 **Référence.** `u ≡ 0` exactement. La solution est triviale, ce qui est précisément l'intérêt.
 **Assertion.** `max|u| < 1 mm/s` après 60 s ; `max|η − η₀| < 1 mm`.
 
+**Conditions de mesure** *(B-S23)*. **`dx` libre, et c'est le sujet** : pour un schéma bien équilibré,
+le cas est exact à *toute* résolution, et c'est précisément la propriété testée. Un candidat dont le
+résultat dépend de la maille a déjà échoué, quelle que soit la valeur mesurée. À dire explicitement,
+sinon cette liberté ressemble à un oubli.
+
 Un très grand nombre de solveurs produisent des **courants parasites** sur un fond incliné, parce
 que le gradient de pression et le terme de fond ne s'annulent pas exactement à la discrétisation.
 Le symptôme en jeu est un lac qui frissonne sans raison et une eau qui « coule » lentement vers le
@@ -188,6 +211,29 @@ dimensionnement.
 **Référence.** `T = 2L/√(gh) = 9,03 s`.
 **Assertions.** erreur de période < 1 % ; **demi-vie d'amplitude** > 15 périodes.
 
+**Conditions de mesure** *(B-S23)*.
+
+- **≥ 250 mailles par longueur d'onde du fondamental** (`λ = 2L = 40 m`). Sans cette ligne,
+  l'assertion de demi-vie mesure la maille et non le schéma : le solveur de B-S22 donne **6,0
+  périodes à 100 mailles/λ** — échec — et **43,1 à 800** — succès confortable. Même code, même
+  schéma.
+- **Amplitude ≪ profondeur** — 0,02 m sur 2 m — pour rester en régime linéaire, faute de quoi la
+  référence `T = 2L/√(gh)` cesse d'être exacte.
+- **Période mesurée sur le mode fondamental isolé**, par projection sur `cos(πx/L)`. Une surface
+  inclinée contient les harmoniques impaires en `1/n²`. *(En bassin rectangulaire elles sont en
+  `T/3`, `T/5` — des sous-multiples exacts — et la mesure au mur donne le même chiffre à 0,001 %.
+  Cela ne vaut plus dès que le bassin n'est pas rectangulaire.)*
+
+> **État d'exécution — B-S23, puis B-S24.** Vert dans ces conditions : période à **0,000 %**, demi-vie
+> à **43,1 périodes** à l'ordre un. La demi-vie **double à chaque division par deux de la maille** —
+> ordre un exactement. Voir [ADR-039](../adr/ADR-039-un-cas-sans-conditions-de-mesure-ne-classe-personne.md) §4.
+>
+> **B-S24 : le seuil des 250 mailles/λ ci-dessus vaut pour l'ordre un.** Avec l'ordre deux, il tombe à
+> **≈ 55 mailles par longueur d'onde** — `dx ≈ 75 cm` pour une houle de 40 m au lieu de 16 cm. La
+> condition de mesure doit donc **nommer le schéma en même temps que la maille** ; c'est le même
+> défaut de forme qu'ADR-039 décrit, découvert une fois de plus. Voir
+> [ADR-040](../adr/ADR-040-l-ordre-deux-et-ce-qu-il-deplace.md) §5.
+
 La demi-vie d'amplitude est la mesure directe de la dissipation numérique. C'est elle qui décide si
 une houle traverse un domaine ou s'y éteint — et c'est un chiffre qu'on ne pense presque jamais à
 mesurer, alors qu'il explique la majorité des « l'eau est molle ».
@@ -235,6 +281,22 @@ en x = 0   : h = 4h₀/9 = 0,444 m ,  u = (2/3)√(g h₀) = 2,09 m/s
 
 **Assertions.** position du front à ±3 % à t = 2 s ; `h(0)` à ±3 %.
 
+> **Conditions de mesure — révisées en B-S25 :**
+>
+> - **seuil de mouillage `10⁻²·h₀`**, avec `10⁻³·h₀` rapporté à côté. *(Remplace les 10⁻⁶ m d'ADR-039
+>   §3.1 : reproductibles, et dénués de sens physique — un micron d'eau n'est pas de l'eau.)*
+> - **la référence est le front exact au même seuil et sur la même moyenne de maille**, jamais le
+>   front mathématique ;
+> - **une norme `L¹` sur la solution entière** accompagne les assertions ponctuelles — A156. Borne
+>   large (3 % du volume initial) : elle n'ordonne pas les bons schémas entre eux, elle attrape les
+>   catastrophes, et le défaut du terme de fond de B-S24 valait 12 %.
+>
+> Résultats : `C04-front` **0,736 %**, `C04-L1` **0,063 %**, `h(0)` **0,096 %**, `u(0)` **0,095 %**.
+>
+> **Ce changement de seuil rend le cas vert**, et celui qui l'a fixé est celui dont le solveur est
+> jugé par lui. La justification tient sans le verdict, mais demande une confirmation extérieure —
+> angle mort **A157**.
+
 Teste le front de mouillage sur lit sec, cas où beaucoup de solveurs produisent une hauteur
 négative ou un front trop lent.
 
@@ -268,6 +330,38 @@ négative ou un front trop lent.
 réfléchie par séparation des trains montant et descendant.
 **Assertion.** `R < 1 %` pour λ ∈ [λ_cut, 4·λ_cut].
 
+> **Conditions de mesure** *(B-S26)* :
+>
+> - `R` = rapport de deux maxima d'élévation à **une jauge fixe**, sur deux fenêtres temporelles
+>   **disjointes** — le train incident, puis le train réfléchi. Séparation par le temps, non par
+>   transformée : une analyse spectrale apporterait sa propre fenêtre, donc son biais (A102) ;
+> - **`R` est corrigé par un essai témoin** à `σ_max = 0`, où le bord redevient un mur parfait. Sans
+>   cette correction, la dissipation du trajet — **10 % ici** — serait créditée à l'éponge. Le témoin
+>   est rapporté : s'il s'écarte de 1, la maille est trop grossière pour la mesure ;
+> - **`σ_max·dt` est rapporté.** Au-delà de 1, le facteur d'amortissement est saturé à zéro et la
+>   maille est remise au repos à chaque pas : **ce n'est plus une éponge**, et le chiffre ne mesure
+>   plus la même chose (A160) ;
+> - le solveur est **non dispersif** ; `σ_max·L_s/c` et `L_s/λ` se transposent, **la valeur de
+>   `σ_max` en s⁻¹ ne se transpose pas**.
+>
+> **L'assertion `L_s = λ/2` du montage est trop faible** *(B-S27)*. B-S26 avait conclu que `R` ne
+> dépendait pas de `L_s/λ` ; **c'était une propriété de l'eau peu profonde**, pas de l'éponge. En
+> milieu dispersif, `R` vaut **67 % à `λ/8`**, **23 % à `λ/2`**, et ne passe sous 1 % qu'à
+> **`L_s ≥ λ`** — **`≥ 2λ` pour un spectre**. Le montage de C05 doit donc porter `L_s = 2·λ`, et la
+> largeur `λ/2` reste rapportée à côté comme contre-exemple (L123).
+>
+> **Conditions de mesure supplémentaires** *(B-S27, milieu dispersif)* :
+>
+> - **`R` se mesure en énergie**, `√(∫η²dt réfléchi / ∫η²dt incident)`, jamais en amplitude crête :
+>   un paquet dispersif **s'étale sans rien perdre**, et l'éponge serait créditée de l'étalement ;
+> - **`σ_max = 10·c_g/L_s`, avec la vitesse de GROUPE** — un facteur deux par rapport à la phase, et
+>   ADR-005 §2 ne disait pas laquelle ;
+> - **un essai de garde** — même montage, `σ_max = 0` — doit laisser la fenêtre réfléchie vide. Il a
+>   refusé deux montages avant d'en accepter un, **sans qu'aucune des deux erreurs ne se voie dans
+>   `R`**.
+>
+> Voir [ADR-046](../adr/ADR-046-l-eponge-en-eau-dispersive-retracte-ADR-042.md).
+
 Valide directement ADR-005 §2 et le réglage `σ_max ≈ 4c/L_s`.
 
 ## C06 — Invariance galiléenne
@@ -276,6 +370,22 @@ Valide directement ADR-005 §2 et le réglage `σ_max ≈ 4c/L_s`.
 translation uniforme à 10 m/s, une fois dans un repère en rotation.
 **Référence.** Les trois résultats doivent coïncider après changement de repère.
 **Assertion.** écart RMS de hauteur < 2 % ; forces intégrées sur le solide < 2 %.
+
+**Conditions de mesure** *(B-S23)*.
+
+- **L'écart RMS est rapporté à l'amplitude de la perturbation**, non à la profondeur. Le document
+  disait « < 2 % » sans dire de quoi : entre les deux normalisations, il y a un **facteur 20**.
+- **Décalage entier en mailles** (`u₀·t/dx` entier), pour qu'aucune erreur d'interpolation ne se
+  mêle à la mesure de l'invariance.
+- **Un écart maximal est rapporté à côté du RMS.** Sur le montage de B-S23, il vaut 3,7 fois le RMS :
+  l'erreur est localisée sur les flancs raides, ce qu'un RMS seul masque.
+
+> **État d'exécution — B-S23 : PARTIEL.** Seule la **translation en 1D** est exécutée — 0,76 % de
+> l'amplitude contre 2 % autorisés. **Il manque les deux tiers du cas** : pas de solide, donc la
+> seconde assertion (forces intégrées) n'est pas évaluée ; **pas de rotation**, donc ni `g_eff` ni
+> le référentiel non galiléen ; **une seule dimension**, donc aucun biais directionnel possible.
+> Or ce sont exactement les deux raisons d'être que le paragraphe ci-dessus donne au cas. Le harnais
+> imprime `C06*` comme partiel à chaque exécution.
 
 Attrape les biais directionnels de l'advection **et** valide qu'`g_eff` et le référentiel sont bien
 injectés partout (ADR-002, I-07). Un solveur qui échoue ici produira une eau qui « traîne » derrière
@@ -332,6 +442,31 @@ Attrape l'angle de Kelvin codé en dur (angle mort A05).
 **Mesure.** ordre observé par extrapolation de Richardson :
 `p = log₂( |e_h − e_{h/2}| / |e_{h/2} − e_{h/4}| )`.
 **Assertion.** `p > 0,8`.
+
+**Conditions de mesure** *(B-S23)*.
+
+- **Le support doit être nommé, et les trois proposés ne sont pas interchangeables.** Un ordre
+  mesuré sur une solution **discontinue** est structurellement inférieur à un ordre mesuré sur une
+  solution **lisse** — et l'écart n'est pas marginal : le solveur de B-S22 donne **0,95 sur la seiche
+  de C03** et **0,66 à 0,74 sur le front de Ritter**. Le verdict `p > 0,8` bascule de l'un à
+  l'autre pour le même code.
+- **Norme `L¹`.** Sur une solution discontinue, la norme `L∞` est celle de la maille qui chevauche
+  le front : elle ne décroît pas, et l'ordre observé serait **nul** — pour tout schéma, quel qu'il
+  soit.
+- **Les deux estimateurs rapportés ensemble** : la formule de Richardson ci-dessus et, quand une
+  solution exacte existe, l'ordre direct `log₂(e_h/e_{h/2})`. S'ils divergent, c'est l'estimateur
+  qu'il faut suspecter avant le solveur. *(En B-S24 ils ont divergé de 0,83 — et c'est ce qui a
+  révélé un défaut du terme de fond d'ordre deux. Ce cas diagnostic a payé sa place.)*
+
+> **État d'exécution — B-S23 : ROUGE ; B-S24 : VERT.** En B-S23, sur Ritter, `p = 0,655` par Richardson
+> contre une assertion `p > 0,8` — la cause étant l'ordre un du schéma. L'ordre deux (MUSCL + RK2,
+> [ADR-040](../adr/ADR-040-l-ordre-deux-et-ce-qu-il-deplace.md)) donne **`p = 1,003`**, les deux estimateurs à 0,005 l'un de l'autre. C'est le
+> maximum atteignable en `L¹` sur une solution à dérivée discontinue.
+>
+> **Résultat annexe qui vaut d'être lu** : MUSCL **sans** RK2 divise l'erreur par 2,2 et laisse
+> l'ordre exactement où il était — 0,725 contre 0,742. Il améliore la constante, pas le taux. Un
+> candidat d'ordre deux en espace mais d'ordre un en temps échouera donc C08 **sans que son erreur
+> paraisse mauvaise**.
 
 Un solveur qui ne converge pas ne résout pas l'équation qu'on croit : il est **faux**, pas
 imprécis. Aucun raffinement ne le sauvera, et aucune campagne de performance n'a de sens tant que
