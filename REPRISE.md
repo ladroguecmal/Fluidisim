@@ -12,9 +12,9 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-07
-Session en cours : —
+Session en cours : S42 — l'essai à zéro de C03
 Dernière session : S41 — 2026-09-07 — cinq des sept angles morts importés désignaient un défaut présent ici
 Session suivante : S42 — **écrire l'essai à zéro de C03** (S41-4) *(recommandé)*, ou refaire les formules restantes (S41-2)
 ```
