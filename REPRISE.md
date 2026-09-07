@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-08 00:47 +02:00
+JETON            : occupé
+Battement        : 2026-09-08 01:00 +02:00
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S60 — S57-2, éprouver le critère d'admission de C22 (par ADR)
 Dernière session : S59 — 2026-09-08 — C22 conclut : p = 1,96 stabilisé ; A181, L177
-Session suivante : S60 — S57-2, le critère d'admission de C22, par ADR
+Session suivante : selon le résultat de S60
 
 Note S58 : S57 puis S58 ont travaillé dans le worktree claude/reprise-projet-29ef50, et **les
 deux ont été fusionnées dans master en avance rapide** — bd9f087 puis 531491f. Les deux copies

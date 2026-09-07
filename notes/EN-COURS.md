@@ -59,71 +59,48 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S59
-État             : terminée
+Session          : S60
+État             : en cours
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Objectif         : S57-1 — découpage du calcul, borne du mode à 89600, mesure 89600/179200.
+Objectif         : S57-2 — éprouver le critère d'admission de C22, et le décider par ADR.
 ```
 
 ### Plan
 
 - [x] **P1** — passation, jeton, plan seul.
-- [x] **P2** — éprouver le découpage que S56 prescrit : mesurer s'il change le champ, avant de l'implémenter.
-- [x] **P3** — implémenter le découpage retenu et relever la borne du mode à 89600 ; tests d'identité, d'admission et de refus.
-- [x] **P4** — mesurer 89600/179200 selon le critère **inchangé** ; consigner erreurs, écart, temps.
-- [x] **P5** — rapport MESURES-C22-S59 : admission de 12800, verdict des quatre fenêtres, apport au dossier A179 sans trancher S57-2.
-- [x] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, passation, jeton, **fusion dans master**.
+- [ ] **P2** — poser ce que le filtre protège, et instrumenter : calculer les ordres contre **chacun** des deux oracles, sans toucher à aucun critère.
+- [ ] **P3** — contre-épreuve rétrospective sur 51200/102400, la campagne que le filtre a fait refuser en S56 ; et essai de refus sur un oracle franchement trop grossier.
+- [ ] **P4** — ADR-049 : trancher au vu des deux mesures, ou refuser de trancher en disant ce qui manque.
+- [ ] **P5** — appliquer la décision au code, avec ses essais de refus et ses témoins.
+- [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
 
 ### Notes de reprise
 
-Départ ae93fd0, master et worktree confondus. Attendu de S57 : admission de 12800 prévue avec
-20 à 30 % de marge selon l'exposant retenu, coût projeté 1147 s (19 min 07 s). **Une admission
-ne vaut pas un verdict** : la fenêtre 800–12800 n'aurait alors que trois ordres, et la stabilité
-n'a jamais été établie sur 1,961 / 2,012.
+Départ 283e82a, master et worktree confondus.
 
-**Réserve à lever d'abord, et elle est sérieuse.** REFERENCE-C22-S56 §5 prescrit, au-delà du
-quart d'heure, « un découpage de calcul en tranches temporelles gardées en mémoire ». Or
-`avancer_jusqu_a(t_fin, cfl)` choisit `dt = dt_cfl.min(t_fin − t)` : **découper l'intégration en
-deux appels insère un pas tronqué au point de coupure**, qui n'existe pas dans le calcul
-monolithique. La séquence de pas change, donc le champ change, donc toute comparaison avec
-S48, S49, S56 et S57 tombe. Le remède prescrit invaliderait la mesure qu'il doit rendre
-possible. À **mesurer** avant de conclure (L75), pas à supposer.
+**Le piège de cette session est nommé d'avance.** Un critère d'admission qu'on rouvre après
+avoir obtenu un succès, c'est le geste que le dépôt refuse ailleurs — *« la session qui rendra
+C04 vert devra changer de schéma, pas de seuil »*. **Rien ne sera assoupli pour obtenir un
+résultat.** Si la mesure ne tranche pas, la sortie légitime est de ne pas trancher et de dire
+ce qui manque.
 
-Voie envisagée si la mesure confirme : découpage d'**observation** — même boucle, mêmes `dt`,
-même séquence exacte, avec un rendu de progression tous les N pas — et identité **bit à bit**
-vérifiée par un test contre le chemin monolithique.
+**Ce que le filtre veut protéger** : que l'erreur mesurée d'une grille soit dominée par sa
+propre erreur de discrétisation, et non par celle de l'oracle. Le filtre actuel en est un
+**proxy global** — `e(n) ≥ 30 × ‖o1 − o2‖` — et A179 a mesuré qu'il est piloté par le biais du
+plus **grossier** des deux oracles, dont aucune erreur publiée ne dépend.
 
-Interdits inchangés : pas de champ sur disque (I-17), pas d'extrapolation de Richardson du
-champ, aucun changement de CFL, d'amplitude, de temps final ou d'initialisation, pas
-d'assouplissement du filtre ×30 ni du test de stabilité. **Ne pas traiter S57-2 ici** : cette
-session mesure sous le critère actuel ; discuter le critère est un autre travail, par ADR.
+**La piste, et sa contre-épreuve.** L'ordre est estimé sur des **différences successives**, où
+une contamination additive uniforme s'annule : mesuré en S59, les ordres calculés contre les
+deux oracles coïncident à 1e-5 sur les six triplets. Un critère direct serait donc l'**invariance
+de la grandeur publiée au choix de l'oracle**, qui porte sur ce qu'on publie et se lit sans
+modèle. Mais il faut d'abord répondre à deux questions, et par la mesure :
 
-P2 : la réserve est confirmée par la mesure. le_decoupage_temporel_n_est_pas_neutre passe :
-découper 0-1 s en quatre appels change le champ bit à bit, parce que chaque borne insère un pas
-tronqué par min(t_fin - t). Le remède prescrit par REFERENCE-C22-S56 par.5 aurait invalidé
-la comparaison avec S48, S49, S56, S57. Retenu à la place : découpage d observation.
-avancer_jusqu_a_observe porte désormais la seule boucle, avancer_jusqu_a n en est qu un appel
-avec observateur vide — identité structurelle, pas seulement testée.
-Le second test a d abord échoué en trouvant une vraie faute de sa propre écriture : cadence 50
-pour 35 pas, observateur jamais appelé, champ pourtant identique — un témoin muet aurait passé
-pour neutre. Compte de rendus désormais vérifié contre le nombre de pas. 127 tests, deux ignorés.
+1. **Aurait-il conclu en S56**, avec 51200/102400 — la campagne que le filtre a refusée ? Si oui
+   avec la même valeur d'ordre, le filtre a coûté 32 minutes pour rien. Si avec une valeur
+   différente, il protégeait, et la piste tombe.
+2. **Refuse-t-il ce qu'il doit refuser ?** Un oracle franchement trop grossier doit faire
+   diverger les deux ordres. Un critère qu'on n'a jamais vu refuser n'a pas été testé (S34).
 
-P3 : borne du mode portée de 76800 à 89600, décrite comme limite de campagne. Refus vérifiés :
-0, 12800, 32000, 102400 (multiple de 12800, refusé par la borne seule) et usize::MAX ; 89601
-refusé aussi. 127 tests réussis, deux ignorés ; hashs check inchangés. Mesure P4 lancée sans
-test concurrent.
-
-P4/P5 : campagne 1143,284 s (projete 1147,2 ; -0,34 %) ; oracles 227,124 et 910,168 s.
-Ecart 2,118278666e-10, predit 2,1129e-10 : +0,26 %. **12800 admise a 1,2240 fois le seuil,
-marge +22,40 %**. Fenetre 800-12800 : 5/5, ordres 1,960625 / 2,011671 / 1,997599,
-**OK p = 1,96 stabilise — premier succes de C22**. Bilan 1 succes, 0 echec, 3 sans verdict.
-Rapport MESURES-C22-S59, avec ses trois reserves et la portee de l oracle du meme schema.
-Apport A179 : plateau additif 1,1839e-11, loi de S57 verifiee a -3,8 % sur un troisieme couple ;
-et les ordres contre les deux oracles coincident a 1e-5, Richardson travaillant sur des
-differences. S57-2 non traitee, volontairement.
-
-P6 : rituel exécuté. Journal S59, A181 (sévérité 2, corrigé), L177, S57-1 close, S59-1 ouverte,
-ordre recommandé S57-2 puis S58-2 puis S59-1. Index et REPRISE : angles 180 vers 181, tests
-125 vers 127, bilan C08 corrigé de cinq sans verdict à trois sans verdict et un succès.
-48 ADR et 14 registres inchangés. Aucun invariant invalidé, aucun ADR réécrit.
-Jeton libre. Reste la fusion dans master.
+Réserve à garder au chaud : deux oracles du même schéma partagent leur erreur de modèle. Le
+critère proposé n'y remédie pas — il ne la voit pas davantage que le filtre actuel (A114,
+ADR-043 §3). Ce serait à écrire dans la décision, pas à passer sous silence.
