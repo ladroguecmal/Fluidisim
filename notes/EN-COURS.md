@@ -59,74 +59,21 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S44
-État             : terminée
-Battement        : 2026-09-07
-Agent            : Claude Code
-Objectif         : Inventorier les valeurs de repli — que devient un refus qui les traverse ?
+Session          : S45
+État             : en cours
+Agent            : Codex (git et cargo disponibles)
+Objectif         : Suivre les treize replis NaN jusqu'à leur consommation (S44-2).
 ```
 
 ### Plan
 
-Action **S43-1**, qui reprend **S42-2**. **Deux sessions de suite ont trouvé par hasard un repli de
-sévérité 1**, chacune en cherchant autre chose :
-
-| | repli | ce qu'il rendait | pourquoi c'était grave |
-|---|---|---|---|
-| **S42** | `NaN.min(10⁶)` | `10⁶` périodes | le **meilleur score** face à un minorant de 15 |
-| **S43** | `else { 1.0 }` | l'ordre `1,0` | **l'ordre nominal du schéma**, dans les bornes de G10 |
-
-**La troisième ne doit pas être trouvée par hasard.** La recherche est mécanique et son critère
-tient en une question : *que devient un refus qui passe là-dedans ?*
-
-**Le recensement préalable donne l'ordre de grandeur** — 25 `unwrap_or` et 24 `min`/`max` dans le
-harnais :
-
-| repli | nombre | première lecture |
-|---|---|---|
-| `unwrap_or(f64::NAN)` et variantes | **13** | le refus **survit** — a priori sains |
-| **`unwrap_or(0.0)`** | **8** | **suspects** |
-| `unwrap_or(4.0)`, `unwrap_or(64)`, `unwrap_or(0)`, `unwrap_or(false)` | 4 | à regarder un par un |
-
-> **Les huit `unwrap_or(0.0)` sont le cœur de la session.** Pour un **écart**, une **erreur**, une
-> **dérive** ou une **vitesse parasite**, **zéro est la meilleure valeur possible** — pas une valeur
-> neutre. C'est **A171** porté à son extrême : un repli qui ne vaut pas seulement le nominal, mais
-> le **parfait**.
-
-*Thèse déclarée : au moins un `unwrap_or(0.0)` se trouve sur le chemin d'une grandeur publiée, et y
-transforme un refus en résultat parfait.*
-
-**Si elle est fausse** — si les huit sont sur des chemins de diagnostic ou d'affichage — c'est un
-résultat aussi, et le premier depuis trois sessions qui dirait que ce motif est sous contrôle. Mais
-il faudra le **montrer**, pas le supposer : c'est ce que les deux sessions précédentes n'ont pas pu
-faire, faute d'inventaire.
-
-- [x] **P1** — plan, jeton.
-- [x] **P2** — **l'inventaire complet**, un tableau : chaque repli, ce qu'il rend, et **ce que
-      devient la valeur** — assertion publiée, diagnostic imprimé, ou calcul interne.
-- [x] **P3** — classer : *sain* · *inoffensif ici* · **fautif**. Un repli n'est fautif que s'il est
-      **sur le chemin d'une grandeur lue**, et le distinguer demande de suivre chaque valeur.
-- [x] **P4** — corriger les fautifs, **avec leur témoin** (**L119**), et vérifier qu'aucun chiffre
-      publié ne bouge.
-- [x] **P5** — le registre `AUDIT-REPLIS-S44`, et la règle qui évite le prochain.
-- [x] **P6a** — rituel : journal, leçons L165-L166, actions S44-1 et S44-2.
-- [x] **P6b** — rituel : index, décomptes, jeton libéré.
+- [x] **P1** — vérifier les copies et branches, prendre le jeton et committer ce plan seul.
+- [ ] **P2** — tracer les treize chemins dans un complément à AUDIT-REPLIS-S44 ; identifier les transformations qui avalent un refus.
+- [ ] **P3** — vérifier les chemins suspects par essais avec refus et témoins ; corriger les défauts constatés, rejouer tests et références.
+- [ ] **P4** — rituel de fin : journal, leçons et angles morts si nouveaux, actions, index et décomptes, jeton libre.
 
 ### Notes de reprise
 
-**Ce qui commande cette session.**
-
-- **Le critère n'est pas « le repli est-il correct »** mais *que devient un refus qui le traverse*.
-  Un `unwrap_or(0.0)` sur une somme vide est juste ; le même sur une mesure qui a refusé est un
-  mensonge. **Seul le chemin de la valeur les distingue.**
-- **Les 13 `unwrap_or(NaN)` ne sont pas automatiquement sains** : `NaN` survit aux comparaisons, mais
-  **pas à `min`/`max`** — c'est exactement ce qui a mordu en S42. Il faut vérifier ce qui suit.
-- **Ne pas corriger un repli sans savoir ce qu'il portait.** Retirer un filet sans savoir ce qu'il
-  retient est le geste qui transforme un défaut visible en défaut invisible (note de S38).
-- **Chiffres à ne pas casser** : `C08-p = 0,999745`, les demi-vies 6,01 / 44,36 / 43,12 / 161,14, le
-  front à 0,7365 %, les ordres 0,654 / 0,621 / 1,000, et les deux hashs.
-- **État de départ** : `cargo test` = **95 tests** (38 cœur + 57 harnais, deux `ignore`), `check` = 0
-  échec, hashs `0x3e2c06a7b00e73e3` et `0x1a8b0629a9f51b6e`.
-- **Hors session, juste avant** : l'amorce a été déplacée dans `AGENTS.md` et le jeton a reçu une
-  ligne `Agent`, sur demande de l'utilisateur — voir `FORK-S22-S26` §9.5. Cette session est la
-  première à renseigner cette ligne.
+Départ : master b521129, propre. Copie reprise-projet-c107bf au même commit, propre et jeton libre ; friendly-bhabha-6da427 explicitement archivée. Pas de branche plus avancée. Travail dans la copie principale, sans nouvelle branche.
+S44 recommande S44-2. Le recensement réel trouve treize occurrences dans code/, dont deux dans les tests de water-core (pas treize dans le harnais).
+Références à préserver : les deux hashs et les verdicts canoniques, notamment C04 volontairement rouge sur delta.

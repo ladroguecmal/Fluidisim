@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-07
-Agent            : —
-Session en cours : —
+JETON            : occupé
+Battement        : 2026-09-07 12:35 +02:00
+Agent            : Codex (git et cargo disponibles)
+Session en cours : S45
 Dernière session : S44 — 2026-09-07 — quand la grandeur est un écart, zéro est le succès parfait
 Session suivante : S45 — **suivre les treize `unwrap_or(NaN)` jusqu'à leur assertion** (S44-2) *(recommandé)*
 ```
