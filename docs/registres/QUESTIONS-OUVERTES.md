@@ -476,3 +476,25 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 >
 > **Et le refus n'a d'abord rien corrigé** : la régression était écrite deux fois dans le même
 > fichier, et l'assertion passait par la copie que je n'avais pas touchée (**L162**).
+
+## Actions relevées en séance — S43
+
+| # | Action | D'où elle vient | Qui la porte | État |
+|---|---|---|---|---|
+| S43-1 | **Inventorier les valeurs de repli placées après une mesure** — `min`, `max`, `unwrap_or`, `clamp`, `else` d'un test de validité — et vérifier pour chacune : *que devient un refus qui passe là-dedans ?* Deux sessions de suite en ont trouvé une **par hasard**, chacune sévérité 1. C'est **S42-2**, dont l'urgence a doublé | **A170**, **A171** | session | **ouverte** |
+| S43-2 | **Ajouter le troisième cas aux contrôles existants** : chaque garde-fou a son cas refusé et son témoin, aucun n'a **l'entrée vide de ce qu'il examine**. C'est ce cas-là qui a révélé le défaut de G10, neuf sessions après son audit | **L164** | session | **ouverte** |
+| S43-3 | **L'essai à zéro de C02**, dernier des quatre montages sans témoin nul | **A167** | session | **ouverte** |
+
+> **Note S43 — l'action S42-1 est close, et elle a répondu à sa propre question.**
+>
+> *Que veut dire « résultat attendu zéro » pour une mesure d'ordre ?* L'essai ne porte pas sur le
+> solveur mais sur **l'estimateur**, et il se joue sur des suites synthétiques — sans lancer une
+> simulation.
+>
+> **`ordre_grossier_estime` rendait `1,0` dans les trois cas où il n'y a aucun ordre à mesurer**,
+> dont le plus grave : deux grilles successives de même erreur, c'est-à-dire un solveur qui ne
+> converge pas. `1,0` est l'ordre nominal du schéma, dans les bornes de G10 : **le repli était
+> silencieux par construction** (**A171**).
+>
+> Le refus est passé dans le **type**, et le compilateur a révélé un **troisième** estimateur de
+> Richardson dans le harnais. Il n'y en a plus qu'un. **Aucun chiffre publié n'a bougé.**

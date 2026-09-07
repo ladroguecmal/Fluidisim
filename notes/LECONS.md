@@ -2641,3 +2641,44 @@ qu'il **ne reste aucun appelant de l'ancien code** — vérifié en le suppriman
 quand on corrige une mesure, chercher d'abord *combien de fois est-elle écrite ?* avant de chercher
 *où est le défaut ?* Une correction validée par un test qui passe par la mauvaise copie est pire
 qu'une absence de correction : elle est écrite, elle est relue, et elle ne fait rien.
+
+## L163 — Une valeur de repli prise dans le domaine nominal ne sera jamais suspectée
+
+*(S43)* Un estimateur d'ordre de convergence rendait `1.0` chaque fois qu'il n'avait rien à mesurer :
+moins de trois points, valeurs toutes nulles, et surtout **deux mesures successives identiques** —
+c'est-à-dire le cas où le solveur ne converge pas, le résultat le plus important que ce contrôle
+puisse produire.
+
+`1.0` était **l'ordre nominal du schéma**. Un contrôle en aval signalait tout ordre hors de
+`[0,3 ; 3,0]` ; il ne pouvait pas broncher. Le repli n'était pas mal signalé : il était **invisible
+par construction**, parce que la valeur choisie pour « ne rien dire » était celle qui dit *tout va
+bien*.
+
+Comparer avec le cas voisin, trouvé une session plus tôt : un autre repli valait `10⁶`, hors du
+domaine plausible. Il était tout aussi faux, et il **finit par se faire remarquer** — un lecteur voit
+un nombre rond et démesuré. Un repli de `1.0` au milieu des ordres attendus ne se fera jamais
+remarquer.
+
+**Réflexe** : toute valeur de repli — `unwrap_or`, `else` d'un test de validité, valeur par défaut,
+constante de secours — doit être choisie **hors du domaine des valeurs valides**, ou ne pas exister
+du tout. La question à poser est : *si cette valeur apparaît dans un rapport, est-ce que quelqu'un
+peut la distinguer d'une vraie mesure ?* Si la réponse est non, la seule issue correcte est de mettre
+le refus dans le **type** — `Option`, `Result`, une variante d'énumération — pour que l'appelant ne
+puisse pas ne pas le voir.
+
+## L164 — Un audit vérifie ce qu'un contrôle fait, rarement ce qu'il fait quand il n'a rien à faire
+
+*(S43)* Un audit de garde-fous avait examiné celui-ci, l'avait trouvé défaillant, et avait corrigé son
+bornage — le seul des dix qui masquait au lieu de refuser. **Le défaut suivant était sur la ligne
+juste au-dessus**, et il a survécu neuf sessions.
+
+Les deux tests écrits par cet audit donnaient au contrôle une série **absurde** et une série
+**saine**. Aucun ne lui donnait une série **vide de l'objet qu'il mesure**. Ce n'est pas un oubli :
+un audit se construit à partir de ce que le contrôle est censé attraper, et la liste vient de
+l'intention de son auteur. Le cas « il n'y a rien à mesurer » n'est dans l'intention de personne — il
+n'est le but d'aucune ligne de code.
+
+**Réflexe** : à tout contrôle, poser **trois** cas et non deux — celui qu'il doit refuser, le témoin
+qu'il ne doit pas refuser, et **l'entrée vide de ce qu'il examine** : liste sans élément, mesure sans
+signal, série sans variation, fichier sans ligne. Le troisième est celui qu'on n'écrit jamais
+spontanément, et c'est souvent celui qui révèle que le contrôle rend une valeur au lieu de refuser.

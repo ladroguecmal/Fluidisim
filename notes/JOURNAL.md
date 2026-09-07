@@ -4242,3 +4242,118 @@ front comparables (S41-1).
 ### Arbitrages en attente
 
 Inchangés.
+
+---
+
+## S43 — 2026-09-07 — Un solveur qui ne converge pas recevait l'ordre 1
+
+**Consigne reçue.** « Enchaîne sur S43 ».
+
+**Entrées.** Action **S42-1** — *concevoir l'essai à zéro de C08*, le seul des quatre qui demandait
+de penser ce que « résultat attendu zéro » veut dire pour une mesure d'**ordre de convergence**.
+
+**Sorties.** L'essai à zéro de C08 sous ses trois formes ; `ordre_grossier_estime` rend désormais un
+refus **typé** ; les trois estimateurs de Richardson ramenés à un ; un troisième volet au test de
+**G10** ; angle mort **A171** *(sévérité 1)* ; conditions de mesure de C08 complétées.
+
+**Ça tourne.** `cargo test` : **95 tests** au vert — 38 dans le cœur, 57 dans le harnais dont deux
+`ignore` — contre 93 en début de session. `check` : 0 échec, hashs inchangés. **Aucun chiffre publié
+ne bouge** : `C08-p = 0,999745`, et les trois ordres d'`ADR-040` §3 — 0,654 / 0,621 / 1,000.
+
+### La réponse à la question que S42 laissait ouverte
+
+*Que veut dire « résultat attendu zéro » pour une mesure d'ordre ?* **L'essai ne porte pas sur le
+solveur, il porte sur l'estimateur.** Un montage sans objet à mesurer, ici, c'est une suite d'erreurs
+qui ne converge pas : trois grilles, la même erreur. Il n'y a pas d'ordre, et l'estimateur doit le
+dire.
+
+C'est ce qui rend l'essai **immédiat** : il se joue sur des suites synthétiques, sans lancer une
+simulation. `ordre_grossier_estime` avait été extraite en S34 précisément pour cela.
+
+### Le résultat
+
+L'estimateur est **exact** là où il y a un ordre :
+
+| suite | rendu |
+|---|---|
+| `e ∝ dx¹` | **1,0000** |
+| `e ∝ dx²` | **2,0000** |
+| `e ∝ dx^0,5` | **0,5000** |
+
+Et il rendait **1,0000** dans les **trois** cas où il n'y a rien à mesurer :
+
+| | rendu avant S43 |
+|---|---|
+| erreur **constante** — le solveur ne converge pas | **1,0000** |
+| moins de trois grilles — triplet incomplet | **1,0000** |
+| erreurs toutes nulles | **1,0000** |
+
+### Pourquoi c'est le pire cas possible d'A170
+
+`1,0` n'est pas une valeur neutre : c'est **l'ordre nominal du schéma d'essai**, exactement ce qu'on
+espère lire. Et le garde-fou **G10**, qui signale tout ordre hors de `[0,3 ; 3,0]`, ne pouvait pas
+broncher — `1,0` est dedans.
+
+> **Le repli était silencieux par construction**, et non par oubli de signalement : la valeur choisie
+> pour « ne rien dire » était celle qui dit *tout va bien*. Angle mort **A171**.
+
+C03, en S42, saturait à `10⁶` périodes — une valeur qui finit par paraître suspecte. **Une valeur de
+repli à l'intérieur du domaine nominal ne paraîtra jamais suspecte à personne.**
+
+Le chemin du défaut allait jusqu'au filtre : `p_brut` → `p_grossier` → `e_oracle = e_max/ratio^p` →
+`retain(|e| e >= 30·e_oracle)`. Un ordre inventé déplace le seuil qui écarte les grilles.
+
+### Ce que l'audit de S34 n'avait pas vu
+
+S34 a audité G10, l'a trouvé défaillant — *le seul des dix qui masquait au lieu de refuser* — et a
+corrigé son **bornage**. Le repli est sur la **ligne juste au-dessus du `clamp`** :
+
+```rust
+let brut = if d1 > 0.0 { (d0 / d1).log2() } else { 1.0 };
+(brut, brut.clamp(0.3, 3.0))
+```
+
+L'audit a regardé le `clamp` et pas le `if`. Ses deux tests donnaient à l'estimateur une série
+pré-asymptotique et une série saine — **jamais une série sans ordre du tout**. *Un garde-fou testé
+sur ce qu'on a pensé à lui donner n'est pas un garde-fou testé.*
+
+### La correction, et ce qu'elle a forcé à déclarer
+
+Le refus est passé **dans le type** : `(Option<f64>, f64)`. Le compilateur a énuméré les usages —
+c'est **L149**, pour la troisième fois en six sessions — et il en a trouvé un que je n'attendais pas :
+le harnais portait **trois** estimateurs de Richardson, dont un troisième dans `physics_shallow.rs`
+sans aucun garde. Il délègue désormais au partagé.
+
+Le second membre reste un nombre — il faut bien filtrer — et il vaut `1.0`, ce qui est conservateur :
+un `p` bas surestime l'erreur d'oracle, donc écarte **plus** de grilles. La différence est que
+l'appelant **sait** maintenant, et le signale.
+
+### Chiffres qui ont orienté la session
+
+- **1,0000 trois fois** : le même repli pour trois formes distinctes de « rien à mesurer ».
+- **3 estimateurs** de Richardson dans le harnais ; **1** après, plus l'ordre direct qui est une
+  autre grandeur.
+- **0,999745** et **0,654 / 0,621 / 1,000** : inchangés, ce qui était la condition de la correction.
+
+### Ce qui n'a pas été fait
+
+- **C02 n'a pas d'essai à zéro** (S42-1, reliquat).
+- **Les autres valeurs de repli** n'ont pas été inventoriées (S42-2) — cette session en a traité une,
+  trouvée par le chemin de C08, pas par une recherche.
+- **Les autres formules à constantes** ne sont pas refaites (S41-2).
+- **La réserve de cadre** n'est pas portée dans les quatre ADR exposés (S41-3).
+- **Les deux mesures de front ne sont pas comparables** (S41-1).
+
+### Session suivante recommandée
+
+**S44 — inventorier les valeurs de repli placées après une mesure** (S42-2). Deux sessions de suite
+en ont trouvé une par hasard, chacune sévérité 1 : `NaN.min(10⁶)` en S42, `else { 1.0 }` en S43. La
+troisième ne devrait pas être trouvée par hasard. La recherche est mécanique — `min`, `max`,
+`unwrap_or`, `clamp`, `else` d'un `if` de validité — et elle a un critère : *que devient un refus
+qui passe là-dedans ?*
+
+*Solutions de rechange* : l'essai à zéro de C02 ; ou refaire les formules restantes (S41-2).
+
+### Arbitrages en attente
+
+Inchangés.

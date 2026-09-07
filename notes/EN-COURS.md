@@ -110,7 +110,8 @@ tient, c'est une leçon sur ce que voit un audit de garde-fous.
       tableau de `ADR-040` §3, et les deux hashs.
 - [x] **P6** — répercussions : `A170` étendu ou confirmé, `CAS-CANONIQUES` C08, et ce que S34
       n'avait pas vu.
-- [ ] **P7** — rituel de fin (`REPRISE.md` §6).
+- [x] **P7a** — rituel : journal, leçons L163-L164, actions S43-1 à S43-3.
+- [ ] **P7b** — rituel : index, décomptes, jeton libéré.
 
 ### Notes de reprise
 
