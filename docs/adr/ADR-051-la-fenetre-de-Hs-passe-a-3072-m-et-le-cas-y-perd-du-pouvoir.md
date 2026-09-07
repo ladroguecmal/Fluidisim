@@ -105,3 +105,10 @@ intactes.
 > et six graines à 256 composantes donnent −7,270 à +5,844 %. A186 corrigé pour le paramètre
 > mort ; calibration et A187 restent ouverts. Fenêtre et tolérance inchangées.
 > Voir [GRAINES-S65](../validation/GRAINES-S65.md).
+
+> **Note corrective S67 — 2026-09-08.** A187 est expliqué : les covariances sur fenêtre finie
+> reproduisent les 6,612 % historiques. La somme des variances individuelles rend 1,200001971 m ;
+> à fenêtre doublée, Hs total vaut 1,218126498 m. Les battements entre composantes voisines
+> atteignent 20,208 km. L’affirmation excluant la fenêtre était trop forte ; seul le pas avait
+> été éprouvé à fenêtre constante. S64-3 close, S64-2 à instruire avec calibration d’ensemble.
+> Fenêtre nominale et tolérance inchangées. [SPECTRE-DENSE-S67](../validation/SPECTRE-DENSE-S67.md).

@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S67
-État             : en cours
+État             : terminée
 Agent            : Codex (git et cargo disponibles)
 Objectif         : Expliquer A187, écart de Hs à 256 composantes (S64-3).
 ```
@@ -70,7 +70,7 @@ Objectif         : Expliquer A187, écart de Hs à 256 composantes (S64-3).
 - [x] **P1** — reprise, état réel, jeton et plan seul.
 - [x] **P2** — décomposer exactement les moments sur la grille par sommes trigonométriques ; vérifier contre le diagnostic point par point et le témoin monochromatique.
 - [x] **P3** — mesurer spectres 32/256, phases historiques et six graines ; isoler les termes croisés et les échelles de battement, documenter sans resserrer de tolérance.
-- [>] **P4** — rituel : journal, actions, angles/leçons éventuels, corrections datées, index/décomptes, jeton libre.
+- [x] **P4** — rituel : journal, actions, angles/leçons éventuels, corrections datées, index/décomptes, jeton libre.
 
 ### Notes de reprise
 
@@ -91,3 +91,5 @@ Hs_prod=1,279349902 contre 1,279349889 analytique ; variance individuelle -> Hs=
 Fenêtre doublée 6144 m -> Hs=1,218126498. Battements voisins jusqu’à 20208,431 m.
 A187 expliqué par covariances de fenêtre ; S64-3 close possible. 135 tests verts, cinq ignorés,
 check inchangé. SPECTRE-DENSE-S67 documente formule, valeurs et limites, aucun seuil changé.
+
+P4 : rituel terminé, S64-3 close, L184, suite S68 S66-1. Aucun calcul en cours, jeton libre.

@@ -5366,3 +5366,30 @@ statistique. Aucun seuil ni invariant modifié, aucune API publique nouvelle, au
 Suite S67 : S64-3, expliquer A187 à 256 composantes avec la décomposition mesurée, sans
 supposer que le résultat à 32 composantes suffit. Puis instruire S66-1 et S64-2 par ADR.
 S63-1, couche dispersive, demeure le blocage B2. A103 et C22 clos ; aucun distant créé.
+
+## S67 — 2026-09-08 — La plus longue onde ne donne pas le plus long battement
+
+Agent Codex, git/cargo disponibles. Master 87d3186 et copie 29ef50 propres et identiques,
+copie avancée à chaque étape. Entrée S64-3 : cause de Hs à 256 composantes, A187.
+
+Ajout sous cfg(test) de moments exacts sur grille finie par sommes géométriques et produits
+trigonométriques. Vérifiés contre sommation directe à 1/32/256 composantes, fréquence nulle
+et alias exact. 28 montages mesurés : 32/256 composantes, phases historiques et six graines,
+fenêtres 3072/6144 m ; deux vérifications directes sur 1024² points. Diagnostic 49,40 s.
+
+A187 reproduit : Hs historique 1,279349902 en production, 1,279349889 par formule. Somme des
+variances individuelles -> Hs 1,200001971 ; covariance croisée 0,012295713 m², dont 73,1 %
+entre voisines. Battements voisins jusqu’à 20,208 km à 256 composantes contre 2,361 km à 32.
+À 6144 m, Hs historique 1,218126498 : la fenêtre compte, contrairement à la formulation S64.
+SPECTRE-DENSE-S67 conserve les chiffres et la portée ; ni normalisation ni précision ne causent
+cet écart. Aucun seuil ni paramètre de production changé, pas de calibration sur six graines.
+
+135 tests réussis (43 cœur + 92 harnais), cinq ignorés ; diagnostic exécuté séparément.
+Check vert et hashs inchangés. Physics général non répété, chemins de production inchangés.
+A187 expliqué, S64-3 close. L184 ajoutée, pas de nouvel angle. Notes correctives ADR-051,
+registre et cas canoniques ; I-08 respecté, aucun invariant invalidé, aucun ADR réécrit.
+51 ADR, 17 invariants, six SPEC, seize registres, 23 cas, 188 angles ; dernière leçon L184.
+
+Suite S68 : S66-1, décider par ADR la séparation du contrôle de précision et du diagnostic
+statistique ; puis S64-2, désormais à instruire avec une cause connue et des ensembles possibles.
+S63-1 demeure le seul blocage B2 : couche dispersive à planifier. A103/C22 clos, aucun distant créé.

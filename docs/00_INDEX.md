@@ -207,6 +207,11 @@ parfaitement stable ne pouvait pas distinguer.
 
 ## État d'avancement
 
+**S67 — 2026-09-08 :** A187 expliqué par les covariances sur la fenêtre ; 6,612 % reproduits,
+battements voisins jusqu’à 20,208 km. Voir docs/validation/SPECTRE-DENSE-S67.md. S64-3 close,
+L184 ; 135 tests réussis, cinq ignorés, hashs et production inchangés. Suite S68 : S66-1,
+puis calibration S64-2. La tolérance reste inchangée.
+
 **S66 — 2026-09-08 :** refus d’homogénéité expliqué par les interférences sur la fenêtre,
 reproduit en f64 ; seuil et verdict conservés. Voir docs/validation/HOMOGENEITE-S66.md.
 134 tests réussis, quatre ignorés ; hashs inchangés. A188, L183 ; S65-1 close.
@@ -343,7 +348,7 @@ Chiffrage et contraintes  █████████████████░
 Spécification technique   ████████████████████░░   92 %   chemins tiré et poussé posés, persistance tranchée ; reste IGpuBackend
 Cohérence interne         █████████████████░░░░░   80 %   26 ADR + 6 SPEC confrontés, 45 écarts résolus ; **les 6 ADR de S35 n'ont pas été confrontés au corpus**
 Décisions expérimentales  █████░░░░░░░░░░░░░░░░░   24 %   onze bancs définis, aucun exécuté ; **une moitié de `λ_cut` est mesurée** ; B3 a deux critères d'entrée
-Outillage et pipeline     ████████████████████░░   90 %   **H1, H3, deux δ et un milieu dispersif**, **134 tests exécutés, 4 ignorés** ; C01/C03 passent, C04 échoue à l'ordre un et **passe à l'ordre deux** ; H2, H4-H6 non écrits
+Outillage et pipeline     ████████████████████░░   90 %   **H1, H3, deux δ et un milieu dispersif**, **135 tests exécutés, 5 ignorés** ; C01/C03 passent, C04 échoue à l'ordre un et **passe à l'ordre deux** ; H2, H4-H6 non écrits
 Accords inter-équipes     █████░░░░░░░░░░░░░░░░░   25 %   cinq arbitrages tranchés ; quatorze demandes extérieures en attente
 ```
 

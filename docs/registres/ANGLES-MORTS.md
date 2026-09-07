@@ -1506,3 +1506,10 @@ réalisations distinctes et reproductibles vérifiées. GRAINES-S65. Barres d’
   de 3,35e-7. Les covariances entre composantes sur 144 m expliquent la hausse. Aucune perte
   de précision causant ce refus établie. Commentaire corrigé, verdict et seuil conservés ;
   S66-1 porte le devenir du contrôle. HOMOGENEITE-S66, L183.
+
+**Suivi A187 — S67, 2026-09-08 : cause expliquée.** Les phases historiques reproduisent
++6,612 % ; la contribution croisée des composantes explique le résidu, la somme des variances
+individuelles rend Hs 1,200001971 m. À 6144 m, Hs vaut 1,218126498 : « ni la fenêtre ni le pas »
+était trop fort, seul le défaut de pas avait été écarté. Les battements voisins atteignent
+20,208 km à 256 composantes. S64-3 close ; calibration toujours à faire, aucune tolérance
+resserrée. Voir SPECTRE-DENSE-S67 et L184. Le présent suivi supplante la cause inconnue ci-dessus.

@@ -2989,3 +2989,14 @@ La mer statistiquement homogène ne promet pas la même variance sur chaque port
 support sur lequel elle est vraie : ensemble, limite de fenêtre, durée ou réalisation.
 Décomposer le résidu et modifier le mécanisme suspecté seul. Un contrôle sensible à un défaut
 peut aussi réagir à autre chose ; son nom ne suffit pas à attribuer la cause d’un refus.
+
+## L184 — Le support d’un second moment dépend aussi des différences de fréquences
+
+*(S67)* Le domaine couvrait largement les ondes individuelles, mais la variance gardait 6,6 %
+d’écart. Densifier le spectre sans élargir ses bornes rapprochait les composantes : leurs
+battements atteignaient 20 km sur une fenêtre de 3 km. Les termes croisés ont été mesurés,
+ils expliquaient le résidu ; raffiner les points ne pouvait pas les faire disparaître.
+
+**Réflexe :** pour dimensionner une moyenne quadratique, examiner les fréquences de ses
+produits et pas seulement celles du signal. Séparer résolution des oscillations et étendue
+nécessaire pour moyenner les battements. Une grille convergée en pas peut rester trop courte.

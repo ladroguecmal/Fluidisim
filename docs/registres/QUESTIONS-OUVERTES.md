@@ -757,8 +757,8 @@ venait de la portée de l'ancre et non de la sommation, et le coût est de +6 % 
 | # | Action | Origine | Porteur | État |
 |---|---|---|---|---|
 | S64-1 | **Brancher `scenario.graine` sur les phases des composantes.** Le déterminisme est conservé — même graine, même mer — et les mesures statistiques deviennent répétables sur des réalisations indépendantes. Sans cela, aucune tolérance du corpus ne peut recevoir de provenance statistique | **A186** | session | **close en S65** |
-| S64-2 | **Resserrer la tolérance de `Hs`**, aujourd'hui à 10 % pour un écart de 0,28 %. Bloquée par S64-1 *et* par A187 : les deux doivent être levées d'abord | **A106**, ADR-051 D2 | session, par ADR | ouverte, bloquée |
-| S64-3 | **Élucider l'écart de 6,6 % à 256 composantes**, qui n'est ni la fenêtre ni le pas. Piste non vérifiée : la corrélation entre composantes, toutes dans un cône de 30 degrés | **A187** | session | ouverte |
+| S64-2 | **Resserrer la tolérance de `Hs`**, aujourd'hui à 10 % pour un écart de 0,28 %. Bloquée par S64-1 *et* par A187 : les deux doivent être levées d'abord | **A106**, ADR-051 D2 | session, par ADR | **à instruire depuis S67 ; calibration nécessaire** |
+| S64-3 | **Élucider l'écart de 6,6 % à 256 composantes**, qui n'est ni la fenêtre ni le pas. Piste non vérifiée : la corrélation entre composantes, toutes dans un cône de 30 degrés | **A187** | session | **close en S67** |
 
 > **Ordre : S64-1, puis S64-3, puis S64-2.** Les deux premières sont indépendantes et débloquent
 > la troisième ; S64-1 est aussi la moins chère et sert au-delà de `Hs`.
@@ -782,3 +782,9 @@ HOMOGENEITE-S66. Aucun seuil changé ; A187 reste ouvert, suite prioritaire S67 
 | # | Action | Origine | Porteur | État |
 |---|---|---|---|---|
 | S66-1 | Décider par ADR comment séparer le diagnostic statistique d’homogénéité et le contrôle de précision ; éprouver un défaut injecté avant toute nouvelle assertion, conserver le refus actuel jusque-là | A188, HOMOGENEITE-S66 | session après diagnostic S64-3 | ouverte |
+
+## Actions relevées en séance — S67
+
+S64-3 close, A187 expliqué : SPECTRE-DENSE-S67. La graine fonctionne et la cause est connue ;
+S64-2 reste à instruire par ADR et campagne statistique, sans resserrement automatique.
+S66-1 est la suite S68 recommandée. Aucun nouvel engagement différé ; S63-1 toujours ouverte.

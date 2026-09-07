@@ -1085,3 +1085,7 @@ S65-1. Hashs C02/C18 remplacés avant vérification. Mesures et limites :
 croisés entre composantes sur 144 m expliquent la hausse, sans défaut de précision causant
 ce refus établi. Seuil et verdict conservés ; S65-1 close, décision du contrôle suivie S66-1.
 [HOMOGENEITE-S66](HOMOGENEITE-S66.md). Ne pas assimiler cette mesure à la résolution d’A187.
+
+**Suivi S67 — 2026-09-08.** A187 expliqué : Hs historique à 256 composantes reproduit par
+les moments finis ; interférences sur 3072 m, battements voisins jusqu’à 20,208 km. Aucun
+changement de tolérance, fenêtre ni verdict. [SPECTRE-DENSE-S67](SPECTRE-DENSE-S67.md).

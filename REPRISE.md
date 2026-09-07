@@ -18,14 +18,14 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 01:12 +02:00
+JETON            : libre
+Battement        : 2026-09-08 01:13 +02:00
 Agent            : Codex (git et cargo disponibles)
-Session en cours : S67
-Dernière session : S66 — 2026-09-08 — interferences de fenetre mesurees
-Session suivante : S67 — S64-3, expliquer A187 a 256 composantes
+Session en cours : aucune
+Dernière session : S67 — 2026-09-08 — A187 explique par les battements
+Session suivante : S68 — S66-1, separer precision et diagnostic statistique par ADR
 
-S65 : les ensembles sont possibles, mais les barres statistiques restent à établir ; A187 reste ouvert.
+S67 : ensembles possibles, A187 expliqué ; calibration statistique et décision S66-1 restent à faire.
 
 À signaler à l'humain : **le seul blocage réel du banc B2 est une couche dispersive**, constatée
 nécessaire en S22 et jamais planifiée depuis. C'est l'action **S63-1**, et elle est plus lourde
@@ -154,6 +154,11 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S67 — 2026-09-08 :** A187 expliqué par les covariances sur la fenêtre ; 6,612 % reproduits,
+battements voisins jusqu’à 20,208 km. Voir docs/validation/SPECTRE-DENSE-S67.md. S64-3 close,
+L184 ; 135 tests réussis, cinq ignorés, hashs et production inchangés. Suite S68 : S66-1,
+puis calibration S64-2. La tolérance reste inchangée.
 
 **S66 — 2026-09-08 :** refus d’homogénéité expliqué par les interférences sur la fenêtre,
 reproduit en f64 ; seuil et verdict conservés. Voir docs/validation/HOMOGENEITE-S66.md.
@@ -337,7 +342,7 @@ Quarante-huit sessions ici, **plus cinq dans une lignée parallèle réconcilié
 B-S27) — **51 ADR** *(dont un acté)*, six spécifications, **seize registres** — **et du code qui
 tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équilibrés et **tous deux
 montés sur leurs cas, confrontés l'un à l'autre et instrumentés, **plus un milieu à dispersion
-exacte** *(S39)*, **134 tests verts, quatre ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **trois sans
+exacte** *(S39)*, **135 tests verts, cinq ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **trois sans
 verdict** (C08), **un succès depuis S59** : la fenêtre C22 800–12800 conclut à `p = 1,96`
 stabilisé, contre un oracle du même schéma. Quatre cas canoniques sur δ sont exécutés ici :
 **C01 et C03 passent**, C04 échoue, C08 ne conclut pas. **Le second véhicule passe C04 sur un montage dont le schéma et la mesure
