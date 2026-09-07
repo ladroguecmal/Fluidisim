@@ -59,37 +59,24 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S66
-État             : terminée
+Session          : S67
+État             : en cours
 Agent            : Codex (git et cargo disponibles)
-Objectif         : Diagnostiquer le nouvel échec d’homogénéité (S65-1).
+Objectif         : Expliquer A187, écart de Hs à 256 composantes (S64-3).
 ```
 
 ### Plan
 
-- [x] **P1** — état réel, passation, jeton et plan seul.
-- [x] **P2** — diagnostic à phases spatiales et sommation f64 sur les mêmes composantes ; fenêtres 144/576/1536 m, six graines, translation 3000 m.
-- [x] **P3** — confronter les mesures, ajouter un témoin de causalité et documenter la portée ; aucun seuil modifié.
-- [x] **P4** — rituel : journal, actions, angles/leçons si établis, index, corrections datées et jeton libre.
+- [x] **P1** — reprise, état réel, jeton et plan seul.
+- [>] **P2** — décomposer exactement les moments sur la grille par sommes trigonométriques ; vérifier contre le diagnostic point par point et le témoin monochromatique.
+- [ ] **P3** — mesurer spectres 32/256, phases historiques et six graines ; isoler les termes croisés et les échelles de battement, documenter sans resserrer de tolérance.
+- [ ] **P4** — rituel : journal, actions, angles/leçons éventuels, corrections datées, index/décomptes, jeton libre.
 
 ### Notes de reprise
 
-Départ master 25d3a9e propre ; copie 29ef50 identique et propre. REPRISE et socle lus dans
-cette conversation, dernière entrée S65 relue. Ordre prévu S65-1 puis S64-3 puis S64-2.
-La fenêtre homogénéité vaut 48*3=144 m, distincte du Hs à 3072 m. À 3000 m, la fenêtre
-1536 m reste dans le rayon 4096 m ; celle de 3072 m dépasserait ce rayon. Ne pas la copier.
-S63-1 reste le blocage B2. Tolérance 15 % conservée ; aucun choix de graine pour rendre vert.
-
-P2 : dix-huit couples de fenêtres mesurés, diagnostic release 9,46 s. Nominal ratio
-production 1,397506641, référence spatiale f64 1,397506306 ; somme des variances par composante
-ratio 0,979715316. Écart interférences : cross_p=0,006459304, cross_l=0,046176100 m².
-Fenêtre nominale 144 m, 576 m -> 1,079318732, 1536 m -> 0,943614087. Aucune correction
-production ; contrôler par un témoin monochromatique et conserver le verdict en P3.
-
-P3 : test de causalité et témoin monochromatique verts ; 134 tests réussis, quatre ignorés.
-Check inchangé. HOMOGENEITE-S66 contient les 18 ratios et la décomposition. Aucun chemin de
-production ni seuil modifié ; commentaire du contrôle corrigé. S65-1 peut être close,
-S66-1 portera la décision de séparer contrôle de précision et diagnostic statistique.
-
-P4 : A188/L183 consignés, S65-1 close, S66-1 ouverte. Suite S67 S64-3. Aucun calcul en cours,
-jeton libre, copie 29ef50 à avancer comme aux étapes précédentes.
+Master 87d3186 et copie 29ef50 propres et identiques. REPRISE/socle lus dans cette conversation,
+passation S66 relue. Le résultat à 32 composantes ne clôt pas A187 : mesurer à 256 et restaurer
+les seules phases historiques dans le diagnostic pour reproduire les 6,612 % de S64.
+Fenêtres centrées à zéro : 3072 et 6144 m, pas 3 m, dans la portée 4096 m. Formule exacte
+sur la grille, pas une limite de fenêtre infinie. Aucun calcul ni paramètre de production modifié.
+S66-1 puis S64-2 restent des décisions par ADR ; S63-1 reste le blocage B2.

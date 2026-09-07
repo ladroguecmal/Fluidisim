@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-08 01:07 +02:00
+JETON            : occupé
+Battement        : 2026-09-08 01:08 +02:00
 Agent            : Codex (git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S67
 Dernière session : S66 — 2026-09-08 — interferences de fenetre mesurees
 Session suivante : S67 — S64-3, expliquer A187 a 256 composantes
 
