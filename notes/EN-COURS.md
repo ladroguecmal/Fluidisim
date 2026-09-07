@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S59
-État             : en cours
+État             : terminée
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
 Objectif         : S57-1 — découpage du calcul, borne du mode à 89600, mesure 89600/179200.
 ```
@@ -72,7 +72,7 @@ Objectif         : S57-1 — découpage du calcul, borne du mode à 89600, mesur
 - [x] **P3** — implémenter le découpage retenu et relever la borne du mode à 89600 ; tests d'identité, d'admission et de refus.
 - [x] **P4** — mesurer 89600/179200 selon le critère **inchangé** ; consigner erreurs, écart, temps.
 - [x] **P5** — rapport MESURES-C22-S59 : admission de 12800, verdict des quatre fenêtres, apport au dossier A179 sans trancher S57-2.
-- [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, passation, jeton, **fusion dans master**.
+- [x] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, passation, jeton, **fusion dans master**.
 
 ### Notes de reprise
 
@@ -121,3 +121,9 @@ Rapport MESURES-C22-S59, avec ses trois reserves et la portee de l oracle du mem
 Apport A179 : plateau additif 1,1839e-11, loi de S57 verifiee a -3,8 % sur un troisieme couple ;
 et les ordres contre les deux oracles coincident a 1e-5, Richardson travaillant sur des
 differences. S57-2 non traitee, volontairement.
+
+P6 : rituel exécuté. Journal S59, A181 (sévérité 2, corrigé), L177, S57-1 close, S59-1 ouverte,
+ordre recommandé S57-2 puis S58-2 puis S59-1. Index et REPRISE : angles 180 vers 181, tests
+125 vers 127, bilan C08 corrigé de cinq sans verdict à trois sans verdict et un succès.
+48 ADR et 14 registres inchangés. Aucun invariant invalidé, aucun ADR réécrit.
+Jeton libre. Reste la fusion dans master.

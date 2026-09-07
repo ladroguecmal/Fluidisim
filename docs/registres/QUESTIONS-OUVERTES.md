@@ -632,7 +632,7 @@ Quatre familles sans verdict, sortie 0. Voir MESURES-C22-S57. Aucun doublement a
 
 | # | Action | Origine | Porteur | État |
 |---|---|---|---|---|
-| S57-1 | Relever la borne du mode `c22-shallow-fin` à 89600, **déclarer et tester le découpage du calcul en tranches gardées en mémoire** exigé au-delà du quart d'heure, puis mesurer 89600/179200 — étape de code et étape de mesure séparées | MESURES-C22-S57 : oracle requis ≈ 79 000, admission prévue avec 20 à 30 % de marge, coût projeté 19 min 07 s | session S58 | ouverte |
+| S57-1 *(close en S59)* | Relever la borne du mode `c22-shallow-fin` à 89600, **déclarer et tester le découpage du calcul en tranches gardées en mémoire** exigé au-delà du quart d'heure, puis mesurer 89600/179200 — étape de code et étape de mesure séparées | MESURES-C22-S57 : oracle requis ≈ 79 000, admission prévue avec 20 à 30 % de marge, coût projeté 19 min 07 s | session S58 | ouverte |
 | S57-2 | Éprouver la loi de biais d'oracle `c(n) ∝ n^-1,879` sur un troisième couple, et décider si le filtre de contamination doit comparer l'erreur au **biais de l'oracle de mesure** plutôt qu'à l'écart des deux oracles. **Par ADR** : cela change un critère d'admission, pas une constante | **A179** *(sév. 2)*, MESURES-C22-S57 §3 | session, par ADR | ouverte |
 
 > **Ne pas traiter S57-2 en même temps que S57-1.** S57-1 mesure sous le critère actuel ;
@@ -657,4 +657,24 @@ constante, ses quatre assertions passent à écart nul aux deux valeurs (RHO-EAU
 > **S58-2 avant S58-1.** La première question porte sur un cas ; la seconde demande combien il y
 > en a. Un recensement qui trouverait trois autres cas aveugles changerait la forme de la réponse
 > à donner au premier.
+
+## Actions relevées en séance — S59
+
+**S57-1 close.** Borne portée à 89600, découpage tranché par la mesure, couple 89600/179200
+exécuté en 1143,284 s. **La grille 12800 est admise (marge +22,40 %) et la fenêtre 800–12800
+conclut : `p = 1,96`, stabilisé — premier succès de C22.** Voir MESURES-C22-S59.
+Le remède prescrit par S56 aurait invalidé la mesure : **A181**, **L177**.
+
+**S57-2 devient la suite recommandée**, et S59 lui apporte deux arguments : la loi de biais de
+S57 se vérifie à −3,8 % sur un troisième couple, et les ordres calculés contre les deux oracles
+coïncident à 1e-5 — l'estimateur est presque insensible à l'oracle, le filtre d'admission ne
+l'est pas du tout.
+
+| # | Action | Origine | Porteur | État |
+|---|---|---|---|---|
+| S59-1 | Reprendre les prescriptions non éprouvées laissées par les rapports antérieurs — les consignes « à faire si… » écrites par une session qui ne subissait pas encore le cas. **A181 en a coûté une** ; personne ne sait combien il en reste | **A181**, **L177** | session ultérieure | ouverte |
+
+> **Ordre recommandé : S57-2, puis S58-2, puis S59-1.** S57-2 clôt le dossier C22 ; S58-2 et
+> S59-1 sont deux recensements du même genre — des fautes déjà identifiées dont on ignore le
+> nombre d'instances — et ils ne se périment pas.
 

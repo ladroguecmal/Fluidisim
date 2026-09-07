@@ -2854,3 +2854,23 @@ recopié depuis ; sa charge de vérité est celle du jour où il a été écrit.
 tests unitaires qui tenaient la propriété** — et le cas de validation est à requalifier, pas à
 créditer.
 
+## L177 — Un protocole écrit d'avance est une hypothèse, y compris dans ses remèdes
+
+*(S59)* Une session avait clos son rapport par une consigne de prudence : au-delà du quart
+d'heure, découper le calcul en tranches temporelles gardées en mémoire. La consigne était de
+bonne foi, cadrée, et elle respectait tous les interdits du dossier — pas de fichier, pas de
+changement de paramètre. **Elle aurait détruit la mesure.** L'intégration tronque son dernier pas
+pour atterrir sur le temps demandé, donc découper insère des pas qui n'existaient pas, et le
+champ change. Trois campagnes de référence devenaient incomparables.
+
+Ce qui rend le cas instructif n'est pas l'erreur, c'est **qui pouvait la voir**. La session qui a
+écrit le remède ne subissait pas encore le problème : elle a prescrit sans exécuter. Celle qui
+l'a appliqué avait la mesure sous la main, et quatre minutes ont suffi.
+
+**Réflexe :** un protocole reçu — d'une session précédente, d'un document, de soi-même — se lit
+comme une **hypothèse à éprouver**, pas comme une contrainte à satisfaire, et ses **remèdes**
+méritent la même défiance que ses conclusions. Le premier geste est de chercher ce que le remède
+déplace, avant de l'implémenter. Corollaire : en écrivant une consigne pour la session suivante,
+**dire ce qu'on n'a pas vérifié** — le coût d'une prescription non éprouvée est payé plus tard,
+par quelqu'un qui la croira mesurée.
+

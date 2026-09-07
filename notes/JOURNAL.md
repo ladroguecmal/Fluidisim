@@ -4982,3 +4982,61 @@ du calcul exigé au-delà du quart d'heure, puis mesurer 89600/179200 (≈ 19 mi
 **A103 est close** et sort des rappels de fin de session. Restent : l'état réel du projet et
 l'infrastructure — aucun distant créé. A107 historiquement réconcilié.
 
+## S59 — 2026-09-08 — C22 conclut, et le remède prescrit aurait empêché de le voir
+
+**Agent : Claude Code (Opus 5)**, git et cargo disponibles. Départ ae93fd0, master et worktree
+confondus. Entrée : **S57-1** — découpage du calcul, borne du mode, mesure 89600/179200.
+
+**Sorties.** MESURES-C22-S59 ; `avancer_jusqu_a_observe` dans `water-core` ; borne du mode
+portée à 89600 ; deux tests de découpage ; A181, L177. **S57-1 close.**
+
+**La réserve levée en premier, et elle était fondée.** REFERENCE-C22-S56 §5 prescrivait, au-delà
+du quart d'heure, « un découpage de calcul en tranches temporelles gardées en mémoire ». Or
+`avancer_jusqu_a` prend `dt = dt_cfl.min(t_fin − t)` : **chaque borne de tranche insère un pas
+tronqué** absent du calcul continu. Mesuré avant d'implémenter : à nx=200, t=1 s, quatre tranches
+donnent un champ différent bit à bit. Le remède aurait rendu la campagne incomparable à S48, S49,
+S56 et S57 — c'est-à-dire aurait détruit ce qu'il devait rendre possible (**A181**, **L177**).
+
+Retenu à la place : le découpage d'**observation**. `avancer_jusqu_a_observe` porte la seule
+boucle, `avancer_jusqu_a` n'en est qu'un appel avec un observateur vide — l'identité est
+structurelle et non retestée à chaque modification (L162, A176). Et le test d'identité a
+d'abord échoué **en trouvant une faute de sa propre écriture** : cadence de 50 pour 35 pas,
+observateur jamais appelé, champ pourtant identique. Un témoin muet passait pour neutre.
+
+**Décision structurante.** Aucune. Le critère est resté intact — c'était la condition pour que le
+résultat signifie quelque chose.
+
+**Le résultat.** Campagne 1143,284 s contre 1147,2 projetés (**−0,34 %**). Écart d'oracles
+**2,118278666e-10**, prédit 2,1129e-10 (**+0,26 %**). La grille **12800 est admise** à 1,2240 fois
+le seuil, marge **+22,40 %** — refusée à 0,494 en S56, à 0,9556 en S57. **La fenêtre 800–12800
+conclut : 5/5 grilles, ordres 1,960625 · 2,011671 · 1,997599, `p = 1,96` stabilisé.** Bilan C22 :
+**un succès**, zéro échec, trois sans verdict — le premier après quatre campagnes vides.
+
+**Ce que le succès ne dit pas**, et le rapport le porte : la référence est un oracle numérique
+**du même schéma**. Ce qui est établi, c'est que le schéma converge à l'ordre 2 environ vers sa
+propre limite de raffinement, pas qu'il résout Saint-Venant. A114 reste entier. Trois réserves
+accompagnent le chiffre : filtre empirique, marge de 22 % seulement, ordres non monotones.
+
+**Et un fait inattendu, pour A179.** Les ordres calculés contre l'oracle 89600 et contre l'oracle
+179200 coïncident à **1e-5** sur les six triplets : l'estimateur de Richardson travaille sur des
+différences successives, où une contamination additive uniforme s'annule. **La grandeur mesurée
+est presque insensible à l'oracle, alors que le droit de la publier en dépend entièrement.** La
+loi de biais ajustée en S57 se vérifie par ailleurs à −3,8 % sur ce troisième couple, qui n'a pas
+servi à l'ajuster.
+
+**Ce qui n'a pas été fait.** **S57-2 n'a pas été traitée, volontairement** : discuter le critère
+pendant la mesure aurait rendu le succès inexploitable — on n'aurait pas su s'il venait de la
+référence plus fine ou d'un critère assoupli. Aucun couple plus grand n'a été lancé : il ne
+renforcerait qu'une marge, sans déplacer un ordre qui ne dépend pas de l'oracle.
+
+**Validation.** **127 tests réussis** (40 cœur + 87 harnais), deux ignorés. Release compilée.
+Hashs `check` inchangés, `0x3e2c06a7b00e73e3` et `0x1a8b0629a9f51b6e`. Refus du mode vérifiés,
+dont 102400 — multiple de 12800 que seule la borne de campagne refuse. Aucun test pendant la
+mesure.
+
+**Suite S60 : S57-2**, éprouver le critère lui-même par ADR — comparer l'erreur au biais de
+l'oracle de mesure plutôt qu'à l'écart des deux oracles. C'est désormais la seule question
+ouverte du dossier C22, et S59 lui apporte un troisième point et un argument neuf. Restent
+S58-2 puis S58-1 sur les cas aveugles à leurs paramètres. A103 close en S58 ; l'état réel et
+l'infrastructure restent hors de portée, aucun distant créé.
+

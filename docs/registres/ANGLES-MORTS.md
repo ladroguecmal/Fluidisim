@@ -1406,3 +1406,17 @@ pendant quatre sessions.
   formule vérifiée. Inventer cette source serait fabriquer la mesure qui manque.
   Voir RHO-EAU-S58, ADR-048 et L176. Instance d'**A104**, jamais reliée à **A103**.
 
+- **A181** *(sévérité 2, corrigé S59)* — **Un protocole peut prescrire un remède qui détruit ce
+  qu'il doit rendre possible.** `REFERENCE-C22-S56` §5 demandait, au-delà du quart d'heure, « un
+  découpage de calcul en tranches temporelles gardées en mémoire », pour rendre supportable une
+  campagne longue. Or l'intégration est à **pas adaptatif tronqué** — `dt = dt_cfl.min(t_fin − t)`
+  — donc chaque borne de tranche insère un pas absent du calcul continu : le champ change bit à
+  bit, mesuré à nx=200 sur quatre tranches. Appliqué, le remède rendait la campagne incomparable
+  à S48, S49, S56 et S57, c'est-à-dire supprimait la seule chose qu'on venait y chercher.
+  La prescription a été écrite par la session qui n'avait pas encore le besoin, et n'a été
+  éprouvée qu'au moment de l'appliquer — trois sessions plus tard. **Corrigé** : le découpage
+  retenu est celui de l'**observation**, `avancer_jusqu_a_observe`, qui porte désormais la seule
+  boucle d'intégration ; l'identité avec `avancer_jusqu_a` est structurelle. Le chemin fautif est
+  conservé comme témoin dans `le_decoupage_temporel_n_est_pas_neutre`.
+  Voir MESURES-C22-S59 et **L177**.
+

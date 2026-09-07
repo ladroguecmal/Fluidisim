@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 00:05 +02:00
+JETON            : libre
+Battement        : 2026-09-08 00:47 +02:00
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Session en cours : S59 — S57-1, découpage, borne à 89600, puis mesurer 89600/179200
-Dernière session : S58 — 2026-09-07 — A103 close : ρ = 1025, propriété du milieu ; A180, L176
-Session suivante : selon le résultat de S59
+Session en cours : aucune
+Dernière session : S59 — 2026-09-08 — C22 conclut : p = 1,96 stabilisé ; A181, L177
+Session suivante : S60 — S57-2, le critère d'admission de C22, par ADR
 
 Note S58 : S57 puis S58 ont travaillé dans le worktree claude/reprise-projet-29ef50, et **les
 deux ont été fusionnées dans master en avance rapide** — bd9f087 puis 531491f. Les deux copies
@@ -146,6 +146,20 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
+**S59 :** **C22 a son premier verdict positif.** Couple d'oracles 89600/179200, 1143,284 s
+(−0,34 % de la projection) : la grille 12800 est **admise** avec 22,40 % de marge, et la fenêtre
+800–12800 conclut — 5/5 grilles, ordres 1,960625 · 2,011671 · 1,997599, **`p = 1,96`,
+stabilisé**. Quatre campagnes s'étaient conclues sans aucun succès. **Ce que cela ne dit pas** :
+la référence est un oracle **du même schéma**, donc le schéma converge vers *sa propre* limite —
+pas vers Saint-Venant ; A114 reste entier, et le rapport porte trois réserves.
+
+Et le protocole de S56 prescrivait un remède qui **aurait détruit la mesure** : découper
+l'intégration insère des pas tronqués et déplace le champ bit à bit (**A181**, **L177** — *un
+protocole écrit d'avance est une hypothèse, y compris dans ses remèdes*). Retenu à la place : le
+découpage d'**observation**, `avancer_jusqu_a_observe`, qui porte désormais la seule boucle.
+127 tests réussis, deux ignorés ; hashs inchangés. Voir docs/validation/MESURES-C22-S59.md.
+S57-1 close ; suite S60 : **S57-2**, le critère d'admission lui-même, par ADR.
+
 **S58 :** **A103 close sur délégation explicite**, après trente-sept sessions de rappel.
 La masse volumique du projet est **1025** — l'eau de mer — et elle **cesse d'être une constante
 globale** : `Milieu::MER` et `Milieu::EAU_DOUCE`, la mer par défaut, parce que le monde contient
@@ -228,9 +242,10 @@ Quarante-huit sessions ici, **plus cinq dans une lignée parallèle réconcilié
 B-S27) — **48 ADR** *(dont un acté)*, six spécifications, **quatorze registres** — **et du code qui
 tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équilibrés et **tous deux
 montés sur leurs cas, confrontés l'un à l'autre et instrumentés, **plus un milieu à dispersion
-exacte** *(S39)*, **125 tests verts, deux ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **cinq sans
-verdict** (C08). Quatre cas canoniques sur δ sont exécutés ici : **C01 et C03 passent**, C04 échoue,
-C08 ne conclut pas. **Le second véhicule passe C04 sur un montage dont le schéma et la mesure
+exacte** *(S39)*, **127 tests verts, deux ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **trois sans
+verdict** (C08), **un succès depuis S59** : la fenêtre C22 800–12800 conclut à `p = 1,96`
+stabilisé, contre un oracle du même schéma. Quatre cas canoniques sur δ sont exécutés ici :
+**C01 et C03 passent**, C04 échoue, C08 ne conclut pas. **Le second véhicule passe C04 sur un montage dont le schéma et la mesure
 diffèrent** (S41). Son ancien C08 vert est requalifié en S47 : diagnostic sur Ritter, trois
 grilles, sans validation du contrat C08 amendé. Les 30 sections du document de
 questions ouvertes d'origine sont traitées. Les vingt premiers ADR ont été confrontés les uns aux
