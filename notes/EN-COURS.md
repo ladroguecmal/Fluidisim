@@ -70,8 +70,8 @@ Objectif         : S57-1 — découpage du calcul, borne du mode à 89600, mesur
 - [x] **P1** — passation, jeton, plan seul.
 - [x] **P2** — éprouver le découpage que S56 prescrit : mesurer s'il change le champ, avant de l'implémenter.
 - [x] **P3** — implémenter le découpage retenu et relever la borne du mode à 89600 ; tests d'identité, d'admission et de refus.
-- [ ] **P4** — mesurer 89600/179200 selon le critère **inchangé** ; consigner erreurs, écart, temps.
-- [ ] **P5** — rapport MESURES-C22-S59 : admission de 12800, verdict des quatre fenêtres, apport au dossier A179 sans trancher S57-2.
+- [x] **P4** — mesurer 89600/179200 selon le critère **inchangé** ; consigner erreurs, écart, temps.
+- [x] **P5** — rapport MESURES-C22-S59 : admission de 12800, verdict des quatre fenêtres, apport au dossier A179 sans trancher S57-2.
 - [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, passation, jeton, **fusion dans master**.
 
 ### Notes de reprise
@@ -112,3 +112,12 @@ P3 : borne du mode portée de 76800 à 89600, décrite comme limite de campagne.
 0, 12800, 32000, 102400 (multiple de 12800, refusé par la borne seule) et usize::MAX ; 89601
 refusé aussi. 127 tests réussis, deux ignorés ; hashs check inchangés. Mesure P4 lancée sans
 test concurrent.
+
+P4/P5 : campagne 1143,284 s (projete 1147,2 ; -0,34 %) ; oracles 227,124 et 910,168 s.
+Ecart 2,118278666e-10, predit 2,1129e-10 : +0,26 %. **12800 admise a 1,2240 fois le seuil,
+marge +22,40 %**. Fenetre 800-12800 : 5/5, ordres 1,960625 / 2,011671 / 1,997599,
+**OK p = 1,96 stabilise — premier succes de C22**. Bilan 1 succes, 0 echec, 3 sans verdict.
+Rapport MESURES-C22-S59, avec ses trois reserves et la portee de l oracle du meme schema.
+Apport A179 : plateau additif 1,1839e-11, loi de S57 verifiee a -3,8 % sur un troisieme couple ;
+et les ordres contre les deux oracles coincident a 1e-5, Richardson travaillant sur des
+differences. S57-2 non traitee, volontairement.
