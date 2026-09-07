@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-07 21:06 +02:00
+JETON            : libre
+Battement        : 2026-09-07 21:07 +02:00
 Agent            : Codex (git et cargo disponibles)
-Session en cours : S56
-Dernière session : S55 — 2026-09-07 — extrema sur plateaux corrigés
-Session suivante : S56 — stratégie de référence et budget C22 (S49-1)
+Session en cours : aucune
+Dernière session : S56 — 2026-09-07 — référence et budget C22 dimensionnés
+Session suivante : S57 — mesurer C22 sur oracles 76800/153600 (S56-1)
 ```
 
 > **Avant de regarder le jeton, exécuter `git worktree list` et `git branch -a`.** Le jeton est un
@@ -139,6 +139,11 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S56 :** fenêtre C22 800–12800 mesurée ; grille fine rejetée par le filtre de contamination,
+quatre familles sans verdict. Anciennes mesures reproduites ; coût 371,116 s. S49-1 close
+pour stratégie et budget, suite S57 : couple 76800/153600 (S56-1), environ 827 s estimés.
+Voir docs/validation/REFERENCE-C22-S56.md. 123 tests réussis, deux ignorés.
 
 **S55 :** extrema conservés au travers des plateaux f32 ; S54-1 close. Seiche nx=400 sur
 60 s désormais mesurable ; demi-vies nominales et harmoniques révisées sans changement

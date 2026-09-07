@@ -4844,3 +4844,38 @@ l'échantillonnage ; pas de revendication nouvelle sur la précision des demi-vi
 **Suite S56 : S49-1**, stratégie de référence et budget pour une fenêtre C22 plus fine,
 avec contrôle de contamination conservé. A103, état réel et infrastructure inchangés ;
 aucun distant créé. A107 historiquement réconcilié, anciennes copies conservées.
+
+## S56 — 2026-09-07 — La référence limite la fenêtre suivante
+
+**Agent : Codex**, git et cargo disponibles. Départ master d8e952a propre, anciennes copies
+contrôlées propres. Entrée : S49-1, stratégie de référence et budget pour raffiner C22.
+
+**Sorties.** Mode séparé c22-shallow-fin : huit grilles, quatre fenêtres jusqu’à 800–12800,
+deux oracles réutilisés en mémoire, chronométrés séparément. Anciens modes et seuils conservés.
+REFERENCE-C22-S56 décrit résultats, coût, extrapolations et protocole de la campagne suivante.
+
+**Mesure.** Références 51200/102400, 371,116 s au total ; 72,727/292,354 s pour les oracles.
+Les sept anciennes grilles reproduisent S49 aux chiffres imprimés. La grille 12800 a une
+erreur 7,710700097e-9 contre 102400, sous le seuil empirique 1,562278094e-8. Elle est rejetée :
+fenêtre fine 4/5, deux ordres seulement, sans verdict. Bilan : quatre familles sans verdict,
+zéro succès et zéro échec physique. Aucun ordre reconstruit après la grille rejetée.
+
+**Stratégie.** Prochain couple 76800/153600, budget estimé 827,467 s (13 min 47 s), sans
+garantie de délai ni d’admission. L’exposant empirique de décroissance des écarts d’oracles
+vaut 1,72145 ; utiliser deux à sa place changerait la prévision du filtre sur 12800.
+Mesurer d’abord cette admission ; pas de doublement automatique si elle échoue. Un couple
+102400/204800 coûterait environ 24 min 26 s : prévoir un découpage en mémoire avant extension.
+Aucun champ sérialisé (I-17), aucune extrapolation du champ fondée sur l’ordre recherché.
+
+**Validation.** 123 tests réussis, deux ignorés ; trois tests C22 ciblés avant mesure,
+refus du nouveau mode ajoutés au test existant. Release compilée. check vert, hashs
+0x3e2c06a7b00e73e3 et 0x1a8b0629a9f51b6e inchangés. Tests complets exécutés après
+la mesure de coût. physics général non répété ; solveurs et scénarios inchangés.
+
+**Enseignements / angles.** Pas de nouvel identifiant : contamination déjà documentée S48/S49,
+application de L173 au support et des limites connues de l’oracle. 178 angles, dernière leçon L174.
+Aucun invariant invalidé ni ADR réécrit ; les mesures historiques restent valables.
+
+**Suite S57 : S56-1**, exécuter le couple 76800/153600 selon REFERENCE-C22-S56.
+S49-1 close pour la stratégie et le budget. A103, état réel et infrastructure inchangés ;
+aucun distant créé. A107 historiquement réconcilié, anciennes copies conservées.

@@ -567,7 +567,7 @@ la tâche de mesure est achevée. Voir MESURES-C22-S49.
 
 | # | Action | Origine | Porteur | État |
 |---|---|---|---|---|
-| S49-1 | Établir une stratégie de référence et un budget permettant de tester une fenêtre C22 encore plus fine ; contrôler la contamination avant de conclure, conserver les critères actuels | MESURES-C22-S49 : ordre final 2,0117, ralentissement insuffisant, marge ×30 réduite à deux sur 6400 | session ultérieure ; priorité S51 à S42-3 | ouverte |
+| S49-1 | Établir une stratégie de référence et un budget permettant de tester une fenêtre C22 encore plus fine ; contrôler la contamination avant de conclure, conserver les critères actuels | MESURES-C22-S49 : ordre final 2,0117, ralentissement insuffisant, marge ×30 réduite à deux sur 6400 | session ultérieure ; priorité S51 à S42-3 | **close en S56 — stratégie et budget** |
 
 ## Actions relevées en séance — S50
 
@@ -614,3 +614,12 @@ table et limites dans GARDE-FOUS-VIDE-S54. Aucun faux succès supplémentaire é
 S54-1 close : perte des extrema sur plateau corrigée, sans assouplir le seuil de six.
 Voir EXTREMA-SEICHE-S55 et corrections ADR-033/034. Aucun nouvel engagement différé.
 Suite recommandée S56 : S49-1, stratégie de référence C22 et budget du raffinement suivant.
+
+## Actions relevées en séance — S56
+
+S49-1 close pour la stratégie et le budget : REFERENCE-C22-S56. Fenêtre 800–12800 mesurée
+avec 51200/102400, grille finale rejetée par le filtre ; quatre familles sans verdict.
+
+| # | Action | Origine | Porteur | État |
+|---|---|---|---|---|
+| S56-1 | Mesurer C22 avec oracles 76800/153600 et les huit grilles ; vérifier le filtre avant la stabilité, conserver le refus si 12800 reste contaminée ; aucun doublement automatique | REFERENCE-C22-S56, budget estimé 827 s, admission incertaine | session S57 | ouverte |

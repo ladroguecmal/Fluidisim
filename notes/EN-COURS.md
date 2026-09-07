@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S56
-État             : en cours
+État             : terminée
 Agent            : Codex (git et cargo disponibles)
 Objectif         : Stratégie de référence et budget pour la fenêtre C22 800–12800 (S49-1).
 ```
@@ -70,7 +70,7 @@ Objectif         : Stratégie de référence et budget pour la fenêtre C22 800�
 - [x] **P1** — état réel, passation et plan seul.
 - [x] **P2** — ajouter une fenêtre fine dédiée sans changer les modes existants ; vérifier les admissions et compiler.
 - [x] **P3** — mesurer 800–12800 avec les références 51200/102400, filtre inchangé ; établir le budget du couple suivant et ses critères de passage.
-- [ ] **P4** — rituel : journal, actions, enseignements éventuels, index, passation et jeton libre.
+- [x] **P4** — rituel : journal, actions, enseignements éventuels, index, passation et jeton libre.
 
 ### Notes de reprise
 
@@ -83,3 +83,6 @@ P3 : campagne 371,116 s ; oracles 72,727/292,354 s ; erreur 12800 = 7,710700097e
 seuil = 1,562278094e-8 : grille rejetée, fenêtre 4/5, quatre familles sans verdict.
 Sept anciennes grilles identiques à S49. Budget suivant 76800/153600 ~827 s estimés,
 admission incertaine. 123 tests verts, deux ignorés ; rapport REFERENCE-C22-S56.
+
+P4 : journal et actions consignés, S49-1 close, S56-1 ouverte pour S57. Aucun calcul en cours.
+Jeton libre ; aucun nouvel ADR, angle ou leçon, décomptes inchangés.

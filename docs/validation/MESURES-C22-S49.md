@@ -76,3 +76,8 @@ reste coupée. Refus de 9600 et 6400 pour le mode fenêtres ; taille 9600 testé
 par la commande (sortie 1). Mode historique rejoué à 3200/6400 : trois grilles retenues,
 stabilité indisponible, aucun faux succès. Compilation release réussie, diff sans erreur.
 Les tests de mesures historiques passent ; aucun changement des solveurs ou scénarios.
+
+**Suivi S56 — 2026-09-07.** S49-1 close pour sa stratégie et son budget ; la fenêtre
+800–12800 a été mesurée avec les mêmes oracles : grille finale rejetée, 4/5 seulement.
+Les sept anciennes grilles reproduisent ce rapport. Couple suivant 76800/153600 suivi en
+S56-1 ; [REFERENCE-C22-S56](REFERENCE-C22-S56.md) donne protocole et coût estimé.
