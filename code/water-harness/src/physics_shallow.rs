@@ -530,7 +530,7 @@ pub fn c04_ritter(t_fin: f64, n: usize, dx: f64) -> Vec<Cas> {
 }
 
 /// Instants des passages a zero **montants** d'un signal echantillonne, par interpolation lineaire.
-fn passages_a_zero(t: &[f64], y: &[f64]) -> Vec<f64> {
+pub fn passages_a_zero(t: &[f64], y: &[f64]) -> Vec<f64> {
     let mut v = Vec::new();
     for k in 1..y.len() {
         if y[k - 1] <= 0.0 && y[k] > 0.0 {
@@ -542,7 +542,7 @@ fn passages_a_zero(t: &[f64], y: &[f64]) -> Vec<f64> {
 }
 
 /// Periode moyenne deduite d'une suite de passages a zero. `None` s'il y en a moins de deux.
-fn periode_moyenne(zeros: &[f64]) -> Option<f64> {
+pub fn periode_moyenne(zeros: &[f64]) -> Option<f64> {
     if zeros.len() < 2 {
         return None;
     }

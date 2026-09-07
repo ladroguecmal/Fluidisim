@@ -24,6 +24,7 @@
 mod host_impl;
 mod oracle;
 mod physics;
+mod physics_dispersif;
 mod physics_shallow;
 mod scenario;
 
