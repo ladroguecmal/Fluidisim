@@ -69,7 +69,7 @@ Objectif         : S62-1 — corriger la sommation de variance, puis trancher pa
 ### Plan
 
 - [x] **P1** — passation, jeton, plan seul.
-- [ ] **P2** — **diagnostiquer le `NaN` avant de le corriger** : S62 l'a attribué à l'annulation catastrophique sans le vérifier.
+- [x] **P2** — **diagnostiquer le `NaN` avant de le corriger** : S62 l'a attribué à l'annulation catastrophique sans le vérifier.
 - [ ] **P3** — corriger ce que le diagnostic désigne, avec témoin et essai de refus ; vérifier que les valeurs nominales ne bougent pas.
 - [ ] **P4** — mesurer la loi complète, jusqu'aux fenêtres qui étaient hors d'atteinte.
 - [ ] **P5** — ADR : trancher la fenêtre, ou dire pourquoi elle ne se tranche pas.
@@ -96,3 +96,17 @@ le diagnostic manque. C'est la famille de **L166** — *c'est l'aval qu'il faut 
 
 Interdits : ne pas changer la fenêtre nominale sans ADR (elle déplace un chiffre publié), ne pas
 toucher aux tolérances, ne pas rendre le cas vert en élargissant la marge.
+
+P2 : **l explication de S62 etait fausse, et l action S62-1 prescrivait donc une correction
+inutile** (Welford). Le NaN ne vient pas de l annulation : to_local refuse tout point a plus de
+4096 m de l ancre (types.rs:90, LIMIT = 4096 x WORLD_UNITS_PER_METRE), eval rend None, eta rend
+NaN par unwrap_or, et la somme le propage. Confirme a six metres pres : demi-fenetre 4092 m rend
+0,505 pour cent, demi-fenetre 4098 m rend NaN.
+
+Consequences. La fenetre utilisable va jusqu a 8192 m de cote, soit 145 lambda_pic — trois fois
+ce qu il faut. Et le cas ne dit pas pourquoi il rend NaN : un point hors portee ne se compte
+nulle part, exactement le defaut corrige en S45 sur C10 (A173, L166). C est l aval du NaN qui
+manque, pas la sommation.
+
+Note : la faute que S63 vient de recenser — une prescription ecrite sans etre eprouvee — a ete
+commise par S62, la session immediatement precedente, dans l action meme que S64 execute.
