@@ -68,8 +68,8 @@ Objectif         : Diagnostiquer le nouvel échec d’homogénéité (S65-1).
 ### Plan
 
 - [x] **P1** — état réel, passation, jeton et plan seul.
-- [>] **P2** — diagnostic à phases spatiales et sommation f64 sur les mêmes composantes ; fenêtres 144/576/1536 m, six graines, translation 3000 m.
-- [ ] **P3** — confronter les mesures, ajouter un témoin de causalité et documenter la portée ; aucun seuil modifié.
+- [x] **P2** — diagnostic à phases spatiales et sommation f64 sur les mêmes composantes ; fenêtres 144/576/1536 m, six graines, translation 3000 m.
+- [>] **P3** — confronter les mesures, ajouter un témoin de causalité et documenter la portée ; aucun seuil modifié.
 - [ ] **P4** — rituel : journal, actions, angles/leçons si établis, index, corrections datées et jeton libre.
 
 ### Notes de reprise
@@ -79,3 +79,9 @@ cette conversation, dernière entrée S65 relue. Ordre prévu S65-1 puis S64-3 p
 La fenêtre homogénéité vaut 48*3=144 m, distincte du Hs à 3072 m. À 3000 m, la fenêtre
 1536 m reste dans le rayon 4096 m ; celle de 3072 m dépasserait ce rayon. Ne pas la copier.
 S63-1 reste le blocage B2. Tolérance 15 % conservée ; aucun choix de graine pour rendre vert.
+
+P2 : dix-huit couples de fenêtres mesurés, diagnostic release 9,46 s. Nominal ratio
+production 1,397506641, référence spatiale f64 1,397506306 ; somme des variances par composante
+ratio 0,979715316. Écart interférences : cross_p=0,006459304, cross_l=0,046176100 m².
+Fenêtre nominale 144 m, 576 m -> 1,079318732, 1536 m -> 0,943614087. Aucune correction
+production ; contrôler par un témoin monochromatique et conserver le verdict en P3.

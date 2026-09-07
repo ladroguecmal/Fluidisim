@@ -229,3 +229,87 @@ mod tests_phases {
         assert_eq!(phase_initiale(0, u64::MAX).0, 0); // Arithmétique modulo 2^64 explicite.
     }
 }
+
+#[cfg(test)]
+mod diagnostic_homogeneite_s66 {
+    use super::*;
+    use crate::host::{Allocator, AllocStats, JobSystem, Sink};
+
+    struct Hote;
+    impl Allocator for Hote {
+        fn alloc_persistent(&mut self, _: usize) -> Result<usize, AllocError> { Ok(0) }
+        fn seal(&mut self) {}
+        fn is_sealed(&self) -> bool { false }
+        fn stats(&self) -> AllocStats { AllocStats::default() }
+    }
+    impl Sink for Hote {
+        fn warn(&self, _: &str) {}
+        fn metric(&self, _: &str, _: f64) {}
+    }
+    impl JobSystem for Hote {
+        fn worker_count(&self) -> u32 { 1 }
+        fn parallel_reduce_ordered_f64(&self, n: usize, _: usize,
+            reduce: &dyn Fn(usize, usize) -> f64, merge: &dyn Fn(f64, f64) -> f64,
+            init: f64) -> f64 { merge(init, reduce(0,n)) }
+    }
+
+    fn fond(graine: u64, n: usize) -> Background {
+        let mut alloc = Hote;
+        let services = Hote;
+        let mut host = HostServices { alloc: &mut alloc, jobs: &services, sink: &services };
+        Background::configure(&mut host, SeaState { hs: 1.2, tp: 6.0,
+            theta_turns: 0.0, components: n, graine }, WorldPos::from_metres(0.,0.,0.)).unwrap()
+    }
+
+    // Même table de composantes et même phase temporelle entière ; seule l'évaluation
+    // spatiale et la sommation passent en f64. Pas de prétention à un oracle du spectre.
+    // Rend variance production / référence / somme des variances individuelles / max écart eta.
+    fn variances(bg: &Background, cote: usize, pas: f64, ox: f64) -> [f64; 4] {
+        let t = SimTime::from_micros(1_735_689_600_000_000);
+        let mut somme = [0.0; 2];
+        let mut carres = [0.0; 2];
+        let mut sommes_i = vec![0.0; bg.components.len()];
+        let mut carres_i = vec![0.0; bg.components.len()];
+        let mut max_ecart = 0.0f64;
+        for iy in 0..cote {
+            for ix in 0..cote {
+                let x = ox + (ix as f64 - cote as f64*0.5)*pas;
+                let y = (iy as f64 - cote as f64*0.5)*pas;
+                let prod = bg.eval(WorldPos::from_metres(x,y,0.0),t).unwrap().eta as f64;
+                let mut reference = 0.0;
+                for (j,c) in bg.components.iter().enumerate() {
+                    let temporelle = c.phase0.0.wrapping_sub(PhaseQ32::from_time(c.freq_q32,t).0);
+                    let tours = c.k_turns_per_m as f64 * (x*c.dir[0] as f64+y*c.dir[1] as f64)
+                        + temporelle as f64 / 4_294_967_296.0;
+                    let v = c.amplitude as f64 * (core::f64::consts::TAU*tours.fract()).sin();
+                    reference += v;
+                    sommes_i[j] += v;
+                    carres_i[j] += v*v;
+                }
+                max_ecart = max_ecart.max((prod-reference).abs());
+                for (j,v) in [prod,reference].into_iter().enumerate() {
+                    somme[j] += v;
+                    carres[j] += v*v;
+                }
+            }
+        }
+        let n = (cote*cote) as f64;
+        let diag = sommes_i.iter().zip(&carres_i).map(|(s,s2)| s2/n-(s/n).powi(2)).sum();
+        [carres[0]/n-(somme[0]/n).powi(2), carres[1]/n-(somme[1]/n).powi(2), diag,max_ecart]
+    }
+
+    #[test]
+    #[ignore = "diagnostic S66 : six graines, trois fenêtres ; lancer en release"]
+    fn balayer_homogeneite() {
+        for graine in [0,1,2,3,20260905,u64::MAX] {
+            let bg = fond(graine,32);
+            for cote in [48,192,512] {
+                let p = variances(&bg,cote,3.0,0.0);
+                let l = variances(&bg,cote,3.0,3000.0);
+                println!("S66 g={graine} cote={cote} ratio={:.9} f64={:.9} diag={:.9} proche={:.9} loin={:.9} cross_p={:.9} cross_l={:.9} max_eta={:.9e}",
+                    l[0]/p[0], l[1]/p[1], l[2]/p[2],p[1],l[1],p[1]-p[2],l[1]-l[2],p[3].max(l[3]));
+                assert!(p.iter().chain(&l).all(|x| x.is_finite()));
+            }
+        }
+    }
+}
