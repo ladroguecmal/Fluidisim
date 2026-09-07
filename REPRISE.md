@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-08 09:55 +02:00
+JETON            : occupé
+Battement        : 2026-09-08 10:05 +02:00
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S64 — S62-1, la fenêtre d'échantillonnage de Hs
 Dernière session : S63 — 2026-09-08 — les préalables de B2 étaient périmés ; A185, L181
-Session suivante : S64 — S62-1, la fenêtre d'échantillonnage de Hs, par ADR
+Session suivante : selon le résultat de S64
 
 À signaler à l'humain : **le seul blocage réel du banc B2 est une couche dispersive**, constatée
 nécessaire en S22 et jamais planifiée depuis. C'est l'action **S63-1**, et elle est plus lourde

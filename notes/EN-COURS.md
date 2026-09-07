@@ -59,73 +59,40 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S63
-État             : terminée
+Session          : S64
+État             : en cours
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Objectif         : S59-1 — recenser les prescriptions non éprouvées, celles qu'une session a
-                   écrites pour une situation qu'elle ne subissait pas encore.
+Objectif         : S62-1 — corriger la sommation de variance, puis trancher par ADR la fenêtre
+                   d'échantillonnage de Hs.
 ```
 
 ### Plan
 
 - [x] **P1** — passation, jeton, plan seul.
-- [x] **P2** — séparer les genres : une condition de réversibilité n'est pas une recette, et seules les recettes se vérifient.
-- [x] **P3** — recenser les recettes du corpus et établir, pour chacune, si elle a été exécutée et ce qu'elle a donné.
-- [x] **P4** — éprouver celles qui sont vérifiables à bas coût, en commençant par les plus engageantes.
-- [x] **P5** — rapport, marquage des prescriptions non éprouvées, et la règle d'écriture qui en découle.
-- [x] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
+- [ ] **P2** — **diagnostiquer le `NaN` avant de le corriger** : S62 l'a attribué à l'annulation catastrophique sans le vérifier.
+- [ ] **P3** — corriger ce que le diagnostic désigne, avec témoin et essai de refus ; vérifier que les valeurs nominales ne bougent pas.
+- [ ] **P4** — mesurer la loi complète, jusqu'aux fenêtres qui étaient hors d'atteinte.
+- [ ] **P5** — ADR : trancher la fenêtre, ou dire pourquoi elle ne se tranche pas.
+- [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
 
 ### Notes de reprise
 
-Départ 5aac200. **Deux instances connues, et elles sont toutes deux fautives.**
-**A181** (S59) : `REFERENCE-C22-S56` §5 prescrivait un découpage temporel au-delà du quart
-d'heure — il changeait le champ bit à bit et aurait invalidé la campagne. **ADR-049 D4** (S60) :
-l'expérience nommée en S60-1 était impossible, pas coûteuse ; S61 l'a dissoute.
+Départ eacd9d9. Acquis de S62 : `Hs` est aveugle à `hs` (rapport 0,914723 sur un facteur 8) et
+gouverné par la fenêtre rapportée à `λ_pic` — 8,53 % à 6,8 λ, **0,28 % à 54,7 λ**. À 12288 m
+la mesure rend `NaN`, et le cas échoue alors correctement, sans faux succès.
 
-**La thèse à éprouver, et elle est inconfortable** : *les deux seules prescriptions du corpus
-qui aient été mises à l'épreuve se sont révélées fautives*. Si c'est exact, le taux n'est pas
-anecdotique — il dit que la prescription non exécutée est un genre de texte dont la fiabilité
-n'a jamais été établie, et le corpus en contient beaucoup.
+**La cause du `NaN` est déclarée non établie.** S62 a écrit « la variance en une passe rend
+`NaN` » — c'est une hypothèse, pas une mesure, et l'ordre de grandeur ne la soutient pas : à
+16,7 millions de points, `somme2/n ≈ 0,09` et `moyenne² ≈ 0`, donc `m0` n'a aucune raison de
+passer sous zéro. **Une explication correcte n'est pas une cause tant que son effet n'a pas été
+mesuré** (**L75**), et le dépôt a déjà payé cette faute.
 
-**Premier tri, fait à l'ouverture.** Le grep sépare trois genres, et un seul est en cause :
+**L'autre candidat, plus probable et plus grave.** `eta()` s'écrit
+`bg.eval(p, t).map(...).unwrap_or(f64::NAN)` : un point hors du domaine évaluable rend `NaN`, et
+la somme le propage. À 12288 m de côté les positions vont de −6144 à +6144 m — l'ancre et la
+portée du fond n'ont pas été vérifiées à cette distance. Si c'est cela, **le cas ne dit pas
+qu'un point était invalide, il dit seulement que la mesure est `NaN`** : le refus fonctionne,
+le diagnostic manque. C'est la famille de **L166** — *c'est l'aval qu'il faut suivre*.
 
-1. **Condition de réversibilité** — *« si la réponse était l'inverse, il faudrait rouvrir X »*.
-   ADR-027 en a cinq, ADR-048 une. **Ce n'est pas une recette** : rien à exécuter, rien à
-   éprouver, et c'est un dispositif voulu. Hors sujet.
-2. **Anticipation de conception** — *« prévoir un raffinement côtier »*, *« probablement 2 à 4 m »*.
-   Non éprouvées par nature, mais elles ne se donnent pas pour vérifiées.
-3. **Recette procédurale** — *« si X, faire Y »*, avec une action technique. **C'est là que les
-   deux fautes se logent**, et c'est ce qu'il faut recenser.
-
-**Où chercher.** Les rapports de mesure finissent tous par une section « suite ». Et surtout
-`DOSSIER-B2` et `PLAN-BENCHMARK` sont **entièrement** faits de recettes écrites pour un travail
-qui n'a jamais eu lieu — c'est le gisement principal, et personne ne l'a confronté à l'exécution
-parce que l'exécution n'a pas commencé.
-
-P2/P3/P4 : recensement fait, et le corpus est mieux tenu que la these ne le craignait.
-Les si la reponse etait l inverse d ADR-027 et ADR-048 ne sont pas des recettes : rien a
-executer, dispositif voulu. Les anticipations de conception ne se donnent pas pour verifiees.
-Restent les recettes procedurales, et elles sont rares.
-
-**Une seule prescription perimee dans tout le corpus — mais c est celle du banc decisif.**
-DOSSIER-B2 par.8, ecrit en S14, annoncait cinq blocages : H1 non ecrit, H3 non ecrit, C01 et C02
-non executes, ADR-020 propose. **Quatre sont leves depuis une quarantaine de sessions** — H1 et
-H3 en S20, C01 en S22 et S36, ADR-020 actee en S19 — et rien ne l avait signale. Un lecteur y
-voyait un banc hors d atteinte.
-
-Et la cinquieme ligne etait mal qualifiee, ce qui compte davantage : C02 n est pas non execute,
-il est **inexecutable** — les deux delta d essai sont non dispersifs, et le milieu a dispersion
-exacte de S39 declare lui-meme ne pas etre un solveur delta, sa dispersion etant exacte par
-construction. Ce qui manque est une couche dispersive du projet, une dependance de conception.
-Tableau corrige, avec une colonne *constate* qui date chaque ligne.
-
-P5 : PRESCRIPTIONS-S63 ecrit. Trois recettes confrontees a l execution, trois fautives, par trois
-mecanismes : fausse des l ecriture (A181), prescrite sans etre chiffree (S60-1), **perimee en
-silence** (A185, nouveau). Aucune autre recette non eprouvee dans le corpus. Regle ajoutee au
-rituel REPRISE par.6 point 5 : un etat recopie se perime comme un decompte, et le remede n est pas
-de tout relire mais de **dater**. Colonne *constate* ajoutee au tableau de B2.
-
-P6 : rituel exécuté. Journal S63, A185 (sévérité 2, corrigé), L181, S59-1 close, S63-1 ouverte
-et signalée comme la plus lourde. Index et REPRISE : angles 184 vers 185, registres 15 vers 16.
-Tests inchangés a 130, aucun code modifié. Règle ajoutée au rituel REPRISE par.6 point 5.
-Jeton libre. Reste la fusion dans master.
+Interdits : ne pas changer la fenêtre nominale sans ADR (elle déplace un chiffre publié), ne pas
+toucher aux tolérances, ne pas rendre le cas vert en élargissant la marge.
