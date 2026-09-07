@@ -68,7 +68,7 @@ Objectif         : Exécuter le couple d'oracles 76800/153600 selon REFERENCE-C2
 ### Plan
 
 - [x] **P1** — état réel, prise du jeton, plan seul.
-- [ ] **P2** — vérifier les tests et compiler en release avant toute mesure ; aucun changement de montage.
+- [x] **P2** — vérifier les tests et compiler en release avant toute mesure ; aucun changement de montage.
 - [ ] **P3** — exécuter `c22-shallow-fin 76800`, consigner erreurs, écart d'oracles, temps ; appliquer le filtre ×30 sans l'assouplir.
 - [ ] **P4** — rédiger MESURES-C22-S57 : admission de 12800, verdict des quatre fenêtres, déplacement éventuel des sept anciennes grilles, budget révisé.
 - [ ] **P5** — rituel : journal, angles, leçons, actions, index, décomptes, passation et jeton.
@@ -87,3 +87,7 @@ le verdict d'admission : c'est précisément ce que cette mesure tranche.
 Interdits rappelés par le protocole : pas de doublement automatique si 12800 est refusée,
 pas de champ sur disque (I-17), pas d'extrapolation de Richardson du champ, aucun changement
 de CFL, amplitude, temps final ou initialisation.
+
+P2 : socle vérifié avant mesure, aucun fichier de code touché. 123 tests réussis
+(38 cœur + 85 harnais), deux ignorés ; release compilée. check vert, hashs
+0x3e2c06a7b00e73e3 et 0x1a8b0629a9f51b6e inchangés. Mesure P3 lancée sans test concurrent.
