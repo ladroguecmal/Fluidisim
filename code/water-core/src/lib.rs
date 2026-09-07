@@ -13,6 +13,11 @@
 //! le solveur du projet : ce choix appartient au banc B3 (ADR-007 §5). Ni `W`, ni `V` n'existent
 //! encore, et chacun attend son banc.
 //!
+//! **S39 y ajoute `dispersif.rs`**, un milieu linéaire à **dispersion exacte** — ni dissipation,
+//! ni erreur de phase — et `eponge.rs`, le profil d'`ADR-005 §2` écrit une fois pour tous ses
+//! porteurs. Le milieu dispersif n'est pas un solveur candidat : c'est un **instrument**, celui qui
+//! a rétracté `ADR-042` (voir `ADR-046`). Importés de la lignée B à la réconciliation de B-S27.
+//!
 //! **S35 y ajoute `shallow.rs`**, une **seconde implémentation du même modèle**, écrite
 //! indépendamment dans une histoire parallèle du dépôt et importée à la réconciliation du fork.
 //! Elle n'est pas redondante : deux implémentations du même modèle forment le seul **oracle
@@ -28,6 +33,8 @@
 pub mod background;
 pub mod body;
 pub mod delta;
+pub mod dispersif;
+pub mod eponge;
 pub mod hash;
 pub mod host;
 pub mod phase;
@@ -37,6 +44,7 @@ pub mod types;
 pub use background::{Background, Component, SeaState};
 pub use body::{FloatingBox, RHO_EAU};
 pub use delta::{Bassin, Definition, Delta1D, EtatInitial, ParoiMobile};
+pub use dispersif::MilieuDispersif;
 pub use hash::Hasher64;
 pub use host::{AllocError, AllocStats, Allocator, HostServices, JobSystem, Sink};
 pub use phase::PhaseQ32;

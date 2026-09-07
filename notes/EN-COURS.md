@@ -109,7 +109,7 @@ donnait 1,5 pour mille.
 - [x] **P4** — leçons **L150–L152**, angles morts **A166–A167** *(deux de sévérité 1)*.
 - [x] **P5** — **ce que la rétractation déplace chez moi** : note corrective datée sur `ADR-042`,
       vérification de `ADR-043` D1, et `DOSSIER-B2` §3.1 bis qui s'appuyait dessus.
-- [ ] **P6** — le code : `dispersif.rs` et `eponge.rs`. **Attention** : `eponge.rs` factorise le
+- [x] **P6** — le code : `dispersif.rs` et `eponge.rs`. **Attention** : `eponge.rs` factorise le
       profil qui vit dans `shallow.rs`, que S38 a instrumenté. Compiler, puis les 77 tests.
 - [ ] **P7** — **le procédé** : trois épisodes du même fork, et le remède écrit à chaque fois dans
       une seule branche. Écrire ce qui aurait marché, **et le répliquer des deux côtés le jour même**.
