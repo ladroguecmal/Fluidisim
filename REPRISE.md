@@ -1,8 +1,14 @@
 # REPRISE — à lire en premier, en entier
 
-Ce document permet à **n'importe quelle session** — un autre compte Claude, une autre machine, une
-personne — de reprendre le projet sans rien connaître de ce qui précède. Il est autoportant : tout
-ce qui est nécessaire est ici ou pointé depuis ici.
+Ce document permet à **n'importe quelle session** de reprendre le projet sans rien connaître de ce
+qui précède — un autre compte, une autre machine, **un autre agent** (Claude, ChatGPT, Codex, un
+autre modèle), ou une personne. Il est autoportant : tout ce qui est nécessaire est ici ou pointé
+depuis ici.
+
+**L'amorce est [`AGENTS.md`](AGENTS.md)**, et elle n'existe qu'à cet endroit : `CLAUDE.md` n'en est
+qu'un renvoi, parce que chaque outil lit automatiquement un nom de fichier différent. *Un renvoi
+d'une ligne, jamais une copie* — le dépôt a forké trois fois pour avoir dupliqué une procédure
+(**L137**).
 
 Il est mis à jour à la fin de chaque session. Si son contenu contredit une mémoire privée ou un
 souvenir de conversation, **c'est lui qui fait foi**.
@@ -14,6 +20,7 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ```
 JETON            : libre
 Battement        : 2026-09-07
+Agent            : —
 Session en cours : —
 Dernière session : S43 — 2026-09-07 — un solveur qui ne converge pas recevait l'ordre 1
 Session suivante : S44 — **inventorier les valeurs de repli après mesure** (S43-1) *(recommandé)* — deux trouvées par hasard, sévérité 1 chacune
@@ -38,6 +45,16 @@ Session suivante : S44 — **inventorier les valeurs de repli après mesure** (S
 | `occupé` + battement ancien (> 2 h) | session présumée interrompue | passer à `interrompu`, puis reprise à chaud (§7) |
 | `interrompu` | interruption constatée | reprise à chaud (§7) |
 | `archivé` | **branche conservée pour son historique**, réconciliée ailleurs | **ne pas travailler ici** ; le jeton dit où est la branche vivante |
+
+**La ligne `Agent` a été ajoutée le 2026-09-07**, quand le projet s'est ouvert aux agents autres que
+Claude. Elle dit **qui travaille**, et ce n'est pas une formalité : la session suivante doit savoir
+quels outils étaient disponibles — un agent sans `cargo` ne peut pas avoir vérifié les tests, un
+agent sans `git` n'a pas pu committer ses étapes. Écrire *« Claude Code »*, *« ChatGPT »*,
+*« Codex »*, ou le nom de la personne.
+
+> **Le jeton ne distingue pas les fournisseurs, et il n'a pas à le faire : il distingue les copies
+> de travail.** Deux agents différents se marchent dessus exactement comme deux sessions du même
+> agent, et un agent qui ouvre une copie isolée reforke, quel que soit son nom.
 
 **L'état `archivé` a été ajouté en S39, après le troisième épisode du même fork.** Les deux premiers
 venaient d'une ignorance ; le troisième est venu d'une **conservation délibérée** — une branche

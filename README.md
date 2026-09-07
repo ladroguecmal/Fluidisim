@@ -5,14 +5,15 @@ existe pour que le travail survive au changement de conversation, de session et 
 
 ## Entrer
 
-- **Vous reprenez le projet** (autre session, autre compte, autre personne) →
+- **Vous reprenez le projet** (autre session, autre compte, **autre agent**, autre personne) →
   **[`REPRISE.md`](REPRISE.md)**, à lire en entier avant toute action.
 - **Vous cherchez une décision ou une donnée** → [`docs/00_INDEX.md`](docs/00_INDEX.md)
 
 ## Organisation
 
 ```
-CLAUDE.md              amorce : dirige toute session vers REPRISE.md
+AGENTS.md              **l'amorce** — le seul texte, quel que soit l'agent qui lit
+CLAUDE.md              renvoi d'une ligne vers AGENTS.md (Claude Code lit ce nom-là)
 REPRISE.md             passation : rôle, état, rituel de fin de session, jeton
 docs/
   00_INDEX.md          point d'entrée, état d'avancement, arbitrages en attente
@@ -43,6 +44,10 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
   fin décrit dans [`REPRISE.md`](REPRISE.md) §6.
 - **Une seule session travaille à la fois** : le jeton en tête de `REPRISE.md` en tient le compte,
   avec trois états — `libre`, `occupé`, `interrompu`.
+- **Une seule amorce, [`AGENTS.md`](AGENTS.md)**, quel que soit l'agent — Claude, ChatGPT, Codex,
+  un autre modèle, ou une personne. Les autres noms de fichier d'amorce sont des **renvois d'une
+  ligne**, jamais des copies : deux amorces qui se ressemblent divergeront, et chaque agent suivra
+  alors la sienne (**L137**).
 - **Avant de regarder le jeton : `git worktree list` et `git branch -a`.** Le jeton est un fichier
   **versionné** : il est propre à une branche et à une copie de travail, et ne dit rien de ce qui
   se passe ailleurs. Le dépôt a forké **deux fois** par ce mécanisme — voir

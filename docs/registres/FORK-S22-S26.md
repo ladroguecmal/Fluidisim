@@ -255,3 +255,32 @@ son seul rôle — mais **elle dit maintenant ce qu'elle est** à qui l'ouvre.
 > pas écrit tant qu'il n'est pas écrit **partout où il doit être lu**. Et une action de réplication
 > confiée à « l'utilisateur » n'a pas de porteur : c'est la session qui constate le fork qui doit la
 > faire, dans la même séance, ou dire explicitement qu'elle ne l'a pas faite.
+
+### 9.5 L'amorce déplacée dans `AGENTS.md` — 2026-09-07
+
+**L'utilisateur a demandé que le projet puisse être repris par d'autres agents que Claude.** Le
+dispositif n'en dépendait déjà pas — il repose sur des fichiers versionnés et sur `git` — mais
+**le fichier d'amorce portait un nom de fournisseur**, et chaque outil lit automatiquement un nom
+différent.
+
+La tentation évidente était d'écrire un second fichier d'amorce à côté du premier. **C'est
+exactement ce que ce registre interdit** : trois forks, et le troisième parce que le correctif du
+premier vivait dans une seule branche (**L137**). Deux amorces qui se ressemblent aujourd'hui
+divergeront, et chaque agent suivra alors la sienne — le même mécanisme, transposé des branches aux
+fichiers.
+
+| | |
+|---|---|
+| **`AGENTS.md`** | **le texte**, neutre, seul endroit où l'amorce existe |
+| `CLAUDE.md` | un renvoi de quatre lignes, qui dit *ne recopie rien ici* |
+| tout autre nom à venir | un renvoi, créé par l'agent qui en a besoin, **jamais une copie** |
+
+**Et une ligne `Agent` au jeton.** Elle ne sert pas à discriminer : le jeton distingue des **copies
+de travail**, pas des fournisseurs, et un agent qui ouvre une copie isolée reforke quel que soit son
+nom. Elle sert à dire **quels outils étaient disponibles** — un agent sans `cargo` n'a pas pu
+vérifier les tests, un agent sans `git` n'a pas pu committer ses étapes, et la session suivante doit
+le savoir sans avoir à le deviner.
+
+> **Ce que cette ouverture ne change pas** : deux agents différents se marchent dessus exactement
+> comme deux sessions du même agent. Les deux commandes d'amorce restent le seul dispositif qui ait
+> tenu — trois fois.
