@@ -69,8 +69,8 @@ Objectif         : S60-1 — atteindre le régime où l'erreur d'une grille pass
 ### Plan
 
 - [x] **P1** — passation, jeton, plan seul.
-- [ ] **P2** — chiffrer l'expérience prescrite avant de la lancer, et établir si le régime visé est atteignable dans ce dispositif.
-- [ ] **P3** — si non : dériver ce que le filtre ×30 exige réellement, et **le vérifier contre les cinq campagnes historiques**, dont les refus sont connus.
+- [x] **P2** — chiffrer l'expérience prescrite avant de la lancer, et établir si le régime visé est atteignable dans ce dispositif.
+- [x] **P3** — si non : dériver ce que le filtre ×30 exige réellement, et **le vérifier contre les cinq campagnes historiques**, dont les refus sont connus.
 - [ ] **P4** — conclure : note corrective datée sur ADR-049 D4, et ce qui remplace l'expérience impossible.
 - [ ] **P5** — appliquer au code ce qui doit l'être, avec essais de refus et témoins.
 - [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
@@ -98,3 +98,13 @@ Piste ouverte par le même calcul : si le rapport `e/écart` ne dépend que du *
 oracle/grille**, alors le filtre ×30 équivaut à une condition **géométrique**, connue d'avance et
 sans aucune mesure — et les quatre campagnes de S48 à S57 auraient pu savoir leur résultat avant
 de calculer. À vérifier contre les refus réellement observés, qui sont tous consignés.
+
+P2/P3 : GEOMETRIE-DU-FILTRE-S61. Treize points de cinq campagnes, oracles de 3200 a 89600 :
+ratio = 2,011 k^1,902 o^-0,058, ecart max 23,5 pour cent. La taille d oracle ne compte presque
+pas. Identite sous-jacente : ratio = k^p / (1 - 2^-p). Le filtre x30 equivaut a k >= 5,6 a 6,0,
+soit un oracle six fois plus fin que la grille la plus fine ; l historique 2, 4, 6, 7 s y range
+sans exception. **S60-1 est dissoute** : ratio < 1 demande k = 1, l emboitement exige k >= 2.
+Mon propre chiffrage de P1 (72 h) etait faux — exposant local 1,596 extrapole sur cinq decades,
+alors que le global vaut 1,9 ; la conclusion se durcit, impossible et non couteux. A183 :
+le seuil d admission d une mesure d ordre est fonction de l ordre. L uniformite du biais, elle,
+est etablie sans regime extreme : colonne variation plate a 2 pour cent sur un facteur 256.
