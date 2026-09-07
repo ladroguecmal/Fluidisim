@@ -68,8 +68,8 @@ Objectif         : Stratégie de référence et budget pour la fenêtre C22 800�
 ### Plan
 
 - [x] **P1** — état réel, passation et plan seul.
-- [>] **P2** — ajouter une fenêtre fine dédiée sans changer les modes existants ; vérifier les admissions et compiler.
-- [ ] **P3** — mesurer 800–12800 avec les références 51200/102400, filtre inchangé ; établir le budget du couple suivant et ses critères de passage.
+- [x] **P2** — ajouter une fenêtre fine dédiée sans changer les modes existants ; vérifier les admissions et compiler.
+- [>] **P3** — mesurer 800–12800 avec les références 51200/102400, filtre inchangé ; établir le budget du couple suivant et ses critères de passage.
 - [ ] **P4** — rituel : journal, actions, enseignements éventuels, index, passation et jeton libre.
 
 ### Notes de reprise

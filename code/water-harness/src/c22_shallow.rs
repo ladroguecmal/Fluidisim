@@ -48,11 +48,15 @@ fn erreur(h: &[f64], oracle: &[f64]) -> Result<f64, String> {
 }
 
 pub fn campagne(nx_oracle: usize) -> Result<usize, String> {
-    mesurer(nx_oracle, false)
+    mesurer(nx_oracle, 1)
 }
 
 pub fn fenetres(nx_oracle: usize) -> Result<usize, String> {
-    mesurer(nx_oracle, true)
+    mesurer(nx_oracle, 3)
+}
+
+pub fn fine(nx_oracle: usize) -> Result<usize, String> {
+    mesurer(nx_oracle, 4)
 }
 
 fn famille(mesures: &[(usize, f64)], seuil: f64, debut: usize) -> Vec<(usize, f64)> {
@@ -60,17 +64,25 @@ fn famille(mesures: &[(usize, f64)], seuil: f64, debut: usize) -> Vec<(usize, f6
         .take_while(|(_, e)| e.is_finite() && *e >= seuil).collect()
 }
 
-fn mesurer(nx_oracle: usize, plusieurs: bool) -> Result<usize, String> {
-    let grilles = [100, 200, 400, 800, 1600, 3200, 6400];
-    if nx_oracle < 3200 || nx_oracle > 51200 || nx_oracle % 1600 != 0 {
+fn mesurer(nx_oracle: usize, fenetres: usize) -> Result<usize, String> {
+    let grilles = [100, 200, 400, 800, 1600, 3200, 6400, 12800];
+    if fenetres == 4 {
+        if nx_oracle <= 12800 || nx_oracle > 76800 || nx_oracle % 12800 != 0 {
+            return Err("fenêtre fine : oracle multiple de 12800, entre 25600 et 76800".into());
+        }
+    } else if nx_oracle < 3200 || nx_oracle > 51200 || nx_oracle % 1600 != 0 {
         return Err("oracle attendu : multiple de 1600, entre 3200 et 51200".into());
     }
-    if plusieurs && (nx_oracle <= 6400 || nx_oracle % 6400 != 0) {
+    if fenetres > 1 && (nx_oracle <= 6400 || nx_oracle % 6400 != 0) {
         return Err("fenêtres : oracle multiple de 6400, strictement supérieur à 6400".into());
     }
     let debut = std::time::Instant::now();
+    println!("Calcul oracle {nx_oracle}...");
     let o1 = champ(nx_oracle, 0.01, 1.0)?;
+    let cout_o1 = debut.elapsed().as_secs_f64();
+    println!("Oracle {nx_oracle} : {cout_o1:.3} s ; calcul oracle {}...", 2*nx_oracle);
     let o2 = champ(2*nx_oracle, 0.01, 1.0)?;
+    println!("Oracle {} : {:.3} s", 2*nx_oracle, debut.elapsed().as_secs_f64()-cout_o1);
     let ecart_oracles = erreur(&o1, &o2)?;
     // Plancher de sommation conservateur en f64 : n opérations, erreur relative n*epsilon.
     let plancher = o2.len() as f64 * f64::EPSILON;
@@ -78,7 +90,7 @@ fn mesurer(nx_oracle: usize, plusieurs: bool) -> Result<usize, String> {
     println!("oracles {nx_oracle}/{} : écart L1 = {ecart_oracles:.9e}", 2*nx_oracle);
     println!(" nx       erreur/oracle1   erreur/oracle2    variation       séparée");
     let mut mesures = Vec::new();
-    for n in grilles.into_iter().take(if plusieurs { 7 } else { 5 }) {
+    for n in grilles.into_iter().take(fenetres + 4) {
         let h = champ(n, 0.01, 1.0)?;
         let e1 = erreur(&h, &o1)?;
         let e2 = erreur(&h, &o2)?;
@@ -91,7 +103,7 @@ fn mesurer(nx_oracle: usize, plusieurs: bool) -> Result<usize, String> {
     }
     let mut bilan = Bilan::default();
     // Fenêtres fixées avant mesure ; champs/oracles calculés une seule fois, sans fichier.
-    for debut in 0..if plusieurs { 3 } else { 1 } {
+    for debut in 0..fenetres {
         let c = Convergence { grandeur: "C22 shallow, HLL MUSCL+RK2, deux oracles".into(),
             erreurs: famille(&mesures, 30.0*ecart_oracles, debut), plancher,
             reference: Reference::Oracle };
@@ -116,6 +128,7 @@ mod tests {
         assert_eq!(famille(&m,0.0,2),m[2..]);
         assert!(fenetres(9600).is_err());
         assert!(fenetres(6400).is_err());
+        for n in [0, 12800, 32000, 89600, usize::MAX] { assert!(fine(n).is_err()); }
     }
     #[test]
     fn projection_conservative_et_refus() {
