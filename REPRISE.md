@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-07 19:26 +02:00
+JETON            : occupé
+Battement        : 2026-09-07 19:30 +02:00
 Agent            : Codex (git et cargo disponibles)
-Session en cours : —
+Session en cours : S54
 Dernière session : S53 — 2026-09-07 — admission des grilles C22 corrigée
 Session suivante : S54 — entrées vides des garde-fous (S43-2)
 ```
