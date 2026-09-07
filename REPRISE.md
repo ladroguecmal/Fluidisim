@@ -18,18 +18,19 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 01:52 +02:00
+JETON            : libre
+Battement        : 2026-09-08 01:57 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S71
-Dernière session : S70 — 2026-09-08 — ADR-053 actée : le projet passe à la construction
-Session suivante : S71 — **B1**, le banc du champ de fond (S70-1)
+Session en cours : aucune
+Dernière session : S71 — 2026-09-08 — construction validée, dépendances corrigées
+Session suivante : S72 — WaveEvent, contrat et code de validation (S70-2 / W1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
-**B1 → arrêter `WaveEvent` → écrire `W`** → C02, `λ_cut`, **B2**. `W` est la couche dispersive
-que S63-1 cherchait depuis S22 ; quatre besoins indépendants la désignent. `δ`, solveur 3D, reste
-la pièce la plus lourde et ne commence pas ici.
+**Ordre corrigé S71 par ADR-054** : `WaveEvent` → journal rejouable → impact propagé →
+sillage/intégration → B2. B1 contribue au budget B+W sans bloquer W. Premier candidat
+analytique CPU en milieu uniforme ; sélection finale encore ouverte. La référence dispersive
+exacte seule ne fixe pas la coupure W/δ. C19 complet exige aussi V. Aucun lot W écrit en S71.
 
 **Bilan S69, et il change l'ordre des priorités.** ~85 % comme corpus de conception, **~15 %
 comme système** : `δ`, `W` et `V` n'existent pas. **Onze cas sur 23 et onze bancs sur onze
@@ -136,7 +137,7 @@ n'interviennent pas dans la conception.
 | **Publier dans le dépôt** | une réponse conversationnelle non archivée est une perte sèche |
 | **Markdown uniquement** | pas de page HTML publiée, pas d'artefact — demandé explicitement après S01 |
 | **Français, concis, factuel** | pas de reformulation, pas de remplissage ; le fond va dans les fichiers, pas dans le message |
-| **Signaler, ne pas trancher** | les décisions qui engagent le design ou une autre équipe remontent à l'humain (§5) |
+| **Autonomie technique (S71)** | arbitrages délégués ; distinguer les décisions des faits externes encore non constatés (§5) |
 
 Le protocole de conception détaillé est dans `notes/METHODE.md`. Les enseignements accumulés sont
 dans `notes/LECONS.md` — les lire avant de commencer fait gagner du temps, plusieurs y sont des
@@ -147,7 +148,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 17 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 52 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 54 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -166,6 +167,10 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S71 — 2026-09-08 :** ADR-054 confirme construction et priorité W, corrige les dépendances
+de S70 et définit les lots avec réception. Aucun code modifié ; prochaine production W1.
+54 ADR, 189 angles morts, 17 invariants inchangés. Journal S71 et ADR-054 font foi.
 
 **S68 — 2026-09-08 :** ADR-052 sépare précision spatiale et diagnostic statistique.
 Scores phase 0,227536/0,650281, diagnostics inchangés et sans verdict. S66-1 close ;
@@ -678,6 +683,11 @@ H3 aurait hérité du défaut, et le harnais l'aurait certifié stable.
 Détail à jour : `docs/00_INDEX.md`, section « État d'avancement ».
 
 ## 5. Ce qui n'est pas à toi de décider
+
+**Actualisation S71 — 2026-09-08 :** l’utilisateur délègue explicitement la validation
+d’ADR-053 et les arbitrages techniques. Ne plus renvoyer ces décisions aux développeurs
+observateurs. Les faits d’intégration non constatés et les actions d’infrastructure restent
+distincts de cette autonomie. ADR-054 remplace l’ordre technique de S70.
 
 **Mise à jour S45 :** les treize chemins de refus sont suivis. C02 conservait zéro assertion
 sans passages par zéro ; C10 ignorait les points invalides dans son maximum. Ces deux défauts

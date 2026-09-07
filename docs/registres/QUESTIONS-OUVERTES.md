@@ -813,3 +813,14 @@ S64-2 est la suite S69 recommandée ; aucune calibration de Hs effectuée ici. S
 > Les actions de harnais encore ouvertes ne disparaissent pas — elles cessent d'être prioritaires
 > (ADR-053 D4).
 
+
+### Révision S71 — 2026-09-08, ADR-054 fait foi sur l’ordre S70 ci-dessus
+
+| Action | État actualisé | Prochaine production |
+|---|---|---|
+| S70-1 | Ouverte, B1 complet non exécutable ; retirée des préalables de W | Mesure CPU partielle puis volets LOD/perception, sans conclure N final sur le CPU seul |
+| S70-2 | Priorité S72, lot W1 | Contrat versionné, bornes par événement, code de validation et vecteurs d’encodage ; ADR si signature modifiée |
+| S70-3 | Ouverte, lots W2 à W4 puis comparaison B2 | Journal rejouable, impact propagé, sillage et intégration ; premier candidat CPU analytique |
+| S63-1 | Ouverte | Couche dispersive construite et contrôlée ; référence exacte seule insuffisante pour fixer λ_cut |
+
+Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif pour bloquer W.

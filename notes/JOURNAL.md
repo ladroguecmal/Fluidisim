@@ -5502,3 +5502,20 @@ calendrier : l'état réel du projet reste hors de portée d'une session.
 arrêter `WaveEvent`, puis écrire `W`. A103 close en S58 ; l'état réel et l'infrastructure restent
 hors de portée, aucun distant créé.
 
+
+## S71 — 2026-09-08 — Construction validée, faux préalables retirés
+
+**Entrée :** demande de validation autonome d’ADR-053 ; master et copie 29ef50 à 14b4b7a.
+**Décision :** ADR-054 actée par délégation technique. Construction et priorité W confirmées.
+B1 informe le budget sans bloquer WaveEvent. V dispose de C12 sans δ ; C19 entier exige aussi V.
+A187 est expliqué depuis S67. Une loi dispersive exacte ne valide pas la coupure numérique de δ.
+**Sortie :** cinq lots avec réception : événement, journal, propagation, intégration, sélection B2.
+Premier candidat CPU analytique à milieu uniforme, sans prétendre avoir gagné B2.
+**Chiffres :** B1 demande 32/64/128/256 composantes et des volets LOD/perceptuels absents ;
+50 octets de champs WaveEvent ne fixent pas encore un protocole évolutif.
+**Validation :** comparaison des décisions aux invariants et protocoles, liens locaux et diff.
+Aucun code changé ; tests non relancés, dernier état rapporté S68 : 137 réussis, cinq ignorés.
+**Apprentissage :** A189, L185. Aucun lot W implémenté, aucun banc supplémentaire validé.
+**Suite S72 :** S70-2 / W1, contrat versionné et code de validation des événements.
+S70-1 reste partielle à construire ; S70-3 et S63-1 restent ouvertes. Pas d’arbitrage technique
+renvoyé à une équipe ; état réel moteur/protocole/matériel cible toujours non constaté.

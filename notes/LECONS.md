@@ -3000,3 +3000,11 @@ ils expliquaient le résidu ; raffiner les points ne pouvait pas les faire dispa
 **Réflexe :** pour dimensionner une moyenne quadratique, examiner les fréquences de ses
 produits et pas seulement celles du signal. Séparer résolution des oscillations et étendue
 nécessaire pour moyenner les battements. Une grille convergée en pas peut rester trop courte.
+
+## L185 — Une dépendance de budget ne détermine pas un ordre de construction
+
+*(S71)* Deux composants consomment une enveloppe commune ; cela impose de mesurer leur coût
+ensemble avant réception. Cela ne prouve pas que le premier doive être entièrement calibré
+avant que le second existe. Nommer ce qui traverse la dépendance : donnée, signature,
+ressource ou preuve. Un préalable qui ne fournit aucune entrée nécessaire peut être un jalon
+ultérieur. Vérifier aussi qu’un banc annoncé exécutable ne possède pas de volets encore absents.

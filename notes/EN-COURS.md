@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S71 — en cours
+Session : S71 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : valider ou rejeter ADR-053 sur délégation explicite de l’utilisateur,
 et rendre la trajectoire de construction concrète, avec critères de réception.
@@ -67,7 +67,7 @@ et rendre la trajectoire de construction concrète, avec critères de réception
 
 - [x] **P1** — lire la passation, vérifier les copies, prendre le jeton et committer le plan seul.
 - [x] **P2** — décision ADR-054 : construction confirmée, dépendances corrigées et lots W recevables.
-- [ ] **P3** — rituel : journal, leçon, angle mort, actions, index, passation et copies synchronisées.
+- [x] **P3** — rituel : journal, leçon, angle mort, actions, index, passation et copies synchronisées.
 
 ### Notes de reprise
 

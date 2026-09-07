@@ -17,6 +17,11 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S71 :** [ADR-054 — Construire W sans faux préalable](adr/ADR-054-construire-w-sans-faux-prealable.md),
+**ACTÉE sur délégation technique**, confirme la construction et remplace l’ordre technique
+d’ADR-053 : WaveEvent, journal, propagation, intégration, comparaison B2. B1 ne bloque pas W.
+54 ADR, 189 angles morts. Aucun code ajouté en S71 ; prochaine production S70-2 / W1.
+
 ### Socle *(S01)*
 
 | ADR | Sujet | Statut | Sections sources traitées |
@@ -90,7 +95,7 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 | [045](adr/ADR-045-la-saturation-est-un-detecteur-pas-un-filet.md) | **La saturation d'état est un détecteur de divergence, pas un filet** | proposée | **zéro déclenchement** en régime nominal · la frontière tombe sur la **condition de Courant** · un seuil de sec ne coupe pas le flux de masse (**A165**) · clôt S34-1 et S37-3, **requalifie A146** |
 | [048](adr/ADR-048-la-masse-volumique-est-une-propriete-du-milieu.md) | **La masse volumique est une propriété du milieu** | proposée | tranche **A103** sur délégation, ouvert depuis S21 · la valeur du projet est **1025** · la constante globale devient `Milieu` — l'estuaire est le cas qu'elle rendait inexprimable · **C10 est aveugle à `ρ` : quatre assertions vertes aux deux valeurs** · ouvre **A180** |
 | [050](adr/ADR-050-le-filtre-de-contamination-est-une-condition-geometrique.md) | **Le filtre de contamination est une condition géométrique** | proposée | `ratio = k^p/(1 − 2^-p)` — le filtre ×30 équivaut à **`k ≥ 6`**, lisible avant tout calcul · **dissout S60-1** : le régime visé demande `k ≈ 1`, l'emboîtement impose `k ≥ 2` · ouvre **A183** : le seuil d'admission d'une mesure d'ordre est fonction de l'ordre |
-| [053](adr/ADR-053-le-projet-passe-a-la-construction.md) | **Le projet passe à la construction, et il commence par W** | **ACTÉE (S70)** — arbitrage de l'utilisateur | `W` désignée par **quatre besoins indépendants** : la couche dispersive de **S63-1**, C07 et C19, un coût analytique contre un solveur 3D, et l'urgence `WaveEvent` · **B1 d'abord**, par dépendance |
+| [053](adr/ADR-053-le-projet-passe-a-la-construction.md) | **Le projet passe à la construction, et il commence par W** | **ACTÉE (S70)** — arbitrage de l'utilisateur | `W` désignée par **quatre besoins indépendants** : la couche dispersive de **S63-1**, C07 et C19, un coût analytique contre un solveur 3D, et l'urgence `WaveEvent` · ordre remplacé par ADR-054 (S71) |
 | [051](adr/ADR-051-la-fenetre-de-Hs-passe-a-3072-m-et-le-cas-y-perd-du-pouvoir.md) | **La fenêtre de `Hs` passe à 3072 m, et le cas y perd du pouvoir** | proposée | clôt **S62-1**, dont **les deux motifs de report étaient faux** · 8,528 % → **0,282 %**, et le cas qui échouait à `tp = 9 s` passe · tolérance conservée, **marge réelle de 1,5 à 9,7 points** · ouvre **A186** et **A187** |
 | [052](adr/ADR-052-separer-phase-et-statistique.md) | Séparer précision de phase et statistique locale | proposée | S66-1 close ; ratio diagnostique, borne arithmétique et défaut injecté |
 | [049](adr/ADR-049-le-filtre-de-contamination-n-est-pas-mal-calibre-il-est-mal-attribue.md) | **Le filtre de contamination est mal attribué, pas mal calibré** | proposée | clôt **S57-2** **sans changer le critère** · l'invariance à l'oracle ne refuse pas une contamination flagrante — 5,1e-3 pour des erreurs fausses de 5,2 % · mais l'ordre de S59 était mesurable en S56 à **3,29e-5** près, 1987,7 s plus tôt · requalifie **A179**, ouvre **A182** |
@@ -148,7 +153,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`registres/BILAN-S69.md`](registres/BILAN-S69.md) | **bilan d'avancement** — ~85 % comme corpus de conception, **~15 % comme système** ; **onze cas sur 23 et onze bancs sur onze attendent une couche non écrite** ; **B1 est le seul banc exécutable et n'a jamais été lancé** |
 | [`registres/PRESCRIPTIONS-S63.md`](registres/PRESCRIPTIONS-S63.md) | **les prescriptions non éprouvées** — trois genres, dont un seul se vérifie ; **trois recettes mises à l'épreuve, trois fautives** ; les préalables de B2 périmés depuis quarante sessions (**A185**) |
 | [`registres/AUDIT-REFERENCES-S62.md`](registres/AUDIT-REFERENCES-S62.md) | **ce qu'une référence peut voir bouger** — 41 références, trois degrés, **une seule tautologie** ; `Hs` aveugle à `hs` et gouverné par sa fenêtre, première mesure d'**A102** ; la fenêtre était hors du scénario (**A184**) |
-| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **188 points**, avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
+| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **189 points**, avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
 | [`registres/FORK-S22-S26.md`](registres/FORK-S22-S26.md) | **le second fork** — constat, carte de renumérotation complète, la règle manquante, et ce qui reste à fusionner |
 | [`registres/AUDIT-ASSERTIONS-S29.md`](registres/AUDIT-ASSERTIONS-S29.md) | **ce que chaque assertion peut voir** — 23 cas classés, 5 fautifs, 1 mesure du harnais retirée ; **réécriture S30 sans aucun seuil inventé** |
 | [`registres/AUDIT-REPLIS-S44.md`](registres/AUDIT-REPLIS-S44.md) | **les valeurs de repli, inventoriées** — 49 recensées, deux fautives ; *quand la grandeur est un écart, zéro est son meilleur point* |

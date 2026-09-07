@@ -1518,3 +1518,9 @@ resserrée. Voir SPECTRE-DENSE-S67 et L184. Le présent suivi supplante la cause
 statistique sans verdict et la précision spatiale directement bornée, avec défaut injecté.
 Refus statistique non fini conservé. Les mesures statistiques ne sont pas déclarées validées.
 S66-1 close ; voir CONTROLES-S68.
+
+- **A189** *(sévérité 2, S71 ; traité par ADR-054)* — **Un budget partagé devient un faux
+  préalable de construction.** ADR-053 imposait B1 avant WaveEvent au motif du coût B+W,
+  alors que B1 complet exige aussi LOD et évaluation perceptuelle. L’ordre aurait arrêté W
+  derrière des composants absents. Coût partagé signifie réception commune du budget,
+  pas dépendance des identités et unités d’événements. Première étape W1 désormais explicite.
