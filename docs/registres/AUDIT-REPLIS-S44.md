@@ -181,3 +181,43 @@ les échecs déjà présents (dont C04 ordre un). Aucun solveur ni seuil modifi�
 
 **S44-2 est close.** Le statut `Observe(NaN)` de C08 reste une dette de représentation,
 sans succès indu sur ce chemin ; son traitement est porté par S45-1.
+
+## 8. Le refus jusqu'au bilan C08 — S46, 2026-09-07
+
+**S45-1 close.** `Convergence::ordre` refuse les entrées et résultats non finis, y compris
+un rapport qui déborde à partir d'entrées finies. Les ordres négatifs finis restent observés
+(ADR-032 §5). Les seuils d'arrondi et d'asymptoticité ne changent pas.
+
+Deux essais échouaient avant correction : `Observe(NaN)` et une série dont les triplets refusés
+étaient retirés avant le contrôle de stabilité. La seconde était déclarée stable : retirer
+des trous construit une autre famille. `asymptotique` rend désormais `None` si un triplet de
+la famille n'est pas exploitable ; il ne recolle plus les seuls ordres observés.
+
+Le rapport principal utilisait deux classifications différentes. Elles sont remplacées par
+`rapport_convergence::Bilan`, appelé pour chaque famille :
+
+| Mesure et contexte | Classe dans le bilan |
+|---|---|
+| Cas régulier, stabilité établie, p > 0,8 | succès |
+| Cas régulier, stabilité établie, p ≤ 0,8 | échec |
+| Stabilité fausse ou non établie | sans verdict, cause affichée |
+| Triplet indéterminé ou plancher d'arrondi | sans verdict, cause affichée |
+| Cas singulier, même stabilisé | diagnostic sans verdict de validation |
+
+**Chaque famille compte exactement une fois.** Le bilan imprime systématiquement succès,
+échecs et sans-verdict, dont la somme donne le total. Un plancher n'est pas une preuve d'ordre ;
+un refus n'est pas un ordre nul. Ce traitement applique l'énoncé amendé de C08 (S26), sans
+modifier une décision d'architecture.
+
+**Portée :** les quatre familles delta sur C04 et la famille régulière C22 dans le rapport
+principal. Le montage hérité `physics_shallow::c08_convergence` conserve sa paire C08-p /
+C08-coherence : il mesure Ritter sur trois grilles et applique toujours un seuil. Cette
+différence avec l'énoncé amendé mérite son propre traitement (S46-1), pas une attribution
+de validation globale à cette correction.
+
+**Validation S46.** 101 tests réussis (38 cœur + 63 harnais), deux ignorés ; sept tests ciblés
+incluant les refus, les témoins et dix familles de rapport. check : zéro échec, deux hashs
+inchangés. Comparaison avant/après : 56 lignes de mesures, assertions et suites C08 identiques.
+Le bilan principal passe à **5 grandeurs, 0 succès, 0 échec, 5 sans verdict** : le cas régulier
+(p = 0,82, stabilité inconnue) n'était pas compté parmi les quatre sans verdict antérieurs.
+La sortie physics reste 1, avec le même échec attendu de C04 ordre un.

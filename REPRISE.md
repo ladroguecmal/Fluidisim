@@ -19,7 +19,7 @@ souvenir de conversation, **c'est lui qui fait foi**.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-07 13:59 +02:00
+Battement        : 2026-09-07 14:01 +02:00
 Agent            : Codex (git et cargo disponibles)
 Session en cours : S46
 Dernière session : S45 — 2026-09-07 — un refus peut supprimer son assertion

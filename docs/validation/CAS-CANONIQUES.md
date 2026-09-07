@@ -541,6 +541,12 @@ ce test ne passe pas.
 
 ### Énoncé amendé — S26
 
+> **Application S46 au rapport principal :** les mesures non finies deviennent indéterminées ;
+> une famille contenant un triplet refusé ne prouve pas sa stabilité. Le bilan compte toutes
+> les familles, y compris indéterminées, au plancher et diagnostics singuliers, comme sans verdict
+> de validation. Succès/échec exige un cas régulier et une stabilité établie. La paire héritée
+> C08-p/C08-coherence de `physics_shallow` reste distincte ; écart de contrat suivi en S46-1.
+
 L'énoncé d'origine est conservé ci-dessus ; celui-ci le **remplace pour toute exécution**. Les
 quatre changements viennent chacun d'une mesure de S24, et non d'un avis.
 
