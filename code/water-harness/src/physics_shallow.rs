@@ -806,6 +806,76 @@ fn erreur_l1_ritter_ponctuelle(n: usize, dx: f64, h0: f64, t_fin: f64, sc: Schem
     e
 }
 
+/// **La demi-vie d'amplitude, à partir d'une trace de mode** — la seule implémentation.
+///
+/// Enveloppe par le pic de `|mode|` sur chaque demi-période, puis régression linéaire de
+/// `ln(amplitude)` sur le temps. `ln2` divisé par le taux donne la demi-vie, rapportée à `t_ref`.
+///
+/// # Les deux refus, et pourquoi ils sont ici plutôt qu'ailleurs
+///
+/// Ajoutés en **S42** par l'essai à zéro de C03 (**A167**, action S41-4). Sans eux, cette mesure
+/// rend `INFINITY` sur un bassin **sans seiche** — plat, au repos, rien à mesurer. `c03_seiche`
+/// sature cette valeur à `10⁶`, la compare au minorant de 15 périodes, et **déclare le néant
+/// conforme avec le meilleur score possible**.
+///
+/// Les deux critères sont **dérivés, pas choisis** — le corpus a déjà payé un seuil posé au jugé
+/// (**A157**) :
+///
+/// 1. **Moins de trois points** : une régression sur deux points passe exactement par eux et n'a
+///    aucun résidu. Elle rend une pente, jamais une mesure.
+/// 2. **Une amplitude sous l'ulp de la hauteur d'eau** : `η` ne peut pas varier moins que `ε·h₀`
+///    sans que la variation soit un artefact d'arrondi. C'est le pendant `f64` de **G5**, le
+///    garde-fou que le véhicule d'accueil porte depuis S27 et que celui-ci n'avait pas.
+///
+/// **Le refus est `NaN`, pas une valeur de repli.** `NaN` échoue toute comparaison, donc le cas
+/// devient rouge des deux façons — par `passe()` et par la tolérance conditionnelle. Une valeur de
+/// repli aurait été lue comme une mesure.
+///
+/// # Une seule implémentation, et c'est le point
+///
+/// Cette régression était écrite **deux fois** : ici et en ligne dans `c03_seiche`. S42 a corrigé
+/// l'une et découvert que l'assertion passait par l'autre — *le refus était écrit et le cas
+/// continuait de déclarer le néant conforme.*
+pub fn demi_vie_depuis_enveloppe(ts: &[f64], mode: &[f64], t_ref: f64, h0: f64) -> f64 {
+    let par_demi = 32usize;
+    let (mut te, mut ae) = (Vec::new(), Vec::new());
+    let mut k = 0usize;
+    while k + par_demi <= mode.len() {
+        let (mut pic, mut t_pic) = (0.0f64, ts[k]);
+        for j in k..k + par_demi {
+            if mode[j].abs() > pic {
+                pic = mode[j].abs();
+                t_pic = ts[j];
+            }
+        }
+        if pic > 0.0 {
+            te.push(t_pic);
+            ae.push(pic.ln());
+        }
+        k += par_demi;
+    }
+    if te.len() < 3 {
+        return f64::NAN;
+    }
+    let amplitude_max = ae.iter().fold(f64::NEG_INFINITY, |a, &b| a.max(b)).exp();
+    if amplitude_max <= f64::EPSILON * h0 {
+        return f64::NAN;
+    }
+    let m = te.len() as f64;
+    let (sx, sy): (f64, f64) = (te.iter().sum(), ae.iter().sum());
+    let sxx: f64 = te.iter().map(|x| x * x).sum();
+    let sxy: f64 = te.iter().zip(ae.iter()).map(|(x, y)| x * y).sum();
+    let taux = (m * sxy - sx * sy) / (m * sxx - sx * sx);
+    if taux < 0.0 {
+        (2.0f64).ln() / -taux / t_ref
+    } else {
+        // Pente positive ou nulle : le schéma **n'amortit pas**. C'est un résultat, pas un refus —
+        // un solveur sans dissipation passe C03, et c'est voulu. À ne pas confondre avec les deux
+        // refus ci-dessus, qui disent qu'il n'y avait rien à mesurer.
+        f64::INFINITY
+    }
+}
+
 /// **Demi-vie d'amplitude d'une seiche, en périodes** — fonction pure, exerçable seule.
 ///
 /// Extraite en S36 de la fermeture qui vivait dans [`c03_seiche`]. Le motif est celui de **L118** :
@@ -836,37 +906,14 @@ pub fn demi_vie_seiche(m: usize, pas_m: f64, h0: f64, eta_bord: f64, periodes: f
     e.regler_ordre2(sc.ordre2);
     e.regler_rk2(sc.rk2);
 
-    let (mut tx, mut ly) = (Vec::new(), Vec::new());
-    let mut pics: Vec<(f64, f64)> = Vec::new();
+    let mut ts = Vec::with_capacity(echantillons + 1);
+    let mut mode = Vec::with_capacity(echantillons + 1);
     for k in 0..=echantillons {
         e.avancer_jusqu_a(k as f64 * dt_e, 0.45);
-        pics.push((e.temps(), e.mode_fondamental(h0).abs()));
+        ts.push(e.temps());
+        mode.push(e.mode_fondamental(h0));
     }
-    let mut j = 0usize;
-    while j + 32 <= pics.len() {
-        let (mut pic, mut tp) = (0.0f64, pics[j].0);
-        for q in j..j + 32 {
-            if pics[q].1 > pic {
-                pic = pics[q].1;
-                tp = pics[q].0;
-            }
-        }
-        if pic > 0.0 {
-            tx.push(tp);
-            ly.push(pic.ln());
-        }
-        j += 32;
-    }
-    let mm = tx.len() as f64;
-    let (sx, sy): (f64, f64) = (tx.iter().sum(), ly.iter().sum());
-    let sxx: f64 = tx.iter().map(|x| x * x).sum();
-    let sxy: f64 = tx.iter().zip(ly.iter()).map(|(x, y)| x * y).sum();
-    let tau = (mm * sxy - sx * sy) / (mm * sxx - sx * sx);
-    if tau < 0.0 {
-        (2.0f64).ln() / -tau / t_ref
-    } else {
-        f64::INFINITY
-    }
+    demi_vie_depuis_enveloppe(&ts, &mode, t_ref, h0)
 }
 
 /// **C03 — seiche en bassin clos.**
@@ -920,39 +967,11 @@ pub fn c03_seiche(n: usize, dx: f64, h0: f64, eta_bord: f64, periodes: f64) -> V
     let t_mur = periode_moyenne(&passages_a_zero(&ts, &mur)).unwrap_or(f64::NAN);
     let t_mode = periode_moyenne(&passages_a_zero(&ts, &mode)).unwrap_or(f64::NAN);
 
-    // Enveloppe : le maximum de |mode| sur chaque demi-periode, puis regression de ln(amplitude)
-    // sur le temps. La demi-vie vaut ln(2) / taux de decroissance.
-    let par_demi = 32.max(1);
-    let (mut te, mut ae) = (Vec::new(), Vec::new());
-    let mut k = 0usize;
-    while k + par_demi <= mode.len() {
-        let mut pic = 0.0f64;
-        let mut t_pic = ts[k];
-        for j in k..k + par_demi {
-            if mode[j].abs() > pic {
-                pic = mode[j].abs();
-                t_pic = ts[j];
-            }
-        }
-        if pic > 0.0 {
-            te.push(t_pic);
-            ae.push(pic.ln());
-        }
-        k += par_demi;
-    }
-    let taux = {
-        let m = te.len() as f64;
-        let (sx, sy): (f64, f64) = (te.iter().sum(), ae.iter().sum());
-        let sxx: f64 = te.iter().map(|x| x * x).sum();
-        let sxy: f64 = te.iter().zip(ae.iter()).map(|(x, y)| x * y).sum();
-        (m * sxy - sx * sy) / (m * sxx - sx * sx)
-    };
-    let demi_vie_s = if taux < 0.0 {
-        (2.0f64).ln() / -taux
-    } else {
-        f64::INFINITY
-    };
-    let demi_vie_periodes = demi_vie_s / t_ref;
+    // La régression était écrite **deux fois** dans ce fichier — ici, et dans [`demi_vie_seiche`]
+    // extraite en S36. S42 a corrigé la seconde et découvert que l'assertion passait par la
+    // première : les deux copies portaient la même logique, et une seule a reçu le refus.
+    // Elles sont désormais **la même fonction**.
+    let demi_vie_periodes = demi_vie_depuis_enveloppe(&ts, &mode, t_ref, h0);
 
     println!("  C03 — seiche, L = {l:.1} m, h = {h0:.1} m, {periodes:.0} periodes simulees :");
     println!("      periode de reference  2L/√(gh)          = {t_ref:>9.4} s");
@@ -961,8 +980,8 @@ pub fn c03_seiche(n: usize, dx: f64, h0: f64, eta_bord: f64, periodes: f64) -> V
     println!("      periode du mode fondamental             = {t_mode:>9.4} s   ecart {:>6.3} %",
              (t_mode - t_ref).abs() / t_ref * 100.0);
     println!("      amplitude : {:.6} m au depart, {:.6} m a la fin",
-             ae.first().map(|x| x.exp()).unwrap_or(0.0),
-             ae.last().map(|x| x.exp()).unwrap_or(0.0));
+             mode.first().map(|x: &f64| x.abs()).unwrap_or(0.0),
+             mode.last().map(|x: &f64| x.abs()).unwrap_or(0.0));
     println!("      demi-vie d'amplitude                    = {demi_vie_periodes:>9.3} periodes");
 
     // La demi-vie depend-elle de la maille ? Si oui, ce n'est pas une propriete du schema mais du
@@ -1005,7 +1024,16 @@ pub fn c03_seiche(n: usize, dx: f64, h0: f64, eta_bord: f64, periodes: f64) -> V
         Cas {
             id: "C03-demi-vie",
             grandeur: "demi-vie d'amplitude, en periodes".into(),
-            mesure: demi_vie_periodes.min(1e6),
+            // **`f64::min` avale les `NaN`** : `NaN.min(1e6)` rend `1e6`. La saturation, qui sert à
+            // afficher une demi-vie infinie, transformait donc un **refus** en la plus grande
+            // valeur possible — le cas échouait quand même, par la tolérance conditionnelle
+            // ci-dessous, mais le rapport affichait `1000000` là où la mesure valait `NaN`.
+            // Un lecteur y voyait un grand nombre et un échec sans lien apparent (**A149**).
+            mesure: if demi_vie_periodes.is_nan() {
+                f64::NAN
+            } else {
+                demi_vie_periodes.min(1e6)
+            },
             // Un minorant se compare mal avec une tolerance relative : on le pose en reference et
             // on tolere 100 % **en dessous**, ce qui revient a exiger `mesure ≥ 0`. Le cas est donc
             // juge a la main ci-dessous, et cette ligne sert a afficher les deux nombres.

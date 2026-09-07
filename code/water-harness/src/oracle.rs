@@ -815,6 +815,114 @@ mod tests {
         );
     }
 
+    /// **P2 — l'essai à zéro de C03** (**A167**, action S41-4).
+    ///
+    /// *Tout montage de mesure doit venir avec un essai dont le résultat attendu est zéro.* Pour
+    /// C03, il s'écrit sans une ligne de montage nouvelle : **le même bassin, sans excitation**
+    /// (`eta_bord = 0`). L'eau est plate et au repos ; il n'y a pas de seiche, donc **pas de
+    /// demi-vie à mesurer**.
+    ///
+    /// Ce test **constate** ce que la mesure rend aujourd'hui, avant toute correction.
+    #[test]
+    fn c03_essai_a_zero_ce_que_la_mesure_rend_sur_un_bassin_au_repos() {
+        use crate::physics_shallow::{demi_vie_seiche, SCHEMAS, SCHEMA_RETENU};
+        println!("C03 — essai à zéro : bassin plat, `eta_bord = 0`, aucune seiche");
+        for (nom, sc) in [("ordre 1", SCHEMAS[0]), ("ordre 2", SCHEMA_RETENU)] {
+            let dv = demi_vie_seiche(400, 0.05, 2.0, 0.0, 20.0, sc);
+            println!("      {nom:<8} — demi-vie mesurée sur le néant : {dv:>12.3} périodes");
+        }
+        // Aucune assertion ici : ce test est un relevé, et sa valeur est dans ce qu'il imprime.
+        // Le refus, s'il en faut un, est écrit en P3 avec son témoin.
+    }
+
+    /// **P2 (suite) — et ce que le CAS en fait.**
+    ///
+    /// `demi_vie_seiche` rend `INFINITY` sur un bassin au repos — non par refus délibéré, mais
+    /// parce que le filtre `pic > 0` ne laisse passer aucun point et que la régression sur zéro
+    /// point rend `NaN`, dont la comparaison `< 0` est fausse.
+    ///
+    /// **La question n'est pas là.** Elle est : que devient cette valeur en traversant le cas ?
+    #[test]
+    fn c03_essai_a_zero_le_cas_declare_t_il_le_neant_conforme() {
+        use crate::physics_shallow::c03_seiche;
+        let cas = c03_seiche(400, 0.05, 2.0, 0.0, 20.0);
+        println!("C03 — essai à zéro : verdicts du CAS sur un bassin sans seiche");
+        for c in &cas {
+            println!(
+                "      {:<14} {:<50} mesuré {:>14.4}  référence {:>10.4}  {}",
+                c.id,
+                c.grandeur,
+                c.mesure,
+                c.reference,
+                if c.passe() { "PASSE" } else { "échoue" }
+            );
+        }
+        let dv = cas.iter().find(|c| c.id == "C03-demi-vie").expect("C03-demi-vie");
+        println!(
+            "      → sur un montage VIDE, C03-demi-vie rend {:.0} et {}",
+            dv.mesure,
+            if dv.passe() { "**PASSE**" } else { "échoue" }
+        );
+    }
+
+    /// **P3 — le refus, et son témoin** (**L119**).
+    ///
+    /// *Le test d'un garde-fou est le cas qu'il doit refuser, jamais le cas nominal.* Et il lui
+    /// faut aussi son **témoin**, le cas sain qu'il ne doit pas refuser — sans quoi un refus écrit
+    /// « toujours vrai » passerait le premier volet.
+    ///
+    /// | | attendu |
+    /// |---|---|
+    /// | bassin **sans seiche** (`eta_bord = 0`) | **refus** — `NaN` |
+    /// | bassin excité (`eta_bord = 0,02`) | **pas de refus**, et la valeur publiée |
+    #[test]
+    fn c03_la_demi_vie_refuse_un_bassin_sans_seiche() {
+        use crate::physics_shallow::{demi_vie_seiche, SCHEMAS, SCHEMA_RETENU};
+
+        // **Le cas refusé.** Aucune seiche : il n'y a rien à mesurer, et la fonction doit le dire.
+        for (nom, sc) in [("ordre 1", SCHEMAS[0]), ("ordre 2", SCHEMA_RETENU)] {
+            let dv = demi_vie_seiche(400, 0.05, 2.0, 0.0, 20.0, sc);
+            println!("C03 essai à zéro — {nom} : {dv}");
+            assert!(
+                dv.is_nan(),
+                "un bassin sans seiche doit être refusé, pas mesuré : {nom} rend {dv}"
+            );
+        }
+
+        // **Le témoin.** Le montage nominal doit passer, et rendre exactement la valeur publiée par
+        // `ADR-040` §5 — un refus mal placé la ferait disparaître sans que rien ne le dise.
+        let dv = demi_vie_seiche(400, 0.05, 2.0, 0.02, 20.0, SCHEMA_RETENU);
+        println!("C03 témoin — bassin excité, ordre 2 : {dv:.2} périodes (publié 161,14)");
+        assert!(dv.is_finite(), "le montage nominal ne doit pas être refusé : {dv}");
+        assert!(
+            (dv - 161.14).abs() / 161.14 < 0.001,
+            "le refus ne doit déplacer aucun chiffre publié : {dv:.3} contre 161,14"
+        );
+    }
+
+    /// **P3 (suite) — et le cas déclare-t-il encore le néant conforme ?**
+    ///
+    /// C'était le défaut : `C03-demi-vie` rendait `10⁶` sur un montage vide et **passait**. Les deux
+    /// autres assertions du cas échouaient déjà — le cas entier était rouge — mais l'assertion qui
+    /// **porte le résultat publié** déclarait le néant excellent.
+    #[test]
+    fn c03_le_neant_n_est_plus_declare_conforme() {
+        use crate::physics_shallow::c03_seiche;
+        let cas = c03_seiche(400, 0.05, 2.0, 0.0, 20.0);
+        for c in &cas {
+            println!(
+                "C03 essai à zéro — {:<14} mesuré {:>12.4}  {}",
+                c.id,
+                c.mesure,
+                if c.passe() { "PASSE" } else { "échoue" }
+            );
+        }
+        assert!(
+            cas.iter().all(|c| !c.passe()),
+            "aucune assertion de C03 ne doit passer sur un bassin sans seiche"
+        );
+    }
+
     /// **A157 — un seuil reproductible peut être dénué de sens, et deux seuils incomparables
     /// peuvent être mis côte à côte.**
     ///

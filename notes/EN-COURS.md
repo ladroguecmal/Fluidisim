@@ -96,12 +96,12 @@ S34. **Le véhicule importé n'en a aucun.** Deux implémentations de la même m
 l'autre non — encore une divergence que l'oracle croisé n'a pas cherchée parce qu'elle est dans le
 **harnais**, pas dans les solveurs.
 
-- [>] **P1** — plan, jeton.
-- [ ] **P2** — **l'essai à zéro** : `demi_vie_seiche` sur un bassin au repos. Mesurer ce qu'elle
+- [x] **P1** — plan, jeton.
+- [x] **P2** — **l'essai à zéro** : `demi_vie_seiche` sur un bassin au repos. Mesurer ce qu'elle
       rend, sans rien corriger encore.
-- [ ] **P3** — selon le résultat : écrire le refus, **avec son témoin** — le cas qu'il doit
+- [x] **P3** — selon le résultat : écrire le refus, **avec son témoin** — le cas qu'il doit
       refuser *et* le cas qu'il ne doit pas refuser (**L119**).
-- [ ] **P4** — vérifier que le refus ne change **aucun** chiffre publié : les quatre demi-vies du
+- [x] **P4** — vérifier que le refus ne change **aucun** chiffre publié : les quatre demi-vies du
       tableau d'`ADR-040` §5 doivent se reproduire à l'identique.
 - [ ] **P5** — **C06 et C08** : ont-ils un essai à zéro possible, et lequel ? Écrire au moins le
       plus court des deux.
