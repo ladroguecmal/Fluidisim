@@ -4357,3 +4357,128 @@ qui passe là-dedans ?*
 ### Arbitrages en attente
 
 Inchangés.
+
+---
+
+## S44 — 2026-09-07 — Trois formes, une cause : quand la grandeur est un écart, zéro est le succès parfait
+
+**Consigne reçue.** « Rajoute la possibilité d'utiliser aussi ChatGPT dans le projet. Enchaîne
+ensuite sur S44. »
+
+**Entrées.** Action **S43-1**, qui reprend **S42-2** : *inventorier les valeurs de repli placées
+après une mesure.* Deux sessions de suite en avaient trouvé une par hasard, chacune sévérité 1.
+
+**Sorties.** [`AUDIT-REPLIS-S44`](../docs/registres/AUDIT-REPLIS-S44.md) ; la fonction `deficit()`
+qui sépare le minorant tenu du refus ; angle mort **A172** *(sévérité 1)*.
+
+**Ça tourne.** `cargo test` : **96 tests** au vert — 38 dans le cœur, 58 dans le harnais dont deux
+`ignore` — contre 95 en début de session. `check` : 0 échec, hashs inchangés. Aucun chiffre publié ne
+bouge : 20,69 et 24,40 périodes, `R²` 0,9920 et 0,9998, `C08-p` 0,999745.
+
+### Avant la session : l'amorce ouverte aux autres agents
+
+Demandé par l'utilisateur, fait hors session, commit `faeb56c`. **Le dispositif ne dépendait déjà
+d'aucun fournisseur** — il repose sur des fichiers versionnés et sur `git` — mais le fichier
+d'amorce portait un nom de fournisseur, et chaque outil lit automatiquement un nom différent.
+
+La tentation évidente était un second fichier d'amorce à côté du premier. **C'est exactement ce que
+`FORK-S22-S26` interdit** : trois forks, dont le troisième parce qu'un correctif vivait dans une
+seule branche (**L137**). Le même mécanisme, transposé des branches aux fichiers.
+
+| | |
+|---|---|
+| **`AGENTS.md`** | **le texte**, seul endroit où l'amorce existe |
+| `CLAUDE.md` | un renvoi de quatre lignes : *ne recopie rien ici* |
+
+Et une ligne **`Agent`** au jeton — non pour discriminer un fournisseur, mais pour dire **quels
+outils étaient disponibles** : un agent sans `cargo` n'a pas vérifié les tests, un agent sans `git`
+n'a pas committé ses étapes. Cette session est la première à la renseigner. Voir `FORK-S22-S26` §9.5.
+
+### La thèse était fausse sur la cible et juste sur le fond
+
+*Thèse déclarée : au moins un `unwrap_or(0.0)` se trouve sur le chemin d'une grandeur publiée et y
+transforme un refus en résultat parfait.*
+
+**Les huit `unwrap_or(0.0)` sont innocents.** Deux sont sains — l'absence de paroi mobile *est* une
+vitesse nulle, ce n'est pas un refus. Les six autres portent sur des positions de front : un front
+introuvable y devient `0`, c'est-à-dire *au barrage*, ce qui produit un **écart de 100 %** contre une
+référence à 10,6 m. Le cas échoue. Bruyamment.
+
+**Les deux fautifs étaient ailleurs**, et le fond de la thèse s'y applique mot pour mot.
+
+### Ce qui a été trouvé
+
+`physics.rs` exprime les deux minorants de C03 sous forme de **déficit** — une formulation
+excellente, et le commentaire qui l'accompagne dit pourquoi : un minorant s'exprime mal avec une
+tolérance relative.
+
+```text
+déficit de demi-vie = max(0, 15 − mesure) / 15      référence 0, tolérance 0
+déficit de R²       = max(0, 0,9 − mesure)          référence 0, tolérance 0
+```
+
+**Le `max(0, …)` qui rend cette forme juste est exactement ce qui avale les refus.**
+
+| entrée | ce que ça veut dire | avant | après |
+|---|---|---|---|
+| `+∞` | le schéma n'amortit pas | déficit **0** — passe | **0** — passe, et c'est juste |
+| `NaN` | il n'y avait **rien à mesurer** | déficit **0** — **PASSE** | **`NaN`** — échoue |
+
+### Le résultat de la session
+
+Trois défauts en trois sessions, trois formes, **une seule cause** :
+
+| | forme | valeur rendue | position dans le domaine |
+|---|---|---|---|
+| S42 | `NaN.min(10⁶)` | `10⁶` | **hors** du plausible |
+| S43 | `else { 1.0 }` | `1,0` | **dans** le nominal |
+| S44 | `(15 − NaN).max(0)` | `0` | **le meilleur point** |
+
+> **La gravité croît et la visibilité décroît dans le même ordre.** Un `10⁶` finit par se faire
+> remarquer ; un `1,0` au milieu des ordres attendus, jamais ; un `0` sur un déficit **est le
+> résultat qu'on espère**.
+
+Et le motif ne tient pas au repli mais à la **grandeur** : dès qu'une mesure est un écart, une erreur
+ou un déficit, **son domaine contient zéro et zéro en est le meilleur point**. Toute opération capable
+de produire zéro à partir d'un refus le transforme en succès parfait. Angle mort **A172**.
+
+### Le corollaire, qui est ce que l'audit a coûté à trouver
+
+**Un repli ne s'inspecte jamais seul.** Les treize `unwrap_or(NaN)` du harnais sont irréprochables —
+`NaN` échoue toute comparaison — et **ils ont produit les trois défauts**, parce que `min`, `max` et
+une soustraction suivie d'un `max` avalent tous le `NaN`.
+
+*C'est l'aval qu'il faut suivre, jusqu'à l'assertion ou l'affichage.* Un inventaire des replis qui se
+serait arrêté aux replis n'aurait rien trouvé.
+
+### Chiffres qui ont orienté la session
+
+- **25 `unwrap_or` et 24 `min`/`max`** : la taille de l'inventaire, et ce qui rendait la recherche
+  faisable en une session.
+- **8 suspects, 0 fautif** : la thèse, démentie sur sa cible.
+- **2 fautifs**, tous deux sur des assertions publiées de C03.
+- **0 chiffre déplacé** : la condition de toute correction de ce genre.
+
+### Ce qui n'a pas été fait
+
+- **`front_mouille` rend toujours zéro** quand le front est introuvable, plutôt que de refuser. Un
+  front à zéro n'est pas un front au barrage (S44-1).
+- **Les treize `unwrap_or(NaN)` n'ont pas tous été suivis** jusqu'à leur assertion — trois l'ont été,
+  parce que trois défauts y menaient (S44-2).
+- **L'essai à zéro de C02** reste à écrire (S43-3).
+- **Le troisième cas des contrôles** — l'entrée vide de ce qu'ils examinent — n'est pas généralisé
+  (S43-2).
+- **Les autres formules à constantes** ne sont pas refaites (S41-2), la réserve de cadre n'est pas
+  portée (S41-3), les deux mesures de front ne sont pas comparables (S41-1).
+
+### Session suivante recommandée
+
+**S45 — suivre les treize `unwrap_or(NaN)` jusqu'à leur assertion** (S44-2). C'est la seule des
+actions ouvertes dont cette session ait montré qu'elle trouve quelque chose : trois sur treize ont
+été suivis, et les trois menaient à un défaut de sévérité 1.
+
+*Solutions de rechange* : faire refuser `front_mouille` (S44-1) ; ou l'essai à zéro de C02 (S43-3).
+
+### Arbitrages en attente
+
+Inchangés.

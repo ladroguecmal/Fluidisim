@@ -109,7 +109,8 @@ faire, faute d'inventaire.
 - [x] **P4** — corriger les fautifs, **avec leur témoin** (**L119**), et vérifier qu'aucun chiffre
       publié ne bouge.
 - [x] **P5** — le registre `AUDIT-REPLIS-S44`, et la règle qui évite le prochain.
-- [ ] **P6** — rituel de fin (`REPRISE.md` §6).
+- [x] **P6a** — rituel : journal, leçons L165-L166, actions S44-1 et S44-2.
+- [ ] **P6b** — rituel : index, décomptes, jeton libéré.
 
 ### Notes de reprise
 

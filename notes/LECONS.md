@@ -2682,3 +2682,45 @@ n'est le but d'aucune ligne de code.
 qu'il ne doit pas refuser, et **l'entrée vide de ce qu'il examine** : liste sans élément, mesure sans
 signal, série sans variation, fichier sans ligne. Le troisième est celui qu'on n'écrit jamais
 spontanément, et c'est souvent celui qui révèle que le contrôle rend une valeur au lieu de refuser.
+
+## L165 — Quand la grandeur mesurée est un écart, zéro est son meilleur point
+
+*(S44)* Trois défauts en trois sessions, trois écritures différentes, une seule cause. Une mesure qui
+refusait — `NaN` — traversait une opération de mise en forme et en ressortait comme un résultat :
+`min(10⁶)` en a fait le plus grand nombre du domaine, `else { 1.0 }` la valeur nominale, et
+`max(0, seuil − mesure)` **zéro**, c'est-à-dire le succès parfait d'un déficit.
+
+**La gravité croît et la visibilité décroît dans le même ordre.** Une valeur hors du domaine
+plausible finit par se faire remarquer ; une valeur au milieu du domaine nominal, jamais ; une valeur
+au **meilleur point** du domaine est exactement ce qu'on espère lire, et personne ne la
+questionnera.
+
+Le motif ne tient pas à l'opération mais à la **grandeur**. Dès qu'on mesure un écart, une erreur,
+une dérive, un déficit, un taux de perte — **zéro est le meilleur résultat possible**, et il est dans
+le domaine des valeurs valides. Toute opération capable de produire zéro à partir d'un refus
+transforme donc ce refus en succès parfait : `unwrap_or(0.0)`, `max(0.0)`, `saturating_sub`, une
+différence de deux valeurs par défaut identiques.
+
+**Réflexe** : quand la grandeur est un écart, **aucune valeur de repli n'est acceptable** — le refus
+va dans le type. Et pour les autres grandeurs, la question à poser est *où tombe mon repli dans le
+domaine des valeurs valides ?* S'il tombe dedans, il est invisible ; s'il tombe sur le meilleur
+point, il est pire qu'une absence de contrôle.
+
+## L166 — Un mécanisme de repli ne s'inspecte jamais seul : c'est l'aval qu'il faut suivre
+
+*(S44)* Un inventaire des valeurs de repli a été fait pour cesser de les trouver par hasard. Il en a
+recensé quarante-neuf, dont **treize irréprochables** : elles rendent `NaN`, qui échoue toute
+comparaison et rend rouge tout contrôle qui le reçoit.
+
+**Ces treize ont produit les trois défauts des trois dernières sessions.** Pas parce qu'elles étaient
+mauvaises, mais parce que `min`, `max` et une soustraction suivie d'un `max` **avalent tous le
+`NaN`** — la valeur de refus la plus solide du langage disparaît sur la ligne suivante.
+
+L'inventaire aurait donc pu être fait entièrement, correctement, et ne rien trouver : les huit replis
+que la thèse visait se sont révélés innocents, et les deux fautifs étaient dans une expression que
+personne n'aurait classée comme « valeur de repli » — un `max(0, …)` qui sert à borner un déficit.
+
+**Réflexe** : ne jamais auditer un mécanisme de refus à l'endroit où il est produit. **Partir de la
+valeur publiée et remonter** — quelle expression la calcule, qu'est-ce qui entre dedans, et que
+devient un refus à chaque étape. C'est plus long qu'un `grep`, et c'est la seule chose qui trouve. Le
+`grep` sert à borner le travail, pas à le faire.

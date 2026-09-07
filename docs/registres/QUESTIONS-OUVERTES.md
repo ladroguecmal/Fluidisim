@@ -498,3 +498,24 @@ datée : S15 en avait retrouvé trois, perdues depuis six sessions (L55). Voici 
 >
 > Le refus est passé dans le **type**, et le compilateur a révélé un **troisième** estimateur de
 > Richardson dans le harnais. Il n'y en a plus qu'un. **Aucun chiffre publié n'a bougé.**
+
+## Actions relevées en séance — S44
+
+| # | Action | D'où elle vient | Qui la porte | État |
+|---|---|---|---|---|
+| S44-1 | **Faire refuser `front_mouille`** quand aucune cellule n'atteint le seuil, au lieu de rendre `0`. Un front introuvable n'est pas un front au barrage — l'écart de 100 % qui en résulte fait échouer le cas, mais pour la mauvaise raison, et six replis en dépendent | `AUDIT-REPLIS-S44` §6.2 | session | **ouverte** |
+| S44-2 | **Suivre les treize `unwrap_or(NaN)` jusqu'à leur assertion.** Trois l'ont été, parce que trois défauts y menaient ; les dix autres n'ont été classés que sur leur écriture. *Un repli ne s'inspecte pas seul* (**L166**) | `AUDIT-REPLIS-S44` §6.3 | session | **ouverte** |
+
+> **Note S44 — les actions S42-2 et S43-1 sont closes.**
+>
+> L'inventaire est fait : **25 `unwrap_or`, 24 `min`/`max`**, classés par ce que devient la valeur et
+> non par la forme du repli. **Les huit `unwrap_or(0.0)` que la thèse visait sont innocents** ; les
+> deux fautifs sont des `max(0, …)` qui bornent un **déficit**, sur des assertions publiées de C03.
+>
+> **Trois défauts en trois sessions, une seule cause** : quand la grandeur est un écart, zéro est son
+> meilleur point, et toute opération capable de produire zéro à partir d'un refus le transforme en
+> succès parfait (**A172**, **L165**).
+>
+> **Et le corollaire, qui est ce que l'audit a coûté à trouver** : les treize `unwrap_or(NaN)` sont
+> irréprochables et **ont produit les trois défauts**, parce que `min`, `max` et une soustraction
+> suivie d'un `max` avalent tous le `NaN`. *C'est l'aval qu'il faut suivre* (**L166**).
