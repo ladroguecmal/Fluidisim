@@ -59,32 +59,37 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S69
-État             : terminée
+Session          : S70
+État             : en cours
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Objectif         : Bilan d'avancement — taux de progression, goulot réel, étapes futures.
-                   Demandé par l'utilisateur ; S64-2 est décalée à S70.
+Objectif         : Enregistrer l'arbitrage de l'utilisateur — le projet passe à la construction —
+                   et en tirer l'ordre de construction.
 ```
 
 ### Plan
 
 - [x] **P1** — passation, jeton, plan seul.
-- [x] **P2** — établir le bilan sur des compteurs vérifiés, pas sur les colonnes d'état des vieux tableaux (**A185**).
-- [x] **P3** — rituel : journal, index, jeton, **fusion dans master**.
+- [ ] **P2** — ADR-053 : la décision, ce qu'elle ne change pas, et par quelle couche on commence.
+- [ ] **P3** — rituel : journal, index, actions, jeton, **fusion dans master**.
 
 ### Notes de reprise
 
-Départ e839c77, master et worktree confondus. Les sessions S65 à S68 ont été conduites par Codex
-et sont fusionnées ; rien n'était en cours.
+Départ 1afbb3a. **Arbitrage rendu par l'utilisateur le 2026-09-08**, en réponse au point 4 de
+`BILAN-S69` §6 : *« Je ne savais pas, donc on passe à la construction. »* C'était la question que
+le bilan avait remontée comme hors de portée d'une session — décider si le projet reste un corpus
+de conception ou devient un système. **Elle est tranchée : construction.**
 
-**Une précaution de méthode, et elle vient d'A185.** Les colonnes « État » des tableaux d'actions
-antérieurs à S45 ne sont pas fiables : plusieurs actions y sont marquées « ouverte » alors que des
-notes en prose sous les tableaux les closent (S35-1 et S35-2 closes par une note de S36, par
-exemple). **Ne pas compter les actions ouvertes à partir de ces colonnes.** Le bilan s'appuie sur
-ce qui se vérifie : le nombre de fichiers, les compteurs de l'index tenus à jour par le rituel, la
-sortie du harnais, et le chemin critique de `REPRISE.md` §4.
+**Par quelle couche commencer.** ADR-001 §2 définit B, W, δ et V. Le choix n'est pas ouvert : il
+converge. **W** est *« des perturbations propagatives à dispersion correcte »*, et quatre besoins
+indépendants la désignent —
 
-P2/P3 : BILAN-S69 écrit et indexé, entrée de journal, jeton rendu. Aucun code, aucun calcul.
-Trois recommandations remontées : lancer B1 (seul banc exécutable, jamais lancé), trancher S63-1
-(seul verrou de B2), et **décider si le projet passe à la construction** — ce dernier point hors
-de portée d une session.
+1. **S63-1** cherche une couche dispersive depuis S22 ; W en est une par définition. Elle
+   débloque C02, donc `λ_cut`, donc **B2**, le banc décisif.
+2. Elle débloque aussi **C07** et **C19**, deux des onze cas en attente.
+3. Elle est **analytique** — des paquets dérivés d'événements horodatés, au déterminisme exact —
+   et non un solveur libre : bien moins lourde que `δ`, qui est un solveur 3D à surface libre.
+4. Son format réseau, **`WaveEvent`** (SPEC-006 §3.1), est **la seule urgence de format du
+   corpus** : structure répliquée à arrêter avant que le réseau ne fige son protocole. L'écrire
+   force à la trancher.
+
+`δ` reste la pièce la plus lourde et ne commence pas ici. `B` existe déjà.

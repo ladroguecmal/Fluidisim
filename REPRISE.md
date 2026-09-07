@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-08 12:30 +02:00
+JETON            : occupé
+Battement        : 2026-09-08 12:45 +02:00
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S70 — enregistrer l'arbitrage : le projet passe à la construction
 Dernière session : S69 — 2026-09-08 — bilan d'avancement (BILAN-S69)
-Session suivante : S70 — **B1**, le seul banc exécutable, recommandé par le bilan ; ou S64-2
+Session suivante : selon ADR-053
 
 **Bilan S69, et il change l'ordre des priorités.** ~85 % comme corpus de conception, **~15 %
 comme système** : `δ`, `W` et `V` n'existent pas. **Onze cas sur 23 et onze bancs sur onze
