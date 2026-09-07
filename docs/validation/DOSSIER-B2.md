@@ -316,17 +316,35 @@ Le point 5 est ce que ce dossier ajoute au protocole d'origine. B2 ne produit pa
 
 ## 8. Ce qui doit être vrai avant de lancer
 
-| Préalable | Où | État |
-|---|---|---|
-| **H1** — lecteur de scénario, hôte harnais, mode `check`, hashes | SPEC-003 §10 | non écrit |
-| **H3** — cas canoniques analytiques, mode `physics` | SPEC-003 §10 | non écrit |
-| **C01, C02** passés | `CAS-CANONIQUES` | non exécutés |
-| ADR-020 acté | ADR-020 | **proposé — décision humaine** |
-| `paquets_W_max` mesuré, non supposé | ADR-012 §3 | à mesurer en B2 même |
+> **État vérifié en S63, 2026-09-08.** *Le tableau ci-dessous datait de S14 et annonçait cinq
+> blocages. **Quatre étaient levés depuis une quarantaine de sessions**, et rien ne l'avait
+> signalé : un lecteur y voyait un banc hors d'atteinte alors qu'il ne manque qu'une pièce.*
+> C'est le troisième mécanisme de défaillance des prescriptions recensé en S63 — non pas fausse
+> à l'écriture, mais **périmée en silence** (**A185**). La colonne « état » porte désormais la
+> session qui l'a constaté ; **un état sans date se lit au présent, et il ne l'est plus**.
 
-C02 mérite une mention : `CAS-CANONIQUES` §C02 dit qu'il « **produit `λ_cut`** » — la plus petite
-longueur d'onde que le solveur δ transporte sans erreur de célérité rédhibitoire. C02 donne donc une
-**borne basse physique** supplémentaire, mesurée celle-là, à croiser avec les deux bornes calculées
+| Préalable | Où | État | Constaté |
+|---|---|---|---|
+| **H1** — lecteur de scénario, hôte harnais, mode `check`, hashes | SPEC-003 §10 | **écrit** | S20 |
+| **H3** — cas canoniques analytiques, mode `physics` | SPEC-003 §10 | **écrit** | S20 |
+| **C01** passé | `CAS-CANONIQUES` | **passe**, sur deux véhicules | S22, S36 |
+| **C02** passé | `CAS-CANONIQUES` | **inexécutable en l'état** — voir ci-dessous | S63 |
+| ADR-020 acté | ADR-020 | **ACTÉE** | S19 |
+| `paquets_W_max` mesuré, non supposé | ADR-012 §3 | à mesurer en B2 même | inchangé |
+
+**Il ne manque donc qu'une chose, et ce n'est pas du travail d'exécution.** C02 n'est pas « non
+exécuté » : il est **inexécutable avec les véhicules existants**, et la nuance change ce qu'une
+session doit faire en le lisant. `CAS-CANONIQUES` §C02 dit qu'il « **produit `λ_cut`** » — la plus
+petite longueur d'onde que le solveur δ transporte sans erreur de célérité rédhibitoire. Or les
+deux δ d'essai sont **Saint-Venant, non dispersifs** : leur erreur de célérité en fonction de `λ`
+n'existe pas au sens où C02 la mesure (ADR-030 §5, S22). Et le milieu à **dispersion exacte**
+écrit en S39 ne la fournit pas davantage : son en-tête pose qu'il *n'est pas un solveur δ* et que
+sa dispersion est exacte par construction — son erreur est nulle, donc la mesure serait vide.
+
+**Ce qui manque est une couche dispersive du projet — `W`, ou un `δ` d'une autre famille.** C'est
+une dépendance de conception, pas un retard de codage, et elle n'était pas dans le graphe d'origine.
+
+C02 donnerait alors une **borne basse physique** mesurée, à croiser avec les deux bornes calculées
 en §3.
 
 ---

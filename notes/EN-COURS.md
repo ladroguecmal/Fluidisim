@@ -69,9 +69,9 @@ Objectif         : S59-1 — recenser les prescriptions non éprouvées, celles 
 ### Plan
 
 - [x] **P1** — passation, jeton, plan seul.
-- [ ] **P2** — séparer les genres : une condition de réversibilité n'est pas une recette, et seules les recettes se vérifient.
-- [ ] **P3** — recenser les recettes du corpus et établir, pour chacune, si elle a été exécutée et ce qu'elle a donné.
-- [ ] **P4** — éprouver celles qui sont vérifiables à bas coût, en commençant par les plus engageantes.
+- [x] **P2** — séparer les genres : une condition de réversibilité n'est pas une recette, et seules les recettes se vérifient.
+- [x] **P3** — recenser les recettes du corpus et établir, pour chacune, si elle a été exécutée et ce qu'elle a donné.
+- [x] **P4** — éprouver celles qui sont vérifiables à bas coût, en commençant par les plus engageantes.
 - [ ] **P5** — rapport, marquage des prescriptions non éprouvées, et la règle d'écriture qui en découle.
 - [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
 
@@ -101,3 +101,20 @@ n'a jamais été établie, et le corpus en contient beaucoup.
 `DOSSIER-B2` et `PLAN-BENCHMARK` sont **entièrement** faits de recettes écrites pour un travail
 qui n'a jamais eu lieu — c'est le gisement principal, et personne ne l'a confronté à l'exécution
 parce que l'exécution n'a pas commencé.
+
+P2/P3/P4 : recensement fait, et le corpus est mieux tenu que la these ne le craignait.
+Les si la reponse etait l inverse d ADR-027 et ADR-048 ne sont pas des recettes : rien a
+executer, dispositif voulu. Les anticipations de conception ne se donnent pas pour verifiees.
+Restent les recettes procedurales, et elles sont rares.
+
+**Une seule prescription perimee dans tout le corpus — mais c est celle du banc decisif.**
+DOSSIER-B2 par.8, ecrit en S14, annoncait cinq blocages : H1 non ecrit, H3 non ecrit, C01 et C02
+non executes, ADR-020 propose. **Quatre sont leves depuis une quarantaine de sessions** — H1 et
+H3 en S20, C01 en S22 et S36, ADR-020 actee en S19 — et rien ne l avait signale. Un lecteur y
+voyait un banc hors d atteinte.
+
+Et la cinquieme ligne etait mal qualifiee, ce qui compte davantage : C02 n est pas non execute,
+il est **inexecutable** — les deux delta d essai sont non dispersifs, et le milieu a dispersion
+exacte de S39 declare lui-meme ne pas etre un solveur delta, sa dispersion etant exacte par
+construction. Ce qui manque est une couche dispersive du projet, une dependance de conception.
+Tableau corrige, avec une colonne *constate* qui date chaque ligne.
