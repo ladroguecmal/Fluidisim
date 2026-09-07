@@ -11,6 +11,11 @@ Deux oracles (12800 et 25600 cellules), cinq grilles, coût et bilan explicites 
 peut être sans verdict. Campagne séparée de physics : voir
 [`MESURES-C22-S48`](../docs/validation/MESURES-C22-S48.md).
 
+**S56 — fenêtre fine C22 :** `cargo run --offline --release -- c22-shallow-fin 51200`.
+Quatre fenêtres, jusqu'à 12800 cellules ; oracles chronométrés séparément, filtre inchangé.
+Premier oracle : multiple de 12800 entre 25600 et 76800, 51200 par défaut. Calcul coûteux,
+séparé de la batterie courante : [REFERENCE-C22-S56](../docs/validation/REFERENCE-C22-S56.md).
+
 ```bash
 cd code
 cargo test --offline                      # 18 tests

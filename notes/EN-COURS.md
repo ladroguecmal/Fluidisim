@@ -69,7 +69,7 @@ Objectif         : Stratégie de référence et budget pour la fenêtre C22 800�
 
 - [x] **P1** — état réel, passation et plan seul.
 - [x] **P2** — ajouter une fenêtre fine dédiée sans changer les modes existants ; vérifier les admissions et compiler.
-- [>] **P3** — mesurer 800–12800 avec les références 51200/102400, filtre inchangé ; établir le budget du couple suivant et ses critères de passage.
+- [x] **P3** — mesurer 800–12800 avec les références 51200/102400, filtre inchangé ; établir le budget du couple suivant et ses critères de passage.
 - [ ] **P4** — rituel : journal, actions, enseignements éventuels, index, passation et jeton libre.
 
 ### Notes de reprise
@@ -78,3 +78,8 @@ Départ master d8e952a propre, autres copies anciennes propres. Socle lu dans ce
 REPRISE relu, dernier journal S55 et mesure S49 connus. S49-1 demande une stratégie et un budget,
 pas une promesse de convergence. Aucun champ δ sur disque ; mesures scalaires seules conservées.
 Fenêtre supplémentaire fixée avant calcul ; ne pas assouplir le filtre ×30 ni la stabilité.
+
+P3 : campagne 371,116 s ; oracles 72,727/292,354 s ; erreur 12800 = 7,710700097e-9,
+seuil = 1,562278094e-8 : grille rejetée, fenêtre 4/5, quatre familles sans verdict.
+Sept anciennes grilles identiques à S49. Budget suivant 76800/153600 ~827 s estimés,
+admission incertaine. 123 tests verts, deux ignorés ; rapport REFERENCE-C22-S56.
