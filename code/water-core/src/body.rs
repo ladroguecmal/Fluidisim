@@ -22,20 +22,45 @@
 //! Ces deux approximations sont exactes dans le montage de C10 — eau calme — et c'est exactement le
 //! domaine où les références de C10 sont, elles aussi, exactes.
 //!
-//! # Une convention qui manquait au corpus
+//! # La masse volumique n'est pas une constante d'ici — ADR-048
 //!
-//! Aucun document du projet ne fixait la masse volumique de l'eau. La référence de C10
-//! (`T = 1,00 s`) n'est retrouvée qu'avec `ρ = 1000 kg/m³` : l'eau douce. La constante est donc
-//! posée ici, explicitement, et l'eau de mer — `≈1025` — est signalée comme un choix à faire, pas
-//! comme un détail. Voir angle mort A103.
+//! Aucun document du projet ne fixait la masse volumique de l'eau, et ce fichier l'a longtemps
+//! posée à `1000` en affirmant que *c'était la valeur avec laquelle la référence de C10 se
+//! referme*. **C'était faux, et mesurément faux** : les trois références de C10 sont construites
+//! *avec* la constante, donc leur écart est nul pour toute valeur. Le balayage est dans
+//! `docs/validation/RHO-EAU-S58.md` ; la faute est une instance de l'angle mort **A104**, énoncé
+//! trois modules plus loin dans le harnais.
+//!
+//! ADR-048 tranche A103 : la valeur du projet est celle de l'**eau de mer**, et elle devient une
+//! propriété du **milieu**, parce que le monde contient aussi des eaux intérieures — et que
+//! l'estuaire est l'endroit où un même corps change de tirant en avançant.
 
-/// Masse volumique de l'eau douce, en kg/m³.
+/// Le milieu dans lequel un corps flotte — ADR-048 §3 D2.
 ///
-/// **Convention, pas mesure.** Elle vaut `1000` parce que c'est la valeur avec laquelle la référence
-/// de C10 se referme. L'eau de mer vaut ≈1025 kg/m³ : un cube de densité 500 y flotte avec 2,5 % de
-/// tirant en moins. Le jour où le projet distingue les deux, ce choix devient un paramètre de
-/// `HydroSample` et cette constante devient sa valeur par défaut.
-pub const RHO_EAU: f64 = 1000.0;
+/// Un paramètre, **pas un champ** : aucun mélange, aucune stratification, aucun transport de
+/// salinité n'est introduit ici. Le jour où la salinité devient un champ transporté, c'est ici
+/// qu'elle arrive, et ce sera un autre ADR.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Milieu {
+    /// Masse volumique, en kg/m³.
+    pub rho: f64,
+}
+
+impl Milieu {
+    /// Eau de mer — **la valeur du projet** (ADR-048 D1). Convention, pas mesure : aucune mesure
+    /// du corpus ne départage 1025 de 1000, et il n'en existe pas de candidate. Le choix se fait
+    /// sur le domaine — mer ouverte, ADR-001 — et ADR-048 §4 dit ce qui l'inverserait.
+    pub const MER: Milieu = Milieu { rho: 1025.0 };
+
+    /// Eau douce — rivières, lacs, et la valeur que le projet a portée par défaut de S21 à S58.
+    pub const EAU_DOUCE: Milieu = Milieu { rho: 1000.0 };
+}
+
+impl Default for Milieu {
+    fn default() -> Self {
+        Milieu::MER
+    }
+}
 
 /// Accélération de la pesanteur, en m/s². Même valeur que `background.rs`.
 pub const G: f64 = 9.81;
@@ -72,8 +97,8 @@ impl FloatingBox {
     }
 
     /// Force verticale nette, en newtons : poussée d'Archimède moins poids. Vers le haut si positive.
-    pub fn force_verticale(&self, z_c: f64, eta: f64) -> f64 {
-        RHO_EAU * G * self.volume_immerge(z_c, eta) - self.masse() * G
+    pub fn force_verticale(&self, milieu: Milieu, z_c: f64, eta: f64) -> f64 {
+        milieu.rho * G * self.volume_immerge(z_c, eta) - self.masse() * G
     }
 
     /// Altitude d'équilibre du centre, par bissection sur la force.
@@ -82,8 +107,8 @@ impl FloatingBox {
     /// converge sans hypothèse supplémentaire. Renvoie `None` si le corps ne peut pas flotter,
     /// c'est-à-dire si sa masse volumique dépasse celle de l'eau : le cas est réel, il ne doit pas
     /// se traduire par une valeur silencieuse.
-    pub fn equilibre(&self, eta: f64) -> Option<f64> {
-        if self.rho >= RHO_EAU {
+    pub fn equilibre(&self, milieu: Milieu, eta: f64) -> Option<f64> {
+        if self.rho >= milieu.rho {
             return None;
         }
         // Encadrement : entièrement immergé (force maximale, positive) et entièrement émergé
@@ -91,7 +116,7 @@ impl FloatingBox {
         let (mut bas, mut haut) = (eta - self.cote_m, eta + self.cote_m);
         for _ in 0..80 {
             let m = 0.5 * (bas + haut);
-            if self.force_verticale(m, eta) > 0.0 {
+            if self.force_verticale(milieu, m, eta) > 0.0 {
                 bas = m;
             } else {
                 haut = m;
@@ -102,8 +127,8 @@ impl FloatingBox {
 
     /// Tirant d'eau à l'équilibre, en mètres — la référence fermée de C10 vaut
     /// `d = (ρ_corps/ρ_eau)·H`.
-    pub fn tirant(&self, eta: f64) -> Option<f64> {
-        let z_c = self.equilibre(eta)?;
+    pub fn tirant(&self, milieu: Milieu, eta: f64) -> Option<f64> {
+        let z_c = self.equilibre(milieu, eta)?;
         Some(eta - (z_c - self.cote_m * 0.5))
     }
 }
@@ -121,9 +146,15 @@ mod tests {
 
     #[test]
     fn tirant_du_cube_de_c10() {
-        // d = (ρ_corps/ρ_eau)·H = 0,25 m — CAS-CANONIQUES, C10.
-        let d = cube().tirant(0.0).expect("le cube flotte");
-        assert!((d - 0.25).abs() < 1e-6, "tirant {d}");
+        // d = (ρ_corps/ρ_eau)·H. **Ce littéral est une conséquence d'ADR-048 D1, pas une mesure** :
+        // 500/1025 × 0,5 = 0,243902…  En eau douce il vaudrait 0,25, le chiffre que le corpus a
+        // porté de S21 à S58. Ces deux assertions sont le SEUL contrôle du projet sur la masse
+        // volumique — le cas canonique C10, lui, est aveugle (A180, RHO-EAU-S58).
+        let d = cube().tirant(Milieu::MER, 0.0).expect("le cube flotte");
+        assert!((d - 0.243_902_439_024_39).abs() < 1e-9, "tirant {d}");
+
+        let douce = cube().tirant(Milieu::EAU_DOUCE, 0.0).expect("le cube flotte");
+        assert!((douce - 0.25).abs() < 1e-9, "tirant en eau douce {douce}");
     }
 
     #[test]
@@ -131,9 +162,30 @@ mod tests {
         // La référence est relative à la surface libre, pas à z = 0. Un test qui n'interroge que
         // eta = 0 ne peut pas révéler une confusion entre les deux — angle mort A100.
         for eta in [-3.0, -0.4, 0.0, 0.7, 12.5] {
-            let d = cube().tirant(eta).expect("le cube flotte");
-            assert!((d - 0.25).abs() < 1e-6, "eta {eta}, tirant {d}");
+            let d = cube().tirant(Milieu::MER, eta).expect("le cube flotte");
+            assert!((d - 0.243_902_439_024_39).abs() < 1e-9, "eta {eta}, tirant {d}");
         }
+    }
+
+    /// Le milieu commande, et il commande la bonne quantité — ADR-048 §2.
+    ///
+    /// Essai de sensibilité : la grandeur doit varier, et varier **de la quantité prévue par la
+    /// formule fermée**. Un paramètre qu'on introduit sans vérifier qu'il déplace quelque chose
+    /// est un paramètre qu'on croira réglé alors qu'il sera mort — c'est la faute inverse de celle
+    /// qu'A180 décrit, et elle est aussi facile à commettre.
+    #[test]
+    fn le_tirant_suit_la_masse_volumique_du_milieu() {
+        let c = cube();
+        for rho_eau in [1000.0, 1010.0, 1025.0, 1100.0] {
+            let m = Milieu { rho: rho_eau };
+            let d = c.tirant(m, 0.0).expect("le cube flotte");
+            let attendu = (c.rho / rho_eau) * c.cote_m;
+            assert!((d - attendu).abs() < 1e-9, "ρ_eau {rho_eau}, tirant {d}");
+        }
+        // Et l'écart mer/eau douce est bien celui que le corpus annonçait depuis S21 : 2,44 %.
+        let mer = c.tirant(Milieu::MER, 0.0).unwrap();
+        let douce = c.tirant(Milieu::EAU_DOUCE, 0.0).unwrap();
+        assert!(((douce - mer) / douce - 0.024_390_243_9).abs() < 1e-9);
     }
 
     #[test]
@@ -142,7 +194,23 @@ mod tests {
             cote_m: 0.5,
             rho: 11340.0,
         };
-        assert!(plomb.equilibre(0.0).is_none());
+        assert!(plomb.equilibre(Milieu::MER, 0.0).is_none());
+
+        // Le seuil est celui du milieu, pas une constante : un corps à 1010 kg/m³ coule en eau
+        // douce et flotte en mer. C'est le cas que D2 rend exprimable.
+        let saumatre = FloatingBox {
+            cote_m: 0.5,
+            rho: 1010.0,
+        };
+        assert!(saumatre.equilibre(Milieu::EAU_DOUCE, 0.0).is_none());
+        assert!(saumatre.equilibre(Milieu::MER, 0.0).is_some());
+    }
+
+    #[test]
+    fn le_defaut_du_projet_est_la_mer() {
+        assert_eq!(Milieu::default(), Milieu::MER);
+        assert_eq!(Milieu::MER.rho, 1025.0);
+        assert_eq!(Milieu::EAU_DOUCE.rho, 1000.0);
     }
 
     #[test]

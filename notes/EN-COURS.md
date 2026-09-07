@@ -72,7 +72,7 @@ Objectif         : Trancher A103 — la masse volumique de l'eau — sur délég
 - [x] **P2** — recenser tous les emplois de la masse volumique dans le code et dans le corpus ; établir ce qui en dépend et ce qui n'en dépend pas.
 - [x] **P3** — balayer la constante et mesurer, pour chaque grandeur publiée, l'écart ET la valeur absolue ; figer le constat par un test.
 - [x] **P4** — ADR-048 : trancher, dire ce qu'il faudrait pour inverser, et corriger la justification fautive de body.rs sans réécrire d'ADR.
-- [ ] **P5** — appliquer la décision au code ; vérifier les 123 tests, la campagne physics et les deux hashs.
+- [x] **P5** — appliquer la décision au code ; vérifier les 123 tests, la campagne physics et les deux hashs.
 - [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, passation et jeton.
 
 ### Notes de reprise
@@ -106,3 +106,11 @@ propriété du milieu, type Milieu avec MER et EAU_DOUCE, motif estuaire ; D3 la
 reste construite avec la constante — pas de littéral inventé — et sa cécité est écrite (A180).
 Section 4 : ce qu il faudrait pour inverser chacune des trois. Notes correctives datées dans
 CAS-CANONIQUES et 00_INDEX, sans réécriture. Reste P5 : appliquer au code.
+
+P5 : Milieu introduit dans water-core (MER 1025 par defaut, EAU_DOUCE 1000) ; RHO_EAU retiree
+de l export. force_verticale, equilibre et tirant prennent le milieu. physics.rs C10 utilise
+Milieu::default(). Tests de body.rs transposes : le litteral devient 0,243902439, avec mention
+qu il decoule d ADR-048 D1 et non d une mesure ; deux tests ajoutes (sensibilite reelle au
+milieu, et un corps a 1010 qui coule en eau douce mais flotte en mer). 125 tests reussis
+(40 coeur + 85 harnais), deux ignores. Hashs check inchanges. Campagne physics identique :
+seul C04 ordre un echoue comme voulu, C08 sans verdict. C10 vert aux nouvelles valeurs.

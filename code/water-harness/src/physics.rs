@@ -22,7 +22,7 @@
 //! n'existent pas. Voir `cas_en_attente()` : la liste est imprimée à chaque exécution, pour qu'un
 //! rapport vert ne se lise jamais comme une couverture complète.
 
-use water_core::{Background, FloatingBox, SimTime, WorldPos, RHO_EAU};
+use water_core::{Background, FloatingBox, Milieu, SimTime, WorldPos};
 
 pub const G: f64 = 9.81;
 
@@ -428,11 +428,15 @@ pub fn borne_referentiel(bg: &Background, t: SimTime) -> Cas {
 /// Cube de 0,5 m, `ρ = 500 kg/m³` (CAS-CANONIQUES, C10) :
 ///
 /// ```text
-/// tirant d'eau     d = (ρ_corps/ρ_eau)·H            = 0,25 m
+/// tirant d'eau     d = (ρ_corps/ρ_eau)·H            = 0,243902 m
 /// force résiduelle F(z_équilibre)                    = 0
-/// raideur          k = ρ_eau·g·A                     = 2452,5 N/m
-/// période          T = 2π·√(ρ_corps·H/(ρ_eau·g))     = 1,003 s
+/// raideur          k = ρ_eau·g·A                     = 2513,8125 N/m
+/// période          T = 2π·√(ρ_corps·H/(ρ_eau·g))     = 0,990726 s
 /// ```
+///
+/// **Les trois valeurs numériques ci-dessus ont changé en S58**, et aucun verdict n'a bougé :
+/// ADR-048 porte le milieu du projet à l'eau de mer, `ρ = 1025`. Les chiffres de S21 — 0,25 m,
+/// 2452,5 N/m, 1,003 s — étaient ceux de l'eau douce.
 ///
 /// **Ce que ces quatre cas testent vraiment.** Le tirant est mesuré **au point d'élévation maximale
 /// du champ**, pas à `η = 0` : la référence de C10 est relative à la surface libre, et un montage
@@ -451,10 +455,15 @@ pub fn borne_referentiel(bg: &Background, t: SimTime) -> Cas {
 /// quatre cas ci-dessous s'y conforment à des degrés très inégaux, et les quatre affichent
 /// **0,000 %** — ce qui est un signal, pas un résultat :
 ///
-/// - **`C10-tirant`** est le seul vraiment indépendant : la valeur est trouvée par **bissection sur
-///   la force**, quatre-vingts itérations, et comparée à une formule fermée que le solveur ignore.
-///   Un signe inversé, une saturation manquante ou une confusion entre centre et carène le font
-///   tomber ;
+/// - **`C10-tirant`** est le seul indépendant **par la méthode** : la valeur est trouvée par
+///   **bissection sur la force**, quatre-vingts itérations, et comparée à une formule fermée que le
+///   solveur ignore. Un signe inversé, une saturation manquante ou une confusion entre centre et
+///   carène le font tomber. *Mais il n'est pas indépendant par les **paramètres**, et S58 a mesuré
+///   ce que cela coûte* : sa référence contient `milieu.rho`, donc porter la masse volumique de
+///   1000 à 1025 déplace la mesure de 2,44 % **et la référence d'autant** — écart 0,000 %, cas vert.
+///   Les quatre assertions de C10 sont **aveugles à `ρ_eau`**, et le corpus a pourtant présenté ce
+///   cas pendant trente-sept sessions comme celui qui l'arbitrait. Indépendance de méthode et
+///   indépendance de paramètre sont deux propriétés distinctes — **A180**, `RHO-EAU-S58` ;
 /// - **`C10-force`** en est le corollaire direct : il vérifie la convergence de la bissection, pas la
 ///   physique ;
 /// - **`C10-raideur`** et **`C10-période`** sont **quasi tautologiques** : la force est construite
@@ -487,29 +496,33 @@ pub fn c10_cube_flottant(bg: &Background, t: SimTime) -> Vec<Cas> {
         }
     }
 
-    let z_eq = cube.equilibre(e_max).expect("le cube flotte");
+    // Le milieu du projet — ADR-048 D1. Les quatre assertions ci-dessous ne le discriminent pas
+    // (A180) : elles vérifient la statique, pas la valeur.
+    let milieu = Milieu::default();
+    let z_eq = cube.equilibre(milieu, e_max).expect("le cube flotte");
     let poids = cube.masse() * G;
     let aire = cube.aire();
 
     // Raideur par différence centrée sur ±1 mm, bien à l'intérieur de la plage linéaire.
     let h = 1e-3;
     let k_mesuree =
-        -(cube.force_verticale(z_eq + h, e_max) - cube.force_verticale(z_eq - h, e_max)) / (2.0 * h);
+        -(cube.force_verticale(milieu, z_eq + h, e_max) - cube.force_verticale(milieu, z_eq - h, e_max))
+            / (2.0 * h);
     let t_impliquee = core::f64::consts::TAU * (cube.masse() / k_mesuree).sqrt();
 
     vec![
         Cas {
             id: "C10-tirant",
             grandeur: format!("tirant d'eau, surface libre à η = {e_max:.3} m"),
-            mesure: cube.tirant(e_max).expect("le cube flotte"),
-            reference: (cube.rho / RHO_EAU) * cube.cote_m,
+            mesure: cube.tirant(milieu, e_max).expect("le cube flotte"),
+            reference: (cube.rho / milieu.rho) * cube.cote_m,
             tolerance_rel: 0.01,
             source: "CAS-CANONIQUES C10 — d = (ρ_corps/ρ_eau)·H",
         },
         Cas {
             id: "C10-force",
             grandeur: "force verticale résiduelle / poids".into(),
-            mesure: cube.force_verticale(z_eq, e_max).abs() / poids,
+            mesure: cube.force_verticale(milieu, z_eq, e_max).abs() / poids,
             reference: 0.0,
             tolerance_rel: 1e-6,
             source: "équilibre statique — poussée = poids",
@@ -518,7 +531,7 @@ pub fn c10_cube_flottant(bg: &Background, t: SimTime) -> Vec<Cas> {
             id: "C10-raideur",
             grandeur: "raideur hydrostatique −∂F/∂z".into(),
             mesure: k_mesuree,
-            reference: RHO_EAU * G * aire,
+            reference: milieu.rho * G * aire,
             tolerance_rel: 0.01,
             source: "ADR-008 §3 — k = ρ·g·A",
         },
@@ -526,7 +539,7 @@ pub fn c10_cube_flottant(bg: &Background, t: SimTime) -> Vec<Cas> {
             id: "C10-période",
             grandeur: "période de pilonnement impliquée par la raideur".into(),
             mesure: t_impliquee,
-            reference: core::f64::consts::TAU * (cube.rho * cube.cote_m / (RHO_EAU * G)).sqrt(),
+            reference: core::f64::consts::TAU * (cube.rho * cube.cote_m / (milieu.rho * G)).sqrt(),
             tolerance_rel: 0.05,
             source: "CAS-CANONIQUES C10 — T = 2π·√(ρ_corps·H/(ρ_eau·g)), sans masse ajoutée",
         },
