@@ -1084,7 +1084,22 @@ pub fn c08_convergence(h0: f64, t_fin: f64) -> Vec<Cas> {
         for (k, (n, dx)) in grilles.into_iter().enumerate() {
             e[k] = erreur_l1_ritter(n, dx, h0, t_fin, sc);
         }
-        let pr = ((e[0] - e[1]).abs() / (e[1] - e[2]).abs()).log2();
+        // **La forme de Richardson passe par l'estimateur partagé** (S43). Elle était écrite ici
+        // une troisième fois — `physics.rs` en porte deux — et chacune refusait différemment. Celle
+        // de `ordre_grossier_estime` refuse dans le **type** : `None` quand il n'y a aucun ordre à
+        // mesurer, ce qui arrive de trois façons dont la plus grave est *deux grilles successives
+        // de même erreur*, c'est-à-dire un solveur qui ne converge pas.
+        //
+        // Ce que cette ligne rendait auparavant — `NaN` ou `−∞` — faisait bien échouer le cas, par
+        // la tolérance conditionnelle. Mais elle ne le **disait** pas, et le rapport affichait un
+        // `NaN` sans explication. Le `f64::NAN` ci-dessous est désormais un refus **explicite**.
+        let pr = crate::physics::ordre_grossier_estime(&[
+            (grilles[0].0, e[0]),
+            (grilles[1].0, e[1]),
+            (grilles[2].0, e[2]),
+        ])
+        .0
+        .unwrap_or(f64::NAN);
         // L'ordre direct, disponible seulement parce qu'une solution exacte existe. Il n'est pas
         // l'assertion du cas : il sert a verifier que la forme de Richardson dit la meme chose.
         let pd = (e[1] / e[2]).log2();

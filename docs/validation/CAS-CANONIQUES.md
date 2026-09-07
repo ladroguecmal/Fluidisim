@@ -479,6 +479,16 @@ Attrape l'angle de Kelvin codé en dur (angle mort A05).
 
 **Conditions de mesure** *(B-S23)*.
 
+> **Essai à zéro** *(S43, **A167**)* : il ne porte pas sur le solveur mais sur **l'estimateur**.
+> Une suite d'erreurs **constante** — trois grilles, la même erreur — n'a aucun ordre : le solveur
+> ne converge pas. L'estimateur doit **refuser**, pas rendre un nombre.
+>
+> **Il rendait `1,0`** — l'ordre nominal du schéma, dans les bornes de G10, donc sans aucun
+> signalement. Deux autres formes de « rien à mesurer » rendaient la même valeur : moins de trois
+> grilles, et des erreurs toutes nulles. Le refus est désormais dans le **type** (`Option<f64>`),
+> et l'estimateur est **partagé** par les deux véhicules au lieu d'être écrit trois fois.
+> Angle mort **A171**.
+
 - **Le support doit être nommé, et les trois proposés ne sont pas interchangeables.** Un ordre
   mesuré sur une solution **discontinue** est structurellement inférieur à un ordre mesuré sur une
   solution **lisse** — et l'écart n'est pas marginal : le solveur de B-S22 donne **0,95 sur la seiche

@@ -212,6 +212,7 @@ ce que les sources avaient omis.
 | **A168** | Écrire une distinction ne suffit pas à s'en servir : `ADR-043` §6 ignore le §5 du même document | 2 | ADR-043, note S39 |
 | **A169** | Une prudence justifiée par une mauvaise raison se défend mal et se reporte longtemps | 2 | ADR-047 §6 |
 | **A170** | Une saturation d'affichage transforme un refus en la meilleure mesure possible | **1** | S42, `c03_seiche` |
+| **A171** | Une valeur de repli qui coïncide avec la valeur nominale est invisible à tout contrôle | **1** | S43, `ordre_grossier_estime` |
 
 Cent huit angles morts recensés, tous traités ou explicitement cadrés. Aucun n'est laissé sans
 propriétaire.
@@ -1243,6 +1244,24 @@ pendant quatre sessions.
   `1000000` là où la mesure valait `NaN` (**A149**). *Toute valeur de repli appliquée **après** une
   mesure doit préserver ce que la mesure a refusé : un refus qui traverse une saturation devient un
   résultat.* Trouvé par l'essai à zéro de S42, pas par la relecture.
+
+- **A171** *(sévérité 1)* — **Une valeur de repli qui coïncide avec la valeur nominale est
+  invisible à tout contrôle.** `ordre_grossier_estime` rendait **`1.0`** dans les trois cas où il
+  n'y a aucun ordre à mesurer : moins de trois grilles, erreurs toutes nulles, et surtout **deux
+  grilles successives de même erreur** — c'est-à-dire un solveur qui **ne converge pas**.
+
+  Or `1,0` est **l'ordre nominal du schéma d'essai**, la valeur qu'on espère lire. Et le garde-fou
+  **G10**, qui signale tout ordre hors de `[0,3 ; 3,0]`, ne pouvait pas broncher : `1,0` est
+  dedans. *Le repli était silencieux par construction* — non par oubli de signalement, mais parce
+  que **la valeur choisie pour « ne rien dire » était celle qui dit tout va bien**.
+
+  **Ce qu'A170 décrit en général, celui-ci le porte au pire** : une valeur de repli distincte du
+  domaine nominal — `10⁶` périodes pour C03 — finit par paraître suspecte à un lecteur. Une valeur
+  de repli **dans** le domaine nominal ne paraîtra jamais suspecte à personne.
+
+  *Une valeur de repli doit être choisie hors du domaine des valeurs valides, ou ne pas exister :
+  le refus va dans le type.* Et l'audit de S34, qui a examiné G10 et corrigé son bornage, n'a pas
+  vu ce repli — **il était sur la ligne juste au-dessus du `clamp`**.
 
 ---
 

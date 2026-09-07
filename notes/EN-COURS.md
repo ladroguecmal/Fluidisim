@@ -104,11 +104,11 @@ tient, c'est une leçon sur ce que voit un audit de garde-fous.
       doit rendre `p` **exactement** ; une suite **constante** doit être refusée. Constater d'abord.
 - [x] **P3** — remplacer les replis par un refus, **avec leur témoin** (**L119**) — et vérifier
       que le signalement se déclenche, ce que `1,0` empêchait.
-- [ ] **P4** — **les trois estimateurs refusent-ils pareil ?** Le corpus contient déjà la bonne
+- [x] **P4** — **les trois estimateurs refusent-ils pareil ?** Le corpus contient déjà la bonne
       solution, `Ordre::Indetermine` ; les deux autres l'ignorent (**S42-3**, **L162**).
-- [ ] **P5** — vérifier qu'**aucun chiffre publié ne bouge** : `p = 0,9997` (S36), les ordres du
+- [x] **P5** — vérifier qu'**aucun chiffre publié ne bouge** : `p = 0,9997` (S36), les ordres du
       tableau de `ADR-040` §3, et les deux hashs.
-- [ ] **P6** — répercussions : `A170` étendu ou confirmé, `CAS-CANONIQUES` C08, et ce que S34
+- [x] **P6** — répercussions : `A170` étendu ou confirmé, `CAS-CANONIQUES` C08, et ce que S34
       n'avait pas vu.
 - [ ] **P7** — rituel de fin (`REPRISE.md` §6).
 
