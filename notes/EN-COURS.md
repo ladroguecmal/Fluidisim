@@ -59,85 +59,25 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S64
-État             : terminée
-Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Objectif         : S62-1 — corriger la sommation de variance, puis trancher par ADR la fenêtre
-                   d'échantillonnage de Hs.
+Session          : S65
+État             : en cours
+Agent            : Codex (git et cargo disponibles)
+Objectif         : Brancher la graine sur les phases (S64-1), conserver la reproductibilité.
 ```
 
 ### Plan
 
-- [x] **P1** — passation, jeton, plan seul.
-- [x] **P2** — **diagnostiquer le `NaN` avant de le corriger** : S62 l'a attribué à l'annulation catastrophique sans le vérifier.
-- [x] **P3** — corriger ce que le diagnostic désigne, avec témoin et essai de refus ; vérifier que les valeurs nominales ne bougent pas.
-- [x] **P4** — mesurer la loi complète, jusqu'aux fenêtres qui étaient hors d'atteinte.
-- [x] **P5** — ADR : trancher la fenêtre, ou dire pourquoi elle ne se tranche pas.
-- [x] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
+- [x] **P1** — état réel, lectures de reprise, jeton et plan seul.
+- [>] **P2** — fonction entière indexée par graine/composante, raccord scénario ; tests de reproductibilité et sensibilité.
+- [ ] **P3** — mesurer les déplacements nominaux et plusieurs graines ; consigner puis committer les nouveaux hashs avant leur vérification.
+- [ ] **P4** — vérifier tests et scénarios sur références committées ; documenter portée statistique et limites.
+- [ ] **P5** — rituel : journal, actions, index/décomptes, corrections datées, passation et jeton libre.
 
 ### Notes de reprise
 
-Départ eacd9d9. Acquis de S62 : `Hs` est aveugle à `hs` (rapport 0,914723 sur un facteur 8) et
-gouverné par la fenêtre rapportée à `λ_pic` — 8,53 % à 6,8 λ, **0,28 % à 54,7 λ**. À 12288 m
-la mesure rend `NaN`, et le cas échoue alors correctement, sans faux succès.
-
-**La cause du `NaN` est déclarée non établie.** S62 a écrit « la variance en une passe rend
-`NaN` » — c'est une hypothèse, pas une mesure, et l'ordre de grandeur ne la soutient pas : à
-16,7 millions de points, `somme2/n ≈ 0,09` et `moyenne² ≈ 0`, donc `m0` n'a aucune raison de
-passer sous zéro. **Une explication correcte n'est pas une cause tant que son effet n'a pas été
-mesuré** (**L75**), et le dépôt a déjà payé cette faute.
-
-**L'autre candidat, plus probable et plus grave.** `eta()` s'écrit
-`bg.eval(p, t).map(...).unwrap_or(f64::NAN)` : un point hors du domaine évaluable rend `NaN`, et
-la somme le propage. À 12288 m de côté les positions vont de −6144 à +6144 m — l'ancre et la
-portée du fond n'ont pas été vérifiées à cette distance. Si c'est cela, **le cas ne dit pas
-qu'un point était invalide, il dit seulement que la mesure est `NaN`** : le refus fonctionne,
-le diagnostic manque. C'est la famille de **L166** — *c'est l'aval qu'il faut suivre*.
-
-Interdits : ne pas changer la fenêtre nominale sans ADR (elle déplace un chiffre publié), ne pas
-toucher aux tolérances, ne pas rendre le cas vert en élargissant la marge.
-
-P2 : **l explication de S62 etait fausse, et l action S62-1 prescrivait donc une correction
-inutile** (Welford). Le NaN ne vient pas de l annulation : to_local refuse tout point a plus de
-4096 m de l ancre (types.rs:90, LIMIT = 4096 x WORLD_UNITS_PER_METRE), eval rend None, eta rend
-NaN par unwrap_or, et la somme le propage. Confirme a six metres pres : demi-fenetre 4092 m rend
-0,505 pour cent, demi-fenetre 4098 m rend NaN.
-
-Consequences. La fenetre utilisable va jusqu a 8192 m de cote, soit 145 lambda_pic — trois fois
-ce qu il faut. Et le cas ne dit pas pourquoi il rend NaN : un point hors portee ne se compte
-nulle part, exactement le defaut corrige en S45 sur C10 (A173, L166). C est l aval du NaN qui
-manque, pas la sommation.
-
-Note : la faute que S63 vient de recenser — une prescription ecrite sans etre eprouvee — a ete
-commise par S62, la session immediatement precedente, dans l action meme que S64 execute.
-
-P3 : les points hors portee sont comptes et le motif est ecrit dans le libelle ; la mesure reste
-refusee (pas de variance sur un domaine ampute — faute corrigee en S45 sur C10). Test de refus
-et temoin. 131 tests reussis, deux ignores ; hashs et valeur nominale inchanges.
-
-P4, et il a corrige deux affirmations de S62-1 puis en a produit une troisieme.
- (a) **Le cout annonce etait faux** : mode physics 33,9 s au nominal, 35,9 s avec la fenetre
-     64 fois plus grande — **+6 pour cent**, pas 64 fois. La mesure de Hs est marginale devant
-     les solveurs. L action S62-1 avancait deux raisons de ne pas elargir, toutes deux fausses.
- (b) **La correction marche sur une mer ou le cas echouait** : tp=9 rendait 15,58 pour cent a la
-     fenetre nominale, **0,184 pour cent** a 3072 m. Six configurations mesurees a cette fenetre :
-     0,152 / 0,184 / 0,282 / 0,282 / 0,367 pour cent — et **6,612 pour cent a 256 composantes**.
- (c) **La graine du scenario ne commande rien** : six graines, six fois 0,282 pour cent au
-     chiffre pres. phase0 = i x 0x9E3779B9, sans PRNG ; SeaState n a pas de champ graine, et
-     scenario.graine est lue puis jamais utilisee. **Il n existe qu une realisation par etat de
-     mer**, donc aucune barre d erreur n est mesurable et aucune tolerance ne se calibre. A186.
- (d) L ecart a 256 composantes ne vient ni de la fenetre ni du pas : 6,614 et 6,615 pour cent a
-     pas 1,5 et 1,0 m, fenetre egale. Cause **non identifiee** — A187, et elle borne D2.
-
-P5 : ADR-051. D1 fenetre a 3072 m, declaree dans le scenario ; chiffre publie 8,528 vers 0,282
-pour cent, et le cas qui echouait a tp=9 passe desormais. D2 tolerance conservee a 10 pour cent,
-**et le cas y perd du pouvoir de detection** — marge reelle de 1,5 point a 9,7 : dit explicitement
-plutot que decouvert plus tard. Resserrer est bloque par deux faits mesures, A187 (6,6 pour cent a
-256 composantes, cause inconnue) et A186 (une seule realisation par etat de mer). D3 hashs et
-autres mesures inchanges. Section 3 : ce qu il faudrait pour inverser D1 et D2.
-
-P6 : rituel exécuté. Journal S64, A186 et A187 (sévérité 2, ouverts), L182, S62-1 close,
-S64-1 / S64-2 / S64-3 ouvertes avec leur ordre. Index et REPRISE : ADR 50 vers 51, angles 185
-vers 187, tests 130 vers 131. Aucun invariant invalidé, aucun ADR réécrit ; un chiffre publié
-déplacé, par ADR, avec sa mesure et ses réserves.
-Jeton libre. Reste la fusion dans master.
+Départ master 6a128e7, copie reprise-projet-29ef50 au même commit et propre. S57–S64 réalisées
+par Claude Code : C22 clos, A103 close. Suite prioritaire S64-1 puis S64-3, puis S64-2 par ADR.
+S63-1 (couche dispersive) reste ouverte. Aucun seuil de Hs resserré ici.
+Les références H1 devront changer puisque les phases changent ; inscription dans un commit
+précédant le check qui les juge. Pas de mode compatible caché pour une graine particulière.
+La copie 29ef50 sera avancée vers master à chaque étape pour conserver une passation commune.

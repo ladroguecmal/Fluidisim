@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-08 11:20 +02:00
-Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-08 00:51 +02:00
+Agent            : Codex (git et cargo disponibles)
+Session en cours : S65
 Dernière session : S64 — 2026-09-08 — fenêtre de Hs à 3072 m ; A186, A187, L182
 Session suivante : S65 — S64-1, brancher la graine sur les phases
 
