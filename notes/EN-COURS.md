@@ -60,7 +60,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ```
 Session          : S61
-État             : en cours
+État             : terminée
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
 Objectif         : S60-1 — atteindre le régime où l'erreur d'une grille passe sous l'écart des
                    oracles, ou établir qu'il est hors d'atteinte et dire ce qui le remplace.
@@ -73,7 +73,7 @@ Objectif         : S60-1 — atteindre le régime où l'erreur d'une grille pass
 - [x] **P3** — si non : dériver ce que le filtre ×30 exige réellement, et **le vérifier contre les cinq campagnes historiques**, dont les refus sont connus.
 - [x] **P4** — conclure : note corrective datée sur ADR-049 D4, et ce qui remplace l'expérience impossible.
 - [x] **P5** — appliquer au code ce qui doit l'être, avec essais de refus et témoins.
-- [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
+- [x] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
 
 ### Notes de reprise
 
@@ -124,3 +124,8 @@ mode sec ne contourne aucun refus de taille. 129 tests reussis, deux ignores ; h
 Note d honnetete : deux campagnes ont ete lancees par distraction pendant cette etape, faute
 d avoir ce mode sec — l une de 14 min interrompue, l autre de 6 min. Aucun resultat n en depend.
 C est exactement le besoin auquel --annonce repond, rencontre en le construisant.
+
+P6 : rituel exécuté. Journal S61, A183 (sévérité 2, ouvert par décision), L179, S60-1 dissoute,
+S61-1 close par construction. Index et REPRISE : ADR 49 vers 50, angles 182 vers 183, tests 128
+vers 129. Aucun invariant invalidé, aucun ADR réécrit, aucun verdict déplacé.
+Jeton libre. Reste la fusion dans master.

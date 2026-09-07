@@ -18,12 +18,15 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 02:00 +02:00
+JETON            : libre
+Battement        : 2026-09-08 02:38 +02:00
 Agent            : Claude Code (Opus 5 ; git et cargo disponibles)
-Session en cours : S61 — S60-1, et d'abord vérifier que l'expérience prescrite est réalisable
-Dernière session : S60 — 2026-09-08 — filtre conservé, A179 requalifié ; A182, L178
-Session suivante : selon le résultat de S61
+Session en cours : aucune
+Dernière session : S61 — 2026-09-08 — le filtre est géométrique, S60-1 dissoute ; A183, L179
+Session suivante : S62 — S58-2, recenser les cas aveugles à leurs paramètres
+
+Le dossier C22 est fermé : un verdict (S59), un critère compris (S60, S61), quatre angles morts.
+Ce qui reste ouvert du côté de la convergence n'est plus une mesure mais **A114**.
 
 Note S58 : S57 puis S58 ont travaillé dans le worktree claude/reprise-projet-29ef50, et **les
 deux ont été fusionnées dans master en avance rapide** — bd9f087 puis 531491f. Les deux copies
@@ -146,6 +149,22 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
+**S61 :** **la frontière que quatre campagnes cherchaient se calculait.** L'erreur d'une grille
+et l'écart de deux oracles ont la **même origine** — l'erreur du schéma — donc leur rapport vaut
+`k^p/(1 − 2^-p)`, où `k = oracle/grille`. Ajusté sur treize couples issus de cinq campagnes,
+oracles de 3200 à 89600 : `2,011·k^1,902·o^-0,058`, écart maximal 23,5 %. **La taille de l'oracle
+ne compte presque pas**, et le filtre ×30 équivaut à **« l'oracle est six fois plus fin que la
+grille la plus fine »**. L'historique s'y range sans exception : `k` = 2 en S48, 4 en S49 et S56,
+6 en S57, **7 en S59** — l'admission bascule exactement là.
+**S60-1 est dissoute** : `ratio < 1` demande `k ≈ 1`, l'emboîtement impose `k ≥ 2`, et le minimum
+mesuré est 4,75. *Le régime n'était pas coûteux, il n'existait pas.*
+[`ADR-050`](docs/adr/ADR-050-le-filtre-de-contamination-est-une-condition-geometrique.md) ouvre
+**A183** — *le seuil d'admission d'une mesure d'ordre est une fonction de l'ordre*, `k ≥ 4,7` à
+l'ordre deux et `k ≥ 15` à l'ordre un — et **L179** : *avant de mesurer une frontière, chercher
+si elle se calcule*. Une annonce d'admissibilité précède désormais chaque campagne, et
+`--annonce` la donne sans rien calculer. **Aucun solveur n'a été lancé pour ce résultat.**
+129 tests réussis, deux ignorés ; aucun verdict déplacé.
+
 **S60 :** **le critère de C22 est rouvert, instruit, et conservé.** Rouvrir un filtre juste
 après le succès qu'il avait retardé était le piège de la session ; il a été nommé dans le plan
 avant la première mesure, et **rien n'a été assoupli**. Deux mesures, en sens contraire. L'essai
@@ -254,10 +273,10 @@ le cas régulier p = 0,82 dont la stabilité n'est pas établie. Mesures et hash
 S45-1 close ; S47 recommandée : portée de la paire héritée C08-p/C08-coherence (S46-1).
 
 Quarante-huit sessions ici, **plus cinq dans une lignée parallèle réconciliée en S35** (B-S22 à
-B-S27) — **49 ADR** *(dont un acté)*, six spécifications, **quatorze registres** — **et du code qui
+B-S27) — **50 ADR** *(dont un acté)*, six spécifications, **quatorze registres** — **et du code qui
 tourne** : `code/`, étages **H1 et H3** du harnais, **deux δ d'essai** équilibrés et **tous deux
 montés sur leurs cas, confrontés l'un à l'autre et instrumentés, **plus un milieu à dispersion
-exacte** *(S39)*, **128 tests verts, deux ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **trois sans
+exacte** *(S39)*, **129 tests verts, deux ignorés** et 25 assertions analytiques — dont **une en échec par décision** (C04) et **trois sans
 verdict** (C08), **un succès depuis S59** : la fenêtre C22 800–12800 conclut à `p = 1,96`
 stabilisé, contre un oracle du même schéma. Quatre cas canoniques sur δ sont exécutés ici :
 **C01 et C03 passent**, C04 échoue, C08 ne conclut pas. **Le second véhicule passe C04 sur un montage dont le schéma et la mesure

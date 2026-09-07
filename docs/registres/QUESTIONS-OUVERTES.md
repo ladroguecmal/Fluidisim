@@ -688,10 +688,30 @@ l'ordre publié par S59 était mesurable en S56, à **3,29e-5** près, pour 1987
 
 | # | Action | Origine | Porteur | État |
 |---|---|---|---|---|
-| S60-1 | **Mesurer une grille dont l'erreur passe sous l'écart des oracles** — 25600 contre 51200/102400, erreur attendue à environ 3,7 fois l'écart, puis plus bas si le montage le permet. C'est le régime où l'on saura si la contamination reste additive et uniforme, et **le seul point qui manque pour attribuer un critère propre à l'ordre** | **A182**, ADR-049 D4 | session S61 | ouverte |
+| S60-1 *(dissoute en S61)* | **Mesurer une grille dont l'erreur passe sous l'écart des oracles** — 25600 contre 51200/102400, erreur attendue à environ 3,7 fois l'écart, puis plus bas si le montage le permet. C'est le régime où l'on saura si la contamination reste additive et uniforme, et **le seul point qui manque pour attribuer un critère propre à l'ordre** | **A182**, ADR-049 D4 | session S61 | **dissoute en S61 — le régime n'existe pas (ADR-050)** |
 
 > **S60-1 est peu chère et bloque tout le reste du dossier** : moins de sept minutes de calcul,
 > et sans elle aucun critère d'admission de l'ordre ne peut être proposé sans extrapoler hors du
 > domaine mesuré (**L175**). Elle passe avant S58-2, S59-1 et S58-1, qui sont des recensements
 > et ne se périment pas.
+
+## Actions relevées en séance — S61
+
+**S60-1 dissoute**, et non close : le régime qu'elle prescrivait — l'erreur d'une grille sous
+l'écart des oracles — demande `k ≈ 1` quand l'emboîtement impose `k ≥ 2`. Voir
+[`ADR-050`](../adr/ADR-050-le-filtre-de-contamination-est-une-condition-geometrique.md) et
+[`GEOMETRIE-DU-FILTRE-S61`](../validation/GEOMETRIE-DU-FILTRE-S61.md). L'hypothèse d'uniformité
+qu'elle devait éprouver est établie autrement : colonne « variation » plate à 2 % sur un facteur
+256 en erreur.
+
+**S61-1 close par construction dans la même séance** : l'annonce d'admissibilité s'affiche avant
+chaque campagne, et `--annonce` la donne sans rien calculer.
+
+**Rien de nouveau n'est différé.** Les actions ouvertes restent **S58-2**, **S59-1** et
+**S58-1**, dans cet ordre.
+
+> **Le dossier C22 est fermé.** Il a produit un verdict (S59), un critère compris (S60, S61) et
+> quatre angles morts — A179, A182, A183, plus A181 sur son protocole. Ce qui reste ouvert du
+> côté de la convergence n'est plus une mesure mais **A114** : l'oracle est du même schéma, et
+> aucune campagne de ce dispositif ne peut en sortir.
 

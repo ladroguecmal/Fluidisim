@@ -5094,3 +5094,60 @@ contre 51200/102400, où l'erreur attendue vaut environ 3,7 fois l'écart. C'est
 manque pour décider du critère, et il coûte moins de sept minutes. Restent S58-2, S59-1 et S58-1.
 A103 close en S58 ; l'état réel et l'infrastructure restent hors de portée, aucun distant créé.
 
+## S61 — 2026-09-08 — Quatre campagnes ont mesuré ce qu'un rapport d'entiers donnait
+
+**Agent : Claude Code (Opus 5)**, git et cargo disponibles. Départ 9f63f2c. Entrée : **S60-1**,
+mesurer une grille dont l'erreur passe sous l'écart des deux oracles.
+
+**Sorties.** [`ADR-050`](../docs/adr/ADR-050-le-filtre-de-contamination-est-une-condition-geometrique.md),
+[`GEOMETRIE-DU-FILTRE-S61`](../docs/validation/GEOMETRIE-DU-FILTRE-S61.md), l'annonce
+d'admissibilité et le mode `--annonce`, **A183**, **L179**, action **S61-1**.
+**S60-1 close par dissolution.**
+
+**Le premier geste a été d'éprouver la prescription** — c'est L177, apprise en S59, et elle a
+servi dès la session suivante. **Aucun solveur n'a été lancé pour ce résultat** : les treize
+points viennent des campagnes déjà consignées.
+
+**Décision structurante.** Le rapport entre l'erreur d'une grille et l'écart des deux oracles
+vaut `k^p / (1 − 2^-p)`, où `k = oracle/grille` : les deux quantités ont la **même origine**,
+l'erreur du schéma. Ajusté sur treize couples issus de cinq campagnes, oracles de 3200 à 89600 :
+`ratio ≈ 2,011·k^1,902·o^-0,058`, écart maximal **23,5 %**. **La taille de l'oracle ne compte
+presque pas.**
+
+Trois conséquences. **Le filtre ×30 équivaut à `k ≥ 6`** — une condition géométrique, lisible sur
+un rapport d'entiers avant tout calcul. L'historique s'y range sans exception : `k` valait 2 en
+S48, 4 en S49 et S56, 6 en S57, **7 en S59**, et l'admission bascule exactement là. **Quatre
+campagnes et près d'une heure de calcul ont mesuré ce que la suite 2, 4, 6, 7 donnait.**
+
+**Et S60-1 est dissoute** : `ratio < 1` demande `k ≈ 1`, quand l'emboîtement impose `k ≥ 2`. Le
+minimum atteignable est **4,75 mesuré**, et la dérive en `o^-0,058` ne l'efface jamais. *Le régime
+n'est pas coûteux, il n'existe pas.* L'hypothèse d'uniformité qu'il devait éprouver est établie
+autrement, et depuis longtemps : la colonne « variation » est plate à 2 % sur un facteur 16 en
+grille et 256 en erreur.
+
+**Une erreur de cette session, corrigée dans la session même.** Le premier chiffrage annonçait
+1 355 000 cellules et **72,3 h** — donc « hors budget ». Il extrapolait l'exposant **local**
+1,596, mesuré entre 76800 et 89600, alors que le calage sur toute la plage donne **1,9**. Le
+chiffre était faux et la conclusion trop douce. **C'est L175 une seconde fois, commise par la
+session qui venait de l'écrire.**
+
+**Ce que cela apprend sur le critère.** Le filtre est décrit depuis S48 comme empirique. C'est
+vrai de ce qu'il **borne**, faux de ce qu'il **exige** : `(o/n)^p ≥ 30·(1 − 2^-p)`. **Le seuil
+d'admission d'une mesure d'ordre est une fonction de l'ordre** — `k ≥ 4,7` à l'ordre deux,
+`k ≥ 15` à l'ordre un. Dimensionner la campagne suppose de connaître la réponse cherchée, et se
+tromper d'hypothèse ne produit pas d'erreur visible mais un **« sans verdict »** : l'histoire de
+C22 de S48 à S57 (**A183**, **L179**).
+
+**Ce qui a été construit.** L'annonce d'admissibilité s'affiche avant chaque campagne, et
+`--annonce` la donne sans rien calculer. Elle ne commande rien, dit qu'elle suppose l'ordre deux,
+et **avoue son incertitude entre `k = 5` et `k = 7`** — à `k = 6` elle annoncerait 31,6 contre
+28,7 mesurés, du mauvais côté du seuil. Un test la confronte à l'historique.
+
+**Validation.** **129 tests réussis** (40 cœur + 89 harnais), deux ignorés. Release compilée ;
+hashs `check` inchangés ; aucun verdict déplacé, aucun résultat rouvert.
+
+**Suite S62 : S61-1** est close par construction — l'annonce existe. Restent **S58-2** puis
+**S59-1**, deux recensements du même genre : des fautes identifiées dont on ignore le nombre
+d'instances, et qui ne se périment pas. Puis **S58-1**. A103 close en S58 ; l'état réel et
+l'infrastructure restent hors de portée, aucun distant créé.
+

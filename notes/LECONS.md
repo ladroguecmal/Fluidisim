@@ -2897,3 +2897,26 @@ résultat favorable doit être instruit à charge. La sortie honnête est souven
 changer** et de nommer l'expérience qui manque — ici, un régime jamais observé, que sept minutes
 de calcul suffiront à atteindre.
 
+## L179 — Avant de mesurer une frontière, chercher si elle se calcule
+
+*(S61)* Quatre campagnes, près d'une heure de calcul et quatre sessions ont cherché quelle taille
+d'oracle admettrait une grille. La réponse tenait dans un rapport d'entiers : les deux quantités
+comparées — l'erreur d'une grille et l'écart de deux oracles — ont **la même origine**, l'erreur
+du schéma, et leur rapport ne dépend que de `oracle/grille`, au carré. Le point de bascule était
+calculable dès la première campagne.
+
+Ce qui a caché la réponse est le mot **empirique**. Le filtre était décrit comme « un indicateur
+empirique, sans borne prouvée » — ce qui est vrai de ce qu'il **borne**, et faux de ce qu'il
+**exige**. La première qualité, honnêtement écrite, a dispensé quatre sessions d'examiner la
+seconde.
+
+**Réflexe :** quand un critère fait tâtonner, écrire son inégalité et y substituer la forme
+attendue des grandeurs qu'il compare. Si les deux viennent de la même source, leur rapport se
+simplifie et la frontière devient géométrique. **Et se méfier d'un critère qu'on qualifie
+d'empirique** : la mention décrit souvent sa garantie, pas son contenu.
+
+**Corollaire, payé dans la même session** : le calcul de dimensionnement a d'abord utilisé un
+exposant mesuré entre deux tailles voisines, extrapolé sur cinq décades — il annonçait 72 heures
+là où la réponse était « impossible ». **Un exposant local n'est pas une loi**, et c'est L175 que
+la session précédente venait d'écrire.
+

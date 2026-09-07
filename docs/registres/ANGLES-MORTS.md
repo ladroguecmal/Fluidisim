@@ -1433,3 +1433,17 @@ pendant quatre sessions.
   jamais été observé, donc rien ne permet encore d'attribuer un critère propre à l'ordre.
   Action **S60-1**. Voir **L178**.
 
+- **A183** *(sévérité 2, ouvert par décision, S61)* — **Le seuil d'admission d'une mesure d'ordre
+  est une fonction de l'ordre qu'elle cherche.** Le filtre ×30 de C22 s'écrit, pour un schéma
+  d'ordre `p` et un rapport `k = oracle/grille`, `k^p ≥ 30·(1 − 2^-p)` : il demande `k ≥ 4,7` à
+  l'ordre deux, **`k ≥ 15` à l'ordre un**, `k ≥ 3,2` à l'ordre trois. Dimensionner une campagne
+  suppose donc de connaître sa réponse — et se tromper d'hypothèse ne produit **aucune erreur
+  visible** : cela produit un « sans verdict ». C'est l'histoire de C22 de S48 à S57, quatre
+  campagnes et près d'une heure de calcul pour un point de bascule qui se lisait sur la suite
+  `k = 2, 4, 6, 7`.
+  Ce n'est pas un défaut de ce filtre mais une propriété de tout critère d'admission bâti sur une
+  comparaison d'erreurs entre grilles. **Ouvert par décision** : rien n'est modifié, le critère
+  reste celui d'ADR-049 D1 ; ce qui est ajouté est l'**annonce** de ce qu'une campagne pourra
+  admettre, avant de la payer, avec l'hypothèse d'ordre écrite sur la même ligne.
+  Voir ADR-050, GEOMETRIE-DU-FILTRE-S61 et **L179**.
+
