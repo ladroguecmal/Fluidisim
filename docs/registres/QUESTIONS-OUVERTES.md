@@ -632,8 +632,8 @@ Quatre familles sans verdict, sortie 0. Voir MESURES-C22-S57. Aucun doublement a
 
 | # | Action | Origine | Porteur | État |
 |---|---|---|---|---|
-| S57-1 *(close en S59)* | Relever la borne du mode `c22-shallow-fin` à 89600, **déclarer et tester le découpage du calcul en tranches gardées en mémoire** exigé au-delà du quart d'heure, puis mesurer 89600/179200 — étape de code et étape de mesure séparées | MESURES-C22-S57 : oracle requis ≈ 79 000, admission prévue avec 20 à 30 % de marge, coût projeté 19 min 07 s | session S58 | ouverte |
-| S57-2 *(close en S60)* | Éprouver la loi de biais d'oracle `c(n) ∝ n^-1,879` sur un troisième couple, et décider si le filtre de contamination doit comparer l'erreur au **biais de l'oracle de mesure** plutôt qu'à l'écart des deux oracles. **Par ADR** : cela change un critère d'admission, pas une constante | **A179** *(sév. 2)*, MESURES-C22-S57 §3 | session, par ADR | ouverte |
+| S57-1 *(close en S59)* | Relever la borne du mode `c22-shallow-fin` à 89600, **déclarer et tester le découpage du calcul en tranches gardées en mémoire** exigé au-delà du quart d'heure, puis mesurer 89600/179200 — étape de code et étape de mesure séparées | MESURES-C22-S57 : oracle requis ≈ 79 000, admission prévue avec 20 à 30 % de marge, coût projeté 19 min 07 s | session S58 | **close en S59 — la fenêtre conclut** |
+| S57-2 *(close en S60)* | Éprouver la loi de biais d'oracle `c(n) ∝ n^-1,879` sur un troisième couple, et décider si le filtre de contamination doit comparer l'erreur au **biais de l'oracle de mesure** plutôt qu'à l'écart des deux oracles. **Par ADR** : cela change un critère d'admission, pas une constante | **A179** *(sév. 2)*, MESURES-C22-S57 §3 | session, par ADR | **close en S60 — ADR-049, critère conservé** |
 
 > **Ne pas traiter S57-2 en même temps que S57-1.** S57-1 mesure sous le critère actuel ;
 > S57-2 discute le critère. Les mélanger produirait une admission dont on ne saurait pas si
