@@ -59,32 +59,21 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S49
-État             : terminée
+Session          : S50
+État             : en cours
 Agent            : Codex (git et cargo disponibles)
-Objectif         : Raffiner les fenêtres C22 shallow avec réutilisation des oracles (S48-1).
+Objectif         : Préserver le refus de front absent dans C04 shallow (S44-1).
 ```
 
 ### Plan
 
 - [x] **P1** — reprise, copies, jeton et plan seul.
-- [x] **P2** — fenêtres prédéclarées 100–1600, 200–3200, 400–6400 ; réutilisation en mémoire des oracles et mesures ; tests du filtrage.
-- [x] **P3** — mesurer avec deux oracles suffisamment fins, vérifier stabilité et coût, documenter les limites et tester.
-- [x] **P4** — rituel de fin : journal, leçons, actions, index, décomptes, passation et jeton libre.
+- [ ] **P2** — tracer les usages, conserver Option jusqu'aux sorties, refuser le profil absent ; tests absence/témoin et assertion.
+- [ ] **P3** — tests complets, comparaison nominale avant/après, documentation du suivi des refus.
+- [ ] **P4** — rituel : journal, enseignements, actions, index, décomptes et passation ; jeton libre.
 
 ### Notes de reprise
 
-Départ master 8395ca0 propre. Copies anciennes contrôlées ; aucun travail concurrent détecté.
-Socle lu dans cette conversation ; S48 et son registre de mesures relus. Aucun seuil changé.
-Les champs restent en mémoire, sans sérialisation (I17). Toutes les fenêtres seront rapportées.
-
-P2 : mode c22-shallow-fenetres, trois fenêtres fixes, sept champs et deux oracles calculés une fois en mémoire. Trois tests ciblés verts, compilation release réussie.
-
-P3 : oracles 51200/102400, écart 5,207593646e-10 ; sept grilles séparées.
-Fenêtre 400–6400 : p=1,849839 / 1,960632 / 2,011665, toujours non stable car
-4*d1>d0. Trois fenêtres sans verdict, 382,716 s sans tests concurrents. 105 tests
-réussis, deux ignorés. Refus CLI et mode historique vérifiés. MESURES-C22-S49 écrit.
-
-P4 : journal, L171, aucun nouvel angle mort (175), S48-1 close, S49-1 ouverte.
-Index et passation à jour : suite S50 S44-1. Décomptes inchangés : 47 ADR, 17 invariants,
-6 SPEC, 14 registres, 23 cas. Jeton libre.
+Master 7a33d95 propre, anciennes copies propres. Socle déjà lu dans cette conversation,
+REPRISE et dernière entrée du journal relues. Le détecteur du cœur renvoie déjà Option ;
+le défaut est dans ses appelants. Aucun seuil ou solveur à modifier.
