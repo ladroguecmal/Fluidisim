@@ -70,7 +70,7 @@ Objectif         : Exécuter le couple d'oracles 76800/153600 selon REFERENCE-C2
 - [x] **P1** — état réel, prise du jeton, plan seul.
 - [x] **P2** — vérifier les tests et compiler en release avant toute mesure ; aucun changement de montage.
 - [x] **P3** — exécuter `c22-shallow-fin 76800`, consigner erreurs, écart d'oracles, temps ; appliquer le filtre ×30 sans l'assouplir.
-- [ ] **P4** — rédiger MESURES-C22-S57 : admission de 12800, verdict des quatre fenêtres, déplacement éventuel des sept anciennes grilles, budget révisé.
+- [x] **P4** — rédiger MESURES-C22-S57 : admission de 12800, verdict des quatre fenêtres, déplacement éventuel des sept anciennes grilles, budget révisé.
 - [ ] **P5** — rituel : journal, angles, leçons, actions, index, décomptes, passation et jeton.
 
 ### Notes de reprise
@@ -96,3 +96,12 @@ P3 : campagne 844,433 s (estimation S56 : 827,467 s, +2,05 %) ; oracles 165,833 
 reste 6,040 s. Écart d oracles 2,709078717e-10, seuil 8,127236151e-9. Grille 12800 :
 7,766762184e-9, soit 0,9556 fois le seuil — **encore refusée**, à 4,4 pour cent près.
 Quatre familles sans verdict, sortie 0. Aucun code modifié.
+
+P4 : rapport MESURES-C22-S57 complété. Trois résultats. (1) Les deux extrapolations de S56
+sous-estiment la contamination de 14,6 et 4,6 pour cent ; exposant local tombé de 1,72145 a
+1,61233. (2) Le deficit n est que de 4,44 pour cent : les quatre exposants s accordent a 0,8
+pour cent sur l oracle requis, environ 79000 — le choix du modele a cesse de decider. (3) Le
+deplacement des erreurs entre S56 et S57 est additif et constant (5,587e-11 des nx=800) : le
+biais de l oracle de mesure s estime a 4,9e-11, soit 159 fois moins que l erreur de 12800,
+quand l indicateur du filtre en vaut 5,5 fois. A179, severite 2. Rien modifie, refus maintenu.
+Suite S57-1 : relever la borne du mode a 89600, decouper le calcul, 19 min projetees.
