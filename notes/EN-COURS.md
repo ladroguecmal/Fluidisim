@@ -59,30 +59,22 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S55
-État             : terminée
+Session          : S56
+État             : en cours
 Agent            : Codex (git et cargo disponibles)
-Objectif         : Expliquer le refus de seiche à 400 cellules et 60 s (S54-1).
+Objectif         : Stratégie de référence et budget pour la fenêtre C22 800–12800 (S49-1).
 ```
 
 ### Plan
 
-- [x] **P1** — reprise, état réel, jeton et plan seul.
-- [x] **P2** — instrumenter les étapes de mesure et reproduire refus/témoin ; isoler une cause vérifiable.
-- [x] **P3** — corriger la cause si démontrée, tests analytiques et campagne nominale ; documenter chiffres déplacés et portée.
-- [x] **P4** — rituel : journal, enseignements, actions, index/décomptes, passation et jeton libre.
+- [x] **P1** — état réel, passation et plan seul.
+- [>] **P2** — ajouter une fenêtre fine dédiée sans changer les modes existants ; vérifier les admissions et compiler.
+- [ ] **P3** — mesurer 800–12800 avec les références 51200/102400, filtre inchangé ; établir le budget du couple suivant et ses critères de passage.
+- [ ] **P4** — rituel : journal, actions, enseignements éventuels, index, passation et jeton libre.
 
 ### Notes de reprise
 
-Master e55582a propre. Socle et REPRISE lus dans cette conversation ; S54 relue.
-Hypothèse à tester : les plateaux de quantification f32 effacent les changements de pente.
-Ne pas réduire le minimum de six extrema pour faire passer le témoin.
-
-P2 : sept passages à zéro aux deux résolutions sur 60 s. Détecteur courant : huit extrema
-à nx=200, cinq à nx=400 ; en conservant le dernier sens non nul : treize aux deux.
-Avant correction nx=200 T=9,0301704179, demi-vie=25,2378474365 périodes, R²=0,9996929481 ;
-nx=400 refus. Instrumentation temporaire cfg(test) à retirer en P3, cause des plateaux isolée.
-
-P3 : correction validée, rapport EXTREMA-SEICHE-S55 et notes ADR-033/034. 123 tests verts,
-deux ignorés ; campagne nominale et check effectués. P4 : passation terminée ; S56 reprend
-S49-1, stratégie de référence C22. Pas de calcul coûteux en cours.
+Départ master d8e952a propre, autres copies anciennes propres. Socle lu dans cette conversation,
+REPRISE relu, dernier journal S55 et mesure S49 connus. S49-1 demande une stratégie et un budget,
+pas une promesse de convergence. Aucun champ δ sur disque ; mesures scalaires seules conservées.
+Fenêtre supplémentaire fixée avant calcul ; ne pas assouplir le filtre ×30 ni la stabilité.
