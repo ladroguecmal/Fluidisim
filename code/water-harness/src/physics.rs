@@ -1427,8 +1427,6 @@ pub fn mesurer_seiche_cfl(
     let mut pente_prec = 0.0f64;
     let mut zeros: Vec<f64> = Vec::new();
     let mut extrema: Vec<(f64, f64)> = Vec::new();
-    #[cfg(test)]
-    let (mut derniere_non_nulle, mut extrema_plateaux) = (0.0f64, 0usize);
 
     while t < duree_s {
         let mut dt = d.dt_cfl();
@@ -1444,11 +1442,6 @@ pub fn mesurer_seiche_cfl(
 
         let eta = d.eta(0) as f64;
         let pente = eta - eta_prec;
-        #[cfg(test)]
-        if pente != 0.0 {
-            if derniere_non_nulle * pente < 0.0 { extrema_plateaux += 1; }
-            derniere_non_nulle = pente;
-        }
 
         // Passage à zéro **descendant** : un seul par période, donc aucun risque de compter deux
         // fois. Interpolé linéairement pour ne pas quantifier la mesure au pas de temps.
@@ -1457,15 +1450,12 @@ pub fn mesurer_seiche_cfl(
             zeros.push(t - dt as f64 * (1.0 - f));
         }
         // Extremum : la pente change de signe.
-        if pente_prec != 0.0 && pente * pente_prec < 0.0 {
+        if changement_de_pente(&mut pente_prec, pente) {
             extrema.push((t, eta_prec.abs()));
         }
-        pente_prec = pente;
         eta_prec = eta;
     }
 
-    #[cfg(test)]
-    eprintln!("S55 nx={} durée={duree_s} zéros={} extrema={} avec_plateaux={extrema_plateaux}", bassin.nx, zeros.len(), extrema.len());
     if zeros.len() < 3 || extrema.len() < 6 {
         return None;
     }
@@ -1501,6 +1491,15 @@ pub fn mesurer_seiche_cfl(
         amplitude_debut: extrema[0].1,
         amplitude_fin: extrema[extrema.len() - 1].1,
     })
+}
+
+// Un plateau de quantification ne réinitialise pas le sens de variation.
+// L'extremum est compté une fois, lorsque le signal quitte le plateau dans l'autre sens.
+fn changement_de_pente(derniere: &mut f64, pente: f64) -> bool {
+    if pente == 0.0 { return false; }
+    let change = *derniere * pente < 0.0;
+    *derniere = pente;
+    change
 }
 
 /// C03 — `CAS-CANONIQUES` §C03. Bassin clos de 20 m, 2 m de fond, 20 périodes.
@@ -2750,9 +2749,25 @@ mod tests_garde_fous_vide {
         avec_hote(|host| {
             for nx in [200,400] {
                 let r = mesurer_seiche(host, Bassin { nx, ..Bassin::c03(true) }, 60.0);
-                eprintln!("S55 nx={nx} résultat={:?}", r.map(|s| (s.periode_s,s.demi_vie_periodes,s.r2)));
+                let s = r.expect("une seiche excitée sur 60 s doit être mesurable ici");
+                eprintln!("S55 nx={nx} résultat={:?}", (s.periode_s,s.demi_vie_periodes,s.r2));
+                assert!((s.periode_s / (40.0/(G*2.0).sqrt()) - 1.0).abs() < 0.01);
+                assert!(s.r2 > 0.9);
             }
         });
+    }
+
+    #[test]
+    fn extrema_sur_plateaux_et_temoins() {
+        let compter = |y: &[f64]| {
+            let mut sens = 0.0;
+            y.windows(2).filter(|p| changement_de_pente(&mut sens, p[1]-p[0])).count()
+        };
+        assert_eq!(compter(&[0.,1.,1.,1.,0.,-1.,-1.,0.]), 2);
+        assert_eq!(compter(&[0.,1.,0.,-1.,0.]), 2);
+        assert_eq!(compter(&[0.,0.,1.,1.,2.,2.]), 0);
+        assert_eq!(compter(&[1.,1.,1.,1.]), 0);
+        assert_eq!(compter(&[0.,1.,1.]), 0); // Pas de retournement observé à la fin.
     }
 
     #[test]

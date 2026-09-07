@@ -1055,3 +1055,11 @@ couplage fluide-solide qu'il ne touche pas.
 **Rattachement** : banc **B3** (solveur δ) et **B6** (flottabilité) ; batterie `physics`. Le cas est
 lié à **C20**, l'impact d'entrée dans l'eau, qui est précisément le régime `u_paroi ≫ c` — et où le
 pas de temps est divisé par 3,3 à `u_p = 10 m/s`.
+
+### Complément S55 — 2026-09-07 : mesure des extrema de C03
+
+Les plateaux de quantification faisaient perdre des maxima/minima au détecteur. Correction
+sans changement de solveur ni de seuil : demi-vies nominales rampe **21,20** et mode propre
+**24,45 périodes**, R² rampe **0,9924**. Les chiffres historiques 20,7/24,4 ci-dessus sont
+supplantés par cette mesure ; verdicts conservés. Le témoin nx=400 sur 60 s est désormais
+mesurable. Voir [EXTREMA-SEICHE-S55](EXTREMA-SEICHE-S55.md), notamment les limites physiques.

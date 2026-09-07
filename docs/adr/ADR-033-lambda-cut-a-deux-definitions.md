@@ -179,3 +179,10 @@ c'est un arbitrage de conception, pas un détail de réglage.
    > par cette mesure ; voir [`ADR-034`](ADR-034-la-dissipation-est-un-filtre-passe-bas.md).
 4. **`λ_cut` dispersif reste bloqué** sur l'absence de couche dispersive (ADR-030 §5). La décision
    du §3 ne le débloque pas : elle établit que l'autre moitié de la question, elle, est ouverte.
+
+> **Note corrective S55 — 2026-09-07.** Le détecteur perdait les extrema séparés par un
+> plateau de quantification. Sa correction déplace les mesures historiques ci-dessus :
+> C03 rampe 21,20 périodes (R² 0,9924), mode propre 24,45 ; harmoniques 1–4 :
+> 48,35 / 24,44 / 16,50 / 12,49 périodes propres, soit 436,58 / 110,37 / 49,67 / 28,19 s.
+> La loi et les seuils ne changent pas ; la cause du biais résiduel n'est pas démontrée par
+> cette correction. Tables, montage et limites : [EXTREMA-SEICHE-S55](../validation/EXTREMA-SEICHE-S55.md).

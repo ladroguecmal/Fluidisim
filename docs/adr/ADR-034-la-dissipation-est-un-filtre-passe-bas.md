@@ -133,3 +133,10 @@ de le poser en chiffres.
    > dissolution et chiffre ce qui la remplace : un sillage de barque long de **deux mètres**.
 4. **`λ_cut` dispersif reste bloqué** (ADR-030 §5). Cet ADR ne le débloque pas ; il change la forme
    de la moitié qui est mesurable.
+
+> **Note corrective S55 — 2026-09-07.** Le détecteur perdait les extrema séparés par un
+> plateau de quantification. Sa correction déplace les mesures historiques ci-dessus :
+> C03 rampe 21,20 périodes (R² 0,9924), mode propre 24,45 ; harmoniques 1–4 :
+> 48,35 / 24,44 / 16,50 / 12,49 périodes propres, soit 436,58 / 110,37 / 49,67 / 28,19 s.
+> La loi et les seuils ne changent pas ; la cause du biais résiduel n'est pas démontrée par
+> cette correction. Tables, montage et limites : [EXTREMA-SEICHE-S55](../validation/EXTREMA-SEICHE-S55.md).

@@ -69,7 +69,7 @@ Objectif         : Expliquer le refus de seiche à 400 cellules et 60 s (S54-1).
 
 - [x] **P1** — reprise, état réel, jeton et plan seul.
 - [x] **P2** — instrumenter les étapes de mesure et reproduire refus/témoin ; isoler une cause vérifiable.
-- [ ] **P3** — corriger la cause si démontrée, tests analytiques et campagne nominale ; documenter chiffres déplacés et portée.
+- [x] **P3** — corriger la cause si démontrée, tests analytiques et campagne nominale ; documenter chiffres déplacés et portée.
 - [ ] **P4** — rituel : journal, enseignements, actions, index/décomptes, passation et jeton libre.
 
 ### Notes de reprise
