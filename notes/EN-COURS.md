@@ -59,33 +59,21 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 ```
-Session          : S48
-État             : terminée
+Session          : S49
+État             : en cours
 Agent            : Codex (git et cargo disponibles)
-Objectif         : Construire et mesurer C22 régulier sur shallow (S47-1).
+Objectif         : Raffiner les fenêtres C22 shallow avec réutilisation des oracles (S48-1).
 ```
 
 ### Plan
 
-- [x] **P1** — reprise, contrôles des copies, jeton et plan seul.
-- [x] **P2** — montage gaussien C22, comparaison conservative aux oracles emboîtés, essais nul/refus ; première mesure et coût.
-- [x] **P3** — campagne de raffinement et stabilité, branchement au rapport adapté au coût, tests et documentation des résultats/limites.
-- [x] **P4** — rituel : journal, leçons/angles morts, actions, index/décomptes et passation, jeton libre.
+- [x] **P1** — reprise, copies, jeton et plan seul.
+- [ ] **P2** — fenêtres prédéclarées 100–1600, 200–3200, 400–6400 ; réutilisation en mémoire des oracles et mesures ; tests du filtrage.
+- [ ] **P3** — mesurer avec deux oracles suffisamment fins, vérifier stabilité et coût, documenter les limites et tester.
+- [ ] **P4** — rituel de fin : journal, leçons, actions, index, décomptes, passation et jeton libre.
 
 ### Notes de reprise
 
-Départ master 5795f05 propre, copies anciennes sans modification détectée. Lectures socle
-effectuées dans cette conversation. Aucun verdict présupposé : cinq grilles sont nécessaires,
-pas suffisantes. C22 impose une gaussienne de 1 cm sur 1 m, domaine 40 m, t = 1 s.
-Vérifier la convention de largeur de configure_bosse. Tester l'oracle à deux résolutions et
-mesurer son influence au lieu de présumer une erreur nulle. Préserver les mesures historiques.
-P2 : montage sigma converti par sqrt(2), projection conservative et refus testes (2 tests).
-Premiere mesure 6400/12800 : ecart oracle 2,520893353e-8, quatre grilles retenues sur cinq,
-p=1,63758 et 1,63170 ; non concluant, cout release 5,416 s. Commande c22-shallow dediee.
-
-P3 : trois campagnes jusqu'a 25600/51200 ; cinq grilles retenues, p=1,637646 /
-1,631733 / 1,849841, non concluant. Cout final 102,612 s avec charge concurrente signalee.
-104 tests verts, deux ignores, check sans echec et hashs inchanges. Taille invalide refusee.
-
-P4 : journal, L170, aucun nouvel angle mort (175), S47-1 close, S48-1 ouverte.
-Decomptes inchanges : 47 ADR, 17 invariants, 6 SPEC, 14 registres, 23 cas. Jeton libre.
+Départ master 8395ca0 propre. Copies anciennes contrôlées ; aucun travail concurrent détecté.
+Socle lu dans cette conversation ; S48 et son registre de mesures relus. Aucun seuil changé.
+Les champs restent en mémoire, sans sérialisation (I17). Toutes les fenêtres seront rapportées.
