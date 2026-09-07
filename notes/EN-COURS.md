@@ -69,8 +69,8 @@ Objectif         : Trancher A103 — la masse volumique de l'eau — sur délég
 ### Plan
 
 - [x] **P1** — passation, jeton, plan seul.
-- [ ] **P2** — recenser tous les emplois de la masse volumique dans le code et dans le corpus ; établir ce qui en dépend et ce qui n'en dépend pas.
-- [ ] **P3** — balayer la constante et mesurer, pour chaque grandeur publiée, l'écart ET la valeur absolue ; figer le constat par un test.
+- [x] **P2** — recenser tous les emplois de la masse volumique dans le code et dans le corpus ; établir ce qui en dépend et ce qui n'en dépend pas.
+- [x] **P3** — balayer la constante et mesurer, pour chaque grandeur publiée, l'écart ET la valeur absolue ; figer le constat par un test.
 - [ ] **P4** — ADR-048 : trancher, dire ce qu'il faudrait pour inverser, et corriger la justification fautive de body.rs sans réécrire d'ADR.
 - [ ] **P5** — appliquer la décision au code ; vérifier les 123 tests, la campagne physics et les deux hashs.
 - [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, passation et jeton.
@@ -92,3 +92,11 @@ A103. À vérifier par balayage avant d'en tirer quoi que ce soit (L75).
 Attendu à contrôler aussi : ρ apparaît-il dans l'hydrodynamique ? Saint-Venant s'écrit en
 h et u, ρ s'y simplifie ; si c'est le cas ici, la portée de la décision est bornée aux forces
 sur les corps. Ne pas le supposer non plus.
+
+P2/P3 : recensement et balayage faits, RHO-EAU-S58. RHO_EAU vit à cinq endroits, aucun dans
+un solveur : la portée est bornée aux forces sur les corps. Balayage 1000 vers 1025 par
+recompilation : les quatre cas C10 passent identiquement, écart 0,000 pour cent aux deux
+valeurs, parce que les trois références sont construites AVEC la constante. Les valeurs
+publiées bougent (tirant -2,439, raideur +2,500, période -1,227 pour cent) sans verdict.
+Hashs check inchangés. Les seuls contrôles qui échouent sont deux tests unitaires de body.rs
+comparant le tirant au littéral 0,25 : A180. Constante restaurée à 1000 avant commit.
