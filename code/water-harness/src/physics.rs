@@ -87,7 +87,7 @@ mod tests_refus_s45 {
         let sink = StderrSink;
         let mut host = HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink };
         Background::configure(&mut host, SeaState {
-            hs, tp: 8.0, theta_turns: 0.0, components: 1,
+            hs, tp: 8.0, theta_turns: 0.0, components: 1, graine: 0,
         }, WorldPos::from_metres(ancre, 0.0, 0.0)).unwrap()
     }
 
@@ -98,7 +98,7 @@ mod tests_refus_s45 {
         let sink = StderrSink;
         let mut host = HostServices { alloc: &mut alloc, jobs: &jobs, sink: &sink };
         Background::configure(&mut host, SeaState {
-            hs, tp, theta_turns: 0.0, components: composantes,
+            hs, tp, theta_turns: 0.0, components: composantes, graine: 0,
         }, WorldPos::from_metres(0.0, 0.0, 0.0)).unwrap()
     }
 

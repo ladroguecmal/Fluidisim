@@ -47,6 +47,17 @@ pub struct SeaState {
     pub theta_turns: f32,
     /// Nombre de composantes.
     pub components: usize,
+    /// Graine des phases ; même graine et même indice donnent la même phase.
+    pub graine: u64,
+}
+
+/// SplitMix64 indexé : accès direct, aucun état partagé ni dépendance à l'ordre d'appel.
+/// Mix13 de Stafford, constantes de SplittableRandom (OpenJDK) ; formule documentée S65.
+fn phase_initiale(graine: u64, indice: u64) -> PhaseQ32 {
+    let mut z = graine.wrapping_add(indice.wrapping_add(1).wrapping_mul(0x9E37_79B9_7F4A_7C15));
+    z = (z ^ (z >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
+    z = (z ^ (z >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
+    PhaseQ32(((z ^ (z >> 31)) >> 32) as u32)
 }
 
 pub struct Background {
@@ -102,8 +113,7 @@ impl Background {
                 k_turns_per_m: k_turns as f32,
                 dir: [ang.cos() as f32, ang.sin() as f32],
                 freq_q32: freq_hz_to_q32(hz),
-                // Déphasage dérivé de l'indice : reproductible, sans PRNG et sans horloge.
-                phase0: PhaseQ32((i as u32).wrapping_mul(0x9E37_79B9)),
+                phase0: phase_initiale(sea.graine, i as u64),
             });
         }
 
@@ -199,5 +209,23 @@ impl Background {
             }
         }
         h.finish()
+    }
+}
+
+#[cfg(test)]
+mod tests_phases {
+    use super::*;
+
+    #[test]
+    fn vecteurs_entiers_et_acces_direct() {
+        // Trois premières sorties SplitMix64, graine zéro, 32 bits de poids fort.
+        let attendu = [0xe220_a839, 0x6e78_9e6a, 0x06c4_5d18];
+        for i in [2, 0, 1, 2] {
+            assert_eq!(phase_initiale(0, i).0, attendu[i as usize]);
+        }
+        // Les 32 bits hauts de la graine ne sont pas perdus ; zéro n'est pas un mode spécial.
+        assert_ne!(phase_initiale(0, 0), phase_initiale(1 << 32, 0));
+        assert_ne!(phase_initiale(0, 0), phase_initiale(u64::MAX, 0));
+        assert_eq!(phase_initiale(0, u64::MAX).0, 0); // Arithmétique modulo 2^64 explicite.
     }
 }

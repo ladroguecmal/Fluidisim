@@ -64,6 +64,7 @@ fn construire(sc: &Scenario) -> (Background, u32) {
         tp: sc.tp,
         theta_turns: sc.theta_turns,
         components: sc.composantes,
+        graine: sc.graine,
     };
     let anchor = WorldPos::from_metres(0.0, 0.0, 0.0);
     let bg = Background::configure(&mut host, sea, anchor).expect("configuration");
@@ -685,5 +686,57 @@ fn main() -> ExitCode {
         ExitCode::from(1)
     } else {
         ExitCode::SUCCESS
+    }
+}
+
+#[cfg(test)]
+mod tests_graine_s65 {
+    use super::*;
+
+    fn scenario(graine: u64) -> Scenario {
+        let texte = include_str!("../../scenarios/C18-invariants.toml");
+        let mut sc = Scenario::parse(&texte.replace("20260905", &graine.to_string())).unwrap();
+        sc.hash_b_attendu = None; // Les valeurs de référence nominales sont jugées par check.
+        sc
+    }
+
+    #[test]
+    fn graine_du_fichier_change_le_champ_et_se_rejoue() {
+        let graines = [0, 1, 2, 3, 20260905, u64::MAX];
+        let mut hashs = Vec::new();
+        for g in graines {
+            let sc = scenario(g);
+            let a = executer(&sc);
+            let b = executer(&sc);
+            assert!(a.echecs.is_empty() && b.echecs.is_empty());
+            assert_eq!(a.hash_b, b.hash_b);
+            hashs.push(a.hash_b);
+        }
+        hashs.sort_unstable();
+        hashs.dedup();
+        assert_eq!(hashs.len(), graines.len());
+        // La graine ne doit pas être seulement injectée dans le hash : mer plate identique.
+        let mut a = scenario(0);
+        let mut b = scenario(u64::MAX);
+        a.hs = 0.0;
+        b.hs = 0.0;
+        assert_eq!(executer(&a).hash_b, executer(&b).hash_b);
+    }
+
+    #[test]
+    #[ignore = "diagnostic S65 : six graines, 32/256 composantes, fenêtre 3072 m ; lancer en release"]
+    fn mesurer_hs_sur_six_graines() {
+        for n in [32, 256] {
+            for g in [0, 1, 2, 3, 20260905, u64::MAX] {
+                let mut sc = scenario(g);
+                sc.composantes = n;
+                let (bg, _) = construire(&sc);
+                let c = physics::hs_restitue(&bg, SimTime::from_micros(sc.t_sim_debut_us),
+                    sc.hs as f64, sc.fenetre_cote, sc.fenetre_pas_m);
+                assert!(c.mesure.is_finite());
+                println!("S65 n={n} graine={g} Hs={:.9} ecart_signe={:.9}%",
+                    c.mesure, 100.0*(c.mesure/c.reference-1.0));
+            }
+        }
     }
 }

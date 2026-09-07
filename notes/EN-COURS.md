@@ -68,8 +68,8 @@ Objectif         : Brancher la graine sur les phases (S64-1), conserver la repro
 ### Plan
 
 - [x] **P1** — état réel, lectures de reprise, jeton et plan seul.
-- [>] **P2** — fonction entière indexée par graine/composante, raccord scénario ; tests de reproductibilité et sensibilité.
-- [ ] **P3** — mesurer les déplacements nominaux et plusieurs graines ; consigner puis committer les nouveaux hashs avant leur vérification.
+- [x] **P2** — fonction entière indexée par graine/composante, raccord scénario ; tests de reproductibilité et sensibilité.
+- [>] **P3** — mesurer les déplacements nominaux et plusieurs graines ; consigner puis committer les nouveaux hashs avant leur vérification.
 - [ ] **P4** — vérifier tests et scénarios sur références committées ; documenter portée statistique et limites.
 - [ ] **P5** — rituel : journal, actions, index/décomptes, corrections datées, passation et jeton libre.
 
@@ -81,3 +81,8 @@ S63-1 (couche dispersive) reste ouverte. Aucun seuil de Hs resserré ici.
 Les références H1 devront changer puisque les phases changent ; inscription dans un commit
 précédant le check qui les juge. Pas de mode compatible caché pour une graine particulière.
 La copie 29ef50 sera avancée vers master à chaque étape pour conserver une passation commune.
+
+P2 : SeaState.graine raccordée au scénario ; SplitMix64 indexé, 32 bits hauts vers PhaseQ32.
+Vecteurs graine zéro et accès direct, six graines distinctes répétées, témoin mer plate.
+Suite initiale (avant test intégration ajouté) verte ; test intégration ciblé vert ; release
+compilée. Diagnostic ignoré ajouté pour six graines x 32/256 composantes, à lancer en P3.
