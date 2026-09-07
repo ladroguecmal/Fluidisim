@@ -145,6 +145,34 @@ mod tests_refus_s45 {
             nominal.ecart_rel(), large.ecart_rel());
     }
 
+    /// La fenêtre de `Hs` refuse d'aller au-delà de la portée de l'ancre, **et le dit** — S64.
+    ///
+    /// Le refus existait déjà, par propagation du `NaN` : le cas échouait. Ce qui manquait est le
+    /// **motif**. Une session lisant « mesuré NaN » ne pouvait pas savoir qu'elle avait dépassé
+    /// ±4096 m, et S62 a effectivement attribué ce `NaN` à l'annulation catastrophique de la
+    /// variance — puis prescrit une correction de sommation qui n'avait pas lieu d'être.
+    #[test]
+    fn hs_refuse_hors_de_portee_de_l_ancre_et_dit_pourquoi() {
+        let t = SimTime::from_micros(0);
+        let bg = mer(1.2, 6.0, 8);
+
+        // 4092 m de demi-fenêtre : sous la limite, la mesure existe.
+        let dedans = hs_restitue(&bg, t, 1.2, 8, 1023.0);
+        assert!(dedans.mesure.is_finite(), "mesure {}", dedans.mesure);
+        assert!(!dedans.grandeur.contains("REFUSÉE"));
+
+        // 4100 m : au-delà, refus explicite, et le libellé compte les points perdus.
+        let dehors = hs_restitue(&bg, t, 1.2, 8, 1025.0);
+        assert!(!dehors.mesure.is_finite(), "un point hors portée doit refuser la mesure");
+        assert!(!dehors.passe(), "un refus ne doit pas passer");
+        assert!(dehors.grandeur.contains("REFUSÉE") && dehors.grandeur.contains("hors portée"),
+            "le motif doit être lisible : {}", dehors.grandeur);
+        // Et il compte. Ce ne sont pas les quatre coins : à ce pas, seule la première rangée
+        // dépasse en x et la première en y, soit 8 + 8 − 1 = 15 points. Le compte exact est ce qui
+        // distingue « la fenêtre déborde d'un cheveu » de « la moitié du domaine manque ».
+        assert!(dehors.grandeur.contains("15 pt"), "compte attendu : {}", dehors.grandeur);
+    }
+
     #[test]
     fn c02_refus_et_temoin() {
         let t = SimTime::from_micros(0);
@@ -354,25 +382,46 @@ pub fn hs_restitue(bg: &Background, t: SimTime, hs_config: f64, cote: u32, pas_m
     let mut somme = 0.0f64;
     let mut somme2 = 0.0f64;
     let mut n = 0u64;
+    // Les points hors de portée sont **comptés**, pas avalés — S64. `eta()` rend `NaN` quand
+    // `to_local` refuse un point à plus de 4096 m de l'ancre (`types.rs`), et une somme propage ce
+    // `NaN` jusqu'à la mesure : le cas échoue, ce qui est juste, mais **sans dire pourquoi**.
+    // C'est le défaut corrigé en S45 sur C10 (**A173**) : suivre l'aval du `NaN` (**L166**).
+    let mut hors_portee = 0u64;
     for iy in 0..cote {
         for ix in 0..cote {
             let x = (ix as f64 - cote as f64 * 0.5) * pas_m;
             let y = (iy as f64 - cote as f64 * 0.5) * pas_m;
             let e = eta(bg, x, y, t);
+            if !e.is_finite() {
+                hors_portee += 1;
+                continue;
+            }
             somme += e;
             somme2 += e * e;
             n += 1;
         }
     }
+    // **Le refus reste un refus.** Écarter les points invalides et mesurer sur le reste
+    // fabriquerait une variance sur un domaine qui n'est pas celui qu'on croit — la faute exacte
+    // que S45 a corrigée sur C10. La mesure devient `NaN`, le cas échoue, et le libellé dit
+    // combien de points manquaient et pourquoi.
+    let invalide = hors_portee > 0 || n == 0;
     let moyenne = somme / n as f64;
     let m0 = somme2 / n as f64 - moyenne * moyenne;
     Cas {
         id: "Hs",
-        grandeur: format!(
-            "Hs restituée par la variance, fenêtre {} m",
-            (cote as f64 * pas_m).round()
-        ),
-        mesure: 4.0 * m0.sqrt(),
+        grandeur: if invalide {
+            format!(
+                "Hs REFUSÉE — {hors_portee} pt hors portée de l'ancre (±4096 m), fenêtre {} m",
+                (cote as f64 * pas_m).round()
+            )
+        } else {
+            format!(
+                "Hs restituée par la variance, fenêtre {} m",
+                (cote as f64 * pas_m).round()
+            )
+        },
+        mesure: if invalide { f64::NAN } else { 4.0 * m0.sqrt() },
         reference: hs_config,
         tolerance_rel: 0.10,
         source: "SPEC-001 §3 — Hs = 4√m₀ ; condition de mesure : fenêtre ≫ λ_pic (A102, S62)",

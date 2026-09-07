@@ -70,8 +70,8 @@ Objectif         : S62-1 — corriger la sommation de variance, puis trancher pa
 
 - [x] **P1** — passation, jeton, plan seul.
 - [x] **P2** — **diagnostiquer le `NaN` avant de le corriger** : S62 l'a attribué à l'annulation catastrophique sans le vérifier.
-- [ ] **P3** — corriger ce que le diagnostic désigne, avec témoin et essai de refus ; vérifier que les valeurs nominales ne bougent pas.
-- [ ] **P4** — mesurer la loi complète, jusqu'aux fenêtres qui étaient hors d'atteinte.
+- [x] **P3** — corriger ce que le diagnostic désigne, avec témoin et essai de refus ; vérifier que les valeurs nominales ne bougent pas.
+- [x] **P4** — mesurer la loi complète, jusqu'aux fenêtres qui étaient hors d'atteinte.
 - [ ] **P5** — ADR : trancher la fenêtre, ou dire pourquoi elle ne se tranche pas.
 - [ ] **P6** — rituel : journal, angles, leçons, actions, index, décomptes, jeton, **fusion dans master**.
 
@@ -110,3 +110,21 @@ manque, pas la sommation.
 
 Note : la faute que S63 vient de recenser — une prescription ecrite sans etre eprouvee — a ete
 commise par S62, la session immediatement precedente, dans l action meme que S64 execute.
+
+P3 : les points hors portee sont comptes et le motif est ecrit dans le libelle ; la mesure reste
+refusee (pas de variance sur un domaine ampute — faute corrigee en S45 sur C10). Test de refus
+et temoin. 131 tests reussis, deux ignores ; hashs et valeur nominale inchanges.
+
+P4, et il a corrige deux affirmations de S62-1 puis en a produit une troisieme.
+ (a) **Le cout annonce etait faux** : mode physics 33,9 s au nominal, 35,9 s avec la fenetre
+     64 fois plus grande — **+6 pour cent**, pas 64 fois. La mesure de Hs est marginale devant
+     les solveurs. L action S62-1 avancait deux raisons de ne pas elargir, toutes deux fausses.
+ (b) **La correction marche sur une mer ou le cas echouait** : tp=9 rendait 15,58 pour cent a la
+     fenetre nominale, **0,184 pour cent** a 3072 m. Six configurations mesurees a cette fenetre :
+     0,152 / 0,184 / 0,282 / 0,282 / 0,367 pour cent — et **6,612 pour cent a 256 composantes**.
+ (c) **La graine du scenario ne commande rien** : six graines, six fois 0,282 pour cent au
+     chiffre pres. phase0 = i x 0x9E3779B9, sans PRNG ; SeaState n a pas de champ graine, et
+     scenario.graine est lue puis jamais utilisee. **Il n existe qu une realisation par etat de
+     mer**, donc aucune barre d erreur n est mesurable et aucune tolerance ne se calibre. A186.
+ (d) L ecart a 256 composantes ne vient ni de la fenetre ni du pas : 6,614 et 6,615 pour cent a
+     pas 1,5 et 1,0 m, fenetre egale. Cause **non identifiee** — A187, et elle borne D2.
