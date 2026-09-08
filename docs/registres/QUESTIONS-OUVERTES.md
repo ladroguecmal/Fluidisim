@@ -861,3 +861,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
   périodiques ; distinguer vitesse de groupe et fréquence avant choix du support régional.
 - Raccordement journal/WaterSample B+W, budget et domaine interplateforme restent ouverts W3/W4.
   S72-2 rétention reste ouverte : refus après ttl ne signifie pas disparition physique.
+
+### S76 — Support régional décidé
+
+- **S75-1 : close.** Transport radial et copies mesurés ; ADR-059 écarte le support périodique
+  pour un impact isolé. Vitesse de groupe d’un paquet étroit toujours non validée.
+- **S76-1 : ouverte, S77.** Construire le candidat radial de Hankel, domaine de quadrature
+  explicite, normalisation physique et contrôles indépendants ; pas une nouvelle campagne du carré.
+- S74-1 / W3 et S72-2 rétention restent partielles/ouvertes. Aucun raccordement B+W régional reçu.

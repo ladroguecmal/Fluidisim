@@ -17,6 +17,10 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S76 :** [ADR-059 — Impact régional sans répétition](adr/ADR-059-impact-regional-sans-repetition.md),
+**ACTÉE**. [Mesures radiales](validation/TRANSPORT-RADIAL-S76.md) : support périodique refusé
+comme impact isolé. 59 ADR, 191 angles morts ; suite S77 : candidat radial (S76-1).
+
 **S75 :** [ADR-058 — Premier impact dispersif](adr/ADR-058-premier-impact-dispersif.md),
 **ACTÉE**. Champ analytique périodique, énergie et fréquence vérifiées ; W3 reste partielle.
 58 ADR, 191 angles morts. Suite S76 : transport radial et retours périodiques.

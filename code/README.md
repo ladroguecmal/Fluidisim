@@ -93,3 +93,9 @@ Voir ADR-057 pour les limites de confiance, de publication et de complétude ré
 impact_field construit une expansion analytique à 40 modes périodiques, eau profonde,
 énergie normalisée et milieu injecté. Voir ADR-058 : premier support physique, pas encore
 impact régional sans répétition ni intégration B+W. Refus explicite au-delà de ttl.
+
+### S76 — Limite du support périodique
+
+Le diagnostic radial mesure une densité cinétique positive, intégrée en profondeur. ADR-059
+refuse ImpactField périodique comme impact isolé : copies exactes dès naissance. Le module
+reste un support de comparaison ; prochain candidat radial non périodique, S76-1.

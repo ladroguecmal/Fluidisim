@@ -5577,3 +5577,19 @@ raccordement B+W ni journal, pas de réception B2/C19. S74-1 reste partielle.
 Aucun nouvel angle numéroté, aucun invariant amendé. Résultats complets ci-dessous.
 
 **Vérification finale :** 60 tests core + 93 harnais = 153 réussis, cinq ignorés, aucun échec ; quatre avertissements préexistants du harnais. Diff vérifié, copies synchronisées après commit.
+
+## S76 — 2026-09-08 — La répétition existe avant tout retour
+
+**Entrée :** Continue utilisateur ; départ 466ba65, copies actives identiques.
+**Mesure :** densité physique positive intégrée en profondeur ; grille 32/64, sept instants.
+Rayon moyen 2,217 m à naissance, 7,040 à 8 s, 6,293 à 12 s. Copie exacte à 16 m dès t=0.
+Énergie 1,00000003 à 1,00000005 J. Rapport TRANSPORT-RADIAL-S76 reproductible.
+**Décision :** ADR-059, support périodique refusé comme impact isolé. Prochain candidat radial
+non périodique dans sa définition continue, quadrature bornée à recevoir ; pas de sélection B2.
+**Correction :** identité énergétique intégrée distincte de densité locale, L190. Témoin
+initial de déplacement à 2 s réfuté ; reporté explicitement à 4 s comme régression seulement.
+**Suite S77 :** S76-1, construire Hankel et son domaine. S75-1 close ; W3 et rétention ouvertes.
+Pas de nouvelle couche régionale cette session ; aucune prétention de vitesse de groupe validée.
+Aucun nouvel angle numéroté ni invariant amendé.
+
+**Vérification finale :** 61 tests core + 93 harnais = 154 réussis, cinq ignorés, aucun échec. Diagnostic release passé, quatre avertissements préexistants du harnais. Diff vérifié ; copies synchronisées après commit.

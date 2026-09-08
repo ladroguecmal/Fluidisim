@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S76 — en cours
+Session : S76 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : mesurer la propagation radiale et décider du support régional.
 
@@ -66,7 +66,7 @@ Objectif : mesurer la propagation radiale et décider du support régional.
 
 - [x] **P1** — état réel, passation, jeton et plan seul.
 - [x] **P2** — densité physique positive, transport radial et répliques périodiques ; mesures reproductibles.
-- [ ] **P3** — décision de support et rituel, tests adaptés, copies synchronisées.
+- [x] **P3** — décision de support et rituel, tests adaptés, copies synchronisées.
 
 ### Notes de reprise
 

@@ -3036,3 +3036,10 @@ ambigu transforme une observation locale en prétendue garantie pour la session 
 source répétée artificiellement et un mauvais transport d’enveloppe. Nommer séparément phase,
 énergie, déplacement du paquet et validité du support spatial. Leurs contrôles doivent rester
 séparés ; la facilité de vérifier les deux premiers ne reçoit pas les deux autres par extension.
+
+## L190 — Une identité intégrée ne fournit pas une densité locale
+
+*(S76)* Deux intégrandes peuvent avoir la même intégrale sans représenter la même répartition.
+Une forme de bord du bilan énergétique est exacte pour le total mais peut devenir négative
+localement. Avant de pondérer une position ou un rayon, vérifier la positivité et le sens local
+du poids. Changer la question de total à localisation impose de réexaminer la mesure.

@@ -69,3 +69,8 @@ référentiels mobiles, interface de journal vers le champ et budget. La fréque
 la conservation d’énergie ne prouvent pas ces propriétés. S74-1 reste partielle. Prochaine
 session : mesurer le transport radial et les retours périodiques avant de choisir le support
 régional. Aucun invariant amendé ; I-07/I-08, I-14 et I-17 relus.
+
+> **Actualisation S76 — 2026-09-08.** ADR-059 refuse ce support comme impact régional isolé :
+> copie exacte dès naissance à L, mesurée à 16 m. Énergie radiale mesurée avec la densité
+> cinétique intégrée en profondeur ; les contrôles d’énergie totale ci-dessus restent valides.
+> Prochaine construction : candidat radial à définition continue non périodique.
