@@ -51,3 +51,4 @@ pub use phase::PhaseQ32;
 pub use shallow::{Flux, Shallow1D};
 pub use types::{Saturations, FrameId, LayerMask, SimTime, WaterSample, WorldPos, WORLD_UNITS_PER_METRE};
 pub mod wave_event;
+pub mod wave_journal;

@@ -65,7 +65,7 @@ Objectif : identité de cause et journal Impact borné, réconciliation atomique
 ### Plan
 
 - [x] **P1** — passation, vérification des copies, jeton et plan seul.
-- [ ] **P2** — ADR-056, journal sans allocation, confirmation/rejet et essais contradictoires.
+- [x] **P2** — ADR-056, journal sans allocation, confirmation/rejet et essais contradictoires.
 - [ ] **P3** — tests complets et rituel ; documenter les limites de rétention puis synchroniser.
 
 ### Notes de reprise

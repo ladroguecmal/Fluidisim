@@ -854,3 +854,10 @@ d'interface qui rend la faute inexprimable ; la règle écrite n'est que le dern
    [SPEC-004 §10.1](SPEC-004-interfaces.md). Trois documents posaient la même question en se
    justifiant les uns par les autres — le symptôme à retenir étant qu'un point ouvert qui se
    justifie par le fait que d'autres le posent aussi ne devrait pas exister.
+
+### Actualisation S73 — identité du bus Impact
+
+ADR-056 corrige la correspondance implicite de §3.3 : prédiction et confirmation se relient
+par une identité de cause fournie par le gameplay, distincte du server_seq. Le journal
+wave_journal restitue la prédiction à rétracter ; publication multilecteur et enveloppe
+persistée restent à construire. Un rejet serveur antérieur empêche une prédiction tardive.
