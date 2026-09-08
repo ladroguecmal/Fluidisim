@@ -58,20 +58,17 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S84 — terminée
+Session : S85 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : séparer TTL source et horizon numérique, exposer le renouvellement sans perte.
+Objectif : construire le contrôleur de renouvellement à deux pools, à résolution constante.
 
 ### Plan
 
-- [x] **P1** — passation, copies, jeton et plan seul.
-- [x] **P2** — horizon explicite et prolongation par reconstruction depuis la naissance ; tests.
-- [x] **P3** — politique de rétention, vérification et rituel de passation.
+- [x] **P1** — vérifier la passation et déclarer le plan seul.
+- [ ] **P2** — contrôleur à deux pools, échéance et bascule transactionnelle ; tests de refus et reprise.
+- [ ] **P3** — vérification complète, documentation et rituel de passation.
 
 ### Notes de reprise
 
-Départ 419e217. Le milieu non dissipatif conserve une énergie globale : aucun TTL ne justifie
-une purge. La durée de calcul peut être renouvelée sans déplacer naissance ou phase.
-
-P2 : 0615277. Trois tests ciblés debug/release réussis ; suite complète 174 réussis, cinq ignorés.
-ADR-066 et L198 publiées. Suite S85 : S84-1, contrôleur de renouvellement à deux pools.
+Départ c8fbba5, copies actives synchronisées. S84-1 : journal immuable, N et milieu fixes,
+aucun effacement ni déplacement de naissance. Un horizon épuisé doit rester visible après refus.
