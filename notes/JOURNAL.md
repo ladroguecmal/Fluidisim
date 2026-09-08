@@ -5727,3 +5727,19 @@ Pas de purge, de résolution adaptative ni de publication multilecteur. Aucun no
 angle numéroté, invariants inchangés, L199 enregistrée. README actualisé.
 **Suite S86 :** S85-1, admission transactionnelle d'un journal actualisé avec ses champs.
 S84-1 close ; S72-2 partielle. Rituel exécuté, copies synchronisées après commit de clôture.
+
+## S86 — 2026-09-08 — Admission transactionnelle journal et champs
+
+**Entrée :** Continue utilisateur ; départ 338a2f9, copies actives identiques et jeton libre.
+**Produit :** LiveWater possède deux journaux et deux pools, applique les commandes dans la
+réserve puis échange la paire complète après calcul. Prédictions, confirmations, rejets et
+renouvellement explicite raccordés. Commande bloquée conservée, vue courante refusée jusqu'au succès.
+ADR-067 actée ; copie interne du journal conserve époque, ordre et indicateur de perte.
+**Vérification :** quatre tests ciblés release ; suite debug 89 core + 93 harnais = 182 réussis,
+cinq ignorés, aucun échec. Quatre avertissements préexistants du harnais. Refus sur second champ,
+saturation journal/champs, reprise, erreurs d'époque et horizon, comparaison directe du lot.
+Formatage et diff vérifiés. P2 : 48c7d99. L200 enregistrée, aucun nouvel angle numéroté ni invariant.
+**Limites :** commande unique en attente, contre-pression hôte, pas de routage spatial ni
+réception réseau complète. La sauvegarde WJNL seule ne couvre pas le service bloqué.
+**Suite S87 :** S86-1, sauvegarde de la paire publiée et de la commande en attente, puis reprise
+sur pools élargis. S85-1 réalisée ; rétention S72-2 encore partielle. Copies synchronisées à clôture.

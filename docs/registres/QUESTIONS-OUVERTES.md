@@ -944,3 +944,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
   avec confirmations/rejets et saturation ; aucune paire journal/champs incohérente publiée.
 - S72-2 reste partielle : le contrôleur conserve un journal figé, ne purge rien et ne permet
   pas une durée arbitraire. Publication multilecteur et ordonnanceur restent ouverts.
+
+### S86 — Admission dynamique construite
+
+- **S85-1 : réalisée dans LiveWater.** Journal et champs échangés ensemble, commandes typées,
+  rétractions après succès ; refus tardif/saturation conservant la commande et bloquant la vue courante.
+- **S86-1 : ouverte, S87.** Sauvegarde/restauration du service et de la commande en attente,
+  reconstruction sur des pools plus grands sans perdre cette attente. WJNL seul est insuffisant.
+- S72-2 reste partielle ; réseau complet, routage spatial et publication multilecteur ouverts.

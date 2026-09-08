@@ -17,6 +17,10 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S86 :** [ADR-067 — Admission transactionnelle](adr/ADR-067-admission-transactionnelle.md), **ACTÉE**.
+Journal et champs publiés ensemble ; commande bloquée conservée. 67 ADR, 193 angles morts.
+Suite S87 : sauvegarde du service et reprise de la commande en attente, S86-1.
+
 **S85 :** [Contrôleur de renouvellement](validation/CONTROLEUR-S85.md) construit.
 Deux pools, bascule après succès et expiration explicite ; 66 ADR, 193 angles morts inchangés.
 Suite S86 : admission d'un journal actualisé avec ses champs, S85-1.

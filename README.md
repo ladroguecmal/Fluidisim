@@ -61,9 +61,10 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S85 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S86 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
-l'expiration. Prochaine étape : admission transactionnelle de nouveaux événements, S85-1.
+l'expiration. LiveWater admet désormais les commandes en publiant ensemble journal et champs ;
+une commande bloquée reste visible. Prochaine étape : sauvegarde et reprise de ce service, S86-1.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

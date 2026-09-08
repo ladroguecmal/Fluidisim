@@ -3102,3 +3102,10 @@ artificiel de phase ; changer de résolution exige en plus de mesurer la discont
 *(S85)* Un renouvellement refusé peut laisser une version encore utilisable ; la même version
 peut ensuite expirer sans nouvelle tentative. Retourner l'erreur de l'opération et calculer
 séparément la validité à l'instant demandé évite aussi bien le faux arrêt que le faux succès.
+
+## L200 — Le retour transactionnel ne doit pas effacer une entrée reçue
+
+*(S86)* Annuler un calcul candidat protège la cohérence des données publiées, mais peut cacher
+une commande non appliquée. Conserver cette commande et distinguer version publiée et vue courante.
+La sauvegarde doit inclure cette attente : restaurer seulement les données publiées ferait disparaître
+la raison pour laquelle le service refusait de répondre.

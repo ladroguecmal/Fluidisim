@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S86 — en cours
+Session : S86 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : admission transactionnelle des commandes et de leurs champs, sans perte masquée.
 
@@ -66,9 +66,12 @@ Objectif : admission transactionnelle des commandes et de leurs champs, sans per
 
 - [x] **P1** — vérifier la passation, prendre le jeton et déclarer le plan.
 - [x] **P2** — service à deux journaux et deux pools, commande en attente après refus physique ou saturation ; tests.
-- [ ] **P3** — vérifier, documenter les limites et exécuter le rituel de passation.
+- [x] **P3** — vérifier, documenter les limites et exécuter le rituel de passation.
 
 ### Notes de reprise
 
 Départ 338a2f9. Une ancienne paire cohérente ne prouve pas que la dernière commande reçue
 est appliquée. Conserver la commande bloquée et refuser la vue courante jusqu'à résolution.
+
+P2 : 48c7d99. Quatre tests release ; suite debug 182 réussis, cinq ignorés.
+ADR-067 et L200 publiées. Suite S87 : S86-1, sauvegarde et reprise du service bloqué.

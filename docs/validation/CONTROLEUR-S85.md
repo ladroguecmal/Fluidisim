@@ -70,3 +70,7 @@ entre ancien journal et nouveaux champs. Tester les refus tardifs et la saturati
 
 La purge S72-2, les durées arbitraires, la résolution adaptative et la publication multilecteur
 restent ouverts. I-03, I-06 et I-08 inchangés ; aucun nouvel angle numéroté. Leçon L199.
+
+> **Actualisation S86 — 2026-09-08.** S85-1 réalisée par LiveWater : ADR-067.
+> Admission et reconstruction publient ensemble journal et champs. Une commande bloquée interdit
+> une vue courante ; sauvegarde de cette attente et reprise sur pools élargis : S86-1.
