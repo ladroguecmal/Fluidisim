@@ -274,4 +274,93 @@ mod tests {
             .sample(FrameId(2), 3, [0.0; 2], SimTime(100_000_011))
             .is_err());
     }
+    // Intégration exacte en profondeur de |grad(phi)|², avec phi_k(z)=psi_k exp(kz).
+    // Une somme de carrés est positive ; psi*deta_dt ne l'est que sous intégrale spatiale.
+    fn radial_energy(f: &ImpactField, seconds: f64, n: usize) -> (f64, f64, f64, f64, f64) {
+        let side = f.side() as f64;
+        let mut total = 0.0;
+        let mut moment = 0.0;
+        let mut outer = 0.0;
+        let mut center = 0.0;
+        let mut min_density = f64::INFINITY;
+        let mut inverse = [[0.0; 40]; 40];
+        for i in 0..40 {
+            for j in 0..40 {
+                inverse[i][j] = 1.0 / (f.modes[i].k as f64 + f.modes[j].k as f64);
+            }
+        }
+        for ix in 0..n {
+            for iy in 0..n {
+                let x = (ix as f64 + 0.5) * side / n as f64 - side / 2.0;
+                let y = (iy as f64 + 0.5) * side / n as f64 - side / 2.0;
+                let radius = (x * x + y * y).sqrt();
+                let mut eta = 0.0;
+                let mut gradients = [[0.0; 3]; 40];
+                for (i, m) in f.modes.iter().enumerate() {
+                    let angle =
+                        core::f64::consts::TAU * (m.turns[0] as f64 * x + m.turns[1] as f64 * y);
+                    let temporal = core::f64::consts::TAU * m.freq as f64 / 4294967296.0 * seconds;
+                    eta += m.amplitude as f64 * angle.cos() * temporal.cos();
+                    let coefficient =
+                        -(m.amplitude as f64) * m.omega as f64 / m.k as f64 * temporal.sin();
+                    gradients[i] = [
+                        -coefficient * core::f64::consts::TAU * m.turns[0] as f64 * angle.sin(),
+                        -coefficient * core::f64::consts::TAU * m.turns[1] as f64 * angle.sin(),
+                        coefficient * m.k as f64 * angle.cos(),
+                    ];
+                }
+                let mut kinetic = 0.0;
+                for i in 0..40 {
+                    for j in 0..40 {
+                        kinetic += (gradients[i][0] * gradients[j][0]
+                            + gradients[i][1] * gradients[j][1]
+                            + gradients[i][2] * gradients[j][2])
+                            * inverse[i][j];
+                    }
+                }
+                let density = 0.5 * 1025.0 * (9.81 * eta * eta + kinetic);
+                min_density = min_density.min(density);
+                total += density;
+                moment += radius * density;
+                if radius >= side / 4.0 {
+                    outer += density;
+                }
+                if radius < side / 8.0 {
+                    center += density;
+                }
+            }
+        }
+        (
+            total * (side / n as f64).powi(2),
+            moment / total,
+            outer / total,
+            center / total,
+            min_density,
+        )
+    }
+    #[test]
+    fn radial_transport_and_periodic_copies_s76() {
+        let f = ImpactField::new(source(), medium()).unwrap();
+        for seconds in [0.0, 1.0, 2.0, 4.0, 6.0, 8.0, 12.0] {
+            let r = radial_energy(&f, seconds, 64);
+            let coarse = radial_energy(&f, seconds, 32);
+            println!("S76 t={seconds:.0} E={:.8} radius={:.6} outside4={:.6} inside2={:.6} min={:.3e} delta_radius={:.6}",r.0,r.1,r.2,r.3,r.4,(r.1-coarse.1).abs());
+            assert!((r.0 - 1.0).abs() < 2e-5);
+            assert!(r.4 >= -1e-12);
+            assert!((r.1 - coarse.1).abs() < 0.03);
+        }
+        let initial = radial_energy(&f, 0.0, 32);
+        let propagated = radial_energy(&f, 4.0, 32);
+        assert!(propagated.1 > initial.1 + 1.0); // témoin de déplacement, pas vitesse de groupe.
+        for us in [0, 2_000_000, 8_000_000] {
+            let a = f
+                .sample(FrameId(2), 3, [0.0, 0.0], SimTime(10 + us))
+                .unwrap();
+            let b = f
+                .sample(FrameId(2), 3, [16.0, 0.0], SimTime(10 + us))
+                .unwrap();
+            assert_eq!(a.eta.to_bits(), b.eta.to_bits());
+            assert_eq!(a.deta_dt.to_bits(), b.deta_dt.to_bits());
+        }
+    }
 }

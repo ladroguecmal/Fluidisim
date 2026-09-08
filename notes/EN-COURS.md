@@ -65,7 +65,7 @@ Objectif : mesurer la propagation radiale et décider du support régional.
 ### Plan
 
 - [x] **P1** — état réel, passation, jeton et plan seul.
-- [ ] **P2** — densité physique positive, transport radial et répliques périodiques ; mesures reproductibles.
+- [x] **P2** — densité physique positive, transport radial et répliques périodiques ; mesures reproductibles.
 - [ ] **P3** — décision de support et rituel, tests adaptés, copies synchronisées.
 
 ### Notes de reprise
