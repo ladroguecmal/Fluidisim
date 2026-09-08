@@ -960,3 +960,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S87-1 : ouverte, S88.** Scénario hôte complet : B+W monde, commandes dynamiques, sauvegarde,
   redémarrage et reprise ; mesurer le coût réel du service, pas seulement du noyau ponctuel.
 - Intégrité du stockage, crash disque, réseau complet et purge S72-2 restent ouverts.
+
+### S88 — Cycle hôte reçu sur scénario local
+
+- **S87-1 : réalisée.** Admissions, requêtes monde, saturation, sauvegarde mémoire, destruction
+  source, restauration et reprise ; référence directe identique. Coûts dans CYCLE-HOTE-S88.
+- **S88-1 : ouverte, S89.** Première source de sillage depuis une trajectoire en milieu profond
+  uniforme : relation mouvement/forçage/énergie puis candidat exécutable et réception physique.
+- Le cycle logiciel ne clôt ni W4 complet, ni rétention S72-2, ni crash disque ou réseau réel.

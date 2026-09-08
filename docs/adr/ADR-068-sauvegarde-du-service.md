@@ -85,3 +85,7 @@ S72-2 reste partielle : sauvegarder les faits ne justifie pas leur purge.
 **S87-1, prochaine session S88 :** raccorder le service dynamique à un scénario hôte de bout
 en bout, avec requêtes B+W monde, admissions, sauvegarde, redémarrage et reprise ; mesurer
 son coût complet avant de poursuivre l'extension des modèles.
+
+> **Actualisation S88 — 2026-09-08.** S87-1 réalisée dans CYCLE-HOTE-S88 : scénario complet
+> B+W monde, saturation, sauvegarde mémoire et cible reconstruite ; empreinte identique à une
+> référence directe. Chronométrages séparés ; aucun test de crash disque ni budget cible reçu.

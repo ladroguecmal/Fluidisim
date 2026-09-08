@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 17:15 +02:00
+JETON            : libre
+Battement        : 2026-09-08 17:17 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S88
-Dernière session : S87 — sauvegarde et reprise ; 185 tests réussis, cinq ignorés
-Session suivante : S88 — scénario hôte complet et coût du service (S87-1)
+Session en cours : aucune
+Dernière session : S88 — cycle hôte reçu ; 185 tests suite + 4 exemple, cinq ignorés
+Session suivante : S89 — source de sillage depuis trajectoire (S88-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -167,6 +167,11 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S88 — 2026-09-08 :** cycle hôte complet reçu sur scénario local, restauration comparée à
+une référence directe ; CYCLE-HOTE-S88. Médiane 3×64 points : 0,6396 ms ; restauration 2,8 µs.
+185 tests suite réussis + quatre tests exemple (dont trois importés), cinq ignorés.
+S87-1 close ; suite S89 : source de sillage depuis trajectoire, S88-1. 68 ADR, 193 angles morts.
 
 **S87 — 2026-09-08 :** ADR-068, sauvegarde WLIV V1 et restauration transactionnelle du service,
 attente conservée, reprise sur pools élargis. 185 tests réussis, cinq ignorés ; S86-1 réalisée.

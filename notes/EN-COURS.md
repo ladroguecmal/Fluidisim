@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S88 — en cours
+Session : S88 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : scénario hôte B+W dynamique, redémarrage depuis WLIV et mesure du coût complet.
 
@@ -66,9 +66,12 @@ Objectif : scénario hôte B+W dynamique, redémarrage depuis WLIV et mesure du 
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
 - [x] **P2** — exemple exécutable de bout en bout, référence indépendante du redémarrage et chronométrage.
-- [ ] **P3** — mesures, vérifications et rituel de passation.
+- [x] **P3** — mesures, vérifications et rituel de passation.
 
 ### Notes de reprise
 
 Départ e8d8c01. Scénario borné N128 : commandes, saturation, sauvegarde, cible plus grande,
 reprise et requêtes monde à 12 s ; aucune promesse de budget AAA ni nouveau modèle physique.
+
+P2 : c0d5320. Suite 185 réussis/cinq ignorés ; cible exemple quatre réussis (trois importés).
+CYCLE-HOTE-S88 et L202 publiés. Suite S89 : S88-1, première source de sillage.

@@ -17,6 +17,10 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S88 :** [Cycle hôte et coûts](validation/CYCLE-HOTE-S88.md), scénario dynamique avec reprise reçu.
+3 impacts × 64 points : médiane locale 0,6396 ms, restauration 2,8 µs ; 68 ADR, 193 angles morts.
+Suite S89 : première source de sillage depuis une trajectoire, S88-1.
+
 **S87 :** [ADR-068 — Sauvegarde du service](adr/ADR-068-sauvegarde-du-service.md), **ACTÉE**.
 WLIV V1, attente préservée et reprise sur pools élargis. 68 ADR, 193 angles morts.
 Suite S88 : scénario hôte complet et coût du service, S87-1.

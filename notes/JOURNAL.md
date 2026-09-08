@@ -5760,3 +5760,22 @@ Contexte et époque identiques ; aucune durée arbitraire ni purge reçue. L201,
 numéroté ni invariant modifié. P2 : 455ff14.
 **Suite S88 :** S87-1, scénario hôte complet avec requêtes monde B+W, admissions, sauvegarde,
 redémarrage et reprise ; coût réel. Copies synchronisées après clôture ; S72-2 reste partielle.
+
+## S88 — 2026-09-08 — Cycle hôte complet et coût réel
+
+**Entrée :** Continue utilisateur ; départ e8d8c01, copies actives identiques, jeton libre.
+**Produit :** bench_live_water, B32 et W N128, ancre à un million de mètres, 64 points monde.
+Cinq admissions, deux impacts, saturation, WLIV, destruction source, cible plus grande,
+restauration bloquée puis reprise à 12 s/16 s d'horizon. Référence directe des confirmations.
+**Résultats :** empreinte 2518ba19f6e53c8d identique, refus tardif sans sortie partielle.
+Médianes µs : admissions 6,6 ; requête 2×64 429,2 ; save 0,2 ; restore 2,8 ; reprise 3,7 ;
+requête 3×64 639,6. Trois échauffements et 21 mesures release, comparaison hors chronométrage.
+CYCLE-HOTE-S88 précise les exclusions et la mémoire. Aucune optimisation du noyau justifiée ici.
+**Vérification :** suite 92 core + 93 harnais = 185 réussis, cinq ignorés ; cible exemple
+explicitement testée : quatre réussis dont trois tests host_impl importés et un nouveau scénario.
+Ces trois tests importés ne sont pas trois nouvelles propriétés. Quatre avertissements préexistants
+harnais. Formatage/diff vérifiés. P2 c0d5320. Aucun nouvel ADR ni angle ; L202, invariants inchangés.
+**Limites :** sauvegarde mémoire seulement, physique commune non revalidée par identité de code,
+aucun budget cible ou coût de crash disque. Journal toujours sans purge.
+**Suite S89 :** S88-1, source de sillage depuis trajectoire en milieu profond uniforme, relation
+forçage/énergie puis candidat testable. S87-1 close ; copies synchronisées après clôture.

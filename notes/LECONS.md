@@ -3116,3 +3116,10 @@ la raison pour laquelle le service refusait de répondre.
 ne doit pourtant pas confondre capacité nouvelle et opération déjà exécutée : rétablir d'abord
 les faits publiés et leur attente, puis déclencher explicitement la nouvelle tentative.
 Cela conserve un point de comparaison avant reprise et évite un acquittement implicite.
+
+## L202 — Mesurer la reprise sans la confondre avec le stockage
+
+*(S88)* Un parcours complet peut vérifier une restauration depuis des octets tout en laissant
+hors champ la durabilité disque. Chronométrer séparément sauvegarde mémoire, reconstruction et
+requêtes ; annoncer les exclusions évite de transformer un coût de codec en latence de redémarrage.
+Une référence directe des faits vérifie le cycle de vie sans réutiliser son chemin de sauvegarde.
