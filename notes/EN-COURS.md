@@ -58,20 +58,17 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S90 — terminée
+Session : S91 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : champ d'une pression gaussienne mobile, quadrature spectrale et bilan global.
+Objectif : trajectoires continues par segments, superposition et travail sur le champ total.
 
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [x] **P2** — prototype spatial de référence, normalisation et tests de convergence/travail.
-- [x] **P3** — publier les mesures, limites et rituel de passation.
+- [ ] **P2** — somme modale multi-segments, validation de trajectoire, tests de découpage et virage.
+- [ ] **P3** — mesures et limites, vérification complète, rituel de passation.
 
 ### Notes de reprise
 
-Départ 1dc6e38. Prolonger pressure_mode f64 hors runtime. Transformée gaussienne explicite,
-intégrale polaire continue tronquée ; aucun carré périodique ni réception Kelvin présumée.
-
-P2 : d3e3f87. Trois tests release ; suite 193 réussis, cinq ignorés.
-ADR-070 et L204 publiées. Suite S91 : S90-1, trajectoire et travail total.
+Départ bc1610e. Même profil gaussien ; segments contigus en temps et position, vitesse par
+morceaux. Calculer énergie après somme complexe, puissance contre vitesse totale ; hors runtime.
