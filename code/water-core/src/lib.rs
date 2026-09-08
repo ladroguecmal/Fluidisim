@@ -29,6 +29,7 @@
 //! permet à la batterie déterministe de tourner en moins de 60 secondes sans réseau.
 
 #![forbid(unsafe_code)]
+mod bessel_directions;
 
 pub mod background;
 pub mod body;

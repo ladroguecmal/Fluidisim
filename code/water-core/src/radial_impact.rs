@@ -10,8 +10,7 @@ pub fn bessel(x: f32) -> Result<(f32, f32), Error> {
     }
     let mut j0 = 0.0;
     let mut j1 = 0.0;
-    for i in 0..128u32 {
-        let c = PhaseQ32(i << 25).cos();
+    for c in crate::bessel_directions::DIRECTIONS {
         let phase = PhaseQ32::from_distance(x / core::f32::consts::TAU, c);
         j0 += phase.cos();
         j1 += c * phase.sin();
@@ -436,6 +435,12 @@ mod tests {
                 .sample(FrameId(0), 0, [1.0, 0.0], SimTime(us + 1000))
                 .unwrap();
             assert!((s.deta_dt - (after.eta - before.eta) / 0.002).abs() < 2e-6);
+        }
+    }
+    #[test]
+    fn directions_table_matches_original_bits_s81() {
+        for i in 0..128u32 {
+            assert_eq!(crate::bessel_directions::DIRECTIONS[i as usize].to_bits(),PhaseQ32(i<<25).cos().to_bits());
         }
     }
 }
