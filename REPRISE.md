@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-08 23:04 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S104 — puissance et bilan
-Dernière session : S103 — résolution reçue ; suite217/cinq ignorés inchangée
-Session suivante : S104 — puissance et bilan candidat (S103-1)
+Session en cours : aucune
+Dernière session : S104 — puissance reçue ; 218 tests/cinq ignorés
+Session suivante : S105 — contexte et publication candidate (S104-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -168,6 +168,10 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
+**S104 — 2026-09-08 :** [PUISSANCE-S104](docs/validation/PUISSANCE-S104.md), puissance du
+champ total reçue ; résidus travail/énergie<1,31e-7 J à800 pas, contrôle spatial<7,3e-9 W.
+218 tests réussis/cinq ignorés ; 73 ADR,193 angles morts inchangés. S103-1 réalisée sur
+fixture ; suite S105 : contexte explicite et publication atomique sur pools hôte S104-1.
 **S103 — 2026-09-08 :** RESOLUTION-S103, candidat112×80 reçu sur8379 échantillons ;
 lot64 11,305 ms médian local. Bibliothèque inchangée, suite217/cinq ignorés non relancée.
 73 ADR,193 angles morts. S102-1 réalisée ; suite S104 : puissance et bilan S103-1.

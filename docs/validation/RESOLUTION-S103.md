@@ -73,3 +73,7 @@ sur virage et extinction, aux résolutions 128² et 112×80. Une accélération 
 ne ferme pas cette lacune physique. Garder 112×80 comme candidat de fixture ; toute autre
 emprise, trajectoire ou pression demande sa réception propre. Intégration autoritaire,
 codec et conformité interplateforme restent ouverts. 73 ADR et 193 angles inchangés.
+
+**Mise à jour S104, 2026-09-08 :** S103-1 réalisée sur fixture ; voir
+[Puissance candidate](PUISSANCE-S104.md). La préparation calcule désormais aussi la
+puissance ; les mesures ci-dessus décrivent S103. Suite S104-1 : contexte et publication.

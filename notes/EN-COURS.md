@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S104 — en cours
+Session : S104 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : puissance candidate et bilan travail/énergie, interférences conservées.
 
@@ -66,10 +66,13 @@ Objectif : puissance candidate et bilan travail/énergie, interférences conserv
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
 - [x] **P2** — construire la puissance, tests et campagne aux deux résolutions reçues.
-- [ ] **P3** — publier résultats et limites ; rituel de passation et synchronisation.
+- [x] **P3** — publier résultats et limites ; rituel de passation et synchronisation.
 
 ### Notes de reprise
 
 Départ 750124d, copies propres identiques. S103-1.
 Puissance=-somme poids Re(P*conj(qdot_total)). Pression active seulement ; énergie totale.
 Comparer travail intégré, référence f64 et extinction ; aucune énergie additionnée par segment.
+
+P2 1389480 ; campagne et suite218/cinq ignorés réussies. Résultats PUISSANCE-S104.
+Suite S105 : S104-1, contexte explicite et publication atomique sur pools hôte.

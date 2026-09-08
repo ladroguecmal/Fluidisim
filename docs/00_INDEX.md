@@ -17,6 +17,8 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S104 :** [Puissance candidate](validation/PUISSANCE-S104.md), bilan temporel/spatial reçu aux deux résolutions.
+218 tests réussis, cinq ignorés ; 73 ADR,193 angles morts. Suite S105 : contexte et publication, S104-1.
 **S103 :** [Résolution du virage](validation/RESOLUTION-S103.md), candidat112×80 reçu ; lot64 11,305 ms localement.
 73 ADR,193 angles morts. Suite S104 : puissance et bilan candidat, S103-1.
 

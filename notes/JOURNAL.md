@@ -6044,3 +6044,17 @@ non exact. Gain local non entrelacé, aucun budget cible certifié. 73 ADR,193 a
 L204/L205 appliquées sans nouvelle leçon distincte.
 **Suite S104 :** S103-1, puissance et travail/énergie candidat aux deux résolutions,
 virage et extinction. S102-1 réalisée, optimisation limitée à cette fixture.
+
+## S104 — 2026-09-08 — Puissance et bilan candidat
+
+**Entrée :** Continue ; P1 264eae2 repris, P2 complété, copies actives identiques.
+**Produit :** pression modale Q32, puissance du champ total, receive_power et PUISSANCE-S104.
+Interférences conservées. Résidus à800 pas1,303e-7/1,220e-7 J (128²/112×80).
+Puissance nulle après extinction, énergie4/8 s identique. Contrôle spatial<7,3e-9 W.
+**Vérification :** suite complète218 réussis/cinq ignorés ; campagne release avec assertions,
+formatage/diff. P2 1389480. Banc isolé préparation6528,6/3597,5 µs ; série concurrente écartée.
+**Limites :** fixture bornée, pas de conformité interplateforme ni raccordement autoritaire.
+73 ADR,193 angles,17 invariants,6 spécifications,23 cas inchangés. Aucun angle ou leçon
+nouveau ; déterminisme interplateforme non déclaré reçu. Aucun budget cible certifié.
+**Suite S105 :** S104-1, contexte explicite et publication atomique sur pools hôte,
+refus de contexte incompatible. S103-1 réalisée sur fixture. Synchronisation finale.

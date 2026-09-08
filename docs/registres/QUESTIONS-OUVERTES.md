@@ -1085,3 +1085,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
   RESOLUTION-S103 ; recette par défaut inchangée, pas de certificat continu.
 - **S103-1 : ouverte, S104.** Puissance et bilan travail/énergie du candidat, virage et
   extinction, résolutions128²/112×80 ; combler cette lacune avant intégration.
+
+### S104 — Puissance candidate reçue
+
+- **S103-1 : réalisée sur fixture.** [PUISSANCE-S104](../validation/PUISSANCE-S104.md),
+  bilans temporel et spatial, extinction, résolutions128² et112×80 ; pas de borne continue.
+- **S104-1 : ouverte, S105.** Contexte explicite du candidat pression (recette, gravité,
+  densité, domaine, horizon), publication atomique sur pools hôte et refus de contexte
+  incompatible, avant raccordement autoritaire B+W.
