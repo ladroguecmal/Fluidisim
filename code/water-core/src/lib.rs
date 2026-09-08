@@ -62,3 +62,4 @@ pub mod pressure_mode;
 pub mod gaussian_pressure;
 pub mod modal_pressure;
 pub mod spectral_pressure;
+pub mod gaussian_spectrum;

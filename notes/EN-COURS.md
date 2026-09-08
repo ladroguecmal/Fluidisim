@@ -65,7 +65,7 @@ Objectif : cuisson gaussienne f32 sans libm dans un pool hôte, recette et hash 
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [ ] **P2** — construire la cuisson bornée, vérifier profil, nœuds, champ et refus.
+- [x] **P2** — construire la cuisson bornée, vérifier profil, nœuds, champ et refus.
 - [ ] **P3** — publier réception et limites ; rituel de passation et synchronisation.
 
 ### Notes de reprise
@@ -73,3 +73,7 @@ Objectif : cuisson gaussienne f32 sans libm dans un pool hôte, recette et hash 
 Départ d88f10d, copies propres identiques. S96-1.
 Directions Q32 et exponentielle négative par réduction entière/polynôme fixe.
 Domaine explicite de recette ; aucune certification interplateforme depuis une seule machine.
+
+P2 : trois tests release réussis ; suite 210 réussis/cinq ignorés puis nouveau test de limites
+exécuté séparément en debug : total 211 réussis. Hash nominal 20e64a392ae237a1.
+ADR-072 contient recette, bornes, erreurs et prochaine mesure de coût S97-1.
