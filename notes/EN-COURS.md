@@ -58,22 +58,18 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S99 — terminée
+Session : S100 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : réduire les paires conjuguées après vérification, recevoir erreur et coût.
+Objectif : préparer les coefficients et bornes constants hors de la boucle par point.
 
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [x] **P2** — construire la réduction contrôlée, tests physiques et mesures comparatives.
-- [x] **P3** — publier décision et résultats ; rituel de passation et synchronisation.
+- [ ] **P2** — alléger la requête, recevoir identité ou erreur, refus et coût.
+- [ ] **P3** — publier résultats et limites ; rituel de passation et synchronisation.
 
 ### Notes de reprise
 
-Départ 065dcf5, copies propres identiques. S98-1.
-Ne pas présumer les nœuds cuits exactement opposés ; réduction refusée sinon.
-Conserver le chemin complet et mesurer toutes les grandeurs avant adoption.
-
-P2 : deux tests release ; suite 120 core + 93 harnais = 213 réussis, cinq ignorés.
-Gain64 ~52 %, 21487,7 µs vs 44798,1 µs ; ADR-073 contient les résultats et limites.
-Banc contrôlé après ajout du décompte de mémoire réduit. Recette V1 inchangée.
+Départ 2ca0148, copies propres identiques. S99-1.
+Conserver les opérations dépendantes du point et les refus de sortie non finie.
+Mesurer le surcoût mémoire des coefficients et le gain avant de retenir le changement.
