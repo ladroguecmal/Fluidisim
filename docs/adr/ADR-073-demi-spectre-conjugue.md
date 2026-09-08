@@ -72,3 +72,7 @@ constants et contrôles qui peuvent être reçus à la préparation, puis compar
 Conserver les refus de domaine et de non-finis ; éviter une optimisation qui supprime le
 contrat de requête. Batching plus profond et coût asymptotique restent ensuite à examiner.
 Pas de conformité interplateforme ni budget cible certifiés ; LiveWater reste distinct.
+
+> **Actualisation S100 — 2026-09-08 :** S99-1 réalisée,
+> [COEFFICIENTS-S100](../validation/COEFFICIENTS-S100.md), hashes et refus conservés.
+> Suite S100-1 : interrogation par lot. Gain local modeste, coût encore élevé.

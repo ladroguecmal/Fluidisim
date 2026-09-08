@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 22:36 +02:00
+JETON            : libre
+Battement        : 2026-09-08 22:37 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S100 — coefficients préparés
-Dernière session : S99 — demi-spectre ; 213 tests réussis, cinq ignorés
-Session suivante : S100 — coefficients préparés (S99-1)
+Session en cours : aucune
+Dernière session : S100 — coefficients ; 215 tests réussis, cinq ignorés
+Session suivante : S101 — interrogation par lot (S100-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -167,6 +167,10 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S100 — 2026-09-08 :** coefficients préparés, COEFFICIENTS-S100 ; hashes et refus conservés.
+215 tests réussis, cinq ignorés ; 73 ADR, 193 angles morts. 64 points 19,800 ms médian local.
+S99-1 réalisée ; suite S101 : lots S100-1. Gain modeste, coût encore élevé.
 
 **S99 — 2026-09-08 :** ADR-073, demi-spectre contrôlé ; gain local ~52 % sur 64 points,
 21,488 ms médian. Réception physique inchangée ; 213 tests réussis, cinq ignorés.

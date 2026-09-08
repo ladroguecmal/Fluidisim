@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S100 — en cours
+Session : S100 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : préparer les coefficients et bornes constants hors de la boucle par point.
 
@@ -66,7 +66,7 @@ Objectif : préparer les coefficients et bornes constants hors de la boucle par 
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
 - [x] **P2** — alléger la requête, recevoir identité ou erreur, refus et coût.
-- [ ] **P3** — publier résultats et limites ; rituel de passation et synchronisation.
+- [x] **P3** — publier résultats et limites ; rituel de passation et synchronisation.
 
 ### Notes de reprise
 
@@ -77,3 +77,5 @@ Mesurer le surcoût mémoire des coefficients et le gain avant de retenir le cha
 P2 : tests release identité/refus réussis ; hashes conservés. Banc64 médian 19799,8 µs,
 Slot40 octets ; comparaison S99 bruitée, gain non certifié. COEFFICIENTS-S100 publié.
 Suite complète en cours : code/target/s100-tests.log.
+
+Clôture : suite complète 215 réussis, cinq ignorés ; copies synchronisées après commit final.

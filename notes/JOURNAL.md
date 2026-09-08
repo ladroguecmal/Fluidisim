@@ -5973,3 +5973,20 @@ conformité interplateforme. Mesures locales non entrelacées ; aucun budget cib
 73 ADR, 193 angles morts, invariants inchangés ; aucune nouvelle leçon distincte.
 **Suite S100 :** S99-1, coefficients et contrôles constants déplacés à la préparation,
 réception d'erreur et coût, refus conservés. S98-1 réalisée ; copies synchronisées à la clôture.
+
+## S100 — 2026-09-08 — Coefficients constants préparés
+
+**Entrée :** Continue ; départ 2ca0148, copies actives propres et identiques.
+**Produit :** k en tours et poids*k préparés ; borne de phase par rectangle avec repli
+sur contrôle par point si elle échoue. Aucune restriction nouvelle du domaine accepté.
+COEFFICIENTS-S100 publié ; pas de changement de formule ou représentation.
+**Mesures :** hashes conservés ; demi-spectre64 médian 19799,8 µs, 121 points 40547,7 µs,
+préparation 6470,7 µs. Gain observé 7,9/3,2 % vs S99, comparaison bruitée non certifiée.
+Slot passe 36→40 octets, +32768 octets par champ de 8192 modes ; compromis explicite.
+**Vérification :** deux tests release identité/refus, suite debug 122 core + 93 harnais =
+215 réussis, cinq ignorés, quatre avertissements préexistants. Banc contre référence :
+max 5,478e-9 inchangé. Formatage/diff vérifiés, P2 7dcfc52.
+**Limites :** coût toujours élevé ; pas de gain garanti ni conformité interplateforme.
+73 ADR, 193 angles morts, invariants inchangés ; aucune nouvelle leçon distincte.
+**Suite S101 :** S100-1, interrogation par lot réutilisant les données modales, ordre par point
+conservé, sortie atomique, comparaison scalaire et coût. S99-1 réalisée.

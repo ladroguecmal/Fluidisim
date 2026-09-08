@@ -1056,3 +1056,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S99-1 : ouverte, S100.** Sortir les coefficients et contrôles constants de la boucle
   par point, recevoir erreur et coût en conservant les refus de domaine et non-finis.
 - Coût toujours élevé ; conformité interplateforme et intégration autoritaire ouvertes.
+
+### S100 — Coefficients constants et garde de phase
+
+- **S99-1 : réalisée.** Coefficients préparés, borne de phase avec repli, hashes et refus
+  conservés ; COEFFICIENTS-S100. Gain local modeste, mémoire du champ +11,1 %.
+- **S100-1 : ouverte, S101.** Interrogation par lot, réutilisation des données modales,
+  ordre de sommation par point et publication atomique ; comparaison scalaire et coût.
+- Coût élevé, conformité interplateforme et intégration autoritaire restent ouverts.

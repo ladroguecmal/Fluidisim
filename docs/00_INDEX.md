@@ -17,6 +17,9 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S100 :** [Coefficients préparés](validation/COEFFICIENTS-S100.md), hashes et refus conservés.
+215 tests réussis, cinq ignorés ; 73 ADR, 193 angles morts. Suite S101 : lots, S100-1.
+
 **S99 :** [ADR-073 — Demi-spectre conjugué](adr/ADR-073-demi-spectre-conjugue.md), **ACTÉE**.
 213 tests réussis, cinq ignorés ; 73 ADR, 193 angles morts. Suite S100 : coefficients préparés, S99-1.
 
