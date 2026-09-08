@@ -223,6 +223,24 @@ mod tests {
         assert_eq!(spectrum.hash(), 0x20e6_4a39_2ae2_37a1);
         receive_field(spectrum.nodes());
     }
+    #[test]
+    fn half_field_and_splitting_s99() {
+        let mut pool = vec![Node::default(); 128 * 128];
+        let spectrum = crate::gaussian_spectrum::bake(
+            crate::gaussian_spectrum::Recipe {
+                sigma: 1.0,
+                cutoff: 6.0,
+                radial: 128,
+                angular: 128,
+            },
+            &mut pool,
+        )
+        .unwrap();
+        let mut half = vec![Node::default(); 128 * 64];
+        let reduced = spectrum.half_into(&mut half).unwrap();
+        assert_eq!(reduced.source_hash(), spectrum.hash());
+        receive_field(reduced.nodes());
+    }
     fn receive_field(nodes: &[Node]) {
         let a = source();
         let b = Segment {

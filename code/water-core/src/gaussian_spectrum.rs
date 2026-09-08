@@ -11,6 +11,20 @@ pub struct Recipe {
 pub enum Error {
     Domain,
     Capacity,
+    NotConjugate,
+}
+/// Demi-spectre reçu : poids doublés, hash de la recette complète conservé pour provenance.
+pub struct HalfSpectrum<'a> {
+    nodes: &'a [Node],
+    source_hash: u64,
+}
+impl HalfSpectrum<'_> {
+    pub fn nodes(&self) -> &[Node] {
+        self.nodes
+    }
+    pub fn source_hash(&self) -> u64 {
+        self.source_hash
+    }
 }
 pub struct Spectrum<'a> {
     nodes: &'a [Node],
@@ -18,6 +32,40 @@ pub struct Spectrum<'a> {
     hash: u64,
 }
 impl Spectrum<'_> {
+    /// Réduction exacte de la géométrie cuite, avant tout calcul modal.
+    /// Tous les contrôles précèdent l'écriture ; pas de correction silencieuse des directions.
+    pub fn half_into<'a>(&self, pool: &'a mut [Node]) -> Result<HalfSpectrum<'a>, Error> {
+        let angular = self.recipe.angular;
+        let half = angular / 2;
+        if pool.len() < self.nodes.len() / 2 {
+            return Err(Error::Capacity);
+        }
+        for ring in self.nodes.chunks_exact(angular) {
+            for j in 0..half {
+                let a = ring[j];
+                let b = ring[j + half];
+                if a.k[0] != -b.k[0]
+                    || a.k[1] != -b.k[1]
+                    || a.transform.to_bits() != b.transform.to_bits()
+                    || a.weight.to_bits() != b.weight.to_bits()
+                {
+                    return Err(Error::NotConjugate);
+                }
+            }
+        }
+        for (i, ring) in self.nodes.chunks_exact(angular).enumerate() {
+            for j in 0..half {
+                pool[i * half + j] = Node {
+                    weight: ring[j].weight * 2.0,
+                    ..ring[j]
+                };
+            }
+        }
+        Ok(HalfSpectrum {
+            nodes: &pool[..self.nodes.len() / 2],
+            source_hash: self.hash,
+        })
+    }
     pub fn nodes(&self) -> &[Node] {
         self.nodes
     }
@@ -100,6 +148,53 @@ pub fn bake(recipe: Recipe, pool: &mut [Node]) -> Result<Spectrum<'_>, Error> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn pairs_and_refusal_s99() {
+        for angular in (4..=512).step_by(2) {
+            let mut pool = vec![Node::default(); angular];
+            let s = bake(
+                Recipe {
+                    sigma: 1.0,
+                    cutoff: 6.0,
+                    radial: 1,
+                    angular,
+                },
+                &mut pool,
+            )
+            .unwrap();
+            let mut out = vec![Node::default(); angular / 2 + 1];
+            out[angular / 2].weight = 123.0;
+            assert!(s.half_into(&mut out).is_ok(), "angular={angular}");
+            assert_eq!(out[angular / 2].weight, 123.0);
+            assert!(matches!(s.half_into(&mut []), Err(Error::Capacity)));
+        }
+        let mut nodes = [Node::default(); 4];
+        let s = bake(
+            Recipe {
+                sigma: 1.0,
+                cutoff: 6.0,
+                radial: 1,
+                angular: 4,
+            },
+            &mut nodes,
+        )
+        .unwrap();
+        let recipe = s.recipe;
+        let hash = s.hash;
+        nodes[2].k[0] += 0.01;
+        let bad = Spectrum {
+            nodes: &nodes,
+            recipe,
+            hash,
+        };
+        let mut out = [Node {
+            weight: 123.0,
+            ..Node::default()
+        }; 2];
+        assert!(matches!(bad.half_into(&mut out), Err(Error::NotConjugate)));
+        assert_eq!(out[0].weight, 123.0);
+        assert_eq!(out[1].weight, 123.0);
+    }
     #[test]
     fn decay_profile_and_recipe_s97() {
         let mut worst = 0.0f64;

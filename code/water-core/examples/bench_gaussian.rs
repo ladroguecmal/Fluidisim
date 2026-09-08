@@ -60,7 +60,10 @@ fn main() {
         },
     ];
     let mut nodes = vec![Node::default(); 16384];
-    let mut slots = vec![Slot::default(); 16384];
+    let paired = std::env::args().any(|s| s == "--half");
+    let count = if paired { 8192 } else { 16384 };
+    let mut reduced = vec![Node::default(); if paired { 8192 } else { 0 }];
+    let mut slots = vec![Slot::default(); count];
     let mut output = [Surface::default(); 121];
     let mut points = [[0.0f32; 2]; 121];
     for (i, p) in points.iter_mut().enumerate() {
@@ -74,9 +77,23 @@ fn main() {
     println!("bake {times:?}");
     let spectrum = bake(recipe, &mut nodes).unwrap();
     assert_eq!(spectrum.hash(), 0x20e6_4a39_2ae2_37a1);
+    if paired {
+        let t = measure(|| {
+            let h = spectrum.half_into(black_box(&mut reduced)).unwrap();
+            black_box(h.nodes());
+        });
+        println!("reduce {t:?}");
+    }
+    let half = if paired {
+        Some(spectrum.half_into(&mut reduced).unwrap())
+    } else {
+        None
+    };
+    let input = half.as_ref().map_or(spectrum.nodes(), |h| h.nodes());
+    println!("mode_count={count}");
     let times = measure(|| {
         let f = prepare(
-            black_box(spectrum.nodes()),
+            black_box(input),
             black_box(&path),
             9.81,
             1025.0,
@@ -91,7 +108,7 @@ fn main() {
     });
     println!("prepare_two_segments {times:?}");
     let field = prepare(
-        spectrum.nodes(),
+        input,
         &path,
         9.81,
         1025.0,
@@ -151,6 +168,6 @@ fn main() {
     }
     assert!(max < 1e-7);
     println!("max absolute component error={max:.9e} (mixed units, threshold 1e-7 in each unit)");
-    println!("bytes Node={} Slot={} Surface={} nodes={} one_field={} two_fields={} points={} output={} trajectory={}",size_of::<Node>(),size_of::<Slot>(),size_of::<Surface>(),16384*size_of::<Node>(),16384*size_of::<Slot>(),32768*size_of::<Slot>(),size_of_val(&points),size_of_val(&output),size_of_val(&path));
+    println!("bytes Node={} Slot={} Surface={} nodes={} reduced_nodes={} one_field={} two_fields={} points={} output={} trajectory={}",size_of::<Node>(),size_of::<Slot>(),size_of::<Surface>(),16384*size_of::<Node>(),reduced.len()*size_of::<Node>(),count*size_of::<Slot>(),2*count*size_of::<Slot>(),size_of_val(&points),size_of_val(&output),size_of_val(&path));
     println!("excludes allocator metadata, reference model, stack temporaries and OS; no allocation counter");
 }
