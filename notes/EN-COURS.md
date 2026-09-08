@@ -65,7 +65,7 @@ Objectif : première expansion analytique dispersive d’un impact isotrope, dom
 ### Plan
 
 - [x] **P1** — passation, copies, jeton et plan seul.
-- [ ] **P2** — impact spectral fini en eau profonde, énergie normalisée, tests physiques indépendants.
+- [x] **P2** — impact spectral fini en eau profonde, énergie normalisée, tests physiques indépendants.
 - [ ] **P3** — ADR et limites, vérification complète, rituel et synchronisation.
 
 ### Notes de reprise
