@@ -65,7 +65,7 @@ Objectif : mesurer le coût réel et la mémoire du chemin gaussien complet, san
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [ ] **P2** — construire et exécuter le banc release, vérifier les sorties et compter la mémoire.
+- [x] **P2** — construire et exécuter le banc release, vérifier les sorties et compter la mémoire.
 - [ ] **P3** — publier mesures et limites ; rituel de passation et synchronisation.
 
 ### Notes de reprise
@@ -73,3 +73,7 @@ Objectif : mesurer le coût réel et la mémoire du chemin gaussien complet, san
 Départ 15e2b4b, copies propres identiques. S97-1.
 Recette 128², virage S91, requêtes 1/64/121 points. Séparer cuisson/préparation/requête.
 Pas de budget cible certifié à partir de mesures sur une seule machine.
+
+P2 : banc release exécuté et comparaison indépendante reçue ; COUT-GAUSSIEN-S98.
+Médianes cuisson 532 µs, préparation 12501 µs, requêtes64 44637,8 µs ; coût dominant requête.
+Aucun code bibliothèque modifié, suite 211/cinq ignorés inchangée ; exemple exécuté avec assertions.
