@@ -917,3 +917,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S82-1 : ouverte, S83.** Lier explicitement points, instant et contexte au tampon B du lot,
   sans précondition silencieuse permettant de composer B(t1) avec W(t2).
 - Budget cible, élargissement physique, publication et rétention S72-2 restent ouverts.
+
+### S83 — Requête commune B+W
+
+- **S82-1 : réalisée sur sample_world_batch.** B calculé depuis les mêmes points et instant W,
+  identifiants et gravité contrôlés ; ancien chemin brut reste un adaptateur de confiance.
+- **S83-1 : ouverte, S84, reprend S72-2.** Rétention et fin de validité explicites ; permettre
+  le fonctionnement prolongé sans supprimer physiquement les effets au TTL de la source.
+- Géométrie hôte réelle, publication et index restent ouverts ; ADR-065 détaille les limites.

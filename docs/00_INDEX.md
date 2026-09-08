@@ -17,6 +17,10 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S83 :** [ADR-065 — Requête commune B/W](adr/ADR-065-requete-commune-b-w.md), **ACTÉE**.
+Points/temps partagés, contexte contrôlé ; débordement to_local corrigé. 65 ADR, 193 angles morts.
+Suite S84 : rétention et validité (S83-1 / S72-2).
+
 **S82 :** [ADR-064 — Bessel interpolé](adr/ADR-064-bessel-interpole.md), **ACTÉE**.
 Noyau accéléré reçu, contrôles physiques inchangés. 64 ADR, 192 angles morts.
 Suite S83 : métadonnées et cohérence du tampon B (S82-1).
@@ -197,7 +201,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`registres/BILAN-S69.md`](registres/BILAN-S69.md) | **bilan d'avancement** — ~85 % comme corpus de conception, **~15 % comme système** ; **onze cas sur 23 et onze bancs sur onze attendent une couche non écrite** ; **B1 est le seul banc exécutable et n'a jamais été lancé** |
 | [`registres/PRESCRIPTIONS-S63.md`](registres/PRESCRIPTIONS-S63.md) | **les prescriptions non éprouvées** — trois genres, dont un seul se vérifie ; **trois recettes mises à l'épreuve, trois fautives** ; les préalables de B2 périmés depuis quarante sessions (**A185**) |
 | [`registres/AUDIT-REFERENCES-S62.md`](registres/AUDIT-REFERENCES-S62.md) | **ce qu'une référence peut voir bouger** — 41 références, trois degrés, **une seule tautologie** ; `Hs` aveugle à `hs` et gouverné par sa fenêtre, première mesure d'**A102** ; la fenêtre était hors du scénario (**A184**) |
-| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **192 points**, avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
+| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **193 points**, avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
 | [`registres/FORK-S22-S26.md`](registres/FORK-S22-S26.md) | **le second fork** — constat, carte de renumérotation complète, la règle manquante, et ce qui reste à fusionner |
 | [`registres/AUDIT-ASSERTIONS-S29.md`](registres/AUDIT-ASSERTIONS-S29.md) | **ce que chaque assertion peut voir** — 23 cas classés, 5 fautifs, 1 mesure du harnais retirée ; **réécriture S30 sans aucun seuil inventé** |
 | [`registres/AUDIT-REPLIS-S44.md`](registres/AUDIT-REPLIS-S44.md) | **les valeurs de repli, inventoriées** — 49 recensées, deux fautives ; *quand la grandeur est un écart, zéro est son meilleur point* |

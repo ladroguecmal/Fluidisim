@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S83 — en cours
+Session : S83 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : chemin de lot B+W calculant B aux mêmes points/instant que W.
 
@@ -66,7 +66,7 @@ Objectif : chemin de lot B+W calculant B aux mêmes points/instant que W.
 
 - [x] **P1** — passation, copies, jeton et plan seul.
 - [x] **P2** — liaison explicite B/référentiel/cellule, lot monde cohérent et tests de refus.
-- [ ] **P3** — banc raccordé, tests complets, documentation et rituel.
+- [x] **P3** — banc raccordé, tests complets, documentation et rituel.
 
 ### Notes de reprise
 

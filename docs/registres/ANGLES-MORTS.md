@@ -1548,3 +1548,8 @@ connue ne signifie pas complétude réseau ; protocole de resynchronisation hôt
   alors que la vitesse horizontale est juste.** B rendait w=-deta_dt. L’identité orbitale
   horizontale de S21 ne testait pas la condition cinématique verticale. Signe corrigé, contrôle
   par différence temporelle ajouté ; références de conformité renouvelées, ADR-062.
+
+- **A193** *(sévérité 1, S83 ; corrigée dans WorldPos::to_local)* — **Une borne locale après
+  soustraction ne protège pas la soustraction.** Deux positions i64 lointaines pouvaient faire
+  déborder le calcul avant le contrôle des 4096 m. checked_sub refuse désormais les extrêmes,
+  dans les deux sens, et le lot conserve sa sortie. ADR-065.

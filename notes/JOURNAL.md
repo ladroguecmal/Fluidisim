@@ -5682,3 +5682,17 @@ interplateforme. Aucun seuil physique déplacé, aucune capacité AAA déduite d
 S81-1 close. Aucun angle numéroté ajouté ni invariant amendé. Vérification complète ci-dessous.
 
 **Vérification finale :** 77 tests core + 93 harnais = 170 réussis, cinq ignorés, aucun échec. Quatre avertissements préexistants des tests du harnais. Diff vérifié ; copies synchronisées après commit.
+
+## S83 — 2026-09-08 — Une requête commune pour B et W
+
+**Entrée :** Continue utilisateur ; départ dc0dd39, copies actives identiques.
+**Produit :** BoundBackground et sample_world_batch calculent B puis W aux mêmes points/instant.
+Contexte et gravité contrôlés, output transactionnel conservé ; banc raccordé au chemin commun.
+**Défaut trouvé :** to_local soustrayait les i64 avant de borner ; checked_sub et extrêmes testés.
+A193 corrigée, L197. Ancre décalée de 1 million de mètres, deux points/deux instants testés.
+**Mesure :** quatre hashs S82 conservés ; latences en environnement occupé, pas de verdict sur
+un surcoût isolé. ADR-065 distingue déclaration hôte des axes et garanties du code.
+**Suite S84 :** S83-1 / S72-2, rétention et validité prolongée. S82-1 réalisée sur chemin commun.
+Ancien chemin brut conservé avec préconditions, pas de réception multi-référentiels universelle.
+
+**Vérification finale :** 78 tests core + 93 harnais = 171 réussis, cinq ignorés, aucun échec. Quatre avertissements préexistants des tests du harnais. Banc et test ciblé release vérifiés ; copies synchronisées après commit.

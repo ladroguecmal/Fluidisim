@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 12:27 +02:00
+JETON            : libre
+Battement        : 2026-09-08 12:32 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S83
-Dernière session : S82 — Bessel interpole ; 170 tests réussis, cinq ignorés
-Session suivante : S83 — coherence contexte temps points du lot B (S82-1)
+Session en cours : aucune
+Dernière session : S83 — requete commune B+W ; 171 tests réussis, cinq ignorés
+Session suivante : S84 — retention et validite prolongee (S83-1 / S72-2)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -148,7 +148,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 17 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 64 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 65 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -167,6 +167,10 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S83 — 2026-09-08 :** ADR-065, lot monde B+W à requête commune ; contrôles de contexte,
+gravité et conversion extrême. S82-1 réalisée sur ce chemin ; géométrie hôte encore déclarative.
+Suite S84 : validité prolongée et rétention S83-1 / S72-2. 65 ADR, 193 angles morts.
 
 **S82 — 2026-09-08 :** ADR-064 adopte Hermite pour Bessel, erreur mesurée max 5,86e-8.
 1×64 points : 0,1553 ms médian local ; 16×64 : 1,5978 ms. S81-1 close, pas de budget cible

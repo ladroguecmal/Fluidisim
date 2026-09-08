@@ -3082,3 +3082,10 @@ Conserver les sorties à bits identiques permet d’isoler une optimisation de c
 *(S82)* Le reste Hermite suppose valeurs et dérivées nodales exactes. Une table quantifiée
 et une évaluation flottante ajoutent leurs erreurs. Publier séparément borne analytique du
 schéma et erreur mesurée du code ; une grille dense n’est pas une preuve de tous les arguments.
+
+## L197 — Une étiquette ne prouve pas la provenance d’un résultat
+
+*(S83)* Ajouter un instant à un tampon calculé ailleurs ne garantit pas son origine. Quand
+c’est possible, produire les grandeurs couplées depuis une même requête plutôt que demander
+au consommateur de certifier leur cohérence après coup. Déclarer séparément les associations
+hôte que le système ne peut encore vérifier, notamment les transformations géométriques.

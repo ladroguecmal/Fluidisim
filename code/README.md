@@ -133,3 +133,9 @@ Directions Bessel tabulées exactement ; COUT-BW-S81 documente gains et limites 
 
 Hermite au pas 1/16, table de bits générée par examples/generate_bessel.py. Référence angulaire
 conservée ; ADR-064 documente erreur, changement d’arrondi et gain des lots. Domaine inchangé.
+
+### S83 — Requête commune
+
+Prepared::sample_world_batch calcule B depuis les points monde et compose W au même instant.
+BoundBackground déclare le référentiel/cellule ; l’hôte garantit encore ses axes et son ancre.
+ADR-065. L’ancien sample_batch reste réservé aux adaptateurs maîtrisant ses préconditions.
