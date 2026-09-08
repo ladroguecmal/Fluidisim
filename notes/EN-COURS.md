@@ -58,22 +58,18 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S101 — terminée
+Session : S102 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : interrogation par lot sur scratch hôte, ordre modal conservé et publication atomique.
+Objectif : mesurer et partager la réduction du sinus/cosinus, vérifier identité et coût.
 
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [x] **P2** — construire le lot, vérifier identité/refus et mesurer le coût face au scalaire.
-- [x] **P3** — publier résultats et limites ; rituel de passation et synchronisation.
+- [ ] **P2** — construire sin_cos partagé et banc de phase ; identité, physique et coûts.
+- [ ] **P3** — publier résultats et limites ; rituel de passation et synchronisation.
 
 ### Notes de reprise
 
-Départ d416e0a, copies propres identiques. S100-1.
-Même calcul élémentaire partagé ; ordre des nœuds inchangé par point, boucle par tuiles.
-Scratch hôte distinct de la sortie pour garantir le refus sans publication partielle.
-
-P2 reprise à chaud : tuiles rejetées après mesure ; lot final scalaire atomique reçu.
-Hashes inchangés. LOTS-S101 : coût lot64 20050 µs, scratch3388 octets pour121.
-Suite initiale s101-tests.log ; vérification finale ciblée s101-final-core.log après retrait tuiles.
+Départ 561f496, copies propres identiques. S101-1.
+Même polynômes et même angle réduit : quadrant commun pour les deux résultats.
+Ne pas remplacer les fonctions individuelles utilisées ailleurs ; raccordement spectral seul.
