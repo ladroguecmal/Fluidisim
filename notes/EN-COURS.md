@@ -65,7 +65,7 @@ Objectif : noyau modal sans libm ni allocation, horloge entière et résonance r
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [ ] **P2** — construire le candidat modal f32, contrat borné et comparaison physique/déterministe.
+- [x] **P2** — construire le candidat modal f32, contrat borné et comparaison physique/déterministe.
 - [ ] **P3** — publier décision, mesures et limites ; rituel de fin et copies synchronisées.
 
 ### Notes de reprise
@@ -75,3 +75,8 @@ Réutiliser PhaseQ32 ; ne convertir aucun temps en f32, même dans l'enveloppe r
 Produits fréquence × durée entiers pour phases ; croissance d'amplitude par multiplication
 entière du coefficient par microseconde. Tester ±résonance, époque proche de u64::MAX,
 petits âges, extinction, refus et concordance debug/release. Référence S89 conservée.
+
+P2 : reprise après interruption ; quatre tests release réussis et suite terminée :
+113 core + 93 harnais = 206 réussis, cinq ignorés. Hash debug/release 8ea15f4a3334830b.
+Échecs initiaux corrigés sans changer les seuils : parité petits angles, conversion Q32 entière.
+ADR-071 documente le candidat et sa réception locale ; interplateforme encore ouverte.
