@@ -968,3 +968,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S88-1 : ouverte, S89.** Première source de sillage depuis une trajectoire en milieu profond
   uniforme : relation mouvement/forçage/énergie puis candidat exécutable et réception physique.
 - Le cycle logiciel ne clôt ni W4 complet, ni rétention S72-2, ni crash disque ou réseau réel.
+
+### S89 — Première réponse physique de sillage
+
+- **S88-1 : partielle.** Pression mobile modale, résonance finie, travail/énergie et segmentation
+  reçus sur fixtures ; instrument f64 hors runtime autoritaire, ADR-069.
+- **S89-1 : ouverte, S90.** Pression spatialement localisée en translation : superposition
+  spectrale, normalisation, convergence et bilan de travail total avant codec et intégration W.
+- Aucun sillage de Kelvin complet ni relation coque/pression calibrée. W4 et B2 restent partiels.

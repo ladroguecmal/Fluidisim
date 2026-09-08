@@ -5779,3 +5779,21 @@ harnais. Formatage/diff vérifiés. P2 c0d5320. Aucun nouvel ADR ni angle ; L202
 aucun budget cible ou coût de crash disque. Journal toujours sans purge.
 **Suite S89 :** S88-1, source de sillage depuis trajectoire en milieu profond uniforme, relation
 forçage/énergie puis candidat testable. S87-1 close ; copies synchronisées après clôture.
+
+## S89 — 2026-09-08 — Réponse d'une pression mobile
+
+**Entrée :** Continue utilisateur ; départ fe64cd7, copies actives identiques, jeton libre.
+**Produit :** pressure_mode.rs, instrument f64 hors runtime répliqué. Segment de pression mobile,
+réponse analytique finie à résonance, extinction puis propagation libre, énergie moyenne et puissance.
+Sources primaires consultées et dérivation dans ADR-069 ; amplitude de pression explicitement fournie.
+**Vérification :** cinq tests release puis suite 97 core + 93 harnais = 190 réussis, cinq ignorés,
+aucun échec ; quatre avertissements préexistants du harnais. Quadrature temporelle indépendante,
+pression stationnaire, résonance ±ω et voisins, travail intégré, énergie après extinction,
+translation, segmentation et refus numériques. Écart travail/énergie maximal du fixture : 9,31e-11 J/m².
+**Décision :** ne pas normaliser les segments comme des impacts indépendants : leurs champs
+s'additionnent, leurs énergies interfèrent. L203 enregistrée. P2 78b7bf8, formatage et diff vérifiés.
+**Limites :** pas de pression localisée ni champ de sillage complet, pas de codec ni de LiveWater,
+libm/temps relatif f64 de référence, aucune conformité runtime I-03/I-08 revendiquée.
+Aucun nouvel angle numéroté ni invariant amendé ; ADR-069 actée, 69 ADR.
+**Suite S90 :** S89-1, pression localisée et superposition spectrale avec convergence et travail
+total. S88-1 partielle ; copies synchronisées après clôture.

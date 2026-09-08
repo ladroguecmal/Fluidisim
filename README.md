@@ -61,12 +61,13 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S88 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S89 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
 l'expiration. LiveWater admet désormais les commandes en publiant ensemble journal et champs ;
 une commande bloquée reste visible. La sauvegarde WLIV conserve cette attente et permet une
 reprise sur des buffers plus grands. Le scénario hôte complet est testé et mesuré : 3 impacts
-sur 64 points en 0,64 ms médiane locale. Prochaine étape : source de sillage depuis une trajectoire, S88-1.
+sur 64 points en 0,64 ms médiane locale. Une première réponse physique à une pression mobile
+est construite hors runtime ; prochaine étape : pression localisée et champ de sillage, S89-1.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

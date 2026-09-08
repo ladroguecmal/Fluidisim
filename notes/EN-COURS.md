@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S89 — en cours
+Session : S89 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : premier candidat de forçage de sillage, pression mobile et travail injecté.
 
@@ -66,10 +66,13 @@ Objectif : premier candidat de forçage de sillage, pression mobile et travail i
 
 - [x] **P1** — vérifier la passation, rechercher la formulation physique et déclarer le plan.
 - [x] **P2** — réponse modale à une pression mobile de durée finie, résonance sans singularité ; tests analytiques et travail/énergie.
-- [ ] **P3** — décision et limites, vérification complète, rituel de passation.
+- [x] **P3** — décision et limites, vérification complète, rituel de passation.
 
 ### Notes de reprise
 
 Départ fe64cd7. Première brique physique de W4, pas une suite d'Impact. Candidat de référence
 f64 comme dispersif.rs, hors runtime autoritaire : modal profond uniforme, onde localisée
 et codec de trajectoire à construire après réception de la réponse forcée.
+
+P2 : 78b7bf8. Cinq tests release ; suite 190 réussis, cinq ignorés.
+ADR-069 et L203 publiées. Suite S90 : S89-1, pression localisée et superposition spectrale.

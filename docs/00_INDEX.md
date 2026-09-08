@@ -17,6 +17,10 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S89 :** [ADR-069 — Pression mobile et sillage](adr/ADR-069-pression-mobile-et-sillage.md), **ACTÉE**.
+Réponse modale et travail reçus, prototype f64 hors runtime ; 69 ADR, 193 angles morts.
+Suite S90 : pression localisée et superposition spectrale, S89-1.
+
 **S88 :** [Cycle hôte et coûts](validation/CYCLE-HOTE-S88.md), scénario dynamique avec reprise reçu.
 3 impacts × 64 points : médiane locale 0,6396 ms, restauration 2,8 µs ; 68 ADR, 193 angles morts.
 Suite S89 : première source de sillage depuis une trajectoire, S88-1.

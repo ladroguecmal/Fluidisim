@@ -3123,3 +3123,10 @@ Cela conserve un point de comparaison avant reprise et évite un acquittement im
 hors champ la durabilité disque. Chronométrer séparément sauvegarde mémoire, reconstruction et
 requêtes ; annoncer les exclusions évite de transformer un coût de codec en latence de redémarrage.
 Une référence directe des faits vérifie le cycle de vie sans réutiliser son chemin de sauvegarde.
+
+## L203 — Une décomposition linéaire du champ ne rend pas son énergie additive
+
+*(S89)* Les réponses de segments de forçage s'additionnent, mais leur énergie quadratique
+contient des interférences. Valider la segmentation sur le champ, puis le travail sur la vitesse
+totale. Normaliser chaque segment indépendamment rendrait le résultat dépendant du découpage
+de la trajectoire, alors que le mouvement physique n'a pas changé.
