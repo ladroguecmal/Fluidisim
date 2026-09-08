@@ -77,3 +77,7 @@ qui contrôle ensemble troncature spatiale et quadrature. Le contrôle pi/2 seul
 Le coût de 128 directions par nœud est élevé : aucune promesse de budget temps réel ; optimisation
 à partir du coût mesuré après réception physique. Journal→champ, WaterSample B+W, autorité réseau,
 plateformes et budgets restent ouverts. Aucun choix final B2. I-03, I-07, I-08, I-14 relus, inchangés.
+
+> **Actualisation S78 — 2026-09-08.** BILAN-RADIAL-S78 mesure l’énergie positive dans le temps
+> et son transport. ADR-061 autorise l’intégration limitée sur le scénario reçu, sans élargir
+> cette réception à tous les paramètres admis. Pas de compensation du déficit d’un disque fini.

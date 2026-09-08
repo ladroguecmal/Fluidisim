@@ -105,3 +105,9 @@ reste un support de comparaison ; prochain candidat radial non périodique, S76-
 radial_impact remplace le pavage carré par une quadrature de Hankel à domaine explicite.
 Bessel sans libm, énergie spectrale normalisée ; réception physique initiale seulement.
 Voir ADR-060 pour rayon/durée, convergence et limites. Pas encore de raccordement B+W.
+
+### S78 — Bilan temporel radial
+
+Le scénario reçu conserve son énergie à l’échelle du disque de 20 m sur les quatre instants
+mesurés ; un disque de 8 m laisse sortir une part de cette énergie. BILAN-RADIAL-S78 et ADR-061.
+Suite : vitesse orbitale et composition B+W limitée, sans élargir implicitement la réception.

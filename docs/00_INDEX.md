@@ -17,6 +17,10 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S78 :** [ADR-061 — Intégration radiale limitée](adr/ADR-061-integration-radiale-limitee.md),
+**ACTÉE**. [Bilan temporel](validation/BILAN-RADIAL-S78.md) reçu sur son scénario ; suite S79,
+vitesse orbitale et B+W. 61 ADR, 191 angles morts, invariants inchangés.
+
 **S77 :** [ADR-060 — Candidat radial borné](adr/ADR-060-candidat-radial-borne.md),
 **ACTÉE**. RadialImpact construit, source normalisée et quadrature contrôlée. 60 ADR,
 191 angles morts. Suite S78 : bilan temporel et transport radial (S77-1).

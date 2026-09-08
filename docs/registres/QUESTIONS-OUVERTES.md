@@ -877,3 +877,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S77-1 : ouverte, S78.** Bilan temporel et transport radial physiques du candidat, convergence
   avec troncature spatiale et résolution ; établir un domaine de réception, pas seulement de calcul.
 - Coût, journal→champ, B+W et réception croisée restent ouverts W3/W4 ; S72-2 rétention inchangée.
+
+### S78 — Campagne temporelle reçue sur son scénario
+
+- **S77-1 : close pour le scénario mesuré.** Bilan temporel, transport et troncature séparés ;
+  BILAN-RADIAL-S78 et ADR-061. Aucune réception globale de tous les profils.
+- **S78-1 : ouverte, S79.** Vitesse orbitale radiale puis composition B+W limitée, ordre des
+  confirmations, échecs visibles et normale reconstruite ; tester avant exposition consommateur.
+- Budget, autorité croisée, portée multi-référentiels et rétention S72-2 restent ouverts W3/W4.

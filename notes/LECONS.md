@@ -3050,3 +3050,9 @@ du poids. Changer la question de total à localisation impose de réexaminer la 
 Cela ne borne pas automatiquement l’erreur totale : amplitude, troncature et oscillations
 peuvent encore intervenir. Séparer contrôles d’admission numériques et réception physique
 mesurée ; ne pas transformer le premier en certificat du second dans la documentation.
+
+## L192 — Une grandeur conservée peut quitter son domaine d’observation
+
+*(S78)* Le disque de 8 m semblait perdre de l’énergie ; celui de 20 m la récupérait. Avant de
+corriger une amplitude ou un bilan, varier séparément l’étendue et le pas de mesure. Un déficit
+par transport réclame une frontière de flux, pas une source compensatrice inventée.

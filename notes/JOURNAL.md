@@ -5608,3 +5608,17 @@ Contrôle de résolution distinct de réception, L191. Pas de nouveau numéro d�
 B+W, journal→champ, autorité croisée et rétention restent ouverts. Quatre tests ciblés réussis.
 
 **Vérification finale :** 65 tests core + 93 harnais = 158 réussis, cinq ignorés, aucun échec. Quatre avertissements préexistants du harnais. Tests ciblés release et diff vérifiés ; copies synchronisées après commit.
+
+## S78 — 2026-09-08 — Le déficit sort du disque
+
+**Entrée :** Continue utilisateur ; départ e872a3c, copies actives identiques.
+**Mesure :** densité positive avec intégration analytique en profondeur, quatre instants,
+trois rayons et deux raffinements. À 4 s, R8 contient 99,319 % ; R20 récupère 100,000146 %.
+Rayon moyen : 1,160 à 4,457 m. Écart spectral <1e-7, biais des anneaux identifié.
+**Décision :** ADR-061 : scénario reçu pour poursuivre l’intégration limitée ; pas de
+compensation d’un déficit dû au transport. Pas de réception universelle ni sélection B2.
+**Produit :** contrôle temporel reproductible et BILAN-RADIAL-S78. Aucune tolérance modifiée.
+**Suite S79 :** S78-1, vitesse orbitale puis composition B+W ; S77-1 close sur le scénario.
+Rétention, autres profils, budget et autorité croisée ouverts. L192, aucun angle numéroté ajouté.
+
+**Vérification finale :** 66 tests core + 93 harnais = 159 réussis, cinq ignorés, aucun échec. Diagnostic release passé ; quatre avertissements préexistants du harnais. Diff vérifié, copies synchronisées après commit.

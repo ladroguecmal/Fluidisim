@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S78 — en cours
+Session : S78 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : bilan temporel positif, transport et troncature du candidat radial.
 
@@ -66,7 +66,7 @@ Objectif : bilan temporel positif, transport et troncature du candidat radial.
 
 - [x] **P1** — passation, état réel, jeton et plan seul.
 - [x] **P2** — quadrature physique en profondeur, disque et raffinement ; mesures reproductibles.
-- [ ] **P3** — décision de réception bornée, tests adaptés, rituel et copies synchronisées.
+- [x] **P3** — décision de réception bornée, tests adaptés, rituel et copies synchronisées.
 
 ### Notes de reprise
 
