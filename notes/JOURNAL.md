@@ -5534,3 +5534,17 @@ interplateforme. W1 reste partielle. A190 expose la corrélation absente des ide
 L186 enregistrée ; aucun arbitrage reporté à une équipe. Résultats de vérification ci-dessous.
 
 **Vérification S72 :** cargo test complet : 48 core + 93 harnais = 141 réussis, cinq ignorés ; aucun échec. Quatre avertissements préexistants dans le harnais. Diff vérifié ; code formaté. Copies synchronisées après commit.
+
+## S73 — 2026-09-08 — La cause et le journal deviennent exécutables
+
+**Entrée :** Continue utilisateur ; départ 8ae26b4, copies actives identiques.
+**Décision :** ADR-056, cause gameplay distincte du server_seq, époque serveur contrôlée.
+**Produit :** journal sur mémoire prêtée, sans allocation ; déduplication, conflits atomiques,
+confirmation remplaçant une prédiction à pool plein, rejet terminal et ordre autoritaire stable.
+Cinq tests ciblés passent : replay encodé avec causes, désordre, rejets, saturation et provenance.
+**Limites :** sans enveloppe persistée, bus concurrent, purge ni propagation ; W2 partielle.
+A190 résolu au niveau interne ; A191 expose la complétude après saturation. L187 enregistrée.
+**Suite S74 :** S73-1, enveloppe de restauration et état de complétude. S72-2 reste ouverte.
+Les causes doivent être fournies par le gameplay authentifié, pas inventées depuis les arrivées.
+
+**Vérification :** 53 tests core + 93 harnais = 146 réussis, cinq ignorés, aucun échec ; quatre avertissements préexistants du harnais. Diff vérifié. Copies synchronisées après commit.

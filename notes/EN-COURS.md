@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S73 — en cours
+Session : S73 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : identité de cause et journal Impact borné, réconciliation atomique.
 
@@ -66,7 +66,7 @@ Objectif : identité de cause et journal Impact borné, réconciliation atomique
 
 - [x] **P1** — passation, vérification des copies, jeton et plan seul.
 - [x] **P2** — ADR-056, journal sans allocation, confirmation/rejet et essais contradictoires.
-- [ ] **P3** — tests complets et rituel ; documenter les limites de rétention puis synchroniser.
+- [x] **P3** — tests complets et rituel ; documenter les limites de rétention puis synchroniser.
 
 ### Notes de reprise
 

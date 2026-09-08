@@ -1530,3 +1530,12 @@ S66-1 close ; voir CONTROLES-S68.
   définir leur correspondance. Deux compteurs ne constituent pas cette correspondance.
   Il faut une identité de cause corrélable et des espaces de noms, avant le journal W2.
   ADR-055 garde les id opaques et ne prétend pas résoudre cette association.
+
+**Suivi A190 — S73 : contrat interne résolu par ADR-056.** La cause gameplay, distincte du
+server_seq, relie prédiction et confirmation ; tests avec id différents. Enveloppe de transport
+et raccordement hôte restent à réaliser, sans prétendre que le réseau est intégré.
+
+- **A191** *(sévérité 1, S73 ; ouverte)* — **Un refus de capacité rend le rejeu incomplet.**
+  Un pool qui refuse sans corrompre est correct localement mais peut exposer un sous-ensemble
+  dépendant de l’ordre des arrivées. Full doit invalider la complétude et déclencher une reprise.
+  Le premier journal le signale à l’appelant, sans encore mémoriser cet état. Suite S73-1.

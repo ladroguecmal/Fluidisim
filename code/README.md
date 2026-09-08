@@ -74,3 +74,10 @@ exactement la propriété qu'on cherche : qu'un déplacement de référence soit
 construction et au décodage, sans allocation. Voir ADR-055. Les autres événements, le journal
 et la propagation restent à construire. `decode_server` exige un canal déjà authentifié par
 l’hôte ; un bit de provenance ne fournit aucune authentification.
+
+### S73 — Journal Impact borné
+
+`water-core::wave_journal` corrèle les causes gameplay avec les confirmations serveur et
+conserve prédictions, confirmations et rejets sur mémoire prêtée. Pas de purge ni allocation.
+Full réclame une récupération par l’hôte ; le journal ne certifie pas encore sa complétude.
+Voir ADR-056. La propagation et la sauvegarde de cette enveloppe restent à construire.

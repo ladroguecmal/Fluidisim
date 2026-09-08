@@ -833,3 +833,12 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
   corrélation prédiction/serveur ; contrat de retrait, puis journal Impact à capacité bornée.
 - **S72-2 : ouverte, W2.** Distinguer expiration source, durée des effets et rétention de
   rejeu ; tester livraison tardive, conflit de contenu, doublons et saturation sans perte muette.
+
+### S73 — Journal Impact et identité de cause
+
+- **S72-1 : partielle.** Corrélation interne A190 résolue, confirmation/rejet et journal borné
+  construits. Publication multilecteur et transport de la cause restent ouverts.
+- **S73-1 : ouverte, S74.** Enveloppe de sauvegarde/rejeu avec époque, causes et rejets ;
+  état explicite de complétude après Full (A191) et restauration transactionnelle.
+- **S72-2 : ouverte.** Aucune expiration ni purge : définir frontière de rétention et durée
+  des effets avant de recycler le pool. Ne pas prendre ttl_us pour une preuve de disparition.

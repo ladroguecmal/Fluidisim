@@ -3015,3 +3015,10 @@ ultérieur. Vérifier aussi qu’un banc annoncé exécutable ne possède pas de
 Avant de promettre une déduplication ou une réconciliation par id, décrire qui crée cet id,
 quand chaque participant le connaît, et comment une prédiction se rattache au fait confirmé.
 Les octets et leur tri peuvent être parfaits alors que la correspondance reste impossible.
+
+## L187 — Refuser sans corruption ne préserve pas la complétude
+
+*(S73)* Un conteneur plein peut conserver exactement son état et perdre une information requise
+pour le résultat global. Tester aussi ce que l’appelant pourra encore prétendre après le refus :
+état local cohérent et état complet sont deux propriétés distinctes. La récupération et la
+validité publiée doivent porter cette différence, pas seulement le code de retour.
