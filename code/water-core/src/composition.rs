@@ -12,10 +12,10 @@ pub enum Error {
     NonFinite,
 }
 /// Pas d'allocation ni publication partielle. Champs préconstruits en ordre server_seq.
-pub fn compose<const N: usize>(
+pub fn compose<'a, const N: usize>(
     mut base: WaterSample,
     journal: &Journal<'_>,
-    fields: &[RadialImpact<N>],
+    fields: impl IntoIterator<Item = &'a RadialImpact<N>>,
     frame: FrameId,
     cell: u64,
     point: [f32; 2],
@@ -24,6 +24,9 @@ pub fn compose<const N: usize>(
 ) -> Result<WaterSample, Error> {
     if journal.loss_known() {
         return Err(Error::LossKnown);
+    }
+    if point.iter().any(|x| !x.is_finite() || x.abs() >= 4096.0) {
+        return Err(Error::Domain);
     }
     if !max_slope.is_finite() || max_slope <= 0.0 {
         return Err(Error::Slope);
@@ -47,15 +50,14 @@ pub fn compose<const N: usize>(
     {
         return Err(Error::InvalidBackground);
     }
-    if journal.confirmed().count() != fields.len() {
-        return Err(Error::FieldsMismatch);
-    }
+    let mut fields = fields.into_iter();
     let mut bound = base.steepness * core::f32::consts::PI;
     let mut slope = [
         -base.normal[0] / base.normal[2],
         -base.normal[1] / base.normal[2],
     ];
-    for (e, field) in journal.confirmed().zip(fields) {
+    for e in journal.confirmed() {
+        let field = fields.next().ok_or(Error::FieldsMismatch)?;
         if e != field.event() {
             return Err(Error::FieldsMismatch);
         }
@@ -70,6 +72,9 @@ pub fn compose<const N: usize>(
         base.u_total[2] += w.deta_dt;
         slope[0] += w.slope[0];
         slope[1] += w.slope[1];
+    }
+    if fields.next().is_some() {
+        return Err(Error::FieldsMismatch);
     }
     if !bound.is_finite() || bound > max_slope {
         return Err(Error::Slope);

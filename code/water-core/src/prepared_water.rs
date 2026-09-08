@@ -1,0 +1,327 @@
+//! Préparation empruntée et publication de lot après succès complet, ADR-063.
+use crate::{
+    composition, impact_field,
+    radial_impact::{Domain, RadialImpact},
+    wave_journal::Journal,
+};
+use crate::{FrameId, SimTime, WaterSample};
+#[derive(Clone, Copy)]
+pub struct Context {
+    pub frame: FrameId,
+    pub cell: u64,
+    pub medium: impact_field::Medium,
+    pub domain: Domain,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum PrepareError {
+    LossKnown,
+    Capacity,
+    Context { id: u64 },
+    Field { id: u64, error: impact_field::Error },
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum BatchError {
+    Length,
+    Capacity,
+    Point {
+        index: usize,
+        error: composition::Error,
+    },
+}
+/// L'emprunt interdit de muter le journal ou de réemployer le pool avant libération.
+pub struct Prepared<'a, 'j, const N: usize = 64> {
+    journal: &'a Journal<'j>,
+    fields: &'a [Option<RadialImpact<N>>],
+    frame: FrameId,
+    cell: u64,
+}
+impl<'a, 'j, const N: usize> Prepared<'a, 'j, N> {
+    /// Pool de travail : peut être modifié en cas de refus ; aucun Prepared n'est alors publié.
+    pub fn build(
+        journal: &'a Journal<'j>,
+        pool: &'a mut [Option<RadialImpact<N>>],
+        context: Context,
+    ) -> Result<Self, PrepareError> {
+        if journal.loss_known() {
+            return Err(PrepareError::LossKnown);
+        }
+        let count = journal.confirmed().count();
+        if count > pool.len() {
+            return Err(PrepareError::Capacity);
+        }
+        // Réinitialiser aussi les emplacements inutilisés : ne pas conserver d'anciens champs.
+        for slot in pool.iter_mut() {
+            *slot = None;
+        }
+        for (i, event) in journal.confirmed().enumerate() {
+            let v = event.data();
+            if v.frame != context.frame || v.cell != context.cell {
+                return Err(PrepareError::Context { id: v.id });
+            }
+            pool[i] = Some(
+                RadialImpact::new(*event, context.medium, context.domain)
+                    .map_err(|error| PrepareError::Field { id: v.id, error })?,
+            );
+        }
+        Ok(Self {
+            journal,
+            fields: &pool[..count],
+            frame: context.frame,
+            cell: context.cell,
+        })
+    }
+    pub fn field_count(&self) -> usize {
+        self.fields.len()
+    }
+    /// B et points doivent provenir du même instant et repère hôte. Pas de calcul de B ici.
+    pub fn sample_batch(
+        &self,
+        base: &[WaterSample],
+        points: &[[f32; 2]],
+        time: SimTime,
+        max_slope: f32,
+        output: &mut [WaterSample],
+        scratch: &mut [WaterSample],
+    ) -> Result<usize, BatchError> {
+        if base.len() != points.len() {
+            return Err(BatchError::Length);
+        }
+        let count = points.len();
+        if count > output.len() || count > scratch.len() {
+            return Err(BatchError::Capacity);
+        }
+        for i in 0..count {
+            // Les None sont impossibles dans la tranche reçue ; aucun accès mutable n'est exposé.
+            scratch[i] = composition::compose(
+                base[i],
+                self.journal,
+                self.fields.iter().flatten(),
+                self.frame,
+                self.cell,
+                points[i],
+                time,
+                max_slope,
+            )
+            .map_err(|error| BatchError::Point { index: i, error })?;
+        }
+        output[..count].copy_from_slice(&scratch[..count]);
+        Ok(count)
+    }
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::wave_event::{Impact, Origin, WaveEvent};
+    use crate::wave_journal::Cause;
+    fn e(id: u64) -> WaveEvent {
+        WaveEvent::impact(Impact {
+            id,
+            frame: FrameId(0),
+            cell: 0,
+            birth: SimTime(0),
+            ttl_us: 4_000_000,
+            position: [0.0; 3],
+            energy_j: 0.01,
+            wavelength_m: 4.0,
+            direction_turns: 0.0,
+            anisotropy: 0.0,
+            displaced_l: 0.0,
+            material: 0,
+            origin: Origin::Server,
+            above_surface: true,
+        })
+        .unwrap()
+    }
+    fn context() -> Context {
+        Context {
+            frame: FrameId(0),
+            cell: 0,
+            medium: impact_field::Medium {
+                gravity: 9.81,
+                density: 1025.0,
+                depth: 20.0,
+                max_slope: 0.1,
+            },
+            domain: Domain {
+                radius: 16.0,
+                age_us: 4_000_000,
+            },
+        }
+    }
+    fn cause(n: u64) -> Cause {
+        Cause {
+            entity: 0,
+            command: n,
+            emission: 0,
+        }
+    }
+    fn base() -> WaterSample {
+        WaterSample {
+            normal: [0.0, 0.0, 1.0],
+            ..WaterSample::default()
+        }
+    }
+    #[test]
+    fn prepared_batch_matches_points_and_leaves_tail() {
+        let mut slots = [None; 2];
+        let mut journal = Journal::new(0, &mut slots);
+        journal.confirm(0, cause(2), e(2)).unwrap();
+        journal.confirm(0, cause(1), e(1)).unwrap();
+        let mut pool = [const { None }; 3];
+        let p = Prepared::<64>::build(&journal, &mut pool, context()).unwrap();
+        assert_eq!(p.field_count(), 2);
+        let points = [[0.0, 0.0], [1.0, 0.0]];
+        let bases = [base(); 2];
+        let sentinel = WaterSample {
+            eta: 123.0,
+            ..base()
+        };
+        let mut out = [sentinel; 3];
+        let mut scratch = [base(); 2];
+        assert_eq!(
+            p.sample_batch(
+                &bases,
+                &points,
+                SimTime(1_000_000),
+                0.1,
+                &mut out,
+                &mut scratch
+            ),
+            Ok(2)
+        );
+        for i in 0..2 {
+            let direct = composition::compose(
+                bases[i],
+                &journal,
+                p.fields.iter().flatten(),
+                FrameId(0),
+                0,
+                points[i],
+                SimTime(1_000_000),
+                0.1,
+            )
+            .unwrap();
+            assert_eq!(out[i].eta.to_bits(), direct.eta.to_bits());
+            assert_eq!(out[i].u_total, direct.u_total);
+            assert_eq!(out[i].normal, direct.normal);
+        }
+        assert_eq!(out[2].eta, 123.0);
+    }
+    #[test]
+    fn late_point_failure_leaves_entire_output_unchanged() {
+        let mut slots = [None; 1];
+        let mut journal = Journal::new(0, &mut slots);
+        journal.confirm(0, cause(1), e(1)).unwrap();
+        let mut pool = [const { None }; 1];
+        let p = Prepared::<64>::build(&journal, &mut pool, context()).unwrap();
+        let bases = [base(); 2];
+        let mut output = [WaterSample {
+            eta: 123.0,
+            ..base()
+        }; 2];
+        let mut scratch = [base(); 2];
+        let result = p.sample_batch(
+            &bases,
+            &[[0.0, 0.0], [17.0, 0.0]],
+            SimTime(0),
+            0.1,
+            &mut output,
+            &mut scratch,
+        );
+        assert_eq!(
+            result,
+            Err(BatchError::Point {
+                index: 1,
+                error: composition::Error::Domain
+            })
+        );
+        assert!(output.iter().all(|s| s.eta == 123.0));
+        assert_ne!(scratch[0].eta, 0.0);
+        assert_eq!(
+            p.sample_batch(&bases, &[], SimTime(0), 0.1, &mut output, &mut scratch),
+            Err(BatchError::Length)
+        );
+        assert_eq!(
+            p.sample_batch(
+                &bases,
+                &[[0.0; 2]; 2],
+                SimTime(0),
+                0.1,
+                &mut output,
+                &mut []
+            ),
+            Err(BatchError::Capacity)
+        );
+        assert!(output.iter().all(|s| s.eta == 123.0));
+    }
+    #[test]
+    fn preparation_refuses_loss_capacity_context_and_invalid_source() {
+        let mut slots = [None; 2];
+        let mut journal = Journal::new(0, &mut slots);
+        journal.confirm(0, cause(1), e(1)).unwrap();
+        assert!(matches!(
+            Prepared::<64>::build(&journal, &mut [], context()),
+            Err(PrepareError::Capacity)
+        ));
+        let mut pool = [const { None }; 2];
+        let mut wrong = context();
+        wrong.cell = 1;
+        assert!(matches!(
+            Prepared::<64>::build(&journal, &mut pool, wrong),
+            Err(PrepareError::Context { id: 1 })
+        ));
+        let mut bad = *e(2).data();
+        bad.anisotropy = 0.5;
+        journal
+            .confirm(0, cause(2), WaveEvent::impact(bad).unwrap())
+            .unwrap();
+        assert!(matches!(
+            Prepared::<64>::build(&journal, &mut pool, context()),
+            Err(PrepareError::Field { id: 2, .. })
+        ));
+        journal.confirm(0, cause(3), e(3)).unwrap_err();
+        assert!(matches!(
+            Prepared::<64>::build(&journal, &mut pool, context()),
+            Err(PrepareError::LossKnown)
+        ));
+    }
+    #[test]
+    fn empty_batch_and_empty_journal_are_explicit() {
+        let mut slots = [];
+        let journal = Journal::new(0, &mut slots);
+        let mut pool = [];
+        let p = Prepared::<64>::build(&journal, &mut pool, context()).unwrap();
+        assert_eq!(
+            p.sample_batch(&[], &[], SimTime(0), 0.1, &mut [], &mut []),
+            Ok(0)
+        );
+        let mut out = [base()];
+        let mut scratch = [base()];
+        assert_eq!(
+            p.sample_batch(
+                &[base()],
+                &[[0.0; 2]],
+                SimTime(0),
+                0.1,
+                &mut out,
+                &mut scratch
+            ),
+            Ok(1)
+        );
+        assert_eq!(out[0].eta, 0.0);
+        assert_eq!(
+            p.sample_batch(
+                &[base()],
+                &[[f32::NAN, 0.0]],
+                SimTime(0),
+                0.1,
+                &mut out,
+                &mut scratch
+            ),
+            Err(BatchError::Point {
+                index: 0,
+                error: composition::Error::Domain
+            })
+        );
+    }
+}

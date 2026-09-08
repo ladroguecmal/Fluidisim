@@ -65,7 +65,7 @@ Objectif : préparer les champs sur pool hôte puis évaluer des lots sans sorti
 ### Plan
 
 - [x] **P1** — passation, copies, jeton et plan seul.
-- [ ] **P2** — préparation empruntée au journal, lot transactionnel et essais de refus.
+- [x] **P2** — préparation empruntée au journal, lot transactionnel et essais de refus.
 - [ ] **P3** — tests complets, contrat et limites, rituel et synchronisation.
 
 ### Notes de reprise
