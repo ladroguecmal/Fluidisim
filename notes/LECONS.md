@@ -3144,3 +3144,10 @@ résolution. La comparer à un travail spatial indépendant puis raffiner sépar
 sur ce rectangle. Garder distincts le contrat d'accès, les échantillons de réception et une
 éventuelle borne continue. Un constructeur qui vérifie la forme des bornes ne doit pas être
 nommé ou présenté comme un certificat numérique.
+
+## L206 — Une erreur absolue faible peut effacer un démarrage
+
+*(S95)* La précision absolue d'une fonction trigonométrique ne garantit pas sa précision
+relative près de zéro. Une soustraction dans la réduction d'angle peut altérer le premier
+mouvement tout en passant une réception globale. Vérifier séparément le développement aux
+petits temps, avec un signal non nul, et exploiter les symétries avant les soustractions.

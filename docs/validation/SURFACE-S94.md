@@ -77,3 +77,7 @@ S93-1 réalisée. **S94-1, S95 :** construire le noyau modal f32 à phases déte
 avec traitement des résonances et comparaison à la référence S89, avant portage du champ
 gaussien et composition. L'instrument actuel reste f64/libm ; ses pools ne le rendent pas
 conforme à I-03/I-08. Aucun coût, codec de trajectoire, couplage de coque ou Kelvin complet reçu.
+
+**Actualisation S95 — 2026-09-08 :** S94-1 réalisée comme candidat modal local,
+[ADR-071](../adr/ADR-071-noyau-modal-deterministe.md). Suite S95-1 : découpage et champ
+superposé ; conformité interplateforme et composition autoritaire restent ouvertes.

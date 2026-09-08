@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S95 — en cours
+Session : S95 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : noyau modal sans libm ni allocation, horloge entière et résonance régulière.
 
@@ -66,7 +66,7 @@ Objectif : noyau modal sans libm ni allocation, horloge entière et résonance r
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
 - [x] **P2** — construire le candidat modal f32, contrat borné et comparaison physique/déterministe.
-- [ ] **P3** — publier décision, mesures et limites ; rituel de fin et copies synchronisées.
+- [x] **P3** — publier décision, mesures et limites ; rituel de fin et copies synchronisées.
 
 ### Notes de reprise
 

@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 22:05 +02:00
+JETON            : libre
+Battement        : 2026-09-08 22:06 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S95 — noyau modal déterministe
-Dernière session : S94 — grandeurs de surface ; 202 tests réussis, cinq ignorés
-Session suivante : S95 — noyau modal déterministe (S94-1)
+Session en cours : aucune
+Dernière session : S95 — candidat modal ; 206 tests réussis, cinq ignorés
+Session suivante : S96 — superposition gaussienne du candidat (S95-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -148,7 +148,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 17 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 70 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 71 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -167,6 +167,11 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S95 — 2026-09-08 :** ADR-071, candidat modal f32 à phases entières et résonance régulière.
+550 réponses reçues, hash debug/release identique localement ; 206 tests réussis, cinq ignorés.
+71 ADR, 193 angles morts. S94-1 réalisée comme candidat ; suite S96 : superposition, S95-1.
+Conformité interplateforme et intégration autoritaire ouvertes.
 
 **S94 — 2026-09-08 :** potentiel, pente et vitesse horizontale construits ; dérivées,
 symétries et raffinement reçus, SURFACE-S94. 202 tests réussis, cinq ignorés ; S93-1 réalisée.

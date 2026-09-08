@@ -61,7 +61,7 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S94 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S95 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
@@ -73,6 +73,7 @@ est construite hors runtime, puis étendue à un profil gaussien localisé avec 
 Les trajectoires avec virage conservent désormais les interférences et le bilan de travail.
 Une enveloppe refuse les requêtes hors bornes ; le virage est comparé par raffinement sur
 [-8,12]² m et 0–8 s, sans garantie continue. La préparation dispose d'un chemin sur pool hôte.
-Potentiel, pente et vitesses du sillage sont vérifiés : 202 tests réussis, cinq ignorés.
-Suite : noyau modal déterministe, S94-1 ; modèle encore hors runtime répliqué.
+Potentiel, pente et vitesses sont vérifiés. Le candidat modal à phases entières passe la
+réception locale : 206 tests réussis, cinq ignorés ; conformité interplateforme encore ouverte.
+Suite : superposition gaussienne sur le candidat, S95-1 ; aucun raccordement autoritaire.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

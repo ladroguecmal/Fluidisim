@@ -5882,3 +5882,21 @@ L204/L205 appliquées sans nouvelle leçon distincte.
 Réception échantillonnée sur fixture, seuils hors fixture à calibrer ; coût non mesuré.
 **Suite S95 :** S94-1, noyau modal f32 à phases déterministes, résonances et comparaison S89,
 avant portage du champ gaussien. S93-1 réalisée ; copies actives synchronisées à la clôture.
+
+## S95 — 2026-09-08 — Candidat modal déterministe
+
+**Entrée :** Continue puis Reprends ; départ 2064105, copies actives propres et identiques.
+Étape P2 reprise après interruption, suite déjà terminée récupérée dans s95-tests.log.
+**Produit :** ModalPressure f32, phases Q32 signées, multiplication entière des durées,
+résonance régulière, horizon inclusif borné à 16 s. ADR-071 acté ; référence S89 conservée.
+**Mesures :** 550 réponses contre référence : hauteur 1,436e-7 m, vitesse 1,355e-6 m/s.
+Hash debug/release 8ea15f4a3334830b ; translation entière proche de u64::MAX à bits identiques.
+Travail/énergie : 9,173e-9 J/m². Premiers échecs corrigés sans assouplissement : petits angles
+négatifs par parité ; conversion fréquence Q32 depuis mantisse/exposant et constante entière.
+**Vérification :** quatre tests release, suite debug 113 core + 93 harnais = 206 réussis,
+cinq ignorés ; quatre avertissements préexistants. P2 ebc2f03, formatage et diff vérifiés.
+**Limites :** candidat reçu localement, pas de conformité interplateforme démontrée, aucun
+raccordement autoritaire. Paramètres représentables plus larges que la fixture reçue.
+Aucun nouvel angle numéroté ; leçon L206. 71 ADR, 193 angles, invariants inchangés.
+**Suite S96 :** S95-1, découpage et superposition gaussienne sur pool avec le candidat,
+comparaison des grandeurs complètes à la référence. S94-1 réalisée dans cette portée.

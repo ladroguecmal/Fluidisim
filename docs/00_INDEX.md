@@ -17,6 +17,9 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S95 :** [ADR-071 — Noyau modal déterministe](adr/ADR-071-noyau-modal-deterministe.md), **ACTÉE**.
+206 tests réussis, cinq ignorés ; 71 ADR, 193 angles morts. Suite S96 : superposition, S95-1.
+
 **S94 :** [Grandeurs de surface](validation/SURFACE-S94.md), potentiel, pente et vitesses reçus.
 202 tests réussis, cinq ignorés ; 70 ADR, 193 angles morts. Suite S95 : noyau modal déterministe, S94-1.
 

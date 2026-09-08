@@ -1016,3 +1016,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S94-1 : ouverte, S95.** Construire le noyau modal f32 à phases déterministes avec traitement
   des résonances et comparaison à la référence S89, avant portage du champ gaussien.
 - Composition WaterSample, codec de trajectoire et LiveWater restent ouverts ; I-03/I-08 inchangés.
+
+### S95 — Candidat modal à phases entières
+
+- **S94-1 : réalisée comme candidat local.** ADR-071, ModalPressure, 550 réponses reçues,
+  hash debug/release identique ; conformité interplateforme encore à établir.
+- **S95-1 : ouverte, S96.** Recevoir le découpage et construire la superposition gaussienne
+  sur pool hôte avec ce noyau ; comparer toutes les grandeurs à la référence f64.
+- Codec, coûts, multiprofils et intégration autoritaire restent ouverts.
