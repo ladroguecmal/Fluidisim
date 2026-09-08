@@ -3076,3 +3076,9 @@ lecteurs ne doivent jamais accéder au temporaire pour gagner une copie.
 Une refonte du journal aurait optimisé le mauvais étage. Mesurer séparément préparation,
 base et composition puis attaquer les invariants recalculés dans la boucle dominante.
 Conserver les sorties à bits identiques permet d’isoler une optimisation de calcul du modèle.
+
+## L196 — La borne d’interpolation ne borne pas à elle seule le programme
+
+*(S82)* Le reste Hermite suppose valeurs et dérivées nodales exactes. Une table quantifiée
+et une évaluation flottante ajoutent leurs erreurs. Publier séparément borne analytique du
+schéma et erreur mesurée du code ; une grille dense n’est pas une preuve de tous les arguments.

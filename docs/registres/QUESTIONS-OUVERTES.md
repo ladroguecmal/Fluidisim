@@ -909,3 +909,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S81-1 : ouverte, S82.** Candidat Bessel accéléré, erreur bornée et réception comparative
   avant remplacement du chemin actuel ; mêmes scénarios physiques et de coût.
 - Aucun budget cible, index spatial, rétention ou réception croisée clôturé par cette mesure.
+
+### S82 — Noyau Bessel accéléré reçu
+
+- **S81-1 : réalisée.** ADR-064 adopte Hermite ; contrôle dense 5,86e-8 maximum, physique inchangée
+  dans ses tolérances. Mesure locale 1×64 à 0,1553 ms, 16×64 à 1,5978 ms.
+- **S82-1 : ouverte, S83.** Lier explicitement points, instant et contexte au tampon B du lot,
+  sans précondition silencieuse permettant de composer B(t1) avec W(t2).
+- Budget cible, élargissement physique, publication et rétention S72-2 restent ouverts.

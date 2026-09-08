@@ -5667,3 +5667,18 @@ session à optimiser la préparation négligeable. S80-1 close. Rapport COUT-BW-
 Aucun nouvel angle numéroté ni invariant amendé. Charge encore impropre à une promesse AAA.
 
 **Vérification finale :** 76 tests core + 93 harnais = 169 réussis, cinq ignorés, aucun échec. Quatre avertissements préexistants des tests du harnais. Diff vérifié ; copies synchronisées après commit.
+
+## S82 — 2026-09-08 — Bessel passe à une interpolation reçue
+
+**Entrée :** Continue utilisateur ; départ f736683, copies actives identiques.
+**Produit :** table de 1025 nœuds J0/J1/J1’, générateur et interpolation Hermite, référence
+angulaire conservée. Pas de libm au runtime, mêmes refus et domaines. ADR-064 actée.
+**Résultats :** erreur max 5,85699e-8 sur 8193 arguments ; huit tests radiaux release passent.
+B+W 1×64 : 9,956→0,1553 ms, 16×64 : 159,158→1,5978 ms. Résultats numériques changés,
+quatre hashs de lots nouveaux documentés, références B seules inchangées.
+**Limites :** borne Hermite idéale distincte des arrondis, L196. Pas de réception globale ni
+interplateforme. Aucun seuil physique déplacé, aucune capacité AAA déduite du poste local.
+**Suite S83 :** S82-1, contexte/temps/points attachés au lot B ; arrêter optimisation ici.
+S81-1 close. Aucun angle numéroté ajouté ni invariant amendé. Vérification complète ci-dessous.
+
+**Vérification finale :** 77 tests core + 93 harnais = 170 réussis, cinq ignorés, aucun échec. Quatre avertissements préexistants des tests du harnais. Diff vérifié ; copies synchronisées après commit.

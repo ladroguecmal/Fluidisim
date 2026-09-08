@@ -128,3 +128,8 @@ Voir ADR-063 pour les préconditions du tampon B et la publication concurrente e
 
 Exemple bench_water : préparation, B réel et lots B+W chronométrés séparément, sorties hachées.
 Directions Bessel tabulées exactement ; COUT-BW-S81 documente gains et limites du poste local.
+
+### S82 — Bessel interpolé
+
+Hermite au pas 1/16, table de bits générée par examples/generate_bessel.py. Référence angulaire
+conservée ; ADR-064 documente erreur, changement d’arrondi et gain des lots. Domaine inchangé.

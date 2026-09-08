@@ -17,6 +17,10 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S82 :** [ADR-064 — Bessel interpolé](adr/ADR-064-bessel-interpole.md), **ACTÉE**.
+Noyau accéléré reçu, contrôles physiques inchangés. 64 ADR, 192 angles morts.
+Suite S83 : métadonnées et cohérence du tampon B (S82-1).
+
 **S81 :** [Coût B+W](validation/COUT-BW-S81.md), banc réel et directions Bessel tabulées.
 Gain médian local 41–45 %, sorties identiques ; suite S82, candidat Bessel accéléré (S81-1).
 63 ADR, 192 angles morts ; aucune nouvelle décision physique.

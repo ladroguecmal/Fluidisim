@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S82 — en cours
+Session : S82 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : interpolation Bessel rapide avec erreur contrôlée et réception physique.
 
@@ -66,7 +66,7 @@ Objectif : interpolation Bessel rapide avec erreur contrôlée et réception phy
 
 - [x] **P1** — passation, copies, jeton et plan seul.
 - [x] **P2** — table et interpolation cubique, référence indépendante et bornes.
-- [ ] **P3** — mesures de coût, tests physiques complets, décision et rituel de passation.
+- [x] **P3** — mesures de coût, tests physiques complets, décision et rituel de passation.
 
 ### Notes de reprise
 

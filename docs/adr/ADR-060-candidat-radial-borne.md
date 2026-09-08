@@ -81,3 +81,7 @@ plateformes et budgets restent ouverts. Aucun choix final B2. I-03, I-07, I-08, 
 > **Actualisation S78 — 2026-09-08.** BILAN-RADIAL-S78 mesure l’énergie positive dans le temps
 > et son transport. ADR-061 autorise l’intégration limitée sur le scénario reçu, sans élargir
 > cette réception à tous les paramètres admis. Pas de compensation du déficit d’un disque fini.
+
+> **Actualisation S82 — 2026-09-08.** ADR-064 remplace le noyau angulaire de production par
+> une interpolation Hermite tabulée, domaine [0,64] inchangé. Référence angulaire conservée ;
+> tests physiques repassés, nouveau comportement d’arrondi documenté. Domaine physique non élargi.
