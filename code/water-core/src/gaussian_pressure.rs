@@ -23,6 +23,66 @@ pub struct Surface {
     pub eta: f64,
     pub vertical_velocity: f64,
 }
+/// Domaine déclaré par l'appelant ; ne constitue pas une certification numérique.
+#[derive(Clone, Copy)]
+pub struct QueryDomain {
+    pub min: [f64; 2],
+    pub max: [f64; 2],
+    pub start: SimTime,
+    pub end: SimTime,
+}
+pub struct BoundedGaussian<'a> {
+    model: &'a GaussianPressure,
+    segments: &'a [PressureSegment],
+    domain: QueryDomain,
+}
+pub struct BoundedField {
+    field: GaussianField,
+    domain: QueryDomain,
+}
+impl<'a> BoundedGaussian<'a> {
+    pub fn new(
+        model: &'a GaussianPressure,
+        segments: &'a [PressureSegment],
+        domain: QueryDomain,
+    ) -> Result<Self, Error> {
+        if domain.start.0 > domain.end.0
+            || !(0..2).all(|i| {
+                domain.min[i].is_finite()
+                    && domain.max[i].is_finite()
+                    && domain.min[i] <= domain.max[i]
+            })
+        {
+            return Err(Error::Domain);
+        }
+        // Valide aussi l'ensemble de la trajectoire, y compris les segments futurs.
+        model.trajectory(segments, domain.start)?;
+        Ok(Self {
+            model,
+            segments,
+            domain,
+        })
+    }
+    pub fn field(&self, time: SimTime) -> Result<BoundedField, Error> {
+        if time.0 < self.domain.start.0 || time.0 > self.domain.end.0 {
+            return Err(Error::Domain);
+        }
+        Ok(BoundedField {
+            field: self.model.trajectory(self.segments, time)?,
+            domain: self.domain,
+        })
+    }
+}
+impl BoundedField {
+    pub fn sample(&self, point: [f64; 2]) -> Result<Surface, Error> {
+        if !(0..2).all(|i| {
+            point[i].is_finite() && point[i] >= self.domain.min[i] && point[i] <= self.domain.max[i]
+        }) {
+            return Err(Error::Domain);
+        }
+        self.field.sample(point)
+    }
+}
 impl GaussianPressure {
     /// p(x)=P0 exp(-|x|²/(2 sigma²)). Quadrature polaire k dk dtheta/(2pi)².
     pub fn new(
@@ -191,6 +251,38 @@ mod tests {
     }
     fn grid(n: usize, a: usize, cut: f64) -> GaussianPressure {
         GaussianPressure::new(1.0, cut, n, a, 9.81, 1025.0).unwrap()
+    }
+    #[test]
+    fn bounded_queries_refuse_outside_and_accept_edges_s92() {
+        let g = grid(8, 8, 6.0);
+        let path = [source()];
+        let domain = QueryDomain {
+            min: [-8.0; 2],
+            max: [12.0; 2],
+            start: SimTime(0),
+            end: SimTime(8_000_000),
+        };
+        let bounded = BoundedGaussian::new(&g, &path, domain).unwrap();
+        for t in [0, 8_000_000] {
+            let f = bounded.field(SimTime(t)).unwrap();
+            assert!(f.sample(domain.min).is_ok());
+            assert!(f.sample(domain.max).is_ok());
+            assert!(f.sample([12.000001, 0.0]).is_err());
+            assert!(f.sample([0.0, -8.000001]).is_err());
+            assert!(f.sample([f64::NAN, 0.0]).is_err());
+        }
+        assert!(bounded.field(SimTime(8_000_001)).is_err());
+        let mut d = domain;
+        d.start = SimTime(10);
+        assert!(BoundedGaussian::new(&g, &path, d)
+            .unwrap()
+            .field(SimTime(9))
+            .is_err());
+        d.end = SimTime(0);
+        assert!(BoundedGaussian::new(&g, &path, d).is_err());
+        d = domain;
+        d.max[0] = f64::INFINITY;
+        assert!(BoundedGaussian::new(&g, &path, d).is_err());
     }
     #[test]
     fn splitting_trajectory_preserves_field_and_work_s91() {

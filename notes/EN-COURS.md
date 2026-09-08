@@ -65,7 +65,7 @@ Objectif : emprise explicitement bornée et campagne de raffinement du virage.
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [ ] **P2** — enveloppe de requête bornée et campagne indépendante radial/angular/coupure.
+- [x] **P2** — enveloppe de requête bornée et campagne indépendante radial/angular/coupure.
 - [ ] **P3** — publier portée et mesures, vérification et rituel de passation.
 
 ### Notes de reprise
