@@ -1,6 +1,6 @@
 //! Référence spatiale f64 S90. Allocations/libm assumées, hors runtime répliqué.
 use crate::{
-    pressure_mode::{Error, PressureMode, PressureSegment, Response},
+    pressure_mode::{Complex, Error, PressureMode, PressureSegment, Response},
     SimTime,
 };
 use std::f64::consts::TAU;
@@ -83,16 +83,70 @@ impl GaussianPressure {
     }
     /// Prépare la réponse à un seul segment. P0 du segment devient le pic gaussien en Pa.
     pub fn field(&self, segment: PressureSegment, time: SimTime) -> Result<GaussianField, Error> {
+        self.trajectory(&[segment], time)
+    }
+    /// Une source continue, segments contigus ; jonctions spatiales exactes dans ce prototype.
+    pub fn trajectory(
+        &self,
+        segments: &[PressureSegment],
+        time: SimTime,
+    ) -> Result<GaussianField, Error> {
+        if segments.is_empty() {
+            return Err(Error::Domain);
+        }
+        for s in segments {
+            if s.duration_us == 0
+                || s.birth.0.checked_add(s.duration_us).is_none()
+                || !s
+                    .origin
+                    .iter()
+                    .chain(s.velocity.iter())
+                    .chain([s.pressure_pa].iter())
+                    .all(|x| x.is_finite())
+            {
+                return Err(Error::Domain);
+            }
+        }
+        for pair in segments.windows(2) {
+            let a = pair[0];
+            let b = pair[1];
+            let dt = a.duration_us as f64 / 1e6;
+            let end = [
+                a.origin[0] + a.velocity[0] * dt,
+                a.origin[1] + a.velocity[1] * dt,
+            ];
+            if a.birth.0 + a.duration_us != b.birth.0 || end != b.origin {
+                return Err(Error::Domain);
+            }
+        }
         let mut modes = Vec::with_capacity(self.nodes.len());
         let mut energy = 0.0;
         let mut power = 0.0;
         for n in &self.nodes {
-            let mut s = segment;
-            s.pressure_pa *= n.transform;
-            let r = n.mode.sample(s, time)?;
+            let mut r = Response {
+                eta: Complex::default(),
+                velocity: Complex::default(),
+            };
+            let mut pressure = Complex::default();
+            for segment in segments {
+                let mut s = *segment;
+                s.pressure_pa *= n.transform;
+                let q = n.mode.sample(s, time)?;
+                r.eta.re += q.eta.re;
+                r.eta.im += q.eta.im;
+                r.velocity.re += q.velocity.re;
+                r.velocity.im += q.velocity.im;
+                if time.0 >= s.birth.0 && time.0 - s.birth.0 < s.duration_us {
+                    let dt = (time.0 - s.birth.0) as f64 / 1e6;
+                    let angle = -(n.k[0] * (s.origin[0] + s.velocity[0] * dt)
+                        + n.k[1] * (s.origin[1] + s.velocity[1] * dt));
+                    pressure.re = s.pressure_pa * angle.cos();
+                    pressure.im = s.pressure_pa * angle.sin();
+                }
+            }
             // Intégrale sur tout le plan k : facteur 2 par rapport à l'énergie moyenne cosinus S89.
             energy += 2.0 * n.weight * n.mode.energy(r);
-            power += 2.0 * n.weight * n.mode.power(s, time)?;
+            power -= n.weight * (pressure.re * r.velocity.re + pressure.im * r.velocity.im);
             modes.push((n.k, r, n.weight));
         }
         if !energy.is_finite() || !power.is_finite() {
@@ -137,6 +191,98 @@ mod tests {
     }
     fn grid(n: usize, a: usize, cut: f64) -> GaussianPressure {
         GaussianPressure::new(1.0, cut, n, a, 9.81, 1025.0).unwrap()
+    }
+    #[test]
+    fn splitting_trajectory_preserves_field_and_work_s91() {
+        let g = grid(32, 48, 6.0);
+        let whole = source();
+        let mut a = whole;
+        a.duration_us = 2_000_000;
+        let mut b = a;
+        b.birth = SimTime(2_000_000);
+        b.origin = [4.0, 0.0];
+        for us in [0, 1_000_000, 2_000_000, 2_000_001, 4_000_000, 8_000_000] {
+            let x = g.field(whole, SimTime(us)).unwrap();
+            let y = g.trajectory(&[a, b], SimTime(us)).unwrap();
+            assert!((x.energy_j - y.energy_j).abs() < 1e-13);
+            assert!((x.power_w - y.power_w).abs() < 1e-13);
+            for p in [[0.0, 0.0], [4.0, 2.0], [12.0, 0.0]] {
+                let u = x.sample(p).unwrap();
+                let v = y.sample(p).unwrap();
+                assert!((u.eta - v.eta).abs() < 1e-14);
+                assert!((u.vertical_velocity - v.vertical_velocity).abs() < 1e-14);
+            }
+        }
+    }
+    #[test]
+    fn turning_source_total_work_includes_interference_s91() {
+        let g = grid(32, 48, 6.0);
+        let mut a = source();
+        a.duration_us = 2_000_000;
+        let mut b = a;
+        b.birth = SimTime(2_000_000);
+        b.origin = [4.0, 0.0];
+        b.velocity = [0.0, 2.0];
+        let mut work = 0.0;
+        for i in 0..400 {
+            work += g
+                .trajectory(&[a, b], SimTime(i * 10_000 + 5_000))
+                .unwrap()
+                .power_w
+                * 0.01;
+        }
+        let total = g.trajectory(&[a, b], SimTime(4_000_000)).unwrap();
+        let separate = g.field(a, SimTime(4_000_000)).unwrap().energy_j
+            + g.field(b, SimTime(4_000_000)).unwrap().energy_j;
+        println!(
+            "S91 work={work:.12e} energy={:.12e} separate={separate:.12e} delta={:.3e}",
+            total.energy_j,
+            (work - total.energy_j).abs()
+        );
+        assert!((work - total.energy_j).abs() < 2e-5);
+        assert!((separate - total.energy_j).abs() > 1e-3);
+        assert!(
+            (g.trajectory(&[a, b], SimTime(8_000_000)).unwrap().energy_j - total.energy_j).abs()
+                < 1e-12
+        );
+        let t = SimTime(3_000_000);
+        let field = g.trajectory(&[a, b], t).unwrap();
+        let mut spatial = 0.0;
+        for iy in 0..40 {
+            for ix in 0..40 {
+                let x = -6.0 + (ix as f64 + 0.5) * 0.3;
+                let y = -6.0 + (iy as f64 + 0.5) * 0.3;
+                spatial -= 10.0
+                    * (-0.5 * (x * x + y * y)).exp()
+                    * field.sample([x + 4.0, y + 2.0]).unwrap().vertical_velocity
+                    * 0.09;
+            }
+        }
+        println!(
+            "S91 spatial_power={spatial:.12e} spectral_power={:.12e}",
+            field.power_w
+        );
+        assert!((spatial - field.power_w).abs() < 1e-8);
+    }
+    #[test]
+    fn trajectory_gaps_overlaps_and_teleports_refused_s91() {
+        let g = grid(8, 8, 6.0);
+        let mut a = source();
+        a.duration_us = 2_000_000;
+        let mut b = a;
+        b.birth = SimTime(2_000_000);
+        b.origin = [4.0, 0.0];
+        assert!(g.trajectory(&[], SimTime(0)).is_err());
+        for birth in [1_999_999, 2_000_001] {
+            b.birth = SimTime(birth);
+            assert!(g.trajectory(&[a, b], SimTime(0)).is_err());
+        }
+        b.birth = SimTime(2_000_000);
+        b.origin = [4.1, 0.0];
+        assert!(g.trajectory(&[a, b], SimTime(0)).is_err());
+        b.origin = [4.0, 0.0];
+        b.velocity = [f64::NAN, 0.0];
+        assert!(g.trajectory(&[a, b], SimTime(0)).is_err());
     }
     #[test]
     fn gaussian_normalization_and_refinement_s90() {

@@ -65,7 +65,7 @@ Objectif : trajectoires continues par segments, superposition et travail sur le 
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [ ] **P2** — somme modale multi-segments, validation de trajectoire, tests de découpage et virage.
+- [x] **P2** — somme modale multi-segments, validation de trajectoire, tests de découpage et virage.
 - [ ] **P3** — mesures et limites, vérification complète, rituel de passation.
 
 ### Notes de reprise
