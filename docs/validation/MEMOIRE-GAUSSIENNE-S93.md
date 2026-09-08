@@ -52,3 +52,7 @@ avec contrôles par dérivées du potentiel et symétries, pour disposer des gra
 à WaterSample avant portage déterministe. Ne pas composer une hauteur de sillage en laissant
 une normale ou une vitesse B seule. Aucun nouvel ADR, angle ou invariant ; L194/L197 appliquées,
 aucune nouvelle leçon distincte.
+
+**Actualisation S94 — 2026-09-08 :** S93-1 réalisée dans la référence, voir
+[SURFACE-S94](SURFACE-S94.md). Potentiel, pente et vitesses vérifiés ; suite S94-1,
+portage du noyau modal avant intégration du champ gaussien au runtime.

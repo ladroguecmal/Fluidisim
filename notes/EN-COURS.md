@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S94 — en cours
+Session : S94 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : compléter les grandeurs de surface du sillage et vérifier leurs identités physiques.
 
@@ -66,7 +66,7 @@ Objectif : compléter les grandeurs de surface du sillage et vérifier leurs ide
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
 - [x] **P2** — construire potentiel, pente et vitesse horizontale ; tests de dérivées et symétries, raffinement et suite.
-- [ ] **P3** — publier les résultats et limites, mettre à jour la connaissance et exécuter le rituel de passation.
+- [x] **P3** — publier les résultats et limites, mettre à jour la connaissance et exécuter le rituel de passation.
 
 ### Notes de reprise
 

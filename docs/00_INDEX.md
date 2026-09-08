@@ -17,6 +17,9 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S94 :** [Grandeurs de surface](validation/SURFACE-S94.md), potentiel, pente et vitesses reçus.
+202 tests réussis, cinq ignorés ; 70 ADR, 193 angles morts. Suite S95 : noyau modal déterministe, S94-1.
+
 **S93 :** [Mémoire gaussienne](validation/MEMOIRE-GAUSSIENNE-S93.md), préparation empruntée et identité.
 70 ADR, 193 angles morts. Suite S94 : pente et vitesses du champ, S93-1.
 

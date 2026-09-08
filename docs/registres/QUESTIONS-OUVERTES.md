@@ -1008,3 +1008,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S93-1 : ouverte, S94.** Pente et vitesse horizontale du champ gaussien, vérification par
   dérivées du potentiel et symétries, avant portage et composition WaterSample.
 - f64/libm hors runtime, codec de trajectoire et raccordement LiveWater restent ouverts.
+
+### S94 — Pente et vitesses de surface
+
+- **S93-1 : réalisée dans la référence.** Potentiel, pente et vitesse horizontale construits ;
+  dérivées, symétries, découpage et raffinement séparé vérifiés, SURFACE-S94.
+- **S94-1 : ouverte, S95.** Construire le noyau modal f32 à phases déterministes avec traitement
+  des résonances et comparaison à la référence S89, avant portage du champ gaussien.
+- Composition WaterSample, codec de trajectoire et LiveWater restent ouverts ; I-03/I-08 inchangés.

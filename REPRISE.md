@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 17:52 +02:00
+JETON            : libre
+Battement        : 2026-09-08 17:53 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S94 — pente et vitesses du sillage
-Dernière session : S93 — préparation empruntée ; 199 tests réussis, cinq ignorés
-Session suivante : S94 — pente et vitesses du sillage (S93-1)
+Session en cours : aucune
+Dernière session : S94 — grandeurs de surface ; 202 tests réussis, cinq ignorés
+Session suivante : S95 — noyau modal déterministe (S94-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -167,6 +167,10 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S94 — 2026-09-08 :** potentiel, pente et vitesse horizontale construits ; dérivées,
+symétries et raffinement reçus, SURFACE-S94. 202 tests réussis, cinq ignorés ; S93-1 réalisée.
+70 ADR, 193 angles morts. Suite S95 : noyau modal déterministe, S94-1 ; f64/libm hors runtime.
 
 **S93 — 2026-09-08 :** préparation gaussienne sur pool hôte, vue empruntée et refus ;
 MEMOIRE-GAUSSIENNE-S93. Sorties identiques et campagne S92 inchangée. 199 tests réussis,

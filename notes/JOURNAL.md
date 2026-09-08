@@ -5864,3 +5864,21 @@ Nœuds du modèle toujours alloués à l'initialisation, f64/libm hors runtime ;
 MEMOIRE-GAUSSIENNE-S93 publié, aucun nouvel ADR/angle/invariant ni leçon distincte ; L194/L197 appliquées.
 **Suite S94 :** S93-1, pente et vitesse horizontale avec vérification par potentiel, avant
 composition. S92-1 réalisée dans la référence ; copies synchronisées après clôture.
+
+## S94 — 2026-09-08 — Grandeurs de surface du sillage
+
+**Entrée :** Continue utilisateur ; départ c68e2e8, copies actives propres et identiques, jeton libre.
+**Produit :** potentiel, pente et vitesse horizontale dans Surface ; potentiel modal préparé,
+contrôles non finis étendus, calcul partagé possédé/emprunté. SURFACE-S94 publié.
+**Mesures :** dérivées spatiales à 4,49e-12 / 5,52e-12, cinématique à 2,50e-11,
+dynamique à 1,50e-10 ; témoins non nuls. Raffinement radial : potentiel 4,617e-6 m²/s,
+pente 1,703e-9, vitesse horizontale 3,586e-8 m/s. Trois axes sous seuils, maxima S92 inchangés.
+**Vérification :** trois tests release S94, identité empruntée étendue, symétries et découpage,
+refus des nouvelles composantes non finies ; campagne release et suite debug complète :
+109 core + 93 harnais = 202 réussis, cinq ignorés, quatre avertissements préexistants.
+Formatage et diff vérifiés. P2 b3dfae4 ; aucun nouveau modèle, ADR, angle ou invariant.
+L204/L205 appliquées sans nouvelle leçon distincte.
+**Limites :** référence f64/libm, vitesses linéarisées à z=0, pas de champ immergé ni composition.
+Réception échantillonnée sur fixture, seuils hors fixture à calibrer ; coût non mesuré.
+**Suite S95 :** S94-1, noyau modal f32 à phases déterministes, résonances et comparaison S89,
+avant portage du champ gaussien. S93-1 réalisée ; copies actives synchronisées à la clôture.
