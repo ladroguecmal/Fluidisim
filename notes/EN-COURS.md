@@ -58,18 +58,17 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S79 — terminée
+Session : S80 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : vitesse orbitale W, correction verticale B, noyau de composition B+W.
+Objectif : préparer les champs sur pool hôte puis évaluer des lots sans sortie partielle.
 
 ### Plan
 
 - [x] **P1** — passation, copies, jeton et plan seul.
-- [x] **P2** — vitesses physiques, correction B par différence temporelle ; composition à refus explicites.
-- [x] **P3** — tests et références de conformité, ADR et rituel, synchronisation.
+- [ ] **P2** — préparation empruntée au journal, lot transactionnel et essais de refus.
+- [ ] **P3** — tests complets, contrat et limites, rituel et synchronisation.
 
 ### Notes de reprise
 
-Départ 2734123. B donne w=+a omega cos mais deta_dt=-a omega cos : signe à corriger.
-La composition reçoit un échantillon B évalué au même point/temps/repère ; le WaterSystem
-multi-référentiels et les lots concurrents ne sont pas encore implémentés.
+Départ cc1915e. Journal emprunté immuablement pendant la vie de la préparation : pas de
+champs périmés par mutation concurrente. Pool de préparation et tampon de lot fournis par hôte.
