@@ -324,4 +324,86 @@ mod tests {
         assert!(a.sample(FrameId(1), 0, [0.0; 2], SimTime(0)).is_err());
         assert!(a.sample(FrameId(0), 1, [0.0; 2], SimTime(0)).is_err());
     }
+    fn physical_disk<const N: usize>(
+        f: &RadialImpact<N>,
+        radius: f64,
+        us: u64,
+        rings: usize,
+    ) -> (f64, f64, f64) {
+        let mut energy = 0.0;
+        let mut moment = 0.0;
+        let mut minimum = f64::INFINITY;
+        let dr = radius / rings as f64;
+        let mut temporal = [0.0f64; N];
+        for (i, node) in f.nodes.iter().enumerate() {
+            temporal[i] = node.coefficient as f64
+                * node.omega as f64
+                * PhaseQ32::from_time(node.freq, SimTime(us)).sin() as f64;
+        }
+        for ir in 0..rings {
+            let r = (ir as f64 + 0.5) * dr;
+            let sample = f
+                .sample(FrameId(0), 0, [r as f32, 0.0], SimTime(us))
+                .unwrap();
+            let mut vertical = [0.0f64; N];
+            let mut radial = [0.0f64; N];
+            for (i, node) in f.nodes.iter().enumerate() {
+                let (j0, j1) = bessel(node.k * r as f32).unwrap();
+                vertical[i] = -temporal[i] * j0 as f64;
+                radial[i] = temporal[i] * j1 as f64;
+            }
+            let mut kinetic = 0.0;
+            for i in 0..N {
+                for j in 0..N {
+                    kinetic += (vertical[i] * vertical[j] + radial[i] * radial[j])
+                        / (f.nodes[i].k as f64 + f.nodes[j].k as f64);
+                }
+            }
+            let density = 0.5 * 1025.0 * (9.81 * (sample.eta as f64).powi(2) + kinetic);
+            minimum = minimum.min(density);
+            let e = core::f64::consts::TAU * r * dr * density;
+            energy += e;
+            moment += r * e;
+        }
+        (energy, moment / energy, minimum)
+    }
+    #[test]
+    fn temporal_energy_transport_and_truncation_s78() {
+        let d = Domain {
+            radius: 20.0,
+            age_us: 4_000_000,
+        };
+        let a = RadialImpact::<64>::new(source(), medium(), d).unwrap();
+        let b = RadialImpact::<128>::new(source(), medium(), d).unwrap();
+        let mut initial_radius = 0.0;
+        for us in [0, 1_000_000, 2_000_000, 4_000_000] {
+            let mut previous = 0.0;
+            for radius in [8.0, 16.0, 20.0] {
+                let q = physical_disk(&a, radius, us, 256);
+                println!(
+                    "S78 us={us} R={radius:.0} E_ratio={:.8} mean_r={:.6} min={:.3e}",
+                    q.0 / 0.01,
+                    q.1,
+                    q.2
+                );
+                assert!(q.0 >= previous);
+                previous = q.0;
+                assert!(q.2 >= -1e-12);
+            }
+            let base = physical_disk(&a, 20.0, us, 256);
+            let fine = physical_disk(&a, 20.0, us, 512);
+            let spectral = physical_disk(&b, 20.0, us, 512);
+            println!("S78 refinement us={us} E64_512={:.8} E128_512={:.8} delta_disk={:.8} delta_spectrum={:.8} mean_r={:.6}",
+                fine.0/0.01,spectral.0/0.01,(base.0-fine.0).abs()/0.01,(fine.0-spectral.0).abs()/0.01,spectral.1);
+            assert!((fine.0 - spectral.0).abs() / 0.01 < 1e-4);
+            assert!((base.0 - fine.0).abs() / 0.01 < 0.002);
+            assert!((spectral.0 / 0.01 - 1.0).abs() < 0.003);
+            if us == 0 {
+                initial_radius = spectral.1;
+            }
+            if us == 4_000_000 {
+                assert!(spectral.1 > initial_radius + 1.0);
+            }
+        }
+    }
 }

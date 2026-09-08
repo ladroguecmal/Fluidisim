@@ -65,7 +65,7 @@ Objectif : bilan temporel positif, transport et troncature du candidat radial.
 ### Plan
 
 - [x] **P1** — passation, état réel, jeton et plan seul.
-- [ ] **P2** — quadrature physique en profondeur, disque et raffinement ; mesures reproductibles.
+- [x] **P2** — quadrature physique en profondeur, disque et raffinement ; mesures reproductibles.
 - [ ] **P3** — décision de réception bornée, tests adaptés, rituel et copies synchronisées.
 
 ### Notes de reprise
