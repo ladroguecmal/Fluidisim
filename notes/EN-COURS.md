@@ -58,20 +58,17 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S87 — terminée
+Session : S88 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : sauvegarde versionnée de LiveWater et restauration transactionnelle avec attente.
+Objectif : scénario hôte B+W dynamique, redémarrage depuis WLIV et mesure du coût complet.
 
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [x] **P2** — codec du service, restauration sur réserves et tests de reprise après saturation.
-- [x] **P3** — vérification complète, documentation et rituel de passation.
+- [ ] **P2** — exemple exécutable de bout en bout, référence indépendante du redémarrage et chronométrage.
+- [ ] **P3** — mesures, vérifications et rituel de passation.
 
 ### Notes de reprise
 
-Départ 1fd8c60. Sauver contexte, résolution et commande en attente avec WJNL ; reconstruire
-les champs. Refuser une restauration invalide sans changer la paire publiée ni son blocage.
-
-P2 : 455ff14. Trois tests release ; suite debug 185 réussis, cinq ignorés.
-ADR-068 et L201 publiées. Suite S88 : S87-1, scénario hôte complet et coût du service.
+Départ e8d8c01. Scénario borné N128 : commandes, saturation, sauvegarde, cible plus grande,
+reprise et requêtes monde à 12 s ; aucune promesse de budget AAA ni nouveau modèle physique.
