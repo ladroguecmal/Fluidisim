@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-08 22:25 +02:00
+JETON            : occupé
+Battement        : 2026-09-08 22:26 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S99 — conjugaison spectrale
 Dernière session : S98 — coût gaussien mesuré ; suite 211/cinq ignorés inchangée
 Session suivante : S99 — conjugaison spectrale (S98-1)
 

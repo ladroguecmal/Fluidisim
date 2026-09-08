@@ -58,22 +58,18 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S98 — terminée
+Session : S99 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : mesurer le coût réel et la mémoire du chemin gaussien complet, sans optimisation préalable.
+Objectif : réduire les paires conjuguées après vérification, recevoir erreur et coût.
 
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [x] **P2** — construire et exécuter le banc release, vérifier les sorties et compter la mémoire.
-- [x] **P3** — publier mesures et limites ; rituel de passation et synchronisation.
+- [ ] **P2** — construire la réduction contrôlée, tests physiques et mesures comparatives.
+- [ ] **P3** — publier décision et résultats ; rituel de passation et synchronisation.
 
 ### Notes de reprise
 
-Départ 15e2b4b, copies propres identiques. S97-1.
-Recette 128², virage S91, requêtes 1/64/121 points. Séparer cuisson/préparation/requête.
-Pas de budget cible certifié à partir de mesures sur une seule machine.
-
-P2 : banc release exécuté et comparaison indépendante reçue ; COUT-GAUSSIEN-S98.
-Médianes cuisson 532 µs, préparation 12501 µs, requêtes64 44637,8 µs ; coût dominant requête.
-Aucun code bibliothèque modifié, suite 211/cinq ignorés inchangée ; exemple exécuté avec assertions.
+Départ 065dcf5, copies propres identiques. S98-1.
+Ne pas présumer les nœuds cuits exactement opposés ; réduction refusée sinon.
+Conserver le chemin complet et mesurer toutes les grandeurs avant adoption.
