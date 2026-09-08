@@ -58,24 +58,19 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S102 — terminée
+Session : S103 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : mesurer et partager la réduction du sinus/cosinus, vérifier identité et coût.
+Objectif : comparer résolutions radiales/angulaires sur emprise inchangée et grandeurs complètes.
 
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [x] **P2** — construire sin_cos partagé et banc de phase ; identité, physique et coûts.
-- [x] **P3** — publier résultats et limites ; rituel de passation et synchronisation.
+- [ ] **P2** — construire/exécuter la campagne, conserver les refus et identifier un candidat.
+- [ ] **P3** — publier résultats, portée et suite ; rituel de passation et synchronisation.
 
 ### Notes de reprise
 
-Départ 561f496, copies propres identiques. S101-1.
-Même polynômes et même angle réduit : quadrant commun pour les deux résultats.
-Ne pas remplacer les fonctions individuelles utilisées ailleurs ; raccordement spectral seul.
-
-P2 : identité release sur million de phases + frontières, hashes champ conservés.
-Banc isolé gain14,2 %, pas de gain global net ; TRIGONOMETRIE-S102 publié.
-Suite complète en cours dans code/target/s102-tests.log.
-
-Clôture : 217 réussis, cinq ignorés ; passation S103, résolution et emprise.
+Départ fdf874b, copies propres identiques. S102-1. Virage, [-8,12]² et 0–8s conservés.
+Seuils S92/S94 : eta1e-6, w1e-5, phi1e-5, pente1e-6, u1e-5, énergie1e-5.
+Comparer référence128² et contrôle256² ; axes séparés puis candidat combiné.
+Ne pas transformer une réception échantillonnée en borne continue ou profil universel.
