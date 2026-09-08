@@ -182,6 +182,103 @@ impl<'a, 'j, const N: usize> Prepared<'a, 'j, N> {
         Ok(count)
     }
 }
+/// État temporel uniquement : ne certifie ni les coordonnées ni le fond d'une requête.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum RenewalState {
+    UnboundedEmpty,
+    Ready { id: u64, until: SimTime },
+    Due { id: u64, until: SimTime },
+    Expired { id: u64, until: SimTime },
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum RenewalError {
+    NotExtended,
+    DoesNotCoverTime,
+    Prepare(PrepareError),
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum RenewalOutcome {
+    Unchanged,
+    Renewed,
+}
+/// Contrôleur synchrone à journal figé et deux pools hôte. Aucun tampon auto-référent.
+/// Une vue empruntée empêche la bascule tant qu'un lecteur l'utilise.
+pub struct RenewalController<'a, 'j, const N: usize = 64> {
+    journal: &'a Journal<'j>,
+    active: &'a mut [Option<RadialImpact<N>>],
+    spare: &'a mut [Option<RadialImpact<N>>],
+    context: Context,
+    count: usize,
+}
+impl<'a, 'j, const N: usize> RenewalController<'a, 'j, N> {
+    pub fn build(
+        journal: &'a Journal<'j>,
+        active: &'a mut [Option<RadialImpact<N>>],
+        spare: &'a mut [Option<RadialImpact<N>>],
+        context: Context,
+    ) -> Result<Self, PrepareError> {
+        if journal.confirmed().count() > spare.len() {
+            return Err(PrepareError::Capacity);
+        }
+        let count = Prepared::build(journal, active, context)?.field_count();
+        Ok(Self {
+            journal,
+            active,
+            spare,
+            context,
+            count,
+        })
+    }
+    pub fn prepared(&self) -> Prepared<'_, 'j, N> {
+        Prepared {
+            journal: self.journal,
+            fields: &self.active[..self.count],
+            frame: self.context.frame,
+            cell: self.context.cell,
+            gravity: self.context.medium.gravity,
+        }
+    }
+    /// Marge fournie par l'hôte ; soustraction après comparaison, sans débordement now + marge.
+    pub fn state(&self, now: SimTime, lead_us: u64) -> RenewalState {
+        match self.prepared().renewal_deadline() {
+            None => RenewalState::UnboundedEmpty,
+            Some((id, until)) if now.0 > until.0 => RenewalState::Expired { id, until },
+            Some((id, until)) if until.0 - now.0 <= lead_us => RenewalState::Due { id, until },
+            Some((id, until)) => RenewalState::Ready { id, until },
+        }
+    }
+    /// Tenter une seule reconstruction si due/expirée. L'âge cible part toujours de la naissance.
+    /// Un refus laisse le contexte et le pool actifs intacts ; l'erreur n'est jamais un succès B seul.
+    pub fn ensure(
+        &mut self,
+        now: SimTime,
+        lead_us: u64,
+        target_age_us: u64,
+    ) -> Result<RenewalOutcome, RenewalError> {
+        if matches!(
+            self.state(now, lead_us),
+            RenewalState::Ready { .. } | RenewalState::UnboundedEmpty
+        ) {
+            return Ok(RenewalOutcome::Unchanged);
+        }
+        if target_age_us <= self.context.domain.age_us {
+            return Err(RenewalError::NotExtended);
+        }
+        let mut next = self.context;
+        next.domain.age_us = target_age_us;
+        let candidate =
+            Prepared::build(self.journal, self.spare, next).map_err(RenewalError::Prepare)?;
+        if candidate
+            .renewal_deadline()
+            .is_some_and(|(_, until)| until.0 < now.0)
+        {
+            return Err(RenewalError::DoesNotCoverTime);
+        }
+        core::mem::swap(&mut self.active, &mut self.spare);
+        self.context = next;
+        Ok(RenewalOutcome::Renewed)
+    }
+}
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -357,6 +454,242 @@ mod tests {
         assert!(matches!(
             Prepared::<64>::build(&journal, &mut pool, context()),
             Err(PrepareError::LossKnown)
+        ));
+    }
+    #[test]
+    fn controller_switches_twice_without_phase_reset_s85() {
+        let mut slots = [None; 1];
+        let mut journal = Journal::new(0, &mut slots);
+        journal.confirm(0, cause(1), e(1)).unwrap();
+        let mut a = [const { None }; 1];
+        let mut b = [const { None }; 1];
+        let mut c = RenewalController::<128>::build(&journal, &mut a, &mut b, context()).unwrap();
+        let mut before = [base()];
+        let mut after = [base()];
+        let mut scratch = [base()];
+        c.prepared()
+            .sample_batch(
+                &[base()],
+                &[[1.0, 0.0]],
+                SimTime(3_000_000),
+                0.1,
+                &mut before,
+                &mut scratch,
+            )
+            .unwrap();
+        assert_eq!(
+            c.ensure(SimTime(2_999_999), 1_000_000, 8_000_000),
+            Ok(RenewalOutcome::Unchanged)
+        );
+        assert_eq!(
+            c.ensure(SimTime(3_000_000), 1_000_000, 8_000_000),
+            Ok(RenewalOutcome::Renewed)
+        );
+        c.prepared()
+            .sample_batch(
+                &[base()],
+                &[[1.0, 0.0]],
+                SimTime(3_000_000),
+                0.1,
+                &mut after,
+                &mut scratch,
+            )
+            .unwrap();
+        assert_eq!(before[0].eta.to_bits(), after[0].eta.to_bits());
+        assert_eq!(before[0].normal, after[0].normal);
+        assert_eq!(before[0].u_total, after[0].u_total);
+        assert_eq!(
+            c.ensure(SimTime(8_000_001), 0, 16_000_000),
+            Ok(RenewalOutcome::Renewed)
+        );
+        assert_eq!(
+            c.state(SimTime(16_000_000), 0),
+            RenewalState::Due {
+                id: 1,
+                until: SimTime(16_000_000)
+            }
+        );
+        c.prepared()
+            .sample_batch(
+                &[base()],
+                &[[1.0, 0.0]],
+                SimTime(16_000_000),
+                0.1,
+                &mut after,
+                &mut scratch,
+            )
+            .unwrap();
+        let mut reference_pool = [const { None }; 1];
+        let mut ctx = context();
+        ctx.domain.age_us = 16_000_000;
+        Prepared::<128>::build(&journal, &mut reference_pool, ctx)
+            .unwrap()
+            .sample_batch(
+                &[base()],
+                &[[1.0, 0.0]],
+                SimTime(16_000_000),
+                0.1,
+                &mut before,
+                &mut scratch,
+            )
+            .unwrap();
+        assert_eq!(before[0].eta.to_bits(), after[0].eta.to_bits());
+        assert_eq!(before[0].u_total, after[0].u_total);
+    }
+    #[test]
+    fn controller_refusal_preserves_active_and_expiry_s85() {
+        let mut slots = [None; 1];
+        let mut journal = Journal::new(0, &mut slots);
+        journal.confirm(0, cause(1), e(1)).unwrap();
+        let mut a = [const { None }; 1];
+        let mut b = [const { None }; 1];
+        let mut c = RenewalController::<128>::build(&journal, &mut a, &mut b, context()).unwrap();
+        assert_eq!(
+            c.ensure(SimTime(4_000_000), 0, 4_000_000),
+            Err(RenewalError::NotExtended)
+        );
+        assert!(matches!(
+            c.ensure(SimTime(4_000_000), 0, 100_000_000),
+            Err(RenewalError::Prepare(_))
+        ));
+        let mut out = [base()];
+        let mut scratch = [base()];
+        c.prepared()
+            .sample_batch(
+                &[base()],
+                &[[1.0, 0.0]],
+                SimTime(4_000_000),
+                0.1,
+                &mut out,
+                &mut scratch,
+            )
+            .unwrap();
+        assert_eq!(
+            c.ensure(SimTime(12_000_000), 0, 8_000_000),
+            Err(RenewalError::DoesNotCoverTime)
+        );
+        assert_eq!(
+            c.state(SimTime(12_000_000), 0),
+            RenewalState::Expired {
+                id: 1,
+                until: SimTime(4_000_000)
+            }
+        );
+        out[0].eta = 123.0;
+        assert!(c
+            .prepared()
+            .sample_batch(
+                &[base()],
+                &[[1.0, 0.0]],
+                SimTime(12_000_000),
+                0.1,
+                &mut out,
+                &mut scratch
+            )
+            .is_err());
+        assert_eq!(out[0].eta, 123.0);
+        assert_eq!(
+            c.ensure(SimTime(12_000_000), 0, 16_000_000),
+            Ok(RenewalOutcome::Renewed)
+        );
+    }
+    #[test]
+    fn controller_partial_candidate_never_published_s85() {
+        let mut slots = [None; 2];
+        let mut journal = Journal::new(0, &mut slots);
+        journal.confirm(0, cause(1), e(1)).unwrap();
+        let mut second = *e(2).data();
+        second.wavelength_m = 3.2;
+        journal
+            .confirm(0, cause(2), WaveEvent::impact(second).unwrap())
+            .unwrap();
+        let mut a = [const { None }; 2];
+        let mut b = [const { None }; 2];
+        let mut c = RenewalController::<128>::build(&journal, &mut a, &mut b, context()).unwrap();
+        let mut before = [base()];
+        let mut after = [base()];
+        let mut scratch = [base()];
+        c.prepared()
+            .sample_batch(
+                &[base()],
+                &[[1.0, 0.0]],
+                SimTime(4_000_000),
+                0.1,
+                &mut before,
+                &mut scratch,
+            )
+            .unwrap();
+        assert!(matches!(
+            c.ensure(SimTime(4_000_000), 0, 34_000_000),
+            Err(RenewalError::Prepare(PrepareError::Field { id: 2, .. }))
+        ));
+        assert!(c.spare[0].is_some());
+        assert!(c.spare[1].is_none());
+        c.prepared()
+            .sample_batch(
+                &[base()],
+                &[[1.0, 0.0]],
+                SimTime(4_000_000),
+                0.1,
+                &mut after,
+                &mut scratch,
+            )
+            .unwrap();
+        assert_eq!(before[0].eta.to_bits(), after[0].eta.to_bits());
+        assert_eq!(before[0].u_total, after[0].u_total);
+        assert_eq!(before[0].normal, after[0].normal);
+        assert_eq!(
+            c.ensure(SimTime(4_000_000), 0, 16_000_000),
+            Ok(RenewalOutcome::Renewed)
+        );
+        assert_eq!(c.prepared().field_count(), 2);
+    }
+    #[test]
+    fn controller_empty_capacity_and_extreme_time_s85() {
+        let mut empty = [];
+        let journal = Journal::new(0, &mut empty);
+        let mut a = [];
+        let mut b = [];
+        let mut c = RenewalController::<128>::build(&journal, &mut a, &mut b, context()).unwrap();
+        assert_eq!(
+            c.state(SimTime(u64::MAX), u64::MAX),
+            RenewalState::UnboundedEmpty
+        );
+        assert_eq!(
+            c.ensure(SimTime(u64::MAX), u64::MAX, 0),
+            Ok(RenewalOutcome::Unchanged)
+        );
+        let mut slots = [None; 1];
+        let mut journal = Journal::new(0, &mut slots);
+        let mut event = *e(1).data();
+        event.birth = SimTime(u64::MAX - 4_000_000);
+        journal
+            .confirm(0, cause(1), WaveEvent::impact(event).unwrap())
+            .unwrap();
+        let mut a = [const { None }; 1];
+        assert!(matches!(
+            RenewalController::<128>::build(&journal, &mut a, &mut [], context()),
+            Err(PrepareError::Capacity)
+        ));
+        let mut b = [const { None }; 1];
+        let mut c = RenewalController::<128>::build(&journal, &mut a, &mut b, context()).unwrap();
+        assert_eq!(
+            c.state(SimTime(0), u64::MAX),
+            RenewalState::Due {
+                id: 1,
+                until: SimTime(u64::MAX)
+            }
+        );
+        assert_eq!(
+            c.state(SimTime(u64::MAX), 0),
+            RenewalState::Due {
+                id: 1,
+                until: SimTime(u64::MAX)
+            }
+        );
+        assert!(matches!(
+            c.ensure(SimTime(u64::MAX), 0, 8_000_000),
+            Err(RenewalError::Prepare(_))
         ));
     }
     #[test]

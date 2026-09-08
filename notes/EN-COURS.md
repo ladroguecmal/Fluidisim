@@ -65,7 +65,7 @@ Objectif : construire le contrôleur de renouvellement à deux pools, à résolu
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan seul.
-- [ ] **P2** — contrôleur à deux pools, échéance et bascule transactionnelle ; tests de refus et reprise.
+- [x] **P2** — contrôleur à deux pools, échéance et bascule transactionnelle ; tests de refus et reprise.
 - [ ] **P3** — vérification complète, documentation et rituel de passation.
 
 ### Notes de reprise
