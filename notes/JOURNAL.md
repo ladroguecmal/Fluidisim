@@ -5622,3 +5622,19 @@ compensation d’un déficit dû au transport. Pas de réception universelle ni 
 Rétention, autres profils, budget et autorité croisée ouverts. L192, aucun angle numéroté ajouté.
 
 **Vérification finale :** 66 tests core + 93 harnais = 159 réussis, cinq ignorés, aucun échec. Diagnostic release passé ; quatre avertissements préexistants du harnais. Diff vérifié, copies synchronisées après commit.
+
+## S79 — 2026-09-08 — Vitesses et composition B+W
+
+**Entrée :** Continue utilisateur ; départ 2734123, copies actives identiques.
+**Défaut :** vitesse verticale B opposée à deta_dt ; corrigée après lecture de la convention
+kx-omega t, contrôlée par différences temporelles. A192, L193, ADR-062.
+**Produit :** vitesse horizontale radiale et support périodique ; composition ponctuelle avec
+journal confirmé, ordre et contenu exacts, refus de perte/domaine, normale reconstruite.
+Test avec Background réel ; aucune construction de champ pendant compose, aucune allocation.
+**Références :** C02 0x0a3a3bcc945db263, C18 0x85c8bc610f551d11 ; anciens hashs invalidés par
+la correction verticale, deux check réussis après inscription. C04 non modifié.
+**Limites :** l’hôte garantit la correspondance B/W du point et du milieu ; service en lot,
+préparation, index, réseau et rétention restent à construire. Pas de généralisation physique.
+**Suite S80 :** S79-1, préparation bornée et lot ; S78-1 réalisée au niveau ponctuel.
+
+**Vérification finale :** 71 tests core + 93 harnais = 164 réussis, cinq ignorés, aucun échec. C02/C18 check : deux succès. Quatre avertissements préexistants dans la compilation des tests du harnais. Diff vérifié ; copies synchronisées après commit.

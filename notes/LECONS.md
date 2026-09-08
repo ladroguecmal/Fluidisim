@@ -3056,3 +3056,9 @@ mesurée ; ne pas transformer le premier en certificat du second dans la documen
 *(S78)* Le disque de 8 m semblait perdre de l’énergie ; celui de 20 m la récupérait. Avant de
 corriger une amplitude ou un bilan, varier séparément l’étendue et le pas de mesure. Un déficit
 par transport réclame une frontière de flux, pas une source compensatrice inventée.
+
+## L193 — Une identité vectorielle ne se teste pas sur une seule composante
+
+*(S79)* La correction orbitale horizontale de S21 avait laissé un signe vertical erroné.
+Lorsqu’une grandeur est vectorielle, nommer la loi qui contrôle chaque composante. Une
+régression sur la composante historiquement fautive ne protège pas les autres directions.

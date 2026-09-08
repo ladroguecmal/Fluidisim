@@ -885,3 +885,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S78-1 : ouverte, S79.** Vitesse orbitale radiale puis composition B+W limitée, ordre des
   confirmations, échecs visibles et normale reconstruite ; tester avant exposition consommateur.
 - Budget, autorité croisée, portée multi-référentiels et rétention S72-2 restent ouverts W3/W4.
+
+### S79 — Noyau ponctuel B+W construit
+
+- **S78-1 : réalisée dans le noyau ponctuel.** Vitesses, correspondance des confirmations,
+  refus et composition des normales ; correction B verticale, ADR-062.
+- **S79-1 : ouverte, S80.** Préparation des champs sur pool hôte borné et interrogation en lot,
+  statut explicite sans publication partielle ; mesurer ensuite le coût B+W réellement raccordé.
+- WaterSystem multi-référentiels, index spatial, réception réseau et rétention S72-2 restent ouverts.

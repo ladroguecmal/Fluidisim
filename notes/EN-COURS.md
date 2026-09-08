@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S79 — en cours
+Session : S79 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : vitesse orbitale W, correction verticale B, noyau de composition B+W.
 
@@ -66,7 +66,7 @@ Objectif : vitesse orbitale W, correction verticale B, noyau de composition B+W.
 
 - [x] **P1** — passation, copies, jeton et plan seul.
 - [x] **P2** — vitesses physiques, correction B par différence temporelle ; composition à refus explicites.
-- [ ] **P3** — tests et références de conformité, ADR et rituel, synchronisation.
+- [x] **P3** — tests et références de conformité, ADR et rituel, synchronisation.
 
 ### Notes de reprise
 

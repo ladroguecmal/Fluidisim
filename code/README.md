@@ -111,3 +111,9 @@ Voir ADR-060 pour rayon/durée, convergence et limites. Pas encore de raccordeme
 Le scénario reçu conserve son énergie à l’échelle du disque de 20 m sur les quatre instants
 mesurés ; un disque de 8 m laisse sortir une part de cette énergie. BILAN-RADIAL-S78 et ADR-061.
 Suite : vitesse orbitale et composition B+W limitée, sans élargir implicitement la réception.
+
+### S79 — Composition ponctuelle B+W
+
+composition::compose reçoit le B déjà évalué et les champs du journal confirmé, vérifie leur
+correspondance et compose hauteurs, vitesses et pentes. Perte connue et hors domaine refusés.
+ADR-062 précise les préconditions hôte et le signe vertical B corrigé ; nouveaux hashs C02/C18.

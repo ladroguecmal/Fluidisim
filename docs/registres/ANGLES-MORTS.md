@@ -1543,3 +1543,8 @@ et raccordement hôte restent à réaliser, sans prétendre que le réseau est i
 **Suivi A191 — S74 : traité localement par ADR-057.** Full mémorise une perte connue,
 persistée et restaurée. Aucun succès ultérieur ne l’efface implicitement. Absence de perte
 connue ne signifie pas complétude réseau ; protocole de resynchronisation hôte encore ouvert.
+
+- **A192** *(sévérité 1, S79 ; corrigée)* — **La vitesse verticale peut contredire la surface
+  alors que la vitesse horizontale est juste.** B rendait w=-deta_dt. L’identité orbitale
+  horizontale de S21 ne testait pas la condition cinématique verticale. Signe corrigé, contrôle
+  par différence temporelle ajouté ; références de conformité renouvelées, ADR-062.
