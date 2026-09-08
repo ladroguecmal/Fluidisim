@@ -65,7 +65,7 @@ Objectif : champ d'une pression gaussienne mobile, quadrature spectrale et bilan
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [ ] **P2** — prototype spatial de référence, normalisation et tests de convergence/travail.
+- [x] **P2** — prototype spatial de référence, normalisation et tests de convergence/travail.
 - [ ] **P3** — publier les mesures, limites et rituel de passation.
 
 ### Notes de reprise
