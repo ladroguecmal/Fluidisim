@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S96 — en cours
+Session : S96 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : superposition f32 sur pool, à spectre fourni explicitement par préparation de référence.
 
@@ -66,7 +66,7 @@ Objectif : superposition f32 sur pool, à spectre fourni explicitement par prép
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
 - [x] **P2** — construire le champ emprunté et vérifier découpage, virage, grandeurs et refus.
-- [ ] **P3** — publier portée et résultats ; rituel de fin et synchronisation.
+- [x] **P3** — publier portée et résultats ; rituel de fin et synchronisation.
 
 ### Notes de reprise
 
@@ -76,3 +76,5 @@ déterministe. Recevoir le même spectre puis comparer à la référence complè
 
 P2 : deux tests release reçus ; compensation énergie après échec de somme naïve, seuil maintenu.
 Maxima champ dans SUPERPOSITION-S96 ; suite complète en cours dans code/target/s96-tests.log.
+
+P3 : suite 208 réussis, cinq ignorés ; passation S97, spectre reproductible S96-1.

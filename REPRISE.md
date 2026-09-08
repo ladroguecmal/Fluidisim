@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 22:08 +02:00
+JETON            : libre
+Battement        : 2026-09-08 22:12 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S96 — superposition
-Dernière session : S95 — candidat modal ; 206 tests réussis, cinq ignorés
-Session suivante : S96 — superposition gaussienne du candidat (S95-1)
+Session en cours : aucune
+Dernière session : S96 — superposition ; 208 tests réussis, cinq ignorés
+Session suivante : S97 — spectre gaussien reproductible (S96-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -167,6 +167,10 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S96 — 2026-09-08 :** superposition f32 sur pool, virage et découpage reçus ;
+SUPERPOSITION-S96. 208 tests réussis, cinq ignorés ; 71 ADR, 193 angles morts.
+S95-1 réalisée sur spectre fourni ; suite S97 : cuisson reproductible, S96-1.
 
 **S95 — 2026-09-08 :** ADR-071, candidat modal f32 à phases entières et résonance régulière.
 550 réponses reçues, hash debug/release identique localement ; 206 tests réussis, cinq ignorés.

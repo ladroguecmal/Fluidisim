@@ -17,6 +17,9 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S96 :** [Superposition sur pool](validation/SUPERPOSITION-S96.md), virage et découpage reçus.
+71 ADR, 193 angles morts. Suite S97 : spectre reproductible, S96-1.
+
 **S95 :** [ADR-071 — Noyau modal déterministe](adr/ADR-071-noyau-modal-deterministe.md), **ACTÉE**.
 206 tests réussis, cinq ignorés ; 71 ADR, 193 angles morts. Suite S96 : superposition, S95-1.
 

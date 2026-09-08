@@ -1024,3 +1024,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S95-1 : ouverte, S96.** Recevoir le découpage et construire la superposition gaussienne
   sur pool hôte avec ce noyau ; comparer toutes les grandeurs à la référence f64.
 - Codec, coûts, multiprofils et intégration autoritaire restent ouverts.
+
+### S96 — Superposition sur spectre fourni
+
+- **S95-1 : réalisée sur spectre fourni.** Champ f32 sur pool, découpage et virage reçus,
+  toutes les grandeurs de surface comparées ; SUPERPOSITION-S96.
+- **S96-1 : ouverte, S97.** Spectre gaussien reproductible sur mémoire hôte, contrat et
+  provenance, réception sans cuisson libm implicite.
+- Puissance/travail candidat, coût, conformité interplateforme et LiveWater restent ouverts.

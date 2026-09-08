@@ -75,3 +75,7 @@ construire la superposition gaussienne sur mémoire hôte avec ce noyau, en cons
 les interférences, les grandeurs S94 et la comparaison indépendante à la référence f64.
 La transformation gaussienne, les phases spatiales, le coût, la réception multiprofils et
 interplateforme restent à traiter avant intégration autoritaire. Aucun budget cible reçu.
+
+> **Actualisation S96 — 2026-09-08.** S95-1 réalisée sur spectre fourni :
+> [SUPERPOSITION-S96](../validation/SUPERPOSITION-S96.md). Cuisson reproductible encore
+> ouverte, S96-1 ; aucun raccordement autoritaire.

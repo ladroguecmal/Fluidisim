@@ -5900,3 +5900,21 @@ raccordement autoritaire. Paramètres représentables plus larges que la fixture
 Aucun nouvel angle numéroté ; leçon L206. 71 ADR, 193 angles, invariants inchangés.
 **Suite S96 :** S95-1, découpage et superposition gaussienne sur pool avec le candidat,
 comparaison des grandeurs complètes à la référence. S94-1 réalisée dans cette portée.
+
+## S96 — 2026-09-08 — Superposition sur spectre fourni
+
+**Entrée :** Continue ; départ 288dfdb, copies actives propres et identiques.
+**Produit :** spectral_pressure, préparation du champ total sur pool hôte, vue empruntée
+et bornes ; potentiel, pente, vitesses et énergie. SUPERPOSITION-S96 publié, P2 acf0eed.
+**Mesures :** 1089 points du virage contre référence complète : maxima hauteur 8,079e-9 m,
+vitesse verticale 3,941e-8 m/s, potentiel 6,100e-8 m²/s, pente 9,963e-9, vitesse horizontale
+2,976e-8 m/s. Découpage reçu aux mêmes seuils. Énergie reçue après compensation f32,
+somme naïve initialement refusée ; seuil 2e-6 J conservé.
+**Vérification :** deux tests release ; suite complète consignée à la clôture ci-dessous.
+**Limites :** spectre fourni par hôte ; cuisson des tests f64/libm, donc non déterministe
+par contrat. Pas de puissance candidate, coût mesuré, codec ni intégration LiveWater.
+Aucun nouvel ADR, angle numéroté ou invariant ; L204/L205 appliquées sans nouvelle leçon.
+**Suite S97 :** S96-1, fabrication reproductible du spectre gaussien sur mémoire hôte,
+contrat et provenance. S95-1 réalisée pour le chemin sur spectre fourni.
+
+**Clôture :** 115 core + 93 harnais = 208 tests réussis, cinq ignorés, quatre avertissements préexistants. Copies synchronisées après commit final.
