@@ -279,6 +279,150 @@ impl<'a, 'j, const N: usize> RenewalController<'a, 'j, N> {
         Ok(RenewalOutcome::Renewed)
     }
 }
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Admission {
+    Predict {
+        epoch: u64,
+        cause: crate::wave_journal::Cause,
+        event: crate::wave_event::WaveEvent,
+    },
+    Confirm {
+        epoch: u64,
+        cause: crate::wave_journal::Cause,
+        event: crate::wave_event::WaveEvent,
+    },
+    Reject {
+        epoch: u64,
+        cause: crate::wave_journal::Cause,
+    },
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum AdmissionError {
+    Pending,
+    Horizon,
+    Journal(crate::wave_journal::Error),
+    Prepare(PrepareError),
+}
+/// Paire journal/champs publiée ensemble ; une commande bloquée interdit une vue dite courante.
+pub struct LiveWater<'a, const N: usize = 64> {
+    journal: Journal<'a>,
+    spare_journal: Journal<'a>,
+    fields: &'a mut [Option<RadialImpact<N>>],
+    spare_fields: &'a mut [Option<RadialImpact<N>>],
+    context: Context,
+    count: usize,
+    pending: Option<Admission>,
+}
+impl<'a, const N: usize> LiveWater<'a, N> {
+    /// Le journal de réserve est un espace de travail ; son contenu antérieur est remplacé.
+    pub fn build(
+        journal: Journal<'a>,
+        mut spare_journal: Journal<'a>,
+        fields: &'a mut [Option<RadialImpact<N>>],
+        spare_fields: &'a mut [Option<RadialImpact<N>>],
+        context: Context,
+    ) -> Result<Self, AdmissionError> {
+        spare_journal
+            .copy_from(&journal)
+            .map_err(AdmissionError::Journal)?;
+        if journal.confirmed().count() > spare_fields.len() {
+            return Err(AdmissionError::Prepare(PrepareError::Capacity));
+        }
+        let count = Prepared::build(&journal, fields, context)
+            .map_err(AdmissionError::Prepare)?
+            .field_count();
+        Ok(Self {
+            journal,
+            spare_journal,
+            fields,
+            spare_fields,
+            context,
+            count,
+            pending: None,
+        })
+    }
+    pub fn pending(&self) -> Option<Admission> {
+        self.pending
+    }
+    pub fn current(&self) -> Result<Prepared<'_, 'a, N>, AdmissionError> {
+        if self.pending.is_some() {
+            return Err(AdmissionError::Pending);
+        }
+        Ok(Prepared {
+            journal: &self.journal,
+            fields: &self.fields[..self.count],
+            frame: self.context.frame,
+            cell: self.context.cell,
+            gravity: self.context.medium.gravity,
+        })
+    }
+    /// None renouvelle l'horizon sans commande. Après blocage, seule la même commande est admise.
+    /// Les changements de prédiction ne sont retournés qu'après publication complète.
+    pub fn update(
+        &mut self,
+        command: Option<Admission>,
+        now: SimTime,
+        age_us: u64,
+    ) -> Result<Option<crate::wave_journal::Change>, AdmissionError> {
+        if self.pending.is_some() && command != self.pending {
+            return Err(AdmissionError::Pending);
+        }
+        if age_us < self.context.domain.age_us {
+            return Err(AdmissionError::Horizon);
+        }
+        // Une erreur de capacité doit rester visible même si le candidat est abandonné.
+        if let Err(e) = self.spare_journal.copy_from(&self.journal) {
+            self.pending = command;
+            return Err(AdmissionError::Journal(e));
+        }
+        use Admission::*;
+        let change = match command {
+            Some(Predict {
+                epoch,
+                cause,
+                event,
+            }) => self.spare_journal.predict(epoch, cause, event).map(Some),
+            Some(Confirm {
+                epoch,
+                cause,
+                event,
+            }) => self.spare_journal.confirm(epoch, cause, event).map(Some),
+            Some(Reject { epoch, cause }) => self.spare_journal.reject(epoch, cause).map(Some),
+            None => Ok(None),
+        };
+        let change = match change {
+            Ok(c) => c,
+            Err(e) => {
+                if e == crate::wave_journal::Error::Full {
+                    self.pending = command;
+                }
+                return Err(AdmissionError::Journal(e));
+            }
+        };
+        let mut next = self.context;
+        next.domain.age_us = age_us;
+        let candidate = match Prepared::build(&self.spare_journal, self.spare_fields, next) {
+            Ok(p) => p,
+            Err(e) => {
+                self.pending = command;
+                return Err(AdmissionError::Prepare(e));
+            }
+        };
+        if candidate
+            .renewal_deadline()
+            .is_some_and(|(_, t)| t.0 < now.0)
+        {
+            self.pending = command;
+            return Err(AdmissionError::Horizon);
+        }
+        self.count = candidate.field_count();
+        core::mem::swap(&mut self.journal, &mut self.spare_journal);
+        core::mem::swap(&mut self.fields, &mut self.spare_fields);
+        self.context = next;
+        self.pending = None;
+        Ok(change)
+    }
+}
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -455,6 +599,236 @@ mod tests {
             Prepared::<64>::build(&journal, &mut pool, context()),
             Err(PrepareError::LossKnown)
         ));
+    }
+    #[test]
+    fn live_prediction_confirmation_rejection_and_renewal_s86() {
+        use crate::wave_journal::Change;
+        let mut a = [None; 3];
+        let mut b = [None; 3];
+        let mut fa = [const { None }; 3];
+        let mut fb = [const { None }; 3];
+        let mut live = LiveWater::<128>::build(
+            Journal::new(0, &mut a),
+            Journal::new(99, &mut b),
+            &mut fa,
+            &mut fb,
+            context(),
+        )
+        .unwrap();
+        let mut prediction = *e(99).data();
+        prediction.origin = Origin::Prediction;
+        let prediction = WaveEvent::impact(prediction).unwrap();
+        assert_eq!(
+            live.update(
+                Some(Admission::Predict {
+                    epoch: 0,
+                    cause: cause(1),
+                    event: prediction
+                }),
+                SimTime(0),
+                4_000_000
+            ),
+            Ok(Some(Change::Added))
+        );
+        assert_eq!(live.current().unwrap().field_count(), 0);
+        let confirm = Admission::Confirm {
+            epoch: 0,
+            cause: cause(1),
+            event: e(1),
+        };
+        assert_eq!(
+            live.update(Some(confirm), SimTime(0), 4_000_000),
+            Ok(Some(Change::Retract(prediction)))
+        );
+        assert_eq!(
+            live.update(Some(confirm), SimTime(0), 4_000_000),
+            Ok(Some(Change::Unchanged))
+        );
+        live.update(
+            Some(Admission::Predict {
+                epoch: 0,
+                cause: cause(2),
+                event: prediction,
+            }),
+            SimTime(0),
+            4_000_000,
+        )
+        .unwrap();
+        assert_eq!(
+            live.update(
+                Some(Admission::Reject {
+                    epoch: 0,
+                    cause: cause(2)
+                }),
+                SimTime(0),
+                4_000_000
+            ),
+            Ok(Some(Change::Retract(prediction)))
+        );
+        live.update(
+            Some(Admission::Confirm {
+                epoch: 0,
+                cause: cause(3),
+                event: e(3),
+            }),
+            SimTime(0),
+            4_000_000,
+        )
+        .unwrap();
+        assert_eq!(live.current().unwrap().field_count(), 2);
+        assert_eq!(
+            live.journal
+                .confirmed()
+                .map(|e| e.data().id)
+                .collect::<Vec<_>>(),
+            vec![1, 3]
+        );
+        live.update(None, SimTime(12_000_000), 16_000_000).unwrap();
+        let mut out = [base()];
+        let mut scratch = [base()];
+        live.current()
+            .unwrap()
+            .sample_batch(
+                &[base()],
+                &[[1.0, 0.0]],
+                SimTime(12_000_000),
+                0.1,
+                &mut out,
+                &mut scratch,
+            )
+            .unwrap();
+        let mut reference_pool = [const { None }; 3];
+        let mut ctx = context();
+        ctx.domain.age_us = 16_000_000;
+        let reference = Prepared::<128>::build(&live.journal, &mut reference_pool, ctx).unwrap();
+        let mut expected = [base()];
+        reference
+            .sample_batch(
+                &[base()],
+                &[[1.0, 0.0]],
+                SimTime(12_000_000),
+                0.1,
+                &mut expected,
+                &mut scratch,
+            )
+            .unwrap();
+        assert_eq!(out[0].eta.to_bits(), expected[0].eta.to_bits());
+        assert_eq!(out[0].u_total, expected[0].u_total);
+        assert_eq!(out[0].normal, expected[0].normal);
+    }
+    #[test]
+    fn live_late_failure_blocks_stale_view_and_retry_recovers_s86() {
+        let mut a = [None; 2];
+        let mut b = [None; 2];
+        let mut journal = Journal::new(0, &mut a);
+        journal.confirm(0, cause(1), e(1)).unwrap();
+        let mut fa = [const { None }; 2];
+        let mut fb = [const { None }; 2];
+        let mut live = LiveWater::<128>::build(
+            journal,
+            Journal::new(0, &mut b),
+            &mut fa,
+            &mut fb,
+            context(),
+        )
+        .unwrap();
+        let mut second = *e(2).data();
+        second.wavelength_m = 3.2;
+        let cmd = Admission::Confirm {
+            epoch: 0,
+            cause: cause(2),
+            event: WaveEvent::impact(second).unwrap(),
+        };
+        assert!(matches!(
+            live.update(Some(cmd), SimTime(0), 34_000_000),
+            Err(AdmissionError::Prepare(PrepareError::Field { id: 2, .. }))
+        ));
+        assert!(live.spare_fields[0].is_some());
+        assert_eq!(live.journal.confirmed().count(), 1);
+        assert_eq!(live.count, 1);
+        assert_eq!(live.pending(), Some(cmd));
+        assert!(matches!(live.current(), Err(AdmissionError::Pending)));
+        assert_eq!(
+            live.update(None, SimTime(0), 16_000_000),
+            Err(AdmissionError::Pending)
+        );
+        live.update(Some(cmd), SimTime(12_000_000), 16_000_000)
+            .unwrap();
+        assert_eq!(live.current().unwrap().field_count(), 2);
+        assert_eq!(live.pending(), None);
+    }
+    #[test]
+    fn live_full_and_field_capacity_cannot_be_hidden_s86() {
+        for journal_capacity in [1, 2] {
+            let mut a = [None; 2];
+            let mut b = [None; 2];
+            let mut journal = Journal::new(0, &mut a[..journal_capacity]);
+            journal.confirm(0, cause(1), e(1)).unwrap();
+            let mut fa = [const { None }; 1];
+            let mut fb = [const { None }; 1];
+            let mut live = LiveWater::<128>::build(
+                journal,
+                Journal::new(0, &mut b[..journal_capacity]),
+                &mut fa,
+                &mut fb,
+                context(),
+            )
+            .unwrap();
+            let cmd = Admission::Confirm {
+                epoch: 0,
+                cause: cause(2),
+                event: e(2),
+            };
+            let expected = if journal_capacity == 1 {
+                AdmissionError::Journal(crate::wave_journal::Error::Full)
+            } else {
+                AdmissionError::Prepare(PrepareError::Capacity)
+            };
+            assert_eq!(live.update(Some(cmd), SimTime(0), 4_000_000), Err(expected));
+            assert_eq!(live.pending(), Some(cmd));
+            assert!(matches!(live.current(), Err(AdmissionError::Pending)));
+            assert_eq!(live.update(Some(cmd), SimTime(0), 4_000_000), Err(expected));
+            assert_eq!(live.journal.confirmed().count(), 1);
+        }
+    }
+    #[test]
+    fn live_invalid_command_and_expired_candidate_s86() {
+        let mut a = [None; 2];
+        let mut b = [None; 2];
+        let mut fa = [const { None }; 2];
+        let mut fb = [const { None }; 2];
+        let mut live = LiveWater::<128>::build(
+            Journal::new(0, &mut a),
+            Journal::new(0, &mut b),
+            &mut fa,
+            &mut fb,
+            context(),
+        )
+        .unwrap();
+        let bad = Admission::Confirm {
+            epoch: 1,
+            cause: cause(1),
+            event: e(1),
+        };
+        assert_eq!(
+            live.update(Some(bad), SimTime(0), 4_000_000),
+            Err(AdmissionError::Journal(crate::wave_journal::Error::Epoch))
+        );
+        assert!(live.current().is_ok());
+        let cmd = Admission::Confirm {
+            epoch: 0,
+            cause: cause(1),
+            event: e(1),
+        };
+        assert_eq!(
+            live.update(Some(cmd), SimTime(12_000_000), 4_000_000),
+            Err(AdmissionError::Horizon)
+        );
+        assert_eq!(live.pending(), Some(cmd));
+        assert_eq!(live.count, 0);
+        live.update(Some(cmd), SimTime(12_000_000), 16_000_000)
+            .unwrap();
+        assert_eq!(live.current().unwrap().field_count(), 1);
     }
     #[test]
     fn controller_switches_twice_without_phase_reset_s85() {

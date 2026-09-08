@@ -55,6 +55,19 @@ impl<'a> Journal<'a> {
     pub fn loss_known(&self) -> bool {
         self.loss_known
     }
+    /// Copie interne de transaction, avec capacité contrôlée avant toute écriture.
+    pub(crate) fn copy_from(&mut self, source: &Journal<'_>) -> Result<(), Error> {
+        if source.records().count() > self.slots.len() {
+            return Err(Error::Full);
+        }
+        self.slots.fill(None);
+        for (slot, record) in self.slots.iter_mut().zip(source.records()) {
+            *slot = Some(*record);
+        }
+        self.epoch = source.epoch;
+        self.loss_known = source.loss_known;
+        Ok(())
+    }
     pub fn records(&self) -> impl Iterator<Item = &Record> {
         self.slots.iter().flatten()
     }

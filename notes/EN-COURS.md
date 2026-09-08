@@ -65,7 +65,7 @@ Objectif : admission transactionnelle des commandes et de leurs champs, sans per
 ### Plan
 
 - [x] **P1** — vérifier la passation, prendre le jeton et déclarer le plan.
-- [ ] **P2** — service à deux journaux et deux pools, commande en attente après refus physique ou saturation ; tests.
+- [x] **P2** — service à deux journaux et deux pools, commande en attente après refus physique ou saturation ; tests.
 - [ ] **P3** — vérifier, documenter les limites et exécuter le rituel de passation.
 
 ### Notes de reprise
