@@ -17,6 +17,9 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S101 :** [Lots atomiques](validation/LOTS-S101.md), hashes conservés ; tuiles rejetées après mesure.
+73 ADR, 193 angles morts. Suite S102 : phase et sinus/cosinus, S101-1.
+
 **S100 :** [Coefficients préparés](validation/COEFFICIENTS-S100.md), hashes et refus conservés.
 215 tests réussis, cinq ignorés ; 73 ADR, 193 angles morts. Suite S101 : lots, S100-1.
 

@@ -61,3 +61,5 @@ L'augmentation est de 32768 octets par champ ; aucune allocation nouvelle dans l
 sur plusieurs points, sans changer les sommes par point ; comparer une référence scalaire
 et mesurer le coût avant adoption. Conserver les refus et empêcher la publication d'un lot
 partiel. Puissance/travail candidat, codec, LiveWater et conformité interplateforme restent ouverts.
+
+**Actualisation S101 :** S100-1 close, [LOTS-S101](LOTS-S101.md) : lot atomique construit, tuiles rejetées après mesure. Suite S101-1 : phase et sinus/cosinus.

@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S101 — en cours
+Session : S101 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : interrogation par lot sur scratch hôte, ordre modal conservé et publication atomique.
 
@@ -66,7 +66,7 @@ Objectif : interrogation par lot sur scratch hôte, ordre modal conservé et pub
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
 - [x] **P2** — construire le lot, vérifier identité/refus et mesurer le coût face au scalaire.
-- [ ] **P3** — publier résultats et limites ; rituel de passation et synchronisation.
+- [x] **P3** — publier résultats et limites ; rituel de passation et synchronisation.
 
 ### Notes de reprise
 

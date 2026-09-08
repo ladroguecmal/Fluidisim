@@ -5990,3 +5990,21 @@ max 5,478e-9 inchangé. Formatage/diff vérifiés, P2 7dcfc52.
 73 ADR, 193 angles morts, invariants inchangés ; aucune nouvelle leçon distincte.
 **Suite S101 :** S100-1, interrogation par lot réutilisant les données modales, ordre par point
 conservé, sortie atomique, comparaison scalaire et coût. S99-1 réalisée.
+
+## S101 — 2026-09-08 — Lot atomique et tuiles rejetées
+
+**Entrée :** Continue puis Reprends ; départ d416e0a, P2 reprise à chaud après compilation.
+**Produit :** sample_batch avec scratch hôte et publication après succès intégral.
+Calcul élémentaire partagé, hashes conservés. LOTS-S101 publié, P2 35da756.
+**Expérience :** tuiles huit points plus lentes (64 : 24872,1 vs 20590,9 µs), retirées.
+Lot final scalaire : 20050 µs pour64, 38682,8 pour121, médianes locales ; aucun gain revendiqué.
+Scratch 3388 octets pour121 ; mêmes hashes que S100 et écart oracle 5,478e-9.
+**Vérification :** test release tailles/identité/queues/refus/reprise ; suite complète initiale
+puis sept tests spectral_pressure debug repassés après retrait des tuiles. Aucun seuil déplacé.
+Formatage/diff vérifiés ; quatre avertissements préexistants du harnais.
+**Limites :** accélération par tuiles rejetée, coût élevé. 73 ADR, 193 angles, invariants inchangés.
+Aucune nouvelle leçon distincte ; mesure préalable à adoption appliquée.
+**Suite S102 :** S101-1, décomposer coût de phase spatiale et sinus/cosinus, candidat commun
+à réduction partagée. S100-1 close : API réalisée, accélération non retenue.
+
+**Clôture :** suite initiale 123 core + 93 harnais = 216 réussis, cinq ignorés ; sept tests ciblés finaux réussis. Copies actives synchronisées après commit final.

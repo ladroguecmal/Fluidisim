@@ -1064,3 +1064,10 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S100-1 : ouverte, S101.** Interrogation par lot, réutilisation des données modales,
   ordre de sommation par point et publication atomique ; comparaison scalaire et coût.
 - Coût élevé, conformité interplateforme et intégration autoritaire restent ouverts.
+
+### S101 — Lot atomique
+
+- **S100-1 : close.** API de lot et refus atomiques réalisés ; optimisation par tuiles
+  rejetée après mesure. LOTS-S101, hashes inchangés, aucun gain de vitesse revendiqué.
+- **S101-1 : ouverte, S102.** Mesurer phase spatiale et sinus/cosinus séparément ; évaluer
+  une réduction d'angle partagée avec réception des bits ou de l'erreur et du coût.
