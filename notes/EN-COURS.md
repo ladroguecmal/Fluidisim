@@ -65,7 +65,7 @@ Objectif : construire la première tranche WaveEvent, impact versionné et valid
 ### Plan
 
 - [x] **P1** — passation, état réel, jeton et plan seul.
-- [ ] **P2** — ADR-055 et codec Impact V1 ; contrat explicite, refus et vecteur de référence.
+- [x] **P2** — ADR-055 et codec Impact V1 ; contrat explicite, refus et vecteur de référence.
 - [ ] **P3** — vérifier les tests, publier limites et résultats, rituel et synchronisation.
 
 ### Notes de reprise

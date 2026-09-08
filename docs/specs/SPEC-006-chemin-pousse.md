@@ -265,6 +265,11 @@ vus.
 
 ### 3.1 `WaveEvent`, au complet
 
+> **Actualisation S72 — 2026-09-08.** La tranche Impact exécutable est désormais définie par
+> [ADR-055](../adr/ADR-055-evenement-impact-versionne.md) : 76 octets versionnés, f32 locaux,
+> durée entière et validation stricte. Le schéma ci-dessous reste la proposition historique
+> pour les autres kinds, non implémentés. Le retrait et la corrélation des prédictions attendent W2.
+
 `WaveEvent` vivait dans ADR-009 §2, c'est-à-dire dans un document de réseau, alors qu'il traverse
 trois frontières. Il est ici porté dans une spécification d'interface, avec les trois champs
 qu'ADR-016 §6 demande d'ajouter « avant de figer le format ».
