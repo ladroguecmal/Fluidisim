@@ -58,17 +58,17 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S83 — terminée
+Session : S84 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : chemin de lot B+W calculant B aux mêmes points/instant que W.
+Objectif : séparer TTL source et horizon numérique, exposer le renouvellement sans perte.
 
 ### Plan
 
 - [x] **P1** — passation, copies, jeton et plan seul.
-- [x] **P2** — liaison explicite B/référentiel/cellule, lot monde cohérent et tests de refus.
-- [x] **P3** — banc raccordé, tests complets, documentation et rituel.
+- [ ] **P2** — horizon explicite et prolongation par reconstruction depuis la naissance ; tests.
+- [ ] **P3** — politique de rétention, vérification et rituel de passation.
 
 ### Notes de reprise
 
-Départ dc0dd39. Éviter de certifier un tampon arbitraire par une étiquette fournie après calcul.
-Le nouveau chemin doit calculer B lui-même et dériver les coordonnées W du même point monde.
+Départ 419e217. Le milieu non dissipatif conserve une énergie globale : aucun TTL ne justifie
+une purge. La durée de calcul peut être renouvelée sans déplacer naissance ou phase.
