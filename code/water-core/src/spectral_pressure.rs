@@ -145,33 +145,37 @@ pub fn prepare<'a>(
     })
 }
 impl Field<'_> {
+    /// Scratch modifiable au refus, sortie inchangée jusqu'au succès intégral.
+    /// Préfixe points.len() seulement ; lot vide accepté sans mutation.
+    pub fn sample_batch(
+        &self,
+        points: &[[f32; 2]],
+        scratch: &mut [Surface],
+        output: &mut [Surface],
+    ) -> Result<(), PrepareError> {
+        let count = points.len();
+        if scratch.len() < count || output.len() < count {
+            return Err(PrepareError::Capacity);
+        }
+        for p in points {
+            if !(0..2).all(|i| p[i].is_finite() && p[i] >= self.min[i] && p[i] <= self.max[i]) {
+                return Err(Error::Domain.into());
+            }
+        }
+        // S101 : parcours par tuiles mesuré plus lent ; conserver le scalaire reçu.
+        for (p, out) in points.iter().zip(scratch[..count].iter_mut()) {
+            *out = self.sample(*p)?;
+        }
+        output[..count].copy_from_slice(&scratch[..count]);
+        Ok(())
+    }
     pub fn sample(&self, p: [f32; 2]) -> Result<Surface, Error> {
         if !(0..2).all(|i| p[i].is_finite() && p[i] >= self.min[i] && p[i] <= self.max[i]) {
             return Err(Error::Domain);
         }
         let mut out = Surface::default();
         for slot in self.slots {
-            let r = slot.response;
-            let k = slot.magnitude;
-            if !self.phase_safe {
-                let turns = [slot.turns[0] * p[0], slot.turns[1] * p[1]];
-                if !turns.iter().all(|v| v.is_finite() && v.abs() < 1_048_576.0) {
-                    return Err(Error::Domain);
-                }
-            }
-            let phase = PhaseQ32::from_distance(slot.turns[0], p[0])
-                .wrapping_add(PhaseQ32::from_distance(slot.turns[1], p[1]));
-            let (s, c) = (phase.sin(), phase.cos());
-            let eta = r.eta.re * c - r.eta.im * s;
-            let vel = r.velocity.re * c - r.velocity.im * s;
-            out.eta += slot.weight * eta;
-            out.vertical_velocity += slot.weight * vel;
-            out.potential += slot.weight * (vel / k);
-            for i in 0..2 {
-                out.slope[i] -= slot.weighted_k[i] * (r.eta.re * s + r.eta.im * c);
-                out.horizontal_velocity[i] -=
-                    slot.weighted_k[i] * ((r.velocity.re * s + r.velocity.im * c) / k);
-            }
+            slot.accumulate(p, self.phase_safe, &mut out)?;
         }
         if ![out.eta, out.vertical_velocity, out.potential]
             .iter()
@@ -184,9 +188,151 @@ impl Field<'_> {
         Ok(out)
     }
 }
+
+impl Slot {
+    #[inline]
+    fn accumulate(&self, p: [f32; 2], phase_safe: bool, out: &mut Surface) -> Result<(), Error> {
+        let slot = self;
+        let r = slot.response;
+        let k = slot.magnitude;
+        if !phase_safe {
+            let turns = [slot.turns[0] * p[0], slot.turns[1] * p[1]];
+            if !turns.iter().all(|v| v.is_finite() && v.abs() < 1_048_576.0) {
+                return Err(Error::Domain);
+            }
+        }
+        let phase = PhaseQ32::from_distance(slot.turns[0], p[0])
+            .wrapping_add(PhaseQ32::from_distance(slot.turns[1], p[1]));
+        let (s, c) = (phase.sin(), phase.cos());
+        let eta = r.eta.re * c - r.eta.im * s;
+        let vel = r.velocity.re * c - r.velocity.im * s;
+        out.eta += slot.weight * eta;
+        out.vertical_velocity += slot.weight * vel;
+        out.potential += slot.weight * (vel / k);
+        for i in 0..2 {
+            out.slope[i] -= slot.weighted_k[i] * (r.eta.re * s + r.eta.im * c);
+            out.horizontal_velocity[i] -=
+                slot.weighted_k[i] * ((r.velocity.re * s + r.velocity.im * c) / k);
+        }
+        Ok(())
+    }
+}
 #[cfg(test)]
 mod tests {
     use super::*;
+    fn bits(s: Surface) -> [u32; 7] {
+        [
+            s.eta,
+            s.vertical_velocity,
+            s.potential,
+            s.slope[0],
+            s.slope[1],
+            s.horizontal_velocity[0],
+            s.horizontal_velocity[1],
+        ]
+        .map(f32::to_bits)
+    }
+    #[test]
+    fn batch_identity_and_atomic_refusals_s101() {
+        let nodes = [
+            Node {
+                k: [0.6, 0.8],
+                transform: 1.0,
+                weight: 0.7,
+            },
+            Node {
+                k: [1.2, -0.4],
+                transform: 0.8,
+                weight: 0.2,
+            },
+        ];
+        let mut pool = [Slot::default(); 2];
+        let path = [source()];
+        let f = prepare(
+            &nodes,
+            &path,
+            9.81,
+            1025.0,
+            SimTime(1_000_000),
+            SimTime(8_000_000),
+            [-8.0; 2],
+            [12.0; 2],
+            &mut pool,
+        )
+        .unwrap();
+        let points: Vec<_> = (0..121)
+            .map(|i| [-8.0 + (i % 11) as f32 * 2.0, -8.0 + (i / 11) as f32 * 2.0])
+            .collect();
+        let sentinel = Surface {
+            eta: 123.0,
+            ..Surface::default()
+        };
+        let mut output = [sentinel; 122];
+        let mut scratch = [sentinel; 122];
+        for count in [0, 1, 7, 8, 9, 64, 121] {
+            f.sample_batch(&points[..count], &mut scratch, &mut output)
+                .unwrap();
+            for i in 0..count {
+                assert_eq!(bits(output[i]), bits(f.sample(points[i]).unwrap()));
+            }
+            assert_eq!(bits(output[121]), bits(sentinel));
+            assert_eq!(bits(scratch[121]), bits(sentinel));
+        }
+        let before = output.map(bits);
+        assert!(matches!(
+            f.sample_batch(&points, &mut scratch[..120], &mut output),
+            Err(PrepareError::Capacity)
+        ));
+        assert!(matches!(
+            f.sample_batch(&points, &mut scratch, &mut output[..120]),
+            Err(PrepareError::Capacity)
+        ));
+        let mut bad = points.clone();
+        bad[120] = [f32::NAN, 0.0];
+        assert!(f.sample_batch(&bad, &mut scratch, &mut output).is_err());
+        assert_eq!(output.map(bits), before);
+        let poison = [Slot {
+            turns: [1e6, 0.0],
+            weighted_k: [1.0; 2],
+            weight: 1.0,
+            response: Response::default(),
+            magnitude: 1.0,
+        }];
+        let g = Field {
+            slots: &poison,
+            min: [-8.0; 2],
+            max: [12.0; 2],
+            phase_safe: false,
+            energy_j: 0.0,
+        };
+        assert!(g
+            .sample_batch(&[[0.0; 2], [12.0, 0.0]], &mut scratch, &mut output)
+            .is_err());
+        assert_eq!(output.map(bits), before);
+        let poison = [Slot {
+            response: Response {
+                eta: crate::modal_pressure::Complex {
+                    re: f32::NAN,
+                    im: 0.0,
+                },
+                ..Response::default()
+            },
+            ..poison[0]
+        }];
+        let g = Field {
+            slots: &poison,
+            min: [-8.0; 2],
+            max: [12.0; 2],
+            phase_safe: true,
+            energy_j: 0.0,
+        };
+        assert!(matches!(
+            g.sample_batch(&[[0.0; 2]], &mut scratch, &mut output),
+            Err(PrepareError::Calculation(Error::NonFinite))
+        ));
+        assert_eq!(output.map(bits), before);
+        f.sample_batch(&points, &mut scratch, &mut output).unwrap();
+    }
     #[test]
     fn prepared_coefficients_preserve_hash_s100() {
         let mut nodes = vec![Node::default(); 16384];

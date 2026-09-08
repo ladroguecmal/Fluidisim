@@ -119,6 +119,7 @@ fn main() {
         &mut slots,
     )
     .unwrap();
+    let mut scratch = [Surface::default(); 121];
     for count in [1, 64, 121] {
         let times = measure(|| {
             for i in 0..count {
@@ -130,7 +131,21 @@ fn main() {
             "sample_{count} {times:?} hash={:016x}",
             hash(&output[..count])
         );
+        let expected = hash(&output[..count]);
+        let times = measure(|| {
+            field
+                .sample_batch(
+                    black_box(&points[..count]),
+                    black_box(&mut scratch),
+                    black_box(&mut output),
+                )
+                .unwrap();
+            black_box(&output[..count]);
+        });
+        assert_eq!(hash(&output[..count]), expected);
+        println!("batch_{count} {times:?} hash={expected:016x}");
     }
+    println!("batch scratch bytes={}", size_of_val(&scratch));
     // Comparaison hors chronométrage, indépendante de la cuisson et du calcul modal candidats.
     let model = water_core::gaussian_pressure::GaussianPressure::new(
         1.0,

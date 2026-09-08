@@ -65,7 +65,7 @@ Objectif : interrogation par lot sur scratch hôte, ordre modal conservé et pub
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [ ] **P2** — construire le lot, vérifier identité/refus et mesurer le coût face au scalaire.
+- [x] **P2** — construire le lot, vérifier identité/refus et mesurer le coût face au scalaire.
 - [ ] **P3** — publier résultats et limites ; rituel de passation et synchronisation.
 
 ### Notes de reprise
@@ -73,3 +73,7 @@ Objectif : interrogation par lot sur scratch hôte, ordre modal conservé et pub
 Départ d416e0a, copies propres identiques. S100-1.
 Même calcul élémentaire partagé ; ordre des nœuds inchangé par point, boucle par tuiles.
 Scratch hôte distinct de la sortie pour garantir le refus sans publication partielle.
+
+P2 reprise à chaud : tuiles rejetées après mesure ; lot final scalaire atomique reçu.
+Hashes inchangés. LOTS-S101 : coût lot64 20050 µs, scratch3388 octets pour121.
+Suite initiale s101-tests.log ; vérification finale ciblée s101-final-core.log après retrait tuiles.
