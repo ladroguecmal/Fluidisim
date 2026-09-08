@@ -1,0 +1,327 @@
+//! Candidat radial Hankel borné, ADR-060. Aucun raccordement autoritaire implicite.
+use crate::impact_field::{Error, Medium, Sample};
+use crate::wave_event::WaveEvent;
+use crate::{FrameId, PhaseQ32, SimTime};
+
+/// J0 et J1 par quadrature angulaire fixe, sans libm. Domaine reçu : 0 <= x <= 64.
+pub fn bessel(x: f32) -> Result<(f32, f32), Error> {
+    if !x.is_finite() || !(0.0..=64.0).contains(&x) {
+        return Err(Error::Domain);
+    }
+    let mut j0 = 0.0;
+    let mut j1 = 0.0;
+    for i in 0..128u32 {
+        let c = PhaseQ32(i << 25).cos();
+        let phase = PhaseQ32::from_distance(x / core::f32::consts::TAU, c);
+        j0 += phase.cos();
+        j1 += c * phase.sin();
+    }
+    Ok((j0 / 128.0, j1 / 128.0))
+}
+#[derive(Clone, Copy)]
+pub struct Domain {
+    pub radius: f32,
+    pub age_us: u64,
+}
+#[derive(Clone, Copy, Default)]
+struct Node {
+    k: f32,
+    omega: f32,
+    freq: u64,
+    coefficient: f32,
+}
+pub struct RadialImpact<const N: usize = 64> {
+    event: WaveEvent,
+    domain: Domain,
+    nodes: [Node; N],
+}
+impl<const N: usize> RadialImpact<N> {
+    pub fn new(event: WaveEvent, medium: Medium, domain: Domain) -> Result<Self, Error> {
+        if !(64..=256).contains(&N)
+            || !domain.radius.is_finite()
+            || domain.radius <= 0.0
+            || domain.radius >= 4096.0
+            || domain.age_us == 0
+            || domain.age_us > event.data().ttl_us
+        {
+            return Err(Error::Domain);
+        }
+        if [
+            medium.gravity,
+            medium.density,
+            medium.depth,
+            medium.max_slope,
+        ]
+        .iter()
+        .any(|v| !v.is_finite() || *v <= 0.0)
+        {
+            return Err(Error::Medium);
+        }
+        if event.data().anisotropy != 0.0 {
+            return Err(Error::Anisotropy);
+        }
+        let k0 = core::f32::consts::TAU / event.data().wavelength_m;
+        let lo = k0 / 2.0;
+        let hi = 2.0 * k0;
+        let width = hi - lo;
+        let dk = width / N as f32;
+        if !hi.is_finite() || lo <= 0.0 || hi * domain.radius > 64.0 {
+            return Err(Error::Domain);
+        }
+        if medium.depth <= core::f32::consts::PI / lo {
+            return Err(Error::Medium);
+        }
+        // Contrôle de résolution, pas borne d'erreur : variation de phase par intervalle.
+        let cg_max = 0.5 * (medium.gravity / lo).sqrt();
+        let phase_step =
+            dk as f64 * (domain.radius as f64 + cg_max as f64 * (domain.age_us as f64 / 1e6));
+        if !phase_step.is_finite() || phase_step > core::f64::consts::FRAC_PI_2 {
+            return Err(Error::Domain);
+        }
+        // ∫_0^1 x^4(1-x)^4 dx = 1/630, moyenne x=1/2.
+        let integral = width * (lo + width / 2.0) / 630.0;
+        let scale = (event.data().energy_j
+            / medium.density
+            / medium.gravity
+            / core::f32::consts::PI
+            / integral)
+            .sqrt();
+        if !scale.is_finite() || scale <= 0.0 {
+            return Err(Error::Domain);
+        }
+        let mut nodes = [Node::default(); N];
+        let mut slope = 0.0;
+        for (i, node) in nodes.iter_mut().enumerate() {
+            let x = (i as f32 + 0.5) / N as f32;
+            let k = lo + width * x;
+            let a = scale * x * x * (1.0 - x) * (1.0 - x);
+            let omega = (medium.gravity * k).sqrt();
+            let frequency = omega / core::f32::consts::TAU * 4294967296.0;
+            if !frequency.is_finite() || frequency < 1.0 || frequency >= u64::MAX as f32 {
+                return Err(Error::Domain);
+            }
+            *node = Node {
+                k,
+                omega,
+                freq: frequency as u64,
+                coefficient: a * k * dk,
+            };
+            slope += node.coefficient * k; // |J1| <= 1, borne conservative.
+        }
+        if !slope.is_finite() || slope > medium.max_slope {
+            return Err(Error::Steepness);
+        }
+        Ok(Self {
+            event,
+            domain,
+            nodes,
+        })
+    }
+    pub fn sample(
+        &self,
+        frame: FrameId,
+        cell: u64,
+        point: [f32; 2],
+        time: SimTime,
+    ) -> Result<Sample, Error> {
+        let v = self.event.data();
+        if frame != v.frame
+            || cell != v.cell
+            || point.iter().any(|x| !x.is_finite() || x.abs() >= 4096.0)
+        {
+            return Err(Error::Domain);
+        }
+        let d = [point[0] - v.position[0], point[1] - v.position[1]];
+        if d.iter().any(|x| x.abs() >= 4096.0) {
+            return Err(Error::Domain);
+        }
+        let r = (d[0] * d[0] + d[1] * d[1]).sqrt();
+        if r > self.domain.radius {
+            return Err(Error::Domain);
+        }
+        if time < v.birth {
+            return Ok(Sample::default());
+        }
+        let age = SimTime(time.0 - v.birth.0);
+        if age.0 > self.domain.age_us {
+            return Err(Error::Time);
+        }
+        let mut out = Sample::default();
+        let mut radial_slope = 0.0;
+        for node in &self.nodes {
+            let (j0, j1) = bessel(node.k * r)?;
+            let phase = PhaseQ32::from_time(node.freq, age);
+            let ct = phase.cos();
+            let st = phase.sin();
+            out.eta += node.coefficient * j0 * ct;
+            out.deta_dt -= node.coefficient * node.omega * j0 * st;
+            out.potential -= node.coefficient * node.omega / node.k * j0 * st;
+            radial_slope -= node.coefficient * node.k * j1 * ct;
+        }
+        if r > 0.0 {
+            out.slope = [radial_slope * d[0] / r, radial_slope * d[1] / r];
+        }
+        if [
+            out.eta,
+            out.deta_dt,
+            out.potential,
+            out.slope[0],
+            out.slope[1],
+        ]
+        .iter()
+        .any(|x| !x.is_finite())
+        {
+            return Err(Error::Domain);
+        }
+        Ok(out)
+    }
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::wave_event::{Impact, Origin};
+    fn source() -> WaveEvent {
+        WaveEvent::impact(Impact {
+            id: 1,
+            frame: FrameId(0),
+            cell: 0,
+            birth: SimTime(0),
+            ttl_us: 10_000_000,
+            position: [0.0; 3],
+            energy_j: 0.01,
+            wavelength_m: 4.0,
+            direction_turns: 0.0,
+            anisotropy: 0.0,
+            displaced_l: 0.0,
+            material: 0,
+            origin: Origin::Server,
+            above_surface: true,
+        })
+        .unwrap()
+    }
+    fn medium() -> Medium {
+        Medium {
+            gravity: 9.81,
+            density: 1025.0,
+            depth: 20.0,
+            max_slope: 0.1,
+        }
+    }
+    fn domain() -> Domain {
+        Domain {
+            radius: 16.0,
+            age_us: 4_000_000,
+        }
+    }
+    fn reference_bessel(x: f64) -> (f64, f64) {
+        let mut a = 0.0;
+        let mut b = 0.0;
+        for i in 0..4096 {
+            let c = (core::f64::consts::TAU * (i as f64 + 0.5) / 4096.0).cos();
+            a += (x * c).cos();
+            b += c * (x * c).sin();
+        }
+        (a / 4096.0, b / 4096.0)
+    }
+    #[test]
+    fn bessel_against_series_and_dense_angular_reference() {
+        for x in [
+            0.0f32, 0.01, 1.0, 2.4048256, 3.831706, 8.0, 16.0, 32.0, 64.0,
+        ] {
+            let a = bessel(x).unwrap();
+            let b = reference_bessel(x as f64);
+            assert!((a.0 as f64 - b.0).abs() < 4e-6, "J0 {x} {:?} {:?}", a, b);
+            assert!((a.1 as f64 - b.1).abs() < 4e-6, "J1 {x}");
+        }
+        let x = 0.01f32;
+        let j = bessel(x).unwrap();
+        assert!((j.0 - (1.0 - x * x / 4.0)).abs() < 2e-7);
+        assert!((j.1 - (x / 2.0 - x * x * x / 16.0)).abs() < 2e-7);
+        assert!(bessel(2.4048256).unwrap().0.abs() < 2e-6);
+        assert!(bessel(3.831706).unwrap().1.abs() < 2e-6);
+        assert!(bessel(f32::NAN).is_err());
+        assert!(bessel(64.01).is_err());
+    }
+    #[test]
+    fn radial_refinement_symmetry_and_absence_of_old_copy() {
+        let a = RadialImpact::<64>::new(source(), medium(), domain()).unwrap();
+        let b = RadialImpact::<128>::new(source(), medium(), domain()).unwrap();
+        let mut max = 0.0f32;
+        let peak = a.sample(FrameId(0), 0, [0.0; 2], SimTime(0)).unwrap().eta;
+        for us in [0, 1_000_000, 4_000_000] {
+            for r in [0.0, 1.0, 4.0, 8.0, 16.0] {
+                let x = a.sample(FrameId(0), 0, [r, 0.0], SimTime(us)).unwrap();
+                let y = b.sample(FrameId(0), 0, [r, 0.0], SimTime(us)).unwrap();
+                max = max.max((x.eta - y.eta).abs() / peak);
+                let rotated = a.sample(FrameId(0), 0, [0.0, -r], SimTime(us)).unwrap();
+                assert_eq!(x.eta.to_bits(), rotated.eta.to_bits());
+            }
+        }
+        println!("S77 max_delta_64_128_over_peak={max:.8}");
+        assert!(max < 1e-4);
+        let copy = a
+            .sample(FrameId(0), 0, [16.0, 0.0], SimTime(0))
+            .unwrap()
+            .eta;
+        println!("S77 old_copy_over_peak={:.8}", copy / peak);
+        assert!(copy.abs() < peak * 0.01);
+        assert!(a.sample(FrameId(0), 0, [16.01, 0.0], SimTime(0)).is_err());
+        assert!(a
+            .sample(FrameId(0), 0, [0.0; 2], SimTime(4_000_001))
+            .is_err());
+    }
+    #[test]
+    fn initial_energy_in_disk_and_volume_residual() {
+        let a = RadialImpact::<128>::new(source(), medium(), domain()).unwrap();
+        for n in [256, 512] {
+            let dr = 16.0 / n as f64;
+            let mut energy = 0.0;
+            let mut volume = 0.0;
+            for i in 0..n {
+                let r = (i as f64 + 0.5) * dr;
+                let eta = a
+                    .sample(FrameId(0), 0, [r as f32, 0.0], SimTime(0))
+                    .unwrap()
+                    .eta as f64;
+                energy += core::f64::consts::PI * 1025.0 * 9.81 * eta * eta * r * dr;
+                volume += core::f64::consts::TAU * eta * r * dr;
+            }
+            println!(
+                "S77 rings={n} energy_ratio={:.8} disk_volume={volume:.8}",
+                energy / 0.01
+            );
+            assert!((energy / 0.01 - 1.0).abs() < 0.003);
+        }
+    }
+    #[test]
+    fn invalid_construction_domains_refused() {
+        let mut d = domain();
+        d.radius = 32.0;
+        assert!(RadialImpact::<64>::new(source(), medium(), d).is_err());
+        d = domain();
+        d.age_us = 10_000_001;
+        assert!(RadialImpact::<64>::new(source(), medium(), d).is_err());
+        d = domain();
+        d.radius = f32::NAN;
+        assert!(RadialImpact::<64>::new(source(), medium(), d).is_err());
+        let mut m = medium();
+        m.depth = 4.0;
+        assert!(RadialImpact::<64>::new(source(), m, domain()).is_err());
+        m = medium();
+        m.max_slope = 1e-10;
+        assert!(matches!(
+            RadialImpact::<64>::new(source(), m, domain()),
+            Err(Error::Steepness)
+        ));
+        assert!(RadialImpact::<32>::new(source(), medium(), domain()).is_err());
+        let mut v = *source().data();
+        v.anisotropy = 0.5;
+        assert!(matches!(
+            RadialImpact::<64>::new(WaveEvent::impact(v).unwrap(), medium(), domain()),
+            Err(Error::Anisotropy)
+        ));
+        let a = RadialImpact::<64>::new(source(), medium(), domain()).unwrap();
+        assert!(a.sample(FrameId(1), 0, [0.0; 2], SimTime(0)).is_err());
+        assert!(a.sample(FrameId(0), 1, [0.0; 2], SimTime(0)).is_err());
+    }
+}

@@ -65,7 +65,7 @@ Objectif : candidat radial non périodique, noyaux Bessel déterministes et doma
 ### Plan
 
 - [x] **P1** — passation, copies, jeton et plan seul.
-- [ ] **P2** — quadrature radiale, domaine explicite, tests Bessel et convergence indépendante.
+- [x] **P2** — quadrature radiale, domaine explicite, tests Bessel et convergence indépendante.
 - [ ] **P3** — ADR, mesures physiques et limites, tests complets, rituel et synchronisation.
 
 ### Notes de reprise
