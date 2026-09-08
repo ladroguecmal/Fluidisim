@@ -65,7 +65,7 @@ Objectif : sauvegarde versionnée de LiveWater et restauration transactionnelle 
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [ ] **P2** — codec du service, restauration sur réserves et tests de reprise après saturation.
+- [x] **P2** — codec du service, restauration sur réserves et tests de reprise après saturation.
 - [ ] **P3** — vérification complète, documentation et rituel de passation.
 
 ### Notes de reprise

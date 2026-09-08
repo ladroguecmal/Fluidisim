@@ -5,6 +5,9 @@ use crate::{
     wave_journal::Journal,
 };
 use crate::{Background, FrameId, SimTime, WaterSample, WorldPos};
+#[path = "live_snapshot.rs"]
+mod live_snapshot;
+pub use live_snapshot::{ServiceSnapshotError, SERVICE_HEADER};
 /// Déclaration hôte : l'ancre de B est l'origine locale du couple frame/cell de W.
 /// L'hôte reste responsable de cette géométrie et du milieu réellement présent.
 pub struct BoundBackground<'a> {
@@ -599,6 +602,187 @@ mod tests {
             Prepared::<64>::build(&journal, &mut pool, context()),
             Err(PrepareError::LossKnown)
         ));
+    }
+    #[test]
+    fn service_snapshot_blocked_commands_resume_on_larger_pools_s87() {
+        let mut prediction = *e(1).data();
+        prediction.origin = Origin::Prediction;
+        for cmd in [
+            Admission::Confirm {
+                epoch: 0,
+                cause: cause(1),
+                event: e(1),
+            },
+            Admission::Predict {
+                epoch: 0,
+                cause: cause(1),
+                event: WaveEvent::impact(prediction).unwrap(),
+            },
+            Admission::Reject {
+                epoch: 0,
+                cause: cause(1),
+            },
+        ] {
+            let mut a = [];
+            let mut b = [];
+            let mut fa = [];
+            let mut fb = [];
+            let mut source = LiveWater::<128>::build(
+                Journal::new(0, &mut a),
+                Journal::new(0, &mut b),
+                &mut fa,
+                &mut fb,
+                context(),
+            )
+            .unwrap();
+            assert!(source.update(Some(cmd), SimTime(0), 4_000_000).is_err());
+            let mut bytes = vec![0; source.snapshot_len().unwrap()];
+            source.save(&mut bytes).unwrap();
+            assert_eq!(&bytes[..6], b"WLIV\x01\x00");
+            assert_eq!(&bytes[SERVICE_HEADER..SERVICE_HEADER + 4], b"WJNL");
+            let mut a = [None; 2];
+            let mut b = [None; 2];
+            let mut fa = [const { None }; 2];
+            let mut fb = [const { None }; 2];
+            let mut target = LiveWater::<128>::build(
+                Journal::new(0, &mut a),
+                Journal::new(0, &mut b),
+                &mut fa,
+                &mut fb,
+                context(),
+            )
+            .unwrap();
+            target.restore(&bytes, &mut []).unwrap();
+            assert_eq!(target.pending(), Some(cmd));
+            assert!(matches!(target.current(), Err(AdmissionError::Pending)));
+            let mut again = vec![0; bytes.len()];
+            target.save(&mut again).unwrap();
+            assert_eq!(bytes, again);
+            target
+                .update(target.pending(), SimTime(0), 4_000_000)
+                .unwrap();
+            assert!(target.current().is_ok());
+            assert_eq!(target.journal.records().count(), 1);
+        }
+    }
+    #[test]
+    fn service_snapshot_roundtrip_and_failed_restore_are_atomic_s87() {
+        let mut a = [None; 2];
+        let mut b = [None; 2];
+        let mut fa = [const { None }; 2];
+        let mut fb = [const { None }; 2];
+        let mut service = LiveWater::<128>::build(
+            Journal::new(0, &mut a),
+            Journal::new(0, &mut b),
+            &mut fa,
+            &mut fb,
+            context(),
+        )
+        .unwrap();
+        service
+            .update(
+                Some(Admission::Confirm {
+                    epoch: 0,
+                    cause: cause(1),
+                    event: e(1),
+                }),
+                SimTime(0),
+                16_000_000,
+            )
+            .unwrap();
+        let mut bytes = vec![0; service.snapshot_len().unwrap()];
+        service.save(&mut bytes).unwrap();
+        let mut before = [base()];
+        let mut after = [base()];
+        let mut sample_scratch = [base()];
+        service
+            .current()
+            .unwrap()
+            .sample_batch(
+                &[base()],
+                &[[1.0, 0.0]],
+                SimTime(12_000_000),
+                0.1,
+                &mut before,
+                &mut sample_scratch,
+            )
+            .unwrap();
+        let mut scratch = [None; 2];
+        service.restore(&bytes, &mut scratch).unwrap();
+        service
+            .current()
+            .unwrap()
+            .sample_batch(
+                &[base()],
+                &[[1.0, 0.0]],
+                SimTime(12_000_000),
+                0.1,
+                &mut after,
+                &mut sample_scratch,
+            )
+            .unwrap();
+        assert_eq!(before[0].eta.to_bits(), after[0].eta.to_bits());
+        assert_eq!(before[0].u_total, after[0].u_total);
+        assert_eq!(before[0].normal, after[0].normal);
+        for length in 0..bytes.len() {
+            assert!(service.restore(&bytes[..length], &mut scratch).is_err());
+        }
+        for offset in [0, 4, 6, 8, 12, 24, 44, 56, 57, 161, SERVICE_HEADER + 8] {
+            let mut bad = bytes.clone();
+            bad[offset] ^= 128;
+            assert!(
+                service.restore(&bad, &mut scratch).is_err(),
+                "offset {offset}"
+            );
+        }
+        let mut bad = bytes.clone();
+        bad[48..56].copy_from_slice(&100_000_000u64.to_le_bytes());
+        assert!(matches!(
+            service.restore(&bad, &mut scratch),
+            Err(ServiceSnapshotError::Prepare(_))
+        ));
+        assert!(service.restore(&bytes, &mut []).is_err());
+        let mut again = vec![0; bytes.len()];
+        service.save(&mut again).unwrap();
+        assert_eq!(bytes, again);
+        let mut small = [123; 10];
+        assert!(service.save(&mut small).is_err());
+        assert_eq!(small, [123; 10]);
+        service.restore(&bytes, &mut scratch).unwrap();
+    }
+    #[test]
+    fn service_snapshot_pending_epoch_is_checked_without_clearing_block_s87() {
+        let mut a = [];
+        let mut b = [];
+        let mut fa = [];
+        let mut fb = [];
+        let mut service = LiveWater::<128>::build(
+            Journal::new(0, &mut a),
+            Journal::new(0, &mut b),
+            &mut fa,
+            &mut fb,
+            context(),
+        )
+        .unwrap();
+        let cmd = Admission::Reject {
+            epoch: 0,
+            cause: cause(1),
+        };
+        service
+            .update(Some(cmd), SimTime(0), 4_000_000)
+            .unwrap_err();
+        let mut bytes = vec![0; service.snapshot_len().unwrap()];
+        service.save(&mut bytes).unwrap();
+        let mut bad = bytes.clone();
+        bad[57] = 1;
+        assert_eq!(
+            service.restore(&bad, &mut []),
+            Err(ServiceSnapshotError::Pending)
+        );
+        assert_eq!(service.pending(), Some(cmd));
+        assert!(service.current().is_err());
+        service.restore(&bytes, &mut []).unwrap();
+        assert_eq!(service.pending(), Some(cmd));
     }
     #[test]
     fn live_prediction_confirmation_rejection_and_renewal_s86() {
