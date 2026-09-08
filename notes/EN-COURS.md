@@ -65,7 +65,7 @@ Objectif : premier candidat de forçage de sillage, pression mobile et travail i
 ### Plan
 
 - [x] **P1** — vérifier la passation, rechercher la formulation physique et déclarer le plan.
-- [ ] **P2** — réponse modale à une pression mobile de durée finie, résonance sans singularité ; tests analytiques et travail/énergie.
+- [x] **P2** — réponse modale à une pression mobile de durée finie, résonance sans singularité ; tests analytiques et travail/énergie.
 - [ ] **P3** — décision et limites, vérification complète, rituel de passation.
 
 ### Notes de reprise
