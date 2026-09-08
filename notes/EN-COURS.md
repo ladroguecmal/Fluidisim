@@ -58,17 +58,17 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S75 — terminée
+Session : S76 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : première expansion analytique dispersive d’un impact isotrope, domaine déclaré.
+Objectif : mesurer la propagation radiale et décider du support régional.
 
 ### Plan
 
-- [x] **P1** — passation, copies, jeton et plan seul.
-- [x] **P2** — impact spectral fini en eau profonde, énergie normalisée, tests physiques indépendants.
-- [x] **P3** — ADR et limites, vérification complète, rituel et synchronisation.
+- [x] **P1** — état réel, passation, jeton et plan seul.
+- [ ] **P2** — densité physique positive, transport radial et répliques périodiques ; mesures reproductibles.
+- [ ] **P3** — décision de support et rituel, tests adaptés, copies synchronisées.
 
 ### Notes de reprise
 
-Départ b438b1e. Première représentation analytique périodique, pas encore paquet régional
-sans répétition. Ne pas déclarer B2 ni C19 acquis. Gravité et densité injectées.
+Départ 466ba65. Ne pas confondre psi*deta_dt (identité intégrée) et densité cinétique locale.
+La mesure radiale doit intégrer le carré du gradient de potentiel sur la profondeur.
