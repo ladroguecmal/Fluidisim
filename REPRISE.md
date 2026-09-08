@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-08 22:12 +02:00
+JETON            : occupé
+Battement        : 2026-09-08 22:13 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S97 — cuisson gaussienne
 Dernière session : S96 — superposition ; 208 tests réussis, cinq ignorés
 Session suivante : S97 — spectre gaussien reproductible (S96-1)
 

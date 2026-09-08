@@ -58,23 +58,18 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S96 — terminée
+Session : S97 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : superposition f32 sur pool, à spectre fourni explicitement par préparation de référence.
+Objectif : cuisson gaussienne f32 sans libm dans un pool hôte, recette et hash explicites.
 
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [x] **P2** — construire le champ emprunté et vérifier découpage, virage, grandeurs et refus.
-- [x] **P3** — publier portée et résultats ; rituel de fin et synchronisation.
+- [ ] **P2** — construire la cuisson bornée, vérifier profil, nœuds, champ et refus.
+- [ ] **P3** — publier réception et limites ; rituel de passation et synchronisation.
 
 ### Notes de reprise
 
-Départ 288dfdb, copies propres identiques. S95-1. Séparer la cuisson du spectre gaussien
-(f64/libm à initialisation) de la préparation/requête f32 ; ne pas déclarer cette cuisson
-déterministe. Recevoir le même spectre puis comparer à la référence complète.
-
-P2 : deux tests release reçus ; compensation énergie après échec de somme naïve, seuil maintenu.
-Maxima champ dans SUPERPOSITION-S96 ; suite complète en cours dans code/target/s96-tests.log.
-
-P3 : suite 208 réussis, cinq ignorés ; passation S97, spectre reproductible S96-1.
+Départ d88f10d, copies propres identiques. S96-1.
+Directions Q32 et exponentielle négative par réduction entière/polynôme fixe.
+Domaine explicite de recette ; aucune certification interplateforme depuis une seule machine.
