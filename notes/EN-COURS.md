@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S92 — en cours
+Session : S92 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : emprise explicitement bornée et campagne de raffinement du virage.
 
@@ -66,9 +66,12 @@ Objectif : emprise explicitement bornée et campagne de raffinement du virage.
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
 - [x] **P2** — enveloppe de requête bornée et campagne indépendante radial/angular/coupure.
-- [ ] **P3** — publier portée et mesures, vérification et rituel de passation.
+- [x] **P3** — publier portée et mesures, vérification et rituel de passation.
 
 ### Notes de reprise
 
 Départ b8cede4. Ne pas présenter une grille finie comme une preuve continue. Le domaine
 est un contrat explicite hôte ; réception mesurée limitée au profil et trajectoire testés.
+
+P2 : 6c64acc. Campagne release ; suite 197 réussis, cinq ignorés.
+EMPRISE-S92 et L205 publiés. Suite S93 : S92-1, mémoire hôte.

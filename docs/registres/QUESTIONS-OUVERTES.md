@@ -992,3 +992,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S91-1 : ouverte, S92.** Recevoir puis borner une emprise spatio-temporelle par raffinement
   indépendant des directions, rayons et coupure, avec le virage ; refuser hors domaine reçu.
 - Aucune réception générale de la finesse spectrale par le seul bilan énergétique.
+
+### S92 — Emprise déclarée et campagne du virage
+
+- **S91-1 : réalisée comme contrat et réception échantillonnée.** Enveloppe bornée ; 1089
+  comparaisons par axe radial/angular/coupure sur fixture, EMPRISE-S92. Pas de borne continue.
+- **S92-1 : ouverte, S93.** Préparation sur mémoire hôte et requête sans allocation de référence,
+  identité des résultats et refus atomiques ; préparation du portage runtime.
+- Réception multiprofils, f32 déterministe, codec et intégration B+W restent ouverts.

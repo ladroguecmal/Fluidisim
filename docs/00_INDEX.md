@@ -17,6 +17,9 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S92 :** [Emprise et raffinement](validation/EMPRISE-S92.md), contrat borné et virage échantillonné.
+70 ADR, 193 angles morts. Suite S93 : préparation sur mémoire hôte, S92-1.
+
 **S91 :** [Trajectoires et travail total](validation/TRAJECTOIRES-S91.md), virage et découpage reçus.
 70 ADR, 193 angles morts inchangés. Suite S92 : emprise spatio-temporelle reçue, S91-1.
 

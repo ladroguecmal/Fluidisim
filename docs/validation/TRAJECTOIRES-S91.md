@@ -46,3 +46,7 @@ emprise spatiale et une fenêtre temporelle reçues par raffinement indépendant
 rayons et coupure, notamment pour le virage. Exposer les refus hors de cette emprise avant le
 portage runtime. Coque/pression, accélération lissée, déterminisme et intégration restent ouverts.
 Aucun invariant ou angle numéroté ajouté. L203/L204 appliquées ; aucune nouvelle leçon distincte.
+
+> **Actualisation S92 — 2026-09-08.** S91-1 réalisée comme enveloppe bornée et campagne
+> échantillonnée du virage : EMPRISE-S92. Précision continue et multiprofils non certifiée.
+> Suite S93 : préparation sur mémoire hôte, S92-1.

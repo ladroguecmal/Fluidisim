@@ -5833,3 +5833,19 @@ hors runtime. Bilan fermé ne reçoit pas la résolution spectrale du virage. Au
 angle numéroté ou invariant amendé ; L203/L204 appliquées sans nouvelle leçon distincte.
 **Suite S92 :** S91-1, recevoir et borner l'emprise spatio-temporelle avant runtime. S90-1
 réalisée ; copies synchronisées après clôture.
+
+## S92 — 2026-09-08 — Emprise et raffinement du virage
+
+**Entrée :** Continue utilisateur ; départ b8cede4, copies actives identiques, jeton libre.
+**Produit :** QueryDomain, BoundedGaussian et BoundedField ; refus hors bornes déclarées,
+validation de la trajectoire entière. Exemple receive_gaussian pour trois axes de raffinement.
+**Mesures :** fixture du virage, [-8,12]² m, 0–8 s, 1089 échantillons par comparaison.
+Maxima radiaux : 3,828e-7 m, 1,016e-7 m/s, 2,091e-6 J et 8,872e-7 W ; directions et coupure
+également sous seuils. EMPRISE-S92 distingue contrat, échantillonnage et absence de borne continue.
+**Vérification :** campagne release ; test de frontières puis suite debug 104 core + 93 harnais
+= 197 réussis, cinq ignorés, aucun échec. Quatre avertissements préexistants du harnais.
+P2 6c64acc. Formatage/diff vérifiés. Aucun nouvel ADR, angle ou invariant ; L205 enregistrée.
+**Limites :** domaine déclaré non certifié par constructeur ; modèle f64/libm et allocations.
+La validation initiale construit un champ temporaire. Pas de réception continue ni multiprofils.
+**Suite S93 :** S92-1, préparation sur buffers hôte avec résultats identiques et refus atomiques.
+S91-1 réalisée dans cette portée ; copies synchronisées après clôture.

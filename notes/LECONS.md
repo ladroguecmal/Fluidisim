@@ -3137,3 +3137,10 @@ de la trajectoire, alors que le mouvement physique n'a pas changé.
 partagent la même approximation spectrale. Cette identité reçoit la comptabilité, pas la
 résolution. La comparer à un travail spatial indépendant puis raffiner séparément le spectre
 évite de confondre conservation et justesse du champ.
+
+## L205 — Une borne d'accès ne certifie pas la précision à l'intérieur
+
+*(S92)* Un rectangle validé peut fermer les requêtes hors domaine sans prouver le calcul
+sur ce rectangle. Garder distincts le contrat d'accès, les échantillons de réception et une
+éventuelle borne continue. Un constructeur qui vérifie la forme des bornes ne doit pas être
+nommé ou présenté comme un certificat numérique.
