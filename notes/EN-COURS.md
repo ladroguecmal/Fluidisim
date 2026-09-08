@@ -65,7 +65,7 @@ Objectif : persister le journal Impact et restaurer sans mutation partielle.
 ### Plan
 
 - [x] **P1** — passation, copies, jeton et plan seul.
-- [ ] **P2** — marqueur de perte, enveloppe versionnée et restauration transactionnelle ; tests ciblés.
+- [x] **P2** — marqueur de perte, enveloppe versionnée et restauration transactionnelle ; tests ciblés.
 - [ ] **P3** — décision documentée, tests complets et rituel de passation.
 
 ### Notes de reprise

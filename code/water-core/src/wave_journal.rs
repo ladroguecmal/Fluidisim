@@ -39,12 +39,21 @@ pub enum Change {
 /// Emprunt exclusif : publication concurrente d'instantanés à construire séparément.
 pub struct Journal<'a> {
     epoch: u64,
+    loss_known: bool,
     slots: &'a mut [Option<Record>],
 }
 impl<'a> Journal<'a> {
     pub fn new(epoch: u64, slots: &'a mut [Option<Record>]) -> Self {
         slots.fill(None);
-        Self { epoch, slots }
+        Self {
+            epoch,
+            slots,
+            loss_known: false,
+        }
+    }
+    /// Absence de perte connue, pas une preuve de livraison réseau complète.
+    pub fn loss_known(&self) -> bool {
+        self.loss_known
     }
     pub fn records(&self) -> impl Iterator<Item = &Record> {
         self.slots.iter().flatten()
@@ -110,10 +119,10 @@ impl<'a> Journal<'a> {
             }
         } else {
             (
-                self.slots
-                    .iter()
-                    .position(Option::is_none)
-                    .ok_or(Error::Full)?,
+                self.slots.iter().position(Option::is_none).ok_or_else(|| {
+                    self.loss_known = true;
+                    Error::Full
+                })?,
                 Change::Added,
             )
         };
@@ -267,5 +276,295 @@ mod tests {
         );
         assert_eq!(j.reject(7, cause(1)), Err(Error::Full));
         assert_eq!(j.records().count(), 0);
+    }
+}
+
+/// Format WJNL V1 : en-tête 24 octets, puis cause(20), état(1), Impact V1(76).
+pub const SNAPSHOT_HEADER: usize = 24;
+pub const SNAPSHOT_RECORD: usize = 97;
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum SnapshotError {
+    Format,
+    Version,
+    Length,
+    Capacity,
+    Epoch,
+    Event,
+    Conflict,
+}
+impl Journal<'_> {
+    pub fn snapshot_len(&self) -> Option<usize> {
+        self.records()
+            .count()
+            .checked_mul(SNAPSHOT_RECORD)?
+            .checked_add(SNAPSHOT_HEADER)
+    }
+    /// Écrit dans une mémoire fournie ; refus de capacité avant toute écriture.
+    pub fn save(&self, out: &mut [u8]) -> Result<usize, SnapshotError> {
+        let size = self.snapshot_len().ok_or(SnapshotError::Length)?;
+        if out.len() < size {
+            return Err(SnapshotError::Capacity);
+        }
+        let count = self.records().count() as u64;
+        out[..size].fill(0);
+        out[..4].copy_from_slice(b"WJNL");
+        out[4..6].copy_from_slice(&1u16.to_le_bytes());
+        out[6] = u8::from(self.loss_known);
+        out[8..16].copy_from_slice(&self.epoch.to_le_bytes());
+        out[16..24].copy_from_slice(&count.to_le_bytes());
+        for (i, r) in self.records().enumerate() {
+            let start = SNAPSHOT_HEADER + i * SNAPSHOT_RECORD;
+            let b = &mut out[start..start + SNAPSHOT_RECORD];
+            b[..8].copy_from_slice(&r.cause.entity.to_le_bytes());
+            b[8..16].copy_from_slice(&r.cause.command.to_le_bytes());
+            b[16..20].copy_from_slice(&r.cause.emission.to_le_bytes());
+            match r.state {
+                State::Predicted(e) => {
+                    b[20] = 0;
+                    b[21..].copy_from_slice(&e.encode());
+                }
+                State::Confirmed(e) => {
+                    b[20] = 1;
+                    b[21..].copy_from_slice(&e.encode());
+                }
+                State::Rejected => {
+                    b[20] = 2;
+                }
+            }
+        }
+        Ok(size)
+    }
+    /// Remplacement hors publication, depuis une source hôte de confiance.
+    /// L'espace temporaire peut être modifié en cas d'erreur ; le journal reste intact.
+    /// Ne constitue ni une authentification ni une preuve de complétude réseau.
+    pub fn restore(
+        &mut self,
+        input: &[u8],
+        scratch: &mut [Option<Record>],
+    ) -> Result<(), SnapshotError> {
+        if input.len() < SNAPSHOT_HEADER {
+            return Err(SnapshotError::Length);
+        }
+        if &input[..4] != b"WJNL" || input[6] > 1 || input[7] != 0 {
+            return Err(SnapshotError::Format);
+        }
+        if input[4..6] != 1u16.to_le_bytes() {
+            return Err(SnapshotError::Version);
+        }
+        let epoch = u64::from_le_bytes(input[8..16].try_into().unwrap());
+        if epoch != self.epoch {
+            return Err(SnapshotError::Epoch);
+        }
+        let count = usize::try_from(u64::from_le_bytes(input[16..24].try_into().unwrap()))
+            .map_err(|_| SnapshotError::Length)?;
+        let expected = count
+            .checked_mul(SNAPSHOT_RECORD)
+            .and_then(|n| n.checked_add(SNAPSHOT_HEADER))
+            .ok_or(SnapshotError::Length)?;
+        if input.len() != expected {
+            return Err(SnapshotError::Length);
+        }
+        if count > self.slots.len() || count > scratch.len() {
+            return Err(SnapshotError::Capacity);
+        }
+        let mut staging = Journal::new(epoch, &mut scratch[..count]);
+        for b in input[SNAPSHOT_HEADER..].chunks_exact(SNAPSHOT_RECORD) {
+            let cause = Cause {
+                entity: u64::from_le_bytes(b[..8].try_into().unwrap()),
+                command: u64::from_le_bytes(b[8..16].try_into().unwrap()),
+                emission: u32::from_le_bytes(b[16..20].try_into().unwrap()),
+            };
+            // Un instantané est un ensemble, pas un flux de transitions : aucun doublon.
+            if staging.records().any(|r| r.cause == cause) {
+                return Err(SnapshotError::Conflict);
+            }
+            let result = match b[20] {
+                0 => staging.predict(
+                    epoch,
+                    cause,
+                    WaveEvent::decode(&b[21..]).map_err(|_| SnapshotError::Event)?,
+                ),
+                1 => staging.confirm(
+                    epoch,
+                    cause,
+                    WaveEvent::decode(&b[21..]).map_err(|_| SnapshotError::Event)?,
+                ),
+                2 => {
+                    if b[21..].iter().any(|v| *v != 0) {
+                        return Err(SnapshotError::Format);
+                    }
+                    staging.reject(epoch, cause)
+                }
+                _ => return Err(SnapshotError::Format),
+            };
+            result.map_err(|e| match e {
+                Error::Conflict => SnapshotError::Conflict,
+                _ => SnapshotError::Event,
+            })?;
+        }
+        // Dernière action : publication du contenu intégral validé, sans point de refus restant.
+        self.slots.fill(None);
+        self.slots[..count].copy_from_slice(staging.slots);
+        self.loss_known = input[6] != 0;
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod snapshot_tests {
+    use super::*;
+    fn cause(n: u64) -> Cause {
+        Cause {
+            entity: 4,
+            command: n,
+            emission: 0,
+        }
+    }
+    fn impact(origin: Origin) -> WaveEvent {
+        use crate::{wave_event::Impact, FrameId, SimTime};
+        WaveEvent::impact(Impact {
+            id: 12,
+            frame: FrameId(0),
+            cell: 0,
+            birth: SimTime(1),
+            ttl_us: 2,
+            position: [0.0; 3],
+            energy_j: 1.0,
+            wavelength_m: 1.0,
+            direction_turns: 0.0,
+            anisotropy: 0.0,
+            displaced_l: 0.0,
+            material: 0,
+            origin,
+            above_surface: false,
+        })
+        .unwrap()
+    }
+    #[test]
+    fn golden_empty_and_rejected_record() {
+        let mut slots = [None; 1];
+        let mut j = Journal::new(7, &mut slots);
+        let mut bytes = [255; 121];
+        assert_eq!(j.save(&mut bytes), Ok(24));
+        assert_eq!(
+            &bytes[..24],
+            &[87, 74, 78, 76, 1, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        );
+        assert_eq!(bytes[24], 255);
+        j.reject(7, cause(2)).unwrap();
+        j.save(&mut bytes).unwrap();
+        let mut expected = [0u8; 121];
+        expected[..24].copy_from_slice(&[
+            87, 74, 78, 76, 1, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+        ]);
+        expected[24] = 4;
+        expected[32] = 2;
+        expected[44] = 2;
+        assert_eq!(bytes, expected);
+    }
+    #[test]
+    fn mixed_states_and_loss_survive_restore() {
+        let mut a = [None; 3];
+        let mut j = Journal::new(7, &mut a);
+        j.predict(7, cause(1), impact(Origin::Prediction)).unwrap();
+        j.confirm(7, cause(2), impact(Origin::Server)).unwrap();
+        j.reject(7, cause(3)).unwrap();
+        assert!(!j.loss_known()); // Plein seul ne signifie pas perte.
+        assert_eq!(j.reject(7, cause(4)), Err(Error::Full));
+        assert!(j.loss_known());
+        j.reject(7, cause(3)).unwrap();
+        assert!(j.loss_known());
+        let mut bytes = [0; 315];
+        j.save(&mut bytes).unwrap();
+        let mut b = [None; 4];
+        let mut scratch = [None; 3];
+        let mut k = Journal::new(7, &mut b);
+        k.restore(&bytes, &mut scratch).unwrap();
+        assert!(k.loss_known());
+        assert_eq!(
+            j.records().collect::<Vec<_>>(),
+            k.records().collect::<Vec<_>>()
+        );
+        let mut again = [0; 315];
+        k.save(&mut again).unwrap();
+        assert_eq!(again, bytes);
+        assert_eq!(
+            k.predict(7, cause(3), impact(Origin::Prediction)),
+            Ok(Change::Superseded)
+        );
+    }
+    #[test]
+    fn malformed_late_record_never_changes_live_state() {
+        let mut a = [None; 2];
+        let mut source = Journal::new(7, &mut a);
+        source.reject(7, cause(1)).unwrap();
+        source.reject(7, cause(2)).unwrap();
+        let mut bytes = [0; 218];
+        source.save(&mut bytes).unwrap();
+        let mut b = [None; 3];
+        let mut scratch = [None; 3];
+        let mut live = Journal::new(7, &mut b);
+        live.confirm(7, cause(9), impact(Origin::Server)).unwrap();
+        let mut before = [0; 121];
+        live.save(&mut before).unwrap();
+        let mut variants = Vec::new();
+        for (offset, value) in [
+            (0, 0),
+            (4, 2),
+            (6, 2),
+            (7, 1),
+            (8, 8),
+            (16, 3),
+            (141, 9),
+            (217, 1),
+        ] {
+            let mut bad = bytes;
+            bad[offset] = value;
+            variants.push(bad);
+        }
+        let mut duplicate = bytes;
+        duplicate[129..137].copy_from_slice(&1u64.to_le_bytes());
+        variants.push(duplicate);
+        for bad in variants {
+            assert!(live.restore(&bad, &mut scratch).is_err());
+            let mut after = [0; 121];
+            live.save(&mut after).unwrap();
+            assert_eq!(before, after);
+        }
+        for n in 0..bytes.len() {
+            assert!(live.restore(&bytes[..n], &mut scratch).is_err());
+        }
+        assert_eq!(live.restore(&bytes, &mut []), Err(SnapshotError::Capacity));
+        let mut after = [0; 121];
+        live.save(&mut after).unwrap();
+        assert_eq!(before, after);
+        let mut small = [123; 120];
+        assert_eq!(live.save(&mut small), Err(SnapshotError::Capacity));
+        assert_eq!(small, [123; 120]);
+    }
+    #[test]
+    fn forged_state_and_server_sequence_collision_refused() {
+        let mut a = [None; 2];
+        let mut source = Journal::new(7, &mut a);
+        source.confirm(7, cause(1), impact(Origin::Server)).unwrap();
+        source
+            .predict(7, cause(2), impact(Origin::Prediction))
+            .unwrap();
+        let mut bytes = [0; 218];
+        source.save(&mut bytes).unwrap();
+        let mut b = [None; 2];
+        let mut scratch = [None; 2];
+        let mut live = Journal::new(7, &mut b);
+        bytes[141] = 1; // État confirmé, mais événement encore marqué prédit.
+        assert_eq!(
+            live.restore(&bytes, &mut scratch),
+            Err(SnapshotError::Event)
+        );
+        bytes[217] = 0; // Provenance serveur : même server_seq pour deux causes.
+        assert_eq!(
+            live.restore(&bytes, &mut scratch),
+            Err(SnapshotError::Conflict)
+        );
+        assert_eq!(live.records().count(), 0);
     }
 }
