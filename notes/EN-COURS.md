@@ -58,17 +58,17 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S82 — terminée
+Session : S83 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : interpolation Bessel rapide avec erreur contrôlée et réception physique.
+Objectif : chemin de lot B+W calculant B aux mêmes points/instant que W.
 
 ### Plan
 
 - [x] **P1** — passation, copies, jeton et plan seul.
-- [x] **P2** — table et interpolation cubique, référence indépendante et bornes.
-- [x] **P3** — mesures de coût, tests physiques complets, décision et rituel de passation.
+- [ ] **P2** — liaison explicite B/référentiel/cellule, lot monde cohérent et tests de refus.
+- [ ] **P3** — banc raccordé, tests complets, documentation et rituel.
 
 ### Notes de reprise
 
-Départ f736683. Candidat Hermite au pas 1/16 sur [0,64] ; dérivée quatrième bornée
-par 1 via représentation angulaire, erreur théorique h^4/384 hors erreurs des données/flottants.
+Départ dc0dd39. Éviter de certifier un tampon arbitraire par une étiquette fournie après calcul.
+Le nouveau chemin doit calculer B lui-même et dériver les coordonnées W du même point monde.

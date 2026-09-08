@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-08 12:27 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S83
 Dernière session : S82 — Bessel interpole ; 170 tests réussis, cinq ignorés
 Session suivante : S83 — coherence contexte temps points du lot B (S82-1)
 
