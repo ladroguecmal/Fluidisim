@@ -61,7 +61,7 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S90 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S91 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
@@ -70,5 +70,6 @@ une commande bloquée reste visible. La sauvegarde WLIV conserve cette attente e
 reprise sur des buffers plus grands. Le scénario hôte complet est testé et mesuré : 3 impacts
 sur 64 points en 0,64 ms médiane locale. Une première réponse physique à une pression mobile
 est construite hors runtime, puis étendue à un profil gaussien localisé avec bilan global vérifié.
-Prochaine étape : trajectoire multi-segments et travail sur l'onde totale, S90-1.
+Les trajectoires avec virage conservent désormais les interférences et le bilan de travail.
+Prochaine étape : borner l'emprise spatio-temporelle reçue, S91-1.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

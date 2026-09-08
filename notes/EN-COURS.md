@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S91 — en cours
+Session : S91 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : trajectoires continues par segments, superposition et travail sur le champ total.
 
@@ -66,9 +66,12 @@ Objectif : trajectoires continues par segments, superposition et travail sur le 
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
 - [x] **P2** — somme modale multi-segments, validation de trajectoire, tests de découpage et virage.
-- [ ] **P3** — mesures et limites, vérification complète, rituel de passation.
+- [x] **P3** — mesures et limites, vérification complète, rituel de passation.
 
 ### Notes de reprise
 
 Départ bc1610e. Même profil gaussien ; segments contigus en temps et position, vitesse par
 morceaux. Calculer énergie après somme complexe, puissance contre vitesse totale ; hors runtime.
+
+P2 : 741672b. Trois tests release ; suite 196 réussis, cinq ignorés.
+TRAJECTOIRES-S91 publié. Suite S92 : S91-1, emprise reçue et refus hors domaine.

@@ -91,3 +91,7 @@ variable, d'intégration LiveWater ou de conformité interplateforme. Aucun nouv
 champ superposé, avec test de découpage invariant et changement de direction. Ne pas additionner
 les énergies des segments (L203). Puis fixer l'emprise de réception et construire le chemin runtime.
 Aucun nouvel angle numéroté ; I-01, I-03, I-06, I-08 et I-11 inchangés.
+
+> **Actualisation S91 — 2026-09-08.** S90-1 réalisée : TRAJECTOIRES-S91, champ et travail
+> multi-segments avec virage. Les interférences sont conservées ; réception d'emprise S91-1
+> encore ouverte. Aucune précision spectrale générale déduite de la fermeture du bilan.

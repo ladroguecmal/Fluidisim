@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 17:34 +02:00
+JETON            : libre
+Battement        : 2026-09-08 17:36 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S91
-Dernière session : S90 — pression localisée ; 193 tests réussis, cinq ignorés
-Session suivante : S91 — trajectoire multi-segments et travail total (S90-1)
+Session en cours : aucune
+Dernière session : S91 — trajectoires et interférences ; 196 tests réussis, cinq ignorés
+Session suivante : S92 — emprise spatio-temporelle reçue (S91-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -167,6 +167,11 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S91 — 2026-09-08 :** trajectoires contiguës avec virage, énergie et travail du champ total.
+TRAJECTOIRES-S91 ; découpage invariant et interférences vérifiés. 196 tests réussis, cinq ignorés.
+S90-1 réalisée ; suite S92 : borner l'emprise reçue, S91-1. 70 ADR, 193 angles morts.
+Référence f64 hors runtime ; fermeture du bilan distincte de la réception spectrale.
 
 **S90 — 2026-09-08 :** ADR-070, pression gaussienne localisée, reconstruction du champ et
 bilan global ; raffinement reçu après échec de la première résolution. 193 tests réussis,

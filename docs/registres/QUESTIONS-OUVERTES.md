@@ -984,3 +984,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S90-1 : ouverte, S91.** Trajectoire multi-segments et puissance sur le champ total,
   découpage invariant et virage ; conserver les interférences dans le bilan énergétique.
 - Emprise spatio-temporelle, coque/pression, Kelvin complet et runtime restent ouverts W4.
+
+### S91 — Trajectoires et travail total
+
+- **S90-1 : réalisée.** Superposition complexe avant énergie, puissance contre vitesse totale,
+  virage et découpage invariant ; TRAJECTOIRES-S91. Référence f64 hors runtime.
+- **S91-1 : ouverte, S92.** Recevoir puis borner une emprise spatio-temporelle par raffinement
+  indépendant des directions, rayons et coupure, avec le virage ; refuser hors domaine reçu.
+- Aucune réception générale de la finesse spectrale par le seul bilan énergétique.

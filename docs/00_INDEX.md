@@ -17,6 +17,9 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S91 :** [Trajectoires et travail total](validation/TRAJECTOIRES-S91.md), virage et découpage reçus.
+70 ADR, 193 angles morts inchangés. Suite S92 : emprise spatio-temporelle reçue, S91-1.
+
 **S90 :** [ADR-070 — Pression localisée](adr/ADR-070-pression-localisee.md), **ACTÉE**.
 Champ gaussien mobile et bilan global reçus sur fixture f64 ; 70 ADR, 193 angles morts.
 Suite S91 : trajectoire multi-segments et travail total, S90-1.

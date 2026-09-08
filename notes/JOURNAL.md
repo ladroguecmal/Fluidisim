@@ -5815,3 +5815,21 @@ P2 d3e3f87 ; formatage/diff vérifiés. Aucun nouvel angle numéroté ni invaria
 de la somme finie ; emprise non reçue, Kelvin/coque/pression et runtime ouverts.
 **Suite S91 :** S90-1, trajectoire multi-segments et travail contre vitesse totale, avec virage
 et découpage invariant. S89-1 réalisée sur un segment gaussien ; copies synchronisées à clôture.
+
+## S91 — 2026-09-08 — Trajectoires segmentées et interférences
+
+**Entrée :** Continue puis Reprends utilisateur. Plan 906bb53 déjà committé, seule P2 marquée
+active sans code au moment de la reprise ; étape complétée. Copies actives identiques.
+**Produit :** trajectory dans GaussianPressure ; validation de continuité, somme complexe des
+réponses puis énergie, pression active contre vitesse totale. field délègue au cas un segment.
+**Mesures :** virage à 2 s, travail 0,1267090729839 J contre énergie 0,1267085948949 J,
+écart 4,781e-7 J ; énergies isolées 0,2160453260870 J. Puissance spatiale/spectrale à 3 s :
+écart ~2,13e-12 W. Découpage rectiligne invariant aux arrondis près. TRAJECTOIRES-S91 publié.
+**Vérification :** trois tests release ; suite debug 103 core + 93 harnais = 196 réussis,
+cinq ignorés, aucun échec. Quatre avertissements préexistants du harnais. Refus de trous,
+chevauchements, saut spatial et NaN futur. Formatage/diff vérifiés ; P2 741672b.
+**Limites :** égalité exacte aux jonctions f64, virage prescrit instantané, référence allouante
+hors runtime. Bilan fermé ne reçoit pas la résolution spectrale du virage. Aucun nouvel ADR,
+angle numéroté ou invariant amendé ; L203/L204 appliquées sans nouvelle leçon distincte.
+**Suite S92 :** S91-1, recevoir et borner l'emprise spatio-temporelle avant runtime. S90-1
+réalisée ; copies synchronisées après clôture.
