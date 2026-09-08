@@ -17,6 +17,9 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S102 :** [Trigonométrie partagée](validation/TRIGONOMETRIE-S102.md), identité conservée ; gain isolé seulement.
+73 ADR, 193 angles morts. Suite S103 : résolution et emprise, S102-1.
+
 **S101 :** [Lots atomiques](validation/LOTS-S101.md), hashes conservés ; tuiles rejetées après mesure.
 73 ADR, 193 angles morts. Suite S102 : phase et sinus/cosinus, S101-1.
 

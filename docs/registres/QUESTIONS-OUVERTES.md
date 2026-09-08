@@ -1071,3 +1071,10 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
   rejetée après mesure. LOTS-S101, hashes inchangés, aucun gain de vitesse revendiqué.
 - **S101-1 : ouverte, S102.** Mesurer phase spatiale et sinus/cosinus séparément ; évaluer
   une réduction d'angle partagée avec réception des bits ou de l'erreur et du coût.
+
+### S102 — Réduction trigonométrique partagée
+
+- **S101-1 : réalisée.** Identité en bits reçue, gain isolé14,2 %, aucun gain global établi ;
+  TRIGONOMETRIE-S102. Coût du lot64 encore ~20,7 ms localement.
+- **S102-1 : ouverte, S103.** Recevoir une résolution adaptée à l'emprise, axes radial et
+  angulaire indépendants, toutes les grandeurs contrôlées ; conserver référence et seuils.

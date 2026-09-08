@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S102 — en cours
+Session : S102 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : mesurer et partager la réduction du sinus/cosinus, vérifier identité et coût.
 
@@ -66,7 +66,7 @@ Objectif : mesurer et partager la réduction du sinus/cosinus, vérifier identit
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
 - [x] **P2** — construire sin_cos partagé et banc de phase ; identité, physique et coûts.
-- [ ] **P3** — publier résultats et limites ; rituel de passation et synchronisation.
+- [x] **P3** — publier résultats et limites ; rituel de passation et synchronisation.
 
 ### Notes de reprise
 
@@ -77,3 +77,5 @@ Ne pas remplacer les fonctions individuelles utilisées ailleurs ; raccordement 
 P2 : identité release sur million de phases + frontières, hashes champ conservés.
 Banc isolé gain14,2 %, pas de gain global net ; TRIGONOMETRIE-S102 publié.
 Suite complète en cours dans code/target/s102-tests.log.
+
+Clôture : 217 réussis, cinq ignorés ; passation S103, résolution et emprise.

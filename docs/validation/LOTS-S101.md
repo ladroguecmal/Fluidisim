@@ -42,3 +42,5 @@ reste élevé. **S101-1, S102 :** mesurer séparément la conversion spatiale de
 l'évaluation sinus/cosinus ; rechercher une évaluation conjointe qui partage la réduction
 d'angle, conserver les hashes existants ou recevoir explicitement tout changement.
 Conformité interplateforme, budget cible, puissance/travail et LiveWater restent ouverts.
+
+**Actualisation S102 :** S101-1 réalisée, [TRIGONOMETRIE-S102](TRIGONOMETRIE-S102.md). Gain isolé sans gain global établi. Suite S102-1 : résolution et emprise.

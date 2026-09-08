@@ -6008,3 +6008,20 @@ Aucune nouvelle leçon distincte ; mesure préalable à adoption appliquée.
 à réduction partagée. S100-1 close : API réalisée, accélération non retenue.
 
 **Clôture :** suite initiale 123 core + 93 harnais = 216 réussis, cinq ignorés ; sept tests ciblés finaux réussis. Copies actives synchronisées après commit final.
+
+## S102 — 2026-09-08 — Réduction trigonométrique commune
+
+**Entrée :** Continue ; départ 561f496, copies actives propres et identiques.
+**Produit :** PhaseQ32::sin_cos, même angle réduit et polynômes ; seul chemin spectral raccordé.
+bench_phase et TRIGONOMETRIE-S102 publiés. Aucun stockage supplémentaire ni modèle modifié.
+**Mesures :** 65536 paires, séparées 1839,7 µs, conjointes 1578,1 µs ; gain isolé14,2 %.
+Phase spatiale 453,4 µs sur autre jeu de données. Lot64 complet 20696,2 µs : aucun gain global
+net établi. Les coûts isolés ne s'additionnent pas pour prédire le champ.
+**Vérification :** million de phases + frontières d'octant en bits, release ; hashes du champ
+inchangés, oracle max5,478e-9. Bancs exécutés et diff/formatage vérifiés. P2 e11f235.
+**Limites :** mesure locale, conformité interplateforme ouverte ; requête toujours coûteuse.
+73 ADR, 193 angles morts et invariants inchangés ; aucune nouvelle leçon distincte.
+**Suite S103 :** S102-1, résolution adaptée au domaine, réception indépendante radiale/angulaire
+sur toutes les grandeurs avant réduction. S101-1 réalisée, aucun gain global revendiqué.
+
+**Clôture :** suite complète debug 124 core + 93 harnais = 217 réussis, cinq ignorés ; quatre avertissements préexistants. Copies synchronisées après commit final.
