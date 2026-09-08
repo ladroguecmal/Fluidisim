@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-08 02:28 +02:00
+JETON            : occupé
+Battement        : 2026-09-08 11:54 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S77
 Dernière session : S76 — transport radial mesuré ; 154 tests réussis, cinq ignorés
 Session suivante : S77 — candidat radial non périodique, quadrature bornée (S76-1)
 

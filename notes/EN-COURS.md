@@ -58,17 +58,17 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S76 — terminée
+Session : S77 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : mesurer la propagation radiale et décider du support régional.
+Objectif : candidat radial non périodique, noyaux Bessel déterministes et domaine borné.
 
 ### Plan
 
-- [x] **P1** — état réel, passation, jeton et plan seul.
-- [x] **P2** — densité physique positive, transport radial et répliques périodiques ; mesures reproductibles.
-- [x] **P3** — décision de support et rituel, tests adaptés, copies synchronisées.
+- [x] **P1** — passation, copies, jeton et plan seul.
+- [ ] **P2** — quadrature radiale, domaine explicite, tests Bessel et convergence indépendante.
+- [ ] **P3** — ADR, mesures physiques et limites, tests complets, rituel et synchronisation.
 
 ### Notes de reprise
 
-Départ 466ba65. Ne pas confondre psi*deta_dt (identité intégrée) et densité cinétique locale.
-La mesure radiale doit intégrer le carré du gradient de potentiel sur la profondeur.
+Départ e70e67d. Spectre compact normalisé par Parseval ; approximation finie valable seulement
+sur rayon et temps déclarés. Aucune réception B2 ou autorité interplateforme implicite.
