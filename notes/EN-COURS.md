@@ -58,24 +58,18 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S100 — terminée
+Session : S101 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : préparer les coefficients et bornes constants hors de la boucle par point.
+Objectif : interrogation par lot sur scratch hôte, ordre modal conservé et publication atomique.
 
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [x] **P2** — alléger la requête, recevoir identité ou erreur, refus et coût.
-- [x] **P3** — publier résultats et limites ; rituel de passation et synchronisation.
+- [ ] **P2** — construire le lot, vérifier identité/refus et mesurer le coût face au scalaire.
+- [ ] **P3** — publier résultats et limites ; rituel de passation et synchronisation.
 
 ### Notes de reprise
 
-Départ 2ca0148, copies propres identiques. S99-1.
-Conserver les opérations dépendantes du point et les refus de sortie non finie.
-Mesurer le surcoût mémoire des coefficients et le gain avant de retenir le changement.
-
-P2 : tests release identité/refus réussis ; hashes conservés. Banc64 médian 19799,8 µs,
-Slot40 octets ; comparaison S99 bruitée, gain non certifié. COEFFICIENTS-S100 publié.
-Suite complète en cours : code/target/s100-tests.log.
-
-Clôture : suite complète 215 réussis, cinq ignorés ; copies synchronisées après commit final.
+Départ d416e0a, copies propres identiques. S100-1.
+Même calcul élémentaire partagé ; ordre des nœuds inchangé par point, boucle par tuiles.
+Scratch hôte distinct de la sortie pour garantir le refus sans publication partielle.
