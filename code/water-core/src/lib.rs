@@ -30,6 +30,7 @@
 
 #![forbid(unsafe_code)]
 mod bessel_directions;
+mod bessel_table;
 
 pub mod background;
 pub mod body;

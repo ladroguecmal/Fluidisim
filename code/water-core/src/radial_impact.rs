@@ -8,6 +8,27 @@ pub fn bessel(x: f32) -> Result<(f32, f32), Error> {
     if !x.is_finite() || !(0.0..=64.0).contains(&x) {
         return Err(Error::Domain);
     }
+    let scaled = x * 16.0;
+    let i = (scaled as usize).min(1023);
+    let t = scaled - i as f32;
+    let a = crate::bessel_table::TABLE[i];
+    let b = crate::bessel_table::TABLE[i + 1];
+    let interpolate = |y0: f32, y1: f32, d0: f32, d1: f32| {
+        let delta = y1 - y0;
+        let m0 = d0 / 16.0;
+        let m1 = d1 / 16.0;
+        y0 + t * (m0 + t * (3.0 * delta - 2.0 * m0 - m1 + t * (-2.0 * delta + m0 + m1)))
+    };
+    Ok((
+        interpolate(a[0], b[0], -a[1], -b[1]),
+        interpolate(a[1], b[1], a[2], b[2]),
+    ))
+}
+/// Référence angulaire S77 conservée pour comparaison et diagnostic.
+pub fn bessel_angular(x: f32) -> Result<(f32, f32), Error> {
+    if !x.is_finite() || !(0.0..=64.0).contains(&x) {
+        return Err(Error::Domain);
+    }
     let mut j0 = 0.0;
     let mut j1 = 0.0;
     for c in crate::bessel_directions::DIRECTIONS {
@@ -440,7 +461,32 @@ mod tests {
     #[test]
     fn directions_table_matches_original_bits_s81() {
         for i in 0..128u32 {
-            assert_eq!(crate::bessel_directions::DIRECTIONS[i as usize].to_bits(),PhaseQ32(i<<25).cos().to_bits());
+            assert_eq!(
+                crate::bessel_directions::DIRECTIONS[i as usize].to_bits(),
+                PhaseQ32(i << 25).cos().to_bits()
+            );
         }
+    }
+    #[test]
+    fn hermite_dense_reference_s82() {
+        let mut max = 0.0f64;
+        let mut angular_delta = 0.0f32;
+        for i in 0..=8192 {
+            let x = i as f32 / 128.0;
+            let a = bessel(x).unwrap();
+            let r = reference_bessel(x as f64);
+            max = max
+                .max((a.0 as f64 - r.0).abs())
+                .max((a.1 as f64 - r.1).abs());
+            let old = bessel_angular(x).unwrap();
+            angular_delta = angular_delta
+                .max((a.0 - old.0).abs())
+                .max((a.1 - old.1).abs());
+        }
+        println!("S82 max_reference={max:.9e} max_old={angular_delta:.9e}");
+        assert!(max < 2e-7);
+        assert_eq!(bessel(0.0).unwrap(), (1.0, 0.0));
+        assert!(bessel(-0.01).is_err());
+        assert!(bessel(f32::INFINITY).is_err());
     }
 }

@@ -65,7 +65,7 @@ Objectif : interpolation Bessel rapide avec erreur contrôlée et réception phy
 ### Plan
 
 - [x] **P1** — passation, copies, jeton et plan seul.
-- [ ] **P2** — table et interpolation cubique, référence indépendante et bornes.
+- [x] **P2** — table et interpolation cubique, référence indépendante et bornes.
 - [ ] **P3** — mesures de coût, tests physiques complets, décision et rituel de passation.
 
 ### Notes de reprise
