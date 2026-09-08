@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-08 17:17 +02:00
+JETON            : occupé
+Battement        : 2026-09-08 17:18 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S89
 Dernière session : S88 — cycle hôte reçu ; 185 tests suite + 4 exemple, cinq ignorés
 Session suivante : S89 — source de sillage depuis trajectoire (S88-1)
 

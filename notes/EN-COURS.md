@@ -58,20 +58,18 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S88 — terminée
+Session : S89 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : scénario hôte B+W dynamique, redémarrage depuis WLIV et mesure du coût complet.
+Objectif : premier candidat de forçage de sillage, pression mobile et travail injecté.
 
 ### Plan
 
-- [x] **P1** — vérifier la passation et déclarer le plan.
-- [x] **P2** — exemple exécutable de bout en bout, référence indépendante du redémarrage et chronométrage.
-- [x] **P3** — mesures, vérifications et rituel de passation.
+- [x] **P1** — vérifier la passation, rechercher la formulation physique et déclarer le plan.
+- [ ] **P2** — réponse modale à une pression mobile de durée finie, résonance sans singularité ; tests analytiques et travail/énergie.
+- [ ] **P3** — décision et limites, vérification complète, rituel de passation.
 
 ### Notes de reprise
 
-Départ e8d8c01. Scénario borné N128 : commandes, saturation, sauvegarde, cible plus grande,
-reprise et requêtes monde à 12 s ; aucune promesse de budget AAA ni nouveau modèle physique.
-
-P2 : c0d5320. Suite 185 réussis/cinq ignorés ; cible exemple quatre réussis (trois importés).
-CYCLE-HOTE-S88 et L202 publiés. Suite S89 : S88-1, première source de sillage.
+Départ fe64cd7. Première brique physique de W4, pas une suite d'Impact. Candidat de référence
+f64 comme dispersif.rs, hors runtime autoritaire : modal profond uniforme, onde localisée
+et codec de trajectoire à construire après réception de la réponse forcée.
