@@ -5743,3 +5743,20 @@ Formatage et diff vérifiés. P2 : 48c7d99. L200 enregistrée, aucun nouvel angl
 réception réseau complète. La sauvegarde WJNL seule ne couvre pas le service bloqué.
 **Suite S87 :** S86-1, sauvegarde de la paire publiée et de la commande en attente, puis reprise
 sur pools élargis. S85-1 réalisée ; rétention S72-2 encore partielle. Copies synchronisées à clôture.
+
+## S87 — 2026-09-08 — Sauvegarde du service et de son attente
+
+**Entrée :** Continue utilisateur ; départ 1fd8c60, copies actives identiques et jeton libre.
+**Produit :** WLIV V1, en-tête 168 octets et WJNL inchangé ; contexte, N, horizon et attente
+sauvegardés. Restauration sur réserves, reconstruction des champs, échange après succès seulement.
+Reprise sur cible plus grande sans détruire la source ; attente conservée avant tentative explicite.
+ADR-068 actée ; S86-1 réalisée au niveau bibliothèque.
+**Vérification :** trois tests ciblés release ; suite debug 92 core + 93 harnais = 185 réussis,
+cinq ignorés, aucun échec. Quatre avertissements préexistants du harnais. Trois commandes bloquées,
+reprise après saturation, identité des octets et des échantillons, troncatures exhaustives du fixture,
+mutations ciblées, refus tardif physique et préservation du blocage. Formatage et diff vérifiés.
+**Limites :** stockage hôte fiable requis, sans checksum/authentification ni gestion des crashs disque.
+Contexte et époque identiques ; aucune durée arbitraire ni purge reçue. L201, aucun nouvel angle
+numéroté ni invariant modifié. P2 : 455ff14.
+**Suite S88 :** S87-1, scénario hôte complet avec requêtes monde B+W, admissions, sauvegarde,
+redémarrage et reprise ; coût réel. Copies synchronisées après clôture ; S72-2 reste partielle.

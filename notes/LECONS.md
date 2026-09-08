@@ -3109,3 +3109,10 @@ séparément la validité à l'instant demandé évite aussi bien le faux arrêt
 une commande non appliquée. Conserver cette commande et distinguer version publiée et vue courante.
 La sauvegarde doit inclure cette attente : restaurer seulement les données publiées ferait disparaître
 la raison pour laquelle le service refusait de répondre.
+
+## L201 — Restaurer un blocage avant de tenter de le résoudre
+
+*(S87)* Une cible plus capable peut accepter une opération autrefois refusée. La restauration
+ne doit pourtant pas confondre capacité nouvelle et opération déjà exécutée : rétablir d'abord
+les faits publiés et leur attente, puis déclencher explicitement la nouvelle tentative.
+Cela conserve un point de comparaison avant reprise et évite un acquittement implicite.

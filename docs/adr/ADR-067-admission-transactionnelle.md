@@ -72,3 +72,8 @@ en attente, puis permettre une reconstruction sur des pools plus grands sans per
 Le codec WJNL seul ne contient pas cette attente ; l'utiliser comme sauvegarde complète du service
 serait incorrect. Rétention durable S72-2, purge, publication multilecteur et durée arbitraire
 restent ouvertes. Aucune migration d'époque ni abandon silencieux d'une commande ajoutés ici.
+
+> **Actualisation S87 — 2026-09-08.** S86-1 réalisée : ADR-068, enveloppe WLIV V1,
+> attente préservée et restauration transactionnelle sur service cible, y compris pools élargis.
+> Le constructeur consommant ses journaux n'est pas modifié ; la source peut rester vivante
+> pendant la construction et la restauration d'une cible distincte. Aucun crash disque traité.

@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S87 — en cours
+Session : S87 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : sauvegarde versionnée de LiveWater et restauration transactionnelle avec attente.
 
@@ -66,9 +66,12 @@ Objectif : sauvegarde versionnée de LiveWater et restauration transactionnelle 
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
 - [x] **P2** — codec du service, restauration sur réserves et tests de reprise après saturation.
-- [ ] **P3** — vérification complète, documentation et rituel de passation.
+- [x] **P3** — vérification complète, documentation et rituel de passation.
 
 ### Notes de reprise
 
 Départ 1fd8c60. Sauver contexte, résolution et commande en attente avec WJNL ; reconstruire
 les champs. Refuser une restauration invalide sans changer la paire publiée ni son blocage.
+
+P2 : 455ff14. Trois tests release ; suite debug 185 réussis, cinq ignorés.
+ADR-068 et L201 publiées. Suite S88 : S87-1, scénario hôte complet et coût du service.

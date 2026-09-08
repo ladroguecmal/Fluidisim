@@ -17,6 +17,10 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S87 :** [ADR-068 — Sauvegarde du service](adr/ADR-068-sauvegarde-du-service.md), **ACTÉE**.
+WLIV V1, attente préservée et reprise sur pools élargis. 68 ADR, 193 angles morts.
+Suite S88 : scénario hôte complet et coût du service, S87-1.
+
 **S86 :** [ADR-067 — Admission transactionnelle](adr/ADR-067-admission-transactionnelle.md), **ACTÉE**.
 Journal et champs publiés ensemble ; commande bloquée conservée. 67 ADR, 193 angles morts.
 Suite S87 : sauvegarde du service et reprise de la commande en attente, S86-1.

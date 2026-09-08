@@ -952,3 +952,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S86-1 : ouverte, S87.** Sauvegarde/restauration du service et de la commande en attente,
   reconstruction sur des pools plus grands sans perdre cette attente. WJNL seul est insuffisant.
 - S72-2 reste partielle ; réseau complet, routage spatial et publication multilecteur ouverts.
+
+### S87 — Sauvegarde et reprise du service
+
+- **S86-1 : réalisée.** WLIV V1 conserve contexte, journal publié et attente ; restauration
+  transactionnelle et reprise explicite sur pools élargis, ADR-068.
+- **S87-1 : ouverte, S88.** Scénario hôte complet : B+W monde, commandes dynamiques, sauvegarde,
+  redémarrage et reprise ; mesurer le coût réel du service, pas seulement du noyau ponctuel.
+- Intégrité du stockage, crash disque, réseau complet et purge S72-2 restent ouverts.
