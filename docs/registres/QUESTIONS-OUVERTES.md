@@ -1048,3 +1048,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S98-1 : ouverte, S99.** Candidat par conjugaison k/-k : contrôler géométrie cuite,
   recevoir toutes les grandeurs et arrondis, comparer coût avant changement de représentation.
 - Précision, résolution et seuils conservés ; intégration autoritaire encore ouverte.
+
+### S99 — Réduction par conjugaison
+
+- **S98-1 : réalisée.** ADR-073, paires contrôlées puis poids doublés ; réception physique
+  et gain local ~52 % sur 64 points. Recette complète V1 conservée.
+- **S99-1 : ouverte, S100.** Sortir les coefficients et contrôles constants de la boucle
+  par point, recevoir erreur et coût en conservant les refus de domaine et non-finis.
+- Coût toujours élevé ; conformité interplateforme et intégration autoritaire ouvertes.

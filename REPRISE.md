@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-08 22:30 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S99 — conjugaison spectrale
-Dernière session : S98 — coût gaussien mesuré ; suite 211/cinq ignorés inchangée
-Session suivante : S99 — conjugaison spectrale (S98-1)
+Session en cours : aucune
+Dernière session : S99 — demi-spectre ; 213 tests réussis, cinq ignorés
+Session suivante : S100 — coefficients préparés (S99-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -148,7 +148,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 17 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 72 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 73 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -167,6 +167,10 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S99 — 2026-09-08 :** ADR-073, demi-spectre contrôlé ; gain local ~52 % sur 64 points,
+21,488 ms médian. Réception physique inchangée ; 213 tests réussis, cinq ignorés.
+73 ADR, 193 angles morts. S98-1 réalisée ; suite S100 : coefficients préparés S99-1.
 
 **S98 — 2026-09-08 :** coût réel gaussien, COUT-GAUSSIEN-S98 ; préparation 12,501 ms,
 64 points 44,638 ms médians locaux. Exemple reçu contre référence, bibliothèque inchangée.

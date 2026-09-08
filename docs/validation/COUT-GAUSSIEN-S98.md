@@ -68,3 +68,7 @@ réception des arrondis et nouveau coût. Les directions étant paires, la géom
 un candidat naturel ; les bits cuits ne sont pas présumés exactement opposés sans vérification.
 Avant tout changement de représentation/version, mesurer cette propriété et conserver la
 référence complète. Aucun budget cible ni conformité interplateforme reçus en S98.
+
+**Actualisation S99 — 2026-09-08 :** S98-1 réalisée,
+[ADR-073](../adr/ADR-073-demi-spectre-conjugue.md), gain local ~52 % ; coût restant
+21,488 ms pour 64 points. Suite S99-1 : préparation des coefficients constants.

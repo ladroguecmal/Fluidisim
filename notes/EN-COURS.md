@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S99 — en cours
+Session : S99 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : réduire les paires conjuguées après vérification, recevoir erreur et coût.
 
@@ -66,7 +66,7 @@ Objectif : réduire les paires conjuguées après vérification, recevoir erreur
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
 - [x] **P2** — construire la réduction contrôlée, tests physiques et mesures comparatives.
-- [ ] **P3** — publier décision et résultats ; rituel de passation et synchronisation.
+- [x] **P3** — publier décision et résultats ; rituel de passation et synchronisation.
 
 ### Notes de reprise
 

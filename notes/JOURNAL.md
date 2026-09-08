@@ -5955,3 +5955,21 @@ réseau et composition exclus ; oracle hors chronométrage. 72 ADR, 193 angles m
 Aucune nouvelle leçon distincte ; séparation mesure/coût/propriété appliquée.
 **Suite S99 :** S98-1, candidat utilisant conjugaison k/-k ; vérifier les bits de géométrie,
 recevoir erreur puis mesurer avant de changer de représentation. S97-1 réalisée.
+
+## S99 — 2026-09-08 — Demi-spectre conjugué
+
+**Entrée :** Continue ; départ 065dcf5, copies actives propres et identiques.
+**Produit :** half_into et HalfSpectrum, vérification exacte des paires avant écriture,
+poids doublés, provenance source conservée ; ADR-073 acté. Recette V1 inchangée.
+**Mesures :** 255 valeurs angulaires admises ; virage 1089 points et découpage reçus,
+seuil 1e-7 sur toutes les composantes et 2e-6 J conservé. Erreurs max 2,010e-8 au plus.
+Médianes préparation 6327,2 vs 12883,8 µs ; 64 points 21487,7 vs 44798,1 µs,
+gain ~52 %. Le coût demeure élevé. Un champ 294912 octets, spectre réduit 131072.
+**Vérification :** deux tests release, suite debug 120 core + 93 harnais = 213 réussis,
+cinq ignorés ; quatre avertissements préexistants. Banc complet/réduit exécuté avec oracle,
+contrôle compilation après ajout du compteur mémoire réduit ; formatage/diff vérifiés.
+**Limites :** sorties différentes en bits, hash source distinct du contenu réduit ; aucune
+conformité interplateforme. Mesures locales non entrelacées ; aucun budget cible certifié.
+73 ADR, 193 angles morts, invariants inchangés ; aucune nouvelle leçon distincte.
+**Suite S100 :** S99-1, coefficients et contrôles constants déplacés à la préparation,
+réception d'erreur et coût, refus conservés. S98-1 réalisée ; copies synchronisées à la clôture.

@@ -17,6 +17,9 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S99 :** [ADR-073 — Demi-spectre conjugué](adr/ADR-073-demi-spectre-conjugue.md), **ACTÉE**.
+213 tests réussis, cinq ignorés ; 73 ADR, 193 angles morts. Suite S100 : coefficients préparés, S99-1.
+
 **S98 :** [Coût gaussien](validation/COUT-GAUSSIEN-S98.md), préparation 12,501 ms et 64 points 44,638 ms médians locaux.
 72 ADR, 193 angles morts. Suite S99 : conjugaison spectrale, S98-1.
 
