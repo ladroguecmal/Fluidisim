@@ -146,6 +146,8 @@ impl Background {
     pub fn component_count(&self) -> usize {
         self.components.len()
     }
+    /// Coordonnées dans les axes locaux de ce B ; refus d'écart ou soustraction hors domaine.
+    pub fn local_point(&self, p: WorldPos) -> Option<[f32; 3]> { p.to_local(self.anchor) }
 
     /// Diagnostic numérique sur la même primitive que eval, borne ADR-052.
     /// Ne certifie que les composantes et positions échantillonnées ; aucune allocation.
@@ -519,5 +521,47 @@ mod diagnostic_homogeneite_s66 {
         assert_eq!(combined.eta,base.eta+w.eta);
         assert_eq!(combined.u_total[2],combined.deta_dt);
         assert_ne!(combined.eta.to_bits(),base.eta.to_bits());
+    }
+    #[test]
+    fn world_batch_owns_time_points_and_context_s83() {
+        use crate::prepared_water::{BoundBackground,Prepared,Context,BatchError};
+        use crate::radial_impact::Domain;
+        use crate::wave_journal::{Journal,Cause};
+        use crate::wave_event::{Impact,Origin,WaveEvent};
+        use crate::{FrameId,WaterSample};
+        let anchor=WorldPos::from_metres(1_000_000.0,0.0,0.0);
+        let mut alloc=Hote;let services=Hote;
+        let mut host=HostServices{alloc:&mut alloc,jobs:&services,sink:&services};
+        let bg=Background::configure(&mut host,SeaState{hs:0.01,tp:6.0,theta_turns:0.0,components:32,graine:0},anchor).unwrap();
+        let bound=BoundBackground::new(&bg,FrameId(7),3);
+        let e=WaveEvent::impact(Impact{id:1,frame:FrameId(7),cell:3,birth:SimTime(0),ttl_us:4_000_000,
+            position:[0.0;3],energy_j:0.01,wavelength_m:4.0,direction_turns:0.0,anisotropy:0.0,
+            displaced_l:0.0,material:0,origin:Origin::Server,above_surface:true}).unwrap();
+        let mut records=[None;1];let mut journal=Journal::new(0,&mut records);
+        journal.confirm(0,Cause{entity:0,command:1,emission:0},e).unwrap();
+        let context=Context{frame:FrameId(7),cell:3,medium:crate::impact_field::Medium{gravity:9.81,density:1025.0,depth:20.0,max_slope:0.1},domain:Domain{radius:16.0,age_us:4_000_000}};
+        let mut pool=[const {None};1];let prepared=Prepared::<64>::build(&journal,&mut pool,context).unwrap();
+        let points=[WorldPos::from_units(anchor.x+2048,0,0),WorldPos::from_units(anchor.x,2048,0)];
+        let mut scratch=[WaterSample::default();2];let mut out=scratch;let mut expected=scratch;
+        for time in [SimTime(0),SimTime(1_000_000)] {
+            prepared.sample_world_batch(&bound,&points,time,0.1,&mut out,&mut scratch).unwrap();
+            let bases=points.map(|p|bg.eval(p,time).unwrap());
+            prepared.sample_batch(&bases,&[[1.0,0.0],[0.0,1.0]],time,0.1,&mut expected,&mut scratch).unwrap();
+            for i in 0..2 { assert_eq!(out[i].eta.to_bits(),expected[i].eta.to_bits());
+                assert_eq!(out[i].u_total,expected[i].u_total);assert_eq!(out[i].normal,expected[i].normal); }
+        }
+        let before=out.map(|v|v.eta.to_bits());
+        let wrong=BoundBackground::new(&bg,FrameId(8),3);
+        assert_eq!(prepared.sample_world_batch(&wrong,&points,SimTime(0),0.1,&mut out,&mut scratch),Err(BatchError::Context));
+        let invalid=[points[0],WorldPos::from_units(i64::MIN,0,0)];
+        assert_eq!(prepared.sample_world_batch(&bound,&invalid,SimTime(0),0.1,&mut out,&mut scratch),
+            Err(BatchError::Point{index:1,error:crate::composition::Error::Domain}));
+        assert_eq!(out.map(|v|v.eta.to_bits()),before);
+        assert_eq!(prepared.sample_world_batch(&bound,&points,SimTime(0),0.1,&mut out,&mut []),Err(BatchError::Capacity));
+        let mut other=context;other.medium.gravity=1.62;let mut other_pool=[const {None};1];
+        let lunar=Prepared::<64>::build(&journal,&mut other_pool,other).unwrap();
+        assert_eq!(lunar.sample_world_batch(&bound,&points,SimTime(0),0.1,&mut out,&mut scratch),Err(BatchError::Context));
+        assert!(WorldPos::from_units(i64::MIN,0,0).to_local(WorldPos::from_units(i64::MAX,0,0)).is_none());
+        assert!(WorldPos::from_units(i64::MAX,0,0).to_local(WorldPos::from_units(i64::MIN,0,0)).is_none());
     }
 }

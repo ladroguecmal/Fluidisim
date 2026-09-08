@@ -136,13 +136,10 @@ fn main() {
         );
         let bw = times(
             || {
-                for i in 0..points_n {
-                    bases[i] = bg.eval(black_box(world[i]), t).unwrap();
-                }
                 prepared
-                    .sample_batch(
-                        &bases,
-                        black_box(&points),
+                    .sample_world_batch(
+                        &water_core::prepared_water::BoundBackground::new(&bg, FrameId(0), 0),
+                        black_box(&world),
                         t,
                         1.0,
                         &mut output,

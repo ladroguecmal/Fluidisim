@@ -88,7 +88,7 @@ impl WorldPos {
     /// (SPEC-004 §1.3), détectée et non subie.
     pub fn to_local(self, anchor: WorldPos) -> Option<[f32; 3]> {
         const LIMIT: i64 = 4096 * WORLD_UNITS_PER_METRE;
-        let d = [self.x - anchor.x, self.y - anchor.y, self.z - anchor.z];
+        let d = [self.x.checked_sub(anchor.x)?, self.y.checked_sub(anchor.y)?, self.z.checked_sub(anchor.z)?];
         for c in d {
             if c >= LIMIT || c <= -LIMIT {
                 return None;

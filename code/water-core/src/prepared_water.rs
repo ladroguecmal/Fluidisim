@@ -4,7 +4,23 @@ use crate::{
     radial_impact::{Domain, RadialImpact},
     wave_journal::Journal,
 };
-use crate::{FrameId, SimTime, WaterSample};
+use crate::{Background, FrameId, SimTime, WaterSample, WorldPos};
+/// Déclaration hôte : l'ancre de B est l'origine locale du couple frame/cell de W.
+/// L'hôte reste responsable de cette géométrie et du milieu réellement présent.
+pub struct BoundBackground<'a> {
+    background: &'a Background,
+    frame: FrameId,
+    cell: u64,
+}
+impl<'a> BoundBackground<'a> {
+    pub fn new(background: &'a Background, frame: FrameId, cell: u64) -> Self {
+        Self {
+            background,
+            frame,
+            cell,
+        }
+    }
+}
 #[derive(Clone, Copy)]
 pub struct Context {
     pub frame: FrameId,
@@ -21,6 +37,7 @@ pub enum PrepareError {
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum BatchError {
+    Context,
     Length,
     Capacity,
     Point {
@@ -34,6 +51,7 @@ pub struct Prepared<'a, 'j, const N: usize = 64> {
     fields: &'a [Option<RadialImpact<N>>],
     frame: FrameId,
     cell: u64,
+    gravity: f32,
 }
 impl<'a, 'j, const N: usize> Prepared<'a, 'j, N> {
     /// Pool de travail : peut être modifié en cas de refus ; aucun Prepared n'est alors publié.
@@ -68,10 +86,58 @@ impl<'a, 'j, const N: usize> Prepared<'a, 'j, N> {
             fields: &pool[..count],
             frame: context.frame,
             cell: context.cell,
+            gravity: context.medium.gravity,
         })
     }
     pub fn field_count(&self) -> usize {
         self.fields.len()
+    }
+    /// Chemin hôte : un seul instant et une seule liste monde, sans tampon B arbitraire.
+    pub fn sample_world_batch(
+        &self,
+        bound: &BoundBackground<'_>,
+        points: &[WorldPos],
+        time: SimTime,
+        max_slope: f32,
+        output: &mut [WaterSample],
+        scratch: &mut [WaterSample],
+    ) -> Result<usize, BatchError> {
+        // Le B minimal est configuré avec g=9,81. Un autre milieu n'est pas encore compatible.
+        if bound.frame != self.frame || bound.cell != self.cell || self.gravity != 9.81f32 {
+            return Err(BatchError::Context);
+        }
+        if points.len() > output.len() || points.len() > scratch.len() {
+            return Err(BatchError::Capacity);
+        }
+        for (i, point) in points.iter().enumerate() {
+            let local = bound
+                .background
+                .local_point(*point)
+                .ok_or(BatchError::Point {
+                    index: i,
+                    error: composition::Error::Domain,
+                })?;
+            let base = bound
+                .background
+                .eval(*point, time)
+                .ok_or(BatchError::Point {
+                    index: i,
+                    error: composition::Error::InvalidBackground,
+                })?;
+            scratch[i] = composition::compose(
+                base,
+                self.journal,
+                self.fields.iter().flatten(),
+                self.frame,
+                self.cell,
+                [local[0], local[1]],
+                time,
+                max_slope,
+            )
+            .map_err(|error| BatchError::Point { index: i, error })?;
+        }
+        output[..points.len()].copy_from_slice(&scratch[..points.len()]);
+        Ok(points.len())
     }
     /// B et points doivent provenir du même instant et repère hôte. Pas de calcul de B ici.
     pub fn sample_batch(

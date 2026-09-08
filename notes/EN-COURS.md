@@ -65,7 +65,7 @@ Objectif : chemin de lot B+W calculant B aux mêmes points/instant que W.
 ### Plan
 
 - [x] **P1** — passation, copies, jeton et plan seul.
-- [ ] **P2** — liaison explicite B/référentiel/cellule, lot monde cohérent et tests de refus.
+- [x] **P2** — liaison explicite B/référentiel/cellule, lot monde cohérent et tests de refus.
 - [ ] **P3** — banc raccordé, tests complets, documentation et rituel.
 
 ### Notes de reprise
