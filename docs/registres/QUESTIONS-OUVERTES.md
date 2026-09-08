@@ -901,3 +901,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S80-1 : ouverte, S81.** Mesurer préparation et lots incluant les vraies évaluations B,
   mémoire et latences ; optimiser le poste dominant, sans annoncer un budget cible non constaté.
 - Métadonnées B/points, publication multilecteur, index spatial et rétention S72-2 restent ouverts.
+
+### S81 — Coût mesuré et directions tabulées
+
+- **S80-1 : réalisée.** Banc B réel + W, mémoire et latences, COUT-BW-S81. Directions Bessel
+  tabulées à bits identiques ; gain médian local de 41 à 45 %, charge encore coûteuse.
+- **S81-1 : ouverte, S82.** Candidat Bessel accéléré, erreur bornée et réception comparative
+  avant remplacement du chemin actuel ; mêmes scénarios physiques et de coût.
+- Aucun budget cible, index spatial, rétention ou réception croisée clôturé par cette mesure.

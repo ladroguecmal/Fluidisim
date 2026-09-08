@@ -123,3 +123,8 @@ ADR-062 précise les préconditions hôte et le signe vertical B corrigé ; nouv
 prepared_water::Prepared emprunte le journal et un pool hôte de champs ; sample_batch
 évalue sur temporaire et ne copie la sortie qu’après succès intégral. Aucun agrandissement.
 Voir ADR-063 pour les préconditions du tampon B et la publication concurrente encore absente.
+
+### S81 — Banc de coût et directions Bessel
+
+Exemple bench_water : préparation, B réel et lots B+W chronométrés séparément, sorties hachées.
+Directions Bessel tabulées exactement ; COUT-BW-S81 documente gains et limites du poste local.

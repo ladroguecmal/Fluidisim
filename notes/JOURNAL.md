@@ -5653,3 +5653,17 @@ L194 enregistrée ; aucun angle numéroté supplémentaire, aucun invariant amen
 B, bus, index et rétention ouverts. Aucun budget matériel cible proclamé.
 
 **Vérification finale :** 75 tests core + 93 harnais = 168 réussis, cinq ignorés, aucun échec. Quatre avertissements préexistants des tests du harnais. Tests ciblés release et diff vérifiés ; copies synchronisées après commit.
+
+## S81 — 2026-09-08 — Le coût vient de Bessel
+
+**Entrée :** Continue puis Reprends en cours ; départ a5385e2, copies actives identiques.
+**Produit :** exemple bench_water mesurant préparation, B réel et lot B+W, pools et hashs.
+**Mesures :** 1×64 points 17,349→9,956 ms médian ; 16×64 277,877→159,158 ms.
+Préparation 0,6 à 9,8 µs après, B seul environ 57 µs pour 64 points. Poste local seulement.
+**Optimisation :** 128 directions constantes tabulées en bits, 512 octets ; aucun changement
+physique. Quatre empreintes de lots inchangées. Pas de nouvel ADR car décision physique inchangée.
+**Suite S82 :** S81-1, candidat Bessel accéléré avec erreur reçue ; ne pas consacrer une
+session à optimiser la préparation négligeable. S80-1 close. Rapport COUT-BW-S81, L195.
+Aucun nouvel angle numéroté ni invariant amendé. Charge encore impropre à une promesse AAA.
+
+**Vérification finale :** 76 tests core + 93 harnais = 169 réussis, cinq ignorés, aucun échec. Quatre avertissements préexistants des tests du harnais. Diff vérifié ; copies synchronisées après commit.

@@ -17,6 +17,10 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S81 :** [Coût B+W](validation/COUT-BW-S81.md), banc réel et directions Bessel tabulées.
+Gain médian local 41–45 %, sorties identiques ; suite S82, candidat Bessel accéléré (S81-1).
+63 ADR, 192 angles morts ; aucune nouvelle décision physique.
+
 **S80 :** [ADR-063 — Préparation et lots](adr/ADR-063-preparation-et-lots.md), **ACTÉE**.
 Pool emprunté et lots sans sortie partielle construits. 63 ADR, 192 angles morts.
 Suite S81 : mesure du chemin réel B+W (S80-1).

@@ -3069,3 +3069,10 @@ régression sur la composante historiquement fautive ne protège pas les autres 
 transactionnelle pour le consommateur. Nommer clairement les deux stockages et leurs droits
 permet de refuser sans copie de secours cachée. Le succès est le point de publication ; les
 lecteurs ne doivent jamais accéder au temporaire pour gagner une copie.
+
+## L195 — Mesurer le chemin complet avant d’optimiser sa structure
+
+*(S81)* La préparation coûtait des microsecondes, les lots des dizaines de millisecondes.
+Une refonte du journal aurait optimisé le mauvais étage. Mesurer séparément préparation,
+base et composition puis attaquer les invariants recalculés dans la boucle dominante.
+Conserver les sorties à bits identiques permet d’isoler une optimisation de calcul du modèle.

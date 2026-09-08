@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 12:18 +02:00
+JETON            : libre
+Battement        : 2026-09-08 12:23 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S81
-Dernière session : S80 — preparation et lots ; 168 tests réussis, cinq ignorés
-Session suivante : S81 — mesure preparation et lots B+W (S80-1)
+Session en cours : aucune
+Dernière session : S81 — cout B+W optimise ; 169 tests réussis, cinq ignorés
+Session suivante : S82 — candidat Bessel accelere et reception erreur (S81-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -167,6 +167,10 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S81 — 2026-09-08 :** coût réel mesuré, directions Bessel tabulées à bits identiques.
+Gain médian local 41–45 %, B+W reste coûteux. S80-1 close ; suite S82 : candidat Bessel
+accéléré avec réception d’erreur (S81-1). Voir COUT-BW-S81. 63 ADR, 192 angles morts inchangés.
 
 **S80 — 2026-09-08 :** ADR-063, préparation bornée et interrogation par lots construites.
 Journal emprunté immuablement, résultats publiés seulement après succès intégral. S79-1 réalisée
