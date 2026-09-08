@@ -5797,3 +5797,21 @@ libm/temps relatif f64 de référence, aucune conformité runtime I-03/I-08 reve
 Aucun nouvel angle numéroté ni invariant amendé ; ADR-069 actée, 69 ADR.
 **Suite S90 :** S89-1, pression localisée et superposition spectrale avec convergence et travail
 total. S88-1 partielle ; copies synchronisées après clôture.
+
+## S90 — 2026-09-08 — Champ d'une pression localisée
+
+**Entrée :** Continue utilisateur ; départ 1dc6e38, copies actives identiques et jeton libre.
+**Produit :** gaussian_pressure.rs, quadrature polaire d'une pression gaussienne mobile, champ
+hauteur/vitesse et énergie/puissance globales. Instrument f64 allouant, hors runtime autoritaire.
+ADR-070 actée, normalisation Fourier/Parseval explicitée ; aucune nouvelle décision de coque.
+**Échec instructif :** 64²→128² diffère de 3,25e-5 J à 4 s, refus au seuil 1e-5 J.
+Seuil conservé, 128²→256² reçu à 2,10e-6 J (~0,0024 %). Travail spatial/spectral à 2 s :
+écart 1,76e-11 W ; travail temporel/énergie du même maillage : 1,08e-6 J. L204 enregistrée.
+**Vérification :** trois tests release ; suite debug 100 core + 93 harnais = 193 réussis,
+cinq ignorés, aucun échec. Quatre avertissements préexistants du harnais. Normalisation,
+raffinement, directions et coupure séparés, symétrie, énergie après extinction et refus testés.
+P2 d3e3f87 ; formatage/diff vérifiés. Aucun nouvel angle numéroté ni invariant amendé.
+**Limites :** énergie de la référence continue estimée par quadrature, pas intégrale infinie
+de la somme finie ; emprise non reçue, Kelvin/coque/pression et runtime ouverts.
+**Suite S91 :** S90-1, trajectoire multi-segments et travail contre vitesse totale, avec virage
+et découpage invariant. S89-1 réalisée sur un segment gaussien ; copies synchronisées à clôture.

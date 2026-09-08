@@ -976,3 +976,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S89-1 : ouverte, S90.** Pression spatialement localisée en translation : superposition
   spectrale, normalisation, convergence et bilan de travail total avant codec et intégration W.
 - Aucun sillage de Kelvin complet ni relation coque/pression calibrée. W4 et B2 restent partiels.
+
+### S90 — Pression localisée reconstruite
+
+- **S89-1 : réalisée sur le profil gaussien et un segment.** Normalisation, raffinement,
+  coupure et travail spatial/temporel séparés ; ADR-070, référence f64 hors runtime.
+- **S90-1 : ouverte, S91.** Trajectoire multi-segments et puissance sur le champ total,
+  découpage invariant et virage ; conserver les interférences dans le bilan énergétique.
+- Emprise spatio-temporelle, coque/pression, Kelvin complet et runtime restent ouverts W4.

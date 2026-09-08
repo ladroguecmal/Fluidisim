@@ -3130,3 +3130,10 @@ Une référence directe des faits vérifie le cycle de vie sans réutiliser son 
 contient des interférences. Valider la segmentation sur le champ, puis le travail sur la vitesse
 totale. Normaliser chaque segment indépendamment rendrait le résultat dépendant du découpage
 de la trajectoire, alors que le mouvement physique n'a pas changé.
+
+## L204 — Un bilan fermé peut rester spatialement imprécis
+
+*(S90)* Travail intégré et énergie concordent sur une quadrature grossière parce qu'ils
+partagent la même approximation spectrale. Cette identité reçoit la comptabilité, pas la
+résolution. La comparer à un travail spatial indépendant puis raffiner séparément le spectre
+évite de confondre conservation et justesse du champ.

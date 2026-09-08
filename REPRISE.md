@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 17:28 +02:00
+JETON            : libre
+Battement        : 2026-09-08 17:30 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S90
-Dernière session : S89 — pression mobile modale ; 190 tests réussis, cinq ignorés
-Session suivante : S90 — pression localisée et superposition spectrale (S89-1)
+Session en cours : aucune
+Dernière session : S90 — pression localisée ; 193 tests réussis, cinq ignorés
+Session suivante : S91 — trajectoire multi-segments et travail total (S90-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -148,7 +148,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 17 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 69 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 70 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -167,6 +167,11 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S90 — 2026-09-08 :** ADR-070, pression gaussienne localisée, reconstruction du champ et
+bilan global ; raffinement reçu après échec de la première résolution. 193 tests réussis,
+cinq ignorés. S89-1 réalisée sur fixture ; suite S91 : trajectoire et travail total, S90-1.
+70 ADR, 193 angles morts. Instrument f64 hors runtime, emprise de réception encore ouverte.
 
 **S89 — 2026-09-08 :** ADR-069, première réponse de pression mobile, résonance et travail/énergie
 vérifiés. Instrument f64 hors runtime autoritaire ; 190 tests réussis, cinq ignorés.

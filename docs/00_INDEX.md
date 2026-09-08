@@ -17,6 +17,10 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S90 :** [ADR-070 — Pression localisée](adr/ADR-070-pression-localisee.md), **ACTÉE**.
+Champ gaussien mobile et bilan global reçus sur fixture f64 ; 70 ADR, 193 angles morts.
+Suite S91 : trajectoire multi-segments et travail total, S90-1.
+
 **S89 :** [ADR-069 — Pression mobile et sillage](adr/ADR-069-pression-mobile-et-sillage.md), **ACTÉE**.
 Réponse modale et travail reçus, prototype f64 hors runtime ; 69 ADR, 193 angles morts.
 Suite S90 : pression localisée et superposition spectrale, S89-1.

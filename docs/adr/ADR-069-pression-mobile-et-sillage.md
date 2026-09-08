@@ -102,3 +102,7 @@ une intégration sur les directions et longueurs d'onde avec normalisation et tr
 en translation et vérifier convergence spatiale/spectrale et travail total, avant codec ou intégration.
 Pas de nouveau budget AAA, de sélection finale B2 ni d'autorité physique client. I-01, I-03,
 I-06, I-08 et I-11 inchangés ; aucun nouvel angle numéroté.
+
+> **Actualisation S90 — 2026-09-08.** S89-1 réalisée sur un profil gaussien en translation,
+> ADR-070. Champ et bilan global par quadrature reçus sur fixtures ; première résolution
+> refusée puis raffinement reçu sans relèvement du seuil. Trajectoire multi-segments : S90-1.
