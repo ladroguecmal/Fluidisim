@@ -65,7 +65,7 @@ Objectif : préparer les coefficients et bornes constants hors de la boucle par 
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [ ] **P2** — alléger la requête, recevoir identité ou erreur, refus et coût.
+- [x] **P2** — alléger la requête, recevoir identité ou erreur, refus et coût.
 - [ ] **P3** — publier résultats et limites ; rituel de passation et synchronisation.
 
 ### Notes de reprise
@@ -73,3 +73,7 @@ Objectif : préparer les coefficients et bornes constants hors de la boucle par 
 Départ 2ca0148, copies propres identiques. S99-1.
 Conserver les opérations dépendantes du point et les refus de sortie non finie.
 Mesurer le surcoût mémoire des coefficients et le gain avant de retenir le changement.
+
+P2 : tests release identité/refus réussis ; hashes conservés. Banc64 médian 19799,8 µs,
+Slot40 octets ; comparaison S99 bruitée, gain non certifié. COEFFICIENTS-S100 publié.
+Suite complète en cours : code/target/s100-tests.log.

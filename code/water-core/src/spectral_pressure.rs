@@ -11,7 +11,9 @@ pub struct Node {
 }
 #[derive(Clone, Copy, Default)]
 pub struct Slot {
-    node: Node,
+    turns: [f32; 2],
+    weighted_k: [f32; 2],
+    weight: f32,
     response: Response,
     magnitude: f32,
 }
@@ -27,6 +29,7 @@ pub struct Field<'a> {
     slots: &'a [Slot],
     min: [f32; 2],
     max: [f32; 2],
+    phase_safe: bool,
     pub energy_j: f32,
 }
 #[derive(Debug, PartialEq, Eq)]
@@ -81,6 +84,7 @@ pub fn prepare<'a>(
     }
     let mut energy = 0.0;
     let mut correction = 0.0;
+    let mut phase_safe = true;
     for (node, slot) in nodes.iter().zip(pool.iter_mut()) {
         if !node.transform.is_finite()
             || node.transform < 0.0
@@ -113,8 +117,18 @@ pub fn prepare<'a>(
         let next = energy + y;
         correction = (next - energy) - y;
         energy = next;
+        let turns = [
+            node.k[0] / core::f32::consts::TAU,
+            node.k[1] / core::f32::consts::TAU,
+        ];
+        for axis in 0..2 {
+            let bound = turns[axis].abs() * min[axis].abs().max(max[axis].abs());
+            phase_safe &= bound.is_finite() && bound < 1_048_576.0;
+        }
         *slot = Slot {
-            node: *node,
+            turns,
+            weighted_k: [node.weight * node.k[0], node.weight * node.k[1]],
+            weight: node.weight,
             response: total,
             magnitude,
         };
@@ -126,6 +140,7 @@ pub fn prepare<'a>(
         slots: &pool[..nodes.len()],
         min,
         max,
+        phase_safe,
         energy_j: energy,
     })
 }
@@ -136,30 +151,26 @@ impl Field<'_> {
         }
         let mut out = Surface::default();
         for slot in self.slots {
-            let n = slot.node;
             let r = slot.response;
             let k = slot.magnitude;
-            let turns = [
-                n.k[0] / core::f32::consts::TAU * p[0],
-                n.k[1] / core::f32::consts::TAU * p[1],
-            ];
-            if !turns.iter().all(|v| v.is_finite() && v.abs() < 1_048_576.0) {
-                return Err(Error::Domain);
+            if !self.phase_safe {
+                let turns = [slot.turns[0] * p[0], slot.turns[1] * p[1]];
+                if !turns.iter().all(|v| v.is_finite() && v.abs() < 1_048_576.0) {
+                    return Err(Error::Domain);
+                }
             }
-            let phase =
-                PhaseQ32::from_distance(n.k[0] / core::f32::consts::TAU, p[0]).wrapping_add(
-                    PhaseQ32::from_distance(n.k[1] / core::f32::consts::TAU, p[1]),
-                );
+            let phase = PhaseQ32::from_distance(slot.turns[0], p[0])
+                .wrapping_add(PhaseQ32::from_distance(slot.turns[1], p[1]));
             let (s, c) = (phase.sin(), phase.cos());
             let eta = r.eta.re * c - r.eta.im * s;
             let vel = r.velocity.re * c - r.velocity.im * s;
-            out.eta += n.weight * eta;
-            out.vertical_velocity += n.weight * vel;
-            out.potential += n.weight * (vel / k);
+            out.eta += slot.weight * eta;
+            out.vertical_velocity += slot.weight * vel;
+            out.potential += slot.weight * (vel / k);
             for i in 0..2 {
-                out.slope[i] -= n.weight * n.k[i] * (r.eta.re * s + r.eta.im * c);
+                out.slope[i] -= slot.weighted_k[i] * (r.eta.re * s + r.eta.im * c);
                 out.horizontal_velocity[i] -=
-                    n.weight * n.k[i] * ((r.velocity.re * s + r.velocity.im * c) / k);
+                    slot.weighted_k[i] * ((r.velocity.re * s + r.velocity.im * c) / k);
             }
         }
         if ![out.eta, out.vertical_velocity, out.potential]
@@ -176,6 +187,136 @@ impl Field<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn prepared_coefficients_preserve_hash_s100() {
+        let mut nodes = vec![Node::default(); 16384];
+        let spectrum = crate::gaussian_spectrum::bake(
+            crate::gaussian_spectrum::Recipe {
+                sigma: 1.0,
+                cutoff: 6.0,
+                radial: 128,
+                angular: 128,
+            },
+            &mut nodes,
+        )
+        .unwrap();
+        let mut half = vec![Node::default(); 8192];
+        let reduced = spectrum.half_into(&mut half).unwrap();
+        let a = source();
+        let path = [
+            a,
+            Segment {
+                birth: SimTime(2_000_000),
+                origin: [4.0, 0.0],
+                velocity: [0.0, 2.0],
+                ..a
+            },
+        ];
+        let mut slots = vec![Slot::default(); 8192];
+        let f = prepare(
+            reduced.nodes(),
+            &path,
+            9.81,
+            1025.0,
+            SimTime(3_000_000),
+            SimTime(8_000_000),
+            [-8.0; 2],
+            [12.0; 2],
+            &mut slots,
+        )
+        .unwrap();
+        assert!(f.phase_safe);
+        let mut h = crate::Hasher64::new();
+        for iy in 0..11 {
+            for ix in 0..11 {
+                let s = f
+                    .sample([-8.0 + ix as f32 * 2.0, -8.0 + iy as f32 * 2.0])
+                    .unwrap();
+                for v in [
+                    s.eta,
+                    s.vertical_velocity,
+                    s.potential,
+                    s.slope[0],
+                    s.slope[1],
+                    s.horizontal_velocity[0],
+                    s.horizontal_velocity[1],
+                ] {
+                    h.write_f32(v);
+                }
+            }
+        }
+        assert_eq!(h.finish(), 0xf1d8_89f9_7488_bc37);
+    }
+    #[test]
+    fn phase_guard_keeps_partial_domain_and_refusals_s100() {
+        let nodes = [Node {
+            k: [1e6, 0.0],
+            transform: 1.0,
+            weight: 1.0,
+        }];
+        let path = [Segment {
+            origin: [0.0; 2],
+            velocity: [0.0; 2],
+            pressure_pa: 0.0,
+            ..source()
+        }];
+        let mut pool = [Slot::default(); 1];
+        let f = prepare(
+            &nodes,
+            &path,
+            9.81,
+            1025.0,
+            SimTime(0),
+            SimTime(8_000_000),
+            [-8.0; 2],
+            [12.0; 2],
+            &mut pool,
+        )
+        .unwrap();
+        assert!(!f.phase_safe);
+        assert!(f.sample([0.0; 2]).is_ok());
+        assert!(matches!(f.sample([12.0, 0.0]), Err(Error::Domain)));
+        assert!(f.sample([f32::NAN, 0.0]).is_err());
+        assert!(f.sample([13.0, 0.0]).is_err());
+        let f = prepare(
+            &nodes,
+            &path,
+            9.81,
+            1025.0,
+            SimTime(0),
+            SimTime(8_000_000),
+            [-1.0; 2],
+            [1.0; 2],
+            &mut pool,
+        )
+        .unwrap();
+        assert!(f.phase_safe);
+        for p in [[-1.0, -1.0], [1.0, 1.0]] {
+            assert!(f.sample(p).is_ok());
+        }
+        // Le contrôle de phase ne remplace pas celui des résultats.
+        let poisoned = [Slot {
+            turns: [0.0; 2],
+            weighted_k: [0.0; 2],
+            weight: 1.0,
+            response: Response {
+                eta: crate::modal_pressure::Complex {
+                    re: f32::NAN,
+                    im: 0.0,
+                },
+                ..Response::default()
+            },
+            magnitude: 1.0,
+        }];
+        let f = Field {
+            slots: &poisoned,
+            min: [-1.0; 2],
+            max: [1.0; 2],
+            phase_safe: true,
+            energy_j: 0.0,
+        };
+        assert!(matches!(f.sample([0.0; 2]), Err(Error::NonFinite)));
+    }
     fn nodes() -> Vec<Node> {
         let mut out = Vec::new();
         let dk = 6.0 / 128.0;
