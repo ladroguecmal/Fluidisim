@@ -58,23 +58,20 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S94 — terminée
+Session : S95 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : compléter les grandeurs de surface du sillage et vérifier leurs identités physiques.
+Objectif : noyau modal sans libm ni allocation, horloge entière et résonance régulière.
 
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [x] **P2** — construire potentiel, pente et vitesse horizontale ; tests de dérivées et symétries, raffinement et suite.
-- [x] **P3** — publier les résultats et limites, mettre à jour la connaissance et exécuter le rituel de passation.
+- [ ] **P2** — construire le candidat modal f32, contrat borné et comparaison physique/déterministe.
+- [ ] **P3** — publier décision, mesures et limites ; rituel de fin et copies synchronisées.
 
 ### Notes de reprise
 
-Départ c68e2e8, copies actives identiques et propres, jeton libre. S93-1.
-Référence profonde linéaire f64 uniquement : potentiel de surface q_dot/|k| ;
-pente = gradient de eta, vitesse horizontale = gradient du potentiel, verticale = eta_t.
-Réception des nouvelles grandeurs distincte de celle de la hauteur. Pas de composition runtime.
-
-P2 : trois tests S94 release réussis ; campagne étendue reçue, maxima S92 inchangés.
-Suite : 109 core + 93 harnais = 202 réussis, cinq ignorés, quatre avertissements préexistants.
-SURFACE-S94 contient formules, mesures et limites ; prochain lot S95 : noyau modal déterministe.
+Départ 2064105, copies actives identiques et propres. S94-1.
+Réutiliser PhaseQ32 ; ne convertir aucun temps en f32, même dans l'enveloppe résonante.
+Produits fréquence × durée entiers pour phases ; croissance d'amplitude par multiplication
+entière du coefficient par microseconde. Tester ±résonance, époque proche de u64::MAX,
+petits âges, extinction, refus et concordance debug/release. Référence S89 conservée.
