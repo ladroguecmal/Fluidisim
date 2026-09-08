@@ -17,6 +17,9 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S93 :** [Mémoire gaussienne](validation/MEMOIRE-GAUSSIENNE-S93.md), préparation empruntée et identité.
+70 ADR, 193 angles morts. Suite S94 : pente et vitesses du champ, S93-1.
+
 **S92 :** [Emprise et raffinement](validation/EMPRISE-S92.md), contrat borné et virage échantillonné.
 70 ADR, 193 angles morts. Suite S93 : préparation sur mémoire hôte, S92-1.
 

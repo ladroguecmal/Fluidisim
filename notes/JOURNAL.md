@@ -5849,3 +5849,18 @@ P2 6c64acc. Formatage/diff vérifiés. Aucun nouvel ADR, angle ou invariant ; L2
 La validation initiale construit un champ temporaire. Pas de réception continue ni multiprofils.
 **Suite S93 :** S92-1, préparation sur buffers hôte avec résultats identiques et refus atomiques.
 S91-1 réalisée dans cette portée ; copies synchronisées après clôture.
+
+## S93 — 2026-09-08 — Champ préparé sur mémoire hôte
+
+**Entrée :** Continue utilisateur ; départ 01716ce, copies actives identiques, jeton libre.
+**Produit :** PreparedMode opaque, prepare_into et BorrowedGaussian. Validation de trajectoire
+extraite sans champ temporaire ; calcul et échantillonnage partagés avec la référence possédée.
+Capacité/date refusées avant écriture, erreur numérique sans vue, queue du pool préservée.
+**Vérification :** deux tests release d'identité/refus, sept tests précédents release repassés,
+campagne S92 aux maxima inchangés. Suite debug 106 core + 93 harnais = 199 réussis, cinq ignorés,
+aucun échec ; quatre avertissements préexistants du harnais. Formatage/diff vérifiés. P2 6aa7979.
+**Limites :** chemin emprunté sans allocation par inspection, pas de compteur d'allocations.
+Nœuds du modèle toujours alloués à l'initialisation, f64/libm hors runtime ; aucune mesure de coût.
+MEMOIRE-GAUSSIENNE-S93 publié, aucun nouvel ADR/angle/invariant ni leçon distincte ; L194/L197 appliquées.
+**Suite S94 :** S93-1, pente et vitesse horizontale avec vérification par potentiel, avant
+composition. S92-1 réalisée dans la référence ; copies synchronisées après clôture.

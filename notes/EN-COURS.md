@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S93 — en cours
+Session : S93 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : préparation de référence dans un pool hôte, vue empruntée et refus sans publication.
 
@@ -66,9 +66,12 @@ Objectif : préparation de référence dans un pool hôte, vue empruntée et ref
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
 - [x] **P2** — extraire validation/calcul partagé, préparation sans allocation et tests d'identité/refus.
-- [ ] **P3** — vérifier et publier les limites, rituel de passation.
+- [x] **P3** — vérifier et publier les limites, rituel de passation.
 
 ### Notes de reprise
 
 Départ 01716ce. Les nœuds du modèle peuvent rester alloués à l'initialisation ; préparation
 et interrogation sur mémoire hôte. Pool candidat modifiable au refus, aucune vue publiée.
+
+P2 : 6aa7979. Tests release et campagne S92 ; suite 199 réussis, cinq ignorés.
+MEMOIRE-GAUSSIENNE-S93 publié. Suite S94 : S93-1, pente et vitesses.

@@ -54,3 +54,7 @@ de préparation sur mémoire hôte et sortir les allocations du chemin de requê
 avec identité des résultats et refus atomiques. Cela prépare le portage sans prétendre que
 f64/libm est déjà un runtime répliqué. Déterminisme f32, codec de trajectoire, pente, vitesses
 horizontales et couplage B+W restent à construire. Aucun nouvel angle ni invariant ; L205.
+
+> **Actualisation S93 — 2026-09-08.** S92-1 réalisée : MEMOIRE-GAUSSIENNE-S93, pool hôte
+> et vue empruntée. La validation initiale ne construit plus de champ ; les refus numériques
+> sont vérifiés à la préparation. Campagne S92 inchangée. Grandeurs WaterSample : S93-1.

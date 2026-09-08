@@ -1000,3 +1000,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S92-1 : ouverte, S93.** Préparation sur mémoire hôte et requête sans allocation de référence,
   identité des résultats et refus atomiques ; préparation du portage runtime.
 - Réception multiprofils, f32 déterministe, codec et intégration B+W restent ouverts.
+
+### S93 — Préparation sur pool hôte
+
+- **S92-1 : réalisée dans la référence.** Préparation empruntée sans allocation dans son chemin,
+  identité et refus testés ; MEMOIRE-GAUSSIENNE-S93. Modèle initial et référence possédée allouants.
+- **S93-1 : ouverte, S94.** Pente et vitesse horizontale du champ gaussien, vérification par
+  dérivées du potentiel et symétries, avant portage et composition WaterSample.
+- f64/libm hors runtime, codec de trajectoire et raccordement LiveWater restent ouverts.

@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 17:42 +02:00
+JETON            : libre
+Battement        : 2026-09-08 17:44 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S93
-Dernière session : S92 — emprise et raffinement ; 197 tests réussis, cinq ignorés
-Session suivante : S93 — préparation sur mémoire hôte (S92-1)
+Session en cours : aucune
+Dernière session : S93 — préparation empruntée ; 199 tests réussis, cinq ignorés
+Session suivante : S94 — pente et vitesses du sillage (S93-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -167,6 +167,11 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S93 — 2026-09-08 :** préparation gaussienne sur pool hôte, vue empruntée et refus ;
+MEMOIRE-GAUSSIENNE-S93. Sorties identiques et campagne S92 inchangée. 199 tests réussis,
+cinq ignorés. S92-1 réalisée ; suite S94 : pente et vitesses, S93-1. 70 ADR, 193 angles morts.
+Modèle f64/libm encore hors runtime ; absence d'allocation du chemin constatée par inspection.
 
 **S92 — 2026-09-08 :** enveloppe bornée et campagne du virage, EMPRISE-S92 ; 1089 échantillons
 par axe de raffinement, seuils respectés. 197 tests réussis, cinq ignorés. S91-1 réalisée comme
