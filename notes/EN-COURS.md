@@ -65,7 +65,7 @@ Objectif : séparer TTL source et horizon numérique, exposer le renouvellement 
 ### Plan
 
 - [x] **P1** — passation, copies, jeton et plan seul.
-- [ ] **P2** — horizon explicite et prolongation par reconstruction depuis la naissance ; tests.
+- [x] **P2** — horizon explicite et prolongation par reconstruction depuis la naissance ; tests.
 - [ ] **P3** — politique de rétention, vérification et rituel de passation.
 
 ### Notes de reprise

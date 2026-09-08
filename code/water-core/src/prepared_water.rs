@@ -92,6 +92,14 @@ impl<'a, 'j, const N: usize> Prepared<'a, 'j, N> {
     pub fn field_count(&self) -> usize {
         self.fields.len()
     }
+    /// Prochain horizon à renouveler, avec la source concernée ; aucun champ supprimé.
+    pub fn renewal_deadline(&self) -> Option<(u64, SimTime)> {
+        self.fields
+            .iter()
+            .flatten()
+            .map(|f| (f.event().data().id, f.valid_until()))
+            .min_by_key(|(id, time)| (time.0, *id))
+    }
     /// Chemin hôte : un seul instant et une seule liste monde, sans tampon B arbitraire.
     pub fn sample_world_batch(
         &self,
@@ -352,11 +360,67 @@ mod tests {
         ));
     }
     #[test]
+    fn renewal_deadline_and_alternate_pool_s84() {
+        let mut slots = [None; 2];
+        let mut journal = Journal::new(0, &mut slots);
+        let mut later = *e(1).data();
+        later.birth = SimTime(1_000_000);
+        journal
+            .confirm(0, cause(1), WaveEvent::impact(later).unwrap())
+            .unwrap();
+        journal.confirm(0, cause(2), e(2)).unwrap();
+        let mut old_pool = [const { None }; 2];
+        let old = Prepared::<128>::build(&journal, &mut old_pool, context()).unwrap();
+        assert_eq!(old.renewal_deadline(), Some((2, SimTime(4_000_000))));
+        let mut next_pool = [const { None }; 2];
+        let mut ctx = context();
+        ctx.domain.age_us = 100_000_000;
+        assert!(Prepared::<128>::build(&journal, &mut next_pool, ctx).is_err());
+        let mut a = [base()];
+        let mut b = [base()];
+        let mut scratch = [base()];
+        old.sample_batch(
+            &[base()],
+            &[[1.0, 0.0]],
+            SimTime(4_000_000),
+            0.1,
+            &mut a,
+            &mut scratch,
+        )
+        .unwrap();
+        ctx.domain.age_us = 16_000_000;
+        let next = Prepared::<128>::build(&journal, &mut next_pool, ctx).unwrap();
+        assert_eq!(next.renewal_deadline(), Some((2, SimTime(16_000_000))));
+        next.sample_batch(
+            &[base()],
+            &[[1.0, 0.0]],
+            SimTime(4_000_000),
+            0.1,
+            &mut b,
+            &mut scratch,
+        )
+        .unwrap();
+        assert_eq!(a[0].eta.to_bits(), b[0].eta.to_bits());
+        assert_eq!(a[0].u_total, b[0].u_total);
+        assert_eq!(a[0].normal, b[0].normal);
+        next.sample_batch(
+            &[base()],
+            &[[1.0, 0.0]],
+            SimTime(12_000_000),
+            0.1,
+            &mut b,
+            &mut scratch,
+        )
+        .unwrap();
+        assert_eq!(next.field_count(), 2);
+    }
+    #[test]
     fn empty_batch_and_empty_journal_are_explicit() {
         let mut slots = [];
         let journal = Journal::new(0, &mut slots);
         let mut pool = [];
         let p = Prepared::<64>::build(&journal, &mut pool, context()).unwrap();
+        assert_eq!(p.renewal_deadline(), None);
         assert_eq!(
             p.sample_batch(&[], &[], SimTime(0), 0.1, &mut [], &mut []),
             Ok(0)

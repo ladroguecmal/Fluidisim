@@ -63,7 +63,7 @@ impl<const N: usize> RadialImpact<N> {
             || domain.radius <= 0.0
             || domain.radius >= 4096.0
             || domain.age_us == 0
-            || domain.age_us > event.data().ttl_us
+            || event.data().birth.0.checked_add(domain.age_us).is_none()
         {
             return Err(Error::Domain);
         }
@@ -141,6 +141,10 @@ impl<const N: usize> RadialImpact<N> {
     }
     pub fn event(&self) -> &WaveEvent {
         &self.event
+    }
+    /// Dernier instant calculable inclus. Indépendant de la durée demandée par la source.
+    pub fn valid_until(&self) -> SimTime {
+        SimTime(self.event.data().birth.0 + self.domain.age_us)
     }
     pub fn slope_bound(&self) -> f32 {
         self.slope_bound
@@ -332,7 +336,7 @@ mod tests {
         d.radius = 32.0;
         assert!(RadialImpact::<64>::new(source(), medium(), d).is_err());
         d = domain();
-        d.age_us = 10_000_001;
+        d.age_us = 100_000_000;
         assert!(RadialImpact::<64>::new(source(), medium(), d).is_err());
         d = domain();
         d.radius = f32::NAN;
@@ -356,6 +360,64 @@ mod tests {
         let a = RadialImpact::<64>::new(source(), medium(), domain()).unwrap();
         assert!(a.sample(FrameId(1), 0, [0.0; 2], SimTime(0)).is_err());
         assert!(a.sample(FrameId(0), 1, [0.0; 2], SimTime(0)).is_err());
+    }
+    #[test]
+    fn renewal_preserves_phase_beyond_source_ttl_s84() {
+        let old = RadialImpact::<128>::new(source(), medium(), domain()).unwrap();
+        let mut longer = domain();
+        longer.age_us = 16_000_000;
+        let new = RadialImpact::<128>::new(source(), medium(), longer).unwrap();
+        assert_eq!(new.valid_until(), SimTime(16_000_000));
+        for us in [0, 1_000_000, 4_000_000] {
+            for p in [[0.0, 0.0], [1.0, 2.0], [16.0, 0.0]] {
+                let a = old.sample(FrameId(0), 0, p, SimTime(us)).unwrap();
+                let b = new.sample(FrameId(0), 0, p, SimTime(us)).unwrap();
+                assert_eq!(a.eta.to_bits(), b.eta.to_bits());
+                assert_eq!(a.deta_dt.to_bits(), b.deta_dt.to_bits());
+                assert_eq!(a.potential.to_bits(), b.potential.to_bits());
+                assert_eq!(a.slope, b.slope);
+                assert_eq!(a.horizontal_velocity, b.horizontal_velocity);
+            }
+        }
+        assert!(matches!(
+            old.sample(FrameId(0), 0, [0.0; 2], SimTime(4_000_001)),
+            Err(Error::Time)
+        ));
+        assert!(new
+            .sample(FrameId(0), 0, [0.0; 2], SimTime(16_000_000))
+            .is_ok());
+        assert!(matches!(
+            new.sample(FrameId(0), 0, [0.0; 2], SimTime(16_000_001)),
+            Err(Error::Time)
+        ));
+        assert!(RadialImpact::<64>::new(source(), medium(), longer).is_err());
+        let fine = RadialImpact::<256>::new(source(), medium(), longer).unwrap();
+        for us in [10_000_001, 12_000_000, 16_000_000] {
+            for r in [0.0, 4.0, 8.0, 16.0] {
+                let a = new.sample(FrameId(0), 0, [r, 0.0], SimTime(us)).unwrap();
+                let b = fine.sample(FrameId(0), 0, [r, 0.0], SimTime(us)).unwrap();
+                assert!((a.eta - b.eta).abs() < 1e-6);
+                assert!((a.deta_dt - b.deta_dt).abs() < 1e-5);
+                assert!((a.horizontal_velocity[0] - b.horizontal_velocity[0]).abs() < 1e-5);
+                assert!((a.slope[0] - b.slope[0]).abs() < 1e-5);
+            }
+        }
+    }
+    #[test]
+    fn horizon_timestamp_overflow_refused_s84() {
+        let mut v = *source().data();
+        v.birth = SimTime(u64::MAX - 2_000_000);
+        v.ttl_us = 1_000_000;
+        let e = WaveEvent::impact(v).unwrap();
+        assert!(matches!(
+            RadialImpact::<64>::new(e, medium(), domain()),
+            Err(Error::Domain)
+        ));
+        let mut d = domain();
+        d.age_us = 2_000_000;
+        let f = RadialImpact::<64>::new(e, medium(), d).unwrap();
+        assert_eq!(f.valid_until(), SimTime(u64::MAX));
+        assert!(f.sample(FrameId(0), 0, [0.0; 2], SimTime(u64::MAX)).is_ok());
     }
     fn physical_disk<const N: usize>(
         f: &RadialImpact<N>,
