@@ -58,25 +58,18 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S95 — terminée
+Session : S96 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : noyau modal sans libm ni allocation, horloge entière et résonance régulière.
+Objectif : superposition f32 sur pool, à spectre fourni explicitement par préparation de référence.
 
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [x] **P2** — construire le candidat modal f32, contrat borné et comparaison physique/déterministe.
-- [x] **P3** — publier décision, mesures et limites ; rituel de fin et copies synchronisées.
+- [ ] **P2** — construire le champ emprunté et vérifier découpage, virage, grandeurs et refus.
+- [ ] **P3** — publier portée et résultats ; rituel de fin et synchronisation.
 
 ### Notes de reprise
 
-Départ 2064105, copies actives identiques et propres. S94-1.
-Réutiliser PhaseQ32 ; ne convertir aucun temps en f32, même dans l'enveloppe résonante.
-Produits fréquence × durée entiers pour phases ; croissance d'amplitude par multiplication
-entière du coefficient par microseconde. Tester ±résonance, époque proche de u64::MAX,
-petits âges, extinction, refus et concordance debug/release. Référence S89 conservée.
-
-P2 : reprise après interruption ; quatre tests release réussis et suite terminée :
-113 core + 93 harnais = 206 réussis, cinq ignorés. Hash debug/release 8ea15f4a3334830b.
-Échecs initiaux corrigés sans changer les seuils : parité petits angles, conversion Q32 entière.
-ADR-071 documente le candidat et sa réception locale ; interplateforme encore ouverte.
+Départ 288dfdb, copies propres identiques. S95-1. Séparer la cuisson du spectre gaussien
+(f64/libm à initialisation) de la préparation/requête f32 ; ne pas déclarer cette cuisson
+déterministe. Recevoir le même spectre puis comparer à la référence complète.
