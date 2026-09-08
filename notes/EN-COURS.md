@@ -58,21 +58,17 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S89 — terminée
+Session : S90 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : premier candidat de forçage de sillage, pression mobile et travail injecté.
+Objectif : champ d'une pression gaussienne mobile, quadrature spectrale et bilan global.
 
 ### Plan
 
-- [x] **P1** — vérifier la passation, rechercher la formulation physique et déclarer le plan.
-- [x] **P2** — réponse modale à une pression mobile de durée finie, résonance sans singularité ; tests analytiques et travail/énergie.
-- [x] **P3** — décision et limites, vérification complète, rituel de passation.
+- [x] **P1** — vérifier la passation et déclarer le plan.
+- [ ] **P2** — prototype spatial de référence, normalisation et tests de convergence/travail.
+- [ ] **P3** — publier les mesures, limites et rituel de passation.
 
 ### Notes de reprise
 
-Départ fe64cd7. Première brique physique de W4, pas une suite d'Impact. Candidat de référence
-f64 comme dispersif.rs, hors runtime autoritaire : modal profond uniforme, onde localisée
-et codec de trajectoire à construire après réception de la réponse forcée.
-
-P2 : 78b7bf8. Cinq tests release ; suite 190 réussis, cinq ignorés.
-ADR-069 et L203 publiées. Suite S90 : S89-1, pression localisée et superposition spectrale.
+Départ 1dc6e38. Prolonger pressure_mode f64 hors runtime. Transformée gaussienne explicite,
+intégrale polaire continue tronquée ; aucun carré périodique ni réception Kelvin présumée.
