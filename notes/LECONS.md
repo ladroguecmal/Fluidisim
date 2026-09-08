@@ -3008,3 +3008,10 @@ ensemble avant réception. Cela ne prouve pas que le premier doive être entièr
 avant que le second existe. Nommer ce qui traverse la dépendance : donnée, signature,
 ressource ou preuve. Un préalable qui ne fournit aucune entrée nécessaire peut être un jalon
 ultérieur. Vérifier aussi qu’un banc annoncé exécutable ne possède pas de volets encore absents.
+
+## L186 — Une identité commune exige un producteur commun ou une corrélation
+
+*(S72)* Deux producteurs indépendants ne peuvent pas partager un compteur futur par convention.
+Avant de promettre une déduplication ou une réconciliation par id, décrire qui crée cet id,
+quand chaque participant le connaît, et comment une prédiction se rattache au fait confirmé.
+Les octets et leur tri peuvent être parfaits alors que la correspondance reste impossible.

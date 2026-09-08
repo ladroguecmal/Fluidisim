@@ -5519,3 +5519,18 @@ Aucun code changé ; tests non relancés, dernier état rapporté S68 : 137 réu
 **Suite S72 :** S70-2 / W1, contrat versionné et code de validation des événements.
 S70-1 reste partielle à construire ; S70-3 et S63-1 restent ouvertes. Pas d’arbitrage technique
 renvoyé à une équipe ; état réel moteur/protocole/matériel cible toujours non constaté.
+
+## S72 — 2026-09-08 — Impact V1 devient du code
+
+**Entrée :** Go utilisateur, suite W1 de S71 ; départ 399830b, copies actives identiques.
+**Décision :** ADR-055 actée, première tranche Impact de WaveEvent. 76 octets explicites,
+f32 locaux au lieu de half, durée entière ; provenance locale refusée sur decode_server.
+**Produit :** constructeur validé, encodage/décodage sans allocation, quatre tests de contrat.
+Vecteur d’octets indépendant, refus des enveloppes et scalaires invalides, limites temporelles,
+canonicalisation et grands événements représentables. Aucune saturation silencieuse.
+**Limites :** autres kinds refusés ; aucune propagation, journal, authentification ou preuve
+interplateforme. W1 reste partielle. A190 expose la corrélation absente des identités prédites.
+**Suite S73 :** S72-1, identité et retrait, puis journal Impact borné. S72-2 porte la rétention.
+L186 enregistrée ; aucun arbitrage reporté à une équipe. Résultats de vérification ci-dessous.
+
+**Vérification S72 :** cargo test complet : 48 core + 93 harnais = 141 réussis, cinq ignorés ; aucun échec. Quatre avertissements préexistants dans le harnais. Diff vérifié ; code formaté. Copies synchronisées après commit.

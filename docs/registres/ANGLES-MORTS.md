@@ -1524,3 +1524,9 @@ S66-1 close ; voir CONTROLES-S68.
   alors que B1 complet exige aussi LOD et évaluation perceptuelle. L’ordre aurait arrêté W
   derrière des composants absents. Coût partagé signifie réception commune du budget,
   pas dépendance des identités et unités d’événements. Première étape W1 désormais explicite.
+
+- **A190** *(sévérité 1, S72 ; ouverte, W2)* — **La prédiction ne connaît pas le server_seq.**
+  SPEC-006 §3.3 promet une réconciliation par id entre événement anticipé et serveur, sans
+  définir leur correspondance. Deux compteurs ne constituent pas cette correspondance.
+  Il faut une identité de cause corrélable et des espaces de noms, avant le journal W2.
+  ADR-055 garde les id opaques et ne prétend pas résoudre cette association.

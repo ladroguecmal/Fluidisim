@@ -67,3 +67,10 @@ déterministe tourne en moins de 60 secondes, sans GPU.
 `bless` **imprime** le hash, il ne l'écrit pas. Une référence s'inscrit à la main, dans un commit
 qui ne contient rien d'autre — ADR-029 §4. Le confort d'une réécriture automatique coûterait
 exactement la propriété qu'on cherche : qu'un déplacement de référence soit un acte visible.
+
+### S72 — Première tranche de construction W
+
+`water-core::wave_event` fournit Impact V1 : 76 octets little endian, validation commune à la
+construction et au décodage, sans allocation. Voir ADR-055. Les autres événements, le journal
+et la propagation restent à construire. `decode_server` exige un canal déjà authentifié par
+l’hôte ; un bit de provenance ne fournit aucune authentification.

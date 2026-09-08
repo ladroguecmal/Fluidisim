@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S72 — en cours
+Session : S72 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : construire la première tranche WaveEvent, impact versionné et validé.
 
@@ -66,7 +66,7 @@ Objectif : construire la première tranche WaveEvent, impact versionné et valid
 
 - [x] **P1** — passation, état réel, jeton et plan seul.
 - [x] **P2** — ADR-055 et codec Impact V1 ; contrat explicite, refus et vecteur de référence.
-- [ ] **P3** — vérifier les tests, publier limites et résultats, rituel et synchronisation.
+- [x] **P3** — vérifier les tests, publier limites et résultats, rituel et synchronisation.
 
 ### Notes de reprise
 

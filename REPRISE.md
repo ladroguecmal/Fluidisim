@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 01:58 +02:00
+JETON            : libre
+Battement        : 2026-09-08 02:02 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S72
-Dernière session : S71 — 2026-09-08 — construction validée, dépendances corrigées
-Session suivante : S72 — WaveEvent, contrat et code de validation (S70-2 / W1)
+Session en cours : aucune
+Dernière session : S72 — Impact V1 construit, 141 tests réussis, cinq ignorés
+Session suivante : S73 — identité de cause et journal Impact borné (S72-1, A190)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -148,7 +148,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 17 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 54 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 55 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -167,6 +167,11 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S72 — 2026-09-08 :** ADR-055, première tranche WaveEvent construite : Impact V1,
+codec 76 octets et validation sans allocation. 141 tests réussis, cinq ignorés.
+W1 partielle ; autres kinds, journal et propagation absents. A190 : corrélation des
+identités prédites à résoudre avant W2. 55 ADR, 190 angles morts, 17 invariants inchangés.
 
 **S71 — 2026-09-08 :** ADR-054 confirme construction et priorité W, corrige les dépendances
 de S70 et définit les lots avec réception. Aucun code modifié ; prochaine production W1.

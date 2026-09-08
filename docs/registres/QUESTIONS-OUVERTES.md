@@ -824,3 +824,12 @@ S64-2 est la suite S69 recommandée ; aucune calibration de Hs effectuée ici. S
 | S63-1 | Ouverte | Couche dispersive construite et contrôlée ; référence exacte seule insuffisante pour fixer λ_cut |
 
 Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif pour bloquer W.
+
+### S72 — Première tranche événement construite
+
+- **S70-2 / W1 : partielle.** Impact V1, codec et validation implémentés (ADR-055).
+  Les huit autres kinds restent refusés ; définir leur sémantique avant de les activer.
+- **S72-1 : ouverte, prochaine session S73.** Résoudre A190 : identité de cause et
+  corrélation prédiction/serveur ; contrat de retrait, puis journal Impact à capacité bornée.
+- **S72-2 : ouverte, W2.** Distinguer expiration source, durée des effets et rétention de
+  rejeu ; tester livraison tardive, conflit de contenu, doublons et saturation sans perte muette.
