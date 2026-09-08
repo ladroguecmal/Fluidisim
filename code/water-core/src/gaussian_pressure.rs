@@ -13,8 +13,48 @@ struct Node {
 pub struct GaussianPressure {
     nodes: Vec<Node>,
 }
+/// Emplacement opaque, initialisable par l'hôte avant la boucle de simulation.
+#[derive(Clone, Copy)]
+pub struct PreparedMode {
+    k: [f64; 2],
+    response: Response,
+    weight: f64,
+}
+impl Default for PreparedMode {
+    fn default() -> Self {
+        Self {
+            k: [0.0; 2],
+            response: Response {
+                eta: Complex::default(),
+                velocity: Complex::default(),
+            },
+            weight: 0.0,
+        }
+    }
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum PrepareError {
+    Capacity,
+    Calculation(Error),
+}
+pub struct BorrowedGaussian<'a> {
+    modes: &'a [PreparedMode],
+    domain: QueryDomain,
+    pub energy_j: f64,
+    pub power_w: f64,
+}
+impl BorrowedGaussian<'_> {
+    pub fn sample(&self, point: [f64; 2]) -> Result<Surface, Error> {
+        if !(0..2).all(|i| {
+            point[i].is_finite() && point[i] >= self.domain.min[i] && point[i] <= self.domain.max[i]
+        }) {
+            return Err(Error::Domain);
+        }
+        sample_modes(self.modes, point)
+    }
+}
 pub struct GaussianField {
-    modes: Vec<([f64; 2], Response, f64)>,
+    modes: Vec<PreparedMode>,
     pub energy_j: f64,
     pub power_w: f64,
 }
@@ -56,7 +96,7 @@ impl<'a> BoundedGaussian<'a> {
             return Err(Error::Domain);
         }
         // Valide aussi l'ensemble de la trajectoire, y compris les segments futurs.
-        model.trajectory(segments, domain.start)?;
+        validate_segments(segments)?;
         Ok(Self {
             model,
             segments,
@@ -70,6 +110,34 @@ impl<'a> BoundedGaussian<'a> {
         Ok(BoundedField {
             field: self.model.trajectory(self.segments, time)?,
             domain: self.domain,
+        })
+    }
+    /// Pool de travail modifiable au refus ; aucune vue n'est alors retournée.
+    pub fn prepare_into<'p>(
+        &self,
+        time: SimTime,
+        pool: &'p mut [PreparedMode],
+    ) -> Result<BorrowedGaussian<'p>, PrepareError> {
+        if time.0 < self.domain.start.0 || time.0 > self.domain.end.0 {
+            return Err(PrepareError::Calculation(Error::Domain));
+        }
+        let count = self.model.mode_count();
+        if pool.len() < count {
+            return Err(PrepareError::Capacity);
+        }
+        let mut index = 0;
+        let (energy_j, power_w) = self
+            .model
+            .compute(self.segments, time, |mode| {
+                pool[index] = mode;
+                index += 1;
+            })
+            .map_err(PrepareError::Calculation)?;
+        Ok(BorrowedGaussian {
+            modes: &pool[..count],
+            domain: self.domain,
+            energy_j,
+            power_w,
         })
     }
 }
@@ -151,35 +219,21 @@ impl GaussianPressure {
         segments: &[PressureSegment],
         time: SimTime,
     ) -> Result<GaussianField, Error> {
-        if segments.is_empty() {
-            return Err(Error::Domain);
-        }
-        for s in segments {
-            if s.duration_us == 0
-                || s.birth.0.checked_add(s.duration_us).is_none()
-                || !s
-                    .origin
-                    .iter()
-                    .chain(s.velocity.iter())
-                    .chain([s.pressure_pa].iter())
-                    .all(|x| x.is_finite())
-            {
-                return Err(Error::Domain);
-            }
-        }
-        for pair in segments.windows(2) {
-            let a = pair[0];
-            let b = pair[1];
-            let dt = a.duration_us as f64 / 1e6;
-            let end = [
-                a.origin[0] + a.velocity[0] * dt,
-                a.origin[1] + a.velocity[1] * dt,
-            ];
-            if a.birth.0 + a.duration_us != b.birth.0 || end != b.origin {
-                return Err(Error::Domain);
-            }
-        }
+        validate_segments(segments)?;
         let mut modes = Vec::with_capacity(self.nodes.len());
+        let (energy, power) = self.compute(segments, time, |mode| modes.push(mode))?;
+        Ok(GaussianField {
+            modes,
+            energy_j: energy,
+            power_w: power,
+        })
+    }
+    fn compute(
+        &self,
+        segments: &[PressureSegment],
+        time: SimTime,
+        mut write: impl FnMut(PreparedMode),
+    ) -> Result<(f64, f64), Error> {
         let mut energy = 0.0;
         let mut power = 0.0;
         for n in &self.nodes {
@@ -207,35 +261,73 @@ impl GaussianPressure {
             // Intégrale sur tout le plan k : facteur 2 par rapport à l'énergie moyenne cosinus S89.
             energy += 2.0 * n.weight * n.mode.energy(r);
             power -= n.weight * (pressure.re * r.velocity.re + pressure.im * r.velocity.im);
-            modes.push((n.k, r, n.weight));
+            write(PreparedMode {
+                k: n.k,
+                response: r,
+                weight: n.weight,
+            });
         }
         if !energy.is_finite() || !power.is_finite() {
             return Err(Error::NonFinite);
         }
-        Ok(GaussianField {
-            modes,
-            energy_j: energy,
-            power_w: power,
-        })
+        Ok((energy, power))
+    }
+    pub fn mode_count(&self) -> usize {
+        self.nodes.len()
     }
 }
 impl GaussianField {
     pub fn sample(&self, point: [f64; 2]) -> Result<Surface, Error> {
-        if !point.iter().all(|v| v.is_finite()) {
+        sample_modes(&self.modes, point)
+    }
+}
+fn validate_segments(segments: &[PressureSegment]) -> Result<(), Error> {
+    if segments.is_empty() {
+        return Err(Error::Domain);
+    }
+    for s in segments {
+        if s.duration_us == 0
+            || s.birth.0.checked_add(s.duration_us).is_none()
+            || !s
+                .origin
+                .iter()
+                .chain(s.velocity.iter())
+                .chain([s.pressure_pa].iter())
+                .all(|x| x.is_finite())
+        {
             return Err(Error::Domain);
         }
-        let mut out = Surface::default();
-        for (k, r, w) in &self.modes {
-            let phase = k[0] * point[0] + k[1] * point[1];
-            let (s, c) = phase.sin_cos();
-            out.eta += w * (r.eta.re * c - r.eta.im * s);
-            out.vertical_velocity += w * (r.velocity.re * c - r.velocity.im * s);
-        }
-        if !out.eta.is_finite() || !out.vertical_velocity.is_finite() {
-            return Err(Error::NonFinite);
-        }
-        Ok(out)
     }
+    for pair in segments.windows(2) {
+        let a = pair[0];
+        let b = pair[1];
+        let dt = a.duration_us as f64 / 1e6;
+        let end = [
+            a.origin[0] + a.velocity[0] * dt,
+            a.origin[1] + a.velocity[1] * dt,
+        ];
+        if a.birth.0 + a.duration_us != b.birth.0 || end != b.origin {
+            return Err(Error::Domain);
+        }
+    }
+    Ok(())
+}
+fn sample_modes(modes: &[PreparedMode], point: [f64; 2]) -> Result<Surface, Error> {
+    if !point.iter().all(|v| v.is_finite()) {
+        return Err(Error::Domain);
+    }
+    let mut out = Surface::default();
+    for mode in modes {
+        let (k, r, w) = (&mode.k, &mode.response, mode.weight);
+        let phase = k[0] * point[0] + k[1] * point[1];
+        let (s, c) = phase.sin_cos();
+        out.eta += w * (r.eta.re * c - r.eta.im * s);
+        out.vertical_velocity += w * (r.velocity.re * c - r.velocity.im * s);
+    }
+    if !out.eta.is_finite() || !out.vertical_velocity.is_finite() {
+        return Err(Error::NonFinite);
+    }
+    Ok(out)
 }
 #[cfg(test)]
 mod tests {
@@ -251,6 +343,71 @@ mod tests {
     }
     fn grid(n: usize, a: usize, cut: f64) -> GaussianPressure {
         GaussianPressure::new(1.0, cut, n, a, 9.81, 1025.0).unwrap()
+    }
+    #[test]
+    fn borrowed_preparation_matches_owned_and_preserves_tail_s93() {
+        let g = grid(32, 48, 6.0);
+        let path = [source()];
+        let domain = QueryDomain {
+            min: [-8.0; 2],
+            max: [12.0; 2],
+            start: SimTime(0),
+            end: SimTime(8_000_000),
+        };
+        let bounded = BoundedGaussian::new(&g, &path, domain).unwrap();
+        let mut pool = vec![PreparedMode::default(); g.mode_count() + 1];
+        pool[g.mode_count()].weight = 123.0;
+        for us in [0, 2_000_000, 4_000_000, 8_000_000] {
+            let owned = g.trajectory(&path, SimTime(us)).unwrap();
+            let borrowed = bounded.prepare_into(SimTime(us), &mut pool).unwrap();
+            assert_eq!(owned.energy_j.to_bits(), borrowed.energy_j.to_bits());
+            assert_eq!(owned.power_w.to_bits(), borrowed.power_w.to_bits());
+            for p in [[-8.0, -8.0], [0.0, 0.0], [4.0, 2.0], [12.0, 12.0]] {
+                let a = owned.sample(p).unwrap();
+                let b = borrowed.sample(p).unwrap();
+                assert_eq!(a.eta.to_bits(), b.eta.to_bits());
+                assert_eq!(a.vertical_velocity.to_bits(), b.vertical_velocity.to_bits());
+            }
+            assert!(borrowed.sample([13.0, 0.0]).is_err());
+        }
+        assert_eq!(pool[g.mode_count()].weight, 123.0);
+    }
+    #[test]
+    fn borrowed_refusal_keeps_separate_active_pool_s93() {
+        let g = grid(8, 8, 6.0);
+        let path = [source()];
+        let d = QueryDomain {
+            min: [-8.0; 2],
+            max: [12.0; 2],
+            start: SimTime(0),
+            end: SimTime(8_000_000),
+        };
+        let b = BoundedGaussian::new(&g, &path, d).unwrap();
+        let mut active = vec![PreparedMode::default(); g.mode_count()];
+        let live = b.prepare_into(SimTime(1_000_000), &mut active).unwrap();
+        let before = live.sample([0.0, 0.0]).unwrap();
+        let mut short = vec![PreparedMode::default(); g.mode_count() - 1];
+        short[0].weight = 99.0;
+        assert!(matches!(
+            b.prepare_into(SimTime(1_000_000), &mut short),
+            Err(PrepareError::Capacity)
+        ));
+        assert_eq!(short[0].weight, 99.0);
+        let mut spare = vec![PreparedMode::default(); g.mode_count()];
+        assert!(b.prepare_into(SimTime(8_000_001), &mut spare).is_err());
+        let mut bad = source();
+        bad.pressure_pa = f64::MAX;
+        let badpath = [bad];
+        let badbound = BoundedGaussian::new(&g, &badpath, d).unwrap();
+        assert!(matches!(
+            badbound.prepare_into(SimTime(1_000_000), &mut spare),
+            Err(PrepareError::Calculation(_))
+        ));
+        assert_eq!(
+            before.eta.to_bits(),
+            live.sample([0.0, 0.0]).unwrap().eta.to_bits()
+        );
+        assert!(b.prepare_into(SimTime(2_000_000), &mut spare).is_ok());
     }
     #[test]
     fn bounded_queries_refuse_outside_and_accept_edges_s92() {

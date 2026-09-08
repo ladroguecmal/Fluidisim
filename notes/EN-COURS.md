@@ -65,7 +65,7 @@ Objectif : préparation de référence dans un pool hôte, vue empruntée et ref
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [ ] **P2** — extraire validation/calcul partagé, préparation sans allocation et tests d'identité/refus.
+- [x] **P2** — extraire validation/calcul partagé, préparation sans allocation et tests d'identité/refus.
 - [ ] **P3** — vérifier et publier les limites, rituel de passation.
 
 ### Notes de reprise
