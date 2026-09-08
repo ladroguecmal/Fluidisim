@@ -71,6 +71,8 @@ pub struct ModalPressure {
     plus: i64,
     minus: i64,
     force: Complex,
+    pressure: Complex,
+    doppler: i64,
 }
 // Conversion d'une fréquence signée ; marge pour somme et différence sans débordement.
 fn frequency(rate: f32) -> Result<i64, Error> {
@@ -191,10 +193,33 @@ impl ModalPressure {
             plus: doppler + freq,
             minus: doppler - freq,
             force,
+            pressure: Complex::phase(negative(origin)).scale(s.pressure_pa),
+            doppler,
         })
     }
     pub fn valid_until(&self) -> SimTime {
         SimTime(self.birth.0 + self.horizon)
+    }
+    /// Pression complexe active sur [naissance, extinction), phase Q32 de la source.
+    pub fn pressure(&self, now: SimTime) -> Result<Complex, Error> {
+        let Some(age) = now.0.checked_sub(self.birth.0) else {
+            return Ok(Complex::default());
+        };
+        if age > self.horizon {
+            return Err(Error::Time);
+        }
+        if age >= self.duration {
+            return Ok(Complex::default());
+        }
+        let p = self.pressure.mul(Complex::phase(negative(phase(
+            self.doppler,
+            age,
+            1_000_000,
+        ))));
+        if !p.re.is_finite() || !p.im.is_finite() {
+            return Err(Error::NonFinite);
+        }
+        Ok(p)
     }
     pub fn sample(&self, now: SimTime) -> Result<Response, Error> {
         let Some(age) = now.0.checked_sub(self.birth.0) else {
@@ -241,6 +266,34 @@ impl ModalPressure {
 mod tests {
     use super::*;
     use crate::pressure_mode::{PressureMode, PressureSegment};
+    #[test]
+    fn pressure_phase_and_half_open_lifetime_s104() {
+        for birth in [10, u64::MAX - 8_000_000] {
+            let s = Segment {
+                birth: SimTime(birth),
+                ..source(2.0)
+            };
+            let mode = ModalPressure::new([0.6, 0.8], 9.81, 1025.0, s, 8_000_000).unwrap();
+            assert_eq!(mode.pressure(SimTime(birth - 1)).unwrap().re, 0.0);
+            for age in [0, 1, 1_000_000, 3_999_999] {
+                let p = mode.pressure(SimTime(birth + age)).unwrap();
+                let angle = -(0.6f32 as f64 * s.origin[0] as f64
+                    + 0.8f32 as f64 * s.origin[1] as f64
+                    + (0.6f32 * 2.0) as f64 * age as f64 / 1e6);
+                assert!((p.re as f64 - 10.0 * angle.cos()).abs() < 4e-6);
+                assert!((p.im as f64 - 10.0 * angle.sin()).abs() < 4e-6);
+            }
+            for age in [4_000_000, 8_000_000] {
+                let p = mode.pressure(SimTime(birth + age)).unwrap();
+                assert_eq!((p.re, p.im), (0.0, 0.0));
+            }
+        }
+        let mode = ModalPressure::new([1.0, 0.0], 9.81, 1025.0, source(2.0), 8_000_000).unwrap();
+        assert!(matches!(
+            mode.pressure(SimTime(8_000_001)),
+            Err(Error::Time)
+        ));
+    }
     fn source(speed: f32) -> Segment {
         Segment {
             birth: SimTime(0),

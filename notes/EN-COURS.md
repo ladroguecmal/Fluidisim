@@ -65,7 +65,7 @@ Objectif : puissance candidate et bilan travail/énergie, interférences conserv
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [ ] **P2** — construire la puissance, tests et campagne aux deux résolutions reçues.
+- [x] **P2** — construire la puissance, tests et campagne aux deux résolutions reçues.
 - [ ] **P3** — publier résultats et limites ; rituel de passation et synchronisation.
 
 ### Notes de reprise

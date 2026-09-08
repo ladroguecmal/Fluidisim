@@ -1,6 +1,6 @@
 //! S96 : champ f32 sur spectre fourni par l'hôte. La cuisson gaussienne reste extérieure.
 use crate::{
-    modal_pressure::{scale_integer, Error, ModalPressure, Response, Segment},
+    modal_pressure::{scale_integer, Complex, Error, ModalPressure, Response, Segment},
     PhaseQ32, SimTime,
 };
 #[derive(Clone, Copy, Default)]
@@ -31,6 +31,8 @@ pub struct Field<'a> {
     max: [f32; 2],
     phase_safe: bool,
     pub energy_j: f32,
+    /// Travail de la pression par seconde sur la vitesse totale, interférences incluses.
+    pub power_w: f32,
 }
 #[derive(Debug, PartialEq, Eq)]
 pub enum PrepareError {
@@ -84,6 +86,8 @@ pub fn prepare<'a>(
     }
     let mut energy = 0.0;
     let mut correction = 0.0;
+    let mut power = 0.0;
+    let mut power_correction = 0.0;
     let mut phase_safe = true;
     for (node, slot) in nodes.iter().zip(pool.iter_mut()) {
         if !node.transform.is_finite()
@@ -94,13 +98,18 @@ pub fn prepare<'a>(
             return Err(Error::Domain.into());
         }
         let mut total = Response::default();
+        let mut pressure = Complex::default();
         for s in path {
             let horizon = end.0.checked_sub(s.birth.0).ok_or(Error::Time)?;
             let source = Segment {
                 pressure_pa: s.pressure_pa * node.transform,
                 ..*s
             };
-            let r = ModalPressure::new(node.k, gravity, density, source, horizon)?.sample(now)?;
+            let mode = ModalPressure::new(node.k, gravity, density, source, horizon)?;
+            let r = mode.sample(now)?;
+            let p = mode.pressure(now)?;
+            pressure.re += p.re;
+            pressure.im += p.im;
             total.eta.re += r.eta.re;
             total.eta.im += r.eta.im;
             total.velocity.re += r.velocity.re;
@@ -117,6 +126,12 @@ pub fn prepare<'a>(
         let next = energy + y;
         correction = (next - energy) - y;
         energy = next;
+        let work_rate =
+            -node.weight * (pressure.re * total.velocity.re + pressure.im * total.velocity.im);
+        let y = work_rate - power_correction;
+        let next = power + y;
+        power_correction = (next - power) - y;
+        power = next;
         let turns = [
             node.k[0] / core::f32::consts::TAU,
             node.k[1] / core::f32::consts::TAU,
@@ -133,7 +148,7 @@ pub fn prepare<'a>(
             magnitude,
         };
     }
-    if !energy.is_finite() {
+    if !energy.is_finite() || !power.is_finite() {
         return Err(Error::NonFinite.into());
     }
     Ok(Field {
@@ -142,6 +157,7 @@ pub fn prepare<'a>(
         max,
         phase_safe,
         energy_j: energy,
+        power_w: power,
     })
 }
 impl Field<'_> {
@@ -304,6 +320,7 @@ mod tests {
             max: [12.0; 2],
             phase_safe: false,
             energy_j: 0.0,
+            power_w: 0.0,
         };
         assert!(g
             .sample_batch(&[[0.0; 2], [12.0, 0.0]], &mut scratch, &mut output)
@@ -325,6 +342,7 @@ mod tests {
             max: [12.0; 2],
             phase_safe: true,
             energy_j: 0.0,
+            power_w: 0.0,
         };
         assert!(matches!(
             g.sample_batch(&[[0.0; 2]], &mut scratch, &mut output),
@@ -460,6 +478,7 @@ mod tests {
             max: [1.0; 2],
             phase_safe: true,
             energy_j: 0.0,
+            power_w: 0.0,
         };
         assert!(matches!(f.sample([0.0; 2]), Err(Error::NonFinite)));
     }
@@ -573,6 +592,10 @@ mod tests {
             .unwrap();
             let r = reference.trajectory(&rp, SimTime(us)).unwrap();
             assert!((f.energy_j as f64 - r.energy_j).abs() < 2e-6);
+            assert!((f.power_w as f64 - r.power_w).abs() < 1e-7);
+            if us >= 4_000_000 {
+                assert_eq!(f.power_w, 0.0);
+            }
             for iy in 0..11 {
                 for ix in 0..11 {
                     let p = [-8.0 + ix as f32 * 2.0, -8.0 + iy as f32 * 2.0];
