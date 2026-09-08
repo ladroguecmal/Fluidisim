@@ -65,7 +65,7 @@ Objectif : compléter les grandeurs de surface du sillage et vérifier leurs ide
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [ ] **P2** — construire potentiel, pente et vitesse horizontale ; tests de dérivées et symétries, raffinement et suite.
+- [x] **P2** — construire potentiel, pente et vitesse horizontale ; tests de dérivées et symétries, raffinement et suite.
 - [ ] **P3** — publier les résultats et limites, mettre à jour la connaissance et exécuter le rituel de passation.
 
 ### Notes de reprise
@@ -74,3 +74,7 @@ Départ c68e2e8, copies actives identiques et propres, jeton libre. S93-1.
 Référence profonde linéaire f64 uniquement : potentiel de surface q_dot/|k| ;
 pente = gradient de eta, vitesse horizontale = gradient du potentiel, verticale = eta_t.
 Réception des nouvelles grandeurs distincte de celle de la hauteur. Pas de composition runtime.
+
+P2 : trois tests S94 release réussis ; campagne étendue reçue, maxima S92 inchangés.
+Suite : 109 core + 93 harnais = 202 réussis, cinq ignorés, quatre avertissements préexistants.
+SURFACE-S94 contient formules, mesures et limites ; prochain lot S95 : noyau modal déterministe.

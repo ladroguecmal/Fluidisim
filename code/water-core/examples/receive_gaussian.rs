@@ -25,7 +25,8 @@ fn main() {
         .iter()
         .map(|&(r, a, k)| GaussianPressure::new(1.0, k, r, a, 9.81, 1025.0).unwrap())
         .collect();
-    let mut max = [[0.0f64; 4]; 3];
+    // S94 : seuils de régression à calibrer hors de cette fixture.
+    let mut max = [[0.0f64; 7]; 3];
     for us in [
         0, 1_000_000, 1_999_999, 2_000_000, 2_000_001, 3_000_000, 4_000_000, 6_000_000, 8_000_000,
     ] {
@@ -45,6 +46,13 @@ fn main() {
                     let q = fields[i + 1].sample(p).unwrap();
                     max[i][0] = max[i][0].max((base.eta - q.eta).abs());
                     max[i][1] = max[i][1].max((base.vertical_velocity - q.vertical_velocity).abs());
+                    max[i][4] = max[i][4].max((base.potential - q.potential).abs());
+                    for axis in 0..2 {
+                        max[i][5] = max[i][5].max((base.slope[axis] - q.slope[axis]).abs());
+                        max[i][6] = max[i][6].max(
+                            (base.horizontal_velocity[axis] - q.horizontal_velocity[axis]).abs(),
+                        );
+                    }
                 }
             }
         }
@@ -55,6 +63,11 @@ fn main() {
             errors[0], errors[1], errors[2], errors[3]
         );
         assert!(errors[0] < 1e-6 && errors[1] < 1e-5 && errors[2] < 1e-5 && errors[3] < 1e-5);
+        println!(
+            "{name}: potential_m2_s={:.9e} slope={:.9e} horizontal_m_s={:.9e}",
+            errors[4], errors[5], errors[6]
+        );
+        assert!(errors[4] < 1e-5 && errors[5] < 1e-6 && errors[6] < 1e-5);
     }
     println!("9 times x 121 points = 1089 points per comparison; bounds [-8,12]^2, [0,8]s; sampled evidence only");
 }

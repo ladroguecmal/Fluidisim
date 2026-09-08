@@ -6,6 +6,7 @@ use crate::{
 use std::f64::consts::TAU;
 struct Node {
     k: [f64; 2],
+    magnitude: f64,
     mode: PressureMode,
     transform: f64,
     weight: f64,
@@ -18,12 +19,14 @@ pub struct GaussianPressure {
 pub struct PreparedMode {
     k: [f64; 2],
     response: Response,
+    potential: Complex,
     weight: f64,
 }
 impl Default for PreparedMode {
     fn default() -> Self {
         Self {
             k: [0.0; 2],
+            potential: Complex::default(),
             response: Response {
                 eta: Complex::default(),
                 velocity: Complex::default(),
@@ -60,8 +63,15 @@ pub struct GaussianField {
 }
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Surface {
+    /// Élévation en mètres ; toutes les grandeurs sont linéarisées à z=0.
     pub eta: f64,
     pub vertical_velocity: f64,
+    /// Potentiel de vitesse à z=0, en m²/s (jauge sans mode constant).
+    pub potential: f64,
+    /// Gradient horizontal de l'élévation, sans dimension.
+    pub slope: [f64; 2],
+    /// Gradient horizontal du potentiel, en m/s ; pas la vitesse de la source.
+    pub horizontal_velocity: [f64; 2],
 }
 /// Domaine déclaré par l'appelant ; ne constitue pas une certification numérique.
 #[derive(Clone, Copy)]
@@ -187,6 +197,7 @@ impl GaussianPressure {
                 let vector = [k * angle.cos(), k * angle.sin()];
                 nodes.push(Node {
                     k: vector,
+                    magnitude: vector[0].hypot(vector[1]),
                     mode: PressureMode::new(vector, gravity, density)?,
                     transform,
                     weight,
@@ -261,9 +272,18 @@ impl GaussianPressure {
             // Intégrale sur tout le plan k : facteur 2 par rapport à l'énergie moyenne cosinus S89.
             energy += 2.0 * n.weight * n.mode.energy(r);
             power -= n.weight * (pressure.re * r.velocity.re + pressure.im * r.velocity.im);
+            // Condition cinématique profonde : q_dot = |k| psi, à z=0.
+            let potential = Complex {
+                re: r.velocity.re / n.magnitude,
+                im: r.velocity.im / n.magnitude,
+            };
+            if !potential.re.is_finite() || !potential.im.is_finite() {
+                return Err(Error::NonFinite);
+            }
             write(PreparedMode {
                 k: n.k,
                 response: r,
+                potential,
                 weight: n.weight,
             });
         }
@@ -323,8 +343,19 @@ fn sample_modes(modes: &[PreparedMode], point: [f64; 2]) -> Result<Surface, Erro
         let (s, c) = phase.sin_cos();
         out.eta += w * (r.eta.re * c - r.eta.im * s);
         out.vertical_velocity += w * (r.velocity.re * c - r.velocity.im * s);
+        let psi = &mode.potential;
+        out.potential += w * (psi.re * c - psi.im * s);
+        for axis in 0..2 {
+            out.slope[axis] -= w * k[axis] * (r.eta.re * s + r.eta.im * c);
+            out.horizontal_velocity[axis] -= w * k[axis] * (psi.re * s + psi.im * c);
+        }
     }
-    if !out.eta.is_finite() || !out.vertical_velocity.is_finite() {
+    if ![out.eta, out.vertical_velocity, out.potential]
+        .iter()
+        .chain(out.slope.iter())
+        .chain(out.horizontal_velocity.iter())
+        .all(|x| x.is_finite())
+    {
         return Err(Error::NonFinite);
     }
     Ok(out)
@@ -343,6 +374,141 @@ mod tests {
     }
     fn grid(n: usize, a: usize, cut: f64) -> GaussianPressure {
         GaussianPressure::new(1.0, cut, n, a, 9.81, 1025.0).unwrap()
+    }
+    #[test]
+    fn surface_derivatives_and_dynamic_condition_s94() {
+        let g = grid(32, 48, 6.0);
+        let mut a = source();
+        a.duration_us = 2_000_000;
+        let b = PressureSegment {
+            birth: SimTime(2_000_000),
+            origin: [4.0, 0.0],
+            velocity: [0.0, 2.0],
+            ..a
+        };
+        let path = [a, b];
+        let mut max = [0.0f64; 4];
+        let mut signals = [0.0f64; 4];
+        // Hors discontinuités du forçage : différences centrées, dt=100 µs, dx=0,1 mm.
+        for us in [1_000_000, 3_000_000, 6_000_000] {
+            let f = g.trajectory(&path, SimTime(us)).unwrap();
+            let before = g.trajectory(&path, SimTime(us - 100)).unwrap();
+            let after = g.trajectory(&path, SimTime(us + 100)).unwrap();
+            for p in [[0.7, -0.8], [4.2, 2.3], [8.0, 6.0]] {
+                let q = f.sample(p).unwrap();
+                for axis in 0..2 {
+                    let mut lo = p;
+                    let mut hi = p;
+                    lo[axis] -= 1e-4;
+                    hi[axis] += 1e-4;
+                    let lo = f.sample(lo).unwrap();
+                    let hi = f.sample(hi).unwrap();
+                    max[0] = max[0].max(((hi.eta - lo.eta) / 2e-4 - q.slope[axis]).abs());
+                    max[1] = max[1].max(
+                        ((hi.potential - lo.potential) / 2e-4 - q.horizontal_velocity[axis]).abs(),
+                    );
+                    signals[0] = signals[0].max(q.slope[axis].abs());
+                    signals[1] = signals[1].max(q.horizontal_velocity[axis].abs());
+                }
+                let lo = before.sample(p).unwrap();
+                let hi = after.sample(p).unwrap();
+                max[2] = max[2].max(((hi.eta - lo.eta) / 2e-4 - q.vertical_velocity).abs());
+                let pressure = if us < 4_000_000 {
+                    let center = if us < 2_000_000 {
+                        [2.0, 0.0]
+                    } else {
+                        [4.0, 2.0]
+                    };
+                    10.0 * g
+                        .unit_pressure([p[0] - center[0], p[1] - center[1]])
+                        .unwrap()
+                } else {
+                    0.0
+                };
+                // Même quadrature : vérifie la dynamique, pas son erreur spectrale.
+                let expected = -9.81 * q.eta - pressure / 1025.0;
+                max[3] = max[3].max(((hi.potential - lo.potential) / 2e-4 - expected).abs());
+                signals[2] = signals[2].max(q.vertical_velocity.abs());
+                signals[3] = signals[3].max(expected.abs());
+            }
+        }
+        println!("S94 derivative errors={max:?}, nonzero witnesses={signals:?}");
+        assert!(signals.iter().all(|&x| x > 1e-5));
+        assert!(max.iter().all(|&x| x < 1e-9));
+    }
+    #[test]
+    fn vector_symmetries_and_segment_splitting_s94() {
+        let g = grid(32, 48, 6.0);
+        let s = source();
+        let rotated = PressureSegment {
+            velocity: [0.0, 2.0],
+            ..s
+        };
+        let a = PressureSegment {
+            duration_us: 2_000_000,
+            ..s
+        };
+        let b = PressureSegment {
+            birth: SimTime(2_000_000),
+            origin: [4.0, 0.0],
+            ..a
+        };
+        for us in [0, 1_000_000, 2_000_000, 4_000_000, 8_000_000] {
+            let f = g.field(s, SimTime(us)).unwrap();
+            let rot = g.field(rotated, SimTime(us)).unwrap();
+            let split = g.trajectory(&[a, b], SimTime(us)).unwrap();
+            for p in [[0.7, -0.8], [4.2, 2.3], [8.0, 6.0]] {
+                let q = f.sample(p).unwrap();
+                let r = rot.sample([-p[1], p[0]]).unwrap();
+                let m = f.sample([p[0], -p[1]]).unwrap();
+                let d = split.sample(p).unwrap();
+                assert!((q.potential - r.potential).abs() < 1e-14);
+                assert!((q.potential - m.potential).abs() < 1e-14);
+                assert!((q.potential - d.potential).abs() < 1e-14);
+                for (v, vr, vm, vd) in [
+                    (q.slope, r.slope, m.slope, d.slope),
+                    (
+                        q.horizontal_velocity,
+                        r.horizontal_velocity,
+                        m.horizontal_velocity,
+                        d.horizontal_velocity,
+                    ),
+                ] {
+                    assert!((v[0] - vr[1]).abs() < 1e-14 && (v[1] + vr[0]).abs() < 1e-14);
+                    assert!((v[0] - vm[0]).abs() < 1e-14 && (v[1] + vm[1]).abs() < 1e-14);
+                    assert!((v[0] - vd[0]).abs() < 1e-14 && (v[1] - vd[1]).abs() < 1e-14);
+                }
+            }
+        }
+    }
+    #[test]
+    fn nonfinite_new_surface_components_refused_s94() {
+        // Les anciens scalaires restent finis : un contrôle limité à eta/w manquerait ces refus.
+        let mut m = PreparedMode::default();
+        m.k = [2.0, 0.0];
+        m.weight = 1.0;
+        m.response.eta.im = f64::MAX;
+        assert!(matches!(
+            sample_modes(&[m], [0.0; 2]),
+            Err(Error::NonFinite)
+        ));
+        m.response.eta.im = 0.0;
+        m.potential.im = f64::MAX;
+        assert!(matches!(
+            sample_modes(&[m], [0.0; 2]),
+            Err(Error::NonFinite)
+        ));
+        m.potential = Complex {
+            re: f64::MAX,
+            im: 0.0,
+        };
+        m.weight = 2.0;
+        assert!(matches!(
+            sample_modes(&[m], [0.0; 2]),
+            Err(Error::NonFinite)
+        ));
+        m.potential.re = 1.0;
+        assert!(sample_modes(&[m], [0.0; 2]).is_ok());
     }
     #[test]
     fn borrowed_preparation_matches_owned_and_preserves_tail_s93() {
@@ -367,6 +533,12 @@ mod tests {
                 let b = borrowed.sample(p).unwrap();
                 assert_eq!(a.eta.to_bits(), b.eta.to_bits());
                 assert_eq!(a.vertical_velocity.to_bits(), b.vertical_velocity.to_bits());
+                assert_eq!(a.potential.to_bits(), b.potential.to_bits());
+                assert_eq!(a.slope.map(f64::to_bits), b.slope.map(f64::to_bits));
+                assert_eq!(
+                    a.horizontal_velocity.map(f64::to_bits),
+                    b.horizontal_velocity.map(f64::to_bits)
+                );
             }
             assert!(borrowed.sample([13.0, 0.0]).is_err());
         }
