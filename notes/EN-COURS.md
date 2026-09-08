@@ -58,23 +58,18 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S103 — terminée
+Session : S104 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : comparer résolutions radiales/angulaires sur emprise inchangée et grandeurs complètes.
+Objectif : puissance candidate et bilan travail/énergie, interférences conservées.
 
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [x] **P2** — construire/exécuter la campagne, conserver les refus et identifier un candidat.
-- [x] **P3** — publier résultats, portée et suite ; rituel de passation et synchronisation.
+- [ ] **P2** — construire la puissance, tests et campagne aux deux résolutions reçues.
+- [ ] **P3** — publier résultats et limites ; rituel de passation et synchronisation.
 
 ### Notes de reprise
 
-Départ fdf874b, copies propres identiques. S102-1. Virage, [-8,12]² et 0–8s conservés.
-Seuils S92/S94 : eta1e-6, w1e-5, phi1e-5, pente1e-6, u1e-5, énergie1e-5.
-Comparer référence128² et contrôle256² ; axes séparés puis candidat combiné.
-Ne pas transformer une réception échantillonnée en borne continue ou profil universel.
-
-P2 : 14 résolutions comparées ; 112x80 passe deux références et campagne dense8379 points.
-Lot64 11305,4 µs vs19732,1 ; RESOLUTION-S103. Exemples release exécutés, bibliothèque inchangée.
-Suite217/cinq ignorés inchangée, non relancée ; dense possède assertions de réception.
+Départ 750124d, copies propres identiques. S103-1.
+Puissance=-somme poids Re(P*conj(qdot_total)). Pression active seulement ; énergie totale.
+Comparer travail intégré, référence f64 et extinction ; aucune énergie additionnée par segment.
