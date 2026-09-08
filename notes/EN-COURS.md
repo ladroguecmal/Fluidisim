@@ -58,17 +58,18 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S80 — terminée
+Session : S81 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : préparer les champs sur pool hôte puis évaluer des lots sans sortie partielle.
+Objectif : mesurer préparation/B/B+W et optimiser à résultats identiques le poste dominant.
 
 ### Plan
 
 - [x] **P1** — passation, copies, jeton et plan seul.
-- [x] **P2** — préparation empruntée au journal, lot transactionnel et essais de refus.
-- [x] **P3** — tests complets, contrat et limites, rituel et synchronisation.
+- [ ] **P2** — banc release reproductible : latences, mémoire et empreinte des sorties.
+- [ ] **P3** — optimisation mesurée, contrôles physiques et comparaison avant/après.
+- [ ] **P4** — rapport, actions et rituel ; copies synchronisées.
 
 ### Notes de reprise
 
-Départ cc1915e. Journal emprunté immuablement pendant la vie de la préparation : pas de
-champs périmés par mutation concurrente. Pool de préparation et tampon de lot fournis par hôte.
+Départ a5385e2. Ne pas transformer les mesures du poste local en budget matériel cible.
+Optimisation première envisagée : directions Bessel invariantes ; confirmer le coût dominant.
