@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
+JETON            : occupé
 Battement        : 2026-09-08 17:40 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S93
 Dernière session : S92 — emprise et raffinement ; 197 tests réussis, cinq ignorés
 Session suivante : S93 — préparation sur mémoire hôte (S92-1)
 

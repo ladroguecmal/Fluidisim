@@ -58,20 +58,17 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S92 — terminée
+Session : S93 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : emprise explicitement bornée et campagne de raffinement du virage.
+Objectif : préparation de référence dans un pool hôte, vue empruntée et refus sans publication.
 
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [x] **P2** — enveloppe de requête bornée et campagne indépendante radial/angular/coupure.
-- [x] **P3** — publier portée et mesures, vérification et rituel de passation.
+- [ ] **P2** — extraire validation/calcul partagé, préparation sans allocation et tests d'identité/refus.
+- [ ] **P3** — vérifier et publier les limites, rituel de passation.
 
 ### Notes de reprise
 
-Départ b8cede4. Ne pas présenter une grille finie comme une preuve continue. Le domaine
-est un contrat explicite hôte ; réception mesurée limitée au profil et trajectoire testés.
-
-P2 : 6c64acc. Campagne release ; suite 197 réussis, cinq ignorés.
-EMPRISE-S92 et L205 publiés. Suite S93 : S92-1, mémoire hôte.
+Départ 01716ce. Les nœuds du modèle peuvent rester alloués à l'initialisation ; préparation
+et interrogation sur mémoire hôte. Pool candidat modifiable au refus, aucune vue publiée.
