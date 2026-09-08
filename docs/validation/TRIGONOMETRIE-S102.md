@@ -48,3 +48,5 @@ interrogé, par raffinements radiaux et angulaires indépendants, avant toute ba
 de modes. Mesurer erreur sur hauteur, pente, potentiel et vitesses, pas seulement énergie.
 Conserver la référence 128² et son emprise ; ne pas réduire arbitrairement sa résolution.
 Puissance/travail candidat, codec, intégration et conformité interplateforme restent ouverts.
+
+**Actualisation S103 :** S102-1 réalisée comme campagne, [RESOLUTION-S103](RESOLUTION-S103.md). Candidat112×80 reçu sur fixture ; suite S103-1 : puissance et bilan candidat.

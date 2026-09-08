@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 22:53 +02:00
+JETON            : libre
+Battement        : 2026-09-08 22:54 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S103 — résolution et emprise
-Dernière session : S102 — trigonométrie ; 217 tests réussis, cinq ignorés
-Session suivante : S103 — résolution et emprise (S102-1)
+Session en cours : aucune
+Dernière session : S103 — résolution reçue ; suite217/cinq ignorés inchangée
+Session suivante : S104 — puissance et bilan candidat (S103-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -167,6 +167,10 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S103 — 2026-09-08 :** RESOLUTION-S103, candidat112×80 reçu sur8379 échantillons ;
+lot64 11,305 ms médian local. Bibliothèque inchangée, suite217/cinq ignorés non relancée.
+73 ADR,193 angles morts. S102-1 réalisée ; suite S104 : puissance et bilan S103-1.
 
 **S102 — 2026-09-08 :** TRIGONOMETRIE-S102, réduction commune reçue en bits ; gain isolé14,2 %,
 aucun gain global établi. 217 tests réussis, cinq ignorés ; 73 ADR, 193 angles morts.

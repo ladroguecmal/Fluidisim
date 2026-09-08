@@ -6025,3 +6025,22 @@ inchangés, oracle max5,478e-9. Bancs exécutés et diff/formatage vérifiés. P
 sur toutes les grandeurs avant réduction. S101-1 réalisée, aucun gain global revendiqué.
 
 **Clôture :** suite complète debug 124 core + 93 harnais = 217 réussis, cinq ignorés ; quatre avertissements préexistants. Copies synchronisées après commit final.
+
+## S103 — 2026-09-08 — Résolution reçue du virage
+
+**Entrée :** Continue ; départ fdf874b, copies actives propres et identiques.
+**Produit :** receive_resolution et bench_resolution, RESOLUTION-S103 ; aucun défaut
+ou changement de bibliothèque, aucun réglage par défaut déplacé.
+**Mesures :** 14 résolutions, références128²/256² ; 96 rayons refusés par potentiel,
+64 directions refusées par pente/vitesse. 112×80 reçu séparément puis combiné, et sur
+8379 échantillons densifiés. Max potentiel contre256² 8,534e-6, marge14,7 % au seuil,
+pas à la solution continue. Candidat4480 modes, hash045e84b6b9ef7249.
+Médianes préparation3353,5 µs, lot64 11305,4 µs ; référence6293,6/19732,1 µs.
+**Vérification :** campagnes release exécutées ; dense avec assertions, tous critères
+respectés sur fixture. Formatage/diff vérifiés, P2 38d41b8. Suite217 réussis/cinq ignorés
+inchangée, non relancée pour ajout de bancs. Bibliothèque et recetteV1 inchangées.
+**Limites :** réception échantillonnée, pas de borne continue ni profil universel ; oracle256²
+non exact. Gain local non entrelacé, aucun budget cible certifié. 73 ADR,193 angles inchangés.
+L204/L205 appliquées sans nouvelle leçon distincte.
+**Suite S104 :** S103-1, puissance et travail/énergie candidat aux deux résolutions,
+virage et extinction. S102-1 réalisée, optimisation limitée à cette fixture.

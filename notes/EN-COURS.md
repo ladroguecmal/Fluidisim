@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S103 — en cours
+Session : S103 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : comparer résolutions radiales/angulaires sur emprise inchangée et grandeurs complètes.
 
@@ -66,7 +66,7 @@ Objectif : comparer résolutions radiales/angulaires sur emprise inchangée et g
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
 - [x] **P2** — construire/exécuter la campagne, conserver les refus et identifier un candidat.
-- [ ] **P3** — publier résultats, portée et suite ; rituel de passation et synchronisation.
+- [x] **P3** — publier résultats, portée et suite ; rituel de passation et synchronisation.
 
 ### Notes de reprise
 

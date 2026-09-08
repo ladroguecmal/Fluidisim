@@ -17,6 +17,9 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S103 :** [Résolution du virage](validation/RESOLUTION-S103.md), candidat112×80 reçu ; lot64 11,305 ms localement.
+73 ADR,193 angles morts. Suite S104 : puissance et bilan candidat, S103-1.
+
 **S102 :** [Trigonométrie partagée](validation/TRIGONOMETRIE-S102.md), identité conservée ; gain isolé seulement.
 73 ADR, 193 angles morts. Suite S103 : résolution et emprise, S102-1.
 

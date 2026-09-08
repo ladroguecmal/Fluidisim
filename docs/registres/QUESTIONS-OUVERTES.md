@@ -1078,3 +1078,10 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
   TRIGONOMETRIE-S102. Coût du lot64 encore ~20,7 ms localement.
 - **S102-1 : ouverte, S103.** Recevoir une résolution adaptée à l'emprise, axes radial et
   angulaire indépendants, toutes les grandeurs contrôlées ; conserver référence et seuils.
+
+### S103 — Résolution reçue sur fixture
+
+- **S102-1 : réalisée comme campagne.** 112×80 reçu sur8379 échantillons contre128²/256²,
+  RESOLUTION-S103 ; recette par défaut inchangée, pas de certificat continu.
+- **S103-1 : ouverte, S104.** Puissance et bilan travail/énergie du candidat, virage et
+  extinction, résolutions128²/112×80 ; combler cette lacune avant intégration.
