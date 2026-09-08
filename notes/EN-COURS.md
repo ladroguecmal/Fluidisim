@@ -65,7 +65,7 @@ Objectif : mesurer préparation/B/B+W et optimiser à résultats identiques le p
 ### Plan
 
 - [x] **P1** — passation, copies, jeton et plan seul.
-- [ ] **P2** — banc release reproductible : latences, mémoire et empreinte des sorties.
+- [x] **P2** — banc release reproductible : latences, mémoire et empreinte des sorties.
 - [ ] **P3** — optimisation mesurée, contrôles physiques et comparaison avant/après.
 - [ ] **P4** — rapport, actions et rituel ; copies synchronisées.
 
