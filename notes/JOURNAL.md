@@ -5638,3 +5638,18 @@ préparation, index, réseau et rétention restent à construire. Pas de génér
 **Suite S80 :** S79-1, préparation bornée et lot ; S78-1 réalisée au niveau ponctuel.
 
 **Vérification finale :** 71 tests core + 93 harnais = 164 réussis, cinq ignorés, aucun échec. C02/C18 check : deux succès. Quatre avertissements préexistants dans la compilation des tests du harnais. Diff vérifié ; copies synchronisées après commit.
+
+## S80 — 2026-09-08 — Préparation bornée et interrogation par lots
+
+**Entrée :** Continue utilisateur ; départ cc1915e, copies actives identiques.
+**Produit :** prepared_water construit les confirmations une fois dans le pool hôte ; emprunt
+immuable du journal interdisant sa mutation pendant la vie de la préparation. Lot évalué dans
+un temporaire puis copié en sortie après succès complet. Aucun résultat partiel sur erreur.
+**Contrôles :** quatre tests préparation/lot, refus tardifs, queue conservée et journal vide.
+Compose refuse aussi un point NaN sans champ W. Pas de changement physique ni de hash B attendu.
+**Décision :** ADR-063, S79-1 réalisée localement ; stockage de préparation distinct de publication.
+L194 enregistrée ; aucun angle numéroté supplémentaire, aucun invariant amendé.
+**Suite S81 :** S80-1, mesurer le chemin réel B+W et optimiser le coût dominant. Préconditions
+B, bus, index et rétention ouverts. Aucun budget matériel cible proclamé.
+
+**Vérification finale :** 75 tests core + 93 harnais = 168 réussis, cinq ignorés, aucun échec. Quatre avertissements préexistants des tests du harnais. Tests ciblés release et diff vérifiés ; copies synchronisées après commit.

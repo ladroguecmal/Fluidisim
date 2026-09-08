@@ -17,6 +17,10 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S80 :** [ADR-063 — Préparation et lots](adr/ADR-063-preparation-et-lots.md), **ACTÉE**.
+Pool emprunté et lots sans sortie partielle construits. 63 ADR, 192 angles morts.
+Suite S81 : mesure du chemin réel B+W (S80-1).
+
 **S79 :** [ADR-062 — Vitesses et composition](adr/ADR-062-vitesses-et-composition.md),
 **ACTÉE**. Composition ponctuelle B+W et signe vertical B corrigé. 62 ADR, 192 angles morts.
 Suite S80 : préparation bornée et lots (S79-1).

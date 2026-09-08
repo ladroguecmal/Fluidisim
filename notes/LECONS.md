@@ -3062,3 +3062,10 @@ par transport réclame une frontière de flux, pas une source compensatrice inve
 *(S79)* La correction orbitale horizontale de S21 avait laissé un signe vertical erroné.
 Lorsqu’une grandeur est vectorielle, nommer la loi qui contrôle chaque composante. Une
 régression sur la composante historiquement fautive ne protège pas les autres directions.
+
+## L194 — Le stockage de préparation n’est pas une publication
+
+*(S80)* Une opération peut laisser un préfixe dans son espace temporaire tout en restant
+transactionnelle pour le consommateur. Nommer clairement les deux stockages et leurs droits
+permet de refuser sans copie de secours cachée. Le succès est le point de publication ; les
+lecteurs ne doivent jamais accéder au temporaire pour gagner une copie.

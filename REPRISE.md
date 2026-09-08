@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 12:13 +02:00
+JETON            : libre
+Battement        : 2026-09-08 12:17 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S80
-Dernière session : S79 — composition B+W ; 164 tests réussis, cinq ignorés
-Session suivante : S80 — preparation bornee et interrogation en lot (S79-1)
+Session en cours : aucune
+Dernière session : S80 — preparation et lots ; 168 tests réussis, cinq ignorés
+Session suivante : S81 — mesure preparation et lots B+W (S80-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -148,7 +148,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 17 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 62 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 63 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -167,6 +167,11 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S80 — 2026-09-08 :** ADR-063, préparation bornée et interrogation par lots construites.
+Journal emprunté immuablement, résultats publiés seulement après succès intégral. S79-1 réalisée
+localement. Suite S81 : coût préparation et B+W réel (S80-1) ; bus/index/rétention ouverts.
+63 ADR, 192 angles morts, 17 invariants inchangés.
 
 **S79 — 2026-09-08 :** ADR-062, vitesse orbitale et composition ponctuelle B+W construites.
 Signe vertical B corrigé, nouveaux hashs C02/C18 contrôlés. A192 corrigée ; S78-1 réalisée

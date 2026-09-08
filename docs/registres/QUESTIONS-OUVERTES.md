@@ -893,3 +893,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S79-1 : ouverte, S80.** Préparation des champs sur pool hôte borné et interrogation en lot,
   statut explicite sans publication partielle ; mesurer ensuite le coût B+W réellement raccordé.
 - WaterSystem multi-référentiels, index spatial, réception réseau et rétention S72-2 restent ouverts.
+
+### S80 — Préparation et lots construits
+
+- **S79-1 : réalisée dans le service local.** Pool de champs, journal immuable emprunté,
+  interrogation par lots sans sortie partielle ; ADR-063.
+- **S80-1 : ouverte, S81.** Mesurer préparation et lots incluant les vraies évaluations B,
+  mémoire et latences ; optimiser le poste dominant, sans annoncer un budget cible non constaté.
+- Métadonnées B/points, publication multilecteur, index spatial et rétention S72-2 restent ouverts.

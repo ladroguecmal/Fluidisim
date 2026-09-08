@@ -117,3 +117,9 @@ Suite : vitesse orbitale et composition B+W limitée, sans élargir implicitemen
 composition::compose reçoit le B déjà évalué et les champs du journal confirmé, vérifie leur
 correspondance et compose hauteurs, vitesses et pentes. Perte connue et hors domaine refusés.
 ADR-062 précise les préconditions hôte et le signe vertical B corrigé ; nouveaux hashs C02/C18.
+
+### S80 — Préparation et lots
+
+prepared_water::Prepared emprunte le journal et un pool hôte de champs ; sample_batch
+évalue sur temporaire et ne copie la sortie qu’après succès intégral. Aucun agrandissement.
+Voir ADR-063 pour les préconditions du tampon B et la publication concurrente encore absente.

@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S80 — en cours
+Session : S80 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : préparer les champs sur pool hôte puis évaluer des lots sans sortie partielle.
 
@@ -66,7 +66,7 @@ Objectif : préparer les champs sur pool hôte puis évaluer des lots sans sorti
 
 - [x] **P1** — passation, copies, jeton et plan seul.
 - [x] **P2** — préparation empruntée au journal, lot transactionnel et essais de refus.
-- [ ] **P3** — tests complets, contrat et limites, rituel et synchronisation.
+- [x] **P3** — tests complets, contrat et limites, rituel et synchronisation.
 
 ### Notes de reprise
 
