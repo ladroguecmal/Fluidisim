@@ -104,7 +104,7 @@ fn negative(p: PhaseQ32) -> PhaseQ32 {
 
 /// Multiplication par un entier, sans conversion de la durée en flottant.
 /// Ordre bas-vers-haut fixé ; ici au plus 24 bits pour une durée <=16 millions de µs.
-fn scale_integer(mut coefficient: f32, mut count: u64) -> f32 {
+pub(crate) fn scale_integer(mut coefficient: f32, mut count: u64) -> f32 {
     let mut sum = 0.0;
     while count != 0 {
         if count & 1 != 0 {

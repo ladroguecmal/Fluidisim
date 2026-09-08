@@ -65,7 +65,7 @@ Objectif : superposition f32 sur pool, à spectre fourni explicitement par prép
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [ ] **P2** — construire le champ emprunté et vérifier découpage, virage, grandeurs et refus.
+- [x] **P2** — construire le champ emprunté et vérifier découpage, virage, grandeurs et refus.
 - [ ] **P3** — publier portée et résultats ; rituel de fin et synchronisation.
 
 ### Notes de reprise
@@ -73,3 +73,6 @@ Objectif : superposition f32 sur pool, à spectre fourni explicitement par prép
 Départ 288dfdb, copies propres identiques. S95-1. Séparer la cuisson du spectre gaussien
 (f64/libm à initialisation) de la préparation/requête f32 ; ne pas déclarer cette cuisson
 déterministe. Recevoir le même spectre puis comparer à la référence complète.
+
+P2 : deux tests release reçus ; compensation énergie après échec de somme naïve, seuil maintenu.
+Maxima champ dans SUPERPOSITION-S96 ; suite complète en cours dans code/target/s96-tests.log.

@@ -61,3 +61,4 @@ pub mod prepared_water;
 pub mod pressure_mode;
 pub mod gaussian_pressure;
 pub mod modal_pressure;
+pub mod spectral_pressure;
