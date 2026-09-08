@@ -65,7 +65,7 @@ Objectif : mesurer et partager la réduction du sinus/cosinus, vérifier identit
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [ ] **P2** — construire sin_cos partagé et banc de phase ; identité, physique et coûts.
+- [x] **P2** — construire sin_cos partagé et banc de phase ; identité, physique et coûts.
 - [ ] **P3** — publier résultats et limites ; rituel de passation et synchronisation.
 
 ### Notes de reprise
@@ -73,3 +73,7 @@ Objectif : mesurer et partager la réduction du sinus/cosinus, vérifier identit
 Départ 561f496, copies propres identiques. S101-1.
 Même polynômes et même angle réduit : quadrant commun pour les deux résultats.
 Ne pas remplacer les fonctions individuelles utilisées ailleurs ; raccordement spectral seul.
+
+P2 : identité release sur million de phases + frontières, hashes champ conservés.
+Banc isolé gain14,2 %, pas de gain global net ; TRIGONOMETRIE-S102 publié.
+Suite complète en cours dans code/target/s102-tests.log.

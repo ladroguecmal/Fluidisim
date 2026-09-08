@@ -30,6 +30,27 @@ use crate::types::SimTime;
 pub struct PhaseQ32(pub u32);
 
 impl PhaseQ32 {
+    /// Même arithmétique que sin/cos séparés, réduction d'angle commune.
+    #[inline]
+    pub fn sin_cos(self) -> (f32, f32) {
+        let quadrant = self.0 >> 30;
+        let within = self.0 & 0x3fff_ffff;
+        let x = within as f32 * (core::f32::consts::FRAC_PI_2 / 1_073_741_824.0f32);
+        let swap = x > core::f32::consts::FRAC_PI_4;
+        let a = if swap {
+            core::f32::consts::FRAC_PI_2 - x
+        } else {
+            x
+        };
+        let (s, c) = (poly_sin(a), poly_cos(a));
+        let (s, c) = if swap { (c, s) } else { (s, c) };
+        match quadrant {
+            0 => (s, c),
+            1 => (c, -s),
+            2 => (-s, -c),
+            _ => (-c, s),
+        }
+    }
     #[inline]
     pub fn wrapping_add(self, other: PhaseQ32) -> PhaseQ32 {
         PhaseQ32(self.0.wrapping_add(other.0))
@@ -177,6 +198,26 @@ pub fn freq_hz_to_q32(hz: f64) -> u64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn joint_trig_matches_separate_bits_s102() {
+        let check = |p: u32| {
+            let phase = PhaseQ32(p);
+            let (s, c) = phase.sin_cos();
+            assert_eq!(s.to_bits(), phase.sin().to_bits(), "sin {p}");
+            assert_eq!(c.to_bits(), phase.cos().to_bits(), "cos {p}");
+        };
+        for octant in 0..8u32 {
+            for offset in 0..257u32 {
+                check((octant << 29).wrapping_add(offset));
+                check((octant << 29).wrapping_sub(offset));
+            }
+        }
+        let mut state = 123456789u32;
+        for _ in 0..1_000_000 {
+            state = state.wrapping_mul(1664525).wrapping_add(1013904223);
+            check(state);
+        }
+    }
 
     fn max_ecart_contre_reference() -> f64 {
         let mut worst = 0.0f64;

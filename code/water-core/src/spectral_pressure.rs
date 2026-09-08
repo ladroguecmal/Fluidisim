@@ -203,7 +203,7 @@ impl Slot {
         }
         let phase = PhaseQ32::from_distance(slot.turns[0], p[0])
             .wrapping_add(PhaseQ32::from_distance(slot.turns[1], p[1]));
-        let (s, c) = (phase.sin(), phase.cos());
+        let (s, c) = phase.sin_cos();
         let eta = r.eta.re * c - r.eta.im * s;
         let vel = r.velocity.re * c - r.velocity.im * s;
         out.eta += slot.weight * eta;
