@@ -852,3 +852,12 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S74-2 : ouverte, intégration.** Référence de resynchronisation hôte, frontière d’intérêt et
   intégrité du stockage/transport ; ne pas distribuer une sauvegarde locale comme état serveur.
 - **S72-2 : ouverte.** Rétention après définition des effets W ; aucune purge TTL actuelle.
+
+### S75 — Première expansion Impact
+
+- **S74-1 : partielle.** Champ analytique périodique en eau profonde, énergie normalisée et
+  fréquence modale vérifiées (ADR-058). Propagation régionale isolée non reçue.
+- **S75-1 : ouverte, S76.** Mesurer le transport radial de l’enveloppe et les retours
+  périodiques ; distinguer vitesse de groupe et fréquence avant choix du support régional.
+- Raccordement journal/WaterSample B+W, budget et domaine interplateforme restent ouverts W3/W4.
+  S72-2 rétention reste ouverte : refus après ttl ne signifie pas disparition physique.

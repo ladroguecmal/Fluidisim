@@ -241,3 +241,12 @@ Wagner et von Karman pour l'impact d'entrée et la masse ajoutée,
 relations JONSWAP/SMB pour le fetch, Kelvin pour le sillage, Manning et Torricelli pour
 l'hydraulique. Toutes classiques, aucune n'est spécifique au projet ; leur intérêt ici est d'être
 **réunies avec les ordres de grandeur du projet**.
+
+## Complément S75 — énergie du premier impact spectral linéaire
+
+ADR-058 : en eau profonde uniforme, eta=a cos(k·r) cos(omega t),
+psi=-a omega/k cos(k·r) sin(omega t), omega²=gk. L’énergie intégrée vaut
+rho/2 intégrale(g eta² + psi deta_dt) dS. Sur un carré périodique de côté L,
+les modes cosinus distincts et non opposés sont orthogonaux ; un mode porte rho*g*L²*a²/4.
+La normalisation du champ Impact utilise cette identité, vérifiée par quadrature spatiale.
+Ce complément ne fixe ni le spectre de source ni les seuils de qualité B2.

@@ -87,3 +87,9 @@ Voir ADR-056. La propagation et la sauvegarde de cette enveloppe restent à cons
 save/restore conservent causes, états et perte connue dans WJNL V1. Restauration via pool
 hôte temporaire : toute erreur laisse le journal courant intact. Aucune allocation, ni purge.
 Voir ADR-057 pour les limites de confiance, de publication et de complétude réseau.
+
+### S75 — Champ Impact dispersif
+
+impact_field construit une expansion analytique à 40 modes périodiques, eau profonde,
+énergie normalisée et milieu injecté. Voir ADR-058 : premier support physique, pas encore
+impact régional sans répétition ni intégration B+W. Refus explicite au-delà de ttl.

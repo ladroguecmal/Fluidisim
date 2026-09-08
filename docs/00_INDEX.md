@@ -17,6 +17,10 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S75 :** [ADR-058 — Premier impact dispersif](adr/ADR-058-premier-impact-dispersif.md),
+**ACTÉE**. Champ analytique périodique, énergie et fréquence vérifiées ; W3 reste partielle.
+58 ADR, 191 angles morts. Suite S76 : transport radial et retours périodiques.
+
 **S74 :** [ADR-057 — Restauration et perte connue](adr/ADR-057-restauration-et-perte-connue.md),
 **ACTÉE**. Sauvegarde du journal et restauration transactionnelle construites. 57 ADR,
 191 angles morts. Suite S75 : premier impact propagé (S74-1).

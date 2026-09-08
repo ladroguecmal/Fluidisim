@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S75 — en cours
+Session : S75 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : première expansion analytique dispersive d’un impact isotrope, domaine déclaré.
 
@@ -66,7 +66,7 @@ Objectif : première expansion analytique dispersive d’un impact isotrope, dom
 
 - [x] **P1** — passation, copies, jeton et plan seul.
 - [x] **P2** — impact spectral fini en eau profonde, énergie normalisée, tests physiques indépendants.
-- [ ] **P3** — ADR et limites, vérification complète, rituel et synchronisation.
+- [x] **P3** — ADR et limites, vérification complète, rituel et synchronisation.
 
 ### Notes de reprise
 

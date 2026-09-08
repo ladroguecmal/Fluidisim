@@ -3029,3 +3029,10 @@ validité publiée doivent porter cette différence, pas seulement le code de re
 sont parvenus. Nommer un indicateur selon ce qu’il mesure effectivement : perte connue,
 plutôt que complet. Conserver cette portée dans le format sauvegardé ; persister un booléen
 ambigu transforme une observation locale en prétendue garantie pour la session suivante.
+
+## L189 — Deux preuves physiques ne couvrent pas le même mouvement
+
+*(S75)* Une énergie conservée et la bonne fréquence d’un mode peuvent coexister avec une
+source répétée artificiellement et un mauvais transport d’enveloppe. Nommer séparément phase,
+énergie, déplacement du paquet et validité du support spatial. Leurs contrôles doivent rester
+séparés ; la facilité de vérifier les deux premiers ne reçoit pas les deux autres par extension.

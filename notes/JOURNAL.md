@@ -5562,3 +5562,18 @@ C19. Une restauration zéro perte requiert une référence hôte pertinente, pas
 A191 traité localement, L188 enregistrée. Aucun nouvel angle numéroté ni invariant amendé.
 
 **Vérification finale :** 57 tests core + 93 harnais = 150 réussis, cinq ignorés, aucun échec. Quatre avertissements préexistants du harnais. Format et diff vérifiés ; copies synchronisées après commit.
+
+## S75 — 2026-09-08 — Première expansion dispersive Impact
+
+**Entrée :** Continue utilisateur ; départ b438b1e, copies actives identiques.
+**Décision :** ADR-058, 40 modes profonds sur carré périodique ; premier support analytique
+explicite, pas encore paquet régional. Gravité/densité injectées, énergie normalisée.
+**Produit :** impact_field sans allocation, élévation, dérivée, potentiel et pente, temps entier.
+Tests : énergie intégrée indépendante, volume nul, fréquence par projection spatiale, refus.
+100 J refusés par la borne de pente du test ; scénario réduit à 1 J, contrôle conservé.
+**Limites :** répétition périodique, isotropie et vitesse de groupe non reçues ; pas de
+raccordement B+W ni journal, pas de réception B2/C19. S74-1 reste partielle.
+**Suite S76 :** S75-1, transport radial et retours, puis support régional. L189 enregistrée.
+Aucun nouvel angle numéroté, aucun invariant amendé. Résultats complets ci-dessous.
+
+**Vérification finale :** 60 tests core + 93 harnais = 153 réussis, cinq ignorés, aucun échec ; quatre avertissements préexistants du harnais. Diff vérifié, copies synchronisées après commit.
