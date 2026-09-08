@@ -58,17 +58,18 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S78 — terminée
+Session : S79 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : bilan temporel positif, transport et troncature du candidat radial.
+Objectif : vitesse orbitale W, correction verticale B, noyau de composition B+W.
 
 ### Plan
 
-- [x] **P1** — passation, état réel, jeton et plan seul.
-- [x] **P2** — quadrature physique en profondeur, disque et raffinement ; mesures reproductibles.
-- [x] **P3** — décision de réception bornée, tests adaptés, rituel et copies synchronisées.
+- [x] **P1** — passation, copies, jeton et plan seul.
+- [ ] **P2** — vitesses physiques, correction B par différence temporelle ; composition à refus explicites.
+- [ ] **P3** — tests et références de conformité, ADR et rituel, synchronisation.
 
 ### Notes de reprise
 
-Départ e872a3c. Densité cinétique positive par produits de gradients intégrés en profondeur,
-non psi*deta_dt locale. Séparer troncature du disque et défaut de quadrature.
+Départ 2734123. B donne w=+a omega cos mais deta_dt=-a omega cos : signe à corriger.
+La composition reçoit un échantillon B évalué au même point/temps/repère ; le WaterSystem
+multi-référentiels et les lots concurrents ne sont pas encore implémentés.
