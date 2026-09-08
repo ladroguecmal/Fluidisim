@@ -27,6 +27,7 @@ pub struct Medium {
 }
 #[derive(Clone, Copy, Debug, Default)]
 pub struct Sample {
+    pub horizontal_velocity: [f32; 2],
     pub eta: f32,
     pub deta_dt: f32,
     pub potential: f32,
@@ -145,6 +146,13 @@ impl ImpactField {
             s.eta += m.amplitude * x * t;
             s.deta_dt -= m.amplitude * m.omega * x * st;
             s.potential -= m.amplitude * m.omega / m.k * x * st;
+            for axis in 0..2 {
+                s.horizontal_velocity[axis] += m.amplitude * m.omega / m.k
+                    * core::f32::consts::TAU
+                    * m.turns[axis]
+                    * space.sin()
+                    * st;
+            }
             for (axis, value) in s.slope.iter_mut().enumerate() {
                 *value -= m.amplitude * core::f32::consts::TAU * m.turns[axis] * space.sin() * t;
             }

@@ -54,3 +54,4 @@ pub mod wave_event;
 pub mod wave_journal;
 pub mod impact_field;
 pub mod radial_impact;
+pub mod composition;

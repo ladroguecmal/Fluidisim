@@ -185,7 +185,7 @@ impl Background {
             // Vitesse orbitale de surface, théorie d'Airy en eau profonde.
             //
             // Avec `η = a·sin(φ)`, le potentiel donne `u = a·ω·sin(φ)` — **en phase avec
-            // l'élévation** — et `w = a·ω·cos(φ)`, en quadrature. La conséquence physique est
+            // l'élévation** — et `w = -a·ω·cos(φ)`, en quadrature pour φ=kx-ωt. La conséquence physique est
             // directe : **sous une crête, l'eau avance**.
             //
             // Ces deux lignes étaient inversées jusqu'en S21. La relecture ne l'avait pas vu ; le
@@ -194,7 +194,8 @@ impl Background {
             let uo = c.amplitude * omega;
             s.u_total[0] += uo * sn * c.dir[0];
             s.u_total[1] += uo * sn * c.dir[1];
-            s.u_total[2] += uo * cs;
+            // S79 : condition cinématique linéaire w=∂tη ; signe corrigé, ADR-062.
+            s.u_total[2] -= uo * cs;
 
             // Pente locale : ∂η/∂x = a·k·cos(φ), avec k en radians par mètre.
             let k_rad = c.k_turns_per_m * core::f32::consts::TAU;
@@ -487,5 +488,36 @@ mod diagnostic_homogeneite_s66 {
                 assert!(p.iter().chain(&l).all(|x| x.is_finite()));
             }
         }
+    }
+    #[test]
+    fn vertical_velocity_follows_height_s79() {
+        let bg=fond(0,1);let p=WorldPos::from_metres(1.0,0.0,0.0);
+        for us in [500_000,1_000_000,2_000_000] {
+            let sample=bg.eval(p,SimTime(us)).unwrap();
+            let before=bg.eval(p,SimTime(us-1000)).unwrap();
+            let after=bg.eval(p,SimTime(us+1000)).unwrap();
+            let finite=(after.eta-before.eta)/0.002;
+            assert!((sample.u_total[2]-finite).abs()<0.001);
+            assert_eq!(sample.u_total[2],sample.deta_dt);
+        }
+    }
+    #[test]
+    fn actual_background_and_confirmed_impact_compose_s79() {
+        use crate::wave_event::{Impact,Origin,WaveEvent};
+        use crate::wave_journal::{Journal,Cause};
+        use crate::radial_impact::{RadialImpact,Domain};
+        let bg=fond(0,1);let t=SimTime(1_000_000);
+        let base=bg.eval(WorldPos::from_metres(1.0,0.0,0.0),t).unwrap();
+        let e=WaveEvent::impact(Impact{id:1,frame:crate::FrameId(0),cell:0,birth:SimTime(0),ttl_us:4_000_000,
+            position:[0.0;3],energy_j:0.01,wavelength_m:4.0,direction_turns:0.0,anisotropy:0.0,
+            displaced_l:0.0,material:0,origin:Origin::Server,above_surface:true}).unwrap();
+        let fields=[RadialImpact::<64>::new(e,crate::impact_field::Medium{gravity:9.81,density:1025.0,depth:20.0,max_slope:0.1},Domain{radius:16.0,age_us:4_000_000}).unwrap()];
+        let mut slots=[None;1];let mut journal=Journal::new(0,&mut slots);
+        journal.confirm(0,Cause{entity:0,command:1,emission:0},e).unwrap();
+        let combined=crate::composition::compose(base,&journal,&fields,crate::FrameId(0),0,[1.0,0.0],t,1.0).unwrap();
+        let w=fields[0].sample(crate::FrameId(0),0,[1.0,0.0],t).unwrap();
+        assert_eq!(combined.eta,base.eta+w.eta);
+        assert_eq!(combined.u_total[2],combined.deta_dt);
+        assert_ne!(combined.eta.to_bits(),base.eta.to_bits());
     }
 }

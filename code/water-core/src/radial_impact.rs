@@ -32,6 +32,7 @@ struct Node {
 }
 pub struct RadialImpact<const N: usize = 64> {
     event: WaveEvent,
+    slope_bound: f32,
     domain: Domain,
     nodes: [Node; N],
 }
@@ -113,9 +114,16 @@ impl<const N: usize> RadialImpact<N> {
         }
         Ok(Self {
             event,
+            slope_bound: slope,
             domain,
             nodes,
         })
+    }
+    pub fn event(&self) -> &WaveEvent {
+        &self.event
+    }
+    pub fn slope_bound(&self) -> f32 {
+        self.slope_bound
     }
     pub fn sample(
         &self,
@@ -148,6 +156,7 @@ impl<const N: usize> RadialImpact<N> {
         }
         let mut out = Sample::default();
         let mut radial_slope = 0.0;
+        let mut radial_velocity = 0.0;
         for node in &self.nodes {
             let (j0, j1) = bessel(node.k * r)?;
             let phase = PhaseQ32::from_time(node.freq, age);
@@ -157,9 +166,11 @@ impl<const N: usize> RadialImpact<N> {
             out.deta_dt -= node.coefficient * node.omega * j0 * st;
             out.potential -= node.coefficient * node.omega / node.k * j0 * st;
             radial_slope -= node.coefficient * node.k * j1 * ct;
+            radial_velocity += node.coefficient * node.omega * j1 * st;
         }
         if r > 0.0 {
             out.slope = [radial_slope * d[0] / r, radial_slope * d[1] / r];
+            out.horizontal_velocity = [radial_velocity * d[0] / r, radial_velocity * d[1] / r];
         }
         if [
             out.eta,
@@ -167,6 +178,8 @@ impl<const N: usize> RadialImpact<N> {
             out.potential,
             out.slope[0],
             out.slope[1],
+            out.horizontal_velocity[0],
+            out.horizontal_velocity[1],
         ]
         .iter()
         .any(|x| !x.is_finite())
@@ -404,6 +417,25 @@ mod tests {
             if us == 4_000_000 {
                 assert!(spectral.1 > initial_radius + 1.0);
             }
+        }
+    }
+    #[test]
+    fn velocity_is_gradient_of_potential_and_time_derivative() {
+        let f = RadialImpact::<64>::new(source(), medium(), domain()).unwrap();
+        for us in [500_000, 1_000_000, 2_000_000] {
+            let s = f.sample(FrameId(0), 0, [1.0, 0.0], SimTime(us)).unwrap();
+            let lo = f.sample(FrameId(0), 0, [0.999, 0.0], SimTime(us)).unwrap();
+            let hi = f.sample(FrameId(0), 0, [1.001, 0.0], SimTime(us)).unwrap();
+            let finite = (hi.potential - lo.potential) / 0.002;
+            assert!((s.horizontal_velocity[0] - finite).abs() < 2e-6);
+            assert_eq!(s.horizontal_velocity[1], 0.0);
+            let before = f
+                .sample(FrameId(0), 0, [1.0, 0.0], SimTime(us - 1000))
+                .unwrap();
+            let after = f
+                .sample(FrameId(0), 0, [1.0, 0.0], SimTime(us + 1000))
+                .unwrap();
+            assert!((s.deta_dt - (after.eta - before.eta) / 0.002).abs() < 2e-6);
         }
     }
 }

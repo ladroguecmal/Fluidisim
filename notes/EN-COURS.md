@@ -65,7 +65,7 @@ Objectif : vitesse orbitale W, correction verticale B, noyau de composition B+W.
 ### Plan
 
 - [x] **P1** — passation, copies, jeton et plan seul.
-- [ ] **P2** — vitesses physiques, correction B par différence temporelle ; composition à refus explicites.
+- [x] **P2** — vitesses physiques, correction B par différence temporelle ; composition à refus explicites.
 - [ ] **P3** — tests et références de conformité, ADR et rituel, synchronisation.
 
 ### Notes de reprise
