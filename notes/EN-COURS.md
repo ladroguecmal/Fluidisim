@@ -58,18 +58,17 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S81 — terminée
+Session : S82 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : mesurer préparation/B/B+W et optimiser à résultats identiques le poste dominant.
+Objectif : interpolation Bessel rapide avec erreur contrôlée et réception physique.
 
 ### Plan
 
 - [x] **P1** — passation, copies, jeton et plan seul.
-- [x] **P2** — banc release reproductible : latences, mémoire et empreinte des sorties.
-- [x] **P3** — optimisation mesurée, contrôles physiques et comparaison avant/après.
-- [x] **P4** — rapport, actions et rituel ; copies synchronisées.
+- [ ] **P2** — table et interpolation cubique, référence indépendante et bornes.
+- [ ] **P3** — mesures de coût, tests physiques complets, décision et rituel de passation.
 
 ### Notes de reprise
 
-Départ a5385e2. Ne pas transformer les mesures du poste local en budget matériel cible.
-Optimisation première envisagée : directions Bessel invariantes ; confirmer le coût dominant.
+Départ f736683. Candidat Hermite au pas 1/16 sur [0,64] ; dérivée quatrième bornée
+par 1 via représentation angulaire, erreur théorique h^4/384 hors erreurs des données/flottants.
