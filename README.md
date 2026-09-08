@@ -61,7 +61,7 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S97 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S98 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
@@ -77,5 +77,6 @@ Potentiel, pente et vitesses sont vérifiés. Le candidat modal à phases entiè
 réception locale : 211 tests réussis, cinq ignorés ; conformité interplateforme encore ouverte.
 La superposition sur pool passe le virage et le découpage, pour toutes les grandeurs.
 La cuisson gaussienne possède une recette versionnée, sur pool et sans libm.
-Suite : coûts du chemin complet, S97-1 ; aucun raccordement autoritaire.
+Le coût gaussien est mesuré : 44,638 ms pour 64 points, médiane locale, optimisation nécessaire.
+Suite : conjugaison spectrale, S98-1 ; aucun raccordement autoritaire.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

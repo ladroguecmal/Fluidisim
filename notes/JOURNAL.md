@@ -5936,3 +5936,22 @@ Hash diagnostique, pas authentification. 72 ADR, 193 angles morts ; invariants i
 Aucune nouvelle leçon distincte ; L205 appliquée aux limites de recette.
 **Suite S98 :** S97-1, coût réel et mémoire de cuisson/préparation/requête avant optimisation.
 S96-1 réalisée dans la bibliothèque ; copies actives synchronisées après clôture.
+
+## S98 — 2026-09-08 — Coût réel du chemin gaussien
+
+**Entrée :** Continue ; départ 15e2b4b, copies actives propres et identiques.
+**Produit :** bench_gaussian et COUT-GAUSSIEN-S98 ; cuisson, préparation et requêtes séparées,
+mémoire explicite. Aucun code bibliothèque modifié ni optimisation introduite.
+**Mesures :** Ryzen AI 7 350, rustc 1.97.0, release ; 3 échauffements, 21 répétitions.
+Médianes cuisson 532 µs, préparation de deux segments 12501 µs, requêtes 1/64/121 points
+621,5 / 44637,8 / 87066,5 µs. Requête dominante, candidat trop coûteux pour cet usage par image.
+Spectre 262144 octets, champ 589824 ; total buffers avec deux champs 1446228 octets.
+**Vérification :** exemple exécuté avec assertions ; 121 sorties comparées à référence
+f64, max 2,285177e-8 sous 1e-7 par composante. Hash121 47820ae52df0b569 ; recette inchangée.
+Formatage/diff vérifiés, P2 0a66565. Suite 211 réussis/cinq ignorés inchangée, non relancée
+pour cet ajout de banc ; aucun nouveau test unitaire. Pas de compteur global d'allocation.
+**Limites :** mesure locale bruitée, aucun pire cas ni budget cible certifié. Coûts du journal,
+réseau et composition exclus ; oracle hors chronométrage. 72 ADR, 193 angles morts inchangés.
+Aucune nouvelle leçon distincte ; séparation mesure/coût/propriété appliquée.
+**Suite S99 :** S98-1, candidat utilisant conjugaison k/-k ; vérifier les bits de géométrie,
+recevoir erreur puis mesurer avant de changer de représentation. S97-1 réalisée.

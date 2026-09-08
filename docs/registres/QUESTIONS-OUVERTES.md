@@ -1040,3 +1040,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S97-1 : ouverte, S98.** Mesurer coût et mémoire effectifs de cuisson, préparation et
   interrogation du chemin complet sur buffers hôte, avant optimisation.
 - Puissance/travail candidat, codec, admission et LiveWater restent ouverts.
+
+### S98 — Coût du chemin gaussien complet
+
+- **S97-1 : réalisée.** Coûts et capacités publiés, COUT-GAUSSIEN-S98 : requête dominante,
+  44,638 ms médiane pour 64 points sur machine locale. Aucun budget cible certifié.
+- **S98-1 : ouverte, S99.** Candidat par conjugaison k/-k : contrôler géométrie cuite,
+  recevoir toutes les grandeurs et arrondis, comparer coût avant changement de représentation.
+- Précision, résolution et seuils conservés ; intégration autoritaire encore ouverte.

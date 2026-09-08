@@ -17,6 +17,9 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S98 :** [Coût gaussien](validation/COUT-GAUSSIEN-S98.md), préparation 12,501 ms et 64 points 44,638 ms médians locaux.
+72 ADR, 193 angles morts. Suite S99 : conjugaison spectrale, S98-1.
+
 **S97 :** [ADR-072 — Cuisson gaussienne](adr/ADR-072-cuisson-gaussienne-reproductible.md), **ACTÉE**.
 211 tests réussis, cinq ignorés ; 72 ADR, 193 angles morts. Suite S98 : coûts, S97-1.
 

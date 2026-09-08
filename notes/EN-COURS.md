@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S98 — en cours
+Session : S98 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : mesurer le coût réel et la mémoire du chemin gaussien complet, sans optimisation préalable.
 
@@ -66,7 +66,7 @@ Objectif : mesurer le coût réel et la mémoire du chemin gaussien complet, san
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
 - [x] **P2** — construire et exécuter le banc release, vérifier les sorties et compter la mémoire.
-- [ ] **P3** — publier mesures et limites ; rituel de passation et synchronisation.
+- [x] **P3** — publier mesures et limites ; rituel de passation et synchronisation.
 
 ### Notes de reprise
 

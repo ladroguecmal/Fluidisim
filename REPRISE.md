@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 22:24 +02:00
+JETON            : libre
+Battement        : 2026-09-08 22:25 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S98 — mesure du coût
-Dernière session : S97 — cuisson gaussienne ; 211 tests réussis, cinq ignorés
-Session suivante : S98 — coût du chemin complet (S97-1)
+Session en cours : aucune
+Dernière session : S98 — coût gaussien mesuré ; suite 211/cinq ignorés inchangée
+Session suivante : S99 — conjugaison spectrale (S98-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -167,6 +167,11 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S98 — 2026-09-08 :** coût réel gaussien, COUT-GAUSSIEN-S98 ; préparation 12,501 ms,
+64 points 44,638 ms médians locaux. Exemple reçu contre référence, bibliothèque inchangée.
+Suite 211/cinq ignorés inchangée, non relancée ; 72 ADR, 193 angles morts.
+S97-1 réalisée ; suite S99 : conjugaison spectrale S98-1. Aucun budget cible certifié.
 
 **S97 — 2026-09-08 :** ADR-072, recette de cuisson gaussienne sans libm sur pool.
 27 recettes et champ complet reçus ; 211 tests réussis, cinq ignorés ; 72 ADR, 193 angles morts.

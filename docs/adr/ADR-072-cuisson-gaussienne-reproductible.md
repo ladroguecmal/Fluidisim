@@ -64,3 +64,7 @@ Pas de réception universelle sur tous les profils, aucune intégration autorita
 sur mémoire hôte, et sa mémoire effective ; identifier le coût dominant avant optimisation.
 Puissance/travail candidat, codec de trajectoire, admission et LiveWater restent ouverts.
 I-03/I-06/I-08 inchangés. Aucun nouvel angle numéroté.
+
+> **Actualisation S98 — 2026-09-08 :** S97-1 réalisée,
+> [COUT-GAUSSIEN-S98](../validation/COUT-GAUSSIEN-S98.md). Requête dominante ; candidat de
+> réduction par conjugaison à recevoir en S99, S98-1. Aucun budget cible certifié.
