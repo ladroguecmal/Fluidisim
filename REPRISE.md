@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-08 17:44 +02:00
+JETON            : occupé
+Battement        : 2026-09-08 17:48 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S94 — pente et vitesses du sillage
 Dernière session : S93 — préparation empruntée ; 199 tests réussis, cinq ignorés
 Session suivante : S94 — pente et vitesses du sillage (S93-1)
 
@@ -910,3 +910,4 @@ travail, et il ne l'a peut-être jamais vu.
   `git log` plutôt que se fier à un souvenir.
 - **Le battement n'est pas une preuve de vie.** Une session peut être coupée juste après un commit
   et paraître active pendant deux heures. Le seuil protège du conflit, il ne le supprime pas.
+
