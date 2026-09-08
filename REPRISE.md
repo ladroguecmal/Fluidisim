@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 11:54 +02:00
+JETON            : libre
+Battement        : 2026-09-08 11:58 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S77
-Dernière session : S76 — transport radial mesuré ; 154 tests réussis, cinq ignorés
-Session suivante : S77 — candidat radial non périodique, quadrature bornée (S76-1)
+Session en cours : aucune
+Dernière session : S77 — candidat radial construit ; 158 tests réussis, cinq ignorés
+Session suivante : S78 — bilan temporel et transport radial (S77-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -148,7 +148,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 17 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 59 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 60 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -167,6 +167,11 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S77 — 2026-09-08 :** ADR-060, candidat radial à domaine borné construit ; énergie initiale
+et convergence testées. S76-1 réalisée comme candidat, W3 partielle. Prochaine session S78 :
+S77-1, bilan temporel physique et transport radial avant réception/budget. Pas encore de B+W.
+60 ADR, 191 angles morts, 17 invariants inchangés.
 
 **S76 — 2026-09-08 :** ADR-059, transport radial mesuré ; copie exacte dès naissance à 16 m.
 Support périodique refusé comme impact régional. S75-1 close, W3 partielle. Prochaine session :

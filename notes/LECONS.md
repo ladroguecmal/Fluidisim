@@ -3043,3 +3043,10 @@ séparés ; la facilité de vérifier les deux premiers ne reçoit pas les deux 
 Une forme de bord du bilan énergétique est exacte pour le total mais peut devenir négative
 localement. Avant de pondérer une position ou un rayon, vérifier la positivité et le sens local
 du poids. Changer la question de total à localisation impose de réexaminer la mesure.
+
+## L191 — Un domaine calculable n’est pas un domaine reçu
+
+*(S77)* Borner la variation de phase entre deux nœuds évite une sous-résolution évidente.
+Cela ne borne pas automatiquement l’erreur totale : amplitude, troncature et oscillations
+peuvent encore intervenir. Séparer contrôles d’admission numériques et réception physique
+mesurée ; ne pas transformer le premier en certificat du second dans la documentation.

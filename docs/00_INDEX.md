@@ -17,6 +17,10 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S77 :** [ADR-060 — Candidat radial borné](adr/ADR-060-candidat-radial-borne.md),
+**ACTÉE**. RadialImpact construit, source normalisée et quadrature contrôlée. 60 ADR,
+191 angles morts. Suite S78 : bilan temporel et transport radial (S77-1).
+
 **S76 :** [ADR-059 — Impact régional sans répétition](adr/ADR-059-impact-regional-sans-repetition.md),
 **ACTÉE**. [Mesures radiales](validation/TRANSPORT-RADIAL-S76.md) : support périodique refusé
 comme impact isolé. 59 ADR, 191 angles morts ; suite S77 : candidat radial (S76-1).

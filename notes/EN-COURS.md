@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S77 — en cours
+Session : S77 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : candidat radial non périodique, noyaux Bessel déterministes et domaine borné.
 
@@ -66,7 +66,7 @@ Objectif : candidat radial non périodique, noyaux Bessel déterministes et doma
 
 - [x] **P1** — passation, copies, jeton et plan seul.
 - [x] **P2** — quadrature radiale, domaine explicite, tests Bessel et convergence indépendante.
-- [ ] **P3** — ADR, mesures physiques et limites, tests complets, rituel et synchronisation.
+- [x] **P3** — ADR, mesures physiques et limites, tests complets, rituel et synchronisation.
 
 ### Notes de reprise
 

@@ -5593,3 +5593,18 @@ Pas de nouvelle couche régionale cette session ; aucune prétention de vitesse 
 Aucun nouvel angle numéroté ni invariant amendé.
 
 **Vérification finale :** 61 tests core + 93 harnais = 154 réussis, cinq ignorés, aucun échec. Diagnostic release passé, quatre avertissements préexistants du harnais. Diff vérifié ; copies synchronisées après commit.
+
+## S77 — 2026-09-08 — Candidat radial sans pavage
+
+**Entrée :** Reprends utilisateur ; départ e70e67d, copies actives identiques.
+**Produit :** radial_impact : quadrature de Hankel à N nœuds, Bessel par directions fixes,
+source profonde isotrope et énergie normalisée par intégrale fermée ; aucune allocation.
+**Résultats :** écart N64/128 au pic 1,3e-7 ; ancien emplacement de copie/pic 0,00003731.
+Énergie initiale dans disque 16 m : 1,00052365 puis 1,00012767 de la prescription, 256/512 anneaux.
+Volumes tronqués -3,7e-7 et -1,15e-6 m³, diagnostics seulement. ADR-060 contient protocole et limites.
+**Décision :** S76-1 réalisée en tant que candidat, aucun domaine physique universel certifié.
+Contrôle de résolution distinct de réception, L191. Pas de nouveau numéro d’angle ni invariant.
+**Suite S78 :** S77-1, énergie dans le temps et transport radial, puis réception et coût.
+B+W, journal→champ, autorité croisée et rétention restent ouverts. Quatre tests ciblés réussis.
+
+**Vérification finale :** 65 tests core + 93 harnais = 158 réussis, cinq ignorés, aucun échec. Quatre avertissements préexistants du harnais. Tests ciblés release et diff vérifiés ; copies synchronisées après commit.

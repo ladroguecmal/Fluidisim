@@ -250,3 +250,10 @@ rho/2 intégrale(g eta² + psi deta_dt) dS. Sur un carré périodique de côté 
 les modes cosinus distincts et non opposés sont orthogonaux ; un mode porte rho*g*L²*a²/4.
 La normalisation du champ Impact utilise cette identité, vérifiée par quadrature spatiale.
 Ce complément ne fixe ni le spectre de source ni les seuils de qualité B2.
+
+## Complément S77 — normalisation du candidat radial
+
+Convention eta(r)=intégrale A(k)J0(kr)k dk. Parseval donne
+E_initial=pi*rho*g intégrale A(k)²k dk. Pour A=Cx²(1-x)², x=(k-a)/(b-a),
+le facteur intégral est C²(b-a)(a+(b-a)/2)/630. Voir ADR-060 pour sa dérivation et
+la quadrature spatiale de contrôle ; la bande [k0/2,2k0] reste à calibrer B2.

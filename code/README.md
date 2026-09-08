@@ -99,3 +99,9 @@ impact régional sans répétition ni intégration B+W. Refus explicite au-delà
 Le diagnostic radial mesure une densité cinétique positive, intégrée en profondeur. ADR-059
 refuse ImpactField périodique comme impact isolé : copies exactes dès naissance. Le module
 reste un support de comparaison ; prochain candidat radial non périodique, S76-1.
+
+### S77 — Candidat radial borné
+
+radial_impact remplace le pavage carré par une quadrature de Hankel à domaine explicite.
+Bessel sans libm, énergie spectrale normalisée ; réception physique initiale seulement.
+Voir ADR-060 pour rayon/durée, convergence et limites. Pas encore de raccordement B+W.

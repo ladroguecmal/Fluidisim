@@ -869,3 +869,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S76-1 : ouverte, S77.** Construire le candidat radial de Hankel, domaine de quadrature
   explicite, normalisation physique et contrôles indépendants ; pas une nouvelle campagne du carré.
 - S74-1 / W3 et S72-2 rétention restent partielles/ouvertes. Aucun raccordement B+W régional reçu.
+
+### S77 — Candidat radial construit
+
+- **S76-1 : réalisée comme candidat borné.** RadialImpact, Bessel déterministe, spectre normalisé,
+  contrôles d’admission et mesures initiales (ADR-060). W3 reste partielle.
+- **S77-1 : ouverte, S78.** Bilan temporel et transport radial physiques du candidat, convergence
+  avec troncature spatiale et résolution ; établir un domaine de réception, pas seulement de calcul.
+- Coût, journal→champ, B+W et réception croisée restent ouverts W3/W4 ; S72-2 rétention inchangée.
