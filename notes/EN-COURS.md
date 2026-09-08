@@ -58,20 +58,17 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S91 — terminée
+Session : S92 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : trajectoires continues par segments, superposition et travail sur le champ total.
+Objectif : emprise explicitement bornée et campagne de raffinement du virage.
 
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [x] **P2** — somme modale multi-segments, validation de trajectoire, tests de découpage et virage.
-- [x] **P3** — mesures et limites, vérification complète, rituel de passation.
+- [ ] **P2** — enveloppe de requête bornée et campagne indépendante radial/angular/coupure.
+- [ ] **P3** — publier portée et mesures, vérification et rituel de passation.
 
 ### Notes de reprise
 
-Départ bc1610e. Même profil gaussien ; segments contigus en temps et position, vitesse par
-morceaux. Calculer énergie après somme complexe, puissance contre vitesse totale ; hors runtime.
-
-P2 : 741672b. Trois tests release ; suite 196 réussis, cinq ignorés.
-TRAJECTOIRES-S91 publié. Suite S92 : S91-1, emprise reçue et refus hors domaine.
+Départ b8cede4. Ne pas présenter une grille finie comme une preuve continue. Le domaine
+est un contrat explicite hôte ; réception mesurée limitée au profil et trajectoire testés.
