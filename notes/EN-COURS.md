@@ -58,17 +58,17 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S74 — terminée
+Session : S75 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : persister le journal Impact et restaurer sans mutation partielle.
+Objectif : première expansion analytique dispersive d’un impact isotrope, domaine déclaré.
 
 ### Plan
 
 - [x] **P1** — passation, copies, jeton et plan seul.
-- [x] **P2** — marqueur de perte, enveloppe versionnée et restauration transactionnelle ; tests ciblés.
-- [x] **P3** — décision documentée, tests complets et rituel de passation.
+- [ ] **P2** — impact spectral fini en eau profonde, énergie normalisée, tests physiques indépendants.
+- [ ] **P3** — ADR et limites, vérification complète, rituel et synchronisation.
 
 ### Notes de reprise
 
-Départ 2483f8e. Le marqueur signifie perte connue, jamais preuve de livraison réseau complète.
-Restauration via espace de travail fourni par l’hôte, aucune allocation ; pas de purge TTL.
+Départ b438b1e. Première représentation analytique périodique, pas encore paquet régional
+sans répétition. Ne pas déclarer B2 ni C19 acquis. Gravité et densité injectées.
