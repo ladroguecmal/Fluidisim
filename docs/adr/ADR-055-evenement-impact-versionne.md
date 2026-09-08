@@ -79,3 +79,7 @@ flags, non-finis, bornes, débordement du temps et refus de provenance locale su
 Ils ne certifient ni l’authentification réseau, ni les valeurs physiques d’une cause, ni une
 exécution interplateforme. Le coût brut à 20 événements/s serait 1520 octets/s, hors enveloppe
 transport, contre les 1000 estimés avec les 50 octets précédents ; compression à mesurer ensuite.
+
+> **Actualisation S84 — 2026-09-08.** ADR-066 remplace la borne numérique au TTL :
+> l'horizon se mesure depuis la naissance, indépendamment de la durée source. Renouvellement
+> à résolution inchangée testé jusqu'à 16 s ; aucune purge TTL, rétention générale encore ouverte.

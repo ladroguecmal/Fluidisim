@@ -63,3 +63,7 @@ puis fonctionnement au-delà de la fenêtre de quatre secondes. Un lot qui refus
 après cette fenêtre n’est pas un système durable. Ne pas supprimer une onde active au seul TTL.
 Publication multilecteur, index spatial, profils non reçus et autorité croisée restent ouverts.
 I-01, I-03, I-07, I-08 et I-14 relus ; aucun invariant amendé.
+
+> **Actualisation S84 — 2026-09-08.** ADR-066 remplace la borne numérique au TTL :
+> l'horizon se mesure depuis la naissance, indépendamment de la durée source. Renouvellement
+> à résolution inchangée testé jusqu'à 16 s ; aucune purge TTL, rétention générale encore ouverte.

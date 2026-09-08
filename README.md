@@ -61,6 +61,8 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-Voir la section « État d'avancement » de l'index. En une phrase : la conception conceptuelle est
-faite, les décisions restantes sont expérimentales, et le chemin critique passe par le harnais de
-validation.
+État S84 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
+jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
+construire. Prochaine étape : contrôleur de renouvellement à deux pools, S84-1.
+Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

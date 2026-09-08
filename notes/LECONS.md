@@ -3089,3 +3089,10 @@ schéma et erreur mesurée du code ; une grille dense n’est pas une preuve de 
 c’est possible, produire les grandeurs couplées depuis une même requête plutôt que demander
 au consommateur de certifier leur cohérence après coup. Déclarer séparément les associations
 hôte que le système ne peut encore vérifier, notamment les transformations géométriques.
+
+## L198 — Une échéance de représentation ne termine pas le phénomène
+
+*(S84)* Une durée de validité borne ce que le calcul sait produire, pas la durée physique
+ni la conservation des faits permettant de le reconstruire. Séparer les trois horloges avant
+une purge ou un renouvellement. Reconstruire depuis la cause originelle évite le redémarrage
+artificiel de phase ; changer de résolution exige en plus de mesurer la discontinuité.

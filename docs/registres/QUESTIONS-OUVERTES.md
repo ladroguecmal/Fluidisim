@@ -925,3 +925,13 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S83-1 : ouverte, S84, reprend S72-2.** Rétention et fin de validité explicites ; permettre
   le fonctionnement prolongé sans supprimer physiquement les effets au TTL de la source.
 - Géométrie hôte réelle, publication et index restent ouverts ; ADR-065 détaille les limites.
+
+### S84 — Horizon indépendant de la source
+
+- **S83-1 : partiellement réalisée.** Horizon exposé et prolongation par reconstruction,
+  sans changement de naissance ni suppression TTL ; ADR-066, tests jusqu'à 16 s.
+- **S72-2 : partielle.** Conservation intégrale retenue dans le journal borné ; effacement avec
+  preuve de négligeabilité et frontière de rejeu encore ouvert. Aucun service infini promis.
+- **S84-1 : ouverte, S85.** Construire le contrôleur de renouvellement sur deux pools fournis
+  par l'hôte : bascule après succès, ancienne préparation conservée après refus, état explicite
+  lorsque son horizon est épuisé. Garder N fixe ; ne pas masquer un refus par remise à zéro.

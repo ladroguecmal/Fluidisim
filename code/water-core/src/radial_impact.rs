@@ -3,7 +3,7 @@ use crate::impact_field::{Error, Medium, Sample};
 use crate::wave_event::WaveEvent;
 use crate::{FrameId, PhaseQ32, SimTime};
 
-/// J0 et J1 par quadrature angulaire fixe, sans libm. Domaine reçu : 0 <= x <= 64.
+/// J0 et J1 par interpolation Hermite tabulée, sans libm. Domaine reçu : 0 <= x <= 64.
 pub fn bessel(x: f32) -> Result<(f32, f32), Error> {
     if !x.is_finite() || !(0.0..=64.0).contains(&x) {
         return Err(Error::Domain);
@@ -41,6 +41,7 @@ pub fn bessel_angular(x: f32) -> Result<(f32, f32), Error> {
 #[derive(Clone, Copy)]
 pub struct Domain {
     pub radius: f32,
+    /// Horizon numérique depuis la naissance, indépendant du TTL source (ADR-066).
     pub age_us: u64,
 }
 #[derive(Clone, Copy, Default)]

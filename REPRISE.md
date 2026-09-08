@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 12:32 +02:00
+JETON            : libre
+Battement        : 2026-09-08 12:39 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S84
-Dernière session : S83 — requete commune B+W ; 171 tests réussis, cinq ignorés
-Session suivante : S84 — retention et validite prolongee (S83-1 / S72-2)
+Session en cours : aucune
+Dernière session : S84 — horizon et rétention ; 174 tests réussis, cinq ignorés
+Session suivante : S85 — contrôleur de renouvellement à deux pools (S84-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -148,7 +148,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 17 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 65 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 66 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -167,6 +167,11 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S84 — 2026-09-08 :** ADR-066, horizon numérique indépendant du TTL, échéance exposée et
+renouvellement à N constant testé jusqu'à 16 s. Conservation intégrale dans le journal borné ;
+rétention générale S72-2 partielle. 174 tests réussis, cinq ignorés. 66 ADR, 193 angles morts.
+Suite S85 : contrôleur à deux pools, S84-1 ; aucune remise à zéro pour prolonger une onde.
 
 **S83 — 2026-09-08 :** ADR-065, lot monde B+W à requête commune ; contrôles de contexte,
 gravité et conversion extrême. S82-1 réalisée sur ce chemin ; géométrie hôte encore déclarative.

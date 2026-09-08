@@ -5696,3 +5696,19 @@ un surcoût isolé. ADR-065 distingue déclaration hôte des axes et garanties d
 Ancien chemin brut conservé avec préconditions, pas de réception multi-référentiels universelle.
 
 **Vérification finale :** 78 tests core + 93 harnais = 171 réussis, cinq ignorés, aucun échec. Quatre avertissements préexistants des tests du harnais. Banc et test ciblé release vérifiés ; copies synchronisées après commit.
+
+## S84 — 2026-09-08 — Horizon numérique indépendant du TTL
+
+**Entrée :** Continue utilisateur ; départ 419e217, copies actives identiques.
+**Produit :** valid_until et renewal_deadline exposés ; horizon radial découplé du TTL,
+débordement temporel refusé. Reconstruction à N constant depuis la naissance d'origine,
+second pool testé sans invalidation du premier en cas de refus. ADR-066 actée.
+**Vérification :** trois tests nouveaux debug et release. Période commune identique bit à bit,
+frontières 4/16 s, comparaison 128/256 après TTL et date u64 maximale. Suite complète :
+81 core + 93 harnais = 174 tests réussis, cinq ignorés, aucun échec ; quatre avertissements
+préexistants du harnais. Formatage des deux fichiers modifiés, diff vérifié.
+**Décision :** aucune purge TTL. Conservation intégrale dans la capacité existante, saturation
+visible ; ni durée arbitraire ni mémoire de rejeu durable résolues. Les comparaisons à 16 s
+ne remplacent pas une réception énergétique élargie. L198, aucun angle ni invariant ajouté.
+**Suite S85 :** S84-1, contrôleur de renouvellement à deux pools ; bascule transactionnelle et
+état après épuisement. S83-1 et S72-2 partielles. Copies synchronisées après commit de clôture.

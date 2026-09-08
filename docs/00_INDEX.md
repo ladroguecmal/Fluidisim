@@ -17,6 +17,10 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S84 :** [ADR-066 — Horizon et rétention](adr/ADR-066-horizon-et-retention.md), **ACTÉE**.
+Renouvellement sans redémarrage de phase testé à 16 s ; rétention intégrale bornée,
+purge non résolue. 66 ADR, 193 angles morts. Suite S85 : contrôleur à deux pools (S84-1).
+
 **S83 :** [ADR-065 — Requête commune B/W](adr/ADR-065-requete-commune-b-w.md), **ACTÉE**.
 Points/temps partagés, contexte contrôlé ; débordement to_local corrigé. 65 ADR, 193 angles morts.
 Suite S84 : rétention et validité (S83-1 / S72-2).

@@ -85,3 +85,7 @@ plateformes et budgets restent ouverts. Aucun choix final B2. I-03, I-07, I-08, 
 > **Actualisation S82 — 2026-09-08.** ADR-064 remplace le noyau angulaire de production par
 > une interpolation Hermite tabulée, domaine [0,64] inchangé. Référence angulaire conservée ;
 > tests physiques repassés, nouveau comportement d’arrondi documenté. Domaine physique non élargi.
+
+> **Actualisation S84 — 2026-09-08.** ADR-066 remplace la borne numérique au TTL :
+> l'horizon se mesure depuis la naissance, indépendamment de la durée source. Renouvellement
+> à résolution inchangée testé jusqu'à 16 s ; aucune purge TTL, rétention générale encore ouverte.
