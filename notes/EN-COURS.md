@@ -58,20 +58,17 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S85 — terminée
+Session : S86 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : construire le contrôleur de renouvellement à deux pools, à résolution constante.
+Objectif : admission transactionnelle des commandes et de leurs champs, sans perte masquée.
 
 ### Plan
 
-- [x] **P1** — vérifier la passation et déclarer le plan seul.
-- [x] **P2** — contrôleur à deux pools, échéance et bascule transactionnelle ; tests de refus et reprise.
-- [x] **P3** — vérification complète, documentation et rituel de passation.
+- [x] **P1** — vérifier la passation, prendre le jeton et déclarer le plan.
+- [ ] **P2** — service à deux journaux et deux pools, commande en attente après refus physique ou saturation ; tests.
+- [ ] **P3** — vérifier, documenter les limites et exécuter le rituel de passation.
 
 ### Notes de reprise
 
-Départ c8fbba5, copies actives synchronisées. S84-1 : journal immuable, N et milieu fixes,
-aucun effacement ni déplacement de naissance. Un horizon épuisé doit rester visible après refus.
-
-P2 : 394d869. Quatre tests ciblés release ; suite debug 178 réussis, cinq ignorés.
-S84-1 réalisée, CONTROLEUR-S85 et L199 publiés. Suite S86 : S85-1.
+Départ 338a2f9. Une ancienne paire cohérente ne prouve pas que la dernière commande reçue
+est appliquée. Conserver la commande bloquée et refuser la vue courante jusqu'à résolution.

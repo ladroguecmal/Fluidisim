@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-08 12:45 +02:00
+JETON            : occupé
+Battement        : 2026-09-08 16:59 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S86
 Dernière session : S85 — contrôleur de renouvellement ; 178 tests réussis, cinq ignorés
 Session suivante : S86 — admission transactionnelle journal et champs (S85-1)
 
