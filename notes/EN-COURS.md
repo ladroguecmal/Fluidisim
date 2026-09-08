@@ -58,22 +58,18 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S97 — terminée
+Session : S98 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : cuisson gaussienne f32 sans libm dans un pool hôte, recette et hash explicites.
+Objectif : mesurer le coût réel et la mémoire du chemin gaussien complet, sans optimisation préalable.
 
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [x] **P2** — construire la cuisson bornée, vérifier profil, nœuds, champ et refus.
-- [x] **P3** — publier réception et limites ; rituel de passation et synchronisation.
+- [ ] **P2** — construire et exécuter le banc release, vérifier les sorties et compter la mémoire.
+- [ ] **P3** — publier mesures et limites ; rituel de passation et synchronisation.
 
 ### Notes de reprise
 
-Départ d88f10d, copies propres identiques. S96-1.
-Directions Q32 et exponentielle négative par réduction entière/polynôme fixe.
-Domaine explicite de recette ; aucune certification interplateforme depuis une seule machine.
-
-P2 : trois tests release réussis ; suite 210 réussis/cinq ignorés puis nouveau test de limites
-exécuté séparément en debug : total 211 réussis. Hash nominal 20e64a392ae237a1.
-ADR-072 contient recette, bornes, erreurs et prochaine mesure de coût S97-1.
+Départ 15e2b4b, copies propres identiques. S97-1.
+Recette 128², virage S91, requêtes 1/64/121 points. Séparer cuisson/préparation/requête.
+Pas de budget cible certifié à partir de mesures sur une seule machine.
