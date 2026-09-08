@@ -58,17 +58,17 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S77 — terminée
+Session : S78 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : candidat radial non périodique, noyaux Bessel déterministes et domaine borné.
+Objectif : bilan temporel positif, transport et troncature du candidat radial.
 
 ### Plan
 
-- [x] **P1** — passation, copies, jeton et plan seul.
-- [x] **P2** — quadrature radiale, domaine explicite, tests Bessel et convergence indépendante.
-- [x] **P3** — ADR, mesures physiques et limites, tests complets, rituel et synchronisation.
+- [x] **P1** — passation, état réel, jeton et plan seul.
+- [ ] **P2** — quadrature physique en profondeur, disque et raffinement ; mesures reproductibles.
+- [ ] **P3** — décision de réception bornée, tests adaptés, rituel et copies synchronisées.
 
 ### Notes de reprise
 
-Départ e70e67d. Spectre compact normalisé par Parseval ; approximation finie valable seulement
-sur rayon et temps déclarés. Aucune réception B2 ou autorité interplateforme implicite.
+Départ e872a3c. Densité cinétique positive par produits de gradients intégrés en profondeur,
+non psi*deta_dt locale. Séparer troncature du disque et défaut de quadrature.
