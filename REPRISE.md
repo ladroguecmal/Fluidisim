@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-08 02:02 +02:00
+JETON            : occupé
+Battement        : 2026-09-08 02:03 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S73
 Dernière session : S72 — Impact V1 construit, 141 tests réussis, cinq ignorés
 Session suivante : S73 — identité de cause et journal Impact borné (S72-1, A190)
 

@@ -58,18 +58,17 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S72 — terminée
-Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : construire la première tranche WaveEvent, impact versionné et validé.
+Session : S73 — en cours
+Agent : Codex (fichiers, git et cargo disponibles)
+Objectif : identité de cause et journal Impact borné, réconciliation atomique.
 
 ### Plan
 
-- [x] **P1** — passation, état réel, jeton et plan seul.
-- [x] **P2** — ADR-055 et codec Impact V1 ; contrat explicite, refus et vecteur de référence.
-- [x] **P3** — vérifier les tests, publier limites et résultats, rituel et synchronisation.
+- [x] **P1** — passation, vérification des copies, jeton et plan seul.
+- [ ] **P2** — ADR-056, journal sans allocation, confirmation/rejet et essais contradictoires.
+- [ ] **P3** — tests complets et rituel ; documenter les limites de rétention puis synchroniser.
 
 ### Notes de reprise
 
-Départ 399830b, deux copies actives identiques. SPEC-006 propose des half sans protocole.
-La première tranche prend Impact seul ; les autres kinds restent refusés jusqu’à leur contrat.
-Pas de prétention à W1 complet ni à une couche W propagative cette session.
+Départ 8ae26b4. Pas de collecte automatique fondée sur ttl : les effets propagés ne sont pas
+encore définis. Saturation explicite, aucune éviction. Journal lié à une époque serveur.
