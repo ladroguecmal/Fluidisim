@@ -1032,3 +1032,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S96-1 : ouverte, S97.** Spectre gaussien reproductible sur mémoire hôte, contrat et
   provenance, réception sans cuisson libm implicite.
 - Puissance/travail candidat, coût, conformité interplateforme et LiveWater restent ouverts.
+
+### S97 — Recette de cuisson gaussienne V1
+
+- **S96-1 : réalisée dans la bibliothèque.** Cuisson sur pool sans libm, recette/version/hash,
+  profil et champ complet reçus ; ADR-072. Conformité interplateforme encore ouverte.
+- **S97-1 : ouverte, S98.** Mesurer coût et mémoire effectifs de cuisson, préparation et
+  interrogation du chemin complet sur buffers hôte, avant optimisation.
+- Puissance/travail candidat, codec, admission et LiveWater restent ouverts.

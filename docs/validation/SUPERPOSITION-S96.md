@@ -57,3 +57,7 @@ gaussien reproductible sur mémoire hôte, fixer son contrat de paramètres et s
 puis recevoir identité et erreur sans cuisson libm implicite. Ensuite mesurer les coûts
 et raccorder la composition. Conformité interplateforme, codec de trajectoire, LiveWater,
 puissance du champ candidat et bilan travail/énergie candidat restent ouverts.
+
+**Actualisation S97 — 2026-09-08 :** S96-1 réalisée dans la bibliothèque,
+[ADR-072](../adr/ADR-072-cuisson-gaussienne-reproductible.md) ; cuisson sans libm et recette
+V1 identifiée. Conformité interplateforme toujours ouverte. Suite S97-1 : coûts et mémoire.

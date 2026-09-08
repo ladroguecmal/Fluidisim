@@ -17,6 +17,9 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S97 :** [ADR-072 — Cuisson gaussienne](adr/ADR-072-cuisson-gaussienne-reproductible.md), **ACTÉE**.
+211 tests réussis, cinq ignorés ; 72 ADR, 193 angles morts. Suite S98 : coûts, S97-1.
+
 **S96 :** [Superposition sur pool](validation/SUPERPOSITION-S96.md), virage et découpage reçus.
 71 ADR, 193 angles morts. Suite S97 : spectre reproductible, S96-1.
 

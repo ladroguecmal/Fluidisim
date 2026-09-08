@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 22:16 +02:00
+JETON            : libre
+Battement        : 2026-09-08 22:17 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S97 — cuisson gaussienne
-Dernière session : S96 — superposition ; 208 tests réussis, cinq ignorés
-Session suivante : S97 — spectre gaussien reproductible (S96-1)
+Session en cours : aucune
+Dernière session : S97 — cuisson gaussienne ; 211 tests réussis, cinq ignorés
+Session suivante : S98 — coût du chemin complet (S97-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -148,7 +148,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 17 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 71 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 72 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -167,6 +167,10 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S97 — 2026-09-08 :** ADR-072, recette de cuisson gaussienne sans libm sur pool.
+27 recettes et champ complet reçus ; 211 tests réussis, cinq ignorés ; 72 ADR, 193 angles morts.
+S96-1 réalisée ; suite S98 : coûts et mémoire, S97-1. Conformité interplateforme ouverte.
 
 **S96 — 2026-09-08 :** superposition f32 sur pool, virage et découpage reçus ;
 SUPERPOSITION-S96. 208 tests réussis, cinq ignorés ; 71 ADR, 193 angles morts.

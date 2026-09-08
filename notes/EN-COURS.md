@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S97 — en cours
+Session : S97 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : cuisson gaussienne f32 sans libm dans un pool hôte, recette et hash explicites.
 
@@ -66,7 +66,7 @@ Objectif : cuisson gaussienne f32 sans libm dans un pool hôte, recette et hash 
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
 - [x] **P2** — construire la cuisson bornée, vérifier profil, nœuds, champ et refus.
-- [ ] **P3** — publier réception et limites ; rituel de passation et synchronisation.
+- [x] **P3** — publier réception et limites ; rituel de passation et synchronisation.
 
 ### Notes de reprise
 

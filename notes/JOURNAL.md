@@ -5918,3 +5918,21 @@ Aucun nouvel ADR, angle numéroté ou invariant ; L204/L205 appliquées sans nou
 contrat et provenance. S95-1 réalisée pour le chemin sur spectre fourni.
 
 **Clôture :** 115 core + 93 harnais = 208 tests réussis, cinq ignorés, quatre avertissements préexistants. Copies synchronisées après commit final.
+
+## S97 — 2026-09-08 — Cuisson gaussienne sans libm
+
+**Entrée :** Continue ; départ d88f10d, copies actives propres et identiques.
+**Produit :** gaussian_spectrum::bake, recette V1 et vue empruntée, hash de recette/contenu.
+Directions Q32, exponentielle réduite polynomiale, limites explicites ; ADR-072 acté.
+**Mesures :** exp relative 1,16047e-6 ; profil 9,17911e-5 ; 27 recettes comparées aux nœuds
+f64, erreurs direction/transformée/poids 1,259e-7 / 2,110e-6 / 1,306e-7. Champ complet
+1089 points sous 1e-7 pour chaque grandeur et 2e-6 J ; découpage reçu sans déplacer les seuils.
+Hash nominal 20e64a392ae237a1, assertion debug/release locale.
+**Vérification :** trois tests release ; suite complète 117 core + 93 harnais = 210 réussis,
+cinq ignorés, puis test de limites ajouté et exécuté en debug séparément : total 211 réussis.
+Quatre avertissements préexistants ; formatage/diff vérifiés. P2 4c45621.
+**Limites :** conformité interplateforme non démontrée, aucun coût mesuré ni codec de recette.
+Hash diagnostique, pas authentification. 72 ADR, 193 angles morts ; invariants inchangés.
+Aucune nouvelle leçon distincte ; L205 appliquée aux limites de recette.
+**Suite S98 :** S97-1, coût réel et mémoire de cuisson/préparation/requête avant optimisation.
+S96-1 réalisée dans la bibliothèque ; copies actives synchronisées après clôture.
