@@ -58,17 +58,17 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S73 — terminée
+Session : S74 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : identité de cause et journal Impact borné, réconciliation atomique.
+Objectif : persister le journal Impact et restaurer sans mutation partielle.
 
 ### Plan
 
-- [x] **P1** — passation, vérification des copies, jeton et plan seul.
-- [x] **P2** — ADR-056, journal sans allocation, confirmation/rejet et essais contradictoires.
-- [x] **P3** — tests complets et rituel ; documenter les limites de rétention puis synchroniser.
+- [x] **P1** — passation, copies, jeton et plan seul.
+- [ ] **P2** — marqueur de perte, enveloppe versionnée et restauration transactionnelle ; tests ciblés.
+- [ ] **P3** — décision documentée, tests complets et rituel de passation.
 
 ### Notes de reprise
 
-Départ 8ae26b4. Pas de collecte automatique fondée sur ttl : les effets propagés ne sont pas
-encore définis. Saturation explicite, aucune éviction. Journal lié à une époque serveur.
+Départ 2483f8e. Le marqueur signifie perte connue, jamais preuve de livraison réseau complète.
+Restauration via espace de travail fourni par l’hôte, aucune allocation ; pas de purge TTL.
