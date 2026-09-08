@@ -17,6 +17,10 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S85 :** [Contrôleur de renouvellement](validation/CONTROLEUR-S85.md) construit.
+Deux pools, bascule après succès et expiration explicite ; 66 ADR, 193 angles morts inchangés.
+Suite S86 : admission d'un journal actualisé avec ses champs, S85-1.
+
 **S84 :** [ADR-066 — Horizon et rétention](adr/ADR-066-horizon-et-retention.md), **ACTÉE**.
 Renouvellement sans redémarrage de phase testé à 16 s ; rétention intégrale bornée,
 purge non résolue. 66 ADR, 193 angles morts. Suite S85 : contrôleur à deux pools (S84-1).

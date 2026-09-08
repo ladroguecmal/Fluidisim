@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S85 — en cours
+Session : S85 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : construire le contrôleur de renouvellement à deux pools, à résolution constante.
 
@@ -66,9 +66,12 @@ Objectif : construire le contrôleur de renouvellement à deux pools, à résolu
 
 - [x] **P1** — vérifier la passation et déclarer le plan seul.
 - [x] **P2** — contrôleur à deux pools, échéance et bascule transactionnelle ; tests de refus et reprise.
-- [ ] **P3** — vérification complète, documentation et rituel de passation.
+- [x] **P3** — vérification complète, documentation et rituel de passation.
 
 ### Notes de reprise
 
 Départ c8fbba5, copies actives synchronisées. S84-1 : journal immuable, N et milieu fixes,
 aucun effacement ni déplacement de naissance. Un horizon épuisé doit rester visible après refus.
+
+P2 : 394d869. Quatre tests ciblés release ; suite debug 178 réussis, cinq ignorés.
+S84-1 réalisée, CONTROLEUR-S85 et L199 publiés. Suite S86 : S85-1.

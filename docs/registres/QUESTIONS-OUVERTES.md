@@ -935,3 +935,12 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S84-1 : ouverte, S85.** Construire le contrôleur de renouvellement sur deux pools fournis
   par l'hôte : bascule après succès, ancienne préparation conservée après refus, état explicite
   lorsque son horizon est épuisé. Garder N fixe ; ne pas masquer un refus par remise à zéro.
+
+### S85 — Renouvellement transactionnel construit
+
+- **S84-1 : réalisée.** Contrôleur à deux pools, marge hôte, bascule après succès, état temporel
+  explicite et refus sans publication partielle ; CONTROLEUR-S85.
+- **S85-1 : ouverte, S86.** Admission transactionnelle d'un journal actualisé et de ses champs,
+  avec confirmations/rejets et saturation ; aucune paire journal/champs incohérente publiée.
+- S72-2 reste partielle : le contrôleur conserve un journal figé, ne purge rien et ne permet
+  pas une durée arbitraire. Publication multilecteur et ordonnanceur restent ouverts.

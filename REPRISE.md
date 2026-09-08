@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-08 12:43 +02:00
+JETON            : libre
+Battement        : 2026-09-08 12:45 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S85
-Dernière session : S84 — horizon et rétention ; 174 tests réussis, cinq ignorés
-Session suivante : S85 — contrôleur de renouvellement à deux pools (S84-1)
+Session en cours : aucune
+Dernière session : S85 — contrôleur de renouvellement ; 178 tests réussis, cinq ignorés
+Session suivante : S86 — admission transactionnelle journal et champs (S85-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -167,6 +167,11 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S85 — 2026-09-08 :** contrôleur à deux pools construit, bascule après succès, état d'expiration
+et conservation de la préparation active après refus. 178 tests réussis, cinq ignorés.
+S84-1 close, journal encore figé. Suite S86 : admission journal/champs, S85-1.
+Voir CONTROLEUR-S85. 66 ADR et 193 angles morts inchangés.
 
 **S84 — 2026-09-08 :** ADR-066, horizon numérique indépendant du TTL, échéance exposée et
 renouvellement à N constant testé jusqu'à 16 s. Conservation intégrale dans le journal borné ;

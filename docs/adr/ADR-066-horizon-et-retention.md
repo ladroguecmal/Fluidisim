@@ -69,3 +69,7 @@ Trois tests S84 passent en debug et release :
 
 I-03, I-06, I-08 et I-14 relus, inchangés. Déterminisme interplateforme encore non reçu.
 Aucun nouvel angle numéroté : la rétention était déjà ouverte en S72-2. Leçon L198.
+
+> **Réalisation S85 — 2026-09-08.** Le contrôleur à deux pools est construit et testé :
+> voir [CONTROLEUR-S85](../validation/CONTROLEUR-S85.md). Bascule après succès, refus conservant
+> la préparation active, état temporel explicite. Le journal reste figé ; admission dynamique S85-1.

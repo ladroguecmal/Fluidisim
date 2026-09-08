@@ -3096,3 +3096,9 @@ hôte que le système ne peut encore vérifier, notamment les transformations g�
 ni la conservation des faits permettant de le reconstruire. Séparer les trois horloges avant
 une purge ou un renouvellement. Reconstruire depuis la cause originelle évite le redémarrage
 artificiel de phase ; changer de résolution exige en plus de mesurer la discontinuité.
+
+## L199 — Séparer le résultat d'une tentative de l'état du service conservé
+
+*(S85)* Un renouvellement refusé peut laisser une version encore utilisable ; la même version
+peut ensuite expirer sans nouvelle tentative. Retourner l'erreur de l'opération et calculer
+séparément la validité à l'instant demandé évite aussi bien le faux arrêt que le faux succès.

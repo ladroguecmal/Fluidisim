@@ -5712,3 +5712,18 @@ visible ; ni durée arbitraire ni mémoire de rejeu durable résolues. Les compa
 ne remplacent pas une réception énergétique élargie. L198, aucun angle ni invariant ajouté.
 **Suite S85 :** S84-1, contrôleur de renouvellement à deux pools ; bascule transactionnelle et
 état après épuisement. S83-1 et S72-2 partielles. Copies synchronisées après commit de clôture.
+
+## S85 — 2026-09-08 — Contrôleur de renouvellement construit
+
+**Entrée :** Continue utilisateur ; départ c8fbba5, copies actives synchronisées, jeton libre.
+**Produit :** RenewalController à deux pools hôte, état Ready/Due/Expired ou vide, marge explicite,
+une tentative par appel et échange après validation complète. Milieu, résolution et journal fixes.
+**Vérification :** quatre tests ciblés release ; suite debug 85 core + 93 harnais = 178 réussis,
+cinq ignorés, aucun échec. Quatre avertissements préexistants du harnais. Deux bascules et
+comparaison directe, refus après premier champ, expiration, reprise, capacité et u64 extrêmes.
+Formatage et diff vérifiés. P2 : 394d869. Documentation CONTROLEUR-S85, réalisation ADR-066.
+**Limites :** appel synchrone sans budget d'ordonnancement reçu ; journal figé par emprunt.
+Pas de purge, de résolution adaptative ni de publication multilecteur. Aucun nouvel ADR ni
+angle numéroté, invariants inchangés, L199 enregistrée. README actualisé.
+**Suite S86 :** S85-1, admission transactionnelle d'un journal actualisé avec ses champs.
+S84-1 close ; S72-2 partielle. Rituel exécuté, copies synchronisées après commit de clôture.
