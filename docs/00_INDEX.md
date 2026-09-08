@@ -17,6 +17,10 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S74 :** [ADR-057 — Restauration et perte connue](adr/ADR-057-restauration-et-perte-connue.md),
+**ACTÉE**. Sauvegarde du journal et restauration transactionnelle construites. 57 ADR,
+191 angles morts. Suite S75 : premier impact propagé (S74-1).
+
 **S73 :** [ADR-056 — Cause et journal Impact](adr/ADR-056-cause-et-journal-impact.md),
 **ACTÉE**. Journal borné construit, corrélation prédiction/confirmation et rejet terminal.
 56 ADR et 191 angles morts. Suite S74 : restauration et complétude (S73-1).

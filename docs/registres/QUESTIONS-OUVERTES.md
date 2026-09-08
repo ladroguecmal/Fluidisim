@@ -842,3 +842,13 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
   état explicite de complétude après Full (A191) et restauration transactionnelle.
 - **S72-2 : ouverte.** Aucune expiration ni purge : définir frontière de rétention et durée
   des effets avant de recycler le pool. Ne pas prendre ttl_us pour une preuve de disparition.
+
+### S74 — Persistance et restauration du journal
+
+- **S73-1 : réalisée dans la bibliothèque.** Enveloppe V1, perte connue persistée, restauration
+  transactionnelle ; ADR-057. A191 traité localement, aucune certification de livraison réseau.
+- **S74-1 : ouverte, S75.** W3 : premier impact propagé en milieu uniforme, validité physique,
+  célérité et énergie contrôlées indépendamment. Aucun choix final B2 implicite.
+- **S74-2 : ouverte, intégration.** Référence de resynchronisation hôte, frontière d’intérêt et
+  intégrité du stockage/transport ; ne pas distribuer une sauvegarde locale comme état serveur.
+- **S72-2 : ouverte.** Rétention après définition des effets W ; aucune purge TTL actuelle.

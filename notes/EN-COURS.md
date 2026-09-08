@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S74 — en cours
+Session : S74 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : persister le journal Impact et restaurer sans mutation partielle.
 
@@ -66,7 +66,7 @@ Objectif : persister le journal Impact et restaurer sans mutation partielle.
 
 - [x] **P1** — passation, copies, jeton et plan seul.
 - [x] **P2** — marqueur de perte, enveloppe versionnée et restauration transactionnelle ; tests ciblés.
-- [ ] **P3** — décision documentée, tests complets et rituel de passation.
+- [x] **P3** — décision documentée, tests complets et rituel de passation.
 
 ### Notes de reprise
 

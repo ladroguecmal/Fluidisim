@@ -81,3 +81,9 @@ l’hôte ; un bit de provenance ne fournit aucune authentification.
 conserve prédictions, confirmations et rejets sur mémoire prêtée. Pas de purge ni allocation.
 Full réclame une récupération par l’hôte ; le journal ne certifie pas encore sa complétude.
 Voir ADR-056. La propagation et la sauvegarde de cette enveloppe restent à construire.
+
+### S74 — Sauvegarde du journal
+
+save/restore conservent causes, états et perte connue dans WJNL V1. Restauration via pool
+hôte temporaire : toute erreur laisse le journal courant intact. Aucune allocation, ni purge.
+Voir ADR-057 pour les limites de confiance, de publication et de complétude réseau.

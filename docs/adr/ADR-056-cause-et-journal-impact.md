@@ -75,3 +75,8 @@ server_seq, doublons, conflits atomiques, rejet avant/après prédiction, proven
 erronée et capacité nulle. Ni C19 complet ni test réseau. Prochaine tranche : enveloppe
 persistée et état explicite de complétude/rétention avant propagation. Invariants I-03,
 I-06, I-10, I-11, I-16 et I-17 relus ; aucun amendé.
+
+> **Actualisation S74 — 2026-09-08, ADR-057.** Le journal mémorise désormais la perte connue
+> après Full ; les enregistrements restent inchangés mais cet indicateur évolue. Enveloppe
+> WJNL V1 et restauration transactionnelle implémentées. Les limites réseau et de rétention
+> ci-dessus restent applicables. Texte de décision initial conservé.

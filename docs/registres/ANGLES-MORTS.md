@@ -1539,3 +1539,7 @@ et raccordement hôte restent à réaliser, sans prétendre que le réseau est i
   Un pool qui refuse sans corrompre est correct localement mais peut exposer un sous-ensemble
   dépendant de l’ordre des arrivées. Full doit invalider la complétude et déclencher une reprise.
   Le premier journal le signale à l’appelant, sans encore mémoriser cet état. Suite S73-1.
+
+**Suivi A191 — S74 : traité localement par ADR-057.** Full mémorise une perte connue,
+persistée et restaurée. Aucun succès ultérieur ne l’efface implicitement. Absence de perte
+connue ne signifie pas complétude réseau ; protocole de resynchronisation hôte encore ouvert.

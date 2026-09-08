@@ -5548,3 +5548,17 @@ A190 résolu au niveau interne ; A191 expose la complétude après saturation. L
 Les causes doivent être fournies par le gameplay authentifié, pas inventées depuis les arrivées.
 
 **Vérification :** 53 tests core + 93 harnais = 146 réussis, cinq ignorés, aucun échec ; quatre avertissements préexistants du harnais. Diff vérifié. Copies synchronisées après commit.
+
+## S74 — 2026-09-08 — Le journal se sauvegarde et se restaure
+
+**Entrée :** Continue utilisateur ; départ 2483f8e, copies actives identiques.
+**Décision :** ADR-057. Perte connue mémorisée au refus Full, persistée sans prétendre prouver
+la complétude réseau. Format WJNL V1 : 24 octets + 97 par enregistrement, causes et rejets inclus.
+**Produit :** save dans mémoire hôte ; restore via temporaire fourni, puis remplacement unique.
+Erreur tardive : journal vivant inchangé. Quatre nouveaux tests, neuf ciblés réussis.
+**Limites :** pas de fichiers ni transport, pas de purge ni propagation, pas de preuve globale
+C19. Une restauration zéro perte requiert une référence hôte pertinente, pas seulement valide.
+**Suite S75 :** S74-1, premier impact propagé ; S72-2 rétention et S74-2 intégration ouvertes.
+A191 traité localement, L188 enregistrée. Aucun nouvel angle numéroté ni invariant amendé.
+
+**Vérification finale :** 57 tests core + 93 harnais = 150 réussis, cinq ignorés, aucun échec. Quatre avertissements préexistants du harnais. Format et diff vérifiés ; copies synchronisées après commit.

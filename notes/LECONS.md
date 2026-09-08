@@ -3022,3 +3022,10 @@ Les octets et leur tri peuvent être parfaits alors que la correspondance reste 
 pour le résultat global. Tester aussi ce que l’appelant pourra encore prétendre après le refus :
 état local cohérent et état complet sont deux propriétés distinctes. La récupération et la
 validité publiée doivent porter cette différence, pas seulement le code de retour.
+
+## L188 — Une preuve négative locale ne certifie pas une livraison globale
+
+*(S74)* Ne pas avoir observé de perte dans un pool ne prouve pas que tous les événements lui
+sont parvenus. Nommer un indicateur selon ce qu’il mesure effectivement : perte connue,
+plutôt que complet. Conserver cette portée dans le format sauvegardé ; persister un booléen
+ambigu transforme une observation locale en prétendue garantie pour la session suivante.
