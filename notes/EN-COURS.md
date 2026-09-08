@@ -65,7 +65,7 @@ Objectif : scénario hôte B+W dynamique, redémarrage depuis WLIV et mesure du 
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [ ] **P2** — exemple exécutable de bout en bout, référence indépendante du redémarrage et chronométrage.
+- [x] **P2** — exemple exécutable de bout en bout, référence indépendante du redémarrage et chronométrage.
 - [ ] **P3** — mesures, vérifications et rituel de passation.
 
 ### Notes de reprise
