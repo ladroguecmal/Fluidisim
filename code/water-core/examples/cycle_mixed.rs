@@ -251,7 +251,7 @@ fn main() {
         let mut expected = scratch.clone();
         let mut hash = Hasher64::new();
         let mut controller =
-            Controller::new(ctx, &half, &pj, SimTime(0), &mut active, &mut spare).unwrap();
+            Controller::new(ctx, &half, &mut pj, SimTime(0), &mut active, &mut spare).unwrap();
         // S119 : l'horizon est connu avant toute publication. Il vaut ici la validité des
         // impacts, plus courte que la fenêtre de pression.
         let (lo, hi) = prepared_water::mixed::horizon(&impacts, Some(&controller)).unwrap();
@@ -309,7 +309,7 @@ fn main() {
             )
             .unwrap();
             let direct =
-                bound_pressure::Prepared::from_journal(ctx, &half, &pj, t, &mut witness).unwrap();
+                bound_pressure::Prepared::from_journal(ctx, &half, controller.journal(), t, &mut witness).unwrap();
             prepared_water::mixed::sample_world_batch(
                 &bound,
                 &impacts,
@@ -467,7 +467,7 @@ fn main() {
             let p = bound_pressure::Prepared::from_journal(
                 ctx,
                 &half,
-                &pj,
+                controller.journal(),
                 SimTime(1_500_000),
                 &mut witness,
             )
@@ -573,7 +573,7 @@ fn main() {
             let p = bound_pressure::Prepared::from_journal(
                 ctx,
                 &half,
-                &pj,
+                controller.journal(),
                 SimTime(1_500_000),
                 &mut witness,
             )
@@ -587,7 +587,7 @@ fn main() {
             alt = !alt;
             let t = SimTime(if alt { 1_500_000 } else { 1_500_001 });
             let p =
-                bound_pressure::Prepared::from_journal(ctx, &half, &pj, t, &mut witness).unwrap();
+                bound_pressure::Prepared::from_journal(ctx, &half, controller.journal(), t, &mut witness).unwrap();
             black_box(p.energy_j());
         });
         let mut alt = true;
@@ -595,7 +595,7 @@ fn main() {
             alt = !alt;
             let pool: &mut [Slot] = if alt { &mut witness } else { &mut second };
             let p =
-                bound_pressure::Prepared::from_journal(ctx, &half, &pj, SimTime(1_500_000), pool)
+                bound_pressure::Prepared::from_journal(ctx, &half, controller.journal(), SimTime(1_500_000), pool)
                     .unwrap();
             black_box(p.energy_j());
         });

@@ -206,7 +206,7 @@ fn mount(
     let mut controller = bound_pressure::Controller::new(
         pc,
         &half,
-        &pj,
+        &mut pj,
         SimTime(window_start_us),
         &mut pp,
         &mut spare,

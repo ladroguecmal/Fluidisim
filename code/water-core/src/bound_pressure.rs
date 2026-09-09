@@ -8,7 +8,7 @@ use crate::{
 };
 #[path = "pressure_controller.rs"]
 mod controller;
-pub use controller::{Controller, PublicationState, Update};
+pub use controller::{Admission, AdmitError, Controller, PublicationState, Update};
 
 /// Association géométrique déclarée par l'hôte ; aucune conversion monde/local ici.
 #[derive(Clone, Copy, Debug)]

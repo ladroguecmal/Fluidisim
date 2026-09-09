@@ -86,7 +86,7 @@ fn controller_advances_rewinds_and_matches_direct_bits() {
     let mut active = [Slot::default(); 193];
     let mut spare = active;
     let mut direct = active;
-    let mut c = Controller::new(ctx, &half, &j, SimTime(0), &mut active, &mut spare).unwrap();
+    let mut c = Controller::new(ctx, &half, &mut j, SimTime(0), &mut active, &mut spare).unwrap();
     let points = [[0.0; 2], [2.0, 1.0], [-8.0; 2], [12.0; 2]];
     for us in [
         0, 499_999, 500_000, 500_001, 1_500_000, 2_000_000, 2_500_000, 8_000_000, 0, 1_500_000,
@@ -114,7 +114,7 @@ fn controller_advances_rewinds_and_matches_direct_bits() {
         );
         assert_eq!(c.update(t), Ok(Update::Unchanged));
         let f = c.current(t).unwrap();
-        let r = Prepared::from_journal(ctx, &half, &j, t, &mut direct).unwrap();
+        let r = Prepared::from_journal(ctx, &half, c.journal(), t, &mut direct).unwrap();
         let mut out = [Surface::default(); 4];
         let mut expected = out;
         let mut work = out;
@@ -156,7 +156,7 @@ fn controller_late_numeric_failure_keeps_publication_and_refuses_missing_time() 
     let ctx = Context::new(settings(), &half).unwrap();
     let mut active = [Slot::default(); 192];
     let mut spare = active;
-    let mut c = Controller::new(ctx, &half, &j, SimTime(0), &mut active, &mut spare).unwrap();
+    let mut c = Controller::new(ctx, &half, &mut j, SimTime(0), &mut active, &mut spare).unwrap();
     for t in [SimTime(1_500_000), SimTime(2_000_000)] {
         assert!(matches!(c.update(t), Err(Error::Preparation(_))));
         assert!(matches!(c.current(t), Err(Error::Time)));
@@ -186,7 +186,7 @@ fn controller_requires_both_pools_and_unblocked_journal() {
     let mut active = [Slot::default(); 192];
     let mut spare = active;
     assert!(matches!(
-        Controller::new(ctx, &half, &j, SimTime(0), &mut active, &mut spare),
+        Controller::new(ctx, &half, &mut j, SimTime(0), &mut active, &mut spare),
         Err(Error::Pending)
     ));
     let mut entries = [None; 1];
@@ -199,13 +199,13 @@ fn controller_requires_both_pools_and_unblocked_journal() {
             (&mut active[..], &mut spare[..191])
         };
         assert!(matches!(
-            Controller::new(ctx, &half, &j, SimTime(0), a, b),
+            Controller::new(ctx, &half, &mut j, SimTime(0), a, b),
             Err(Error::Preparation(
                 spectral_pressure::PrepareError::Capacity
             ))
         ));
     }
-    Controller::new(ctx, &half, &j, SimTime(0), &mut active, &mut spare).unwrap();
+    Controller::new(ctx, &half, &mut j, SimTime(0), &mut active, &mut spare).unwrap();
 }
 #[test]
 fn two_distinct_sources_are_linear_but_energy_is_not_additive() {
@@ -405,4 +405,146 @@ fn blocked_empty_or_incompatible_journals_refuse() {
     ));
     assert!(Prepared::from_journal(ctx, &half, &j, t, &mut pool[..191]).is_err());
     Prepared::from_journal(ctx, &half, &j, t, &mut pool).unwrap();
+}
+/// S130, ADR-086 : les trois issues d'une admission, et rien entre elles. Ce qui compte n'est
+/// pas le code d'erreur mais l'état laissé derrière : journal **et** champ sont comparés avant
+/// et après chaque refus.
+#[test]
+fn admission_republishes_or_leaves_everything_as_it_was() {
+    let p = paths();
+    let first = Source::new(meta(1), &p[0]).unwrap();
+    let second = Source::new(meta(2), &p[1]).unwrap();
+    let mut entries = [None; 2];
+    let mut j = Journal::new(1, &mut entries);
+    j.admit_authenticated(first).unwrap();
+    let mut nodes = [Node::default(); 384];
+    let mut hn = [Node::default(); 192];
+    let full = bake(recipe(), &mut nodes).unwrap();
+    let half = full.half_into(&mut hn).unwrap();
+    let ctx = Context::new(settings(), &half).unwrap();
+    let mut active = [Slot::default(); 192];
+    let mut spare = active;
+    let t = SimTime(1_500_000);
+    let mut c = Controller::new(ctx, &half, &mut j, t, &mut active, &mut spare).unwrap();
+    let points = [[0.0; 2], [2.0, 1.0], [-8.0; 2], [12.0; 2]];
+    let echantillon = |c: &Controller<'_, '_, '_, '_, '_>| {
+        let f = c.current(t).unwrap();
+        let mut out = [Surface::default(); 4];
+        let mut work = out;
+        f.sample_batch(&ctx, t, &points, &mut work, &mut out).unwrap();
+        (
+            out.map(|s| vals(s).map(f32::to_bits)),
+            [f.energy_j(), f.power_w(), f.slope_envelope()].map(f32::to_bits),
+        )
+    };
+    let une_source = echantillon(&c);
+    assert_eq!(c.journal().published().count(), 1);
+
+    // 1. Réadmettre la même source, à l'octet près : rien n'est recalculé, rien ne bouge.
+    assert_eq!(c.admit(first), Ok(Admission::AlreadyPresent));
+    assert_eq!(echantillon(&c), une_source);
+    assert_eq!(c.journal().published().count(), 1);
+    assert_eq!(c.published_time(), t);
+
+    // 2. Une source nouvelle : le journal l'acquiert et le champ la reflète, au même instant.
+    assert_eq!(c.admit(second), Ok(Admission::Republished));
+    assert_eq!(c.published_time(), t);
+    assert_eq!(c.journal().published().count(), 2);
+    let deux_sources = echantillon(&c);
+    assert_ne!(deux_sources, une_source);
+    // Et c'est bien le champ des deux sources, pas un champ quelconque : il coïncide en bits
+    // avec une préparation directe du même journal.
+    {
+        let mut direct = [Slot::default(); 192];
+        let r = Prepared::from_journal(ctx, &half, c.journal(), t, &mut direct).unwrap();
+        let mut out = [Surface::default(); 4];
+        let mut work = out;
+        r.sample_batch(&ctx, t, &points, &mut work, &mut out).unwrap();
+        assert_eq!(
+            (
+                out.map(|s| vals(s).map(f32::to_bits)),
+                [r.energy_j(), r.power_w(), r.slope_envelope()].map(f32::to_bits)
+            ),
+            deux_sources
+        );
+    }
+
+    // 3. Conflit : même identité, contenu différent. Journal et champ intacts.
+    let conflit = Source::new(meta(2), &p[0]).unwrap();
+    assert_eq!(
+        c.admit(conflit),
+        Err(AdmitError::Journal(crate::pressure_journal::Error::Conflict))
+    );
+    assert_eq!(echantillon(&c), deux_sources);
+    assert_eq!(c.journal().published().count(), 2);
+
+    // 4. Époque : la source vient d'un autre cycle d'admission.
+    let mut ailleurs = meta(3);
+    ailleurs.epoch = 2;
+    let autre_epoque = Source::new(ailleurs, &p[0]).unwrap();
+    assert_eq!(
+        c.admit(autre_epoque),
+        Err(AdmitError::Journal(crate::pressure_journal::Error::Epoch))
+    );
+    assert_eq!(echantillon(&c), deux_sources);
+
+    // 5. Saturation : le journal ne tient que deux sources. La troisième est conservée en
+    // attente, et **le contrôleur ne peut plus changer d'instant non plus** — c'est la
+    // conséquence, dite par ADR-086, d'une attente non résolue.
+    let troisieme = Source::new(meta(3), &p[0]).unwrap();
+    assert_eq!(c.admit(troisieme), Err(AdmitError::Saturated));
+    assert_eq!(echantillon(&c), deux_sources);
+    assert_eq!(c.journal().published().count(), 2);
+    assert_eq!(
+        c.journal().pending().map(|s| s.metadata().id),
+        Some(troisieme.metadata().id)
+    );
+    assert_eq!(c.update(SimTime(2_000_000)), Err(Error::Pending));
+    assert_eq!(c.published_time(), t);
+    assert_eq!(echantillon(&c), deux_sources);
+}
+/// S130 : le cas qui demandait un retour en arrière — le journal accepte, le champ refuse.
+#[test]
+fn a_field_that_cannot_be_computed_gives_the_source_back() {
+    let path = paths()[0];
+    // Une pression représentable dont le champ déborde : même témoin qu'en S117.
+    let enorme = [Segment {
+        pressure_pa: 1e30,
+        ..path[0]
+    }];
+    let first = Source::new(meta(1), &path).unwrap();
+    let debordante = Source::new(meta(2), &enorme).unwrap();
+    let mut entries = [None; 2];
+    let mut j = Journal::new(1, &mut entries);
+    j.admit_authenticated(first).unwrap();
+    let mut nodes = [Node::default(); 384];
+    let mut hn = [Node::default(); 192];
+    let full = bake(recipe(), &mut nodes).unwrap();
+    let half = full.half_into(&mut hn).unwrap();
+    let ctx = Context::new(settings(), &half).unwrap();
+    let mut active = [Slot::default(); 192];
+    let mut spare = active;
+    let t = SimTime(2_000_000);
+    let mut c = Controller::new(ctx, &half, &mut j, t, &mut active, &mut spare).unwrap();
+    let avant = c.current(t).unwrap().energy_j().to_bits();
+    assert_eq!(c.journal().published().count(), 1);
+
+    let issue = c.admit(debordante);
+    assert!(
+        matches!(issue, Err(AdmitError::Field(_))),
+        "attendu un refus du champ, obtenu {issue:?}"
+    );
+    // La source a été rendue : le journal est exactement celui d'avant.
+    assert_eq!(c.journal().published().count(), 1);
+    assert_eq!(
+        c.journal().published().next().map(|s| s.metadata().id),
+        Some(first.metadata().id)
+    );
+    assert!(c.journal().pending().is_none());
+    // Et la publication n'a pas bougé.
+    assert_eq!(c.published_time(), t);
+    assert_eq!(c.current(t).unwrap().energy_j().to_bits(), avant);
+    // Le contrôleur reste utilisable : ni le journal ni le champ ne gardent de trace.
+    assert_eq!(c.update(SimTime(1_000_000)), Ok(Update::Published));
+    assert_eq!(c.admit(first), Ok(Admission::AlreadyPresent));
 }

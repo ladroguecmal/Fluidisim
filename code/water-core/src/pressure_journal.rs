@@ -78,15 +78,29 @@ impl<'p, 's> Journal<'p, 's> {
             return Err(Error::Full);
         }
         // Ordre canonique d'identifiant ; ce n'est pas un ordre de séquence serveur.
-        let at = self
-            .published()
-            .position(|s| s.metadata().id > m.id)
-            .unwrap_or(self.count);
+        // Même calcul que `insertion_index`, dont le retour en arrière d'ADR-086 dépend.
+        let at = self.insertion_index(m.id);
         self.slots.copy_within(at..self.count, at + 1);
         self.slots[at] = Some(source);
         self.count += 1;
         self.pending = None;
         Ok(Change::Added)
+    }
+    /// ADR-086 : défaire l'insertion qui vient d'avoir lieu, à sa position connue. Réservée
+    /// au retour en arrière d'une transaction dont le champ n'a pas pu être recalculé — ce
+    /// n'est pas un retrait par identifiant, et il n'en existe pas.
+    pub(crate) fn undo_last_admit(&mut self, at: usize) {
+        debug_assert!(at < self.count);
+        self.slots.copy_within(at + 1..self.count, at);
+        self.count -= 1;
+        self.slots[self.count] = None;
+    }
+    /// Position qu'occuperait une source dans l'ordre canonique — la même que celle où
+    /// `admit_authenticated` l'insère.
+    pub(crate) fn insertion_index(&self, id: u64) -> usize {
+        self.published()
+            .position(|s| s.metadata().id > id)
+            .unwrap_or(self.count)
     }
     pub fn retry(&mut self) -> Result<Change, Error> {
         match self.pending {

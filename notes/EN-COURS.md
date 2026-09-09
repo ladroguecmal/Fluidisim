@@ -71,11 +71,11 @@ lui corresponde, ou ne rien changer du tout.
       de recalcul laisse derrière lui, et ce que la saturation entraîne — `from_journal`
       refuse tout journal en attente, donc un `Full` bloque aussi les changements d'instant.
 - [x] **P3** — ADR-086 : emprunt mutable, trois issues, retour en arriere interne, saturation dite terminale.
-- [ ] **P4** — construire : emprunt mutable du journal, `admit` transactionnel, retour à
-      l'état antérieur si le champ n'est pas calculable.
-- [ ] **P5** — les tests : admission qui republie, `Unchanged` légitime et `Unchanged`
-      interdit, doublon, conflit, époque, saturation et son blocage, refus numérique.
-- [ ] **P6** — suite complète, release, **hachages de campagne inchangés**.
+- [x] **P4** — emprunt mutable, `admit` transactionnel, `undo_last_admit` interne, accesseur
+      `journal()` en lecture seule.
+- [x] **P5** — deux tests : les cinq issues d'admission avec état comparé avant/après, et le
+      retour en arrière après refus du champ.
+- [x] **P6** — 259 tests, ciblés en release, hachages inchangés.
 - [ ] **P7** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
@@ -110,3 +110,15 @@ la forme : l emprunt mutable **garantit** l invariant "jamais Unchanged sur un j
 different" (le compilateur, pas la vigilance), et les deux succes d admit_authenticated n ont
 pas les memes consequences — Added exige un recalcul, Unchanged non, et confondre les deux
 ferait payer une preparation complete a chaque readmission d une source connue.
+
+P4-P6 : 166 core + 93 harnais = **259 réussis, cinq ignorés** ; les trois tests ciblés passent
+aussi en release ; hachages de campagne identiques (6591ab360344f76e, b563610d1dd78ada).
+
+Deux choses apprises en construisant :
+1. L'emprunt mutable a une conséquence que je n'avais pas anticipée : **le journal n'est plus
+   lisible directement** pendant la vie du contrôleur, et la campagne comme les tests s'en
+   servaient pour la voie directe témoin. D'où `Controller::journal()`, accesseur en lecture
+   seule — qui manquait, et qui est le seul chemin honnête pour inspecter sans muter.
+2. Le test du retour en arrière a été **vérifié comme témoin** : rollback désactivé, il échoue
+   (journal à 2 sources au lieu de 1) ; réactivé, il passe. Sans cette vérification, il aurait
+   pu être creux — c'est L211 appliquée à un test d'état plutôt qu'à un nom d'erreur.
