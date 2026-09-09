@@ -58,53 +58,49 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S129 — terminée
-Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S128-1 — recevoir énergie cinétique et bilan total du candidat N256/R80/48,
-depuis ses nœuds effectivement construits, contre les résultats indépendants S127.
+Session : S130 — en cours
+Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
+Objectif : S129-1 — admission dynamique des sources de pression. Le contrôleur d'ADR-078
+emprunte un journal **figé** ; il doit pouvoir admettre une source et republier un champ qui
+lui corresponde, ou ne rien changer du tout.
 
 ### Plan
 
-- [x] **P1** — état réel, jeton et plan seul ; continuité de S128 sur master propre.
-- [x] **P2** — instrument dans les tests privés, sans exposer les nœuds en API : densité
-      positive profonde, termes croisés conservés, potentielle/cinétique séparées ;
-      intégration Simpson320/640, disque80 et anneau32–80. Références chiffrées S127 figées.
-- [x] **P3** — réception à0/24/48 s, témoins initiaux et contre-épreuves (cinétique omise,
-      termes croisés omis), contrôles de surface contre sample, rapport fidèle aux résultats.
-      Corriger la production seulement si un défaut est établi.
-- [x] **P4** — tests adaptés et suite complète (nouveau test), journal/registres/actions,
-      index/README/passation, décomptes/invariants, jeton libre et commit final.
+- [x] **P1** — état réel, jeton, plan seul.
+- [ ] **P2** — inventaire avant de décider (L209) : ce que l'emprunt impose, ce qu'un refus
+      de recalcul laisse derrière lui, et ce que la saturation entraîne — `from_journal`
+      refuse tout journal en attente, donc un `Full` bloque aussi les changements d'instant.
+- [ ] **P3** — ADR-086, sur ce que l'inventaire aura montré.
+- [ ] **P4** — construire : emprunt mutable du journal, `admit` transactionnel, retour à
+      l'état antérieur si le champ n'est pas calculable.
+- [ ] **P5** — les tests : admission qui republie, `Unchanged` légitime et `Unchanged`
+      interdit, doublon, conflit, époque, saturation et son blocage, refus numérique.
+- [ ] **P6** — suite complète, release, **hachages de campagne inchangés**.
+- [ ] **P7** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
-Départ7701759 master propre ; branches/copies anciennes sans avance ni modification, aucune
-copie créée. Instructions et corpus déjà lus dans cette conversation, reprise immédiate.
-S78 physical_disk est privé dans les tests, assemble en f64 les nœuds réels/PhaseQ32/Bessel.
-La même méthode sera employée en S129 ; pas de fonction d'énergie de production ajoutée.
-Référence indépendante S127 publiée à10 décimales pour E/E0, cinétique=total−potentielle ;
-son incertitude de copie <1e-10 E0, largement sous le critère annoncé. Pas d'oracle du candidat.
-Critères AVANT mesure : total/potentielle/cinétique et anneau contre S127 <=1e-4 E0 ;
-raffinement radial <=0,002 E0, énergie totale fine proche deE0 <=0,003 (S78/S127).
-Densité >=−1e-12 J/m², cinétique initiale nulle, énergie hors32 à48 >0,5 E0 et initiale<0,003.
-Contrôle de surface assemblée depuis les mêmes nœuds <=1e-6 normalisé aux poids positifs,
-plus strict que S126 (1e-4) car seules les opérations d'assemblage diffèrent.
-Références : TRANSPORT-ETENDU-S127 tableaux ; conserver les termes croisés et la profondeur
-infinie du modèle. Refuser toute lecture de ce bilan comme une réception en profondeur finie.
+Départ e817d0e = master, après avance rapide de ma copie qui était restée à 52e80a5 (S124) et
+n'avait rien d'unique. S125 à S129 ont été faites par Codex sur master ; lues à l'amorce.
 
-P2 : tests_radial_energy.rs branché sous cfg(test), nœuds privés conservés ; Simpson320/640.
-Première mesure release : cinétique/E0≈0,5000000245 à24 et0,4999376328 à48 ; total/reference
-max9,05e-7 E0. Diagonale seule ramène le bilan à~0,617 E0 (contre-épreuve efficace).
-Avant réception finale, suppression d'un raccourci imposant K=0 à la naissance : le zéro
-doit être réellement calculé par la même double somme. Repasser ce test final en P3.
+Ce que la consigne S129-1 demande explicitement : publication cohérente journal/champ,
+attente explicite, ancien état conservé au refus, et **jamais `Unchanged` sur un journal
+différent**. Doublons, conflits et saturation à recevoir avant toute transaction mixte.
 
-P3 : version finale release reçue0,32 s ; bilan total/référence max9,045e-7 E0,
-cinétique max3,424e-7 E0, contrôle de surface2,036e-8. Contre-épreuves reçues.
-BILAN-CANDIDAT-ETENDU-S129.md contient résultats et limites ; S128-1 réalisée sur fixture.
-Suite complète déjà achevée :257 réussis/cinq ignorés,0 échec (164+93),7,78+53,10 s.
-S129-1 déclaré : admission dynamique pression, journal/champ cohérents, attente et refus,
-y compris nouvelle source à l'instant déjà publié. Construction à poursuivre en S130.
+Ce que la lecture a déjà établi :
+- `Controller` détient `&'v Journal` : admettre exige `&'v mut Journal`. Sept appelants, tous
+  en tests ou exemples — le changement est peu invasif.
+- L'emprunt mutable **garantit structurellement** l'invariant « jamais `Unchanged` sur un
+  journal différent » : personne d'autre ne peut muter le journal pendant la vie du contrôleur.
+  Préférable à un compteur de version, qui ne ferait que le détecter après coup.
+- `admit_authenticated` rend `Added`, `Unchanged`, ou `Epoch`/`Conflict`/`Pending`/`Full`.
+  `Full` met la source **en attente** et la conserve.
+- `from_journal` refuse tout journal dont l'attente est non vide (`Error::Pending`). Une
+  saturation bloque donc aussi les changements d'instant, pas seulement les admissions.
+- Le journal n'offre **aucun retrait**. Si le champ n'est pas calculable après une admission
+  réussie, il faut soit revenir en arrière (retrait interne, symétrique de l'insertion), soit
+  laisser le journal en avance sur le champ. ADR-078 a déjà écrit qu'on ne doit pas présenter
+  l'ancien champ comme représentant le journal modifié.
 
-P4 : journal, registres et rapports S127/S128 suivis ; index/README/REPRISE actualisés.
-85 ADR,204 angles,17 invariants,6 spécifications,23 cas vérifiés ; suite257/cinq ignorés.
-Invariants applicables relus, aucun invalidé, aucune nouvelle leçon ou angle distinct.
-Travail conservé sur master, aucun calcul de production modifié. Jeton libre, suite S130.
+Piège à éviter : élargir l'API du journal avec un retrait public. Ce qu'il faut est le retour
+en arrière d'une admission dont on connaît la position, pas une suppression arbitraire.

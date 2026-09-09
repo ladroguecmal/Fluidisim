@@ -18,12 +18,16 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-10 01:05 +02:00
-Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-10 01:10 +02:00
+Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
+Session en cours : S130 — admission dynamique des sources de pression (S129-1)
 Dernière session : S129 — bilan énergétique du candidat transporté reçu
-Session suivante : S130 — admission dynamique des sources de pression (S129-1)
+Session suivante : à fixer en fin de S130
+
+**Copie de travail S130** : worktree `claude/reprise-projet-2d3506`, remis en avance rapide sur
+master (e817d0e) au démarrage — il était resté à 52e80a5 et n'avait rien d'unique, donc aucun
+fork. Terminer par `git -C <racine> merge --ff-only claude/reprise-projet-2d3506`.
 
 *Le battement de fin de S118 disait 15:05 : une heure estimée, pas relevée. Corrigée ici.
 Un battement dans le futur ferait croire à une session active — le relever, jamais l'écrire de mémoire.*
