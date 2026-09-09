@@ -69,7 +69,7 @@ depuis ses nœuds effectivement construits, contre les résultats indépendants 
 - [x] **P2** — instrument dans les tests privés, sans exposer les nœuds en API : densité
       positive profonde, termes croisés conservés, potentielle/cinétique séparées ;
       intégration Simpson320/640, disque80 et anneau32–80. Références chiffrées S127 figées.
-- [ ] **P3** — réception à0/24/48 s, témoins initiaux et contre-épreuves (cinétique omise,
+- [x] **P3** — réception à0/24/48 s, témoins initiaux et contre-épreuves (cinétique omise,
       termes croisés omis), contrôles de surface contre sample, rapport fidèle aux résultats.
       Corriger la production seulement si un défaut est établi.
 - [ ] **P4** — tests adaptés et suite complète (nouveau test), journal/registres/actions,
@@ -96,3 +96,10 @@ Première mesure release : cinétique/E0≈0,5000000245 à24 et0,4999376328 à48
 max9,05e-7 E0. Diagonale seule ramène le bilan à~0,617 E0 (contre-épreuve efficace).
 Avant réception finale, suppression d'un raccourci imposant K=0 à la naissance : le zéro
 doit être réellement calculé par la même double somme. Repasser ce test final en P3.
+
+P3 : version finale release reçue0,32 s ; bilan total/référence max9,045e-7 E0,
+cinétique max3,424e-7 E0, contrôle de surface2,036e-8. Contre-épreuves reçues.
+BILAN-CANDIDAT-ETENDU-S129.md contient résultats et limites ; S128-1 réalisée sur fixture.
+Suite complète déjà achevée :257 réussis/cinq ignorés,0 échec (164+93),7,78+53,10 s.
+S129-1 déclaré : admission dynamique pression, journal/champ cohérents, attente et refus,
+y compris nouvelle source à l'instant déjà publié. Construction à poursuivre en S130.
