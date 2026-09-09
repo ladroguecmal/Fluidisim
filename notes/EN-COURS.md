@@ -66,7 +66,7 @@ s'arrête à `x = 64`. Mesurer d'abord si la piste asymptotique tient, **puis** 
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan.
-- [ ] **P2** — mesurer avant de décider (L209, L210). Trois erreurs à séparer, et la troisième
+- [x] **P2** — mesurer avant de décider (L209, L210). Trois erreurs à séparer, et la troisième
       est celle qu'on risque d'oublier :
       1. l'asymptotique elle-même, en f64 pur, contre la référence dense existante ;
       2. le raccord en `x = 64` — une discontinuité y ferait un anneau visible ;
@@ -98,3 +98,21 @@ cosinus passent par PhaseQ32, la racine carrée f32 est admise.
 
 Issue possible et parfaitement acceptable : la mesure dit que la limite n'est pas la table mais
 la phase, et la décision devient autre chose que « étendre ». Ne pas forcer la piste annoncée.
+
+P2 : `bessel_reach.rs`. La piste tient, et la mesure a corrigé deux idées fausses.
+
+1. **Asymptotique** (A&S 9.2.1) : ordre 2, erreur **3,6e-8 a x=64**, decroissante ensuite.
+   L'ordre 1 seul donne 1,6e-6, deja sous la tolerance de 4e-6. La mesure a aussi attrape un
+   signe faux dans mon terme d'ordre 2 pour J1 — P0 = 1 - 9/(128x^2) mais P1 = 1 + 15/(128x^2).
+2. **Raccord en x=64** : saut de **1,04e-7** entre la table et la candidate. Aucun anneau.
+3. **Ma crainte sur l'argument f32 etait exageree** : l'erreur sur J0 croit comme
+   ulp_rel * x * |J1|, et |J1| decroit en 1/sqrt(x), donc l'ensemble ne croit qu'en sqrt(x).
+
+Mais **le premier jeu de couples de test etait degenere** : lambda=4 m et r=60 m tombent sur 30
+tours pile, la phase y est exacte par accident et l'erreur affichee valait 1e-9. En balayant
+finement, le pire cas remonte a 8e-6. Piege classique, et il aurait fait publier une borne
+fausse d'un facteur mille.
+
+**Borne mesuree** : pire erreur 3,77e-6 a x<=2048, 5,8e-6 a x<=4096. Donc **x <= 2048**, fixe
+par la precision de la phase spatiale en f32 — la meme limite que pour B (ADR-052) — et non par
+la formule. Portee : **163 lambda** au lieu de 5,09, soit un facteur 32.
