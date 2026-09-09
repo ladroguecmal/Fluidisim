@@ -65,7 +65,7 @@ Objectif : source de pression immuable, codec versionné et validation sans allo
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [ ] **P2** — construire source et codec, décision de format ; tester refus et reconstruction.
+- [x] **P2** — construire source et codec, décision de format ; tester refus et reconstruction.
 - [ ] **P3** — publier résultats et limites, rituel final et synchronisation.
 
 ### Notes de reprise
@@ -73,3 +73,6 @@ Objectif : source de pression immuable, codec versionné et validation sans allo
 Départ50de79a, copies propres identiques. S107-1.
 Format séparé des impacts existants ; cause et époque explicites, aucun bit ne vaut authentification.
 Décodage sur pool hôte après validation complète, aucune vue partielle publiée.
+
+P2 : WPRS V1,116+40*n octets ; virage196. Trois tests ciblés debug/release.
+Suite228 réussis/cinq ignorés ; mêmes validateurs recette/contexte, formats impacts inchangés.

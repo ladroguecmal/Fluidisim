@@ -41,6 +41,10 @@ impl Context {
     /// Bornes d'accès et représentabilité, pas réception physique de cette configuration.
     /// La recette est tirée d'un demi-spectre opaque produit par la cuisson contrôlée.
     pub fn new(settings: Settings, spectrum: &HalfSpectrum<'_>) -> Result<Self, Error> {
+        Self::from_recipe(settings, spectrum.recipe())
+    }
+    pub(crate) fn from_recipe(settings: Settings, recipe: Recipe) -> Result<Self, Error> {
+        crate::gaussian_spectrum::validate_recipe(recipe).map_err(|_| Error::Context)?;
         let s = settings;
         if !s.gravity.is_finite()
             || s.gravity <= 0.0
@@ -60,10 +64,7 @@ impl Context {
         if duration == 0 || duration > 16_000_000 {
             return Err(Error::Time);
         }
-        Ok(Self {
-            settings,
-            recipe: spectrum.recipe(),
-        })
+        Ok(Self { settings, recipe })
     }
     pub fn settings(&self) -> Settings {
         self.settings

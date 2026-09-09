@@ -101,18 +101,8 @@ fn decay(x: f32) -> f32 {
 /// Recette V1 : sigma 1/16..64 m, coupure réduite sigma*kmax 1..8,
 /// radial 1..512, directions paires 4..512. Représentabilité, pas réception universelle.
 pub fn bake(recipe: Recipe, pool: &mut [Node]) -> Result<Spectrum<'_>, Error> {
+    validate_recipe(recipe)?;
     let r = recipe;
-    let reduced = r.sigma * r.cutoff;
-    if !r.sigma.is_finite()
-        || !(0.0625..=64.0).contains(&r.sigma)
-        || !r.cutoff.is_finite()
-        || !(1.0..=8.0).contains(&reduced)
-        || !(1..=512).contains(&r.radial)
-        || !(4..=512).contains(&r.angular)
-        || r.angular % 2 != 0
-    {
-        return Err(Error::Domain);
-    }
     let count = r.radial * r.angular;
     if pool.len() < count {
         return Err(Error::Capacity);
@@ -286,4 +276,20 @@ mod tests {
         println!("S97 nodes direction/transform/weight errors={worst:?}");
         assert!(worst[0] < 3e-7 && worst[1] < 1e-5 && worst[2] < 5e-7);
     }
+}
+
+pub(crate) fn validate_recipe(recipe: Recipe) -> Result<(), Error> {
+    let r = recipe;
+    let reduced = r.sigma * r.cutoff;
+    if !r.sigma.is_finite()
+        || !(0.0625..=64.0).contains(&r.sigma)
+        || !r.cutoff.is_finite()
+        || !(1.0..=8.0).contains(&reduced)
+        || !(1..=512).contains(&r.radial)
+        || !(4..=512).contains(&r.angular)
+        || r.angular % 2 != 0
+    {
+        return Err(Error::Domain);
+    }
+    Ok(())
 }
