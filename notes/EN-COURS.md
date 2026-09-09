@@ -70,7 +70,7 @@ ne documente laquelle mord en premier.
 - [x] **P2** — inventaire, avant toute décision (L209) : recenser chaque borne des deux
       constructeurs, le paramètre qu'elle contraint, et le nom qu'elle porte aujourd'hui.
       Puis **mesurer** laquelle mord, où, avec la sonde (L210).
-- [ ] **P3** — ADR-082, sur ce que l'inventaire aura montré.
+- [x] **P3** — ADR-082 : neuf noms pour les bornes de construction, Domain reserve aux positions, ImpactField laisse tel quel et dit comme limite.
 - [ ] **P4** — construire, en gardant l'implémentation unique (motif d'ADR-079 et 080).
 - [ ] **P5** — les tests : chaque borne nommée est atteinte par un cas qui la vise.
 - [ ] **P6** — vérification d'ensemble : hachages, suite, release.
