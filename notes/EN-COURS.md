@@ -67,10 +67,10 @@ lui corresponde, ou ne rien changer du tout.
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seul.
-- [ ] **P2** — inventaire avant de décider (L209) : ce que l'emprunt impose, ce qu'un refus
+- [x] **P2** — inventaire avant de décider (L209) : ce que l'emprunt impose, ce qu'un refus
       de recalcul laisse derrière lui, et ce que la saturation entraîne — `from_journal`
       refuse tout journal en attente, donc un `Full` bloque aussi les changements d'instant.
-- [ ] **P3** — ADR-086, sur ce que l'inventaire aura montré.
+- [x] **P3** — ADR-086 : emprunt mutable, trois issues, retour en arriere interne, saturation dite terminale.
 - [ ] **P4** — construire : emprunt mutable du journal, `admit` transactionnel, retour à
       l'état antérieur si le champ n'est pas calculable.
 - [ ] **P5** — les tests : admission qui republie, `Unchanged` légitime et `Unchanged`
@@ -104,3 +104,9 @@ Ce que la lecture a déjà établi :
 
 Piège à éviter : élargir l'API du journal avec un retrait public. Ce qu'il faut est le retour
 en arrière d'une admission dont on connaît la position, pas une suppression arbitraire.
+
+P2/P3 : inventaire dans ADMISSION-PRESSION-S130 §1, decision ADR-086. Deux points ont oriente
+la forme : l emprunt mutable **garantit** l invariant "jamais Unchanged sur un journal
+different" (le compilateur, pas la vigilance), et les deux succes d admit_authenticated n ont
+pas les memes consequences — Added exige un recalcul, Unchanged non, et confondre les deux
+ferait payer une preparation complete a chaque readmission d une source connue.
