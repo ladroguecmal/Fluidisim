@@ -58,25 +58,19 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S115 — terminée
+Session : S116 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : construire la requête B+impacts+pressions avec publication transactionnelle.
+Objectif : recevoir et mesurer le montage mixte aux résolutions reçues.
 
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [x] **P2** — définir le contrat mixte, construire la requête et recevoir ses réductions/refus.
-- [x] **P3** — publier résultats et limites ; rituel final et synchronisation.
+- [ ] **P2** — campagne mixte, référence de composition, refus et coût complet.
+- [ ] **P3** — publier résultats et corrections ; rituel final et synchronisation.
 
 ### Notes de reprise
 
-Départbbc2a0c, copies actives propres identiques. S114-1.
-B évalué une fois ; impacts en ordre journal puis champ de pression ; normale calculée une fois.
-Contexte frame/cell/g/rho commun, instant pression exact et horizons impacts conservés.
-Aucun bilan énergétique mixte implicite. ADR complémentaire, tests significatifs et suite complète.
-
-P2 : requête mixte construite, ADR-077 et MIXTE-S115. Trois tests debug/release reçus.
-Suite complète243 réussis/cinq ignorés. Réductions identiques en bits ; refus tardifs et enveloppe totale.
-Reprise après message utilisateur : changements locaux cohérents conservés et terminés.
-
-P2 4b63423. Suite S116 : S115-1, réception et coût mixte. Passation publiée.
+Départ1bbcef5, copies actives propres identiques. S115-1.
+Lecture du code radial : dispersion profonde, profondeur utilisée comme garde de validité.
+La formulation profondeur finie de S115 doit recevoir une correction datée, pas une réécriture ADR.
+Bibliothèque inchangée prévue ; réception executable sur domaine commun et instants0–4 s.
