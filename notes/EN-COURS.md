@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S113 — en cours
+Session : S113 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : référence f64 indépendante et réception spatiale du montage multisource S112.
 
@@ -66,7 +66,7 @@ Objectif : référence f64 indépendante et réception spatiale du montage multi
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
 - [x] **P2** — construire la référence, comparer les résolutions et mesurer le coût reçu.
-- [ ] **P3** — publier résultats et limites ; rituel final et synchronisation.
+- [x] **P3** — publier résultats et limites ; rituel final et synchronisation.
 
 ### Notes de reprise
 
@@ -85,3 +85,6 @@ P2 terminée : références256/512 reçues ; neuf recettes normales et cinq dens
 224×128 et256×128 passent10143 points-temps chacun ; puissance max6,1785e-8/3,5708e-8 W.
 Cycles pression préparation+64 points médians48,2895/56,1288 ms. B/codecs exclus.
 Rapport RECEPTION-MULTISOURCE-S113 ; bibliothèque inchangée, suite S112 non relancée.
+
+P2 a4917db. Publication, questions et passation synchronisées ; aucun nouvel angle/leçon distincte.
+Suite S114 : S113-1, reprise multisource WPJR vers B+pression aux recettes224×128/256×128.

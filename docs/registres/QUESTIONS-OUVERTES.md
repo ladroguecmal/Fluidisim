@@ -1157,3 +1157,13 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S112-1 : ouverte, S113.** Référence indépendante f64 du montage, raffinement radial
   et angulaire des sept grandeurs et bilans, puis coût complet aux résolutions reçues.
   Précision spatiale et reprise numérique multisource restent à vérifier.
+
+### S113 — Précision multisource reçue
+
+- **S112-1 : réalisée sur fixture pour le champ de pression.** [RECEPTION-MULTISOURCE-S113](../validation/RECEPTION-MULTISOURCE-S113.md),
+  oracle f64 raffiné256/512,224×128 et256×128 reçues ; coût préparation+requête64 mesuré.
+  Le seuil de puissance1e-7 W est un critère de banc à calibrer pour le jeu.
+- **S113-1 : ouverte, S114.** Reprise WPJR de deux sources, attente/retry, préparation
+  multisource et requête B+pression aux résolutions reçues ; dix sorties et bilans
+  identiques en bits à la construction directe, refus transactionnels et coût complet.
+  Le coût S113 exclut B, codecs et admission ; durabilité disque toujours ouverte.

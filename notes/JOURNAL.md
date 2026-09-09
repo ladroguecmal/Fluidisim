@@ -6203,3 +6203,27 @@ nouvel angle ou leçon distincte ; invariants inchangés.
 **Suite S113 :** S112-1, oracle f64 indépendant, raffinement des grandeurs et bilan,
 puis coût multisource. S111-1 réalisée ; scénario de reprise numérique multisource reste
 à exercer, ainsi que raccordement aux impacts et durabilité.
+
+## S113 — 2026-09-09 — Réception indépendante du montage multisource
+
+**Entrée :** Continue ;31a9e2b, copies actives propres identiques.
+**Produit :** receive_multisource et RECEPTION-MULTISOURCE-S113. Référence f64 pleine,
+réponses et pressions additionnées avant énergie/puissance ; aucune donnée cuite candidate réutilisée.
+**Diagnostic :** références128/256 insuffisantes pour puissance1e-7 W (écart5,8441e-7 W).
+Raffinement256/512, écart3,6446e-8 W. Seuil S104 explicitement étendu à la résolution,
+critère de fixture à calibrer pour le jeu, sans décision de budget universel.
+112×80 échoue sur potentiel ;128² et192×128 échouent sur puissance malgré champs reçus.
+**Réception :** balayage neuf recettes/121 points, puis cinq recettes/441 points ;23 instants.
+224×128 et256×128 passent10143 points-temps chacun contre les deux références.
+Puissance maximale6,1785e-8/3,5708e-8 W contre512². Assertions release réussies.
+Préparation+requête pression64 médianes48,2895/56,1288 ms ; lot identique, mémoire chaude.
+Première chronométrie dense à lot différent écartée ; rapport conserve la série finale.
+**Vérification :** bibliothèque inchangée, suite240 réussis/cinq ignorés de S112 non relancée.
+Formatage reçu ; P2 a4917db. Une ligne vide terminale signalée par diff P2 supprimée en P3.
+**Limites :** indépendance numérique, même modèle physique ; pas de borne continue, de
+résolution minimale ni de gain garanti. B, codecs, admission et durabilité exclus du coût.
+76 ADR,193 angles,17 invariants,6 spécifications,23 cas vérifiés sans création de catégorie.
+L138/L170/L204 appliquées ; aucun nouvel angle ou leçon distincte ; invariants inchangés.
+**Suite S114 :** S113-1, reprise multisource WPJR avec attente/retry puis B+pression aux
+recettes reçues ; dix sorties et bilans identiques en bits, refus et coût du cycle complet.
+S112-1 réalisée sur fixture pour le champ de pression ; intégration aux impacts et durabilité ouvertes.

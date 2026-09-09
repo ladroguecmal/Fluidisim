@@ -17,6 +17,10 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S113 :** [Réception multisource](validation/RECEPTION-MULTISOURCE-S113.md),224×128 et256×128 reçues contre f64 raffiné.
+Cycles pression64 médians48,29/56,13 ms ; bibliothèque inchangée, suite240/cinq ignorés de S112 non relancée.
+76 ADR,193 angles,17 invariants,6 spécifications,23 cas. Suite S114 : reprise multisource B+pression, S113-1.
+
 **S112 :** [Champ multisource](validation/MULTISOURCE-S112.md), réponses et bilans totaux, contexte et attente contrôlés.
 240 tests réussis/cinq ignorés ;76 ADR,193 angles. Suite S113 : référence et réception multisource, S112-1.
 

@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-09 13:32 +02:00
+JETON            : libre
+Battement        : 2026-09-09 13:34 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S113 — réception multisource
-Dernière session : S112 — champ multisource ;240 tests/cinq ignorés
-Session suivante : S113 — référence et réception multisource (S112-1)
+Session en cours : aucune
+Dernière session : S113 — réception multisource ; bibliothèque inchangée
+Session suivante : S114 — reprise multisource vers B+pression (S113-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -167,6 +167,15 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S113 — 2026-09-09 :** [RECEPTION-MULTISOURCE-S113](docs/validation/RECEPTION-MULTISOURCE-S113.md),
+références f64 pleines256/512 ;224×128 et256×128 passent neuf critères sur10143 points-temps.
+112×80 échoue sur potentiel ;128² et192×128 sur puissance. Critères locaux, pas de borne continue.
+Préparation+requête pression64 médianes48,2895/56,1288 ms ; B, admission et codecs exclus.
+Bibliothèque inchangée, suite240 réussis/cinq ignorés de S112 non relancée ; assertions release reçues.
+76 ADR,193 angles,17 invariants,6 spécifications,23 cas. S112-1 réalisée sur fixture.
+Suite S114 : S113-1, reprise WPJR multisource/attente/retry jusqu’à B+pression,
+identité en bits avec construction directe, refus et coût complet. Impacts et durabilité ouverts.
 
 **S112 — 2026-09-09 :** [MULTISOURCE-S112](docs/validation/MULTISOURCE-S112.md),
 champ commun depuis le journal compatible, interférences et travail total conservés,
@@ -1004,5 +1013,3 @@ travail, et il ne l'a peut-être jamais vu.
   `git log` plutôt que se fier à un souvenir.
 - **Le battement n'est pas une preuve de vie.** Une session peut être coupée juste après un commit
   et paraître active pendant deux heures. Le seuil protège du conflit, il ne le supprime pas.
-
-

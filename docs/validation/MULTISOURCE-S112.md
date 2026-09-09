@@ -75,3 +75,9 @@ bilan fermé et précision spatiale. La restauration d'un journal multisource es
 possible en format ; un scénario de reprise numérique multisource reste à exercer.
 Impacts, milieu variable, durabilité et autorité interplateforme restent ouverts.
 76 ADR,193 angles,17 invariants,6 spécifications,23 cas inchangés.
+
+**Mise à jour S113, 2026-09-09 :** S112-1 réalisée pour le champ de pression, voir
+[RECEPTION-MULTISOURCE-S113](RECEPTION-MULTISOURCE-S113.md).224×128 et256×128 passent
+contre f64 raffiné256/512 ;112×80 échoue sur potentiel,128² et192×128 sur puissance.
+Le bilan discret16×24 ci-dessus reste son résultat historique, sans réception spatiale.
+Suite S113-1 : reprise multisource et cycle B+pression complet ; coût S113 limité à la pression.
