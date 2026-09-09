@@ -6,6 +6,9 @@ use crate::{
     spectral_pressure::{self, Field, Slot, Surface},
     FrameId, SimTime,
 };
+#[path = "pressure_controller.rs"]
+mod controller;
+pub use controller::{Controller, PublicationState, Update};
 
 /// Association géométrique déclarée par l'hôte ; aucune conversion monde/local ici.
 #[derive(Clone, Copy, Debug)]

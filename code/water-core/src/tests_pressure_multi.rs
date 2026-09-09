@@ -70,6 +70,144 @@ fn vals(s: Surface) -> [f32; 7] {
     ]
 }
 #[test]
+fn controller_advances_rewinds_and_matches_direct_bits() {
+    let paths = paths();
+    let mut entries = [None; 2];
+    let mut j = Journal::new(1, &mut entries);
+    for i in 0..2 {
+        j.admit_authenticated(Source::new(meta(i as u64 + 1), &paths[i]).unwrap())
+            .unwrap();
+    }
+    let mut nodes = [Node::default(); 384];
+    let mut hn = [Node::default(); 192];
+    let full = bake(recipe(), &mut nodes).unwrap();
+    let half = full.half_into(&mut hn).unwrap();
+    let ctx = Context::new(settings(), &half).unwrap();
+    let mut active = [Slot::default(); 193];
+    let mut spare = active;
+    let mut direct = active;
+    let mut c = Controller::new(ctx, &half, &j, SimTime(0), &mut active, &mut spare).unwrap();
+    let points = [[0.0; 2], [2.0, 1.0], [-8.0; 2], [12.0; 2]];
+    for us in [
+        0, 499_999, 500_000, 500_001, 1_500_000, 2_000_000, 2_500_000, 8_000_000, 0, 1_500_000,
+    ] {
+        let t = SimTime(us);
+        let old = c.published_time();
+        assert_eq!(
+            c.state(t),
+            if old == t {
+                PublicationState::Ready
+            } else {
+                PublicationState::NeedsUpdate { published: old }
+            }
+        );
+        if old != t {
+            assert!(matches!(c.current(t), Err(Error::Time)));
+        }
+        assert_eq!(
+            c.update(t).unwrap(),
+            if old == t {
+                Update::Unchanged
+            } else {
+                Update::Published
+            }
+        );
+        assert_eq!(c.update(t), Ok(Update::Unchanged));
+        let f = c.current(t).unwrap();
+        let r = Prepared::from_journal(ctx, &half, &j, t, &mut direct).unwrap();
+        let mut out = [Surface::default(); 4];
+        let mut expected = out;
+        let mut work = out;
+        f.sample_batch(&ctx, t, &points, &mut work, &mut out)
+            .unwrap();
+        r.sample_batch(&ctx, t, &points, &mut work, &mut expected)
+            .unwrap();
+        assert_eq!(
+            out.map(|s| vals(s).map(f32::to_bits)),
+            expected.map(|s| vals(s).map(f32::to_bits))
+        );
+        assert_eq!(
+            [f.energy_j(), f.power_w(), f.slope_envelope()].map(f32::to_bits),
+            [r.energy_j(), r.power_w(), r.slope_envelope()].map(f32::to_bits)
+        );
+    }
+    let old = c.published_time();
+    let energy = c.current(old).unwrap().energy_j().to_bits();
+    assert_eq!(c.update(SimTime(8_000_001)), Err(Error::Time));
+    assert_eq!(
+        c.state(SimTime(u64::MAX)),
+        PublicationState::OutsideWindow { published: old }
+    );
+    assert_eq!(c.published_time(), old);
+    assert_eq!(c.current(old).unwrap().energy_j().to_bits(), energy);
+}
+#[test]
+fn controller_late_numeric_failure_keeps_publication_and_refuses_missing_time() {
+    let mut path = paths()[0];
+    path[0].pressure_pa = 1e30;
+    let mut entries = [None; 1];
+    let mut j = Journal::new(1, &mut entries);
+    j.admit_authenticated(Source::new(meta(1), &path).unwrap())
+        .unwrap();
+    let mut nodes = [Node::default(); 384];
+    let mut hn = [Node::default(); 192];
+    let full = bake(recipe(), &mut nodes).unwrap();
+    let half = full.half_into(&mut hn).unwrap();
+    let ctx = Context::new(settings(), &half).unwrap();
+    let mut active = [Slot::default(); 192];
+    let mut spare = active;
+    let mut c = Controller::new(ctx, &half, &j, SimTime(0), &mut active, &mut spare).unwrap();
+    for t in [SimTime(1_500_000), SimTime(2_000_000)] {
+        assert!(matches!(c.update(t), Err(Error::Preparation(_))));
+        assert!(matches!(c.current(t), Err(Error::Time)));
+        assert_eq!(c.published_time(), SimTime(0));
+        let f = c.current(SimTime(0)).unwrap();
+        assert_eq!(f.energy_j(), 0.0);
+        let mut out = [Surface::default()];
+        let mut work = out;
+        f.sample_batch(&ctx, SimTime(0), &[[1.0; 2]], &mut work, &mut out)
+            .unwrap();
+        assert!(vals(out[0]).iter().all(|v| *v == 0.0));
+    }
+    assert_eq!(c.update(SimTime(0)), Ok(Update::Unchanged));
+}
+#[test]
+fn controller_requires_both_pools_and_unblocked_journal() {
+    let path = paths()[0];
+    let source = Source::new(meta(1), &path).unwrap();
+    let mut entries = [];
+    let mut j = Journal::new(1, &mut entries);
+    j.admit_authenticated(source).unwrap_err();
+    let mut nodes = [Node::default(); 384];
+    let mut hn = [Node::default(); 192];
+    let full = bake(recipe(), &mut nodes).unwrap();
+    let half = full.half_into(&mut hn).unwrap();
+    let ctx = Context::new(settings(), &half).unwrap();
+    let mut active = [Slot::default(); 192];
+    let mut spare = active;
+    assert!(matches!(
+        Controller::new(ctx, &half, &j, SimTime(0), &mut active, &mut spare),
+        Err(Error::Pending)
+    ));
+    let mut entries = [None; 1];
+    let mut j = Journal::new(1, &mut entries);
+    j.admit_authenticated(source).unwrap();
+    for small_active in [true, false] {
+        let (a, b) = if small_active {
+            (&mut active[..191], &mut spare[..])
+        } else {
+            (&mut active[..], &mut spare[..191])
+        };
+        assert!(matches!(
+            Controller::new(ctx, &half, &j, SimTime(0), a, b),
+            Err(Error::Preparation(
+                spectral_pressure::PrepareError::Capacity
+            ))
+        ));
+    }
+    Controller::new(ctx, &half, &j, SimTime(0), &mut active, &mut spare).unwrap();
+}
+#[test]
 fn two_distinct_sources_are_linear_but_energy_is_not_additive() {
     let p = paths();
     let sources = [

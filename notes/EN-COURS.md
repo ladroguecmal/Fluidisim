@@ -65,7 +65,7 @@ Objectif : contrôleur pression à deux pools, publication après succès et ins
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [ ] **P2** — construire le contrôleur, recevoir les transitions/refus et la requête mixte.
+- [x] **P2** — construire le contrôleur, recevoir les transitions/refus et la requête mixte.
 - [ ] **P3** — publier décision, résultats et suite ; rituel final et synchronisation.
 
 ### Notes de reprise
@@ -74,3 +74,8 @@ Départc46a85e, copies actives propres identiques. S116-1.
 Journal et recette empruntés immuables pendant la vie du contrôleur ; admission dynamique hors scope.
 Deux pools empruntés disjoints, métadonnées validées séparées des coefficients pour éviter auto-référence.
 Même instant sans recalcul ; erreur à autre instant, ancienne publication conservée si mise à jour refusée.
+
+P2 terminée : Controller, FieldState opaque, trois tests nouveaux et tests mixtes via contrôleur.
+Suite246 réussis/cinq ignorés ; ciblés contrôleur et mixte aussi en release.
+Refus numérique répété conserve la publication à0 ; demandes aux dates refusées indisponibles.
+ADR-078 et CONTROLEUR-PRESSION-S117 ; admission figée explicitement.

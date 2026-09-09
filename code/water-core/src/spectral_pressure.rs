@@ -34,6 +34,38 @@ pub struct Field<'a> {
     /// Travail de la pression par seconde sur la vitesse totale, interférences incluses.
     pub power_w: f32,
 }
+/// Métadonnées opaques d'un champ validé ; utilisables uniquement avec ses propres slots.
+#[derive(Clone, Copy)]
+pub(crate) struct FieldState {
+    min: [f32; 2],
+    max: [f32; 2],
+    phase_safe: bool,
+    energy_j: f32,
+    power_w: f32,
+}
+impl Field<'_> {
+    pub(crate) fn state(&self) -> FieldState {
+        FieldState {
+            min: self.min,
+            max: self.max,
+            phase_safe: self.phase_safe,
+            energy_j: self.energy_j,
+            power_w: self.power_w,
+        }
+    }
+}
+impl FieldState {
+    pub(crate) fn bind(self, slots: &[Slot]) -> Field<'_> {
+        Field {
+            slots,
+            min: self.min,
+            max: self.max,
+            phase_safe: self.phase_safe,
+            energy_j: self.energy_j,
+            power_w: self.power_w,
+        }
+    }
+}
 #[derive(Debug, PartialEq, Eq)]
 pub enum PrepareError {
     Capacity,

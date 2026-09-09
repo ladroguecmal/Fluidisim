@@ -195,9 +195,15 @@ fn fixture(
         .unwrap();
     }
     let mut pp = [Slot::default(); 192];
-    let pressure =
-        bound_pressure::Prepared::from_journal(pc, &half, &pj, SimTime(1_500_000), &mut pp)
-            .unwrap();
+    let mut spare = pp;
+    let mut controller =
+        bound_pressure::Controller::new(pc, &half, &pj, SimTime(0), &mut pp, &mut spare).unwrap();
+    controller.update(SimTime(1_500_000)).unwrap();
+    assert_eq!(
+        controller.update(SimTime(8_000_001)),
+        Err(bound_pressure::Error::Time)
+    );
+    let pressure = controller.current(SimTime(1_500_000)).unwrap();
     check(&b, &impacts, &pressure, &single);
 }
 #[test]
