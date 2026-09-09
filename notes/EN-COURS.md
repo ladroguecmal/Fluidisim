@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S114 — en cours
+Session : S114 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : reprise de deux sources jusqu’à B+pression, refus et coût complet.
 
@@ -66,7 +66,7 @@ Objectif : reprise de deux sources jusqu’à B+pression, refus et coût complet
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
 - [x] **P2** — construire et recevoir le cycle multisource, mesurer ses étapes.
-- [ ] **P3** — publier résultats, limites et suite ; rituel final et synchronisation.
+- [x] **P3** — publier résultats, limites et suite ; rituel final et synchronisation.
 
 ### Notes de reprise
 
@@ -82,3 +82,6 @@ Dix sorties, E/P/enveloppe identiques en bits.344 troncatures et refus tardifs r
 pools de restauration et publication active conservés ; dépassement numérique refusé.
 Cycles complets depuis WPRS médians47,9483/55,5501 ms ; reprise48,5010/55,4706 ms.
 Rapport REPRISE-MULTISOURCE-S114. Bibliothèque inchangée, suite S112 non relancée.
+
+P2 dccd298. Publication, questions et passation mises à jour ; aucun nouvel angle/leçon distincte.
+Suite S115 : S114-1, requête commune B+impacts+pressions, refus et montage mixte.

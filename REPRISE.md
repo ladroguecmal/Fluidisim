@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-09 13:43 +02:00
+JETON            : libre
+Battement        : 2026-09-09 13:45 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S114 — reprise multisource
-Dernière session : S113 — réception multisource ; bibliothèque inchangée
-Session suivante : S114 — reprise multisource vers B+pression (S113-1)
+Session en cours : aucune
+Dernière session : S114 — reprise multisource ; bibliothèque inchangée
+Session suivante : S115 — requête B+impacts+pressions (S114-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -167,6 +167,15 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S114 — 2026-09-09 :** [REPRISE-MULTISOURCE-S114](docs/validation/REPRISE-MULTISOURCE-S114.md),
+deux sources WPRS/WPJR avec attente/retry jusqu’à B+pression ;2944 points-temps identiques en bits.
+Refus transactionnels reçus. Cycle depuis WPRS médian47,9483/55,5501 ms ; cuisson et disque exclus.
+Bibliothèque inchangée, suite240/cinq ignorés de S112 non relancée ; campagne release avec assertions.
+76 ADR,193 angles,17 invariants,6 spécifications,23 cas. S113-1 réalisée sur fixture.
+Suite S115 : S114-1, requête commune B+impacts+pressions, B unique, pentes/enveloppe totales,
+contexte/instant communs, publication atomique, montage mixte et réductions aux chemins existants.
+Renouvellement pression, durabilité et conformité interplateforme restent ouverts.
 
 **S113 — 2026-09-09 :** [RECEPTION-MULTISOURCE-S113](docs/validation/RECEPTION-MULTISOURCE-S113.md),
 références f64 pleines256/512 ;224×128 et256×128 passent neuf critères sur10143 points-temps.

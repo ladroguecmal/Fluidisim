@@ -123,3 +123,8 @@ retry compris, jusqu'à B+pression aux résolutions reçues ici. Comparer les di
 et bilans en bits à la construction directe ; mesurer le cycle complet et les refus.
 Le raccordement aux impacts, le milieu variable et la durabilité restent ouverts.
 76 ADR,193 angles,17 invariants,6 spécifications,23 cas inchangés.
+
+**Mise à jour S114, 2026-09-09 :** S113-1 réalisée sur fixture, voir
+[REPRISE-MULTISOURCE-S114](REPRISE-MULTISOURCE-S114.md). Reprise de deux sources jusqu’à
+B+pression,2944 points-temps identiques en bits et refus reçus ; cycle depuis WPRS
+47,95/55,55 ms médians locaux, cuisson exclue. Suite S114-1 : requête mixte impacts/pressions.

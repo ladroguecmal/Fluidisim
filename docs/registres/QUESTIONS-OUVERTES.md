@@ -1167,3 +1167,15 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
   multisource et requête B+pression aux résolutions reçues ; dix sorties et bilans
   identiques en bits à la construction directe, refus transactionnels et coût complet.
   Le coût S113 exclut B, codecs et admission ; durabilité disque toujours ouverte.
+
+### S114 — Reprise multisource reçue
+
+- **S113-1 : réalisée sur fixture.** [REPRISE-MULTISOURCE-S114](../validation/REPRISE-MULTISOURCE-S114.md),
+  attente/retry et WPJR jusqu’à B+pression,2944 points-temps identiques en bits,
+  refus transactionnels et cycle complet depuis WPRS mesuré, cuisson et disque exclus.
+- **S114-1 : ouverte, S115.** Construire une requête commune B+impacts+pressions :
+  contexte et instant communs, B compté une fois, pentes additionnées avant normale,
+  enveloppe totale et publication du lot après succès intégral. Recevoir montage mixte,
+  réductions aux chemins existants et refus. Le bilan énergétique global mixte ne peut
+  pas être déduit de la somme des bilans séparés sans traiter les interférences.
+  Renouvellement pression, durabilité et conformité interplateforme restent ouverts.

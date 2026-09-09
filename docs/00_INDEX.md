@@ -17,6 +17,10 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S114 :** [Reprise multisource](validation/REPRISE-MULTISOURCE-S114.md), WPJR et attente/retry jusqu’à B+pression.
+2944 points-temps identiques en bits ; cycles depuis WPRS47,95/55,55 ms médians locaux.
+Bibliothèque inchangée, suite240/cinq ignorés de S112 non relancée. Suite S115 : requête mixte, S114-1.
+
 **S113 :** [Réception multisource](validation/RECEPTION-MULTISOURCE-S113.md),224×128 et256×128 reçues contre f64 raffiné.
 Cycles pression64 médians48,29/56,13 ms ; bibliothèque inchangée, suite240/cinq ignorés de S112 non relancée.
 76 ADR,193 angles,17 invariants,6 spécifications,23 cas. Suite S114 : reprise multisource B+pression, S113-1.

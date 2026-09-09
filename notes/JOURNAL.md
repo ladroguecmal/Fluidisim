@@ -6227,3 +6227,28 @@ L138/L170/L204 appliquées ; aucun nouvel angle ou leçon distincte ; invariants
 **Suite S114 :** S113-1, reprise multisource WPJR avec attente/retry puis B+pression aux
 recettes reçues ; dix sorties et bilans identiques en bits, refus et coût du cycle complet.
 S112-1 réalisée sur fixture pour le champ de pression ; intégration aux impacts et durabilité ouvertes.
+
+## S114 — 2026-09-09 — Reprise multisource vers B+pression
+
+**Entrée :** Continue ;74a70bd, copies actives propres identiques.
+**Produit :** restart_multisource et REPRISE-MULTISOURCE-S114. Deux WPRS156 octets,
+journal une source publiée/une en attente, WPJR344 octets, restauration puis retry
+sur pool élargi, préparation et requête B+pression aux recettes224×128/256×128.
+**Réception :**2944 points-temps, dix sorties et E/P/enveloppe identiques en bits au
+journal direct ; ordre1,2 reconstitué malgré publication initiale2 et attente1.
+Tous les instantanés de roundtrip sont identiques en octets à état égal.
+344 troncatures, corruption tardive, époque/capacités, contexte restauré incompatible,
+dépassement numérique, dernier point invalide, mauvaise date et pente insuffisante reçus.
+Les deux pools de restauration restent intacts au refus ; la publication active reste utilisable.
+**Mesures finales :** restauration médiane0,6514/0,4909 µs par moyennes de lots1000.
+Reprise→requête48,5010/55,4706 ms ; cycle depuis WPRS47,9483/55,5501 ms.
+Cuisson, B configuré, construction des sources, allocations et disque hors mesure.
+Ne pas soustraire les médianes de séries successives ; variabilité locale visible.
+**Vérification :** campagne release finale avec assertions, formatage/diff reçus ; P2 dccd298.
+Bibliothèque inchangée, suite240 réussis/cinq ignorés exécutée en S112 non relancée.
+76 ADR,193 angles,17 invariants,6 spécifications,23 cas inchangés.
+L195/L201/L202 appliquées ; aucun nouvel angle ou leçon distincte ; invariants inchangés.
+**Suite S115 :** S114-1, construire une requête commune B+impacts+pressions, contribution
+B unique, somme des pentes et enveloppe totale, refus transactionnels, montage mixte
+et réductions aux chemins existants. S113-1 réalisée ; renouvellement pression,
+durabilité et conformité interplateforme restent ouverts. Aucun arbitrage externe ajouté.
