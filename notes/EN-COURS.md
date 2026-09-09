@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S108 — en cours
+Session : S108 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : source de pression immuable, codec versionné et validation sans allocation.
 
@@ -66,7 +66,7 @@ Objectif : source de pression immuable, codec versionné et validation sans allo
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
 - [x] **P2** — construire source et codec, décision de format ; tester refus et reconstruction.
-- [ ] **P3** — publier résultats et limites, rituel final et synchronisation.
+- [x] **P3** — publier résultats et limites, rituel final et synchronisation.
 
 ### Notes de reprise
 
@@ -76,3 +76,5 @@ Décodage sur pool hôte après validation complète, aucune vue partielle publi
 
 P2 : WPRS V1,116+40*n octets ; virage196. Trois tests ciblés debug/release.
 Suite228 réussis/cinq ignorés ; mêmes validateurs recette/contexte, formats impacts inchangés.
+
+P2 b8e72be. Suite S109 : S108-1, admission et conflits des sources.

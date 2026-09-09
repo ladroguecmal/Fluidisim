@@ -86,3 +86,6 @@ trajectoire et contexte explicites, codec et refus des entrées invalides/tronqu
 Préserver les formats existants des impacts ; qualifier sa future admission dans le
 journal et les sauvegardes avant de déclarer une persistance ou autorité du sillage.
 La construction des causes persistantes est prioritaire à une nouvelle micro-optimisation.
+
+**Mise à jour S108, 2026-09-09 :** S107-1 réalisée ; [ADR-074](../adr/ADR-074-source-de-pression-versionnee.md),
+source et codec WPRS V1. Suite S108-1 : admission bornée et conflits, avant sauvegarde.

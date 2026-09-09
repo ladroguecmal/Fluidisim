@@ -1117,3 +1117,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S107-1 : ouverte, S108.** Source de pression immuable versionnée, trajectoire et
   contexte, codec et refus des entrées invalides/tronquées. Formats impacts conservés ;
   qualification de la future admission journal/sauvegarde avant autorité ou persistance.
+
+### S108 — Source de pression versionnée
+
+- **S107-1 : réalisée pour la source candidate.** [ADR-074](../adr/ADR-074-source-de-pression-versionnee.md),
+  WPRS V1, validation et reconstruction, formats impacts conservés.
+- **S108-1 : ouverte, S109.** Admission bornée et idempotente des sources de pression,
+  vérification époque/cause/id et conflits explicites, conservation au refus. Qualifier
+  les sauvegardes après ce contrat ; authentification fournie par l'hôte.

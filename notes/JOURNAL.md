@@ -6114,3 +6114,21 @@ angle ou leçon distincte. L195/L202/L204 appliquées.
 **Suite S108 :** S107-1, source de pression versionnée immuable et codec, trajectoire et
 contexte, refus des données invalides/tronquées. Formats impacts conservés ; admission
 journal et sauvegarde à qualifier. S106-1 réalisée, copies synchronisées après clôture.
+
+## S108 — 2026-09-09 — Source de pression versionnée
+
+**Entrée :** continue ;50de79a, copies actives propres identiques.
+**Produit :** ADR-074, Source immuable et WPRS V1,116+40*n octets, virage196.
+Cause/époque/identifiant, contexte et recette, segments ; aucun coefficient persisté.
+Validation commune avec cuisson/contexte, décodage en deux passages sans mutation au
+refus. Formats Impact/WJNL/WLIV inchangés, aucune authentification implicite.
+**Vérification :** suite135 core +93 harnais =228 réussis,cinq ignorés ; quatre
+avertissements préexistants. Trois tests ciblés aussi en release : aller-retour binaire
+et reconstruction identique, époque extrême, toutes troncatures, suffixes/réservés,
+capacités, NaN tardif, discontinuités et contexte. P2 b8e72be, formatage/diff vérifiés.
+**Limites :** descripteur candidat borné, représentabilité distincte du succès numérique,
+aucun transport, stockage durable ou journal de pression. Zéros signés conservés.
+74 ADR,193 angles,17 invariants,6 spécifications,23 cas. Aucun nouvel angle ni leçon
+distincte ; I-08/I-17 conservés, I-03/I-15 non déclarés reçus entre plateformes.
+**Suite S109 :** S108-1, admission bornée/idempotente, époque/cause/id et conflits,
+conservation au refus avant sauvegardes. S107-1 réalisée. Synchronisation finale.

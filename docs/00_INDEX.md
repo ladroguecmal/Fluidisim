@@ -17,6 +17,9 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S108 :** [ADR-074 — Source de pression versionnée](adr/ADR-074-source-de-pression-versionnee.md), **ACTÉE**.
+WPRS V1,228 tests réussis/cinq ignorés ;74 ADR,193 angles. Suite S109 : admission des sources, S108-1.
+
 **S107 :** [Cycle hôte B+pression](validation/CYCLE-PRESSION-S107.md), virage reçu et cycles médians29,37/16,28 ms.
 Bibliothèque inchangée ; suite225/cinq ignorés non relancée. Suite S108 : source versionnée et codec, S107-1.
 

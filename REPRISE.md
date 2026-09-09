@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-09 08:35 +02:00
+JETON            : libre
+Battement        : 2026-09-09 08:36 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S108 — source de pression et codec
-Dernière session : S107 — cycle hôte reçu ; suite225/cinq ignorés inchangée
-Session suivante : S108 — source de pression versionnée et codec (S107-1)
+Session en cours : aucune
+Dernière session : S108 — source WPRS construite ;228 tests/cinq ignorés
+Session suivante : S109 — admission des sources et conflits (S108-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -148,7 +148,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 17 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 73 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 74 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -167,6 +167,12 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S108 — 2026-09-09 :** [ADR-074](docs/adr/ADR-074-source-de-pression-versionnee.md),
+source immuable et WPRS V1,116+40*n octets ; validation complète avant écriture,
+reconstruction identique.228 tests réussis/cinq ignorés ; trois ciblés aussi en release.
+74 ADR,193 angles inchangés. S107-1 réalisée ; suite S109 : admission bornée/idempotente,
+époque/cause/identifiant et conflits, S108-1. Authentification et sauvegarde non construites.
 
 **S107 — 2026-09-09 :** [CYCLE-PRESSION-S107](docs/validation/CYCLE-PRESSION-S107.md),
 virage reçu avec B16 et64 points, références/refus/reprise ; cycles médians29,3672 ms
