@@ -67,12 +67,12 @@ fenêtre sans champ était incompressible ; la vérifier plutôt que la croire.
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seul.
-- [ ] **P2** — conception : quelle forme donne le meilleur résultat, et à quel prix ?
+- [x] **P2** — conception : quelle forme donne le meilleur résultat, et à quel prix ?
       La question qui décide n'est pas « comment recycler les coefficients » mais **qui tient
       le champ pendant l'opération**. Un contrôleur qui en construit un autre à partir de ses
       propres coefficients, sans se détruire, servirait jusqu'au basculement — et la fenêtre
       **disparaîtrait** au lieu de raccourcir. Le prix serait un second jeu de pools.
-- [ ] **P3** — ADR-089 sur ce que P2 aura établi.
+- [x] **P3** — ADR-089 : extend_into lit l ancien controleur et en construit un second, sans le detruire.
 - [ ] **P4** — construire, en réutilisant `add_segments` d'ADR-088.
 - [ ] **P5** — recevoir : identité en bits avec la voie directe, service maintenu pendant
       l'opération, et refus quand la condition d'ordre n'est pas remplie.
