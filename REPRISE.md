@@ -18,12 +18,15 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-09 15:05 +02:00
+JETON            : occupé
+Battement        : 2026-09-09 14:36 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S119 — horizon effectif du montage mixte (S118-1)
 Dernière session : S118 — cycle hôte temporel mixte ;247 tests/cinq ignorés
-Session suivante : S119 — horizon effectif du montage mixte (S118-1)
+Session suivante : à fixer en fin de S119
+
+*Le battement de fin de S118 disait 15:05 : une heure estimée, pas relevée. Corrigée ici.
+Un battement dans le futur ferait croire à une session active — le relever, jamais l'écrire de mémoire.*
 
 **Note S118, même mécanisme que la note S58 plus bas.** S118 a travaillé dans le worktree
 `claude/reprise-projet-2d3506` et l'a refusionné dans master en avance rapide. Les copies

@@ -58,53 +58,37 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S118 — terminée
+Session : S119 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : exercer le contrôleur de publication dans un cycle hôte temporel mixte
-(S117-1) — recettes 224×128 et 256×128, plusieurs changements d'instant, identité en
-bits avec la voie directe, chemin `Unchanged`, refus, coût mise à jour + requête 64.
+Objectif : A194 — l'hôte doit pouvoir savoir **avant de publier** quelles dates le montage
+mixte peut servir. Construire l'horizon effectif et l'état du montage, et prouver par
+balayage que ce qui est annoncé est exactement ce que la requête accepte.
 
 ### Plan
 
-- [x] **P1** — vérifier la passation, prendre le jeton, déclarer ce plan.
-- [x] **P2** — écrire la campagne `cycle_mixed` : contrôleur piloté par une séquence
-      d'instants (avance, retour, répétition), requête mixte B+impact+pression sur la
-      publication, comparaison en bits à la préparation directe, refus hors fenêtre et
-      vue à une date non publiée. Plus le test de bibliothèque du fait neuf.
-- [x] **P3** — publier le livrable : chiffres reçus, biais de position de la mesure,
-      angle mort et leçon.
-- [x] **P4** — rituel de fin (`REPRISE.md` §6) et synchronisation `--ff-only` vers master.
+- [x] **P1** — passation, jeton, plan.
+- [ ] **P2** — ADR-079 : ce que le contrôleur tient, ce que le montage exige, et pourquoi
+      l'annonce est une fonction séparée plutôt qu'un contrôle de plus dans `update`.
+- [ ] **P3** — construire `mixed::horizon` et `mixed::plan`, `Controller::context`,
+      factoriser les contrôles indépendants des points depuis `sample_world_batch`.
+- [ ] **P4** — le test qui compte : balayage d'instants, `plan(t)` comparé à ce que la
+      séquence réelle (update puis requête à lot vide) fait vraiment.
+- [ ] **P5** — recevoir dans la campagne `cycle_mixed`, avec bloc de mise en régime (A195).
+- [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
-Départ c16c308 (= master, quatre worktrees au même commit sauf 5134cd archivé et c107bf
-à S44). Copie de travail : `claude/reprise-projet-2d3506`.
+Départ 6700773 = master ; trois copies coïncident (master, 29ef50, 2d3506), 5134cd archivée,
+c107bf sur la ligne S44. Worktree `claude/reprise-projet-2d3506`.
 
-Ce que S117 laisse acquis : `Controller::{new,update,published_time,state,current}`,
-deux pools disjoints, bascule après succès intégral, `Unchanged` sur même instant,
-`Err(Time)` pour une vue à une date non publiée. Reçu à la recette 16×24 seulement —
-S118 doit l'exercer aux recettes que S116 a reçues spatialement (224×128, 256×128).
+Le problème, tel que S118 l'a constaté : `update(6 s)` réussit alors que les impacts expirent
+à 4 s. Le contrôleur valide **sa** fenêtre ; la requête mixte refuse ensuite sur
+`renewal_deadline`. Rien ne permet à l'hôte de le savoir avant de publier.
 
-P2 : `cycle_mixed` reçu aux deux recettes, 3468 points-temps chacune, identité en bits
-avec la voie directe à chaque étape ; hash 6591ab360344f76e (224x128) et b563610d1dd78ada
-(256x128), stables d une exécution à l autre. Suite 154 core + 93 harnais = 247 réussis,
-cinq ignorés ; le test neuf passe aussi en release. Quatre avertissements préexistants.
+Ce qui est disponible sans publication : `bound`, `impacts` (donc `renewal_deadline` et
+`loss_known`), et le contrôleur (donc sa fenêtre). Tout ce que `sample_world_batch` vérifie
+indépendamment des points est donc décidable avant publication — c'est ce qui rend
+l'équivalence annonçable *et* testable, et non une simple heuristique.
 
-Trouvaille de P2, et c est l apport de la session : la comparaison `update` vs voie
-directe donnait un écart de +15 % à 224x128, instable. Trois témoins l ont expliqué —
-instant alterné (non), pool alterné (non), même mesure replacée en dernier (oui). Le
-premier bloc `measure` d une séquence est surestimé. Cela touche rétroactivement les
-chiffres de préparation publiés depuis S104, qui sont tous des premiers blocs.
-
-Attendu de la mesure : le contrôleur ne recopie pas les coefficients, donc
-`update`+`current` devrait coûter la préparation directe de S116 (48–58 ms) sans surcoût
-mesurable ; c'est cela qu'il faut vérifier, pas seulement l'égalité en bits.
-
-P3 : CYCLE-MIXTE-S118, A194 (deux horizons), A195 et L207 (biais de position de la mesure).
-Index, README, décompte daté du registre des angles morts. Commit 2076ea2.
-
-P4 : journal, REPRISE (jeton rendu, état S118, suite S119), fusion ff-only vers master.
-Ce que S119 doit savoir sans relire : le contrôleur ne coûte rien de plus que la voie directe
-(12,55/15,07 ms contre 12,63/14,56), son gain mesuré est le chemin Unchanged à 0,1 microseconde,
-et la requête 64 points domine tout le reste (35,57/40,04 ms). Ne pas comparer deux blocs de
-mesure à des positions différentes : c'est ce qui a failli faire publier un faux surcoût.
+Piège à éviter : réimplémenter les contrôles dans l'annonce. Deux implémentations du même
+contrôle divergent (L137 est la même leçon, appliquée au code). Factoriser, ne pas recopier.
