@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S105 — en cours
+Session : S105 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : contexte explicite et publication candidate atomique sur pools hôte.
 
@@ -66,7 +66,7 @@ Objectif : contexte explicite et publication candidate atomique sur pools hôte.
 
 - [x] **P1** — vérifier les copies et déclarer le plan.
 - [x] **P2** — construire enveloppe de contexte et requête liée ; tester refus et maintien de la publication précédente.
-- [ ] **P3** — publier résultats, limites et suite ; rituel final et synchronisation.
+- [x] **P3** — publier résultats, limites et suite ; rituel final et synchronisation.
 
 ### Notes de reprise
 
@@ -78,3 +78,5 @@ Contexte hôte déclaré, pas de preuve géométrique ni de réception universel
 
 P2 : bound_pressure, recette conservée dans HalfSpectrum. Quatre tests debug/release.
 Suite222 réussis/cinq ignorés ; sorties physiques inchangées, données dans CONTEXTE-PRESSION-S105.
+
+P2 4921bd7. Résultats publiés ; suite S106 S105-1, requête monde commune B+pression.

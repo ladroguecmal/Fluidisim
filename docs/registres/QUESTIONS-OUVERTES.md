@@ -1093,3 +1093,12 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S104-1 : ouverte, S105.** Contexte explicite du candidat pression (recette, gravité,
   densité, domaine, horizon), publication atomique sur pools hôte et refus de contexte
   incompatible, avant raccordement autoritaire B+W.
+
+### S105 — Contexte et publication candidate
+
+- **S104-1 : réalisée dans le périmètre emprunté.** [CONTEXTE-PRESSION-S105](../validation/CONTEXTE-PRESSION-S105.md).
+  Contexte complet, date exacte, maintien de la publication précédente après refus.
+  Le contrôleur autonome cyclique et les causes persistantes ne sont pas construits ici.
+- **S105-1 : ouverte, S106.** Requête monde commune B+pression : conversion des points,
+  instant/contexte uniques, vitesses et normale reçues, contrôle de pente et lot atomique.
+  Distinguer borne de pente du champ et mesure ponctuelle ; source autoritaire toujours ouverte.

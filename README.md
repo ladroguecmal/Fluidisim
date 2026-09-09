@@ -61,7 +61,7 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S104 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S105 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
@@ -74,7 +74,7 @@ Les trajectoires avec virage conservent désormais les interférences et le bila
 Une enveloppe refuse les requêtes hors bornes ; le virage est comparé par raffinement sur
 [-8,12]² m et 0–8 s, sans garantie continue. La préparation dispose d'un chemin sur pool hôte.
 Potentiel, pente et vitesses sont vérifiés. Le candidat modal à phases entières passe la
-réception locale : 218 tests réussis, cinq ignorés ; conformité interplateforme encore ouverte.
+réception locale : 222 tests réussis, cinq ignorés ; conformité interplateforme encore ouverte.
 La superposition sur pool passe le virage et le découpage, pour toutes les grandeurs.
 La cuisson gaussienne possède une recette versionnée, sur pool et sans libm.
 Le demi-spectre et les coefficients préparés coûtent 19,800 ms pour 64 points, médiane locale.
@@ -82,5 +82,7 @@ Les lots publient après succès intégral ; le parcours par tuiles, plus lent, 
 Sinus/cosinus partagent leur réduction avec identité locale, sans gain global établi.
 Une résolution112×80 passe le virage densifié : lot64 à11,305 ms médian local, usage limité à cette fixture.
 Puissance candidate reçue : bilans spatial et temporel, extinction, aux deux résolutions (S104).
-Suite : contexte explicite et publication atomique, S104-1 ; raccordement autoritaire ouvert.
+Le candidat lie désormais ses requêtes au contexte complet et à son instant préparé.
+Une préparation refusée conserve la publication précédente (S105).
+Suite : requête monde commune B+pression, S105-1 ; raccordement autoritaire ouvert.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

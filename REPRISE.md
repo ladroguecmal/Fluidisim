@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-09 08:13 +02:00
+JETON            : libre
+Battement        : 2026-09-09 08:14 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S105 — contexte et publication candidate
-Dernière session : S104 — puissance reçue ; 218 tests/cinq ignorés
-Session suivante : S105 — contexte et publication candidate (S104-1)
+Session en cours : aucune
+Dernière session : S105 — contexte candidat ; 222 tests/cinq ignorés
+Session suivante : S106 — requête monde B+pression (S105-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -167,6 +167,12 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S105 — 2026-09-09 :** [CONTEXTE-PRESSION-S105](docs/validation/CONTEXTE-PRESSION-S105.md),
+contexte complet, requête liée à l'instant préparé ; publication active conservée au refus.
+222 tests réussis/cinq ignorés, quatre tests ciblés aussi en release. Géométrie hôte déclarée,
+contrôleur autonome et persistance ouverts. 73 ADR,193 angles inchangés. S104-1 réalisée
+comme enveloppe empruntée ; suite S106 : requête monde B+pression, S105-1.
 
 **S104 — 2026-09-08 :** [PUISSANCE-S104](docs/validation/PUISSANCE-S104.md), puissance du
 champ total reçue ; résidus travail/énergie<1,31e-7 J à800 pas, contrôle spatial<7,3e-9 W.

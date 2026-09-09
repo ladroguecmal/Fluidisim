@@ -6058,3 +6058,23 @@ formatage/diff. P2 1389480. Banc isolé préparation6528,6/3597,5 µs ; série c
 nouveau ; déterminisme interplateforme non déclaré reçu. Aucun budget cible certifié.
 **Suite S105 :** S104-1, contexte explicite et publication atomique sur pools hôte,
 refus de contexte incompatible. S103-1 réalisée sur fixture. Synchronisation finale.
+
+## S105 — 2026-09-09 — Contexte et publication candidate
+
+**Entrée :** Continue ; f4d84d2, copies actives propres identiques, jeton libre.
+**Produit :** bound_pressure : contexte complet tirant sa recette du demi-spectre opaque,
+champ figé à un instant, refus de requête incompatible, publication sur pool candidat.
+La fenêtre de reconstruction ne rend pas les coefficients valides à un autre instant.
+**Vérification :** quatre tests ciblés debug/release ; suite complète129 core +93 harnais
+=222 réussis, cinq ignorés, quatre avertissements préexistants. Recettes et contextes
+modifiés refusés ; sortie active conservée après débordement numérique du candidat ;
+lot refusé inchangé ; réemploi du pool après échec. Identité avec calcul direct des sept
+grandeurs et des bilans, y compris à époque proche de u64::MAX. P2 4921bd7.
+**Limites :** protocole hôte, pas contrôleur cyclique autonome. Géométrie déclarée,
+pas conversion monde, codec, sauvegarde, LiveWater ou conformité interplateforme.
+Aucun coût mesuré ici, calcul physique inchangé. 73 ADR,193 angles,17 invariants,
+6 spécifications,23 cas inchangés. L194/L197/L198/L205 appliquées ; aucune nouvelle
+leçon distincte ou angle mort. I-03/I-15 restent ouverts, aucun invariant modifié.
+**Suite S106 :** S105-1, requête monde commune B+pression, cohérence des points/temps,
+vitesses et normale, contrôle de pente et lot atomique. S104-1 réalisée dans le périmètre
+emprunté ; journal et sauvegarde des sources de sillage restent à construire.

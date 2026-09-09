@@ -59,3 +59,7 @@ atomique sur pools hôte et refus de contexte incompatible. Préparer ainsi son
 raccordement B+W sans annoncer un codec ni une intégration LiveWater déjà réalisés.
 Conformité interplateforme et sauvegarde autoritaire du sillage restent ouvertes.
 73 ADR,193 angles morts,17 invariants,6 spécifications,23 cas : inchangés.
+
+**Mise à jour S105, 2026-09-09 :** S104-1 réalisée comme enveloppe empruntée ; voir
+[CONTEXTE-PRESSION-S105](CONTEXTE-PRESSION-S105.md). Contexte et instant liés aux
+requêtes, publication précédente conservée au refus. Suite S105-1 : requête monde B+pression.

@@ -17,6 +17,9 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S105 :** [Contexte du candidat](validation/CONTEXTE-PRESSION-S105.md), instant lié et publication précédente conservée au refus.
+222 tests réussis, cinq ignorés ; 73 ADR,193 angles morts. Suite S106 : requête monde B+pression, S105-1.
+
 **S104 :** [Puissance candidate](validation/PUISSANCE-S104.md), bilan temporel/spatial reçu aux deux résolutions.
 218 tests réussis, cinq ignorés ; 73 ADR,193 angles morts. Suite S105 : contexte et publication, S104-1.
 **S103 :** [Résolution du virage](validation/RESOLUTION-S103.md), candidat112×80 reçu ; lot64 11,305 ms localement.
