@@ -68,7 +68,7 @@ puis trancher le choix du profil sans confondre domaine calculable et réception
 - [x] **P1** — amorce, état réel, jeton et déclaration du plan seule.
 - [x] **P2** — sonde reproductible : domaine commun et portée étendue, mise en régime,
       ordre alterné, médianes et dispersion, empreinte mémoire ; contrôle des sorties finies.
-- [ ] **P3** — rapport et ADR sur le profil retenu après mesure ; application nécessaire
+- [x] **P3** — rapport et ADR sur le profil retenu après mesure ; application nécessaire
       au code ou documentation explicite du maintien, sans migration silencieuse des fixtures.
 - [ ] **P4** — vérification adaptée, rituel de fin complet, jeton rendu et commits propres.
 
@@ -83,3 +83,6 @@ S118 ~49 ms cité comme contexte historique, pas comme mesure sur cette machine.
 P2 : deux mesures release, sonde et COUT-PROFIL-IMPACT-S125. Coût commun N256/N64 ~4 ;
 extension R128/N256 contre R16/N64 ~9. Les profils changent les bits ; WLIV encode déjà N.
 Suite complète lancée, résultat final à recueillir en P4.
+
+P3 : ADR-085 actée ; défaut N64 maintenu, N128/N256 explicites par service homogène.
+Contrat documenté dans radial_impact et Prepared, aucun comportement ni codec modifié.

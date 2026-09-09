@@ -75,6 +75,9 @@ struct Node {
     freq: u64,
     coefficient: f32,
 }
+/// ADR-085 : N64 reste le défaut ; dimensionner explicitement N128/N256 au rayon et à
+/// l'horizon requis. L'admission numérique ne reçoit pas la précision physique du domaine.
+/// N doit être commun aux participants d'un même service autoritaire : il change les bits.
 pub struct RadialImpact<const N: usize = 64> {
     event: WaveEvent,
     slope_bound: f32,

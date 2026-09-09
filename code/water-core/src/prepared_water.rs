@@ -54,6 +54,8 @@ pub enum BatchError {
     },
 }
 /// L'emprunt interdit de muter le journal ou de réemployer le pool avant libération.
+/// ADR-085 : le pool est homogène en N ; dimensionner le profil pour tous les impacts
+/// du domaine commun, pas selon la qualité graphique locale. N64 reste le défaut.
 pub struct Prepared<'a, 'j, const N: usize = 64> {
     journal: &'a Journal<'j>,
     fields: &'a [Option<RadialImpact<N>>],
