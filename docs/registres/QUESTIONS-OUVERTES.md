@@ -1188,3 +1188,16 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
   comparaison indépendante des opérations de composition, domaines/instants communs,
   puis coût préparation/requête. La recette16×24 des tests ne reçoit pas la précision spatiale.
   Milieu commun à justifier ; aucun bilan énergétique mixte par addition des bilans séparés.
+
+### S116 — Montage mixte reçu sur le modèle profond
+
+- **S115-1 : réalisée sur fixture.** [RECEPTION-MIXTE-S116](../validation/RECEPTION-MIXTE-S116.md),
+  8670 points-temps et coûts complets. Impacts et pression sont tous deux profonds :
+  la description contraire de S115 était erronée, corrigée par note datée ADR-077.
+- **S116-1 : ouverte, S117.** Contrôleur de publication pression sur deux pools,
+  instant exact, bascule après succès, dernière publication conservée au refus ;
+  requête mixte exercée sur les vues du contrôleur.
+- **S116-2 : ouverte.** Quantifier la validité du modèle profond de pression à profondeur
+  finie, notamment ses petits k, avant de recevoir un milieu réel de profondeur déclarée.
+  Le garde de profondeur des impacts ne certifie pas le spectre gaussien de pression.
+  Bilan énergétique mixte et durabilité restent ouverts.

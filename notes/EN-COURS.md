@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S116 — en cours
+Session : S116 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : recevoir et mesurer le montage mixte aux résolutions reçues.
 
@@ -66,7 +66,7 @@ Objectif : recevoir et mesurer le montage mixte aux résolutions reçues.
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
 - [x] **P2** — campagne mixte, référence de composition, refus et coût complet.
-- [ ] **P3** — publier résultats et corrections ; rituel final et synchronisation.
+- [x] **P3** — publier résultats et corrections ; rituel final et synchronisation.
 
 ### Notes de reprise
 
@@ -83,3 +83,5 @@ Ne pas conclure profondeur20 m valable pour toute la pression gaussienne : petit
 P2 terminée :8670 points-temps reçus, dix champs contre deux oracles de pression et composition f64.
 Cycles complets médians50,0497/57,9712 ms ; préparation impact incluse, cuisson/admission exclues.
 Refus de domaines et expiration reçus. Bibliothèque inchangée, suite S115 non relancée.
+
+P2 e4068c6. Passation publiée ; suite S117 contrôleur pression S116-1. S116-2 profondeur finie ouverte.

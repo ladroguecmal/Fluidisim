@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-09 14:02 +02:00
+JETON            : libre
+Battement        : 2026-09-09 14:04 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S116 — réception mixte
-Dernière session : S115 — requête mixte ;243 tests/cinq ignorés
-Session suivante : S116 — réception et coût mixte (S115-1)
+Session en cours : aucune
+Dernière session : S116 — réception mixte ; bibliothèque inchangée
+Session suivante : S117 — contrôleur de publication pression (S116-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -167,6 +167,15 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S116 — 2026-09-09 :** [RECEPTION-MIXTE-S116](docs/validation/RECEPTION-MIXTE-S116.md),
+8670 points-temps du mélange B+impact+deux pressions reçus ; cycles50,0497/57,9712 ms.
+Oracle pression256/512 et composition f64, B/impact évalués séparément par leurs candidats.
+Correction datée ADR-077 : impacts profonds, depth utilisé comme garde ; modèle profond commun.
+Bibliothèque inchangée, suite243/cinq ignorés de S115 non relancée ; campagne release reçue.
+77 ADR,193 angles,17 invariants,6 spécifications,23 cas. S115-1 réalisée sur fixture.
+Suite S117 : S116-1, contrôleur pression à deux pools, instant exact et publication sur succès.
+S116-2 : profondeur finie de pression ; bilan mixte et durabilité toujours ouverts.
 
 **S115 — 2026-09-09 :** [MIXTE-S115](docs/validation/MIXTE-S115.md), ADR-077 actée.
 Requête commune B+impacts+pressions : B unique, pentes/enveloppe totales, publication transactionnelle.

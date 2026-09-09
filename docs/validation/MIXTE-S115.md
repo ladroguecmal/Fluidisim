@@ -57,3 +57,6 @@ Renouvellement pression, durabilité et bilan énergétique mixte restent ouvert
 et non à dispersion de profondeur finie (description erronée dans ADR-077 et le
 journal S115). La profondeur20 m sert de garde sur la bande de l'impact. Voir la
 note corrective ADR-077 et [RECEPTION-MIXTE-S116](RECEPTION-MIXTE-S116.md).
+
+**Suite réalisée S116 :** S115-1 reçue sur8670 points-temps du modèle profond commun.
+Cycles complets50,05/57,97 ms médians locaux ; voir RECEPTION-MIXTE-S116.

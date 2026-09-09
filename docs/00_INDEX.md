@@ -17,6 +17,10 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S116 :** [Réception mixte](validation/RECEPTION-MIXTE-S116.md),8670 points-temps reçus, cycles50,05/57,97 ms.
+Correction datée ADR-077 : impacts profonds. Bibliothèque inchangée ; suite243/cinq ignorés de S115 non relancée.
+77 ADR,193 angles,17 invariants,6 spécifications,23 cas. Suite S117 : contrôleur pression, S116-1.
+
 **S115 :** [ADR-077](adr/ADR-077-requete-mixte-impacts-et-pressions.md), requête commune B+impacts+pressions.
 [MIXTE-S115](validation/MIXTE-S115.md) :243 tests réussis/cinq ignorés, trois ciblés aussi en release.
 77 ADR,193 angles,17 invariants,6 spécifications,23 cas. Suite S116 : réception et coût mixte, S115-1.

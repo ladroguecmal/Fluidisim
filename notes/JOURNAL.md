@@ -6273,3 +6273,27 @@ nouvel angle ou leçon distincte ; invariants de composition et de précision in
 **Suite S116 :** S115-1, campagne mixte aux recettes224×128/256×128, instants et domaines
 communs, référence de composition et coût complet. S114-1 réalisée comme construction.
 Renouvellement pression, durabilité et bilan énergétique mixte restent ouverts.
+
+## S116 — 2026-09-09 — Réception et coût mixte
+
+**Entrée :** Continue ;1bbcef5, copies actives propres identiques.
+**Produit :** receive_mixed et RECEPTION-MIXTE-S116. B16, un impact64 modes et deux
+pressions aux recettes224×128/256×128 ; grille17² et15 instants0–4 s,8670 points-temps.
+Oracle de pression f64 plein256/512, assemblage et normale en f64 ; B et impact repris
+séparément du candidat, donc pas de validation physique indépendante de ces deux couches.
+**Résultat :** dix champs reçus, hauteur max1,185e-8 m, normale1,158e-7 ; aération identique.
+Références de pression convergentes sous seuils S103. Refus de domaines et expiration reçus.
+Cycles préparation des deux familles+requête64 médians50,0497/57,9712 ms ; cuisson,
+admission, B configuré et allocations hors mesure. Pas de budget de production certifié.
+**Correction :** ADR-077 décrivait à tort une dispersion de profondeur finie des impacts.
+Code et ADR-060 utilisent omega²=gk ; depth sert de garde. Note corrective datée ajoutée,
+ainsi qu’à MIXTE-S115 ; la description historique du journal S115 est corrigée par cette entrée.
+La validité de la pression gaussienne à profondeur20 m ne découle pas de ce constat.
+**Vérification :** campagne release finale avec assertions, formatage/diff ; P2 e4068c6.
+Bibliothèque inchangée, suite243 réussis/cinq ignorés exécutée en S115 non relancée.
+77 ADR,193 angles,17 invariants,6 spécifications,23 cas inchangés. L138/L176/L204 appliquées ;
+aucun nouvel angle ou leçon distincte ; invariants inchangés.
+**Suite S117 :** S116-1, contrôleur de publication pression à deux pools, instant exact,
+préparation candidate/bascule sur succès, dernière publication conservée au refus,
+et requête mixte exercée sur sa vue. S115-1 réalisée sur modèle profond commun.
+S116-2 : pression à profondeur finie, encore ouverte ; bilan mixte et durabilité ouverts.
