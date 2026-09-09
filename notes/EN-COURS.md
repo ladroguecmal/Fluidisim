@@ -73,7 +73,7 @@ s'arrête à `x = 64`. Mesurer d'abord si la piste asymptotique tient, **puis** 
       3. **la précision de l'argument** `k·r`, calculé en f32 : à `x = 4000`, un ulp de f32
          vaut déjà 2,4e-4 rad, soit cinquante fois la tolérance actuelle de 4e-6. Si c'est
          la phase qui limite, étendre la table ne servirait à rien.
-- [ ] **P3** — ADR-084, sur ce que la mesure aura montré, y compris si elle dit non.
+- [x] **P3** — ADR-084, sur ce que la mesure aura montré, y compris si elle dit non.
 - [ ] **P4** — construire ce que la décision retient.
 - [ ] **P5** — tests : précision au-delà de 64, continuité au raccord, et **hachages de
       campagne inchangés** — rien ne doit bouger sous `x = 64`.
