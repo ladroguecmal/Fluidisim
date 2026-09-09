@@ -58,30 +58,19 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S114 — terminée
+Session : S115 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : reprise de deux sources jusqu’à B+pression, refus et coût complet.
+Objectif : construire la requête B+impacts+pressions avec publication transactionnelle.
 
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [x] **P2** — construire et recevoir le cycle multisource, mesurer ses étapes.
-- [x] **P3** — publier résultats, limites et suite ; rituel final et synchronisation.
+- [ ] **P2** — définir le contrat mixte, construire la requête et recevoir ses réductions/refus.
+- [ ] **P3** — publier résultats et limites ; rituel final et synchronisation.
 
 ### Notes de reprise
 
-Départ74a70bd, copies actives propres identiques. S113-1.
-Montage S112/S113, recettes224×128 et256×128. Une source publiée, une en attente,
-WPJR restauré sur pool élargi, retry explicite, somme modale puis requête monde B+pression.
-Comparaison en bits avec journal direct ; refus tardifs sans altérer la publication active.
-Bibliothèque inchangée prévue ; instrument executable et campagne release avec assertions.
-
-P2 terminée : restart_multisource, campagne release finale reçue,2944 points-temps.
-WPJR344 octets ; deux sources en ordre restauré1,2 après attente/retry.
-Dix sorties, E/P/enveloppe identiques en bits.344 troncatures et refus tardifs reçus,
-pools de restauration et publication active conservés ; dépassement numérique refusé.
-Cycles complets depuis WPRS médians47,9483/55,5501 ms ; reprise48,5010/55,4706 ms.
-Rapport REPRISE-MULTISOURCE-S114. Bibliothèque inchangée, suite S112 non relancée.
-
-P2 dccd298. Publication, questions et passation mises à jour ; aucun nouvel angle/leçon distincte.
-Suite S115 : S114-1, requête commune B+impacts+pressions, refus et montage mixte.
+Départbbc2a0c, copies actives propres identiques. S114-1.
+B évalué une fois ; impacts en ordre journal puis champ de pression ; normale calculée une fois.
+Contexte frame/cell/g/rho commun, instant pression exact et horizons impacts conservés.
+Aucun bilan énergétique mixte implicite. ADR complémentaire, tests significatifs et suite complète.
