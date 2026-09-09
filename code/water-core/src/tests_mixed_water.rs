@@ -75,8 +75,12 @@ fn world(x: f64, y: f64) -> WorldPos {
     WorldPos::from_metres(1e9 + x, -1e9 + y, 0.0)
 }
 /// Montage complet rendu avec le contrôleur encore pilotable : la publication n'est
-/// pas figée, et l'appelant choisit les instants du cycle.
-fn with_controller(
+/// pas figée, et l'appelant choisit les instants du cycle. `age_us` fixe la validité des
+/// impacts et `window_start_us` le début de la fenêtre de pression : c'est par leur écart
+/// que se construisent les montages dont l'horizon est tronqué, voire vide (S119).
+fn mount(
+    age_us: u64,
+    window_start_us: u64,
     check: impl FnOnce(
         &Background,
         &Prepared<'_, '_, 64>,
@@ -132,7 +136,8 @@ fn with_controller(
             event,
         )
         .unwrap();
-    let ctx = context();
+    let mut ctx = context();
+    ctx.domain.age_us = age_us;
     let single = RadialImpact::<64>::new(event, ctx.medium, ctx.domain).unwrap();
     let mut pool = [const { None }; 1];
     let impacts = Prepared::<64>::build(&journal, &mut pool, ctx).unwrap();
@@ -153,12 +158,12 @@ fn with_controller(
         density: 1025.0,
         min: [-8.0; 2],
         max: [12.0; 2],
-        start: SimTime(0),
+        start: SimTime(window_start_us),
         end: SimTime(8_000_000),
     };
     let pc = bound_pressure::Context::new(settings, &half).unwrap();
     let a = Segment {
-        birth: SimTime(0),
+        birth: SimTime(window_start_us),
         duration_us: 2_000_000,
         origin: [0.0; 2],
         velocity: [2.0, 0.0],
@@ -167,7 +172,7 @@ fn with_controller(
     let paths = [
         [a],
         [Segment {
-            birth: SimTime(500_000),
+            birth: SimTime(window_start_us + 500_000),
             origin: [1.0, 1.0],
             velocity: [0.0, 2.0],
             pressure_pa: 7.0,
@@ -198,9 +203,27 @@ fn with_controller(
     }
     let mut pp = [Slot::default(); 192];
     let mut spare = pp;
-    let mut controller =
-        bound_pressure::Controller::new(pc, &half, &pj, SimTime(0), &mut pp, &mut spare).unwrap();
+    let mut controller = bound_pressure::Controller::new(
+        pc,
+        &half,
+        &pj,
+        SimTime(window_start_us),
+        &mut pp,
+        &mut spare,
+    )
+    .unwrap();
     check(&b, &impacts, &mut controller, &single);
+}
+/// Le montage de référence : impacts valides 4 s, fenêtre de pression de 0 à 8 s.
+fn with_controller(
+    check: impl FnOnce(
+        &Background,
+        &Prepared<'_, '_, 64>,
+        &mut bound_pressure::Controller<'_, '_, '_, '_, '_>,
+        &RadialImpact<64>,
+    ),
+) {
+    mount(4_000_000, 0, check)
 }
 fn fixture(
     check: impl FnOnce(
@@ -468,4 +491,154 @@ fn controller_publishes_beyond_impact_validity_and_query_refuses() {
         sample_world_batch(&bound, impacts, Some(&p), t, &points, 0.1, &mut work, &mut out).unwrap();
         assert!(out[0].eta.is_finite() && out[0].eta != 0.0);
     })
+}
+/// S119, ADR-079 : l'annonce doit coïncider avec ce que la séquence réelle fait, dans les
+/// deux sens. Une annonce seulement prudente passerait un test de sûreté et échouerait
+/// celui-ci : on vérifie aussi qu'aucun `Ready` ne ment et qu'aucun refus n'est tu.
+#[test]
+fn announced_state_matches_what_the_sequence_really_does() {
+    with_controller(|b, impacts, controller, _| {
+        let bound = BoundBackground::new(b, FrameId(7), 9);
+        let mut work = [WaterSample::default(); 1];
+        let mut out = work;
+        let (start, end) = horizon(impacts, Some(controller)).unwrap();
+        let (_, until) = impacts.renewal_deadline().unwrap();
+        // L'horizon est bien l'intersection : la fenêtre va à 8 s, les impacts à 4 s.
+        assert_eq!((start, end), (SimTime(0), until));
+        assert!(until < controller.context().settings().end);
+        let mut seen = [0usize; 4];
+        for us in [
+            0,
+            1,
+            499_999,
+            500_000,
+            1_500_000,
+            3_999_999,
+            4_000_000,
+            4_000_001,
+            5_000_000,
+            8_000_000,
+            8_000_001,
+            u64::MAX,
+        ] {
+            let t = SimTime(us);
+            let announced = state(&bound, impacts, Some(controller), t);
+            // Hors horizon si et seulement si aucune publication ne rendra cet instant servable.
+            assert_eq!(
+                matches!(
+                    announced,
+                    State::ImpactsExpired { .. } | State::OutsideWindow { .. }
+                ),
+                t < start || t > end
+            );
+            let update = controller.update(t);
+            match announced {
+                State::Ready | State::NeedsUpdate { .. } => {
+                    seen[0] += 1;
+                    update.unwrap();
+                    assert_eq!(state(&bound, impacts, Some(controller), t), State::Ready);
+                    let p = controller.current(t).unwrap();
+                    sample_world_batch(&bound, impacts, Some(&p), t, &[], 0.1, &mut work, &mut out)
+                        .unwrap();
+                }
+                State::ImpactsExpired { id, until: u } => {
+                    seen[1] += 1;
+                    assert!(id == 1 && u == until && t > u);
+                    // La publication peut réussir : c'est exactement A194. La requête, non.
+                    if update.is_ok() {
+                        let p = controller.current(t).unwrap();
+                        assert_eq!(
+                            sample_world_batch(
+                                &bound, impacts, Some(&p), t, &[], 0.1, &mut work, &mut out
+                            ),
+                            Err(Error::Time)
+                        );
+                    }
+                    assert_ne!(state(&bound, impacts, Some(controller), t), State::Ready);
+                }
+                State::OutsideWindow { start: s, end: e } => {
+                    seen[2] += 1;
+                    assert!(t < s || t > e);
+                    assert_eq!(update, Err(bound_pressure::Error::Time));
+                }
+                State::LossKnown | State::Context => seen[3] += 1,
+            }
+        }
+        // Les trois premiers cas sont réellement exercés ; le montage est sain, donc pas les autres.
+        assert!(seen[0] >= 5 && seen[1] >= 3 && seen[2] == 0 && seen[3] == 0);
+    })
+}
+/// S119 : les deux montages que la fixture de référence n'atteint pas. Sans eux, `OutsideWindow`
+/// et l'horizon vide seraient du code non exercé — et l'horizon vide est le cas qu'un hôte doit
+/// justement détecter, puisque aucune publication ne le sauvera.
+#[test]
+fn horizon_covers_the_window_the_impacts_and_their_empty_intersection() {
+    // Impacts valides 10 s, fenêtre de pression jusqu'à 8 s : c'est la fenêtre qui borne.
+    mount(10_000_000, 0, |b, impacts, controller, _| {
+        let bound = BoundBackground::new(b, FrameId(7), 9);
+        let settings = controller.context().settings();
+        assert_eq!(
+            horizon(impacts, Some(controller)),
+            Some((settings.start, settings.end))
+        );
+        assert!(impacts.renewal_deadline().unwrap().1 > settings.end);
+        assert_eq!(
+            state(&bound, impacts, Some(controller), SimTime(8_000_001)),
+            State::OutsideWindow {
+                start: settings.start,
+                end: settings.end
+            }
+        );
+        assert_eq!(
+            controller.update(SimTime(8_000_001)),
+            Err(bound_pressure::Error::Time)
+        );
+        // Sans pression, seuls les impacts bornent, et la borne basse n'est pas contrainte.
+        assert_eq!(
+            horizon(impacts, None),
+            Some((SimTime(0), impacts.renewal_deadline().unwrap().1))
+        );
+        assert_eq!(
+            state(&bound, impacts, None, SimTime(u64::MAX)),
+            State::ImpactsExpired {
+                id: 1,
+                until: impacts.renewal_deadline().unwrap().1
+            }
+        );
+    });
+    // Impacts éteints à 1 s, fenêtre de pression ouverte à 2 s : aucune date ne convient.
+    mount(1_000_000, 2_000_000, |b, impacts, controller, _| {
+        let bound = BoundBackground::new(b, FrameId(7), 9);
+        let settings = controller.context().settings();
+        let (_, until) = impacts.renewal_deadline().unwrap();
+        assert!(until < settings.start);
+        assert_eq!(horizon(impacts, Some(controller)), None);
+        let mut work = [WaterSample::default(); 1];
+        let mut out = work;
+        // Aucune date n'est `Ready`, mais la cause change de côté : avant l'ouverture de la
+        // fenêtre les impacts sont encore vivants, après, ils sont éteints. **Aucune annonce
+        // ponctuelle ne dit qu'il n'existe aucune date** — c'est `horizon` qui le dit, et
+        // c'est la raison d'être des deux fonctions.
+        for us in [0, 1_000_000, 2_000_000, 3_000_000, 8_000_000] {
+            let t = SimTime(us);
+            assert_eq!(
+                state(&bound, impacts, Some(controller), t),
+                if t > until {
+                    State::ImpactsExpired { id: 1, until }
+                } else {
+                    State::OutsideWindow {
+                        start: settings.start,
+                        end: settings.end
+                    }
+                }
+            );
+            if controller.update(t).is_ok() {
+                let p = controller.current(t).unwrap();
+                assert_eq!(
+                    sample_world_batch(&bound, impacts, Some(&p), t, &[], 0.1, &mut work, &mut out),
+                    Err(Error::Time)
+                );
+            }
+        }
+    });
 }

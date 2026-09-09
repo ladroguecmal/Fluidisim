@@ -71,10 +71,12 @@ balayage que ce qui est annoncé est exactement ce que la requête accepte.
       l'annonce est une fonction séparée plutôt qu'un contrôle de plus dans `update`.
 - [x] **P3** — construire `mixed::horizon` et `mixed::plan`, `Controller::context`,
       factoriser les contrôles indépendants des points depuis `sample_world_batch`.
-- [ ] **P4** — le test qui compte : balayage d'instants, `plan(t)` comparé à ce que la
+- [x] **P4** — le test qui compte : balayage d'instants, `state(t)` comparé à ce que la
       séquence réelle (update puis requête à lot vide) fait vraiment.
-- [ ] **P5** — recevoir dans la campagne `cycle_mixed`, avec bloc de mise en régime (A195).
-- [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
+- [x] **P5** — les deux montages que la fixture n'atteint pas : fenêtre plus courte que
+      les impacts, et intersection vide. Fixture paramétrée par `mount(age, start)`.
+- [ ] **P6** — recevoir dans la campagne `cycle_mixed`, avec bloc de mise en régime (A195).
+- [ ] **P7** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -104,3 +106,14 @@ renouvellement, plus cher que le problème résolu.
 P3 : `mixed::{State, state, horizon}` et `classify` interne ; `sample_world_batch` consulte
 `classify` et traduit. `Controller::context()` ajouté. Les 154 tests core passent inchangés —
 c est la vérification qui comptait : aucun refus existant n a changé de nature.
+
+P4/P5 : 156 core + 93 harnais = 249 réussis, cinq ignorés ; les six tests mixtes passent aussi
+en release. Deux choses apprises en écrivant les tests, et qui vont au livrable :
+
+1. L'annonce donne **la première cause dans l'ordre de la requête**, pas l'ensemble des causes.
+   Avec des impacts qui expirent avant la fin de fenêtre, `OutsideWindow` n'est jamais rendu :
+   `ImpactsExpired` arrive d'abord. Il a fallu un montage à impacts longs (10 s) pour l'exercer.
+2. Sur un montage d'horizon vide, la cause annoncée **change de côté** selon la date — avant
+   l'ouverture de la fenêtre les impacts vivent encore, après ils sont éteints. Aucune annonce
+   ponctuelle ne révèle qu'il n'existe aucune date : seul `horizon` le dit. C'est la
+   justification des deux fonctions, et elle n'était pas dans l'ADR ; à y porter en note.
