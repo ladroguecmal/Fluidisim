@@ -58,47 +58,35 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S128 — terminée
+Session : S129 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S127-1 — exercer le montage N256/R80/48 s dans LiveWater B+W, renouvellement,
-sauvegarde/restauration, identité avec construction directe et coût mesuré.
+Objectif : S128-1 — recevoir énergie cinétique et bilan total du candidat N256/R80/48,
+depuis ses nœuds effectivement construits, contre les résultats indépendants S127.
 
 ### Plan
 
-- [x] **P1** — vérifier branches/copies/jeton, lire la suite, déclarer le plan seul.
-- [x] **P2** — construire le scénario hôte : impact S127 unique, fond B réel, points jusqu'à80 m,
-      horizon4→24→48 s, comparaison en bits des dix sorties aux champs directs et restaurés.
-      Refus : temps, rayon tardif, renouvellement impossible, sauvegarde tronquée et N différent ;
-      publication précédente et sorties conservées. TTL4 inchangé, sauvegarde en mémoire seulement.
-- [x] **P3** — recevoir le scénario, mesurer séparément update, requête64, save/restore et cycle
-      complet après mise en régime ; bornes de mesure explicites, rapport et suite motivée.
-      Corriger la bibliothèque seulement si un défaut est reproduit et documenté.
-- [x] **P4** — vérification adaptée, journal/angles/leçons/actions, index/README/passation,
-      décomptes et invariants, jeton libre et commit final propre.
+- [x] **P1** — état réel, jeton et plan seul ; continuité de S128 sur master propre.
+- [ ] **P2** — instrument dans les tests privés, sans exposer les nœuds en API : densité
+      positive profonde, termes croisés conservés, potentielle/cinétique séparées ;
+      intégration Simpson320/640, disque80 et anneau32–80. Références chiffrées S127 figées.
+- [ ] **P3** — réception à0/24/48 s, témoins initiaux et contre-épreuves (cinétique omise,
+      termes croisés omis), contrôles de surface contre sample, rapport fidèle aux résultats.
+      Corriger la production seulement si un défaut est établi.
+- [ ] **P4** — tests adaptés et suite complète (nouveau test), journal/registres/actions,
+      index/README/passation, décomptes/invariants, jeton libre et commit final.
 
 ### Notes de reprise
 
-Départ4c33261 sur master propre ; anciennes copies en retard et propres, aucune branche
-avancée ni copie créée. Cargo1.97 disponible. Règles et REPRISE déjà lus dans cette conversation.
-Points d'entrée : bench_live_water.rs (S88), prepared_water::{LiveWater, Prepared}, live_snapshot.rs.
-Production actuelle : update(None) reconstruit le journal et les champs, même à horizon constant ;
-current() ne vérifie pas l'instant demandé, c'est la requête qui refuse hors horizon.
-Référence du cycle : même Background et composition ponctuelle, champ RadialImpact256 construit
-directement depuis les faits ; identité d'acheminement seulement. Réception physique = S127.
-Critère : identité des bits de chaque sortie, pas seulement hash ; refus avec témoins.
-Aucun seuil de performance choisi ; résultats locaux, pas de budget cible certifié.
-
-P2 : cycle_transported_water.rs construit et première exécution release reçue :1280 points-temps,
-dix composantes identiques, sources détruites avant reprise, WLIV289 octets, TTL4 conservé.
-Refus atomiques : horizon dépassé, rayon au dernier point, extension64 s impossible, now hors
-horizon, sauvegarde tronquée et N128 cible. B seul diffère des64 résultats à48 s (W présent).
-Mesure initiale requête64 ~971 µs, cycle3 requêtes ~3004 µs ; compléter en P3 par update+requête48.
-P3 : CYCLE-TRANSPORTE-S128 publié, deux campagnes release finales et debug --verify-only
-reçus, mêmes hashes. Update24→48+requête64 médian0,956/0,962 ms ; cycle3 requêtes2,928–3,027 ms.
-Restauration~2,46 µs, sauvegarde289 octets ; pools/service12688 octets hors B et requêtes.
-Production inchangée. S127-1 réalisée sur fixture ; S129 recommandé : S128-1, bilan cinétique
-réel du candidat N256/R80/48 pour fermer la limite explicitement conservée par S127.
-
-P4 : journal, actions et suivi S127, index/README/REPRISE actualisés. Aucun angle ni leçon
-nouvelle distincte. Décomptes85/204/17/6/23 inchangés, invariants non invalidés.
-Jeton rendu, master seul avancé. Suite S129 : S128-1.
+Départ7701759 master propre ; branches/copies anciennes sans avance ni modification, aucune
+copie créée. Instructions et corpus déjà lus dans cette conversation, reprise immédiate.
+S78 physical_disk est privé dans les tests, assemble en f64 les nœuds réels/PhaseQ32/Bessel.
+La même méthode sera employée en S129 ; pas de fonction d'énergie de production ajoutée.
+Référence indépendante S127 publiée à10 décimales pour E/E0, cinétique=total−potentielle ;
+son incertitude de copie <1e-10 E0, largement sous le critère annoncé. Pas d'oracle du candidat.
+Critères AVANT mesure : total/potentielle/cinétique et anneau contre S127 <=1e-4 E0 ;
+raffinement radial <=0,002 E0, énergie totale fine proche deE0 <=0,003 (S78/S127).
+Densité >=−1e-12 J/m², cinétique initiale nulle, énergie hors32 à48 >0,5 E0 et initiale<0,003.
+Contrôle de surface assemblée depuis les mêmes nœuds <=1e-6 normalisé aux poids positifs,
+plus strict que S126 (1e-4) car seules les opérations d'assemblage diffèrent.
+Références : TRANSPORT-ETENDU-S127 tableaux ; conserver les termes croisés et la profondeur
+infinie du modèle. Refuser toute lecture de ce bilan comme une réception en profondeur finie.
