@@ -6533,3 +6533,51 @@ le jeu produira : goutte, projectile, coque, arme. Si un régime attendu tombe h
 c'est un manque de modèle et non de nommage. Question de conception, à trancher sans
 interlocuteur (ADR-028). Restent ouverts : admission dynamique, extension de fenêtre, profondeur
 finie S116-2, bilan mixte, durabilité disque.
+
+---
+
+## S123 — 2026-09-09 — Le couloir du candidat radial face aux impacts du jeu
+
+**Entrée :** jeton libre à c208d87, trois copies coïncidentes. A199, ouverte par S122.
+**Session de conception**, la première depuis longtemps : la mesure y sert une décision.
+**Produit :** [ADR-083](../docs/adr/ADR-083-portee-du-champ-d-impact.md),
+[ENVELOPPE-IMPACTS-S123](../docs/validation/ENVELOPPE-IMPACTS-S123.md) et la sonde
+`code/water-core/examples/impact_envelope.rs`. Bibliothèque non touchée.
+**Le premier résultat précède la question posée.** La longueur d'onde qui pilote tout le
+candidat — étendue, propagation, bornes — **n'est reliée à rien**. ADR-055 la valide comme
+« positive en mètres » et confie le reste à un générateur physique qui n'existe pas ; ADR-060
+qualifie son λ de 4 m de « paramètre d'essai uniquement ». Le registre n'en disait rien. **A200,
+sévérité 1** : sans ce lien, aucun verdict d'acceptation n'a de sens physique.
+**Ce que le corpus permettait d'écrire.** SPEC-001 §5 bis (Wagner) donne l'étendue mouillée à la
+fin de l'impact : elle vaut la demi-largeur `b` de l'objet, indépendamment de la vitesse et du
+relèvement. D'où `λ = α·b`, `α` **à calibrer B2**, seule écriture conforme à I-14. `λ = 2πv²/g`
+écartée : elle décrit un sillage établi, pas une entrée.
+**La session ne fixe pas `α` et n'en a pas besoin. L212.** Elle balaie sa plage plausible sur un
+facteur 2π et regarde si le verdict change. Il ne change pas : sur onze cas, un seul se construit
+à la portée voulue, trois sont refusés pour toute valeur.
+**Chiffres.** Portée atteignable = **5,09 λ = 10,18 b**, exactement, au-dessus d'une quinzaine de
+centimètres ; en dessous c'est la résolution qui mord avant. Un plongeon humain n'est calculable
+que dans trois mètres. Vaisseau en port : **aucune portée**, régime d'eau profonde. Plafond
+d'énergie : **10⁻⁶ à 10⁻²** de l'énergie de référence (masse ajoutée `~ρb³` à la vitesse
+d'entrée).
+**Décision structurante :** la limite de portée est actée comme **défaut d'outillage, pas comme
+propriété du modèle** — elle vient de la table de Bessel arrêtée à `x = 64`, qu'ADR-060 range
+parmi les « choix numériques testés, pas des paramètres gameplay ». **A201.** Le régime d'eau
+profonde, lui, est assumé comme limite du modèle : le lever demanderait `ω² = gk·tanh(kh)`, un
+autre noyau. Et le plafond d'énergie devient une contrainte écrite pour le générateur à venir,
+chiffrée au lieu d'être ignorée.
+**Erreur de méthode attrapée par la mesure.** La première sonde prenait 10⁻⁹ J pour une énergie
+« négligeable ». Aux courtes longueurs d'onde la pente y dépasse déjà la limite du milieu : un
+refus d'amplitude se lisait comme une impossibilité géométrique. Il a fallu descendre à 10⁻³⁰ J
+et séparer explicitement les deux questions.
+**Limites :** les onze cas ne sont pas le catalogue du jeu — un catalogue véritable demanderait
+des données de contenu qui n'existent pas, et l'inférence resterait « probable et non vérifiée »
+(§5 de ce document). `α` non fixé, plafond dépendant du seuil de pente pris à 0,1.
+255 tests réussis, cinq ignorés — inchangés, la bibliothèque n'ayant pas été modifiée.
+83 ADR, 201 angles, 17 invariants, 6 spécifications, 23 cas. Invariants relus : aucun invalidé.
+**Suite S124 :** S123-1 — lever la limite de portée, qui est un défaut d'outillage. Piste
+identifiée et **non retenue avant mesure** : développement asymptotique de `J0`/`J1` au-delà de
+`x = 64`, dont l'erreur décroît quand l'argument grandit, à comparer à la référence f64
+existante. Restent ouverts : générateur physique d'ADR-055 (énergie et `α`), grands objets en eau
+peu profonde, admission dynamique, extension de fenêtre, profondeur finie S116-2, bilan mixte,
+durabilité disque.

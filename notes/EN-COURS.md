@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S123 — en cours
+Session : S123 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : A199 — le couloir d'acceptation du candidat radial, mesuré en S122, n'a jamais été
 confronté aux impacts que le jeu produira. Établir quels régimes il couvre, lesquels il ne
@@ -79,7 +79,7 @@ mesure est ici au service d'une décision, pas l'inverse.
 - [x] **P4** — le catalogue des cas du jeu confronté au couloir, **mesuré** et non supposé
       (L210) : une sonde qui construit le candidat pour chaque cas et rend le verdict.
 - [x] **P5** — ADR-083, sur ce que la confrontation aura montré.
-- [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
+- [x] **P6** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -137,3 +137,16 @@ décision de cette session.
 Erreur de méthode évitée de justesse et consignée dans le livrable : la première sonde prenait
 1e-9 J pour « négligeable », ce qui faisait lire un refus de pente comme une impossibilité
 géométrique. Il a fallu descendre à 1e-30.
+
+P6 : ADR-083, ENVELOPPE-IMPACTS-S123, suivi A199, A200 (sévérité 1), A201, L212, journal, index,
+README, jeton rendu, fusion ff-only.
+
+Pour S124 sans relire : S123-1 est une tâche de code bien cernée. La table vit dans
+`code/water-core/src/bessel_table.rs`, l'interpolation Hermite et le refus hors [0,64] dans
+`radial_impact::bessel`. La référence f64 indépendante existe déjà — `bessel_angular` et la
+quadrature à 4096 directions du test `bessel_against_series_and_dense_angular_reference`. La
+piste asymptotique se mesure contre elle avant toute décision : erreur relative de
+J0(x) ~ sqrt(2/(pi x)) cos(x - pi/4) et J1(x) ~ sqrt(2/(pi x)) sin(x - pi/4) pour x de 64 à
+quelques milliers. Attention au raccord en x=64 : une discontinuité y produirait un anneau
+visible sur le champ. Et vérifier que `Reach` devient bien la nouvelle borne étendue, sans que
+`Resolution` prenne le relais aussitôt — la sonde `impact_envelope` le dira.

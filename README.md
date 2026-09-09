@@ -61,7 +61,7 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S122 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S123 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
@@ -122,5 +122,10 @@ bornes couplées — portée, régime, résolution — sont nommées comme des r
 du couloir d'acceptation est mesurée : ondes du mètre à la dizaine de mètres, rayon d'autant plus petit que
 l'onde est courte. Le test d'atteignabilité de chaque nom a montré qu'un refus attribué à l'énergie venait
 en réalité de la longueur d'onde (L211).
-Suite : confronter ce couloir aux impacts que le jeu produira (A199), S122-1.
+Le couloir a été confronté aux impacts du jeu : sur onze cas couvrant six ordres de grandeur en taille,
+**un seul se construit à la portée voulue** (ADR-083, S123). La portée d'un champ d'impact vaut5,09 λ, soit
+une dizaine de fois la taille de l'objet — limite venue de la table de Bessel, non de la physique (A201).
+Et la longueur d'onde qui pilote tout le candidat n'est reliée à aucune propriété de l'objet (A200,
+sévérité1) : le contrat `λ = α·b` est acté, α restant à calibrer.
+Suite : lever la limite de portée, qui est un défaut d'outillage, S123-1.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

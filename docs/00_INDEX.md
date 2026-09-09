@@ -17,6 +17,13 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S123 :** [ADR-083](adr/ADR-083-portee-du-champ-d-impact.md), la portée d'un champ d'impact et ce qui la borne.
+[ENVELOPPE-IMPACTS-S123](validation/ENVELOPPE-IMPACTS-S123.md) : onze cas de jeu confrontés au couloir ; **un seul
+se construit à la portée voulue**, et le verdict ne dépend pas de la calibration. Portée =5,09 λ =10,18 b.
+Contrat `λ = α·b` acté, α à calibrer. **A199 traitée, A200 (sévérité 1) et A201 ouvertes, L212.**
+Bibliothèque non touchée,255 tests inchangés.83 ADR,201 angles,17 invariants,6 spécifications,23 cas.
+Suite S124 : lever la limite de portée, un défaut d'outillage, S123-1.
+
 **S122 :** [ADR-082](adr/ADR-082-nommer-la-borne-qui-refuse.md), nommer la borne qui refuse.
 [BORNES-CONSTRUCTION-S122](validation/BORNES-CONSTRUCTION-S122.md) : neuf noms remplacent deux fourre-tout,
 les trois bornes couplées nommées comme telles, `Domain` réservé aux positions. Carte du couloir d'acceptation

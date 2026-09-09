@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-09 15:56 +02:00
+JETON            : libre
+Battement        : 2026-09-09 16:05 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S123 — enveloppe du candidat radial face aux impacts réels (S122-1, A199)
-Dernière session : S122 — chaque borne nomme son paramètre ;255 tests/cinq ignorés
-Session suivante : à fixer en fin de S123
+Session en cours : aucune
+Dernière session : S123 — un seul cas de jeu sur onze tient dans le couloir ;255 tests/cinq ignorés
+Session suivante : S124 — lever la limite de portée du champ d'impact (S123-1, A201)
 
 *Le battement de fin de S118 disait 15:05 : une heure estimée, pas relevée. Corrigée ici.
 Un battement dans le futur ferait croire à une session active — le relever, jamais l'écrire de mémoire.*
@@ -176,6 +176,27 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S123 — 2026-09-09 :** [ADR-083](docs/adr/ADR-083-portee-du-champ-d-impact.md),
+[ENVELOPPE-IMPACTS-S123](docs/validation/ENVELOPPE-IMPACTS-S123.md). **Session de conception.**
+Le couloir de S122 confronté à onze cas de jeu, de la goutte de pluie au vaisseau : **un seul se
+construit à la portée voulue**, et le verdict ne dépend pas de la calibration inconnue — c'est
+l'objet du balayage de α sur un facteur 2π (**L212** : mesurer la sensibilité plutôt qu'attendre
+un paramètre).
+**A200, sévérité 1** : la longueur d'onde qui pilote tout le candidat n'est reliée à rien.
+ADR-055 la valide comme « positive en mètres » et confie le reste à un générateur physique qui
+n'existe pas. Contrat `λ = α·b` acté depuis Wagner (SPEC-001 §5 bis), α **à calibrer B2**.
+**A201** : la portée vaut **5,09 λ =10,18 b** — un plongeon humain n'est calculable que dans
+trois mètres — et cette borne vient de la table de Bessel, pas de la physique. Actée comme
+défaut d'outillage.
+Le régime d'eau profonde est assumé comme limite du modèle : un vaisseau en port n'est
+modélisable à aucune portée. Plafond d'énergie chiffré,10⁻⁶ à10⁻² de l'énergie de référence :
+contrainte écrite pour le générateur à venir.
+Bibliothèque non touchée,255 tests inchangés.83 ADR,201 angles,17 invariants,6 spécifications,
+23 cas. S122-1 réalisée.
+Suite S124 : S123-1, lever la limite de portée. Piste **non retenue avant mesure** : asymptotique
+de `J0`/`J1` au-delà de `x =64`. Générateur physique, eau peu profonde, admission dynamique,
+extension de fenêtre, S116-2, bilan mixte et durabilité restent ouverts.
 
 **S122 — 2026-09-09 :** [ADR-082](docs/adr/ADR-082-nommer-la-borne-qui-refuse.md),
 [BORNES-CONSTRUCTION-S122](docs/validation/BORNES-CONSTRUCTION-S122.md). Treize conditions se

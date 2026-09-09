@@ -1640,3 +1640,27 @@ encore un refus de longueur d'onde. `ImpactField` garde ses noms : plus le chemi
   Si un régime attendu tombe hors du couloir, ce n'est pas un défaut de nommage mais un manque
   de modèle, et il faudra soit un second candidat, soit un raccordement. La question est de
   conception et se tranche sans interlocuteur (ADR-028). Suite S122-1.
+
+**Suivi A199 — S123 : traitée par ADR-083, et elle en a ouvert deux autres.** La confrontation
+demandée a eu lieu : sur onze cas de jeu couvrant six ordres de grandeur en taille, **un seul se
+construit à la portée voulue**, et ce verdict ne dépend pas de la calibration inconnue. Les
+causes sont maintenant nommées et séparées — portée bornée par la table (A200), régime d'eau
+profonde assumé comme limite du modèle, plafond d'énergie chiffré pour le générateur à venir.
+
+- **A200** *(sévérité 1, S123 ; ouverte)* — **La longueur d'onde d'un impact n'est reliée à
+  rien.** Tout le candidat radial découle de `wavelength_m` : son étendue, sa vitesse de
+  propagation, les bornes qui l'acceptent. ADR-055 la valide comme « positive en mètres » et
+  confie le reste à un générateur physique qui n'existe pas ; ADR-060 qualifie son λ de 4 m de
+  « paramètre d'essai uniquement ». Aucun document ne dit comment un objet qui tombe produit une
+  longueur d'onde. Tant que ce lien manque, **aucun verdict d'acceptation n'a de sens physique**,
+  et deux contenus identiques peuvent donner des champs sans rapport. ADR-083 pose le contrat
+  `λ = α·b` et laisse `α` à calibrer ; l'angle reste ouvert tant que `α` n'est pas mesuré.
+  Suite : banc B2.
+
+- **A201** *(sévérité 2, S123 ; ouverte)* — **La portée d'un champ d'impact est bornée par une
+  table, pas par la physique.** `hi · radius ≤ 64` vient de la tabulation de Bessel, qu'ADR-060
+  range parmi les « choix numériques testés, pas des paramètres gameplay ». La conséquence n'a
+  jamais été examinée : la portée vaut **5,09 λ**, soit une dizaine de fois la taille de l'objet,
+  et un plongeon humain n'est calculable que dans un rayon de trois mètres. Ce n'est pas une
+  décision de conception, c'est un effet de bord d'outillage. Piste identifiée, non retenue avant
+  mesure : développement asymptotique de `J0`/`J1` au-delà de la table. Suite S123-1.

@@ -3222,3 +3222,20 @@ Corollaire pour les conditions composées : quand un refus tient à une relation
 paramètres, le nommer d'après un seul est un mensonge commode. Nommer la relation — portée,
 régime, résolution — coûte un mot de plus et reste vrai des deux côtés. Voir [[L210]], qui dit
 la même chose de la cible d'une correction : ce qui se vérifie par relecture ne se vérifie pas.
+
+## L212 — Un paramètre non calibré n'interdit pas de conclure : mesurer la sensibilité
+
+*(S123)* La confrontation demandée semblait bloquée par un inconnu : la longueur d'onde d'un
+impact n'est reliée à aucune propriété de l'objet, et sans ce lien, dire qu'un cas « entre dans
+le domaine » n'a pas de sens. Attendre la calibration aurait reporté la session entière.
+
+La sortie n'est pas de choisir une valeur — ce serait inventer un nombre sans provenance — mais
+de **balayer toute la plage plausible du paramètre et de regarder si le verdict change**. Ici,
+un facteur 2π : sur onze cas, trois sont refusés pour toute valeur, un seul passe pour toutes,
+et la conclusion tient sans que le paramètre soit connu. Le résultat est plus solide qu'avec une
+valeur choisie, puisqu'il ne repose sur aucune.
+
+La règle : quand un paramètre manque, chercher d'abord si la question posée en dépend
+réellement. Souvent la réponse est non sur toute la plage utile, et l'inconnu devient une note
+de bas de page au lieu d'un blocage. Quand la réponse est oui, on a au moins appris que le
+paramètre est décisif — ce qui est aussi un résultat, et qui justifie de le calibrer.
