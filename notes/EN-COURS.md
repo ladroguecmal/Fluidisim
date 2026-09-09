@@ -58,59 +58,41 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S122 — terminée
+Session : S123 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : A198 — un champ d'impact refusé ne dit pas **quel paramètre** est en cause. Un
-seul nom d'erreur recouvre plusieurs bornes portant sur des grandeurs sans rapport, et rien
-ne documente laquelle mord en premier.
+Objectif : A199 — le couloir d'acceptation du candidat radial, mesuré en S122, n'a jamais été
+confronté aux impacts que le jeu produira. Établir quels régimes il couvre, lesquels il ne
+couvre pas, et dire ce qui manque plutôt qu'élargir une borne au hasard.
+
+**Session de conception**, pas de construction : la première depuis longtemps. Le bilan S69
+reprochait aux sessions S47–S68 de n'avoir produit aucune conception du système d'eau ; la
+mesure est ici au service d'une décision, pas l'inverse.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan.
-- [x] **P2** — inventaire, avant toute décision (L209) : recenser chaque borne des deux
-      constructeurs, le paramètre qu'elle contraint, et le nom qu'elle porte aujourd'hui.
-      Puis **mesurer** laquelle mord, où, avec la sonde (L210).
-- [x] **P3** — ADR-082 : neuf noms pour les bornes de construction, Domain reserve aux positions, ImpactField laisse tel quel et dit comme limite.
-- [x] **P4** — neuf variantes ; `Domain` réservé aux positions.
-- [x] **P5** — chaque nom atteint par un cas qui le vise ; le test a montré qu'`Energy` mentait encore.
-- [x] **P6** — 255 tests, release, hachages inchangés, carte reproduite.
-- [x] **P7** — livrable, rituel de fin, fusion `--ff-only`.
+- [ ] **P2** — inventaire (L209) : que disent SPEC-002, ADR-058 et ADR-060 du choix de la
+      longueur d'onde et de l'usage visé ? **D'où vient `wavelength_m`** — dérivée, ou
+      déclarée par l'appelant ? Aucune conclusion avant cette lecture.
+- [ ] **P3** — la relation entre un impact réel et la longueur d'onde qu'il engendre, avec
+      provenance (I-14) : formule citée du corpus, ou étiquette « à calibrer » et le banc.
+- [ ] **P4** — le catalogue des cas du jeu confronté au couloir, **mesuré** et non supposé
+      (L210) : une sonde qui construit le candidat pour chaque cas et rend le verdict.
+- [ ] **P5** — ADR-083, sur ce que la confrontation aura montré.
+- [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
-Départ 14be58f = master ; trois copies coïncidentes, 5134cd archivée, c107bf sur la ligne S44.
+Départ c208d87 = master ; trois copies coïncidentes, 5134cd archivée, c107bf sur la ligne S44.
 
-Ce que S121 laisse : `Error::{Medium, Domain, Anisotropy, Steepness, NotRepresentable, Time}`.
-`Domain` recouvre à lui seul plusieurs conditions portant sur des paramètres différents —
-nombre de modes, rayon, âge, longueur d'onde, énergie. Les autres sont plus spécifiques.
+Le couloir mesuré en S122 (livrable §4) : ondes du mètre à la dizaine de mètres. Les bornes
+dominantes tirées de la lecture du code — à revérifier en P4 plutôt qu'à croire :
+`Reach` impose `hi·radius ≤ 64` avec `hi = 4π/λ`, donc **rayon ≤ ~5,09 λ** ; `Regime` impose
+**profondeur > λ** ; `Resolution` fait entrer l'horizon.
 
-La sonde `code/water-core/examples/probe_degenerate.rs` existe et sait balayer l'espace des
-paramètres : la réutiliser pour cartographier plutôt que d'en écrire une autre.
+Deux nombres déjà dans le corpus et utilisables : `λ = 2πv²/g` (64 m à 10 m/s, S01) et la
+cambrure limite `H/λ = 0,78`. Ne pas en inventer d'autres sans provenance — I-14.
 
-Piège à éviter, hérité de S120 : ne pas construire ce qui n'a pas de consommateur. Une erreur
-qui nomme sa borne sert le code appelant ; une carte des combinaisons acceptées sert l'auteur
-de contenu. Vérifier en P2 que les deux sont utiles avant de faire les deux.
-
-P2 : treize bornes, six noms. `Domain` en recouvre sept, portant sur cinq paramètres ; `Medium`
-en recouvre deux dont une qui ne parle pas du milieu (condition 9 : depth > pi/lo, le régime
-d'eau profonde). Même défaut de nommage qu'ADR-081, un cran plus loin.
-
-La carte mesurée (livrable §2) montre un **couloir étroit** — lambda de l'ordre du mètre à la
-dizaine, rayon d'autant plus petit que lambda est courte — bordé de trois causes différentes
-sous deux noms : résolution en dessous, régime d'eau profonde au-dessus, portée de la table de
-Bessel à droite. Rien ne le documentait. Et c'est une coupe, pas une frontière : l'horizon entre
-dans la condition de résolution, donc un âge plus court élargit le couloir.
-
-Peu d'assertions à corriger (4-5 sites) : renommer franchement plutôt qu'ajouter une API
-parallèle. `Domain` doit rester pour les **positions** hors domaine dans `sample` (ADR-080) ;
-ce sont les bornes de construction qui reçoivent des noms propres.
-
-P4-P7 : ADR-082 avec deux corrections datées — l'attribution de la bande inférieure à la
-résolution (c'est `Reach`) et le nom `Energy` pour un refus de longueur d'onde. Suivi A198
-(résolue), A199, L211, journal, index, README, jeton rendu, fusion ff-only.
-
-Pour S123 sans relire : A199 est une question de conception, pas de code. Le couloir mesuré est
-dans le livrable §4. Ce qu'il faut confronter : les longueurs d'onde qu'un impact réel engendre
-(elles dépendent de la taille et de la vitesse de l'objet) contre l'intervalle accepté. Si un
-régime attendu tombe dehors, la réponse n'est pas d'élargir une borne au hasard mais de dire
-quel modèle manque. SPEC-002 et ADR-058/060 portent le raisonnement d'origine sur ce candidat.
+Piège : la tentation sera d'élargir une borne pour faire entrer un cas. Une borne existe pour
+une raison (portée tabulée, régime d'eau profonde, résolution de phase) ; la déplacer sans
+traiter cette raison remplacerait un refus franc par un résultat faux.

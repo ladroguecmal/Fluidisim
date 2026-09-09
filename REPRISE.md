@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-09 15:40 +02:00
+JETON            : occupé
+Battement        : 2026-09-09 15:56 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S123 — enveloppe du candidat radial face aux impacts réels (S122-1, A199)
 Dernière session : S122 — chaque borne nomme son paramètre ;255 tests/cinq ignorés
-Session suivante : S123 — enveloppe du candidat radial face aux impacts réels (S122-1, A199)
+Session suivante : à fixer en fin de S123
 
 *Le battement de fin de S118 disait 15:05 : une heure estimée, pas relevée. Corrigée ici.
 Un battement dans le futur ferait croire à une session active — le relever, jamais l'écrire de mémoire.*
