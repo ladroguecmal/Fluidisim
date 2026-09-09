@@ -1125,3 +1125,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S108-1 : ouverte, S109.** Admission bornée et idempotente des sources de pression,
   vérification époque/cause/id et conflits explicites, conservation au refus. Qualifier
   les sauvegardes après ce contrat ; authentification fournie par l'hôte.
+
+### S109 — Admission et attente des sources
+
+- **S108-1 : réalisée dans le journal emprunté.** [ADR-075](../adr/ADR-075-admission-des-sources-de-pression.md),
+  époque, unicité cause/id, doublons, conflits, saturation et reprise explicite.
+- **S109-1 : ouverte, S110.** Sauvegarde mémoire versionnée du journal de pression,
+  incluant pending ; restauration transactionnelle sur pools hôte. Paquets incomplets
+  ou conflictuels refusés ; pool élargi ne doit pas acquitter l'attente sans retry.

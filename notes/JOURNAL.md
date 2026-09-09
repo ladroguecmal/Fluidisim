@@ -6132,3 +6132,21 @@ aucun transport, stockage durable ou journal de pression. Zéros signés conserv
 distincte ; I-08/I-17 conservés, I-03/I-15 non déclarés reçus entre plateformes.
 **Suite S109 :** S108-1, admission bornée/idempotente, époque/cause/id et conflits,
 conservation au refus avant sauvegardes. S107-1 réalisée. Synchronisation finale.
+
+## S109 — 2026-09-09 — Admission des sources de pression
+
+**Entrée :** Continue ; ce51abe, copies actives propres identiques. P2 poursuivie après
+relance utilisateur ; correction de durée de vie du stockage de test, aucune étape annulée.
+**Produit :** ADR-075, journal sur pool de références immuables, époque/id/cause,
+comparaison intégrale en bits. Ordre canonique par id, sans prétention de séquence serveur.
+Saturation conserve une source pending ; current refuse, published reste explicite.
+Copie sur pool élargi conserve l'attente, retry seul l'admet.
+**Vérification :** quatre tests debug/release ; suite139 core +93 harnais =232 réussis,
+cinq ignorés, quatre avertissements préexistants. Doublons en saturation, conflits,
+zéros signés, capacité zéro, migration/cible refusée et reprise reçus. P2 f2a5e1b.
+**Limites :** authentification hôte, un seul pending ; source indépendante supplémentaire
+refusée et à retenir par l'hôte. Aucun transport, préparation multisource, sauvegarde ou
+admission atomique journal/champs.75 ADR,193 angles,17 invariants,6 spécifications,23 cas.
+L199/L200/L201 appliquées ; aucun nouvel angle ou leçon distincte, invariants inchangés.
+**Suite S110 :** S109-1, instantané mémoire versionné, publication et pending conservés,
+restauration transactionnelle sur pools. S108-1 réalisée ; synchronisation finale.

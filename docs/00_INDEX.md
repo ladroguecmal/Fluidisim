@@ -17,6 +17,9 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S109 :** [ADR-075 — Admission des sources](adr/ADR-075-admission-des-sources-de-pression.md), **ACTÉE**.
+232 tests réussis/cinq ignorés ;75 ADR,193 angles. Suite S110 : sauvegarde du journal et de son attente, S109-1.
+
 **S108 :** [ADR-074 — Source de pression versionnée](adr/ADR-074-source-de-pression-versionnee.md), **ACTÉE**.
 WPRS V1,228 tests réussis/cinq ignorés ;74 ADR,193 angles. Suite S109 : admission des sources, S108-1.
 

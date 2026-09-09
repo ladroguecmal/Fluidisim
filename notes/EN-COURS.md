@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S109 — en cours
+Session : S109 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : admission bornée et idempotente, conflits et attente explicites.
 
@@ -66,7 +66,7 @@ Objectif : admission bornée et idempotente, conflits et attente explicites.
 
 - [x] **P1** — vérifier les copies et déclarer le plan.
 - [x] **P2** — construire journal emprunté, attente sur saturation et reprise sur pool élargi ; recevoir les refus.
-- [ ] **P3** — publier décision et résultats, rituel final et synchronisation.
+- [x] **P3** — publier décision et résultats, rituel final et synchronisation.
 
 ### Notes de reprise
 
@@ -76,3 +76,5 @@ Sources empruntées immuablement ; pas de transport ni de sauvegarde implicite.
 
 P2 : journal emprunté, comparaison complète, pending et reprise explicite.
 Quatre tests ciblés debug/release, suite232 réussis/cinq ignorés. ADR-075.
+
+P2 f2a5e1b. Suite S110 : S109-1, sauvegarde et restauration de l'attente.
