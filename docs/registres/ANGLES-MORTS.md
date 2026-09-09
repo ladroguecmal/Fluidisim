@@ -1693,3 +1693,17 @@ pas selon la qualité graphique locale. Réception physique étendue suivie par 
   de 384 points-temps étendus. Avant adoption dans le cycle, recevoir les sept composantes
   contre une référence indépendante avec convergence de l'oracle, près des bornes de rayon
   et d'âge. Porteur : S125-1, prochaine session S126. Aucun défaut physique établi à ce stade.
+
+**Suivi A203 — S126 : partielle.** RECEPTION-ETENDUE-S126 reçoit sept composantes sur
+1350 points-temps N128/R64 et N256/R128, λ4/âge0–4 s, oracle indépendant raffiné.
+Erreur normalisée<=4,44e-7 pour1e-4 annoncé. Réception limitée à ces fixtures ; autres
+paramètres et précision relative des queues non reçus. Le transport effectif ouvre A204.
+
+- **A204** *(sévérité 2, S126 ; ouverte)* — **Un domaine calculable et précis au loin ne
+  prouve pas qu'il puisse y transporter l'onde.** Les montages S125/S126 ont un âge4 s ;
+  le déplacement caractéristique du groupe le plus rapide n'est que7,07 m. Les points
+  à64/128 m mesurent surtout des queues très faibles, pas un paquet arrivé. Les horizons
+  numériques permis aux deux profils,12,07/24,15 s, restent inférieurs aux temps de groupe
+  R/c_g,max=36,22/72,44 s. Une simple prolongation serait refusée. Dimensionner portée et
+  horizon ensemble, puis mesurer le transport ; ne pas lire le succès spatial comme une
+  réception de portée utile. Porteur : S126-1, prochaine session S127.

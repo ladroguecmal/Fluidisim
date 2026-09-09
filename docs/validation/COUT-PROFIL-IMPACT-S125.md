@@ -77,3 +77,8 @@ S125-1 : réception indépendante du champ étendu, avant toute adoption dans le
 **cinq ignorés**, aucun échec ; quatre avertissements préexistants du harnais.
 Deux exécutions release de la sonde reçues. Les modifications de bibliothèque sont seulement
 la documentation du profil ; aucune opération numérique ni fixture modifiée.
+
+> **Suivi S126 — 2026-09-09 :** S125-1 réalisée sur les fixtures dans
+> [RECEPTION-ETENDUE-S126](RECEPTION-ETENDUE-S126.md), sept composantes reçues contre oracle
+> indépendant. A203 partielle ; A204/S126-1 suit le transport, absent de la fenêtre0–4 s
+> aux distances annoncées. Le défaut N64 reste inchangé.

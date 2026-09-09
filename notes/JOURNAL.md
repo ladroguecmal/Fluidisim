@@ -6651,3 +6651,33 @@ physique et calibration B2, profondeur finie, admission dynamique mixte, bilan m
 **Suite S126 :** S125-1, référence indépendante du champ étendu N128/R64 et N256/R128,
 λ4 et horizon4 s, sept composantes et convergence de l'oracle. Aucun arbitrage humain requis ;
 actions d'infrastructure toujours séparées. Travail directement sur master, aucune copie créée.
+
+---
+
+## S126 — 2026-09-09 — Champ étendu reçu, transport encore à mesurer
+
+**Entrée :** poursuite demandée, master propre c7cb140, anciennes copies sans modification.
+**Produit :** receive_extended_impact.rs et RECEPTION-ETENDUE-S126. Bibliothèque inchangée.
+**Protocole avant mesure :** N128/R64 et N256/R128, λ4, horizon4 s ; sept composantes,
+seuil1e-4 normalisé aux poids positifs, oracle1e-6. Référence f64 sans table ni PhaseQ32,
+raffinements spectraux512/1024/2048 et angulaires1024/2048 séparés. Même modèle physique,
+implémentation indépendante. Centre initial analytique, zéros et défaut de signe injecté.
+**Résultat :** 1350 points-temps reçus, maximum normalisé4,44e-7 ; erreur absolue d'élévation
+<=4,50e-10 m. Oracle spectral final<=6e-12, angulaire<=4,29e-16. Refus au premier f32 hors
+rayon et première microseconde hors horizon reçus. Deux campagnes release25,50/25,85 s,
+identiques sur les valeurs ; aucune promesse de coût runtime dans ces durées.
+**Ce qui a changé la lecture :** le diagnostic par anneau extérieur donne jusqu'à4,01 % et
+14,84 % d'erreur rapportée au pic local, mais ces pics d'élévation valent2,82e-9/2,17e-10 m.
+Ce sont les queues du champ. Le groupe le plus rapide parcourt7,07 m en4 s : aucun paquet
+arrivé à64/128 m n'est reçu. La borne numérique ne permet pas simplement d'attendre davantage.
+**Décision structurante :** succès du critère annoncé conservé, portée de la conclusion
+limitée aux fixtures et à leurs âges. Aucun critère modifié après mesure, aucun ADR nouveau.
+S125-1 réalisée sur fixture, A203 partielle ; A204 et S126-1 portent le transport effectif.
+**Vérification :** assertions de la nouvelle campagne release exécutées deux fois ; suite
+256/cinq ignorés reçue en S125 non relancée, aucun calcul ou test existant modifié.
+**Rituel :** L215, registre/actions/index/README/REPRISE actualisés ; I-03/I-08/I-14/I-15
+relus, aucun invariant invalidé. 85 ADR,204 angles,17 invariants,6 spécifications,23 cas.
+**Non fait :** transport lointain, bilan d'énergie étendu, cycle mixte, autres paramètres,
+générateur physique et calibration B2, profondeur finie, durabilité. Aucun arbitrage humain.
+**Suite S127 :** S126-1, dimensionner portée/horizon ensemble puis recevoir un paquet propagé,
+ou constater la limite de N≤256. Travail sur master, aucun worktree créé, jeton rendu.

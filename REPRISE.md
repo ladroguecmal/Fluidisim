@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-09 18:38 +02:00
+JETON            : libre
+Battement        : 2026-09-09 18:40 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S126 — réception du champ étendu
-Dernière session : S125 — coût mesuré, défaut N64 conservé ; 256 tests/cinq ignorés
-Session suivante : S126 — réception indépendante du champ étendu (S125-1, A203)
+Session en cours : aucune
+Dernière session : S126 — champ étendu reçu sur fixture, transport encore ouvert
+Session suivante : S127 — portée et horizon du transport (S126-1, A204)
 
 *Le battement de fin de S118 disait 15:05 : une heure estimée, pas relevée. Corrigée ici.
 Un battement dans le futur ferait croire à une session active — le relever, jamais l'écrire de mémoire.*
@@ -176,6 +176,25 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S126 — 2026-09-09 :** [RECEPTION-ETENDUE-S126](docs/validation/RECEPTION-ETENDUE-S126.md).
+Oracle f64 indépendant sans table ni PhaseQ32, raffinements spectraux512/1024/2048 et
+angulaires1024/2048. Deux fixtures N128/R64 et N256/R128, λ4, âge0–4 s :1350 points-temps,
+sept composantes reçues ; maximum normalisé4,44e-7 pour seuil1e-4 annoncé au plan.
+Centre analytique, zéros, refus aux frontières et défaut de signe volontaire reçus.
+**S125-1 réalisée sur fixture ; A203 partielle.** Aucun algorithme de bibliothèque modifié.
+La mesure locale révèle des erreurs/pics de1,56–4,01 % et11,32–14,84 % dans les anneaux
+extérieurs, sur des queues d'élévation de2,82e-9/2,17e-10 m. Aucun seuil local inventé.
+**A204/L215 :** en4 s le groupe le plus rapide parcourt7,07 m, pas64/128 m. Un champ reçu
+au loin n'est pas un paquet reçu après transport. Les horizons admissibles12,07/24,15 s
+restent sous R/c_g,max36,22/72,44 s : prolonger simplement le temps ne suffit pas.
+**Suite S127 : S126-1**, dimensionner ensemble portée et horizon puis mesurer le transport,
+avec un montage N≤256 admissible ou un constat explicite de sa limite.
+85 ADR,204 angles,17 invariants,6 spécifications,23 cas. Deux campagnes release avec assertions
+reçues ; suite256/cinq ignorés vérifiée en S125 non relancée, bibliothèque inchangée.
+Générateur physique, profondeur finie, admission dynamique mixte, bilan mixte et disque ouverts.
+Master seul avancé ; anciennes copies propres mais en retard, à synchroniser avant reprise.
+
 
 **S125 — 2026-09-09 :** [ADR-085](docs/adr/ADR-085-profils-radiaux-selon-le-domaine.md),
 [COUT-PROFIL-IMPACT-S125](docs/validation/COUT-PROFIL-IMPACT-S125.md). N256/N64 coûte ~4 sur

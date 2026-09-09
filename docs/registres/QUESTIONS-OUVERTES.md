@@ -1218,3 +1218,13 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
   λ4/horizon4 s, sept composantes, contre une référence Bessel et spectrale indépendante
   dont la convergence est contrôlée. Tester les frontières spatiale et temporelle avant
   l'adoption dans le cycle mixte. La finitude et l'admission ne prouvent pas la précision.
+
+### S126 — Réception spatiale étendue et transport
+
+- **S125-1 : réalisée sur les deux fixtures, A203 partielle.** RECEPTION-ETENDUE-S126 :
+  1350 points-temps, sept composantes, oracle spectral et angulaire raffiné. Domaine
+  N128/R64 et N256/R128, λ4, âge0–4 s ; autres paramètres non reçus.
+- **S126-1 : ouverte, S127, A204.** Dimensionner portée et horizon pour recevoir un paquet
+  réellement propagé au loin ; confronter temps de groupe et borne numérique, construire
+  un montage N≤256 admissible ou constater sa limite, puis référence et bilan de transport.
+  Ne pas assimiler l'exactitude des queues faibles à une portée utile validée.

@@ -61,7 +61,7 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S125 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S126 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
@@ -134,7 +134,12 @@ déjà permis depuis ADR-060, **neuf cas de jeu sur onze** atteignent enfin leur
 Coût mesuré en S125 : environ ×4 à points identiques et ×9 pour le montage étendu comparé au montage
 initial. [ADR-085](docs/adr/ADR-085-profils-radiaux-selon-le-domaine.md) conserve N64 par défaut ;
 N128/N256 se dimensionnent explicitement au domaine commun du service. A202 traitée ; A203 suit
-la réception physique à grande portée, prochaine étape S126 (S125-1).
-État vérifié : **256 tests réussis, cinq ignorés ; 85 ADR, 203 angles, 17 invariants,
+la réception physique à grande portée, réalisée en S126 sur les deux fixtures à âge0–4 s.
+État vérifié : **256 tests réussis, cinq ignorés ; 85 ADR, 204 angles, 17 invariants,
 6 spécifications, 23 cas canoniques.**
+[Réception S126](docs/validation/RECEPTION-ETENDUE-S126.md) :1350 points-temps reçus contre
+oracle indépendant, erreur normalisée<=4,44e-7. La fenêtre4 s reçoit surtout des queues aux
+distances64/128 m ; elle ne valide pas encore un paquet transporté au loin. Suite S127 :
+S126-1/A204, dimensionner portée et horizon ensemble. Bibliothèque inchangée ; les256 tests
+restent ceux vérifiés en S125, deux nouvelles campagnes release avec assertions passent en S126.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

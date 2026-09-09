@@ -17,6 +17,15 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S126 :** [RECEPTION-ETENDUE-S126](validation/RECEPTION-ETENDUE-S126.md), oracle indépendant
+f64 et raffinements séparés. N128/R64 et N256/R128 reçus sur1350 points-temps, sept composantes,
+erreur normalisée<=4,44e-7 pour1e-4 annoncé. **S125-1 réalisée sur fixture, A203 partielle.**
+À4 s le groupe le plus rapide ne parcourt que7,07 m : réception spatiale des queues, pas encore
+transport jusqu'aux portées annoncées. **A204/L215**, suite S127 : S126-1, portée et horizon ensemble.
+85 ADR,204 angles,17 invariants,6 spécifications,23 cas. Bibliothèque inchangée ; suite256/cinq
+ignorés reçue S125 non relancée, deux campagnes release avec assertions reçues ici.
+
+
 **S125 :** [ADR-085](adr/ADR-085-profils-radiaux-selon-le-domaine.md), profil dimensionné au domaine commun.
 [COUT-PROFIL-IMPACT-S125](validation/COUT-PROFIL-IMPACT-S125.md) : N256 coûte environ quatre fois N64
 sur les mêmes points ; le montage étendu N256/R128 coûte environ neuf fois N64/R16.
@@ -432,6 +441,15 @@ parfaitement stable ne pouvait pas distinguer.
 | [`../notes/JOURNAL.md`](../notes/JOURNAL.md) | historique des sessions, points de reprise |
 
 ## État d'avancement
+
+**S126 :** [RECEPTION-ETENDUE-S126](validation/RECEPTION-ETENDUE-S126.md), oracle indépendant
+f64 et raffinements séparés. N128/R64 et N256/R128 reçus sur1350 points-temps, sept composantes,
+erreur normalisée<=4,44e-7 pour1e-4 annoncé. **S125-1 réalisée sur fixture, A203 partielle.**
+À4 s le groupe le plus rapide ne parcourt que7,07 m : réception spatiale des queues, pas encore
+transport jusqu'aux portées annoncées. **A204/L215**, suite S127 : S126-1, portée et horizon ensemble.
+85 ADR,204 angles,17 invariants,6 spécifications,23 cas. Bibliothèque inchangée ; suite256/cinq
+ignorés reçue S125 non relancée, deux campagnes release avec assertions reçues ici.
+
 
 **S125 :** [ADR-085](adr/ADR-085-profils-radiaux-selon-le-domaine.md), profil dimensionné au domaine commun.
 [COUT-PROFIL-IMPACT-S125](validation/COUT-PROFIL-IMPACT-S125.md) : N256 coûte environ quatre fois N64

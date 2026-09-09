@@ -69,3 +69,9 @@ déplacée. I-03, I-05, I-06, I-08, I-14, I-15, I-16 relus ; aucun invariant ame
   avec contrôle de convergence de l'oracle. Les sorties finies de S125 ne suffisent pas.
 - Générateur physique d'ADR-055 et calibration B2, profondeur finie, budget cible et coût
   du cycle complet étendu, admission dynamique mixte, bilan mixte et durabilité disque.
+
+> **Suivi S126 — 2026-09-09 :** S125-1 réalisée sur les deux fixtures prévues,
+> [RECEPTION-ETENDUE-S126](../validation/RECEPTION-ETENDUE-S126.md). Précision des sept
+> composantes reçue au critère annoncé, oracle raffiné ; A203 partielle. La réception
+> d'un paquet transporté au loin reste distincte : A204/S126-1, rayon et horizon à
+> dimensionner ensemble. La décision de profil ne change pas.

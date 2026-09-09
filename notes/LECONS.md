@@ -3265,3 +3265,15 @@ Comparer les variantes sur une charge commune pour isoler le paramètre, puis me
 charge nouvelle qu'il permet. Publier les deux facteurs avec leurs domaines ; aucun des deux
 ne remplace l'autre. Un coût marginal faible devant un ancien scénario dominant n'est pas
 une réserve de budget garantie pour tous les usages.
+
+## L215 — Recevoir une portée demande un temps de transport cohérent
+
+*(S126)* Un champ comparé à un oracle à128 mètres passait largement son critère. Mais
+l'horizon de4 secondes n'envoyait le groupe le plus rapide qu'à7 mètres : le banc mesurait
+les queues du champ, pas un paquet ayant parcouru la distance promise. Les erreurs relatives
+locales étaient grandes sur des valeurs infimes, sans invalider l'exactitude absolue reçue.
+
+Avant de déclarer une portée utile, confronter distance, vitesse caractéristique et horizon
+numérique. Un banc spatial peut être exact tout en ne contenant jamais le phénomène de
+transport qu'on lui attribue. Quand un garde couple rayon et âge, attendre davantage n'est
+pas une correction gratuite : il faut dimensionner les deux ensemble.

@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S126 — en cours
+Session : S126 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S125-1 / A203 — recevoir sept composantes du champ étendu contre un oracle
 f64 indépendant, en contrôlant séparément convergence spectrale et angulaire.
@@ -72,7 +72,7 @@ f64 indépendant, en contrôlant séparément convergence spectrale et angulaire
 - [x] **P3** — exécuter et interpréter ; conserver tout refus. Rapport avec domaine exact,
       provenance des critères, contrôles de l'oracle et contre-épreuve du verdict.
       Corriger le candidat seulement si une erreur est établie (sinon bibliothèque inchangée).
-- [ ] **P4** — vérifications adaptées, journal, angles/leçons/actions, index et passation,
+- [x] **P4** — vérifications adaptées, journal, angles/leçons/actions, index et passation,
       décomptes, jeton libre et commit de fin.
 
 ### Notes de reprise
@@ -100,3 +100,7 @@ Point nouveau : à4 s le groupe le plus rapide parcourt ~7,07 m ; le banc ne re�
 un paquet arrivé à64/128 m. Horizons admissibles théoriques12,07/24,15 s contre temps
 caractéristiques36,22/72,44 s. A204 / S126-1 : dimensionner et mesurer le transport.
 Bibliothèque inchangée, pas d'ADR nouveau, pas de modification des critères en cours de mesure.
+
+P4 : journal, A203/A204, L215, actions, index/README/REPRISE et suivis actualisés.
+85 ADR,204 angles,17 invariants,6 spécifications,23 cas. Aucun invariant invalidé.
+Deux campagnes release reçues ; suite S125 inchangée non relancée. Jeton rendu, master seul avancé.
