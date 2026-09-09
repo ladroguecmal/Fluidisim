@@ -540,6 +540,13 @@ pub enum WorldError {
     },
 }
 impl Prepared<'_> {
+    /// Appel interne après vérification du contexte et de l'instant par la requête mixte.
+    pub(crate) fn sample_local(
+        &self,
+        point: [f32; 2],
+    ) -> Result<Surface, crate::modal_pressure::Error> {
+        self.field.sample(point)
+    }
     pub fn slope_envelope(&self) -> f32 {
         self.slope_envelope
     }

@@ -8,6 +8,8 @@ use crate::{Background, FrameId, SimTime, WaterSample, WorldPos};
 #[path = "live_snapshot.rs"]
 mod live_snapshot;
 pub use live_snapshot::{ServiceSnapshotError, SERVICE_HEADER};
+#[path = "mixed_water.rs"]
+pub mod mixed;
 /// Déclaration hôte : l'ancre de B est l'origine locale du couple frame/cell de W.
 /// L'hôte reste responsable de cette géométrie et du milieu réellement présent.
 pub struct BoundBackground<'a> {
@@ -58,6 +60,7 @@ pub struct Prepared<'a, 'j, const N: usize = 64> {
     frame: FrameId,
     cell: u64,
     gravity: f32,
+    density: f32,
 }
 impl<'a, 'j, const N: usize> Prepared<'a, 'j, N> {
     /// Pool de travail : peut être modifié en cas de refus ; aucun Prepared n'est alors publié.
@@ -93,6 +96,7 @@ impl<'a, 'j, const N: usize> Prepared<'a, 'j, N> {
             frame: context.frame,
             cell: context.cell,
             gravity: context.medium.gravity,
+            density: context.medium.density,
         })
     }
     pub fn field_count(&self) -> usize {
@@ -242,6 +246,7 @@ impl<'a, 'j, const N: usize> RenewalController<'a, 'j, N> {
             frame: self.context.frame,
             cell: self.context.cell,
             gravity: self.context.medium.gravity,
+            density: self.context.medium.density,
         }
     }
     /// Marge fournie par l'hôte ; soustraction après comparaison, sans débordement now + marge.
@@ -360,6 +365,7 @@ impl<'a, const N: usize> LiveWater<'a, N> {
             frame: self.context.frame,
             cell: self.context.cell,
             gravity: self.context.medium.gravity,
+            density: self.context.medium.density,
         })
     }
     /// None renouvelle l'horizon sans commande. Après blocage, seule la même commande est admise.
