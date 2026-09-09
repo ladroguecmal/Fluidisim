@@ -67,14 +67,13 @@ bits avec la voie directe, chemin `Unchanged`, refus, coût mise à jour + requ�
 ### Plan
 
 - [x] **P1** — vérifier la passation, prendre le jeton, déclarer ce plan.
-- [ ] **P2** — écrire la campagne `cycle_mixed` : contrôleur piloté par une séquence
+- [x] **P2** — écrire la campagne `cycle_mixed` : contrôleur piloté par une séquence
       d'instants (avance, retour, répétition), requête mixte B+impact+pression sur la
       publication, comparaison en bits à la préparation directe, refus hors fenêtre et
-      vue à une date non publiée.
-- [ ] **P3** — mesurer `update`+`current`+requête 64 aux deux recettes, recevoir la
-      campagne en release, lire ce que les chiffres disent.
-- [ ] **P4** — publier le livrable, rituel de fin (`REPRISE.md` §6) et synchronisation
-      `--ff-only` vers master.
+      vue à une date non publiée. Plus le test de bibliothèque du fait neuf.
+- [ ] **P3** — publier le livrable : chiffres reçus, biais de position de la mesure,
+      angle mort et leçon.
+- [ ] **P4** — rituel de fin (`REPRISE.md` §6) et synchronisation `--ff-only` vers master.
 
 ### Notes de reprise
 
@@ -85,6 +84,17 @@ Ce que S117 laisse acquis : `Controller::{new,update,published_time,state,curren
 deux pools disjoints, bascule après succès intégral, `Unchanged` sur même instant,
 `Err(Time)` pour une vue à une date non publiée. Reçu à la recette 16×24 seulement —
 S118 doit l'exercer aux recettes que S116 a reçues spatialement (224×128, 256×128).
+
+P2 : `cycle_mixed` reçu aux deux recettes, 3468 points-temps chacune, identité en bits
+avec la voie directe à chaque étape ; hash 6591ab360344f76e (224x128) et b563610d1dd78ada
+(256x128), stables d une exécution à l autre. Suite 154 core + 93 harnais = 247 réussis,
+cinq ignorés ; le test neuf passe aussi en release. Quatre avertissements préexistants.
+
+Trouvaille de P2, et c est l apport de la session : la comparaison `update` vs voie
+directe donnait un écart de +15 % à 224x128, instable. Trois témoins l ont expliqué —
+instant alterné (non), pool alterné (non), même mesure replacée en dernier (oui). Le
+premier bloc `measure` d une séquence est surestimé. Cela touche rétroactivement les
+chiffres de préparation publiés depuis S104, qui sont tous des premiers blocs.
 
 Attendu de la mesure : le contrôleur ne recopie pas les coefficients, donc
 `update`+`current` devrait coûter la préparation directe de S116 (48–58 ms) sans surcoût

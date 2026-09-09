@@ -74,11 +74,13 @@ fn vals(s: WaterSample) -> [f32; 10] {
 fn world(x: f64, y: f64) -> WorldPos {
     WorldPos::from_metres(1e9 + x, -1e9 + y, 0.0)
 }
-fn fixture(
+/// Montage complet rendu avec le contrôleur encore pilotable : la publication n'est
+/// pas figée, et l'appelant choisit les instants du cycle.
+fn with_controller(
     check: impl FnOnce(
         &Background,
         &Prepared<'_, '_, 64>,
-        &bound_pressure::Prepared<'_>,
+        &mut bound_pressure::Controller<'_, '_, '_, '_, '_>,
         &RadialImpact<64>,
     ),
 ) {
@@ -198,13 +200,25 @@ fn fixture(
     let mut spare = pp;
     let mut controller =
         bound_pressure::Controller::new(pc, &half, &pj, SimTime(0), &mut pp, &mut spare).unwrap();
-    controller.update(SimTime(1_500_000)).unwrap();
-    assert_eq!(
-        controller.update(SimTime(8_000_001)),
-        Err(bound_pressure::Error::Time)
-    );
-    let pressure = controller.current(SimTime(1_500_000)).unwrap();
-    check(&b, &impacts, &pressure, &single);
+    check(&b, &impacts, &mut controller, &single);
+}
+fn fixture(
+    check: impl FnOnce(
+        &Background,
+        &Prepared<'_, '_, 64>,
+        &bound_pressure::Prepared<'_>,
+        &RadialImpact<64>,
+    ),
+) {
+    with_controller(|b, impacts, controller, single| {
+        controller.update(SimTime(1_500_000)).unwrap();
+        assert_eq!(
+            controller.update(SimTime(8_000_001)),
+            Err(bound_pressure::Error::Time)
+        );
+        let pressure = controller.current(SimTime(1_500_000)).unwrap();
+        check(b, impacts, &pressure, single);
+    })
 }
 #[test]
 fn mixed_fields_match_sum_and_single_final_normal() {
@@ -410,4 +424,48 @@ fn mixed_rejects_context_time_capacity_domains_and_total_slope_atomically() {
         sample_world_batch(&bound, i, Some(p), t, &points, 0.1, &mut work, &mut out).unwrap();
         assert_ne!(out.map(|s| vals(s).map(f32::to_bits)), before);
     });
+}
+/// S118 : la fenêtre de publication de la pression et la validité des impacts sont deux
+/// horizons distincts. Le contrôleur ne connaît que le sien ; publier plus tard que la
+/// validité des impacts réussit, et c'est la requête mixte qui refuse.
+#[test]
+fn controller_publishes_beyond_impact_validity_and_query_refuses() {
+    with_controller(|b, impacts, controller, _| {
+        let bound = BoundBackground::new(b, FrameId(7), 9);
+        let points = [world(1.0, 0.0)];
+        let mut work = [WaterSample::default(); 1];
+        let mut out = work;
+        let (_, until) = impacts.renewal_deadline().unwrap();
+        let late = SimTime(6_000_000);
+        assert!(until.0 < late.0 && late.0 < 8_000_000);
+        assert_eq!(
+            controller.update(late),
+            Ok(bound_pressure::Update::Published)
+        );
+        assert_eq!(controller.published_time(), late);
+        {
+            let p = controller.current(late).unwrap();
+            assert!(p.energy_j().is_finite() && p.slope_envelope().is_finite());
+            assert_eq!(
+                sample_world_batch(
+                    &bound,
+                    impacts,
+                    Some(&p),
+                    late,
+                    &points,
+                    0.1,
+                    &mut work,
+                    &mut out
+                ),
+                Err(Error::Time)
+            );
+        }
+        assert_eq!(out.map(|s| vals(s).map(f32::to_bits)), [[0u32; 10]; 1]);
+        // Le cycle repart : une publication que la requête refuse ne bloque pas l'hôte.
+        let t = SimTime(1_500_000);
+        assert_eq!(controller.update(t), Ok(bound_pressure::Update::Published));
+        let p = controller.current(t).unwrap();
+        sample_world_batch(&bound, impacts, Some(&p), t, &points, 0.1, &mut work, &mut out).unwrap();
+        assert!(out[0].eta.is_finite() && out[0].eta != 0.0);
+    })
 }
