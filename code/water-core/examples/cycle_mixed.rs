@@ -1,6 +1,8 @@
 //! S118 : cycle hôte temporel mixte piloté par le contrôleur de publication (S117-1).
 //! Le contrôleur remplace la préparation directe dans la boucle de l'hôte ; la voie
 //! directe reste présente comme témoin, à la même date et sur un troisième pool.
+//! S119 : l'horizon et l'annonce d'ADR-079 sont exercés à chaque étape, et un bloc de mise
+//! en régime précède la première mesure — c'est la correction d'A195.
 use std::{hint::black_box, time::Instant};
 use water_core::*;
 use water_core::{
@@ -250,10 +252,24 @@ fn main() {
         let mut hash = Hasher64::new();
         let mut controller =
             Controller::new(ctx, &half, &pj, SimTime(0), &mut active, &mut spare).unwrap();
+        // S119 : l'horizon est connu avant toute publication. Il vaut ici la validité des
+        // impacts, plus courte que la fenêtre de pression.
+        let (lo, hi) = prepared_water::mixed::horizon(&impacts, Some(&controller)).unwrap();
+        assert_eq!((lo, hi), (SimTime(0), SimTime(4_000_000)));
+        assert!(hi < controller.context().settings().end);
         let mut unchanged = 0usize;
         for &us in &cycle {
             let t = SimTime(us);
+            let announced = prepared_water::mixed::state(&bound, &impacts, Some(&controller), t);
             let old = controller.published_time();
+            assert_eq!(
+                announced,
+                if old == t {
+                    prepared_water::mixed::State::Ready
+                } else {
+                    prepared_water::mixed::State::NeedsUpdate { published: old }
+                }
+            );
             assert_eq!(
                 controller.state(t),
                 if old == t {
@@ -276,6 +292,10 @@ fn main() {
             assert_eq!(step == Update::Unchanged, old == t);
             assert_eq!(controller.update(t), Ok(Update::Unchanged));
             assert_eq!(controller.published_time(), t);
+            assert_eq!(
+                prepared_water::mixed::state(&bound, &impacts, Some(&controller), t),
+                prepared_water::mixed::State::Ready
+            );
             let view = controller.current(t).unwrap();
             prepared_water::mixed::sample_world_batch(
                 &bound,
@@ -357,7 +377,18 @@ fn main() {
             }
         }
         // Refus 3 — la publication de pression réussit au-delà de la validité de l'impact.
-        // Deux horizons distincts : le contrôleur publie, la requête mixte refuse.
+        // Deux horizons distincts : le contrôleur publie, la requête mixte refuse. Depuis
+        // ADR-079 l'hôte l'apprend **avant** de payer la préparation : l'annonce le dit,
+        // et 6 s est déjà hors de l'horizon rendu plus haut.
+        let late = SimTime(6_000_000);
+        assert!(late > hi);
+        assert_eq!(
+            prepared_water::mixed::state(&bound, &impacts, Some(&controller), late),
+            prepared_water::mixed::State::ImpactsExpired {
+                id: 1,
+                until: SimTime(4_000_000)
+            }
+        );
         assert_eq!(controller.update(SimTime(6_000_000)), Ok(Update::Published));
         assert_eq!(controller.published_time(), SimTime(6_000_000));
         {
@@ -393,6 +424,33 @@ fn main() {
             )
             .unwrap();
         }
+        // A195 : mettre la machine en régime avant la PREMIÈRE mesure. Sans ce bloc, S118
+        // lisait un surcoût de 15 à 28 % sur `update` qui n'était que sa position dans la
+        // séquence. Le témoin `update_again_us`, en fin de série, dit si cela a suffi.
+        for _ in 0..21 {
+            let p = bound_pressure::Prepared::from_journal(
+                ctx,
+                &half,
+                &pj,
+                SimTime(1_500_000),
+                &mut witness,
+            )
+            .unwrap();
+            black_box(p.energy_j());
+        }
+        // Coût de l'annonce, mille appels par tour : ce qu'il en coûte d'éviter une
+        // préparation inutile, comparé aux ~12,6 ms qu'elle aurait coûtés.
+        let announce_ns = measure(|| {
+            for _ in 0..1000 {
+                black_box(prepared_water::mixed::state(
+                    &bound,
+                    &impacts,
+                    Some(&controller),
+                    black_box(SimTime(6_000_000)),
+                ));
+            }
+        })
+        .map(|v| v);
         // Coûts. Alterner d'une microseconde force un recalcul complet à chaque tour.
         // Publié à 1,5 s en entrant : le premier tour doit viser l autre instant.
         let mut alt = true;
@@ -502,7 +560,7 @@ fn main() {
             assert_eq!(controller.update(t), Ok(Update::Published));
         });
         println!(
-            "{radial}x{angular} update_us={update_us:?} update_again_us={update_again_us:?} \
+            "{radial}x{angular} announce_1000_us={announce_ns:?} update_us={update_us:?} update_again_us={update_again_us:?} \
 unchanged_us={unchanged_us:?} \
 mixed_query64_us={query_us:?} step_update_query_us={step_us:?} direct_prepare_us={direct_us:?} \
 direct_alt_time_us={direct_alt_time_us:?} direct_alt_pool_us={direct_alt_pool_us:?}"

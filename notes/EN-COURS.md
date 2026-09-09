@@ -75,7 +75,7 @@ balayage que ce qui est annoncé est exactement ce que la requête accepte.
       séquence réelle (update puis requête à lot vide) fait vraiment.
 - [x] **P5** — les deux montages que la fixture n'atteint pas : fenêtre plus courte que
       les impacts, et intersection vide. Fixture paramétrée par `mount(age, start)`.
-- [ ] **P6** — recevoir dans la campagne `cycle_mixed`, avec bloc de mise en régime (A195).
+- [x] **P6** — recevoir dans la campagne `cycle_mixed`, avec bloc de mise en régime (A195).
 - [ ] **P7** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
@@ -117,3 +117,10 @@ en release. Deux choses apprises en écrivant les tests, et qui vont au livrable
    l'ouverture de la fenêtre les impacts vivent encore, après ils sont éteints. Aucune annonce
    ponctuelle ne révèle qu'il n'existe aucune date : seul `horizon` le dit. C'est la
    justification des deux fonctions, et elle n'était pas dans l'ADR ; à y porter en note.
+
+P6 : campagne reçue. Hachages **inchangés** (6591ab360344f76e, b563610d1dd78ada) — le
+refactoring vers `classify` n'a rien changé numériquement, ce qui était l'enjeu.
+Annonce : 23 ns (1000 appels en 23,0 µs), contre 12,6 ms pour la préparation qu'elle évite.
+**A195 corrigé et vérifié** : avec le bloc de mise en régime, `update` 12,78 / `update_again`
+13,21 / `direct` 12,64 ms à 224×128 — l'écart de 15 à 28 % de S118 a disparu, sur trois
+exécutions. La mise en régime est donc la bonne correction, pas seulement une hypothèse.
