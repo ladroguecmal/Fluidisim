@@ -161,6 +161,19 @@ pub fn prepare<'a>(
     })
 }
 impl Field<'_> {
+    /// Enveloppe analytique L1 du spectre discret à cet instant, évaluée en f32.
+    /// Ne certifie ni l'arrondi dirigé ni la précision envers le continuum.
+    pub fn slope_envelope(&self) -> Result<f32, Error> {
+        let mut bound = 0.0;
+        for s in self.slots {
+            bound += (s.weighted_k[0].abs() + s.weighted_k[1].abs())
+                * (s.response.eta.re.abs() + s.response.eta.im.abs());
+        }
+        if !bound.is_finite() {
+            return Err(Error::NonFinite);
+        }
+        Ok(bound)
+    }
     /// Scratch modifiable au refus, sortie inchangée jusqu'au succès intégral.
     /// Préfixe points.len() seulement ; lot vide accepté sans mutation.
     pub fn sample_batch(

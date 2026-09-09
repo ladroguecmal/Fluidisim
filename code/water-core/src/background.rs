@@ -171,6 +171,12 @@ impl Background {
     /// ADR-003 §2 pour le déterminisme bit à bit.
     pub fn eval(&self, p: WorldPos, t: SimTime) -> Option<WaterSample> {
         let local = p.to_local(self.anchor)?;
+        self.eval_local(local, t)
+    }
+
+    /// Chemin interne après conversion commune B/W ; mêmes opérations que eval.
+    pub(crate) fn eval_local(&self, local: [f32; 3], t: SimTime) -> Option<WaterSample> {
+        if local.iter().any(|v| !v.is_finite() || v.abs() >= 4096.0) { return None; }
         let mut s = WaterSample::default();
         let mut steep = 0.0f32;
 
@@ -565,3 +571,7 @@ mod diagnostic_homogeneite_s66 {
         assert!(WorldPos::from_units(i64::MAX,0,0).to_local(WorldPos::from_units(i64::MIN,0,0)).is_none());
     }
 }
+
+#[cfg(test)]
+#[path = "tests_pressure_world.rs"]
+mod tests_pressure_world;

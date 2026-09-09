@@ -93,6 +93,7 @@ pub struct Prepared<'a> {
     context: Context,
     time: SimTime,
     field: Field<'a>,
+    slope_envelope: f32,
 }
 impl<'a> Prepared<'a> {
     /// Pool candidat modifiable au refus, aucune vue partielle retournée.
@@ -135,10 +136,14 @@ impl<'a> Prepared<'a> {
             pool,
         )
         .map_err(Error::Preparation)?;
+        let slope_envelope = field
+            .slope_envelope()
+            .map_err(|e| Error::Preparation(spectral_pressure::PrepareError::Calculation(e)))?;
         Ok(Self {
             context,
             time,
             field,
+            slope_envelope,
         })
     }
     pub fn context(&self) -> Context {
@@ -469,4 +474,108 @@ mod tests {
             }
         }
     }
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum WorldError {
+    Context,
+    Time,
+    Capacity,
+    Slope,
+    Point {
+        index: usize,
+        error: crate::composition::Error,
+    },
+}
+impl Prepared<'_> {
+    pub fn slope_envelope(&self) -> f32 {
+        self.slope_envelope
+    }
+    /// Une conversion monde/local par point, même instant pour B et la pression.
+    /// L'hôte déclare l'alignement de l'ancre B avec le repère/cellule de la pression.
+    pub fn sample_world_batch(
+        &self,
+        bound: &crate::prepared_water::BoundBackground<'_>,
+        context: &Context,
+        time: SimTime,
+        points: &[crate::WorldPos],
+        max_slope: f32,
+        scratch: &mut [crate::WaterSample],
+        output: &mut [crate::WaterSample],
+    ) -> Result<(), WorldError> {
+        let (background, frame, cell) = bound.binding();
+        let settings = self.context.settings;
+        if !self.context.matches(context)
+            || frame != settings.frame
+            || cell != settings.cell
+            || settings.gravity != 9.81f32
+        {
+            return Err(WorldError::Context);
+        }
+        if time != self.time {
+            return Err(WorldError::Time);
+        }
+        if !max_slope.is_finite() || max_slope <= 0.0 {
+            return Err(WorldError::Slope);
+        }
+        if points.len() > scratch.len() || points.len() > output.len() {
+            return Err(WorldError::Capacity);
+        }
+        for (index, point) in points.iter().enumerate() {
+            let fail = |error| WorldError::Point { index, error };
+            let local = background
+                .local_point(*point)
+                .ok_or_else(|| fail(crate::composition::Error::Domain))?;
+            let mut base = background
+                .eval_local(local, time)
+                .ok_or_else(|| fail(crate::composition::Error::InvalidBackground))?;
+            if !finite_sample(&base) || base.normal[2] <= 0.0 || base.steepness < 0.0 {
+                return Err(fail(crate::composition::Error::InvalidBackground));
+            }
+            let w = self.field.sample([local[0], local[1]]).map_err(|e| {
+                fail(match e {
+                    crate::modal_pressure::Error::NonFinite => crate::composition::Error::NonFinite,
+                    _ => crate::composition::Error::Domain,
+                })
+            })?;
+            let envelope = base.steepness * core::f32::consts::PI + self.slope_envelope;
+            if !envelope.is_finite() || envelope > max_slope {
+                return Err(WorldError::Slope);
+            }
+            let slope = [
+                -base.normal[0] / base.normal[2] + w.slope[0],
+                -base.normal[1] / base.normal[2] + w.slope[1],
+            ];
+            let norm = (1.0 + slope[0] * slope[0] + slope[1] * slope[1]).sqrt();
+            base.normal = [-slope[0] / norm, -slope[1] / norm, 1.0 / norm];
+            base.eta += w.eta;
+            base.deta_dt += w.vertical_velocity;
+            base.u_total[0] += w.horizontal_velocity[0];
+            base.u_total[1] += w.horizontal_velocity[1];
+            base.u_total[2] += w.vertical_velocity;
+            base.steepness = envelope / core::f32::consts::PI;
+            if !finite_sample(&base) || base.normal[2] <= 0.0 {
+                return Err(fail(crate::composition::Error::NonFinite));
+            }
+            scratch[index] = base;
+        }
+        output[..points.len()].copy_from_slice(&scratch[..points.len()]);
+        Ok(())
+    }
+}
+fn finite_sample(s: &crate::WaterSample) -> bool {
+    [
+        s.eta,
+        s.deta_dt,
+        s.steepness,
+        s.aeration,
+        s.normal[0],
+        s.normal[1],
+        s.normal[2],
+        s.u_total[0],
+        s.u_total[1],
+        s.u_total[2],
+    ]
+    .iter()
+    .all(|x| x.is_finite())
 }

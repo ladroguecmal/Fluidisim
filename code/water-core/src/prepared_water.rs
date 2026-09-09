@@ -16,6 +16,9 @@ pub struct BoundBackground<'a> {
     cell: u64,
 }
 impl<'a> BoundBackground<'a> {
+    pub(crate) fn binding(&self) -> (&Background, FrameId, u64) {
+        (self.background, self.frame, self.cell)
+    }
     pub fn new(background: &'a Background, frame: FrameId, cell: u64) -> Self {
         Self {
             background,
