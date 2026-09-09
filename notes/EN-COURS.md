@@ -67,7 +67,7 @@ un refus annonçable, sans jamais promettre plus que ce qui est vrai.
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan.
-- [ ] **P2** — inventaire : lire les trois conditions par point (domaine de B, emprise de
+- [x] **P2** — inventaire : lire les trois conditions par point (domaine de B, emprise de
       la pression, portée des impacts, pente totale, capacité) et écrire, pour chacune, ce
       qui est bornable et dans quel sens. **Ne rien décider avant cet inventaire.**
 - [ ] **P3** — ADR-080, sur ce que l'inventaire aura montré.
@@ -93,3 +93,12 @@ peut passer, et c'est annonçable sans voir un seul point.
 
 Leçon de S119 à ne pas perdre (L208) : une borne seulement prudente passerait un test de
 sûreté et serait inutile. Il faut dire dans quel sens elle est exacte, et le prouver.
+
+P2 : inventaire fait, six conditions par point, dans BORNES-POINTS-S120 §1. Trois faits qui
+changent le plan : (a) les conditions géométriques sont exactes et bon marché — ce sont des
+comparaisons, donc le prédicat se transpose au lieu de se borner ; (b) la pente a un seul terme
+dépendant du point, positif, donc la somme des autres est un plancher annonçable ; (c)
+`RadialImpact::sample` rend Domain aussi pour une sortie non finie, donc aucun prédicat
+géométrique ne peut promettre l absence de Domain — seulement l absence de refus géométrique.
+Décidé de ne pas construire d AABB : il faudrait exposer l ancre de B (décision sur B, hors
+sujet) et aucun consommateur ne la demande. À dire dans le livrable, pas à faire en silence.
