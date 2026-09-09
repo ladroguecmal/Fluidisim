@@ -65,7 +65,7 @@ Objectif : reprise de deux sources jusqu’à B+pression, refus et coût complet
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [ ] **P2** — construire et recevoir le cycle multisource, mesurer ses étapes.
+- [x] **P2** — construire et recevoir le cycle multisource, mesurer ses étapes.
 - [ ] **P3** — publier résultats, limites et suite ; rituel final et synchronisation.
 
 ### Notes de reprise
@@ -75,3 +75,10 @@ Montage S112/S113, recettes224×128 et256×128. Une source publiée, une en atte
 WPJR restauré sur pool élargi, retry explicite, somme modale puis requête monde B+pression.
 Comparaison en bits avec journal direct ; refus tardifs sans altérer la publication active.
 Bibliothèque inchangée prévue ; instrument executable et campagne release avec assertions.
+
+P2 terminée : restart_multisource, campagne release finale reçue,2944 points-temps.
+WPJR344 octets ; deux sources en ordre restauré1,2 après attente/retry.
+Dix sorties, E/P/enveloppe identiques en bits.344 troncatures et refus tardifs reçus,
+pools de restauration et publication active conservés ; dépassement numérique refusé.
+Cycles complets depuis WPRS médians47,9483/55,5501 ms ; reprise48,5010/55,4706 ms.
+Rapport REPRISE-MULTISOURCE-S114. Bibliothèque inchangée, suite S112 non relancée.
