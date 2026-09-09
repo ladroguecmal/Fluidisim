@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S118 — en cours
+Session : S118 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : exercer le contrôleur de publication dans un cycle hôte temporel mixte
 (S117-1) — recettes 224×128 et 256×128, plusieurs changements d'instant, identité en
@@ -71,9 +71,9 @@ bits avec la voie directe, chemin `Unchanged`, refus, coût mise à jour + requ�
       d'instants (avance, retour, répétition), requête mixte B+impact+pression sur la
       publication, comparaison en bits à la préparation directe, refus hors fenêtre et
       vue à une date non publiée. Plus le test de bibliothèque du fait neuf.
-- [ ] **P3** — publier le livrable : chiffres reçus, biais de position de la mesure,
+- [x] **P3** — publier le livrable : chiffres reçus, biais de position de la mesure,
       angle mort et leçon.
-- [ ] **P4** — rituel de fin (`REPRISE.md` §6) et synchronisation `--ff-only` vers master.
+- [x] **P4** — rituel de fin (`REPRISE.md` §6) et synchronisation `--ff-only` vers master.
 
 ### Notes de reprise
 
@@ -99,3 +99,12 @@ chiffres de préparation publiés depuis S104, qui sont tous des premiers blocs.
 Attendu de la mesure : le contrôleur ne recopie pas les coefficients, donc
 `update`+`current` devrait coûter la préparation directe de S116 (48–58 ms) sans surcoût
 mesurable ; c'est cela qu'il faut vérifier, pas seulement l'égalité en bits.
+
+P3 : CYCLE-MIXTE-S118, A194 (deux horizons), A195 et L207 (biais de position de la mesure).
+Index, README, décompte daté du registre des angles morts. Commit 2076ea2.
+
+P4 : journal, REPRISE (jeton rendu, état S118, suite S119), fusion ff-only vers master.
+Ce que S119 doit savoir sans relire : le contrôleur ne coûte rien de plus que la voie directe
+(12,55/15,07 ms contre 12,63/14,56), son gain mesuré est le chemin Unchanged à 0,1 microseconde,
+et la requête 64 points domine tout le reste (35,57/40,04 ms). Ne pas comparer deux blocs de
+mesure à des positions différentes : c'est ce qui a failli faire publier un faux surcoût.

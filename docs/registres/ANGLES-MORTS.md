@@ -13,7 +13,8 @@ de validation), 6 en S04 (signatures), 3 en S05 (revue croisée), 6 en S06 (outi
 3 en S11 (audit des points ouverts), 3 en S12 (mécanismes de détail), 3 en S13 (revue croisée des
 documents récents), 3 en S14 (audit inverse des invariants), 2 en S15 (audit des registres), 2 en S16 (dossier B2), 2 en S17
 (dossier de réunion), 1 en S18 (arbitrages), 1 en S19 (nature du projet), 3 en S20 (première ligne de code), 4 en S21 (cas analytiques), 4 en S22 (C01 et le premier δ), 4 en S23 (C04 et le lit sec), 4 en S24 (C08 et l'oracle), 4 en S25 (C03 et la dissipation), 4 en S26 (les harmoniques), 4 en S27 (le nombre de Courant), 3 en S28 (la paroi mobile), 3 en S29 (l'audit des assertions), 3 en S30 (la réécriture), 3 en S31 (la dissolution d'A122), 3 en S32 (celle d'A139), 2 en S33 (le train entretenu), 3 en S34 (l'audit des garde-fous) — **148 au
-total**. **Quatre-vingt-huit ont été trouvés dans nos propres écrits**, pas dans les documents sources :
+total**. *Ce décompte cumulé s'arrête à S34 et n'est plus tenu ; le registre compte **195
+entrées au 2026-09-09** (S118). Un état sans date se lit au présent — A185.* **Quatre-vingt-huit ont été trouvés dans nos propres écrits**, pas dans les documents sources :
 A49, A56, A57, A58, puis A65 à A148. La proportion
 augmente, et c'est attendu — plus le corpus grandit, plus ce qu'il se contredit à lui-même dépasse
 ce que les sources avaient omis.

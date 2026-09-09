@@ -6319,3 +6319,50 @@ appliquent les leçons existantes ; aucun nouvel angle ou leçon distincte, inva
 **Suite S118 :** S117-1, cycle hôte temporel mixte aux recettes224×128/256×128,
 identité directe en bits et coût update+requête64, chemin Unchanged et refus.
 S116-1 réalisée sur journal figé ; profondeur finie S116-2, bilan mixte et durabilité ouverts.
+
+---
+
+## S118 — 2026-09-09 — Cycle hôte temporel mixte et biais de la mesure
+
+**Entrée :** Reprise à froid ; jeton libre à c16c308, quatre copies au même commit
+(5134cd archivée, c107bf restée à S44). Worktree claude/reprise-projet-2d3506.
+**Produit :** `code/water-core/examples/cycle_mixed.rs` et
+[CYCLE-MIXTE-S118](../docs/validation/CYCLE-MIXTE-S118.md). Douze instants non monotones —
+avance, deux pas d'une microseconde, répétition, retour à zéro, retour arrière — aux recettes
+224×128 et 256×128. À chaque étape : état, refus de vue non publiée, `update`, `update` répété,
+requête mixte B+impact+deux pressions sur 289 points par la vue puis par la voie directe.
+Un test de bibliothèque ajouté, fixture de test scindée pour rendre le contrôleur pilotable.
+**Réception :** 3468 points-temps par recette, identité en bits sur les dix composantes plus
+E/P/enveloppe/instant ; hachages 6591ab360344f76e et b563610d1dd78ada, stables. Trois refus
+reçus. Suite 154 core + 93 harnais = 247 réussis/cinq ignorés ; le test neuf passe aussi en
+release ; quatre avertissements préexistants, aucun nouveau.
+**Décision structurante :** aucune. ADR-078 est exercée, pas modifiée. Ce que la session
+rapporte tient dans deux constats.
+**A194 — deux horizons distincts.** La fenêtre de pression va à 8 s, les impacts expirent à
+4 s : `update(6 s)` **réussit**, la vue est finie, et c'est la requête mixte qui refuse. Un
+hôte qui lit « publication réussie » et en conclut « échantillonnable » se trompe, sans que
+rien dans le type ne l'avertisse. Verrouillé par un test, non résolu.
+**A195 et L207 — la mesure racontait faux.** `update` semblait coûter 15 à 28 % de plus que
+la voie directe. Deux explications plausibles se présentaient — empreinte mémoire doublée par
+les deux pools, instant alterné d'un seul côté — et **les deux étaient fausses** ; les témoins
+correspondants restent au niveau nominal. Ce qui a tranché : le même appel, mesuré en dernier,
+rejoint la voie directe. L'effet est celui de la **position du bloc dans le processus**, il
+disparaît à la seconde recette, et les trois échauffements de `measure` n'y suffisent pas.
+Il touche toutes les campagnes depuis S104, dont le premier bloc mesuré est biaisé.
+**Chiffres (médianes locales, machine non isolée, cuisson et admission exclues) :**
+`update` 12,55 / 15,07 ms · `Unchanged` 0,1 µs · requête mixte 64 points 35,57 / 40,04 ms ·
+cycle `update`+`current`+requête 48,82 / 56,06 ms · préparation directe 12,63 / 14,56 ms.
+Le gain chiffré du contrôleur est le chemin `Unchanged` : 12,6 ms économisés par requête
+supplémentaire au même instant. La requête sur 64 points coûte près de trois fois la
+préparation, soit ~556 µs par point ; aucun budget de trame n'est approché — S107 le disait,
+S118 ne le corrige pas.
+**Limites :** aucune précision spatiale nouvelle, les références f64 de S116 ne sont pas
+relancées ; la campagne compare deux voies du même candidat. Admission figée. Mesures d'une
+seule machine, non isolées, ne certifiant rien.
+78 ADR, 195 angles, 17 invariants, 6 spécifications, 23 cas. Invariants relus : aucun n'est
+invalidé ; I-05 reste hors de portée de ce chemin, qui n'est pas un solveur du runtime.
+**Suite S119 :** S118-1 — faire consulter au contrôleur la validité des impacts, ou publier
+l'horizon effectif du montage (A194). Et, pour toute campagne de coût, un bloc de mise en
+régime avant la première mesure, ou chaque voie mesurée à deux positions (A195).
+Restent ouverts : admission dynamique, extension de fenêtre, profondeur finie S116-2,
+bilan mixte, durabilité disque.

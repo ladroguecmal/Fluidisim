@@ -61,7 +61,7 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S117 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S118 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
@@ -100,5 +100,9 @@ refus transactionnels et réductions aux chemins antérieurs reçus (ADR-077, S1
 Montage mixte reçu sur8670 points-temps du modèle profond, cycles50,05/57,97 ms (S116).
 Contrôleur pression à deux pools construit : publication sur succès, instant exact,
 champ précédent conservé au refus ; journal figé (ADR-078, S117).
-Suite : cycle temporel mixte aux résolutions reçues et coût du contrôleur, S117-1.
+Cycle hôte temporel mixte reçu par le contrôleur : douze instants non monotones,3468 points-temps
+identiques en bits à la voie directe par recette, cycle48,82/56,06 ms,`Unchanged`0,1 µs (S118).
+Deux horizons distincts constatés — la pression publie plus loin que la validité des impacts (A194) ;
+la position d'un bloc de mesure fabriquait un écart de coût qui n'existe pas (A195, L207).
+Suite : horizon effectif du montage mixte, S118-1.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

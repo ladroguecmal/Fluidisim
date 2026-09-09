@@ -18,16 +18,18 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-09 14:15 +02:00
+JETON            : libre
+Battement        : 2026-09-09 15:05 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S118 — cycle hôte temporel mixte via le contrôleur (S117-1)
-Dernière session : S117 — contrôleur pression ;246 tests/cinq ignorés
-Session suivante : à fixer en fin de S118
+Session en cours : aucune
+Dernière session : S118 — cycle hôte temporel mixte ;247 tests/cinq ignorés
+Session suivante : S119 — horizon effectif du montage mixte (S118-1)
 
-**Copie de travail S118** : worktree `claude/reprise-projet-2d3506`, parti de c16c308 = master.
-Terminer par `git -C C:/Users/antoi/Fluidisim merge --ff-only claude/reprise-projet-2d3506`,
-comme la note S58 le prescrit pour 29ef50. Deux copies divergentes portent deux jetons (L137).
+**Note S118, même mécanisme que la note S58 plus bas.** S118 a travaillé dans le worktree
+`claude/reprise-projet-2d3506` et l'a refusionné dans master en avance rapide. Les copies
+coïncident ; il n'y a qu'un jeton. Toute session qui rouvre ce worktree termine de même :
+`git -C <racine> merge --ff-only claude/reprise-projet-2d3506`. Deux copies qui divergent
+portent deux jetons, et c'est le mécanisme des trois forks (L137).
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -171,6 +173,20 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S118 — 2026-09-09 :** [CYCLE-MIXTE-S118](docs/validation/CYCLE-MIXTE-S118.md). Aucune décision
+nouvelle : ADR-078 exercée dans un cycle hôte de douze instants non monotones, recettes224×128
+et256×128 ;3468 points-temps par recette identiques en bits à la voie directe, deux hachages stables.
+Cycle `update`+`current`+requête64 :48,82/56,06 ms ; `Unchanged`0,1 µs ; requête64 seule
+35,57/40,04 ms, soit ~556 µs par point — aucun budget de trame approché, comme en S107.
+**A194** : la pression publie au-delà de la validité des impacts, `update(6 s)` réussit et c'est
+la requête mixte qui refuse — un hôte peut lire une publication réussie comme échantillonnable.
+**A195/L207** : un écart de coût de 15 à 28 % venait de la position du bloc de mesure, non du
+contrôleur ; deux explications plausibles ont été réfutées par témoin. Toutes les campagnes
+depuis S104 ont un premier bloc biaisé.247 tests réussis/cinq ignorés.
+78 ADR,195 angles,17 invariants,6 spécifications,23 cas. S117-1 réalisée.
+Suite S119 : S118-1, horizon effectif du montage ; mise en régime avant toute mesure de coût.
+Admission dynamique, extension de fenêtre, S116-2 profondeur finie, bilan mixte, durabilité ouverts.
 
 **S117 — 2026-09-09 :** [CONTROLEUR-PRESSION-S117](docs/validation/CONTROLEUR-PRESSION-S117.md), ADR-078.
 Controller à deux pools : publication et instant basculent sur succès, ancienne vue conservée au refus.
