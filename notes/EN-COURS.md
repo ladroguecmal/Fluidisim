@@ -78,7 +78,7 @@ mesure est ici au service d'une décision, pas l'inverse.
       provenance (I-14) : formule citée du corpus, ou étiquette « à calibrer » et le banc.
 - [x] **P4** — le catalogue des cas du jeu confronté au couloir, **mesuré** et non supposé
       (L210) : une sonde qui construit le candidat pour chaque cas et rend le verdict.
-- [ ] **P5** — ADR-083, sur ce que la confrontation aura montré.
+- [x] **P5** — ADR-083, sur ce que la confrontation aura montré.
 - [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise

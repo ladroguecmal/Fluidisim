@@ -168,3 +168,42 @@ un seuil deux fois plus permissif ne déplacerait ces parts que d'un facteur qua
 5. **Le plafond d'énergie est de l'ordre de 10⁻⁶ à 10⁻² de l'énergie mise en jeu**, ce qui fixe
    une contrainte chiffrée au générateur physique à venir.
 
+
+## 6. Décision
+
+Voir [ADR-083](../adr/ADR-083-portee-du-champ-d-impact.md), qui acte le contrat `λ = α·b`, range
+la limite de portée parmi les défauts d'outillage, assume le régime d'eau profonde comme limite
+du modèle, et fait du plafond d'énergie une contrainte écrite pour le générateur à venir.
+
+## 7. Ce qui n'est pas revendiqué
+
+Les onze cas ne sont pas le catalogue du jeu : ce sont des cas plausibles couvrant six ordres de
+grandeur en taille. Un catalogue véritable demanderait des données de contenu qui n'existent
+pas, et l'inférence resterait « probable et non vérifiée » (`REPRISE.md` §5).
+
+`α` n'est pas fixé, et les portées mesurées lui sont proportionnelles. Le plafond d'énergie
+dépend du seuil de pente, pris à 0,1 comme dans les fixtures ; il varie comme son carré.
+L'énergie de référence est un ordre de grandeur, pas l'énergie transférée aux ondes.
+
+Aucune borne n'a été modifiée, aucun code de la bibliothèque n'a changé : la session ajoute une
+sonde et deux documents.
+
+## 8. Vérification
+
+`cargo test` : 162 core + 93 harnais = 255 tests réussis, cinq ignorés — inchangé, la
+bibliothèque n'ayant pas été touchée. La sonde compile sans avertissement.
+
+## 9. Suite
+
+**S123-1, S124 :** lever la limite de portée, qui est un défaut d'outillage et non une propriété
+du modèle. Piste identifiée et **non retenue avant mesure** : le développement asymptotique de
+`J0` et `J1` au-delà de `x = 64`, `J0(x) ≈ √(2/πx)·cos(x − π/4)`, dont l'erreur décroît quand
+l'argument grandit — exactement le régime où la table s'arrête. À mesurer contre la référence
+f64 existante avant toute décision.
+
+**Restent ouverts et non traités ici :** le générateur physique d'ADR-055 (quelle énergie, quel
+`α`), les grands objets en eau peu profonde (§5.3), l'admission dynamique dans le contrôleur, le
+renouvellement de fenêtre, la profondeur finie de pression (S116-2), le bilan mixte, la
+durabilité disque.
+
+83 ADR, 201 angles, 17 invariants, 6 spécifications, 23 cas.
