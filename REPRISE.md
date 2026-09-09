@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-09 15:05 +02:00
+JETON            : occupé
+Battement        : 2026-09-09 15:13 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S121 — séparer champ dégénéré et point hors domaine (S120-1, A197)
 Dernière session : S120 — annonce des points du montage mixte ;251 tests/cinq ignorés
-Session suivante : S121 — séparer champ dégénéré et point hors domaine (S120-1, A197)
+Session suivante : à fixer en fin de S121
 
 *Le battement de fin de S118 disait 15:05 : une heure estimée, pas relevée. Corrigée ici.
 Un battement dans le futur ferait croire à une session active — le relever, jamais l'écrire de mémoire.*

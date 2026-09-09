@@ -58,72 +58,37 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S120 — terminée
+Session : S121 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : A196 — ce qui reste découvert point par point. Établir d'abord ce qui est
-réellement bornable, puis construire les bornes qui transforment un refus par point en
-un refus annonçable, sans jamais promettre plus que ce qui est vrai.
+Objectif : A197 — un même refus confond « point hors domaine », imputable à l'appelant, et
+« champ dégénéré », défaut de la couche. Le second se reproduit partout ; le premier se
+corrige en changeant de point. Un appelant qui filtre — ce qu'ADR-080 rend naturel —
+masquerait le second en croyant écarter le premier.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan.
-- [x] **P2** — inventaire : lire les trois conditions par point (domaine de B, emprise de
-      la pression, portée des impacts, pente totale, capacité) et écrire, pour chacune, ce
-      qui est bornable et dans quel sens. **Ne rien décider avant cet inventaire.**
-- [x] **P3** — ADR-080, sur ce que l'inventaire a montré : prédicat exact plutôt que borne pour le domaine, plancher pour la pente.
-- [x] **P4** — prédicats descendus dans Background, RadialImpact et Field ; `mixed::admits` les compose, `mixed::slope_floor` somme la part constante.
-- [x] **P5** — le test qui compte : `admits` confronté au comportement réel sur douze
-      points aux trois frontières, plus le plancher de pente sous et au-dessus.
-- [x] **P6** — campagne : lot mixte refusé en entier puis sauvé par filtrage, coûts mesurés.
-- [x] **P7** — livrable, rituel de fin, fusion `--ff-only`.
+- [ ] **P2** — inventaire, avant toute décision (L209) : recenser dans le crate les refus qui
+      confondent une faute d'appelant avec un défaut de couche, **et vérifier si le cas
+      dégénéré est seulement atteignable** — S120 a annoncé ce montage sans le construire.
+- [ ] **P3** — ADR-081, sur ce que l'inventaire aura montré.
+- [ ] **P4** — construire la séparation et mettre à jour les appelants.
+- [ ] **P5** — le test qui compte : un champ réellement dégénéré, et la démonstration qu'un
+      filtrage par `admits` ne l'écarte plus en silence.
+- [ ] **P6** — campagne, hachages inchangés, mise en régime (A195).
+- [ ] **P7** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
-Départ 6d77057 = master ; trois copies coïncidentes, 5134cd archivée, c107bf sur la ligne S44.
+Départ c0b491a = master ; trois copies coïncidentes, 5134cd archivée, c107bf sur la ligne S44.
 
-Ce que S119 laisse : `mixed::{horizon, state}` couvrent le montage et l'instant, par une
-implémentation unique partagée avec la requête. Le reste — domaine, pente totale, capacité —
-dépend des **arguments** de la requête, donc aucune annonce ne peut le trancher sans recevoir
-les mêmes points. Ce qui est annonçable est une borne.
+Point d'entrée exact : `RadialImpact::sample` (`code/water-core/src/radial_impact.rs`) rend
+`Error::Domain` à la fois pour une position hors domaine et pour une sortie non finie — ce
+dernier cas est le bloc de test de finitude en fin de fonction. `mixed::sample_world_batch`
+mappe ensuite **toute** erreur de champ vers `composition::Error::Domain` ; ce mappage masque
+aussi `Error::Time` du champ, aujourd'hui neutralisé en amont par `state`.
 
-Piste tenue pour probable, à vérifier en P2 : dans l'enveloppe de pente, seul le terme de B
-dépend du point ; les `slope_bound` des impacts et l'enveloppe de pression sont constants sur
-le lot. Leur somme est donc un **plancher** : si `max_slope` lui est inférieur, aucun point ne
-peut passer, et c'est annonçable sans voir un seul point.
-
-Leçon de S119 à ne pas perdre (L208) : une borne seulement prudente passerait un test de
-sûreté et serait inutile. Il faut dire dans quel sens elle est exacte, et le prouver.
-
-P2 : inventaire fait, six conditions par point, dans BORNES-POINTS-S120 §1. Trois faits qui
-changent le plan : (a) les conditions géométriques sont exactes et bon marché — ce sont des
-comparaisons, donc le prédicat se transpose au lieu de se borner ; (b) la pente a un seul terme
-dépendant du point, positif, donc la somme des autres est un plancher annonçable ; (c)
-`RadialImpact::sample` rend Domain aussi pour une sortie non finie, donc aucun prédicat
-géométrique ne peut promettre l absence de Domain — seulement l absence de refus géométrique.
-Décidé de ne pas construire d AABB : il faudrait exposer l ancre de B (décision sur B, hors
-sujet) et aucun consommateur ne la demande. À dire dans le livrable, pas à faire en silence.
-
-P4/P5 : 158 core + 93 harnais = 251 réussis, cinq ignorés ; les huit tests mixtes aussi en
-release. Le balayage compte quelle couche refuse et exige les trois — sans ce compteur, une
-frontière qui cesse d être franchie rendrait le test creux sans le faire échouer (c est ce que
-le `seen[2] == 0` de S119 avait révélé sur OutsideWindow).
-Précision à porter dans l ADR : un refus géométrique se nomme `Domain` **ou**
-`InvalidBackground` — pour le fond, quand la conversion monde/local a réussi mais que la
-borne f32 ne passe pas. L ADR-080 annonçait `Domain` seul ; à corriger par note datée.
-
-P6 : **hachages inchangés** (6591ab360344f76e, b563610d1dd78ada) — poser les prédicats dans les
-trois couches n a rien changé numériquement, c était l enjeu. Filtrage de 64 points : 2,5 µs,
-soit ~39 ns par point, contre 35,6 ms pour la requête qu il sauve — rapport ~14 000.
-Plancher de pente 0,0074634 (224x128) et 0,0074633 (256x128), contre max_slope 0,1 : le montage
-consomme 7,5 % du budget de pente sans aucun point. Non contraignant ici, mais chiffré.
-Mise en régime toujours efficace : update 12,63 / update_again 12,69 / direct 12,73 ms.
-
-P7 : BORNES-POINTS-S120, deux corrections datées dans ADR-080, suivi A196, A197, L209, journal,
-index, README, jeton rendu, fusion ff-only.
-
-Pour S121 sans relire : A197 est concret et petit. `RadialImpact::sample` (radial_impact.rs)
-rend `Error::Domain` à la fois pour une position hors domaine et pour une sortie non finie —
-le second cas est le bloc de test de finitude en fin de fonction. Séparer les deux demande une
-variante d'erreur distincte et la mise à jour des appelants, dont `mixed::sample_world_batch`
-qui mappe aujourd'hui toute erreur de champ vers `composition::Error::Domain`. Attention : ce
-mappage-là est aussi ce qui masque `Error::Time` du champ, neutralisé en amont par `state`.
+Question à trancher en P2 avant toute construction : **le bloc de finitude est-il atteignable ?**
+Si `WaveEvent::impact` et `RadialImpact::new` bornent assez fort, il ne l'est pas, et la réponse
+juste n'est plus « séparer deux causes » mais autre chose. Ne pas présumer — S120 a précisément
+annoncé un montage dégénéré qu'elle n'a pas construit, et l'a corrigé par note datée.
