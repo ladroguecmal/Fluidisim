@@ -66,7 +66,7 @@ le transport d'énergie radial loin de la source sans dépasser N256.
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seuls ; continuité de S126 sur master propre.
-- [ ] **P2** — dériver le domaine et construire une campagne : N256/R80/48 s visé,
+- [x] **P2** — dériver le domaine et construire une campagne : N256/R80/48 s visé,
       λ4 et source S126 inchangée. Refus des portées64/128 à N128/256 aux temps de groupe.
       Réemployer l'oracle S126 par module partagé, sans recopier les formules.
 - [ ] **P3** — recevoir surface et transport : sept composantes contre référence,
@@ -87,3 +87,9 @@ hors32 m à48 s, quasi-absence (<0,003 E0) initialement ; seuils de banc, pas ga
 Le modèle profond de référence reçoit son bilan ; le candidat reçoit sa surface et sa
 part potentielle. Ne pas annoncer son bilan cinétique complet sans accès à ses nœuds.
 Comparer les sept sorties jusqu'à48 s, sans allonger le TTL source ni remettre les phases à zéro.
+
+P2 : oracle extrait sans duplication vers examples/support/radial_reference.rs ; campagne
+transport_extended_impact construite. N256/R80/T48 admis ; anciens couples aux temps de
+R/cg_max refusent Resolution. Première campagne exécutée en15,94 s et reçue.
+Énergie hors32 à48 s=0,999852 E0 ; rayon moyen53,4157 m ; erreur surface<=7,13e-7.
+Résultats à publier et extraction S126 à vérifier en P3.

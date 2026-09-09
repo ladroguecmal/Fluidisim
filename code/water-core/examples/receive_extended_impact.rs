@@ -1,9 +1,11 @@
 //! S126 : réception indépendante du champ étendu. Oracle f64/libm hors runtime.
 use std::time::Instant;
+#[path = "support/radial_reference.rs"]
+mod reference;
+use reference::{components, directions, event, medium, Reference};
 use water_core::{
-    impact_field::{Error, Medium, Sample},
+    impact_field::Error,
     radial_impact::{Domain, RadialImpact},
-    wave_event::{Impact, Origin, WaveEvent},
     FrameId, SimTime,
 };
 const LIMIT: f64 = 1e-4; // ADR-060, extension aux échelles des sept composantes : banc B2.
@@ -11,139 +13,6 @@ const ORACLE_LIMIT: f64 = 1e-6; // 1 % du seuil ; déclaré en P1.
 const TIMES: [u64; 9] = [
     0, 1, 137_119, 500_003, 1_333_331, 2_718_281, 3_999_000, 3_999_999, 4_000_000,
 ];
-fn event() -> WaveEvent {
-    WaveEvent::impact(Impact {
-        id: 1,
-        frame: FrameId(7),
-        cell: 9,
-        birth: SimTime(0),
-        ttl_us: 4_000_000,
-        position: [0.0; 3],
-        energy_j: 0.01,
-        wavelength_m: 4.0,
-        direction_turns: 0.0,
-        anisotropy: 0.0,
-        displaced_l: 0.0,
-        material: 0,
-        origin: Origin::Server,
-        above_surface: true,
-    })
-    .unwrap()
-}
-fn medium() -> Medium {
-    Medium {
-        gravity: 9.81,
-        density: 1025.0,
-        depth: 20.0,
-        max_slope: 0.1,
-    }
-}
-fn components(s: Sample) -> [f64; 7] {
-    [
-        s.eta as f64,
-        s.deta_dt as f64,
-        s.potential as f64,
-        s.slope[0] as f64,
-        s.slope[1] as f64,
-        s.horizontal_velocity[0] as f64,
-        s.horizontal_velocity[1] as f64,
-    ]
-}
-// Intégrales définissant J0/J1, aucune fonction Bessel du candidat.
-fn angular(x: f64, directions: &[f64]) -> [f64; 2] {
-    let mut sum = [0.0; 2];
-    for &c in directions {
-        let (s, co) = (x * c).sin_cos();
-        sum[0] += co;
-        sum[1] += c * s;
-    }
-    [
-        sum[0] / directions.len() as f64,
-        sum[1] / directions.len() as f64,
-    ]
-}
-fn directions(n: usize) -> Vec<f64> {
-    (0..n)
-        .map(|i| (std::f64::consts::TAU * (i as f64 + 0.5) / n as f64).cos())
-        .collect()
-}
-struct Node {
-    k: f64,
-    omega: f64,
-    weight: f64,
-    j: [f64; 2],
-}
-struct Reference {
-    nodes: Vec<Node>,
-    direction: [f64; 2],
-    scales: [f64; 7],
-}
-impl Reference {
-    fn new(point: [f32; 2], n: usize, directions: &[f64]) -> Self {
-        // Convertit les entrées f32 exactes ; ne copie ni nœuds ni coefficients de production.
-        let g = medium().gravity as f64;
-        let rho = medium().density as f64;
-        let energy = event().data().energy_j as f64;
-        let k0 = std::f64::consts::TAU / event().data().wavelength_m as f64;
-        let lo = k0 / 2.0;
-        let width = 1.5 * k0;
-        let amplitude =
-            (energy * 630.0 / (std::f64::consts::PI * rho * g * width * (lo + width / 2.0))).sqrt();
-        let r = (point[0] as f64).hypot(point[1] as f64);
-        let direction = if r == 0.0 {
-            [0.0; 2]
-        } else {
-            [point[0] as f64 / r, point[1] as f64 / r]
-        };
-        let mut scales = [0.0; 7];
-        let nodes = (0..n)
-            .map(|i| {
-                let x = (i as f64 + 0.5) / n as f64;
-                let k = lo + x * width;
-                let omega = (g * k).sqrt();
-                let weight = amplitude * x.powi(2) * (1.0 - x).powi(2) * k * width / n as f64;
-                let terms = [
-                    weight,
-                    weight * omega,
-                    weight * omega / k,
-                    weight * k,
-                    weight * k,
-                    weight * omega,
-                    weight * omega,
-                ];
-                for v in 0..7 {
-                    scales[v] += terms[v];
-                }
-                Node {
-                    k,
-                    omega,
-                    weight,
-                    j: angular(k * r, directions),
-                }
-            })
-            .collect();
-        Self {
-            nodes,
-            direction,
-            scales,
-        }
-    }
-    fn at(&self, us: u64) -> [f64; 7] {
-        let time = us as f64 / 1e6; // autorisé uniquement dans cet oracle hors runtime
-        let mut v = [0.0; 7];
-        for n in &self.nodes {
-            let (s, c) = (n.omega * time).sin_cos();
-            v[0] += n.weight * n.j[0] * c;
-            v[1] -= n.weight * n.omega * n.j[0] * s;
-            v[2] -= n.weight * n.omega / n.k * n.j[0] * s;
-            for axis in 0..2 {
-                v[3 + axis] -= n.weight * n.k * n.j[1] * c * self.direction[axis];
-                v[5 + axis] += n.weight * n.omega * n.j[1] * s * self.direction[axis];
-            }
-        }
-        v
-    }
-}
 fn points(radius: f32) -> Vec<[f32; 2]> {
     let mut points = vec![[0.0; 2]];
     for i in 1..=64 {
