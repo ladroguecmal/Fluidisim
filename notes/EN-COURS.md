@@ -58,95 +58,43 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S123 — terminée
+Session : S124 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : A199 — le couloir d'acceptation du candidat radial, mesuré en S122, n'a jamais été
-confronté aux impacts que le jeu produira. Établir quels régimes il couvre, lesquels il ne
-couvre pas, et dire ce qui manque plutôt qu'élargir une borne au hasard.
-
-**Session de conception**, pas de construction : la première depuis longtemps. Le bilan S69
-reprochait aux sessions S47–S68 de n'avoir produit aucune conception du système d'eau ; la
-mesure est ici au service d'une décision, pas l'inverse.
+Objectif : A201 — la portée d'un champ d'impact vaut 5,09 λ parce que la table de Bessel
+s'arrête à `x = 64`. Mesurer d'abord si la piste asymptotique tient, **puis** décider.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan.
-- [x] **P2** — inventaire (L209) : que disent SPEC-002, ADR-058 et ADR-060 du choix de la
-      longueur d'onde et de l'usage visé ? **D'où vient `wavelength_m`** — dérivée, ou
-      déclarée par l'appelant ? Aucune conclusion avant cette lecture.
-- [x] **P3** — la relation entre un impact réel et la longueur d'onde qu'il engendre, avec
-      provenance (I-14) : formule citée du corpus, ou étiquette « à calibrer » et le banc.
-- [x] **P4** — le catalogue des cas du jeu confronté au couloir, **mesuré** et non supposé
-      (L210) : une sonde qui construit le candidat pour chaque cas et rend le verdict.
-- [x] **P5** — ADR-083, sur ce que la confrontation aura montré.
-- [x] **P6** — livrable, rituel de fin, fusion `--ff-only`.
+- [ ] **P2** — mesurer avant de décider (L209, L210). Trois erreurs à séparer, et la troisième
+      est celle qu'on risque d'oublier :
+      1. l'asymptotique elle-même, en f64 pur, contre la référence dense existante ;
+      2. le raccord en `x = 64` — une discontinuité y ferait un anneau visible ;
+      3. **la précision de l'argument** `k·r`, calculé en f32 : à `x = 4000`, un ulp de f32
+         vaut déjà 2,4e-4 rad, soit cinquante fois la tolérance actuelle de 4e-6. Si c'est
+         la phase qui limite, étendre la table ne servirait à rien.
+- [ ] **P3** — ADR-084, sur ce que la mesure aura montré, y compris si elle dit non.
+- [ ] **P4** — construire ce que la décision retient.
+- [ ] **P5** — tests : précision au-delà de 64, continuité au raccord, et **hachages de
+      campagne inchangés** — rien ne doit bouger sous `x = 64`.
+- [ ] **P6** — la sonde `impact_envelope` rejouée : de combien la portée gagne-t-elle ?
+- [ ] **P7** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
-Départ c208d87 = master ; trois copies coïncidentes, 5134cd archivée, c107bf sur la ligne S44.
+Départ ea1669e = master ; trois copies coïncidentes, 5134cd archivée, c107bf sur la ligne S44.
 
-Le couloir mesuré en S122 (livrable §4) : ondes du mètre à la dizaine de mètres. Les bornes
-dominantes tirées de la lecture du code — à revérifier en P4 plutôt qu'à croire :
-`Reach` impose `hi·radius ≤ 64` avec `hi = 4π/λ`, donc **rayon ≤ ~5,09 λ** ; `Regime` impose
-**profondeur > λ** ; `Resolution` fait entrer l'horizon.
+Points d'entrée : `radial_impact::bessel` (interpolation Hermite, refus hors [0,64]),
+`bessel_table.rs`, et la référence f64 indépendante déjà écrite —`bessel_angular` plus la
+quadrature à 4096 directions du test `bessel_against_series_and_dense_angular_reference`.
 
-Deux nombres déjà dans le corpus et utilisables : `λ = 2πv²/g` (64 m à 10 m/s, S01) et la
-cambrure limite `H/λ = 0,78`. Ne pas en inventer d'autres sans provenance — I-14.
+Asymptotique visée, à vérifier et non à croire :
+`J0(x) ≈ √(2/πx)·[cos θ + sin θ/(8x)]`, `J1(x) ≈ √(2/πx)·[sin θ − cos θ·3/(8x)]`, θ = x − π/4.
+L'ordre zéro seul donne ~2e-4 d'erreur absolue à x = 64, cinquante fois la tolérance ; le terme
+en 1/(8x) devrait suffire, c'est à mesurer.
 
-Piège : la tentation sera d'élargir une borne pour faire entrer un cas. Une borne existe pour
-une raison (portée tabulée, régime d'eau profonde, résolution de phase) ; la déplacer sans
-traiter cette raison remplacerait un refus franc par un résultat faux.
+Contrainte du dépôt : **pas de libm** dans le chemin de production (ADR-060). Les sinus et
+cosinus passent par PhaseQ32, la racine carrée f32 est admise.
 
-P2/P3, et le premier résultat précède la question posée : **la longueur d'onde ne vient de
-nulle part**. ADR-055 la valide comme « positive en mètres » et reporte au « générateur
-physique » qui n'existe pas ; ADR-060 dit que la bande est « à calibrer B2 » et que son
-lambda=4 m est un « paramètre d'essai uniquement ». Le registre ne contient rien là-dessus.
-Le candidat est donc piloté par une grandeur que personne ne sait produire, et parler de cas
-qui « tombent dans le couloir » n'a pas de sens tant que ce lien manque.
-
-Écriture retenue, conforme à I-14 : lambda = alpha * b, avec b la demi-largeur de l'objet
-(SPEC-001 §5 bis, Wagner : l'étendue mouillée à la fin de l'impact vaut b, indépendamment de
-v et beta) et alpha **à calibrer, banc B2**. La session ne fixe pas alpha ; elle mesure la
-**sensibilité du verdict à alpha**, ce qui ne demande pas de le connaître.
-
-`lambda = 2*pi*v^2/g` (SPEC-001 §5) écartée : elle décrit le sillage d'un mouvement horizontal
-établi, pas une entrée verticale. L'employer ici serait un détournement.
-
-Substitution dans les bornes : radius <= 5,09*alpha*b (Reach), depth > alpha*b (Regime).
-Donc portée et profondeur requises sont toutes deux **proportionnelles à la taille de l'objet**.
-
-P4 : `impact_envelope.rs`, onze cas, quatre valeurs d'alpha. **Un seul cas sur onze se construit
-à la portée voulue** (vaisseau en haute mer), et le verdict ne dépend pas d'alpha — c'était
-l'objet du balayage.
-
-Trois chiffres qui portent la session :
-- **portée = 5,09 lambda = 10,18 b** exactement, au-dessus de ~15 cm ; en dessous c'est
-  `Resolution` qui mord avant. Un plongeon humain n'est calculable que dans 3 m.
-- **vaisseau en port : aucune portée**, `Regime` — le modèle suppose l'eau profonde (ADR-059).
-- **plafond d'énergie : 1e-6 à 1e-2** de l'énergie de référence (masse ajoutée ~rho b^3 à la
-  vitesse d'entrée, SPEC-001 §5 bis). Ne dit pas que le candidat est insuffisant : la fraction
-  réellement transférée n'a jamais été établie (ADR-055 la reporte). Donne le seuil que le
-  générateur devra respecter.
-
-La limite de portée est **numérique, pas physique** : table de Bessel tabulée jusqu'à x=64, et
-ADR-060 range explicitement cette limite parmi les « choix numériques testés, pas des paramètres
-gameplay ». Piste pour la lever : développement asymptotique J0(x) ~ sqrt(2/(pi x)) cos(x-pi/4)
-au-delà de la table. **À ne pas décider sans mesurer** (L209/L210) — c'est une action, pas une
-décision de cette session.
-
-Erreur de méthode évitée de justesse et consignée dans le livrable : la première sonde prenait
-1e-9 J pour « négligeable », ce qui faisait lire un refus de pente comme une impossibilité
-géométrique. Il a fallu descendre à 1e-30.
-
-P6 : ADR-083, ENVELOPPE-IMPACTS-S123, suivi A199, A200 (sévérité 1), A201, L212, journal, index,
-README, jeton rendu, fusion ff-only.
-
-Pour S124 sans relire : S123-1 est une tâche de code bien cernée. La table vit dans
-`code/water-core/src/bessel_table.rs`, l'interpolation Hermite et le refus hors [0,64] dans
-`radial_impact::bessel`. La référence f64 indépendante existe déjà — `bessel_angular` et la
-quadrature à 4096 directions du test `bessel_against_series_and_dense_angular_reference`. La
-piste asymptotique se mesure contre elle avant toute décision : erreur relative de
-J0(x) ~ sqrt(2/(pi x)) cos(x - pi/4) et J1(x) ~ sqrt(2/(pi x)) sin(x - pi/4) pour x de 64 à
-quelques milliers. Attention au raccord en x=64 : une discontinuité y produirait un anneau
-visible sur le champ. Et vérifier que `Reach` devient bien la nouvelle borne étendue, sans que
-`Resolution` prenne le relais aussitôt — la sonde `impact_envelope` le dira.
+Issue possible et parfaitement acceptable : la mesure dit que la limite n'est pas la table mais
+la phase, et la décision devient autre chose que « étendre ». Ne pas forcer la piste annoncée.

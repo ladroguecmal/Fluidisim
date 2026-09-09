@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-09 16:05 +02:00
+JETON            : occupé
+Battement        : 2026-09-09 16:07 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S124 — lever la limite de portée du champ d'impact (S123-1, A201)
 Dernière session : S123 — un seul cas de jeu sur onze tient dans le couloir ;255 tests/cinq ignorés
-Session suivante : S124 — lever la limite de portée du champ d'impact (S123-1, A201)
+Session suivante : à fixer en fin de S124
 
 *Le battement de fin de S118 disait 15:05 : une heure estimée, pas relevée. Corrigée ici.
 Un battement dans le futur ferait croire à une session active — le relever, jamais l'écrire de mémoire.*
