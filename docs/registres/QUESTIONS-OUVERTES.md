@@ -1149,3 +1149,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S111-1 : ouverte, S112.** Superposition de plusieurs sources compatibles admises au
   journal, ordre déterministe, énergie/puissance avec interférences ; contexte incompatible
   et journal en attente refusés avant publication. Recevoir deux sources et leur travail total.
+
+### S112 — Champ multisource construit
+
+- **S111-1 : réalisée pour les contextes strictement compatibles.** [MULTISOURCE-S112](../validation/MULTISOURCE-S112.md),
+  interférences, ordre et refus ; travail total reçu sur spectre discret de test.
+- **S112-1 : ouverte, S113.** Référence indépendante f64 du montage, raffinement radial
+  et angulaire des sept grandeurs et bilans, puis coût complet aux résolutions reçues.
+  Précision spatiale et reprise numérique multisource restent à vérifier.

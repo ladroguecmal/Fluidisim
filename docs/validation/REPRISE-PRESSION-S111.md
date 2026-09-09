@@ -68,3 +68,6 @@ interférences conservées dans énergie/puissance, refus de contexte incompatib
 journal bloqué avant publication. Recevoir deux sources distinctes et leur travail
 total ; ne pas sommer leurs énergies isolées. L'intégration des impacts et le stockage
 durable restent ouverts. Le coût élevé de la requête reste mesuré, sans budget certifié.
+
+**Mise à jour S112, 2026-09-09 :** S111-1 réalisée comme construction du champ commun,
+voir [MULTISOURCE-S112](MULTISOURCE-S112.md). Suite S112-1 : réception spatiale et coût.

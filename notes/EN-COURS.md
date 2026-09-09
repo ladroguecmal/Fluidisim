@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S112 — en cours
+Session : S112 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : champ commun de sources compatibles, interférences et travail total.
 
@@ -66,7 +66,7 @@ Objectif : champ commun de sources compatibles, interférences et travail total.
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
 - [x] **P2** — construire la préparation depuis le journal ; recevoir superposition, bilans et refus.
-- [ ] **P3** — publier résultats et limites ; rituel final et synchronisation.
+- [x] **P3** — publier résultats et limites ; rituel final et synchronisation.
 
 ### Notes de reprise
 
@@ -76,3 +76,5 @@ Contexte complet identique, journal non vide sans attente ; pool candidat seul m
 
 P2 : from_journal, total modal avant bilan, ordre id/segments ; quatre tests release/debug.
 Suite240 réussis/cinq ignorés. Résidu travail1,639e-7 J à1000 pas ; MULTISOURCE-S112.
+
+P2 4cd136e. Suite S113 : S112-1, référence et réception multisource.

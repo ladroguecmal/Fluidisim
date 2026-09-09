@@ -61,7 +61,7 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S111 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S112 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
@@ -74,7 +74,7 @@ Les trajectoires avec virage conservent désormais les interférences et le bila
 Une enveloppe refuse les requêtes hors bornes ; le virage est comparé par raffinement sur
 [-8,12]² m et 0–8 s, sans garantie continue. La préparation dispose d'un chemin sur pool hôte.
 Potentiel, pente et vitesses sont vérifiés. Le candidat modal à phases entières passe la
-réception locale : 236 tests réussis, cinq ignorés ; conformité interplateforme encore ouverte.
+réception locale : 240 tests réussis, cinq ignorés ; conformité interplateforme encore ouverte.
 La superposition sur pool passe le virage et le découpage, pour toutes les grandeurs.
 La cuisson gaussienne possède une recette versionnée, sur pool et sans libm.
 Le demi-spectre et les coefficients préparés coûtent 19,800 ms pour 64 points, médiane locale.
@@ -90,5 +90,6 @@ Source de pression immuable et codec WPRS V1 construits (ADR-074), virage196 oct
 Journal de pression construit : doublons, conflits, attente en saturation et reprise explicite (ADR-075).
 Instantané mémoire WPJR et restauration construits, attente conservée (ADR-076).
 Reprise complète reçue :1152 points-temps identiques en bits, cycles locaux28,4/17,0 ms (S111).
-Suite : champ commun à plusieurs sources de pression, S111-1.
+Champ multisource construit, interférences et travail total conservés (S112).
+Suite : référence indépendante, réception spatiale et coût multisource, S112-1.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

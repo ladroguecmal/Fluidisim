@@ -17,6 +17,9 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S112 :** [Champ multisource](validation/MULTISOURCE-S112.md), réponses et bilans totaux, contexte et attente contrôlés.
+240 tests réussis/cinq ignorés ;76 ADR,193 angles. Suite S113 : référence et réception multisource, S112-1.
+
 **S111 :** [Reprise vers le champ](validation/REPRISE-PRESSION-S111.md), cycle complet reçu aux deux résolutions.
 Bibliothèque inchangée, suite236/cinq ignorés non relancée. Suite S112 : plusieurs sources compatibles, S111-1.
 

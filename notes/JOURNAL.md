@@ -6184,3 +6184,22 @@ hôte non global. Aucun budget cible.76 ADR,193 angles,17 invariants,6 spécific
 L195/L201/L202 appliquées ; aucun nouvel angle ou leçon distincte, invariants inchangés.
 **Suite S112 :** S111-1, superposition de sources compatibles du journal, interférences
 et travail total, contexte/attente refusés avant publication. S110-1 réalisée sur fixture.
+
+## S112 — 2026-09-09 — Superposition des sources du journal
+
+**Entrée :** Continue ;3547926, copies actives propres identiques.
+**Produit :** Prepared::from_journal, contexte complet commun, journal vide/bloqué refusé,
+ordre id puis segments ; somme des réponses/pressions avant bilan. Vue liée à l'emprunt
+du journal. Noyau partagé sans tableau concaténé ; formats inchangés.
+**Vérification :** quatre tests debug/release ; suite147 core +93 harnais =240 réussis,
+cinq ignorés, quatre avertissements préexistants. Arrivées inversées identiques en bits,
+linéarité du champ mais énergie non additive ; sources opposées annulées, doublées reçues.
+Travail final0,2008518278599 J, résidu1,6384e-7 J à1000 pas ; énergie libre conservée.
+Refus contexte/date/capacité/attente et témoin nominal. P2 4cd136e, formatage/diff vérifiés.
+**Limites :** recette16×24 de test, pas réception spatiale du montage ; bilan du spectre
+discret, pas du continuum. Coût non mesuré, pas de garantie interplateforme ni budget.
+76 ADR,193 angles,17 invariants,6 spécifications,23 cas. L203/L204 appliquées, aucun
+nouvel angle ou leçon distincte ; invariants inchangés.
+**Suite S113 :** S112-1, oracle f64 indépendant, raffinement des grandeurs et bilan,
+puis coût multisource. S111-1 réalisée ; scénario de reprise numérique multisource reste
+à exercer, ainsi que raccordement aux impacts et durabilité.
