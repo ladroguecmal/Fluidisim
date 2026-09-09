@@ -65,7 +65,7 @@ Objectif : recevoir et mesurer le montage mixte aux résolutions reçues.
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [ ] **P2** — campagne mixte, référence de composition, refus et coût complet.
+- [x] **P2** — campagne mixte, référence de composition, refus et coût complet.
 - [ ] **P3** — publier résultats et corrections ; rituel final et synchronisation.
 
 ### Notes de reprise
@@ -74,3 +74,12 @@ Départ1bbcef5, copies actives propres identiques. S115-1.
 Lecture du code radial : dispersion profonde, profondeur utilisée comme garde de validité.
 La formulation profondeur finie de S115 doit recevoir une correction datée, pas une réécriture ADR.
 Bibliothèque inchangée prévue ; réception executable sur domaine commun et instants0–4 s.
+
+P2 en cours : premier passage reçu aux deux recettes,4335 points-temps chacune.
+Campagne finale ajoute le contrôle de convergence des deux oracles sur les sept grandeurs.
+Correction datée ADR-077 : impacts profonds, depth est une garde ; ADR-060 confirmait déjà.
+Ne pas conclure profondeur20 m valable pour toute la pression gaussienne : petits k non reçus.
+
+P2 terminée :8670 points-temps reçus, dix champs contre deux oracles de pression et composition f64.
+Cycles complets médians50,0497/57,9712 ms ; préparation impact incluse, cuisson/admission exclues.
+Refus de domaines et expiration reçus. Bibliothèque inchangée, suite S115 non relancée.

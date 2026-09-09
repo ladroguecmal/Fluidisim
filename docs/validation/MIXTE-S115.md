@@ -52,3 +52,8 @@ indépendante des opérations d'assemblage et mesurer préparation/requête comp
 Conserver les refus d'expiration et de domaines, sans tronquer les composantes.
 Renouvellement pression, durabilité et bilan énergétique mixte restent ouverts.
 77 ADR,193 angles,17 invariants,6 spécifications,23 cas.
+
+**Correction S116, 2026-09-09 :** les impacts radiaux sont profonds, comme la pression,
+et non à dispersion de profondeur finie (description erronée dans ADR-077 et le
+journal S115). La profondeur20 m sert de garde sur la bande de l'impact. Voir la
+note corrective ADR-077 et [RECEPTION-MIXTE-S116](RECEPTION-MIXTE-S116.md).

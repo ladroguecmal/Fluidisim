@@ -66,3 +66,13 @@ Voir [MIXTE-S115](../validation/MIXTE-S115.md) : contributions séparées puis n
 de référence en f64, réductions aux chemins existants, refus tardifs et enveloppe
 totale, suite de tests complète. Cette référence vérifie l'assemblage, pas le modèle
 de chaque source. Suite S115-1 : campagne mixte aux recettes reçues S113 et coût complet.
+
+## Note corrective — S116, 2026-09-09
+
+La phrase du §Portée physique « impacts à dispersion de profondeur finie » est
+factuellement incorrecte. ADR-060 et RadialImpact::new imposent omega²=gk ; depth
+ne sert que de garde de régime profond (depth>pi/k_min). Impacts et pression
+partagent donc la loi profonde. Le paramètre de profondeur ne prouve toutefois
+pas la validité du spectre gaussien de pression dans ce milieu : ses petits k
+restent à confronter à une référence de profondeur finie. Décision de composition
+inchangée ; réception échantillonnée : RECEPTION-MIXTE-S116.
