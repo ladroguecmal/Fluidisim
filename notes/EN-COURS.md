@@ -69,7 +69,7 @@ balayage que ce qui est annoncé est exactement ce que la requête accepte.
 - [x] **P1** — passation, jeton, plan.
 - [x] **P2** — ADR-079 : ce que le contrôleur tient, ce que le montage exige, et pourquoi
       l'annonce est une fonction séparée plutôt qu'un contrôle de plus dans `update`.
-- [ ] **P3** — construire `mixed::horizon` et `mixed::plan`, `Controller::context`,
+- [x] **P3** — construire `mixed::horizon` et `mixed::plan`, `Controller::context`,
       factoriser les contrôles indépendants des points depuis `sample_world_batch`.
 - [ ] **P4** — le test qui compte : balayage d'instants, `plan(t)` comparé à ce que la
       séquence réelle (update puis requête à lot vide) fait vraiment.
@@ -100,3 +100,7 @@ requête traduit et que l annonce rend telle quelle. Ordre d évaluation conserv
 donc aucun refus existant ne change de nature. `Controller::context()` à ajouter.
 Publication tardive laissée possible : coupler le contrôleur aux impacts figerait leur
 renouvellement, plus cher que le problème résolu.
+
+P3 : `mixed::{State, state, horizon}` et `classify` interne ; `sample_world_batch` consulte
+`classify` et traduit. `Controller::context()` ajouté. Les 154 tests core passent inchangés —
+c est la vérification qui comptait : aucun refus existant n a changé de nature.

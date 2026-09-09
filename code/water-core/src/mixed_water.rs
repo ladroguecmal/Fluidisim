@@ -30,6 +30,102 @@ fn finite(s: &WaterSample) -> bool {
     .iter()
     .all(|v| v.is_finite())
 }
+/// ADR-079 : ce que la requête décidera d'un instant, connu avant toute publication.
+/// Une réponse par cause de refus indépendante des points ; `Ready` ne promet rien sur
+/// les points eux-mêmes — domaine, pente totale et capacité restent évalués par la requête.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum State {
+    Ready,
+    NeedsUpdate { published: SimTime },
+    OutsideWindow { start: SimTime, end: SimTime },
+    ImpactsExpired { id: u64, until: SimTime },
+    LossKnown,
+    Context,
+}
+/// Contrôles du montage, indépendants des points. **Implémentation unique** : la requête la
+/// traduit en ses erreurs, `state` la rend telle quelle. Deux implémentations du même
+/// contrôle divergent (L137) ; l'ordre est celui de la requête avant ADR-079.
+fn classify<const N: usize>(
+    bound: &BoundBackground<'_>,
+    impacts: &Prepared<'_, '_, N>,
+    pressure: Option<(bound_pressure::Settings, SimTime)>,
+    time: SimTime,
+) -> State {
+    let (_, frame, cell) = bound.binding();
+    if frame != impacts.frame
+        || cell != impacts.cell
+        || impacts.gravity != 9.81f32
+        || !impacts.density.is_finite()
+        || impacts.density <= 0.0
+    {
+        return State::Context;
+    }
+    if impacts.journal.loss_known() {
+        return State::LossKnown;
+    }
+    if let Some((id, until)) = impacts.renewal_deadline() {
+        if time > until {
+            return State::ImpactsExpired { id, until };
+        }
+    }
+    if let Some((s, published)) = pressure {
+        if s.frame != frame
+            || s.cell != cell
+            || s.gravity.to_bits() != impacts.gravity.to_bits()
+            || s.density.to_bits() != impacts.density.to_bits()
+        {
+            return State::Context;
+        }
+        // Une vue publiée existe forcément dans sa fenêtre : scinder l'ancien test d'instant
+        // en fenêtre puis publication ne change aucun refus de la requête.
+        if time < s.start || time > s.end {
+            return State::OutsideWindow {
+                start: s.start,
+                end: s.end,
+            };
+        }
+        if published != time {
+            return State::NeedsUpdate { published };
+        }
+    }
+    State::Ready
+}
+/// Ce que la requête fera d'un instant, avant d'avoir payé une préparation.
+pub fn state<const N: usize>(
+    bound: &BoundBackground<'_>,
+    impacts: &Prepared<'_, '_, N>,
+    pressure: Option<&bound_pressure::Controller<'_, '_, '_, '_, '_>>,
+    requested: SimTime,
+) -> State {
+    classify(
+        bound,
+        impacts,
+        pressure.map(|c| (c.context().settings(), c.published_time())),
+        requested,
+    )
+}
+/// Fenêtre des dates que les contrôles de montage acceptent : la fenêtre du contrôleur
+/// coupée par la validité du plus court des champs d'impact. `None` = intersection vide,
+/// donc aucune date ne convient. Sans pression, la borne basse n'est pas contrainte par le
+/// montage : la naissance des impacts se refuse par point, pas ici.
+pub fn horizon<const N: usize>(
+    impacts: &Prepared<'_, '_, N>,
+    pressure: Option<&bound_pressure::Controller<'_, '_, '_, '_, '_>>,
+) -> Option<(SimTime, SimTime)> {
+    let (start, mut end) = match pressure {
+        Some(c) => {
+            let s = c.context().settings();
+            (s.start, s.end)
+        }
+        None => (SimTime(0), SimTime(u64::MAX)),
+    };
+    if let Some((_, until)) = impacts.renewal_deadline() {
+        if until < end {
+            end = until;
+        }
+    }
+    (start <= end).then_some((start, end))
+}
 /// Les vues empruntées protègent leurs journaux/pools ; None signifie absence explicite
 /// de pression, jamais récupération d'une préparation refusée. Aucun bilan mixte produit.
 pub fn sample_world_batch<const N: usize>(
@@ -43,34 +139,17 @@ pub fn sample_world_batch<const N: usize>(
     output: &mut [WaterSample],
 ) -> Result<(), Error> {
     let (background, frame, cell) = bound.binding();
-    if frame != impacts.frame
-        || cell != impacts.cell
-        || impacts.gravity != 9.81f32
-        || !impacts.density.is_finite()
-        || impacts.density <= 0.0
-    {
-        return Err(Error::Context);
-    }
-    if impacts.journal.loss_known() {
-        return Err(Error::LossKnown);
-    }
-    if impacts
-        .renewal_deadline()
-        .is_some_and(|(_, end)| time > end)
-    {
-        return Err(Error::Time);
-    }
-    if let Some(p) = pressure {
-        let s = p.context().settings();
-        if s.frame != frame
-            || s.cell != cell
-            || s.gravity.to_bits() != impacts.gravity.to_bits()
-            || s.density.to_bits() != impacts.density.to_bits()
-        {
-            return Err(Error::Context);
-        }
-        if p.time() != time {
-            return Err(Error::Time);
+    match classify(
+        bound,
+        impacts,
+        pressure.map(|p| (p.context().settings(), p.time())),
+        time,
+    ) {
+        State::Ready => {}
+        State::Context => return Err(Error::Context),
+        State::LossKnown => return Err(Error::LossKnown),
+        State::ImpactsExpired { .. } | State::OutsideWindow { .. } | State::NeedsUpdate { .. } => {
+            return Err(Error::Time)
         }
     }
     if !max_slope.is_finite() || max_slope <= 0.0 {

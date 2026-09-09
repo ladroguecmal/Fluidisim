@@ -63,6 +63,10 @@ impl<'p, 'v, 'n, 'j, 's> Controller<'p, 'v, 'n, 'j, 's> {
     pub fn published_time(&self) -> SimTime {
         self.time
     }
+    /// Sans lui, l’annonce du montage mixte ne peut pas lire la fenêtre à intersecter (ADR-079).
+    pub fn context(&self) -> Context {
+        self.context
+    }
     pub fn state(&self, requested: SimTime) -> PublicationState {
         let s = self.context.settings();
         if requested < s.start || requested > s.end {
