@@ -58,30 +58,19 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S116 — terminée
+Session : S117 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : recevoir et mesurer le montage mixte aux résolutions reçues.
+Objectif : contrôleur pression à deux pools, publication après succès et instant exact.
 
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [x] **P2** — campagne mixte, référence de composition, refus et coût complet.
-- [x] **P3** — publier résultats et corrections ; rituel final et synchronisation.
+- [ ] **P2** — construire le contrôleur, recevoir les transitions/refus et la requête mixte.
+- [ ] **P3** — publier décision, résultats et suite ; rituel final et synchronisation.
 
 ### Notes de reprise
 
-Départ1bbcef5, copies actives propres identiques. S115-1.
-Lecture du code radial : dispersion profonde, profondeur utilisée comme garde de validité.
-La formulation profondeur finie de S115 doit recevoir une correction datée, pas une réécriture ADR.
-Bibliothèque inchangée prévue ; réception executable sur domaine commun et instants0–4 s.
-
-P2 en cours : premier passage reçu aux deux recettes,4335 points-temps chacune.
-Campagne finale ajoute le contrôle de convergence des deux oracles sur les sept grandeurs.
-Correction datée ADR-077 : impacts profonds, depth est une garde ; ADR-060 confirmait déjà.
-Ne pas conclure profondeur20 m valable pour toute la pression gaussienne : petits k non reçus.
-
-P2 terminée :8670 points-temps reçus, dix champs contre deux oracles de pression et composition f64.
-Cycles complets médians50,0497/57,9712 ms ; préparation impact incluse, cuisson/admission exclues.
-Refus de domaines et expiration reçus. Bibliothèque inchangée, suite S115 non relancée.
-
-P2 e4068c6. Passation publiée ; suite S117 contrôleur pression S116-1. S116-2 profondeur finie ouverte.
+Départc46a85e, copies actives propres identiques. S116-1.
+Journal et recette empruntés immuables pendant la vie du contrôleur ; admission dynamique hors scope.
+Deux pools empruntés disjoints, métadonnées validées séparées des coefficients pour éviter auto-référence.
+Même instant sans recalcul ; erreur à autre instant, ancienne publication conservée si mise à jour refusée.
