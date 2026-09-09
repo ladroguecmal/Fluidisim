@@ -83,3 +83,6 @@ atomique du lot composé. Recevoir toutes les composantes de vitesse et la norma
 et définir le contrôle de pente sans confondre mesure ponctuelle et borne du champ.
 Le codec des causes de pression, LiveWater et la sauvegarde des sillages restent ouverts.
 73 ADR,193 angles morts,17 invariants,6 spécifications,23 cas inchangés.
+
+**Mise à jour S106, 2026-09-09 :** S105-1 réalisée pour la composition candidate ; voir
+[MONDE-PRESSION-S106](MONDE-PRESSION-S106.md). Suite S106-1 : scénario hôte et coût complet.

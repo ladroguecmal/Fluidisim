@@ -1102,3 +1102,10 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S105-1 : ouverte, S106.** Requête monde commune B+pression : conversion des points,
   instant/contexte uniques, vitesses et normale reçues, contrôle de pente et lot atomique.
   Distinguer borne de pente du champ et mesure ponctuelle ; source autoritaire toujours ouverte.
+
+### S106 — Requête monde B+pression
+
+- **S105-1 : réalisée comme chemin candidat.** [MONDE-PRESSION-S106](../validation/MONDE-PRESSION-S106.md),
+  conversion commune, composantes et normale, enveloppe de pente, sortie atomique.
+- **S106-1 : ouverte, S107.** Scénario hôte du virage128²/112×80, préparations et lots64,
+  refus/reprise, comparaison directe et coût complet. Impacts et causes persistantes restent ouverts.

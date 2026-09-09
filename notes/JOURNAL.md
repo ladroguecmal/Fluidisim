@@ -6078,3 +6078,21 @@ leçon distincte ou angle mort. I-03/I-15 restent ouverts, aucun invariant modif
 **Suite S106 :** S105-1, requête monde commune B+pression, cohérence des points/temps,
 vitesses et normale, contrôle de pente et lot atomique. S104-1 réalisée dans le périmètre
 emprunté ; journal et sauvegarde des sources de sillage restent à construire.
+
+## S106 — 2026-09-09 — Requête monde B+pression
+
+**Entrée :** Continue ; 0c525eb, copies actives propres identiques, jeton libre.
+**Produit :** sample_world_batch, conversion unique, contexte/date communs, vitesses et
+normale composées, lot atomique. Enveloppe L1 du spectre calculée à la préparation,
+comparée au plafond avec la contribution B ; pas de validation par pente ponctuelle seule.
+**Vérification :** trois tests debug/release ; suite132 core +93 harnais =225 réussis,
+cinq ignorés, quatre avertissements préexistants. Translation près de i64::MAX identique,
+composantes comparées séparément, normale reçue par différences spatiales ; refus tardif
+sans sortie partielle. Annulation locale distinguée de l'enveloppe. P2 770b243.
+**Limites :** enveloppe f32 sans arrondi dirigé ; fond actuel g=9,81, repère déclaré,
+vitesses de surface seulement. Pas de coût mesuré, impacts et sources persistantes non
+raccordés ici. 73 ADR,193 angles,17 invariants,6 spécifications,23 cas inchangés.
+Aucun nouvel angle mort ou leçon distincte ; L197/L205 et publication S101 appliquées.
+I-03/I-15 et budget I-05 restent ouverts, aucun invariant réécrit.
+**Suite S107 :** S106-1, scénario hôte du virage128²/112×80, lots64, refus/reprise et
+coût complet. S105-1 réalisée pour cette composition candidate. Synchronisation finale.

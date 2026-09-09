@@ -17,6 +17,9 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S106 :** [Requête monde B+pression](validation/MONDE-PRESSION-S106.md), composantes communes et enveloppe de pente.
+225 tests réussis, cinq ignorés ; 73 ADR,193 angles morts. Suite S107 : scénario hôte et coût, S106-1.
+
 **S105 :** [Contexte du candidat](validation/CONTEXTE-PRESSION-S105.md), instant lié et publication précédente conservée au refus.
 222 tests réussis, cinq ignorés ; 73 ADR,193 angles morts. Suite S106 : requête monde B+pression, S105-1.
 

@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-09 08:22 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S106 — requête monde B+pression
-Dernière session : S105 — contexte candidat ; 222 tests/cinq ignorés
-Session suivante : S106 — requête monde B+pression (S105-1)
+Session en cours : aucune
+Dernière session : S106 — requête monde B+pression ; 225 tests/cinq ignorés
+Session suivante : S107 — scénario hôte du virage et coût (S106-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -167,6 +167,12 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S106 — 2026-09-09 :** [MONDE-PRESSION-S106](docs/validation/MONDE-PRESSION-S106.md),
+conversion commune, vitesses et normale composées, enveloppe L1 et publication atomique.
+225 tests réussis/cinq ignorés, trois ciblés aussi en release. Enveloppe f32 non formelle,
+contexte hôte déclaré ; 73 ADR,193 angles inchangés. S105-1 réalisée comme chemin candidat.
+Suite S107 : scénario du virage128²/112×80 et coût complet, S106-1.
 
 **S105 — 2026-09-09 :** [CONTEXTE-PRESSION-S105](docs/validation/CONTEXTE-PRESSION-S105.md),
 contexte complet, requête liée à l'instant préparé ; publication active conservée au refus.

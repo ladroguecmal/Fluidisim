@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S106 — en cours
+Session : S106 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : requête monde B+pression, instant et points communs, publication atomique.
 
@@ -66,7 +66,7 @@ Objectif : requête monde B+pression, instant et points communs, publication ato
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
 - [x] **P2** — construire la composition et le contrôle de pente ; recevoir composantes, contexte et refus.
-- [ ] **P3** — publier les résultats et limites, rituel de passation et synchronisation.
+- [x] **P3** — publier les résultats et limites, rituel de passation et synchronisation.
 
 ### Notes de reprise
 
@@ -76,3 +76,5 @@ Ne pas assimiler la pente au point à une borne spatiale. Réutiliser le calcul 
 
 P2 : composition monde, enveloppe L1 calculée à la préparation. Trois tests debug/release.
 Suite225 réussis/cinq ignorés. Rapport MONDE-PRESSION-S106 ; aucune mesure de coût ici.
+
+P2 770b243. Suite S107 : S106-1, scénario hôte et coût B+pression.
