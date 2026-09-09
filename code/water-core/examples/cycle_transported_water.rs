@@ -330,7 +330,13 @@ fn measure(
     // Réinitialisation hors chrono des opérations isolées. Pools et B déjà construits.
     source
         .restore(
-            &snapshots[if op == 0 || op == 4 { 0 } else { 2 }],
+            &snapshots[if op == 0 || op == 4 {
+                0
+            } else if op == 5 {
+                1
+            } else {
+                2
+            }],
             &mut records,
         )
         .unwrap();
@@ -394,6 +400,20 @@ fn measure(
             )
             .unwrap();
         }
+        5 => {
+            source
+                .update(None, black_box(SimTime(T48)), black_box(T48))
+                .unwrap();
+            query(
+                source,
+                bound,
+                black_box(points),
+                T48,
+                &mut out,
+                &mut scratch,
+            )
+            .unwrap();
+        }
         _ => unreachable!(),
     }
     let elapsed = micros(start);
@@ -440,13 +460,16 @@ fn main() {
         WorldPos::from_metres(1_000_000.0 + r * d[0], r * d[1], 0.0)
     });
     let snapshots = receive(&bg, &bound, &points);
+    if std::env::args().any(|arg| arg == "--verify-only") {
+        return;
+    }
     let mut source_pools = Pools::<256>::new();
     let mut source = source_pools.service();
     let mut target_pools = Pools::<256>::new();
     let mut target = target_pools.service();
     let warm = Instant::now();
     while warm.elapsed().as_secs_f64() < 1.0 {
-        for op in 0..5 {
+        for op in 0..6 {
             black_box(measure(
                 op,
                 &mut source,
@@ -457,10 +480,10 @@ fn main() {
             ));
         }
     }
-    let mut results = [[0.0; 15]; 5];
+    let mut results = [[0.0; 15]; 6];
     for block in 0..15 {
-        for offset in 0..5 {
-            let op = if block % 2 == 0 { offset } else { 4 - offset };
+        for offset in 0..6 {
+            let op = if block % 2 == 0 { offset } else { 5 - offset };
             for _ in 0..32 {
                 results[op][block] +=
                     measure(op, &mut source, &mut target, &bound, &points, &snapshots) / 32.0;
@@ -473,6 +496,7 @@ fn main() {
         "sauvegarde48",
         "restauration48",
         "cycle24_48_reprise48",
+        "renouvellement24vers48_et_requete64",
     ]
     .iter()
     .enumerate()

@@ -70,7 +70,7 @@ sauvegarde/restauration, identité avec construction directe et coût mesuré.
       horizon4→24→48 s, comparaison en bits des dix sorties aux champs directs et restaurés.
       Refus : temps, rayon tardif, renouvellement impossible, sauvegarde tronquée et N différent ;
       publication précédente et sorties conservées. TTL4 inchangé, sauvegarde en mémoire seulement.
-- [ ] **P3** — recevoir le scénario, mesurer séparément update, requête64, save/restore et cycle
+- [x] **P3** — recevoir le scénario, mesurer séparément update, requête64, save/restore et cycle
       complet après mise en régime ; bornes de mesure explicites, rapport et suite motivée.
       Corriger la bibliothèque seulement si un défaut est reproduit et documenté.
 - [ ] **P4** — vérification adaptée, journal/angles/leçons/actions, index/README/passation,
@@ -93,3 +93,8 @@ dix composantes identiques, sources détruites avant reprise, WLIV289 octets, TT
 Refus atomiques : horizon dépassé, rayon au dernier point, extension64 s impossible, now hors
 horizon, sauvegarde tronquée et N128 cible. B seul diffère des64 résultats à48 s (W présent).
 Mesure initiale requête64 ~971 µs, cycle3 requêtes ~3004 µs ; compléter en P3 par update+requête48.
+P3 : CYCLE-TRANSPORTE-S128 publié, deux campagnes release finales et debug --verify-only
+reçus, mêmes hashes. Update24→48+requête64 médian0,956/0,962 ms ; cycle3 requêtes2,928–3,027 ms.
+Restauration~2,46 µs, sauvegarde289 octets ; pools/service12688 octets hors B et requêtes.
+Production inchangée. S127-1 réalisée sur fixture ; S129 recommandé : S128-1, bilan cinétique
+réel du candidat N256/R80/48 pour fermer la limite explicitement conservée par S127.
