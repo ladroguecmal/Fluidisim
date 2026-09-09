@@ -6168,3 +6168,19 @@ partagée dans inspect ; critères et formats WPRS/Impact inchangés.76 ADR,193 
 L194/L201/L202 appliquées, I-17 conservé, autorité interplateforme non reçue.
 **Suite S111 :** S110-1, cycle source→journal→saturation→instantané→restauration→retry→
 champ et requête B+pression, référence directe et coûts séparés. S109-1 réalisée.
+
+## S111 — 2026-09-09 — Reprise complète vers B+pression
+
+**Entrée :** Continue ; a98c74a, copies actives propres identiques.
+**Produit :** restart_pressure et REPRISE-PRESSION-S111. Source→WPRS→admission saturée→
+WPJR→restauration→retry→champ→requête. Une source de virage aux deux résolutions,
+1152 points-temps, dix sorties et bilans identiques en bits à la construction directe.
+**Mesures :** restauration~0,4 µs (moyennes de lots1000), cycles complets médians
+28,4023/17,0401 ms. Mesure unitaire de codec trop courte écartée. Cuisson hors mesure.
+**Vérification :** campagne release avec assertions, formatage/diff ; P2 2c56f1d.
+Bibliothèque inchangée, suite236 réussis/cinq ignorés non relancée. Hashes S107 conservés.
+**Limites :** mémoire chaude, pas durabilité disque ; pas champ multisource, compteur
+hôte non global. Aucun budget cible.76 ADR,193 angles,17 invariants,6 spécifications,23 cas.
+L195/L201/L202 appliquées ; aucun nouvel angle ou leçon distincte, invariants inchangés.
+**Suite S112 :** S111-1, superposition de sources compatibles du journal, interférences
+et travail total, contexte/attente refusés avant publication. S110-1 réalisée sur fixture.

@@ -61,7 +61,7 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S110 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S111 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
@@ -89,5 +89,6 @@ Cycle B+pression reçu sur le virage : médianes locales29,37 ms (128²) et16,28
 Source de pression immuable et codec WPRS V1 construits (ADR-074), virage196 octets.
 Journal de pression construit : doublons, conflits, attente en saturation et reprise explicite (ADR-075).
 Instantané mémoire WPJR et restauration construits, attente conservée (ADR-076).
-Suite : cycle de reprise et requête composée, S110-1.
+Reprise complète reçue :1152 points-temps identiques en bits, cycles locaux28,4/17,0 ms (S111).
+Suite : champ commun à plusieurs sources de pression, S111-1.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

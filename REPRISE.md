@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-09 08:54 +02:00
+JETON            : libre
+Battement        : 2026-09-09 08:55 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S111 — cycle de reprise
-Dernière session : S110 — instantané WPJR ;236 tests/cinq ignorés
-Session suivante : S111 — cycle de reprise et requête (S110-1)
+Session en cours : aucune
+Dernière session : S111 — reprise reçue ;suite236/cinq ignorés inchangée
+Session suivante : S112 — superposition de sources compatibles (S111-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -167,6 +167,12 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S111 — 2026-09-09 :** [REPRISE-PRESSION-S111](docs/validation/REPRISE-PRESSION-S111.md),
+cycle WPRS/journal/WPJR/retry/champ/B reçu,1152 points-temps identiques en bits.
+Cycles médians28,4023/17,0401 ms, restauration~0,4 µs sur données chaudes, cuisson exclue.
+Bibliothèque inchangée, suite236/cinq ignorés non relancée ;76 ADR,193 angles.
+S110-1 réalisée ; suite S112 : sources compatibles multiples et interférences, S111-1.
 
 **S110 — 2026-09-09 :** [ADR-076](docs/adr/ADR-076-instantane-du-journal-de-pression.md),
 WPJR V1, restauration des trajectoires/publication/attente, validation avant mutation.

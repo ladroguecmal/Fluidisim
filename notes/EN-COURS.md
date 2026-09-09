@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S111 — en cours
+Session : S111 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : cycle WPRS/journal/WPJR/reprise jusqu’à B+pression, identité et coûts.
 
@@ -66,7 +66,7 @@ Objectif : cycle WPRS/journal/WPJR/reprise jusqu’à B+pression, identité et c
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
 - [x] **P2** — exécuter le cycle du virage aux deux résolutions et mesurer séparément les étapes.
-- [ ] **P3** — publier résultats et limites ; rituel final et synchronisation.
+- [x] **P3** — publier résultats et limites ; rituel final et synchronisation.
 
 ### Notes de reprise
 
@@ -76,3 +76,5 @@ Pas de composition multisource implicite ; comparaison de chaque bit avec constr
 
 P2 : restart_pressure exécuté release,1152 points-temps identiques en bits.
 Cycles médians28,4023/17,0401 ms ; restauration~0,4 µs par moyenne de lot1000.
+
+P2 2c56f1d. Suite S112 : S111-1, superposition de sources compatibles.

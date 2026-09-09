@@ -1141,3 +1141,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S110-1 : ouverte, S111.** Scénario source WPRS, admission/saturation, WPJR,
   restauration/retry, préparation et requête B+pression ; référence directe et coûts
   séparés. Pas de revendication de durabilité disque ni de champ multisource implicite.
+
+### S111 — Cycle de reprise reçu
+
+- **S110-1 : réalisée sur fixture.** [REPRISE-PRESSION-S111](../validation/REPRISE-PRESSION-S111.md),
+  reprise vers B+pression identique en bits, coûts séparés ; cuisson hors chronométrie.
+- **S111-1 : ouverte, S112.** Superposition de plusieurs sources compatibles admises au
+  journal, ordre déterministe, énergie/puissance avec interférences ; contexte incompatible
+  et journal en attente refusés avant publication. Recevoir deux sources et leur travail total.

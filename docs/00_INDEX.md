@@ -17,6 +17,9 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S111 :** [Reprise vers le champ](validation/REPRISE-PRESSION-S111.md), cycle complet reçu aux deux résolutions.
+Bibliothèque inchangée, suite236/cinq ignorés non relancée. Suite S112 : plusieurs sources compatibles, S111-1.
+
 **S110 :** [ADR-076 — Instantané du journal de pression](adr/ADR-076-instantane-du-journal-de-pression.md), **ACTÉE**.
 236 tests réussis/cinq ignorés ;76 ADR,193 angles. Suite S111 : cycle de reprise et requête, S110-1.
 
