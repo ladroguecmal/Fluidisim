@@ -1201,3 +1201,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
   finie, notamment ses petits k, avant de recevoir un milieu réel de profondeur déclarée.
   Le garde de profondeur des impacts ne certifie pas le spectre gaussien de pression.
   Bilan énergétique mixte et durabilité restent ouverts.
+
+### S117 — Publication temporelle contrôlée
+
+- **S116-1 : réalisée sur journal figé.** ADR-078 et [CONTROLEUR-PRESSION-S117](../validation/CONTROLEUR-PRESSION-S117.md),
+  deux pools, instant exact, bascule sur succès, ancienne publication conservée au refus.
+- **S117-1 : ouverte, S118.** Cycle hôte temporel mixte aux recettes224×128/256×128,
+  références directes en bits et coût update+requête64 ; Unchanged et refus exercés.
+  Admission dynamique, extension de fenêtre, profondeur finie S116-2, bilan mixte et durabilité ouverts.

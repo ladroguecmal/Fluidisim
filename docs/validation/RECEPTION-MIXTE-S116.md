@@ -105,3 +105,7 @@ puis exercer la requête mixte sur les vues fournies par ce contrôleur. La vue 
 permet ce mécanisme mais l'hôte en écrit encore lui-même le cycle.
 Profondeur finie de pression, bilan mixte et durabilité restent ouverts.
 77 ADR,193 angles,17 invariants,6 spécifications,23 cas inchangés.
+
+**Mise à jour S117, 2026-09-09 :** S116-1 construite sur journal figé ; voir
+[CONTROLEUR-PRESSION-S117](CONTROLEUR-PRESSION-S117.md), ADR-078.246 tests/cinq ignorés.
+Suite S117-1 : cycle temporel aux recettes reçues et coûts du contrôleur.

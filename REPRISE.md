@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-09 14:09 +02:00
+JETON            : libre
+Battement        : 2026-09-09 14:11 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S117 — contrôleur pression
-Dernière session : S116 — réception mixte ; bibliothèque inchangée
-Session suivante : S117 — contrôleur de publication pression (S116-1)
+Session en cours : aucune
+Dernière session : S117 — contrôleur pression ;246 tests/cinq ignorés
+Session suivante : S118 — cycle temporel mixte (S117-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -148,7 +148,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 17 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 77 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 78 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -167,6 +167,14 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S117 — 2026-09-09 :** [CONTROLEUR-PRESSION-S117](docs/validation/CONTROLEUR-PRESSION-S117.md), ADR-078.
+Controller à deux pools : publication et instant basculent sur succès, ancienne vue conservée au refus.
+Journal figé emprunté ; aucune vue à une date non publiée, même instant sans recalcul.
+246 tests réussis/cinq ignorés ; contrôleur et requête mixte aussi reçus en release.
+78 ADR,193 angles,17 invariants,6 spécifications,23 cas. S116-1 réalisée sur journal figé.
+Suite S118 : S117-1, cycle temporel mixte224×128/256×128 et coût update+requête64.
+Admission dynamique, extension de fenêtre, S116-2 profondeur finie, bilan mixte et durabilité ouverts.
 
 **S116 — 2026-09-09 :** [RECEPTION-MIXTE-S116](docs/validation/RECEPTION-MIXTE-S116.md),
 8670 points-temps du mélange B+impact+deux pressions reçus ; cycles50,0497/57,9712 ms.

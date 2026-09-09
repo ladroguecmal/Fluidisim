@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S117 — en cours
+Session : S117 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : contrôleur pression à deux pools, publication après succès et instant exact.
 
@@ -66,7 +66,7 @@ Objectif : contrôleur pression à deux pools, publication après succès et ins
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
 - [x] **P2** — construire le contrôleur, recevoir les transitions/refus et la requête mixte.
-- [ ] **P3** — publier décision, résultats et suite ; rituel final et synchronisation.
+- [x] **P3** — publier décision, résultats et suite ; rituel final et synchronisation.
 
 ### Notes de reprise
 
@@ -79,3 +79,5 @@ P2 terminée : Controller, FieldState opaque, trois tests nouveaux et tests mixt
 Suite246 réussis/cinq ignorés ; ciblés contrôleur et mixte aussi en release.
 Refus numérique répété conserve la publication à0 ; demandes aux dates refusées indisponibles.
 ADR-078 et CONTROLEUR-PRESSION-S117 ; admission figée explicitement.
+
+P2 789c5dd. Passation publiée ; suite S118 cycle temporel mixte S117-1.

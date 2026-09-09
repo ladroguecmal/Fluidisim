@@ -17,6 +17,10 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S117 :** [ADR-078](adr/ADR-078-controleur-de-publication-pression.md), contrôleur pression à deux pools.
+[CONTROLEUR-PRESSION-S117](validation/CONTROLEUR-PRESSION-S117.md) :246 tests/cinq ignorés, ciblés aussi release.
+78 ADR,193 angles,17 invariants,6 spécifications,23 cas. Suite S118 : cycle temporel mixte, S117-1.
+
 **S116 :** [Réception mixte](validation/RECEPTION-MIXTE-S116.md),8670 points-temps reçus, cycles50,05/57,97 ms.
 Correction datée ADR-077 : impacts profonds. Bibliothèque inchangée ; suite243/cinq ignorés de S115 non relancée.
 77 ADR,193 angles,17 invariants,6 spécifications,23 cas. Suite S117 : contrôleur pression, S116-1.

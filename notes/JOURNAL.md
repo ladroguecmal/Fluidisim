@@ -6297,3 +6297,25 @@ aucun nouvel angle ou leçon distincte ; invariants inchangés.
 préparation candidate/bascule sur succès, dernière publication conservée au refus,
 et requête mixte exercée sur sa vue. S115-1 réalisée sur modèle profond commun.
 S116-2 : pression à profondeur finie, encore ouverte ; bilan mixte et durabilité ouverts.
+
+## S117 — 2026-09-09 — Contrôleur de publication pression
+
+**Entrée :** Continue ;c46a85e, copies actives propres identiques.
+**Produit :** ADR-078, Controller et CONTROLEUR-PRESSION-S117. Deux pools disjoints,
+préparation candidate puis échange après succès, métadonnées et instant publiés ensemble.
+Journal/recette immuables empruntés ; demande du même instant sans recalcul, retour
+ temporel autorisé dans la fenêtre. current(time) refuse toute date non publiée.
+FieldState opaque sépare métadonnées et coefficients, sans auto-référence ni unsafe.
+**Réception :** trois tests nouveaux, dix dates et quatre points contre préparation
+directe, sept champs et E/P/enveloppe identiques en bits. Deux refus numériques successifs
+conservent le champ initial ; pools insuffisants et journal bloqué refusés.
+Les trois tests mixtes passent par le contrôleur après update puis refus hors fenêtre.
+Suite153 core +93 harnais =246 réussis/cinq ignorés ; ciblés aussi release,
+quatre avertissements préexistants. Formatage/diff reçus ; P2 789c5dd.
+**Limites :** journal figé, pas admission dynamique ni extension de fenêtre, pas nouveau
+coût certifié. Recette16×24 de contrat ; pas de réception spatiale supplémentaire.
+78 ADR,193 angles,17 invariants,6 spécifications,23 cas. Publication et temps explicites
+appliquent les leçons existantes ; aucun nouvel angle ou leçon distincte, invariants inchangés.
+**Suite S118 :** S117-1, cycle hôte temporel mixte aux recettes224×128/256×128,
+identité directe en bits et coût update+requête64, chemin Unchanged et refus.
+S116-1 réalisée sur journal figé ; profondeur finie S116-2, bilan mixte et durabilité ouverts.
