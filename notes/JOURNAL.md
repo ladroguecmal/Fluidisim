@@ -6711,3 +6711,37 @@ I-03/I-06/I-08/I-14/I-15 relus, aucun invariant invalidé ; l'oracle alloue hors
 calibration B2, profondeur finie, mélange pression, durabilité disque. Aucun arbitrage humain.
 **Suite S128 :** S127-1, cycle LiveWater B+W N256/R80/horizon48 : renouvellement au-delà du
 TTL4, requêtes24/48 s, sauvegarde/reprise même N, identité directe et coût. Master seul avancé.
+
+---
+
+## S128 — 2026-09-10 — Cycle hôte du montage transporté reçu
+
+**Entrée :** continuation demandée, master propre4c33261 ; anciennes copies propres et en retard,
+aucune branche avancée. Jeton libre, Codex reprend avec fichiers/git/cargo disponibles.
+**Produits :** cycle_transported_water.rs et CYCLE-TRANSPORTE-S128 ; bibliothèque inchangée.
+**Scénario :** impact unique S127 N256/R80, TTL4 conservé, horizon4→24→48 ; B32 réel,
+ancre à1 000 000 m et64 points jusqu'au bord80 m. Source détruite avant restauration24,
+renouvellement48, nouvelle sauvegarde/reprise48 et interrogations non monotones.
+**Réception :**1280 points-temps, dix composantes comparées en bits à la composition ponctuelle
+du champ construit directement. WLIV289 octets, sauvegardes réémises identiques ; N256 et âge48
+conservés. À48 s, les64 sorties diffèrent de B seul : pas de disparition de W au TTL.
+**Refus reçus :** temps hors horizon, dernier point hors rayon, extension64 s numériquement
+impossible, renouvellement ne couvrant pas now, sauvegarde tronquée et restauration vers N128.
+Sorties et publication antérieure conservées ; témoins valides reçus avant/après les refus.
+**Coût local :** deux campagnes finales après mise en régime complète et ordre alterné.
+Renouvellement24→48+requête64 médian0,956/0,962 ms ; cycle avec3 requêtes, deux renouvellements,
+sauvegarde et restauration2,928–3,027 ms. Restauration2,46–2,47 µs ; sauvegarde~0,11 µs,
+horloge incluse, pas du disque. Pools/service12688 octets hors B et requêtes.
+**Décision :** S127-1 réalisée sur fixture ; aucun changement d'ADR, du modèle ou du défaut N64.
+Le résultat reçoit le service d'une source transportée, pas sa capacité multisource ni un budget cible.
+**Vérification :** deux exécutions release finales et debug --verify-only reçus ; mêmes trois hashes,
+dont565bdb15e3ac7503 à48 s. Une première exécution de mise au point également reçue.
+Suite256/cinq ignorés reçue S125 non relancée, aucun calcul de production modifié.
+**Rituel :** actions, suivi S127 et passation actualisés ; aucun nouvel angle ni leçon distincte.
+Mise en régime et ordre alterné appliquent A195/L207.85 ADR,204 angles,17 invariants,6 SPEC,23 cas.
+I-03/I-06/I-08/I-14/I-15 relus, aucun invariant invalidé ; aucun mécanisme de production ajouté.
+**Non fait :** bilan cinétique complet du candidat étendu, autres sources/paramètres, calibration B2,
+profondeur finie, pression mixte et disque. Aucun arbitrage humain requis.
+**Suite S129 :** S128-1, mesurer la cinétique depuis les nœuds réels du candidat N256/R80/48,
+comme S78 à courte durée, puis comparer au bilan indépendant S127 avec raffinement radial.
+Travail sur master, aucune copie créée ; jeton rendu.

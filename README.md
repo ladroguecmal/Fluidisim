@@ -61,7 +61,7 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S127 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S128 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
@@ -146,4 +146,9 @@ restent ceux vérifiés en S125, deux nouvelles campagnes release avec assertion
 99,985 % de l'énergie de référence est entre32 et80 m à48 s. Rayon moyen53,42 m ;
 2187 points-temps du candidat reçus. A204 traitée sur cette fixture, bilan cinétique total
 du candidat encore ouvert. Suite S128 : cycle LiveWater B+W du montage, reprise et coût.
+[Cycle transporté S128](docs/validation/CYCLE-TRANSPORTE-S128.md) : service B+W N256/R80/horizon48,
+TTL4 conservé,1280 points-temps identiques après renouvellement et reprise. Refus atomiques reçus.
+Renouvellement+requête64 ~0,96 ms médian local, un impact ; restauration~2,47 µs, sauvegarde289 octets.
+Deux campagnes release et debug reçus, production inchangée. Suite S129 : S128-1, bilan cinétique
+réel du candidat étendu.85 ADR,204 angles,17 invariants,6 spécifications,23 cas inchangés.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

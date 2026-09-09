@@ -123,3 +123,8 @@ raffinement radial. Les assertions du transport passent également sur ces mesur
 La campagne S126 repasse après extraction de l'oracle, valeurs conservées,27,77 s.
 Ces durées incluent les références f64 sur Ryzen AI 7 350, rustc1.97 Windows MSVC ;
 aucun chronométrage du runtime B+W dans cette session. Aucune modification de bibliothèque.
+
+> **Suivi S128 — 2026-09-10 :** S127-1 réalisée sur fixture dans
+> [CYCLE-TRANSPORTE-S128](CYCLE-TRANSPORTE-S128.md). Service B+W transporté, renouvellement,
+> sauvegarde/reprise et refus reçus ;1280 points-temps identiques en bits, coût local mesuré.
+> Le bilan cinétique du candidat étendu reste ouvert et devient S128-1, prochaine session S129.

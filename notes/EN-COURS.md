@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S128 — en cours
+Session : S128 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S127-1 — exercer le montage N256/R80/48 s dans LiveWater B+W, renouvellement,
 sauvegarde/restauration, identité avec construction directe et coût mesuré.
@@ -73,7 +73,7 @@ sauvegarde/restauration, identité avec construction directe et coût mesuré.
 - [x] **P3** — recevoir le scénario, mesurer séparément update, requête64, save/restore et cycle
       complet après mise en régime ; bornes de mesure explicites, rapport et suite motivée.
       Corriger la bibliothèque seulement si un défaut est reproduit et documenté.
-- [ ] **P4** — vérification adaptée, journal/angles/leçons/actions, index/README/passation,
+- [x] **P4** — vérification adaptée, journal/angles/leçons/actions, index/README/passation,
       décomptes et invariants, jeton libre et commit final propre.
 
 ### Notes de reprise
@@ -98,3 +98,7 @@ reçus, mêmes hashes. Update24→48+requête64 médian0,956/0,962 ms ; cycle3 r
 Restauration~2,46 µs, sauvegarde289 octets ; pools/service12688 octets hors B et requêtes.
 Production inchangée. S127-1 réalisée sur fixture ; S129 recommandé : S128-1, bilan cinétique
 réel du candidat N256/R80/48 pour fermer la limite explicitement conservée par S127.
+
+P4 : journal, actions et suivi S127, index/README/REPRISE actualisés. Aucun angle ni leçon
+nouvelle distincte. Décomptes85/204/17/6/23 inchangés, invariants non invalidés.
+Jeton rendu, master seul avancé. Suite S129 : S128-1.

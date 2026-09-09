@@ -1237,3 +1237,12 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S127-1 : ouverte, S128.** Cycle hôte LiveWater B+W de ce montage : renouvellement
   au-delà du TTL4 s, requêtes24/48 s, sauvegarde/restauration même N, identité avec les
   champs directs et coût du cycle. Fenêtres et mélange avec pression restent distincts.
+
+### S128 — Cycle hôte transporté reçu
+
+- **S127-1 : réalisée sur fixture.** CYCLE-TRANSPORTE-S128 : LiveWater N256/R80/48,
+  renouvellement après TTL4, sauvegarde/reprise et1280 points-temps identiques en bits aux
+  champs directs. Refus atomiques reçus. Update+requête64 ~0,96 ms médian local, un impact.
+- **S128-1 : ouverte, S129.** Bilan cinétique réel du candidat étendu N256/R80/48,
+  depuis ses nœuds effectivement construits, puis bilan total et comparaison à la référence
+  S127 avec raffinements. La réception de surface et de sa reprise n'a pas mesuré cette cinétique.

@@ -1714,3 +1714,8 @@ contre1,30e-7 E0 au départ. Rayon moyen53,42 m. Les sept composantes du candida
 avec l'oracle ; bilan total de référence et part potentielle du candidat reçus, pas son bilan
 cinétique complet. Les anciennes demandes64/128 m aux temps de groupe restent refusées.
 Cycle hôte transporté encore ouvert : S127-1. A203 demeure partielle pour les autres domaines.
+
+**Suivi A204 — S128 : cycle hôte du montage reçu.** S127-1 réalisée dans
+CYCLE-TRANSPORTE-S128, après renouvellement et restauration,1280 points-temps identiques
+aux champs directs. Le bilan cinétique du candidat étendu demeure distinct et devient S128-1.
+Aucun élargissement implicite de la réception physique d'A203.

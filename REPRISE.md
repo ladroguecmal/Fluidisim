@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 00:51 +02:00
+JETON            : libre
+Battement        : 2026-09-10 00:52 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S128 — cycle LiveWater transporté
-Dernière session : S127 — transport au-delà de32 m reçu sur fixture
-Session suivante : S128 — cycle LiveWater transporté et coût (S127-1)
+Session en cours : aucune
+Dernière session : S128 — cycle LiveWater transporté, reprise et coût reçus
+Session suivante : S129 — bilan cinétique du candidat étendu (S128-1)
 
 *Le battement de fin de S118 disait 15:05 : une heure estimée, pas relevée. Corrigée ici.
 Un battement dans le futur ferait croire à une session active — le relever, jamais l'écrire de mémoire.*
@@ -176,6 +176,22 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S128 — 2026-09-10 :** [CYCLE-TRANSPORTE-S128](docs/validation/CYCLE-TRANSPORTE-S128.md).
+LiveWater B+W du montage N256/R80, horizon4→24→48 et TTL4 conservé.1280 points-temps,
+dix composantes identiques en bits à la composition directe ; service source détruit avant
+reprise, WLIV289 octets, N256/âge48 et sauvegardes réémises identiques. Refus atomiques reçus.
+Deux mesures release finales : renouvellement+requête64 ~0,96 ms médian local, cycle3 requêtes
+avec sauvegarde/reprise2,93–3,03 ms ; restauration~2,47 µs. Aucun budget cible certifié.
+Debug --verify-only reçu avec les mêmes hashes, dont565bdb15e3ac7503 à48 s.
+**S127-1 réalisée sur fixture.** Production inchangée, aucun ADR ni angle nouveau.
+85 ADR,204 angles,17 invariants,6 spécifications,23 cas ; suite256/cinq ignorés reçue S125
+non relancée ici. Pas de nouvelle réception physique : S127 reste la référence du montage.
+**Suite S129 : S128-1**, bilan cinétique du candidat N256/R80/48 depuis ses nœuds réels,
+comme S78 à courte durée ; bilan total contre référence S127 et raffinement radial.
+Autres paramètres/sources, calibration B2, profondeur finie, mélange pression et disque ouverts.
+Master seul avancé ; anciennes copies propres en retard à synchroniser avant reprise.
+
 
 **S127 — 2026-09-09 :** [TRANSPORT-ETENDU-S127](docs/validation/TRANSPORT-ETENDU-S127.md).
 La borne se réduit à R+cg_max*T<=N*lambda/6. N256/R80/horizon48 admis ; anciens
