@@ -58,25 +58,18 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S105 — terminée
+Session : S106 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : contexte explicite et publication candidate atomique sur pools hôte.
+Objectif : requête monde B+pression, instant et points communs, publication atomique.
 
 ### Plan
 
-- [x] **P1** — vérifier les copies et déclarer le plan.
-- [x] **P2** — construire enveloppe de contexte et requête liée ; tester refus et maintien de la publication précédente.
-- [x] **P3** — publier résultats, limites et suite ; rituel final et synchronisation.
+- [x] **P1** — vérifier la passation et déclarer le plan.
+- [ ] **P2** — construire la composition et le contrôle de pente ; recevoir composantes, contexte et refus.
+- [ ] **P3** — publier les résultats et limites, rituel de passation et synchronisation.
 
 ### Notes de reprise
 
-Départ f4d84d2 ; copies actives propres identiques, jeton libre. S104-1.
-Conserver la provenance de la recette dans le demi-spectre ; ne pas comparer seulement un hash.
-Vue de champ figée à un instant : une requête à un autre instant doit être refusée.
-La préparation utilise un pool candidat distinct ; une erreur ne remplace jamais la vue active.
-Contexte hôte déclaré, pas de preuve géométrique ni de réception universelle de résolution.
-
-P2 : bound_pressure, recette conservée dans HalfSpectrum. Quatre tests debug/release.
-Suite222 réussis/cinq ignorés ; sorties physiques inchangées, données dans CONTEXTE-PRESSION-S105.
-
-P2 4921bd7. Résultats publiés ; suite S106 S105-1, requête monde commune B+pression.
+Départ 0c525eb, copies propres identiques. S105-1.
+Conserver la date préparée ; B utilise actuellement g=9,81, autre gravité incompatible.
+Ne pas assimiler la pente au point à une borne spatiale. Réutiliser le calcul de B sans double conversion.
