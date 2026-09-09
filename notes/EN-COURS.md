@@ -58,76 +58,38 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S130 — terminée
+Session : S131 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : S129-1 — admission dynamique des sources de pression. Le contrôleur d'ADR-078
-emprunte un journal **figé** ; il doit pouvoir admettre une source et republier un champ qui
-lui corresponde, ou ne rien changer du tout.
+Objectif : S130-1 — sortir de la saturation. Après un `Full`, le contrôleur conserve sa
+publication mais ne peut plus changer d'instant. Le chemin de sortie existe déjà ; il s'agit
+de le parcourir en entier, de recevoir ce qu'il garantit, et de mesurer ce qu'il coûte.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seul.
-- [x] **P2** — inventaire avant de décider (L209) : ce que l'emprunt impose, ce qu'un refus
-      de recalcul laisse derrière lui, et ce que la saturation entraîne — `from_journal`
-      refuse tout journal en attente, donc un `Full` bloque aussi les changements d'instant.
-- [x] **P3** — ADR-086 : emprunt mutable, trois issues, retour en arriere interne, saturation dite terminale.
-- [x] **P4** — emprunt mutable, `admit` transactionnel, `undo_last_admit` interne, accesseur
-      `journal()` en lecture seule.
-- [x] **P5** — deux tests : les cinq issues d'admission avec état comparé avant/après, et le
-      retour en arrière après refus du champ.
-- [x] **P6** — 259 tests, ciblés en release, hachages inchangés.
-- [x] **P7** — livrable, rituel de fin, fusion `--ff-only`.
+- [ ] **P2** — inventaire avant de décider (L209), et **chercher ce qui manque** : un
+      élargissement qui réussit sans résoudre l'attente est-il possible, et qu'en sait
+      l'appelant avant d'essayer ?
+- [ ] **P3** — recevoir le cycle complet : élargissement, reprise, reconstruction, et
+      identité en bits du champ d'après avec une préparation directe du journal élargi.
+- [ ] **P4** — recevoir les refus du chemin : pool insuffisant, pool tout juste suffisant.
+- [ ] **P5** — mesurer la fenêtre pendant laquelle l'hôte n'a plus de champ.
+- [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
-Départ e817d0e = master, après avance rapide de ma copie qui était restée à 52e80a5 (S124) et
-n'avait rien d'unique. S125 à S129 ont été faites par Codex sur master ; lues à l'amorce.
+Départ 57d0a3b = master, trois copies coïncidentes.
 
-Ce que la consigne S129-1 demande explicitement : publication cohérente journal/champ,
-attente explicite, ancien état conservé au refus, et **jamais `Unchanged` sur un journal
-différent**. Doublons, conflits et saturation à recevoir avant toute transaction mixte.
+Ce que la lecture a déjà établi, et qui change la forme attendue de la réponse :
 
-Ce que la lecture a déjà établi :
-- `Controller` détient `&'v Journal` : admettre exige `&'v mut Journal`. Sept appelants, tous
-  en tests ou exemples — le changement est peu invasif.
-- L'emprunt mutable **garantit structurellement** l'invariant « jamais `Unchanged` sur un
-  journal différent » : personne d'autre ne peut muter le journal pendant la vie du contrôleur.
-  Préférable à un compteur de version, qui ne ferait que le détecter après coup.
-- `admit_authenticated` rend `Added`, `Unchanged`, ou `Epoch`/`Conflict`/`Pending`/`Full`.
-  `Full` met la source **en attente** et la conserve.
-- `from_journal` refuse tout journal dont l'attente est non vide (`Error::Pending`). Une
-  saturation bloque donc aussi les changements d'instant, pas seulement les admissions.
-- Le journal n'offre **aucun retrait**. Si le champ n'est pas calculable après une admission
-  réussie, il faut soit revenir en arrière (retrait interne, symétrique de l'insertion), soit
-  laisser le journal en avance sur le champ. ADR-078 a déjà écrit qu'on ne doit pas présenter
-  l'ancien champ comme représentant le journal modifié.
+- **`copy_into` prend `&self`**, pas `&mut self`. Or le contrôleur expose `journal()` en
+  lecture seule depuis S130. L'élargissement peut donc se faire **pendant que le contrôleur
+  sert encore**, et la reprise aussi : seule la reconstruction impose de le libérer.
+  La fenêtre sans champ se réduit donc à une préparation, et non à tout le cycle.
+- **`copy_into` copie l'attente** avec la publication, sans admission implicite.
+- **`copy_into` refuse seulement si `slots.len() < count`.** Un pool de taille exactement
+  `count` passe la copie et laisse l'attente irrésolue : `retry` y rendra `Full` à nouveau.
+  Un élargissement peut donc « réussir » sans sortir de la saturation, et rien ne le dit à
+  l'appelant avant qu'il essaie. C'est le candidat le plus sérieux pour un ajout d'API.
 
-Piège à éviter : élargir l'API du journal avec un retrait public. Ce qu'il faut est le retour
-en arrière d'une admission dont on connaît la position, pas une suppression arbitraire.
-
-P2/P3 : inventaire dans ADMISSION-PRESSION-S130 §1, decision ADR-086. Deux points ont oriente
-la forme : l emprunt mutable **garantit** l invariant "jamais Unchanged sur un journal
-different" (le compilateur, pas la vigilance), et les deux succes d admit_authenticated n ont
-pas les memes consequences — Added exige un recalcul, Unchanged non, et confondre les deux
-ferait payer une preparation complete a chaque readmission d une source connue.
-
-P4-P6 : 166 core + 93 harnais = **259 réussis, cinq ignorés** ; les trois tests ciblés passent
-aussi en release ; hachages de campagne identiques (6591ab360344f76e, b563610d1dd78ada).
-
-Deux choses apprises en construisant :
-1. L'emprunt mutable a une conséquence que je n'avais pas anticipée : **le journal n'est plus
-   lisible directement** pendant la vie du contrôleur, et la campagne comme les tests s'en
-   servaient pour la voie directe témoin. D'où `Controller::journal()`, accesseur en lecture
-   seule — qui manquait, et qui est le seul chemin honnête pour inspecter sans muter.
-2. Le test du retour en arrière a été **vérifié comme témoin** : rollback désactivé, il échoue
-   (journal à 2 sources au lieu de 1) ; réactivé, il passe. Sans cette vérification, il aurait
-   pu être creux — c'est L211 appliquée à un test d'état plutôt qu'à un nom d'erreur.
-
-P7 : ADMISSION-PRESSION-S130, journal, index, README, REPRISE, jeton rendu, fusion ff-only.
-Aucun angle mort ni leçon distincte : la session applique L211 et le motif d'ADR-079/080.
-
-Pour S131 sans relire : S130-1 est la sortie de saturation. `Journal::copy_into` copie
-publication **et** attente vers un stockage plus grand, sans admission implicite ; `retry`
-rejoue ensuite l'attente. Le contrôleur détenant le journal mutablement, l'élargissement oblige
-à le libérer — donc à perdre la publication le temps du cycle. Mesurer ce que coûte de la
-reconstruire, et vérifier que le champ d'après vaut bien celui du journal élargi.
+Piège à éviter : reconstruire d'abord et élargir ensuite. L'ordre importe, et il est mesurable.
