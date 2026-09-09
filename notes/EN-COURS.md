@@ -58,47 +58,32 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S127 — terminée
+Session : S128 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S126-1 / A204 — dimensionner ensemble rayon et horizon, puis recevoir
-le transport d'énergie radial loin de la source sans dépasser N256.
+Objectif : S127-1 — exercer le montage N256/R80/48 s dans LiveWater B+W, renouvellement,
+sauvegarde/restauration, identité avec construction directe et coût mesuré.
 
 ### Plan
 
-- [x] **P1** — état réel, jeton et plan seuls ; continuité de S126 sur master propre.
-- [x] **P2** — dériver le domaine et construire une campagne : N256/R80/48 s visé,
-      λ4 et source S126 inchangée. Refus des portées64/128 à N128/256 aux temps de groupe.
-      Réemployer l'oracle S126 par module partagé, sans recopier les formules.
-- [x] **P3** — recevoir surface et transport : sept composantes contre référence,
-      densité physique positive intégrée en profondeur (formule S78) et rayon moyen.
-      Raffiner spectre, angles et quadrature spatiale séparément ; rapport fidèle aux refus.
-- [x] **P4** — vérifications, rituel de fin, registres/actions/index/passation,
-      jeton libre et commit propre.
+- [x] **P1** — vérifier branches/copies/jeton, lire la suite, déclarer le plan seul.
+- [ ] **P2** — construire le scénario hôte : impact S127 unique, fond B réel, points jusqu'à80 m,
+      horizon4→24→48 s, comparaison en bits des dix sorties aux champs directs et restaurés.
+      Refus : temps, rayon tardif, renouvellement impossible, sauvegarde tronquée et N différent ;
+      publication précédente et sorties conservées. TTL4 inchangé, sauvegarde en mémoire seulement.
+- [ ] **P3** — recevoir le scénario, mesurer séparément update, requête64, save/restore et cycle
+      complet après mise en régime ; bornes de mesure explicites, rapport et suite motivée.
+      Corriger la bibliothèque seulement si un défaut est reproduit et documenté.
+- [ ] **P4** — vérification adaptée, journal/angles/leçons/actions, index/README/passation,
+      décomptes et invariants, jeton libre et commit final propre.
 
 ### Notes de reprise
 
-Départ760a9f0 sur master, aucune branche avancée, arbre propre ; aucune copie créée.
-Règles et corpus déjà lus dans cette conversation. Le spectre et le milieu restent ceux
-reçus en S126. Domaine visé80+cg_max*48≈164,8 m contre N*lambda/6=170,67 m disponibles.
-Critères de banc AVANT mesure : sept composantes normalisées<=1e-4 (S126), oracle<=1e-6 ;
-énergie totale fine à0,003 relatif et raffinement radial<0,002 (S78), spectral<1e-4.
-Densité>=-1e-12 J/m² (S78). Transport demandé : majorité (>50 %) de l'énergie prescrite
-hors32 m à48 s, quasi-absence (<0,003 E0) initialement ; seuils de banc, pas gameplay.
-Le modèle profond de référence reçoit son bilan ; le candidat reçoit sa surface et sa
-part potentielle. Ne pas annoncer son bilan cinétique complet sans accès à ses nœuds.
-Comparer les sept sorties jusqu'à48 s, sans allonger le TTL source ni remettre les phases à zéro.
-
-P2 : oracle extrait sans duplication vers examples/support/radial_reference.rs ; campagne
-transport_extended_impact construite. N256/R80/T48 admis ; anciens couples aux temps de
-R/cg_max refusent Resolution. Première campagne exécutée en15,94 s et reçue.
-Énergie hors32 à48 s=0,999852 E0 ; rayon moyen53,4157 m ; erreur surface<=7,13e-7.
-Résultats à publier et extraction S126 à vérifier en P3.
-P3 : TRANSPORT-ETENDU-S127 publié. Deux bancs transport reçus15,94/15,22 s ; référence
-S126 rejouée après extraction, valeurs conservées. Raffinements locaux de l'anneau reçus.
-Surface max7,13e-7 ; potentiel candidat/ref max5,63e-7 E0 ; bilan total de référence seul.
-S126-1 réalisée sur fixture, A204 traitée dans ce périmètre. S127-1 : cycle LiveWater B+W
-N256/R80/horizon48 avec renouvellement, sauvegarde/reprise et coût. Aucun ADR nouveau.
-
-P4 : journal, suivi A204, actions, index/README/REPRISE et S126 actualisés.
-Décomptes inchangés85/204/17/6/23, aucun invariant invalidé. L215 appliquée ; pas de
-nouvelle leçon distincte. Jeton rendu, master seul avancé. Suite S128 : S127-1.
+Départ4c33261 sur master propre ; anciennes copies en retard et propres, aucune branche
+avancée ni copie créée. Cargo1.97 disponible. Règles et REPRISE déjà lus dans cette conversation.
+Points d'entrée : bench_live_water.rs (S88), prepared_water::{LiveWater, Prepared}, live_snapshot.rs.
+Production actuelle : update(None) reconstruit le journal et les champs, même à horizon constant ;
+current() ne vérifie pas l'instant demandé, c'est la requête qui refuse hors horizon.
+Référence du cycle : même Background et composition ponctuelle, champ RadialImpact256 construit
+directement depuis les faits ; identité d'acheminement seulement. Réception physique = S127.
+Critère : identité des bits de chaque sortie, pas seulement hash ; refus avec témoins.
+Aucun seuil de performance choisi ; résultats locaux, pas de budget cible certifié.

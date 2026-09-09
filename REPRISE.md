@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-09 18:50 +02:00
+JETON            : occupé
+Battement        : 2026-09-10 00:45 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S128 — cycle LiveWater transporté
 Dernière session : S127 — transport au-delà de32 m reçu sur fixture
 Session suivante : S128 — cycle LiveWater transporté et coût (S127-1)
 
