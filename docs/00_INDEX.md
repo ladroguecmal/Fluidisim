@@ -17,6 +17,13 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S130 :** [ADR-086](adr/ADR-086-admission-dynamique-de-la-pression.md), admission dynamique des sources de pression.
+[ADMISSION-PRESSION-S130](validation/ADMISSION-PRESSION-S130.md) : le contrôleur emprunte le journal mutablement —
+l'invariant « jamais `Unchanged` sur un journal différent » est tenu par le compilateur — et `admit` est une
+transaction à trois issues, dont le retour à l'état antérieur si le champ n'est pas calculable. Saturation reçue
+comme état terminal.259 tests/cinq ignorés, hachages inchangés.
+86 ADR,204 angles,17 invariants,6 spécifications,23 cas. Suite S131 : sortie de saturation, S130-1.
+
 **S129 :** [BILAN-CANDIDAT-ETENDU-S129](validation/BILAN-CANDIDAT-ETENDU-S129.md), cinétique
 et bilan total des nœuds construits N256/R80/48 reçus contre S127. Écart total maximal
 9,045e-7 E0 ;99,985214 % de E0 dans l'anneau32–80 à48 s. Termes croisés conservés,

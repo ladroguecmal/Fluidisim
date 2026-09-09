@@ -61,7 +61,7 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S129 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S130 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
@@ -153,7 +153,10 @@ Deux campagnes release et debug reçus, production inchangée.
 [Bilan candidat S129](docs/validation/BILAN-CANDIDAT-ETENDU-S129.md) : cinétique et énergie totale
 du candidat N256/R80/48 reçues contre S127, écart total maximal9,045e-7 E0. Interférences
 conservées ;99,985214 % de E0 entre32 et80 m à48 s. **S128-1 réalisée sur fixture.**
-Suite complète257/cinq ignorés. Suite S130 : S129-1, admission dynamique des sources de
-pression avec publication cohérente du journal et du champ, maintien de l'état valide au refus.
-85 ADR,204 angles,17 invariants,6 spécifications,23 cas inchangés.
+Suite complète259/cinq ignorés.
+Les sources de pression s'admettent désormais pendant qu'une publication est en cours : le contrôleur
+emprunte le journal mutablement, et `admit` republie un champ qui lui corresponde ou rend le journal à
+son état antérieur (ADR-086, S130). La saturation est reçue comme état terminal du contrôleur.
+Suite : la sortie de saturation, qui oblige encore à détruire la publication en cours, S130-1.
+86 ADR,204 angles,17 invariants,6 spécifications,23 cas.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

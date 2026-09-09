@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S130 — en cours
+Session : S130 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : S129-1 — admission dynamique des sources de pression. Le contrôleur d'ADR-078
 emprunte un journal **figé** ; il doit pouvoir admettre une source et republier un champ qui
@@ -76,7 +76,7 @@ lui corresponde, ou ne rien changer du tout.
 - [x] **P5** — deux tests : les cinq issues d'admission avec état comparé avant/après, et le
       retour en arrière après refus du champ.
 - [x] **P6** — 259 tests, ciblés en release, hachages inchangés.
-- [ ] **P7** — livrable, rituel de fin, fusion `--ff-only`.
+- [x] **P7** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -122,3 +122,12 @@ Deux choses apprises en construisant :
 2. Le test du retour en arrière a été **vérifié comme témoin** : rollback désactivé, il échoue
    (journal à 2 sources au lieu de 1) ; réactivé, il passe. Sans cette vérification, il aurait
    pu être creux — c'est L211 appliquée à un test d'état plutôt qu'à un nom d'erreur.
+
+P7 : ADMISSION-PRESSION-S130, journal, index, README, REPRISE, jeton rendu, fusion ff-only.
+Aucun angle mort ni leçon distincte : la session applique L211 et le motif d'ADR-079/080.
+
+Pour S131 sans relire : S130-1 est la sortie de saturation. `Journal::copy_into` copie
+publication **et** attente vers un stockage plus grand, sans admission implicite ; `retry`
+rejoue ensuite l'attente. Le contrôleur détenant le journal mutablement, l'élargissement oblige
+à le libérer — donc à perdre la publication le temps du cycle. Mesurer ce que coûte de la
+reconstruire, et vérifier que le champ d'après vaut bien celui du journal élargi.

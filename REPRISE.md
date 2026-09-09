@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 01:10 +02:00
+JETON            : libre
+Battement        : 2026-09-10 01:17 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S130 — admission dynamique des sources de pression (S129-1)
-Dernière session : S129 — bilan énergétique du candidat transporté reçu
-Session suivante : à fixer en fin de S130
+Session en cours : aucune
+Dernière session : S130 — admission dynamique de la pression ;259 tests/cinq ignorés
+Session suivante : S131 — sortie de saturation du journal de pression (S130-1)
 
 **Copie de travail S130** : worktree `claude/reprise-projet-2d3506`, remis en avance rapide sur
 master (e817d0e) au démarrage — il était resté à 52e80a5 et n'avait rien d'unique, donc aucun
@@ -180,6 +180,25 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S130 — 2026-09-10 :** [ADR-086](docs/adr/ADR-086-admission-dynamique-de-la-pression.md),
+[ADMISSION-PRESSION-S130](docs/validation/ADMISSION-PRESSION-S130.md). S129-1 réalisée. Le
+contrôleur emprunte le journal **mutablement** : l'invariant « jamais `Unchanged` sur un journal
+différent » est tenu par le compilateur, non par la vigilance. `admit` est une transaction à
+trois issues — réadmission à l'octet près sans recalcul, admission republiée identique en bits à
+une préparation directe, refus qui rend le journal à son état antérieur. Le retour en arrière
+défait l'insertion à sa position connue (`insertion_index`, `undo_last_admit`, tous deux
+internes) ; aucun retrait public n'est ouvert.
+**Saturation reçue comme état terminal** : après un `Full`, la source est conservée en attente et
+le contrôleur ne peut plus changer d'instant, `from_journal` refusant tout journal en attente.
+Cinq issues exercées avec journal et champ comparés avant/après ; le test du retour en arrière a
+été vérifié comme témoin (rollback désactivé, il échoue).
+`Controller::journal()` ajouté : l'emprunt mutable rendait le journal illisible pendant la vie du
+contrôleur.259 tests/cinq ignorés ; hachages de campagne identiques à S118.
+86 ADR,204 angles,17 invariants,6 spécifications,23 cas.
+Suite S131 : S130-1, sortie de saturation — `copy_into` vers un pool élargi puis `retry` oblige
+encore à détruire la publication en cours ; recevoir ce cycle et le mesurer. Transaction mixte,
+extension de fenêtre, S116-2, bilan mixte, durabilité et calibration B2 restent ouverts.
 
 **S129 — 2026-09-10 :** [BILAN-CANDIDAT-ETENDU-S129](docs/validation/BILAN-CANDIDAT-ETENDU-S129.md).
 S128-1 réalisée sur fixture : cinétique et total du candidat N256/R80/48 mesurés depuis ses

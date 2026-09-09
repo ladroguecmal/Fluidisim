@@ -6779,3 +6779,43 @@ mixte et disque. Aucun arbitrage humain requis.
 figé ; construire la publication cohérente journal/champ, attente explicite et maintien de
 l'ancienne publication au refus. Recevoir l'arrivée d'une source à l'instant déjà publié
 avant de revendiquer la transaction du montage mixte. Master seul avancé, jeton rendu.
+
+---
+
+## S130 — 2026-09-10 — Admettre une source sans mentir sur le champ publié
+
+**Entrée :** jeton libre à e817d0e. Ma copie était restée à 52e80a5 (S124) sans rien d'unique ;
+avance rapide au démarrage, **aucun fork**. S125 à S129 ont été faites par Codex sur master.
+**Produit :** [ADR-086](../docs/adr/ADR-086-admission-dynamique-de-la-pression.md) et
+[ADMISSION-PRESSION-S130](../docs/validation/ADMISSION-PRESSION-S130.md). Le contrôleur emprunte
+désormais le journal **mutablement** et expose `admit`, transaction à trois issues.
+**Décision structurante :** l'emprunt mutable ne sert pas la commodité mais l'invariant. La
+consigne exigeait « jamais `Unchanged` sur un journal différent » ; un compteur de version
+l'aurait détecté après coup, l'emprunt l'interdit d'avance — personne ne peut modifier le
+journal pendant qu'une publication en dépend. Même préférence qu'ADR-079 et ADR-080 : tenir une
+propriété par structure plutôt que par vigilance.
+**Les trois issues.** Réadmission à l'octet près : rien n'est recalculé, le champ reste exact —
+distinguer ce cas évite de payer une préparation complète à chaque réadmission d'une source
+connue. Admission réussie : champ republié au même instant, identique en bits à une préparation
+directe du journal. Refus : journal rendu à son état antérieur, publication conservée.
+**Le retour en arrière.** `admit_authenticated` peut réussir puis le recalcul échouer, laissant
+le journal en avance sur le champ. `undo_last_admit` défait l'insertion à sa position connue —
+`insertion_index`, calculé avant elle, et dont `admit_authenticated` se sert aussi désormais,
+pour que le retrait défasse exactement ce que l'insertion a fait. Aucun retrait public.
+**La saturation est dite terminale.** Après un `Full`, la source est conservée en attente et
+`from_journal` refuse tout journal en attente : le contrôleur ne peut plus changer d'instant non
+plus. Reçu explicitement plutôt que découvert au premier `update`.
+**Deux choses apprises en construisant.** L'emprunt mutable rend le journal illisible
+directement pendant la vie du contrôleur, ce que la campagne et les tests faisaient pour leur
+voie témoin — d'où `Controller::journal()`, qui manquait. Et le test du retour en arrière a été
+**vérifié comme témoin** : rollback désactivé il échoue, réactivé il passe. Un test d'état peut
+être creux exactement comme un nom d'erreur inatteignable (L211).
+**Réception :** cinq issues exercées avec journal et champ comparés avant/après, plus le refus
+numérique sur le témoin de S117. 166 core + 93 harnais = **259 réussis, cinq ignorés** ; trois
+ciblés aussi en release ; hachages de campagne identiques à S118.
+**Limites :** saturation non résolue, aucune source publiée retirable, transaction mixte non
+revendiquée, aucun coût nouveau certifié.
+86 ADR, 204 angles, 17 invariants, 6 spécifications, 23 cas. Invariants relus : aucun invalidé.
+Aucun angle mort ni leçon distincte : la session applique des leçons existantes.
+**Suite S131 :** S130-1 — la sortie de saturation existe (`copy_into` vers un pool élargi puis
+`retry`) mais oblige à détruire la publication en cours. Recevoir ce cycle et le mesurer.
