@@ -296,3 +296,7 @@ mod tests {
         assert_eq!(ids(&grown), vec![1]);
     }
 }
+
+#[path = "pressure_snapshot.rs"]
+mod snapshot;
+pub use snapshot::{SnapshotError, SNAPSHOT_HEADER};

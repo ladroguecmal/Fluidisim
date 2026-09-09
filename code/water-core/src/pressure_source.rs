@@ -209,53 +209,11 @@ impl<'a> Source<'a> {
     /// Deux passages : tous les contrôles avant la première écriture dans le pool.
     /// Taille exacte ; les suffixes inconnus ne sont jamais ignorés.
     pub fn decode_into(bytes: &[u8], pool: &'a mut [Segment]) -> Result<Self, Error> {
-        if bytes.len() < HEADER {
-            return Err(Error::Length);
-        }
-        if &bytes[..4] != b"WPRS" || bytes[4..6] != 1u16.to_le_bytes() {
-            return Err(Error::Version);
-        }
-        if bytes[6..8] != [0, 0] {
-            return Err(Error::Reserved);
-        }
+        let m = inspect(bytes)?;
         let count = u32_at(bytes, 12) as usize;
-        if bytes.len() != length(count)? || u32_at(bytes, 8) as usize != bytes.len() {
-            return Err(Error::Length);
-        }
         if pool.len() < count {
             return Err(Error::Capacity);
         }
-        let m = Metadata {
-            epoch: u64_at(bytes, 16),
-            id: u64_at(bytes, 24),
-            cause: Cause {
-                entity: u64_at(bytes, 32),
-                command: u64_at(bytes, 40),
-                emission: u32_at(bytes, 48),
-            },
-            settings: Settings {
-                frame: FrameId(u32_at(bytes, 52)),
-                cell: u64_at(bytes, 56),
-                gravity: f32_at(bytes, 64),
-                density: f32_at(bytes, 68),
-                min: [f32_at(bytes, 72), f32_at(bytes, 76)],
-                max: [f32_at(bytes, 80), f32_at(bytes, 84)],
-                start: SimTime(u64_at(bytes, 88)),
-                end: SimTime(u64_at(bytes, 96)),
-            },
-            recipe: Recipe {
-                sigma: f32_at(bytes, 104),
-                cutoff: f32_at(bytes, 108),
-                radial: u16::from_le_bytes(bytes[112..114].try_into().unwrap()) as usize,
-                angular: u16::from_le_bytes(bytes[114..116].try_into().unwrap()) as usize,
-            },
-        };
-        for b in bytes[HEADER..].chunks_exact(RECORD) {
-            if b[36..40] != [0; 4] {
-                return Err(Error::Reserved);
-            }
-        }
-        validate(m, bytes[HEADER..].chunks_exact(RECORD).map(segment))?;
         for (out, b) in pool.iter_mut().zip(bytes[HEADER..].chunks_exact(RECORD)) {
             *out = segment(b);
         }
@@ -504,4 +462,52 @@ mod tests {
         signed[1].pressure_pa = 0.0;
         assert!(Source::new(meta(), &signed).is_ok());
     }
+}
+
+pub(crate) fn inspect(bytes: &[u8]) -> Result<Metadata, Error> {
+    if bytes.len() < HEADER {
+        return Err(Error::Length);
+    }
+    if &bytes[..4] != b"WPRS" || bytes[4..6] != 1u16.to_le_bytes() {
+        return Err(Error::Version);
+    }
+    if bytes[6..8] != [0, 0] {
+        return Err(Error::Reserved);
+    }
+    let count = u32_at(bytes, 12) as usize;
+    if bytes.len() != length(count)? || u32_at(bytes, 8) as usize != bytes.len() {
+        return Err(Error::Length);
+    }
+    let m = Metadata {
+        epoch: u64_at(bytes, 16),
+        id: u64_at(bytes, 24),
+        cause: Cause {
+            entity: u64_at(bytes, 32),
+            command: u64_at(bytes, 40),
+            emission: u32_at(bytes, 48),
+        },
+        settings: Settings {
+            frame: FrameId(u32_at(bytes, 52)),
+            cell: u64_at(bytes, 56),
+            gravity: f32_at(bytes, 64),
+            density: f32_at(bytes, 68),
+            min: [f32_at(bytes, 72), f32_at(bytes, 76)],
+            max: [f32_at(bytes, 80), f32_at(bytes, 84)],
+            start: SimTime(u64_at(bytes, 88)),
+            end: SimTime(u64_at(bytes, 96)),
+        },
+        recipe: Recipe {
+            sigma: f32_at(bytes, 104),
+            cutoff: f32_at(bytes, 108),
+            radial: u16::from_le_bytes(bytes[112..114].try_into().unwrap()) as usize,
+            angular: u16::from_le_bytes(bytes[114..116].try_into().unwrap()) as usize,
+        },
+    };
+    for b in bytes[HEADER..].chunks_exact(RECORD) {
+        if b[36..40] != [0; 4] {
+            return Err(Error::Reserved);
+        }
+    }
+    validate(m, bytes[HEADER..].chunks_exact(RECORD).map(segment))?;
+    Ok(m)
 }

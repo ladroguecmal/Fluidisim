@@ -65,7 +65,7 @@ Objectif : instantané mémoire du journal et de l'attente, restauration transac
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [ ] **P2** — construire format et restauration, valider intégralement avant écriture ; tester reprise et refus.
+- [x] **P2** — construire format et restauration, valider intégralement avant écriture ; tester reprise et refus.
 - [ ] **P3** — publier décision et résultats ; rituel final et synchronisation.
 
 ### Notes de reprise
@@ -73,3 +73,6 @@ Objectif : instantané mémoire du journal et de l'attente, restauration transac
 Départ dcb9ee6, copies propres identiques. S109-1.
 Conserver pending même sur cible agrandie ; copie des segments dans un pool indépendant.
 Validation intégrale des sources, capacités et conflits avant mutation des pools de destination.
+
+P2 : WPJR V1, validation globale avant écriture, copie des trajectoires et attente intacte.
+Suite236 réussis/cinq ignorés ; huit tests journal/instantané aussi en release. ADR-076.
