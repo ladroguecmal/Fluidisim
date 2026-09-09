@@ -58,71 +58,24 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S124 — terminée
-Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : A201 — la portée d'un champ d'impact vaut 5,09 λ parce que la table de Bessel
-s'arrête à `x = 64`. Mesurer d'abord si la piste asymptotique tient, **puis** décider.
+Session : S125 — en cours
+Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
+Objectif : S124-1 / A202 — mesurer construction, évaluation et mémoire à N=64/128/256,
+puis trancher le choix du profil sans confondre domaine calculable et réception physique.
 
 ### Plan
 
-- [x] **P1** — amorce, jeton, plan.
-- [x] **P2** — mesurer avant de décider (L209, L210). Trois erreurs à séparer, et la troisième
-      est celle qu'on risque d'oublier :
-      1. l'asymptotique elle-même, en f64 pur, contre la référence dense existante ;
-      2. le raccord en `x = 64` — une discontinuité y ferait un anneau visible ;
-      3. **la précision de l'argument** `k·r`, calculé en f32 : à `x = 4000`, un ulp de f32
-         vaut déjà 2,4e-4 rad, soit cinquante fois la tolérance actuelle de 4e-6. Si c'est
-         la phase qui limite, étendre la table ne servirait à rien.
-- [x] **P3** — ADR-084, sur ce que la mesure aura montré, y compris si elle dit non.
-- [x] **P4** — `BESSEL_MAX = 2048`, asymptotique d'ordre 2 au-delà de la table, `Reach` étendu.
-- [x] **P5** — précision jusqu'à 2048, continuité au raccord, valeurs tabulées revérifiées,
-      hachages de campagne identiques à S118.
-- [x] **P6** — rejouée : gain de 0 à +82 %, `Resolution` prend le relais ; à N=256, neuf cas sur onze passent.
-- [x] **P7** — livrable, rituel de fin, fusion `--ff-only`.
+- [x] **P1** — amorce, état réel, jeton et déclaration du plan seule.
+- [ ] **P2** — sonde reproductible : domaine commun et portée étendue, mise en régime,
+      ordre alterné, médianes et dispersion, empreinte mémoire ; contrôle des sorties finies.
+- [ ] **P3** — rapport et ADR sur le profil retenu après mesure ; application nécessaire
+      au code ou documentation explicite du maintien, sans migration silencieuse des fixtures.
+- [ ] **P4** — vérification adaptée, rituel de fin complet, jeton rendu et commits propres.
 
 ### Notes de reprise
 
-Départ ea1669e = master ; trois copies coïncidentes, 5134cd archivée, c107bf sur la ligne S44.
-
-Points d'entrée : `radial_impact::bessel` (interpolation Hermite, refus hors [0,64]),
-`bessel_table.rs`, et la référence f64 indépendante déjà écrite —`bessel_angular` plus la
-quadrature à 4096 directions du test `bessel_against_series_and_dense_angular_reference`.
-
-Asymptotique visée, à vérifier et non à croire :
-`J0(x) ≈ √(2/πx)·[cos θ + sin θ/(8x)]`, `J1(x) ≈ √(2/πx)·[sin θ − cos θ·3/(8x)]`, θ = x − π/4.
-L'ordre zéro seul donne ~2e-4 d'erreur absolue à x = 64, cinquante fois la tolérance ; le terme
-en 1/(8x) devrait suffire, c'est à mesurer.
-
-Contrainte du dépôt : **pas de libm** dans le chemin de production (ADR-060). Les sinus et
-cosinus passent par PhaseQ32, la racine carrée f32 est admise.
-
-Issue possible et parfaitement acceptable : la mesure dit que la limite n'est pas la table mais
-la phase, et la décision devient autre chose que « étendre ». Ne pas forcer la piste annoncée.
-
-P2 : `bessel_reach.rs`. La piste tient, et la mesure a corrigé deux idées fausses.
-
-1. **Asymptotique** (A&S 9.2.1) : ordre 2, erreur **3,6e-8 a x=64**, decroissante ensuite.
-   L'ordre 1 seul donne 1,6e-6, deja sous la tolerance de 4e-6. La mesure a aussi attrape un
-   signe faux dans mon terme d'ordre 2 pour J1 — P0 = 1 - 9/(128x^2) mais P1 = 1 + 15/(128x^2).
-2. **Raccord en x=64** : saut de **1,04e-7** entre la table et la candidate. Aucun anneau.
-3. **Ma crainte sur l'argument f32 etait exageree** : l'erreur sur J0 croit comme
-   ulp_rel * x * |J1|, et |J1| decroit en 1/sqrt(x), donc l'ensemble ne croit qu'en sqrt(x).
-
-Mais **le premier jeu de couples de test etait degenere** : lambda=4 m et r=60 m tombent sur 30
-tours pile, la phase y est exacte par accident et l'erreur affichee valait 1e-9. En balayant
-finement, le pire cas remonte a 8e-6. Piege classique, et il aurait fait publier une borne
-fausse d'un facteur mille.
-
-**Borne mesuree** : pire erreur 3,77e-6 a x<=2048, 5,8e-6 a x<=4096. Donc **x <= 2048**, fixe
-par la precision de la phase spatiale en f32 — la meme limite que pour B (ADR-052) — et non par
-la formule. Portee : **163 lambda** au lieu de 5,09, soit un facteur 32.
-
-P4-P7 : ADR-084 avec note corrective datée sur le facteur 32 qui ne s'est pas produit.
-PORTEE-ETENDUE-S124, suivi A201, A202, L213, journal, index, README, jeton rendu, ff-only.
-
-Pour S125 sans relire : S124-1 est une mesure de coût, pas une décision de conception. `N` est
-le paramètre de type de `RadialImpact<N>` et de `Prepared<N>` ; passer à 256 touche donc les
-signatures des appelants, y compris `mixed`. Mesurer d'abord sur `radial_impact` seul —
-construction et `sample` par point, N=64 contre 256 — avec un bloc de mise en régime avant la
-première mesure (A195), et comparer au budget du cycle mixte (~49 ms à 224x128, dont 35 ms de
-requête 64 points). Les portées obtenues par N sont dans PORTEE-ETENDUE-S124 §5.
+Départ 52e80a5 sur master. Deux worktrees propres au même commit ; c107bf ancien sans
+avance ni modification ; lignée 5134cd archivée. Aucun worktree créé.
+Cargo 1.97 disponible. S124 annonce neuf cas sur onze admis à N256 ; réception physique
+limitée au scénario historique. Mesurer d'abord le candidat radial isolé ; cycle mixte
+S118 ~49 ms cité comme contexte historique, pas comme mesure sur cette machine.

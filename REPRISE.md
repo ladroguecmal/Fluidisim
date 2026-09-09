@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-09 16:37 +02:00
-Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-09 18:23 +02:00
+Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
+Session en cours : S125 — coût et profil des impacts
 Dernière session : S124 — portée étendue, neuf cas sur onze à N=256 ;256 tests/cinq ignorés
 Session suivante : S125 — coût de N=256 et choix du profil (S124-1, A202)
 
