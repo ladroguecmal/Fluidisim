@@ -641,3 +641,176 @@ fn saturation_is_left_exactly_when_the_announced_capacity_is_given() {
     // Et la saturation est bien derrière : le contrôleur change d'instant à nouveau.
     assert_eq!(c2.update(SimTime(2_000_000)), Ok(Update::Published));
 }
+/// S132 P2 — sonde de décision, sans rien construire : l'ajout d'une source au champ déjà
+/// préparé donne-t-il **le même champ, au bit près**, que la préparation complète ? La réponse
+/// dépend de la position d'insertion, puisque l'accumulation se fait par nœud, segment après
+/// segment, en `f32`.
+#[test]
+fn incremental_addition_is_exact_only_when_the_source_comes_last() {
+    use crate::spectral_pressure::prepare_segments;
+    let p = paths();
+    let s = settings();
+    let mut nodes = [Node::default(); 384];
+    let mut hn = [Node::default(); 192];
+    let full = bake(recipe(), &mut nodes).unwrap();
+    let half = full.half_into(&mut hn).unwrap();
+    let t = SimTime(1_500_000);
+    let prepare = |segs: &[Segment], pool: &mut [Slot]| -> ([u32; 2], Vec<[u32; 8]>) {
+        let f = prepare_segments(
+            half.nodes(),
+            segs.iter().copied(),
+            s.gravity,
+            s.density,
+            t,
+            s.end,
+            s.min,
+            s.max,
+            pool,
+        )
+        .unwrap();
+        let bilans = [f.energy_j.to_bits(), f.power_w.to_bits()];
+        // Les coefficients eux-mêmes, relevés par échantillonnage en huit points : c'est ce
+        // que l'incrémental doit reproduire.
+        let points = [
+            [0.0; 2],
+            [1.0, 0.0],
+            [2.0, 1.0],
+            [-3.0, 2.0],
+            [-8.0; 2],
+            [12.0; 2],
+            [5.5, -2.5],
+            [0.25, 11.75],
+        ];
+        let echantillons = points
+            .iter()
+            .map(|q| {
+                let v = f.sample(*q).unwrap();
+                [
+                    v.eta,
+                    v.vertical_velocity,
+                    v.potential,
+                    v.slope[0],
+                    v.slope[1],
+                    v.horizontal_velocity[0],
+                    v.horizontal_velocity[1],
+                    0.0,
+                ]
+                .map(f32::to_bits)
+            })
+            .collect();
+        (bilans, echantillons)
+    };
+    // **Trois** segments, et non deux : avec deux termes l'addition f32 est commutative, et
+    // une sonde à deux sources conclurait à tort que l'ordre n'a aucune importance.
+    let a = p[0][0];
+    let b = p[1][0];
+    let c = Segment {
+        birth: SimTime(250_000),
+        origin: [-2.5, 3.25],
+        velocity: [1.5, -0.75],
+        pressure_pa: 3.125,
+        ..a
+    };
+    // Cas favorable : la nouvelle source porte le plus grand identifiant, donc elle s'insère
+    // en dernier et l'ordre d'addition est préservé.
+    let anciens = [a, b];
+    let nouveaux = [c];
+    let tous_en_fin = [a, b, c];
+    // Cas défavorable : la nouvelle s'insère entre les deux autres.
+    let anciens_milieu = [a, c];
+    let tous_au_milieu = [a, b, c];
+
+    let mut pool_a = [Slot::default(); 192];
+    let mut pool_b = [Slot::default(); 192];
+    let (_, direct_fin) = prepare(&tous_en_fin, &mut pool_a);
+    let (_, direct_milieu) = prepare(&tous_au_milieu, &mut pool_b);
+    // Même ensemble, même ordre canonique : les deux voies directes coïncident forcément.
+    assert_eq!(direct_fin, direct_milieu);
+
+    // Simulation de l'incrémental : préparer les anciens, puis ajouter la réponse des
+    // nouveaux, nœud par nœud, dans cet ordre.
+    let mut pool_anciens = [Slot::default(); 192];
+    let mut pool_nouveaux = [Slot::default(); 192];
+    prepare(&anciens, &mut pool_anciens);
+    prepare(&nouveaux, &mut pool_nouveaux);
+    let mut pool_somme = pool_anciens;
+    for (cible, ajout) in pool_somme.iter_mut().zip(pool_nouveaux.iter()) {
+        cible.add_response_of(ajout);
+    }
+    // Et la même chose quand la source s'insère au milieu : (a+c)+b contre (a+b)+c.
+    let mut pool_anciens_milieu = [Slot::default(); 192];
+    let mut pool_b_seul = [Slot::default(); 192];
+    prepare(&anciens_milieu, &mut pool_anciens_milieu);
+    prepare(&[b], &mut pool_b_seul);
+    let mut pool_somme_milieu = pool_anciens_milieu;
+    for (cible, ajout) in pool_somme_milieu.iter_mut().zip(pool_b_seul.iter()) {
+        cible.add_response_of(ajout);
+    }
+    // Reconstruire un champ depuis les slots sommés et l'échantillonner comme les autres.
+    let somme = crate::spectral_pressure::Field::from_slots(&pool_somme, s.min, s.max);
+    let points = [
+        [0.0; 2],
+        [1.0, 0.0],
+        [2.0, 1.0],
+        [-3.0, 2.0],
+        [-8.0; 2],
+        [12.0; 2],
+        [5.5, -2.5],
+        [0.25, 11.75],
+    ];
+    let incremental: Vec<[u32; 8]> = points
+        .iter()
+        .map(|q| {
+            let v = somme.sample(*q).unwrap();
+            [
+                v.eta,
+                v.vertical_velocity,
+                v.potential,
+                v.slope[0],
+                v.slope[1],
+                v.horizontal_velocity[0],
+                v.horizontal_velocity[1],
+                0.0,
+            ]
+            .map(f32::to_bits)
+        })
+        .collect();
+    let somme_milieu = crate::spectral_pressure::Field::from_slots(&pool_somme_milieu, s.min, s.max);
+    let incremental_milieu: Vec<[u32; 8]> = points
+        .iter()
+        .map(|q| {
+            let v = somme_milieu.sample(*q).unwrap();
+            [
+                v.eta,
+                v.vertical_velocity,
+                v.potential,
+                v.slope[0],
+                v.slope[1],
+                v.horizontal_velocity[0],
+                v.horizontal_velocity[1],
+                0.0,
+            ]
+            .map(f32::to_bits)
+        })
+        .collect();
+    let ecart = |x: &Vec<[u32; 8]>| {
+        x.iter()
+            .zip(direct_fin.iter())
+            .filter(|(u, v)| u != v)
+            .count()
+    };
+    println!(
+        "source en fin    : identique = {} ({} points sur 8 differents)",
+        incremental == direct_fin,
+        ecart(&incremental)
+    );
+    println!(
+        "source au milieu : identique = {} ({} points sur 8 differents)",
+        incremental_milieu == direct_fin,
+        ecart(&incremental_milieu)
+    );
+    assert_eq!(
+        incremental, direct_fin,
+        "l'ajout d'une source de plus grand identifiant doit reproduire la voie directe"
+    );
+}

@@ -67,14 +67,14 @@ décider. Renoncer est une issue légitime.
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seul.
-- [ ] **P2** — mesurer avant de décider (L209, L210), sans toucher la production :
+- [x] **P2** — mesurer avant de décider (L209, L210), sans toucher la production :
       1. l'identité en bits, selon que la source s'insère **en fin** ou **au milieu** de
          l'ordre canonique — l'accumulation se fait par nœud, segment après segment, donc
          seule la première position préserve l'ordre d'addition ;
       2. ce que l'incrémental ne peut pas reprendre en l'état : la **pression modale cumulée**
          n'est pas stockée dans le `Slot`, or la puissance en dépend ;
       3. le gain réel, qui vaut au mieux le rapport du nombre de sources.
-- [ ] **P3** — ADR-088 sur ce que la mesure aura montré, **y compris si elle dit non**.
+- [x] **P3** — ADR-088 : incremental si et seulement si insertion finale, resultat toujours celui de la voie directe.
 - [ ] **P4** — construire ce que la décision retient.
 - [ ] **P5** — recevoir : identité, refus, et hachages de campagne.
 - [ ] **P6** — mesurer le gain effectif.
@@ -101,3 +101,15 @@ Piège à éviter : conclure sur le gain sans compter ce que la structure grossi
 l'identité conditionnelle impose à l'appelant. Le consommateur — un hôte qui admet une source
 en cours de jeu — n'est pas une boucle par trame ; 12,2 ms occasionnels ne sont peut-être pas
 un problème à résoudre.
+
+P2 : deux mesures, et la premiere version de la sonde etait trop faible. Avec **deux** segments,
+l addition f32 est commutative : la sonde concluait que l ordre n a aucune importance. Avec
+trois, le verdict est net — insertion en fin : identique en bits, 0 point sur 8 different ;
+au milieu : les 8 points different.
+Cout de la preparation lineaire en segments : x1,98 a n=2, x3,91 a n=4, x7,12 a n=8 (224x128),
+soit 4,85 ms par segment. Un incremental ramenerait toute admission au cout de n=1.
+Decision : incremental **si et seulement si** la source s insere en dernier, sinon recalcul.
+Le resultat est alors toujours celui de la voie directe — sans quoi deux hotes ayant admis les
+memes sources dans un ordre different auraient des champs differents, et I-03 ne survivrait pas.
+Prix : le Slot doit porter la pression modale cumulee (+18 % sur les pools) car la puissance en
+depend et la reconstituer couterait ce qu on cherche a eviter.

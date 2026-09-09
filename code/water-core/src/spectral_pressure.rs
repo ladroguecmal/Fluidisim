@@ -219,6 +219,34 @@ pub(crate) fn prepare_segments<'a>(
         power_w: power,
     })
 }
+#[cfg(test)]
+impl Slot {
+    /// S132, sonde de décision : ajoute la réponse d'un autre slot à celle-ci, dans l'ordre
+    /// où `prepare_segments` l'aurait fait si les segments correspondants venaient après.
+    /// N'existe qu'en test — le chemin de production n'a pas d'addition de slots.
+    pub(crate) fn add_response_of(&mut self, other: &Slot) {
+        self.response.eta.re += other.response.eta.re;
+        self.response.eta.im += other.response.eta.im;
+        self.response.velocity.re += other.response.velocity.re;
+        self.response.velocity.im += other.response.velocity.im;
+    }
+}
+#[cfg(test)]
+impl<'a> Field<'a> {
+    /// S132, sonde de décision : un champ assemblé depuis des slots déjà remplis, pour
+    /// échantillonner une somme sans repasser par `prepare_segments`. Les bilans ne sont pas
+    /// reconstruits — la sonde ne les compare pas.
+    pub(crate) fn from_slots(slots: &'a [Slot], min: [f32; 2], max: [f32; 2]) -> Self {
+        Field {
+            slots,
+            min,
+            max,
+            phase_safe: true,
+            energy_j: 0.0,
+            power_w: 0.0,
+        }
+    }
+}
 impl Field<'_> {
     /// Enveloppe analytique L1 du spectre discret à cet instant, évaluée en f32.
     /// Ne certifie ni l'arrondi dirigé ni la précision envers le continuum.
