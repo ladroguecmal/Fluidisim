@@ -65,7 +65,7 @@ Objectif : référence f64 indépendante et réception spatiale du montage multi
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [ ] **P2** — construire la référence, comparer les résolutions et mesurer le coût reçu.
+- [x] **P2** — construire la référence, comparer les résolutions et mesurer le coût reçu.
 - [ ] **P3** — publier résultats et limites ; rituel final et synchronisation.
 
 ### Notes de reprise
@@ -74,3 +74,14 @@ Départ31a9e2b, copies actives propres identiques. S112-1.
 Oracle f64 à quadrature complète, somme modale avant énergie et puissance.
 Seuils spatiaux S103 ; puissance reçue séparément avec seuil déclaré et convergence de référence.
 Bibliothèque inchangée prévue ; assertions exécutables dans un exemple de réception.
+
+
+P2 en cours : premier balayage128/256 refuse toutes les résolutions au seuil puissance1e-7 W.
+Écart des références5,8441e-7 W : comparer à128 empêche toute réception honnête à ce seuil.
+Références raffinées256/512 en cours.112×80 échoue déjà sur potentiel1,1256e-5 >1e-5.
+Les essais et sorties sont dans code/target/s113-reception.log et s113-dense.log.
+
+P2 terminée : références256/512 reçues ; neuf recettes normales et cinq denses, assertions OK.
+224×128 et256×128 passent10143 points-temps chacun ; puissance max6,1785e-8/3,5708e-8 W.
+Cycles pression préparation+64 points médians48,2895/56,1288 ms. B/codecs exclus.
+Rapport RECEPTION-MULTISOURCE-S113 ; bibliothèque inchangée, suite S112 non relancée.
