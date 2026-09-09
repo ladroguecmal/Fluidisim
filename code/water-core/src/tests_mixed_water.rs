@@ -642,3 +642,164 @@ fn horizon_covers_the_window_the_impacts_and_their_empty_intersection() {
         }
     });
 }
+/// S120, ADR-080 : `admits` confronté au comportement réel, point par point, sur les trois
+/// frontières et leurs deux côtés. Le test ne prédit pas de quel côté tombe chaque point : il
+/// compare l'annonce à ce que la requête fait, ce qui est précisément la propriété voulue.
+#[test]
+fn admits_matches_the_geometric_refusals_of_the_request() {
+    fixture(|b, impacts, p, impact| {
+        let bound = BoundBackground::new(b, FrameId(7), 9);
+        let t = p.time();
+        let mut work = [WaterSample::default(); 1];
+        let mut out = work;
+        let u = |m: f64| (m * WORLD_UNITS_PER_METRE as f64) as i64;
+        // Rectangle de pression [-8,12]², disque d'impact de rayon 16 centré en (0,0),
+        // fond limité à 4096 m. Les trois bords sont approchés des deux côtés.
+        let sweep = [
+            world(0.0, 0.0),
+            world(12.0, 0.0),
+            world(-8.0, 0.0),
+            world(-8.0, -8.0),
+            world(11.0, 11.0),
+            world(12.0, 10.0),
+            world(12.0, 11.0),
+            world(12.0, 12.0),
+            WorldPos::from_units(world(12.0, 0.0).x + 1, world(12.0, 0.0).y, 0),
+            WorldPos::from_units(world(-8.0, 0.0).x - 1, world(-8.0, 0.0).y, 0),
+            WorldPos::from_units(world(0.0, 12.0).x, world(0.0, 12.0).y + 1, 0),
+            WorldPos::from_units(1_000_000_000 * WORLD_UNITS_PER_METRE + u(5000.0), 0, 0),
+        ];
+        let (mut yes, mut no) = (0, 0);
+        // Une frontière qui cesserait d'être franchie rendrait ce test creux sans le faire
+        // échouer : on compte donc quelle couche a refusé, et on exige les trois.
+        let mut causes = [0usize; 3];
+        for point in sweep {
+            let announced = admits(&bound, impacts, Some(p), point);
+            let real = sample_world_batch(
+                &bound,
+                impacts,
+                Some(p),
+                t,
+                &[point],
+                1.0,
+                &mut work,
+                &mut out,
+            );
+            match real {
+                Ok(()) => {
+                    yes += 1;
+                    assert!(announced, "point accepté mais annoncé inadmis");
+                }
+                Err(Error::Point { index: 0, error }) => {
+                    no += 1;
+                    assert!(!announced, "point refusé mais annoncé admis : {error:?}");
+                    match b.local_point(point) {
+                        Some(l) if l.iter().all(|v| v.is_finite() && v.abs() < 4096.0) => {
+                            let flat = [l[0], l[1]];
+                            if !impact.admits(FrameId(7), 9, flat) {
+                                causes[1] += 1;
+                            } else if !p.admits_local(flat) {
+                                causes[2] += 1;
+                            }
+                        }
+                        _ => causes[0] += 1,
+                    }
+                    // Selon la couche qui borne, le refus géométrique se nomme Domain ou,
+                    // pour le fond dont la conversion a réussi, InvalidBackground.
+                    assert!(matches!(
+                        error,
+                        composition::Error::Domain | composition::Error::InvalidBackground
+                    ));
+                }
+                other => panic!("refus non ponctuel inattendu : {other:?}"),
+            }
+        }
+        // Le balayage exerce vraiment les deux côtés, et les trois frontières.
+        assert!(yes >= 5 && no >= 4);
+        assert!(causes.iter().all(|&c| c > 0), "frontière non exercée : {causes:?}");
+        // `admits` ne promet pas l'acceptation : ce point est admis et la requête le refuse
+        // quand même, sur la pente totale. La garantie porte sur la géométrie, pas au-delà.
+        let inside = world(1.0, 0.0);
+        assert!(admits(&bound, impacts, Some(p), inside));
+        let floor = slope_floor(impacts, Some(p));
+        assert!(floor > 0.0);
+        assert_eq!(
+            sample_world_batch(
+                &bound,
+                impacts,
+                Some(p),
+                t,
+                &[inside],
+                floor * 0.5,
+                &mut work,
+                &mut out
+            ),
+            Err(Error::Slope)
+        );
+    })
+}
+/// S120 : le plancher de pente refuse tout lot non vide, et ne prétend rien au-dessus.
+#[test]
+fn slope_floor_refuses_every_batch_below_it() {
+    fixture(|b, impacts, p, impact| {
+        let bound = BoundBackground::new(b, FrameId(7), 9);
+        let t = p.time();
+        let mut work = [WaterSample::default(); 3];
+        let mut out = work;
+        let points = [world(1.0, 0.0), world(2.0, 1.0), world(-3.0, 2.0)];
+        let floor = slope_floor(impacts, Some(p));
+        // Le plancher est bien la somme des parts constantes, dans l'ordre de la requête.
+        assert_eq!(floor.to_bits(), (impact.slope_bound() + p.slope_envelope()).to_bits());
+        // Sous le plancher, chaque lot non vide est refusé — un point comme trois.
+        for below in [floor * 0.999, floor * 0.5, f32::MIN_POSITIVE] {
+            assert!(below < floor);
+            for n in 1..=3 {
+                assert_eq!(
+                    sample_world_batch(
+                        &bound,
+                        impacts,
+                        Some(p),
+                        t,
+                        &points[..n],
+                        below,
+                        &mut work,
+                        &mut out
+                    ),
+                    Err(Error::Slope)
+                );
+            }
+        }
+        // Un lot vide n'a aucun point à mesurer : le plancher ne le concerne pas.
+        assert_eq!(
+            sample_world_batch(&bound, impacts, Some(p), t, &[], floor * 0.5, &mut work, &mut out),
+            Ok(())
+        );
+        // Au-dessus, c'est la raideur de B qui décide : le plancher ne promet rien.
+        let base = b.eval(points[0], t).unwrap().steepness * core::f32::consts::PI;
+        assert!(base > 0.0);
+        assert_eq!(
+            sample_world_batch(
+                &bound,
+                impacts,
+                Some(p),
+                t,
+                &points[..1],
+                floor + base * 0.5,
+                &mut work,
+                &mut out
+            ),
+            Err(Error::Slope)
+        );
+        sample_world_batch(
+            &bound,
+            impacts,
+            Some(p),
+            t,
+            &points[..1],
+            floor + base * 2.0,
+            &mut work,
+            &mut out,
+        )
+        .unwrap();
+    })
+}

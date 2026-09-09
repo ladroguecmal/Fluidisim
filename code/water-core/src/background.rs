@@ -60,6 +60,11 @@ fn phase_initiale(graine: u64, indice: u64) -> PhaseQ32 {
     PhaseQ32(((z ^ (z >> 31)) >> 32) as u32)
 }
 
+/// Bornes locales du fond : conversion déjà faite, mêmes seuils pour les trois axes.
+/// Posée ici pour que l'annonce (ADR-080) et l'évaluation ne puissent pas diverger.
+pub(crate) fn admits_local(local: [f32; 3]) -> bool {
+    local.iter().all(|v| v.is_finite() && v.abs() < 4096.0)
+}
 pub struct Background {
     components: Vec<Component>,
     anchor: WorldPos,
@@ -149,6 +154,11 @@ impl Background {
     /// Coordonnées dans les axes locaux de ce B ; refus d'écart ou soustraction hors domaine.
     pub fn local_point(&self, p: WorldPos) -> Option<[f32; 3]> { p.to_local(self.anchor) }
 
+    /// Domaine exact d'`eval`, posé une fois et appliqué par `eval_local` lui-même (ADR-080).
+    pub fn admits(&self, p: WorldPos) -> bool {
+        self.local_point(p).is_some_and(admits_local)
+    }
+
     /// Diagnostic numérique sur la même primitive que eval, borne ADR-052.
     /// Ne certifie que les composantes et positions échantillonnées ; aucune allocation.
     pub fn audit_phase_spatiale(&self, points: &[[f32;2]]) -> Option<f64> {
@@ -176,7 +186,7 @@ impl Background {
 
     /// Chemin interne après conversion commune B/W ; mêmes opérations que eval.
     pub(crate) fn eval_local(&self, local: [f32; 3], t: SimTime) -> Option<WaterSample> {
-        if local.iter().any(|v| !v.is_finite() || v.abs() >= 4096.0) { return None; }
+        if !admits_local(local) { return None; }
         let mut s = WaterSample::default();
         let mut steep = 0.0f32;
 

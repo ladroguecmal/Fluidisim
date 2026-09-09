@@ -246,7 +246,7 @@ impl Field<'_> {
             return Err(PrepareError::Capacity);
         }
         for p in points {
-            if !(0..2).all(|i| p[i].is_finite() && p[i] >= self.min[i] && p[i] <= self.max[i]) {
+            if !self.admits(*p) {
                 return Err(Error::Domain.into());
             }
         }
@@ -257,8 +257,12 @@ impl Field<'_> {
         output[..count].copy_from_slice(&scratch[..count]);
         Ok(())
     }
+    /// Emprise déclarée du champ, posée une fois et appliquée par `sample` (ADR-080).
+    pub fn admits(&self, p: [f32; 2]) -> bool {
+        (0..2).all(|i| p[i].is_finite() && p[i] >= self.min[i] && p[i] <= self.max[i])
+    }
     pub fn sample(&self, p: [f32; 2]) -> Result<Surface, Error> {
-        if !(0..2).all(|i| p[i].is_finite() && p[i] >= self.min[i] && p[i] <= self.max[i]) {
+        if !self.admits(p) {
             return Err(Error::Domain);
         }
         let mut out = Surface::default();

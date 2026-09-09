@@ -150,6 +150,23 @@ impl<const N: usize> RadialImpact<N> {
     pub fn slope_bound(&self) -> f32 {
         self.slope_bound
     }
+    /// Domaine géométrique exact appliqué par `sample`, posé une fois (ADR-080).
+    /// Ne dit rien du temps ni de la finitude du résultat : `sample` rend aussi `Domain`
+    /// pour une sortie non finie, et aucun prédicat géométrique ne peut le prévoir.
+    pub fn admits(&self, frame: FrameId, cell: u64, point: [f32; 2]) -> bool {
+        let v = self.event.data();
+        if frame != v.frame
+            || cell != v.cell
+            || point.iter().any(|x| !x.is_finite() || x.abs() >= 4096.0)
+        {
+            return false;
+        }
+        let d = [point[0] - v.position[0], point[1] - v.position[1]];
+        if d.iter().any(|x| x.abs() >= 4096.0) {
+            return false;
+        }
+        (d[0] * d[0] + d[1] * d[1]).sqrt() <= self.domain.radius
+    }
     pub fn sample(
         &self,
         frame: FrameId,
@@ -158,20 +175,11 @@ impl<const N: usize> RadialImpact<N> {
         time: SimTime,
     ) -> Result<Sample, Error> {
         let v = self.event.data();
-        if frame != v.frame
-            || cell != v.cell
-            || point.iter().any(|x| !x.is_finite() || x.abs() >= 4096.0)
-        {
+        if !self.admits(frame, cell, point) {
             return Err(Error::Domain);
         }
         let d = [point[0] - v.position[0], point[1] - v.position[1]];
-        if d.iter().any(|x| x.abs() >= 4096.0) {
-            return Err(Error::Domain);
-        }
         let r = (d[0] * d[0] + d[1] * d[1]).sqrt();
-        if r > self.domain.radius {
-            return Err(Error::Domain);
-        }
         if time < v.birth {
             return Ok(Sample::default());
         }

@@ -553,6 +553,10 @@ impl Prepared<'_> {
     pub fn slope_envelope(&self) -> f32 {
         self.slope_envelope
     }
+    /// Emprise du champ publié, celle-là même que `sample_local` applique (ADR-080).
+    pub(crate) fn admits_local(&self, point: [f32; 2]) -> bool {
+        self.field.admits(point)
+    }
     /// Une conversion monde/local par point, même instant pour B et la pression.
     /// L'hôte déclare l'alignement de l'ancre B avec le repère/cellule de la pression.
     pub fn sample_world_batch(

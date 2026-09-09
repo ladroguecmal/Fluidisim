@@ -126,6 +126,54 @@ pub fn horizon<const N: usize>(
     }
     (start <= end).then_some((start, end))
 }
+/// ADR-080 : le point satisfait-il les trois domaines géométriques du montage ? Composition
+/// des prédicats que les couches appliquent elles-mêmes, dans l'ordre de la requête.
+///
+/// `false` ⟹ la requête refusera ce point (`Domain`), et le lot entier avec lui.
+/// `true` ⟹ aucun refus **géométrique** ; une sortie non finie reste possible, et
+/// `RadialImpact::sample` la rend elle aussi en `Domain`. On ne promet pas davantage.
+pub fn admits<const N: usize>(
+    bound: &BoundBackground<'_>,
+    impacts: &Prepared<'_, '_, N>,
+    pressure: Option<&bound_pressure::Prepared<'_>>,
+    point: WorldPos,
+) -> bool {
+    let (background, frame, cell) = bound.binding();
+    let Some(local) = background.local_point(point) else {
+        return false;
+    };
+    if !crate::background::admits_local(local) {
+        return false;
+    }
+    let flat = [local[0], local[1]];
+    if impacts
+        .fields
+        .iter()
+        .flatten()
+        .any(|f| !f.admits(frame, cell, flat))
+    {
+        return false;
+    }
+    !pressure.is_some_and(|p| !p.admits_local(flat))
+}
+/// ADR-080 : part de l'enveloppe de pente qui ne dépend d'aucun point, sommée dans l'ordre
+/// exact de la requête. Si `max_slope` lui est inférieur, **tout lot non vide sera refusé** :
+/// la requête part de `steepness·π ≥ 0` puis ajoute les mêmes termes dans le même ordre, et
+/// l'arrondi IEEE au plus proche est monotone, donc son enveloppe ne peut pas passer sous ce
+/// plancher. La réciproque est fausse : au-dessus, c'est la raideur de B qui décide.
+pub fn slope_floor<const N: usize>(
+    impacts: &Prepared<'_, '_, N>,
+    pressure: Option<&bound_pressure::Prepared<'_>>,
+) -> f32 {
+    let mut floor = 0.0f32;
+    for f in impacts.fields.iter().flatten() {
+        floor += f.slope_bound();
+    }
+    if let Some(p) = pressure {
+        floor += p.slope_envelope();
+    }
+    floor
+}
 /// Les vues empruntées protègent leurs journaux/pools ; None signifie absence explicite
 /// de pression, jamais récupération d'une préparation refusée. Aucun bilan mixte produit.
 pub fn sample_world_batch<const N: usize>(

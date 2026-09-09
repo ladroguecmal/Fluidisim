@@ -71,9 +71,9 @@ un refus annonçable, sans jamais promettre plus que ce qui est vrai.
       la pression, portée des impacts, pente totale, capacité) et écrire, pour chacune, ce
       qui est bornable et dans quel sens. **Ne rien décider avant cet inventaire.**
 - [x] **P3** — ADR-080, sur ce que l'inventaire a montré : prédicat exact plutôt que borne pour le domaine, plancher pour la pente.
-- [ ] **P4** — construire les bornes et leurs tests.
-- [ ] **P5** — le test qui compte : la borne confrontée au comportement réel sur un
-      balayage de points, dans les deux sens.
+- [x] **P4** — prédicats descendus dans Background, RadialImpact et Field ; `mixed::admits` les compose, `mixed::slope_floor` somme la part constante.
+- [x] **P5** — le test qui compte : `admits` confronté au comportement réel sur douze
+      points aux trois frontières, plus le plancher de pente sous et au-dessus.
 - [ ] **P6** — recevoir en campagne, avec mise en régime (A195).
 - [ ] **P7** — livrable, rituel de fin, fusion `--ff-only`.
 
@@ -102,3 +102,11 @@ dépendant du point, positif, donc la somme des autres est un plancher annonçab
 géométrique ne peut promettre l absence de Domain — seulement l absence de refus géométrique.
 Décidé de ne pas construire d AABB : il faudrait exposer l ancre de B (décision sur B, hors
 sujet) et aucun consommateur ne la demande. À dire dans le livrable, pas à faire en silence.
+
+P4/P5 : 158 core + 93 harnais = 251 réussis, cinq ignorés ; les huit tests mixtes aussi en
+release. Le balayage compte quelle couche refuse et exige les trois — sans ce compteur, une
+frontière qui cesse d être franchie rendrait le test creux sans le faire échouer (c est ce que
+le `seen[2] == 0` de S119 avait révélé sur OutsideWindow).
+Précision à porter dans l ADR : un refus géométrique se nomme `Domain` **ou**
+`InvalidBackground` — pour le fond, quand la conversion monde/local a réussi mais que la
+borne f32 ne passe pas. L ADR-080 annonçait `Domain` seul ; à corriger par note datée.
