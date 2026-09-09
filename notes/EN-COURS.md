@@ -65,7 +65,7 @@ Objectif : scénario hôte du virage B+pression, réception et coût complet.
 ### Plan
 
 - [x] **P1** — vérifier les copies et déclarer le plan.
-- [ ] **P2** — construire et exécuter le scénario aux deux résolutions ; comparer, refuser/reprendre et mesurer.
+- [x] **P2** — construire et exécuter le scénario aux deux résolutions ; comparer, refuser/reprendre et mesurer.
 - [ ] **P3** — publier mesures et limites ; rituel final et synchronisation.
 
 ### Notes de reprise
@@ -73,3 +73,6 @@ Objectif : scénario hôte du virage B+pression, réception et coût complet.
 Départ d962706, copies propres identiques. S106-1.
 Même virage reçu S103/S104 ; référence gaussienne f64 indépendante à même résolution,
 B évalué directement. Séparer préparation, lot et cycle complet mesuré directement.
+
+P2 : host_pressure exécuté release,576 points-temps par résolution, assertions reçues.
+Cycles médians29,3672/16,2846 ms ; bibliothèque inchangée, suite225/cinq ignorés non relancée.
