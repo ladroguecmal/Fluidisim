@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-09 08:28 +02:00
+JETON            : libre
+Battement        : 2026-09-09 08:29 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S107 — scénario hôte et coût
-Dernière session : S106 — requête monde B+pression ; 225 tests/cinq ignorés
-Session suivante : S107 — scénario hôte du virage et coût (S106-1)
+Session en cours : aucune
+Dernière session : S107 — cycle hôte reçu ; suite225/cinq ignorés inchangée
+Session suivante : S108 — source de pression versionnée et codec (S107-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -167,6 +167,12 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S107 — 2026-09-09 :** [CYCLE-PRESSION-S107](docs/validation/CYCLE-PRESSION-S107.md),
+virage reçu avec B16 et64 points, références/refus/reprise ; cycles médians29,3672 ms
+(128²),16,2846 ms (112×80), aucun budget cible certifié. Bibliothèque inchangée,
+suite225/cinq ignorés non relancée. 73 ADR,193 angles inchangés. S106-1 réalisée ;
+suite S108 : source de pression immuable versionnée et codec, S107-1.
 
 **S106 — 2026-09-09 :** [MONDE-PRESSION-S106](docs/validation/MONDE-PRESSION-S106.md),
 conversion commune, vitesses et normale composées, enveloppe L1 et publication atomique.

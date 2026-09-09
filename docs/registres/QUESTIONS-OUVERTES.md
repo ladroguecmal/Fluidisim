@@ -1109,3 +1109,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
   conversion commune, composantes et normale, enveloppe de pente, sortie atomique.
 - **S106-1 : ouverte, S107.** Scénario hôte du virage128²/112×80, préparations et lots64,
   refus/reprise, comparaison directe et coût complet. Impacts et causes persistantes restent ouverts.
+
+### S107 — Cycle hôte du virage reçu
+
+- **S106-1 : réalisée sur fixture.** [CYCLE-PRESSION-S107](../validation/CYCLE-PRESSION-S107.md),
+  référence composée, refus/reprise, cycle complet mesuré aux deux résolutions.
+- **S107-1 : ouverte, S108.** Source de pression immuable versionnée, trajectoire et
+  contexte, codec et refus des entrées invalides/tronquées. Formats impacts conservés ;
+  qualification de la future admission journal/sauvegarde avant autorité ou persistance.

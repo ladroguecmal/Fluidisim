@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S107 — en cours
+Session : S107 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : scénario hôte du virage B+pression, réception et coût complet.
 
@@ -66,7 +66,7 @@ Objectif : scénario hôte du virage B+pression, réception et coût complet.
 
 - [x] **P1** — vérifier les copies et déclarer le plan.
 - [x] **P2** — construire et exécuter le scénario aux deux résolutions ; comparer, refuser/reprendre et mesurer.
-- [ ] **P3** — publier mesures et limites ; rituel final et synchronisation.
+- [x] **P3** — publier mesures et limites ; rituel final et synchronisation.
 
 ### Notes de reprise
 
@@ -76,3 +76,5 @@ B évalué directement. Séparer préparation, lot et cycle complet mesuré dire
 
 P2 : host_pressure exécuté release,576 points-temps par résolution, assertions reçues.
 Cycles médians29,3672/16,2846 ms ; bibliothèque inchangée, suite225/cinq ignorés non relancée.
+
+P2 acfba2f. Suite S108 : S107-1, source versionnée et codec.

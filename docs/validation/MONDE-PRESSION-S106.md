@@ -81,3 +81,6 @@ hôte reste déclarative ; pas de rotation ni de milieu variable dans cette tran
 Suite debug complète :132 core +93 harnais =225 réussis, cinq ignorés ; trois tests
 ciblés aussi réussis en release. Quatre avertissements préexistants.
  73 ADR,193 angles,17 invariants,6 spécifications,23 cas inchangés.
+
+**Mise à jour S107, 2026-09-09 :** S106-1 réalisée sur fixture ; voir
+[CYCLE-PRESSION-S107](CYCLE-PRESSION-S107.md). Suite S107-1 : source versionnée et codec.

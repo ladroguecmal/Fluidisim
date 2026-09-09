@@ -17,6 +17,9 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S107 :** [Cycle hôte B+pression](validation/CYCLE-PRESSION-S107.md), virage reçu et cycles médians29,37/16,28 ms.
+Bibliothèque inchangée ; suite225/cinq ignorés non relancée. Suite S108 : source versionnée et codec, S107-1.
+
 **S106 :** [Requête monde B+pression](validation/MONDE-PRESSION-S106.md), composantes communes et enveloppe de pente.
 225 tests réussis, cinq ignorés ; 73 ADR,193 angles morts. Suite S107 : scénario hôte et coût, S106-1.
 

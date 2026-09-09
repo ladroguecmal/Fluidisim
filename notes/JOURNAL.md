@@ -6096,3 +6096,21 @@ Aucun nouvel angle mort ou leçon distincte ; L197/L205 et publication S101 appl
 I-03/I-15 et budget I-05 restent ouverts, aucun invariant réécrit.
 **Suite S107 :** S106-1, scénario hôte du virage128²/112×80, lots64, refus/reprise et
 coût complet. S105-1 réalisée pour cette composition candidate. Synchronisation finale.
+
+## S107 — 2026-09-09 — Cycle hôte du virage
+
+**Entrée :** Continue ; d962706, copies actives propres identiques.
+**Produit :** host_pressure et CYCLE-PRESSION-S107. Virage aux deux résolutions,
+B16 composantes et64 points monde ;576 points-temps par résolution. Référence composée
+f64, refus/reprise et identité des sorties reçus. Erreur max normale1,148e-7 ; autres
+composantes<2e-8. Pas de code de bibliothèque modifié.
+**Coût :** cycles complets médians29,3672 ms (128²),16,2846 ms (112×80), mesurés
+ directement. Préparation6,9898/3,8079 ms ; requête20,9700/12,2401 ms. Aucun budget cible.
+**Vérification :** release exécuté avec assertions, formatage/diff ; P2 acfba2f.
+Suite225 réussis/cinq ignorés inchangée, non relancée. Instrumentation allouée hors mesure,
+compteur hôte non global. Géométrie déclarée, ni journal ni sauvegarde de pression ajoutés.
+73 ADR,193 angles,17 invariants,6 spécifications,23 cas inchangés ; aucun nouveau
+angle ou leçon distincte. L195/L202/L204 appliquées.
+**Suite S108 :** S107-1, source de pression versionnée immuable et codec, trajectoire et
+contexte, refus des données invalides/tronquées. Formats impacts conservés ; admission
+journal et sauvegarde à qualifier. S106-1 réalisée, copies synchronisées après clôture.

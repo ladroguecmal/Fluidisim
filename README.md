@@ -61,7 +61,7 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S106 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S107 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
@@ -85,5 +85,6 @@ Puissance candidate reçue : bilans spatial et temporel, extinction, aux deux r�
 Le candidat lie désormais ses requêtes au contexte complet et à son instant préparé.
 Une préparation refusée conserve la publication précédente (S105).
 Une requête monde commune compose désormais B et la pression, avec contrôle de pente et lot atomique (S106).
-Suite : scénario hôte du virage et coût complet, S106-1 ; sources autoritaires ouvertes.
+Cycle B+pression reçu sur le virage : médianes locales29,37 ms (128²) et16,28 ms (112×80), sans budget cible certifié.
+Suite : source de pression versionnée et codec, S107-1 ; journal et sauvegarde ouverts.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.
