@@ -1553,3 +1553,21 @@ connue ne signifie pas complétude réseau ; protocole de resynchronisation hôt
   soustraction ne protège pas la soustraction.** Deux positions i64 lointaines pouvaient faire
   déborder le calcul avant le contrôle des 4096 m. checked_sub refuse désormais les extrêmes,
   dans les deux sens, et le lot conserve sa sortie. ADR-065.
+
+- **A194** *(sévérité 2, S118 ; ouverte)* — **Une publication réussie ne dit pas que le montage
+  est échantillonnable.** Le contrôleur de pression valide la fenêtre de son contexte, qui ne
+  sait rien de la validité des impacts. `update(6 s)` réussit alors que les impacts expirent à
+  4 s ; la vue est finie, et c'est la requête mixte qui refuse ensuite. Rien dans le type
+  n'avertit l'hôte que la date qu'il vient de publier est inexploitable pour le montage complet.
+  Verrouillé par un test, non résolu : il faudrait que le contrôleur consulte la validité des
+  impacts, ou que le montage publie son horizon effectif. Suite S118-1.
+
+- **A195** *(sévérité 2, S118 ; ouverte)* — **La position d'un bloc dans la séquence de mesure
+  fabrique un écart de coût.** Le premier `measure` d'un processus est surestimé jusqu'à 28 % ;
+  le même code replacé en dernier rejoint son témoin à 1 % près, et l'effet disparaît dès la
+  seconde recette. Les trois échauffements de `measure` ne mettent pas la machine en régime.
+  Toutes les campagnes depuis S104 comparent des blocs successifs dans un même exemple, et
+  publient donc au moins un chiffre biaisé — celui mesuré en premier, généralement la
+  préparation. Les chiffres passés ne sont pas corrigeables a posteriori ; il faut un bloc de
+  mise en régime avant la première mesure, ou mesurer chaque voie deux fois à des positions
+  différentes. Voir L207 et CYCLE-MIXTE-S118.

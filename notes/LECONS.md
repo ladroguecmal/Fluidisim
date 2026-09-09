@@ -3151,3 +3151,16 @@ nommé ou présenté comme un certificat numérique.
 relative près de zéro. Une soustraction dans la réduction d'angle peut altérer le premier
 mouvement tout en passant une réception globale. Vérifier séparément le développement aux
 petits temps, avec un signal non nul, et exploiter les symétries avant les soustractions.
+
+## L207 — Deux mesures à des positions différentes ne se comparent pas
+
+*(S118)* Un écart de coût de 15 à 28 % entre deux voies du même calcul venait entièrement de
+l'ordre des blocs de mesure : le premier bloc d'un processus est lent, les suivants ne le sont
+pas. Deux explications plausibles s'offraient d'abord — une empreinte mémoire doublée, un
+paramètre qui variait d'un côté seulement — et **toutes deux étaient fausses**. Ce qui a tranché
+n'est pas le raisonnement mais un troisième témoin : le même code, mesuré en dernier.
+
+Avant de croire un écart entre deux voies, les replacer symétriquement. Un témoin qui reproduit
+la cause soupçonnée coûte quelques lignes ; une explication plausible non testée entre dans un
+livrable et y reste. Vaut au-delà du temps de calcul : dès que deux mesures diffèrent par autre
+chose que ce qu'on croit comparer.
