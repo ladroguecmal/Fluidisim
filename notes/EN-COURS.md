@@ -70,7 +70,7 @@ un refus annonçable, sans jamais promettre plus que ce qui est vrai.
 - [x] **P2** — inventaire : lire les trois conditions par point (domaine de B, emprise de
       la pression, portée des impacts, pente totale, capacité) et écrire, pour chacune, ce
       qui est bornable et dans quel sens. **Ne rien décider avant cet inventaire.**
-- [ ] **P3** — ADR-080, sur ce que l'inventaire aura montré.
+- [x] **P3** — ADR-080, sur ce que l'inventaire a montré : prédicat exact plutôt que borne pour le domaine, plancher pour la pente.
 - [ ] **P4** — construire les bornes et leurs tests.
 - [ ] **P5** — le test qui compte : la borne confrontée au comportement réel sur un
       balayage de points, dans les deux sens.
