@@ -37,7 +37,8 @@ corriger un cran plus loin.
 
 | λ \ rayon | 0,01 m | 1 m | 16 m | 1000 m |
 |---|---|---|---|---|
-| ≤ 0,1 m | `Domain` | `Domain` | `Domain` | `Domain` |
+| ≤ 10⁻³ m | `Domain` | `Domain` | `Domain` | `Domain` |
+| 0,01 – 0,1 m | `Domain` | `Domain` | `Domain` | `Domain` |
 | 1 m | **construit** | **construit** | `Domain` | `Domain` |
 | 10 m | **construit** | **construit** | **construit** | `Domain` |
 | 100 m | `Medium` | `Medium` | `Medium` | `Domain` |
@@ -48,18 +49,38 @@ Trois enseignements, dont deux n'étaient écrits nulle part :
 - **La zone acceptée est un couloir étroit** — longueurs d'onde de l'ordre du mètre à la
   dizaine de mètres, rayon d'autant plus petit que la longueur d'onde est courte. Rien ne le
   documentait ; il fallait construire pour l'apprendre.
-- **Les refus qui la bordent ne sont pas les mêmes selon le côté.** En dessous, c'est la
-  résolution (condition 10) qui mord : `dk · (radius + c_g · âge)` dépasse π/2. Au-dessus,
-  c'est le régime d'eau profonde (condition 9). À droite, c'est la portée de la table de
-  Bessel (condition 8). Trois causes, deux noms.
-- **La carte est une coupe, pas une frontière fixe.** L'horizon entre dans la condition 10 :
-  un âge plus court élargit le couloir vers les courtes longueurs d'onde. Aucune de ces
-  dépendances n'apparaît dans le nom du refus.
+- **Les refus qui la bordent ne sont pas les mêmes selon le côté**, et la carte ne permet pas
+  de le voir : quinze cases sur vingt portent `Domain` ou `Medium` pour trois causes
+  différentes. C'est précisément le défaut à corriger, et il rend cette carte-ci illisible.
+- **La carte est une coupe, pas une frontière fixe.** L'horizon entre dans l'une des
+  conditions : un âge plus court déplace la bordure. Aucune de ces dépendances n'apparaît
+  dans le nom du refus.
 
 ## 3. Décision
 
 Voir [ADR-082](../adr/ADR-082-nommer-la-borne-qui-refuse.md).
 
-## 4. Construction et réception
+## 4. La même carte, après renommage
+
+Les mêmes couples sont acceptés — la décision ne déplace aucune borne — mais chaque refus dit
+maintenant lequel des paramètres est en cause :
+
+| λ \ rayon | 0,01 m | 1 m | 16 m | 1000 m |
+|---|---|---|---|---|
+| ≤ 10⁻³ m | `Reach` | `Reach` | `Reach` | `Reach` |
+| 0,01 – 0,1 m | `Resolution` | `Reach` | `Reach` | `Reach` |
+| 1 m | **construit** | **construit** | `Reach` | `Reach` |
+| 10 m | **construit** | **construit** | **construit** | `Reach` |
+| 100 m | `Regime` | `Regime` | `Regime` | `Reach` |
+| ≥ 1000 m | `Regime` | `Regime` | `Regime` | `Regime` |
+
+**Et cette carte corrige ce que la première laissait supposer.** En lisant la carte d'origine,
+on attribuait naturellement la bande inférieure à la résolution — c'est la borne dont on parle
+quand les ondes deviennent courtes. La mesure dit autre chose : c'est presque partout `Reach`,
+le produit `hi · radius` qui dépasse la portée de la table de Bessel, et la résolution ne mord
+que dans le coin du plus petit rayon. La supposition était plausible et fausse ; seul le
+renommage la rend vérifiable.
+
+## 5. Construction et réception
 
 *(à compléter)*

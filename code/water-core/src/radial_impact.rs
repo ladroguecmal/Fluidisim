@@ -59,14 +59,15 @@ pub struct RadialImpact<const N: usize = 64> {
 }
 impl<const N: usize> RadialImpact<N> {
     pub fn new(event: WaveEvent, medium: Medium, domain: Domain) -> Result<Self, Error> {
-        if !(64..=256).contains(&N)
-            || !domain.radius.is_finite()
-            || domain.radius <= 0.0
-            || domain.radius >= 4096.0
-            || domain.age_us == 0
-            || event.data().birth.0.checked_add(domain.age_us).is_none()
-        {
-            return Err(Error::Domain);
+        // ADR-082 : une borne, un nom, et le nom désigne ce qu'il faut revoir.
+        if !(64..=256).contains(&N) {
+            return Err(Error::ModeCount);
+        }
+        if !domain.radius.is_finite() || domain.radius <= 0.0 || domain.radius >= 4096.0 {
+            return Err(Error::Radius);
+        }
+        if domain.age_us == 0 || event.data().birth.0.checked_add(domain.age_us).is_none() {
+            return Err(Error::Horizon);
         }
         if [
             medium.gravity,
@@ -87,21 +88,32 @@ impl<const N: usize> RadialImpact<N> {
         let hi = 2.0 * k0;
         let width = hi - lo;
         let dk = width / N as f32;
-        if !hi.is_finite() || lo <= 0.0 || hi * domain.radius > 64.0 {
-            return Err(Error::Domain);
+        if !hi.is_finite() || lo <= 0.0 {
+            return Err(Error::Wavelength);
         }
+        // Portée de la table de Bessel : le produit, donc les deux paramètres.
+        if hi * domain.radius > 64.0 {
+            return Err(Error::Reach);
+        }
+        // Eau profonde : le milieu n'est pas en cause, le régime l'est.
         if medium.depth <= core::f32::consts::PI / lo {
-            return Err(Error::Medium);
+            return Err(Error::Regime);
         }
         // Contrôle de résolution, pas borne d'erreur : variation de phase par intervalle.
         let cg_max = 0.5 * (medium.gravity / lo).sqrt();
         let phase_step =
             dk as f64 * (domain.radius as f64 + cg_max as f64 * (domain.age_us as f64 / 1e6));
         if !phase_step.is_finite() || phase_step > core::f64::consts::FRAC_PI_2 {
-            return Err(Error::Domain);
+            return Err(Error::Resolution);
         }
         // ∫_0^1 x^4(1-x)^4 dx = 1/630, moyenne x=1/2.
         let integral = width * (lo + width / 2.0) / 630.0;
+        // S122 : l'intégrale ne dépend que de la longueur d'onde. Si elle sous-passe, c'est
+        // elle qu'il faut revoir — attribuer ce refus à l'énergie serait un nom qui ment,
+        // et c'est exactement ce qu'ADR-082 corrige. Le test l'a montré.
+        if !integral.is_finite() || integral <= 0.0 {
+            return Err(Error::Wavelength);
+        }
         let scale = (event.data().energy_j
             / medium.density
             / medium.gravity
@@ -109,7 +121,7 @@ impl<const N: usize> RadialImpact<N> {
             / integral)
             .sqrt();
         if !scale.is_finite() || scale <= 0.0 {
-            return Err(Error::Domain);
+            return Err(Error::Energy);
         }
         let mut nodes = [Node::default(); N];
         let mut slope = 0.0;
@@ -120,7 +132,7 @@ impl<const N: usize> RadialImpact<N> {
             let omega = (medium.gravity * k).sqrt();
             let frequency = omega / core::f32::consts::TAU * 4294967296.0;
             if !frequency.is_finite() || frequency < 1.0 || frequency >= u64::MAX as f32 {
-                return Err(Error::Domain);
+                return Err(Error::Wavelength);
             }
             *node = Node {
                 k,
@@ -285,6 +297,102 @@ mod tests {
             radius: 16.0,
             age_us: 4_000_000,
         }
+    }
+    /// S122, ADR-082 : chaque borne de construction porte un nom, et **chaque nom est
+    /// atteignable**. Un nom qu'aucune entrée ne produit serait une promesse vide ; le test
+    /// échoue si l'un d'eux cesse de l'être.
+    #[test]
+    fn every_named_bound_is_reachable_and_names_its_own_cause() {
+        let sane = Medium {
+            gravity: 9.81,
+            density: 1025.0,
+            depth: 20.0,
+            max_slope: 0.1,
+        };
+        let event = |wavelength_m: f32, energy_j: f32| {
+            let mut v = source_data();
+            v.wavelength_m = wavelength_m;
+            v.energy_j = energy_j;
+            WaveEvent::impact(v).unwrap()
+        };
+        let dom = |radius: f32, age_us: u64| Domain { radius, age_us };
+        // Le montage de référence se construit : les refus qui suivent tiennent chacun à un
+        // seul écart par rapport à lui.
+        RadialImpact::<64>::new(event(4.0, 0.01), sane, dom(16.0, 4_000_000)).unwrap();
+
+        assert_eq!(
+            RadialImpact::<32>::new(event(4.0, 0.01), sane, dom(16.0, 4_000_000)).err(),
+            Some(Error::ModeCount)
+        );
+        assert_eq!(
+            RadialImpact::<64>::new(event(4.0, 0.01), sane, dom(0.0, 4_000_000)).err(),
+            Some(Error::Radius)
+        );
+        assert_eq!(
+            RadialImpact::<64>::new(event(4.0, 0.01), sane, dom(16.0, 0)).err(),
+            Some(Error::Horizon)
+        );
+        // Rayon et longueur d'onde ensemble : le même refus se lève des deux côtés.
+        assert_eq!(
+            RadialImpact::<64>::new(event(4.0, 0.01), sane, dom(1000.0, 4_000_000)).err(),
+            Some(Error::Reach)
+        );
+        // L onde plus longue lève Reach, mais bute alors sur le régime : le couple est réel.
+        assert_eq!(
+            RadialImpact::<64>::new(event(300.0, 0.01), sane, dom(1000.0, 4_000_000)).err(),
+            Some(Error::Regime)
+        );
+        // Profondeur et longueur d'onde : le milieu ci-dessous est sain, c'est le régime.
+        assert_eq!(
+            RadialImpact::<64>::new(event(100.0, 0.01), sane, dom(16.0, 4_000_000)).err(),
+            Some(Error::Regime)
+        );
+        let mut deep = sane;
+        deep.depth = 500.0;
+        RadialImpact::<64>::new(event(100.0, 0.01), deep, dom(16.0, 4_000_000)).unwrap();
+        // Résolution : trois paramètres, et l'horizon suffit à la franchir.
+        assert_eq!(
+            RadialImpact::<64>::new(event(1.0, 0.01), sane, dom(1.0, 1_000_000_000)).err(),
+            Some(Error::Resolution)
+        );
+        RadialImpact::<64>::new(event(1.0, 0.01), sane, dom(1.0, 1_000_000)).unwrap();
+        // Milieu : celui-là est vraiment invalide.
+        let mut broken = sane;
+        broken.density = -1.0;
+        assert_eq!(
+            RadialImpact::<64>::new(event(4.0, 0.01), broken, dom(16.0, 4_000_000)).err(),
+            Some(Error::Medium)
+        );
+        // Énergie, puis pente : deux verdicts distincts sur le même paramètre.
+        // Une énergie dénormalisée fait sous-passer l échelle à zéro : le champ n a pas
+        // d amplitude représentable, et c est bien l énergie qu il faut revoir.
+        assert_eq!(
+            RadialImpact::<64>::new(event(4.0, f32::from_bits(1)), sane, dom(16.0, 4_000_000))
+                .err(),
+            Some(Error::Energy)
+        );
+        assert_eq!(
+            RadialImpact::<64>::new(event(4.0, 1e6), sane, dom(16.0, 4_000_000)).err(),
+            Some(Error::Steepness)
+        );
+        // Anisotropie, et longueur d'onde seule.
+        let mut aniso = source_data();
+        aniso.anisotropy = 0.5;
+        assert_eq!(
+            RadialImpact::<64>::new(
+                WaveEvent::impact(aniso).unwrap(),
+                sane,
+                dom(16.0, 4_000_000)
+            )
+            .err(),
+            Some(Error::Anisotropy)
+        );
+        let mut huge = sane;
+        huge.depth = f32::MAX;
+        assert_eq!(
+            RadialImpact::<64>::new(event(1e30, 0.01), huge, dom(1e-6, 4_000_000)).err(),
+            Some(Error::Wavelength)
+        );
     }
     /// S121, ADR-081 : le refus de représentabilité et le verdict de pente sont deux choses.
     /// Le cas de débordement est construit, pas supposé — la sonde `probe_degenerate` l'a
@@ -544,9 +652,10 @@ mod tests {
         v.birth = SimTime(u64::MAX - 2_000_000);
         v.ttl_us = 1_000_000;
         let e = WaveEvent::impact(v).unwrap();
+        // ADR-082 : l appelant doit revoir l horizon, et le nom le dit maintenant.
         assert!(matches!(
             RadialImpact::<64>::new(e, medium(), domain()),
-            Err(Error::Domain)
+            Err(Error::Horizon)
         ));
         let mut d = domain();
         d.age_us = 2_000_000;

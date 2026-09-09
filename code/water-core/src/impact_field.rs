@@ -3,8 +3,29 @@ use crate::wave_event::WaveEvent;
 use crate::{FrameId, PhaseQ32, SimTime};
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Error {
+    /// Le milieu lui-même : valeur non finie ou négative. Rien d'autre (ADR-082).
     Medium,
+    /// Position hors du domaine d'un champ construit — jamais une borne de construction,
+    /// qui portent chacune leur nom depuis ADR-082. C'est ce refus qu'`admits` prédit.
     Domain,
+    /// `N` hors des bornes de modes admises.
+    ModeCount,
+    /// Le rayon du domaine, seul.
+    Radius,
+    /// L'horizon du domaine, seul : nul, ou fin non représentable depuis la naissance.
+    Horizon,
+    /// La longueur d'onde, seule.
+    Wavelength,
+    /// L'énergie de l'événement.
+    Energy,
+    /// Rayon **et** longueur d'onde : leur produit dépasse la portée de la table de Bessel.
+    /// Se lève en réduisant le rayon comme en allongeant l'onde.
+    Reach,
+    /// Profondeur **et** longueur d'onde : l'eau n'est pas profonde pour cette onde.
+    /// Le milieu peut être parfaitement valide — c'est le régime qui ne l'est pas.
+    Regime,
+    /// Rayon, horizon et longueur d'onde : la phase varie trop d'un mode au suivant.
+    Resolution,
     Anisotropy,
     /// La pente dépasse la limite du milieu : verdict sur les données de l'appelant, qui
     /// peut réduire l'énergie et réessayer.
