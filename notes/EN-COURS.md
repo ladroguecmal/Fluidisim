@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S120 — en cours
+Session : S120 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : A196 — ce qui reste découvert point par point. Établir d'abord ce qui est
 réellement bornable, puis construire les bornes qui transforment un refus par point en
@@ -75,7 +75,7 @@ un refus annonçable, sans jamais promettre plus que ce qui est vrai.
 - [x] **P5** — le test qui compte : `admits` confronté au comportement réel sur douze
       points aux trois frontières, plus le plancher de pente sous et au-dessus.
 - [x] **P6** — campagne : lot mixte refusé en entier puis sauvé par filtrage, coûts mesurés.
-- [ ] **P7** — livrable, rituel de fin, fusion `--ff-only`.
+- [x] **P7** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -117,3 +117,13 @@ soit ~39 ns par point, contre 35,6 ms pour la requête qu il sauve — rapport ~
 Plancher de pente 0,0074634 (224x128) et 0,0074633 (256x128), contre max_slope 0,1 : le montage
 consomme 7,5 % du budget de pente sans aucun point. Non contraignant ici, mais chiffré.
 Mise en régime toujours efficace : update 12,63 / update_again 12,69 / direct 12,73 ms.
+
+P7 : BORNES-POINTS-S120, deux corrections datées dans ADR-080, suivi A196, A197, L209, journal,
+index, README, jeton rendu, fusion ff-only.
+
+Pour S121 sans relire : A197 est concret et petit. `RadialImpact::sample` (radial_impact.rs)
+rend `Error::Domain` à la fois pour une position hors domaine et pour une sortie non finie —
+le second cas est le bloc de test de finitude en fin de fonction. Séparer les deux demande une
+variante d'erreur distincte et la mise à jour des appelants, dont `mixed::sample_world_batch`
+qui mappe aujourd'hui toute erreur de champ vers `composition::Error::Domain`. Attention : ce
+mappage-là est aussi ce qui masque `Error::Time` du champ, neutralisé en amont par `state`.

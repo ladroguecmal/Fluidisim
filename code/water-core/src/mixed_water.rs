@@ -129,7 +129,9 @@ pub fn horizon<const N: usize>(
 /// ADR-080 : le point satisfait-il les trois domaines géométriques du montage ? Composition
 /// des prédicats que les couches appliquent elles-mêmes, dans l'ordre de la requête.
 ///
-/// `false` ⟹ la requête refusera ce point (`Domain`), et le lot entier avec lui.
+/// `false` ⟹ la requête refusera ce point, et le lot entier avec lui — par `Domain`, ou par
+/// `InvalidBackground` quand c'est la borne locale du fond qui tranche après une conversion
+/// monde/local réussie.
 /// `true` ⟹ aucun refus **géométrique** ; une sortie non finie reste possible, et
 /// `RadialImpact::sample` la rend elle aussi en `Domain`. On ne promet pas davantage.
 pub fn admits<const N: usize>(

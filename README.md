@@ -61,7 +61,7 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S119 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S120 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
@@ -108,5 +108,10 @@ Horizon effectif et annonce du montage mixte construits : avant toute publicatio
 la fenêtre servable et ce que la requête fera d'un instant, par une implémentation unique partagée
 avec la requête elle-même (ADR-079, S119). Annonce 23 ns contre12,6 ms de préparation évitée.
 A194 résolue ; A195 corrigée et vérifiée par une mise en régime avant la première mesure.
-Suite : bornes annonçables des points — pente atteignable, emprise du domaine — S119-1.
+Les points sont annonçables à leur tour : `admits` compose les prédicats de domaine posés dans les
+trois couches, `slope_floor` donne la part de l'enveloppe de pente indépendante des points (ADR-080,
+S120). Filtrer coûte ~40 ns par point contre35,60 ms pour le lot que l'atomicité ferait perdre.
+L'inventaire a montré que deux des trois conditions n'avaient besoin d'aucune borne : leur prédicat
+exact est quatre ordres de grandeur moins cher que l'évaluation (L209).
+Suite : séparer « champ dégénéré » de « point hors domaine », que le même refus confond (A197), S120-1.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

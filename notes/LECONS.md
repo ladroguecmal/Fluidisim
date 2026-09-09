@@ -3177,3 +3177,17 @@ solution — elle demande sa propre fonction, à côté du prédicat ponctuel. L
 redondantes : l'une répond sur un point, l'autre sur l'ensemble, et la seconde ne se déduit pas
 d'un nombre fini d'appels à la première. Vaut pour toute API de validation, pas seulement pour
 le temps.
+
+## L209 — Mesurer le coût de l'exactitude avant de choisir une approximation
+
+*(S120)* La session ouvrait sur une commande explicite — produire des *bornes* pour ce qui était
+évalué point par point. L'inventaire préalable a montré que deux des trois conditions n'avaient
+besoin d'aucune borne : leurs prédicats exacts sont des comparaisons, quatre ordres de grandeur
+moins chers que l'évaluation qu'ils précèdent. Une boîte englobante aurait été strictement moins
+informative, pour le même prix.
+
+Une approximation se justifie par le coût de l'exactitude, et ce coût se constate — il ne se
+suppose pas depuis le vocabulaire de la question posée. Lire ce que fait réellement le code avant
+de décider de la forme de la réponse coûte quelques minutes ; s'être engagé sur la mauvaise forme
+coûte la session. Vaut aussi quand la commande vient d'une session précédente : elle a nommé un
+problème, pas nécessairement la forme de sa solution.

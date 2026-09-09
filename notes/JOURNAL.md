@@ -6409,3 +6409,46 @@ précision spatiale nouvelle, mesures d'une seule machine non isolée.
 **Suite S120 :** S119-1 — ce qui est annonçable des points est une **borne** (pente maximale
 atteignable sur un lot, emprise du domaine), pas un verdict par point. Restent ouverts :
 admission dynamique, extension de fenêtre, profondeur finie S116-2, bilan mixte, durabilité.
+
+---
+
+## S120 — 2026-09-09 — Ce qui est annonçable des points
+
+**Entrée :** jeton libre à 6d77057, trois copies coïncidentes. A196, ouverte par S119.
+**Produit :** [ADR-080](../docs/adr/ADR-080-annonce-des-points-du-montage-mixte.md) et
+[BORNES-POINTS-S120](../docs/validation/BORNES-POINTS-S120.md). `mixed::admits` compose les
+prédicats de domaine de trois couches ; `mixed::slope_floor` somme la part de l'enveloppe de
+pente qui ne dépend d'aucun point. Prédicats **posés dans les couches** — `Background::admits`,
+`RadialImpact::admits`, `Field::admits` — et appliqués par elles, non recopiés dans l'annonce.
+**Décision structurante, et elle contredit la commande reçue.** S119-1 demandait des *bornes*.
+L'inventaire préalable (livrable §1) a montré que deux des trois conditions n'en ont pas besoin :
+les domaines sont des comparaisons, quatre ordres de grandeur moins chères que l'évaluation
+qu'elles précèdent. Le prédicat exact se transpose au lieu de s'approcher ; une boîte englobante
+aurait été moins informative pour le même prix. Seule la pente demandait vraiment une borne —
+un plancher, parce qu'un seul de ses termes dépend du point et qu'il est positif. **L209.**
+**Réception :** équivalence de `admits` avec le verdict réel, sur douze points aux trois
+frontières et de leurs deux côtés, sans que le test prédise de quel côté ils tombent ; un
+compteur exige que les trois frontières soient effectivement franchies. Plancher vérifié sous
+lui-même (un, deux, trois points ; trois valeurs dont `f32::MIN_POSITIVE`), et au-dessus dans
+les deux issues. En campagne : un lot de 66 points dont deux hors domaine échoue en entier,
+et le même lot filtré passe. **Hachages inchangés depuis S118** — l'enjeu du refactoring.
+158 core + 93 harnais = 251 réussis, cinq ignorés ; huit tests mixtes aussi en release.
+**Chiffres :** filtrage ~40 ns par point (2,5 µs pour 64) contre 35,60 ms pour la requête qu'il
+sauve — rapport voisin de 14 000. Plancher de pente 0,0074634 pour un `max_slope` de 0,1 : le
+montage consomme 7,5 % du budget de pente sans qu'aucun point n'ait été évalué. Mise en régime
+de S119 toujours efficace : `update` 12,63 / le même en dernier 12,69 / direct 12,73 ms.
+**Deux corrections datées portées à ADR-080, écrit avant la construction.** Le refus géométrique
+se nomme `Domain` **ou** `InvalidBackground` selon la couche — la décision n'annonçait que le
+premier. Et sa section Réception annonçait un montage numériquement dégénéré qui **n'a pas été
+construit** : la limite d'`admits` est vérifiée par la pente, pas par la non-finitude. Écrire un
+ADR avant de construire fait gagner du temps et produit ce genre d'écart ; le corriger par note
+datée est le prix, pas un accident.
+**Limites :** `admits` ne dit pas qu'un point passera ; il ne supprime pas la préparation, il
+évite la perte du lot. Atomicité d'ADR-077 non rouverte. Aucune boîte englobante : il faudrait
+exposer l'ancre de B, décision sur B, sans consommateur aujourd'hui — point ouvert daté.
+80 ADR, 197 angles, 17 invariants, 6 spécifications, 23 cas. Invariants relus : aucun invalidé.
+**Suite S121 :** S120-1, **A197** — `RadialImpact::sample` confond « point hors domaine » et
+« champ dégénéré » sous le même `Error::Domain`. Un appelant qui filtre ses points, ce qu'ADR-080
+rend naturel, écarterait des positions valides autour d'un champ défaillant et masquerait le vrai
+défaut. Restent ouverts : admission dynamique, extension de fenêtre, profondeur finie S116-2,
+bilan mixte, durabilité disque.

@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-09 14:51 +02:00
+JETON            : libre
+Battement        : 2026-09-09 15:05 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S120 — bornes annonçables des points (S119-1)
-Dernière session : S119 — horizon et annonce du montage mixte ;249 tests/cinq ignorés
-Session suivante : à fixer en fin de S120
+Session en cours : aucune
+Dernière session : S120 — annonce des points du montage mixte ;251 tests/cinq ignorés
+Session suivante : S121 — séparer champ dégénéré et point hors domaine (S120-1, A197)
 
 *Le battement de fin de S118 disait 15:05 : une heure estimée, pas relevée. Corrigée ici.
 Un battement dans le futur ferait croire à une session active — le relever, jamais l'écrire de mémoire.*
@@ -176,6 +176,28 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S120 — 2026-09-09 :** [ADR-080](docs/adr/ADR-080-annonce-des-points-du-montage-mixte.md),
+[BORNES-POINTS-S120](docs/validation/BORNES-POINTS-S120.md). `mixed::admits` compose les prédicats
+de domaine **posés dans les couches qui les appliquent** (`Background`, `RadialImpact`, `Field`) ;
+`mixed::slope_floor` annonce la part de l'enveloppe de pente indépendante des points. Équivalence
+avec le verdict réel reçue sur douze points aux trois frontières, un compteur exigeant que les
+trois soient franchies. Hachages inchangés depuis S118.
+Filtrage **~40 ns par point** contre35,60 ms pour le lot que l'atomicité ferait perdre — rapport
+~14 000. Plancher de pente0,0074634 pour un `max_slope` de0,1 : 7,5 % du budget consommés avant
+tout point.251 tests/cinq ignorés.
+**L209** : l'inventaire préalable a contredit la commande reçue — S119-1 demandait des bornes,
+deux des trois conditions n'en avaient besoin d'aucune, leur prédicat exact étant quatre ordres
+de grandeur moins cher que l'évaluation. Une approximation se justifie par le coût mesuré de
+l'exactitude, pas par le vocabulaire de la question.
+Deux corrections datées portées à ADR-080, écrit avant la construction : le refus géométrique se
+nomme `Domain` **ou** `InvalidBackground`, et le montage dégénéré annoncé en Réception n'a pas
+été construit — la limite d'`admits` est vérifiée par la pente.
+80 ADR,197 angles,17 invariants,6 spécifications,23 cas. S119-1 réalisée.
+Suite S121 : S120-1, **A197** — `RadialImpact::sample` confond « point hors domaine » et « champ
+dégénéré » sous le même refus ; un appelant qui filtre ses points écarterait des positions valides
+autour d'un champ défaillant. Admission dynamique, extension de fenêtre, S116-2 profondeur finie,
+bilan mixte et durabilité restent ouverts.
 
 **S119 — 2026-09-09 :** [ADR-079](docs/adr/ADR-079-horizon-effectif-du-montage-mixte.md),
 [HORIZON-MIXTE-S119](docs/validation/HORIZON-MIXTE-S119.md). `mixed::horizon` rend la fenêtre

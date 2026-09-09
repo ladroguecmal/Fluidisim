@@ -17,6 +17,13 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S120 :** [ADR-080](adr/ADR-080-annonce-des-points-du-montage-mixte.md), annonce des points du montage mixte.
+[BORNES-POINTS-S120](validation/BORNES-POINTS-S120.md) : `admits` compose les prédicats de domaine posés
+dans les trois couches, `slope_floor` annonce la part constante de l'enveloppe. Filtrage ~40 ns par point
+contre35,60 ms pour le lot qu'il sauve ; hachages inchangés. Deux corrections datées portées à l'ADR.
+A196 traitée à moitié, **A197 ouverte**, L209.251 tests réussis/cinq ignorés.
+80 ADR,197 angles,17 invariants,6 spécifications,23 cas. Suite S121 : séparer champ dégénéré et point hors domaine, S120-1.
+
 **S119 :** [ADR-079](adr/ADR-079-horizon-effectif-du-montage-mixte.md), horizon effectif et annonce du montage mixte.
 [HORIZON-MIXTE-S119](validation/HORIZON-MIXTE-S119.md) : `horizon` et `state` avant toute publication,
 implémentation unique partagée avec la requête ; équivalence annonce/comportement reçue par balayage.

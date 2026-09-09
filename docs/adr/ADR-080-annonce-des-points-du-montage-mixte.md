@@ -73,3 +73,30 @@ l'équivalence, sur un balayage de points couvrant chaque frontière et ses deux
 `admits(p)` et l'existence d'un refus géométrique de la requête sur `[p]`. Un montage
 numériquement dégénéré vérifie la limite annoncée : `admits` reste vrai et la requête refuse
 pour non-finitude — l'annonce ne promet pas ce qu'elle ne peut pas tenir.
+
+## Note corrective du 2026-09-09, à la construction (S120, P5)
+
+La décision annonce, pour `admits(p) == false`, un refus « avec `Domain` ». **C'est trop
+précis, et faux dans un cas** : lorsque la conversion monde/local réussit mais que la borne
+locale de 4096 m ne passe pas, `eval_local` rend `None` et la requête nomme ce refus
+`InvalidBackground`, pas `Domain`. Les deux frontières du fond ne sont pas exactement la même,
+et elles ne portent pas le même nom d'erreur.
+
+La garantie exacte est donc : `admits(p) == false` ⟹ **la requête refuse ce point**, par
+`Domain` ou par `InvalidBackground` selon la couche qui borne. Le sens de la garantie est
+inchangé ; seul le nom de l'erreur était mal annoncé. Le test de réception vérifie l'appartenance
+à ces deux causes.
+
+**Second point, sur la Réception ci-dessus.** Elle annonce un montage numériquement dégénéré
+où `admits` resterait vrai pendant que la requête refuse pour non-finitude. **Ce montage n'a pas
+été construit.** La limite est bien vérifiée, mais par la **pente totale** : un point admis que
+la requête refuse sur son enveloppe. La démonstration porte donc sur « `admits` ne promet pas
+l'acceptation », pas spécifiquement sur la non-finitude. Écrire l'inverse aurait annoncé une
+réception qui n'a pas eu lieu.
+
+## Point ouvert daté — 2026-09-09
+
+Aucune boîte englobante n'est fournie. Un hôte qui voudrait **engendrer** des points dans la
+zone servable, plutôt que les tester, n'a pas de quoi la situer : `Background` n'expose pas son
+ancre, et sans elle une boîte en coordonnées locales n'est pas convertible en positions monde.
+Exposer l'ancre est une décision sur B, à prendre le jour où un consommateur la demande.

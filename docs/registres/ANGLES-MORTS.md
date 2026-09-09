@@ -1593,3 +1593,18 @@ corrigeables a posteriori.
   montage, donc aucune annonce préalable ne peut les couvrir sans recevoir les mêmes points.
   Ce qui est annonçable est une **borne** : pente maximale atteignable sur un lot, emprise du
   domaine. Suite S119-1.
+
+**Suivi A196 — S120 : traitée à moitié par ADR-080.** Ce qui dépend de la géométrie est
+désormais décidable avant la requête, par des prédicats posés dans les couches qui les
+appliquent (`admits`), et la part constante de l'enveloppe de pente est annonçable
+(`slope_floor`). Filtrer coûte ~40 ns par point contre 35,6 ms pour le lot qu'il sauve.
+Reste hors d'atteinte : la finitude des calculs, qui ne se prévoit pas sans évaluer.
+
+- **A197** *(sévérité 3, S120 ; ouverte)* — **Un champ dégénéré se présente comme un mauvais
+  point.** `RadialImpact::sample` rend `Error::Domain` aussi bien pour une position hors
+  domaine que pour une sortie non finie. Les deux causes n'ont rien de commun : la première est
+  imputable à l'appelant et se corrige en changeant le point, la seconde est un défaut du champ
+  et se reproduira partout. Un appelant qui filtre ses points sur `Domain` — ce que ADR-080
+  rend naturel — écarterait silencieusement des positions parfaitement valides autour d'un champ
+  dégénéré, et masquerait le vrai défaut. Séparer les deux causes touche la couche, pas
+  l'annonce. Suite S120-1.
