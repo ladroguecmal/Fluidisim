@@ -154,6 +154,54 @@ fn main() {
         }
     }
     println!("marge avant depassement f32 : {:e}", f32::MAX / worst);
+    // S122 : carte des bornes. Quelle borne mord, selon la longueur d'onde et le rayon ?
+    println!("--- carte des refus, energie 0,01 J, milieu sain (depth 20, pente 0,1) ---");
+    println!("lambda | radius  0,01      1         16        1000");
+    for e in -6..=4 {
+        let wavelength = 10f32.powi(e);
+        let mut row = format!("1e{e:<3}          ");
+        for radius in [0.01f32, 1.0, 16.0, 1000.0] {
+            let verdict = match WaveEvent::impact(Impact {
+                id: 1,
+                frame: FrameId(7),
+                cell: 9,
+                birth: SimTime(0),
+                ttl_us: 4_000_000,
+                position: [0.0; 3],
+                energy_j: 0.01,
+                wavelength_m: wavelength,
+                direction_turns: 0.0,
+                anisotropy: 0.0,
+                displaced_l: 0.0,
+                material: 0,
+                origin: Origin::Server,
+                above_surface: true,
+            }) {
+                Err(_) => "evenement".to_string(),
+                Ok(event) => {
+                    let medium = Medium {
+                        gravity: 9.81,
+                        density: 1025.0,
+                        depth: 20.0,
+                        max_slope: 0.1,
+                    };
+                    match RadialImpact::<64>::new(
+                        event,
+                        medium,
+                        Domain {
+                            radius,
+                            age_us: 4_000_000,
+                        },
+                    ) {
+                        Ok(_) => "construit".to_string(),
+                        Err(why) => format!("{why:?}"),
+                    }
+                }
+            };
+            row.push_str(&format!("{verdict:<10}"));
+        }
+        println!("{row}");
+    }
     // Second site de la même confusion : ImpactField::new. Où bascule-t-il, et vers quoi ?
     println!("--- ImpactField, energie et pente maximales ---");
     for e in -6..=3 {

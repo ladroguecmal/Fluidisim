@@ -67,7 +67,7 @@ ne documente laquelle mord en premier.
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan.
-- [ ] **P2** — inventaire, avant toute décision (L209) : recenser chaque borne des deux
+- [x] **P2** — inventaire, avant toute décision (L209) : recenser chaque borne des deux
       constructeurs, le paramètre qu'elle contraint, et le nom qu'elle porte aujourd'hui.
       Puis **mesurer** laquelle mord, où, avec la sonde (L210).
 - [ ] **P3** — ADR-082, sur ce que l'inventaire aura montré.
@@ -90,3 +90,17 @@ paramètres : la réutiliser pour cartographier plutôt que d'en écrire une aut
 Piège à éviter, hérité de S120 : ne pas construire ce qui n'a pas de consommateur. Une erreur
 qui nomme sa borne sert le code appelant ; une carte des combinaisons acceptées sert l'auteur
 de contenu. Vérifier en P2 que les deux sont utiles avant de faire les deux.
+
+P2 : treize bornes, six noms. `Domain` en recouvre sept, portant sur cinq paramètres ; `Medium`
+en recouvre deux dont une qui ne parle pas du milieu (condition 9 : depth > pi/lo, le régime
+d'eau profonde). Même défaut de nommage qu'ADR-081, un cran plus loin.
+
+La carte mesurée (livrable §2) montre un **couloir étroit** — lambda de l'ordre du mètre à la
+dizaine, rayon d'autant plus petit que lambda est courte — bordé de trois causes différentes
+sous deux noms : résolution en dessous, régime d'eau profonde au-dessus, portée de la table de
+Bessel à droite. Rien ne le documentait. Et c'est une coupe, pas une frontière : l'horizon entre
+dans la condition de résolution, donc un âge plus court élargit le couloir.
+
+Peu d'assertions à corriger (4-5 sites) : renommer franchement plutôt qu'ajouter une API
+parallèle. `Domain` doit rester pour les **positions** hors domaine dans `sample` (ADR-080) ;
+ce sont les bornes de construction qui reçoivent des noms propres.
