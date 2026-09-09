@@ -18,12 +18,16 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-09 14:11 +02:00
-Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-09 14:15 +02:00
+Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
+Session en cours : S118 — cycle hôte temporel mixte via le contrôleur (S117-1)
 Dernière session : S117 — contrôleur pression ;246 tests/cinq ignorés
-Session suivante : S118 — cycle temporel mixte (S117-1)
+Session suivante : à fixer en fin de S118
+
+**Copie de travail S118** : worktree `claude/reprise-projet-2d3506`, parti de c16c308 = master.
+Terminer par `git -C C:/Users/antoi/Fluidisim merge --ff-only claude/reprise-projet-2d3506`,
+comme la note S58 le prescrit pour 29ef50. Deux copies divergentes portent deux jetons (L137).
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :

@@ -58,26 +58,34 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S117 — terminée
-Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : contrôleur pression à deux pools, publication après succès et instant exact.
+Session : S118 — en cours
+Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
+Objectif : exercer le contrôleur de publication dans un cycle hôte temporel mixte
+(S117-1) — recettes 224×128 et 256×128, plusieurs changements d'instant, identité en
+bits avec la voie directe, chemin `Unchanged`, refus, coût mise à jour + requête 64.
 
 ### Plan
 
-- [x] **P1** — vérifier la passation et déclarer le plan.
-- [x] **P2** — construire le contrôleur, recevoir les transitions/refus et la requête mixte.
-- [x] **P3** — publier décision, résultats et suite ; rituel final et synchronisation.
+- [x] **P1** — vérifier la passation, prendre le jeton, déclarer ce plan.
+- [ ] **P2** — écrire la campagne `cycle_mixed` : contrôleur piloté par une séquence
+      d'instants (avance, retour, répétition), requête mixte B+impact+pression sur la
+      publication, comparaison en bits à la préparation directe, refus hors fenêtre et
+      vue à une date non publiée.
+- [ ] **P3** — mesurer `update`+`current`+requête 64 aux deux recettes, recevoir la
+      campagne en release, lire ce que les chiffres disent.
+- [ ] **P4** — publier le livrable, rituel de fin (`REPRISE.md` §6) et synchronisation
+      `--ff-only` vers master.
 
 ### Notes de reprise
 
-Départc46a85e, copies actives propres identiques. S116-1.
-Journal et recette empruntés immuables pendant la vie du contrôleur ; admission dynamique hors scope.
-Deux pools empruntés disjoints, métadonnées validées séparées des coefficients pour éviter auto-référence.
-Même instant sans recalcul ; erreur à autre instant, ancienne publication conservée si mise à jour refusée.
+Départ c16c308 (= master, quatre worktrees au même commit sauf 5134cd archivé et c107bf
+à S44). Copie de travail : `claude/reprise-projet-2d3506`.
 
-P2 terminée : Controller, FieldState opaque, trois tests nouveaux et tests mixtes via contrôleur.
-Suite246 réussis/cinq ignorés ; ciblés contrôleur et mixte aussi en release.
-Refus numérique répété conserve la publication à0 ; demandes aux dates refusées indisponibles.
-ADR-078 et CONTROLEUR-PRESSION-S117 ; admission figée explicitement.
+Ce que S117 laisse acquis : `Controller::{new,update,published_time,state,current}`,
+deux pools disjoints, bascule après succès intégral, `Unchanged` sur même instant,
+`Err(Time)` pour une vue à une date non publiée. Reçu à la recette 16×24 seulement —
+S118 doit l'exercer aux recettes que S116 a reçues spatialement (224×128, 256×128).
 
-P2 789c5dd. Passation publiée ; suite S118 cycle temporel mixte S117-1.
+Attendu de la mesure : le contrôleur ne recopie pas les coefficients, donc
+`update`+`current` devrait coûter la préparation directe de S116 (48–58 ms) sans surcoût
+mesurable ; c'est cela qu'il faut vérifier, pas seulement l'égalité en bits.
