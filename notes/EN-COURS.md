@@ -58,23 +58,18 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S110 — terminée
+Session : S111 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : instantané mémoire du journal et de l'attente, restauration transactionnelle.
+Objectif : cycle WPRS/journal/WPJR/reprise jusqu’à B+pression, identité et coûts.
 
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [x] **P2** — construire format et restauration, valider intégralement avant écriture ; tester reprise et refus.
-- [x] **P3** — publier décision et résultats ; rituel final et synchronisation.
+- [ ] **P2** — exécuter le cycle du virage aux deux résolutions et mesurer séparément les étapes.
+- [ ] **P3** — publier résultats et limites ; rituel final et synchronisation.
 
 ### Notes de reprise
 
-Départ dcb9ee6, copies propres identiques. S109-1.
-Conserver pending même sur cible agrandie ; copie des segments dans un pool indépendant.
-Validation intégrale des sources, capacités et conflits avant mutation des pools de destination.
-
-P2 : WPJR V1, validation globale avant écriture, copie des trajectoires et attente intacte.
-Suite236 réussis/cinq ignorés ; huit tests journal/instantané aussi en release. ADR-076.
-
-P2 6c1a451. Suite S111 : S110-1, cycle de reprise et coûts.
+Départ a98c74a, copies propres identiques. S110-1.
+Une source de virage, journal initial sans place, attente restaurée sur pool agrandi.
+Pas de composition multisource implicite ; comparaison de chaque bit avec construction directe.
