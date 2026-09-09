@@ -58,52 +58,46 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S131 — terminée
+Session : S132 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : S130-1 — sortir de la saturation. Après un `Full`, le contrôleur conserve sa
-publication mais ne peut plus changer d'instant. Le chemin de sortie existe déjà ; il s'agit
-de le parcourir en entier, de recevoir ce qu'il garantit, et de mesurer ce qu'il coûte.
+Objectif : S131-1 — une admission recalcule tout le champ alors que la superposition modale
+est linéaire. Mesurer si un chemin incrémental est **exact** et ce qu'il rapporte, **puis**
+décider. Renoncer est une issue légitime.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seul.
-- [x] **P2** — oui, il est possible : `copy_into` ne refuse que si le stockage est plus
-      petit que la publication. ADR-087 et `required_capacity`.
-- [x] **P3** — cycle reçu, champ d'après identique en bits à la voie directe et différent
-      de l'ancien.
-- [x] **P4** — balayage sur les tailles, chaque étape distinguée ; service maintenu à chaque échec.
-- [x] **P5** — élargissement 0,1 µs service maintenu ; reconstruction 12,21/13,41 ms.
-- [x] **P6** — livrable, rituel de fin, fusion `--ff-only`.
+- [ ] **P2** — mesurer avant de décider (L209, L210), sans toucher la production :
+      1. l'identité en bits, selon que la source s'insère **en fin** ou **au milieu** de
+         l'ordre canonique — l'accumulation se fait par nœud, segment après segment, donc
+         seule la première position préserve l'ordre d'addition ;
+      2. ce que l'incrémental ne peut pas reprendre en l'état : la **pression modale cumulée**
+         n'est pas stockée dans le `Slot`, or la puissance en dépend ;
+      3. le gain réel, qui vaut au mieux le rapport du nombre de sources.
+- [ ] **P3** — ADR-088 sur ce que la mesure aura montré, **y compris si elle dit non**.
+- [ ] **P4** — construire ce que la décision retient.
+- [ ] **P5** — recevoir : identité, refus, et hachages de campagne.
+- [ ] **P6** — mesurer le gain effectif.
+- [ ] **P7** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
-Départ 57d0a3b = master, trois copies coïncidentes.
+Départ 357b052 = master, trois copies coïncidentes.
 
-Ce que la lecture a déjà établi, et qui change la forme attendue de la réponse :
+Ce que la lecture de `prepare_segments` établit déjà :
 
-- **`copy_into` prend `&self`**, pas `&mut self`. Or le contrôleur expose `journal()` en
-  lecture seule depuis S130. L'élargissement peut donc se faire **pendant que le contrôleur
-  sert encore**, et la reprise aussi : seule la reconstruction impose de le libérer.
-  La fenêtre sans champ se réduit donc à une préparation, et non à tout le cycle.
-- **`copy_into` copie l'attente** avec la publication, sans admission implicite.
-- **`copy_into` refuse seulement si `slots.len() < count`.** Un pool de taille exactement
-  `count` passe la copie et laisse l'attente irrésolue : `retry` y rendra `Full` à nouveau.
-  Un élargissement peut donc « réussir » sans sortir de la saturation, et rien ne le dit à
-  l'appelant avant qu'il essaie. C'est le candidat le plus sérieux pour un ajout d'API.
+- L'accumulation est **par nœud, boucle sur les segments** dans l'ordre de l'itérateur, avec
+  `+=` en f32. Une source insérée en dernier laisse donc l'ordre d'addition inchangé ;
+  au milieu, il change, et l'identité en bits n'est plus acquise.
+- L'énergie et la puissance sont sommées en Kahan **sur les nœuds** : reparcourir les nœuds
+  dans le même ordre les reproduit à l'identique.
+- L'énergie ne dépend que de `total` (la réponse cumulée), qui est stockée dans le `Slot`.
+  **La puissance dépend aussi de la pression modale cumulée, qui ne l'est pas.** La reprendre
+  exigerait de refaire `ModalPressure::new` pour chaque segment — c'est-à-dire l'essentiel du
+  coût — ou d'agrandir le `Slot` de deux `f32`.
+- `phase_safe` et l'enveloppe ne dépendent que des nœuds et des slots : inchangés.
 
-Piège à éviter : reconstruire d'abord et élargir ensuite. L'ordre importe, et il est mesurable.
-
-P2-P6 : ADR-087, SORTIE-SATURATION-S131, journal, index, README, REPRISE, jeton rendu, ff-only.
-260 tests/cinq ignorés, ciblé aussi en release, hachages inchangés. Aucun angle ni leçon nouveaux.
-
-Une mesure corrigée avant publication : placée d'abord avant le bloc de mise en régime, elle
-donnait une médiane tenable mais un maximum à 35 ms. Déplacée après (A195).
-
-Pour S132 sans relire : S131-1 est un chemin incrémental. La superposition modale est linéaire
-et S112 l'a reçue (champ multisource = somme des contributions, interférences conservées). L'idée
-est d'ajouter au champ publié la contribution de la seule source admise, au lieu de recalculer
-toutes les sources. Attention : `prepare_segments` accumule sur tous les segments de toutes les
-sources publiées, dans l'ordre canonique ; ajouter après coup change l'ordre de sommation, donc
-**l'identité en bits avec la voie directe n'est pas acquise** — c'est le point à mesurer d'abord,
-avant toute décision. Si elle tombe, il faudra choisir entre le gain et l'identité, et ce choix
-touche les hachages de campagne.
+Piège à éviter : conclure sur le gain sans compter ce que la structure grossit ni ce que
+l'identité conditionnelle impose à l'appelant. Le consommateur — un hôte qui admet une source
+en cours de jeu — n'est pas une boucle par trame ; 12,2 ms occasionnels ne sont peut-être pas
+un problème à résoudre.

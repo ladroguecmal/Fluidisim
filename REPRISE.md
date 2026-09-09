@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-10 01:32 +02:00
+JETON            : occupé
+Battement        : 2026-09-10 01:34 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S132 — chemin incrémental contre reconstruction (S131-1)
 Dernière session : S131 — sortie de saturation reçue et chiffrée ;260 tests/cinq ignorés
-Session suivante : S132 — chemin incrémental contre reconstruction (S131-1)
+Session suivante : à fixer en fin de S132
 
 **Copie de travail S130** : worktree `claude/reprise-projet-2d3506`, remis en avance rapide sur
 master (e817d0e) au démarrage — il était resté à 52e80a5 et n'avait rien d'unique, donc aucun
