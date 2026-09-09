@@ -1719,3 +1719,10 @@ Cycle hôte transporté encore ouvert : S127-1. A203 demeure partielle pour les 
 CYCLE-TRANSPORTE-S128, après renouvellement et restauration,1280 points-temps identiques
 aux champs directs. Le bilan cinétique du candidat étendu demeure distinct et devient S128-1.
 Aucun élargissement implicite de la réception physique d'A203.
+
+**Suivi A203/A204 — S129 : bilan des nœuds du candidat reçu sur la même fixture.**
+[BILAN-CANDIDAT-ETENDU-S129](../validation/BILAN-CANDIDAT-ETENDU-S129.md) ferme S128-1 :
+cinétique complète et total contre la référence S127, écart total maximal9,045e-7 E0.
+Interférences conservées et contre-épreuve diagonale seule rejetée ;99,985214 % de E0 dans
+l'anneau32–80 à48 s. A203 reste partielle pour les autres paramètres ; aucune réception
+en profondeur finie ou du bilan mixte. Aucun angle nouveau distinct ajouté.

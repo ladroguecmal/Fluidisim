@@ -134,3 +134,8 @@ de cette surface. Aucun de ces succès ne mesure son énergie cinétique en prof
 Défaut N64 et ADR-085 inchangés. Autres sources/paramètres, calibration B2, profondeur finie,
 pression mixte, admission dynamique mixte, bilan mixte et durabilité disque restent ouverts.
 85 ADR,204 angles,17 invariants,6 spécifications,23 cas ; aucun nouvel angle ou ADR.
+
+> **Suivi S129 — 2026-09-10 :** S128-1 réalisée sur fixture dans
+> [BILAN-CANDIDAT-ETENDU-S129](BILAN-CANDIDAT-ETENDU-S129.md), cinétique et total des nœuds
+> réellement construits contre S127, interférences et contre-épreuves reçues. Suite complète
+> actualisée :257 réussis/cinq ignorés. Aucun élargissement aux autres sources ou au bilan mixte.

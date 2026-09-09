@@ -17,6 +17,14 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S129 :** [BILAN-CANDIDAT-ETENDU-S129](validation/BILAN-CANDIDAT-ETENDU-S129.md), cinétique
+et bilan total des nœuds construits N256/R80/48 reçus contre S127. Écart total maximal
+9,045e-7 E0 ;99,985214 % de E0 dans l'anneau32–80 à48 s. Termes croisés conservés,
+contre-épreuves reçues. **S128-1 réalisée sur fixture**, A203 reste partielle.
+Suite257/cinq ignorés,0 échec ; aucun calcul de production ni ADR modifié.
+Suite S130 : S129-1, admission dynamique pression et publication cohérente journal/champ.
+85 ADR,204 angles,17 invariants,6 spécifications,23 cas inchangés.
+
 **S128 :** [CYCLE-TRANSPORTE-S128](validation/CYCLE-TRANSPORTE-S128.md), LiveWater B+W N256/R80,
 horizon4→24→48 s et TTL4 conservé.1280 points-temps identiques aux champs directs ; sauvegardes
 et reprises identiques, refus atomiques reçus. Renouvellement+requête64 ~0,96 ms médian local,
@@ -459,6 +467,14 @@ parfaitement stable ne pouvait pas distinguer.
 | [`../notes/JOURNAL.md`](../notes/JOURNAL.md) | historique des sessions, points de reprise |
 
 ## État d'avancement
+
+**S129 :** [BILAN-CANDIDAT-ETENDU-S129](validation/BILAN-CANDIDAT-ETENDU-S129.md), cinétique
+et bilan total des nœuds construits N256/R80/48 reçus contre S127. Écart total maximal
+9,045e-7 E0 ;99,985214 % de E0 dans l'anneau32–80 à48 s. Termes croisés conservés,
+contre-épreuves reçues. **S128-1 réalisée sur fixture**, A203 reste partielle.
+Suite257/cinq ignorés,0 échec ; aucun calcul de production ni ADR modifié.
+Suite S130 : S129-1, admission dynamique pression et publication cohérente journal/champ.
+85 ADR,204 angles,17 invariants,6 spécifications,23 cas inchangés.
 
 **S128 :** [CYCLE-TRANSPORTE-S128](validation/CYCLE-TRANSPORTE-S128.md), LiveWater B+W N256/R80,
 horizon4→24→48 s et TTL4 conservé.1280 points-temps identiques aux champs directs ; sauvegardes

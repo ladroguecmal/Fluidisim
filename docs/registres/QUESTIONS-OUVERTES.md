@@ -1246,3 +1246,16 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S128-1 : ouverte, S129.** Bilan cinétique réel du candidat étendu N256/R80/48,
   depuis ses nœuds effectivement construits, puis bilan total et comparaison à la référence
   S127 avec raffinements. La réception de surface et de sa reprise n'a pas mesuré cette cinétique.
+
+### S129 — Bilan du candidat transporté reçu
+
+- **S128-1 : réalisée sur fixture.** [BILAN-CANDIDAT-ETENDU-S129](../validation/BILAN-CANDIDAT-ETENDU-S129.md),
+  cinétique depuis les nœuds construits N256/R80/48, termes croisés conservés. Total et anneau
+  concordent avec S127 ; contre-épreuves reçues. Les limites correspondantes de S127/S128 sont
+  levées dans ce périmètre. A203 reste partielle pour les autres paramètres.
+- **S129-1 : ouverte, S130.** Admission dynamique des sources de pression : remplacer la
+  contrainte de journal figé d'ADR-078 par une publication cohérente journal/champ sur pools
+  hôte. Nouvelle source au même instant implique recalcul ; aucune réponse `Unchanged` depuis
+  un journal différent. Maintien de l'ancienne publication au refus, attente explicite,
+  doublons/conflits et saturation reçus avant raccordement à la transaction mixte.
+  Fenêtre physique, profondeur finie S116-2, énergie mixte et durabilité restent distinctes.

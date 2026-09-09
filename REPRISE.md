@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 01:02 +02:00
+JETON            : libre
+Battement        : 2026-09-10 01:05 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S129 — bilan énergétique du candidat
-Dernière session : S128 — cycle LiveWater transporté, reprise et coût reçus
-Session suivante : S129 — bilan cinétique du candidat étendu (S128-1)
+Session en cours : aucune
+Dernière session : S129 — bilan énergétique du candidat transporté reçu
+Session suivante : S130 — admission dynamique des sources de pression (S129-1)
 
 *Le battement de fin de S118 disait 15:05 : une heure estimée, pas relevée. Corrigée ici.
 Un battement dans le futur ferait croire à une session active — le relever, jamais l'écrire de mémoire.*
@@ -176,6 +176,23 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S129 — 2026-09-10 :** [BILAN-CANDIDAT-ETENDU-S129](docs/validation/BILAN-CANDIDAT-ETENDU-S129.md).
+S128-1 réalisée sur fixture : cinétique et total du candidat N256/R80/48 mesurés depuis ses
+nœuds construits, PhaseQ32 et Bessel réels, double somme complète en profondeur et Simpson320/640.
+Écart maximal total/référence9,045e-7 E0 ; cinétique3,424e-7 E0 ; surface normalisée2,036e-8.
+À48 s99,985214 % de E0 entre32 et80 m. Sans cinétique~0,5 E0 ; diagonale seule~0,617 E0 :
+les deux contre-épreuves sont rejetées. Test privé, aucun nouvel accès public aux nœuds.
+Suite complète **257 réussis/cinq ignorés**,0 échec ; test final reçu aussi en release.
+85 ADR,204 angles,17 invariants,6 spécifications,23 cas inchangés ; aucun ADR nouveau ni
+calcul de production modifié. A203 partielle pour les autres paramètres ; profondeur finie,
+calibration B2 et sources physiques, énergie mixte et disque restent ouverts.
+**Suite S130 : S129-1**, admission dynamique des sources de pression. Le contrôleur ADR-078
+emprunte un journal figé ; construire la publication cohérente journal/champ sur pools hôte,
+attente explicite et ancien état conservé au refus. Une source ajoutée au même instant exige
+recalcul, jamais `Unchanged` sur un journal différent. Recevoir doublons/conflits et saturation
+sur le chemin pression avant de revendiquer une transaction mixte. Aucun arbitrage humain.
+Master seul avancé, copies anciennes propres et sans avance ; aucune copie créée.
 
 **S128 — 2026-09-10 :** [CYCLE-TRANSPORTE-S128](docs/validation/CYCLE-TRANSPORTE-S128.md).
 LiveWater B+W du montage N256/R80, horizon4→24→48 et TTL4 conservé.1280 points-temps,

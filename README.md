@@ -61,7 +61,7 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S128 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S129 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
@@ -135,7 +135,7 @@ Coût mesuré en S125 : environ ×4 à points identiques et ×9 pour le montage 
 initial. [ADR-085](docs/adr/ADR-085-profils-radiaux-selon-le-domaine.md) conserve N64 par défaut ;
 N128/N256 se dimensionnent explicitement au domaine commun du service. A202 traitée ; A203 suit
 la réception physique à grande portée, réalisée en S126 sur les deux fixtures à âge0–4 s.
-État vérifié : **256 tests réussis, cinq ignorés ; 85 ADR, 204 angles, 17 invariants,
+État vérifié S129 : **257 tests réussis, cinq ignorés ; 85 ADR, 204 angles, 17 invariants,
 6 spécifications, 23 cas canoniques.**
 [Réception S126](docs/validation/RECEPTION-ETENDUE-S126.md) :1350 points-temps reçus contre
 oracle indépendant, erreur normalisée<=4,44e-7. La fenêtre4 s reçoit surtout des queues aux
@@ -145,10 +145,15 @@ restent ceux vérifiés en S125, deux nouvelles campagnes release avec assertion
 [Transport S127](docs/validation/TRANSPORT-ETENDU-S127.md) : N256/R80/horizon48 admis ;
 99,985 % de l'énergie de référence est entre32 et80 m à48 s. Rayon moyen53,42 m ;
 2187 points-temps du candidat reçus. A204 traitée sur cette fixture, bilan cinétique total
-du candidat encore ouvert. Suite S128 : cycle LiveWater B+W du montage, reprise et coût.
+du candidat encore ouvert en S127, reçu en S129 ci-dessous. Cycle hôte reçu en S128.
 [Cycle transporté S128](docs/validation/CYCLE-TRANSPORTE-S128.md) : service B+W N256/R80/horizon48,
 TTL4 conservé,1280 points-temps identiques après renouvellement et reprise. Refus atomiques reçus.
 Renouvellement+requête64 ~0,96 ms médian local, un impact ; restauration~2,47 µs, sauvegarde289 octets.
-Deux campagnes release et debug reçus, production inchangée. Suite S129 : S128-1, bilan cinétique
-réel du candidat étendu.85 ADR,204 angles,17 invariants,6 spécifications,23 cas inchangés.
+Deux campagnes release et debug reçus, production inchangée.
+[Bilan candidat S129](docs/validation/BILAN-CANDIDAT-ETENDU-S129.md) : cinétique et énergie totale
+du candidat N256/R80/48 reçues contre S127, écart total maximal9,045e-7 E0. Interférences
+conservées ;99,985214 % de E0 entre32 et80 m à48 s. **S128-1 réalisée sur fixture.**
+Suite complète257/cinq ignorés. Suite S130 : S129-1, admission dynamique des sources de
+pression avec publication cohérente du journal et du champ, maintien de l'état valide au refus.
+85 ADR,204 angles,17 invariants,6 spécifications,23 cas inchangés.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

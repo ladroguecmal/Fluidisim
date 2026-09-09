@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S129 — en cours
+Session : S129 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S128-1 — recevoir énergie cinétique et bilan total du candidat N256/R80/48,
 depuis ses nœuds effectivement construits, contre les résultats indépendants S127.
@@ -72,7 +72,7 @@ depuis ses nœuds effectivement construits, contre les résultats indépendants 
 - [x] **P3** — réception à0/24/48 s, témoins initiaux et contre-épreuves (cinétique omise,
       termes croisés omis), contrôles de surface contre sample, rapport fidèle aux résultats.
       Corriger la production seulement si un défaut est établi.
-- [ ] **P4** — tests adaptés et suite complète (nouveau test), journal/registres/actions,
+- [x] **P4** — tests adaptés et suite complète (nouveau test), journal/registres/actions,
       index/README/passation, décomptes/invariants, jeton libre et commit final.
 
 ### Notes de reprise
@@ -103,3 +103,8 @@ BILAN-CANDIDAT-ETENDU-S129.md contient résultats et limites ; S128-1 réalisée
 Suite complète déjà achevée :257 réussis/cinq ignorés,0 échec (164+93),7,78+53,10 s.
 S129-1 déclaré : admission dynamique pression, journal/champ cohérents, attente et refus,
 y compris nouvelle source à l'instant déjà publié. Construction à poursuivre en S130.
+
+P4 : journal, registres et rapports S127/S128 suivis ; index/README/REPRISE actualisés.
+85 ADR,204 angles,17 invariants,6 spécifications,23 cas vérifiés ; suite257/cinq ignorés.
+Invariants applicables relus, aucun invalidé, aucune nouvelle leçon ou angle distinct.
+Travail conservé sur master, aucun calcul de production modifié. Jeton libre, suite S130.

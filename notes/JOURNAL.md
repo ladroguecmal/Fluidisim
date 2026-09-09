@@ -6745,3 +6745,37 @@ profondeur finie, pression mixte et disque. Aucun arbitrage humain requis.
 **Suite S129 :** S128-1, mesurer la cinétique depuis les nœuds réels du candidat N256/R80/48,
 comme S78 à courte durée, puis comparer au bilan indépendant S127 avec raffinement radial.
 Travail sur master, aucune copie créée ; jeton rendu.
+
+---
+
+## S129 — 2026-09-10 — Bilan énergétique du candidat transporté reçu
+
+**Entrée :** continuation demandée, master propre7701759 ; copies anciennes propres sans
+avance, jeton libre. S128-1, fixture N256/R80/horizon48 issue de S127/S128.
+**Produits :** test privé tests_radial_energy.rs et BILAN-CANDIDAT-ETENDU-S129. Les nœuds
+restent privés ; aucun calcul ou seuil de production modifié, aucun ADR nouveau.
+**Mesure :** vitesses modales assemblées en f64 depuis coefficients/fréquences/PhaseQ32 et
+Bessel réels du candidat, profondeur intégrée par1/(ki+kj), termes croisés conservés.
+Potentielle depuis l'élévation publiée ; Simpson320/640, disque80 et anneau32–80 à0/24/48 s.
+La naissance suit la même double somme : le zéro cinétique est observé, jamais imposé.
+**Résultat :** cinétique/E0=0 ;0,5000000245 ;0,4999376328. Total à48 s0,9998652235 E0,
+énergie hors32 m0,9998521408 E0. Écart maximal total/référence S127 :9,045e-7 E0,
+cinétique3,424e-7 E0 ; contrôle des vitesses de surface2,036e-8 pour1e-6 annoncé.
+Raffinement maximal1,019e-3 E0, initial ; densité totale minimale8,447e-22 J/m².
+**Contre-épreuves :** omettre la cinétique donne~0,5 E0 ; ne garder que ses termes diagonaux
+donne~0,617 E0 aux temps non nuls. Les deux erreurs volontaires sont effectivement rejetées.
+**Décision :** S128-1 réalisée sur fixture ; bilan des nœuds du candidat profond reçu,
+complément des surfaces S127 et du service S128. A203 reste partielle ; pas de conservation
+globale exacte déduite du disque, pas de compensation d'amplitude, défaut N64 conservé.
+**Vérification :** version finale du test reçue en release0,32 s ; suite complète debug
+257 réussis/cinq ignorés,0 échec (164+93),7,78+53,10 s. Quatre avertissements préexistants.
+**Rituel :** suivi A203/A204, actions, anciens rapports et passation actualisés ; aucun
+nouvel angle ni leçon distincte. Interférences S78 et portée L215 appliquées. I-03/I-06/I-08/
+I-14/I-15 relus, aucun invariant invalidé : f64 et allocations limités à la mesure de test.
+85 ADR,204 angles,17 invariants,6 spécifications,23 cas vérifiés, inchangés.
+**Non fait :** autres sources/paramètres, calibration B2, profondeur finie, bilan énergétique
+mixte et disque. Aucun arbitrage humain requis.
+**Suite S130 :** S129-1, admission dynamique des sources de pression. ADR-078 garde un journal
+figé ; construire la publication cohérente journal/champ, attente explicite et maintien de
+l'ancienne publication au refus. Recevoir l'arrivée d'une source à l'instant déjà publié
+avant de revendiquer la transaction du montage mixte. Master seul avancé, jeton rendu.

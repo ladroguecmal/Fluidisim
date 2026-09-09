@@ -128,3 +128,8 @@ aucun chronométrage du runtime B+W dans cette session. Aucune modification de b
 > [CYCLE-TRANSPORTE-S128](CYCLE-TRANSPORTE-S128.md). Service B+W transporté, renouvellement,
 > sauvegarde/reprise et refus reçus ;1280 points-temps identiques en bits, coût local mesuré.
 > Le bilan cinétique du candidat étendu reste ouvert et devient S128-1, prochaine session S129.
+
+> **Suivi S129 — 2026-09-10 :** le bilan cinétique du candidat étendu, laissé ouvert ci-dessus,
+> est reçu dans [BILAN-CANDIDAT-ETENDU-S129](BILAN-CANDIDAT-ETENDU-S129.md). Même fixture,
+> nœuds réellement construits, double somme profonde complète et Simpson320/640 ; écart total
+> maximal9,045e-7 E0 contre les références de ce rapport. S128-1 réalisée sur fixture.
