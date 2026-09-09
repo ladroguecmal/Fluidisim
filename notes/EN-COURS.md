@@ -69,7 +69,7 @@ f64 indépendant, en contrôlant séparément convergence spectrale et angulaire
 - [x] **P2** — construire une campagne release indépendante, spectre physique ADR-060,
       Bessel par intégrale angulaire f64 sans table ni PhaseQ32, raffinements séparés.
       Prévoir centre, rayons irréguliers, raccord Bessel, bord spatial et âge limite.
-- [ ] **P3** — exécuter et interpréter ; conserver tout refus. Rapport avec domaine exact,
+- [x] **P3** — exécuter et interpréter ; conserver tout refus. Rapport avec domaine exact,
       provenance des critères, contrôles de l'oracle et contre-épreuve du verdict.
       Corriger le candidat seulement si une erreur est établie (sinon bibliothèque inchangée).
 - [ ] **P4** — vérifications adaptées, journal, angles/leçons/actions, index et passation,
@@ -91,3 +91,12 @@ sur vitesse pour vérifier que le verdict peut refuser. Aucune promesse de borne
 P2 : receive_extended_impact.rs construit, compilation release réussie. Intégrales
 angulaires indépendantes et trois maillages spectraux. Centre analytique reçu à 4,64e-14.
 Première exécution lancée ; recevoir les résultats en P3 (processus 68746).
+
+P3 : deux campagnes release reçues, 1350 points-temps ; erreur normalisée <=4,44e-7.
+Raffinements oracle <=9,80e-11 puis <=6e-12 ; angulaire <=4,29e-16.
+Diagnostics locaux : anneau extérieur erreur/pic de 1,56–4,01 % / 11,32–14,84 %, sur des
+queues d'élévation de 2,82e-9 / 2,17e-10 m. Pas de seuil ajouté après observation.
+Point nouveau : à4 s le groupe le plus rapide parcourt ~7,07 m ; le banc ne reçoit pas
+un paquet arrivé à64/128 m. Horizons admissibles théoriques12,07/24,15 s contre temps
+caractéristiques36,22/72,44 s. A204 / S126-1 : dimensionner et mesurer le transport.
+Bibliothèque inchangée, pas d'ADR nouveau, pas de modification des critères en cours de mesure.

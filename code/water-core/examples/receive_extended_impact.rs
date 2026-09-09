@@ -188,6 +188,8 @@ fn campaign<const N: usize>(radius: f32) {
     let mut absolute = [0.0f64; 7];
     let mut faulty = [0.0; 7];
     let mut scale_report = [0.0; 7];
+    let mut tail_error = [[0.0f64; 7]; 2];
+    let mut tail_peak = [[0.0f64; 7]; 2];
     for (index, &point) in points.iter().enumerate() {
         let a = Reference::new(point, 512, &dirs);
         let b = Reference::new(point, 1024, &dirs);
@@ -206,6 +208,13 @@ fn campaign<const N: usize>(radius: f32) {
             max_errors(got, dd, d.scales, &mut errors);
             for k in 0..7 {
                 absolute[k] = absolute[k].max((got[k] - dd[k]).abs());
+                let r = (point[0] as f64).hypot(point[1] as f64);
+                for (region, lower) in [16.0, 0.9 * radius as f64].iter().enumerate() {
+                    if r >= *lower {
+                        tail_error[region][k] = tail_error[region][k].max((got[k] - dd[k]).abs());
+                        tail_peak[region][k] = tail_peak[region][k].max(dd[k].abs());
+                    }
+                }
             }
             let mut wrong = got;
             wrong[5] = -wrong[5];
@@ -251,6 +260,16 @@ fn campaign<const N: usize>(radius: f32) {
     println!(
         "erreurs normalisees={errors:?}\nerreurs absolues={absolute:?}\ndefaut signe={faulty:?}"
     );
+    for region in 0..2 {
+        let ratio: [f64; 7] = std::array::from_fn(|k| {
+            assert!(tail_peak[region][k] > 0.0);
+            tail_error[region][k] / tail_peak[region][k]
+        });
+        println!(
+            "region {region} pics={:?} erreurs={:?} rapports={ratio:?}",
+            tail_peak[region], tail_error[region]
+        );
+    }
     assert!(spectral.iter().flatten().all(|e| *e <= ORACLE_LIMIT));
     assert!(angular_error.iter().all(|e| *e <= ORACLE_LIMIT));
     assert!(errors.iter().all(|e| *e <= LIMIT));
