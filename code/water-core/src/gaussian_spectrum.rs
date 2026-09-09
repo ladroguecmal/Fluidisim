@@ -17,6 +17,7 @@ pub enum Error {
 pub struct HalfSpectrum<'a> {
     nodes: &'a [Node],
     source_hash: u64,
+    recipe: Recipe,
 }
 impl HalfSpectrum<'_> {
     pub fn nodes(&self) -> &[Node] {
@@ -24,6 +25,9 @@ impl HalfSpectrum<'_> {
     }
     pub fn source_hash(&self) -> u64 {
         self.source_hash
+    }
+    pub fn recipe(&self) -> Recipe {
+        self.recipe
     }
 }
 pub struct Spectrum<'a> {
@@ -64,6 +68,7 @@ impl Spectrum<'_> {
         Ok(HalfSpectrum {
             nodes: &pool[..self.nodes.len() / 2],
             source_hash: self.hash,
+            recipe: self.recipe,
         })
     }
     pub fn nodes(&self) -> &[Node] {

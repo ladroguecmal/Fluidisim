@@ -65,7 +65,7 @@ Objectif : contexte explicite et publication candidate atomique sur pools hôte.
 ### Plan
 
 - [x] **P1** — vérifier les copies et déclarer le plan.
-- [ ] **P2** — construire enveloppe de contexte et requête liée ; tester refus et maintien de la publication précédente.
+- [x] **P2** — construire enveloppe de contexte et requête liée ; tester refus et maintien de la publication précédente.
 - [ ] **P3** — publier résultats, limites et suite ; rituel final et synchronisation.
 
 ### Notes de reprise
@@ -75,3 +75,6 @@ Conserver la provenance de la recette dans le demi-spectre ; ne pas comparer seu
 Vue de champ figée à un instant : une requête à un autre instant doit être refusée.
 La préparation utilise un pool candidat distinct ; une erreur ne remplace jamais la vue active.
 Contexte hôte déclaré, pas de preuve géométrique ni de réception universelle de résolution.
+
+P2 : bound_pressure, recette conservée dans HalfSpectrum. Quatre tests debug/release.
+Suite222 réussis/cinq ignorés ; sorties physiques inchangées, données dans CONTEXTE-PRESSION-S105.
