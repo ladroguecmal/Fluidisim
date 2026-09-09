@@ -58,23 +58,18 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S106 — terminée
+Session : S107 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : requête monde B+pression, instant et points communs, publication atomique.
+Objectif : scénario hôte du virage B+pression, réception et coût complet.
 
 ### Plan
 
-- [x] **P1** — vérifier la passation et déclarer le plan.
-- [x] **P2** — construire la composition et le contrôle de pente ; recevoir composantes, contexte et refus.
-- [x] **P3** — publier les résultats et limites, rituel de passation et synchronisation.
+- [x] **P1** — vérifier les copies et déclarer le plan.
+- [ ] **P2** — construire et exécuter le scénario aux deux résolutions ; comparer, refuser/reprendre et mesurer.
+- [ ] **P3** — publier mesures et limites ; rituel final et synchronisation.
 
 ### Notes de reprise
 
-Départ 0c525eb, copies propres identiques. S105-1.
-Conserver la date préparée ; B utilise actuellement g=9,81, autre gravité incompatible.
-Ne pas assimiler la pente au point à une borne spatiale. Réutiliser le calcul de B sans double conversion.
-
-P2 : composition monde, enveloppe L1 calculée à la préparation. Trois tests debug/release.
-Suite225 réussis/cinq ignorés. Rapport MONDE-PRESSION-S106 ; aucune mesure de coût ici.
-
-P2 770b243. Suite S107 : S106-1, scénario hôte et coût B+pression.
+Départ d962706, copies propres identiques. S106-1.
+Même virage reçu S103/S104 ; référence gaussienne f64 indépendante à même résolution,
+B évalué directement. Séparer préparation, lot et cycle complet mesuré directement.
