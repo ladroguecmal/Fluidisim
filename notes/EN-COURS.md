@@ -69,7 +69,7 @@ le transport d'énergie radial loin de la source sans dépasser N256.
 - [x] **P2** — dériver le domaine et construire une campagne : N256/R80/48 s visé,
       λ4 et source S126 inchangée. Refus des portées64/128 à N128/256 aux temps de groupe.
       Réemployer l'oracle S126 par module partagé, sans recopier les formules.
-- [ ] **P3** — recevoir surface et transport : sept composantes contre référence,
+- [x] **P3** — recevoir surface et transport : sept composantes contre référence,
       densité physique positive intégrée en profondeur (formule S78) et rayon moyen.
       Raffiner spectre, angles et quadrature spatiale séparément ; rapport fidèle aux refus.
 - [ ] **P4** — vérifications, rituel de fin, registres/actions/index/passation,
@@ -93,3 +93,8 @@ transport_extended_impact construite. N256/R80/T48 admis ; anciens couples aux t
 R/cg_max refusent Resolution. Première campagne exécutée en15,94 s et reçue.
 Énergie hors32 à48 s=0,999852 E0 ; rayon moyen53,4157 m ; erreur surface<=7,13e-7.
 Résultats à publier et extraction S126 à vérifier en P3.
+P3 : TRANSPORT-ETENDU-S127 publié. Deux bancs transport reçus15,94/15,22 s ; référence
+S126 rejouée après extraction, valeurs conservées. Raffinements locaux de l'anneau reçus.
+Surface max7,13e-7 ; potentiel candidat/ref max5,63e-7 E0 ; bilan total de référence seul.
+S126-1 réalisée sur fixture, A204 traitée dans ce périmètre. S127-1 : cycle LiveWater B+W
+N256/R80/horizon48 avec renouvellement, sauvegarde/reprise et coût. Aucun ADR nouveau.

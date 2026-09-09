@@ -159,6 +159,8 @@ fn main() {
         let radial = integrate(&rows[it], 2, 0);
         let spectral = integrate(&coarse[it], 1, 0);
         let outer = integrate(&rows[it], 1, 256);
+        let outer_radial = integrate(&rows[it], 2, 256);
+        let outer_spectral = integrate(&coarse[it], 1, 256);
         mean[it] = full[1] / full[0];
         outside[it] = outer[0] / energy;
         println!("t={} s: E/E0={:.10} rayon_moyen={:.8} E_hors32/E0={:.10} potentiel_ref/E0={:.10} potentiel_candidat/E0={:.10}",TIMES[it] as f64/1e6,full[0]/energy,mean[it],outside[it],full[2]/energy,full[3]/energy);
@@ -171,6 +173,14 @@ fn main() {
         assert!((full[0] / energy - 1.0).abs() < 0.003);
         assert!((radial[0] - full[0]).abs() / energy < 0.002);
         assert!((spectral[0] - full[0]).abs() / energy < 1e-4);
+        println!(
+            "raffinement hors32 radial={:.3e} spectral={:.3e} rayon_moyen={:.3e} m",
+            (outer_radial[0] - outer[0]).abs() / energy,
+            (outer_spectral[0] - outer[0]).abs() / energy,
+            (radial[1] / radial[0] - mean[it]).abs()
+        );
+        assert!((outer_radial[0] - outer[0]).abs() / energy < 0.002);
+        assert!((outer_spectral[0] - outer[0]).abs() / energy < 1e-4);
         assert!((full[2] - full[3]).abs() / energy < 1e-4);
     }
     println!("{surface_count} points-temps, erreur candidat={candidate_error:?}\nspectral={spectral_error:?}\nangulaire={angular_error:?}\ndensite minimale={min_density:.3e}");
