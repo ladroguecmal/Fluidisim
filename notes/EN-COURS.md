@@ -66,7 +66,7 @@ puis trancher le choix du profil sans confondre domaine calculable et réception
 ### Plan
 
 - [x] **P1** — amorce, état réel, jeton et déclaration du plan seule.
-- [ ] **P2** — sonde reproductible : domaine commun et portée étendue, mise en régime,
+- [x] **P2** — sonde reproductible : domaine commun et portée étendue, mise en régime,
       ordre alterné, médianes et dispersion, empreinte mémoire ; contrôle des sorties finies.
 - [ ] **P3** — rapport et ADR sur le profil retenu après mesure ; application nécessaire
       au code ou documentation explicite du maintien, sans migration silencieuse des fixtures.
@@ -79,3 +79,7 @@ avance ni modification ; lignée 5134cd archivée. Aucun worktree créé.
 Cargo 1.97 disponible. S124 annonce neuf cas sur onze admis à N256 ; réception physique
 limitée au scénario historique. Mesurer d'abord le candidat radial isolé ; cycle mixte
 S118 ~49 ms cité comme contexte historique, pas comme mesure sur cette machine.
+
+P2 : deux mesures release, sonde et COUT-PROFIL-IMPACT-S125. Coût commun N256/N64 ~4 ;
+extension R128/N256 contre R16/N64 ~9. Les profils changent les bits ; WLIV encode déjà N.
+Suite complète lancée, résultat final à recueillir en P4.
