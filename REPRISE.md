@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-09 18:27 +02:00
+JETON            : libre
+Battement        : 2026-09-09 18:30 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S125 — coût et profil des impacts
-Dernière session : S124 — portée étendue, neuf cas sur onze à N=256 ;256 tests/cinq ignorés
-Session suivante : S125 — coût de N=256 et choix du profil (S124-1, A202)
+Session en cours : aucune
+Dernière session : S125 — coût mesuré, défaut N64 conservé ; 256 tests/cinq ignorés
+Session suivante : S126 — réception indépendante du champ étendu (S125-1, A203)
 
 *Le battement de fin de S118 disait 15:05 : une heure estimée, pas relevée. Corrigée ici.
 Un battement dans le futur ferait croire à une session active — le relever, jamais l'écrire de mémoire.*
@@ -176,6 +176,21 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S125 — 2026-09-09 :** [ADR-085](docs/adr/ADR-085-profils-radiaux-selon-le-domaine.md),
+[COUT-PROFIL-IMPACT-S125](docs/validation/COUT-PROFIL-IMPACT-S125.md). N256/N64 coûte ~4 sur
+les mêmes points ; N256/R128 contre N64/R16 ~9. Construction et mémoire mesurées également.
+**Défaut N64 conservé**, N128/N256 explicites selon le domaine commun du service homogène.
+Pas de variation de N selon la qualité graphique : les bits changent ; WLIV encode déjà N.
+A202 traitée, S124-1 réalisée. **A203** suit la réception physique étendue encore manquante.
+256 tests réussis/cinq ignorés, bibliothèque modifiée seulement en commentaires.
+85 ADR, 203 angles, 17 invariants, 6 spécifications, 23 cas. L214.
+Suite S126 : S125-1, référence indépendante et raffinée du champ N128/R64 et N256/R128,
+λ4/horizon4 s, sept composantes et frontières spatiale/temporelle. Aucun budget cible reçu.
+Générateur physique, profondeur finie, admission dynamique mixte, bilan mixte et durabilité ouverts.
+Travail directement sur master ; les anciennes copies S124 sont désormais en retard et doivent
+rejoindre master avant toute reprise. Aucune nouvelle copie créée.
+
 
 **S124 — 2026-09-09 :** [ADR-084](docs/adr/ADR-084-portee-etendue-par-l-asymptotique.md),
 [PORTEE-ETENDUE-S124](docs/validation/PORTEE-ETENDUE-S124.md). Le domaine de Bessel passe de64 à

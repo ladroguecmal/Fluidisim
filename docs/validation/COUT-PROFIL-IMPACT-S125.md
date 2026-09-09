@@ -70,3 +70,10 @@ Voir [ADR-085](../adr/ADR-085-profils-radiaux-selon-le-domaine.md).
 Le défaut N64 est conservé. Les montages étendus déclarent explicitement N128 ou N256
 au niveau du service homogène, dimensionné au domaine commun, puis reçu physiquement.
 S125-1 : réception indépendante du champ étendu, avant toute adoption dans le cycle mixte.
+
+## Vérification finale S125
+
+`cargo test --manifest-path code/Cargo.toml` : 163 core + 93 harnais = **256 réussis**,
+**cinq ignorés**, aucun échec ; quatre avertissements préexistants du harnais.
+Deux exécutions release de la sonde reçues. Les modifications de bibliothèque sont seulement
+la documentation du profil ; aucune opération numérique ni fixture modifiée.

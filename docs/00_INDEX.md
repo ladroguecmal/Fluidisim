@@ -17,6 +17,14 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S125 :** [ADR-085](adr/ADR-085-profils-radiaux-selon-le-domaine.md), profil dimensionné au domaine commun.
+[COUT-PROFIL-IMPACT-S125](validation/COUT-PROFIL-IMPACT-S125.md) : N256 coûte environ quatre fois N64
+sur les mêmes points ; le montage étendu N256/R128 coûte environ neuf fois N64/R16.
+**N64 reste le défaut**, N128/N256 explicites par service homogène. A202 traitée, A203 ouverte, L214.
+256 tests réussis/cinq ignorés. **85 ADR, 203 angles, 17 invariants, 6 spécifications, 23 cas.**
+Suite S126 : réception physique indépendante du champ étendu, S125-1.
+
+
 **S124 :** [ADR-084](adr/ADR-084-portee-etendue-par-l-asymptotique.md), portée étendue par l'asymptotique.
 [PORTEE-ETENDUE-S124](validation/PORTEE-ETENDUE-S124.md) : domaine de Bessel porté de64 à **2048**, borne
 mesurée et fixée par la précision de la phase `f32`, pas par la formule. **Le facteur 32 annoncé ne se
@@ -424,6 +432,14 @@ parfaitement stable ne pouvait pas distinguer.
 | [`../notes/JOURNAL.md`](../notes/JOURNAL.md) | historique des sessions, points de reprise |
 
 ## État d'avancement
+
+**S125 :** [ADR-085](adr/ADR-085-profils-radiaux-selon-le-domaine.md), profil dimensionné au domaine commun.
+[COUT-PROFIL-IMPACT-S125](validation/COUT-PROFIL-IMPACT-S125.md) : N256 coûte environ quatre fois N64
+sur les mêmes points ; le montage étendu N256/R128 coûte environ neuf fois N64/R16.
+**N64 reste le défaut**, N128/N256 explicites par service homogène. A202 traitée, A203 ouverte, L214.
+256 tests réussis/cinq ignorés. **85 ADR, 203 angles, 17 invariants, 6 spécifications, 23 cas.**
+Suite S126 : réception physique indépendante du champ étendu, S125-1.
+
 
 **S68 — 2026-09-08 :** ADR-052 sépare précision spatiale et diagnostic statistique.
 Scores phase 0,227536/0,650281, diagnostics inchangés et sans verdict. S66-1 close ;

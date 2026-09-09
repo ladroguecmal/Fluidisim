@@ -1209,3 +1209,12 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S117-1 : ouverte, S118.** Cycle hôte temporel mixte aux recettes224×128/256×128,
   références directes en bits et coût update+requête64 ; Unchanged et refus exercés.
   Admission dynamique, extension de fenêtre, profondeur finie S116-2, bilan mixte et durabilité ouverts.
+
+### S125 — Coût et profil des impacts
+
+- **S124-1 : réalisée.** COUT-PROFIL-IMPACT-S125 et ADR-085 : défaut N64 conservé,
+  N128/N256 explicites selon le domaine commun. A202 traitée. Pas de migration des fixtures.
+- **S125-1 : ouverte, S126, A203.** Recevoir le champ étendu N128/R64 et N256/R128,
+  λ4/horizon4 s, sept composantes, contre une référence Bessel et spectrale indépendante
+  dont la convergence est contrôlée. Tester les frontières spatiale et temporelle avant
+  l'adoption dans le cycle mixte. La finitude et l'admission ne prouvent pas la précision.

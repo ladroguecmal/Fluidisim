@@ -61,7 +61,7 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S124 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S125 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
@@ -131,5 +131,10 @@ La limite de portée est levée : le domaine de Bessel passe de64 à2048 par dé
 borne **mesurée** et fixée par la précision de la phase en `f32` (ADR-084, S124). Le facteur32 espéré ne
 se produit pas — une seconde borne, `Resolution`, prend aussitôt le relais (L213) — mais avec `N =256`,
 déjà permis depuis ADR-060, **neuf cas de jeu sur onze** atteignent enfin leur portée, contre un seul.
-Suite : mesurer le coût de `N =256` et trancher le profil, S124-1.
+Coût mesuré en S125 : environ ×4 à points identiques et ×9 pour le montage étendu comparé au montage
+initial. [ADR-085](docs/adr/ADR-085-profils-radiaux-selon-le-domaine.md) conserve N64 par défaut ;
+N128/N256 se dimensionnent explicitement au domaine commun du service. A202 traitée ; A203 suit
+la réception physique à grande portée, prochaine étape S126 (S125-1).
+État vérifié : **256 tests réussis, cinq ignorés ; 85 ADR, 203 angles, 17 invariants,
+6 spécifications, 23 cas canoniques.**
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

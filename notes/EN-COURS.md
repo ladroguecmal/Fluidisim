@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S125 — en cours
+Session : S125 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S124-1 / A202 — mesurer construction, évaluation et mémoire à N=64/128/256,
 puis trancher le choix du profil sans confondre domaine calculable et réception physique.
@@ -70,7 +70,7 @@ puis trancher le choix du profil sans confondre domaine calculable et réception
       ordre alterné, médianes et dispersion, empreinte mémoire ; contrôle des sorties finies.
 - [x] **P3** — rapport et ADR sur le profil retenu après mesure ; application nécessaire
       au code ou documentation explicite du maintien, sans migration silencieuse des fixtures.
-- [ ] **P4** — vérification adaptée, rituel de fin complet, jeton rendu et commits propres.
+- [x] **P4** — vérification adaptée, rituel de fin complet, jeton rendu et commits propres.
 
 ### Notes de reprise
 
@@ -86,3 +86,6 @@ Suite complète lancée, résultat final à recueillir en P4.
 
 P3 : ADR-085 actée ; défaut N64 maintenu, N128/N256 explicites par service homogène.
 Contrat documenté dans radial_impact et Prepared, aucun comportement ni codec modifié.
+
+P4 : suite 256 réussis/cinq ignorés ; journal, A202/A203, L214, actions, index, README
+et REPRISE actualisés. S126 : S125-1 / A203. Jeton rendu. Master seul a avancé.

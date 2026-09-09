@@ -140,3 +140,8 @@ peu profonde, l'admission dynamique, l'extension de fenêtre, la profondeur fini
 (S116-2), le bilan mixte, la durabilité disque.
 
 84 ADR, 202 angles, 17 invariants, 6 spécifications, 23 cas.
+
+> **Suivi S125 — 2026-09-09 :** S124-1 réalisée par
+> [COUT-PROFIL-IMPACT-S125](COUT-PROFIL-IMPACT-S125.md) et ADR-085 : N64 reste le défaut,
+> profils supérieurs explicites au domaine commun. A202 traitée ; réception physique à
+> grande portée désormais suivie par A203 / S125-1.

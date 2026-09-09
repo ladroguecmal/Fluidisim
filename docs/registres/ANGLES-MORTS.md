@@ -1681,3 +1681,15 @@ leviers étaient nécessaires, aucun ne suffisait seul.
   par point d'évaluation. **Le coût n'est pas mesuré**, donc l'arbitrage n'est pas fait : c'est
   la suite S124-1. Tant qu'il ne l'est pas, la portée d'un champ dépend d'un paramètre choisi
   pour une autre raison.
+
+**Suivi A202 — S125 : traitée par ADR-085.** Coûts de construction, évaluation et mémoire
+mesurés. N64 conservé par défaut ; N128/N256 explicites selon le domaine commun du service,
+pas selon la qualité graphique locale. Réception physique étendue suivie par A203.
+
+- **A203** *(sévérité 2, S125 ; ouverte, limite déjà signalée en S124)* — **L'admission
+  à grande portée n'a pas de réception physique correspondante.** Neuf cas sur onze sont
+  géométriquement constructibles à N256 ; le contrôle de variation de phase et la précision
+  de Bessel ne bornent pas l'erreur finale de quadrature. S125 constate seulement la finitude
+  de 384 points-temps étendus. Avant adoption dans le cycle, recevoir les sept composantes
+  contre une référence indépendante avec convergence de l'oracle, près des bornes de rayon
+  et d'âge. Porteur : S125-1, prochaine session S126. Aucun défaut physique établi à ce stade.

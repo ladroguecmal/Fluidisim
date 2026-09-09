@@ -3253,3 +3253,15 @@ la corriger par une note datée. Le corollaire est plus utile encore : une fois 
 identifiée, on sait si le déblocage vaut la peine — ici, les deux bornes devaient tomber
 ensemble, et aucune des deux levées séparément ne donnait presque rien. Voir [[L210]] et
 [[L211]] : ce qui se vérifie par relecture ne se vérifie pas.
+
+## L214 — Séparer le coût du réglage et celui de l'usage qu'il débloque
+
+*(S125)* Quadrupler le nombre de modes multiplie le coût par environ quatre sur les mêmes
+points. Mais les points rendus accessibles passent davantage par une autre branche du noyau :
+le montage étendu coûte environ neuf fois le montage initial. Mesurer seulement à travail
+constant aurait correctement mesuré le réglage et sous-estimé son usage.
+
+Comparer les variantes sur une charge commune pour isoler le paramètre, puis mesurer la
+charge nouvelle qu'il permet. Publier les deux facteurs avec leurs domaines ; aucun des deux
+ne remplace l'autre. Un coût marginal faible devant un ancien scénario dominant n'est pas
+une réserve de budget garantie pour tous les usages.

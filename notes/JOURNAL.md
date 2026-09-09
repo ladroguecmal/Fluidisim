@@ -6622,3 +6622,32 @@ trancher si ce profil devient le défaut pour les impacts. **A202** : la borne a
 désormais un paramètre de profil que personne n'a choisi en fonction de la portée. Restent
 ouverts : générateur physique d'ADR-055, grands objets en eau peu profonde, admission dynamique,
 extension de fenêtre, profondeur finie S116-2, bilan mixte, durabilité disque.
+
+---
+
+## S125 — 2026-09-09 — Le profil se dimensionne au domaine, pas au défaut global
+
+**Entrée :** reprise demandée, master propre à 52e80a5 ; aucun travail parallèle avancé.
+Jeton libre, session ouverte par Codex (GPT-6 ; fichiers, git et cargo disponibles).
+**Produits :** ADR-085, COUT-PROFIL-IMPACT-S125, sonde impact_profile_cost.
+**Mesure :** deux campagnes release avec mise en régime et ordre alterné. N256/N64 à points
+identiques coûte 3,93–4,15 fois ; N256/R128 contre N64/R16 coûte 8,85–9,38 fois. Médianes
+64 points : 0,1041 ms à N64/R16 ; 0,4090 ms à N256/R16 ; 0,9209 ms à N256/R128.
+Champs seuls : 1632/3168/6240 octets. Mesures locales Ryzen AI 7 350, pas budgets cibles.
+**Décision :** N64 reste le défaut ; choisir explicitement le plus petit profil mesuré
+64/128/256 couvrant tous les événements du domaine commun, puis recevoir sa précision et
+son coût complet. Pools homogènes et contexte commun constatés dans le code ; aucun choix
+par impact ou par qualité graphique ajouté. 1495 composantes sur 1792 changent en bits entre
+N64/N256 : les participants d'un même service doivent partager N. WLIV le vérifie déjà.
+**Validation :** 256 tests réussis, cinq ignorés, quatre avertissements préexistants ; deux
+exécutions de la sonde, 256 points-temps communs et 384 étendus finis par exécution. Seuls des
+commentaires changent dans la bibliothèque. Pas de nouveau test unitaire ni de campagne de
+hachages : aucun calcul existant modifié. Les écarts entre profils ne sont pas un oracle.
+**Rituel :** A202 traitée, A203 formalise la réception étendue manquante ; L214 ; actions et
+états mis à jour. 85 ADR, 203 angles, 17 invariants, 6 spécifications, 23 cas. Les six SPEC
+incluent SPEC-003 dans docs/validation ; cinq seulement sont dans docs/specs.
+**Non fait :** réception physique à grande portée, changement du cycle mixte, générateur
+physique et calibration B2, profondeur finie, admission dynamique mixte, bilan mixte, disque.
+**Suite S126 :** S125-1, référence indépendante du champ étendu N128/R64 et N256/R128,
+λ4 et horizon4 s, sept composantes et convergence de l'oracle. Aucun arbitrage humain requis ;
+actions d'infrastructure toujours séparées. Travail directement sur master, aucune copie créée.
