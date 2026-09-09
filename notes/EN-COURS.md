@@ -66,7 +66,7 @@ sauvegarde/restauration, identité avec construction directe et coût mesuré.
 ### Plan
 
 - [x] **P1** — vérifier branches/copies/jeton, lire la suite, déclarer le plan seul.
-- [ ] **P2** — construire le scénario hôte : impact S127 unique, fond B réel, points jusqu'à80 m,
+- [x] **P2** — construire le scénario hôte : impact S127 unique, fond B réel, points jusqu'à80 m,
       horizon4→24→48 s, comparaison en bits des dix sorties aux champs directs et restaurés.
       Refus : temps, rayon tardif, renouvellement impossible, sauvegarde tronquée et N différent ;
       publication précédente et sorties conservées. TTL4 inchangé, sauvegarde en mémoire seulement.
@@ -87,3 +87,9 @@ Référence du cycle : même Background et composition ponctuelle, champ RadialI
 directement depuis les faits ; identité d'acheminement seulement. Réception physique = S127.
 Critère : identité des bits de chaque sortie, pas seulement hash ; refus avec témoins.
 Aucun seuil de performance choisi ; résultats locaux, pas de budget cible certifié.
+
+P2 : cycle_transported_water.rs construit et première exécution release reçue :1280 points-temps,
+dix composantes identiques, sources détruites avant reprise, WLIV289 octets, TTL4 conservé.
+Refus atomiques : horizon dépassé, rayon au dernier point, extension64 s impossible, now hors
+horizon, sauvegarde tronquée et N128 cible. B seul diffère des64 résultats à48 s (W présent).
+Mesure initiale requête64 ~971 µs, cycle3 requêtes ~3004 µs ; compléter en P3 par update+requête48.
