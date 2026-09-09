@@ -58,76 +58,39 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S132 — terminée
+Session : S133 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : S131-1 — une admission recalcule tout le champ alors que la superposition modale
-est linéaire. Mesurer si un chemin incrémental est **exact** et ce qu'il rapporte, **puis**
-décider. Renoncer est une issue légitime.
+Objectif : S132-1 — la reconstruction après élargissement repart d'un pool vide alors que les
+coefficients publiés restent valides pour toutes les sources sauf une. S131 avait conclu que la
+fenêtre sans champ était incompressible ; la vérifier plutôt que la croire.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seul.
-- [x] **P2** — mesurer avant de décider (L209, L210), sans toucher la production :
-      1. l'identité en bits, selon que la source s'insère **en fin** ou **au milieu** de
-         l'ordre canonique — l'accumulation se fait par nœud, segment après segment, donc
-         seule la première position préserve l'ordre d'addition ;
-      2. ce que l'incrémental ne peut pas reprendre en l'état : la **pression modale cumulée**
-         n'est pas stockée dans le `Slot`, or la puissance en dépend ;
-      3. le gain réel, qui vaut au mieux le rapport du nombre de sources.
-- [x] **P3** — ADR-088 : incremental si et seulement si insertion finale, resultat toujours celui de la voie directe.
-- [x] **P4** — pression cumulée dans le `Slot`, `add_segments`, branchement conditionnel dans `admit`.
-- [x] **P5** — champ identique à la voie directe dans les deux ordres d'arrivée ; test vérifié comme témoin.
-- [x] **P6** — 5,03 ms au lieu de 35,06 à sept segments publiés ; recopie 28,5 µs.
-- [x] **P7** — livrable, rituel de fin, fusion `--ff-only`.
+- [ ] **P2** — conception : quelle forme donne le meilleur résultat, et à quel prix ?
+      La question qui décide n'est pas « comment recycler les coefficients » mais **qui tient
+      le champ pendant l'opération**. Un contrôleur qui en construit un autre à partir de ses
+      propres coefficients, sans se détruire, servirait jusqu'au basculement — et la fenêtre
+      **disparaîtrait** au lieu de raccourcir. Le prix serait un second jeu de pools.
+- [ ] **P3** — ADR-089 sur ce que P2 aura établi.
+- [ ] **P4** — construire, en réutilisant `add_segments` d'ADR-088.
+- [ ] **P5** — recevoir : identité en bits avec la voie directe, service maintenu pendant
+      l'opération, et refus quand la condition d'ordre n'est pas remplie.
+- [ ] **P6** — mesurer : ce que devient la fenêtre de S131.
+- [ ] **P7** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
-Départ 357b052 = master, trois copies coïncidentes.
+Départ 355b4ce = master, trois copies coïncidentes.
 
-Ce que la lecture de `prepare_segments` établit déjà :
+Acquis d'ADR-088, directement réutilisable : `spectral_pressure::add_segments` ajoute des
+segments à un champ déjà préparé, exactement, **à condition** qu'ils viennent en dernier dans
+l'ordre canonique. La même condition vaudra ici — la source reprise doit porter l'identifiant
+le plus grand, ce qui n'est **pas** garanti : le vérifier, et retomber sur la préparation
+complète sinon, exactement comme `admit` le fait déjà.
 
-- L'accumulation est **par nœud, boucle sur les segments** dans l'ordre de l'itérateur, avec
-  `+=` en f32. Une source insérée en dernier laisse donc l'ordre d'addition inchangé ;
-  au milieu, il change, et l'identité en bits n'est plus acquise.
-- L'énergie et la puissance sont sommées en Kahan **sur les nœuds** : reparcourir les nœuds
-  dans le même ordre les reproduit à l'identique.
-- L'énergie ne dépend que de `total` (la réponse cumulée), qui est stockée dans le `Slot`.
-  **La puissance dépend aussi de la pression modale cumulée, qui ne l'est pas.** La reprendre
-  exigerait de refaire `ModalPressure::new` pour chaque segment — c'est-à-dire l'essentiel du
-  coût — ou d'agrandir le `Slot` de deux `f32`.
-- `phase_safe` et l'enveloppe ne dépendent que des nœuds et des slots : inchangés.
+Chiffres de S131 à battre : élargissement + reprise 0,1 µs service maintenu, **reconstruction
+12,21 ms (224×128) et 13,41 ms (256×128) sans champ**.
 
-Piège à éviter : conclure sur le gain sans compter ce que la structure grossit ni ce que
-l'identité conditionnelle impose à l'appelant. Le consommateur — un hôte qui admet une source
-en cours de jeu — n'est pas une boucle par trame ; 12,2 ms occasionnels ne sont peut-être pas
-un problème à résoudre.
-
-P2 : deux mesures, et la premiere version de la sonde etait trop faible. Avec **deux** segments,
-l addition f32 est commutative : la sonde concluait que l ordre n a aucune importance. Avec
-trois, le verdict est net — insertion en fin : identique en bits, 0 point sur 8 different ;
-au milieu : les 8 points different.
-Cout de la preparation lineaire en segments : x1,98 a n=2, x3,91 a n=4, x7,12 a n=8 (224x128),
-soit 4,85 ms par segment. Un incremental ramenerait toute admission au cout de n=1.
-Decision : incremental **si et seulement si** la source s insere en dernier, sinon recalcul.
-Le resultat est alors toujours celui de la voie directe — sans quoi deux hotes ayant admis les
-memes sources dans un ordre different auraient des champs differents, et I-03 ne survivrait pas.
-Prix : le Slot doit porter la pression modale cumulee (+18 % sur les pools) car la puissance en
-depend et la reconstituer couterait ce qu on cherche a eviter.
-
-P4-P7 : ADR-088, INCREMENTAL-S132, journal, index, README, REPRISE, jeton rendu, ff-only.
-262 tests/cinq ignorés, hachages inchangés. Aucun angle ni leçon nouveaux — la session applique
-L211 (témoin) et la discipline de mesure de L209/L210.
-
-Deux écueils évités, à retenir :
-1. J'ai failli ajouter deux méthodes publiques au contrôleur pour instrumenter un banc. Retiré :
-   les chiffres qui décidaient étaient déjà accessibles par l'API publique (`Prepared::build` sur
-   des chemins de 1 à 8 segments). Ne pas élargir une API pour une mesure.
-2. `prepare` exige un chemin **contigu** ; une suite de segments identiques est refusée. La sonde
-   de coût mesure donc une trajectoire réelle découpée.
-
-Pour S133 sans relire : S132-1 veut faire repartir la reconstruction d'ADR-087 des coefficients
-déjà calculés. Il faudrait transporter les slots d'un pool à l'autre (`copy_from_slice` suffit,
-les pools ont la même taille si la recette est la même) puis appeler `add_segments` pour la seule
-source reprise. Condition d'ordre : la source en attente doit avoir l'identifiant le plus grand,
-ce qui n'est **pas** garanti — le vérifier avant, et retomber sur la reconstruction complète
-sinon, exactement comme `admit` le fait déjà.
+Piège à éviter : une signature qui consomme le contrôleur. En cas de refus, l'hôte aurait perdu
+son champ pour rien — alors que le refus est précisément le cas où il en a besoin.
