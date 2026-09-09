@@ -75,3 +75,19 @@ qui la surveille.
 explicitement — λ = 10⁻¹⁰, `energy_j` et `max_slope` à `f32::MAX` — et distingué d'un vrai
 dépassement de pente sur le même montage. L'invariant « construit ⟹ sorties finies » est
 vérifié par une sonde bornée intégrée à la suite.
+
+## Note du 2026-09-09, ajoutée à la construction (S121, P4-P5)
+
+La décision n'énonce la séparation que pour `RadialImpact::new`. Elle a été appliquée aussi à
+**`ImpactField::new`**, qui portait exactement la même ligne — par cohérence de vocabulaire :
+deux constructeurs du même crate ne doivent pas nommer différemment la même distinction.
+
+Mais **le débordement n'y est atteint par aucune entrée explorée**. À énergie et pente
+maximales, la descente en longueur d'onde y passe de `Domain` — pour λ ≤ 3 mm — directement à
+un champ construit, sans jamais déborder : `side = 4λ` et le contrôle de `scale` bornent plus
+tôt que la somme des pentes. Le test qui accompagne ce site verrouille donc l'autre moitié de la
+propriété, `Steepness` comme verdict sur le milieu, et constate le refus `Domain` sans prétendre
+qu'il s'agit du cas visé.
+
+La section Réception ci-dessus, écrite avant la construction, ne vaut donc que pour
+`RadialImpact`. C'est là que le cas est construit et distingué.

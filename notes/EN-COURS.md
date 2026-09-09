@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S121 — en cours
+Session : S121 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : A197 — un même refus confond « point hors domaine », imputable à l'appelant, et
 « champ dégénéré », défaut de la couche. Le second se reproduit partout ; le premier se
@@ -76,7 +76,7 @@ masquerait le second en croyant écarter le premier.
 - [x] **P5** — le cas de débordement construit (λ=1e-10), le verdict de pente distingué sur
       le même champ, et l'invariant « construit ⟹ sorties finies » devenu un test.
 - [x] **P6** — campagne relancée : hachages inchangés, aucun refus atteignable renommé.
-- [ ] **P7** — livrable, rituel de fin, fusion `--ff-only`.
+- [x] **P7** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -114,3 +114,12 @@ aucune entrée explorée — à énergie et pente maximales, la descente en λ p
 (λ ≤ 3 mm) à un champ construit, sans jamais déborder. `side = 4λ` et le contrôle de `scale`
 bornent avant. Le test y verrouille donc l'autre moitié : `Steepness` reste un verdict sur le
 milieu. Ne pas écrire que le site est « démontré » — S120 a payé ce genre d'annonce.
+
+P7 : CAUSES-REFUS-S121, note datée dans ADR-081, suivi A197 (résolue), A198, L210, journal,
+index, README, jeton rendu, fusion ff-only.
+
+Pour S122 sans relire : A198 se voit dans la sortie de `probe_degenerate`. `ImpactField` passe
+de `Domain` (λ ≤ 3 mm) à « construit » sans jamais franchir la borne de pente ; `RadialImpact`
+bascule au même endroit sur `NotRepresentable` puis `Steepness`. Les bornes en cause sont
+dispersées dans les deux `new` : `side`/`radius`, `depth <= π/lo`, `phase_step`, `scale`,
+`frequency >= 1`, puis la pente. Aucune ne dit quelle valeur a mordu ni de combien.

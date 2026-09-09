@@ -61,7 +61,7 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S120 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S121 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
@@ -113,5 +113,9 @@ trois couches, `slope_floor` donne la part de l'enveloppe de pente indépendante
 S120). Filtrer coûte ~40 ns par point contre35,60 ms pour le lot que l'atomicité ferait perdre.
 L'inventaire a montré que deux des trois conditions n'avaient besoin d'aucune borne : leur prédicat
 exact est quatre ordres de grandeur moins cher que l'évaluation (L209).
-Suite : séparer « champ dégénéré » de « point hors domaine », que le même refus confond (A197), S120-1.
+Un refus de champ ne confond plus la limite physique et la limite numérique : `NotRepresentable`
+dit que la bibliothèque ne peut pas représenter le champ, `Steepness` reste un verdict que l'appelant
+peut lever (ADR-081, S121). La cible reçue était le mauvais étage — le bloc visé n'a aucune entrée qui
+l'atteigne, sur 673 884 échantillons — et la sonde a désigné le site voisin, lui démontrable (L210).
+Suite : les bornes de construction se recouvrent sans ordre documenté (A198), S121-1.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

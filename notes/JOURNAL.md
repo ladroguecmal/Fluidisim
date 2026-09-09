@@ -6452,3 +6452,43 @@ exposer l'ancre de B, décision sur B, sans consommateur aujourd'hui — point o
 rend naturel, écarterait des positions valides autour d'un champ défaillant et masquerait le vrai
 défaut. Restent ouverts : admission dynamique, extension de fenêtre, profondeur finie S116-2,
 bilan mixte, durabilité disque.
+
+---
+
+## S121 — 2026-09-09 — Deux causes sous un seul refus, et la cible déplacée
+
+**Entrée :** jeton libre à c0b491a, trois copies coïncidentes. A197, ouverte par S120.
+**Produit :** [ADR-081](../docs/adr/ADR-081-separer-limite-physique-et-limite-numerique.md),
+[CAUSES-REFUS-S121](../docs/validation/CAUSES-REFUS-S121.md) et la sonde
+`code/water-core/examples/probe_degenerate.rs`. `impact_field::Error::NotRepresentable` sépare
+« la bibliothèque ne peut pas représenter ce champ » de tout refus qui juge les données de
+l'appelant.
+**Décision structurante, et elle déplace la cible reçue.** A197 visait `RadialImpact::sample`.
+La sonde répond non : 18 719 champs construits, 673 884 échantillons, **aucun refus**, pic à
+3,17 × 10²⁶ — douze ordres sous le débordement `f32`. En suivant la direction où les sorties
+croissent (longueurs d'onde décroissantes), le pic vaut constamment `slope_bound / 17,7`, et la
+construction refuse une borne non représentable **avant** que `sample` puisse déborder. Le bloc
+incriminé est du code défensif inatteignable.
+Le défaut réel est un étage plus haut : `RadialImpact::new` rendait `Steepness` pour
+`!slope.is_finite() || slope > max_slope`. Deux situations sans rien de commun — un verdict que
+l'appelant peut lever en réduisant l'énergie, et un champ hors du domaine numérique où réessayer
+ne répond pas à la question. **Atteignable et démontré** : λ = 10⁻¹⁰, `energy_j` et `max_slope`
+à `f32::MAX`. **L210.**
+**Réception :** cas de débordement construit ; à λ = 10⁻⁹ le même montage se construit avec une
+borne au-delà de 10³⁶, et une limite de milieu basse y redonne `Steepness` — le nom retrouve son
+sens. L'invariant « construit ⟹ sorties finies » devient un test : 37 champs, 592 échantillons,
+pic 7,27 × 10³⁵, marge 468. 161 core + 93 harnais = 254 réussis, cinq ignorés ; `radial_impact`
+aussi en release. **Hachages de campagne inchangés** et 158 tests antérieurs intacts : aucun
+refus atteignable n'a changé de nom.
+**Note datée portée à ADR-081**, écrit avant la construction : la séparation a aussi été
+appliquée à `ImpactField::new`, mais le débordement n'y est atteint par aucune entrée explorée —
+`side = 4λ` et le contrôle de `scale` bornent avant. Le test y verrouille l'autre moitié.
+**Limites :** aucune borne de construction modifiée, aucun résultat numérique déplacé. Une sonde
+qui ne trouve pas de contre-exemple mesure une marge, elle ne démontre pas une impossibilité —
+le code défensif de `sample` est conservé pour cette raison.
+81 ADR, 198 angles, 17 invariants, 6 spécifications, 23 cas. Invariants relus : aucun invalidé.
+**Suite S122 :** S121-1, **A198** — les bornes de construction se recouvrent sans ordre
+documenté ; selon la famille de paramètres c'est `Medium`, `Domain`, `Steepness` ou
+`NotRepresentable` qui mord en premier, et l'appelant ne sait pas quel paramètre réduire.
+Restent ouverts : admission dynamique, extension de fenêtre, profondeur finie S116-2, bilan
+mixte, durabilité disque.

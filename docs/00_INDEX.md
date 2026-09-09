@@ -17,6 +17,13 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S121 :** [ADR-081](adr/ADR-081-separer-limite-physique-et-limite-numerique.md), séparer la limite physique de la limite numérique.
+[CAUSES-REFUS-S121](validation/CAUSES-REFUS-S121.md) : `NotRepresentable` distincte de `Steepness`, cas de débordement
+construit (λ=10⁻¹⁰), invariant « construit ⟹ sorties finies » devenu test. **A197 résolue après requalification de sa
+cible** — le bloc visé n'avait aucune entrée qui l'atteigne, sur 673 884 échantillons. A198 ouverte, L210.
+254 tests réussis/cinq ignorés ; hachages inchangés.81 ADR,198 angles,17 invariants,6 spécifications,23 cas.
+Suite S122 : ordre des bornes de construction, S121-1.
+
 **S120 :** [ADR-080](adr/ADR-080-annonce-des-points-du-montage-mixte.md), annonce des points du montage mixte.
 [BORNES-POINTS-S120](validation/BORNES-POINTS-S120.md) : `admits` compose les prédicats de domaine posés
 dans les trois couches, `slope_floor` annonce la part constante de l'enveloppe. Filtrage ~40 ns par point

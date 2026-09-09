@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-09 15:13 +02:00
+JETON            : libre
+Battement        : 2026-09-09 15:28 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S121 — séparer champ dégénéré et point hors domaine (S120-1, A197)
-Dernière session : S120 — annonce des points du montage mixte ;251 tests/cinq ignorés
-Session suivante : à fixer en fin de S121
+Session en cours : aucune
+Dernière session : S121 — limite physique et limite numérique séparées ;254 tests/cinq ignorés
+Session suivante : S122 — ordre des bornes de construction (S121-1, A198)
 
 *Le battement de fin de S118 disait 15:05 : une heure estimée, pas relevée. Corrigée ici.
 Un battement dans le futur ferait croire à une session active — le relever, jamais l'écrire de mémoire.*
@@ -176,6 +176,25 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S121 — 2026-09-09 :** [ADR-081](docs/adr/ADR-081-separer-limite-physique-et-limite-numerique.md),
+[CAUSES-REFUS-S121](docs/validation/CAUSES-REFUS-S121.md). `impact_field::Error::NotRepresentable`
+sépare « la bibliothèque ne peut pas représenter ce champ » d'un verdict sur les données de
+l'appelant ; `Steepness` redevient ce que son nom dit.
+**A197 résolue après requalification de sa cible.** Elle visait `RadialImpact::sample` : la sonde
+`probe_degenerate` montre que ce bloc n'a aucune entrée qui l'atteigne —18 719 champs,673 884
+échantillons, aucun refus, pic douze ordres sous le débordement, la construction refusant d'abord.
+Le défaut atteignable était dans les **constructeurs** ; cas construit à λ=10⁻¹⁰ avec `energy_j` et
+`max_slope` à `f32::MAX`. L'invariant « construit ⟹ sorties finies » est devenu un test, marge468.
+254 tests/cinq ignorés ; hachages de campagne inchangés,158 tests antérieurs intacts.
+**L210** : vérifier qu'un défaut est atteignable avant de le corriger. Corriger la cible annoncée
+aurait produit du code juste, testé par rien, en laissant le vrai défaut en place.
+Note datée portée à ADR-081 : la séparation vaut aussi pour `ImpactField::new`, où le débordement
+n'est atteint par aucune entrée explorée.
+81 ADR,198 angles,17 invariants,6 spécifications,23 cas. S120-1 réalisée.
+Suite S122 : S121-1, **A198** — les bornes de construction se recouvrent sans ordre documenté et
+l'appelant ne sait pas quel paramètre réduire. Admission dynamique, extension de fenêtre, S116-2
+profondeur finie, bilan mixte et durabilité restent ouverts.
 
 **S120 — 2026-09-09 :** [ADR-080](docs/adr/ADR-080-annonce-des-points-du-montage-mixte.md),
 [BORNES-POINTS-S120](docs/validation/BORNES-POINTS-S120.md). `mixed::admits` compose les prédicats

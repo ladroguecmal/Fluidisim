@@ -3191,3 +3191,17 @@ suppose pas depuis le vocabulaire de la question posée. Lire ce que fait réell
 de décider de la forme de la réponse coûte quelques minutes ; s'être engagé sur la mauvaise forme
 coûte la session. Vaut aussi quand la commande vient d'une session précédente : elle a nommé un
 problème, pas nécessairement la forme de sa solution.
+
+## L210 — Vérifier qu'un défaut est atteignable avant de le corriger
+
+*(S121)* Un angle mort désignait une confusion réelle entre deux causes d'erreur, à un endroit
+précis du code. La confusion existait ; **l'endroit était faux**. Une sonde de quelques dizaines
+de lignes — 674 000 échantillons sur toute la plage représentable des paramètres — a montré que
+le bloc incriminé n'a aucune entrée qui l'atteigne, et a désigné au passage le site voisin où le
+même défaut est, lui, atteignable et démontrable.
+
+Corriger le premier aurait produit du code juste, testé par rien, et laissé le vrai défaut en
+place — avec la satisfaction d'avoir refermé une entrée du registre. **Avant de corriger, écrire
+ce qui atteint le défaut.** Si rien ne l'atteint, ce n'est pas la correction qui est en cause,
+c'est la cible. Le corollaire vaut pour ce qu'on écrit ensuite : une sonde qui ne trouve pas de
+contre-exemple mesure une marge, elle ne démontre pas une impossibilité.

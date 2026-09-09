@@ -1608,3 +1608,20 @@ Reste hors d'atteinte : la finitude des calculs, qui ne se prévoit pas sans év
   rend naturel — écarterait silencieusement des positions parfaitement valides autour d'un champ
   dégénéré, et masquerait le vrai défaut. Séparer les deux causes touche la couche, pas
   l'annonce. Suite S120-1.
+
+**Suivi A197 — S121 : résolue, après requalification de sa cible.** ADR-081 sépare
+`NotRepresentable` de `Steepness`. La cible annoncée était le mauvais étage : le bloc de
+finitude de `RadialImpact::sample` n'a aucune entrée qui l'atteigne — 18 719 champs construits,
+673 884 échantillons, aucun refus, et la construction refuse une borne non représentable avant
+que `sample` puisse déborder. Le défaut réel et atteignable était dans les **constructeurs**, où
+« pente trop raide » et « champ non représentable » partageaient un seul nom. L'invariant
+« construit ⟹ sorties finies » est désormais un test, avec sa marge surveillée.
+
+- **A198** *(sévérité 3, S121 ; ouverte)* — **Les bornes de construction se recouvrent sans
+  ordre documenté.** Selon la famille de paramètres, un champ d'impact est refusé par `Medium`,
+  `Domain`, `Steepness` ou `NotRepresentable`, et rien ne dit laquelle borne quoi : la sonde de
+  S121 voit `ImpactField` passer de `Domain` à « construit » sans jamais franchir la borne de
+  pente, tandis que `RadialImpact` bascule sur la représentabilité au même endroit. Un appelant
+  qui veut savoir **quel paramètre réduire** ne dispose que du nom d'une borne, pas de sa cause.
+  Cartographier ces bornes — ou nommer celle qui a mordu, avec la valeur en cause — est le
+  prolongement naturel. Suite S121-1.
