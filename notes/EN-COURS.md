@@ -68,7 +68,7 @@ masquerait le second en croyant écarter le premier.
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan.
-- [ ] **P2** — inventaire, avant toute décision (L209) : recenser dans le crate les refus qui
+- [x] **P2** — inventaire, avant toute décision (L209) : recenser dans le crate les refus qui
       confondent une faute d'appelant avec un défaut de couche, **et vérifier si le cas
       dégénéré est seulement atteignable** — S120 a annoncé ce montage sans le construire.
 - [ ] **P3** — ADR-081, sur ce que l'inventaire aura montré.
@@ -92,3 +92,15 @@ Question à trancher en P2 avant toute construction : **le bloc de finitude est-
 Si `WaveEvent::impact` et `RadialImpact::new` bornent assez fort, il ne l'est pas, et la réponse
 juste n'est plus « séparer deux causes » mais autre chose. Ne pas présumer — S120 a précisément
 annoncé un montage dégénéré qu'elle n'a pas construit, et l'a corrigé par note datée.
+
+P2, et il déplace la cible. La sonde `probe_degenerate` répond non à la question posée :
+18 719 champs, 673 884 échantillons, **zéro refus**, pic 3,17e26 — douze ordres sous le
+débordement f32. En descendant en longueur d'onde (la direction où les sorties croissent), le
+pic vaut constamment slope_bound/17,7 et la **construction refuse avant** que `sample` puisse
+déborder. Le bloc de finitude de `sample` est donc du code défensif inatteignable.
+
+Mais le même défaut est réel un étage plus haut : `RadialImpact::new` rend `Error::Steepness`
+pour `!slope.is_finite() || slope > max_slope` — deux causes sans rien de commun. À
+lambda=1e-10 avec energy et max_slope à f32::MAX, le refus est un débordement, pas une pente
+trop raide. Un appelant qui répond à Steepness en réduisant l'énergie boucle indéfiniment.
+**Atteignable, démontré, et c'est là qu'il faut agir.**
