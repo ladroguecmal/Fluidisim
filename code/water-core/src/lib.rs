@@ -65,3 +65,4 @@ pub mod spectral_pressure;
 pub mod gaussian_spectrum;
 pub mod bound_pressure;
 pub mod pressure_source;
+pub mod pressure_journal;

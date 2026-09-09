@@ -26,6 +26,7 @@ pub enum Error {
     Trajectory,
 }
 /// Vue immuable ; propriétaire du pool ou des segments non modifiable pendant l'emprunt.
+#[derive(Clone, Copy)]
 pub struct Source<'a> {
     metadata: Metadata,
     segments: &'a [Segment],
@@ -107,6 +108,23 @@ fn segment(b: &[u8]) -> Segment {
     }
 }
 impl<'a> Source<'a> {
+    /// Identité complète du contenu WPRS V1, zéros signés compris ; aucun hash.
+    pub fn same_content(&self, other: &Self) -> bool {
+        let a = self.metadata;
+        let b = other.metadata;
+        a.epoch == b.epoch
+            && a.id == b.id
+            && a.cause == b.cause
+            && self.context().matches(&other.context())
+            && self.segments.len() == other.segments.len()
+            && self.segments.iter().zip(other.segments).all(|(a, b)| {
+                a.birth == b.birth
+                    && a.duration_us == b.duration_us
+                    && a.origin.map(f32::to_bits) == b.origin.map(f32::to_bits)
+                    && a.velocity.map(f32::to_bits) == b.velocity.map(f32::to_bits)
+                    && a.pressure_pa.to_bits() == b.pressure_pa.to_bits()
+            })
+    }
     pub fn new(metadata: Metadata, segments: &'a [Segment]) -> Result<Self, Error> {
         length(segments.len())?;
         validate(metadata, segments.iter().copied())?;

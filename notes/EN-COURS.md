@@ -65,7 +65,7 @@ Objectif : admission bornée et idempotente, conflits et attente explicites.
 ### Plan
 
 - [x] **P1** — vérifier les copies et déclarer le plan.
-- [ ] **P2** — construire journal emprunté, attente sur saturation et reprise sur pool élargi ; recevoir les refus.
+- [x] **P2** — construire journal emprunté, attente sur saturation et reprise sur pool élargi ; recevoir les refus.
 - [ ] **P3** — publier décision et résultats, rituel final et synchronisation.
 
 ### Notes de reprise
@@ -73,3 +73,6 @@ Objectif : admission bornée et idempotente, conflits et attente explicites.
 Départ ce51abe, copies propres identiques. S108-1.
 Comparer tous les bits, pas un hash. Une source saturée reste en attente, sans masquer le blocage.
 Sources empruntées immuablement ; pas de transport ni de sauvegarde implicite.
+
+P2 : journal emprunté, comparaison complète, pending et reprise explicite.
+Quatre tests ciblés debug/release, suite232 réussis/cinq ignorés. ADR-075.
