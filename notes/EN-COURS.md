@@ -58,23 +58,19 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S112 — terminée
+Session : S113 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : champ commun de sources compatibles, interférences et travail total.
+Objectif : référence f64 indépendante et réception spatiale du montage multisource S112.
 
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [x] **P2** — construire la préparation depuis le journal ; recevoir superposition, bilans et refus.
-- [x] **P3** — publier résultats et limites ; rituel final et synchronisation.
+- [ ] **P2** — construire la référence, comparer les résolutions et mesurer le coût reçu.
+- [ ] **P3** — publier résultats et limites ; rituel final et synchronisation.
 
 ### Notes de reprise
 
-Départ3547926, copies actives propres identiques. S111-1.
-Sommer réponses et pressions par mode avant énergie et puissance ; ordre id puis segment.
-Contexte complet identique, journal non vide sans attente ; pool candidat seul modifiable au refus numérique.
-
-P2 : from_journal, total modal avant bilan, ordre id/segments ; quatre tests release/debug.
-Suite240 réussis/cinq ignorés. Résidu travail1,639e-7 J à1000 pas ; MULTISOURCE-S112.
-
-P2 4cd136e. Suite S113 : S112-1, référence et réception multisource.
+Départ31a9e2b, copies actives propres identiques. S112-1.
+Oracle f64 à quadrature complète, somme modale avant énergie et puissance.
+Seuils spatiaux S103 ; puissance reçue séparément avec seuil déclaré et convergence de référence.
+Bibliothèque inchangée prévue ; assertions exécutables dans un exemple de réception.
