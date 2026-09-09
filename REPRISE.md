@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 01:26 +02:00
+JETON            : libre
+Battement        : 2026-09-10 01:32 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S131 — sortie de saturation du journal de pression (S130-1)
-Dernière session : S130 — admission dynamique de la pression ;259 tests/cinq ignorés
-Session suivante : à fixer en fin de S131
+Session en cours : aucune
+Dernière session : S131 — sortie de saturation reçue et chiffrée ;260 tests/cinq ignorés
+Session suivante : S132 — chemin incrémental contre reconstruction (S131-1)
 
 **Copie de travail S130** : worktree `claude/reprise-projet-2d3506`, remis en avance rapide sur
 master (e817d0e) au démarrage — il était resté à 52e80a5 et n'avait rien d'unique, donc aucun
@@ -180,6 +180,26 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S131 — 2026-09-10 :** [ADR-087](docs/adr/ADR-087-sortie-de-saturation-annoncee.md),
+[SORTIE-SATURATION-S131](docs/validation/SORTIE-SATURATION-S131.md). S130-1 réalisée.
+Le chemin de sortie existait, avec un piège : `copy_into` ne refuse que si le stockage est plus
+petit que la publication, donc **un élargissement peut réussir sans sortir de la saturation**.
+`required_capacity` l'annonce — publication plus attente — et l'équivalence est vérifiée par
+balayage, en distinguant laquelle des deux étapes échoue.
+**L'ordre du cycle est prescrit parce qu'il est mesurable** : `copy_into` prend `&self`, donc
+élargissement et reprise se font **service maintenu** (0,1 µs) ; seule la reconstruction prive
+l'hôte de champ —12,21/13,41 ms, exactement une préparation, incompressible. Trois quarts de
+trame à 60 Hz : argument de plus pour dimensionner afin de ne jamais saturer.
+Champ d'après identique en bits à une préparation directe du journal élargi, et différent de
+l'ancien ; champ inchangé après chaque tentative ratée.260 tests/cinq ignorés ; hachages de
+campagne identiques à S118.
+87 ADR,204 angles,17 invariants,6 spécifications,23 cas.
+Suite S132 : S131-1, chemin incrémental — la reconstruction repart de zéro alors que le journal
+élargi contient les mêmes sources plus une, et la superposition modale est linéaire (S112).
+Supprimerait la fenêtre et accélérerait l'admission ordinaire. **À mesurer avant de décider** :
+l'identité en bits avec la voie directe n'est pas acquise. Transaction mixte, extension de
+fenêtre, S116-2, bilan mixte, durabilité et générateur physique restent ouverts.
 
 **S130 — 2026-09-10 :** [ADR-086](docs/adr/ADR-086-admission-dynamique-de-la-pression.md),
 [ADMISSION-PRESSION-S130](docs/validation/ADMISSION-PRESSION-S130.md). S129-1 réalisée. Le

@@ -6819,3 +6819,39 @@ revendiquée, aucun coût nouveau certifié.
 Aucun angle mort ni leçon distincte : la session applique des leçons existantes.
 **Suite S131 :** S130-1 — la sortie de saturation existe (`copy_into` vers un pool élargi puis
 `retry`) mais oblige à détruire la publication en cours. Recevoir ce cycle et le mesurer.
+
+---
+
+## S131 — 2026-09-10 — Sortir de la saturation, et ce que cela coûte vraiment
+
+**Entrée :** jeton libre à 57d0a3b, trois copies coïncidentes. S130-1.
+**Produit :** [ADR-087](../docs/adr/ADR-087-sortie-de-saturation-annoncee.md) et
+[SORTIE-SATURATION-S131](../docs/validation/SORTIE-SATURATION-S131.md).
+`Journal::required_capacity()` — la publication, plus l'attente s'il y en a une.
+**Ce que l'inventaire a trouvé, et qui justifiait la session.** Le chemin de sortie existait
+déjà, avec un piège : `copy_into` ne refuse que si le stockage est plus petit que la
+publication. Un stockage de taille exactement `count` passe la copie et laisse l'attente
+irrésolue — `retry` y rend `Full` de nouveau. **Un élargissement peut réussir sans sortir de la
+saturation**, et l'hôte ne l'apprend qu'après avoir payé la copie et la reconstruction.
+**L'ordre du cycle est prescrit parce qu'il est mesurable.** `copy_into` prend `&self`, et le
+contrôleur expose son journal en lecture seule depuis ADR-086 : élargissement et reprise se font
+pendant qu'il sert encore. Seule la reconstruction laisse l'hôte sans champ.
+**Chiffres :** élargissement + reprise **0,1 µs, service maintenu** ; reconstruction **12,21 et
+13,41 ms**, soit exactement une préparation. La fenêtre sans champ vaut trois quarts de trame à
+60 Hz et elle est incompressible — argument de plus pour dimensionner le pool afin de ne jamais
+saturer, cette sortie étant un secours et non une manœuvre de routine.
+**Réception :** équivalence vérifiée par balayage sur les tailles, en distinguant *laquelle* des
+deux étapes échoue ; champ rééchantillonné et comparé en bits après chaque tentative ratée —
+il ne bouge pas ; champ d'après identique en bits à une préparation directe du journal élargi,
+et différent de l'ancien. 167 core + 93 harnais = **260 réussis, cinq ignorés** ; ciblé aussi en
+release ; hachages de campagne identiques à S118.
+**Une mesure corrigée avant publication :** placée d'abord avant le bloc de mise en régime, elle
+donnait une médiane tenable mais un maximum à 35 ms. Déplacée après, comme A195 l'impose.
+**Limites :** fenêtre bornée et mesurée, pas supprimée. Rien n'est alloué. Une seule source en
+attente, ADR-075 non rouvert. Transaction mixte toujours hors de portée.
+87 ADR, 204 angles, 17 invariants, 6 spécifications, 23 cas. Invariants relus : aucun invalidé.
+Aucun angle mort ni leçon distincte — la session applique A195 et le motif d'annonce d'ADR-079.
+**Suite S132 :** S131-1 — la reconstruction repart de zéro alors que le journal élargi contient
+les mêmes sources plus une. La superposition modale étant linéaire (S112), un chemin incrémental
+supprimerait la fenêtre et accélérerait aussi l'admission ordinaire. **À mesurer avant de
+décider** : le gain semble atteignable, l'identité en bits avec la voie directe peut-être pas.

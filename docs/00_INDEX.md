@@ -17,6 +17,13 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S131 :** [ADR-087](adr/ADR-087-sortie-de-saturation-annoncee.md), la capacité qui résout une attente s'annonce.
+[SORTIE-SATURATION-S131](validation/SORTIE-SATURATION-S131.md) : `required_capacity` évite un élargissement qui
+réussit sans sortir de la saturation. Élargissement et reprise **service maintenu, 0,1 µs** ; seule la
+reconstruction prive l'hôte de champ,12,21/13,41 ms — une préparation, incompressible.
+260 tests/cinq ignorés, hachages inchangés.87 ADR,204 angles,17 invariants,6 spécifications,23 cas.
+Suite S132 : chemin incrémental contre reconstruction, S131-1.
+
 **S130 :** [ADR-086](adr/ADR-086-admission-dynamique-de-la-pression.md), admission dynamique des sources de pression.
 [ADMISSION-PRESSION-S130](validation/ADMISSION-PRESSION-S130.md) : le contrôleur emprunte le journal mutablement —
 l'invariant « jamais `Unchanged` sur un journal différent » est tenu par le compilateur — et `admit` est une

@@ -108,6 +108,13 @@ impl<'p, 's> Journal<'p, 's> {
             None => Ok(Change::Unchanged),
         }
     }
+    /// ADR-087 : emplacements nécessaires pour que `copy_into` **et** `retry` aboutissent —
+    /// la publication, plus l'attente s'il y en a une. Un stockage de cette taille sort de la
+    /// saturation ; un stockage plus petit échoue à l'une des deux étapes, et le savoir avant
+    /// évite de payer une copie puis une reconstruction pour rien.
+    pub fn required_capacity(&self) -> usize {
+        self.count + usize::from(self.pending.is_some())
+    }
     /// Copie de la publication ET de l'attente ; aucune tentative d'admission implicite.
     /// Capacité refusée avant écriture ; anciennes vues conservées. Références aux mêmes sources.
     pub fn copy_into<'q>(

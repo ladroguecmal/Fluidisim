@@ -474,6 +474,36 @@ fn main() {
             .unwrap();
             black_box(p.energy_j());
         }
+        // S131 : ce que coûte la sortie de saturation. `copy_into` prend `&self`, donc
+        // l'élargissement et la reprise se font pendant que le contrôleur sert encore ;
+        // seule la reconstruction laisse l'hôte sans champ. On mesure les deux séparément.
+        {
+            let mut large = vec![None; controller.journal().required_capacity() + 2];
+            let elargissement = measure(|| {
+                let copie = controller.journal().copy_into(&mut large).unwrap();
+                black_box(copie.published().count());
+            });
+            let mut elargi = controller.journal().copy_into(&mut large).unwrap();
+            assert_eq!(elargi.required_capacity(), elargi.published().count());
+            // Reconstruction sur un troisième jeu de pools : c'est la fenêtre sans champ.
+            let mut neuf = vec![Slot::default(); count];
+            let mut neuf_spare = vec![Slot::default(); count];
+            let reconstruction = measure(|| {
+                let c = Controller::new(
+                    ctx,
+                    &half,
+                    &mut elargi,
+                    SimTime(1_500_000),
+                    &mut neuf,
+                    &mut neuf_spare,
+                )
+                .unwrap();
+                black_box(c.published_time());
+            });
+            println!(
+                "{radial}x{angular} elargissement_us={elargissement:?} reconstruction_us={reconstruction:?}"
+            );
+        }
         // Coût de l'annonce, mille appels par tour : ce qu'il en coûte d'éviter une
         // préparation inutile, comparé aux ~12,6 ms qu'elle aurait coûtés.
         let announce_ns = measure(|| {

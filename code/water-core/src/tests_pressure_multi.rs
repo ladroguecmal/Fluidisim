@@ -548,3 +548,96 @@ fn a_field_that_cannot_be_computed_gives_the_source_back() {
     assert_eq!(c.update(SimTime(1_000_000)), Ok(Update::Published));
     assert_eq!(c.admit(first), Ok(Admission::AlreadyPresent));
 }
+/// S131, ADR-087 : sortir de la saturation. Le cycle entier — élargir pendant que le
+/// contrôleur sert, reprendre l'attente, reconstruire — et l'équivalence annoncée par
+/// `required_capacity`, vérifiée dans les deux sens par balayage sur les tailles.
+#[test]
+fn saturation_is_left_exactly_when_the_announced_capacity_is_given() {
+    let p = paths();
+    let first = Source::new(meta(1), &p[0]).unwrap();
+    let second = Source::new(meta(2), &p[1]).unwrap();
+    let mut nodes = [Node::default(); 384];
+    let mut hn = [Node::default(); 192];
+    let full = bake(recipe(), &mut nodes).unwrap();
+    let half = full.half_into(&mut hn).unwrap();
+    let ctx = Context::new(settings(), &half).unwrap();
+    let t = SimTime(1_500_000);
+    let points = [[0.0; 2], [2.0, 1.0], [-8.0; 2], [12.0; 2]];
+
+    // Un journal d'une seule place, saturé par une seconde source.
+    let mut entries = [None; 1];
+    let mut j = Journal::new(1, &mut entries);
+    j.admit_authenticated(first).unwrap();
+    let mut active = [Slot::default(); 192];
+    let mut spare = active;
+    let mut c = Controller::new(ctx, &half, &mut j, t, &mut active, &mut spare).unwrap();
+    assert_eq!(c.admit(second), Err(AdmitError::Saturated));
+    // L'attente rend le contrôleur incapable de changer d'instant : c'est l'état à quitter.
+    assert_eq!(c.update(SimTime(2_000_000)), Err(Error::Pending));
+    let avant = {
+        let f = c.current(t).unwrap();
+        let mut out = [Surface::default(); 4];
+        let mut work = out;
+        f.sample_batch(&ctx, t, &points, &mut work, &mut out).unwrap();
+        out.map(|s| vals(s).map(f32::to_bits))
+    };
+    assert_eq!(c.journal().required_capacity(), 2);
+
+    // Les tailles insuffisantes échouent, chacune à son étape, **sans que le contrôleur
+    // cesse de servir** : l'élargissement se tente pendant qu'il tient sa publication.
+    for taille in 0..c.journal().required_capacity() {
+        let mut petit = [None; 2];
+        let issue = c.journal().copy_into(&mut petit[..taille]);
+        match issue {
+            Err(crate::pressure_journal::Error::Capacity) => assert!(taille < 1),
+            Ok(mut copie) => {
+                // Copie acceptée, attente irrésolue : c'est le piège que l'annonce évite.
+                assert_eq!(taille, 1);
+                assert_eq!(copie.retry(), Err(crate::pressure_journal::Error::Full));
+                assert!(copie.pending().is_some());
+            }
+            Err(e) => panic!("refus inattendu de la copie : {e:?}"),
+        }
+        let f = c.current(t).unwrap();
+        let mut out = [Surface::default(); 4];
+        let mut work = out;
+        f.sample_batch(&ctx, t, &points, &mut work, &mut out).unwrap();
+        assert_eq!(out.map(|s| vals(s).map(f32::to_bits)), avant);
+    }
+
+    // À la capacité annoncée, la copie et la reprise aboutissent — toujours pendant que le
+    // contrôleur ancien sert encore.
+    let mut large = [None; 4];
+    let mut elargi = c
+        .journal()
+        .copy_into(&mut large[..c.journal().required_capacity()])
+        .unwrap();
+    assert_eq!(elargi.retry(), Ok(crate::pressure_journal::Change::Added));
+    assert!(elargi.pending().is_none());
+    assert_eq!(elargi.published().count(), 2);
+
+    // Seule la reconstruction impose de libérer le contrôleur : c'est là, et seulement là,
+    // que l'hôte n'a plus de champ.
+    drop(c);
+    let mut c2 = Controller::new(ctx, &half, &mut elargi, t, &mut active, &mut spare).unwrap();
+    assert_eq!(c2.published_time(), t);
+    let apres = {
+        let f = c2.current(t).unwrap();
+        let mut out = [Surface::default(); 4];
+        let mut work = out;
+        f.sample_batch(&ctx, t, &points, &mut work, &mut out).unwrap();
+        out.map(|s| vals(s).map(f32::to_bits))
+    };
+    // Le champ d'après est celui des deux sources, pas l'ancien conservé par mégarde.
+    assert_ne!(apres, avant);
+    {
+        let mut direct = [Slot::default(); 192];
+        let r = Prepared::from_journal(ctx, &half, c2.journal(), t, &mut direct).unwrap();
+        let mut out = [Surface::default(); 4];
+        let mut work = out;
+        r.sample_batch(&ctx, t, &points, &mut work, &mut out).unwrap();
+        assert_eq!(out.map(|s| vals(s).map(f32::to_bits)), apres);
+    }
+    // Et la saturation est bien derrière : le contrôleur change d'instant à nouveau.
+    assert_eq!(c2.update(SimTime(2_000_000)), Ok(Update::Published));
+}

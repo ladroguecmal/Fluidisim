@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S131 — en cours
+Session : S131 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : S130-1 — sortir de la saturation. Après un `Full`, le contrôleur conserve sa
 publication mais ne peut plus changer d'instant. Le chemin de sortie existe déjà ; il s'agit
@@ -67,14 +67,13 @@ de le parcourir en entier, de recevoir ce qu'il garantit, et de mesurer ce qu'il
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seul.
-- [ ] **P2** — inventaire avant de décider (L209), et **chercher ce qui manque** : un
-      élargissement qui réussit sans résoudre l'attente est-il possible, et qu'en sait
-      l'appelant avant d'essayer ?
-- [ ] **P3** — recevoir le cycle complet : élargissement, reprise, reconstruction, et
-      identité en bits du champ d'après avec une préparation directe du journal élargi.
-- [ ] **P4** — recevoir les refus du chemin : pool insuffisant, pool tout juste suffisant.
-- [ ] **P5** — mesurer la fenêtre pendant laquelle l'hôte n'a plus de champ.
-- [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
+- [x] **P2** — oui, il est possible : `copy_into` ne refuse que si le stockage est plus
+      petit que la publication. ADR-087 et `required_capacity`.
+- [x] **P3** — cycle reçu, champ d'après identique en bits à la voie directe et différent
+      de l'ancien.
+- [x] **P4** — balayage sur les tailles, chaque étape distinguée ; service maintenu à chaque échec.
+- [x] **P5** — élargissement 0,1 µs service maintenu ; reconstruction 12,21/13,41 ms.
+- [x] **P6** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -93,3 +92,18 @@ Ce que la lecture a déjà établi, et qui change la forme attendue de la répon
   l'appelant avant qu'il essaie. C'est le candidat le plus sérieux pour un ajout d'API.
 
 Piège à éviter : reconstruire d'abord et élargir ensuite. L'ordre importe, et il est mesurable.
+
+P2-P6 : ADR-087, SORTIE-SATURATION-S131, journal, index, README, REPRISE, jeton rendu, ff-only.
+260 tests/cinq ignorés, ciblé aussi en release, hachages inchangés. Aucun angle ni leçon nouveaux.
+
+Une mesure corrigée avant publication : placée d'abord avant le bloc de mise en régime, elle
+donnait une médiane tenable mais un maximum à 35 ms. Déplacée après (A195).
+
+Pour S132 sans relire : S131-1 est un chemin incrémental. La superposition modale est linéaire
+et S112 l'a reçue (champ multisource = somme des contributions, interférences conservées). L'idée
+est d'ajouter au champ publié la contribution de la seule source admise, au lieu de recalculer
+toutes les sources. Attention : `prepare_segments` accumule sur tous les segments de toutes les
+sources publiées, dans l'ordre canonique ; ajouter après coup change l'ordre de sommation, donc
+**l'identité en bits avec la voie directe n'est pas acquise** — c'est le point à mesurer d'abord,
+avant toute décision. Si elle tombe, il faudra choisir entre le gain et l'identité, et ce choix
+touche les hachages de campagne.

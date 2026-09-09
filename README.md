@@ -61,7 +61,7 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S130 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S131 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
@@ -157,6 +157,9 @@ Suite complète259/cinq ignorés.
 Les sources de pression s'admettent désormais pendant qu'une publication est en cours : le contrôleur
 emprunte le journal mutablement, et `admit` republie un champ qui lui corresponde ou rend le journal à
 son état antérieur (ADR-086, S130). La saturation est reçue comme état terminal du contrôleur.
-Suite : la sortie de saturation, qui oblige encore à détruire la publication en cours, S130-1.
-86 ADR,204 angles,17 invariants,6 spécifications,23 cas.
+La sortie de saturation est reçue et chiffrée : `required_capacity` annonce ce qu'il faut pour que la copie
+et la reprise aboutissent, l'élargissement se fait **sans interrompre le service** (0,1 µs) et seule la
+reconstruction prive l'hôte de champ — une préparation,12,21/13,41 ms, incompressible (ADR-087, S131).
+Suite : un chemin incrémental qui ajouterait la source au champ publié au lieu de tout recalculer, S131-1.
+87 ADR,204 angles,17 invariants,6 spécifications,23 cas.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.
