@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-09 08:55 +02:00
+JETON            : occupé
+Battement        : 2026-09-09 08:57 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S112 — superposition multisource
 Dernière session : S111 — reprise reçue ;suite236/cinq ignorés inchangée
 Session suivante : S112 — superposition de sources compatibles (S111-1)
 

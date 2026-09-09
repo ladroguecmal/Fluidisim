@@ -58,23 +58,18 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S111 — terminée
+Session : S112 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : cycle WPRS/journal/WPJR/reprise jusqu’à B+pression, identité et coûts.
+Objectif : champ commun de sources compatibles, interférences et travail total.
 
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [x] **P2** — exécuter le cycle du virage aux deux résolutions et mesurer séparément les étapes.
-- [x] **P3** — publier résultats et limites ; rituel final et synchronisation.
+- [ ] **P2** — construire la préparation depuis le journal ; recevoir superposition, bilans et refus.
+- [ ] **P3** — publier résultats et limites ; rituel final et synchronisation.
 
 ### Notes de reprise
 
-Départ a98c74a, copies propres identiques. S110-1.
-Une source de virage, journal initial sans place, attente restaurée sur pool agrandi.
-Pas de composition multisource implicite ; comparaison de chaque bit avec construction directe.
-
-P2 : restart_pressure exécuté release,1152 points-temps identiques en bits.
-Cycles médians28,4023/17,0401 ms ; restauration~0,4 µs par moyenne de lot1000.
-
-P2 2c56f1d. Suite S112 : S111-1, superposition de sources compatibles.
+Départ3547926, copies actives propres identiques. S111-1.
+Sommer réponses et pressions par mode avant énergie et puissance ; ordre id puis segment.
+Contexte complet identique, journal non vide sans attente ; pool candidat seul modifiable au refus numérique.
