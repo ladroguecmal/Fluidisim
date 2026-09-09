@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S115 — en cours
+Session : S115 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : construire la requête B+impacts+pressions avec publication transactionnelle.
 
@@ -66,7 +66,7 @@ Objectif : construire la requête B+impacts+pressions avec publication transacti
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
 - [x] **P2** — définir le contrat mixte, construire la requête et recevoir ses réductions/refus.
-- [ ] **P3** — publier résultats et limites ; rituel final et synchronisation.
+- [x] **P3** — publier résultats et limites ; rituel final et synchronisation.
 
 ### Notes de reprise
 
@@ -78,3 +78,5 @@ Aucun bilan énergétique mixte implicite. ADR complémentaire, tests significat
 P2 : requête mixte construite, ADR-077 et MIXTE-S115. Trois tests debug/release reçus.
 Suite complète243 réussis/cinq ignorés. Réductions identiques en bits ; refus tardifs et enveloppe totale.
 Reprise après message utilisateur : changements locaux cohérents conservés et terminés.
+
+P2 4b63423. Suite S116 : S115-1, réception et coût mixte. Passation publiée.

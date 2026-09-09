@@ -106,3 +106,7 @@ Aujourd'hui les deux familles de W ont chacune leur chemin B+W ; le scénario pr
 ne les réunit pas. B est reconfiguré par l'hôte, pas sauvegardé dans WPJR.
 Renouvellement du champ de pression, durabilité et conformité interplateforme restent ouverts.
 76 ADR,193 angles,17 invariants,6 spécifications,23 cas inchangés.
+
+**Mise à jour S115, 2026-09-09 :** S114-1 construite par ADR-077 et
+[MIXTE-S115](MIXTE-S115.md). Réductions et refus reçus,243 tests/cinq ignorés.
+Suite S115-1 : réception physique échantillonnée du montage mixte et coût complet.

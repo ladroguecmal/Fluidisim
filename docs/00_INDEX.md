@@ -17,6 +17,10 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S115 :** [ADR-077](adr/ADR-077-requete-mixte-impacts-et-pressions.md), requête commune B+impacts+pressions.
+[MIXTE-S115](validation/MIXTE-S115.md) :243 tests réussis/cinq ignorés, trois ciblés aussi en release.
+77 ADR,193 angles,17 invariants,6 spécifications,23 cas. Suite S116 : réception et coût mixte, S115-1.
+
 **S114 :** [Reprise multisource](validation/REPRISE-MULTISOURCE-S114.md), WPJR et attente/retry jusqu’à B+pression.
 2944 points-temps identiques en bits ; cycles depuis WPRS47,95/55,55 ms médians locaux.
 Bibliothèque inchangée, suite240/cinq ignorés de S112 non relancée. Suite S115 : requête mixte, S114-1.

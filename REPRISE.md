@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-09 13:55 +02:00
+JETON            : libre
+Battement        : 2026-09-09 13:56 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S115 — requête mixte
-Dernière session : S114 — reprise multisource ; bibliothèque inchangée
-Session suivante : S115 — requête B+impacts+pressions (S114-1)
+Session en cours : aucune
+Dernière session : S115 — requête mixte ;243 tests/cinq ignorés
+Session suivante : S116 — réception et coût mixte (S115-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -148,7 +148,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 17 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 76 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 77 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -167,6 +167,14 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S115 — 2026-09-09 :** [MIXTE-S115](docs/validation/MIXTE-S115.md), ADR-077 actée.
+Requête commune B+impacts+pressions : B unique, pentes/enveloppe totales, publication transactionnelle.
+Contexte g/rho/frame/cell, temps/horizons reçus ; réductions historiques identiques en bits.
+243 tests réussis/cinq ignorés, trois ciblés aussi en release.77 ADR,193 angles,17 invariants,
+6 spécifications,23 cas. S114-1 réalisée comme construction, recette16×24 non reçue spatialement.
+Suite S116 : S115-1, campagne mixte aux recettes224×128/256×128 et coût complet.
+Renouvellement pression, durabilité, compatibilité physique du milieu et bilan mixte restent ouverts.
 
 **S114 — 2026-09-09 :** [REPRISE-MULTISOURCE-S114](docs/validation/REPRISE-MULTISOURCE-S114.md),
 deux sources WPRS/WPJR avec attente/retry jusqu’à B+pression ;2944 points-temps identiques en bits.

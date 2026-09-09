@@ -1179,3 +1179,12 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
   réductions aux chemins existants et refus. Le bilan énergétique global mixte ne peut
   pas être déduit de la somme des bilans séparés sans traiter les interférences.
   Renouvellement pression, durabilité et conformité interplateforme restent ouverts.
+
+### S115 — Requête mixte construite
+
+- **S114-1 : réalisée comme construction.** ADR-077 et [MIXTE-S115](../validation/MIXTE-S115.md),
+  B unique, pentes et enveloppe totales, contrôles communs et sortie transactionnelle.
+- **S115-1 : ouverte, S116.** Réception du montage mixte aux recettes224×128 et256×128,
+  comparaison indépendante des opérations de composition, domaines/instants communs,
+  puis coût préparation/requête. La recette16×24 des tests ne reçoit pas la précision spatiale.
+  Milieu commun à justifier ; aucun bilan énergétique mixte par addition des bilans séparés.

@@ -6252,3 +6252,24 @@ L195/L201/L202 appliquées ; aucun nouvel angle ou leçon distincte ; invariants
 B unique, somme des pentes et enveloppe totale, refus transactionnels, montage mixte
 et réductions aux chemins existants. S113-1 réalisée ; renouvellement pression,
 durabilité et conformité interplateforme restent ouverts. Aucun arbitrage externe ajouté.
+
+## S115 — 2026-09-09 — Requête commune B+impacts+pressions
+
+**Entrée :** Continue puis reprends ;bbc2a0c, copies actives identiques.
+**Produit :** ADR-077, mixed::sample_world_batch et MIXTE-S115. B évalué une fois,
+impacts puis pression, pentes additionnées avant normale ; lot publié après succès complet.
+Densité ajoutée aux vues préparées des impacts et transmise par leurs trois constructeurs.
+Contexte frame/cell/g/rho, instant exact et horizons contrôlés même à lot vide.
+**Réception :** trois tests debug/release ; contributions comparées en f64, réductions
+aux deux chemins historiques identiques en bits. Refus de domaines tardifs, contexte,
+densité, date, expiration, capacité et enveloppe totale ; sortie conservée, témoin accepté.
+Suite150 core +93 harnais =243 réussis/cinq ignorés, quatre avertissements préexistants.
+P2 4b63423. Changements locaux de P2 conservés et terminés après le message de reprise.
+**Limites :** recette16×24 de contrat, pas réception spatiale mixte ; pas de bilan
+énergétique mixte, de coût mesuré ni de garantie interplateforme. Profondeur finie des
+impacts et pression profonde restent deux approximations à recevoir sur montage commun.
+77 ADR,193 angles,17 invariants,6 spécifications,23 cas. L203/L204 appliquées ; aucun
+nouvel angle ou leçon distincte ; invariants de composition et de précision inchangés.
+**Suite S116 :** S115-1, campagne mixte aux recettes224×128/256×128, instants et domaines
+communs, référence de composition et coût complet. S114-1 réalisée comme construction.
+Renouvellement pression, durabilité et bilan énergétique mixte restent ouverts.
