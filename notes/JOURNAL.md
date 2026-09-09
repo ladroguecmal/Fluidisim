@@ -6150,3 +6150,21 @@ admission atomique journal/champs.75 ADR,193 angles,17 invariants,6 spécificati
 L199/L200/L201 appliquées ; aucun nouvel angle ou leçon distincte, invariants inchangés.
 **Suite S110 :** S109-1, instantané mémoire versionné, publication et pending conservés,
 restauration transactionnelle sur pools. S108-1 réalisée ; synchronisation finale.
+
+## S110 — 2026-09-09 — Instantané du journal de pression
+
+**Entrée :** Continue ; dcb9ee6, copies actives propres identiques.
+**Produit :** ADR-076, WPJR V1, publication et pending,32 octets plus blocs WPRS.
+Validation globale avant mutation des deux pools ; segments copiés, octets source
+libérables. Attente restaurée même sur cible agrandie, retry explicite conservé.
+**Vérification :** suite143 core +93 harnais =236 réussis,cinq ignorés ; quatre
+avertissements préexistants. Huit tests journal/instantané aussi en release, dont quatre
+nouveaux : aller-retour et indépendance des octets,344 troncatures, défauts tardifs,
+conflits, ordre, capacités, vide/attente seule et queues. P2 6c1a451, formatage/diff.
+**Limites :** mémoire seulement, aucune durabilité/authentification ; détection des causes
+quadratique, coût non mesuré. Priorité du refus source invalide avant capacité désormais
+partagée dans inspect ; critères et formats WPRS/Impact inchangés.76 ADR,193 angles,
+17 invariants,6 spécifications,23 cas. Aucun nouvel angle ni leçon distincte ;
+L194/L201/L202 appliquées, I-17 conservé, autorité interplateforme non reçue.
+**Suite S111 :** S110-1, cycle source→journal→saturation→instantané→restauration→retry→
+champ et requête B+pression, référence directe et coûts séparés. S109-1 réalisée.

@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-09 08:49 +02:00
+JETON            : libre
+Battement        : 2026-09-09 08:51 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S110 — sauvegarde du journal
-Dernière session : S109 — admission et attente ;232 tests/cinq ignorés
-Session suivante : S110 — sauvegarde du journal de pression (S109-1)
+Session en cours : aucune
+Dernière session : S110 — instantané WPJR ;236 tests/cinq ignorés
+Session suivante : S111 — cycle de reprise et requête (S110-1)
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -148,7 +148,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 17 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 75 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 76 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -167,6 +167,12 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S110 — 2026-09-09 :** [ADR-076](docs/adr/ADR-076-instantane-du-journal-de-pression.md),
+WPJR V1, restauration des trajectoires/publication/attente, validation avant mutation.
+236 tests réussis/cinq ignorés ; huit ciblés aussi en release.76 ADR,193 angles.
+S109-1 réalisée en mémoire ; suite S111 : cycle complet source→journal→instantané→
+restauration→retry→champ et requête B+pression, S110-1. Durabilité disque non construite.
 
 **S109 — 2026-09-09 :** [ADR-075](docs/adr/ADR-075-admission-des-sources-de-pression.md),
 journal de pression emprunté, doublons/conflits/époque, pending conservé en saturation,

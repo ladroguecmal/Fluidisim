@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S110 — en cours
+Session : S110 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : instantané mémoire du journal et de l'attente, restauration transactionnelle.
 
@@ -66,7 +66,7 @@ Objectif : instantané mémoire du journal et de l'attente, restauration transac
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
 - [x] **P2** — construire format et restauration, valider intégralement avant écriture ; tester reprise et refus.
-- [ ] **P3** — publier décision et résultats ; rituel final et synchronisation.
+- [x] **P3** — publier décision et résultats ; rituel final et synchronisation.
 
 ### Notes de reprise
 
@@ -76,3 +76,5 @@ Validation intégrale des sources, capacités et conflits avant mutation des poo
 
 P2 : WPJR V1, validation globale avant écriture, copie des trajectoires et attente intacte.
 Suite236 réussis/cinq ignorés ; huit tests journal/instantané aussi en release. ADR-076.
+
+P2 6c1a451. Suite S111 : S110-1, cycle de reprise et coûts.

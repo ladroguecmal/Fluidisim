@@ -17,6 +17,9 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S110 :** [ADR-076 — Instantané du journal de pression](adr/ADR-076-instantane-du-journal-de-pression.md), **ACTÉE**.
+236 tests réussis/cinq ignorés ;76 ADR,193 angles. Suite S111 : cycle de reprise et requête, S110-1.
+
 **S109 :** [ADR-075 — Admission des sources](adr/ADR-075-admission-des-sources-de-pression.md), **ACTÉE**.
 232 tests réussis/cinq ignorés ;75 ADR,193 angles. Suite S110 : sauvegarde du journal et de son attente, S109-1.
 

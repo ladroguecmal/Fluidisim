@@ -1133,3 +1133,11 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
 - **S109-1 : ouverte, S110.** Sauvegarde mémoire versionnée du journal de pression,
   incluant pending ; restauration transactionnelle sur pools hôte. Paquets incomplets
   ou conflictuels refusés ; pool élargi ne doit pas acquitter l'attente sans retry.
+
+### S110 — Instantané du journal de pression
+
+- **S109-1 : réalisée en mémoire.** [ADR-076](../adr/ADR-076-instantane-du-journal-de-pression.md),
+  restauration transactionnelle des deux pools, pending conservé, refus globaux.
+- **S110-1 : ouverte, S111.** Scénario source WPRS, admission/saturation, WPJR,
+  restauration/retry, préparation et requête B+pression ; référence directe et coûts
+  séparés. Pas de revendication de durabilité disque ni de champ multisource implicite.
