@@ -72,10 +72,10 @@ masquerait le second en croyant écarter le premier.
       confondent une faute d'appelant avec un défaut de couche, **et vérifier si le cas
       dégénéré est seulement atteignable** — S120 a annoncé ce montage sans le construire.
 - [x] **P3** — ADR-081 : NotRepresentable distincte de Steepness, et le meme nom dans sample ; l invariant mesure devient un test.
-- [ ] **P4** — construire la séparation et mettre à jour les appelants.
-- [ ] **P5** — le test qui compte : un champ réellement dégénéré, et la démonstration qu'un
-      filtrage par `admits` ne l'écarte plus en silence.
-- [ ] **P6** — campagne, hachages inchangés, mise en régime (A195).
+- [x] **P4** — `Error::NotRepresentable` ; les deux sites `new` séparés, le bloc de `sample` renommé, `mixed` traduit vers `NonFinite`.
+- [x] **P5** — le cas de débordement construit (λ=1e-10), le verdict de pente distingué sur
+      le même champ, et l'invariant « construit ⟹ sorties finies » devenu un test.
+- [x] **P6** — campagne relancée : hachages inchangés, aucun refus atteignable renommé.
 - [ ] **P7** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
@@ -104,3 +104,13 @@ pour `!slope.is_finite() || slope > max_slope` — deux causes sans rien de comm
 lambda=1e-10 avec energy et max_slope à f32::MAX, le refus est un débordement, pas une pente
 trop raide. Un appelant qui répond à Steepness en réduisant l'énergie boucle indéfiniment.
 **Atteignable, démontré, et c'est là qu'il faut agir.**
+
+P4-P6 : 161 core + 93 harnais = 254 réussis, cinq ignorés ; radial_impact aussi en release ;
+hachages de campagne inchangés (6591ab360344f76e, b563610d1dd78ada).
+
+Ce que la construction a appris et qui doit aller au livrable : le **second site**
+(`ImpactField::new`) reçoit la même séparation, mais `NotRepresentable` n'y est atteint par
+aucune entrée explorée — à énergie et pente maximales, la descente en λ passe de `Domain`
+(λ ≤ 3 mm) à un champ construit, sans jamais déborder. `side = 4λ` et le contrôle de `scale`
+bornent avant. Le test y verrouille donc l'autre moitié : `Steepness` reste un verdict sur le
+milieu. Ne pas écrire que le site est « démontré » — S120 a payé ce genre d'annonce.

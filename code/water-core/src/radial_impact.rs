@@ -130,7 +130,13 @@ impl<const N: usize> RadialImpact<N> {
             };
             slope += node.coefficient * k; // |J1| <= 1, borne conservative.
         }
-        if !slope.is_finite() || slope > medium.max_slope {
+        // Représentabilité d'abord : un `slope` infini n'est pas « supérieur à max_slope »,
+        // il n'est comparable à rien. C'est ce refus-là qui borne en pratique le domaine
+        // numérique des champs, et il ne dit rien de la physique demandée (ADR-081).
+        if !slope.is_finite() {
+            return Err(Error::NotRepresentable);
+        }
+        if slope > medium.max_slope {
             return Err(Error::Steepness);
         }
         Ok(Self {
@@ -217,7 +223,10 @@ impl<const N: usize> RadialImpact<N> {
         .iter()
         .any(|x| !x.is_finite())
         {
-            return Err(Error::Domain);
+            // Défense en profondeur : aucune entrée connue ne l'atteint, la construction
+            // refusant d'abord une borne non représentable (CAUSES-REFUS-S121 §1). Le nom
+            // reste juste si elle le devenait — ce ne serait pas une mauvaise position.
+            return Err(Error::NotRepresentable);
         }
         Ok(out)
     }
@@ -226,6 +235,24 @@ impl<const N: usize> RadialImpact<N> {
 mod tests {
     use super::*;
     use crate::wave_event::{Impact, Origin};
+    fn source_data() -> Impact {
+        Impact {
+            id: 1,
+            frame: FrameId(0),
+            cell: 0,
+            birth: SimTime(0),
+            ttl_us: 10_000_000,
+            position: [0.0; 3],
+            energy_j: 0.01,
+            wavelength_m: 4.0,
+            direction_turns: 0.0,
+            anisotropy: 0.0,
+            displaced_l: 0.0,
+            material: 0,
+            origin: Origin::Server,
+            above_surface: true,
+        }
+    }
     fn source() -> WaveEvent {
         WaveEvent::impact(Impact {
             id: 1,
@@ -258,6 +285,105 @@ mod tests {
             radius: 16.0,
             age_us: 4_000_000,
         }
+    }
+    /// S121, ADR-081 : le refus de représentabilité et le verdict de pente sont deux choses.
+    /// Le cas de débordement est construit, pas supposé — la sonde `probe_degenerate` l'a
+    /// localisé en descendant en longueur d'onde à énergie et pente maximales.
+    #[test]
+    fn representability_is_not_a_verdict_on_the_physics() {
+        let event = |wavelength_m: f32| {
+            let mut v = source_data();
+            v.wavelength_m = wavelength_m;
+            v.energy_j = f32::MAX;
+            WaveEvent::impact(v).unwrap()
+        };
+        let medium = |max_slope| Medium {
+            gravity: 9.81,
+            density: 1025.0,
+            depth: 1.0,
+            max_slope,
+        };
+        let domain = |wavelength_m: f32| Domain {
+            radius: 5.0 * wavelength_m,
+            age_us: 1,
+        };
+        // La pente maximale est au plus haut : ce n'est donc pas elle qui refuse.
+        assert_eq!(
+            RadialImpact::<64>::new(event(1e-10), medium(f32::MAX), domain(1e-10)).err(),
+            Some(Error::NotRepresentable)
+        );
+        // Une décade plus haut, le même montage se construit : la frontière est bien celle
+        // de la représentation, et elle est franche.
+        let built = RadialImpact::<64>::new(event(1e-9), medium(f32::MAX), domain(1e-9)).unwrap();
+        assert!(built.slope_bound().is_finite() && built.slope_bound() > 1e36);
+        // Sur ce même champ représentable, une limite de milieu basse redonne Steepness :
+        // le nom retrouve son sens, celui d'un verdict que l'appelant peut lever.
+        assert_eq!(
+            RadialImpact::<64>::new(event(1e-9), medium(1.0), domain(1e-9)).err(),
+            Some(Error::Steepness)
+        );
+    }
+    /// S121, ADR-081 : « tout champ construit produit des sorties finies sur son domaine »
+    /// n'était vrai que par une conjonction de bornes disséminées. Sans ce test, la marge
+    /// mesurée en S121 se périmerait en silence à la première modification de ces bornes.
+    #[test]
+    fn every_built_field_samples_finite_values() {
+        let (mut built, mut sampled, mut peak) = (0, 0, 0.0f32);
+        for energy in [1e-6f32, 1.0, 1e12, 1e30, f32::MAX] {
+            for wavelength in [1e-9f32, 1e-4, 1.0, 4.0, 1e4] {
+                for max_slope in [0.1f32, 1e18, f32::MAX] {
+                    let mut v = source_data();
+                    v.energy_j = energy;
+                    v.wavelength_m = wavelength;
+                    let Ok(event) = WaveEvent::impact(v) else {
+                        continue;
+                    };
+                    // La profondeur doit dépasser la longueur d'onde, et l'horizon entre dans
+                    // le contrôle de résolution : les garder liés à λ pour que la grille
+                    // construise vraiment des champs, y compris les plus extrêmes.
+                    let medium = Medium {
+                        gravity: 9.81,
+                        density: 1025.0,
+                        depth: (10.0 * wavelength).max(1.0),
+                        max_slope,
+                    };
+                    let domain = Domain {
+                        radius: 5.0 * wavelength,
+                        age_us: 1,
+                    };
+                    let Ok(field) = RadialImpact::<64>::new(event, medium, domain) else {
+                        continue;
+                    };
+                    built += 1;
+                    assert!(field.slope_bound().is_finite());
+                    for i in 0..8 {
+                        let r = domain.radius * i as f32 / 7.0;
+                        for t in [0, 1] {
+                            let out = field
+                                .sample(FrameId(0), 0, [r, 0.0], SimTime(t))
+                                .expect("un champ construit ne refuse pas son propre domaine");
+                            sampled += 1;
+                            for value in [
+                                out.eta,
+                                out.deta_dt,
+                                out.potential,
+                                out.slope[0],
+                                out.slope[1],
+                                out.horizontal_velocity[0],
+                                out.horizontal_velocity[1],
+                            ] {
+                                assert!(value.is_finite());
+                                peak = peak.max(value.abs());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        // La grille exerce vraiment des champs extrêmes, et garde sa marge.
+        println!("champs={built} echantillons={sampled} pic={peak:e}");
+        assert!(built >= 20 && sampled >= 400);
+        assert!(peak > 1e30 && peak < f32::MAX / 16.0);
     }
     fn reference_bessel(x: f64) -> (f64, f64) {
         let mut a = 0.0;

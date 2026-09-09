@@ -6,7 +6,12 @@ pub enum Error {
     Medium,
     Domain,
     Anisotropy,
+    /// La pente dépasse la limite du milieu : verdict sur les données de l'appelant, qui
+    /// peut réduire l'énergie et réessayer.
     Steepness,
+    /// La bibliothèque ne peut pas représenter ce champ en `f32`. Aucune énergie plus faible
+    /// n'est en cause, et réessayer ne répond pas à la question posée (ADR-081).
+    NotRepresentable,
     Time,
 }
 #[derive(Clone, Copy, Default)]
@@ -101,7 +106,12 @@ impl ImpactField {
             m.amplitude *= scale;
             slope += m.amplitude * m.k;
         }
-        if !slope.is_finite() || slope > medium.max_slope {
+        // Représentabilité d'abord : un `slope` infini n'est pas « supérieur à max_slope »,
+        // il n'est comparable à rien (ADR-081).
+        if !slope.is_finite() {
+            return Err(Error::NotRepresentable);
+        }
+        if slope > medium.max_slope {
             return Err(Error::Steepness);
         }
         Ok(Self { event, modes, side })
@@ -263,6 +273,32 @@ mod tests {
                 .to_bits(),
             at.eta.to_bits()
         );
+    }
+    /// S121, ADR-081 : le second site de la même confusion reçoit la même séparation, mais
+    /// **aucune entrée explorée ne l'y fait basculer** — à énergie et pente maximales, la
+    /// descente en longueur d'onde passe de `Domain` (λ ≤ 3 mm) à un champ construit sans
+    /// jamais déborder ; `side = 4λ` et le contrôle de `scale` bornent avant. Ce que ce test
+    /// verrouille est donc l'autre moitié : `Steepness` reste un verdict sur le milieu.
+    #[test]
+    fn steepness_here_stays_a_verdict_on_the_medium() {
+        let mut modest = medium();
+        modest.max_slope = 1e-10;
+        assert_eq!(
+            ImpactField::new(source(), modest).err(),
+            Some(Error::Steepness)
+        );
+        let mut v = *source().data();
+        v.energy_j = f32::MAX;
+        v.wavelength_m = 1e-6;
+        let event = WaveEvent::impact(v).unwrap();
+        let extreme = Medium {
+            gravity: 9.81,
+            density: 1025.0,
+            depth: 1.0,
+            max_slope: f32::MAX,
+        };
+        // Refusé, mais pas pour cette raison-là : la borne atteinte n'est pas la pente.
+        assert_eq!(ImpactField::new(event, extreme).err(), Some(Error::Domain));
     }
     #[test]
     fn invalid_regimes_refused() {

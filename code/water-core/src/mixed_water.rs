@@ -231,7 +231,14 @@ pub fn sample_world_batch<const N: usize>(
             }
             let w = f
                 .sample(frame, cell, [local[0], local[1]], time)
-                .map_err(|_| fail(composition::Error::Domain))?;
+                .map_err(|e| {
+                    fail(match e {
+                        crate::impact_field::Error::NotRepresentable => {
+                            composition::Error::NonFinite
+                        }
+                        _ => composition::Error::Domain,
+                    })
+                })?;
             s.eta += w.eta;
             s.deta_dt += w.deta_dt;
             s.u_total[0] += w.horizontal_velocity[0];

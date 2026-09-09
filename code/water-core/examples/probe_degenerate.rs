@@ -2,7 +2,7 @@
 //! Recherche systématique d'un champ que `new` accepte et dont `sample` produit une sortie
 //! non finie. Sonde jetable : elle répond à une question, elle ne fait pas partie du harnais.
 use water_core::{
-    impact_field::Medium,
+    impact_field::{ImpactField, Medium},
     radial_impact::{Domain, RadialImpact},
     wave_event::{Impact, Origin, WaveEvent},
     FrameId, SimTime,
@@ -154,4 +154,39 @@ fn main() {
         }
     }
     println!("marge avant depassement f32 : {:e}", f32::MAX / worst);
+    // Second site de la même confusion : ImpactField::new. Où bascule-t-il, et vers quoi ?
+    println!("--- ImpactField, energie et pente maximales ---");
+    for e in -6..=3 {
+        for m in [1.0f32, 3.0, 5.0] {
+            let wavelength = m * 10f32.powi(e);
+            let Ok(event) = WaveEvent::impact(Impact {
+                id: 1,
+                frame: FrameId(7),
+                cell: 9,
+                birth: SimTime(0),
+                ttl_us: 4_000_000,
+                position: [0.0; 3],
+                energy_j: f32::MAX,
+                wavelength_m: wavelength,
+                direction_turns: 0.0,
+                anisotropy: 0.0,
+                displaced_l: 0.0,
+                material: 0,
+                origin: Origin::Server,
+                above_surface: true,
+            }) else {
+                continue;
+            };
+            let medium = Medium {
+                gravity: 9.81,
+                density: 1025.0,
+                depth: (10.0 * wavelength).max(1.0),
+                max_slope: f32::MAX,
+            };
+            match ImpactField::new(event, medium) {
+                Ok(_) => println!("lambda={wavelength:e} : construit"),
+                Err(why) => println!("lambda={wavelength:e} : {why:?}"),
+            }
+        }
+    }
 }
