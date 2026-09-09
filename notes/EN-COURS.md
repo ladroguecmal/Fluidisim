@@ -67,7 +67,7 @@ balayage que ce qui est annoncé est exactement ce que la requête accepte.
 ### Plan
 
 - [x] **P1** — passation, jeton, plan.
-- [ ] **P2** — ADR-079 : ce que le contrôleur tient, ce que le montage exige, et pourquoi
+- [x] **P2** — ADR-079 : ce que le contrôleur tient, ce que le montage exige, et pourquoi
       l'annonce est une fonction séparée plutôt qu'un contrôle de plus dans `update`.
 - [ ] **P3** — construire `mixed::horizon` et `mixed::plan`, `Controller::context`,
       factoriser les contrôles indépendants des points depuis `sample_world_batch`.
@@ -92,3 +92,11 @@ l'équivalence annonçable *et* testable, et non une simple heuristique.
 
 Piège à éviter : réimplémenter les contrôles dans l'annonce. Deux implémentations du même
 contrôle divergent (L137 est la même leçon, appliquée au code). Factoriser, ne pas recopier.
+
+P2 : ADR-079 actée. Choix figés — annonce dans `mixed` (qui seul connaît les deux couches),
+`horizon` rend Option car l intersection peut être vide, `state` a six variantes (une par
+cause de refus indépendante des points), et surtout : une seule implémentation interne que la
+requête traduit et que l annonce rend telle quelle. Ordre d évaluation conservé à l identique,
+donc aucun refus existant ne change de nature. `Controller::context()` à ajouter.
+Publication tardive laissée possible : coupler le contrôleur aux impacts figerait leur
+renouvellement, plus cher que le problème résolu.
