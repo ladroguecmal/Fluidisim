@@ -6492,3 +6492,44 @@ documenté ; selon la famille de paramètres c'est `Medium`, `Domain`, `Steepnes
 `NotRepresentable` qui mord en premier, et l'appelant ne sait pas quel paramètre réduire.
 Restent ouverts : admission dynamique, extension de fenêtre, profondeur finie S116-2, bilan
 mixte, durabilité disque.
+
+---
+
+## S122 — 2026-09-09 — Nommer la borne qui refuse
+
+**Entrée :** jeton libre à 14be58f, trois copies coïncidentes. A198, ouverte par S121.
+**Produit :** [ADR-082](../docs/adr/ADR-082-nommer-la-borne-qui-refuse.md) et
+[BORNES-CONSTRUCTION-S122](../docs/validation/BORNES-CONSTRUCTION-S122.md). Neuf variantes —
+`ModeCount`, `Radius`, `Horizon`, `Wavelength`, `Energy`, `Reach`, `Regime`, `Resolution`, et
+`Medium` réduit à son sens propre — remplacent les deux fourre-tout de `RadialImpact::new`.
+`Domain` est réservé aux positions, celles qu'`admits` prédit depuis ADR-080.
+**Inventaire :** treize conditions pour six noms. `Domain` en recouvrait sept, portant sur cinq
+paramètres sans rapport ; `Medium` en recouvrait deux dont une qui refuse un milieu
+parfaitement valide — le régime d'eau profonde. Trois bornes sont **couplées** et nommées comme
+telles : portée, régime, résolution. Les nommer d'après un seul paramètre aurait été un
+mensonge commode, puisque le refus se lève des deux côtés.
+**La carte mesurée, et ce qu'elle a corrigé.** La zone acceptée est un couloir étroit — ondes
+de l'ordre du mètre à la dizaine de mètres, rayon d'autant plus petit que l'onde est courte —
+que rien ne documentait. En lisant la carte d'origine, où quinze cases sur vingt portaient
+`Domain` ou `Medium`, la bande inférieure avait été attribuée à la résolution. **Faux** : après
+renommage, c'est presque partout `Reach`, et la résolution ne mord que dans un coin. Corrigé
+par note datée dans ADR-082, dont la section Problème portait cette erreur.
+**Le test a trouvé ce que deux relectures n'avaient pas vu. L211.** Le premier renommage
+attribuait à `Energy` le refus de l'échelle modale non représentable. Or l'échelle vaut
+racine de E/(rho·g·pi·I) et l'intégrale I ne dépend que de la longueur d'onde : à lambda de
+10^30 m, elle sous-passe à zéro et l'échelle devient infinie **sans que l'énergie soit en
+cause**. Un appelant aurait réduit son énergie indéfiniment. La condition est scindée ; c'est le
+test d'atteignabilité de chaque nom qui l'a révélé.
+**Réception :** chaque nom est atteint par un cas qui le vise, les couples vérifiés des deux
+côtés — `Regime` se lève en approfondissant le milieu ou en raccourcissant l'onde. 162 core +
+93 harnais = 255 réussis, cinq ignorés ; `radial_impact` aussi en release. Un seul test antérieur
+mis à jour (débordement d'horizon, `Domain` devient `Horizon`). Hachages de campagne inchangés.
+**Limites :** aucune borne déplacée, aucun résultat numérique changé — le couloir est le même,
+seulement lisible. Les erreurs ne portent aucune valeur : elles disent quoi revoir, pas de
+combien ; point ouvert daté. `ImpactField` garde ses noms, n'étant plus le chemin actif.
+82 ADR, 199 angles, 17 invariants, 6 spécifications, 23 cas. Invariants relus : aucun invalidé.
+**Suite S123 :** S122-1, **A199** — le couloir mesuré n'a jamais été confronté aux impacts que
+le jeu produira : goutte, projectile, coque, arme. Si un régime attendu tombe hors du couloir,
+c'est un manque de modèle et non de nommage. Question de conception, à trancher sans
+interlocuteur (ADR-028). Restent ouverts : admission dynamique, extension de fenêtre, profondeur
+finie S116-2, bilan mixte, durabilité disque.

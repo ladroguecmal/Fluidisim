@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S122 — en cours
+Session : S122 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : A198 — un champ d'impact refusé ne dit pas **quel paramètre** est en cause. Un
 seul nom d'erreur recouvre plusieurs bornes portant sur des grandeurs sans rapport, et rien
@@ -71,10 +71,10 @@ ne documente laquelle mord en premier.
       constructeurs, le paramètre qu'elle contraint, et le nom qu'elle porte aujourd'hui.
       Puis **mesurer** laquelle mord, où, avec la sonde (L210).
 - [x] **P3** — ADR-082 : neuf noms pour les bornes de construction, Domain reserve aux positions, ImpactField laisse tel quel et dit comme limite.
-- [ ] **P4** — construire, en gardant l'implémentation unique (motif d'ADR-079 et 080).
-- [ ] **P5** — les tests : chaque borne nommée est atteinte par un cas qui la vise.
-- [ ] **P6** — vérification d'ensemble : hachages, suite, release.
-- [ ] **P7** — livrable, rituel de fin, fusion `--ff-only`.
+- [x] **P4** — neuf variantes ; `Domain` réservé aux positions.
+- [x] **P5** — chaque nom atteint par un cas qui le vise ; le test a montré qu'`Energy` mentait encore.
+- [x] **P6** — 255 tests, release, hachages inchangés, carte reproduite.
+- [x] **P7** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -104,3 +104,13 @@ dans la condition de résolution, donc un âge plus court élargit le couloir.
 Peu d'assertions à corriger (4-5 sites) : renommer franchement plutôt qu'ajouter une API
 parallèle. `Domain` doit rester pour les **positions** hors domaine dans `sample` (ADR-080) ;
 ce sont les bornes de construction qui reçoivent des noms propres.
+
+P4-P7 : ADR-082 avec deux corrections datées — l'attribution de la bande inférieure à la
+résolution (c'est `Reach`) et le nom `Energy` pour un refus de longueur d'onde. Suivi A198
+(résolue), A199, L211, journal, index, README, jeton rendu, fusion ff-only.
+
+Pour S123 sans relire : A199 est une question de conception, pas de code. Le couloir mesuré est
+dans le livrable §4. Ce qu'il faut confronter : les longueurs d'onde qu'un impact réel engendre
+(elles dépendent de la taille et de la vitesse de l'objet) contre l'intervalle accepté. Si un
+régime attendu tombe dehors, la réponse n'est pas d'élargir une borne au hasard mais de dire
+quel modèle manque. SPEC-002 et ADR-058/060 portent le raisonnement d'origine sur ce candidat.

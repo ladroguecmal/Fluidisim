@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-09 15:29 +02:00
+JETON            : libre
+Battement        : 2026-09-09 15:40 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S122 — ordre des bornes de construction (S121-1, A198)
-Dernière session : S121 — limite physique et limite numérique séparées ;254 tests/cinq ignorés
-Session suivante : à fixer en fin de S122
+Session en cours : aucune
+Dernière session : S122 — chaque borne nomme son paramètre ;255 tests/cinq ignorés
+Session suivante : S123 — enveloppe du candidat radial face aux impacts réels (S122-1, A199)
 
 *Le battement de fin de S118 disait 15:05 : une heure estimée, pas relevée. Corrigée ici.
 Un battement dans le futur ferait croire à une session active — le relever, jamais l'écrire de mémoire.*
@@ -176,6 +176,25 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S122 — 2026-09-09 :** [ADR-082](docs/adr/ADR-082-nommer-la-borne-qui-refuse.md),
+[BORNES-CONSTRUCTION-S122](docs/validation/BORNES-CONSTRUCTION-S122.md). Treize conditions se
+partageaient six noms ; `Domain` en recouvrait sept sur cinq paramètres sans rapport, et `Medium`
+refusait un milieu sain quand c'était le régime d'eau profonde qui manquait. Neuf noms les
+remplacent, dont trois **couplés** — portée, régime, résolution — nommés comme des relations,
+parce que le refus se lève des deux côtés. `Domain` est réservé aux positions (ADR-080).
+**Carte du couloir d'acceptation, mesurée** : ondes du mètre à la dizaine de mètres, rayon
+d'autant plus petit que l'onde est courte. Rien ne le documentait.
+**L211** : une taxonomie d'erreurs se teste par surjection. Le test exigeant que chaque nom soit
+atteignable a montré qu'`Energy` recouvrait encore un refus de longueur d'onde — l'intégrale
+modale sous-passe à zéro pour les très grandes ondes, sans que l'énergie soit en cause. Deux
+relectures ne l'avaient pas vu. Deux corrections datées portées à ADR-082, dont une sur sa
+lecture de la carte d'origine.255 tests/cinq ignorés ; hachages de campagne inchangés.
+82 ADR,199 angles,17 invariants,6 spécifications,23 cas. S121-1 réalisée.
+Suite S123 : S122-1, **A199** — le couloir n'a jamais été confronté aux impacts que le jeu
+produira (goutte, projectile, coque, arme) ; si un régime attendu en sort, c'est un manque de
+modèle et non de nommage. Admission dynamique, extension de fenêtre, S116-2 profondeur finie,
+bilan mixte et durabilité restent ouverts.
 
 **S121 — 2026-09-09 :** [ADR-081](docs/adr/ADR-081-separer-limite-physique-et-limite-numerique.md),
 [CAUSES-REFUS-S121](docs/validation/CAUSES-REFUS-S121.md). `impact_field::Error::NotRepresentable`

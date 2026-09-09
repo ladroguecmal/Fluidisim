@@ -74,3 +74,26 @@ atteinte par un cas qui la vise, et le test échoue si l'une d'elles cesse d'êt
 un nom qu'aucune entrée ne produit serait une promesse vide. La carte est reproduite après
 renommage : les mêmes couples sont acceptés, avec des refus qui disent enfin lequel des
 paramètres est en cause.
+
+## Note du 2026-09-09, ajoutée à la construction (S122, P5)
+
+Le tableau des variantes attribue à `Energy` le refus de l'échelle modale non représentable.
+**C'était encore un nom qui ment**, et le test d'atteignabilité l'a montré : l'échelle vaut
+`√(E / (ρ g π I))`, et l'intégrale `I` ne dépend que de la longueur d'onde. Pour λ = 10³⁰ m,
+`I` sous-passe à zéro et l'échelle devient infinie sans que l'énergie soit en cause — un
+appelant l'aurait réduite indéfiniment.
+
+La condition est donc scindée : intégrale non représentable → `Wavelength`, échelle non
+représentable à intégrale saine → `Energy`. La décision est appliquée telle qu'énoncée ; c'est
+son application à un cas qu'elle n'avait pas examiné qui a demandé cette précision.
+
+Ce que cela confirme, et qui vaut au-delà de cet ADR : **un nom d'erreur ne se vérifie pas en
+le relisant.** Il se vérifie en cherchant l'entrée qui le produit, puis en se demandant si le
+paramètre nommé est bien celui qu'il faut changer.
+
+**Seconde correction, sur la section Problème.** Elle affirme que le couloir est bordé « en
+dessous » par la résolution. La carte reproduite après renommage dit autre chose : c'est
+presque partout `Reach` — le produit `hi · radius` qui dépasse la portée tabulée — et la
+résolution ne mord que dans le coin du plus petit rayon. L'attribution était plausible et
+fausse ; elle avait été faite en lisant une carte dont toutes les cases portaient `Domain`,
+ce qui est exactement le défaut que cet ADR corrige.

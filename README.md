@@ -61,7 +61,7 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S121 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S122 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
@@ -117,5 +117,10 @@ Un refus de champ ne confond plus la limite physique et la limite numérique : `
 dit que la bibliothèque ne peut pas représenter le champ, `Steepness` reste un verdict que l'appelant
 peut lever (ADR-081, S121). La cible reçue était le mauvais étage — le bloc visé n'a aucune entrée qui
 l'atteigne, sur 673 884 échantillons — et la sonde a désigné le site voisin, lui démontrable (L210).
-Suite : les bornes de construction se recouvrent sans ordre documenté (A198), S121-1.
+Chaque borne de construction d'un champ d'impact nomme désormais le paramètre à revoir, et les trois
+bornes couplées — portée, régime, résolution — sont nommées comme des relations (ADR-082, S122). La carte
+du couloir d'acceptation est mesurée : ondes du mètre à la dizaine de mètres, rayon d'autant plus petit que
+l'onde est courte. Le test d'atteignabilité de chaque nom a montré qu'un refus attribué à l'énergie venait
+en réalité de la longueur d'onde (L211).
+Suite : confronter ce couloir aux impacts que le jeu produira (A199), S122-1.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

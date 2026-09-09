@@ -3205,3 +3205,20 @@ place — avec la satisfaction d'avoir refermé une entrée du registre. **Avant
 ce qui atteint le défaut.** Si rien ne l'atteint, ce n'est pas la correction qui est en cause,
 c'est la cible. Le corollaire vaut pour ce qu'on écrit ensuite : une sonde qui ne trouve pas de
 contre-exemple mesure une marge, elle ne démontre pas une impossibilité.
+
+## L211 — Une taxonomie d'erreurs se teste par surjection
+
+*(S122)* Neuf noms de refus ont remplacé deux fourre-tout. Le test qui compte n'est pas que le
+code compile, ni que les refus existants passent : c'est que **chaque nom soit produit par au
+moins une entrée**, et que le paramètre nommé soit bien celui qu'il faut changer. Un nom
+qu'aucune entrée n'atteint est une promesse vide ; un nom atteignable mais trompeur est pire,
+parce qu'il envoie l'appelant modifier la mauvaise grandeur — indéfiniment, s'il boucle.
+
+C'est ce test qui a montré qu'un des nouveaux noms mentait encore : le refus attribué à
+l'énergie venait en réalité d'une intégrale qui ne dépend que de la longueur d'onde. La
+relecture ne l'avait pas vu, deux fois de suite.
+
+Corollaire pour les conditions composées : quand un refus tient à une relation entre plusieurs
+paramètres, le nommer d'après un seul est un mensonge commode. Nommer la relation — portée,
+régime, résolution — coûte un mot de plus et reste vrai des deux côtés. Voir [[L210]], qui dit
+la même chose de la cible d'une correction : ce qui se vérifie par relecture ne se vérifie pas.

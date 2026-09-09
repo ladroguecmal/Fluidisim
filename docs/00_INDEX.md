@@ -17,6 +17,13 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S122 :** [ADR-082](adr/ADR-082-nommer-la-borne-qui-refuse.md), nommer la borne qui refuse.
+[BORNES-CONSTRUCTION-S122](validation/BORNES-CONSTRUCTION-S122.md) : neuf noms remplacent deux fourre-tout,
+les trois bornes couplées nommées comme telles, `Domain` réservé aux positions. Carte du couloir d'acceptation
+mesurée avant et après. **A198 résolue, A199 ouverte, L211** — le test d'atteignabilité a révélé qu'`Energy`
+recouvrait encore un refus de longueur d'onde.255 tests/cinq ignorés ; hachages inchangés.
+82 ADR,199 angles,17 invariants,6 spécifications,23 cas. Suite S123 : enveloppe du candidat face aux impacts réels, S122-1.
+
 **S121 :** [ADR-081](adr/ADR-081-separer-limite-physique-et-limite-numerique.md), séparer la limite physique de la limite numérique.
 [CAUSES-REFUS-S121](validation/CAUSES-REFUS-S121.md) : `NotRepresentable` distincte de `Steepness`, cas de débordement
 construit (λ=10⁻¹⁰), invariant « construit ⟹ sorties finies » devenu test. **A197 résolue après requalification de sa

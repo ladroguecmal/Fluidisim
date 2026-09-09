@@ -1625,3 +1625,18 @@ que `sample` puisse déborder. Le défaut réel et atteignable était dans les *
   qui veut savoir **quel paramètre réduire** ne dispose que du nom d'une borne, pas de sa cause.
   Cartographier ces bornes — ou nommer celle qui a mordu, avec la valeur en cause — est le
   prolongement naturel. Suite S121-1.
+
+**Suivi A198 — S122 : résolue par ADR-082.** Neuf noms remplacent les deux fourre-tout de
+`RadialImpact::new` ; chaque nom désigne le paramètre à revoir, et les trois bornes couplées
+sont nommées comme telles. Le test exige que chaque nom soit atteignable — un nom qu'aucune
+entrée ne produit serait une promesse vide — et c'est lui qui a révélé qu'`Energy` recouvrait
+encore un refus de longueur d'onde. `ImpactField` garde ses noms : plus le chemin actif.
+
+- **A199** *(sévérité 2, S122 ; ouverte)* — **L'enveloppe du candidat radial n'a jamais été
+  confrontée aux impacts que le jeu produira.** La carte mesurée en S122 montre un couloir
+  étroit : longueurs d'onde de l'ordre du mètre à la dizaine de mètres, rayon d'autant plus
+  petit que l'onde est courte, et bordé de trois refus distincts. Rien ne dit si cet intervalle
+  couvre les cas réels — une goutte, un projectile, une coque de vaisseau, un impact d'arme.
+  Si un régime attendu tombe hors du couloir, ce n'est pas un défaut de nommage mais un manque
+  de modèle, et il faudra soit un second candidat, soit un raccordement. La question est de
+  conception et se tranche sans interlocuteur (ADR-028). Suite S122-1.
