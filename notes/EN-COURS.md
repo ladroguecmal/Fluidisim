@@ -71,10 +71,10 @@ mesure est ici au service d'une décision, pas l'inverse.
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan.
-- [ ] **P2** — inventaire (L209) : que disent SPEC-002, ADR-058 et ADR-060 du choix de la
+- [x] **P2** — inventaire (L209) : que disent SPEC-002, ADR-058 et ADR-060 du choix de la
       longueur d'onde et de l'usage visé ? **D'où vient `wavelength_m`** — dérivée, ou
       déclarée par l'appelant ? Aucune conclusion avant cette lecture.
-- [ ] **P3** — la relation entre un impact réel et la longueur d'onde qu'il engendre, avec
+- [x] **P3** — la relation entre un impact réel et la longueur d'onde qu'il engendre, avec
       provenance (I-14) : formule citée du corpus, ou étiquette « à calibrer » et le banc.
 - [ ] **P4** — le catalogue des cas du jeu confronté au couloir, **mesuré** et non supposé
       (L210) : une sonde qui construit le candidat pour chaque cas et rend le verdict.
@@ -96,3 +96,21 @@ cambrure limite `H/λ = 0,78`. Ne pas en inventer d'autres sans provenance — I
 Piège : la tentation sera d'élargir une borne pour faire entrer un cas. Une borne existe pour
 une raison (portée tabulée, régime d'eau profonde, résolution de phase) ; la déplacer sans
 traiter cette raison remplacerait un refus franc par un résultat faux.
+
+P2/P3, et le premier résultat précède la question posée : **la longueur d'onde ne vient de
+nulle part**. ADR-055 la valide comme « positive en mètres » et reporte au « générateur
+physique » qui n'existe pas ; ADR-060 dit que la bande est « à calibrer B2 » et que son
+lambda=4 m est un « paramètre d'essai uniquement ». Le registre ne contient rien là-dessus.
+Le candidat est donc piloté par une grandeur que personne ne sait produire, et parler de cas
+qui « tombent dans le couloir » n'a pas de sens tant que ce lien manque.
+
+Écriture retenue, conforme à I-14 : lambda = alpha * b, avec b la demi-largeur de l'objet
+(SPEC-001 §5 bis, Wagner : l'étendue mouillée à la fin de l'impact vaut b, indépendamment de
+v et beta) et alpha **à calibrer, banc B2**. La session ne fixe pas alpha ; elle mesure la
+**sensibilité du verdict à alpha**, ce qui ne demande pas de le connaître.
+
+`lambda = 2*pi*v^2/g` (SPEC-001 §5) écartée : elle décrit le sillage d'un mouvement horizontal
+établi, pas une entrée verticale. L'employer ici serait un détournement.
+
+Substitution dans les bornes : radius <= 5,09*alpha*b (Reach), depth > alpha*b (Regime).
+Donc portée et profondeur requises sont toutes deux **proportionnelles à la taille de l'objet**.
