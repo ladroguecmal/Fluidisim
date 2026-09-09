@@ -133,7 +133,7 @@ impl<'a> Source<'a> {
     pub fn metadata(&self) -> Metadata {
         self.metadata
     }
-    pub fn segments(&self) -> &[Segment] {
+    pub fn segments(&self) -> &'a [Segment] {
         self.segments
     }
     pub fn context(&self) -> Context {

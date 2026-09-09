@@ -37,11 +37,11 @@ impl<'p, 's> Journal<'p, 's> {
         self.pending
     }
     /// Historique publié, qui peut être incomplet face à une commande en attente.
-    pub fn published(&self) -> impl Iterator<Item = Source<'s>> + '_ {
+    pub fn published(&self) -> impl Iterator<Item = Source<'s>> + Clone + '_ {
         self.slots[..self.count].iter().flatten().copied()
     }
     /// Vue courante refusée si une source reçue attend sa place.
-    pub fn current(&self) -> Result<impl Iterator<Item = Source<'s>> + '_, Error> {
+    pub fn current(&self) -> Result<impl Iterator<Item = Source<'s>> + Clone + '_, Error> {
         if self.pending.is_some() {
             return Err(Error::Pending);
         }

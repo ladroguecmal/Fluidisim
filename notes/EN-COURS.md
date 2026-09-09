@@ -65,7 +65,7 @@ Objectif : champ commun de sources compatibles, interférences et travail total.
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [ ] **P2** — construire la préparation depuis le journal ; recevoir superposition, bilans et refus.
+- [x] **P2** — construire la préparation depuis le journal ; recevoir superposition, bilans et refus.
 - [ ] **P3** — publier résultats et limites ; rituel final et synchronisation.
 
 ### Notes de reprise
@@ -73,3 +73,6 @@ Objectif : champ commun de sources compatibles, interférences et travail total.
 Départ3547926, copies actives propres identiques. S111-1.
 Sommer réponses et pressions par mode avant énergie et puissance ; ordre id puis segment.
 Contexte complet identique, journal non vide sans attente ; pool candidat seul modifiable au refus numérique.
+
+P2 : from_journal, total modal avant bilan, ordre id/segments ; quatre tests release/debug.
+Suite240 réussis/cinq ignorés. Résidu travail1,639e-7 J à1000 pas ; MULTISOURCE-S112.

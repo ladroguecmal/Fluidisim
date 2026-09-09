@@ -28,6 +28,8 @@ pub struct Context {
 pub enum Error {
     Context,
     Time,
+    Pending,
+    Empty,
     Preparation(spectral_pressure::PrepareError),
 }
 
@@ -97,6 +99,55 @@ pub struct Prepared<'a> {
     slope_envelope: f32,
 }
 impl<'a> Prepared<'a> {
+    /// Journal emprunté jusqu'à libération du champ : aucun changement d'admission
+    /// pendant l'utilisation de cette publication. Toutes les sources sont incluses.
+    pub fn from_journal(
+        context: Context,
+        spectrum: &HalfSpectrum<'_>,
+        journal: &'a crate::pressure_journal::Journal<'_, '_>,
+        time: SimTime,
+        pool: &'a mut [Slot],
+    ) -> Result<Self, Error> {
+        if journal.pending().is_some() {
+            return Err(Error::Pending);
+        }
+        if journal.published().next().is_none() {
+            return Err(Error::Empty);
+        }
+        if !same_recipe(context.recipe, spectrum.recipe())
+            || journal.published().any(|s| !context.matches(&s.context()))
+        {
+            return Err(Error::Context);
+        }
+        let s = context.settings;
+        if time < s.start || time > s.end {
+            return Err(Error::Time);
+        }
+        let segments = journal
+            .published()
+            .flat_map(|s| s.segments().iter().copied());
+        let field = spectral_pressure::prepare_segments(
+            spectrum.nodes(),
+            segments,
+            s.gravity,
+            s.density,
+            time,
+            s.end,
+            s.min,
+            s.max,
+            pool,
+        )
+        .map_err(Error::Preparation)?;
+        let slope_envelope = field
+            .slope_envelope()
+            .map_err(|e| Error::Preparation(spectral_pressure::PrepareError::Calculation(e)))?;
+        Ok(Self {
+            context,
+            time,
+            field,
+            slope_envelope,
+        })
+    }
     /// Pool candidat modifiable au refus, aucune vue partielle retournée.
     /// Les segments sont déclarés dans le repère du contexte ; ils ne sont pas rebasés.
     pub fn build(
@@ -580,3 +631,7 @@ fn finite_sample(s: &crate::WaterSample) -> bool {
     .iter()
     .all(|x| x.is_finite())
 }
+
+#[cfg(test)]
+#[path = "tests_pressure_multi.rs"]
+mod tests_pressure_multi;

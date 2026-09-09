@@ -84,6 +84,33 @@ pub fn prepare<'a>(
             return Err(Error::Domain.into());
         }
     }
+    prepare_segments(
+        nodes,
+        path.iter().copied(),
+        gravity,
+        density,
+        now,
+        end,
+        min,
+        max,
+        pool,
+    )
+}
+/// Interne : chemins et contexte déjà validés, itérateur reproductible en ordre canonique.
+pub(crate) fn prepare_segments<'a>(
+    nodes: &[Node],
+    segments: impl Iterator<Item = Segment> + Clone,
+    gravity: f32,
+    density: f32,
+    now: SimTime,
+    end: SimTime,
+    min: [f32; 2],
+    max: [f32; 2],
+    pool: &'a mut [Slot],
+) -> Result<Field<'a>, PrepareError> {
+    if pool.len() < nodes.len() {
+        return Err(PrepareError::Capacity);
+    }
     let mut energy = 0.0;
     let mut correction = 0.0;
     let mut power = 0.0;
@@ -99,11 +126,11 @@ pub fn prepare<'a>(
         }
         let mut total = Response::default();
         let mut pressure = Complex::default();
-        for s in path {
+        for s in segments.clone() {
             let horizon = end.0.checked_sub(s.birth.0).ok_or(Error::Time)?;
             let source = Segment {
                 pressure_pa: s.pressure_pa * node.transform,
-                ..*s
+                ..s
             };
             let mode = ModalPressure::new(node.k, gravity, density, source, horizon)?;
             let r = mode.sample(now)?;
