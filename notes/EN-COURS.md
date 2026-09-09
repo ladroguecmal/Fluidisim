@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S119 — en cours
+Session : S119 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : A194 — l'hôte doit pouvoir savoir **avant de publier** quelles dates le montage
 mixte peut servir. Construire l'horizon effectif et l'état du montage, et prouver par
@@ -76,7 +76,7 @@ balayage que ce qui est annoncé est exactement ce que la requête accepte.
 - [x] **P5** — les deux montages que la fixture n'atteint pas : fenêtre plus courte que
       les impacts, et intersection vide. Fixture paramétrée par `mount(age, start)`.
 - [x] **P6** — recevoir dans la campagne `cycle_mixed`, avec bloc de mise en régime (A195).
-- [ ] **P7** — livrable, rituel de fin, fusion `--ff-only`.
+- [x] **P7** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -124,3 +124,13 @@ Annonce : 23 ns (1000 appels en 23,0 µs), contre 12,6 ms pour la préparation q
 **A195 corrigé et vérifié** : avec le bloc de mise en régime, `update` 12,78 / `update_again`
 13,21 / `direct` 12,64 ms à 224×128 — l'écart de 15 à 28 % de S118 a disparu, sur trois
 exécutions. La mise en régime est donc la bonne correction, pas seulement une hypothèse.
+
+P7 : HORIZON-MIXTE-S119, note datée dans ADR-079, suivis A194/A195, A196, L208, journal,
+index, README, jeton rendu, fusion ff-only. Une phrase du livrable annonçait quel refus serait
+« le plus fréquent en pratique » : retirée, ce n'est pas mesuré.
+
+Pour S120 sans relire : ce qui reste tardif (A196) dépend des **arguments** de la requête, pas
+du montage — donc aucune annonce préalable ne peut le trancher sans recevoir les mêmes points.
+Ce qui est annonçable est une borne : pente maximale atteignable sur un lot, emprise du domaine.
+Et la mise en régime avant la première mesure est désormais dans `cycle_mixed` : la reprendre
+dans toute nouvelle campagne de coût, sinon le premier chiffre publié sera faux (A195).

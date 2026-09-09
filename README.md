@@ -61,7 +61,7 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S118 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S119 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
@@ -104,5 +104,9 @@ Cycle hôte temporel mixte reçu par le contrôleur : douze instants non monoton
 identiques en bits à la voie directe par recette, cycle48,82/56,06 ms,`Unchanged`0,1 µs (S118).
 Deux horizons distincts constatés — la pression publie plus loin que la validité des impacts (A194) ;
 la position d'un bloc de mesure fabriquait un écart de coût qui n'existe pas (A195, L207).
-Suite : horizon effectif du montage mixte, S118-1.
+Horizon effectif et annonce du montage mixte construits : avant toute publication, l'hôte connaît
+la fenêtre servable et ce que la requête fera d'un instant, par une implémentation unique partagée
+avec la requête elle-même (ADR-079, S119). Annonce 23 ns contre12,6 ms de préparation évitée.
+A194 résolue ; A195 corrigée et vérifiée par une mise en régime avant la première mesure.
+Suite : bornes annonçables des points — pente atteignable, emprise du domaine — S119-1.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

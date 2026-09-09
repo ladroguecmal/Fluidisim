@@ -6366,3 +6366,46 @@ l'horizon effectif du montage (A194). Et, pour toute campagne de coût, un bloc 
 régime avant la première mesure, ou chaque voie mesurée à deux positions (A195).
 Restent ouverts : admission dynamique, extension de fenêtre, profondeur finie S116-2,
 bilan mixte, durabilité disque.
+
+---
+
+## S119 — 2026-09-09 — Horizon effectif et annonce du montage mixte
+
+**Entrée :** jeton libre à 6700773, trois copies coïncidentes. A194 et A195, ouvertes par S118.
+**Produit :** [ADR-079](../docs/adr/ADR-079-horizon-effectif-du-montage-mixte.md) et
+[HORIZON-MIXTE-S119](../docs/validation/HORIZON-MIXTE-S119.md). `mixed::horizon` rend la fenêtre
+servable — intersection de la fenêtre du contrôleur et de la validité des impacts, `None` si
+elle est vide ; `mixed::state` rend six réponses, une par cause de refus indépendante des
+points. `Controller::context()` ajouté. Fixture de test paramétrée par `mount(age, start)`.
+**Décision structurante :** les contrôles ne sont pas recopiés dans l'annonce, ils sont
+**extraits** de la requête dans une implémentation unique que les deux appellent. C'est ce qui
+rend l'équivalence vraie par structure et non par vigilance — L137 appliqué au code. L'ordre
+d'évaluation est conservé à l'identique : les 154 tests antérieurs passent inchangés et les
+hachages de la campagne S118 sont les mêmes. Aucun refus n'a changé de nature.
+**Réception :** balayage de douze instants confrontant chaque annonce à ce que la séquence
+réelle fait — publier si nécessaire, puis requêter. Aucun `Ready` ne ment, aucun refus n'est tu,
+hors horizon ⟺ non servable dans les deux sens. Deux montages de plus pour ce que la fixture
+n'atteignait pas : impacts 10 s contre fenêtre 8 s (`OutsideWindow` enfin exercé), impacts
+éteints à 1 s contre fenêtre ouverte à 2 s (horizon vide). 156 core + 93 harnais = 249 réussis,
+cinq ignorés ; six tests mixtes aussi en release ; quatre avertissements préexistants.
+**Ce que la construction a appris, et qui n'était pas dans la décision (note datée dans
+ADR-079, L208).** Sur un montage d'horizon vide, l'annonce ponctuelle est exacte à chaque date
+et ne dit jamais qu'aucune date ne convient : la cause change simplement de côté — trop tôt,
+puis trop tard. **Un prédicat ponctuel ne révèle pas un ensemble vide**, et c'est la raison
+d'être des deux fonctions. Second point : l'annonce donne la première cause dans l'ordre, pas
+l'ensemble des causes ; `OutsideWindow` n'apparaît que si les impacts vivent plus longtemps
+que la fenêtre.
+**A195 corrigé et vérifié.** Bloc de mise en régime avant la première mesure : `update` 12,78 ms,
+le même mesuré en dernier 13,21 ms, préparation directe 12,64 ms — ils coïncident, là où S118
+lisait 15 à 28 % d'écart. Vérifié sur trois exécutions. La correction était la bonne, et pas
+une hypothèse plausible de plus. Les campagnes antérieures gardent leur premier chiffre biaisé.
+**Chiffres :** annonce **23 ns** (1000 appels en 23,0 µs) contre 12,6 ms pour la préparation
+qu'elle évite — rapport de l'ordre de 500 000. Le coût de savoir est sans commune mesure avec
+celui de découvrir.
+**Limites :** `Ready` ne promet rien sur les points ; domaine, pente totale et capacité restent
+évalués par la requête (A196). Publication tardive laissée possible, délibérément. Aucune
+précision spatiale nouvelle, mesures d'une seule machine non isolée.
+79 ADR, 196 angles, 17 invariants, 6 spécifications, 23 cas. Invariants relus : aucun invalidé.
+**Suite S120 :** S119-1 — ce qui est annonçable des points est une **borne** (pente maximale
+atteignable sur un lot, emprise du domaine), pas un verdict par point. Restent ouverts :
+admission dynamique, extension de fenêtre, profondeur finie S116-2, bilan mixte, durabilité.

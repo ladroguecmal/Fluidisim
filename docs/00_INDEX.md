@@ -17,6 +17,13 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S119 :** [ADR-079](adr/ADR-079-horizon-effectif-du-montage-mixte.md), horizon effectif et annonce du montage mixte.
+[HORIZON-MIXTE-S119](validation/HORIZON-MIXTE-S119.md) : `horizon` et `state` avant toute publication,
+implémentation unique partagée avec la requête ; équivalence annonce/comportement reçue par balayage.
+Annonce 23 ns contre12,6 ms de préparation évitée. **A194 résolue, A195 corrigée et vérifiée**, A196 ouverte, L208.
+249 tests réussis/cinq ignorés.79 ADR,196 angles,17 invariants,6 spécifications,23 cas.
+Suite S120 : bornes annonçables des points, S119-1.
+
 **S118 :** [CYCLE-MIXTE-S118](validation/CYCLE-MIXTE-S118.md), cycle hôte temporel mixte via le contrôleur.
 Douze instants non monotones, 3468 points-temps par recette identiques en bits à la voie directe ;
 cycle complet48,82/56,06 ms,`Unchanged`0,1 µs. Aucune décision nouvelle ; A194 et A195 ouverts, L207.

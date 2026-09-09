@@ -1572,3 +1572,24 @@ connue ne signifie pas complétude réseau ; protocole de resynchronisation hôt
   préparation. Les chiffres passés ne sont pas corrigeables a posteriori ; il faut un bloc de
   mise en régime avant la première mesure, ou mesurer chaque voie deux fois à des positions
   différentes. Voir L207 et CYCLE-MIXTE-S118.
+
+**Suivi A194 — S119 : résolue par ADR-079.** `mixed::horizon` et `mixed::state` donnent, avant
+toute publication, la fenêtre servable et ce que la requête fera d'un instant. L'équivalence
+entre l'annonce et le comportement est vérifiée par balayage, dans les deux sens, sur trois
+montages dont un d'horizon vide. La publication tardive reste possible et délibérée : la vue
+produite est correcte pour la pression seule.
+
+**Suivi A195 — S119 : corrigée et vérifiée.** Un bloc de mise en régime précède désormais la
+première mesure de la campagne. `update`, le même appel mesuré en dernier, et la préparation
+directe coïncident alors, là où S118 lisait 15 à 28 % d'écart ; vérifié sur trois exécutions.
+Les campagnes antérieures à S119 gardent leur premier chiffre biaisé ; elles ne sont pas
+corrigeables a posteriori.
+
+- **A196** *(sévérité 3, S119 ; ouverte)* — **L'annonce couvre le montage, pas les points.**
+  ADR-079 rend prévisible ce qui dépend du montage et de l'instant. Restent évalués point par
+  point, au moment de la requête : le domaine de chaque position, la pente totale et la capacité
+  des tampons. Ces refus sont tardifs au sens exact où A194 l'était — l'hôte a déjà payé une
+  préparation quand il les découvre — mais ils dépendent des arguments de la requête, et non du
+  montage, donc aucune annonce préalable ne peut les couvrir sans recevoir les mêmes points.
+  Ce qui est annonçable est une **borne** : pente maximale atteignable sur un lot, emprise du
+  domaine. Suite S119-1.

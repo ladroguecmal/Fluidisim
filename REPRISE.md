@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-09 14:36 +02:00
+JETON            : libre
+Battement        : 2026-09-09 14:49 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S119 — horizon effectif du montage mixte (S118-1)
-Dernière session : S118 — cycle hôte temporel mixte ;247 tests/cinq ignorés
-Session suivante : à fixer en fin de S119
+Session en cours : aucune
+Dernière session : S119 — horizon et annonce du montage mixte ;249 tests/cinq ignorés
+Session suivante : S120 — bornes annonçables des points (S119-1)
 
 *Le battement de fin de S118 disait 15:05 : une heure estimée, pas relevée. Corrigée ici.
 Un battement dans le futur ferait croire à une session active — le relever, jamais l'écrire de mémoire.*
@@ -176,6 +176,23 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S119 — 2026-09-09 :** [ADR-079](docs/adr/ADR-079-horizon-effectif-du-montage-mixte.md),
+[HORIZON-MIXTE-S119](docs/validation/HORIZON-MIXTE-S119.md). `mixed::horizon` rend la fenêtre
+servable — fenêtre du contrôleur coupée par la validité des impacts, `None` si vide ;
+`mixed::state` rend six réponses, une par cause de refus indépendante des points. Les contrôles
+sont **extraits** de la requête, pas recopiés : ordre conservé,154 tests antérieurs inchangés,
+hachages de S118 identiques. Équivalence annonce/comportement reçue par balayage de douze
+instants sur trois montages, dont un d'horizon vide. Annonce **23 ns** contre12,6 ms de
+préparation évitée.
+**A194 résolue. A195 corrigée et vérifiée** : avec un bloc de mise en régime,`update`12,78 ms,
+le même mesuré en dernier13,21 ms et la préparation directe12,64 ms coïncident.
+**A196 ouverte, L208** : un prédicat ponctuel ne révèle jamais un ensemble vide — sur un horizon
+vide, l'annonce par date reste exacte et ne dit jamais « aucune date ».249 tests/cinq ignorés.
+79 ADR,196 angles,17 invariants,6 spécifications,23 cas. S118-1 réalisée.
+Suite S120 : S119-1, ce qui est annonçable des points est une borne (pente atteignable sur un
+lot, emprise du domaine), pas un verdict par point. Admission dynamique, extension de fenêtre,
+S116-2 profondeur finie, bilan mixte et durabilité restent ouverts.
 
 **S118 — 2026-09-09 :** [CYCLE-MIXTE-S118](docs/validation/CYCLE-MIXTE-S118.md). Aucune décision
 nouvelle : ADR-078 exercée dans un cycle hôte de douze instants non monotones, recettes224×128

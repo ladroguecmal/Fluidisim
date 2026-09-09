@@ -3164,3 +3164,16 @@ Avant de croire un écart entre deux voies, les replacer symétriquement. Un té
 la cause soupçonnée coûte quelques lignes ; une explication plausible non testée entre dans un
 livrable et y reste. Vaut au-delà du temps de calcul : dès que deux mesures diffèrent par autre
 chose que ce qu'on croit comparer.
+
+## L208 — Un prédicat ponctuel ne révèle jamais un ensemble vide
+
+*(S119)* Une fonction qui répond « cet instant est-il servable ? » peut être exacte à chaque
+date et ne jamais dire qu'**aucune** date ne l'est. Sur un montage dont la fenêtre utile est
+vide, la cause change simplement de côté selon la date demandée : trop tôt d'un côté, trop tard
+de l'autre, jamais « impossible ». L'hôte qui n'interroge que des dates ne l'apprend pas.
+
+Quand une propriété globale existe — un domaine vide, une intersection vide, un ensemble sans
+solution — elle demande sa propre fonction, à côté du prédicat ponctuel. Les deux ne sont pas
+redondantes : l'une répond sur un point, l'autre sur l'ensemble, et la seconde ne se déduit pas
+d'un nombre fini d'appels à la première. Vaut pour toute API de validation, pas seulement pour
+le temps.

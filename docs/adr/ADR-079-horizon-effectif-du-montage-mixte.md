@@ -84,3 +84,20 @@ d'instants compare `state(t)` à ce que fait vraiment la séquence — publier s
 requêter — et vérifie l'équivalence dans les deux sens, y compris pour les montages
 inutilisables. Une annonce qui se contenterait d'être prudente passerait un test de sûreté
 et échouerait celui-ci.
+
+## Note du 2026-09-09, ajoutée à la construction (S119, P4-P5)
+
+Écrire les tests a fait apparaître ce que la décision ne disait pas, et qui justifie que les
+deux fonctions existent séparément.
+
+**Une annonce par date ne peut pas répondre à une question sur toutes les dates.** Sur un
+montage d'horizon vide — impacts éteints avant l'ouverture de la fenêtre de pression — la
+cause annoncée change de côté selon l'instant demandé : `OutsideWindow` tant que les impacts
+vivent encore, `ImpactsExpired` ensuite. Chaque réponse est exacte, aucune ne révèle qu'il
+n'existe aucune date servable. Seul `horizon` le dit, en rendant `None`.
+
+**L'annonce donne la première cause dans l'ordre d'évaluation, pas l'ensemble des causes.**
+Quand les impacts expirent avant la fin de la fenêtre, `OutsideWindow` n'est jamais rendu :
+`ImpactsExpired` arrive d'abord. Un hôte qui lèverait la première cause pourrait en trouver
+une seconde. C'est le prix de l'ordre conservé — celui de la requête — et il est préférable
+à un ordre propre à l'annonce, qui ferait diverger les deux.
