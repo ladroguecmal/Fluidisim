@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-09 16:07 +02:00
+JETON            : libre
+Battement        : 2026-09-09 16:37 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S124 — lever la limite de portée du champ d'impact (S123-1, A201)
-Dernière session : S123 — un seul cas de jeu sur onze tient dans le couloir ;255 tests/cinq ignorés
-Session suivante : à fixer en fin de S124
+Session en cours : aucune
+Dernière session : S124 — portée étendue, neuf cas sur onze à N=256 ;256 tests/cinq ignorés
+Session suivante : S125 — coût de N=256 et choix du profil (S124-1, A202)
 
 *Le battement de fin de S118 disait 15:05 : une heure estimée, pas relevée. Corrigée ici.
 Un battement dans le futur ferait croire à une session active — le relever, jamais l'écrire de mémoire.*
@@ -176,6 +176,23 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S124 — 2026-09-09 :** [ADR-084](docs/adr/ADR-084-portee-etendue-par-l-asymptotique.md),
+[PORTEE-ETENDUE-S124](docs/validation/PORTEE-ETENDUE-S124.md). Le domaine de Bessel passe de64 à
+**2048** par développement asymptotique d'ordre2 : erreur3,6e-8 au raccord, saut de1,0e-7, rien
+ne change sous64 et les hachages de campagne sont identiques. La borne2048 est **mesurée** — au
+delà, la précision de la phase spatiale en `f32` sort de la tolérance (3,8e-6 à2048,5,8e-6
+à4096). Ce n'est ni la formule ni la couture qui bornent.
+**Le facteur32 annoncé ne se produit pas, et c'est le résultat de la session (L213).**
+`Resolution` prend partout le relais dès que `Reach` recule ; gain réel de zéro à +82 %, note
+corrective portée à ADR-084. Mais `Resolution` dépend de `N`, **déjà libre entre64 et256 depuis
+ADR-060** : à `N =256`, **neuf cas de jeu sur onze atteignent leur portée**, contre un seul en
+S123. Les deux leviers étaient nécessaires, aucun ne suffisait seul.
+256 tests/cinq ignorés.84 ADR,202 angles,17 invariants,6 spécifications,23 cas. S123-1 réalisée.
+Suite S125 : S124-1, mesurer le coût de `N =256` (quatre fois plus de modes par point) et
+trancher si ce profil devient le défaut. **A202** : la borne active est désormais un paramètre de
+profil que personne n'a choisi en fonction de la portée. Générateur physique d'ADR-055, eau peu
+profonde, admission dynamique, extension de fenêtre, S116-2, bilan mixte et durabilité ouverts.
 
 **S123 — 2026-09-09 :** [ADR-083](docs/adr/ADR-083-portee-du-champ-d-impact.md),
 [ENVELOPPE-IMPACTS-S123](docs/validation/ENVELOPPE-IMPACTS-S123.md). **Session de conception.**

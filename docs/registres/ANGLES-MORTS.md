@@ -1664,3 +1664,20 @@ profonde assumé comme limite du modèle, plafond d'énergie chiffré pour le g�
   et un plongeon humain n'est calculable que dans un rayon de trois mètres. Ce n'est pas une
   décision de conception, c'est un effet de bord d'outillage. Piste identifiée, non retenue avant
   mesure : développement asymptotique de `J0`/`J1` au-delà de la table. Suite S123-1.
+
+**Suivi A201 — S124 : traitée par ADR-084, et le gain n'est pas celui qu'on croyait.** Le domaine
+de Bessel passe de 64 à **2048**, borne mesurée et non choisie : au-delà, la précision de la
+phase spatiale en `f32` fait sortir l'erreur de la tolérance. `Reach` recule d'un facteur 32,
+mais **`Resolution` prend aussitôt le relais** et le gain effectif va de zéro à +82 %. Avec
+`N = 256`, déjà permis par ADR-060, neuf cas de jeu sur onze atteignent leur portée — les deux
+leviers étaient nécessaires, aucun ne suffisait seul.
+
+- **A202** *(sévérité 3, S124 ; ouverte)* — **La borne active est désormais un paramètre de
+  profil jamais dimensionné pour cet usage.** Depuis ADR-084, `Resolution` borne la portée de
+  tous les cas mesurés, et elle dépend de `N` par `dk ∝ 1/N`. Or `N` est libre entre 64 et 256
+  depuis ADR-060, où il est présenté comme un choix de quadrature — personne ne l'a jamais
+  choisi en fonction de la portée voulue, qui est pourtant ce qu'il commande. À `N = 256` la
+  portée est multipliée par quatre et neuf cas sur onze passent, pour quatre fois plus de modes
+  par point d'évaluation. **Le coût n'est pas mesuré**, donc l'arbitrage n'est pas fait : c'est
+  la suite S124-1. Tant qu'il ne l'est pas, la portée d'un champ dépend d'un paramètre choisi
+  pour une autre raison.

@@ -61,7 +61,7 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S123 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S124 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
@@ -127,5 +127,9 @@ Le couloir a été confronté aux impacts du jeu : sur onze cas couvrant six ord
 une dizaine de fois la taille de l'objet — limite venue de la table de Bessel, non de la physique (A201).
 Et la longueur d'onde qui pilote tout le candidat n'est reliée à aucune propriété de l'objet (A200,
 sévérité1) : le contrat `λ = α·b` est acté, α restant à calibrer.
-Suite : lever la limite de portée, qui est un défaut d'outillage, S123-1.
+La limite de portée est levée : le domaine de Bessel passe de64 à2048 par développement asymptotique,
+borne **mesurée** et fixée par la précision de la phase en `f32` (ADR-084, S124). Le facteur32 espéré ne
+se produit pas — une seconde borne, `Resolution`, prend aussitôt le relais (L213) — mais avec `N =256`,
+déjà permis depuis ADR-060, **neuf cas de jeu sur onze** atteignent enfin leur portée, contre un seul.
+Suite : mesurer le coût de `N =256` et trancher le profil, S124-1.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

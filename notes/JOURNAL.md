@@ -6581,3 +6581,44 @@ identifiée et **non retenue avant mesure** : développement asymptotique de `J0
 existante. Restent ouverts : générateur physique d'ADR-055 (énergie et `α`), grands objets en eau
 peu profonde, admission dynamique, extension de fenêtre, profondeur finie S116-2, bilan mixte,
 durabilité disque.
+
+---
+
+## S124 — 2026-09-09 — La portée étendue, et la borne qui prend le relais
+
+**Entrée :** jeton libre à ea1669e, trois copies coïncidentes. A201, ouverte par S123.
+**Produit :** [ADR-084](../docs/adr/ADR-084-portee-etendue-par-l-asymptotique.md),
+[PORTEE-ETENDUE-S124](../docs/validation/PORTEE-ETENDUE-S124.md), la sonde
+`code/water-core/examples/bessel_reach.rs`, et l'extension de `radial_impact::bessel`.
+**Mesure d'abord.** L'asymptotique d'Abramowitz & Stegun tient largement : ordre 2, erreur
+**3,6e-8 à x = 64**, décroissante ensuite ; le raccord table/formule ne saute que de **1,0e-7**.
+Ce n'est donc ni la formule ni la couture qui bornent, mais **la phase** : `from_distance` forme
+`k_turns · r` en `f32`, et l'erreur sur `J0` croît comme `√x`. Pire cas sur balayage fin :
+3,8e-6 à x ≤ 2048, 5,8e-6 à 4096. D'où `BESSEL_MAX = 2048`, **mesuré et non choisi**.
+**Deux pièges attrapés par la mesure.** Un signe faux dans l'ordre 2 de `J1` — `P0` a un moins,
+`P1` un plus — que la relecture n'avait pas vu. Et surtout : le premier jeu d'essai donnait des
+erreurs de 1e-9, mille fois trop belles, parce que λ = 4 m et r = 60 m tombent sur 30 tours
+pile. **Les valeurs rondes sont le pire choix pour mesurer un arrondi** ; sans le balayage fin,
+la borne publiée aurait été fausse d'un facteur mille.
+**Construction :** sous 64, rien ne change — table, interpolation, hachages de campagne
+identiques à S118. Au-delà, asymptotique d'ordre 2, phase par PhaseQ32, sans libm. `Reach` passe
+à 2048. Deux tests antérieurs mis à jour, tous deux parce que la borne a changé exprès.
+256 tests réussis, cinq ignorés ; `radial_impact` aussi en release.
+**Le gain annoncé ne s'est pas produit, et c'est le résultat de la session. L213.** ADR-084
+annonçait un facteur 32 et « une centaine de mètres » pour un plongeon. Mesure : **3,66 m**, et
+de zéro à +82 % selon les cas. `Resolution` devient partout la borne active dès que `Reach`
+recule. Note corrective datée portée à la décision.
+**Mais la mesure suivante change la conclusion.** `Resolution` dépend de `N` par `dk ∝ 1/N`, et
+`N` est **déjà libre entre 64 et 256 depuis ADR-060**. À `N = 256`, **neuf cas de jeu sur onze
+atteignent la portée voulue**, contre un seul en S123. Et les deux leviers étaient nécessaires :
+`Reach` ne dépendant pas de `N`, l'extension seule donnait +20 % sur le plongeon et `N = 256`
+seul l'aurait laissé à 3,05 m.
+**Limites :** un champ calculable plus loin n'est pas validé plus loin — la réception physique
+reste celle d'ADR-060, sur 16 m. Le coût de `N = 256` n'est pas mesuré, donc son adoption n'est
+pas décidée. Le régime d'eau profonde et le contrat `λ = α·b` sont inchangés.
+84 ADR, 202 angles, 17 invariants, 6 spécifications, 23 cas. Invariants relus : aucun invalidé.
+**Suite S125 :** S124-1 — mesurer le coût de `N = 256` (préparation et évaluation par point) et
+trancher si ce profil devient le défaut pour les impacts. **A202** : la borne active est
+désormais un paramètre de profil que personne n'a choisi en fonction de la portée. Restent
+ouverts : générateur physique d'ADR-055, grands objets en eau peu profonde, admission dynamique,
+extension de fenêtre, profondeur finie S116-2, bilan mixte, durabilité disque.

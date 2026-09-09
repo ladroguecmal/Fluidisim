@@ -3,10 +3,34 @@ use crate::impact_field::{Error, Medium, Sample};
 use crate::wave_event::WaveEvent;
 use crate::{FrameId, PhaseQ32, SimTime};
 
-/// J0 et J1 par interpolation Hermite tabulée, sans libm. Domaine reçu : 0 <= x <= 64.
+/// Borne du domaine de `bessel`, portée de 64 à 2048 par ADR-084. La valeur est **mesurée** :
+/// au-delà, la précision de la phase spatiale en `f32` fait sortir l'erreur de la tolérance de
+/// 4e-6 (5,8e-6 à x = 4096). Ce n'est pas l'ordre du développement qui borne.
+pub const BESSEL_MAX: f32 = 2048.0;
+/// Développement asymptotique d'Abramowitz & Stegun 9.2.1, employé au-delà de la table.
+/// `P0 = 1 − 9/(128x²)` mais `P1 = 1 + 15/(128x²)` : les signes diffèrent entre J0 et J1.
+/// Phase par PhaseQ32 depuis la distance, jamais par un argument reconstruit — sans libm.
+fn bessel_asymptotique(x: f32) -> (f32, f32) {
+    let amplitude = (2.0 / (core::f32::consts::PI * x)).sqrt();
+    // theta = x - pi/4 : un huitième de tour retranché à la phase spatiale.
+    let theta = PhaseQ32::from_distance(1.0 / core::f32::consts::TAU, x)
+        .wrapping_add(PhaseQ32(0xE000_0000));
+    let (s, c) = theta.sin_cos();
+    let inv8x = 1.0 / (8.0 * x);
+    (
+        amplitude * (c + s * inv8x - 4.5 * c * inv8x * inv8x),
+        amplitude * (s + 3.0 * c * inv8x + 7.5 * s * inv8x * inv8x),
+    )
+}
+/// J0 et J1 sans libm : interpolation Hermite tabulée jusqu'à 64, puis développement
+/// asymptotique jusqu'à `BESSEL_MAX` (ADR-084). Au-delà, refus franc — la borne recule,
+/// elle ne disparaît pas.
 pub fn bessel(x: f32) -> Result<(f32, f32), Error> {
-    if !x.is_finite() || !(0.0..=64.0).contains(&x) {
+    if !x.is_finite() || !(0.0..=BESSEL_MAX).contains(&x) {
         return Err(Error::Domain);
+    }
+    if x > 64.0 {
+        return Ok(bessel_asymptotique(x));
     }
     let scaled = x * 16.0;
     let i = (scaled as usize).min(1023);
@@ -91,8 +115,9 @@ impl<const N: usize> RadialImpact<N> {
         if !hi.is_finite() || lo <= 0.0 {
             return Err(Error::Wavelength);
         }
-        // Portée de la table de Bessel : le produit, donc les deux paramètres.
-        if hi * domain.radius > 64.0 {
+        // Portée du calcul de Bessel : le produit, donc les deux paramètres. ADR-084 l'a
+        // portée de 64 à 2048, ce qui fait passer la portée d'un champ de 5,09 λ à 163 λ.
+        if hi * domain.radius > BESSEL_MAX {
             return Err(Error::Reach);
         }
         // Eau profonde : le milieu n'est pas en cause, le régime l'est.
@@ -520,7 +545,52 @@ mod tests {
         assert!(bessel(2.4048256).unwrap().0.abs() < 2e-6);
         assert!(bessel(3.831706).unwrap().1.abs() < 2e-6);
         assert!(bessel(f32::NAN).is_err());
-        assert!(bessel(64.01).is_err());
+        // ADR-084 : au-delà de la table, l'asymptotique prend le relais jusqu'à BESSEL_MAX.
+        assert!(bessel(64.01).is_ok());
+        assert!(bessel(BESSEL_MAX).is_ok());
+        assert!(bessel(BESSEL_MAX + 1.0).is_err());
+    }
+    /// S124, ADR-084 : la précision au-delà de la table, et la continuité au raccord.
+    /// La référence angulaire est densifiée avec `x` — à 4096 directions fixes elle cesserait
+    /// d'échantillonner son propre intégrande bien avant 2048.
+    #[test]
+    fn bessel_beyond_the_table_and_across_the_seam() {
+        fn dense(x: f64) -> (f64, f64) {
+            let n = ((64.0 * x) as usize).max(4096);
+            let (mut a, mut b) = (0.0, 0.0);
+            for i in 0..n {
+                let c = (core::f64::consts::TAU * (i as f64 + 0.5) / n as f64).cos();
+                a += (x * c).cos();
+                b += c * (x * c).sin();
+            }
+            (a / n as f64, b / n as f64)
+        }
+        // Au-delà du raccord, jusqu'à la borne : la tolérance d'ADR-064 tient.
+        for x in [
+            64.5f32, 70.0, 96.0, 128.5, 200.0, 512.0, 1024.0, 1500.0, 2048.0,
+        ] {
+            let got = bessel(x).unwrap();
+            let want = dense(x as f64);
+            assert!(
+                (got.0 as f64 - want.0).abs() < 4e-6,
+                "J0 a x={x} : {got:?} contre {want:?}"
+            );
+            assert!((got.1 as f64 - want.1).abs() < 4e-6, "J1 a x={x}");
+        }
+        // Continuité au raccord : une marche ici ferait un anneau sur le champ.
+        let avant = bessel(64.0).unwrap();
+        let apres = bessel(64.000_01).unwrap();
+        assert!(
+            (avant.0 - apres.0).abs() < 1e-6 && (avant.1 - apres.1).abs() < 1e-6,
+            "saut au raccord : {avant:?} puis {apres:?}"
+        );
+        // Et sous le raccord, rien n'a changé : la table reste le chemin, au bit près.
+        for x in [0.0f32, 0.01, 1.0, 2.4048256, 8.0, 32.0, 63.9, 64.0] {
+            let got = bessel(x).unwrap();
+            let want = dense(x as f64);
+            assert!((got.0 as f64 - want.0).abs() < 4e-6, "J0 tabule a x={x}");
+            assert!((got.1 as f64 - want.1).abs() < 4e-6, "J1 tabule a x={x}");
+        }
     }
     #[test]
     fn radial_refinement_symmetry_and_absence_of_old_copy() {
@@ -576,8 +646,13 @@ mod tests {
     #[test]
     fn invalid_construction_domains_refused() {
         let mut d = domain();
-        d.radius = 32.0;
-        assert!(RadialImpact::<64>::new(source(), medium(), d).is_err());
+        // Rayon au-delà de la portée de Bessel : hi = pi pour lambda = 4 m, donc la borne
+        // est à 2048/pi ≈ 652 m depuis ADR-084 (elle valait 64/pi ≈ 20 m auparavant).
+        d.radius = 700.0;
+        assert_eq!(
+            RadialImpact::<64>::new(source(), medium(), d).err(),
+            Some(Error::Reach)
+        );
         d = domain();
         d.age_us = 100_000_000;
         assert!(RadialImpact::<64>::new(source(), medium(), d).is_err());

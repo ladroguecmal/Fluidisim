@@ -59,11 +59,37 @@ fn milieu(c: &Case) -> Medium {
     }
 }
 fn essai(c: &Case, wavelength_m: f32, energy_j: f32, radius: f32, age_us: u64) -> Option<String> {
+    essai_n::<64>(c, wavelength_m, energy_j, radius, age_us)
+}
+fn essai_n<const N: usize>(
+    c: &Case,
+    wavelength_m: f32,
+    energy_j: f32,
+    radius: f32,
+    age_us: u64,
+) -> Option<String> {
     let event = evenement(c, wavelength_m, energy_j, age_us)?;
-    match RadialImpact::<64>::new(event, milieu(c), Domain { radius, age_us }) {
+    match RadialImpact::<N>::new(event, milieu(c), Domain { radius, age_us }) {
         Ok(_) => None,
         Err(why) => Some(format!("{why:?}")),
     }
+}
+/// Plus grande portée acceptée, par dichotomie, à N modes.
+fn portee_max<const N: usize>(c: &Case, lambda: f32, age_us: u64) -> (f32, String) {
+    const TENUE: f32 = 1e-30;
+    let (mut bas, mut haut) = (0.0f32, 4095.0f32);
+    for _ in 0..48 {
+        let m = 0.5 * (bas + haut);
+        if essai_n::<N>(c, lambda, TENUE, m, age_us).is_none() {
+            bas = m;
+        } else {
+            haut = m;
+        }
+    }
+    (
+        bas,
+        essai_n::<N>(c, lambda, TENUE, haut, age_us).unwrap_or_else(|| "-".to_string()),
+    )
 }
 fn main() {
     let cas = [
@@ -164,6 +190,22 @@ fn main() {
             "{:<22} {bas_e:<13.6e} {reference:<16.6e} {:>10.4} %",
             c.nom,
             100.0 * bas_e / reference
+        );
+    }
+
+    println!();
+    println!("=== 5. Ce que le nombre de modes changerait (S124-1) ===");
+    println!("Resolution borne dk*(rayon + c_g*age) : dk decroit comme 1/N.");
+    println!("cas                    N=64        N=128       N=256       borne a N=256");
+    for c in &cas {
+        let age_us = (c.horizon_s * 1e6) as u64;
+        let lambda = 2.0 * c.demi_largeur_m;
+        let a = portee_max::<64>(c, lambda, age_us);
+        let b = portee_max::<128>(c, lambda, age_us);
+        let d = portee_max::<256>(c, lambda, age_us);
+        println!(
+            "{:<22} {:<11.3} {:<11.3} {:<11.3} {}",
+            c.nom, a.0, b.0, d.0, d.1
         );
     }
 }

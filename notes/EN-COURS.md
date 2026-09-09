@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S124 — en cours
+Session : S124 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : A201 — la portée d'un champ d'impact vaut 5,09 λ parce que la table de Bessel
 s'arrête à `x = 64`. Mesurer d'abord si la piste asymptotique tient, **puis** décider.
@@ -74,11 +74,11 @@ s'arrête à `x = 64`. Mesurer d'abord si la piste asymptotique tient, **puis** 
          vaut déjà 2,4e-4 rad, soit cinquante fois la tolérance actuelle de 4e-6. Si c'est
          la phase qui limite, étendre la table ne servirait à rien.
 - [x] **P3** — ADR-084, sur ce que la mesure aura montré, y compris si elle dit non.
-- [ ] **P4** — construire ce que la décision retient.
-- [ ] **P5** — tests : précision au-delà de 64, continuité au raccord, et **hachages de
-      campagne inchangés** — rien ne doit bouger sous `x = 64`.
-- [ ] **P6** — la sonde `impact_envelope` rejouée : de combien la portée gagne-t-elle ?
-- [ ] **P7** — livrable, rituel de fin, fusion `--ff-only`.
+- [x] **P4** — `BESSEL_MAX = 2048`, asymptotique d'ordre 2 au-delà de la table, `Reach` étendu.
+- [x] **P5** — précision jusqu'à 2048, continuité au raccord, valeurs tabulées revérifiées,
+      hachages de campagne identiques à S118.
+- [x] **P6** — rejouée : gain de 0 à +82 %, `Resolution` prend le relais ; à N=256, neuf cas sur onze passent.
+- [x] **P7** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -116,3 +116,13 @@ fausse d'un facteur mille.
 **Borne mesuree** : pire erreur 3,77e-6 a x<=2048, 5,8e-6 a x<=4096. Donc **x <= 2048**, fixe
 par la precision de la phase spatiale en f32 — la meme limite que pour B (ADR-052) — et non par
 la formule. Portee : **163 lambda** au lieu de 5,09, soit un facteur 32.
+
+P4-P7 : ADR-084 avec note corrective datée sur le facteur 32 qui ne s'est pas produit.
+PORTEE-ETENDUE-S124, suivi A201, A202, L213, journal, index, README, jeton rendu, ff-only.
+
+Pour S125 sans relire : S124-1 est une mesure de coût, pas une décision de conception. `N` est
+le paramètre de type de `RadialImpact<N>` et de `Prepared<N>` ; passer à 256 touche donc les
+signatures des appelants, y compris `mixed`. Mesurer d'abord sur `radial_impact` seul —
+construction et `sample` par point, N=64 contre 256 — avec un bloc de mise en régime avant la
+première mesure (A195), et comparer au budget du cycle mixte (~49 ms à 224x128, dont 35 ms de
+requête 64 points). Les portées obtenues par N sont dans PORTEE-ETENDUE-S124 §5.

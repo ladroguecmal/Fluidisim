@@ -3239,3 +3239,17 @@ La règle : quand un paramètre manque, chercher d'abord si la question posée e
 réellement. Souvent la réponse est non sur toute la plage utile, et l'inconnu devient une note
 de bas de page au lieu d'un blocage. Quand la réponse est oui, on a au moins appris que le
 paramètre est décisif — ce qui est aussi un résultat, et qui justifie de le calibrer.
+
+## L213 — Un facteur sur une borne n'est un facteur sur le résultat que si elle est seule active
+
+*(S124)* Reculer la portée de Bessel d'un facteur 32 devait multiplier par 32 la portée d'un
+champ d'impact. Le gain réel va de zéro à +82 % : dès que la première borne recule, une seconde
+— jusque-là masquée — devient active et reprend la main. Trois cas sur onze n'ont rien gagné du
+tout, parce que la seconde borne mordait déjà avant.
+
+Avant d'annoncer le bénéfice d'un déblocage, chercher **quelle borne prend le relais**. La
+mesure coûte une dichotomie ; l'annonce non vérifiée entre dans une décision et il faut ensuite
+la corriger par une note datée. Le corollaire est plus utile encore : une fois la seconde borne
+identifiée, on sait si le déblocage vaut la peine — ici, les deux bornes devaient tomber
+ensemble, et aucune des deux levées séparément ne donnait presque rien. Voir [[L210]] et
+[[L211]] : ce qui se vérifie par relecture ne se vérifie pas.

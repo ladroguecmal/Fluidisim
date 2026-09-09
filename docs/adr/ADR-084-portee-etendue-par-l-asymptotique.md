@@ -73,3 +73,21 @@ facteur supplémentaire, et il demanderait de reprendre `from_distance` — donc
 [PORTEE-ETENDUE-S124](../validation/PORTEE-ETENDUE-S124.md). La précision est vérifiée contre la
 référence dense au-delà de 64, la continuité au raccord est mesurée, et la sonde
 `impact_envelope` est rejouée pour chiffrer ce que les cas de jeu y gagnent.
+
+## Note corrective du 2026-09-09, à la réception (S124, P6)
+
+La décision annonce « un facteur 32 » sur la portée et « un plongeon humain calculable sur une
+centaine de mètres au lieu de trois ». **Le premier chiffre décrit la borne `Reach` seule ; le
+second est faux.** La mesure donne 3,66 m pour ce plongeon, et de zéro à +82 % selon les cas.
+
+En cause : `Resolution` — `dk · (rayon + c_g · âge) ≤ π/2` — devient partout la borne active dès
+que `Reach` recule. La décision l'avait envisagé en une ligne, sans en tirer la conséquence :
+**un facteur annoncé sur une borne n'est un facteur sur le résultat que si cette borne est la
+seule active.** Vérifier laquelle prend le relais aurait coûté une dichotomie.
+
+Ce que la réception établit en revanche, et qui n'était pas dans la décision : `Resolution`
+dépend de `N`, déjà libre entre 64 et 256 depuis ADR-060. À `N = 256`, neuf cas de jeu sur onze
+atteignent la portée voulue. **Et les deux leviers étaient nécessaires** : `Reach` ne dépendant
+pas de `N`, l'extension sans `N = 256` donnait +20 % sur le plongeon, et `N = 256` sans
+l'extension l'aurait laissé à 3,05 m. Le coût de ce profil n'est pas mesuré ; son adoption
+n'est pas décidée ici.

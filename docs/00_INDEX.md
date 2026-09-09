@@ -17,6 +17,14 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S124 :** [ADR-084](adr/ADR-084-portee-etendue-par-l-asymptotique.md), portée étendue par l'asymptotique.
+[PORTEE-ETENDUE-S124](validation/PORTEE-ETENDUE-S124.md) : domaine de Bessel porté de64 à **2048**, borne
+mesurée et fixée par la précision de la phase `f32`, pas par la formule. **Le facteur 32 annoncé ne se
+produit pas** — `Resolution` prend le relais, gain réel de0 à +82 % ; mais à `N =256`, déjà permis par
+ADR-060, **neuf cas de jeu sur onze** atteignent leur portée. A201 traitée, A202 ouverte, **L213**.
+256 tests/cinq ignorés ; hachages inchangés.84 ADR,202 angles,17 invariants,6 spécifications,23 cas.
+Suite S125 : coût de `N =256` et choix du profil, S124-1.
+
 **S123 :** [ADR-083](adr/ADR-083-portee-du-champ-d-impact.md), la portée d'un champ d'impact et ce qui la borne.
 [ENVELOPPE-IMPACTS-S123](validation/ENVELOPPE-IMPACTS-S123.md) : onze cas de jeu confrontés au couloir ; **un seul
 se construit à la portée voulue**, et le verdict ne dépend pas de la calibration. Portée =5,09 λ =10,18 b.
