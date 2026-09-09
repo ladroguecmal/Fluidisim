@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-09 14:49 +02:00
+JETON            : occupé
+Battement        : 2026-09-09 14:51 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S120 — bornes annonçables des points (S119-1)
 Dernière session : S119 — horizon et annonce du montage mixte ;249 tests/cinq ignorés
-Session suivante : S120 — bornes annonçables des points (S119-1)
+Session suivante : à fixer en fin de S120
 
 *Le battement de fin de S118 disait 15:05 : une heure estimée, pas relevée. Corrigée ici.
 Un battement dans le futur ferait croire à une session active — le relever, jamais l'écrire de mémoire.*

@@ -58,79 +58,38 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S119 — terminée
+Session : S120 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : A194 — l'hôte doit pouvoir savoir **avant de publier** quelles dates le montage
-mixte peut servir. Construire l'horizon effectif et l'état du montage, et prouver par
-balayage que ce qui est annoncé est exactement ce que la requête accepte.
+Objectif : A196 — ce qui reste découvert point par point. Établir d'abord ce qui est
+réellement bornable, puis construire les bornes qui transforment un refus par point en
+un refus annonçable, sans jamais promettre plus que ce qui est vrai.
 
 ### Plan
 
-- [x] **P1** — passation, jeton, plan.
-- [x] **P2** — ADR-079 : ce que le contrôleur tient, ce que le montage exige, et pourquoi
-      l'annonce est une fonction séparée plutôt qu'un contrôle de plus dans `update`.
-- [x] **P3** — construire `mixed::horizon` et `mixed::plan`, `Controller::context`,
-      factoriser les contrôles indépendants des points depuis `sample_world_batch`.
-- [x] **P4** — le test qui compte : balayage d'instants, `state(t)` comparé à ce que la
-      séquence réelle (update puis requête à lot vide) fait vraiment.
-- [x] **P5** — les deux montages que la fixture n'atteint pas : fenêtre plus courte que
-      les impacts, et intersection vide. Fixture paramétrée par `mount(age, start)`.
-- [x] **P6** — recevoir dans la campagne `cycle_mixed`, avec bloc de mise en régime (A195).
-- [x] **P7** — livrable, rituel de fin, fusion `--ff-only`.
+- [x] **P1** — amorce, jeton, plan.
+- [ ] **P2** — inventaire : lire les trois conditions par point (domaine de B, emprise de
+      la pression, portée des impacts, pente totale, capacité) et écrire, pour chacune, ce
+      qui est bornable et dans quel sens. **Ne rien décider avant cet inventaire.**
+- [ ] **P3** — ADR-080, sur ce que l'inventaire aura montré.
+- [ ] **P4** — construire les bornes et leurs tests.
+- [ ] **P5** — le test qui compte : la borne confrontée au comportement réel sur un
+      balayage de points, dans les deux sens.
+- [ ] **P6** — recevoir en campagne, avec mise en régime (A195).
+- [ ] **P7** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
-Départ 6700773 = master ; trois copies coïncident (master, 29ef50, 2d3506), 5134cd archivée,
-c107bf sur la ligne S44. Worktree `claude/reprise-projet-2d3506`.
+Départ 6d77057 = master ; trois copies coïncidentes, 5134cd archivée, c107bf sur la ligne S44.
 
-Le problème, tel que S118 l'a constaté : `update(6 s)` réussit alors que les impacts expirent
-à 4 s. Le contrôleur valide **sa** fenêtre ; la requête mixte refuse ensuite sur
-`renewal_deadline`. Rien ne permet à l'hôte de le savoir avant de publier.
+Ce que S119 laisse : `mixed::{horizon, state}` couvrent le montage et l'instant, par une
+implémentation unique partagée avec la requête. Le reste — domaine, pente totale, capacité —
+dépend des **arguments** de la requête, donc aucune annonce ne peut le trancher sans recevoir
+les mêmes points. Ce qui est annonçable est une borne.
 
-Ce qui est disponible sans publication : `bound`, `impacts` (donc `renewal_deadline` et
-`loss_known`), et le contrôleur (donc sa fenêtre). Tout ce que `sample_world_batch` vérifie
-indépendamment des points est donc décidable avant publication — c'est ce qui rend
-l'équivalence annonçable *et* testable, et non une simple heuristique.
+Piste tenue pour probable, à vérifier en P2 : dans l'enveloppe de pente, seul le terme de B
+dépend du point ; les `slope_bound` des impacts et l'enveloppe de pression sont constants sur
+le lot. Leur somme est donc un **plancher** : si `max_slope` lui est inférieur, aucun point ne
+peut passer, et c'est annonçable sans voir un seul point.
 
-Piège à éviter : réimplémenter les contrôles dans l'annonce. Deux implémentations du même
-contrôle divergent (L137 est la même leçon, appliquée au code). Factoriser, ne pas recopier.
-
-P2 : ADR-079 actée. Choix figés — annonce dans `mixed` (qui seul connaît les deux couches),
-`horizon` rend Option car l intersection peut être vide, `state` a six variantes (une par
-cause de refus indépendante des points), et surtout : une seule implémentation interne que la
-requête traduit et que l annonce rend telle quelle. Ordre d évaluation conservé à l identique,
-donc aucun refus existant ne change de nature. `Controller::context()` à ajouter.
-Publication tardive laissée possible : coupler le contrôleur aux impacts figerait leur
-renouvellement, plus cher que le problème résolu.
-
-P3 : `mixed::{State, state, horizon}` et `classify` interne ; `sample_world_batch` consulte
-`classify` et traduit. `Controller::context()` ajouté. Les 154 tests core passent inchangés —
-c est la vérification qui comptait : aucun refus existant n a changé de nature.
-
-P4/P5 : 156 core + 93 harnais = 249 réussis, cinq ignorés ; les six tests mixtes passent aussi
-en release. Deux choses apprises en écrivant les tests, et qui vont au livrable :
-
-1. L'annonce donne **la première cause dans l'ordre de la requête**, pas l'ensemble des causes.
-   Avec des impacts qui expirent avant la fin de fenêtre, `OutsideWindow` n'est jamais rendu :
-   `ImpactsExpired` arrive d'abord. Il a fallu un montage à impacts longs (10 s) pour l'exercer.
-2. Sur un montage d'horizon vide, la cause annoncée **change de côté** selon la date — avant
-   l'ouverture de la fenêtre les impacts vivent encore, après ils sont éteints. Aucune annonce
-   ponctuelle ne révèle qu'il n'existe aucune date : seul `horizon` le dit. C'est la
-   justification des deux fonctions, et elle n'était pas dans l'ADR ; à y porter en note.
-
-P6 : campagne reçue. Hachages **inchangés** (6591ab360344f76e, b563610d1dd78ada) — le
-refactoring vers `classify` n'a rien changé numériquement, ce qui était l'enjeu.
-Annonce : 23 ns (1000 appels en 23,0 µs), contre 12,6 ms pour la préparation qu'elle évite.
-**A195 corrigé et vérifié** : avec le bloc de mise en régime, `update` 12,78 / `update_again`
-13,21 / `direct` 12,64 ms à 224×128 — l'écart de 15 à 28 % de S118 a disparu, sur trois
-exécutions. La mise en régime est donc la bonne correction, pas seulement une hypothèse.
-
-P7 : HORIZON-MIXTE-S119, note datée dans ADR-079, suivis A194/A195, A196, L208, journal,
-index, README, jeton rendu, fusion ff-only. Une phrase du livrable annonçait quel refus serait
-« le plus fréquent en pratique » : retirée, ce n'est pas mesuré.
-
-Pour S120 sans relire : ce qui reste tardif (A196) dépend des **arguments** de la requête, pas
-du montage — donc aucune annonce préalable ne peut le trancher sans recevoir les mêmes points.
-Ce qui est annonçable est une borne : pente maximale atteignable sur un lot, emprise du domaine.
-Et la mise en régime avant la première mesure est désormais dans `cycle_mixed` : la reprendre
-dans toute nouvelle campagne de coût, sinon le premier chiffre publié sera faux (A195).
+Leçon de S119 à ne pas perdre (L208) : une borne seulement prudente passerait un test de
+sûreté et serait inutile. Il faut dire dans quel sens elle est exacte, et le prouver.
