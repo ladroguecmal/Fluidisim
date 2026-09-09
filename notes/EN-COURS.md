@@ -65,7 +65,7 @@ Objectif : cycle WPRS/journal/WPJR/reprise jusqu’à B+pression, identité et c
 ### Plan
 
 - [x] **P1** — vérifier la passation et déclarer le plan.
-- [ ] **P2** — exécuter le cycle du virage aux deux résolutions et mesurer séparément les étapes.
+- [x] **P2** — exécuter le cycle du virage aux deux résolutions et mesurer séparément les étapes.
 - [ ] **P3** — publier résultats et limites ; rituel final et synchronisation.
 
 ### Notes de reprise
@@ -73,3 +73,6 @@ Objectif : cycle WPRS/journal/WPJR/reprise jusqu’à B+pression, identité et c
 Départ a98c74a, copies propres identiques. S110-1.
 Une source de virage, journal initial sans place, attente restaurée sur pool agrandi.
 Pas de composition multisource implicite ; comparaison de chaque bit avec construction directe.
+
+P2 : restart_pressure exécuté release,1152 points-temps identiques en bits.
+Cycles médians28,4023/17,0401 ms ; restauration~0,4 µs par moyenne de lot1000.
