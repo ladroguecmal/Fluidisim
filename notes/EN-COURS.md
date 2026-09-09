@@ -66,7 +66,7 @@ f64 indépendant, en contrôlant séparément convergence spectrale et angulaire
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seuls ; continuité de S125 sur master propre.
-- [ ] **P2** — construire une campagne release indépendante, spectre physique ADR-060,
+- [x] **P2** — construire une campagne release indépendante, spectre physique ADR-060,
       Bessel par intégrale angulaire f64 sans table ni PhaseQ32, raffinements séparés.
       Prévoir centre, rayons irréguliers, raccord Bessel, bord spatial et âge limite.
 - [ ] **P3** — exécuter et interpréter ; conserver tout refus. Rapport avec domaine exact,
@@ -87,3 +87,7 @@ Oracle : raffinements spectraux 512/1024/2048 ; angulaire 1024/2048 ; écarts no
 <=1e-6 (1 % du seuil de réception). Pas de division par la valeur locale près des zéros.
 Référence centre initial analytique ; zéro initial des vitesses ; défaut de signe volontaire
 sur vitesse pour vérifier que le verdict peut refuser. Aucune promesse de borne continue.
+
+P2 : receive_extended_impact.rs construit, compilation release réussie. Intégrales
+angulaires indépendantes et trois maillages spectraux. Centre analytique reçu à 4,64e-14.
+Première exécution lancée ; recevoir les résultats en P3 (processus 68746).
