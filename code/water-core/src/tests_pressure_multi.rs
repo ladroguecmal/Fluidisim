@@ -814,3 +814,79 @@ fn incremental_addition_is_exact_only_when_the_source_comes_last() {
         "l'ajout d'une source de plus grand identifiant doit reproduire la voie directe"
     );
 }
+/// S132, ADR-088 : le champ publié après admission est celui de la voie directe, **dans les
+/// deux configurations** — que la source s'insère en dernier, où le raccourci incrémental
+/// s'applique, ou au milieu, où il ne doit surtout pas s'appliquer. C'est cette égalité qui
+/// autorise l'optimisation à rester invisible.
+#[test]
+fn admission_matches_the_direct_field_wherever_the_source_lands() {
+    let p = paths();
+    let tiers = [Segment {
+        birth: SimTime(0),
+        duration_us: 2_000_000,
+        origin: [2.0, -1.0],
+        velocity: [1.0, 1.0],
+        pressure_pa: 5.0,
+    }];
+    let mut nodes = [Node::default(); 384];
+    let mut hn = [Node::default(); 192];
+    let full = bake(recipe(), &mut nodes).unwrap();
+    let half = full.half_into(&mut hn).unwrap();
+    let ctx = Context::new(settings(), &half).unwrap();
+    let t = SimTime(1_500_000);
+    let points = [[0.0; 2], [2.0, 1.0], [-8.0; 2], [12.0; 2], [5.5, -2.5]];
+
+    // Deux ordres d'arrivée pour le même journal final {1, 2, 3} : la troisième source
+    // admise est tantôt la dernière de l'ordre canonique, tantôt celle du milieu.
+    for (deja, ajoutee) in [([1u64, 2], 3u64), ([1, 3], 2)] {
+        let chemins = |id: u64| match id {
+            1 => &p[0][..],
+            2 => &p[1][..],
+            _ => &tiers[..],
+        };
+        let mut entries = [None; 3];
+        let mut j = Journal::new(1, &mut entries);
+        for id in deja {
+            j.admit_authenticated(Source::new(meta(id), chemins(id)).unwrap())
+                .unwrap();
+        }
+        let mut active = [Slot::default(); 192];
+        let mut spare = active;
+        let mut c = Controller::new(ctx, &half, &mut j, t, &mut active, &mut spare).unwrap();
+        let source = Source::new(meta(ajoutee), chemins(ajoutee)).unwrap();
+        assert_eq!(c.admit(source), Ok(Admission::Republished));
+
+        // Position réelle de la source ajoutée dans l'ordre canonique, pour que le test dise
+        // ce qu'il exerce et non ce qu'on suppose qu'il exerce.
+        let position = c
+            .journal()
+            .published()
+            .position(|s| s.metadata().id == ajoutee)
+            .unwrap();
+        assert_eq!(position + 1 == c.journal().published().count(), ajoutee == 3);
+
+        let apres = {
+            let f = c.current(t).unwrap();
+            let mut out = [Surface::default(); 5];
+            let mut work = out;
+            f.sample_batch(&ctx, t, &points, &mut work, &mut out).unwrap();
+            (
+                out.map(|s| vals(s).map(f32::to_bits)),
+                [f.energy_j(), f.power_w(), f.slope_envelope()].map(f32::to_bits),
+            )
+        };
+        let mut direct = [Slot::default(); 192];
+        let r = Prepared::from_journal(ctx, &half, c.journal(), t, &mut direct).unwrap();
+        let mut out = [Surface::default(); 5];
+        let mut work = out;
+        r.sample_batch(&ctx, t, &points, &mut work, &mut out).unwrap();
+        assert_eq!(
+            apres,
+            (
+                out.map(|s| vals(s).map(f32::to_bits)),
+                [r.energy_j(), r.power_w(), r.slope_envelope()].map(f32::to_bits)
+            ),
+            "source {ajoutee} en position {position} : le champ publié doit être celui de la voie directe"
+        );
+    }
+}

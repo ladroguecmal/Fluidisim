@@ -17,6 +17,13 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S132 :** [ADR-088](adr/ADR-088-admission-incrementale-exacte.md), admission incrémentale exacte ou pas du tout.
+[INCREMENTAL-S132](validation/INCREMENTAL-S132.md) : le raccourci ne s'applique **que** si la source s'insère en
+dernier, seul cas où l'ordre d'addition `f32` est préservé ; sinon recalcul. Résultat toujours celui de la voie
+directe — I-03 ne survivrait pas à un champ dépendant de l'ordre des admissions. Coût d'une admission ramené au
+prix d'un segment :5,03 ms au lieu de35,06 à sept segments publiés.262 tests/cinq ignorés, hachages inchangés.
+88 ADR,204 angles,17 invariants,6 spécifications,23 cas. Suite S133 : reconstruction repartant des coefficients, S132-1.
+
 **S131 :** [ADR-087](adr/ADR-087-sortie-de-saturation-annoncee.md), la capacité qui résout une attente s'annonce.
 [SORTIE-SATURATION-S131](validation/SORTIE-SATURATION-S131.md) : `required_capacity` évite un élargissement qui
 réussit sans sortir de la saturation. Élargissement et reprise **service maintenu, 0,1 µs** ; seule la

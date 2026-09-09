@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 01:34 +02:00
+JETON            : libre
+Battement        : 2026-09-10 01:47 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S132 — chemin incrémental contre reconstruction (S131-1)
-Dernière session : S131 — sortie de saturation reçue et chiffrée ;260 tests/cinq ignorés
-Session suivante : à fixer en fin de S132
+Session en cours : aucune
+Dernière session : S132 — admission incrémentale exacte ;262 tests/cinq ignorés
+Session suivante : S133 — reconstruction repartant des coefficients (S132-1)
 
 **Copie de travail S130** : worktree `claude/reprise-projet-2d3506`, remis en avance rapide sur
 master (e817d0e) au démarrage — il était resté à 52e80a5 et n'avait rien d'unique, donc aucun
@@ -180,6 +180,27 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S132 — 2026-09-10 :** [ADR-088](docs/adr/ADR-088-admission-incrementale-exacte.md),
+[INCREMENTAL-S132](docs/validation/INCREMENTAL-S132.md). S131-1 réalisée. Le coût de préparation
+est **linéaire** en segments (×7,01 à huit), donc une admission refaisait tout le travail déjà
+publié. L'ajout après coup est exact **si et seulement si** la source s'insère en dernier —
+0 point de contrôle différent sur 8, contre 8 sur 8 au milieu.
+**La première sonde était trop faible et concluait le contraire** : avec deux segments,
+l'addition `f32` est commutative ; il en faut trois pour que l'associativité joue. Elle aurait
+autorisé un raccourci faux dans tous les cas.
+Décision : incrémental si insertion finale, recalcul sinon, **résultat toujours celui de la voie
+directe** — un champ dépendant de l'ordre historique des admissions ferait tomber I-03.
+L'optimisation est invisible : rien n'est annoncé parce qu'il n'y a rien à annoncer.
+Le `Slot` porte la pression modale cumulée (+18 % sur les pools) ; recopie du pool28,5 µs,0,6 %
+d'un segment. Admission ramenée à **5,03 ms au lieu de35,06** à sept segments publiés.
+262 tests/cinq ignorés ; **hachages de campagne identiques à S118**.
+88 ADR,204 angles,17 invariants,6 spécifications,23 cas.
+Suite S133 : S132-1, la reconstruction d'ADR-087 pourrait repartir des coefficients de l'ancien
+contrôleur au lieu d'un pool vide, ramenant la fenêtre sans champ au coût d'un segment. **À
+mesurer** : transporter des coefficients d'un pool à l'autre n'existe pas, et la condition
+d'ordre doit être constatée. Transaction mixte, extension de fenêtre, S116-2, bilan mixte,
+durabilité et générateur physique restent ouverts.
 
 **S131 — 2026-09-10 :** [ADR-087](docs/adr/ADR-087-sortie-de-saturation-annoncee.md),
 [SORTIE-SATURATION-S131](docs/validation/SORTIE-SATURATION-S131.md). S130-1 réalisée.

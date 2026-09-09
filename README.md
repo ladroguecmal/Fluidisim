@@ -61,7 +61,7 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S131 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S132 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
@@ -160,6 +160,11 @@ son état antérieur (ADR-086, S130). La saturation est reçue comme état termi
 La sortie de saturation est reçue et chiffrée : `required_capacity` annonce ce qu'il faut pour que la copie
 et la reprise aboutissent, l'élargissement se fait **sans interrompre le service** (0,1 µs) et seule la
 reconstruction prive l'hôte de champ — une préparation,12,21/13,41 ms, incompressible (ADR-087, S131).
-Suite : un chemin incrémental qui ajouterait la source au champ publié au lieu de tout recalculer, S131-1.
-87 ADR,204 angles,17 invariants,6 spécifications,23 cas.
+Une admission ajoute désormais la source au champ publié au lieu de tout recalculer — mais **seulement**
+quand elle s'insère en dernier, seul cas où l'ordre d'addition `f32` est préservé ; sinon elle recalcule
+(ADR-088, S132). Le résultat est celui de la voie directe dans les deux cas, sans quoi deux hôtes ayant admis
+les mêmes sources dans un ordre différent auraient des champs différents. Coût ramené au prix d'un segment :
+5,03 ms au lieu de35,06 à sept segments publiés.
+Suite : faire repartir la reconstruction des coefficients déjà calculés, S132-1.
+88 ADR,204 angles,17 invariants,6 spécifications,23 cas.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

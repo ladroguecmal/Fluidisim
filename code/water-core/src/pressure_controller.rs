@@ -144,13 +144,33 @@ impl<'p, 'v, 'n, 'j, 's> Controller<'p, 'v, 'n, 'j, 's> {
             Err(e) => return Err(AdmitError::Journal(e)),
         }
         // Le journal est en avance sur le champ : soit le recalcul aboutit, soit on revient.
-        let p = match Prepared::from_journal(
-            self.context,
-            self.spectrum,
-            self.journal,
-            self.time,
-            self.spare,
-        ) {
+        // ADR-088 : quand la source s'insère en dernier, l'ordre d'accumulation des segments
+        // déjà publiés est inchangé, et lui ajouter les nouveaux donne exactement le champ de
+        // la voie directe. Sinon l'ordre change, et il faut tout refaire. Le résultat est le
+        // même dans les deux cas — c'est l'unique raison pour laquelle ce raccourci est
+        // permis, et pourquoi rien ne l'annonce.
+        let en_dernier = at + 1 == self.journal.published().count();
+        let prepared = if en_dernier {
+            // Travailler sur la réserve, jamais sur le champ publié : un échec doit laisser
+            // la publication intacte, comme toute transaction d'ADR-086.
+            self.spare[..self.count].copy_from_slice(&self.active[..self.count]);
+            Prepared::add_source(
+                self.context,
+                self.spectrum,
+                &source,
+                self.time,
+                &mut self.spare[..self.count],
+            )
+        } else {
+            Prepared::from_journal(
+                self.context,
+                self.spectrum,
+                self.journal,
+                self.time,
+                self.spare,
+            )
+        };
+        let p = match prepared {
             Ok(p) => p,
             Err(e) => {
                 self.journal.undo_last_admit(at);

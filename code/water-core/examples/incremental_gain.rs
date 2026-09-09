@@ -81,7 +81,22 @@ fn main() {
         }
         println!("{ligne}");
     }
+    // La seule composante que l'admission incrémentale ajoute et que le tableau ci-dessus ne
+    // couvre pas : la recopie du pool actif vers la réserve, qui préserve la transaction.
+    for (radial, angular) in [(224usize, 128usize), (256, 128)] {
+        let n = radial * angular / 2;
+        let source = vec![Slot::default(); n];
+        let mut cible = vec![Slot::default(); n];
+        let recopie = measure(|| {
+            cible.copy_from_slice(&source);
+            black_box(cible.len());
+        });
+        println!(
+            "{radial}x{angular} recopie_du_pool_us={:.1} ({} slots)",
+            recopie[1], n
+        );
+    }
     println!();
-    println!("Lecture : si le coût croît linéairement, une admission incrémentale ramènerait");
-    println!("le coût d'une source ajoutée à celui de n=1, quel que soit le nombre déjà publié.");
+    println!("Lecture : le coût croît linéairement avec le nombre de segments, donc une");
+    println!("admission incrémentale ramène toute admission au coût de n=1, plus la recopie.");
 }

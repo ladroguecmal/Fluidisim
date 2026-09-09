@@ -6855,3 +6855,46 @@ Aucun angle mort ni leçon distincte — la session applique A195 et le motif d'
 les mêmes sources plus une. La superposition modale étant linéaire (S112), un chemin incrémental
 supprimerait la fenêtre et accélérerait aussi l'admission ordinaire. **À mesurer avant de
 décider** : le gain semble atteignable, l'identité en bits avec la voie directe peut-être pas.
+
+---
+
+## S132 — 2026-09-10 — Admission incrémentale : exacte ou pas du tout
+
+**Entrée :** jeton libre à 357b052, trois copies coïncidentes. S131-1.
+**Produit :** [ADR-088](../docs/adr/ADR-088-admission-incrementale-exacte.md),
+[INCREMENTAL-S132](../docs/validation/INCREMENTAL-S132.md), la sonde `incremental_gain` et
+`spectral_pressure::add_segments`.
+**Deux mesures décidaient, et la première sonde était trop faible.** Le coût de préparation est
+linéaire en segments : ×7,01 à huit, 5,00 ms par segment. Et l'ajout après coup est exact **si
+la source vient en dernier** : 0 point de contrôle différent sur 8, contre 8 sur 8 au milieu.
+Mais la première version de la sonde n'utilisait que **deux** segments — et avec deux termes
+l'addition `f32` est commutative. Elle concluait que l'ordre n'importe pas, ce qui aurait
+autorisé un raccourci faux dans tous les cas. Il en faut trois pour que l'associativité joue.
+**Décision structurante :** incrémental **si et seulement si** insertion finale, sinon recalcul
+complet — le résultat étant celui de la voie directe dans les deux cas. Un champ dépendant de
+l'ordre historique des admissions donnerait deux résultats pour un même journal, et le
+déterminisme bit à bit d'**I-03** ne survivrait pas à deux hôtes ayant admis dans un ordre
+différent. L'optimisation est donc **invisible** : rien n'est annoncé, parce qu'il n'y a rien à
+annoncer. C'est l'inverse d'ADR-079 et ADR-080, et pour la même raison de fond.
+**Construction :** le `Slot` porte la pression modale cumulée (+18 % sur les pools) — la
+puissance en dépend et la reconstituer coûterait ce qu'on évite. `add_segments` repart des
+coefficients présents et refait les bilans en entier, Kahan dans le même ordre. La transaction
+d'ADR-086 tient : recopie du pool actif vers la réserve avant ajout, **28,5 µs**, 0,6 % d'un
+segment.
+**Réception :** le champ publié est celui de la voie directe dans les deux ordres d'arrivée, la
+position réelle étant vérifiée et non supposée. **Test vérifié comme témoin** : raccourci forcé,
+il échoue sur le cas du milieu. Les tests d'ADR-086 exercent désormais le chemin incrémental sans
+avoir été modifiés. 169 core + 93 harnais = **262 réussis, cinq ignorés** ; ciblés aussi en
+release ; **hachages de campagne identiques à S118** — le résultat n'a pas bougé, et c'est la
+propriété centrale.
+**Chiffres :** une admission coûte désormais un segment plus la recopie — 5,03 ms au lieu de
+35,06 ms à sept segments publiés, facteur 6,9. Le gain croît avec la charge.
+**Limites :** la reconstruction d'ADR-087 n'est pas accélérée, aucun mode dégradé, aucun retrait.
+Un montage de sonde a d'abord été refusé parce que `prepare` exige un chemin **contigu** : une
+suite de segments identiques n'en est pas un.
+88 ADR, 204 angles, 17 invariants, 6 spécifications, 23 cas. Invariants relus : I-03 est
+précisément ce que la condition d'exactitude protège ; aucun n'est invalidé.
+**Suite S133 :** S132-1 — la reconstruction après élargissement pourrait repartir des
+coefficients de l'ancien contrôleur, ce qui ramènerait la fenêtre sans champ au coût d'un
+segment. À mesurer : transporter des coefficients d'un pool à l'autre n'existe pas, et la
+condition d'ordre doit être constatée dans les cas réels, pas supposée.

@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S132 — en cours
+Session : S132 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : S131-1 — une admission recalcule tout le champ alors que la superposition modale
 est linéaire. Mesurer si un chemin incrémental est **exact** et ce qu'il rapporte, **puis**
@@ -75,10 +75,10 @@ décider. Renoncer est une issue légitime.
          n'est pas stockée dans le `Slot`, or la puissance en dépend ;
       3. le gain réel, qui vaut au mieux le rapport du nombre de sources.
 - [x] **P3** — ADR-088 : incremental si et seulement si insertion finale, resultat toujours celui de la voie directe.
-- [ ] **P4** — construire ce que la décision retient.
-- [ ] **P5** — recevoir : identité, refus, et hachages de campagne.
-- [ ] **P6** — mesurer le gain effectif.
-- [ ] **P7** — livrable, rituel de fin, fusion `--ff-only`.
+- [x] **P4** — pression cumulée dans le `Slot`, `add_segments`, branchement conditionnel dans `admit`.
+- [x] **P5** — champ identique à la voie directe dans les deux ordres d'arrivée ; test vérifié comme témoin.
+- [x] **P6** — 5,03 ms au lieu de 35,06 à sept segments publiés ; recopie 28,5 µs.
+- [x] **P7** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -113,3 +113,21 @@ Le resultat est alors toujours celui de la voie directe — sans quoi deux hotes
 memes sources dans un ordre different auraient des champs differents, et I-03 ne survivrait pas.
 Prix : le Slot doit porter la pression modale cumulee (+18 % sur les pools) car la puissance en
 depend et la reconstituer couterait ce qu on cherche a eviter.
+
+P4-P7 : ADR-088, INCREMENTAL-S132, journal, index, README, REPRISE, jeton rendu, ff-only.
+262 tests/cinq ignorés, hachages inchangés. Aucun angle ni leçon nouveaux — la session applique
+L211 (témoin) et la discipline de mesure de L209/L210.
+
+Deux écueils évités, à retenir :
+1. J'ai failli ajouter deux méthodes publiques au contrôleur pour instrumenter un banc. Retiré :
+   les chiffres qui décidaient étaient déjà accessibles par l'API publique (`Prepared::build` sur
+   des chemins de 1 à 8 segments). Ne pas élargir une API pour une mesure.
+2. `prepare` exige un chemin **contigu** ; une suite de segments identiques est refusée. La sonde
+   de coût mesure donc une trajectoire réelle découpée.
+
+Pour S133 sans relire : S132-1 veut faire repartir la reconstruction d'ADR-087 des coefficients
+déjà calculés. Il faudrait transporter les slots d'un pool à l'autre (`copy_from_slice` suffit,
+les pools ont la même taille si la recette est la même) puis appeler `add_segments` pour la seule
+source reprise. Condition d'ordre : la source en attente doit avoir l'identifiant le plus grand,
+ce qui n'est **pas** garanti — le vérifier avant, et retomber sur la reconstruction complète
+sinon, exactement comme `admit` le fait déjà.

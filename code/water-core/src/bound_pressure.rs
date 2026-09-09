@@ -151,6 +151,46 @@ impl<'a> Prepared<'a> {
             slope_envelope,
         })
     }
+    /// ADR-088 : ajouter une source à un champ déjà préparé, dans un pool qui en porte la
+    /// copie. **Réservé au cas où la source vient en dernier dans l'ordre canonique** : c'est
+    /// à cette condition que le résultat est celui de la voie directe, au bit près, et
+    /// l'appelant en répond. Les mêmes contrôles de contexte et d'instant qu'à la préparation.
+    pub(crate) fn add_source(
+        context: Context,
+        spectrum: &HalfSpectrum<'_>,
+        source: &crate::pressure_source::Source<'_>,
+        time: SimTime,
+        pool: &'a mut [Slot],
+    ) -> Result<Self, Error> {
+        if !same_recipe(context.recipe, spectrum.recipe()) || !context.matches(&source.context()) {
+            return Err(Error::Context);
+        }
+        let s = context.settings;
+        if time < s.start || time > s.end {
+            return Err(Error::Time);
+        }
+        let field = spectral_pressure::add_segments(
+            spectrum.nodes(),
+            source.segments().iter().copied(),
+            s.gravity,
+            s.density,
+            time,
+            s.end,
+            s.min,
+            s.max,
+            pool,
+        )
+        .map_err(Error::Preparation)?;
+        let slope_envelope = field
+            .slope_envelope()
+            .map_err(|e| Error::Preparation(spectral_pressure::PrepareError::Calculation(e)))?;
+        Ok(Self {
+            context,
+            time,
+            field,
+            slope_envelope,
+        })
+    }
     /// Pool candidat modifiable au refus, aucune vue partielle retournée.
     /// Les segments sont déclarés dans le repère du contexte ; ils ne sont pas rebasés.
     pub fn build(

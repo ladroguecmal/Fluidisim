@@ -15,6 +15,9 @@ pub struct Slot {
     weighted_k: [f32; 2],
     weight: f32,
     response: Response,
+    /// ADR-088 : pression modale cumulée, conservée pour que l'admission incrémentale
+    /// puisse recalculer la puissance sans refaire une réponse modale par segment.
+    pressure: Complex,
     magnitude: f32,
 }
 #[derive(Clone, Copy, Debug, Default)]
@@ -204,8 +207,98 @@ pub(crate) fn prepare_segments<'a>(
             weighted_k: [node.weight * node.k[0], node.weight * node.k[1]],
             weight: node.weight,
             response: total,
+            pressure,
             magnitude,
         };
+    }
+    if !energy.is_finite() || !power.is_finite() {
+        return Err(Error::NonFinite.into());
+    }
+    Ok(Field {
+        slots: &pool[..nodes.len()],
+        min,
+        max,
+        phase_safe,
+        energy_j: energy,
+        power_w: power,
+    })
+}
+/// ADR-088 : ajouter des segments à un champ **déjà préparé**, dans le pool qui le porte.
+/// Exact au bit près à une condition, qui n'est pas vérifiable ici et qui incombe à
+/// l'appelant : les segments ajoutés doivent venir **après** tous ceux déjà accumulés dans
+/// l'ordre canonique. `prepare_segments` accumule par nœud, segment après segment, en `f32` ;
+/// c'est le même ordre d'addition qui est repris, et rien d'autre ne le garantit.
+///
+/// Les bilans sont refaits en entier depuis les coefficients cumulés — sommation de Kahan sur
+/// les nœuds, dans le même ordre — donc identiques à ceux d'une préparation complète.
+pub(crate) fn add_segments<'a>(
+    nodes: &[Node],
+    segments: impl Iterator<Item = Segment> + Clone,
+    gravity: f32,
+    density: f32,
+    now: SimTime,
+    end: SimTime,
+    min: [f32; 2],
+    max: [f32; 2],
+    pool: &'a mut [Slot],
+) -> Result<Field<'a>, PrepareError> {
+    if pool.len() < nodes.len() {
+        return Err(PrepareError::Capacity);
+    }
+    let mut energy = 0.0;
+    let mut correction = 0.0;
+    let mut power = 0.0;
+    let mut power_correction = 0.0;
+    let mut phase_safe = true;
+    for (node, slot) in nodes.iter().zip(pool.iter_mut()) {
+        if !node.transform.is_finite()
+            || node.transform < 0.0
+            || !node.weight.is_finite()
+            || node.weight <= 0.0
+        {
+            return Err(Error::Domain.into());
+        }
+        let mut total = slot.response;
+        let mut pressure = slot.pressure;
+        for s in segments.clone() {
+            let horizon = end.0.checked_sub(s.birth.0).ok_or(Error::Time)?;
+            let source = Segment {
+                pressure_pa: s.pressure_pa * node.transform,
+                ..s
+            };
+            let mode = ModalPressure::new(node.k, gravity, density, source, horizon)?;
+            let r = mode.sample(now)?;
+            let p = mode.pressure(now)?;
+            pressure.re += p.re;
+            pressure.im += p.im;
+            total.eta.re += r.eta.re;
+            total.eta.im += r.eta.im;
+            total.velocity.re += r.velocity.re;
+            total.velocity.im += r.velocity.im;
+        }
+        let magnitude = slot.magnitude;
+        let contribution = density
+            * 0.5
+            * node.weight
+            * (gravity * (total.eta.re * total.eta.re + total.eta.im * total.eta.im)
+                + (total.velocity.re * total.velocity.re + total.velocity.im * total.velocity.im)
+                    / magnitude);
+        let y = contribution - correction;
+        let next = energy + y;
+        correction = (next - energy) - y;
+        energy = next;
+        let work_rate =
+            -node.weight * (pressure.re * total.velocity.re + pressure.im * total.velocity.im);
+        let y = work_rate - power_correction;
+        let next = power + y;
+        power_correction = (next - power) - y;
+        power = next;
+        for axis in 0..2 {
+            let bound = slot.turns[axis].abs() * min[axis].abs().max(max[axis].abs());
+            phase_safe &= bound.is_finite() && bound < 1_048_576.0;
+        }
+        slot.response = total;
+        slot.pressure = pressure;
     }
     if !energy.is_finite() || !power.is_finite() {
         return Err(Error::NonFinite.into());
@@ -416,6 +509,7 @@ mod tests {
             weighted_k: [1.0; 2],
             weight: 1.0,
             response: Response::default(),
+            pressure: Complex::default(),
             magnitude: 1.0,
         }];
         let g = Field {
@@ -574,6 +668,7 @@ mod tests {
                 },
                 ..Response::default()
             },
+            pressure: Complex::default(),
             magnitude: 1.0,
         }];
         let f = Field {
