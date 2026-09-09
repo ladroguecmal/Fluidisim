@@ -6681,3 +6681,33 @@ relus, aucun invariant invalidé. 85 ADR,204 angles,17 invariants,6 spécificati
 générateur physique et calibration B2, profondeur finie, durabilité. Aucun arbitrage humain.
 **Suite S127 :** S126-1, dimensionner portée/horizon ensemble puis recevoir un paquet propagé,
 ou constater la limite de N≤256. Travail sur master, aucun worktree créé, jeton rendu.
+
+---
+
+## S127 — 2026-09-09 — Transport au-delà de32 mètres reçu
+
+**Entrée :** continuation demandée, master propre760a9f0, jeton libre. A204/S126-1.
+**Produits :** transport_extended_impact.rs, oracle S126 extrait dans support/radial_reference.rs,
+TRANSPORT-ETENDU-S127. Bibliothèque inchangée.
+**Dimensionnement :** la borne donne R+cg_max*T<=N*lambda/6. Anciens N128/R64 et N256/R128
+refusés aux temps R/cg_max36,22/72,44 s ; montage N256/R80/48 s admis,164,82 m consommés
+sur170,67. λ4/E0,01/milieu S126 inchangés, TTL source4 s conservé (ADR-066).
+**Résultat :** énergie de référence hors32 m/E0 :1,30e-7 initialement,0,04337 à24 s,
+0,999852 à48 s. Rayon moyen1,1603→26,7098→53,4157 m. Énergie totale R80/E0 à48 s0,999865.
+Densité physique avec profondeur intégrée exactement par1/(ki+kj), positive ; raffinements
+radial/spectral du disque et de l'anneau reçus. Aucun déficit compensé.
+**Candidat :**2187 points-temps, sept composantes, erreur normalisée<=7,13e-7 pour1e-4 ;
+part potentielle intégrée contre référence<=5,63e-7 E0. Le bilan cinétique total du candidat
+n'est pas mesuré, seulement celui de la référence. Les grandeurs reçues restent distinguées.
+**Décision :** S126-1 réalisée sur fixture ; A204 traitée dans ce périmètre. Pas de portée128 m
+reçue, pas d'ADR nouveau, défaut N64 conservé. A203 reste partielle pour les autres domaines.
+**Vérification :** deux campagnes transport release15,94/15,22 s ; S126 rejouée après extraction,
+valeurs conservées. Assertions reçues, compilation sans nouvel avertissement. Suite256/cinq
+ignorés reçue S125 non relancée ; aucun calcul de production ni test existant modifié.
+**Rituel :** suivi A204, actions et passation actualisés ; L215 appliquée, aucune nouvelle leçon
+générale distincte trouvée.85 ADR,204 angles,17 invariants,6 spécifications,23 cas inchangés.
+I-03/I-06/I-08/I-14/I-15 relus, aucun invariant invalidé ; l'oracle alloue hors runtime.
+**Non fait :** bilan cinétique candidat étendu, chemin hôte de ce montage, autres paramètres,
+calibration B2, profondeur finie, mélange pression, durabilité disque. Aucun arbitrage humain.
+**Suite S128 :** S127-1, cycle LiveWater B+W N256/R80/horizon48 : renouvellement au-delà du
+TTL4, requêtes24/48 s, sauvegarde/reprise même N, identité directe et coût. Master seul avancé.

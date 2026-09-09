@@ -1707,3 +1707,10 @@ paramètres et précision relative des queues non reçus. Le transport effectif 
   R/c_g,max=36,22/72,44 s. Une simple prolongation serait refusée. Dimensionner portée et
   horizon ensemble, puis mesurer le transport ; ne pas lire le succès spatial comme une
   réception de portée utile. Porteur : S126-1, prochaine session S127.
+
+**Suivi A204 — S127 : traitée sur fixture.** TRANSPORT-ETENDU-S127 dimensionne ensemble
+N256/R80/horizon48, λ4, puis reçoit99,985 % de l'énergie de référence entre32 et80 m à48 s,
+contre1,30e-7 E0 au départ. Rayon moyen53,42 m. Les sept composantes du candidat concordent
+avec l'oracle ; bilan total de référence et part potentielle du candidat reçus, pas son bilan
+cinétique complet. Les anciennes demandes64/128 m aux temps de groupe restent refusées.
+Cycle hôte transporté encore ouvert : S127-1. A203 demeure partielle pour les autres domaines.

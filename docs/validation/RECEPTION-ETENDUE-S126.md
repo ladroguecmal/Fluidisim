@@ -106,3 +106,8 @@ Le critère spatial reçu ici ne remplace pas ce test de transport.
 85 ADR, 204 angles, 17 invariants, 6 spécifications, 23 cas. Suite256/cinq ignorés vérifiée
 en S125, non relancée : bibliothèque et tests existants inchangés. La nouvelle campagne
 release exécute ses propres assertions ; compilation sans nouvel avertissement.
+
+> **Suivi S127 — 2026-09-09 :** S126-1 réalisée sur fixture dans
+> [TRANSPORT-ETENDU-S127](TRANSPORT-ETENDU-S127.md). N256/R80/horizon48 admis, transport
+> hors32 m reçu ; anciens couples64/128 aux temps de groupe toujours refusés. A204 traitée
+> dans ce périmètre ; cycle hôte du montage ouvert sous S127-1.

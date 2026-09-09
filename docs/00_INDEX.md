@@ -17,6 +17,15 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S127 :** [TRANSPORT-ETENDU-S127](validation/TRANSPORT-ETENDU-S127.md), domaine N256/R80/48 s
+admis ;99,985 % de l'énergie de référence entre32 et80 m à48 s, rayon moyen53,42 m.
+2187 points-temps du candidat reçus, erreur normalisée<=7,13e-7. Bilan total de référence
+et potentiel du candidat reçus ; cinétique totale du candidat non mesurée. **S126-1 réalisée
+sur fixture, A204 traitée dans ce périmètre.** S126 rejouée après extraction de l'oracle.
+Suite S128 : S127-1, cycle LiveWater B+W transporté, renouvellement/reprise/coût.
+85 ADR,204 angles,17 invariants,6 spécifications,23 cas ; bibliothèque inchangée.
+
+
 **S126 :** [RECEPTION-ETENDUE-S126](validation/RECEPTION-ETENDUE-S126.md), oracle indépendant
 f64 et raffinements séparés. N128/R64 et N256/R128 reçus sur1350 points-temps, sept composantes,
 erreur normalisée<=4,44e-7 pour1e-4 annoncé. **S125-1 réalisée sur fixture, A203 partielle.**
@@ -441,6 +450,15 @@ parfaitement stable ne pouvait pas distinguer.
 | [`../notes/JOURNAL.md`](../notes/JOURNAL.md) | historique des sessions, points de reprise |
 
 ## État d'avancement
+
+**S127 :** [TRANSPORT-ETENDU-S127](validation/TRANSPORT-ETENDU-S127.md), domaine N256/R80/48 s
+admis ;99,985 % de l'énergie de référence entre32 et80 m à48 s, rayon moyen53,42 m.
+2187 points-temps du candidat reçus, erreur normalisée<=7,13e-7. Bilan total de référence
+et potentiel du candidat reçus ; cinétique totale du candidat non mesurée. **S126-1 réalisée
+sur fixture, A204 traitée dans ce périmètre.** S126 rejouée après extraction de l'oracle.
+Suite S128 : S127-1, cycle LiveWater B+W transporté, renouvellement/reprise/coût.
+85 ADR,204 angles,17 invariants,6 spécifications,23 cas ; bibliothèque inchangée.
+
 
 **S126 :** [RECEPTION-ETENDUE-S126](validation/RECEPTION-ETENDUE-S126.md), oracle indépendant
 f64 et raffinements séparés. N128/R64 et N256/R128 reçus sur1350 points-temps, sept composantes,

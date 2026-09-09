@@ -1228,3 +1228,12 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
   réellement propagé au loin ; confronter temps de groupe et borne numérique, construire
   un montage N≤256 admissible ou constater sa limite, puis référence et bilan de transport.
   Ne pas assimiler l'exactitude des queues faibles à une portée utile validée.
+
+### S127 — Transport étendu reçu sur fixture
+
+- **S126-1 : réalisée sur fixture, A204 traitée dans ce périmètre.** N256/R80/horizon48,
+  transport de la majorité d'énergie hors32 m, référence physique et sept composantes du
+  candidat reçues. TRANSPORT-ETENDU-S127. Bilan cinétique du candidat étendu encore ouvert.
+- **S127-1 : ouverte, S128.** Cycle hôte LiveWater B+W de ce montage : renouvellement
+  au-delà du TTL4 s, requêtes24/48 s, sauvegarde/restauration même N, identité avec les
+  champs directs et coût du cycle. Fenêtres et mélange avec pression restent distincts.

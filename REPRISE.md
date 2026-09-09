@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-09 18:49 +02:00
+JETON            : libre
+Battement        : 2026-09-09 18:50 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S127 — transport radial et horizon
-Dernière session : S126 — champ étendu reçu sur fixture, transport encore ouvert
-Session suivante : S127 — portée et horizon du transport (S126-1, A204)
+Session en cours : aucune
+Dernière session : S127 — transport au-delà de32 m reçu sur fixture
+Session suivante : S128 — cycle LiveWater transporté et coût (S127-1)
 
 *Le battement de fin de S118 disait 15:05 : une heure estimée, pas relevée. Corrigée ici.
 Un battement dans le futur ferait croire à une session active — le relever, jamais l'écrire de mémoire.*
@@ -176,6 +176,23 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S127 — 2026-09-09 :** [TRANSPORT-ETENDU-S127](docs/validation/TRANSPORT-ETENDU-S127.md).
+La borne se réduit à R+cg_max*T<=N*lambda/6. N256/R80/horizon48 admis ; anciens
+N128/R64 et N256/R128 refusés aux temps de groupe36,22/72,44 s. TTL4 inchangé.
+À48 s,99,985 % de l'énergie de référence se trouve entre32 et80 m, rayon moyen53,42 m,
+énergie totale du disque0,999865 E0. Référence physique positive, raffinements reçus.
+2187 points-temps, sept composantes candidat reçues<=7,13e-7 normalisé ; sa part potentielle
+intégrée concorde<=5,63e-7 E0. **Bilan cinétique total du candidat non mesuré.**
+**S126-1 réalisée sur fixture, A204 traitée dans ce périmètre.** A203 reste partielle.
+Deux campagnes transport release reçues ; oracle S126 partagé et campagne rejouée,
+valeurs conservées. Bibliothèque inchangée ; suite256/cinq ignorés reçue S125 non relancée.
+85 ADR,204 angles,17 invariants,6 spécifications,23 cas. L215 appliquée, aucun ADR nouveau.
+**Suite S128 : S127-1**, cycle LiveWater B+W N256/R80/horizon48 : renouvellement au-delà du
+TTL4, requêtes24/48 s, sauvegarde/restauration même N, identité directe et coût du cycle.
+Mélange pression, bilan cinétique candidat, sources/calibration B2, profondeur finie et disque ouverts.
+Master seul avancé ; anciennes copies propres en retard à synchroniser avant reprise.
+
 
 **S126 — 2026-09-09 :** [RECEPTION-ETENDUE-S126](docs/validation/RECEPTION-ETENDUE-S126.md).
 Oracle f64 indépendant sans table ni PhaseQ32, raffinements spectraux512/1024/2048 et

@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S127 — en cours
+Session : S127 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S126-1 / A204 — dimensionner ensemble rayon et horizon, puis recevoir
 le transport d'énergie radial loin de la source sans dépasser N256.
@@ -72,7 +72,7 @@ le transport d'énergie radial loin de la source sans dépasser N256.
 - [x] **P3** — recevoir surface et transport : sept composantes contre référence,
       densité physique positive intégrée en profondeur (formule S78) et rayon moyen.
       Raffiner spectre, angles et quadrature spatiale séparément ; rapport fidèle aux refus.
-- [ ] **P4** — vérifications, rituel de fin, registres/actions/index/passation,
+- [x] **P4** — vérifications, rituel de fin, registres/actions/index/passation,
       jeton libre et commit propre.
 
 ### Notes de reprise
@@ -98,3 +98,7 @@ S126 rejouée après extraction, valeurs conservées. Raffinements locaux de l'a
 Surface max7,13e-7 ; potentiel candidat/ref max5,63e-7 E0 ; bilan total de référence seul.
 S126-1 réalisée sur fixture, A204 traitée dans ce périmètre. S127-1 : cycle LiveWater B+W
 N256/R80/horizon48 avec renouvellement, sauvegarde/reprise et coût. Aucun ADR nouveau.
+
+P4 : journal, suivi A204, actions, index/README/REPRISE et S126 actualisés.
+Décomptes inchangés85/204/17/6/23, aucun invariant invalidé. L215 appliquée ; pas de
+nouvelle leçon distincte. Jeton rendu, master seul avancé. Suite S128 : S127-1.
