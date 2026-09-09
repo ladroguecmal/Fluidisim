@@ -74,7 +74,7 @@ un refus annonçable, sans jamais promettre plus que ce qui est vrai.
 - [x] **P4** — prédicats descendus dans Background, RadialImpact et Field ; `mixed::admits` les compose, `mixed::slope_floor` somme la part constante.
 - [x] **P5** — le test qui compte : `admits` confronté au comportement réel sur douze
       points aux trois frontières, plus le plancher de pente sous et au-dessus.
-- [ ] **P6** — recevoir en campagne, avec mise en régime (A195).
+- [x] **P6** — campagne : lot mixte refusé en entier puis sauvé par filtrage, coûts mesurés.
 - [ ] **P7** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
@@ -110,3 +110,10 @@ le `seen[2] == 0` de S119 avait révélé sur OutsideWindow).
 Précision à porter dans l ADR : un refus géométrique se nomme `Domain` **ou**
 `InvalidBackground` — pour le fond, quand la conversion monde/local a réussi mais que la
 borne f32 ne passe pas. L ADR-080 annonçait `Domain` seul ; à corriger par note datée.
+
+P6 : **hachages inchangés** (6591ab360344f76e, b563610d1dd78ada) — poser les prédicats dans les
+trois couches n a rien changé numériquement, c était l enjeu. Filtrage de 64 points : 2,5 µs,
+soit ~39 ns par point, contre 35,6 ms pour la requête qu il sauve — rapport ~14 000.
+Plancher de pente 0,0074634 (224x128) et 0,0074633 (256x128), contre max_slope 0,1 : le montage
+consomme 7,5 % du budget de pente sans aucun point. Non contraignant ici, mais chiffré.
+Mise en régime toujours efficace : update 12,63 / update_again 12,69 / direct 12,73 ms.

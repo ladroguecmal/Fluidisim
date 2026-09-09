@@ -424,6 +424,42 @@ fn main() {
             )
             .unwrap();
         }
+        // S120 : l'atomicité fait perdre le lot entier pour un seul point hors domaine.
+        // Filtré par `admits`, le même lot passe — c'est le gain concret d'ADR-080.
+        {
+            let view = controller.current(SimTime(1_500_000)).unwrap();
+            let mut batch = bench.clone();
+            batch.push(to_world([13.0, 0.0]));
+            batch.push(to_world([12.0, 12.0]));
+            assert!(prepared_water::mixed::sample_world_batch(
+                &bound,
+                &impacts,
+                Some(&view),
+                SimTime(1_500_000),
+                &batch,
+                0.1,
+                &mut scratch,
+                &mut output
+            )
+            .is_err());
+            let kept: Vec<_> = batch
+                .iter()
+                .copied()
+                .filter(|p| prepared_water::mixed::admits(&bound, &impacts, Some(&view), *p))
+                .collect();
+            assert_eq!(kept.len(), bench.len());
+            prepared_water::mixed::sample_world_batch(
+                &bound,
+                &impacts,
+                Some(&view),
+                SimTime(1_500_000),
+                &kept,
+                0.1,
+                &mut scratch,
+                &mut output,
+            )
+            .unwrap();
+        }
         // A195 : mettre la machine en régime avant la PREMIÈRE mesure. Sans ce bloc, S118
         // lisait un surcoût de 15 à 28 % sur `update` qui n'était que sa position dans la
         // séquence. Le témoin `update_again_us`, en fin de série, dit si cela a suffi.
@@ -463,9 +499,9 @@ fn main() {
         let unchanged_us = measure(|| {
             black_box(controller.update(black_box(SimTime(1_500_000))).unwrap());
         });
-        let query_us = {
+        let (query_us, admits64_us, floor) = {
             let view = controller.current(SimTime(1_500_000)).unwrap();
-            measure(|| {
+            let q = measure(|| {
                 prepared_water::mixed::sample_world_batch(
                     &bound,
                     &impacts,
@@ -478,7 +514,20 @@ fn main() {
                 )
                 .unwrap();
                 black_box(&output[..64]);
-            })
+            });
+            let a = measure(|| {
+                let mut kept = 0usize;
+                for p in black_box(&bench) {
+                    kept += prepared_water::mixed::admits(&bound, &impacts, Some(&view), *p)
+                        as usize;
+                }
+                black_box(kept);
+            });
+            (
+                q,
+                a,
+                prepared_water::mixed::slope_floor(&impacts, Some(&view)),
+            )
         };
         let reference: Vec<_> = output[..64].iter().copied().map(bits).collect();
         // Publié à 1,5 s en entrant : le premier tour doit viser l autre instant.
@@ -560,7 +609,7 @@ fn main() {
             assert_eq!(controller.update(t), Ok(Update::Published));
         });
         println!(
-            "{radial}x{angular} announce_1000_us={announce_ns:?} update_us={update_us:?} update_again_us={update_again_us:?} \
+            "{radial}x{angular} slope_floor={floor} admits64_us={admits64_us:?} announce_1000_us={announce_ns:?} update_us={update_us:?} update_again_us={update_again_us:?} \
 unchanged_us={unchanged_us:?} \
 mixed_query64_us={query_us:?} step_update_query_us={step_us:?} direct_prepare_us={direct_us:?} \
 direct_alt_time_us={direct_alt_time_us:?} direct_alt_pool_us={direct_alt_pool_us:?}"
