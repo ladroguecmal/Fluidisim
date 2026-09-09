@@ -58,49 +58,32 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S126 — terminée
+Session : S127 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S125-1 / A203 — recevoir sept composantes du champ étendu contre un oracle
-f64 indépendant, en contrôlant séparément convergence spectrale et angulaire.
+Objectif : S126-1 / A204 — dimensionner ensemble rayon et horizon, puis recevoir
+le transport d'énergie radial loin de la source sans dépasser N256.
 
 ### Plan
 
-- [x] **P1** — état réel, jeton et plan seuls ; continuité de S125 sur master propre.
-- [x] **P2** — construire une campagne release indépendante, spectre physique ADR-060,
-      Bessel par intégrale angulaire f64 sans table ni PhaseQ32, raffinements séparés.
-      Prévoir centre, rayons irréguliers, raccord Bessel, bord spatial et âge limite.
-- [x] **P3** — exécuter et interpréter ; conserver tout refus. Rapport avec domaine exact,
-      provenance des critères, contrôles de l'oracle et contre-épreuve du verdict.
-      Corriger le candidat seulement si une erreur est établie (sinon bibliothèque inchangée).
-- [x] **P4** — vérifications adaptées, journal, angles/leçons/actions, index et passation,
-      décomptes, jeton libre et commit de fin.
+- [x] **P1** — état réel, jeton et plan seuls ; continuité de S126 sur master propre.
+- [ ] **P2** — dériver le domaine et construire une campagne : N256/R80/48 s visé,
+      λ4 et source S126 inchangée. Refus des portées64/128 à N128/256 aux temps de groupe.
+      Réemployer l'oracle S126 par module partagé, sans recopier les formules.
+- [ ] **P3** — recevoir surface et transport : sept composantes contre référence,
+      densité physique positive intégrée en profondeur (formule S78) et rayon moyen.
+      Raffiner spectre, angles et quadrature spatiale séparément ; rapport fidèle aux refus.
+- [ ] **P4** — vérifications, rituel de fin, registres/actions/index/passation,
+      jeton libre et commit propre.
 
 ### Notes de reprise
 
-Départ c7cb140, master seul avancé ; anciennes copies propres en retard, aucune copie créée.
-REPRISE et règles déjà lus dans cette conversation, continuité immédiate. S125 complet.
-Fixtures à recevoir : λ4, E0,01 J, g9,81/rho1025/h20, durée4 s ; N128/R64 et N256/R128.
-Critère annoncé AVANT mesure : erreur absolue de chaque composante divisée par son
-échelle naturelle (intégrale des poids positifs correspondants) <=1e-4. Reprend le seuil
-normalisé d'élévation ADR-060, étendu aux autres unités comme critère de banc, à calibrer B2.
-Oracle : raffinements spectraux 512/1024/2048 ; angulaire 1024/2048 ; écarts normalisés
-<=1e-6 (1 % du seuil de réception). Pas de division par la valeur locale près des zéros.
-Référence centre initial analytique ; zéro initial des vitesses ; défaut de signe volontaire
-sur vitesse pour vérifier que le verdict peut refuser. Aucune promesse de borne continue.
-
-P2 : receive_extended_impact.rs construit, compilation release réussie. Intégrales
-angulaires indépendantes et trois maillages spectraux. Centre analytique reçu à 4,64e-14.
-Première exécution lancée ; recevoir les résultats en P3 (processus 68746).
-
-P3 : deux campagnes release reçues, 1350 points-temps ; erreur normalisée <=4,44e-7.
-Raffinements oracle <=9,80e-11 puis <=6e-12 ; angulaire <=4,29e-16.
-Diagnostics locaux : anneau extérieur erreur/pic de 1,56–4,01 % / 11,32–14,84 %, sur des
-queues d'élévation de 2,82e-9 / 2,17e-10 m. Pas de seuil ajouté après observation.
-Point nouveau : à4 s le groupe le plus rapide parcourt ~7,07 m ; le banc ne reçoit pas
-un paquet arrivé à64/128 m. Horizons admissibles théoriques12,07/24,15 s contre temps
-caractéristiques36,22/72,44 s. A204 / S126-1 : dimensionner et mesurer le transport.
-Bibliothèque inchangée, pas d'ADR nouveau, pas de modification des critères en cours de mesure.
-
-P4 : journal, A203/A204, L215, actions, index/README/REPRISE et suivis actualisés.
-85 ADR,204 angles,17 invariants,6 spécifications,23 cas. Aucun invariant invalidé.
-Deux campagnes release reçues ; suite S125 inchangée non relancée. Jeton rendu, master seul avancé.
+Départ760a9f0 sur master, aucune branche avancée, arbre propre ; aucune copie créée.
+Règles et corpus déjà lus dans cette conversation. Le spectre et le milieu restent ceux
+reçus en S126. Domaine visé80+cg_max*48≈164,8 m contre N*lambda/6=170,67 m disponibles.
+Critères de banc AVANT mesure : sept composantes normalisées<=1e-4 (S126), oracle<=1e-6 ;
+énergie totale fine à0,003 relatif et raffinement radial<0,002 (S78), spectral<1e-4.
+Densité>=-1e-12 J/m² (S78). Transport demandé : majorité (>50 %) de l'énergie prescrite
+hors32 m à48 s, quasi-absence (<0,003 E0) initialement ; seuils de banc, pas gameplay.
+Le modèle profond de référence reçoit son bilan ; le candidat reçoit sa surface et sa
+part potentielle. Ne pas annoncer son bilan cinétique complet sans accès à ses nœuds.
+Comparer les sept sorties jusqu'à48 s, sans allonger le TTL source ni remettre les phases à zéro.
