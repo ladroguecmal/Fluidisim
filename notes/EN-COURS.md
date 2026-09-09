@@ -76,7 +76,7 @@ mesure est ici au service d'une décision, pas l'inverse.
       déclarée par l'appelant ? Aucune conclusion avant cette lecture.
 - [x] **P3** — la relation entre un impact réel et la longueur d'onde qu'il engendre, avec
       provenance (I-14) : formule citée du corpus, ou étiquette « à calibrer » et le banc.
-- [ ] **P4** — le catalogue des cas du jeu confronté au couloir, **mesuré** et non supposé
+- [x] **P4** — le catalogue des cas du jeu confronté au couloir, **mesuré** et non supposé
       (L210) : une sonde qui construit le candidat pour chaque cas et rend le verdict.
 - [ ] **P5** — ADR-083, sur ce que la confrontation aura montré.
 - [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
@@ -114,3 +114,26 @@ v et beta) et alpha **à calibrer, banc B2**. La session ne fixe pas alpha ; ell
 
 Substitution dans les bornes : radius <= 5,09*alpha*b (Reach), depth > alpha*b (Regime).
 Donc portée et profondeur requises sont toutes deux **proportionnelles à la taille de l'objet**.
+
+P4 : `impact_envelope.rs`, onze cas, quatre valeurs d'alpha. **Un seul cas sur onze se construit
+à la portée voulue** (vaisseau en haute mer), et le verdict ne dépend pas d'alpha — c'était
+l'objet du balayage.
+
+Trois chiffres qui portent la session :
+- **portée = 5,09 lambda = 10,18 b** exactement, au-dessus de ~15 cm ; en dessous c'est
+  `Resolution` qui mord avant. Un plongeon humain n'est calculable que dans 3 m.
+- **vaisseau en port : aucune portée**, `Regime` — le modèle suppose l'eau profonde (ADR-059).
+- **plafond d'énergie : 1e-6 à 1e-2** de l'énergie de référence (masse ajoutée ~rho b^3 à la
+  vitesse d'entrée, SPEC-001 §5 bis). Ne dit pas que le candidat est insuffisant : la fraction
+  réellement transférée n'a jamais été établie (ADR-055 la reporte). Donne le seuil que le
+  générateur devra respecter.
+
+La limite de portée est **numérique, pas physique** : table de Bessel tabulée jusqu'à x=64, et
+ADR-060 range explicitement cette limite parmi les « choix numériques testés, pas des paramètres
+gameplay ». Piste pour la lever : développement asymptotique J0(x) ~ sqrt(2/(pi x)) cos(x-pi/4)
+au-delà de la table. **À ne pas décider sans mesurer** (L209/L210) — c'est une action, pas une
+décision de cette session.
+
+Erreur de méthode évitée de justesse et consignée dans le livrable : la première sonde prenait
+1e-9 J pour « négligeable », ce qui faisait lire un refus de pente comme une impossibilité
+géométrique. Il a fallu descendre à 1e-30.
