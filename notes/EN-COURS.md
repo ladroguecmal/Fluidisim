@@ -71,7 +71,7 @@ masquerait le second en croyant écarter le premier.
 - [x] **P2** — inventaire, avant toute décision (L209) : recenser dans le crate les refus qui
       confondent une faute d'appelant avec un défaut de couche, **et vérifier si le cas
       dégénéré est seulement atteignable** — S120 a annoncé ce montage sans le construire.
-- [ ] **P3** — ADR-081, sur ce que l'inventaire aura montré.
+- [x] **P3** — ADR-081 : NotRepresentable distincte de Steepness, et le meme nom dans sample ; l invariant mesure devient un test.
 - [ ] **P4** — construire la séparation et mettre à jour les appelants.
 - [ ] **P5** — le test qui compte : un champ réellement dégénéré, et la démonstration qu'un
       filtrage par `admits` ne l'écarte plus en silence.
