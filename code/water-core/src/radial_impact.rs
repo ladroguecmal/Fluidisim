@@ -7,6 +7,9 @@ use crate::{FrameId, PhaseQ32, SimTime};
 /// au-delà, la précision de la phase spatiale en `f32` fait sortir l'erreur de la tolérance de
 /// 4e-6 (5,8e-6 à x = 4096). Ce n'est pas l'ordre du développement qui borne.
 pub const BESSEL_MAX: f32 = 2048.0;
+#[cfg(test)]
+#[path = "tests_radial_energy.rs"]
+mod energy_tests;
 /// Développement asymptotique d'Abramowitz & Stegun 9.2.1, employé au-delà de la table.
 /// `P0 = 1 − 9/(128x²)` mais `P1 = 1 + 15/(128x²)` : les signes diffèrent entre J0 et J1.
 /// Phase par PhaseQ32 depuis la distance, jamais par un argument reconstruit — sans libm.

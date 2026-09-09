@@ -66,7 +66,7 @@ depuis ses nœuds effectivement construits, contre les résultats indépendants 
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seul ; continuité de S128 sur master propre.
-- [ ] **P2** — instrument dans les tests privés, sans exposer les nœuds en API : densité
+- [x] **P2** — instrument dans les tests privés, sans exposer les nœuds en API : densité
       positive profonde, termes croisés conservés, potentielle/cinétique séparées ;
       intégration Simpson320/640, disque80 et anneau32–80. Références chiffrées S127 figées.
 - [ ] **P3** — réception à0/24/48 s, témoins initiaux et contre-épreuves (cinétique omise,
@@ -90,3 +90,9 @@ Contrôle de surface assemblée depuis les mêmes nœuds <=1e-6 normalisé aux p
 plus strict que S126 (1e-4) car seules les opérations d'assemblage diffèrent.
 Références : TRANSPORT-ETENDU-S127 tableaux ; conserver les termes croisés et la profondeur
 infinie du modèle. Refuser toute lecture de ce bilan comme une réception en profondeur finie.
+
+P2 : tests_radial_energy.rs branché sous cfg(test), nœuds privés conservés ; Simpson320/640.
+Première mesure release : cinétique/E0≈0,5000000245 à24 et0,4999376328 à48 ; total/reference
+max9,05e-7 E0. Diagonale seule ramène le bilan à~0,617 E0 (contre-épreuve efficace).
+Avant réception finale, suppression d'un raccourci imposant K=0 à la naissance : le zéro
+doit être réellement calculé par la même double somme. Repasser ce test final en P3.
