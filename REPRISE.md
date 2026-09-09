@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-09 18:30 +02:00
+JETON            : occupé
+Battement        : 2026-09-09 18:32 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S126 — réception du champ étendu
 Dernière session : S125 — coût mesuré, défaut N64 conservé ; 256 tests/cinq ignorés
 Session suivante : S126 — réception indépendante du champ étendu (S125-1, A203)
 

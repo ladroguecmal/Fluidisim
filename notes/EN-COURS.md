@@ -58,34 +58,32 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S125 — terminée
+Session : S126 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S124-1 / A202 — mesurer construction, évaluation et mémoire à N=64/128/256,
-puis trancher le choix du profil sans confondre domaine calculable et réception physique.
+Objectif : S125-1 / A203 — recevoir sept composantes du champ étendu contre un oracle
+f64 indépendant, en contrôlant séparément convergence spectrale et angulaire.
 
 ### Plan
 
-- [x] **P1** — amorce, état réel, jeton et déclaration du plan seule.
-- [x] **P2** — sonde reproductible : domaine commun et portée étendue, mise en régime,
-      ordre alterné, médianes et dispersion, empreinte mémoire ; contrôle des sorties finies.
-- [x] **P3** — rapport et ADR sur le profil retenu après mesure ; application nécessaire
-      au code ou documentation explicite du maintien, sans migration silencieuse des fixtures.
-- [x] **P4** — vérification adaptée, rituel de fin complet, jeton rendu et commits propres.
+- [x] **P1** — état réel, jeton et plan seuls ; continuité de S125 sur master propre.
+- [ ] **P2** — construire une campagne release indépendante, spectre physique ADR-060,
+      Bessel par intégrale angulaire f64 sans table ni PhaseQ32, raffinements séparés.
+      Prévoir centre, rayons irréguliers, raccord Bessel, bord spatial et âge limite.
+- [ ] **P3** — exécuter et interpréter ; conserver tout refus. Rapport avec domaine exact,
+      provenance des critères, contrôles de l'oracle et contre-épreuve du verdict.
+      Corriger le candidat seulement si une erreur est établie (sinon bibliothèque inchangée).
+- [ ] **P4** — vérifications adaptées, journal, angles/leçons/actions, index et passation,
+      décomptes, jeton libre et commit de fin.
 
 ### Notes de reprise
 
-Départ 52e80a5 sur master. Deux worktrees propres au même commit ; c107bf ancien sans
-avance ni modification ; lignée 5134cd archivée. Aucun worktree créé.
-Cargo 1.97 disponible. S124 annonce neuf cas sur onze admis à N256 ; réception physique
-limitée au scénario historique. Mesurer d'abord le candidat radial isolé ; cycle mixte
-S118 ~49 ms cité comme contexte historique, pas comme mesure sur cette machine.
-
-P2 : deux mesures release, sonde et COUT-PROFIL-IMPACT-S125. Coût commun N256/N64 ~4 ;
-extension R128/N256 contre R16/N64 ~9. Les profils changent les bits ; WLIV encode déjà N.
-Suite complète lancée, résultat final à recueillir en P4.
-
-P3 : ADR-085 actée ; défaut N64 maintenu, N128/N256 explicites par service homogène.
-Contrat documenté dans radial_impact et Prepared, aucun comportement ni codec modifié.
-
-P4 : suite 256 réussis/cinq ignorés ; journal, A202/A203, L214, actions, index, README
-et REPRISE actualisés. S126 : S125-1 / A203. Jeton rendu. Master seul a avancé.
+Départ c7cb140, master seul avancé ; anciennes copies propres en retard, aucune copie créée.
+REPRISE et règles déjà lus dans cette conversation, continuité immédiate. S125 complet.
+Fixtures à recevoir : λ4, E0,01 J, g9,81/rho1025/h20, durée4 s ; N128/R64 et N256/R128.
+Critère annoncé AVANT mesure : erreur absolue de chaque composante divisée par son
+échelle naturelle (intégrale des poids positifs correspondants) <=1e-4. Reprend le seuil
+normalisé d'élévation ADR-060, étendu aux autres unités comme critère de banc, à calibrer B2.
+Oracle : raffinements spectraux 512/1024/2048 ; angulaire 1024/2048 ; écarts normalisés
+<=1e-6 (1 % du seuil de réception). Pas de division par la valeur locale près des zéros.
+Référence centre initial analytique ; zéro initial des vitesses ; défaut de signe volontaire
+sur vitesse pour vérifier que le verdict peut refuser. Aucune promesse de borne continue.
