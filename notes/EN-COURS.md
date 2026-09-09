@@ -58,68 +58,35 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S121 — terminée
+Session : S122 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : A197 — un même refus confond « point hors domaine », imputable à l'appelant, et
-« champ dégénéré », défaut de la couche. Le second se reproduit partout ; le premier se
-corrige en changeant de point. Un appelant qui filtre — ce qu'ADR-080 rend naturel —
-masquerait le second en croyant écarter le premier.
+Objectif : A198 — un champ d'impact refusé ne dit pas **quel paramètre** est en cause. Un
+seul nom d'erreur recouvre plusieurs bornes portant sur des grandeurs sans rapport, et rien
+ne documente laquelle mord en premier.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan.
-- [x] **P2** — inventaire, avant toute décision (L209) : recenser dans le crate les refus qui
-      confondent une faute d'appelant avec un défaut de couche, **et vérifier si le cas
-      dégénéré est seulement atteignable** — S120 a annoncé ce montage sans le construire.
-- [x] **P3** — ADR-081 : NotRepresentable distincte de Steepness, et le meme nom dans sample ; l invariant mesure devient un test.
-- [x] **P4** — `Error::NotRepresentable` ; les deux sites `new` séparés, le bloc de `sample` renommé, `mixed` traduit vers `NonFinite`.
-- [x] **P5** — le cas de débordement construit (λ=1e-10), le verdict de pente distingué sur
-      le même champ, et l'invariant « construit ⟹ sorties finies » devenu un test.
-- [x] **P6** — campagne relancée : hachages inchangés, aucun refus atteignable renommé.
-- [x] **P7** — livrable, rituel de fin, fusion `--ff-only`.
+- [ ] **P2** — inventaire, avant toute décision (L209) : recenser chaque borne des deux
+      constructeurs, le paramètre qu'elle contraint, et le nom qu'elle porte aujourd'hui.
+      Puis **mesurer** laquelle mord, où, avec la sonde (L210).
+- [ ] **P3** — ADR-082, sur ce que l'inventaire aura montré.
+- [ ] **P4** — construire, en gardant l'implémentation unique (motif d'ADR-079 et 080).
+- [ ] **P5** — les tests : chaque borne nommée est atteinte par un cas qui la vise.
+- [ ] **P6** — vérification d'ensemble : hachages, suite, release.
+- [ ] **P7** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
-Départ c0b491a = master ; trois copies coïncidentes, 5134cd archivée, c107bf sur la ligne S44.
+Départ 14be58f = master ; trois copies coïncidentes, 5134cd archivée, c107bf sur la ligne S44.
 
-Point d'entrée exact : `RadialImpact::sample` (`code/water-core/src/radial_impact.rs`) rend
-`Error::Domain` à la fois pour une position hors domaine et pour une sortie non finie — ce
-dernier cas est le bloc de test de finitude en fin de fonction. `mixed::sample_world_batch`
-mappe ensuite **toute** erreur de champ vers `composition::Error::Domain` ; ce mappage masque
-aussi `Error::Time` du champ, aujourd'hui neutralisé en amont par `state`.
+Ce que S121 laisse : `Error::{Medium, Domain, Anisotropy, Steepness, NotRepresentable, Time}`.
+`Domain` recouvre à lui seul plusieurs conditions portant sur des paramètres différents —
+nombre de modes, rayon, âge, longueur d'onde, énergie. Les autres sont plus spécifiques.
 
-Question à trancher en P2 avant toute construction : **le bloc de finitude est-il atteignable ?**
-Si `WaveEvent::impact` et `RadialImpact::new` bornent assez fort, il ne l'est pas, et la réponse
-juste n'est plus « séparer deux causes » mais autre chose. Ne pas présumer — S120 a précisément
-annoncé un montage dégénéré qu'elle n'a pas construit, et l'a corrigé par note datée.
+La sonde `code/water-core/examples/probe_degenerate.rs` existe et sait balayer l'espace des
+paramètres : la réutiliser pour cartographier plutôt que d'en écrire une autre.
 
-P2, et il déplace la cible. La sonde `probe_degenerate` répond non à la question posée :
-18 719 champs, 673 884 échantillons, **zéro refus**, pic 3,17e26 — douze ordres sous le
-débordement f32. En descendant en longueur d'onde (la direction où les sorties croissent), le
-pic vaut constamment slope_bound/17,7 et la **construction refuse avant** que `sample` puisse
-déborder. Le bloc de finitude de `sample` est donc du code défensif inatteignable.
-
-Mais le même défaut est réel un étage plus haut : `RadialImpact::new` rend `Error::Steepness`
-pour `!slope.is_finite() || slope > max_slope` — deux causes sans rien de commun. À
-lambda=1e-10 avec energy et max_slope à f32::MAX, le refus est un débordement, pas une pente
-trop raide. Un appelant qui répond à Steepness en réduisant l'énergie boucle indéfiniment.
-**Atteignable, démontré, et c'est là qu'il faut agir.**
-
-P4-P6 : 161 core + 93 harnais = 254 réussis, cinq ignorés ; radial_impact aussi en release ;
-hachages de campagne inchangés (6591ab360344f76e, b563610d1dd78ada).
-
-Ce que la construction a appris et qui doit aller au livrable : le **second site**
-(`ImpactField::new`) reçoit la même séparation, mais `NotRepresentable` n'y est atteint par
-aucune entrée explorée — à énergie et pente maximales, la descente en λ passe de `Domain`
-(λ ≤ 3 mm) à un champ construit, sans jamais déborder. `side = 4λ` et le contrôle de `scale`
-bornent avant. Le test y verrouille donc l'autre moitié : `Steepness` reste un verdict sur le
-milieu. Ne pas écrire que le site est « démontré » — S120 a payé ce genre d'annonce.
-
-P7 : CAUSES-REFUS-S121, note datée dans ADR-081, suivi A197 (résolue), A198, L210, journal,
-index, README, jeton rendu, fusion ff-only.
-
-Pour S122 sans relire : A198 se voit dans la sortie de `probe_degenerate`. `ImpactField` passe
-de `Domain` (λ ≤ 3 mm) à « construit » sans jamais franchir la borne de pente ; `RadialImpact`
-bascule au même endroit sur `NotRepresentable` puis `Steepness`. Les bornes en cause sont
-dispersées dans les deux `new` : `side`/`radius`, `depth <= π/lo`, `phase_step`, `scale`,
-`frequency >= 1`, puis la pente. Aucune ne dit quelle valeur a mordu ni de combien.
+Piège à éviter, hérité de S120 : ne pas construire ce qui n'a pas de consommateur. Une erreur
+qui nomme sa borne sert le code appelant ; une carte des combinaisons acceptées sert l'auteur
+de contenu. Vérifier en P2 que les deux sont utiles avant de faire les deux.
