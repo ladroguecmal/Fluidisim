@@ -58,69 +58,51 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S145 — terminée
+Session : S146 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : **refaire le bilan d'avancement.** Celui de S69 oriente encore `REPRISE.md` §4 — « ~85 %
-comme corpus, ~15 % comme système ; `δ`, `W` et `V` n'existent pas » — et il a **76 sessions**.
-C'est l'exemple même de l'état recopié qui se lit au présent alors qu'il ne l'est plus (**A185**).
-Le refaire à la même méthode, puis en tirer le fil suivant.
+Objectif : **lancer B1** — « champ de fond : nombre de composantes et coût d'évaluation ».
+Recommandé par [BILAN-S69](../docs/registres/BILAN-S69.md) puis par
+[BILAN-S145](../docs/registres/BILAN-S145.md), jamais fait. **Zéro banc sur onze exécuté** depuis
+le premier jour du projet ; celui-ci ne demande aucune couche manquante.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton, **plan déclaré et committé seul**.
-- [x] **P2** — compteurs **à la source**, comme S69 : sessions, ADR, spécifications, registres,
-      angles, leçons, lignes de Rust, tests, cas, bancs. Mécanique, aucune interprétation.
-- [x] **P3** — le bloc « **construire le système** » : ce que le code fait aujourd'hui, module par
-      module, et ce qui manquerait pour que ce soit la couche `W` du jeu. C'est là que S69 disait
-      ~5 %, et c'est l'affirmation la plus susceptible d'avoir vieilli.
-- [x] **P4** — le bloc « **savoir mesurer** » : étages du harnais, cas exécutables, bancs exécutés.
-      S69 disait 2 étages sur 6, 12 cas sur 23 exécutables, 0 banc sur 11 exécuté.
-- [x] **P5** — les deux lectures recalculées, **et ce que S69 recommandait confronté à ce qui a
-      été fait**. Une recommandation vieille de 76 sessions a-t-elle été suivie ? Sinon, pourquoi,
-      et cela vaut-il décision.
-- [x] **P6** — livrable BILAN-S145, rituel de fin (§6), jeton rendu, fusion `--ff-only`.
+- [ ] **P2** — lire le protocole §B1 **en entier** et dire ce qui est exécutable aujourd'hui et ce
+      qui ne l'est pas. Le protocole demande une évaluation **subjective en double aveugle** et
+      une distance de perception : hors de portée d'une session (`REPRISE.md` §5). Et vérifier si
+      des morceaux de B1 ont déjà été mesurés sans être reconnus comme tels — les `bench_*`
+      existent, et S145 vient de montrer que le dépôt fait des choses sans les déclarer.
+- [ ] **P3** — volet **coût** : coût par échantillon pour N ∈ {32, 64, 128, 256}, à ordre de
+      sommation fixé, et ce que la troncature coûte.
+- [ ] **P4** — volet **justesse**, celui qui rend le banc urgent : `Hs` mesuré contre la cible en
+      fonction de N. A187 dit 6,6 % d'écart à 256 composantes par battements ; A188 dit que la
+      calibration statistique reste à faire. C'est ici qu'on tranche.
+- [ ] **P5** — la **courbe demandée** : combien de composantes effectives pour qu'un objet de
+      taille L voie la même hauteur. La partie « taille d'objet » est mesurable ; la partie
+      « distance » ne l'est pas sans caméra — le dire au lieu de la contourner.
+- [ ] **P6** — **décision** : N retenu, ce que la décision porte et ce qu'elle ne porte pas. ADR,
+      rapport de banc, rituel de fin (§6, **dont le point 7 ajouté hier**), jeton, `--ff-only`.
 
 ### Notes de reprise
 
-Départ 4c463f9 = master ; worktree `886155`. 275 tests/cinq ignorés, 98 ADR, 18 invariants.
+Départ 533c7ed = master ; worktree `886155`. 275 tests/cinq ignorés, 98 ADR, 211 angles.
 
-Méthode de S69, à reprendre telle quelle pour que les deux bilans soient comparables :
-compteurs vérifiés à la source (fichiers, sortie du harnais, `REPRISE.md` §4) ; trois blocs
-mesurés séparément — *décider quoi construire*, *savoir mesurer*, *construire le système* ; puis
-deux lectures, corpus et système. **Ne pas s'appuyer sur les colonnes « État » des tableaux
-d'actions antérieurs à S45** : S69 les a écartées, elles disent « ouverte » là où une note en
-prose clôt (A185).
+Ce qui est établi avant de commencer :
+- `background.rs` (587 lignes) est une somme de composantes de **Gerstner**, à ordre de sommation
+  fixé, sans allocation à l'exécution (I-06) ; `SeaState { hs, components, … }` et
+  `Background::configure` répartissent les composantes géométriquement autour de la période de
+  pic, amplitude `a = Hs/(2√(2n))` ;
+- **il n'y a pas de LOD spectral** dans le code. Le protocole demande « le coût avec LOD actif et
+  inactif » : ce volet-là n'est pas exécutable, et pas parce qu'on manque de temps ;
+- A187 (écart de `Hs` par battements) et A188 (calibration statistique) sont la raison pour
+  laquelle S69 disait ce banc **urgent**.
 
-Ce qui est déjà connu et cadre le travail :
-- la trajectoire d'ADR-054 (S71) : `WaveEvent` → journal rejouable → impact propagé →
-  sillage/intégration → B2 ;
-- depuis S71, le dépôt a écrit `RadialImpact`, le journal d'ondes, la composition B+W, la
-  pression spectrale, `LiveWater`, l'admission incrémentale — mais **aucune session n'a déclaré
-  que `W` existait**. Vérifier lequel des deux est vrai est le cœur de P3.
+Piège nommé par S145, à ne pas retomber dedans : **écrire une sonde de plus au lieu de lancer le
+banc**. La distinction n'est pas la forme du code — un banc s'exécute aussi par du code — mais ce
+qui est mesuré : une sonde compare le modèle à lui-même, B1 compare `B` à une **cible statistique
+extérieure**, `Hs = 4√m0`.
 
-Piège à éviter : refaire le bilan en relisant le corpus. S69 a mesuré à la source ; un bilan
-d'opinion ne serait pas comparable au sien et ne vaudrait rien.
-
-Second piège : conclure « le projet a bien avancé » parce que 76 sessions ont passé. Le fait
-central de S69 était que **vingt-deux sessions d'affilée n'avaient produit aucune conception du
-système** ; la même question se pose pour les soixante-seize qui suivent, et la réponse peut être
-la même.
-
-P2-P6 : compteurs à la source, inventaire par couche, état du harnais, deux lectures recalculées,
-BILAN-S145, A211, L228, rituel §6.7, six décomptes corrigés. Aucun code modifié, 275 tests.
-
-Les trois résultats, par ordre d'importance :
-1. **B1 n'a jamais été lancé** — recommandé par S69, zéro banc sur onze après 76 sessions ;
-2. **`W` existe** et le repère disait le contraire — 9 768 lignes reçues par 275 essais ;
-3. **A211** : le chaînage « suite Sxxx » propage la proximité, pas l'importance.
-
-Pour S146 sans relire : **lancer B1**, « champ de fond : nombre de composantes et coût
-d'évaluation ». Il ne demande aucune couche manquante — `B` existe (`background.rs`, 587 lignes),
-le harnais mesure, la graine produit des réalisations indépendantes depuis S65. Sa question n'est
-pas le coût mais la **justesse** : A187 a montré qu'à 256 composantes `Hs` s'écarte de 6,6 % par
-un mécanisme de battements, et A188 que la calibration statistique reste à faire. Le protocole est
-dans `docs/validation/PLAN-BENCHMARK.md` §B1.
-
-Piège pour S146 : écrire une sonde de plus au lieu de lancer le banc. C'est ce que le dépôt fait
-depuis 76 sessions, avec d'excellents résultats — mais une sonde mesure le modèle contre lui-même,
-quand B1 mesurerait autre chose que sa propre cohérence.
+Second piège : annoncer « B1 exécuté » alors que deux de ses volets sont perceptuels. Le banc
+rendra un **verdict partiel**, et il faudra que le rapport dise exactement lequel — sinon la
+prochaine session lira « B1 fait » et le corpus portera un renvoi faux de plus (L217).

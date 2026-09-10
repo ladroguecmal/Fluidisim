@@ -18,13 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-10 13:26 +02:00
+JETON            : occupé
+Battement        : 2026-09-10 13:29 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S146 — **lancer B1**
 Dernière session : S145 — bilan refait ;275 tests/cinq ignorés
-Session suivante : **S146 — lancer B1** *(recommandé par BILAN-S69 puis BILAN-S145 ; l'écarter
-                   demande de l'écrire dans le journal — rituel §6.7, A211)*
+Session suivante : à fixer en fin de S146
 
 **Copie de travail S139 et S140** : worktree `claude/reprise-projet-886155`, refusionné en avance
 rapide dans master à la fin de chacune des deux. Terminer de même :
