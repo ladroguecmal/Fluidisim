@@ -176,3 +176,18 @@ où le perturbatif est **faux**, pas aux cas où il est simplement imprécis.
 2. Technique de δ : FLIP/APIC, MPM, eulérien, hybride → benchmark B3. Sans incidence sur cet ADR grâce à ADR-007.
 3. Calibration du seuil perturbatif/substitutif → benchmark B4.
 4. Comportement de B et W en référentiel non inertiel → ADR-002.
+
+## Note corrective du 2026-09-10 (S161)
+
+Le critère de bascule proposé au §3.3 — `max|δ| > 0,35 · Hs_local` — est **retiré comme
+paramétrage**. La première mesure du premier volet de B4 montre que le rapport à `Hs` ne gouverne
+pas la validité de l'addition : à `max|δ|/h` égal, l'écart d'additivité est le même que la
+perturbation vaille 10 % ou 100 % de l'onde de fond. Ce qui le gouverne est **l'amplitude rapportée
+à la profondeur**, `écart ≈ 0,24 · max|δ|/h` en régime peu profond.
+
+**La décomposition, elle, n'est pas remise en cause** : elle tient à moins de 1 % tant que
+`max|δ| ≤ 0,04·h`. C'est le paramètre qui était mal choisi, pas la décision.
+
+Voir [ADR-111](ADR-111-le-critere-de-bascule-s-exprime-en-profondeur.md) et
+[B4-DEBLOCAGE-S161](../validation/B4-DEBLOCAGE-S161.md). Le régime d'eau profonde reste ouvert :
+Saint-Venant est non dispersif, et la variable y serait vraisemblablement la cambrure.

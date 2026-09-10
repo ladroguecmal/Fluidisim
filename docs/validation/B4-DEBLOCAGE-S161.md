@@ -156,3 +156,14 @@ la profondeur. **C'est une infirmation de son paramétrage.**
 - **Ni forces sur coque, ni perception.** B4 juge l'architecture ; ce volet juge une propriété
   mathématique de l'addition. Il peut infirmer, il ne peut pas valider.
 - **Le régime `A_B/h0 = 0,02` n'est pas expliqué**, seulement mesuré.
+
+## 8. Décision
+
+[ADR-111](../adr/ADR-111-le-critere-de-bascule-s-exprime-en-profondeur.md) : le critère de bascule
+s'exprime en `max|δ|/h`, aucun seuil n'est gelé (ADR-108), et la décomposition n'est **pas**
+infirmée — son paramétrage l'est. Note corrective datée portée à ADR-001 §3.3.
+
+**B4 reste bloqué pour ses trois autres volets** : forces sur la coque (intégrateur de corps
+rigide), perception en double aveugle (personnes), contrôle du terme source (ajout S04, A50). Ce
+qui est débloqué est le premier, et il suffisait pour infirmer un paramétrage vieux de cent
+soixante sessions.

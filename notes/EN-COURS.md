@@ -78,7 +78,7 @@ intégrale** que le dépôt n'a pas, et c'est ce blocage-là qu'il faut instruir
 - [x] **P4** — si la voie tient : mesurer. Superposition linéaire contre solution non linéaire sur
       la même scène, en balayant le rapport d'amplitude, jusqu'à trouver la bascule ou montrer
       qu'elle n'apparaît pas dans la plage accessible.
-- [ ] **P5** — verdict, livrable, et ADR **seulement** si une décision en sort. La valeur de départ
+- [x] **P5** — verdict, livrable, et ADR **seulement** si une décision en sort. La valeur de départ
       d'ADR-001 est 0,35·Hs : la confirmer, la déplacer ou la laisser est une décision.
 - [ ] **P6** — rituel de fin (§6, sept points), jeton rendu. Copie principale : rien à refermer.
 
