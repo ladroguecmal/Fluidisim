@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-10 02:12 +02:00
+JETON            : occupé
+Battement        : 2026-09-10 02:17 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S135 — transaction mixte (S134-1)
 Dernière session : S134 — condition d'ordre pesée et conservée ;264 tests/cinq ignorés
-Session suivante : S135 — transaction mixte (S134-1)
+Session suivante : à fixer en fin de S135
 
 **Copie de travail S130** : worktree `claude/reprise-projet-2d3506`, remis en avance rapide sur
 master (e817d0e) au démarrage — il était resté à 52e80a5 et n'avait rien d'unique, donc aucun

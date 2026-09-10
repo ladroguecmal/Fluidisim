@@ -58,59 +58,46 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S134 — terminée
+Session : S135 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : S133-1 — trois sessions ont buté sur la même limite : l'ajout incrémental n'est
-exact que si la source s'insère **en dernier**. Établir ce que coûterait de s'en affranchir,
-et décider — y compris décider de la garder.
+Objectif : S134-1 — ADR-086 s'est arrêtée au chemin pression et rien ne coordonne l'admission
+entre couches. Établir **ce qui est déjà garanti** avant de supposer qu'il manque une
+transaction, puis décider de ce qui manque vraiment.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seul.
-- [x] **P2** — poser les voies et les chiffrer avant d'en préférer une. Quatre, et la
-      quatrième n'était pas dans les notes de S133 :
-      1. **accumuler en `f64`** puis arrondir : réduit l'écart sans le supprimer — l'ordre
-         compte toujours, plus finement. Et cela déplacerait tous les résultats publiés.
-      2. **sommation compensée** par nœud : même nature, même défaut.
-      3. **sommation exacte** : indépendante de l'ordre par construction, coût à mesurer.
-      4. **stocker la contribution de chaque source séparément**, et recomposer dans l'ordre
-         canonique à chaque admission. L'identité devient exacte **quelle que soit la
-         position**, sans refaire les réponses modales — au prix d'une mémoire proportionnelle
-         au nombre de sources. C'est la seule voie qui rende la condition inutile.
-- [x] **P3** — ADR-090 : la condition reste, faute d'un prix acceptable pour la lever,
-      et devient une contrainte d'usage écrite.
-- [x] **P4** — contrainte portée dans la doc de `admit` et `extend_into`.
-- [x] **P5** — sonde conservée comme test, borne large, commutativité à deux termes figée.
-- [x] **P6** — livrable, rituel de fin, fusion `--ff-only`.
+- [ ] **P2** — inventaire, et il commence par une vérification que S134 avait suggérée : les
+      emprunts interdisent-ils déjà le cas problématique ? Puis établir ce que chaque couche
+      sait faire, et quel état incohérent reste **observable**.
+- [ ] **P3** — ADR-091 sur ce que l'inventaire aura montré. Refuser de coupler deux couches
+      indépendantes est une issue légitime.
+- [ ] **P4** — construire ce que la décision retient.
+- [ ] **P5** — recevoir.
+- [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
-Départ 8269d2f = master, trois copies coïncidentes.
+Départ 6f02880 = master, trois copies coïncidentes.
 
-Ce que la condition coûte aujourd'hui, et qu'il faut peser : rien tant que les identifiants
-croissent — un compteur d'hôte suffit — et une préparation complète sinon. Ce n'est donc pas
-une faute de calcul, c'est une **contrainte d'usage non écrite**. La question n'est pas
-« comment la lever » mais « vaut-elle son prix, et l'hôte sait-il qu'elle existe ».
+Ce que la lecture a déjà établi, et qui recadre la question :
 
-Chiffres de référence : préparation 5,00 ms par segment à 224×128 ; pools de coefficients
-14 336 slots, environ 630 ko chacun ; le contrôleur en tient deux, et ADR-089 en demande deux
-de plus le temps d'une transition.
+- **Les deux couches ont chacune leur admission transactionnelle.** Côté pression,
+  `bound_pressure::Controller` (ADR-086, 088, 089). Côté impacts, `prepared_water::LiveWater` —
+  « paire journal/champs publiée ensemble ; une commande bloquée interdit une vue dite
+  courante ». Il ne manque donc pas une transaction *par couche*.
+- **Pendant une requête mixte, rien ne peut bouger.** `sample_world_batch` prend deux vues
+  immuables ; `LiveWater::admit` et `Controller::admit` exigent `&mut`. Le compilateur interdit
+  déjà d'admettre pendant qu'on échantillonne — c'est la même garantie structurelle qu'en S130.
+- **La cause est déjà commune aux deux couches** : `wave_journal::Cause { entity, command,
+  emission }` est utilisée par le journal W **et** par les métadonnées des sources de pression.
+  Deux effets d'un même événement de jeu peuvent donc porter la même cause.
 
-Piège à éviter : mesurer le coût en temps de la voie 4 et oublier son coût en mémoire, qui est
-le vrai. À 8 sources, elle multiplierait par 8 des pools déjà comptés en mégaoctets.
+D'où la question réelle, qui n'est pas celle du titre : ce qui reste possible est qu'une cause
+soit **partiellement admise** — sa pression acceptée, son impact refusé, ou l'inverse — et que
+rien ne permette de le constater. Forcer les deux couches à réussir ensemble les coupleraient ;
+permettre de voir qu'une cause est incomplète ne les couple pas.
 
-P2-P6 : ADR-090, ORDRE-S134, journal, index, README, REPRISE, jeton rendu, ff-only.
-264 tests/cinq ignorés. Aucun code de calcul modifié — la session refuse de construire.
-
-Le piège de la session, et il aurait été coûteux : ma première sonde mesurait la sensibilité à
-l'ordre sur des valeurs **synthétiques**, amplitudes réparties sur six décades. Elle donnait
-1,5e-2 d'écart relatif à 64 termes, ce qui aurait fait conclure à un défaut de justesse et
-justifié de renouveler toutes les références du projet. Sur les vraies contributions modales,
-l'écart est de 5,6e-7 à 7,1e-6. **Une sonde synthétique mesure le régime qu'on lui donne.**
-
-Pour S135 sans relire : S134-1 est la transaction mixte. ADR-086 §"Ce que cette décision ne fait
-pas" dit exactement où elle s'arrête — l'admission n'est pas coordonnée entre couches. Le montage
-mixte compose B, impacts et pression (ADR-077) ; admettre une source de pression pendant qu'une
-requête mixte est en cours n'a pas de sémantique définie. Commencer par établir ce qui est
-observable : les emprunts Rust interdisent-ils déjà le cas problématique, comme ils l'ont fait
-pour `Unchanged` en S130 ?
+Piège à éviter : construire une transaction inter-couches parce que le titre de la suite dit
+« transaction ». ADR-086 a refusé de faire dépendre le contrôleur des impacts pour une raison
+qui vaut toujours — le couplage coûterait plus que ce qu'il résout.
