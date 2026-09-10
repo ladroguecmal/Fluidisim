@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S156 — en cours
+Session : S156 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : S155-1. La première branche que S154 proposait, que le refus du noyau rendait
 inaccessible et que ADR-106 vient d'ouvrir : **bilan énergétique d'un sillage prolongé et domaine
@@ -76,7 +76,7 @@ de collecte requis**, comme S153 et S154 l'ont fait pour les impacts.
       en **résolution spectrale** ? Les trois ne se corrigent pas au même endroit.
 - [x] **P5** — recevoir ce qui doit l'être, avec un test témoin ; ne rien construire dont le
       prix dépasse le bénéfice.
-- [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
+- [x] **P6** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -167,3 +167,16 @@ pour que seul le pas radial soit juge.
 Temoin verifie : les deux mesures prises a radial 512, le test echoue (ligne 218). Il ne peut donc
 pas passer par construction.
 Cout 0,66 s en debug ; 298 tests/cinq ignores (205+93), debug et release, zero echec.
+
+P6 — SILLAGE-DOMAINE-S156, ADR-107, A214, L233, L234, journal, index, README, REPRISE, jeton
+rendu, ff-only. 298 tests/cinq ignorés en debug et en release.
+
+Pour S157 sans relire : S156-1 remplace deux encadrements par une loi. La sonde `wake_reach`
+fait déjà tout le travail — `rayon_honnete` compare deux profils, `profil(radial, angular, us)`
+construit le champ. Ce qui manque est une dichotomie sur l'instant de décrochage à radial 64, 128
+et 256 (angulaire fixé à 512), soit trois seuils au lieu de deux encadrements, plus la même chose
+à sigma 4 m pour voir si la loi dépend de la largeur de la source. Attention : le décrochage n'est
+pas monotone point par point — à 45 s, 128 contre 256 donnait « 2 m » entre deux « aucun ». La
+dichotomie doit porter sur une quantité lissée, pas sur le premier rayon qui dépasse le seuil.
+Ne pas oublier ce que la session a coûté à apprendre : le plafond 512 borne ce qui est
+vérifiable, donc la loi devra être extrapolée pour 512 et cela devra être écrit comme tel.

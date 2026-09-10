@@ -3585,3 +3585,38 @@ dénominateur passe par zéro — une explosion qui n'était pas davantage une p
 **Le bon dénominateur est une grandeur que la dynamique conserve** : ici l'amplitude invariante
 `sqrt(|eta|^2 + |v|^2/omega^2)`, que la propagation libre laisse fixe. Voir [[L218]] pour l'autre
 manière de se tromper en lisant ses propres mesures.
+
+## L233 — Une conservation qui découle de la structure ne mesure rien
+
+*(S156)* Le bilan énergétique d'un sillage prolongé se conserve au bit près à 16, 20, 30, 45 et
+60 secondes, et la puissance est exactement nulle dès l'extinction. C'est un beau tableau, et il
+ne prouve rien : après extinction chaque mode tourne, et la rotation laisse `g|eta|² + |v|²/k`
+invariant. **Le bilan ne pouvait pas ne pas se conserver.**
+
+Le piège est d'autant plus efficace que la quantité vérifiée est physiquement importante et que le
+résultat est excellent. Un chiffre parfait obtenu d'une identité algébrique ressemble exactement à
+un chiffre parfait obtenu d'une physique juste.
+
+La question à se poser avant de publier une conservation : **qu'est-ce qui aurait pu la briser ?**
+Si la réponse est « rien, c'est une identité », alors la mesure confirme l'implémentation et il
+faut le dire ainsi — jamais la présenter comme un certificat du phénomène. Ici, la validité
+spatiale du champ, qui était la vraie question, était mauvaise au moment même où le bilan était
+parfait. Voir [[L232]] : la même session, deux façons de lire un bon chiffre pour un mauvais.
+
+## L234 — Deux bornes indépendantes n'ont pas d'ordre stable
+
+*(S156)* Un champ de sillage est borné en rayon par la résolution angulaire et en durée par la
+résolution radiale. Les deux mécanismes sont indépendants, et **laquelle des deux mord dépend de
+l'instant** : à 8 secondes, une recette 512 radial / 128 angulaire n'est honnête qu'à 45 m tandis
+que 128/512 l'est au-delà de 200 m ; à 60 secondes, exactement l'inverse, la seconde se trompant
+d'un facteur 75 là où la première reproduit la référence au bit près.
+
+L'habitude est de chercher « le » facteur limitant et de dimensionner dessus. Quand deux bornes
+suivent des lois différentes — l'une proportionnelle, l'autre en périodicité — leur croisement se
+déplace avec le régime, et une valeur unique choisie dans un régime est fausse dans l'autre.
+**Mesurer les deux séparément coûte un essai de plus et évite de dimensionner sur la mauvaise.**
+
+Corollaire pratique : une borne écrite comme un nombre — « le domaine vaut 45 m » — perd
+l'information dont le lecteur suivant aura besoin. Ce qui se transmet est la **loi et son
+paramètre** : « le rayon est proportionnel à `angular` ; il vaut 45 m pour 128 ». Même remarque
+qu'en [[L231]], où une constante en secondes cachait un nombre de bits.

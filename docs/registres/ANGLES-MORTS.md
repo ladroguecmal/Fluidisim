@@ -1936,3 +1936,16 @@ sur80m seulement. Aucun nouvel angle indépendant, A212 inchangée ; B2 reste pa
   ramènerait la dérive vers 1,5e-10 relatif. Ce n'est pas fait parce que cela change
   l'arithmétique du noyau, donc le condensat de réception `8ea15f4a3334830b` de S95, et que cela
   demande sa propre réception. Voir [[L231]].
+
+- **A214** *(sévérité 2, S156 ; ouverte)* — **Le sillage n'annonce pas son domaine, et la loi
+  manque pour qu'il le puisse.** ADR-107 établit que la validité d'un champ de sillage est un
+  couple `(rayon, durée)` déduit de la recette : rayon proportionnel à `angular`, durée bornée par
+  la périodicité `2π·radial/cutoff`. Mais la durée n'est **encadrée qu'en deux points** — radial
+  128 décroche entre 15 et 20 s, radial 256 entre 45 et 50 s — et la formule de récurrence
+  candidate se trompe d'un facteur 2,5 sur le second. Le dépôt annonce ailleurs l'admissibilité
+  plutôt que de mentir en silence (ADR-091, ADR-107 §« ce qu'elle ne dit pas ») ; ici il ne le peut
+  pas, faute de loi. Un garde bâti sur une loi non vérifiée refuserait des configurations valides
+  ou en admettrait d'invalides, ce qui est pire que pas de garde du tout.
+  Ce qui manque est peu cher : trois ou quatre points de plus par dichotomie sur l'instant de
+  décrochage, et la dépendance à `sigma`. La sonde `wake_reach` existe. Suite S156-1.
+  Voir [[L233]] et [[L234]].

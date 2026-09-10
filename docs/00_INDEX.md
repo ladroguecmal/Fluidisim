@@ -17,6 +17,18 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S156 :** [ADR-107](adr/ADR-107-le-domaine-d-un-sillage-se-deduit-de-sa-recette.md),
+[SILLAGE-DOMAINE-S156](validation/SILLAGE-DOMAINE-S156.md). Le bilan énergétique d'un sillage
+prolongé se conserve au bit près — et c'est **vide**, la rotation des modes le garantit (**L233**).
+La validité spatiale, elle, est bornée par **deux mécanismes indépendants** : le pas angulaire borne
+le rayon proportionnellement, le pas radial borne la durée par périodicité `2π·radial/cutoff`, et
+**laquelle mord dépend de l'instant** (**L234**). Radial 128 décroche entre 15 et 20 s, radial 256
+entre 45 et 50 s ; le plafond 512 de la grammaire rend 512 non mesurable. **Verdict B2 volet
+sillage : partiel et négatif à 60 s**, prix mesuré 205 ms de préparation pour la recette qu'il
+faudrait. **A214** : pas de garde-fou, la loi n'est encadrée qu'en deux points.298 tests/cinq ignorés.
+107 ADR,214 angles,234 leçons,18 invariants,6 SPEC,23 cas, deux bancs partiels.
+**Suite S157 : S156-1, établir la loi en durée** au lieu de l'encadrer.
+
 **S155 :** [ADR-106](adr/ADR-106-horizon-d-observation-et-duree-de-forcage.md),
 [HORIZON-MODAL-S155](validation/HORIZON-MODAL-S155.md). La fenêtre de 16 s du noyau de pression
 n'avait **aucune justification numérique** — 16 000 000 µs, c'est 2^24 — et ADR-071 demandait

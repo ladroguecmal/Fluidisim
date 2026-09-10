@@ -7862,3 +7862,53 @@ de domaine ont bougé. 297 tests réussis, cinq ignorés (204+93), debug et rele
 
 **Suite S156 :** S155-1, la première branche de S154, désormais accessible — bilan énergétique
 d'un sillage prolongé et domaine de collecte requis, à comparer aux impacts de S153/S154.
+
+## S156 — 2026-09-10 — Le paquet ne part pas, il revient par l'autre bord
+
+Entrée : jeton libre à d7db1d2, trois copies coïncidentes. S155-1, la branche que S154 proposait
+en premier et que le refus du noyau rendait inaccessible. Production :
+[SILLAGE-DOMAINE-S156](../docs/validation/SILLAGE-DOMAINE-S156.md),
+[ADR-107](../docs/adr/ADR-107-le-domaine-d-un-sillage-se-deduit-de-sa-recette.md), A214, L233, L234.
+
+**Le bilan énergétique est parfait, et c'est un résultat vide. L233.** Puissance nulle dès
+l'extinction, énergie identique au bit près à 16, 20, 30, 45 et 60 s. Mais après extinction chaque
+mode tourne, et la rotation laisse `g|eta|² + |v|²/k` invariant : le bilan ne pouvait pas ne pas se
+conserver. Il confirme l'implémentation et ne dit rien de la validité spatiale du champ — laquelle,
+au même instant, était mauvaise.
+
+**Deux bornes indépendantes, deux lois, et l'ordre s'inverse avec le temps. L234.** Le pas
+angulaire borne le **rayon**, proportionnellement : 20 / 45 / plus de 200 m pour angular 64 / 128 /
+256. Le pas radial rend le champ **périodique** de période `2π·radial/cutoff` et borne la
+**durée** : radial 128 décroche entre 15 et 20 s, radial 256 entre 45 et 50 s. À 4 s, deux
+résolutions voisines cessent de s'accorder aux deux tiers de la période de la plus grossière — le
+paquet ne part pas, il revient par l'autre bord. À 8 s c'est l'angulaire qui mord, à 60 s la
+radiale, exactement l'inverse.
+
+La formule de récurrence que j'avais écrite avant la mesure tombe juste à 30 % pour radial 128 et
+se trompe d'un facteur 2,5 pour 256 — elle prend la vitesse de groupe au plus petit nœud, où
+presque aucune énergie ne vit. **La loi n'est donc pas publiée** ; seuls les encadrements le sont.
+
+Limite de ce qu'on peut savoir, et il faut la dire : `radial` et `angular` plafonnent à 512 dans la
+grammaire de recette, donc la durée honnête de 512 **n'est pas mesurable** — aucune référence plus
+fine n'existe. Un oracle ne sauverait rien : `GaussianPressure` porte la même discrétisation en
+plus fin, les deux replient.
+
+ADR-107 : le domaine est un couple `(rayon, durée)` déduit de la recette, publié avec elle, jamais
+une constante. Plafond non relevé — rien pour vérifier, et le prix est mesuré : 25,6 / 102,0 /
+205,5 / 402,9 ms de préparation pour 128×128 / 256×256 / 512×256 / 512×512, coût linéaire en
+nœuds. **Le volet sillage de B2 reçoit un verdict partiel et négatif à 60 s, fondé sur une mesure
+et non sur un manque de mesure.** Aux durées où le candidat a été reçu — 8 s — il est dans son
+domaine.
+
+Un seul test reçu, qui épingle le fait et non la loi ; témoin vérifié dans les deux sens. Aucun
+garde-fou : la loi en durée n'est encadrée qu'en deux points, et un garde bâti dessus refuserait du
+valide ou admettrait de l'invalide. **A214**, et c'est la suite.
+
+Battement écrit une minute en avance à P5, corrigé aussitôt : un battement dans le futur ferait
+croire à une session active.
+
+298 tests réussis, cinq ignorés (205+93), debug et release. 107 ADR, 214 angles, 234 leçons,
+18 invariants, 6 SPEC, 23 cas. Invariants relus : aucun invalidé.
+
+**Suite S157 :** S156-1, établir la loi en durée au lieu de l'encadrer, et sa dépendance à `sigma`.
+C'est ce qui manque pour qu'A214 devienne un garde-fou plutôt qu'un doute, et la sonde existe.

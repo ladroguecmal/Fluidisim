@@ -264,3 +264,10 @@ la borne venait de la représentation. Horizon d'observation porté à64s, duré
 budget écrit à la place de la constante. L'âge n'est pas gratuit pour autant — omega en f32 fait dériver
 la phase linéairement en temps (A213). Suite S156 : bilan d'un sillage prolongé, S155-1.
 106 ADR,213 angles,232 leçons,18 invariants,6 SPEC,23 cas.
+**S156 : le sillage prolongé revient par l'autre bord**, [mesure](docs/validation/SILLAGE-DOMAINE-S156.md),
+[ADR-107](docs/adr/ADR-107-le-domaine-d-un-sillage-se-deduit-de-sa-recette.md). Le bilan énergétique se
+conserve au bit près, et c'est vide : la rotation des modes le garantit. La validité **spatiale** est bornée
+par deux mécanismes indépendants — le pas angulaire borne le rayon, le pas radial borne la durée par
+périodicité — et laquelle mord dépend de l'instant. Verdict B2 volet sillage : **partiel et négatif à 60 s**,
+prix mesuré à l'appui. Suite S157 : établir la loi en durée, S156-1.
+107 ADR,214 angles,234 leçons,18 invariants,6 SPEC,23 cas.

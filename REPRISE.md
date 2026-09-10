@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 16:29 +02:00
+JETON            : libre
+Battement        : 2026-09-10 16:31 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S156 — bilan et domaine d'un sillage prolongé (S155-1)
-Dernière session : S155 — horizon porté à 64 s ; 297 tests/cinq ignorés
-Session suivante : à fixer en fin de S156
+Session en cours : aucune
+Dernière session : S156 — domaine du sillage mesuré ; 298 tests/cinq ignorés
+Session suivante : S157 — établir la loi en durée (S156-1, A214)
 
 **Copie de travail S155** : worktree `claude/reprise-projet-2d3506`, remis en avance rapide sur
 master (1643232) au démarrage — il était resté à 041dfed, 80 commits en retard et rien d'unique,
@@ -196,6 +196,34 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S156 — 2026-09-10 :** [SILLAGE-DOMAINE-S156](docs/validation/SILLAGE-DOMAINE-S156.md),
+[ADR-107](docs/adr/ADR-107-le-domaine-d-un-sillage-se-deduit-de-sa-recette.md). S155-1, la branche
+que S154 proposait en premier.
+**Le bilan énergétique d'un sillage prolongé est parfait, et c'est un résultat vide (L233)** :
+puissance nulle dès l'extinction, énergie identique au bit près à 16, 20, 30, 45 et 60 s — mais
+chaque mode tourne après extinction et la rotation laisse `g|eta|² + |v|²/k` invariant. Le bilan
+ne pouvait pas ne pas se conserver.
+**La validité spatiale, elle, est mauvaise, et deux mécanismes indépendants la bornent (L234).**
+Le pas angulaire borne le **rayon**, proportionnellement : 20 / 45 / plus de 200 m pour angular
+64 / 128 / 256. Le pas radial rend le champ **périodique** de période `2π·radial/cutoff` et borne
+la **durée** : radial 128 décroche entre 15 et 20 s, radial 256 entre 45 et 50 s. À 4 s, deux
+résolutions cessent de s'accorder aux deux tiers de la période de la plus grossière : le paquet ne
+part pas, **il revient par l'autre bord**. À 8 s c'est l'angulaire qui mord, à 60 s la radiale.
+La formule de récurrence écrite avant la mesure tombe juste à 30 % pour 128 et se trompe d'un
+facteur 2,5 pour 256 : **la loi n'est pas publiée**, seuls les encadrements le sont. Et comme la
+grammaire de recette plafonne à 512, la durée honnête de 512 **n'est pas mesurable** — aucune
+référence plus fine n'existe, et un oracle partageant la discrétisation ne dirait rien.
+ADR-107 : le domaine est un couple `(rayon, durée)` déduit de la recette, publié avec elle, jamais
+une constante. Plafond non relevé ; prix mesuré 25,6 / 102,0 / 205,5 / 402,9 ms de préparation
+pour 128×128 / 256×256 / 512×256 / 512×512. **Le volet sillage de B2 reçoit un verdict partiel et
+négatif à 60 s, fondé sur une mesure.** Aux durées reçues — 8 s, S150 et S151 — le candidat est
+dans son domaine.
+**A214** : aucun garde-fou n'est ajouté, la loi en durée n'étant encadrée qu'en deux points ; un
+garde bâti dessus refuserait du valide ou admettrait de l'invalide.
+298 tests/cinq ignorés.107 ADR,214 angles,234 leçons,18 invariants,6 SPEC,23 cas.
+Suite S157 : S156-1, établir la loi en durée et sa dépendance à `sigma`. Restent ouverts A213, un
+seuil de régression relatif, la coupure W/δ, lambda_cut, la bathymétrie et le multiplateforme.
 
 **S155 — 2026-09-10 :** [HORIZON-MODAL-S155](docs/validation/HORIZON-MODAL-S155.md),
 [ADR-106](docs/adr/ADR-106-horizon-d-observation-et-duree-de-forcage.md). S154-1, seconde branche.
