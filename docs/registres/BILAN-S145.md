@@ -31,3 +31,59 @@ puis recopiée par S143 et S144. C'est exactement le défaut que le rituel de fi
 *Les sept « trous » apparents de la série des angles — A15, A19, A20, A27, A56, A57, A58 — sont des
 artefacts de motif : ces sept-là vivent dans des tableaux, pas dans la liste à puces. S138 avait
 déjà rencontré exactement ce piège.*
+
+## 2. Construire le système — le bloc où S69 disait ~5 %
+
+### 2.1 Où sont les 34 128 lignes
+
+| ensemble | lignes | ce que c'est |
+|---|---:|---|
+| `water-core/src` hors essais | **15 523** | la bibliothèque |
+| essais intégrés `tests_*.rs` | 2 998 | ce qui la reçoit |
+| `water-core/examples` | 7 208 | **les sondes** — instruments de mesure de la conception |
+| `water-harness` | 8 399 | H1 et H3 |
+
+Les sondes pèsent presque la moitié de la bibliothèque. Ce n'est pas du gaspillage : c'est ce
+qu'ADR-020 §*et une chose que S21 a apprise* annonçait — le code comme instrument de mesure de la
+conception. Six des sept dernières sessions ont trouvé leur résultat dans une sonde.
+
+### 2.2 Par couche, à la source
+
+| couche | lignes | état réel |
+|---|---:|---|
+| **`W` — impacts** | 4 573 | `wave_event`, `wave_journal`, `radial_impact`, `impact_generator`, `composition`, `mixed_water`, `prepared_water`, `live_snapshot` |
+| **`W` — pressions** | 5 195 | source, journal, contrôleur, instantané, modal, spectral, borné, cuisson gaussienne |
+| **`δ`** | 2 516 | `delta` (Saint-Venant 1D, véhicule d'essai) et `shallow` (premier candidat exécutable) |
+| **`B`** | 810 | couche de fond minimale, plus la flottaison de C10 |
+| **`V`** | **0** | rien |
+
+### 2.3 Ce que S69 disait, et ce qui a changé
+
+> « `δ`, `W`, `V` n'existent pas. Deux véhicules d'essai 1D et un milieu spectral, qui ne sont pas
+> le système. »
+
+**Pour `W`, cette phrase a cessé d'être vraie**, et aucune session ne l'a dit. Le dépôt contient
+aujourd'hui, reçu par 275 essais :
+
+- un **contrat de production** (`WaveEvent`, ADR-055) et un **journal rejouable** borné
+  (ADR-056) ;
+- deux **champs propagés** dont un candidat radial dispersif en eau profonde, avec domaine de
+  validité déclaré, bornes nommées et pente physique dérivée ;
+- un **générateur** qui dit ce qu'un objet entrant dans l'eau donne au modèle (ADR-092) ;
+- une couche de **pression** complète — source, admission, publication cohérente, reprise ;
+- la **composition B+W**, le **service vivant** `LiveWater` avec sauvegarde et restauration, et
+  l'**admission incrémentale exacte**.
+
+C'est la trajectoire d'ADR-054 — `WaveEvent` → journal rejouable → impact propagé → … → B2 —
+parcourue jusqu'à l'avant-dernière étape.
+
+**Ce qui manque à `W` pour être la couche du jeu**, et qui n'a pas bougé :
+1. **le sillage** — un objet en mouvement n'engendre rien ; seuls les impacts et les pressions
+   existent. C'est l'étape *sillage/intégration* d'ADR-054, jamais commencée ;
+2. **la sélection technologique**, c'est-à-dire **B2**, qui n'a jamais été exécuté. Le candidat
+   radial reste un *candidat* : rien ne dit qu'il est le `W` du jeu ;
+3. **l'anisotropie**, refusée à la construction depuis ADR-060.
+
+**Pour `δ`**, la phrase de S69 tient : deux solveurs 1D, aucun domaine 2D, et le choix appartient
+à B3.
+**Pour `V`**, elle tient entièrement : zéro ligne.

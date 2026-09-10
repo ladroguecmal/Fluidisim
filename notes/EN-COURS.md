@@ -70,7 +70,7 @@ Le refaire à la même méthode, puis en tirer le fil suivant.
 - [x] **P1** — état réel, jeton, **plan déclaré et committé seul**.
 - [x] **P2** — compteurs **à la source**, comme S69 : sessions, ADR, spécifications, registres,
       angles, leçons, lignes de Rust, tests, cas, bancs. Mécanique, aucune interprétation.
-- [ ] **P3** — le bloc « **construire le système** » : ce que le code fait aujourd'hui, module par
+- [x] **P3** — le bloc « **construire le système** » : ce que le code fait aujourd'hui, module par
       module, et ce qui manquerait pour que ce soit la couche `W` du jeu. C'est là que S69 disait
       ~5 %, et c'est l'affirmation la plus susceptible d'avoir vieilli.
 - [ ] **P4** — le bloc « **savoir mesurer** » : étages du harnais, cas exécutables, bancs exécutés.
