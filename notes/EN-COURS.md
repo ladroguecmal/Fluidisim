@@ -75,7 +75,7 @@ intégrale** que le dépôt n'a pas, et c'est ce blocage-là qu'il faut instruir
 - [x] **P3** — **peser une version 1D avant de l'écrire.** Un contre-exemple 1D suffirait à
       infirmer l'additivité ; son absence ne la validerait pas. Dire lequel des deux verdicts un
       B4 en 1D pourrait rendre — et si c'est encore B4 ou un banc différent qui mérite son nom.
-- [ ] **P4** — si la voie tient : mesurer. Superposition linéaire contre solution non linéaire sur
+- [x] **P4** — si la voie tient : mesurer. Superposition linéaire contre solution non linéaire sur
       la même scène, en balayant le rapport d'amplitude, jusqu'à trouver la bascule ou montrer
       qu'elle n'apparaît pas dans la plage accessible.
 - [ ] **P5** — verdict, livrable, et ADR **seulement** si une décision en sort. La valeur de départ

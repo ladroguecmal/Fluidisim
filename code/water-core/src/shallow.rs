@@ -303,6 +303,55 @@ impl Shallow1D {
     /// initiale contiendrait un train gauche qui irait rebondir sur le mur amont et polluerait la
     /// fenetre de mesure du train reflechi.
     #[allow(clippy::too_many_arguments)]
+    /// S161, B4 : une **somme de gaussiennes** au lieu d'une seule, pour poser deux
+    /// perturbations dans un même domaine et comparer `simuler(A) + simuler(B)` à
+    /// `simuler(A et B)`. C'est le montage minimal d'un test d'additivité, et il n'existait pas :
+    /// `configure_bosse` ne pose qu'une bosse, et rien ne permet d'écrire un état initial.
+    ///
+    /// Additive, sans effet sur les montages existants — ce fichier est un véhicule d'essai
+    /// (ADR-043), pas du code de production.
+    pub fn configure_bosses(
+        host: &mut HostServices,
+        n: usize,
+        dx: f64,
+        h0: f64,
+        bosses: &[(f64, f64, f64)],
+    ) -> Result<Shallow1D, AllocError> {
+        host.alloc
+            .alloc_persistent(n * 11 * core::mem::size_of::<f64>())?;
+        let (mut h, mut hu) = (Vec::with_capacity(n), Vec::with_capacity(n));
+        for i in 0..n {
+            let x = (i as f64 + 0.5) * dx;
+            let mut hi = h0;
+            for (amplitude, x0, sigma) in bosses {
+                hi += amplitude * (-((x - x0) / sigma).powi(2)).exp();
+            }
+            h.push(hi);
+            hu.push(0.0);
+        }
+        Ok(Shallow1D {
+            dx,
+            b: vec![0.0; n],
+            h,
+            hu,
+            h_new: vec![0.0; n],
+            hu_new: vec![0.0; n],
+            t: 0.0,
+            bien_equilibre: true,
+            flux: Flux::Hll,
+            eponge: None,
+            ordre2: false,
+            rk2: false,
+            s_eta: vec![0.0; n],
+            s_u: vec![0.0; n],
+            dh: vec![0.0; n],
+            dhu: vec![0.0; n],
+            h1: vec![0.0; n],
+            hu1: vec![0.0; n],
+            h_sec: H_SEC_DEFAUT,
+            sat: Saturations::default(),
+        })
+    }
     pub fn configure_paquet(
         host: &mut HostServices,
         n: usize,
