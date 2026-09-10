@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S161 — en cours
+Session : S161 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : **débloquer B4**, seule voie ouverte selon ADR-109, et qu'A214 attend désormais seule.
 B4 est **le juge de l'architecture** : « à partir de quel rapport `|δ|/Hs` la décomposition
@@ -80,7 +80,7 @@ intégrale** que le dépôt n'a pas, et c'est ce blocage-là qu'il faut instruir
       qu'elle n'apparaît pas dans la plage accessible.
 - [x] **P5** — verdict, livrable, et ADR **seulement** si une décision en sort. La valeur de départ
       d'ADR-001 est 0,35·Hs : la confirmer, la déplacer ou la laisser est une décision.
-- [ ] **P6** — rituel de fin (§6, sept points), jeton rendu. Copie principale : rien à refermer.
+- [x] **P6** — rituel de fin (§6, sept points), jeton rendu. Copie principale : rien à refermer.
 
 ### Notes de reprise
 
@@ -104,3 +104,27 @@ de regarder d'abord si une référence suffisante existe déjà.
 
 Troisième piège : confondre « infirmer ADR-001 » et « mesurer un seuil ». B4 doit pouvoir
 l'infirmer ; une mesure qui ne peut rendre qu'un seuil n'est pas B4.
+
+P2-P6 : B4-DEBLOCAGE-S161, sonde `additivite_b4.rs`, `configure_bosses`, ADR-111, note corrective
+sur ADR-001 §3.3, A216, A217, L243. 299 tests inchangés.
+
+Ce que la session a appris, et qui vaut pour la suivante : **le blocage hérité n'en était pas un.**
+La référence existait depuis S36 ; il manquait trois lignes. Ouvrir un blocage coûte une lecture,
+le supposer coûte des sessions.
+
+Deux pièges évités, à ne pas réexplorer :
+- `dispersif.rs` **ne peut pas** servir de référence : il est linéaire, la superposition y est
+  vraie par construction, l'écart serait nul quel que soit le rapport ;
+- le pas CFL dépend de la hauteur maximale, donc de la présence de la seconde perturbation : les
+  trois simulations d'un même point n'avancent pas par la même suite de pas. Contrôlé à pas imposé,
+  la part numérique vaut 0 à 2 % — l'artefact existe, il est négligeable ici.
+
+Pour S162 sans relire : **A217** demande quelle variable gouverne l'additivité en eau profonde,
+là où la profondeur ne joue plus. La réponse plausible est la **cambrure**, et rien ne le vérifie.
+Le blocage annoncé est qu'aucun solveur du dépôt n'est à la fois **non linéaire et dispersif** —
+`shallow.rs` est non linéaire mais non dispersif, `dispersif.rs` est dispersif mais linéaire.
+**Commencer par vérifier ce blocage-là**, exactement comme S161 a vérifié le précédent : de quoi
+a-t-on besoin au juste, et qu'est-ce qui existe déjà qui y ressemble ? Une réponse négative,
+argumentée, est un résultat — elle dirait que ce volet de B4 attend une couche non écrite.
+À défaut, **A216** est peu coûteuse : la sonde existe, il s'agit de balayer `A_B/h` entre 0,02 et
+0,10 pour voir comment le coefficient passe de 0,95 à 0,24.

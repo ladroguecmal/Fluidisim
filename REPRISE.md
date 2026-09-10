@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 20:00 +02:00
+JETON            : libre
+Battement        : 2026-09-10 20:03 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S161 — débloquer **B4**
-Dernière session : S160 — S158-1 fermée, coïncidence ; 299 tests/cinq ignorés
-Session suivante : à fixer en fin de S161
+Session en cours : aucune
+Dernière session : S161 — premier volet de B4 exécuté ; 299 tests/cinq ignorés
+Session suivante : S162 — **A217**, l'additivité en eau profonde : ouvrir le blocage d'abord
 
 *S160 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
 rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour.*
@@ -187,6 +187,32 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S161 — 2026-09-10 :** [ADR-111](docs/adr/ADR-111-le-critere-de-bascule-s-exprime-en-profondeur.md),
+[B4-DEBLOCAGE-S161](docs/validation/B4-DEBLOCAGE-S161.md). **Premier volet de B4 exécuté**, le banc
+qui juge l'architecture.
+**Le blocage hérité n'en était pas un.** « B4 est bloqué par la référence substitutive intégrale »
+circulait depuis plusieurs sessions ; la référence existe **depuis S36** — `shallow.rs`,
+Saint-Venant 1D non linéaire — et il manquait **trois lignes** pour poser deux perturbations dans
+un même domaine. **L243** : un blocage hérité se vérifie avant d'être contourné ; non vérifié, il
+ferme la question aussi bien qu'un renvoi faux. *Piège le plus proche, évité : `dispersif.rs` est
+linéaire, la superposition y est vraie par construction et l'écart aurait été nul.*
+**Résultat : le critère de bascule d'ADR-001 est exprimé dans la mauvaise variable.** À `max|δ|/h`
+égal, l'écart d'additivité est **le même** que la perturbation vaille10 % ou100 % de l'onde de
+fond. Ce qui gouverne est l'amplitude rapportée à la **profondeur** : `écart ≈0,24·max|δ|/h`,
+proportionnalité vérifiée sur **cinq décades** (jusqu'à8e-6, coefficient à0,99 — pas un plancher) ;
+part numérique de0 à2 % au contrôle à pas imposé. `0,35·Hs` autoriserait des écarts variant d'un
+facteur **dix** selon l'état de mer —0,8 % à8,4 %.
+**La décomposition n'est pas infirmée : son paramétrage l'est.** Elle tient à moins de1 % tant que
+`max|δ| ≤0,04·h`, et n'atteint10 % qu'à la moitié de la profondeur. **Aucun seuil gelé** (ADR-108) :
+la loi est publiée, le seuil suit la tolérance que personne n'a spécifiée. Note corrective datée
+portée à ADR-001 §3.3.
+**Trois volets de B4 restent bloqués** : forces sur coque, perception en double aveugle, contrôle du
+terme source (A50). **A217** : en eau profonde la variable est inconnue, et le dépôt n'a aucun
+solveur à la fois non linéaire **et** dispersif. **A216** : le coefficient passe de0,24 à0,95 à
+très faible amplitude de fond, mesuré et non compris.
+299 tests inchangés.111 ADR,217 angles,243 leçons,18 invariants,6 SPEC,23 cas.
+Suite S162 : **A217**, en commençant comme S161 — par **ouvrir le blocage** plutôt que le supposer.
 
 **S160 — 2026-09-10 :** [FACTEUR-25-S160](docs/validation/FACTEUR-25-S160.md). S158-1 fermée,
 **aucun ADR : rien n'était à décider**. Session menée dans la **copie principale**, sur `master`.

@@ -289,4 +289,4 @@ Le juge de fidélité est B4, bloqué ailleurs. Suite S159 : le facteur 2,5 qui 
 L'une croyait la dernière session être **S44** : l'ouvrir aurait recréé cent quinze sessions parallèles.
 Avance rapide d'abord, suppressions ensuite ; six copies ramenées à trois, aucune histoire perdue, et la
 procédure de fermeture écrite dans l'amorce. Suite S160 : le facteur 2,5, S158-1.
-110 ADR,215 angles,242 leçons,18 invariants,6 SPEC,23 cas.
+111 ADR,217 angles,243 leçons,18 invariants,6 SPEC,23 cas.

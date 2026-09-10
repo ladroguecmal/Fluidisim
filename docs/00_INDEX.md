@@ -17,6 +17,18 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S161 :** [ADR-111](adr/ADR-111-le-critere-de-bascule-s-exprime-en-profondeur.md),
+[B4-DEBLOCAGE-S161](validation/B4-DEBLOCAGE-S161.md). **Premier volet de B4 exécuté** — le banc qui juge
+l'architecture. Le blocage hérité (« pas de référence substitutive intégrale ») n'en était pas un : `shallow.rs`
+existe depuis S36, il manquait **trois lignes** pour poser deux perturbations dans un même domaine (**L243**).
+**Le critère de bascule d'ADR-001 est exprimé dans la mauvaise variable** : à `max|δ|/h` égal, l'écart
+d'additivité est le même que la perturbation vaille 10 % ou 100 % de l'onde de fond. Ce qui gouverne est
+l'amplitude rapportée à la **profondeur** — `écart ≈ 0,24·max|δ|/h`, vérifié sur cinq décades. `0,35·Hs`
+autoriserait des écarts variant d'un facteur dix selon l'état de mer. **La décomposition, elle, tient** : moins
+de 1 % tant que `max|δ| ≤ 0,04·h`. Aucun seuil gelé (ADR-108). Trois volets de B4 restent bloqués ; **A217** :
+en eau profonde, la variable est inconnue et aucune référence non linéaire dispersive n'existe.
+299 tests inchangés. 111 ADR,217 angles,243 leçons,18 invariants,6 SPEC,23 cas. Suite S162 : **A217**.
+
 **S160 :** [FACTEUR-25-S160](validation/FACTEUR-25-S160.md). S158-1 : **coïncidence**, et aucun ADR — rien
 n'était à décider. Les deux « 2,5 » n'étaient pas la même statistique : S157 publiait une **étendue** `max/min`,
 S158 une **déviation** au rapport idéal ; sur le seul jeu de S158 elles valent 3,42 et 2,50. Et le nombre de S158
