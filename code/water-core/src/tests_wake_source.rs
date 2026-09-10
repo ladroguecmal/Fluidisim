@@ -220,3 +220,82 @@ fn recurrence_radiale_hors_domaine_s156() {
         "60 s sans récurrence visible : {tard_tot:.6e} contre {tard_fin:.6e}"
     );
 }
+
+/// ADR-109 : la récurrence rephase les modes sans toucher aux amplitudes, donc tout consommateur
+/// qui lit une **borne** — enveloppe de pente, énergie — y est insensible, là où le champ
+/// échantillonné se trompe d'un facteur cinquante. Témoin de conception autant que de calcul :
+/// si un jour le déclencheur d'écume lisait un échantillon au lieu de l'enveloppe, ce test
+/// tomberait, et c'est exactement ce qu'on veut qu'il signale.
+#[test]
+fn bornes_insensibles_au_repliement_s158() {
+    use crate::{
+        bound_pressure::Prepared,
+        gaussian_spectrum::bake,
+        pressure_journal::Journal,
+        spectral_pressure::{Node, Slot, Surface},
+    };
+    let points = [[2.0f32, 0.0], [0.0, 3.0], [-4.0, 1.0], [1.0, -5.0]];
+    let mesure = |radial: usize, us: u64| -> (f32, f32, f64) {
+        let mut m = metadata();
+        m.settings.end = SimTime(60_000_000);
+        m.settings.min = [-64.0; 2];
+        m.settings.max = [64.0; 2];
+        m.recipe = Recipe {
+            sigma: 1.0,
+            cutoff: 6.0,
+            radial,
+            angular: 64,
+        };
+        let legs = [Leg {
+            duration_us: 2_000_000,
+            velocity: [2.0, 0.0],
+            downward_force_n: 100.0,
+        }; 8];
+        let wake = Wake::build(m, SimTime(0), [0.0; 2], &legs).unwrap();
+        let mut records = [None];
+        let mut journal = Journal::new(1, &mut records);
+        journal.admit_authenticated(wake.source()).unwrap();
+        let mut nodes = vec![Node::default(); radial * 64];
+        let mut demi = vec![Node::default(); radial * 32];
+        let complet = bake(m.recipe, &mut nodes).unwrap();
+        let moitie = complet.half_into(&mut demi).unwrap();
+        let mut slots = vec![Slot::default(); moitie.nodes().len()];
+        let context = wake.source().context();
+        let p =
+            Prepared::from_journal(context, &moitie, &journal, SimTime(us), &mut slots).unwrap();
+        let mut sortie = [Surface::default(); 4];
+        let mut scratch = sortie;
+        p.sample_batch(&context, SimTime(us), &points, &mut scratch, &mut sortie)
+            .unwrap();
+        let somme: f64 = sortie.iter().map(|s| (s.eta as f64) * (s.eta as f64)).sum();
+        (p.slope_envelope(), p.energy_j(), (somme / 4.0).sqrt())
+    };
+    let (env_grossier, energie_grossier, champ_grossier) = mesure(128, 60_000_000);
+    let (env_fin, energie_fin, champ_fin) = mesure(512, 60_000_000);
+    let ecart = |a: f32, b: f32| ((a - b) / b).abs() as f64;
+    println!(
+        "S158 60s: enveloppe {:.3e} vs {:.3e} ({:.2e}) | energie {:.3e} vs {:.3e} ({:.2e}) | champ x{:.1}",
+        env_grossier,
+        env_fin,
+        ecart(env_grossier, env_fin),
+        energie_grossier,
+        energie_fin,
+        ecart(energie_grossier, energie_fin),
+        champ_grossier / champ_fin
+    );
+    // Les bornes ne bougent pas...
+    assert!(
+        ecart(env_grossier, env_fin) < 0.05,
+        "enveloppe sensible au repliement : {env_grossier:e} contre {env_fin:e}"
+    );
+    assert!(
+        ecart(energie_grossier, energie_fin) < 0.01,
+        "énergie sensible au repliement : {energie_grossier:e} contre {energie_fin:e}"
+    );
+    // ...alors que le champ échantillonné, lui, est méconnaissable. Sans cette dernière
+    // assertion, le test passerait aussi sur un champ où il ne se passe rien.
+    assert!(
+        champ_grossier > 5.0 * champ_fin,
+        "pas de repliement à constater : {champ_grossier:e} contre {champ_fin:e}"
+    );
+}

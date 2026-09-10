@@ -82,7 +82,7 @@ n'appartiendrait ni à une formule citée ni à un banc qui le fixe.
       même chose.
 - [x] **P4** — ADR fixant la tolérance et sa provenance, puis relecture des durées de S157 **à
       cette tolérance** — les mesures existent, aucune campagne nouvelle si elle tombe dedans.
-- [ ] **P5** — le garde-fou, désormais constructible, avec son test témoin ; ou le constat motivé
+- [x] **P5** — le garde-fou, désormais constructible, avec son test témoin ; ou le constat motivé
       qu'il ne l'est toujours pas.
 - [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
 
@@ -192,3 +192,13 @@ d'etre ecrite a la session precedente pour ce geste exact.** Une lecon ecrite ne
 geste ; seule une procedure le change. Ce que je fais desormais et qu'il faut consigner en fin de
 session : lire l'horloge dans un appel **separe**, puis copier la valeur lue. Tant que la lecture
 et l'ecriture sont dans la meme commande, la valeur est decidee avant d'etre connue.
+
+P5 — un seul test recu, `bornes_insensibles_au_repliement_s158`, et c'est un temoin de
+**conception** autant que de calcul. A 60 s, radial 128 contre 512 : enveloppe de pente 5,27e-3
+d'ecart, energie 4,24e-4, champ echantillonne **48,4 fois** plus grand. Les trois assertions
+tiennent ensemble : les deux premieres disent que les bornes ne bougent pas, la troisieme
+interdit au test de passer sur un champ ou il ne se passe rien.
+Ce qu'il garde vraiment : si un jour le declencheur d'ecume lisait un echantillon au lieu de
+l'enveloppe, ce test tomberait. C'est la raison de l'ecrire, plus que la verification d'aujourd'hui.
+Temoin verifie : les deux mesures prises a radial 512, il echoue (ligne 297).
+299 tests/cinq ignores (206+93), debug et release, zero echec.
