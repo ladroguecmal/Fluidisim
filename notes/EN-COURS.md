@@ -68,10 +68,10 @@ reste hétérogène et aucun seuil ne s'y dérive (ADR-094, L220).
 ### Plan
 
 - [x] **P1** — état réel, jeton, **plan déclaré et committé seul**.
-- [ ] **P2** — monter le champ de pression minimal et échantillonner sa pente réelle. Cas à
+- [x] **P2** — monter le champ de pression minimal et échantillonner sa pente réelle. Cas à
       **une seule case**, où le facteur doit valoir *exactement* le produit des deux
       majorations connues — c'est le témoin qui dit que la sonde mesure ce qu'elle croit.
-- [ ] **P3** — balayer ce dont le facteur dépend : direction de `k`, phase de `η`, nombre de
+- [x] **P3** — balayer ce dont le facteur dépend : direction de `k`, phase de `η`, nombre de
       cases, taille de l'emprise. Est-il borné, ou l'emprise peut-elle le faire diverger ?
 - [ ] **P4** — la borne resserrée `Σ|k_w|·|η|` (norme euclidienne au lieu des deux sommes de
       valeurs absolues) : même coût, majorant rigoureux. Mesurer ce qu'elle récupère, et
