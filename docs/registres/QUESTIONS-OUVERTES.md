@@ -1326,3 +1326,10 @@ entrée par entrée. Le fil reprend ci-dessous.
   construire la valeur, la garde serait une bosse et non un mur.
 - **A208 : ouverte, trois fois reportée.** Le refus ne désigne pas l'emprise, qui est pourtant ce
   que l'hôte peut changer. **À prendre en S144** — trois reports valent avertissement (L55).
+
+### S144 — Le refus dit enfin lequel des deux
+
+- **A208 : traitée.** [ADR-098](../adr/ADR-098-trois-causes-trois-noms-dans-le-budget-de-pente.md),
+  [REFUS-EMPRISE-S144](../validation/REFUS-EMPRISE-S144.md). Trois causes, trois noms. Les deux
+  réparations qu'A208 proposait sont écartées avec leur motif — l'une mentirait, l'autre était
+  périmée (**L227**).

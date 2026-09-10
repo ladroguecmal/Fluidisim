@@ -1836,3 +1836,13 @@ Retenu : deux gardes exécutables — l'une sur ce que les champs **calculent**,
 crate **contient** — plus l'**invariant I-18** qui dit ce qu'elles protègent. Les deux ont été
 **vues échouer** sur les fautes qu'elles gardent, dont celle de S141. Voir
 [CONTRAT-PENTE-S143](../validation/CONTRAT-PENTE-S143.md).
+
+**Suivi A208 — S144 : traitée par ADR-098, et aucune de ses deux réparations n'a été prise.**
+`Footprint` attribuerait la cause à l'emprise quand le facteur d'alignement dépend aussi du
+spectre : la bibliothèque ne peut pas trancher, et ADR-082 refuse un nom qui ment autant qu'un nom
+vague. Publier le rapport des deux enveloppes ne dirait que le facteur de **forme**, que S141 avait
+déjà retiré — la réparation était périmée par la session qui a suivi son écriture.
+Ce qui est fait à la place tient à un constat : **les trois budgets ont la pente réelle au point
+sous la main au moment du refus**. Trois causes décidables, trois noms — `MaxSlope`, `Slope`
+resserré, `SlopeEnvelope`. Six essais ont changé d'attente ; cinq exerçaient le majorant en
+croyant exercer la pente. Voir [REFUS-EMPRISE-S144](../validation/REFUS-EMPRISE-S144.md).

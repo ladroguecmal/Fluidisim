@@ -3476,3 +3476,21 @@ déguisée en contrainte.
 Ce qui reste alors : rendre la faute **bruyante** plutôt qu'impossible. Deux gardes exécutables
 l'ont fait ici pour un centième du coût, et l'une d'elles donne même le facteur manquant dans son
 message d'échec. Voir [[L219]] — et se souvenir qu'on ne mesure une garde qu'en la voyant échouer.
+
+## L227 — Une réparation proposée se périme comme un état, et pour la même raison
+
+*(S144)* A208 proposait deux réparations. La première attribuait une cause que la bibliothèque ne
+peut pas établir — défaut de rédaction, repérable à la lecture. **La seconde était juste le jour
+où elle a été écrite, et sans objet six jours plus tard** : publier le rapport des deux enveloppes
+aurait montré le facteur de forme, et la session suivante l'a retiré du calcul.
+
+Le dépôt sait déjà qu'un **état** recopié se périme et qu'il faut le dater (A185, S63). Une
+**réparation proposée** est un état déguisé : elle décrit ce qu'il faudrait faire *étant donné le
+système tel qu'il est*. Quand le système bouge, elle vieillit sans que rien ne la marque — et elle
+vieillit d'autant plus vite qu'elle est fine.
+
+En pratique : une proposition de réparation portée dans un angle mort se **relit avant d'être
+exécutée**, jamais ne s'exécute sur sa seule autorité — surtout après plusieurs sessions. Et
+l'écrire en disant *de quoi elle dépend* — ici « tant que l'enveloppe additionne les deux facteurs
+» — aurait suffi à la voir tomber. Voir [[L225]] : une dispense aussi dépend d'un état ; c'est le
+même mécanisme, du côté de l'action au lieu de l'inaction.

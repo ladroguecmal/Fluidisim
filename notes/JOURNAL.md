@@ -7419,3 +7419,55 @@ changer, alors qu'ADR-082 exige qu'un nom de refus désigne ce qu'il faut revoir
 valent avertissement (L55) : la prendre avant toute autre. Restent ouverts : l'audit des renvois
 « traité en Sxx » (S138), l'extension de fenêtre, S116-2, le bilan mixte, la durabilité et les
 deux calibrations de B10.
+
+---
+
+## S144 — 2026-09-10 — Le refus dit enfin lequel des deux, et les essais avouent ce qu'ils testaient
+
+**Entrée :** jeton libre à 597eca7, worktree `886155`, master coïncident. **A208**, ouverte en S140
+et **reportée trois fois**.
+**Produit :** [ADR-098](../docs/adr/ADR-098-trois-causes-trois-noms-dans-le-budget-de-pente.md),
+[REFUS-EMPRISE-S144](../docs/validation/REFUS-EMPRISE-S144.md), trois noms de refus dans les trois
+budgets, deux essais neufs, six essais corrigés, L227.
+
+**Aucune des deux réparations qu'A208 proposait n'a été prise, et il fallait le dire avant d'en
+proposer une autre.** `Footprint` attribuerait la cause à l'emprise, quand le facteur d'alignement
+dépend aussi du spectre publié : la bibliothèque ne peut pas trancher, et ADR-082 refuse un nom qui
+ment autant qu'un nom vague. Publier le rapport des deux enveloppes ne dirait que le facteur de
+**forme** — que S141 avait déjà retiré. **L227** : une réparation proposée est un état déguisé,
+elle se périme comme un état, et d'autant plus vite qu'elle est fine.
+
+**Ce qui a débloqué l'instruction est un constat, pas une idée** : les trois budgets refusent
+**après** avoir échantillonné le point demandé. La pente réelle au point est donc sous la main. Elle
+ne dit pas le maximum sur l'emprise — il ne se calcule pas — mais elle en est une borne inférieure,
+et cela suffit à séparer deux situations qui n'ont pas le même remède.
+
+**Trois causes, trois noms** : `MaxSlope` pour un paramètre inutilisable — faute d'entrée que
+`Slope` portait indûment, exactement le fourre-tout qu'ADR-082 démonte ; `Slope` resserré à « la
+pente réelle au point dépasse » ; **`SlopeEnvelope`** pour « ta pente tient ici, c'est mon majorant
+qui refuse ». Le troisième ne dit pas *pourquoi* l'enveloppe est large : il dit **où regarder**,
+et c'est tout ce qui est vrai.
+
+**Le résultat le plus instructif n'était pas prévu : six essais ont changé d'attente, et cinq
+exerçaient le majorant en croyant exercer la pente.** Le dépôt testait le conservatisme sous le nom
+de la pente depuis que ces essais existent. L'un d'eux — `normal_matches_spatial_difference_and_
+envelope_sees_cancellation` — construisait exactement le cas d'A208 **avant** qu'elle soit ouverte ;
+son nom dit « l'enveloppe voit une compensation », et il ne pouvait le nommer que `Slope`.
+
+**La garde de S143 a servi le lendemain**, sur une modification sans rapport avec elle : le premier
+`cargo test` a signalé trois sites de comparaison nouveaux, légitimes mais non déclarés. Une garde
+écrite pour un troisième champ hypothétique a rattrapé une session qui ne pensait pas à elle.
+
+**Vérifié que le nom sert** : même champ de pression, même limite, même enveloppe, deux points — au
+plus raide `Slope`, au plus plat `SlopeEnvelope`. Une aide qu'on n'a pas vue aider ne vaut pas mieux
+qu'une garde qu'on n'a pas vue échouer.
+
+275 tests, cinq ignorés — deux de plus. Aucun hachage touché, harnais H1 inchangé : les noms de
+refus ne sont pas des bits publiés. 98 ADR, 211 angles, 18 invariants, 6 spécifications, 23 cas.
+Invariants relus : aucun invalidé.
+
+**Suite S145 :** plus aucun angle mort de la série pente n'est ouvert — A205 à A210 sont toutes
+traitées. Reprendre le **fil du projet** plutôt qu'un angle : le bilan S69 reste vrai, `δ`, `W` et
+`V` n'existent pas comme couches, et onze bancs sur onze attendent une couche non écrite. L'audit
+des renvois « traité en Sxx » (S138) est le dernier travail de corpus ouvert ; l'extension de
+fenêtre, S116-2, le bilan mixte, la durabilité et les deux calibrations de B10 restent ouverts.

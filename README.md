@@ -135,7 +135,7 @@ Coût mesuré en S125 : environ ×4 à points identiques et ×9 pour le montage 
 initial. [ADR-085](docs/adr/ADR-085-profils-radiaux-selon-le-domaine.md) conserve N64 par défaut ;
 N128/N256 se dimensionnent explicitement au domaine commun du service. A202 traitée ; A203 suit
 la réception physique à grande portée, réalisée en S126 sur les deux fixtures à âge0–4 s.
-État vérifié S143 : **273 tests réussis, cinq ignorés ; 97 ADR, 211 angles, 18 invariants,
+État vérifié S144 : **275 tests réussis, cinq ignorés ; 98 ADR, 211 angles, 18 invariants,
 6 spécifications, 23 cas canoniques.**
 [Réception S126](docs/validation/RECEPTION-ETENDUE-S126.md) :1350 points-temps reçus contre
 oracle indépendant, erreur normalisée<=4,44e-7. La fenêtre4 s reçoit surtout des queues aux
@@ -210,6 +210,12 @@ A210 est traitée en S143 : deux gardes exécutables — l'une sur ce que les ch
 crate contient — et l'**invariant I-18**. La pesée a écarté le type porteur, qui paraissait la garde la plus
 solide : l'hôte devant pouvoir construire la valeur, la garde serait une bosse et non un mur (L226). Les deux
 gardes ont été **vues échouer** sur la faute de S141 avant d'être acceptées.
-Suite : A208, ouverte depuis S140 et trois fois reportée — le refus ne désigne pas l'emprise.
-97 ADR,211 angles,18 invariants,6 spécifications,23 cas.
+A208 est traitée en S144, et **aucune des deux réparations qu'elle proposait n'a été prise** : l'une attribuerait
+une cause que la bibliothèque ne peut pas établir, l'autre était périmée par la session suivante (L227). Le refus
+distingue désormais trois causes — un paramètre inutilisable, un champ vraiment trop raide au point, et une
+enveloppe qui refuse ce que la pente ne contredit pas. Six essais ont changé d'attente : cinq exerçaient le
+majorant en croyant exercer la pente.
+Suite : la série pente est close — A205 à A210 toutes traitées. Reprendre le fil du projet, où `δ`, `W` et `V`
+n'existent toujours pas comme couches (bilan S69).
+98 ADR,211 angles,18 invariants,6 spécifications,23 cas.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

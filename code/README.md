@@ -18,7 +18,7 @@ séparé de la batterie courante : [REFERENCE-C22-S56](../docs/validation/REFERE
 
 ```bash
 cd code
-cargo test --offline                      # 273 tests, 5 ignorés (S142)
+cargo test --offline                      # 275 tests, 5 ignorés (S144)
 cargo build --offline --release
 ./target/release/water-harness check scenarios/*.toml
 ```

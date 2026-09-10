@@ -17,6 +17,16 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S144 :** [ADR-098](adr/ADR-098-trois-causes-trois-noms-dans-le-budget-de-pente.md), trois causes trois noms.
+[REFUS-EMPRISE-S144](validation/REFUS-EMPRISE-S144.md) : **A208 traitée**, et **aucune de ses deux réparations
+n'a été prise** — `Footprint` mentirait, et publier le rapport des enveloppes était **périmé** par S141 (**L227** :
+une réparation proposée est un état déguisé). Ce qui débloque est un constat : les trois budgets ont la pente
+réelle **au point** sous la main au moment du refus. D'où `MaxSlope` (paramètre inutilisable, que `Slope` portait
+indûment), `Slope` resserré, et **`SlopeEnvelope`** — « ta pente tient ici, c'est mon majorant qui refuse ».
+**Six essais ont changé d'attente et cinq exerçaient le majorant en croyant exercer la pente.**
+275 tests/cinq ignorés, aucun hachage touché.
+98 ADR,211 angles,18 invariants,6 spécifications,23 cas. Suite S145 : la série pente est close, reprendre le fil.
+
 **S143 :** [ADR-097](adr/ADR-097-ce-qui-garde-le-contrat-de-pente.md), ce qui garde le contrat de pente.
 [CONTRAT-PENTE-S143](validation/CONTRAT-PENTE-S143.md) : **A210 traitée**, et la pesée a **inversé** la préférence
 de départ. Le type porteur ne garde rien — l'hôte devant pouvoir construire la valeur, le constructeur est public
@@ -566,7 +576,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | `code/scenarios` | les scénarios du mode `check`, assertions comprises |
 
 ```
-cargo test --offline                                  # 273 succès, 5 ignorés (S142)
+cargo test --offline                                  # 275 succès, 5 ignorés (S144)
 water-harness check   scenarios/*.toml                # H1 — déterminisme, 0,04 s / budget 60 s
 water-harness physics scenarios/*.toml                # H3 — assertions analytiques et diagnostics
 ```

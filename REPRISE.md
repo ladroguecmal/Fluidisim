@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 13:08 +02:00
+JETON            : libre
+Battement        : 2026-09-10 13:10 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S144 — A208, le refus qui ne désigne pas l'emprise
-Dernière session : S143 — A210 traitée, invariant I-18 ;273 tests/cinq ignorés
-Session suivante : à fixer en fin de S144
+Session en cours : aucune
+Dernière session : S144 — A208 traitée ;275 tests/cinq ignorés
+Session suivante : S145 — la série pente est close ; reprendre le fil du projet (bilan S69)
 
 **Copie de travail S139 et S140** : worktree `claude/reprise-projet-886155`, refusionné en avance
 rapide dans master à la fin de chacune des deux. Terminer de même :
@@ -189,6 +189,31 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S144 — 2026-09-10 :** [ADR-098](docs/adr/ADR-098-trois-causes-trois-noms-dans-le-budget-de-pente.md),
+[REFUS-EMPRISE-S144](docs/validation/REFUS-EMPRISE-S144.md). **A208 traitée**, après trois reports.
+**Aucune de ses deux réparations n'a été prise**, et il fallait le dire avant d'en proposer une
+autre : `Footprint` attribuerait la cause à l'emprise quand l'alignement dépend aussi du spectre —
+ADR-082 refuse un nom qui ment ; et publier le rapport des deux enveloppes ne dirait que le facteur
+de **forme**, que S141 avait déjà retiré. **L227** : une réparation proposée est un état déguisé,
+elle se périme comme un état, et d'autant plus vite qu'elle est fine.
+**Ce qui débloque est un constat** : les trois budgets refusent **après** avoir échantillonné le
+point, donc la pente réelle au point est sous la main. D'où trois causes décidables et trois noms —
+`MaxSlope` (paramètre inutilisable, que `Slope` portait indûment : le fourre-tout qu'ADR-082
+démonte), `Slope` resserré à « la pente réelle au point dépasse », et **`SlopeEnvelope`** : *ta
+pente tient ici, c'est mon majorant qui refuse*. Il ne dit pas pourquoi l'enveloppe est large — la
+bibliothèque ne le sait pas — il dit **où regarder**.
+**Le résultat le plus instructif n'était pas prévu** : six essais ont changé d'attente et **cinq
+exerçaient le majorant en croyant exercer la pente**. L'un d'eux construisait exactement le cas
+d'A208 avant qu'elle soit ouverte, sans pouvoir le nommer.
+**La garde de S143 a servi le lendemain**, sur une modification sans rapport : elle a signalé trois
+sites de comparaison nouveaux, légitimes mais non déclarés.
+275 tests/cinq ignorés, aucun hachage touché, harnais H1 inchangé.
+98 ADR,211 angles,18 invariants,6 spécifications,23 cas.
+Suite S145 : **la série pente est close** — A205 à A210 toutes traitées. Reprendre le **fil du
+projet** plutôt qu'un angle : le bilan S69 reste vrai, `δ`, `W` et `V` n'existent pas comme couches
+et onze bancs sur onze attendent une couche non écrite. L'audit des renvois « traité en Sxx »
+(S138) est le dernier travail de corpus ouvert.
 
 **S143 — 2026-09-10 :** [ADR-097](docs/adr/ADR-097-ce-qui-garde-le-contrat-de-pente.md),
 [CONTRAT-PENTE-S143](docs/validation/CONTRAT-PENTE-S143.md). **A210 traitée**, et **la pesée a

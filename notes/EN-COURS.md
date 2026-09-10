@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S144 — en cours
+Session : S144 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : **A208**, ouverte depuis S140 et **trois fois reportée**. À champ identique, l'emprise
 publiée décide de la part de budget de pente consommée — ×10,9 mesuré, sans borne — et le refus
@@ -82,7 +82,7 @@ pas à changer. ADR-082 exige qu'un nom de refus désigne ce qu'il faut revoir.
       posée sur un zéro, facteur ×10,9 — et montrer que l'appelant voit désormais ce qui le
       fait refuser. Une aide qu'on n'a pas vue aider ne vaut pas mieux qu'une garde qu'on n'a
       pas vue échouer (S143).
-- [ ] **P6** — ADR, livrable, rituel de fin (§6), jeton rendu, fusion `--ff-only`.
+- [x] **P6** — ADR, livrable, rituel de fin (§6), jeton rendu, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -108,3 +108,25 @@ ment, et ADR-082 refuse un nom qui ment autant qu'un nom vague.
 
 Second piège : trois reports ont déjà eu lieu. Si la conclusion honnête est « rien à faire ici »,
 la dire et **fermer** A208 avec son motif, plutôt que la reporter une quatrième fois.
+
+P2-P6 : constat de ce qui est calculable au refus, pesée, trois noms dans trois budgets, deux
+essais neufs, six essais corrigés, ADR-098, REFUS-EMPRISE-S144, L227. 275 tests/cinq ignorés.
+
+Ce que l'instruction a retourné : **les deux réparations proposées par A208 étaient l'une fausse,
+l'autre périmée**. Ne pas exécuter une réparation portée dans un angle mort sans la relire — c'est
+L227, et c'est la leçon de la session.
+
+Ce qui a débloqué : un constat de lecture, pas une idée. Les trois budgets échantillonnent le
+point **avant** de tester le budget, donc la pente réelle au point est disponible gratuitement.
+Chercher ce qui est déjà là avant d'inventer.
+
+Impasse évitée : `Footprint`. Le nom aurait été agréable et faux — l'alignement dépend aussi du
+spectre, pas seulement de l'emprise.
+
+Pour S145 sans relire : **la série pente est close**, A205 à A210 toutes traitées, et il n'y a plus
+d'angle mort de cette famille. Le prochain travail n'est pas un angle mort mais un choix de fil.
+Le bilan S69 dit l'essentiel : ~85 % du projet est un corpus de conception, ~15 % un système ;
+`δ`, `W` et `V` n'existent pas comme couches ; onze cas sur 23 et onze bancs sur onze attendent
+une couche non écrite. La trajectoire d'ADR-054 (S71) reste : `WaveEvent` → journal rejouable →
+impact propagé → sillage/intégration → B2. Le dernier travail de corpus ouvert est l'audit des
+renvois « traité en Sxx » (S138) — moins urgent que d'écrire une couche.
