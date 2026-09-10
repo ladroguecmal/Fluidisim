@@ -17,6 +17,15 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S162 :** [ADR-112](adr/ADR-112-la-superposition-independante-ne-recoit-pas-le-couplage.md),
+[ADDITIVITE-PROFONDE-S162](validation/ADDITIVITE-PROFONDE-S162.md). **A217 partielle** : Stokes
+au second ordre fournit un terme croisé en `kab`, sensible à la cambrure et à la phase ; aucune
+référence évolutive générale. **Portée S161 corrigée** : sa sonde additionne des évolutions
+indépendantes et ne calcule pas le résidu couplé de SPEC-004 §6.1. ADR-112 remplace le choix du
+paramètre de bascule d'ADR-111 ; les mesures restent, aucun seuil n'est reçu. B4 reste à recevoir
+sur les architectures réelles. A218, L244. 299 tests/cinq ignorés, plus un test d'exemple reçu.
+112 ADR,218 angles,244 leçons,18 invariants,6 SPEC,23 cas.
+**Suite S163 : S162-1**, résidu couplé en Saint-Venant et contre-épreuve du couplage.
 **S161 :** [ADR-111](adr/ADR-111-le-critere-de-bascule-s-exprime-en-profondeur.md),
 [B4-DEBLOCAGE-S161](validation/B4-DEBLOCAGE-S161.md). **Premier volet de B4 exécuté** — le banc qui juge
 l'architecture. Le blocage hérité (« pas de référence substitutive intégrale ») n'en était pas un : `shallow.rs`

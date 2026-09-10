@@ -3801,3 +3801,18 @@ En pratique, deux questions avant d'accepter un blocage hérité : **de quoi exa
 besoin**, et **qu'est-ce qui existe déjà qui y ressemble** ? Ici, la seconde a suffi. Voir aussi
 [[L240]] : une consigne qui nomme une ressource disparue égare ; un blocage qui ne nomme rien
 égare autant.
+
+## L244 — Une décomposition d'état n'est pas une superposition d'évolutions
+
+*(S162)* Un diagnostic comparait deux simulations autonomes additionnées à leur simulation
+conjointe. Il révélait une interaction physique réelle. L'architecture visée, elle, prévoyait
+une équation du résidu avec termes croisés : ce diagnostic n'en testait pas le calcul.
+
+Pour `U_t=N(U)`, poser `U=Q+d` donne `d_t=N(Q+d)-Q_t`, même si N est non linéaire.
+La reconstruction additive reste exacte en principe ; ce sont les approximations de l'équation
+résiduelle qu'il faut recevoir. Un écart de superposition ne les mesure pas.
+
+Avant d'interpréter un banc, écrire côte à côte **l'équation prévue et celle exécutée**.
+Une réserve de dimension ou de précision ne suffit pas si l'objet mathématique a changé.
+Et construire le résidu après coup par soustraction ne teste pas son intégration : ce serait
+une identité. Un vrai témoin doit retirer un terme du couplage et faire perdre l'accord.

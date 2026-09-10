@@ -8160,3 +8160,47 @@ Recommandation du dernier bilan (BILAN-S145 : lancer B1) : exécutée en S146 �
 Une référence non linéaire *et* dispersive est-elle à portée ? Si oui, l'additivité en eau profonde
 se mesure ; si non, le dire fermement, car c'est alors la limite structurelle de tout ce volet de
 B4. À défaut, A216 est peu coûteuse et la sonde existe.
+
+---
+
+## S162 — 2026-09-10 — A217 s'ouvre par Stokes ; la superposition ne reçoit pas le résidu
+
+**Entrée :** master 832762f, jeton libre, arbre propre ; fichiers, git et cargo disponibles.
+Trois autres copies propres à S159 ont été avancées au jeton occupé de S162. Aucune copie
+créée ni supprimée. Branche archivée conservée. Plan déclaré seul en P1.
+
+**Produit :** [ADDITIVITE-PROFONDE-S162](../docs/validation/ADDITIVITE-PROFONDE-S162.md),
+sonde `stokes_additivite.rs`, SPEC-001 §1 ter,
+[ADR-112](../docs/adr/ADR-112-la-superposition-independante-ne-recoit-pas-le-couplage.md),
+notes datées ADR-001/111 et B4-S161, A218, L244, action S162-1.
+
+**A217 partielle.** L'absence de référence évolutive non linéaire dispersive est confirmée,
+mais Stokes d'ordre deux donne un diagnostic analytique : interaction `kab cos(2θ+ϕ)` pour
+une même longueur d'onde et une même direction. À b/a=0,35 et a=0,02 m, changer k de 0,25 à 4
+fait passer l'écart relatif de 0,1296 % à 2,0711 %. Même ka, même ratio : même écart.
+La phase change le dénominateur ; à annulation des fondamentales le rapport est indéfini,
+pas nul. Aucun seuil ni loi générale n'en sort. Profils liés, pas évolution de Cauchy.
+
+**La conclusion structurante est une correction de portée.** SPEC-004 §6.1 prévoit des termes
+croisés et un résidu du fond ; la sonde S161 additionne des évolutions autonomes. Elle mesure
+une propriété différente de celle dont ADR-111 a décidé le critère. ADR-112 remplace ce choix,
+conserve les mesures historiques et n'installe aucun seuil. L'ancienne valeur 0,35·Hs reste
+historique et non reçue ; max|δ|/h reste une variable d'étude, sans prescription générale.
+B4 n'a pas encore reçu sa comparaison architecturale. A50 était le garde-fou pertinent.
+
+**Vérification :** 299 tests workspace réussis (206 cœur + 93 harnais), cinq ignorés,
+zéro échec ; un test supplémentaire propre à l'exemple reçu séparément en debug, et ses
+assertions reçues en release. Quadrature contre expression fermée sur 27 montages à trois
+résolutions ; essai à zéro et annulation explicite. Résidus cinématique/dynamique évalués sur
+la surface réelle : décroissance normalisée d'ordre deux, contre ordre un si l'harmonique est
+retirée. Cela reçoit l'instrument, pas l'évolution non linéaire. Avertissements hérités inchangés.
+
+**Non fait :** aucun solveur nouveau, aucune réception dispersive évolutive, aucune force sur
+coque ni perception. A216 reportée explicitement derrière le défaut de portée A218.
+Invariants I-01, I-04, I-14 et I-15 relus, aucun invalidé ; aucun calcul de production changé.
+112 ADR, 218 angles, 244 leçons, 18 invariants, 6 SPEC, 23 cas.
+
+**Suite S163 : S162-1**, intégrer un résidu couplé en Saint-Venant et le recevoir contre le
+champ total à mêmes conditions initiales, avec contre-épreuve d'un terme croisé retiré.
+BILAN-S145 suivi : B1 exécuté S146, S63-1 close S147 ; poursuite de B4 maintenue. A217 reste
+partielle pour l'évolution profonde générale, A214 attend B4. Aucun arbitrage humain nouveau.

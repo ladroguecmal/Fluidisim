@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S162 — en cours
+Session : S162 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : instruire A217 : vérifier le blocage de la référence non linéaire dispersive,
 puis établir ce qu'une expérience bornée peut dire de l'additivité en eau profonde.
@@ -72,7 +72,7 @@ puis établir ce qu'une expérience bornée peut dire de l'additivité en eau pr
       mesurer si une référence recevable existe, sinon publier le blocage argumenté et le prochain lot.
       Distinguer une correction liée d'ordre deux d'une référence intégrale évolutive.
 - [x] **P4** — verdict et propagation aux points ouverts ; contrôles adaptés, aucun seuil inventé.
-- [ ] **P5** — rituel de fin REPRISE §6, journal, index, décomptes, suite et jeton rendu.
+- [x] **P5** — rituel de fin REPRISE §6, journal, index, décomptes, suite et jeton rendu.
 
 ### Notes de reprise
 
@@ -91,3 +91,8 @@ n'est pas testé en S161 ; P4 corrigera la portée d'ADR-111 par un nouvel ADR, 
 
 P4 : ADR-112 actée, notes de portée sur ADR-001/111 et B4-S161, A217 partielle,
 A218 et S162-1 ouvertes. Aucun seuil rétabli. Suite workspace lancée ; P5 attend sa fin.
+
+P5 : rituel effectué. Suite workspace reçue 299/5 ignorés, test exemple 1/0 ; aucun échec.
+Décomptes vérifiés : 112 ADR, 218 angles (dont A15/19/20/27 sans gras), 244 leçons,
+18 invariants, 6 SPEC (SPEC-003 dans validation), 23 cas. Prochaine S163 : S162-1.
+Copies à synchroniser au commit de clôture avant de rendre la main ; aucune suppression.

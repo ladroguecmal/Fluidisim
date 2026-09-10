@@ -132,3 +132,7 @@ croisés ; comparer leur évolution à état initial et pas identiques, puis ret
 un terme couplé. Ne pas construire `d` par soustraction a posteriori pour prétendre avoir testé
 son intégration. Ce lot exercera la distinction révélée ici avant d'écrire un nouveau solveur
 dispersif. A216 reste ouverte ; sa constante n'est pas un seuil du couplage.
+
+
+Réception finale : 299 tests workspace réussis, cinq ignorés ; un test d'exemple reçu
+séparément en debug et assertions de la sonde reçues en release. Aucun calcul de production modifié.

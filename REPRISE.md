@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 20:14 +02:00
+JETON            : libre
+Battement        : 2026-09-10 20:15 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S162 — instruction A217, additivité en eau profonde
-Dernière session : S161 — premier volet de B4 exécuté ; 299 tests/cinq ignorés
-Session suivante : S162 — **A217**, l'additivité en eau profonde : ouvrir le blocage d'abord
+Session en cours : aucune
+Dernière session : S162 — A217 partielle ; portée B4 corrigée par ADR-112
+Session suivante : S163 — S162-1 : intégrer et recevoir le résidu couplé en Saint-Venant
 
 *S160 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
 rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour.*
@@ -188,6 +188,25 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
+**S162 — 2026-09-10 :** [ADR-112](docs/adr/ADR-112-la-superposition-independante-ne-recoit-pas-le-couplage.md),
+[ADDITIVITE-PROFONDE-S162](docs/validation/ADDITIVITE-PROFONDE-S162.md). **A217 partielle** :
+une référence analytique de Stokes au second ordre établit le terme croisé `kab` et sa dépendance
+à la cambrure ; la référence évolutive non linéaire dispersive reste absente. À ratio fixé,
+la longueur d'onde change l'écart ; à amplitudes fixées, la phase peut annuler le dénominateur.
+
+**Correction structurante : S161 ne calcule pas le résidu couplé.** Elle additionne des évolutions
+indépendantes, quand SPEC-004 §6.1 prévoit termes croisés et source du fond. ADR-112 remplace
+le choix du paramètre de bascule d'ADR-111, conserve les mesures et ne rétablit aucun seuil.
+B4 n'a pas encore reçu la comparaison des architectures ; S161/S162 en sont des diagnostics
+préalables. **A218**, sévérité 1 ; **L244**, distinguer décomposition d'état et superposition
+d'évolutions. Aucun calcul de production modifié.
+
+299 tests workspace réussis, cinq ignorés ; un test d'exemple supplémentaire reçu en debug,
+assertions analytiques reçues en release. 112 ADR,218 angles,244 leçons,18 invariants,6 SPEC,23 cas.
+**Suite S163 : S162-1**, résidu couplé en Saint-Venant reçu contre l'évolution totale, avec
+contre-épreuve retirant un terme croisé. A216 reportée derrière ce préalable ; A217 reste
+partielle. BILAN-S145 suivi (B1 S146, S63-1 S147, poursuite B4).
+Session dans la copie principale ; trois copies anciennes synchronisées, aucune créée ni supprimée.
 **S161 — 2026-09-10 :** [ADR-111](docs/adr/ADR-111-le-critere-de-bascule-s-exprime-en-profondeur.md),
 [B4-DEBLOCAGE-S161](docs/validation/B4-DEBLOCAGE-S161.md). **Premier volet de B4 exécuté**, le banc
 qui juge l'architecture.
