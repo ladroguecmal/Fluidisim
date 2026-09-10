@@ -58,25 +58,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S151 — terminée
+Session : S152 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S150-1, émission progressive de tronçons de sillage sans perte ni doublon.
+Objectif : S151-1, exécuter un volet B2 à60s et publier une décision de domaine/profil, explicitement partielle.
 
 ### Plan
 
-- [x] **P1** — état réel, contrats, jeton et plan seul.
-- [x] **P2** — émetteur à préparation/acquittement, continuité et identité ; ADR et refus testés.
-- [x] **P3** — intégration journal/contrôleur, saturation/reprise, comparaison au trajet complet et arrêt.
-- [x] **P4** — vérifications, rapport et rituel de fin ; passation vers B2, jeton rendu.
+- [x] **P1** — état réel, dossier B2, protocole annoncé, jeton et plan seul.
+- [ ] **P2** — instrument B2 impact : lambda source2/3/4/5/6m, rayon80m, horizon60s ; admissibilité N64/128/256, erreur indépendante et contrôles d'oracle.
+- [ ] **P3** — traiter les refus de couverture si nécessaire par profil explicite ; coûts locaux répétés, reconstruction à30s, décision ADR et rapport.
+- [ ] **P4** — tests et rituel : journal, angles/leçons/actions, index/décomptes, passation et jeton rendu.
 
 ### Notes de reprise
 
-Départ master03a8b04, copies historiques propres.287 tests/cinq ignorés,103 ADR.
-Les sources WPRS sont immuables et empruntées : chaque tronçon acquiert une identité
-nouvelle, conservée tant que son historique est requis. Aucun remplacement de source.
-Le curseur de mouvement n'avance qu'après présence exacte au journal ; refus/saturation
-conservent la même émission. L'hôte possède le stockage des émissions.
-W4 reste candidat sans coque calibrée ni preuve multiplateforme. B2 est la suite du bilan.
-P3 : cinq nouveaux tests release reçus ; scénario également debug, hashce3395b96567718c. Refus calcul/saturation préservent curseur et publication, reprise identique au trajet entier.
-
-P4 :292 tests/cinq ignorés (199+93), zéro échec ; quatre avertissements préexistants.104 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas. Rituel exécuté, jeton rendu ; suite B2.
+Départ masterab3fee5, copies propres.292 tests/cinq ignorés,104 ADR.
+B2 partiel : pas de GPU/champ2D/Boussinesq, pression bornée16s, ni D1 multiplateforme.
+Comparer des résolutions du même candidat ne sélectionne pas sa technologie.
+La longueur de source n'est pas lambda_cut. Erreur normalisée des sept composantes
+<=1e-4 (S126) ; oracle radial512/1024 et angulaire1024/2048, variation<=1e-6.
+Points centre et16 rayons irréguliers jusqu'à80m, temps0/1/10/30/45/60s, grille de réception
+échantillonnée. Coût : cinq répétitions, p50/p99 locaux et dispersion ; reconstruction
+WLIV à30s séparée de l'évaluation. Aucun nouveau seuil de célérité ad hoc.
+Si profils existants refusent la couverture, essayer N512 explicitement par ADR,
+sans affaiblir le garde de résolution. B2 global et lambda_cut resteront ouverts.
