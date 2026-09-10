@@ -2038,3 +2038,17 @@ alors que l'omission ne converge pas. Voir FOND-PRESCRIT-S164. A50 reste partiel
   le champ. S164-1 : fenêtre interne, frontière fond seul confrontée à un témoin oracle total,
   avec traversée effective du bord par une perturbation. Ce témoin diagnostique n'est pas une
   alimentation de production. Limite de réception, aucun défaut runtime constaté.
+
+**Suivi A220 — S165 : traitée sur véhicule local 1D.** Fenêtre [30,90] dans le canal de
+120 m ; oracle aux étages RK2 reçu à <=1,12e-13 normalisé. Le bord fond seul échoue au
+critère d'identité malgré un bilan de flux à l'arrondi ; retard d'étage convergent distingué.
+La bosse traverse effectivement le bord. Voir FRONTIERE-LOCALE-S165 ; A50 reste partielle.
+
+- **A221** *(sévérité 2, S165 ; ouverte)* — **La frontière reçue dépend d'une information
+  extérieure indisponible au domaine local.** L'oracle S165 fournit le résidu extérieur
+  aux deux étages RK2. Le remplacer par zéro donne peu d'erreur sur une bosse sortante
+  en fond uniforme, mais injecte une anomalie quand le résidu extérieur compense le fond
+  prescrit. Une fermeture sans oracle doit distinguer entrée et sortie et déclarer quelle
+  information entrante elle suppose. S165-1 : extrapolation et fermeture caractéristique,
+  cas sortant puis fond entrant ; aucun engagement à reconstruire un résidu extérieur
+  arbitraire inconnu. Instrument 1D, aucun défaut de production constaté.

@@ -1480,3 +1480,17 @@ entrée par entrée. Le fil reprend ci-dessous.
   comparer frontières alimentées par le fond seul et par le total de référence (témoin oracle).
   Mesurer le passage d'une perturbation à la frontière, sans confondre défaut de bord et source.
   Porteur : session de construction. Aucun choix d'absorbeur avant cette mesure.
+
+### Suivi S165 — Frontière locale exercée
+
+- **S164-1 : réalisée, A220 traitée sur véhicule 1D**, FRONTIERE-LOCALE-S165. Oracle aux
+  deux étages reçu ; bord fond seul non convergent vers lui en temps, retard convergent.
+  Traversée, cœur et bilan de flux ouverts mesurés sur 54 montages. Aucun ADR nouveau.
+- **A50 partielle** : domaine local exercé avec source exacte, mais pas de frontière
+  utilisable sans oracle ni d'interpolation grossière/pression 3D.
+- **S165-1 / A221 : ouverte, priorité S166.** Construire une fermeture sans oracle en
+  séparant information entrante de Q et sortie issue de l'intérieur ; comparer extrapolation
+  et fermeture caractéristique. Cas sortant puis onde de fond entrante. Le résidu extérieur
+  arbitraire reste une information manquante, pas une promesse de reconstruction.
+  Porteur : session de construction ; aucun choix d'absorbeur ni seuil physique reçu.
+- A216/A217 inchangées ; BILAN-S145 suivi par poursuite B4 après B1 et S63-1.

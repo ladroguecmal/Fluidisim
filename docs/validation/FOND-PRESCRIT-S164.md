@@ -142,3 +142,7 @@ sur le même canal, frontière alimentée par le fond seul contre frontière té
 la référence totale. Mesurer quand et comment une perturbation traversant la frontière
 dégrade la reconstruction ; distinguer défaut de frontière et source intérieure.
 Ne pas appeler la frontière témoin une solution utilisable en production : elle exige l'oracle.
+
+**Suivi S165 : S164-1 réalisée sur véhicule 1D**, voir [FRONTIERE-LOCALE-S165](FRONTIERE-LOCALE-S165.md).
+Fenêtre locale, fantômes aux étages reçus ; fond seul et retard comparés, bilan ouvert mesuré.
+A220 traitée dans ce périmètre ; fermeture sans oracle suivie par A221/S165-1.

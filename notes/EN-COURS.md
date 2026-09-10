@@ -67,7 +67,7 @@ Objectif : S164-1/A220, isoler les erreurs de frontière dans un domaine résidu
 - [x] **P1** — vérifier les copies, prendre le jeton, déclarer le plan seul.
 - [x] **P2** — déclarer protocole, frontière aux deux étages RK2 et bilan de flux ; synchroniser les copies propres.
 - [x] **P3** — construire la fenêtre locale et les témoins, mesurer traversée et raffinements.
-- [ ] **P4** — recevoir les tests, publier mesures/limites, suivre A220 et actions.
+- [x] **P4** — recevoir les tests, publier mesures/limites, suivre A220 et actions.
 - [ ] **P5** — rituel de fin : journal, leçons, index, décomptes, reprise, jeton et copies.
 
 ### Notes de reprise
@@ -84,3 +84,7 @@ P3 : fenêtre [30,90], cinq tests propres +3 host reçus ; 54 montages release r
 Oracle <=1,12e-13 ; fond seul non convergent en temps, oracle retardé convergent.
 Attente non dérivée 1e-4 dans le cœur corrigée en diagnostic d'écart résolu ; voir protocole.
 Norme de bord inclut le débit, sinon le nœud de hauteur masque l'anomalie extérieure.
+
+P4 : résultats publiés, A220 traitée sur véhicule ; A221/S165-1 frontière sans oracle.
+Campagne finale : 54 cas, Courant <=0,213264, bilan <=6,97e-15 ; cinq tests propres reçus.
+A50 reste partielle ; aucun ADR, aucun seuil physique. Bibliothèques inchangées.
