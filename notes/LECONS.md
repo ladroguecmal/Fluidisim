@@ -3720,3 +3720,37 @@ numérique était chercher dans la mauvaise catégorie.
 D'où l'ordre à tenir : *que casse l'erreur* → *qui en juge* → *quelle tolérance* → *quel
 garde-fou*. Commencer par la fin fait mesurer longtemps une quantité dont on ne sait pas encore si
 elle mérite d'être bornée. Voir ADR-109 et [[L236]].
+
+## L240 — Une consigne qui nomme une ressource disparue n'instruit plus, elle égare
+
+*(S159)* Le bloc de jeton de `REPRISE.md` avait accumulé, de session en session, des notes du type
+« cette copie a été refusionnée, terminez de même ». Elles étaient exactes le jour où elles ont été
+écrites. Au moment de S159, l'une annonçait « cinq worktrees » quand il y en avait six, et une
+autre prescrivait de refusionner une branche que plus rien ne justifiait de garder.
+
+Le défaut n'est pas l'inexactitude, c'est le **genre**. Un document de passation doit porter la
+**procédure** ; l'**inventaire** se constate — ici par `git worktree list`, en une seconde et sans
+risque de mentir. Tout inventaire recopié dans un document commence à vieillir à la seconde où il
+est écrit, et il vieillit sans prévenir, parce que rien ne relit une note qui a été juste.
+
+Le signe à guetter : une consigne qui **nomme** une ressource — une branche, un fichier, un
+chemin. Elle a une date de péremption que son lecteur ne connaîtra pas. Quand la consigne peut être
+écrite sans nommer, elle survit ; quand elle doit nommer, elle appartient à un registre daté, pas à
+un document qu'on lit pour agir. Voir [[L218]] : là aussi, une écriture juste à sa date induisait
+en erreur plus tard.
+
+## L241 — Mettre à jour avant de supprimer, même quand la suppression est l'objectif
+
+*(S159)* Six copies de travail à assainir, dont quatre annonçaient un jeton `libre` avec quatre
+« dernière session » différentes — S158, S157, S146 et S44. La tentation est de supprimer d'abord :
+c'est ce qu'on est venu faire.
+
+L'ordre inverse vaut mieux, et pour une raison qui n'est pas la prudence. **Une avance rapide
+éteint le danger sans rien détruire** : dès qu'elles lisent le même jeton, aucune ne peut plus
+égarer une session, qu'on les supprime ensuite ou non. Le geste réversible produit ici l'essentiel
+du bénéfice, et le geste irréversible ne fait que ranger.
+
+Le critère se généralise : **quand un geste réversible et un geste irréversible visent le même
+danger, faire le réversible d'abord change ce qu'une interruption laisse derrière elle.** Une
+session coupée après l'avance rapide laisse un dépôt plus sûr qu'au départ ; coupée au milieu des
+suppressions, elle aurait laissé un état intermédiaire que personne n'aurait su lire.

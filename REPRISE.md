@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 18:28 +02:00
+JETON            : libre
+Battement        : 2026-09-10 18:32 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S159 — assainir les copies de travail (demande utilisateur)
-Dernière session : S158 — infidélité et non faute ; 299 tests/cinq ignorés
-Session suivante : à fixer en fin de S159
+Session en cours : aucune
+Dernière session : S159 — copies assainies ; 299 tests/cinq ignorés
+Session suivante : S160 — le facteur 2,5 est-il un plafond ? (S158-1)
 
 **Copies de travail — ADR-110, S159.** Le décompte n'a plus sa place ici : il vieillissait de
 session en session et annonçait « cinq worktrees » quand il y en avait six. **L'état se constate**
@@ -184,6 +184,25 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S159 — 2026-09-10 :** [COPIES-S159](docs/registres/COPIES-S159.md),
+[ADR-110](docs/adr/ADR-110-une-copie-de-travail-se-ferme.md). **Demande de l'utilisateur** : régler
+les problèmes de copies de travail, action S35-7 parquée depuis longtemps. S158-1 reporté.
+**Six copies étaient ouvertes, et quatre annonçaient un jeton `libre` au même instant** avec quatre
+« dernière session » différentes : S158, S157, S146 et **S44**. Une session ouvrant la dernière
+aurait pris le jeton de bonne foi et commencé S45. Une seule protection fonctionnait, l'état
+`archivé` de S39. Et une copie était **apparue pendant S158** sans annonce : elles se recréent.
+**Avance rapide d'abord (L241)** : dès que les cinq copies sans commit unique lisaient le même
+jeton, le danger était éteint sans rien détruire. Retraits ensuite — quatre worktrees, quatre
+branches, `git branch -d` jamais `-D`, aucune refusée. **Six copies à trois, sept branches à
+quatre, aucune ligne d'histoire perdue** ; la lignée B garde ses 44 commits, seul son répertoire
+est parti. `project-status-progress-d31d78` est conservée et à jour : rien ne prouve qu'aucune
+session ne l'occupe, et la commande de retrait est dans le livrable.
+Correctif durable : la procédure de fermeture vit dans `AGENTS.md`, à un seul endroit ; le bloc de
+jeton perd son inventaire périmé, **une consigne qui nomme une ressource disparue égare** (L240).
+**A215** : rien n'empêche une copie de se recréer, le jeton restant un fichier versionné.
+Aucun code modifié,299 tests/cinq ignorés.110 ADR,215 angles,241 leçons,18 invariants,6 SPEC,23 cas.
+Suite S160 : S158-1, le facteur 2,5 est-il un plafond de précision ou une coïncidence ?
 
 **S158 — 2026-09-10 :** [TOLERANCE-SILLAGE-S158](docs/validation/TOLERANCE-SILLAGE-S158.md),
 [ADR-109](docs/adr/ADR-109-le-repliement-est-une-infidelite-pas-une-faute.md). S157-1, A214.

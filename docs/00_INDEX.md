@@ -17,6 +17,18 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S159 :** [ADR-110](adr/ADR-110-une-copie-de-travail-se-ferme.md),
+[COPIES-S159](registres/COPIES-S159.md). **Demande de l'utilisateur**, action S35-7. Six copies de
+travail étaient ouvertes ; **quatre annonçaient un jeton `libre` avec quatre « dernière session »
+différentes — S158, S157, S146 et S44**. Une session ouvrant la dernière aurait commencé S45. Avance
+rapide d'abord — le danger éteint sans rien détruire (**L241**) — puis retrait de quatre worktrees et
+quatre branches, `-d` jamais `-D`, aucune histoire perdue ; la lignée B garde ses 44 commits. Procédure
+de fermeture écrite dans `AGENTS.md`, à un seul endroit. `REPRISE.md` perd son inventaire périmé :
+**une consigne qui nomme une ressource disparue égare** (**L240**). **A215** : rien n'empêche une copie
+de se recréer, et l'une est apparue pendant S158. Aucun code modifié,299 tests/cinq ignorés.
+110 ADR,215 angles,241 leçons,18 invariants,6 SPEC,23 cas, deux bancs partiels.
+**Suite S160 : S158-1**, reporté — le facteur 2,5 est-il un plafond ?
+
 **S158 :** [ADR-109](adr/ADR-109-le-repliement-est-une-infidelite-pas-une-faute.md),
 [TOLERANCE-SILLAGE-S158](validation/TOLERANCE-SILLAGE-S158.md). La question était **dans le mauvais
 ordre** (**L239**) : avant la tolérance, il fallait demander ce que l'erreur casse. Elle est

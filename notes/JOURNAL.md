@@ -8007,3 +8007,49 @@ change pas un geste ; seule une procédure le change.
 
 **Suite S159 :** S158-1, vérifier si le facteur 2,5 qui revient partout est le plafond de précision
 de tout ce qui touche au repliement ou une coïncidence — les deux jeux de données existent.
+
+## S159 — 2026-09-10 — Quatre copies disaient « libre », dont une croyait être en S44
+
+Entrée : jeton libre à 3f25fe5. **Demande explicite de l'utilisateur** — régler tous les problèmes
+liés aux copies de travail, soit l'action S35-7 parquée depuis longtemps. S158-1 est reporté.
+Production : [COPIES-S159](../docs/registres/COPIES-S159.md),
+[ADR-110](../docs/adr/ADR-110-une-copie-de-travail-se-ferme.md), A215, L240, L241, procédure dans
+`AGENTS.md`. Aucun code modifié.
+
+**Le danger était démontrable, pas hypothétique.** Six copies ouvertes ; quatre annonçaient un
+jeton `libre` au même instant, avec quatre « dernière session » différentes : S158, S157, S146 et
+**S44**. Une session ouvrant la dernière aurait pris le jeton de bonne foi et commencé S45,
+recréant cent quinze sessions d'histoire parallèle. C'est le mécanisme des trois forks, intact.
+
+**Une seule protection fonctionnait** : l'état `archivé` ajouté en S39 après le troisième fork. La
+copie qui le portait est la seule que personne n'aurait ouverte par erreur.
+
+**Fait qui change la conclusion** : `project-status-progress-d31d78` est apparue **pendant S158**,
+sans annonce. Les copies ne s'éteignent pas, elles se recréent — donc ranger ne suffit pas.
+
+**L'ordre choisi vaut autant que le résultat. L241.** D'abord l'avance rapide des cinq copies sans
+commit unique : à cet instant elles lisaient toutes le même jeton, et le danger était éteint
+**avant** la première suppression. Une interruption à ce point aurait laissé le dépôt plus sûr
+qu'au départ. Ensuite seulement les retraits : quatre worktrees, quatre branches, `git branch -d`
+et jamais `-D` — aucune refusée, ce qui est la vérification et non la formalité. Six copies à
+trois, sept branches à quatre, **aucune ligne d'histoire perdue** ; la lignée B garde ses 44
+commits, seul son répertoire est parti.
+
+**Non supprimée, et c'est un choix** : `project-status-progress-d31d78`, propre et à jour, mais
+rien ne prouve qu'aucune session ne l'occupe. La règle posée avant de commencer disait qu'une copie
+peut-être vivante se met à jour ; la commande de retrait est laissée dans le livrable.
+
+**Le correctif durable. L240.** La procédure de fermeture vit dans `AGENTS.md`, à un seul endroit.
+Le bloc de jeton de `REPRISE.md` a perdu son inventaire : il annonçait « cinq worktrees » quand il
+y en avait six et prescrivait de refusionner une branche supprimée. Une consigne qui nomme une
+ressource disparue n'instruit plus, elle égare — l'inventaire se constate, le document dit la
+procédure.
+
+Ce qui reste ouvert et ne peut pas être fermé ici : le jeton demeure un fichier **versionné**, donc
+chaque copie nouvelle en portera un. **A215.**
+
+299 tests réussis, cinq ignorés, inchangés — aucun code touché. 110 ADR, 215 angles, 241 leçons,
+18 invariants, 6 SPEC, 23 cas. Invariants relus : aucun invalidé.
+
+**Suite S160 :** S158-1, reporté par cette session — le facteur 2,5 qui revient partout est-il un
+plafond de précision ou une coïncidence ? Les deux jeux de données sont dans le dépôt.

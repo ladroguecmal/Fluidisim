@@ -61,3 +61,55 @@ perd aucune histoire, seulement un nom. Six branches sur sept sont dans ce cas.
 La septième, `claude/reprise-projet-5134cd`, porte **44 commits uniques** — la lignée B, réconciliée
 dans master par renumérotation mais non fusionnée. **Elle est conservée.** Seule sa copie de
 travail est retirée : ce qui invitait à y travailler était le répertoire, pas la branche.
+
+## 5. Ce qui a été fait, dans cet ordre
+
+**D'abord mettre à jour, ensuite seulement supprimer.** Les cinq copies sans commit unique ont été
+remises en avance rapide sur `master`. À partir de cet instant elles lisaient toutes le **même
+jeton**, la même dernière session, le même état : le danger était éteint **avant** qu'une seule
+suppression n'ait eu lieu. Si la session s'était interrompue là, le dépôt aurait déjà été plus sûr
+qu'au départ.
+
+Puis les retraits, chacun vérifié :
+
+| geste | objet | perte |
+|---|---|---|
+| `git worktree remove` | `friendly-bhabha-6da427` | aucune — **la branche archivée est conservée**, avec ses 44 commits |
+| `git worktree remove` | `reprise-projet-c107bf`, `reprise-projet-886155`, `reprise-projet-29ef50` | aucune |
+| `git branch -d` | les trois branches correspondantes et `claude/s22-suite` | aucune — toutes ancêtres de `master` |
+
+`-d` et jamais `-D` : `-d` refuse une branche portant un commit unique. Aucune n'a été refusée, ce
+qui est la vérification, et non la formalité.
+
+**Six copies ramenées à trois, sept branches à quatre.** Vérifié après coup : la branche archivée
+porte toujours ses 44 commits.
+
+## 6. Ce qui n'a pas été supprimé, et pourquoi
+
+`project-status-progress-d31d78` est propre, sans commit unique, et remise à jour. Elle n'a pas
+été retirée : rien ne prouve qu'aucune session ne l'occupe, et la règle posée avant de commencer
+dit qu'une copie peut-être vivante **se met à jour, elle ne se supprime pas**. La retirer est une
+commande d'une ligne, laissée à qui saura qu'elle est morte :
+
+```bash
+git worktree remove .claude/worktrees/project-status-progress-d31d78
+git branch -d claude/project-status-progress-d31d78
+```
+
+La copie de S159 elle-même reste ouverte, puisque la session y travaille. Sa fermeture revient à
+qui travaillera ensuite sur `master`.
+
+## 7. Le correctif durable
+
+Ranger ne suffit pas : `project-status-progress-d31d78` est apparue **pendant S158**. La procédure
+de fermeture vit désormais dans [`AGENTS.md`](../../AGENTS.md), **à un seul endroit**, et la
+décision est [ADR-110](../adr/ADR-110-une-copie-de-travail-se-ferme.md).
+
+Le bloc de jeton de `REPRISE.md` a perdu son inventaire : il vieillissait de session en session,
+annonçait « cinq worktrees » quand il y en avait six, et prescrivait encore de refusionner une
+branche supprimée depuis. **Une consigne qui nomme une ressource disparue n'instruit plus, elle
+égare.** L'état des copies se constate par `git worktree list` ; le document dit la procédure.
+
+Ce qui n'est pas réglé, et ne peut pas l'être ici : le jeton reste un fichier **versionné**, donc
+chaque copie en portera toujours un. Réduire le nombre d'univers et écrire la procédure ne change
+pas la nature du dispositif. **A215.**

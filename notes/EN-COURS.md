@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S159 — en cours
+Session : S159 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : **demande explicite de l'utilisateur** — régler tous les problèmes liés aux copies de
 travail. S158-1 (le facteur 2,5) est reporté ; il ne se périme pas, les jeux de données sont dans
@@ -91,7 +91,7 @@ périmé qu'une session y trouvera `libre`.
       d'une copie doit vivre dans `AGENTS.md`, à un seul endroit, et le décompte périmé de
       `REPRISE.md` doit être corrigé. Décision à acter par ADR : une branche sans commit unique
       ne se conserve pas.
-- [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
+- [x] **P6** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -169,3 +169,17 @@ une branche disparue n'instruit plus, elle egare.**
 **FORK-S22-S26** recoit une note datee : `claude/s22-suite` a ete supprimee, la lignee B survit.
 Balayage fait : plus aucun document ne **prescrit** quoi que ce soit sur une branche supprimee ;
 celles qui les nomment encore les **racontent**, ce qui est leur role.
+
+P6 — COPIES-S159 complete, ADR-110, A215, L240, L241, procedure dans AGENTS.md, journal, index,
+README, REPRISE, jeton rendu, ff-only. 299 tests/cinq ignores, aucun code touche.
+
+Pour S160 sans relire : S158-1 attend, inchange — verifier si le facteur 2,5 (etendue du
+groupement de S157, dispersion de l'estimateur de S158) est un plafond ou une coincidence.
+Sur les copies, ce qui reste a faire et par qui :
+- retirer `project-status-progress-d31d78` **quand on saura qu'elle est morte** — deux commandes,
+  ecrites dans le livrable ;
+- fermer la copie de la session courante, ce qui revient a la session suivante travaillant sur
+  master ;
+- ne pas rouvrir `claude/reprise-projet-5134cd` : jeton `archive`, 44 commits uniques, conservee
+  pour son histoire.
+Et le point qu'aucune procedure ne regle : le jeton reste versionne (A215).

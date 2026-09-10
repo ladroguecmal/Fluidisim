@@ -1972,3 +1972,15 @@ A214 ne réclame donc plus une mesure ni une spécification que nous pourrions �
 **B4**, seul juge de fidélité du corpus, lui-même bloqué par la référence substitutive intégrale.
 Recours d'ici là : rester dans le domaine déduit de la recette (ADR-107), ou estimer l'erreur en
 comparant `radial` et `radial+1` — fidèle à un facteur 2,5, et sous-estimant.
+
+- **A215** *(sévérité 2, S159 ; ouverte)* — **Rien n'empêche une copie de travail de se recréer.**
+  S159 a ramené six copies à trois et écrit la procédure de fermeture dans `AGENTS.md` (ADR-110),
+  mais la copie `project-status-progress-d31d78` était apparue **pendant S158** sans annonce :
+  l'outillage crée des worktrees de son propre chef, et une procédure ne contraint que l'agent qui
+  lit l'amorce. Le jeton restant un fichier **versionné**, chaque copie nouvelle en portera un, et
+  une copie en retard portera un jeton périmé qu'une session y trouvera `libre` — le mécanisme des
+  trois forks (L137), intact.
+  Ce qui manque n'est pas une décision de plus mais un **dispositif qui ne dépende pas de la bonne
+  volonté** : un jeton non versionné cesserait de voyager avec l'histoire, ce qui est précisément
+  sa vertu ; un contrôle à l'amorce qui refuse de travailler dans une copie en retard serait
+  possible, et personne ne l'a spécifié. Voir ADR-110 §« ce qu'elle ne dit pas », [[L240]].

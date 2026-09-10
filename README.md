@@ -284,3 +284,9 @@ tolérance, demander ce que l'erreur casse : elle est déterministe et identique
 et non faute**, et les consommateurs qui lisent une **borne** y sont insensibles d'un facteur huit mille.
 Le juge de fidélité est B4, bloqué ailleurs. Suite S159 : le facteur 2,5 qui revient partout, S158-1.
 109 ADR,214 angles,239 leçons,18 invariants,6 SPEC,23 cas.
+**S159 : six copies de travail, quatre jetons « libres » contradictoires**,
+[inventaire](docs/registres/COPIES-S159.md), [ADR-110](docs/adr/ADR-110-une-copie-de-travail-se-ferme.md).
+L'une croyait la dernière session être **S44** : l'ouvrir aurait recréé cent quinze sessions parallèles.
+Avance rapide d'abord, suppressions ensuite ; six copies ramenées à trois, aucune histoire perdue, et la
+procédure de fermeture écrite dans l'amorce. Suite S160 : le facteur 2,5, S158-1.
+110 ADR,215 angles,241 leçons,18 invariants,6 SPEC,23 cas.
