@@ -48,3 +48,40 @@ non-linéarité est celle qui compte ici : advection et terme `h·u`.
 **Le blocage n'est donc pas « il n'y a pas de référence ».** Il est que la référence disponible est
 **1D et non dispersive**, quand `B` est une houle dispersive 2D. Ce que cela autorise et interdit
 est la question de la section suivante — et c'est une question de conception, pas d'outillage.
+
+## 4. Ce qu'un B4 en une dimension peut rendre, et ce qu'il ne peut pas
+
+**Ce qu'il peut rendre : une infirmation.** L'additivité est une propriété mathématique ; il suffit
+d'**un** contre-exemple pour la borner. Si `simuler(A) + simuler(B)` s'écarte de
+`simuler(A et B)` au-delà d'un rapport d'amplitude donné, dans un modèle non linéaire d'eau, alors
+la décomposition additive a un domaine de validité et ce rapport en donne une borne — dans ce
+régime.
+
+**Ce qu'il ne peut pas rendre : une validation.** L'absence de rupture en 1D ne dit rien du 2D
+dispersif, ni des forces sur une coque, ni de la visibilité. Un banc qui ne peut qu'infirmer garde
+sa valeur — c'est même la forme la plus honnête d'un juge — mais il ne remplace pas B4, qui doit
+pouvoir infirmer **l'architecture**, pas seulement l'additivité d'un modèle.
+
+**Le régime testé n'est pas quelconque.** Saint-Venant est non dispersif et vaut en eau peu
+profonde ; c'est **exactement** le régime qu'ADR-001 §3.3 nomme pour justifier la bascule
+substitutive : « rouleau de déferlement, piscine, coque qui émerge entièrement, cavité
+traversante ». Le contre-exemple, s'il existe, tombera donc dans le domaine que la décision vise —
+pas à côté.
+
+**Ce qui reste hors d'atteinte, et qu'il faudra dire à chaque fois** : la houle de `B` est
+dispersive en eau profonde ; un écart mesuré en eau peu profonde ne se transporte pas tel quel.
+
+### La question posée, et la forme de la réponse
+
+> À partir de quel rapport `A_δ / A_B` l'écart entre l'addition et la simulation conjointe dépasse
+> un seuil donné, dans un modèle d'eau non linéaire ?
+
+ADR-001 propose `max|δ| > 0,35·Hs` **comme valeur de départ, à calibrer**. La mesure la confrontera
+directement. Et parce que « visiblement fausse » est perceptuel et que nous ne jugeons pas de
+visibilité, la réponse sera rendue **à plusieurs seuils** — 1 %, 5 %, 10 %, 25 % — plutôt qu'en un
+nombre unique qui cacherait le seuil choisi (**L242**).
+
+*Une réserve de plan d'expérience, posée avant la mesure* : dans Saint-Venant, la non-linéarité
+dépend aussi de l'amplitude absolue rapportée à la profondeur, `a/h0`. Le rapport `A_δ/A_B` seul ne
+peut donc pas gouverner l'écart ; les deux doivent varier séparément, sans quoi le plan est
+dégénéré comme celui de S157 (**L235**).

@@ -72,7 +72,7 @@ intégrale** que le dépôt n'a pas, et c'est ce blocage-là qu'il faut instruir
       coque, perception en double aveugle — et une seule est hors de portée d'une session. Le
       blocage annoncé est la référence intégrale : établir ce que le dépôt possède déjà
       (`shallow.rs`, `dispersif.rs`, l'oracle croisé de S37) et ce qui manque vraiment.
-- [ ] **P3** — **peser une version 1D avant de l'écrire.** Un contre-exemple 1D suffirait à
+- [x] **P3** — **peser une version 1D avant de l'écrire.** Un contre-exemple 1D suffirait à
       infirmer l'additivité ; son absence ne la validerait pas. Dire lequel des deux verdicts un
       B4 en 1D pourrait rendre — et si c'est encore B4 ou un banc différent qui mérite son nom.
 - [ ] **P4** — si la voie tient : mesurer. Superposition linéaire contre solution non linéaire sur
