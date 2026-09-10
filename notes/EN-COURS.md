@@ -58,73 +58,48 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S142 — terminée
+Session : S143 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : **A209**, ouverte par ma propre migration en S141. `ImpactField::new` compare sa
-**borne L1** à `medium.max_slope` quand `RadialImpact` y compare désormais la pente **réelle** :
-le même champ de `Medium` signifie deux choses selon le champ qui le lit. Mesurer le rapport de
-ce champ-là comme S139 l'a fait pour le candidat radial, puis décider — migrer, séparer les deux
-sens dans le type, ou retirer un champ que plus personne ne construit.
+Objectif : **A210**. Le crate porte deux constantes homonymes qui ne se déduisent pas l'une de
+l'autre, et le contrat « ce qui est comparé à `max_slope` est une pente réelle » ne vit que dans
+deux commentaires et deux essais. Un troisième champ pourrait écrire
+`slope > medium.max_slope` sans que rien ne l'arrête — c'est ce que les deux premiers ont fait
+pendant soixante sessions. Défaut de **dispositif**, pas de calcul.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton, **plan déclaré et committé seul**.
-- [x] **P2** — sonde `pente_modale` : rapport `slope_bound / max|∇η|` d'`ImpactField`, avec son
-      témoin analytique — la borne somme `a_m·k_m` et la pente vaut `|Σ a_m·k_m·û_m·sin(φ_m)·
-      cos(ω_m t)|`, donc le rapport ne peut pas descendre sous 1.
-- [x] **P3** — balayer ce dont il pourrait dépendre : longueur d'onde, énergie, instant. Thèse à
-      vérifier : `side = 4λ` et les modes sont indexés par des entiers, donc le motif est
-      **identique** à toute λ — le rapport devrait être une constante, comme pour le radial et
-      contrairement à la pression. Le champ étant périodique et `sample` n'ayant pas d'emprise
-      restreinte, le maximum est toujours atteint : c'est ce qui distingue ce cas de A206.
-- [x] **P4** — **constater l'état réel du champ** avant d'en décider : qui le construit, quels
-      ADR le documentent, ce qu'il porte que le candidat radial ne porte pas. Une décision de
-      retrait ne se prend pas sur le seul fait qu'aucun appelant ne subsiste dans le dépôt.
-- [x] **P5** — décider et appliquer : ADR, migration ou retrait. Témoins avant/après si des bits
-      bougent, comme en S141.
-- [x] **P6** — rituel de fin (§6), jeton rendu, fusion `--ff-only`.
+- [ ] **P2** — peser les trois réparations **avant** d'en écrire une, et écrire la pesée. Type
+      porteur, essai générique, entrée d'invariant : coût, ce que chacune attrape, ce qu'elle
+      laisse passer. La question qui décide est *qu'est-ce qui aurait arrêté le défaut de S141*,
+      pas *qu'est-ce qui est le plus propre*.
+- [ ] **P3** — construire ce que la pesée retient. Étape courte : si la réparation ne tient pas
+      en un quart d'heure, c'est qu'elle est plus lourde que le défaut.
+- [ ] **P4** — **vérifier qu'elle attrape le défaut** : réintroduire la faute de S141 dans une
+      copie de travail jetable et constater l'échec. Une garde qu'on n'a pas vue échouer ne
+      garde rien — c'est la moitié qu'ADR-082 vérifie pour chaque nom de refus.
+- [ ] **P5** — ADR et livrable ; porter l'invariant s'il y en a un.
+- [ ] **P6** — rituel de fin (§6), jeton rendu, fusion `--ff-only`.
 
 ### Notes de reprise
 
-Départ f40df3a = master ; worktree `886155`. 272 tests/cinq ignorés.
+Départ 66c192f = master ; worktree `886155`. 273 tests/cinq ignorés.
 
-Ce qui est déjà lu et n'est pas à relire :
-- `impact_field.rs` — `new` : 40 modes sur une grille cartésienne, `side = 4λ`, amplitude
-  `1/(1+(radius−4)⁴)` mise à l'échelle par l'énergie, `k = τ·radius/side`, borne
-  `slope += amplitude·k` ;
-- `sample` : `slope[axe] -= amplitude·τ·turns[axe]·sin(phase_espace)·cos(ω t)`, et
-  `τ·|turns| = k` — même structure que le candidat radial, donc même forme de majoration.
-- à `t = birth`, toutes les phases temporelles valent 1 : c'est là que le maximum est attendu,
-  comme en S139.
+Les trois voies, telles que S142 les a laissées :
+- **type porteur** — un `RealSlope(f32)` au lieu d'un `f32` nu ; le plus solide, le plus
+  intrusif : il traverse `Medium`, `composition`, `mixed_water`, `bound_pressure` ;
+- **essai générique** — praticable, mais **il faut un trait commun aux champs, qui n'existe
+  pas**. Les deux `sample` ont pourtant la même signature : à vérifier avant de conclure ;
+- **entrée d'invariant** — la moins chère, la plus oubliable.
 
-Piège à éviter : conclure « personne ne le construit, donc il est mort ». Le dépôt garde des
-choses **exprès** — c'est le troisième fork qui l'a appris (S39, état `archivé`). Constater qui
-le documente avant de proposer quoi que ce soit.
+Ce que S142 a noté et qui oriente : **I-14 a tenu soixante sessions parce qu'un essai le
+vérifiait**, pas parce qu'il était écrit. Une entrée d'invariant seule ne suffira pas.
 
-Second piège : si le rapport est une constante, la migration est **tentante et facile**. Elle
-déplacerait pourtant une frontière de plus, et ce champ n'a aucun essai de réception comparable à
-ceux du candidat. Mesurer d'abord, décider ensuite — pas l'inverse.
+Piège à éviter : construire le plus beau des trois. Le défaut réel est qu'une **troisième
+implémentation** de la même comparaison puisse naître sans mesurer son rapport. La bonne question
+n'est pas « comment exprimer le contrat » mais « qu'est-ce qui échouerait le jour où quelqu'un
+l'oublie ».
 
-P2-P5 : sonde `pente_modale` (5 sections), migration d'`ImpactField`, essai bout à bout, ADR-096,
-PENTE-MODALE-S142, note datée sur ADR-082, A210, L225. 273 tests/cinq ignorés, aucun hachage touché.
-
-Ce qui a décidé, et ce n'est pas la mesure : **ADR-081** (deux constructeurs du même crate ne
-nomment pas différemment la même distinction) et **ADR-059** (le champ est conservé exprès, donc
-le retrait était exclu avant même de mesurer). La mesure a seulement rendu la migration possible.
-
-Impasse évitée : proposer le retrait parce qu'aucun appelant ne subsiste. ADR-059 le conserve
-comme support de comparaison, et le dépôt a payé cette confusion au troisième fork (S39).
-
-Ce que la sonde fait et qui se réutilisera : elle retrouve la borne **par dichotomie sur
-`max_slope`**, sans accesseur et sans toucher à la bibliothèque. C'est la bonne méthode quand la
-grandeur en cause est justement celle que l'extérieur voit — et elle évite d'ajouter une surface
-publique sans lecteur (ADR-082).
-
-Pour S143 sans relire : A210 est un défaut de **dispositif**, pas de calcul. Le contrat « ce qui
-est comparé à `max_slope` est une pente réelle » ne vit que dans deux commentaires
-(`radial_impact.rs`, `impact_field.rs`) et deux essais homonymes. Trois réparations à peser : un
-type qui porte la pente réelle plutôt qu'un `f32` nu — le plus solide, le plus intrusif ; un essai
-générique que tout champ doit passer — praticable, mais il faut un trait commun aux champs, qui
-n'existe pas ; une entrée d'invariant dans `docs/01_INVARIANTS.md` — le moins cher, le plus
-oubliable. Peser avant d'écrire, et se souvenir qu'I-14 a tenu soixante sessions **parce qu'un
-essai le vérifiait**, pas parce qu'il était écrit.
+Second piège : un trait commun inventé pour l'occasion, que rien d'autre n'utilise, est une
+surface publique sans lecteur — exactement ce qu'ADR-082 refuse. S'il n'a qu'un usage, l'écrire
+côté essais plutôt que côté bibliothèque.
