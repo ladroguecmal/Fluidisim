@@ -58,26 +58,24 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S147 — terminée
+Session : S148 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : clore S63-1 sur preuves existantes, puis instruire A212 (forme du spectre de B).
+Objectif : S147-1, construire et recevoir un fond spectral explicite selon ADR-100.
 
 ### Plan
 
-- [x] **P1** — vérifier copies, branches, historique et outils ; prendre le jeton et committer ce plan seul.
-- [x] **P2** — lectures de reprise ; clore S63-1/S145-2 avec le périmètre exact de la dispersion construite et les dépendances restantes de B2.
-- [x] **P3** — examiner A212 dans les spécifications et le code, vérifier les références physiques et arrêter une décision de spectre avec son protocole de réception ; construire le lot que cette décision permet dans la session.
-- [x] **P4** — vérifier le lot, écrire journal et passation, contrôler décomptes et renvois, exécuter le rituel de fin et rendre le jeton.
+- [x] **P1** — état réel, lectures de reprise, jeton et plan committé seul.
+- [>] **P2** — arrêter le contrat de recette et de cuisson bornée/reproductible ; écrire le constructeur explicite sans migrer la voie historique ; tests des coefficients et refus.
+- [ ] **P3** — réception indépendante contre S147, moments et pics, phases/dérivées, B+W et rejeu ; témoins historiques et debug/release.
+- [ ] **P4** — suite complète, rapport, angles/leçons/actions, journal, index/décomptes et passation ; rituel de fin, jeton rendu.
 
 ### Notes de reprise
 
-Départ : master 66cd765, identique à 886155 ; autres copies propres et historiques, aucune copie créée.
-S146 terminée ; 275 tests réussis/cinq ignorés annoncés, 99 ADR, 212 angles, 18 invariants,
-6 spécifications, 23 cas. Cargo 1.97.0 disponible. B1 partiel : volets perceptuels et LOD ouverts.
-La recommandation BILAN-S145 est portée : B1 exécuté S146, S63-1 prise en premier ici.
-P3 : ADR-100, SPEC-001 §1 bis, instrument spectral cfg(test), deux tests release reçus.
-A212 partielle : décision et instrument réalisés, constructeur spectral S147-1 à construire.
-P4 : suite workspace 277 réussis/cinq ignorés ; deux essais S147 aussi en release.
-Rituel exécuté : journal, A212 partielle, L230, suivi S147-1, index/README/REPRISE actualisés.
-100 ADR,212 angles (formats de titres et de tables pris en compte),18 invariants,6 SPEC,23 cas.
-S148 : construire le candidat spectral explicite, sans migrer implicitement le fond historique.
+Départ master99cb421, toutes les copies propres et en retard. Aucune copie créée.
+S147 :277 tests/cinq ignorés,100 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas.
+ADR-100 décide un candidat JONSWAP normalisé dans une bande explicite ; fixture [0,5fp;4fp],
+gamma1/3,3/7,N32/64/128/256. Référence S147 f64/libm uniquement pour tests.
+L'exp f32 bornée existe déjà dans gaussian_spectrum (S97) ; préférer la partager sans changer
+ses opérations. Ni recette numérique reçue localement ni hash debug/release ne prouvent I-03
+sur plusieurs plateformes. Le fond historique et les scénarios restent inchangés.
+BILAN-S145 : B1 exécuté S146, S63-1 close S147 ; W4/sillage puis B2 restent la trajectoire.

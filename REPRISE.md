@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-10 14:10 +02:00
+JETON            : occupé
+Battement        : 2026-09-10 14:13 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S148
 Dernière session : S147 — S63-1 close, ADR-100 spectre explicite ; 277 tests/cinq ignorés
 Session suivante : S148 — S147-1, construire le candidat spectral de B (ADR-100), puis W4/B2
 
