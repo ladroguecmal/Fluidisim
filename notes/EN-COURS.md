@@ -77,7 +77,7 @@ ne l'a fait.
       active** du forçage n'empruntent pas le même chemin numérique. Mesurer la seconde seule.
 - [x] **P4** — décider d'après les chiffres : nouvel ADR si les deux bornes se séparent, ou
       provenance mesurée écrite pour la borne conservée. Un ADR n'est jamais réécrit.
-- [ ] **P5** — appliquer la décision dans le code, avec un test **témoin** : désactiver le
+- [x] **P5** — appliquer la décision dans le code, avec un test **témoin** : désactiver le
       mécanisme doit faire échouer le test, sinon le test ne prouve rien.
 - [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
 
@@ -166,3 +166,13 @@ découpe déjà le mouvement et que B2 a besoin d'observer, pas de forcer. Budge
 écrit à la place de la constante : <4e-5 relatif à 64 s, soit ~7e-5 en énergie contre le seuil
 1e-4 E0 de B2 — sous le seuil, sans marge confortable, et il fallait le dire.
 Non fait et nommé : corriger la dérive en portant omega au-delà du f32 (A213 à écrire en P5).
+
+P5 — trois constantes, pas deux. `modal_pressure` (horizon 64 s, durée active 16 s explicitée),
+`bound_pressure::Context::new` (fenêtre 64 s), et **`pressure_source::Source::new` qui en hérite
+par `Context::from_recipe`** — celle-là, c'est un test existant qui l'a trouvée, en cessant de
+refuser ce qu'il refusait. Note datée ajoutée à ADR-106 le jour même : je ne le réécris pas.
+Témoin vérifié : horizon ramené à 16 s, le test S155 échoue à la construction (ligne 331), pas au
+seuil ; horizon rétabli, il passe. Un test qui ne peut pas échouer ne prouve rien.
+Le condensat S95 `8ea15f4a3334830b` est **inchangé** : seules des bornes de domaine ont bougé,
+aucune arithmétique. C'est la contre-épreuve la moins chère de la session.
+297 tests/cinq ignorés (204+93), debug et release, zéro échec.

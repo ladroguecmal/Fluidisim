@@ -96,3 +96,14 @@ augmentait. Un seuil relatif dirait mieux ce qu'on veut garantir ; ce n'est pas 
   prise.
 - **Elle ne touche ni la conformité interplateforme (I-03), ni l'absence d'allocation (I-06)**,
   ni aucun invariant : seules deux bornes de domaine changent de valeur.
+
+## Note du 2026-09-10 (S155), le jour même — une troisième borne, trouvée par un test
+
+La décision ci-dessus nomme deux constantes. Il y en a **trois** : `pressure_source::Source::new`
+valide la fenêtre `settings.start..end` en passant par `Context::from_recipe`, donc la fenêtre
+d'admission WPRS a suivi les deux autres sans être citée. C'est bien l'effet voulu — une source
+admise doit couvrir la durée qu'on peut observer — mais il n'avait pas été écrit, et c'est un
+**test existant qui l'a signalé** en refusant de refuser.
+
+Le bornage de fenêtre annoncé par ADR-074 §« durées positives dans la fenêtre <=16 s » est donc
+remplacé ici par 64 s. ADR-074 n'est pas corrigé : il décrivait exactement l'état de son époque.

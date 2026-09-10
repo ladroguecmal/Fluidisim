@@ -448,7 +448,7 @@ mod tests {
             match i {
                 0 => m.recipe.angular = 7,
                 1 => m.settings.cell = 1 << 60,
-                2 => m.settings.end.0 = 16_000_001,
+                2 => m.settings.end.0 = 64_000_001, // ADR-106 : la fenêtre WPRS suit le contexte.
                 3 => m.settings.gravity = 0.0,
                 _ => m.settings.density = -1.0,
             };

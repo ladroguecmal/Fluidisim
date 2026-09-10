@@ -61,7 +61,9 @@ pub enum Error {
     NonFinite,
 }
 
-/// Préparation d'un mode et d'un segment. Horizon <=16 s dans ce premier candidat.
+/// Préparation d'un mode et d'un segment. **Horizon d'observation <=64 s, durée active <=16 s**
+/// depuis ADR-106 : les deux bornes ne suivent pas le même chemin numérique, et « 16 s » les
+/// confondait. Budget mesuré S155 : erreur relative <4e-5 à 64 s d'âge.
 pub struct ModalPressure {
     birth: SimTime,
     duration: u64,
@@ -105,7 +107,7 @@ fn negative(p: PhaseQ32) -> PhaseQ32 {
 }
 
 /// Multiplication par un entier, sans conversion de la durée en flottant.
-/// Ordre bas-vers-haut fixé ; ici au plus 24 bits pour une durée <=16 millions de µs.
+/// Ordre bas-vers-haut fixé ; au plus 24 bits pour la durée active, bornée à 16 s (ADR-106).
 pub(crate) fn scale_integer(mut coefficient: f32, mut count: u64) -> f32 {
     let mut sum = 0.0;
     while count != 0 {
@@ -153,7 +155,8 @@ impl ModalPressure {
             || gravity <= 0.0
             || density <= 0.0
             || horizon_us == 0
-            || horizon_us > 16_000_000
+            || horizon_us > 64_000_000
+            || s.duration_us > 16_000_000
             || s.duration_us == 0
             || s.duration_us > horizon_us
             || s.birth.0.checked_add(horizon_us).is_none()
@@ -315,6 +318,43 @@ mod tests {
     fn components(r: Response) -> [f32; 4] {
         [r.eta.re, r.eta.im, r.velocity.re, r.velocity.im]
     }
+    /// ADR-106 : l'observation va jusqu'à 64 s, et l'erreur y reste dans le budget annoncé.
+    /// Témoin : ramener l'horizon à 16 s fait échouer ce test à la construction, pas au seuil.
+    #[test]
+    fn horizon_observation_soixante_quatre_secondes_s155() {
+        let mut worst = 0.0f64;
+        let mut amplitude = 0.0f64;
+        let mut compares = 0u32;
+        for k in [[1.0f32, 0.0], [0.6, 0.8], [6.0, 0.0], [9.0, 0.0]] {
+            let oracle = PressureMode::new(k.map(f64::from), 9.81f32 as f64, 1025.0).unwrap();
+            let s = source(1.5);
+            let m = ModalPressure::new(k, 9.81, 1025.0, s, 64_000_000).unwrap();
+            assert_eq!(m.valid_until(), SimTime(64_000_000));
+            for us in [16_000_000u64, 32_000_000, 60_000_000, 64_000_000] {
+                let r = components(m.sample(SimTime(us)).unwrap());
+                let q = oracle.sample(reference(s), SimTime(us)).unwrap();
+                let attendu = [q.eta.re, q.eta.im, q.velocity.re, q.velocity.im];
+                let omega = (9.81f32 as f64 * (k[0] as f64).hypot(k[1] as f64)).sqrt();
+                let a = (q.eta.re * q.eta.re
+                    + q.eta.im * q.eta.im
+                    + (q.velocity.re * q.velocity.re + q.velocity.im * q.velocity.im)
+                        / (omega * omega))
+                    .sqrt();
+                let ecart = ((r[0] as f64 - attendu[0]).powi(2)
+                    + (r[1] as f64 - attendu[1]).powi(2))
+                .sqrt();
+                worst = worst.max(ecart / a);
+                amplitude = amplitude.max(a);
+                compares += 1;
+            }
+        }
+        // Un écart nul sans comparaison, ou sur un champ nul, ressemble à un résultat parfait.
+        assert_eq!(compares, 16);
+        assert!(amplitude > 1e-3, "champ trop faible pour conclure : {amplitude}");
+        assert!(worst < 4e-5, "budget ADR-106 dépassé : {worst}");
+        let m = ModalPressure::new([1.0, 0.0], 9.81, 1025.0, source(1.5), 64_000_000).unwrap();
+        assert!(matches!(m.sample(SimTime(64_000_001)), Err(Error::Time)));
+    }
     #[test]
     fn reference_resonances_epochs_and_hash_s95() {
         let mut worst = [0.0f64; 2];
@@ -427,7 +467,20 @@ mod tests {
         for k in [[0.0; 2], [f32::MAX, 0.0], [f32::NAN, 0.0]] {
             assert!(ModalPressure::new(k, 9.81, 1025.0, s, 16_000_000).is_err());
         }
-        assert!(ModalPressure::new([1.0, 0.0], 9.81, 1025.0, s, 16_000_001).is_err());
+        assert!(ModalPressure::new([1.0, 0.0], 9.81, 1025.0, s, 64_000_001).is_err());
+        // ADR-106 : la durée active reste bornée à 16 s même quand l'horizon va jusqu'à 64.
+        assert!(ModalPressure::new([1.0, 0.0], 9.81, 1025.0, s, 64_000_000).is_ok());
+        assert!(ModalPressure::new(
+            [1.0, 0.0],
+            9.81,
+            1025.0,
+            Segment {
+                duration_us: 16_000_001,
+                ..s
+            },
+            64_000_000
+        )
+        .is_err());
         let future = ModalPressure::new(
             [1.0, 0.0],
             9.81,

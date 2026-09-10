@@ -66,7 +66,8 @@ impl Context {
             return Err(Error::Context);
         }
         let duration = s.end.0.checked_sub(s.start.0).ok_or(Error::Time)?;
-        if duration == 0 || duration > 16_000_000 {
+        // ADR-106 : fenêtre d'observation portée à 64 s, avec la même borne que le noyau modal.
+        if duration == 0 || duration > 64_000_000 {
             return Err(Error::Time);
         }
         Ok(Self { settings, recipe })
@@ -425,7 +426,7 @@ mod tests {
                 7 => s.max[0] = -9.0,
                 8 => s.end = s.start,
                 9 => s.start = SimTime(9_000_000),
-                _ => s.end = SimTime(16_000_001),
+                _ => s.end = SimTime(64_000_001),
             }
             assert!(Context::new(s, &half).is_err());
         }
