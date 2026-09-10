@@ -17,6 +17,13 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S150 :** [ADR-103](adr/ADR-103-mouvement-charge-sillage.md),
+[TRAJET-SILLAGE-S150](validation/TRAJET-SILLAGE-S150.md). Mouvement et charge prescrits
+vers WPRS, journal et B spectral+W ;441 comparaisons au champ f64 raffiné, erreur de
+hauteur<=6,051e-7m. W4 partiel ; correction datée de BILAN-S145.
+**Suite S151 : S150-1, alimentation progressive du sillage puis B2.**
+287 tests réussis/cinq ignorés ;103 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas ; aucun nouveau banc reçu.
+
 **S149 :** [ADR-102](adr/ADR-102-transport-recette-spectrale.md),
 [CYCLE-SPECTRAL-S149](validation/CYCLE-SPECTRAL-S149.md). WSPR64 octets et cycle
 hôte B+impact reçus ; hashes debug/release identiques, coût64 points479,488µs localement.

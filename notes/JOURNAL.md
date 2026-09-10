@@ -7687,3 +7687,31 @@ et bandes/directions du jeu restent suivies par A212. Pas de format global disqu
 ni preuve multiplateforme. **Suite S150 : S149-1, construire W4/sillage puis B2**,
 conformément au dernier bilan ; les essais spectraux complémentaires ne bloquent pas W4.
 Aucun nouvel arbitrage utilisateur.
+
+## S150 — 2026-09-10 — Un mouvement chargé engendre W
+
+Entrée : S149-1/W4. Le calcul de pression mobile existait (ADR-069 à078) ; le
+raccordement objet/charge manquait. Production : ADR-103, Wake::build sur64 tronçons
+fixes, charge F convertie en pic gaussien F/(2pi sigma²), vue Source WPRS réutilisable.
+SPEC-001 porte la normalisation et distingue charge prescrite et coque calibrée.
+
+[TRAJET-SILLAGE-S150](../docs/validation/TRAJET-SILLAGE-S150.md) reçoit le trajet avec
+virage, transport après destruction du constructeur, admission puis B spectral+W.
+441 points-temps contre quadrature f64 doublée par axe : hauteur6,050583e-7m au pire,
+seuil1e-5 inchangé. Après extinction, énergie0,3198232J à6/8s, vagues encore présentes.
+Quatre tests ciblés debug/release reçus, hash du scénario13f0b5fd14a4ac9b identique.
+
+Correction datée de BILAN-S145 : « sillage jamais commencé » confondait absence de
+raccordement moteur et absence de calcul physique ; S89 avait déjà commencé W4.
+Ce mécanisme est déjà A185/L217 : aucun nouvel angle ni leçon autonome ajouté.
+A212 partielle, réception pression avec fond spectral ajoutée sur cette fixture,
+statistiques, choix de bande et montage mixte encore ouverts. Invariants relus,
+aucun changé. Pas d'action distante, pas de nouvelle copie, pas d'arbitrage utilisateur.
+
+W4 reste partiel : trajectoire connue d'avance, pas d'alimentation par des poses moteur,
+de coque calibrée, de changement de repère ou de Kelvin stationnaire. **S150-1, prochaine
+S151 : alimentation progressive par le mouvement hôte**, préservation de l'historique et
+des ondes à l'arrêt ; puis B2. Cette suite porte toujours le dernier bilan, sans revenir
+à une campagne de fond préalable. Aucun banc canonique supplémentaire déclaré reçu.
+
+Vérification finale :287 tests réussis/cinq ignorés (194+93), zéro échec ; quatre avertissements préexistants du harnais.103 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas. Diff sans erreur d'espacement, jeton rendu.

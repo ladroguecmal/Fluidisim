@@ -1898,3 +1898,9 @@ des bandes/directions restent ouverts. Voir FOND-SPECTRAL-S148.
 comparaison directe et hashes debug/release identiques, coûts locaux mesurés
 (CYCLE-SPECTRAL-S149). S148-1 close. Restent statistiques multigraines,
 bandes/directions du jeu et pression/mixte. Aucun nouvel angle indépendant.
+
+**Suivi A185 — S150 : état daté corrigé.** BILAN-S145 disait le sillage « jamais commencé » ;
+ADR-069/070 avaient construit la pression mobile. Le raccordement objet/charge est ajouté
+par ADR-103, la construction W4 reste partielle. Aucun nouvel angle indépendant.
+**Suivi A212 — S150 : partielle.** B spectral+pression mobile reçu contre une référence
+raffinée sur le trajet S150 ; restent statistiques, bandes/directions et montage mixte.

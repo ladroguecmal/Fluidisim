@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 15:05 +02:00
+JETON            : libre
+Battement        : 2026-09-10 15:07 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S150
-Dernière session : S149 — recette transportée et cycle reçu ; 283 tests/cinq ignorés
-Session suivante : S150 — S149-1, construire W4/sillage puis B2 (dernier bilan)
+Session en cours : aucune
+Dernière session : S150 — mouvement et charge vers le sillage ; 287 tests/cinq ignorés
+Session suivante : S151 — S150-1, alimentation progressive du sillage W4 puis B2 (dernier bilan)
 
 **S147 : travail directement sur master.** Les anciennes copies, dont 886155, doivent rejoindre
 master avant toute reprise ; aucune copie créée, toutes propres au démarrage.
@@ -192,6 +192,14 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S150 — 2026-09-10 :** [ADR-103](docs/adr/ADR-103-mouvement-charge-sillage.md),
+[TRAJET-SILLAGE-S150](docs/validation/TRAJET-SILLAGE-S150.md). Charge et mouvement
+prescrits vers source WPRS, journal puis B spectral+W.441 points-temps reçus contre
+quadrature f64 raffinée, erreur hauteur6,051e-7m ; hash debug/release identique.
+287 tests/cinq ignorés ;103 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas ; aucun nouveau banc.
+W4 reste partiel ; BILAN-S145 corrigé (pression mobile déjà construite S89).
+**Suite S151 : S150-1, alimentation progressive du sillage puis B2.**
 
 **S149 — 2026-09-10 :** [ADR-102](docs/adr/ADR-102-transport-recette-spectrale.md),
 [CYCLE-SPECTRAL-S149](docs/validation/CYCLE-SPECTRAL-S149.md). WSPR64 octets,

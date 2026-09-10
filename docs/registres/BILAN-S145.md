@@ -84,7 +84,12 @@ aujourd'hui, reçu par 275 essais :
 C'est la trajectoire d'ADR-054 — `WaveEvent` → journal rejouable → impact propagé → … → B2 —
 parcourue jusqu'à l'avant-dernière étape.
 
-**Ce qui manque à `W` pour être la couche du jeu**, et qui n'a pas bougé :
+> **Correction S150 — 2026-09-10.** « Sillage jamais commencé » ci-dessous est trop large :
+> ADR-069/070 avaient construit la pression mobile, puis le runtime et son intégration.
+> Manquait le raccordement objet/charge, ajouté par ADR-103. W4 reste partiel : alimentation
+> progressive moteur et modèle de coque à recevoir. La trajectoire W4 puis B2 est conservée.
+
+**Ce qui manque à `W` pour être la couche du jeu**, état historique S145 :
 1. **le sillage** — un objet en mouvement n'engendre rien ; seuls les impacts et les pressions
    existent. C'est l'étape *sillage/intégration* d'ADR-054, jamais commencée ;
 2. **la sélection technologique**, c'est-à-dire **B2**, qui n'a jamais été exécuté. Le candidat

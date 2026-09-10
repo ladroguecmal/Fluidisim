@@ -1378,3 +1378,13 @@ entrée par entrée. Le fil reprend ci-dessous.
 - **S149-1 : ouverte, prochaine S150.** Construire W4/sillage suivant ADR-054, puis B2.
   Statistiques multigraines et réception pression/mixte du fond restent dans A212 ;
   elles ne constituent pas un préalable à W4.
+
+### S150 — Mouvement et charge vers le sillage
+
+- **S149-1 : partielle**, ADR-103 et TRAJET-SILLAGE-S150. Trajectoire déclarée et charge
+  prescrite converties en WPRS ; transport, admission et champ B+W reçus.
+- **S150-1 : ouverte, prochaine S151.** Alimenter progressivement depuis le mouvement
+  hôte sans réémettre l'historique ; recevoir arrêt, capacité et discontinuité de repère.
+  Puis B2, conformément à la trajectoire du dernier bilan.
+- **A212 : partielle**, pression avec fond spectral reçue sur cette fixture ; les autres
+  compléments restent ouverts. Aucun modèle de coque calibré ni W4 complet déclaré.
