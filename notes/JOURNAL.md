@@ -7246,3 +7246,62 @@ recevoir le déplacement des refus avec ses témoins de hachage — c'est le pre
 série qui **change des bits**, et il doit être découpé en conséquence. Instruire A208 avec lui.
 Restent ouverts : l'audit des renvois « traité en Sxx » (S138), l'extension de fenêtre, S116-2,
 le bilan mixte, la durabilité et les deux calibrations de B10.
+
+---
+
+## S141 — 2026-09-10 — La migration qui change des bits, et le champ limite à la cambrure de Stokes
+
+**Entrée :** jeton libre à d10cc45, worktree `886155`, master coïncident. **S139-1**, dont les
+deux préalables avaient été levés par S139 et S140.
+**Produit :** [MIGRATION-PENTE-S141](../docs/validation/MIGRATION-PENTE-S141.md), migration des
+cinq sites, `BREAKING_SLOPE` publiée, deux essais neufs, A209, L223, L224. Aucun ADR nouveau :
+cette session **exécute** ADR-094 et ADR-095.
+
+**Ce qui est fait.** Chaque terme du budget de pente consomme désormais le meilleur majorant exact
+de sa pente réelle : `slope_max()` pour l'impact radial, `slope_envelope_tight()` pour la
+pression, `steepness_B·π` inchangé pour le fond. `RadialImpact::new` compare la pente réelle à
+`max_slope`. `BREAKING_SLOPE = π/7 = 0,4487990` est publiée avec sa provenance (SPEC-001 §4), et
+`Medium` ne porte plus le renvoi « à calibrer B2 ».
+
+**Le résultat qui referme la chaîne.** Dichotomie sur l'énergie jusqu'au dernier champ admis avec
+`max_slope = BREAKING_SLOPE`, puis mesure de sa pente réelle sur 4 000 points :
+**0,448799 contre 0,448799 attendu**. Le champ limite est *exactement* à la cambrure limite de
+Stokes. Jusqu'à S139 il était à 12,4 % de cette cambrure sans que rien ne le dise.
+
+**Ce que la migration a fait apparaître, et qui ne se serait pas vu autrement.**
+- **`K_ENERGIE` mentait.** Mesurée par dichotomie en S136 **contre l'ancienne frontière**, elle
+  annonçait une borne d'énergie fausse d'un facteur `ρ² = 3,22` dès que la frontière a bougé —
+  dans le sens conservateur, donc sans rien casser. Le facteur est maintenant **écrit dans le
+  code** : `K_ENERGIE = 8,891e-4 · SLOPE_L1_RATIO²`. **L224.**
+- **Un cinquième site avait été oublié**, et c'est le recalcul parallèle de `receive_mixed` qui
+  l'a dit, pas les essais — qui étaient tous verts. Un hachage dit qu'un nombre a bougé ; un
+  recalcul indépendant dit **lequel des termes**. **L223.**
+- **Le vrai point de migration de la pression n'était pas où le plan le disait** :
+  `bound_pressure::Prepared` **retient** l'enveloppe à la préparation, en trois sites, et les
+  migrer fait suivre six consommateurs d'un coup.
+
+**Ce qui a bougé, prédit puis vérifié.** `slope_floor` de 0,0074634003 à 0,0044472935, soit
+−40,4 % : côté impact l'écart vaut 9,25832e-4, exactement la différence entre borne L1 et pente
+réelle mesurée en S139 ; côté pression le facteur vaut **1,6367**, contre 1,634 mesuré
+indépendamment en S140 sur un spectre gaussien. Quatre hachages de campagne déplacés, chacun
+expliqué. **Les deux scénarios du harnais H1 sont inchangés** — ils n'empruntent pas le budget
+mixte, et c'est une information.
+
+**Ce qui n'est pas fait, et qui est nommé. A209** : `ImpactField::new` compare toujours sa borne
+L1, dont le rapport à la pente réelle n'a jamais été mesuré. `Medium::max_slope` signifie donc
+deux choses selon le champ qui le lit. Migrer sans mesurer aurait remplacé un facteur inconnu par
+un autre ; le défaut est nommé plutôt que déplacé. **A208** (le refus ne désigne pas l'emprise)
+devait être instruite avec ce lot : elle ne l'a pas été, et reste ouverte.
+
+**Aucune fixture n'a changé de valeur.** Les dix-sept `max_slope: 0.1` sont des paramètres
+d'essai, plusieurs servant à provoquer un refus ; aucune ne tenait lieu de limite physique. Ce qui
+manquait était la constante avec sa provenance, pas une valeur dans les essais.
+
+272 tests, cinq ignorés — deux de plus. 95 ADR, 209 angles, 17 invariants, 6 spécifications,
+23 cas. Invariants relus : **I-14 est tenu pour `max_slope` jusque dans le type** ; aucun invalidé.
+
+**Suite S142 :** **A209** — mesurer le rapport d'`ImpactField` comme S139 l'a fait pour le
+candidat radial, ou constater qu'il est mort et le retirer. Puis **A208**, le nom du refus quand
+c'est l'emprise qui consomme le budget. Restent ouverts : l'audit des renvois « traité en Sxx »
+(S138), l'extension de fenêtre, S116-2, le bilan mixte, la durabilité et les deux calibrations
+de B10.

@@ -1296,3 +1296,14 @@ entrée par entrée. Le fil reprend ci-dessous.
   témoins de hachage obligatoires, découpage par étape de moins d'un quart d'heure.
 - **A208 : ouverte, à instruire avec S139-1.** L'emprise publiée décide de la part de budget
   consommée, et le nom du refus ne la désigne pas.
+
+### S141 — Le budget de pente migré
+
+- **S139-1 : réalisée.** [MIGRATION-PENTE-S141](../validation/MIGRATION-PENTE-S141.md). Cinq sites
+  migrés, `BREAKING_SLOPE` publiée, quatre hachages déplacés et expliqués, harnais H1 inchangé.
+  Le champ limite admis est exactement à la cambrure de Stokes — 0,448799 mesuré.
+- **A209 : ouverte, S142.** `ImpactField` compare toujours sa borne L1 ; `Medium::max_slope` a
+  donc deux sens selon le lecteur. Mesurer son rapport, le retirer, ou séparer les deux sens dans
+  le type.
+- **A208 : ouverte, non instruite.** Devait l'être avec ce lot ; ne l'a pas été. Le refus ne
+  désigne pas l'emprise, qui est pourtant ce que l'hôte peut changer.

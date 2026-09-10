@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S141 — en cours
+Session : S141 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : **S139-1** — rendre le budget de pente homogène. Chaque terme consomme le meilleur
 majorant exact de sa pente réelle (ADR-095) : `slope_max()` pour l'impact radial,
@@ -79,7 +79,7 @@ physique. **C'est le premier lot de la série qui change des bits publiés.**
 - [x] **P5** — poser **`max_slope = 0,4488`** dans les fixtures où 0,1 tenait lieu de limite
       physique — **et pas dans celles qui exercent un refus**, où la valeur est choisie pour
       refuser et doit le dire. Recevoir : quels refus se déplacent, quels bits bougent.
-- [ ] **P6** — livrable de réception, rituel de fin (§6), jeton rendu, fusion `--ff-only`.
+- [x] **P6** — livrable de réception, rituel de fin (§6), jeton rendu, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -106,3 +106,25 @@ commit**, tests verts entre chaque.
 
 Deuxième piège, plus coûteux : accepter un hachage qui bouge sans savoir dire pourquoi. Un
 hachage global ne dit pas *lequel* des scénarios a changé — relever par scénario en P2.
+
+P2-P5 : témoins avant, étage impact, étage pression, `BREAKING_SLOPE` et l'essai qui referme la
+chaîne. MIGRATION-PENTE-S141, A209, L223, L224. 272 tests/cinq ignorés.
+
+Écarts entre le plan et le fait, tous deux instructifs :
+- **P4 visait les mauvais sites.** La pression ne se migre pas dans `mixed_water` : c'est
+  `bound_pressure::Prepared` qui **retient** l'enveloppe à la préparation, en trois endroits, et
+  les migrer fait suivre six consommateurs.
+- **P5 ne pouvait pas se faire comme annoncé.** Aucune des dix-sept fixtures `max_slope: 0.1` ne
+  tient lieu de limite physique — ce sont des paramètres d'essai. Ce qui manquait était la
+  constante avec sa provenance, publiée sous le nom `BREAKING_SLOPE`.
+
+Impasse évitée de justesse : migrer aussi `ImpactField::new`. Son rapport borne L1 / pente réelle
+n'a **jamais** été mesuré ; le migrer aurait remplacé un facteur inconnu par un autre, sans que
+rien ne le signale. Nommé A209 à la place.
+
+Pour S142 sans relire : A209 se traite comme S139 a traité le candidat radial — une sonde qui
+échantillonne `ImpactField::sample` sur le carré et compare au `slope` accumulé dans `new`
+(`impact_field.rs`, ~ligne 125). Différence à prévoir : ce champ est une somme de cosinus sur une
+grille cartésienne, pas une intégrale de Bessel ; son rapport n'a aucune raison de valoir 1,795 et
+pourrait dépendre du côté `side`. Si le rapport dépend d'un paramètre, la conclusion est la même
+qu'en S140 pour la pression : pas de constante, et il faut décider quoi faire du champ.

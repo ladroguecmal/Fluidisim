@@ -3399,3 +3399,39 @@ facteur relève d'un traitement différent — le premier se supprime, le second
 s'annonce. Les confondre mène soit à calibrer un nombre qui n'existe pas, soit à laisser sur la
 table un gain de 60 % qui ne coûtait rien. Voir [[L220]], dont cette leçon corrige la
 prescription.
+
+## L223 — Le recalcul parallèle est l'instrument d'une migration, pas une redondance
+
+*(S141)* En migrant le budget de pente, j'ai changé quatre sites de bibliothèque et lancé les
+essais : **tout est passé au vert**. Puis `examples/receive_mixed` a échoué — il recalcule le
+budget *hors* de la bibliothèque, à partir des mêmes grandeurs publiées, et sa formule sommait
+encore l'ancienne. Un cinquième site avait été oublié, et c'est ce recalcul-là qui l'a dit.
+
+Un test d'égalité de bits n'aurait rien appris : il dit *qu'un* hachage a bougé, jamais **lequel
+des termes** ni **où**. Un recalcul indépendant de la même quantité, lui, désigne le site.
+
+Généralisable : quand une formule partagée change, ce qui protège n'est pas la comparaison de
+sorties gelées mais **une seconde implémentation de la même grandeur, écrite ailleurs et de
+façon indépendante**. Elle coûte quelques lignes, elle vieillit avec le modèle, et le jour d'une
+migration elle vaut une journée de recherche. Voir [[L49]] et [[L167]].
+
+## L224 — Une constante mesurée contre une frontière devient fausse quand la frontière bouge
+
+*(S141)* `K_ENERGIE` avait été obtenue en S136 par dichotomie sur le candidat : le plus grand `E`
+que la construction acceptait. C'est une mesure honnête — et elle mesurait **la frontière**, pas
+la physique. Quand S141 a déplacé cette frontière d'un facteur `ρ`, la borne d'énergie annoncée
+par le générateur est devenue fausse d'un facteur `ρ² = 3,22`, dans le sens conservateur, donc
+sans que rien ne casse côté sûreté.
+
+Ce qui l'a rattrapée est un essai qui vérifiait la borne **des deux côtés** — construction juste
+en dessous, refus juste au-dessus. Un essai qui n'aurait vérifié que « la borne est respectée »
+serait resté vert en annonçant trois fois moins que le vrai.
+
+Deux prescriptions, et la seconde est celle qui économise le plus :
+
+1. **vérifier une borne des deux côtés**, toujours — une borne qu'on ne peut pas dépasser sans
+   refus *et* qu'on peut atteindre sans refus ;
+2. **écrire la dépendance dans le code, pas dans la valeur.** `K_ENERGIE = 8,891e-4 ·
+   SLOPE_L1_RATIO²` suit désormais toute nouvelle mesure du rapport ; `2,865e-3` aurait recommencé
+   à mentir à la prochaine décimale. Voir [[L219]] : un nombre sans sa dépendance est un
+   qualificatif déguisé.

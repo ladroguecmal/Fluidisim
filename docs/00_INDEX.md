@@ -17,6 +17,17 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S141 :** [MIGRATION-PENTE-S141](validation/MIGRATION-PENTE-S141.md), exécution de **S139-1** — aucun ADR
+nouveau, cette session applique ADR-094 et ADR-095. Chaque terme du budget consomme le meilleur majorant exact de
+sa pente réelle ; `BREAKING_SLOPE = π/7` est publiée avec sa provenance. **Le champ limite admis est exactement à
+la cambrure de Stokes : 0,448799 mesuré** — il était à 12,4 % de cette valeur jusqu'à S139. `slope_floor` recule
+de 40,4 %, quatre hachages de campagne se déplacent, chacun **prédit puis vérifié** ; harnais H1 inchangé.
+Deux découvertes de migration : `K_ENERGIE` avait été calibrée contre l'ancienne frontière et annonçait ×3,22
+trop peu (**L224**) ; un cinquième site oublié a été trouvé par un recalcul parallèle, pas par les essais
+(**L223**). **A209** : `ImpactField` compare toujours sa borne L1, donc `max_slope` a deux sens.
+272 tests/cinq ignorés.
+95 ADR,209 angles,17 invariants,6 spécifications,23 cas. Suite S142 : A209, puis A208.
+
 **S140 :** [ADR-095](adr/ADR-095-ce-que-la-pression-peut-annoncer-de-sa-pente.md), ce que la pression peut
 annoncer de sa pente. [ENVELOPPE-PRESSION-S140](validation/ENVELOPPE-PRESSION-S140.md) : **A206 traitée, et la
 réponse est non** — le facteur de conservatisme de la pression n'est pas une constante. Il se décompose en un
@@ -535,7 +546,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | `code/scenarios` | les scénarios du mode `check`, assertions comprises |
 
 ```
-cargo test --offline                                  # 271 succès, 5 ignorés (S140)
+cargo test --offline                                  # 272 succès, 5 ignorés (S141)
 water-harness check   scenarios/*.toml                # H1 — déterminisme, 0,04 s / budget 60 s
 water-harness physics scenarios/*.toml                # H3 — assertions analytiques et diagnostics
 ```

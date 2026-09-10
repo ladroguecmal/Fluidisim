@@ -135,7 +135,7 @@ Coût mesuré en S125 : environ ×4 à points identiques et ×9 pour le montage 
 initial. [ADR-085](docs/adr/ADR-085-profils-radiaux-selon-le-domaine.md) conserve N64 par défaut ;
 N128/N256 se dimensionnent explicitement au domaine commun du service. A202 traitée ; A203 suit
 la réception physique à grande portée, réalisée en S126 sur les deux fixtures à âge0–4 s.
-État vérifié S140 : **271 tests réussis, cinq ignorés ; 95 ADR, 208 angles, 17 invariants,
+État vérifié S141 : **272 tests réussis, cinq ignorés ; 95 ADR, 209 angles, 17 invariants,
 6 spécifications, 23 cas canoniques.**
 [Réception S126](docs/validation/RECEPTION-ETENDUE-S126.md) :1350 points-temps reçus contre
 oracle indépendant, erreur normalisée<=4,44e-7. La fenêtre4 s reçoit surtout des queues aux
@@ -199,6 +199,10 @@ Le facteur de la pression, lui, **n'est pas une constante** : il se décompose e
 2 et éliminable sans coût, et un facteur d'alignement que rien ne borne — 3,03 sur un spectre réaliste, 16,7 sur
 une emprise étroite (ADR-095, S140). Le budget devient homogène par la **nature** de ses termes : la même
 grandeur majorée, le meilleur majorant exact de chacun, la marge résiduelle mesurée (L222).
-Suite : S139-1, substituer la borne resserrée et poser `max_slope = 0,4488` — le premier lot qui change des bits.
-95 ADR,208 angles,17 invariants,6 spécifications,23 cas.
+S139-1 est **faite** (S141) : chaque terme du budget consomme le meilleur majorant exact de sa pente réelle, et
+`BREAKING_SLOPE = π/7` est publiée avec sa provenance. Le champ limite admis est désormais **exactement à la
+cambrure de Stokes** — 0,448799 mesuré, contre 12,4 % de cette valeur jusqu'à S139. Quatre hachages de campagne
+se sont déplacés, chacun prédit puis vérifié ; le harnais H1 est inchangé.
+Suite : A209 — `ImpactField` compare toujours sa borne L1, donc `max_slope` a deux sens selon le champ qui le lit.
+95 ADR,209 angles,17 invariants,6 spécifications,23 cas.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

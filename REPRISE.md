@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 12:23 +02:00
+JETON            : libre
+Battement        : 2026-09-10 12:25 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S141 — S139-1, la migration qui change des bits
-Dernière session : S140 — le facteur de la pression n'est pas une constante ;271 tests/cinq ignorés
-Session suivante : à fixer en fin de S141
+Session en cours : aucune
+Dernière session : S141 — S139-1 réalisée ;272 tests/cinq ignorés
+Session suivante : S142 — A209, `ImpactField` compare toujours sa borne L1
 
 **Copie de travail S139 et S140** : worktree `claude/reprise-projet-886155`, refusionné en avance
 rapide dans master à la fin de chacune des deux. Terminer de même :
@@ -189,6 +189,32 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S141 — 2026-09-10 :** [MIGRATION-PENTE-S141](docs/validation/MIGRATION-PENTE-S141.md). **S139-1
+réalisée** ; aucun ADR nouveau, cette session exécute ADR-094 et ADR-095.
+Chaque terme du budget consomme le meilleur majorant exact de sa pente réelle — `slope_max()` pour
+l'impact, `slope_envelope_tight()` pour la pression, `steepness_B·π` inchangé. `BREAKING_SLOPE =
+π/7 =0,4487990` est publiée avec sa provenance, et `Medium` ne porte plus « à calibrer B2 ».
+**La chaîne est refermée** : dichotomie sur l'énergie jusqu'au dernier champ admis, puis mesure de
+sa pente réelle sur4 000 points — **0,448799 contre0,448799 attendu**. Le champ limite est
+*exactement* à la cambrure de Stokes ; il était à12,4 % de cette valeur jusqu'à S139.
+**Deux découvertes que seule la migration pouvait produire.** `K_ENERGIE`, mesurée par dichotomie
+en S136 **contre l'ancienne frontière**, annonçait une borne fausse d'un facteur ρ² =3,22 dès que
+la frontière a bougé — dans le sens conservateur, donc silencieusement (**L224** : écrire la
+dépendance dans le code, `K_ENERGIE =8,891e-4·SLOPE_L1_RATIO²`, et vérifier une borne **des deux
+côtés**). Et un **cinquième site oublié** a été trouvé par le recalcul parallèle de
+`receive_mixed`, quand tous les essais étaient verts (**L223** : un hachage dit qu'un nombre a
+bougé, un recalcul indépendant dit *lequel des termes*).
+**Déplacements, prédits puis vérifiés** : `slope_floor` de0,0074634003 à0,0044472935 (−40,4 %) —
+9,25832e-4 côté impact, exactement l'écart mesuré en S139 ; facteur1,6367 côté pression, contre
+1,634 mesuré indépendamment en S140. Quatre hachages de campagne déplacés, **harnais H1 inchangé**.
+**A209, introduite par cette migration et nommée plutôt que déplacée** : `ImpactField` compare
+toujours sa borne L1, donc `Medium::max_slope` signifie deux choses selon le champ qui le lit.
+**A208 devait être instruite avec ce lot ; elle ne l'a pas été** et reste ouverte.
+Aucune fixture n'a changé de valeur : les dix-sept `max_slope:0.1` sont des paramètres d'essai.
+272 tests/cinq ignorés.95 ADR,209 angles,17 invariants,6 spécifications,23 cas.
+Suite S142 : **A209** — mesurer le rapport d'`ImpactField` comme S139 l'a fait pour le candidat
+radial, ou constater qu'il est mort et le retirer. Puis **A208**.
 
 **S140 — 2026-09-10 :** [ADR-095](docs/adr/ADR-095-ce-que-la-pression-peut-annoncer-de-sa-pente.md),
 [ENVELOPPE-PRESSION-S140](docs/validation/ENVELOPPE-PRESSION-S140.md). **A206 traitée, réponse : non.**

@@ -1794,3 +1794,14 @@ couche divise sa borne par son facteur — n'existe donc pas. Voir
   faut revoir ; celui-ci désigne le contraire. Deux réparations possibles, aucune tranchée :
   nommer le cas (`Footprint`), ou publier le rapport des deux enveloppes pour que l'appelant voie
   sa propre marge. À instruire avec S139-1.
+
+- **A209** *(sévérité 2, S141 ; ouverte, **introduite par la migration**)* — **`Medium::max_slope`
+  ne signifie plus la même chose selon le champ qui le lit.** Depuis S141, `RadialImpact` lui
+  compare la pente **réelle** (borne L1 divisée par `SLOPE_L1_RATIO`) ; `ImpactField::new` lui
+  compare toujours **sa borne L1**, dont le rapport à la pente réelle n'a jamais été mesuré. Un
+  même `Medium` passé aux deux produit donc deux frontières de sens différent, et rien dans le
+  type ne le dit. La migration a préféré nommer ce défaut plutôt que remplacer un facteur inconnu
+  par un autre. `ImpactField` n'étant plus construit que par `probe_degenerate`, trois issues :
+  mesurer son rapport comme S139 l'a fait pour le candidat radial, le retirer, ou séparer les deux
+  significations dans le type. À trancher, pas à laisser dormir — c'est exactement la forme de
+  défaut que L219 décrit.
