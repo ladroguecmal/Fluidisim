@@ -18,12 +18,15 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-10 18:32 +02:00
+JETON            : occupé
+Battement        : 2026-09-10 19:16 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S160 — le facteur 2,5 est-il un plafond ? (S158-1)
 Dernière session : S159 — copies assainies ; 299 tests/cinq ignorés
-Session suivante : S160 — le facteur 2,5 est-il un plafond ? (S158-1)
+Session suivante : à fixer en fin de S160
+
+*S160 travaille dans la **copie principale**, sur `master` : aucune copie isolée n'a été ouverte,
+donc rien à refermer (AGENTS.md). Les trois worktrees vus à l'amorce étaient tous à 824ee62.*
 
 **Copies de travail — ADR-110, S159.** Le décompte n'a plus sa place ici : il vieillissait de
 session en session et annonçait « cinq worktrees » quand il y en avait six. **L'état se constate**

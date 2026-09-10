@@ -58,128 +58,46 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S159 — terminée
+Session : S160 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : **demande explicite de l'utilisateur** — régler tous les problèmes liés aux copies de
-travail. S158-1 (le facteur 2,5) est reporté ; il ne se périme pas, les jeux de données sont dans
-le dépôt.
-
-C'est l'action **S35-7**, parquée depuis longtemps comme « sort des branches, décision de
-l'utilisateur ». Elle vient d'être donnée.
-
-### Ce qui a déclenché la demande, et qui est un fait nouveau
-
-Un **sixième** worktree est apparu pendant S158 : `project-status-progress-d31d78`, créé sur la
-tête de S157, sept commits en retard, aucun commit unique. Personne ne l'a annoncé. C'est
-exactement le mécanisme qui a forké le dépôt **trois fois** (L137, FORK-S22-S26) : le jeton est un
-fichier **versionné**, donc chaque copie en possède un, et une copie en retard porte un jeton
-périmé qu'une session y trouvera `libre`.
+Objectif : **S158-1** — le facteur **2,5** revient dans deux mesures de ce problème : l'étendue du
+groupement `t·½√(g·sigma)·dk` de S157 (1,17 à 2,94) et la fidélité de l'estimateur d'erreur de
+S158 (« à un facteur 2,5 près »). Plafond de précision de tout ce qui touche au repliement, ou
+coïncidence entre deux mesures indépendantes ? Les deux jeux de données existent — `wake_law.rs`
+et `wake_estimator.rs`.
 
 ### Plan
 
-- [x] **P1** — état réel, jeton, plan déclaré et committé seul.
-- [x] **P2** — inventaire **factuel** des six copies et des six branches : commits uniques,
-      propreté, âge, état du jeton que chacune porte. Rien ne sera supprimé avant que ce tableau
-      existe et soit publié.
-- [x] **P3** — remettre en avance rapide toute copie sans commit unique. C'est le geste le moins
-      risqué et il éteint à lui seul le danger du jeton périmé : toutes les copies liront alors
-      le même jeton.
-- [x] **P4** — retirer les worktrees morts et supprimer les branches **sans commit unique**.
-      La branche archivée porte 44 commits uniques : son worktree est retiré, **la branche est
-      conservée**. Aucune histoire n'est perdue.
-- [x] **P5** — le correctif **durable**, sans lequel tout repoussera : la procédure de fermeture
-      d'une copie doit vivre dans `AGENTS.md`, à un seul endroit, et le décompte périmé de
-      `REPRISE.md` doit être corrigé. Décision à acter par ADR : une branche sans commit unique
-      ne se conserve pas.
-- [x] **P6** — livrable, rituel de fin, fusion `--ff-only`.
+- [x] **P1** — état réel, jeton, **plan déclaré et committé seul**.
+- [ ] **P2** — **définir les deux grandeurs avant de les comparer.** L'une est une étendue entre
+      configurations, l'autre un rapport estimé/vrai : rien ne dit qu'elles soient commensurables.
+      Rejouer les deux sondes telles quelles pour repartir de chiffres, pas de citations.
+- [ ] **P3** — le test qui tranche : **bougent-elles ensemble ?** Faire varier un paramètre commun
+      — `sigma`, `cutoff`, `radial` — et regarder si les deux quantités suivent. Si l'une passe à
+      4 quand l'autre reste à 2,5, elles sont indépendantes et la question est close.
+- [ ] **P4** — si elles bougent ensemble, chercher la cause commune ; sinon, dire pourquoi la
+      coïncidence était plausible et ce qui l'a fait croire.
+- [ ] **P5** — livrable ; ADR seulement si une décision en sort. Une question fermée sans décision
+      n'a pas besoin d'ADR, et S157 comme S158 ont montré qu'un résultat négatif est un résultat.
+- [ ] **P6** — rituel de fin (§6, **sept points**), jeton rendu. Pas de copie isolée à refermer.
 
 ### Notes de reprise
 
-Départ 3f25fe5 = master. Six copies, toutes **propres** — aucune modification non committée nulle
-part, vérifié avant tout.
+Départ 824ee62 = master, copie principale, arbre propre. 299 tests/cinq ignorés.
+110 ADR, 215 angles, 241 leçons, 18 invariants, 6 SPEC, 23 cas.
 
-| branche | retard | unique |
-|---|---|---|
-| master | — | — |
-| claude/reprise-projet-2d3506 (la mienne) | 0 | 0 |
-| claude/reprise-projet-29ef50 | 0 | 0 |
-| claude/project-status-progress-d31d78 | 7 | 0 |
-| claude/reprise-projet-886155 | 58 | 0 |
-| claude/reprise-projet-c107bf | 434 | 0 |
-| claude/s22-suite (sans worktree) | 434 | 0 |
-| claude/reprise-projet-5134cd (archivée) | 603 | **44** |
+Ce que les deux « 2,5 » sont, d'après les livrables et **à vérifier avant de s'en servir** :
+- **S157** — `t·½√(g·sigma)·dk` va de 1,17 à 2,94 sur sept configurations : c'est l'**étendue
+  résiduelle** d'un groupement adimensionnel, donc une dispersion entre configurations ;
+- **S158** — l'estimateur `radial` contre `radial+1` suit l'erreur vraie « à un facteur 2,5 près,
+  et en la sous-estimant » : c'est une **fidélité**, un rapport estimé/vrai.
 
-Règles que je me donne avant de toucher à quoi que ce soit, parce qu'une suppression se regrette :
-1. **Ne jamais supprimer une branche portant un commit unique.** Une seule est dans ce cas et elle
-   est archivée volontairement.
-2. **Ne rien retirer qui contienne du travail non committé.** Vérifié : rien nulle part.
-3. **Ne pas toucher au dépôt distant** — `REPRISE.md` §9, hors de ma portée, et la demande porte
-   sur les copies locales.
-4. **Ne pas retirer ma propre copie** : j'y travaille. La dernière fermeture revient à qui
-   travaillera sur master.
-5. Une copie qu'une autre session pourrait utiliser en ce moment se **remet à jour**, elle ne se
-   supprime pas sans preuve qu'elle est morte.
+Deux natures différentes. La coïncidence est donc l'hypothèse par défaut, et c'est **l'hypothèse
+que la session doit chercher à réfuter**, pas à confirmer.
 
-Piège à éviter, et il est réel : croire que ranger les copies règle le problème. Le problème est
-que **le jeton est versionné**, et il le restera. Ranger réduit le nombre d'univers ; seule une
-procédure écrite au bon endroit empêche qu'ils se remultiplient.
+Piège à éviter : conclure « même chiffre, donc même cause ». S157 a payé exactement cela — un
+ajustement libre rassemblait sept points à 1,38 avec un exposant séduisant, sur un plan
+d'expérience dégénéré (L235). Deux nombres égaux à 2,5 ne sont pas une mesure.
 
-P2 — inventaire publie dans COPIES-S159, avant toute modification.
-Le danger est demontrable, pas hypothetique : quatre copies disent `libre` au meme instant avec
-quatre "derniere session" differentes — S158, S157, S146 et **S44**. Une session ouvrant c107bf
-prendrait le jeton de bonne foi et commencerait S45, recreant cent quinze sessions d'histoire
-parallele. Seule la copie archivee est protegee, par l'etat `archivé` ajoute en S39 : il fonctionne,
-et il est la seule chose qui fonctionne.
-Fait nouveau : project-status-progress-d31d78 est **apparue pendant S158**, sans annonce. Les
-copies ne s'eteignent pas toutes seules, elles se recreent.
-Aucune copie ne porte de travail non committe — verifie en premier, c'est la seule perte qui serait
-irreversible.
-
-P3 — les cinq copies sans commit unique sont en avance rapide sur master. Elles lisent maintenant
-**le meme jeton**, la meme derniere session, le meme etat : le danger du jeton perime est eteint
-**avant** qu'aucune suppression n'ait eu lieu. C'est le point important de l'ordre choisi — si la
-session s'interrompait ici, le depot serait deja plus sur qu'au depart.
-Rien n'a change dans ma copie : le travail de cette etape est dans les autres repertoires, et
-seul ce journal en garde la trace. C'est exactement le cas ou l'ecriture anticipee sert.
-
-P4 — six copies ramenees a trois, sept branches a quatre, aucune histoire perdue.
-Retires : `friendly-bhabha-6da427` (archivee — **la branche est conservee**, seul le repertoire
-qui invitait a y travailler est parti), `reprise-projet-c107bf`, `reprise-projet-886155`,
-`reprise-projet-29ef50`. Supprimees : les trois branches correspondantes et `claude/s22-suite`,
-toutes ancetres de master. `git branch -d` a ete employe et non `-D` : il aurait refuse si l'une
-d'elles avait porte quoi que ce soit d'unique. Verifie apres coup : la branche archivee porte
-toujours ses **44** commits.
-**Non retiree, et c'est un choix, pas un oubli** : `project-status-progress-d31d78`, apparue
-pendant S158 sans annonce. Elle est propre, sans commit unique, et remise a jour. Mais je n'ai
-aucune preuve qu'aucune session ne l'occupe en ce moment, et la regle que je me suis donnee en P1
-dit qu'une copie peut-etre vivante se met a jour, elle ne se supprime pas. La retirer est une
-commande d'une ligne, laissee a l'utilisateur.
-Ma propre copie reste : j'y travaille. La derniere fermeture revient a qui travaillera sur master.
-
-P5 — le correctif durable, en quatre endroits et un seul par sujet.
-**ADR-110** : une branche sans commit unique ne se conserve pas ; une branche qui en porte se
-conserve mais pas sa copie ; fermer sa copie fait partie du travail ; une copie qu'on ne peut pas
-prouver morte se met a jour au lieu d'etre supprimee.
-**AGENTS.md** recoit la procedure de fermeture — trois commandes, et l'avertissement que `-d`
-refusant est un signal et non un obstacle. C'est l'amorce, donc le seul endroit ou elle vit.
-**REPRISE.md** : le bloc de jeton accumulait des notes de session depuis S58, dont l'une annoncait
-« cinq worktrees » alors qu'il y en avait six et dont une autre prescrivait de refusionner une
-branche desormais supprimee. Remplacees par la procedure et un renvoi. **Une consigne qui nomme
-une branche disparue n'instruit plus, elle egare.**
-**FORK-S22-S26** recoit une note datee : `claude/s22-suite` a ete supprimee, la lignee B survit.
-Balayage fait : plus aucun document ne **prescrit** quoi que ce soit sur une branche supprimee ;
-celles qui les nomment encore les **racontent**, ce qui est leur role.
-
-P6 — COPIES-S159 complete, ADR-110, A215, L240, L241, procedure dans AGENTS.md, journal, index,
-README, REPRISE, jeton rendu, ff-only. 299 tests/cinq ignores, aucun code touche.
-
-Pour S160 sans relire : S158-1 attend, inchange — verifier si le facteur 2,5 (etendue du
-groupement de S157, dispersion de l'estimateur de S158) est un plafond ou une coincidence.
-Sur les copies, ce qui reste a faire et par qui :
-- retirer `project-status-progress-d31d78` **quand on saura qu'elle est morte** — deux commandes,
-  ecrites dans le livrable ;
-- fermer la copie de la session courante, ce qui revient a la session suivante travaillant sur
-  master ;
-- ne pas rouvrir `claude/reprise-projet-5134cd` : jeton `archive`, 44 commits uniques, conservee
-  pour son histoire.
-Et le point qu'aucune procedure ne regle : le jeton reste versionne (A215).
+Second piège : élargir. S158 a écrit que la voie ouverte est **B4**, chantier sans rapport. Si la
+question se ferme en une heure, la fermer et le dire, pas la prolonger pour remplir la session.
