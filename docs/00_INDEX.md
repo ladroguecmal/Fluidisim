@@ -17,6 +17,17 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S140 :** [ADR-095](adr/ADR-095-ce-que-la-pression-peut-annoncer-de-sa-pente.md), ce que la pression peut
+annoncer de sa pente. [ENVELOPPE-PRESSION-S140](validation/ENVELOPPE-PRESSION-S140.md) : **A206 traitée, et la
+réponse est non** — le facteur de conservatisme de la pression n'est pas une constante. Il se décompose en un
+facteur de **forme** (borné par 2, éliminé exactement par `slope_envelope_tight()`, gain ×1,634) et un facteur
+d'**alignement** que rien ne borne : 3,027 sur un spectre gaussien réaliste, 16,7 sur une emprise étroite posée
+sur un zéro. La voie que S139 recommandait n'existe pas ; le budget devient homogène par la **nature** de ses
+termes — même grandeur majorée, meilleur majorant exact de chacun, marge résiduelle mesurée (**L222**). A208 :
+l'emprise décide de la part de budget consommée, et le refus ne la désigne pas.
+271 tests/cinq ignorés, aucun hachage touché.
+95 ADR,208 angles,17 invariants,6 spécifications,23 cas. Suite S141 : S139-1, le premier lot qui change des bits.
+
 **S139 :** [ADR-094](adr/ADR-094-d-ou-vient-la-limite-de-pente.md), d'où vient la limite de pente.
 [PENTE-REELLE-S139](validation/PENTE-REELLE-S139.md) : **A205 traitée**, et la question n'était pas celle qu'on
 croyait. La limite physique est déjà écrite — SPEC-001 §4, `πH/λ = 0,4488` — et ce qui manquait est le rapport
@@ -524,7 +535,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | `code/scenarios` | les scénarios du mode `check`, assertions comprises |
 
 ```
-cargo test --offline                                  # 270 succès, 5 ignorés (S139)
+cargo test --offline                                  # 271 succès, 5 ignorés (S140)
 water-harness check   scenarios/*.toml                # H1 — déterminisme, 0,04 s / budget 60 s
 water-harness physics scenarios/*.toml                # H3 — assertions analytiques et diagnostics
 ```

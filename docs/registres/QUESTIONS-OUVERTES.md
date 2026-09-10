@@ -1283,3 +1283,16 @@ entrée par entrée. Le fil reprend ci-dessous.
   devient 0,4488 avec provenance. Déplace la frontière d'admission de tous les champs et change
   les hachages de campagne — témoins obligatoires. Préalable : mesurer le facteur de
   `slope_envelope` (A206), non constant, sans quoi la somme reste hétérogène.
+
+### S140 — Ce que la pression peut annoncer
+
+- **A206 : traitée.** [ENVELOPPE-PRESSION-S140](../validation/ENVELOPPE-PRESSION-S140.md),
+  [ADR-095](../adr/ADR-095-ce-que-la-pression-peut-annoncer-de-sa-pente.md). Le facteur n'est pas
+  une constante : forme (borné par 2, éliminé) × alignement (non borné). `slope_envelope_tight()`
+  publiée, exacte pour une case dont l'emprise contient le maximum.
+- **S139-1 : ouverte, S141, préalables levés.** Substituer la borne resserrée dans
+  `mixed_water::slope_floor` et dans le budget de `composition.rs`, poser `max_slope = 0,4488`
+  (ADR-094), recevoir le déplacement des refus. **Premier lot de la série qui change des bits** :
+  témoins de hachage obligatoires, découpage par étape de moins d'un quart d'heure.
+- **A208 : ouverte, à instruire avec S139-1.** L'emprise publiée décide de la part de budget
+  consommée, et le nom du refus ne la désigne pas.

@@ -3365,3 +3365,37 @@ fort : pour la pression, cette grandeur ne se calcule pas, elle se cherche, et u
 manque le maximum rend un majorant faux — pire que conservateur. La règle tenable est **la même
 grandeur majorée, le meilleur majorant exact de chacun, et la marge résiduelle mesurée**. La
 leçon tient, sa prescription se corrige (ADR-095).
+
+## L221 — Un battement se relève, il ne s'écrit pas de mémoire
+
+*(S140)* Les cinq battements de S139 — de 03:05 à 04:25 — étaient **estimés**. L'heure réelle à la
+fin de la session était 03:20 : le jeton rendu portait un battement **une heure dans le futur**,
+c'est-à-dire exactement ce qui fait croire à une session active et bloque la suivante pendant deux
+heures.
+
+Le dépôt savait déjà : `REPRISE.md` porte depuis S118 une note disant qu'un battement estimé avait
+dû être corrigé, avec la phrase « le relever, jamais l'écrire de mémoire ». Je l'ai lue en
+démarrant S139, et je l'ai refaite dans la même session.
+
+**Ce qui n'a pas marché est le format, pas le contenu.** Une mise en garde posée dans un
+commentaire au milieu d'un bloc de données se lit comme du décor. Elle est désormais une **leçon**
+et une ligne de la procédure : `date` avant chaque commit d'étape, une commande, deux secondes.
+Voir [[L219]] — c'est le même mécanisme qu'un qualificatif à la place d'un nombre : une phrase qui
+a l'air de traiter la question sans l'obliger.
+
+## L222 — Décomposer une majoration avant de chercher à la calibrer
+
+*(S140)* Le conservatisme de l'enveloppe de pression valait 3,03. Chercher « le facteur de la
+pression » comme on avait trouvé `ρ = 1,795` pour l'impact aurait échoué — il n'y en a pas un,
+parce que la majoration en cache **deux, de natures opposées** :
+
+- un facteur de **forme** — normes L1 au lieu d'euclidiennes — borné par 2, indépendant de tout,
+  et **éliminable exactement et gratuitement** : deux `hypot` au lieu de deux `abs` ;
+- un facteur d'**alignement** — les termes n'atteignent pas leur maximum au même endroit — que
+  **rien ne borne**, parce qu'il dépend du domaine choisi par l'appelant et non du modèle.
+
+Généralisable : devant une majoration trop lâche, **la séparer avant de la mesurer**. Chaque
+facteur relève d'un traitement différent — le premier se supprime, le second se mesure et
+s'annonce. Les confondre mène soit à calibrer un nombre qui n'existe pas, soit à laisser sur la
+table un gain de 60 % qui ne coûtait rien. Voir [[L220]], dont cette leçon corrige la
+prescription.

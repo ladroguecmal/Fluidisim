@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S140 — en cours
+Session : S140 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : A206 — mesurer le facteur de conservatisme de `slope_envelope`
 (`spectral_pressure.rs:346`, `Σ(|kx|+|ky|)·(|Re η|+|Im η|)`) contre la pente réelle du champ de
@@ -77,7 +77,7 @@ reste hétérogène et aucun seuil ne s'y dérive (ADR-094, L220).
       valeurs absolues) : même coût, majorant rigoureux. Mesurer ce qu'elle récupère, et
       **vérifier qu'elle majore toujours** — c'est une propriété de sûreté, pas de finesse.
 - [x] **P5** — décision et livrable : ce que A206 impose à S139-1.
-- [ ] **P6** — rituel de fin (§6), jeton rendu, fusion `--ff-only`.
+- [x] **P6** — rituel de fin (§6), jeton rendu, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -99,3 +99,23 @@ une voie : resserrer la borne au lieu de chercher un facteur par couche.
 
 Piège à éviter : conclure d'un balayage 2D trop grossier que le maximum est plus bas qu'il ne
 l'est — même piège qu'en S139, et il rend la borne trop permissive dans le sens dangereux.
+
+P2-P5 : sonde `enveloppe_pression` (7 sections), `slope_envelope_tight()` + test d'encadrement,
+ADR-095, ENVELOPPE-PRESSION-S140, note corrective sur ADR-094, post-scriptum sur L220.
+271 tests/cinq ignorés.
+
+Ce que la thèse de départ avait de faux : je pensais chercher **un** facteur. Il y en a deux, de
+natures opposées, et c'est toute la réponse — forme (borné par 2, éliminé exactement) et
+alignement (non borné, dépend de l'emprise de l'hôte). L222.
+
+Impasse à ne pas réexplorer : rétrécir l'emprise **autour de l'origine** ne fait pas diverger le
+facteur. La phase y vaut zéro, la réponse a `|η_re|/|η_im| = 0,0856`, donc son maximum est à
+0,0136 tour de l'origine et toute emprise centrée le contient. Il faut décentrer, et de préférence
+sur un zéro du champ (section 2bis de la sonde le montre en douze lignes).
+
+Pour S141 sans relire : S139-1 substitue `slope_envelope_tight()` à `slope_envelope()` dans
+`mixed_water::slope_floor` (ligne ~175) et dans le budget de `composition.rs` (~67), et pose
+`max_slope = 0,4488` dans les fixtures. **C'est le premier lot de la série qui change des bits** :
+les refus se déplacent dans le sens permissif, les campagnes de hachage bougent. Découper en
+étapes courtes, et faire un témoin avant/après par scénario — pas un seul hachage global, qui ne
+dirait pas *lequel* a bougé.

@@ -7191,3 +7191,58 @@ corpus ; aucun autre invalidé.
 de `bound_pressure`, préalable à S139-1. Puis S139-1 lui-même, avec ses témoins de hachage.
 Restent ouverts : l'audit des renvois « traité en Sxx » (S138), l'extension de fenêtre, S116-2,
 le bilan mixte, la durabilité et les deux calibrations de B10.
+
+---
+
+## S140 — 2026-09-10 — Le facteur de la pression n'existe pas : il y en a deux
+
+**Entrée :** jeton libre à 57504f0, worktree `886155`, master coïncident. A206, ouverte la veille.
+**Produit :** [ADR-095](../docs/adr/ADR-095-ce-que-la-pression-peut-annoncer-de-sa-pente.md),
+[ENVELOPPE-PRESSION-S140](../docs/validation/ENVELOPPE-PRESSION-S140.md), sonde
+`enveloppe_pression`, `Field::slope_envelope_tight()` et son test, note corrective sur ADR-094,
+post-scriptum sur L220, A208, L221, L222.
+
+**La question était : ce facteur est-il une constante, comme `ρ` ? La réponse est non**, et elle
+ferme la voie que S139 recommandait pour S139-1. Le rapport entre l'enveloppe et la pente réelle
+se décompose en **deux facteurs de natures opposées** : un facteur de **forme** — normes L1 au
+lieu d'euclidiennes — borné par 2, atteint, et éliminable exactement sans coût ; et un facteur
+d'**alignement**, que rien ne borne parce qu'il dépend de l'emprise que l'hôte publie, pas du
+modèle.
+
+**Les chiffres.** Sur une case unique, la factorisation est exacte et le facteur de phase déduit
+ne dépasse jamais √2 (1,4133 mesuré pour 1,41421) — c'est le témoin qui valide la sonde. Sur un
+spectre gaussien cuit de 128 à 4480 cases, le facteur total vaut **3,027**, stable en résolution :
+il caractérise le spectre publié. Sur une emprise de 0,01 λ posée sur un zéro du champ, il vaut
+**16,7**, et il continue de croître.
+
+**Ce que le resserrement récupère.** `slope_envelope_tight() = Σ|k_w|·|η|` retire exactement le
+facteur de forme : **×1,530** sur une case, **×1,634** sur le spectre gaussien. Elle est **exacte
+— atteinte, pas approchée —** quand l'emprise contient le maximum d'une case unique. Ce qu'elle
+ne touche pas est l'alignement, c'est-à-dire précisément la part sans borne.
+
+**Ce que S140 corrige de S139, et c'est le résultat de fond.** L220 prescrivait que chaque terme
+publie *la grandeur réelle* qu'il majore. Irréalisable pour la pression : sa pente maximale ne se
+calcule pas, elle se **cherche** sur l'emprise, et une recherche qui manque le maximum rend un
+majorant faux — un refus qui n'en est pas un. La formulation tenable est **la même grandeur
+majorée par tous, le meilleur majorant exact de chacun, la marge résiduelle mesurée**. Le budget
+devient alors homogène par la *nature* de ses termes, et `max_slope = 0,4488` s'énonce en une
+phrase : aucun point ne dépasse la cambrure limite de Stokes.
+
+**Angle mort nouveau, A208.** À champ identique, l'emprise publiée décide de la part de budget
+consommée — ×10,9 mesuré, sans borne — et le refus rendu désigne la pente, c'est-à-dire la seule
+chose que l'hôte n'a pas à changer. ADR-082 exige qu'un nom de refus désigne ce qu'il faut revoir.
+
+**Un manquement de cette session, constaté et corrigé : les battements de S139 étaient estimés.**
+Le jeton rendu portait 04:25 quand il était 03:20 — un battement dans le futur, ce qui bloque la
+session suivante. `REPRISE.md` porte cette mise en garde depuis S118 ; je l'avais lue. **L221** :
+le format d'une mise en garde compte autant que son contenu, et `date` coûte deux secondes.
+
+271 tests, cinq ignorés — un de plus. Aucun hachage touché, aucun comportement modifié.
+95 ADR, 208 angles, 17 invariants, 6 spécifications, 23 cas. Invariants relus : aucun invalidé.
+
+**Suite S141 :** **S139-1**, dont les deux préalables sont levés. Substituer la borne resserrée
+dans `mixed_water::slope_floor` et dans le budget de composition, poser `max_slope = 0,4488`,
+recevoir le déplacement des refus avec ses témoins de hachage — c'est le premier lot de cette
+série qui **change des bits**, et il doit être découpé en conséquence. Instruire A208 avec lui.
+Restent ouverts : l'audit des renvois « traité en Sxx » (S138), l'extension de fenêtre, S116-2,
+le bilan mixte, la durabilité et les deux calibrations de B10.

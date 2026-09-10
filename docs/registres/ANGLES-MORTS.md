@@ -1775,3 +1775,22 @@ S139-1. Voir [PENTE-REELLE-S139](../validation/PENTE-REELLE-S139.md).
   de déferlement. Ouverte par décision : la trancher demanderait une mesure du monde, hors de
   portée d'une session (`REPRISE.md` §5), et le majorant géométrique suffit à l'usage qui en est
   fait.
+
+**Suivi A206 — S140 : traitée par ADR-095, et la réponse est « non ».** Le facteur de
+conservatisme de `slope_envelope` **n'est pas une constante** : il vaut 3,027 sur un spectre
+gaussien réaliste — stable en résolution, donc caractéristique du spectre publié — et croît sans
+borne quand l'emprise se resserre sur un zéro du champ (16,7 mesuré à 0,01 λ). Il se décompose en
+un facteur de **forme**, borné par 2 et éliminé exactement par `slope_envelope_tight()`, et un
+facteur d'**alignement**, que rien ne borne. La voie que S139 recommandait pour S139-1 — chaque
+couche divise sa borne par son facteur — n'existe donc pas. Voir
+[ENVELOPPE-PRESSION-S140](../validation/ENVELOPPE-PRESSION-S140.md).
+
+- **A208** *(sévérité 2, S140 ; ouverte)* — **L'hôte consomme le budget de pente par un choix
+  qu'aucun refus ne lui désigne : l'emprise.** À champ identique, publier sur une emprise étroite
+  posée loin de la source multiplie la part de budget consommée — mesuré ×10,9 sur une case, sans
+  borne supérieure — parce que la borne ne dépend pas de l'emprise quand la pente réelle, elle,
+  en dépend. Le refus rendu est `Slope` ou `Steepness` : il désigne la pente, c'est-à-dire la
+  seule chose que l'hôte n'a pas à changer. ADR-082 exige qu'un nom de refus désigne ce qu'il
+  faut revoir ; celui-ci désigne le contraire. Deux réparations possibles, aucune tranchée :
+  nommer le cas (`Footprint`), ou publier le rapport des deux enveloppes pour que l'appelant voie
+  sa propre marge. À instruire avec S139-1.

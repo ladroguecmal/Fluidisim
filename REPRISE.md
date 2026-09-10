@@ -18,21 +18,21 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 03:33 +02:00
+JETON            : libre
+Battement        : 2026-09-10 03:36 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S140 — le facteur de conservatisme de la pression (A206)
-Dernière session : S139 — la limite de pente se dérive ;270 tests/cinq ignorés
-Session suivante : à fixer en fin de S140
+Session en cours : aucune
+Dernière session : S140 — le facteur de la pression n'est pas une constante ;271 tests/cinq ignorés
+Session suivante : S141 — S139-1, substituer la borne resserrée et poser `max_slope = 0,4488`
 
-*Les battements de S139 — de 03:05 à 04:25 — étaient **estimés et non relevés** : l'heure réelle
-à la fin de S139 était 03:20. Même défaut qu'en S118, signalé plus bas et refait quand même.
-Corrigé ici, et porté en leçon : un battement se relève, jamais ne s'écrit de mémoire.*
+**Copie de travail S139 et S140** : worktree `claude/reprise-projet-886155`, refusionné en avance
+rapide dans master à la fin de chacune des deux. Terminer de même :
+`git -C <racine> merge --ff-only claude/reprise-projet-886155`. Les worktrees `29ef50` et `2d3506`
+sont restés à 041dfed — en retard, rien d'unique ; `c107bf` est à S44 et `5134cd` porte le jeton
+`archivé`. **Cinq worktrees ouverts, et le sort des branches reste l'action S35-7 de l'utilisateur.**
 
-**Copie de travail S139** : worktree `claude/reprise-projet-886155`, ouvert sur 041dfed = master.
-Terminer par `git -C <racine> merge --ff-only claude/reprise-projet-886155`. Deux autres
-worktrees — `29ef50` et `2d3506` — coïncident avec master ; `c107bf` est resté à S44 et
-`5134cd` porte le jeton `archivé`.
+*Battements relevés par `date` à chaque commit d'étape, et non estimés — **L221**, après que ceux
+de S139 se soient retrouvés une heure dans le futur.*
 
 **Copie de travail S130** : worktree `claude/reprise-projet-2d3506`, remis en avance rapide sur
 master (e817d0e) au démarrage — il était resté à 52e80a5 et n'avait rien d'unique, donc aucun
@@ -189,6 +189,30 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S140 — 2026-09-10 :** [ADR-095](docs/adr/ADR-095-ce-que-la-pression-peut-annoncer-de-sa-pente.md),
+[ENVELOPPE-PRESSION-S140](docs/validation/ENVELOPPE-PRESSION-S140.md). **A206 traitée, réponse : non.**
+Le facteur de conservatisme de la pression n'est pas une constante — il en cache **deux, de natures
+opposées**. Un facteur de **forme** (normes L1 au lieu d'euclidiennes) borné par2, atteint, et
+éliminable exactement sans coût : `slope_envelope_tight()` le retire, gain ×1,530 sur une case et
+×1,634 sur un spectre gaussien. Un facteur d'**alignement** que **rien ne borne**, parce qu'il
+dépend de l'emprise publiée par l'hôte :3,027 sur un spectre réaliste (stable en résolution),
+**16,7** sur une emprise de0,01 λ posée sur un zéro du champ, et croissant.
+**Ce que S140 corrige de S139 :** L220 prescrivait que chaque terme publie *la grandeur réelle*
+qu'il majore. Irréalisable pour la pression, dont la pente maximale ne se calcule pas mais se
+**cherche** — et une recherche qui manque le maximum rend un majorant faux, donc un refus qui n'en
+est pas un. Formulation tenable : **la même grandeur majorée, le meilleur majorant exact de chacun,
+la marge résiduelle mesurée** (L222). Le budget est alors homogène par la *nature* de ses termes et
+`max_slope =0,4488` s'énonce en une phrase : aucun point ne dépasse la cambrure limite de Stokes.
+**A208** : à champ identique, l'emprise décide de la part de budget consommée (×10,9 mesuré), et le
+refus rendu désigne la pente — la seule chose que l'hôte n'a pas à changer.
+**L221, manquement constaté** : les battements de S139 étaient estimés, le jeton rendu portait une
+heure dans le futur. La mise en garde existait depuis S118, dans un commentaire ; elle est
+maintenant une leçon et une commande, `date` avant chaque commit d'étape.
+271 tests/cinq ignorés, aucun hachage touché.95 ADR,208 angles,17 invariants,6 spécifications,23 cas.
+Suite S141 : **S139-1**, préalables levés — substituer la borne resserrée dans `slope_floor` et dans
+le budget de composition, poser `max_slope =0,4488`, recevoir le déplacement des refus. **Premier lot
+de la série qui change des bits** : témoins de hachage obligatoires. Instruire A208 avec lui.
 
 **S139 — 2026-09-10 :** [ADR-094](docs/adr/ADR-094-d-ou-vient-la-limite-de-pente.md),
 [PENTE-REELLE-S139](docs/validation/PENTE-REELLE-S139.md). **A205 traitée.**
