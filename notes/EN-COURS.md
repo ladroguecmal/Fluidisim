@@ -58,40 +58,40 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S137 — terminée
+Session : S138 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : S136-1 — spécifier le banc B2. **La prémisse était fausse** : il l'est déjà.
+Objectif : S137-1 — auditer les renvois du corpus. S137 a trouvé un renvoi faux recopié par
+trois ADR pendant soixante sessions, et deux numéros de leçon en collision. Chercher les autres,
+par recherche de texte et non par relecture — la méthode de S11 et S15.
 
 ### Plan
 
-**Ce plan a été écrit après coup, et c'est un manquement.** La règle veut qu'il soit déclaré et
-committé seul *avant* la première modification ; il ne l'a pas été. Une coupure en cours de
-session n'aurait laissé aucune trace d'intention, ce qui est exactement le défaut que
-`notes/EN-COURS.md` existe pour éviter. Consigné plutôt que masqué.
-
-- [x] **P1** — amorce : état réel, copies, jeton.
-- [x] **P2** — lire avant d'écrire : B2 est spécifié dans PLAN-BENCHMARK et DOSSIER-B2 (S16).
-- [x] **P3** — établir ce que B2 et B10 mesurent réellement, et constater le trou.
-- [x] **P4** — ADR-093, extension de PLAN-BENCHMARK §B10, trois notes correctives datées.
-- [x] **P5** — livrable, leçon, rituel de fin, fusion `--ff-only`.
+- [x] **P1** — état réel, jeton, **plan déclaré et committé seul**. S137 ne l'a pas fait ;
+      cette session commence par le faire.
+- [ ] **P2** — audit mécanique des **identifiants** : ADR, angles, leçons, invariants, cas.
+      Collisions, trous, et références vers des numéros qui n'existent pas. C'est le plus
+      automatisable, et S137 a montré qu'il y a des collisions.
+- [ ] **P3** — audit des renvois vers les **bancs** — c'est là que S137 a trouvé le défaut, et
+      la même erreur peut viser B3, B4 ou B10.
+- [ ] **P4** — audit des renvois vers les **sections de spécification** : `SPEC-00x §y` où la
+      section a pu bouger, disparaître, ou n'avoir jamais porté ce qu'on lui attribue.
+- [ ] **P5** — corriger ce qui est faux : notes datées pour les ADR, correction directe pour
+      les documents qui ne sont pas des ADR, et **dire ce qui est douteux sans le trancher**.
+- [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
-La session n'a produit aucun code : elle corrige un renvoi et comble un trou de plan.
+Départ 17aa26b = master, trois copies coïncidentes.
 
-Ce qu'elle a trouvé : B2 choisit la technologie de W, B10 mesure la cavité, et **aucun banc ne
-mesure la source d'onde d'un impact**. Le renvoi « à calibrer B2 » d'ADR-060, recopié par ADR-083
-puis ADR-092 — la mienne — a masqué ce trou depuis S77.
+Ce que S137 a établi et qui oriente cet audit :
+- un renvoi non vérifié **ferme** la question au lieu de la laisser ouverte (L217) ; les
+  renvois les plus dangereux sont donc ceux qui attribuent une tâche — « à calibrer B2 »,
+  « traité en Sxx », « voir tel banc » ;
+- les numéros peuvent entrer en collision quand deux agents travaillent en parallèle, ce qui
+  est le cas depuis S125 (Codex sur master, moi sur ce worktree).
 
-Second défaut trouvé en fin de session : mes leçons de S136 et S137 réutilisaient L214 et L215,
-déjà prises par Codex. Renumérotées L216 et L217. **Vérifier le dernier numéro dans le fichier,
-jamais depuis sa propre mémoire de la session précédente** — surtout après avoir fusionné le
-travail d'un autre agent.
+Piège à éviter : corriger un renvoi douteux en devinant sa cible. Si la cible juste n'est pas
+évidente, le dire et laisser ouvert vaut mieux qu'un second renvoi faux.
 
-Pour S138 sans relire : S137-1 est un audit des renvois. La méthode est celle de S11 et S15 —
-recherche de texte plutôt que relecture. Motifs : « à calibrer », « voir ADR-0xx », « traité en
-S », les identifiants de bancs, les sections de SPEC. Pour chacun, ouvrir la cible et vérifier
-qu'elle porte ce qu'on lui confie. Commencer par les renvois vers des **bancs** et des **sections
-de SPEC**, les plus susceptibles de n'avoir jamais couvert ce qu'on leur attribue. Et y ajouter
-les **numéros** — leçons, angles, ADR — dont S137 vient de montrer qu'ils peuvent entrer en
-collision quand deux agents travaillent en parallèle.
+Attendu réaliste : un audit trouve surtout des choses mineures. Le résultat utile peut être
+« le corpus est cohérent sur ces points », à condition d'avoir cherché pour de bon.
