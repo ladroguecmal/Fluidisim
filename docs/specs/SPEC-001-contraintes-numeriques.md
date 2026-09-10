@@ -67,6 +67,18 @@ Référence analytique indépendante pour `γ=1` : `∫_a^b q dx=[exp(-5/(4x^4))
 Ces identités reçoivent l'instrument S147 ; les bornes physiques de bande restent explicites
 et la migration du constructeur reste à faire (ADR-100).
 
+## 1 ter. Référence analytique de Stokes — S162, hors runtime
+
+En profondeur infinie, pour une onde progressive irrotationnelle de faible cambrure `ka`,
+`θ=kx-ωt`, `ω²=gk` : à l'ordre deux,
+`η=a cos(θ)+(ka²/2) cos(2θ)` et `φ=(aω/k) exp(kz) sin(θ)`.
+Source : [Principia, DeepLines, Stokes d'ordre deux](https://www.principia-support.com/Software/Deeplines/Theory/Hydrodynamics/Hydrodynamics_of_offshore_floating_structures/#stokes-2nd-order-waves).
+
+Ces expressions tronquées ne sont pas une solution exacte à amplitude finie. Leur emploi
+comme diagnostic d'interaction et leurs résidus aux limites sont documentés dans
+[ADDITIVITE-PROFONDE-S162](../validation/ADDITIVITE-PROFONDE-S162.md).
+Ce complément n'ajoute ni seuil de bascule ni modèle de production.
+
 ## 2. Stabilité et coût d'un solveur volumétrique
 
 ### 2.1 CFL
