@@ -38,6 +38,35 @@ plutôt que réinventer un chiffre.
 > tout délai d'établissement se calcule avec `c_g`. En eau profonde, c'est deux fois plus lent
 > qu'on ne le croit en regardant les crêtes.
 
+## 1 bis. Spectre fréquentiel du fond — S147, ADR-100
+
+Pour une mer de vent unimodale, poser `fp=1/Tp`, `x=f/fp` et la densité de forme
+`q(x)=x^-5 exp(-5/(4x^4)) γ^r`, avec
+`r=exp(-(x-1)^2/(2σ²))`, `σ=0,07` pour `x≤1`, `0,09` sinon.
+`γ≥1` ; `γ=1` donne la forme Pierson–Moskowitz modifiée, `γ=3,3` est une référence
+JONSWAP usuelle, pas une valeur universelle. Sources :
+[Hasselmann et al., 1973, §2.4](https://airsea.ucsd.edu/wp-content/uploads/sites/10/2019/10/Jonswap-Hasselmann1973.pdf),
+[formules de spectres Orcina](https://www.orcina.com/webhelp/OrcaFlex/Content/html/Waves,Wavespectra.htm).
+
+**Convention décidée pour le candidat : Hs désigne la variance représentée dans une bande
+finie explicitement déclarée** `[a fp,b fp]`, `0<a<1<b`. Alors
+`S(f)=Hs² q(f/fp)/(16 fp ∫_a^b q(x)dx)` dans la bande, zéro hors bande.
+Par cellule spectrale, `e_i=∫cellule S(f)df`, `amplitude_i=√(2e_i)`.
+Une intégration en `u=ln(x)` inclut **dx=x du** ; une énergie égale par cellule
+logarithmique décrit `S(f)∝1/f`, pas une densité constante par hertz.
+
+Dérivations pour la réception : `m_p=∫ f^p S(f)df`, `Hs=4√m0`,
+`Tz=√(m0/m2)` ; en Airy profond, `variance(∂tη)=(2π)²m2` et
+`E[|∇η|²]=(2π)^4 m4/g²`, pour des phases indépendantes et des directions unitaires.
+Ce sont des moments d'ensemble, pas les statistiques exactes d'une fenêtre finie.
+Le `m4` d'une queue idéale en `f^-5` diverge logarithmiquement : **la pente exige une
+coupure**, même lorsque Hs converge. Ne pas confondre cette bande de B avec λ_cut de W/δ.
+
+Référence analytique indépendante pour `γ=1` : `∫_a^b q dx=[exp(-5/(4x^4))/5]_a^b`,
+`∫_0^∞ q dx=1/5` et `∫_0^∞ x²q dx=√π/(4√(5/4))`.
+Ces identités reçoivent l'instrument S147 ; les bornes physiques de bande restent explicites
+et la migration du constructeur reste à faire (ADR-100).
+
 ## 2. Stabilité et coût d'un solveur volumétrique
 
 ### 2.1 CFL

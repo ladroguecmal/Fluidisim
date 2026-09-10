@@ -66,8 +66,8 @@ Objectif : clore S63-1 sur preuves existantes, puis instruire A212 (forme du spe
 
 - [x] **P1** — vérifier copies, branches, historique et outils ; prendre le jeton et committer ce plan seul.
 - [x] **P2** — lectures de reprise ; clore S63-1/S145-2 avec le périmètre exact de la dispersion construite et les dépendances restantes de B2.
-- [>] **P3** — examiner A212 dans les spécifications et le code, vérifier les références physiques et arrêter une décision de spectre avec son protocole de réception ; construire le lot que cette décision permet dans la session.
-- [ ] **P4** — vérifier le lot, écrire journal et passation, contrôler décomptes et renvois, exécuter le rituel de fin et rendre le jeton.
+- [x] **P3** — examiner A212 dans les spécifications et le code, vérifier les références physiques et arrêter une décision de spectre avec son protocole de réception ; construire le lot que cette décision permet dans la session.
+- [>] **P4** — vérifier le lot, écrire journal et passation, contrôler décomptes et renvois, exécuter le rituel de fin et rendre le jeton.
 
 ### Notes de reprise
 
@@ -75,3 +75,5 @@ Départ : master 66cd765, identique à 886155 ; autres copies propres et histori
 S146 terminée ; 275 tests réussis/cinq ignorés annoncés, 99 ADR, 212 angles, 18 invariants,
 6 spécifications, 23 cas. Cargo 1.97.0 disponible. B1 partiel : volets perceptuels et LOD ouverts.
 La recommandation BILAN-S145 est portée : B1 exécuté S146, S63-1 prise en premier ici.
+P3 : ADR-100, SPEC-001 §1 bis, instrument spectral cfg(test), deux tests release reçus.
+A212 partielle : décision et instrument réalisés, constructeur spectral S147-1 à construire.

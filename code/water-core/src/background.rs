@@ -21,6 +21,11 @@ use crate::host::{AllocError, HostServices};
 use crate::phase::{freq_hz_to_q32, PhaseQ32};
 use crate::types::{SimTime, WaterSample, WorldPos};
 
+// Instrument S147 hors runtime : moments du spectre réel et référence indépendante.
+#[cfg(test)]
+#[path = "spectrum_reference_s147.rs"]
+mod spectrum_reference_s147;
+
 /// Une composante de houle. Paramètres figés à la configuration.
 #[derive(Clone, Copy, Debug)]
 pub struct Component {
