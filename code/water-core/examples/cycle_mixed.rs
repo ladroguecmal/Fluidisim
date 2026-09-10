@@ -474,36 +474,6 @@ fn main() {
             .unwrap();
             black_box(p.energy_j());
         }
-        // S131 : ce que coûte la sortie de saturation. `copy_into` prend `&self`, donc
-        // l'élargissement et la reprise se font pendant que le contrôleur sert encore ;
-        // seule la reconstruction laisse l'hôte sans champ. On mesure les deux séparément.
-        {
-            let mut large = vec![None; controller.journal().required_capacity() + 2];
-            let elargissement = measure(|| {
-                let copie = controller.journal().copy_into(&mut large).unwrap();
-                black_box(copie.published().count());
-            });
-            let mut elargi = controller.journal().copy_into(&mut large).unwrap();
-            assert_eq!(elargi.required_capacity(), elargi.published().count());
-            // Reconstruction sur un troisième jeu de pools : c'est la fenêtre sans champ.
-            let mut neuf = vec![Slot::default(); count];
-            let mut neuf_spare = vec![Slot::default(); count];
-            let reconstruction = measure(|| {
-                let c = Controller::new(
-                    ctx,
-                    &half,
-                    &mut elargi,
-                    SimTime(1_500_000),
-                    &mut neuf,
-                    &mut neuf_spare,
-                )
-                .unwrap();
-                black_box(c.published_time());
-            });
-            println!(
-                "{radial}x{angular} elargissement_us={elargissement:?} reconstruction_us={reconstruction:?}"
-            );
-        }
         // Coût de l'annonce, mille appels par tour : ce qu'il en coûte d'éviter une
         // préparation inutile, comparé aux ~12,6 ms qu'elle aurait coûtés.
         let announce_ns = measure(|| {
@@ -638,6 +608,87 @@ fn main() {
             let t = SimTime(if alt { 1_500_000 } else { 1_500_001 });
             assert_eq!(controller.update(t), Ok(Update::Published));
         });
+        // S131 : ce que coûte la sortie de saturation. `copy_into` prend `&self`, donc
+        // l'élargissement et la reprise se font pendant que le contrôleur sert encore ;
+        // seule la reconstruction laisse l'hôte sans champ. On mesure les deux séparément.
+        {
+            let mut large = vec![None; controller.journal().required_capacity() + 2];
+            let elargissement = measure(|| {
+                let copie = controller.journal().copy_into(&mut large).unwrap();
+                black_box(copie.published().count());
+            });
+            let mut elargi = controller.journal().copy_into(&mut large).unwrap();
+            assert_eq!(elargi.required_capacity(), elargi.published().count());
+            // Reconstruction sur un troisième jeu de pools : la fenêtre sans champ de S131.
+            let mut neuf = vec![Slot::default(); count];
+            let mut neuf_spare = vec![Slot::default(); count];
+            let reconstruction = measure(|| {
+                let c = Controller::new(
+                    ctx,
+                    &half,
+                    &mut elargi,
+                    SimTime(1_500_000),
+                    &mut neuf,
+                    &mut neuf_spare,
+                )
+                .unwrap();
+                black_box(c.published_time());
+            });
+            // S133, cas sans prolongement : le journal élargi porte les mêmes sources, donc
+            // le raccourci ne s'applique pas et l'extension emprunte la voie complète.
+            let extension_simple = measure(|| {
+                let c = controller
+                    .extend_into(&mut elargi, &mut neuf, &mut neuf_spare)
+                    .unwrap();
+                black_box(c.published_time());
+            });
+            // S133, cas qui compte : le journal élargi porte une source **de plus**, en
+            // dernier dans l'ordre canonique. Le raccourci s'applique alors, et l'ancien
+            // contrôleur sert pendant toute l'opération.
+            elargi
+                .admit_authenticated(
+                    Source::new(
+                        Metadata {
+                            epoch: 0,
+                            id: 2,
+                            cause: Cause {
+                                entity: 3,
+                                command: 0,
+                                emission: 0,
+                            },
+                            settings,
+                            recipe,
+                        },
+                        &paths[0],
+                    )
+                    .unwrap(),
+                )
+                .unwrap();
+            let extension_prolongee = measure(|| {
+                let c = controller
+                    .extend_into(&mut elargi, &mut neuf, &mut neuf_spare)
+                    .unwrap();
+                black_box(c.published_time());
+            });
+            let complete = measure(|| {
+                let c = Controller::new(
+                    ctx,
+                    &half,
+                    &mut elargi,
+                    SimTime(1_500_000),
+                    &mut neuf,
+                    &mut neuf_spare,
+                )
+                .unwrap();
+                black_box(c.published_time());
+            });
+            println!(
+                "{radial}x{angular} elargissement_us={elargissement:?} reconstruction_us={reconstruction:?}"
+            );
+            println!(
+                "{radial}x{angular} extension_sans_prolongement_us={extension_simple:?} extension_prolongee_us={extension_prolongee:?} construction_complete_3_sources_us={complete:?}"
+            );
+        }
         println!(
             "{radial}x{angular} slope_floor={floor} admits64_us={admits64_us:?} announce_1000_us={announce_ns:?} update_us={update_us:?} update_again_us={update_again_us:?} \
 unchanged_us={unchanged_us:?} \

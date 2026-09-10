@@ -185,6 +185,63 @@ impl<'p, 'v, 'n, 'j, 's> Controller<'p, 'v, 'n, 'j, 's> {
         self.envelope = envelope;
         Ok(Admission::Republished)
     }
+    /// ADR-089 : construire un second contrôleur sur un journal élargi, en repartant des
+    /// coefficients déjà publiés — **sans toucher à celui-ci**, qui reste servable pendant et
+    /// après l'opération. C'est ce qui supprime la fenêtre sans champ de S131 : l'ancien sert
+    /// jusqu'au basculement, et un refus ne coûte que le temps passé.
+    ///
+    /// Le nouveau publie au même instant, seule date à laquelle les coefficients repris ont
+    /// un sens. Le raccourci ne s'emploie que si le journal élargi contient exactement les
+    /// mêmes sources, dans le même ordre, plus une **en dernier** ; sinon la préparation
+    /// complète prend le relais, et le résultat est le même — celui de la voie directe.
+    pub fn extend_into<'q, 'w>(
+        &self,
+        journal: &'w mut Journal<'j, 's>,
+        active: &'q mut [Slot],
+        spare: &'q mut [Slot],
+    ) -> Result<Controller<'q, 'w, 'n, 'j, 's>, Error>
+    where
+        'v: 'w,
+    {
+        if active.len() < self.count || spare.len() < self.count {
+            return Err(Error::Preparation(PrepareError::Capacity));
+        }
+        // Le journal élargi prolonge-t-il exactement le nôtre, d'une source en dernier ?
+        let ancien: usize = self.journal.published().count();
+        let nouveau: usize = journal.published().count();
+        let prolonge = nouveau == ancien + 1
+            && journal.epoch() == self.journal.epoch()
+            && journal
+                .published()
+                .zip(self.journal.published())
+                .all(|(a, b)| a.metadata().id == b.metadata().id && a.same_content(&b));
+        let p = if prolonge {
+            let ajoutee = journal.published().nth(ancien).ok_or(Error::Empty)?;
+            active[..self.count].copy_from_slice(&self.active[..self.count]);
+            Prepared::add_source(
+                self.context,
+                self.spectrum,
+                &ajoutee,
+                self.time,
+                &mut active[..self.count],
+            )?
+        } else {
+            Prepared::from_journal(self.context, self.spectrum, journal, self.time, active)?
+        };
+        let state = p.field.state();
+        let envelope = p.slope_envelope;
+        Ok(Controller {
+            context: self.context,
+            spectrum: self.spectrum,
+            journal,
+            active,
+            spare,
+            count: self.count,
+            state,
+            time: self.time,
+            envelope,
+        })
+    }
     /// Recalcul absolu au temps demandé, retour temporel autorisé dans la fenêtre.
     pub fn update(&mut self, requested: SimTime) -> Result<Update, Error> {
         if requested == self.time {

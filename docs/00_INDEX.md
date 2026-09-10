@@ -17,6 +17,13 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S133 :** [ADR-089](adr/ADR-089-extension-sans-interruption.md), étendre sans interrompre.
+[EXTENSION-S133](validation/EXTENSION-S133.md) : `extend_into` **lit** le contrôleur et en construit un second
+sur un journal élargi, sans le détruire — l'ancien sert pendant et après. **La fenêtre sans champ de S131 ne
+raccourcit pas, elle disparaît** ; le coût tombe à6,21 ms contre19,11 pour le même journal à trois sources.
+263 tests/cinq ignorés, hachages inchangés.89 ADR,204 angles,17 invariants,6 spécifications,23 cas.
+Suite S134 : l'exactitude conditionnée à l'insertion en dernier, S133-1.
+
 **S132 :** [ADR-088](adr/ADR-088-admission-incrementale-exacte.md), admission incrémentale exacte ou pas du tout.
 [INCREMENTAL-S132](validation/INCREMENTAL-S132.md) : le raccourci ne s'applique **que** si la source s'insère en
 dernier, seul cas où l'ordre d'addition `f32` est préservé ; sinon recalcul. Résultat toujours celui de la voie

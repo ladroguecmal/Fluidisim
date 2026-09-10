@@ -890,3 +890,88 @@ fn admission_matches_the_direct_field_wherever_the_source_lands() {
         );
     }
 }
+/// S133, ADR-089 : étendre sans interrompre. Le nouveau contrôleur vaut une préparation
+/// complète du journal élargi, l'ancien continue de servir le sien, et la condition d'ordre
+/// est vérifiée plutôt que supposée.
+#[test]
+fn extension_yields_the_direct_field_and_leaves_the_old_controller_serving() {
+    let p = paths();
+    let tiers = [Segment {
+        birth: SimTime(0),
+        duration_us: 2_000_000,
+        origin: [2.0, -1.0],
+        velocity: [1.0, 1.0],
+        pressure_pa: 5.0,
+    }];
+    let chemins = |id: u64| match id {
+        1 => &p[0][..],
+        2 => &p[1][..],
+        _ => &tiers[..],
+    };
+    let mut nodes = [Node::default(); 384];
+    let mut hn = [Node::default(); 192];
+    let full = bake(recipe(), &mut nodes).unwrap();
+    let half = full.half_into(&mut hn).unwrap();
+    let ctx = Context::new(settings(), &half).unwrap();
+    let t = SimTime(1_500_000);
+    let points = [[0.0; 2], [2.0, 1.0], [-8.0; 2], [12.0; 2], [5.5, -2.5]];
+    let releve = |f: &Prepared<'_>| {
+        let mut out = [Surface::default(); 5];
+        let mut work = out;
+        f.sample_batch(&ctx, t, &points, &mut work, &mut out).unwrap();
+        (
+            out.map(|s| vals(s).map(f32::to_bits)),
+            [f.energy_j(), f.power_w(), f.slope_envelope()].map(f32::to_bits),
+        )
+    };
+    // `deja` sont les sources publiées ; `reprise` celle que l'élargissement fait entrer.
+    // Premier cas : elle s'insère en dernier ; second : au milieu.
+    for (deja, reprise) in [(vec![1u64, 2], 3u64), (vec![1, 3], 2)] {
+        let mut entries = vec![None; deja.len()];
+        let mut j = Journal::new(1, &mut entries);
+        for &id in &deja {
+            j.admit_authenticated(Source::new(meta(id), chemins(id)).unwrap())
+                .unwrap();
+        }
+        let mut active = [Slot::default(); 192];
+        let mut spare = active;
+        let mut c = Controller::new(ctx, &half, &mut j, t, &mut active, &mut spare).unwrap();
+        // Saturation : la reprise ne tient pas dans le journal actuel.
+        assert_eq!(
+            c.admit(Source::new(meta(reprise), chemins(reprise)).unwrap()),
+            Err(AdmitError::Saturated)
+        );
+        let avant = releve(&c.current(t).unwrap());
+        assert_eq!(c.journal().required_capacity(), deja.len() + 1);
+
+        // Élargissement et reprise, pendant que le contrôleur sert (ADR-087).
+        let mut large = vec![None; c.journal().required_capacity()];
+        let mut elargi = c.journal().copy_into(&mut large).unwrap();
+        assert_eq!(
+            elargi.retry(),
+            Ok(crate::pressure_journal::Change::Added)
+        );
+
+        // Extension : un second contrôleur, sans toucher au premier.
+        let mut a2 = [Slot::default(); 192];
+        let mut s2 = [Slot::default(); 192];
+        let c2 = c.extend_into(&mut elargi, &mut a2, &mut s2).unwrap();
+        assert_eq!(c2.published_time(), t);
+        let apres = releve(&c2.current(t).unwrap());
+
+        // Le champ du nouveau est celui d'une préparation directe du journal élargi.
+        let mut direct = [Slot::default(); 192];
+        let r = Prepared::from_journal(ctx, &half, c2.journal(), t, &mut direct).unwrap();
+        assert_eq!(
+            apres,
+            releve(&r),
+            "reprise {reprise} : le champ étendu doit être celui de la voie directe"
+        );
+        assert_ne!(apres, avant);
+        drop(c2);
+
+        // Et l'ancien sert toujours le sien, inchangé : c'est ce qui supprime la fenêtre.
+        assert_eq!(releve(&c.current(t).unwrap()), avant);
+        assert_eq!(c.journal().published().count(), deja.len());
+    }
+}

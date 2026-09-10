@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 01:56 +02:00
+JETON            : libre
+Battement        : 2026-09-10 02:03 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S133 — reconstruction repartant des coefficients (S132-1)
-Dernière session : S132 — admission incrémentale exacte ;262 tests/cinq ignorés
-Session suivante : à fixer en fin de S133
+Session en cours : aucune
+Dernière session : S133 — extension sans interruption ;263 tests/cinq ignorés
+Session suivante : S134 — l'exactitude conditionnée à l'insertion en dernier (S133-1)
 
 **Copie de travail S130** : worktree `claude/reprise-projet-2d3506`, remis en avance rapide sur
 master (e817d0e) au démarrage — il était resté à 52e80a5 et n'avait rien d'unique, donc aucun
@@ -180,6 +180,28 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S133 — 2026-09-10 :** [ADR-089](docs/adr/ADR-089-extension-sans-interruption.md),
+[EXTENSION-S133](docs/validation/EXTENSION-S133.md). S132-1 réalisée, **et une conclusion de
+S131 corrigée** : la fenêtre sans champ n'était pas incompressible, elle tenait à la forme
+supposée de la sortie. `Controller::extend_into` **lit** le contrôleur et en construit un second
+sur un journal élargi, en repartant des coefficients publiés, sans le détruire — l'ancien sert
+pendant et après, et un refus ne coûte que le temps passé.
+Le point qui décidait n'était ni le recyclage des coefficients ni le raccourci d'ADR-088, mais
+**qui tient le champ pendant l'opération**. Consommer le contrôleur aurait raccourci la fenêtre
+sans la supprimer, et fait perdre le champ en cas de refus.
+Extension prolongée **6,21 ms** contre **19,11 ms** pour le même journal à trois sources —
+facteur3,1 — mais surtout : **le service n'est plus interrompu du tout**. Quand le raccourci ne
+s'applique pas (reprise au milieu), l'extension coûte comme la reconstruction et garde le service.
+Les deux configurations reçues depuis une vraie saturation, champ identique en bits à la voie
+directe, ancien contrôleur réinterrogé après coup ; test vérifié comme témoin.
+263 tests/cinq ignorés ; hachages de campagne identiques à S118.
+89 ADR,204 angles,17 invariants,6 spécifications,23 cas.
+Suite S134 : S133-1 — trois sessions ont buté sur la même limite implicite, l'exactitude
+conditionnée à une insertion **en dernier**. Les identifiants viennent de l'hôte et rien ne
+garantit qu'ils croissent. Mesurer ce que coûterait une accumulation indépendante de l'ordre
+avant de décider si la condition doit rester. Transaction mixte, extension de fenêtre, S116-2,
+bilan mixte, durabilité et générateur physique restent ouverts.
 
 **S132 — 2026-09-10 :** [ADR-088](docs/adr/ADR-088-admission-incrementale-exacte.md),
 [INCREMENTAL-S132](docs/validation/INCREMENTAL-S132.md). S131-1 réalisée. Le coût de préparation

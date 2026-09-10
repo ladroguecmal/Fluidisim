@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S133 — en cours
+Session : S133 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : S132-1 — la reconstruction après élargissement repart d'un pool vide alors que les
 coefficients publiés restent valides pour toutes les sources sauf une. S131 avait conclu que la
@@ -73,11 +73,11 @@ fenêtre sans champ était incompressible ; la vérifier plutôt que la croire.
       propres coefficients, sans se détruire, servirait jusqu'au basculement — et la fenêtre
       **disparaîtrait** au lieu de raccourcir. Le prix serait un second jeu de pools.
 - [x] **P3** — ADR-089 : extend_into lit l ancien controleur et en construit un second, sans le detruire.
-- [ ] **P4** — construire, en réutilisant `add_segments` d'ADR-088.
-- [ ] **P5** — recevoir : identité en bits avec la voie directe, service maintenu pendant
-      l'opération, et refus quand la condition d'ordre n'est pas remplie.
-- [ ] **P6** — mesurer : ce que devient la fenêtre de S131.
-- [ ] **P7** — livrable, rituel de fin, fusion `--ff-only`.
+- [x] **P4** — `extend_into`, condition d'ordre vérifiée, repli sur la préparation complète.
+- [x] **P5** — deux configurations depuis une vraie saturation ; ancien contrôleur
+      réinterrogé après coup ; test vérifié comme témoin.
+- [x] **P6** — elle disparaît ; coût 6,21 ms contre 19,11 pour le même journal.
+- [x] **P7** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -94,3 +94,17 @@ Chiffres de S131 à battre : élargissement + reprise 0,1 µs service maintenu, 
 
 Piège à éviter : une signature qui consomme le contrôleur. En cas de refus, l'hôte aurait perdu
 son champ pour rien — alors que le refus est précisément le cas où il en a besoin.
+
+P4-P7 : ADR-089, EXTENSION-S133, journal, index, README, REPRISE, jeton rendu, ff-only.
+263 tests/cinq ignorés, hachages inchangés. Aucun angle ni leçon nouveaux.
+
+Un obstacle de compilation à connaître : `extend_into` porte `'v: 'w`, et l'inférence tend à
+prendre `'w = 'v`, ce qui fait vivre le journal élargi aussi longtemps que le contrôleur source.
+Dans la campagne, cela obligeait le stockage élargi à survivre jusqu'à la dernière utilisation du
+contrôleur — la mesure a donc été déplacée en fin de boucle, après toutes les autres.
+
+Pour S134 sans relire : la condition « en dernier » vient de l'accumulation par nœud, segment
+après segment, en f32 (`prepare_segments`). S'en affranchir demanderait que la somme par nœud ne
+dépende pas de l'ordre — accumulation en f64 puis arrondi final, ou sommation compensée par nœud.
+Le premier changerait les résultats (donc les hachages), le second peut-être pas : c'est
+exactement ce qu'il faut mesurer avant de décider, et le coût par nœud est le facteur à peser.

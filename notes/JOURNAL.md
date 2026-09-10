@@ -6898,3 +6898,38 @@ précisément ce que la condition d'exactitude protège ; aucun n'est invalidé.
 coefficients de l'ancien contrôleur, ce qui ramènerait la fenêtre sans champ au coût d'un
 segment. À mesurer : transporter des coefficients d'un pool à l'autre n'existe pas, et la
 condition d'ordre doit être constatée dans les cas réels, pas supposée.
+
+---
+
+## S133 — 2026-09-10 — Étendre sans interrompre
+
+**Entrée :** jeton libre à 355b4ce, trois copies coïncidentes. S132-1.
+**Produit :** [ADR-089](../docs/adr/ADR-089-extension-sans-interruption.md),
+[EXTENSION-S133](../docs/validation/EXTENSION-S133.md) et `Controller::extend_into`.
+**Ce que la session corrige, et c'est une conclusion de S131.** S131 avait écrit que la fenêtre
+sans champ était incompressible, « il n'existe pas de chemin qui republie sans recalculer ». La
+conclusion tenait à la **forme supposée** de la sortie, pas au calcul : les coefficients publiés
+restent valides pour toutes les sources sauf une, et ADR-088 savait déjà en ajouter une.
+**Le point qui décide n'est pourtant ni l'un ni l'autre : c'est qui tient le champ pendant
+l'opération.** Une méthode consommant le contrôleur aurait raccourci la fenêtre sans la
+supprimer — et en cas de refus l'hôte aurait perdu son champ au moment où il en a besoin. Une
+méthode qui **lit** le contrôleur et en construit un second sur des pools fournis n'a aucun de
+ces défauts : l'ancien sert jusqu'au basculement.
+**Chiffres :** extension prolongée **6,21 ms** contre **19,11 ms** pour construire le même
+journal à trois sources — facteur 3,1. Mais le chiffre qui comptait n'était pas le coût : la
+fenêtre de S131 était une **absence de service**, et elle ne raccourcit pas, elle disparaît.
+Quand le raccourci ne s'applique pas — reprise au milieu — l'extension coûte comme la
+reconstruction et garde son seul avantage, le service continu.
+**Réception :** les deux configurations exercées depuis une vraie saturation ; champ identique en
+bits à la voie directe dans les deux cas ; **l'ancien contrôleur réinterrogé après l'opération**
+sert toujours le sien, inchangé. Test vérifié comme témoin : condition d'ordre forcée, il échoue
+sur la reprise du milieu. 170 core + 93 harnais = **263 réussis, cinq ignorés** ; ciblé aussi en
+release ; hachages de campagne identiques à S118.
+**Limites :** le coût n'est pas supprimé mais déplacé hors du chemin critique ; le prix est un
+second jeu de pools pendant la transition, que l'hôte fournit — `Controller::new` reste le chemin
+quand la mémoire prime. Aucune source admise ni modifiée par l'extension.
+89 ADR, 204 angles, 17 invariants, 6 spécifications, 23 cas. Invariants relus : aucun invalidé.
+**Suite S134 :** S133-1 — trois sessions ont buté sur la même limite implicite, l'exactitude
+conditionnée à une insertion en dernier. Les identifiants viennent de l'hôte et rien ne garantit
+qu'ils croissent. Mesurer ce que coûterait une accumulation indépendante de l'ordre avant de
+décider si cette condition doit rester.

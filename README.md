@@ -61,7 +61,7 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S132 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S133 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
@@ -165,6 +165,11 @@ quand elle s'insère en dernier, seul cas où l'ordre d'addition `f32` est prés
 (ADR-088, S132). Le résultat est celui de la voie directe dans les deux cas, sans quoi deux hôtes ayant admis
 les mêmes sources dans un ordre différent auraient des champs différents. Coût ramené au prix d'un segment :
 5,03 ms au lieu de35,06 à sept segments publiés.
-Suite : faire repartir la reconstruction des coefficients déjà calculés, S132-1.
-88 ADR,204 angles,17 invariants,6 spécifications,23 cas.
+Sortir d'une saturation n'interrompt plus le service : `extend_into` lit le contrôleur en place et en
+construit un second sur le journal élargi, en repartant des coefficients publiés, pendant que l'ancien
+continue de servir (ADR-089, S133). La fenêtre sans champ de S131 **disparaît** au lieu de raccourcir, et
+le coût tombe à6,21 ms contre19,11 pour construire le même journal à trois sources.
+Suite : l'exactitude incrémentale reste conditionnée à une insertion en dernier — mesurer ce que coûterait
+de s'en affranchir, S133-1.
+89 ADR,204 angles,17 invariants,6 spécifications,23 cas.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.
