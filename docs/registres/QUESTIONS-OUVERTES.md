@@ -1458,3 +1458,15 @@ entrée par entrée. Le fil reprend ci-dessous.
 - **ADR-112 remplace le choix de paramètre d'ADR-111.** S161 mesure la superposition indépendante,
   pas le couplage de SPEC-004 §6.1 ; aucune des deux amplitudes de bascule n'est reçue.
 - **A216 reste ouverte**, report explicite derrière la réception de l'objet effectivement prévu.
+### Suivi S163 — Résidu effectivement couplé
+
+- **S162-1 : réalisée sur véhicule 1D**, RESIDU-COUPLE-S163. Intégration fond/résidu indépendante,
+  mêmes pas et état total initial que Shallow1D ; flux croisés physiques et numériques explicites.
+  Fond évolué et fond figé avec source reçus ; trois classes de contre-épreuves échouent.
+- **A218 : traitée dans ce périmètre**, aucun seuil ni réception générale de B4. ADR-112 maintenue.
+- **A50 : partiellement exercée** par la source du fond figé. Fond analytique instationnaire,
+  dérivées interpolées et domaine local non reçus.
+- **S163-1 / A219 : ouverte, priorité S164.** Fond analytique instationnaire : dériver et recevoir
+  la source aux étages RK2, comparer dérivée continue et incréments discrets, mêmes conditions
+  totales initiales et contre-épreuve de source temporelle omise. Porteur : session de construction.
+- A217 profonde et A216 restent dans leur état S162 ; pas de nouvelle calibration.

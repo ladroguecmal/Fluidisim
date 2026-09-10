@@ -71,7 +71,7 @@ recevoir contre l'évolution totale. Pas de δ 3D ni de seuil de bascule dans ce
       et la contre-épreuve avant le calcul. Synchroniser les copies propres au jeton occupé.
 - [x] **P3** — construire l'intégration du fond et du résidu, sans soustraction a posteriori
       du total ; recevoir contre la référence et retirer volontairement un terme de couplage.
-- [ ] **P4** — campagne de raffinement et cas limites, limites de portée, verdict et suivi
+- [x] **P4** — campagne de raffinement et cas limites, limites de portée, verdict et suivi
       A218/A50. ADR seulement si décision nouvelle. Tests adaptés et bilan numérique.
 - [ ] **P5** — rituel de fin REPRISE §6 : journal, angles/leçons, index, décomptes, prochaine
       action, jeton libéré et copies synchronisées. Aucun worktree créé.
@@ -94,3 +94,9 @@ P3 : intégration Q,d distincte construite dans examples/support/residu_shallow.
 aucun appel à Shallow1D dans le véhicule. À N240, accord h<=5,93e-15 normalisé,
 contre-épreuves physiques/numériques/source toutes refusées. 2 nouveaux tests propres
 à l'exemple reçus en debug (+3 tests importés du host) ; campagne release reçue.
+
+P4 : cas limites et raffinements reçus. N960 : max h reconstruction 1,61352e-13 ;
+écart spatial de la référence 9,07266e-3 L2 normalisé. Aucun ordre spatial certifié.
+5 tests propres à l'exemple +3 host importés passent ; campagne release complète reçue.
+Suite workspace 299 tests réussis/cinq ignorés. S162-1 réalisée dans le périmètre 1D,
+A218 traitée ici, A50 partielle. Pas d'ADR nouveau ; A219/S163-1 pour le fond prescrit en temps.

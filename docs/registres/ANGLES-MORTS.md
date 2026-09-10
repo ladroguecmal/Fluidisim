@@ -2015,3 +2015,15 @@ terme croisé `kab`, dépendance à `ka` à rapport fixé et effet de phase reç
   sans effacer les mesures. Action S162-1 : intégrer réellement le résidu, puis comparer au
   total avec témoin de couplage supprimé. Gravité liée à la décision architecturale tirée du
   diagnostic ; aucun défaut de production nouveau observé.
+**Suivi A218 — S163 : traitée sur véhicule 1D.** `residu_couple` intègre réellement le résidu
+avec ses flux croisés et reçoit la reconstruction à chaque pas contre Shallow1D. Contre-épreuves
+pression croisée, viscosité numérique et source du fond figé reçues. Ce n'est pas le couplage 3D
+ni B4 complet. **A50 partiellement exercée** ; suite sous A219. Voir RESIDU-COUPLE-S163.
+
+- **A219** *(sévérité 2, S163 ; ouverte)* — **Un fond analytique réévalué en temps n'est pas un
+  fond avancé par le même intégrateur que le résidu.** S163 reçoit deux cas où cette différence
+  ne se pose pas : fond évolué par RK2, et fond constant en temps. Avec `Q(t)` prescrit, employer
+  `Q_t` continu dans la source n'assure pas que les deux étages reproduisent exactement
+  `Q(t+dt)-Q(t)`. Le défaut temporel peut alors être attribué à tort au couplage spatial.
+  S163-1 : mesurer et recevoir cette clôture, avec une onde analytique et une contre-épreuve.
+  Limite nommée du véhicule, aucun défaut observé en production.

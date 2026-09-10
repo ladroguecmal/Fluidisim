@@ -53,3 +53,11 @@ l'instrument analytique dans sa portée annoncée, pas l'architecture.
 - **A216 :** variation du coefficient du montage S161, toujours inexpliquée.
 - **B4 :** comparaison des architectures avec A50, forces, perception ; aucun volet complet reçu.
 - B2, coupure W/δ, bathymétrie et conformité multiplateforme restent ouverts.
+
+## Suivi de réception du 2026-09-10 (S163)
+
+S162-1 réalisée sur véhicule 1D : le résidu couplé est intégré et reçu à chaque pas contre
+Shallow1D. Les trois classes de contre-épreuves échouent, témoins complets et nuls reçus.
+Voir [RESIDU-COUPLE-S163](../validation/RESIDU-COUPLE-S163.md). A218 traitée dans ce périmètre ;
+A50 reste partielle et le fond analytique instationnaire devient S163-1/A219. Cette réception
+ne modifie aucune décision ci-dessus et ne reçoit pas B4 complet.

@@ -100,6 +100,11 @@ fn run(n: usize, step_factor: f64, f: Fixture, mode: Background, terms: Terms) -
     let scale = f.a.abs() + f.b.abs();
     assert!(scale > 0.0);
     let qscale = scale * (G * H0).sqrt();
+    for i in 0..n {
+        let initial = c.bg[i].plus(c.d[i]);
+        assert!((initial.h - ref_total.hauteur(i)).abs() / scale < LIMIT);
+        assert_eq!(initial.q, 0.0);
+    }
     let mass0: f64 = c.bg.iter().zip(&c.d).map(|(b, d)| b.h + d.h).sum();
     let mut out = Report {
         h: 0.0,
@@ -180,6 +185,113 @@ fn check_flux() {
         }
     }
 }
+
+fn limiting_cases(n: usize, print: bool) {
+    let cases = [
+        Fixture {
+            name: "residu nul",
+            b: 0.0,
+            ..BASE
+        },
+        Fixture {
+            name: "fond uniforme",
+            a: 0.0,
+            ..BASE
+        },
+        Fixture {
+            name: "creux",
+            b: -0.1,
+            ..BASE
+        },
+        Fixture {
+            name: "reflexion",
+            xb: 10.0,
+            xd: 15.0,
+            end: 12.0,
+            ..BASE
+        },
+    ];
+    for f in cases {
+        for mode in [Background::Evolving, Background::Frozen] {
+            let good = run(n, 1.0, f, mode, Terms::Complete);
+            complete(&good);
+            if f.b == 0.0 && mode == Background::Evolving {
+                assert_eq!(good.residual, 0.0);
+            }
+            if f.b == 0.0 && mode == Background::Frozen {
+                assert!(good.residual > 0.01);
+                let bad = run(n, 1.0, f, mode, Terms::NoSource);
+                assert_eq!(bad.residual, 0.0);
+                assert!(bad.h > 1e-3);
+            }
+            if f.a == 0.0 {
+                // Les termes retirés sont identiquement nuls sur ce témoin : ils doivent passer.
+                for terms in [
+                    Terms::NoPressureCross,
+                    Terms::NoNumericalCross,
+                    Terms::NoSource,
+                ] {
+                    complete(&run(n, 1.0, f, mode, terms));
+                }
+            }
+            if print {
+                println!(
+                    "| {} | {mode:?} | {:.6e} | {:.6e} | {:.6e} |",
+                    f.name, good.h, good.q, good.residual
+                );
+            }
+        }
+    }
+}
+
+fn refinement() {
+    println!("\n| N | max h couple | sans couplage numerique h | ecart spatial reference L2 |");
+    println!("|---:|---:|---:|---:|");
+    let mut previous: Option<Vec<f64>> = None;
+    for n in [120, 240, 480, 960] {
+        let good = run(n, 1.0, BASE, Background::Evolving, Terms::Complete);
+        complete(&good);
+        let bad = run(n, 1.0, BASE, Background::Evolving, Terms::NoNumericalCross);
+        assert!(bad.h > LIMIT * 100.0);
+        let label = if let Some(coarse) = previous {
+            let error = coarse
+                .iter()
+                .enumerate()
+                .map(|(i, h)| (h - 0.5 * (good.final_h[2 * i] + good.final_h[2 * i + 1])).powi(2))
+                .sum::<f64>();
+            format!(
+                "{:.6e}",
+                (error / coarse.len() as f64).sqrt() / (BASE.a + BASE.b)
+            )
+        } else {
+            "non mesure".into()
+        };
+        println!("| {n} | {:.6e} | {:.6e} | {label} |", good.h, bad.h);
+        previous = Some(good.final_h);
+    }
+    println!("\n| facteur division dt (N240) | max h couple | ecart temporel reference L2 |");
+    println!("|---:|---:|---:|");
+    let mut previous: Option<Vec<f64>> = None;
+    for factor in [1.0, 2.0, 4.0] {
+        let good = run(240, factor, BASE, Background::Evolving, Terms::Complete);
+        complete(&good);
+        let label = if let Some(coarse) = previous {
+            let error = coarse
+                .iter()
+                .zip(&good.final_h)
+                .map(|(a, b)| (a - b).powi(2))
+                .sum::<f64>();
+            format!(
+                "{:.6e}",
+                (error / coarse.len() as f64).sqrt() / (BASE.a + BASE.b)
+            )
+        } else {
+            "non mesure".into()
+        };
+        println!("| {factor} | {:.6e} | {label} |", good.h);
+        previous = Some(good.final_h);
+    }
+}
 fn main() {
     check_flux();
     println!("# S163 — Rusanov espace ordre 1, RK2, murs, lit plat ; comparaison a chaque pas");
@@ -207,6 +319,12 @@ fn main() {
             );
         }
     }
+    println!(
+        "\n| cas limite N240 | fond | max h normalise | max q normalise | max residu hauteur (m) |"
+    );
+    println!("|---|---|---:|---:|---:|");
+    limiting_cases(240, true);
+    refinement();
 }
 
 #[cfg(test)]
@@ -232,5 +350,27 @@ mod tests {
                 assert!(bad.h.max(bad.q) > LIMIT * 100.0);
             }
         }
+    }
+    #[test]
+    fn zero_source_uniform_and_reflecting_cases_s163() {
+        limiting_cases(120, false);
+    }
+    #[test]
+    #[should_panic(expected = "hors domaine mouille")]
+    fn dry_state_is_refused_without_clamping_s163() {
+        let b = State { h: 1.0, q: 0.0 };
+        let d = State { h: -1.0, q: 0.0 };
+        residu::delta_numerical(b, b, d, d, H0, Terms::Complete);
+    }
+    #[test]
+    #[should_panic(expected = "hors domaine mouille")]
+    fn nonfinite_state_is_refused_s163() {
+        residu::numerical(
+            State {
+                h: 1.0,
+                q: f64::NAN,
+            },
+            State { h: 1.0, q: 0.0 },
+        );
     }
 }

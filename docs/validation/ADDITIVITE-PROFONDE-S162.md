@@ -136,3 +136,11 @@ dispersif. A216 reste ouverte ; sa constante n'est pas un seuil du couplage.
 
 Réception finale : 299 tests workspace réussis, cinq ignorés ; un test d'exemple reçu
 séparément en debug et assertions de la sonde reçues en release. Aucun calcul de production modifié.
+
+## Suivi du 2026-09-10 (S163)
+
+L'action S162-1 est réalisée sur un véhicule mouillé 1D à fond plat : évolution indépendante
+fond/résidu, flux croisés développés, réception contre Shallow1D à chaque pas, contre-épreuves
+physiques/numériques/source reçues. Voir [RESIDU-COUPLE-S163](RESIDU-COUPLE-S163.md).
+Cette réception du même schéma ne reçoit ni le fond analytique instationnaire ni B4 complet.
+Suite S163-1/A219 ; ADR-112 reste la décision applicable.
