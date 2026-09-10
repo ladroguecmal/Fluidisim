@@ -58,38 +58,22 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S164 — terminée
+Session : S165 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S163-1/A219, recevoir la clôture temporelle du résidu sur un fond analytique prescrit.
+Objectif : S164-1/A220, isoler les erreurs de frontière dans un domaine résiduel local.
 
 ### Plan
 
-- [x] **P1** — état réel, jeton et plan committé seul.
-- [x] **P2** — dériver les sources aux étages RK2 et déclarer le protocole avant mesure ;
-      synchroniser les copies propres au jeton occupé.
-- [x] **P3** — implémenter le fond prescrit dans le véhicule S163, comparer incréments discrets,
-      dérivées continues et source temporelle omise ; raffinement et témoins nuls.
-- [x] **P4** — réception, limites et suivi A219/A50, tests S163 conservés ; décision si nécessaire.
-- [x] **P5** — rituel de fin, journal/index/décomptes/suite, jeton rendu et copies synchronisées.
+- [x] **P1** — vérifier les copies, prendre le jeton, déclarer le plan seul.
+- [ ] **P2** — déclarer protocole, frontière aux deux étages RK2 et bilan de flux ; synchroniser les copies propres.
+- [ ] **P3** — construire la fenêtre locale et les témoins, mesurer traversée et raffinements.
+- [ ] **P4** — recevoir les tests, publier mesures/limites, suivre A220 et actions.
+- [ ] **P5** — rituel de fin : journal, leçons, index, décomptes, reprise, jeton et copies.
 
 ### Notes de reprise
 
-Départ master 6a295cb propre ; quatre copies au même commit, aucune branche vivante avancée.
-REPRISE et corpus lus dans cette conversation ; S163 achevée, aucune étape à reconstituer.
-112 ADR,219 angles,245 leçons,18 invariants,6 SPEC,23 cas ; 299 tests/cinq ignorés,
-plus exemples S162 et S163. Aucun worktree créé. BILAN-S145 porté par la poursuite B4.
-
-Instrument : fond Q réévalué aux temps RK, résidu seul intégré. Ne pas reconstruire le résidu
-par soustraction d'une référence avancée ; seules les différences du fond prescrit sont permises.
-Une dérivée continue peut converger sans reproduire exactement la référence au pas donné.
-P2 : FOND-PRESCRIT-S164 déclare incréments RK2, dérivées continues et omission.
-Fond onde debout linéaire, même état total initial gaussien, seuil S163 conservé.
-
-P3 : step_prescribed construit dans le support S163 ; trois sources temporelles reçues.
-72 montages N240 en release : incréments <=1,60e-13 hauteur ; dérivée continue converge
-à l'ordre deux, omission ne converge pas. 4 tests propres S164 +3 host et 5 tests propres
-S163 +3 host reçus. Deux avertissements d'import partagé corrigés par annotation locale.
-
-P4 : 78 exécutions release reçues (72 N240 +6 raffinements), 7 tests exemple S164 et
-8 S163 reçus. A219 traitée dans le véhicule ; A50 partielle, A220/S164-1 suit la frontière
-locale. Aucun ADR nouveau. Suite workspace inchangée, reçue S163 et non relancée.
+Départ master a20f514 propre, quatre copies au même commit ; branche B archivée conservée.
+S164 terminée, corpus lu dans cette conversation ; aucune étape interrompue.
+112 ADR,220 angles,246 leçons,18 invariants,6 SPEC,23 cas. Workspace 299/cinq ignorés
+reçu S163 ; exemples S163/S164 reçus S164. Aucun worktree à créer.
+BILAN-S145 porté par poursuite B4. Aucun absorbeur choisi avant mesure.

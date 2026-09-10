@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-10 20:42 +02:00
+JETON            : occupé
+Battement        : 2026-09-10 20:48 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S165 — frontière du domaine résiduel local
 Dernière session : S164 — fond prescrit instationnaire reçu en 1D ; quatre nouveaux tests exemple
 Session suivante : S165 — S164-1 : frontière du domaine résiduel local (A220)
 
