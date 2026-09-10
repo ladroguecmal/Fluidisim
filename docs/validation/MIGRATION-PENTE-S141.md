@@ -116,3 +116,70 @@ gaussien indépendant. Ce n'est pas un hachage qu'on constate, c'est un nombre q
 
 Le plancher total a baissé de **40,4 %** : il consommait 7,46 % d'un budget de 0,1, il en
 consomme 4,45 %.
+
+## 4. La valeur du seuil — et pourquoi aucune fixture ne change
+
+Le plan prévoyait de poser `max_slope = 0,4488` « dans les fixtures où 0,1 tenait lieu de limite
+physique ». **En les ouvrant, aucune n'est dans ce cas** : les dix-sept occurrences de
+`max_slope: 0.1` sont des paramètres d'essai, et plusieurs servent explicitement à provoquer un
+refus. Changer une valeur d'entrée d'essai ne rendrait rien plus juste ; cela déplacerait des
+frontières pour une raison qui n'est pas une décision de conception, et une seconde fois les
+hachages.
+
+Ce qui manquait n'était donc pas une valeur dans les fixtures, mais **la constante avec sa
+provenance**, là où un hôte la lit :
+
+```rust
+pub const BREAKING_SLOPE: f32 = core::f32::consts::PI / 7.0;   // 0,4487990
+```
+
+`Medium` portait encore le commentaire « Limite de pente à calibrer par B2 » — le renvoi faux
+qu'ADR-093 et ADR-094 ont fermé. Il dit maintenant d'où vient la limite et ce que `max_slope`
+borne depuis cette migration.
+
+### Le test qui referme la chaîne
+
+`the_admitted_limit_field_sits_exactly_at_stokes_steepness_s141` : dichotomie sur l'énergie
+jusqu'au dernier champ admis avec `max_slope = BREAKING_SLOPE`, puis mesure de sa pente réelle sur
+4 000 points.
+
+```
+energie_limite = 1,485427e3 J    pente = 0,448799    stokes = 0,448799
+```
+
+**Le champ limite est exactement à la cambrure limite de Stokes.** La chaîne borne L1 →
+`SLOPE_L1_RATIO` → `πH/λ` tient bout à bout, et c'est ce qu'aucune version antérieure du dépôt ne
+pouvait affirmer : jusqu'à S139, le champ limite était à 12,4 % de cette cambrure sans que rien
+ne le dise.
+
+## 5. Ce qui n'a pas été migré, et qui est nommé
+
+`ImpactField::new` — le champ modal cartésien — compare **toujours sa borne L1** à
+`medium.max_slope`. Le rapport entre cette borne et la pente réelle de *ce* champ-là n'a jamais
+été mesuré, et le migrer sans l'avoir mesuré remplacerait un facteur inconnu par un autre.
+
+Conséquence à dire franchement : **`Medium::max_slope` ne signifie plus la même chose selon le
+champ qui le lit** — pente réelle pour `RadialImpact`, borne L1 pour `ImpactField`. C'est **A209**,
+introduite par cette migration et non par le code d'origine. `ImpactField` n'est plus construit
+que par la sonde `probe_degenerate` ; le mesurer ou le retirer est une décision, pas un effet de
+bord.
+
+## 6. Réception
+
+272 tests, cinq ignorés — deux de plus qu'à l'entrée de la session.
+Les deux scénarios du harnais H1 sont **inchangés** aux trois étapes : la migration n'a touché que
+ce qui compose la couche W.
+
+| ce qui a bougé | de | à | pourquoi |
+|---|---|---|---|
+| `slope_floor` (cycle mixte) | 0,0074634003 | 0,0044472935 | −40,4 % : ρ sur l'impact, 1,6367 sur la pression |
+| `cycle_mixed` 224×128 | `6591ab360344f76e` | `e8aa3c7ca7906ccd` | `steepness` publiée = budget/π |
+| `cycle_mixed` 256×128 | `b563610d1dd78ada` | `99d2cd9e18e079b0` | idem |
+| `receive_mixed` 224×128 | `957dc8b9608790cf` | `db80db2bf9a7e3c9` | idem |
+| `receive_mixed` 256×128 | `20f9a748a6978775` | `0e4850dbcf302ccc` | idem |
+| `K_ENERGIE` | 8,891e-4 | `8,891e-4·ρ²` = 2,865e-3 | la frontière a bougé de ρ en pente |
+
+Chacun de ces déplacements a été **prédit puis vérifié** : 9,25832e-4 sur le plancher côté impact,
+facteur 1,6367 côté pression contre 1,634 mesuré indépendamment en S140, et le champ limite à
+0,448799 contre 0,4487990 attendu. Aucun hachage n'a été accepté sans savoir dire lequel et
+pourquoi.

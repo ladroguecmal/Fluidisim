@@ -76,7 +76,7 @@ physique. **C'est le premier lot de la série qui change des bits publiés.**
       `composition.rs` / `mixed_water.rs` somment `slope_max()`. Étage seul, tests verts.
 - [x] **P4** — migrer la **pression** : `slope_envelope_tight()` dans `slope_floor` et dans
       l'enveloppe de `mixed_water`. Étage seul, tests verts.
-- [ ] **P5** — poser **`max_slope = 0,4488`** dans les fixtures où 0,1 tenait lieu de limite
+- [x] **P5** — poser **`max_slope = 0,4488`** dans les fixtures où 0,1 tenait lieu de limite
       physique — **et pas dans celles qui exercent un refus**, où la valeur est choisie pour
       refuser et doit le dire. Recevoir : quels refus se déplacent, quels bits bougent.
 - [ ] **P6** — livrable de réception, rituel de fin (§6), jeton rendu, fusion `--ff-only`.

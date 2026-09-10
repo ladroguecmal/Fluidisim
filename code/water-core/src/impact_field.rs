@@ -43,7 +43,22 @@ struct Mode {
     freq: u64,
     amplitude: f32,
 }
-/// Toutes les valeurs du milieu sont injectées. Limite de pente à calibrer par B2.
+/// Pente de déferlement, `πH/λ` à la cambrure limite de Stokes `H/λ = 1/7` (SPEC-001 §4).
+/// **Dérivée, pas calibrée** : ADR-094 ferme le renvoi « à calibrer B2 », qui était faux — aucun
+/// banc ne mesure une limite de pente, et la limite physique était déjà écrite. La lecture
+/// alternative — pente réelle de la crête à 120° de la vague limite, `tan 30° = 0,5774` — borne
+/// l'incertitude à 29 % ; la valeur retenue est la plus conservatrice des deux.
+///
+/// C'est la valeur qu'un hôte fournit dans `Medium::max_slope` lorsqu'il veut la limite physique.
+/// Elle n'est **pas** un défaut imposé : le milieu reste injecté (I-14 exige la provenance, pas
+/// la valeur).
+pub const BREAKING_SLOPE: f32 = core::f32::consts::PI / 7.0;
+/// Toutes les valeurs du milieu sont injectées.
+///
+/// **S141 :** `max_slope` borne désormais la pente **réelle** du champ pour `RadialImpact` —
+/// voir `BREAKING_SLOPE` pour sa provenance et `SLOPE_L1_RATIO` pour la conversion. Attention,
+/// `ImpactField` (plus bas) lui compare toujours sa borne L1 : le même champ de ce type ne
+/// signifie donc pas la même chose selon le champ qui le lit. C'est **A209**.
 #[derive(Clone, Copy)]
 pub struct Medium {
     pub gravity: f32,
@@ -132,6 +147,11 @@ impl ImpactField {
         if !slope.is_finite() {
             return Err(Error::NotRepresentable);
         }
+        // S141, A209 : cette comparaison est restée **L1**, contrairement à celle de
+        // `RadialImpact`. Le rapport entre cette borne et la pente réelle de ce champ-ci n'a
+        // jamais été mesuré, et le migrer sans l'avoir mesuré remplacerait un facteur inconnu
+        // par un autre. Ce champ n'est plus construit que par la sonde `probe_degenerate` ;
+        // le mesurer ou le retirer est une décision, pas un effet de bord de cette migration.
         if slope > medium.max_slope {
             return Err(Error::Steepness);
         }
