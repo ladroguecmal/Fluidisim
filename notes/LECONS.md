@@ -3546,3 +3546,42 @@ Avant de recevoir une représentation normalisée, mesurer **avant normalisation
 retranché, puis contrôler les moments qui gouvernent ses consommateurs. Séparer l'erreur de
 troncature de l'erreur de discrétisation : augmenter le nombre de points dans une bande ne
 récupère jamais ce qui est hors bande. Vaut pour tout signal filtré dont on utilise les dérivées.
+## L231 — Une borne en secondes qui vaut exactement 2^n microsecondes n'est pas une durée
+
+*(S155)* Le noyau de pression refusait au-delà de « 16 secondes » depuis soixante sessions, et
+ADR-071 disait lui-même que c'était « un périmètre de travail à calibrer par réception ». Personne
+ne l'avait calibré, et B2 — qui mesure à soixante secondes — était bloqué par cette valeur.
+
+16 000 000 µs, c'est 2^24 à un pour cent près, et le commentaire d'une fonction voisine parlait
+justement de « 24 bits ». **Une grandeur physique dont la valeur est une puissance de deux
+déguisée vient de la représentation, pas du phénomène.** C'est un signal lisible à l'œil nu, et il
+suffit à décider d'aller mesurer.
+
+La mesure a donné mieux qu'un déblocage : il n'y avait aucun mur à seize secondes — l'erreur croît
+continûment, rien ne distingue 16 de 15 ou 17 — **mais l'âge n'était pas gratuit non plus**, ce que
+la lecture du code laissait croire puisque la propagation libre est en arithmétique entière. Les
+deux moitiés de la réponse étaient fausses. Voir [[A213]] et ADR-106.
+
+Corollaire de méthode : remplacer la constante par le **budget** qui la justifie. Une borne écrite
+seule se transmet sans provenance et personne n'ose y toucher ; une borne accompagnée de son
+budget d'erreur dit exactement à quelle condition on peut la déplacer. C'est I-14 appliqué aux
+limites de domaine, pas seulement aux coefficients.
+
+## L232 — Un écart absolu ne distingue pas la perte de précision de la croissance du signal
+
+*(S155)* Mesurant l'erreur du noyau modal quand la durée de forçage s'allonge, j'ai lu un écart
+multiplié par quinze entre 16 et 60 secondes et j'ai failli conclure à une dégradation numérique.
+L'amplitude du champ, elle, était multipliée par presque quatre sur le même intervalle : **la
+moitié de la croissance était du signal, pas de l'erreur.** Rapportée à l'amplitude, l'erreur
+suivait la même loi que dans le régime où l'amplitude ne bougeait pas.
+
+Les seuils de régression du dépôt sont souvent absolus, parce qu'ils sont nés d'une fixture unique
+où l'amplitude ne variait pas. Dès qu'on sort de la fixture, un seuil absolu mélange deux choses
+et fait ressembler un signal plus fort à un calcul plus faux.
+
+Le piège a une seconde face, rencontrée dans la même session. Rapporter l'écart à `|eta|`
+instantané le faisait exploser d'un facteur cent au voisinage des nœuds de l'oscillation, là où le
+dénominateur passe par zéro — une explosion qui n'était pas davantage une perte de précision.
+**Le bon dénominateur est une grandeur que la dynamique conserve** : ici l'amplitude invariante
+`sqrt(|eta|^2 + |v|^2/omega^2)`, que la propagation libre laisse fixe. Voir [[L218]] pour l'autre
+manière de se tromper en lisant ses propres mesures.

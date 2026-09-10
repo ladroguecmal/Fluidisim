@@ -7813,3 +7813,52 @@ La poursuite B2 porte la recommandation du dernier bilan ; technologie globale,
 lambda_cut, bathymétrie et conformité multiplateforme restent ouvertes.
 
 Vérification finale :296 tests réussis/cinq ignorés (203+93), zéro échec ; quatre avertissements préexistants. Deux essais également release, décomptes inchangés, diff vérifié ; jeton rendu.
+
+## S155 — 2026-09-10 — Seize secondes, c'était vingt-quatre bits
+
+Entrée : jeton libre à 1643232 (S154, Codex), worktree 80 commits en retard remis en avance
+rapide, rien d'unique. Production : [HORIZON-MODAL-S155](../docs/validation/HORIZON-MODAL-S155.md),
+[ADR-106](../docs/adr/ADR-106-horizon-d-observation-et-duree-de-forcage.md), A213, L231, L232.
+
+S154 laissait deux branches. La première — quantifier le domaine d'un sillage prolongé — est
+inaccessible tant que le noyau refuse au-delà de 16 s alors que B2 mesure à 60. J'ai pris la
+seconde. ADR-071 disait pourtant, depuis soixante sessions, que cette borne était « un périmètre
+de travail **à calibrer par réception** » ; personne ne l'avait calibrée.
+
+**La prédiction écrite avant la mesure était fausse des deux côtés.** La lecture du code disait :
+après extinction, la rotation libre est entière, donc l'erreur est plate en âge, et la seule
+accumulation f32 dépend de la durée active. Mesure : l'erreur croît en âge (1,381e-7 m à 16 s,
+5,931e-7 à 60 s) ; et sa croissance apparente en durée active était pour moitié une croissance de
+l'amplitude du champ, pas de l'erreur. **L232.**
+
+Cause attribuée, pas devinée : `omega` est calculé en f32, désaccord relatif de 6,6e-9 à 5,7e-8
+selon le mode, d'où une dérive de phase `|domega|·t` **linéaire en temps**. Un oracle portant
+exactement le même omega divise l'écart par 58 pour k=(6,0) et le rend plat. Il reste un second
+terme, constant en temps, venant de la phase spatiale et de l'amplitude en f32. **A213**, avec un
+remède identifié et non appliqué — il changerait le condensat de réception S95.
+
+**Il n'y avait aucun mur à seize secondes** : l'erreur croît continûment, rien ne distingue 16 de
+15 ou 17. Mais 16 000 000 µs, c'est 2^24, et le commentaire d'une fonction voisine parlait de
+« 24 bits ». **Une borne en secondes qui vaut une puissance de deux vient de la représentation,
+pas du phénomène — L231**, et c'est visible à l'œil nu avant toute mesure.
+
+ADR-106 sépare l'horizon d'observation de la durée de forçage, que la constante confondait, porte
+le premier à 64 s et **écrit le budget de précision à la place de la constante** : <4e-5 relatif
+à 64 s, ~7e-5 en énergie, sous le seuil de 1e-4 E0 de B2 mais sans marge confortable. La durée
+active reste à 16 s, parce qu'ADR-104 découpe déjà le mouvement en tronçons : B2 manquait
+d'horizon, jamais de durée.
+
+Trois constantes portaient la borne, pas deux — `pressure_source` en héritait par
+`Context::from_recipe`, et c'est **un test existant qui l'a signalé en cessant de refuser**. Note
+datée ajoutée à ADR-106 le jour même plutôt qu'une réécriture.
+
+Deux fois, un artefact de sonde a ressemblé à un résultat : une ligne à zéro parce que rien
+n'avait été comparé, un dénominateur près d'un nœud qui multipliait l'écart par cent. Les deux
+corrigés avant publication ; la sonde compte désormais ses couples.
+
+Témoin vérifié dans les deux sens ; condensat S95 `8ea15f4a3334830b` inchangé, seules des bornes
+de domaine ont bougé. 297 tests réussis, cinq ignorés (204+93), debug et release, zéro échec.
+106 ADR, 213 angles, 232 leçons, 18 invariants, 6 SPEC, 23 cas. Invariants relus : aucun invalidé.
+
+**Suite S156 :** S155-1, la première branche de S154, désormais accessible — bilan énergétique
+d'un sillage prolongé et domaine de collecte requis, à comparer aux impacts de S153/S154.

@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 16:05 +02:00
+JETON            : libre
+Battement        : 2026-09-10 16:09 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S155 — la fenêtre de 16 s est-elle une limite numérique ? (S154-1)
-Dernière session : S154 — cinq bilans impact60s reçus ; 296 tests/cinq ignorés
-Session suivante : à fixer en fin de S155
+Session en cours : aucune
+Dernière session : S155 — horizon porté à 64 s ; 297 tests/cinq ignorés
+Session suivante : S156 — bilan d'un sillage prolongé (S155-1)
 
 **Copie de travail S155** : worktree `claude/reprise-projet-2d3506`, remis en avance rapide sur
 master (1643232) au démarrage — il était resté à 041dfed, 80 commits en retard et rien d'unique,
@@ -196,6 +196,29 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S155 — 2026-09-10 :** [HORIZON-MODAL-S155](docs/validation/HORIZON-MODAL-S155.md),
+[ADR-106](docs/adr/ADR-106-horizon-d-observation-et-duree-de-forcage.md). S154-1, seconde branche.
+**La fenêtre de 16 s du noyau de pression n'avait aucune justification numérique.** ADR-071 la
+disait « à calibrer par réception » ; soixante sessions plus tard, personne ne l'avait fait, et
+B2 — qui mesure à 60 s — était bloqué par elle. 16 000 000 µs valent 2^24 : la borne venait de la
+représentation, pas du phénomène (**L231**).
+**La prédiction écrite avant la mesure était fausse des deux côtés.** L'erreur n'est pas plate en
+âge (1,381e-7 m à 16 s, 5,931e-7 à 60 s), et sa croissance apparente avec la durée de forçage
+était pour moitié une croissance de l'amplitude, pas de l'erreur (**L232**).
+Cause attribuée par mesure : `omega` en **f32**, désaccord relatif 6,6e-9 à 5,7e-8, d'où une
+dérive de phase linéaire en temps ; un oracle portant le même omega divise l'écart par 58 pour
+k=(6,0). Reste un second terme constant en temps, venant de la phase spatiale f32. **A213**,
+remède identifié et non appliqué — il changerait le condensat de réception S95.
+ADR-106 sépare l'**horizon d'observation** (porté à 64 s) de la **durée de forçage** (gardée à
+16 s, ADR-104 découpant déjà le mouvement en tronçons), et écrit le **budget** à la place de la
+constante : <4e-5 relatif à 64 s, ~7e-5 en énergie, sous le seuil 1e-4 E0 de B2 sans marge
+confortable. Trois constantes portaient la borne, pas deux ; la troisième a été trouvée par un
+test existant qui a cessé de refuser. Condensat S95 inchangé.
+297 tests/cinq ignorés.106 ADR,213 angles,232 leçons,18 invariants,6 SPEC,23 cas.
+Suite S156 : S155-1, la première branche de S154, désormais accessible — bilan énergétique d'un
+sillage prolongé et domaine de collecte. Restent ouverts A213, un seuil de régression relatif, la
+coupure W/δ, lambda_cut, la bathymétrie et la conformité multiplateforme.
 
 **S154 — 2026-09-10 :** [ENERGIE-BANDE-B2-S154](docs/validation/ENERGIE-BANDE-B2-S154.md).
 Bilans initiaux/60s des sources2/3/5/6m reçus, complétant4m S153. Collecteurs88/112/

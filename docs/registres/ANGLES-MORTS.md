@@ -1922,3 +1922,17 @@ Mécanisme déjà connu S127, aucun angle indépendant ajouté. A212 inchangée.
 **Suivi S154 — transport sur la bande de fixtures.** ENERGIE-BANDE-B2-S154 retrouve
 l'énergie des quatre autres impacts60s, collecteurs adaptés ; N2565/6 reste reçu
 sur80m seulement. Aucun nouvel angle indépendant, A212 inchangée ; B2 reste partiel.
+
+- **A213** *(sévérité 2, S155 ; ouverte)* — **La pulsation est stockée en f32, et l'erreur de
+  phase qui en découle croît sans borne avec l'âge.** `ModalPressure` calcule
+  `omega = (gravity * magnitude).sqrt()` en f32 ; son erreur relative, mesurée entre 6,6e-9 et
+  5,7e-8 selon le mode, se traduit par une dérive de phase `|domega| * t` **linéaire en temps**.
+  Mesuré S155 : l'écart au noyau f64 passe de 1,381e-7 m à 16 s à 5,931e-7 m à 60 s, et
+  neutraliser la seule pulsation le divise par 58 pour k=(6,0). ADR-106 borne l'horizon à 64 s
+  avec ce budget écrit ; **la borne est un budget, pas une correction**, et tout consommateur qui
+  demandera mieux, ou plus long, rouvrira la question.
+  Remède identifié et non appliqué : convertir la pulsation en Q32 depuis un calcul de précision
+  supérieure au f32, ce qui coûte zéro à l'exécution — la conversion a lieu à la préparation — et
+  ramènerait la dérive vers 1,5e-10 relatif. Ce n'est pas fait parce que cela change
+  l'arithmétique du noyau, donc le condensat de réception `8ea15f4a3334830b` de S95, et que cela
+  demande sa propre réception. Voir [[L231]].

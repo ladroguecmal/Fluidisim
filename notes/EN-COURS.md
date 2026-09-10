@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S155 — en cours
+Session : S155 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : S154-1. B2 mesure des bilans à 60 s ; le noyau de pression refuse au-delà de 16 s.
 Prendre la seconde branche annoncée par S154 — **isoler par mesure le blocage numérique** —
@@ -79,7 +79,7 @@ ne l'a fait.
       provenance mesurée écrite pour la borne conservée. Un ADR n'est jamais réécrit.
 - [x] **P5** — appliquer la décision dans le code, avec un test **témoin** : désactiver le
       mécanisme doit faire échouer le test, sinon le test ne prouve rien.
-- [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
+- [x] **P6** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -176,3 +176,15 @@ seuil ; horizon rétabli, il passe. Un test qui ne peut pas échouer ne prouve r
 Le condensat S95 `8ea15f4a3334830b` est **inchangé** : seules des bornes de domaine ont bougé,
 aucune arithmétique. C'est la contre-épreuve la moins chère de la session.
 297 tests/cinq ignorés (204+93), debug et release, zéro échec.
+
+P6 — HORIZON-MODAL-S155, A213, L231, L232, journal, index, README, REPRISE, jeton rendu, ff-only.
+297 tests/cinq ignorés en debug et en release.
+
+Pour S156 sans relire : S155-1 est la branche que S154 proposait en premier et que le refus du
+noyau rendait inaccessible. Elle est ouverte maintenant. Mesurer le bilan énergétique d'un
+sillage prolongé et le domaine de collecte requis, comme S153/S154 l'ont fait pour les impacts —
+mais en sachant que le budget d'erreur à 60 s vaut ~7e-5 en énergie contre le seuil 1e-4 E0 :
+**la marge n'est pas confortable, et un écart de cet ordre ne prouvera rien.** Si le bilan tombe
+dans cette zone, c'est A213 qu'il faudra traiter avant, pas le bilan qu'il faudra raffiner.
+Méthode : `wake_motion` et `emitter_` construisent déjà des sillages reçus ; l'oracle f64 est
+`PressureMode`, et la sonde `horizon_modal` montre comment le brancher.

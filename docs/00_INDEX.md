@@ -17,6 +17,16 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S155 :** [ADR-106](adr/ADR-106-horizon-d-observation-et-duree-de-forcage.md),
+[HORIZON-MODAL-S155](validation/HORIZON-MODAL-S155.md). La fenêtre de 16 s du noyau de pression
+n'avait **aucune justification numérique** — 16 000 000 µs, c'est 2^24 — et ADR-071 demandait
+depuis soixante sessions qu'elle soit calibrée. Horizon d'observation porté à **64 s**, durée de
+forçage conservée à 16 s : les deux bornes ne suivent pas le même chemin, et B2 manquait
+d'horizon. Budget écrit à la place de la constante : <4e-5 relatif à 64 s. **A213** : omega en
+f32 fait dériver la phase linéairement en temps. **L231**, **L232**.297 tests/cinq ignorés.
+106 ADR,213 angles,232 leçons,18 invariants,6 SPEC,23 cas, deux bancs partiels.
+**Suite S156 : S155-1, bilan d'un sillage prolongé**, branche que S154 proposait et qui s'ouvre.
+
 **S154 :** [ENERGIE-BANDE-B2-S154](validation/ENERGIE-BANDE-B2-S154.md).
 Les cinq fixtures d'impact B2 ont leur bilan initial/60s reçu ; collecteurs explicites,
 erreur candidat/oracle<=5,61e-7 E0 sur les quatre nouvelles sources.296 tests/cinq ignorés.

@@ -258,3 +258,9 @@ Suite S154 : extension aux quatre autres sources B2 ; verdict global toujours pa
 **S154 : cinq bilans d'impact à60s reçus**, [rapport](docs/validation/ENERGIE-BANDE-B2-S154.md).
 Énergie retrouvée sur des collecteurs adaptés ; profils hôte80m conservés.
 Suite S155 : B2 sillage prolongé (S154-1), verdict global encore partiel.
+**S155 : la fenêtre de 16 s n'était pas une limite numérique**, [mesure](docs/validation/HORIZON-MODAL-S155.md),
+[ADR-106](docs/adr/ADR-106-horizon-d-observation-et-duree-de-forcage.md). 16 000 000 µs, c'est 2^24 :
+la borne venait de la représentation. Horizon d'observation porté à64s, durée de forçage gardée à16s ;
+budget écrit à la place de la constante. L'âge n'est pas gratuit pour autant — omega en f32 fait dériver
+la phase linéairement en temps (A213). Suite S156 : bilan d'un sillage prolongé, S155-1.
+106 ADR,213 angles,232 leçons,18 invariants,6 SPEC,23 cas.
