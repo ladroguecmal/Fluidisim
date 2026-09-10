@@ -58,63 +58,46 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S135 — terminée
+Session : S136 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : S134-1 — ADR-086 s'est arrêtée au chemin pression et rien ne coordonne l'admission
-entre couches. Établir **ce qui est déjà garanti** avant de supposer qu'il manque une
-transaction, puis décider de ce qui manque vraiment.
+Objectif : A200, sévérité 1 — un objet qui tombe dans l'eau doit produire les deux nombres que
+`WaveEvent::impact` exige, `wavelength_m` et `energy_j`. Aucun document ne dit comment.
+**Session de conception.**
 
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seul.
-- [x] **P2** — inventaire, et il commence par une vérification que S134 avait suggérée : les
-      emprunts interdisent-ils déjà le cas problématique ? Puis établir ce que chaque couche
-      sait faire, et quel état incohérent reste **observable**.
-- [x] **P3** — ADR-091 : pas de coordinateur, l'admissibilité s'annonce. Aucune admission
-      n'étant annulable, c'est le seul moyen d'éviter un état partiel.
-- [x] **P4** — `would_admit` et `would_confirm`, sans duplication des contrôles.
-- [x] **P5** — annonce contre verdict sur cinq cas ; scénario inter-couches joué.
-- [x] **P6** — livrable, rituel de fin, fusion `--ff-only`.
+- [ ] **P2** — séparer ce qui est dérivable de ce qui doit être calibré. Deux nombres, deux
+      statuts différents, et c'est le cœur de la session :
+      - **λ** : ADR-083 pose `λ = α·b` avec α « à calibrer ». Mais α pourrait n'être pas un
+        paramètre libre : le modèle d'ADR-060 fixe déjà la forme spatiale initiale
+        `η(r) = ∫A(k)J0(kr)k dk` pour une bande donnée. Mesurer le **rayon caractéristique**
+        de cette forme en fonction de λ donnerait α par dérivation interne, pas par arbitrage.
+      - **E** : la fraction de l'énergie d'entrée qui part en ondes de gravité est une
+        propriété physique externe, que rien dans le modèle ne peut produire. Elle restera
+        « à calibrer » — mais S123 en a mesuré une **borne supérieure**.
+- [ ] **P3** — ADR-092 sur ce que la mesure aura montré.
+- [ ] **P4** — construire ce que la décision retient, sans inventer de nombre (I-14).
+- [ ] **P5** — recevoir : un impact engendré par le générateur passe les bornes du candidat
+      et produit le champ attendu.
+- [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
-Départ 6f02880 = master, trois copies coïncidentes.
+Départ 34d1be8 = master, trois copies coïncidentes.
 
-Ce que la lecture a déjà établi, et qui recadre la question :
+Ce dont on dispose, avec provenance :
+- **SPEC-001 §5 bis** (Wagner) : demi-largeur mouillée `c(t) = (π/2)·v·t / tan β`, durée
+  d'impact `t_impact = 2·b·tan β / (π·v)`, masse ajoutée `m_a = ½πρc²` par mètre, impulsion
+  `J = Δ(m_a)·v_rel`. C'est ce qui relie un objet à l'eau qu'il déplace.
+- **ADR-060** : `A(k) = C x²(1-x)²` sur `[k0/2, 2k0]`, `k0 = 2π/λ`, et `C` déduit de l'énergie
+  par Parseval radial. La forme spatiale initiale est donc entièrement déterminée par λ et E.
+- **ENVELOPPE-IMPACTS-S123 §4.3** : le candidat ne porte que 10⁻⁶ à 10⁻² de l'énergie de
+  référence avant que la pente dépasse la limite du milieu. C'est une borne sur ce que le
+  générateur peut demander.
+- **SPEC-001 §5** : `λ = 2πv²/g` — sillage d'un mouvement établi, écartée pour une entrée
+  (ADR-083), et il faut continuer de l'écarter.
 
-- **Les deux couches ont chacune leur admission transactionnelle.** Côté pression,
-  `bound_pressure::Controller` (ADR-086, 088, 089). Côté impacts, `prepared_water::LiveWater` —
-  « paire journal/champs publiée ensemble ; une commande bloquée interdit une vue dite
-  courante ». Il ne manque donc pas une transaction *par couche*.
-- **Pendant une requête mixte, rien ne peut bouger.** `sample_world_batch` prend deux vues
-  immuables ; `LiveWater::admit` et `Controller::admit` exigent `&mut`. Le compilateur interdit
-  déjà d'admettre pendant qu'on échantillonne — c'est la même garantie structurelle qu'en S130.
-- **La cause est déjà commune aux deux couches** : `wave_journal::Cause { entity, command,
-  emission }` est utilisée par le journal W **et** par les métadonnées des sources de pression.
-  Deux effets d'un même événement de jeu peuvent donc porter la même cause.
-
-D'où la question réelle, qui n'est pas celle du titre : ce qui reste possible est qu'une cause
-soit **partiellement admise** — sa pression acceptée, son impact refusé, ou l'inverse — et que
-rien ne permette de le constater. Forcer les deux couches à réussir ensemble les coupleraient ;
-permettre de voir qu'une cause est incomplète ne les couple pas.
-
-Piège à éviter : construire une transaction inter-couches parce que le titre de la suite dit
-« transaction ». ADR-086 a refusé de faire dépendre le contrôleur des impacts pour une raison
-qui vaut toujours — le couplage coûterait plus que ce qu'il résout.
-
-P2-P6 : ADR-091, ADMISSIBILITE-S135, journal, index, README, REPRISE, jeton rendu, ff-only.
-266 tests/cinq ignorés, hachages inchangés. Aucun angle ni leçon nouveaux.
-
-Ce que la session a corrigé en cours de route : j'ai d'abord cru que `reject` permettait
-d'annuler une confirmation, donc qu'une transaction inter-couches était réalisable par l'hôte en
-admettant d'abord la couche annulable. Lecture faite, `insert` rend `Conflict` sur
-`(Confirmed, Rejected)` : **rien n'est annulable**, et c'est ce fait qui commande la décision.
-Vérifier ce qu'une primitive fait vraiment, avant de bâtir un ordre d'opérations dessus.
-
-Pour S136 sans relire : A200 (sévérité 1) est le plus gros manque ouvert du corpus. ADR-055 dit
-« le générateur physique devra établir ce transfert » pour l'énergie ; ADR-083 a posé le contrat
-`λ = α·b` avec α à calibrer. Ce qui manque est ce qui relie un événement de gameplay — un objet
-de taille b entrant à vitesse v — aux deux nombres que l'événement porte. SPEC-001 §5 bis
-(Wagner) donne l'étendue mouillée et la masse ajoutée ; ENVELOPPE-IMPACTS-S123 §4.3 donne le
-plafond d'énergie que le candidat peut porter, soit 1e-6 à 1e-2 de l'énergie de référence. C'est
-une session de conception, pas de code.
+Piège à éviter : produire une fonction qui rend des nombres d'apparence physique alors qu'un
+facteur reste arbitraire. Si η n'est pas calibré, il doit être **un paramètre de l'appelant**,
+nommé et borné, pas une constante enfouie.
