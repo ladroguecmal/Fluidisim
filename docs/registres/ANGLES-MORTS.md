@@ -1904,3 +1904,8 @@ ADR-069/070 avaient construit la pression mobile. Le raccordement objet/charge e
 par ADR-103, la construction W4 reste partielle. Aucun nouvel angle indépendant.
 **Suivi A212 — S150 : partielle.** B spectral+pression mobile reçu contre une référence
 raffinée sur le trajet S150 ; restent statistiques, bandes/directions et montage mixte.
+
+**Suivi S151 — aucun nouvel angle indépendant.** L'émission progressive conserve le
+tronçon en attente et n'acquitte que le contenu admis. Les limites de rétention longue
+durée (S72-2), de fenêtre16s et de sauvegarde du curseur hôte restent explicites dans
+EMISSION-SILLAGE-S151. A212 inchangée et partielle ; pas de nouvelle réception du fond.

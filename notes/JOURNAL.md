@@ -7715,3 +7715,31 @@ des ondes à l'arrêt ; puis B2. Cette suite porte toujours le dernier bilan, sa
 à une campagne de fond préalable. Aucun banc canonique supplémentaire déclaré reçu.
 
 Vérification finale :287 tests réussis/cinq ignorés (194+93), zéro échec ; quatre avertissements préexistants du harnais.103 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas. Diff sans erreur d'espacement, jeton rendu.
+
+## S151 — 2026-09-10 — Le sillage suit des intervalles successifs
+
+Entrée : S150-1. Production : ADR-104, Emitter/Emission/Cursor, cinq tests et
+[EMISSION-SILLAGE-S151](../docs/validation/EMISSION-SILLAGE-S151.md). Une source par
+tronçon, curseur acquitté seulement si le contenu exact figure au journal sans attente.
+L'hôte admet au contrôleur avant cet acquittement, puis conserve le stockage emprunté.
+Pas de nouveau codec, de mutation des anciennes sources ou de purge des vagues à l'arrêt.
+
+Le journal saturé reste servable à son instant publié ; son élargissement reçoit
+le tronçon en attente. Le champ après reprise égale bit à bit le trajet complet,
+sept points à quatre instants, énergie et puissance incluses ; hashce3395b96567718c
+identique debug/release. Un refus énergétique retire la source candidate, sans
+avancer le curseur. Doublons, acquittement prématuré, conflits, dates/positions/repères
+incohérents et compteurs épuisés refusés. Aucun seuil physique modifié.
+
+S150-1 close sur le contrat hôte uniforme borné. W4 reste partiel : fenêtres<=16s,
+rétention S72-2 et restauration du curseur hôte explicites ; pas de coque calibrée,
+de changement de repère ou de moteur externe raccordé. Aucun nouvel angle ni leçon
+indépendant : conservation de l'attente et publication atomique suivent ADR-086/089.
+I-06/I-07/I-08/I-10/I-11 relus, aucun modifié ; preuve interplateforme I-03 ouverte.
+
+**Suite S152 : S151-1, B2**, domaine/coût comparables et verdict partiel si nécessaire.
+Le dernier bilan reste porté ; ne pas transformer les limites du candidat en une
+nouvelle série de préalables empêchant de mesurer. Aucun arbitrage utilisateur,
+aucune action distante, aucune copie créée, aucun banc canonique supplémentaire reçu.
+
+Vérification finale :292 tests réussis/cinq ignorés (199+93), zéro échec ; quatre avertissements préexistants.104 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas. Cinq essais ciblés également release ; diff sans erreur d'espacement, jeton rendu.

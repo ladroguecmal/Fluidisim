@@ -1388,3 +1388,13 @@ entrée par entrée. Le fil reprend ci-dessous.
   Puis B2, conformément à la trajectoire du dernier bilan.
 - **A212 : partielle**, pression avec fond spectral reçue sur cette fixture ; les autres
   compléments restent ouverts. Aucun modèle de coque calibré ni W4 complet déclaré.
+
+### S151 — Émission progressive reçue
+
+- **S150-1 : close sur le contrat hôte uniforme borné**, ADR-104 : un tronçon par source,
+  acquittement, saturation/reprise et arrêt reçus contre le trajet complet.
+- **S151-1 : ouverte, prochaine S152.** B2 : annoncer domaine/coût comparables pour
+  impact et sillage ; exécuter la comparaison disponible et produire un verdict partiel
+  si les solveurs ou le matériel absents empêchent une sélection globale.
+- W4 reste partiel. Rétention longue durée S72-2, restauration du curseur moteur,
+  changement de repère et coque calibrée restent hors de la réception S151.

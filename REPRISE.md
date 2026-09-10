@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 15:13 +02:00
+JETON            : libre
+Battement        : 2026-09-10 15:15 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S151
-Dernière session : S150 — mouvement et charge vers le sillage ; 287 tests/cinq ignorés
-Session suivante : S151 — S150-1, alimentation progressive du sillage W4 puis B2 (dernier bilan)
+Session en cours : aucune
+Dernière session : S151 — émission progressive reçue ; 292 tests/cinq ignorés
+Session suivante : S152 — S151-1, comparaison B2 après W4 candidat (dernier bilan)
 
 **S147 : travail directement sur master.** Les anciennes copies, dont 886155, doivent rejoindre
 master avant toute reprise ; aucune copie créée, toutes propres au démarrage.
@@ -192,6 +192,15 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S151 — 2026-09-10 :** [ADR-104](docs/adr/ADR-104-emission-progressive-sillage.md),
+[EMISSION-SILLAGE-S151](docs/validation/EMISSION-SILLAGE-S151.md). Source par tronçon,
+curseur acquitté après admission, saturation/reprise sans perte ni doublon. Champ
+identique au trajet complet ; hashce3395b96567718c debug/release. S150-1 close sur
+le contrat hôte uniforme borné. W4 partiel : fenêtre16s, rétention S72-2, curseur hôte
+à persister, pas de coque calibrée ni de migration de référentiel reçues.
+292 tests/cinq ignorés ;104 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas ; aucun nouveau banc.
+**Suite S152 : S151-1, B2**, domaine/coût comparables, verdict explicitement partiel si besoin.
 
 **S150 — 2026-09-10 :** [ADR-103](docs/adr/ADR-103-mouvement-charge-sillage.md),
 [TRAJET-SILLAGE-S150](docs/validation/TRAJET-SILLAGE-S150.md). Charge et mouvement

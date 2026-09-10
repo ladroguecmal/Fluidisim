@@ -17,6 +17,12 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S151 :** [ADR-104](adr/ADR-104-emission-progressive-sillage.md),
+[EMISSION-SILLAGE-S151](validation/EMISSION-SILLAGE-S151.md). Sillage progressif,
+acquittement après admission et reprise de saturation ; champ identique au trajet entier.
+S150-1 close sur le contrat borné, W4 partiel. **Suite S152 : S151-1, B2**.
+292 tests réussis/cinq ignorés ;104 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas ; aucun nouveau banc reçu.
+
 **S150 :** [ADR-103](adr/ADR-103-mouvement-charge-sillage.md),
 [TRAJET-SILLAGE-S150](validation/TRAJET-SILLAGE-S150.md). Mouvement et charge prescrits
 vers WPRS, journal et B spectral+W ;441 comparaisons au champ f64 raffiné, erreur de

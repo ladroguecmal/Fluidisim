@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S151 — en cours
+Session : S151 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S150-1, émission progressive de tronçons de sillage sans perte ni doublon.
 
@@ -67,7 +67,7 @@ Objectif : S150-1, émission progressive de tronçons de sillage sans perte ni d
 - [x] **P1** — état réel, contrats, jeton et plan seul.
 - [x] **P2** — émetteur à préparation/acquittement, continuité et identité ; ADR et refus testés.
 - [x] **P3** — intégration journal/contrôleur, saturation/reprise, comparaison au trajet complet et arrêt.
-- [ ] **P4** — vérifications, rapport et rituel de fin ; passation vers B2, jeton rendu.
+- [x] **P4** — vérifications, rapport et rituel de fin ; passation vers B2, jeton rendu.
 
 ### Notes de reprise
 
@@ -78,3 +78,5 @@ Le curseur de mouvement n'avance qu'après présence exacte au journal ; refus/s
 conservent la même émission. L'hôte possède le stockage des émissions.
 W4 reste candidat sans coque calibrée ni preuve multiplateforme. B2 est la suite du bilan.
 P3 : cinq nouveaux tests release reçus ; scénario également debug, hashce3395b96567718c. Refus calcul/saturation préservent curseur et publication, reprise identique au trajet entier.
+
+P4 :292 tests/cinq ignorés (199+93), zéro échec ; quatre avertissements préexistants.104 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas. Rituel exécuté, jeton rendu ; suite B2.
