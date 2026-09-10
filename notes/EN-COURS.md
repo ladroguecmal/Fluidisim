@@ -66,7 +66,7 @@ Objectif : S165-1/A221, fermeture autonome avec information entrante et sortante
 
 - [x] **P1** — état réel, jeton et plan seul.
 - [x] **P2** — dériver caractéristiques et référence analytique, protocole avant mesure ; copies synchronisées.
-- [ ] **P3** — implémenter fermeture aux étages, comparer entrée/sortie et raffinements.
+- [x] **P3** — implémenter fermeture aux étages, comparer entrée/sortie et raffinements.
 - [ ] **P4** — réception, résultats, limites et suivi des actions.
 - [ ] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
@@ -77,3 +77,8 @@ S165 terminée ; 112 ADR,221 angles,247 leçons. Bibliothèques inchangées depu
 Suite BILAN-S145 portée par poursuite B4. Aucun domaine 3D ni absorbeur choisi.
 P2 : BORD-AUTONOME-S166 déclaré, invariants dérivés et onde simple avant choc.
 Témoin analytique distinct de l'identité discrète S165. Entrée et sortie dans les deux sens.
+
+P3 : six tests propres S166 et huit S165 reçus ; 32 montages/128 évolutions release.
+À N240/a0,05 entrée : erreur totale 0,314832 ; écart de frontière 0,001505704.
+Perte de crête vers12s 0,1277563, identique au témoin : défaut intérieur observé.
+Bilan <=2,04e-15, Courant <=0,214735. Aucun runtime modifié.

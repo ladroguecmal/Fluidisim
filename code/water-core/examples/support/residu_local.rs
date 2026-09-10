@@ -73,6 +73,17 @@ impl Local {
         sample: impl Fn(usize, f64) -> State,
         ghosts: [[State; 2]; 2],
     ) -> f64 {
+        self.step_with_boundary(t, dt, sample, |stage, _| ghosts[stage])
+    }
+
+    /// S166 : la fermeture voit les deux cellules intérieures de l'étage courant.
+    pub fn step_with_boundary(
+        &mut self,
+        t: f64,
+        dt: f64,
+        sample: impl Fn(usize, f64) -> State,
+        boundary: impl Fn(usize, [State; 2]) -> [State; 2],
+    ) -> f64 {
         assert!(dt.is_finite() && dt > 0.0 && t.is_finite());
         let n = self.d.len();
         for i in 0..n {
@@ -80,12 +91,19 @@ impl Local {
             self.bg1[i] = sample(self.offset + i, t + dt);
         }
         let bg_ghost = |time| [sample(self.offset - 1, time), sample(self.offset + n, time)];
+        let ghosts0 = boundary(
+            0,
+            [
+                self.bg[0].plus(self.d[0]),
+                self.bg[n - 1].plus(self.d[n - 1]),
+            ],
+        );
         let (f0, c0) = Self::rhs(
             &self.bg,
             &self.d,
             &mut self.rhs,
             bg_ghost(t),
-            ghosts[0],
+            ghosts0,
             self.dx,
         );
         for i in 0..n {
@@ -93,12 +111,19 @@ impl Local {
                 .plus(self.rhs[i].times(dt))
                 .minus(self.bg1[i].minus(self.bg[i]));
         }
+        let ghosts1 = boundary(
+            1,
+            [
+                self.bg1[0].plus(self.d1[0]),
+                self.bg1[n - 1].plus(self.d1[n - 1]),
+            ],
+        );
         let (f1, c1) = Self::rhs(
             &self.bg1,
             &self.d1,
             &mut self.rhs,
             bg_ghost(t + dt),
-            ghosts[1],
+            ghosts1,
             self.dx,
         );
         for i in 0..n {

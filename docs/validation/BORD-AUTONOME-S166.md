@@ -42,4 +42,13 @@ extrapolation. Le seuil 1e-10 S165 garde seulement bilan et identités algébriq
 
 ## 3. Mesures et réception
 
-À produire en P3/P4. Aucun seuil perceptuel ou absorbeur choisi.
+Première campagne : 32 montages, quatre fermetures, soit 128 évolutions. Six nouveaux
+tests reçus ; huit tests S165 rejoués après extension du support aux callbacks de bord.
+Le callback reçoit le total intérieur du prédicteur au second étage ; l'ancienne interface
+à fantômes imposés est conservée par délégation, sans modification de sa sémantique.
+
+**Diagnostic ajouté après première mesure :** l'écart au continu reste nettement plus grand
+que l'écart au témoin utilisant les mêmes mailles. Pour distinguer perte d'amplitude et
+simple déphasage, relever aussi, pour l'entrée, la différence des maxima de hauteur
+vers 12 s, quand la crête est dans la fenêtre ; normalisation par a. Ce diagnostic ne
+change aucune réception ni tolérance. Aucun seuil perceptuel ou absorbeur choisi.
