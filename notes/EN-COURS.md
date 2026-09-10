@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S160 — en cours
+Session : S160 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : **S158-1** — le facteur **2,5** revient dans deux mesures de ce problème : l'étendue du
 groupement `t·½√(g·sigma)·dk` de S157 (1,17 à 2,94) et la fidélité de l'estimateur d'erreur de
@@ -77,9 +77,9 @@ et `wake_estimator.rs`.
       4 quand l'autre reste à 2,5, elles sont indépendantes et la question est close.
 - [x] **P4** — si elles bougent ensemble, chercher la cause commune ; sinon, dire pourquoi la
       coïncidence était plausible et ce qui l'a fait croire.
-- [ ] **P5** — livrable ; ADR seulement si une décision en sort. Une question fermée sans décision
+- [x] **P5** — livrable ; ADR seulement si une décision en sort. Une question fermée sans décision
       n'a pas besoin d'ADR, et S157 comme S158 ont montré qu'un résultat négatif est un résultat.
-- [ ] **P6** — rituel de fin (§6, **sept points**), jeton rendu. Pas de copie isolée à refermer.
+- [x] **P6** — rituel de fin (§6, **sept points**), jeton rendu. Pas de copie isolée à refermer.
 
 ### Notes de reprise
 
@@ -101,3 +101,30 @@ d'expérience dégénéré (L235). Deux nombres égaux à 2,5 ne sont pas une me
 
 Second piège : élargir. S158 a écrit que la voie ouverte est **B4**, chantier sans rapport. Si la
 question se ferme en une heure, la fermer et le dire, pas la prolonger pour remplir la session.
+
+P2-P6 : sonde `wake_plafond.rs`, FACTEUR-25-S160, note datée sur TOLERANCE-SILLAGE-S158, L242.
+299 tests inchangés, aucun ADR — rien n'était à décider.
+
+Ce que la session a retourné, et qui vaut pour la suivante : **la moitié de la réponse ne
+demandait aucune mesure.** Comparer les définitions des deux nombres suffisait à voir qu'ils
+n'étaient pas commensurables — une étendue et une déviation. Regarder ce qu'un chiffre *est* avant
+de chercher *pourquoi* il vaut ce qu'il vaut.
+
+Deux choses à ne pas réexplorer :
+- `validate_recipe` impose `sigma·cutoff ∈ [1 ; 8]` : à cutoff 6, sigma plafonne à 1,33. Pour un
+  sigma plus grand il faut baisser cutoff, ce qui change la bande — et c'est justement la variable
+  qui gouverne la fidélité de l'estimateur ;
+- le couple `4 / 1,5` est atypique dans les deux jeux à la fois, S157 comme S160 : un spectre coupé
+  près du pic n'a plus assez de modes pour que quoi que ce soit se moyenne. Ce n'est pas un
+  artefact de sonde.
+
+Pour S161 sans relire : **B4** juge « à partir de quel rapport la décomposition additive devient
+*visiblement* fausse » (ADR-109 §47). Il est le seul juge de fidélité du corpus, A214 l'attend
+désormais seule — elle ne réclame plus ni mesure ni spécification — et il est **bloqué par la
+référence substitutive intégrale**. Commencer par lire ce que cette référence doit être et si elle
+est à portée, comme S146 a commencé B1 en disant ce que le banc pouvait et ne pouvait pas trancher.
+Un banc dont deux volets sur quatre sont perceptuels reste utile s'il dit lesquels.
+
+Friction d'outil rencontrée, sans conséquence sur le dépôt : l'outil d'écriture de fichiers croyait
+la session encore dans le worktree supprimé et refusait les chemins de la copie principale ; tout a
+été écrit par le shell, et les commits sont bien sur `master`.

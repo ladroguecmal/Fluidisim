@@ -17,6 +17,16 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S160 :** [FACTEUR-25-S160](validation/FACTEUR-25-S160.md). S158-1 : **coïncidence**, et aucun ADR — rien
+n'était à décider. Les deux « 2,5 » n'étaient pas la même statistique : S157 publiait une **étendue** `max/min`,
+S158 une **déviation** au rapport idéal ; sur le seul jeu de S158 elles valent 3,42 et 2,50. Et le nombre de S158
+décrit **son montage** : la déviation vaut 2,17 à 2,47 tant que `cutoff = 6`, sur un facteur 4 en sigma, puis
+**24,08** à `cutoff = 1,5` — ce qui gouverne est la largeur de bande conservée. Défaut trouvé en chemin : S158
+écarte deux cases en disant que l'erreur y vaut 0,2 %, faux pour l'une (8,7e-2) ; au seuil uniforme de 1 %, sa
+déviation passe de 2,47 à **12,30**. **L242** : publier un facteur, c'est publier quelle statistique, sur quel
+régime, dans quelle famille. 299 tests inchangés, aucun code de production modifié.
+110 ADR,215 angles,242 leçons,18 invariants,6 SPEC,23 cas, deux bancs partiels. Suite S161 : débloquer **B4**.
+
 **S159 :** [ADR-110](adr/ADR-110-une-copie-de-travail-se-ferme.md),
 [COPIES-S159](registres/COPIES-S159.md). **Demande de l'utilisateur**, action S35-7. Six copies de
 travail étaient ouvertes ; **quatre annonçaient un jeton `libre` avec quatre « dernière session »

@@ -18,15 +18,15 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 19:43 +02:00
+JETON            : libre
+Battement        : 2026-09-10 19:47 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S160 — le facteur 2,5 est-il un plafond ? (S158-1)
-Dernière session : S159 — copies assainies ; 299 tests/cinq ignorés
-Session suivante : à fixer en fin de S160
+Session en cours : aucune
+Dernière session : S160 — S158-1 fermée, coïncidence ; 299 tests/cinq ignorés
+Session suivante : S161 — débloquer **B4** (ADR-109 ; A214 l'attend seule)
 
-*S160 travaille dans la **copie principale**, sur `master` : aucune copie isolée n'a été ouverte,
-donc rien à refermer (AGENTS.md). Les trois worktrees vus à l'amorce étaient tous à 824ee62.*
+*S160 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
+rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour.*
 
 **Copies de travail — ADR-110, S159.** Le décompte n'a plus sa place ici : il vieillissait de
 session en session et annonçait « cinq worktrees » quand il y en avait six. **L'état se constate**
@@ -187,6 +187,26 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S160 — 2026-09-10 :** [FACTEUR-25-S160](docs/validation/FACTEUR-25-S160.md). S158-1 fermée,
+**aucun ADR : rien n'était à décider**. Session menée dans la **copie principale**, sur `master`.
+**Coïncidence, et la moitié de la démonstration ne demandait aucune mesure** : S157 publiait une
+**étendue** `max/min`, S158 une **déviation** au rapport idéal1. Sur le seul jeu de S158, les deux
+valent3,42 et2,50 — l'égalité venait d'avoir comparé l'une à l'autre. Chiffres refaits à la source.
+**Et le2,5 de S158 décrit son montage, pas le repliement** : la déviation tient entre2,17 et2,47
+tant que `cutoff =6`, sur un facteur4 en sigma — vraie robustesse — puis vaut **24,08** à
+`cutoff =1,5`. Ce qui gouverne est **la largeur de bande conservée**. `validate_recipe` impose
+`sigma·cutoff ∈ [1 ;8]`, d'où le refus de sigma4 à cutoff6, dit dans la sonde plutôt que contourné.
+**Défaut trouvé en chemin** : S158 écarte deux cases en écrivant que l'erreur y vaut0,2 % — vrai de
+l'une (2,1e-3), **faux de l'autre** (8,7e-2). Au seuil uniforme de1 %, sa déviation passe de2,47 à
+**12,30**, et seule la ligne que S158 avait mesurée y est sensible. Note datée portée au livrable.
+**L242** : publier un facteur, c'est publier **quelle statistique, sur quel régime, dans quelle
+famille** — sans quoi un chiffre décrit le montage de son auteur en ayant l'air de décrire le
+problème. Troisième session de suite dont le résultat est de cette famille (L235, L239, L242).
+299 tests inchangés, aucun code de production modifié.
+110 ADR,215 angles,242 leçons,18 invariants,6 SPEC,23 cas.
+Suite S161 : **débloquer B4** — seule voie ouverte selon ADR-109, et A214 l'attend désormais seule.
+S146 a montré qu'un banc s'exécute ; deux sur onze vaudraient mieux qu'un.
 
 **S159 — 2026-09-10 :** [COPIES-S159](docs/registres/COPIES-S159.md),
 [ADR-110](docs/adr/ADR-110-une-copie-de-travail-se-ferme.md). **Demande de l'utilisateur** : régler
