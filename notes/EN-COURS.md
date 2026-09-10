@@ -80,7 +80,7 @@ n'appartiendrait ni à une formule citée ni à un banc qui le fixe.
 - [x] **P3** — convertir en tolérance sur l'observable de S157, l'excès de champ proche. Sans
       cette conversion, une tolérance dérivée reste inutilisable : les deux ne parlent pas de la
       même chose.
-- [ ] **P4** — ADR fixant la tolérance et sa provenance, puis relecture des durées de S157 **à
+- [x] **P4** — ADR fixant la tolérance et sa provenance, puis relecture des durées de S157 **à
       cette tolérance** — les mesures existent, aucune campagne nouvelle si elle tombe dedans.
 - [ ] **P5** — le garde-fou, désormais constructible, avec son test témoin ; ou le constat motivé
       qu'il ne l'est toujours pas.
@@ -176,3 +176,13 @@ plafond de precision de tout ce qui touche au repliement, et pas une coincidence
 Cout : deux preparations au lieu d'une, soit 50 ms au lieu de 25 pour 128x128. Reel.
 Decision reportee a P4 : rien n'est ajoute en production, aucun consommateur ne l'ayant demande
 (S132 : ne pas ajouter d'API publique pour instrumenter).
+
+P4 — ADR-109 : le repliement est une infidelite, pas une faute. Trois choses actees.
+Requalification du mode de defaillance : deterministe, donc ni desynchronisation, ni divergence de
+replique, ni inegalite entre joueurs ; I-15 reste satisfait **avec l'erreur dedans**. Rien ajoute
+en production. Methode d'estimation publiee avec sa fidelite mesuree et son sens d'erreur.
+A214 change de dependance : elle attend **B4**, seul juge de fidelite du corpus, lui-meme bloque
+par la reference substitutive integrale.
+Ce que je n'ecris pas dans l'ADR faute de l'avoir verifie : le facteur 2,5 qui revient partout
+(groupement de S157, dispersion de l'estimateur) est peut-etre le plafond de precision de tout ce
+qui touche au repliement. Note ici pour la session qui voudra le verifier.
