@@ -17,6 +17,16 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S142 :** [ADR-096](adr/ADR-096-les-deux-champs-disent-la-meme-chose-de-max-slope.md), les deux champs disent la
+même chose de `max_slope`. [PENTE-MODALE-S142](validation/PENTE-MODALE-S142.md) : **A209 traitée** — le rapport du
+champ modal vaut **1,701591**, constante du modèle, retrouvée par dichotomie sur `max_slope` sans toucher à la
+bibliothèque. `ImpactField::new` compare désormais la pente réelle ; le champ n'est **pas** retiré, ADR-059 le
+conservant exprès. La dispense d'ADR-082 §65 a expiré sans avoir été fausse : son motif a disparu quand les deux
+champs ont divergé (**L225**). Champ limite à 0,448737 contre 0,448799 attendu ; aucun hachage touché.
+**A210** : rien n'oblige un futur champ à mesurer son rapport — le contrat ne vit que dans deux commentaires.
+273 tests/cinq ignorés.
+96 ADR,211 angles,17 invariants,6 spécifications,23 cas. Suite S143 : A210, puis A208.
+
 **S141 :** [MIGRATION-PENTE-S141](validation/MIGRATION-PENTE-S141.md), exécution de **S139-1** — aucun ADR
 nouveau, cette session applique ADR-094 et ADR-095. Chaque terme du budget consomme le meilleur majorant exact de
 sa pente réelle ; `BREAKING_SLOPE = π/7` est publiée avec sa provenance. **Le champ limite admis est exactement à
@@ -546,7 +556,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | `code/scenarios` | les scénarios du mode `check`, assertions comprises |
 
 ```
-cargo test --offline                                  # 272 succès, 5 ignorés (S141)
+cargo test --offline                                  # 273 succès, 5 ignorés (S142)
 water-harness check   scenarios/*.toml                # H1 — déterminisme, 0,04 s / budget 60 s
 water-harness physics scenarios/*.toml                # H3 — assertions analytiques et diagnostics
 ```

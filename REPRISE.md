@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 12:36 +02:00
+JETON            : libre
+Battement        : 2026-09-10 12:38 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S142 — A209, le second champ et sa borne L1
-Dernière session : S141 — S139-1 réalisée ;272 tests/cinq ignorés
-Session suivante : à fixer en fin de S142
+Session en cours : aucune
+Dernière session : S142 — A209 traitée ;273 tests/cinq ignorés
+Session suivante : S143 — A210, donner un support au contrat de pente
 
 **Copie de travail S139 et S140** : worktree `claude/reprise-projet-886155`, refusionné en avance
 rapide dans master à la fin de chacune des deux. Terminer de même :
@@ -189,6 +189,29 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S142 — 2026-09-10 :** [ADR-096](docs/adr/ADR-096-les-deux-champs-disent-la-meme-chose-de-max-slope.md),
+[PENTE-MODALE-S142](docs/validation/PENTE-MODALE-S142.md). **A209 traitée** — le défaut était le
+mien, ouvert par la migration de S141.
+**Le champ modal a lui aussi une constante :1,701591**, invariante en λ (0,5→32 m) et en énergie
+(1e-4→10 J), stable dès25 points de grille par côté, maximum à `t = birth`. Retrouvée **par
+dichotomie sur `max_slope`**, sans toucher à la bibliothèque — telle que l'extérieur la voit.
+Le champ est périodique et `sample` n'impose aucune emprise : le maximum est **toujours** atteint,
+ce qui sépare ce cas de celui de la pression (A206).
+**Ce qui a décidé n'est pas la mesure, c'est ADR-081** : deux constructeurs du même crate ne
+doivent pas nommer différemment la même distinction. Depuis S141 ils le faisaient. Et la dispense
+d'ADR-082 §65 — « pas de consommateur, donc pas de lecteur » — **a expiré sans avoir été fausse**,
+son motif ayant disparu (**L225**). Le champ n'est **pas** retiré : ADR-059 le conserve exprès
+comme support de comparaison, et « personne ne le construit » n'établit pas qu'il est mort (S39).
+Réception : `energie_limite =5,720523e3 J`, `pente =0,448737`, `stokes =0,448799` — écart1,4e-4.
+Les deux champs du crate placent leur champ limite à la cambrure de Stokes. **Aucun hachage
+touché, harnais H1 inchangé** : sans consommateur de production, cette migration-ci est gratuite.
+**A210, de dispositif** : les deux constantes homonymes **ne se déduisent pas l'une de l'autre**,
+un troisième champ aurait la sienne, et le contrat « ce qui est comparé à `max_slope` est une
+pente réelle » ne vit que dans deux commentaires et deux essais.
+273 tests/cinq ignorés.96 ADR,211 angles,17 invariants,6 spécifications,23 cas.
+Suite S143 : **A210** — un type porteur, un essai générique ou un invariant, avant qu'un troisième
+champ existe. Puis **A208**, ouverte depuis S140 et deux fois reportée.
 
 **S141 — 2026-09-10 :** [MIGRATION-PENTE-S141](docs/validation/MIGRATION-PENTE-S141.md). **S139-1
 réalisée** ; aucun ADR nouveau, cette session exécute ADR-094 et ADR-095.

@@ -3435,3 +3435,24 @@ Deux prescriptions, et la seconde est celle qui économise le plus :
    SLOPE_L1_RATIO²` suit désormais toute nouvelle mesure du rapport ; `2,865e-3` aurait recommencé
    à mentir à la prochaine décimale. Voir [[L219]] : un nombre sans sa dépendance est un
    qualificatif déguisé.
+
+## L225 — Une dispense accordée pour absence de conséquence tombe le jour où la conséquence apparaît
+
+*(S142)* ADR-082 avait délibérément laissé `ImpactField` de côté : « ses bornes ont la même maladie,
+mais il n'est plus le chemin actif, et le renommer sans consommateur ajouterait du travail sans
+lecteur ». C'était juste, et bien argumenté.
+
+Puis S141 a migré l'autre champ, et les deux constructeurs ont cessé de dire la même chose de
+`max_slope`. La dispense n'est pas devenue fausse : **son motif a disparu**. Le lecteur qui
+manquait existait désormais — quiconque lit le paramètre.
+
+Ce qui est généralisable n'est pas « les dispenses expirent », c'est **où regarder** : une
+décision de ne rien faire s'appuie sur un état du reste du système, et ce sont les modifications
+de cet état-là qui doivent la rouvrir, pas le calendrier. En pratique, quand une migration change
+un vocabulaire partagé, **relire les endroits qu'on avait exemptés de ce vocabulaire** — ils sont
+peu nombreux, ils sont écrits, et c'est exactement là que l'incohérence s'installe.
+
+Corollaire pour la rédaction : une dispense doit dire **de quoi elle dépend**, pas seulement
+qu'elle est accordée. Celle d'ADR-082 le disait — « il n'est plus le chemin actif » — et c'est ce
+qui a permis de constater sa péremption en une lecture. Voir [[L219]] et [[L224]] : un motif écrit
+vaut mieux qu'une conclusion écrite.

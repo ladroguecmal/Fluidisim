@@ -7305,3 +7305,62 @@ candidat radial, ou constater qu'il est mort et le retirer. Puis **A208**, le no
 c'est l'emprise qui consomme le budget. Restent ouverts : l'audit des renvois « traité en Sxx »
 (S138), l'extension de fenêtre, S116-2, le bilan mixte, la durabilité et les deux calibrations
 de B10.
+
+---
+
+## S142 — 2026-09-10 — Le second champ a sa constante, et la dispense qui le protégeait a expiré
+
+**Entrée :** jeton libre à f40df3a, worktree `886155`, master coïncident. **A209**, ouverte par ma
+propre migration de S141.
+**Produit :** [ADR-096](../docs/adr/ADR-096-les-deux-champs-disent-la-meme-chose-de-max-slope.md),
+[PENTE-MODALE-S142](../docs/validation/PENTE-MODALE-S142.md), sonde `pente_modale`, migration
+d'`ImpactField`, essai bout à bout, note datée sur ADR-082, A210, L225.
+
+**Le rapport du champ modal vaut 1,701591, et c'est une constante.** Invariante sur λ de 0,5 à
+32 m et E de 1e-4 à 10 J, stable dès 25 points de grille par côté, maximum atteint à `t = birth`
+en `[0 ; 0,0733]·side`. Deux raisons structurelles : `side = 4λ` avec des modes indexés par des
+entiers rend le motif identique à toute longueur d'onde, et le champ étant périodique **sans
+emprise restreinte**, le maximum est toujours atteint — c'est ce second point qui sépare ce cas de
+celui de la pression, où l'emprise pouvait le manquer et faire diverger le rapport (A206).
+
+La borne a été retrouvée **par dichotomie sur `max_slope`**, sans toucher à la bibliothèque : telle
+que l'extérieur la voit, c'est-à-dire exactement la grandeur qu'A209 mettait en cause.
+
+**Ce que la session a d'abord fait, et qui a décidé du reste : constater l'état du champ.**
+Aucun appelant de production ne le construit — mais **ADR-059 le conserve délibérément** comme
+support de comparaison physique. « Personne ne le construit » n'établit pas qu'il est mort, et le
+dépôt a payé cette confusion au troisième fork (S39). Le retrait était donc exclu avant même la
+mesure.
+
+**Ce qui a tranché est ADR-081.** La séparation `NotRepresentable`/`Steepness` avait été appliquée
+à ce champ « par cohérence de vocabulaire : deux constructeurs du même crate ne doivent pas nommer
+différemment la même distinction ». Depuis S141, ils nommaient différemment la même distinction.
+Migrer n'était donc pas un confort, c'était une dette ouverte par ma session précédente.
+
+**Et la dispense d'ADR-082 §65 a expiré sans avoir été fausse. L225.** Elle disait : pas de
+consommateur, donc pas de lecteur, donc pas de travail. Le motif a disparu quand les deux champs
+ont divergé — le lecteur, c'est quiconque lit `Medium::max_slope`. Une décision de ne rien faire
+s'appuie sur un état du reste du système ; ce sont les changements de cet état qui la rouvrent.
+
+**Réception.** Même essai qu'en S141, mot pour mot : `energie_limite = 5,720523e3 J`,
+`pente = 0,448737`, `stokes = 0,448799` — écart relatif **1,4e-4**. Les deux champs du crate
+placent leur champ limite à la cambrure limite de Stokes. **Aucun hachage touché, harnais H1
+inchangé** : sans consommateur de production, cette migration-ci est gratuite, là où celle de S141
+coûtait quatre hachages déplacés.
+
+**Angle mort nouveau, A210, et il est de dispositif.** Le crate porte deux constantes homonymes
+qui **ne se déduisent pas l'une de l'autre** — 1,795071 pour la quadrature de Hankel, 1,701591
+pour les 40 modes cartésiens. Un troisième champ aurait la sienne, et rien ne l'empêcherait
+d'écrire `slope > medium.max_slope` comme les deux premiers l'ont fait pendant soixante sessions.
+Le contrat « ce qui est comparé à `max_slope` est une pente réelle » ne vit que dans deux
+commentaires et deux essais. À instruire **avant** qu'un troisième champ existe ; après, ce sera
+un audit.
+
+273 tests, cinq ignorés — un de plus. 96 ADR, 211 angles, 17 invariants, 6 spécifications,
+23 cas. Invariants relus : aucun invalidé.
+
+**Suite S143 :** **A210** — donner un support au contrat de pente : un type qui porte la pente
+réelle plutôt qu'un `f32` nu, un essai générique que tout champ doit passer, ou une entrée
+d'invariant. Puis **A208**, ouverte depuis S140 et deux fois reportée — le refus ne désigne pas
+l'emprise. Restent ouverts : l'audit des renvois « traité en Sxx » (S138), l'extension de fenêtre,
+S116-2, le bilan mixte, la durabilité et les deux calibrations de B10.

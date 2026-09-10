@@ -1307,3 +1307,13 @@ entrée par entrée. Le fil reprend ci-dessous.
   le type.
 - **A208 : ouverte, non instruite.** Devait l'être avec ce lot ; ne l'a pas été. Le refus ne
   désigne pas l'emprise, qui est pourtant ce que l'hôte peut changer.
+
+### S142 — Le second champ aligné
+
+- **A209 : traitée.** [ADR-096](../adr/ADR-096-les-deux-champs-disent-la-meme-chose-de-max-slope.md),
+  [PENTE-MODALE-S142](../validation/PENTE-MODALE-S142.md). Rapport modal 1,701591, constante ;
+  `ImpactField::new` compare la pente réelle. Champ conservé (ADR-059).
+- **A210 : ouverte, S143.** Rien n'oblige un futur champ à mesurer son rapport avant de comparer
+  à `max_slope`. Trois réparations possibles — type porteur, essai générique, invariant — aucune
+  tranchée. À instruire avant qu'un troisième champ existe.
+- **A208 : ouverte, deux fois reportée.** Le refus ne désigne pas l'emprise.

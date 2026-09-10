@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S142 — en cours
+Session : S142 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : **A209**, ouverte par ma propre migration en S141. `ImpactField::new` compare sa
 **borne L1** à `medium.max_slope` quand `RadialImpact` y compare désormais la pente **réelle** :
@@ -82,7 +82,7 @@ sens dans le type, ou retirer un champ que plus personne ne construit.
       retrait ne se prend pas sur le seul fait qu'aucun appelant ne subsiste dans le dépôt.
 - [x] **P5** — décider et appliquer : ADR, migration ou retrait. Témoins avant/après si des bits
       bougent, comme en S141.
-- [ ] **P6** — rituel de fin (§6), jeton rendu, fusion `--ff-only`.
+- [x] **P6** — rituel de fin (§6), jeton rendu, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -104,3 +104,27 @@ le documente avant de proposer quoi que ce soit.
 Second piège : si le rapport est une constante, la migration est **tentante et facile**. Elle
 déplacerait pourtant une frontière de plus, et ce champ n'a aucun essai de réception comparable à
 ceux du candidat. Mesurer d'abord, décider ensuite — pas l'inverse.
+
+P2-P5 : sonde `pente_modale` (5 sections), migration d'`ImpactField`, essai bout à bout, ADR-096,
+PENTE-MODALE-S142, note datée sur ADR-082, A210, L225. 273 tests/cinq ignorés, aucun hachage touché.
+
+Ce qui a décidé, et ce n'est pas la mesure : **ADR-081** (deux constructeurs du même crate ne
+nomment pas différemment la même distinction) et **ADR-059** (le champ est conservé exprès, donc
+le retrait était exclu avant même de mesurer). La mesure a seulement rendu la migration possible.
+
+Impasse évitée : proposer le retrait parce qu'aucun appelant ne subsiste. ADR-059 le conserve
+comme support de comparaison, et le dépôt a payé cette confusion au troisième fork (S39).
+
+Ce que la sonde fait et qui se réutilisera : elle retrouve la borne **par dichotomie sur
+`max_slope`**, sans accesseur et sans toucher à la bibliothèque. C'est la bonne méthode quand la
+grandeur en cause est justement celle que l'extérieur voit — et elle évite d'ajouter une surface
+publique sans lecteur (ADR-082).
+
+Pour S143 sans relire : A210 est un défaut de **dispositif**, pas de calcul. Le contrat « ce qui
+est comparé à `max_slope` est une pente réelle » ne vit que dans deux commentaires
+(`radial_impact.rs`, `impact_field.rs`) et deux essais homonymes. Trois réparations à peser : un
+type qui porte la pente réelle plutôt qu'un `f32` nu — le plus solide, le plus intrusif ; un essai
+générique que tout champ doit passer — praticable, mais il faut un trait commun aux champs, qui
+n'existe pas ; une entrée d'invariant dans `docs/01_INVARIANTS.md` — le moins cher, le plus
+oubliable. Peser avant d'écrire, et se souvenir qu'I-14 a tenu soixante sessions **parce qu'un
+essai le vérifiait**, pas parce qu'il était écrit.

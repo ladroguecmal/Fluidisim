@@ -1805,3 +1805,23 @@ couche divise sa borne par son facteur — n'existe donc pas. Voir
   mesurer son rapport comme S139 l'a fait pour le candidat radial, le retirer, ou séparer les deux
   significations dans le type. À trancher, pas à laisser dormir — c'est exactement la forme de
   défaut que L219 décrit.
+
+**Suivi A209 — S142 : traitée par ADR-096.** Le rapport du champ modal vaut **1,701591**, et c'est
+une constante du modèle comme celle du candidat radial — invariante en λ et en énergie, maximum
+toujours atteint parce que le champ est périodique et sans emprise restreinte. `ImpactField::new`
+compare désormais la pente réelle ; `max_slope` a un seul sens dans le crate. Le champ n'est
+**pas** retiré : ADR-059 le conserve délibérément comme support de comparaison, et « personne ne le
+construit » n'établit pas qu'il est mort (S39). Voir
+[PENTE-MODALE-S142](../validation/PENTE-MODALE-S142.md).
+
+- **A210** *(sévérité 2, S142 ; ouverte)* — **Rien n'oblige un futur champ à mesurer son rapport
+  avant de comparer quoi que ce soit à `max_slope`.** Le crate porte maintenant deux constantes
+  homonymes — 1,795071 pour la quadrature de Hankel, 1,701591 pour les 40 modes cartésiens — et
+  elles **ne se déduisent pas l'une de l'autre** : chacune est une propriété du spectre de son
+  champ. Un troisième champ aurait la sienne, et le langage ne l'empêchera pas d'écrire
+  `slope > medium.max_slope` comme les deux premiers l'ont fait pendant soixante sessions. Le
+  défaut n'est pas dans un calcul, il est dans le **dispositif** : aucune trace du contrat « ce qui
+  est comparé à `max_slope` est une pente réelle » ne vit ailleurs que dans deux commentaires et
+  deux essais. Trois réparations possibles, aucune tranchée : un type qui porte la pente réelle
+  plutôt qu'un `f32` nu, un essai générique que tout champ doit passer, ou une entrée d'invariant.
+  À instruire avant qu'un troisième champ existe — après, ce sera un audit.
