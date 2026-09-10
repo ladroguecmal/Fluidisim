@@ -67,7 +67,7 @@ de collecte requis**, comme S153 et S154 l'ont fait pour les impacts.
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan déclaré et committé seul.
-- [ ] **P2** — énergie d'un sillage prolongé jusqu'à 60 s : puissance pendant le forçage,
+- [x] **P2** — énergie d'un sillage prolongé jusqu'à 60 s : puissance pendant le forçage,
       conservation après extinction. C'est exactement ce que S155 vient de rendre mesurable, et
       personne ne l'a encore regardé au-delà de 8 s.
 - [ ] **P3** — **où** est cette énergie dans l'espace à 60 s : balayage radial du champ contre
@@ -106,3 +106,13 @@ Piège identifié d'avance : l'oracle `GaussianPressure` porte **la même** disc
 fin. Un accord candidat/oracle ne prouverait donc rien sur le repliement — les deux replient. Le
 seul juge est la comparaison entre **deux résolutions** et, si possible, une quantité physique
 indépendante de la quadrature : l'énergie totale, qui doit être conservée après extinction.
+
+P2 — l'energie d'un sillage prolonge se conserve, et c'est un resultat vide.
+Forcage 16 s en huit troncons de 2 s a 2 m/s, 100 N, sigma 1 m, cutoff 6 ; observation a 60 s,
+possible depuis ADR-106. Puissance exactement nulle des l'extinction ; energie **identique au bit
+pres** a 16, 20, 30, 45 et 60 s : 2,882884145e-1 J en 128x128, 2,884232700e-1 en 256x256.
+Mais cette conservation est **structurelle** : apres extinction chaque mode tourne, et la rotation
+laisse g|eta|^2 + |v|^2/k invariant. Le bilan spectral ne pouvait pas ne pas se conserver. Il
+confirme l'implementation, il ne dit rien de la validite spatiale du champ. Le noter comme
+resultat aurait ete une mesure vide.
+Ecart de quadrature sur l'energie totale entre 128x128 et 256x256 : 4,7e-4 relatif. Petit.
