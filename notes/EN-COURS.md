@@ -73,7 +73,7 @@ Le refaire à la même méthode, puis en tirer le fil suivant.
 - [x] **P3** — le bloc « **construire le système** » : ce que le code fait aujourd'hui, module par
       module, et ce qui manquerait pour que ce soit la couche `W` du jeu. C'est là que S69 disait
       ~5 %, et c'est l'affirmation la plus susceptible d'avoir vieilli.
-- [ ] **P4** — le bloc « **savoir mesurer** » : étages du harnais, cas exécutables, bancs exécutés.
+- [x] **P4** — le bloc « **savoir mesurer** » : étages du harnais, cas exécutables, bancs exécutés.
       S69 disait 2 étages sur 6, 12 cas sur 23 exécutables, 0 banc sur 11 exécuté.
 - [ ] **P5** — les deux lectures recalculées, **et ce que S69 recommandait confronté à ce qui a
       été fait**. Une recommandation vieille de 76 sessions a-t-elle été suivie ? Sinon, pourquoi,

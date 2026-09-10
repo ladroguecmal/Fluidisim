@@ -87,3 +87,37 @@ parcourue jusqu'à l'avant-dernière étape.
 **Pour `δ`**, la phrase de S69 tient : deux solveurs 1D, aucun domaine 2D, et le choix appartient
 à B3.
 **Pour `V`**, elle tient entièrement : zéro ligne.
+
+## 3. Savoir mesurer — le bloc où S69 disait ~35 %
+
+| | S69 | **S145** |
+|---|---|---|
+| Étages du harnais (SPEC-003 §10 en définit 6) | H1, H3 | H1, H3 — **et les pièces de H4** |
+| Cas exécutés par le mode `physics` | 12 | **13**, dont un échec |
+| Bancs exécutés sur 11 définis | **0** | **0** |
+
+**L'échec est le même qu'en S69** : C04, front à ε = 1 mm, 16,2 % d'écart pour 3 % de tolérance.
+Les trois autres grandeurs de C04 passent. C'est un désaccord de définition du front, documenté,
+pas une régression.
+
+**Les pièces de H4 existent sans que l'étage ait été déclaré.** SPEC-003 le définit comme « oracle
+lent 1D/2D, convergence, protocole iso-qualité ». Le harnais contient `oracle.rs` — l'oracle croisé
+de S37, qui confronte `delta.rs` et `shallow.rs` champ à champ — et `rapport_convergence.rs`, et
+C08 mesure la convergence sous raffinement. Ce qui manque est le protocole iso-qualité et le
+2D. **Dire que le harnais a deux étages sur six est donc devenu inexact par défaut** ; dire qu'il
+en a trois serait inexact par excès.
+
+**Le vrai chiffre de ce bloc n'a pas bougé : zéro banc sur onze.** C'est ce que S69 appelait le
+goulot, et soixante-seize sessions plus tard il est intact.
+
+### Ce qui a grandi, et qui n'est pas dans ce tableau
+
+La couche `W` est reçue par **275 essais intégrés** et **73 documents de validation** — dont
+`ENVELOPPE-PRESSION`, `PENTE-REELLE`, `MIGRATION-PENTE`, `TRANSPORT-ETENDU`, `BILAN-CANDIDAT-ETENDU`.
+Aucun de ces reçus ne passe par le harnais.
+
+Ce n'est pas une faute : les essais intégrés vérifient ce qu'un scénario ne peut pas voir — bits
+publiés, atomicité des refus, bornes nommées. Mais cela veut dire que **le dispositif de mesure
+prévu par SPEC-003 n'a pas suivi la couche qui a été écrite**, et que les bancs, qui sont la
+raison d'être des étages H3 à H6, restent hors de portée pour une raison qui n'a rien à voir avec
+`W` : ils demandent des étages qui n'existent pas.
