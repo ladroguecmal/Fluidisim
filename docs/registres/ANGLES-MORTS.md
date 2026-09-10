@@ -1825,3 +1825,14 @@ construit » n'établit pas qu'il est mort (S39). Voir
   deux essais. Trois réparations possibles, aucune tranchée : un type qui porte la pente réelle
   plutôt qu'un `f32` nu, un essai générique que tout champ doit passer, ou une entrée d'invariant.
   À instruire avant qu'un troisième champ existe — après, ce sera un audit.
+
+**Suivi A210 — S143 : traitée par ADR-097, et la pesée a inversé la préférence de départ.** Le
+type porteur — `Medium::max_slope: RealSlope` — paraissait la garde la plus solide : elle tient à
+la compilation, sans rien à inscrire. Elle ne tient pas, parce que **l'hôte doit pouvoir
+construire un `RealSlope`** : le constructeur est public, et un troisième champ écrira
+`RealSlope::new(slope)` pour faire compiler sa comparaison fausse. Une bosse, pas un mur, pour une
+cinquantaine de sites et une API publique changée.
+Retenu : deux gardes exécutables — l'une sur ce que les champs **calculent**, l'autre sur ce que le
+crate **contient** — plus l'**invariant I-18** qui dit ce qu'elles protègent. Les deux ont été
+**vues échouer** sur les fautes qu'elles gardent, dont celle de S141. Voir
+[CONTRAT-PENTE-S143](../validation/CONTRAT-PENTE-S143.md).

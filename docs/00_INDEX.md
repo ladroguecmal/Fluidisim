@@ -6,7 +6,7 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Lire dans cet ordre
 
-1. [`01_INVARIANTS.md`](01_INVARIANTS.md) — les 17 règles non négociables, dont **huit amendées** :
+1. [`01_INVARIANTS.md`](01_INVARIANTS.md) — les 18 règles non négociables, dont **huit amendées** :
    I-11 et I-12 en S13 (ADR-024), I-01, I-02, I-03, I-10, I-13 et I-16 en S14 (ADR-026).
    Cinq minutes.
 2. [`adr/ADR-001`](adr/ADR-001-decomposition-en-couches.md) — la décision qui commande tout le reste.
@@ -16,6 +16,16 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 4. Le reste selon le besoin.
 
 ## Décisions d'architecture
+
+**S143 :** [ADR-097](adr/ADR-097-ce-qui-garde-le-contrat-de-pente.md), ce qui garde le contrat de pente.
+[CONTRAT-PENTE-S143](validation/CONTRAT-PENTE-S143.md) : **A210 traitée**, et la pesée a **inversé** la préférence
+de départ. Le type porteur ne garde rien — l'hôte devant pouvoir construire la valeur, le constructeur est public
+et un futur champ écrira `RealSlope::new(slope)` pour faire compiler sa comparaison fausse : une bosse, pas un
+mur, pour une cinquantaine de sites (**L226**). Retenu : deux gardes exécutables — ce que les champs *calculent*,
+ce que le crate *contient* — **vues échouer** sur la faute de S141 et sur un troisième champ fictif ; plus
+l'**invariant I-18**, le premier depuis S14. Deux essais dupliqués retirés (L137).
+273 tests/cinq ignorés — le même compte qu'à l'entrée.
+97 ADR,211 angles,**18 invariants**,6 spécifications,23 cas. Suite S144 : A208, trois fois reportée.
 
 **S142 :** [ADR-096](adr/ADR-096-les-deux-champs-disent-la-meme-chose-de-max-slope.md), les deux champs disent la
 même chose de `max_slope`. [PENTE-MODALE-S142](validation/PENTE-MODALE-S142.md) : **A209 traitée** — le rapport du

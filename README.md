@@ -17,7 +17,7 @@ CLAUDE.md              renvoi d'une ligne vers AGENTS.md (Claude Code lit ce nom
 REPRISE.md             passation : rôle, état, rituel de fin de session, jeton
 docs/
   00_INDEX.md          point d'entrée, état d'avancement, arbitrages en attente
-  01_INVARIANTS.md     les 17 règles non négociables
+  01_INVARIANTS.md     les 18 règles non négociables
   adr/                 décisions d'architecture, numérotées, jamais réécrites
   specs/               références chiffrées et signatures d'interfaces
   registres/           angles morts, traçabilité des questions sources
@@ -135,7 +135,7 @@ Coût mesuré en S125 : environ ×4 à points identiques et ×9 pour le montage 
 initial. [ADR-085](docs/adr/ADR-085-profils-radiaux-selon-le-domaine.md) conserve N64 par défaut ;
 N128/N256 se dimensionnent explicitement au domaine commun du service. A202 traitée ; A203 suit
 la réception physique à grande portée, réalisée en S126 sur les deux fixtures à âge0–4 s.
-État vérifié S142 : **273 tests réussis, cinq ignorés ; 96 ADR, 211 angles, 17 invariants,
+État vérifié S143 : **273 tests réussis, cinq ignorés ; 97 ADR, 211 angles, 18 invariants,
 6 spécifications, 23 cas canoniques.**
 [Réception S126](docs/validation/RECEPTION-ETENDUE-S126.md) :1350 points-temps reçus contre
 oracle indépendant, erreur normalisée<=4,44e-7. La fenêtre4 s reçoit surtout des queues aux
@@ -206,7 +206,10 @@ se sont déplacés, chacun prédit puis vérifié ; le harnais H1 est inchangé.
 A209 est traitée dès la session suivante (S142) : le champ modal a lui aussi une constante — **1,701591** — et il
 compare désormais la pente réelle. `max_slope` a un seul sens dans le crate, et les **deux** champs placent leur
 champ limite à la cambrure de Stokes. Le champ n'est pas retiré : ADR-059 le conserve exprès.
-Suite : A210 — rien n'oblige un futur champ à mesurer son rapport avant de comparer à `max_slope`, et le contrat
-ne vit que dans deux commentaires et deux essais.
-96 ADR,211 angles,17 invariants,6 spécifications,23 cas.
+A210 est traitée en S143 : deux gardes exécutables — l'une sur ce que les champs calculent, l'autre sur ce que le
+crate contient — et l'**invariant I-18**. La pesée a écarté le type porteur, qui paraissait la garde la plus
+solide : l'hôte devant pouvoir construire la valeur, la garde serait une bosse et non un mur (L226). Les deux
+gardes ont été **vues échouer** sur la faute de S141 avant d'être acceptées.
+Suite : A208, ouverte depuis S140 et trois fois reportée — le refus ne désigne pas l'emprise.
+97 ADR,211 angles,18 invariants,6 spécifications,23 cas.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

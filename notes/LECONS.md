@@ -3456,3 +3456,23 @@ Corollaire pour la rédaction : une dispense doit dire **de quoi elle dépend**,
 qu'elle est accordée. Celle d'ADR-082 le disait — « il n'est plus le chemin actif » — et c'est ce
 qui a permis de constater sa péremption en une lecture. Voir [[L219]] et [[L224]] : un motif écrit
 vaut mieux qu'une conclusion écrite.
+
+## L226 — Une garde structurelle ne vaut que par les portes qu'elle laisse ouvertes
+
+*(S143)* Pour empêcher qu'un futur champ compare une borne L1 à `max_slope`, la voie qui paraissait
+la meilleure était un type : `RealSlope` au lieu d'un `f32` nu, garde à la compilation, rien à
+inscrire, rien à se rappeler.
+
+Elle ne garde rien, et le motif tient en une phrase : **l'hôte doit pouvoir en construire un**,
+puisque c'est lui qui fournit le milieu. Le constructeur est donc public, et l'auteur pressé
+écrira `RealSlope::new(slope)` — trois mots — pour faire compiler sa comparaison fausse. Le type
+ne l'arrête pas ; il lui demande de signer, ce qui n'est pas la même chose.
+
+Généralisable, et pas seulement aux types : **toute garde structurelle qui doit rester ouverte à un
+usage légitime laisse exactement la même porte à l'usage fautif.** Avant de choisir une garde,
+chercher qui a le droit de la contourner — s'il existe un tel acteur, la garde est une convention
+déguisée en contrainte.
+
+Ce qui reste alors : rendre la faute **bruyante** plutôt qu'impossible. Deux gardes exécutables
+l'ont fait ici pour un centième du coût, et l'une d'elles donne même le facteur manquant dans son
+message d'échec. Voir [[L219]] — et se souvenir qu'on ne mesure une garde qu'en la voyant échouer.

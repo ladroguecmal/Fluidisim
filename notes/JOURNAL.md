@@ -7364,3 +7364,58 @@ réelle plutôt qu'un `f32` nu, un essai générique que tout champ doit passer,
 d'invariant. Puis **A208**, ouverte depuis S140 et deux fois reportée — le refus ne désigne pas
 l'emprise. Restent ouverts : l'audit des renvois « traité en Sxx » (S138), l'extension de fenêtre,
 S116-2, le bilan mixte, la durabilité et les deux calibrations de B10.
+
+---
+
+## S143 — 2026-09-10 — Le contrat de pente a un support, et la meilleure garde n'était pas la bonne
+
+**Entrée :** jeton libre à 66c192f, worktree `886155`, master coïncident. **A210**, ouverte par
+S142.
+**Produit :** [ADR-097](../docs/adr/ADR-097-ce-qui-garde-le-contrat-de-pente.md),
+[CONTRAT-PENTE-S143](../docs/validation/CONTRAT-PENTE-S143.md), deux gardes exécutables,
+**l'invariant I-18** — le dix-huitième, et le premier depuis S14 —, L226.
+
+**La pesée a inversé ma préférence, et c'est le résultat de la session.** Le type porteur —
+`Medium::max_slope: RealSlope` — paraissait la garde la plus solide : compilation, rien à
+inscrire. Elle ne garde rien, pour une raison qui tient en une phrase : **l'hôte doit pouvoir en
+construire un**, donc le constructeur est public, donc un troisième champ écrira
+`RealSlope::new(slope)` pour faire compiler sa comparaison fausse. Une bosse, pas un mur — et le
+coût, mesuré et non estimé, était d'une cinquantaine de sites et d'une API publique changée.
+**L226** : toute garde structurelle qui doit rester ouverte à un usage légitime laisse la même
+porte à l'usage fautif ; chercher qui a le droit de la contourner **avant** de la choisir.
+
+**Ce qui est retenu : rendre la faute bruyante plutôt qu'impossible.** Deux gardes, qui n'attrapent
+pas la même chose.
+- `every_field_places_its_limit_at_stokes_steepness_s143` — ce que les champs **calculent**. Le
+  même essai bout à bout pour chacun, écrit **une fois** ; les deux essais que S141 et S142
+  avaient écrits chacun de leur côté sont retirés, 86 lignes, contenu intégralement repris (L137).
+- `no_undeclared_comparison_to_max_slope_s143` — ce que le crate **contient**. Elle lit les
+  sources et recense les comparaisons à `max_slope`. Elle ne juge aucun calcul : elle constate un
+  site, et attrape donc ce qu'A210 décrit vraiment — une implémentation de plus qui ignore le
+  contrat.
+
+**Les deux ont été vues échouer, et c'est la moitié qui compte.** La faute de S141 réintroduite :
+le recensement donne la ligne exacte, l'essai donne `pente = 0,263716` contre 0,448799 — soit
+**le facteur 1,701591 manquant, nommé dans le message**. Un troisième champ fictif, dans un
+fichier que rien ne déclare : attrapé avant même d'être branché.
+
+**I-18** dit *pourquoi* les gardes existent, ce qu'aucun code n'exprime — et son énoncé porte sa
+propre limite : `I-14` a tenu soixante sessions parce qu'un essai le vérifiait, pas parce qu'il
+était écrit.
+
+**Un manquement, attrapé par le compte de tests.** Le livrable annonçait que les deux essais
+spécifiques étaient « remplacés » alors qu'ils étaient toujours là — 275 tests au lieu de 273.
+Corrigé dans la foulée, mais c'est **L55** dans sa forme la plus pure : une annonce en prose est
+une intention, pas une tâche. Le décompte l'a dit ; la prose ne l'aurait jamais dit.
+
+273 tests, cinq ignorés — **le même compte qu'à l'entrée** : deux essais retirés, deux gardes
+ajoutées. Aucun code de calcul modifié, aucun hachage touché, harnais H1 inchangé.
+97 ADR, 211 angles, **18 invariants**, 6 spécifications, 23 cas. Invariants relus : aucun invalidé,
+un ajouté.
+
+**Suite S144 : A208**, ouverte depuis S140 et **trois fois reportée** — le refus rendu quand
+l'emprise consomme le budget désigne la pente, c'est-à-dire la seule chose que l'hôte n'a pas à
+changer, alors qu'ADR-082 exige qu'un nom de refus désigne ce qu'il faut revoir. Trois reports
+valent avertissement (L55) : la prendre avant toute autre. Restent ouverts : l'audit des renvois
+« traité en Sxx » (S138), l'extension de fenêtre, S116-2, le bilan mixte, la durabilité et les
+deux calibrations de B10.

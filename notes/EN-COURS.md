@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S143 — en cours
+Session : S143 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : **A210**. Le crate porte deux constantes homonymes qui ne se déduisent pas l'une de
 l'autre, et le contrat « ce qui est comparé à `max_slope` est une pente réelle » ne vit que dans
@@ -79,7 +79,7 @@ pendant soixante sessions. Défaut de **dispositif**, pas de calcul.
       copie de travail jetable et constater l'échec. Une garde qu'on n'a pas vue échouer ne
       garde rien — c'est la moitié qu'ADR-082 vérifie pour chaque nom de refus.
 - [x] **P5** — ADR et livrable ; porter l'invariant s'il y en a un.
-- [ ] **P6** — rituel de fin (§6), jeton rendu, fusion `--ff-only`.
+- [x] **P6** — rituel de fin (§6), jeton rendu, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -103,3 +103,23 @@ l'oublie ».
 Second piège : un trait commun inventé pour l'occasion, que rien d'autre n'utilise, est une
 surface publique sans lecteur — exactement ce qu'ADR-082 refuse. S'il n'a qu'un usage, l'écrire
 côté essais plutôt que côté bibliothèque.
+
+P2-P5 : pesée écrite avant d'écrire du code, deux gardes, vérification par réintroduction des
+fautes, retrait des deux essais dupliqués, ADR-097, invariant I-18, CONTRAT-PENTE-S143, L226.
+273 tests/cinq ignorés — le même compte qu'à l'entrée.
+
+Ce que la pesée a retourné, et qui vaut pour la prochaine fois : **le type porteur ne garde rien**
+dès lors qu'un acteur légitime — ici l'hôte — doit pouvoir construire la valeur. Le constructeur
+public est la porte, et l'auteur pressé la prend. Ne pas y revenir sans un argument neuf.
+
+Manquement de la session, attrapé par le compte de tests et non par la relecture : le livrable
+annonçait « les deux essais spécifiques sont remplacés » alors qu'ils étaient toujours là — 275 au
+lieu de 273. Corrigé en P4b. Vérifier le **décompte** après toute annonce de remplacement.
+
+Pour S144 sans relire : A208 dit que le refus rendu quand l'emprise consomme le budget désigne la
+pente — `Slope` ou `Steepness` — alors que ce que l'hôte peut changer est **l'emprise** publiée
+(ENVELOPPE-PRESSION-S140 §4, facteur ×10,9 mesuré, non borné). ADR-082 exige qu'un nom de refus
+désigne ce qu'il faut revoir ; celui-ci désigne le contraire. Deux réparations évoquées et aucune
+tranchée : nommer le cas (`Footprint`), ou publier le rapport des deux enveloppes pour que
+l'appelant voie sa propre marge. Attention : `bound_pressure::Prepared` retient déjà la borne
+resserrée ; publier aussi la L1 rendrait le rapport calculable sans rien mesurer.

@@ -1317,3 +1317,12 @@ entrée par entrée. Le fil reprend ci-dessous.
   à `max_slope`. Trois réparations possibles — type porteur, essai générique, invariant — aucune
   tranchée. À instruire avant qu'un troisième champ existe.
 - **A208 : ouverte, deux fois reportée.** Le refus ne désigne pas l'emprise.
+
+### S143 — Le contrat de pente a un support
+
+- **A210 : traitée.** [ADR-097](../adr/ADR-097-ce-qui-garde-le-contrat-de-pente.md),
+  [CONTRAT-PENTE-S143](../validation/CONTRAT-PENTE-S143.md). Deux gardes exécutables et
+  l'invariant **I-18**. Le type porteur est écarté avec son motif : l'hôte devant pouvoir
+  construire la valeur, la garde serait une bosse et non un mur.
+- **A208 : ouverte, trois fois reportée.** Le refus ne désigne pas l'emprise, qui est pourtant ce
+  que l'hôte peut changer. **À prendre en S144** — trois reports valent avertissement (L55).

@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 12:50 +02:00
+JETON            : libre
+Battement        : 2026-09-10 12:53 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S143 — A210, donner un support au contrat de pente
-Dernière session : S142 — A209 traitée ;273 tests/cinq ignorés
-Session suivante : à fixer en fin de S143
+Session en cours : aucune
+Dernière session : S143 — A210 traitée, invariant I-18 ;273 tests/cinq ignorés
+Session suivante : S144 — **A208**, trois fois reportée : le refus ne désigne pas l'emprise
 
 **Copie de travail S139 et S140** : worktree `claude/reprise-projet-886155`, refusionné en avance
 rapide dans master à la fin de chacune des deux. Terminer de même :
@@ -169,8 +169,8 @@ pièges déjà payés.
 
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
-docs/01_INVARIANTS.md     ← 17 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 78 décisions d'architecture, numérotées, jamais réécrites
+docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
+docs/adr/                 ← 97 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -189,6 +189,31 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S143 — 2026-09-10 :** [ADR-097](docs/adr/ADR-097-ce-qui-garde-le-contrat-de-pente.md),
+[CONTRAT-PENTE-S143](docs/validation/CONTRAT-PENTE-S143.md). **A210 traitée**, et **la pesée a
+inversé la préférence de départ**. Le type porteur — `Medium::max_slope: RealSlope` — paraissait la
+garde la plus solide : compilation, rien à inscrire. Il ne garde rien, parce que **l'hôte doit
+pouvoir en construire un** : le constructeur est public, et un troisième champ écrira
+`RealSlope::new(slope)` pour faire compiler sa comparaison fausse. Une bosse, pas un mur — pour une
+cinquantaine de sites et une API publique changée (**L226** : chercher qui a le droit de contourner
+une garde **avant** de la choisir).
+**Retenu : rendre la faute bruyante plutôt qu'impossible.** Deux gardes qui n'attrapent pas la même
+chose — `every_field_places_its_limit_at_stokes_steepness_s143` sur ce que les champs *calculent*,
+écrit **une fois** pour tous (les deux essais dupliqués de S141 et S142 sont retirés, L137) ; et
+`no_undeclared_comparison_to_max_slope_s143` sur ce que le crate *contient*, qui recense les
+comparaisons à `max_slope` dans les sources.
+**Les deux ont été vues échouer**, et c'est la moitié qui compte : la faute de S141 réintroduite
+donne `pente =0,263716` contre0,448799, soit **le facteur1,701591 manquant nommé dans le message** ;
+un troisième champ fictif est attrapé avant même d'être branché.
+**Invariant I-18 ajouté** — le premier depuis S14 : *ce qui est comparé à `max_slope` est une pente
+réelle*. Son énoncé porte sa limite : I-14 a tenu soixante sessions parce qu'un essai le vérifiait.
+*Manquement attrapé par le compte de tests : le livrable annonçait un remplacement non fait —275
+tests au lieu de273. Corrigé. C'est L55 dans sa forme la plus pure.*
+273 tests/cinq ignorés, le même compte qu'à l'entrée.97 ADR,211 angles,**18 invariants**,
+6 spécifications,23 cas.
+Suite S144 : **A208**, ouverte depuis S140 et **trois fois reportée** — trois reports valent
+avertissement (L55), la prendre avant toute autre.
 
 **S142 — 2026-09-10 :** [ADR-096](docs/adr/ADR-096-les-deux-champs-disent-la-meme-chose-de-max-slope.md),
 [PENTE-MODALE-S142](docs/validation/PENTE-MODALE-S142.md). **A209 traitée** — le défaut était le
