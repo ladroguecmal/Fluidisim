@@ -66,7 +66,7 @@ Objectif : S148-1, transporter la recette spectrale et recevoir le cycle hôte B
 
 - [x] **P1** — état réel, jeton et plan committé seul.
 - [x] **P2** — codec versionné borné, contrat ADR et tests de refus/recuisson.
-- [ ] **P3** — cycle hôte spectral sauvegardé/restauré, comparaison directe et coût local.
+- [x] **P3** — cycle hôte spectral sauvegardé/restauré, comparaison directe et coût local.
 - [ ] **P4** — vérifications complètes et rituel de fin : rapport, journal, registres, index et jeton rendu.
 
 ### Notes de reprise
@@ -74,3 +74,4 @@ Objectif : S148-1, transporter la recette spectrale et recevoir le cycle hôte B
 Départ master e4a8de9, copies historiques propres et en retard. S148 : 282 tests/cinq ignorés.
 A212 partielle. WLIV ne contient pas B ; la recette, son ancre et le contexte doivent accompagner le snapshot.
 La recommandation du dernier bilan (W4 puis B2) reste la suite après ce cycle.
+P3 : cycle reçu debug/release, hashes identiques ; mesures dans CYCLE-SPECTRAL-S149. Suite complète en cours.
