@@ -58,29 +58,24 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S153 — terminée
+Session : S154 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S152-1, recevoir énergie intérieure et transport hors80m à60s.
+Objectif : S153-1, bilan60s sur sources2/3/5/6m, sans confondre collecte et domaine hôte.
 
 ### Plan
 
-- [x] **P1** — état réel, lecture S127/S129, jeton et plan seul.
-- [x] **P2** — oracle énergétique indépendant pour source4m, disques80/120m, temps0/60s ; raffinement spatial et spectral.
-- [x] **P3** — observable énergétique depuis les coefficients N512 ; réception contre oracle et contre-épreuves.
-- [x] **P4** — tests, rapport et rituel de fin ; poursuite B2 et jeton rendu.
+- [x] **P1** — état réel, protocole, jeton et plan seul.
+- [ ] **P2** — oracle indépendant sur quatre longueurs, rayons88/112/136/152m ; raffinement séparé.
+- [ ] **P3** — réception coefficients N512 et profils N256 sur80m ; énergie, anneaux et contre-épreuves.
+- [ ] **P4** — suite de tests, rapport et rituel ; verdict B2 daté et jeton rendu.
 
 ### Notes de reprise
 
-Départ masterc7475a4, copies historiques propres.293 tests/cinq ignorés,105 ADR.
-Source4m/0,01J, profondeur20m, N512 ; étendre le disque de mesure à120m pour observer
-l'énergie sortie de80m. Ne pas identifier E0-E80 à une dissipation. Fenêtre60s.
-Oracle S127 : densité totale avec termes croisés intégrés sur z<0. Simpson480/960
-sur120m ; spectral256/512, angulaire1024/2048 sur points sentinelles.
-Seuils annoncés : écarts oracle spectral et candidat<=1e-4 E0 ; raffinement spatial<=0,002 E0,
-fermeture disque120 à0,003 E0 (réception de troncature, pas preuve sur plan infini).
-Première fixture seulement, pas de généralisation aux cinq longueurs S152.
-P2 : oracle60s E80/E0=0,964843720099 ; E120/E0=0,999999680964 ; anneau=0,035155960865. Initial1,000060620645/1,000060621813. Raffinement reçu. Généralisation privée de Measurement et test candidat déjà préparés pour P3, non committés.
-
-P3 : candidat512 E80(60)/E0=0,964843755487 ; E120=0,999999791824 ; oracle reçu et contre-épreuves actives. Rapport ENERGIE-B2-S153, aucun code de production modifié.
-
-P4 :294 tests/cinq ignorés (201+93), zéro échec ; quatre avertissements préexistants.105 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas, deux bancs partiels. Rituel exécuté ; jeton rendu.
+Départ master3264ec7, copies historiques propres.294 tests/cinq ignorés,105 ADR.
+Mêmes E0=0,01J,g9,81,rho1025,h20m. Durées0/60s. Rayons collecteurs2→88,3→112,
+5→136,6→152m : au-delà de cg_max*60s, garde N512 à vérifier sans le changer.
+Pas radial0,0625m pour2/3m,0,125m pour5/6m ; Simpson avec pas doublé indépendant.
+Oracle spectral256/512, directions1024/2048 sentinelles. Seuils S153 inchangés :
+écart spectral/candidat<=1e-4 E0, spatial<=0,002 E0, fermeture<=0,003 E0.
+N512 sur collecte élargie ; N2565/6 évalué sur80m seulement si le garde refuse plus loin.
+Aucun changement de production prévu ; ne pas transposer un profil80m au collecteur.
