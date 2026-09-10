@@ -18,12 +18,16 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-10 04:25 +02:00
+JETON            : occupé
+Battement        : 2026-09-10 03:22 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S140 — le facteur de conservatisme de la pression (A206)
 Dernière session : S139 — la limite de pente se dérive ;270 tests/cinq ignorés
-Session suivante : S140 — mesurer le facteur de conservatisme de la pression (A206), préalable à S139-1
+Session suivante : à fixer en fin de S140
+
+*Les battements de S139 — de 03:05 à 04:25 — étaient **estimés et non relevés** : l'heure réelle
+à la fin de S139 était 03:20. Même défaut qu'en S118, signalé plus bas et refait quand même.
+Corrigé ici, et porté en leçon : un battement se relève, jamais ne s'écrit de mémoire.*
 
 **Copie de travail S139** : worktree `claude/reprise-projet-886155`, ouvert sur 041dfed = master.
 Terminer par `git -C <racine> merge --ff-only claude/reprise-projet-886155`. Deux autres

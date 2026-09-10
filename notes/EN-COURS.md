@@ -58,65 +58,44 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S139 — terminée
+Session : S140 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : S138-1 — `max_slope` vaut 0,1 partout depuis S77 sans provenance (A205), et décide
-de l'admissibilité de tout champ. Mesurer le rapport entre `slope_bound` — la borne L1
-`Σ|a_k|·k·dk·k` calculée dans `RadialImpact::new` — et la **pente réelle** maximale du champ,
-échantillonnée par `sample().slope`. Si ce rapport est stable, `max_slope` se dérive de la
-cambrure de Stokes (SPEC-001 §4) au lieu de rester un nombre sans origine.
+Objectif : A206 — mesurer le facteur de conservatisme de `slope_envelope`
+(`spectral_pressure.rs:346`, `Σ(|kx|+|ky|)·(|Re η|+|Im η|)`) contre la pente réelle du champ de
+pression. C'est le préalable à S139-1 : tant que ce facteur est inconnu, le budget de pente
+reste hétérogène et aucun seuil ne s'y dérive (ADR-094, L220).
 
 ### Plan
 
 - [x] **P1** — état réel, jeton, **plan déclaré et committé seul**.
-- [x] **P2** — sonde `pente_reelle` : rapport `slope_bound / max|slope|` sur le disque et sur
-      l'âge, pour un cas. Établir d'abord **où** le maximum se trouve — centre, premier anneau,
-      instant initial — avant de balayer quoi que ce soit.
-- [x] **P3** — balayer λ, énergie, N et rayon du domaine. Le rapport est-il une constante du
-      modèle, ou dépend-il d'un paramètre ? C'est la question qui décide de tout le reste.
-- [x] **P4** — si le rapport est stable : dériver `max_slope` de `πH/λ ≈ 0,449` divisé par lui,
-      et **vérifier la conséquence** — quelles énergies deviennent admissibles ou refusées à
-      0,1 contre la valeur dérivée. Sinon : dire de quoi il dépend, et ce que cela coûte.
-- [x] **P5** — ADR : d'où vient `max_slope`. Livrable de mesure dans `docs/validation/`.
-      Notes correctives datées là où 0,1 est cité comme une donnée du milieu.
-- [x] **P6** — rituel de fin (§6), jeton rendu, fusion `--ff-only`.
+- [ ] **P2** — monter le champ de pression minimal et échantillonner sa pente réelle. Cas à
+      **une seule case**, où le facteur doit valoir *exactement* le produit des deux
+      majorations connues — c'est le témoin qui dit que la sonde mesure ce qu'elle croit.
+- [ ] **P3** — balayer ce dont le facteur dépend : direction de `k`, phase de `η`, nombre de
+      cases, taille de l'emprise. Est-il borné, ou l'emprise peut-elle le faire diverger ?
+- [ ] **P4** — la borne resserrée `Σ|k_w|·|η|` (norme euclidienne au lieu des deux sommes de
+      valeurs absolues) : même coût, majorant rigoureux. Mesurer ce qu'elle récupère, et
+      **vérifier qu'elle majore toujours** — c'est une propriété de sûreté, pas de finesse.
+- [ ] **P5** — décision et livrable : ce que A206 impose à S139-1.
+- [ ] **P6** — rituel de fin (§6), jeton rendu, fusion `--ff-only`.
 
 ### Notes de reprise
 
-Départ 041dfed = master ; worktree `886155`. Tests au départ : 269, cinq ignorés (176+93).
+Départ 57504f0 = master ; worktree `886155`. 270 tests/cinq ignorés.
 
-Ce qui est déjà connu et n'est pas à remesurer :
-- `slope_bound` est une borne **L1**, construite avec `|J1| ≤ 1` (commentaire de
-  `radial_impact.rs:170`, « borne conservative »). Le maximum réel de `J1` vaut 0,5819 en
-  x ≈ 1,841 : le rapport ne peut donc pas descendre sous 1,72, et les phases temporelles
-  `cos(ω_k t)` comme les zéros de `J1(k r)` l'écartent encore.
-- la forme initiale est **exactement** homothétique en λ (S136, écart nul de 0,5 à 32 m) ;
-  si le rapport dépend de λ, ce ne peut être que par la discrétisation ou la portée de Bessel,
-  pas par la physique.
-- `slope_bound ∝ √E` (S136) : le rapport devrait être **indépendant de l'énergie**. Le vérifier
-  quand même — c'est justement ce genre de « devrait » que S136 a pris en défaut sur `α`.
+Ce qui est établi et n'est pas à remesurer :
+- `slope[i] = -Σ weighted_k[i]·(η_re·sin φ_i + η_im·cos φ_i)`, `φ` dépendant du point
+  (`spectral_pressure.rs`, `Slot::accumulate`) ; l'enveloppe somme
+  `(|kx_w|+|ky_w|)·(|η_re|+|η_im|)`.
+- les deux majorations sont indépendantes et chacune vaut 1 à √2 : `|kx|+|ky| ≥ |k|` selon la
+  direction, `|Re|+|Im| ≥ |η|` selon la phase. Produit dans [1 ; 2] **pour une seule case**.
+- contrairement à `ρ = 1,7950713` (S139), qui est fixé par une forme spectrale figée, ce
+  facteur dépend de ce que l'appelant publie : c'est la thèse à confirmer ou à réfuter.
 
-Piège à éviter : conclure « la pente réelle vaut ρ fois moins » depuis un échantillonnage trop
-grossier. Le maximum d'une somme de 64 Bessel oscille ; sous-échantillonner **sous-estime** le
-maximum et **surestime** le rapport, donc rend `max_slope` trop permissif. Raffiner jusqu'à
-stabilité, et le dire.
+Thèse de travail, à vérifier et non à supposer : le conservatisme se **décompose** en un facteur
+de forme (L1 contre euclidien, borné par 2, éliminable sans coût) et un facteur de phase (les
+phases ne s'alignent pas toutes sur une emprise bornée, non éliminable). Si c'est vrai, S139-1 a
+une voie : resserrer la borne au lieu de chercher un facteur par couche.
 
-P2-P5 : sonde `pente_reelle` (9 sections), `slope_max()` + test, ADR-094,
-PENTE-REELLE-S139, trois notes correctives (ADR-058, ADR-062, ADR-081). 270 tests/cinq ignorés.
-
-Ce que la session a trouvé et qui n'était pas dans le plan : **le budget de pente d'ADR-080
-additionne trois grandeurs de natures différentes** (pente exacte du fond, borne L1 d'impact de
-facteur 1,795, enveloppe L1 de pression de facteur inconnu). C'est la raison pour laquelle
-`max_slope` n'avait pas de provenance — il n'y en avait pas à trouver. L220.
-
-Pour S140 sans relire : A206 mesure le facteur de `slope_envelope`
-(`spectral_pressure.rs:346`, `Σ(|kx|+|ky|)(|Re η|+|Im η|)`) contre la pente réelle échantillonnée
-d'un champ de pression, sur les fixtures de `bound_pressure`. Méthode : la sonde `pente_reelle`
-fait exactement ce balayage pour l'impact radial et se transpose. Attendu : un facteur **non
-constant** — 1 à √2 sur `|k|` selon la direction, 1 à √2 sur `|η|` selon la phase, davantage à
-plusieurs cases. Si c'est confirmé, S139-1 ne peut pas se contenter d'un facteur par couche :
-il faudra que la pression publie sa pente réelle échantillonnée, pas un quotient.
-
-Impasse à ne pas réexplorer : chercher le seuil « juste » sans toucher au budget. Il n'existe pas,
-et la démonstration est au §5 du livrable — le même nombre autorise 1,8 fois la limite de
-déferlement au fond B s'il rend justice aux impacts.
+Piège à éviter : conclure d'un balayage 2D trop grossier que le maximum est plus bas qu'il ne
+l'est — même piège qu'en S139, et il rend la borne trop permissive dans le sens dangereux.
