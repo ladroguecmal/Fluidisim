@@ -65,7 +65,7 @@ Objectif : S163-1/A219, recevoir la clôture temporelle du résidu sur un fond a
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan committé seul.
-- [ ] **P2** — dériver les sources aux étages RK2 et déclarer le protocole avant mesure ;
+- [x] **P2** — dériver les sources aux étages RK2 et déclarer le protocole avant mesure ;
       synchroniser les copies propres au jeton occupé.
 - [ ] **P3** — implémenter le fond prescrit dans le véhicule S163, comparer incréments discrets,
       dérivées continues et source temporelle omise ; raffinement et témoins nuls.
@@ -82,3 +82,5 @@ plus exemples S162 et S163. Aucun worktree créé. BILAN-S145 porté par la pour
 Instrument : fond Q réévalué aux temps RK, résidu seul intégré. Ne pas reconstruire le résidu
 par soustraction d'une référence avancée ; seules les différences du fond prescrit sont permises.
 Une dérivée continue peut converger sans reproduire exactement la référence au pas donné.
+P2 : FOND-PRESCRIT-S164 déclare incréments RK2, dérivées continues et omission.
+Fond onde debout linéaire, même état total initial gaussien, seuil S163 conservé.
