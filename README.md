@@ -61,7 +61,7 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S134 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S135 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
@@ -173,6 +173,11 @@ La condition d'exactitude incrémentale a été pesée et **conservée** : sur l
 des segments ne déplace le champ que de5,6e-7 à7,1e-6 — du bruit d'arrondi — tandis que s'en affranchir
 rendrait toutes les références depuis S113 non reproductibles. Elle devient une contrainte d'usage écrite :
 des identifiants croissants donnent le chemin rapide, sinon le même champ plus lentement (ADR-090, S134).
-Suite : la transaction mixte, seule pièce que la couche pression laisse encore ouverte, S134-1.
-90 ADR,204 angles,17 invariants,6 spécifications,23 cas.
+La « transaction mixte » n'était pas ce qui manquait : les emprunts interdisent déjà d'admettre pendant une
+requête, chaque couche est transactionnelle, et la cause est commune aux deux journaux. Ce que personne n'avait
+constaté, c'est qu'**aucune admission n'est annulable** — ce qui rend un coordinateur irréalisable. L'admissibilité
+s'annonce donc des deux côtés, et l'hôte vérifie avant de modifier quoi que ce soit (ADR-091, S135).
+Suite : le générateur physique d'ADR-055, sans lequel longueur d'onde et énergie restent des nombres que personne
+ne sait produire, S135-1.
+91 ADR,204 angles,17 invariants,6 spécifications,23 cas.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

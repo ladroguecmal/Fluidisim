@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 02:17 +02:00
+JETON            : libre
+Battement        : 2026-09-10 02:25 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S135 — transaction mixte (S134-1)
-Dernière session : S134 — condition d'ordre pesée et conservée ;264 tests/cinq ignorés
-Session suivante : à fixer en fin de S135
+Session en cours : aucune
+Dernière session : S135 — admissibilité annoncée entre couches ;266 tests/cinq ignorés
+Session suivante : S136 — générateur physique d'ADR-055 (S135-1, A200)
 
 **Copie de travail S130** : worktree `claude/reprise-projet-2d3506`, remis en avance rapide sur
 master (e817d0e) au démarrage — il était resté à 52e80a5 et n'avait rien d'unique, donc aucun
@@ -180,6 +180,28 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S135 — 2026-09-10 :** [ADR-091](docs/adr/ADR-091-admissibilite-annoncee-entre-couches.md),
+[ADMISSIBILITE-S135](docs/validation/ADMISSIBILITE-S135.md). S134-1 réalisée après recadrage.
+**La « transaction mixte » n'était pas ce qui manquait** : les emprunts interdisent déjà
+d'admettre pendant une requête (le compilateur, pas une convention), chaque couche a son
+admission transactionnelle — `Controller` et `LiveWater` — et la cause est **déjà commune** aux
+deux journaux.
+**Ce que personne n'avait constaté** : `reject` sur une cause confirmée rend `Conflict`, et
+aucune source de pression publiée n'est retirable. **Aucune admission n'est annulable**, ce qui
+rend un coordinateur irréalisable — première admission réussie, seconde refusée, aucun retour.
+Donc : `would_admit` et `would_confirm` annoncent ce que l'admission déciderait, sans rien
+changer ; l'hôte vérifie les deux couches avant d'en modifier une. Une seule implémentation,
+pour la troisième fois après ADR-079 et ADR-080. Reste comme risque l'échec **numérique** de la
+seconde admission — réduit et nommé, pas supprimé.
+Annonce comparée au verdict sur cinq cas, stabilité et absence d'effet de bord vérifiées ;
+scénario inter-couches joué, refus d'un côté et **rien n'a bougé nulle part**.
+266 tests/cinq ignorés ; hachages de campagne identiques à S118.
+91 ADR,204 angles,17 invariants,6 spécifications,23 cas.
+Suite S136 : S135-1 — la mécanique de la couche pression est complète ; ce qui reste tient au
+**contenu**. Le générateur physique d'ADR-055, cité comme manquant par S123, S132 et S135, sans
+lequel `wavelength_m` et `energy_j` restent des nombres que personne ne sait produire (**A200**,
+sévérité 1). Extension de fenêtre, S116-2, bilan mixte, durabilité et calibration B2 ouverts.
 
 **S134 — 2026-09-10 :** [ADR-090](docs/adr/ADR-090-la-condition-d-ordre-reste-et-s-ecrit.md),
 [ORDRE-S134](docs/validation/ORDRE-S134.md). S133-1 réalisée **en refusant de construire**.

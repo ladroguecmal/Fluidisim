@@ -48,7 +48,13 @@ impl<'p, 's> Journal<'p, 's> {
         Ok(self.published())
     }
     /// Précondition : provenance authentifiée par l'hôte. Ce nom n'authentifie aucun octet.
-    pub fn admit_authenticated(&mut self, source: Source<'s>) -> Result<Change, Error> {
+    /// ADR-091 : ce que `admit_authenticated` déciderait, sans rien changer. `Full` y signifie
+    /// que l'admission saturerait — mais **la source n'est pas mise en attente**, puisque rien
+    /// n'est modifié. C'est l'unique différence de comportement, et elle est voulue.
+    ///
+    /// Une seule implémentation : `admit_authenticated` appelle ceci et n'insère qu'ensuite.
+    /// Deux implémentations du même contrôle divergent (L137).
+    pub fn would_admit(&self, source: &Source<'s>) -> Result<Change, Error> {
         let m = source.metadata();
         if m.epoch != self.epoch {
             return Err(Error::Epoch);
@@ -56,7 +62,7 @@ impl<'p, 's> Journal<'p, 's> {
         for old in self.published() {
             let o = old.metadata();
             if o.id == m.id || o.cause == m.cause {
-                return if old.same_content(&source) {
+                return if old.same_content(source) {
                     Ok(Change::Unchanged)
                 } else {
                     Err(Error::Conflict)
@@ -64,7 +70,7 @@ impl<'p, 's> Journal<'p, 's> {
             }
         }
         if let Some(pending) = self.pending {
-            if !pending.same_content(&source) {
+            if !pending.same_content(source) {
                 let p = pending.metadata();
                 return Err(if p.id == m.id || p.cause == m.cause {
                     Error::Conflict
@@ -74,8 +80,21 @@ impl<'p, 's> Journal<'p, 's> {
             }
         }
         if self.count == self.slots.len() {
-            self.pending = Some(source);
             return Err(Error::Full);
+        }
+        Ok(Change::Added)
+    }
+    pub fn admit_authenticated(&mut self, source: Source<'s>) -> Result<Change, Error> {
+        let m = source.metadata();
+        match self.would_admit(&source) {
+            Ok(Change::Unchanged) => return Ok(Change::Unchanged),
+            Ok(Change::Added) => {}
+            // Saturation : ici, et ici seulement, la source est conservée en attente.
+            Err(Error::Full) => {
+                self.pending = Some(source);
+                return Err(Error::Full);
+            }
+            Err(e) => return Err(e),
         }
         // Ordre canonique d'identifiant ; ce n'est pas un ordre de séquence serveur.
         // Même calcul que `insertion_index`, dont le retour en arrière d'ADR-086 dépend.

@@ -803,3 +803,117 @@ fn slope_floor_refuses_every_batch_below_it() {
         .unwrap();
     })
 }
+/// S135, ADR-091 : le scénario que la décision rend possible. Un même événement de jeu produit
+/// deux effets — un impact et une source de pression — portant **la même cause**. Aucune
+/// admission n'étant annulable, l'hôte interroge les deux couches avant d'en modifier une.
+#[test]
+fn a_shared_cause_is_checked_on_both_layers_before_either_is_touched() {
+    use crate::pressure_source::{Metadata, Source};
+    use crate::wave_journal::Change as WChange;
+    let cause = Cause {
+        entity: 42,
+        command: 7,
+        emission: 0,
+    };
+    // Côté impacts : le journal W, avec une place libre.
+    let evenement = WaveEvent::impact(Impact {
+        id: 9,
+        frame: FrameId(7),
+        cell: 9,
+        birth: SimTime(0),
+        ttl_us: 4_000_000,
+        position: [1.0, 0.0, 0.0],
+        energy_j: 0.01,
+        wavelength_m: 4.0,
+        direction_turns: 0.0,
+        anisotropy: 0.0,
+        displaced_l: 0.0,
+        material: 0,
+        origin: Origin::Server,
+        above_surface: true,
+    })
+    .unwrap();
+    let mut records = [None; 2];
+    let mut w = Journal::new(0, &mut records);
+
+    // Côté pression : un journal **plein**, pour que la seconde admission refuse.
+    let recipe = Recipe {
+        sigma: 1.0,
+        cutoff: 6.0,
+        radial: 16,
+        angular: 24,
+    };
+    let settings = bound_pressure::Settings {
+        frame: FrameId(7),
+        cell: 9,
+        gravity: 9.81,
+        density: 1025.0,
+        min: [-8.0; 2],
+        max: [12.0; 2],
+        start: SimTime(0),
+        end: SimTime(8_000_000),
+    };
+    let a = Segment {
+        birth: SimTime(0),
+        duration_us: 2_000_000,
+        origin: [0.0; 2],
+        velocity: [2.0, 0.0],
+        pressure_pa: 10.0,
+    };
+    let chemin = [a];
+    let occupant = Source::new(
+        Metadata {
+            epoch: 0,
+            id: 0,
+            cause: Cause {
+                entity: 1,
+                command: 1,
+                emission: 0,
+            },
+            settings,
+            recipe,
+        },
+        &chemin,
+    )
+    .unwrap();
+    let notre_pression = Source::new(
+        Metadata {
+            epoch: 0,
+            id: 1,
+            cause,
+            settings,
+            recipe,
+        },
+        &chemin,
+    )
+    .unwrap();
+    let mut ps = [None; 1];
+    let mut pj = pressure_journal::Journal::new(0, &mut ps);
+    pj.admit_authenticated(occupant).unwrap();
+
+    // L'hôte interroge les deux couches **avant** de toucher à l'une d'elles.
+    assert_eq!(w.would_confirm(0, cause, evenement), Ok(WChange::Added));
+    assert_eq!(
+        pj.would_admit(&notre_pression),
+        Err(crate::pressure_journal::Error::Full)
+    );
+    // La pression refuserait : il n'admet donc rien, et **rien n'a bougé nulle part**.
+    assert_eq!(w.records().count(), 0);
+    assert_eq!(pj.published().count(), 1);
+    assert!(pj.pending().is_none());
+
+    // Avec un journal de pression qui a de la place, les deux annonces passent, et les deux
+    // admissions aussi. La cause est alors portée par les deux couches.
+    let mut ps = [None; 2];
+    let mut pj = pressure_journal::Journal::new(0, &mut ps);
+    pj.admit_authenticated(occupant).unwrap();
+    assert_eq!(w.would_confirm(0, cause, evenement), Ok(WChange::Added));
+    assert_eq!(
+        pj.would_admit(&notre_pression),
+        Ok(crate::pressure_journal::Change::Added)
+    );
+    w.confirm(0, cause, evenement).unwrap();
+    pj.admit_authenticated(notre_pression).unwrap();
+    assert!(w.records().any(|r| r.cause == cause));
+    assert!(pj.published().any(|s| s.metadata().cause == cause));
+}

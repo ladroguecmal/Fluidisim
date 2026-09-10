@@ -1067,3 +1067,47 @@ fn order_of_segments_stays_within_rounding() {
         }
     }
 }
+/// S135, ADR-091 : l'annonce d'admissibilité dit exactement ce que l'admission ferait. Vérifié
+/// sur chaque cause de refus, et dans les deux sens — une annonce seulement prudente passerait
+/// un test de sûreté et serait inutile pour décider d'admettre.
+#[test]
+fn would_admit_says_exactly_what_admission_would_do() {
+    let p = paths();
+    let premiere = Source::new(meta(1), &p[0]).unwrap();
+    let seconde = Source::new(meta(2), &p[1]).unwrap();
+    let conflit = Source::new(meta(2), &p[0]).unwrap();
+    let mut ailleurs = meta(3);
+    ailleurs.epoch = 2;
+    let autre_epoque = Source::new(ailleurs, &p[0]).unwrap();
+    let troisieme = Source::new(meta(3), &p[0]).unwrap();
+
+    // Deux places : la troisième source saturera.
+    let mut entries = [None; 2];
+    let mut j = Journal::new(1, &mut entries);
+    let cas: [(&str, Source<'_>); 5] = [
+        ("premiere", premiere),
+        ("reprise identique", premiere),
+        ("seconde", seconde),
+        ("conflit d'identite", conflit),
+        ("epoque etrangere", autre_epoque),
+    ];
+    for (nom, source) in cas {
+        let annonce = j.would_admit(&source);
+        // L'annonce ne change rien : deux appels de suite disent la même chose.
+        assert_eq!(annonce, j.would_admit(&source), "{nom} : annonce instable");
+        let publiees_avant = j.published().count();
+        let verdict = j.admit_authenticated(source);
+        assert_eq!(annonce, verdict, "{nom} : annonce et verdict divergent");
+        // Et l'annonce n'avait rien admis d'elle-même.
+        let attendu = publiees_avant + usize::from(verdict == Ok(crate::pressure_journal::Change::Added));
+        assert_eq!(j.published().count(), attendu, "{nom}");
+    }
+    // Saturation : l'annonce la voit, et — seule différence voulue — ne met rien en attente.
+    assert_eq!(j.would_admit(&troisieme), Err(crate::pressure_journal::Error::Full));
+    assert!(j.pending().is_none(), "l'annonce ne doit rien mettre en attente");
+    assert_eq!(
+        j.admit_authenticated(troisieme),
+        Err(crate::pressure_journal::Error::Full)
+    );
+    assert!(j.pending().is_some(), "l'admission, elle, conserve la source");
+}

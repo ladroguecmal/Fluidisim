@@ -6970,3 +6970,42 @@ voulu l'optimisation invisible.
 **Suite S135 :** S134-1 — la couche pression a désormais son cycle complet. Ce qui reste de son
 côté est la **transaction mixte**, qu'ADR-086 avait explicitement laissée de côté : rien ne
 coordonne encore l'admission d'une source avec les autres couches d'un montage.
+
+---
+
+## S135 — 2026-09-10 — Admissibilité annoncée entre couches
+
+**Entrée :** jeton libre à 6f02880, trois copies coïncidentes. S134-1, intitulée « transaction
+mixte ».
+**Produit :** [ADR-091](../docs/adr/ADR-091-admissibilite-annoncee-entre-couches.md),
+[ADMISSIBILITE-S135](../docs/validation/ADMISSIBILITE-S135.md), `would_admit` et
+`would_confirm`.
+**L'inventaire a recadré la question, et c'est l'apport de la session.** Trois pièces sur quatre
+existaient déjà : les emprunts interdisent d'admettre pendant une requête mixte (le compilateur,
+pas une convention) ; chaque couche a son admission transactionnelle — `Controller` et
+`LiveWater` ; et la cause est **déjà commune** aux deux journaux, `wave_journal::Cause` servant
+aussi aux métadonnées des sources de pression.
+**Ce qui manquait n'était pas un coordinateur.** `wave_journal::reject` sur une cause déjà
+confirmée rend `Conflict` — seule une prédiction est retirable — et aucune source de pression
+publiée ne l'est. **Aucune admission n'est annulable**, ce que personne n'avait constaté, et
+c'est ce qui rend la transaction inter-couches irréalisable : première admission réussie, seconde
+refusée, aucun retour en arrière.
+**Décision :** pas de coordinateur — il faudrait rouvrir le retrait ou coupler les couches,
+qu'ADR-086 a refusé pour un motif toujours valable. À la place, l'admissibilité s'annonce des
+deux côtés, et l'hôte vérifie avant de modifier quoi que ce soit. Une seule implémentation, pour
+la troisième fois après ADR-079 et ADR-080 : `admit_authenticated` appelle `would_admit`,
+`confirm` et `insert` appellent `check_confirm` et `would_insert`.
+**Réception :** annonce comparée au verdict sur cinq cas, stabilité vérifiée, absence d'effet de
+bord recomptée. La seule différence voulue est testée — à saturation l'annonce ne met rien en
+attente et ne marque pas la perte connue. Scénario inter-couches joué : refus d'un côté, **rien
+n'a bougé nulle part** ; avec de la place, les deux passent et la cause est portée des deux
+côtés. 173 core + 93 harnais = **266 réussis, cinq ignorés** ; deux tests neufs aussi en release ;
+hachages de campagne identiques à S118.
+**Limites :** l'état partiel reste possible par échec **numérique** de la seconde admission —
+réduit et nommé, pas supprimé. Retrait non ouvert, couches non couplées, « cause complète » non
+définie par le système. L'ordre d'admission ne rattrape rien et n'est donc pas prescrit.
+91 ADR, 204 angles, 17 invariants, 6 spécifications, 23 cas. Invariants relus : aucun invalidé.
+**Suite S136 :** S135-1 — la mécanique de la couche pression est complète. Ce qui reste tient au
+**contenu** : le générateur physique d'ADR-055, cité comme manquant par S123, S132 et S135, sans
+lequel `wavelength_m` et `energy_j` restent des nombres que personne ne sait produire (A200,
+sévérité 1).

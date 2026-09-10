@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S135 — en cours
+Session : S135 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : S134-1 — ADR-086 s'est arrêtée au chemin pression et rien ne coordonne l'admission
 entre couches. Établir **ce qui est déjà garanti** avant de supposer qu'il manque une
@@ -67,14 +67,14 @@ transaction, puis décider de ce qui manque vraiment.
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seul.
-- [ ] **P2** — inventaire, et il commence par une vérification que S134 avait suggérée : les
+- [x] **P2** — inventaire, et il commence par une vérification que S134 avait suggérée : les
       emprunts interdisent-ils déjà le cas problématique ? Puis établir ce que chaque couche
       sait faire, et quel état incohérent reste **observable**.
-- [ ] **P3** — ADR-091 sur ce que l'inventaire aura montré. Refuser de coupler deux couches
-      indépendantes est une issue légitime.
-- [ ] **P4** — construire ce que la décision retient.
-- [ ] **P5** — recevoir.
-- [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
+- [x] **P3** — ADR-091 : pas de coordinateur, l'admissibilité s'annonce. Aucune admission
+      n'étant annulable, c'est le seul moyen d'éviter un état partiel.
+- [x] **P4** — `would_admit` et `would_confirm`, sans duplication des contrôles.
+- [x] **P5** — annonce contre verdict sur cinq cas ; scénario inter-couches joué.
+- [x] **P6** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -101,3 +101,20 @@ permettre de voir qu'une cause est incomplète ne les couple pas.
 Piège à éviter : construire une transaction inter-couches parce que le titre de la suite dit
 « transaction ». ADR-086 a refusé de faire dépendre le contrôleur des impacts pour une raison
 qui vaut toujours — le couplage coûterait plus que ce qu'il résout.
+
+P2-P6 : ADR-091, ADMISSIBILITE-S135, journal, index, README, REPRISE, jeton rendu, ff-only.
+266 tests/cinq ignorés, hachages inchangés. Aucun angle ni leçon nouveaux.
+
+Ce que la session a corrigé en cours de route : j'ai d'abord cru que `reject` permettait
+d'annuler une confirmation, donc qu'une transaction inter-couches était réalisable par l'hôte en
+admettant d'abord la couche annulable. Lecture faite, `insert` rend `Conflict` sur
+`(Confirmed, Rejected)` : **rien n'est annulable**, et c'est ce fait qui commande la décision.
+Vérifier ce qu'une primitive fait vraiment, avant de bâtir un ordre d'opérations dessus.
+
+Pour S136 sans relire : A200 (sévérité 1) est le plus gros manque ouvert du corpus. ADR-055 dit
+« le générateur physique devra établir ce transfert » pour l'énergie ; ADR-083 a posé le contrat
+`λ = α·b` avec α à calibrer. Ce qui manque est ce qui relie un événement de gameplay — un objet
+de taille b entrant à vitesse v — aux deux nombres que l'événement porte. SPEC-001 §5 bis
+(Wagner) donne l'étendue mouillée et la masse ajoutée ; ENVELOPPE-IMPACTS-S123 §4.3 donne le
+plafond d'énergie que le candidat peut porter, soit 1e-6 à 1e-2 de l'énergie de référence. C'est
+une session de conception, pas de code.

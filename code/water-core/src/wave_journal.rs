@@ -88,7 +88,15 @@ impl<'a> Journal<'a> {
         self.insert(cause, State::Predicted(e))
     }
     /// Canal de causes serveur authentifié requis ; aucun événement issu de δ n'est admis.
-    pub fn confirm(&mut self, epoch: u64, cause: Cause, e: WaveEvent) -> Result<Change, Error> {
+    /// ADR-091 : ce que `confirm` déciderait, sans rien changer. Permet à un hôte qui admet
+    /// deux effets d'une même cause de vérifier les deux couches avant d'en modifier une —
+    /// aucune admission n'étant annulable, c'est le seul moyen d'éviter un état partiel.
+    /// Une seule implémentation : `confirm` appelle ceci et n'écrit qu'ensuite.
+    pub fn would_confirm(&self, epoch: u64, cause: Cause, e: WaveEvent) -> Result<Change, Error> {
+        self.check_confirm(epoch, cause, e)?;
+        self.would_insert(cause, State::Confirmed(e)).map(|(_, c)| c)
+    }
+    fn check_confirm(&self, epoch: u64, cause: Cause, e: WaveEvent) -> Result<(), Error> {
         if epoch != self.epoch {
             return Err(Error::Epoch);
         }
@@ -102,6 +110,10 @@ impl<'a> Journal<'a> {
         }) {
             return Err(Error::Conflict);
         }
+        Ok(())
+    }
+    pub fn confirm(&mut self, epoch: u64, cause: Cause, e: WaveEvent) -> Result<Change, Error> {
+        self.check_confirm(epoch, cause, e)?;
         self.insert(cause, State::Confirmed(e))
     }
     /// Rejet définitif d'une cause par le serveur, y compris avant sa prédiction locale.
@@ -111,33 +123,45 @@ impl<'a> Journal<'a> {
         }
         self.insert(cause, State::Rejected)
     }
-    fn insert(&mut self, cause: Cause, state: State) -> Result<Change, Error> {
+    /// ADR-091 : ce qu'`insert` déciderait, sans rien changer — y compris la place libre
+    /// qu'elle prendrait. `Full` y est rendu **sans** marquer la perte connue, puisque rien
+    /// n'est modifié ; c'est l'unique différence, et elle est voulue.
+    fn would_insert(&self, cause: Cause, state: State) -> Result<(usize, Change), Error> {
         let index = self
             .slots
             .iter()
             .position(|s| s.is_some_and(|r| r.cause == cause));
-        let (index, change) = if let Some(i) = index {
+        if let Some(i) = index {
             let old = self.slots[i].unwrap().state;
             if old == state {
-                return Ok(Change::Unchanged);
+                return Ok((i, Change::Unchanged));
             }
             match (old, state) {
                 (State::Confirmed(_) | State::Rejected, State::Predicted(_)) => {
-                    return Ok(Change::Superseded)
+                    Ok((i, Change::Superseded))
                 }
                 (State::Predicted(e), State::Confirmed(_) | State::Rejected) => {
-                    (i, Change::Retract(e))
+                    Ok((i, Change::Retract(e)))
                 }
-                _ => return Err(Error::Conflict),
+                _ => Err(Error::Conflict),
             }
         } else {
-            (
-                self.slots.iter().position(Option::is_none).ok_or_else(|| {
-                    self.loss_known = true;
-                    Error::Full
-                })?,
-                Change::Added,
-            )
+            match self.slots.iter().position(Option::is_none) {
+                Some(i) => Ok((i, Change::Added)),
+                None => Err(Error::Full),
+            }
+        }
+    }
+    fn insert(&mut self, cause: Cause, state: State) -> Result<Change, Error> {
+        let (index, change) = match self.would_insert(cause, state) {
+            Ok((_, Change::Unchanged)) => return Ok(Change::Unchanged),
+            Ok((_, Change::Superseded)) => return Ok(Change::Superseded),
+            Ok(pair) => pair,
+            Err(Error::Full) => {
+                self.loss_known = true;
+                return Err(Error::Full);
+            }
+            Err(e) => return Err(e),
         };
         self.slots[index] = Some(Record { cause, state });
         self.slots.sort_unstable_by_key(|slot| match slot {

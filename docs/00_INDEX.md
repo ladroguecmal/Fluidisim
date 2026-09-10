@@ -17,6 +17,14 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S135 :** [ADR-091](adr/ADR-091-admissibilite-annoncee-entre-couches.md), annoncer l'admissibilité plutôt que
+coordonner. [ADMISSIBILITE-S135](validation/ADMISSIBILITE-S135.md) : la « transaction mixte » n'était pas ce qui
+manquait — les emprunts interdisent déjà d'admettre pendant une requête, chaque couche est transactionnelle et la
+cause est commune. **Mais aucune admission n'est annulable**, ce qui rend le coordinateur irréalisable. D'où
+`would_admit` et `would_confirm` : vérifier les deux couches avant d'en modifier une.
+266 tests/cinq ignorés, hachages inchangés.91 ADR,204 angles,17 invariants,6 spécifications,23 cas.
+Suite S136 : le générateur physique d'ADR-055, S135-1.
+
 **S134 :** [ADR-090](adr/ADR-090-la-condition-d-ordre-reste-et-s-ecrit.md), la condition d'ordre reste et s'écrit.
 [ORDRE-S134](validation/ORDRE-S134.md) : sur les contributions réelles, l'ordre déplace le champ de5,6e-7 à
 7,1e-6 — du bruit d'arrondi, pas un défaut de justesse. Lever la condition par accumulation `f64` rendrait
