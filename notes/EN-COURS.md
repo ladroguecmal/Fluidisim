@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S145 — en cours
+Session : S145 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : **refaire le bilan d'avancement.** Celui de S69 oriente encore `REPRISE.md` §4 — « ~85 %
 comme corpus, ~15 % comme système ; `δ`, `W` et `V` n'existent pas » — et il a **76 sessions**.
@@ -78,7 +78,7 @@ Le refaire à la même méthode, puis en tirer le fil suivant.
 - [x] **P5** — les deux lectures recalculées, **et ce que S69 recommandait confronté à ce qui a
       été fait**. Une recommandation vieille de 76 sessions a-t-elle été suivie ? Sinon, pourquoi,
       et cela vaut-il décision.
-- [ ] **P6** — livrable BILAN-S145, rituel de fin (§6), jeton rendu, fusion `--ff-only`.
+- [x] **P6** — livrable BILAN-S145, rituel de fin (§6), jeton rendu, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -105,3 +105,22 @@ Second piège : conclure « le projet a bien avancé » parce que 76 sessions on
 central de S69 était que **vingt-deux sessions d'affilée n'avaient produit aucune conception du
 système** ; la même question se pose pour les soixante-seize qui suivent, et la réponse peut être
 la même.
+
+P2-P6 : compteurs à la source, inventaire par couche, état du harnais, deux lectures recalculées,
+BILAN-S145, A211, L228, rituel §6.7, six décomptes corrigés. Aucun code modifié, 275 tests.
+
+Les trois résultats, par ordre d'importance :
+1. **B1 n'a jamais été lancé** — recommandé par S69, zéro banc sur onze après 76 sessions ;
+2. **`W` existe** et le repère disait le contraire — 9 768 lignes reçues par 275 essais ;
+3. **A211** : le chaînage « suite Sxxx » propage la proximité, pas l'importance.
+
+Pour S146 sans relire : **lancer B1**, « champ de fond : nombre de composantes et coût
+d'évaluation ». Il ne demande aucune couche manquante — `B` existe (`background.rs`, 587 lignes),
+le harnais mesure, la graine produit des réalisations indépendantes depuis S65. Sa question n'est
+pas le coût mais la **justesse** : A187 a montré qu'à 256 composantes `Hs` s'écarte de 6,6 % par
+un mécanisme de battements, et A188 que la calibration statistique reste à faire. Le protocole est
+dans `docs/validation/PLAN-BENCHMARK.md` §B1.
+
+Piège pour S146 : écrire une sonde de plus au lieu de lancer le banc. C'est ce que le dépôt fait
+depuis 76 sessions, avec d'excellents résultats — mais une sonde mesure le modèle contre lui-même,
+quand B1 mesurerait autre chose que sa propre cohérence.

@@ -7471,3 +7471,59 @@ traitées. Reprendre le **fil du projet** plutôt qu'un angle : le bilan S69 res
 `V` n'existent pas comme couches, et onze bancs sur onze attendent une couche non écrite. L'audit
 des renvois « traité en Sxx » (S138) est le dernier travail de corpus ouvert ; l'extension de
 fenêtre, S116-2, le bilan mixte, la durabilité et les deux calibrations de B10 restent ouverts.
+
+---
+
+## S145 — 2026-09-10 — Le bilan avait 76 sessions, et le goulot n'a pas bougé
+
+**Entrée :** jeton libre à 4c463f9, worktree `886155`, master coïncident. La série pente étant
+close, le fil du projet est redevenu la question — et le repère qui l'oriente, `BILAN-S69`, datait
+de soixante-seize sessions.
+**Produit :** [BILAN-S145](../docs/registres/BILAN-S145.md), A211, L228, un point de plus au rituel
+de fin (`REPRISE.md` §6.7), et six décomptes faux corrigés.
+
+**`W` a cessé de ne pas exister, et aucune session ne l'a dit.** `REPRISE.md` §4 annonçait encore
+« `δ`, `W` et `V` n'existent pas ». Le dépôt contient aujourd'hui, reçu par 275 essais : le contrat
+de production `WaveEvent`, un journal rejouable borné, deux champs propagés dont un candidat radial
+dispersif, un générateur d'impact, une couche de pression complète, la composition B+W, le service
+vivant `LiveWater` avec sauvegarde, restauration et admission incrémentale. **4 573 lignes pour les
+impacts, 5 195 pour les pressions.** C'est la trajectoire d'ADR-054 parcourue jusqu'à
+l'avant-dernière étape. Manquent le **sillage**, jamais commencé, et la **sélection technologique**
+— c'est-à-dire B2.
+
+**Pour `δ` et `V`, la phrase de S69 tient** : deux solveurs 1D et zéro ligne respectivement.
+
+**Le fait central, et il est sévère : B1 n'a jamais été lancé.** S69 le recommandait explicitement
+— aucun banc n'exige de couche manquante, `B` existe, le harnais mesure, et A187 avait montré que
+le nombre de composantes est une question de **justesse** et non de coût. Soixante-seize sessions
+plus tard : **zéro banc exécuté sur onze**, exactement comme en S69, pendant que 7 208 lignes de
+sondes étaient écrites.
+
+**Pourquoi — et c'est A211, sévérité 1.** Le chaînage « suite Sxxx » n'a jamais rompu en 144
+sessions, mais il est **local** : il propage ce que la dernière session a vu, pas ce qu'un bilan a
+conclu. Deux des quatre recommandations de S69 sont restées lettre morte, non par désaccord mais
+parce qu'**aucun canal ne les portait**. **L228** : ce qui n'est pas dans le canal que le suivant
+lit par obligation n'existe pas ; ajouter un registre ne répare rien, puisqu'un registre est
+précisément ce que personne ne relit.
+**Réparation appliquée, à éprouver** : la ligne `Session suivante` du jeton porte la
+recommandation, et le rituel de fin gagne un point — vérifier qu'elle y est, ou qu'elle a été
+écartée **par écrit**. Si B1 n'est toujours pas lancé en S150, la réparation aura échoué.
+
+**Un décompte faux, corrigé, et il vient de mes propres sessions.** `README.md`, `docs/00_INDEX.md`
+et `REPRISE.md` annonçaient **211 angles morts** depuis S142 : il y en avait **210**, de A1 à A210
+sans trou. L'erreur — A210 ajouté à 209 écrit 211 — a traversé trois rituels de fin, dont le point
+5 demande précisément de vérifier les décomptes recopiés. Corrigée aux six occurrences.
+*Et l'ouverture d'A211 par ce bilan rend le chiffre exact à partir d'aujourd'hui.*
+
+**Les deux lectures, recalculées à la méthode de S69** : ~90 % comme corpus (contre ~85 %), **~30 %
+comme système** (contre ~15 %). La progression est réelle et presque entièrement dans `W`.
+Le bloc « savoir mesurer » passe de ~35 % à ~40 % — les pièces de H4 existent sans que l'étage soit
+déclaré — mais son vrai chiffre, zéro banc sur onze, est intact.
+
+275 tests inchangés, aucun code modifié. 98 ADR, **211 angles**, 18 invariants, 6 spécifications,
+23 cas. Invariants relus : aucun invalidé.
+
+**Suite S146 : lancer B1.** C'est la deuxième fois qu'un bilan le recommande ; cette fois la
+recommandation est portée par la ligne `Session suivante`, et l'écarter demandera de l'écrire.
+Restent ouverts : clore S63-1 par écrit, le sillage, l'audit des renvois « traité en Sxx » (S138),
+l'extension de fenêtre, S116-2, le bilan mixte, la durabilité et les deux calibrations de B10.

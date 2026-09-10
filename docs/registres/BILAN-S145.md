@@ -28,6 +28,13 @@ A210 sans trou. L'erreur a été introduite en S142 — A210 ajouté à un total
 puis recopiée par S143 et S144. C'est exactement le défaut que le rituel de fin de session
 (`REPRISE.md` §6, point 5) demande de vérifier, et il a traversé trois rituels.
 
+Les six occurrences fautives sont corrigées à **210** dans `README.md`, `docs/00_INDEX.md` et
+`REPRISE.md`, y compris dans les lignes d'état de S142, S143 et S144 : ce sont des décomptes, pas
+des décisions, et la correction directe leur est due (méthode de S138). *Curiosité de calendrier :
+l'ouverture d'**A211** par ce bilan rend le chiffre 211 exact à partir de S145 — ce qui n'excuse
+rien et rendra la relecture des trois entrées précédentes plus trompeuse encore si on ne la dit
+pas ici.*
+
 *Les sept « trous » apparents de la série des angles — A15, A19, A20, A27, A56, A57, A58 — sont des
 artefacts de motif : ces sept-là vivent dans des tableaux, pas dans la liste à puces. S138 avait
 déjà rencontré exactement ce piège.*

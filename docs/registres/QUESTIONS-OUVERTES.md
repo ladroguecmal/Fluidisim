@@ -1333,3 +1333,13 @@ entrée par entrée. Le fil reprend ci-dessous.
   [REFUS-EMPRISE-S144](../validation/REFUS-EMPRISE-S144.md). Trois causes, trois noms. Les deux
   réparations qu'A208 proposait sont écartées avec leur motif — l'une mentirait, l'autre était
   périmée (**L227**).
+
+### S145 — Le bilan refait
+
+- **BILAN-S145 produit.** `W` existe désormais comme couche instanciable ; `δ` reste 1D, `V` nul ;
+  **zéro banc sur onze exécuté**, inchangé depuis S69.
+- **S145-1 : ouverte, S146. Lancer B1.** Recommandé par S69, jamais fait. Aucune couche manquante,
+  question de justesse ouverte depuis A187. Porté par la ligne `Session suivante` du jeton.
+- **S145-2 : ouverte. Clore S63-1 par écrit** — la dispersion vit dans `W` depuis ADR-060, la
+  question est tranchée en pratique et jamais fermée.
+- **A211 : ouverte, réparation appliquée à éprouver.** Si B1 n'est pas lancé en S150, elle a échoué.

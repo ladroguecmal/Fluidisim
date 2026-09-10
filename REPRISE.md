@@ -18,12 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 13:24 +02:00
+JETON            : libre
+Battement        : 2026-09-10 13:26 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S145 — refaire le bilan, qui a 76 sessions
-Dernière session : S144 — A208 traitée ;275 tests/cinq ignorés
-Session suivante : à fixer en fin de S145
+Session en cours : aucune
+Dernière session : S145 — bilan refait ;275 tests/cinq ignorés
+Session suivante : **S146 — lancer B1** *(recommandé par BILAN-S69 puis BILAN-S145 ; l'écarter
+                   demande de l'écrire dans le journal — rituel §6.7, A211)*
 
 **Copie de travail S139 et S140** : worktree `claude/reprise-projet-886155`, refusionné en avance
 rapide dans master à la fin de chacune des deux. Terminer de même :
@@ -190,6 +191,31 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
+**S145 — 2026-09-10 :** [BILAN-S145](docs/registres/BILAN-S145.md). Session de constat, aucun ADR.
+**Le repère avait 76 sessions**, et il disait encore « `δ`, `W` et `V` n'existent pas ».
+**C'est faux pour `W` depuis longtemps, et aucune session ne l'avait dit** : contrat `WaveEvent`,
+journal rejouable borné, deux champs propagés dont le candidat radial dispersif, générateur
+d'impact, couche de pression complète, composition B+W, service vivant avec sauvegarde,
+restauration et admission incrémentale — **4 573 lignes d'impacts, 5 195 de pressions**, reçues par
+275 essais. Manquent le **sillage**, jamais commencé, et la **sélection technologique** (B2).
+`δ` reste 1D (deux solveurs), `V` est toujours à zéro ligne.
+**Le fait central : zéro banc sur onze, exactement comme en S69.** B1 ne demande aucune couche
+manquante, tranche une question de justesse ouverte depuis A187, et **n'a jamais été lancé** —
+alors que 7 208 lignes de sondes ont été écrites depuis.
+**A211, sévérité 1, et c'est un défaut de dispositif** : le chaînage « suite Sxxx » n'a jamais rompu
+en 144 sessions mais il est **local** — il propage ce que la dernière session a vu, pas ce qu'un
+bilan a conclu. Deux des quatre recommandations de S69 sont restées lettre morte, non par
+désaccord, mais parce qu'aucun canal ne les portait (**L228**).
+**Réparation appliquée, à éprouver** : la ligne `Session suivante` du jeton porte la recommandation,
+et le rituel de fin gagne le point **§6.7** — vérifier qu'elle y est, ou qu'elle a été écartée par
+écrit. Si B1 n'est pas lancé en S150, la réparation aura échoué.
+Lectures recalculées : **~90 %** comme corpus, **~30 %** comme système (contre ~85 % et ~15 %).
+*Six décomptes faux corrigés : **210 angles** et non 211 jusqu'à S144 — erreur née en S142, passée
+par trois rituels dont le point qui demande précisément de les vérifier.*
+275 tests inchangés, aucun code modifié.98 ADR,211 angles,18 invariants,6 spécifications,23 cas.
+Suite S146 : **lancer B1**. Puis clore **S63-1** par écrit — la dispersion vit dans `W` depuis
+ADR-060, la question est tranchée en pratique et jamais fermée.
+
 **S144 — 2026-09-10 :** [ADR-098](docs/adr/ADR-098-trois-causes-trois-noms-dans-le-budget-de-pente.md),
 [REFUS-EMPRISE-S144](docs/validation/REFUS-EMPRISE-S144.md). **A208 traitée**, après trois reports.
 **Aucune de ses deux réparations n'a été prise**, et il fallait le dire avant d'en proposer une
@@ -209,7 +235,7 @@ d'A208 avant qu'elle soit ouverte, sans pouvoir le nommer.
 **La garde de S143 a servi le lendemain**, sur une modification sans rapport : elle a signalé trois
 sites de comparaison nouveaux, légitimes mais non déclarés.
 275 tests/cinq ignorés, aucun hachage touché, harnais H1 inchangé.
-98 ADR,211 angles,18 invariants,6 spécifications,23 cas.
+98 ADR,210 angles,18 invariants,6 spécifications,23 cas.
 Suite S145 : **la série pente est close** — A205 à A210 toutes traitées. Reprendre le **fil du
 projet** plutôt qu'un angle : le bilan S69 reste vrai, `δ`, `W` et `V` n'existent pas comme couches
 et onze bancs sur onze attendent une couche non écrite. L'audit des renvois « traité en Sxx »
@@ -235,7 +261,7 @@ un troisième champ fictif est attrapé avant même d'être branché.
 réelle*. Son énoncé porte sa limite : I-14 a tenu soixante sessions parce qu'un essai le vérifiait.
 *Manquement attrapé par le compte de tests : le livrable annonçait un remplacement non fait —275
 tests au lieu de273. Corrigé. C'est L55 dans sa forme la plus pure.*
-273 tests/cinq ignorés, le même compte qu'à l'entrée.97 ADR,211 angles,**18 invariants**,
+273 tests/cinq ignorés, le même compte qu'à l'entrée.97 ADR,210 angles,**18 invariants**,
 6 spécifications,23 cas.
 Suite S144 : **A208**, ouverte depuis S140 et **trois fois reportée** — trois reports valent
 avertissement (L55), la prendre avant toute autre.
@@ -259,7 +285,7 @@ touché, harnais H1 inchangé** : sans consommateur de production, cette migrati
 **A210, de dispositif** : les deux constantes homonymes **ne se déduisent pas l'une de l'autre**,
 un troisième champ aurait la sienne, et le contrat « ce qui est comparé à `max_slope` est une
 pente réelle » ne vit que dans deux commentaires et deux essais.
-273 tests/cinq ignorés.96 ADR,211 angles,17 invariants,6 spécifications,23 cas.
+273 tests/cinq ignorés.96 ADR,210 angles,17 invariants,6 spécifications,23 cas.
 Suite S143 : **A210** — un type porteur, un essai générique ou un invariant, avant qu'un troisième
 champ existe. Puis **A208**, ouverte depuis S140 et deux fois reportée.
 
@@ -1570,6 +1596,11 @@ Avant de rendre la main, dans cet ordre :
    Deux pages, trois minutes — S13 a trouvé deux invariants périmés sur dix-sept, dont un de
    gravité 1, et ils avaient survécu à deux revues croisées et à un audit des points ouverts (L49).
 6. **Mettre à jour ce document** : jeton, numéro de session, état, session suivante.
+7. **Vérifier que la recommandation du dernier bilan est portée** par la ligne `Session suivante`,
+   ou qu'elle a été **écartée par écrit** dans le journal. *Ajouté en S145 après constat : deux des
+   quatre recommandations de [BILAN-S69](docs/registres/BILAN-S69.md) sont restées lettre morte
+   pendant soixante-seize sessions, non par désaccord mais parce qu'aucun canal ne les portait
+   (**A211**, **L228**). Le chaînage « suite Sxxx » propage la proximité, pas l'importance.*
 
 Une session qui n'exécute pas ce rituel laisse le projet dans un état où la suivante devra
 reconstituer ce qu'elle a fait — c'est-à-dire perdre l'essentiel de son apport.

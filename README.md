@@ -135,8 +135,9 @@ Coût mesuré en S125 : environ ×4 à points identiques et ×9 pour le montage 
 initial. [ADR-085](docs/adr/ADR-085-profils-radiaux-selon-le-domaine.md) conserve N64 par défaut ;
 N128/N256 se dimensionnent explicitement au domaine commun du service. A202 traitée ; A203 suit
 la réception physique à grande portée, réalisée en S126 sur les deux fixtures à âge0–4 s.
-État vérifié S144 : **275 tests réussis, cinq ignorés ; 98 ADR, 211 angles, 18 invariants,
-6 spécifications, 23 cas canoniques.**
+État vérifié S145 : **275 tests réussis, cinq ignorés ; 98 ADR, 211 angles, 18 invariants,
+6 spécifications, 23 cas canoniques.** Détail par couche et par bloc :
+[BILAN-S145](docs/registres/BILAN-S145.md).
 [Réception S126](docs/validation/RECEPTION-ETENDUE-S126.md) :1350 points-temps reçus contre
 oracle indépendant, erreur normalisée<=4,44e-7. La fenêtre4 s reçoit surtout des queues aux
 distances64/128 m ; elle ne valide pas encore un paquet transporté au loin. Suite S127 :
@@ -215,7 +216,11 @@ une cause que la bibliothèque ne peut pas établir, l'autre était périmée pa
 distingue désormais trois causes — un paramètre inutilisable, un champ vraiment trop raide au point, et une
 enveloppe qui refuse ce que la pente ne contredit pas. Six essais ont changé d'attente : cinq exerçaient le
 majorant en croyant exercer la pente.
-Suite : la série pente est close — A205 à A210 toutes traitées. Reprendre le fil du projet, où `δ`, `W` et `V`
-n'existent toujours pas comme couches (bilan S69).
+Le bilan est refait en S145, celui de S69 ayant 76 sessions : **`W` a cessé de ne pas exister** — impacts,
+pressions, journal rejouable et service vivant, 9 768 lignes reçues par 275 essais — pendant que le repère
+annonçait le contraire. `δ` reste 1D, `V` nul, et **zéro banc sur onze a été exécuté**, exactement comme en S69.
+Le projet est à ~90 % comme corpus de conception et **~30 % comme système**.
+Suite : **lancer B1**, recommandé par S69 et jamais fait — la recommandation est cette fois portée par le jeton
+lui-même (A211, L228).
 98 ADR,211 angles,18 invariants,6 spécifications,23 cas.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

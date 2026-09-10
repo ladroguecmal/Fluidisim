@@ -3494,3 +3494,22 @@ exécutée**, jamais ne s'exécute sur sa seule autorité — surtout après plu
 l'écrire en disant *de quoi elle dépend* — ici « tant que l'enveloppe additionne les deux facteurs
 » — aurait suffi à la voir tomber. Voir [[L225]] : une dispense aussi dépend d'un état ; c'est le
 même mécanisme, du côté de l'action au lieu de l'inaction.
+
+## L228 — Un chaînage local propage la proximité, pas l'importance
+
+*(S145)* Ce dépôt enchaîne ses sessions par une ligne « suite Sxxx » que chacune écrit pour la
+suivante. Le mécanisme n'a jamais rompu en 144 sessions, et il est la raison pour laquelle un
+projet mené par des sessions sans mémoire tient une trajectoire.
+
+Mais il ne propage **que ce que la dernière session a vu**. Un bilan qui recommande quatre choses
+n'a aucun porteur : sa recommandation est écrite dans un registre, et la « suite » de la session
+suivante parle d'autre chose — non par désaccord, par proximité. Résultat mesuré : deux des quatre
+recommandations de S69 sont restées lettre morte pendant soixante-seize sessions, dont la plus
+concrète des quatre.
+
+Généralisable à tout dispositif de passation : **ce qui n'est pas dans le canal que le suivant lit
+par obligation n'existe pas.** Ajouter un registre ne répare rien — un registre est précisément ce
+que personne ne relit. La réparation consiste à faire porter l'intention par le canal obligatoire
+lui-même, si étroit soit-il, et à rendre son contournement **explicite** : écarter par écrit, pas
+par oubli. Voir [[L55]] — une annonce en prose est une intention, pas une tâche ; ici, même une
+tâche n'est rien sans un canal qui la porte.

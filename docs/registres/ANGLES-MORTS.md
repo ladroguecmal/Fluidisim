@@ -1846,3 +1846,19 @@ Ce qui est fait à la place tient à un constat : **les trois budgets ont la pen
 sous la main au moment du refus**. Trois causes décidables, trois noms — `MaxSlope`, `Slope`
 resserré, `SlopeEnvelope`. Six essais ont changé d'attente ; cinq exerçaient le majorant en
 croyant exercer la pente. Voir [REFUS-EMPRISE-S144](../validation/REFUS-EMPRISE-S144.md).
+
+- **A211** *(sévérité 1, S145 ; ouverte)* — **Une recommandation globale n'a aucun porteur dans ce
+  dépôt.** Le chaînage « suite Sxxx » n'a jamais rompu en 144 sessions, mais il est **local** : il
+  propage ce que la dernière session a vu, pas ce qu'un bilan a conclu. [BILAN-S69](BILAN-S69.md)
+  recommandait quatre choses ; **deux sont restées lettre morte pendant soixante-seize sessions**,
+  dont « lancer B1 », qui ne demandait aucune couche manquante et tranchait une question de
+  justesse ouverte depuis A187. Personne ne les a refusées — personne ne les a relues.
+  La sévérité tient à ce que cela touche : non pas un calcul, mais **la direction du projet**. Un
+  dépôt qui ne peut pas porter une intention au-delà d'une session choisit sa trajectoire par
+  proximité, pas par importance.
+  **Réparation appliquée en S145, à éprouver** : la ligne `Session suivante` du jeton porte la
+  recommandation — c'est le seul mécanisme que toute session lit à l'amorce — et le rituel de fin
+  (`REPRISE.md` §6) gagne un point qui demande de vérifier qu'elle y est, ou qu'elle a été écartée
+  **par écrit**. Ce n'est pas un registre de plus : un registre est justement ce que personne ne
+  relit. À juger dans quelques sessions : si B1 n'est toujours pas lancé en S150, la réparation
+  aura échoué et il faudra autre chose.

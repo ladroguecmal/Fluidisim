@@ -17,6 +17,16 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S145 :** [BILAN-S145](registres/BILAN-S145.md) — le bilan refait, celui de S69 ayant **76 sessions**. Aucun ADR :
+une session de constat. **`W` a cessé de ne pas exister et personne ne l'avait dit** — 4 573 lignes d'impacts,
+5 195 de pressions, journal rejouable, service vivant, reçus par 275 essais ; manquent le sillage et B2. `δ` reste
+1D, `V` nul. **Mais zéro banc sur onze, exactement comme en S69** : B1, recommandé alors, n'a jamais été lancé.
+**A211 (sévérité 1)** : le chaînage « suite Sxxx » propage la proximité, pas l'importance — deux des quatre
+recommandations de S69 sont restées lettre morte 76 sessions (**L228**). Réparation : la ligne `Session suivante`
+porte la recommandation, et le rituel §6 gagne un point. Lectures recalculées : ~90 % corpus, **~30 % système**.
+*Six décomptes faux corrigés : 210 angles et non 211, erreur née en S142 et passée par trois rituels.*
+275 tests inchangés. 98 ADR,211 angles,18 invariants,6 spécifications,23 cas. **Suite S146 : lancer B1.**
+
 **S144 :** [ADR-098](adr/ADR-098-trois-causes-trois-noms-dans-le-budget-de-pente.md), trois causes trois noms.
 [REFUS-EMPRISE-S144](validation/REFUS-EMPRISE-S144.md) : **A208 traitée**, et **aucune de ses deux réparations
 n'a été prise** — `Footprint` mentirait, et publier le rapport des enveloppes était **périmé** par S141 (**L227** :
@@ -25,7 +35,7 @@ réelle **au point** sous la main au moment du refus. D'où `MaxSlope` (paramèt
 indûment), `Slope` resserré, et **`SlopeEnvelope`** — « ta pente tient ici, c'est mon majorant qui refuse ».
 **Six essais ont changé d'attente et cinq exerçaient le majorant en croyant exercer la pente.**
 275 tests/cinq ignorés, aucun hachage touché.
-98 ADR,211 angles,18 invariants,6 spécifications,23 cas. Suite S145 : la série pente est close, reprendre le fil.
+98 ADR,210 angles,18 invariants,6 spécifications,23 cas. Suite S145 : la série pente est close, reprendre le fil.
 
 **S143 :** [ADR-097](adr/ADR-097-ce-qui-garde-le-contrat-de-pente.md), ce qui garde le contrat de pente.
 [CONTRAT-PENTE-S143](validation/CONTRAT-PENTE-S143.md) : **A210 traitée**, et la pesée a **inversé** la préférence
@@ -35,7 +45,7 @@ mur, pour une cinquantaine de sites (**L226**). Retenu : deux gardes exécutable
 ce que le crate *contient* — **vues échouer** sur la faute de S141 et sur un troisième champ fictif ; plus
 l'**invariant I-18**, le premier depuis S14. Deux essais dupliqués retirés (L137).
 273 tests/cinq ignorés — le même compte qu'à l'entrée.
-97 ADR,211 angles,**18 invariants**,6 spécifications,23 cas. Suite S144 : A208, trois fois reportée.
+97 ADR,210 angles,**18 invariants**,6 spécifications,23 cas. Suite S144 : A208, trois fois reportée.
 
 **S142 :** [ADR-096](adr/ADR-096-les-deux-champs-disent-la-meme-chose-de-max-slope.md), les deux champs disent la
 même chose de `max_slope`. [PENTE-MODALE-S142](validation/PENTE-MODALE-S142.md) : **A209 traitée** — le rapport du
@@ -45,7 +55,7 @@ conservant exprès. La dispense d'ADR-082 §65 a expiré sans avoir été fausse
 champs ont divergé (**L225**). Champ limite à 0,448737 contre 0,448799 attendu ; aucun hachage touché.
 **A210** : rien n'oblige un futur champ à mesurer son rapport — le contrat ne vit que dans deux commentaires.
 273 tests/cinq ignorés.
-96 ADR,211 angles,17 invariants,6 spécifications,23 cas. Suite S143 : A210, puis A208.
+96 ADR,210 angles,17 invariants,6 spécifications,23 cas. Suite S143 : A210, puis A208.
 
 **S141 :** [MIGRATION-PENTE-S141](validation/MIGRATION-PENTE-S141.md), exécution de **S139-1** — aucun ADR
 nouveau, cette session applique ADR-094 et ADR-095. Chaque terme du budget consomme le meilleur majorant exact de
