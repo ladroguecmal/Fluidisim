@@ -68,7 +68,7 @@ intégrale** que le dépôt n'a pas, et c'est ce blocage-là qu'il faut instruir
 ### Plan
 
 - [x] **P1** — état réel, jeton, **plan déclaré et committé seul**.
-- [ ] **P2** — **dire ce qui bloque exactement.** B4 compare trois choses — surface, forces sur la
+- [x] **P2** — **dire ce qui bloque exactement.** B4 compare trois choses — surface, forces sur la
       coque, perception en double aveugle — et une seule est hors de portée d'une session. Le
       blocage annoncé est la référence intégrale : établir ce que le dépôt possède déjà
       (`shallow.rs`, `dispersif.rs`, l'oracle croisé de S37) et ce qui manque vraiment.
