@@ -17,6 +17,15 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S163 :** [RESIDU-COUPLE-S163](validation/RESIDU-COUPLE-S163.md), **S162-1 réalisée sur véhicule 1D**.
+Le résidu conservatif est intégré indépendamment, flux croisés physiques et numériques explicites,
+puis comparé à Shallow1D à chaque pas. Fond évolué et fond figé avec source reçus ; cinq variantes
+fautives refusées alors que la masse reste conservée. Erreur de reconstruction <=1,62e-13 jusqu'à
+N960 ; écarts de référence entre grilles encore au pourcent. **A218 traitée dans ce périmètre,
+A50 partielle** ; aucun seuil ni réception B4 complet. A219, L245 ; aucun ADR nouveau.
+299 tests/cinq ignorés, plus cinq tests nouveaux propres à l'exemple (trois host importés aussi reçus).
+112 ADR,219 angles,245 leçons,18 invariants,6 SPEC,23 cas.
+**Suite S164 : S163-1**, fond analytique instationnaire, source continue et incréments discrets.
 **S162 :** [ADR-112](adr/ADR-112-la-superposition-independante-ne-recoit-pas-le-couplage.md),
 [ADDITIVITE-PROFONDE-S162](validation/ADDITIVITE-PROFONDE-S162.md). **A217 partielle** : Stokes
 au second ordre fournit un terme croisé en `kab`, sensible à la cambrure et à la phase ; aucune

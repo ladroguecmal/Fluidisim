@@ -8204,3 +8204,50 @@ Invariants I-01, I-04, I-14 et I-15 relus, aucun invalidé ; aucun calcul de pro
 champ total à mêmes conditions initiales, avec contre-épreuve d'un terme croisé retiré.
 BILAN-S145 suivi : B1 exécuté S146, S63-1 close S147 ; poursuite de B4 maintenue. A217 reste
 partielle pour l'évolution profonde générale, A214 attend B4. Aucun arbitrage humain nouveau.
+---
+
+## S163 — 2026-09-10 — Le résidu couplé retrouve le total ; la masse ne détecte pas son omission
+
+**Entrée :** master 8902f5a, arbre propre ; trois copies au même commit, propres et libres.
+Plan déclaré seul, copies avancées au jeton occupé ; aucune copie créée ni supprimée.
+Suite S162-1/ADR-112 : intégrer le résidu, pas le reconstruire après coup depuis la référence.
+
+**Produit :** [RESIDU-COUPLE-S163](../docs/validation/RESIDU-COUPLE-S163.md), véhicule indépendant
+`examples/support/residu_shallow.rs`, campagne `examples/residu_couple.rs`, suivi ADR-112,
+S162-1 et A218 ; A219, L245, action S163-1. Aucun ADR nouveau, aucune bibliothèque modifiée.
+
+**S162-1 réalisée sur véhicule 1D.** Variables conservatives Q=(H,M), d=(z,r) ; flux résiduel
+physique développé, correction de viscosité Rusanov explicite. Deux étages RK2 pour Q et d,
+sans dépendance à Shallow1D ; la campagne seule compare à cette référence. Murs réfléchissants,
+lit plat, eau strictement mouillée. Fond évolué et fond figé non uniforme avec source reçus.
+
+**Résultat nominal N240 :** max erreur normalisée hauteur 5,92119e-15, débit 4,14606e-15.
+Retirer la pression croisée donne 7,26910e-3 ; le couplage numérique 2,73063e-4 ; avec fond
+figé retirer sa source donne 6,66505e-1. La masse reste conservée à environ 1e-15 dans les
+cinq variantes fautives. Les mêmes omissions deviennent sans effet sur fond uniforme et le
+test les accepte : témoins nuls, pas un refus systématique des modes dégradés.
+
+**Le cas à zéro porte le résultat le plus clair.** Sans perturbation initiale, le résidu reste
+exactement nul si le fond évolue correctement ; il atteint 0,199881 m si la bosse du fond est
+figée, pour corriger ce fond qui n'est pas une solution. Retirer la source maintient ce résidu
+à zéro et donne un total faux. A50 est donc partiellement exercée par un vrai témoin.
+
+**Les deux précisions ne se confondent pas.** N120→960, la reconstruction reste sous 1,62e-13,
+mais l'écart de la référence entre les dernières grilles vaut 9,07266e-3 en L2 normalisée.
+Aucun ordre spatial certifié. Diviser le pas par deux puis quatre donne des écarts temporels
+3,82064e-5 et 9,53036e-6. L'accord du résidu reçoit une écriture du schéma, pas la physique.
+
+**Vérification :** 81 états de flux ; zéro, fond uniforme, creux, réflexions ; refus sec et NaN.
+Cinq tests nouveaux propres à l'exemple et trois tests host importés passent en debug.
+Campagne complète release avec assertions reçue. 299 tests workspace réussis, cinq ignorés,
+zéro échec ; avertissements hérités inchangés. I-01/04/14/15 relus, aucun invariant invalidé.
+112 ADR,219 angles,245 leçons,18 invariants,6 SPEC,23 cas.
+
+**Limites :** pas de domaine local, bathymétrie, dispersion, fond analytique instationnaire,
+δ 3D, forces ou perception. A218 traitée dans le périmètre de S162-1 ; B4 reste incomplet.
+A216 reportée et A217 partielle inchangées. Aucun seuil, aucune décision humaine nouvelle.
+
+**Suite S164 : S163-1/A219**, fond prescrit instationnaire : recevoir les sources spatiales et
+temporelles, comparer dérivée continue et incrément discret aux étages RK2, avec témoin de
+source temporelle omise. Le fond réévalué n'est pas forcément celui qu'avance RK2.
+BILAN-S145 porté : B1 fait S146, S63-1 close S147, poursuite B4 par ce couplage.

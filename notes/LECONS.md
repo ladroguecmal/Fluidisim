@@ -3816,3 +3816,19 @@ Avant d'interpréter un banc, écrire côte à côte **l'équation prévue et ce
 Une réserve de dimension ou de précision ne suffit pas si l'objet mathématique a changé.
 Et construire le résidu après coup par soustraction ne teste pas son intégration : ce serait
 une identité. Un vrai témoin doit retirer un terme du couplage et faire perdre l'accord.
+## L245 — Le résidu du schéma contient des termes absents de l'équation continue
+
+*(S163)* Le flux physique du résidu était exact. Il fallait pourtant lui ajouter un terme de
+couplage issu de Rusanov : la vitesse de diffusion numérique change entre fond seul et champ
+total. Sans `(a_total-a_fond) saut(fond)`, le couplage se trompe de 2,73e-4 à N240,
+contre 5,92e-15 pour le calcul complet. Les deux conservent la masse.
+
+Soustraire les équations continues puis discrétiser n'équivaut donc pas, sans contrôle, à
+soustraire leurs versions discrètes. Ce qui paraît artificiel dans la physique peut être
+indispensable pour retrouver le schéma effectivement exécuté. Le défaut décroît au raffinement,
+mais cela ne le rend pas acceptable à la maille utilisée.
+
+Pour recevoir un couplage, écrire le résidu du **calcul complet**, frontières et intégrateur
+compris, et distinguer cette fidélité au schéma de sa précision physique. Ici l'accord à
+1e-13 coexiste avec des différences entre grilles au pourcent : les deux verdicts répondent
+à des questions différentes. Voir L244 et SPEC-004 §6.1.

@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S163 — en cours
+Session : S163 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S162-1 / A218, intégrer réellement le résidu couplé en Saint-Venant et le
 recevoir contre l'évolution totale. Pas de δ 3D ni de seuil de bascule dans ce lot.
@@ -73,7 +73,7 @@ recevoir contre l'évolution totale. Pas de δ 3D ni de seuil de bascule dans ce
       du total ; recevoir contre la référence et retirer volontairement un terme de couplage.
 - [x] **P4** — campagne de raffinement et cas limites, limites de portée, verdict et suivi
       A218/A50. ADR seulement si décision nouvelle. Tests adaptés et bilan numérique.
-- [ ] **P5** — rituel de fin REPRISE §6 : journal, angles/leçons, index, décomptes, prochaine
+- [x] **P5** — rituel de fin REPRISE §6 : journal, angles/leçons, index, décomptes, prochaine
       action, jeton libéré et copies synchronisées. Aucun worktree créé.
 
 ### Notes de reprise
@@ -100,3 +100,7 @@ P4 : cas limites et raffinements reçus. N960 : max h reconstruction 1,61352e-13
 5 tests propres à l'exemple +3 host importés passent ; campagne release complète reçue.
 Suite workspace 299 tests réussis/cinq ignorés. S162-1 réalisée dans le périmètre 1D,
 A218 traitée ici, A50 partielle. Pas d'ADR nouveau ; A219/S163-1 pour le fond prescrit en temps.
+P5 : rituel effectué, journal, L245, A219, index/README/REPRISE et suivi ADR-112.
+Décomptes 112 ADR/219 angles/245 leçons vérifiés ; 18 invariants/6 SPEC/23 cas inchangés.
+BILAN-S145 porté via S163-1, aucune décision humaine requise. Jeton rendu.
+Copies propres à avancer au commit de clôture avant réponse finale, sans retrait.

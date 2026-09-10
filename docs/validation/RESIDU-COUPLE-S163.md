@@ -162,3 +162,7 @@ instationnaire prescrite. Recevoir la source spatiale **et temporelle** à chaqu
 à même état total initial ; comparer l'emploi de la dérivée continue du fond et de ses
 incréments discrets. Le fond réévalué n'est pas en général celui qu'un RK2 avancerait :
 la clôture temporelle n'est pas reçue par ce lot.
+
+
+Réception finale : 299 tests workspace réussis, cinq ignorés ; cinq tests nouveaux de l'exemple
+et trois tests host importés réussis en debug, campagne complète avec assertions reçue en release.

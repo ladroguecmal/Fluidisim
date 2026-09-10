@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 20:28 +02:00
+JETON            : libre
+Battement        : 2026-09-10 20:30 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S163 — construire et recevoir le résidu couplé
-Dernière session : S162 — A217 partielle ; portée B4 corrigée par ADR-112
-Session suivante : S163 — S162-1 : intégrer et recevoir le résidu couplé en Saint-Venant
+Session en cours : aucune
+Dernière session : S163 — résidu couplé reçu en 1D ; 299 tests/cinq ignorés + cinq nouveaux tests exemple
+Session suivante : S164 — S163-1 : fond prescrit instationnaire et clôture temporelle (A219)
 
 *S160 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
 rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour.*
@@ -168,7 +168,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 101 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 112 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -188,6 +188,27 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
+**S163 — 2026-09-10 :** [RESIDU-COUPLE-S163](docs/validation/RESIDU-COUPLE-S163.md).
+**S162-1 réalisée sur véhicule 1D.** Fond Q et résidu conservatif d intégrés séparément,
+flux croisés physiques et numériques développés ; comparaison à Shallow1D à chaque pas.
+Rusanov ordre un en espace, RK2, lit plat, eau mouillée, murs réfléchissants.
+Fond évolué et fond figé non uniforme avec source reçus. Aucun calcul de bibliothèque modifié.
+
+Erreur de reconstruction hauteur <=1,62e-13 jusqu'à N960 ; **la précision du champ physique
+n'est pas reçue par cet accord**, les écarts entre références de grilles restant au pourcent.
+Retirer pression croisée, viscosité croisée ou source fait échouer les cinq variantes testées,
+alors que **la masse reste conservée**. À résidu initial nul, le fond figé crée un résidu de
+0,199881 m pour corriger sa non-évolution ; sans source il reste nul et le total est faux.
+**A218 traitée dans ce périmètre, A50 partiellement exercée.** Aucun seuil ni réception B4 complet.
+
+**A219** : le fond analytique réévalué en temps n'est pas le fond qu'avancerait le même RK2.
+**L245** : le résidu discret comporte des termes absents de l'équation continue.
+112 ADR,219 angles,245 leçons,18 invariants,6 SPEC,23 cas. 299 tests workspace réussis/cinq
+ignorés ; cinq tests propres à l'exemple et trois host importés reçus ; campagne release reçue.
+**Suite S164 : S163-1**, onde analytique prescrite, source spatiale et temporelle aux étages RK2,
+comparaison dérivée continue/incréments discrets, témoin de source temporelle omise.
+A217 reste partielle, A216 reportée ; BILAN-S145 suivi par poursuite B4 après B1 et S63-1.
+Session dans la copie principale ; copies existantes synchronisées, aucune créée ni supprimée.
 **S162 — 2026-09-10 :** [ADR-112](docs/adr/ADR-112-la-superposition-independante-ne-recoit-pas-le-couplage.md),
 [ADDITIVITE-PROFONDE-S162](docs/validation/ADDITIVITE-PROFONDE-S162.md). **A217 partielle** :
 une référence analytique de Stokes au second ordre établit le terme croisé `kab` et sa dépendance
