@@ -975,3 +975,95 @@ fn extension_yields_the_direct_field_and_leaves_the_old_controller_serving() {
         assert_eq!(c.journal().published().count(), deja.len());
     }
 }
+/// S134, ADR-090 : sur les **vraies** contributions modales, l'ordre des segments déplace le
+/// champ d'un écart de niveau d'arrondi — 7,1e-6 au pire à seize segments, pour un ulp `f32` de
+/// 6e-8. C'est ce qui autorise à garder la condition d'ordre d'ADR-088 plutôt qu'à payer le
+/// renouvellement de toutes les références pour l'en affranchir.
+///
+/// Le test fige cet ordre de grandeur : si l'écart changeait de nature, la décision devrait
+/// être reprise. La borne est large exprès — elle sépare « bruit d'arrondi » de « défaut de
+/// justesse », pas deux valeurs voisines.
+#[test]
+fn order_of_segments_stays_within_rounding() {
+    use crate::spectral_pressure::prepare_segments;
+    let s = settings();
+    let mut nodes = [Node::default(); 384];
+    let mut hn = [Node::default(); 192];
+    let full = bake(recipe(), &mut nodes).unwrap();
+    let half = full.half_into(&mut hn).unwrap();
+    let t = SimTime(1_500_000);
+    let points = [[0.0; 2], [2.0, 1.0], [-8.0; 2], [12.0; 2], [5.5, -2.5]];
+    // Segments indépendants — l'ordre d'accumulation ne suppose aucune contiguïté, et
+    // `prepare_segments` n'en exige pas : c'est `prepare` qui valide les chemins.
+    let base = Segment {
+        birth: SimTime(0),
+        duration_us: 2_000_000,
+        origin: [0.0; 2],
+        velocity: [2.0, 0.0],
+        pressure_pa: 10.0,
+    };
+    for n in [2usize, 4, 8, 16] {
+        let segments: Vec<Segment> = (0..n)
+            .map(|i| Segment {
+                birth: SimTime((i as u64 % 4) * 250_000),
+                origin: [(i % 7) as f32 - 3.0, ((i * 3) % 5) as f32 - 2.0],
+                velocity: if i % 2 == 0 { [2.0, 0.0] } else { [0.0, 2.0] },
+                // Amplitudes très inégales : c'est ce qui rend une somme sensible à l'ordre.
+                pressure_pa: 10.0 * 0.1f32.powi((i % 5) as i32),
+                ..base
+            })
+            .collect();
+        let mesure = |ordre: &[Segment]| {
+            let mut pool = [Slot::default(); 192];
+            let f = prepare_segments(
+                half.nodes(),
+                ordre.iter().copied(),
+                s.gravity,
+                s.density,
+                t,
+                s.end,
+                s.min,
+                s.max,
+                &mut pool,
+            )
+            .unwrap();
+            let v: Vec<f32> = points
+                .iter()
+                .map(|q| f.sample(*q).unwrap().eta)
+                .chain([f.energy_j, f.power_w])
+                .collect();
+            v
+        };
+        let direct = mesure(&segments);
+        let mut inverse = segments.clone();
+        inverse.reverse();
+        let renverse = mesure(&inverse);
+        let ecart = direct
+            .iter()
+            .zip(renverse.iter())
+            .map(|(a, b)| {
+                if a.abs() > 0.0 {
+                    ((a - b) / a).abs()
+                } else {
+                    0.0
+                }
+            })
+            .fold(0.0f32, f32::max);
+        let identiques = direct
+            .iter()
+            .zip(renverse.iter())
+            .all(|(a, b)| a.to_bits() == b.to_bits());
+        println!(
+            "{n:>2} segments : identiques en bits = {identiques:<5} ecart relatif max = {ecart:.3e}"
+        );
+        assert!(
+            ecart < 1e-4,
+            "{n} segments : l'ordre déplace le champ de {ecart:.3e}, ce n'est plus un arrondi"
+        );
+        // Deux termes : l'addition `f32` est commutative, et le résultat ne peut pas bouger.
+        // C'est ce qui rendait la première sonde de S132 muette, et il vaut de le garder écrit.
+        if n == 2 {
+            assert!(identiques, "deux segments ne peuvent pas dépendre de leur ordre");
+        }
+    }
+}

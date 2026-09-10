@@ -130,6 +130,13 @@ impl<'p, 'v, 'n, 'j, 's> Controller<'p, 'v, 'n, 'j, 's> {
     ///
     /// Le journal est emprunté mutablement par le contrôleur : nul autre ne peut le modifier
     /// pendant qu'une publication en dépend, et c'est ce qui rend `Unchanged` toujours exact.
+    ///
+    /// **Contrainte d'usage (ADR-090).** Une source dont l'identifiant dépasse tous ceux déjà
+    /// publiés s'insère en dernier, et l'admission emprunte alors le chemin incrémental — le
+    /// coût d'un segment au lieu de celui du journal entier. Un identifiant qui s'intercale
+    /// donne le **même champ**, calculé par une préparation complète. Attribuer les
+    /// identifiants par un compteur croissant suffit à rester sur le chemin rapide ; ne pas le
+    /// faire ne rend rien faux, seulement plus lent.
     pub fn admit(&mut self, source: Source<'s>) -> Result<Admission, AdmitError> {
         let id = source.metadata().id;
         // Position que l'insertion occupera, calculée avant elle pour pouvoir la défaire.
@@ -194,6 +201,10 @@ impl<'p, 'v, 'n, 'j, 's> Controller<'p, 'v, 'n, 'j, 's> {
     /// un sens. Le raccourci ne s'emploie que si le journal élargi contient exactement les
     /// mêmes sources, dans le même ordre, plus une **en dernier** ; sinon la préparation
     /// complète prend le relais, et le résultat est le même — celui de la voie directe.
+    ///
+    /// **Contrainte d'usage (ADR-090)** : la même que pour `admit`. Un identifiant supérieur à
+    /// tous ceux publiés donne le chemin rapide ; un identifiant qui s'intercale donne le même
+    /// champ, plus lentement.
     pub fn extend_into<'q, 'w>(
         &self,
         journal: &'w mut Journal<'j, 's>,

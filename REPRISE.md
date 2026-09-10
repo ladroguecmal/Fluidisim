@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 02:06 +02:00
+JETON            : libre
+Battement        : 2026-09-10 02:12 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S134 — l'exactitude conditionnée à l'insertion en dernier (S133-1)
-Dernière session : S133 — extension sans interruption ;263 tests/cinq ignorés
-Session suivante : à fixer en fin de S134
+Session en cours : aucune
+Dernière session : S134 — condition d'ordre pesée et conservée ;264 tests/cinq ignorés
+Session suivante : S135 — transaction mixte (S134-1)
 
 **Copie de travail S130** : worktree `claude/reprise-projet-2d3506`, remis en avance rapide sur
 master (e817d0e) au démarrage — il était resté à 52e80a5 et n'avait rien d'unique, donc aucun
@@ -180,6 +180,27 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S134 — 2026-09-10 :** [ADR-090](docs/adr/ADR-090-la-condition-d-ordre-reste-et-s-ecrit.md),
+[ORDRE-S134](docs/validation/ORDRE-S134.md). S133-1 réalisée **en refusant de construire**.
+Sur les contributions modales réelles, permuter l'ordre des segments déplace le champ de
+**5,6e-7 à 7,1e-6** — dix à cent fois l'ulp `f32`. La condition d'ordre d'ADR-088 ne masque donc
+aucun défaut de justesse. Une première sonde sur valeurs synthétiques donnait 1,5e-2 : la prendre
+pour une mesure du problème aurait fait renouveler toutes les références pour du bruit d'arrondi.
+Lever la condition par accumulation `f64` la supprimerait (0 jeu sensible sur6000, contre288 sur
+1000 dès trois termes en `f32`) pour un surcoût en temps faible — **mais rendrait toutes les
+références depuis S113 non reproductibles**. Une contribution par source, seule voie sans effet
+sur les résultats, coûterait10,5 Mo par contrôleur à huit sources.
+Donc : la condition **reste** et devient une contrainte d'usage écrite dans `admit` et
+`extend_into` — identifiants croissants pour le chemin rapide, sinon même champ plus lentement.
+`f64` refusée aujourd'hui, motif daté : à reconsidérer si les références sont renouvelées pour
+une autre raison. Mesure figée par un test à borne large.264 tests/cinq ignorés ; aucun code de
+calcul modifié.
+90 ADR,204 angles,17 invariants,6 spécifications,23 cas.
+Suite S135 : S134-1, **transaction mixte** — la couche pression a désormais son cycle complet
+(admission, saturation, sortie, extension), et rien ne coordonne encore l'admission d'une source
+avec les autres couches d'un montage ; ADR-086 s'y était explicitement arrêtée. Extension de
+fenêtre, S116-2, bilan mixte, durabilité, générateur physique et calibration B2 restent ouverts.
 
 **S133 — 2026-09-10 :** [ADR-089](docs/adr/ADR-089-extension-sans-interruption.md),
 [EXTENSION-S133](docs/validation/EXTENSION-S133.md). S132-1 réalisée, **et une conclusion de

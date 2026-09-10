@@ -17,6 +17,14 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S134 :** [ADR-090](adr/ADR-090-la-condition-d-ordre-reste-et-s-ecrit.md), la condition d'ordre reste et s'écrit.
+[ORDRE-S134](validation/ORDRE-S134.md) : sur les contributions réelles, l'ordre déplace le champ de5,6e-7 à
+7,1e-6 — du bruit d'arrondi, pas un défaut de justesse. Lever la condition par accumulation `f64` rendrait
+**toutes les références depuis S113 non reproductibles** ; une contribution par source coûterait10,5 Mo à huit
+sources. La condition devient donc une **contrainte d'usage écrite**, et la mesure est figée par un test.
+Aucun code de calcul modifié.264 tests/cinq ignorés.
+90 ADR,204 angles,17 invariants,6 spécifications,23 cas. Suite S135 : transaction mixte, S134-1.
+
 **S133 :** [ADR-089](adr/ADR-089-extension-sans-interruption.md), étendre sans interrompre.
 [EXTENSION-S133](validation/EXTENSION-S133.md) : `extend_into` **lit** le contrôleur et en construit un second
 sur un journal élargi, sans le détruire — l'ancien sert pendant et après. **La fenêtre sans champ de S131 ne

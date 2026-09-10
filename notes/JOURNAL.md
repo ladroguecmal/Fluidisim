@@ -6933,3 +6933,40 @@ quand la mémoire prime. Aucune source admise ni modifiée par l'extension.
 conditionnée à une insertion en dernier. Les identifiants viennent de l'hôte et rien ne garantit
 qu'ils croissent. Mesurer ce que coûterait une accumulation indépendante de l'ordre avant de
 décider si cette condition doit rester.
+
+---
+
+## S134 — 2026-09-10 — La condition d'ordre reste, et s'écrit
+
+**Entrée :** jeton libre à 8269d2f, trois copies coïncidentes. S133-1.
+**Produit :** [ADR-090](../docs/adr/ADR-090-la-condition-d-ordre-reste-et-s-ecrit.md),
+[ORDRE-S134](../docs/validation/ORDRE-S134.md), la sonde `ordre_accumulation` et un test
+conservé. **Aucun code de calcul modifié : la session refuse de construire, et le justifie.**
+**La mesure qui décide, et le piège qu'elle a évité.** Sur les contributions modales réelles,
+permuter l'ordre des segments déplace le champ de **5,6e-7 à 7,1e-6** en relatif — dix à cent
+fois l'ulp `f32`. La condition d'ordre ne masque donc **aucun défaut de justesse**. Une première
+sonde, sur valeurs synthétiques aux amplitudes réparties sur six décades, donnait jusqu'à
+**1,5e-2** : prendre ce chiffre pour une mesure du problème aurait fait renouveler toutes les
+références du projet pour du bruit d'arrondi.
+**Ce que lever la condition coûterait.** L'accumulation `f64` supprime la sensibilité — 0 jeu
+sensible sur 6000, contre 288 sur 1000 dès trois termes en `f32` — pour un surcoût en temps
+faible et noyé dans les trigonométries. **Mais son prix est ailleurs** : les hachages et
+réceptions accumulés depuis S113 sont des sommes `f32`, et changer l'accumulation les rend tous
+non reproductibles. Stocker une contribution par source, seule voie qui ne toucherait pas aux
+résultats, coûte 10,5 Mo par contrôleur à huit sources et 21 Mo avec la transition d'ADR-089.
+**Décision :** la condition reste et devient une **contrainte d'usage écrite** — des
+identifiants croissants donnent le chemin rapide, sinon le même champ plus lentement. Ce qui
+manquait n'était pas de la lever mais de la dire, dans la documentation de `admit` et
+`extend_into`. L'accumulation `f64` est refusée **aujourd'hui**, avec motif daté : à
+reconsidérer le jour où les références seraient renouvelées pour une autre raison.
+**Réception :** la sonde est conservée comme test, avec une borne large (1e-4) qui sépare bruit
+d'arrondi et défaut de justesse. Elle fige aussi qu'à deux segments l'ordre ne peut rien changer
+— l'addition `f32` est commutative, ce qui avait rendu muette la première sonde de S132.
+171 core + 93 harnais = **264 réussis, cinq ignorés**.
+**Limites :** six mille jeux ne démontrent rien, ils mesurent. L'écart réel porte sur un montage
+et une recette. La contrainte n'est pas vérifiable par l'appelant, et c'est délibéré : ADR-088 a
+voulu l'optimisation invisible.
+90 ADR, 204 angles, 17 invariants, 6 spécifications, 23 cas. Invariants relus : aucun invalidé.
+**Suite S135 :** S134-1 — la couche pression a désormais son cycle complet. Ce qui reste de son
+côté est la **transaction mixte**, qu'ADR-086 avait explicitement laissée de côté : rien ne
+coordonne encore l'admission d'une source avec les autres couches d'un montage.

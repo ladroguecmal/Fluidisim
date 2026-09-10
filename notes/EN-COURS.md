@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S134 — en cours
+Session : S134 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : S133-1 — trois sessions ont buté sur la même limite : l'ajout incrémental n'est
 exact que si la source s'insère **en dernier**. Établir ce que coûterait de s'en affranchir,
@@ -67,7 +67,7 @@ et décider — y compris décider de la garder.
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seul.
-- [ ] **P2** — poser les voies et les chiffrer avant d'en préférer une. Quatre, et la
+- [x] **P2** — poser les voies et les chiffrer avant d'en préférer une. Quatre, et la
       quatrième n'était pas dans les notes de S133 :
       1. **accumuler en `f64`** puis arrondir : réduit l'écart sans le supprimer — l'ordre
          compte toujours, plus finement. Et cela déplacerait tous les résultats publiés.
@@ -77,11 +77,11 @@ et décider — y compris décider de la garder.
          canonique à chaque admission. L'identité devient exacte **quelle que soit la
          position**, sans refaire les réponses modales — au prix d'une mémoire proportionnelle
          au nombre de sources. C'est la seule voie qui rende la condition inutile.
-- [ ] **P3** — ADR-090 sur ce que les chiffres montreront. **Garder la condition est une
-      issue légitime** si son prix est plus bas que celui de la lever.
-- [ ] **P4** — construire ce que la décision retient.
-- [ ] **P5** — recevoir.
-- [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
+- [x] **P3** — ADR-090 : la condition reste, faute d'un prix acceptable pour la lever,
+      et devient une contrainte d'usage écrite.
+- [x] **P4** — contrainte portée dans la doc de `admit` et `extend_into`.
+- [x] **P5** — sonde conservée comme test, borne large, commutativité à deux termes figée.
+- [x] **P6** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -98,3 +98,19 @@ de plus le temps d'une transition.
 
 Piège à éviter : mesurer le coût en temps de la voie 4 et oublier son coût en mémoire, qui est
 le vrai. À 8 sources, elle multiplierait par 8 des pools déjà comptés en mégaoctets.
+
+P2-P6 : ADR-090, ORDRE-S134, journal, index, README, REPRISE, jeton rendu, ff-only.
+264 tests/cinq ignorés. Aucun code de calcul modifié — la session refuse de construire.
+
+Le piège de la session, et il aurait été coûteux : ma première sonde mesurait la sensibilité à
+l'ordre sur des valeurs **synthétiques**, amplitudes réparties sur six décades. Elle donnait
+1,5e-2 d'écart relatif à 64 termes, ce qui aurait fait conclure à un défaut de justesse et
+justifié de renouveler toutes les références du projet. Sur les vraies contributions modales,
+l'écart est de 5,6e-7 à 7,1e-6. **Une sonde synthétique mesure le régime qu'on lui donne.**
+
+Pour S135 sans relire : S134-1 est la transaction mixte. ADR-086 §"Ce que cette décision ne fait
+pas" dit exactement où elle s'arrête — l'admission n'est pas coordonnée entre couches. Le montage
+mixte compose B, impacts et pression (ADR-077) ; admettre une source de pression pendant qu'une
+requête mixte est en cours n'a pas de sémantique définie. Commencer par établir ce qui est
+observable : les emprunts Rust interdisent-ils déjà le cas problématique, comme ils l'ont fait
+pour `Unchanged` en S130 ?

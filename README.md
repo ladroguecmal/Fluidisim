@@ -61,7 +61,7 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S133 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S134 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
@@ -169,7 +169,10 @@ Sortir d'une saturation n'interrompt plus le service : `extend_into` lit le cont
 construit un second sur le journal élargi, en repartant des coefficients publiés, pendant que l'ancien
 continue de servir (ADR-089, S133). La fenêtre sans champ de S131 **disparaît** au lieu de raccourcir, et
 le coût tombe à6,21 ms contre19,11 pour construire le même journal à trois sources.
-Suite : l'exactitude incrémentale reste conditionnée à une insertion en dernier — mesurer ce que coûterait
-de s'en affranchir, S133-1.
-89 ADR,204 angles,17 invariants,6 spécifications,23 cas.
+La condition d'exactitude incrémentale a été pesée et **conservée** : sur les contributions réelles, l'ordre
+des segments ne déplace le champ que de5,6e-7 à7,1e-6 — du bruit d'arrondi — tandis que s'en affranchir
+rendrait toutes les références depuis S113 non reproductibles. Elle devient une contrainte d'usage écrite :
+des identifiants croissants donnent le chemin rapide, sinon le même champ plus lentement (ADR-090, S134).
+Suite : la transaction mixte, seule pièce que la couche pression laisse encore ouverte, S134-1.
+90 ADR,204 angles,17 invariants,6 spécifications,23 cas.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.
