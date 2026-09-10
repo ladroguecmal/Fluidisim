@@ -75,7 +75,7 @@ facteur 2,5 sur le second. Sans loi, pas de garde-fou : c'est exactement ce que 
       Trois points suffisent à trancher entre les deux exposants candidats.
 - [x] **P4** — dépendance à `sigma` : mêmes seuils à `sigma` 4 m, `cutoff` 1,5 pour garder le
       **même produit réduit** `sigma*cutoff = 6` et donc la même forme spectrale à échelle près.
-- [ ] **P5** — décider : loi écrite si elle tient sur les deux familles, refus argumenté sinon.
+- [x] **P5** — décider : loi écrite si elle tient sur les deux familles, refus argumenté sinon.
       Garde-fou reçu seulement si la loi le mérite — A214 dit pourquoi un garde faux est pire.
 - [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
 
@@ -188,3 +188,14 @@ Trois choses manquent, et deux sont fermees par des decisions deja prises :
 
 Sonde temporaire `wake_law_sigma.rs` supprimee : un duplicat d'exemple diverge, c'est le
 mecanisme des trois forks a l'echelle d'un fichier. Le balayage vit dans `wake_law`.
+
+P5 — ADR-108 : pas de garde-fou sans tolerance declaree. Refus argumente, pas un report.
+Encoder un seuil gelerait dans l'API une tolerance que personne n'a specifiee, et le tableau des
+seuils montre que l'instant limite change du simple au double entre 10 % et 100 % d'exces.
+Publie a la place : une **estimation conservatrice**, dans la documentation et non dans le code —
+duree sure ~ 1,17 / (0,5*sqrt(g*sigma)*cutoff/radial) — accompagnee de sa dispersion, facteur 2,5.
+A214 reste ouverte mais **change de nature** : il ne manque plus une mesure, il manque une
+specification, et deux bornes de grammaire (64 s par ADR-106, 512 par ADR-097) limitent ce qu'on
+peut mesurer. C'est ce qu'une session de mesure a rapporte.
+Aucun code modifie, donc aucun test nouveau : un test ne peut pas temoigner d'un refus de
+construire. Les 298 tests existants restent la seule verification, et ils passent.
