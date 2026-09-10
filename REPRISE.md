@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-10 03:36 +02:00
+JETON            : occupé
+Battement        : 2026-09-10 12:04 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S141 — S139-1, la migration qui change des bits
 Dernière session : S140 — le facteur de la pression n'est pas une constante ;271 tests/cinq ignorés
-Session suivante : S141 — S139-1, substituer la borne resserrée et poser `max_slope = 0,4488`
+Session suivante : à fixer en fin de S141
 
 **Copie de travail S139 et S140** : worktree `claude/reprise-projet-886155`, refusionné en avance
 rapide dans master à la fin de chacune des deux. Terminer de même :

@@ -58,64 +58,51 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S140 — terminée
+Session : S141 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : A206 — mesurer le facteur de conservatisme de `slope_envelope`
-(`spectral_pressure.rs:346`, `Σ(|kx|+|ky|)·(|Re η|+|Im η|)`) contre la pente réelle du champ de
-pression. C'est le préalable à S139-1 : tant que ce facteur est inconnu, le budget de pente
-reste hétérogène et aucun seuil ne s'y dérive (ADR-094, L220).
+Objectif : **S139-1** — rendre le budget de pente homogène. Chaque terme consomme le meilleur
+majorant exact de sa pente réelle (ADR-095) : `slope_max()` pour l'impact radial,
+`slope_envelope_tight()` pour la pression, `steepness_B·π` inchangé pour le fond ; et
+`max_slope` devient la limite physique **0,4488** (ADR-094) là où il tenait lieu de limite
+physique. **C'est le premier lot de la série qui change des bits publiés.**
 
 ### Plan
 
 - [x] **P1** — état réel, jeton, **plan déclaré et committé seul**.
-- [x] **P2** — monter le champ de pression minimal et échantillonner sa pente réelle. Cas à
-      **une seule case**, où le facteur doit valoir *exactement* le produit des deux
-      majorations connues — c'est le témoin qui dit que la sonde mesure ce qu'elle croit.
-- [x] **P3** — balayer ce dont le facteur dépend : direction de `k`, phase de `η`, nombre de
-      cases, taille de l'emprise. Est-il borné, ou l'emprise peut-elle le faire diverger ?
-- [x] **P4** — la borne resserrée `Σ|k_w|·|η|` (norme euclidienne au lieu des deux sommes de
-      valeurs absolues) : même coût, majorant rigoureux. Mesurer ce qu'elle récupère, et
-      **vérifier qu'elle majore toujours** — c'est une propriété de sûreté, pas de finesse.
-- [x] **P5** — décision et livrable : ce que A206 impose à S139-1.
-- [x] **P6** — rituel de fin (§6), jeton rendu, fusion `--ff-only`.
+- [ ] **P2** — **témoins avant**, et rien d'autre. Hachages de campagne des deux scénarios,
+      budgets des fixtures mixtes, frontières de refus. Relevés et committés **avant** toute
+      modification : sans cela, « ce qui a bougé » ne se démontre plus, il se raconte.
+- [ ] **P3** — migrer l'**impact radial** : `RadialImpact::new` compare `slope_max()`, et
+      `composition.rs` / `mixed_water.rs` somment `slope_max()`. Étage seul, tests verts.
+- [ ] **P4** — migrer la **pression** : `slope_envelope_tight()` dans `slope_floor` et dans
+      l'enveloppe de `mixed_water`. Étage seul, tests verts.
+- [ ] **P5** — poser **`max_slope = 0,4488`** dans les fixtures où 0,1 tenait lieu de limite
+      physique — **et pas dans celles qui exercent un refus**, où la valeur est choisie pour
+      refuser et doit le dire. Recevoir : quels refus se déplacent, quels bits bougent.
+- [ ] **P6** — livrable de réception, rituel de fin (§6), jeton rendu, fusion `--ff-only`.
 
 ### Notes de reprise
 
-Départ 57504f0 = master ; worktree `886155`. 270 tests/cinq ignorés.
+Départ d10cc45 = master ; worktree `886155`. 271 tests/cinq ignorés.
 
-Ce qui est établi et n'est pas à remesurer :
-- `slope[i] = -Σ weighted_k[i]·(η_re·sin φ_i + η_im·cos φ_i)`, `φ` dépendant du point
-  (`spectral_pressure.rs`, `Slot::accumulate`) ; l'enveloppe somme
-  `(|kx_w|+|ky_w|)·(|η_re|+|η_im|)`.
-- les deux majorations sont indépendantes et chacune vaut 1 à √2 : `|kx|+|ky| ≥ |k|` selon la
-  direction, `|Re|+|Im| ≥ |η|` selon la phase. Produit dans [1 ; 2] **pour une seule case**.
-- contrairement à `ρ = 1,7950713` (S139), qui est fixé par une forme spectrale figée, ce
-  facteur dépend de ce que l'appelant publie : c'est la thèse à confirmer ou à réfuter.
+Sites à migrer, relevés avant de commencer :
+- `composition.rs:67` — `bound += field.slope_bound()` ; **publie** `base.steepness = bound/π`,
+  donc c'est ce site qui change des bits publiés, pas seulement une frontière de refus ;
+- `mixed_water.rs:172` et `:249` — `slope_bound()` dans `slope_floor` et dans l'enveloppe ;
+- `mixed_water.rs:175` et `:268` — `slope_envelope()`, mêmes deux fonctions ;
+- `radial_impact.rs` — `if slope > medium.max_slope { Steepness }` dans `new`.
 
-Thèse de travail, à vérifier et non à supposer : le conservatisme se **décompose** en un facteur
-de forme (L1 contre euclidien, borné par 2, éliminable sans coût) et un facteur de phase (les
-phases ne s'alignent pas toutes sur une emprise bornée, non éliminable). Si c'est vrai, S139-1 a
-une voie : resserrer la borne au lieu de chercher un facteur par couche.
+Reproduisent la formule et suivront : `tests_mixed_water.rs:299, 430, 432, 752` et
+`examples/receive_mixed.rs:471`. Ce ne sont pas des bits gelés mais des recalculs parallèles —
+ils doivent rester d'accord avec la bibliothèque, c'est leur seul rôle.
 
-Piège à éviter : conclure d'un balayage 2D trop grossier que le maximum est plus bas qu'il ne
-l'est — même piège qu'en S139, et il rend la borne trop permissive dans le sens dangereux.
+Ne bougent pas : `slope_envelope()` elle-même reste publiée et testée (`tests_pressure_multi`,
+`restart_multisource` comparent deux chemins entre eux, pas des constantes) ; `bound_pressure.rs`
+la retient comme métadonnée de préparation — à vérifier en P4, c'est peut-être un cinquième site.
 
-P2-P5 : sonde `enveloppe_pression` (7 sections), `slope_envelope_tight()` + test d'encadrement,
-ADR-095, ENVELOPPE-PRESSION-S140, note corrective sur ADR-094, post-scriptum sur L220.
-271 tests/cinq ignorés.
+Piège à éviter : changer les quatre sites et la valeur du seuil dans la même étape. Les refus se
+déplacent alors pour deux raisons à la fois, et plus rien ne dit laquelle. **Un étage par
+commit**, tests verts entre chaque.
 
-Ce que la thèse de départ avait de faux : je pensais chercher **un** facteur. Il y en a deux, de
-natures opposées, et c'est toute la réponse — forme (borné par 2, éliminé exactement) et
-alignement (non borné, dépend de l'emprise de l'hôte). L222.
-
-Impasse à ne pas réexplorer : rétrécir l'emprise **autour de l'origine** ne fait pas diverger le
-facteur. La phase y vaut zéro, la réponse a `|η_re|/|η_im| = 0,0856`, donc son maximum est à
-0,0136 tour de l'origine et toute emprise centrée le contient. Il faut décentrer, et de préférence
-sur un zéro du champ (section 2bis de la sonde le montre en douze lignes).
-
-Pour S141 sans relire : S139-1 substitue `slope_envelope_tight()` à `slope_envelope()` dans
-`mixed_water::slope_floor` (ligne ~175) et dans le budget de `composition.rs` (~67), et pose
-`max_slope = 0,4488` dans les fixtures. **C'est le premier lot de la série qui change des bits** :
-les refus se déplacent dans le sens permissif, les campagnes de hachage bougent. Découper en
-étapes courtes, et faire un témoin avant/après par scénario — pas un seul hachage global, qui ne
-dirait pas *lequel* a bougé.
+Deuxième piège, plus coûteux : accepter un hachage qui bouge sans savoir dire pourquoi. Un
+hachage global ne dit pas *lequel* des scénarios a changé — relever par scénario en P2.
