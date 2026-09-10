@@ -73,7 +73,7 @@ pas à changer. ADR-082 exige qu'un nom de refus désigne ce qu'il faut revoir.
       « emprise étroite » ? S140 dit que la pente réelle d'une pression ne se calcule pas, elle
       se cherche — si c'est vrai ici, un refus `Footprint` serait un nom qu'on ne peut pas
       justifier, et ADR-082 refuse autant un nom faux qu'un nom vague.
-- [ ] **P3** — peser les réparations à la lumière de P2, et écrire la pesée. Nommer le cas ;
+- [x] **P3** — peser les réparations à la lumière de P2, et écrire la pesée. Nommer le cas ;
       publier de quoi calculer sa marge ; rendre la marge observable sur les points de
       l'appelant. Le critère reste celui de S143 : **qu'est-ce qui aurait aidé quelqu'un qui
       se fait refuser sans comprendre**.

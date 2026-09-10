@@ -69,3 +69,33 @@ Le premier est une **faute d'entrée de l'hôte** — un paramètre invalide ; l
 sur le champ**. Les deux portent le même nom, et `mixed_water` comme `bound_pressure` reproduisent
 le motif. C'est exactement le fourre-tout qu'ADR-082 a démonté ailleurs, resté ici parce que rien
 ne l'a rouvert depuis.
+
+## 6. La pesée
+
+Le critère est celui de S143 : **qu'est-ce qui aurait aidé quelqu'un qui se fait refuser sans
+comprendre.**
+
+| voie | ce qu'elle donne | coût | retenue |
+|---|---|---|---|
+| fermer A208 sans rien faire | rien | nul | **non** — §2 montre qu'un diagnostic exact est possible |
+| `Footprint` | un nom | faible | **non** — il attribue une cause que la bibliothèque ne peut pas établir (§3) |
+| publier le rapport des deux enveloppes | le facteur de forme | faible | **non** — périmé, S141 l'a déjà retiré (§4) |
+| **distinguer les causes décidables par des noms** | *ce n'est pas ta pente ici, c'est le majorant* | 3 énumérations, 6 essais | **oui** |
+| une fonction de diagnostic détaillée | la marge par couche | moyen | **non** — surface publique sans lecteur (ADR-082) ; l'hôte a déjà les deux enveloppes et `sample` |
+
+**Les constructions ne sont pas concernées.** `RadialImpact::new` et `ImpactField::new` connaissent
+**exactement** la pente réelle maximale de leur champ — c'est la borne L1 divisée par le rapport
+mesuré — donc leur `Steepness` désigne bien la pente, et il dit vrai. A208 ne portait que sur les
+budgets, où la part de pression dépend de l'emprise.
+
+## 7. Les trois noms
+
+| cause | nom | ce qu'il faut revoir |
+|---|---|---|
+| `max_slope` non fini ou négatif | **`MaxSlope`** | le paramètre fourni par l'hôte |
+| la pente réelle **au point** dépasse `max_slope` | **`Slope`** *(sens resserré)* | le champ, qui est vraiment trop raide ici |
+| la pente au point tient, seule la somme des majorants dépasse | **`SlopeEnvelope`** | l'enveloppe : emprise publiée, spectre, ou marge acceptée |
+
+Le troisième nom ne dit pas *pourquoi* l'enveloppe est large — la bibliothèque ne le sait pas —
+mais il dit **où regarder**, ce qu'ADR-082 demande. Et il retire au premier ce qu'il n'aurait
+jamais dû porter.
