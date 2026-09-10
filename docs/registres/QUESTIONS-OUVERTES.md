@@ -1363,3 +1363,10 @@ entrée par entrée. Le fil reprend ci-dessous.
   et sa cuisson reproductible, recevoir la fixture [0,5fp;4fp], gamma 1/3,3/7 et N32/64/128/256
   contre S147, puis pente, B+W et rejeu. Garder le constructeur uniforme comme témoin historique.
   Aucune migration implicite des scénarios ; le choix des bandes du jeu reste à instruire.
+### S148 — Fond spectral construit
+
+- **S147-1 : partielle**, ADR-101. Cuisson explicite et réception ponctuelle B+impact réalisées.
+- **S148-1 : ouverte, prochaine S149.** Transport versionné de la recette et cycle hôte spectral
+  avec sauvegarde/restauration ; comparer au chemin direct, puis mesurer le coût B+W.
+- **A212 : partielle.** Bandes/directions du jeu, statistiques multi-graines et réception
+  pression/mixte restent ouvertes. N32 n'est pas reçu par transposition de B1.

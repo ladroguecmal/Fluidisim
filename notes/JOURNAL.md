@@ -7630,3 +7630,36 @@ Le sillage W4 puis B2 restent la trajectoire système d'ADR-054. Audit S138 des 
 et calibrations B10 restent ouverts. Aucun arbitrage technique renvoyé à l'humain.
 Infrastructure inchangée : aucun distant configuré ; sort des anciennes branches S35-7 ouvert.
 Les anciennes copies doivent rejoindre master avant reprise ; aucun travail non committé laissé.
+---
+
+## S148 — 2026-09-10 — Le fond spectral devient évaluable
+
+**Entrée :** master99cb421, toutes les copies propres, jeton libre. S147-1 portée par
+la passation. Plan committé seul, aucun worktree créé ; outils fichiers/git/cargo disponibles.
+**Produit :** [ADR-101](../docs/adr/ADR-101-cuisson-du-fond-spectral.md),
+[FOND-SPECTRAL-S148](../docs/validation/FOND-SPECTRAL-S148.md), cuisson JONSWAP V1,
+Background::from_spectrum et cinq essais ciblés. Fond historique et scénarios conservés.
+
+La cuisson partage l'exponentielle S97 sans changer ses opérations ; logarithme par série,
+directions PhaseQ32, intégration en fréquence indépendante de l'oracle S147 en log-fréquence.
+Poids et diagnostics précèdent la publication de l'objet immuable, sur tableaux fixes.
+Background porte sa gravité ; les trois compositions B+W comparent cette donnée au milieu W,
+remplaçant leur hypothèse de9,81. Cela évite qu'une recette à gravité injectée soit reçue seule
+puis composée dans un milieu différent. La garde a été exercée avec9,81 et3, sortie conservée.
+
+Sur douze recettes, erreur maximale m1/m2/m4 **0,185274 %**, Hs et pic reçus. Hash nominal
+cuisson26695af7314e21db, champ2f32c548a0ff89d2, identiques debug/release. Refus de paramètres,
+allocation après seal, dérivée temporelle, pente et impact non nul reçus. Rejeu depuis recette
+en mémoire seulement : aucun codec nouveau, pas de sauvegarde complète du service revendiquée.
+
+**Portée : S147-1 et A212 partielles.** Le candidat existe et se compose ; restent le transport
+versionné de recette, le cycle hôte avec sauvegarde, pression/mixte, les statistiques multi-graines,
+les coûts et les bandes/directions du jeu. **S148-1**, prochaine S149 : cycle spectral complet,
+recette transportée explicitement, rejeu puis coût B+W. W4/sillage et B2 restent la trajectoire.
+BILAN-S145 suivi : B1 S146, clôture S63-1 S147 ; aucun retour aux audits comme préalable.
+
+Aucun angle indépendant ajouté : le reliquat est celui d'A212. Pas de nouvelle leçon artificielle ;
+L230 appliquée aux diagnostics avant normalisation, L137 à l'exponentielle partagée.
+I-01 à I-18 relus, aucun amendé ; conformité interplateforme toujours à recevoir.
+Infrastructure inchangée : aucun distant, S35-7 reste ouverte ; anciennes copies en retard.
+**Vérification finale :** workspace282 réussis/cinq ignorés, zéro échec ; quatre avertissements préexistants du harnais. Cinq essais ciblés également release. Décomptes101 ADR,212 angles,18 invariants,6 SPEC,23 cas ; diff sans erreur d'espacement.

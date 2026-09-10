@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S148 — en cours
+Session : S148 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S147-1, construire et recevoir un fond spectral explicite selon ADR-100.
 
@@ -67,7 +67,7 @@ Objectif : S147-1, construire et recevoir un fond spectral explicite selon ADR-1
 - [x] **P1** — état réel, lectures de reprise, jeton et plan committé seul.
 - [x] **P2** — arrêter le contrat de recette et de cuisson bornée/reproductible ; écrire le constructeur explicite sans migrer la voie historique ; tests des coefficients et refus.
 - [x] **P3** — réception indépendante contre S147, moments et pics, phases/dérivées, B+W et rejeu ; témoins historiques et debug/release.
-- [>] **P4** — suite complète, rapport, angles/leçons/actions, journal, index/décomptes et passation ; rituel de fin, jeton rendu.
+- [x] **P4** — suite complète, rapport, angles/leçons/actions, journal, index/décomptes et passation ; rituel de fin, jeton rendu.
 
 ### Notes de reprise
 
@@ -82,3 +82,5 @@ BILAN-S145 : B1 exécuté S146, S63-1 close S147 ; W4/sillage puis B2 restent la
 P2 : cuisson V1 construite, quatre tests ciblés debug reçus. Gravité portée par B et vérifiée dans les trois compositions.
 
 P3 : cinq tests debug/release reçus ; ADR-101 et rapport. Rejeu depuis recette mémoire seulement ; codec/cycle complet reste S148-1.
+
+P4 :282 tests/cinq ignorés, rituel exécuté ;101 ADR,212 angles,18 invariants,6 SPEC,23 cas. Jeton rendu ; suite S149/S148-1. A212 partielle, aucune nouvelle leçon ni angle indépendant.

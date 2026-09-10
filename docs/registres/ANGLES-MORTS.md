@@ -1890,3 +1890,7 @@ reçu contre intégrales fermées et raffinements (SPECTRE-FOND-S147). Normalise
 la perte des moments dérivés : à gamma=3,3, 2fp retient 95,07 % de m0 mais 75,86 % de m2.
 Le constructeur spectral et sa réception restent **S147-1**, prochaine production S148.
 Aucun nouvel angle indépendant : cette conséquence relève de la forme déjà suivie par A212.
+**Suivi A212 — S148 : partielle.** ADR-101 construit le candidat spectral explicite, cuisson
+sans libm et gravité portée par B. Moments/pic, dérivée, pente et impact non nul reçus ; hashes
+locaux debug/release identiques. Cycle hôte/transport de recette S148-1, statistiques et choix
+des bandes/directions restent ouverts. Voir FOND-SPECTRAL-S148.

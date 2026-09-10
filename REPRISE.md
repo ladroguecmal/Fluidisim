@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 14:22 +02:00
+JETON            : libre
+Battement        : 2026-09-10 14:24 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S148
-Dernière session : S147 — S63-1 close, ADR-100 spectre explicite ; 277 tests/cinq ignorés
-Session suivante : S148 — S147-1, construire le candidat spectral de B (ADR-100), puis W4/B2
+Session en cours : aucune
+Dernière session : S148 — fond spectral construit ; 282 tests/cinq ignorés
+Session suivante : S149 — S148-1, cycle hôte spectral et transport de recette, puis coût B+W et W4/B2
 
 **S147 : travail directement sur master.** Les anciennes copies, dont 886155, doivent rejoindre
 master avant toute reprise ; aucune copie créée, toutes propres au démarrage.
@@ -173,7 +173,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 100 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 101 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -192,6 +192,19 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S148 — 2026-09-10 :** [ADR-101](docs/adr/ADR-101-cuisson-du-fond-spectral.md),
+[FOND-SPECTRAL-S148](docs/validation/FOND-SPECTRAL-S148.md). Candidat JONSWAP construit,
+cuisson sur tableaux fixes sans libm, Background::from_spectrum. Gravité portée par B,
+comparée dans les trois compositions. Douze recettes reçues contre S147 : erreur maximale
+m1/m2/m4 de0,185274 %, pic et Hs reçus. Impact non nul et refus de gravité reçus ; hashes
+locaux debug/release identiques. **282 tests réussis/cinq ignorés**, cinq nouveaux.
+101 ADR,212 angles,18 invariants,6 spécifications,23 cas ; aucun banc supplémentaire.
+**S147-1/A212 partielles** : rejeu reçu depuis recette mémoire ; codec/cycle complet,
+pression/mixte, statistiques et coûts restent ouverts. **Suite S149 : S148-1**, transport
+versionné de recette et cycle hôte spectral, puis coût B+W. W4/sillage et B2 restent la
+trajectoire ; BILAN-S145 suivi (B1 S146, S63-1 S147). Aucun arbitrage humain nouveau.
+
 **S147 — 2026-09-10 :** [ADR-100](docs/adr/ADR-100-spectre-de-fond-et-bande-explicite.md),
 [SPECTRE-FOND-S147](docs/validation/SPECTRE-FOND-S147.md).
 **S63-1/S145-2 closes** sur les preuves existantes de W, sans verdict B2 ni coupure W/δ.

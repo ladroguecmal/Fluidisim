@@ -36,3 +36,5 @@ des statistiques sur fenêtres finies, des coûts, de la composition pression/mi
 nouveau fond ou des plateformes distantes. S147-1 et A212 restent partielles, suite S148-1.
 La gravité des trois compositions a été raccordée ; le témoin à gravité différente exerce
 le chemin impacts. Les chemins pression/mixte gardent leurs essais historiques.
+
+Suite complète workspace : **282 réussis/cinq ignorés**, zéro échec ; quatre avertissements préexistants du harnais. Aucun hash historique renouvelé.

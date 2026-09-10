@@ -16,6 +16,14 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 4. Le reste selon le besoin.
 
 ## Décisions d'architecture
+
+**S148 :** [ADR-101](adr/ADR-101-cuisson-du-fond-spectral.md),
+[FOND-SPECTRAL-S148](validation/FOND-SPECTRAL-S148.md). Candidat JONSWAP évaluable,
+cuisson sans libm, gravité portée par B et vérifiée en composition. Douze recettes reçues,
+écart maximal des moments0,185274 %, cinq nouveaux essais debug/release.
+S147-1/A212 partielles : cycle hôte/transport de recette et statistiques à recevoir.
+**Suite S149 : S148-1**, cycle spectral complet puis coût B+W ; W4/B2 restent la trajectoire.
+101 ADR,212 angles,18 invariants,6 spécifications,23 cas ; aucun banc supplémentaire.
 **S147 :** [ADR-100](adr/ADR-100-spectre-de-fond-et-bande-explicite.md),
 [SPECTRE-FOND-S147](validation/SPECTRE-FOND-S147.md), SPEC-001 §1 bis.
 **S63-1/S145-2 closes** : [constat de dispersion W](validation/CLOTURE-S63-1-S147.md).
