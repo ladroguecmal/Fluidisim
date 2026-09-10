@@ -80,7 +80,7 @@ sens dans le type, ou retirer un champ que plus personne ne construit.
 - [x] **P4** — **constater l'état réel du champ** avant d'en décider : qui le construit, quels
       ADR le documentent, ce qu'il porte que le candidat radial ne porte pas. Une décision de
       retrait ne se prend pas sur le seul fait qu'aucun appelant ne subsiste dans le dépôt.
-- [ ] **P5** — décider et appliquer : ADR, migration ou retrait. Témoins avant/après si des bits
+- [x] **P5** — décider et appliquer : ADR, migration ou retrait. Témoins avant/après si des bits
       bougent, comme en S141.
 - [ ] **P6** — rituel de fin (§6), jeton rendu, fusion `--ff-only`.
 

@@ -53,12 +53,21 @@ struct Mode {
 /// Elle n'est **pas** un défaut imposé : le milieu reste injecté (I-14 exige la provenance, pas
 /// la valeur).
 pub const BREAKING_SLOPE: f32 = core::f32::consts::PI / 7.0;
+/// Rapport entre la borne L1 `Σ a_m·k_m` d'`ImpactField` et sa **pente réelle** maximale.
+/// **Mesuré** (S142, ADR-096), pas calibré : `side = 4λ` et les modes sont indexés par des
+/// entiers, donc le motif est identique à toute longueur d'onde — vérifié invariant sur λ de 0,5
+/// à 32 m et E de 1e-4 à 10 J, stable dès 25 points de grille par côté. Le maximum est atteint à
+/// `t = birth`, en `[0 ; 0,0733]·side`.
+///
+/// Homonyme de `radial_impact::SLOPE_L1_RATIO` — même grandeur, autre champ, autre valeur
+/// (1,795071 là-bas). Le chemin de module dit lequel, et c'est voulu : deux constructeurs du
+/// même crate ne doivent pas nommer différemment la même distinction (ADR-081).
+pub const SLOPE_L1_RATIO: f32 = 1.701_591;
 /// Toutes les valeurs du milieu sont injectées.
 ///
-/// **S141 :** `max_slope` borne désormais la pente **réelle** du champ pour `RadialImpact` —
-/// voir `BREAKING_SLOPE` pour sa provenance et `SLOPE_L1_RATIO` pour la conversion. Attention,
-/// `ImpactField` (plus bas) lui compare toujours sa borne L1 : le même champ de ce type ne
-/// signifie donc pas la même chose selon le champ qui le lit. C'est **A209**.
+/// **S141-S142 :** `max_slope` borne la pente **réelle** du champ, pour les deux champs de ce
+/// crate — voir `BREAKING_SLOPE` pour sa provenance et les deux `SLOPE_L1_RATIO` pour la
+/// conversion propre à chacun.
 #[derive(Clone, Copy)]
 pub struct Medium {
     pub gravity: f32,
@@ -147,12 +156,10 @@ impl ImpactField {
         if !slope.is_finite() {
             return Err(Error::NotRepresentable);
         }
-        // S141, A209 : cette comparaison est restée **L1**, contrairement à celle de
-        // `RadialImpact`. Le rapport entre cette borne et la pente réelle de ce champ-ci n'a
-        // jamais été mesuré, et le migrer sans l'avoir mesuré remplacerait un facteur inconnu
-        // par un autre. Ce champ n'est plus construit que par la sonde `probe_degenerate` ;
-        // le mesurer ou le retirer est une décision, pas un effet de bord de cette migration.
-        if slope > medium.max_slope {
+        // S142, ADR-096 : la pente **réelle**, comme dans `RadialImpact::new`. Le rapport de ce
+        // champ-ci a été mesuré avant d'être appliqué (A209) — migrer sans mesurer aurait
+        // remplacé un facteur inconnu par un autre.
+        if slope / SLOPE_L1_RATIO > medium.max_slope {
             return Err(Error::Steepness);
         }
         Ok(Self { event, modes, side })
@@ -239,6 +246,53 @@ mod tests {
             above_surface: true,
         })
         .unwrap()
+    }
+    /// S142, ADR-096 : la frontière de ce champ-ci est désormais la pente physique, comme celle
+    /// du candidat radial depuis S141. Même essai bout à bout — dichotomie sur l'énergie jusqu'au
+    /// dernier champ admis avec `max_slope = BREAKING_SLOPE`, puis mesure de sa pente réelle sur
+    /// une période spatiale complète. Les deux champs disent maintenant la même chose de
+    /// `max_slope`, et c'est cet essai qui l'atteste plutôt qu'un commentaire.
+    #[test]
+    fn the_admitted_limit_field_sits_exactly_at_stokes_steepness_s142() {
+        let medium = Medium {
+            gravity: 9.81,
+            density: 1025.0,
+            depth: 40.0,
+            max_slope: BREAKING_SLOPE,
+        };
+        let build = |energy_j: f32| {
+            let mut v = *source().data();
+            v.energy_j = energy_j;
+            ImpactField::new(WaveEvent::impact(v).unwrap(), medium)
+        };
+        let (mut bas, mut haut) = (1e-3f32, 1e9f32);
+        assert!(build(bas).is_ok() && build(haut).is_err());
+        for _ in 0..60 {
+            let milieu = 0.5 * (bas + haut);
+            if build(milieu).is_ok() {
+                bas = milieu;
+            } else {
+                haut = milieu;
+            }
+        }
+        let limite = build(bas).expect("le dernier admis construit");
+        let side = limite.side();
+        let mut pente = 0.0f32;
+        for i in 0..=400u32 {
+            for j in 0..=400u32 {
+                let p = [
+                    side * i as f32 / 400.0,
+                    side * j as f32 / 400.0,
+                ];
+                let s = limite
+                    .sample(FrameId(2), 3, p, SimTime(10))
+                    .expect("dans le domaine");
+                pente = pente.max((s.slope[0] * s.slope[0] + s.slope[1] * s.slope[1]).sqrt());
+            }
+        }
+        println!("S142 energie_limite={bas:.6e} pente={pente:.6} stokes={BREAKING_SLOPE:.6}");
+        assert!(pente <= BREAKING_SLOPE);
+        assert!(pente >= BREAKING_SLOPE * (1.0 - 1e-3));
     }
     fn medium() -> Medium {
         Medium {

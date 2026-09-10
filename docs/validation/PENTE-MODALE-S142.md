@@ -65,3 +65,37 @@ Ce que les décisions en disent :
 valait quand les deux constructeurs disaient la même chose. Depuis S141 ils ne la disent plus, et
 c'est précisément ce qu'ADR-081 interdit. Le lecteur qui manquait à ADR-082 existe désormais : il
 lit `Medium::max_slope`.
+
+## 4. Décision et réception
+
+[ADR-096](../adr/ADR-096-les-deux-champs-disent-la-meme-chose-de-max-slope.md) : `ImpactField::new`
+compare la pente réelle, la constante est publiée en homonyme volontaire de celle du candidat
+radial — `impact_field::SLOPE_L1_RATIO = 1,701591` en regard de
+`radial_impact::SLOPE_L1_RATIO = 1,795071` — et le champ **n'est pas retiré**, ADR-059 le
+conservant délibérément.
+
+L'essai de réception reprend mot pour mot celui de S141 :
+
+```
+energie_limite = 5,720523e3 J    pente = 0,448737    stokes = 0,448799
+```
+
+Écart relatif **1,4e-4**. Les deux champs du crate placent désormais leur champ limite à la
+cambrure limite de Stokes.
+
+**Aucun hachage touché, harnais H1 inchangé** : ce champ n'a aucun consommateur de production. La
+même migration coûtait quatre hachages déplacés en S141 ; ici elle est gratuite — et c'est
+précisément ce qui rendait la dispense d'ADR-082 tentante, alors que ce n'est pas le coût qui
+décidait mais la cohérence du vocabulaire (ADR-081).
+
+## 5. Ce qui reste
+
+- **A208** — le refus ne désigne pas l'emprise, alors que c'est ce que l'hôte peut changer.
+  Ouverte depuis S140, non instruite en S141 ni ici.
+- La condition de régime d'`ImpactField` est nommée `Medium`, ce qui est faux de la même façon
+  que les bornes l'étaient (noté par ADR-082 §65, toujours vrai).
+- Les deux constantes `SLOPE_L1_RATIO` ne se déduisent pas l'une de l'autre : 1,795071 pour une
+  quadrature de Hankel, 1,701591 pour 40 modes cartésiens. **Un troisième champ aurait la
+  sienne**, et rien dans le crate n'oblige aujourd'hui un futur champ à la mesurer avant de
+  comparer quoi que ce soit à `max_slope`. C'est le prochain défaut de cette famille, et il n'a
+  pas encore de nom.

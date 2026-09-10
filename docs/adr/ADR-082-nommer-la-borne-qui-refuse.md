@@ -97,3 +97,16 @@ presque partout `Reach` — le produit `hi · radius` qui dépasse la portée ta
 résolution ne mord que dans le coin du plus petit rayon. L'attribution était plausible et
 fausse ; elle avait été faite en lisant une carte dont toutes les cases portaient `Domain`,
 ce qui est exactement le défaut que cet ADR corrige.
+
+## Note du 2026-09-10 (S142)
+
+La dispense du §65 — ne pas toucher `ImpactField`, « il n'est plus le chemin actif, et le renommer
+sans consommateur ajouterait du travail sans lecteur » — **a cessé de s'appliquer**, sans avoir été
+fausse. Elle valait tant que les deux constructeurs disaient la même chose de `max_slope` ; S141 a
+fait diverger leurs frontières, et le lecteur qui manquait est apparu : quiconque lit
+`Medium::max_slope`.
+
+`ImpactField::new` compare désormais la pente réelle, avec sa propre constante mesurée
+(1,701591). Voir [ADR-096](ADR-096-les-deux-champs-disent-la-meme-chose-de-max-slope.md).
+Le reste du §65 tient : sa condition de régime est toujours nommée `Medium`, et c'est toujours
+faux de la même façon.
