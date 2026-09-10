@@ -69,7 +69,7 @@ recevoir contre l'évolution totale. Pas de δ 3D ni de seuil de bascule dans ce
 - [x] **P2** — préciser variables conservatives, flux croisés, pas et frontières ; choisir
       un instrument minimal compatible avec le solveur total existant. Déclarer les réceptions
       et la contre-épreuve avant le calcul. Synchroniser les copies propres au jeton occupé.
-- [ ] **P3** — construire l'intégration du fond et du résidu, sans soustraction a posteriori
+- [x] **P3** — construire l'intégration du fond et du résidu, sans soustraction a posteriori
       du total ; recevoir contre la référence et retirer volontairement un terme de couplage.
 - [ ] **P4** — campagne de raffinement et cas limites, limites de portée, verdict et suivi
       A218/A50. ADR seulement si décision nouvelle. Tests adaptés et bilan numérique.
@@ -89,3 +89,8 @@ A217 reste partielle, A216 reportée. BILAN-S145 suivi par la poursuite B4.
 P2 : RESIDU-COUPLE-S163 déclare flux physique résiduel, correction de viscosité Rusanov,
 deux fonds (évolué/figé), sources, RK2, critères et trois contre-épreuves avant calcul.
 Référence Shallow1D configurée en Rusanov, ordre un espace, RK2 ; copie conservée sans modification.
+
+P3 : intégration Q,d distincte construite dans examples/support/residu_shallow.rs ;
+aucun appel à Shallow1D dans le véhicule. À N240, accord h<=5,93e-15 normalisé,
+contre-épreuves physiques/numériques/source toutes refusées. 2 nouveaux tests propres
+à l'exemple reçus en debug (+3 tests importés du host) ; campagne release reçue.
