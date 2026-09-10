@@ -17,6 +17,18 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S157 :** [ADR-108](adr/ADR-108-pas-de-garde-fou-sans-tolerance-declaree.md),
+[LOI-DUREE-S157](validation/LOI-DUREE-S157.md). La loi en durée d'un sillage **n'existe pas** dans la
+fenêtre accessible : la dégradation est graduelle, l'instant limite hérite de la tolérance choisie
+(**L236**), et le plan d'expérience à produit réduit constant était **dégénéré** — `sigma` et `dk` liés,
+donc leurs exposants non identifiables (**L235**). Pas de garde-fou : encoder un seuil gèlerait dans l'API
+une tolérance que personne n'a spécifiée. Publiée à la place, une estimation conservatrice avec sa
+dispersion. **A214 change de nature** : il manque une spécification, pas une mesure, et deux bornes
+décidées séparément — 64 s, 512 — se conjuguent pour fermer la question. **L237** sur les battements.
+Aucun code modifié,298 tests/cinq ignorés.
+108 ADR,214 angles,237 leçons,18 invariants,6 SPEC,23 cas, deux bancs partiels.
+**Suite S158 : S157-1**, sortir la mesure de sa dégénérescence, ou demander la tolérance.
+
 **S156 :** [ADR-107](adr/ADR-107-le-domaine-d-un-sillage-se-deduit-de-sa-recette.md),
 [SILLAGE-DOMAINE-S156](validation/SILLAGE-DOMAINE-S156.md). Le bilan énergétique d'un sillage
 prolongé se conserve au bit près — et c'est **vide**, la rotation des modes le garantit (**L233**).

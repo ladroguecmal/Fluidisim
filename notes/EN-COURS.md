@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S157 — en cours
+Session : S157 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : S156-1, A214. Remplacer **deux encadrements par une loi**. S156 a montré que le pas
 radial borne la durée d'un sillage par périodicité, mais n'a mesuré que deux seuils — radial 128
@@ -77,7 +77,7 @@ facteur 2,5 sur le second. Sans loi, pas de garde-fou : c'est exactement ce que 
       **même produit réduit** `sigma*cutoff = 6` et donc la même forme spectrale à échelle près.
 - [x] **P5** — décider : loi écrite si elle tient sur les deux familles, refus argumenté sinon.
       Garde-fou reçu seulement si la loi le mérite — A214 dit pourquoi un garde faux est pire.
-- [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
+- [x] **P6** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -199,3 +199,18 @@ specification, et deux bornes de grammaire (64 s par ADR-106, 512 par ADR-097) l
 peut mesurer. C'est ce qu'une session de mesure a rapporte.
 Aucun code modifie, donc aucun test nouveau : un test ne peut pas temoigner d'un refus de
 construire. Les 298 tests existants restent la seule verification, et ils passent.
+
+P6 — LOI-DUREE-S157, ADR-108, suivi d'A214, L235, L236, L237, journal, index, README, REPRISE,
+jeton rendu, ff-only. Aucun code modifié, 298 tests/cinq ignorés.
+
+Pour S158 sans relire : deux voies, et la seconde est probablement la bonne.
+1. Sortir la mesure de sa dégénérescence — faire varier `cutoff` et `sigma` **séparément**, ce qui
+   revient à comparer des formes spectrales différentes et demande de dire d'abord ce qu'on
+   compare. La sonde `wake_law` prend déjà `(sigma, cutoff)` en paramètres, donc c'est peu de
+   travail ; le travail est de justifier la comparaison, pas de la coder.
+2. **Demander la tolérance plutôt que la mesurer.** C'est le seul des trois manques qui ne soit
+   pas fermé par une décision antérieure, et une tolérance déclarée transformerait la courbe
+   publiée en borne utilisable sans mesure nouvelle. Le consommateur est ici B2, et personne
+   n'a écrit ce qu'il tolère sur un champ de sillage.
+Ne pas recommencer : la dichotomie (courbe non monotone), l'écart L2 global (mesure la fenêtre
+d'échantillonnage), la comparaison à la résolution voisine (attribue la panne à la mauvaise).

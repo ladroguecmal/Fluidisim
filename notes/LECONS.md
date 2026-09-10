@@ -3620,3 +3620,55 @@ Corollaire pratique : une borne écrite comme un nombre — « le domaine vaut 4
 l'information dont le lecteur suivant aura besoin. Ce qui se transmet est la **loi et son
 paramètre** : « le rayon est proportionnel à `angular` ; il vaut 45 m pour 128 ». Même remarque
 qu'en [[L231]], où une constante en secondes cachait un nombre de bits.
+
+## L235 — Un plan d'expérience où deux variables sont liées ne peut pas les séparer
+
+*(S157)* Pour éprouver la dépendance à la largeur de source, j'ai balayé `sigma` en gardant le
+produit réduit `sigma·cutoff` constant — le bon réflexe, puisque c'est ce qui conserve la forme
+spectrale. Mais le pas radial vaut `dk = cutoff/radial`, donc à produit constant
+`dk = 6/(sigma·radial)` : **`sigma` et `dk` n'étaient plus des variables indépendantes**.
+
+L'ajustement libre `t = C·sigma^p·dk^q` rassemblait alors les sept points à un facteur 1,38, avec
+un exposant `q = −1,04` séduisant parce que proportionnel à la période spatiale. Trois paramètres
+pour sept points liés ajustent n'importe quoi, et le bon chiffre donnait au résultat toute
+l'apparence d'une loi.
+
+La vérification tient en une ligne : **écrire les variables du plan et regarder si l'une se déduit
+des autres.** Si oui, aucun ajustement ne séparera leurs effets, quelle que soit la qualité du
+résidu. En variables réellement indépendantes — `sigma` et `radial` — l'exposant valait 0,74 pour
+une source et 1,20 pour une autre, ce qui dit franchement qu'il n'y a pas de loi de puissance.
+
+Le résidu d'un ajustement mesure la souplesse du modèle autant que la régularité des données.
+Voir [[L232]] : encore une façon de lire un bon chiffre pour un mauvais.
+
+## L236 — Un instant de rupture qui dépend du seuil n'est pas un instant de rupture
+
+*(S157)* Chercher « à partir de quand » une résolution cesse d'être valide suppose qu'il existe un
+instant à mesurer. Ici la dégradation est **graduelle** : la courbe monte, et l'instant qu'on en
+tire est celui de la tolérance qu'on a choisie. Le seuil de 10 % donnait 16 / 36 / 56 secondes,
+celui de 100 % donnait 32 / 46 / au-delà de la fenêtre — et l'exposant de la loi supposée passait
+de 0,90 à 0,63 au passage.
+
+Le signe à guetter est exactement celui-là : **si le résultat bouge quand la convention bouge, ce
+n'est pas le phénomène qu'on mesure, c'est la convention.** Il faut alors soit obtenir la
+convention de qui la subira — c'est ce qui manquait ici, personne n'ayant spécifié l'erreur
+acceptable —, soit publier la courbe entière plutôt qu'un point d'icelle.
+
+Corollaire pour les garde-fous : un refus à l'exécution gèle une tolérance dans l'API. Quand la
+tolérance n'est pas spécifiée, la coder revient à choisir à la place du consommateur la chose la
+plus lourde de conséquences. Voir ADR-108.
+
+## L237 — Écrire la valeur avant de lire l'horloge
+
+*(S157)* Deux battements faux en deux sessions : une minute d'avance en S156, dix minutes de
+retard en S157. La cause n'est pas l'étourderie, c'est l'**ordre des gestes** — j'écrivais la
+valeur dans le script, puis je lançais `date` dans la même commande pour « vérifier ». La valeur
+était donc décidée avant d'être connue, et la vérification arrivait trop tard pour servir.
+
+La règle du dépôt dit « le relever, jamais l'écrire de mémoire » (note S118). Elle ne vise pas la
+mémoire longue : elle vise ce geste-là, à trente secondes d'intervalle. **Lire, puis écrire ce
+qu'on a lu, dans cet ordre et en deux temps.**
+
+La généralisation dépasse le battement. Chaque fois qu'une valeur mesurable est écrite dans un
+script avant d'être mesurée, la mesure ne sert plus qu'à confirmer — et elle confirme rarement
+quelque chose qu'on aurait le courage de défaire.

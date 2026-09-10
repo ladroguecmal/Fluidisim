@@ -1949,3 +1949,14 @@ sur80m seulement. Aucun nouvel angle indépendant, A212 inchangée ; B2 reste pa
   Ce qui manque est peu cher : trois ou quatre points de plus par dichotomie sur l'instant de
   décrochage, et la dépendance à `sigma`. La sonde `wake_reach` existe. Suite S156-1.
   Voir [[L233]] et [[L234]].
+
+**Suivi S157 — A214 change de nature, elle ne se ferme pas.** Une session entière de mesure a
+établi qu'**il n'y a pas de loi à écrire** dans la fenêtre accessible : la dégradation est
+graduelle, l'instant limite hérite de la tolérance choisie — 16 / 36 / 56 s à 10 % d'excès contre
+32 / 46 / au-delà de 64 s à 100 % — et aucun groupement ne rassemble les mesures à mieux qu'un
+facteur 2,5. Il ne manque donc plus une mesure mais une **spécification** de l'erreur acceptable,
+et c'est le seul des trois manques qui ne coûte rien.
+Les deux autres sont fermés par des décisions prises pour d'autres raisons : la fenêtre de 64 s
+d'ADR-106 censure la source large, le plafond de 512 d'ADR-097 limite le bras de levier à deux
+doublements. **Deux bornes décidées séparément se conjuguent ici pour fermer une question**, et
+aucune des deux décisions ne pouvait le prévoir. Voir ADR-108, [[L235]], [[L236]].

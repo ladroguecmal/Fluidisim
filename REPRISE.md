@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 17:53 +02:00
+JETON            : libre
+Battement        : 2026-09-10 17:57 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S157 — la loi en durée du sillage (S156-1, A214)
-Dernière session : S156 — domaine du sillage mesuré ; 298 tests/cinq ignorés
-Session suivante : à fixer en fin de S157
+Session en cours : aucune
+Dernière session : S157 — pas de loi, refus argumenté ; 298 tests/cinq ignorés
+Session suivante : S158 — sortir la mesure de sa dégénérescence (S157-1)
 
 **Copie de travail S155** : worktree `claude/reprise-projet-2d3506`, remis en avance rapide sur
 master (1643232) au démarrage — il était resté à 041dfed, 80 commits en retard et rien d'unique,
@@ -196,6 +196,30 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S157 — 2026-09-10 :** [LOI-DUREE-S157](docs/validation/LOI-DUREE-S157.md),
+[ADR-108](docs/adr/ADR-108-pas-de-garde-fou-sans-tolerance-declaree.md). S156-1, A214.
+La session devait remplacer deux encadrements par une loi. **Elle n'existe pas dans la fenêtre
+accessible, et c'est le résultat.**
+**La dégradation est graduelle (L236)** : l'exposant vaut 0,63 à 0,93 selon la tolérance, et les
+deux rapports d'une même ligne diffèrent d'un facteur 1,5, ce qu'une loi de puissance interdit.
+Il n'y a pas d'instant de rupture à mesurer — seulement une courbe, dont l'instant qu'on tire est
+celui de la tolérance qu'on a choisie. Chercher un `t_max` unique était mal posé.
+**Le plan d'expérience était dégénéré (L235)** : à produit réduit `sigma·cutoff` constant,
+`dk = 6/(sigma·radial)`, donc `sigma` et `dk` ne sont pas indépendants. Un ajustement libre
+rassemblait sept points à 1,38 avec un exposant −1,04 séduisant — trois paramètres pour sept
+points liés ajustent n'importe quoi.
+Trois observables essayés, trois façons différentes de se tromper, dont un genou qui mesurait ma
+**fenêtre d'échantillonnage** et non le champ. Le bon observable est l'excès de champ proche.
+ADR-108 : **pas de garde-fou**, parce qu'encoder un seuil gèlerait dans l'API une tolérance que
+personne n'a spécifiée. Publiée à la place, hors du code, une estimation conservatrice
+`1,17 / (½√(g·sigma)·cutoff/radial)` avec sa dispersion de 2,5.
+**A214 reste ouverte et change de nature** : il manque une spécification, pas une mesure. Deux
+bornes décidées séparément pour d'autres raisons — les 64 s d'ADR-106, les 512 d'ADR-097 — se
+conjuguent pour fermer la question.
+Aucun code modifié,298 tests/cinq ignorés.108 ADR,214 angles,237 leçons,18 invariants,6 SPEC,23 cas.
+Suite S158 : S157-1, faire varier `cutoff` et `sigma` séparément, ou demander la tolérance plutôt
+que la mesurer. Restent ouverts A213, la coupure W/δ, lambda_cut, la bathymétrie, le multiplateforme.
 
 **S156 — 2026-09-10 :** [SILLAGE-DOMAINE-S156](docs/validation/SILLAGE-DOMAINE-S156.md),
 [ADR-107](docs/adr/ADR-107-le-domaine-d-un-sillage-se-deduit-de-sa-recette.md). S155-1, la branche

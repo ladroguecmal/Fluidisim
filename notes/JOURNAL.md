@@ -7912,3 +7912,51 @@ croire à une session active.
 
 **Suite S157 :** S156-1, établir la loi en durée au lieu de l'encadrer, et sa dépendance à `sigma`.
 C'est ce qui manque pour qu'A214 devienne un garde-fou plutôt qu'un doute, et la sonde existe.
+
+## S157 — 2026-09-10 — Il n'y a pas de loi, et c'est le résultat
+
+Entrée : jeton libre à dc78f2e, trois copies coïncidentes. S156-1, A214. Production :
+[LOI-DUREE-S157](../docs/validation/LOI-DUREE-S157.md),
+[ADR-108](../docs/adr/ADR-108-pas-de-garde-fou-sans-tolerance-declaree.md), L235, L236, L237,
+suivi d'A214. Aucun code modifié.
+
+La session devait remplacer deux encadrements par une loi, pour qu'A214 devienne un garde-fou.
+**Elle n'existe pas dans la fenêtre accessible.**
+
+**Trois observables, trois façons différentes de se tromper.** Comparer une résolution à sa
+voisine attribue la panne à la mauvaise des deux. L'écart L2 contre référence fixe n'est pas
+monotone — donc pas de dichotomie — et montrait un genou simultané à 20 s pour deux résolutions
+dont les périodes diffèrent d'un facteur deux : c'était ma **fenêtre d'échantillonnage** que je
+mesurais, pas le champ. Troisième artefact de sonde en trois sessions. Le bon observable est
+l'excès de champ proche, propre au mécanisme : il vaut 1 tant que rien n'est revenu.
+
+**Les seuils proprement obtenus ne donnent pas de loi. L236.** L'exposant vaut 0,63 à 0,93 selon
+la tolérance, et les deux rapports d'une même ligne diffèrent d'un facteur 1,5 — ce qu'une loi de
+puissance interdit. La dégradation est graduelle : il n'y a pas d'instant de rupture à mesurer,
+seulement une courbe, et l'instant qu'on en tire est celui de la tolérance qu'on a choisie.
+Chercher un `t_max` unique était mal posé.
+
+**Le plan d'expérience était dégénéré. L235.** À produit réduit `sigma·cutoff` constant — le bon
+réflexe pourtant — `dk = 6/(sigma·radial)`, donc `sigma` et `dk` ne sont pas indépendants. Un
+ajustement libre rassemblait les sept points à 1,38 avec un exposant −1,04 séduisant parce que
+proportionnel à la période spatiale : trois paramètres pour sept points liés ajustent n'importe
+quoi. En variables réellement indépendantes, l'exposant vaut 0,74 pour une source et 1,20 pour
+une autre.
+
+ADR-108 : **pas de garde-fou.** Encoder un seuil gèlerait dans l'API une tolérance que personne n'a
+spécifiée. Publiée à la place, dans la documentation et non dans le code, une estimation
+conservatrice — `1,17 / (½√(g·sigma)·cutoff/radial)` — avec sa dispersion de 2,5.
+
+A214 reste ouverte et **change de nature** : il manque une spécification, pas une mesure. Et deux
+bornes décidées séparément pour d'autres raisons — les 64 s d'ADR-106, les 512 d'ADR-097 — se
+conjuguent pour fermer la question.
+
+Deux battements faux en deux sessions, corrigés tous les deux : la cause est l'ordre des gestes,
+j'écrivais la valeur avant de lire l'horloge. **L237.**
+
+298 tests réussis, cinq ignorés, inchangés — un test ne peut pas témoigner d'un refus de
+construire. 108 ADR, 214 angles, 237 leçons, 18 invariants, 6 SPEC, 23 cas. Invariants relus :
+aucun invalidé.
+
+**Suite S158 :** S157-1, sortir la mesure de sa dégénérescence en faisant varier `cutoff` et
+`sigma` séparément — ou, à défaut, demander la tolérance plutôt que la mesurer.

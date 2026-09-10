@@ -271,3 +271,10 @@ par deux mécanismes indépendants — le pas angulaire borne le rayon, le pas r
 périodicité — et laquelle mord dépend de l'instant. Verdict B2 volet sillage : **partiel et négatif à 60 s**,
 prix mesuré à l'appui. Suite S157 : établir la loi en durée, S156-1.
 107 ADR,214 angles,234 leçons,18 invariants,6 SPEC,23 cas.
+**S157 : il n'y a pas de loi, et c'est le résultat**, [mesure](docs/validation/LOI-DUREE-S157.md),
+[ADR-108](docs/adr/ADR-108-pas-de-garde-fou-sans-tolerance-declaree.md). La dégradation d'un sillage
+hors domaine est **graduelle** : l'instant limite hérite de la tolérance qu'on choisit, et le plan
+d'expérience à produit réduit constant liait deux variables qu'il prétendait séparer. Pas de garde-fou —
+encoder un seuil gèlerait une tolérance que personne n'a spécifiée ; une estimation conservatrice est
+publiée à sa place. Suite S158 : sortir la mesure de sa dégénérescence, ou demander la tolérance, S157-1.
+108 ADR,214 angles,237 leçons,18 invariants,6 SPEC,23 cas.
