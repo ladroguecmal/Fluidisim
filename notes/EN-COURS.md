@@ -68,7 +68,7 @@ facteur 2,5 sur le second. Sans loi, pas de garde-fou : c'est exactement ce que 
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan déclaré et committé seul.
-- [ ] **P2** — un critère **lisse** et sa vérification de monotonie. Le critère de S156 — premier
+- [x] **P2** — un critère **lisse** et sa vérification de monotonie. Le critère de S156 — premier
       rayon qui dépasse le seuil — n'était pas monotone en temps ; une dichotomie posée dessus
       donnerait un chiffre faux avec l'apparence d'un chiffre précis.
 - [ ] **P3** — trois seuils par dichotomie, radial 64 / 128 / 256, angulaire fixé à 512.
@@ -104,3 +104,21 @@ interdirait le garde-fou pour de bon.
 Piège de méthode déjà payé en S156 : un critère qui compare `radial` à `2*radial` mesure la
 défaillance **de la plus grossière des deux**, à condition que la plus fine soit encore dans son
 domaine. Pour radial 256 contre 512 à 50 s, cette condition n'est pas vérifiable. Le dire.
+
+P2 — la dichotomie est exclue, et le premier critere lisse etait mauvais pour une autre raison.
+Ecart global L2 entre profils, reference **fixee a radial 512** (comparer chaque resolution a sa
+voisine attribue la panne a la mauvaise quand c'est la voisine qui defaille) : 4 / 5 / 3 reculs
+sur 15 intervalles pour radial 64 / 128 / 256. **Non monotone : pas de dichotomie.**
+Pire, le critere a un genou simultane a 20 s pour radial 64 **et** 128, alors que leurs periodes
+spatiales different d'un facteur deux. Deux resolutions ne peuvent pas defaillir en meme temps
+pour un mecanisme proportionnel a la periode : le genou vient de ma **fenetre d'echantillonnage**
+— les 200 m sondes sont quittes vers 20 s par le front rapide — et pas du champ. Encore un
+artefact de sonde qui ressemble a un resultat, le troisieme en trois sessions.
+Critere retenu, propre au mecanisme : **exces d'elevation en champ proche**, cinq premiers cercles,
+en **rapport** a la reference. Il vaut 1 tant que rien n'est revenu, et ne bouge que si du signal
+apparait la ou il ne devrait plus y en avoir. Quasi monotone, et il separe les trois resolutions :
+radial 64 quitte 1,10 entre 16 et 20 s ; radial 128 entre 32 et 36 s ; radial 256 entre 52 et 56 s.
+A seuil 2,0 : ~30 s, ~47 s, au-dela de 64 s.
+Rapport par doublement de `radial` : **~1,5**, soit un exposant 0,58. La racine (1,41) est proche,
+le lineaire (2,0) est exclu. La formule de S156 avait donc le bon **exposant** et une mauvaise
+constante — l'inverse de ce que j'avais conclu.
