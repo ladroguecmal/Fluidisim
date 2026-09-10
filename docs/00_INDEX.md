@@ -17,6 +17,13 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S152 :** [ADR-105](adr/ADR-105-profil-radial-b2-soixante-secondes.md),
+[BANC-B2-S152](validation/BANC-B2-S152.md). Premier volet B2 reçu : impact80m/60s,
+profils512 pour sources2/3/4m et256 pour5/6m, restauration locale à30s.
+293 tests réussis/cinq ignorés ;105 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas ; **deux bancs partiellement
+exécutés sur11 (B1/B2)**. Pas de sélection technologique ni de lambda_cut.
+**Suite S153 : S152-1, énergie et transport à60s, poursuite B2.**
+
 **S151 :** [ADR-104](adr/ADR-104-emission-progressive-sillage.md),
 [EMISSION-SILLAGE-S151](validation/EMISSION-SILLAGE-S151.md). Sillage progressif,
 acquittement après admission et reprise de saturation ; champ identique au trajet entier.

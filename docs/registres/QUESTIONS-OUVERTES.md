@@ -1398,3 +1398,12 @@ entrée par entrée. Le fil reprend ci-dessous.
   si les solveurs ou le matériel absents empêchent une sélection globale.
 - W4 reste partiel. Rétention longue durée S72-2, restauration du curseur moteur,
   changement de repère et coque calibrée restent hors de la réception S151.
+
+### S152 — Premier volet B2 exécuté
+
+- **S151-1 : partielle**, ADR-105/BANC-B2-S152 : profil512 pour sources2/3/4m,
+  256 pour5/6m, rayon80m/horizon60s ; qualité, coût et restauration à30s reçus.
+- **S152-1 : ouverte, prochaine S153.** Énergie et transport à60s sur ce domaine ;
+  distinguer le flux sortant d'une perte numérique avant de conclure sur B2-03.
+- B2 global ouvert : lambda_cut, concurrence technologique, sillage long,
+  bathymétrie, capacité multi-sources et déterminisme distant non reçus.

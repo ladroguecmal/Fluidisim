@@ -1,6 +1,8 @@
 # Dossier d'exécution du banc B2 — couche W et `λ_cut`
 
-- **Statut** : proposé — mode d'emploi, pas décision
+- **Statut S152** : partiellement exécuté — volet impact80m/60s et restauration locale30s.
+  [BANC-B2-S152](BANC-B2-S152.md), ADR-105 : choix de résolution du candidat radial,
+  pas de technologie ni de lambda_cut. Le protocole global ci-dessous reste ouvert.
 - **Session** : S16
 - **Complète** : [`PLAN-BENCHMARK`](PLAN-BENCHMARK.md) §B2, qui reste la vue d'ensemble des onze bancs
 - **Dépend de** : ADR-001, ADR-005, ADR-009, ADR-021, SPEC-001, SPEC-003, SPEC-004 §5.1, SPEC-006

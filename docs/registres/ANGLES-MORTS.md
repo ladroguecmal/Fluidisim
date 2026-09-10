@@ -1909,3 +1909,8 @@ raffinée sur le trajet S150 ; restent statistiques, bandes/directions et montag
 tronçon en attente et n'acquitte que le contenu admis. Les limites de rétention longue
 durée (S72-2), de fenêtre16s et de sauvegarde du curseur hôte restent explicites dans
 EMISSION-SILLAGE-S151. A212 inchangée et partielle ; pas de nouvelle réception du fond.
+
+**Suivi S152 — B2 partiellement exécuté.** Couverture80m/60s exige N512 pour les sources2–4m.
+Le garde de résolution ne certifie pas la précision ; l'oracle indépendant reçoit ensuite le champ.
+Énergie globale60s, sillage long et sélection technologique restent ouverts dans BANC-B2-S152.
+Aucun nouvel angle indépendant ; A212 inchangée, pas de nouvelle mesure du fond.

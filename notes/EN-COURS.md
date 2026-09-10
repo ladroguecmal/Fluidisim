@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S152 — en cours
+Session : S152 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S151-1, exécuter un volet B2 à60s et publier une décision de domaine/profil, explicitement partielle.
 
@@ -67,7 +67,7 @@ Objectif : S151-1, exécuter un volet B2 à60s et publier une décision de domai
 - [x] **P1** — état réel, dossier B2, protocole annoncé, jeton et plan seul.
 - [x] **P2** — instrument B2 impact : lambda source2/3/4/5/6m, rayon80m, horizon60s ; admissibilité N64/128/256, erreur indépendante et contrôles d'oracle.
 - [x] **P3** — traiter les refus de couverture si nécessaire par profil explicite ; coûts locaux répétés, reconstruction à30s, décision ADR et rapport.
-- [ ] **P4** — tests et rituel : journal, angles/leçons/actions, index/décomptes, passation et jeton rendu.
+- [x] **P4** — tests et rituel : journal, angles/leçons/actions, index/décomptes, passation et jeton rendu.
 
 ### Notes de reprise
 
@@ -84,3 +84,5 @@ sans affaiblir le garde de résolution. B2 global et lambda_cut resteront ouvert
 P2 : N64/128 refusent tout ; N256 accepte seulement lambda5/6 àR80/t60. Oracle radial max1,3651e-9, angulaire3,90e-16 ; erreurs N2565,385e-7 et4,110e-7. Profil N512 nécessaire à essayer, garde inchangé.
 
 P3 : N512 reçu sur cinq fixtures, hashes debug/release identiques ; coûts et restauration30s dans BANC-B2-S152. ADR-105, défaut64 inchangé.
+
+P4 :293 tests/cinq ignorés (200+93), zéro échec. Profil512 également release.105 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas, deux bancs partiels. Rituel exécuté et jeton rendu.

@@ -7743,3 +7743,28 @@ nouvelle série de préalables empêchant de mesurer. Aucun arbitrage utilisateu
 aucune action distante, aucune copie créée, aucun banc canonique supplémentaire reçu.
 
 Vérification finale :292 tests réussis/cinq ignorés (199+93), zéro échec ; quatre avertissements préexistants.104 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas. Cinq essais ciblés également release ; diff sans erreur d'espacement, jeton rendu.
+
+## S152 — 2026-09-10 — B2 produit son premier choix de profil
+
+Entrée : S151-1 et DOSSIER-B2. Production : banc_b2, ADR-105, [BANC-B2-S152](../docs/validation/BANC-B2-S152.md).
+À rayon80m/horizon60s, les profils64/128 refusent la campagne et256 refuse les sources2/3/4m.
+N512 ajouté explicitement, garde de résolution inchangé. Référence indépendante raffinée,
+variation<=1,366e-9 ; erreur normalisée<=1,342e-6 contre seuil1e-4, hashes debug/release identiques.
+Décision locale :512 pour2/3/4m,256 pour5/6m ; défaut64 inchangé, aucune interpolation certifiée.
+
+Coût lot64 points : médianes p50 de649 à2026µs selon source/profil ; queues bruitées,
+pire p99 observé8074µs. Doubler N sur5/6m double environ le coût sans besoin de qualité.
+Mémoire champ6240/12384 octets. WLIV289 octets dans les deux cas ; restauration à30s reçue
+bit à bit, médianes3,3–7,5µs. Ce volume exclut les métadonnées hôte et les paramètres B.
+
+B2 désormais partiellement exécuté, B1 aussi : deux bancs sur onze ont une exécution partielle.
+Ce ne sont pas deux technologies concurrentes mais deux résolutions. Ni lambda_cut, ni
+paquets_W_max, ni D1 distant, ni conservation énergétique globale60s ne sont décidés.
+Aucun nouvel angle ou leçon indépendant : la confusion admissibilité/précision et la
+perte d'énergie hors domaine sont déjà connues. Invariants I-06/I-07/I-08/I-18 relus,
+aucun changé ; le facteur de pente est testé à512. Aucun acte distant ni nouvelle copie.
+
+**Suite S153 : S152-1, énergie et transport à60s** dans ce même domaine, en distinguant
+énergie sortie et dissipation ; poursuite de B2 selon le dernier bilan. Aucun arbitrage utilisateur.
+
+Vérification finale :293 tests réussis/cinq ignorés (200+93), zéro échec ; quatre avertissements préexistants. Profil512 également reçu release.105 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas, deux bancs partiels. Diff vérifié, jeton rendu.

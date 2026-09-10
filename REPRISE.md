@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 15:26 +02:00
+JETON            : libre
+Battement        : 2026-09-10 15:28 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S152
-Dernière session : S151 — émission progressive reçue ; 292 tests/cinq ignorés
-Session suivante : S152 — S151-1, comparaison B2 après W4 candidat (dernier bilan)
+Session en cours : aucune
+Dernière session : S152 — premier volet B2 reçu ; 293 tests/cinq ignorés
+Session suivante : S153 — S152-1, énergie et transport à60s, poursuite B2 (dernier bilan)
 
 **S147 : travail directement sur master.** Les anciennes copies, dont 886155, doivent rejoindre
 master avant toute reprise ; aucune copie créée, toutes propres au démarrage.
@@ -192,6 +192,14 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S152 — 2026-09-10 :** [ADR-105](docs/adr/ADR-105-profil-radial-b2-soixante-secondes.md),
+[BANC-B2-S152](docs/validation/BANC-B2-S152.md). Impact80m/60s : N512 reçu pour
+sources2/3/4m, N256 pour5/6m ; défaut64 inchangé. Erreur normalisée<=1,342e-6,
+hashes debug/release identiques ; coûts et restauration WLIV289 octets à30s reçus.
+293 tests/cinq ignorés ;105 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas ; deux bancs partiellement
+exécutés sur11 (B1/B2). Ni technologie ni lambda_cut décidés.
+**Suite S153 : S152-1, énergie et transport à60s, poursuite B2.**
 
 **S151 — 2026-09-10 :** [ADR-104](docs/adr/ADR-104-emission-progressive-sillage.md),
 [EMISSION-SILLAGE-S151](docs/validation/EMISSION-SILLAGE-S151.md). Source par tronçon,

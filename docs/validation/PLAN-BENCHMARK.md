@@ -58,6 +58,10 @@ sinon la flottabilité dépendra de la distance de la caméra — défaut subtil
 
 ## B2 — Couche W : technologie et λ_cut
 
+**S152 : partiellement exécuté**, [BANC-B2-S152](BANC-B2-S152.md), ADR-105.
+Impact80m/60s, choix de profils256/512, coût et restauration30s. Technologie globale,
+lambda_cut et capacité restent ouverts ; énergie60s est la prochaine mesure S152-1.
+
 **Question.** Paquets d'ondes lagrangiens, équation d'onde 2D sur pyramide GPU, ou Boussinesq ?
 Et où placer la coupure `λ_cut` avec δ ?
 **Protocole.** Trois scénarios : sillage de bateau (5, 10, 15 m/s, eau profonde puis 5 m de fond),
