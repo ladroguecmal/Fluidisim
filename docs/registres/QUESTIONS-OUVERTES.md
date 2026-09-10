@@ -740,7 +740,7 @@ la péremption silencieuse (**A185**). Voir [`PRESCRIPTIONS-S63`](PRESCRIPTIONS-
 
 | # | Action | Origine | Porteur | État |
 |---|---|---|---|---|
-| S63-1 | **Planifier la couche dispersive**, ou acter qu'elle ne viendra pas. C'est le **seul** blocage réel de B2 depuis que les quatre autres sont levés, et elle n'a jamais figuré dans un plan : ni `W`, ni un `δ` d'une autre famille n'est engagé. Tant qu'elle manque, C02 est inexécutable et `λ_cut` dispersif n'a pas de source | **A185** §4, **L181**, ADR-030 §5 | session, par ADR | ouverte |
+| S63-1 | **Planifier la couche dispersive**, ou acter qu'elle ne viendra pas. C'est le **seul** blocage réel de B2 depuis que les quatre autres sont levés, et elle n'a jamais figuré dans un plan : ni `W`, ni un `δ` d'une autre famille n'est engagé. Tant qu'elle manque, C02 est inexécutable et `λ_cut` dispersif n'a pas de source | **A185** §4, **L181**, ADR-030 §5 | session, par ADR | **close S147**, voir CLOTURE-S63-1-S147 |
 
 > **S63-1 est plus lourde que les actions qui la précèdent, et plus ancienne qu'elle n'en a
 > l'air** : la dépendance a été constatée en S22 (ADR-030 §5), le dossier B2 la portait sous la
@@ -1352,3 +1352,10 @@ entrée par entrée. Le fil reprend ci-dessous.
 - **A212 : ouverte.** La forme du spectre reste uniforme et aucun banc ne la mesure ; le renvoi du
   code à B1 était faux.
 - **S145-2 : toujours ouverte.** Clore S63-1 par écrit.
+
+### S147 — Clôture documentée de la couche dispersive
+
+- **S63-1 et S145-2 : closes**, [CLOTURE-S63-1-S147](../validation/CLOTURE-S63-1-S147.md).
+  W choisie par ADR-054, construite par ADR-060, transport/énergie reçus S127/S129,
+  intégration et rejeu S128. Ce suivi remplace les états ouverts S63, S70, S71 et S145/S146.
+  La sélection B2 et la coupure W/δ restent ouvertes ; aucune dispersion de δ n'est certifiée.

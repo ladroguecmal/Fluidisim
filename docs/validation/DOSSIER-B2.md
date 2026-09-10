@@ -315,6 +315,11 @@ Le point 5 est ce que ce dossier ajoute au protocole d'origine. B2 ne produit pa
 ---
 
 ## 8. Ce qui doit être vrai avant de lancer
+> **Actualisation S147 — 2026-09-10.** S63-1 est close : W dispersive est construite et
+> contrôlée (ADR-060, S127–S129). Le tableau S63 ci-dessous est historique. La réception
+> de W ne donne pas la coupure W/δ : ADR-054 §2 distingue ces deux questions. B2 garde
+> notamment la comparaison des candidats, la bathymétrie, le sillage, les budgets cibles et
+> le déterminisme croisé. Voir [CLOTURE-S63-1-S147](CLOTURE-S63-1-S147.md).
 
 > **État vérifié en S63, 2026-09-08.** *Le tableau ci-dessous datait de S14 et annonçait cinq
 > blocages. **Quatre étaient levés depuis une quarantaine de sessions**, et rien ne l'avait

@@ -65,8 +65,8 @@ Objectif : clore S63-1 sur preuves existantes, puis instruire A212 (forme du spe
 ### Plan
 
 - [x] **P1** — vérifier copies, branches, historique et outils ; prendre le jeton et committer ce plan seul.
-- [>] **P2** — lectures de reprise ; clore S63-1/S145-2 avec le périmètre exact de la dispersion construite et les dépendances restantes de B2.
-- [ ] **P3** — examiner A212 dans les spécifications et le code, vérifier les références physiques et arrêter une décision de spectre avec son protocole de réception ; construire le lot que cette décision permet dans la session.
+- [x] **P2** — lectures de reprise ; clore S63-1/S145-2 avec le périmètre exact de la dispersion construite et les dépendances restantes de B2.
+- [>] **P3** — examiner A212 dans les spécifications et le code, vérifier les références physiques et arrêter une décision de spectre avec son protocole de réception ; construire le lot que cette décision permet dans la session.
 - [ ] **P4** — vérifier le lot, écrire journal et passation, contrôler décomptes et renvois, exécuter le rituel de fin et rendre le jeton.
 
 ### Notes de reprise

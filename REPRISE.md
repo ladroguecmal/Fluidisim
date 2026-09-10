@@ -19,7 +19,7 @@ souvenir de conversation, **c'est lui qui fait foi**.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-10 13:58 +02:00
+Battement        : 2026-09-10 14:00 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Session en cours : S147
 Dernière session : S146 — **B1 exécuté**, le premier banc du projet ;275 tests/cinq ignorés
@@ -62,9 +62,9 @@ S68, **aucune session n'a produit de conception du système d'eau**. Voir
 
 S68 : A187 expliqué et S66-1 close ; calibration statistique S64-2 reste à instruire.
 
-À signaler à l'humain : **le seul blocage réel du banc B2 est une couche dispersive**, constatée
-nécessaire en S22 et jamais planifiée depuis. C'est l'action **S63-1**, et elle est plus lourde
-que tout ce qui est ouvert par ailleurs.
+**S147 — S63-1 et S145-2 closes** : la dispersion est construite dans W (ADR-060),
+transport/énergie reçus S127/S129 et rejeu S128. B2 et la coupure W/δ restent ouverts ;
+voir [CLOTURE-S63-1-S147](docs/validation/CLOTURE-S63-1-S147.md).
 
 Le dossier C22 est fermé : un verdict (S59), un critère compris (S60, S61), quatre angles morts.
 Ce qui reste ouvert du côté de la convergence n'est plus une mesure mais **A114**.
