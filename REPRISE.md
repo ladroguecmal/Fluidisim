@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-10 16:09 +02:00
+JETON            : occupé
+Battement        : 2026-09-10 16:12 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S156 — bilan et domaine d'un sillage prolongé (S155-1)
 Dernière session : S155 — horizon porté à 64 s ; 297 tests/cinq ignorés
-Session suivante : S156 — bilan d'un sillage prolongé (S155-1)
+Session suivante : à fixer en fin de S156
 
 **Copie de travail S155** : worktree `claude/reprise-projet-2d3506`, remis en avance rapide sur
 master (1643232) au démarrage — il était resté à 041dfed, 80 commits en retard et rien d'unique,
