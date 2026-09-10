@@ -176,13 +176,31 @@ orbitale complète plutôt que le seul courant.
 **Piège.** Un réglage d'écume calé à l'œil dérive systématiquement vers le trop-blanc. Le banc doit
 comparer à la couverture prédite, pas au goût.
 
-## B10 — Cavité d'entrée dans l'eau *(S02)*
+## B10 — Cavité d'entrée dans l'eau *(S02)*, et source d'onde *(S137)*
 
 **Question.** Coefficients de la séquence couronne → cavité → pincement → jet de Worthington.
+**Et, depuis S137 :** que le même corps **émet** comme onde de gravité — à quelle longueur
+d'onde, et avec quelle part de son énergie.
 **Protocole.** Sphères et corps allongés, `Fr` d'entrée de 1 à 15, `dx` = 0,05 m et 0,02 m.
 **Métriques.** Profondeur de pincement en diamètres de corps, hauteur de jet, durée, coût.
+**Ajout S137, deux métriques de source**, observables sans instrumenter l'entrée :
+
+- **Longueur d'onde dominante.** Chronométrer l'arrivée du maximum d'amplitude à une distance
+  `r` du point d'entrée : `λ = 8πr²/(g·t²)`, dérivé de `c_g = ½√(gλ/2π)` (SPEC-001 §1). D'où
+  `α = λ/b`, `b` étant la demi-largeur du corps. Deux distances au moins, pour vérifier que le
+  résultat n'en dépend pas — trop près le paquet n'est pas dispersé, trop loin l'amplitude passe
+  sous le bruit, et **fixer ces deux bornes fait partie du protocole**.
+- **Énergie rayonnée.** Énergie du train d'ondes intégrée sur un anneau à distance `r`,
+  rapportée à `½ρb³v²` : c'est `η` directement.
+
 **Décision.** Table de coefficients par `Fr`, et seuil de `Fr` en dessous duquel la cavité n'est
-pas modélisée.
+pas modélisée. **Et, depuis S137 :** `α` et `η`, avec leur dépendance éventuelle au régime.
+
+> **Critère de réussite, S137.** Ce que la calibration doit resserrer est borné avant la mesure :
+> `α ∈ [3,35 ; 6,11]` par dérivation de la forme du modèle (ADR-092), et `η ≤ 2Kgα⁴bs²/v²` par
+> sa borne d'énergie. **Une mesure hors de ces bornes ne calibrerait pas le modèle : elle le
+> réfuterait** — ce qui est un résultat en soi, et doit être rapporté comme tel plutôt que
+> reporté sur les coefficients. Voir [ADR-093](../adr/ADR-093-ou-se-calibre-la-source-d-impact.md).
 
 ## B11 — Rendu sous-marin *(S02)*
 

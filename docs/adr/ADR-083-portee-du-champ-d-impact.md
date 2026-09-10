@@ -80,3 +80,11 @@ non vérifiée », au sens de `REPRISE.md` §5.
 facteur 2π précisément pour que les constats ne dépendent pas de sa valeur, et sépare la
 géométrie de l'amplitude — la première version les confondait, et lisait un refus de pente
 comme une impossibilité géométrique.
+
+## Note corrective du 2026-09-10 (S137)
+
+Cette décision renvoie la calibration **au banc B2**. C'est faux : B2 choisit la technologie de W
+et `λ_cut`, et aucune de ses métriques ne mesure ce qu'un objet qui entre dans l'eau émet. La
+calibration de la source relève de **B10**, dont le protocole — sphères et corps allongés à
+Froude connu — fournit déjà les entrées, et auquel S137 ajoute deux métriques de source.
+Voir [ADR-093](ADR-093-ou-se-calibre-la-source-d-impact.md).

@@ -61,7 +61,7 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S136 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S137 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
@@ -181,6 +181,10 @@ Un objet qui entre dans l'eau donne enfin ses deux nombres au modèle : la **lon
 forme que le candidat engendre — `λ = 3,35·b`, bornée à [3,35 ;6,11]·b — et l'énergie reste à calibrer mais sa
 borne suit une loi exacte, `E_max = K·ρ·g·λ⁴·s²` (ADR-092, S136). A200, sévérité1, est traitée. Les conclusions
 de S123 s'en trouvent changées : cinq cas de jeu sur onze tiennent dans le couloir au lieu d'un seul.
-Suite : spécifier le banc B2, mentionné depuis ADR-060 sans avoir jamais été décrit, S136-1.
-92 ADR,204 angles,17 invariants,6 spécifications,23 cas.
+Le renvoi « à calibrer B2 », que trois décisions recopiaient depuis S77, est **faux** : B2 choisit la technologie
+de W et B10 mesure la cavité — aucun banc ne mesurait la source d'onde d'un impact. La calibration passe à B10,
+étendu de deux métriques observables et doté d'un critère de réussite qui peut **réfuter** le modèle au lieu de
+l'absorber (ADR-093, S137). Un renvoi non vérifié ferme la question au lieu de la laisser ouverte (L217).
+Suite : auditer les renvois du corpus, celui-ci n'étant probablement pas le seul, S137-1.
+93 ADR,204 angles,17 invariants,6 spécifications,23 cas.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

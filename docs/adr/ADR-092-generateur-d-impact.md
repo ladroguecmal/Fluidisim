@@ -97,3 +97,11 @@ n'intervient dans Wagner que par la **durée** de l'impact, pas par son étendue
 dichotomie sur plusieurs longueurs d'onde et pentes, l'homothétie de la forme est mesurée, et un
 impact engendré par le générateur est construit puis échantillonné — le générateur produit des
 événements que le candidat accepte, ce qui est le seul critère qui compte pour lui.
+
+## Note corrective du 2026-09-10 (S137)
+
+Cette décision renvoie la calibration **au banc B2**. C'est faux : B2 choisit la technologie de W
+et `λ_cut`, et aucune de ses métriques ne mesure ce qu'un objet qui entre dans l'eau émet. La
+calibration de la source relève de **B10**, dont le protocole — sphères et corps allongés à
+Froude connu — fournit déjà les entrées, et auquel S137 ajoute deux métriques de source.
+Voir [ADR-093](ADR-093-ou-se-calibre-la-source-d-impact.md).

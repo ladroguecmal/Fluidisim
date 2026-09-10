@@ -17,10 +17,18 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S137 :** [ADR-093](adr/ADR-093-ou-se-calibre-la-source-d-impact.md), où se calibre la source d'un impact.
+[BANC-SOURCE-S137](validation/BANC-SOURCE-S137.md) : le renvoi « à calibrer B2 », recopié par trois ADR depuis
+S77, est **faux** — B2 choisit la technologie de W, B10 mesure la cavité, et **aucun banc ne mesure la source
+d'onde**. La calibration passe à B10, étendu de deux métriques et doté d'un critère de réussite. **L217** : un
+renvoi non vérifié ferme la question au lieu de la laisser ouverte. Trois notes correctives datées.
+Aucun code modifié,269 tests inchangés.93 ADR,204 angles,17 invariants,6 spécifications,23 cas.
+Suite S138 : audit des renvois du corpus, S137-1.
+
 **S136 :** [ADR-092](adr/ADR-092-generateur-d-impact.md), ce qu'un objet qui entre dans l'eau donne au modèle.
 [GENERATEUR-S136](validation/GENERATEUR-S136.md) : la longueur d'onde se **dérive** — forme initiale
 exactement homothétique, premier zéro à0,2985 λ, **α =3,35** borné à [3,35 ;6,11] ; l'énergie non, mais sa
-borne suit `E_max = K·ρ·g·λ⁴·s²` mesurée exacte. **A200 (sévérité1) traitée, L214.** Les conclusions de S123
+borne suit `E_max = K·ρ·g·λ⁴·s²` mesurée exacte. **A200 (sévérité1) traitée, L216.** Les conclusions de S123
 en sont changées :5 cas sur11 au lieu de1.269 tests/cinq ignorés, hachages inchangés.
 92 ADR,204 angles,17 invariants,6 spécifications,23 cas. Suite S137 : spécifier le banc B2, S136-1.
 

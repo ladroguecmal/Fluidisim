@@ -3278,7 +3278,7 @@ numérique. Un banc spatial peut être exact tout en ne contenant jamais le phé
 transport qu'on lui attribue. Quand un garde couple rayon et âge, attendre davantage n'est
 pas une correction gratuite : il faut dimensionner les deux ensemble.
 
-## L214 — Un paramètre « à calibrer » peut être déjà déterminé par le modèle
+## L216 — Un paramètre « à calibrer » peut être déjà déterminé par le modèle
 
 *(S136)* `α`, le rapport entre longueur d'onde et taille d'objet, était étiqueté « à calibrer »
 depuis ADR-083, et trois sessions l'avaient traité comme un paramètre libre — en balayant [1, 2π]
@@ -3291,3 +3291,20 @@ L'étiquette « à calibrer » est honnête quand elle recouvre une grandeur **p
 modèle ne contient pas. Elle est trompeuse quand la grandeur est une **conséquence** du modèle
 qu'on n'a pas encore calculée. Avant de renvoyer un nombre à un banc, se demander lequel des deux
 cas on a : le banc mesure le monde, il ne mesure pas ce que notre propre modèle affirme déjà.
+
+## L217 — Un renvoi se vérifie, surtout quand il se recopie
+
+*(S137)* Trois décisions successives ont renvoyé la calibration de la source d'impact « au banc
+B2 ». Aucune n'avait ouvert B2, dont les métriques mesurent tout autre chose — la technologie de
+propagation, pas ce qu'un objet émet. Le renvoi était faux à sa naissance, et les deux suivantes
+l'ont recopié parce qu'il était déjà écrit.
+
+Un renvoi non vérifié est pire qu'un manque déclaré : il **ferme** la question au lieu de la
+laisser ouverte. Personne ne cherche ce qui est déjà attribué. Ici, le trou a survécu soixante
+sessions sous une étiquette qui le désignait comme traité.
+
+Deux gestes en découlent. Quand on écrit un renvoi, ouvrir la cible et vérifier qu'elle porte
+bien ce qu'on lui confie. Quand on en recopie un, se rappeler qu'il n'a peut-être jamais été
+vérifié — l'ancienneté d'une phrase n'est pas une preuve. Voir [[L137]] : le même dépôt sait déjà
+qu'une chose écrite deux fois finit par diverger ; une chose renvoyée trois fois n'est pas
+davantage garantie.

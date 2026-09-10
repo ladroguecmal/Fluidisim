@@ -7022,7 +7022,7 @@ sonde `forme_initiale`.
 **Le point de départ : deux nombres, deux statuts.** `wavelength_m` et `energy_j` n'ont pas le
 même statut, et les confondre aurait produit une formule d'apparence physique avec un facteur
 arbitraire dedans.
-**La longueur d'onde se dérive, et c'est L214.** La forme spatiale initiale du candidat est
+**La longueur d'onde se dérive, et c'est L216.** La forme spatiale initiale du candidat est
 **exactement** homothétique en λ — écart nul, mesuré de 0,5 à 32 m. Son premier zéro vaut
 0,2985 λ ; faire coïncider cette étendue avec la demi-largeur mouillée de Wagner donne
 **α = 3,35**, et les trois lectures raisonnables du rayon bornent α à **[3,35 ; 6,11]**. `α`
@@ -7052,3 +7052,49 @@ précisément ce que la séparation dérivable/calibrable sert ; aucun n'est inv
 **Suite S137 :** S136-1 — les deux calibrations ont désormais un objet précis, `α` dans
 [3,35 ; 6,11] et `η` sous sa borne. Le banc B2 est mentionné depuis ADR-060 sans avoir jamais été
 spécifié : dire **quelles mesures il devrait produire** est le prolongement direct.
+
+---
+
+## S137 — 2026-09-10 — Le banc qui devait calibrer la source ne la mesure pas
+
+**Entrée :** jeton libre à ef07826, trois copies coïncidentes. S136-1, que j'avais moi-même
+rédigée — et dont la prémisse était fausse.
+**Produit :** [ADR-093](../docs/adr/ADR-093-ou-se-calibre-la-source-d-impact.md),
+[BANC-SOURCE-S137](../docs/validation/BANC-SOURCE-S137.md), l'extension de PLAN-BENCHMARK §B10 et
+trois notes correctives datées. **Aucun code modifié.**
+**La prémisse fausse, d'abord.** S136-1 disait « le banc B2 est mentionné depuis ADR-060 sans
+avoir jamais été spécifié ». B2 **est** spécifié — PLAN-BENCHMARK §B2, plus un dossier entier
+écrit en S16. Écrire un banc à partir de rien aurait produit un second protocole à côté du
+premier, ce que L137 interdit. La première chose à faire était de lire.
+**Ce que la lecture montre. L215.** B2 choisit la **technologie de W** et `λ_cut` ; aucune de ses
+métriques ne mesure ce qu'un objet émet. B10 est plus proche mais mesure la **cavité** —
+pincement, jet de Worthington — pas l'onde qui en part. **Aucun banc ne mesure la source d'onde
+d'un impact**, et le renvoi « à calibrer B2 » a masqué ce trou depuis S77 : trois décisions
+successives l'ont recopié sans ouvrir la cible, la mienne comprise. **Un renvoi non vérifié est
+pire qu'un manque déclaré : il ferme la question au lieu de la laisser ouverte.**
+**Décision :** la calibration relève de **B10**, dont le protocole — corps entrant à Froude connu
+— fournit déjà les entrées ; créer un douzième banc dupliquerait un protocole existant. Deux
+métriques y sont ajoutées, observables sans instrumenter l'entrée : longueur d'onde dominante par
+le temps d'arrivée du pic, `λ = 8πr²/(g·t²)` dérivé de `c_g = ½√(gλ/2π)` (SPEC-001 §1), d'où
+`α = λ/b` ; et énergie rayonnée sur un anneau, rapportée à `½ρb³v²`, qui donne `η`.
+**Et le banc reçoit un critère de réussite qu'il n'avait pas** : `α ∈ [3,35 ; 6,11]` et
+`η ≤ 2Kgα⁴bs²/v²` sont bornés *avant* la mesure. Une mesure hors de ces bornes ne calibrerait pas
+le modèle, **elle le réfuterait** — à rapporter comme tel plutôt qu'à absorber dans les
+coefficients.
+**Écrit :** PLAN-BENCHMARK §B10 étendu ; trois notes correctives datées dans ADR-060, ADR-083 et
+ADR-092, à l'endroit où chacune porte le renvoi ; ADR-093.
+**Limites :** rien n'a été mesuré — un banc ne se reçoit qu'en l'exécutant, et onze bancs sur
+onze attendent toujours. La formule d'observation demande deux distances à fixer, ce qui n'est
+pas fait. B2 et son dossier ne sont pas touchés. 269 tests inchangés.
+93 ADR, 204 angles, 17 invariants, 6 spécifications, 23 cas. Invariants relus : aucun invalidé.
+**Deux manquements de cette session, dits parce qu'ils comptent.** Le plan n'a **pas** été
+déclaré dans `notes/EN-COURS.md` avant le travail, ni le jeton pris : j'ai enchaîné sur l'amorce
+et commencé à écrire. C'est précisément ce contre quoi l'écriture anticipée existe — une coupure
+n'aurait laissé aucune trace d'intention. Et mes leçons de S136 et S137 portaient des numéros
+**déjà pris** par Codex en S125–S129, L214 et L215 : j'avais numéroté depuis ma propre dernière
+leçon sans rouvrir le fichier après la fusion de master. Renumérotées L216 et L217. Même cause
+dans les deux cas : reprendre le fil sans revérifier l'état après un travail parallèle.
+**Suite S138 :** S137-1 — trois ADR portaient le même renvoi erroné, recopié sans vérification.
+Ce n'est probablement pas le seul : 93 décisions, 204 angles, et les renvois entre eux n'ont
+jamais été audités. **Un audit des renvois** est le prolongement direct ; le dépôt a déjà payé ce
+genre d'audit deux fois — S11 sur les points ouverts, S15 sur les actions annoncées en prose.

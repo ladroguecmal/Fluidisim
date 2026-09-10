@@ -89,3 +89,11 @@ plateformes et budgets restent ouverts. Aucun choix final B2. I-03, I-07, I-08, 
 > **Actualisation S84 — 2026-09-08.** ADR-066 remplace la borne numérique au TTL :
 > l'horizon se mesure depuis la naissance, indépendamment de la durée source. Renouvellement
 > à résolution inchangée testé jusqu'à 16 s ; aucune purge TTL, rétention générale encore ouverte.
+
+## Note corrective du 2026-09-10 (S137)
+
+Cette décision renvoie la calibration **au banc B2**. C'est faux : B2 choisit la technologie de W
+et `λ_cut`, et aucune de ses métriques ne mesure ce qu'un objet qui entre dans l'eau émet. La
+calibration de la source relève de **B10**, dont le protocole — sphères et corps allongés à
+Froude connu — fournit déjà les entrées, et auquel S137 ajoute deux métriques de source.
+Voir [ADR-093](ADR-093-ou-se-calibre-la-source-d-impact.md).

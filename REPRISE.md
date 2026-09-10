@@ -19,11 +19,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 
 ```
 JETON            : libre
-Battement        : 2026-09-10 02:36 +02:00
+Battement        : 2026-09-10 02:44 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Session en cours : aucune
-Dernière session : S136 — générateur d'impact, A200 traitée ;269 tests/cinq ignorés
-Session suivante : S137 — spécifier le banc B2 (S136-1)
+Dernière session : S137 — le renvoi de calibration était faux ;269 tests/cinq ignorés
+Session suivante : S138 — audit des renvois du corpus (S137-1)
 
 **Copie de travail S130** : worktree `claude/reprise-projet-2d3506`, remis en avance rapide sur
 master (e817d0e) au démarrage — il était resté à 52e80a5 et n'avait rien d'unique, donc aucun
@@ -181,6 +181,31 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
+**S137 — 2026-09-10 :** [ADR-093](docs/adr/ADR-093-ou-se-calibre-la-source-d-impact.md),
+[BANC-SOURCE-S137](docs/validation/BANC-SOURCE-S137.md). **La suite S136-1 partait d'une prémisse
+fausse**, que j'avais écrite : B2 **est** spécifié — PLAN-BENCHMARK §B2 plus un dossier entier de
+S16. L'écrire à partir de rien aurait produit un second protocole à côté du premier (L137).
+**Le renvoi « à calibrer B2 » est faux depuis l'origine.** B2 choisit la technologie de W et
+`λ_cut` ; B10 mesure la **cavité** — pincement, jet de Worthington. **Aucun banc ne mesure la
+source d'onde d'un impact**, et trois ADR — 060, 083, 092 — ont recopié ce renvoi sans ouvrir la
+cible, masquant le trou pendant soixante sessions. **L217** : un renvoi non vérifié ferme la
+question au lieu de la laisser ouverte ; personne ne cherche ce qui est déjà attribué.
+Décision : la calibration passe à **B10**, dont le protocole fournit déjà les entrées, étendu de
+deux métriques — longueur d'onde par le temps d'arrivée du pic, `λ = 8πr²/(g·t²)` dérivé de
+SPEC-001 §1 ; énergie rayonnée sur un anneau rapportée à `½ρb³v²`. **Et un critère de réussite
+qu'il n'avait pas** : `α ∈ [3,35 ;6,11]` et `η ≤ 2Kgα⁴bs²/v²` sont bornés avant la mesure — hors
+de ces bornes, une mesure **réfute** le modèle au lieu de le calibrer.
+Trois notes correctives datées posées. Aucun code modifié,269 tests inchangés.
+**Deux manquements de cette session, corrigés et dits** : le plan n'a pas été déclaré avant le
+travail, contrairement à la règle ; et mes leçons de S136 et S137 portaient des numéros déjà pris
+par Codex (L214, L215) — renumérotées **L216** et **L217**. Les deux ont la même cause : avoir
+repris le fil sans revérifier l'état après la fusion d'un travail parallèle.
+93 ADR,204 angles,17 invariants,6 spécifications,23 cas.
+Suite S138 : S137-1, **audit des renvois** — 93 décisions, 204 angles, et les renvois entre eux
+n'ont jamais été vérifiés systématiquement ; celui-ci n'est probablement pas le seul. Le dépôt a
+déjà payé ce genre d'audit deux fois, S11 et S15. Extension de fenêtre, S116-2, bilan mixte,
+durabilité et les deux calibrations de B10 restent ouverts.
+
 **S136 — 2026-09-10 :** [ADR-092](docs/adr/ADR-092-generateur-d-impact.md),
 [GENERATEUR-S136](docs/validation/GENERATEUR-S136.md). **A200, sévérité 1, traitée.**
 Session de conception. Les deux nombres qu'un impact porte n'ont pas le même statut :
@@ -188,7 +213,7 @@ Session de conception. Les deux nombres qu'un impact porte n'ont pas le même st
 homothétique en λ (écart nul, de0,5 à32 m) ; son premier zéro vaut0,2985 λ, et le faire
 coïncider avec la demi-largeur mouillée de Wagner donne **α =3,35**, borné à **[3,35 ;6,11]**
 selon la lecture du rayon. `α` était étiqueté « à calibrer » et traité comme libre par trois
-sessions — **L214** : une telle étiquette est trompeuse quand la grandeur est une conséquence du
+sessions — **L216** : une telle étiquette est trompeuse quand la grandeur est une conséquence du
 modèle qu'on n'a pas calculée.
 **L'énergie ne se dérive pas, sa borne oui** : `E_max/λ⁴` constant à8,9401e-2, rapport16,00
 exact quand la pente quadruple, d'où `E_max = K·ρ·g·λ⁴·s²`. Et `η ≤ 2Kgα⁴bs²/v²` — la fraction

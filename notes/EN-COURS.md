@@ -58,57 +58,40 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S136 — terminée
+Session : S137 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : A200, sévérité 1 — un objet qui tombe dans l'eau doit produire les deux nombres que
-`WaveEvent::impact` exige, `wavelength_m` et `energy_j`. Aucun document ne dit comment.
-**Session de conception.**
+Objectif : S136-1 — spécifier le banc B2. **La prémisse était fausse** : il l'est déjà.
 
 ### Plan
 
-- [x] **P1** — état réel, jeton, plan seul.
-- [x] **P2** — séparer ce qui est dérivable de ce qui doit être calibré. Deux nombres, deux
-      statuts différents, et c'est le cœur de la session :
-      - **λ** : ADR-083 pose `λ = α·b` avec α « à calibrer ». Mais α pourrait n'être pas un
-        paramètre libre : le modèle d'ADR-060 fixe déjà la forme spatiale initiale
-        `η(r) = ∫A(k)J0(kr)k dk` pour une bande donnée. Mesurer le **rayon caractéristique**
-        de cette forme en fonction de λ donnerait α par dérivation interne, pas par arbitrage.
-      - **E** : la fraction de l'énergie d'entrée qui part en ondes de gravité est une
-        propriété physique externe, que rien dans le modèle ne peut produire. Elle restera
-        « à calibrer » — mais S123 en a mesuré une **borne supérieure**.
-- [x] **P3** — ADR-092 : α dérivé à 3,35 (borné [3,35 ; 6,11]), η calibrable mais borné.
-- [x] **P4** — module `impact_generator` : η en paramètre de l'appelant, borne du modèle appliquée.
-- [x] **P5** — borne annoncée vérifiée contre le candidat (97 % / 105 %) sur douze
-      combinaisons ; lois d'échelle vérifiées ; onze cas de S123 rejoués.
-- [x] **P6** — livrable, rituel de fin, fusion `--ff-only`.
+**Ce plan a été écrit après coup, et c'est un manquement.** La règle veut qu'il soit déclaré et
+committé seul *avant* la première modification ; il ne l'a pas été. Une coupure en cours de
+session n'aurait laissé aucune trace d'intention, ce qui est exactement le défaut que
+`notes/EN-COURS.md` existe pour éviter. Consigné plutôt que masqué.
+
+- [x] **P1** — amorce : état réel, copies, jeton.
+- [x] **P2** — lire avant d'écrire : B2 est spécifié dans PLAN-BENCHMARK et DOSSIER-B2 (S16).
+- [x] **P3** — établir ce que B2 et B10 mesurent réellement, et constater le trou.
+- [x] **P4** — ADR-093, extension de PLAN-BENCHMARK §B10, trois notes correctives datées.
+- [x] **P5** — livrable, leçon, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
-Départ 34d1be8 = master, trois copies coïncidentes.
+La session n'a produit aucun code : elle corrige un renvoi et comble un trou de plan.
 
-Ce dont on dispose, avec provenance :
-- **SPEC-001 §5 bis** (Wagner) : demi-largeur mouillée `c(t) = (π/2)·v·t / tan β`, durée
-  d'impact `t_impact = 2·b·tan β / (π·v)`, masse ajoutée `m_a = ½πρc²` par mètre, impulsion
-  `J = Δ(m_a)·v_rel`. C'est ce qui relie un objet à l'eau qu'il déplace.
-- **ADR-060** : `A(k) = C x²(1-x)²` sur `[k0/2, 2k0]`, `k0 = 2π/λ`, et `C` déduit de l'énergie
-  par Parseval radial. La forme spatiale initiale est donc entièrement déterminée par λ et E.
-- **ENVELOPPE-IMPACTS-S123 §4.3** : le candidat ne porte que 10⁻⁶ à 10⁻² de l'énergie de
-  référence avant que la pente dépasse la limite du milieu. C'est une borne sur ce que le
-  générateur peut demander.
-- **SPEC-001 §5** : `λ = 2πv²/g` — sillage d'un mouvement établi, écartée pour une entrée
-  (ADR-083), et il faut continuer de l'écarter.
+Ce qu'elle a trouvé : B2 choisit la technologie de W, B10 mesure la cavité, et **aucun banc ne
+mesure la source d'onde d'un impact**. Le renvoi « à calibrer B2 » d'ADR-060, recopié par ADR-083
+puis ADR-092 — la mienne — a masqué ce trou depuis S77.
 
-Piège à éviter : produire une fonction qui rend des nombres d'apparence physique alors qu'un
-facteur reste arbitraire. Si η n'est pas calibré, il doit être **un paramètre de l'appelant**,
-nommé et borné, pas une constante enfouie.
+Second défaut trouvé en fin de session : mes leçons de S136 et S137 réutilisaient L214 et L215,
+déjà prises par Codex. Renumérotées L216 et L217. **Vérifier le dernier numéro dans le fichier,
+jamais depuis sa propre mémoire de la session précédente** — surtout après avoir fusionné le
+travail d'un autre agent.
 
-P2-P6 : ADR-092, GENERATEUR-S136, suivi daté sur ENVELOPPE-IMPACTS-S123, suivi A200, L214,
-journal, index, README, REPRISE, jeton rendu, ff-only. 269 tests/cinq ignorés, hachages inchangés.
-
-Pour S137 sans relire : S136-1 est la spécification du banc B2, cité par ADR-060, ADR-083 et
-ADR-092 sans avoir jamais été décrit. Ce qu'il doit fixer est désormais précis — `α` dans
-[3,35 ; 6,11] et `η` sous `2Kgα⁴bs²/v²`. Deux questions à trancher : quelle observable mesure
-α (le rayon de la perturbation initiale n'est pas directement observable sur une vidéo ; le
-spectre des ondes à distance, peut-être), et quelle observable mesure η (l'énergie des ondes
-loin de l'impact, contre l'énergie cinétique de l'objet). SPEC-003 et PLAN-BENCHMARK décrivent
-la forme des autres bancs — s'y conformer plutôt qu'inventer un format.
+Pour S138 sans relire : S137-1 est un audit des renvois. La méthode est celle de S11 et S15 —
+recherche de texte plutôt que relecture. Motifs : « à calibrer », « voir ADR-0xx », « traité en
+S », les identifiants de bancs, les sections de SPEC. Pour chacun, ouvrir la cible et vérifier
+qu'elle porte ce qu'on lui confie. Commencer par les renvois vers des **bancs** et des **sections
+de SPEC**, les plus susceptibles de n'avoir jamais couvert ce qu'on leur attribue. Et y ajouter
+les **numéros** — leçons, angles, ADR — dont S137 vient de montrer qu'ils peuvent entrer en
+collision quand deux agents travaillent en parallèle.
