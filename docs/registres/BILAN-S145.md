@@ -121,3 +121,50 @@ publiés, atomicité des refus, bornes nommées. Mais cela veut dire que **le di
 prévu par SPEC-003 n'a pas suivi la couche qui a été écrite**, et que les bancs, qui sont la
 raison d'être des étages H3 à H6, restent hors de portée pour une raison qui n'a rien à voir avec
 `W` : ils demandent des étages qui n'existent pas.
+
+## 4. Les deux lectures, recalculées
+
+Même méthode qu'en S69, et même statut : ce sont des **jugements**, pas des mesures. Les compteurs
+des §1 à §3 sont vérifiés ; les pourcentages ci-dessous ne le sont pas et ne peuvent pas l'être.
+
+| Bloc | S69 | **S145** | ce qui a bougé |
+|---|---:|---:|---|
+| Décider quoi construire | ~85 % | **~90 %** | 46 ADR de plus ; les 14 demandes extérieures restent |
+| Savoir mesurer | ~35 % | **~40 %** | les pièces de H4 ; toujours **0 banc sur 11** |
+| Construire le système | ~5 % | **~30 %** | `W` impacts + pressions, journal, service vivant, reprise ; `δ` 1D ; `V` toujours nul |
+
+- **Comme corpus de conception : ~90 %.** L'achèvement ne dépend toujours pas de travail mais
+  d'arbitrages.
+- **Comme système d'eau utilisable dans un jeu : ~30 %**, contre ~15 % en S69. La progression est
+  réelle et elle est presque entièrement dans `W`.
+
+## 5. Ce que S69 recommandait, et ce qui en a été fait
+
+| # | Recommandation de S69 | 76 sessions plus tard |
+|---|---|---|
+| 1 | Arrêter d'instrumenter l'instrument tant qu'un banc reste lançable | **non suivie** — 7 208 lignes de sondes écrites depuis |
+| 2 | **Lancer B1** — le seul banc exécutable en l'état | **non faite** — B1 n'a jamais été lancé |
+| 3 | Trancher S63-1 par ADR — la couche dispersive | **faite en pratique, jamais déclarée** |
+| 4 | Décider si le projet passe à la construction | **faite** — ADR-053, 2026-09-08 |
+
+**Le point 3 mérite d'être dit exactement.** La dispersion vit dans `W` depuis ADR-060 : le
+candidat radial est dispersif en eau profonde, et c'est la réponse que S63-1 cherchait depuis S22.
+Mais **aucun ADR ne la tranche explicitement**, et l'action est restée « ouverte » au journal
+jusqu'à S70 avant de disparaître des listes. Une question fermée par la pratique sans être fermée
+par écrit se relit comme ouverte — c'est le mécanisme de L217, appliqué à une action au lieu d'un
+renvoi.
+
+**Le point 2 est le fait central de ce bilan.** B1 ne demande aucune couche manquante : `B` existe,
+le harnais mesure, la graine produit des réalisations indépendantes depuis S65. Il est exécutable
+**depuis avant S69**, il tranche une question de justesse et non de coût (A187), et soixante-seize
+sessions ont passé sans le lancer.
+
+### Pourquoi, et c'est un défaut de dispositif
+
+Chaque session lit la précédente et exécute sa « suite Sxxx ». Ce chaînage est excellent — il n'a
+jamais rompu en 144 sessions — mais il est **local** : il propage ce que la dernière session a vu,
+pas ce qu'un bilan a recommandé. Une recommandation globale n'a aucun porteur dans ce dépôt : elle
+est écrite dans un registre que personne ne relit, et la « suite » de la session suivante parle
+d'autre chose.
+
+C'est **A211**, et sa sévérité tient à ce qu'elle touche : non pas un calcul, mais la direction.

@@ -75,7 +75,7 @@ Le refaire à la même méthode, puis en tirer le fil suivant.
       ~5 %, et c'est l'affirmation la plus susceptible d'avoir vieilli.
 - [x] **P4** — le bloc « **savoir mesurer** » : étages du harnais, cas exécutables, bancs exécutés.
       S69 disait 2 étages sur 6, 12 cas sur 23 exécutables, 0 banc sur 11 exécuté.
-- [ ] **P5** — les deux lectures recalculées, **et ce que S69 recommandait confronté à ce qui a
+- [x] **P5** — les deux lectures recalculées, **et ce que S69 recommandait confronté à ce qui a
       été fait**. Une recommandation vieille de 76 sessions a-t-elle été suivie ? Sinon, pourquoi,
       et cela vaut-il décision.
 - [ ] **P6** — livrable BILAN-S145, rituel de fin (§6), jeton rendu, fusion `--ff-only`.
