@@ -58,31 +58,24 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S152 — terminée
+Session : S153 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S151-1, exécuter un volet B2 à60s et publier une décision de domaine/profil, explicitement partielle.
+Objectif : S152-1, recevoir énergie intérieure et transport hors80m à60s.
 
 ### Plan
 
-- [x] **P1** — état réel, dossier B2, protocole annoncé, jeton et plan seul.
-- [x] **P2** — instrument B2 impact : lambda source2/3/4/5/6m, rayon80m, horizon60s ; admissibilité N64/128/256, erreur indépendante et contrôles d'oracle.
-- [x] **P3** — traiter les refus de couverture si nécessaire par profil explicite ; coûts locaux répétés, reconstruction à30s, décision ADR et rapport.
-- [x] **P4** — tests et rituel : journal, angles/leçons/actions, index/décomptes, passation et jeton rendu.
+- [x] **P1** — état réel, lecture S127/S129, jeton et plan seul.
+- [ ] **P2** — oracle énergétique indépendant pour source4m, disques80/120m, temps0/60s ; raffinement spatial et spectral.
+- [ ] **P3** — observable énergétique depuis les coefficients N512 ; réception contre oracle et contre-épreuves.
+- [ ] **P4** — tests, rapport et rituel de fin ; poursuite B2 et jeton rendu.
 
 ### Notes de reprise
 
-Départ masterab3fee5, copies propres.292 tests/cinq ignorés,104 ADR.
-B2 partiel : pas de GPU/champ2D/Boussinesq, pression bornée16s, ni D1 multiplateforme.
-Comparer des résolutions du même candidat ne sélectionne pas sa technologie.
-La longueur de source n'est pas lambda_cut. Erreur normalisée des sept composantes
-<=1e-4 (S126) ; oracle radial512/1024 et angulaire1024/2048, variation<=1e-6.
-Points centre et16 rayons irréguliers jusqu'à80m, temps0/1/10/30/45/60s, grille de réception
-échantillonnée. Coût : cinq répétitions, p50/p99 locaux et dispersion ; reconstruction
-WLIV à30s séparée de l'évaluation. Aucun nouveau seuil de célérité ad hoc.
-Si profils existants refusent la couverture, essayer N512 explicitement par ADR,
-sans affaiblir le garde de résolution. B2 global et lambda_cut resteront ouverts.
-P2 : N64/128 refusent tout ; N256 accepte seulement lambda5/6 àR80/t60. Oracle radial max1,3651e-9, angulaire3,90e-16 ; erreurs N2565,385e-7 et4,110e-7. Profil N512 nécessaire à essayer, garde inchangé.
-
-P3 : N512 reçu sur cinq fixtures, hashes debug/release identiques ; coûts et restauration30s dans BANC-B2-S152. ADR-105, défaut64 inchangé.
-
-P4 :293 tests/cinq ignorés (200+93), zéro échec. Profil512 également release.105 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas, deux bancs partiels. Rituel exécuté et jeton rendu.
+Départ masterc7475a4, copies historiques propres.293 tests/cinq ignorés,105 ADR.
+Source4m/0,01J, profondeur20m, N512 ; étendre le disque de mesure à120m pour observer
+l'énergie sortie de80m. Ne pas identifier E0-E80 à une dissipation. Fenêtre60s.
+Oracle S127 : densité totale avec termes croisés intégrés sur z<0. Simpson480/960
+sur120m ; spectral256/512, angulaire1024/2048 sur points sentinelles.
+Seuils annoncés : écarts oracle spectral et candidat<=1e-4 E0 ; raffinement spatial<=0,002 E0,
+fermeture disque120 à0,003 E0 (réception de troncature, pas preuve sur plan infini).
+Première fixture seulement, pas de généralisation aux cinq longueurs S152.
