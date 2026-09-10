@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S139 — en cours
+Session : S139 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : S138-1 — `max_slope` vaut 0,1 partout depuis S77 sans provenance (A205), et décide
 de l'admissibilité de tout champ. Mesurer le rapport entre `slope_bound` — la borne L1
@@ -79,7 +79,7 @@ cambrure de Stokes (SPEC-001 §4) au lieu de rester un nombre sans origine.
       0,1 contre la valeur dérivée. Sinon : dire de quoi il dépend, et ce que cela coûte.
 - [x] **P5** — ADR : d'où vient `max_slope`. Livrable de mesure dans `docs/validation/`.
       Notes correctives datées là où 0,1 est cité comme une donnée du milieu.
-- [ ] **P6** — rituel de fin (§6), jeton rendu, fusion `--ff-only`.
+- [x] **P6** — rituel de fin (§6), jeton rendu, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -100,3 +100,23 @@ Piège à éviter : conclure « la pente réelle vaut ρ fois moins » depuis un
 grossier. Le maximum d'une somme de 64 Bessel oscille ; sous-échantillonner **sous-estime** le
 maximum et **surestime** le rapport, donc rend `max_slope` trop permissif. Raffiner jusqu'à
 stabilité, et le dire.
+
+P2-P5 : sonde `pente_reelle` (9 sections), `slope_max()` + test, ADR-094,
+PENTE-REELLE-S139, trois notes correctives (ADR-058, ADR-062, ADR-081). 270 tests/cinq ignorés.
+
+Ce que la session a trouvé et qui n'était pas dans le plan : **le budget de pente d'ADR-080
+additionne trois grandeurs de natures différentes** (pente exacte du fond, borne L1 d'impact de
+facteur 1,795, enveloppe L1 de pression de facteur inconnu). C'est la raison pour laquelle
+`max_slope` n'avait pas de provenance — il n'y en avait pas à trouver. L220.
+
+Pour S140 sans relire : A206 mesure le facteur de `slope_envelope`
+(`spectral_pressure.rs:346`, `Σ(|kx|+|ky|)(|Re η|+|Im η|)`) contre la pente réelle échantillonnée
+d'un champ de pression, sur les fixtures de `bound_pressure`. Méthode : la sonde `pente_reelle`
+fait exactement ce balayage pour l'impact radial et se transpose. Attendu : un facteur **non
+constant** — 1 à √2 sur `|k|` selon la direction, 1 à √2 sur `|η|` selon la phase, davantage à
+plusieurs cases. Si c'est confirmé, S139-1 ne peut pas se contenter d'un facteur par couche :
+il faudra que la pression publie sa pente réelle échantillonnée, pas un quotient.
+
+Impasse à ne pas réexplorer : chercher le seuil « juste » sans toucher au budget. Il n'existe pas,
+et la démonstration est au §5 du livrable — le même nombre autorise 1,8 fois la limite de
+déferlement au fond B s'il rend justice aux impacts.

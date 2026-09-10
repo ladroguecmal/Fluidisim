@@ -7135,3 +7135,59 @@ relus : aucun invalidé.
 **Suite S139 :** S138-1 — mesurer le rapport entre la borne L1 et la pente réelle, et voir si
 `max_slope` se dérive comme `α` s'est dérivé. Si oui, un troisième paramètre sort de l'arbitraire ;
 sinon, on saura quel banc doit le fixer, ce qu'aucun document ne dit aujourd'hui.
+
+---
+
+## S139 — 2026-09-10 — La limite de pente se dérive, mais le budget ne le permet pas encore
+
+**Entrée :** jeton libre à 041dfed, worktree `886155`, master et deux autres copies coïncidentes.
+S138-1, A205.
+**Produit :** [ADR-094](../docs/adr/ADR-094-d-ou-vient-la-limite-de-pente.md),
+[PENTE-REELLE-S139](../docs/validation/PENTE-REELLE-S139.md), sonde `pente_reelle`,
+`RadialImpact::slope_max()` et son test, trois notes correctives datées (ADR-058, ADR-062,
+ADR-081), A206, A207, L219, L220.
+
+**La question posée par S138 n'était pas la bonne, et c'est le résultat principal.** Elle
+demandait « quel banc fixe `max_slope` ». Il n'y en a pas à trouver : SPEC-001 §4 donne déjà la
+limite physique, `πH/λ = 0,4488` à la cambrure limite de Stokes. Ce qui manquait est le rapport
+entre la grandeur **comparée** et la grandeur **bornée**.
+
+**Le rapport est une constante du modèle : `ρ = 1,7950713`.** `slope_bound` est une borne L1
+obtenue en majorant `|J1| ≤ 1` ; la pente réelle maximale vaut `slope_bound/ρ`, atteinte en
+`r = 0,2062 λ` à l'instant de naissance. `ρ` ne dépend de rien de ce que l'appelant fournit —
+vérifié à sept chiffres sur λ de 0,5 à 32 m, E de 1e-4 à 100 J, N de 64 à 256, rayon de 0,5 à
+8 λ — parce que la forme spectrale d'ADR-060 est figée et que le champ est homothétique en λ
+(S136). Une quadrature f64 écrite hors du dépôt, avec une autre fonction de Bessel, donne
+1,795071271 : deux chaînes indépendantes coïncident. Borne théorique `ρ ≥ 1/0,5819 = 1,7185` — le
+conservatisme est presque entièrement dans `|J1| ≤ 1`.
+
+**Sûreté vérifiée, pas seulement précision.** `slope_max()` n'est exacte qu'à `t = birth` ; sur
+1 000 instants et trois longueurs d'onde, aucun instant ultérieur ne la dépasse (0,99966 à
+0,999995 fois). Mesuré, non démontré — dit comme tel.
+
+**Ce que personne n'avait constaté, et qui explique l'absence de provenance : le budget de pente
+additionne trois grandeurs de natures différentes.** `composition.rs` compare à `max_slope` la
+somme `steepness_B·π + Σ slope_bound (+ slope_envelope)` : une pente **exacte**, une borne L1 de
+facteur 1,795, et une enveloppe L1 de facteur inconnu et non constant. **Aucun seuil unique n'y
+est physiquement juste** — 0,806 rendrait justice aux impacts en autorisant au fond 1,8 fois la
+limite de déferlement. Le nombre est resté sans provenance parce qu'il n'y en avait pas à
+trouver. C'est L220, et c'est la vraie découverte de la session.
+
+**Ce que le seuil actuel coûte, en chiffres.** À `max_slope = 0,1` : un impact seul est admis
+jusqu'à une pente réelle de 0,0557, soit 12,4 % de la limite physique ; le fond B seul jusqu'à
+`H/λ = 1/31,4` au lieu de 1/7 ; l'énergie admissible d'un impact est divisée par 64,9.
+
+**Non fait, délibérément.** Migrer le refus `Steepness` et le budget vers les pentes réelles
+déplace la frontière d'admission de tous les champs et change les hachages de campagne : c'est
+un lot à part, **S139-1**, et il a un préalable — mesurer le facteur de la pression (A206).
+`slope_max()` est publiée sans rien changer au comportement ; `0,1` reste dans les fixtures.
+
+270 tests, cinq ignorés — un de plus, `slope_max_is_attained_and_never_exceeded_s139`. Aucun
+hachage touché. 94 ADR, 207 angles, 17 invariants, 6 spécifications, 23 cas. Invariants relus :
+**I-14 est désormais tenu pour `max_slope`**, qui était le contre-exemple le plus visible du
+corpus ; aucun autre invalidé.
+
+**Suite S140 :** A206 — mesurer le facteur de conservatisme de `slope_envelope` sur les fixtures
+de `bound_pressure`, préalable à S139-1. Puis S139-1 lui-même, avec ses témoins de hachage.
+Restent ouverts : l'audit des renvois « traité en Sxx » (S138), l'extension de fenêtre, S116-2,
+le bilan mixte, la durabilité et les deux calibrations de B10.

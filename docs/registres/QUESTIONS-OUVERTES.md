@@ -1259,3 +1259,27 @@ Aucun lot reçu en S71. A187 ne constitue plus une cause inconnue ni un motif po
   un journal différent. Maintien de l'ancienne publication au refus, attente explicite,
   doublons/conflits et saturation reçus avant raccordement à la transaction mixte.
   Fenêtre physique, profondeur finie S116-2, énergie mixte et durabilité restent distinctes.
+
+### Note du 2026-09-10 (S139) — le fil des actions s'est interrompu de S130 à S138
+
+**Ce registre n'a pas été alimenté pendant neuf sessions.** La dernière entrée par session
+datait de S129 ; S130 à S138 ont travaillé, décidé et laissé des actions, mais dans le journal,
+l'index et `REPRISE.md` §4 seulement. Rien ne signalait ici que la série s'était arrêtée, et un
+lecteur pouvait croire le projet arrêté à S129.
+
+Aucune tentative de reconstitution rétroactive n'est faite : elle serait une lecture, pas un
+relevé. **Les actions de S130 à S138 se lisent dans [`notes/JOURNAL.md`](../../notes/JOURNAL.md)**,
+entrée par entrée. Le fil reprend ci-dessous.
+
+### S139 — La limite de pente
+
+- **S138-1 : réalisée.** [PENTE-REELLE-S139](../validation/PENTE-REELLE-S139.md),
+  [ADR-094](../adr/ADR-094-d-ou-vient-la-limite-de-pente.md). `max_slope` se dérive de SPEC-001 §4
+  (`πH/λ = 0,4488`) ; le rapport entre la borne L1 et la pente réelle vaut `ρ = 1,7950713`,
+  constante du modèle. A205 traitée. **Statut : partiel** — le seuil n'est applicable qu'une fois
+  le budget de pente homogène.
+- **S139-1 : ouverte, préalable A206.** Migrer le refus `Steepness` et le budget d'ADR-080 vers
+  les **pentes réelles** : chaque terme publie la grandeur qu'il majore aujourd'hui, `max_slope`
+  devient 0,4488 avec provenance. Déplace la frontière d'admission de tous les champs et change
+  les hachages de campagne — témoins obligatoires. Préalable : mesurer le facteur de
+  `slope_envelope` (A206), non constant, sans quoi la somme reste hétérogène.

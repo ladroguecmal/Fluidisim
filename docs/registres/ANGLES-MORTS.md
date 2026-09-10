@@ -1746,3 +1746,32 @@ resserre » — c'est le banc B2, et c'est la suite S136-1.
   demie le seuil employé. Ce qui manque n'est donc pas la limite physique, mais **le rapport
   entre la borne L1 du modèle** — `Σ|a_k|·k`, majoration conservative — **et la pente réelle du
   champ**, qui se mesure dans le modèle comme `α` l'a été en S136. Suite S138-1.
+
+**Suivi A205 — S139 : traitée par ADR-094, et la question n'était pas celle qu'on croyait.** La
+limite physique n'avait pas à être mesurée : SPEC-001 §4 la donne, `πH/λ = 0,4488` à la cambrure
+limite de Stokes. Ce qui manquait est le rapport entre la borne L1 et la pente réelle, et il vaut
+**1,7950713** — constante du modèle, invariante en λ, en énergie, en `N` et en rayon, retrouvée à
+sept chiffres par une quadrature f64 indépendante. `RadialImpact::slope_max()` publie désormais
+la pente réelle. **Mais le seuil ne devient dérivable que si le budget d'ADR-080 cesse
+d'additionner une pente exacte et deux bornes L1 de facteurs différents** — voir A206 et l'action
+S139-1. Voir [PENTE-REELLE-S139](../validation/PENTE-REELLE-S139.md).
+
+- **A206** *(sévérité 2, S139 ; ouverte)* — **Le facteur de conservatisme de la pression n'est pas
+  mesuré, et il n'est probablement pas constant.** `slope_envelope` additionne
+  `(|kx|+|ky|)·(|Re η|+|Im η|)` (`spectral_pressure.rs:346`) : chacun des deux facteurs majore la
+  grandeur réelle de 1 à √2 selon la direction du vecteur d'onde et la phase, et la somme sur les
+  cases perd en plus toute compensation entre elles. Contrairement à `ρ = 1,7950713`, qui est fixé
+  par une forme spectrale figée, ce facteur dépend de ce que l'appelant publie. Tant qu'il est
+  inconnu, le budget de pente reste hétérogène et aucun seuil unique n'y est physiquement juste.
+  Mesurable sur les fixtures existantes de `bound_pressure`, et c'est un préalable à S139-1.
+
+- **A207** *(sévérité 3, S139 ; ouverte par décision)* — **Le critère de Stokes est appliqué à un
+  paquet transitoire, ce qu'il ne décrit pas.** La cambrure limite `H/λ ≈ 1/7` est établie pour
+  une onde progressive monochromatique et permanente en eau profonde. Le champ d'impact est un
+  paquet dispersif dont la crête vit une fraction de période, et rien ne dit qu'il déferle au même
+  seuil — la littérature de déferlement transitoire donne des critères plus élevés pour des
+  paquets focalisés. ADR-094 l'emploie comme **majorant géométrique** — au-delà, la surface cesse
+  d'être une fonction de la position, ce qui est vrai pour toute forme — et non comme prédiction
+  de déferlement. Ouverte par décision : la trancher demanderait une mesure du monde, hors de
+  portée d'une session (`REPRISE.md` §5), et le majorant géométrique suffit à l'usage qui en est
+  fait.

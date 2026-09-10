@@ -3325,3 +3325,37 @@ Le corollaire vaut pour ce qu'on écrit ensuite : annoncer « trois ADR portaien
 avoir compté, c'est publier un décompte faux — et le dépôt sait déjà ce que valent les décomptes
 non vérifiés (S07, S10). Voir [[L217]] : le renvoi non vérifié ferme la question ; le correctif
 non cherché la rouvre à moitié.
+
+## L219 — Un qualificatif n'est pas un nombre
+
+*(S139)* « Borne conservative » est écrit deux fois dans le corpus à propos de `slope_bound` —
+ADR-058 §22 et ADR-062 §50 — et les deux fois c'est exact. Pendant soixante-deux sessions,
+personne n'a mesuré **de combien**. Le facteur vaut 1,7950713, et l'obtenir a demandé une sonde
+de deux cents lignes et un quart d'heure.
+
+Le mécanisme est celui de [[L216]] et [[L217]], sous une troisième forme. Une étiquette juste
+— « à calibrer », « traité en Sxx », « conservative » — **rend la question présentable**, donc
+close : elle a l'air d'une réponse partielle alors qu'elle est une absence de réponse. Les trois
+étiquettes ont chacune coûté une soixantaine de sessions dans ce dépôt.
+
+Le test est mécanique et tient en une question : *si ce qualificatif était remplacé par le nombre
+qu'il résume, saurais-je l'écrire ?* Si non, la question est ouverte, et le document doit le dire
+comme tel plutôt que la qualifier.
+
+## L220 — Un budget qui additionne des natures différentes ne peut pas porter un seuil dérivé
+
+*(S139)* Le budget de pente d'ADR-080 additionne trois termes : la pente **exacte** du fond, la
+borne L1 d'un impact (1,795 fois la pente réelle) et l'enveloppe L1 d'une pression (facteur
+inconnu, non constant). Le tout est comparé à un seul `max_slope`.
+
+Il n'existe alors **aucune valeur physiquement juste** : le seuil qui rend justice aux impacts
+autorise au fond une cambrure de 1,8 fois la limite de déferlement, et l'inverse étrangle les
+impacts d'un facteur 65 en énergie. Ce n'est pas un défaut de calibration, c'est une propriété de
+la somme — et elle explique pourquoi le nombre est resté sans provenance : *il n'y en avait pas à
+trouver*.
+
+Généralisable à toute somme qui sert de garde : **avant de chercher le seuil, vérifier que tous
+les termes sont la même grandeur.** Une somme de majorants d'inégale finesse est sûre — c'est
+pourquoi le défaut est invisible en essais — mais elle n'est plus interprétable, et un seuil
+posé dessus ne se dérive de rien. La réparation n'est pas de choisir mieux : c'est de faire
+publier à chaque terme la grandeur réelle qu'il majore.

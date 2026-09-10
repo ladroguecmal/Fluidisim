@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 04:10 +02:00
+JETON            : libre
+Battement        : 2026-09-10 04:25 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S139 — `max_slope` se dérive-t-il ? (S138-1, A205)
-Dernière session : S138 — audit des renvois ;269 tests/cinq ignorés
-Session suivante : à fixer en fin de S139
+Session en cours : aucune
+Dernière session : S139 — la limite de pente se dérive ;270 tests/cinq ignorés
+Session suivante : S140 — mesurer le facteur de conservatisme de la pression (A206), préalable à S139-1
 
 **Copie de travail S139** : worktree `claude/reprise-projet-886155`, ouvert sur 041dfed = master.
 Terminer par `git -C <racine> merge --ff-only claude/reprise-projet-886155`. Deux autres
@@ -185,6 +185,31 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S139 — 2026-09-10 :** [ADR-094](docs/adr/ADR-094-d-ou-vient-la-limite-de-pente.md),
+[PENTE-REELLE-S139](docs/validation/PENTE-REELLE-S139.md). **A205 traitée.**
+**La question de S138 n'était pas la bonne, et c'est le résultat.** Elle demandait quel banc fixe
+`max_slope` : aucun, et il n'y en a pas à trouver. SPEC-001 §4 donne déjà la limite physique —
+cambrure limite de Stokes, `πH/λ = 0,4488`. Ce qui manquait est le rapport entre la grandeur
+**comparée** et la grandeur **bornée**.
+**`ρ = slope_bound / pente réelle = 1,7950713`, constante du modèle** — invariante sur λ de0,5 à
+32 m, E de1e-4 à100 J, N de64 à256, rayon de0,5 à8 λ ; maximum atteint en `r =0,2062 λ` à
+l'instant de naissance. Retrouvée à1,795071271 par une quadrature f64 écrite hors du dépôt, avec
+une autre fonction de Bessel. Sur1 000 instants, aucun instant ultérieur ne dépasse ce maximum —
+mesuré, non démontré. `RadialImpact::slope_max()` publie la pente réelle sans rien changer au
+comportement.
+**Ce que personne n'avait constaté : le budget de pente additionne trois grandeurs de natures
+différentes** — pente exacte du fond, borne L1 d'un impact (facteur1,795), enveloppe L1 d'une
+pression (facteur inconnu, non constant). **Aucun seuil unique n'y est physiquement juste** :
+0,806 rendrait justice aux impacts en autorisant au fond1,8 fois la limite de déferlement. Le
+nombre est resté sans provenance parce qu'il n'y en avait pas à trouver (**L220**).
+À0,1, un impact seul n'est admis qu'à12,4 % de la pente physique, le fond à `H/λ =1/31,4`.
+Trois notes correctives datées (ADR-058, ADR-062, ADR-081). A206, A207, L219, L220.
+270 tests/cinq ignorés — un de plus ; aucun hachage touché.
+94 ADR,207 angles,17 invariants,6 spécifications,23 cas.
+Suite S140 : **A206**, mesurer le facteur de `slope_envelope` sur les fixtures de
+`bound_pressure` — c'est le préalable à **S139-1**, la migration du refus `Steepness` et du
+budget vers les pentes réelles, qui déplacera la frontière d'admission et les hachages.
 
 **S138 — 2026-09-10 :** [AUDIT-RENVOIS-S138](docs/validation/AUDIT-RENVOIS-S138.md). S137-1.
 **L'audit mécanique ne trouve rien, et c'est le résultat** : 93 ADR de 1 à 93, 217 leçons de 1 à

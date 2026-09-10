@@ -17,6 +17,16 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S139 :** [ADR-094](adr/ADR-094-d-ou-vient-la-limite-de-pente.md), d'où vient la limite de pente.
+[PENTE-REELLE-S139](validation/PENTE-REELLE-S139.md) : **A205 traitée**, et la question n'était pas celle qu'on
+croyait. La limite physique est déjà écrite — SPEC-001 §4, `πH/λ = 0,4488` — et ce qui manquait est le rapport
+entre la borne L1 et la pente réelle : **ρ = 1,7950713**, constante du modèle, invariante en λ, énergie, `N` et
+rayon, retrouvée à sept chiffres par une quadrature f64 indépendante. `slope_max()` publie la pente réelle.
+**Mais le budget d'ADR-080 additionne une pente exacte et deux bornes L1 de facteurs différents** : aucun seuil
+unique n'y est juste (**L220**, A206, A207). À 0,1, un impact n'est admis qu'à 12,4 % de la pente physique.
+270 tests/cinq ignorés, aucun hachage touché.
+94 ADR,207 angles,17 invariants,6 spécifications,23 cas. Suite S140 : A206 puis S139-1.
+
 **S138 :** [AUDIT-RENVOIS-S138](validation/AUDIT-RENVOIS-S138.md), audit des renvois du corpus. Identifiants
 **cohérents** — 93 ADR, 217 leçons, 204 angles, aucun trou ni doublon, aucun renvoi cassé vers un numéro ou une
 section. Mais le correctif de S137 était **incomplet** : six ADR portaient « à calibrer B2 », trois seulement
@@ -514,7 +524,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | `code/scenarios` | les scénarios du mode `check`, assertions comprises |
 
 ```
-cargo test --offline                                  # 104 succès, 2 ignorés
+cargo test --offline                                  # 270 succès, 5 ignorés (S139)
 water-harness check   scenarios/*.toml                # H1 — déterminisme, 0,04 s / budget 60 s
 water-harness physics scenarios/*.toml                # H3 — assertions analytiques et diagnostics
 ```

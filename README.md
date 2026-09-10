@@ -135,7 +135,7 @@ Coût mesuré en S125 : environ ×4 à points identiques et ×9 pour le montage 
 initial. [ADR-085](docs/adr/ADR-085-profils-radiaux-selon-le-domaine.md) conserve N64 par défaut ;
 N128/N256 se dimensionnent explicitement au domaine commun du service. A202 traitée ; A203 suit
 la réception physique à grande portée, réalisée en S126 sur les deux fixtures à âge0–4 s.
-État vérifié S129 : **257 tests réussis, cinq ignorés ; 85 ADR, 204 angles, 17 invariants,
+État vérifié S139 : **270 tests réussis, cinq ignorés ; 94 ADR, 207 angles, 17 invariants,
 6 spécifications, 23 cas canoniques.**
 [Réception S126](docs/validation/RECEPTION-ETENDUE-S126.md) :1350 points-temps reçus contre
 oracle indépendant, erreur normalisée<=4,44e-7. La fenêtre4 s reçoit surtout des queues aux
@@ -189,6 +189,12 @@ L'audit des renvois montre un corpus **cohérent** sur ses identifiants — 93 A
 trou ni renvoi cassé — mais que le correctif de la session précédente était **incomplet** : six ADR portaient le
 renvoi erroné, trois seulement avaient été corrigés (S138, L218). Et `max_slope`, qui décide de l'admissibilité de
 tout champ, est renvoyé à un banc qui ne le mesure pas alors que sa limite physique est déjà dérivable (A205).
-Suite : mesurer si `max_slope` se dérive du modèle comme la longueur d'onde s'en est dérivée, S138-1.
-93 ADR,205 angles,17 invariants,6 spécifications,23 cas.
+`max_slope` se dérive, et la question n'était pas celle qu'on croyait : la limite physique est déjà dans
+SPEC-001 §4 — cambrure limite de Stokes, `πH/λ = 0,4488` — et ce qui manquait est le **rapport entre la borne L1
+du modèle et la pente réelle**, mesuré constant à **1,7950713** (ADR-094, S139). Mais le budget de pente
+**additionne trois grandeurs de natures différentes** — une pente exacte, une borne L1 de facteur 1,795, une
+enveloppe de facteur inconnu : aucun seuil unique n'y est physiquement juste, et c'est pourquoi le nombre était
+resté sans provenance (L220). Le seuil de 0,1 n'admet aujourd'hui que 12,4 % de la pente physique.
+Suite : mesurer le facteur de la pression (A206), puis migrer le budget vers les pentes réelles, S139-1.
+94 ADR,207 angles,17 invariants,6 spécifications,23 cas.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.
