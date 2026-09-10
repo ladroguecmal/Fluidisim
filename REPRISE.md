@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-10 12:53 +02:00
+JETON            : occupé
+Battement        : 2026-09-10 12:55 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S144 — A208, le refus qui ne désigne pas l'emprise
 Dernière session : S143 — A210 traitée, invariant I-18 ;273 tests/cinq ignorés
-Session suivante : S144 — **A208**, trois fois reportée : le refus ne désigne pas l'emprise
+Session suivante : à fixer en fin de S144
 
 **Copie de travail S139 et S140** : worktree `claude/reprise-projet-886155`, refusionné en avance
 rapide dans master à la fin de chacune des deux. Terminer de même :

@@ -58,68 +58,53 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S143 — terminée
+Session : S144 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : **A210**. Le crate porte deux constantes homonymes qui ne se déduisent pas l'une de
-l'autre, et le contrat « ce qui est comparé à `max_slope` est une pente réelle » ne vit que dans
-deux commentaires et deux essais. Un troisième champ pourrait écrire
-`slope > medium.max_slope` sans que rien ne l'arrête — c'est ce que les deux premiers ont fait
-pendant soixante sessions. Défaut de **dispositif**, pas de calcul.
+Objectif : **A208**, ouverte depuis S140 et **trois fois reportée**. À champ identique, l'emprise
+publiée décide de la part de budget de pente consommée — ×10,9 mesuré, sans borne — et le refus
+rendu, `Slope` ou `Steepness`, désigne la **pente**, c'est-à-dire la seule chose que l'hôte n'a
+pas à changer. ADR-082 exige qu'un nom de refus désigne ce qu'il faut revoir.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton, **plan déclaré et committé seul**.
-- [x] **P2** — peser les trois réparations **avant** d'en écrire une, et écrire la pesée. Type
-      porteur, essai générique, entrée d'invariant : coût, ce que chacune attrape, ce qu'elle
-      laisse passer. La question qui décide est *qu'est-ce qui aurait arrêté le défaut de S141*,
-      pas *qu'est-ce qui est le plus propre*.
-- [x] **P3** — construire ce que la pesée retient. Étape courte : si la réparation ne tient pas
-      en un quart d'heure, c'est qu'elle est plus lourde que le défaut.
-- [x] **P4** — **vérifier qu'elle attrape le défaut** : réintroduire la faute de S141 dans une
-      copie de travail jetable et constater l'échec. Une garde qu'on n'a pas vue échouer ne
-      garde rien — c'est la moitié qu'ADR-082 vérifie pour chaque nom de refus.
-- [x] **P5** — ADR et livrable ; porter l'invariant s'il y en a un.
-- [x] **P6** — rituel de fin (§6), jeton rendu, fusion `--ff-only`.
+- [ ] **P2** — établir ce qui est **calculable au moment du refus**, avant d'imaginer un nom.
+      La question décisive : la bibliothèque peut-elle distinguer « champ vraiment raide » de
+      « emprise étroite » ? S140 dit que la pente réelle d'une pression ne se calcule pas, elle
+      se cherche — si c'est vrai ici, un refus `Footprint` serait un nom qu'on ne peut pas
+      justifier, et ADR-082 refuse autant un nom faux qu'un nom vague.
+- [ ] **P3** — peser les réparations à la lumière de P2, et écrire la pesée. Nommer le cas ;
+      publier de quoi calculer sa marge ; rendre la marge observable sur les points de
+      l'appelant. Le critère reste celui de S143 : **qu'est-ce qui aurait aidé quelqu'un qui
+      se fait refuser sans comprendre**.
+- [ ] **P4** — construire ce que la pesée retient, étage court, tests verts.
+- [ ] **P5** — **vérifier que ça sert** : reprendre le cas mesuré en S140 — emprise de 0,01 λ
+      posée sur un zéro, facteur ×10,9 — et montrer que l'appelant voit désormais ce qui le
+      fait refuser. Une aide qu'on n'a pas vue aider ne vaut pas mieux qu'une garde qu'on n'a
+      pas vue échouer (S143).
+- [ ] **P6** — ADR, livrable, rituel de fin (§6), jeton rendu, fusion `--ff-only`.
 
 ### Notes de reprise
 
-Départ 66c192f = master ; worktree `886155`. 273 tests/cinq ignorés.
+Départ 597eca7 = master ; worktree `886155`. 273 tests/cinq ignorés, 18 invariants.
 
-Les trois voies, telles que S142 les a laissées :
-- **type porteur** — un `RealSlope(f32)` au lieu d'un `f32` nu ; le plus solide, le plus
-  intrusif : il traverse `Medium`, `composition`, `mixed_water`, `bound_pressure` ;
-- **essai générique** — praticable, mais **il faut un trait commun aux champs, qui n'existe
-  pas**. Les deux `sample` ont pourtant la même signature : à vérifier avant de conclure ;
-- **entrée d'invariant** — la moins chère, la plus oubliable.
+Ce qui est établi et n'est pas à remesurer (ENVELOPPE-PRESSION-S140) :
+- le conservatisme de la pression se décompose en un facteur de **forme**, borné par 2 et
+  **déjà retiré** depuis S141 par `slope_envelope_tight()`, et un facteur d'**alignement** que
+  rien ne borne, qui dépend de l'emprise choisie par l'hôte ;
+- à emprise large le facteur d'alignement vaut 1,0000 sur une case ; à 0,01 λ posée sur un zéro
+  du champ, il vaut 10,89 et continue de croître ;
+- sur un spectre gaussien réaliste il vaut 1,8522, stable en résolution.
 
-Ce que S142 a noté et qui oriente : **I-14 a tenu soixante sessions parce qu'un essai le
-vérifiait**, pas parce qu'il était écrit. Une entrée d'invariant seule ne suffira pas.
+`bound_pressure::Prepared` retient déjà la borne resserrée et l'expose par `slope_envelope()`.
+La L1 reste disponible sur `Field::slope_envelope()`. Le rapport des deux ne dit que la
+**forme** — déjà retirée : le publier n'apprendrait donc rien sur l'alignement, qui est le sujet
+d'A208. À vérifier en P2 plutôt qu'à supposer, mais c'est la piste qui rend la réparation (b)
+douteuse.
 
-Piège à éviter : construire le plus beau des trois. Le défaut réel est qu'une **troisième
-implémentation** de la même comparaison puisse naître sans mesurer son rapport. La bonne question
-n'est pas « comment exprimer le contrat » mais « qu'est-ce qui échouerait le jour où quelqu'un
-l'oublie ».
+Piège à éviter : inventer `Footprint` parce que le nom est joli. Un refus doit être **décidable**
+au moment où il est rendu ; si la bibliothèque ne peut pas distinguer les deux causes, le nom
+ment, et ADR-082 refuse un nom qui ment autant qu'un nom vague.
 
-Second piège : un trait commun inventé pour l'occasion, que rien d'autre n'utilise, est une
-surface publique sans lecteur — exactement ce qu'ADR-082 refuse. S'il n'a qu'un usage, l'écrire
-côté essais plutôt que côté bibliothèque.
-
-P2-P5 : pesée écrite avant d'écrire du code, deux gardes, vérification par réintroduction des
-fautes, retrait des deux essais dupliqués, ADR-097, invariant I-18, CONTRAT-PENTE-S143, L226.
-273 tests/cinq ignorés — le même compte qu'à l'entrée.
-
-Ce que la pesée a retourné, et qui vaut pour la prochaine fois : **le type porteur ne garde rien**
-dès lors qu'un acteur légitime — ici l'hôte — doit pouvoir construire la valeur. Le constructeur
-public est la porte, et l'auteur pressé la prend. Ne pas y revenir sans un argument neuf.
-
-Manquement de la session, attrapé par le compte de tests et non par la relecture : le livrable
-annonçait « les deux essais spécifiques sont remplacés » alors qu'ils étaient toujours là — 275 au
-lieu de 273. Corrigé en P4b. Vérifier le **décompte** après toute annonce de remplacement.
-
-Pour S144 sans relire : A208 dit que le refus rendu quand l'emprise consomme le budget désigne la
-pente — `Slope` ou `Steepness` — alors que ce que l'hôte peut changer est **l'emprise** publiée
-(ENVELOPPE-PRESSION-S140 §4, facteur ×10,9 mesuré, non borné). ADR-082 exige qu'un nom de refus
-désigne ce qu'il faut revoir ; celui-ci désigne le contraire. Deux réparations évoquées et aucune
-tranchée : nommer le cas (`Footprint`), ou publier le rapport des deux enveloppes pour que
-l'appelant voie sa propre marge. Attention : `bound_pressure::Prepared` retient déjà la borne
-resserrée ; publier aussi la L1 rendrait le rapport calculable sans rien mesurer.
+Second piège : trois reports ont déjà eu lieu. Si la conclusion honnête est « rien à faire ici »,
+la dire et **fermer** A208 avec son motif, plutôt que la reporter une quatrième fois.
