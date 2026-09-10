@@ -58,125 +58,49 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S156 — terminée
+Session : S157 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : S155-1. La première branche que S154 proposait, que le refus du noyau rendait
-inaccessible et que ADR-106 vient d'ouvrir : **bilan énergétique d'un sillage prolongé et domaine
-de collecte requis**, comme S153 et S154 l'ont fait pour les impacts.
+Objectif : S156-1, A214. Remplacer **deux encadrements par une loi**. S156 a montré que le pas
+radial borne la durée d'un sillage par périodicité, mais n'a mesuré que deux seuils — radial 128
+décroche entre 15 et 20 s, radial 256 entre 45 et 50 s — et la formule candidate se trompe d'un
+facteur 2,5 sur le second. Sans loi, pas de garde-fou : c'est exactement ce que dit A214.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan déclaré et committé seul.
-- [x] **P2** — énergie d'un sillage prolongé jusqu'à 60 s : puissance pendant le forçage,
-      conservation après extinction. C'est exactement ce que S155 vient de rendre mesurable, et
-      personne ne l'a encore regardé au-delà de 8 s.
-- [x] **P3** — **où** est cette énergie dans l'espace à 60 s : balayage radial du champ contre
-      l'oracle f64 à quadrature doublée, et fraction contenue dans un rayon donné.
-- [x] **P4** — décider d'après les chiffres : la borne utile est-elle en temps, en domaine, ou
-      en **résolution spectrale** ? Les trois ne se corrigent pas au même endroit.
-- [x] **P5** — recevoir ce qui doit l'être, avec un test témoin ; ne rien construire dont le
-      prix dépasse le bénéfice.
-- [x] **P6** — livrable, rituel de fin, fusion `--ff-only`.
+- [ ] **P2** — un critère **lisse** et sa vérification de monotonie. Le critère de S156 — premier
+      rayon qui dépasse le seuil — n'était pas monotone en temps ; une dichotomie posée dessus
+      donnerait un chiffre faux avec l'apparence d'un chiffre précis.
+- [ ] **P3** — trois seuils par dichotomie, radial 64 / 128 / 256, angulaire fixé à 512.
+      Trois points suffisent à trancher entre les deux exposants candidats.
+- [ ] **P4** — dépendance à `sigma` : mêmes seuils à `sigma` 4 m, `cutoff` 1,5 pour garder le
+      **même produit réduit** `sigma*cutoff = 6` et donc la même forme spectrale à échelle près.
+- [ ] **P5** — décider : loi écrite si elle tient sur les deux familles, refus argumenté sinon.
+      Garde-fou reçu seulement si la loi le mérite — A214 dit pourquoi un garde faux est pire.
+- [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
-Départ d7db1d2 = master, trois copies coïncidentes, rien en attente.
-297 tests/cinq ignorés, 106 ADR, 213 angles, 232 leçons, 18 invariants.
+Départ dc78f2e = master, trois copies coïncidentes, rien en attente.
+298 tests/cinq ignorés, 107 ADR, 214 angles, 234 leçons, 18 invariants.
 
-Outillage déjà en place, à ne pas réécrire :
-- `examples/wake_motion.rs` (S150) monte la chaîne complète — `Wake::build`, WPRS, journal,
-  `Prepared::from_journal`, oracle f64 `GaussianPressure` à quadrature doublée ;
-- `Prepared::energy_j()` et `power_w()` donnent le bilan spectral en joules ; l'énergie est une
-  somme de Kahan sur les nœuds, `rho/2 * poids * (g|eta|^2 + |v|^2/k)` ;
-- `wake_emitter` découpe le mouvement en tronçons, chacun source distincte (ADR-104).
+Ce que S156 laisse et qu'il ne faut pas refaire :
+- `examples/wake_reach.rs` porte `profil(radial, angular, us)` et `rayon_honnete` ;
+- mécanisme établi : période spatiale `2*pi*radial/cutoff`, soit 67 / 134 / 268 / 536 m ;
+- le rayon est borné indépendamment par `angular`, proportionnellement — fixer `angular` à 512
+  met cette seconde borne hors du chemin, et c'est pour cela qu'on la fixe ;
+- plafond de la grammaire : `radial` et `angular` au plus 512. Donc `t_max(512)` restera
+  **extrapolé**, jamais mesuré, et cela devra être écrit comme tel.
 
-**Prédiction écrite avant la mesure**, pour qu'elle puisse être démentie — c'est ce qui a le
-mieux rapporté en S155. Le paquet s'étale à la vitesse de groupe `c_g = ½ sqrt(g/k)` : pour
-sigma 1 m et cutoff 6, les modes rapides sont les **petits** k, et à 60 s ils sont déjà à des
-centaines de mètres. Mais la quadrature est **discrète** : un pas radial `dk ≈ cutoff/radial`
-rend le champ périodique de période `2*pi/dk`, soit ~134 m pour radial 128. Si le paquet dépasse
-cette période, il **revient** par l'autre bord au lieu de partir. La borne utile serait alors ni
-le temps ni le domaine, mais la **résolution spectrale**, et le rayon honnête décroîtrait
-relativement à l'étalement au lieu de croître.
+**Prédiction écrite avant la mesure.** Deux exposants sont en lice. Si la vitesse pertinente est
+celle du plus petit nœud du maillage, `t_max` croît comme `sqrt(radial)` — c'est la formule de
+S156, qui se trompe d'un facteur 2,5 sur 256. Si elle est fixée par l'échelle où vit l'énergie,
+donc indépendante du maillage, `t_max` croît comme `radial`. Les deux seuils connus donnent un
+rapport de 2,7 pour un doublement : **plus proche de la seconde**, et même au-delà. Le troisième
+point tranchera, et s'il donne un rapport franchement différent de 2,7 c'est qu'aucune loi de
+puissance simple ne décrit le phénomène — ce serait le résultat le plus utile, parce qu'il
+interdirait le garde-fou pour de bon.
 
-Si c'est vrai, ADR-106 est nécessaire et **non suffisant** : porter l'horizon à 64 s sans porter
-la résolution ne donne qu'un champ replié. Si c'est faux, il faut le dire aussi.
-
-Piège identifié d'avance : l'oracle `GaussianPressure` porte **la même** discrétisation, en plus
-fin. Un accord candidat/oracle ne prouverait donc rien sur le repliement — les deux replient. Le
-seul juge est la comparaison entre **deux résolutions** et, si possible, une quantité physique
-indépendante de la quadrature : l'énergie totale, qui doit être conservée après extinction.
-
-P2 — l'energie d'un sillage prolonge se conserve, et c'est un resultat vide.
-Forcage 16 s en huit troncons de 2 s a 2 m/s, 100 N, sigma 1 m, cutoff 6 ; observation a 60 s,
-possible depuis ADR-106. Puissance exactement nulle des l'extinction ; energie **identique au bit
-pres** a 16, 20, 30, 45 et 60 s : 2,882884145e-1 J en 128x128, 2,884232700e-1 en 256x256.
-Mais cette conservation est **structurelle** : apres extinction chaque mode tourne, et la rotation
-laisse g|eta|^2 + |v|^2/k invariant. Le bilan spectral ne pouvait pas ne pas se conserver. Il
-confirme l'implementation, il ne dit rien de la validite spatiale du champ. Le noter comme
-resultat aurait ete une mesure vide.
-Ecart de quadrature sur l'energie totale entre 128x128 et 256x256 : 4,7e-4 relatif. Petit.
-
-P3 — deux bornes, deux lois, et la prediction n'etait juste qu'a moitie.
-
-Ce qui est confirme : la quadrature discrete rend le champ **periodique**, de periode
-`2*pi*radial/cutoff` — 67 / 134 / 268 / 536 m pour radial 64 / 128 / 256 / 512. A 4 s, deux
-resolutions voisines cessent de s'accorder a 45 m (64 contre 128) et 100 m (128 contre 256),
-soit les **deux tiers** de la periode de la plus grossiere dans les deux cas. Le paquet ne part
-pas : il **revient par l'autre bord**.
-
-Ce qui n'etait pas prevu : la borne **angulaire** est independante et suit une autre loi. A 8 s,
-radial fixe a 512, le rayon honnete vaut 20 / 45 / plus de 200 m pour angular 64 / 128 / 256 —
-proportionnel a `angular`, comme l'alias de `exp(i k.x)` sur le cercle le veut. Les deux bornes
-ne se corrigent donc pas au meme endroit, et **laquelle mord depend de l'instant** : a 8 s c'est
-l'angulaire (512x128 honnete a 45 m, 128x512 honnete au-dela de 200 m) ; a 60 s c'est la radiale,
-exactement l'inverse (512x128 reproduit 512x512 au bit pres en champ proche, 128x512 se trompe
-d'un facteur 75).
-
-Duree honnete mesuree, angulaire fixe a 512 : radial 128 cesse de s'accorder **entre 15 et 20 s**,
-radial 256 **entre 45 et 50 s**. La recurrence predite `2*pi/(c_g,max * dk)` donne 13,1 et 18,5 s :
-juste a 30 % pour 128, trop pessimiste d'un facteur 2,5 pour 256. La formule prend `c_g` au plus
-petit noeud du maillage, alors que les tres petits k ne portent presque pas d'energie. **La loi
-n'est pas verifiee ; seuls les deux encadrements le sont**, et c'est ce qui sera publie.
-
-Point de logique a ne pas rater : quand 256 et 512 divergent a 50 s, cela accuse **256**, pas 512
-— la coherence en dessous de 45 s et l'echec plus precoce de 128 le montrent. Mais `radial` et
-`angular` plafonnent a **512** dans la grammaire de recette (`validate_recipe`), donc
-**t_max(512) n'est pas mesurable** : il n'existe aucune reference plus fine. Extrapoler donnerait
-plus de 100 s ; ce serait une extrapolation, pas une mesure, et il faut le dire.
-
-Consequence pour B2 : la recette de la reception de sillage S150 est 128x128 — honnete jusqu'a
-~17 s et ~45 m. Un bilan a 60 s demande radial >= 512 et angular >= 256, soit 131072 noeuds
-contre 16384 : **huit fois plus**.
-
-P4 — ADR-107 : le domaine d'un sillage se deduit de sa recette. Prix mesure, mediane sur cent
-repetitions apres chauffe separee : 25,6 / 102,0 / 205,5 / 402,9 ms de preparation et 19,5 / 75,0
-/ 150,4 / 298,3 ms par lot de 64 points pour 128x128 / 256x256 / 512x256 / 512x512. Cout lineaire
-en nombre de noeuds. Le plafond de 512 n'est pas releve : aucune reference plus fine n'existe pour
-verifier, et le prix de ce qu'il faudrait est deja hors de portee.
-Verdict B2 volet sillage : **partiel et negatif a 60 s**, fonde sur une mesure et non sur un
-manque de mesure. Aux durees ou il a ete recu (8 s, S150/S151), le candidat est dans son domaine.
-Non fait et nomme (A214) : le garde-fou d'admissibilite. La loi en duree n'est encadree qu'en deux
-points ; un garde bati dessus refuserait du valide ou admettrait de l'invalide.
-
-P5 — un seul test recu, et rien d'autre construit. `recurrence_radiale_hors_domaine_s156` epingle
-le fait, pas la loi : a 8 s radial 128 et 512 s'accordent a 2,4 % pres du centre ; a 60 s la
-grossiere y montre 6,406e-5 m contre 1,322e-6 pour la fine, **quarante-huit fois plus**, energie
-revenue par periodicite. Angulaire fixe a 64, points a moins de 5 m — dans le domaine angulaire,
-pour que seul le pas radial soit juge.
-Temoin verifie : les deux mesures prises a radial 512, le test echoue (ligne 218). Il ne peut donc
-pas passer par construction.
-Cout 0,66 s en debug ; 298 tests/cinq ignores (205+93), debug et release, zero echec.
-
-P6 — SILLAGE-DOMAINE-S156, ADR-107, A214, L233, L234, journal, index, README, REPRISE, jeton
-rendu, ff-only. 298 tests/cinq ignorés en debug et en release.
-
-Pour S157 sans relire : S156-1 remplace deux encadrements par une loi. La sonde `wake_reach`
-fait déjà tout le travail — `rayon_honnete` compare deux profils, `profil(radial, angular, us)`
-construit le champ. Ce qui manque est une dichotomie sur l'instant de décrochage à radial 64, 128
-et 256 (angulaire fixé à 512), soit trois seuils au lieu de deux encadrements, plus la même chose
-à sigma 4 m pour voir si la loi dépend de la largeur de la source. Attention : le décrochage n'est
-pas monotone point par point — à 45 s, 128 contre 256 donnait « 2 m » entre deux « aucun ». La
-dichotomie doit porter sur une quantité lissée, pas sur le premier rayon qui dépasse le seuil.
-Ne pas oublier ce que la session a coûté à apprendre : le plafond 512 borne ce qui est
-vérifiable, donc la loi devra être extrapolée pour 512 et cela devra être écrit comme tel.
+Piège de méthode déjà payé en S156 : un critère qui compare `radial` à `2*radial` mesure la
+défaillance **de la plus grossière des deux**, à condition que la plus fine soit encore dans son
+domaine. Pour radial 256 contre 512 à 50 s, cette condition n'est pas vérifiable. Le dire.
