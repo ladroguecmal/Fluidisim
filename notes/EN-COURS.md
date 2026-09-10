@@ -73,7 +73,7 @@ facteur 2,5 sur le second. Sans loi, pas de garde-fou : c'est exactement ce que 
       donnerait un chiffre faux avec l'apparence d'un chiffre précis.
 - [x] **P3** — trois seuils par dichotomie, radial 64 / 128 / 256, angulaire fixé à 512.
       Trois points suffisent à trancher entre les deux exposants candidats.
-- [ ] **P4** — dépendance à `sigma` : mêmes seuils à `sigma` 4 m, `cutoff` 1,5 pour garder le
+- [x] **P4** — dépendance à `sigma` : mêmes seuils à `sigma` 4 m, `cutoff` 1,5 pour garder le
       **même produit réduit** `sigma*cutoff = 6` et donc la même forme spectrale à échelle près.
 - [ ] **P5** — décider : loi écrite si elle tient sur les deux familles, refus argumenté sinon.
       Garde-fou reçu seulement si la loi le mérite — A214 dit pourquoi un garde faux est pire.
@@ -154,3 +154,37 @@ sigma de P4 doit reveler — si le regroupement tient a sigma 4 m, la vitesse ma
 par la source ; s'il ne tient pas, il n'y a rien a ecrire.
 Censure a connaitre : l'horizon de 64 s (ADR-106) coupe la mesure pour radial 256 des le seuil 2,0,
 et rend radial 512 inobservable. Le plafond de la grammaire et l'horizon se conjuguent.
+
+P4 — l'epreuve du sigma refute le regroupement, et aucun autre ne tient.
+Trois sources a produit reduit `sigma*cutoff = 6` constant, donc meme forme spectrale a l'echelle
+pres. Grille adaptee a l'echelle : 1 s pour sigma 0,25 m, 4 s pour les autres — une grille de 4 s
+quantifiait la source etroite au point de la rendre illisible.
+
+| sigma | cutoff | radial 64 | radial 128 | radial 256 |
+|---|---|---|---|---|
+| 0,25 m | 24 | 4 s | 13 s | 21 s |
+| 1 m | 6 | 20 s | 36 s | 56 s |
+| 4 m | 1,5 | 32 s | au-dela de 64 s | au-dela de 64 s |
+
+- `t*dk` : 1,50 / 2,44 / 1,97 puis 1,88 / 1,69 / 1,31 puis 0,75. **Facteur 4. Refute.**
+- `t*0,5*sqrt(g*sigma)*dk`, le groupe physiquement motive : 1,17 a 2,94. **Facteur 2,5.** Mieux,
+  pas constant.
+- Ajustement libre `t = C*sigma^p*dk^q` : dispersion 1,38, `q = -1,04` — proportionnel a la periode
+  spatiale. Mais **le plan d'experience est degenere** : `dk = 6/(sigma*radial)` par construction,
+  donc `sigma` et `dk` ne sont pas independants et les deux exposants ne sont pas identifiables.
+  Trois parametres pour sept points lies : ce 1,38 n'est pas une loi, c'est un ajustement.
+- En variables reellement independantes `sigma` et `radial` : l'exposant en `radial` vaut 0,74 a
+  sigma 1 m et 1,20 a sigma 0,25 m. **Il depend de sigma : pas de loi de puissance.**
+
+Conclusion : la degradation est graduelle, l'instant de franchissement herite du seuil choisi
+(exposant 0,63 a 0,93 selon le seuil a sigma 1 m), et aucun groupe ne rassemble les mesures a
+mieux qu'un facteur 2,5. **Il n'y a pas de loi a ecrire.**
+
+Trois choses manquent, et deux sont fermees par des decisions deja prises :
+1. une **specification de l'erreur acceptable** — le seuil de 10 % d'exces est ma convention, et
+   c'est elle qui commande l'instant ; personne n'a dit ce qu'un consommateur tolere ;
+2. une fenetre d'observation **au-dela de 64 s** — ADR-106 la borne, et la censure frappe sigma 4 ;
+3. des resolutions **au-dela de 512** pour allonger le bras de levier — ADR-097 la borne.
+
+Sonde temporaire `wake_law_sigma.rs` supprimee : un duplicat d'exemple diverge, c'est le
+mecanisme des trois forks a l'echelle d'un fichier. Le balayage vit dans `wake_law`.

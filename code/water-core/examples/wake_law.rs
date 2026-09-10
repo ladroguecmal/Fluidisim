@@ -123,6 +123,50 @@ fn ecart_contre(radial: usize, reference: usize, sigma: f32, cutoff: f32, us: u6
 fn main() {
     monotonie();
     retour_proche();
+    balayage_sigma();
+}
+
+/// L'épreuve décisive. Si `t * dk` est l'invariant, une source quatre fois plus large — à produit
+/// réduit `sigma*cutoff` inchangé, donc même forme spectrale à l'échelle près — doit multiplier
+/// les instants de franchissement par quatre, et une source quatre fois plus étroite les diviser
+/// par quatre. Sinon il manque une vitesse que la source fixe, et il n'y a pas de loi à écrire.
+fn balayage_sigma() {
+    println!();
+    println!("# S157 — épreuve du sigma, produit réduit sigma*cutoff = 6 dans les trois cas");
+    println!("Grille de 4 s. `t*dk` avec `dk = cutoff/radial` ; constant si le regroupement tient.");
+    println!("| sigma | cutoff | radial 64 | radial 128 | radial 256 | t*dk pour 64 / 128 / 256 |");
+    println!("|---:|---:|---:|---:|---:|---|");
+    for (sigma, cutoff) in [(0.25f32, 24.0f32), (1.0, 6.0), (4.0, 1.5)] {
+        // Une source étroite décroche vite : une grille de 4 s y quantifierait le résultat au
+        // point de le rendre illisible. Le pas suit l'échelle de la source.
+        let pas = if sigma < 0.5 { 1_000_000 } else { 4_000_000 };
+        let (instants, lignes) = table(sigma, cutoff, pas);
+        let mut mots = Vec::new();
+        let mut produits = Vec::new();
+        for (c, radial) in [64usize, 128, 256].into_iter().enumerate() {
+            match lisse(&lignes[c])
+                .iter()
+                .position(|v| *v > 1.10)
+                .map(|i| instants[i] as f64 / 1e6)
+            {
+                Some(t) => {
+                    mots.push(format!("{t:.0} s"));
+                    produits.push(format!("{:.2}", t * cutoff as f64 / radial as f64));
+                }
+                None => {
+                    mots.push("au-delà de 64 s".into());
+                    produits.push("—".into());
+                }
+            }
+        }
+        println!(
+            "| {sigma} m | {cutoff} | {} | {} | {} | {} |",
+            mots[0],
+            mots[1],
+            mots[2],
+            produits.join(" / ")
+        );
+    }
 }
 
 
@@ -246,7 +290,7 @@ fn monotonie() {
     println!("Chaque colonne compare la résolution indiquée à la référence radial 512.");
     println!("| instant | radial 64 | radial 128 | radial 256 |");
     println!("|---:|---:|---:|---:|");
-    let instants: Vec<u64> = (1..=16).map(|i| i * 4_000_000).collect();
+    let instants: Vec<u64> = (1..=8).map(|i| i * 8_000_000).collect();
     let mut colonnes = vec![Vec::new(); 3];
     for &us in &instants {
         let mut ligne = Vec::new();
