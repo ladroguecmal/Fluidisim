@@ -66,7 +66,7 @@ Objectif : S164-1/A220, isoler les erreurs de frontière dans un domaine résidu
 
 - [x] **P1** — vérifier les copies, prendre le jeton, déclarer le plan seul.
 - [x] **P2** — déclarer protocole, frontière aux deux étages RK2 et bilan de flux ; synchroniser les copies propres.
-- [ ] **P3** — construire la fenêtre locale et les témoins, mesurer traversée et raffinements.
+- [x] **P3** — construire la fenêtre locale et les témoins, mesurer traversée et raffinements.
 - [ ] **P4** — recevoir les tests, publier mesures/limites, suivre A220 et actions.
 - [ ] **P5** — rituel de fin : journal, leçons, index, décomptes, reprise, jeton et copies.
 
@@ -79,3 +79,8 @@ reçu S163 ; exemples S163/S164 reçus S164. Aucun worktree à créer.
 BILAN-S145 porté par poursuite B4. Aucun absorbeur choisi avant mesure.
 P2 : protocole FRONTIERE-LOCALE-S165 déclaré ; oracle aux étages, fond seul, oracle retardé.
 Bilan ouvert mesuré, ne pas confondre erreur locale et coefficient de réflexion.
+
+P3 : fenêtre [30,90], cinq tests propres +3 host reçus ; 54 montages release reçus.
+Oracle <=1,12e-13 ; fond seul non convergent en temps, oracle retardé convergent.
+Attente non dérivée 1e-4 dans le cœur corrigée en diagnostic d'écart résolu ; voir protocole.
+Norme de bord inclut le débit, sinon le nœud de hauteur masque l'anomalie extérieure.

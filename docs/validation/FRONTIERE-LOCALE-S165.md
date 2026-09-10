@@ -47,4 +47,16 @@ doivent rester au repos. Raffiner pour séparer frontière persistante et retard
 
 ## 3. Résultats
 
-À mesurer en P3 ; réception et limites en P4.
+P3 : 54 montages (trois grilles, trois pas, deux fonds, trois frontières). L'oracle RK2
+local retrouve le total à <=1,12e-13 en hauteur ; contrôle auxiliaire global <=2,23e-15.
+Cinq nouveaux tests propres à l'exemple et trois tests host importés reçus.
+
+**Précision du diagnostic après premier passage :** la norme de bord prend le maximum
+de |d_h|/0,1 et |d_q|/(0,1 sqrt(g)), pas seulement la hauteur. L'onde prescrite a presque
+un nœud de hauteur aux bords de cette fenêtre, mais son débit y est maximal : observer
+seulement la hauteur retardait artificiellement le repère d'erreur extérieure.
+
+Un premier test attendait >1e-4 dans le cœur pour la bosse sortante ; la mesure vaut
+8,647e-5 à N240. Cette attente non dérivée a été retirée : le test vérifie un défaut
+résolu à plus de 1000 fois le seuil d'arrondi, conformément au protocole d'identité,
+et ne prétend pas vérifier une tolérance physique. Les mesures restent publiées telles quelles.
