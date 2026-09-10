@@ -66,7 +66,7 @@ recevoir contre l'évolution totale. Pas de δ 3D ni de seuil de bascule dans ce
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan committé seul.
-- [ ] **P2** — préciser variables conservatives, flux croisés, pas et frontières ; choisir
+- [x] **P2** — préciser variables conservatives, flux croisés, pas et frontières ; choisir
       un instrument minimal compatible avec le solveur total existant. Déclarer les réceptions
       et la contre-épreuve avant le calcul. Synchroniser les copies propres au jeton occupé.
 - [ ] **P3** — construire l'intégration du fond et du résidu, sans soustraction a posteriori
@@ -86,3 +86,6 @@ analytique S162. 112 ADR,218 angles,244 leçons,18 invariants,6 SPEC,23 cas.
 ADR-112 impose de tester l'équation résiduelle, pas la superposition indépendante.
 SPEC-004 §6.1 contient les termes croisés et le résidu du fond. A218 est prioritaire ;
 A217 reste partielle, A216 reportée. BILAN-S145 suivi par la poursuite B4.
+P2 : RESIDU-COUPLE-S163 déclare flux physique résiduel, correction de viscosité Rusanov,
+deux fonds (évolué/figé), sources, RK2, critères et trois contre-épreuves avant calcul.
+Référence Shallow1D configurée en Rusanov, ordre un espace, RK2 ; copie conservée sans modification.
