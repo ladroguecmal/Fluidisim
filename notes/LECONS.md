@@ -3754,3 +3754,27 @@ Le critère se généralise : **quand un geste réversible et un geste irrévers
 danger, faire le réversible d'abord change ce qu'une interruption laisse derrière elle.** Une
 session coupée après l'avance rapide laisse un dépôt plus sûr qu'au départ ; coupée au milieu des
 suppressions, elle aurait laissé un état intermédiaire que personne n'aurait su lire.
+
+## L242 — Publier un « facteur », c'est publier trois choses
+
+*(S160)* Deux sessions consécutives ont publié « 2,5 » sur le même problème, et la troisième a été
+dépensée à demander si c'était un plafond. Ce n'en était pas un, et la moitié de la réponse ne
+demandait aucune mesure : **les deux nombres n'étaient pas la même statistique**. S157 publiait une
+*étendue* `max/min` ; S158 une *déviation* au rapport idéal. Sur le seul jeu de S158, les deux
+valent 3,42 et 2,50 — un « facteur » ne désigne rien tant qu'on ne dit pas laquelle.
+
+L'autre moitié demandait une mesure, et elle a montré deux dépendances que le nombre publié
+cachait : **le régime** — S158 écartait deux cases sur un motif inexact, et un seuil uniforme fait
+passer sa déviation de 2,47 à 12,30 — et **la famille de montages** : 2,17 à 2,47 pour un cutoff de
+6, sur un facteur 4 en sigma, mais 24,08 à cutoff 1,5.
+
+Un facteur publié se lit donc avec trois compléments, et sans eux il décrit le montage de son
+auteur en ayant l'air de décrire le problème :
+
+1. **quelle statistique** — étendue, déviation, écart-type, dispersion ;
+2. **sur quel régime** — quelles cases sont retenues, et pourquoi, vérifié plutôt qu'affirmé ;
+3. **dans quelle famille** — les paramètres qui n'ont pas varié pendant la mesure.
+
+Voir [[L219]] : un qualificatif rend une question présentable sans y répondre ; un facteur nu fait
+pire, il donne l'illusion d'un chiffre. Et [[L229]] : là, l'écart ne survivait pas au changement de
+graine ; ici, il ne survit pas au changement de bande.

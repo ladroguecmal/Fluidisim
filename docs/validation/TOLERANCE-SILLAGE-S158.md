@@ -107,3 +107,23 @@ les deux jeux de données existent. À défaut, la voie restée ouverte est cell
 débloquer B4, chantier sans rapport avec le sillage.
 
 299 tests réussis, cinq ignorés. 109 ADR, 214 angles, 239 leçons, 18 invariants, 6 SPEC, 23 cas.
+
+## Note du 2026-09-10 (S160) — deux corrections à ce rapport
+
+**Le « facteur 2,5 » de la §4 est une *déviation* au rapport idéal 1, pas une étendue.** L'étendue
+du même tableau vaut 3,42. La distinction n'est pas académique : c'est elle qui a fabriqué la
+coïncidence avec le 2,5 de S157 — qui est, lui, une étendue — et qui a coûté la session S160.
+Publier un « facteur » sans dire quelle statistique il désigne rend deux nombres comparables qui
+ne le sont pas.
+
+**Le régime écarte deux cases pour un motif inexact.** Le texte dit « l'erreur réelle vaut 0,2 % »
+pour radial 256 à 8 s **et** 24 s. C'est vrai à 8 s (2,1e-3) et faux à 24 s : l'erreur y vaut
+8,7e-2, quarante fois plus. Avec un seuil uniforme à 1 %, la case revient et la déviation passe de
+2,47 à **12,30**.
+
+**Et la fidélité dépend de la bande conservée.** Elle vaut 2,17 à 2,47 pour un cutoff de 6, sur un
+facteur 4 en sigma — donc le nombre est robuste dans sa famille — mais **24,08** à cutoff 1,5. Un
+appelant qui lirait « facteur 2,5 » hors de cette famille se tromperait d'un ordre de grandeur.
+
+Ce qui tient sans réserve : l'estimateur **sous-estime**, et il est aveugle là où l'erreur est de
+quadrature. Voir [FACTEUR-25-S160](FACTEUR-25-S160.md).

@@ -8053,3 +8053,52 @@ chaque copie nouvelle en portera un. **A215.**
 
 **Suite S160 :** S158-1, reporté par cette session — le facteur 2,5 qui revient partout est-il un
 plafond de précision ou une coïncidence ? Les deux jeux de données sont dans le dépôt.
+
+---
+
+## S160 — 2026-09-10 — Le facteur 2,5 était deux statistiques différentes
+
+**Entrée :** jeton libre à 824ee62, **copie principale sur `master`** — aucune copie isolée
+ouverte, donc rien à refermer (ADR-110). Les trois worktrees vus à l'amorce étaient tous à jour.
+S158-1.
+**Produit :** [FACTEUR-25-S160](../docs/validation/FACTEUR-25-S160.md), sonde `wake_plafond.rs`,
+une note datée sur TOLERANCE-SILLAGE-S158, L242. **Aucun ADR : rien n'était à décider.**
+
+**Réponse : coïncidence, et la moitié de la démonstration ne demandait aucune mesure.** S157
+publiait une **étendue** `max/min` ; S158 une **déviation** au rapport idéal 1. Ce ne sont pas la
+même statistique : sur le seul jeu de S158, elles valent 3,42 et 2,50. L'égalité venait d'avoir
+comparé l'une à l'autre. Chiffres refaits à la source, pas recopiés — `wake_law` redonne
+`t·dk` de 0,75 à 2,44, d'où les sept points du groupement et une étendue de 2,506.
+
+**Et le 2,5 de S158 n'est pas un plafond : il décrit son montage.** Même estimateur, même
+protocole, quatre couples `sigma / cutoff` — la déviation vaut **2,17 à 2,47 tant que cutoff = 6**,
+sur un facteur 4 en sigma, ce qui est une vraie robustesse ; puis **24,08** à cutoff 1,5. Ce qui
+gouverne n'est pas sigma et n'est pas le repliement : c'est **la largeur de bande conservée**.
+`validate_recipe` impose `sigma·cutoff ∈ [1 ; 8]`, ce qui a d'abord fait refuser sigma 4 à cutoff 6
+— le refus est un fait du montage, il est dit dans la sonde plutôt que contourné.
+
+**Un défaut trouvé en chemin, et il change le nombre.** S158 écarte deux cases en écrivant que
+« l'erreur réelle vaut 0,2 % ». C'est vrai de l'une (2,1e-3) et **faux de l'autre** (8,7e-2,
+quarante fois plus). Au seuil uniforme de 1 %, la déviation à sigma 1 passe de 2,47 à **12,30**.
+Les deux autres sigma y sont insensibles : le défaut ne se manifeste que sur la seule ligne que
+S158 avait mesurée.
+
+**L242** : publier un facteur, c'est publier trois choses — quelle statistique, sur quel régime,
+dans quelle famille de montages. Sans elles, un chiffre décrit le montage de son auteur en ayant
+l'air de décrire le problème. C'est la troisième session de suite dont le résultat est de cette
+famille : L235 (plan d'expérience dégénéré), L239 (question dans le mauvais ordre), L242.
+
+**Le point `4 / 1,5` est atypique dans les deux jeux à la fois** — S157 y butait déjà, deux de ses
+trois cases tombant « au-delà de 64 s ». Un spectre coupé près du pic n'a plus assez de modes pour
+que quoi que ce soit se moyenne. Ce n'est pas une coïncidence, celle-là.
+
+299 tests inchangés, cinq ignorés ; aucun code de production modifié.
+110 ADR, 215 angles, **242 leçons**, 18 invariants, 6 SPEC, 23 cas.
+Invariants relus : aucun invalidé. Recommandation du dernier bilan (BILAN-S145 : lancer B1) :
+**exécutée en S146**, rien à reporter — point 7 du rituel.
+
+**Suite S161 : débloquer B4.** C'est ce que S158 et ADR-109 nomment comme seule voie ouverte, et
+A214 l'attend maintenant seule — elle ne réclame plus ni mesure ni spécification. B4 juge la
+fidélité perceptuelle de la décomposition additive ; il est bloqué par la référence substitutive
+intégrale. **S146 a montré qu'un banc s'exécute** : deux bancs sur onze vaudraient mieux qu'un.
+Restent ouverts : A213, la coupure W/δ, `lambda_cut`, la bathymétrie, le multiplateforme.

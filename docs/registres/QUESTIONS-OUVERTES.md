@@ -1424,3 +1424,11 @@ entrée par entrée. Le fil reprend ci-dessous.
   requise face au contexte16s, construire une première fixture reçue ou identifier
   par mesure le blocage numérique. Ne pas confondre pression et impact.
 - Technologie globale, lambda_cut, sillage stationnaire, bathymétrie et D1 distant ouverts.
+
+### S160 — Le facteur 2,5
+
+- **S158-1 : fermée.** [FACTEUR-25-S160](../validation/FACTEUR-25-S160.md). Coïncidence : les deux
+  nombres n'étaient pas la même statistique — étendue contre déviation — et celui de S158 dépend
+  du régime retenu (2,47 ou 12,30 selon le seuil) comme de la bande conservée (24,08 à cutoff 1,5).
+  Note datée portée à TOLERANCE-SILLAGE-S158. Aucun ADR : rien n'était à décider.
+- **A214 : inchangée**, elle attend toujours **B4**.
