@@ -75,10 +75,10 @@ le premier jour du projet ; celui-ci ne demande aucune couche manquante.
       existent, et S145 vient de montrer que le dépôt fait des choses sans les déclarer.
 - [x] **P3** — volet **coût** : coût par échantillon pour N ∈ {32, 64, 128, 256}, à ordre de
       sommation fixé, et ce que la troncature coûte.
-- [ ] **P4** — volet **justesse**, celui qui rend le banc urgent : `Hs` mesuré contre la cible en
+- [x] **P4** — volet **justesse**, celui qui rend le banc urgent : `Hs` mesuré contre la cible en
       fonction de N. A187 dit 6,6 % d'écart à 256 composantes par battements ; A188 dit que la
       calibration statistique reste à faire. C'est ici qu'on tranche.
-- [ ] **P5** — la **courbe demandée** : combien de composantes effectives pour qu'un objet de
+- [x] **P5** — la **courbe demandée** : combien de composantes effectives pour qu'un objet de
       taille L voie la même hauteur. La partie « taille d'objet » est mesurable ; la partie
       « distance » ne l'est pas sans caméra — le dire au lieu de la contourner.
 - [ ] **P6** — **décision** : N retenu, ce que la décision porte et ce qu'elle ne porte pas. ADR,
