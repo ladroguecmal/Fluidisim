@@ -77,7 +77,7 @@ n'appartiendrait ni à une formule citée ni à un banc qui le fixe.
       réellement : `eta`, sa dérivée temporelle, la vitesse, la normale. Pour chacun, la plus
       petite erreur qui change une grandeur déjà décidée ailleurs. La réponse est là, pas dans
       une mesure de plus.
-- [ ] **P3** — convertir en tolérance sur l'observable de S157, l'excès de champ proche. Sans
+- [x] **P3** — convertir en tolérance sur l'observable de S157, l'excès de champ proche. Sans
       cette conversion, une tolérance dérivée reste inutilisable : les deux ne parlent pas de la
       même chose.
 - [ ] **P4** — ADR fixant la tolérance et sa provenance, puis relecture des durées de S157 **à
@@ -144,3 +144,35 @@ Ce que l'inventaire ne trouve pas, et il faut le dire : **aucun consommateur n'a
 que l'erreur de recurrence pourrait franchir.** Le declencheur d'ecume a bien un seuil chiffre —
 cambrure de Stokes 1/7, SPEC-001 §3 — mais il lit une borne, donc il est immunise ; et les pentes
 du sillage mesure (5,6e-3) sont de toute facon a deux ordres de grandeur du seuil.
+
+P3 — la conversion demandee par le plan n'a pas lieu, et c'est justifie : P2 a montre qu'il n'y a
+aucun seuil de consommateur a convertir. J'ai donc pris la question par l'autre bout — rendre
+l'erreur **mesurable par l'appelant**, qui appliquera sa tolerance quand il en aura une.
+
+Methode : deux resolutions **voisines**, `radial` et `radial+1`, ont presque la meme erreur de
+quadrature mais des periodes spatiales differentes. Leur ecart isole donc le repliement. Aucune
+extension de grammaire n'est necessaire — `radial` accepte 1 a 512 — ce qui evite de rouvrir le
+plafond qu'ADR-107 avait refuse de relever.
+
+Estimateur contre erreur reelle (ecart a radial 512), rapportes a l'amplitude du champ fin :
+
+| radial | 8 s | 24 s | 40 s | 60 s |
+|---|---|---|---|---|
+| 64 | 0,89 | 0,71 | 0,54 | 0,40 |
+| 128 | 1,17 | 0,97 | 1,08 | 0,59 |
+| 256 | **0,02** | **0,08** | 0,70 | 1,37 |
+
+Lecture. Dans le regime ou l'erreur est **significative**, l'estimateur la suit a un facteur 2,5
+pres — et il **sous-estime**, jamais l'inverse, ce qui est le mauvais sens pour un garde-fou et
+doit etre dit. La ou il s'effondre (radial 256 a 8 et 24 s, facteur 43), c'est que l'erreur reelle
+est dominee par la **quadrature** et non par le repliement : les deux voisins la partagent, donc
+elle s'annule dans l'ecart. Or a ces instants l'erreur reelle vaut 0,2 % : sous-estimer un
+negligeable est sans consequence. L'estimateur est aveugle exactement la ou il n'y a rien a voir.
+
+Note qui vaut peut-etre plus que le reste : **le facteur 2,5 revient partout dans ce probleme** —
+etendue du groupement de S157, dispersion de l'estimateur ici. Il se pourrait que ce soit le
+plafond de precision de tout ce qui touche au repliement, et pas une coincidence. Non verifie.
+
+Cout : deux preparations au lieu d'une, soit 50 ms au lieu de 25 pour 128x128. Reel.
+Decision reportee a P4 : rien n'est ajoute en production, aucun consommateur ne l'ayant demande
+(S132 : ne pas ajouter d'API publique pour instrumenter).
