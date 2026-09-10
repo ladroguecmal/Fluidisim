@@ -58,25 +58,22 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S150 — terminée
+Session : S151 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S149-1, raccorder un objet mobile à une source de sillage W existante.
+Objectif : S150-1, émission progressive de tronçons de sillage sans perte ni doublon.
 
 ### Plan
 
-- [x] **P1** — état réel, lecture W4, jeton et plan seul.
-- [x] **P2** — contrat charge/trajectoire vers pression gaussienne, constructeur borné et refus ; ADR.
-- [x] **P3** — recevoir le trajet avec virage, extinction, transport et comparaison au champ de référence ; scénario exécutable.
-- [x] **P4** — suite complète, rapport et rituel de fin : journal, angles/leçons/actions, index et jeton.
+- [x] **P1** — état réel, contrats, jeton et plan seul.
+- [ ] **P2** — émetteur à préparation/acquittement, continuité et identité ; ADR et refus testés.
+- [ ] **P3** — intégration journal/contrôleur, saturation/reprise, comparaison au trajet complet et arrêt.
+- [ ] **P4** — vérifications, rapport et rituel de fin ; passation vers B2, jeton rendu.
 
 ### Notes de reprise
 
-Départ master d189042, toutes les copies propres.283 tests/cinq ignorés,102 ADR.
-ADR-069/070 et sources WPRS calculent déjà un sillage sous pression mobile : la formule
-« jamais commencée » de BILAN-S145 §5 est trop large. Manque l'adaptateur mouvement/charge.
-Charge verticale prescrite en newtons, profil gaussien sigma explicite ; pas de calibration coque,
-pas de pression déduite arbitrairement de la vitesse, pas de nouveau solveur. W4 restera partiel.
-Suite portée : intégration W4 puis B2 selon ADR-054.
-P3 : quatre tests et scénario reçus debug/release ;441 comparaisons au champ f64 raffiné. Hash13f0b5fd14a4ac9b. Suite S150-1 alimentation progressive, puis B2.
-
-P4 :287 tests/cinq ignorés (194+93), zéro échec ; quatre avertissements préexistants.103 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas. Rituel exécuté ; jeton rendu.
+Départ master03a8b04, copies historiques propres.287 tests/cinq ignorés,103 ADR.
+Les sources WPRS sont immuables et empruntées : chaque tronçon acquiert une identité
+nouvelle, conservée tant que son historique est requis. Aucun remplacement de source.
+Le curseur de mouvement n'avance qu'après présence exacte au journal ; refus/saturation
+conservent la même émission. L'hôte possède le stockage des émissions.
+W4 reste candidat sans coque calibrée ni preuve multiplateforme. B2 est la suite du bilan.
