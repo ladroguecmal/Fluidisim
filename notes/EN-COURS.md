@@ -72,7 +72,7 @@ de collecte requis**, comme S153 et S154 l'ont fait pour les impacts.
       personne ne l'a encore regardé au-delà de 8 s.
 - [x] **P3** — **où** est cette énergie dans l'espace à 60 s : balayage radial du champ contre
       l'oracle f64 à quadrature doublée, et fraction contenue dans un rayon donné.
-- [ ] **P4** — décider d'après les chiffres : la borne utile est-elle en temps, en domaine, ou
+- [x] **P4** — décider d'après les chiffres : la borne utile est-elle en temps, en domaine, ou
       en **résolution spectrale** ? Les trois ne se corrigent pas au même endroit.
 - [ ] **P5** — recevoir ce qui doit l'être, avec un test témoin ; ne rien construire dont le
       prix dépasse le bénéfice.
@@ -148,3 +148,13 @@ plus de 100 s ; ce serait une extrapolation, pas une mesure, et il faut le dire.
 Consequence pour B2 : la recette de la reception de sillage S150 est 128x128 — honnete jusqu'a
 ~17 s et ~45 m. Un bilan a 60 s demande radial >= 512 et angular >= 256, soit 131072 noeuds
 contre 16384 : **huit fois plus**.
+
+P4 — ADR-107 : le domaine d'un sillage se deduit de sa recette. Prix mesure, mediane sur cent
+repetitions apres chauffe separee : 25,6 / 102,0 / 205,5 / 402,9 ms de preparation et 19,5 / 75,0
+/ 150,4 / 298,3 ms par lot de 64 points pour 128x128 / 256x256 / 512x256 / 512x512. Cout lineaire
+en nombre de noeuds. Le plafond de 512 n'est pas releve : aucune reference plus fine n'existe pour
+verifier, et le prix de ce qu'il faudrait est deja hors de portee.
+Verdict B2 volet sillage : **partiel et negatif a 60 s**, fonde sur une mesure et non sur un
+manque de mesure. Aux durees ou il a ete recu (8 s, S150/S151), le candidat est dans son domaine.
+Non fait et nomme (A214) : le garde-fou d'admissibilite. La loi en duree n'est encadree qu'en deux
+points ; un garde bati dessus refuserait du valide ou admettrait de l'invalide.

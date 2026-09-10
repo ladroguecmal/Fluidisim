@@ -24,6 +24,92 @@ fn main() {
         bilan(radial, angular);
         println!();
     }
+    cout();
+}
+
+/// Prix des résolutions que S156 montre nécessaires à 60 s. Médiane sur cent répétitions, après
+/// un bloc de chauffe séparé — mesurer avant la chauffe fait mentir la médiane (A195).
+fn cout() {
+    println!("# S156 — prix d'une préparation et d'un lot de 64 points");
+    println!("| recette | nœuds du demi-spectre | préparation p50 | lot 64 points p50 |");
+    println!("|---|---:|---:|---:|");
+    for (radial, angular) in [(128usize, 128usize), (256, 256), (512, 256), (512, 512)] {
+        let (nodes, preparation, lot) = mesure_cout(radial, angular);
+        println!("| {radial}x{angular} | {nodes} | {preparation} µs | {lot} µs |");
+    }
+}
+
+fn mesure_cout(radial: usize, angular: usize) -> (usize, u128, u128) {
+    let settings = Settings {
+        frame: FrameId(7),
+        cell: 9,
+        gravity: 9.81,
+        density: 1025.0,
+        min: [-256.0; 2],
+        max: [256.0; 2],
+        start: SimTime(0),
+        end: SimTime(FIN_US),
+    };
+    let recipe = Recipe {
+        sigma: 1.0,
+        cutoff: 6.0,
+        radial,
+        angular,
+    };
+    let metadata = Metadata {
+        epoch: 1,
+        id: 7,
+        cause: Cause {
+            entity: 7,
+            command: 1,
+            emission: 0,
+        },
+        settings,
+        recipe,
+    };
+    let legs = [Leg {
+        duration_us: 2_000_000,
+        velocity: [2.0, 0.0],
+        downward_force_n: 100.0,
+    }; 8];
+    let wake = Wake::build(metadata, SimTime(0), [0.0; 2], &legs).unwrap();
+    let mut records = [None];
+    let mut journal = Journal::new(1, &mut records);
+    journal.admit_authenticated(wake.source()).unwrap();
+    let mut nodes = vec![water_core::spectral_pressure::Node::default(); radial * angular];
+    let mut demi = vec![water_core::spectral_pressure::Node::default(); radial * angular / 2];
+    let complet = bake(recipe, &mut nodes).unwrap();
+    let moitie = complet.half_into(&mut demi).unwrap();
+    let mut slots = vec![Slot::default(); moitie.nodes().len()];
+    let context = wake.source().context();
+    let time = SimTime(FIN_US);
+    let points: Vec<[f32; 2]> = (0..64)
+        .map(|i| [i as f32 * 0.5 - 16.0, i as f32 * 0.25 - 8.0])
+        .collect();
+    let mut sortie = vec![water_core::spectral_pressure::Surface::default(); points.len()];
+    let mut scratch = sortie.clone();
+
+    // Chauffe, sans aucune mesure retenue.
+    for _ in 0..20 {
+        let p = Prepared::from_journal(context, &moitie, &journal, time, &mut slots).unwrap();
+        p.sample_batch(&context, time, &points, &mut scratch, &mut sortie)
+            .unwrap();
+    }
+
+    let mut preparations = Vec::new();
+    let mut lots = Vec::new();
+    for _ in 0..100 {
+        let debut = std::time::Instant::now();
+        let p = Prepared::from_journal(context, &moitie, &journal, time, &mut slots).unwrap();
+        preparations.push(debut.elapsed().as_micros());
+        let debut = std::time::Instant::now();
+        p.sample_batch(&context, time, &points, &mut scratch, &mut sortie)
+            .unwrap();
+        lots.push(debut.elapsed().as_micros());
+    }
+    preparations.sort_unstable();
+    lots.sort_unstable();
+    (moitie.nodes().len(), preparations[50], lots[50])
 }
 
 fn bilan(radial: usize, angular: usize) {
