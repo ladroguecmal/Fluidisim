@@ -69,13 +69,13 @@ et `wake_estimator.rs`.
 ### Plan
 
 - [x] **P1** — état réel, jeton, **plan déclaré et committé seul**.
-- [ ] **P2** — **définir les deux grandeurs avant de les comparer.** L'une est une étendue entre
+- [x] **P2** — **définir les deux grandeurs avant de les comparer.** L'une est une étendue entre
       configurations, l'autre un rapport estimé/vrai : rien ne dit qu'elles soient commensurables.
       Rejouer les deux sondes telles quelles pour repartir de chiffres, pas de citations.
-- [ ] **P3** — le test qui tranche : **bougent-elles ensemble ?** Faire varier un paramètre commun
+- [x] **P3** — le test qui tranche : **bougent-elles ensemble ?** Faire varier un paramètre commun
       — `sigma`, `cutoff`, `radial` — et regarder si les deux quantités suivent. Si l'une passe à
       4 quand l'autre reste à 2,5, elles sont indépendantes et la question est close.
-- [ ] **P4** — si elles bougent ensemble, chercher la cause commune ; sinon, dire pourquoi la
+- [x] **P4** — si elles bougent ensemble, chercher la cause commune ; sinon, dire pourquoi la
       coïncidence était plausible et ce qui l'a fait croire.
 - [ ] **P5** — livrable ; ADR seulement si une décision en sort. Une question fermée sans décision
       n'a pas besoin d'ADR, et S157 comme S158 ont montré qu'un résultat négatif est un résultat.
