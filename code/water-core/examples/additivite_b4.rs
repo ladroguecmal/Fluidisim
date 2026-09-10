@@ -1,5 +1,9 @@
 //! S161 — B4, premier volet : à partir de quel rapport d'amplitude l'addition cesse d'être vraie ?
 //!
+//! Note de portée S162 (ADR-112) : ce diagnostic compare des évolutions indépendantes.
+//! Il ne calcule pas le résidu couplé de SPEC-004 §6.1 et ne reçoit donc pas la bascule
+//! perturbative/substitutive. Les mesures historiques restent inchangées.
+//!
 //! ADR-001 décompose l'eau en couches **additives** et pose un critère de bascule « à calibrer » :
 //! `max|δ| > 0,35·Hs`. B4 est le banc qui doit le calibrer — ou infirmer la décomposition. Il
 //! demande une **référence substitutive intégrale**, c'est-à-dire un solveur qui calcule le champ

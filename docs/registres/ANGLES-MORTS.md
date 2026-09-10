@@ -2003,3 +2003,15 @@ comparant `radial` et `radial+1` — fidèle à un facteur 2,5, et sous-estimant
   pas servir : la superposition y est vraie par construction. **Instruire d'abord si une telle
   référence est à portée**, avant de supposer qu'elle ne l'est pas — c'est exactement ce que S161 a
   gagné en ouvrant un blocage hérité (**L243**).
+
+**Suivi A217 — S162, partielle :** référence analytique de Stokes d'ordre deux instrumentée,
+terme croisé `kab`, dépendance à `ka` à rapport fixé et effet de phase reçus. Aucun solveur
+évolutif non linéaire dispersif disponible. Voir ADDITIVITE-PROFONDE-S162 et ADR-112.
+
+- **A218** *(sévérité 1, S162 ; ouverte)* — **La sonde d'additivité ne calcule pas le couplage
+  dont elle a décidé le critère.** S161 compare `F(A)+F(B)` à `F(A+B)` ; SPEC-004 §6.1 prévoit
+  une équation du résidu avec termes croisés et source du fond. L'absence de superposition des
+  solutions autonomes ne reçoit ni ne réfute cette équation. ADR-112 corrige la portée d'ADR-111,
+  sans effacer les mesures. Action S162-1 : intégrer réellement le résidu, puis comparer au
+  total avec témoin de couplage supprimé. Gravité liée à la décision architecturale tirée du
+  diagnostic ; aucun défaut de production nouveau observé.

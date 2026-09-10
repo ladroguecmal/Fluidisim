@@ -191,3 +191,11 @@ perturbation vaille 10 % ou 100 % de l'onde de fond. Ce qui le gouverne est **l'
 Voir [ADR-111](ADR-111-le-critere-de-bascule-s-exprime-en-profondeur.md) et
 [B4-DEBLOCAGE-S161](../validation/B4-DEBLOCAGE-S161.md). Le régime d'eau profonde reste ouvert :
 Saint-Venant est non dispersif, et la variable y serait vraisemblablement la cambrure.
+
+## Note de portée du 2026-09-10 (S162)
+
+**ADR-112 remplace les conclusions de choix du paramètre de bascule d'ADR-111.** Le montage
+S161 compare des évolutions indépendantes, alors que SPEC-004 §6.1 prévoit un résidu couplé
+au fond, avec termes croisés et source. Les mesures S161 sont conservées ; elles ne suffisent
+pas à recevoir ce couplage ni à choisir sa bascule. Aucun seuil n'est rétabli ou gelé.
+Voir [ADR-112](ADR-112-la-superposition-independante-ne-recoit-pas-le-couplage.md).

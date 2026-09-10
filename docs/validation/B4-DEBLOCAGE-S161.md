@@ -167,3 +167,12 @@ infirmée — son paramétrage l'est. Note corrective datée portée à ADR-001 
 rigide), perception en double aveugle (personnes), contrôle du terme source (ajout S04, A50). Ce
 qui est débloqué est le premier, et il suffisait pour infirmer un paramétrage vieux de cent
 soixante sessions.
+
+## Note de portée du 2026-09-10 (S162)
+
+Les mesures ci-dessus restent celles du montage S161. **Leur interprétation comme choix du
+paramètre de bascule est remplacée par ADR-112** : ce montage additionne des évolutions
+indépendantes, sans le résidu couplé ni les termes croisés de SPEC-004 §6.1. Il ne reçoit donc
+pas le premier volet architectural de B4. Le contrôle du terme source A50 reste préalable.
+Voir [ADR-112](../adr/ADR-112-la-superposition-independante-ne-recoit-pas-le-couplage.md) et
+[ADDITIVITE-PROFONDE-S162](ADDITIVITE-PROFONDE-S162.md). Aucun chiffre historique n'est effacé.

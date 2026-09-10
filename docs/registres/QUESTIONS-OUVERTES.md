@@ -1445,3 +1445,16 @@ entrée par entrée. Le fil reprend ci-dessous.
   dire si une référence non linéaire **dispersive** est à portée.
 - **A216 : ouverte.** Le coefficient passe de 0,24 à 0,95 à très faible amplitude de fond.
 - **A214 : inchangée**, elle attend toujours B4 — dont un volet vient de s'ouvrir sans la servir.
+
+### Suivi S162 — A217 partielle ; couplage à recevoir
+
+- **A217 : partielle.** Une sonde de Stokes au second ordre établit un terme croisé en `kab`
+  et une dépendance à la cambrure dans une famille monochromatique profonde. La référence
+  évolutive générale manque toujours ; aucun seuil ni réception B4. Voir ADDITIVITE-PROFONDE-S162.
+- **S162-1 / A218 : ouverte, priorité S163.** Construire un véhicule du résidu couplé en
+  Saint-Venant, variables conservatives et termes croisés explicites ; le recevoir contre le
+  total à état initial et pas identiques. Contre-épreuve : retirer un terme de couplage.
+  Une soustraction a posteriori ne constitue pas cette réception. Porteur : session de construction.
+- **ADR-112 remplace le choix de paramètre d'ADR-111.** S161 mesure la superposition indépendante,
+  pas le couplage de SPEC-004 §6.1 ; aucune des deux amplitudes de bascule n'est reçue.
+- **A216 reste ouverte**, report explicite derrière la réception de l'objet effectivement prévu.

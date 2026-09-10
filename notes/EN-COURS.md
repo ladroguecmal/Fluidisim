@@ -71,7 +71,7 @@ puis établir ce qu'une expérience bornée peut dire de l'additivité en eau pr
 - [x] **P3** — confronter une voie analytique ou numérique minimale à la question A217 ;
       mesurer si une référence recevable existe, sinon publier le blocage argumenté et le prochain lot.
       Distinguer une correction liée d'ordre deux d'une référence intégrale évolutive.
-- [ ] **P4** — verdict et propagation aux points ouverts ; contrôles adaptés, aucun seuil inventé.
+- [x] **P4** — verdict et propagation aux points ouverts ; contrôles adaptés, aucun seuil inventé.
 - [ ] **P5** — rituel de fin REPRISE §6, journal, index, décomptes, suite et jeton rendu.
 
 ### Notes de reprise
@@ -88,3 +88,6 @@ Trois copies synchronisées au commit P1 occupé. Aucun retrait.
 P3 : sonde Stokes et contre-épreuve reçues en release, test exemple reçu en debug.
 Formules SPEC-001, dérivation et limites dans le livrable. Le couplage prévu par SPEC-004 §6.1
 n'est pas testé en S161 ; P4 corrigera la portée d'ADR-111 par un nouvel ADR, sans le réécrire.
+
+P4 : ADR-112 actée, notes de portée sur ADR-001/111 et B4-S161, A217 partielle,
+A218 et S162-1 ouvertes. Aucun seuil rétabli. Suite workspace lancée ; P5 attend sa fin.

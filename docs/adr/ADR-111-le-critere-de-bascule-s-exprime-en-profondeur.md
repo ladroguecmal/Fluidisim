@@ -80,3 +80,11 @@ initial à deux perturbations. Sans elle, le montage minimal d'un test d'additiv
 inexprimable — ce qui explique en partie que ce volet n'ait jamais été tenté.
 
 Banc rejouable : `cargo run -p water-core --release --example additivite_b4`.
+
+## Note de portée du 2026-09-10 (S162)
+
+**ADR-112 remplace les conclusions de choix du paramètre de bascule d'ADR-111.** Le montage
+S161 compare des évolutions indépendantes, alors que SPEC-004 §6.1 prévoit un résidu couplé
+au fond, avec termes croisés et source. Les mesures S161 sont conservées ; elles ne suffisent
+pas à recevoir ce couplage ni à choisir sa bascule. Aucun seuil n'est rétabli ou gelé.
+Voir [ADR-112](ADR-112-la-superposition-independante-ne-recoit-pas-le-couplage.md).
