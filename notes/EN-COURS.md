@@ -77,7 +77,7 @@ sens dans le type, ou retirer un champ que plus personne ne construit.
       **identique** à toute λ — le rapport devrait être une constante, comme pour le radial et
       contrairement à la pression. Le champ étant périodique et `sample` n'ayant pas d'emprise
       restreinte, le maximum est toujours atteint : c'est ce qui distingue ce cas de A206.
-- [ ] **P4** — **constater l'état réel du champ** avant d'en décider : qui le construit, quels
+- [x] **P4** — **constater l'état réel du champ** avant d'en décider : qui le construit, quels
       ADR le documentent, ce qu'il porte que le candidat radial ne porte pas. Une décision de
       retrait ne se prend pas sur le seul fait qu'aucun appelant ne subsiste dans le dépôt.
 - [ ] **P5** — décider et appliquer : ADR, migration ou retrait. Témoins avant/après si des bits
