@@ -68,7 +68,7 @@ pas à changer. ADR-082 exige qu'un nom de refus désigne ce qu'il faut revoir.
 ### Plan
 
 - [x] **P1** — état réel, jeton, **plan déclaré et committé seul**.
-- [ ] **P2** — établir ce qui est **calculable au moment du refus**, avant d'imaginer un nom.
+- [x] **P2** — établir ce qui est **calculable au moment du refus**, avant d'imaginer un nom.
       La question décisive : la bibliothèque peut-elle distinguer « champ vraiment raide » de
       « emprise étroite » ? S140 dit que la pente réelle d'une pression ne se calcule pas, elle
       se cherche — si c'est vrai ici, un refus `Footprint` serait un nom qu'on ne peut pas
