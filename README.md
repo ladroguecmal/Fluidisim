@@ -278,3 +278,9 @@ d'expérience à produit réduit constant liait deux variables qu'il prétendait
 encoder un seuil gèlerait une tolérance que personne n'a spécifiée ; une estimation conservatrice est
 publiée à sa place. Suite S158 : sortir la mesure de sa dégénérescence, ou demander la tolérance, S157-1.
 108 ADR,214 angles,237 leçons,18 invariants,6 SPEC,23 cas.
+**S158 : la question était dans le mauvais ordre**, [inventaire](docs/validation/TOLERANCE-SILLAGE-S158.md),
+[ADR-109](docs/adr/ADR-109-le-repliement-est-une-infidelite-pas-une-faute.md). Avant de chercher une
+tolérance, demander ce que l'erreur casse : elle est déterministe et identique chez tous, donc **infidélité
+et non faute**, et les consommateurs qui lisent une **borne** y sont insensibles d'un facteur huit mille.
+Le juge de fidélité est B4, bloqué ailleurs. Suite S159 : le facteur 2,5 qui revient partout, S158-1.
+109 ADR,214 angles,239 leçons,18 invariants,6 SPEC,23 cas.

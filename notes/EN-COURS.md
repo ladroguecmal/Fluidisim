@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S158 — en cours
+Session : S158 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : S157-1, A214. S157 a laissé deux voies. Je prends la **seconde** — la tolérance — et
 non la première, pour une raison qui se vérifie : sortir le plan d'expérience de sa dégénérescence
@@ -84,7 +84,7 @@ n'appartiendrait ni à une formule citée ni à un banc qui le fixe.
       cette tolérance** — les mesures existent, aucune campagne nouvelle si elle tombe dedans.
 - [x] **P5** — le garde-fou, désormais constructible, avec son test témoin ; ou le constat motivé
       qu'il ne l'est toujours pas.
-- [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
+- [x] **P6** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -202,3 +202,18 @@ Ce qu'il garde vraiment : si un jour le declencheur d'ecume lisait un echantillo
 l'enveloppe, ce test tomberait. C'est la raison de l'ecrire, plus que la verification d'aujourd'hui.
 Temoin verifie : les deux mesures prises a radial 512, il echoue (ligne 297).
 299 tests/cinq ignores (206+93), debug et release, zero echec.
+
+P6 — TOLERANCE-SILLAGE-S158, ADR-109, suivi d'A214, L238, L239, addendum a L237, journal, index,
+README, REPRISE, jeton rendu, ff-only. 299 tests/cinq ignores, debug et release.
+
+Pour S159 sans relire : S158-1 verifie si le facteur 2,5 est un plafond ou une coincidence. Les
+deux jeux de donnees existent — l'etendue du groupement `t*0,5*sqrt(g*sigma)*dk` de S157
+(1,17 a 2,94) et la dispersion de l'estimateur de S158 (0,40 a 1,37 dans le regime significatif).
+Si les deux mesurent la meme chose, il devrait exister une raison commune ; sinon ce sont deux
+dispersions independantes qui se ressemblent, et il faudra le dire pour que personne ne reprenne
+le rapprochement comme un fait.
+**Ne pas oublier ce qui a ete etabli et coute cher a etablir** : la tolerance ne se derivera pas
+du corpus, elle sortira de B4. Une session qui recommencerait a la chercher numeriquement
+repeterait S157 et S158.
+Procedure du battement, appliquee depuis P4bis : lire l'horloge dans un appel **separe**, puis
+copier la valeur. Trois battements faux en deux sessions avant de la poser.

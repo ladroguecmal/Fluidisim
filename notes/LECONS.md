@@ -3669,6 +3669,54 @@ La règle du dépôt dit « le relever, jamais l'écrire de mémoire » (note S1
 mémoire longue : elle vise ce geste-là, à trente secondes d'intervalle. **Lire, puis écrire ce
 qu'on a lu, dans cet ordre et en deux temps.**
 
+**Addendum du 2026-09-10 (S158)** : la leçon a été violée à la session suivante, deux fois, pour
+le geste exact qu'elle décrit. Une leçon écrite ne change pas un geste ; seule une procédure le
+change. Celle-ci : **lire l'horloge dans un appel séparé, puis copier la valeur lue**. Tant que la
+lecture et l'écriture tiennent dans la même commande, la valeur est décidée avant d'être connue,
+et la lecture ne sert qu'à donner bonne conscience.
+
 La généralisation dépasse le battement. Chaque fois qu'une valeur mesurable est écrite dans un
 script avant d'être mesurée, la mesure ne sert plus qu'à confirmer — et elle confirme rarement
 quelque chose qu'on aurait le courage de défaire.
+
+## L238 — Qui lit une borne est immunisé contre une erreur de phase
+
+*(S158)* Un champ de sillage replié se trompe d'un facteur cinquante sur son élévation
+échantillonnée. Au même instant, son enveloppe de pente et son énergie se trompent de 0,6 % et
+0,04 % — **huit mille fois moins**. La raison est structurelle : le repliement rephase les modes
+sans toucher aux amplitudes, et toute grandeur calculée depuis les coefficients ne voit que les
+amplitudes.
+
+Le déclencheur d'écume du dépôt lit l'enveloppe, pas un échantillon. Il est donc immunisé, sans
+que personne l'ait conçu pour cela.
+
+La règle se généralise et vaut au moment de choisir ce qu'une couche publie : **une borne dérivée
+des coefficients traverse intacte les erreurs de phase ; un échantillon les subit en entier.**
+Quand un consommateur peut être servi par une borne, la servir coûte moins cher en robustesse
+qu'un échantillon plus précis. La réciproque est le piège : remplacer une borne par un échantillon
+« plus exact » peut dégrader le consommateur d'un facteur mille sans qu'aucun test d'exactitude ne
+s'en aperçoive — c'est pourquoi S158 laisse un témoin qui tombera si cela arrive.
+
+L'immunité ne vaut que pour les erreurs de phase. Une erreur d'**amplitude** traverse les bornes
+comme les échantillons. Voir [[L233]] : là aussi, une propriété structurelle expliquait un chiffre
+parfait, et il fallait savoir laquelle.
+
+## L239 — Demander la tolérance avant le mode de défaillance, c'est demander dans le mauvais ordre
+
+*(S158)* Trois sessions ont cherché de quoi borner un champ de sillage replié : une loi (S157),
+puis une tolérance (S158). La question utile était en amont des deux — **qu'est-ce que cette erreur
+casse au juste ?**
+
+La réponse la déclasse. L'erreur est déterministe, identique chez tous les participants, donc elle
+ne produit ni désynchronisation, ni divergence de réplique, ni inégalité entre joueurs ; l'autorité
+au sens d'I-15 reste acquise **avec l'erreur dedans**. Ce qui souffre est la vraisemblance, et rien
+d'autre. Un garde-fou contre une faute protège d'un dommage ; un garde-fou contre une infidélité
+arbitre une apparence. Ni la même urgence, ni le même juge, ni le même coût quand on se trompe.
+
+Le mode de défaillance dit aussi **qui tranche**. Une infidélité se juge à l'œil, et le dépôt a
+déjà un dispositif pour cela — B4 et sa perception en double aveugle. Chercher une dérivation
+numérique était chercher dans la mauvaise catégorie.
+
+D'où l'ordre à tenir : *que casse l'erreur* → *qui en juge* → *quelle tolérance* → *quel
+garde-fou*. Commencer par la fin fait mesurer longtemps une quantité dont on ne sait pas encore si
+elle mérite d'être bornée. Voir ADR-109 et [[L236]].

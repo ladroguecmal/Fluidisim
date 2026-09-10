@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 18:19 +02:00
+JETON            : libre
+Battement        : 2026-09-10 18:21 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S158 — d'où vient la tolérance d'un champ de sillage (S157-1, A214)
-Dernière session : S157 — pas de loi, refus argumenté ; 298 tests/cinq ignorés
-Session suivante : à fixer en fin de S158
+Session en cours : aucune
+Dernière session : S158 — infidélité et non faute ; 299 tests/cinq ignorés
+Session suivante : S159 — le facteur 2,5 est-il un plafond ? (S158-1)
 
 **Copie de travail S155** : worktree `claude/reprise-projet-2d3506`, remis en avance rapide sur
 master (1643232) au démarrage — il était resté à 041dfed, 80 commits en retard et rien d'unique,
@@ -196,6 +196,28 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S158 — 2026-09-10 :** [TOLERANCE-SILLAGE-S158](docs/validation/TOLERANCE-SILLAGE-S158.md),
+[ADR-109](docs/adr/ADR-109-le-repliement-est-une-infidelite-pas-une-faute.md). S157-1, A214.
+La session devait dériver la tolérance manquante. **Elle a montré que la question était dans le
+mauvais ordre (L239)** : avant la tolérance, il fallait demander ce que l'erreur casse.
+**Elle ne casse presque rien.** Le repliement est déterministe et identique chez tous les
+participants : ni désynchronisation, ni divergence de réplique, ni inégalité entre joueurs, et
+I-15 reste satisfait **avec l'erreur dedans**. C'est une **infidélité, pas une faute**.
+**Et les consommateurs qui lisent une borne y sont insensibles (L238)** : le repliement rephase
+les modes sans toucher aux amplitudes, donc enveloppe de pente et énergie s'écartent de 6,2e-3 et
+4,2e-4 là où le champ échantillonné se trompe d'un **facteur 48**. Huit mille fois moins sensible.
+Le déclencheur d'écume passe par l'enveloppe : il ne voit rien.
+Le juge de fidélité existe et n'a pas siégé : **B4**, sa perception en double aveugle, sa valeur
+de départ explicitement provisoire — bloqué par la référence substitutive intégrale. **A214
+n'attend donc plus une mesure ni une spécification que nous pourrions écrire : elle attend B4.**
+Publié hors production, faute de demandeur : estimer l'erreur en comparant `radial` et
+`radial+1` — fidèle à un facteur 2,5 dans le régime qui compte, et **sous-estimant**.
+Un test reçu, témoin de conception : il tombera si le déclencheur d'écume lit un jour un
+échantillon au lieu de l'enveloppe.
+299 tests/cinq ignorés.109 ADR,214 angles,239 leçons,18 invariants,6 SPEC,23 cas.
+Suite S159 : S158-1, le facteur 2,5 qui revient partout est-il un plafond de précision ou une
+coïncidence ? Restent ouverts A213, B4, la coupure W/δ, lambda_cut, la bathymétrie.
 
 **S157 — 2026-09-10 :** [LOI-DUREE-S157](docs/validation/LOI-DUREE-S157.md),
 [ADR-108](docs/adr/ADR-108-pas-de-garde-fou-sans-tolerance-declaree.md). S156-1, A214.

@@ -7960,3 +7960,50 @@ aucun invalidé.
 
 **Suite S158 :** S157-1, sortir la mesure de sa dégénérescence en faisant varier `cutoff` et
 `sigma` séparément — ou, à défaut, demander la tolérance plutôt que la mesurer.
+
+## S158 — 2026-09-10 — La question était dans le mauvais ordre
+
+Entrée : jeton libre à 7d474cd, trois copies coïncidentes. S157-1, A214. Production :
+[TOLERANCE-SILLAGE-S158](../docs/validation/TOLERANCE-SILLAGE-S158.md),
+[ADR-109](../docs/adr/ADR-109-le-repliement-est-une-infidelite-pas-une-faute.md), L238, L239,
+addendum à L237, suivi d'A214, un test.
+
+S157 laissait deux voies ; j'ai pris la tolérance plutôt que la mesure plus fine, parce que
+mesurer plus finement une quantité dont la définition dépend d'une convention non écrite ne
+rapporte rien. ADR-028 : personne à qui demander, donc dériver. **La dérivation n'a pas eu lieu,
+et l'inventaire qui devait la préparer a donné mieux.**
+
+**Les consommateurs qui lisent une borne sont immunisés. L238.** Le repliement rephase les modes
+sans toucher aux amplitudes : enveloppe de pente et énergie s'écartent de 6,2e-3 et 4,2e-4 là où le
+champ échantillonné se trompe d'un facteur 48. Huit mille fois moins sensible. Le déclencheur
+d'écume passe par l'enveloppe, donc il ne voit rien — sans que personne l'ait conçu pour cela.
+
+**L'erreur ne peut pas diviser.** Elle est déterministe, identique chez tous les participants :
+ni désynchronisation, ni divergence de réplique, ni inégalité entre joueurs, et I-15 reste
+satisfait **avec l'erreur dedans**. Le repliement est donc une **infidélité, pas une faute** —
+ADR-109.
+
+**Et c'est ce qui montre que la question était dans le mauvais ordre. L239.** Trois sessions ont
+cherché une loi puis une tolérance ; la question utile était en amont : *qu'est-ce que cette erreur
+casse ?* La réponse dit aussi qui tranche — une infidélité se juge à l'œil, et le dépôt a déjà le
+dispositif : **B4**, sa perception en double aveugle, sa valeur de départ explicitement provisoire.
+B4 est bloqué par la référence substitutive intégrale. A214 ne réclame donc plus une mesure ni une
+spécification que nous pourrions écrire : elle attend B4.
+
+Publié pour l'intégrateur, et non ajouté en production faute de demandeur (S132) : estimer l'erreur
+en comparant `radial` et `radial+1` — presque la même erreur de quadrature, des périodes
+différentes. Fidèle à un facteur 2,5 dans le régime qui compte, et **sous-estimant**, ce qui est le
+mauvais sens et s'écrit avec.
+
+Un test reçu, témoin de conception : il tombera si le déclencheur d'écume lit un jour un
+échantillon au lieu de l'enveloppe.
+
+Battement faux deux fois de plus, corrigé deux fois — L237 avait été écrite la session précédente
+pour ce geste exact. Addendum posé : lire l'horloge dans un appel **séparé**. Une leçon écrite ne
+change pas un geste ; seule une procédure le change.
+
+299 tests réussis, cinq ignorés (206+93), debug et release. 109 ADR, 214 angles, 239 leçons,
+18 invariants, 6 SPEC, 23 cas. Invariants relus : I-03 et I-15 confirmés, aucun invalidé.
+
+**Suite S159 :** S158-1, vérifier si le facteur 2,5 qui revient partout est le plafond de précision
+de tout ce qui touche au repliement ou une coïncidence — les deux jeux de données existent.

@@ -17,6 +17,17 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S158 :** [ADR-109](adr/ADR-109-le-repliement-est-une-infidelite-pas-une-faute.md),
+[TOLERANCE-SILLAGE-S158](validation/TOLERANCE-SILLAGE-S158.md). La question était **dans le mauvais
+ordre** (**L239**) : avant la tolérance, il fallait demander ce que l'erreur casse. Elle est
+déterministe et identique chez tous — ni désynchronisation, ni divergence, ni inégalité, I-15 satisfait
+avec l'erreur dedans — donc **infidélité et non faute**. Et les consommateurs qui lisent une **borne**
+y sont insensibles : 6,2e-3 contre un facteur 48 sur le champ échantillonné (**L238**). Le juge de
+fidélité est **B4**, bloqué par la référence substitutive. A214 attend B4, pas une mesure. Estimateur
+publié hors production : comparer `radial` et `radial+1`, fidèle à 2,5 près et sous-estimant.
+299 tests/cinq ignorés.109 ADR,214 angles,239 leçons,18 invariants,6 SPEC,23 cas, deux bancs partiels.
+**Suite S159 : S158-1**, le facteur 2,5 est-il un plafond de précision ou une coïncidence ?
+
 **S157 :** [ADR-108](adr/ADR-108-pas-de-garde-fou-sans-tolerance-declaree.md),
 [LOI-DUREE-S157](validation/LOI-DUREE-S157.md). La loi en durée d'un sillage **n'existe pas** dans la
 fenêtre accessible : la dégradation est graduelle, l'instant limite hérite de la tolérance choisie

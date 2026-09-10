@@ -1960,3 +1960,15 @@ Les deux autres sont fermés par des décisions prises pour d'autres raisons : l
 d'ADR-106 censure la source large, le plafond de 512 d'ADR-097 limite le bras de levier à deux
 doublements. **Deux bornes décidées séparément se conjuguent ici pour fermer une question**, et
 aucune des deux décisions ne pouvait le prévoir. Voir ADR-108, [[L235]], [[L236]].
+
+**Suivi S158 — A214 change de dépendance et de gravité apparente.** L'inventaire des consommateurs
+montre que le repliement est une **infidélité, pas une faute** : l'erreur est déterministe et
+identique chez tous, donc ni désynchronisation, ni divergence de réplique, ni inégalité ; I-15
+reste satisfait avec l'erreur dedans (ADR-109, [[L239]]). Et les consommateurs qui lisent une
+**borne** — déclencheur d'écume par `slope_envelope`, budget de pente, admissibilité — y sont
+insensibles : 6,2e-3 et 4,2e-4 d'écart quand le champ échantillonné se trompe d'un facteur 48
+([[L238]], test `bornes_insensibles_au_repliement_s158`).
+A214 ne réclame donc plus une mesure ni une spécification que nous pourrions écrire : elle attend
+**B4**, seul juge de fidélité du corpus, lui-même bloqué par la référence substitutive intégrale.
+Recours d'ici là : rester dans le domaine déduit de la recette (ADR-107), ou estimer l'erreur en
+comparant `radial` et `radial+1` — fidèle à un facteur 2,5, et sous-estimant.
