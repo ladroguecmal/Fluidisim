@@ -31,3 +31,24 @@ pour `W` : le dépôt fait des choses sans les déclarer, et ce qui n'est pas d�
 **Le volet coût, lui, n'avait jamais été mesuré** : les cinq bancs locaux existants — `bench_water`,
 `bench_gaussian`, `bench_phase`, `bench_resolution`, `bench_live_water` — portent tous sur `W`,
 aucun sur le champ de fond.
+
+## 3. Volet coût — `banc_b1.rs`, B1.1
+
+Hs = 2 m, Tp = 6 s, 4096 points par campagne, 64 campagnes, minimum retenu.
+
+| N | coût par échantillon | par composante | rapport à N = 32 |
+|---:|---:|---:|---:|
+| 32 | **1 531 ns** | 47,86 ns | 1,000 |
+| 64 | 3 089 ns | 48,26 ns | 1,008 |
+| 128 | 6 210 ns | 48,51 ns | 1,014 |
+| 256 | **12 763 ns** | 49,86 ns | 1,042 |
+
+**Le coût est linéaire en N**, à 4 % près sur un facteur 8 — la somme de Gerstner ne cache aucune
+structure. Le chiffre à retenir est **48 ns par composante et par échantillon**, et il donne un
+budget directement utilisable :
+
+> à 16,7 ms par image et 1 000 échantillons demandés, le plafond est de **≈ 348 composantes** ;
+> à 10 000 échantillons, il tombe à **≈ 35**.
+
+C'est la première fois que ce projet dispose d'un chiffre de ce genre, et il ne vient pas d'une
+estimation : `B` à 256 composantes coûte **12,8 µs par point**.

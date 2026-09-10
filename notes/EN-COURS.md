@@ -73,7 +73,7 @@ le premier jour du projet ; celui-ci ne demande aucune couche manquante.
       une distance de perception : hors de portée d'une session (`REPRISE.md` §5). Et vérifier si
       des morceaux de B1 ont déjà été mesurés sans être reconnus comme tels — les `bench_*`
       existent, et S145 vient de montrer que le dépôt fait des choses sans les déclarer.
-- [ ] **P3** — volet **coût** : coût par échantillon pour N ∈ {32, 64, 128, 256}, à ordre de
+- [x] **P3** — volet **coût** : coût par échantillon pour N ∈ {32, 64, 128, 256}, à ordre de
       sommation fixé, et ce que la troncature coûte.
 - [ ] **P4** — volet **justesse**, celui qui rend le banc urgent : `Hs` mesuré contre la cible en
       fonction de N. A187 dit 6,6 % d'écart à 256 composantes par battements ; A188 dit que la
