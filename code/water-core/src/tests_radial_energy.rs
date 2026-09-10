@@ -56,14 +56,14 @@ impl Density {
     }
 }
 
-struct Measurement<'a> {
+struct Measurement<'a, const N: usize> {
     field: &'a RadialImpact<N>,
     medium: Medium,
     us: u64,
     temporal: [f64; N],
     speed_scale: f64,
 }
-impl<'a> Measurement<'a> {
+impl<'a, const N: usize> Measurement<'a, N> {
     fn new(field: &'a RadialImpact<N>, medium: Medium, us: u64) -> Self {
         let age = SimTime(us - field.event.data().birth.0);
         let temporal = std::array::from_fn(|i| {
@@ -245,4 +245,35 @@ fn transported_candidate_energy_s129() {
     }
     println!("S129 surface normalisee={surface_error:.3e} densite minimale={minimum:.3e} J/m2");
     assert!(surface_error <= 1e-6 && minimum >= -1e-12);
+}
+
+#[test]
+fn energy_leaves_disk_without_disappearing_s153() {
+    let (old,m)=fixture();let e=old.event;
+    let field=RadialImpact::<512>::new(e,m,Domain {radius:120.,age_us:60_000_000}).unwrap();
+    let e0=e.data().energy_j as f64;let mut surface=0.0;
+    let integral=|rows:&[Density],end:usize,stride:usize,component:usize|->f64 {
+        let steps=end/stride;
+        (0..=steps).map(|j| {let i=j*stride;let w=if j==0||j==steps {1.}else if j%2==0 {2.}else {4.};
+            let d=rows[i];let value=match component {0=>d.total(),1=>d.potential,_=>d.potential+d.diagonal};
+            value*core::f64::consts::TAU*(i as f64*0.125)*w*(stride as f64*0.125)/3.
+        }).sum::<f64>()/e0
+    };
+    for us in [0,60_000_000] {
+        let measure=Measurement::new(&field,m,us);
+        let rows:Vec<_>=(0..=960).map(|i|measure.density(i as f32*0.125,&mut surface)).collect();
+        let a=integral(&rows,640,1,0);let b=integral(&rows,960,1,0);
+        println!("S153 candidate t={us} E80/E0={a:.12} E120/E0={b:.12} shell={:.12}",b-a);
+        for end in [640,960] {assert!((integral(&rows,end,1,0)-integral(&rows,end,2,0)).abs()<0.002);}
+        assert!((b-1.).abs()<0.003);
+        if us==0 {assert!((a-1.000060620645).abs()<1e-4);assert!((b-1.000060621813).abs()<1e-4);}
+        else {
+            assert!((a-0.964843720099).abs()<1e-4);
+            assert!((b-0.999999680964).abs()<1e-4);
+            assert!(b-a>0.01);
+            assert!((integral(&rows,960,1,1)-b).abs()>0.1);
+            assert!((integral(&rows,960,1,2)-b).abs()>1e-4);
+        }
+    }
+    assert!(surface<1e-6);
 }
