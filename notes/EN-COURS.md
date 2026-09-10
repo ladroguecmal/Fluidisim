@@ -69,7 +69,7 @@ physique. **C'est le premier lot de la série qui change des bits publiés.**
 ### Plan
 
 - [x] **P1** — état réel, jeton, **plan déclaré et committé seul**.
-- [ ] **P2** — **témoins avant**, et rien d'autre. Hachages de campagne des deux scénarios,
+- [x] **P2** — **témoins avant**, et rien d'autre. Hachages de campagne des deux scénarios,
       budgets des fixtures mixtes, frontières de refus. Relevés et committés **avant** toute
       modification : sans cela, « ce qui a bougé » ne se démontre plus, il se raconte.
 - [ ] **P3** — migrer l'**impact radial** : `RadialImpact::new` compare `slope_max()`, et
