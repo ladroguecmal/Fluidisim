@@ -65,7 +65,7 @@ Objectif : S153-1, bilan60s sur sources2/3/5/6m, sans confondre collecte et doma
 ### Plan
 
 - [x] **P1** — état réel, protocole, jeton et plan seul.
-- [ ] **P2** — oracle indépendant sur quatre longueurs, rayons88/112/136/152m ; raffinement séparé.
+- [x] **P2** — oracle indépendant sur quatre longueurs, rayons88/112/136/152m ; raffinement séparé.
 - [ ] **P3** — réception coefficients N512 et profils N256 sur80m ; énergie, anneaux et contre-épreuves.
 - [ ] **P4** — suite de tests, rapport et rituel ; verdict B2 daté et jeton rendu.
 
@@ -79,3 +79,4 @@ Oracle spectral256/512, directions1024/2048 sentinelles. Seuils S153 inchangés 
 écart spectral/candidat<=1e-4 E0, spatial<=0,002 E0, fermeture<=0,003 E0.
 N512 sur collecte élargie ; N2565/6 évalué sur80m seulement si le garde refuse plus loin.
 Aucun changement de production prévu ; ne pas transposer un profil80m au collecteur.
+P2 : quatre oracles reçus. Collecteurs60s :2=0,999999975071 ;3=0,999999976655 ;5=0,999999630848 ;6=0,999999694485. À80m :0,999999481614 /0,999111648388 /0,787762595879 /0,446944872471. Rapports dans ENERGIE-BANDE-B2-S154.
