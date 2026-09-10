@@ -58,53 +58,43 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S133 — terminée
+Session : S134 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : S132-1 — la reconstruction après élargissement repart d'un pool vide alors que les
-coefficients publiés restent valides pour toutes les sources sauf une. S131 avait conclu que la
-fenêtre sans champ était incompressible ; la vérifier plutôt que la croire.
+Objectif : S133-1 — trois sessions ont buté sur la même limite : l'ajout incrémental n'est
+exact que si la source s'insère **en dernier**. Établir ce que coûterait de s'en affranchir,
+et décider — y compris décider de la garder.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seul.
-- [x] **P2** — conception : quelle forme donne le meilleur résultat, et à quel prix ?
-      La question qui décide n'est pas « comment recycler les coefficients » mais **qui tient
-      le champ pendant l'opération**. Un contrôleur qui en construit un autre à partir de ses
-      propres coefficients, sans se détruire, servirait jusqu'au basculement — et la fenêtre
-      **disparaîtrait** au lieu de raccourcir. Le prix serait un second jeu de pools.
-- [x] **P3** — ADR-089 : extend_into lit l ancien controleur et en construit un second, sans le detruire.
-- [x] **P4** — `extend_into`, condition d'ordre vérifiée, repli sur la préparation complète.
-- [x] **P5** — deux configurations depuis une vraie saturation ; ancien contrôleur
-      réinterrogé après coup ; test vérifié comme témoin.
-- [x] **P6** — elle disparaît ; coût 6,21 ms contre 19,11 pour le même journal.
-- [x] **P7** — livrable, rituel de fin, fusion `--ff-only`.
+- [ ] **P2** — poser les voies et les chiffrer avant d'en préférer une. Quatre, et la
+      quatrième n'était pas dans les notes de S133 :
+      1. **accumuler en `f64`** puis arrondir : réduit l'écart sans le supprimer — l'ordre
+         compte toujours, plus finement. Et cela déplacerait tous les résultats publiés.
+      2. **sommation compensée** par nœud : même nature, même défaut.
+      3. **sommation exacte** : indépendante de l'ordre par construction, coût à mesurer.
+      4. **stocker la contribution de chaque source séparément**, et recomposer dans l'ordre
+         canonique à chaque admission. L'identité devient exacte **quelle que soit la
+         position**, sans refaire les réponses modales — au prix d'une mémoire proportionnelle
+         au nombre de sources. C'est la seule voie qui rende la condition inutile.
+- [ ] **P3** — ADR-090 sur ce que les chiffres montreront. **Garder la condition est une
+      issue légitime** si son prix est plus bas que celui de la lever.
+- [ ] **P4** — construire ce que la décision retient.
+- [ ] **P5** — recevoir.
+- [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
-Départ 355b4ce = master, trois copies coïncidentes.
+Départ 8269d2f = master, trois copies coïncidentes.
 
-Acquis d'ADR-088, directement réutilisable : `spectral_pressure::add_segments` ajoute des
-segments à un champ déjà préparé, exactement, **à condition** qu'ils viennent en dernier dans
-l'ordre canonique. La même condition vaudra ici — la source reprise doit porter l'identifiant
-le plus grand, ce qui n'est **pas** garanti : le vérifier, et retomber sur la préparation
-complète sinon, exactement comme `admit` le fait déjà.
+Ce que la condition coûte aujourd'hui, et qu'il faut peser : rien tant que les identifiants
+croissent — un compteur d'hôte suffit — et une préparation complète sinon. Ce n'est donc pas
+une faute de calcul, c'est une **contrainte d'usage non écrite**. La question n'est pas
+« comment la lever » mais « vaut-elle son prix, et l'hôte sait-il qu'elle existe ».
 
-Chiffres de S131 à battre : élargissement + reprise 0,1 µs service maintenu, **reconstruction
-12,21 ms (224×128) et 13,41 ms (256×128) sans champ**.
+Chiffres de référence : préparation 5,00 ms par segment à 224×128 ; pools de coefficients
+14 336 slots, environ 630 ko chacun ; le contrôleur en tient deux, et ADR-089 en demande deux
+de plus le temps d'une transition.
 
-Piège à éviter : une signature qui consomme le contrôleur. En cas de refus, l'hôte aurait perdu
-son champ pour rien — alors que le refus est précisément le cas où il en a besoin.
-
-P4-P7 : ADR-089, EXTENSION-S133, journal, index, README, REPRISE, jeton rendu, ff-only.
-263 tests/cinq ignorés, hachages inchangés. Aucun angle ni leçon nouveaux.
-
-Un obstacle de compilation à connaître : `extend_into` porte `'v: 'w`, et l'inférence tend à
-prendre `'w = 'v`, ce qui fait vivre le journal élargi aussi longtemps que le contrôleur source.
-Dans la campagne, cela obligeait le stockage élargi à survivre jusqu'à la dernière utilisation du
-contrôleur — la mesure a donc été déplacée en fin de boucle, après toutes les autres.
-
-Pour S134 sans relire : la condition « en dernier » vient de l'accumulation par nœud, segment
-après segment, en f32 (`prepare_segments`). S'en affranchir demanderait que la somme par nœud ne
-dépende pas de l'ordre — accumulation en f64 puis arrondi final, ou sommation compensée par nœud.
-Le premier changerait les résultats (donc les hachages), le second peut-être pas : c'est
-exactement ce qu'il faut mesurer avant de décider, et le coût par nœud est le facteur à peser.
+Piège à éviter : mesurer le coût en temps de la voie 4 et oublier son coût en mémoire, qui est
+le vrai. À 8 sources, elle multiplierait par 8 des pools déjà comptés en mégaoctets.
