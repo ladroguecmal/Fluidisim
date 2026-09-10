@@ -58,54 +58,45 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S138 — terminée
+Session : S139 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : S137-1 — auditer les renvois du corpus. S137 a trouvé un renvoi faux recopié par
-trois ADR pendant soixante sessions, et deux numéros de leçon en collision. Chercher les autres,
-par recherche de texte et non par relecture — la méthode de S11 et S15.
+Objectif : S138-1 — `max_slope` vaut 0,1 partout depuis S77 sans provenance (A205), et décide
+de l'admissibilité de tout champ. Mesurer le rapport entre `slope_bound` — la borne L1
+`Σ|a_k|·k·dk·k` calculée dans `RadialImpact::new` — et la **pente réelle** maximale du champ,
+échantillonnée par `sample().slope`. Si ce rapport est stable, `max_slope` se dérive de la
+cambrure de Stokes (SPEC-001 §4) au lieu de rester un nombre sans origine.
 
 ### Plan
 
-- [x] **P1** — état réel, jeton, **plan déclaré et committé seul**. S137 ne l'a pas fait ;
-      cette session commence par le faire.
-- [x] **P2** — audit mécanique des **identifiants** : ADR, angles, leçons, invariants, cas.
-      Collisions, trous, et références vers des numéros qui n'existent pas. C'est le plus
-      automatisable, et S137 a montré qu'il y a des collisions.
-- [x] **P3** — audit des renvois vers les **bancs** — c'est là que S137 a trouvé le défaut, et
-      la même erreur peut viser B3, B4 ou B10.
-- [x] **P4** — audit des renvois vers les **sections de spécification** : `SPEC-00x §y` où la
-      section a pu bouger, disparaître, ou n'avoir jamais porté ce qu'on lui attribue.
-- [x] **P5** — corriger ce qui est faux : notes datées pour les ADR, correction directe pour
-      les documents qui ne sont pas des ADR, et **dire ce qui est douteux sans le trancher**.
-- [x] **P6** — livrable, rituel de fin, fusion `--ff-only`.
+- [x] **P1** — état réel, jeton, **plan déclaré et committé seul**.
+- [ ] **P2** — sonde `pente_reelle` : rapport `slope_bound / max|slope|` sur le disque et sur
+      l'âge, pour un cas. Établir d'abord **où** le maximum se trouve — centre, premier anneau,
+      instant initial — avant de balayer quoi que ce soit.
+- [ ] **P3** — balayer λ, énergie, N et rayon du domaine. Le rapport est-il une constante du
+      modèle, ou dépend-il d'un paramètre ? C'est la question qui décide de tout le reste.
+- [ ] **P4** — si le rapport est stable : dériver `max_slope` de `πH/λ ≈ 0,449` divisé par lui,
+      et **vérifier la conséquence** — quelles énergies deviennent admissibles ou refusées à
+      0,1 contre la valeur dérivée. Sinon : dire de quoi il dépend, et ce que cela coûte.
+- [ ] **P5** — ADR : d'où vient `max_slope`. Livrable de mesure dans `docs/validation/`.
+      Notes correctives datées là où 0,1 est cité comme une donnée du milieu.
+- [ ] **P6** — rituel de fin (§6), jeton rendu, fusion `--ff-only`.
 
 ### Notes de reprise
 
-Départ 17aa26b = master, trois copies coïncidentes.
+Départ 041dfed = master ; worktree `886155`. Tests au départ : 269, cinq ignorés (176+93).
 
-Ce que S137 a établi et qui oriente cet audit :
-- un renvoi non vérifié **ferme** la question au lieu de la laisser ouverte (L217) ; les
-  renvois les plus dangereux sont donc ceux qui attribuent une tâche — « à calibrer B2 »,
-  « traité en Sxx », « voir tel banc » ;
-- les numéros peuvent entrer en collision quand deux agents travaillent en parallèle, ce qui
-  est le cas depuis S125 (Codex sur master, moi sur ce worktree).
+Ce qui est déjà connu et n'est pas à remesurer :
+- `slope_bound` est une borne **L1**, construite avec `|J1| ≤ 1` (commentaire de
+  `radial_impact.rs:170`, « borne conservative »). Le maximum réel de `J1` vaut 0,5819 en
+  x ≈ 1,841 : le rapport ne peut donc pas descendre sous 1,72, et les phases temporelles
+  `cos(ω_k t)` comme les zéros de `J1(k r)` l'écartent encore.
+- la forme initiale est **exactement** homothétique en λ (S136, écart nul de 0,5 à 32 m) ;
+  si le rapport dépend de λ, ce ne peut être que par la discrétisation ou la portée de Bessel,
+  pas par la physique.
+- `slope_bound ∝ √E` (S136) : le rapport devrait être **indépendant de l'énergie**. Le vérifier
+  quand même — c'est justement ce genre de « devrait » que S136 a pris en défaut sur `α`.
 
-Piège à éviter : corriger un renvoi douteux en devinant sa cible. Si la cible juste n'est pas
-évidente, le dire et laisser ouvert vaut mieux qu'un second renvoi faux.
-
-Attendu réaliste : un audit trouve surtout des choses mineures. Le résultat utile peut être
-« le corpus est cohérent sur ces points », à condition d'avoir cherché pour de bon.
-
-P2-P6 : AUDIT-RENVOIS-S138, deux notes correctives (ADR-058, ADR-085), A205, L218, journal,
-index, README, REPRISE, jeton rendu, ff-only. Aucun code modifié, 269 tests inchangés.
-
-Ce que l'audit a coûté et rapporté, pour la prochaine fois : l'automatique n'a produit que des
-faux positifs — dix-sept, tous dus à mes motifs — et il a fallu vérifier chacun. Le vrai résultat
-est venu d'une seule recherche ciblée sur la formulation fautive de S137. **Chercher la
-formulation exacte de l'erreur connue rapporte plus que balayer le corpus au hasard.**
-
-Pour S139 sans relire : S138-1 mesure le rapport entre `slope_bound` — la borne L1 du modèle,
-`Σ|a_k|·k`, calculée dans `RadialImpact::new` — et la pente réelle maximale du champ, obtenue en
-échantillonnant `sample().slope` sur le disque. Si le rapport est stable, `max_slope` se dérive
-de la cambrure de Stokes (SPEC-001 §4, `H/λ ≈ 1/7`, pente `πH/λ ≈ 0,449`) divisée par ce rapport.
-Méthode : la sonde `forme_initiale` fait déjà ce genre de balayage et peut servir de modèle.
+Piège à éviter : conclure « la pente réelle vaut ρ fois moins » depuis un échantillonnage trop
+grossier. Le maximum d'une somme de 64 Bessel oscille ; sous-échantillonner **sous-estime** le
+maximum et **surestime** le rapport, donc rend `max_slope` trop permissif. Raffiner jusqu'à
+stabilité, et le dire.
