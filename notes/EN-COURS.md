@@ -58,73 +58,20 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S146 — terminée
-Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : **lancer B1** — « champ de fond : nombre de composantes et coût d'évaluation ».
-Recommandé par [BILAN-S69](../docs/registres/BILAN-S69.md) puis par
-[BILAN-S145](../docs/registres/BILAN-S145.md), jamais fait. **Zéro banc sur onze exécuté** depuis
-le premier jour du projet ; celui-ci ne demande aucune couche manquante.
+Session : S147 — en cours
+Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
+Objectif : clore S63-1 sur preuves existantes, puis instruire A212 (forme du spectre de B).
 
 ### Plan
 
-- [x] **P1** — état réel, jeton, **plan déclaré et committé seul**.
-- [x] **P2** — lire le protocole §B1 **en entier** et dire ce qui est exécutable aujourd'hui et ce
-      qui ne l'est pas. Le protocole demande une évaluation **subjective en double aveugle** et
-      une distance de perception : hors de portée d'une session (`REPRISE.md` §5). Et vérifier si
-      des morceaux de B1 ont déjà été mesurés sans être reconnus comme tels — les `bench_*`
-      existent, et S145 vient de montrer que le dépôt fait des choses sans les déclarer.
-- [x] **P3** — volet **coût** : coût par échantillon pour N ∈ {32, 64, 128, 256}, à ordre de
-      sommation fixé, et ce que la troncature coûte.
-- [x] **P4** — volet **justesse**, celui qui rend le banc urgent : `Hs` mesuré contre la cible en
-      fonction de N. A187 dit 6,6 % d'écart à 256 composantes par battements ; A188 dit que la
-      calibration statistique reste à faire. C'est ici qu'on tranche.
-- [x] **P5** — la **courbe demandée** : combien de composantes effectives pour qu'un objet de
-      taille L voie la même hauteur. La partie « taille d'objet » est mesurable ; la partie
-      « distance » ne l'est pas sans caméra — le dire au lieu de la contourner.
-- [x] **P6** — **décision** : N retenu, ce que la décision porte et ce qu'elle ne porte pas. ADR,
-      rapport de banc, rituel de fin (§6, **dont le point 7 ajouté hier**), jeton, `--ff-only`.
+- [x] **P1** — vérifier copies, branches, historique et outils ; prendre le jeton et committer ce plan seul.
+- [>] **P2** — lectures de reprise ; clore S63-1/S145-2 avec le périmètre exact de la dispersion construite et les dépendances restantes de B2.
+- [ ] **P3** — examiner A212 dans les spécifications et le code, vérifier les références physiques et arrêter une décision de spectre avec son protocole de réception ; construire le lot que cette décision permet dans la session.
+- [ ] **P4** — vérifier le lot, écrire journal et passation, contrôler décomptes et renvois, exécuter le rituel de fin et rendre le jeton.
 
 ### Notes de reprise
 
-Départ 533c7ed = master ; worktree `886155`. 275 tests/cinq ignorés, 98 ADR, 211 angles.
-
-Ce qui est établi avant de commencer :
-- `background.rs` (587 lignes) est une somme de composantes de **Gerstner**, à ordre de sommation
-  fixé, sans allocation à l'exécution (I-06) ; `SeaState { hs, components, … }` et
-  `Background::configure` répartissent les composantes géométriquement autour de la période de
-  pic, amplitude `a = Hs/(2√(2n))` ;
-- **il n'y a pas de LOD spectral** dans le code. Le protocole demande « le coût avec LOD actif et
-  inactif » : ce volet-là n'est pas exécutable, et pas parce qu'on manque de temps ;
-- A187 (écart de `Hs` par battements) et A188 (calibration statistique) sont la raison pour
-  laquelle S69 disait ce banc **urgent**.
-
-Piège nommé par S145, à ne pas retomber dedans : **écrire une sonde de plus au lieu de lancer le
-banc**. La distinction n'est pas la forme du code — un banc s'exécute aussi par du code — mais ce
-qui est mesuré : une sonde compare le modèle à lui-même, B1 compare `B` à une **cible statistique
-extérieure**, `Hs = 4√m0`.
-
-Second piège : annoncer « B1 exécuté » alors que deux de ses volets sont perceptuels. Le banc
-rendra un **verdict partiel**, et il faudra que le rapport dise exactement lequel — sinon la
-prochaine session lira « B1 fait » et le corpus portera un renvoi faux de plus (L217).
-
-P2-P6 : banc `banc_b1.rs`, coût, justesse sur douze graines, composantes effectives, ADR-099,
-BANC-B1-S146, `COMPOSANTES_B1`, A212, L229, A187 requalifiée. 275 tests inchangés.
-
-Deux erreurs de conception de mesure, corrigées en séance et qui valent d'être connues :
-- **comparer l'élévation moyenne entre deux N n'a aucun sens** — les phases changent avec N, ce
-  sont deux mers différentes. Ce qui se compare est une statistique (écart-type de la hauteur
-  moyennée sur une empreinte) ;
-- **quatre graines ne distinguent pas un biais d'une dispersion.** Douze le font, et c'est ce qui
-  a requalifié A187 (L229).
-
-Le mécanisme d'A211 a fonctionné : la ligne `Session suivante` portait « lancer B1 », et le banc a
-été lancé. Un seul essai ne prouve rien — le juge est S150.
-
-Pour S147 sans relire : **S63-1** se clôt par écrit — la dispersion vit dans `W` depuis ADR-060, la
-question « où va la couche dispersive » est tranchée en pratique depuis S77 et n'a jamais été
-fermée ; il faut un ADR court ou une note datée qui le dise, pas une nouvelle instruction. Puis
-**A212** : `Background::configure` répartit l'énergie **uniformément** dans `[Tp/2, 2Tp]`, alors
-qu'un spectre de mer suit JONSWAP ou Pierson-Moskowitz. `Hs` reste exact par construction quelle
-que soit la forme — donc rien de mesuré n'est faux — mais le **contenu fréquentiel** en dépend,
-donc l'aspect, les périodes vues par un objet et la réponse d'un corps flottant. Aucun banc ne la
-mesure : c'est une décision de conception, pas une mesure.
+Départ : master 66cd765, identique à 886155 ; autres copies propres et historiques, aucune copie créée.
+S146 terminée ; 275 tests réussis/cinq ignorés annoncés, 99 ADR, 212 angles, 18 invariants,
+6 spécifications, 23 cas. Cargo 1.97.0 disponible. B1 partiel : volets perceptuels et LOD ouverts.
+La recommandation BILAN-S145 est portée : B1 exécuté S146, S63-1 prise en premier ici.
