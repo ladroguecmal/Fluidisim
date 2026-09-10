@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-10 18:21 +02:00
+JETON            : occupé
+Battement        : 2026-09-10 18:23 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S159 — assainir les copies de travail (demande utilisateur)
 Dernière session : S158 — infidélité et non faute ; 299 tests/cinq ignorés
-Session suivante : S159 — le facteur 2,5 est-il un plafond ? (S158-1)
+Session suivante : à fixer en fin de S159
 
 **Copie de travail S155** : worktree `claude/reprise-projet-2d3506`, remis en avance rapide sur
 master (1643232) au démarrage — il était resté à 041dfed, 80 commits en retard et rien d'unique,

@@ -58,162 +58,68 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S158 — terminée
+Session : S159 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : S157-1, A214. S157 a laissé deux voies. Je prends la **seconde** — la tolérance — et
-non la première, pour une raison qui se vérifie : sortir le plan d'expérience de sa dégénérescence
-demanderait de faire varier `cutoff` et `sigma` séparément, donc de comparer des formes spectrales
-différentes ; or S157 a montré que l'instant limite hérite de la tolérance choisie. **Mesurer plus
-finement une quantité dont la définition dépend d'une convention non écrite ne rapporterait rien.**
+Objectif : **demande explicite de l'utilisateur** — régler tous les problèmes liés aux copies de
+travail. S158-1 (le facteur 2,5) est reporté ; il ne se périme pas, les jeux de données sont dans
+le dépôt.
 
-ADR-028 : il n'y a personne à qui demander. Une question de conception est à moi. « Demander la
-tolérance » veut donc dire la **dériver**, avec provenance — I-14 interdit un nombre qui
-n'appartiendrait ni à une formule citée ni à un banc qui le fixe.
+C'est l'action **S35-7**, parquée depuis longtemps comme « sort des branches, décision de
+l'utilisateur ». Elle vient d'être donnée.
+
+### Ce qui a déclenché la demande, et qui est un fait nouveau
+
+Un **sixième** worktree est apparu pendant S158 : `project-status-progress-d31d78`, créé sur la
+tête de S157, sept commits en retard, aucun commit unique. Personne ne l'a annoncé. C'est
+exactement le mécanisme qui a forké le dépôt **trois fois** (L137, FORK-S22-S26) : le jeton est un
+fichier **versionné**, donc chaque copie en possède un, et une copie en retard porte un jeton
+périmé qu'une session y trouvera `libre`.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan déclaré et committé seul.
-- [x] **P2** — inventaire des **consommateurs** d'un champ de sillage et de ce que chacun lit
-      réellement : `eta`, sa dérivée temporelle, la vitesse, la normale. Pour chacun, la plus
-      petite erreur qui change une grandeur déjà décidée ailleurs. La réponse est là, pas dans
-      une mesure de plus.
-- [x] **P3** — convertir en tolérance sur l'observable de S157, l'excès de champ proche. Sans
-      cette conversion, une tolérance dérivée reste inutilisable : les deux ne parlent pas de la
-      même chose.
-- [x] **P4** — ADR fixant la tolérance et sa provenance, puis relecture des durées de S157 **à
-      cette tolérance** — les mesures existent, aucune campagne nouvelle si elle tombe dedans.
-- [x] **P5** — le garde-fou, désormais constructible, avec son test témoin ; ou le constat motivé
-      qu'il ne l'est toujours pas.
-- [x] **P6** — livrable, rituel de fin, fusion `--ff-only`.
+- [ ] **P2** — inventaire **factuel** des six copies et des six branches : commits uniques,
+      propreté, âge, état du jeton que chacune porte. Rien ne sera supprimé avant que ce tableau
+      existe et soit publié.
+- [ ] **P3** — remettre en avance rapide toute copie sans commit unique. C'est le geste le moins
+      risqué et il éteint à lui seul le danger du jeton périmé : toutes les copies liront alors
+      le même jeton.
+- [ ] **P4** — retirer les worktrees morts et supprimer les branches **sans commit unique**.
+      La branche archivée porte 44 commits uniques : son worktree est retiré, **la branche est
+      conservée**. Aucune histoire n'est perdue.
+- [ ] **P5** — le correctif **durable**, sans lequel tout repoussera : la procédure de fermeture
+      d'une copie doit vivre dans `AGENTS.md`, à un seul endroit, et le décompte périmé de
+      `REPRISE.md` doit être corrigé. Décision à acter par ADR : une branche sans commit unique
+      ne se conserve pas.
+- [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
-Départ 7d474cd = master, trois copies coïncidentes, rien en attente.
-298 tests/cinq ignorés, 108 ADR, 214 angles, 237 leçons, 18 invariants.
+Départ 3f25fe5 = master. Six copies, toutes **propres** — aucune modification non committée nulle
+part, vérifié avant tout.
 
-Pistes de provenance repérées avant de commencer, à vérifier et non à croire :
-- **I-08 et SPEC-001** : ulp d'un f32 à distance `d` vaut `d·2⁻²³`, soit 0,49 mm au bord du
-  domaine de 4096 m. C'est un **plancher de représentation**, pas une tolérance — le confondre
-  avec une tolérance serait exactement l'erreur qu'I-14 vise.
-- **budget de pente** : `max_slope`, le facteur L1 de 1,7950713 (ADR-094) et la cambrure limite
-  de Stokes 0,4488 (SPEC-001 §4). La pente est ce que lisent le rendu **et** la flottabilité.
-- **seuil de B2** : 1e-4 E0 depuis S153, déjà employé sur les bilans d'énergie.
-- **ADR-008** flottabilité, **I-13** le rendu ne pilote pas la physique, **I-12** un domaine
-  perturbatif est visuellement gratuit.
-
-Danger principal de cette session, à énoncer pour pouvoir s'y prendre : **inventer un nombre qui
-sonne juste**. Un « 2 mm » plausible et sans provenance vaudrait moins que l'absence de garde-fou
-d'ADR-108, parce qu'il aurait l'autorité d'une décision. Si aucune dérivation ne tient, la
-conclusion correcte est qu'A214 reste ouverte et que la session l'aura montré une seconde fois.
-
-P2 — l'inventaire des consommateurs donne plus que prevu, et deplace la question.
-
-**Premier resultat, mesure et non argumente : les consommateurs qui lisent une borne sont
-immunises.** La recurrence rephase les modes ; elle ne change pas l'amplitude des coefficients.
-Enveloppe de pente et energie, radial 128 contre 512, angulaire 512 :
-
-| recette | 8 s | 60 s |
+| branche | retard | unique |
 |---|---|---|
-| enveloppe, 128 | 5,578484852e-3 | 5,620170385e-3 |
-| enveloppe, 512 | 5,578064360e-3 | 5,585675128e-3 |
-| ecart relatif | 7,5e-5 | **6,2e-3** |
-| energie, ecart relatif | 2,5e-4 | **4,2e-4** |
+| master | — | — |
+| claude/reprise-projet-2d3506 (la mienne) | 0 | 0 |
+| claude/reprise-projet-29ef50 | 0 | 0 |
+| claude/project-status-progress-d31d78 | 7 | 0 |
+| claude/reprise-projet-886155 | 58 | 0 |
+| claude/reprise-projet-c107bf | 434 | 0 |
+| claude/s22-suite (sans worktree) | 434 | 0 |
+| claude/reprise-projet-5134cd (archivée) | 603 | **44** |
 
-A 60 s, la ou le champ **echantillonne** en champ proche se trompe d'un facteur 48 (S156), les
-grandeurs **bornees** se trompent de 0,6 % et 0,04 %. Rapport de sensibilite : environ 8000.
-Consequence directe : le declencheur d'ecume, qui passe par `slope_envelope` et non par un
-echantillon (`bound_pressure` ligne 663, `base.steepness*PI + slope_envelope`), **ne voit pas la
-recurrence**. Le budget de pente d'ADR-080 non plus. L'admissibilite non plus.
+Règles que je me donne avant de toucher à quoi que ce soit, parce qu'une suppression se regrette :
+1. **Ne jamais supprimer une branche portant un commit unique.** Une seule est dans ce cas et elle
+   est archivée volontairement.
+2. **Ne rien retirer qui contienne du travail non committé.** Vérifié : rien nulle part.
+3. **Ne pas toucher au dépôt distant** — `REPRISE.md` §9, hors de ma portée, et la demande porte
+   sur les copies locales.
+4. **Ne pas retirer ma propre copie** : j'y travaille. La dernière fermeture revient à qui
+   travaillera sur master.
+5. Une copie qu'une autre session pourrait utiliser en ce moment se **remet à jour**, elle ne se
+   supprime pas sans preuve qu'elle est morte.
 
-**Deuxieme resultat, celui qui deplace la question.** L'erreur de recurrence est **deterministe et
-identique chez tous les participants** — I-03 le garantit, et c'est le meme calcul partout. Donc
-elle ne peut produire ni desynchronisation, ni divergence de replique, ni inegalite entre joueurs.
-I-15 : une grandeur derivee est autoritaire si tous la calculent a l'identique ; c'est le cas, y
-compris avec l'erreur. **L'autorite est preservee ; seule la fidelite souffre.**
-Cela change la nature du garde-fou cherche depuis A214 : il ne protegerait pas d'une faute, il
-protegerait d'une **invraisemblance**. Ce n'est pas la meme urgence, et ce n'est pas le meme juge.
-
-**Troisieme resultat : le juge existe et n'a pas siege.** Le seul dispositif du corpus qui statue
-sur une fidelite est **B4** — « a partir de quel rapport la decomposition additive devient-elle
-visiblement fausse ? », protocole avec « perception en double aveugle », et sa valeur de depart
-0,35*Hs est explicitement provisoire. B4 est concu pour produire exactement le type de nombre
-qu'A214 reclame, et il est bloque : il demande la reference substitutive integrale, qui n'existe
-pas.
-
-Ce que l'inventaire ne trouve pas, et il faut le dire : **aucun consommateur n'a de seuil declare
-que l'erreur de recurrence pourrait franchir.** Le declencheur d'ecume a bien un seuil chiffre —
-cambrure de Stokes 1/7, SPEC-001 §3 — mais il lit une borne, donc il est immunise ; et les pentes
-du sillage mesure (5,6e-3) sont de toute facon a deux ordres de grandeur du seuil.
-
-P3 — la conversion demandee par le plan n'a pas lieu, et c'est justifie : P2 a montre qu'il n'y a
-aucun seuil de consommateur a convertir. J'ai donc pris la question par l'autre bout — rendre
-l'erreur **mesurable par l'appelant**, qui appliquera sa tolerance quand il en aura une.
-
-Methode : deux resolutions **voisines**, `radial` et `radial+1`, ont presque la meme erreur de
-quadrature mais des periodes spatiales differentes. Leur ecart isole donc le repliement. Aucune
-extension de grammaire n'est necessaire — `radial` accepte 1 a 512 — ce qui evite de rouvrir le
-plafond qu'ADR-107 avait refuse de relever.
-
-Estimateur contre erreur reelle (ecart a radial 512), rapportes a l'amplitude du champ fin :
-
-| radial | 8 s | 24 s | 40 s | 60 s |
-|---|---|---|---|---|
-| 64 | 0,89 | 0,71 | 0,54 | 0,40 |
-| 128 | 1,17 | 0,97 | 1,08 | 0,59 |
-| 256 | **0,02** | **0,08** | 0,70 | 1,37 |
-
-Lecture. Dans le regime ou l'erreur est **significative**, l'estimateur la suit a un facteur 2,5
-pres — et il **sous-estime**, jamais l'inverse, ce qui est le mauvais sens pour un garde-fou et
-doit etre dit. La ou il s'effondre (radial 256 a 8 et 24 s, facteur 43), c'est que l'erreur reelle
-est dominee par la **quadrature** et non par le repliement : les deux voisins la partagent, donc
-elle s'annule dans l'ecart. Or a ces instants l'erreur reelle vaut 0,2 % : sous-estimer un
-negligeable est sans consequence. L'estimateur est aveugle exactement la ou il n'y a rien a voir.
-
-Note qui vaut peut-etre plus que le reste : **le facteur 2,5 revient partout dans ce probleme** —
-etendue du groupement de S157, dispersion de l'estimateur ici. Il se pourrait que ce soit le
-plafond de precision de tout ce qui touche au repliement, et pas une coincidence. Non verifie.
-
-Cout : deux preparations au lieu d'une, soit 50 ms au lieu de 25 pour 128x128. Reel.
-Decision reportee a P4 : rien n'est ajoute en production, aucun consommateur ne l'ayant demande
-(S132 : ne pas ajouter d'API publique pour instrumenter).
-
-P4 — ADR-109 : le repliement est une infidelite, pas une faute. Trois choses actees.
-Requalification du mode de defaillance : deterministe, donc ni desynchronisation, ni divergence de
-replique, ni inegalite entre joueurs ; I-15 reste satisfait **avec l'erreur dedans**. Rien ajoute
-en production. Methode d'estimation publiee avec sa fidelite mesuree et son sens d'erreur.
-A214 change de dependance : elle attend **B4**, seul juge de fidelite du corpus, lui-meme bloque
-par la reference substitutive integrale.
-Ce que je n'ecris pas dans l'ADR faute de l'avoir verifie : le facteur 2,5 qui revient partout
-(groupement de S157, dispersion de l'estimateur) est peut-etre le plafond de precision de tout ce
-qui touche au repliement. Note ici pour la session qui voudra le verifier.
-
-Correctif P4 : battement ecrit 18:18 pour un relevé a 18:16. **Troisieme fois, et L237 venait
-d'etre ecrite a la session precedente pour ce geste exact.** Une lecon ecrite ne change pas un
-geste ; seule une procedure le change. Ce que je fais desormais et qu'il faut consigner en fin de
-session : lire l'horloge dans un appel **separe**, puis copier la valeur lue. Tant que la lecture
-et l'ecriture sont dans la meme commande, la valeur est decidee avant d'etre connue.
-
-P5 — un seul test recu, `bornes_insensibles_au_repliement_s158`, et c'est un temoin de
-**conception** autant que de calcul. A 60 s, radial 128 contre 512 : enveloppe de pente 5,27e-3
-d'ecart, energie 4,24e-4, champ echantillonne **48,4 fois** plus grand. Les trois assertions
-tiennent ensemble : les deux premieres disent que les bornes ne bougent pas, la troisieme
-interdit au test de passer sur un champ ou il ne se passe rien.
-Ce qu'il garde vraiment : si un jour le declencheur d'ecume lisait un echantillon au lieu de
-l'enveloppe, ce test tomberait. C'est la raison de l'ecrire, plus que la verification d'aujourd'hui.
-Temoin verifie : les deux mesures prises a radial 512, il echoue (ligne 297).
-299 tests/cinq ignores (206+93), debug et release, zero echec.
-
-P6 — TOLERANCE-SILLAGE-S158, ADR-109, suivi d'A214, L238, L239, addendum a L237, journal, index,
-README, REPRISE, jeton rendu, ff-only. 299 tests/cinq ignores, debug et release.
-
-Pour S159 sans relire : S158-1 verifie si le facteur 2,5 est un plafond ou une coincidence. Les
-deux jeux de donnees existent — l'etendue du groupement `t*0,5*sqrt(g*sigma)*dk` de S157
-(1,17 a 2,94) et la dispersion de l'estimateur de S158 (0,40 a 1,37 dans le regime significatif).
-Si les deux mesurent la meme chose, il devrait exister une raison commune ; sinon ce sont deux
-dispersions independantes qui se ressemblent, et il faudra le dire pour que personne ne reprenne
-le rapprochement comme un fait.
-**Ne pas oublier ce qui a ete etabli et coute cher a etablir** : la tolerance ne se derivera pas
-du corpus, elle sortira de B4. Une session qui recommencerait a la chercher numeriquement
-repeterait S157 et S158.
-Procedure du battement, appliquee depuis P4bis : lire l'horloge dans un appel **separe**, puis
-copier la valeur. Trois battements faux en deux sessions avant de la poser.
+Piège à éviter, et il est réel : croire que ranger les copies règle le problème. Le problème est
+que **le jeton est versionné**, et il le restera. Ranger réduit le nombre d'univers ; seule une
+procédure écrite au bon endroit empêche qu'ils se remultiplient.
