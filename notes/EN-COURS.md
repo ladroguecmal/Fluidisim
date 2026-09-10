@@ -73,7 +73,7 @@ n'appartiendrait ni à une formule citée ni à un banc qui le fixe.
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan déclaré et committé seul.
-- [ ] **P2** — inventaire des **consommateurs** d'un champ de sillage et de ce que chacun lit
+- [x] **P2** — inventaire des **consommateurs** d'un champ de sillage et de ce que chacun lit
       réellement : `eta`, sa dérivée temporelle, la vitesse, la normale. Pour chacun, la plus
       petite erreur qui change une grandeur déjà décidée ailleurs. La réponse est là, pas dans
       une mesure de plus.
@@ -105,3 +105,42 @@ Danger principal de cette session, à énoncer pour pouvoir s'y prendre : **inve
 sonne juste**. Un « 2 mm » plausible et sans provenance vaudrait moins que l'absence de garde-fou
 d'ADR-108, parce qu'il aurait l'autorité d'une décision. Si aucune dérivation ne tient, la
 conclusion correcte est qu'A214 reste ouverte et que la session l'aura montré une seconde fois.
+
+P2 — l'inventaire des consommateurs donne plus que prevu, et deplace la question.
+
+**Premier resultat, mesure et non argumente : les consommateurs qui lisent une borne sont
+immunises.** La recurrence rephase les modes ; elle ne change pas l'amplitude des coefficients.
+Enveloppe de pente et energie, radial 128 contre 512, angulaire 512 :
+
+| recette | 8 s | 60 s |
+|---|---|---|
+| enveloppe, 128 | 5,578484852e-3 | 5,620170385e-3 |
+| enveloppe, 512 | 5,578064360e-3 | 5,585675128e-3 |
+| ecart relatif | 7,5e-5 | **6,2e-3** |
+| energie, ecart relatif | 2,5e-4 | **4,2e-4** |
+
+A 60 s, la ou le champ **echantillonne** en champ proche se trompe d'un facteur 48 (S156), les
+grandeurs **bornees** se trompent de 0,6 % et 0,04 %. Rapport de sensibilite : environ 8000.
+Consequence directe : le declencheur d'ecume, qui passe par `slope_envelope` et non par un
+echantillon (`bound_pressure` ligne 663, `base.steepness*PI + slope_envelope`), **ne voit pas la
+recurrence**. Le budget de pente d'ADR-080 non plus. L'admissibilite non plus.
+
+**Deuxieme resultat, celui qui deplace la question.** L'erreur de recurrence est **deterministe et
+identique chez tous les participants** — I-03 le garantit, et c'est le meme calcul partout. Donc
+elle ne peut produire ni desynchronisation, ni divergence de replique, ni inegalite entre joueurs.
+I-15 : une grandeur derivee est autoritaire si tous la calculent a l'identique ; c'est le cas, y
+compris avec l'erreur. **L'autorite est preservee ; seule la fidelite souffre.**
+Cela change la nature du garde-fou cherche depuis A214 : il ne protegerait pas d'une faute, il
+protegerait d'une **invraisemblance**. Ce n'est pas la meme urgence, et ce n'est pas le meme juge.
+
+**Troisieme resultat : le juge existe et n'a pas siege.** Le seul dispositif du corpus qui statue
+sur une fidelite est **B4** — « a partir de quel rapport la decomposition additive devient-elle
+visiblement fausse ? », protocole avec « perception en double aveugle », et sa valeur de depart
+0,35*Hs est explicitement provisoire. B4 est concu pour produire exactement le type de nombre
+qu'A214 reclame, et il est bloque : il demande la reference substitutive integrale, qui n'existe
+pas.
+
+Ce que l'inventaire ne trouve pas, et il faut le dire : **aucun consommateur n'a de seuil declare
+que l'erreur de recurrence pourrait franchir.** Le declencheur d'ecume a bien un seuil chiffre —
+cambrure de Stokes 1/7, SPEC-001 §3 — mais il lit une borne, donc il est immunise ; et les pentes
+du sillage mesure (5,6e-3) sont de toute facon a deux ordres de grandeur du seuil.

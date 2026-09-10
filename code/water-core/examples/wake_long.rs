@@ -25,6 +25,74 @@ fn main() {
         println!();
     }
     cout();
+    enveloppe();
+}
+
+/// S158 — ce que consomment les consommateurs qui lisent une **borne** et non un échantillon.
+/// La récurrence rephase les modes ; elle ne change pas l'amplitude des coefficients. Si c'est
+/// vrai, l'enveloppe de pente et l'énergie ne bougent pas d'une résolution à l'autre ni dans le
+/// temps, alors que le champ échantillonné, lui, se trompe d'un facteur cinquante.
+fn enveloppe() {
+    println!();
+    println!("# S158 — enveloppe de pente et énergie, les deux grandeurs bornées");
+    println!("| recette | instant | enveloppe de pente | énergie (J) |");
+    println!("|---|---:|---:|---:|");
+    for (radial, angular) in [(128usize, 512usize), (512, 512)] {
+        for us in [8_000_000u64, 60_000_000] {
+            let (enveloppe, energie) = bornes(radial, angular, us);
+            println!(
+                "| {radial}x{angular} | {} s | {enveloppe:.9e} | {energie:.9e} |",
+                us / 1_000_000
+            );
+        }
+    }
+}
+
+fn bornes(radial: usize, angular: usize, us: u64) -> (f32, f32) {
+    let settings = Settings {
+        frame: FrameId(7),
+        cell: 9,
+        gravity: 9.81,
+        density: 1025.0,
+        min: [-256.0; 2],
+        max: [256.0; 2],
+        start: SimTime(0),
+        end: SimTime(FIN_US),
+    };
+    let recipe = Recipe {
+        sigma: 1.0,
+        cutoff: 6.0,
+        radial,
+        angular,
+    };
+    let metadata = Metadata {
+        epoch: 1,
+        id: 7,
+        cause: Cause {
+            entity: 7,
+            command: 1,
+            emission: 0,
+        },
+        settings,
+        recipe,
+    };
+    let legs = [Leg {
+        duration_us: 2_000_000,
+        velocity: [2.0, 0.0],
+        downward_force_n: 100.0,
+    }; 8];
+    let wake = Wake::build(metadata, SimTime(0), [0.0; 2], &legs).unwrap();
+    let mut records = [None];
+    let mut journal = Journal::new(1, &mut records);
+    journal.admit_authenticated(wake.source()).unwrap();
+    let mut nodes = vec![Node::default(); radial * angular];
+    let mut demi = vec![Node::default(); radial * angular / 2];
+    let complet = bake(recipe, &mut nodes).unwrap();
+    let moitie = complet.half_into(&mut demi).unwrap();
+    let mut slots = vec![Slot::default(); moitie.nodes().len()];
+    let context = wake.source().context();
+    let p = Prepared::from_journal(context, &moitie, &journal, SimTime(us), &mut slots).unwrap();
+    (p.slope_envelope(), p.energy_j())
 }
 
 /// Prix des résolutions que S156 montre nécessaires à 60 s. Médiane sur cent répétitions, après
