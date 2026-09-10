@@ -86,3 +86,33 @@ le budget mixte. Ce qui bouge, bouge là où la couche W est composée — nulle
 2,090296e-3 − 1,164464e-3 = 9,25832e-4 : c'est exactement l'écart entre la borne L1 et la pente
 réelle du champ mesuré en S139 (λ = 4 m, E = 0,01 J). Le déplacement du plancher n'est pas
 « plausible », il est **égal au nombre attendu**.
+
+## 3. Étage pression — la borne resserrée
+
+Un seul endroit compte, et ce n'était pas celui du plan : `bound_pressure::Prepared` **retient**
+l'enveloppe au moment de la préparation, en trois sites. Migrer ces trois-là fait suivre
+l'accesseur, `slope_floor`, l'enveloppe de `mixed_water` et le budget interne de `bound_pressure`
+— soit six consommateurs d'un coup. Les deux sites que le plan visait dans `mixed_water`
+appelaient déjà `Prepared::slope_envelope()`, pas la formule.
+
+`Field::slope_envelope()` reste publiée inchangée : c'est la L1, et des essais la comparent à
+elle-même sur deux chemins. `Prepared::slope_envelope()` garde son nom — il désigne *ce que la
+pression consomme*, pas la formule qui le produit — et le dit désormais dans sa documentation.
+
+### Témoins après l'étage pression
+
+| témoin | avant S141 | après impact | après pression |
+|---|---|---|---|
+| H1 `C02` et `C18` | — | inchangés | **inchangés** |
+| `cycle_mixed` 224×128 | `6591ab360344f76e` | `6af524c7b11f8913` | `e8aa3c7ca7906ccd` |
+| `cycle_mixed` 256×128 | `b563610d1dd78ada` | `182b58e51699bad6` | `99d2cd9e18e079b0` |
+| `slope_floor` 224×128 | 0,0074634003 | 0,0065375683 | **0,0044472935** |
+| `receive_mixed` 224×128 | `957dc8b9608790cf` | `7b95c75ad299230c` | `db80db2bf9a7e3c9` |
+| `receive_mixed` 256×128 | `20f9a748a6978775` | `b93f4744bb90b01d` | `0e4850dbcf302ccc` |
+
+**Le déplacement se vérifie encore à la main.** La part de pression passe de 5,3731e-3 à
+3,2828e-3, soit un facteur **1,6367** — à comparer au 1,634 mesuré en S140 sur un spectre
+gaussien indépendant. Ce n'est pas un hachage qu'on constate, c'est un nombre qu'on retrouve.
+
+Le plancher total a baissé de **40,4 %** : il consommait 7,46 % d'un budget de 0,1, il en
+consomme 4,45 %.

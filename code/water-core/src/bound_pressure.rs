@@ -141,8 +141,10 @@ impl<'a> Prepared<'a> {
             pool,
         )
         .map_err(Error::Preparation)?;
+        // S141, ADR-095 : la préparation retient la borne **resserrée**, seul majorant exact
+        // que la pression sache calculer. Même coût, et le facteur de forme disparaît.
         let slope_envelope = field
-            .slope_envelope()
+            .slope_envelope_tight()
             .map_err(|e| Error::Preparation(spectral_pressure::PrepareError::Calculation(e)))?;
         Ok(Self {
             context,
@@ -181,8 +183,10 @@ impl<'a> Prepared<'a> {
             pool,
         )
         .map_err(Error::Preparation)?;
+        // S141, ADR-095 : la préparation retient la borne **resserrée**, seul majorant exact
+        // que la pression sache calculer. Même coût, et le facteur de forme disparaît.
         let slope_envelope = field
-            .slope_envelope()
+            .slope_envelope_tight()
             .map_err(|e| Error::Preparation(spectral_pressure::PrepareError::Calculation(e)))?;
         Ok(Self {
             context,
@@ -231,8 +235,10 @@ impl<'a> Prepared<'a> {
             pool,
         )
         .map_err(Error::Preparation)?;
+        // S141, ADR-095 : la préparation retient la borne **resserrée**, seul majorant exact
+        // que la pression sache calculer. Même coût, et le facteur de forme disparaît.
         let slope_envelope = field
-            .slope_envelope()
+            .slope_envelope_tight()
             .map_err(|e| Error::Preparation(spectral_pressure::PrepareError::Calculation(e)))?;
         Ok(Self {
             context,
@@ -590,6 +596,10 @@ impl Prepared<'_> {
     ) -> Result<Surface, crate::modal_pressure::Error> {
         self.field.sample(point)
     }
+    /// Enveloppe de pente que cette préparation consomme dans le budget d'ADR-080. Depuis S141
+    /// c'est la borne **resserrée** `Σ|k_w|·|η|` (ADR-095), et non plus la L1 de
+    /// `Field::slope_envelope()`, qui reste publiée telle quelle. Le nom désigne le rôle — ce
+    /// que la pression consomme — pas la formule.
     pub fn slope_envelope(&self) -> f32 {
         self.slope_envelope
     }

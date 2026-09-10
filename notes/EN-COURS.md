@@ -74,7 +74,7 @@ physique. **C'est le premier lot de la série qui change des bits publiés.**
       modification : sans cela, « ce qui a bougé » ne se démontre plus, il se raconte.
 - [x] **P3** — migrer l'**impact radial** : `RadialImpact::new` compare `slope_max()`, et
       `composition.rs` / `mixed_water.rs` somment `slope_max()`. Étage seul, tests verts.
-- [ ] **P4** — migrer la **pression** : `slope_envelope_tight()` dans `slope_floor` et dans
+- [x] **P4** — migrer la **pression** : `slope_envelope_tight()` dans `slope_floor` et dans
       l'enveloppe de `mixed_water`. Étage seul, tests verts.
 - [ ] **P5** — poser **`max_slope = 0,4488`** dans les fixtures où 0,1 tenait lieu de limite
       physique — **et pas dans celles qui exercent un refus**, où la valeur est choisie pour
