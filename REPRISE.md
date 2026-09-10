@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-10 12:25 +02:00
+JETON            : occupé
+Battement        : 2026-09-10 12:28 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S142 — A209, le second champ et sa borne L1
 Dernière session : S141 — S139-1 réalisée ;272 tests/cinq ignorés
-Session suivante : S142 — A209, `ImpactField` compare toujours sa borne L1
+Session suivante : à fixer en fin de S142
 
 **Copie de travail S139 et S140** : worktree `claude/reprise-projet-886155`, refusionné en avance
 rapide dans master à la fin de chacune des deux. Terminer de même :

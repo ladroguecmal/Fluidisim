@@ -58,73 +58,49 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S141 — terminée
+Session : S142 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : **S139-1** — rendre le budget de pente homogène. Chaque terme consomme le meilleur
-majorant exact de sa pente réelle (ADR-095) : `slope_max()` pour l'impact radial,
-`slope_envelope_tight()` pour la pression, `steepness_B·π` inchangé pour le fond ; et
-`max_slope` devient la limite physique **0,4488** (ADR-094) là où il tenait lieu de limite
-physique. **C'est le premier lot de la série qui change des bits publiés.**
+Objectif : **A209**, ouverte par ma propre migration en S141. `ImpactField::new` compare sa
+**borne L1** à `medium.max_slope` quand `RadialImpact` y compare désormais la pente **réelle** :
+le même champ de `Medium` signifie deux choses selon le champ qui le lit. Mesurer le rapport de
+ce champ-là comme S139 l'a fait pour le candidat radial, puis décider — migrer, séparer les deux
+sens dans le type, ou retirer un champ que plus personne ne construit.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton, **plan déclaré et committé seul**.
-- [x] **P2** — **témoins avant**, et rien d'autre. Hachages de campagne des deux scénarios,
-      budgets des fixtures mixtes, frontières de refus. Relevés et committés **avant** toute
-      modification : sans cela, « ce qui a bougé » ne se démontre plus, il se raconte.
-- [x] **P3** — migrer l'**impact radial** : `RadialImpact::new` compare `slope_max()`, et
-      `composition.rs` / `mixed_water.rs` somment `slope_max()`. Étage seul, tests verts.
-- [x] **P4** — migrer la **pression** : `slope_envelope_tight()` dans `slope_floor` et dans
-      l'enveloppe de `mixed_water`. Étage seul, tests verts.
-- [x] **P5** — poser **`max_slope = 0,4488`** dans les fixtures où 0,1 tenait lieu de limite
-      physique — **et pas dans celles qui exercent un refus**, où la valeur est choisie pour
-      refuser et doit le dire. Recevoir : quels refus se déplacent, quels bits bougent.
-- [x] **P6** — livrable de réception, rituel de fin (§6), jeton rendu, fusion `--ff-only`.
+- [ ] **P2** — sonde `pente_modale` : rapport `slope_bound / max|∇η|` d'`ImpactField`, avec son
+      témoin analytique — la borne somme `a_m·k_m` et la pente vaut `|Σ a_m·k_m·û_m·sin(φ_m)·
+      cos(ω_m t)|`, donc le rapport ne peut pas descendre sous 1.
+- [ ] **P3** — balayer ce dont il pourrait dépendre : longueur d'onde, énergie, instant. Thèse à
+      vérifier : `side = 4λ` et les modes sont indexés par des entiers, donc le motif est
+      **identique** à toute λ — le rapport devrait être une constante, comme pour le radial et
+      contrairement à la pression. Le champ étant périodique et `sample` n'ayant pas d'emprise
+      restreinte, le maximum est toujours atteint : c'est ce qui distingue ce cas de A206.
+- [ ] **P4** — **constater l'état réel du champ** avant d'en décider : qui le construit, quels
+      ADR le documentent, ce qu'il porte que le candidat radial ne porte pas. Une décision de
+      retrait ne se prend pas sur le seul fait qu'aucun appelant ne subsiste dans le dépôt.
+- [ ] **P5** — décider et appliquer : ADR, migration ou retrait. Témoins avant/après si des bits
+      bougent, comme en S141.
+- [ ] **P6** — rituel de fin (§6), jeton rendu, fusion `--ff-only`.
 
 ### Notes de reprise
 
-Départ d10cc45 = master ; worktree `886155`. 271 tests/cinq ignorés.
+Départ f40df3a = master ; worktree `886155`. 272 tests/cinq ignorés.
 
-Sites à migrer, relevés avant de commencer :
-- `composition.rs:67` — `bound += field.slope_bound()` ; **publie** `base.steepness = bound/π`,
-  donc c'est ce site qui change des bits publiés, pas seulement une frontière de refus ;
-- `mixed_water.rs:172` et `:249` — `slope_bound()` dans `slope_floor` et dans l'enveloppe ;
-- `mixed_water.rs:175` et `:268` — `slope_envelope()`, mêmes deux fonctions ;
-- `radial_impact.rs` — `if slope > medium.max_slope { Steepness }` dans `new`.
+Ce qui est déjà lu et n'est pas à relire :
+- `impact_field.rs` — `new` : 40 modes sur une grille cartésienne, `side = 4λ`, amplitude
+  `1/(1+(radius−4)⁴)` mise à l'échelle par l'énergie, `k = τ·radius/side`, borne
+  `slope += amplitude·k` ;
+- `sample` : `slope[axe] -= amplitude·τ·turns[axe]·sin(phase_espace)·cos(ω t)`, et
+  `τ·|turns| = k` — même structure que le candidat radial, donc même forme de majoration.
+- à `t = birth`, toutes les phases temporelles valent 1 : c'est là que le maximum est attendu,
+  comme en S139.
 
-Reproduisent la formule et suivront : `tests_mixed_water.rs:299, 430, 432, 752` et
-`examples/receive_mixed.rs:471`. Ce ne sont pas des bits gelés mais des recalculs parallèles —
-ils doivent rester d'accord avec la bibliothèque, c'est leur seul rôle.
+Piège à éviter : conclure « personne ne le construit, donc il est mort ». Le dépôt garde des
+choses **exprès** — c'est le troisième fork qui l'a appris (S39, état `archivé`). Constater qui
+le documente avant de proposer quoi que ce soit.
 
-Ne bougent pas : `slope_envelope()` elle-même reste publiée et testée (`tests_pressure_multi`,
-`restart_multisource` comparent deux chemins entre eux, pas des constantes) ; `bound_pressure.rs`
-la retient comme métadonnée de préparation — à vérifier en P4, c'est peut-être un cinquième site.
-
-Piège à éviter : changer les quatre sites et la valeur du seuil dans la même étape. Les refus se
-déplacent alors pour deux raisons à la fois, et plus rien ne dit laquelle. **Un étage par
-commit**, tests verts entre chaque.
-
-Deuxième piège, plus coûteux : accepter un hachage qui bouge sans savoir dire pourquoi. Un
-hachage global ne dit pas *lequel* des scénarios a changé — relever par scénario en P2.
-
-P2-P5 : témoins avant, étage impact, étage pression, `BREAKING_SLOPE` et l'essai qui referme la
-chaîne. MIGRATION-PENTE-S141, A209, L223, L224. 272 tests/cinq ignorés.
-
-Écarts entre le plan et le fait, tous deux instructifs :
-- **P4 visait les mauvais sites.** La pression ne se migre pas dans `mixed_water` : c'est
-  `bound_pressure::Prepared` qui **retient** l'enveloppe à la préparation, en trois endroits, et
-  les migrer fait suivre six consommateurs.
-- **P5 ne pouvait pas se faire comme annoncé.** Aucune des dix-sept fixtures `max_slope: 0.1` ne
-  tient lieu de limite physique — ce sont des paramètres d'essai. Ce qui manquait était la
-  constante avec sa provenance, publiée sous le nom `BREAKING_SLOPE`.
-
-Impasse évitée de justesse : migrer aussi `ImpactField::new`. Son rapport borne L1 / pente réelle
-n'a **jamais** été mesuré ; le migrer aurait remplacé un facteur inconnu par un autre, sans que
-rien ne le signale. Nommé A209 à la place.
-
-Pour S142 sans relire : A209 se traite comme S139 a traité le candidat radial — une sonde qui
-échantillonne `ImpactField::sample` sur le carré et compare au `slope` accumulé dans `new`
-(`impact_field.rs`, ~ligne 125). Différence à prévoir : ce champ est une somme de cosinus sur une
-grille cartésienne, pas une intégrale de Bessel ; son rapport n'a aucune raison de valoir 1,795 et
-pourrait dépendre du côté `side`. Si le rapport dépend d'un paramètre, la conclusion est la même
-qu'en S140 pour la pression : pas de constante, et il faut décider quoi faire du champ.
+Second piège : si le rapport est une constante, la migration est **tentante et facile**. Elle
+déplacerait pourtant une frontière de plus, et ce champ n'a aucun essai de réception comparable à
+ceux du candidat. Mesurer d'abord, décider ensuite — pas l'inverse.
