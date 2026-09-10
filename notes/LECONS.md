@@ -3308,3 +3308,20 @@ bien ce qu'on lui confie. Quand on en recopie un, se rappeler qu'il n'a peut-êt
 vérifié — l'ancienneté d'une phrase n'est pas une preuve. Voir [[L137]] : le même dépôt sait déjà
 qu'une chose écrite deux fois finit par diverger ; une chose renvoyée trois fois n'est pas
 davantage garantie.
+
+## L218 — Corriger une occurrence n'est pas corriger l'erreur
+
+*(S138)* S137 a trouvé un renvoi faux, l'a corrigé dans les trois décisions qu'elle avait sous
+les yeux, et a conclu. L'audit de la session suivante en a trouvé **six** : deux ADR portaient la
+même erreur sans avoir été ouverts, dont un écrit par un autre agent trois sessions plus tôt.
+
+Le défaut de méthode est net et se répare en une commande. Quand une erreur est trouvée par
+hasard — dans un document qu'on lisait pour autre chose — la première question n'est pas
+« comment la corriger » mais « **combien de fois figure-t-elle** ». Une recherche de texte sur la
+formulation fautive coûte quelques secondes et transforme une correction ponctuelle en
+correction réelle.
+
+Le corollaire vaut pour ce qu'on écrit ensuite : annoncer « trois ADR portaient ce renvoi » sans
+avoir compté, c'est publier un décompte faux — et le dépôt sait déjà ce que valent les décomptes
+non vérifiés (S07, S10). Voir [[L217]] : le renvoi non vérifié ferme la question ; le correctif
+non cherché la rouvre à moitié.

@@ -74,3 +74,13 @@ régional. Aucun invariant amendé ; I-07/I-08, I-14 et I-17 relus.
 > copie exacte dès naissance à L, mesurée à 16 m. Énergie radiale mesurée avec la densité
 > cinétique intégrée en profondeur ; les contrôles d’énergie totale ci-dessus restent valides.
 > Prochaine construction : candidat radial à définition continue non périodique.
+
+## Note corrective du 2026-09-10 (S138)
+
+Cette décision renvoie **des paramètres de source** « à calibrer par B2 ». C'est faux : B2 choisit
+la technologie de W et `λ_cut`, et aucune de ses métriques ne mesure ce qu'un objet qui entre dans
+l'eau émet. La calibration de la source relève de **B10**, étendu en S137 de deux métriques à cet
+effet. Voir [ADR-093](ADR-093-ou-se-calibre-la-source-d-impact.md).
+
+*S137 avait corrigé trois ADR portant ce renvoi ; l'audit S138 en a trouvé six. Ce correctif-ci
+est le résultat de la recherche que S137 n'avait pas faite.*

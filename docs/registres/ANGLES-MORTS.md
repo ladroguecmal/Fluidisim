@@ -1735,3 +1735,14 @@ paramètre libre auparavant. L'énergie, elle, ne se dérive pas : la fraction t
 calibrer, mais le modèle en donne la borne `η ≤ 2Kgα⁴bs²/v²`, mesurée et vérifiée contre le
 candidat. Ce qui reste ouvert n'est plus « d'où vient ce nombre » mais « quelle mesure le
 resserre » — c'est le banc B2, et c'est la suite S136-1.
+
+- **A205** *(sévérité 2, S138 ; ouverte)* — **Aucun banc ne fixe la limite de pente, et elle est
+  peut-être dérivable.** `max_slope` décide de l'admissibilité de tout champ — c'est le refus
+  `Steepness` — et vaut 0,1 dans toutes les fixtures depuis S77, sans provenance. ADR-058 §21 et
+  ADR-062 §50 le renvoient « à calibrer B2 », qui ne mesure pas cela ; B4 juge la décomposition
+  additive, pas la linéarité d'une onde. Le renvoi désigne donc un banc qui ne répondra pas.
+  **Et la question n'est peut-être pas une mesure du monde** : SPEC-001 §4 donne la cambrure
+  limite de Stokes `H/λ ≈ 1/7`, d'où une pente de déferlement `πH/λ ≈ 0,449` — quatre fois et
+  demie le seuil employé. Ce qui manque n'est donc pas la limite physique, mais **le rapport
+  entre la borne L1 du modèle** — `Σ|a_k|·k`, majoration conservative — **et la pente réelle du
+  champ**, qui se mesure dans le modèle comme `α` l'a été en S136. Suite S138-1.

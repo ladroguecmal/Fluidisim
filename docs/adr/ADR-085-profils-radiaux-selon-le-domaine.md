@@ -75,3 +75,13 @@ déplacée. I-03, I-05, I-06, I-08, I-14, I-15, I-16 relus ; aucun invariant ame
 > composantes reçue au critère annoncé, oracle raffiné ; A203 partielle. La réception
 > d'un paquet transporté au loin reste distincte : A204/S126-1, rayon et horizon à
 > dimensionner ensemble. La décision de profil ne change pas.
+
+## Note corrective du 2026-09-10 (S138)
+
+Cette décision renvoie **des paramètres de source** « à calibrer par B2 ». C'est faux : B2 choisit
+la technologie de W et `λ_cut`, et aucune de ses métriques ne mesure ce qu'un objet qui entre dans
+l'eau émet. La calibration de la source relève de **B10**, étendu en S137 de deux métriques à cet
+effet. Voir [ADR-093](ADR-093-ou-se-calibre-la-source-d-impact.md).
+
+*S137 avait corrigé trois ADR portant ce renvoi ; l'audit S138 en a trouvé six. Ce correctif-ci
+est le résultat de la recherche que S137 n'avait pas faite.*
