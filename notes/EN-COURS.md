@@ -68,7 +68,7 @@ le premier jour du projet ; celui-ci ne demande aucune couche manquante.
 ### Plan
 
 - [x] **P1** — état réel, jeton, **plan déclaré et committé seul**.
-- [ ] **P2** — lire le protocole §B1 **en entier** et dire ce qui est exécutable aujourd'hui et ce
+- [x] **P2** — lire le protocole §B1 **en entier** et dire ce qui est exécutable aujourd'hui et ce
       qui ne l'est pas. Le protocole demande une évaluation **subjective en double aveugle** et
       une distance de perception : hors de portée d'une session (`REPRISE.md` §5). Et vérifier si
       des morceaux de B1 ont déjà été mesurés sans être reconnus comme tels — les `bench_*`
