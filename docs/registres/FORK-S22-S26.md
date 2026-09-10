@@ -284,3 +284,13 @@ le savoir sans avoir à le deviner.
 > **Ce que cette ouverture ne change pas** : deux agents différents se marchent dessus exactement
 > comme deux sessions du même agent. Les deux commandes d'amorce restent le seul dispositif qui ait
 > tenu — trois fois.
+
+## Note du 2026-09-10 (S159) — les branches nommées ici n'existent plus toutes
+
+`claude/s22-suite`, la lignée d'accueil du second fork, a été **supprimée en S159** : elle ne
+portait plus aucun commit que `master` n'ait déjà, la réconciliation de S35 ayant tout amené. Son
+histoire est dans `master`, et ce document reste le récit de ce qui s'est passé.
+
+Une seule branche de cette époque survit, et volontairement : `claude/reprise-projet-5134cd`, la
+lignée B, **44 commits uniques**, jeton `archivé`. Son répertoire de travail a été retiré en S159 —
+ce qui invitait à y travailler était le répertoire, pas la référence (ADR-110).

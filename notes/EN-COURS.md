@@ -87,7 +87,7 @@ périmé qu'une session y trouvera `libre`.
 - [x] **P4** — retirer les worktrees morts et supprimer les branches **sans commit unique**.
       La branche archivée porte 44 commits uniques : son worktree est retiré, **la branche est
       conservée**. Aucune histoire n'est perdue.
-- [ ] **P5** — le correctif **durable**, sans lequel tout repoussera : la procédure de fermeture
+- [x] **P5** — le correctif **durable**, sans lequel tout repoussera : la procédure de fermeture
       d'une copie doit vivre dans `AGENTS.md`, à un seul endroit, et le décompte périmé de
       `REPRISE.md` doit être corrigé. Décision à acter par ADR : une branche sans commit unique
       ne se conserve pas.
@@ -155,3 +155,17 @@ aucune preuve qu'aucune session ne l'occupe en ce moment, et la regle que je me 
 dit qu'une copie peut-etre vivante se met a jour, elle ne se supprime pas. La retirer est une
 commande d'une ligne, laissee a l'utilisateur.
 Ma propre copie reste : j'y travaille. La derniere fermeture revient a qui travaillera sur master.
+
+P5 — le correctif durable, en quatre endroits et un seul par sujet.
+**ADR-110** : une branche sans commit unique ne se conserve pas ; une branche qui en porte se
+conserve mais pas sa copie ; fermer sa copie fait partie du travail ; une copie qu'on ne peut pas
+prouver morte se met a jour au lieu d'etre supprimee.
+**AGENTS.md** recoit la procedure de fermeture — trois commandes, et l'avertissement que `-d`
+refusant est un signal et non un obstacle. C'est l'amorce, donc le seul endroit ou elle vit.
+**REPRISE.md** : le bloc de jeton accumulait des notes de session depuis S58, dont l'une annoncait
+« cinq worktrees » alors qu'il y en avait six et dont une autre prescrivait de refusionner une
+branche desormais supprimee. Remplacees par la procedure et un renvoi. **Une consigne qui nomme
+une branche disparue n'instruit plus, elle egare.**
+**FORK-S22-S26** recoit une note datee : `claude/s22-suite` a ete supprimee, la lignee B survit.
+Balayage fait : plus aucun document ne **prescrit** quoi que ce soit sur une branche supprimee ;
+celles qui les nomment encore les **racontent**, ce qui est leur role.

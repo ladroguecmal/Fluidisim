@@ -19,40 +19,29 @@ souvenir de conversation, **c'est lui qui fait foi**.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-10 18:26 +02:00
+Battement        : 2026-09-10 18:28 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Session en cours : S159 — assainir les copies de travail (demande utilisateur)
 Dernière session : S158 — infidélité et non faute ; 299 tests/cinq ignorés
 Session suivante : à fixer en fin de S159
 
-**Copie de travail S155** : worktree `claude/reprise-projet-2d3506`, remis en avance rapide sur
-master (1643232) au démarrage — il était resté à 041dfed, 80 commits en retard et rien d'unique,
-donc aucun fork. Terminer par `git -C <racine> merge --ff-only claude/reprise-projet-2d3506`.
+**Copies de travail — ADR-110, S159.** Le décompte n'a plus sa place ici : il vieillissait de
+session en session et annonçait « cinq worktrees » quand il y en avait six. **L'état se constate**
+par `git worktree list` ; ce document dit la procédure.
 
-**S147 : travail directement sur master.** Les anciennes copies, dont 886155, doivent rejoindre
-master avant toute reprise ; aucune copie créée, toutes propres au démarrage.
+S159 a ramené six copies à trois et sept branches à quatre, sur demande de l'utilisateur, sans
+perdre une ligne d'histoire — inventaire dans [`COPIES-S159`](docs/registres/COPIES-S159.md). Ce
+qui restait : `master`, la copie de la session, et `project-status-progress-d31d78`, propre et à
+jour mais peut-être occupée. La branche archivée `claude/reprise-projet-5134cd` conserve ses 44
+commits de la lignée B ; seul son répertoire est parti.
 
-**Copie de travail S139 et S140** : worktree `claude/reprise-projet-886155`, refusionné en avance
-rapide dans master à la fin de chacune des deux. Terminer de même :
-`git -C <racine> merge --ff-only claude/reprise-projet-886155`. Les worktrees `29ef50` et `2d3506`
-sont restés à 041dfed — en retard, rien d'unique ; `c107bf` est à S44 et `5134cd` porte le jeton
-`archivé`. **Cinq worktrees ouverts, et le sort des branches reste l'action S35-7 de l'utilisateur.**
+**Si tu ouvres une copie isolée, referme-la** : avance rapide dans master, `git worktree remove`,
+puis `git branch -d` — jamais `-D`. La procédure complète est dans [`AGENTS.md`](AGENTS.md), à un
+seul endroit, parce que le dépôt a déjà forké pour avoir dupliqué une procédure (L137).
 
-*Battements relevés par `date` à chaque commit d'étape, et non estimés — **L221**, après que ceux
-de S139 se soient retrouvés une heure dans le futur.*
+*Battements relevés par `date` dans un appel **séparé**, puis recopiés — L237 et son addendum S158,
+après trois battements faux en deux sessions pour avoir écrit la valeur avant de lire l'horloge.*
 
-**Copie de travail S130** : worktree `claude/reprise-projet-2d3506`, remis en avance rapide sur
-master (e817d0e) au démarrage — il était resté à 52e80a5 et n'avait rien d'unique, donc aucun
-fork. Terminer par `git -C <racine> merge --ff-only claude/reprise-projet-2d3506`.
-
-*Le battement de fin de S118 disait 15:05 : une heure estimée, pas relevée. Corrigée ici.
-Un battement dans le futur ferait croire à une session active — le relever, jamais l'écrire de mémoire.*
-
-**Note S118, même mécanisme que la note S58 plus bas.** S118 a travaillé dans le worktree
-`claude/reprise-projet-2d3506` et l'a refusionné dans master en avance rapide. Les copies
-coïncident ; il n'y a qu'un jeton. Toute session qui rouvre ce worktree termine de même :
-`git -C <racine> merge --ff-only claude/reprise-projet-2d3506`. Deux copies qui divergent
-portent deux jetons, et c'est le mécanisme des trois forks (L137).
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -76,11 +65,10 @@ voir [CLOTURE-S63-1-S147](docs/validation/CLOTURE-S63-1-S147.md).
 Le dossier C22 est fermé : un verdict (S59), un critère compris (S60, S61), quatre angles morts.
 Ce qui reste ouvert du côté de la convergence n'est plus une mesure mais **A114**.
 
-Note S58 : S57 puis S58 ont travaillé dans le worktree claude/reprise-projet-29ef50, et **les
-deux ont été fusionnées dans master en avance rapide** — bd9f087 puis 531491f. Les deux copies
-coïncident ; il n'y a qu'un jeton. Toute session qui rouvre ce worktree doit refusionner de la
-même façon en terminant : `git -C <racine> merge --ff-only claude/reprise-projet-29ef50`.
-Deux copies qui divergent portent deux jetons, et c'est le mécanisme des trois forks (L137).
+*Note S58 retirée en S159 : elle prescrivait de refusionner `claude/reprise-projet-29ef50`, branche
+supprimée depuis parce qu'elle ne portait aucun commit unique. Ce qu'elle enseignait — deux copies
+qui divergent portent deux jetons, et c'est le mécanisme des trois forks (L137) — est dit plus haut
+et dans `AGENTS.md`. Une consigne qui nomme une branche disparue n'instruit plus, elle égare.*
 ```
 
 > **Avant de regarder le jeton, exécuter `git worktree list` et `git branch -a`.** Le jeton est un

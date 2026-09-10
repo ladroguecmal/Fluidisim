@@ -52,6 +52,33 @@ de validation et deux δ d'essai, en Rust, sans aucune dépendance.
    session suivante doit savoir à quoi s'attendre — quels outils étaient disponibles, et où aller
    chercher si quelque chose manque.
 
+## Ce que tu fais en dernier, si tu travailles dans une copie isolée
+
+**Une copie de travail se ferme.** ADR-110, sur demande de l'utilisateur, après que S159 eut trouvé
+**six** copies ouvertes dont quatre annonçaient un jeton `libre` avec quatre « dernière session »
+différentes — S158, S157, S146 et **S44**. Une session ouvrant la dernière aurait commencé S45.
+
+Après le rituel de fin, et depuis la copie où tu as travaillé :
+
+```bash
+git -C <racine> merge --ff-only <ta-branche>   # ce que tu fais déjà
+git worktree remove <ton-répertoire>           # ce que les sessions oubliaient
+git branch -d <ta-branche>                     # -d, jamais -D
+```
+
+`-d` refuse de supprimer une branche portant un commit unique. **C'est le garde-fou, ne le
+contourne pas** : si `-d` refuse, ta branche contient quelque chose que `master` n'a pas, et c'est
+une fusion qui manque, pas une suppression qui résiste.
+
+Deux exceptions, et deux seulement.
+
+- **Une branche portant des commits uniques se conserve** — mais pas sa copie de travail. Ce qui
+  invite à travailler dans une lignée morte est le répertoire, pas la référence. C'est le cas de
+  `claude/reprise-projet-5134cd`, lignée B, 44 commits, jeton `archivé`.
+- **Une copie que tu ne peux pas prouver morte se met à jour, elle ne se supprime pas.** Une
+  avance rapide éteint son jeton périmé sans rien détruire. C'est le premier geste à faire, avant
+  toute suppression, et il suffit à lui seul à supprimer le danger.
+
 ## Si tu n'es pas Claude Code
 
 **Rien de ce qui précède ne change.** Le dispositif ne repose sur aucune fonctionnalité propre à un
