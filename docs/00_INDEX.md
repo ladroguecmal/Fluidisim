@@ -17,6 +17,13 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S165 :** [FRONTIERE-LOCALE-S165](validation/FRONTIERE-LOCALE-S165.md). **S164-1 réalisée,
+A220 traitée sur véhicule local 1D.** Oracle aux étages RK2 reçu à <=1,12e-13 ; fond seul
+échoue malgré un bilan de flux à l'arrondi. 54 montages release, cinq nouveaux tests propres
+et trois host importés reçus. A50 partielle ; A221/L247, aucun ADR ni seuil nouveau.
+112 ADR,221 angles,247 leçons,18 invariants,6 SPEC,23 cas. Workspace 299/cinq ignorés reçu
+S163, non relancé. **Suite S166 : S165-1**, fermeture sans oracle, entrées et sorties distinctes.
+
 **S164 :** [FOND-PRESCRIT-S164](validation/FOND-PRESCRIT-S164.md). **S163-1 réalisée, A219 traitée
 sur véhicule RK2.** Le fond prescrit est réévalué ; les incréments aux étages retrouvent le total
 à l'arrondi (<=1,60e-13 normalisé). La source continue converge à l'ordre deux ; son omission ne

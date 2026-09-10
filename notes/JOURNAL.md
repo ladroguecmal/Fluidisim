@@ -8293,3 +8293,48 @@ l'instrument S163. 112 ADR,220 angles,246 leçons,18 invariants,6 SPEC,23 cas.
 totale, perturbation traversant réellement le bord. Le témoin oracle n'est pas une solution
 de production. BILAN-S145 porté via la poursuite B4, après B1 S146 et S63-1 S147.
 Aucun arbitrage humain nouveau, aucun seuil proposé ; état final propre et copies synchronisées.
+
+---
+
+## S165 — 2026-09-10 — Le bord local a besoin de son information extérieure
+
+**Entrée :** master a20f514 propre, quatre copies au même commit, aucune branche vivante
+avancée. Suite S164-1/A220. Plan committé seul avant construction ; copies propres avancées
+au jeton occupé. Aucune copie créée ni supprimée.
+
+**Produit :** [FRONTIERE-LOCALE-S165](../docs/validation/FRONTIERE-LOCALE-S165.md), sonde
+`frontiere_locale.rs` et support `residu_local.rs`. Fenêtre [30,90] m dans un canal de 120 m,
+résidu intérieur intégré indépendamment ; fantômes de total au début du pas et au prédicteur
+Euler. Le prédicteur auxiliaire du banc est contrôlé contre Shallow1D à chaque pas.
+Aucune bibliothèque ni support antérieur modifié ; aucun ADR nouveau.
+
+**S164-1 réalisée, A220 traitée sur véhicule 1D.** Reconstruction locale oracle <=1,12e-13
+normalisé ; contrôle du total auxiliaire <=2,23e-15. 54 montages release : trois grilles,
+trois pas, deux fonds, trois frontières. La bosse sort effectivement, le résidu au bord
+atteint 18 à 31 % de son amplitude initiale en fond constant. Aucun absorbeur ajouté.
+
+**Résultat décisif :** à N240, bord fond seul, bosse sortante sur fond constant : hauteur
+1,96708e-3 normalisée, cœur 8,64703e-5. Même total initial avec fond variable compensé :
+0,440460 jusque dans le cœur. Le bord change le problème en annulant une information
+extérieure non nulle. Ce montage non local ne prétend pas être un δ de production.
+Le témoin sans bosse confirme l'injection du bord ; oracle conserve le repos.
+
+L'oracle retardé au second étage converge en temps (erreur hauteur 2,797e-6 →1,181e-6 →
+5,402e-7), le fond seul reste à 1,968e-3. Bilan ouvert <=6,97e-15 pour toutes les variantes,
+même fausses ; Courant <=0,213264. Pas de coefficient de réflexion ni seuil physique inféré.
+
+**Réception :** cinq nouveaux tests propres et trois host importés reçus ; campagne finale
+54 montages reçue. Premier test du cœur corrigé : attente 1e-4 non dérivée, remplacée par
+un diagnostic d'erreur résolue au-dessus de l'arrondi, conforme au protocole ; chiffre réel
+conservé. Norme du bord étendue au débit pour ne pas confondre nœud de hauteur et résidu nul.
+Réceptions précédentes non rejouées : exemples S163/S164 reçus S164, workspace 299 réussis /
+cinq ignorés reçu S163. Le runtime n'a pas changé.
+
+**Suivi :** A50 reste partielle, A216/A217 inchangées ; A221 et L247 ajoutées. I-01/04/12/14/15
+relus, aucun invariant modifié. 112 ADR,221 angles,247 leçons,18 invariants,6 SPEC,23 cas.
+
+**Suite S166 : S165-1/A221**, fermeture sans oracle, information entrante de Q distincte
+de la sortie issue de l'intérieur ; comparer extrapolation et fermeture caractéristique,
+cas sortant puis onde de fond entrante. L'extérieur résiduel arbitraire reste inconnu.
+BILAN-S145 porté par poursuite B4 après B1/S63-1 ; aucun arbitrage humain nouveau.
+État final propre, jeton libre, quatre copies synchronisées ; aucune créée ni supprimée.

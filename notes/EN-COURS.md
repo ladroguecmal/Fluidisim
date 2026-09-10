@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S165 — en cours
+Session : S165 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S164-1/A220, isoler les erreurs de frontière dans un domaine résiduel local.
 
@@ -68,7 +68,7 @@ Objectif : S164-1/A220, isoler les erreurs de frontière dans un domaine résidu
 - [x] **P2** — déclarer protocole, frontière aux deux étages RK2 et bilan de flux ; synchroniser les copies propres.
 - [x] **P3** — construire la fenêtre locale et les témoins, mesurer traversée et raffinements.
 - [x] **P4** — recevoir les tests, publier mesures/limites, suivre A220 et actions.
-- [ ] **P5** — rituel de fin : journal, leçons, index, décomptes, reprise, jeton et copies.
+- [x] **P5** — rituel de fin : journal, leçons, index, décomptes, reprise, jeton et copies.
 
 ### Notes de reprise
 

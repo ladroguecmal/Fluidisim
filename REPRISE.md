@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 20:55 +02:00
+JETON            : libre
+Battement        : 2026-09-10 20:59 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S165 — frontière du domaine résiduel local
-Dernière session : S164 — fond prescrit instationnaire reçu en 1D ; quatre nouveaux tests exemple
-Session suivante : S165 — S164-1 : frontière du domaine résiduel local (A220)
+Session en cours : aucune
+Dernière session : S165 — frontière locale exercée en 1D ; cinq nouveaux tests exemple
+Session suivante : S166 — S165-1 : fermeture sans oracle, entrées et sorties (A221)
 
 *S160 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
 rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour.*
@@ -187,6 +187,25 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S165 — 2026-09-10 :** [FRONTIERE-LOCALE-S165](docs/validation/FRONTIERE-LOCALE-S165.md).
+**S164-1 réalisée, A220 traitée sur véhicule local 1D.** Fenêtre [30,90] m dans le canal
+de 120 m ; oracle aux deux étages RK2 reçu à <=1,12e-13 normalisé. Bord fond seul comparé
+à l'oracle et au témoin retardé. La bosse traverse effectivement la frontière.
+À N240, fond seul : erreur hauteur 0,001967 sur fond constant, 0,440460 avec fond variable
+compensé, même total initial. Le second montage porte volontairement un résidu extérieur
+non nul : le bord l'omet et change le problème. Aucun défaut de production inféré.
+Retard d'étage convergent en temps, omission extérieure non convergente à dx fixé.
+Bilan de flux ouvert <=6,97e-15 même sur champ faux ; Courant <=0,213264.
+54 montages release et cinq nouveaux tests propres +trois host reçus. Bibliothèques et
+support S163/S164 inchangés ; workspace 299 réussis/cinq ignorés reçu S163, non relancé.
+112 ADR,221 angles,247 leçons,18 invariants,6 SPEC,23 cas. Aucun ADR ni seuil nouveau.
+**A221 / suite S166 : S165-1**, fermeture sans oracle : information entrante de Q distincte
+de la sortie issue de l'intérieur, extrapolation contre fermeture caractéristique,
+cas sortant puis onde de fond entrante. Un résidu extérieur arbitraire reste inconnu.
+A50 partielle, A216/A217 inchangées ; L247 distingue réception d'une sortie et d'une entrée.
+BILAN-S145 porté via poursuite B4 après B1/S63-1. Copie principale, quatre copies synchronisées,
+aucune créée ni supprimée. B4 général, δ 3D, forces et perception restent hors réception.
 
 **S164 — 2026-09-10 :** [FOND-PRESCRIT-S164](docs/validation/FOND-PRESCRIT-S164.md).
 **S163-1 réalisée sur véhicule 1D.** Fond analytique prescrit réévalué aux temps RK2,

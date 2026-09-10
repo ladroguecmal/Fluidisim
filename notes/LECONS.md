@@ -3848,3 +3848,20 @@ Le remède de cette expérience se dérive au niveau des étages : corriger par 
 du fond prescrit, plutôt que par ses dérivées continues, retrouve l'identité au pas utilisé.
 Cela reçoit le changement de variables discret ; la précision du schéma total reste à part.
 Voir L245 et FOND-PRESCRIT-S164.
+
+## L247 — Recevoir une sortie ne reçoit pas l'information entrante
+
+*(S165)* Un bord alimenté par le fond seul laisse sortir une bosse avec un écart de hauteur
+de 0,2 % de son amplitude initiale à N240 ; dans le cœur, l'écart est encore vingt fois plus
+petit. Le même bord, sur le même total initial décomposé avec un fond variable, donne 44 %
+d'écart jusque dans le cœur. Il omet alors le résidu extérieur qui compense ce fond.
+
+Une frontière fait deux choses : laisser sortir ce que le domaine connaît et recevoir ce
+qu'il ne connaît pas. Une bonne mesure de la première ne garantit rien sur la seconde.
+Déclarer l'information entrante disponible avant de qualifier la fermeture, et tester les
+deux sens. Un oracle aux mêmes étages permet de localiser le défaut ; il ne résout pas
+l'absence d'information dans le système réel.
+
+Le montage avec compensation extérieure est volontairement non local : il reçoit le
+changement de variables, pas la possibilité de retrouver un extérieur arbitraire. Cette
+limite appartient à l'énoncé du banc. Voir FRONTIERE-LOCALE-S165 et A221.
