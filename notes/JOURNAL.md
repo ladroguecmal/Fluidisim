@@ -8102,3 +8102,61 @@ A214 l'attend maintenant seule — elle ne réclame plus ni mesure ni spécifica
 fidélité perceptuelle de la décomposition additive ; il est bloqué par la référence substitutive
 intégrale. **S146 a montré qu'un banc s'exécute** : deux bancs sur onze vaudraient mieux qu'un.
 Restent ouverts : A213, la coupure W/δ, `lambda_cut`, la bathymétrie, le multiplateforme.
+
+---
+
+## S161 — 2026-09-10 — B4 s'ouvre par un bout, et infirme le paramétrage d'ADR-001
+
+**Entrée :** jeton libre à fb73282, copie principale sur `master`, rien à refermer. Suite désignée
+par S160 : débloquer **B4**, seule voie ouverte selon ADR-109, attendue seule par A214.
+**Produit :** [ADR-111](../docs/adr/ADR-111-le-critere-de-bascule-s-exprime-en-profondeur.md),
+[B4-DEBLOCAGE-S161](../docs/validation/B4-DEBLOCAGE-S161.md), sonde `additivite_b4.rs`,
+`Shallow1D::configure_bosses`, note corrective sur ADR-001 §3.3, A216, A217, **L243**.
+
+**Le blocage n'était pas celui qu'on croyait, et c'est la leçon de la session.** « B4 est bloqué
+par la référence substitutive intégrale » circulait depuis plusieurs sessions. En l'ouvrant : la
+référence demandée est un solveur qui calcule le champ total sans décomposition, et le dépôt en a
+un **depuis S36** — `shallow.rs`, Saint-Venant 1D non linéaire, reçu par le harnais et l'oracle
+croisé. Ce qui manquait était **une fonction de trois lignes** pour poser deux perturbations dans
+un même domaine. **L243** : un blocage hérité se vérifie avant d'être contourné ; non vérifié, il
+ferme la question aussi bien qu'un renvoi faux (L217).
+
+*Un solveur linéaire ne pouvait pas servir, et c'était le piège le plus proche : `dispersif.rs` est
+le fichier le plus « référence » d'apparence du dépôt, mais la superposition y est vraie par
+construction — l'écart mesuré aurait été nul quel que soit le rapport.*
+
+**Le résultat : le critère de bascule d'ADR-001 est exprimé dans la mauvaise variable.** À
+`max|δ|/h` égal, l'écart d'additivité est le même que la perturbation vaille 10 % ou 100 % de
+l'onde de fond — cinq fois moins de perturbation *relative*, le même écart. Ce qui gouverne est
+**l'amplitude rapportée à la profondeur** : `écart ≈ 0,24 · max|δ|/h`, proportionnalité vérifiée
+sur **cinq décades**, jusqu'à 8e-6 où le coefficient vaut encore 0,99 fois sa valeur — donc pas un
+plancher d'intégration. Contrôle à pas de temps imposé : la part numérique vaut 0 à 2 %.
+
+**Appliqué tel quel, `0,35·Hs` autorise des écarts variant d'un facteur dix selon l'état de mer** —
+0,8 % pour une houle faible, 8,4 % quand `Hs` approche la profondeur. Un critère de bascule ne peut
+pas faire dépendre la validité d'une grandeur qui ne la gouverne pas.
+
+**Mais la décomposition n'est pas infirmée : son paramétrage l'est.** Elle tient à moins de 1 %
+tant que `max|δ| ≤ 0,04·h`, et n'atteint 10 % que lorsque la perturbation vaut la moitié de la
+profondeur. C'est un résultat **favorable** à ADR-001, obtenu par un banc conçu pour pouvoir
+l'infirmer — ce que B4 doit être.
+
+**Aucun seuil n'est gelé** (ADR-108) : la loi est publiée, le seuil suit la tolérance que personne
+n'a spécifiée — 0,21 pour 5 %, 0,45 pour 10 %.
+
+**Ce qui reste bloqué, et il faut le dire à chaque fois** : trois volets sur quatre. Forces sur
+coque (intégrateur de corps rigide), perception en double aveugle (personnes), contrôle du terme
+source (ajout S04, A50). Et **A217** : en eau profonde, où la profondeur ne joue plus, on ignore
+quelle variable gouverne — la référence disponible est non dispersive par construction, et le
+dépôt n'a aucun solveur à la fois non linéaire et dispersif. **A216** : le coefficient passe de
+0,24 à 0,95 à très faible amplitude de fond, mesuré et non compris.
+
+299 tests inchangés, cinq ignorés. `configure_bosses` est additive, sur un véhicule d'essai.
+**111 ADR**, 217 angles, 243 leçons, 18 invariants, 6 SPEC, 23 cas. Invariants relus : aucun
+invalidé — I-15 n'est pas touché, la décomposition reste la décision d'ADR-001.
+Recommandation du dernier bilan (BILAN-S145 : lancer B1) : exécutée en S146 — point 7 du rituel.
+
+**Suite S162 : A217**, et commencer comme cette session a commencé — **par ouvrir le blocage**.
+Une référence non linéaire *et* dispersive est-elle à portée ? Si oui, l'additivité en eau profonde
+se mesure ; si non, le dire fermement, car c'est alors la limite structurelle de tout ce volet de
+B4. À défaut, A216 est peu coûteuse et la sonde existe.

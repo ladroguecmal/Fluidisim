@@ -3778,3 +3778,26 @@ auteur en ayant l'air de décrire le problème :
 Voir [[L219]] : un qualificatif rend une question présentable sans y répondre ; un facteur nu fait
 pire, il donne l'illusion d'un chiffre. Et [[L229]] : là, l'écart ne survivait pas au changement de
 graine ; ici, il ne survit pas au changement de bande.
+
+## L243 — Un blocage hérité se vérifie avant d'être contourné
+
+*(S161)* B4 était « bloqué par la référence substitutive intégrale ». La phrase circulait depuis
+plusieurs sessions, et elle était vraie — mais elle ne disait pas *ce qui* manquait, et personne ne
+l'avait ouverte.
+
+En l'ouvrant : la référence demandée est un solveur qui calcule le champ total sans décomposition,
+et le dépôt en a un depuis **S36** — `shallow.rs`, Saint-Venant 1D non linéaire, reçu par le
+harnais et par l'oracle croisé. Ce qui manquait n'était pas la référence : c'était **une fonction
+de trois lignes** pour poser deux perturbations dans un même domaine, `configure_bosses`. Le
+montage minimal d'un test d'additivité était inexprimable, ce qui suffit à expliquer qu'il n'ait
+jamais été tenté.
+
+Ce qui rend le motif générique : un blocage énoncé une fois se **recopie** de session en session
+comme un fait, et chaque recopie le rend moins ouvrable — il devient une propriété du corpus au
+lieu d'un constat daté. C'est [[L217]] appliqué à un empêchement plutôt qu'à un renvoi : *un
+blocage non vérifié ferme la question aussi bien qu'un renvoi faux.*
+
+En pratique, deux questions avant d'accepter un blocage hérité : **de quoi exactement a-t-on
+besoin**, et **qu'est-ce qui existe déjà qui y ressemble** ? Ici, la seconde a suffi. Voir aussi
+[[L240]] : une consigne qui nomme une ressource disparue égare ; un blocage qui ne nomme rien
+égare autant.

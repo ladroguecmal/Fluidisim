@@ -1432,3 +1432,16 @@ entrée par entrée. Le fil reprend ci-dessous.
   du régime retenu (2,47 ou 12,30 selon le seuil) comme de la bande conservée (24,08 à cutoff 1,5).
   Note datée portée à TOLERANCE-SILLAGE-S158. Aucun ADR : rien n'était à décider.
 - **A214 : inchangée**, elle attend toujours **B4**.
+
+### S161 — B4, premier volet
+
+- **B4 : premier volet exécuté.** [B4-DEBLOCAGE-S161](../validation/B4-DEBLOCAGE-S161.md),
+  [ADR-111](../adr/ADR-111-le-critere-de-bascule-s-exprime-en-profondeur.md). Le critère de bascule
+  s'exprime en `max|δ|/h` ; `0,35·Hs` est retiré comme paramétrage ; la décomposition n'est pas
+  infirmée. Note corrective portée à ADR-001 §3.3.
+- **B4 : trois volets restent bloqués.** Forces sur coque (intégrateur de corps rigide), perception
+  en double aveugle (personnes), contrôle du terme source (ajout S04, A50).
+- **A217 : ouverte, S162.** Quelle variable gouverne l'additivité en eau profonde ? Commencer par
+  dire si une référence non linéaire **dispersive** est à portée.
+- **A216 : ouverte.** Le coefficient passe de 0,24 à 0,95 à très faible amplitude de fond.
+- **A214 : inchangée**, elle attend toujours B4 — dont un volet vient de s'ouvrir sans la servir.

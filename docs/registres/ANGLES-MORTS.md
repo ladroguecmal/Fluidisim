@@ -1984,3 +1984,22 @@ comparant `radial` et `radial+1` — fidèle à un facteur 2,5, et sous-estimant
   volonté** : un jeton non versionné cesserait de voyager avec l'histoire, ce qui est précisément
   sa vertu ; un contrôle à l'amorce qui refuse de travailler dans une copie en retard serait
   possible, et personne ne l'a spécifié. Voir ADR-110 §« ce qu'elle ne dit pas », [[L240]].
+
+- **A216** *(sévérité 3, S161 ; ouverte)* — **Le coefficient d'additivité change de valeur à très
+  faible amplitude de fond, et rien ne l'explique.** `écart ≈ k · max|δ|/h` avec `k = 0,24` pour
+  `A_B/h ≥ 0,10`, mais **`k = 0,95`** à `A_B/h = 0,02` — quatre fois plus. La proportionnalité à
+  `max|δ|` tient dans les deux régimes, vérifiée sur cinq décades, donc ce n'est ni un plancher
+  d'intégration ni un artefact de pas de temps (contrôle à pas imposé : 0 à 2 %). Seule la
+  constante change. Mesuré, pas compris. Peu coûteux à instruire — la sonde `additivite_b4.rs`
+  existe et le balayage tient en une étape.
+
+- **A217** *(sévérité 2, S161 ; ouverte)* — **En eau profonde, on ne sait pas quelle variable
+  gouverne la validité de l'addition.** Le premier volet de B4 (ADR-111) l'établit en régime peu
+  profond : c'est `max|δ|/h`, et non le rapport à `Hs` qu'ADR-001 proposait. Mais `B` est une houle
+  **dispersive en eau profonde**, où la profondeur ne joue plus : la variable y serait
+  vraisemblablement la cambrure, et rien ne le vérifie. Le blocage n'est pas budgétaire mais
+  structurel — la référence disponible, `shallow.rs`, est non dispersive par construction, et le
+  dépôt n'a **aucun** solveur à la fois non linéaire et dispersif. Or un solveur linéaire ne peut
+  pas servir : la superposition y est vraie par construction. **Instruire d'abord si une telle
+  référence est à portée**, avant de supposer qu'elle ne l'est pas — c'est exactement ce que S161 a
+  gagné en ouvrant un blocage hérité (**L243**).
