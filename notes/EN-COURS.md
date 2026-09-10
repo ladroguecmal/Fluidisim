@@ -58,75 +58,50 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S144 — terminée
+Session : S145 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : **A208**, ouverte depuis S140 et **trois fois reportée**. À champ identique, l'emprise
-publiée décide de la part de budget de pente consommée — ×10,9 mesuré, sans borne — et le refus
-rendu, `Slope` ou `Steepness`, désigne la **pente**, c'est-à-dire la seule chose que l'hôte n'a
-pas à changer. ADR-082 exige qu'un nom de refus désigne ce qu'il faut revoir.
+Objectif : **refaire le bilan d'avancement.** Celui de S69 oriente encore `REPRISE.md` §4 — « ~85 %
+comme corpus, ~15 % comme système ; `δ`, `W` et `V` n'existent pas » — et il a **76 sessions**.
+C'est l'exemple même de l'état recopié qui se lit au présent alors qu'il ne l'est plus (**A185**).
+Le refaire à la même méthode, puis en tirer le fil suivant.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton, **plan déclaré et committé seul**.
-- [x] **P2** — établir ce qui est **calculable au moment du refus**, avant d'imaginer un nom.
-      La question décisive : la bibliothèque peut-elle distinguer « champ vraiment raide » de
-      « emprise étroite » ? S140 dit que la pente réelle d'une pression ne se calcule pas, elle
-      se cherche — si c'est vrai ici, un refus `Footprint` serait un nom qu'on ne peut pas
-      justifier, et ADR-082 refuse autant un nom faux qu'un nom vague.
-- [x] **P3** — peser les réparations à la lumière de P2, et écrire la pesée. Nommer le cas ;
-      publier de quoi calculer sa marge ; rendre la marge observable sur les points de
-      l'appelant. Le critère reste celui de S143 : **qu'est-ce qui aurait aidé quelqu'un qui
-      se fait refuser sans comprendre**.
-- [x] **P4** — construire ce que la pesée retient, étage court, tests verts.
-- [x] **P5** — **vérifier que ça sert** : reprendre le cas mesuré en S140 — emprise de 0,01 λ
-      posée sur un zéro, facteur ×10,9 — et montrer que l'appelant voit désormais ce qui le
-      fait refuser. Une aide qu'on n'a pas vue aider ne vaut pas mieux qu'une garde qu'on n'a
-      pas vue échouer (S143).
-- [x] **P6** — ADR, livrable, rituel de fin (§6), jeton rendu, fusion `--ff-only`.
+- [ ] **P2** — compteurs **à la source**, comme S69 : sessions, ADR, spécifications, registres,
+      angles, leçons, lignes de Rust, tests, cas, bancs. Mécanique, aucune interprétation.
+- [ ] **P3** — le bloc « **construire le système** » : ce que le code fait aujourd'hui, module par
+      module, et ce qui manquerait pour que ce soit la couche `W` du jeu. C'est là que S69 disait
+      ~5 %, et c'est l'affirmation la plus susceptible d'avoir vieilli.
+- [ ] **P4** — le bloc « **savoir mesurer** » : étages du harnais, cas exécutables, bancs exécutés.
+      S69 disait 2 étages sur 6, 12 cas sur 23 exécutables, 0 banc sur 11 exécuté.
+- [ ] **P5** — les deux lectures recalculées, **et ce que S69 recommandait confronté à ce qui a
+      été fait**. Une recommandation vieille de 76 sessions a-t-elle été suivie ? Sinon, pourquoi,
+      et cela vaut-il décision.
+- [ ] **P6** — livrable BILAN-S145, rituel de fin (§6), jeton rendu, fusion `--ff-only`.
 
 ### Notes de reprise
 
-Départ 597eca7 = master ; worktree `886155`. 273 tests/cinq ignorés, 18 invariants.
+Départ 4c463f9 = master ; worktree `886155`. 275 tests/cinq ignorés, 98 ADR, 18 invariants.
 
-Ce qui est établi et n'est pas à remesurer (ENVELOPPE-PRESSION-S140) :
-- le conservatisme de la pression se décompose en un facteur de **forme**, borné par 2 et
-  **déjà retiré** depuis S141 par `slope_envelope_tight()`, et un facteur d'**alignement** que
-  rien ne borne, qui dépend de l'emprise choisie par l'hôte ;
-- à emprise large le facteur d'alignement vaut 1,0000 sur une case ; à 0,01 λ posée sur un zéro
-  du champ, il vaut 10,89 et continue de croître ;
-- sur un spectre gaussien réaliste il vaut 1,8522, stable en résolution.
+Méthode de S69, à reprendre telle quelle pour que les deux bilans soient comparables :
+compteurs vérifiés à la source (fichiers, sortie du harnais, `REPRISE.md` §4) ; trois blocs
+mesurés séparément — *décider quoi construire*, *savoir mesurer*, *construire le système* ; puis
+deux lectures, corpus et système. **Ne pas s'appuyer sur les colonnes « État » des tableaux
+d'actions antérieurs à S45** : S69 les a écartées, elles disent « ouverte » là où une note en
+prose clôt (A185).
 
-`bound_pressure::Prepared` retient déjà la borne resserrée et l'expose par `slope_envelope()`.
-La L1 reste disponible sur `Field::slope_envelope()`. Le rapport des deux ne dit que la
-**forme** — déjà retirée : le publier n'apprendrait donc rien sur l'alignement, qui est le sujet
-d'A208. À vérifier en P2 plutôt qu'à supposer, mais c'est la piste qui rend la réparation (b)
-douteuse.
+Ce qui est déjà connu et cadre le travail :
+- la trajectoire d'ADR-054 (S71) : `WaveEvent` → journal rejouable → impact propagé →
+  sillage/intégration → B2 ;
+- depuis S71, le dépôt a écrit `RadialImpact`, le journal d'ondes, la composition B+W, la
+  pression spectrale, `LiveWater`, l'admission incrémentale — mais **aucune session n'a déclaré
+  que `W` existait**. Vérifier lequel des deux est vrai est le cœur de P3.
 
-Piège à éviter : inventer `Footprint` parce que le nom est joli. Un refus doit être **décidable**
-au moment où il est rendu ; si la bibliothèque ne peut pas distinguer les deux causes, le nom
-ment, et ADR-082 refuse un nom qui ment autant qu'un nom vague.
+Piège à éviter : refaire le bilan en relisant le corpus. S69 a mesuré à la source ; un bilan
+d'opinion ne serait pas comparable au sien et ne vaudrait rien.
 
-Second piège : trois reports ont déjà eu lieu. Si la conclusion honnête est « rien à faire ici »,
-la dire et **fermer** A208 avec son motif, plutôt que la reporter une quatrième fois.
-
-P2-P6 : constat de ce qui est calculable au refus, pesée, trois noms dans trois budgets, deux
-essais neufs, six essais corrigés, ADR-098, REFUS-EMPRISE-S144, L227. 275 tests/cinq ignorés.
-
-Ce que l'instruction a retourné : **les deux réparations proposées par A208 étaient l'une fausse,
-l'autre périmée**. Ne pas exécuter une réparation portée dans un angle mort sans la relire — c'est
-L227, et c'est la leçon de la session.
-
-Ce qui a débloqué : un constat de lecture, pas une idée. Les trois budgets échantillonnent le
-point **avant** de tester le budget, donc la pente réelle au point est disponible gratuitement.
-Chercher ce qui est déjà là avant d'inventer.
-
-Impasse évitée : `Footprint`. Le nom aurait été agréable et faux — l'alignement dépend aussi du
-spectre, pas seulement de l'emprise.
-
-Pour S145 sans relire : **la série pente est close**, A205 à A210 toutes traitées, et il n'y a plus
-d'angle mort de cette famille. Le prochain travail n'est pas un angle mort mais un choix de fil.
-Le bilan S69 dit l'essentiel : ~85 % du projet est un corpus de conception, ~15 % un système ;
-`δ`, `W` et `V` n'existent pas comme couches ; onze cas sur 23 et onze bancs sur onze attendent
-une couche non écrite. La trajectoire d'ADR-054 (S71) reste : `WaveEvent` → journal rejouable →
-impact propagé → sillage/intégration → B2. Le dernier travail de corpus ouvert est l'audit des
-renvois « traité en Sxx » (S138) — moins urgent que d'écrire une couche.
+Second piège : conclure « le projet a bien avancé » parce que 76 sessions ont passé. Le fait
+central de S69 était que **vingt-deux sessions d'affilée n'avaient produit aucune conception du
+système** ; la même question se pose pour les soixante-seize qui suivent, et la réponse peut être
+la même.
