@@ -125,6 +125,7 @@ fn main() {
     retour_proche();
 }
 
+
 /// Observable propre au mécanisme, et non à la fenêtre d'échantillonnage : la périodicité fait
 /// **revenir** au centre l'énergie qui aurait dû partir. On compare donc l'élévation efficace en
 /// champ proche — les cinq premiers cercles — à celle de la référence, en **rapport** et non en
@@ -133,23 +134,105 @@ fn main() {
 /// L'écart global de `monotonie` mêle tous les rayons ; quand le paquet quitte la fenêtre, il
 /// bouge pour une raison qui n'est pas une perte de résolution. Celui-ci ne bouge que si du
 /// signal apparaît là où il ne devrait plus y en avoir.
+///
+/// La table est calculée **une fois** : la référence 512x512 coûte quatre secondes par instant,
+/// et la recalculer pour chaque seuil rendait la sonde inutilisable.
+fn table(sigma: f32, cutoff: f32, pas_us: u64) -> (Vec<u64>, Vec<Vec<f64>>) {
+    let mut instants = Vec::new();
+    let mut lignes = vec![Vec::new(); 3];
+    let mut us = 4_000_000u64;
+    while us <= FIN_US {
+        let reference = proche(512, sigma, cutoff, us);
+        for (c, radial) in [64usize, 128, 256].into_iter().enumerate() {
+            lignes[c].push(proche(radial, sigma, cutoff, us) / reference);
+        }
+        instants.push(us);
+        us += pas_us;
+    }
+    (instants, lignes)
+}
+
 fn retour_proche() {
     println!();
     println!("# S157 — excès d'élévation en champ proche, rapporté à la référence radial 512");
     println!("Cinq premiers cercles (8 à 40 m pour sigma 1 m). Vaut 1 tant que rien n'est revenu.");
+    let (instants, lignes) = table(1.0, 6.0, 2_000_000);
     println!("| instant | radial 64 | radial 128 | radial 256 |");
     println!("|---:|---:|---:|---:|");
-    for us in (1..=16).map(|i| i * 4_000_000u64) {
-        let reference = proche(512, 1.0, 6.0, us);
-        print!("| {} s |", us / 1_000_000);
-        for radial in [64usize, 128, 256] {
-            print!(" {:.3} |", proche(radial, 1.0, 6.0, us) / reference);
-        }
-        println!();
+    for (i, us) in instants.iter().enumerate() {
+        println!(
+            "| {} s | {:.3} | {:.3} | {:.3} |",
+            us / 1_000_000,
+            lignes[0][i],
+            lignes[1][i],
+            lignes[2][i]
+        );
     }
+    seuils(&instants, &lignes);
+}
+
+/// Premier instant où l'excès franchit un seuil, lu dans la table : la quantité croît sans être
+/// strictement monotone, et une bissection y rendrait un chiffre faux d'apparence précise.
+fn seuils(instants: &[u64], lignes: &[Vec<f64>]) {
+    println!();
+    println!("# S157 — premier franchissement, sigma 1 m, cutoff 6, grille de 2 s");
+    println!("| seuil | radial 64 | radial 128 | radial 256 | rapport 64→128 | 128→256 | exposant |");
+    println!("|---:|---:|---:|---:|---:|---:|---:|");
+    for seuil in [1.10f64, 1.25, 1.50, 2.00] {
+        let t: Vec<Option<f64>> = (0..3)
+            .map(|c| {
+                lisse(&lignes[c])
+                    .iter()
+                    .position(|v| *v > seuil)
+                    .map(|i| instants[i] as f64 / 1e6)
+            })
+            .collect();
+        let mot = |v: Option<f64>| match v {
+            Some(s) => format!("{s:.0} s"),
+            None => "au-delà de 64 s".into(),
+        };
+        let rapport = |a: Option<f64>, b: Option<f64>| match (a, b) {
+            (Some(x), Some(y)) => format!("{:.2}", y / x),
+            _ => "—".into(),
+        };
+        let exposant = match (t[0], t[2]) {
+            (Some(x), Some(y)) => format!("{:.2}", (y / x).log2() / 2.0),
+            _ => "—".into(),
+        };
+        println!(
+            "| {seuil:.2} | {} | {} | {} | {} | {} | {exposant} |",
+            mot(t[0]),
+            mot(t[1]),
+            mot(t[2]),
+            rapport(t[0], t[1]),
+            rapport(t[1], t[2])
+        );
+    }
+    println!("Exposant 0,50 = racine de radial ; 1,00 = proportionnel à radial.");
 }
 
 /// Élévation efficace sur les cinq premiers cercles seulement.
+/// Médiane glissante à trois points puis maximum courant. Le rapport oscille — la récurrence est
+/// un battement — et un franchissement lu sur une pointe isolée n'est pas un franchissement. Le
+/// maximum courant rend la courbe monotone par construction, donc l'instant de franchissement
+/// bien défini ; la médiane l'empêche d'être déclenché par un seul point.
+fn lisse(v: &[f64]) -> Vec<f64> {
+    let mut median = v.to_vec();
+    for i in 1..v.len() - 1 {
+        let mut trois = [v[i - 1], v[i], v[i + 1]];
+        trois.sort_by(|a, b| a.partial_cmp(b).unwrap());
+        median[i] = trois[1];
+    }
+    let mut courant = 0.0f64;
+    median
+        .iter()
+        .map(|x| {
+            courant = courant.max(*x);
+            courant
+        })
+        .collect()
+}
+
 fn proche(radial: usize, sigma: f32, cutoff: f32, us: u64) -> f64 {
     let p = profil(radial, 512, sigma, cutoff, us);
     let carre: f64 = p[..5].iter().map(|v| v * v).sum();

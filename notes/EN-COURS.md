@@ -71,7 +71,7 @@ facteur 2,5 sur le second. Sans loi, pas de garde-fou : c'est exactement ce que 
 - [x] **P2** — un critère **lisse** et sa vérification de monotonie. Le critère de S156 — premier
       rayon qui dépasse le seuil — n'était pas monotone en temps ; une dichotomie posée dessus
       donnerait un chiffre faux avec l'apparence d'un chiffre précis.
-- [ ] **P3** — trois seuils par dichotomie, radial 64 / 128 / 256, angulaire fixé à 512.
+- [x] **P3** — trois seuils par dichotomie, radial 64 / 128 / 256, angulaire fixé à 512.
       Trois points suffisent à trancher entre les deux exposants candidats.
 - [ ] **P4** — dépendance à `sigma` : mêmes seuils à `sigma` 4 m, `cutoff` 1,5 pour garder le
       **même produit réduit** `sigma*cutoff = 6` et donc la même forme spectrale à échelle près.
@@ -128,3 +128,29 @@ valeur etait dans le script **avant** que l'horloge soit lue. Corrige. Cause com
 battement en avance de S156 P5 : j'ecris la valeur puis je la verifie, au lieu de lire puis
 d'ecrire. La regle du depot dit "le relever, jamais l'ecrire de memoire" ; elle vise ce
 geste-la exactement. A generaliser en fin de session.
+
+P3 — trois seuils obtenus, et **aucune loi de puissance ne les decrit**.
+Franchissement lu sur la courbe lissee — mediane glissante a trois points puis maximum courant,
+parce que la recurrence est un battement et qu'une pointe isolee n'est pas un franchissement.
+
+| seuil | radial 64 | radial 128 | radial 256 | rapport 64→128 | 128→256 | exposant |
+|---|---|---|---|---|---|---|
+| 1,10 | 16 s | 36 s | 56 s | 2,25 | 1,56 | 0,90 |
+| 1,25 | 16 s | 40 s | 58 s | 2,50 | 1,45 | 0,93 |
+| 1,50 | 26 s | 42 s | 62 s | 1,62 | 1,48 | 0,63 |
+| 2,00 | 32 s | 46 s | au-dela de 64 s | 1,44 | — | — |
+
+L'exposant vaut 0,63 a 0,93 selon le seuil, et **les deux rapports d'un meme seuil different d'un
+facteur 1,5** — ce qu'une loi de puissance interdit. Avant lissage c'etait pire : 0,48 a 1,00.
+La degradation est **graduelle**, pas un seuil : c'est pourquoi l'instant de franchissement herite
+du seuil qu'on choisit. Chercher un t_max unique etait mal pose.
+
+Le meilleur regroupement essaye : `t * dk` avec `dk = cutoff/radial`. Au seuil 1,10 il vaut
+1,50 / 1,69 / 1,31 pour radial 64 / 128 / 256 — constant a ±15 %. Aux seuils plus hauts il derive
+(2,44 / 1,97 / 1,45 a 1,50). Donc `t_max` proportionnel a `radial`, c'est-a-dire a la periode
+spatiale, **approximativement et au seuil le plus bas seulement**.
+`t * dk` n'est pas sans dimension : il manque une vitesse. C'est exactement ce que le balayage en
+sigma de P4 doit reveler — si le regroupement tient a sigma 4 m, la vitesse manquante est fixee
+par la source ; s'il ne tient pas, il n'y a rien a ecrire.
+Censure a connaitre : l'horizon de 64 s (ADR-106) coupe la mesure pour radial 256 des le seuil 2,0,
+et rend radial 512 inobservable. Le plafond de la grammaire et l'horizon se conjuguent.
