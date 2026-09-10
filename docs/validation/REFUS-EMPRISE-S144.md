@@ -141,7 +141,7 @@ compensation », dit son nom. Il attend désormais `SlopeEnvelope`.
 
 ## 10. Réception
 
-274 tests, cinq ignorés — deux de plus : l'essai d'atteignabilité des trois verdicts et la
+275 tests, cinq ignorés — deux de plus : l'essai d'atteignabilité des trois verdicts et la
 démonstration ci-dessus. Aucun hachage touché, harnais H1 inchangé : les noms de refus ne sont pas
 des bits publiés.
 
