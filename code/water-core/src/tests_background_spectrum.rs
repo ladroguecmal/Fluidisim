@@ -23,10 +23,16 @@ fn spectral_coefficients_match_independent_reference_s148() {
     for gamma in [1.0,3.3,7.0] { for n in [32,64,128,256] {
         let mut r=recipe();r.gamma=gamma;r.sea.components=n;
         let c=bake(r).unwrap(); let mut m=[0.0;5];
-        for node in c.components() {
+        let mut peak=(0.0,0.0);
+        for (i,node) in c.components().iter().enumerate() {
             let x=node.freq_q32 as f64/4294967296.0*r.sea.tp as f64;
+            let lo=0.5*8.0_f64.powf(i as f64/n as f64);
+            let hi=0.5*8.0_f64.powf((i+1) as f64/n as f64);
+            let density=(node.amplitude as f64).powi(2)/(hi-lo);
+            if density>peak.1 {peak=(x,density);}
             for p in [0,1,2,4] { m[p]+=0.5*(node.amplitude as f64).powi(2)*x.powi(p as i32); }
         }
+        assert!((peak.0.ln()).abs()<8.0_f64.ln()/n as f64);
         assert!((4.0*m[0].sqrt()/r.sea.hs as f64-1.0).abs()<2e-6);
         let oracle=|p| spectrum_reference_s147::moment(gamma as f64,0.5,4.0,p,16384);
         for p in [1,2,4] { let error=(m[p]/m[0]/(oracle(p as i32)/oracle(0))-1.0).abs();worst=worst.max(error);assert!(error<0.002); }
@@ -39,6 +45,19 @@ fn spectral_coefficients_match_independent_reference_s148() {
         println!("S148 gamma={gamma} N={n} hash={:016x}",c.hash());
     }}
     println!("S148 worst moment relative={worst:.9}");
+}
+
+#[test]
+fn spectral_allocation_refusal_s148() {
+    struct Sealed;
+    impl Allocator for Sealed {
+        fn alloc_persistent(&mut self,_:usize)->Result<usize,AllocError>{Err(AllocError::Sealed)}
+        fn seal(&mut self){} fn is_sealed(&self)->bool{true}
+        fn stats(&self)->AllocStats{AllocStats::default()}
+    }
+    let c=bake(recipe()).unwrap();let mut a=Sealed;let h=Host;
+    assert!(matches!(Background::from_spectrum(&mut HostServices {alloc:&mut a,jobs:&h,sink:&h},&c,WorldPos::from_metres(0.,0.,0.)),Err(AllocError::Sealed)));
+    assert_eq!(c.hash(),0x26695af7314e21db);
 }
 #[test]
 fn spectral_refusals_and_replay_s148() {
