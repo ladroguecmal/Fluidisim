@@ -58,29 +58,19 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S148 — terminée
+Session : S149 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S147-1, construire et recevoir un fond spectral explicite selon ADR-100.
+Objectif : S148-1, transporter la recette spectrale et recevoir le cycle hôte B+W.
 
 ### Plan
 
-- [x] **P1** — état réel, lectures de reprise, jeton et plan committé seul.
-- [x] **P2** — arrêter le contrat de recette et de cuisson bornée/reproductible ; écrire le constructeur explicite sans migrer la voie historique ; tests des coefficients et refus.
-- [x] **P3** — réception indépendante contre S147, moments et pics, phases/dérivées, B+W et rejeu ; témoins historiques et debug/release.
-- [x] **P4** — suite complète, rapport, angles/leçons/actions, journal, index/décomptes et passation ; rituel de fin, jeton rendu.
+- [x] **P1** — état réel, jeton et plan committé seul.
+- [ ] **P2** — codec versionné borné, contrat ADR et tests de refus/recuisson.
+- [ ] **P3** — cycle hôte spectral sauvegardé/restauré, comparaison directe et coût local.
+- [ ] **P4** — vérifications complètes et rituel de fin : rapport, journal, registres, index et jeton rendu.
 
 ### Notes de reprise
 
-Départ master99cb421, toutes les copies propres et en retard. Aucune copie créée.
-S147 :277 tests/cinq ignorés,100 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas.
-ADR-100 décide un candidat JONSWAP normalisé dans une bande explicite ; fixture [0,5fp;4fp],
-gamma1/3,3/7,N32/64/128/256. Référence S147 f64/libm uniquement pour tests.
-L'exp f32 bornée existe déjà dans gaussian_spectrum (S97) ; préférer la partager sans changer
-ses opérations. Ni recette numérique reçue localement ni hash debug/release ne prouvent I-03
-sur plusieurs plateformes. Le fond historique et les scénarios restent inchangés.
-BILAN-S145 : B1 exécuté S146, S63-1 close S147 ; W4/sillage puis B2 restent la trajectoire.
-P2 : cuisson V1 construite, quatre tests ciblés debug reçus. Gravité portée par B et vérifiée dans les trois compositions.
-
-P3 : cinq tests debug/release reçus ; ADR-101 et rapport. Rejeu depuis recette mémoire seulement ; codec/cycle complet reste S148-1.
-
-P4 :282 tests/cinq ignorés, rituel exécuté ;101 ADR,212 angles,18 invariants,6 SPEC,23 cas. Jeton rendu ; suite S149/S148-1. A212 partielle, aucune nouvelle leçon ni angle indépendant.
+Départ master e4a8de9, copies historiques propres et en retard. S148 : 282 tests/cinq ignorés.
+A212 partielle. WLIV ne contient pas B ; la recette, son ancre et le contexte doivent accompagner le snapshot.
+La recommandation du dernier bilan (W4 puis B2) reste la suite après ce cycle.

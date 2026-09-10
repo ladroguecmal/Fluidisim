@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-10 14:24 +02:00
+JETON            : occupé
+Battement        : 2026-09-10 14:53 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S149
 Dernière session : S148 — fond spectral construit ; 282 tests/cinq ignorés
 Session suivante : S149 — S148-1, cycle hôte spectral et transport de recette, puis coût B+W et W4/B2
 
