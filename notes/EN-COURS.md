@@ -70,7 +70,7 @@ ne l'a fait.
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan déclaré et committé seul.
-- [ ] **P2** — sonde : erreur du noyau modal contre l'oracle f64 `PressureMode` pour des âges de
+- [x] **P2** — sonde : erreur du noyau modal contre l'oracle f64 `PressureMode` pour des âges de
       0 à 64 s, durée active inchangée. La constante d'horizon est relevée **localement et non
       committée** — c'est ce qui rend la mesure possible, et rien d'autre ne change.
 - [ ] **P3** — séparer ce que « 16 s » recouvre : l'**âge** auquel on échantillonne et la **durée
@@ -102,3 +102,23 @@ fausse et c'est le résultat le plus intéressant de la session.
 Piège : mesurer contre un oracle qui partagerait la quantification f32 de ω masquerait justement
 ce qu'on cherche. L'oracle S95 convertit le **même** f32 en f64 — il isole l'erreur
 d'implémentation, pas celle de l'entrée. Garder cette convention et le dire.
+
+P2 — la prédiction est **démentie sur l'âge** et trompeuse sur la durée.
+Écart contre l'oracle f64 (30 couples par ligne, 5 k x 6 rapports Doppler, 10 Pa, origine 0,7/-0,3) :
+- âge croissant, durée active 4 s : 1,381e-7 m à 16 s, 2,539e-7 à 32 s, 5,931e-7 à 60 s. L'âge
+  n'est donc **pas** gratuit, contrairement à ce que la lecture du code laissait croire.
+- durée active croissante : 4,835e-7 m à 16 s, 7,463e-6 à 60 s — quinze fois plus. Mais
+  l'amplitude elle-même passe de 7,50e-2 à 2,80e-1 m : la moitié de cette croissance est du signal.
+- **l'erreur relative est la même dans les deux régimes** : 5,03e-7 (1 s), 7,37e-6 (16 s),
+  3,18e-5 (60 s) pour l'âge ; 6,45e-6 (16 s), 2,66e-5 (60 s) pour la durée. Rapportée au temps
+  écoulé, elle vaut **4,0e-7 à 5,3e-7 par seconde**, à peu près constante sur deux décades.
+Loi apparente : dérive de phase linéaire en temps, ~5e-7 relatif par seconde, soit ~4 eps f32/s.
+Hypothèse à trancher en P3 : omega est calculé en **f32** par `(gravity*magnitude).sqrt()`, erreur
+relative ~6e-8 ; la phase omega*t hérite d'une dérive omega*t*6e-8. Pour le pire k=9, omega=9,4 rad/s,
+cela donne 5,6e-7 par seconde — l'ordre de grandeur mesuré. Si c'est cela, la borne n'est ni
+l'horizon ni les 24 bits de scale_integer, mais **le stockage de omega en f32**.
+Artefact corrigé en cours de route : une ligne affichait 0,000000e0 parce que l'horizon demandé
+dépassait ce que le constructeur acceptait et que toutes les combinaisons étaient sautées. Un
+écart nul sans comparaison ressemble exactement à un résultat parfait. La sonde compte désormais
+ses couples et annonce l'horizon accepté.
+Constante d'horizon relevée à 64 s **localement, non committée** — sans elle rien n'est mesurable.
