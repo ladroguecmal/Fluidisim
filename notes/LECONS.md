@@ -3535,3 +3535,14 @@ sessions — « la tolérance ne peut pas descendre sous 7 % tant que la cause e
 la vraie réponse était que **la tolérance dépend du nombre de composantes**. Voir [[L219]] : le
 qualificatif « inexpliqué » a la même propriété qu'un qualificatif chiffré manquant, il rend la
 question présentable.
+
+## L230 — Une normalisation peut masquer une perte que les dérivées amplifient
+
+*(S147)* Renormaliser un spectre tronqué retrouve exactement sa variance totale, même lorsque
+la bande supprimée portait une part importante de ses vitesses ou de ses pentes. Le contrôle
+portant sur la grandeur normalisée ne peut pas détecter cette erreur : il vérifie le réglage.
+
+Avant de recevoir une représentation normalisée, mesurer **avant normalisation** ce qui a été
+retranché, puis contrôler les moments qui gouvernent ses consommateurs. Séparer l'erreur de
+troncature de l'erreur de discrétisation : augmenter le nombre de points dans une bande ne
+récupère jamais ce qui est hors bande. Vaut pour tout signal filtré dont on utilise les dérivées.

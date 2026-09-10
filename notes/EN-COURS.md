@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S147 — en cours
+Session : S147 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : clore S63-1 sur preuves existantes, puis instruire A212 (forme du spectre de B).
 
@@ -67,7 +67,7 @@ Objectif : clore S63-1 sur preuves existantes, puis instruire A212 (forme du spe
 - [x] **P1** — vérifier copies, branches, historique et outils ; prendre le jeton et committer ce plan seul.
 - [x] **P2** — lectures de reprise ; clore S63-1/S145-2 avec le périmètre exact de la dispersion construite et les dépendances restantes de B2.
 - [x] **P3** — examiner A212 dans les spécifications et le code, vérifier les références physiques et arrêter une décision de spectre avec son protocole de réception ; construire le lot que cette décision permet dans la session.
-- [>] **P4** — vérifier le lot, écrire journal et passation, contrôler décomptes et renvois, exécuter le rituel de fin et rendre le jeton.
+- [x] **P4** — vérifier le lot, écrire journal et passation, contrôler décomptes et renvois, exécuter le rituel de fin et rendre le jeton.
 
 ### Notes de reprise
 
@@ -77,3 +77,7 @@ S146 terminée ; 275 tests réussis/cinq ignorés annoncés, 99 ADR, 212 angles,
 La recommandation BILAN-S145 est portée : B1 exécuté S146, S63-1 prise en premier ici.
 P3 : ADR-100, SPEC-001 §1 bis, instrument spectral cfg(test), deux tests release reçus.
 A212 partielle : décision et instrument réalisés, constructeur spectral S147-1 à construire.
+P4 : suite workspace 277 réussis/cinq ignorés ; deux essais S147 aussi en release.
+Rituel exécuté : journal, A212 partielle, L230, suivi S147-1, index/README/REPRISE actualisés.
+100 ADR,212 angles (formats de titres et de tables pris en compte),18 invariants,6 SPEC,23 cas.
+S148 : construire le candidat spectral explicite, sans migrer implicitement le fond historique.

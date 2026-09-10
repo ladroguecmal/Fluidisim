@@ -16,6 +16,18 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 4. Le reste selon le besoin.
 
 ## Décisions d'architecture
+**S147 :** [ADR-100](adr/ADR-100-spectre-de-fond-et-bande-explicite.md),
+[SPECTRE-FOND-S147](validation/SPECTRE-FOND-S147.md), SPEC-001 §1 bis.
+**S63-1/S145-2 closes** : [constat de dispersion W](validation/CLOTURE-S63-1-S147.md).
+**A212 partielle** : forme JONSWAP, bande explicite, intégration de l'énergie par cellule ;
+constructeur spectral encore à construire. Hs normalisé masque la perte de m2 :95,07 % de
+m0 contre75,86 % de m2 conservés dans la bande historique pour gamma=3,3. Instrument reçu
+contre intégrales fermées, raffinements et contre-épreuve ; N32 approche les moments de
+la bande à moins de0,186 % sur six fixtures. Les résultats B1 historiques ne se transposent pas.
+277 tests réussis/cinq ignorés, production inchangée ;100 ADR,212 angles,18 invariants,
+6 spécifications,23 cas,1 banc partiellement exécuté sur11. L230.
+**Suite S148 : S147-1**, candidat spectral explicite et cuisson reproductible, puis réception
+B+W/pente/rejeu ; le sillage W4 et B2 restent la trajectoire système.
 
 **S146 :** [ADR-099](adr/ADR-099-b1-trente-deux-composantes.md), B1 : trente-deux composantes.
 [BANC-B1-S146](validation/BANC-B1-S146.md) — **premier banc exécuté du projet**, onze définis depuis S02.

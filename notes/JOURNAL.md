@@ -7586,3 +7586,47 @@ mesurée en S64 et expliquée en S67, sans que personne ne la rapproche du banc 
 de `B` que rien ne justifie, et qui décide de l'aspect autant que de la réponse d'un corps
 flottant. Restent ouverts : le sillage, l'audit des renvois « traité en Sxx » (S138), l'extension
 de fenêtre, S116-2, le bilan mixte, la durabilité et les deux calibrations de B10.
+
+---
+
+## S147 — 2026-09-10 — La dispersion existe ; Hs ne reçoit pas un spectre
+
+**Entrée :** master 66cd765, S146 terminée, toutes les copies propres, aucun jeton actif.
+Travail sur master, sans nouvelle copie. Fichiers, git et cargo disponibles ; plan committé seul.
+
+**Produits :** [CLOTURE-S63-1-S147](../docs/validation/CLOTURE-S63-1-S147.md),
+[ADR-100](../docs/adr/ADR-100-spectre-de-fond-et-bande-explicite.md), SPEC-001 §1 bis,
+[SPECTRE-FOND-S147](../docs/validation/SPECTRE-FOND-S147.md), deux tests hors runtime, L230.
+
+**S63-1 et S145-2 closes** : la dispersion est construite dans W (ADR-060), transport/énergie
+reçus S127/S129, intégration/rejeu S128. Les preuves archivées sont citées, non remesurées.
+La sélection B2 et la coupure W/δ ne se déduisent pas de cette réception (ADR-054).
+La recommandation du dernier bilan est suivie : B1 exécuté S146, clôture écrite faite ici.
+
+**A212 partiellement traitée.** Le fond actuel distribue l'énergie uniformément en
+log-fréquence, pas par hertz ; Tp ne marque aucun pic. ADR-004 prévoyait déjà gamma JONSWAP.
+Décision : candidat JONSWAP à bande explicite, Hs de la bande représentée, intégrales de cellule
+avant normalisation, constructeur distinct à recevoir avant migration des scénarios.
+
+**Chiffre décisif :** à gamma=3,3, la bande [0,5fp;2fp] conserve 95,0719 % de m0, mais
+75,8610 % de m2. À 4fp : 99,6806 % et 93,8178 %. Normaliser Hs masque la troncature sans
+réparer les dérivées ; m4 diverge pour la queue idéale infinie. Sur six fixtures, N32 suffit
+à approcher les moments dans la bande à moins de 0,186 % ; cela ne certifie ni la bande
+physique ni les statistiques spatiales ni la réponse d'une coque.
+
+**Vérifications :** suite workspace 277 réussis/cinq ignorés, zéro échec ; deux nouveaux essais
+également reçus en release. Instrument comparé aux intégrales fermées PM, raffinements,
+contre-épreuve du Jacobien. Deux fautes initiales documentées dans le rapport : seuil de
+séparation anticipé à 5 % alors que l'écart est 4,334 %, et Simpson traversant le changement de
+sigma. La seconde est corrigée par découpage, sans relâcher le seuil numérique.
+Aucun calcul de production modifié ; aucun hash de référence renouvelé. Quatre avertissements
+préexistants du harnais. Décomptes vérifiés aux sources : 100 ADR, 212 angles, 18 invariants,
+6 spécifications, 23 cas. I-01 à I-18 relus, aucun modifié.
+
+**Non fait :** constructeur spectral, cuisson déterministe, réception B+W et nouvelles
+statistiques B1. A212 reste partielle, suivie par **S147-1**, prochaine session S148.
+Le sillage W4 puis B2 restent la trajectoire système d'ADR-054. Audit S138 des renvois
+« traité en Sxx », extension de fenêtre, S116-2 profondeur finie, bilan mixte, durabilité
+et calibrations B10 restent ouverts. Aucun arbitrage technique renvoyé à l'humain.
+Infrastructure inchangée : aucun distant configuré ; sort des anciennes branches S35-7 ouvert.
+Les anciennes copies doivent rejoindre master avant reprise ; aucun travail non committé laissé.

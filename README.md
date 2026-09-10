@@ -135,7 +135,7 @@ Coût mesuré en S125 : environ ×4 à points identiques et ×9 pour le montage 
 initial. [ADR-085](docs/adr/ADR-085-profils-radiaux-selon-le-domaine.md) conserve N64 par défaut ;
 N128/N256 se dimensionnent explicitement au domaine commun du service. A202 traitée ; A203 suit
 la réception physique à grande portée, réalisée en S126 sur les deux fixtures à âge0–4 s.
-État vérifié S146 : **275 tests réussis, cinq ignorés ; 99 ADR, 212 angles, 18 invariants,
+État vérifié S147 : **277 tests réussis, cinq ignorés ; 100 ADR, 212 angles, 18 invariants,
 6 spécifications, 23 cas canoniques, 1 banc sur 11 exécuté.** Détail par couche et par bloc :
 [BILAN-S145](docs/registres/BILAN-S145.md).
 [Réception S126](docs/validation/RECEPTION-ETENDUE-S126.md) :1350 points-temps reçus contre
@@ -225,6 +225,9 @@ fonctionné. Décision : **32 composantes**, les trois critères mesurables conv
 `Hs` ×2,0, aucune différence pour un objet de côté ≤ 30 m). Le banc renverse une intuition : **augmenter le
 nombre de composantes ne rend pas la mer plus juste, il la rend moins prévisible**, et A187 — un écart de 6,6 %
 inexpliqué depuis quatre-vingts sessions — était une réalisation à 3 σ sur une graine unique.
-Suite : clore S63-1 par écrit, puis A212 — la forme du spectre de `B`, uniforme et que rien ne justifie.
-99 ADR,212 angles,18 invariants,6 spécifications,23 cas, **1 banc sur 11 exécuté**.
+**S147 : S63-1 close** sur la dispersion W déjà reçue. [ADR-100](docs/adr/ADR-100-spectre-de-fond-et-bande-explicite.md)
+décide un candidat JONSWAP à bande explicite ; **A212 reste partielle**, constructeur à écrire.
+L'instrument montre que normaliser Hs masque la perte des moments gouvernant les vitesses.
+Suite S148 : S147-1, configuration spectrale et cuisson reproductible, puis B+W/pente/rejeu.
+100 ADR,212 angles,18 invariants,6 spécifications,23 cas, **1 banc partiellement exécuté sur11**.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

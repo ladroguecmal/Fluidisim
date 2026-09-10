@@ -5,9 +5,9 @@
 //! quelque chose de réel à hacher. Elle exerce la chaîne complète : phases repliées, conversion de
 //! position monde, réduction ordonnée, hash de conformité.
 //!
-//! **Ce qu'elle n'est pas.** Le champ de fond du projet. Le nombre de composantes, leur découpage
-//! en bandes et le choix Gerstner sommé contre tuile FFT sont ouverts et se tranchent au banc **B1**
-//! (ADR-004 §7.1 et §7.2). Rien ici ne préjuge de ce résultat.
+//! **État S147.** Véhicule H1 historique à énergie égale par composante logarithmique.
+//! B1 a retenu 32 composantes sur ce véhicule (ADR-099). ADR-100 décide un candidat JONSWAP
+//! à bande explicite, encore à construire ; son instrument de réception est hors runtime.
 //!
 //! **Deux invariants sont mécaniques dans ce module.**
 //!
@@ -49,6 +49,8 @@ pub struct Component {
 /// Ce n'est pas un défaut imposé : `SeaState::components` reste fourni par l'hôte. Augmenter ce
 /// nombre est légitime pour une raison **perceptuelle**, qui n'a pas été mesurée ; ce ne l'est pas
 /// pour la justesse, qui se dégrade quand il croît.
+/// **Portée S147 (ADR-100)** : ces mesures concernent le spectre historique ; le candidat
+/// JONSWAP doit recevoir ses moments et ses statistiques avant toute transposition de B1.
 pub const COMPOSANTES_B1: usize = 32;
 /// Paramètres d'un état de mer — sous-ensemble de `HydroSample` (ADR-004 §2.2) suffisant pour H1.
 #[derive(Clone, Copy, Debug)]
@@ -118,6 +120,8 @@ impl Background {
     /// tranchera » qui figurait ici était trop large : le protocole §B1 mesure le nombre de
     /// composantes et le coût, jamais la répartition de l'énergie dans la bande. Voir
     /// `COMPOSANTES_B1` pour ce qui est tranché, et **A212** pour ce qui ne l'est pas.
+    /// **S147 : A212 partielle, ADR-100.** Énergie égale en log-fréquence, pas par hertz.
+    /// Le futur constructeur spectral sera explicite ; cette voie reste le témoin historique.
     pub fn configure(
         host: &mut HostServices,
         sea: SeaState,

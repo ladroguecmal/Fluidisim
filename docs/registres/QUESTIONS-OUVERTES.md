@@ -1358,4 +1358,8 @@ entrée par entrée. Le fil reprend ci-dessous.
 - **S63-1 et S145-2 : closes**, [CLOTURE-S63-1-S147](../validation/CLOTURE-S63-1-S147.md).
   W choisie par ADR-054, construite par ADR-060, transport/énergie reçus S127/S129,
   intégration et rejeu S128. Ce suivi remplace les états ouverts S63, S70, S71 et S145/S146.
-  La sélection B2 et la coupure W/δ restent ouvertes ; aucune dispersion de δ n'est certifiée.
+  La sélection B2 et la coupure W/δ restent ouvertes ; aucune dispersion de δ n'est certifiée.- **A212 : partielle**, ADR-100 ; forme JONSWAP et bande explicite décidées, instrument reçu.
+- **S147-1 : ouverte, prochaine session S148.** Construire la configuration spectrale explicite
+  et sa cuisson reproductible, recevoir la fixture [0,5fp;4fp], gamma 1/3,3/7 et N32/64/128/256
+  contre S147, puis pente, B+W et rejeu. Garder le constructeur uniforme comme témoin historique.
+  Aucune migration implicite des scénarios ; le choix des bandes du jeu reste à instruire.

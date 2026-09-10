@@ -68,3 +68,10 @@ additives. Le banc est `code/water-core/examples/banc_b1.rs`, rejouable.
 **Le rapport dit lui-même ce qu'il ne tranche pas**, et c'est délibéré : deux volets sur quatre
 sont hors de portée. Une session qui lirait « B1 fait » sans cette réserve porterait un renvoi
 faux de plus.
+
+## Actualisation du 2026-09-10 — S147
+
+[ADR-100](ADR-100-spectre-de-fond-et-bande-explicite.md) décide un candidat spectral JONSWAP.
+Les résultats ci-dessus sont ceux du constructeur historique, à énergie égale par composante
+logarithmique. Ils ne reçoivent pas les moments, la dispersion statistique ou les pentes d'un
+autre spectre. N32 est un point de départ pour le nouveau candidat, à recevoir de nouveau.

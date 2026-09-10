@@ -18,12 +18,15 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 14:05 +02:00
+JETON            : libre
+Battement        : 2026-09-10 14:10 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S147
-Dernière session : S146 — **B1 exécuté**, le premier banc du projet ;275 tests/cinq ignorés
-Session suivante : S147 — clore **S63-1** par écrit, puis **A212** (la forme du spectre de `B`)
+Session en cours : aucune
+Dernière session : S147 — S63-1 close, ADR-100 spectre explicite ; 277 tests/cinq ignorés
+Session suivante : S148 — S147-1, construire le candidat spectral de B (ADR-100), puis W4/B2
+
+**S147 : travail directement sur master.** Les anciennes copies, dont 886155, doivent rejoindre
+master avant toute reprise ; aucune copie créée, toutes propres au démarrage.
 
 **Copie de travail S139 et S140** : worktree `claude/reprise-projet-886155`, refusionné en avance
 rapide dans master à la fin de chacune des deux. Terminer de même :
@@ -54,7 +57,7 @@ sillage/intégration → B2. B1 contribue au budget B+W sans bloquer W. Premier 
 analytique CPU en milieu uniforme ; sélection finale encore ouverte. La référence dispersive
 exacte seule ne fixe pas la coupure W/δ. C19 complet exige aussi V. Aucun lot W écrit en S71.
 
-**Bilan S69, et il change l'ordre des priorités.** ~85 % comme corpus de conception, **~15 %
+**Repère historique S69, remplacé par BILAN-S145 (W est désormais construit).** ~85 % comme corpus de conception, **~15 %
 comme système** : `δ`, `W` et `V` n'existent pas. **Onze cas sur 23 et onze bancs sur onze
 attendent une couche non écrite** — le projet ne peut plus progresser par la mesure. De S47 à
 S68, **aucune session n'a produit de conception du système d'eau**. Voir
@@ -170,7 +173,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 97 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 100 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -189,6 +192,19 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+**S147 — 2026-09-10 :** [ADR-100](docs/adr/ADR-100-spectre-de-fond-et-bande-explicite.md),
+[SPECTRE-FOND-S147](docs/validation/SPECTRE-FOND-S147.md).
+**S63-1/S145-2 closes** sur les preuves existantes de W, sans verdict B2 ni coupure W/δ.
+**A212 partielle** : JONSWAP à bande explicite décidé, instrument de réception construit.
+Le fond actuel a une énergie uniforme en log-fréquence et aucun pic à Tp. À gamma=3,3,
+sa bande ne retiendrait que75,86 % de m2 contre95,07 % de m0 : normaliser Hs masque la perte.
+32 cellules intégrées reçoivent les moments de la bande à moins de0,186 % sur six fixtures ;
+ce n'est pas un champ JONSWAP construit ni une validation de ses statistiques spatiales.
+**277 tests réussis/cinq ignorés**, deux nouveaux aussi en release ; production inchangée.
+100 ADR,212 angles,18 invariants,6 spécifications,23 cas,1 banc partiellement exécuté sur11.
+**Suite S148 : S147-1**, configuration spectrale explicite et cuisson reproductible, réception
+contre l'instrument S147 puis B+W/pente/rejeu. A212 reste partielle jusque-là. W4/sillage puis
+B2 restent la trajectoire système. Recommandations BILAN-S145 portées : B1 S146, S63-1 S147.
 
 **S146 — 2026-09-10 :** [ADR-099](docs/adr/ADR-099-b1-trente-deux-composantes.md),
 [BANC-B1-S146](docs/validation/BANC-B1-S146.md). **Premier banc exécuté du projet** — onze sont
