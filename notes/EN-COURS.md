@@ -77,7 +77,7 @@ cambrure de Stokes (SPEC-001 §4) au lieu de rester un nombre sans origine.
 - [x] **P4** — si le rapport est stable : dériver `max_slope` de `πH/λ ≈ 0,449` divisé par lui,
       et **vérifier la conséquence** — quelles énergies deviennent admissibles ou refusées à
       0,1 contre la valeur dérivée. Sinon : dire de quoi il dépend, et ce que cela coûte.
-- [ ] **P5** — ADR : d'où vient `max_slope`. Livrable de mesure dans `docs/validation/`.
+- [x] **P5** — ADR : d'où vient `max_slope`. Livrable de mesure dans `docs/validation/`.
       Notes correctives datées là où 0,1 est cité comme une donnée du milieu.
 - [ ] **P6** — rituel de fin (§6), jeton rendu, fusion `--ff-only`.
 

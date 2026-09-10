@@ -84,3 +84,15 @@ effet. Voir [ADR-093](ADR-093-ou-se-calibre-la-source-d-impact.md).
 
 *S137 avait corrigé trois ADR portant ce renvoi ; l'audit S138 en a trouvé six. Ce correctif-ci
 est le résultat de la recherche que S137 n'avait pas faite.*
+
+## Note corrective du 2026-09-10 (S139)
+
+§21 renvoie la **limite de pente** « à calibrer B2 » : faux pour la même raison que ci-dessus, et
+d'une façon de plus — *elle ne se calibre pas du tout*. La limite physique est déjà écrite dans
+SPEC-001 §4 (cambrure limite de Stokes) et vaut 0,4488.
+
+Le §22 a raison de dire que la borne `Σ|a_k|k` est conservative et peut refuser un champ dont les
+pentes se compensent. Ce qu'il ne disait pas est **de combien** : le rapport à la pente réelle
+vaut **1,7950713**, constante du modèle mesurée en S139, indépendante de λ, de l'énergie, de `N`
+et du rayon. Voir [ADR-094](ADR-094-d-ou-vient-la-limite-de-pente.md) et
+[PENTE-REELLE-S139](../validation/PENTE-REELLE-S139.md).

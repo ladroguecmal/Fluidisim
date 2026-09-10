@@ -69,3 +69,16 @@ restent ouverts. Prochaine construction : préparer les champs du journal dans u
 bornée et évaluer un lot avec statut explicite, sans construction par point ni sortie partielle.
 Ce chemin permettra de mesurer le coût réel B+W. Les profils non reçus, plusieurs référentiels,
 réseau et rétention S72-2 restent ouverts. Invariants I-01/I-03/I-06/I-08/I-11/I-14 relus, inchangés.
+
+## Note corrective du 2026-09-10 (S139)
+
+« Elle doit respecter max_slope hôte, à calibrer B2 » (§50) est faux deux fois : B2 ne mesure pas
+de limite de pente (ADR-093), et cette limite **se dérive** au lieu de se calibrer — SPEC-001 §4,
+`πH/λ` à `H/λ = 1/7`, soit 0,4488 ([ADR-094](ADR-094-d-ou-vient-la-limite-de-pente.md)).
+
+La suite du §50 — « c'est une borne conservative, pas la cambrure mesurée sur une crête
+particulière » — reste exacte, et le facteur est désormais chiffré : **1,7950713** pour la part
+d'un impact radial. Mais la borne d'ensemble `π·B.steepness + Σ bornes W` **additionne une pente
+exacte et des bornes L1 de facteurs différents** : aucun seuil unique ne peut être physiquement
+juste pour tous ses termes tant qu'elle reste hétérogène. Voir
+[PENTE-REELLE-S139](../validation/PENTE-REELLE-S139.md) §5.

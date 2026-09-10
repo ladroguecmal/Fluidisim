@@ -91,3 +91,14 @@ qu'il s'agit du cas visé.
 
 La section Réception ci-dessus, écrite avant la construction, ne vaut donc que pour
 `RadialImpact`. C'est là que le cas est construit et distingué.
+
+## Note corrective du 2026-09-10 (S139)
+
+« `Steepness` … `max_slope`, qui redevient ce que son nom dit » n'est vrai qu'à moitié, et la
+moitié manquante a laissé le seuil sans provenance de S77 à S139. L'ordre des refus
+posé ici est juste ; mais la grandeur comparée à `max_slope` reste la **borne L1**
+`Σ|a_k·k·dk|·k`, qui majore la pente réelle du champ d'un facteur mesuré à **1,7950713** (S139).
+Un `max_slope` nommé « pente maximale » borne donc, aujourd'hui encore, autre chose qu'une pente.
+
+`RadialImpact::slope_max()` publie la pente réelle depuis S139 ; migrer le refus vers elle est
+l'action S139-1. Voir [ADR-094](ADR-094-d-ou-vient-la-limite-de-pente.md).
