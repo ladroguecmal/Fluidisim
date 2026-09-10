@@ -75,7 +75,7 @@ ne l'a fait.
       committée** — c'est ce qui rend la mesure possible, et rien d'autre ne change.
 - [x] **P3** — séparer ce que « 16 s » recouvre : l'**âge** auquel on échantillonne et la **durée
       active** du forçage n'empruntent pas le même chemin numérique. Mesurer la seconde seule.
-- [ ] **P4** — décider d'après les chiffres : nouvel ADR si les deux bornes se séparent, ou
+- [x] **P4** — décider d'après les chiffres : nouvel ADR si les deux bornes se séparent, ou
       provenance mesurée écrite pour la borne conservée. Un ADR n'est jamais réécrit.
 - [ ] **P5** — appliquer la décision dans le code, avec un test **témoin** : désactiver le
       mécanisme doit faire échouer le test, sinon le test ne prouve rien.
@@ -159,3 +159,10 @@ manque à B2 est l'horizon, pas la durée.
 Deuxième constante à bouger, trouvée en cherchant : `bound_pressure::Context::new` borne aussi
 `end - start` à 16 s. C'est la « fenêtre » de S151. Les deux disent la même chose au même endroit
 du raisonnement, et l'une sans l'autre ne débloque rien.
+
+P4 — ADR-106 : l'horizon d'observation n'est pas la durée de forçage. Horizon à 64 s dans
+`modal_pressure` **et** `bound_pressure` ; durée active conservée à 16 s parce qu'ADR-104
+découpe déjà le mouvement et que B2 a besoin d'observer, pas de forcer. Budget de précision
+écrit à la place de la constante : <4e-5 relatif à 64 s, soit ~7e-5 en énergie contre le seuil
+1e-4 E0 de B2 — sous le seuil, sans marge confortable, et il fallait le dire.
+Non fait et nommé : corriger la dérive en portant omega au-delà du f32 (A213 à écrire en P5).
