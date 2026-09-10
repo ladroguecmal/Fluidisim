@@ -78,7 +78,7 @@ périmé qu'une session y trouvera `libre`.
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan déclaré et committé seul.
-- [ ] **P2** — inventaire **factuel** des six copies et des six branches : commits uniques,
+- [x] **P2** — inventaire **factuel** des six copies et des six branches : commits uniques,
       propreté, âge, état du jeton que chacune porte. Rien ne sera supprimé avant que ce tableau
       existe et soit publié.
 - [ ] **P3** — remettre en avance rapide toute copie sans commit unique. C'est le geste le moins
@@ -123,3 +123,14 @@ Règles que je me donne avant de toucher à quoi que ce soit, parce qu'une suppr
 Piège à éviter, et il est réel : croire que ranger les copies règle le problème. Le problème est
 que **le jeton est versionné**, et il le restera. Ranger réduit le nombre d'univers ; seule une
 procédure écrite au bon endroit empêche qu'ils se remultiplient.
+
+P2 — inventaire publie dans COPIES-S159, avant toute modification.
+Le danger est demontrable, pas hypothetique : quatre copies disent `libre` au meme instant avec
+quatre "derniere session" differentes — S158, S157, S146 et **S44**. Une session ouvrant c107bf
+prendrait le jeton de bonne foi et commencerait S45, recreant cent quinze sessions d'histoire
+parallele. Seule la copie archivee est protegee, par l'etat `archivé` ajoute en S39 : il fonctionne,
+et il est la seule chose qui fonctionne.
+Fait nouveau : project-status-progress-d31d78 est **apparue pendant S158**, sans annonce. Les
+copies ne s'eteignent pas toutes seules, elles se recreent.
+Aucune copie ne porte de travail non committe — verifie en premier, c'est la seule perte qui serait
+irreversible.
