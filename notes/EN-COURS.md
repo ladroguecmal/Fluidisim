@@ -69,7 +69,7 @@ pendant soixante sessions. Défaut de **dispositif**, pas de calcul.
 ### Plan
 
 - [x] **P1** — état réel, jeton, **plan déclaré et committé seul**.
-- [ ] **P2** — peser les trois réparations **avant** d'en écrire une, et écrire la pesée. Type
+- [x] **P2** — peser les trois réparations **avant** d'en écrire une, et écrire la pesée. Type
       porteur, essai générique, entrée d'invariant : coût, ce que chacune attrape, ce qu'elle
       laisse passer. La question qui décide est *qu'est-ce qui aurait arrêté le défaut de S141*,
       pas *qu'est-ce qui est le plus propre*.
