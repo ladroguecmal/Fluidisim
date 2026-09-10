@@ -66,3 +66,53 @@ garde dit *pourquoi* la garde existe, ce qu'aucun code n'exprime.
 
 Voies 2, 3 et 4 ensemble — l'essai générique pour ce que les champs calculent, le recensement pour
 ce que le crate contient, l'invariant pour dire ce que les deux protègent.
+
+## 4. Les deux gardes, et la vérification qu'elles gardent
+
+### Garde 1 — `every_field_places_its_limit_at_stokes_steepness_s143`
+
+Le même essai bout à bout pour chaque champ, **écrit une fois** : S141 et S142 l'avaient écrit
+deux fois, dans deux modules, et deux textes qui se ressemblent finissent par diverger (L137). Les
+deux essais spécifiques sont remplacés par celui-ci.
+
+```
+RadialImpact<64> : energie_limite=1,485427e3  pente=0,448799  stokes=0,448799
+ImpactField      : energie_limite=5,720523e3  pente=0,448737  stokes=0,448799
+```
+
+Ses deux assertions ne disent pas la même chose. **Ne pas dépasser** est la sûreté. **Atteindre**
+est le contrat : si le champ limite reste loin sous la cambrure, c'est que la frontière borne
+autre chose qu'une pente réelle.
+
+### Garde 2 — `no_undeclared_comparison_to_max_slope_s143`
+
+Elle lit les sources du crate et compare l'ensemble des comparaisons à `max_slope` à une liste
+déclarée — deux constructions qui convertissent leur borne L1, trois budgets qui somment des
+grandeurs déjà converties. Elle ne juge aucun calcul : elle constate un site.
+
+Elle voit aussi les fichiers que le compilateur ignore, un module non déclaré compris. Ce n'est
+pas un défaut : un fichier de code mort finit par être déclaré, et il vaut mieux qu'il soit
+signalé avant.
+
+### La vérification : réintroduire les fautes et les voir attrapées
+
+Une garde qu'on n'a pas vue échouer ne garde rien — c'est la moitié qu'ADR-082 exige de chaque nom
+de refus. Les deux fautes ont été réintroduites dans une copie de travail, puis annulées.
+
+**Faute 1, celle de S141** — rendre à `ImpactField::new` sa comparaison L1 :
+
+| garde | ce qu'elle a dit |
+|---|---|
+| recensement | `impact_field.rs : slope>medium.max_slope` au lieu de `slope/SLOPE_L1_RATIO>medium.max_slope` |
+| essai générique | `ImpactField : pente=0,263716` contre 0,448799 attendu |
+
+0,448799 / 1,701591 = 0,263748 : **l'essai ne signale pas seulement l'échec, il donne le facteur
+manquant**, et il l'aurait donné en S141.
+
+**Faute 2, celle qu'A210 décrit** — un troisième champ, dans un fichier que rien ne déclare :
+
+```
+left: [… ("champ_fictif.rs", "slope>medium.max_slope"), …]
+```
+
+Attrapée le jour où le fichier est écrit, avant même d'être branché.

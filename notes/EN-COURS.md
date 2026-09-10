@@ -75,7 +75,7 @@ pendant soixante sessions. Défaut de **dispositif**, pas de calcul.
       pas *qu'est-ce qui est le plus propre*.
 - [x] **P3** — construire ce que la pesée retient. Étape courte : si la réparation ne tient pas
       en un quart d'heure, c'est qu'elle est plus lourde que le défaut.
-- [ ] **P4** — **vérifier qu'elle attrape le défaut** : réintroduire la faute de S141 dans une
+- [x] **P4** — **vérifier qu'elle attrape le défaut** : réintroduire la faute de S141 dans une
       copie de travail jetable et constater l'échec. Une garde qu'on n'a pas vue échouer ne
       garde rien — c'est la moitié qu'ADR-082 vérifie pour chaque nom de refus.
 - [ ] **P5** — ADR et livrable ; porter l'invariant s'il y en a un.
