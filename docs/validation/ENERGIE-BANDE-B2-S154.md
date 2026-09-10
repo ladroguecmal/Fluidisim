@@ -47,3 +47,47 @@ Rapports à E0 ; chaque ligne donne les disques80m et collecteur au temps indiqu
 Le disque80m manque environ21,224 % à5m et55,305 % à6m ; cette énergie se trouve
 plus loin. À2m, presque toute l'énergie reste encore dans80m. La taille de collecte
 ne se transpose donc pas d'une longueur d'onde à l'autre à durée identique.
+
+## Réception du candidat
+
+Observable S129 depuis les coefficients réellement cuits, phases et Bessel de production ;
+assemblage énergétique f64 hors runtime. Les vitesses assemblées restent comparées à sample()
+(seuil1e-6 normalisé). Chaque énergie est comparée à l'oracle indépendant ci-dessus.
+
+| Source m / N / rayon | E80/E0 à0s | Ecollecteur/E0 à0s | E80/E0 à60s | Ecollecteur/E0 à60s |
+|---|---:|---:|---:|---:|
+| 2 /512 /88 | 1,000060262152 | 1,000060262170 | 0,999999796164 | 1,000000289417 |
+| 3 /512 /112 | 1,000011906027 | 1,000011906301 | 0,999111707548 | 1,000000052974 |
+| 5 /512 /136 | 1,000024809735 | 1,000024813544 | 0,787762620518 | 0,999999562700 |
+| 6 /512 /152 | 1,000011896054 | 1,000011905932 | 0,446945053321 | 0,999999823405 |
+| 5 /256 /80 | 1,000024469097 | même disque | 0,787762416677 | même disque |
+| 6 /256 /80 | 1,000011811824 | même disque | 0,446944311999 | même disque |
+
+Écart maximal candidat/oracle<=5,61e-7 E0, seuil1e-4 ; fermeture des collecteurs
+à moins de0,003 E0 et raffinement spatial candidat à moins de0,002 E0.
+Référence : écart spectral maximal1,076e-9 E0 ; spatial maximal1,019e-3 E0,
+à la naissance2m. Densité angulaire aux sentinelles<=2,669e-18 E0 par m².
+Le très petit excès initial relève de la quadrature de mesure (S153), pas d'une
+création d'énergie démontrée. À60s les collecteurs sont à moins de4,38e-7 E0 de1
+pour le candidat. Pas de preuve d'une queue exactement nulle hors collecteur.
+
+Deux tests nouveaux, `energy_band_collectors_s154` et `energy_band_selected256_s154` :
+références copiées à12 décimales, arrondi<=5e-13 E0. Omettre la cinétique ou supprimer
+ses interférences échoue sur toutes les fixtures à60s ; garde-fous inchangés.
+Commande : `cargo test -p water-core --release energy_band -- --nocapture`.
+
+## Verdict et suite
+
+S153-1 réalisée. Avec S153, le bilan initial/60s est reçu sur les cinq longueurs
+sources2/3/4/5/6m du volet impact B2. Le profil256 reste reçu dans80m pour5/6m ;
+N512 sert à vérifier l'énergie qui a dépassé ce domaine. Le fait d'observer le
+collecteur plus grand ne certifie pas N256 sur celui-ci.
+Aucun coût ni seuil de qualité modifié, aucun nouvel ADR ou changement de production.
+Deux bancs restent partiels : B1 et B2. La réception d'impacts ne vaut pas Kelvin,
+sillage long, réfraction, capacité4096 sources ou preuve multiplateforme.
+
+**S154-1 : prochaine S155, B2 sillage.** Quantifier la couverture temporelle/spatiale
+requise par B2-01 face au contexte de pression16s ; construire un premier scénario
+de sillage prolongé recevable ou identifier par mesure le blocage numérique précis.
+Ne pas transposer l'admission d'impact60s au noyau de pression. La prochaine production
+reste une étape de B2 selon le dernier bilan, pas une sélection technologique globale.

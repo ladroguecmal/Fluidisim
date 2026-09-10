@@ -277,3 +277,43 @@ fn energy_leaves_disk_without_disappearing_s153() {
     }
     assert!(surface<1e-6);
 }
+
+fn band_energy<const M:usize>(lambda:f32,radius:f64,step:f64,expected:[[f64;2];2]) {
+    let (old,m)=fixture();let mut v=*old.event.data();v.wavelength_m=lambda;
+    let event=WaveEvent::impact(v).unwrap();let e0=v.energy_j as f64;
+    let field=RadialImpact::<M>::new(event,m,Domain {radius:radius as f32,age_us:60_000_000}).unwrap();
+    let rings=(radius/step) as usize;let inner=(80./step) as usize;let mut surface=0.0;
+    let integrate=|rows:&[Density],end:usize,stride:usize,component:usize|->f64 {
+        let n=end/stride;assert_eq!(n%2,0);
+        (0..=n).map(|j| {let i=j*stride;let w=if j==0||j==n {1.}else if j%2==0 {2.}else {4.};let d=rows[i];
+            let value=match component {0=>d.total(),1=>d.potential,_=>d.potential+d.diagonal};
+            value*core::f64::consts::TAU*(i as f64*step)*w*(stride as f64*step)/3.
+        }).sum::<f64>()/e0
+    };
+    for (ti,us) in [0,60_000_000].into_iter().enumerate() {
+        let measure=Measurement::new(&field,m,us);
+        let rows:Vec<_>=(0..=rings).map(|i|measure.density((i as f64*step) as f32,&mut surface)).collect();
+        let mut result=[0.;2];
+        for (j,end) in [inner,rings].into_iter().enumerate() {
+            result[j]=integrate(&rows,end,1,0);
+            assert!((result[j]-expected[ti][j]).abs()<1e-4);
+            assert!((result[j]-integrate(&rows,end,2,0)).abs()<0.002);
+        }
+        println!("S154 lambda={lambda} N={M} t={us} R={radius} E80/E0={:.12} Ecollect/E0={:.12}",result[0],result[1]);
+        if radius>80. {assert!((result[1]-1.).abs()<0.003);}
+        if us>0 {assert!((integrate(&rows,rings,1,1)-result[1]).abs()>0.1);assert!((integrate(&rows,rings,1,2)-result[1]).abs()>1e-4);}
+    }
+    assert!(surface<1e-6);
+}
+#[test]
+fn energy_band_collectors_s154() {
+    band_energy::<512>(2.,88.,0.0625,[[1.000060621948,1.000060621964],[0.999999481614,0.999999975071]]);
+    band_energy::<512>(3.,112.,0.0625,[[1.000011753834,1.000011754095],[0.999111648388,0.999999976655]]);
+    band_energy::<512>(5.,136.,0.125,[[1.000024528388,1.000024532205],[0.787762595879,0.999999630848]]);
+    band_energy::<512>(6.,152.,0.125,[[1.000011743876,1.000011753740],[0.446944872471,0.999999694485]]);
+}
+#[test]
+fn energy_band_selected256_s154() {
+    band_energy::<256>(5.,80.,0.125,[[1.000024528388;2],[0.787762595879;2]]);
+    band_energy::<256>(6.,80.,0.125,[[1.000011743876;2],[0.446944872471;2]]);
+}
