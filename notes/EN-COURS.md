@@ -67,7 +67,7 @@ Objectif : S165-1/A221, fermeture autonome avec information entrante et sortante
 - [x] **P1** — état réel, jeton et plan seul.
 - [x] **P2** — dériver caractéristiques et référence analytique, protocole avant mesure ; copies synchronisées.
 - [x] **P3** — implémenter fermeture aux étages, comparer entrée/sortie et raffinements.
-- [ ] **P4** — réception, résultats, limites et suivi des actions.
+- [x] **P4** — réception, résultats, limites et suivi des actions.
 - [ ] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
@@ -82,3 +82,6 @@ P3 : six tests propres S166 et huit S165 reçus ; 32 montages/128 évolutions re
 À N240/a0,05 entrée : erreur totale 0,314832 ; écart de frontière 0,001505704.
 Perte de crête vers12s 0,1277563, identique au témoin : défaut intérieur observé.
 Bilan <=2,04e-15, Courant <=0,214735. Aucun runtime modifié.
+
+P4 : A221 traitée subcritique 1D entrée connue ; A222/S166-1 distingue source physique
+et résidu numérique du fond. A50 partielle, aucun ADR. Résultats publiés dans BORD-AUTONOME.

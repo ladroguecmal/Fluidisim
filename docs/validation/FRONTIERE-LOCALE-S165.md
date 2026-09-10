@@ -146,3 +146,7 @@ A50 reste partielle ; A216/A217 inchangées. Aucun absorbeur choisi, aucun seuil
 aucun ADR nouveau. Ni δ 3D, ni interface B du runtime, ni interpolation grossière, ni forces
 ou perception ; B4 non reçu intégralement. I-01/04/12/14/15 inchangés : aucune conséquence
 sur la gratuité visuelle de création/destruction d'un domaine n'est mesurée ici.
+
+**Suivi S166 : S165-1 réalisée**, voir [BORD-AUTONOME-S166](BORD-AUTONOME-S166.md).
+Fermeture caractéristique autonome reçue sur entrée connue et sortie, subcritique 1D.
+La précision du calcul intérieur domine désormais l'écart de frontière ; suite A222/S166-1.

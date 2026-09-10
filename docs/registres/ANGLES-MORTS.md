@@ -2052,3 +2052,16 @@ La bosse traverse effectivement le bord. Voir FRONTIERE-LOCALE-S165 ; A50 reste 
   information entrante elle suppose. S165-1 : extrapolation et fermeture caractéristique,
   cas sortant puis fond entrant ; aucun engagement à reconstruire un résidu extérieur
   arbitraire inconnu. Instrument 1D, aucun défaut de production constaté.
+
+**Suivi A221 — S166 : traitée sur véhicule subcritique 1D, entrée connue.** Invariant
+entrant fourni par Q, sortant par l'intérieur de chaque étage. Entrée/sortie dans les
+deux directions reçues ; état supercritique refusé. Voir BORD-AUTONOME-S166. Aucune
+promesse sur un extérieur résiduel inconnu ou sur le solveur 3D.
+
+- **A222** *(sévérité 2, S166 ; ouverte)* — **Retrouver le solveur total transmet aussi
+  ses défauts au fond analytique.** Sur l'onde simple exacte prescrite, d initial nul,
+  le témoin analytique aux bords perd 12,8 % de hauteur de crête à N240 vers 12 s ; la
+  fermeture caractéristique donne la même perte. L'erreur de frontière est secondaire.
+  La source discrète reçue S164 impose l'identité au schéma total, pas la préservation de Q.
+  S166-1 : distinguer défaut physique et résidu numérique du fond, recevoir un candidat
+  préservant le fond exact puis une perturbation. Aucun changement de source runtime ici.

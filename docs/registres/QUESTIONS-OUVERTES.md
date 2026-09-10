@@ -1494,3 +1494,16 @@ entrée par entrée. Le fil reprend ci-dessous.
   arbitraire reste une information manquante, pas une promesse de reconstruction.
   Porteur : session de construction ; aucun choix d'absorbeur ni seuil physique reçu.
 - A216/A217 inchangées ; BILAN-S145 suivi par poursuite B4 après B1 et S63-1.
+
+### Suivi S166 — Fermeture autonome construite
+
+- **S165-1 réalisée, A221 traitée sur véhicule subcritique 1D à entrée connue.**
+  BORD-AUTONOME-S166 : invariant entrant de Q, sortant de l'intérieur aux deux étages.
+  Six nouveaux tests et huit S165 reçus ; 32 montages/128 évolutions. Aucun ADR nouveau.
+- **A50 partielle**, A216/A217 inchangées. Pas de réception de frontière 3D/supercritique,
+  ni reconstitution d'un résidu extérieur inconnu.
+- **S166-1 / A222 : ouverte, priorité S167.** Dériver et mesurer une discrétisation qui
+  préserve d=0 sur fond exact ; onde simple puis perturbation ajoutée. Comparer à S164
+  sans imposer l'identité au solveur total dissipatif. Distinguer défaut physique du fond
+  approximatif et résidu numérique : ne pas supprimer le premier avec le second.
+  Porteur : session de construction, poursuite B4 selon BILAN-S145.
