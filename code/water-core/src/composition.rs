@@ -64,7 +64,8 @@ pub fn compose<'a, const N: usize>(
         let w = field
             .sample(frame, cell, point, time)
             .map_err(|_| Error::Domain)?;
-        bound += field.slope_bound();
+        // S141 : chaque terme consomme le meilleur majorant exact de sa pente réelle (ADR-095).
+        bound += field.slope_max();
         base.eta += w.eta;
         base.deta_dt += w.deta_dt;
         base.u_total[0] += w.horizontal_velocity[0];

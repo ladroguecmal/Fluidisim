@@ -187,7 +187,10 @@ impl<const N: usize> RadialImpact<N> {
         if !slope.is_finite() {
             return Err(Error::NotRepresentable);
         }
-        if slope > medium.max_slope {
+        // S141, ADR-094 : `max_slope` est la pente **réelle** admissible, et la grandeur qui
+        // lui est comparée doit l'être aussi. `slope` est la borne L1, qui la majore d'un
+        // facteur constant `SLOPE_L1_RATIO` — division exacte à `t = birth`, majorante ensuite.
+        if slope / SLOPE_L1_RATIO > medium.max_slope {
             return Err(Error::Steepness);
         }
         Ok(Self {

@@ -4,6 +4,7 @@
 //! taille de l'objet, l'autre non — et ce module tient les deux statuts séparés plutôt que de
 //! les mélanger dans une formule d'apparence physique.
 use crate::impact_field::Medium;
+use crate::radial_impact::SLOPE_L1_RATIO;
 
 /// Rapport `λ / b` : la forme spatiale initiale du candidat s'annule à `0,2985 λ`, et c'est
 /// cette étendue centrale — celle que la cavité creuse — qu'on fait coïncider avec la
@@ -17,7 +18,12 @@ pub const ALPHA: f32 = 3.35;
 /// Constante sans dimension de la borne d'énergie `E_max = K·ρ·g·λ⁴·s²`. Mesurée par
 /// dichotomie sur le candidat lui-même : `E_max/λ⁴` est constant à 8,9401e-2 pour λ de 0,5 à
 /// 8 m, et le rapport vaut exactement 16 quand la pente admise quadruple (S136).
-pub const K_ENERGIE: f32 = 8.891e-4;
+///
+/// **S141 :** `8,891e-4` valait quand `max_slope` bornait la borne L1. Depuis que la frontière
+/// compare la pente **réelle** (ADR-094), le candidat admet `SLOPE_L1_RATIO` fois plus de pente,
+/// donc son carré en énergie — `E ∝ pente²`. Le facteur est écrit ici plutôt que multiplié dans
+/// la valeur : si le rapport mesuré change, la borne annoncée suit, au lieu de mentir en silence.
+pub const K_ENERGIE: f32 = 8.891e-4 * SLOPE_L1_RATIO * SLOPE_L1_RATIO;
 /// Entrée d'un objet dans l'eau, telle que le gameplay la connaît.
 #[derive(Clone, Copy, Debug)]
 pub struct Entry {

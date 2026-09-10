@@ -169,7 +169,7 @@ pub fn slope_floor<const N: usize>(
 ) -> f32 {
     let mut floor = 0.0f32;
     for f in impacts.fields.iter().flatten() {
-        floor += f.slope_bound();
+        floor += f.slope_max();
     }
     if let Some(p) = pressure {
         floor += p.slope_envelope();
@@ -246,7 +246,7 @@ pub fn sample_world_batch<const N: usize>(
             s.u_total[2] += w.deta_dt;
             slope[0] += w.slope[0];
             slope[1] += w.slope[1];
-            envelope += f.slope_bound();
+            envelope += f.slope_max();
         }
         if fields.next().is_some() {
             return Err(fail(composition::Error::FieldsMismatch));

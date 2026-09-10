@@ -296,7 +296,7 @@ fn mixed_fields_match_sum_and_single_final_normal() {
             assert_eq!(out[n].aeration.to_bits(), base.aeration.to_bits());
             assert_eq!(out[n].deta_dt.to_bits(), out[n].u_total[2].to_bits());
             let envelope =
-                (base.steepness * std::f32::consts::PI + impact.slope_bound()) + p.slope_envelope();
+                (base.steepness * std::f32::consts::PI + impact.slope_max()) + p.slope_envelope();
             assert_eq!(
                 out[n].steepness.to_bits(),
                 (envelope / std::f32::consts::PI).to_bits()
@@ -427,9 +427,9 @@ fn mixed_rejects_context_time_capacity_domains_and_total_slope_atomically() {
             Err(Error::Context)
         );
         let base = b.eval(points[0], t).unwrap().steepness * std::f32::consts::PI;
-        let limit = base + impact.slope_bound().max(p.slope_envelope());
+        let limit = base + impact.slope_max().max(p.slope_envelope());
         // Chaque contribution séparée tient, leur somme dépasse la même limite.
-        assert!(base + impact.slope_bound() <= limit && base + p.slope_envelope() <= limit);
+        assert!(base + impact.slope_max() <= limit && base + p.slope_envelope() <= limit);
         assert_eq!(
             sample_world_batch(
                 &bound,
@@ -749,7 +749,7 @@ fn slope_floor_refuses_every_batch_below_it() {
         let points = [world(1.0, 0.0), world(2.0, 1.0), world(-3.0, 2.0)];
         let floor = slope_floor(impacts, Some(p));
         // Le plancher est bien la somme des parts constantes, dans l'ordre de la requête.
-        assert_eq!(floor.to_bits(), (impact.slope_bound() + p.slope_envelope()).to_bits());
+        assert_eq!(floor.to_bits(), (impact.slope_max() + p.slope_envelope()).to_bits());
         // Sous le plancher, chaque lot non vide est refusé — un point comme trois.
         for below in [floor * 0.999, floor * 0.5, f32::MIN_POSITIVE] {
             assert!(below < floor);

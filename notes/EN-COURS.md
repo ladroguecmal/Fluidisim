@@ -72,7 +72,7 @@ physique. **C'est le premier lot de la série qui change des bits publiés.**
 - [x] **P2** — **témoins avant**, et rien d'autre. Hachages de campagne des deux scénarios,
       budgets des fixtures mixtes, frontières de refus. Relevés et committés **avant** toute
       modification : sans cela, « ce qui a bougé » ne se démontre plus, il se raconte.
-- [ ] **P3** — migrer l'**impact radial** : `RadialImpact::new` compare `slope_max()`, et
+- [x] **P3** — migrer l'**impact radial** : `RadialImpact::new` compare `slope_max()`, et
       `composition.rs` / `mixed_water.rs` somment `slope_max()`. Étage seul, tests verts.
 - [ ] **P4** — migrer la **pression** : `slope_envelope_tight()` dans `slope_floor` et dans
       l'enveloppe de `mixed_water`. Étage seul, tests verts.

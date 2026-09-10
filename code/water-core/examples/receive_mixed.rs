@@ -468,7 +468,8 @@ fn main() {
                     r[6] = -sy / norm;
                     r[7] = 1.0 / norm;
                     // Enveloppe de contrat candidate, distincte de la référence de champs physiques.
-                    r[8] = ((base.steepness * std::f32::consts::PI + single.slope_bound())
+                    // S141 : la part de l'impact est sa pente réelle, pas sa borne L1 (ADR-094).
+                    r[8] = ((base.steepness * std::f32::consts::PI + single.slope_max())
                         + p.slope_envelope()) as f64
                         / std::f32::consts::PI as f64;
                     for c in 0..10 {
