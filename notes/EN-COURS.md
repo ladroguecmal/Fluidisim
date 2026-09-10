@@ -58,49 +58,27 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S163 — terminée
+Session : S164 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S162-1 / A218, intégrer réellement le résidu couplé en Saint-Venant et le
-recevoir contre l'évolution totale. Pas de δ 3D ni de seuil de bascule dans ce lot.
+Objectif : S163-1/A219, recevoir la clôture temporelle du résidu sur un fond analytique prescrit.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan committé seul.
-- [x] **P2** — préciser variables conservatives, flux croisés, pas et frontières ; choisir
-      un instrument minimal compatible avec le solveur total existant. Déclarer les réceptions
-      et la contre-épreuve avant le calcul. Synchroniser les copies propres au jeton occupé.
-- [x] **P3** — construire l'intégration du fond et du résidu, sans soustraction a posteriori
-      du total ; recevoir contre la référence et retirer volontairement un terme de couplage.
-- [x] **P4** — campagne de raffinement et cas limites, limites de portée, verdict et suivi
-      A218/A50. ADR seulement si décision nouvelle. Tests adaptés et bilan numérique.
-- [x] **P5** — rituel de fin REPRISE §6 : journal, angles/leçons, index, décomptes, prochaine
-      action, jeton libéré et copies synchronisées. Aucun worktree créé.
+- [ ] **P2** — dériver les sources aux étages RK2 et déclarer le protocole avant mesure ;
+      synchroniser les copies propres au jeton occupé.
+- [ ] **P3** — implémenter le fond prescrit dans le véhicule S163, comparer incréments discrets,
+      dérivées continues et source temporelle omise ; raffinement et témoins nuls.
+- [ ] **P4** — réception, limites et suivi A219/A50, tests S163 conservés ; décision si nécessaire.
+- [ ] **P5** — rituel de fin, journal/index/décomptes/suite, jeton rendu et copies synchronisées.
 
 ### Notes de reprise
 
-Départ master 8902f5a, arbre propre ; trois autres copies au même commit, propres et libres.
-Cargo 1.97.0 disponible. REPRISE et corpus lus en S162 dans cette conversation ; états et
-nouvelle entrée relus, aucune modification intermédiaire. 299 tests/cinq ignorés, plus le test
-analytique S162. 112 ADR,218 angles,244 leçons,18 invariants,6 SPEC,23 cas.
+Départ master 6a295cb propre ; quatre copies au même commit, aucune branche vivante avancée.
+REPRISE et corpus lus dans cette conversation ; S163 achevée, aucune étape à reconstituer.
+112 ADR,219 angles,245 leçons,18 invariants,6 SPEC,23 cas ; 299 tests/cinq ignorés,
+plus exemples S162 et S163. Aucun worktree créé. BILAN-S145 porté par la poursuite B4.
 
-ADR-112 impose de tester l'équation résiduelle, pas la superposition indépendante.
-SPEC-004 §6.1 contient les termes croisés et le résidu du fond. A218 est prioritaire ;
-A217 reste partielle, A216 reportée. BILAN-S145 suivi par la poursuite B4.
-P2 : RESIDU-COUPLE-S163 déclare flux physique résiduel, correction de viscosité Rusanov,
-deux fonds (évolué/figé), sources, RK2, critères et trois contre-épreuves avant calcul.
-Référence Shallow1D configurée en Rusanov, ordre un espace, RK2 ; copie conservée sans modification.
-
-P3 : intégration Q,d distincte construite dans examples/support/residu_shallow.rs ;
-aucun appel à Shallow1D dans le véhicule. À N240, accord h<=5,93e-15 normalisé,
-contre-épreuves physiques/numériques/source toutes refusées. 2 nouveaux tests propres
-à l'exemple reçus en debug (+3 tests importés du host) ; campagne release reçue.
-
-P4 : cas limites et raffinements reçus. N960 : max h reconstruction 1,61352e-13 ;
-écart spatial de la référence 9,07266e-3 L2 normalisé. Aucun ordre spatial certifié.
-5 tests propres à l'exemple +3 host importés passent ; campagne release complète reçue.
-Suite workspace 299 tests réussis/cinq ignorés. S162-1 réalisée dans le périmètre 1D,
-A218 traitée ici, A50 partielle. Pas d'ADR nouveau ; A219/S163-1 pour le fond prescrit en temps.
-P5 : rituel effectué, journal, L245, A219, index/README/REPRISE et suivi ADR-112.
-Décomptes 112 ADR/219 angles/245 leçons vérifiés ; 18 invariants/6 SPEC/23 cas inchangés.
-BILAN-S145 porté via S163-1, aucune décision humaine requise. Jeton rendu.
-Copies propres à avancer au commit de clôture avant réponse finale, sans retrait.
+Instrument : fond Q réévalué aux temps RK, résidu seul intégré. Ne pas reconstruire le résidu
+par soustraction d'une référence avancée ; seules les différences du fond prescrit sont permises.
+Une dérivée continue peut converger sans reproduire exactement la référence au pas donné.

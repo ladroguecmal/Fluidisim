@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-10 20:30 +02:00
+JETON            : occupé
+Battement        : 2026-09-10 20:33 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S164 — fond prescrit instationnaire
 Dernière session : S163 — résidu couplé reçu en 1D ; 299 tests/cinq ignorés + cinq nouveaux tests exemple
 Session suivante : S164 — S163-1 : fond prescrit instationnaire et clôture temporelle (A219)
 
