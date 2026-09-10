@@ -18,12 +18,16 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-10 15:44 +02:00
-Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-10 15:52 +02:00
+Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
+Session en cours : S155 — la fenêtre de 16 s est-elle une limite numérique ? (S154-1)
 Dernière session : S154 — cinq bilans impact60s reçus ; 296 tests/cinq ignorés
-Session suivante : S155 — S154-1, B2 sillage prolongé et domaine numérique (dernier bilan)
+Session suivante : à fixer en fin de S155
+
+**Copie de travail S155** : worktree `claude/reprise-projet-2d3506`, remis en avance rapide sur
+master (1643232) au démarrage — il était resté à 041dfed, 80 commits en retard et rien d'unique,
+donc aucun fork. Terminer par `git -C <racine> merge --ff-only claude/reprise-projet-2d3506`.
 
 **S147 : travail directement sur master.** Les anciennes copies, dont 886155, doivent rejoindre
 master avant toute reprise ; aucune copie créée, toutes propres au démarrage.

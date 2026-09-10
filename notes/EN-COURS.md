@@ -58,29 +58,47 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S154 — terminée
-Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S153-1, bilan60s sur sources2/3/5/6m, sans confondre collecte et domaine hôte.
+Session : S155 — en cours
+Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
+Objectif : S154-1. B2 mesure des bilans à 60 s ; le noyau de pression refuse au-delà de 16 s.
+Prendre la seconde branche annoncée par S154 — **isoler par mesure le blocage numérique** —
+parce que la première (quantifier le domaine d'un sillage prolongé) est inaccessible tant que le
+noyau refuse la durée à laquelle B2 mesure. Question : le 16 s d'ADR-071 est-il une limite
+numérique ou un périmètre déclaré ? ADR-071 dit lui-même « à calibrer par réception » ; personne
+ne l'a fait.
 
 ### Plan
 
-- [x] **P1** — état réel, protocole, jeton et plan seul.
-- [x] **P2** — oracle indépendant sur quatre longueurs, rayons88/112/136/152m ; raffinement séparé.
-- [x] **P3** — réception coefficients N512 et profils N256 sur80m ; énergie, anneaux et contre-épreuves.
-- [x] **P4** — suite de tests, rapport et rituel ; verdict B2 daté et jeton rendu.
+- [x] **P1** — état réel, jeton, plan déclaré et committé seul.
+- [ ] **P2** — sonde : erreur du noyau modal contre l'oracle f64 `PressureMode` pour des âges de
+      0 à 64 s, durée active inchangée. La constante d'horizon est relevée **localement et non
+      committée** — c'est ce qui rend la mesure possible, et rien d'autre ne change.
+- [ ] **P3** — séparer ce que « 16 s » recouvre : l'**âge** auquel on échantillonne et la **durée
+      active** du forçage n'empruntent pas le même chemin numérique. Mesurer la seconde seule.
+- [ ] **P4** — décider d'après les chiffres : nouvel ADR si les deux bornes se séparent, ou
+      provenance mesurée écrite pour la borne conservée. Un ADR n'est jamais réécrit.
+- [ ] **P5** — appliquer la décision dans le code, avec un test **témoin** : désactiver le
+      mécanisme doit faire échouer le test, sinon le test ne prouve rien.
+- [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
-Départ master3264ec7, copies historiques propres.294 tests/cinq ignorés,105 ADR.
-Mêmes E0=0,01J,g9,81,rho1025,h20m. Durées0/60s. Rayons collecteurs2→88,3→112,
-5→136,6→152m : au-delà de cg_max*60s, garde N512 à vérifier sans le changer.
-Pas radial0,0625m pour2/3m,0,125m pour5/6m ; Simpson avec pas doublé indépendant.
-Oracle spectral256/512, directions1024/2048 sentinelles. Seuils S153 inchangés :
-écart spectral/candidat<=1e-4 E0, spatial<=0,002 E0, fermeture<=0,003 E0.
-N512 sur collecte élargie ; N2565/6 évalué sur80m seulement si le garde refuse plus loin.
-Aucun changement de production prévu ; ne pas transposer un profil80m au collecteur.
-P2 : quatre oracles reçus. Collecteurs60s :2=0,999999975071 ;3=0,999999976655 ;5=0,999999630848 ;6=0,999999694485. À80m :0,999999481614 /0,999111648388 /0,787762595879 /0,446944872471. Rapports dans ENERGIE-BANDE-B2-S154.
+Départ 1643232 = master (S154, Codex). Worktree remis en avance rapide, rien d'unique.
+296 tests/cinq ignorés, 105 ADR, 212 angles, 230 leçons, 18 invariants.
 
-P3 : deux tests release reçus, candidat/oracle max5,61e-7 E0. N512 collecteurs et N2565/6 à80m ; contre-épreuves actives. Aucun changement de production.
+Ce que la lecture du noyau donne **avant** toute mesure, et qui oriente la sonde :
+- après extinction, `sample` calcule la rotation libre par `phase(frequency, age - active, 1e6)`,
+  arithmétique **entière** i128 réduite modulo un tour ; aucun flottant ne porte le temps ;
+- la seule accumulation f32 dépendant du temps est `scale_integer(sinc/1e6, us)` dans la branche
+  proche de zéro de J, et son argument est `active = min(age, duration)`, **borné par la durée** ;
+- le commentaire de `scale_integer` dit « au plus 24 bits pour une durée <=16 millions de µs » :
+  24 bits, c'est 2^24 = 16 777 216 µs. Le 16 s a donc l'air d'être un **nombre de bits**, pas une
+  seconde physique.
 
-P4 :296 tests/cinq ignorés (203+93), zéro échec ; quatre avertissements préexistants. Deux essais nouveaux reçus release.105 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas, deux bancs partiels. Rituel exécuté ; jeton rendu.
+Prédiction écrite avant la mesure, pour qu'elle puisse être démentie : l'erreur sera à peu près
+**plate** en âge et croissante en **durée active**. Si elle croît aussi en âge, la prédiction est
+fausse et c'est le résultat le plus intéressant de la session.
+
+Piège : mesurer contre un oracle qui partagerait la quantification f32 de ω masquerait justement
+ce qu'on cherche. L'oracle S95 convertit le **même** f32 en f64 — il isole l'erreur
+d'implémentation, pas celle de l'entrée. Garder cette convention et le dire.
