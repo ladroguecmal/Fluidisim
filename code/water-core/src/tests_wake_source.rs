@@ -94,3 +94,66 @@ fn emitter_conflicting_content_does_not_advance_s151() {
     assert_eq!(emitter.acknowledge(&b,&j),Err(EmitError::NotAdmitted));assert_eq!(emitter.cursor(),start);
     emitter.acknowledge(&a,&j).unwrap();
 }
+
+#[test]
+fn emitter_controller_saturation_recovery_and_full_path_s151() {
+    use crate::{bound_pressure::{Controller,Prepared,AdmitError,Admission},gaussian_spectrum::bake,
+        spectral_pressure::{Node,Slot,Surface},pressure_journal::Journal};
+    fn sample(p:&Prepared<'_>) -> Vec<u32> {
+        let points=[[-4.,0.],[0.,0.],[1.,2.],[2.,0.],[2.,2.],[4.,4.],[8.,8.]];
+        let mut out=[Surface::default();7];let mut scratch=out;
+        p.sample_batch(&p.context(),p.time(),&points,&mut scratch,&mut out).unwrap();
+        let mut result=vec![p.energy_j().to_bits(),p.power_w().to_bits()];
+        for v in out {for f in [v.eta,v.vertical_velocity,v.potential,v.slope[0],v.slope[1],v.horizontal_velocity[0],v.horizontal_velocity[1]] {result.push(f.to_bits());}}
+        result
+    }
+    let m=metadata();let mut e=Emitter::new(m,SimTime(0),[0.;2]).unwrap();
+    let a=e.prepare(e.cursor(),leg()).unwrap();let b;
+    let mut turn=leg();turn.velocity=[0.,2.];
+    let full_path=Wake::build(m,SimTime(0),[0.;2],&[leg(),turn]).unwrap();
+    let mut nodes=vec![Node::default();32*32];let mut hn=vec![Node::default();32*16];
+    let spectrum=bake(m.recipe,&mut nodes).unwrap();let half=spectrum.half_into(&mut hn).unwrap();
+    let mut active=vec![Slot::default();512];let mut spare=active.clone();let mut direct=active.clone();
+    let mut next_active=active.clone();let mut next_spare=active.clone();
+    let mut small=[None];let mut large=[None;2];
+    let mut journal=Journal::new(1,&mut small);journal.admit_authenticated(a.source()).unwrap();
+    let context=a.source().context();
+    let mut controller=Controller::new(context,&half,&mut journal,SimTime(0),&mut active,&mut spare).unwrap();
+    e.acknowledge(&a,controller.journal()).unwrap();b=e.prepare(e.cursor(),turn).unwrap();
+    controller.update(SimTime(1_000_000)).unwrap();let before=sample(&controller.current(SimTime(1_000_000)).unwrap());
+    assert_eq!(controller.admit(b.source()),Err(AdmitError::Saturated));
+    let cursor=e.cursor();assert_eq!(e.acknowledge(&b,controller.journal()),Err(EmitError::NotAdmitted));
+    assert_eq!(e.cursor(),cursor);assert_eq!(before,sample(&controller.current(SimTime(1_000_000)).unwrap()));
+    let mut expanded=controller.journal().copy_into(&mut large).unwrap();expanded.retry().unwrap();
+    let mut recovered=controller.extend_into(&mut expanded,&mut next_active,&mut next_spare).unwrap();
+    e.acknowledge(&b,recovered.journal()).unwrap();
+    assert_eq!(recovered.admit(b.source()),Ok(Admission::AlreadyPresent));
+    assert_eq!(e.cursor().time,SimTime(2_000_000));assert_eq!(recovered.journal().published().count(),2);
+    let mut h=crate::Hasher64::new();
+    for us in [1_000_000,2_000_000,4_000_000,8_000_000] {
+        let time=SimTime(us);recovered.update(time).unwrap();let actual=recovered.current(time).unwrap();
+        let expected=Prepared::build(context,&half,full_path.source().segments(),time,&mut direct).unwrap();
+        let signature=sample(&actual);assert_eq!(signature,sample(&expected));
+        for bits in signature {h.write_u32(bits);}
+        if us>=4_000_000 {assert_eq!(actual.power_w(),0.);assert!(actual.energy_j()>0.);}
+    }
+    println!("S151 progressive hash={:016x}",h.finish());
+}
+
+#[test]
+fn emitter_field_refusal_preserves_cursor_s151() {
+    use crate::{bound_pressure::{Controller,AdmitError},gaussian_spectrum::bake,
+        spectral_pressure::{Node,Slot},pressure_journal::Journal};
+    let m=metadata();let mut e=Emitter::new(m,SimTime(0),[0.;2]).unwrap();
+    let a=e.prepare(e.cursor(),leg()).unwrap();let bad;
+    let mut nodes=vec![Node::default();1024];let mut hn=vec![Node::default();512];
+    let spectrum=bake(m.recipe,&mut nodes).unwrap();let half=spectrum.half_into(&mut hn).unwrap();
+    let mut active=vec![Slot::default();512];let mut spare=active.clone();
+    let mut records=[None;2];let mut journal=Journal::new(1,&mut records);journal.admit_authenticated(a.source()).unwrap();
+    let mut c=Controller::new(a.source().context(),&half,&mut journal,SimTime(2_000_000),&mut active,&mut spare).unwrap();
+    e.acknowledge(&a,c.journal()).unwrap();let start=e.cursor();let energy=c.current(SimTime(2_000_000)).unwrap().energy_j();
+    let mut l=leg();l.downward_force_n=1e30;bad=e.prepare(start,l).unwrap();
+    assert!(matches!(c.admit(bad.source()),Err(AdmitError::Field(_))));
+    assert_eq!(e.acknowledge(&bad,c.journal()),Err(EmitError::NotAdmitted));assert_eq!(e.cursor(),start);
+    assert_eq!(c.journal().published().count(),1);assert_eq!(c.current(SimTime(2_000_000)).unwrap().energy_j().to_bits(),energy.to_bits());
+}

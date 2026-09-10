@@ -66,7 +66,7 @@ Objectif : S150-1, émission progressive de tronçons de sillage sans perte ni d
 
 - [x] **P1** — état réel, contrats, jeton et plan seul.
 - [x] **P2** — émetteur à préparation/acquittement, continuité et identité ; ADR et refus testés.
-- [ ] **P3** — intégration journal/contrôleur, saturation/reprise, comparaison au trajet complet et arrêt.
+- [x] **P3** — intégration journal/contrôleur, saturation/reprise, comparaison au trajet complet et arrêt.
 - [ ] **P4** — vérifications, rapport et rituel de fin ; passation vers B2, jeton rendu.
 
 ### Notes de reprise
@@ -77,3 +77,4 @@ nouvelle, conservée tant que son historique est requis. Aucun remplacement de s
 Le curseur de mouvement n'avance qu'après présence exacte au journal ; refus/saturation
 conservent la même émission. L'hôte possède le stockage des émissions.
 W4 reste candidat sans coque calibrée ni preuve multiplateforme. B2 est la suite du bilan.
+P3 : cinq nouveaux tests release reçus ; scénario également debug, hashce3395b96567718c. Refus calcul/saturation préservent curseur et publication, reprise identique au trajet entier.
