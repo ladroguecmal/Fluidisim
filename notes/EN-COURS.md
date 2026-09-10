@@ -73,7 +73,7 @@ ne l'a fait.
 - [x] **P2** — sonde : erreur du noyau modal contre l'oracle f64 `PressureMode` pour des âges de
       0 à 64 s, durée active inchangée. La constante d'horizon est relevée **localement et non
       committée** — c'est ce qui rend la mesure possible, et rien d'autre ne change.
-- [ ] **P3** — séparer ce que « 16 s » recouvre : l'**âge** auquel on échantillonne et la **durée
+- [x] **P3** — séparer ce que « 16 s » recouvre : l'**âge** auquel on échantillonne et la **durée
       active** du forçage n'empruntent pas le même chemin numérique. Mesurer la seconde seule.
 - [ ] **P4** — décider d'après les chiffres : nouvel ADR si les deux bornes se séparent, ou
       provenance mesurée écrite pour la borne conservée. Un ADR n'est jamais réécrit.
@@ -122,3 +122,40 @@ dépassait ce que le constructeur acceptait et que toutes les combinaisons étai
 écart nul sans comparaison ressemble exactement à un résultat parfait. La sonde compte désormais
 ses couples et annonce l'horizon accepté.
 Constante d'horizon relevée à 64 s **localement, non committée** — sans elle rien n'est mesurable.
+
+P3 — la dérive est attribuée, et l'erreur se décompose en deux termes qui n'ont rien à voir.
+Premier dénominateur choisi (|eta| instantané) : instable, il explosait au voisinage des nœuds de
+l'oscillation — 7,75e-5 pour k=(0,6 ; 0,8) qui n'était pas une perte de précision mais un
+dénominateur proche de zéro. Repris avec l'amplitude invariante A = sqrt(|eta|^2 + |v|^2/omega^2),
+conservée par la rotation libre. **Deuxième fois cette session qu'un artefact de sonde ressemble
+à un résultat.**
+Désaccord de pulsation, fait exact et non mesuré : domega/omega vaut -6,58e-9 (k=1),
+-1,85e-8 (0,6 ; 0,8), -2,145e-8 (k=0,0234 et k=6), -5,73e-8 (k=9) — l'arrondi f32 de omega.
+Écart mesuré contre l'oracle f64, rapporté à A, durée active 4 s :
+
+| k | 16 s | 32 s | 64 s | prédit |domega|*64 | même omega, 64 s |
+|---|---|---|---|---|---|
+| (6, 0) | 1,554e-6 | 3,627e-6 | 8,794e-6 | 1,053e-5 | **1,505e-7** |
+| (1, 0) | 8,285e-7 | 1,233e-6 | 2,132e-6 | 1,319e-6 | 1,912e-6 |
+| (9, 0) | 2,739e-5 | 3,602e-5 | 2,283e-5 | 3,447e-5 | 4,402e-6 |
+| (0,6 ; 0,8) | 1,028e-5 | 1,084e-5 | 1,250e-5 | 3,708e-6 | 5,377e-6 |
+| (0,0234 ; 0) | 2,796e-7 | 7,657e-8 | 2,036e-7 | 6,582e-7 | 1,214e-7 |
+
+Lecture : pour k=(6,0), l'écart croît d'un facteur 5,7 de 16 à 64 s, colle à la prédiction
+|domega|*t à 20 % près, et **tombe d'un facteur 58 quand l'oracle porte le même omega** — la
+cause est établie pour ce mode. Pour k=(9,0) et (0,6 ; 0,8), neutraliser omega ne suffit pas :
+il reste 4,4e-6 et 5,4e-6, **constants en temps**. Il y a donc deux termes :
+- un terme **indépendant du temps**, 1e-7 à 5e-6 selon le mode, venant de la phase spatiale et de
+  l'amplitude en f32 (`from_distance` par axe, `magnitude` f32) — présent dès t=0 ;
+- un terme **proportionnel au temps**, |domega|*t, venant du stockage de omega en f32.
+Le second domine au-delà d'un croisement propre à chaque mode. Aucune rupture, aucun seuil,
+rien qui distingue 16 s de 15 ou de 17 : **la fenêtre de 16 s n'a pas de justification numérique.**
+Ce qu'elle a, c'est 2^24 microsecondes, c'est-à-dire un nombre de bits.
+
+Fait décisif pour la décision : le budget est en **âge**, pas en durée active. ADR-104 découpe
+déjà le mouvement en tronçons, chacun source distincte avec sa propre naissance ; un sillage de
+60 s est fait de tronçons courts que l'on doit pouvoir **observer** 60 s plus tard. Ce qu'il
+manque à B2 est l'horizon, pas la durée.
+Deuxième constante à bouger, trouvée en cherchant : `bound_pressure::Context::new` borne aussi
+`end - start` à 16 s. C'est la « fenêtre » de S151. Les deux disent la même chose au même endroit
+du raisonnement, et l'une sans l'autre ne débloque rien.

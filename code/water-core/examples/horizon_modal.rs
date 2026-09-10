@@ -98,6 +98,55 @@ fn horizon_accepte() -> u64 {
     best
 }
 
+/// Écart d'élévation d'un mode seul, rapporté à l'**amplitude invariante**
+/// `A = sqrt(|eta|^2 + |v|^2/omega^2)` — conservée par la rotation libre, donc jamais nulle en
+/// cours de propagation. Rapporter à `|eta|` seul faisait exploser la mesure au voisinage des
+/// nœuds de l'oscillation, et cette explosion n'était pas une perte de précision.
+///
+/// Deux oracles : celui de S95 (omega recalculé en f64) et un oracle dont la gravité est ajustée
+/// pour porter **exactement** le omega f32 du candidat. `sample` n'emploie `gravity` que par
+/// omega, donc c'est la seule différence neutralisée.
+fn ecart_mode(k: [f32; 2], age_us: u64, duration_us: u64, omega_f64: bool) -> f64 {
+    let magnitude = (k[0] * k[0] + k[1] * k[1]).sqrt();
+    let omega_candidat = (9.81f32 * magnitude).sqrt();
+    let kf = [k[0] as f64, k[1] as f64];
+    let gravite = if omega_f64 {
+        9.81f32 as f64
+    } else {
+        let w = omega_candidat as f64;
+        w * w / kf[0].hypot(kf[1])
+    };
+    let oracle = PressureMode::new(kf, gravite, 1025.0).unwrap();
+    let s = Segment {
+        birth: SimTime(0),
+        duration_us,
+        origin: [0.7, -0.3],
+        velocity: [0.5 * omega_candidat / k[0], 0.0],
+        pressure_pa: 10.0,
+    };
+    let m = ModalPressure::new(k, 9.81, 1025.0, s, age_us.max(16_000_000)).unwrap();
+    let c = m.sample(SimTime(age_us)).unwrap();
+    let q = oracle.sample(reference(s), SimTime(age_us)).unwrap();
+    let w = oracle_omega(kf, gravite);
+    let amplitude = (q.eta.re * q.eta.re
+        + q.eta.im * q.eta.im
+        + (q.velocity.re * q.velocity.re + q.velocity.im * q.velocity.im) / (w * w))
+        .sqrt();
+    ((c.eta.re as f64 - q.eta.re).powi(2) + (c.eta.im as f64 - q.eta.im).powi(2)).sqrt() / amplitude
+}
+
+fn oracle_omega(kf: [f64; 2], gravite: f64) -> f64 {
+    (gravite * kf[0].hypot(kf[1])).sqrt()
+}
+
+/// Écart de pulsation entre le candidat (f32) et l'oracle (f64) : un fait, pas une mesure.
+fn desaccord_omega(k: [f32; 2]) -> (f64, f64) {
+    let magnitude = (k[0] * k[0] + k[1] * k[1]).sqrt();
+    let candidat = (9.81f32 * magnitude).sqrt() as f64;
+    let exact = oracle_omega([k[0] as f64, k[1] as f64], 9.81f32 as f64);
+    (exact, candidat - exact)
+}
+
 fn main() {
     let accepte = horizon_accepte();
     println!(
@@ -134,5 +183,27 @@ fn main() {
         let age = duree + 4_000_000;
         let (eta, v, a, n) = ecart(age, duree, age.max(16_000_000));
         println!("| {secondes} s | {eta:.6e} | {v:.6e} | {a:.6e} | {:.3e} | {n} |", eta / a);
+    }
+
+    println!();
+    println!("# S155 — d'où vient la dérive : omega f64 contre omega f32 partagé");
+    println!("Durée active 4 s, rapport Doppler 0,5. Écart rapporté à l'amplitude invariante.");
+    println!("Prédiction écrite avant lecture : écart ~= |domega| * t, la dérive de phase pure.");
+    println!("| k | omega (rad/s) | domega/omega | âge | mesuré, oracle f64 | prédit |domega|*t | même omega |");
+    println!("|---:|---:|---:|---:|---:|---:|---:|");
+    for k in K {
+        let (omega, delta) = desaccord_omega(k);
+        for secondes in [16u64, 32, 64] {
+            let age = secondes * 1_000_000;
+            let avec = ecart_mode(k, age, 4_000_000, true);
+            let sans = ecart_mode(k, age, 4_000_000, false);
+            let predit = delta.abs() * secondes as f64;
+            println!(
+                "| ({}, {}) | {omega:.4} | {:.3e} | {secondes} s | {avec:.4e} | {predit:.4e} | {sans:.4e} |",
+                k[0],
+                k[1],
+                delta / omega
+            );
+        }
     }
 }
