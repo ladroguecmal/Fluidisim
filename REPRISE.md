@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-10 17:57 +02:00
+JETON            : occupé
+Battement        : 2026-09-10 18:08 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S158 — d'où vient la tolérance d'un champ de sillage (S157-1, A214)
 Dernière session : S157 — pas de loi, refus argumenté ; 298 tests/cinq ignorés
-Session suivante : S158 — sortir la mesure de sa dégénérescence (S157-1)
+Session suivante : à fixer en fin de S158
 
 **Copie de travail S155** : worktree `claude/reprise-projet-2d3506`, remis en avance rapide sur
 master (1643232) au démarrage — il était resté à 041dfed, 80 commits en retard et rien d'unique,
