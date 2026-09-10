@@ -1470,3 +1470,13 @@ entrée par entrée. Le fil reprend ci-dessous.
   la source aux étages RK2, comparer dérivée continue et incréments discrets, mêmes conditions
   totales initiales et contre-épreuve de source temporelle omise. Porteur : session de construction.
 - A217 profonde et A216 restent dans leur état S162 ; pas de nouvelle calibration.
+### Suivi S164 — Clôture temporelle du fond prescrit
+
+- **S163-1 : réalisée, A219 traitée sur véhicule RK2.** FOND-PRESCRIT-S164 : incréments de Q
+  aux étages reçus contre Shallow1D, erreur normalisée <=1,60e-13 ; dérivée continue convergente
+  à l'ordre deux, omission temporelle non convergente. Aucun ADR ni seuil nouveau.
+- **A50 reste partielle** : sources exactes en 1D, pas d'interpolation ni domaine local.
+- **S164-1 / A220 : ouverte, priorité S165.** Restreindre le résidu à une fenêtre interne ;
+  comparer frontières alimentées par le fond seul et par le total de référence (témoin oracle).
+  Mesurer le passage d'une perturbation à la frontière, sans confondre défaut de bord et source.
+  Porteur : session de construction. Aucun choix d'absorbeur avant cette mesure.

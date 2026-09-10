@@ -53,3 +53,92 @@ Les amplitudes et fréquences du fond sont des paramètres du montage de mesure,
 
 Portée : même schéma 1D mouillé sur tout le domaine. Ni précision physique, ni domaines locaux,
 ni eau profonde, ni interpolation des dérivées, ni conformité multiplateforme ne sont reçues.
+
+## 3. Résultats mesurés
+
+`examples/fond_prescrit.rs` interroge Shallow1D uniquement pour l'état initial et la réception.
+`step_prescribed` dans le support partagé ne connaît pas cette référence : les incréments
+portent exclusivement sur le fond prescrit. Le calcul spatial de S163 est réutilisé, sans copie.
+Les valeurs de Q aux deux étages sont mises en tampon. Le temps est donné par indice de pas
+en f64 ; l'écart d'arrondi entre `t+dt` et le temps du pas suivant reste dans l'erreur publiée.
+
+Campagne release du 2026-09-10 : L=120 m, h0=1 m, g=9,81 repris de `shallow::G`, durée 8 s,
+deux gaussiennes initiales de S163 ; N240, dt nominal ≈0,2 dx/sqrt(g), ajusté par nombre entier
+de pas. Fond : amplitude 0 / 0,05 / 0,2 m et mode 2 / 8 ; division de dt par 1 / 2 / 4 / 8.
+Trois sources temporelles par montage : **72 exécutions**. Erreurs maximales sur cellules et
+pas, normalisées par 0,3 m pour h et `0,3 sqrt(g)` pour q, comme S163.
+
+### Incréments, dérivée continue et omission
+
+Cas a=0,2 m, mode 8, N240 :
+
+| division dt | incréments : h | incréments : q | dérivée continue : h | dérivée continue : q | omission : h |
+|---:|---:|---:|---:|---:|---:|
+| 1 | 8,88178e-15 | 4,52051e-15 | 2,19421e-4 | 1,59769e-4 | 2,762789 |
+| 2 | 8,14164e-15 | 7,23009e-15 | 5,48012e-5 | 3,98645e-5 | 2,762767 |
+| 4 | 3,47870e-14 | 2,37558e-14 | 1,37203e-5 | 9,97591e-6 | 2,762761 |
+| 8 | 1,59872e-13 | 9,53516e-14 | 3,43258e-6 | 2,49520e-6 | 2,762759 |
+
+Les incréments retrouvent le schéma total à l'arrondi près. La dérivée continue perd l'identité
+mais son écart décroît d'un facteur proche de quatre : **ce n'est pas une source manquante**,
+c'est une erreur temporelle de discrétisation, cohérente avec l'ordre deux. L'omission ne
+disparaît pas au raffinement. Les deux échouent au critère d'identité numérique annoncé ; ce
+verdict ne les met pas dans la même catégorie physique. Aucun critère d'acceptabilité de jeu
+n'est déduit de cette tolérance d'instrument.
+
+À amplitude nulle, les trois voies passent et rendent les mêmes chiffres. Les tests exigent
+ce témoin. À même total initial, deux fonds distincts (a=0,05/mode2 et a=0,2/mode8) donnent
+le même total reconstruit à la tolérance 1e-10 ; l'amplitude du résidu n'est donc pas une
+mesure universelle de l'erreur du total, elle dépend aussi de la représentation du fond.
+
+### Sensibilité au fond
+
+À dt nominal, erreur hauteur de la source continue :
+
+| a (m) | mode 2 | mode 8 |
+|---:|---:|---:|
+| 0,05 | 1,05840e-6 | 5,48545e-5 |
+| 0,2 | 4,23362e-6 | 2,19421e-4 |
+
+Amplitude multipliée par quatre, erreur multipliée par quatre sur cette famille. Fréquence
+quadruplée, erreur multipliée par environ 52 ; ne pas appeler cela une loi universelle en
+fréquence : la forme spatiale et le trajet dans le domaine changent aussi.
+La masse reste à moins de 2e-15 de sa valeur initiale dans ces 72 exécutions, omission comprise.
+Courant maximal 0,3224 ; aucune saturation ni état sec dans la référence.
+
+### Raffinement de grille complémentaire
+
+a=0,2/mode8, dt proportionnel à dx :
+
+| N | incréments : h | incréments : q | dérivée continue : h |
+|---:|---:|---:|---:|
+| 120 | 8,14164e-15 | 6,26963e-15 | 7,46223e-4 |
+| 480 | 1,25825e-14 | 8,36740e-15 | 6,05613e-5 |
+| 960 | 8,88178e-14 | 5,13125e-14 | 1,61828e-5 |
+
+Ces six exécutions ajoutées aux 72 précédentes vérifient la reconstruction sur quatre maillages
+avec N240 ; elles ne séparent pas erreurs spatiale et temporelle de la référence.
+
+## 4. Verdict et limites
+
+**S163-1 réalisée, A219 traitée sur le véhicule RK2.** L'identité discrète annoncée est
+construite et reçue ; la source continue converge et son omission ne converge pas.
+Choix de l'instrument : employer les incréments pour les futures comparaisons voulant isoler
+le couplage spatial au pas donné. Ce choix local n'impose pas une API au solveur 3D ; aucun ADR
+nouveau ni calcul de bibliothèque modifié. ADR-112 reste applicable.
+
+**A50 reste partielle** : sources temporelle et spatiale exactes dans ce montage, sans
+interpolation grossière, pression 3D ni domaine local. Q n'est pas le B du runtime : c'est une
+onde debout linéaire 1D, évaluée en f64/libm. Réception du même schéma, jamais preuve de sa
+précision physique. Aucun seuil de bascule ni réception complète de B4.
+
+Tests : quatre nouveaux tests propres à S164, trois host importés ; huit tests de S163
+rejoués (cinq propres et trois host). Tous passent en debug. Campagne release complète avec
+assertions reçue. Suite workspace 299/cinq ignorés reçue en S163, **non relancée** ici : seules
+les sondes et leur support hors bibliothèque ont changé.
+
+**Suite S165 : S164-1/A220**, localiser le domaine du résidu. Premier essai : fenêtre interne
+sur le même canal, frontière alimentée par le fond seul contre frontière témoin alimentée par
+la référence totale. Mesurer quand et comment une perturbation traversant la frontière
+dégrade la reconstruction ; distinguer défaut de frontière et source intérieure.
+Ne pas appeler la frontière témoin une solution utilisable en production : elle exige l'oracle.

@@ -2027,3 +2027,14 @@ ni B4 complet. **A50 partiellement exercée** ; suite sous A219. Voir RESIDU-COU
   `Q(t+dt)-Q(t)`. Le défaut temporel peut alors être attribué à tort au couplage spatial.
   S163-1 : mesurer et recevoir cette clôture, avec une onde analytique et une contre-épreuve.
   Limite nommée du véhicule, aucun défaut observé en production.
+**Suivi A219 — S164 : traitée sur véhicule RK2.** Les incréments du fond aux deux étages
+retrouvent la référence au pas donné ; la dérivée continue introduit un écart d'ordre deux,
+alors que l'omission ne converge pas. Voir FOND-PRESCRIT-S164. A50 reste partielle.
+
+- **A220** *(sévérité 2, S164 ; ouverte)* — **Le couplage reçu occupe le domaine entier.**
+  S163/S164 intègrent le résidu sur tout le canal avec les mêmes murs que le total. Aucun
+  échange à la frontière d'un domaine local n'est reçu, alors que δ est local par définition.
+  Une source exacte dans l'intérieur n'empêche pas une condition de bord erronée de dégrader
+  le champ. S164-1 : fenêtre interne, frontière fond seul confrontée à un témoin oracle total,
+  avec traversée effective du bord par une perturbation. Ce témoin diagnostique n'est pas une
+  alimentation de production. Limite de réception, aucun défaut runtime constaté.

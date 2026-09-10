@@ -163,6 +163,18 @@ fn main() {
             }
         }
     }
+    println!("\n| N | source discrete hauteur | source discrete debit | source continue hauteur |");
+    println!("|---:|---:|---:|---:|");
+    for n in [120, 480, 960] {
+        let wave = Wave {
+            amplitude: 0.2,
+            mode: 8,
+        };
+        let d = run(n, 1.0, wave, Temporal::Discrete);
+        let c = run(n, 1.0, wave, Temporal::Continuous);
+        received(&d);
+        println!("| {n} | {:.6e} | {:.6e} | {:.6e} |", d.h, d.q, c.h);
+    }
 }
 #[cfg(test)]
 mod tests {

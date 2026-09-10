@@ -69,7 +69,7 @@ Objectif : S163-1/A219, recevoir la clôture temporelle du résidu sur un fond a
       synchroniser les copies propres au jeton occupé.
 - [x] **P3** — implémenter le fond prescrit dans le véhicule S163, comparer incréments discrets,
       dérivées continues et source temporelle omise ; raffinement et témoins nuls.
-- [ ] **P4** — réception, limites et suivi A219/A50, tests S163 conservés ; décision si nécessaire.
+- [x] **P4** — réception, limites et suivi A219/A50, tests S163 conservés ; décision si nécessaire.
 - [ ] **P5** — rituel de fin, journal/index/décomptes/suite, jeton rendu et copies synchronisées.
 
 ### Notes de reprise
@@ -89,3 +89,7 @@ P3 : step_prescribed construit dans le support S163 ; trois sources temporelles 
 72 montages N240 en release : incréments <=1,60e-13 hauteur ; dérivée continue converge
 à l'ordre deux, omission ne converge pas. 4 tests propres S164 +3 host et 5 tests propres
 S163 +3 host reçus. Deux avertissements d'import partagé corrigés par annotation locale.
+
+P4 : 78 exécutions release reçues (72 N240 +6 raffinements), 7 tests exemple S164 et
+8 S163 reçus. A219 traitée dans le véhicule ; A50 partielle, A220/S164-1 suit la frontière
+locale. Aucun ADR nouveau. Suite workspace inchangée, reçue S163 et non relancée.

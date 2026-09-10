@@ -166,3 +166,10 @@ la clôture temporelle n'est pas reçue par ce lot.
 
 Réception finale : 299 tests workspace réussis, cinq ignorés ; cinq tests nouveaux de l'exemple
 et trois tests host importés réussis en debug, campagne complète avec assertions reçue en release.
+
+## Suivi du 2026-09-10 (S164)
+
+S163-1 réalisée : [FOND-PRESCRIT-S164](FOND-PRESCRIT-S164.md) reçoit la clôture temporelle
+avec un fond analytique prescrit. Incréments discrets à l'arrondi ; dérivée continue convergente,
+omission non convergente. A219 traitée sur véhicule, A50 partielle. Suite S164-1 : frontière
+locale du résidu, encore absente de ces comparaisons sur domaine entier.
