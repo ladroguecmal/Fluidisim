@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-10 20:15 +02:00
+JETON            : occupé
+Battement        : 2026-09-10 20:18 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S163 — construire et recevoir le résidu couplé
 Dernière session : S162 — A217 partielle ; portée B4 corrigée par ADR-112
 Session suivante : S163 — S162-1 : intégrer et recevoir le résidu couplé en Saint-Venant
 

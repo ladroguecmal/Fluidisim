@@ -58,41 +58,31 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S162 — terminée
+Session : S163 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : instruire A217 : vérifier le blocage de la référence non linéaire dispersive,
-puis établir ce qu'une expérience bornée peut dire de l'additivité en eau profonde.
+Objectif : S162-1 / A218, intégrer réellement le résidu couplé en Saint-Venant et le
+recevoir contre l'évolution totale. Pas de δ 3D ni de seuil de bascule dans ce lot.
 
 ### Plan
 
-- [x] **P1** — état réel, outils, jeton et plan committé seul.
-- [x] **P2** — lectures de reprise ; inventaire des références et formulation précise du manque.
-      Synchroniser les trois copies propres sans avance vers le jeton courant, sans les supprimer.
-- [x] **P3** — confronter une voie analytique ou numérique minimale à la question A217 ;
-      mesurer si une référence recevable existe, sinon publier le blocage argumenté et le prochain lot.
-      Distinguer une correction liée d'ordre deux d'une référence intégrale évolutive.
-- [x] **P4** — verdict et propagation aux points ouverts ; contrôles adaptés, aucun seuil inventé.
-- [x] **P5** — rituel de fin REPRISE §6, journal, index, décomptes, suite et jeton rendu.
+- [x] **P1** — état réel, jeton et plan committé seul.
+- [ ] **P2** — préciser variables conservatives, flux croisés, pas et frontières ; choisir
+      un instrument minimal compatible avec le solveur total existant. Déclarer les réceptions
+      et la contre-épreuve avant le calcul. Synchroniser les copies propres au jeton occupé.
+- [ ] **P3** — construire l'intégration du fond et du résidu, sans soustraction a posteriori
+      du total ; recevoir contre la référence et retirer volontairement un terme de couplage.
+- [ ] **P4** — campagne de raffinement et cas limites, limites de portée, verdict et suivi
+      A218/A50. ADR seulement si décision nouvelle. Tests adaptés et bilan numérique.
+- [ ] **P5** — rituel de fin REPRISE §6 : journal, angles/leçons, index, décomptes, prochaine
+      action, jeton libéré et copies synchronisées. Aucun worktree créé.
 
 ### Notes de reprise
 
-Départ : master 832762f, arbre propre. Trois copies à 824ee62 (S159), toutes propres,
-jetons libres ; aucune branche vivante plus avancée. Branche 5134cd archivée conservée.
-Cargo 1.97.0 disponible. Aucun worktree créé. Suite héritée : 299 tests/cinq ignorés.
-A217 prioritaire ; BILAN-S145 porté via la poursuite B4, après B1 et clôture S63-1.
-Piège : un solveur linéaire donnerait une additivité exacte par construction ; un développement
-faiblement non linéaire peut réfuter une universalité, pas recevoir B4 complet.
-P2 : inventaire et distinction résidu/superposition publiés dans ADDITIVITE-PROFONDE-S162.
-Trois copies synchronisées au commit P1 occupé. Aucun retrait.
+Départ master 8902f5a, arbre propre ; trois autres copies au même commit, propres et libres.
+Cargo 1.97.0 disponible. REPRISE et corpus lus en S162 dans cette conversation ; états et
+nouvelle entrée relus, aucune modification intermédiaire. 299 tests/cinq ignorés, plus le test
+analytique S162. 112 ADR,218 angles,244 leçons,18 invariants,6 SPEC,23 cas.
 
-P3 : sonde Stokes et contre-épreuve reçues en release, test exemple reçu en debug.
-Formules SPEC-001, dérivation et limites dans le livrable. Le couplage prévu par SPEC-004 §6.1
-n'est pas testé en S161 ; P4 corrigera la portée d'ADR-111 par un nouvel ADR, sans le réécrire.
-
-P4 : ADR-112 actée, notes de portée sur ADR-001/111 et B4-S161, A217 partielle,
-A218 et S162-1 ouvertes. Aucun seuil rétabli. Suite workspace lancée ; P5 attend sa fin.
-
-P5 : rituel effectué. Suite workspace reçue 299/5 ignorés, test exemple 1/0 ; aucun échec.
-Décomptes vérifiés : 112 ADR, 218 angles (dont A15/19/20/27 sans gras), 244 leçons,
-18 invariants, 6 SPEC (SPEC-003 dans validation), 23 cas. Prochaine S163 : S162-1.
-Copies à synchroniser au commit de clôture avant de rendre la main ; aucune suppression.
+ADR-112 impose de tester l'équation résiduelle, pas la superposition indépendante.
+SPEC-004 §6.1 contient les termes croisés et le résidu du fond. A218 est prioritaire ;
+A217 reste partielle, A216 reportée. BILAN-S145 suivi par la poursuite B4.
