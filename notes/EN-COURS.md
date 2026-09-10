@@ -65,7 +65,7 @@ Objectif : S164-1/A220, isoler les erreurs de frontière dans un domaine résidu
 ### Plan
 
 - [x] **P1** — vérifier les copies, prendre le jeton, déclarer le plan seul.
-- [ ] **P2** — déclarer protocole, frontière aux deux étages RK2 et bilan de flux ; synchroniser les copies propres.
+- [x] **P2** — déclarer protocole, frontière aux deux étages RK2 et bilan de flux ; synchroniser les copies propres.
 - [ ] **P3** — construire la fenêtre locale et les témoins, mesurer traversée et raffinements.
 - [ ] **P4** — recevoir les tests, publier mesures/limites, suivre A220 et actions.
 - [ ] **P5** — rituel de fin : journal, leçons, index, décomptes, reprise, jeton et copies.
@@ -77,3 +77,5 @@ S164 terminée, corpus lu dans cette conversation ; aucune étape interrompue.
 112 ADR,220 angles,246 leçons,18 invariants,6 SPEC,23 cas. Workspace 299/cinq ignorés
 reçu S163 ; exemples S163/S164 reçus S164. Aucun worktree à créer.
 BILAN-S145 porté par poursuite B4. Aucun absorbeur choisi avant mesure.
+P2 : protocole FRONTIERE-LOCALE-S165 déclaré ; oracle aux étages, fond seul, oracle retardé.
+Bilan ouvert mesuré, ne pas confondre erreur locale et coefficient de réflexion.
