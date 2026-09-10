@@ -117,3 +117,19 @@ left: [… ("champ_fictif.rs", "slope>medium.max_slope"), …]
 ```
 
 Attrapée le jour où le fichier est écrit, avant même d'être branché.
+
+## 5. Ce qui est décidé, et ce que cela ne rend pas impossible
+
+[ADR-097](../adr/ADR-097-ce-qui-garde-le-contrat-de-pente.md) acte les deux gardes et ajoute
+**l'invariant I-18** — le dix-huitième, et le premier depuis S14.
+
+**Aucune des trois voies ne rendait la faute impossible.** Celle-ci la rend **bruyante** : au
+premier `cargo test`, avec un message qui nomme le rapport manquant. C'est la seule promesse que
+la pesée autorisait, et il vaut mieux la tenir que promettre un mur.
+
+**Portée** : le recensement lit `src/` de `water-core`. Aucun autre crate ne compare aujourd'hui
+quoi que ce soit à `max_slope` ; si cela change, c'est le recensement qui doit s'étendre — dit ici
+plutôt que découvert plus tard.
+
+273 tests, cinq ignorés : **le même compte qu'à l'entrée de la session**, deux essais retirés et
+deux gardes ajoutées. Aucun code de calcul modifié, aucun hachage touché.

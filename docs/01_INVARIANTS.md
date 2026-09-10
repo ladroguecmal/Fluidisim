@@ -142,3 +142,23 @@ proposition qui demande à écrire un champ de δ quelque part est refusée sans
 la restauration d'un domaine substitutif se fait depuis une **graine cuite** (`SeedState`), jamais
 depuis une capture d'exécution.
 → ADR-022
+
+**I-18 — Ce qui est comparé à `max_slope` est une pente réelle.** `max_slope` est la pente de
+déferlement du milieu — `πH/λ` à la cambrure limite de Stokes, SPEC-001 §4 — et rien d'autre ne
+lui est comparé. Un champ qui n'en connaît qu'une **borne L1** la divise d'abord par le rapport
+**mesuré** entre cette borne et sa pente réelle ; ce rapport est une propriété de son spectre, il
+ne se déduit d'aucun autre et ne se choisit pas. Un budget ne somme que des grandeurs déjà
+converties.
+
+*Pourquoi il existe : deux champs ont comparé leur borne L1 à ce paramètre pendant soixante
+sessions, et le seuil est resté sans provenance parce que personne ne pouvait dire ce qu'il
+bornait (S139, S141). Les deux rapports mesurés depuis diffèrent — 1,795071 pour la quadrature de
+Hankel, 1,701591 pour les 40 modes cartésiens — ce qui interdit de traiter l'un comme la valeur
+par défaut de l'autre.*
+
+*Comment il tient : deux gardes exécutables, pas cet énoncé.
+`every_field_places_its_limit_at_stokes_steepness_s143` vérifie que le champ limite admis de
+chaque champ est **à** la cambrure de Stokes, et `no_undeclared_comparison_to_max_slope_s143`
+recense les sites de comparaison du crate. Les deux ont été vues échouer sur les fautes qu'elles
+gardent (S143).*
+→ ADR-094, ADR-096, **ADR-097**

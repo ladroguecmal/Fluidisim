@@ -78,7 +78,7 @@ pendant soixante sessions. Défaut de **dispositif**, pas de calcul.
 - [x] **P4** — **vérifier qu'elle attrape le défaut** : réintroduire la faute de S141 dans une
       copie de travail jetable et constater l'échec. Une garde qu'on n'a pas vue échouer ne
       garde rien — c'est la moitié qu'ADR-082 vérifie pour chaque nom de refus.
-- [ ] **P5** — ADR et livrable ; porter l'invariant s'il y en a un.
+- [x] **P5** — ADR et livrable ; porter l'invariant s'il y en a un.
 - [ ] **P6** — rituel de fin (§6), jeton rendu, fusion `--ff-only`.
 
 ### Notes de reprise
