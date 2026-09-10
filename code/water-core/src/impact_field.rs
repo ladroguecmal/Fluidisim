@@ -251,49 +251,6 @@ mod tests {
     /// du candidat radial depuis S141. Même essai bout à bout — dichotomie sur l'énergie jusqu'au
     /// dernier champ admis avec `max_slope = BREAKING_SLOPE`, puis mesure de sa pente réelle sur
     /// une période spatiale complète. Les deux champs disent maintenant la même chose de
-    /// `max_slope`, et c'est cet essai qui l'atteste plutôt qu'un commentaire.
-    #[test]
-    fn the_admitted_limit_field_sits_exactly_at_stokes_steepness_s142() {
-        let medium = Medium {
-            gravity: 9.81,
-            density: 1025.0,
-            depth: 40.0,
-            max_slope: BREAKING_SLOPE,
-        };
-        let build = |energy_j: f32| {
-            let mut v = *source().data();
-            v.energy_j = energy_j;
-            ImpactField::new(WaveEvent::impact(v).unwrap(), medium)
-        };
-        let (mut bas, mut haut) = (1e-3f32, 1e9f32);
-        assert!(build(bas).is_ok() && build(haut).is_err());
-        for _ in 0..60 {
-            let milieu = 0.5 * (bas + haut);
-            if build(milieu).is_ok() {
-                bas = milieu;
-            } else {
-                haut = milieu;
-            }
-        }
-        let limite = build(bas).expect("le dernier admis construit");
-        let side = limite.side();
-        let mut pente = 0.0f32;
-        for i in 0..=400u32 {
-            for j in 0..=400u32 {
-                let p = [
-                    side * i as f32 / 400.0,
-                    side * j as f32 / 400.0,
-                ];
-                let s = limite
-                    .sample(FrameId(2), 3, p, SimTime(10))
-                    .expect("dans le domaine");
-                pente = pente.max((s.slope[0] * s.slope[0] + s.slope[1] * s.slope[1]).sqrt());
-            }
-        }
-        println!("S142 energie_limite={bas:.6e} pente={pente:.6} stokes={BREAKING_SLOPE:.6}");
-        assert!(pente <= BREAKING_SLOPE);
-        assert!(pente >= BREAKING_SLOPE * (1.0 - 1e-3));
-    }
     fn medium() -> Medium {
         Medium {
             gravity: 9.81,

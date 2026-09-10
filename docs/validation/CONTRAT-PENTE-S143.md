@@ -73,7 +73,8 @@ ce que le crate contient, l'invariant pour dire ce que les deux protègent.
 
 Le même essai bout à bout pour chaque champ, **écrit une fois** : S141 et S142 l'avaient écrit
 deux fois, dans deux modules, et deux textes qui se ressemblent finissent par diverger (L137). Les
-deux essais spécifiques sont remplacés par celui-ci.
+deux essais spécifiques sont **retirés** — 86 lignes, leur contenu étant intégralement repris ici.
+Le compte de tests revient donc à celui de S142 : deux essais en moins, deux gardes en plus.
 
 ```
 RadialImpact<64> : energie_limite=1,485427e3  pente=0,448799  stokes=0,448799

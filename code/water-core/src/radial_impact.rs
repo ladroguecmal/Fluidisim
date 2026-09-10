@@ -916,49 +916,6 @@ mod tests {
     /// bout à bout — dichotomie sur l'énergie jusqu'au dernier champ admis avec
     /// `max_slope = BREAKING_SLOPE`, puis mesure de sa pente réelle. Si la chaîne
     /// borne L1 → `SLOPE_L1_RATIO` → cambrure de Stokes tient, le champ limite est exactement à
-    /// la cambrure limite, et c'est ce qu'aucune version antérieure ne pouvait affirmer.
-    #[test]
-    fn the_admitted_limit_field_sits_exactly_at_stokes_steepness_s141() {
-        let medium = Medium {
-            gravity: 9.81,
-            density: 1025.0,
-            depth: 40.0,
-            max_slope: crate::impact_field::BREAKING_SLOPE,
-        };
-        let domain = Domain {
-            radius: 16.0,
-            age_us: 2_000_000,
-        };
-        let build = |energy_j: f32| {
-            let mut v = source_data();
-            v.energy_j = energy_j;
-            RadialImpact::<64>::new(WaveEvent::impact(v).unwrap(), medium, domain)
-        };
-        let (mut bas, mut haut) = (1e-3f32, 1e6f32);
-        assert!(build(bas).is_ok() && build(haut).is_err());
-        for _ in 0..60 {
-            let milieu = 0.5 * (bas + haut);
-            if build(milieu).is_ok() {
-                bas = milieu;
-            } else {
-                haut = milieu;
-            }
-        }
-        let limite = build(bas).expect("le dernier admis construit");
-        let mut pente = 0.0f32;
-        for i in 0..=4000u32 {
-            let r = 16.0 * i as f32 / 4000.0;
-            let s = limite.sample(FrameId(0), 0, [r, 0.0], SimTime(0)).unwrap();
-            pente = pente.max((s.slope[0] * s.slope[0] + s.slope[1] * s.slope[1]).sqrt());
-        }
-        println!(
-            "S141 energie_limite={bas:.6e} pente={pente:.6} stokes={:.6}",
-            crate::impact_field::BREAKING_SLOPE
-        );
-        // Le champ limite touche la cambrure de Stokes, et ne la dépasse pas.
-        assert!(pente <= crate::impact_field::BREAKING_SLOPE);
-        assert!(pente >= crate::impact_field::BREAKING_SLOPE * (1.0 - 1e-3));
-    }
     #[test]
     fn directions_table_matches_original_bits_s81() {
         for i in 0..128u32 {
