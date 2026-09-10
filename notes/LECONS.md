@@ -3359,3 +3359,9 @@ les termes sont la même grandeur.** Une somme de majorants d'inégale finesse e
 pourquoi le défaut est invisible en essais — mais elle n'est plus interprétable, et un seuil
 posé dessus ne se dérive de rien. La réparation n'est pas de choisir mieux : c'est de faire
 publier à chaque terme la grandeur réelle qu'il majore.
+
+*Post-scriptum S140.* « Faire publier à chaque terme la grandeur réelle qu'il majore » est trop
+fort : pour la pression, cette grandeur ne se calcule pas, elle se cherche, et une recherche qui
+manque le maximum rend un majorant faux — pire que conservateur. La règle tenable est **la même
+grandeur majorée, le meilleur majorant exact de chacun, et la marge résiduelle mesurée**. La
+leçon tient, sa prescription se corrige (ADR-095).

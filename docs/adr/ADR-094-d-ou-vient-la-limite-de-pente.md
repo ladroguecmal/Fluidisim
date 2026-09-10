@@ -119,3 +119,17 @@ ni ailleurs sur le disque ni à vingt instants ultérieurs. La seconde moitié e
 sûreté : si un instant la dépassait, la grandeur ne pourrait pas servir de borne.
 
 Aucun comportement modifié, aucun hachage de campagne touché : `slope_max()` est additive.
+
+## Note corrective du 2026-09-10 (S140)
+
+La décision 2 — « la grandeur comparée doit être la pente réelle » — **n'est pas applicable à la
+pression**, et A206 l'a montré dès la session suivante. La pente maximale d'un champ de pression
+ne se calcule pas : elle se cherche sur l'emprise, et une recherche qui manque le maximum produit
+un majorant faux. Le facteur de conservatisme de `slope_envelope` n'est d'ailleurs **pas une
+constante** — il vaut 3,03 sur un spectre gaussien réaliste et croît sans borne quand l'emprise se
+resserre sur un zéro du champ (16,7 mesuré).
+
+La formulation juste est celle d'[ADR-095](ADR-095-ce-que-la-pression-peut-annoncer-de-sa-pente.md) :
+**la même grandeur majorée par tous les termes, le meilleur majorant exact de chacun, la marge
+résiduelle mesurée.** Le reste de cette décision — `max_slope = 0,4488` avec provenance,
+`ρ = 1,7950713`, l'hétérogénéité du budget comme cause de l'absence de provenance — est inchangé.

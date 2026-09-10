@@ -76,7 +76,7 @@ reste hétérogène et aucun seuil ne s'y dérive (ADR-094, L220).
 - [x] **P4** — la borne resserrée `Σ|k_w|·|η|` (norme euclidienne au lieu des deux sommes de
       valeurs absolues) : même coût, majorant rigoureux. Mesurer ce qu'elle récupère, et
       **vérifier qu'elle majore toujours** — c'est une propriété de sûreté, pas de finesse.
-- [ ] **P5** — décision et livrable : ce que A206 impose à S139-1.
+- [x] **P5** — décision et livrable : ce que A206 impose à S139-1.
 - [ ] **P6** — rituel de fin (§6), jeton rendu, fusion `--ff-only`.
 
 ### Notes de reprise
