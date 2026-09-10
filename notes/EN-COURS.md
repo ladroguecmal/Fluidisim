@@ -67,7 +67,7 @@ Objectif : S163-1/A219, recevoir la clôture temporelle du résidu sur un fond a
 - [x] **P1** — état réel, jeton et plan committé seul.
 - [x] **P2** — dériver les sources aux étages RK2 et déclarer le protocole avant mesure ;
       synchroniser les copies propres au jeton occupé.
-- [ ] **P3** — implémenter le fond prescrit dans le véhicule S163, comparer incréments discrets,
+- [x] **P3** — implémenter le fond prescrit dans le véhicule S163, comparer incréments discrets,
       dérivées continues et source temporelle omise ; raffinement et témoins nuls.
 - [ ] **P4** — réception, limites et suivi A219/A50, tests S163 conservés ; décision si nécessaire.
 - [ ] **P5** — rituel de fin, journal/index/décomptes/suite, jeton rendu et copies synchronisées.
@@ -84,3 +84,8 @@ par soustraction d'une référence avancée ; seules les différences du fond pr
 Une dérivée continue peut converger sans reproduire exactement la référence au pas donné.
 P2 : FOND-PRESCRIT-S164 déclare incréments RK2, dérivées continues et omission.
 Fond onde debout linéaire, même état total initial gaussien, seuil S163 conservé.
+
+P3 : step_prescribed construit dans le support S163 ; trois sources temporelles reçues.
+72 montages N240 en release : incréments <=1,60e-13 hauteur ; dérivée continue converge
+à l'ordre deux, omission ne converge pas. 4 tests propres S164 +3 host et 5 tests propres
+S163 +3 host reçus. Deux avertissements d'import partagé corrigés par annotation locale.

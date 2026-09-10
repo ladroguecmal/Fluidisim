@@ -54,6 +54,14 @@ pub enum Terms {
     NoSource,
 }
 
+/// S164 : choix de la source temporelle pour un fond prescrit.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Temporal {
+    Discrete,
+    Continuous,
+    Omitted,
+}
+
 fn physical(a: State) -> State {
     State {
         h: a.q,
@@ -109,6 +117,78 @@ pub struct Coupled {
     pub max_courant: f64,
 }
 impl Coupled {
+    /// S164 : fond reçu par callback (état, dérivée temporelle) ; aucun total de référence.
+    /// Q1=Q(t+dt)=Q+, donc les deux corrections discrètes sont Q1-Q0.
+    pub fn step_prescribed(
+        &mut self,
+        t: f64,
+        dt: f64,
+        temporal: Temporal,
+        sample: impl Fn(usize, f64) -> (State, State),
+    ) {
+        assert!(t.is_finite() && dt.is_finite() && dt > 0.0);
+        assert_eq!(self.mode, Background::Frozen);
+        assert_eq!(self.terms, Terms::Complete);
+        let n = self.bg.len();
+        for i in 0..n {
+            let (q0, derivative) = sample(i, t);
+            self.bg[i] = q0;
+            // b1 temporaire : dérivée à t, utilisée après rhs.
+            self.b1[i] = derivative;
+        }
+        let c1 = Self::rhs(
+            &self.bg,
+            &self.d,
+            &mut self.lb,
+            &mut self.ld,
+            self.dx,
+            self.h0,
+            Background::Frozen,
+            Terms::Complete,
+            dt,
+        );
+        for i in 0..n {
+            let (q1, derivative1) = sample(i, t + dt);
+            let increment = q1.minus(self.bg[i]);
+            let correction = match temporal {
+                Temporal::Discrete => increment,
+                Temporal::Continuous => self.b1[i].times(dt),
+                Temporal::Omitted => State::default(),
+            };
+            self.d1[i] = self.d[i].plus(self.ld[i].times(dt)).minus(correction);
+            self.b1[i] = q1;
+            // hôte indépendant, pas de nouvelle allocation : lb sert au second correcteur.
+            self.lb[i] = match temporal {
+                Temporal::Discrete => increment,
+                Temporal::Continuous => derivative1.times(dt),
+                Temporal::Omitted => State::default(),
+            };
+        }
+        // rhs écrase lb : conserver les correcteurs dans bg (Q0 n'est plus nécessaire).
+        self.bg.copy_from_slice(&self.lb);
+        let c2 = Self::rhs(
+            &self.b1,
+            &self.d1,
+            &mut self.lb,
+            &mut self.ld,
+            self.dx,
+            self.h0,
+            Background::Frozen,
+            Terms::Complete,
+            dt,
+        );
+        for i in 0..n {
+            self.d[i] = self.d[i]
+                .plus(self.d1[i])
+                .plus(self.ld[i].times(dt))
+                .minus(self.bg[i])
+                .times(0.5);
+            self.bg[i] = self.b1[i];
+            self.bg[i].speed();
+            self.bg[i].plus(self.d[i]).speed();
+        }
+        self.max_courant = self.max_courant.max(c1).max(c2);
+    }
     pub fn new(
         bg: Vec<State>,
         d: Vec<State>,

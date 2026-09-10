@@ -3,6 +3,7 @@
 #[path = "../../water-harness/src/host_impl.rs"]
 mod host_impl;
 #[path = "support/residu_shallow.rs"]
+#[allow(dead_code)] // Le support partagé inclut aussi le fond prescrit de S164.
 mod residu;
 use residu::{Background, Coupled, State, Terms, G};
 use water_core::{
