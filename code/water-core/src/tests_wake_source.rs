@@ -55,3 +55,42 @@ fn stationary_load_zero_and_scaling_s150() {
     assert_eq!(heights[2].to_bits(),(2.*heights[1]).to_bits());
     assert_eq!(energies[2].to_bits(),(4.*energies[1]).to_bits());
 }
+
+#[test]
+fn emitter_acknowledgement_and_retry_s151() {
+    let mut emitter=Emitter::new(metadata(),SimTime(0),[0.;2]).unwrap();let start=emitter.cursor();
+    let a=emitter.prepare(start,leg()).unwrap();let retry=emitter.prepare(start,leg()).unwrap();
+    assert!(a.source().same_content(&retry.source()));assert_eq!(emitter.cursor(),start);
+    let mut slots=[None;2];let mut j=crate::pressure_journal::Journal::new(1,&mut slots);
+    assert_eq!(emitter.acknowledge(&a,&j),Err(EmitError::NotAdmitted));
+    j.admit_authenticated(a.source()).unwrap();emitter.acknowledge(&retry,&j).unwrap();
+    assert_eq!(emitter.cursor(),a.end());assert_eq!(emitter.acknowledge(&a,&j),Err(EmitError::Stale));
+    let b=emitter.prepare(emitter.cursor(),leg()).unwrap();
+    assert_eq!(b.source().metadata().id,8);assert_eq!(b.source().metadata().cause.emission,1);
+    assert_eq!(b.source().segments()[0].origin,[2.,0.]);
+    j.admit_authenticated(b.source()).unwrap();emitter.acknowledge(&b,&j).unwrap();
+    assert_eq!(emitter.cursor().time,SimTime(2_000_000));
+}
+#[test]
+fn emitter_discontinuities_and_saturation_s151() {
+    let mut emitter=Emitter::new(metadata(),SimTime(0),[0.;2]).unwrap();let start=emitter.cursor();
+    for bad in [Cursor {frame:FrameId(1),..start},Cursor {cell:1,..start},Cursor {time:SimTime(1),..start},Cursor {position:[1.,0.],..start}] {
+        assert!(matches!(emitter.prepare(bad,leg()),Err(EmitError::Discontinuity)));
+    }
+    let a=emitter.prepare(start,leg()).unwrap();let mut slots=[];let mut j=crate::pressure_journal::Journal::new(1,&mut slots);
+    assert_eq!(j.admit_authenticated(a.source()),Err(crate::pressure_journal::Error::Full));
+    assert_eq!(emitter.acknowledge(&a,&j),Err(EmitError::NotAdmitted));assert_eq!(emitter.cursor(),start);
+    let mut m=metadata();m.id=u64::MAX;let e=Emitter::new(m,SimTime(0),[0.;2]).unwrap();
+    assert!(matches!(e.prepare(e.cursor(),leg()),Err(EmitError::Identity)));
+    m=metadata();m.cause.emission=u32::MAX;let e=Emitter::new(m,SimTime(0),[0.;2]).unwrap();
+    assert!(matches!(e.prepare(e.cursor(),leg()),Err(EmitError::Identity)));
+}
+#[test]
+fn emitter_conflicting_content_does_not_advance_s151() {
+    let mut emitter=Emitter::new(metadata(),SimTime(0),[0.;2]).unwrap();let start=emitter.cursor();
+    let a=emitter.prepare(start,leg()).unwrap();let mut changed=leg();changed.downward_force_n=200.;
+    let b=emitter.prepare(start,changed).unwrap();let mut slots=[None];let mut j=crate::pressure_journal::Journal::new(1,&mut slots);
+    j.admit_authenticated(a.source()).unwrap();
+    assert_eq!(emitter.acknowledge(&b,&j),Err(EmitError::NotAdmitted));assert_eq!(emitter.cursor(),start);
+    emitter.acknowledge(&a,&j).unwrap();
+}

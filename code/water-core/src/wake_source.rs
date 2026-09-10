@@ -3,6 +3,9 @@
 use crate::{modal_pressure::{scale_integer, Segment}, pressure_source::{Metadata, Source}, SimTime};
 
 pub const MAX_LEGS: usize = 64;
+#[path = "wake_emitter.rs"]
+mod emitter;
+pub use emitter::{Cursor, Emission, Emitter, EmitError};
 #[derive(Clone, Copy, Debug)]
 pub struct Leg {
     pub duration_us: u64,

@@ -65,7 +65,7 @@ Objectif : S150-1, émission progressive de tronçons de sillage sans perte ni d
 ### Plan
 
 - [x] **P1** — état réel, contrats, jeton et plan seul.
-- [ ] **P2** — émetteur à préparation/acquittement, continuité et identité ; ADR et refus testés.
+- [x] **P2** — émetteur à préparation/acquittement, continuité et identité ; ADR et refus testés.
 - [ ] **P3** — intégration journal/contrôleur, saturation/reprise, comparaison au trajet complet et arrêt.
 - [ ] **P4** — vérifications, rapport et rituel de fin ; passation vers B2, jeton rendu.
 
