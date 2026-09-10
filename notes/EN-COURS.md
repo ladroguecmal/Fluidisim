@@ -122,3 +122,9 @@ A seuil 2,0 : ~30 s, ~47 s, au-dela de 64 s.
 Rapport par doublement de `radial` : **~1,5**, soit un exposant 0,58. La racine (1,41) est proche,
 le lineaire (2,0) est exclu. La formule de S156 avait donc le bon **exposant** et une mauvaise
 constante — l'inverse de ce que j'avais conclu.
+
+Correctif immediat : le battement de P2 a ete ecrit 16:40 alors que `date` disait 16:50 — la
+valeur etait dans le script **avant** que l'horloge soit lue. Corrige. Cause commune avec le
+battement en avance de S156 P5 : j'ecris la valeur puis je la verifie, au lieu de lire puis
+d'ecrire. La regle du depot dit "le relever, jamais l'ecrire de memoire" ; elle vise ce
+geste-la exactement. A generaliser en fin de session.
