@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S153 — en cours
+Session : S153 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S152-1, recevoir énergie intérieure et transport hors80m à60s.
 
@@ -67,7 +67,7 @@ Objectif : S152-1, recevoir énergie intérieure et transport hors80m à60s.
 - [x] **P1** — état réel, lecture S127/S129, jeton et plan seul.
 - [x] **P2** — oracle énergétique indépendant pour source4m, disques80/120m, temps0/60s ; raffinement spatial et spectral.
 - [x] **P3** — observable énergétique depuis les coefficients N512 ; réception contre oracle et contre-épreuves.
-- [ ] **P4** — tests, rapport et rituel de fin ; poursuite B2 et jeton rendu.
+- [x] **P4** — tests, rapport et rituel de fin ; poursuite B2 et jeton rendu.
 
 ### Notes de reprise
 
@@ -82,3 +82,5 @@ Première fixture seulement, pas de généralisation aux cinq longueurs S152.
 P2 : oracle60s E80/E0=0,964843720099 ; E120/E0=0,999999680964 ; anneau=0,035155960865. Initial1,000060620645/1,000060621813. Raffinement reçu. Généralisation privée de Measurement et test candidat déjà préparés pour P3, non committés.
 
 P3 : candidat512 E80(60)/E0=0,964843755487 ; E120=0,999999791824 ; oracle reçu et contre-épreuves actives. Rapport ENERGIE-B2-S153, aucun code de production modifié.
+
+P4 :294 tests/cinq ignorés (201+93), zéro échec ; quatre avertissements préexistants.105 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas, deux bancs partiels. Rituel exécuté ; jeton rendu.

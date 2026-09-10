@@ -1914,3 +1914,7 @@ EMISSION-SILLAGE-S151. A212 inchangée et partielle ; pas de nouvelle réception
 Le garde de résolution ne certifie pas la précision ; l'oracle indépendant reçoit ensuite le champ.
 Énergie globale60s, sillage long et sélection technologique restent ouverts dans BANC-B2-S152.
 Aucun nouvel angle indépendant ; A212 inchangée, pas de nouvelle mesure du fond.
+
+**Suivi S153 — énergie hors domaine.** À60s pour source4m, l'anneau80–120m contient
+3,516 % de E0 ; le déficit du disque80m n'est pas une dissipation (ENERGIE-B2-S153).
+Mécanisme déjà connu S127, aucun angle indépendant ajouté. A212 inchangée.

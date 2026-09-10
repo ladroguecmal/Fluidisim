@@ -87,3 +87,7 @@ la rétractation S39, pas un résultat que cette campagne confirmerait.
 **S152-1, prochaine S153 : énergie et transport à60s** sur ce même candidat/domaine ;
 mesurer le flux ou l'énergie sortie du disque au lieu d'appeler sa perte une dissipation.
 B2 reste la priorité du dernier bilan. Aucun choix de lambda_cut ni de technologie finale.
+
+> **Actualisation S153 — 2026-09-10.** Le bilan énergétique60s de la source4m
+> est reçu dans [ENERGIE-B2-S153](ENERGIE-B2-S153.md), collecte étendue à120m :
+> l'énergie sortie de80m est retrouvée. Les quatre autres longueurs restent S153-1.

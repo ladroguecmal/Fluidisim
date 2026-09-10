@@ -7768,3 +7768,25 @@ aucun changé ; le facteur de pente est testé à512. Aucun acte distant ni nouv
 énergie sortie et dissipation ; poursuite de B2 selon le dernier bilan. Aucun arbitrage utilisateur.
 
 Vérification finale :293 tests réussis/cinq ignorés (200+93), zéro échec ; quatre avertissements préexistants. Profil512 également reçu release.105 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas, deux bancs partiels. Diff vérifié, jeton rendu.
+
+## S153 — 2026-09-10 — L'énergie manquante se trouve plus loin
+
+Entrée S152-1. Oracle et observable candidat N512 pour source4m/0,01J jusqu'à60s,
+disques80/120m : [ENERGIE-B2-S153](../docs/validation/ENERGIE-B2-S153.md).
+À60s E80/E0=0,964843755487, E120/E0=0,999999791824 ;3,516 % de l'énergie
+est dans l'anneau. L'oracle indépendant confirme à3,60e-7 E0 au pire.
+La baisse dans80m dépasse2 % mais n'est pas une dissipation ; le disque120m
+ferme le bilan à moins de0,003 E0. Raffinements spectral/spatial et sentinelles
+angulaires reçus, contre-épreuves sans cinétique et sans interférences éliminées.
+
+Un test S153 ajouté ; Measurement privé généralisé à const N, S129 conservé.
+Aucun changement de production, d'ADR ou d'invariant.105 ADR,212 angles,230 leçons,
+18 invariants,6 SPEC,23 cas, deux bancs partiels. Aucun nouvel angle ni leçon autonome :
+le transport hors domaine était connu S127, il est ici quantifié à la durée de B2.
+Pas de nouvelle copie ni action distante, pas d'arbitrage utilisateur.
+
+S152-1 réalisée sur source4m seulement. **S153-1, prochaine S154 : étendre aux
+sources2/3/5/6m de S152**, domaine de collecte reçu pour chacune. Poursuite B2
+conforme au dernier bilan ; pas de sélection technologique ni de lambda_cut.
+
+Vérification finale :294 tests réussis/cinq ignorés (201+93), zéro échec ; quatre avertissements préexistants. Nouveau test également release ; décomptes inchangés, diff vérifié et jeton rendu.

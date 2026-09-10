@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 15:33 +02:00
+JETON            : libre
+Battement        : 2026-09-10 15:34 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S153
-Dernière session : S152 — premier volet B2 reçu ; 293 tests/cinq ignorés
-Session suivante : S153 — S152-1, énergie et transport à60s, poursuite B2 (dernier bilan)
+Session en cours : aucune
+Dernière session : S153 — énergie60s reçue sur source4m ; 294 tests/cinq ignorés
+Session suivante : S154 — S153-1, énergie60s des sources2/3/5/6m, poursuite B2 (dernier bilan)
 
 **S147 : travail directement sur master.** Les anciennes copies, dont 886155, doivent rejoindre
 master avant toute reprise ; aucune copie créée, toutes propres au démarrage.
@@ -192,6 +192,12 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S153 — 2026-09-10 :** [ENERGIE-B2-S153](docs/validation/ENERGIE-B2-S153.md).
+Source4m/N512 à60s : E80/E0=0,964843755487, E120/E0=0,999999791824.
+L'anneau retrouve3,516 % ; oracle indépendant et contre-épreuves reçus.294 tests/cinq ignorés.
+105 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas, deux bancs partiels.
+**Suite S154 : S153-1, étendre aux sources2/3/5/6m de S152**, poursuite B2.
 
 **S152 — 2026-09-10 :** [ADR-105](docs/adr/ADR-105-profil-radial-b2-soixante-secondes.md),
 [BANC-B2-S152](docs/validation/BANC-B2-S152.md). Impact80m/60s : N512 reçu pour

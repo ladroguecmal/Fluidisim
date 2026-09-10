@@ -389,3 +389,7 @@ Les six pièges généraux de SPEC-003 §6 s'appliquent. Quatre sont propres à 
 4. **Le taux de décimation par classe de domaine** sort de B2 (§7, point 5) mais sa validité se
    vérifie en B4, dont c'est un paramètre direct (SPEC-004 §10.3). Les deux bancs partagent ce
    paramètre et doivent partager sa valeur.
+
+> **S153 — énergie60s :** source4m reçue, voir [ENERGIE-B2-S153](ENERGIE-B2-S153.md).
+> Le déficit de3,516 % dans80m est transporté dans l'anneau80–120m. Verdict B2
+> toujours partiel ; prochaine extension S153-1 aux quatre autres fixtures S152.

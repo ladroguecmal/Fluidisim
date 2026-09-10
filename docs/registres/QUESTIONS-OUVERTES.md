@@ -1407,3 +1407,11 @@ entrée par entrée. Le fil reprend ci-dessous.
   distinguer le flux sortant d'une perte numérique avant de conclure sur B2-03.
 - B2 global ouvert : lambda_cut, concurrence technologique, sillage long,
   bathymétrie, capacité multi-sources et déterminisme distant non reçus.
+
+### S153 — Bilan énergétique sur une fixture B2
+
+- **S152-1 : réalisée sur source4m**, ENERGIE-B2-S153 ; N512, collecte120m,
+  énergie transportée hors80m retrouvée, oracle et contre-épreuves reçus.
+- **S153-1 : ouverte, prochaine S154.** Étendre le bilan60s aux sources2/3/5/6m
+  de S152, avec rayon de collecte et raffinements reçus pour chacune.
+- B2 demeure partiel : technologie, lambda_cut, sillage long et bathymétrie ouverts.

@@ -17,6 +17,11 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S153 :** [ENERGIE-B2-S153](validation/ENERGIE-B2-S153.md), source4m/N512 à60s.
+3,516 % de l'énergie hors80m retrouvée dans120m ; oracle et contre-épreuves reçus.294 tests réussis/cinq ignorés.
+105 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas, deux bancs partiels.
+**Suite S154 : S153-1, bilan des quatre autres sources, poursuite B2.**
+
 **S152 :** [ADR-105](adr/ADR-105-profil-radial-b2-soixante-secondes.md),
 [BANC-B2-S152](validation/BANC-B2-S152.md). Premier volet B2 reçu : impact80m/60s,
 profils512 pour sources2/3/4m et256 pour5/6m, restauration locale à30s.
