@@ -69,10 +69,10 @@ cambrure de Stokes (SPEC-001 §4) au lieu de rester un nombre sans origine.
 ### Plan
 
 - [x] **P1** — état réel, jeton, **plan déclaré et committé seul**.
-- [ ] **P2** — sonde `pente_reelle` : rapport `slope_bound / max|slope|` sur le disque et sur
+- [x] **P2** — sonde `pente_reelle` : rapport `slope_bound / max|slope|` sur le disque et sur
       l'âge, pour un cas. Établir d'abord **où** le maximum se trouve — centre, premier anneau,
       instant initial — avant de balayer quoi que ce soit.
-- [ ] **P3** — balayer λ, énergie, N et rayon du domaine. Le rapport est-il une constante du
+- [x] **P3** — balayer λ, énergie, N et rayon du domaine. Le rapport est-il une constante du
       modèle, ou dépend-il d'un paramètre ? C'est la question qui décide de tout le reste.
 - [ ] **P4** — si le rapport est stable : dériver `max_slope` de `πH/λ ≈ 0,449` divisé par lui,
       et **vérifier la conséquence** — quelles énergies deviennent admissibles ou refusées à
