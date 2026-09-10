@@ -58,73 +58,27 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S161 — terminée
-Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : **débloquer B4**, seule voie ouverte selon ADR-109, et qu'A214 attend désormais seule.
-B4 est **le juge de l'architecture** : « à partir de quel rapport `|δ|/Hs` la décomposition
-additive d'ADR-001 devient-elle visiblement fausse ? ». Il exige une **référence substitutive
-intégrale** que le dépôt n'a pas, et c'est ce blocage-là qu'il faut instruire — pas le contourner.
+Session : S162 — en cours
+Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
+Objectif : instruire A217 : vérifier le blocage de la référence non linéaire dispersive,
+puis établir ce qu'une expérience bornée peut dire de l'additivité en eau profonde.
 
 ### Plan
 
-- [x] **P1** — état réel, jeton, **plan déclaré et committé seul**.
-- [x] **P2** — **dire ce qui bloque exactement.** B4 compare trois choses — surface, forces sur la
-      coque, perception en double aveugle — et une seule est hors de portée d'une session. Le
-      blocage annoncé est la référence intégrale : établir ce que le dépôt possède déjà
-      (`shallow.rs`, `dispersif.rs`, l'oracle croisé de S37) et ce qui manque vraiment.
-- [x] **P3** — **peser une version 1D avant de l'écrire.** Un contre-exemple 1D suffirait à
-      infirmer l'additivité ; son absence ne la validerait pas. Dire lequel des deux verdicts un
-      B4 en 1D pourrait rendre — et si c'est encore B4 ou un banc différent qui mérite son nom.
-- [x] **P4** — si la voie tient : mesurer. Superposition linéaire contre solution non linéaire sur
-      la même scène, en balayant le rapport d'amplitude, jusqu'à trouver la bascule ou montrer
-      qu'elle n'apparaît pas dans la plage accessible.
-- [x] **P5** — verdict, livrable, et ADR **seulement** si une décision en sort. La valeur de départ
-      d'ADR-001 est 0,35·Hs : la confirmer, la déplacer ou la laisser est une décision.
-- [x] **P6** — rituel de fin (§6, sept points), jeton rendu. Copie principale : rien à refermer.
+- [x] **P1** — état réel, outils, jeton et plan committé seul.
+- [ ] **P2** — lectures de reprise ; inventaire des références et formulation précise du manque.
+      Synchroniser les trois copies propres sans avance vers le jeton courant, sans les supprimer.
+- [ ] **P3** — confronter une voie analytique ou numérique minimale à la question A217 ;
+      mesurer si une référence recevable existe, sinon publier le blocage argumenté et le prochain lot.
+      Distinguer une correction liée d'ordre deux d'une référence intégrale évolutive.
+- [ ] **P4** — verdict et propagation aux points ouverts ; contrôles adaptés, aucun seuil inventé.
+- [ ] **P5** — rituel de fin REPRISE §6, journal, index, décomptes, suite et jeton rendu.
 
 ### Notes de reprise
 
-Départ fb73282 = master, copie principale, arbre propre. 299 tests/cinq ignorés.
-110 ADR, 215 angles, 242 leçons, 18 invariants, 6 SPEC, 23 cas.
-
-Ce que le protocole demande, mot pour mot (`PLAN-BENCHMARK` §B4) : même scène simulée deux fois,
-(a) perturbative B+W+δ, (b) **substitutive intégrale de référence à résolution élevée** ; puis
-comparaison de la surface, des forces sur la coque, et de la perception en double aveugle. Décision
-attendue : seuil de bascule, valeur de départ **0,35·Hs**, ou remise en cause d'ADR-001.
-**Ajout S04** : avant toute conclusion sur l'architecture, écarter le terme source incomplet
-(A50) — une exécution avec `S` non dégradé, une avec `S` tronqué, l'écart mesure la sensibilité.
-
-Piège nommé par S146, et il vaut ici plus qu'ailleurs : **un banc dont deux volets sont hors de
-portée reste utile s'il dit lesquels.** Le contraire — annoncer « B4 débloqué » sans réserve —
-ferait porter au corpus un renvoi faux sur le banc qui juge l'architecture.
-
-Second piège, propre à cette session : **écrire un solveur**. La tentation est réelle et elle
-mangerait dix sessions. Ce qui est demandé est de dire ce qu'il faut, pas de le construire — et
-de regarder d'abord si une référence suffisante existe déjà.
-
-Troisième piège : confondre « infirmer ADR-001 » et « mesurer un seuil ». B4 doit pouvoir
-l'infirmer ; une mesure qui ne peut rendre qu'un seuil n'est pas B4.
-
-P2-P6 : B4-DEBLOCAGE-S161, sonde `additivite_b4.rs`, `configure_bosses`, ADR-111, note corrective
-sur ADR-001 §3.3, A216, A217, L243. 299 tests inchangés.
-
-Ce que la session a appris, et qui vaut pour la suivante : **le blocage hérité n'en était pas un.**
-La référence existait depuis S36 ; il manquait trois lignes. Ouvrir un blocage coûte une lecture,
-le supposer coûte des sessions.
-
-Deux pièges évités, à ne pas réexplorer :
-- `dispersif.rs` **ne peut pas** servir de référence : il est linéaire, la superposition y est
-  vraie par construction, l'écart serait nul quel que soit le rapport ;
-- le pas CFL dépend de la hauteur maximale, donc de la présence de la seconde perturbation : les
-  trois simulations d'un même point n'avancent pas par la même suite de pas. Contrôlé à pas imposé,
-  la part numérique vaut 0 à 2 % — l'artefact existe, il est négligeable ici.
-
-Pour S162 sans relire : **A217** demande quelle variable gouverne l'additivité en eau profonde,
-là où la profondeur ne joue plus. La réponse plausible est la **cambrure**, et rien ne le vérifie.
-Le blocage annoncé est qu'aucun solveur du dépôt n'est à la fois **non linéaire et dispersif** —
-`shallow.rs` est non linéaire mais non dispersif, `dispersif.rs` est dispersif mais linéaire.
-**Commencer par vérifier ce blocage-là**, exactement comme S161 a vérifié le précédent : de quoi
-a-t-on besoin au juste, et qu'est-ce qui existe déjà qui y ressemble ? Une réponse négative,
-argumentée, est un résultat — elle dirait que ce volet de B4 attend une couche non écrite.
-À défaut, **A216** est peu coûteuse : la sonde existe, il s'agit de balayer `A_B/h` entre 0,02 et
-0,10 pour voir comment le coefficient passe de 0,95 à 0,24.
+Départ : master 832762f, arbre propre. Trois copies à 824ee62 (S159), toutes propres,
+jetons libres ; aucune branche vivante plus avancée. Branche 5134cd archivée conservée.
+Cargo 1.97.0 disponible. Aucun worktree créé. Suite héritée : 299 tests/cinq ignorés.
+A217 prioritaire ; BILAN-S145 porté via la poursuite B4, après B1 et clôture S63-1.
+Piège : un solveur linéaire donnerait une additivité exacte par construction ; un développement
+faiblement non linéaire peut réfuter une universalité, pas recevoir B4 complet.

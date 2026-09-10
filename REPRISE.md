@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-10 20:03 +02:00
-Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-10 20:06 +02:00
+Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
+Session en cours : S162 — instruction A217, additivité en eau profonde
 Dernière session : S161 — premier volet de B4 exécuté ; 299 tests/cinq ignorés
 Session suivante : S162 — **A217**, l'additivité en eau profonde : ouvrir le blocage d'abord
 
