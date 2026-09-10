@@ -7098,3 +7098,40 @@ dans les deux cas : reprendre le fil sans revérifier l'état après un travail 
 Ce n'est probablement pas le seul : 93 décisions, 204 angles, et les renvois entre eux n'ont
 jamais été audités. **Un audit des renvois** est le prolongement direct ; le dépôt a déjà payé ce
 genre d'audit deux fois — S11 sur les points ouverts, S15 sur les actions annoncées en prose.
+
+---
+
+## S138 — 2026-09-10 — Audit des renvois : ce que S137 avait manqué
+
+**Entrée :** jeton libre à 17aa26b, trois copies coïncidentes. S137-1. **Plan déclaré et
+committé seul avant le travail** — ce que S137 avait omis.
+**Produit :** [AUDIT-RENVOIS-S138](../docs/validation/AUDIT-RENVOIS-S138.md), deux notes
+correctives datées, A205, L218. Aucune décision nouvelle, aucun code modifié.
+**L'audit mécanique ne trouve rien, et c'est un résultat.** 93 ADR de 1 à 93, 217 leçons de 1 à
+217, 204 angles : aucun trou, aucun doublon, aucun renvoi vers un numéro inexistant, aucune
+section de spécification citée à tort. Les dix-sept « absences » du premier passage étaient
+**toutes** des artefacts de mes propres motifs — SPEC-003 vit dans `docs/validation/`, « §5 bis »
+échappait à l'expression, et les « §10.3 » désignent des points numérotés et non des sous-titres.
+Vérifier chaque signalement avant de le rapporter a supprimé la totalité des résultats
+automatiques.
+**Ce que la lecture trouve, en revanche : mon correctif de S137 était incomplet. L218.** S137 a
+écrit que « trois ADR » portaient le renvoi erroné « à calibrer B2 ». **Ils sont six.** ADR-058
+§12 renvoie des paramètres de **source** à un banc qui ne les mesure pas, et ADR-085 §17 — écrite
+par Codex en S125 — y renvoie **α**, ce que S137 venait précisément d'attribuer à B10. S137 a
+corrigé les trois décisions qu'elle avait sous les yeux et a conclu, sans chercher les autres.
+**Quand une erreur est trouvée par hasard, la première question n'est pas comment la corriger
+mais combien de fois elle figure** — une recherche de texte coûte quelques secondes.
+**Un doute nommé et non tranché : A205.** ADR-058 §21 et ADR-062 §50 renvoient `max_slope` à B2.
+Aucun banc ne fixe une limite de pente — B2 choisit la technologie de W, B4 juge la décomposition
+additive. Mais la correction n'est pas de rediriger vers un autre banc : **SPEC-001 §4 donne la
+cambrure limite de Stokes** `H/λ ≈ 1/7`, d'où une pente de déferlement `πH/λ ≈ 0,449`, quatre fois
+et demie le seuil de 0,1 employé depuis S77. Ce qui manque est le **rapport entre la borne L1 du
+modèle et la pente réelle**, mesurable dans le modèle — comme `α` l'était. Nommé, pas fait.
+**Limites :** l'audit a couvert les identifiants, les sections de spécification et les renvois
+vers les bancs. Il n'a **pas** vérifié les « traité en Sxx » ni les « résolu par ADR-0xx », qui
+demandent d'ouvrir chaque cible — c'est ce qui a coûté à S137, et cela dépasse une session.
+269 tests inchangés. 93 ADR, 205 angles, 17 invariants, 6 spécifications, 23 cas. Invariants
+relus : aucun invalidé.
+**Suite S139 :** S138-1 — mesurer le rapport entre la borne L1 et la pente réelle, et voir si
+`max_slope` se dérive comme `α` s'est dérivé. Si oui, un troisième paramètre sort de l'arbitraire ;
+sinon, on saura quel banc doit le fixer, ce qu'aucun document ne dit aujourd'hui.

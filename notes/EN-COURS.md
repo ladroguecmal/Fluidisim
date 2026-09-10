@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S138 — en cours
+Session : S138 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : S137-1 — auditer les renvois du corpus. S137 a trouvé un renvoi faux recopié par
 trois ADR pendant soixante sessions, et deux numéros de leçon en collision. Chercher les autres,
@@ -68,16 +68,16 @@ par recherche de texte et non par relecture — la méthode de S11 et S15.
 
 - [x] **P1** — état réel, jeton, **plan déclaré et committé seul**. S137 ne l'a pas fait ;
       cette session commence par le faire.
-- [ ] **P2** — audit mécanique des **identifiants** : ADR, angles, leçons, invariants, cas.
+- [x] **P2** — audit mécanique des **identifiants** : ADR, angles, leçons, invariants, cas.
       Collisions, trous, et références vers des numéros qui n'existent pas. C'est le plus
       automatisable, et S137 a montré qu'il y a des collisions.
-- [ ] **P3** — audit des renvois vers les **bancs** — c'est là que S137 a trouvé le défaut, et
+- [x] **P3** — audit des renvois vers les **bancs** — c'est là que S137 a trouvé le défaut, et
       la même erreur peut viser B3, B4 ou B10.
-- [ ] **P4** — audit des renvois vers les **sections de spécification** : `SPEC-00x §y` où la
+- [x] **P4** — audit des renvois vers les **sections de spécification** : `SPEC-00x §y` où la
       section a pu bouger, disparaître, ou n'avoir jamais porté ce qu'on lui attribue.
-- [ ] **P5** — corriger ce qui est faux : notes datées pour les ADR, correction directe pour
+- [x] **P5** — corriger ce qui est faux : notes datées pour les ADR, correction directe pour
       les documents qui ne sont pas des ADR, et **dire ce qui est douteux sans le trancher**.
-- [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
+- [x] **P6** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -95,3 +95,17 @@ Piège à éviter : corriger un renvoi douteux en devinant sa cible. Si la cible
 
 Attendu réaliste : un audit trouve surtout des choses mineures. Le résultat utile peut être
 « le corpus est cohérent sur ces points », à condition d'avoir cherché pour de bon.
+
+P2-P6 : AUDIT-RENVOIS-S138, deux notes correctives (ADR-058, ADR-085), A205, L218, journal,
+index, README, REPRISE, jeton rendu, ff-only. Aucun code modifié, 269 tests inchangés.
+
+Ce que l'audit a coûté et rapporté, pour la prochaine fois : l'automatique n'a produit que des
+faux positifs — dix-sept, tous dus à mes motifs — et il a fallu vérifier chacun. Le vrai résultat
+est venu d'une seule recherche ciblée sur la formulation fautive de S137. **Chercher la
+formulation exacte de l'erreur connue rapporte plus que balayer le corpus au hasard.**
+
+Pour S139 sans relire : S138-1 mesure le rapport entre `slope_bound` — la borne L1 du modèle,
+`Σ|a_k|·k`, calculée dans `RadialImpact::new` — et la pente réelle maximale du champ, obtenue en
+échantillonnant `sample().slope` sur le disque. Si le rapport est stable, `max_slope` se dérive
+de la cambrure de Stokes (SPEC-001 §4, `H/λ ≈ 1/7`, pente `πH/λ ≈ 0,449`) divisée par ce rapport.
+Méthode : la sonde `forme_initiale` fait déjà ce genre de balayage et peut servir de modèle.

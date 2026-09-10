@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 02:47 +02:00
+JETON            : libre
+Battement        : 2026-09-10 02:55 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S138 — audit des renvois du corpus (S137-1)
-Dernière session : S137 — le renvoi de calibration était faux ;269 tests/cinq ignorés
-Session suivante : à fixer en fin de S138
+Session en cours : aucune
+Dernière session : S138 — audit des renvois ;269 tests/cinq ignorés
+Session suivante : S139 — `max_slope` se dérive-t-il ? (S138-1, A205)
 
 **Copie de travail S130** : worktree `claude/reprise-projet-2d3506`, remis en avance rapide sur
 master (e817d0e) au démarrage — il était resté à 52e80a5 et n'avait rien d'unique, donc aucun
@@ -180,6 +180,26 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S138 — 2026-09-10 :** [AUDIT-RENVOIS-S138](docs/validation/AUDIT-RENVOIS-S138.md). S137-1.
+**L'audit mécanique ne trouve rien, et c'est le résultat** : 93 ADR de 1 à 93, 217 leçons de 1 à
+217, 204 angles, aucun trou, aucun doublon, aucun renvoi vers un numéro ou une section
+inexistants. Les dix-sept « absences » du premier passage étaient toutes des artefacts de mes
+motifs de recherche, vérifiés un à un avant d'être écartés.
+**Mais le correctif de S137 était incomplet. L218.** Elle annonçait « trois ADR » portant le
+renvoi « à calibrer B2 » : **ils sont six**. ADR-058 §12 y renvoie des paramètres de source, et
+ADR-085 §17 — écrite par un autre agent en S125 — y renvoie `α`, que S137 venait d'attribuer à
+B10. Deux notes correctives datées posées. **Quand une erreur est trouvée par hasard, la première
+question est combien de fois elle figure**, pas comment la corriger.
+**A205, nommée et non tranchée** : `max_slope` décide de l'admissibilité de tout champ, vaut 0,1
+partout depuis S77 sans provenance, et est renvoyé à B2 qui ne le mesure pas. Mais SPEC-001 §4
+donne déjà la cambrure limite de Stokes `H/λ ≈ 1/7`, d'où une pente de déferlement `πH/λ ≈ 0,449`
+— quatre fois et demie le seuil employé. Ce qui manque est le **rapport entre la borne L1 du
+modèle et la pente réelle**, mesurable dans le modèle comme `α` l'a été.
+Aucun code modifié,269 tests inchangés.93 ADR,205 angles,17 invariants,6 spécifications,23 cas.
+Suite S139 : S138-1, mesurer ce rapport et voir si `max_slope` se dérive. L'audit des renvois de
+type « traité en Sxx » n'a **pas** été mené et reste ouvert, avec l'extension de fenêtre, S116-2,
+le bilan mixte, la durabilité et les deux calibrations de B10.
 
 **S137 — 2026-09-10 :** [ADR-093](docs/adr/ADR-093-ou-se-calibre-la-source-d-impact.md),
 [BANC-SOURCE-S137](docs/validation/BANC-SOURCE-S137.md). **La suite S136-1 partait d'une prémisse

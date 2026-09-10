@@ -17,6 +17,14 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S138 :** [AUDIT-RENVOIS-S138](validation/AUDIT-RENVOIS-S138.md), audit des renvois du corpus. Identifiants
+**cohérents** — 93 ADR, 217 leçons, 204 angles, aucun trou ni doublon, aucun renvoi cassé vers un numéro ou une
+section. Mais le correctif de S137 était **incomplet** : six ADR portaient « à calibrer B2 », trois seulement
+avaient été corrigés — ADR-058 et ADR-085 le portaient aussi. **L218** : corriger une occurrence n'est pas
+corriger l'erreur. **A205** : aucun banc ne fixe `max_slope`, et sa limite physique est déjà dérivable de
+SPEC-001 §4. Aucun code modifié,269 tests inchangés.
+93 ADR,205 angles,17 invariants,6 spécifications,23 cas. Suite S139 : `max_slope` se dérive-t-il ? S138-1.
+
 **S137 :** [ADR-093](adr/ADR-093-ou-se-calibre-la-source-d-impact.md), où se calibre la source d'un impact.
 [BANC-SOURCE-S137](validation/BANC-SOURCE-S137.md) : le renvoi « à calibrer B2 », recopié par trois ADR depuis
 S77, est **faux** — B2 choisit la technologie de W, B10 mesure la cavité, et **aucun banc ne mesure la source
