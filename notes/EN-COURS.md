@@ -58,73 +58,49 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S160 — terminée
+Session : S161 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : **S158-1** — le facteur **2,5** revient dans deux mesures de ce problème : l'étendue du
-groupement `t·½√(g·sigma)·dk` de S157 (1,17 à 2,94) et la fidélité de l'estimateur d'erreur de
-S158 (« à un facteur 2,5 près »). Plafond de précision de tout ce qui touche au repliement, ou
-coïncidence entre deux mesures indépendantes ? Les deux jeux de données existent — `wake_law.rs`
-et `wake_estimator.rs`.
+Objectif : **débloquer B4**, seule voie ouverte selon ADR-109, et qu'A214 attend désormais seule.
+B4 est **le juge de l'architecture** : « à partir de quel rapport `|δ|/Hs` la décomposition
+additive d'ADR-001 devient-elle visiblement fausse ? ». Il exige une **référence substitutive
+intégrale** que le dépôt n'a pas, et c'est ce blocage-là qu'il faut instruire — pas le contourner.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton, **plan déclaré et committé seul**.
-- [x] **P2** — **définir les deux grandeurs avant de les comparer.** L'une est une étendue entre
-      configurations, l'autre un rapport estimé/vrai : rien ne dit qu'elles soient commensurables.
-      Rejouer les deux sondes telles quelles pour repartir de chiffres, pas de citations.
-- [x] **P3** — le test qui tranche : **bougent-elles ensemble ?** Faire varier un paramètre commun
-      — `sigma`, `cutoff`, `radial` — et regarder si les deux quantités suivent. Si l'une passe à
-      4 quand l'autre reste à 2,5, elles sont indépendantes et la question est close.
-- [x] **P4** — si elles bougent ensemble, chercher la cause commune ; sinon, dire pourquoi la
-      coïncidence était plausible et ce qui l'a fait croire.
-- [x] **P5** — livrable ; ADR seulement si une décision en sort. Une question fermée sans décision
-      n'a pas besoin d'ADR, et S157 comme S158 ont montré qu'un résultat négatif est un résultat.
-- [x] **P6** — rituel de fin (§6, **sept points**), jeton rendu. Pas de copie isolée à refermer.
+- [ ] **P2** — **dire ce qui bloque exactement.** B4 compare trois choses — surface, forces sur la
+      coque, perception en double aveugle — et une seule est hors de portée d'une session. Le
+      blocage annoncé est la référence intégrale : établir ce que le dépôt possède déjà
+      (`shallow.rs`, `dispersif.rs`, l'oracle croisé de S37) et ce qui manque vraiment.
+- [ ] **P3** — **peser une version 1D avant de l'écrire.** Un contre-exemple 1D suffirait à
+      infirmer l'additivité ; son absence ne la validerait pas. Dire lequel des deux verdicts un
+      B4 en 1D pourrait rendre — et si c'est encore B4 ou un banc différent qui mérite son nom.
+- [ ] **P4** — si la voie tient : mesurer. Superposition linéaire contre solution non linéaire sur
+      la même scène, en balayant le rapport d'amplitude, jusqu'à trouver la bascule ou montrer
+      qu'elle n'apparaît pas dans la plage accessible.
+- [ ] **P5** — verdict, livrable, et ADR **seulement** si une décision en sort. La valeur de départ
+      d'ADR-001 est 0,35·Hs : la confirmer, la déplacer ou la laisser est une décision.
+- [ ] **P6** — rituel de fin (§6, sept points), jeton rendu. Copie principale : rien à refermer.
 
 ### Notes de reprise
 
-Départ 824ee62 = master, copie principale, arbre propre. 299 tests/cinq ignorés.
-110 ADR, 215 angles, 241 leçons, 18 invariants, 6 SPEC, 23 cas.
+Départ fb73282 = master, copie principale, arbre propre. 299 tests/cinq ignorés.
+110 ADR, 215 angles, 242 leçons, 18 invariants, 6 SPEC, 23 cas.
 
-Ce que les deux « 2,5 » sont, d'après les livrables et **à vérifier avant de s'en servir** :
-- **S157** — `t·½√(g·sigma)·dk` va de 1,17 à 2,94 sur sept configurations : c'est l'**étendue
-  résiduelle** d'un groupement adimensionnel, donc une dispersion entre configurations ;
-- **S158** — l'estimateur `radial` contre `radial+1` suit l'erreur vraie « à un facteur 2,5 près,
-  et en la sous-estimant » : c'est une **fidélité**, un rapport estimé/vrai.
+Ce que le protocole demande, mot pour mot (`PLAN-BENCHMARK` §B4) : même scène simulée deux fois,
+(a) perturbative B+W+δ, (b) **substitutive intégrale de référence à résolution élevée** ; puis
+comparaison de la surface, des forces sur la coque, et de la perception en double aveugle. Décision
+attendue : seuil de bascule, valeur de départ **0,35·Hs**, ou remise en cause d'ADR-001.
+**Ajout S04** : avant toute conclusion sur l'architecture, écarter le terme source incomplet
+(A50) — une exécution avec `S` non dégradé, une avec `S` tronqué, l'écart mesure la sensibilité.
 
-Deux natures différentes. La coïncidence est donc l'hypothèse par défaut, et c'est **l'hypothèse
-que la session doit chercher à réfuter**, pas à confirmer.
+Piège nommé par S146, et il vaut ici plus qu'ailleurs : **un banc dont deux volets sont hors de
+portée reste utile s'il dit lesquels.** Le contraire — annoncer « B4 débloqué » sans réserve —
+ferait porter au corpus un renvoi faux sur le banc qui juge l'architecture.
 
-Piège à éviter : conclure « même chiffre, donc même cause ». S157 a payé exactement cela — un
-ajustement libre rassemblait sept points à 1,38 avec un exposant séduisant, sur un plan
-d'expérience dégénéré (L235). Deux nombres égaux à 2,5 ne sont pas une mesure.
+Second piège, propre à cette session : **écrire un solveur**. La tentation est réelle et elle
+mangerait dix sessions. Ce qui est demandé est de dire ce qu'il faut, pas de le construire — et
+de regarder d'abord si une référence suffisante existe déjà.
 
-Second piège : élargir. S158 a écrit que la voie ouverte est **B4**, chantier sans rapport. Si la
-question se ferme en une heure, la fermer et le dire, pas la prolonger pour remplir la session.
-
-P2-P6 : sonde `wake_plafond.rs`, FACTEUR-25-S160, note datée sur TOLERANCE-SILLAGE-S158, L242.
-299 tests inchangés, aucun ADR — rien n'était à décider.
-
-Ce que la session a retourné, et qui vaut pour la suivante : **la moitié de la réponse ne
-demandait aucune mesure.** Comparer les définitions des deux nombres suffisait à voir qu'ils
-n'étaient pas commensurables — une étendue et une déviation. Regarder ce qu'un chiffre *est* avant
-de chercher *pourquoi* il vaut ce qu'il vaut.
-
-Deux choses à ne pas réexplorer :
-- `validate_recipe` impose `sigma·cutoff ∈ [1 ; 8]` : à cutoff 6, sigma plafonne à 1,33. Pour un
-  sigma plus grand il faut baisser cutoff, ce qui change la bande — et c'est justement la variable
-  qui gouverne la fidélité de l'estimateur ;
-- le couple `4 / 1,5` est atypique dans les deux jeux à la fois, S157 comme S160 : un spectre coupé
-  près du pic n'a plus assez de modes pour que quoi que ce soit se moyenne. Ce n'est pas un
-  artefact de sonde.
-
-Pour S161 sans relire : **B4** juge « à partir de quel rapport la décomposition additive devient
-*visiblement* fausse » (ADR-109 §47). Il est le seul juge de fidélité du corpus, A214 l'attend
-désormais seule — elle ne réclame plus ni mesure ni spécification — et il est **bloqué par la
-référence substitutive intégrale**. Commencer par lire ce que cette référence doit être et si elle
-est à portée, comme S146 a commencé B1 en disant ce que le banc pouvait et ne pouvait pas trancher.
-Un banc dont deux volets sur quatre sont perceptuels reste utile s'il dit lesquels.
-
-Friction d'outil rencontrée, sans conséquence sur le dépôt : l'outil d'écriture de fichiers croyait
-la session encore dans le worktree supprimé et refusait les chemins de la copie principale ; tout a
-été écrit par le shell, et les commits sont bien sur `master`.
+Troisième piège : confondre « infirmer ADR-001 » et « mesurer un seuil ». B4 doit pouvoir
+l'infirmer ; une mesure qui ne peut rendre qu'un seuil n'est pas B4.

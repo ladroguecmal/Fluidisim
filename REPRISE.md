@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-10 19:47 +02:00
+JETON            : occupé
+Battement        : 2026-09-10 19:50 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S161 — débloquer **B4**
 Dernière session : S160 — S158-1 fermée, coïncidence ; 299 tests/cinq ignorés
-Session suivante : S161 — débloquer **B4** (ADR-109 ; A214 l'attend seule)
+Session suivante : à fixer en fin de S161
 
 *S160 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
 rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour.*
