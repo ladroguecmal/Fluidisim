@@ -70,7 +70,7 @@ de collecte requis**, comme S153 et S154 l'ont fait pour les impacts.
 - [x] **P2** — énergie d'un sillage prolongé jusqu'à 60 s : puissance pendant le forçage,
       conservation après extinction. C'est exactement ce que S155 vient de rendre mesurable, et
       personne ne l'a encore regardé au-delà de 8 s.
-- [ ] **P3** — **où** est cette énergie dans l'espace à 60 s : balayage radial du champ contre
+- [x] **P3** — **où** est cette énergie dans l'espace à 60 s : balayage radial du champ contre
       l'oracle f64 à quadrature doublée, et fraction contenue dans un rayon donné.
 - [ ] **P4** — décider d'après les chiffres : la borne utile est-elle en temps, en domaine, ou
       en **résolution spectrale** ? Les trois ne se corrigent pas au même endroit.
@@ -116,3 +116,35 @@ laisse g|eta|^2 + |v|^2/k invariant. Le bilan spectral ne pouvait pas ne pas se 
 confirme l'implementation, il ne dit rien de la validite spatiale du champ. Le noter comme
 resultat aurait ete une mesure vide.
 Ecart de quadrature sur l'energie totale entre 128x128 et 256x256 : 4,7e-4 relatif. Petit.
+
+P3 — deux bornes, deux lois, et la prediction n'etait juste qu'a moitie.
+
+Ce qui est confirme : la quadrature discrete rend le champ **periodique**, de periode
+`2*pi*radial/cutoff` — 67 / 134 / 268 / 536 m pour radial 64 / 128 / 256 / 512. A 4 s, deux
+resolutions voisines cessent de s'accorder a 45 m (64 contre 128) et 100 m (128 contre 256),
+soit les **deux tiers** de la periode de la plus grossiere dans les deux cas. Le paquet ne part
+pas : il **revient par l'autre bord**.
+
+Ce qui n'etait pas prevu : la borne **angulaire** est independante et suit une autre loi. A 8 s,
+radial fixe a 512, le rayon honnete vaut 20 / 45 / plus de 200 m pour angular 64 / 128 / 256 —
+proportionnel a `angular`, comme l'alias de `exp(i k.x)` sur le cercle le veut. Les deux bornes
+ne se corrigent donc pas au meme endroit, et **laquelle mord depend de l'instant** : a 8 s c'est
+l'angulaire (512x128 honnete a 45 m, 128x512 honnete au-dela de 200 m) ; a 60 s c'est la radiale,
+exactement l'inverse (512x128 reproduit 512x512 au bit pres en champ proche, 128x512 se trompe
+d'un facteur 75).
+
+Duree honnete mesuree, angulaire fixe a 512 : radial 128 cesse de s'accorder **entre 15 et 20 s**,
+radial 256 **entre 45 et 50 s**. La recurrence predite `2*pi/(c_g,max * dk)` donne 13,1 et 18,5 s :
+juste a 30 % pour 128, trop pessimiste d'un facteur 2,5 pour 256. La formule prend `c_g` au plus
+petit noeud du maillage, alors que les tres petits k ne portent presque pas d'energie. **La loi
+n'est pas verifiee ; seuls les deux encadrements le sont**, et c'est ce qui sera publie.
+
+Point de logique a ne pas rater : quand 256 et 512 divergent a 50 s, cela accuse **256**, pas 512
+— la coherence en dessous de 45 s et l'echec plus precoce de 128 le montrent. Mais `radial` et
+`angular` plafonnent a **512** dans la grammaire de recette (`validate_recipe`), donc
+**t_max(512) n'est pas mesurable** : il n'existe aucune reference plus fine. Extrapoler donnerait
+plus de 100 s ; ce serait une extrapolation, pas une mesure, et il faut le dire.
+
+Consequence pour B2 : la recette de la reception de sillage S150 est 128x128 — honnete jusqu'a
+~17 s et ~45 m. Un bilan a 60 s demande radial >= 512 et angular >= 256, soit 131072 noeuds
+contre 16384 : **huit fois plus**.
