@@ -1370,3 +1370,11 @@ entrée par entrée. Le fil reprend ci-dessous.
   avec sauvegarde/restauration ; comparer au chemin direct, puis mesurer le coût B+W.
 - **A212 : partielle.** Bandes/directions du jeu, statistiques multi-graines et réception
   pression/mixte restent ouvertes. N32 n'est pas reçu par transposition de B1.
+### S149 — Recette transportée et cycle hôte reçu
+
+- **S148-1 : close**, ADR-102 et CYCLE-SPECTRAL-S149 : WSPR, restauration après destruction
+  des sources, comparaison directe et coût B+W mesuré.
+- **S147-1 : réalisée sur la fixture B+impact**, compléments suivis par A212 partielle.
+- **S149-1 : ouverte, prochaine S150.** Construire W4/sillage suivant ADR-054, puis B2.
+  Statistiques multigraines et réception pression/mixte du fond restent dans A212 ;
+  elles ne constituent pas un préalable à W4.

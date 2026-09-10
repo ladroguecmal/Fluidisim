@@ -135,7 +135,7 @@ Coût mesuré en S125 : environ ×4 à points identiques et ×9 pour le montage 
 initial. [ADR-085](docs/adr/ADR-085-profils-radiaux-selon-le-domaine.md) conserve N64 par défaut ;
 N128/N256 se dimensionnent explicitement au domaine commun du service. A202 traitée ; A203 suit
 la réception physique à grande portée, réalisée en S126 sur les deux fixtures à âge0–4 s.
-État vérifié S148 : **282 tests réussis, cinq ignorés ; 101 ADR, 212 angles, 18 invariants,
+État vérifié S149 : **283 tests réussis, cinq ignorés ; 102 ADR, 212 angles, 18 invariants,
 6 spécifications, 23 cas canoniques, 1 banc sur 11 exécuté.** Détail par couche et par bloc :
 [BILAN-S145](docs/registres/BILAN-S145.md).
 [Réception S126](docs/validation/RECEPTION-ETENDUE-S126.md) :1350 points-temps reçus contre
@@ -236,3 +236,7 @@ Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état dét
 Cuisson explicite sans libm, moments/pic et B+impact reçus ; gravité vérifiée en composition.
 282 tests réussis/cinq ignorés,101 ADR,212 angles,18 invariants,6 SPEC,23 cas.
 Suite S149 : S148-1, transport de recette et cycle hôte spectral ; A212 reste partielle.
+**S149 : recette spectrale transportée**, [ADR-102](docs/adr/ADR-102-transport-recette-spectrale.md).
+[Cycle hôte reçu](docs/validation/CYCLE-SPECTRAL-S149.md) après destruction des sources,
+comparaison directe et hashes debug/release identiques. S148-1 close ; A212 partielle.
+Suite S150 : S149-1, W4/sillage puis B2.

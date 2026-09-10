@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 14:56 +02:00
+JETON            : libre
+Battement        : 2026-09-10 14:58 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S149
-Dernière session : S148 — fond spectral construit ; 282 tests/cinq ignorés
-Session suivante : S149 — S148-1, cycle hôte spectral et transport de recette, puis coût B+W et W4/B2
+Session en cours : aucune
+Dernière session : S149 — recette transportée et cycle reçu ; 283 tests/cinq ignorés
+Session suivante : S150 — S149-1, construire W4/sillage puis B2 (dernier bilan)
 
 **S147 : travail directement sur master.** Les anciennes copies, dont 886155, doivent rejoindre
 master avant toute reprise ; aucune copie créée, toutes propres au démarrage.
@@ -192,6 +192,14 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S149 — 2026-09-10 :** [ADR-102](docs/adr/ADR-102-transport-recette-spectrale.md),
+[CYCLE-SPECTRAL-S149](docs/validation/CYCLE-SPECTRAL-S149.md). WSPR64 octets,
+cycle hôte B+impact restauré après destruction des sources, composition directe et
+hashes debug/release identiques. Recuisson2,661ms au chargement, requête64 points
+B32+W256479,488µs localement.283 tests/cinq ignorés ;102 ADR,212 angles,230 leçons,
+18 invariants,6 SPEC,23 cas ; aucun nouveau banc. S148-1 close, A212 partielle
+(statistiques, bandes/directions, pression/mixte). **Suite S150 : S149-1, W4/sillage puis B2.**
 
 **S148 — 2026-09-10 :** [ADR-101](docs/adr/ADR-101-cuisson-du-fond-spectral.md),
 [FOND-SPECTRAL-S148](docs/validation/FOND-SPECTRAL-S148.md). Candidat JONSWAP construit,

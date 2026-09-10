@@ -1894,3 +1894,7 @@ Aucun nouvel angle indépendant : cette conséquence relève de la forme déjà 
 sans libm et gravité portée par B. Moments/pic, dérivée, pente et impact non nul reçus ; hashes
 locaux debug/release identiques. Cycle hôte/transport de recette S148-1, statistiques et choix
 des bandes/directions restent ouverts. Voir FOND-SPECTRAL-S148.
+**Suivi A212 — S149 : partielle.** Transport WSPR et cycle hôte B+impact reçus,
+comparaison directe et hashes debug/release identiques, coûts locaux mesurés
+(CYCLE-SPECTRAL-S149). S148-1 close. Restent statistiques multigraines,
+bandes/directions du jeu et pression/mixte. Aucun nouvel angle indépendant.

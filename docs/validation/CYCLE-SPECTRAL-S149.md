@@ -9,7 +9,7 @@ WSPR64 octets et WLIV289 octets reconstruisent B32 + un impact W256 après destr
 des objets sources. Ancre à 1 000 000 m, référentiel7/cellule9, milieu et temps conservés
 par l'hôte. 64 points, temps0/1/3/4s ; chaque échantillon compare les dix f32 bit à bit
 à la composition directe, puis les hashes avant/après restauration coïncident.
-Le dernier temps reçoit aussi l'expiration de l'événement. Snapshot réencodé identique ;
+Le dernier temps atteint la borne incluse de l'horizon de préparation. Snapshot réencodé identique ;
 WLIV de mauvais référentiel refusé sans changer le snapshot publié.
 
 Hashes identiques debug/release : `5f3b72dadb1de4aa`, `964662f5054e452d`,

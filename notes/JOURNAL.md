@@ -7663,3 +7663,27 @@ L230 appliquée aux diagnostics avant normalisation, L137 à l'exponentielle par
 I-01 à I-18 relus, aucun amendé ; conformité interplateforme toujours à recevoir.
 Infrastructure inchangée : aucun distant, S35-7 reste ouverte ; anciennes copies en retard.
 **Vérification finale :** workspace282 réussis/cinq ignorés, zéro échec ; quatre avertissements préexistants du harnais. Cinq essais ciblés également release. Décomptes101 ADR,212 angles,18 invariants,6 SPEC,23 cas ; diff sans erreur d'espacement.
+
+## S149 — 2026-09-10 — La recette spectrale traverse une restauration
+
+Entrée : S148-1, fond construit et rejeu mémoire seulement. Sorties : ADR-102,
+codec WSPR64 octets, cycle_spectral et [réception](../docs/validation/CYCLE-SPECTRAL-S149.md).
+Décision : recuire avant publication et comparer le hash numérique ; l'hôte conserve
+l'ancre, le contexte et le temps avec WSPR/WLIV. Aucun état temporel de B stocké.
+
+Après destruction des sources, 64 points à quatre temps concordent bit à bit avec
+la composition directe ; hashes debug/release identiques. Refus de charge malformée
+et de contexte incompatible reçus. Coût release local : recuisson2,661ms,
+restauration W2,534µs, requête B32+W256/64 points479,488µs. La recuisson reste au chargement.
+
+Vérification :283 tests réussis/cinq ignorés (190+93), aucun échec ; nouveau test
+également reçu release. Quatre avertissements préexistants du harnais.102 ADR,
+212 angles,230 leçons,18 invariants,6 SPEC,23 cas ; B1 reste partiel, aucun nouveau banc.
+I-02/I-03/I-06/I-07/I-09 relus, aucun invariant changé. A212 reste partielle,
+aucun nouvel angle ni leçon généralisable. Pas d'action distante ni nouvelle copie.
+
+S148-1 close ; S147-1 achevée sur la fixture B+impact. Pression/mixte, statistiques
+et bandes/directions du jeu restent suivies par A212. Pas de format global disque/réseau,
+ni preuve multiplateforme. **Suite S150 : S149-1, construire W4/sillage puis B2**,
+conformément au dernier bilan ; les essais spectraux complémentaires ne bloquent pas W4.
+Aucun nouvel arbitrage utilisateur.

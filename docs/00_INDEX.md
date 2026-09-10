@@ -17,6 +17,13 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S149 :** [ADR-102](adr/ADR-102-transport-recette-spectrale.md),
+[CYCLE-SPECTRAL-S149](validation/CYCLE-SPECTRAL-S149.md). WSPR64 octets et cycle
+hôte B+impact reçus ; hashes debug/release identiques, coût64 points479,488µs localement.
+S148-1 close ; A212 reste partielle. **283 tests réussis/cinq ignorés ;102 ADR,
+212 angles,18 invariants,6 spécifications,23 cas.** B1 partiel, aucun nouveau banc.
+**Suite S150 : S149-1, W4/sillage puis B2**, recommandation du dernier bilan portée.
+
 **S148 :** [ADR-101](adr/ADR-101-cuisson-du-fond-spectral.md),
 [FOND-SPECTRAL-S148](validation/FOND-SPECTRAL-S148.md). Candidat JONSWAP évaluable,
 cuisson sans libm, gravité portée par B et vérifiée en composition. Douze recettes reçues,
