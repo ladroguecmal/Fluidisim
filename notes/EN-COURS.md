@@ -84,7 +84,7 @@ périmé qu'une session y trouvera `libre`.
 - [x] **P3** — remettre en avance rapide toute copie sans commit unique. C'est le geste le moins
       risqué et il éteint à lui seul le danger du jeton périmé : toutes les copies liront alors
       le même jeton.
-- [ ] **P4** — retirer les worktrees morts et supprimer les branches **sans commit unique**.
+- [x] **P4** — retirer les worktrees morts et supprimer les branches **sans commit unique**.
       La branche archivée porte 44 commits uniques : son worktree est retiré, **la branche est
       conservée**. Aucune histoire n'est perdue.
 - [ ] **P5** — le correctif **durable**, sans lequel tout repoussera : la procédure de fermeture
@@ -141,3 +141,17 @@ P3 — les cinq copies sans commit unique sont en avance rapide sur master. Elle
 session s'interrompait ici, le depot serait deja plus sur qu'au depart.
 Rien n'a change dans ma copie : le travail de cette etape est dans les autres repertoires, et
 seul ce journal en garde la trace. C'est exactement le cas ou l'ecriture anticipee sert.
+
+P4 — six copies ramenees a trois, sept branches a quatre, aucune histoire perdue.
+Retires : `friendly-bhabha-6da427` (archivee — **la branche est conservee**, seul le repertoire
+qui invitait a y travailler est parti), `reprise-projet-c107bf`, `reprise-projet-886155`,
+`reprise-projet-29ef50`. Supprimees : les trois branches correspondantes et `claude/s22-suite`,
+toutes ancetres de master. `git branch -d` a ete employe et non `-D` : il aurait refuse si l'une
+d'elles avait porte quoi que ce soit d'unique. Verifie apres coup : la branche archivee porte
+toujours ses **44** commits.
+**Non retiree, et c'est un choix, pas un oubli** : `project-status-progress-d31d78`, apparue
+pendant S158 sans annonce. Elle est propre, sans commit unique, et remise a jour. Mais je n'ai
+aucune preuve qu'aucune session ne l'occupe en ce moment, et la regle que je me suis donnee en P1
+dit qu'une copie peut-etre vivante se met a jour, elle ne se supprime pas. La retirer est une
+commande d'une ligne, laissee a l'utilisateur.
+Ma propre copie reste : j'y travaille. La derniere fermeture revient a qui travaillera sur master.
