@@ -65,7 +65,7 @@ Objectif : S149-1, raccorder un objet mobile à une source de sillage W existant
 ### Plan
 
 - [x] **P1** — état réel, lecture W4, jeton et plan seul.
-- [ ] **P2** — contrat charge/trajectoire vers pression gaussienne, constructeur borné et refus ; ADR.
+- [x] **P2** — contrat charge/trajectoire vers pression gaussienne, constructeur borné et refus ; ADR.
 - [ ] **P3** — recevoir le trajet avec virage, extinction, transport et comparaison au champ de référence ; scénario exécutable.
 - [ ] **P4** — suite complète, rapport et rituel de fin : journal, angles/leçons/actions, index et jeton.
 

@@ -67,6 +67,7 @@ pub mod spectral_pressure;
 pub mod gaussian_spectrum;
 pub mod bound_pressure;
 pub mod pressure_source;
+pub mod wake_source;
 pub mod pressure_journal;
 
 /// S143, A210 : les gardes du contrat de pente. Elles ne portent sur aucun module en
