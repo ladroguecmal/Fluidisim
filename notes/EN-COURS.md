@@ -58,33 +58,20 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S165 — terminée
+Session : S166 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S164-1/A220, isoler les erreurs de frontière dans un domaine résiduel local.
+Objectif : S165-1/A221, fermeture autonome avec information entrante et sortante distincte.
 
 ### Plan
 
-- [x] **P1** — vérifier les copies, prendre le jeton, déclarer le plan seul.
-- [x] **P2** — déclarer protocole, frontière aux deux étages RK2 et bilan de flux ; synchroniser les copies propres.
-- [x] **P3** — construire la fenêtre locale et les témoins, mesurer traversée et raffinements.
-- [x] **P4** — recevoir les tests, publier mesures/limites, suivre A220 et actions.
-- [x] **P5** — rituel de fin : journal, leçons, index, décomptes, reprise, jeton et copies.
+- [x] **P1** — état réel, jeton et plan seul.
+- [ ] **P2** — dériver caractéristiques et référence analytique, protocole avant mesure ; copies synchronisées.
+- [ ] **P3** — implémenter fermeture aux étages, comparer entrée/sortie et raffinements.
+- [ ] **P4** — réception, résultats, limites et suivi des actions.
+- [ ] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
-Départ master a20f514 propre, quatre copies au même commit ; branche B archivée conservée.
-S164 terminée, corpus lu dans cette conversation ; aucune étape interrompue.
-112 ADR,220 angles,246 leçons,18 invariants,6 SPEC,23 cas. Workspace 299/cinq ignorés
-reçu S163 ; exemples S163/S164 reçus S164. Aucun worktree à créer.
-BILAN-S145 porté par poursuite B4. Aucun absorbeur choisi avant mesure.
-P2 : protocole FRONTIERE-LOCALE-S165 déclaré ; oracle aux étages, fond seul, oracle retardé.
-Bilan ouvert mesuré, ne pas confondre erreur locale et coefficient de réflexion.
-
-P3 : fenêtre [30,90], cinq tests propres +3 host reçus ; 54 montages release reçus.
-Oracle <=1,12e-13 ; fond seul non convergent en temps, oracle retardé convergent.
-Attente non dérivée 1e-4 dans le cœur corrigée en diagnostic d'écart résolu ; voir protocole.
-Norme de bord inclut le débit, sinon le nœud de hauteur masque l'anomalie extérieure.
-
-P4 : résultats publiés, A220 traitée sur véhicule ; A221/S165-1 frontière sans oracle.
-Campagne finale : 54 cas, Courant <=0,213264, bilan <=6,97e-15 ; cinq tests propres reçus.
-A50 reste partielle ; aucun ADR, aucun seuil physique. Bibliothèques inchangées.
+Master 8ecf20b propre, quatre copies alignées. Corpus lu dans cette conversation,
+S165 terminée ; 112 ADR,221 angles,247 leçons. Bibliothèques inchangées depuis S163.
+Suite BILAN-S145 portée par poursuite B4. Aucun domaine 3D ni absorbeur choisi.

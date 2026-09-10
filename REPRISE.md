@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-10 20:59 +02:00
+JETON            : occupé
+Battement        : 2026-09-10 21:00 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S166 — fermeture autonome du bord
 Dernière session : S165 — frontière locale exercée en 1D ; cinq nouveaux tests exemple
 Session suivante : S166 — S165-1 : fermeture sans oracle, entrées et sorties (A221)
 
