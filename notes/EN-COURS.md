@@ -81,7 +81,7 @@ périmé qu'une session y trouvera `libre`.
 - [x] **P2** — inventaire **factuel** des six copies et des six branches : commits uniques,
       propreté, âge, état du jeton que chacune porte. Rien ne sera supprimé avant que ce tableau
       existe et soit publié.
-- [ ] **P3** — remettre en avance rapide toute copie sans commit unique. C'est le geste le moins
+- [x] **P3** — remettre en avance rapide toute copie sans commit unique. C'est le geste le moins
       risqué et il éteint à lui seul le danger du jeton périmé : toutes les copies liront alors
       le même jeton.
 - [ ] **P4** — retirer les worktrees morts et supprimer les branches **sans commit unique**.
@@ -134,3 +134,10 @@ Fait nouveau : project-status-progress-d31d78 est **apparue pendant S158**, sans
 copies ne s'eteignent pas toutes seules, elles se recreent.
 Aucune copie ne porte de travail non committe — verifie en premier, c'est la seule perte qui serait
 irreversible.
+
+P3 — les cinq copies sans commit unique sont en avance rapide sur master. Elles lisent maintenant
+**le meme jeton**, la meme derniere session, le meme etat : le danger du jeton perime est eteint
+**avant** qu'aucune suppression n'ait eu lieu. C'est le point important de l'ordre choisi — si la
+session s'interrompait ici, le depot serait deja plus sur qu'au depart.
+Rien n'a change dans ma copie : le travail de cette etape est dans les autres repertoires, et
+seul ce journal en garde la trace. C'est exactement le cas ou l'ecriture anticipee sert.
