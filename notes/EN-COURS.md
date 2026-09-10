@@ -73,7 +73,7 @@ reste hétérogène et aucun seuil ne s'y dérive (ADR-094, L220).
       majorations connues — c'est le témoin qui dit que la sonde mesure ce qu'elle croit.
 - [x] **P3** — balayer ce dont le facteur dépend : direction de `k`, phase de `η`, nombre de
       cases, taille de l'emprise. Est-il borné, ou l'emprise peut-elle le faire diverger ?
-- [ ] **P4** — la borne resserrée `Σ|k_w|·|η|` (norme euclidienne au lieu des deux sommes de
+- [x] **P4** — la borne resserrée `Σ|k_w|·|η|` (norme euclidienne au lieu des deux sommes de
       valeurs absolues) : même coût, majorant rigoureux. Mesurer ce qu'elle récupère, et
       **vérifier qu'elle majore toujours** — c'est une propriété de sûreté, pas de finesse.
 - [ ] **P5** — décision et livrable : ce que A206 impose à S139-1.

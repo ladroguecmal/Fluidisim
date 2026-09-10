@@ -354,6 +354,27 @@ impl Field<'_> {
         }
         Ok(bound)
     }
+    /// Enveloppe **resserrée**, S140 : `Σ |k_w|·|η|` en normes euclidiennes au lieu des deux
+    /// sommes de valeurs absolues. Majorant tout aussi rigoureux — `|slope| = |Σ k_w·(η_re sin φ
+    /// + η_im cos φ)| ≤ Σ |k_w|·|η|` — et jamais supérieur à `slope_envelope()`, dont il retire
+    /// exactement deux facteurs indépendants valant chacun 1 à √2 : la direction du vecteur
+    /// d'onde et la phase de la réponse. Même coût, deux `hypot` au lieu de deux `abs`.
+    ///
+    /// Ce qu'il ne retire **pas** : le conservatisme dû aux phases qui ne s'alignent pas sur
+    /// l'emprise, qui n'est borné par rien (A206). Publiée sans changer aucun comportement ;
+    /// substituer l'une à l'autre dans l'admission déplace des refus, et c'est ADR-095.
+    pub fn slope_envelope_tight(&self) -> Result<f32, Error> {
+        let mut bound = 0.0;
+        for s in self.slots {
+            bound += (s.weighted_k[0] * s.weighted_k[0] + s.weighted_k[1] * s.weighted_k[1]).sqrt()
+                * (s.response.eta.re * s.response.eta.re + s.response.eta.im * s.response.eta.im)
+                    .sqrt();
+        }
+        if !bound.is_finite() {
+            return Err(Error::NonFinite);
+        }
+        Ok(bound)
+    }
     /// Scratch modifiable au refus, sortie inchangée jusqu'au succès intégral.
     /// Préfixe points.len() seulement ; lot vide accepté sans mutation.
     pub fn sample_batch(
@@ -444,6 +465,58 @@ mod tests {
             s.horizontal_velocity[1],
         ]
         .map(f32::to_bits)
+    }
+    /// S140, A206 : l'enveloppe resserrée doit rester **entre** la pente réelle et l'enveloppe
+    /// L1, aux deux bouts. Le bout bas est une propriété de sûreté — un majorant qui passe sous
+    /// le champ n'est plus un majorant ; le bout haut dit qu'elle ne perd rien.
+    #[test]
+    fn tight_envelope_brackets_the_real_slope_s140() {
+        let nodes = [
+            Node {
+                k: [0.6, 0.8],
+                transform: 1.0,
+                weight: 0.7,
+            },
+            Node {
+                k: [1.2, -0.4],
+                transform: 0.8,
+                weight: 0.2,
+            },
+            Node {
+                k: [-0.9, 1.7],
+                transform: 0.5,
+                weight: 0.4,
+            },
+        ];
+        let mut pool = [Slot::default(); 3];
+        let path = [source()];
+        let f = prepare(
+            &nodes,
+            &path,
+            9.81,
+            1025.0,
+            SimTime(1_000_000),
+            SimTime(8_000_000),
+            [-8.0; 2],
+            [12.0; 2],
+            &mut pool,
+        )
+        .unwrap();
+        let large = f.slope_envelope().unwrap();
+        let tight = f.slope_envelope_tight().unwrap();
+        assert!(tight <= large);
+        // Les deux facteurs retirés valent chacun au plus √2 : le gain ne peut pas dépasser 2.
+        assert!(large <= 2.0 * tight);
+        let mut worst = 0.0f32;
+        for i in 0..=200 {
+            for j in 0..=200 {
+                let p = [-8.0 + i as f32 * 0.1, -8.0 + j as f32 * 0.1];
+                let s = f.sample(p).unwrap();
+                worst = worst.max((s.slope[0] * s.slope[0] + s.slope[1] * s.slope[1]).sqrt());
+            }
+        }
+        println!("S140 large={large:.6e} tight={tight:.6e} reelle={worst:.6e}");
+        assert!(worst <= tight);
     }
     #[test]
     fn batch_identity_and_atomic_refusals_s101() {

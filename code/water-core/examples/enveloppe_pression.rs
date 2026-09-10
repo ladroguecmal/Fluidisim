@@ -237,7 +237,9 @@ fn main() {
 
     println!("=== 4. Un spectre reel : le facteur d'un champ gaussien cuit ===");
     println!("Meme montage que receive_power : Recipe sigma=1, cutoff=6, resolutions variees.");
-    println!("  radial x angular   cases   enveloppe       pente reelle    facteur");
+    println!(
+        "  radial x angular   cases   enveloppe     resserree     pente reelle  facteur  apres"
+    );
     for (radial, angular) in [(16usize, 16usize), (32, 32), (64, 64), (112, 80)] {
         let mut nodes = vec![Node::default(); radial * angular];
         let spectre = bake(
@@ -268,14 +270,61 @@ fn main() {
         )
         .expect("champ preparable");
         let enveloppe = champ.slope_envelope().expect("enveloppe finie") as f64;
-        let (reelle, arg) = pente_max(&champ, [-emprise, -emprise], [emprise, emprise], 120);
+        let resserree = champ.slope_envelope_tight().expect("resserree finie") as f64;
+        let (reelle, _) = pente_max(&champ, [-emprise, -emprise], [emprise, emprise], 120);
         println!(
-            "  {:<18} {:<7} {enveloppe:<15.6e} {reelle:<15.6e} {:.4}   (max en [{:.2} ; {:.2}])",
+            "  {:<18} {:<7} {enveloppe:<13.6e} {resserree:<13.6e} {reelle:<13.6e} {:<8.4} {:.4}",
             format!("{radial} x {angular}"),
             moitie.nodes().len(),
             enveloppe / reelle,
-            arg[0],
-            arg[1]
+            resserree / reelle
+        );
+    }
+    println!();
+
+    println!("=== 5. Ce que le resserrement recupere, et ce qu'il ne recupere pas ===");
+    println!("Il retire deux facteurs bornes chacun par racine(2) : direction et phase. Il ne");
+    println!("touche pas au conservatisme d'emprise, qui est celui qui n'a pas de borne.");
+    println!("  cas                                enveloppe/resserree   resserree/reelle");
+    let phi = core::f32::consts::TAU * 0.125;
+    let k = [magnitude * phi.cos(), magnitude * phi.sin()];
+    let nodes = [Node {
+        k,
+        transform: 1.0,
+        weight: 1.0,
+    }];
+    let path = [segment()];
+    for (nom, centre, demi) in [
+        ("une case, emprise 5 lambda", [0.0f32, 0.0], 5.0 * lambda),
+        ("une case, emprise 0,01 lambda", [0.0, 0.0], 0.01 * lambda),
+        (
+            "une case, 0,01 lambda sur un zero",
+            [1.34, 0.0],
+            0.01 * lambda,
+        ),
+    ] {
+        let mut pool = vec![Slot::default(); 1];
+        let min = [centre[0] - demi, centre[1] - demi];
+        let max = [centre[0] + demi, centre[1] + demi];
+        let champ = prepare(
+            &nodes,
+            &path,
+            9.81,
+            1025.0,
+            SimTime(1_000_000),
+            SimTime(4_000_000),
+            min,
+            max,
+            &mut pool,
+        )
+        .expect("champ preparable");
+        let enveloppe = champ.slope_envelope().unwrap() as f64;
+        let resserree = champ.slope_envelope_tight().unwrap() as f64;
+        let (reelle, _) = pente_max(&champ, min, max, 60);
+        println!(
+            "  {nom:<34} {:<21.4} {:.4}",
+            enveloppe / resserree,
+            resserree / reelle
         );
     }
 }
