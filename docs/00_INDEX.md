@@ -17,6 +17,13 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S164 :** [FOND-PRESCRIT-S164](validation/FOND-PRESCRIT-S164.md). **S163-1 réalisée, A219 traitée
+sur véhicule RK2.** Le fond prescrit est réévalué ; les incréments aux étages retrouvent le total
+à l'arrondi (<=1,60e-13 normalisé). La source continue converge à l'ordre deux ; son omission ne
+converge pas. 78 exécutions release, quatre nouveaux tests propres à l'exemple ; S163 rejoué.
+A50 partielle, aucun ADR ni seuil nouveau ; A220/L246. Suite workspace 299/cinq ignorés reçue
+S163, non relancée. 112 ADR,220 angles,246 leçons,18 invariants,6 SPEC,23 cas.
+**Suite S165 : S164-1**, frontières d'un domaine local, fond seul contre témoin oracle total.
 **S163 :** [RESIDU-COUPLE-S163](validation/RESIDU-COUPLE-S163.md), **S162-1 réalisée sur véhicule 1D**.
 Le résidu conservatif est intégré indépendamment, flux croisés physiques et numériques explicites,
 puis comparé à Shallow1D à chaque pas. Fond évolué et fond figé avec source reçus ; cinq variantes

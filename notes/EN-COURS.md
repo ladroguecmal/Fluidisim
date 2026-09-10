@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S164 — en cours
+Session : S164 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S163-1/A219, recevoir la clôture temporelle du résidu sur un fond analytique prescrit.
 
@@ -70,7 +70,7 @@ Objectif : S163-1/A219, recevoir la clôture temporelle du résidu sur un fond a
 - [x] **P3** — implémenter le fond prescrit dans le véhicule S163, comparer incréments discrets,
       dérivées continues et source temporelle omise ; raffinement et témoins nuls.
 - [x] **P4** — réception, limites et suivi A219/A50, tests S163 conservés ; décision si nécessaire.
-- [ ] **P5** — rituel de fin, journal/index/décomptes/suite, jeton rendu et copies synchronisées.
+- [x] **P5** — rituel de fin, journal/index/décomptes/suite, jeton rendu et copies synchronisées.
 
 ### Notes de reprise
 

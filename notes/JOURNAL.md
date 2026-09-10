@@ -8251,3 +8251,45 @@ A216 reportée et A217 partielle inchangées. Aucun seuil, aucune décision huma
 temporelles, comparer dérivée continue et incrément discret aux étages RK2, avec témoin de
 source temporelle omise. Le fond réévalué n'est pas forcément celui qu'avance RK2.
 BILAN-S145 porté : B1 fait S146, S63-1 close S147, poursuite B4 par ce couplage.
+---
+
+## S164 — 2026-09-10 — Le fond se réévalue, le résidu compense ses incréments
+
+**Entrée :** master 6a295cb, arbre propre, quatre copies au même commit. Plan seul avant
+construction, trois copies synchronisées au jeton occupé. Aucune copie créée ni supprimée.
+Suite S163-1/A219 : recevoir le fond analytique prescrit aux étages RK2.
+
+**Produit :** [FOND-PRESCRIT-S164](../docs/validation/FOND-PRESCRIT-S164.md), sonde
+`fond_prescrit.rs`, extension `step_prescribed` du support S163, suivi A219, A220, L246,
+action S164-1. Aucun ADR nouveau, aucune bibliothèque runtime modifiée.
+
+**S163-1 réalisée sur le véhicule.** Q0=Q(t), Q1=Q+=Q(t+dt) ; soustraire Q1-Q0 au premier
+étage et 2Q+-Q0-Q1 au second rend la reconstruction identique au RK2 du total. Le code intègre
+d indépendamment, ne consulte aucun total avancé. La référence est seulement dans la campagne.
+Fond onde debout 1D linéaire, même état total initial gaussien pour tous les fonds.
+
+**Résultat N240, a=0,2/mode8 :** incréments, erreur normalisée hauteur 8,88e-15 au pas nominal,
+1,60e-13 au pas divisé par huit. Dérivée continue : 2,19421e-4 →5,48012e-5 →1,37203e-5 →
+3,43258e-6 ; ordre deux. Omission : 2,762789 →2,762759 ; ne converge pas. **Échouer au
+critère d'identité n'est donc pas suffisant pour classer une méthode** : la source continue
+est cohérente, l'omission ne l'est pas. Pas de seuil de qualité de jeu inféré.
+
+Trois amplitudes, deux modes, quatre pas, trois méthodes : 72 exécutions N240. Six exécutions
+supplémentaires N120/480/960. Les quatre maillages reçoivent les incréments à l'arrondi.
+La masse reste conservée même sans source temporelle. Fond nul : les trois voies sont
+identiques ; deux fonds distincts reconstruisent le même total au critère annoncé.
+
+**Réception :** quatre tests propres S164 et trois host importés passent, huit tests S163
+rejoués (cinq propres et trois host), campagne release 78 exécutions reçue. Aucun échec.
+Suite workspace 299 réussis/cinq ignorés reçue S163, non relancée car seules les sondes changent.
+Deux avertissements de support partagé éliminés par annotation d'import locale.
+
+**Portée :** A219 traitée sur véhicule, A50 partielle. Ce n'est pas B runtime ni un domaine
+local, pas de dérivées interpolées, eau profonde, δ 3D, forces ou perception. A216 et A217
+inchangées. I-01/04/14/15 relus, aucun invariant modifié. Les tolérances restent celles de
+l'instrument S163. 112 ADR,220 angles,246 leçons,18 invariants,6 SPEC,23 cas.
+
+**Suite S165 : S164-1/A220**, fenêtre interne et frontière fond seul contre frontière oracle
+totale, perturbation traversant réellement le bord. Le témoin oracle n'est pas une solution
+de production. BILAN-S145 porté via la poursuite B4, après B1 S146 et S63-1 S147.
+Aucun arbitrage humain nouveau, aucun seuil proposé ; état final propre et copies synchronisées.

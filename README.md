@@ -289,7 +289,7 @@ Le juge de fidélité est B4, bloqué ailleurs. Suite S159 : le facteur 2,5 qui 
 L'une croyait la dernière session être **S44** : l'ouvrir aurait recréé cent quinze sessions parallèles.
 Avance rapide d'abord, suppressions ensuite ; six copies ramenées à trois, aucune histoire perdue, et la
 procédure de fermeture écrite dans l'amorce. Suite S160 : le facteur 2,5, S158-1.
-112 ADR,219 angles,245 leçons,18 invariants,6 SPEC,23 cas.
+112 ADR,220 angles,246 leçons,18 invariants,6 SPEC,23 cas.
 **S162 : diagnostic de Stokes et portée de B4 corrigée.**
 [Résultats](docs/validation/ADDITIVITE-PROFONDE-S162.md),
 [ADR-112](docs/adr/ADR-112-la-superposition-independante-ne-recoit-pas-le-couplage.md).
@@ -301,3 +301,7 @@ n'est validé. 299 tests/cinq ignorés, plus un test d'exemple. Suite S163 : rec
 à l'arrondi ; retirer les couplages physiques, numériques ou la source fait échouer la comparaison,
 même quand la masse reste conservée. S162-1 réalisée sur véhicule ; aucun seuil ni B4 complet.
 299 tests/cinq ignorés, plus cinq nouveaux tests d'exemple. Suite S164 : fond prescrit instationnaire.
+**S164 : fond analytique variable en temps reçu sur le véhicule 1D.**
+[Résultats](docs/validation/FOND-PRESCRIT-S164.md). Les incréments discrets du fond retrouvent
+le total ; la dérivée continue converge, l'omission temporelle reste fausse. Quatre nouveaux
+tests d'exemple, S163 rejoué et 78 exécutions release reçus. Suite S165 : frontière locale.

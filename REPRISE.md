@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 20:39 +02:00
+JETON            : libre
+Battement        : 2026-09-10 20:42 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S164 — fond prescrit instationnaire
-Dernière session : S163 — résidu couplé reçu en 1D ; 299 tests/cinq ignorés + cinq nouveaux tests exemple
-Session suivante : S164 — S163-1 : fond prescrit instationnaire et clôture temporelle (A219)
+Session en cours : aucune
+Dernière session : S164 — fond prescrit instationnaire reçu en 1D ; quatre nouveaux tests exemple
+Session suivante : S165 — S164-1 : frontière du domaine résiduel local (A220)
 
 *S160 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
 rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour.*
@@ -187,6 +187,24 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S164 — 2026-09-10 :** [FOND-PRESCRIT-S164](docs/validation/FOND-PRESCRIT-S164.md).
+**S163-1 réalisée sur véhicule 1D.** Fond analytique prescrit réévalué aux temps RK2,
+résidu intégré séparément avec compensation des incréments du fond à chaque étage.
+Reconstruction du total à <=1,60e-13 en hauteur sur la campagne N240 ; 78 exécutions
+release reçues, dont raffinements N120/480/960. La dérivée continue converge à l'ordre deux
+en temps mais ne donne pas l'identité discrète ; son omission ne converge pas.
+**A219 traitée dans ce périmètre, A50 partielle.** Aucun seuil ni réception B4 complète.
+**A220** : le résidu couvre encore tout le canal ; aucune frontière de domaine local reçue.
+**L246** : distinguer approximation convergente et terme manquant par raffinement.
+112 ADR,220 angles,246 leçons,18 invariants,6 SPEC,23 cas. Quatre nouveaux tests propres
+S164 et trois host importés reçus ; huit tests exemple S163 conservés. Les 299 tests workspace
+et cinq ignorés restent la réception S163, non relancée S164 : aucune bibliothèque modifiée.
+**Suite S165 : S164-1**, fenêtre résiduelle interne, perturbation traversant sa frontière,
+comparaison du bord fourni par le fond seul à un témoin fourni par la référence totale.
+Ce témoin n'est pas une condition de production ; mesurer avant de choisir un absorbeur.
+BILAN-S145 suivi par poursuite B4 après B1 et S63-1. Session dans la copie principale ;
+copies existantes synchronisées, aucune créée ni supprimée.
 
 **S163 — 2026-09-10 :** [RESIDU-COUPLE-S163](docs/validation/RESIDU-COUPLE-S163.md).
 **S162-1 réalisée sur véhicule 1D.** Fond Q et résidu conservatif d intégrés séparément,

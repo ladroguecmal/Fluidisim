@@ -3832,3 +3832,19 @@ Pour recevoir un couplage, écrire le résidu du **calcul complet**, frontières
 compris, et distinguer cette fidélité au schéma de sa précision physique. Ici l'accord à
 1e-13 coexiste avec des différences entre grilles au pourcent : les deux verdicts répondent
 à des questions différentes. Voir L244 et SPEC-004 §6.1.
+## L246 — Un défaut d'identité ne distingue pas une approximation d'un terme manquant
+
+*(S164)* La dérivée continue du fond et l'omission de sa source échouent toutes deux au test
+qui exige de retrouver le même RK2 du total. Au raffinement, la première réduit son écart
+d'un facteur quatre à chaque division du pas par deux ; la seconde conserve son erreur.
+Le même verdict nominal désignait deux comportements différents.
+
+Un critère vérifie la propriété qu'il énonce : ici l'identité discrète. Il ne qualifie pas
+à lui seul la cohérence, la stabilité ou l'utilité physique de ce qu'il rejette. Avant de
+condamner une approximation parce qu'elle n'est pas identique, mesurer sa convergence et
+la confronter à un vrai terme manquant.
+
+Le remède de cette expérience se dérive au niveau des étages : corriger par les incréments
+du fond prescrit, plutôt que par ses dérivées continues, retrouve l'identité au pas utilisé.
+Cela reçoit le changement de variables discret ; la précision du schéma total reste à part.
+Voir L245 et FOND-PRESCRIT-S164.
