@@ -168,3 +168,32 @@ est écrite dans un registre que personne ne relit, et la « suite » de la sess
 d'autre chose.
 
 C'est **A211**, et sa sévérité tient à ce qu'elle touche : non pas un calcul, mais la direction.
+
+## 6. Ce que ce bilan recommande
+
+1. **Lancer B1.** C'est la deuxième fois qu'un bilan le recommande, et rien n'a changé dans les
+   raisons : aucune couche manquante, une question de justesse ouverte depuis A187, un banc
+   exécutable en l'état. *Si ce bilan ne produit qu'une chose, que ce soit celle-là.*
+2. **Donner un porteur à cette recommandation**, faute de quoi elle vaudra ce que valait celle de
+   S69. Le seul mécanisme qui n'a jamais rompu en 144 sessions est la ligne **`Session suivante`**
+   du jeton : toute session la lit à l'amorce. Elle porte donc « S146 — lancer B1 », et le rituel
+   de fin (`REPRISE.md` §6) gagne un point : *vérifier que la recommandation du dernier bilan est
+   portée par cette ligne, ou explicitement écartée par écrit.*
+3. **Clore S63-1 par écrit.** La dispersion vit dans `W` depuis ADR-060 ; la question est
+   tranchée, seule sa fermeture manque.
+4. **Ne pas écrire de nouvelle sonde tant que B1 n'est pas lancé.** C'était le point 1 de S69, il
+   n'a pas été suivi, et 7 208 lignes de sondes plus tard le banc est toujours au même endroit.
+   Les sondes ont produit d'excellents résultats — six des sept dernières sessions — mais elles
+   mesurent le modèle contre lui-même. **B1 est le premier endroit où le projet mesurerait autre
+   chose que sa propre cohérence.**
+
+## 7. Ce que ce bilan ne dit pas
+
+Il ne dit pas que le projet va bien ou mal. Il dit que la couche `W` a été écrite pendant que le
+repère annonçait qu'elle n'existait pas, et que le goulot désigné il y a soixante-seize sessions
+n'a pas bougé d'un pouce.
+
+Il ne juge pas non plus le régime de travail. **Le fait central de S69 était que vingt-deux
+sessions d'affilée n'avaient produit aucune conception du système** ; celui de S145 est l'inverse
+— soixante-seize sessions ont produit `W`, et aucune n'a lancé un banc. Ce sont deux façons
+différentes de ne pas franchir la même porte.
