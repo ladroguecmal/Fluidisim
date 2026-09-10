@@ -58,22 +58,22 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S149 — terminée
+Session : S150 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S148-1, transporter la recette spectrale et recevoir le cycle hôte B+W.
+Objectif : S149-1, raccorder un objet mobile à une source de sillage W existante.
 
 ### Plan
 
-- [x] **P1** — état réel, jeton et plan committé seul.
-- [x] **P2** — codec versionné borné, contrat ADR et tests de refus/recuisson.
-- [x] **P3** — cycle hôte spectral sauvegardé/restauré, comparaison directe et coût local.
-- [x] **P4** — vérifications complètes et rituel de fin : rapport, journal, registres, index et jeton rendu.
+- [x] **P1** — état réel, lecture W4, jeton et plan seul.
+- [ ] **P2** — contrat charge/trajectoire vers pression gaussienne, constructeur borné et refus ; ADR.
+- [ ] **P3** — recevoir le trajet avec virage, extinction, transport et comparaison au champ de référence ; scénario exécutable.
+- [ ] **P4** — suite complète, rapport et rituel de fin : journal, angles/leçons/actions, index et jeton.
 
 ### Notes de reprise
 
-Départ master e4a8de9, copies historiques propres et en retard. S148 : 282 tests/cinq ignorés.
-A212 partielle. WLIV ne contient pas B ; la recette, son ancre et le contexte doivent accompagner le snapshot.
-La recommandation du dernier bilan (W4 puis B2) reste la suite après ce cycle.
-P3 : cycle reçu debug/release, hashes identiques ; mesures dans CYCLE-SPECTRAL-S149. Suite complète en cours.
-
-P4 :283 tests/cinq ignorés ; codec release et cycle debug/release reçus. Rituel exécuté, aucun invariant changé ; jeton rendu. Suite S150/W4 puis B2.
+Départ master d189042, toutes les copies propres.283 tests/cinq ignorés,102 ADR.
+ADR-069/070 et sources WPRS calculent déjà un sillage sous pression mobile : la formule
+« jamais commencée » de BILAN-S145 §5 est trop large. Manque l'adaptateur mouvement/charge.
+Charge verticale prescrite en newtons, profil gaussien sigma explicite ; pas de calibration coque,
+pas de pression déduite arbitrairement de la vitesse, pas de nouveau solveur. W4 restera partiel.
+Suite portée : intégration W4 puis B2 selon ADR-054.
