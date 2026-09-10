@@ -7,6 +7,14 @@ use crate::{FrameId, PhaseQ32, SimTime};
 /// au-delà, la précision de la phase spatiale en `f32` fait sortir l'erreur de la tolérance de
 /// 4e-6 (5,8e-6 à x = 4096). Ce n'est pas l'ordre du développement qui borne.
 pub const BESSEL_MAX: f32 = 2048.0;
+/// Rapport entre la borne L1 `slope_bound` et la **pente réelle** maximale du champ. Il est
+/// **mesuré dans le modèle** (S139, ADR-094), pas calibré : la forme spectrale d'ADR-060 est
+/// fixe et le champ est homothétique en λ (S136), donc ce rapport ne dépend ni de la longueur
+/// d'onde, ni de l'énergie, ni de `N`, ni du rayon du domaine — vérifié sur λ de 0,5 à 32 m,
+/// E de 1e-4 à 100 J, N de 64 à 256. Quadrature indépendante en f64 : 1,795071271.
+/// Il vaut ce qu'il vaut parce que `|J1| ≤ 1` majore chaque terme, quand le maximum réel de la
+/// somme est atteint en `r = 0,2062 λ`, à `t = birth`.
+pub const SLOPE_L1_RATIO: f32 = 1.795_071_3;
 #[cfg(test)]
 #[path = "tests_radial_energy.rs"]
 mod energy_tests;
@@ -198,6 +206,14 @@ impl<const N: usize> RadialImpact<N> {
     }
     pub fn slope_bound(&self) -> f32 {
         self.slope_bound
+    }
+    /// Pente réelle maximale du champ : **exacte** à `t = birth`, majorante ensuite (S139).
+    /// C'est cette grandeur-là, et non `slope_bound`, que la cambrure limite de Stokes borne
+    /// (SPEC-001 §4). Publiée sans changer la construction : le refus `Steepness` compare
+    /// toujours la borne L1, et le migrer déplace la frontière d'admission de tous les champs
+    /// — c'est une décision d'ADR-094, pas un effet de bord de cette méthode.
+    pub fn slope_max(&self) -> f32 {
+        self.slope_bound / SLOPE_L1_RATIO
     }
     /// Domaine géométrique exact appliqué par `sample`, posé une fois (ADR-080).
     /// Ne dit rien du temps ni de la finitude du résultat : `sample` rend aussi `Domain`
@@ -843,6 +859,54 @@ mod tests {
                 .sample(FrameId(0), 0, [1.0, 0.0], SimTime(us + 1000))
                 .unwrap();
             assert!((s.deta_dt - (after.eta - before.eta) / 0.002).abs() < 2e-6);
+        }
+    }
+    /// S139, ADR-094 : `slope_max()` annonce la pente réelle du champ. Le test vérifie les deux
+    /// moitiés de cette annonce — **atteinte** à l'instant initial, et **jamais dépassée**
+    /// ailleurs ni plus tard. La seconde est une propriété de sûreté : si un instant la
+    /// dépassait, la grandeur ne pourrait pas servir de borne, quelle que soit sa précision.
+    #[test]
+    fn slope_max_is_attained_and_never_exceeded_s139() {
+        for (wavelength_m, energy_j) in [(0.5f32, 0.01f32), (4.0, 0.01), (4.0, 10.0), (32.0, 0.001)]
+        {
+            let mut v = source_data();
+            v.wavelength_m = wavelength_m;
+            v.energy_j = energy_j;
+            let radius = 4.0 * wavelength_m;
+            let field = RadialImpact::<64>::new(
+                WaveEvent::impact(v).unwrap(),
+                Medium {
+                    gravity: 9.81,
+                    density: 1025.0,
+                    depth: 10.0 * wavelength_m,
+                    max_slope: 1.0e6,
+                },
+                Domain {
+                    radius,
+                    age_us: 2_000_000,
+                },
+            )
+            .unwrap();
+            let annonce = field.slope_max();
+            let pente = |r: f32, us: u64| {
+                let s = field.sample(FrameId(0), 0, [r, 0.0], SimTime(us)).unwrap();
+                (s.slope[0] * s.slope[0] + s.slope[1] * s.slope[1]).sqrt()
+            };
+            let mut atteint = 0.0f32;
+            let mut ailleurs = 0.0f32;
+            for i in 0..=2000u32 {
+                let r = radius * i as f32 / 2000.0;
+                atteint = atteint.max(pente(r, 0));
+                for j in 1..=20u64 {
+                    ailleurs = ailleurs.max(pente(r, 100_000 * j));
+                }
+            }
+            println!("S139 lambda={wavelength_m} annonce={annonce:.6e} atteint={atteint:.6e}");
+            // Atteinte : la grille de 2000 points encadre le maximum à mieux que 1e-3.
+            assert!((atteint - annonce).abs() <= 1e-3 * annonce);
+            // Sûreté : ni la grille initiale ni aucun des vingt instants ne la dépasse.
+            assert!(atteint <= annonce * (1.0 + 1e-6));
+            assert!(ailleurs <= annonce * (1.0 + 1e-6));
         }
     }
     #[test]

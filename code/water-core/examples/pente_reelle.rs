@@ -4,10 +4,13 @@
 //! `Σ|a_k·k·dk|·k`, construite avec `|J1| ≤ 1` — une majoration, pas la pente du champ.
 //!
 //! Cette sonde mesure le rapport `ρ = slope_bound / max|∇η|` dans le modèle lui-même, par
-//! `sample()`, comme S136 a mesuré `α` au lieu de le calibrer. Si `ρ` est une constante du
-//! modèle, alors `max_slope` se dérive : la pente physique admissible est la cambrure limite de
-//! Stokes (SPEC-001 §4, `H/λ ≈ 1/7`, soit `πH/λ = 0,4488`), et le seuil à écrire sur la borne L1
-//! vaut `0,4488·ρ`.
+//! `sample()`, comme S136 a mesuré `α` au lieu de le calibrer. La limite physique, elle, est
+//! déjà écrite : cambrure limite de Stokes, SPEC-001 §4, `H/λ ≈ 1/7`, soit `πH/λ = 0,4488`.
+//!
+//! Le résultat n'est pas seulement un nombre. §9 montre que le budget de pente d'ADR-080
+//! **additionne trois grandeurs de natures différentes** — une pente exacte et deux bornes L1
+//! de facteurs distincts — ce qui interdit d'y dériver un seuil unique tant qu'il reste
+//! hétérogène. Voir ADR-094.
 use water_core::{
     impact_field::Medium,
     radial_impact::{Domain, RadialImpact},
@@ -61,7 +64,12 @@ fn pente<const N: usize>(champ: &RadialImpact<N>, r: f64, t_us: u64) -> f64 {
 /// Maximum de `|∇η|` sur le rayon, à instant fixé : grille uniforme de `m` points, puis section
 /// dorée sur l'intervalle encadrant le meilleur point. La grille seule sous-estime le maximum
 /// d'une somme de N Bessel, et **sous-estimer la pente rend le seuil trop permissif**.
-fn max_sur_rayon<const N: usize>(champ: &RadialImpact<N>, rayon: f64, m: usize, t_us: u64) -> (f64, f64) {
+fn max_sur_rayon<const N: usize>(
+    champ: &RadialImpact<N>,
+    rayon: f64,
+    m: usize,
+    t_us: u64,
+) -> (f64, f64) {
     let pas = rayon / m as f64;
     let (mut meilleur, mut arg) = (0.0f64, 0.0f64);
     for i in 0..=m {
@@ -127,9 +135,12 @@ fn domaine(lambda: f32, ages_us: u64, rayons_lambda: f32) -> Domain {
 fn main() {
     println!("=== 1. Ou se trouve la pente maximale ? (lambda = 4 m, E = 0,01 J) ===");
     let lambda = 4.0f32;
-    let champ: RadialImpact<64> =
-        RadialImpact::new(evenement(lambda, 0.01), milieu(lambda), domaine(lambda, 2_000_000, 4.0))
-            .expect("construction");
+    let champ: RadialImpact<64> = RadialImpact::new(
+        evenement(lambda, 0.01),
+        milieu(lambda),
+        domaine(lambda, 2_000_000, 4.0),
+    )
+    .expect("construction");
     let borne = champ.slope_bound() as f64;
     println!("  slope_bound (borne L1)        : {borne:.6e}");
     println!();
@@ -138,22 +149,39 @@ fn main() {
     for i in 0..=24 {
         let r = i as f64 * 0.05 * lambda as f64;
         let v = pente(&champ, r, 0);
-        println!("  {:<11.2} {:<14.6e} {:.3}", r / lambda as f64, v, borne / v.max(1e-30));
+        println!(
+            "  {:<11.2} {:<14.6e} {:.3}",
+            r / lambda as f64,
+            v,
+            borne / v.max(1e-30)
+        );
     }
     let (max_t0, arg_r) = max_sur_rayon(&champ, 4.0 * lambda as f64, 20_000, 0);
     println!();
-    println!("  maximum a t = 0 : {max_t0:.6e} en r = {:.4} lambda", arg_r / lambda as f64);
+    println!(
+        "  maximum a t = 0 : {max_t0:.6e} en r = {:.4} lambda",
+        arg_r / lambda as f64
+    );
     let (max_st, arg_t) = max_espace_temps(&champ, 4.0 * lambda as f64, 4_000, 2_000_000, 200);
-    println!("  maximum sur l'age (201 instants, 2 s) : {max_st:.6e} a t = {} us", arg_t);
+    println!(
+        "  maximum sur l'age (201 instants, 2 s) : {max_st:.6e} a t = {} us",
+        arg_t
+    );
     println!(
         "  le maximum temporel est-il l'instant initial ? {}",
-        if arg_t == 0 { "oui" } else { "NON — voir ci-dessus" }
+        if arg_t == 0 {
+            "oui"
+        } else {
+            "NON — voir ci-dessus"
+        }
     );
     println!();
 
     println!("=== 2. Convergence de la grille en rayon (t = 0) ===");
     println!("Sous-echantillonner sous-estime le maximum, donc surestime le rapport, donc rend");
-    println!("le seuil trop permissif. On raffine jusqu'a stabilite au lieu de choisir une grille.");
+    println!(
+        "le seuil trop permissif. On raffine jusqu'a stabilite au lieu de choisir une grille."
+    );
     println!("  points     max|grad eta|   rapport");
     let mut precedent = 0.0f64;
     for m in [200usize, 500, 1_000, 2_000, 5_000, 10_000, 20_000, 40_000] {
@@ -163,7 +191,10 @@ fn main() {
         } else {
             "—".to_string()
         };
-        println!("  {m:<10} {v:<15.8e} {:<10.5} ecart relatif {ecart}", borne / v);
+        println!(
+            "  {m:<10} {v:<15.8e} {:<10.5} ecart relatif {ecart}",
+            borne / v
+        );
         precedent = v;
     }
     println!();
@@ -209,23 +240,50 @@ fn main() {
         };
         let borne = champ.slope_bound() as f64;
         let (v, _) = max_sur_rayon(&champ, 16.0, 20_000, 0);
-        println!("  {energie:<11.0e} {borne:<15.6e} {v:<15.6e} {:.6}", borne / v);
+        println!(
+            "  {energie:<11.0e} {borne:<15.6e} {v:<15.6e} {:.6}",
+            borne / v
+        );
     }
     println!();
 
     println!("=== 5. Le rapport depend-il du nombre de modes ? ===");
     println!("N change les bits (ADR-085) : il peut changer la borne comme la pente.");
     println!("  N           slope_bound     max|grad eta|   rapport");
-    let e64: RadialImpact<64> =
-        RadialImpact::new(evenement(4.0, 0.01), milieu(4.0), domaine(4.0, 2_000_000, 4.0)).unwrap();
-    let e128: RadialImpact<128> =
-        RadialImpact::new(evenement(4.0, 0.01), milieu(4.0), domaine(4.0, 2_000_000, 4.0)).unwrap();
-    let e256: RadialImpact<256> =
-        RadialImpact::new(evenement(4.0, 0.01), milieu(4.0), domaine(4.0, 2_000_000, 4.0)).unwrap();
+    let e64: RadialImpact<64> = RadialImpact::new(
+        evenement(4.0, 0.01),
+        milieu(4.0),
+        domaine(4.0, 2_000_000, 4.0),
+    )
+    .unwrap();
+    let e128: RadialImpact<128> = RadialImpact::new(
+        evenement(4.0, 0.01),
+        milieu(4.0),
+        domaine(4.0, 2_000_000, 4.0),
+    )
+    .unwrap();
+    let e256: RadialImpact<256> = RadialImpact::new(
+        evenement(4.0, 0.01),
+        milieu(4.0),
+        domaine(4.0, 2_000_000, 4.0),
+    )
+    .unwrap();
     for (n, borne, v) in [
-        (64usize, e64.slope_bound() as f64, max_sur_rayon(&e64, 16.0, 20_000, 0).0),
-        (128, e128.slope_bound() as f64, max_sur_rayon(&e128, 16.0, 20_000, 0).0),
-        (256, e256.slope_bound() as f64, max_sur_rayon(&e256, 16.0, 20_000, 0).0),
+        (
+            64usize,
+            e64.slope_bound() as f64,
+            max_sur_rayon(&e64, 16.0, 20_000, 0).0,
+        ),
+        (
+            128,
+            e128.slope_bound() as f64,
+            max_sur_rayon(&e128, 16.0, 20_000, 0).0,
+        ),
+        (
+            256,
+            e256.slope_bound() as f64,
+            max_sur_rayon(&e256, 16.0, 20_000, 0).0,
+        ),
     ] {
         println!("  {n:<11} {borne:<15.6e} {v:<15.6e} {:.6}", borne / v);
     }
@@ -250,7 +308,11 @@ fn main() {
         let borne = champ.slope_bound() as f64;
         let points = (2_000.0 * rayons) as usize;
         let (v, _) = max_sur_rayon(&champ, rayons as f64 * 4.0, points.min(200_000), 0);
-        println!("  {:<11} {v:<15.6e} {:.6}", format!("{rayons} lambda"), borne / v);
+        println!(
+            "  {:<11} {v:<15.6e} {:.6}",
+            format!("{rayons} lambda"),
+            borne / v
+        );
     }
     println!();
 
@@ -259,7 +321,11 @@ fn main() {
     let rho = champ.slope_bound() as f64 / rho;
     println!("  pente de deferlement (Stokes) : {PENTE_DEFERLEMENT:.6}");
     println!("  rapport mesure rho            : {rho:.6}");
-    println!("  max_slope derive = 0,4488*rho : {:.6}", PENTE_DEFERLEMENT * rho);
+    println!(
+        "  seuil sur la borne L1 = 0,4488*rho : {:.6}  (**seulement** si le budget ne",
+        PENTE_DEFERLEMENT * rho
+    );
+    println!("  contenait que des impacts radiaux — voir 9)");
     println!("  max_slope employe depuis S77  : 0,1");
     println!(
         "  pente reelle admise a 0,1     : {:.6}  ({:.1} % de la limite physique)",
@@ -267,7 +333,9 @@ fn main() {
         100.0 * (0.1 / rho) / PENTE_DEFERLEMENT
     );
     let facteur = (PENTE_DEFERLEMENT * rho / 0.1).powi(2);
-    println!("  energie admissible x{facteur:.1} si le seuil derive remplace 0,1 (E propto pente^2)");
+    println!(
+        "  energie admissible x{facteur:.1} si le seuil derive remplace 0,1 (E propto pente^2)"
+    );
     println!();
 
     println!("=== 8. La relation pente_reelle = borne/rho est-elle sure a tout instant ? ===");
@@ -276,9 +344,12 @@ fn main() {
     println!("une propriete de surete, pas de precision. Balayage dense (r, t).");
     println!("  lambda      max a t=0       max sur t>0     rapport t>0 / t=0");
     for lambda in [0.5f32, 4.0, 32.0] {
-        let champ: RadialImpact<64> =
-            RadialImpact::new(evenement(lambda, 0.01), milieu(lambda), domaine(lambda, 2_000_000, 4.0))
-                .expect("construction");
+        let champ: RadialImpact<64> = RadialImpact::new(
+            evenement(lambda, 0.01),
+            milieu(lambda),
+            domaine(lambda, 2_000_000, 4.0),
+        )
+        .expect("construction");
         let rayon = 4.0 * lambda as f64;
         let (a_zero, _) = max_sur_rayon(&champ, rayon, 4_000, 0);
         let mut apres = 0.0f64;

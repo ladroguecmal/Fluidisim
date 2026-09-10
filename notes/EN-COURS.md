@@ -74,7 +74,7 @@ cambrure de Stokes (SPEC-001 §4) au lieu de rester un nombre sans origine.
       instant initial — avant de balayer quoi que ce soit.
 - [x] **P3** — balayer λ, énergie, N et rayon du domaine. Le rapport est-il une constante du
       modèle, ou dépend-il d'un paramètre ? C'est la question qui décide de tout le reste.
-- [ ] **P4** — si le rapport est stable : dériver `max_slope` de `πH/λ ≈ 0,449` divisé par lui,
+- [x] **P4** — si le rapport est stable : dériver `max_slope` de `πH/λ ≈ 0,449` divisé par lui,
       et **vérifier la conséquence** — quelles énergies deviennent admissibles ou refusées à
       0,1 contre la valeur dérivée. Sinon : dire de quoi il dépend, et ce que cela coûte.
 - [ ] **P5** — ADR : d'où vient `max_slope`. Livrable de mesure dans `docs/validation/`.
