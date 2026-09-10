@@ -186,3 +186,9 @@ par la reference substitutive integrale.
 Ce que je n'ecris pas dans l'ADR faute de l'avoir verifie : le facteur 2,5 qui revient partout
 (groupement de S157, dispersion de l'estimateur) est peut-etre le plafond de precision de tout ce
 qui touche au repliement. Note ici pour la session qui voudra le verifier.
+
+Correctif P4 : battement ecrit 18:18 pour un relevé a 18:16. **Troisieme fois, et L237 venait
+d'etre ecrite a la session precedente pour ce geste exact.** Une lecon ecrite ne change pas un
+geste ; seule une procedure le change. Ce que je fais desormais et qu'il faut consigner en fin de
+session : lire l'horloge dans un appel **separe**, puis copier la valeur lue. Tant que la lecture
+et l'ecriture sont dans la meme commande, la valeur est decidee avant d'etre connue.
