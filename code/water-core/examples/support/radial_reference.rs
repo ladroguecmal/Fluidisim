@@ -97,11 +97,14 @@ impl Reference {
         0.5 * medium().density as f64 * (medium().gravity as f64 * eta * eta + kinetic)
     }
     pub fn new(point: [f32; 2], n: usize, directions: &[f64]) -> Self {
+        Self::with_wavelength(point, n, directions, event().data().wavelength_m)
+    }
+    pub fn with_wavelength(point: [f32; 2], n: usize, directions: &[f64], wavelength: f32) -> Self {
         // Convertit les entrées f32 exactes ; ne copie ni nœuds ni coefficients de production.
         let g = medium().gravity as f64;
         let rho = medium().density as f64;
         let energy = event().data().energy_j as f64;
-        let k0 = std::f64::consts::TAU / event().data().wavelength_m as f64;
+        let k0 = std::f64::consts::TAU / wavelength as f64;
         let lo = k0 / 2.0;
         let width = 1.5 * k0;
         let amplitude =

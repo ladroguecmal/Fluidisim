@@ -65,7 +65,7 @@ Objectif : S151-1, exécuter un volet B2 à60s et publier une décision de domai
 ### Plan
 
 - [x] **P1** — état réel, dossier B2, protocole annoncé, jeton et plan seul.
-- [ ] **P2** — instrument B2 impact : lambda source2/3/4/5/6m, rayon80m, horizon60s ; admissibilité N64/128/256, erreur indépendante et contrôles d'oracle.
+- [x] **P2** — instrument B2 impact : lambda source2/3/4/5/6m, rayon80m, horizon60s ; admissibilité N64/128/256, erreur indépendante et contrôles d'oracle.
 - [ ] **P3** — traiter les refus de couverture si nécessaire par profil explicite ; coûts locaux répétés, reconstruction à30s, décision ADR et rapport.
 - [ ] **P4** — tests et rituel : journal, angles/leçons/actions, index/décomptes, passation et jeton rendu.
 
@@ -81,3 +81,4 @@ Points centre et16 rayons irréguliers jusqu'à80m, temps0/1/10/30/45/60s, grill
 WLIV à30s séparée de l'évaluation. Aucun nouveau seuil de célérité ad hoc.
 Si profils existants refusent la couverture, essayer N512 explicitement par ADR,
 sans affaiblir le garde de résolution. B2 global et lambda_cut resteront ouverts.
+P2 : N64/128 refusent tout ; N256 accepte seulement lambda5/6 àR80/t60. Oracle radial max1,3651e-9, angulaire3,90e-16 ; erreurs N2565,385e-7 et4,110e-7. Profil N512 nécessaire à essayer, garde inchangé.
