@@ -66,7 +66,7 @@ puis établir ce qu'une expérience bornée peut dire de l'additivité en eau pr
 ### Plan
 
 - [x] **P1** — état réel, outils, jeton et plan committé seul.
-- [ ] **P2** — lectures de reprise ; inventaire des références et formulation précise du manque.
+- [x] **P2** — lectures de reprise ; inventaire des références et formulation précise du manque.
       Synchroniser les trois copies propres sans avance vers le jeton courant, sans les supprimer.
 - [ ] **P3** — confronter une voie analytique ou numérique minimale à la question A217 ;
       mesurer si une référence recevable existe, sinon publier le blocage argumenté et le prochain lot.
@@ -82,3 +82,5 @@ Cargo 1.97.0 disponible. Aucun worktree créé. Suite héritée : 299 tests/cinq
 A217 prioritaire ; BILAN-S145 porté via la poursuite B4, après B1 et clôture S63-1.
 Piège : un solveur linéaire donnerait une additivité exacte par construction ; un développement
 faiblement non linéaire peut réfuter une universalité, pas recevoir B4 complet.
+P2 : inventaire et distinction résidu/superposition publiés dans ADDITIVITE-PROFONDE-S162.
+Trois copies synchronisées au commit P1 occupé. Aucun retrait.
