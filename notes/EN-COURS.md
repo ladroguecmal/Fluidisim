@@ -74,7 +74,7 @@ de collecte requis**, comme S153 et S154 l'ont fait pour les impacts.
       l'oracle f64 à quadrature doublée, et fraction contenue dans un rayon donné.
 - [x] **P4** — décider d'après les chiffres : la borne utile est-elle en temps, en domaine, ou
       en **résolution spectrale** ? Les trois ne se corrigent pas au même endroit.
-- [ ] **P5** — recevoir ce qui doit l'être, avec un test témoin ; ne rien construire dont le
+- [x] **P5** — recevoir ce qui doit l'être, avec un test témoin ; ne rien construire dont le
       prix dépasse le bénéfice.
 - [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
 
@@ -158,3 +158,12 @@ Verdict B2 volet sillage : **partiel et negatif a 60 s**, fonde sur une mesure e
 manque de mesure. Aux durees ou il a ete recu (8 s, S150/S151), le candidat est dans son domaine.
 Non fait et nomme (A214) : le garde-fou d'admissibilite. La loi en duree n'est encadree qu'en deux
 points ; un garde bati dessus refuserait du valide ou admettrait de l'invalide.
+
+P5 — un seul test recu, et rien d'autre construit. `recurrence_radiale_hors_domaine_s156` epingle
+le fait, pas la loi : a 8 s radial 128 et 512 s'accordent a 2,4 % pres du centre ; a 60 s la
+grossiere y montre 6,406e-5 m contre 1,322e-6 pour la fine, **quarante-huit fois plus**, energie
+revenue par periodicite. Angulaire fixe a 64, points a moins de 5 m — dans le domaine angulaire,
+pour que seul le pas radial soit juge.
+Temoin verifie : les deux mesures prises a radial 512, le test echoue (ligne 218). Il ne peut donc
+pas passer par construction.
+Cout 0,66 s en debug ; 298 tests/cinq ignores (205+93), debug et release, zero echec.

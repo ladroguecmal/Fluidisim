@@ -157,3 +157,66 @@ fn emitter_field_refusal_preserves_cursor_s151() {
     assert_eq!(e.acknowledge(&bad,c.journal()),Err(EmitError::NotAdmitted));assert_eq!(e.cursor(),start);
     assert_eq!(c.journal().published().count(),1);assert_eq!(c.current(SimTime(2_000_000)).unwrap().energy_j().to_bits(),energy.to_bits());
 }
+
+/// ADR-107 : le domaine d'un sillage se déduit de sa recette, et une recette trop grossière ne
+/// se contente pas d'être imprécise — elle **fait revenir** par périodicité l'énergie qui aurait
+/// dû partir. Témoin : à 8 s les deux résolutions radiales s'accordent près de l'origine ; à
+/// 60 s la grossière y montre un champ que la fine n'a pas.
+#[test]
+fn recurrence_radiale_hors_domaine_s156() {
+    use crate::{
+        bound_pressure::Prepared,
+        gaussian_spectrum::bake,
+        pressure_journal::Journal,
+        spectral_pressure::{Node, Slot, Surface},
+    };
+    let points = [[2.0f32, 0.0], [0.0, 3.0], [-4.0, 1.0], [1.0, -5.0]];
+    let mesure = |radial: usize, us: u64| -> f64 {
+        let mut m = metadata();
+        m.settings.end = SimTime(60_000_000);
+        m.settings.min = [-64.0; 2];
+        m.settings.max = [64.0; 2];
+        m.recipe = Recipe {
+            sigma: 1.0,
+            cutoff: 6.0,
+            radial,
+            angular: 64,
+        };
+        let legs = [Leg {
+            duration_us: 2_000_000,
+            velocity: [2.0, 0.0],
+            downward_force_n: 100.0,
+        }; 8];
+        let wake = Wake::build(m, SimTime(0), [0.0; 2], &legs).unwrap();
+        let mut records = [None];
+        let mut journal = Journal::new(1, &mut records);
+        journal.admit_authenticated(wake.source()).unwrap();
+        let mut nodes = vec![Node::default(); radial * 64];
+        let mut demi = vec![Node::default(); radial * 32];
+        let complet = bake(m.recipe, &mut nodes).unwrap();
+        let moitie = complet.half_into(&mut demi).unwrap();
+        let mut slots = vec![Slot::default(); moitie.nodes().len()];
+        let context = wake.source().context();
+        let time = SimTime(us);
+        let p = Prepared::from_journal(context, &moitie, &journal, time, &mut slots).unwrap();
+        let mut sortie = [Surface::default(); 4];
+        let mut scratch = sortie;
+        p.sample_batch(&context, time, &points, &mut scratch, &mut sortie)
+            .unwrap();
+        let somme: f64 = sortie.iter().map(|s| (s.eta as f64) * (s.eta as f64)).sum();
+        (somme / points.len() as f64).sqrt()
+    };
+    let (tot, fin) = (mesure(128, 8_000_000), mesure(512, 8_000_000));
+    let (tard_tot, tard_fin) = (mesure(128, 60_000_000), mesure(512, 60_000_000));
+    println!("S156 8s: 128={tot:.6e} 512={fin:.6e} | 60s: 128={tard_tot:.6e} 512={tard_fin:.6e}");
+    // Dans le domaine : les deux recettes disent la même chose.
+    assert!(
+        (tot - fin).abs() / fin < 0.05,
+        "8 s hors accord : {tot:.6e} contre {fin:.6e}"
+    );
+    // Hors domaine : la grossière montre un champ que la fine n'a pas.
+    assert!(
+        tard_tot > 5.0 * tard_fin,
+        "60 s sans récurrence visible : {tard_tot:.6e} contre {tard_fin:.6e}"
+    );
+}
