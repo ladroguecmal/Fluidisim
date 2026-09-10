@@ -39,3 +39,19 @@ fn wake_existing_transport_and_identity_s150() {
     assert_eq!(journal.admit_authenticated(s),Ok(crate::pressure_journal::Change::Added));
     assert_eq!(journal.admit_authenticated(restored),Ok(crate::pressure_journal::Change::Unchanged));
 }
+
+#[test]
+fn stationary_load_zero_and_scaling_s150() {
+    use crate::{gaussian_spectrum::bake,spectral_pressure::{self,Node,Slot}};
+    let mut nodes=vec![Node::default();32*32];let m=metadata();let spectrum=bake(m.recipe,&mut nodes).unwrap();
+    let mut slots=vec![Slot::default();32*32];let mut heights=[0.;3];let mut energies=[0.;3];
+    for (i,force) in [0.,100.,200.].into_iter().enumerate() {
+        let mut l=leg();l.velocity=[0.;2];l.downward_force_n=force;
+        let w=Wake::build(m,SimTime(0),[0.;2],&[l]).unwrap();let s=w.source();
+        let f=spectral_pressure::prepare(spectrum.nodes(),s.segments(),9.81,1025.,SimTime(1_000_000),SimTime(8_000_000),[-16.;2],[16.;2],&mut slots).unwrap();
+        heights[i]=f.sample([0.;2]).unwrap().eta;energies[i]=f.energy_j;
+    }
+    assert_eq!(heights[0],0.);assert_eq!(energies[0],0.);assert!(heights[1]<0.);
+    assert_eq!(heights[2].to_bits(),(2.*heights[1]).to_bits());
+    assert_eq!(energies[2].to_bits(),(4.*energies[1]).to_bits());
+}

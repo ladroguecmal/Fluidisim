@@ -66,7 +66,7 @@ Objectif : S149-1, raccorder un objet mobile à une source de sillage W existant
 
 - [x] **P1** — état réel, lecture W4, jeton et plan seul.
 - [x] **P2** — contrat charge/trajectoire vers pression gaussienne, constructeur borné et refus ; ADR.
-- [ ] **P3** — recevoir le trajet avec virage, extinction, transport et comparaison au champ de référence ; scénario exécutable.
+- [x] **P3** — recevoir le trajet avec virage, extinction, transport et comparaison au champ de référence ; scénario exécutable.
 - [ ] **P4** — suite complète, rapport et rituel de fin : journal, angles/leçons/actions, index et jeton.
 
 ### Notes de reprise
@@ -77,3 +77,4 @@ ADR-069/070 et sources WPRS calculent déjà un sillage sous pression mobile : l
 Charge verticale prescrite en newtons, profil gaussien sigma explicite ; pas de calibration coque,
 pas de pression déduite arbitrairement de la vitesse, pas de nouveau solveur. W4 restera partiel.
 Suite portée : intégration W4 puis B2 selon ADR-054.
+P3 : quatre tests et scénario reçus debug/release ;441 comparaisons au champ f64 raffiné. Hash13f0b5fd14a4ac9b. Suite S150-1 alimentation progressive, puis B2.

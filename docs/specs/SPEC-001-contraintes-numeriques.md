@@ -286,3 +286,13 @@ Convention eta(r)=intégrale A(k)J0(kr)k dk. Parseval donne
 E_initial=pi*rho*g intégrale A(k)²k dk. Pour A=Cx²(1-x)², x=(k-a)/(b-a),
 le facteur intégral est C²(b-a)(a+(b-a)/2)/630. Voir ADR-060 pour sa dérivation et
 la quadrature spatiale de contrôle ; la bande [k0/2,2k0] reste à calibrer B2.
+
+## Complément S150 — Charge gaussienne prescrite (ADR-103)
+
+Sur le candidat profond uniforme, `p(r)=P0 exp(-r²/(2 sigma²))` a pour intégrale
+`F=2 pi sigma² P0`. L'entrée charge verticale en N devient donc `P0=F/(2 pi sigma²)`
+en Pa ; F>=0, sigma>0, valeurs et opérations représentables. Cette conversion
+normalise une charge prescrite, elle ne détermine pas la charge hydrodynamique d'une coque.
+La fixture100N/sigma1m est un essai de réception (TRAJET-SILLAGE-S150), pas une
+valeur de jeu calibrée. La capacité64 tronçons est un stockage fixe du prototype,
+à dimensionner au futur profil hôte ; aucune saturation silencieuse.
