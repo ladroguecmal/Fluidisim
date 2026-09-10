@@ -98,7 +98,8 @@ pub struct RadialImpact<const N: usize = 64> {
 impl<const N: usize> RadialImpact<N> {
     pub fn new(event: WaveEvent, medium: Medium, domain: Domain) -> Result<Self, Error> {
         // ADR-082 : une borne, un nom, et le nom désigne ce qu'il faut revoir.
-        if !(64..=256).contains(&N) {
+        // ADR-105 : N512 explicite pour la campagne R80/60s ; garde de phase inchangé.
+        if !(64..=256).contains(&N) && N != 512 {
             return Err(Error::ModeCount);
         }
         if !domain.radius.is_finite() || domain.radius <= 0.0 || domain.radius >= 4096.0 {
@@ -946,5 +947,30 @@ mod tests {
         assert_eq!(bessel(0.0).unwrap(), (1.0, 0.0));
         assert!(bessel(-0.01).is_err());
         assert!(bessel(f32::INFINITY).is_err());
+    }
+}
+
+#[cfg(test)]
+mod profile512_s152 {
+    use super::*;
+    use crate::wave_event::{Impact,Origin};
+    #[test]
+    fn profile_covers_sixty_seconds_without_relaxing_guards() {
+        let m=Medium {gravity:9.81,density:1025.,depth:20.,max_slope:0.1};
+        let d=Domain {radius:80.,age_us:60_000_000};
+        for lambda in [2.,3.,4.,5.,6.] {
+            let e=WaveEvent::impact(Impact {id:1,frame:FrameId(0),cell:0,birth:SimTime(0),ttl_us:4_000_000,
+                position:[0.;3],energy_j:0.01,wavelength_m:lambda,direction_turns:0.,anisotropy:0.,
+                displaced_l:0.,material:0,origin:Origin::Server,above_surface:true}).unwrap();
+            let f=RadialImpact::<512>::new(e,m,d).unwrap();
+            assert_eq!(RadialImpact::<256>::new(e,m,d).is_ok(),lambda>=5.);
+            assert!(matches!(RadialImpact::<257>::new(e,m,d),Err(Error::ModeCount)));
+            assert!(matches!(RadialImpact::<513>::new(e,m,d),Err(Error::ModeCount)));
+            assert!(f.sample(FrameId(0),0,[80.,0.],SimTime(60_000_000)).is_ok());
+            assert!(matches!(f.sample(FrameId(0),0,[80.,0.],SimTime(60_000_001)),Err(Error::Time)));
+            let s=f.sample(FrameId(0),0,[0.2062*lambda,0.],SimTime(0)).unwrap();
+            assert!((s.slope[0].abs()/f.slope_max()-1.).abs()<1e-4);
+            if lambda==2. {assert!(matches!(RadialImpact::<512>::new(e,m,Domain {radius:300.,..d}),Err(Error::Resolution)));}
+        }
     }
 }
