@@ -73,7 +73,7 @@ pendant soixante sessions. Défaut de **dispositif**, pas de calcul.
       porteur, essai générique, entrée d'invariant : coût, ce que chacune attrape, ce qu'elle
       laisse passer. La question qui décide est *qu'est-ce qui aurait arrêté le défaut de S141*,
       pas *qu'est-ce qui est le plus propre*.
-- [ ] **P3** — construire ce que la pesée retient. Étape courte : si la réparation ne tient pas
+- [x] **P3** — construire ce que la pesée retient. Étape courte : si la réparation ne tient pas
       en un quart d'heure, c'est qu'elle est plus lourde que le défaut.
 - [ ] **P4** — **vérifier qu'elle attrape le défaut** : réintroduire la faute de S141 dans une
       copie de travail jetable et constater l'échec. Une garde qu'on n'a pas vue échouer ne

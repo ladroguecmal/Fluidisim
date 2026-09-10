@@ -67,3 +67,9 @@ pub mod gaussian_spectrum;
 pub mod bound_pressure;
 pub mod pressure_source;
 pub mod pressure_journal;
+
+/// S143, A210 : les gardes du contrat de pente. Elles ne portent sur aucun module en
+/// particulier — c'est leur objet : ce qui est comparé à `max_slope`, **partout**.
+#[cfg(test)]
+#[path = "tests_contrat_pente.rs"]
+mod contrat_pente;
