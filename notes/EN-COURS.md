@@ -69,10 +69,10 @@ sens dans le type, ou retirer un champ que plus personne ne construit.
 ### Plan
 
 - [x] **P1** — état réel, jeton, **plan déclaré et committé seul**.
-- [ ] **P2** — sonde `pente_modale` : rapport `slope_bound / max|∇η|` d'`ImpactField`, avec son
+- [x] **P2** — sonde `pente_modale` : rapport `slope_bound / max|∇η|` d'`ImpactField`, avec son
       témoin analytique — la borne somme `a_m·k_m` et la pente vaut `|Σ a_m·k_m·û_m·sin(φ_m)·
       cos(ω_m t)|`, donc le rapport ne peut pas descendre sous 1.
-- [ ] **P3** — balayer ce dont il pourrait dépendre : longueur d'onde, énergie, instant. Thèse à
+- [x] **P3** — balayer ce dont il pourrait dépendre : longueur d'onde, énergie, instant. Thèse à
       vérifier : `side = 4λ` et les modes sont indexés par des entiers, donc le motif est
       **identique** à toute λ — le rapport devrait être une constante, comme pour le radial et
       contrairement à la pression. Le champ étant périodique et `sample` n'ayant pas d'emprise
