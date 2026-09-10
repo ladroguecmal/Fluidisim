@@ -207,3 +207,11 @@ renouvellement de fenêtre, la profondeur finie de pression (S116-2), le bilan m
 durabilité disque.
 
 83 ADR, 201 angles, 17 invariants, 6 spécifications, 23 cas.
+
+> **Suivi S136 — 2026-09-10.** `α` n'est plus un paramètre libre : ADR-092 le dérive de la forme
+> initiale du modèle et le borne à **[3,35 ; 6,11]**. Les valeurs 1 et 2 employées ci-dessus sont
+> **hors de cette fourchette**, et les tableaux qui en dépendent — §4.1, §4.2, §4.3 — sont donc
+> pessimistes. Avec α = 3,35, cinq cas sur onze tiennent à la portée demandée au lieu d'un, et
+> les portées atteintes vont de 20 à 321 % de la portée voulue au lieu de 3 à 102 %. Les deux
+> limites identifiées ici tiennent en revanche : petits objets bornés par la résolution, grands
+> objets exclus par le régime d'eau profonde. Voir [GENERATEUR-S136](GENERATEUR-S136.md) §5.

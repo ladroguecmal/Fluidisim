@@ -17,6 +17,13 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S136 :** [ADR-092](adr/ADR-092-generateur-d-impact.md), ce qu'un objet qui entre dans l'eau donne au modèle.
+[GENERATEUR-S136](validation/GENERATEUR-S136.md) : la longueur d'onde se **dérive** — forme initiale
+exactement homothétique, premier zéro à0,2985 λ, **α =3,35** borné à [3,35 ;6,11] ; l'énergie non, mais sa
+borne suit `E_max = K·ρ·g·λ⁴·s²` mesurée exacte. **A200 (sévérité1) traitée, L214.** Les conclusions de S123
+en sont changées :5 cas sur11 au lieu de1.269 tests/cinq ignorés, hachages inchangés.
+92 ADR,204 angles,17 invariants,6 spécifications,23 cas. Suite S137 : spécifier le banc B2, S136-1.
+
 **S135 :** [ADR-091](adr/ADR-091-admissibilite-annoncee-entre-couches.md), annoncer l'admissibilité plutôt que
 coordonner. [ADMISSIBILITE-S135](validation/ADMISSIBILITE-S135.md) : la « transaction mixte » n'était pas ce qui
 manquait — les emprunts interdisent déjà d'admettre pendant une requête, chaque couche est transactionnelle et la

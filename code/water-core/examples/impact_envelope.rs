@@ -105,14 +105,17 @@ fn main() {
         Case { nom: "vaisseau haute mer", demi_largeur_m: 20.0, vitesse_ms: 2.0, profondeur_m: 2000.0, portee_m: 200.0, horizon_s: 10.0 },
         Case { nom: "explosion de surface", demi_largeur_m: 3.0, vitesse_ms: 50.0, profondeur_m: 50.0, portee_m: 80.0, horizon_s: 8.0 },
     ];
-    // alpha à calibrer : du diamètre apparent (1) au périmètre (2*pi).
-    let alphas = [1.0f32, 2.0, 4.0, 6.283_185];
+    // S136 : alpha n'est plus libre. ADR-092 le dérive de la forme initiale du modèle —
+    // 3,35 au premier zéro, 5,46 à mi-hauteur, 6,11 au rayon de giration. Les valeurs 1 et 2
+    // testées en S123 sont **hors** de cette fourchette, et les portées y étaient donc
+    // sous-estimées : on garde 2 comme témoin de ce que S123 rapportait.
+    let alphas = [2.0f32, 3.35, 5.46, 6.11];
     // Énergie négligeable : isole la géométrie de l'amplitude. 1e-9 J ne suffit pas — aux
     // très courtes longueurs d'onde la pente y dépasse déjà la limite du milieu, et le refus
     // se lit alors comme une impossibilité géométrique qu'il n'est pas.
     const TENUE: f32 = 1e-30;
     println!("=== 1. Geometrie seule (energie negligeable), a la portee demandee ===");
-    println!("cas                    b(m)     portee   prof   | alpha=1      alpha=2      alpha=4      alpha=2pi");
+    println!("cas                    b(m)     portee   prof   | a=2 (S123)   a=3,35       a=5,46       a=6,11");
     for c in &cas {
         let age_us = (c.horizon_s * 1e6) as u64;
         let mut ligne = format!(
@@ -127,11 +130,11 @@ fn main() {
         println!("{ligne}");
     }
     println!();
-    println!("=== 2. Portee maximale geometrique, alpha = 2 ===");
+    println!("=== 2. Portee maximale geometrique, alpha = 3,35 (ADR-092) ===");
     println!("cas                    demandee     obtenue      part      borne au-dela");
     for c in &cas {
         let age_us = (c.horizon_s * 1e6) as u64;
-        let lambda = 2.0 * c.demi_largeur_m;
+        let lambda = 3.35 * c.demi_largeur_m;
         let (mut bas, mut haut) = (0.0f32, 4095.0f32);
         for _ in 0..48 {
             let milieu_r = 0.5 * (bas + haut);

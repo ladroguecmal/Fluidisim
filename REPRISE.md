@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 02:28 +02:00
+JETON            : libre
+Battement        : 2026-09-10 02:36 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S136 — générateur physique d'ADR-055 (S135-1, A200)
-Dernière session : S135 — admissibilité annoncée entre couches ;266 tests/cinq ignorés
-Session suivante : à fixer en fin de S136
+Session en cours : aucune
+Dernière session : S136 — générateur d'impact, A200 traitée ;269 tests/cinq ignorés
+Session suivante : S137 — spécifier le banc B2 (S136-1)
 
 **Copie de travail S130** : worktree `claude/reprise-projet-2d3506`, remis en avance rapide sur
 master (e817d0e) au démarrage — il était resté à 52e80a5 et n'avait rien d'unique, donc aucun
@@ -180,6 +180,29 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S136 — 2026-09-10 :** [ADR-092](docs/adr/ADR-092-generateur-d-impact.md),
+[GENERATEUR-S136](docs/validation/GENERATEUR-S136.md). **A200, sévérité 1, traitée.**
+Session de conception. Les deux nombres qu'un impact porte n'ont pas le même statut :
+**la longueur d'onde se dérive.** La forme spatiale initiale du candidat est **exactement**
+homothétique en λ (écart nul, de0,5 à32 m) ; son premier zéro vaut0,2985 λ, et le faire
+coïncider avec la demi-largeur mouillée de Wagner donne **α =3,35**, borné à **[3,35 ;6,11]**
+selon la lecture du rayon. `α` était étiqueté « à calibrer » et traité comme libre par trois
+sessions — **L214** : une telle étiquette est trompeuse quand la grandeur est une conséquence du
+modèle qu'on n'a pas calculée.
+**L'énergie ne se dérive pas, sa borne oui** : `E_max/λ⁴` constant à8,9401e-2, rapport16,00
+exact quand la pente quadruple, d'où `E_max = K·ρ·g·λ⁴·s²`. Et `η ≤ 2Kgα⁴bs²/v²` — la fraction
+représentable **décroît comme le carré de la vitesse**. η reste à calibrer, en paramètre de
+l'appelant. Borne vérifiée contre le candidat : construction à97 %, refus à105 %.
+**Les conclusions de S123 changent** : cinq cas de jeu sur onze tiennent à la portée demandée au
+lieu d'un, sept à α =5,46 ; portées de20 à321 % au lieu de3 à102 %. Suivi daté porté à
+ENVELOPPE-IMPACTS-S123. Résistent : petits objets bornés par la résolution, vaisseau en port par
+le régime d'eau profonde.269 tests/cinq ignorés ; hachages de campagne identiques à S118.
+92 ADR,204 angles,17 invariants,6 spécifications,23 cas.
+Suite S137 : S136-1 — les deux calibrations ont un objet précis, `α` dans [3,35 ;6,11] et `η`
+sous sa borne. Le **banc B2** est mentionné depuis ADR-060 sans avoir jamais été spécifié : dire
+quelles mesures il devrait produire. Extension de fenêtre, S116-2, bilan mixte et durabilité
+restent ouverts.
 
 **S135 — 2026-09-10 :** [ADR-091](docs/adr/ADR-091-admissibilite-annoncee-entre-couches.md),
 [ADMISSIBILITE-S135](docs/validation/ADMISSIBILITE-S135.md). S134-1 réalisée après recadrage.

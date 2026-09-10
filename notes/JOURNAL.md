@@ -7009,3 +7009,46 @@ définie par le système. L'ordre d'admission ne rattrape rien et n'est donc pas
 **contenu** : le générateur physique d'ADR-055, cité comme manquant par S123, S132 et S135, sans
 lequel `wavelength_m` et `energy_j` restent des nombres que personne ne sait produire (A200,
 sévérité 1).
+
+---
+
+## S136 — 2026-09-10 — Ce qu'un objet qui entre dans l'eau donne au modèle
+
+**Entrée :** jeton libre à 34d1be8, trois copies coïncidentes. A200, sévérité 1. Session de
+conception.
+**Produit :** [ADR-092](../docs/adr/ADR-092-generateur-d-impact.md),
+[GENERATEUR-S136](../docs/validation/GENERATEUR-S136.md), le module `impact_generator` et la
+sonde `forme_initiale`.
+**Le point de départ : deux nombres, deux statuts.** `wavelength_m` et `energy_j` n'ont pas le
+même statut, et les confondre aurait produit une formule d'apparence physique avec un facteur
+arbitraire dedans.
+**La longueur d'onde se dérive, et c'est L214.** La forme spatiale initiale du candidat est
+**exactement** homothétique en λ — écart nul, mesuré de 0,5 à 32 m. Son premier zéro vaut
+0,2985 λ ; faire coïncider cette étendue avec la demi-largeur mouillée de Wagner donne
+**α = 3,35**, et les trois lectures raisonnables du rayon bornent α à **[3,35 ; 6,11]**. `α`
+était étiqueté « à calibrer » depuis ADR-083 et traité comme libre par trois sessions : il ne
+l'était pas. **Une étiquette « à calibrer » est trompeuse quand la grandeur est une conséquence
+du modèle qu'on n'a pas encore calculée.**
+**L'énergie ne se dérive pas, sa borne oui.** `E_max/λ⁴` est constant à **8,9401e-2** pour λ de
+0,5 à 8 m, et le rapport vaut **16,00 exactement** quand la pente quadruple : `E_max = K·ρ·g·λ⁴·s²`
+avec K ≈ 8,89e-4. D'où `η ≤ 2Kgα⁴bs²/v²` — **la fraction représentable décroît comme le carré de
+la vitesse et croît avec la taille**, ce que personne n'avait écrit et qui explique après coup
+les 10⁻⁶ mesurés en S123 pour une balle d'arme. η reste à calibrer et est un **paramètre de
+l'appelant**, jamais une constante enfouie.
+**Réception :** la borne annoncée est celle que le candidat applique — construction à 97 %,
+refus `Steepness` à 105 % — sur douze combinaisons. Lois d'échelle vérifiées. 176 core + 93
+harnais = **269 réussis, cinq ignorés** ; trois tests neufs aussi en release ; **hachages de
+campagne identiques à S118**.
+**Ce que cela change à S123, et c'est important.** S123 concluait « un seul cas de jeu sur onze »
+à α = 2. Avec l'α dérivé : **5 sur 11 à α = 3,35**, 7 sur 11 à 5,46 et 6,11 ; les portées
+atteintes passent de 3–102 % à **20–321 %** de la portée demandée. Suivi daté porté à
+ENVELOPPE-IMPACTS-S123. Ce qui résiste ne bouge pas : petits objets bornés par la résolution,
+vaisseau en port exclu par le régime d'eau profonde.
+**Limites :** η non calibré, α non définitif (fourchette 1,8), K mesurée à quelques pour cent et
+sa dépendance en ρ et g posée par homogénéité, non mesurée. β n'intervient pas — dans Wagner il
+fixe la durée, pas l'étendue finale.
+92 ADR, 204 angles, 17 invariants, 6 spécifications, 23 cas. Invariants relus : I-14 est
+précisément ce que la séparation dérivable/calibrable sert ; aucun n'est invalidé.
+**Suite S137 :** S136-1 — les deux calibrations ont désormais un objet précis, `α` dans
+[3,35 ; 6,11] et `η` sous sa borne. Le banc B2 est mentionné depuis ADR-060 sans avoir jamais été
+spécifié : dire **quelles mesures il devrait produire** est le prolongement direct.

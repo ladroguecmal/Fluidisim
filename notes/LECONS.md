@@ -3277,3 +3277,17 @@ Avant de déclarer une portée utile, confronter distance, vitesse caractéristi
 numérique. Un banc spatial peut être exact tout en ne contenant jamais le phénomène de
 transport qu'on lui attribue. Quand un garde couple rayon et âge, attendre davantage n'est
 pas une correction gratuite : il faut dimensionner les deux ensemble.
+
+## L214 — Un paramètre « à calibrer » peut être déjà déterminé par le modèle
+
+*(S136)* `α`, le rapport entre longueur d'onde et taille d'objet, était étiqueté « à calibrer »
+depuis ADR-083, et trois sessions l'avaient traité comme un paramètre libre — en balayant [1, 2π]
+faute de mieux. Il ne l'était pas : la forme spatiale que le modèle engendre a un rayon
+caractéristique proportionnel à λ, et α n'est que le rapport qui le fait coïncider avec l'objet.
+Le mesurer a coûté une sonde de quarante lignes et a réduit un intervalle de facteur 6 à un
+facteur 1,8 — en déplaçant au passage les conclusions d'une session entière.
+
+L'étiquette « à calibrer » est honnête quand elle recouvre une grandeur **physique** que le
+modèle ne contient pas. Elle est trompeuse quand la grandeur est une **conséquence** du modèle
+qu'on n'a pas encore calculée. Avant de renvoyer un nombre à un banc, se demander lequel des deux
+cas on a : le banc mesure le monde, il ne mesure pas ce que notre propre modèle affirme déjà.

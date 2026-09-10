@@ -1726,3 +1726,12 @@ cinétique complète et total contre la référence S127, écart total maximal9,
 Interférences conservées et contre-épreuve diagonale seule rejetée ;99,985214 % de E0 dans
 l'anneau32–80 à48 s. A203 reste partielle pour les autres paramètres ; aucune réception
 en profondeur finie ou du bilan mixte. Aucun angle nouveau distinct ajouté.
+
+**Suivi A200 — S136 : traitée par ADR-092.** La longueur d'onde se **dérive** : la forme
+spatiale initiale du candidat est exactement homothétique en λ, son premier zéro vaut 0,2985 λ,
+et faire coïncider cette étendue avec la demi-largeur mouillée de Wagner donne `α = 3,35`. Les
+trois lectures raisonnables du rayon bornent α à [3,35 ; 6,11] — un facteur 1,8, contre un
+paramètre libre auparavant. L'énergie, elle, ne se dérive pas : la fraction transférée reste à
+calibrer, mais le modèle en donne la borne `η ≤ 2Kgα⁴bs²/v²`, mesurée et vérifiée contre le
+candidat. Ce qui reste ouvert n'est plus « d'où vient ce nombre » mais « quelle mesure le
+resserre » — c'est le banc B2, et c'est la suite S136-1.

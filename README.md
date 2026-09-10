@@ -61,7 +61,7 @@ code/                  le harnais et deux δ d'essai — Rust, sans dépendance 
 
 ## Où en est le projet
 
-État S135 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
+État S136 : la construction est actée par ADR-053. Le noyau B+W dispose d'un journal rejouable,
 d'impacts radiaux et de requêtes communes en lot. Le renouvellement numérique est testé
 jusqu'à 16 secondes sur un scénario borné ; rétention durable et système complet restent à
 construire. Le contrôleur à deux pools assure désormais la bascule après succès et signale
@@ -177,7 +177,10 @@ La « transaction mixte » n'était pas ce qui manquait : les emprunts interdise
 requête, chaque couche est transactionnelle, et la cause est commune aux deux journaux. Ce que personne n'avait
 constaté, c'est qu'**aucune admission n'est annulable** — ce qui rend un coordinateur irréalisable. L'admissibilité
 s'annonce donc des deux côtés, et l'hôte vérifie avant de modifier quoi que ce soit (ADR-091, S135).
-Suite : le générateur physique d'ADR-055, sans lequel longueur d'onde et énergie restent des nombres que personne
-ne sait produire, S135-1.
-91 ADR,204 angles,17 invariants,6 spécifications,23 cas.
+Un objet qui entre dans l'eau donne enfin ses deux nombres au modèle : la **longueur d'onde se dérive** de la
+forme que le candidat engendre — `λ = 3,35·b`, bornée à [3,35 ;6,11]·b — et l'énergie reste à calibrer mais sa
+borne suit une loi exacte, `E_max = K·ρ·g·λ⁴·s²` (ADR-092, S136). A200, sévérité1, est traitée. Les conclusions
+de S123 s'en trouvent changées : cinq cas de jeu sur onze tiennent dans le couloir au lieu d'un seul.
+Suite : spécifier le banc B2, mentionné depuis ADR-060 sans avoir jamais été décrit, S136-1.
+92 ADR,204 angles,17 invariants,6 spécifications,23 cas.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

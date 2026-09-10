@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S136 — en cours
+Session : S136 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : A200, sévérité 1 — un objet qui tombe dans l'eau doit produire les deux nombres que
 `WaveEvent::impact` exige, `wavelength_m` et `energy_j`. Aucun document ne dit comment.
@@ -67,7 +67,7 @@ Objectif : A200, sévérité 1 — un objet qui tombe dans l'eau doit produire l
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seul.
-- [ ] **P2** — séparer ce qui est dérivable de ce qui doit être calibré. Deux nombres, deux
+- [x] **P2** — séparer ce qui est dérivable de ce qui doit être calibré. Deux nombres, deux
       statuts différents, et c'est le cœur de la session :
       - **λ** : ADR-083 pose `λ = α·b` avec α « à calibrer ». Mais α pourrait n'être pas un
         paramètre libre : le modèle d'ADR-060 fixe déjà la forme spatiale initiale
@@ -76,11 +76,11 @@ Objectif : A200, sévérité 1 — un objet qui tombe dans l'eau doit produire l
       - **E** : la fraction de l'énergie d'entrée qui part en ondes de gravité est une
         propriété physique externe, que rien dans le modèle ne peut produire. Elle restera
         « à calibrer » — mais S123 en a mesuré une **borne supérieure**.
-- [ ] **P3** — ADR-092 sur ce que la mesure aura montré.
-- [ ] **P4** — construire ce que la décision retient, sans inventer de nombre (I-14).
-- [ ] **P5** — recevoir : un impact engendré par le générateur passe les bornes du candidat
-      et produit le champ attendu.
-- [ ] **P6** — livrable, rituel de fin, fusion `--ff-only`.
+- [x] **P3** — ADR-092 : α dérivé à 3,35 (borné [3,35 ; 6,11]), η calibrable mais borné.
+- [x] **P4** — module `impact_generator` : η en paramètre de l'appelant, borne du modèle appliquée.
+- [x] **P5** — borne annoncée vérifiée contre le candidat (97 % / 105 %) sur douze
+      combinaisons ; lois d'échelle vérifiées ; onze cas de S123 rejoués.
+- [x] **P6** — livrable, rituel de fin, fusion `--ff-only`.
 
 ### Notes de reprise
 
@@ -101,3 +101,14 @@ Ce dont on dispose, avec provenance :
 Piège à éviter : produire une fonction qui rend des nombres d'apparence physique alors qu'un
 facteur reste arbitraire. Si η n'est pas calibré, il doit être **un paramètre de l'appelant**,
 nommé et borné, pas une constante enfouie.
+
+P2-P6 : ADR-092, GENERATEUR-S136, suivi daté sur ENVELOPPE-IMPACTS-S123, suivi A200, L214,
+journal, index, README, REPRISE, jeton rendu, ff-only. 269 tests/cinq ignorés, hachages inchangés.
+
+Pour S137 sans relire : S136-1 est la spécification du banc B2, cité par ADR-060, ADR-083 et
+ADR-092 sans avoir jamais été décrit. Ce qu'il doit fixer est désormais précis — `α` dans
+[3,35 ; 6,11] et `η` sous `2Kgα⁴bs²/v²`. Deux questions à trancher : quelle observable mesure
+α (le rayon de la perturbation initiale n'est pas directement observable sur une vidéo ; le
+spectre des ondes à distance, peut-être), et quelle observable mesure η (l'énergie des ondes
+loin de l'impact, contre l'énergie cinétique de l'objet). SPEC-003 et PLAN-BENCHMARK décrivent
+la forme des autres bancs — s'y conformer plutôt qu'inventer un format.
