@@ -91,3 +91,5 @@ requise par B2-01 face au contexte de pression16s ; construire un premier scéna
 de sillage prolongé recevable ou identifier par mesure le blocage numérique précis.
 Ne pas transposer l'admission d'impact60s au noyau de pression. La prochaine production
 reste une étape de B2 selon le dernier bilan, pas une sélection technologique globale.
+
+Les deux nouveaux essais sont reçus en release ; ils conservent les diagnostics énergétiques hors runtime. Le résultat ne suppose pas que la fenêtre80m contienne toute l'énergie à60s.

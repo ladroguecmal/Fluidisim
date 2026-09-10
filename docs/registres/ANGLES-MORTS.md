@@ -1918,3 +1918,7 @@ Aucun nouvel angle indépendant ; A212 inchangée, pas de nouvelle mesure du fon
 **Suivi S153 — énergie hors domaine.** À60s pour source4m, l'anneau80–120m contient
 3,516 % de E0 ; le déficit du disque80m n'est pas une dissipation (ENERGIE-B2-S153).
 Mécanisme déjà connu S127, aucun angle indépendant ajouté. A212 inchangée.
+
+**Suivi S154 — transport sur la bande de fixtures.** ENERGIE-BANDE-B2-S154 retrouve
+l'énergie des quatre autres impacts60s, collecteurs adaptés ; N2565/6 reste reçu
+sur80m seulement. Aucun nouvel angle indépendant, A212 inchangée ; B2 reste partiel.

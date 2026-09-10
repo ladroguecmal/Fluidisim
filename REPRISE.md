@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 15:41 +02:00
+JETON            : libre
+Battement        : 2026-09-10 15:44 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S154
-Dernière session : S153 — énergie60s reçue sur source4m ; 294 tests/cinq ignorés
-Session suivante : S154 — S153-1, énergie60s des sources2/3/5/6m, poursuite B2 (dernier bilan)
+Session en cours : aucune
+Dernière session : S154 — cinq bilans impact60s reçus ; 296 tests/cinq ignorés
+Session suivante : S155 — S154-1, B2 sillage prolongé et domaine numérique (dernier bilan)
 
 **S147 : travail directement sur master.** Les anciennes copies, dont 886155, doivent rejoindre
 master avant toute reprise ; aucune copie créée, toutes propres au démarrage.
@@ -192,6 +192,12 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S154 — 2026-09-10 :** [ENERGIE-BANDE-B2-S154](docs/validation/ENERGIE-BANDE-B2-S154.md).
+Bilans initiaux/60s des sources2/3/5/6m reçus, complétant4m S153. Collecteurs88/112/
+136/152m àN512 ; profils2565/6 reçus dans80m. Erreur<=5,61e-7 E0, énergie retrouvée.296 tests/cinq ignorés.
+105 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas, deux bancs partiels.
+**Suite S155 : S154-1, B2 sillage prolongé**, mesurer la couverture face à la fenêtre16s.
 
 **S153 — 2026-09-10 :** [ENERGIE-B2-S153](docs/validation/ENERGIE-B2-S153.md).
 Source4m/N512 à60s : E80/E0=0,964843755487, E120/E0=0,999999791824.

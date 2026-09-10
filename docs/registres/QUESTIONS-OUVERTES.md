@@ -1415,3 +1415,12 @@ entrée par entrée. Le fil reprend ci-dessous.
 - **S153-1 : ouverte, prochaine S154.** Étendre le bilan60s aux sources2/3/5/6m
   de S152, avec rayon de collecte et raffinements reçus pour chacune.
 - B2 demeure partiel : technologie, lambda_cut, sillage long et bathymétrie ouverts.
+
+### S154 — Bilan énergétique des cinq fixtures B2
+
+- **S153-1 : close**, ENERGIE-BANDE-B2-S154 et S153. Énergies initiales/60s reçues
+  sur sources2/3/4/5/6m, profils et domaines de collecte explicites.
+- **S154-1 : ouverte, prochaine S155.** B2 sillage prolongé : quantifier la couverture
+  requise face au contexte16s, construire une première fixture reçue ou identifier
+  par mesure le blocage numérique. Ne pas confondre pression et impact.
+- Technologie globale, lambda_cut, sillage stationnaire, bathymétrie et D1 distant ouverts.

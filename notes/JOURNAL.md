@@ -7790,3 +7790,26 @@ sources2/3/5/6m de S152**, domaine de collecte reçu pour chacune. Poursuite B2
 conforme au dernier bilan ; pas de sélection technologique ni de lambda_cut.
 
 Vérification finale :294 tests réussis/cinq ignorés (201+93), zéro échec ; quatre avertissements préexistants. Nouveau test également release ; décomptes inchangés, diff vérifié et jeton rendu.
+
+## S154 — 2026-09-10 — Les cinq impacts B2 ont leur bilan à60s
+
+Entrée S153-1. [ENERGIE-BANDE-B2-S154](../docs/validation/ENERGIE-BANDE-B2-S154.md),
+oracle paramétré et deux tests : sources2/3/5/6m, collecteurs88/112/136/152m,
+N512, plus N2565/6m sur80m. Écart candidat/oracle<=5,61e-7 E0 ; raffinements et
+contre-épreuves sans cinétique/interférences reçus. À6m55,305 % de l'énergie est
+hors80m mais retrouvée dans152m ; à2m presque tout reste dans80m à60s.
+La portée de collecte dépend de la longueur, elle n'est pas un budget hôte gratuit.
+
+Avec S153, bilan initial/60s reçu sur les cinq fixtures d'impact de S152.
+Aucun changement de production, de seuil, d'ADR ni d'invariant.105 ADR,212 angles,
+230 leçons,18 invariants,6 SPEC,23 cas ; B1/B2 restent partiels. Pas de nouvel angle
+ou leçon autonome : extension quantitative du mécanisme de transport déjà reçu.
+A212 inchangée. Pas de nouvelle copie, acte distant ou arbitrage utilisateur.
+
+S153-1 close. **Suite S155 : S154-1, B2 sillage prolongé**, quantifier le domaine
+requis face à la fenêtre16s, construire une fixture reçue ou isoler par mesure le
+blocage numérique. L'admission d'impact60s ne certifie pas le noyau de pression.
+La poursuite B2 porte la recommandation du dernier bilan ; technologie globale,
+lambda_cut, bathymétrie et conformité multiplateforme restent ouvertes.
+
+Vérification finale :296 tests réussis/cinq ignorés (203+93), zéro échec ; quatre avertissements préexistants. Deux essais également release, décomptes inchangés, diff vérifié ; jeton rendu.

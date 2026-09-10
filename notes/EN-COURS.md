@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S154 — en cours
+Session : S154 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S153-1, bilan60s sur sources2/3/5/6m, sans confondre collecte et domaine hôte.
 
@@ -67,7 +67,7 @@ Objectif : S153-1, bilan60s sur sources2/3/5/6m, sans confondre collecte et doma
 - [x] **P1** — état réel, protocole, jeton et plan seul.
 - [x] **P2** — oracle indépendant sur quatre longueurs, rayons88/112/136/152m ; raffinement séparé.
 - [x] **P3** — réception coefficients N512 et profils N256 sur80m ; énergie, anneaux et contre-épreuves.
-- [ ] **P4** — suite de tests, rapport et rituel ; verdict B2 daté et jeton rendu.
+- [x] **P4** — suite de tests, rapport et rituel ; verdict B2 daté et jeton rendu.
 
 ### Notes de reprise
 
@@ -82,3 +82,5 @@ Aucun changement de production prévu ; ne pas transposer un profil80m au collec
 P2 : quatre oracles reçus. Collecteurs60s :2=0,999999975071 ;3=0,999999976655 ;5=0,999999630848 ;6=0,999999694485. À80m :0,999999481614 /0,999111648388 /0,787762595879 /0,446944872471. Rapports dans ENERGIE-BANDE-B2-S154.
 
 P3 : deux tests release reçus, candidat/oracle max5,61e-7 E0. N512 collecteurs et N2565/6 à80m ; contre-épreuves actives. Aucun changement de production.
+
+P4 :296 tests/cinq ignorés (203+93), zéro échec ; quatre avertissements préexistants. Deux essais nouveaux reçus release.105 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas, deux bancs partiels. Rituel exécuté ; jeton rendu.

@@ -91,3 +91,7 @@ B2 reste la priorité du dernier bilan. Aucun choix de lambda_cut ni de technolo
 > **Actualisation S153 — 2026-09-10.** Le bilan énergétique60s de la source4m
 > est reçu dans [ENERGIE-B2-S153](ENERGIE-B2-S153.md), collecte étendue à120m :
 > l'énergie sortie de80m est retrouvée. Les quatre autres longueurs restent S153-1.
+
+> **S154 — énergie :** les cinq impacts source2/3/4/5/6m ont un bilan initial/60s
+> reçu sur des collecteurs explicites, [ENERGIE-BANDE-B2-S154](ENERGIE-BANDE-B2-S154.md).
+> Les profils hôte80m restent distincts des collecteurs élargis. Suite B2 sillage.

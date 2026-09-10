@@ -17,6 +17,12 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S154 :** [ENERGIE-BANDE-B2-S154](validation/ENERGIE-BANDE-B2-S154.md).
+Les cinq fixtures d'impact B2 ont leur bilan initial/60s reçu ; collecteurs explicites,
+erreur candidat/oracle<=5,61e-7 E0 sur les quatre nouvelles sources.296 tests/cinq ignorés.
+105 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas, deux bancs partiels.
+**Suite S155 : S154-1, B2 sillage prolongé.**
+
 **S153 :** [ENERGIE-B2-S153](validation/ENERGIE-B2-S153.md), source4m/N512 à60s.
 3,516 % de l'énergie hors80m retrouvée dans120m ; oracle et contre-épreuves reçus.294 tests réussis/cinq ignorés.
 105 ADR,212 angles,230 leçons,18 invariants,6 SPEC,23 cas, deux bancs partiels.

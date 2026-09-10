@@ -53,3 +53,7 @@ bathymétrie ou D1 interplateforme. Deux bancs restent partiellement exécutés 
 **S153-1 : prochaine S154, étendre ce bilan aux sources2/3/5/6m de S152**, avec rayon
 de collecte choisi et reçu pour chacune ; garder oracle et contre-épreuves avant
 de conclure sur toute la bande de fixtures. B2 reste la trajectoire du dernier bilan.
+
+> **Actualisation S154 — 2026-09-10.** S153-1 close : les quatre autres bilans sont
+> reçus dans [ENERGIE-BANDE-B2-S154](ENERGIE-BANDE-B2-S154.md), collecteurs adaptés.
+> Le bilan60s couvre les cinq fixtures S152. Suite B2 sillage prolongé, S154-1.

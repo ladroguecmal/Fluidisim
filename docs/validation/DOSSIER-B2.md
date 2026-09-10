@@ -393,3 +393,7 @@ Les six pièges généraux de SPEC-003 §6 s'appliquent. Quatre sont propres à 
 > **S153 — énergie60s :** source4m reçue, voir [ENERGIE-B2-S153](ENERGIE-B2-S153.md).
 > Le déficit de3,516 % dans80m est transporté dans l'anneau80–120m. Verdict B2
 > toujours partiel ; prochaine extension S153-1 aux quatre autres fixtures S152.
+
+> **S154 — bilan60s :** les cinq fixtures impact sont reçues (S153/S154), voir
+> [ENERGIE-BANDE-B2-S154](ENERGIE-BANDE-B2-S154.md). B2 global reste partiel ;
+> prochaine production S154-1 : sillage prolongé, avec domaine numérique reçu.
