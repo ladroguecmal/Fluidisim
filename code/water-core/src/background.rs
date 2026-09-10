@@ -36,6 +36,15 @@ pub struct Component {
     pub phase0: PhaseQ32,
 }
 
+/// Nombre de composantes retenu par **B1** (S146, ADR-099). **Mesuré, pas choisi** : à coût
+/// linéaire — 48 ns par composante et par échantillon — 32 composantes coûtent huit fois moins
+/// que 256, dispersent `Hs` deux fois moins (écart-type 1,09 point contre 2,23 sur douze graines)
+/// et donnent la même hauteur à tout objet de côté ≤ 30 m, à 4 % près.
+///
+/// Ce n'est pas un défaut imposé : `SeaState::components` reste fourni par l'hôte. Augmenter ce
+/// nombre est légitime pour une raison **perceptuelle**, qui n'a pas été mesurée ; ce ne l'est pas
+/// pour la justesse, qui se dégrade quand il croît.
+pub const COMPOSANTES_B1: usize = 32;
 /// Paramètres d'un état de mer — sous-ensemble de `HydroSample` (ADR-004 §2.2) suffisant pour H1.
 #[derive(Clone, Copy, Debug)]
 pub struct SeaState {
@@ -98,7 +107,12 @@ impl Background {
     ///
     /// La dispersion en eau profonde donne `ω² = g·k` (SPEC-001 §1) ; les composantes sont réparties
     /// géométriquement autour de la période de pic, et leurs amplitudes suivent `E = ρgHs²/16`
-    /// réparti uniformément — c'est grossier, et c'est assumé : B1 tranchera.
+    /// réparti uniformément — c'est grossier, et c'est assumé.
+    ///
+    /// **S146 : B1 a été exécuté, et il a tranché le nombre, pas la forme.** Le renvoi « B1
+    /// tranchera » qui figurait ici était trop large : le protocole §B1 mesure le nombre de
+    /// composantes et le coût, jamais la répartition de l'énergie dans la bande. Voir
+    /// `COMPOSANTES_B1` pour ce qui est tranché, et **A212** pour ce qui ne l'est pas.
     pub fn configure(
         host: &mut HostServices,
         sea: SeaState,

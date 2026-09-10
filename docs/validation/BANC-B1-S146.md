@@ -106,3 +106,30 @@ longueurs d'onde, donc du tirage.
 
 **La part « distance » de la courbe demandée n'est pas mesurable ici** : elle dépend d'une caméra,
 d'une projection et d'un œil. Elle reste ouverte, et le rapport ne la contourne pas.
+
+## 6. Décision
+
+[ADR-099](../adr/ADR-099-b1-trente-deux-composantes.md) : **32 composantes**, publiées sous
+`background::COMPOSANTES_B1`. Les trois critères mesurables convergent — coût ×8,3, dispersion
+×2,0, et aucune différence pour un objet de côté ≤ 30 m.
+
+**Verdict du banc : partiel, et le mot est exact.** Deux volets sur quatre sont tranchés ; les deux
+autres — évaluation perceptuelle, distance de perception d'une tuile qui n'existe pas — demandent
+des personnes ou une couche non écrite. Le banc est **rejouable** :
+
+```bash
+cargo run --release --example banc_b1
+```
+
+## 7. Ce que ce premier banc apprend sur les bancs
+
+Onze bancs sont définis depuis S02, et celui-ci est le premier exécuté. Deux constats valent pour
+les dix autres :
+
+1. **La moitié de sa réponse existait déjà**, mesurée en S64 et expliquée en S67, sans que
+   personne ne la rapproche du banc. Ouvrir un banc, c'est d'abord regarder ce qui a déjà été
+   mesuré sous un autre nom.
+2. **Le protocole a vieilli sur des points qu'il ne pouvait pas prévoir** : il demande le coût d'un
+   LOD spectral qui n'a jamais été écrit, et la répétition d'une tuile FFT dans un champ qui est
+   une somme de Gerstner. Un protocole écrit en S02 décrit le système qu'on croyait construire.
+   **Le banc n'a pas à s'y plier : il a à dire ce qu'il mesure et ce qu'il ne mesure pas.**
