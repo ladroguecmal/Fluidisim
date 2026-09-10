@@ -122,8 +122,8 @@ impl<'a, 'j, const N: usize> Prepared<'a, 'j, N> {
         output: &mut [WaterSample],
         scratch: &mut [WaterSample],
     ) -> Result<usize, BatchError> {
-        // Le B minimal est configuré avec g=9,81. Un autre milieu n'est pas encore compatible.
-        if bound.frame != self.frame || bound.cell != self.cell || self.gravity != 9.81f32 {
+        // La gravité doit être celle qui a servi à construire B.
+        if bound.frame != self.frame || bound.cell != self.cell || self.gravity != bound.background.gravity() {
             return Err(BatchError::Context);
         }
         if points.len() > output.len() || points.len() > scratch.len() {

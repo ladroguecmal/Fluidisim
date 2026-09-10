@@ -56,10 +56,10 @@ fn classify<const N: usize>(
     pressure: Option<(bound_pressure::Settings, SimTime)>,
     time: SimTime,
 ) -> State {
-    let (_, frame, cell) = bound.binding();
+    let (background, frame, cell) = bound.binding();
     if frame != impacts.frame
         || cell != impacts.cell
-        || impacts.gravity != 9.81f32
+        || impacts.gravity != background.gravity()
         || !impacts.density.is_finite()
         || impacts.density <= 0.0
     {

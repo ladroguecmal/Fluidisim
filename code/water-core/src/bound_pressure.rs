@@ -629,7 +629,7 @@ impl Prepared<'_> {
         if !self.context.matches(context)
             || frame != settings.frame
             || cell != settings.cell
-            || settings.gravity != 9.81f32
+            || settings.gravity != background.gravity()
         {
             return Err(WorldError::Context);
         }

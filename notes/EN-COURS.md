@@ -65,8 +65,8 @@ Objectif : S147-1, construire et recevoir un fond spectral explicite selon ADR-1
 ### Plan
 
 - [x] **P1** — état réel, lectures de reprise, jeton et plan committé seul.
-- [>] **P2** — arrêter le contrat de recette et de cuisson bornée/reproductible ; écrire le constructeur explicite sans migrer la voie historique ; tests des coefficients et refus.
-- [ ] **P3** — réception indépendante contre S147, moments et pics, phases/dérivées, B+W et rejeu ; témoins historiques et debug/release.
+- [x] **P2** — arrêter le contrat de recette et de cuisson bornée/reproductible ; écrire le constructeur explicite sans migrer la voie historique ; tests des coefficients et refus.
+- [>] **P3** — réception indépendante contre S147, moments et pics, phases/dérivées, B+W et rejeu ; témoins historiques et debug/release.
 - [ ] **P4** — suite complète, rapport, angles/leçons/actions, journal, index/décomptes et passation ; rituel de fin, jeton rendu.
 
 ### Notes de reprise
@@ -79,3 +79,4 @@ L'exp f32 bornée existe déjà dans gaussian_spectrum (S97) ; préférer la par
 ses opérations. Ni recette numérique reçue localement ni hash debug/release ne prouvent I-03
 sur plusieurs plateformes. Le fond historique et les scénarios restent inchangés.
 BILAN-S145 : B1 exécuté S146, S63-1 close S147 ; W4/sillage puis B2 restent la trajectoire.
+P2 : cuisson V1 construite, quatre tests ciblés debug reçus. Gravité portée par B et vérifiée dans les trois compositions.

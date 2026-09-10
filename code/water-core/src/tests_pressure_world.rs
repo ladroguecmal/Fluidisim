@@ -9,6 +9,7 @@ use crate::{
 };
 fn bg(anchor: WorldPos, amplitude: f32) -> Background {
     Background {
+        gravity: 9.81,
         anchor,
         components: vec![Component {
             amplitude,

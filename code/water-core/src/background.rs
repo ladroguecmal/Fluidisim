@@ -25,6 +25,9 @@ use crate::types::{SimTime, WaterSample, WorldPos};
 #[cfg(test)]
 #[path = "spectrum_reference_s147.rs"]
 mod spectrum_reference_s147;
+#[cfg(test)]
+#[path = "tests_background_spectrum.rs"]
+mod tests_background_spectrum;
 
 /// Une composante de houle. Paramètres figés à la configuration.
 #[derive(Clone, Copy, Debug)]
@@ -69,7 +72,7 @@ pub struct SeaState {
 
 /// SplitMix64 indexé : accès direct, aucun état partagé ni dépendance à l'ordre d'appel.
 /// Mix13 de Stafford, constantes de SplittableRandom (OpenJDK) ; formule documentée S65.
-fn phase_initiale(graine: u64, indice: u64) -> PhaseQ32 {
+pub(crate) fn phase_initiale(graine: u64, indice: u64) -> PhaseQ32 {
     let mut z = graine.wrapping_add(indice.wrapping_add(1).wrapping_mul(0x9E37_79B9_7F4A_7C15));
     z = (z ^ (z >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
     z = (z ^ (z >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
@@ -84,6 +87,7 @@ pub(crate) fn admits_local(local: [f32; 3]) -> bool {
 pub struct Background {
     components: Vec<Component>,
     anchor: WorldPos,
+    gravity: f32,
 }
 
 fn phase_spatiale(c: &Component, local: [f32;2]) -> PhaseQ32 {
@@ -168,8 +172,23 @@ impl Background {
             });
         }
 
-        Ok(Background { components, anchor })
+        Ok(Background { components, anchor, gravity: G as f32 })
     }
+
+    /// Construction explicite depuis une recette spectrale cuite et validée (ADR-101).
+    /// À l'initialisation, avant seal ; le constructeur historique est inchangé.
+    pub fn from_spectrum(
+        host: &mut HostServices,
+        spectrum: &crate::background_spectrum::Cooked,
+        anchor: WorldPos,
+    ) -> Result<Self, AllocError> {
+        let components = spectrum.components();
+        host.alloc.alloc_persistent(core::mem::size_of_val(components))?;
+        Ok(Self { components: components.to_vec(), anchor, gravity: spectrum.recipe().gravity })
+    }
+
+    /// Gravité qui a servi à la dispersion ; comparée par les compositions B+W.
+    pub fn gravity(&self) -> f32 { self.gravity }
 
     pub fn component_count(&self) -> usize {
         self.components.len()

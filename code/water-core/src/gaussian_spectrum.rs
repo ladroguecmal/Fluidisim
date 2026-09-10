@@ -83,7 +83,7 @@ impl Spectrum<'_> {
     }
 }
 // exp(-x), 0<=x<=32. Réduction x=n ln2+r, puis Taylor degré 9 et puissance de deux exacte.
-fn decay(x: f32) -> f32 {
+pub(crate) fn decay(x: f32) -> f32 {
     let n = (x / core::f32::consts::LN_2) as u32;
     let r = x - n as f32 * core::f32::consts::LN_2;
     let p = -1.0 / 362880.0;

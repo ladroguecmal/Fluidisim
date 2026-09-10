@@ -33,6 +33,7 @@ mod bessel_directions;
 mod bessel_table;
 
 pub mod background;
+pub mod background_spectrum;
 pub mod body;
 pub mod delta;
 pub mod dispersif;

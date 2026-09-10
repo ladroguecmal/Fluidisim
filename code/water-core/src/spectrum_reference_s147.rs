@@ -28,7 +28,7 @@ fn shape(x: f64, gamma: f64) -> f64 {
 }
 
 // Simpson en log-fréquence ; les moments dimensionnels valent fp^p fois ces rapports.
-fn moment(gamma: f64, lo: f64, hi: f64, p: i32, n: usize) -> f64 {
+pub(super) fn moment(gamma: f64, lo: f64, hi: f64, p: i32, n: usize) -> f64 {
     assert!(n > 0 && n % 2 == 0 && lo > 0.0 && hi > lo && gamma >= 1.0);
     // Le changement de sigma au pic casse la régularité requise par Simpson.
     if lo < 1.0 && hi > 1.0 {
