@@ -99,3 +99,52 @@ budgets, où la part de pression dépend de l'emprise.
 Le troisième nom ne dit pas *pourquoi* l'enveloppe est large — la bibliothèque ne le sait pas —
 mais il dit **où regarder**, ce qu'ADR-082 demande. Et il retire au premier ce qu'il n'aurait
 jamais dû porter.
+
+## 8. Ce que la garde de S143 a fait dès le premier changement
+
+Le premier `cargo test` après la séparation des causes a échoué sur
+`no_undeclared_comparison_to_max_slope_s143` — la garde écrite la veille — en signalant **trois
+sites nouveaux** :
+
+```
+("composition.rs", "reelle>max_slope")
+("mixed_water.rs", "reelle>max_slope")
+("bound_pressure.rs", "reelle>max_slope")
+```
+
+Ils sont légitimes : ils comparent une pente réelle sans conversion, ce qu'I-18 demande. Mais
+c'est **la garde qui l'a demandé**, pas ma mémoire, et elle l'a demandé le jour même. Une garde
+écrite pour un troisième champ hypothétique a servi le lendemain, sur une modification qui n'avait
+rien à voir avec elle.
+
+## 9. La vérification : le nouveau nom sert-il ?
+
+Une aide qu'on n'a pas vue aider ne vaut pas mieux qu'une garde qu'on n'a pas vue échouer.
+
+**Sur le chemin même d'A208**, `the_same_envelope_names_the_field_or_itself_depending_on_the_point_s144`
+prend un champ de pression, balaye une ligne pour y trouver le point le plus raide et le plus
+plat, puis pose une limite **entre les deux pentes réelles** et sous l'enveloppe. Les deux points
+sont refusés — l'enveloppe dépasse partout, elle ne dépend pas du point — mais :
+
+| point | pente réelle | verdict |
+|---|---|---|
+| le plus raide | au-dessus de la limite | `Slope` — le champ est vraiment trop raide ici |
+| le plus plat | sous la limite | **`SlopeEnvelope`** — c'est le majorant qui refuse |
+
+C'est exactement la distinction qu'A208 réclamait : l'hôte qui publie sur une emprise où son champ
+est plat lisait `Slope`, c'est-à-dire « ta pente », alors que sa pente était plate.
+
+**Et un essai qui existait déjà décrivait le cas sans pouvoir le nommer** :
+`normal_matches_spatial_difference_and_envelope_sees_cancellation`, écrit bien avant A208,
+construisait une limite entre la pente locale et l'enveloppe — « l'enveloppe voit une
+compensation », dit son nom. Il attend désormais `SlopeEnvelope`.
+
+## 10. Réception
+
+274 tests, cinq ignorés — deux de plus : l'essai d'atteignabilité des trois verdicts et la
+démonstration ci-dessus. Aucun hachage touché, harnais H1 inchangé : les noms de refus ne sont pas
+des bits publiés.
+
+Six essais existants ont changé d'attente, et **c'est le résultat le plus instructif de la
+session** : tous attendaient `Slope`, et cinq d'entre eux exerçaient en réalité le majorant. Le
+dépôt testait le conservatisme en croyant tester la pente, depuis que ces essais existent.

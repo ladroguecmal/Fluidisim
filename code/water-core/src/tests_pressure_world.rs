@@ -236,6 +236,77 @@ fn world_refusals_are_atomic_and_context_checked_even_empty() {
     assert_ne!(bits(out[0]), saved[0]);
     assert_eq!(bits(out[1]), saved[1]);
 }
+/// S144, A208 — **la vérification que le nouveau nom sert à quelque chose.**
+///
+/// Même champ, même limite, même enveloppe : seul le point change. Là où la pente réelle dépasse
+/// la limite, le refus désigne le champ ; là où elle tient, il désigne l'enveloppe. C'est ce que
+/// l'hôte ne pouvait pas distinguer avant — il lisait `Slope` dans les deux cas, c'est-à-dire
+/// « ta pente », y compris là où sa pente était plate et où seul le majorant refusait.
+#[test]
+fn the_same_envelope_names_the_field_or_itself_depending_on_the_point_s144() {
+    let mut nodes = [Node::default(); 64];
+    let mut hn = [Node::default(); 32];
+    let full = bake(recipe(), &mut nodes).unwrap();
+    let half = full.half_into(&mut hn).unwrap();
+    let ctx = Context::new(settings(), &half).unwrap();
+    let mut pool = [Slot::default(); 32];
+    let t = SimTime(3_000_000);
+    let f = Prepared::build(ctx, &half, &source(), t, &mut pool).unwrap();
+    let b = bg(WorldPos::from_units(0, 0, 0), 0.01);
+    let bound = BoundBackground::new(&b, FrameId(2), 3);
+    let mut scratch = [WaterSample::default(); 1];
+    let mut out = scratch;
+
+    // Balayage d'une ligne : le champ a des points raides et des points plats, et l'enveloppe,
+    // elle, ne dépend pas du point. On cherche un exemplaire de chaque.
+    let mut pente = |x: f32| {
+        f.sample_world_batch(
+            &bound,
+            &ctx,
+            t,
+            &[WorldPos::from_metres(x as f64, 0.0, 0.0)],
+            1.0,
+            &mut scratch,
+            &mut out,
+        )
+        .unwrap();
+        (out[0].normal[0].powi(2) + out[0].normal[1].powi(2)).sqrt() / out[0].normal[2]
+    };
+    let mut raide = f32::NAN;
+    let mut plat = f32::NAN;
+    for i in 0..400 {
+        let x = i as f32 * 0.01;
+        let p = pente(x);
+        if raide.is_nan() || p > pente(raide) {
+            raide = x;
+        }
+        if plat.is_nan() || p < pente(plat) {
+            plat = x;
+        }
+    }
+    let (fort, faible) = (pente(raide), pente(plat));
+    assert!(
+        fort > faible * 10.0,
+        "il faut un contraste net entre les deux points"
+    );
+
+    // Une limite entre les deux pentes réelles, et sous l'enveloppe : les deux points sont
+    // refusés — l'enveloppe dépasse partout — mais **pas pour la même raison**.
+    let limite = 0.5 * (fort + faible);
+    let mut refus = |x: f32| {
+        f.sample_world_batch(
+            &bound,
+            &ctx,
+            t,
+            &[WorldPos::from_metres(x as f64, 0.0, 0.0)],
+            limite,
+            &mut scratch,
+            &mut out,
+        )
+    };
+    assert_eq!(refus(raide), Err(WorldError::Slope));
+    assert_eq!(refus(plat), Err(WorldError::SlopeEnvelope));
+}
 #[test]
 fn normal_matches_spatial_difference_and_envelope_sees_cancellation() {
     let mut nodes = [Node::default(); 64];
