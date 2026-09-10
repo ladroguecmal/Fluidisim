@@ -1862,3 +1862,24 @@ croyant exercer la pente. Voir [REFUS-EMPRISE-S144](../validation/REFUS-EMPRISE-
   **par écrit**. Ce n'est pas un registre de plus : un registre est justement ce que personne ne
   relit. À juger dans quelques sessions : si B1 n'est toujours pas lancé en S150, la réparation
   aura échoué et il faudra autre chose.
+
+**Suivi A187 — S146 : requalifiée par B1, ce n'était pas un défaut.** Les +6,612 % mesurés à 256
+composantes étaient **une réalisation à trois écarts-types sur une graine unique**. Douze graines
+par densité montrent qu'il n'y a **aucun biais** — moyenne des écarts dans ±0,42 % à toutes les
+densités — et que ce qui croît avec le nombre de composantes est la **dispersion** : écart-type
+1,09 point à 32, 2,23 à 256. La cause identifiée en S67 explique exactement cela. **La tolérance de
+`Hs` dépend donc de N** : ±3 % couvre 2,7 σ à 32 composantes et 1,3 σ à 256. Voir
+[BANC-B1-S146](../validation/BANC-B1-S146.md) et ADR-099.
+
+- **A212** *(sévérité 2, S146 ; ouverte)* — **La forme du spectre de `B` est grossière, et le
+  renvoi qui la couvrait était faux.** `Background::configure` répartit l'énergie **uniformément**
+  dans la bande `[Tp/2, 2Tp]` ; le code renvoyait cette grossièreté à B1 — « c'est assumé : B1
+  tranchera ». B1 a été exécuté en S146 : son protocole mesure **le nombre de composantes et le
+  coût**, jamais la répartition de l'énergie. Aucun banc ne mesure la forme du spectre, et aucune
+  décision ne la justifie : un spectre de mer réel suit JONSWAP ou Pierson-Moskowitz, pas une
+  répartition uniforme. Le commentaire est corrigé ; la question reste entière. C'est le mécanisme
+  de **L217** — un renvoi non vérifié ferme la question au lieu de la laisser ouverte —, cette
+  fois dans le code plutôt que dans un ADR.
+  *Ce que cela change, ou non : `Hs` est exact par construction quelle que soit la forme, donc
+  rien de ce qui est mesuré aujourd'hui n'est faux. Ce qui dépend de la forme est le **contenu
+  fréquentiel** — donc l'aspect, les périodes vues par un objet, et la réponse d'un corps flottant.*

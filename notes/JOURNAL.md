@@ -7527,3 +7527,62 @@ déclaré — mais son vrai chiffre, zéro banc sur onze, est intact.
 recommandation est portée par la ligne `Session suivante`, et l'écarter demandera de l'écrire.
 Restent ouverts : clore S63-1 par écrit, le sillage, l'audit des renvois « traité en Sxx » (S138),
 l'extension de fenêtre, S116-2, le bilan mixte, la durabilité et les deux calibrations de B10.
+
+---
+
+## S146 — 2026-09-10 — Le premier banc du projet, et il dit l'inverse de l'intuition
+
+**Entrée :** jeton libre à 533c7ed, worktree `886155`. **S145-1 : lancer B1** — porté par la ligne
+`Session suivante` du jeton, mécanisme mis en place la veille pour A211. **Il a fonctionné.**
+**Produit :** [ADR-099](../docs/adr/ADR-099-b1-trente-deux-composantes.md),
+[BANC-B1-S146](../docs/validation/BANC-B1-S146.md), le banc `banc_b1.rs`,
+`background::COMPOSANTES_B1`, A212, L229, A187 requalifiée.
+
+**Onze bancs sont définis depuis S02. C'est le premier exécuté.**
+
+**Décision : 32 composantes**, et les trois critères mesurables convergent — ce qui est assez rare
+pour être dit. Coût **×8,3** entre 32 et 256 ; dispersion de `Hs` **×2,0** ; et **aucune
+différence** pour un objet de côté ≤ 30 m, c'est-à-dire tout ce qui flotte dans le jeu.
+
+**Le coût, mesuré pour la première fois : 48 ns par composante et par échantillon**, linéaire à 4 %
+près sur un facteur 8. `B` à 256 composantes coûte **12,8 µs par point**. À 16,7 ms par image et
+1 000 échantillons, le plafond est de 348 composantes ; à 10 000 échantillons, de 35.
+
+**Et le résultat qui renverse l'intuition : augmenter le nombre de composantes ne rend pas la mer
+plus juste, il la rend moins prévisible.** Aucun biais à aucune densité — la moyenne des écarts sur
+`Hs` tient dans ±0,42 % — mais l'écart-type entre réalisations double, de 1,09 point à 32
+composantes à 2,23 à 256. La cause identifiée en S67 l'explique exactement : les composantes sont
+toutes dans un cône de 30°, leur nombre croît, leur indépendance non.
+
+**A187 change donc de nature, et c'est L229.** Ses +6,612 % étaient **une réalisation à 3 σ, sur une
+graine unique**. La mesure était juste ; sa robustesse avait été vérifiée sur le pas, la fenêtre,
+les bornes du spectre — **jamais sur la graine**. Quatre-vingts sessions ont porté une conclusion
+prudente — « la tolérance ne peut pas descendre sous 7 % tant que la cause est inconnue » — là où
+la vraie réponse est que **la tolérance dépend du nombre de composantes** : ±3 % couvre 2,7 σ à 32
+et 1,3 σ à 256.
+
+**Le banc dit aussi ce qu'il ne tranche pas, et c'est délibéré.** Deux volets sur quatre sont hors
+de portée : l'évaluation subjective en double aveugle demande des personnes, et la distance de
+perception d'une tuile FFT demande en plus une tuile FFT — le fond est une somme de Gerstner. Le
+« coût avec LOD spectral actif et inactif » n'a pas été mesuré parce qu'**il n'y a pas de LOD**.
+Une session qui lirait « B1 fait » sans ces réserves porterait un renvoi faux de plus.
+
+**Un renvoi faux trouvé dans le code, A212.** `Background::configure` répartit l'énergie
+**uniformément** dans la bande et renvoyait cette grossièreté à B1 — « c'est assumé : B1
+tranchera ». B1 ne mesure pas la forme du spectre, seulement le nombre et le coût. Aucun banc ne la
+mesure, et un spectre de mer réel suit JONSWAP, pas une répartition uniforme. C'est L217 dans le
+code plutôt que dans un ADR.
+
+**Ce que ce premier banc apprend sur les dix autres** : la moitié de sa réponse existait déjà,
+mesurée en S64 et expliquée en S67, sans que personne ne la rapproche du banc ; et son protocole,
+écrit en S02, décrit le système qu'on croyait alors construire. Un banc n'a pas à s'y plier — il a
+à dire ce qu'il mesure.
+
+275 tests inchangés, aucun code de calcul modifié. **99 ADR**, 212 angles, 18 invariants,
+6 spécifications, 23 cas, **1 banc exécuté sur 11**. Invariants relus : aucun invalidé.
+
+**Suite S147 :** deux candidats, et le premier est un reste de S145. **Clore S63-1 par écrit**
+(S145-2) coûte dix minutes. Puis **A212** — la forme du spectre — qui est maintenant le seul point
+de `B` que rien ne justifie, et qui décide de l'aspect autant que de la réponse d'un corps
+flottant. Restent ouverts : le sillage, l'audit des renvois « traité en Sxx » (S138), l'extension
+de fenêtre, S116-2, le bilan mixte, la durabilité et les deux calibrations de B10.

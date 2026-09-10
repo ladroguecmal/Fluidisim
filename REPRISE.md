@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 13:41 +02:00
+JETON            : libre
+Battement        : 2026-09-10 13:43 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S146 — **lancer B1**
-Dernière session : S145 — bilan refait ;275 tests/cinq ignorés
-Session suivante : à fixer en fin de S146
+Session en cours : aucune
+Dernière session : S146 — **B1 exécuté**, le premier banc du projet ;275 tests/cinq ignorés
+Session suivante : S147 — clore **S63-1** par écrit, puis **A212** (la forme du spectre de `B`)
 
 **Copie de travail S139 et S140** : worktree `claude/reprise-projet-886155`, refusionné en avance
 rapide dans master à la fin de chacune des deux. Terminer de même :
@@ -189,6 +189,31 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S146 — 2026-09-10 :** [ADR-099](docs/adr/ADR-099-b1-trente-deux-composantes.md),
+[BANC-B1-S146](docs/validation/BANC-B1-S146.md). **Premier banc exécuté du projet** — onze sont
+définis depuis S02. La recommandation portée par la ligne `Session suivante` (A211, veille) **a
+fonctionné**.
+**Décision : 32 composantes** (`background::COMPOSANTES_B1`). Les trois critères mesurables
+convergent : coût **×8,3** entre32 et256 — **48 ns par composante et par échantillon**, linéaire à
+4 % près, soit **12,8 µs par point** à256 ; dispersion de `Hs` **×2,0** ; et **aucune différence**
+pour un objet de côté ≤30 m, c'est-à-dire tout ce qui flotte.
+**Le résultat renverse l'intuition** : augmenter le nombre de composantes ne rend pas la mer plus
+juste, **il la rend moins prévisible**. Aucun biais à aucune densité — moyenne des écarts dans
+±0,42 % — mais écart-type de1,09 point à32 contre2,23 à256, par la corrélation entre composantes
+d'un cône de30° (cause identifiée en S67).
+**A187 requalifiée** : ses +6,612 % étaient **une réalisation à3 σ sur une graine unique**. Sa
+robustesse avait été vérifiée sur le pas, la fenêtre et les bornes — **jamais sur la graine**
+(**L229**). La tolérance de `Hs` **dépend de N** : ±3 % couvre2,7 σ à32 et1,3 σ à256.
+**Verdict partiel, et dit comme tel** : deux volets sur quatre sont hors de portée — évaluation en
+double aveugle, et distance de perception d'une tuile FFT qui n'existe pas. Le « coût avec LOD » n'a
+pas été mesuré faute de LOD.
+**A212** : `configure` répartit l'énergie **uniformément** et renvoyait cette grossièreté à B1, qui
+ne mesure pas la forme du spectre. Renvoi faux dans le code, corrigé ; la question reste entière.
+275 tests inchangés.99 ADR,212 angles,18 invariants,6 spécifications,23 cas, **1 banc sur11**.
+Suite S147 : **clore S63-1 par écrit** (S145-2, dix minutes), puis **A212** — la forme du spectre est
+désormais le seul point de `B` que rien ne justifie, et elle décide de l'aspect autant que de la
+réponse d'un corps flottant.
 
 **S145 — 2026-09-10 :** [BILAN-S145](docs/registres/BILAN-S145.md). Session de constat, aucun ADR.
 **Le repère avait 76 sessions**, et il disait encore « `δ`, `W` et `V` n'existent pas ».

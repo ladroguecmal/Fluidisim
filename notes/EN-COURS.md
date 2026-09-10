@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S146 — en cours
+Session : S146 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : **lancer B1** — « champ de fond : nombre de composantes et coût d'évaluation ».
 Recommandé par [BILAN-S69](../docs/registres/BILAN-S69.md) puis par
@@ -81,7 +81,7 @@ le premier jour du projet ; celui-ci ne demande aucune couche manquante.
 - [x] **P5** — la **courbe demandée** : combien de composantes effectives pour qu'un objet de
       taille L voie la même hauteur. La partie « taille d'objet » est mesurable ; la partie
       « distance » ne l'est pas sans caméra — le dire au lieu de la contourner.
-- [ ] **P6** — **décision** : N retenu, ce que la décision porte et ce qu'elle ne porte pas. ADR,
+- [x] **P6** — **décision** : N retenu, ce que la décision porte et ce qu'elle ne porte pas. ADR,
       rapport de banc, rituel de fin (§6, **dont le point 7 ajouté hier**), jeton, `--ff-only`.
 
 ### Notes de reprise
@@ -106,3 +106,25 @@ extérieure**, `Hs = 4√m0`.
 Second piège : annoncer « B1 exécuté » alors que deux de ses volets sont perceptuels. Le banc
 rendra un **verdict partiel**, et il faudra que le rapport dise exactement lequel — sinon la
 prochaine session lira « B1 fait » et le corpus portera un renvoi faux de plus (L217).
+
+P2-P6 : banc `banc_b1.rs`, coût, justesse sur douze graines, composantes effectives, ADR-099,
+BANC-B1-S146, `COMPOSANTES_B1`, A212, L229, A187 requalifiée. 275 tests inchangés.
+
+Deux erreurs de conception de mesure, corrigées en séance et qui valent d'être connues :
+- **comparer l'élévation moyenne entre deux N n'a aucun sens** — les phases changent avec N, ce
+  sont deux mers différentes. Ce qui se compare est une statistique (écart-type de la hauteur
+  moyennée sur une empreinte) ;
+- **quatre graines ne distinguent pas un biais d'une dispersion.** Douze le font, et c'est ce qui
+  a requalifié A187 (L229).
+
+Le mécanisme d'A211 a fonctionné : la ligne `Session suivante` portait « lancer B1 », et le banc a
+été lancé. Un seul essai ne prouve rien — le juge est S150.
+
+Pour S147 sans relire : **S63-1** se clôt par écrit — la dispersion vit dans `W` depuis ADR-060, la
+question « où va la couche dispersive » est tranchée en pratique depuis S77 et n'a jamais été
+fermée ; il faut un ADR court ou une note datée qui le dise, pas une nouvelle instruction. Puis
+**A212** : `Background::configure` répartit l'énergie **uniformément** dans `[Tp/2, 2Tp]`, alors
+qu'un spectre de mer suit JONSWAP ou Pierson-Moskowitz. `Hs` reste exact par construction quelle
+que soit la forme — donc rien de mesuré n'est faux — mais le **contenu fréquentiel** en dépend,
+donc l'aspect, les périodes vues par un objet et la réponse d'un corps flottant. Aucun banc ne la
+mesure : c'est une décision de conception, pas une mesure.

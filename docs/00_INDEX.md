@@ -17,6 +17,17 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S146 :** [ADR-099](adr/ADR-099-b1-trente-deux-composantes.md), B1 : trente-deux composantes.
+[BANC-B1-S146](validation/BANC-B1-S146.md) — **premier banc exécuté du projet**, onze définis depuis S02.
+Les trois critères mesurables convergent : coût **×8,3** entre 32 et 256 composantes (48 ns par composante et par
+échantillon, linéaire), dispersion de `Hs` **×2,0**, et aucune différence pour un objet de côté ≤ 30 m.
+**Augmenter le nombre de composantes ne rend pas la mer plus juste, il la rend moins prévisible** — aucun biais à
+aucune densité, mais l'écart-type entre réalisations double. **A187 requalifiée** : ses +6,612 % étaient une
+réalisation à 3 σ sur une graine unique (**L229**). Verdict **partiel** et dit comme tel : deux volets sur quatre
+sont perceptuels. **A212** : la forme du spectre reste uniforme, et le renvoi du code à B1 était faux.
+275 tests inchangés. 99 ADR,212 angles,18 invariants,6 spécifications,23 cas, **1 banc sur 11 exécuté**.
+Suite S147 : clore S63-1 par écrit, puis A212.
+
 **S145 :** [BILAN-S145](registres/BILAN-S145.md) — le bilan refait, celui de S69 ayant **76 sessions**. Aucun ADR :
 une session de constat. **`W` a cessé de ne pas exister et personne ne l'avait dit** — 4 573 lignes d'impacts,
 5 195 de pressions, journal rejouable, service vivant, reçus par 275 essais ; manquent le sillage et B2. `δ` reste

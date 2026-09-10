@@ -135,8 +135,8 @@ Coût mesuré en S125 : environ ×4 à points identiques et ×9 pour le montage 
 initial. [ADR-085](docs/adr/ADR-085-profils-radiaux-selon-le-domaine.md) conserve N64 par défaut ;
 N128/N256 se dimensionnent explicitement au domaine commun du service. A202 traitée ; A203 suit
 la réception physique à grande portée, réalisée en S126 sur les deux fixtures à âge0–4 s.
-État vérifié S145 : **275 tests réussis, cinq ignorés ; 98 ADR, 211 angles, 18 invariants,
-6 spécifications, 23 cas canoniques.** Détail par couche et par bloc :
+État vérifié S146 : **275 tests réussis, cinq ignorés ; 99 ADR, 212 angles, 18 invariants,
+6 spécifications, 23 cas canoniques, 1 banc sur 11 exécuté.** Détail par couche et par bloc :
 [BILAN-S145](docs/registres/BILAN-S145.md).
 [Réception S126](docs/validation/RECEPTION-ETENDUE-S126.md) :1350 points-temps reçus contre
 oracle indépendant, erreur normalisée<=4,44e-7. La fenêtre4 s reçoit surtout des queues aux
@@ -220,7 +220,11 @@ Le bilan est refait en S145, celui de S69 ayant 76 sessions : **`W` a cessé de 
 pressions, journal rejouable et service vivant, 9 768 lignes reçues par 275 essais — pendant que le repère
 annonçait le contraire. `δ` reste 1D, `V` nul, et **zéro banc sur onze a été exécuté**, exactement comme en S69.
 Le projet est à ~90 % comme corpus de conception et **~30 % comme système**.
-Suite : **lancer B1**, recommandé par S69 et jamais fait — la recommandation est cette fois portée par le jeton
-lui-même (A211, L228).
-98 ADR,211 angles,18 invariants,6 spécifications,23 cas.
+**B1 a été lancé en S146** — le premier banc exécuté du projet — et la recommandation portée par le jeton a donc
+fonctionné. Décision : **32 composantes**, les trois critères mesurables convergeant (coût ×8,3, dispersion de
+`Hs` ×2,0, aucune différence pour un objet de côté ≤ 30 m). Le banc renverse une intuition : **augmenter le
+nombre de composantes ne rend pas la mer plus juste, il la rend moins prévisible**, et A187 — un écart de 6,6 %
+inexpliqué depuis quatre-vingts sessions — était une réalisation à 3 σ sur une graine unique.
+Suite : clore S63-1 par écrit, puis A212 — la forme du spectre de `B`, uniforme et que rien ne justifie.
+99 ADR,212 angles,18 invariants,6 spécifications,23 cas, **1 banc sur 11 exécuté**.
 Voir [l'index](docs/00_INDEX.md) et [la passation](REPRISE.md) pour l'état détaillé.

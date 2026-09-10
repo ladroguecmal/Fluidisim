@@ -1343,3 +1343,12 @@ entrée par entrée. Le fil reprend ci-dessous.
 - **S145-2 : ouverte. Clore S63-1 par écrit** — la dispersion vit dans `W` depuis ADR-060, la
   question est tranchée en pratique et jamais fermée.
 - **A211 : ouverte, réparation appliquée à éprouver.** Si B1 n'est pas lancé en S150, elle a échoué.
+
+### S146 — Le premier banc
+
+- **S145-1 : réalisée. B1 exécuté**, [BANC-B1-S146](../validation/BANC-B1-S146.md), ADR-099.
+  32 composantes. Verdict **partiel** : deux volets sur quatre sont hors de portée (perceptuels).
+- **A187 : requalifiée**, ce n'était pas un défaut mais une réalisation à 3 σ (**L229**).
+- **A212 : ouverte.** La forme du spectre reste uniforme et aucun banc ne la mesure ; le renvoi du
+  code à B1 était faux.
+- **S145-2 : toujours ouverte.** Clore S63-1 par écrit.

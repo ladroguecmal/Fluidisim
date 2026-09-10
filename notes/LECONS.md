@@ -3513,3 +3513,25 @@ que personne ne relit. La réparation consiste à faire porter l'intention par l
 lui-même, si étroit soit-il, et à rendre son contournement **explicite** : écarter par écrit, pas
 par oubli. Voir [[L55]] — une annonce en prose est une intention, pas une tâche ; ici, même une
 tâche n'est rien sans un canal qui la porte.
+
+## L229 — Une mesure sur un tirage unique ne distingue pas un biais d'une dispersion
+
+*(S146)* A187 vivait depuis S64 : « à 256 composantes, `Hs` s'écarte de 6,6 % ». La mesure était
+juste, sa robustesse avait été vérifiée — raffinement de l'échantillonnage, bornes du spectre,
+amplitude par composante — et deux sessions l'avaient instruite. Ce qui n'avait pas été varié est
+**la graine**.
+
+Douze graines par densité donnent une tout autre lecture : aucun biais — la moyenne des écarts
+tient dans ±0,42 % — mais une **dispersion qui double** entre 32 et 256 composantes. Les +6,6 %
+étaient une réalisation à 3 σ.
+
+Généralisable, et pas seulement aux graines : **avant de chercher la cause d'un écart, vérifier
+qu'il est reproductible sur le paramètre le plus arbitraire du montage.** Un écart qui ne survit
+pas au changement de tirage n'est pas un défaut à expliquer, c'est une largeur de distribution à
+mesurer — et les deux appellent des travaux opposés.
+
+Le coût de l'erreur se lit dans le corpus : A187 a tenu une conclusion prudente pendant quatre-vingts
+sessions — « la tolérance ne peut pas descendre sous 7 % tant que la cause est inconnue » — là où
+la vraie réponse était que **la tolérance dépend du nombre de composantes**. Voir [[L219]] : le
+qualificatif « inexpliqué » a la même propriété qu'un qualificatif chiffré manquant, il rend la
+question présentable.
