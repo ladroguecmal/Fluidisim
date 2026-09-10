@@ -123,3 +123,19 @@ fn spectral_derivatives_and_composition_s148() {
         assert_eq!(c.eta.to_bits(),s.eta.to_bits());
     }
 }
+
+#[test]
+fn spectral_transport_s149() {
+    use crate::background_spectrum::{decode, TransportError};
+    let bytes=bake(recipe()).unwrap().encode();
+    assert_eq!(&bytes[..8], b"WSPR\x01\x00\x00\x00");
+    assert_eq!(decode(&bytes).unwrap().encode(),bytes);
+    for n in 0..64 { assert!(matches!(decode(&bytes[..n]),Err(TransportError::Format))); }
+    let mut long=bytes.to_vec();long.push(0);assert!(matches!(decode(&long),Err(TransportError::Format)));
+    for i in [0,12,13,14,15] { let mut bad=bytes;bad[i]^=1;assert!(matches!(decode(&bad),Err(TransportError::Format))); }
+    let mut bad=bytes;bad[4]=2;assert!(matches!(decode(&bad),Err(TransportError::Version)));
+    for i in [24,28,32,36,40,44,48,52] { let mut bad=bytes;bad[i..i+4].copy_from_slice(&f32::NAN.to_bits().to_le_bytes());assert!(matches!(decode(&bad),Err(TransportError::Recipe(_)))); }
+    let mut bad=bytes;bad[8..12].copy_from_slice(&u32::MAX.to_le_bytes());assert!(matches!(decode(&bad),Err(TransportError::Recipe(Error::Components))));
+    for i in [16,56,63] {let mut bad=bytes;bad[i]^=1;assert!(matches!(decode(&bad),Err(TransportError::Conformance)));}
+    for n in [32,64,128,256] {for gamma in [1.,3.3,7.] {let mut r=recipe();r.sea.components=n;r.gamma=gamma;r.sea.theta_turns=-0.0;let c=bake(r).unwrap();assert_eq!(decode(&c.encode()).unwrap().encode(),c.encode());}}
+}

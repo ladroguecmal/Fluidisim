@@ -65,7 +65,7 @@ Objectif : S148-1, transporter la recette spectrale et recevoir le cycle hôte B
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan committé seul.
-- [ ] **P2** — codec versionné borné, contrat ADR et tests de refus/recuisson.
+- [x] **P2** — codec versionné borné, contrat ADR et tests de refus/recuisson.
 - [ ] **P3** — cycle hôte spectral sauvegardé/restauré, comparaison directe et coût local.
 - [ ] **P4** — vérifications complètes et rituel de fin : rapport, journal, registres, index et jeton rendu.
 

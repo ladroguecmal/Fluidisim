@@ -5,6 +5,10 @@ use crate::{background::phase_initiale, Component, Hasher64, PhaseQ32, SeaState}
 pub const VERSION: u32 = 1;
 pub const MAX_COMPONENTS: usize = 256;
 
+#[path = "spectral_recipe_codec.rs"]
+mod codec;
+pub use codec::{decode, TransportError, RECIPE_BYTES};
+
 #[derive(Clone, Copy, Debug)]
 pub struct Recipe {
     pub sea: SeaState,
@@ -165,5 +169,4 @@ pub fn bake(r: Recipe) -> Result<Cooked, Error> {
     out.hash = h.finish();
     Ok(out)
 }
-
 
