@@ -582,7 +582,12 @@ pub enum WorldError {
     Context,
     Time,
     Capacity,
+    /// Paramètre `max_slope` inutilisable — faute d'entrée de l'hôte (S144).
+    MaxSlope,
+    /// La pente réelle au point demandé dépasse `max_slope`.
     Slope,
+    /// La pente au point tient ; seule la somme des majorants dépasse (A208, ADR-098).
+    SlopeEnvelope,
     Point {
         index: usize,
         error: crate::composition::Error,
@@ -632,7 +637,7 @@ impl Prepared<'_> {
             return Err(WorldError::Time);
         }
         if !max_slope.is_finite() || max_slope <= 0.0 {
-            return Err(WorldError::Slope);
+            return Err(WorldError::MaxSlope);
         }
         if points.len() > scratch.len() || points.len() > output.len() {
             return Err(WorldError::Capacity);
@@ -655,13 +660,20 @@ impl Prepared<'_> {
                 })
             })?;
             let envelope = base.steepness * core::f32::consts::PI + self.slope_envelope;
-            if !envelope.is_finite() || envelope > max_slope {
-                return Err(WorldError::Slope);
-            }
             let slope = [
                 -base.normal[0] / base.normal[2] + w.slope[0],
                 -base.normal[1] / base.normal[2] + w.slope[1],
             ];
+            if !envelope.is_finite() || envelope > max_slope {
+                // S144, A208 : la pente réelle au point est formée avant le test, pour que le
+                // refus puisse dire lequel des deux — le champ ou le majorant — est en cause.
+                let reelle = (slope[0] * slope[0] + slope[1] * slope[1]).sqrt();
+                return Err(if !reelle.is_finite() || reelle > max_slope {
+                    WorldError::Slope
+                } else {
+                    WorldError::SlopeEnvelope
+                });
+            }
             let norm = (1.0 + slope[0] * slope[0] + slope[1] * slope[1]).sqrt();
             base.normal = [-slope[0] / norm, -slope[1] / norm, 1.0 / norm];
             base.eta += w.eta;

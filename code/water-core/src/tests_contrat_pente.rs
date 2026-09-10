@@ -57,8 +57,14 @@ fn le_champ_limite_est_a_la_cambrure_de_stokes(
     pente: impl Fn(f32) -> f32,
 ) {
     let (mut bas, mut haut) = bornes;
-    assert!(admis(bas), "{nom} : la borne basse de dichotomie doit construire");
-    assert!(!admis(haut), "{nom} : la borne haute de dichotomie doit refuser");
+    assert!(
+        admis(bas),
+        "{nom} : la borne basse de dichotomie doit construire"
+    );
+    assert!(
+        !admis(haut),
+        "{nom} : la borne haute de dichotomie doit refuser"
+    );
     for _ in 0..60 {
         let milieu_energie = 0.5 * (bas + haut);
         if admis(milieu_energie) {
@@ -127,12 +133,18 @@ fn every_field_places_its_limit_at_stokes_steepness_s143() {
 /// Les cinq endroits du crate où quelque chose est comparé à `max_slope`, avec la forme exacte
 /// de la comparaison. **Deux constructions**, qui convertissent leur borne L1 par le rapport
 /// mesuré de leur champ ; **trois budgets**, qui somment des grandeurs déjà converties.
-const SITES_CONNUS: [(&str, &str); 5] = [
+const SITES_CONNUS: [(&str, &str); 8] = [
     ("impact_field.rs", "slope/SLOPE_L1_RATIO>medium.max_slope"),
     ("radial_impact.rs", "slope/SLOPE_L1_RATIO>medium.max_slope"),
     ("composition.rs", "bound>max_slope"),
     ("mixed_water.rs", "envelope>max_slope"),
     ("bound_pressure.rs", "envelope>max_slope"),
+    // S144, A208 : chaque budget compare aussi la pente **réelle au point**, pour dire lequel du
+    // champ ou du majorant refuse. Ces trois sites-là comparent une pente réelle sans conversion,
+    // et c'est exactement ce qu'I-18 demande — la garde les a signalés au premier `cargo test`.
+    ("composition.rs", "reelle>max_slope"),
+    ("mixed_water.rs", "reelle>max_slope"),
+    ("bound_pressure.rs", "reelle>max_slope"),
 ];
 
 /// Seconde garde : **ce que le crate contient**. Elle ne juge aucun calcul — elle constate
@@ -165,7 +177,10 @@ fn no_undeclared_comparison_to_max_slope_s143() {
             if nu.starts_with("//") || nu.starts_with("///") {
                 continue;
             }
-            if let Some(position) = nu.find(">max_slope").or_else(|| nu.find(">medium.max_slope")) {
+            if let Some(position) = nu
+                .find(">max_slope")
+                .or_else(|| nu.find(">medium.max_slope"))
+            {
                 // Depuis le début de la condition : ce qui est comparé, et comment.
                 let debut = nu[..position].rfind(['(', '|', '!']).map_or(0, |i| i + 1);
                 let site = nu[debut..].trim_end_matches('{').trim_start_matches("if");

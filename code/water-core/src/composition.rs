@@ -8,7 +8,17 @@ pub enum Error {
     FieldsMismatch,
     InvalidBackground,
     Domain,
+    /// Le paramètre `max_slope` fourni par l'hôte n'est pas une limite utilisable. **Faute
+    /// d'entrée**, pas verdict sur le champ — S144 l'a séparée de `Slope`, qui la portait.
+    MaxSlope,
+    /// La pente **réelle au point demandé** dépasse `max_slope` : le champ est vraiment trop
+    /// raide ici.
     Slope,
+    /// La pente réelle au point tient, et seule la **somme des majorants** dépasse. Ce n'est pas
+    /// la pente qui refuse, c'est l'enveloppe : emprise publiée, spectre, ou marge acceptée
+    /// (A208, ADR-098). La bibliothèque ne peut pas dire laquelle des trois — elle dit où
+    /// regarder, ce qu'ADR-082 demande, et s'arrête là.
+    SlopeEnvelope,
     NonFinite,
 }
 /// Pas d'allocation ni publication partielle. Champs préconstruits en ordre server_seq.
@@ -29,7 +39,7 @@ pub fn compose<'a, const N: usize>(
         return Err(Error::Domain);
     }
     if !max_slope.is_finite() || max_slope <= 0.0 {
-        return Err(Error::Slope);
+        return Err(Error::MaxSlope);
     }
     if [
         base.eta,
@@ -78,7 +88,15 @@ pub fn compose<'a, const N: usize>(
         return Err(Error::FieldsMismatch);
     }
     if !bound.is_finite() || bound > max_slope {
-        return Err(Error::Slope);
+        // S144 : la pente réelle au point est déjà accumulée. Elle ne dit pas le maximum sur
+        // l'emprise — il ne se calcule pas (S140) — mais elle en est une borne inférieure, et
+        // cela suffit à séparer « ton champ est trop raide ici » de « c'est mon majorant ».
+        let reelle = (slope[0] * slope[0] + slope[1] * slope[1]).sqrt();
+        return Err(if !reelle.is_finite() || reelle > max_slope {
+            Error::Slope
+        } else {
+            Error::SlopeEnvelope
+        });
     }
     let norm = (1.0 + slope[0] * slope[0] + slope[1] * slope[1]).sqrt();
     base.normal = [-slope[0] / norm, -slope[1] / norm, 1.0 / norm];
@@ -157,6 +175,54 @@ mod tests {
             steepness: 0.02 / core::f32::consts::PI,
             ..WaterSample::default()
         }
+    }
+    /// S144, A208 et ADR-082 : **chaque verdict de pente est atteignable, et chacun désigne sa
+    /// propre cause.** Un nom qu'aucune entrée ne produit serait une promesse vide ; un nom que
+    /// deux causes produisent est le fourre-tout qu'ADR-082 démonte.
+    ///
+    /// Le montage est minimal — journal vide, aucun champ — parce que les trois cas ne tiennent
+    /// qu'au fond : `steepness` porte le majorant, la normale porte la pente réelle, et les deux
+    /// sont indépendants dans un `WaterSample`. C'est exactement la situation d'A208, en trois
+    /// lignes au lieu d'une emprise de pression.
+    #[test]
+    fn each_slope_verdict_is_reachable_and_names_its_own_cause_s144() {
+        let mut slots = [None; 1];
+        let j = Journal::new(0, &mut slots);
+        let vide = || core::iter::empty::<&RadialImpact<64>>();
+        let fond = |steepness: f32, pente: f32| WaterSample {
+            eta: 0.0,
+            normal: [-pente, 0.0, 1.0],
+            steepness,
+            ..WaterSample::default()
+        };
+        let p = [1.0, 0.0];
+        let t = SimTime(1_000_000);
+
+        // 1. La limite fournie n'est pas utilisable : faute d'entrée, pas verdict sur le champ.
+        for limite in [0.0, -1.0, f32::NAN, f32::INFINITY] {
+            assert_eq!(
+                compose(fond(0.01, 0.0), &j, vide(), FrameId(0), 0, p, t, limite).err(),
+                Some(Error::MaxSlope),
+                "limite {limite} : le paramètre est en cause, pas la pente"
+            );
+        }
+
+        // 2. La pente réelle au point dépasse : le champ est vraiment trop raide ici.
+        assert_eq!(
+            compose(fond(0.5, 0.5), &j, vide(), FrameId(0), 0, p, t, 0.1).err(),
+            Some(Error::Slope)
+        );
+
+        // 3. La pente au point tient, seul le majorant dépasse : l'enveloppe est en cause. Même
+        //    `steepness` qu'au cas 2, donc le même budget consommé — seule la pente réelle change.
+        assert_eq!(
+            compose(fond(0.5, 0.0), &j, vide(), FrameId(0), 0, p, t, 0.1).err(),
+            Some(Error::SlopeEnvelope)
+        );
+
+        // 4. Et sous la limite, le montage passe : les trois refus ci-dessus tiennent chacun à un
+        //    seul écart par rapport à celui-ci.
+        compose(fond(0.01, 0.0), &j, vide(), FrameId(0), 0, p, t, 0.1).unwrap();
     }
     #[test]
     fn sums_physical_values_and_rebuilds_normal() {

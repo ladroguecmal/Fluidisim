@@ -184,13 +184,30 @@ fn world_refusals_are_atomic_and_context_checked_even_empty() {
         ),
         Err(WorldError::Capacity)
     );
-    for cap in [0.0, f32::NAN, f.slope_envelope() * 0.5] {
+    // S144 : ce lot mélangeait deux causes sous un seul nom. `0.0` et `NAN` sont des **limites
+    // inutilisables** — une faute d'entrée de l'hôte ; `envelope/2` est un vrai dépassement, et
+    // au point d'origine la pente réelle passe elle aussi au-dessus, d'où `Slope` et non
+    // `SlopeEnvelope` : le champ y est réellement trop raide pour cette limite-là.
+    for cap in [0.0, f32::NAN] {
         assert_eq!(
             f.sample_world_batch(&bound, &ctx, t, &[origin], cap, &mut scratch, &mut out),
-            Err(WorldError::Slope)
+            Err(WorldError::MaxSlope)
         );
         assert_eq!(out.map(bits), saved);
     }
+    assert_eq!(
+        f.sample_world_batch(
+            &bound,
+            &ctx,
+            t,
+            &[origin],
+            f.slope_envelope() * 0.5,
+            &mut scratch,
+            &mut out
+        ),
+        Err(WorldError::Slope)
+    );
+    assert_eq!(out.map(bits), saved);
     let invalid = bg(origin, f32::NAN);
     let wrong = BoundBackground::new(&invalid, FrameId(2), 3);
     assert!(matches!(
@@ -257,8 +274,11 @@ fn normal_matches_spatial_difference_and_envelope_sees_cancellation() {
     let envelope = out[0].steepness * core::f32::consts::PI;
     assert!(local_slope < envelope * 0.9);
     let cap = (local_slope + envelope) * 0.5;
+    // S144, A208 : ce cas **est** celui qu'A208 décrivait, et cet essai le construisait déjà sans
+    // pouvoir le nommer — la pente au point tient (`local_slope < envelope*0,9`), seule
+    // l'enveloppe dépasse. Le refus le dit maintenant.
     assert_eq!(
         f.sample_world_batch(&bound, &ctx, t, &points[..1], cap, &mut scratch, &mut out),
-        Err(WorldError::Slope)
+        Err(WorldError::SlopeEnvelope)
     );
 }

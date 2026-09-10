@@ -441,7 +441,7 @@ fn mixed_rejects_context_time_capacity_domains_and_total_slope_atomically() {
                 &mut work,
                 &mut out
             ),
-            Err(Error::Slope)
+            Err(Error::SlopeEnvelope)
         );
         assert_eq!(out.map(|s| vals(s).map(f32::to_bits)), before);
         sample_world_batch(&bound, i, Some(p), t, &points, 0.1, &mut work, &mut out).unwrap();
@@ -734,7 +734,7 @@ fn admits_matches_the_geometric_refusals_of_the_request() {
                 &mut work,
                 &mut out
             ),
-            Err(Error::Slope)
+            Err(Error::SlopeEnvelope)
         );
     })
 }
@@ -754,18 +754,25 @@ fn slope_floor_refuses_every_batch_below_it() {
         for below in [floor * 0.999, floor * 0.5, f32::MIN_POSITIVE] {
             assert!(below < floor);
             for n in 1..=3 {
-                assert_eq!(
-                    sample_world_batch(
-                        &bound,
-                        impacts,
-                        Some(p),
-                        t,
-                        &points[..n],
-                        below,
-                        &mut work,
-                        &mut out
-                    ),
-                    Err(Error::Slope)
+                let refus = sample_world_batch(
+                    &bound,
+                    impacts,
+                    Some(p),
+                    t,
+                    &points[..n],
+                    below,
+                    &mut work,
+                    &mut out,
+                );
+                // S144 : le plancher refuse toujours, mais **lequel des deux verdicts** dépend de
+                // la limite. Juste sous le plancher, la pente au point tient encore et c'est le
+                // majorant qui refuse ; plus bas, la limite passe sous la pente réelle elle-même
+                // et le verdict redevient un verdict sur le champ. Ce test-ci porte sur le
+                // plancher, pas sur la frontière entre les deux : il accepte les deux noms de
+                // pente et refuserait tout autre.
+                assert!(
+                    matches!(refus, Err(Error::Slope) | Err(Error::SlopeEnvelope)),
+                    "sous le plancher, tout lot non vide est refusé sur la pente — {refus:?}"
                 );
             }
         }
@@ -774,7 +781,8 @@ fn slope_floor_refuses_every_batch_below_it() {
             sample_world_batch(&bound, impacts, Some(p), t, &[], floor * 0.5, &mut work, &mut out),
             Ok(())
         );
-        // Au-dessus, c'est la raideur de B qui décide : le plancher ne promet rien.
+        // Au-dessus, c'est la raideur de B qui décide : le plancher ne promet rien. Le refus
+        // porte sur le majorant — la pente réelle au point tient à cette limite-là (S144).
         let base = b.eval(points[0], t).unwrap().steepness * core::f32::consts::PI;
         assert!(base > 0.0);
         assert_eq!(
@@ -788,7 +796,7 @@ fn slope_floor_refuses_every_batch_below_it() {
                 &mut work,
                 &mut out
             ),
-            Err(Error::Slope)
+            Err(Error::SlopeEnvelope)
         );
         sample_world_batch(
             &bound,

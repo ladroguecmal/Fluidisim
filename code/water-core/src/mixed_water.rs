@@ -7,7 +7,12 @@ pub enum Error {
     Context,
     Time,
     Capacity,
+    /// Paramètre `max_slope` inutilisable — faute d'entrée de l'hôte (S144).
+    MaxSlope,
+    /// La pente réelle au point demandé dépasse `max_slope`.
     Slope,
+    /// La pente au point tient ; seule la somme des majorants dépasse (A208, ADR-098).
+    SlopeEnvelope,
     LossKnown,
     Point {
         index: usize,
@@ -203,7 +208,7 @@ pub fn sample_world_batch<const N: usize>(
         }
     }
     if !max_slope.is_finite() || max_slope <= 0.0 {
-        return Err(Error::Slope);
+        return Err(Error::MaxSlope);
     }
     if points.len() > scratch.len() || points.len() > output.len() {
         return Err(Error::Capacity);
@@ -268,7 +273,13 @@ pub fn sample_world_batch<const N: usize>(
             envelope += p.slope_envelope();
         }
         if !envelope.is_finite() || envelope > max_slope {
-            return Err(Error::Slope);
+            // S144, A208 : séparer le verdict sur le champ de celui sur le majorant.
+            let reelle = (slope[0] * slope[0] + slope[1] * slope[1]).sqrt();
+            return Err(if !reelle.is_finite() || reelle > max_slope {
+                Error::Slope
+            } else {
+                Error::SlopeEnvelope
+            });
         }
         let norm = (1.0 + slope[0] * slope[0] + slope[1] * slope[1]).sqrt();
         s.normal = [-slope[0] / norm, -slope[1] / norm, 1.0 / norm];

@@ -77,7 +77,7 @@ pas à changer. ADR-082 exige qu'un nom de refus désigne ce qu'il faut revoir.
       publier de quoi calculer sa marge ; rendre la marge observable sur les points de
       l'appelant. Le critère reste celui de S143 : **qu'est-ce qui aurait aidé quelqu'un qui
       se fait refuser sans comprendre**.
-- [ ] **P4** — construire ce que la pesée retient, étage court, tests verts.
+- [x] **P4** — construire ce que la pesée retient, étage court, tests verts.
 - [ ] **P5** — **vérifier que ça sert** : reprendre le cas mesuré en S140 — emprise de 0,01 λ
       posée sur un zéro, facteur ×10,9 — et montrer que l'appelant voit désormais ce qui le
       fait refuser. Une aide qu'on n'a pas vue aider ne vaut pas mieux qu'une garde qu'on n'a
