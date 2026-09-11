@@ -58,31 +58,21 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S170 — terminée
+Session : S171 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S169-1/A50, source moyenne exacte, interpolée sur réseau décimé et omise.
+Objectif : S170-1/A225, différences de flux partagés ; conservation et précision distinctes.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seul.
-- [x] **P2** — protocole et bilan prédit du défaut de source, copies synchronisées.
-- [x] **P3** — construire la sonde, comparer résolutions et décalages du réseau source.
-- [x] **P4** — réception, résultats, limites et suivi A50.
-- [x] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [ ] **P2** — étendre la sonde avec flux interpolé brut et bornes physiques exactes ; protocole.
+- [ ] **P3** — tests et campagne indépendante des résolutions, résultats et suivi.
+- [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
-Master0cdfa31 propre, quatre copies alignées, S169 terminée. Corpus lu dans cette conversation.
-112 ADR,224 angles,251 leçons,18 invariants,6 SPEC,23 cas. Aucun runtime adopté.
-S169 quatre tests et24 tests S165–S168 reçus ; workspace299/cinq ignorés reçu S163.
-SPEC-004 §6.2 et B4 demandent une variation du réseau source : pas de facteur4 universel.
-BILAN-S145 porté par poursuite B4. Aucun seuil physique à inventer.
-P2 : SOURCE-DECIMEE-S170 déclaré : H indépendant de dx, origine0/H/2 ; intégration
-exacte de l'interpolant linéaire, défaut signé du volume prédit par l'erreur de source.
-
-P3 : quatre tests propres reçus et48 évolutions release. Défaut de volume signé prédit
-à<=2,20e-15 ; réseau16m décalé peut faire pire que l'omission. Aucun support modifié.
-En-tête CSV H renommé source_spacing : PowerShell confondait H et h ; campagne relancée.
-
-P4 : S169-1 réalisée sur véhicule, A50 partielle ; A225/S170-1 source par flux partagé.
-Mesures publiées sans seuil physique. Pas d'ADR ni runtime modifié.
+Master e88b046 propre ; quatre copies alignées. Corpus lu dans cette conversation.
+112 ADR,225 angles,252 leçons,18 invariants,6 SPEC,23 cas.
+La télescopie laisse une erreur aux bornes si le flux interpolé y est inexact.
+Comparer donc flux brut et flux ancré aux bornes exactes, sans correction uniforme de S.
+A50 reste partielle, aucun runtime ou seuil is_smooth_at adopté. BILAN-S145 suivi par B4.
