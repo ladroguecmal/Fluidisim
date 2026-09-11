@@ -1551,3 +1551,14 @@ entrée par entrée. Le fil reprend ci-dessous.
   entrée connue et perturbation sortante, flux réellement utilisé dans le bilan.
   Aucun résidu extérieur inconnu reconstitué. Porteur : session de construction,
   poursuite B4 selon BILAN-S145.
+
+### Suivi S171 — Source par flux partagés
+
+- **S170-1 réalisée, A225 traitée sur véhicule1D à flux de bord connus.**
+  SOURCE-FLUX-PARTAGES-S171 :128 évolutions,7 tests dont3 nouveaux. Volume ancré fermé
+  à<=2,32e-15 ; précision locale distincte et dépendante deH et de la phase.
+- **S171-1 / A50 : ouverte, priorité S172.** Reconstruire Q grossier et S issu du même
+  fond ; d initial égal àTinitial-Qreconstruit pour comparer le même état total.
+  Fond figé, frontière analytique et témoin Q exact ; mesurer représentation, évolution
+  et volume séparément. Porteur : session de construction, poursuite B4/BILAN-S145.
+  Aucun seuil is_smooth_at ni runtime adopté ; A216/A217 inchangées.

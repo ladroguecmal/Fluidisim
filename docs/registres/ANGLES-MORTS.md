@@ -2111,3 +2111,13 @@ indépendants. Pas de seuil is_smooth_at ni réception de l'interpolation conjoi
   du réseau. Raffiner le solveur à réseau fixé n'y change rien. S170-1 : source par
   différence de flux reconstruit aux faces, sans correction globale, mesurer intégrale
   et précision locale séparément. Limite de véhicule1D, aucun défaut runtime observé.
+
+**Suivi A225 — S171 : traitée sur véhicule1D à flux de bord connus.**
+[SOURCE-FLUX-PARTAGES-S171](../validation/SOURCE-FLUX-PARTAGES-S171.md) : flux partagés
+bruts ou ancrés aux bornes exactes,128 évolutions ; ancrés, volume fermé à<=2,32e-15
+mais erreur de hauteur jusqu’à0,844 àN240/H16/phase0. La télescopie seule conserve
+les erreurs aux bornes ; aucune correction uniforme de source. Pas de nouveau runtime.
+
+**Suivi A50 — S171 : toujours partielle.** S170-1 réalisée ; S171-1 étend au fond Q
+reconstruit avec source cohérente, même état total initial. Flux de bord exacts encore
+supposés disponibles. A216/A217 inchangées.

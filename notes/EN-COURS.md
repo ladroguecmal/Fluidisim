@@ -66,7 +66,7 @@ Objectif : S170-1/A225, différences de flux partagés ; conservation et précis
 
 - [x] **P1** — état réel, jeton et plan seul.
 - [x] **P2** — étendre la sonde avec flux interpolé brut et bornes physiques exactes ; protocole.
-- [ ] **P3** — tests et campagne indépendante des résolutions, résultats et suivi.
+- [x] **P3** — tests et campagne indépendante des résolutions, résultats et suivi.
 - [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
@@ -76,3 +76,5 @@ Master e88b046 propre ; quatre copies alignées. Corpus lu dans cette conversati
 La télescopie laisse une erreur aux bornes si le flux interpolé y est inexact.
 Comparer donc flux brut et flux ancré aux bornes exactes, sans correction uniforme de S.
 A50 reste partielle, aucun runtime ou seuil is_smooth_at adopté. BILAN-S145 suivi par B4.
+P3 :7 tests (3 nouveaux),128 évolutions reçus. Volume ancré<=2,32e-15 ;
+prédiction<=2,52e-15. A225 traitée sur véhicule, A50 partielle ; suite S171-1.

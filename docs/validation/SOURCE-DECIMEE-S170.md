@@ -121,3 +121,8 @@ l'injection tout en gardant une erreur locale ; ne pas présenter une source con
 comme précise par construction. Garder source exacte, interpolation directe et omission
 comme témoins, phase du réseau et raffinement indépendants. Aucun recalage global uniforme
 de S pour cacher son intégrale : l'amélioration doit venir d'une discrétisation explicite.
+
+**Suivi S171 : S170-1 réalisée sur véhicule1D**, voir
+[SOURCE-FLUX-PARTAGES-S171](SOURCE-FLUX-PARTAGES-S171.md). La différence de flux
+partagés ferme le bilan physique si ses bornes portent les flux exacts ; précision
+locale encore sensible àH et àla phase. A225 traitée dans ce périmètre, A50 partielle.
