@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S179 — en cours
+Session : S179 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S178-1/A50, différentiel profond RadialImpact et composition B+W.
 
@@ -67,11 +67,13 @@ Objectif : S178-1/A50, différentiel profond RadialImpact et composition B+W.
 - [x] **P1** — état réel, jeton et plan seul.
 - [x] **P2** — dériver le champ radial régulier et déclarer contrat et réception.
 - [x] **P3** — construire le fournisseur et la composition, recevoir dérivées et refus.
-- [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [x] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
 S179 : master ae28d98 propre, quatre copies alignées ;114 ADR/225 angles/260 leçons.
+P4 S179 :115 ADR/225 angles/261 leçons,18 invariants,6 SPEC,23 cas vérifiés.
+Suite S180 : S179-1 pression forcée W ; rituel terminé, jeton libre.
 P3 S179 : six tests nouveaux debug/release ; workspace319/cinq ignorés ; C18/C02
 inchangés. Référence angulaire512/1024, centre et lot reçus ; mutation isotrope rejetée.
 Différences finies àh0,002 échouent pression, h0,01/0,005 passent sans changer seuil.

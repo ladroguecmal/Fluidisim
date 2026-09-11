@@ -289,7 +289,7 @@ Le juge de fidélité est B4, bloqué ailleurs. Suite S159 : le facteur 2,5 qui 
 L'une croyait la dernière session être **S44** : l'ouvrir aurait recréé cent quinze sessions parallèles.
 Avance rapide d'abord, suppressions ensuite ; six copies ramenées à trois, aucune histoire perdue, et la
 procédure de fermeture écrite dans l'amorce. Suite S160 : le facteur 2,5, S158-1.
-114 ADR,225 angles,260 leçons,18 invariants,6 SPEC,23 cas.
+115 ADR,225 angles,261 leçons,18 invariants,6 SPEC,23 cas.
 **S162 : diagnostic de Stokes et portée de B4 corrigée.**
 [Résultats](docs/validation/ADDITIVITE-PROFONDE-S162.md),
 [ADR-112](docs/adr/ADR-112-la-superposition-independante-ne-recoit-pas-le-couplage.md).
@@ -365,3 +365,8 @@ volumique continue à soustraire. Six nouveaux tests ;313 réussis/cinq ignorés
 contre-épreuve de l’advection et condensats historiques préservés. A50 reste partielle.
 Voir [SOURCE-B-S178](docs/validation/SOURCE-B-S178.md) et
 [ADR-114](docs/adr/ADR-114-source-continue-du-fond-profond.md).
+**S179 :** dérivées profondes des impacts radiaux et composition B+un impact reçues,
+y compris au centre. Six nouveaux tests ;319 réussis/cinq ignorés, références historiques
+préservées. A50 partielle ; suite : pression forcée W.
+Voir [DIFFERENTIEL-W-S179](docs/validation/DIFFERENTIEL-W-S179.md),
+[ADR-115](docs/adr/ADR-115-differentiel-radial-et-composition.md).

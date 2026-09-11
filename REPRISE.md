@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-12 01:05 +02:00
+JETON            : libre
+Battement        : 2026-09-12 01:07 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S179
-Dernière session : S178 — source continue du fond B construite ; six nouveaux tests
-Session suivante : S179 — S178-1/A50 : différentiel RadialImpact et composition B+W
+Session en cours : aucune
+Dernière session : S179 — différentiel radial et composition B+un impact reçus
+Session suivante : S180 — S179-1/A50 : fournisseur différentiel de la pression forcée W
 
 *S160 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
 rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour.*
@@ -168,7 +168,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 114 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 115 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -187,6 +187,21 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S179 — 2026-09-12 :** [DIFFERENTIEL-W-S179](docs/validation/DIFFERENTIEL-W-S179.md),
+[ADR-115](docs/adr/ADR-115-differentiel-radial-et-composition.md), actée.
+**S178-1 réalisée pour B+un impact profond local.** RadialImpact différentiel,
+limite isotrope non nulle du gradient au centre, g/rho conservés, exponentielle partagée.
+Composition locale avec B puis source totale ; termes croisés conservés, lot atomique.
+Repère et plan moyen communs déclarés par l'hôte ; seule gravité comparée à B.
+Six nouveaux tests debug/release, référence angulaire indépendante512/1024 ;
+workspace319 réussis/cinq ignorés, C18/C02 inchangés. Contre-épreuve du centre reçue.
+115 ADR,225 angles,261 leçons,18 invariants,6 SPEC,23 cas. L261 ; aucun nouvel angle.
+A50/B4 partiels : pression forcée, multisource, cycle vivant, coûts et δ3D non reçus.
+**Suite S180 : S179-1/A50**, fournisseur différentiel de la pression W forcée, depuis
+le potentiel existant ; distinguer pression imposée et pression de vague, recevoir
+la source avec forçage. Puis multisource et cycle vivant. BILAN-S145/S176 portés par
+construction ; aucun arbitrage humain nouveau.
 
 **S178 — 2026-09-11/12 :** [SOURCE-B-S178](docs/validation/SOURCE-B-S178.md),
 [ADR-114](docs/adr/ADR-114-source-continue-du-fond-profond.md), actée.

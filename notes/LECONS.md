@@ -4038,3 +4038,14 @@ Fournir d’abord le champ total et son gradient, puis contracter. Recevoir sép
 la formule totale et une contre-épreuve où l’addition des résultats isolés diffère.
 Un calcul modal correct n’établit pas la justesse de l’opérateur non linéaire composé.
 Voir SOURCE-B-S178 et ADR-114.
+
+## L261 — Une symétrie qui annule un champ n'annule pas ses dérivées
+
+*(S179)* Au centre d'un impact isotrope, la vitesse horizontale est nulle et la
+direction radiale indéfinie. Le gradient horizontal y reste isotrope et non nul.
+Réutiliser le traitement de la vitesse pour remplir le gradient de zéros détruirait
+les termes de couplage exactement au centre de leur source.
+
+Dériver la limite de chaque grandeur demandée ; recevoir son voisinage dans plusieurs
+directions. Une singularité de coordonnées n'est pas une singularité du champ physique.
+Voir DIFFERENTIEL-W-S179, ADR-115 et contre-épreuve du gradient isotrope neutralisé.

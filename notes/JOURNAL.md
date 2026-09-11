@@ -8829,3 +8829,41 @@ pression, W différentiel ou δ3D reçus.
 puis composition avec B et réception des termes croisés. Traiter l’origine radiale sans
 division singulière et conserver domaine, horizon et refus. Les pressions forcées suivent.
 BILAN-S145/BILAN-B4-S176 portés par cette construction. Aucun arbitrage humain nouveau.
+
+## S179 — 2026-09-12 — Différentiel radial et source B+un impact
+
+**Entrée :** ae28d98 propre, quatre copies alignées ; S178-1/A50. Plan seul,
+jeton diffusé ; travail sur master, aucune copie créée ou supprimée.
+
+**Produit :** ADR-115, radial_differential.rs et tests_radial_differential.rs.
+RadialImpact conserve g/rho de construction ; son nouveau fournisseur produit les
+mêmes grandeurs profondes que B. Exponentielle partagée, phases et sample conservés.
+La limite au centre donne un gradient horizontal isotrope non nul, malgré la vitesse
+horizontale nulle. Séries de J1(q)/q et J0-2J1(q)/q pour éviter annulation et division.
+Le Laplacien du potentiel profond radial est nul analytiquement.
+
+Composition B+un impact sur coordonnées locales communes, gravité contrôlée et
+densité du W fournie à B ; repère/plan moyen restent une déclaration hôte, B n'ayant
+pas de FrameId/cell. Lot sur scratch fourni, publication atomique. La source est
+formée après sommation et conserve les termes croisés B/W. Dérivée à droite àla
+naissance, impulsion d'initialisation hors source continue.
+
+**Réception :** six nouveaux tests debug/release, workspace319 réussis/cinq ignorés,
+C18/C02 inchangés. Référence angulaire f64 à512/1024 directions :18 échantillons,
+26 scalaires chacun, accord de référence1e-9 ; budget3e-7 cinématique,4e-4 pression.
+Différences finies à0,01/0,005m reçues sans élargir les tolérances après échec à0,002m
+sur pression (-107,050812 contre-107,081885Pa/m). Source composée reçue via gradient
+de Bernoulli ; termes croisés >1e-4m/s², leur omission est détectée. Neutraliser le
+gradient isotrope fait échouer le test central ; original restauré avant campagne.
+Refus de domaine/temps/contexte/gravité, non-finis et atomicité reçus. Anciennes valeurs
+de surface bit àbit identiques. Absence d'allocation inspectée, pas mesurée ici.
+
+**Suivi :** S178-1 réalisée pour B+un impact profond local ; A50/B4 partiels.
+115 ADR,225 angles,261 leçons,18 invariants,6 SPEC,23 cas ; L261, aucun nouvel angle.
+I-02/03/06/07/08/09 inchangés. Pression forcée, multisource, cycle vivant, coût et
+δ3D restent non reçus par ce lot ; pas de certification multiplateforme.
+
+**Suite S180 : S179-1**, fournisseur de dérivées de la pression forcée W : partir du
+potentiel existant, distinguer pression imposée et pression de vague, recevoir la source
+avec forçage. Puis multisource et cycle vivant. BILAN-S145 et bilan S176 portés par
+la construction ; aucun arbitrage humain nouveau.

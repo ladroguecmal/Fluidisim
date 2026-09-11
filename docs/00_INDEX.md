@@ -17,6 +17,14 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S179 :** [DIFFERENTIEL-W-S179](validation/DIFFERENTIEL-W-S179.md),
+[ADR-115](adr/ADR-115-differentiel-radial-et-composition.md), actée. S178-1 réalisée
+pour B+un impact profond : gradient radial régulier au centre, pression, source avec
+interactions et lot atomique. Six nouveaux tests debug/release ; workspace319/cinq
+ignorés, C18/C02 inchangés. A50 partielle, B4 complet non reçu.
+115 ADR,225 angles,261 leçons,18 invariants,6 SPEC,23 cas. L261 ; aucun nouvel angle.
+**Suite S180 : S179-1**, fournisseur différentiel de la pression forcée W.
+
 **S178 :** [SOURCE-B-S178](validation/SOURCE-B-S178.md),
 [ADR-114](adr/ADR-114-source-continue-du-fond-profond.md), actée. S177-1 réalisée pour
 B profond linéaire : gradient de pression, Laplacien et source continue à soustraire,

@@ -75,3 +75,7 @@ W `RadialImpact`, puis recevoir sa composition avec B et les termes croisés.
 Dériver depuis le potentiel du candidat, conserver domaine/horizon/refus et traiter
 l'origine radiale sans division singulière. Les pressions forcées viennent ensuite.
 BILAN-S145 et bilan S176 restent portés par cette construction concrète.
+
+**Suivi S179 : S178-1 réalisée pour B+un impact local**, ADR-115 et
+[DIFFERENTIEL-W-S179](DIFFERENTIEL-W-S179.md). Dérivées radiales profondes, centre
+régulier et source avec interactions reçus. Suite S179-1 : pression forcée ; A50 partielle.
