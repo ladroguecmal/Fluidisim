@@ -65,7 +65,7 @@ Objectif : S175-1, bilan B4/SPEC-004 et prochain lot de construction exécutable
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seul.
-- [ ] **P2** — confronter réceptions, interfaces et code réel ; matrice des écarts B4.
+- [x] **P2** — confronter réceptions, interfaces et code réel ; matrice des écarts B4.
 - [ ] **P3** — fixer un lot de construction borné et ses critères ; corriger les états périmés.
 - [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
