@@ -66,7 +66,7 @@ Objectif : S169-1/A50, source moyenne exacte, interpolée sur réseau décimé e
 
 - [x] **P1** — état réel, jeton et plan seul.
 - [x] **P2** — protocole et bilan prédit du défaut de source, copies synchronisées.
-- [ ] **P3** — construire la sonde, comparer résolutions et décalages du réseau source.
+- [x] **P3** — construire la sonde, comparer résolutions et décalages du réseau source.
 - [ ] **P4** — réception, résultats, limites et suivi A50.
 - [ ] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
@@ -79,3 +79,7 @@ SPEC-004 §6.2 et B4 demandent une variation du réseau source : pas de facteur4
 BILAN-S145 porté par poursuite B4. Aucun seuil physique à inventer.
 P2 : SOURCE-DECIMEE-S170 déclaré : H indépendant de dx, origine0/H/2 ; intégration
 exacte de l'interpolant linéaire, défaut signé du volume prédit par l'erreur de source.
+
+P3 : quatre tests propres reçus et48 évolutions release. Défaut de volume signé prédit
+à<=2,20e-15 ; réseau16m décalé peut faire pire que l'omission. Aucun support modifié.
+En-tête CSV H renommé source_spacing : PowerShell confondait H et h ; campagne relancée.
