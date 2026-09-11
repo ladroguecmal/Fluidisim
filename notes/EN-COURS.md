@@ -58,27 +58,22 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S177 — terminée
+Session : S178 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S176-1, fournisseur différentiel de B en bibliothèque, eau profonde linéaire.
+Objectif : S177-1/A50, gradient de pression et source continue du B profond.
 
 ### Plan
 
-- [x] **P1** — état réel, jeton, plan seul.
-- [x] **P2** — conventions, dérivation et ADR du fournisseur volumétrique B.
-- [x] **P3** — API ponctuelle/par lot sans allocation, réception indépendante et conformité.
-- [x] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [x] **P1** — état réel, jeton et plan seul.
+- [ ] **P2** — dériver source, Laplacien et conventions ; construire les termes en bibliothèque.
+- [ ] **P3** — recevoir avec références indépendantes, contre-épreuves et conformité.
+- [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
-Master d0d6b7d propre, quatre copies alignées ; corpus lu dans cette conversation.
-112 ADR,225 angles,258 leçons,18 invariants,6 SPEC,23 cas.
-Préserver eval et hashs ; nouveau type distinct. z relatif au plan moyen, z<=0,
-pression dynamique en Pa, rho explicite uniforme, grad_u[i][j]=∂u_i/∂x_j.
-Exponentielle négative àarithmétique fixe, pas libm non déterministe sur le chemin B.
-Réception champ analytique représenté distincte de dérivation de phase quantifiée.
-P3 : huit nouveaux tests, workspace307/cinq ignorés, deux check reçus, hashs inchangés.
-Exponentielle : réduction ln2 scindée après échec du test relatif ; tolérance inchangée.
-ADR113 ; S176-1 réalisée B seul, suite S177-1 gradient pression/source continue.
-
-P4 : rituel complet, ADR113/L259 ; suite S178/S177-1.
+Master 4314dc8 propre ; quatre copies alignées, branche historique archivée conservée.
+113 ADR,225 angles,259 leçons,18 invariants,6 SPEC,23 cas. S177 :307 tests/cinq ignorés.
+Source continue distincte du résidu discret. Conserver eval et phases historiques.
+B linéaire profond seulement ; pression relative au plan moyen ADR113, rho explicite.
+Dériver avant de coder ; pas de zéro pour un terme non démontré nul.
+BILAN-S145 porté par construction B4 après B1/S63-1. Aucune copie créée.
