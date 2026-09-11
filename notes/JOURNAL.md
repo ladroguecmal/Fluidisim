@@ -8520,3 +8520,45 @@ fond figé asymétrique. Raffiner séparément solveur et source, mesurer dériv
 Cette suite est le paramètre explicitement demandé par SPEC-004 §6.2 et B4, après les
 contrôles du couplage. BILAN-S145 porté par poursuite B4 après B1/S63-1.
 État final propre, jeton libre, copies synchronisées ; aucun arbitrage humain nouveau.
+---
+
+## S170 — 2026-09-11 — La source grossière injecte un défaut que le solveur fin ne corrige pas
+
+**Entrée :** master0cdfa31 propre, quatre copies alignées. Suite S169-1/A50, protocole
+B4/SPEC-004 §6.2 relu ; plan seul, copies synchronisées au jeton occupé. Aucune créée
+ni supprimée. Pas de seuil de décimation supposé universel.
+
+**Produit :** SOURCE-DECIMEE-S170 et exemple source_decimee.rs. Fond figé asymétrique
+centre55 m, source analytique, interpolation linéaire intégrée exactement en chaque
+cellule. Q et frontières restent exacts pour isoler S. Aucun support ni runtime modifié.
+
+**S169-1 réalisée sur véhicule, A50 reste partielle.** Source exacte, omise, cinq pas
+H1/2/4/8/16 m et deux origines, indépendants de dx1/0,5/0,25 ; demi-pas N240. Quatre
+configurations de solveur et douze sources =48 évolutions. Quatre tests nouveaux reçus.
+
+**Résultats N240 :** erreur de champ par rapport au témoin, normalisée par0,05, origine0 :
+0,003768/0,014667/0,057859/0,246223/0,444852 selon H. À H16 décalé de H/2, erreur
+1,067309, supérieure à l'omission0,989676. Le réseau ne fait pas qu'atténuer S.
+À H8 fixé, cette erreur vaut0,239621/0,246223/0,250013 quand le solveur est raffiné.
+À ratio H/dx=4, elle varie0,055454/0,014667/0,003862 : pas de précision universelle du ratio.
+
+**Injection prédite :** défaut signé du volume = t somme(S_interpolée−S_exacte)dx,
+vérifié à<=2,20e-15 relatif sur toute la campagne. À H8, injection+6,384401e-4 m²/s
+pour origine0, −4,998521e-4 pour origine H/2. Le bilan physique reste publié sans
+correction cachée ; l'identité sert à expliquer le défaut, pas à le supprimer.
+Courant<=0,217062, aucune saturation. Le nombre de nœuds n'est pas un benchmark runtime.
+
+**Réception :** quatre tests (interpolant affine, omission/prédiction, raffinement source,
+injection à réseau fixé),48 évolutions release réussies. En-tête CSV H renommé
+source_spacing après conflit de casse avec h dans PowerShell ; campagne relancée.
+Tests antérieurs non rejoués, supports inchangés : S165–S169 reçus S169 ; workspace299 /
+cinq ignorés reçu S163. Aucun coût3D ni interpolation conjointe de Q et S reçu.
+
+**Suivi :** A225/L252 ajoutées ; A50 partielle, A216/A217 inchangées. 112 ADR,225 angles,
+252 leçons,18 invariants,6 SPEC,23 cas. Aucun ADR, seuil is_smooth_at, profil ou schéma
+runtime adopté ; I-01/04/12/14/15 inchangés. Aucun arbitrage humain nouveau.
+
+**Suite S171 : S170-1/A225**, source par différence de flux reconstruit partagé aux faces,
+comparée à source directe/exacte/omise. Recevoir intégrale et erreur locale séparément,
+phases et résolutions indépendantes ; aucun recalage global uniforme pour masquer le défaut.
+BILAN-S145 porté via B4 après B1/S63-1. État final propre, jeton libre, copies synchronisées.

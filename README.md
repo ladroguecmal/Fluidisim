@@ -289,7 +289,7 @@ Le juge de fidélité est B4, bloqué ailleurs. Suite S159 : le facteur 2,5 qui 
 L'une croyait la dernière session être **S44** : l'ouvrir aurait recréé cent quinze sessions parallèles.
 Avance rapide d'abord, suppressions ensuite ; six copies ramenées à trois, aucune histoire perdue, et la
 procédure de fermeture écrite dans l'amorce. Suite S160 : le facteur 2,5, S158-1.
-112 ADR,224 angles,251 leçons,18 invariants,6 SPEC,23 cas.
+112 ADR,225 angles,252 leçons,18 invariants,6 SPEC,23 cas.
 **S162 : diagnostic de Stokes et portée de B4 corrigée.**
 [Résultats](docs/validation/ADDITIVITE-PROFONDE-S162.md),
 [ADR-112](docs/adr/ADR-112-la-superposition-independante-ne-recoit-pas-le-couplage.md).
@@ -328,3 +328,7 @@ et la frontière autonome. Voir [VOLUME-MOYEN-S168](docs/validation/VOLUME-MOYEN
 sortie et volume reçus ensemble sur le véhicule1D. Quatre nouveaux tests et60 évolutions.
 Suite : source interpolée sur réseau grossier (A50).
 Voir [ASSEMBLAGE-AUTONOME-S169](docs/validation/ASSEMBLAGE-AUTONOME-S169.md).
+**S170 :** source sur réseau grossier mesurée : raffiner le solveur ne corrige pas son
+injection artificielle. Quatre nouveaux tests et48 évolutions reçus. Suite : source
+calculée par différence de flux partagés.
+Voir [SOURCE-DECIMEE-S170](docs/validation/SOURCE-DECIMEE-S170.md).

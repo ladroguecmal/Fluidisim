@@ -3926,3 +3926,17 @@ un résidu. Tester l'assemblage sur un fond variable sans perturbation avant les
 complexes ; conserver l'ancien transfert comme contre-épreuve. Préservation, qualité
 et conservation restent indépendantes : même la fermeture fautive ferme le volume.
 Voir ASSEMBLAGE-AUTONOME-S169.
+## L252 — Raffiner la destination ne répare pas une source figée sur un réseau grossier
+
+*(S170)* Le solveur passe de dx1 m à0,25 m, mais la source interpolée garde H8 m.
+L'injection intégrée reste identique, et l'écart au témoin ne disparaît pas. L'intégrale
+exacte du même interpolant ne dépend pas du découpage fin qui la reçoit.
+
+Distinguer les deux résolutions dans le protocole. Un ratio fixe mélange leurs effets ;
+un seul alignement du réseau cache aussi sa sensibilité de phase. Ici décaler le réseau
+inverse le signe de l'injection et peut rendre l'interpolation pire que l'omission.
+
+Une injection presque nulle ne garantit pas une source locale juste : l'omission perd
+presque toute l'onde tout en ayant un petit défaut de volume, car l'intégrale nette de
+la source exacte est petite. Recevoir structure locale et bilan séparément.
+Voir SOURCE-DECIMEE-S170 et A225.

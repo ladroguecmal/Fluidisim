@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-11 06:39 +02:00
+JETON            : libre
+Battement        : 2026-09-11 06:40 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S170 — source sur réseau décimé
-Dernière session : S169 — assemblage autonome et conservatif reçu en 1D ; quatre nouveaux tests
-Session suivante : S170 — S169-1/A50 : source exacte, interpolée sur réseau décimé et omise
+Session en cours : aucune
+Dernière session : S170 — source décimée mesurée, injection prédite ; quatre nouveaux tests
+Session suivante : S171 — S170-1/A225 : source par différence de flux partagés, bilan et précision locale
 
 *S160 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
 rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour.*
@@ -187,6 +187,23 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S170 — 2026-09-11 :** [SOURCE-DECIMEE-S170](docs/validation/SOURCE-DECIMEE-S170.md).
+**S169-1 réalisée sur véhicule1D, A50 reste partielle.** Source exacte, omise et interpolée
+linéairement sur H1/2/4/8/16 m, deux origines, solveur raffiné indépendamment. Q et fantômes
+exacts pour isoler la source. Quatre nouveaux tests et48 évolutions release reçus.
+L'injection artificielle reste à réseau source fixé malgré le raffinement du solveur ;
+le décalage du réseau peut inverser son signe et faire pire que l'omission. Défaut signé
+du volume prédit par t somme(S_H−S_exacte)dx à<=2,20e-15 relatif. Aucun recalage d'état.
+Courant<=0,217062 ; erreur locale et bilan distincts. Pas de seuil universel H/dx ni is_smooth_at.
+112 ADR,225 angles,252 leçons,18 invariants,6 SPEC,23 cas. A225/L252 ; aucun ADR nouveau.
+Supports et bibliothèques inchangés, tests antérieurs non rejoués : S165–S169 reçus S169,
+workspace299/cinq ignorés reçu S163. Pas de coût runtime,3D ou interpolation conjointe Q/S reçu.
+**Suite S171 : S170-1/A225**, source par différence de flux reconstruit partagé aux faces,
+comparée à interpolation directe, source exacte et omission. Mesurer si l'injection
+disparaît tout en gardant une erreur locale ; phases et résolutions indépendantes.
+Aucun recalage global uniforme. A50 partielle, A216/A217 inchangées ; BILAN-S145 porté
+via B4 après B1/S63-1. Copie principale, copies synchronisées, aucune créée ni supprimée.
 
 **S169 — 2026-09-11 :** [ASSEMBLAGE-AUTONOME-S169](docs/validation/ASSEMBLAGE-AUTONOME-S169.md).
 **S168-1 réalisée, A224 traitée sur véhicule subcritique1D à Q exact connu.** Invariant

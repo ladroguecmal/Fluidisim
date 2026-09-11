@@ -17,6 +17,12 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S170 :** [SOURCE-DECIMEE-S170](validation/SOURCE-DECIMEE-S170.md). **S169-1 réalisée
+sur véhicule1D, A50 partielle.** Source interpolée/exacte/omise, réseau et solveur raffinés
+indépendamment : injection artificielle prédite, phase déterminante. Quatre nouveaux tests,
+48 évolutions. A225/L252 ;112 ADR,225 angles,252 leçons,18 invariants,6 SPEC,23 cas.
+Pas de seuil is_smooth_at ni runtime adopté. **Suite S171 : S170-1**, source par flux partagés.
+
 **S169 :** [ASSEMBLAGE-AUTONOME-S169](validation/ASSEMBLAGE-AUTONOME-S169.md).
 **S168-1 réalisée, A224 traitée sur véhicule subcritique1D à Q exact connu.** Le bord
 transfère l'écart au fond, préserve Q, laisse sortir et ferme le volume à<=1,90e-15.

@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S170 — en cours
+Session : S170 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S169-1/A50, source moyenne exacte, interpolée sur réseau décimé et omise.
 
@@ -68,7 +68,7 @@ Objectif : S169-1/A50, source moyenne exacte, interpolée sur réseau décimé e
 - [x] **P2** — protocole et bilan prédit du défaut de source, copies synchronisées.
 - [x] **P3** — construire la sonde, comparer résolutions et décalages du réseau source.
 - [x] **P4** — réception, résultats, limites et suivi A50.
-- [ ] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [x] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
