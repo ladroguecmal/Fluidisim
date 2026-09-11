@@ -58,30 +58,22 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S169 — terminée
+Session : S170 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S168-1/A224, assembler résidu équilibré en moyennes et frontière autonome.
+Objectif : S169-1/A50, source moyenne exacte, interpolée sur réseau décimé et omise.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seul.
-- [x] **P2** — dériver fermeture préservant Q et protocole, synchroniser les copies.
-- [x] **P3** — construire assemblage et témoins ; mesurer préservation, entrée/sortie et bilan.
-- [x] **P4** — réception, limites, suivi des actions.
-- [x] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [ ] **P2** — protocole et bilan prédit du défaut de source, copies synchronisées.
+- [ ] **P3** — construire la sonde, comparer résolutions et décalages du réseau source.
+- [ ] **P4** — réception, résultats, limites et suivi A50.
+- [ ] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
-Master db3c0e3 propre, quatre copies alignées, S168 terminée. Corpus lu dans cette conversation.
-112 ADR,224 angles,250 leçons,18 invariants,6 SPEC,23 cas. Aucun runtime adopté.
-S168 cinq tests reçus ; supports S165–S167 reçus S167 ; workspace299/cinq ignorés reçu S163.
-BILAN-S145 porté par poursuite B4. Pas d'information extérieure inconnue inventée.
-P2 : ASSEMBLAGE-AUTONOME-S169, transport de l'écart d'invariant sortant ; Q préservé.
-Mesurer l'information entrante omise des gaussiennes non compactes. Quatre voies,15 montages.
-
-P3 : quatre tests nouveaux et24 tests S165–S168 reçus ;60 évolutions release.
-Fond entrant exactement préservé ; bilan <=1,90e-15, Courant<=0,217650.
-Références et fermeture extraites en supports partagés, bibliothèques inchangées.
-
-P4 : A224 traitée sur véhicule ; S169-1/A50 source décimée priorisée par B4/SPEC-004.
-Pas de nouvel angle ni ADR. Résultats publiés, information entrante omise explicitement mesurée.
+Master0cdfa31 propre, quatre copies alignées, S169 terminée. Corpus lu dans cette conversation.
+112 ADR,224 angles,251 leçons,18 invariants,6 SPEC,23 cas. Aucun runtime adopté.
+S169 quatre tests et24 tests S165–S168 reçus ; workspace299/cinq ignorés reçu S163.
+SPEC-004 §6.2 et B4 demandent une variation du réseau source : pas de facteur4 universel.
+BILAN-S145 porté par poursuite B4. Aucun seuil physique à inventer.
