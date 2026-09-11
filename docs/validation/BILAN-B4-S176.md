@@ -114,3 +114,8 @@ lots ultérieurs, àordonner depuis les preuves du fournisseur. Pas de calendrie
 **S175-1 réalisée : bilan et lot borné publiés.** Aucun nouveau seuil, solveur ou choix
 3D adopté ; ADR-112 inchangé. Le prochain travail est du code de bibliothèque avec
 réception, pas une nouvelle variante de la campagne1D.
+
+**Suivi S177 : S176-1 réalisée pour B profond linéaire**, voir
+[FOURNISSEUR-B-S177](FOURNISSEUR-B-S177.md), conventions ADR-113. API de bibliothèque,
+réception indépendante et ancien eval inchangé. B4 complet non reçu, A50 partielle ;
+suite S177-1, gradient de pression et résidu physique continu de B avant extension W.

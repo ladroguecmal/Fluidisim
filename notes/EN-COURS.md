@@ -66,7 +66,7 @@ Objectif : S176-1, fournisseur différentiel de B en bibliothèque, eau profonde
 
 - [x] **P1** — état réel, jeton, plan seul.
 - [x] **P2** — conventions, dérivation et ADR du fournisseur volumétrique B.
-- [ ] **P3** — API ponctuelle/par lot sans allocation, réception indépendante et conformité.
+- [x] **P3** — API ponctuelle/par lot sans allocation, réception indépendante et conformité.
 - [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
@@ -77,3 +77,6 @@ Préserver eval et hashs ; nouveau type distinct. z relatif au plan moyen, z<=0,
 pression dynamique en Pa, rho explicite uniforme, grad_u[i][j]=∂u_i/∂x_j.
 Exponentielle négative àarithmétique fixe, pas libm non déterministe sur le chemin B.
 Réception champ analytique représenté distincte de dérivation de phase quantifiée.
+P3 : huit nouveaux tests, workspace307/cinq ignorés, deux check reçus, hashs inchangés.
+Exponentielle : réduction ln2 scindée après échec du test relatif ; tolérance inchangée.
+ADR113 ; S176-1 réalisée B seul, suite S177-1 gradient pression/source continue.

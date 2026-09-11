@@ -21,6 +21,10 @@ use crate::host::{AllocError, HostServices};
 use crate::phase::{freq_hz_to_q32, PhaseQ32};
 use crate::types::{SimTime, WaterSample, WorldPos};
 
+#[path = "background_differential.rs"]
+mod differential;
+pub use differential::{BackgroundSample, DifferentialError};
+
 // Instrument S147 hors runtime : moments du spectre réel et référence indépendante.
 #[cfg(test)]
 #[path = "spectrum_reference_s147.rs"]

@@ -1608,3 +1608,12 @@ entrée par entrée. Le fil reprend ci-dessous.
   water-core selon le lot et les cinq critères de BILAN-B4-S176. Conventions physiques
   explicites, type distinct, évaluation sans allocation et refus atomiques, réception
   indépendante et conformité existante. B seul ; extension W et solveur3D ultérieurs.
+
+### Suivi S177 — Fournisseur différentiel B construit
+
+- **S176-1 réalisée pour B profond linéaire**, FOURNISSEUR-B-S177 et ADR-113. Nouveau
+  type distinct, API ponctuelle et par lot, sorties atomiques, phases et eval préservés.
+  A50 partielle, B4 complet non reçu ; W et δ3D hors réception.
+- **S177-1 / A50 : ouverte, priorité S178.** Gradient de pression et formation du résidu
+  physique continu de B, unités et termes visqueux qualifiés. Réception analytique et
+  refus conservés ; extension W ultérieure, aucune confusion avec un résidu discret.

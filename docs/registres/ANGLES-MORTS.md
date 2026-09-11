@@ -2156,3 +2156,9 @@ le prochain lot de construction.
 Le fournisseur différentiel BackgroundSample manque encore dans la bibliothèque ;
 S176-1 le construit pour B seul, sans prétendre fournir B+W ni choisir le solveur3D.
 Pas de nouvel angle : c’est le maillon concret de l’angle existant.
+
+**Suivi A50 — S177 : premier fournisseur B construit dans la bibliothèque.**
+[FOURNISSEUR-B-S177](../validation/FOURNISSEUR-B-S177.md), ADR-113 : eta, grad_eta, u,
+du_dt, grad_u et pression de vague àprofondeur connue, type distinct de WaterSample.
+B seul, linéaire profond uniforme ; A50 reste partielle. S177-1 reçoit gradient de
+pression et source continue avant extension W. Aucun nouvel angle, ni seuil B4 adopté.

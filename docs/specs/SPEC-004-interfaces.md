@@ -100,6 +100,13 @@ struct WaterSample {
 
 ### 2.1 Deux types d'échantillon, et pourquoi les fusionner serait une erreur
 
+> **Implémentation partielle S177 — 2026-09-11.** `background::BackgroundSample` et
+> les méthodes `Background::differential*` existent pour B profond linéaire uniforme.
+> z est relatif au plan moyen, z<=0 ; grad_u[i][j]=∂u_i/∂x_j, p_dyn en Pa avec rho
+> fourni. `WaterSample` historique inchangé. ADR-113 et
+> [FOURNISSEUR-B-S177](../validation/FOURNISSEUR-B-S177.md) fixent la réception ; B+W,
+> gradient de pression et fermeture du solveur ne sont pas reçus par ce seul type.
+
 ```cpp
 // Consommateur unique : un solveur δ en régime perturbatif — cf. §6
 struct BackgroundSample {
