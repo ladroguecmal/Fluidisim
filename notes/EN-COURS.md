@@ -65,7 +65,7 @@ Objectif : S181-1/A50, recevoir le consommateur différentiel dans le cycle viva
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seul.
-- [ ] **P2** — déclarer le protocole cycle/direct, refus et rejeu avant les tests.
+- [x] **P2** — déclarer le protocole cycle/direct, refus et rejeu avant les tests.
 - [ ] **P3** — recevoir actualisation, admission, renouvellement et rejeu ; corriger si nécessaire.
 - [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
