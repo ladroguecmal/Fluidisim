@@ -65,7 +65,7 @@ Objectif : S174-1/A50, fond décimé et frontière autonome ancrée S169.
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seul.
-- [ ] **P2** — assembler les frontières comparées et leurs témoins àconditions identiques.
+- [x] **P2** — assembler les frontières comparées et leurs témoins àconditions identiques.
 - [ ] **P3** — recevoir préservation, sortie et budgets ; résultats et suivi.
 - [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 

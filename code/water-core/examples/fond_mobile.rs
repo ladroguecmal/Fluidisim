@@ -5,6 +5,9 @@ mod local;
 #[path = "support/mean_wave.rs"]
 #[allow(dead_code)]
 mod mean_wave;
+#[path = "support/open_boundary.rs"]
+#[allow(dead_code)]
+mod open_boundary;
 #[path = "support/reconstructed_wave.rs"]
 mod reconstructed_wave;
 #[path = "support/residu_shallow.rs"]
@@ -24,6 +27,11 @@ enum Mode {
     Discrete,
     Omitted,
 }
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum Boundary {
+    Analytic,
+    Anchored,
+}
 #[derive(Clone, Copy, Debug, Default)]
 struct Report {
     h: f64,
@@ -38,11 +46,13 @@ struct Report {
     analytic_prediction: f64,
     refresh_h: f64,
     crossings: usize,
+    boundary_effect: f64,
 }
 struct Case {
     spacing: f64,
     phase: f64,
     mode: Mode,
+    boundary: Boundary,
     solver: local::Local,
     flux_budget: f64,
     analytic_flux_budget: f64,
@@ -59,9 +69,14 @@ struct Timeline {
 }
 impl Timeline {
     fn new(n: usize, dx: f64, h: f64, p: f64, tau: f64) -> Self {
+        Self::new_until(n, dx, h, p, tau, 6.0)
+    }
+    fn new_until(n: usize, dx: f64, h: f64, p: f64, tau: f64, duration: f64) -> Self {
         assert!(tau.is_finite() && tau > 0.0);
-        let count = (6.0 / tau).ceil() as usize;
-        let times: Vec<_> = (0..=count).map(|j| (j as f64 * tau).min(6.0)).collect();
+        let count = (duration / tau).ceil() as usize;
+        let times: Vec<_> = (0..=count)
+            .map(|j| (j as f64 * tau).min(duration))
+            .collect();
         let mut cells = Vec::new();
         let mut faces = Vec::new();
         for &t in &times {
@@ -85,8 +100,9 @@ impl Timeline {
         }
     }
     fn bracket(&self, t: f64) -> (usize, f64) {
-        assert!(t >= -1e-12 && t <= 6.0 + 1e-12);
-        let t = t.clamp(0.0, 6.0);
+        let end = *self.times.last().unwrap();
+        assert!(t >= -1e-12 && t <= end + 1e-12);
+        let t = t.clamp(0.0, end);
         let j = self
             .times
             .partition_point(|x| *x <= t)
@@ -118,7 +134,9 @@ impl Timeline {
         result
     }
     fn crosses(&self, a: f64, b: f64) -> bool {
-        self.times.iter().any(|x| *x > a && *x <= b && *x < 6.0)
+        self.times
+            .iter()
+            .any(|x| *x > a && *x <= b && *x < *self.times.last().unwrap())
     }
 }
 fn wave(a: f64) -> Wave {
@@ -143,12 +161,23 @@ fn run(n: usize, factor: f64, amplitude: f64, grids: &[(f64, f64)]) -> Vec<Case>
     run_cadence(n, factor, amplitude, grids, 0.0)
 }
 fn run_cadence(n: usize, factor: f64, amplitude: f64, grids: &[(f64, f64)], tau: f64) -> Vec<Case> {
+    run_boundaries(n, factor, amplitude, grids, tau, 6.0, false)
+}
+fn run_boundaries(
+    n: usize,
+    factor: f64,
+    amplitude: f64,
+    grids: &[(f64, f64)],
+    tau: f64,
+    duration: f64,
+    compare: bool,
+) -> Vec<Case> {
     assert!(n >= 120 && n % 4 == 0 && factor >= 1.0);
     let dx = 120.0 / n as f64;
     let (start, end) = (n / 4, 3 * n / 4);
     let timelines: Vec<_> = grids
         .iter()
-        .map(|&(h, p)| (tau > 0.0).then(|| Timeline::new(n, dx, h, p, tau)))
+        .map(|&(h, p)| (tau > 0.0).then(|| Timeline::new_until(n, dx, h, p, tau, duration)))
         .collect();
     let initial: Vec<_> = (0..n)
         .map(|i| value(wave(amplitude), i, dx, 0.0, true, 1e-12))
@@ -156,29 +185,38 @@ fn run_cadence(n: usize, factor: f64, amplitude: f64, grids: &[(f64, f64)], tau:
     let mass0: f64 = initial[start..end].iter().map(|s| s.h * dx).sum();
     let mut cases = Vec::new();
     let mut backgrounds = Vec::new();
+    let bounds = if compare {
+        vec![Boundary::Analytic, Boundary::Anchored]
+    } else {
+        vec![Boundary::Analytic]
+    };
+    let group = 4 * bounds.len();
     for &(h, p) in grids {
         let (q, _) = background(n, dx, 0.0, h, p);
-        for mode in [
-            Mode::Trapezoid,
-            Mode::Integrated,
-            Mode::Discrete,
-            Mode::Omitted,
-        ] {
-            cases.push(Case {
-                spacing: h,
-                phase: p,
-                mode,
-                solver: local::Local::new(
-                    (start..end).map(|i| initial[i].minus(q[i])).collect(),
-                    start,
-                    dx,
-                ),
-                flux_budget: 0.0,
-                analytic_flux_budget: 0.0,
-                predicted: 0.0,
-                boundary_error: 0.0,
-                report: Report::default(),
-            });
+        for &boundary in &bounds {
+            for mode in [
+                Mode::Trapezoid,
+                Mode::Integrated,
+                Mode::Discrete,
+                Mode::Omitted,
+            ] {
+                cases.push(Case {
+                    spacing: h,
+                    phase: p,
+                    mode,
+                    boundary,
+                    solver: local::Local::new(
+                        (start..end).map(|i| initial[i].minus(q[i])).collect(),
+                        start,
+                        dx,
+                    ),
+                    flux_budget: 0.0,
+                    analytic_flux_budget: 0.0,
+                    predicted: 0.0,
+                    boundary_error: 0.0,
+                    report: Report::default(),
+                });
+            }
         }
         backgrounds.push(q);
     }
@@ -189,8 +227,21 @@ fn run_cadence(n: usize, factor: f64, amplitude: f64, grids: &[(f64, f64)], tau:
         dx,
     );
     let mut reference = initial;
-    let steps = (6.0 / (0.2 * dx / G.sqrt()) * factor).ceil() as usize;
-    let dt = 6.0 / steps as f64;
+    let mut autonomous_totals: Vec<_> = grids
+        .iter()
+        .map(|_| {
+            local::Local::new(
+                reference[start..end]
+                    .iter()
+                    .map(|s| s.minus(rest))
+                    .collect(),
+                start,
+                dx,
+            )
+        })
+        .collect();
+    let steps = (duration / (0.2 * dx / G.sqrt()) * factor).ceil() as usize;
+    let dt = duration / steps as f64;
     for step in 0..steps {
         let t = step as f64 * dt;
         let old = [reference[start - 1], reference[end]];
@@ -245,7 +296,15 @@ fn run_cadence(n: usize, factor: f64, amplitude: f64, grids: &[(f64, f64)], tau:
             let physical_integral = net(&fi);
             let trapezoid_integral = 0.5 * dt * (net(&f0) + net(&f1));
             let change: f64 = (start..end).map(|i| (q1[i].h - q0[i].h) * dx).sum();
-            for c in &mut cases[4 * k..4 * k + 4] {
+            let anchored = |stage: usize, inner: [State; 2]| {
+                let q = if stage == 0 { q0 } else { &q1 };
+                open_boundary::anchored(inner, [q[start], q[end - 1]], [q[start - 1], q[end]])
+            };
+            if compare {
+                autonomous_totals[k].step_with_boundary(t, dt, |_, _| rest, anchored);
+            }
+            let mut paired = vec![vec![State::default(); end - start]; 4];
+            for (m, c) in cases[group * k..group * k + group].iter_mut().enumerate() {
                 let mut s0 = vec![State::default(); n];
                 let mut s1 = s0.clone();
                 for i in start..end {
@@ -268,12 +327,18 @@ fn run_cadence(n: usize, factor: f64, amplitude: f64, grids: &[(f64, f64)], tau:
                         Mode::Omitted => {}
                     }
                 }
-                let (_, numeric) = c.solver.step_balanced(
+                let (_, numeric) = c.solver.step_balanced_with_boundary(
                     t,
                     dt,
                     |i, time| if time == t { q0[i] } else { q1[i] },
                     |i, time| if time == t { s0[i] } else { s1[i] },
-                    ghosts,
+                    |stage, inner| {
+                        if c.boundary == Boundary::Analytic {
+                            ghosts[stage]
+                        } else {
+                            anchored(stage, inner)
+                        }
+                    },
                 );
                 // Physical boundary budget is independent of the chosen source.
                 // The Discrete witness uses its actual full-total numerical flux.
@@ -302,7 +367,20 @@ fn run_cadence(n: usize, factor: f64, amplitude: f64, grids: &[(f64, f64)], tau:
                     let j = i - start;
                     let s = q1[i].plus(c.solver.d[j]);
                     let e = s.minus(reference[i]);
-                    let di = s.minus(rest.plus(total.d[j]));
+                    let witness = if c.boundary == Boundary::Analytic {
+                        &total
+                    } else {
+                        &autonomous_totals[k]
+                    };
+                    let di = s.minus(rest.plus(witness.d[j]));
+                    if m < 4 {
+                        paired[m][j] = s;
+                    } else {
+                        c.report.boundary_effect = c
+                            .report
+                            .boundary_effect
+                            .max((s.h - paired[m % 4][j].h).abs() / 0.05);
+                    }
                     c.report.h = c.report.h.max(e.h.abs() / 0.05);
                     if timeline.is_some_and(|tl| tl.crosses(t, t + dt)) {
                         c.report.refresh_h = c.report.refresh_h.max(e.h.abs() / 0.05);
@@ -343,6 +421,10 @@ fn run_cadence(n: usize, factor: f64, amplitude: f64, grids: &[(f64, f64)], tau:
     cases
 }
 fn main() {
+    if std::env::args().any(|a| a == "--assembly") {
+        assembly_main();
+        return;
+    }
     if std::env::args().any(|a| a == "--cadence") {
         cadence_main();
         return;
@@ -354,6 +436,19 @@ fn main() {
             for c in run(n, factor, a, &grids) {
                 let r = c.report;
                 println!("{n},{factor},{a},{},{},{:?},{:.6e},{:.6e},{:.6e},{:.6e},{:.6e},{:.6e},{:.6e},{:.6}",c.spacing,c.phase,c.mode,r.h,r.q,r.residual,r.identity,r.volume,r.budget,r.prediction,r.courant);
+            }
+        }
+    }
+}
+fn assembly_main() {
+    println!("n,factor,amplitude,cadence,spacing,phase,mode,boundary,h,q,boundary_effect,volume,analytic_volume,prediction_error,identity,courant");
+    for a in [0.05, 0.06] {
+        for (n, factor) in [(120, 1.0), (240, 1.0), (240, 2.0)] {
+            for tau in [0.0, 1.0, 2.0] {
+                for c in run_boundaries(n, factor, a, &[(0.0, 0.0), (8.0, 0.5)], tau, 12.0, true) {
+                    let r = c.report;
+                    println!("{n},{factor},{a},{tau},{},{},{:?},{:?},{:.6e},{:.6e},{:.6e},{:.6e},{:.6e},{:.6e},{:.6e},{:.6}",c.spacing,c.phase,c.mode,c.boundary,r.h,r.q,r.boundary_effect,r.volume,r.analytic_volume,r.prediction.max(r.analytic_prediction),r.identity,r.courant);
+                }
             }
         }
     }
@@ -374,6 +469,24 @@ fn cadence_main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn assembled_boundary_preserves_exact_mobile_background() {
+        let c = run_boundaries(120, 1.0, 0.05, &[(0.0, 0.0)], 0.0, 12.0, true);
+        assert!(
+            c[5].report.h < 1e-9
+                && c[5].report.boundary_effect < 1e-9
+                && c[5].report.volume < 1e-10
+        );
+    }
+    #[test]
+    fn outgoing_crest_has_matched_discrete_witness_and_its_own_budget() {
+        let speed = 3.0 * (G * 1.06).sqrt() - 2.0 * G.sqrt();
+        assert!(55.0 + speed * 12.0 > 90.0);
+        let c = run_boundaries(120, 1.0, 0.06, &[(8.0, 0.5)], 1.0, 12.0, true);
+        assert!(c[6].report.identity < 1e-10 && c[5].report.volume < 1e-10);
+        assert!(c[5].report.boundary_effect > 1e-5 && c[5].report.analytic_volume > 1e-8);
+        assert!(c[5].report.prediction < 1e-10 && c[5].report.analytic_prediction < 1e-10);
+    }
     #[test]
     fn snapshots_are_continuous_and_flux_is_split_across_refresh() {
         let tl = Timeline::new(120, 1.0, 8.0, 0.5, 1.0);
