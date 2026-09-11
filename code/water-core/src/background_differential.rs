@@ -16,6 +16,10 @@ pub struct BackgroundSample {
     pub grad_u: [[f32; 3]; 3],
     /// Pression de vague par rapport à l'hydrostatique du plan moyen, Pa.
     pub p_dyn: f32,
+    /// Gradient de la pression de vague, Pa/m (ADR-114).
+    pub grad_p_dyn: [f32; 3],
+    /// Laplacien de u, 1/(m s). Nul pour les directions exactement unitaires.
+    pub laplacian_u: [f32; 3],
 }
 impl BackgroundSample {
     fn finite(&self) -> bool {
@@ -26,14 +30,46 @@ impl BackgroundSample {
                 .iter()
                 .chain(&self.u)
                 .chain(&self.du_dt)
+                .chain(&self.grad_p_dyn)
+                .chain(&self.laplacian_u)
                 .chain(self.grad_u.iter().flatten())
                 .all(|x| x.is_finite())
+    }
+    /// Résidu continu S=U_t+(U·∇)U+∇p_dyn/rho-nu ΔU, en m/s².
+    /// Le solveur perturbatif doit SOUSTRAIRE S (SPEC-004 §6.1).
+    /// rho doit être celui de l'échantillonnage ; nu est cinématique en m²/s,
+    /// uniforme et >=0. Hydrostatique et gravité se compensent déjà (ADR-114).
+    /// Ce n'est ni une force ni le résidu discret d'un solveur.
+    pub fn momentum_residual(&self, rho: f32, nu: f32) -> Result<[f32; 3], DifferentialError> {
+        if !rho.is_finite() || rho <= 0.0 {
+            return Err(DifferentialError::Density);
+        }
+        if !nu.is_finite() || nu < 0.0 {
+            return Err(DifferentialError::Viscosity);
+        }
+        if !self.finite() {
+            return Err(DifferentialError::NonFinite);
+        }
+        let mut result = [0.0; 3];
+        for (i, out) in result.iter_mut().enumerate() {
+            let mut advection = 0.0;
+            for j in 0..3 {
+                advection += self.u[j] * self.grad_u[i][j];
+            }
+            *out = (self.du_dt[i] + self.grad_p_dyn[i] / rho)
+                + advection - nu * self.laplacian_u[i];
+        }
+        if !result.iter().all(|x| x.is_finite()) {
+            return Err(DifferentialError::NonFinite);
+        }
+        Ok(result)
     }
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum DifferentialError {
     Domain,
     Density,
+    Viscosity,
     Background,
     Capacity,
     NonFinite,
@@ -117,12 +153,18 @@ impl Background {
             let k = c.k_turns_per_m * core::f32::consts::TAU;
             let e = attenuation(-k * local[2]);
             let a = c.amplitude * omega * e;
+            let pressure_gradient = rho * self.gravity * c.amplitude * e * k;
+            // Δ(exp(kz) sin(k d·x)) = k²(1-|d|²) exp(kz) sin(k d·x).
+            // Keep the represented direction's small norm error, rather than invent zero.
+            let lap = (k * k) * ((1.0 - c.dir[0] * c.dir[0]) - c.dir[1] * c.dir[1]);
             s.eta += c.amplitude * sn;
             let slope = c.amplitude * k * cs;
             for i in 0..2 {
                 s.grad_eta[i] += slope * c.dir[i];
                 s.u[i] += a * sn * c.dir[i];
                 s.du_dt[i] -= a * omega * cs * c.dir[i];
+                s.grad_p_dyn[i] += pressure_gradient * cs * c.dir[i];
+                s.laplacian_u[i] += lap * (a * sn * c.dir[i]);
                 for j in 0..2 {
                     s.grad_u[i][j] += a * k * cs * c.dir[i] * c.dir[j];
                 }
@@ -133,6 +175,8 @@ impl Background {
             s.du_dt[2] -= a * omega * sn;
             s.grad_u[2][2] -= a * k * cs;
             s.p_dyn += rho * self.gravity * c.amplitude * e * sn;
+            s.grad_p_dyn[2] += pressure_gradient * sn;
+            s.laplacian_u[2] += lap * (-a * cs);
         }
         if !s.finite() {
             return Err(DifferentialError::NonFinite);
