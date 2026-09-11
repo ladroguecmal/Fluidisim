@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-12 01:07 +02:00
+JETON            : occupé
+Battement        : 2026-09-12 01:08 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S180
 Dernière session : S179 — différentiel radial et composition B+un impact reçus
 Session suivante : S180 — S179-1/A50 : fournisseur différentiel de la pression forcée W
 

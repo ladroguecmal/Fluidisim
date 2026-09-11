@@ -58,18 +58,23 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S179 — terminée
+Session : S180 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S178-1/A50, différentiel profond RadialImpact et composition B+W.
+Objectif : S179-1/A50, différentiel profond de la pression W forcée.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seul.
-- [x] **P2** — dériver le champ radial régulier et déclarer contrat et réception.
-- [x] **P3** — construire le fournisseur et la composition, recevoir dérivées et refus.
-- [x] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [ ] **P2** — dériver pression imposée et champ profond ; contrat et protocole.
+- [ ] **P3** — construire dans le champ spectral, recevoir forçage/dérivées/refus et conformité.
+- [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
+
+S180 : master3b7cae0 propre, quatre copies alignées ;115 ADR/225 angles/261 leçons.
+Le champ spectral conserve déjà pression et vitesse modales dans Slot. Dériver
+depuis phi_t=-g eta-P/rho ; ne pas oublier la pression imposée dans p_dyn profond.
+Suite BILAN-S145/S176, code de bibliothèque ; notes antérieures conservées ci-dessous.
 
 S179 : master ae28d98 propre, quatre copies alignées ;114 ADR/225 angles/260 leçons.
 P4 S179 :115 ADR/225 angles/261 leçons,18 invariants,6 SPEC,23 cas vérifiés.
