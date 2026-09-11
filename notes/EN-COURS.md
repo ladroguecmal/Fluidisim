@@ -58,25 +58,22 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S171 — terminée
+Session : S172 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S170-1/A225, différences de flux partagés ; conservation et précision distinctes.
+Objectif : S171-1/A50, Q figé reconstruit et source issue du même fond.
 
 ### Plan
 
-- [x] **P1** — état réel, jeton et plan seul.
-- [x] **P2** — étendre la sonde avec flux interpolé brut et bornes physiques exactes ; protocole.
-- [x] **P3** — tests et campagne indépendante des résolutions, résultats et suivi.
-- [x] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [x] **P1** — état réel, jeton, plan seul.
+- [ ] **P2** — dériver le défaut de discrétisation et construire la sonde conjointe.
+- [ ] **P3** — recevoir tests et campagne ; publier résultats, limites et suivi.
+- [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
-Master e88b046 propre ; quatre copies alignées. Corpus lu dans cette conversation.
-112 ADR,225 angles,252 leçons,18 invariants,6 SPEC,23 cas.
-La télescopie laisse une erreur aux bornes si le flux interpolé y est inexact.
-Comparer donc flux brut et flux ancré aux bornes exactes, sans correction uniforme de S.
-A50 reste partielle, aucun runtime ou seuil is_smooth_at adopté. BILAN-S145 suivi par B4.
-P3 :7 tests (3 nouveaux),128 évolutions reçus. Volume ancré<=2,32e-15 ;
-prédiction<=2,52e-15. A225 traitée sur véhicule, A50 partielle ; suite S171-1.
-
-P4 : rituel exécuté ; L253,225 angles,112 ADR. Suite S172/S171-1.
+Master e6b25f0 propre, quatre copies alignées ; corpus lu dans cette conversation.
+112 ADR,225 angles,253 leçons,18 invariants,6 SPEC,23 cas. Aucun runtime adopté.
+Q grossier linéaire en (h,q), moyennes exactes et S par différence de F(Q) aux faces.
+Même T initial via d=T-Q. Comparer aussi S=Lnum(Q), identité discrète du solveur total,
+pour isoler le défaut Lphys(Q)-Lnum(Q), sans le déclarer nouveau schéma runtime.
+A50 partielle ; BILAN-S145 porté via B4 après B1/S63-1.
