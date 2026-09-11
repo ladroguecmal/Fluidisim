@@ -1,4 +1,6 @@
 use super::*;
+#[path = "tests_differential_cycle.rs"]
+mod cycle;
 use crate::background::BackgroundSample;
 
 #[test]

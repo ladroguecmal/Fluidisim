@@ -100,6 +100,12 @@ struct WaterSample {
 
 ### 2.1 Deux types d'échantillon, et pourquoi les fusionner serait une erreur
 
+> **Réception S182 — 2026-09-12.** Le consommateur différentiel mixte est reçu
+> dans les chemins d'actualisation, admission, saturation/reprise, renouvellement et
+> restauration existants : dérivées et source identiques en bits à la reconstruction
+> directe. [CYCLE-DIFFERENTIEL-S182](../validation/CYCLE-DIFFERENTIEL-S182.md).
+> Aucun changement de contrat ADR-117 ; coût et consommateur perturbatif non reçus.
+
 > **Complément S181 — 2026-09-12.** La requête mixte différentielle par lot de
 > WorldPos compose B, les impacts du journal et la pression publiée, dans cet ordre.
 > Contexte et instant utilisent les contrôles du montage existant ; sortie atomique,

@@ -66,7 +66,7 @@ Objectif : S181-1/A50, recevoir le consommateur différentiel dans le cycle viva
 
 - [x] **P1** — état réel, jeton et plan seul.
 - [x] **P2** — déclarer le protocole cycle/direct, refus et rejeu avant les tests.
-- [ ] **P3** — recevoir actualisation, admission, renouvellement et rejeu ; corriger si nécessaire.
+- [x] **P3** — recevoir actualisation, admission, renouvellement et rejeu ; corriger si nécessaire.
 - [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
@@ -75,6 +75,11 @@ S182 : master3541390 propre, quatre copies alignées ;117 ADR/225 angles/262 le�
 Suite S181-1. Les contrôleurs existent ; éprouver le consommateur S181 sur leurs
 publications contre préparation directe et rejeu. Ne pas inventer un nouvel ADR si
 le contrat reste inchangé. Aucun coût ou solveur reçu par ces comparaisons.
+
+P3 S182 : trois tests nouveaux debug/release, workspace331/cinq ignorés ; C18/C02
+inchangés.34 scalaires en bits par point, source comprise. Actualisation, admission
+incrémentale/intercalée, saturation/reprise, renouvellement et restauration reçus.
+Aucune correction runtime. Suite S182-1 coût complet du consommateur différentiel.
 
 S181 : master a77ea78 propre, quatre copies alignées ;116 ADR/225 angles/262 leçons.
 Le montage mixed_water possède déjà classify (contexte/temps/perte), BoundBackground
