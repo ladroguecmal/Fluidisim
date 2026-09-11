@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-11 19:42 +02:00
+JETON            : occupé
+Battement        : 2026-09-11 19:43 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S175
 Dernière session : S174 — cadence du fond et deux budgets distingués ; trois nouveaux tests
 Session suivante : S175 — S174-1/A50 : assembler frontière autonome et fond à cadence réduite
 

@@ -58,28 +58,23 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S174 — terminée
+Session : S175 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S173-1/A50, cadence grossière du fond indépendante du pas du solveur.
+Objectif : S174-1/A50, fond décimé et frontière autonome ancrée S169.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seul.
-- [x] **P2** — construire les instantanés interpolés et les flux intégrés aux réactualisations.
-- [x] **P3** — recevoir tests/campagne ; documenter précision, volume et accès aux instantanés.
-- [x] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [ ] **P2** — assembler les frontières comparées et leurs témoins àconditions identiques.
+- [ ] **P3** — recevoir préservation, sortie et budgets ; résultats et suivi.
+- [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
-Master d32f0b8 propre, quatre copies alignées ; corpus lu dans cette conversation.
-112 ADR,225 angles,255 leçons,18 invariants,6 SPEC,23 cas. Aucun runtime adopté.
-Interpoler les moyennes et états de face entre instantanés Q connus à cadence tau.
-Intégrer les flux par morceaux quand un pas traverse une réactualisation ; sécante commune.
-Le témoin continu S173 reste accessible ; futurs instantanés connus dans ce véhicule
-analytique seulement. Mesurer distinctement source cohérente et budget analytique réel.
+Master ab35ea7 propre, quatre copies alignées ; corpus lu dans cette conversation.
+112 ADR,225 angles,256 leçons,18 invariants,6 SPEC,23 cas. Aucun runtime adopté.
+Comparer fantômes analytiques et fermeture ancrée aux deux étages ; identité discrète
+contre solveur total soumis àla même fermeture, pas au témoin analytique de bord.
+Porter la durée à12s pour que la crête sorte effectivement de la fenêtre [30,90].
+Conserver les deux budgets et mesurer les champs appariés, pas seulement leurs maxima.
 A50 partielle ; BILAN-S145 porté via B4 après B1/S63-1.
-P3 : six tests (trois nouveaux),192 évolutions +24 témoins reçus.
-Budget interpolé/prédictions<=1,21e-15 ; Va àtau2s=2,045e-5 persiste.
-S173-1 réalisée, A50 partielle ; suite S174-1 frontière autonome S169.
-
-P4 : rituel exécuté ; L256,225 angles,112 ADR. Suite S175/S174-1.
