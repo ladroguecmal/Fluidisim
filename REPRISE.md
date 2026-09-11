@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-11 05:52 +02:00
+JETON            : occupé
+Battement        : 2026-09-11 05:53 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S167 — préserver le fond exact
 Dernière session : S166 — fermeture autonome reçue en 1D subcritique ; six nouveaux tests
 Session suivante : S167 — S166-1 : préserver le fond exact, distinguer ses défauts physique et numérique (A222)
 

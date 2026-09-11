@@ -58,33 +58,21 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S166 — terminée
+Session : S167 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S165-1/A221, fermeture autonome avec information entrante et sortante distincte.
+Objectif : S166-1/A222, préserver le fond exact sans supprimer son défaut physique éventuel.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seul.
-- [x] **P2** — dériver caractéristiques et référence analytique, protocole avant mesure ; copies synchronisées.
-- [x] **P3** — implémenter fermeture aux étages, comparer entrée/sortie et raffinements.
-- [x] **P4** — réception, résultats, limites et suivi des actions.
-- [x] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [ ] **P2** — dériver le résidu équilibré, les sources et les références ; protocole et copies.
+- [ ] **P3** — implémenter et mesurer fond exact, perturbation analytique et fond figé inexact.
+- [ ] **P4** — recevoir tests, limites et suivi des actions.
+- [ ] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
-Master 8ecf20b propre, quatre copies alignées. Corpus lu dans cette conversation,
-S165 terminée ; 112 ADR,221 angles,247 leçons. Bibliothèques inchangées depuis S163.
-Suite BILAN-S145 portée par poursuite B4. Aucun domaine 3D ni absorbeur choisi.
-P2 : BORD-AUTONOME-S166 déclaré, invariants dérivés et onde simple avant choc.
-Témoin analytique distinct de l'identité discrète S165. Entrée et sortie dans les deux sens.
-
-P3 : six tests propres S166 et huit S165 reçus ; 32 montages/128 évolutions release.
-À N240/a0,05 entrée : erreur totale 0,314832 ; écart de frontière 0,001505704.
-Perte de crête vers12s 0,1277563, identique au témoin : défaut intérieur observé.
-Bilan <=2,04e-15, Courant <=0,214735. Aucun runtime modifié.
-
-P4 : A221 traitée subcritique 1D entrée connue ; A222/S166-1 distingue source physique
-et résidu numérique du fond. A50 partielle, aucun ADR. Résultats publiés dans BORD-AUTONOME.
-
-P5 : clôture reprise le 2026-09-11 après interruption ; seules les écritures finales
-restaient non committées. Six fichiers retrouvés, aucun travail concurrent constaté.
+Master 1f7d9d9 propre, quatre copies alignées ; S166 clôturée après interruption de son rituel.
+Corpus lu dans cette conversation. 112 ADR,222 angles,248 leçons,18 invariants,6 SPEC,23 cas.
+Six tests S166 et huit S165 reçus ; workspace 299/cinq ignorés reçu S163.
+BILAN-S145 porté par poursuite B4. Aucun runtime, seuil physique ou absorbeur à choisir ici.
