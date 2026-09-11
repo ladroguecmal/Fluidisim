@@ -1589,3 +1589,13 @@ entrée par entrée. Le fil reprend ci-dessous.
   la frontière autonome ancrée S169 ; comparer aux fantômes analytiques de S174,
   recevoir préservation, transport et les deux budgets. Q connu, aucun résidu extérieur
   inconnu supposé disponible. Porteur : construction, poursuite B4/BILAN-S145.
+
+### Suivi S175 — Frontière autonome avec fond décimé
+
+- **S174-1 réalisée sur véhicule subcritique connu**, FRONTIERE-FOND-DECIME-S175 :
+  deux nouveaux tests, six rejoués,288 évolutions résiduelles et54 témoins totaux.
+  A50 partielle ; aucun nouveau runtime ou seuil physique adopté.
+- **S175-1 : ouverte, priorité S176.** Bilan de réception B4/SPEC-004 après S163–S175 :
+  acquis et limites explicites, puis choix du prochain lot de construction exécutable.
+  Distinguer véhicule1D, runtime, coût, forces et perception ; ne pas prolonger par
+  défaut une variante de sonde. Porteur : prochaine session, BILAN-S145 relu S175.

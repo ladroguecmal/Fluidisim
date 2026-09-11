@@ -2143,3 +2143,10 @@ A225 décrit aussi cette erreur temporelle de flux aux bornes ; pas de nouvel an
 S173-1 réalisée, A50 partielle ; S174-1 assemble la frontière autonome S169.
 Instantané suivant et fantômes analytiques encore connus dans le véhicule ; aucune
 anticipation d’événement inconnu reçue. A216/A217 inchangées.
+
+**Suivi A50 — S175 : assemblage autonome avec fond décimé reçu sur véhicule.**
+[FRONTIERE-FOND-DECIME-S175](../validation/FRONTIERE-FOND-DECIME-S175.md) : S174-1 réalisée,
+288 évolutions, sortie de crête effective, budgets et identité discrète àbord identique.
+A50 partielle : pas de3D, forces/perception ni coût runtime reçus. A225 reste qualifiée,
+A216/A217 inchangées. Pas de nouvel angle ; S175-1 consolide la réception B4 avant
+le prochain lot de construction.

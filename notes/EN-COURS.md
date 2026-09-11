@@ -66,7 +66,7 @@ Objectif : S174-1/A50, fond décimé et frontière autonome ancrée S169.
 
 - [x] **P1** — état réel, jeton, plan seul.
 - [x] **P2** — assembler les frontières comparées et leurs témoins àconditions identiques.
-- [ ] **P3** — recevoir préservation, sortie et budgets ; résultats et suivi.
+- [x] **P3** — recevoir préservation, sortie et budgets ; résultats et suivi.
 - [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
@@ -78,3 +78,6 @@ contre solveur total soumis àla même fermeture, pas au témoin analytique de b
 Porter la durée à12s pour que la crête sorte effectivement de la fenêtre [30,90].
 Conserver les deux budgets et mesurer les champs appariés, pas seulement leurs maxima.
 A50 partielle ; BILAN-S145 porté via B4 après B1/S63-1.
+P3 : huit tests (deux nouveaux),288 évolutions +54 témoins reçus.
+Budget interpolé<=1,21e-15 ; prédictions<=1,35e-15 ; identité<=2,23e-16.
+S174-1 réalisée ; BILAN-S145 relu, suite S175-1 bilan B4/lot de construction.

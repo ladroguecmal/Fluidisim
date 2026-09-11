@@ -68,9 +68,6 @@ struct Timeline {
     faces: Vec<Vec<State>>,
 }
 impl Timeline {
-    fn new(n: usize, dx: f64, h: f64, p: f64, tau: f64) -> Self {
-        Self::new_until(n, dx, h, p, tau, 6.0)
-    }
     fn new_until(n: usize, dx: f64, h: f64, p: f64, tau: f64, duration: f64) -> Self {
         assert!(tau.is_finite() && tau > 0.0);
         let count = (duration / tau).ceil() as usize;
@@ -489,7 +486,7 @@ mod tests {
     }
     #[test]
     fn snapshots_are_continuous_and_flux_is_split_across_refresh() {
-        let tl = Timeline::new(120, 1.0, 8.0, 0.5, 1.0);
+        let tl = Timeline::new_until(120, 1.0, 8.0, 0.5, 1.0, 6.0);
         let j = 30;
         let left = tl.faces[0][j].plus(tl.faces[1][j].minus(tl.faces[0][j]));
         let right = tl.face(j, 1.0);

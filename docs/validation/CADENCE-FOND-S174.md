@@ -134,3 +134,8 @@ autonome ancrée de S169. Comparer aux fantômes analytiques de S174, recevoir l
 préservation, le transport et les deux budgets ; conserver les hypothèses d’accès àQ
 et ne pas supposer un résidu extérieur inconnu disponible. Porteur : construction,
 poursuite B4/BILAN-S145.
+
+**Suivi S175 : S174-1 réalisée sur véhicule subcritique àfond connu**, voir
+[FRONTIERE-FOND-DECIME-S175](FRONTIERE-FOND-DECIME-S175.md). Comparaison de champs
+appariés, sortie effective de la crête, témoins totaux aux mêmes frontières. A50 reste
+partielle ; suite S175-1, bilan de réception B4 et prochain lot de construction.
