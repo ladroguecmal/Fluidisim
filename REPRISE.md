@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-11 19:59 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S176
-Dernière session : S175 — frontière autonome et fond décimé assemblés ; deux nouveaux tests
-Session suivante : S176 — S175-1 : bilan de réception B4 et prochain lot de construction
+Session en cours : aucune
+Dernière session : S176 — bilan B4 consolidé, fournisseur différentiel de B cadré
+Session suivante : S177 — S176-1 : construire le fournisseur différentiel du fond B
 
 *S160 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
 rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour.*
@@ -187,6 +187,20 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S176 — 2026-09-11 :** [BILAN-B4-S176](docs/validation/BILAN-B4-S176.md).
+**S175-1 réalisée. B4 complet non reçu ; A50 partielle.** Matrice S163–S175 et code réel
+confrontés : les sondes1D ne consomment pas le B+W de bibliothèque ; BackgroundSample
+et le fournisseur différentiel de B manquent encore. Pas de nouveau seuil ni candidat3D.
+**Suite S177 : S176-1**, construire le fournisseur différentiel de B selon le lot et les
+cinq critères du bilan : conventions explicites, type distinct, calcul ponctuel/par lot,
+sorties fournies et refus atomiques, références indépendantes, conformité existante.
+B seul en eau profonde linéaire, aucune extension W implicite ; conventions àdériver
+avant code, ADR si une décision est nécessaire. Aucun champ manquant rempli de zéro.
+112 ADR,225 angles,258 leçons,18 invariants,6 SPEC,23 cas. L258 ; aucun nouvel angle.
+Corrections documentaires SPEC004/B4/lib ; aucun code d’exécution modifié, tests non
+relancés. S175 reste la réception numérique précédente. A225 qualifiée, A216/A217
+inchangées. BILAN-S145 porté par le retour àla construction ; aucun arbitrage humain.
 
 **S175 — 2026-09-11 :** [FRONTIERE-FOND-DECIME-S175](docs/validation/FRONTIERE-FOND-DECIME-S175.md).
 **S174-1 réalisée sur véhicule subcritique àfond connu ; A50 partielle.** Bord ancré

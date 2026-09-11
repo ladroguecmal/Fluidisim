@@ -17,6 +17,12 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S176 :** [BILAN-B4-S176](validation/BILAN-B4-S176.md). S175-1 réalisée : matrice
+S163–S175, B4 complet non reçu, A50 partielle. Maillon manquant constaté : fournisseur
+différentiel du B réel. Lot S176-1 cadré, sans choisir δ3D ni seuil physique.
+112 ADR,225 angles,258 leçons,18 invariants,6 SPEC,23 cas. L258 ; aucun nouveau test.
+**Suite S177 : S176-1**, construire le fournisseur différentiel de B dans water-core.
+
 **S175 :** [FRONTIERE-FOND-DECIME-S175](validation/FRONTIERE-FOND-DECIME-S175.md).
 S174-1 réalisée sur fond connu ; frontière ancrée assemblée, crête sortante et témoins
 appariés. Huit tests dont deux nouveaux ;288 évolutions et54 témoins. Budget interpolé

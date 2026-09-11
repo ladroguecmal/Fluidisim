@@ -8730,3 +8730,32 @@ exécutable. BILAN-S145 §6 relu : B1 et S63-1 ont leurs réceptions antérieure
 pas doit évaluer les acquis des contrôles S163–S175 avant une autre variante locale.
 La recommandation est portée par le jeton. Aucun arbitrage humain nouveau. Clôture avec
 jeton libre, commits et quatre copies alignés.
+
+## S176 — 2026-09-11 — Du véhicule couplé au contrat de bibliothèque
+
+**Entrée :** master0b37fd2 propre, quatre copies alignées. S175-1, bilan B4/SPEC-004.
+Plan seul, jeton diffusé. Interruption après P2 : seul marqueur P3 non committé ; reprise
+explicite puis étape complétée, aucun travail antérieur refait. Copie principale.
+
+**Produit :** BILAN-B4-S176, matrice des preuves S163–S175 et critères du lot S176-1.
+B4 complet reste non reçu. A50 reçoit ses contrôles1D, mais le B réel ne fournit pas
+encore BackgroundSample/du_dt/grad_u : les sondes ne consomment pas le B+W réel.
+Le prochain lot construit le fournisseur différentiel de B, àpartir de ses composantes,
+avec conventions physiques, réception indépendante, refus et sorties fournis par l’hôte.
+B seul et eau profonde linéaire ; ni choix3D ni seuil is_smooth_at adopté.
+
+**Corrections :** note datée sur le seuil historique B4 renvoyant àADR-112 ; distinction
+résidu physique/discret dans SPEC-004 ; commentaire périmé de lib.rs sur W qualifié.
+Aucun ADR réécrit, aucun code d’exécution modifié. Tests non relancés : documentation
+et commentaires seuls. Liens locaux et diff vérifiés àla clôture ; aucun nouveau résultat
+numérique. Réception S175 : huit tests,288 évolutions/54 témoins, conservée comme historique.
+
+**Suivi :** S175-1 réalisée ; S176-1 priorité S177, fournisseur différentiel de bibliothèque.
+A50 partielle, A225 qualifiée, A216/A217 inchangées. Aucun nouvel angle ; L258 ajoutée.
+112 ADR,225 angles,258 leçons,18 invariants,6 SPEC,23 cas. Invariants I-02/06/08/09
+préservés : pas de stockage de réalisation adopté, aucune allocation d’évaluation prévue,
+coordonnées locales et précision du runtime àrecevoir dans le lot.
+
+BILAN-S145 porté par ce retour àla construction après les contrôles ciblés ; B1/S63-1
+ont leurs réceptions antérieures. Aucun arbitrage humain nouveau, aucun pourcentage
+subjectif ajouté. Rituel complet, jeton libre et quatre copies alignées après commit final.

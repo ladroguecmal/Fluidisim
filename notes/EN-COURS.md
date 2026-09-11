@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S176 — en cours
+Session : S176 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S175-1, bilan B4/SPEC-004 et prochain lot de construction exécutable.
 
@@ -67,7 +67,7 @@ Objectif : S175-1, bilan B4/SPEC-004 et prochain lot de construction exécutable
 - [x] **P1** — état réel, jeton, plan seul.
 - [x] **P2** — confronter réceptions, interfaces et code réel ; matrice des écarts B4.
 - [x] **P3** — fixer un lot de construction borné et ses critères ; corriger les états périmés.
-- [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [x] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 

@@ -4004,3 +4004,15 @@ Apparier les conditions aux limites pour recevoir l’identité, puis comparer s
 les champs entre fermetures. Calculer leur différence avant de prendre le maximum :
 la différence de deux maxima n’est pas le maximum de la différence. Conserver les
 budgets fondés sur les flux de chaque calcul. Voir FRONTIERE-FOND-DECIME-S175.
+
+## L258 — Une réception doit nommer le code qui la consomme
+
+*(S176)* Treize sessions reçoivent le résidu, ses sources et ses frontières sur un fond
+analytique1D. Elles ne construisent pas pour autant le fournisseur de dérivées du B
+réel : ses consommateurs utilisent encore un autre type d’échantillon.
+
+Relier chaque preuve àson modèle, àson implémentation et àson interface consommatrice.
+Quand ce dernier lien manque, le prochain lot est un raccord de construction concret,
+pas nécessairement une autre variation du banc. Une matrice de réception doit montrer
+cette absence au lieu de transformer le nombre de tests en avancement du runtime.
+Voir BILAN-B4-S176.
