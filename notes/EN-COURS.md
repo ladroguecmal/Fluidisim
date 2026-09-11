@@ -66,7 +66,7 @@ Objectif : S166-1/A222, préserver le fond exact sans supprimer son défaut phys
 
 - [x] **P1** — état réel, jeton et plan seul.
 - [x] **P2** — dériver le résidu équilibré, les sources et les références ; protocole et copies.
-- [ ] **P3** — implémenter et mesurer fond exact, perturbation analytique et fond figé inexact.
+- [x] **P3** — implémenter et mesurer fond exact, perturbation analytique et fond figé inexact.
 - [ ] **P4** — recevoir tests, limites et suivi des actions.
 - [ ] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
@@ -78,3 +78,7 @@ Six tests S166 et huit S165 reçus ; workspace 299/cinq ignorés reçu S163.
 BILAN-S145 porté par poursuite B4. Aucun runtime, seuil physique ou absorbeur à choisir ici.
 P2 : protocole FOND-PRESERVE-S167 ; source physique distincte du résidu numérique.
 Témoin S164, fond exact, perturbation analytique, fond figé et source omise. Deux bilans.
+
+P3 : 45 évolutions reçues ; cinq tests S167, six S166 et huit S165 reçus.
+Fond exact d=0 ; erreur perturbée N240 0,03129235 contre 0,1583713 (échelle0,05).
+Bilan résiduel à l'arrondi ; flux corrigé laisse quadrature ~dx², suivi à expliciter.

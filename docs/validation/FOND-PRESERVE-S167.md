@@ -52,4 +52,12 @@ Les sommes d'échantillons de Q ne sont pas des intégrales exactes en cellules.
 
 ## 3. Résultats
 
-À recevoir en P3/P4.
+P3 : 15 montages, trois voies, 45 évolutions. Q exact seul reste à d=0 exactement ;
+perturbation ajoutée convergente ; source physique du fond figé indispensable.
+La référence d'onde simple S166 est extraite en support partagé, sans duplication.
+
+**Diagnostic ajouté après le premier passage :** le flux cohérent du candidat est
+delta_flux_numérique + F(Q) physique aux faces, et non le flux Rusanov total ancien.
+Le second bilan est donc complété par ce flux corrigé, intégré aux deux étages RK2.
+Il reste un défaut de quadrature : Q est échantillonné aux centres et en deux temps.
+Ce troisième bilan permet de ne pas appeler « perte de masse » le seul changement de flux.

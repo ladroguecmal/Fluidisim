@@ -2,6 +2,7 @@
 #[path = "../../water-harness/src/host_impl.rs"]
 mod host_impl;
 #[path = "support/residu_local.rs"]
+#[allow(dead_code)] // Support partagé avec S166/S167.
 mod local;
 #[path = "support/residu_shallow.rs"]
 #[allow(dead_code)]
