@@ -8935,3 +8935,39 @@ et contrat de pente I-18 conservés ; garde des sites de comparaison reçue.
 de pression, renouvellement d'impact, refus/reprise et rejeu, comparés à la préparation
 directe au même instant. Puis coût et consommateur perturbatif. BILAN-S145/S176
 portés par la construction ; aucun arbitrage humain nouveau.
+
+## S182 — 2026-09-12 — Cycle vivant du consommateur différentiel
+
+**Entrée :** master3541390 propre, quatre copies alignées, S181-1/A50. Plan seul
+f6f83ab ; protocole487051f ; réception264742b. Copie principale, aucune copie nouvelle.
+ADR-117 appliqué sans nouveau contrat ; code d'exécution inchangé.
+
+**Produit :** tests_differential_cycle.rs, trois réceptions du consommateur mixte.
+Comparaisons de34 scalaires en bits (champ profond, pression appliquée/gradient,
+densité et source), trois points, ancre monde1e9m, B16/pression192/impacts64.
+Actualisation aux commutations et retour temporel, update identique et refus hors
+fenêtre, WPJR restauré puis champs recalculés. Admission id3 en dernier puis id2
+intercalée : mêmes dérivées/source que préparation directe ; id4 sature, attente
+conservée, copie élargie/retry/extend_into reçus sans altérer l'ancienne publication.
+
+Service d'impacts : horizon4s insuffisant à4,1s, refus et sortie intacte ; extension
+à8s identique àreconstruction. Confirmation refusée avec horizon100s, attente
+sauvegardée/restaurée ; deux services reprennent avec8s et retrouvent le même champ
+à0,5/0,75/4,1/6s. Snapshot tronqué refusé, publication préservée. Aucun champ dérivé
+sérialisé ; la publication ancienne de pression pendant saturation représente les
+seules sources publiées, et n'est pas présentée comme un journal sans attente.
+
+**Réception :** trois nouveaux tests debug/release ; workspace331 réussis/cinq ignorés,
+C18/C02 inchangés. Aucun seuil déplacé ni correction runtime nécessaire. Comparaison
+exacte des chemins d'état, pas une nouvelle preuve physique ni mesure de coût.
+
+**Suivi :** S181-1 réalisée sur ce montage ; A50/B4 restent partiels.117 ADR,225 angles,
+262 leçons,18 invariants,6 SPEC,23 cas. Aucun nouvel ADR, angle ni leçon ; les
+obligations existantes de rejeu et de source sont reçues sur le nouveau consommateur.
+I-03/06/08/17/18 conservés ; pas de changement de format, d'allocation de requête ou
+de contrat de pente. Déterminisme multiplateforme et solveur3D non reçus.
+
+**Suite S183 : S182-1**, coût complet de la requête et de sa source sur plusieurs
+lots/recettes : préparation, actualisation, évaluation, refus et allocations, comparés
+au chemin de surface àentrées identiques. Publier les conditions de mesure avant tout
+budget ; puis consommation perturbative. BILAN-S145/S176 portés, aucun arbitrage humain.

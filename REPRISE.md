@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-12 01:39 +02:00
+JETON            : libre
+Battement        : 2026-09-12 01:41 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S182
-Dernière session : S181 — composition différentielle mixte reçue
-Session suivante : S182 — S181-1/A50 : recevoir le consommateur différentiel dans le cycle vivant
+Session en cours : aucune
+Dernière session : S182 — cycle vivant et rejeu différentiel reçus
+Session suivante : S183 — S182-1/A50 : mesurer coût complet et allocations du consommateur différentiel
 
 *S160 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
 rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour.*
@@ -187,6 +187,18 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S182 — 2026-09-12 :** [CYCLE-DIFFERENTIEL-S182](docs/validation/CYCLE-DIFFERENTIEL-S182.md).
+**S181-1 réalisée sur le montage de bibliothèque.** Actualisation, admissions
+incrémentales/intercalées, saturation/reprise, renouvellement et restauration reçus :
+34 scalaires en bits, dérivées/source identiques àla reconstruction directe. Trois
+nouveaux tests debug/release ; workspace331 réussis/cinq ignorés, C18/C02 inchangés.
+Code d'exécution inchangé, ADR-117 appliqué ; aucun nouvel ADR, angle ou leçon.
+117 ADR,225 angles,262 leçons,18 invariants,6 SPEC,23 cas. A50/B4 restent partiels.
+**Suite S183 : S182-1/A50**, coût complet de la requête et de sa source sur plusieurs
+lots/recettes : préparation, actualisation, évaluation, refus et allocations, comparés
+au chemin de surface àentrées identiques. Conditions de mesure avant budget ; puis
+consommation perturbative. BILAN-S145/S176 portés ; aucun arbitrage humain nouveau.
 
 **S181 — 2026-09-12 :** [COMPOSITION-DIFFERENTIELLE-S181](docs/validation/COMPOSITION-DIFFERENTIELLE-S181.md),
 [ADR-117](docs/adr/ADR-117-composition-differentielle-mixte.md), actée.

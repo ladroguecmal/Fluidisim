@@ -4066,3 +4066,8 @@ DIFFERENTIEL-PRESSION-S180, contre-épreuve à56Pa avec eta=u=0.
 les interactions après sommation, et la pression imposée est comptée une fois. La
 réception confronte la source totale aux sources isolées et au gradient de Bernoulli.
 Voir COMPOSITION-DIFFERENTIELLE-S181 ; aucune nouvelle leçon numérotée.
+
+**Application S182 :** la réception du rejeu s'étend aux nouvelles sorties, source
+comprise : l'identité antérieure de la seule surface ne prouve pas celle des dérivées.
+Trente-quatre scalaires confrontés en bits après publication et restauration ; voir
+CYCLE-DIFFERENTIEL-S182. Application des exigences existantes, pas de nouvelle leçon.

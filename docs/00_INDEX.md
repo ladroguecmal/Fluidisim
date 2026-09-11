@@ -17,6 +17,14 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S182 :** [CYCLE-DIFFERENTIEL-S182](validation/CYCLE-DIFFERENTIEL-S182.md), ADR-117
+inchangé. S181-1 réalisée : dérivées/source identiques en bits après actualisation,
+admission, saturation/reprise, renouvellement et restauration. Trois nouveaux tests
+debug/release ; workspace331/cinq ignorés, C18/C02 inchangés. Runtime inchangé.
+117 ADR,225 angles,262 leçons,18 invariants,6 SPEC,23 cas ; aucun nouvel angle ni leçon.
+**Suite S183 : S182-1**, coût complet et allocations du consommateur différentiel,
+conditions de mesure avant budget ; puis consommation perturbative. A50/B4 partiels.
+
 **S181 :** [COMPOSITION-DIFFERENTIELLE-S181](validation/COMPOSITION-DIFFERENTIELLE-S181.md),
 [ADR-117](adr/ADR-117-composition-differentielle-mixte.md), actée. S180-1 réalisée
 sur les publications mixtes, entrée monde, source après somme et pression comptée une

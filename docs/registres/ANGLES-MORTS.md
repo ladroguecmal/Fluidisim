@@ -2186,3 +2186,9 @@ angle. S180-1 compose B+impacts+pressions ; monde, cycle vivant, coût et δ3D r
 ADR-117 : entrée WorldPos, contexte/instant partagés, source après somme et pression
 imposée comptée une fois. Quatre nouveaux tests, termes croisés et refus atomiques.
 A50 reste partielle, aucun nouvel angle ; S181-1 reçoit le cycle vivant du consommateur.
+
+**Suivi A50 — S182 : cycle vivant du consommateur différentiel reçu.**
+[CYCLE-DIFFERENTIEL-S182](../validation/CYCLE-DIFFERENTIEL-S182.md) : actualisation,
+admission, saturation/reprise, renouvellement et restauration identiques àla préparation
+directe, dérivées/source comprises. Trois nouveaux tests, aucun nouvel angle.
+A50/B4 partiels ; S182-1 mesure coût et allocations avant budget de consommation.

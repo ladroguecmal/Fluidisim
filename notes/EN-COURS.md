@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S182 — en cours
+Session : S182 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S181-1/A50, recevoir le consommateur différentiel dans le cycle vivant.
 
@@ -67,7 +67,7 @@ Objectif : S181-1/A50, recevoir le consommateur différentiel dans le cycle viva
 - [x] **P1** — état réel, jeton et plan seul.
 - [x] **P2** — déclarer le protocole cycle/direct, refus et rejeu avant les tests.
 - [x] **P3** — recevoir actualisation, admission, renouvellement et rejeu ; corriger si nécessaire.
-- [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [x] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
@@ -80,6 +80,9 @@ P3 S182 : trois tests nouveaux debug/release, workspace331/cinq ignorés ; C18/C
 inchangés.34 scalaires en bits par point, source comprise. Actualisation, admission
 incrémentale/intercalée, saturation/reprise, renouvellement et restauration reçus.
 Aucune correction runtime. Suite S182-1 coût complet du consommateur différentiel.
+
+P4 S182 : rituel terminé ;117 ADR/225 angles/262 leçons/18 invariants/6 SPEC/23 cas.
+Aucun nouvel ADR, angle ou leçon. Jeton libre ; suite S183, mesure du coût complet.
 
 S181 : master a77ea78 propre, quatre copies alignées ;116 ADR/225 angles/262 leçons.
 Le montage mixed_water possède déjà classify (contexte/temps/perte), BoundBackground

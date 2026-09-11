@@ -382,3 +382,8 @@ source, avec contrôle du contexte et de l'instant. Quatre nouveaux tests ;328 r
 cinq ignorés, références inchangées. Suite : recevoir ce consommateur dans le cycle vivant.
 Voir [COMPOSITION-DIFFERENTIELLE-S181](docs/validation/COMPOSITION-DIFFERENTIELLE-S181.md),
 [ADR-117](docs/adr/ADR-117-composition-differentielle-mixte.md).
+
+**S182 :** dérivées et source préservées lors des mises à jour, admissions,
+renouvellements et restaurations. Trois nouveaux tests ;331 réussis/cinq ignorés,
+références inchangées, aucun correctif d'exécution nécessaire. Suite : mesurer le coût.
+Voir [CYCLE-DIFFERENTIEL-S182](docs/validation/CYCLE-DIFFERENTIEL-S182.md).

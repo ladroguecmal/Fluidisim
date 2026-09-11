@@ -65,3 +65,8 @@ repère est contrôlée ; la géométrie de son association à B reste déclaré
 mixte : réactualisation de pression, renouvellement d'impact, refus/reprise et rejeu,
 dérivées et source comparées à une préparation directe au même instant. Puis coût et
 consommation perturbative. Porteur : construction BILAN-S145/BILAN-B4-S176.
+
+**Suivi S182 — 2026-09-12 :** S181-1 réalisée sur le montage de bibliothèque,
+[CYCLE-DIFFERENTIEL-S182](CYCLE-DIFFERENTIEL-S182.md). Dérivées/source identiques
+après actualisation, admission, saturation/reprise, renouvellement et restauration.
+S182-1 mesure le coût ; la portée physique de S181 reste inchangée.

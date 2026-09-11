@@ -132,3 +132,7 @@ leur composition avec B sur les publications mixtes, avec entrée WorldPos.
 La source est contractée après la somme ; interactions et refus atomiques reçus.
 A50/B4 restent partiels : S181-1 reçoit le consommateur dans le cycle vivant avant
 réception de coût et consommation perturbative ; aucun solveur volumétrique choisi.
+
+**Suivi S182 :** le cycle vivant du consommateur différentiel est reçu sur le montage
+de bibliothèque, [CYCLE-DIFFERENTIEL-S182](CYCLE-DIFFERENTIEL-S182.md). S182-1 mesure
+coût et allocations avant budget de consommation perturbative. A50/B4 restent partiels.

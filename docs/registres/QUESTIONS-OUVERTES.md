@@ -1657,3 +1657,13 @@ entrée par entrée. Le fil reprend ci-dessous.
   mixte : réactualisation de pression, renouvellement d'impact, refus/reprise et rejeu,
   dérivées et source identiques à la préparation directe au même instant. Puis coût
   et consommation perturbative. Porteur : construction BILAN-S145/BILAN-B4-S176.
+
+### Suivi S182 — Cycle différentiel reçu
+
+- **S181-1 réalisée sur le montage de bibliothèque**, CYCLE-DIFFERENTIEL-S182.
+  Actualisation, admission, saturation/reprise, renouvellement et restauration :
+  dérivées/source identiques àla reconstruction directe. A50/B4 restent partiels.
+- **S182-1 : ouverte, priorité S183.** Mesurer coût complet de la requête et de sa
+  source sur plusieurs lots/recettes : préparation, actualisation, évaluation, refus
+  et allocations. Comparer àla surface àentrées identiques ; conditions/limites de
+  mesure avant budget de consommation perturbative. BILAN-S145/BILAN-B4-S176 portés.
