@@ -1530,6 +1530,16 @@ entrée par entrée. Le fil reprend ci-dessous.
   réseau source, mesurer dérive et bilan ; paramètre explicite de SPEC-004 §6.2/B4.
   Porteur : session de construction, poursuite B4 selon BILAN-S145. A216/A217 inchangées.
 
+### Suivi S170 — Source décimée mesurée
+
+- **S169-1 réalisée sur véhicule1D**, SOURCE-DECIMEE-S170 : source exacte, linéaire
+  interpolée et omise, quatre tests et48 évolutions reçus. A50 reste partielle ; aucun
+  seuil is_smooth_at ni interpolation conjointe du fond reçue.
+- **S170-1 / A225 : ouverte, priorité S171.** Comparer source directe interpolée à une
+  source par différence de flux reconstruit partagé aux faces ; mesurer injection et
+  erreur locale, décalages et résolutions indépendants. Aucun recalage global masquant
+  le défaut. Porteur : session de construction, poursuite B4 selon BILAN-S145.
+
 ### Suivi S168 — Volume moyen et flux intégrés
 
 - **S167-1 réalisée, A223 traitée sur véhicule à fond connu.** VOLUME-MOYEN-S168 :

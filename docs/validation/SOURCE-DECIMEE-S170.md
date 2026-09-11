@@ -39,4 +39,85 @@ Le nombre de nœuds est un coût géométrique, pas un gain de temps runtime mes
 
 ## 2. Résultats
 
-À produire en P3/P4.
+### 2.1 Effet du réseau à solveur fixé
+
+N240, dx0,5 m, pas nominal. E=max erreur hauteur/0,05 contre T exact ; D=max différence
+de champ/0,05 par rapport à S exacte aux mêmes mailles. Source h normalisée par max|S_h|
+des moyennes exactes. Volume relatif au volume initial (~60 m² par unité de largeur).
+
+| H (m) | Décalage/H | Erreur source h | E | D | Défaut volume |
+|---|---:|---:|---:|---:|---:|
+|Exacte|—|0|0,135612|0|9,234265e-16|
+|Omise|—|1|0,997949|0,989676|8,881982e-7|
+|1|0|0,006100|0,137232|0,003768|4,254010e-8|
+|1|0,5|0,006169|0,137231|0,003748|4,435084e-8|
+|2|0|0,033642|0,142056|0,014667|1,664352e-7|
+|2|0,5|0,031995|0,142037|0,015099|1,954109e-7|
+|4|0|0,133058|0,160693|0,057859|1,076957e-6|
+|4|0,5|0,133058|0,160684|0,059133|6,124864e-7|
+|8|0|0,484443|0,302221|0,246223|6,309842e-5|
+|8|0,5|0,335303|0,210372|0,172182|4,940147e-5|
+|16|0|0,714807|0,480192|0,444852|6,024954e-3|
+|16|0,5|1,129711|1,092567|1,067309|6,398198e-3|
+
+Le réseau16 m décalé donne plus d'erreur de champ que S omise : l'interpolation n'est
+pas un simple affaiblissement monotone. Les signes d'injection massique changent avec
+la phase : à H8, +6,384401e-4 contre−4,998521e-4 m²/s ; à H16, −0,06096147 contre
++0,06473801 m²/s. Ce sont des défauts numériques dans le banc, pas des volumes gameplay.
+
+### 2.2 Séparer les résolutions
+
+Origine0, effet D du réseau H8 m :0,239621 →0,246223 →0,250013 aux N120/240/480.
+Le solveur plus fin ne supprime pas ce défaut. L'injection intégrée reste6,384401e-4 m²/s
+et le défaut de volume6,309842e-5, car l'intégrale du même interpolant ne change pas
+avec sa partition en cellules. Au demi-pas N240, D=0,246241 : le défaut n'est pas temporel.
+
+Avec ratio H/dx fixé à4, les mêmes grilles donnent H4/2/1 m et D=0,055454/0,014667/0,003862.
+**Un ratio de décimation ne décrit donc pas à lui seul la précision** : la taille physique
+du réseau devant la variation de S compte. Le cas n'a pas de longueur d'onde unique ;
+ne pas remplacer arbitrairement la largeur gaussienne8 m par λ_cut.
+Les nombres de nœuds déclarés couvrent le canal étendu nécessaire au réseau, non seulement
+la fenêtre locale ; ils ne prouvent ni un gain de temps, ni le facteur64 en3D.
+
+### 2.3 Bilan prédit, pas bilan corrigé en cachette
+
+À chaque pas, le défaut **signé** est comparé à t somme(S_H−S_exact)_h dx.
+Écart maximal relatif<=2,20e-15 sur48 évolutions. Le flux de chaque calcul est celui
+effectivement utilisé ; ni la prédiction ni le témoin ne modifient les états évolués.
+La source interpolée injecte un terme volumique artificiel, identifié séparément de
+l'erreur de transport ; le bilan physique brut est conservé dans la table.
+
+L'omission a ici un petit défaut de volume malgré une grande erreur de champ : la
+source exacte possède une petite intégrale nette, mais une structure locale importante.
+Ni volume proche de zéro, ni conservation après ajout de la source ne reçoit cette structure.
+Courant maximal0,217062 ; aucun état invalide ou écrêtage.
+
+## 3. Réception et limites
+
+Depuis `code/` :
+
+```
+cargo test -p water-core --example source_decimee
+cargo run -p water-core --release --example source_decimee
+```
+
+Quatre nouveaux tests reçus : intégrale de l'interpolant affine à travers plusieurs
+segments, omission et prédiction, raffinement source à solveur fixé, injection inchangée
+au raffinement du solveur à source fixée. Campagne quatre configurations de solveur,
+douze sources chacune=48 évolutions. La première lecture CSV a échoué parce que H et h
+sont confondus par PowerShell ; colonne renommée source_spacing, campagne relancée.
+Supports et bibliothèques inchangés ; tests précédents non rejoués, S165–S169 reçus
+S169 et workspace299/cinq ignorés reçu S163. Aucun coût runtime reçu ni dépendance ajoutée.
+
+**S169-1 réalisée, A50 reste partielle.** La sensibilité à la source décimée est mesurée
+sur ce véhicule1D, pour une source spatiale figée exacte connue. L'interface réelle
+échantillonne aussi les champs du fond ; cette interpolation conjointe et les dérivées
+3D/temps ne sont pas reçues. Pas de seuil is_smooth_at, pas d'ADR ni profil adopté.
+A216/A217 inchangées, I-01/04/12/14/15 inchangés ; B4 général non reçu.
+
+**A225 / suite S171 : S170-1**, comparer à une source obtenue par différence d'un **flux
+reconstruit commun aux faces**, pour que son intégrale télescope. Mesurer si cela corrige
+l'injection tout en gardant une erreur locale ; ne pas présenter une source conservative
+comme précise par construction. Garder source exacte, interpolation directe et omission
+comme témoins, phase du réseau et raffinement indépendants. Aucun recalage global uniforme
+de S pour cacher son intégrale : l'amélioration doit venir d'une discrétisation explicite.

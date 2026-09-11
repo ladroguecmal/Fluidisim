@@ -118,3 +118,7 @@ source physique connue, comparer source moyenne exacte, interpolation sur résea
 décimé et omission. Raffiner séparément dx et le réseau source, observer dérive et
 bilan sans les confondre. Ne pas conclure à une faillite de l'architecture sur un défaut
 de source interpolée. Aucun nouvel angle numéroté nécessaire : ce travail relève d'A50.
+
+**Suivi S170 : S169-1 réalisée sur véhicule**, voir [SOURCE-DECIMEE-S170](SOURCE-DECIMEE-S170.md).
+Sensibilité au réseau et à sa phase mesurée ; injection artificielle prédite. A50 reste
+partielle ; discrétisation conservative de la source suivie A225/S170-1.

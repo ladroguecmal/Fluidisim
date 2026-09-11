@@ -67,7 +67,7 @@ Objectif : S169-1/A50, source moyenne exacte, interpolée sur réseau décimé e
 - [x] **P1** — état réel, jeton et plan seul.
 - [x] **P2** — protocole et bilan prédit du défaut de source, copies synchronisées.
 - [x] **P3** — construire la sonde, comparer résolutions et décalages du réseau source.
-- [ ] **P4** — réception, résultats, limites et suivi A50.
+- [x] **P4** — réception, résultats, limites et suivi A50.
 - [ ] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
@@ -83,3 +83,6 @@ exacte de l'interpolant linéaire, défaut signé du volume prédit par l'erreur
 P3 : quatre tests propres reçus et48 évolutions release. Défaut de volume signé prédit
 à<=2,20e-15 ; réseau16m décalé peut faire pire que l'omission. Aucun support modifié.
 En-tête CSV H renommé source_spacing : PowerShell confondait H et h ; campagne relancée.
+
+P4 : S169-1 réalisée sur véhicule, A50 partielle ; A225/S170-1 source par flux partagé.
+Mesures publiées sans seuil physique. Pas d'ADR ni runtime modifié.

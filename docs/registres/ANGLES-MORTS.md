@@ -2100,3 +2100,14 @@ total produit un résidu sur Q variable ; A50 reste partielle.
 **Suivi A50 — S169 : source grossière encore non reçue.** Après les contrôles S163–S169,
 S169-1 priorise le réseau décimé de SPEC-004 §6.2 : source exacte, interpolée et omise,
 fond figé asymétrique, résolutions du solveur et de la source variées séparément.
+
+**Suivi A50 — S170 : décimation spatiale de S reçue sur véhicule, A50 reste partielle.**
+SOURCE-DECIMEE-S170 :48 évolutions, source exacte/interpolée/omise, solveur et réseau
+indépendants. Pas de seuil is_smooth_at ni réception de l'interpolation conjointe du fond.
+
+- **A225** *(sévérité2, S170 ; ouverte)* — **Interpoler directement une source conservative
+  peut introduire une injection nette artificielle.** Le défaut de volume égale l'intégrale
+  temporelle de l'erreur de source, reçue à l'arrondi ; son signe change avec le décalage
+  du réseau. Raffiner le solveur à réseau fixé n'y change rien. S170-1 : source par
+  différence de flux reconstruit aux faces, sans correction globale, mesurer intégrale
+  et précision locale séparément. Limite de véhicule1D, aucun défaut runtime observé.
