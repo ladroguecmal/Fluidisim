@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
+JETON            : libre
 Battement        : 2026-09-11 08:02 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S172
-Dernière session : S171 — flux partagés, bilan et précision distingués ; trois nouveaux tests
-Session suivante : S172 — S171-1/A50 : reconstruire conjointement le fond figé Q et sa source
+Session en cours : aucune
+Dernière session : S172 — Q et source reconstruits ensemble ; quatre nouveaux tests
+Session suivante : S173 — S172-1/A50 : fond reconstruit mobile et cohérence temporelle de la source
 
 *S160 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
 rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour.*
@@ -187,6 +187,21 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S172 — 2026-09-11 :** [FOND-RECONSTRUIT-S172](docs/validation/FOND-RECONSTRUIT-S172.md).
+**S171-1 réalisée sur fond figé, A50 partielle.** Q_H et source construits conjointement ;
+d0=T0-Q_H conserve le même total initial. Le défaut S-Lnum(Q_H) explique les écarts.
+Quatre nouveaux tests,88 évolutions résiduelles et4 témoins totaux ;44 variantes à
+source discrète identiques au témoin total à<=2,23e-16, volume à<=2,29e-15 relatif.
+Le maximum du défaut physique de source peut persister quand sa norme intégrée et
+son effet sur le champ diminuent avec dx. Aucun ordre universel ni seuil is_smooth_at.
+112 ADR,225 angles,254 leçons,18 invariants,6 SPEC,23 cas. L254 ; pas de nouvel angle.
+A225 reste traitée sur véhicule à flux de bord connus ; A216/A217 inchangées. Aucun
+ADR ni runtime adopté. Supports inchangés, workspace non rejoué (S163 :299/cinq ignorés).
+**Suite S173 : S172-1/A50**, Q_H mobile et source cohérente avec sa variation temporelle
+aux étages RK2 ; mesurer préservation, transport et volume, garder le témoin discret.
+Réseau spatial et pas temporel variés séparément, frontière analytique connue.
+BILAN-S145 porté par B4 après B1/S63-1. Aucun arbitrage humain nouveau.
 
 **S171 — 2026-09-11 :** [SOURCE-FLUX-PARTAGES-S171](docs/validation/SOURCE-FLUX-PARTAGES-S171.md).
 **S170-1 réalisée ; A225 traitée sur véhicule1D à flux de bord connus.** Flux partagés

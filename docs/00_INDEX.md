@@ -17,6 +17,13 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S172 :** [FOND-RECONSTRUIT-S172](validation/FOND-RECONSTRUIT-S172.md).
+S171-1 réalisée sur fond figé ; Q et source reconstruits ensemble, même total initial.
+Quatre nouveaux tests,88 évolutions résiduelles et4 témoins totaux ; identité discrète
+à<=2,23e-16, volume à<=2,29e-15. A50 partielle ; aucun runtime adopté.
+112 ADR,225 angles,254 leçons,18 invariants,6 SPEC,23 cas. L254, pas de nouvel angle.
+**Suite S173 : S172-1/A50**, fond mobile et cohérence temporelle de la source.
+
 **S171 :** [SOURCE-FLUX-PARTAGES-S171](validation/SOURCE-FLUX-PARTAGES-S171.md).
 S170-1 réalisée, A225 traitée sur véhicule1D à flux de bord connus ; A50 partielle.
 Flux partagés ancrés : volume fermé à<=2,32e-15, précision locale encore dépendante

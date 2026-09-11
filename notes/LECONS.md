@@ -3952,3 +3952,19 @@ différences locales exactes. Recevoir séparément intégrale, structure locale
 évolué ; déclarer aussi la disponibilité des valeurs utilisées aux bornes. Une preuve
 de conservation ne remplace ni une preuve de précision ni une interface fournissant
 les données nécessaires. Voir SOURCE-FLUX-PARTAGES-S171 et A225.
+
+## L254 — Le résidu dépend de sa référence autant que de la perturbation
+
+*(S172)* Changer la représentation du fond Q sans changer l’eau initiale impose de
+changer d=T-Q. Le résidu peut alors porter une grande compensation de représentation
+sans nouvel événement physique. Une comparaison qui impose d=0 aux deux fonds
+changerait aussi l’état total et confondrait deux expériences.
+
+Même total initial ne suffit pourtant pas : l’évolution conserve le défaut
+S-Lnum(Q). Recevoir la cohérence de la source avec la représentation, puis comparer
+à une évolution totale indépendante. L’identité discrète élimine cette dépendance
+mais ne garantit pas la préservation physique d’un fond déjà solution exacte.
+
+Mesurer représentation, évolution et bilan séparément ; aucune de ces identités ne
+constitue à elle seule un critère physique d’activation du résidu. Voir
+FOND-RECONSTRUIT-S172 et A50.

@@ -8594,3 +8594,37 @@ L253 ajoutée.112 ADR,225 angles,253 leçons,18 invariants,6 SPEC,23 cas.
 avec le même total initial d=Tinitial-Qreconstruit. Séparer représentation, évolution
 et bilan ; frontière analytique et témoin Q exact. BILAN-S145 porté par B4 après
 B1/S63-1. Aucun arbitrage humain nouveau. Clôture avec copies alignées et jeton libre.
+
+## S172 — 2026-09-11 — Même eau initiale, fonds reconstruits différents
+
+**Entrée :** master e6b25f0 propre, quatre copies alignées ; S171-1/A50. Plan seul,
+jeton pris et diffusé aux trois copies propres. Copie principale, aucune création ou
+suppression de worktree. Corpus et invariants relus ; aucun changement de décision.
+
+**Produit :** fond_reconstruit.rs et FOND-RECONSTRUIT-S172. Fond figé Q_H linéaire en
+(h,q), moyennes intégrées par segments, bornes exactes ; d0=T0-Q_H maintient le même
+état total. Deux sources par fond, physique ou discrète, plus un solveur total indépendant.
+L’identité T_t=Lnum(T)+[S-Lnum(Q_H)] localise la différence entre représentations.
+Aucun support partagé ou bibliothèque modifié ; pas de stockage de B adopté.
+
+**Chiffres :** quatre nouveaux tests,88 évolutions résiduelles et4 témoins reçus.
+Total initial restitué à<=3,47e-18 ;44 variantes discrètes identiques au témoin total
+à<=2,23e-16. Volume fermé à<=2,29e-15 relatif, Courant<=0,215253. ÀN240/H16/phase0,
+le résidu initial compense61,7 % de l’amplitude sans erreur initiale du total.
+ÀH8/phase0, l’écart au témoin physique Q exact descend0,05792→0,03226→0,01700
+quand N120→240→480. Le maximum du défaut de source reste0,01269 m/s, sa norme
+intégrée est divisée environ par deux. Mesure intégrée ajoutée après ce constat ;
+les quatre tests et la campagne ont été relancés, sans cumuler les deux exécutions.
+
+**Portée :** S171-1 réalisée sur véhicule figé, A50 partielle. A225 reste traitée dans
+son périmètre, A216/A217 inchangées. Pas de nouvel angle ; L254 ajoutée. Le témoin
+Discrete ne reçoit pas la préservation d’un fond mobile, ni un seuil is_smooth_at.
+Pas de force, perception,3D, coût runtime ou nouvel ADR. Workspace non rejoué
+(dernière réception S163 :299 réussis,5 ignorés). Invariants inchangés : le véhicule
+f64 déterministe ne décide ni mélange stochastique ni stockage de réalisations dans B.
+112 ADR,225 angles,254 leçons,18 invariants,6 SPEC,23 cas.
+
+**Suite S173 : S172-1/A50**, Q_H mobile et source cohérente avec sa variation aux
+étages RK2 ; préservation, transport et volume, témoin discret, résolutions séparées.
+BILAN-S145 porté via B4 après B1/S63-1. Aucun arbitrage humain nouveau. Clôture avec
+jeton libre, commits conservés et quatre copies alignées.
