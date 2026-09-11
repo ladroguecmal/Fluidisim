@@ -66,7 +66,7 @@ Objectif : S171-1/A50, Q figé reconstruit et source issue du même fond.
 
 - [x] **P1** — état réel, jeton, plan seul.
 - [x] **P2** — dériver le défaut de discrétisation et construire la sonde conjointe.
-- [ ] **P3** — recevoir tests et campagne ; publier résultats, limites et suivi.
+- [x] **P3** — recevoir tests et campagne ; publier résultats, limites et suivi.
 - [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
@@ -77,3 +77,6 @@ Q grossier linéaire en (h,q), moyennes exactes et S par différence de F(Q) aux
 Même T initial via d=T-Q. Comparer aussi S=Lnum(Q), identité discrète du solveur total,
 pour isoler le défaut Lphys(Q)-Lnum(Q), sans le déclarer nouveau schéma runtime.
 A50 partielle ; BILAN-S145 porté via B4 après B1/S63-1.
+P3 : quatre tests reçus,88 évolutions résiduelles +4 témoins. Identité discrète
+<=2,23e-16 ; volume<=2,29e-15. G1 ajouté après pic persistant ; campagne relancée.
+S171-1 réalisée sur fond figé, A50 partielle ; suite S172-1 fond mobile.

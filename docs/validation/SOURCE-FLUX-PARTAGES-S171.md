@@ -115,3 +115,8 @@ S à partir de ce même fond reconstruit. Initialiser d=Tinitial-Qreconstruit po
 le même état total physique, mesurer séparément erreur de représentation, évolution
 et bilan. Garder le témoin Q exact et les frontières analytiques ; commencer par le fond
 figé. Porteur : session de construction, poursuite B4/BILAN-S145.
+
+**Suivi S172 : S171-1 réalisée sur véhicule figé**, voir
+[FOND-RECONSTRUIT-S172](FOND-RECONSTRUIT-S172.md). Même total initial pour Q exact et
+reconstruit ; source physique conjointe, témoin discret indépendant. A50 partielle ;
+suite S172-1 : fond reconstruit mobile et cohérence temporelle de sa source.

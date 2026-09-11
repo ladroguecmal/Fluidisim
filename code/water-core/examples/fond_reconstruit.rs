@@ -73,6 +73,8 @@ struct Report {
     initial: f64,
     source_gap_h: f64,
     source_gap_q: f64,
+    source_gap_l1_h: f64,
+    source_gap_l1_q: f64,
     h: f64,
     q: f64,
     effect: f64,
@@ -131,6 +133,8 @@ fn run(n: usize, factor: f64, grids: &[(f64, f64)]) -> Vec<Case> {
                 let gap = physical.minus(numeric);
                 report.source_gap_h = report.source_gap_h.max(gap.h.abs());
                 report.source_gap_q = report.source_gap_q.max(gap.q.abs());
+                report.source_gap_l1_h += gap.h.abs() * dx;
+                report.source_gap_l1_q += gap.q.abs() * dx;
                 let e = bg[i].minus(initial[i]);
                 report.representation_h = report.representation_h.max(e.h.abs() / 0.05);
                 report.representation_q =
@@ -225,12 +229,12 @@ fn main() {
             grids.push((h, p));
         }
     }
-    println!("n,factor,spacing,phase,source,representation_h,representation_q,initial,source_gap_h,source_gap_q,h,q,effect,identity,volume,courant");
+    println!("n,factor,spacing,phase,source,representation_h,representation_q,initial,source_gap_h,source_gap_q,source_gap_l1_h,source_gap_l1_q,h,q,effect,identity,volume,courant");
     for (n, factor) in [(120, 1.0), (240, 1.0), (480, 1.0), (240, 2.0)] {
         for c in run(n, factor, &grids) {
             let r = c.report;
             let mode = if c.discrete { "Discrete" } else { "Physical" };
-            println!("{n},{factor},{},{},{mode},{:.6e},{:.6e},{:.6e},{:.6e},{:.6e},{:.6e},{:.6e},{:.6e},{:.6e},{:.6e},{:.6}",c.spacing,c.phase,r.representation_h,r.representation_q,r.initial,r.source_gap_h,r.source_gap_q,r.h,r.q,r.effect,r.identity,r.volume,r.courant);
+            println!("{n},{factor},{},{},{mode},{:.6e},{:.6e},{:.6e},{:.6e},{:.6e},{:.6e},{:.6e},{:.6e},{:.6e},{:.6e},{:.6e},{:.6e},{:.6}",c.spacing,c.phase,r.representation_h,r.representation_q,r.initial,r.source_gap_h,r.source_gap_q,r.source_gap_l1_h,r.source_gap_l1_q,r.h,r.q,r.effect,r.identity,r.volume,r.courant);
         }
     }
 }
@@ -238,6 +242,14 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn source_gap_peak_and_integrated_norm_have_distinct_refinement_behavior() {
+        let a = run(120, 1.0, &[(0.0, 0.0), (8.0, 0.0)])[2].report;
+        let b = run(240, 1.0, &[(0.0, 0.0), (8.0, 0.0)])[2].report;
+        assert!(b.source_gap_h > 0.9 * a.source_gap_h);
+        assert!(b.source_gap_l1_h < 0.7 * a.source_gap_l1_h);
+        assert!(b.effect < a.effect);
+    }
     #[test]
     fn means_cross_nodes_and_keep_exact_boundary_samples() {
         let g = Background {

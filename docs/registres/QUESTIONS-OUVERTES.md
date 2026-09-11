@@ -1562,3 +1562,12 @@ entrée par entrée. Le fil reprend ci-dessous.
   Fond figé, frontière analytique et témoin Q exact ; mesurer représentation, évolution
   et volume séparément. Porteur : session de construction, poursuite B4/BILAN-S145.
   Aucun seuil is_smooth_at ni runtime adopté ; A216/A217 inchangées.
+
+### Suivi S172 — Fond et source reconstruits ensemble
+
+- **S171-1 réalisée sur véhicule figé**, FOND-RECONSTRUIT-S172 : quatre nouveaux tests,
+  88 évolutions résiduelles et4 témoins totaux. A50 reste partielle ; aucun runtime adopté.
+- **S172-1 / A50 : ouverte, priorité S173.** Faire évoluer le fond reconstruit Q_H,
+  dériver la source avec sa variation temporelle aux étages RK2 ; mesurer préservation,
+  transport et bilan, témoin discret conservé. Réseau spatial et pas temporel variés
+  séparément, frontière analytique connue. Porteur : construction, poursuite B4/BILAN-S145.

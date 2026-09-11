@@ -2121,3 +2121,10 @@ les erreurs aux bornes ; aucune correction uniforme de source. Pas de nouveau ru
 **Suivi A50 — S171 : toujours partielle.** S170-1 réalisée ; S171-1 étend au fond Q
 reconstruit avec source cohérente, même état total initial. Flux de bord exacts encore
 supposés disponibles. A216/A217 inchangées.
+
+**Suivi A50 — S172 : reconstruction conjointe reçue sur véhicule figé, reste partielle.**
+[FOND-RECONSTRUIT-S172](../validation/FOND-RECONSTRUIT-S172.md) : même total initial,
+Q reconstruit et source physique cohérente, défaut Lphys(Q)-Lnum(Q) mesuré en maximum
+et norme intégrée. Le témoin S=Lnum(Q) retrouve le solveur total à<=2,23e-16 mais ne
+prouve pas la préservation du fond mobile. S171-1 réalisée ; S172-1 reçoit cette étape.
+A225 reste traitée à flux de bord connus ; A216/A217 inchangées. Aucun nouvel angle.
