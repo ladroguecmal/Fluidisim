@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S171 — en cours
+Session : S171 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S170-1/A225, différences de flux partagés ; conservation et précision distinctes.
 
@@ -67,7 +67,7 @@ Objectif : S170-1/A225, différences de flux partagés ; conservation et précis
 - [x] **P1** — état réel, jeton et plan seul.
 - [x] **P2** — étendre la sonde avec flux interpolé brut et bornes physiques exactes ; protocole.
 - [x] **P3** — tests et campagne indépendante des résolutions, résultats et suivi.
-- [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [x] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
@@ -78,3 +78,5 @@ Comparer donc flux brut et flux ancré aux bornes exactes, sans correction unifo
 A50 reste partielle, aucun runtime ou seuil is_smooth_at adopté. BILAN-S145 suivi par B4.
 P3 :7 tests (3 nouveaux),128 évolutions reçus. Volume ancré<=2,32e-15 ;
 prédiction<=2,52e-15. A225 traitée sur véhicule, A50 partielle ; suite S171-1.
+
+P4 : rituel exécuté ; L253,225 angles,112 ADR. Suite S172/S171-1.

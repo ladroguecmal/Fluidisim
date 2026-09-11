@@ -3940,3 +3940,15 @@ Une injection presque nulle ne garantit pas une source locale juste : l'omission
 presque toute l'onde tout en ayant un petit défaut de volume, car l'intégrale nette de
 la source exacte est petite. Recevoir structure locale et bilan séparément.
 Voir SOURCE-DECIMEE-S170 et A225.
+## L253 — Une somme télescopique transporte les erreurs aux bornes
+
+*(S171)* Construire une source comme différence de flux partagés annule les flux
+intérieurs dans le bilan global. Il reste le flux à chaque extrémité : s’il est
+interpolé avec erreur, le bilan physique garde cette erreur. Un alignement heureux
+des nœuds peut la masquer ; varier le décalage fait partie du test.
+
+Ancrer les flux aux valeurs exactes aux bornes ferme ce bilan, mais ne rend pas les
+différences locales exactes. Recevoir séparément intégrale, structure locale et champ
+évolué ; déclarer aussi la disponibilité des valeurs utilisées aux bornes. Une preuve
+de conservation ne remplace ni une preuve de précision ni une interface fournissant
+les données nécessaires. Voir SOURCE-FLUX-PARTAGES-S171 et A225.

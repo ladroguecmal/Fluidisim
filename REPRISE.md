@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-11 06:48 +02:00
+JETON            : libre
+Battement        : 2026-09-11 06:49 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S171
-Dernière session : S170 — source décimée mesurée, injection prédite ; quatre nouveaux tests
-Session suivante : S171 — S170-1/A225 : source par différence de flux partagés, bilan et précision locale
+Session en cours : aucune
+Dernière session : S171 — flux partagés, bilan et précision distingués ; trois nouveaux tests
+Session suivante : S172 — S171-1/A50 : reconstruire conjointement le fond figé Q et sa source
 
 *S160 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
 rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour.*
@@ -187,6 +187,20 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S171 — 2026-09-11 :** [SOURCE-FLUX-PARTAGES-S171](docs/validation/SOURCE-FLUX-PARTAGES-S171.md).
+**S170-1 réalisée ; A225 traitée sur véhicule1D à flux de bord connus.** Flux partagés
+bruts et ancrés aux bornes physiques exactes : télescopie intérieure seule insuffisante,
+volume ancré fermé à<=2,32e-15, prédiction de tous les témoins à<=2,52e-15.
+La précision du champ dépend deH et de la phase ; volume exact ne signifie pas champ
+exact. Sept tests de source_decimee dont trois nouveaux,128 évolutions reçues ; supports
+inchangés, bibliothèque non rejouée (S163 :299 tests/cinq ignorés).
+112 ADR,225 angles,253 leçons,18 invariants,6 SPEC,23 cas. L253, pas de nouvel angle.
+A50 partielle, A216/A217 inchangées ; aucun ADR, seuil is_smooth_at ou runtime adopté.
+**Suite S172 : S171-1/A50**, reconstruire Q figé et S issu de ce même fond, initialiser
+d=Tinitial-Qreconstruit pour garder le même état total ; mesurer représentation,
+évolution et bilan séparément. Frontière analytique et témoin Q exact. BILAN-S145 porté
+par B4 après B1/S63-1 ; pas de nouvel arbitrage humain.
 
 **S170 — 2026-09-11 :** [SOURCE-DECIMEE-S170](docs/validation/SOURCE-DECIMEE-S170.md).
 **S169-1 réalisée sur véhicule1D, A50 reste partielle.** Source exacte, omise et interpolée

@@ -8562,3 +8562,35 @@ runtime adopté ; I-01/04/12/14/15 inchangés. Aucun arbitrage humain nouveau.
 comparée à source directe/exacte/omise. Recevoir intégrale et erreur locale séparément,
 phases et résolutions indépendantes ; aucun recalage global uniforme pour masquer le défaut.
 BILAN-S145 porté via B4 après B1/S63-1. État final propre, jeton libre, copies synchronisées.
+## S171 — 2026-09-11 — Partager les flux conserve sans garantir la précision
+
+**Entrée :** master e88b046 propre, quatre copies alignées ; S170-1/A225.
+Plan committé seul. Travail dans la copie principale ; aucune copie créée ou supprimée.
+Les trois autres copies propres ont été avancées au commit P3 avant clôture.
+
+**Produit :** SOURCE-FLUX-PARTAGES-S171 et extension de source_decimee.rs. FluxRaw
+évalue une fois chaque face depuis un interpolant linéaire de F(Q). FluxAnchored
+insère les valeurs physiques exactes aux bornes30/90m ; aucune correction uniforme.
+Télescopie reçue dans les deux composantes ; les erreurs aux bornes demeurent dans
+le flux brut. Le nombre de nœuds retenus ne mesure pas le coût du constructeur.
+
+**Résultats :**128 évolutions ; volume FluxAnchored fermé à<=2,32e-15, prédiction du
+volume signé à<=2,52e-15 sur tous les témoins, Courant<=0,217062. N240/H8 : erreur
+normalisée de hauteur ancrée0,249 contre Linear0,302 àphase0, puis0,312 contre0,210
+àphase0,5. Aucun classement universel. H16/phase0 ancré : erreur0,844 malgré le bilan
+fermé. Raffinement du solveur ou demi-pas ne supprime pas le défaut du réseau grossier.
+
+**Réception :**7 tests de la sonde reçus, dont3 nouveaux ;128 évolutions release.
+Supports et bibliothèques inchangés, pas de nouvelle réception workspace (S163 :299
+réussis,5 ignorés). Pas de nouveau runtime, ADR, seuil is_smooth_at, coût3D ou réception
+perceptive. Invariants relus : aucun modifié ; cette reconstruction déterministe est un
+instrument de mesure, pas une décision de stockage de B ni de mélange stochastique.
+
+**Suivi :** S170-1 réalisée, A225 traitée sur véhicule à flux de bord connus ; A50
+partielle, A216/A217 inchangées. Pas de nouvel angle : la limite aux bornes précise A225.
+L253 ajoutée.112 ADR,225 angles,253 leçons,18 invariants,6 SPEC,23 cas.
+
+**Suite S172 : S171-1/A50**, reconstruire conjointement le fond figé Q et sa source,
+avec le même total initial d=Tinitial-Qreconstruit. Séparer représentation, évolution
+et bilan ; frontière analytique et témoin Q exact. BILAN-S145 porté par B4 après
+B1/S63-1. Aucun arbitrage humain nouveau. Clôture avec copies alignées et jeton libre.

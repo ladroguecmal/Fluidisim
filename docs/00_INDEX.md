@@ -17,6 +17,13 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S171 :** [SOURCE-FLUX-PARTAGES-S171](validation/SOURCE-FLUX-PARTAGES-S171.md).
+S170-1 réalisée, A225 traitée sur véhicule1D à flux de bord connus ; A50 partielle.
+Flux partagés ancrés : volume fermé à<=2,32e-15, précision locale encore dépendante
+du réseau et de sa phase. Sept tests dont trois nouveaux,128 évolutions. L253 ;
+112 ADR,225 angles,253 leçons,18 invariants,6 SPEC,23 cas. Aucun runtime adopté.
+**Suite S172 : S171-1/A50**, reconstruction conjointe du fond figé et de sa source.
+
 **S170 :** [SOURCE-DECIMEE-S170](validation/SOURCE-DECIMEE-S170.md). **S169-1 réalisée
 sur véhicule1D, A50 partielle.** Source interpolée/exacte/omise, réseau et solveur raffinés
 indépendamment : injection artificielle prédite, phase déterminante. Quatre nouveaux tests,
