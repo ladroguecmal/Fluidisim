@@ -58,27 +58,22 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S172 — terminée
+Session : S173 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S171-1/A50, Q figé reconstruit et source issue du même fond.
+Objectif : S172-1/A50, fond mobile et source cohérente aux étages RK2.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seul.
-- [x] **P2** — dériver le défaut de discrétisation et construire la sonde conjointe.
-- [x] **P3** — recevoir tests et campagne ; publier résultats, limites et suivi.
-- [x] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [ ] **P2** — dériver les quadratures temporelles et construire la sonde mobile.
+- [ ] **P3** — recevoir préservation, transport, identité discrète et volume ; suivi.
+- [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
-Master e6b25f0 propre, quatre copies alignées ; corpus lu dans cette conversation.
-112 ADR,225 angles,253 leçons,18 invariants,6 SPEC,23 cas. Aucun runtime adopté.
-Q grossier linéaire en (h,q), moyennes exactes et S par différence de F(Q) aux faces.
-Même T initial via d=T-Q. Comparer aussi S=Lnum(Q), identité discrète du solveur total,
-pour isoler le défaut Lphys(Q)-Lnum(Q), sans le déclarer nouveau schéma runtime.
+Master d7a9367 propre, quatre copies alignées ; corpus lu dans cette conversation.
+112 ADR,225 angles,254 leçons,18 invariants,6 SPEC,23 cas. Aucun runtime adopté.
+Q_t remplacé par la sécante (Q1-Q0)/dt aux deux étages. Comparer flux physique
+trapézoïdal et intégré indépendamment en temps, source discrète et omission.
+Même total initial ; fond exact puis grossier, onde seule puis amplitude perturbée.
 A50 partielle ; BILAN-S145 porté via B4 après B1/S63-1.
-P3 : quatre tests reçus,88 évolutions résiduelles +4 témoins. Identité discrète
-<=2,23e-16 ; volume<=2,29e-15. G1 ajouté après pic persistant ; campagne relancée.
-S171-1 réalisée sur fond figé, A50 partielle ; suite S172-1 fond mobile.
-
-P4 : rituel exécuté ; L254,225 angles,112 ADR. Suite S173/S172-1.
