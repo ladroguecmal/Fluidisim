@@ -1520,6 +1520,16 @@ entrée par entrée. Le fil reprend ci-dessous.
   total, budget résiduel et erreur de transport. Porteur : session de construction,
   poursuite B4 selon BILAN-S145.
 
+### Suivi S169 — Assemblage autonome reçu
+
+- **S168-1 réalisée, A224 traitée sur véhicule subcritique1D à Q exact connu.**
+  ASSEMBLAGE-AUTONOME-S169 : fond intact, sortie et bilan sur flux réels reçus ensemble.
+  Quatre nouveaux tests,24 tests S165–S168 rejoués,60 évolutions reçues. Aucun ADR nouveau.
+- **S169-1 / A50 : ouverte, priorité S170.** Comparer source moyenne exacte, interpolation
+  sur réseau décimé et omission sur fond figé asymétrique. Raffiner séparément solveur et
+  réseau source, mesurer dérive et bilan ; paramètre explicite de SPEC-004 §6.2/B4.
+  Porteur : session de construction, poursuite B4 selon BILAN-S145. A216/A217 inchangées.
+
 ### Suivi S168 — Volume moyen et flux intégrés
 
 - **S167-1 réalisée, A223 traitée sur véhicule à fond connu.** VOLUME-MOYEN-S168 :

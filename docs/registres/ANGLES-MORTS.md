@@ -2091,3 +2091,12 @@ reçue avec flux net non nul. Voir VOLUME-MOYEN-S168 ; pas d'adoption runtime.
   S168-1 : dériver et recevoir l'assemblage, d nul puis entrée connue et sortie,
   bilan fondé sur le flux effectivement utilisé. Limite de réception, pas défaut observé
   en production ; aucune information extérieure résiduelle inconnue supposée disponible.
+
+**Suivi A224 — S169 : traitée sur véhicule subcritique1D à fond exact connu.** Transfert
+d'écart d'invariant sortant, réancré sur Q fantôme : Q intact, sortie reçue et volume
+fermé sur les flux réels à<=1,90e-15. Voir ASSEMBLAGE-AUTONOME-S169. Ancien transfert
+total produit un résidu sur Q variable ; A50 reste partielle.
+
+**Suivi A50 — S169 : source grossière encore non reçue.** Après les contrôles S163–S169,
+S169-1 priorise le réseau décimé de SPEC-004 §6.2 : source exacte, interpolée et omise,
+fond figé asymétrique, résolutions du solveur et de la source variées séparément.

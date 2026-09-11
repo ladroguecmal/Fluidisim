@@ -118,3 +118,7 @@ puis exercer une perturbation sortante et une entrée connue, avec flux réellem
 au bord dans le bilan total. Ne pas supposer que copier un invariant total de la cellule
 intérieure vers le fantôme préserve un Q spatialement variable. Aucun résultat sur cet
 assemblage n'est encore revendiqué ; ni 3D, eau sèche ou choc reçu.
+
+**Suivi S169 : S168-1 réalisée**, voir [ASSEMBLAGE-AUTONOME-S169](ASSEMBLAGE-AUTONOME-S169.md).
+Le bord transfère l'écart d'invariant sortant et préserve Q ; sortie et volume reçus
+ensemble sur le véhicule. A224 traitée dans ce périmètre ; suite S169-1/A50 source décimée.
