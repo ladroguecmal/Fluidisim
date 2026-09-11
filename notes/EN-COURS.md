@@ -66,7 +66,7 @@ Objectif : S167-1/A223, fermer le volume total par moyennes et flux physiques in
 
 - [x] **P1** — état réel, jeton et plan seul.
 - [x] **P2** — dériver bilan et quadratures indépendantes ; protocole et copies synchronisées.
-- [ ] **P3** — construire et mesurer fond exact, perturbation et fond figé asymétriques.
+- [x] **P3** — construire et mesurer fond exact, perturbation et fond figé asymétriques.
 - [ ] **P4** — réception, limites, suivi des actions.
 - [ ] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
@@ -78,3 +78,8 @@ S167 cinq tests, S166 six, S165 huit reçus ; workspace299/cinq ignorés reçu S
 BILAN-S145 porté par poursuite B4 ; pas de schéma runtime adopté.
 P2 : VOLUME-MOYEN-S168, intégrations indépendantes de Q en espace et F(Q) en temps.
 Centre55m, trois cas, bilan du fond figé par différences de flux et non dérivées ponctuelles.
+
+P3 : cinq tests nouveaux et campagne30 évolutions reçus. Moyennes + flux intégrés
+ferment le volume <=2,14e-15 ; moyenne seule laisse5,845e-9 à N240, pas nominal.
+Flux net du fond figé asymétrique constaté : maximum cumulatif absolu5,39216e-5 m².
+Aucun support existant modifié ; tests précédents non rejoués.
