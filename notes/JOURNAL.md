@@ -8664,3 +8664,36 @@ angle ; A225 reste traitée, A216/A217 inchangées. Aucun arbitrage humain nouve
 du solveur, interpolation temporelle et source cohérente ; mesurer réactualisations,
 transport et volume. BILAN-S145 porté via B4 après B1/S63-1. Clôture avec jeton libre,
 commits conservés et quatre copies alignées.
+
+## S174 — 2026-09-11 — La cadence du fond porte sa propre erreur de flux
+
+**Entrée :** master d32f0b8 propre, quatre copies alignées ; S173-1/A50. Plan seul,
+jeton diffusé aux autres copies propres. Copie principale, aucune créée ou supprimée.
+
+**Produit :** extension --cadence de fond_mobile.rs, CADENCE-FOND-S174. Instantanés
+préévalués, interpolation conservative en temps, flux intégrés par morceaux aux
+réactualisations. Même total initial et sécante de source. Deux budgets indépendants :
+flux du fond interpolé et flux analytique de référence. Aucune correction de l’état.
+
+**Réception :** six tests reçus, dont trois nouveaux ;192 évolutions résiduelles et
+24 témoins totaux.48 variantes Integrated ferment leur budget à<=1,21e-15 ; prédictions
+signées des deux budgets à<=1,21e-15.48 témoins Discrete identiques au total à<=2,23e-16.
+Courant<=0,219722. Réactualisations intérieures effectivement traversées :23/5/2.
+
+ÀN240/a0,05/H0, E augmente0,0007673→0,01154→0,03794 avec tau0,25/1/2s. Le budget
+interpolé ferme, mais le défaut analytique vaut3,580e-7/5,574e-6/2,045e-5. Raffiner
+le solveur àtau fixé ne corrige pas cette intégrale de flux. Er aux réactualisations
+ne démontre pas un saut ; Q interpolé reste continu, d n’est jamais remis à zéro.
+
+**Portée :** S173-1 réalisée, A50 partielle. L’instantané suivant est connu grâce au
+fond analytique, pas par anticipation d’un événement W inconnu. Fantômes totaux encore
+analytiques. Pas de coût runtime,3D, force ou perception reçus. Supports et bibliothèques
+inchangés ; trois tests S173 rejoués, S172 reçu S173, workspace reçu S163 (299/cinq ignorés).
+A225 prolongée au défaut temporel de frontière ; aucun nouvel angle, ADR ou runtime.
+I-02/I-09 inchangés : les instantanés du véhicule ne décident pas le stockage de B.
+112 ADR,225 angles,256 leçons,18 invariants,6 SPEC,23 cas. L256 ; A216/A217 inchangées.
+
+**Suite S175 : S174-1/A50**, assembler la frontière autonome ancrée S169 au fond à
+cadence réduite. Comparer àl’extérieur analytique S174 ; préservation, transport et
+les deux budgets, sans résidu entrant inconnu. BILAN-S145 porté via B4 après B1/S63-1.
+Aucun arbitrage humain nouveau. Clôture avec jeton libre, commits et copies alignés.

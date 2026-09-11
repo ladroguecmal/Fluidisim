@@ -3980,3 +3980,15 @@ Recevoir les incréments complets, pas seulement la justesse ponctuelle des dér
 Garder deux références : le solveur total pour l’identité discrète et la solution
 physique pour la préservation du fond. Sur Q exact seul, le premier est diffusif alors
 que le second doit rester intact. Voir FOND-MOBILE-S173 et A50.
+
+## L256 — Un bilan fermé est relatif aux flux qu’il compte
+
+*(S174)* La source construite depuis les mêmes instantanés que le fond ferme exactement
+son budget de flux interpolés. Ceux-ci restent différents des flux analytiques aux
+frontières. Le second bilan garde alors un défaut que ni dx ni dt du solveur ne corrigent
+àcadence du fond fixée.
+
+Nommer la référence du bilan ; publier séparément conservation de la représentation
+et fidélité de ses flux aux données physiques. Prédire leur différence depuis les flux,
+sans reconstruire cette prédiction depuis le volume évolué. Une chaîne cohérente peut
+transporter exactement des données approximatives. Voir CADENCE-FOND-S174 et A225.

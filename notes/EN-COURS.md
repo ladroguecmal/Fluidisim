@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S174 — en cours
+Session : S174 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S173-1/A50, cadence grossière du fond indépendante du pas du solveur.
 
@@ -67,7 +67,7 @@ Objectif : S173-1/A50, cadence grossière du fond indépendante du pas du solveu
 - [x] **P1** — état réel, jeton, plan seul.
 - [x] **P2** — construire les instantanés interpolés et les flux intégrés aux réactualisations.
 - [x] **P3** — recevoir tests/campagne ; documenter précision, volume et accès aux instantanés.
-- [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [x] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
@@ -81,3 +81,5 @@ A50 partielle ; BILAN-S145 porté via B4 après B1/S63-1.
 P3 : six tests (trois nouveaux),192 évolutions +24 témoins reçus.
 Budget interpolé/prédictions<=1,21e-15 ; Va àtau2s=2,045e-5 persiste.
 S173-1 réalisée, A50 partielle ; suite S174-1 frontière autonome S169.
+
+P4 : rituel exécuté ; L256,225 angles,112 ADR. Suite S175/S174-1.

@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-11 19:41 +02:00
+JETON            : libre
+Battement        : 2026-09-11 19:42 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S174
-Dernière session : S173 — fond mobile préservé et budgets temporels reçus ; trois nouveaux tests
-Session suivante : S174 — S173-1/A50 : cadence du fond distincte du pas du solveur
+Session en cours : aucune
+Dernière session : S174 — cadence du fond et deux budgets distingués ; trois nouveaux tests
+Session suivante : S175 — S174-1/A50 : assembler frontière autonome et fond à cadence réduite
 
 *S160 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
 rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour.*
@@ -187,6 +187,21 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S174 — 2026-09-11 :** [CADENCE-FOND-S174](docs/validation/CADENCE-FOND-S174.md).
+**S173-1 réalisée sur instantanés connus ; A50 partielle.** Cadence tau0,25/1/2s,
+indépendante du pas solveur ; source cohérente, quadrature découpée aux réactualisations.
+192 évolutions résiduelles et24 témoins totaux ; six tests dont trois nouveaux reçus.
+Budget interpolé et prédictions signées à<=1,21e-15 ; identité discrète à<=2,23e-16.
+Le budget de référence analytique garde2,045e-5 àtau2s/a0,05, indépendamment du
+raffinement du solveur. Continuité reçue aux réactualisations, pas de remise à zéro.
+112 ADR,225 angles,256 leçons,18 invariants,6 SPEC,23 cas. L256, aucun nouvel angle.
+A225 étendue au défaut temporel des flux ; A216/A217 inchangées. Aucun ADR ni runtime.
+Supports inchangés, trois tests S173 rejoués, workspace non rejoué (S163 :299/cinq ignorés).
+**Suite S175 : S174-1/A50**, assembler le fond àcadence réduite et la frontière autonome
+ancrée S169 ; comparer aux fantômes analytiques S174, préservation, transport et deux
+budgets. Instantané futur connu dans le véhicule analytique seulement ; aucun résidu
+extérieur inconnu supposé disponible. BILAN-S145 porté par B4 après B1/S63-1.
 
 **S173 — 2026-09-11 :** [FOND-MOBILE-S173](docs/validation/FOND-MOBILE-S173.md).
 **S172-1 réalisée sur véhicule mobile connu ; A50 partielle.** Sécante ΔQ/dt commune

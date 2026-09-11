@@ -17,6 +17,13 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S174 :** [CADENCE-FOND-S174](validation/CADENCE-FOND-S174.md).
+S173-1 réalisée sur instantanés connus ; budget interpolé fermé, erreur du flux de
+référence persistante àcadence fixée. Six tests dont trois nouveaux,192 évolutions et
+24 témoins totaux. A50 partielle ; aucun runtime adopté.
+112 ADR,225 angles,256 leçons,18 invariants,6 SPEC,23 cas. L256, pas de nouvel angle.
+**Suite S175 : S174-1/A50**, assembler la frontière autonome ancrée au fond décimé.
+
 **S173 :** [FOND-MOBILE-S173](validation/FOND-MOBILE-S173.md).
 S172-1 réalisée sur fond mobile connu ; source intégrée préservant Q exact,
 volume à<=2,42e-15, transport perturbé encore imparfait. Trois nouveaux tests,
