@@ -65,7 +65,7 @@ Objectif : S172-1/A50, fond mobile et source cohérente aux étages RK2.
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seul.
-- [ ] **P2** — dériver les quadratures temporelles et construire la sonde mobile.
+- [x] **P2** — dériver les quadratures temporelles et construire la sonde mobile.
 - [ ] **P3** — recevoir préservation, transport, identité discrète et volume ; suivi.
 - [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 

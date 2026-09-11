@@ -22,49 +22,10 @@ fn wave() -> Wave {
     }
 }
 
-// Linear reconstruction of conserved variables, with exact boundary samples.
-struct Background {
-    nodes: Vec<(f64, State)>,
-}
-impl Background {
-    fn new(h: f64, phase: f64) -> Self {
-        assert!(h > 0.0 && h.is_finite() && (0.0..=0.5).contains(&phase));
-        let origin = phase * h;
-        let count = ((120.0 - origin) / h).ceil() as usize + 1;
-        let mut xs: Vec<_> = (0..count).map(|j| origin + j as f64 * h).collect();
-        xs.extend([30.0, 90.0]);
-        xs.sort_by(f64::total_cmp);
-        xs.dedup();
-        Self {
-            nodes: xs.into_iter().map(|x| (x, wave().at(x, 0.0))).collect(),
-        }
-    }
-    fn segment(&self, x: f64) -> usize {
-        assert!(x >= self.nodes[0].0 && x <= self.nodes.last().unwrap().0);
-        self.nodes
-            .partition_point(|(p, _)| *p <= x)
-            .saturating_sub(1)
-            .min(self.nodes.len() - 2)
-    }
-    fn at(&self, x: f64) -> State {
-        let j = self.segment(x);
-        let (a, fa) = self.nodes[j];
-        let (b, fb) = self.nodes[j + 1];
-        fa.plus(fb.minus(fa).times((x - a) / (b - a)))
-    }
-    fn mean(&self, a: f64, b: f64) -> State {
-        assert!(b > a);
-        let mut x = a;
-        let mut result = State::default();
-        while x < b {
-            let right = b.min(self.nodes[self.segment(x) + 1].0);
-            assert!(right > x);
-            result = result.plus(self.at(x).plus(self.at(right)).times(0.5 * (right - x)));
-            x = right;
-        }
-        result.times(1.0 / (b - a))
-    }
-}
+#[path = "support/reconstructed_wave.rs"]
+#[allow(dead_code)]
+mod reconstructed_wave;
+use reconstructed_wave::Background;
 
 #[derive(Clone, Copy, Debug, Default)]
 struct Report {
@@ -104,7 +65,7 @@ fn run(n: usize, factor: f64, grids: &[(f64, f64)]) -> Vec<Case> {
     let mass0: f64 = initial[start..end].iter().map(|s| s.h * dx).sum();
     let mut cases = Vec::new();
     for &(spacing, phase) in grids {
-        let grid = (spacing > 0.0).then(|| Background::new(spacing, phase));
+        let grid = (spacing > 0.0).then(|| Background::new(spacing, phase, wave(), 0.0));
         let mut bg = initial.clone();
         for i in start - 1..=end {
             if let Some(g) = &grid {
@@ -261,7 +222,7 @@ mod tests {
         };
         let s = g.mean(1.0, 4.0);
         assert!((s.h - 3.5).abs() < 1e-12 && (s.q + 0.5).abs() < 1e-12);
-        let g = Background::new(16.0, 0.5);
+        let g = Background::new(16.0, 0.5, wave(), 0.0);
         for x in [30.0, 90.0] {
             let e = g.at(x).minus(wave().at(x, 0.0));
             assert!(e.h.abs() < 1e-12 && e.q.abs() < 1e-12);
