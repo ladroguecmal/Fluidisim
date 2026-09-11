@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-11 06:14 +02:00
+JETON            : occupé
+Battement        : 2026-09-11 06:15 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S169 — assemblage autonome et conservatif
 Dernière session : S168 — volume total fermé, moyennes et flux intégrés ; cinq nouveaux tests
 Session suivante : S169 — S168-1 : assemblage du bord autonome et du résidu équilibré en moyennes (A224)
 

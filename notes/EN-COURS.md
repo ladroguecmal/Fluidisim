@@ -58,31 +58,21 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S168 — terminée
+Session : S169 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S167-1/A223, fermer le volume total par moyennes et flux physiques intégrés cohérents.
+Objectif : S168-1/A224, assembler résidu équilibré en moyennes et frontière autonome.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seul.
-- [x] **P2** — dériver bilan et quadratures indépendantes ; protocole et copies synchronisées.
-- [x] **P3** — construire et mesurer fond exact, perturbation et fond figé asymétriques.
-- [x] **P4** — réception, limites, suivi des actions.
-- [x] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [ ] **P2** — dériver fermeture préservant Q et protocole, synchroniser les copies.
+- [ ] **P3** — construire assemblage et témoins ; mesurer préservation, entrée/sortie et bilan.
+- [ ] **P4** — réception, limites, suivi des actions.
+- [ ] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
-Master 7d86eb2 propre, quatre copies alignées ; S167 terminée. Corpus lu dans cette conversation.
-112 ADR,223 angles,249 leçons,18 invariants,6 SPEC,23 cas. Bibliothèques inchangées.
-S167 cinq tests, S166 six, S165 huit reçus ; workspace299/cinq ignorés reçu S163.
-BILAN-S145 porté par poursuite B4 ; pas de schéma runtime adopté.
-P2 : VOLUME-MOYEN-S168, intégrations indépendantes de Q en espace et F(Q) en temps.
-Centre55m, trois cas, bilan du fond figé par différences de flux et non dérivées ponctuelles.
-
-P3 : cinq tests nouveaux et campagne30 évolutions reçus. Moyennes + flux intégrés
-ferment le volume <=2,14e-15 ; moyenne seule laisse5,845e-9 à N240, pas nominal.
-Flux net du fond figé asymétrique constaté : maximum cumulatif absolu5,39216e-5 m².
-Aucun support existant modifié ; tests précédents non rejoués.
-
-P4 : A223 traitée, A224/S168-1 assemblage avec frontière autonome. Résultats et limites
-publiés, aucun ADR. Trois réceptions distinctes : fond intact, bilan, transport.
+Master db3c0e3 propre, quatre copies alignées, S168 terminée. Corpus lu dans cette conversation.
+112 ADR,224 angles,250 leçons,18 invariants,6 SPEC,23 cas. Aucun runtime adopté.
+S168 cinq tests reçus ; supports S165–S167 reçus S167 ; workspace299/cinq ignorés reçu S163.
+BILAN-S145 porté par poursuite B4. Pas d'information extérieure inconnue inventée.
