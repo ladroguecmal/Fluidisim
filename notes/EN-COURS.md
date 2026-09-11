@@ -66,11 +66,11 @@ surface à entrées identiques, sur plusieurs lots et recettes.
 
 ### Plan
 
-- [>] **P1** — état réel, jeton et plan seul.
-- [ ] **P2** — publier les conditions de mesure et le protocole **avant** tout chiffre :
+- [x] **P1** — état réel, jeton et plan seul.
+- [x] **P2** — publier les conditions de mesure et le protocole **avant** tout chiffre :
       montages, lots, recettes, ce qui est chronométré et ce qui ne l'est pas, ce qu'un
       écart mesuré ici ne prouve pas. Aucun budget cible.
-- [ ] **P3** — écrire l'exemple de mesure (`differential_cost`) : préparation, évaluation
+- [>] **P3** — écrire l'exemple de mesure (`differential_cost`) : préparation, évaluation
       différentielle contre surface à entrées identiques, chemins de refus, empreinte
       mémoire et allocations. Exécuter, relever.
 - [ ] **P4** — recevoir les chiffres dans un document de validation, dire ce qu'ils ne
