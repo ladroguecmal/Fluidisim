@@ -8759,3 +8759,36 @@ coordonnées locales et précision du runtime àrecevoir dans le lot.
 BILAN-S145 porté par ce retour àla construction après les contrôles ciblés ; B1/S63-1
 ont leurs réceptions antérieures. Aucun arbitrage humain nouveau, aucun pourcentage
 subjectif ajouté. Rituel complet, jeton libre et quatre copies alignées après commit final.
+
+## S177 — 2026-09-11 — Le fond B fournit ses dérivées
+
+**Entrée :** master d0d6b7d propre, quatre copies alignées ; S176-1, lot de bibliothèque.
+Plan seul, jeton diffusé ; aucune copie créée ou supprimée. ADR-113 fixe la profondeur,
+la pression et les conventions dérivées d’Airy profond, SPEC-001 et SPEC-004.
+
+**Produit :** background_differential.rs, enfant de Background, type distinct et méthodes
+ponctuelles locale/monde et par lot. Composantes et phases identiques àB ; eval historique
+inchangé. z<=0 relatif au plan moyen ; rho fourni, pression de vague en Pa. Gradients
+Eulerien et temporel du champ analytique représenté, pas dérivation de phase quantifiée.
+Sorties atomiques sur refus, scratch fourni, aucun stockage de réalisation ni allocation
+pendant l’évaluation. La propriété d’allocation est inspectée dans le nouveau chemin,
+pas déduite du compteur des anciens scénarios.
+
+**Réception :** huit nouveaux tests, workspace307 réussis/cinq ignorés, deux check reçus.
+C18 hash0x85c8bc610f551d11, C02 hash0x0a3a3bcc945db263 inchangés. Mono-composante,
+directions croisées, pression/mouvement, différences finies, surface bit àbit, état nul,
+refus et atomicité. Exp(-x) reçue contre f64 sur10401 points ; son premier échec a
+localisé une annulation dans x-nln2, corrigée par ln2 scindé sans élargir la tolérance.
+Pas de certification multiplateforme sans autre cible ; avertissements anciens conservés.
+
+**Suivi :** S176-1 réalisée pour B profond linéaire uniforme ; A50 partielle, B4 complet
+non reçu. ADR-113 nouveau, aucun nouvel angle, L259 ajoutée.113 ADR,225 angles,
+259 leçons,18 invariants,6 SPEC,23 cas. I-02/03/06/07/08/09 inchangés : paramètres
+partagés, calcul pur et local, gravité de B, pas d’extrapolation au mouillage réel.
+Ni is_smooth_at permissif, ni δ3D, W différentiel ou forces/perception reçus.
+
+**Suite S178 : S177-1/A50**, gradient de pression et formation du résidu physique continu
+de B ; qualifier Laplacien/viscosité et unités, recevoir les termes avant extension W.
+Le type seul ne ferme pas toute la source SPEC-004. BILAN-S145 et bilan S176 portés
+par la construction de bibliothèque. Aucun arbitrage humain nouveau. Clôture avec
+jeton libre, commits et quatre copies alignés.

@@ -4016,3 +4016,14 @@ Quand ce dernier lien manque, le prochain lot est un raccord de construction con
 pas nécessairement une autre variation du banc. Une matrice de réception doit montrer
 cette absence au lieu de transformer le nombre de tests en avancement du runtime.
 Voir BILAN-B4-S176.
+
+## L259 — Partager les phases ne dispense pas de qualifier les dérivées
+
+*(S177)* Le fournisseur différentiel reprend les paramètres et phases de B. Son
+raccord de surface reste bit àbit identique ; ses dérivées sont pourtant celles du
+champ analytique représenté, pas celles de la fonction quantifiée effectivement
+évaluée en machine. Une différence finie trop petite mesure cette quantification.
+
+Recevoir séparément raccord des valeurs et dérivées physiques, avec une référence
+analytique indépendante et des pas couvrant l’arrondi sans masquer la troncature.
+La concordance d’un hash n’est pas une preuve sur un gradient. Voir FOURNISSEUR-B-S177.

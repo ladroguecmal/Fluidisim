@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S177 — en cours
+Session : S177 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S176-1, fournisseur différentiel de B en bibliothèque, eau profonde linéaire.
 
@@ -67,7 +67,7 @@ Objectif : S176-1, fournisseur différentiel de B en bibliothèque, eau profonde
 - [x] **P1** — état réel, jeton, plan seul.
 - [x] **P2** — conventions, dérivation et ADR du fournisseur volumétrique B.
 - [x] **P3** — API ponctuelle/par lot sans allocation, réception indépendante et conformité.
-- [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [x] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
@@ -80,3 +80,5 @@ Réception champ analytique représenté distincte de dérivation de phase quant
 P3 : huit nouveaux tests, workspace307/cinq ignorés, deux check reçus, hashs inchangés.
 Exponentielle : réduction ln2 scindée après échec du test relatif ; tolérance inchangée.
 ADR113 ; S176-1 réalisée B seul, suite S177-1 gradient pression/source continue.
+
+P4 : rituel complet, ADR113/L259 ; suite S178/S177-1.

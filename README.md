@@ -289,7 +289,7 @@ Le juge de fidélité est B4, bloqué ailleurs. Suite S159 : le facteur 2,5 qui 
 L'une croyait la dernière session être **S44** : l'ouvrir aurait recréé cent quinze sessions parallèles.
 Avance rapide d'abord, suppressions ensuite ; six copies ramenées à trois, aucune histoire perdue, et la
 procédure de fermeture écrite dans l'amorce. Suite S160 : le facteur 2,5, S158-1.
-112 ADR,225 angles,258 leçons,18 invariants,6 SPEC,23 cas.
+113 ADR,225 angles,259 leçons,18 invariants,6 SPEC,23 cas.
 **S162 : diagnostic de Stokes et portée de B4 corrigée.**
 [Résultats](docs/validation/ADDITIVITE-PROFONDE-S162.md),
 [ADR-112](docs/adr/ADR-112-la-superposition-independante-ne-recoit-pas-le-couplage.md).
@@ -355,3 +355,8 @@ Voir [FRONTIERE-FOND-DECIME-S175](docs/validation/FRONTIERE-FOND-DECIME-S175.md)
 **S176 :** bilan B4 consolidé ; contrôles1D reçus, B4 complet encore non reçu.
 Prochain lot : fournisseur des dérivées du fond B dans la bibliothèque.
 Voir [BILAN-B4-S176](docs/validation/BILAN-B4-S176.md). Documentation seule, sans nouveau test.
+**S177 :** le fond B fournit ses dérivées et sa pression en profondeur dans la
+bibliothèque, avec évaluation par lot sans publication partielle. Huit nouveaux tests,
+307 réussis/cinq ignorés ; conformité historique préservée. B profond linéaire seulement.
+Voir [FOURNISSEUR-B-S177](docs/validation/FOURNISSEUR-B-S177.md) et
+[ADR-113](docs/adr/ADR-113-fournisseur-differentiel-du-fond.md).

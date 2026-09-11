@@ -17,6 +17,14 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S177 :** [FOURNISSEUR-B-S177](validation/FOURNISSEUR-B-S177.md),
+[ADR-113](adr/ADR-113-fournisseur-differentiel-du-fond.md), actée. S176-1 réalisée pour
+B profond linéaire : type différentiel et API ponctuelle/par lot dans water-core,
+refus atomiques et eval historique inchangé. Huit nouveaux tests ; workspace307/cinq
+ignorés, deux scénarios check reçus avec hashs inchangés. A50 partielle, B4 non reçu.
+113 ADR,225 angles,259 leçons,18 invariants,6 SPEC,23 cas. L259 ; aucun nouvel angle.
+**Suite S178 : S177-1**, gradient de pression et source physique continue de B.
+
 **S176 :** [BILAN-B4-S176](validation/BILAN-B4-S176.md). S175-1 réalisée : matrice
 S163–S175, B4 complet non reçu, A50 partielle. Maillon manquant constaté : fournisseur
 différentiel du B réel. Lot S176-1 cadré, sans choisir δ3D ni seuil physique.

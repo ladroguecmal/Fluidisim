@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-11 20:09 +02:00
+JETON            : libre
+Battement        : 2026-09-11 20:10 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S177
-Dernière session : S176 — bilan B4 consolidé, fournisseur différentiel de B cadré
-Session suivante : S177 — S176-1 : construire le fournisseur différentiel du fond B
+Session en cours : aucune
+Dernière session : S177 — fournisseur différentiel B construit ; huit nouveaux tests
+Session suivante : S178 — S177-1/A50 : gradient de pression et source physique continue de B
 
 *S160 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
 rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour.*
@@ -168,7 +168,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 112 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 113 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -187,6 +187,22 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S177 — 2026-09-11 :** [FOURNISSEUR-B-S177](docs/validation/FOURNISSEUR-B-S177.md),
+[ADR-113](docs/adr/ADR-113-fournisseur-differentiel-du-fond.md), actée.
+**S176-1 réalisée pour B profond linéaire.** background_differential.rs, type réexporté
+sous background ; méthodes differential_local/differential/differential_batch sur B.
+z<=0 relatif au plan moyen, rho fourni, grad_u[i][j]=∂u_i/∂x_j ; pression de vague en Pa.
+Composantes et phases partagées, eval et hashs historiques inchangés, sorties atomiques.
+Huit nouveaux tests, workspace307 réussis/cinq ignorés ; deux check historiques reçus.
+Exponentielle àarithmétique fixe reçue contre f64 après correction de réduction ln2,
+aucune certification multiplateforme sans autre cible. Aucun stockage par cellule.
+113 ADR,225 angles,259 leçons,18 invariants,6 SPEC,23 cas. L259 ; pas de nouvel angle.
+A50 partielle et B4 complet non reçu : B seul ne fournit pas encore B+W ni la source entière.
+**Suite S178 : S177-1/A50**, gradient de pression et formation du résidu physique continu
+de B, Laplacien/viscosité et unités qualifiés, réception indépendante avant extension W.
+Ne pas confondre source continue et résidu discret du futur solveur. BILAN-S145 et bilan
+S176 portés par ce lot de bibliothèque ; aucun arbitrage humain nouveau.
 
 **S176 — 2026-09-11 :** [BILAN-B4-S176](docs/validation/BILAN-B4-S176.md).
 **S175-1 réalisée. B4 complet non reçu ; A50 partielle.** Matrice S163–S175 et code réel
