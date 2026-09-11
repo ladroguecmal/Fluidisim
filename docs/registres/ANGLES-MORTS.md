@@ -2168,3 +2168,9 @@ pression et source continue avant extension W. Aucun nouvel angle, ni seuil B4 a
 Laplacien et contraction après sommation des modes ; S à soustraire. Six nouveaux
 tests et contre-épreuve de l'advection omise. A50 partielle : source B+W, conditions
 de surface et δ3D restent ouverts. S178-1 construit le différentiel RadialImpact.
+
+**Suivi A50 — S179 : différentiel radial et composition B+un impact reçus.**
+[DIFFERENTIEL-W-S179](../validation/DIFFERENTIEL-W-S179.md), ADR-115 : gradient
+régulier au centre, pression profonde, contraction après composition et lot atomique.
+Six nouveaux tests ; A50 partielle, pression forcée/multisource et δ3D non reçus.
+S179-1 construit le fournisseur de pression forcée. Aucun nouvel angle.

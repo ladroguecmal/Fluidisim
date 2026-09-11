@@ -1627,3 +1627,13 @@ entrée par entrée. Le fil reprend ci-dessous.
   composition avec B et réception des termes croisés. Préserver refus et horizons,
   dériver l'origine radiale régulière ; pressions forcées ultérieures. Porteur :
   construction de bibliothèque, suivant BILAN-S145/BILAN-B4-S176.
+
+### Suivi S179 — Différentiel radial et composition locale construits
+
+- **S178-1 réalisée pour B+un impact profond**, DIFFERENTIEL-W-S179, ADR-115.
+  Centre régulier, dérivées indépendantes, source totale avec interactions et lot
+  atomique reçus. A50 reste partielle ; aucune réception δ3D ou coût.
+- **S179-1 : ouverte, priorité S180.** Fournisseur différentiel de la pression W
+  forcée : dériver depuis le potentiel existant, distinguer pression imposée et
+  pression de vague, recevoir la source avec forçage. Puis composition multisource
+  et cycle vivant ; porteur : construction, BILAN-S145/BILAN-B4-S176.

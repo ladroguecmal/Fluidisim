@@ -22,7 +22,7 @@ pub struct BackgroundSample {
     pub laplacian_u: [f32; 3],
 }
 impl BackgroundSample {
-    fn finite(&self) -> bool {
+    pub(crate) fn finite(&self) -> bool {
         self.eta.is_finite()
             && self.p_dyn.is_finite()
             && self
@@ -77,7 +77,7 @@ pub enum DifferentialError {
 
 // exp(-x), x>=0. Taylor degree 10 on [0,ln2], scale 2^-n from IEEE bits.
 // 104 > 150 ln2: the exact result rounds to zero in f32 there.
-fn attenuation(x: f32) -> f32 {
+pub(crate) fn attenuation(x: f32) -> f32 {
     if x >= 104.0 {
         return 0.0;
     }

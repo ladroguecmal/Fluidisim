@@ -3,6 +3,10 @@ use crate::impact_field::{Error, Medium, Sample};
 use crate::wave_event::WaveEvent;
 use crate::{FrameId, PhaseQ32, SimTime};
 
+#[path = "radial_differential.rs"]
+mod differential;
+pub use differential::DifferentialError;
+
 /// Borne du domaine de `bessel`, portée de 64 à 2048 par ADR-084. La valeur est **mesurée** :
 /// au-delà, la précision de la phase spatiale en `f32` fait sortir l'erreur de la tolérance de
 /// 4e-6 (5,8e-6 à x = 4096). Ce n'est pas l'ordre du développement qui borne.
@@ -94,6 +98,8 @@ pub struct RadialImpact<const N: usize = 64> {
     slope_bound: f32,
     domain: Domain,
     nodes: [Node; N],
+    gravity: f32,
+    density: f32,
 }
 impl<const N: usize> RadialImpact<N> {
     pub fn new(event: WaveEvent, medium: Medium, domain: Domain) -> Result<Self, Error> {
@@ -199,6 +205,8 @@ impl<const N: usize> RadialImpact<N> {
             slope_bound: slope,
             domain,
             nodes,
+            gravity: medium.gravity,
+            density: medium.density,
         })
     }
     pub fn event(&self) -> &WaveEvent {

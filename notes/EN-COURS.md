@@ -66,12 +66,15 @@ Objectif : S178-1/A50, différentiel profond RadialImpact et composition B+W.
 
 - [x] **P1** — état réel, jeton et plan seul.
 - [x] **P2** — dériver le champ radial régulier et déclarer contrat et réception.
-- [ ] **P3** — construire le fournisseur et la composition, recevoir dérivées et refus.
+- [x] **P3** — construire le fournisseur et la composition, recevoir dérivées et refus.
 - [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
 S179 : master ae28d98 propre, quatre copies alignées ;114 ADR/225 angles/260 leçons.
+P3 S179 : six tests nouveaux debug/release ; workspace319/cinq ignorés ; C18/C02
+inchangés. Référence angulaire512/1024, centre et lot reçus ; mutation isotrope rejetée.
+Différences finies àh0,002 échouent pression, h0,01/0,005 passent sans changer seuil.
 Poursuite de construction B4 (BILAN-S145/S176). Conserver phases, valeurs et refus
 historiques ; origine radiale régulière. Notes S178 ci-dessous conservées comme entrée.
 

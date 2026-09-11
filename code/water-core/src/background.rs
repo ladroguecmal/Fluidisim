@@ -24,6 +24,7 @@ use crate::types::{SimTime, WaterSample, WorldPos};
 #[path = "background_differential.rs"]
 mod differential;
 pub use differential::{BackgroundSample, DifferentialError};
+pub(crate) use differential::attenuation;
 
 // Instrument S147 hors runtime : moments du spectre réel et référence indépendante.
 #[cfg(test)]

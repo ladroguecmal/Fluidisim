@@ -100,6 +100,13 @@ struct WaterSample {
 
 ### 2.1 Deux types d'échantillon, et pourquoi les fusionner serait une erreur
 
+> **Complément S179 — 2026-09-12.** RadialImpact fournit le même type différentiel
+> profond et sa composition locale avec B, avec lot atomique sur scratch hôte.
+> Limite du gradient au centre dérivée, g/rho de construction conservés ; contexte
+> de repère B/W déclaré par l'hôte. ADR-115 et
+> [DIFFERENTIEL-W-S179](../validation/DIFFERENTIEL-W-S179.md). Pression forcée,
+> multisource et solveur δ3D restent à construire pour cette interface.
+
 > **Complément S178 — 2026-09-11.** B fournit aussi `grad_p_dyn` (Pa/m) et
 > `laplacian_u` (1/(m s)). `BackgroundSample::momentum_residual(rho,nu)` forme le
 > résidu continu S, à **soustraire**, en m/s² ; rho identique à l'échantillonnage,
