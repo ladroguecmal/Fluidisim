@@ -17,6 +17,13 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S167 :** [FOND-PRESERVE-S167](validation/FOND-PRESERVE-S167.md). **S166-1 réalisée,
+A222 traitée sur véhicule à source connue.** Q exact intact, perturbation évolutive et
+source physique du fond figé reçues. Cinq tests nouveaux, six S166 et huit S165 reçus ;
+45 évolutions. Bilan résiduel à l'arrondi, volume corrigé encore à quadrature finie : A223/L249.
+112 ADR,223 angles,249 leçons,18 invariants,6 SPEC,23 cas. Aucun ADR ni runtime modifié.
+Workspace299/cinq ignorés reçu S163, non relancé. **Suite S168 : S167-1**, moyennes et flux intégrés.
+
 **S166 :** [BORD-AUTONOME-S166](validation/BORD-AUTONOME-S166.md). **S165-1 réalisée,
 A221 traitée subcritique 1D à entrée connue.** Fermeture caractéristique autonome reçue
 dans les deux sens ; six nouveaux tests, huit S165 rejoués, 32 montages/128 évolutions.

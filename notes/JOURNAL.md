@@ -8386,3 +8386,50 @@ BILAN-S145 porté par poursuite B4 après B1/S63-1. Aucun arbitrage humain ni AD
 
 Clôture S166 achevée le 2026-09-11 : interruption pendant P5, six fichiers de rituel
 retrouvés non committés ; état réel revérifié, aucun changement concurrent constaté.
+
+---
+
+## S167 — 2026-09-11 — Le fond exact reste intact, le volume demande une autre représentation
+
+**Entrée :** master 1f7d9d9 propre, quatre copies alignées. Suite S166-1/A222 ; plan
+committé seul, copies avancées au jeton occupé. Aucune copie créée ni supprimée.
+
+**Produit :** [FOND-PRESERVE-S167](../docs/validation/FOND-PRESERVE-S167.md), sonde
+`fond_preserve.rs`, intégration équilibrée dans le support local et référence d'onde
+simple extraite de S166 en support partagé. Aucune bibliothèque ni dépendance modifiée.
+
+**S166-1 réalisée, A222 traitée sur véhicule à source connue.** D(Q,d) discret plus
+S=L_phys(Q)-Q_t : le fond exact donne S=0 et d reste exactement nul. Fond figé inexact :
+S analytique conservée, omission vue échouer. Le témoin S164 est conservé avec son objectif
+d'identité au schéma total ; aucun candidat n'est adopté comme schéma runtime.
+
+**Référence non nulle :** Q onde simple a0,05, T onde simple a0,06 de la même famille,
+donc d évolutif non linéaire connu, pas superposition de solutions. À N240, erreur hauteur
+normalisée par0,05 : 0,03129235 pour le candidat contre 0,1583713 pour le témoin.
+Rapportée à la perturbation initiale de0,01 : 15,6 % encore. À N960 : 4,8 %.
+Le candidat préserve Q, pas automatiquement toute la précision de d.
+
+**Fond figé :** erreur N240 avec source physique 0,135771, sans source 0,998284 ;
+le témoin vaut 0,129671. Le candidat est ici légèrement moins précis, donc aucune
+supériorité générale revendiquée. Source physique et défaut numérique sont distingués.
+
+**Trois bilans :** budget résiduel à <=2,80e-15 ; volume avec ancien flux total Rusanov
+en écart3,316e-5 à N240 ; volume avec flux corrigé delta numérique + fond physique en
+écart5,201e-7. Ce dernier décroît par quatre au raffinement spatial, reste4,906e-7 au
+demi-pas N240. Les échantillons de Q ne sont pas ses moyennes, ni les deux temps RK2
+l'intégrale exacte du flux. Le montage figé masque ce point par symétrie, signalée.
+
+**Réception :** cinq nouveaux tests S167 réussis, six S166 et huit S165 reçus après
+extension/extraction des supports. Campagne release15 montages/45 évolutions reçue ;
+voies source omise et équilibrée identiques par construction quand S=0. Le cinquième
+test de bilan a été ajouté ensuite sans changer le calcul. Courant<=0,217651.
+Workspace299/cinq ignorés reçu S163, non relancé : bibliothèques inchangées.
+
+**Suivi :** A223/L249 ajoutées ; A50 partielle, A216/A217 inchangées. I-01/04/12/14/15
+inchangés. 112 ADR,223 angles,249 leçons,18 invariants,6 SPEC,23 cas. Aucun ADR nouveau,
+ni seuil de qualité ni arbitrage humain. Pas de bord autonome, 3D, choc ou eau sèche reçu.
+
+**Suite S168 : S167-1/A223**, bilan total cohérent avec moyennes de Q en cellules et
+flux physiques intégrés en temps ; fond exact puis perturbation, montage asymétrique.
+BILAN-S145 porté par poursuite B4 après B1/S63-1. P4 amendé avant clôture pour inclure
+son battement réellement relevé. État final propre, jeton libre, copies synchronisées.

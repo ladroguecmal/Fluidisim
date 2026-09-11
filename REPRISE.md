@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-11 06:02 +02:00
+JETON            : libre
+Battement        : 2026-09-11 06:04 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S167 — préserver le fond exact
-Dernière session : S166 — fermeture autonome reçue en 1D subcritique ; six nouveaux tests
-Session suivante : S167 — S166-1 : préserver le fond exact, distinguer ses défauts physique et numérique (A222)
+Session en cours : aucune
+Dernière session : S167 — fond exact préservé, source physique reçue ; cinq nouveaux tests
+Session suivante : S168 — S167-1 : volume total, moyennes de cellules et flux intégrés (A223)
 
 *S160 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
 rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour.*
@@ -187,6 +187,25 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S167 — 2026-09-11 :** [FOND-PRESERVE-S167](docs/validation/FOND-PRESERVE-S167.md).
+**S166-1 réalisée, A222 traitée sur véhicule à source connue.** Flux résiduel D(Q,d)
+et source physique S=L_phys(Q)-Q_t, intégrés RK2. Q exact reste intact, d=0 ; perturbation
+non nulle analytique convergente ; fond figé inexact corrigé seulement si S est conservée.
+À N240, perturbation : erreur normalisée par0,05 de0,031292 contre0,158371 pour S164 ;
+normalisée par la perturbation0,01, elle reste15,6 %. Aucun seuil physique reçu.
+**A223** : bilan résiduel à l'arrondi, mais volume total avec flux corrigé en défaut
+5,201e-7 relatif à N240 ; décroît comme dx², quadratures spatiale et temporelle à recevoir.
+Le fond ponctuel exact n'est pas une moyenne conservative. L249 formalise cette distinction.
+Cinq nouveaux tests, six S166 et huit S165 reçus ; 15 montages/45 évolutions release.
+112 ADR,223 angles,249 leçons,18 invariants,6 SPEC,23 cas. Bibliothèques inchangées,
+workspace299/cinq ignorés reçu S163, non relancé. Aucun ADR ni schéma runtime adopté.
+**Suite S168 : S167-1/A223**, moyennes de Q en cellules et flux physiques intégrés sur le
+pas : dériver et recevoir le bilan total, fond exact puis perturbation, montage asymétrique
+à flux net non nul. Garder distincts volume total, budget résiduel et qualité du transport.
+A50 partielle, A216/A217 inchangées. BILAN-S145 porté par poursuite B4 après B1/S63-1.
+Copie principale, copies synchronisées, aucune créée ni supprimée. Ni bord autonome ni
+δ 3D, choc ou eau sèche reçu par ce nouvel essai ; la réception S166 reste celle du bord.
 
 **S166 — 2026-09-10 :** [BORD-AUTONOME-S166](docs/validation/BORD-AUTONOME-S166.md).
 **S165-1 réalisée, A221 traitée subcritique 1D à entrée connue.** Fermeture autonome :

@@ -3882,3 +3882,19 @@ les champs point à point avant de prendre la norme.
 Ici la référence indépendante est une onde simple non linéaire, dérivée des invariants
 et bornée avant choc. Elle montre aussi que le fond prescrit peut hériter des défauts du
 solveur total alors qu'il était exact à l'entrée. Voir BORD-AUTONOME-S166 et A222.
+
+## L249 — Préserver un champ ponctuel ne préserve pas son intégrale discrète
+
+*(S167)* Le fond analytique reste exact en chaque centre de cellule, avec un résidu nul,
+mais le volume calculé comme somme(h dx) ne ferme pas avec les flux physiques du bord.
+Le budget résiduel ferme pourtant à l'arrondi. Le défaut restant décroît comme dx² :
+les centres ne sont pas des moyennes et la quadrature temporelle n'est pas une intégrale.
+
+Avant d'affirmer qu'une méthode conserve une grandeur, nommer sa représentation discrète
+et le flux auquel on la compare. Changer le schéma du fond change aussi son flux : ici
+le flux pertinent est delta numérique + fond physique, pas l'ancien Rusanov total.
+Même après cette correction, l'exactitude ponctuelle ne donne pas la clôture du volume.
+
+Un bilan nul par symétrie ne tranche pas cette question : le fond figé de S167 a un
+flux net nul et une source intégrée nulle. La réception suivante doit casser cette
+symétrie. Voir FOND-PRESERVE-S167 et A223.

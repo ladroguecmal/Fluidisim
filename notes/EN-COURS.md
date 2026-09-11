@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S167 — en cours
+Session : S167 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S166-1/A222, préserver le fond exact sans supprimer son défaut physique éventuel.
 
@@ -68,7 +68,7 @@ Objectif : S166-1/A222, préserver le fond exact sans supprimer son défaut phys
 - [x] **P2** — dériver le résidu équilibré, les sources et les références ; protocole et copies.
 - [x] **P3** — implémenter et mesurer fond exact, perturbation analytique et fond figé inexact.
 - [x] **P4** — recevoir tests, limites et suivi des actions.
-- [ ] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [x] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
