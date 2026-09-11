@@ -58,27 +58,23 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S173 — terminée
+Session : S174 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S172-1/A50, fond mobile et source cohérente aux étages RK2.
+Objectif : S173-1/A50, cadence grossière du fond indépendante du pas du solveur.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seul.
-- [x] **P2** — dériver les quadratures temporelles et construire la sonde mobile.
-- [x] **P3** — recevoir préservation, transport, identité discrète et volume ; suivi.
-- [x] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [ ] **P2** — construire les instantanés interpolés et les flux intégrés aux réactualisations.
+- [ ] **P3** — recevoir tests/campagne ; documenter précision, volume et accès aux instantanés.
+- [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
-Master d7a9367 propre, quatre copies alignées ; corpus lu dans cette conversation.
-112 ADR,225 angles,254 leçons,18 invariants,6 SPEC,23 cas. Aucun runtime adopté.
-Q_t remplacé par la sécante (Q1-Q0)/dt aux deux étages. Comparer flux physique
-trapézoïdal et intégré indépendamment en temps, source discrète et omission.
-Même total initial ; fond exact puis grossier, onde seule puis amplitude perturbée.
+Master d32f0b8 propre, quatre copies alignées ; corpus lu dans cette conversation.
+112 ADR,225 angles,255 leçons,18 invariants,6 SPEC,23 cas. Aucun runtime adopté.
+Interpoler les moyennes et états de face entre instantanés Q connus à cadence tau.
+Intégrer les flux par morceaux quand un pas traverse une réactualisation ; sécante commune.
+Le témoin continu S173 reste accessible ; futurs instantanés connus dans ce véhicule
+analytique seulement. Mesurer distinctement source cohérente et budget analytique réel.
 A50 partielle ; BILAN-S145 porté via B4 après B1/S63-1.
-P3 : trois tests nouveaux et quatre S172 reçus ;160 évolutions +8 témoins.
-Q exact préservé E<=2,75e-12 ; volume/prédiction<=2,42e-15. S172-1 réalisée.
-Suite S173-1 cadence du fond indépendante du solveur ; A50 partielle.
-
-P4 : rituel exécuté ; L255,225 angles,112 ADR. Suite S174/S173-1.
