@@ -65,7 +65,7 @@ Objectif : S173-1/A50, cadence grossière du fond indépendante du pas du solveu
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seul.
-- [ ] **P2** — construire les instantanés interpolés et les flux intégrés aux réactualisations.
+- [x] **P2** — construire les instantanés interpolés et les flux intégrés aux réactualisations.
 - [ ] **P3** — recevoir tests/campagne ; documenter précision, volume et accès aux instantanés.
 - [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 

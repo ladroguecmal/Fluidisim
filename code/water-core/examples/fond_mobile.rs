@@ -34,6 +34,10 @@ struct Report {
     budget: f64,
     prediction: f64,
     courant: f64,
+    analytic_volume: f64,
+    analytic_prediction: f64,
+    refresh_h: f64,
+    crossings: usize,
 }
 struct Case {
     spacing: f64,
@@ -41,8 +45,81 @@ struct Case {
     mode: Mode,
     solver: local::Local,
     flux_budget: f64,
+    analytic_flux_budget: f64,
     predicted: f64,
+    boundary_error: f64,
     report: Report,
+}
+// Offline snapshots of a known analytical background, including the next sample.
+// No claim that an unknown future event is available to a runtime.
+struct Timeline {
+    times: Vec<f64>,
+    cells: Vec<Vec<State>>,
+    faces: Vec<Vec<State>>,
+}
+impl Timeline {
+    fn new(n: usize, dx: f64, h: f64, p: f64, tau: f64) -> Self {
+        assert!(tau.is_finite() && tau > 0.0);
+        let count = (6.0 / tau).ceil() as usize;
+        let times: Vec<_> = (0..=count).map(|j| (j as f64 * tau).min(6.0)).collect();
+        let mut cells = Vec::new();
+        let mut faces = Vec::new();
+        for &t in &times {
+            let (q, g) = background(n, dx, t, h, p);
+            cells.push(q);
+            faces.push(
+                (n / 4..=3 * n / 4)
+                    .map(|i| {
+                        g.as_ref().map_or_else(
+                            || wave(0.05).at(i as f64 * dx, t),
+                            |g| g.at(i as f64 * dx),
+                        )
+                    })
+                    .collect(),
+            );
+        }
+        Self {
+            times,
+            cells,
+            faces,
+        }
+    }
+    fn bracket(&self, t: f64) -> (usize, f64) {
+        assert!(t >= -1e-12 && t <= 6.0 + 1e-12);
+        let t = t.clamp(0.0, 6.0);
+        let j = self
+            .times
+            .partition_point(|x| *x <= t)
+            .saturating_sub(1)
+            .min(self.times.len() - 2);
+        (j, (t - self.times[j]) / (self.times[j + 1] - self.times[j]))
+    }
+    fn cell(&self, i: usize, t: f64) -> State {
+        let (j, w) = self.bracket(t);
+        self.cells[j][i].plus(self.cells[j + 1][i].minus(self.cells[j][i]).times(w))
+    }
+    fn face(&self, i: usize, t: f64) -> State {
+        let (j, w) = self.bracket(t);
+        self.faces[j][i].plus(self.faces[j + 1][i].minus(self.faces[j][i]).times(w))
+    }
+    fn flux_integral(&self, i: usize, a: f64, b: f64) -> State {
+        let mut result = State::default();
+        let mut left = a;
+        for right in self
+            .times
+            .iter()
+            .copied()
+            .filter(|x| *x > a && *x < b)
+            .chain(std::iter::once(b))
+        {
+            result = result.plus(integral(|t| flux(self.face(i, t)), left, right, 1e-12));
+            left = right;
+        }
+        result
+    }
+    fn crosses(&self, a: f64, b: f64) -> bool {
+        self.times.iter().any(|x| *x > a && *x <= b && *x < 6.0)
+    }
 }
 fn wave(a: f64) -> Wave {
     Wave {
@@ -63,9 +140,16 @@ fn background(n: usize, dx: f64, t: f64, h: f64, p: f64) -> (Vec<State>, Option<
     (q, g)
 }
 fn run(n: usize, factor: f64, amplitude: f64, grids: &[(f64, f64)]) -> Vec<Case> {
+    run_cadence(n, factor, amplitude, grids, 0.0)
+}
+fn run_cadence(n: usize, factor: f64, amplitude: f64, grids: &[(f64, f64)], tau: f64) -> Vec<Case> {
     assert!(n >= 120 && n % 4 == 0 && factor >= 1.0);
     let dx = 120.0 / n as f64;
     let (start, end) = (n / 4, 3 * n / 4);
+    let timelines: Vec<_> = grids
+        .iter()
+        .map(|&(h, p)| (tau > 0.0).then(|| Timeline::new(n, dx, h, p, tau)))
+        .collect();
     let initial: Vec<_> = (0..n)
         .map(|i| value(wave(amplitude), i, dx, 0.0, true, 1e-12))
         .collect();
@@ -90,7 +174,9 @@ fn run(n: usize, factor: f64, amplitude: f64, grids: &[(f64, f64)]) -> Vec<Case>
                     dx,
                 ),
                 flux_budget: 0.0,
+                analytic_flux_budget: 0.0,
                 predicted: 0.0,
+                boundary_error: 0.0,
                 report: Report::default(),
             });
         }
@@ -113,9 +199,21 @@ fn run(n: usize, factor: f64, amplitude: f64, grids: &[(f64, f64)]) -> Vec<Case>
         }
         let ghosts = [old, [reference[start - 1], reference[end]]];
         total.step(t, dt, |_, _| rest, ghosts);
+        let analytic_net = integral(
+            |time| flux(wave(0.05).at(30.0, time)).minus(flux(wave(0.05).at(90.0, time))),
+            t,
+            t + dt,
+            1e-12,
+        )
+        .h;
         for (k, &(h, p)) in grids.iter().enumerate() {
             let q0 = &backgrounds[k];
-            let (q1, g) = background(n, dx, t + dt, h, p);
+            let timeline = timelines[k].as_ref();
+            let (q1, g) = if let Some(tl) = timeline {
+                ((0..n).map(|i| tl.cell(i, t + dt)).collect(), None)
+            } else {
+                background(n, dx, t + dt, h, p)
+            };
             let at = |x, time| {
                 g.as_ref().map_or_else(
                     || wave(0.05).at(x, time),
@@ -129,9 +227,15 @@ fn run(n: usize, factor: f64, amplitude: f64, grids: &[(f64, f64)]) -> Vec<Case>
             let mut num1 = Vec::new();
             for i in start..=end {
                 let x = i as f64 * dx;
-                f0.push(flux(at(x, t)));
-                f1.push(flux(at(x, t + dt)));
-                fi.push(integral(|time| flux(at(x, time)), t, t + dt, 1e-12));
+                if let Some(tl) = timeline {
+                    f0.push(flux(tl.face(i - start, t)));
+                    f1.push(flux(tl.face(i - start, t + dt)));
+                    fi.push(tl.flux_integral(i - start, t, t + dt));
+                } else {
+                    f0.push(flux(at(x, t)));
+                    f1.push(flux(at(x, t + dt)));
+                    fi.push(integral(|time| flux(at(x, time)), t, t + dt, 1e-12));
+                }
                 num0.push(numerical(q0[i - 1], q0[i]));
                 num1.push(numerical(q1[i - 1], q1[i]));
             }
@@ -184,6 +288,15 @@ fn run(n: usize, factor: f64, amplitude: f64, grids: &[(f64, f64)]) -> Vec<Case>
                     Mode::Omitted => change - physical_integral,
                     _ => 0.0,
                 };
+                c.analytic_flux_budget += numeric
+                    + if c.mode == Mode::Discrete {
+                        0.0
+                    } else {
+                        analytic_net - num_integral
+                    };
+                if c.mode != Mode::Discrete {
+                    c.boundary_error += physical_integral - analytic_net;
+                }
                 let mut mass = 0.0;
                 for i in start..end {
                     let j = i - start;
@@ -191,6 +304,9 @@ fn run(n: usize, factor: f64, amplitude: f64, grids: &[(f64, f64)]) -> Vec<Case>
                     let e = s.minus(reference[i]);
                     let di = s.minus(rest.plus(total.d[j]));
                     c.report.h = c.report.h.max(e.h.abs() / 0.05);
+                    if timeline.is_some_and(|tl| tl.crosses(t, t + dt)) {
+                        c.report.refresh_h = c.report.refresh_h.max(e.h.abs() / 0.05);
+                    }
                     c.report.q = c.report.q.max(e.q.abs() / (0.05 * G.sqrt()));
                     c.report.residual = c.report.residual.max(c.solver.d[j].h.abs() / 0.05);
                     c.report.identity =
@@ -199,6 +315,16 @@ fn run(n: usize, factor: f64, amplitude: f64, grids: &[(f64, f64)]) -> Vec<Case>
                 }
                 let defect = mass - mass0 - c.flux_budget;
                 c.report.volume = c.report.volume.max(defect.abs() / mass0);
+                let analytic_defect = mass - mass0 - c.analytic_flux_budget;
+                c.report.analytic_volume =
+                    c.report.analytic_volume.max(analytic_defect.abs() / mass0);
+                c.report.analytic_prediction = c
+                    .report
+                    .analytic_prediction
+                    .max((analytic_defect - (c.predicted + c.boundary_error)).abs() / mass0);
+                if timeline.is_some_and(|tl| tl.crosses(t, t + dt)) {
+                    c.report.crossings += 1;
+                }
                 c.report.prediction = c
                     .report
                     .prediction
@@ -206,6 +332,7 @@ fn run(n: usize, factor: f64, amplitude: f64, grids: &[(f64, f64)]) -> Vec<Case>
                 c.report.budget = c.report.budget.max(c.predicted.abs() / mass0);
                 c.report.courant = c.solver.courant;
                 assert!(c.report.prediction < 1e-10);
+                assert!(c.report.analytic_prediction < 1e-10);
                 if c.mode == Mode::Discrete {
                     assert!(c.report.identity < 1e-10);
                 }
@@ -216,6 +343,10 @@ fn run(n: usize, factor: f64, amplitude: f64, grids: &[(f64, f64)]) -> Vec<Case>
     cases
 }
 fn main() {
+    if std::env::args().any(|a| a == "--cadence") {
+        cadence_main();
+        return;
+    }
     println!("n,factor,amplitude,spacing,phase,mode,h,q,residual,identity,volume,predicted,prediction_error,courant");
     let grids = [(0.0, 0.0), (4.0, 0.0), (4.0, 0.5), (8.0, 0.0), (8.0, 0.5)];
     for a in [0.05, 0.06] {
@@ -227,9 +358,51 @@ fn main() {
         }
     }
 }
+fn cadence_main() {
+    println!("n,factor,amplitude,cadence,spacing,phase,mode,h,q,volume,analytic_volume,prediction_error,refresh_h,crossings,identity,courant");
+    for a in [0.05, 0.06] {
+        for (n, factor) in [(120, 1.0), (240, 1.0), (240, 2.0)] {
+            for tau in [0.0, 0.25, 1.0, 2.0] {
+                for c in run_cadence(n, factor, a, &[(0.0, 0.0), (8.0, 0.5)], tau) {
+                    let r = c.report;
+                    println!("{n},{factor},{a},{tau},{},{},{:?},{:.6e},{:.6e},{:.6e},{:.6e},{:.6e},{:.6e},{},{:.6e},{:.6}",c.spacing,c.phase,c.mode,r.h,r.q,r.volume,r.analytic_volume,r.prediction.max(r.analytic_prediction),r.refresh_h,r.crossings,r.identity,r.courant);
+                }
+            }
+        }
+    }
+}
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn snapshots_are_continuous_and_flux_is_split_across_refresh() {
+        let tl = Timeline::new(120, 1.0, 8.0, 0.5, 1.0);
+        let j = 30;
+        let left = tl.faces[0][j].plus(tl.faces[1][j].minus(tl.faces[0][j]));
+        let right = tl.face(j, 1.0);
+        assert!((left.h - right.h).abs() < 1e-12 && (left.q - right.q).abs() < 1e-12);
+        let f = tl.flux_integral(j, 0.9, 1.1);
+        let split = tl
+            .flux_integral(j, 0.9, 1.0)
+            .plus(tl.flux_integral(j, 1.0, 1.1));
+        assert!((f.h - split.h).abs() < 1e-12 && (f.q - split.q).abs() < 1e-12);
+        assert!(tl.crosses(0.99, 1.01));
+    }
+    #[test]
+    fn snapshot_budget_can_close_while_analytic_budget_does_not() {
+        let c = run_cadence(120, 1.0, 0.05, &[(0.0, 0.0)], 2.0);
+        assert!(c[1].report.volume < 1e-10 && c[1].report.analytic_volume > 1e-8);
+        assert!(c[1].report.h > 1e-4 && c[1].report.crossings == 2);
+        assert!(c[2].report.identity < 1e-10);
+    }
+    #[test]
+    fn cadence_refinement_is_distinct_from_solver_time_refinement() {
+        let a = run_cadence(120, 1.0, 0.05, &[(0.0, 0.0)], 2.0)[1].report;
+        let b = run_cadence(120, 1.0, 0.05, &[(0.0, 0.0)], 0.25)[1].report;
+        let c = run_cadence(120, 2.0, 0.05, &[(0.0, 0.0)], 2.0)[1].report;
+        assert!(b.h < a.h && b.analytic_volume < a.analytic_volume);
+        assert!((a.analytic_volume - c.analytic_volume).abs() < 1e-10);
+    }
     #[test]
     fn exact_mobile_background_is_preserved_by_integrated_source() {
         let c = run(120, 1.0, 0.05, &[(0.0, 0.0)]);
