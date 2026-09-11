@@ -65,7 +65,7 @@ Objectif : S171-1/A50, Q figé reconstruit et source issue du même fond.
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seul.
-- [ ] **P2** — dériver le défaut de discrétisation et construire la sonde conjointe.
+- [x] **P2** — dériver le défaut de discrétisation et construire la sonde conjointe.
 - [ ] **P3** — recevoir tests et campagne ; publier résultats, limites et suivi.
 - [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
