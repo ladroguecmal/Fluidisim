@@ -1571,3 +1571,12 @@ entrée par entrée. Le fil reprend ci-dessous.
   dériver la source avec sa variation temporelle aux étages RK2 ; mesurer préservation,
   transport et bilan, témoin discret conservé. Réseau spatial et pas temporel variés
   séparément, frontière analytique connue. Porteur : construction, poursuite B4/BILAN-S145.
+
+### Suivi S173 — Fond mobile et quadrature temporelle
+
+- **S172-1 réalisée sur véhicule mobile connu**, FOND-MOBILE-S173 : trois nouveaux tests,
+  quatre S172 rejoués,160 évolutions résiduelles et8 témoins totaux. A50 partielle.
+- **S173-1 / A50 : ouverte, priorité S174.** Séparer cadence de réévaluation du fond et
+  pas du solveur : instantanés grossiers de Q, interpolation temporelle et source issue
+  de cette même représentation. Comparer au fond analytique continu ; erreurs aux
+  réactualisations, transport et bilan. Porteur : construction, poursuite B4/BILAN-S145.

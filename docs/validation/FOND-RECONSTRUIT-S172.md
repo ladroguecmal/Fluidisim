@@ -137,3 +137,8 @@ Dériver une source cohérente avec sa variation temporelle aux étages RK2, con
 le témoin d’identité discrète et mesurer préservation, transport et volume. Varier le
 réseau spatial et le pas temporel séparément. Porteur : session de construction,
 poursuite B4/BILAN-S145 ; aucun résidu entrant inconnu supposé disponible.
+
+**Suivi S173 : S172-1 réalisée sur véhicule mobile connu**, voir
+[FOND-MOBILE-S173](FOND-MOBILE-S173.md). Sécante commune aux étages, flux intégrés
+indépendamment ; fond exact préservé, défauts temporels et omission prédits. A50 partielle :
+la cadence de réévaluation de Q reste à séparer du pas du solveur (S173-1).

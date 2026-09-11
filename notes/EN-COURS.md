@@ -66,7 +66,7 @@ Objectif : S172-1/A50, fond mobile et source cohérente aux étages RK2.
 
 - [x] **P1** — état réel, jeton, plan seul.
 - [x] **P2** — dériver les quadratures temporelles et construire la sonde mobile.
-- [ ] **P3** — recevoir préservation, transport, identité discrète et volume ; suivi.
+- [x] **P3** — recevoir préservation, transport, identité discrète et volume ; suivi.
 - [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
@@ -77,3 +77,6 @@ Q_t remplacé par la sécante (Q1-Q0)/dt aux deux étages. Comparer flux physiqu
 trapézoïdal et intégré indépendamment en temps, source discrète et omission.
 Même total initial ; fond exact puis grossier, onde seule puis amplitude perturbée.
 A50 partielle ; BILAN-S145 porté via B4 après B1/S63-1.
+P3 : trois tests nouveaux et quatre S172 reçus ;160 évolutions +8 témoins.
+Q exact préservé E<=2,75e-12 ; volume/prédiction<=2,42e-15. S172-1 réalisée.
+Suite S173-1 cadence du fond indépendante du solveur ; A50 partielle.

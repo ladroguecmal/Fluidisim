@@ -2128,3 +2128,10 @@ Q reconstruit et source physique cohérente, défaut Lphys(Q)-Lnum(Q) mesuré en
 et norme intégrée. Le témoin S=Lnum(Q) retrouve le solveur total à<=2,23e-16 mais ne
 prouve pas la préservation du fond mobile. S171-1 réalisée ; S172-1 reçoit cette étape.
 A225 reste traitée à flux de bord connus ; A216/A217 inchangées. Aucun nouvel angle.
+
+**Suivi A50 — S173 : fond mobile et source cohérente reçus sur véhicule connu.**
+[FOND-MOBILE-S173](../validation/FOND-MOBILE-S173.md) : S172-1 réalisée,160 évolutions,
+source intégrée préservant Q exact ; volume à<=2,42e-15. Le témoin discret retrouve
+le solveur total mais diffuse Q ; omission sur Q exact seul est un témoin insuffisant.
+A50 partielle : accès temporel analytique continu encore nécessaire, cadence grossière
+suivie S173-1. A225 reste traitée, A216/A217 inchangées ; aucun nouvel angle.
