@@ -66,7 +66,7 @@ Objectif : S179-1/A50, différentiel profond de la pression W forcée.
 
 - [x] **P1** — état réel, jeton et plan seul.
 - [x] **P2** — dériver pression imposée et champ profond ; contrat et protocole.
-- [ ] **P3** — construire dans le champ spectral, recevoir forçage/dérivées/refus et conformité.
+- [x] **P3** — construire dans le champ spectral, recevoir forçage/dérivées/refus et conformité.
 - [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
@@ -75,6 +75,12 @@ S180 : master3b7cae0 propre, quatre copies alignées ;115 ADR/225 angles/261 le�
 Le champ spectral conserve déjà pression et vitesse modales dans Slot. Dériver
 depuis phi_t=-g eta-P/rho ; ne pas oublier la pression imposée dans p_dyn profond.
 Suite BILAN-S145/S176, code de bibliothèque ; notes antérieures conservées ci-dessous.
+
+P3 S180 : cinq tests nouveaux debug/release, workspace324/cinq ignorés ; C02/C18
+inchangés. Source forcée reçue dès la naissance, contre-épreuve sans gradient de
+pression détectée. Slot64 octets (+16), chemins incrémental et reliaison reçus.
+Reste P4 : rituel, L262,116 ADR/225 angles/262 leçons ; suite S180-1 composition
+différentielle B+impacts+pressions, contexte et instant communs.
 
 S179 : master ae28d98 propre, quatre copies alignées ;114 ADR/225 angles/260 leçons.
 P4 S179 :115 ADR/225 angles/261 leçons,18 invariants,6 SPEC,23 cas vérifiés.

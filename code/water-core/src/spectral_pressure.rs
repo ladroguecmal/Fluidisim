@@ -1,4 +1,7 @@
 //! S96 : champ f32 sur spectre fourni par l'hôte. La cuisson gaussienne reste extérieure.
+#[path = "pressure_differential.rs"]
+mod differential;
+pub use differential::PressureDifferential;
 use crate::{
     modal_pressure::{scale_integer, Complex, Error, ModalPressure, Response, Segment},
     PhaseQ32, SimTime,
@@ -11,6 +14,10 @@ pub struct Node {
 }
 #[derive(Clone, Copy, Default)]
 pub struct Slot {
+    /// ADR-116 : paramètres non pondérés et milieu de préparation.
+    k: [f32; 2],
+    gravity: f32,
+    density: f32,
     turns: [f32; 2],
     weighted_k: [f32; 2],
     weight: f32,
@@ -203,6 +210,9 @@ pub(crate) fn prepare_segments<'a>(
             phase_safe &= bound.is_finite() && bound < 1_048_576.0;
         }
         *slot = Slot {
+            k: node.k,
+            gravity,
+            density,
             turns,
             weighted_k: [node.weight * node.k[0], node.weight * node.k[1]],
             weight: node.weight,
@@ -299,6 +309,9 @@ pub(crate) fn add_segments<'a>(
         }
         slot.response = total;
         slot.pressure = pressure;
+        slot.k = node.k;
+        slot.gravity = gravity;
+        slot.density = density;
     }
     if !energy.is_finite() || !power.is_finite() {
         return Err(Error::NonFinite.into());
@@ -424,19 +437,22 @@ impl Field<'_> {
 }
 
 impl Slot {
+    fn spatial_phase(&self, p: [f32; 2], phase_safe: bool) -> Result<PhaseQ32, Error> {
+        if !phase_safe {
+            let turns = [self.turns[0] * p[0], self.turns[1] * p[1]];
+            if !turns.iter().all(|v| v.is_finite() && v.abs() < 1_048_576.0) {
+                return Err(Error::Domain);
+            }
+        }
+        Ok(PhaseQ32::from_distance(self.turns[0], p[0])
+            .wrapping_add(PhaseQ32::from_distance(self.turns[1], p[1])))
+    }
     #[inline]
     fn accumulate(&self, p: [f32; 2], phase_safe: bool, out: &mut Surface) -> Result<(), Error> {
         let slot = self;
         let r = slot.response;
         let k = slot.magnitude;
-        if !phase_safe {
-            let turns = [slot.turns[0] * p[0], slot.turns[1] * p[1]];
-            if !turns.iter().all(|v| v.is_finite() && v.abs() < 1_048_576.0) {
-                return Err(Error::Domain);
-            }
-        }
-        let phase = PhaseQ32::from_distance(slot.turns[0], p[0])
-            .wrapping_add(PhaseQ32::from_distance(slot.turns[1], p[1]));
+        let phase = slot.spatial_phase(p, phase_safe)?;
         let (s, c) = phase.sin_cos();
         let eta = r.eta.re * c - r.eta.im * s;
         let vel = r.velocity.re * c - r.velocity.im * s;
@@ -578,6 +594,7 @@ mod tests {
         assert!(f.sample_batch(&bad, &mut scratch, &mut output).is_err());
         assert_eq!(output.map(bits), before);
         let poison = [Slot {
+            k: [1.0; 2], gravity: 9.81, density: 1025.0,
             turns: [1e6, 0.0],
             weighted_k: [1.0; 2],
             weight: 1.0,
@@ -731,6 +748,7 @@ mod tests {
         }
         // Le contrôle de phase ne remplace pas celui des résultats.
         let poisoned = [Slot {
+            k: [0.0; 2], gravity: 9.81, density: 1025.0,
             turns: [0.0; 2],
             weighted_k: [0.0; 2],
             weight: 1.0,

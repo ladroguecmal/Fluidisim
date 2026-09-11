@@ -100,6 +100,15 @@ struct WaterSample {
 
 ### 2.1 Deux types d'échantillon, et pourquoi les fusionner serait une erreur
 
+> **Complément S180 — 2026-09-12.** Le Field spectral préparé fournit les dérivées
+> profondes à son instant de préparation : PressureDifferential contient le
+> BackgroundSample, la densité et la pression imposée de surface avec son gradient.
+> p_dyn comprend déjà la prolongation profonde de cette pression : ne pas l'ajouter
+> une seconde fois à la source volumique. Aux commutations, dérivée de la branche
+> active ; sortie par lot atomique. [ADR-116](../adr/ADR-116-differentiel-de-pression-forcee.md)
+> et [DIFFERENTIEL-PRESSION-S180](../validation/DIFFERENTIEL-PRESSION-S180.md).
+> Composition multisource et exposition monde restent à recevoir (S180-1).
+
 > **Complément S179 — 2026-09-12.** RadialImpact fournit le même type différentiel
 > profond et sa composition locale avec B, avec lot atomique sur scratch hôte.
 > Limite du gradient au centre dérivée, g/rho de construction conservés ; contexte
