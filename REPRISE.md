@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-12 00:51 +02:00
-Agent            : Codex (GPT-6 puis GPT-5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-12 00:56 +02:00
+Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
+Session en cours : S179
 Dernière session : S178 — source continue du fond B construite ; six nouveaux tests
 Session suivante : S179 — S178-1/A50 : différentiel RadialImpact et composition B+W
 

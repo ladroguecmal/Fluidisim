@@ -58,18 +58,22 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S178 — terminée
-Agent : Codex (GPT-6 puis GPT-5 ; fichiers, git et cargo disponibles)
-Objectif : S177-1/A50, gradient de pression et source continue du B profond.
+Session : S179 — en cours
+Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
+Objectif : S178-1/A50, différentiel profond RadialImpact et composition B+W.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seul.
-- [x] **P2** — dériver source, Laplacien et conventions ; construire les termes en bibliothèque.
-- [x] **P3** — recevoir avec références indépendantes, contre-épreuves et conformité.
-- [x] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [ ] **P2** — dériver le champ radial régulier et déclarer contrat et réception.
+- [ ] **P3** — construire le fournisseur et la composition, recevoir dérivées et refus.
+- [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
+
+S179 : master ae28d98 propre, quatre copies alignées ;114 ADR/225 angles/260 leçons.
+Poursuite de construction B4 (BILAN-S145/S176). Conserver phases, valeurs et refus
+historiques ; origine radiale régulière. Notes S178 ci-dessous conservées comme entrée.
 
 Master 4314dc8 propre ; quatre copies alignées, branche historique archivée conservée.
 113 ADR,225 angles,259 leçons,18 invariants,6 SPEC,23 cas. S177 :307 tests/cinq ignorés.
