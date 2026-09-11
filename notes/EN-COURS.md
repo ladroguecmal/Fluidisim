@@ -58,31 +58,21 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S167 — terminée
+Session : S168 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S166-1/A222, préserver le fond exact sans supprimer son défaut physique éventuel.
+Objectif : S167-1/A223, fermer le volume total par moyennes et flux physiques intégrés cohérents.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seul.
-- [x] **P2** — dériver le résidu équilibré, les sources et les références ; protocole et copies.
-- [x] **P3** — implémenter et mesurer fond exact, perturbation analytique et fond figé inexact.
-- [x] **P4** — recevoir tests, limites et suivi des actions.
-- [x] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [ ] **P2** — dériver bilan et quadratures indépendantes ; protocole et copies synchronisées.
+- [ ] **P3** — construire et mesurer fond exact, perturbation et fond figé asymétriques.
+- [ ] **P4** — réception, limites, suivi des actions.
+- [ ] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
-Master 1f7d9d9 propre, quatre copies alignées ; S166 clôturée après interruption de son rituel.
-Corpus lu dans cette conversation. 112 ADR,222 angles,248 leçons,18 invariants,6 SPEC,23 cas.
-Six tests S166 et huit S165 reçus ; workspace 299/cinq ignorés reçu S163.
-BILAN-S145 porté par poursuite B4. Aucun runtime, seuil physique ou absorbeur à choisir ici.
-P2 : protocole FOND-PRESERVE-S167 ; source physique distincte du résidu numérique.
-Témoin S164, fond exact, perturbation analytique, fond figé et source omise. Deux bilans.
-
-P3 : 45 évolutions reçues ; cinq tests S167, six S166 et huit S165 reçus.
-Fond exact d=0 ; erreur perturbée N240 0,03129235 contre 0,1583713 (échelle0,05).
-Bilan résiduel à l'arrondi ; flux corrigé laisse quadrature ~dx², suivi à expliciter.
-
-P4 : réception publiée, A222 traitée sur véhicule ; A223/S167-1 volume total moyenné.
-Défaut corrigé N240 5,200756e-7 ; symétrie du fond figé explicitée, pas de généralisation.
-A50 partielle, aucun ADR ni runtime modifié.
+Master 7d86eb2 propre, quatre copies alignées ; S167 terminée. Corpus lu dans cette conversation.
+112 ADR,223 angles,249 leçons,18 invariants,6 SPEC,23 cas. Bibliothèques inchangées.
+S167 cinq tests, S166 six, S165 huit reçus ; workspace299/cinq ignorés reçu S163.
+BILAN-S145 porté par poursuite B4 ; pas de schéma runtime adopté.

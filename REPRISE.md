@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-11 06:04 +02:00
+JETON            : occupé
+Battement        : 2026-09-11 06:05 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S168 — volume total et moyennes
 Dernière session : S167 — fond exact préservé, source physique reçue ; cinq nouveaux tests
 Session suivante : S168 — S167-1 : volume total, moyennes de cellules et flux intégrés (A223)
 
