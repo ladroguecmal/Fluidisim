@@ -2078,3 +2078,16 @@ d'adoption runtime, A50 reste partielle.
   des échantillons de Q, pas ses moyennes, et le flux temporel est une quadrature RK2.
   S167-1 : moyennes et flux intégrés cohérents, fond exact/perturbation et montage
   asymétrique. Ni perte de volume de production ni seuil perceptuel inféré.
+
+**Suivi A223 — S168 : traitée sur véhicule à fond connu.** Moyennes spatiales et flux
+physiques temporels intégrés indépendamment : bilan du volume <=2,14e-15 relatif.
+Q exact intact, perturbation convergente, source moyenne du fond figé asymétrique
+reçue avec flux net non nul. Voir VOLUME-MOYEN-S168 ; pas d'adoption runtime.
+
+- **A224** *(sévérité 2, S168 ; ouverte)* — **Le bord autonome et le résidu équilibré
+  conservatif n'ont été reçus que séparément.** S168 fournit toujours des fantômes
+  issus de T exact ; S166 utilisait l'ancien couplage et des états ponctuels. Transférer
+  un invariant total entre deux positions ne garantit pas la préservation de Q variable.
+  S168-1 : dériver et recevoir l'assemblage, d nul puis entrée connue et sortie,
+  bilan fondé sur le flux effectivement utilisé. Limite de réception, pas défaut observé
+  en production ; aucune information extérieure résiduelle inconnue supposée disponible.

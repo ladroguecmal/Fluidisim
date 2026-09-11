@@ -67,7 +67,7 @@ Objectif : S167-1/A223, fermer le volume total par moyennes et flux physiques in
 - [x] **P1** — état réel, jeton et plan seul.
 - [x] **P2** — dériver bilan et quadratures indépendantes ; protocole et copies synchronisées.
 - [x] **P3** — construire et mesurer fond exact, perturbation et fond figé asymétriques.
-- [ ] **P4** — réception, limites, suivi des actions.
+- [x] **P4** — réception, limites, suivi des actions.
 - [ ] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
@@ -83,3 +83,6 @@ P3 : cinq tests nouveaux et campagne30 évolutions reçus. Moyennes + flux inté
 ferment le volume <=2,14e-15 ; moyenne seule laisse5,845e-9 à N240, pas nominal.
 Flux net du fond figé asymétrique constaté : maximum cumulatif absolu5,39216e-5 m².
 Aucun support existant modifié ; tests précédents non rejoués.
+
+P4 : A223 traitée, A224/S168-1 assemblage avec frontière autonome. Résultats et limites
+publiés, aucun ADR. Trois réceptions distinctes : fond intact, bilan, transport.

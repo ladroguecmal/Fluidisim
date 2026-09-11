@@ -1519,3 +1519,15 @@ entrée par entrée. Le fil reprend ci-dessous.
   Fond exact puis perturbation, montage asymétrique à flux net non nul. Distinguer bilan
   total, budget résiduel et erreur de transport. Porteur : session de construction,
   poursuite B4 selon BILAN-S145.
+
+### Suivi S168 — Volume moyen et flux intégrés
+
+- **S167-1 réalisée, A223 traitée sur véhicule à fond connu.** VOLUME-MOYEN-S168 :
+  deux quadratures indépendantes, volume fermé à<=2,14e-15, fond exact et perturbation,
+  fond figé asymétrique à flux net non nul. Cinq nouveaux tests et30 évolutions reçus.
+- **A50 partielle**, A216/A217 inchangées ; aucun ADR ni schéma runtime adopté.
+- **S168-1 / A224 : ouverte, priorité S169.** Assembler la frontière autonome S166 avec
+  le résidu équilibré en moyennes. Dériver une fermeture préservant Q variable à d=0 ;
+  entrée connue et perturbation sortante, flux réellement utilisé dans le bilan.
+  Aucun résidu extérieur inconnu reconstitué. Porteur : session de construction,
+  poursuite B4 selon BILAN-S145.

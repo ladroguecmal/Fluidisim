@@ -149,3 +149,7 @@ physiques intégrés sur le pas, au lieu de sommes de valeurs ponctuelles. Déri
 avant code, recevoir Q exact puis une perturbation, et ajouter un montage asymétrique
 pour que le flux net ne s'annule pas. Distinguer cette conservation totale du budget du
 résidu et de la qualité de transport. Ni bord autonome, 3D, choc ou eau sèche reçu ici.
+
+**Suivi S168 : S167-1 réalisée**, voir [VOLUME-MOYEN-S168](VOLUME-MOYEN-S168.md).
+Moyennes et flux intégrés indépendamment ferment le volume, y compris sur Q figé
+asymétrique. A223 traitée dans ce périmètre ; assemblage avec bord autonome suivi A224/S168-1.
