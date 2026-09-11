@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-11 19:13 +02:00
+JETON            : libre
+Battement        : 2026-09-11 19:14 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S173
-Dernière session : S172 — Q et source reconstruits ensemble ; quatre nouveaux tests
-Session suivante : S173 — S172-1/A50 : fond reconstruit mobile et cohérence temporelle de la source
+Session en cours : aucune
+Dernière session : S173 — fond mobile préservé et budgets temporels reçus ; trois nouveaux tests
+Session suivante : S174 — S173-1/A50 : cadence du fond distincte du pas du solveur
 
 *S160 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
 rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour.*
@@ -187,6 +187,22 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S173 — 2026-09-11 :** [FOND-MOBILE-S173](docs/validation/FOND-MOBILE-S173.md).
+**S172-1 réalisée sur véhicule mobile connu ; A50 partielle.** Sécante ΔQ/dt commune
+aux étages ; sources physique trapézoïdale/intégrée, discrète et omise. Q exact seul
+préservé par Integrated à E<=2,75e-12 ; volume/prédiction signée à<=2,42e-15 relatif.
+Trois nouveaux tests et quatre S172 rejoués ;160 évolutions résiduelles et8 témoins totaux.
+Le témoin Discrete retrouve le solveur total à<=2,23e-16 mais diffuse Q exact ; omission
+sur Q exact seul passe, sur Q grossier le défaut de volume est prédit. Perturbation0,01m :
+erreur15,62 % àN240/Q exact,45,82 % àH8/phase0,5. Pas de seuil physique adopté.
+112 ADR,225 angles,255 leçons,18 invariants,6 SPEC,23 cas. L255, aucun nouvel angle.
+A225 reste traitée à flux de bord connus, A216/A217 inchangées. Bibliothèques inchangées,
+workspace non rejoué (S163 :299/cinq ignorés). Aucun ADR ni runtime adopté.
+**Suite S174 : S173-1/A50**, séparer cadence de réévaluation du fond et pas du solveur :
+instantanés grossiers, interpolation temporelle et source issue de la même représentation.
+Comparer au fond continu ; erreurs aux réactualisations, transport et volume. BILAN-S145
+porté par B4 après B1/S63-1 ; aucun arbitrage humain nouveau.
 
 **S172 — 2026-09-11 :** [FOND-RECONSTRUIT-S172](docs/validation/FOND-RECONSTRUIT-S172.md).
 **S171-1 réalisée sur fond figé, A50 partielle.** Q_H et source construits conjointement ;

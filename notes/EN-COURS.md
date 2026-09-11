@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S173 — en cours
+Session : S173 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S172-1/A50, fond mobile et source cohérente aux étages RK2.
 
@@ -67,7 +67,7 @@ Objectif : S172-1/A50, fond mobile et source cohérente aux étages RK2.
 - [x] **P1** — état réel, jeton, plan seul.
 - [x] **P2** — dériver les quadratures temporelles et construire la sonde mobile.
 - [x] **P3** — recevoir préservation, transport, identité discrète et volume ; suivi.
-- [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [x] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
@@ -80,3 +80,5 @@ A50 partielle ; BILAN-S145 porté via B4 après B1/S63-1.
 P3 : trois tests nouveaux et quatre S172 reçus ;160 évolutions +8 témoins.
 Q exact préservé E<=2,75e-12 ; volume/prédiction<=2,42e-15. S172-1 réalisée.
 Suite S173-1 cadence du fond indépendante du solveur ; A50 partielle.
+
+P4 : rituel exécuté ; L255,225 angles,112 ADR. Suite S174/S173-1.

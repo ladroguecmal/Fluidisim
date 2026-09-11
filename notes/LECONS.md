@@ -3968,3 +3968,15 @@ mais ne garantit pas la préservation physique d’un fond déjà solution exact
 Mesurer représentation, évolution et bilan séparément ; aucune de ces identités ne
 constitue à elle seule un critère physique d’activation du résidu. Voir
 FOND-RECONSTRUIT-S172 et A50.
+
+## L255 — La cohérence temporelle porte sur les incréments
+
+*(S173)* Soustraire la même sécante ΔQ/dt aux deux étages RK2 rend leur assemblage
+compatible avec la variation connue du fond. Cela ne suffit pas si le flux physique
+est intégré autrement : le trapèze laisse un défaut de volume que prédit exactement
+son écart à la quadrature temporelle indépendante.
+
+Recevoir les incréments complets, pas seulement la justesse ponctuelle des dérivées.
+Garder deux références : le solveur total pour l’identité discrète et la solution
+physique pour la préservation du fond. Sur Q exact seul, le premier est diffusif alors
+que le second doit rester intact. Voir FOND-MOBILE-S173 et A50.

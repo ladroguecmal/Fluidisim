@@ -8628,3 +8628,39 @@ f64 déterministe ne décide ni mélange stochastique ni stockage de réalisatio
 étages RK2 ; préservation, transport et volume, témoin discret, résolutions séparées.
 BILAN-S145 porté via B4 après B1/S63-1. Aucun arbitrage humain nouveau. Clôture avec
 jeton libre, commits conservés et quatre copies alignées.
+
+## S173 — 2026-09-11 — Préserver le fond mobile exige un incrément cohérent
+
+**Entrée :** master d7a9367 propre, quatre copies alignées ; S172-1/A50. Plan seul,
+jeton diffusé aux trois autres copies propres. Copie principale ; aucune créée ou supprimée.
+Corpus et invariants lus dans cette conversation, aucune décision réouverte.
+
+**Produit :** fond_mobile.rs, FOND-MOBILE-S173, support reconstructed_wave extrait de
+S172 puis étendu au temps. Moyennes par segments ; sécante ΔQ/dt commune aux deux
+étages. Sources Trapezoid, Integrated, Discrete et Omitted ; même total initial,
+Q amplitude0,05, totaux0,05/0,06. Frontières analytiques, budgets indépendants du volume.
+
+**Réception :** trois nouveaux tests et quatre S172 rejoués réussis.160 évolutions
+résiduelles et8 témoins totaux. Fond exact seul préservé par Integrated à E<=2,75e-12,
+volume et prédiction signée à<=2,42e-15 relatif.40 témoins Discrete identiques au
+solveur total à<=2,23e-16 ; Courant<=0,220128. Leur erreur physique reste0,12954 àN240
+sur Q seul. Une identité algorithmique ne garantit pas cette préservation.
+
+ÀN240/Q exact, le défaut trapézoïdal vaut E2,862816e-4/V5,844851e-9, divisés environ
+par quatre au demi-pas. Omission sur Q exact seul passe, mais sur H8/phase0,5, elle
+laisse V1,193235e-4. Son défaut égale Δvolume(Q_H)-flux physique intégré.
+Avec perturbation0,01 m, Integrated/Q exact garde15,62 % d’erreur de hauteur àN240 ;
+H8/phase0,5 garde45,82 %. Transport spatial distinct du bilan fermé.
+
+**Portée :** S172-1 réalisée sur véhicule mobile connu ; A50 partielle. Q est encore
+accessible à chaque instant demandé par la quadrature. Aucun coût runtime,3D, force,
+perception, eau sèche ou choc reçu. Aucun nouveau schéma adopté ; I-02/I-09 inchangés :
+le support d’essai ne décide pas le stockage de réalisations dans B. Bibliothèques
+inchangées et non rejouées (S163 :299 tests/cinq ignorés).
+112 ADR,225 angles,255 leçons,18 invariants,6 SPEC,23 cas. L255 ajoutée, pas de nouvel
+angle ; A225 reste traitée, A216/A217 inchangées. Aucun arbitrage humain nouveau.
+
+**Suite S174 : S173-1/A50**, cadence grossière de réévaluation du fond distincte du pas
+du solveur, interpolation temporelle et source cohérente ; mesurer réactualisations,
+transport et volume. BILAN-S145 porté via B4 après B1/S63-1. Clôture avec jeton libre,
+commits conservés et quatre copies alignées.

@@ -17,6 +17,13 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S173 :** [FOND-MOBILE-S173](validation/FOND-MOBILE-S173.md).
+S172-1 réalisée sur fond mobile connu ; source intégrée préservant Q exact,
+volume à<=2,42e-15, transport perturbé encore imparfait. Trois nouveaux tests,
+quatre S172 rejoués ;160 évolutions et8 témoins totaux. A50 partielle, aucun runtime adopté.
+112 ADR,225 angles,255 leçons,18 invariants,6 SPEC,23 cas. L255 ; pas de nouvel angle.
+**Suite S174 : S173-1/A50**, cadence du fond distincte du pas du solveur.
+
 **S172 :** [FOND-RECONSTRUIT-S172](validation/FOND-RECONSTRUIT-S172.md).
 S171-1 réalisée sur fond figé ; Q et source reconstruits ensemble, même total initial.
 Quatre nouveaux tests,88 évolutions résiduelles et4 témoins totaux ; identité discrète
