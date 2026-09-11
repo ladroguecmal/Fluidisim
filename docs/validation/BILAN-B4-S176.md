@@ -119,3 +119,9 @@ réception, pas une nouvelle variante de la campagne1D.
 [FOURNISSEUR-B-S177](FOURNISSEUR-B-S177.md), conventions ADR-113. API de bibliothèque,
 réception indépendante et ancien eval inchangé. B4 complet non reçu, A50 partielle ;
 suite S177-1, gradient de pression et résidu physique continu de B avant extension W.
+
+**Suivi S178 : S177-1 réalisée pour B profond linéaire**, voir
+[SOURCE-B-S178](SOURCE-B-S178.md), conventions ADR-114. Gradient de pression,
+Laplacien et source volumique continue reçus ; interactions entre modes formées après
+sommation. A50 reste partielle et B4 complet non reçu. Suite S178-1 : fournisseur
+différentiel du candidat RadialImpact puis composition B+W.

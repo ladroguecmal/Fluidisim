@@ -55,7 +55,12 @@ Commandes depuis code/ :
 cargo test -p water-core background::differential
 cargo test --workspace
 cargo run -p water-harness --release -- check scenarios/C18-invariants.toml scenarios/C02-dispersion.toml
+rustfmt --edition 2021 --check water-core/src/background_differential.rs
 ```
+
+Le formatage du fichier touché est conforme. Le contrôle `cargo fmt --all -- --check`
+reste rouge sur le format historique de nombreux exemples et fichiers du harnais,
+hors de ce lot ; aucune réécriture globale n’a été appliquée.
 
 ## Portée et suite
 

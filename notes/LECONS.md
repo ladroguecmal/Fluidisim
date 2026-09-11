@@ -4027,3 +4027,14 @@ champ analytique représenté, pas celles de la fonction quantifiée effectiveme
 Recevoir séparément raccord des valeurs et dérivées physiques, avec une référence
 analytique indépendante et des pas couvrant l’arrondi sans masquer la troncature.
 La concordance d’un hash n’est pas une preuve sur un gradient. Voir FOURNISSEUR-B-S177.
+
+## L260 — Contracter après la somme conserve les interactions
+
+*(S178)* Un opérateur linéaire peut s’évaluer composante par composante. Le terme
+advectif `(U·∇)U` ne le peut pas : sommer les résidus de modes isolés retire tous les
+produits croisés, même si chaque mode est exact et chaque somme reproductible.
+
+Fournir d’abord le champ total et son gradient, puis contracter. Recevoir séparément
+la formule totale et une contre-épreuve où l’addition des résultats isolés diffère.
+Un calcul modal correct n’établit pas la justesse de l’opérateur non linéaire composé.
+Voir SOURCE-B-S178 et ADR-114.

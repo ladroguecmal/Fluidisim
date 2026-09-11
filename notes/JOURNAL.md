@@ -8792,3 +8792,40 @@ de B ; qualifier Laplacien/viscosité et unités, recevoir les termes avant exte
 Le type seul ne ferme pas toute la source SPEC-004. BILAN-S145 et bilan S176 portés
 par la construction de bibliothèque. Aucun arbitrage humain nouveau. Clôture avec
 jeton libre, commits et quatre copies alignés.
+
+## S178 — 2026-09-11/12 — La source continue du fond B est construite
+
+**Entrée :** master 4314dc8 propre, quatre copies alignées ; S177-1/A50, lot de
+bibliothèque. Plan seul et jeton diffusés, aucune copie créée ou supprimée.
+
+**Produit :** BackgroundSample fournit grad_p_dyn en Pa/m et laplacian_u en 1/(m s).
+momentum_residual(rho,nu) forme `S=U_t+(U·∇)U+∇p/rho-nu ΔU` en m/s² ; le solveur
+perturbatif doit soustraire S. Rho est celui de l’échantillonnage, nu la viscosité
+cinématique uniforme fournie par l’appelant. Hydrostatique et gravité sont déjà
+compensées. ADR-114 fixe les signes, unités, limites et le caractère continu du résultat.
+
+Le Laplacien est calculé depuis la direction effectivement représentée, sans forcer à
+zéro son petit défaut de norme f32. Les modes sont sommés avant l’advection : le résidu
+conserve leurs interactions. Même un mode Airy idéal porte une source verticale
+quadratique non nulle ; aucune annulation linéaire n’est substituée au calcul représenté.
+
+**Réception :** six nouveaux tests, quatorze tests différentiels au total ; workspace
+313 réussis/cinq ignorés. Gradient de pression et Laplacien reçus par différences finies,
+résidu par `U_t+∇(p/rho+|U|²/2)`, mode seul à 0,2578228700 m/s², loi quadratique et
+interactions croisées. Une mutation neutralisant l’advection échoue avec zéro contre
+0,2578228700 puis est retirée. Densité, viscosité, non-finis et atomicité d’un lot après
+débordement du nouveau gradient reçus. C18 `0x85c8bc610f551d11` et C02
+`0x0a3a3bcc945db263` inchangés. Avertissements historiques non touchés.
+Le fichier Rust touché passe son contrôle de format ; le contrôle global reste rouge
+sur le format historique de nombreux fichiers hors lot, laissés intacts.
+
+**Suivi :** S177-1 réalisée pour B profond linéaire uniforme ; A50 et B4 restent
+partiels. ADR-114 et L260 ajoutés, aucun nouvel angle. 114 ADR,225 angles,260 leçons,
+18 invariants,6 SPEC,23 cas. I-02/03/06/07/08/09 inchangés ; allocation inspectée,
+conformité multiplateforme non certifiée. Ni surface libre non linéaire, projection de
+pression, W différentiel ou δ3D reçus.
+
+**Suite S179 : S178-1**, fournisseur différentiel profond du candidat RadialImpact,
+puis composition avec B et réception des termes croisés. Traiter l’origine radiale sans
+division singulière et conserver domaine, horizon et refus. Les pressions forcées suivent.
+BILAN-S145/BILAN-B4-S176 portés par cette construction. Aucun arbitrage humain nouveau.

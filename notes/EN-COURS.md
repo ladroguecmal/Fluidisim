@@ -58,8 +58,8 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S178 — en cours
-Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
+Session : S178 — terminée
+Agent : Codex (GPT-6 puis GPT-5 ; fichiers, git et cargo disponibles)
 Objectif : S177-1/A50, gradient de pression et source continue du B profond.
 
 ### Plan
@@ -67,7 +67,7 @@ Objectif : S177-1/A50, gradient de pression et source continue du B profond.
 - [x] **P1** — état réel, jeton et plan seul.
 - [x] **P2** — dériver source, Laplacien et conventions ; construire les termes en bibliothèque.
 - [x] **P3** — recevoir avec références indépendantes, contre-épreuves et conformité.
-- [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [x] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
@@ -81,3 +81,5 @@ P2 : ADR114 ; gradients et Laplacien représenté, source S à soustraire. cargo
 P3 : six nouveaux tests, quatorze tests différentiels reçus ; workspace313/cinq ignorés.
 Contre-épreuve : advection neutralisée, échec 0 contre0,2578228700 m/s² ; original restauré.
 C18/C02 reçus, hashs inchangés ; source mono-mode quadratique et croisements reçus.
+P4 : ADR114/L260 ;114 ADR,225 angles,260 leçons,18 invariants,6 SPEC,23 cas.
+Suite S179 : différentiel RadialImpact puis composition B+W. Jeton libre après clôture.

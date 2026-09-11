@@ -110,8 +110,9 @@ struct WaterSample {
 > les méthodes `Background::differential*` existent pour B profond linéaire uniforme.
 > z est relatif au plan moyen, z<=0 ; grad_u[i][j]=∂u_i/∂x_j, p_dyn en Pa avec rho
 > fourni. `WaterSample` historique inchangé. ADR-113 et
-> [FOURNISSEUR-B-S177](../validation/FOURNISSEUR-B-S177.md) fixent la réception ; B+W,
-> gradient de pression et fermeture du solveur ne sont pas reçus par ce seul type.
+> [FOURNISSEUR-B-S177](../validation/FOURNISSEUR-B-S177.md) fixent cette première réception.
+> S178 ajoute gradient de pression, Laplacien et résidu continu (ADR-114) ; B+W et
+> fermeture du solveur ne sont pas reçus par ce seul type.
 
 ```cpp
 // Consommateur unique : un solveur δ en régime perturbatif — cf. §6
@@ -122,6 +123,8 @@ struct BackgroundSample {
     vec3  du_dt;            // dérivée temporelle locale
     mat3  grad_u;           // gradient de vitesse
     float p_dyn;
+    vec3  grad_p_dyn;       // Pa/m
+    vec3  laplacian_u;      // 1/(m s)
 };
 ```
 

@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-12 00:49 +02:00
-Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S178
-Dernière session : S177 — fournisseur différentiel B construit ; huit nouveaux tests
-Session suivante : S178 — S177-1/A50 : gradient de pression et source physique continue de B
+JETON            : libre
+Battement        : 2026-09-12 00:51 +02:00
+Agent            : Codex (GPT-6 puis GPT-5 ; fichiers, git et cargo disponibles)
+Session en cours : aucune
+Dernière session : S178 — source continue du fond B construite ; six nouveaux tests
+Session suivante : S179 — S178-1/A50 : différentiel RadialImpact et composition B+W
 
 *S160 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
 rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour.*
@@ -168,7 +168,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 113 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 114 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -187,6 +187,20 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S178 — 2026-09-11/12 :** [SOURCE-B-S178](docs/validation/SOURCE-B-S178.md),
+[ADR-114](docs/adr/ADR-114-source-continue-du-fond-profond.md), actée.
+**S177-1 réalisée pour B profond linéaire uniforme.** BackgroundSample fournit
+grad_p_dyn, laplacian_u et momentum_residual : S en m/s², à soustraire. Rho identique
+à l’échantillonnage, nu cinématique fourni ; hydrostatique et gravité déjà compensées.
+Contraction après sommation des modes, donc interactions conservées. Six nouveaux tests,
+workspace313 réussis/cinq ignorés ; mutation de l’advection rejetée. C18/C02 inchangés.
+114 ADR,225 angles,260 leçons,18 invariants,6 SPEC,23 cas. L260 ; pas de nouvel angle.
+A50 et B4 restent partiels : surface libre non linéaire, W différentiel et δ3D non reçus.
+**Suite S179 : S178-1/A50**, dériver et construire le fournisseur différentiel profond
+de RadialImpact, traiter son origine sans singularité, composer avec B et recevoir les
+termes croisés. Pressions forcées ensuite. BILAN-S145/BILAN-B4-S176 portés ; aucun
+arbitrage humain nouveau.
 
 **S177 — 2026-09-11 :** [FOURNISSEUR-B-S177](docs/validation/FOURNISSEUR-B-S177.md),
 [ADR-113](docs/adr/ADR-113-fournisseur-differentiel-du-fond.md), actée.

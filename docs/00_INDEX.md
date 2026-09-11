@@ -17,6 +17,14 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S178 :** [SOURCE-B-S178](validation/SOURCE-B-S178.md),
+[ADR-114](adr/ADR-114-source-continue-du-fond-profond.md), actée. S177-1 réalisée pour
+B profond linéaire : gradient de pression, Laplacien et source continue à soustraire,
+avec interactions entre modes. Six nouveaux tests ; workspace313/cinq ignorés,
+contre-épreuve d’advection et deux condensats historiques inchangés. A50 partielle.
+114 ADR,225 angles,260 leçons,18 invariants,6 SPEC,23 cas. L260 ; aucun nouvel angle.
+**Suite S179 : S178-1**, différentiel RadialImpact puis composition B+W.
+
 **S177 :** [FOURNISSEUR-B-S177](validation/FOURNISSEUR-B-S177.md),
 [ADR-113](adr/ADR-113-fournisseur-differentiel-du-fond.md), actée. S176-1 réalisée pour
 B profond linéaire : type différentiel et API ponctuelle/par lot dans water-core,

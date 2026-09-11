@@ -289,7 +289,7 @@ Le juge de fidélité est B4, bloqué ailleurs. Suite S159 : le facteur 2,5 qui 
 L'une croyait la dernière session être **S44** : l'ouvrir aurait recréé cent quinze sessions parallèles.
 Avance rapide d'abord, suppressions ensuite ; six copies ramenées à trois, aucune histoire perdue, et la
 procédure de fermeture écrite dans l'amorce. Suite S160 : le facteur 2,5, S158-1.
-113 ADR,225 angles,259 leçons,18 invariants,6 SPEC,23 cas.
+114 ADR,225 angles,260 leçons,18 invariants,6 SPEC,23 cas.
 **S162 : diagnostic de Stokes et portée de B4 corrigée.**
 [Résultats](docs/validation/ADDITIVITE-PROFONDE-S162.md),
 [ADR-112](docs/adr/ADR-112-la-superposition-independante-ne-recoit-pas-le-couplage.md).
@@ -360,3 +360,8 @@ bibliothèque, avec évaluation par lot sans publication partielle. Huit nouveau
 307 réussis/cinq ignorés ; conformité historique préservée. B profond linéaire seulement.
 Voir [FOURNISSEUR-B-S177](docs/validation/FOURNISSEUR-B-S177.md) et
 [ADR-113](docs/adr/ADR-113-fournisseur-differentiel-du-fond.md).
+**S178 :** le fond B fournit son gradient de pression, son Laplacien et sa source
+volumique continue à soustraire. Six nouveaux tests ;313 réussis/cinq ignorés,
+contre-épreuve de l’advection et condensats historiques préservés. A50 reste partielle.
+Voir [SOURCE-B-S178](docs/validation/SOURCE-B-S178.md) et
+[ADR-114](docs/adr/ADR-114-source-continue-du-fond-profond.md).
