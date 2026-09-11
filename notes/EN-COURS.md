@@ -66,7 +66,7 @@ Objectif : S180-1/A50, composition différentielle B+impacts+pressions.
 
 - [x] **P1** — état réel, jeton et plan seul.
 - [x] **P2** — fixer composition, contexte/temps et réception avant code.
-- [ ] **P3** — construire sur les vues mixtes existantes ; recevoir interactions et refus.
+- [x] **P3** — construire sur les vues mixtes existantes ; recevoir interactions et refus.
 - [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
@@ -76,6 +76,13 @@ Le montage mixed_water possède déjà classify (contexte/temps/perte), BoundBac
 et les vues de journaux. Réutiliser ces contrôles plutôt qu'inventer une association
 locale sans instant. Pression imposée déjà incluse ; source après somme des champs.
 Poursuite BILAN-S145/S176. Aucune copie nouvelle ; notes antérieures conservées.
+
+P3 S181 : quatre tests nouveaux debug/release ; workspace328/cinq ignorés, C18/C02
+inchangés. Réutilisation classify et helper de pente partagé. WorldPos ancré à1e9m,
+deux impacts et deux pressions ; termes croisés >1e-6 reçus à1e-7m/s². Fixture
+corrigée : confirm reçoit l'époque0, pas le numéro de séquence. Pas de seuil déplacé.
+P4 à faire :117 ADR/225 angles/262 leçons ; L260/L262 appliquées, pas de nouvelle
+leçon nécessaire. Suite S181-1 cycle vivant avec ce consommateur différentiel.
 
 S180 : master3b7cae0 propre, quatre copies alignées ;115 ADR/225 angles/261 leçons.
 Le champ spectral conserve déjà pression et vitesse modales dans Slot. Dériver

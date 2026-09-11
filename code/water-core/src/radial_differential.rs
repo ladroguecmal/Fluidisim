@@ -142,18 +142,7 @@ impl<const N: usize> RadialImpact<N> {
             .differential_local(point, time, self.density)
             .map_err(DifferentialError::Background)?;
         let w = self.differential(frame, cell, point, time)?;
-        total.eta += w.eta;
-        total.p_dyn += w.p_dyn;
-        for i in 0..3 {
-            total.grad_eta[i] += w.grad_eta[i];
-            total.u[i] += w.u[i];
-            total.du_dt[i] += w.du_dt[i];
-            total.grad_p_dyn[i] += w.grad_p_dyn[i];
-            total.laplacian_u[i] += w.laplacian_u[i];
-            for j in 0..3 {
-                total.grad_u[i][j] += w.grad_u[i][j];
-            }
-        }
+        total.add(&w);
         if !total.finite() {
             return Err(Error::NotRepresentable.into());
         }

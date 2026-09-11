@@ -100,6 +100,15 @@ struct WaterSample {
 
 ### 2.1 Deux types d'échantillon, et pourquoi les fusionner serait une erreur
 
+> **Complément S181 — 2026-09-12.** La requête mixte différentielle par lot de
+> WorldPos compose B, les impacts du journal et la pression publiée, dans cet ordre.
+> Contexte et instant utilisent les contrôles du montage existant ; sortie atomique,
+> profondeur relative au plan moyen. DifferentialSample conserve rho et calcule la
+> source après sommation ; la pression imposée est déjà dans p_dyn.
+> [ADR-117](../adr/ADR-117-composition-differentielle-mixte.md),
+> [COMPOSITION-DIFFERENTIELLE-S181](../validation/COMPOSITION-DIFFERENTIELLE-S181.md).
+> Les cycles vivants avec ce consommateur restent à recevoir sous S181-1.
+
 > **Complément S180 — 2026-09-12.** Le Field spectral préparé fournit les dérivées
 > profondes à son instant de préparation : PressureDifferential contient le
 > BackgroundSample, la densité et la pression imposée de surface avec son gradient.

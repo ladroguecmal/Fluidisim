@@ -1,6 +1,21 @@
 //! ADR-077 : B unique, impacts puis pressions, une seule normalisation finale.
 use super::{BoundBackground, Prepared};
 use crate::{bound_pressure, composition, SimTime, WaterSample, WorldPos};
+#[path = "mixed_differential.rs"]
+mod differential;
+pub use differential::{differential_world_batch, DifferentialSample};
+
+fn check_slope(slope: [f32; 2], envelope: f32, max_slope: f32) -> Result<(), Error> {
+    if !envelope.is_finite() || envelope > max_slope {
+        let reelle = (slope[0] * slope[0] + slope[1] * slope[1]).sqrt();
+        return Err(if !reelle.is_finite() || reelle > max_slope {
+            Error::Slope
+        } else {
+            Error::SlopeEnvelope
+        });
+    }
+    Ok(())
+}
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {
@@ -272,15 +287,7 @@ pub fn sample_world_batch<const N: usize>(
             slope[1] += w.slope[1];
             envelope += p.slope_envelope();
         }
-        if !envelope.is_finite() || envelope > max_slope {
-            // S144, A208 : séparer le verdict sur le champ de celui sur le majorant.
-            let reelle = (slope[0] * slope[0] + slope[1] * slope[1]).sqrt();
-            return Err(if !reelle.is_finite() || reelle > max_slope {
-                Error::Slope
-            } else {
-                Error::SlopeEnvelope
-            });
-        }
+        check_slope(slope, envelope, max_slope)?;
         let norm = (1.0 + slope[0] * slope[0] + slope[1] * slope[1]).sqrt();
         s.normal = [-slope[0] / norm, -slope[1] / norm, 1.0 / norm];
         s.steepness = envelope / core::f32::consts::PI;

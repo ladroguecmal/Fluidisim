@@ -1,4 +1,6 @@
 use super::*;
+#[path = "tests_mixed_differential.rs"]
+mod differential;
 use crate::{
     gaussian_spectrum::{bake, Recipe},
     impact_field::Medium,

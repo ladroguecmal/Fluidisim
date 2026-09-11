@@ -254,6 +254,13 @@ impl<'a> Prepared<'a> {
     pub fn time(&self) -> SimTime {
         self.time
     }
+    /// ADR-117 : consommateur mixte ; contexte et instant contrôlés par classify.
+    pub(crate) fn differential_local(
+        &self,
+        point: [f32; 3],
+    ) -> Result<spectral_pressure::PressureDifferential, crate::modal_pressure::Error> {
+        self.field.differential(point)
+    }
     /// Bilans à l'instant publié, pas une promesse sur tout l'horizon.
     pub fn energy_j(&self) -> f32 {
         self.field.energy_j

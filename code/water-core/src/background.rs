@@ -195,6 +195,15 @@ impl Background {
     /// Gravité qui a servi à la dispersion ; comparée par les compositions B+W.
     pub fn gravity(&self) -> f32 { self.gravity }
 
+    /// ADR-117 : même ordre et conversion que steepness*pi dans eval_local.
+    pub(crate) fn differential_slope_envelope(&self) -> f32 {
+        let mut steep = 0.0f32;
+        for c in &self.components {
+            steep += 2.0 * c.amplitude * c.k_turns_per_m;
+        }
+        steep * core::f32::consts::PI
+    }
+
     pub fn component_count(&self) -> usize {
         self.components.len()
     }

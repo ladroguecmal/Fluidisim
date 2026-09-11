@@ -22,6 +22,21 @@ pub struct BackgroundSample {
     pub laplacian_u: [f32; 3],
 }
 impl BackgroundSample {
+    /// Somme linéaire ; contracter le résidu seulement après la dernière couche.
+    pub(crate) fn add(&mut self, other: &Self) {
+        self.eta += other.eta;
+        self.p_dyn += other.p_dyn;
+        for i in 0..3 {
+            self.grad_eta[i] += other.grad_eta[i];
+            self.u[i] += other.u[i];
+            self.du_dt[i] += other.du_dt[i];
+            self.grad_p_dyn[i] += other.grad_p_dyn[i];
+            self.laplacian_u[i] += other.laplacian_u[i];
+            for j in 0..3 {
+                self.grad_u[i][j] += other.grad_u[i][j];
+            }
+        }
+    }
     pub(crate) fn finite(&self) -> bool {
         self.eta.is_finite()
             && self.p_dyn.is_finite()
