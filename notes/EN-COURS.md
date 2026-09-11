@@ -58,18 +58,35 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S182 — terminée
-Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S181-1/A50, recevoir le consommateur différentiel dans le cycle vivant.
+Session : S183 — en cours
+Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
+Objectif : S182-1/A50, mesurer le coût complet et les allocations du consommateur
+différentiel — préparation, actualisation, évaluation, refus — contre le chemin de
+surface à entrées identiques, sur plusieurs lots et recettes.
 
 ### Plan
 
-- [x] **P1** — état réel, jeton et plan seul.
-- [x] **P2** — déclarer le protocole cycle/direct, refus et rejeu avant les tests.
-- [x] **P3** — recevoir actualisation, admission, renouvellement et rejeu ; corriger si nécessaire.
-- [x] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [>] **P1** — état réel, jeton et plan seul.
+- [ ] **P2** — publier les conditions de mesure et le protocole **avant** tout chiffre :
+      montages, lots, recettes, ce qui est chronométré et ce qui ne l'est pas, ce qu'un
+      écart mesuré ici ne prouve pas. Aucun budget cible.
+- [ ] **P3** — écrire l'exemple de mesure (`differential_cost`) : préparation, évaluation
+      différentielle contre surface à entrées identiques, chemins de refus, empreinte
+      mémoire et allocations. Exécuter, relever.
+- [ ] **P4** — recevoir les chiffres dans un document de validation, dire ce qu'ils ne
+      disent pas ; suite perturbative déclarée.
+- [ ] **P5** — rituel de fin (REPRISE.md §6) : journal, angles, leçons, index, décomptes,
+      jeton et copies.
 
 ### Notes de reprise
+
+S183 : master 541ebc5 propre, trois copies alignées ; 117 ADR/225 angles/262 leçons.
+Démarrage à froid, copie principale, aucune copie nouvelle. Précédent de méthode :
+COUT-PROFIL-IMPACT-S125 (deux exécutions, blocs alternés, black_box, mise en régime,
+construction séparée de l'évaluation). Les deux chemins à comparer sont strictement
+parallèles : `sample_world_batch` (WaterSample) et `differential_world_batch`
+(DifferentialSample), mêmes entrées, même `classify`. Ne pas annoncer de budget :
+S125 rappelle que les ~49 ms de S118 sont un contexte historique, pas une enveloppe.
 
 S182 : master3541390 propre, quatre copies alignées ;117 ADR/225 angles/262 leçons.
 Suite S181-1. Les contrôleurs existent ; éprouver le consommateur S181 sur leurs

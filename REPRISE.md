@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-12 01:41 +02:00
-Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-12 01:45 +02:00
+Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
+Session en cours : S183 — S182-1/A50 : coût complet et allocations du consommateur différentiel
 Dernière session : S182 — cycle vivant et rejeu différentiel reçus
-Session suivante : S183 — S182-1/A50 : mesurer coût complet et allocations du consommateur différentiel
+Session suivante : à fixer en fin de S183
 
 *S160 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
 rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour.*
