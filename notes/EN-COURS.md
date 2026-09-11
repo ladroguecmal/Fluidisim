@@ -65,7 +65,7 @@ Objectif : S176-1, fournisseur différentiel de B en bibliothèque, eau profonde
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seul.
-- [ ] **P2** — conventions, dérivation et ADR du fournisseur volumétrique B.
+- [x] **P2** — conventions, dérivation et ADR du fournisseur volumétrique B.
 - [ ] **P3** — API ponctuelle/par lot sans allocation, réception indépendante et conformité.
 - [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
