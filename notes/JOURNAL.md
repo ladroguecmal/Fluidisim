@@ -8867,3 +8867,37 @@ I-02/03/06/07/08/09 inchangés. Pression forcée, multisource, cycle vivant, co�
 potentiel existant, distinguer pression imposée et pression de vague, recevoir la source
 avec forçage. Puis multisource et cycle vivant. BILAN-S145 et bilan S176 portés par
 la construction ; aucun arbitrage humain nouveau.
+
+## S180 — 2026-09-12 — Différentiel de pression forcée
+
+**Entrée :** master3b7cae0 propre, quatre copies alignées, S179-1/A50. Plan seul
+34526c8 ; ADR-116 et protocole635e8cf ; implémentation/réception23e864d.
+Travail dans la copie principale, aucune copie créée ou supprimée.
+
+**Produit :** PressureDifferential et Field::differential/differential_batch.
+Le potentiel forcé donne phi_t=-g eta-P/rho ; pression profonde rho*g*eta+P,
+prolongée par exp(kz). Les deux termes sont nécessaires pour la source cohérente.
+Pression appliquée de surface et gradient exposés séparément ; pas de deuxième
+force volumique à ajouter. Instant de préparation, branche active aux commutations.
+Slot conserve K/g/rho : 64 octets contre48 ; préparation incrémentale et reliaison
+préservent ces métadonnées, pools déjà dimensionnés par size_of. Phase partagée avec
+sample, valeurs historiques de surface identiques en bits ; publication par lot atomique.
+
+**Réception :** cinq nouveaux tests en debug et release, workspace324 réussis/cinq
+ignorés ; C18/C02 inchangés. Mode forcé puis libre comparé à une solution fermée f64,
+deux modes croisés mobiles reçus par différences finies à0,01/0,005m et ±1ms.
+À la naissance eta=u=0, p_dyn=56Pa et du_dt_z=-56/1025m/s² ; retirer grad_p dans
+la contre-épreuve donne un résidu >0,05m/s². Réception de l'extinction sans dérivée
+centrale àtravers le saut. Gradient de Bernoulli reçoit la source totale à6e-6m/s².
+Refus, non-finis, atomicité, chemins direct/incrémental/relié reçus. Pas de campagne
+de coût ni de certification multiplateforme ; absence d'allocation inspectée.
+
+**Suivi :** S179-1 réalisée pour le champ spectral fourni ; A50/B4 restent partiels.
+116 ADR,225 angles,262 leçons,18 invariants,6 SPEC,23 cas ; L262, aucun nouvel angle.
+Invariants relus : I-02/03/06/07/08/09 inchangés. Cuissons gaussiennes générales,
+contexte monde, cycle contrôleur, surface libre non linéaire et δ3D non reçus ici.
+
+**Suite S181 : S180-1**, composition différentielle B+impacts+pressions, contexte
+physique et instant communs, pression comptée une fois, source après sommation et
+réception des interactions. Puis exposition monde et cycle vivant. BILAN-S145/S176
+portés par la construction ; aucun arbitrage humain nouveau.

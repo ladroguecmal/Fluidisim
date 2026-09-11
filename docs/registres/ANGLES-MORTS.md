@@ -2174,3 +2174,9 @@ de surface et δ3D restent ouverts. S178-1 construit le différentiel RadialImpa
 régulier au centre, pression profonde, contraction après composition et lot atomique.
 Six nouveaux tests ; A50 partielle, pression forcée/multisource et δ3D non reçus.
 S179-1 construit le fournisseur de pression forcée. Aucun nouvel angle.
+
+**Suivi A50 — S180 : différentiel profond de pression forcée reçu.**
+[DIFFERENTIEL-PRESSION-S180](../validation/DIFFERENTIEL-PRESSION-S180.md), ADR-116 :
+pression imposée dans l'accélération et la pression profonde, commutations reçues.
+Cinq nouveaux tests ; A50 reste partielle (gravité existante inchangée). Aucun nouvel
+angle. S180-1 compose B+impacts+pressions ; monde, cycle vivant, coût et δ3D restent ouverts.

@@ -78,3 +78,8 @@ par l'hôte (ADR-115), pas validé par la seule égalité de gravité.
 du potentiel existant ; distinguer pression imposée et pression de vague, puis recevoir
 la source en présence de forçage. Composition multisource et cycle vivant ensuite.
 Porteur : construction de bibliothèque, BILAN-S145 et BILAN-B4-S176 suivis.
+
+**Suivi S180 — 2026-09-12 :** S179-1 réalisée pour le champ spectral préparé,
+[DIFFERENTIEL-PRESSION-S180](DIFFERENTIEL-PRESSION-S180.md), ADR-116. La composition
+différentielle multisource reste ouverte sous S180-1 ; ce résultat ne modifie pas la
+portée de la réception S179 ci-dessus.

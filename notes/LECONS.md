@@ -4049,3 +4049,15 @@ les termes de couplage exactement au centre de leur source.
 Dériver la limite de chaque grandeur demandée ; recevoir son voisinage dans plusieurs
 directions. Une singularité de coordonnées n'est pas une singularité du champ physique.
 Voir DIFFERENTIEL-W-S179, ADR-115 et contre-épreuve du gradient isotrope neutralisé.
+
+## L262 — Une condition imposée doit traverser les grandeurs dérivées
+
+*(S180)* Une pression appliquée àla surface intervient àla fois dans l'accélération
+et dans la pression profonde. Garder le forçage dans l'évolution tout en l'oubliant
+dans le gradient de pression fabrique une source volumique parasite. Le rajouter
+ensuite comme une force extérieure peut au contraire le compter deux fois.
+
+Dériver ensemble évolution, champ et source depuis la même condition imposée ;
+documenter où celle-ci est déjà incluse. Recevoir dès le démarrage : un état encore
+nul peut avoir une accélération et une pression non nulles. Voir ADR-116 et
+DIFFERENTIEL-PRESSION-S180, contre-épreuve à56Pa avec eta=u=0.

@@ -17,6 +17,15 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S180 :** [DIFFERENTIEL-PRESSION-S180](validation/DIFFERENTIEL-PRESSION-S180.md),
+[ADR-116](adr/ADR-116-differentiel-de-pression-forcee.md), actée. S179-1 réalisée
+pour le champ spectral préparé : pression imposée et dérivées profondes cohérentes,
+commutations, source avec interactions et lot atomique reçus. Cinq nouveaux tests
+debug/release ; workspace324/cinq ignorés, C18/C02 inchangés. A50/B4 partiels.
+116 ADR,225 angles,262 leçons,18 invariants,6 SPEC,23 cas. L262 ; aucun nouvel angle.
+**Suite S181 : S180-1**, composition différentielle B+impacts+pressions, contexte et
+instant communs ; puis exposition monde et cycle contrôleur.
+
 **S179 :** [DIFFERENTIEL-W-S179](validation/DIFFERENTIEL-W-S179.md),
 [ADR-115](adr/ADR-115-differentiel-radial-et-composition.md), actée. S178-1 réalisée
 pour B+un impact profond : gradient radial régulier au centre, pression, source avec

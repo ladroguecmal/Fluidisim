@@ -1637,3 +1637,13 @@ entrée par entrée. Le fil reprend ci-dessous.
   forcée : dériver depuis le potentiel existant, distinguer pression imposée et
   pression de vague, recevoir la source avec forçage. Puis composition multisource
   et cycle vivant ; porteur : construction, BILAN-S145/BILAN-B4-S176.
+
+### Suivi S180 — Différentiel de pression forcée construit
+
+- **S179-1 réalisée pour le champ spectral préparé**, DIFFERENTIEL-PRESSION-S180,
+  ADR-116. Pression imposée présente dans l'accélération et la pression profonde ;
+  commutations, source totale, refus et lot atomique reçus. A50/B4 restent partiels.
+- **S180-1 : ouverte, priorité S181.** Composition différentielle B+impacts+pressions,
+  contexte physique et instant communs, pression imposée comptée une fois, contraction
+  après sommation et réception des interactions. Puis exposition monde et cycle
+  contrôleur. Porteur : construction de bibliothèque, BILAN-S145/BILAN-B4-S176.

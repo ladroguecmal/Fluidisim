@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-12 01:17 +02:00
+JETON            : libre
+Battement        : 2026-09-12 01:20 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S180
-Dernière session : S179 — différentiel radial et composition B+un impact reçus
-Session suivante : S180 — S179-1/A50 : fournisseur différentiel de la pression forcée W
+Session en cours : aucune
+Dernière session : S180 — différentiel profond de pression forcée reçu
+Session suivante : S181 — S180-1/A50 : composition différentielle B+impacts+pressions
 
 *S160 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
 rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour.*
@@ -168,7 +168,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 115 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 116 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -187,6 +187,19 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S180 — 2026-09-12 :** [DIFFERENTIEL-PRESSION-S180](docs/validation/DIFFERENTIEL-PRESSION-S180.md),
+[ADR-116](docs/adr/ADR-116-differentiel-de-pression-forcee.md), actée.
+**S179-1 réalisée pour le champ spectral préparé.** Pression forcée et dérivées
+profondes cohérentes, branche active aux commutations, surface historique préservée.
+Cinq nouveaux tests debug/release ; workspace324 réussis/cinq ignorés, C18/C02
+inchangés. Contre-épreuve sans gradient de pression au démarrage reçue.
+116 ADR,225 angles,262 leçons,18 invariants,6 SPEC,23 cas. L262 ; aucun nouvel angle.
+A50/B4 partiels ; pas de réception de coût, monde, cycle contrôleur ou δ3D.
+**Suite S181 : S180-1/A50**, composition différentielle B+impacts+pressions, contexte
+physique et instant communs, pression comptée une fois, source après sommation et
+réception des interactions. Puis exposition monde et cycle vivant. BILAN-S145/S176
+portés par la construction ; aucun arbitrage humain nouveau.
 
 **S179 — 2026-09-12 :** [DIFFERENTIEL-W-S179](docs/validation/DIFFERENTIEL-W-S179.md),
 [ADR-115](docs/adr/ADR-115-differentiel-radial-et-composition.md), actée.
