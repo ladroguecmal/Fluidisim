@@ -58,23 +58,22 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S176 — terminée
+Session : S177 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S175-1, bilan B4/SPEC-004 et prochain lot de construction exécutable.
+Objectif : S176-1, fournisseur différentiel de B en bibliothèque, eau profonde linéaire.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seul.
-- [x] **P2** — confronter réceptions, interfaces et code réel ; matrice des écarts B4.
-- [x] **P3** — fixer un lot de construction borné et ses critères ; corriger les états périmés.
-- [x] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [ ] **P2** — conventions, dérivation et ADR du fournisseur volumétrique B.
+- [ ] **P3** — API ponctuelle/par lot sans allocation, réception indépendante et conformité.
+- [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
-Master 0b37fd2 propre, quatre copies alignées ; corpus lu dans cette conversation.
-112 ADR,225 angles,257 leçons,18 invariants,6 SPEC,23 cas.
-S163–S175 sont des véhicules 1D en examples/support ; ne pas les compter comme runtime3D.
-ADR-112 maintient B4 non reçu et les seuils non adoptés. BILAN-S145 relu S175.
-Pas de nouvelle sonde par défaut ; aucun seuil ni score global sans preuve.
-P3 reprise après interruption : seul marqueur P3 non committé, conservé puis complété.
-Lot S176-1 déclaré ; corrections documentaires SPEC004/B4/lib. Aucun code exécuté changé.
+Master d0d6b7d propre, quatre copies alignées ; corpus lu dans cette conversation.
+112 ADR,225 angles,258 leçons,18 invariants,6 SPEC,23 cas.
+Préserver eval et hashs ; nouveau type distinct. z relatif au plan moyen, z<=0,
+pression dynamique en Pa, rho explicite uniforme, grad_u[i][j]=∂u_i/∂x_j.
+Exponentielle négative àarithmétique fixe, pas libm non déterministe sur le chemin B.
+Réception champ analytique représenté distincte de dérivation de phase quantifiée.
