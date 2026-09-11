@@ -1580,3 +1580,12 @@ entrée par entrée. Le fil reprend ci-dessous.
   pas du solveur : instantanés grossiers de Q, interpolation temporelle et source issue
   de cette même représentation. Comparer au fond analytique continu ; erreurs aux
   réactualisations, transport et bilan. Porteur : construction, poursuite B4/BILAN-S145.
+
+### Suivi S174 — Cadence du fond séparée du solveur
+
+- **S173-1 réalisée sur véhicule à instantanés connus**, CADENCE-FOND-S174 : trois nouveaux
+  tests et trois S173 rejoués,192 évolutions résiduelles et24 témoins. A50 partielle.
+- **S174-1 / A50 : ouverte, priorité S175.** Assembler le fond àcadence réduite avec
+  la frontière autonome ancrée S169 ; comparer aux fantômes analytiques de S174,
+  recevoir préservation, transport et les deux budgets. Q connu, aucun résidu extérieur
+  inconnu supposé disponible. Porteur : construction, poursuite B4/BILAN-S145.

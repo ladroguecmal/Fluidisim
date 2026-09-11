@@ -171,3 +171,8 @@ angle ou runtime nouveau. A225 reste traitée dans son périmètre ; A216/A217 i
 la source depuis cette même représentation temporelle ; comparer à l’accès analytique
 continu de S173. Mesurer erreurs aux réactualisations, transport et volume, sans seuil
 universel. Porteur : construction, poursuite B4/BILAN-S145.
+
+**Suivi S174 : S173-1 réalisée sur véhicule à instantanés connus**, voir
+[CADENCE-FOND-S174](CADENCE-FOND-S174.md). Cadence du fond indépendante de dx/dt ;
+budget interpolé fermé mais erreur du flux analytique persistant àcadence fixée.
+A50 partielle ; suite S174-1, assemblage avec la frontière autonome ancrée S169.

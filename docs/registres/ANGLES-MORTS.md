@@ -2135,3 +2135,11 @@ source intégrée préservant Q exact ; volume à<=2,42e-15. Le témoin discret 
 le solveur total mais diffuse Q ; omission sur Q exact seul est un témoin insuffisant.
 A50 partielle : accès temporel analytique continu encore nécessaire, cadence grossière
 suivie S173-1. A225 reste traitée, A216/A217 inchangées ; aucun nouvel angle.
+
+**Suivi A50/A225 — S174 : cadence temporelle reçue sur véhicule à instantanés connus.**
+[CADENCE-FOND-S174](../validation/CADENCE-FOND-S174.md) :192 évolutions, budget interpolé
+fermé à<=1,21e-15, défaut analytique prédit et persistant au raffinement du solveur.
+A225 décrit aussi cette erreur temporelle de flux aux bornes ; pas de nouvel angle.
+S173-1 réalisée, A50 partielle ; S174-1 assemble la frontière autonome S169.
+Instantané suivant et fantômes analytiques encore connus dans le véhicule ; aucune
+anticipation d’événement inconnu reçue. A216/A217 inchangées.

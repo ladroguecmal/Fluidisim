@@ -66,7 +66,7 @@ Objectif : S173-1/A50, cadence grossière du fond indépendante du pas du solveu
 
 - [x] **P1** — état réel, jeton, plan seul.
 - [x] **P2** — construire les instantanés interpolés et les flux intégrés aux réactualisations.
-- [ ] **P3** — recevoir tests/campagne ; documenter précision, volume et accès aux instantanés.
+- [x] **P3** — recevoir tests/campagne ; documenter précision, volume et accès aux instantanés.
 - [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
@@ -78,3 +78,6 @@ Intégrer les flux par morceaux quand un pas traverse une réactualisation ; sé
 Le témoin continu S173 reste accessible ; futurs instantanés connus dans ce véhicule
 analytique seulement. Mesurer distinctement source cohérente et budget analytique réel.
 A50 partielle ; BILAN-S145 porté via B4 après B1/S63-1.
+P3 : six tests (trois nouveaux),192 évolutions +24 témoins reçus.
+Budget interpolé/prédictions<=1,21e-15 ; Va àtau2s=2,045e-5 persiste.
+S173-1 réalisée, A50 partielle ; suite S174-1 frontière autonome S169.
