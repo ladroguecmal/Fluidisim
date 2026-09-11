@@ -58,28 +58,21 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S175 — terminée
+Session : S176 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S174-1/A50, fond décimé et frontière autonome ancrée S169.
+Objectif : S175-1, bilan B4/SPEC-004 et prochain lot de construction exécutable.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seul.
-- [x] **P2** — assembler les frontières comparées et leurs témoins àconditions identiques.
-- [x] **P3** — recevoir préservation, sortie et budgets ; résultats et suivi.
-- [x] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [ ] **P2** — confronter réceptions, interfaces et code réel ; matrice des écarts B4.
+- [ ] **P3** — fixer un lot de construction borné et ses critères ; corriger les états périmés.
+- [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
-Master ab35ea7 propre, quatre copies alignées ; corpus lu dans cette conversation.
-112 ADR,225 angles,256 leçons,18 invariants,6 SPEC,23 cas. Aucun runtime adopté.
-Comparer fantômes analytiques et fermeture ancrée aux deux étages ; identité discrète
-contre solveur total soumis àla même fermeture, pas au témoin analytique de bord.
-Porter la durée à12s pour que la crête sorte effectivement de la fenêtre [30,90].
-Conserver les deux budgets et mesurer les champs appariés, pas seulement leurs maxima.
-A50 partielle ; BILAN-S145 porté via B4 après B1/S63-1.
-P3 : huit tests (deux nouveaux),288 évolutions +54 témoins reçus.
-Budget interpolé<=1,21e-15 ; prédictions<=1,35e-15 ; identité<=2,23e-16.
-S174-1 réalisée ; BILAN-S145 relu, suite S175-1 bilan B4/lot de construction.
-
-P4 : rituel exécuté ; L257,225 angles,112 ADR. Suite S176/S175-1.
+Master 0b37fd2 propre, quatre copies alignées ; corpus lu dans cette conversation.
+112 ADR,225 angles,257 leçons,18 invariants,6 SPEC,23 cas.
+S163–S175 sont des véhicules 1D en examples/support ; ne pas les compter comme runtime3D.
+ADR-112 maintient B4 non reçu et les seuils non adoptés. BILAN-S145 relu S175.
+Pas de nouvelle sonde par défaut ; aucun seuil ni score global sans preuve.
