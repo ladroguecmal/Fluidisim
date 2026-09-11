@@ -65,7 +65,7 @@ Objectif : S169-1/A50, source moyenne exacte, interpolée sur réseau décimé e
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seul.
-- [ ] **P2** — protocole et bilan prédit du défaut de source, copies synchronisées.
+- [x] **P2** — protocole et bilan prédit du défaut de source, copies synchronisées.
 - [ ] **P3** — construire la sonde, comparer résolutions et décalages du réseau source.
 - [ ] **P4** — réception, résultats, limites et suivi A50.
 - [ ] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
@@ -77,3 +77,5 @@ Master0cdfa31 propre, quatre copies alignées, S169 terminée. Corpus lu dans ce
 S169 quatre tests et24 tests S165–S168 reçus ; workspace299/cinq ignorés reçu S163.
 SPEC-004 §6.2 et B4 demandent une variation du réseau source : pas de facteur4 universel.
 BILAN-S145 porté par poursuite B4. Aucun seuil physique à inventer.
+P2 : SOURCE-DECIMEE-S170 déclaré : H indépendant de dx, origine0/H/2 ; intégration
+exacte de l'interpolant linéaire, défaut signé du volume prédit par l'erreur de source.
