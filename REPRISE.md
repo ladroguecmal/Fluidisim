@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-12 01:30 +02:00
+JETON            : libre
+Battement        : 2026-09-12 01:32 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S181
-Dernière session : S180 — différentiel profond de pression forcée reçu
-Session suivante : S181 — S180-1/A50 : composition différentielle B+impacts+pressions
+Session en cours : aucune
+Dernière session : S181 — composition différentielle mixte reçue
+Session suivante : S182 — S181-1/A50 : recevoir le consommateur différentiel dans le cycle vivant
 
 *S160 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
 rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour.*
@@ -168,7 +168,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 116 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 117 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -187,6 +187,20 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S181 — 2026-09-12 :** [COMPOSITION-DIFFERENTIELLE-S181](docs/validation/COMPOSITION-DIFFERENTIELLE-S181.md),
+[ADR-117](docs/adr/ADR-117-composition-differentielle-mixte.md), actée.
+**S180-1 réalisée sur les vues publiées du montage mixte**, entrée WorldPos.
+Fond une fois, impacts en ordre du journal, pression agrégée ; source après somme,
+densité liée et pression imposée comptée une fois. Contexte/instant et pente partagés.
+Quatre nouveaux tests debug/release ; workspace328 réussis/cinq ignorés, C18/C02
+inchangés. Termes croisés, référence par Bernoulli et refus atomiques reçus.
+117 ADR,225 angles,262 leçons,18 invariants,6 SPEC,23 cas ; aucun nouvel angle ni leçon.
+A50/B4 partiels : cycle vivant avec ce consommateur, coût et δ3D restent non reçus.
+**Suite S182 : S181-1/A50**, réactualisation de pression, renouvellement d'impact,
+refus/reprise et rejeu, dérivées/source comparées à la préparation directe au même
+instant. Puis coût et consommation perturbative. BILAN-S145/S176 portés par
+construction ; aucun arbitrage humain nouveau.
 
 **S180 — 2026-09-12 :** [DIFFERENTIEL-PRESSION-S180](docs/validation/DIFFERENTIEL-PRESSION-S180.md),
 [ADR-116](docs/adr/ADR-116-differentiel-de-pression-forcee.md), actée.

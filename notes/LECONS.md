@@ -4061,3 +4061,8 @@ Dériver ensemble évolution, champ et source depuis la même condition imposée
 documenter où celle-ci est déjà incluse. Recevoir dès le démarrage : un état encore
 nul peut avoir une accélération et une pression non nulles. Voir ADR-116 et
 DIFFERENTIEL-PRESSION-S180, contre-épreuve à56Pa avec eta=u=0.
+
+**Application S181 de L260 et L262 :** le montage B+deux impacts+pressions conserve
+les interactions après sommation, et la pression imposée est comptée une fois. La
+réception confronte la source totale aux sources isolées et au gradient de Bernoulli.
+Voir COMPOSITION-DIFFERENTIELLE-S181 ; aucune nouvelle leçon numérotée.

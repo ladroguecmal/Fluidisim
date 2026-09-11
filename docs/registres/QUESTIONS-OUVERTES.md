@@ -1647,3 +1647,13 @@ entrée par entrée. Le fil reprend ci-dessous.
   contexte physique et instant communs, pression imposée comptée une fois, contraction
   après sommation et réception des interactions. Puis exposition monde et cycle
   contrôleur. Porteur : construction de bibliothèque, BILAN-S145/BILAN-B4-S176.
+
+### Suivi S181 — Composition différentielle mixte construite
+
+- **S180-1 réalisée sur les vues publiées**, COMPOSITION-DIFFERENTIELLE-S181, ADR-117.
+  Entrée monde, contexte et instant communs, pression comptée une fois, interactions
+  et sortie atomique reçues. A50/B4 restent partiels.
+- **S181-1 : ouverte, priorité S182.** Nouveau consommateur dans le cycle vivant
+  mixte : réactualisation de pression, renouvellement d'impact, refus/reprise et rejeu,
+  dérivées et source identiques à la préparation directe au même instant. Puis coût
+  et consommation perturbative. Porteur : construction BILAN-S145/BILAN-B4-S176.

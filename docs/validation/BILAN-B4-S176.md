@@ -125,3 +125,10 @@ suite S177-1, gradient de pression et résidu physique continu de B avant extens
 Laplacien et source volumique continue reçus ; interactions entre modes formées après
 sommation. A50 reste partielle et B4 complet non reçu. Suite S178-1 : fournisseur
 différentiel du candidat RadialImpact puis composition B+W.
+
+**Suivi S181 :** S179–S181 ont construit les dérivées radiales, la pression forcée et
+leur composition avec B sur les publications mixtes, avec entrée WorldPos.
+[COMPOSITION-DIFFERENTIELLE-S181](COMPOSITION-DIFFERENTIELLE-S181.md), ADR-115/116/117.
+La source est contractée après la somme ; interactions et refus atomiques reçus.
+A50/B4 restent partiels : S181-1 reçoit le consommateur dans le cycle vivant avant
+réception de coût et consommation perturbative ; aucun solveur volumétrique choisi.

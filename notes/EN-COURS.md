@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S181 — en cours
+Session : S181 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S180-1/A50, composition différentielle B+impacts+pressions.
 
@@ -67,7 +67,7 @@ Objectif : S180-1/A50, composition différentielle B+impacts+pressions.
 - [x] **P1** — état réel, jeton et plan seul.
 - [x] **P2** — fixer composition, contexte/temps et réception avant code.
 - [x] **P3** — construire sur les vues mixtes existantes ; recevoir interactions et refus.
-- [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [x] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
@@ -81,7 +81,7 @@ P3 S181 : quatre tests nouveaux debug/release ; workspace328/cinq ignorés, C18/
 inchangés. Réutilisation classify et helper de pente partagé. WorldPos ancré à1e9m,
 deux impacts et deux pressions ; termes croisés >1e-6 reçus à1e-7m/s². Fixture
 corrigée : confirm reçoit l'époque0, pas le numéro de séquence. Pas de seuil déplacé.
-P4 à faire :117 ADR/225 angles/262 leçons ; L260/L262 appliquées, pas de nouvelle
+P4 :117 ADR/225 angles/262 leçons ; L260/L262 appliquées, pas de nouvelle
 leçon nécessaire. Suite S181-1 cycle vivant avec ce consommateur différentiel.
 
 S180 : master3b7cae0 propre, quatre copies alignées ;115 ADR/225 angles/261 leçons.

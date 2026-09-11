@@ -2180,3 +2180,9 @@ S179-1 construit le fournisseur de pression forcée. Aucun nouvel angle.
 pression imposée dans l'accélération et la pression profonde, commutations reçues.
 Cinq nouveaux tests ; A50 reste partielle (gravité existante inchangée). Aucun nouvel
 angle. S180-1 compose B+impacts+pressions ; monde, cycle vivant, coût et δ3D restent ouverts.
+
+**Suivi A50 — S181 : composition différentielle mixte sur vues publiées reçue.**
+[COMPOSITION-DIFFERENTIELLE-S181](../validation/COMPOSITION-DIFFERENTIELLE-S181.md),
+ADR-117 : entrée WorldPos, contexte/instant partagés, source après somme et pression
+imposée comptée une fois. Quatre nouveaux tests, termes croisés et refus atomiques.
+A50 reste partielle, aucun nouvel angle ; S181-1 reçoit le cycle vivant du consommateur.

@@ -8901,3 +8901,37 @@ contexte monde, cycle contrôleur, surface libre non linéaire et δ3D non reçu
 physique et instant communs, pression comptée une fois, source après sommation et
 réception des interactions. Puis exposition monde et cycle vivant. BILAN-S145/S176
 portés par la construction ; aucun arbitrage humain nouveau.
+
+## S181 — 2026-09-12 — Composition différentielle mixte
+
+**Entrée :** master a77ea78 propre, quatre copies alignées, S180-1/A50. Plan seul
+0ed3e0d ; ADR-117/protocole3464bdd ; code et réception da8abd5. Copie principale,
+aucune copie créée ou supprimée. Réutilisation du montage publié existant.
+
+**Produit :** mixed::differential_world_batch, DifferentialSample avec densité liée
+et momentum_residual(nu). Même classify pour contexte, perte, horizons et instant
+exact ; conversion WorldPos via B, profondeur relative au plan moyen. Fond une fois,
+impacts en ordre du journal, pression agrégée ensuite ; source après somme. Pression
+appliquée exposée séparément mais déjà incluse dans p_dyn. Somme linéaire et décision
+de pente partagées avec les anciens chemins ; aucune allocation dans la requête.
+
+**Réception :** quatre nouveaux tests debug/release, workspace328 réussis/cinq ignorés,
+C18/C02 inchangés. Réductions B, B+impact, B+pression et pression seule reçues ;
+surface eta/u identique en bits. Montage fond16 composantes + deux impacts + deux
+pressions mobiles, ancre à1e9m : différences à1/64 et1/128m, ±2ms ; source par
+gradient de Bernoulli à3e-5m/s². Différence avec les sources isolées égale les termes
+croisés à1e-7m/s², avec un terme >1e-6. Pression de surface reçue à0,001Pa.
+Mauvais contexte/temps, perte connue, champs manquants, point tardif invalide, pente
+et capacité refusés sans sortie partielle ; lot vide et queue préservés.
+
+**Limites :** association géométrique B/frame toujours déclarée par l'hôte ; cycle
+complet de renouvellement/admission/rejeu avec ce consommateur non reçu. Ni coût,
+surface libre non linéaire, δ3D ni certification multiplateforme. A50/B4 partiels.
+117 ADR,225 angles,262 leçons,18 invariants,6 SPEC,23 cas. Aucun nouvel angle ni
+nouvelle leçon : applications de L260/L262 consignées. Invariants I-02/03/06/07/08/09
+et contrat de pente I-18 conservés ; garde des sites de comparaison reçue.
+
+**Suite S182 : S181-1**, cycle vivant mixte avec dérivées et source : réactualisation
+de pression, renouvellement d'impact, refus/reprise et rejeu, comparés à la préparation
+directe au même instant. Puis coût et consommateur perturbatif. BILAN-S145/S176
+portés par la construction ; aucun arbitrage humain nouveau.

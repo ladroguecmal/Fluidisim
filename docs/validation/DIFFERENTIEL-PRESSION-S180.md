@@ -63,3 +63,7 @@ bathymétrie ou d'une pression de coque calibrée. A50/B4 restent partiels.
 contexte physique et temporel commun, pression appliquée comptée une fois, source
 contractée après sommation et réception des interactions. Puis exposition monde et
 cycle contrôleur ; coût, surface libre non linéaire et δ3D restent ouverts.
+
+**Suivi S181 — 2026-09-12 :** S180-1 réalisée sur les vues publiées du montage,
+avec entrée WorldPos ; [COMPOSITION-DIFFERENTIELLE-S181](COMPOSITION-DIFFERENTIELLE-S181.md),
+ADR-117. Le cycle vivant avec ce consommateur reste ouvert sous S181-1.

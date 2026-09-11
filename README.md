@@ -289,7 +289,7 @@ Le juge de fidélité est B4, bloqué ailleurs. Suite S159 : le facteur 2,5 qui 
 L'une croyait la dernière session être **S44** : l'ouvrir aurait recréé cent quinze sessions parallèles.
 Avance rapide d'abord, suppressions ensuite ; six copies ramenées à trois, aucune histoire perdue, et la
 procédure de fermeture écrite dans l'amorce. Suite S160 : le facteur 2,5, S158-1.
-116 ADR,225 angles,262 leçons,18 invariants,6 SPEC,23 cas.
+117 ADR,225 angles,262 leçons,18 invariants,6 SPEC,23 cas.
 **S162 : diagnostic de Stokes et portée de B4 corrigée.**
 [Résultats](docs/validation/ADDITIVITE-PROFONDE-S162.md),
 [ADR-112](docs/adr/ADR-112-la-superposition-independante-ne-recoit-pas-le-couplage.md).
@@ -376,3 +376,9 @@ Voir [DIFFERENTIEL-W-S179](docs/validation/DIFFERENTIEL-W-S179.md),
 préservées. A50 partielle ; suite : composition du fond, des impacts et des pressions.
 Voir [DIFFERENTIEL-PRESSION-S180](docs/validation/DIFFERENTIEL-PRESSION-S180.md),
 [ADR-116](docs/adr/ADR-116-differentiel-de-pression-forcee.md).
+
+**S181 :** fond, impacts et pressions fournissent ensemble leurs dérivées et leur
+source, avec contrôle du contexte et de l'instant. Quatre nouveaux tests ;328 réussis,
+cinq ignorés, références inchangées. Suite : recevoir ce consommateur dans le cycle vivant.
+Voir [COMPOSITION-DIFFERENTIELLE-S181](docs/validation/COMPOSITION-DIFFERENTIELLE-S181.md),
+[ADR-117](docs/adr/ADR-117-composition-differentielle-mixte.md).

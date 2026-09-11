@@ -17,6 +17,15 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S181 :** [COMPOSITION-DIFFERENTIELLE-S181](validation/COMPOSITION-DIFFERENTIELLE-S181.md),
+[ADR-117](adr/ADR-117-composition-differentielle-mixte.md), actée. S180-1 réalisée
+sur les publications mixtes, entrée monde, source après somme et pression comptée une
+fois. Quatre nouveaux tests debug/release ; workspace328/cinq ignorés, C18/C02
+inchangés. Interactions et refus atomiques reçus ; A50/B4 partiels.
+117 ADR,225 angles,262 leçons,18 invariants,6 SPEC,23 cas ; aucun nouvel angle ni leçon.
+**Suite S182 : S181-1**, cycle vivant mixte avec ce consommateur, puis coût et
+consommation perturbative.
+
 **S180 :** [DIFFERENTIEL-PRESSION-S180](validation/DIFFERENTIEL-PRESSION-S180.md),
 [ADR-116](adr/ADR-116-differentiel-de-pression-forcee.md), actée. S179-1 réalisée
 pour le champ spectral préparé : pression imposée et dérivées profondes cohérentes,
