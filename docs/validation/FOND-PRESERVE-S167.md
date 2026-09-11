@@ -61,3 +61,91 @@ delta_flux_numérique + F(Q) physique aux faces, et non le flux Rusanov total an
 Le second bilan est donc complété par ce flux corrigé, intégré aux deux étages RK2.
 Il reste un défaut de quadrature : Q est échantillonné aux centres et en deux temps.
 Ce troisième bilan permet de ne pas appeler « perte de masse » le seul changement de flux.
+
+### 3.1 Fond exact et perturbation
+
+E est max |h−h_exact|/0,05 sur l'espace et les 6 s. Pas nominal.
+
+| N | Fond exact, témoin S164 | Fond exact, candidat | Perturbé, témoin | Perturbé, candidat | Candidat, échelle perturbation 0,01 |
+|---|---:|---:|---:|---:|---:|
+| 120 | 0,217463 | 0 | 0,262775 | 0,050670 | 0,253350 |
+| 240 | 0,129671 | 0 | 0,158371 | 0,031292 | 0,156462 |
+| 480 | 0,072124 | 0 | 0,088399 | 0,017806 | 0,089030 |
+| 960 | 0,038313 | 0 | 0,047131 | 0,009597 | 0,047983 |
+
+Le candidat conserve d=0 exactement en hauteur **et en débit** sur le fond exact.
+Le témoin conserve sa propriété S164, mais amortit Q comme le total qu'il reproduit.
+Sur T de la même famille avec amplitude 0,06, d est non nul et évolue ; l'erreur baisse
+au raffinement et vaut environ un cinquième de celle du témoin. **Il reste 15,6 % d'erreur
+rapportée à la perturbation de 1 cm à N240** : conserver Q ne reçoit pas à lui seul d.
+La dernière colonne normalise par l'amplitude initiale ajoutée, pas par le maximum ultérieur
+du résidu, qui peut varier par déphasage non linéaire.
+Au demi-pas N240, E perturbé candidat=0,031296 ; le défaut n'est pas dominé par dt.
+
+### 3.2 Un fond figé ne doit pas être préservé
+
+| N | Témoin S164 | Candidat avec S physique | Candidat sans S |
+|---|---:|---:|---:|
+| 120 | 0,217463 | 0,227024 | 0,997346 |
+| 240 | 0,129671 | 0,135771 | 0,998284 |
+| 480 | 0,072124 | 0,075451 | 0,998215 |
+| 960 | 0,038313 | 0,040099 | 0,998284 |
+
+La source physique permet de retrouver l'évolution au raffinement. L'omettre laisse presque
+toute l'erreur d'un fond figé ; les fantômes exacts seuls ne la corrigent pas.
+Le candidat n'est pas meilleur dans tous les cas : ici il est légèrement moins précis que
+le témoin S164. La distinction physique/numérique est reçue, pas une supériorité universelle.
+Les voies « équilibrée » et « source omise » coïncident par construction dans les deux
+premiers cas, où la vraie source est nulle ; ce ne sont pas des confirmations indépendantes.
+
+### 3.3 Trois bilans, trois propriétés
+
+Bilan résiduel avec S et incrément exact de somme(Q) : défaut relatif <=2,80e-15 sur les
+45 évolutions. Normalisation des bilans : volume initial de la fenêtre, environ 60 m² par
+unité de largeur, pas amplitude de la perturbation. Courant <=0,217651.
+
+Fond exact seul, candidat :
+
+| N | Écart au flux Rusanov total ancien | Écart au flux corrigé |
+|---|---:|---:|
+| 120 | 7,052058e-5 | 2,078204e-6 |
+| 240 | 3,316266e-5 | 5,200756e-7 |
+| 480 | 1,607166e-5 | 1,300514e-7 |
+| 960 | 7,910231e-6 | 3,251488e-8 |
+
+Le premier écart décroît approximativement comme dx : il comprend le retrait de diffusion
+numérique du fond. Le second décroît comme dx² à dt proportionnel à dx. Au demi-pas N240,
+il vaut 4,905864e-7 : il demeure une composante spatiale. **Le volume total ne ferme donc
+pas à l'arrondi**, même avec le flux corrigé. Q ponctuel et sa somme ne sont pas sa moyenne
+conservative en cellules ; deux temps RK2 ne sont pas une intégrale exacte du flux analytique.
+
+Le fond figé donne un bilan corrigé à l'arrondi **dans ce montage symétrique seulement** :
+son flux de masse analytique net et la somme de S_h s'annulent par symétrie. Cela ne reçoit
+pas le bilan d'un fond figé général. Le prochain montage doit casser cette symétrie.
+
+## 4. Réception et suite
+
+Depuis `code/` :
+
+```
+cargo test -p water-core --example fond_preserve --example bord_autonome --example frontiere_locale
+cargo run -p water-core --release --example fond_preserve
+```
+
+Cinq nouveaux tests reçus : fond exact, perturbation évolutive/convergence, dérivée de flux
+du fond figé, source omise, distinction des bilans et ordre deux du défaut corrigé.
+Six tests S166 et huit S165 reçus après extraction de la référence et extension du support.
+15 montages/45 évolutions release reçus ; seul le cinquième test a été ajouté après cette
+campagne, sans changer le calcul. Bibliothèques inchangées ; workspace 299/cinq ignorés
+reçu S163, non relancé. Aucune dépendance ni allocation par pas dans le support local.
+
+**S166-1 réalisée, A222 traitée sur véhicule à source connue.** Le candidat préserve Q exact,
+fait évoluer d non nul et garde le défaut physique d'un Q faux. Aucun ADR nouveau : ce
+candidat expérimental n'est pas adopté comme schéma runtime et ne remplace pas la réception
+d'identité de S164. A50 partielle, A216/A217 inchangées, pas de réception B4 générale.
+
+**Suite S168 : S167-1/A223**, fermer le volume avec moyennes de Q en cellules et flux
+physiques intégrés sur le pas, au lieu de sommes de valeurs ponctuelles. Dériver le bilan
+avant code, recevoir Q exact puis une perturbation, et ajouter un montage asymétrique
+pour que le flux net ne s'annule pas. Distinguer cette conservation totale du budget du
+résidu et de la qualité de transport. Ni bord autonome, 3D, choc ou eau sèche reçu ici.

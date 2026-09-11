@@ -137,3 +137,7 @@ la comparer à la source S164 sur l'onde simple puis sur une perturbation ajout�
 Ne pas supprimer silencieusement le défaut physique d'un fond approximatif : la source
 doit distinguer ce défaut du résidu numérique de Q. La comparaison au total restera un
 diagnostic distinct, et non un critère d'identité imposé au nouveau candidat.
+
+**Suivi S167 : S166-1 réalisée sur véhicule**, voir [FOND-PRESERVE-S167](FOND-PRESERVE-S167.md).
+Le candidat préserve Q exact et reçoit une perturbation ; source physique d'un Q figé
+conservée. A222 traitée dans ce périmètre ; clôture du volume total suivie par A223/S167-1.

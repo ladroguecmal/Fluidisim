@@ -2065,3 +2065,16 @@ promesse sur un extérieur résiduel inconnu ou sur le solveur 3D.
   La source discrète reçue S164 impose l'identité au schéma total, pas la préservation de Q.
   S166-1 : distinguer défaut physique et résidu numérique du fond, recevoir un candidat
   préservant le fond exact puis une perturbation. Aucun changement de source runtime ici.
+
+**Suivi A222 — S167 : traitée sur véhicule à source connue.** Flux résiduel seul et source
+physique explicite : Q exact reste intact, d ajouté évolue et converge, Q figé exige sa
+source. Le témoin S164 conserve sa réception d'identité. Voir FOND-PRESERVE-S167 ; pas
+d'adoption runtime, A50 reste partielle.
+
+- **A223** *(sévérité 2, S167 ; ouverte)* — **Un fond ponctuellement exact ne ferme pas
+  le volume total discret.** Le budget du résidu ferme à l'arrondi, mais le flux corrigé
+  delta numérique + fond physique laisse 5,20e-7 de défaut relatif au volume initial à
+  N240. Le défaut décroît comme dx² avec dt proportionnel à dx ; les cellules portent
+  des échantillons de Q, pas ses moyennes, et le flux temporel est une quadrature RK2.
+  S167-1 : moyennes et flux intégrés cohérents, fond exact/perturbation et montage
+  asymétrique. Ni perte de volume de production ni seuil perceptuel inféré.

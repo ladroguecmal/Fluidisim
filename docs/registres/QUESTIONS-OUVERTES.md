@@ -1507,3 +1507,15 @@ entrée par entrée. Le fil reprend ci-dessous.
   sans imposer l'identité au solveur total dissipatif. Distinguer défaut physique du fond
   approximatif et résidu numérique : ne pas supprimer le premier avec le second.
   Porteur : session de construction, poursuite B4 selon BILAN-S145.
+
+### Suivi S167 — Fond exact préservé
+
+- **S166-1 réalisée, A222 traitée sur véhicule à source connue.** FOND-PRESERVE-S167 :
+  Q exact intact, perturbation analytique non nulle convergente, source de Q figé nécessaire.
+  Cinq tests nouveaux, six S166 et huit S165 reçus ; 45 évolutions release.
+- **A50 partielle**, A216/A217 inchangées ; aucun ADR ni schéma runtime adopté.
+- **S167-1 / A223 : ouverte, priorité S168.** Recevoir les moyennes de Q en cellules et
+  les flux physiques intégrés en temps, pour fermer le volume total du candidat.
+  Fond exact puis perturbation, montage asymétrique à flux net non nul. Distinguer bilan
+  total, budget résiduel et erreur de transport. Porteur : session de construction,
+  poursuite B4 selon BILAN-S145.

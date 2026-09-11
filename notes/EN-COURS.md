@@ -67,7 +67,7 @@ Objectif : S166-1/A222, préserver le fond exact sans supprimer son défaut phys
 - [x] **P1** — état réel, jeton et plan seul.
 - [x] **P2** — dériver le résidu équilibré, les sources et les références ; protocole et copies.
 - [x] **P3** — implémenter et mesurer fond exact, perturbation analytique et fond figé inexact.
-- [ ] **P4** — recevoir tests, limites et suivi des actions.
+- [x] **P4** — recevoir tests, limites et suivi des actions.
 - [ ] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
@@ -82,3 +82,7 @@ Témoin S164, fond exact, perturbation analytique, fond figé et source omise. D
 P3 : 45 évolutions reçues ; cinq tests S167, six S166 et huit S165 reçus.
 Fond exact d=0 ; erreur perturbée N240 0,03129235 contre 0,1583713 (échelle0,05).
 Bilan résiduel à l'arrondi ; flux corrigé laisse quadrature ~dx², suivi à expliciter.
+
+P4 : réception publiée, A222 traitée sur véhicule ; A223/S167-1 volume total moyenné.
+Défaut corrigé N240 5,200756e-7 ; symétrie du fond figé explicitée, pas de généralisation.
+A50 partielle, aucun ADR ni runtime modifié.
