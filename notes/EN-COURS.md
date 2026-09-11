@@ -65,7 +65,7 @@ Objectif : S178-1/A50, différentiel profond RadialImpact et composition B+W.
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seul.
-- [ ] **P2** — dériver le champ radial régulier et déclarer contrat et réception.
+- [x] **P2** — dériver le champ radial régulier et déclarer contrat et réception.
 - [ ] **P3** — construire le fournisseur et la composition, recevoir dérivées et refus.
 - [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
