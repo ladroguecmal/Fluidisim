@@ -56,8 +56,8 @@ impl BackgroundSample {
             for j in 0..3 {
                 advection += self.u[j] * self.grad_u[i][j];
             }
-            *out = (self.du_dt[i] + self.grad_p_dyn[i] / rho)
-                + advection - nu * self.laplacian_u[i];
+            *out =
+                (self.du_dt[i] + self.grad_p_dyn[i] / rho) + advection - nu * self.laplacian_u[i];
         }
         if !result.iter().all(|x| x.is_finite()) {
             return Err(DifferentialError::NonFinite);
@@ -244,6 +244,215 @@ mod tests {
     }
     fn close(a: f32, b: f64, tol: f64) {
         assert!((a as f64 - b).abs() <= tol, "{a} vs {b}, tol {tol}");
+    }
+    #[test]
+    fn new_gradient_overflow_keeps_entire_batch_s178() {
+        let mut b = field();
+        b.gravity = 1.0;
+        let mut c = component([1.0, 0.0], 0);
+        c.amplitude = 0.1;
+        c.k_turns_per_m = 100.0;
+        b.components = vec![c];
+        let deep = WorldPos::from_units(0, 0, -2048);
+        let surface = WorldPos::from_units(0, 0, 0);
+        assert!(b.differential(deep, SimTime(0), f32::MAX).is_ok());
+        assert!(b.eval(surface, SimTime(0)).is_some());
+        let sentinel = BackgroundSample {
+            eta: 42.0,
+            ..Default::default()
+        };
+        let mut output = [sentinel; 2];
+        let mut scratch = [sentinel; 2];
+        assert_eq!(
+            b.differential_batch(
+                &[deep, surface],
+                SimTime(0),
+                f32::MAX,
+                &mut output,
+                &mut scratch
+            ),
+            Err(DifferentialError::NonFinite)
+        );
+        assert_eq!(output, [sentinel; 2]);
+        assert_ne!(scratch[0], sentinel);
+    }
+    #[test]
+    fn pressure_gradient_and_laplacian_have_independent_differences_s178() {
+        let b = field();
+        let x = [0.25, -0.125, -1.0];
+        let t = SimTime(125000);
+        let s = b.differential_local(x, t, 1025.0).unwrap();
+        let mut lap = [0.0f64; 3];
+        let h = 0.01;
+        for j in 0..3 {
+            let mut l = x;
+            let mut r = x;
+            l[j] -= h;
+            r[j] += h;
+            let l = b.differential_local(l, t, 1025.0).unwrap();
+            let r = b.differential_local(r, t, 1025.0).unwrap();
+            close(
+                s.grad_p_dyn[j],
+                (r.p_dyn as f64 - l.p_dyn as f64) / (2.0 * h as f64),
+                0.04,
+            );
+            for i in 0..3 {
+                lap[i] += (r.grad_u[i][j] as f64 - l.grad_u[i][j] as f64) / (2.0 * h as f64);
+            }
+        }
+        for i in 0..3 {
+            close(s.laplacian_u[i], lap[i], 4e-5);
+        }
+        // Non-unit direction inside the admitted tolerance: the Laplacian is not zero.
+        let mut b = field();
+        b.components = vec![component([1.0 + 8.0 * f32::EPSILON, 0.0], 0x40000000)];
+        let s = b.differential_local([0.0, 0.0, -1.0], t, 1025.0).unwrap();
+        let d = b.components[0].dir[0] as f64;
+        let k = core::f64::consts::TAU * 0.125;
+        close(
+            s.laplacian_u[0],
+            k * k * (1.0 - d * d) * s.u[0] as f64,
+            2e-12,
+        );
+        assert!(s.laplacian_u[0].abs() > 1e-7);
+    }
+    #[test]
+    fn residual_matches_bernoulli_gradient_and_time_difference_s178() {
+        let b = field(); // Deliberately not dispersion-consistent: linear defect must survive.
+        let x = [0.25, -0.125, -1.0];
+        let t = SimTime(125000);
+        let rho = 1025.0;
+        let s = b.differential_local(x, t, rho).unwrap();
+        let residual = s.momentum_residual(rho, 0.0).unwrap();
+        let before = b.differential_local(x, SimTime(124000), rho).unwrap();
+        let after = b.differential_local(x, SimTime(126000), rho).unwrap();
+        let energy = |s: BackgroundSample| {
+            s.p_dyn as f64 / rho as f64 + 0.5 * s.u.iter().map(|v| (*v as f64).powi(2)).sum::<f64>()
+        };
+        let h = 0.002;
+        for j in 0..3 {
+            let mut l = x;
+            let mut r = x;
+            l[j] -= h;
+            r[j] += h;
+            let gradient = (energy(b.differential_local(r, t, rho).unwrap())
+                - energy(b.differential_local(l, t, rho).unwrap()))
+                / (2.0 * h as f64);
+            let dt = (after.u[j] as f64 - before.u[j] as f64) / 0.002;
+            close(residual[j], dt + gradient, 6e-4);
+        }
+    }
+    #[test]
+    fn airy_single_mode_residual_is_vertical_quadratic_s178() {
+        let mut b = field();
+        b.components = vec![component([1.0, 0.0], 0)];
+        let omega = core::f32::consts::TAU;
+        let k = core::f32::consts::TAU * 0.125;
+        b.gravity = omega * omega / k;
+        let expected =
+            k as f64 * (0.2f32 as f64 * core::f64::consts::TAU * (-k as f64).exp()).powi(2);
+        for time in [0, 125000, 250000, 500000, 750000] {
+            let s = b
+                .differential_local([0.0, 0.0, -1.0], SimTime(time), 1025.0)
+                .unwrap();
+            let r = s.momentum_residual(1025.0, 1.0).unwrap();
+            close(r[0], 0.0, 1e-6);
+            close(r[1], 0.0, 1e-7);
+            close(r[2], expected, 1e-6);
+            assert!(r[2] > 0.1); // A source silently filled with zero must fail.
+            assert_eq!(s.laplacian_u, [0.0; 3]);
+        }
+        let s = b
+            .differential_local([0.0, 0.0, -1.0], SimTime(125000), 1025.0)
+            .unwrap();
+        b.components[0].amplitude *= 2.0;
+        let doubled = b
+            .differential_local([0.0, 0.0, -1.0], SimTime(125000), 1025.0)
+            .unwrap();
+        close(
+            doubled.momentum_residual(1025.0, 0.0).unwrap()[2],
+            4.0 * s.momentum_residual(1025.0, 0.0).unwrap()[2] as f64,
+            2e-6,
+        );
+    }
+    #[test]
+    fn crossed_modes_cannot_sum_isolated_residuals_s178() {
+        let b = field();
+        let x = [0.25, -0.125, -1.0];
+        let t = SimTime(125000);
+        let full = b
+            .differential_local(x, t, 1025.0)
+            .unwrap()
+            .momentum_residual(1025.0, 0.0)
+            .unwrap();
+        let mut isolated = [0.0; 3];
+        for c in &b.components {
+            let one = Background {
+                components: vec![*c],
+                anchor: b.anchor,
+                gravity: b.gravity,
+            };
+            let r = one
+                .differential_local(x, t, 1025.0)
+                .unwrap()
+                .momentum_residual(1025.0, 0.0)
+                .unwrap();
+            for i in 0..3 {
+                isolated[i] += r[i];
+            }
+        }
+        assert!((0..3).any(|i| (full[i] - isolated[i]).abs() > 0.05));
+        // Full residual is checked independently by Bernoulli in the preceding test.
+    }
+    #[test]
+    fn density_viscosity_and_invalid_residuals_s178() {
+        let b = field();
+        let x = [0.25, -0.125, -1.0];
+        let t = SimTime(125000);
+        let s = b.differential_local(x, t, 1025.0).unwrap();
+        let d = b.differential_local(x, t, 2050.0).unwrap();
+        assert_eq!(d.grad_p_dyn, s.grad_p_dyn.map(|v| 2.0 * v));
+        assert_eq!(
+            s.momentum_residual(1025.0, 0.0),
+            d.momentum_residual(2050.0, 0.0)
+        );
+        assert_eq!(
+            BackgroundSample::default().momentum_residual(1025.0, 1.0),
+            Ok([0.0; 3])
+        );
+        // A manufactured local field exercises a nonzero viscous term without relying on B's near-zero Δu.
+        let manufactured = BackgroundSample {
+            laplacian_u: [1.0, -2.0, 4.0],
+            ..Default::default()
+        };
+        assert_eq!(
+            manufactured.momentum_residual(1000.0, 0.5),
+            Ok([-0.5, 1.0, -2.0])
+        );
+        for nu in [-1.0, f32::NAN, f32::INFINITY] {
+            assert_eq!(
+                s.momentum_residual(1025.0, nu),
+                Err(DifferentialError::Viscosity)
+            );
+        }
+        for rho in [0.0, -1.0, f32::NAN, f32::INFINITY] {
+            assert_eq!(
+                s.momentum_residual(rho, 0.0),
+                Err(DifferentialError::Density)
+            );
+        }
+        let invalid = BackgroundSample {
+            grad_p_dyn: [f32::NAN, 0.0, 0.0],
+            ..Default::default()
+        };
+        assert_eq!(
+            invalid.momentum_residual(1025.0, 0.0),
+            Err(DifferentialError::NonFinite)
+        );
+        assert_eq!(
+            manufactured.momentum_residual(1025.0, f32::MAX),
+            Err(DifferentialError::NonFinite)
+        );
     }
     #[test]
     fn linear_momentum_matches_pressure_gradient() {

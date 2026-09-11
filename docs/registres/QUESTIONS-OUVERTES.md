@@ -1617,3 +1617,13 @@ entrée par entrée. Le fil reprend ci-dessous.
 - **S177-1 / A50 : ouverte, priorité S178.** Gradient de pression et formation du résidu
   physique continu de B, unités et termes visqueux qualifiés. Réception analytique et
   refus conservés ; extension W ultérieure, aucune confusion avec un résidu discret.
+
+### Suivi S178 — Source continue de B construite
+
+- **S177-1 réalisée pour B profond uniforme**, SOURCE-B-S178, ADR-114 : gradient de
+  pression, Laplacien et source volumique S à soustraire ; interactions entre modes.
+  A50 partielle, fermeture de surface et solveur δ3D non reçus.
+- **S178-1 : ouverte, priorité S179.** Fournisseur différentiel profond de RadialImpact,
+  composition avec B et réception des termes croisés. Préserver refus et horizons,
+  dériver l'origine radiale régulière ; pressions forcées ultérieures. Porteur :
+  construction de bibliothèque, suivant BILAN-S145/BILAN-B4-S176.

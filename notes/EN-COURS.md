@@ -66,7 +66,7 @@ Objectif : S177-1/A50, gradient de pression et source continue du B profond.
 
 - [x] **P1** — état réel, jeton et plan seul.
 - [x] **P2** — dériver source, Laplacien et conventions ; construire les termes en bibliothèque.
-- [ ] **P3** — recevoir avec références indépendantes, contre-épreuves et conformité.
+- [x] **P3** — recevoir avec références indépendantes, contre-épreuves et conformité.
 - [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
@@ -78,3 +78,6 @@ B linéaire profond seulement ; pression relative au plan moyen ADR113, rho expl
 Dériver avant de coder ; pas de zéro pour un terme non démontré nul.
 BILAN-S145 porté par construction B4 après B1/S63-1. Aucune copie créée.
 P2 : ADR114 ; gradients et Laplacien représenté, source S à soustraire. cargo check reçu.
+P3 : six nouveaux tests, quatorze tests différentiels reçus ; workspace313/cinq ignorés.
+Contre-épreuve : advection neutralisée, échec 0 contre0,2578228700 m/s² ; original restauré.
+C18/C02 reçus, hashs inchangés ; source mono-mode quadratique et croisements reçus.

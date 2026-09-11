@@ -2162,3 +2162,9 @@ Pas de nouvel angle : c’est le maillon concret de l’angle existant.
 du_dt, grad_u et pression de vague àprofondeur connue, type distinct de WaterSample.
 B seul, linéaire profond uniforme ; A50 reste partielle. S177-1 reçoit gradient de
 pression et source continue avant extension W. Aucun nouvel angle, ni seuil B4 adopté.
+
+**Suivi A50 — S178 : source volumique continue de B construite.**
+[SOURCE-B-S178](../validation/SOURCE-B-S178.md), ADR-114 : gradient de pression,
+Laplacien et contraction après sommation des modes ; S à soustraire. Six nouveaux
+tests et contre-épreuve de l'advection omise. A50 partielle : source B+W, conditions
+de surface et δ3D restent ouverts. S178-1 construit le différentiel RadialImpact.

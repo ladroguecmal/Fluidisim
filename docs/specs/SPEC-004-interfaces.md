@@ -100,6 +100,12 @@ struct WaterSample {
 
 ### 2.1 Deux types d'échantillon, et pourquoi les fusionner serait une erreur
 
+> **Complément S178 — 2026-09-11.** B fournit aussi `grad_p_dyn` (Pa/m) et
+> `laplacian_u` (1/(m s)). `BackgroundSample::momentum_residual(rho,nu)` forme le
+> résidu continu S, à **soustraire**, en m/s² ; rho identique à l'échantillonnage,
+> nu cinématique uniforme. Hydrostatique et gravité déjà compensées. ADR-114 et
+> [SOURCE-B-S178](../validation/SOURCE-B-S178.md). B+W et fermeture δ restent ouverts.
+
 > **Implémentation partielle S177 — 2026-09-11.** `background::BackgroundSample` et
 > les méthodes `Background::differential*` existent pour B profond linéaire uniforme.
 > z est relatif au plan moyen, z<=0 ; grad_u[i][j]=∂u_i/∂x_j, p_dyn en Pa avec rho
