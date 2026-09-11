@@ -65,7 +65,7 @@ Objectif : S180-1/A50, composition différentielle B+impacts+pressions.
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seul.
-- [ ] **P2** — fixer composition, contexte/temps et réception avant code.
+- [x] **P2** — fixer composition, contexte/temps et réception avant code.
 - [ ] **P3** — construire sur les vues mixtes existantes ; recevoir interactions et refus.
 - [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
