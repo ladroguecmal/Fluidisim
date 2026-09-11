@@ -20,27 +20,12 @@ enum Mode {
     Characteristic,
     Background,
 }
-fn invariants(s: State) -> (f64, f64) {
-    assert!(s.h.is_finite() && s.q.is_finite() && s.h > 1e-8);
-    let u = s.q / s.h;
-    let c = (G * s.h).sqrt();
-    assert!(u.abs() < c, "fermeture subcritique seulement");
-    (u + 2.0 * c, u - 2.0 * c)
-}
-fn characteristic(inner: [State; 2], outside: [State; 2]) -> [State; 2] {
-    std::array::from_fn(|side| {
-        let (ip, im) = invariants(inner[side]);
-        let (op, om) = invariants(outside[side]);
-        let (p, m) = if side == 0 { (op, im) } else { (ip, om) };
-        let c = (p - m) * 0.25;
-        assert!(c > 0.0 && c.is_finite());
-        let u = (p + m) * 0.5;
-        let h = c * c / G;
-        let result = State { h, q: h * u };
-        invariants(result);
-        result
-    })
-}
+#[path = "support/open_boundary.rs"]
+#[allow(dead_code)]
+mod open_boundary;
+use open_boundary::characteristic;
+#[cfg(test)]
+use open_boundary::invariants;
 #[path = "support/simple_wave.rs"]
 mod simple_wave;
 use simple_wave::Wave;

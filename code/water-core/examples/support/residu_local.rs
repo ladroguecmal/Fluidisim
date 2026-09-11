@@ -158,6 +158,18 @@ impl Local {
         source: impl Fn(usize, f64) -> State,
         ghosts: [[State; 2]; 2],
     ) -> (f64, f64) {
+        self.step_balanced_with_boundary(t, dt, sample, source, |stage, _| ghosts[stage])
+    }
+
+    /// S169 : fermeture recalculée depuis le total intérieur de chaque étage.
+    pub fn step_balanced_with_boundary(
+        &mut self,
+        t: f64,
+        dt: f64,
+        sample: impl Fn(usize, f64) -> State,
+        source: impl Fn(usize, f64) -> State,
+        boundary: impl Fn(usize, [State; 2]) -> [State; 2],
+    ) -> (f64, f64) {
         assert!(t.is_finite() && dt.is_finite() && dt > 0.0);
         let n = self.d.len();
         let mut background_mass = 0.0;
@@ -173,15 +185,14 @@ impl Local {
         ];
         let qflux0 = numerical(g0[0], self.bg[0]).h - numerical(self.bg[n - 1], g0[1]).h;
         let qflux1 = numerical(g1[0], self.bg1[0]).h - numerical(self.bg1[n - 1], g1[1]).h;
-        let (f0, c0) = Self::rhs(
-            &self.bg,
-            &self.d,
-            &mut self.rhs,
-            g0,
-            ghosts[0],
-            self.dx,
-            true,
+        let ghosts0 = boundary(
+            0,
+            [
+                self.bg[0].plus(self.d[0]),
+                self.bg[n - 1].plus(self.d[n - 1]),
+            ],
         );
+        let (f0, c0) = Self::rhs(&self.bg, &self.d, &mut self.rhs, g0, ghosts0, self.dx, true);
         let mut source0 = 0.0;
         for i in 0..n {
             let s = source(self.offset + i, t);
@@ -189,12 +200,19 @@ impl Local {
             source0 += s.h * self.dx;
             self.d1[i] = self.d[i].plus(self.rhs[i].plus(s).times(dt));
         }
+        let ghosts1 = boundary(
+            1,
+            [
+                self.bg1[0].plus(self.d1[0]),
+                self.bg1[n - 1].plus(self.d1[n - 1]),
+            ],
+        );
         let (f1, c1) = Self::rhs(
             &self.bg1,
             &self.d1,
             &mut self.rhs,
             g1,
-            ghosts[1],
+            ghosts1,
             self.dx,
             true,
         );

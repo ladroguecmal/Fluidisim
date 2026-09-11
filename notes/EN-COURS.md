@@ -66,7 +66,7 @@ Objectif : S168-1/A224, assembler résidu équilibré en moyennes et frontière 
 
 - [x] **P1** — état réel, jeton et plan seul.
 - [x] **P2** — dériver fermeture préservant Q et protocole, synchroniser les copies.
-- [ ] **P3** — construire assemblage et témoins ; mesurer préservation, entrée/sortie et bilan.
+- [x] **P3** — construire assemblage et témoins ; mesurer préservation, entrée/sortie et bilan.
 - [ ] **P4** — réception, limites, suivi des actions.
 - [ ] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
@@ -78,3 +78,7 @@ S168 cinq tests reçus ; supports S165–S167 reçus S167 ; workspace299/cinq ig
 BILAN-S145 porté par poursuite B4. Pas d'information extérieure inconnue inventée.
 P2 : ASSEMBLAGE-AUTONOME-S169, transport de l'écart d'invariant sortant ; Q préservé.
 Mesurer l'information entrante omise des gaussiennes non compactes. Quatre voies,15 montages.
+
+P3 : quatre tests nouveaux et24 tests S165–S168 reçus ;60 évolutions release.
+Fond entrant exactement préservé ; bilan <=1,90e-15, Courant<=0,217650.
+Références et fermeture extraites en supports partagés, bibliothèques inchangées.
