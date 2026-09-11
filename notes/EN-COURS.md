@@ -65,7 +65,7 @@ Objectif : S179-1/A50, différentiel profond de la pression W forcée.
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seul.
-- [ ] **P2** — dériver pression imposée et champ profond ; contrat et protocole.
+- [x] **P2** — dériver pression imposée et champ profond ; contrat et protocole.
 - [ ] **P3** — construire dans le champ spectral, recevoir forçage/dérivées/refus et conformité.
 - [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
