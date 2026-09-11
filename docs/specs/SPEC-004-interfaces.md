@@ -327,6 +327,14 @@ public:
 
 ### 6.1 Pourquoi les dérivées sont indispensables
 
+> **Clarification S176 — 2026-09-11.** La formule différentielle ci-dessous décrit
+> un résidu physique continu ; elle ne définit pas àelle seule le résidu d’un schéma
+> discret. Les essais S167–S175 distinguent `Lphys(Q)-Qt` et `Lnum(Q)-Qt` (convention
+> conservative1D, signe opposé au `S` soustrait ci-dessous). Le second retrouve le
+> solveur total numérique ; le premier peut préserver un fond physique connu.
+> Il faut déclarer opérateur et quadratures dans l’implémentation, sans les confondre.
+> Aucun schéma3D choisi. Voir [BILAN-B4-S176](../validation/BILAN-B4-S176.md).
+
 En régime perturbatif on écrit `u = U + u'`, `p = P + p'`, où `(U, P)` est le fond. En reportant
 dans les équations du mouvement, l'équation de la perturbation fait apparaître un **terme source**
 égal au résidu du fond dans les équations discrètes :

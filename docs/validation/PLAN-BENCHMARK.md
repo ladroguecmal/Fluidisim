@@ -117,6 +117,12 @@ l'autorise (ADR-007 §3).
 
 ## B4 — Validité du régime perturbatif
 
+> **État S176 — 2026-09-11.** B4 complet non reçu. Le seuil0,35·Hs ci-dessous est une
+> proposition historique non reçue, pas une règle rétablie ; ADR-112 fait foi.
+> S163–S175 reçoivent des contrôles du résidu et de sa source sur véhicule1D, sans
+> réception des forces/perception ni choix de δ3D. Voir
+> [BILAN-B4-S176](BILAN-B4-S176.md), matrice des preuves et lot S176-1.
+
 **Question.** ADR-001 tient-il ? À partir de quel rapport `|δ|/Hs` la décomposition additive
 devient-elle visiblement fausse ?
 **Protocole.** Même scène simulée deux fois : (a) perturbative B+W+δ, (b) substitutive intégrale de

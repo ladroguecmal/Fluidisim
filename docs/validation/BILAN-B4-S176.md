@@ -69,3 +69,48 @@ profonde linéaire et milieu uniforme, àpartir de ses composantes et de sa phas
 Ce lot met le contrat SPEC-004 §2.1 au contact du code de bibliothèque. Il ne transfère
 pas le solveur Rusanov1D vers le runtime et ne déclare pas B4 complet.
 Le périmètre détaillé et ses critères seront fixés en P3 avant la clôture.
+
+## Lot retenu — S176-1, priorité S177
+
+Construire dans `water-core` le fournisseur différentiel de B, directement depuis les
+composantes de `Background`, avec un type distinct de `WaterSample`. Première livraison
+bornée au champ linéaire en eau profonde, milieu uniforme, axes locaux et gravité du fond.
+Aucun transfert automatique du véhicule Saint-Venant vers le runtime.
+
+Le lot doit produire les grandeurs de SPEC-004 §2.1 (`eta`, `grad_eta`, `u`, `du_dt`,
+`grad_u`, `p_dyn`) en nommant précisément leurs conventions : altitude relative au plan
+moyen, profondeur admise, unités de pression et masse volumique fournie, gradient
+Eulerien et ordre des indices. Les formules volumétriques et le raccord àz=0 doivent
+être dérivés avant implémentation. Si une convention exige une nouvelle décision,
+la documenter par ADR ; ne pas compléter un champ indisponible par zéro.
+
+Le calcul doit partager les paramètres et la phase de B existant. Il ne doit pas
+modifier le produit consommateur historique ni ses hashs pour rendre les nouveaux
+tests verts. Une divergence physique constatée se documente séparément. La dérivée
+du champ analytique représenté et la différence finie de la phase quantifiée ne sont
+pas identiques : leurs tolérances et leur objet doivent être explicités.
+
+Critères de réception du lot :
+
+1. API ponctuelle puis par lot avec sorties et travail fournis par l’appelant ; aucune
+   allocation pendant l’évaluation, refus explicites des tailles/points invalides et
+   sorties inchangées en cas de refus. Ordre de sommation fixé.
+2. Cas mono-composante contrôlant signes, axes et unités par formules indépendantes ;
+   directions croisées pour vérifier le gradient tensoriel, pas seulement sa diagonale.
+3. Cohérence surface/vitesse avec le B existant àz=0, dérivées reçues par une référence
+   analytique et des différences finies adaptées àla précision ; état nul et refus.
+4. Tests de bibliothèque et contrôles de conformité existants appropriés au code touché.
+   Aucun résultat numérique nouveau n’est annoncé par ce bilan documentaire.
+5. Documentation de la portée : B seul ne fournit pas B+W, pression scalaire seule ne
+   fournit pas encore son gradient ni le Laplacien visqueux. Le fournisseur ne choisit
+   ni Lphys/Lnum du futur solveur ni `is_smooth_at` ; décimation désactivée par défaut
+   si une interface l’exige, jamais garantie par un ratio universel.
+
+Ce lot est exécutable sans moteur, GPU ou nouvelle dépendance. Il enlève un manque
+concret du contrat utilisé par δ. L’extension aux impacts/pressions W, l’assemblage
+B+W, le solveur volumétrique de B3, le couplage solide puis la réception B4 restent des
+lots ultérieurs, àordonner depuis les preuves du fournisseur. Pas de calendrier fictif.
+
+**S175-1 réalisée : bilan et lot borné publiés.** Aucun nouveau seuil, solveur ou choix
+3D adopté ; ADR-112 inchangé. Le prochain travail est du code de bibliothèque avec
+réception, pas une nouvelle variante de la campagne1D.

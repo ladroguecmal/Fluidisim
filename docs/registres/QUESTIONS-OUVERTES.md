@@ -1599,3 +1599,12 @@ entrée par entrée. Le fil reprend ci-dessous.
   acquis et limites explicites, puis choix du prochain lot de construction exécutable.
   Distinguer véhicule1D, runtime, coût, forces et perception ; ne pas prolonger par
   défaut une variante de sonde. Porteur : prochaine session, BILAN-S145 relu S175.
+
+### Suivi S176 — Bilan B4 et fournisseur différentiel
+
+- **S175-1 réalisée**, BILAN-B4-S176 : matrice de réception S163–S175, B4 complet non
+  reçu et A50 partielle. Pas de nouvelle simulation, ni seuil ou candidat3D adopté.
+- **S176-1 : ouverte, priorité S177.** Construire le fournisseur différentiel de B dans
+  water-core selon le lot et les cinq critères de BILAN-B4-S176. Conventions physiques
+  explicites, type distinct, évaluation sans allocation et refus atomiques, réception
+  indépendante et conformité existante. B seul ; extension W et solveur3D ultérieurs.

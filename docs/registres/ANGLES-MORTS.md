@@ -2150,3 +2150,9 @@ anticipation d’événement inconnu reçue. A216/A217 inchangées.
 A50 partielle : pas de3D, forces/perception ni coût runtime reçus. A225 reste qualifiée,
 A216/A217 inchangées. Pas de nouvel angle ; S175-1 consolide la réception B4 avant
 le prochain lot de construction.
+
+**Suivi A50 — S176 : bilan consolidé, reste partielle.**
+[BILAN-B4-S176](../validation/BILAN-B4-S176.md) sépare les contrôles1D de B4 complet.
+Le fournisseur différentiel BackgroundSample manque encore dans la bibliothèque ;
+S176-1 le construit pour B seul, sans prétendre fournir B+W ni choisir le solveur3D.
+Pas de nouvel angle : c’est le maillon concret de l’angle existant.

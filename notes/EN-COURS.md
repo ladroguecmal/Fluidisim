@@ -66,7 +66,7 @@ Objectif : S175-1, bilan B4/SPEC-004 et prochain lot de construction exécutable
 
 - [x] **P1** — état réel, jeton, plan seul.
 - [x] **P2** — confronter réceptions, interfaces et code réel ; matrice des écarts B4.
-- [ ] **P3** — fixer un lot de construction borné et ses critères ; corriger les états périmés.
+- [x] **P3** — fixer un lot de construction borné et ses critères ; corriger les états périmés.
 - [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
@@ -76,3 +76,5 @@ Master 0b37fd2 propre, quatre copies alignées ; corpus lu dans cette conversati
 S163–S175 sont des véhicules 1D en examples/support ; ne pas les compter comme runtime3D.
 ADR-112 maintient B4 non reçu et les seuils non adoptés. BILAN-S145 relu S175.
 Pas de nouvelle sonde par défaut ; aucun seuil ni score global sans preuve.
+P3 reprise après interruption : seul marqueur P3 non committé, conservé puis complété.
+Lot S176-1 déclaré ; corrections documentaires SPEC004/B4/lib. Aucun code exécuté changé.

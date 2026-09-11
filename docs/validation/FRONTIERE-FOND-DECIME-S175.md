@@ -129,3 +129,7 @@ prochain lot de construction exécutable àpartir de cet écart, sans ajouter un
 variante locale par défaut. BILAN-S145 relu en S175 : B1 et S63-1 ont leurs réceptions
 antérieures, poursuivre la construction après ces contrôles ciblés, pas seulement
 le chaînage des sondes. Porteur : prochaine session ; aucun arbitrage humain requis.
+
+**Suivi S176 : S175-1 réalisée**, [BILAN-B4-S176](BILAN-B4-S176.md) consolide les
+réceptions et fixe S176-1, fournisseur différentiel du B de bibliothèque. B4 complet
+reste non reçu, A50 partielle ; aucune nouvelle variante1D lancée en S176.

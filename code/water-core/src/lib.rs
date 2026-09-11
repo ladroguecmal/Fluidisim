@@ -10,7 +10,7 @@
 //! couche `B` minimale et le hash de conformité.
 //!
 //! **S22 y ajoute un `δ`** — `delta.rs`, Saint-Venant 1D — qui est un **véhicule d'essai** et non
-//! le solveur du projet : ce choix appartient au banc B3 (ADR-007 §5). Ni `W`, ni `V` n'existent
+//! le solveur du projet : ce choix appartient au banc B3 (ADR-007 §5). À cette étape historique, ni `W`, ni `V` n'existent
 //! encore, et chacun attend son banc.
 //!
 //! **S39 y ajoute `dispersif.rs`**, un milieu linéaire à **dispersion exacte** — ni dissipation,
@@ -22,6 +22,10 @@
 //! indépendamment dans une histoire parallèle du dépôt et importée à la réconciliation du fork.
 //! Elle n'est pas redondante : deux implémentations du même modèle forment le seul **oracle
 //! croisé** dont le projet dispose hors des cas à référence fermée (ADR-043 §3).
+//!
+//! **État S176 :** W impacts/pressions et composition B+W sont construits dans les modules
+//! ci-dessous. V et le solveur volumétrique du projet restent à construire ; les véhicules
+//! Saint-Venant ne les remplacent pas. Voir BILAN-B4-S176.
 //!
 //! # Zéro dépendance
 //!
