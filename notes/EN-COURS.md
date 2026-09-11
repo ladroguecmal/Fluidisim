@@ -58,18 +58,24 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S180 — terminée
+Session : S181 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S179-1/A50, différentiel profond de la pression W forcée.
+Objectif : S180-1/A50, composition différentielle B+impacts+pressions.
 
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seul.
-- [x] **P2** — dériver pression imposée et champ profond ; contrat et protocole.
-- [x] **P3** — construire dans le champ spectral, recevoir forçage/dérivées/refus et conformité.
-- [x] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [ ] **P2** — fixer composition, contexte/temps et réception avant code.
+- [ ] **P3** — construire sur les vues mixtes existantes ; recevoir interactions et refus.
+- [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
+
+S181 : master a77ea78 propre, quatre copies alignées ;116 ADR/225 angles/262 leçons.
+Le montage mixed_water possède déjà classify (contexte/temps/perte), BoundBackground
+et les vues de journaux. Réutiliser ces contrôles plutôt qu'inventer une association
+locale sans instant. Pression imposée déjà incluse ; source après somme des champs.
+Poursuite BILAN-S145/S176. Aucune copie nouvelle ; notes antérieures conservées.
 
 S180 : master3b7cae0 propre, quatre copies alignées ;115 ADR/225 angles/261 leçons.
 Le champ spectral conserve déjà pression et vitesse modales dans Slot. Dériver
