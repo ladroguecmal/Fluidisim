@@ -69,6 +69,49 @@ enum Method {
     Exact,
     Omitted,
     Linear(f64, f64),
+    Flux(f64, f64, bool),
+}
+// Each face is evaluated once. Exact endpoints alter only the bordering
+// interpolation segments; there is no uniform correction to the source.
+fn flux_faces(
+    h: f64,
+    phase: f64,
+    anchored: bool,
+    dx: f64,
+    start: usize,
+    end: usize,
+) -> (Vec<State>, usize) {
+    let wave = Wave {
+        a: 0.05,
+        center: 55.0,
+        sign: 1.0,
+    };
+    let grid = Grid::new(h, phase, |x| flux(wave.at(x, 0.0)));
+    let mut nodes: Vec<(f64, State)> = grid
+        .nodes
+        .iter()
+        .enumerate()
+        .map(|(j, &v)| (grid.origin + j as f64 * h, v))
+        .collect();
+    if anchored {
+        nodes.retain(|(x, _)| *x > 30.0 && *x < 90.0);
+        nodes.insert(0, (30.0, flux(wave.at(30.0, 0.0))));
+        nodes.push((90.0, flux(wave.at(90.0, 0.0))));
+    }
+    let faces = (start..=end)
+        .map(|i| {
+            let x = i as f64 * dx;
+            let j = nodes
+                .partition_point(|(p, _)| *p <= x)
+                .saturating_sub(1)
+                .min(nodes.len() - 2);
+            let (a, fa) = nodes[j];
+            let (b, fb) = nodes[j + 1];
+            assert!(x >= a && x <= b);
+            fa.plus(fb.minus(fa).times((x - a) / (b - a)))
+        })
+        .collect();
+    (faces, nodes.len())
 }
 #[derive(Clone, Copy, Debug, Default)]
 struct Report {
@@ -88,6 +131,8 @@ fn methods() -> Vec<Method> {
     for h in [1.0, 2.0, 4.0, 8.0, 16.0] {
         for phase in [0.0, 0.5] {
             m.push(Method::Linear(h, phase));
+            m.push(Method::Flux(h, phase, false));
+            m.push(Method::Flux(h, phase, true));
         }
     }
     m
@@ -122,6 +167,13 @@ fn run(n: usize, factor: f64, methods: &[Method]) -> Vec<Report> {
         .iter()
         .enumerate()
         .map(|(m, method)| {
+            let faces = if let Method::Flux(h, p, anchored) = *method {
+                let (faces, count) = flux_faces(h, p, anchored, dx, start, end);
+                reports[m].nodes = count;
+                Some(faces)
+            } else {
+                None
+            };
             let grid = if let Method::Linear(h, p) = *method {
                 Some(Grid::new(h, p, source))
             } else {
@@ -138,6 +190,10 @@ fn run(n: usize, factor: f64, methods: &[Method]) -> Vec<Report> {
                         match method {
                             Method::Exact => exact_source[i],
                             Method::Omitted => State::default(),
+                            Method::Flux(_, _, _) => {
+                                let f = faces.as_ref().unwrap();
+                                f[i - start].minus(f[i - start + 1]).times(1.0 / dx)
+                            }
                             Method::Linear(_, _) => grid
                                 .as_ref()
                                 .unwrap()
@@ -211,6 +267,8 @@ fn main() {
                 Method::Exact => ("Exact", 0.0, 0.0),
                 Method::Omitted => ("Omitted", 0.0, 0.0),
                 Method::Linear(h, p) => ("Linear", h, p),
+                Method::Flux(h, p, false) => ("FluxRaw", h, p),
+                Method::Flux(h, p, true) => ("FluxAnchored", h, p),
             };
             println!("{n},{factor},{name},{h},{phase},{:.6e},{:.6e},{:.6e},{:.6e},{:.6e},{:.6e},{:.6e},{:.6e},{:.6},{}",r.h,r.q,r.effect,r.source_h,r.source_q,r.volume,r.prediction_error,r.injection,r.courant,r.nodes);
         }
@@ -219,6 +277,57 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn shared_flux_telescopes_to_endpoint_error() {
+        let w = Wave {
+            a: 0.05,
+            center: 55.0,
+            sign: 1.0,
+        };
+        for anchored in [false, true] {
+            let (f, _) = flux_faces(8.0, 0.5, anchored, 0.5, 60, 180);
+            let sum = f
+                .windows(2)
+                .fold(State::default(), |s, p| s.plus(p[0].minus(p[1])));
+            let endpoints = f[0].minus(*f.last().unwrap());
+            assert!((sum.h - endpoints.h).abs() < 1e-12 && (sum.q - endpoints.q).abs() < 1e-12);
+            let exact = flux(w.at(30.0, 0.0)).minus(flux(w.at(90.0, 0.0)));
+            if anchored {
+                assert!((sum.h - exact.h).abs() < 1e-12 && (sum.q - exact.q).abs() < 1e-12);
+            } else {
+                assert!((sum.h - exact.h).abs() > 1e-6);
+            }
+        }
+    }
+    #[test]
+    fn exact_endpoint_budget_does_not_make_local_source_exact() {
+        let r = run(
+            120,
+            1.0,
+            &[
+                Method::Exact,
+                Method::Flux(8.0, 0.5, false),
+                Method::Flux(8.0, 0.5, true),
+            ],
+        );
+        assert!(r[1].volume > 1e-10 && r[1].prediction_error < 1e-10);
+        assert!(r[2].volume < 1e-10 && r[2].injection.abs() < 1e-12);
+        assert!(r[2].source_h > 0.01 && r[2].effect > 0.01);
+    }
+    #[test]
+    fn flux_source_refinement_improves_field_independently_of_budget() {
+        let r = run(
+            120,
+            1.0,
+            &[
+                Method::Exact,
+                Method::Flux(2.0, 0.0, true),
+                Method::Flux(8.0, 0.0, true),
+            ],
+        );
+        assert!(r[1].effect < r[2].effect && r[1].source_h < r[2].source_h);
+        assert!(r[1].volume < 1e-10 && r[2].volume < 1e-10);
+    }
     #[test]
     fn linear_source_is_integrated_across_grid_nodes() {
         let g = Grid::new(4.0, 0.5, |x| State {

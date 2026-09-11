@@ -65,7 +65,7 @@ Objectif : S170-1/A225, différences de flux partagés ; conservation et précis
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seul.
-- [ ] **P2** — étendre la sonde avec flux interpolé brut et bornes physiques exactes ; protocole.
+- [x] **P2** — étendre la sonde avec flux interpolé brut et bornes physiques exactes ; protocole.
 - [ ] **P3** — tests et campagne indépendante des résolutions, résultats et suivi.
 - [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
