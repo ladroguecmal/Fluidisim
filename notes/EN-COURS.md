@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S175 — en cours
+Session : S175 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S174-1/A50, fond décimé et frontière autonome ancrée S169.
 
@@ -67,7 +67,7 @@ Objectif : S174-1/A50, fond décimé et frontière autonome ancrée S169.
 - [x] **P1** — état réel, jeton, plan seul.
 - [x] **P2** — assembler les frontières comparées et leurs témoins àconditions identiques.
 - [x] **P3** — recevoir préservation, sortie et budgets ; résultats et suivi.
-- [ ] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [x] **P4** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
@@ -81,3 +81,5 @@ A50 partielle ; BILAN-S145 porté via B4 après B1/S63-1.
 P3 : huit tests (deux nouveaux),288 évolutions +54 témoins reçus.
 Budget interpolé<=1,21e-15 ; prédictions<=1,35e-15 ; identité<=2,23e-16.
 S174-1 réalisée ; BILAN-S145 relu, suite S175-1 bilan B4/lot de construction.
+
+P4 : rituel exécuté ; L257,225 angles,112 ADR. Suite S176/S175-1.

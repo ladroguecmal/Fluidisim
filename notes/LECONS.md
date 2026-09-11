@@ -3992,3 +3992,15 @@ Nommer la référence du bilan ; publier séparément conservation de la représ
 et fidélité de ses flux aux données physiques. Prédire leur différence depuis les flux,
 sans reconstruire cette prédiction depuis le volume évolué. Une chaîne cohérente peut
 transporter exactement des données approximatives. Voir CADENCE-FOND-S174 et A225.
+
+## L257 — Une identité de solveurs exige aussi des frontières identiques
+
+*(S175)* Le résidu àsource discrète retrouve le solveur total uniquement si les deux
+voient la même règle de frontière àchaque étage. Lui opposer un total àfantômes
+analytiques alors que son propre bord est autonome mesurerait l’effet du bord,
+pas une faute dans l’identité algébrique.
+
+Apparier les conditions aux limites pour recevoir l’identité, puis comparer séparément
+les champs entre fermetures. Calculer leur différence avant de prendre le maximum :
+la différence de deux maxima n’est pas le maximum de la différence. Conserver les
+budgets fondés sur les flux de chaque calcul. Voir FRONTIERE-FOND-DECIME-S175.

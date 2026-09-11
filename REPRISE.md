@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-11 19:49 +02:00
+JETON            : libre
+Battement        : 2026-09-11 19:50 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S175
-Dernière session : S174 — cadence du fond et deux budgets distingués ; trois nouveaux tests
-Session suivante : S175 — S174-1/A50 : assembler frontière autonome et fond à cadence réduite
+Session en cours : aucune
+Dernière session : S175 — frontière autonome et fond décimé assemblés ; deux nouveaux tests
+Session suivante : S176 — S175-1 : bilan de réception B4 et prochain lot de construction
 
 *S160 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
 rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour.*
@@ -187,6 +187,22 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S175 — 2026-09-11 :** [FRONTIERE-FOND-DECIME-S175](docs/validation/FRONTIERE-FOND-DECIME-S175.md).
+**S174-1 réalisée sur véhicule subcritique àfond connu ; A50 partielle.** Bord ancré
+S169 assemblé au fond décimé,12s pour une sortie réelle de crête. Écart de champs
+appariés et témoins totaux àfrontières identiques. Huit tests dont deux nouveaux,
+288 évolutions résiduelles et54 témoins. Budget interpolé<=1,21e-15, prédictions
+signées<=1,35e-15, identité discrète<=2,23e-16. Fond exact seul préservé.
+ÀN240/a0,06/H8/tau1s : E0,131220 contre écart entre bords0,0006836, tous deux
+normalisés par0,05m ; pas de précision physique reçue par le seul bilan fermé.
+112 ADR,225 angles,257 leçons,18 invariants,6 SPEC,23 cas. L257, aucun nouvel angle.
+A225 reste qualifiée, A216/A217 inchangées ; pas de nouvel ADR ni runtime. Supports
+inchangés, workspace non rejoué (S163 :299/cinq ignorés).
+**Suite S176 : S175-1**, bilan B4/SPEC-004 des acquis S163–S175, limites véhicule1D,
+runtime, coûts, forces/perception ; identifier le prochain lot de construction exécutable
+sans ajouter par défaut une variante locale. BILAN-S145 relu S175 : B1/S63-1 ont leurs
+réceptions antérieures, la suite porte le retour àla construction après ces contrôles.
 
 **S174 — 2026-09-11 :** [CADENCE-FOND-S174](docs/validation/CADENCE-FOND-S174.md).
 **S173-1 réalisée sur instantanés connus ; A50 partielle.** Cadence tau0,25/1/2s,

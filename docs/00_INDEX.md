@@ -17,6 +17,13 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S175 :** [FRONTIERE-FOND-DECIME-S175](validation/FRONTIERE-FOND-DECIME-S175.md).
+S174-1 réalisée sur fond connu ; frontière ancrée assemblée, crête sortante et témoins
+appariés. Huit tests dont deux nouveaux ;288 évolutions et54 témoins. Budget interpolé
+à<=1,21e-15, prédictions à<=1,35e-15. A50 partielle, aucun runtime adopté.
+112 ADR,225 angles,257 leçons,18 invariants,6 SPEC,23 cas. L257 ; pas de nouvel angle.
+**Suite S176 : S175-1**, bilan de réception B4 puis prochain lot de construction.
+
 **S174 :** [CADENCE-FOND-S174](validation/CADENCE-FOND-S174.md).
 S173-1 réalisée sur instantanés connus ; budget interpolé fermé, erreur du flux de
 référence persistante àcadence fixée. Six tests dont trois nouveaux,192 évolutions et

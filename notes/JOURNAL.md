@@ -8697,3 +8697,36 @@ I-02/I-09 inchangés : les instantanés du véhicule ne décident pas le stockag
 cadence réduite. Comparer àl’extérieur analytique S174 ; préservation, transport et
 les deux budgets, sans résidu entrant inconnu. BILAN-S145 porté via B4 après B1/S63-1.
 Aucun arbitrage humain nouveau. Clôture avec jeton libre, commits et copies alignés.
+
+## S175 — 2026-09-11 — Recevoir le bord avec le témoin qui lui correspond
+
+**Entrée :** master ab35ea7 propre, quatre copies alignées ; S174-1/A50. Plan seul et
+jeton diffusé aux autres copies propres ; aucune copie créée ni supprimée.
+
+**Produit :** mode --assembly de fond_mobile, FRONTIERE-FOND-DECIME-S175. Durée12s,
+crête effectivement sortie de [30,90]. Frontières analytiques et ancrées S169, quatre
+sources ; chaque témoin discret retrouve un solveur total àla même frontière. Écart
+de champs appariés mesuré avant maximisation. Deux budgets propres àchaque fermeture.
+
+**Réception :** huit tests, dont deux nouveaux ;288 évolutions résiduelles et54 témoins.
+Budget Integrated<=1,21e-15, prédictions signées<=1,35e-15, identité discrète<=2,23e-16.
+Courant<=0,219722. Fond exact seul préservé àN240 (E3,19e-12). ÀN240/a0,06/H8/tau1s,
+E0,131220 et écart apparié du bord0,0006836, normalisés par0,05m. Soit65,61 % d’erreur
+par rapport àla perturbation initiale, contre0,342 % d’écart entre bords : la fermeture
+n’explique pas le défaut dominant de ce montage. Aucun classement universel annoncé.
+
+Constructeur intermédiaire devenu inutilisé retiré ; compilation exemple et tests
+revérifiée après ce nettoyage. Supports physiques et bibliothèques inchangés ; tests
+S173–S174 rejoués, workspace non rejoué (S163 :299 réussis/cinq ignorés).
+
+**Portée :** S174-1 réalisée sur véhicule subcritique àfond connu, A50 partielle.
+Pas de résidu entrant inconnu, de3D, de coût runtime, de force ou perception reçus.
+A225 reste qualifiée, A216/A217 inchangées ; aucun nouvel angle ni ADR ou runtime.
+L257 ajoutée ;112 ADR,225 angles,257 leçons,18 invariants,6 SPEC,23 cas. Invariants
+inchangés : la fermeture ne décide ni autorité gameplay ni stockage de B.
+
+**Suite S176 : S175-1**, bilan de réception B4/SPEC-004, puis prochain lot de construction
+exécutable. BILAN-S145 §6 relu : B1 et S63-1 ont leurs réceptions antérieures ; le prochain
+pas doit évaluer les acquis des contrôles S163–S175 avant une autre variante locale.
+La recommandation est portée par le jeton. Aucun arbitrage humain nouveau. Clôture avec
+jeton libre, commits et quatre copies alignés.

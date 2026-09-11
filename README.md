@@ -289,7 +289,7 @@ Le juge de fidélité est B4, bloqué ailleurs. Suite S159 : le facteur 2,5 qui 
 L'une croyait la dernière session être **S44** : l'ouvrir aurait recréé cent quinze sessions parallèles.
 Avance rapide d'abord, suppressions ensuite ; six copies ramenées à trois, aucune histoire perdue, et la
 procédure de fermeture écrite dans l'amorce. Suite S160 : le facteur 2,5, S158-1.
-112 ADR,225 angles,256 leçons,18 invariants,6 SPEC,23 cas.
+112 ADR,225 angles,257 leçons,18 invariants,6 SPEC,23 cas.
 **S162 : diagnostic de Stokes et portée de B4 corrigée.**
 [Résultats](docs/validation/ADDITIVITE-PROFONDE-S162.md),
 [ADR-112](docs/adr/ADR-112-la-superposition-independante-ne-recoit-pas-le-couplage.md).
@@ -348,3 +348,7 @@ Voir [FOND-MOBILE-S173](docs/validation/FOND-MOBILE-S173.md).
 son écart au flux analytique persiste àcadence fixée. Six tests,192 simulations et
 24 témoins ; suite : assemblage avec la frontière autonome. A50 partielle.
 Voir [CADENCE-FOND-S174](docs/validation/CADENCE-FOND-S174.md).
+**S175 :** frontière autonome assemblée au fond décimé, sortie de crête reçue.
+Huit tests,288 simulations et54 témoins ; effet du bord distingué du transport et
+des budgets. A50 partielle ; suite : bilan B4 et prochain lot de construction.
+Voir [FRONTIERE-FOND-DECIME-S175](docs/validation/FRONTIERE-FOND-DECIME-S175.md).
