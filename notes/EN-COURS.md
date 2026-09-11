@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S169 — en cours
+Session : S169 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S168-1/A224, assembler résidu équilibré en moyennes et frontière autonome.
 
@@ -68,7 +68,7 @@ Objectif : S168-1/A224, assembler résidu équilibré en moyennes et frontière 
 - [x] **P2** — dériver fermeture préservant Q et protocole, synchroniser les copies.
 - [x] **P3** — construire assemblage et témoins ; mesurer préservation, entrée/sortie et bilan.
 - [x] **P4** — réception, limites, suivi des actions.
-- [ ] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [x] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 

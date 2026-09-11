@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-11 06:25 +02:00
+JETON            : libre
+Battement        : 2026-09-11 06:26 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S169 — assemblage autonome et conservatif
-Dernière session : S168 — volume total fermé, moyennes et flux intégrés ; cinq nouveaux tests
-Session suivante : S169 — S168-1 : assemblage du bord autonome et du résidu équilibré en moyennes (A224)
+Session en cours : aucune
+Dernière session : S169 — assemblage autonome et conservatif reçu en 1D ; quatre nouveaux tests
+Session suivante : S170 — S169-1/A50 : source exacte, interpolée sur réseau décimé et omise
 
 *S160 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
 rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour.*
@@ -187,6 +187,22 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S169 — 2026-09-11 :** [ASSEMBLAGE-AUTONOME-S169](docs/validation/ASSEMBLAGE-AUTONOME-S169.md).
+**S168-1 réalisée, A224 traitée sur véhicule subcritique1D à Q exact connu.** Invariant
+sortant : écart au fond intérieur réancré au fond fantôme. Q entrant reste exactement
+intact ; ancien transfert total crée un résidu. Sortie sur repos et fond variable reçue.
+Volume fermé à<=1,90e-15 sur les flux réels de chaque variante ; Courant<=0,217650.
+L'erreur de transport domine celle du bord ; pas de seuil physique reçu.
+Quatre nouveaux tests,24 tests S165–S168 rejoués,60 évolutions release ; supports partagés,
+bibliothèques inchangées. Workspace299/cinq ignorés reçu S163, non relancé.
+112 ADR,224 angles,251 leçons,18 invariants,6 SPEC,23 cas. Aucun nouvel ADR ou angle.
+**Suite S170 : S169-1/A50**, source moyenne exacte contre interpolation sur réseau décimé
+et omission, sur fond figé asymétrique. Raffiner indépendamment solveur et réseau source,
+mesurer dérive et bilan. Paramètre direct de SPEC-004 §6.2 et PLAN-BENCHMARK §B4.
+A50 reste partielle ; A216/A217 inchangées. BILAN-S145 porté via B4 après B1/S63-1.
+L251 : transporter l'écart en changeant sa référence. Pas de3D, choc, eau sèche ni résidu
+entrant inconnu reçu ; aucun schéma runtime adopté. Copie principale, copies synchronisées.
 
 **S168 — 2026-09-11 :** [VOLUME-MOYEN-S168](docs/validation/VOLUME-MOYEN-S168.md).
 **S167-1 réalisée, A223 traitée sur véhicule à fond connu.** Moyennes spatiales de Q

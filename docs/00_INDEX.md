@@ -17,6 +17,13 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S169 :** [ASSEMBLAGE-AUTONOME-S169](validation/ASSEMBLAGE-AUTONOME-S169.md).
+**S168-1 réalisée, A224 traitée sur véhicule subcritique1D à Q exact connu.** Le bord
+transfère l'écart au fond, préserve Q, laisse sortir et ferme le volume à<=1,90e-15.
+Quatre nouveaux tests,24 précédents rejoués,60 évolutions. Erreur intérieure encore dominante.
+112 ADR,224 angles,251 leçons,18 invariants,6 SPEC,23 cas. Aucun ADR ni runtime adopté.
+**Suite S170 : S169-1/A50**, source décimée/interpolée contre exacte et omise selon B4.
+
 **S168 :** [VOLUME-MOYEN-S168](validation/VOLUME-MOYEN-S168.md). **S167-1 réalisée,
 A223 traitée sur véhicule à fond connu.** Moyennes et flux intégrés indépendamment,
 volume fermé à<=2,14e-15 ; Q exact intact, perturbation et Q figé asymétrique reçus.

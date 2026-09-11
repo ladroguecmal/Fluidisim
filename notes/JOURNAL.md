@@ -8480,3 +8480,43 @@ Aucun ADR nouveau, schéma runtime adopté ou arbitrage humain demandé.
 en moyennes : préserver Q variable à d=0, entrée connue et sortie, bilan sur flux réel.
 Les fantômes de cette session viennent encore de T exact. BILAN-S145 porté par poursuite
 B4 après B1/S63-1. État final propre, jeton libre, copies synchronisées.
+
+---
+
+## S169 — 2026-09-11 — Le bord transporte l'écart, le volume ferme sur ses flux réels
+
+**Entrée :** master db3c0e3 propre, quatre copies alignées. Suite S168-1/A224 ; plan seul
+avant construction, copies synchronisées au jeton occupé. Aucune créée ni supprimée.
+
+**Produit :** ASSEMBLAGE-AUTONOME-S169, exemple assemblage_autonome.rs, callback de
+frontière du résidu équilibré. Quadrature S168 et fermeture S166 extraites en supports
+partagés, sans duplication. Aucune bibliothèque ni dépendance modifiée.
+
+**S168-1 réalisée, A224 traitée sur véhicule subcritique1D à Q exact connu.** Transfert
+sortant R(T_int)-R(Q_int), réancré à Q fantôme ; invariant entrant de Q. Formulation
+incrémentale conservant exactement Q à d=0, aucun seuil de remise à zéro.
+
+**Résultats :** fond entrant exactement intact ; ancien transfert total crée un résidu
+normalisé2,316569e-4 à N240. Sortie sur repos, E candidat0,175046, écart au témoin5,004190e-4.
+Sortie sur fond variable, E0,051007, écart6,978624e-5. L'erreur de transport domine ;
+rapportée à la perturbation initiale de1 cm, elle reste25,5 % dans ce dernier cas.
+
+Volume fermé sur les flux effectivement utilisés par chaque variante à<=1,90e-15.
+Échange cumulé maximal0,7096071 m² sur repos et0,8509321 m² sur fond variable à N240.
+Courant<=0,217650. L'écart d'invariant entrant analytique omis reste mesuré non nul,
+notamment à cause des moyennes ; aucun extérieur résiduel arbitraire n'est reconstitué.
+
+**Réception :** quatre nouveaux tests,24 tests antérieurs reçus (8 S165,6 S166,5 S167,
+5 S168) après modification/extraction des supports. Campagne15 montages/quatre voies,
+60 évolutions : trois grilles, gauche N240, demi-pas N240. Aucun échec. Workspace299 /
+cinq ignorés reçu S163, non relancé, bibliothèques inchangées. Pas de coût runtime reçu.
+
+**Suivi :** L251, A224 traitée ; aucun nouvel angle, aucun ADR. A50 partielle,
+A216/A217 inchangées. 112 ADR,224 angles,251 leçons,18 invariants,6 SPEC,23 cas.
+I-01/04/12/14/15 inchangés ; pas de réception3D, choc, eau sèche ou seuil physique.
+
+**Suite S170 : S169-1/A50**, source exacte contre interpolée sur réseau décimé et omise,
+fond figé asymétrique. Raffiner séparément solveur et source, mesurer dérive et bilan.
+Cette suite est le paramètre explicitement demandé par SPEC-004 §6.2 et B4, après les
+contrôles du couplage. BILAN-S145 porté par poursuite B4 après B1/S63-1.
+État final propre, jeton libre, copies synchronisées ; aucun arbitrage humain nouveau.

@@ -3914,3 +3914,15 @@ par annulation des termes que l'on veut éprouver.
 
 Préserver l'indépendance des chemins de calcul du témoin et du candidat, et vérifier
 qu'au moins un cas fait travailler chaque terme du bilan. Voir VOLUME-MOYEN-S168.
+
+## L251 — Transporter un écart demande de changer son point de référence
+
+*(S169)* Copier un invariant total de la cellule intérieure vers le fantôme crée une
+perturbation sur un fond spatialement variable. Le fond exact était différent aux deux
+positions. Copier l'écart à Q intérieur, puis le réancrer sur Q fantôme, préserve d=0.
+
+Une fermeture correcte pour le total n'est donc pas automatiquement équilibrée pour
+un résidu. Tester l'assemblage sur un fond variable sans perturbation avant les scènes
+complexes ; conserver l'ancien transfert comme contre-épreuve. Préservation, qualité
+et conservation restent indépendantes : même la fermeture fautive ferme le volume.
+Voir ASSEMBLAGE-AUTONOME-S169.
