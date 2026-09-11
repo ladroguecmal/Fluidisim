@@ -17,6 +17,13 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S168 :** [VOLUME-MOYEN-S168](validation/VOLUME-MOYEN-S168.md). **S167-1 réalisée,
+A223 traitée sur véhicule à fond connu.** Moyennes et flux intégrés indépendamment,
+volume fermé à<=2,14e-15 ; Q exact intact, perturbation et Q figé asymétrique reçus.
+Cinq nouveaux tests, 30 évolutions ; transport encore imparfait. A224/L250, aucun ADR nouveau.
+112 ADR,224 angles,250 leçons,18 invariants,6 SPEC,23 cas. Supports/bibliothèques inchangés,
+workspace299/cinq ignorés reçu S163. **Suite S169 : S168-1**, assemblage avec frontière autonome.
+
 **S167 :** [FOND-PRESERVE-S167](validation/FOND-PRESERVE-S167.md). **S166-1 réalisée,
 A222 traitée sur véhicule à source connue.** Q exact intact, perturbation évolutive et
 source physique du fond figé reçues. Cinq tests nouveaux, six S166 et huit S165 reçus ;

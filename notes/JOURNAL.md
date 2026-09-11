@@ -8433,3 +8433,50 @@ ni seuil de qualité ni arbitrage humain. Pas de bord autonome, 3D, choc ou eau 
 flux physiques intégrés en temps ; fond exact puis perturbation, montage asymétrique.
 BILAN-S145 porté par poursuite B4 après B1/S63-1. P4 amendé avant clôture pour inclure
 son battement réellement relevé. État final propre, jeton libre, copies synchronisées.
+
+---
+
+## S168 — 2026-09-11 — Le volume ferme par deux intégrations indépendantes
+
+**Entrée :** master 7d86eb2 propre, quatre copies alignées. Suite S167-1/A223, plan seul
+avant travail, copies propres avancées au jeton occupé. Aucune copie créée ni supprimée.
+
+**Produit :** [VOLUME-MOYEN-S168](../docs/validation/VOLUME-MOYEN-S168.md), nouvel exemple
+`volume_moyen.rs`. Moyennes spatiales de Q et flux physiques intégrés dans le temps par
+quadratures adaptatives indépendantes ; aucun recalage ni flux inféré de l'état avancé.
+Support résiduel S167 inchangé, aucune bibliothèque ni dépendance nouvelle.
+
+**S167-1 réalisée, A223 traitée sur véhicule à fond connu.** Volume total fermé à
+<=2,14e-15 relatif, Q exact intact et d nul. Trois cas : fond exact, perturbation non
+nulle d'une autre amplitude de la même famille, fond figé. Centre55 m pour casser
+la symétrie de S167 ; source du fond figé moyennée par différence de flux aux faces.
+
+**Les deux corrections sont nécessaires.** À N240, fond exact : centres + flux RK2
+7,869e-8 ; centres + intégré7,284e-8 ; moyennes + RK2 5,845e-9 ; moyennes + intégré
+1,178e-15. Le demi-pas divise par quatre le défaut temporel, pas le défaut spatial.
+Tolérance de quadrature resserrée de1e-12 à1e-13 : volume9,410e-16, transport inchangé
+aux chiffres publiés. Les deux intégrales ne se donnent pas leurs résultats.
+
+**Le témoin asymétrique est actif.** Maximum absolu du cumul de flux physique net du
+fond figé5,392160e-5 m², non nul. Sa source ponctuelle laisse5,340e-9 de défaut relatif
+à N240 ; sa source moyenne ferme à l'arrondi. Le bilan nul S167 était dû à la symétrie.
+
+**La conservation ne reçoit pas le transport.** Erreur perturbation normalisée par0,05 :
+0,050438 →0,031238 →0,017796 aux trois grilles. À N240, encore15,6 % rapportés à la
+perturbation de1 cm. Erreur fond figé0,226119 →0,135612 →0,075423. Aucun seuil de qualité.
+
+**Réception :** cinq tests nouveaux réussis : quadrature, identité locale (hauteur/débit),
+fond exact, fond figé asymétrique, perturbation. Campagne15 montages/30 évolutions reçue,
+trois grilles, demi-pas et précision resserrée N240. Les deux diagnostics temporels d'un
+même état ne sont pas comptés comme deux évolutions. Courant<=0,217650.
+Supports inchangés, tests précédents non rejoués : S165/S166/S167 reçus S167 ; workspace
+299/cinq ignorés reçu S163. Quadrature de banc, coût runtime non reçu.
+
+**Suivi :** A224/L250 ajoutées ; A50 partielle, A216/A217 inchangées. I-01/04/12/14/15
+relus et inchangés. 112 ADR,224 angles,250 leçons,18 invariants,6 SPEC,23 cas.
+Aucun ADR nouveau, schéma runtime adopté ou arbitrage humain demandé.
+
+**Suite S169 : S168-1/A224**, assemblage du bord autonome S166 et du résidu équilibré
+en moyennes : préserver Q variable à d=0, entrée connue et sortie, bilan sur flux réel.
+Les fantômes de cette session viennent encore de T exact. BILAN-S145 porté par poursuite
+B4 après B1/S63-1. État final propre, jeton libre, copies synchronisées.

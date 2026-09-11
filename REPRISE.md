@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-11 06:11 +02:00
+JETON            : libre
+Battement        : 2026-09-11 06:14 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S168 — volume total et moyennes
-Dernière session : S167 — fond exact préservé, source physique reçue ; cinq nouveaux tests
-Session suivante : S168 — S167-1 : volume total, moyennes de cellules et flux intégrés (A223)
+Session en cours : aucune
+Dernière session : S168 — volume total fermé, moyennes et flux intégrés ; cinq nouveaux tests
+Session suivante : S169 — S168-1 : assemblage du bord autonome et du résidu équilibré en moyennes (A224)
 
 *S160 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
 rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour.*
@@ -187,6 +187,25 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S168 — 2026-09-11 :** [VOLUME-MOYEN-S168](docs/validation/VOLUME-MOYEN-S168.md).
+**S167-1 réalisée, A223 traitée sur véhicule à fond connu.** Moyennes spatiales de Q
+et flux physiques intégrés en temps calculés indépendamment. Le volume total ferme
+à<=2,14e-15 relatif ; Q exact reste intact. Perturbation non nulle et fond figé asymétrique
+reçus, flux net non nul constaté. Aucune compensation d'état ni flux inféré du volume.
+À N240, moyenne seule + flux RK2 laisse5,845e-9 ; le flux intégré l'élimine. Les centres
+avec flux intégré gardent7,284e-8 : les deux quadratures sont nécessaires. L250.
+L'erreur de transport de la perturbation reste15,6 % de son amplitude initiale à N240.
+Cinq nouveaux tests, 15 montages/30 évolutions release reçus ; Courant<=0,217650.
+112 ADR,224 angles,250 leçons,18 invariants,6 SPEC,23 cas. Aucun ADR ni runtime adopté.
+Supports et bibliothèques inchangés ; tests S165/S166/S167 reçus S167 non rejoués,
+workspace299/cinq ignorés reçu S163. Quadratures de banc, coût runtime non reçu.
+**Suite S169 : S168-1/A224**, assembler bord autonome S166 et résidu équilibré en moyennes.
+Dériver la préservation de Q variable au bord quand d=0 ; entrée connue et perturbation
+sortante, bilan fondé sur le flux réellement utilisé. S168 fournit encore les fantômes T
+exacts : l'assemblage n'est pas reçu. Pas d'extérieur résiduel inconnu reconstitué.
+A50 partielle, A216/A217 inchangées ; BILAN-S145 porté par poursuite B4 après B1/S63-1.
+Copie principale, copies synchronisées, aucune créée ni supprimée ; ni 3D, choc ou eau sèche reçu.
 
 **S167 — 2026-09-11 :** [FOND-PRESERVE-S167](docs/validation/FOND-PRESERVE-S167.md).
 **S166-1 réalisée, A222 traitée sur véhicule à source connue.** Flux résiduel D(Q,d)

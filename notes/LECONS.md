@@ -3898,3 +3898,19 @@ Même après cette correction, l'exactitude ponctuelle ne donne pas la clôture 
 Un bilan nul par symétrie ne tranche pas cette question : le fond figé de S167 a un
 flux net nul et une source intégrée nulle. La réception suivante doit casser cette
 symétrie. Voir FOND-PRESERVE-S167 et A223.
+
+## L250 — Recevoir un bilan sans le fabriquer
+
+*(S168)* Les moyennes du fond et les flux temporels sont intégrés indépendamment,
+respectivement dans l'espace et dans le temps. Leur accord à l'arrondi reçoit la
+conservation. Déduire le flux de la variation de volume aurait donné le même zéro,
+sans vérifier la physique ni les quadratures.
+
+Les contre-épreuves séparent les causes : avec les centres, intégrer mieux le temps
+ne supprime pas le défaut spatial ; avec les moyennes, deux temps RK2 laissent un
+défaut temporel qui diminue par quatre au demi-pas. Les deux corrections sont nécessaires.
+Enfin le fond figé asymétrique rend son flux net non nul : le bilan ne peut plus passer
+par annulation des termes que l'on veut éprouver.
+
+Préserver l'indépendance des chemins de calcul du témoin et du candidat, et vérifier
+qu'au moins un cas fait travailler chaque terme du bilan. Voir VOLUME-MOYEN-S168.

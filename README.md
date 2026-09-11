@@ -289,7 +289,7 @@ Le juge de fidélité est B4, bloqué ailleurs. Suite S159 : le facteur 2,5 qui 
 L'une croyait la dernière session être **S44** : l'ouvrir aurait recréé cent quinze sessions parallèles.
 Avance rapide d'abord, suppressions ensuite ; six copies ramenées à trois, aucune histoire perdue, et la
 procédure de fermeture écrite dans l'amorce. Suite S160 : le facteur 2,5, S158-1.
-112 ADR,223 angles,249 leçons,18 invariants,6 SPEC,23 cas.
+112 ADR,224 angles,250 leçons,18 invariants,6 SPEC,23 cas.
 **S162 : diagnostic de Stokes et portée de B4 corrigée.**
 [Résultats](docs/validation/ADDITIVITE-PROFONDE-S162.md),
 [ADR-112](docs/adr/ADR-112-la-superposition-independante-ne-recoit-pas-le-couplage.md).
@@ -320,3 +320,7 @@ préserver ce fond. Voir [BORD-AUTONOME-S166](docs/validation/BORD-AUTONOME-S166
 La source physique d'un fond inexact reste nécessaire. Cinq nouveaux tests et45 évolutions ;
 suite : fermer le volume total avec moyennes et flux cohérents.
 Voir [FOND-PRESERVE-S167](docs/validation/FOND-PRESERVE-S167.md).
+
+**S168 :** volume total fermé à l'arrondi par moyennes de cellules et flux intégrés
+indépendamment. Cinq nouveaux tests et 30 évolutions reçus. Suite : réunir ce calcul
+et la frontière autonome. Voir [VOLUME-MOYEN-S168](docs/validation/VOLUME-MOYEN-S168.md).

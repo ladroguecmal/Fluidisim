@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S168 — en cours
+Session : S168 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S167-1/A223, fermer le volume total par moyennes et flux physiques intégrés cohérents.
 
@@ -68,7 +68,7 @@ Objectif : S167-1/A223, fermer le volume total par moyennes et flux physiques in
 - [x] **P2** — dériver bilan et quadratures indépendantes ; protocole et copies synchronisées.
 - [x] **P3** — construire et mesurer fond exact, perturbation et fond figé asymétriques.
 - [x] **P4** — réception, limites, suivi des actions.
-- [ ] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [x] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
