@@ -3865,3 +3865,20 @@ l'absence d'information dans le système réel.
 Le montage avec compensation extérieure est volontairement non local : il reçoit le
 changement de variables, pas la possibilité de retrouver un extérieur arbitraire. Cette
 limite appartient à l'énoncé du banc. Voir FRONTIERE-LOCALE-S165 et A221.
+
+## L248 — Un témoin qui partage le schéma ne voit pas ses défauts communs
+
+*(S166)* La fermeture autonome donne un écart au témoin de 0,15 % de l'amplitude,
+mais l'écart à l'onde analytique atteint 31 % au même maillage. Vers 12 s, les deux
+calculs ont perdu 13 % de hauteur de crête. Le bord est proche du témoin parce qu'ils
+partagent le calcul intérieur dissipatif, pas parce que l'onde est fidèlement transportée.
+
+Une référence du même schéma isole utilement un changement de variables ou une frontière.
+Elle ne qualifie pas ce que les deux calculs ont en commun. Garder deux comparaisons :
+l'une contre le même calcul pour localiser le défaut, l'autre contre une référence
+physique indépendante pour mesurer la justesse. Ne pas soustraire leurs maxima : comparer
+les champs point à point avant de prendre la norme.
+
+Ici la référence indépendante est une onde simple non linéaire, dérivée des invariants
+et bornée avant choc. Elle montre aussi que le fond prescrit peut hériter des défauts du
+solveur total alors qu'il était exact à l'entrée. Voir BORD-AUTONOME-S166 et A222.

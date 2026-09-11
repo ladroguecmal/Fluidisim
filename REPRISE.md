@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-10 21:07 +02:00
+JETON            : libre
+Battement        : 2026-09-11 05:52 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S166 — fermeture autonome du bord
-Dernière session : S165 — frontière locale exercée en 1D ; cinq nouveaux tests exemple
-Session suivante : S166 — S165-1 : fermeture sans oracle, entrées et sorties (A221)
+Session en cours : aucune
+Dernière session : S166 — fermeture autonome reçue en 1D subcritique ; six nouveaux tests
+Session suivante : S167 — S166-1 : préserver le fond exact, distinguer ses défauts physique et numérique (A222)
 
 *S160 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
 rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour.*
@@ -187,6 +187,26 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S166 — 2026-09-10 :** [BORD-AUTONOME-S166](docs/validation/BORD-AUTONOME-S166.md).
+**S165-1 réalisée, A221 traitée subcritique 1D à entrée connue.** Fermeture autonome :
+invariant entrant fourni par Q, sortant par l'intérieur aux deux étages ; états supercritiques
+refusés. Onde simple non linéaire avant choc dérivée, entrée/sortie dans les deux directions.
+Six nouveaux tests et huit tests S165 reçus ; 32 montages/128 évolutions release reçus.
+À N240/a0,05, entrée : écart de frontière 0,001506 normalisé, erreur au continu 0,314832.
+L'extrapolation manque presque toute l'entrée. La fermeture caractéristique laisse aussi sortir.
+**A222 : le fond exact hérite des défauts du schéma total.** Vers 12 s, perte de crête
+0,127756 normalisée, identique au témoin analytique aux bords. Le défaut dominant est intérieur.
+L'identité discrète S164 reste reçue ; elle ne préserve pas à elle seule le fond analytique.
+**L248** : un témoin partageant le schéma ne voit pas ses défauts communs.
+112 ADR,222 angles,248 leçons,18 invariants,6 SPEC,23 cas. Aucun ADR ni seuil physique nouveau.
+Bibliothèques inchangées ; workspace 299/cinq ignorés reçu S163, non relancé ; S165 rejoué.
+**Suite S167 : S166-1/A222**, préserver d=0 sur fond exact puis mesurer une perturbation,
+en distinguant défaut physique du fond approximatif et résidu numérique. Ne pas imposer
+l'identité au solveur total comme réception du nouveau candidat ; garder cette comparaison.
+A50 partielle, A216/A217 inchangées. BILAN-S145 porté via poursuite B4 après B1/S63-1.
+Copie principale ; quatre copies synchronisées, aucune créée ni supprimée. Ni δ 3D ni
+extérieur résiduel inconnu ni régime supercritique reçu ; B4 général reste ouvert.
 
 **S165 — 2026-09-10 :** [FRONTIERE-LOCALE-S165](docs/validation/FRONTIERE-LOCALE-S165.md).
 **S164-1 réalisée, A220 traitée sur véhicule local 1D.** Fenêtre [30,90] m dans le canal

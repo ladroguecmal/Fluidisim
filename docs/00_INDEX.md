@@ -17,6 +17,13 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S166 :** [BORD-AUTONOME-S166](validation/BORD-AUTONOME-S166.md). **S165-1 réalisée,
+A221 traitée subcritique 1D à entrée connue.** Fermeture caractéristique autonome reçue
+dans les deux sens ; six nouveaux tests, huit S165 rejoués, 32 montages/128 évolutions.
+L'erreur intérieure domine le défaut du bord : source discrète et fond exact suivis A222/L248.
+112 ADR,222 angles,248 leçons,18 invariants,6 SPEC,23 cas. A50 partielle, aucun ADR nouveau.
+Workspace 299/cinq ignorés reçu S163, non relancé. **Suite S167 : S166-1**, préservation du fond exact.
+
 **S165 :** [FRONTIERE-LOCALE-S165](validation/FRONTIERE-LOCALE-S165.md). **S164-1 réalisée,
 A220 traitée sur véhicule local 1D.** Oracle aux étages RK2 reçu à <=1,12e-13 ; fond seul
 échoue malgré un bilan de flux à l'arrondi. 54 montages release, cinq nouveaux tests propres

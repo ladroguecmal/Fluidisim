@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S166 — en cours
+Session : S166 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S165-1/A221, fermeture autonome avec information entrante et sortante distincte.
 
@@ -68,7 +68,7 @@ Objectif : S165-1/A221, fermeture autonome avec information entrante et sortante
 - [x] **P2** — dériver caractéristiques et référence analytique, protocole avant mesure ; copies synchronisées.
 - [x] **P3** — implémenter fermeture aux étages, comparer entrée/sortie et raffinements.
 - [x] **P4** — réception, résultats, limites et suivi des actions.
-- [ ] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
+- [x] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
 
 ### Notes de reprise
 
@@ -85,3 +85,6 @@ Bilan <=2,04e-15, Courant <=0,214735. Aucun runtime modifié.
 
 P4 : A221 traitée subcritique 1D entrée connue ; A222/S166-1 distingue source physique
 et résidu numérique du fond. A50 partielle, aucun ADR. Résultats publiés dans BORD-AUTONOME.
+
+P5 : clôture reprise le 2026-09-11 après interruption ; seules les écritures finales
+restaient non committées. Six fichiers retrouvés, aucun travail concurrent constaté.

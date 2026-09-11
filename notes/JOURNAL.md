@@ -8338,3 +8338,51 @@ de la sortie issue de l'intérieur ; comparer extrapolation et fermeture caract�
 cas sortant puis onde de fond entrante. L'extérieur résiduel arbitraire reste inconnu.
 BILAN-S145 porté par poursuite B4 après B1/S63-1 ; aucun arbitrage humain nouveau.
 État final propre, jeton libre, quatre copies synchronisées ; aucune créée ni supprimée.
+
+---
+
+## S166 — 2026-09-10 — Le bord autonome fonctionne, le fond hérite de la dissipation
+
+**Entrée :** master 8ecf20b propre, quatre copies alignées, aucune branche vivante avancée.
+Suite S165-1/A221 ; plan seul avant travail, copies synchronisées au jeton occupé.
+Aucune copie créée ni supprimée. Corpus et invariants lus dans cette conversation.
+
+**Produit :** [BORD-AUTONOME-S166](../docs/validation/BORD-AUTONOME-S166.md), sonde
+`bord_autonome.rs`, extension du support local S165 pour fermeture aux deux étages RK2.
+R±=u±2sqrt(gh) dérivés ; invariant entrant pris dans Q extérieur, sortant dans l'intérieur.
+États non finis/secs/supercritiques refusés. Aucune bibliothèque ni dépendance modifiée.
+
+**S165-1 réalisée, A221 traitée sur véhicule subcritique 1D à entrée connue.** Référence
+non linéaire d'onde simple avant choc, par inversion des caractéristiques ; conservation
+vérifiée par différences centrées. Comparaisons au témoin analytique discret et au continu
+séparées. Entrée/sortie dans les deux directions, amplitudes 0,02/0,05 m, trois grilles
+et contrôle au demi-pas N240 : 32 montages, quatre frontières, 128 évolutions.
+
+**Mesure décisive N240/a0,05 :** entrée, écart caractéristique au témoin 0,001505704
+normalisé, mais erreur au continu 0,314832. L'extrapolation manque presque toute l'entrée
+(erreur 0,998353). Sortie, écart caractéristique 0,000501318 contre 0,000983095 pour
+extrapolation et 0,01206785 pour fond seul. Aucun coefficient de réflexion inféré.
+
+**L'erreur intérieure domine.** Le diagnostic de crête ajouté après première campagne
+mesure à 12 s une perte de 0,1277563 à N240 pour le témoin comme pour la fermeture.
+La perte descend de 0,215615 à 0,071383 entre N120 et N480. Le fond analytique entrant
+est pourtant exact et d initial nul : l'identité au total transmet sa dissipation.
+Ce constat n'invalide pas l'identité S164 ; il limite ce qu'elle reçoit. A222 et L248.
+
+**Réception :** six nouveaux tests S166 réussis, huit tests S165 rejoués et réussis après
+extension du support partagé ; campagne finale 128 évolutions reçue. Bilan ouvert
+<=2,04e-15, Courant <=0,214735. Symétrie gauche/droite reçue à 1e-10. Workspace 299 tests /
+cinq ignorés reçu S163, non relancé : bibliothèques inchangées. Aucun seuil de qualité.
+
+**Limites :** pas de δ 3D, choc, régime supercritique, information résiduelle extérieure
+inconnue, absorbeur ou décision d'API runtime. A50 partielle, A216/A217 inchangées ;
+I-01/04/12/14/15 inchangés. 112 ADR,222 angles,248 leçons,18 invariants,6 SPEC,23 cas.
+
+**Suite S167 : S166-1/A222**, préserver d=0 sur un fond exact, puis mesurer une perturbation
+ajoutée ; distinguer défaut physique du fond approximatif et résidu numérique. Comparer
+à S164 sans exiger l'identité au solveur total comme critère du nouveau candidat.
+BILAN-S145 porté par poursuite B4 après B1/S63-1. Aucun arbitrage humain ni ADR nouveau.
+État final propre, jeton libre et quatre copies synchronisées, aucune créée ni supprimée.
+
+Clôture S166 achevée le 2026-09-11 : interruption pendant P5, six fichiers de rituel
+retrouvés non committés ; état réel revérifié, aucun changement concurrent constaté.
