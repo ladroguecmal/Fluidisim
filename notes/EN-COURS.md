@@ -65,7 +65,7 @@ Objectif : S167-1/A223, fermer le volume total par moyennes et flux physiques in
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seul.
-- [ ] **P2** — dériver bilan et quadratures indépendantes ; protocole et copies synchronisées.
+- [x] **P2** — dériver bilan et quadratures indépendantes ; protocole et copies synchronisées.
 - [ ] **P3** — construire et mesurer fond exact, perturbation et fond figé asymétriques.
 - [ ] **P4** — réception, limites, suivi des actions.
 - [ ] **P5** — rituel de fin, journal/leçons/index/décomptes, reprise et copies.
@@ -76,3 +76,5 @@ Master 7d86eb2 propre, quatre copies alignées ; S167 terminée. Corpus lu dans 
 112 ADR,223 angles,249 leçons,18 invariants,6 SPEC,23 cas. Bibliothèques inchangées.
 S167 cinq tests, S166 six, S165 huit reçus ; workspace299/cinq ignorés reçu S163.
 BILAN-S145 porté par poursuite B4 ; pas de schéma runtime adopté.
+P2 : VOLUME-MOYEN-S168, intégrations indépendantes de Q en espace et F(Q) en temps.
+Centre55m, trois cas, bilan du fond figé par différences de flux et non dérivées ponctuelles.
