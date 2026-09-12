@@ -17,6 +17,24 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S191 — 2026-09-12 : profil B4 reçu avec projection**, ADR-121.
+**S190-1/S189-1 réalisées sur véhicule de banc** : projecteur D/G reçu contre matrice
+indépendante, 3 tests debug/release. Profil **14×14×8 / extrapolation 80 ms** conservé :
+budget **1,371947 %**, borne avec résidu **1,374540 %**, erreur avec réserves
+**0,948047 %**, sous les **2 % inchangés**. **16 couples reçus / 4 refusés**, 160 ms
+refusé partout ; 20384 évaluations de source, réduction13,46 sur la fenêtre, pas un coût CPU.
+Deux campagnes release identiques, empreinte **0x52d7645d4548ebb2** ; divergence
+normalisée max4,922e-8, pression max44 itérations. Tests workspace331/cinq ignorés
+reçus S190 non rejoués ; bibliothèques et supports historiques inchangés.
+**ADR-121** : projection fixe linéaire ; borne algébrique de composition avec résidu,
+la somme seule d'ADR-119 reste une enveloppe mesurée. **L270**, aucun nouvel angle.
+**Suite S192 : S191-1**, construire une tranche2D à surface libre et recevoir une onde
+de gravité avant comparaison perturbatif/total. Bords algébriques S191, surface libre
+et B4 complet non reçus ; A50 partielle. File plurielle relue, autres chantiers conservés.
+**121 ADR,233 angles,270 leçons,18 invariants,6 SPEC,23 cas.**
+Voir [PROJECTION-B4-S191](validation/PROJECTION-B4-S191.md), [mesures](validation/PROJECTION-B4-S191-MESURES.md), [ADR-121](adr/ADR-121-la-projection-lineaire-et-la-borne-de-composition.md).
+
+
 **S190 — 2026-09-12 : tolérance B4 fixée à 2 % par l'utilisateur**, ADR-120.
 Attente du critère close ; volet d'échantillonnage source reçu sur le véhicule S185–S189.
 Profil de banc choisi : **14×14×8 nœuds gradués, extrapolation 80 ms** ; budget
@@ -1028,7 +1046,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`registres/BILAN-S69.md`](registres/BILAN-S69.md) | **bilan d'avancement** — ~85 % comme corpus de conception, **~15 % comme système** ; **onze cas sur 23 et onze bancs sur onze attendent une couche non écrite** ; **B1 est le seul banc exécutable et n'a jamais été lancé** |
 | [`registres/PRESCRIPTIONS-S63.md`](registres/PRESCRIPTIONS-S63.md) | **les prescriptions non éprouvées** — trois genres, dont un seul se vérifie ; **trois recettes mises à l'épreuve, trois fautives** ; les préalables de B2 périmés depuis quarante sessions (**A185**) |
 | [`registres/AUDIT-REFERENCES-S62.md`](registres/AUDIT-REFERENCES-S62.md) | **ce qu'une référence peut voir bouger** — 41 références, trois degrés, **une seule tautologie** ; `Hs` aveugle à `hs` et gouverné par sa fenêtre, première mesure d'**A102** ; la fenêtre était hors du scénario (**A184**) |
-| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **233 identifiants au 2026-09-12 (S190)** — le décompte se vérifie contre le fichier, il ne se recopie pas ; avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
+| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **233 identifiants au 2026-09-12 (S191)** — le décompte se vérifie contre le fichier, il ne se recopie pas ; avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
 | [`registres/FORK-S22-S26.md`](registres/FORK-S22-S26.md) | **le second fork** — constat, carte de renumérotation complète, la règle manquante, et ce qui reste à fusionner |
 | [`registres/AUDIT-ASSERTIONS-S29.md`](registres/AUDIT-ASSERTIONS-S29.md) | **ce que chaque assertion peut voir** — 23 cas classés, 5 fautifs, 1 mesure du harnais retirée ; **réécriture S30 sans aucun seuil inventé** |
 | [`registres/AUDIT-REPLIS-S44.md`](registres/AUDIT-REPLIS-S44.md) | **les valeurs de repli, inventoriées** — 49 recensées, deux fautives ; *quand la grandeur est un écart, zéro est son meilleur point* |
@@ -1090,7 +1108,7 @@ parfaitement stable ne pouvait pas distinguer.
 
 ## État d'avancement
 
-**État actif S190** : critère B4 fixé à 2 %, profil de source reçu localement ;
+**État actif S191** : critère B4 fixé à 2 %, profil de source reçu aussi sous projection ;
 B1/B2/B4 restent partiels, aucun banc complet. Voir le résultat en tête de cet index
 et la [file plurielle](registres/QUESTIONS-OUVERTES.md#file-active-s190--2026-09-12).
 

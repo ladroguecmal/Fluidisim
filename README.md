@@ -507,3 +507,21 @@ forces et perception. A50 partielle ; N universel et seuil de bascule non dédui
 File plurielle des autres chantiers portée par REPRISE §6.7 pour A211.
 **120 ADR, 233 angles, 269 leçons, 18 invariants, 6 SPEC, 23 cas** ; aucun banc complet.
 Voir [réception B4 à 2 %](docs/validation/B4-TOLERANCE-S190.md) et [ADR-120](docs/adr/ADR-120-b4-tolerance-de-deux-pour-cent.md).
+
+
+**S191 — 2026-09-12 : profil B4 reçu avec projection**, ADR-121.
+**S190-1/S189-1 réalisées sur véhicule de banc** : projecteur D/G reçu contre matrice
+indépendante, 3 tests debug/release. Profil **14×14×8 / extrapolation 80 ms** conservé :
+budget **1,371947 %**, borne avec résidu **1,374540 %**, erreur avec réserves
+**0,948047 %**, sous les **2 % inchangés**. **16 couples reçus / 4 refusés**, 160 ms
+refusé partout ; 20384 évaluations de source, réduction13,46 sur la fenêtre, pas un coût CPU.
+Deux campagnes release identiques, empreinte **0x52d7645d4548ebb2** ; divergence
+normalisée max4,922e-8, pression max44 itérations. Tests workspace331/cinq ignorés
+reçus S190 non rejoués ; bibliothèques et supports historiques inchangés.
+**ADR-121** : projection fixe linéaire ; borne algébrique de composition avec résidu,
+la somme seule d'ADR-119 reste une enveloppe mesurée. **L270**, aucun nouvel angle.
+**Suite S192 : S191-1**, construire une tranche2D à surface libre et recevoir une onde
+de gravité avant comparaison perturbatif/total. Bords algébriques S191, surface libre
+et B4 complet non reçus ; A50 partielle. File plurielle relue, autres chantiers conservés.
+**121 ADR,233 angles,270 leçons,18 invariants,6 SPEC,23 cas.**
+Voir [réception projetée S191](docs/validation/PROJECTION-B4-S191.md).

@@ -9766,3 +9766,58 @@ un comptage des seuls noms en gras en manquait quatre. Aucun identifiant absent.
 **Arbitrage de tolérance : clos**, sans nouvelle question humaine.
 Clôture : jeton libre ; trois copies revérifiées propres au commit d'entrée, à avancer
 sur ce commit final. Aucune copie créée ni supprimée ; aucune branche unique supprimée.
+
+## S191 — 2026-09-12 — Le profil B4 tient sous projection
+
+**Entrées.** « Continue », suite S190-1/S189-1 portée par le jeton. Master propre6684094,
+les trois copies au même commit, branche archivée conservée ; Codex, fichiers/git/cargo.
+REPRISE et invariants déjà lus dans cette conversation, modifications S190 relues,
+file plurielle entière relue. Travail dans la copie principale, aucun sous-agent.
+
+**Décision structurante. ADR-121 actée.** La projection fixe est linéaire, malgré sa
+portée globale. Le motif de crainte S189 était mal formulé. La triangulaire ne borne
+l'erreur composée par les deux erreurs des axes que si les champs sont additifs :
+avec résidu R, la borne exacte est s+t+||R||/M. ADR-119 est restreinte, seuil2 %
+d'ADR-120 conservé. L270 ; aucun nouvel angle, A50/A233 et A211 suivis.
+
+**Sorties.** pressure_projection.rs, projected_b4.rs, PROJECTION-B4-S191 et mesures.
+D central avec extension nulle, G=-D^T, CG sur DD^T par composition réelle des
+opérateurs, f64 de banc vers étatf32 ; pas de stencil sept points substitué. Dimensions
+paires explicites, refus avant publication. Trois tests indépendants : gradient/curl,
+adjoint/linéarité/idempotence/L2, matrice dense avec Gauss, zéro et refus atomiques.
+Tous reçus en debug/release. Aucun code de bibliothèque ni support historique touché.
+
+**Chiffres.** M projeté1,319937583e-4m/s, rapport1,651332283 au non-projeté ; réserve
+q0,407704413 %, pression resserrée qP0,000011025 %. Profil14×14×8/extrapolation80ms
+reçu : s0,368754 %, t0,595477 %, e0,540332 %, budget1,371947 %, e+réserves0,948047 %.
+Résidu additif0,002593561 % : borne corrigée1,374540 %, marge0,625460 point sous2 %.
+**16 couples reçus/4 refusés**, tous les160ms refusés. Profil S190 conservé comme minimum
+d'évaluations parmi les candidats :20384, réduction13,461538 ; aucun gain CPU mesuré.
+Divergence normalisée max4,921623567e-8, max44itérations. Deux sorties release identiques,
+empreinte0x52d7645d4548ebb2. Témoin sans projection retrouve les axes/composé S190.
+
+**Incident tracé avant réception.** La première campagne a échoué sur le contrôle plein :
+graded_indices(want14) dédoublonne à12nœuds. Corrigé en indices pleins explicites,
+conformément au protocole ; aucune assertion assouplie. Demandes10/12 :9/11nœuds
+réels, publiés et comptés. Rejeu intégral reçu après cette correction. L'erreur est
+celle du montage appelant, aucun correctif du générateur historique nécessaire.
+
+**Non fait.** Campagne complète debug non relancée, tests propres reçus dans les deux
+modes. Suite workspace331/cinq ignorés reste celle de S190, bibliothèques inchangées.
+Aucun budget runtime ou I-06 reçu : allocations etf64 appartiennent au banc. Aucune
+surface libre, frontière physique, force ni perception reçue. La contraction L2
+d'une projection ne garantit pas une contraction de la norme maximum finale. Les
+réserves contre dt/2 et pression resserrée ne sont pas une borne au continu.
+
+**Propagation et suite.** Bilan actif S176, PLAN-BENCHMARK B4, SPEC-004, suivis S189/S190,
+ADR-119 et A50/A233 mis à jour. **S190-1/S189-1 closes sur véhicule** ; prochaine
+**S191-1/S192 : tranche2D à surface libre**, conditions cinématique/pression et onde
+de gravité reçue avant comparaison perturbatif/total. Le projecteur collocatif ne se
+transfère pas implicitement ; aucune technologie B3 choisie. Ce lot revient à la
+construction au lieu de poursuivre la seule mesure de réseaux. Les neuf autres lignes
+de file plurielle restent avec leurs déclencheurs, A211 toujours à éprouver.
+
+**Clôture.** I-03/I-04/I-06/I-08/I-14/I-15 relus : rien ne change dans leur périmètre
+runtime/autoritaire. 121ADR,233angles,270leçons,18invariants,6SPEC,23cas ; aucun banc
+complet. Aucun arbitrage humain nouveau, seuil de2 % maintenu. Journal/index/README
+et reprise mis à jour ; copies propres à avancer sur la clôture sans suppression.

@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S191 — en cours
+Session : S191 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S190-1 / S189-1, construire et recevoir une projection discrète compatible
 avec le véhicule de banc, puis éprouver le profil 14×14×8 / extrapolation 80 ms
@@ -75,7 +75,7 @@ sous les 2 % actés. Ne pas confondre projecteur discret et solveur à surface l
   profil reçu S190 et témoins ; qualifier pression, divergence et réserve de référence.
 - [x] **P4** — réception, correction datée des inférences invalidées, ADR si décision,
   angles/leçons et propagation B4/A50/file plurielle ; aucune tolérance redemandée.
-- [ ] **P5** — rituel REPRISE §6, journal/index/README/décomptes, vérifications,
+- [x] **P5** — rituel REPRISE §6, journal/index/README/décomptes, vérifications,
   jeton libre et avance rapide des copies propres sans suppression.
 
 ### Notes de reprise
@@ -102,3 +102,9 @@ ADR-121 préparée P4, non comprise dans ce commit P3b ; prochaine construction 
 P4 : ADR-121 restreint la portée de la somme (résidu requis pour borne algébrique),
 L270 ajoutée. Suivis B4/A50/A233/S189/S190/SPEC-004/file active propagés.
 121 ADR/233 angles/270 leçons/18 invariants/6 SPEC/23 cas à porter en clôture.
+
+P5 : journal/index/README/reprise mis à jour. Liens locaux et diff vérifiés.
+121 ADR, A1-A233 présents,270leçons ; invariants18/SPEC6/cas23 inchangés.
+File plurielle relue et portée ; suite S191-1 surface libre2D. Jeton libre.
+Trois copies revérifiées propres au commit6684094, à avancer sur ce commit final
+immédiatement après clôture. Aucune nouvelle copie, aucune suppression.

@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-12 16:16 +02:00
+JETON            : libre
+Battement        : 2026-09-12 16:18 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S191 — projection de pression et seuil B4 de 2 %
-Dernière session : S190 — 2 % actés ; profil source B4 reçu, ADR-120
-Session suivante : S191 — S190-1 : projection au seuil B4 de 2 % ; relire aussi la file active plurielle
+Session en cours : aucune
+Dernière session : S191 — profil B4 projeté reçu à 2 % ; ADR-121
+Session suivante : S192 — S191-1 : tranche 2D à surface libre ; relire aussi la file active plurielle
 
 *S183 à S189 ont travaillé dans la **copie principale**, sur `master` : aucune copie isolée
 ouverte, donc rien à refermer (AGENTS.md). Les trois worktrees ont été **avancés sur master**
@@ -183,7 +183,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 120 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 121 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -202,6 +202,24 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S191 — 2026-09-12 : profil B4 reçu avec projection**, ADR-121.
+**S190-1/S189-1 réalisées sur véhicule de banc** : projecteur D/G reçu contre matrice
+indépendante, 3 tests debug/release. Profil **14×14×8 / extrapolation 80 ms** conservé :
+budget **1,371947 %**, borne avec résidu **1,374540 %**, erreur avec réserves
+**0,948047 %**, sous les **2 % inchangés**. **16 couples reçus / 4 refusés**, 160 ms
+refusé partout ; 20384 évaluations de source, réduction13,46 sur la fenêtre, pas un coût CPU.
+Deux campagnes release identiques, empreinte **0x52d7645d4548ebb2** ; divergence
+normalisée max4,922e-8, pression max44 itérations. Tests workspace331/cinq ignorés
+reçus S190 non rejoués ; bibliothèques et supports historiques inchangés.
+**ADR-121** : projection fixe linéaire ; borne algébrique de composition avec résidu,
+la somme seule d'ADR-119 reste une enveloppe mesurée. **L270**, aucun nouvel angle.
+**Suite S192 : S191-1**, construire une tranche2D à surface libre et recevoir une onde
+de gravité avant comparaison perturbatif/total. Bords algébriques S191, surface libre
+et B4 complet non reçus ; A50 partielle. File plurielle relue, autres chantiers conservés.
+**121 ADR,233 angles,270 leçons,18 invariants,6 SPEC,23 cas.**
+Voir [PROJECTION-B4-S191](docs/validation/PROJECTION-B4-S191.md) et [ADR-121](docs/adr/ADR-121-la-projection-lineaire-et-la-borne-de-composition.md).
+
 
 **S190 — 2026-09-12 : tolérance B4 fixée à 2 % par l'utilisateur**, ADR-120.
 Attente du critère close ; volet d'échantillonnage source reçu sur le véhicule S185–S189.
