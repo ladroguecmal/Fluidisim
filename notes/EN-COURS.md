@@ -72,10 +72,10 @@ tend-elle vers une **limite** quand `n` croît ?
 - [x] **P2** — protocole **avant tout code** : le montage de parité qui sépare le repli du
       reste, ce qu'il contrôle et ce qu'il ne contrôle pas, les prédictions **falsifiables**
       déclarées d'avance, la fraction de repli comme covariable mesurée, les réceptions.
-- [>] **P3a** — banc `nl_fallback_2d.rs` réutilisant `support/nl_surface.rs` sans le
+- [x] **P3a** — banc `nl_fallback_2d.rs` réutilisant `support/nl_surface.rs` sans le
       modifier ; tests propres dont le **décompte de repli par construction** pour les trois
       familles, le cas nul, et la continuité avec S195 au point `n=6` dense.
-- [ ] **P3b** — campagne : axe « limite » sur la famille dense jusqu'à `n` grand, axe
+- [>] **P3b** — campagne : axe « limite » sur la famille dense jusqu'à `n` grand, axe
       « mécanisme » sur le couple pair/impair, convergence sous la forme de L274, bande
       vérifiée par famille, deux exécutions identiques.
 - [ ] **P4** — verdict sur A241 : le repli est-il la cause, la loi a-t-elle une limite.
@@ -84,6 +84,14 @@ tend-elle vers une **limite** quand `n` croît ?
       `libre`, copies avancées sans suppression non prouvée.
 
 ### Notes de reprise
+
+P3a S196 : `support/nl_fleet.rs` extrait de `nl_sources_2d.rs` — flottille, `Spread`,
+`sources`, plus `fleet_from_modes` général. **L'empreinte de S195 se reproduit à
+l'identique (`0x5eb378f6ffe26c9f`)** : la refactorisation n'a pas déplacé d'arithmétique,
+et c'était le contrôle. `nl_fallback_2d.rs` écrit ; **dix tests passent**, dont le
+décompte de repli par construction pour les trois familles, le repli nul chez les
+impairs à tout `n`, `paire == dense doublée`, le cas nul, `M=1`, et la continuité S195
+à `10⁻⁶`. Workspace 331 réussis/cinq ignorés.
 
 P2 S196 : protocole dans REPLI-CROISEES-S196. Le montage de parité est vérifié par
 arithmétique **avant** d'être codé : repli 0,000 chez les impairs à tout `n` ; la famille
