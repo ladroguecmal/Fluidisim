@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-12 23:37 +02:00
+JETON            : occupé
+Battement        : 2026-09-12 23:41 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
-Session en cours : aucune
+Session en cours : S199 — **B3/δ : premier candidat volumétrique**, le noyau à projection
 Dernière session : S198 — vélocité mesurée ; règle des deux maillons, la file reprend la main
-Session suivante : S199 — **B3/δ : choisir et construire un premier candidat de solveur volumétrique** (avance la couche δ, arrêtée depuis S161)
-Maillons        : 0 — remis à zéro par la règle §6.8 ; la file a repris la main sur le chaînage
+Session suivante : à fixer au rituel de fin, sous la règle des deux maillons (§6.8)
+Maillons        : 0 — S199 est choisie par la file, pas par le chaînage
 
 *S195 a **changé de main en cours de route** : la session ouverte à 21:15 a été coupée par
 une limite d'usage sur un autre compte, et l'utilisateur l'a signalé. Le jeton disait donc

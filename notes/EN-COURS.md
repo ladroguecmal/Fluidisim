@@ -58,26 +58,50 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S198 — terminée
+Session : S199 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
-Objectif : **demande explicite de l'utilisateur** — établir ce qui ralentit le projet, et
-**corriger**, pas seulement constater. La file annonçait A241 ; elle attendra. Le sujet est
-la vélocité elle-même, et il est traité comme tout le reste : mesuré d'abord.
+Objectif : **B3 / δ — construire le premier candidat volumétrique**, celui qui manque depuis
+S01. La couche δ n'a pas reçu de code d'exécution depuis S161. Session choisie **par la file**
+sous la règle des deux maillons (§6.8), et non par le chaînage.
 
 ### Plan
 
-- [x] **P1** — état réel, jeton et plan seuls.
-- [x] **P2** — le diagnostic **chiffré**, depuis le dépôt et son historique git : où va le
-      temps des sessions, qui choisit leur sujet, ce que coûte la reprise de soi. Pas
-      d'impression, pas de jugement : des comptages reproductibles.
-- [x] **P3** — les correctifs **appliqués** : la règle qui casse le chaînage, le tableau de
-      bord des quatre couches, une définition mesurable d'« avancer », et l'outil qui rend
-      la dérive visible sans qu'on ait à y penser.
-- [x] **P4** — appliquer la règle neuve à la session suivante, et propager la file.
-- [x] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes, jeton
-      `libre`, copies avancées sans suppression non prouvée.
+- [>] **P1** — état réel, jeton et plan seuls.
+- [ ] **P2** — déclarer **avant tout code** : quel candidat, **pourquoi celui-là**, ce qu'il
+      doit satisfaire (les deux filtres d'ADR-038 §4, le contrat d'ADR-007 §2, I-03/I-06/I-07),
+      et ce qu'il ne traitera pas — les quatre scénarios de B3 restent hors de portée.
+- [ ] **P3a** — construire le noyau dans `code/water-core/src/` : grille décalée, opérateurs
+      d'ordre deux, fond coupé, surface libre par fluide fantôme, projection de pression.
+      **C'est l'étape qui fait avancer la couche.**
+- [ ] **P3b** — passer les deux filtres et recevoir : lac au repos à l'arrondi sur fond non
+      plat, ordre en espace sur trois résolutions, `g_eff` injectée, zéro allocation après
+      `seal`, déterminisme, budget respecté.
+- [ ] **P4** — documenter ; ADR **seulement** si une décision durable est prise, et elle ne
+      doit pas préempter le verdict de B3.
+- [ ] **P5** — rituel de fin (§6), compteur `Maillons` mis à jour selon la règle.
 
 ### Notes de reprise
+
+S199 : master 71b3595 propre, quatre copies alignées ; 123 ADR/243 angles/279 leçons.
+**Ce que le corpus a déjà tranché, à ne pas redécouvrir.**
+— **ADR-007 §5** liste cinq familles candidates pour δ (FLIP/APIC, MPM, eulérien
+  semi-lagrangien, grille + particules de surface, PBF) sans en privilégier aucune.
+— **ADR-038 §4** ajoute **deux filtres qui passent avant tout banc**, parce qu'ils coûtent
+  quelques minutes et qu'ils éliminent : (1) le candidat est-il **bien équilibré** — sinon
+  C01 le rejette et aucun budget ne le rattrape, le raffinement coûtant ×10 500 en 2D
+  (ADR-030) ; (2) de quel **ordre en espace** — un ordre un ne passe pas C04. Chacun a déjà
+  éliminé un premier jet écrit de bonne foi.
+— **ADR-007 §2** fixe le contrat `IFluidSolver` : `g_eff_provider` et `background_provider`
+  **injectés** (un `−9,81·Z` en dur disqualifie d'emblée), `step` reçoit un **budget** et
+  doit le respecter quitte à sous-résoudre, `sample` ne bloque jamais, **I-17** interdit de
+  sérialiser un état de δ.
+— **B3** attend quatre scénarios (coque mobile, impact lourd, déferlement substitutif,
+  compartiment en référentiel accéléré). S192/S193/S194 ont ajouté des **contraintes de
+  sélection**, jamais un candidat.
+**Argument de choix à écrire en P2, pas à supposer** : construire le noyau à **projection**
+n'est pas parier sur une famille — FLIP, MPM et l'eulérien en ont tous besoin. C'est du
+travail **commun** à trois des cinq candidats, et c'est aussi la pièce que le véhicule de
+S184 déclarait omettre.
 
 P5 S198 : rituel terminé. **123 ADR, 243 angles, 279 leçons, 18 invariants, 6 SPEC,
 23 cas**. **L279** et **A243** écrites. File plurielle relue : tête devenue S198-1 = B3/δ,
