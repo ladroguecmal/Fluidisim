@@ -81,7 +81,7 @@ réduit pas l'erreur — il ne réduit que le nombre de nœuds, ce qui reste le 
       Réception : le chemin général doit reproduire le chemin uniforme **en bits**, et
       S185/S186 doivent rendre leurs empreintes publiées (`0x39567a1d4bc2ba4c`,
       `0x0e743846d4656870`).
-- [ ] **P3b** — attribuer l'erreur par axe, puis construire la graduation depuis le profil
+- [x] **P3b** — attribuer l'erreur par axe, puis construire la graduation depuis le profil
       mesuré et relever la courbe iso-erreur. Relever.
 - [ ] **P4** — recevoir dans un document de validation ; angles, leçons, et **ADR si une
       décision de conception en sort** — un réseau d'échantillonnage gradué est un contrat
@@ -89,6 +89,80 @@ réduit pas l'erreur — il ne réduit que le nombre de nœuds, ce qui reste le 
 - [ ] **P5** — rituel de fin (REPRISE.md §6).
 
 ### Notes de reprise
+
+P3b S187 : `examples/graded_lattice.rs`. Deux exécutions, `diff` strict identique hors
+lignes de cargo ; aucune durée mesurée. Empreinte **0xf2dfa382290e3c64** puis
+**0x6cf13183b4a240df** après l'ajout de la table d'ancrage horizontal — c'est la valeur
+finale à publier. Réceptions 1, 2, 4 et 6 passent ; `max|S| = 1,540547e-4` et
+`max|u'(T)| = 7,993168e-5` redonnent S186, réception 3.
+
+**Amendement de protocole, à déclarer et non à taire.** `rh = 8` a été ajouté après la
+première exécution : le protocole déclarait `rh ∈ {1,2,4}` et la famille graduée n'avait
+alors aucun point sous 75 nœuds, ce qui laissait l'isotrope `r = 8` (27 nœuds) sans
+comparaison. Extension du balayage, pas affaiblissement du critère.
+
+**Q1 — l'axe vertical domine, et les deux axes se compensent** (`eU` en % de max|u'|) :
+
+| r | verticale seule | horizontale seule | isotrope |
+|---|---|---|---|
+| 2 | 2,6635 (1568 nœuds) | 1,6947 (896) | **2,5401** (512) |
+| 4 | 15,4059 (980) | 6,1256 (350) | **13,6043** (125) |
+| 8 | 45,5067 (588) | 13,4919 (126) | **32,9593** (27) |
+
+L'isotrope est **sous** l'axe vertical seul aux trois `r` : même famille que A229, deux
+approximations sur le même contenu se compensent partiellement. Rapport vertical/horizontal
+1,57 / 2,51 / 3,37.
+
+**Le profil remesuré confirme la dérivation.** `|∂²_z S|` de 3,83e-6 (fond) à 4,84e-5
+(haut), rapport extrême **12,63**, donc pas vertical profond jusqu'à **3,55 fois** celui du
+haut. Le protocole avait dérivé 12,6 et 3,5 depuis les `k_eff` de S186 : le profil mesuré
+ici par le programme qui l'utilise tombe dessus.
+
+**LE RÉSULTAT QUI RENVERSE LA SESSION — l'ancrage pèse plus que la graduation.** Le réseau
+historique pose son dernier nœud **hors du bloc** (indice 17, `z = −0,05 m`) alors que les
+mailles intérieures s'arrêtent à 14 (`z = −0,80 m`). À nombre de nœuds verticaux **égal**,
+pas horizontal 2 :
+
+| Nz | débordante (historique) | ancrée uniforme | ancrée dérivée |
+|---|---|---|---|
+| 3 | **41,2153** | 6,7887 | 6,5503 |
+| 5 | **13,6044** | 2,5458 | **1,7919** |
+| 8 | **2,5401** | 1,6947 | 1,6947 |
+| 14 | 1,6947 | 1,6947 | 1,6947 (768 nœuds, 12 après fusion) |
+
+**L'ancrage vaut un facteur 6,1 / 5,3 / 1,50** ; la graduation par-dessus ne vaut que
+**1,04 / 1,42 / 1,00**. Mécanisme : la métrique est un **maximum** et le maximum vit sur la
+tranche la plus haute (S186) ; un nœud posé exactement sur cette tranche supprime le terme
+dominant, tandis qu'un réseau qui déborde l'interpole sur 2 m.
+
+**Contre-épreuve horizontale** — l'ancrage ne vaut presque rien là où la source ne pique
+pas : 3 nœuds 13,4919 → 13,1488 (−2,5 %) ; 5 nœuds 6,1256 → 3,6805 (−40 %) ; 8 nœuds
+1,6947 → 1,7160 (**+1,3 %**, donc légèrement pire). Non monotone, et sans le facteur 6.
+Donc ce n'est pas « ancrer est mieux » : c'est **poser un nœud là où vit le maximum**.
+
+**Q2 — la courbe, et le plancher.** À `rh = 2` le plancher est l'erreur horizontale,
+**1,6947 %**, atteint dès **6 nœuds verticaux gradués** (384 nœuds) ; au-delà, `Nz = 8` et
+`Nz = 14` ne changent plus rien. Lectures à ordonnée égale :
+- isotrope `r = 2` (512 nœuds, 2,5401 %) → gradué `rh=2 Nz=5` (320 nœuds, **1,7919 %**) :
+  **−37,5 % de nœuds et −29 % d'erreur en même temps** ;
+- isotrope `r = 4` (125, 13,6043 %) → gradué `rh=8 Nz=3` (27, 13,4919 %) : **−78,4 %** ;
+- isotrope `r = 8` (27, 32,9593 %) → gradué `rh=8 Nz=3` (27, 13,4919 %) : **à nœuds
+  identiques, l'erreur est divisée par 2,44**.
+À `rh = 4` le plancher est 6,1256 % (atteint à `Nz = 4`, 100 nœuds) ; à `rh = 8`, 13,4919 %
+(atteint dès `Nz = 3`, 27 nœuds). Les lignes `rh = 1` montrent le déplacement du maximum :
+erreur de tranche haute **0,0000** et erreur globale 0,29 à 6,55 % selon `Nz` — la
+graduation chasse l'erreur du haut vers le milieu, ce qui est exactement son but.
+
+**Les deux témoins naïfs sont battus, et la règle dérivée est validée sans être
+spectaculaire.** À nœuds égaux et `rh = 2` : 320 nœuds → dérivée 1,7919, uniforme 2,5458,
+géométrique 3,4373. À 192 → 6,5503 / 6,7887 / 6,5503 (la géométrique coïncide avec la
+dérivée à 3 nœuds). À 512 → 1,6947 / 1,6947 / 3,4373 (les deux premières saturent). La
+dérivation gagne donc **là où elle sert**, entre 4 et 6 nœuds, d'un facteur jusqu'à 1,42.
+
+**Ce qui n'est pas mesuré et doit être dit** : la loi de composition de S186 (le maximum
+pour les modes causaux) a été établie sur le réseau **débordant** ; elle n'est pas rejouée
+sur un réseau ancré. Et l'interpolation d'un réseau gradué coûte un peu plus par maille que
+l'uniforme (poids non constants), ce qui n'est pas chiffré.
 
 P3a S187 : le support est étendu **à côté** du chemin isotrope — `axis_indices`,
 `axes_indices`, `lattice_points_indexed`, `scatter_indexed`, `indexed_count` dans
