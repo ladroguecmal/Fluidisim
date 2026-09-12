@@ -667,15 +667,20 @@ impl Prepared<'_> {
                     _ => crate::composition::Error::Domain,
                 })
             })?;
+            // S205, ADR-128 : `envelope` reste la raideur publiée, B compris, dans le même ordre
+            // qu'avant ; seul le budget de refus perd le terme de B. Le budget ne borne que ce
+            // que la perturbation ajoute : la rugosité de la mer n'est pas une erreur de requête.
             let envelope = base.steepness * core::f32::consts::PI + self.slope_envelope;
+            let budget = self.slope_envelope;
             let slope = [
                 -base.normal[0] / base.normal[2] + w.slope[0],
                 -base.normal[1] / base.normal[2] + w.slope[1],
             ];
-            if !envelope.is_finite() || envelope > max_slope {
+            if !budget.is_finite() || budget > max_slope {
                 // S144, A208 : la pente réelle au point est formée avant le test, pour que le
                 // refus puisse dire lequel des deux — le champ ou le majorant — est en cause.
-                let reelle = (slope[0] * slope[0] + slope[1] * slope[1]).sqrt();
+                // S205 : celle de la perturbation seule, puisque B n'est plus dans le budget.
+                let reelle = (w.slope[0] * w.slope[0] + w.slope[1] * w.slope[1]).sqrt();
                 return Err(if !reelle.is_finite() || reelle > max_slope {
                     WorldError::Slope
                 } else {

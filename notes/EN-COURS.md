@@ -88,7 +88,7 @@ publié, pas une erreur de requête (ADR-127 D7 : pas de fonctionnalité retiré
 ### Plan
 
 - [x] **P1** — état réel, décision de conception, plan seul.
-- [ ] **P2** — code : quatre sites, budget = perturbations seules, nommage sur leur pente
+- [x] **P2** — code : quatre sites, budget = perturbations seules, nommage sur leur pente
  réelle, publication inchangée ; documentation de `slope_floor` (exact) ; compilation.
 - [ ] **P3** — essais : rejouer water-core, trier **chaque** échec (attente liée à B dans le
  budget → réécrite avec cas W et motif écrit ; autre → défaut à corriger) ; nouveaux essais :
@@ -108,3 +108,10 @@ Critère de non-régression déclaré **avant** le code : pour tout lot admis pa
 `eta`, `deta_dt`, `u_total`, `normal`, `steepness`, `aeration` identiques au bit ; seuls des
 refus disparaissent. Si un hachage de campagne ou d'essai change, c'est un défaut du lot, pas
 une attente à réécrire.
+
+P2 : quatre sites modifiés (`budget` = perturbations, `perturbation` = leur pente au point,
+`bound`/`envelope` publiés inchangés). `composition` contrôle désormais `steepness` fini à la
+sortie (le refus ne le garantissait plus). `Background::differential_slope_envelope` retirée :
+seul usage = budget différentiel ; son assertion d'essai remplacée par l'équivalence des deux
+chemins au plancher exact (`slope_floor` et son prédécesseur flottant). Compilation sans
+avertissement. Essais non encore rejoués.

@@ -199,10 +199,25 @@ fn reductions_and_world_surface_keep_values_and_density() {
             0.001,
         );
         assert_eq!(actual, eval(b, i, Some(p), t, surface));
-        assert_eq!(
-            b.differential_slope_envelope(),
-            b.eval(surface, t).unwrap().steepness * core::f32::consts::PI
-        );
+        // S205, ADR-128 : l'égalité `differential_slope_envelope == steepness·π` gardait que les
+        // deux chemins consommaient le même budget, B compris. B sorti du budget, l'équivalence
+        // se garde sur le budget lui-même : `slope_floor` décide les deux chemins à l'identique.
+        let floor = crate::prepared_water::mixed::slope_floor(i, Some(p));
+        assert!(floor > 0.0);
+        let bound = BoundBackground::new(b, FrameId(7), 9);
+        for cap in [floor, f32::from_bits(floor.to_bits() - 1)] {
+            let mut s1 = [WaterSample::default(); 1];
+            let mut o1 = s1;
+            let mut s2 = [DifferentialSample::default(); 1];
+            let mut o2 = s2;
+            let sampled =
+                sample_world_batch(&bound, i, Some(p), t, &[surface], cap, &mut s1, &mut o1).is_ok();
+            let differential =
+                differential_world_batch(&bound, i, Some(p), t, &[surface], cap, &mut s2, &mut o2)
+                    .is_ok();
+            assert_eq!(sampled, cap >= floor);
+            assert_eq!(differential, cap >= floor);
+        }
     });
 }
 

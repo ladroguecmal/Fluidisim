@@ -53,7 +53,6 @@ pub fn differential_world_batch<const N: usize>(
         return Err(Error::Capacity);
     }
     let (b, frame, cell) = bound.binding();
-    let base_envelope = b.differential_slope_envelope();
     for (index, point) in points.iter().enumerate() {
         let fail = |error| Error::Point { index, error };
         let local = b
@@ -73,7 +72,10 @@ pub fn differential_world_batch<const N: usize>(
             density: impacts.density,
             ..Default::default()
         };
-        let mut envelope = base_envelope;
+        // S205, ADR-128 : le budget de refus ne somme que les perturbations, comme
+        // `sample_world_batch` ; ce chemin ne publie pas de raideur, B n'y apparaît donc plus.
+        let mut budget = 0.0f32;
+        let mut perturbation = [0.0f32; 2];
         let mut fields = impacts.fields.iter().flatten();
         for event in impacts.journal.confirmed() {
             let f = fields
@@ -91,7 +93,9 @@ pub fn differential_world_batch<const N: usize>(
                 })
             })?;
             total.water.add(&w);
-            envelope += f.slope_max();
+            perturbation[0] += w.grad_eta[0];
+            perturbation[1] += w.grad_eta[1];
+            budget += f.slope_max();
         }
         if fields.next().is_some() {
             return Err(fail(composition::Error::FieldsMismatch));
@@ -106,16 +110,14 @@ pub fn differential_world_batch<const N: usize>(
             total.water.add(&w.water);
             total.applied_pressure = w.applied_pressure;
             total.grad_applied_pressure = w.grad_applied_pressure;
-            envelope += p.slope_envelope();
+            perturbation[0] += w.water.grad_eta[0];
+            perturbation[1] += w.water.grad_eta[1];
+            budget += p.slope_envelope();
         }
         if !total.water.finite() {
             return Err(fail(composition::Error::NonFinite));
         }
-        check_slope(
-            [total.water.grad_eta[0], total.water.grad_eta[1]],
-            envelope,
-            max_slope,
-        )?;
+        check_slope(perturbation, budget, max_slope)?;
         scratch[index] = total;
     }
     output[..points.len()].copy_from_slice(&scratch[..points.len()]);

@@ -195,14 +195,8 @@ impl Background {
     /// Gravité qui a servi à la dispersion ; comparée par les compositions B+W.
     pub fn gravity(&self) -> f32 { self.gravity }
 
-    /// ADR-117 : même ordre et conversion que steepness*pi dans eval_local.
-    pub(crate) fn differential_slope_envelope(&self) -> f32 {
-        let mut steep = 0.0f32;
-        for c in &self.components {
-            steep += 2.0 * c.amplitude * c.k_turns_per_m;
-        }
-        steep * core::f32::consts::PI
-    }
+    // S205, ADR-128 : `differential_slope_envelope` (ADR-117) est retirée. Elle ne servait qu'à
+    // mettre la raideur de B dans le budget de refus du chemin différentiel, qui n'en contient plus.
 
     pub fn component_count(&self) -> usize {
         self.components.len()

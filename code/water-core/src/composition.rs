@@ -61,11 +61,16 @@ pub fn compose<'a, const N: usize>(
         return Err(Error::InvalidBackground);
     }
     let mut fields = fields.into_iter();
+    // S205, ADR-128 : `bound` reste la raideur publiée, B compris, dans le même ordre qu'avant.
+    // `budget` est ce que le refus consomme : les perturbations seules. La raideur de B est un
+    // fait d'environnement publié pour l'écume, pas une erreur de requête (A245).
     let mut bound = base.steepness * core::f32::consts::PI;
+    let mut budget = 0.0f32;
     let mut slope = [
         -base.normal[0] / base.normal[2],
         -base.normal[1] / base.normal[2],
     ];
+    let mut perturbation = [0.0f32; 2];
     for e in journal.confirmed() {
         let field = fields.next().ok_or(Error::FieldsMismatch)?;
         if e != field.event() {
@@ -76,6 +81,7 @@ pub fn compose<'a, const N: usize>(
             .map_err(|_| Error::Domain)?;
         // S141 : chaque terme consomme le meilleur majorant exact de sa pente réelle (ADR-095).
         bound += field.slope_max();
+        budget += field.slope_max();
         base.eta += w.eta;
         base.deta_dt += w.deta_dt;
         base.u_total[0] += w.horizontal_velocity[0];
@@ -83,15 +89,18 @@ pub fn compose<'a, const N: usize>(
         base.u_total[2] += w.deta_dt;
         slope[0] += w.slope[0];
         slope[1] += w.slope[1];
+        perturbation[0] += w.slope[0];
+        perturbation[1] += w.slope[1];
     }
     if fields.next().is_some() {
         return Err(Error::FieldsMismatch);
     }
-    if !bound.is_finite() || bound > max_slope {
+    if !budget.is_finite() || budget > max_slope {
         // S144 : la pente réelle au point est déjà accumulée. Elle ne dit pas le maximum sur
         // l'emprise — il ne se calcule pas (S140) — mais elle en est une borne inférieure, et
         // cela suffit à séparer « ton champ est trop raide ici » de « c'est mon majorant ».
-        let reelle = (slope[0] * slope[0] + slope[1] * slope[1]).sqrt();
+        // S205 : pente des perturbations seules, B n'étant plus dans le budget.
+        let reelle = (perturbation[0] * perturbation[0] + perturbation[1] * perturbation[1]).sqrt();
         return Err(if !reelle.is_finite() || reelle > max_slope {
             Error::Slope
         } else {
@@ -101,7 +110,9 @@ pub fn compose<'a, const N: usize>(
     let norm = (1.0 + slope[0] * slope[0] + slope[1] * slope[1]).sqrt();
     base.normal = [-slope[0] / norm, -slope[1] / norm, 1.0 / norm];
     base.steepness = bound / core::f32::consts::PI;
+    // S205 : `bound` n'est plus garanti fini par le refus de budget ; il se contrôle ici.
     if [
+        base.steepness,
         base.eta,
         base.deta_dt,
         base.normal[0],

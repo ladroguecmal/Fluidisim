@@ -5,8 +5,9 @@ use crate::{bound_pressure, composition, SimTime, WaterSample, WorldPos};
 mod differential;
 pub use differential::{differential_world_batch, DifferentialSample};
 
-fn check_slope(slope: [f32; 2], envelope: f32, max_slope: f32) -> Result<(), Error> {
-    if !envelope.is_finite() || envelope > max_slope {
+/// S205, ADR-128 : `slope` et `budget` sont ceux des **perturbations** ; B n'y entre pas.
+fn check_slope(slope: [f32; 2], budget: f32, max_slope: f32) -> Result<(), Error> {
+    if !budget.is_finite() || budget > max_slope {
         let reelle = (slope[0] * slope[0] + slope[1] * slope[1]).sqrt();
         return Err(if !reelle.is_finite() || reelle > max_slope {
             Error::Slope
@@ -179,10 +180,13 @@ pub fn admits<const N: usize>(
     !pressure.is_some_and(|p| !p.admits_local(flat))
 }
 /// ADR-080 : part de l'enveloppe de pente qui ne dépend d'aucun point, sommée dans l'ordre
-/// exact de la requête. Si `max_slope` lui est inférieur, **tout lot non vide sera refusé** :
-/// la requête part de `steepness·π ≥ 0` puis ajoute les mêmes termes dans le même ordre, et
-/// l'arrondi IEEE au plus proche est monotone, donc son enveloppe ne peut pas passer sous ce
-/// plancher. La réciproque est fausse : au-dessus, c'est la raideur de B qui décide.
+/// exact de la requête.
+///
+/// **S205, ADR-128 : c'est désormais le budget de refus lui-même**, et l'annonce est exacte
+/// dans les deux sens. La requête somme les mêmes termes, dans le même ordre, à partir de zéro :
+/// B n'y entre plus. Donc `max_slope < slope_floor(...)` ⟹ tout lot non vide est refusé
+/// (`Slope` ou `SlopeEnvelope`), et `max_slope ≥ slope_floor(...)` ⟹ **aucun** refus de pente,
+/// quels que soient les points et la mer. La raideur de B reste publiée dans `steepness`.
 pub fn slope_floor<const N: usize>(
     impacts: &Prepared<'_, '_, N>,
     pressure: Option<&bound_pressure::Prepared<'_>>,
@@ -240,7 +244,11 @@ pub fn sample_world_batch<const N: usize>(
             return Err(fail(composition::Error::InvalidBackground));
         }
         let mut slope = [-s.normal[0] / s.normal[2], -s.normal[1] / s.normal[2]];
+        // S205, ADR-128 : `envelope` reste la raideur publiée, B compris, même ordre qu'avant ;
+        // `budget` est ce que le refus consomme — les perturbations seules, comme `slope_floor`.
         let mut envelope = s.steepness * core::f32::consts::PI;
+        let mut budget = 0.0f32;
+        let mut perturbation = [0.0f32; 2];
         let mut fields = impacts.fields.iter().flatten();
         for event in impacts.journal.confirmed() {
             let f = fields
@@ -266,7 +274,10 @@ pub fn sample_world_batch<const N: usize>(
             s.u_total[2] += w.deta_dt;
             slope[0] += w.slope[0];
             slope[1] += w.slope[1];
+            perturbation[0] += w.slope[0];
+            perturbation[1] += w.slope[1];
             envelope += f.slope_max();
+            budget += f.slope_max();
         }
         if fields.next().is_some() {
             return Err(fail(composition::Error::FieldsMismatch));
@@ -285,9 +296,12 @@ pub fn sample_world_batch<const N: usize>(
             s.u_total[2] += w.vertical_velocity;
             slope[0] += w.slope[0];
             slope[1] += w.slope[1];
+            perturbation[0] += w.slope[0];
+            perturbation[1] += w.slope[1];
             envelope += p.slope_envelope();
+            budget += p.slope_envelope();
         }
-        check_slope(slope, envelope, max_slope)?;
+        check_slope(perturbation, budget, max_slope)?;
         let norm = (1.0 + slope[0] * slope[0] + slope[1] * slope[1]).sqrt();
         s.normal = [-slope[0] / norm, -slope[1] / norm, 1.0 / norm];
         s.steepness = envelope / core::f32::consts::PI;
