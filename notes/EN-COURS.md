@@ -80,10 +80,13 @@ Le lot ne migre pas ce terme (bits changés, lot propre) ; il le chiffre et le s
  inchangée), impact par `impact_generator` (b=1 m, v=8 m/s, fraction déclarée choix de
  banc), milieu profond20 m, `max_slope` de l'impact = π/7 − plancher B (budget alloué,
  dit). Pente réelle de B échantillonnée sur la fenêtre de l'image : facteur L1/réel chiffré.
-- [ ] **P3** — emprise mesurée : coutures spatiale (max|η_W|, |∇η_W| sur r=R, fenêtre
+- [x] **P3** — emprise mesurée : coutures spatiale (max|η_W|, |∇η_W| sur r=R, fenêtre
  [naissance, +A]) et temporelle (max|η_W| dans R à +A) pour candidats (N, R, A) admis ;
  critères déclarés **avant** mesure : ≤3 mm (tolérance du rendu) et ≤2 % du pic central
  (seuil ADR-120 emprunté comme choix de banc). Tests de la fonction de couture.
+- [ ] **P3b** *(ajoutée après P3)* — deux contrôles avant de retenir l'emprise : accord
+ N256/N512 dans R aux instants rendus (+1/+3/+6 s) ; homothétie à λ×2 sur le critère
+ relatif (R×2, A×√2, même N attendu). Si l'un échoue, retenir N512 A64 R60 et le dire.
 - [ ] **P4** — image : B+W par `Prepared::sample_world_batch` dans R, B seul hors R ;
  bornes de marche B+W conservatrices ; trois instants + témoin sans impact ; zéro rayon
  non résolu ; tout pixel différent du témoin doit avoir échantillonné dans R (contrôle).
@@ -115,3 +118,21 @@ L1 0,6082 / **directionnelle exacte 0,5733** (−5,7 %) / échantillonnée 0,421
 aucun budget indépendant du point ne l'admet ; seul un maximum local ou statistique le
 ferait, et il ne garantit rien. Hs max composable (marge nulle, L1) : 0,4488/0,4055 ≈ 1,107 m.
 Six tests exemple passent (debug). Aucune bibliothèque modifiée.
+
+P3, écrit **avant** la campagne : décisif = max|η_W| ≤ min(3 mm ; 2 % de η centre
+0,15482 m = 3,10 mm) sur la couture spatiale (r = R − 1 mm, t ∈ [0 ; A] pas 10 ms) **et**
+temporelle (t = A, r ∈ [0 ; R) pas 2 cm). Pente de couture rapportée, **non décisive**.
+Candidats N ∈ {64,128,256,512} × A ∈ {2,4,6,8,12,16,24,32} s, R = plus grand rayon admis
+par Resolution/Reach (décrément 0,5 m jusqu'à admission). Retenir le plus petit N, puis le
+plus petit R, qui passe les deux coutures pour l'horizon visé ; si aucun ne passe, le dire.
+
+P3 résultats (`seams`, 138 lignes, sortie archivée scratchpad puis MESURES en P6) :
+**aucun candidat A ≤ 32 s ne passe** — couture temporelle 78,4 mm (2 s) · 20,0 (4) · 13,0 (8)
+· 10,1 (12) · 8,3 (16) · 6,2 (24) · 4,8 (32), indépendante de N ; la spatiale est nulle dès
+que R dépasse le front. Horizons longs : 3,25 mm (48 s) · 2,80 (56) · 2,44 (64) · 2,16 (72)
+· 1,62 (96). Balayage N512 : couture spatiale = amplitude de l'anneau au franchissement,
+5,05 mm (R30) · 3,84 (40) · 3,06 (50) · 2,77 (55) ≈ 1/R, indépendante de A. **Premier passant
+selon la règle : N256, A56 s, R52 m** (bord 2,937 mm, horizon 2,255 mm, marge 2 %) ; N256
+échoue à A48 (R65 : horizon 3,246) et A64 (R39 : bord 3,935) → fenêtre étroite. N512 passe
+pour tout R ≥ 55 m et A ≥ 56 s. Lecture : seuil relatif 2 % ⇒ R ≈ 15,5 λ ; énergie et λ
+sortent du critère relatif si l'homothétie S136 tient (non vérifiée ici → P3b).

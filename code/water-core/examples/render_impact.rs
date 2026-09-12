@@ -209,6 +209,166 @@ pub fn sampled_real_slope(bg: &Background, half_m: f64, step_m: f64, seconds: u6
     max
 }
 
+/// Tolérance verticale de la marche de rayon S201 : une couture sous ce seuil ne déplace aucune
+/// intersection au-delà de ce que le rendu admet déjà.
+pub const RAY_TOLERANCE_M: f64 = 0.003;
+/// Seuil relatif ADR-120, **emprunté comme choix de banc** : il n'a pas été dérivé pour une
+/// couture visuelle, et ne le devient pas en étant employé ici.
+pub const RELATIVE_SEAM: f64 = 0.02;
+
+#[derive(Clone, Copy, Debug)]
+pub struct Seams {
+    pub radius: f32,
+    pub eta_centre: f64,
+    /// Couture spatiale : r = R − 1 mm, t ∈ [0 ; A].
+    pub edge_eta: f64,
+    pub edge_slope: f64,
+    pub edge_eta_time_s: f64,
+    /// Couture temporelle : t = A, r ∈ [0 ; R).
+    pub horizon_eta: f64,
+    pub horizon_slope: f64,
+    pub horizon_eta_radius: f64,
+}
+impl Seams {
+    pub fn limit(&self) -> f64 {
+        RAY_TOLERANCE_M.min(RELATIVE_SEAM * self.eta_centre)
+    }
+    pub fn passes(&self) -> bool {
+        self.edge_eta <= self.limit() && self.horizon_eta <= self.limit()
+    }
+}
+
+/// Rayon maximal admis par `RadialImpact::new` pour (N, A) : reproduit le contrôle de
+/// résolution en f64 puis **vérifie par construction**, en reculant de 0,5 m jusqu'à admission.
+pub fn largest_radius<const N: usize>(sc: &Scene, age_us: u64) -> Option<(f32, RadialImpact<N>)> {
+    let k0 = core::f64::consts::TAU / sc.wavelength_m as f64;
+    let dk = 1.5 * k0 / N as f64;
+    let cg = 0.5 * (sc.medium.gravity as f64 / (k0 / 2.0)).sqrt();
+    let reach = 2048.0 / (2.0 * k0);
+    let mut radius =
+        ((core::f64::consts::FRAC_PI_2 / dk - cg * age_us as f64 / 1e6).min(reach) * 2.0).floor() / 2.0;
+    while radius > 0.0 {
+        let domain = Domain {
+            radius: radius as f32,
+            age_us,
+        };
+        if let Ok(f) = RadialImpact::<N>::new(sc.event, sc.medium, domain) {
+            return Some((radius as f32, f));
+        }
+        radius -= 0.5;
+    }
+    None
+}
+
+pub fn seams<const N: usize>(field: &RadialImpact<N>, radius: f32, age_us: u64) -> Result<Seams, String> {
+    let v = *field.event().data();
+    let centre = [v.position[0], v.position[1]];
+    let eta_centre = radial_height_bound(field)?;
+    let mut out = Seams {
+        radius,
+        eta_centre,
+        edge_eta: 0.0,
+        edge_slope: 0.0,
+        edge_eta_time_s: 0.0,
+        horizon_eta: 0.0,
+        horizon_slope: 0.0,
+        horizon_eta_radius: 0.0,
+    };
+    let edge = [centre[0] + radius - 0.001, centre[1]];
+    let steps = age_us / 10_000;
+    for i in 0..=steps {
+        let t = SimTime(v.birth.0 + (i * 10_000).min(age_us));
+        let s = field
+            .sample(v.frame, v.cell, edge, t)
+            .map_err(|e| format!("couture spatiale {e:?}"))?;
+        let slope = (s.slope[0] as f64).hypot(s.slope[1] as f64);
+        if (s.eta as f64).abs() > out.edge_eta {
+            out.edge_eta = (s.eta as f64).abs();
+            out.edge_eta_time_s = (t.0 - v.birth.0) as f64 / 1e6;
+        }
+        out.edge_slope = out.edge_slope.max(slope);
+    }
+    let horizon = SimTime(v.birth.0 + age_us);
+    let count = (radius / 0.02) as u32;
+    for i in 0..count {
+        let r = i as f32 * 0.02;
+        let s = field
+            .sample(v.frame, v.cell, [centre[0] + r, centre[1]], horizon)
+            .map_err(|e| format!("couture temporelle {e:?}"))?;
+        let slope = (s.slope[0] as f64).hypot(s.slope[1] as f64);
+        if (s.eta as f64).abs() > out.horizon_eta {
+            out.horizon_eta = (s.eta as f64).abs();
+            out.horizon_eta_radius = r as f64;
+        }
+        out.horizon_slope = out.horizon_slope.max(slope);
+    }
+    Ok(out)
+}
+
+fn seam_line<const N: usize>(sc: &Scene, age_s: u64) -> Result<(), String> {
+    let age_us = age_s * 1_000_000;
+    match largest_radius::<N>(sc, age_us) {
+        None => println!("N={N} A={age_s}s aucun rayon admis"),
+        Some((radius, field)) => {
+            let s = seams(&field, radius, age_us)?;
+            println!(
+                "N={N} A={age_s}s R={radius:.1}m bord_eta={:.3}mm (t={:.2}s) bord_pente={:.5} horizon_eta={:.3}mm (r={:.2}m) horizon_pente={:.5} seuil={:.3}mm passe={}",
+                s.edge_eta * 1e3,
+                s.edge_eta_time_s,
+                s.edge_slope,
+                s.horizon_eta * 1e3,
+                s.horizon_eta_radius,
+                s.horizon_slope,
+                s.limit() * 1e3,
+                s.passes()
+            );
+        }
+    }
+    Ok(())
+}
+
+fn seams_report() -> Result<(), String> {
+    let sc = scene(HS, 60_000_000)?;
+    println!("# coutures d'emprise S203, lambda={:.4} E={:.1}", sc.wavelength_m, sc.energy_j);
+    for age_s in [2u64, 4, 6, 8, 12, 16, 24, 32] {
+        seam_line::<64>(&sc, age_s)?;
+        seam_line::<128>(&sc, age_s)?;
+        seam_line::<256>(&sc, age_s)?;
+        seam_line::<512>(&sc, age_s)?;
+    }
+    // Extension déclarée après la première série : aucun candidat ≤ 32 s ne passe, la couture
+    // temporelle décroissant comme ~t^-0,72. Horizons longs, N256/N512 seuls admissibles.
+    println!("# extension horizons longs");
+    for age_s in [48u64, 56, 64, 72, 96] {
+        seam_line::<256>(&sc, age_s)?;
+        seam_line::<512>(&sc, age_s)?;
+    }
+    // Plus petit rayon qui passe, N512 : balayage au pas de 5 m sous le rayon maximal.
+    println!("# balayage du rayon, N512");
+    for age_s in [56u64, 64, 72] {
+        let age_us = age_s * 1_000_000;
+        let Some((r_max, _)) = largest_radius::<512>(&sc, age_us) else {
+            continue;
+        };
+        let mut radius = 30.0f32;
+        while radius <= r_max {
+            let field = RadialImpact::<512>::new(sc.event, sc.medium, Domain { radius, age_us })
+                .map_err(|e| format!("{e:?}"))?;
+            let s = seams(&field, radius, age_us)?;
+            println!(
+                "N=512 A={age_s}s R={radius:.1}m bord_eta={:.3}mm (t={:.2}s) horizon_eta={:.3}mm (r={:.2}m) passe={}",
+                s.edge_eta * 1e3,
+                s.edge_eta_time_s,
+                s.horizon_eta * 1e3,
+                s.horizon_eta_radius,
+                s.passes()
+            );
+            radius += 5.0;
+        }
+    }
+    Ok(())
+}
+
 fn scene_report() -> Result<(), String> {
     println!("# constats de construction S203");
     for hs in [0.25f32, 0.5, 1.0, 1.5] {
@@ -307,7 +467,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = std::env::args().collect();
     match args.get(1).map(String::as_str) {
         Some("scene") => scene_report()?,
-        _ => return Err("mode : scene".into()),
+        Some("seams") => seams_report()?,
+        _ => return Err("mode : scene | seams".into()),
     }
     Ok(())
 }
@@ -333,6 +494,34 @@ mod tests {
         let sampled = sampled_real_slope(&sc.background, 16.0, 0.5, 4);
         assert!(sampled <= d, "{sampled} > {d}");
         assert!(d < sc.floor as f64, "{d} >= {}", sc.floor);
+    }
+    #[test]
+    fn seams_see_a_truncated_field_and_the_radius_is_maximal() {
+        let sc = scene(HS, 60_000_000).unwrap();
+        // Emprise volontairement courte : la couture doit être vue, pas lissée.
+        let f = RadialImpact::<64>::new(
+            sc.event,
+            sc.medium,
+            Domain {
+                radius: 2.0,
+                age_us: 2_000_000,
+            },
+        )
+        .unwrap();
+        let s = seams(&f, 2.0, 2_000_000).unwrap();
+        assert!(!s.passes(), "{s:?}");
+        assert!(s.edge_eta > RAY_TOLERANCE_M);
+        // Le rayon rendu est le plus grand au pas de 0,5 m : le suivant est refusé.
+        let (radius, _) = largest_radius::<64>(&sc, 8_000_000).unwrap();
+        let next = RadialImpact::<64>::new(
+            sc.event,
+            sc.medium,
+            Domain {
+                radius: radius + 0.5,
+                age_us: 8_000_000,
+            },
+        );
+        assert!(next.is_err());
     }
     #[test]
     fn radial_height_bound_is_the_centre_at_birth() {
