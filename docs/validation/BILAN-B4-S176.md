@@ -136,3 +136,12 @@ réception de coût et consommation perturbative ; aucun solveur volumétrique c
 **Suivi S182 :** le cycle vivant du consommateur différentiel est reçu sur le montage
 de bibliothèque, [CYCLE-DIFFERENTIEL-S182](CYCLE-DIFFERENTIEL-S182.md). S182-1 mesure
 coût et allocations avant budget de consommation perturbative. A50/B4 restent partiels.
+
+**Suivi S183 — 2026-09-12 :** le coût du consommateur différentiel est reçu,
+[COUT-DIFFERENTIEL-S183](COUT-DIFFERENTIEL-S183.md) : 3,0 à 4,3 fois le chemin de surface
+aux mêmes entrées, facteur identique couche par couche, zéro allocation d'hôte après `seal()`.
+**Cela ne lève pas la mention « coût non reçu » du tableau §1**, qui porte sur les quadratures
+et la préservation physique du solveur, pas sur le fournisseur : c'est le coût de **produire**
+la source qui est mesuré, pas celui de la consommer. Aucun budget n'en découle — une machine,
+une chaîne, pas de cycle vivant. S183-1 mesure la consommation perturbative ; A50/B4 restent
+partiels, aucun solveur volumétrique choisi.

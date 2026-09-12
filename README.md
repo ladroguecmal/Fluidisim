@@ -289,7 +289,7 @@ Le juge de fidélité est B4, bloqué ailleurs. Suite S159 : le facteur 2,5 qui 
 L'une croyait la dernière session être **S44** : l'ouvrir aurait recréé cent quinze sessions parallèles.
 Avance rapide d'abord, suppressions ensuite ; six copies ramenées à trois, aucune histoire perdue, et la
 procédure de fermeture écrite dans l'amorce. Suite S160 : le facteur 2,5, S158-1.
-117 ADR,225 angles,262 leçons,18 invariants,6 SPEC,23 cas.
+117 ADR,226 angles,263 leçons,18 invariants,6 SPEC,23 cas.
 **S162 : diagnostic de Stokes et portée de B4 corrigée.**
 [Résultats](docs/validation/ADDITIVITE-PROFONDE-S162.md),
 [ADR-112](docs/adr/ADR-112-la-superposition-independante-ne-recoit-pas-le-couplage.md).
@@ -387,3 +387,12 @@ Voir [COMPOSITION-DIFFERENTIELLE-S181](docs/validation/COMPOSITION-DIFFERENTIELL
 renouvellements et restaurations. Trois nouveaux tests ;331 réussis/cinq ignorés,
 références inchangées, aucun correctif d'exécution nécessaire. Suite : mesurer le coût.
 Voir [CYCLE-DIFFERENTIEL-S182](docs/validation/CYCLE-DIFFERENTIEL-S182.md).
+
+**S183 :** le coût du consommateur différentiel est mesuré, conditions publiées avant
+les chiffres. Il vaut 3,0 à 4,3 fois le chemin de surface aux mêmes entrées, médiane
+~3,4, et **le même facteur pour chaque couche** : il suit ce qui est publié, 31 scalaires
+contre 10. Préparation et actualisation inchangées ; zéro allocation après `seal()`.
+Aucun ADR, aucun budget. Deux trouvailles : **A226**, un refus porté par un point fait
+payer le lot entier ; **L263**, un axe ne mesure son effet que s'il dépasse ce qu'il
+transporte. Suite : la consommation perturbative.
+Voir [COUT-DIFFERENTIEL-S183](docs/validation/COUT-DIFFERENTIEL-S183.md).

@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S183 — en cours
+Session : S183 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : S182-1/A50, mesurer le coût complet et les allocations du consommateur
 différentiel — préparation, actualisation, évaluation, refus — contre le chemin de
@@ -75,10 +75,19 @@ surface à entrées identiques, sur plusieurs lots et recettes.
       mémoire et allocations. Exécuter, relever.
 - [x] **P4** — recevoir les chiffres dans un document de validation, dire ce qu'ils ne
       disent pas ; suite perturbative déclarée.
-- [>] **P5** — rituel de fin (REPRISE.md §6) : journal, angles, leçons, index, décomptes,
+- [x] **P5** — rituel de fin (REPRISE.md §6) : journal, angles, leçons, index, décomptes,
       jeton et copies.
 
 ### Notes de reprise
+
+P5 S183 : rituel terminé. **117 ADR, 226 angles, 263 leçons, 18 invariants, 6 SPEC,
+23 cas**, vérifiés contre le dépôt (117 fichiers ADR, 18 invariants, 6 SPEC, 23 cas)
+et non recopiés. Jeton libre ; copie principale, aucune copie à refermer, les trois
+worktrees étaient au même commit que master à l'amorce. Une correction de fond au
+passage : la formule « BILAN-S145/S176 portés » circulait depuis plusieurs sessions
+alors que **BILAN-S145 est soldé depuis S147** (B1 lancé S146, S63-1 close S147) ;
+seul BILAN-B4-S176 reste actif, et il reçoit un suivi daté. Suite S184 : S183-1,
+consommation perturbative.
 
 P4 S183 : COUT-DIFFERENTIEL-S183 §6-§8 reçus, **A226** et **L263** écrits. Décomptes
 à porter en P5 : **117 ADR, 226 angles, 263 leçons, 18 invariants, 6 SPEC, 23 cas**

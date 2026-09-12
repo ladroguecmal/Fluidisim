@@ -8971,3 +8971,86 @@ de contrat de pente. Déterminisme multiplateforme et solveur3D non reçus.
 lots/recettes : préparation, actualisation, évaluation, refus et allocations, comparés
 au chemin de surface àentrées identiques. Publier les conditions de mesure avant tout
 budget ; puis consommation perturbative. BILAN-S145/S176 portés, aucun arbitrage humain.
+
+## S183 — 2026-09-12 — Coût complet du consommateur différentiel
+
+**Entrée :** master 541ebc5 propre, trois copies alignées, S182-1/A50. Démarrage à froid,
+copie principale, aucune copie nouvelle. Plan seul ff383fa ; conditions de mesure 6fa5aea ;
+mesure 038d1c2 ; réception e17ec3a. Aucune modification du code d'exécution.
+
+**Produit :** `examples/differential_cost.rs` et
+[COUT-DIFFERENTIEL-S183](../docs/validation/COUT-DIFFERENTIEL-S183.md). Les conditions de
+mesure sont publiées **avant** la première exécution, en étape séparée (§1–§5) : ce qui est
+mesuré, contre quoi, sur quelle machine, quelle grille, et surtout ce que la mesure ne
+prouvera pas. Les relevés sont venus ensuite (§6–§8). L'ordre est délibéré — un chiffre de
+coût lu sans ses conditions devient un budget à la session suivante (A185).
+
+Grille : lots 1/8/64/256, recettes de pression 8×12 / 16×24 / 24×32 (48/192/384 créneaux),
+B à 16 et 64 composantes, 0/1/4 impacts N64. Protocole S125 repris : une seconde de mise en
+régime, quinze blocs d'ordre renversé un sur deux, `black_box`, min/médiane/max des moyennes
+de bloc, **deux exécutions indépendantes publiées toutes les deux**.
+
+**Chiffres qui ont orienté la lecture.**
+Rapport différentiel/surface **3,0 à 4,3**, médiane ~3,4 — et **le même couche par couche** :
+B 3,25/3,63 · impact radial 3,55/3,67 · pression 3,17/3,49. Trois calculs sans rapport entre
+eux, un seul facteur : il suit les **31 scalaires publiés contre 10**, pas la nature du travail
+dérivé. Préparation et actualisation sont identiques sur les deux chemins ; tout le surcoût est
+par point. `Controller::update` coûte 0,85–0,90 µs par créneau, 163–178 µs à 192 créneaux, une
+fois par instant publié — soit **4,4 points différentiels** ou 16 points de surface au montage
+de référence. Empreinte : +124 o par point au lieu de +40, rien d'autre ne change.
+Allocations d'hôte : **1 appel, 512 o (2048 à 64 composantes), zéro refusée après `seal()`**
+sur les six montages — I-06 tenu mécaniquement, complété par une inspection de source qui ne
+trouve qu'un seul emploi du tas, `Background.components`, déclaré à l'hôte.
+
+**Décision structurante :** aucune. Aucun contrat n'a changé, donc **aucun ADR** — mesurer
+n'est pas décider. Ce qui est produit est un chiffre de référence et deux trouvailles.
+
+**Ce que la session a trouvé et qui n'était pas cherché.**
+
+**A226** *(sévérité 2)* — un refus porté par un point fait payer le lot entier. Un lot de 64
+dont le dernier point sort du domaine coûte 2232–2399 µs, **95 % du même lot réussi**, pour
+zéro sortie ; le même point en tête coûte 2,0 µs, rapport 1150. Et ces 2,0 µs montent à
+7,6–8,4 µs à 64 composantes, parce qu'un point hors du rayon d'un impact **paie d'abord B en
+entier** : le test géométrique le moins cher est évalué en dernier. Ce n'est pas un défaut de
+correction — l'atomicité d'ADR-063 est respectée, aucune valeur n'est fausse — c'est un coût
+perdu, et il grandit avec le montage. Le contraste qui le rend visible est que les refus
+indépendants des points, eux, sont gratuits : 0,025–0,097 µs.
+
+**L263** — un axe de mesure ne mesure son effet que s'il dépasse ce qu'il transporte. L'axe
+« lot » devait mesurer l'amortissement des contrôles de montage ; ces contrôles valent
+0,025–0,097 µs, moins de 0,4 ‰ d'un lot de 256. Ce que l'axe montrait était l'effet inverse et
+cent fois plus grand : le coût par point **monte** avec le lot (+13 à 16 % en différentiel,
++39 à 43 % en surface du lot 1 au lot 256), la localité se dégradant. L'axe mesurait la
+distribution des points. Ce qui a sauvé la lecture n'est pas la prudence mais une seconde voie
+— les chemins de refus donnent le coût des contrôles **sans** les points, et ce chiffre rendait
+l'interprétation initiale intenable.
+
+**Réception :** aucun nouveau test unitaire ; workspace **331 réussis / cinq ignorés** en debug
+et en release, C18 et C02 inchangés. La réception préalable des refus est dans l'exemple : les
+deux chemins rendent la même cause aux mêmes entrées (`Time`, `Context`, `MaxSlope`,
+`Capacity`, `Slope`) et préservent leur sortie — sans quoi comparer leurs durées comparerait
+deux contrats.
+
+**Ce que je n'ai pas fait.** Aucun budget, et c'est voulu : rien ici ne dit combien de points
+par image le système sert. Les ~49 ms de cycle et ~35 ms de requête 64 de S118 décrivent un
+autre montage à une autre époque — ni témoin ni enveloppe, et non rejoués. Une seule machine,
+une seule chaîne : I-03 porte sur les valeurs, jamais sur les durées. Pas de cycle vivant, pas
+de concurrence, pas de δ3D. **A50 reste partielle** et le restera tant que le solveur
+perturbatif n'existe pas : produire la source n'est pas s'en servir. A226 est chiffrée, pas
+traitée.
+
+**Prochaine session recommandée. S184 : S183-1**, la consommation perturbative — un pas de
+solveur alimenté par `momentum_residual` contre le même pas sans elle. C'est le seul chiffre
+qui manque pour fermer la boucle A50, et la première occasion de voir si le facteur 3,4 se
+retrouve, s'efface ou se paie ailleurs. Le classement des points avant le lot (A226) suit.
+
+**Recommandations des bilans — état constaté, pas recopié** *(rituel §6.7)*. La formule
+« BILAN-S145/S176 portés par la construction » circule depuis plusieurs sessions ; vérification
+faite, elle recouvre trois situations différentes. **BILAN-S145 est soldé** : son point 1
+« lancer B1 » l'a été en S146, son point 3 « clore S63-1 par écrit » en S147, et son point 4
+— ne pas écrire de sonde avant B1 — est sans objet depuis. Le porter encore n'informe plus.
+**BILAN-B4-S176 reste actif** : il demandait le fournisseur différentiel dans la bibliothèque,
+construit de S177 à S181, reçu vivant en S182 et chiffré ici ; il reçoit un suivi daté. C'est
+donc lui seul, et non les deux, que la ligne `Session suivante` doit continuer de porter.
+
+**Décisions qui demandent un arbitrage humain :** aucune nouvelle. A107 reste ouverte.

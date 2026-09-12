@@ -18,15 +18,16 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-12 01:45 +02:00
+JETON            : libre
+Battement        : 2026-09-12 11:47 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S183 — S182-1/A50 : coût complet et allocations du consommateur différentiel
-Dernière session : S182 — cycle vivant et rejeu différentiel reçus
-Session suivante : à fixer en fin de S183
+Session en cours : aucune
+Dernière session : S183 — coût et allocations du consommateur différentiel mesurés
+Session suivante : S184 — S183-1/A50 : consommation perturbative de la source, un pas de solveur avec et sans elle
 
-*S160 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
-rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour.*
+*S183 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
+rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour, au même
+commit que `master` — constaté par `git worktree list`, pas recopié. (Même situation en S160.)*
 
 **Copies de travail — ADR-110, S159.** Le décompte n'a plus sa place ici : il vieillissait de
 session en session et annonçait « cinq worktrees » quand il y en avait six. **L'état se constate**
@@ -187,6 +188,28 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S183 — 2026-09-12 :** [COUT-DIFFERENTIEL-S183](docs/validation/COUT-DIFFERENTIEL-S183.md).
+**S182-1 réalisée : le coût du consommateur différentiel est mesuré, et rien d'autre.**
+Conditions de mesure publiées avant les chiffres, en étape séparée. Rapport
+différentiel/surface **3,0 à 4,3**, médiane ~3,4, **identique couche par couche**
+(B, impact, pression) : il suit les 31 scalaires publiés contre 10, pas la nature du
+calcul dérivé. Préparation et actualisation **identiques** aux deux chemins ; tout le
+surcoût est par point. `Controller::update` vaut 0,85–0,90 µs par créneau, une fois par
+instant publié — le poste dominant dès que le lot est petit. Empreinte +124 o par point
+au lieu de +40. **Zéro allocation d'hôte après `seal()`** sur six montages ; I-06 tenu
+mécaniquement. Aucun nouveau test ; workspace331 réussis/cinq ignorés, C18/C02 inchangés.
+Code d'exécution inchangé, **aucun ADR** — mesurer n'est pas décider.
+117 ADR,226 angles,263 leçons,18 invariants,6 SPEC,23 cas. **A226** et **L263**.
+**Aucun budget**, et c'est voulu : une machine, une chaîne, pas de cycle vivant, pas de
+solveur. Les ~49 ms de S118 restent un contexte historique, ni témoin ni enveloppe.
+A50/B4 restent partiels.
+**Suite S184 : S183-1/A50**, la consommation perturbative — un pas de solveur alimenté
+par `momentum_residual` contre le même pas sans elle. C'est le seul chiffre qui manque
+pour fermer la boucle A50 ; produire la source n'est pas s'en servir. Le classement des
+points avant le lot (A226) suit. **BILAN-S145 est soldé** — B1 lancé en S146, S63-1 close
+en S147 — et ne se reporte plus ; seul **BILAN-B4-S176** reste actif et porté. Aucun
+arbitrage humain nouveau.
 
 **S182 — 2026-09-12 :** [CYCLE-DIFFERENTIEL-S182](docs/validation/CYCLE-DIFFERENTIEL-S182.md).
 **S181-1 réalisée sur le montage de bibliothèque.** Actualisation, admissions

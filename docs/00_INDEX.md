@@ -17,6 +17,18 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S183 :** [COUT-DIFFERENTIEL-S183](validation/COUT-DIFFERENTIEL-S183.md), aucun ADR —
+mesurer n'est pas décider. Conditions de mesure publiées **avant** les chiffres.
+Rapport différentiel/surface 3,0 à 4,3 (médiane ~3,4), **identique couche par couche** :
+il suit les 31 scalaires publiés contre 10. Préparation et actualisation inchangées entre
+les deux chemins ; +124 o par point au lieu de +40 ; une allocation d'hôte, zéro après
+`seal()` sur six montages. Aucun nouveau test ; workspace331/cinq ignorés, C18/C02
+inchangés. Runtime inchangé.
+117 ADR,226 angles,263 leçons,18 invariants,6 SPEC,23 cas. **A226** et **L263**.
+Aucun budget : une machine, une chaîne, pas de cycle vivant ni de solveur. A50/B4 partiels.
+**Suite S184 : S183-1**, consommation perturbative — un pas de solveur alimenté par la
+source contre le même pas sans elle ; puis le classement des points (A226).
+
 **S182 :** [CYCLE-DIFFERENTIEL-S182](validation/CYCLE-DIFFERENTIEL-S182.md), ADR-117
 inchangé. S181-1 réalisée : dérivées/source identiques en bits après actualisation,
 admission, saturation/reprise, renouvellement et restauration. Trois nouveaux tests
