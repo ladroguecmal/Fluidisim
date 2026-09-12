@@ -194,6 +194,19 @@ ordres de grandeur d'écart, et treize ordres au-dessus de l'arrondi `f64`.
    rentrer dans l'arrondi, l'addition et l'application de l'amplification ne commutant
    qu'à l'arrondi près. Seuil déclaré : `≤ 10⁻¹⁴` relatif.
 
+   > **Précision P3a, 2026-09-12 — « exactement nul » ne vaut que sur l'état, pas sur le
+   > champ, et la distinction fixe le plancher de toute la mesure.** L'énoncé ci-dessus
+   > est vrai des **modes** et faux du **champ reconstruit**, ce que le test a montré
+   > immédiatement : à `M=1` et modes disjoints, l'écart de modes vaut `0` au bit, mais
+   > l'écart de champ vaut `2,6·10⁻¹⁶` relatif. La cause n'est pas la dynamique — les
+   > coefficients sont identiques bit pour bit — c'est la **reconstruction** : le total
+   > somme les modes `2, 3, 4, 6` dans un ordre, chaque train seul en somme un
+   > sous-ensemble dans un autre, et l'addition flottante n'est pas associative. Deux
+   > conséquences retenues : le banc relève désormais **les deux** écarts, et le `2,6·10⁻¹⁶`
+   > est le **plancher** au-dessous duquel aucun écart de champ ne signifie rien. Il est
+   > treize ordres de grandeur sous les mesures du §4, donc inoffensif — mais il devait
+   > être su avant de lire un petit écart comme un couplage faible.
+
 Ces deux lignes sont la condition de crédibilité de tout le reste : sans elles, un écart
 mesuré à `M=3` ne se distingue pas d'un défaut de montage.
 

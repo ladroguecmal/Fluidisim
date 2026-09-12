@@ -73,7 +73,7 @@ nomme ; elle n'était pas possible avant S193. Aucun choix δ, aucun seuil de ba
   modulation croisée de fréquence, cumulative en temps, pente 2), exigence de bande
   pour contenir k₁±k₂ et leurs harmoniques, couples résonants et non résonants,
   normalisation, réceptions chiffrées et contre-épreuves déclarées.
-- [ ] **P3a** — banc de couplage `nl_coupling_2d.rs` réutilisant `support/nl_surface.rs`
+- [x] **P3a** — banc de couplage `nl_coupling_2d.rs` réutilisant `support/nl_surface.rs`
   sans le modifier ; tests propres dont **train unique** et **M=1** à écart nul, et
   couple à modes disjoints exact au bit.
 - [ ] **P3b** — campagne : échelle d'amplitude, partage d'amplitude, croissance en
@@ -117,4 +117,23 @@ Une affirmation fausse corrigee avant commit : j'avais ecrit que la 2D cree des
 triades resonantes en eau profonde ; l'argument de non-resonance est vectoriel et
 survit a l'obliquite. Ce que la 2D change est le desaccord et les quatuors.
 Bande portee a Q=16 (Q=8 n'aurait pas contenu les produits cubiques jusqu'a q=9).
+
+P3a : nl_coupling_2d.rs, support S193 **non modifie** (idiome du depot :
+#[allow(dead_code)] sur le mod partage). Huit tests passent debug et release
+(quatre herites du support, quatre nouveaux). Le test M=1 a corrige une
+affirmation du protocole : la superposition est exacte **au bit sur l'etat** mais
+pas sur le **champ reconstruit** (2,6e-16, sommation flottante non associative).
+Le banc releve desormais les deux ecarts ; 2,6e-16 est le plancher de mesure.
+Controle de vie a s=0,05, couple (2,3), h=8, 20 periodes :
+ M=1 ecart 2,6e-16, croise et train **exactement nuls** ;
+ M=2 ecart 15,36 % ; M=3 ecart 36,12 %, 8,65 % des la premiere periode.
+Rapports dernier/premier quart : croise 1,023 (stationnaire, predit),
+train 4,197 (croissant, predit > 2). Les deux mecanismes se separent bien.
+Ordre de grandeur a retenir pour P3b : alpha ~ 1,6, donc la frontiere des 2 %
+tombe vers s ~ 0,01 et la duree ne l'achete pas — a mesurer proprement.
+
+Incident de procedure, P3a : le commit d'etape est parti **sans** la case cochee,
+un `cd` ayant deplace le repertoire avant l'ecriture du plan. Repare par amende
+du commit local non pousse, la regle du depot exigeant le travail et la case dans
+le meme commit. A retenir : ecrire le plan **avant** `git add`, pas apres.
 
