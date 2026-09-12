@@ -198,3 +198,98 @@ pub fn load_direct(n: usize, values: &[[f32; 3]], block: &mut Block) {
         }
     }
 }
+
+// --- S187 : réseaux à pas par axe, et réseaux à indices quelconques -------------------
+//
+// Rien de ce qui précède n'est modifié. S184 mesure son coût avec `scatter`, S186 son
+// erreur, et S186 a publié deux empreintes qui en dépendent : les formes générales
+// s'écrivent **à côté**, et la réception 2 de S187 exige qu'elles reproduisent la forme
+// uniforme en bits. Une implémentation générale qui ne retrouve pas son cas particulier
+// est fausse quelque part, et l'écart se lirait ensuite comme un effet de la graduation.
+
+/// Indices de mailles où se posent les nœuds d'un réseau uniforme de pas `r`, dans la
+/// convention de `lattice_points` : `1 + a·r`, et le dernier nœud peut déborder des
+/// mailles intérieures — c'est ce débordement que `base` prend en compte.
+pub fn axis_indices(n: usize, r: usize) -> Vec<usize> {
+    (0..nodes_per_axis(n, r)).map(|a| 1 + a * r).collect()
+}
+
+/// Poids d'interpolation d'un axe : pour chaque maille intérieure, le nœud de gauche et la
+/// fraction vers le nœud de droite. Quand la maille tombe sur le dernier nœud ou au-delà,
+/// la fraction vaut zéro et la valeur du nœud passe telle quelle.
+fn axis_weights(n: usize, idx: &[usize]) -> Vec<(usize, usize, f32)> {
+    (1..n - 1)
+        .map(|i| {
+            let mut j = 0;
+            while j + 1 < idx.len() && idx[j + 1] <= i {
+                j += 1;
+            }
+            if j + 1 < idx.len() {
+                let span = idx[j + 1] - idx[j];
+                (j, j + 1, (i - idx[j]) as f32 / span as f32)
+            } else {
+                (j, j, 0.0)
+            }
+        })
+        .collect()
+}
+
+/// Points d'un réseau donné par ses indices de mailles sur chaque axe, dans l'ordre
+/// `(a, b, c)` — celui qu'attendent `scatter_indexed` et `scatter_axes`.
+pub fn lattice_points_indexed(n: usize, idx: &[Vec<usize>; 3]) -> Vec<WorldPos> {
+    let mut v = Vec::with_capacity(idx[0].len() * idx[1].len() * idx[2].len());
+    for &a in &idx[0] {
+        for &b in &idx[1] {
+            for &c in &idx[2] {
+                v.push(point(cell_local(n, a, b, c)));
+            }
+        }
+    }
+    v
+}
+
+/// Interpolation trilinéaire depuis un réseau à indices quelconques vers les centres de
+/// mailles intérieures. Forme générale ; `scatter` en est le cas uniforme.
+pub fn scatter_indexed(n: usize, idx: &[Vec<usize>; 3], nodes: &[[f32; 3]], block: &mut Block) {
+    let (my, mz) = (idx[1].len(), idx[2].len());
+    let at = |a: usize, b: usize, c: usize| (a * my + b) * mz + c;
+    let wx = axis_weights(n, &idx[0]);
+    let wy = axis_weights(n, &idx[1]);
+    let wz = axis_weights(n, &idx[2]);
+    for i in 1..n - 1 {
+        let (ai, ai1, ti) = wx[i - 1];
+        for j in 1..n - 1 {
+            let (aj, aj1, tj) = wy[j - 1];
+            for k in 1..n - 1 {
+                let (ak, ak1, tk) = wz[k - 1];
+                let c = (i * n + j) * n + k;
+                for a in 0..3 {
+                    let g = |x: usize, y: usize, z: usize| nodes[at(x, y, z)][a];
+                    let l = |p: f32, q: f32, t: f32| p + t * (q - p);
+                    let x00 = l(g(ai, aj, ak), g(ai1, aj, ak), ti);
+                    let x10 = l(g(ai, aj1, ak), g(ai1, aj1, ak), ti);
+                    let x01 = l(g(ai, aj, ak1), g(ai1, aj, ak1), ti);
+                    let x11 = l(g(ai, aj1, ak1), g(ai1, aj1, ak1), ti);
+                    let y0 = l(x00, x10, tj);
+                    let y1 = l(x01, x11, tj);
+                    block.s[c][a] = l(y0, y1, tk);
+                }
+            }
+        }
+    }
+}
+
+/// Réseau à pas indépendant par axe. Sert l'attribution par axe de S187 : décimer
+/// verticalement seul, ou horizontalement seul, n'est pas décimer isotropiquement.
+pub fn axes_indices(n: usize, r: [usize; 3]) -> [Vec<usize>; 3] {
+    [
+        axis_indices(n, r[0]),
+        axis_indices(n, r[1]),
+        axis_indices(n, r[2]),
+    ]
+}
+
+/// Nombre de nœuds d'un réseau donné par ses indices.
+pub fn indexed_count(idx: &[Vec<usize>; 3]) -> usize {
+    idx[0].len() * idx[1].len() * idx[2].len()
+}

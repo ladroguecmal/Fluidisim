@@ -76,7 +76,7 @@ réduit pas l'erreur — il ne réduit que le nombre de nœuds, ce qui reste le 
       graduation **dérivée** de la mesure (équidistribution de `h²·∂²S`), la courbe
       erreur/nombre de nœuds comme livrable, les réceptions, et ce que la mesure ne
       prouvera pas.
-- [ ] **P3a** — étendre `support/perturbative_block.rs` **sans toucher au chemin
+- [x] **P3a** — étendre `support/perturbative_block.rs` **sans toucher au chemin
       isotrope** : réseau à pas par axe, puis réseau à indices quelconques par axe.
       Réception : le chemin général doit reproduire le chemin uniforme **en bits**, et
       S185/S186 doivent rendre leurs empreintes publiées (`0x39567a1d4bc2ba4c`,
@@ -89,6 +89,18 @@ réduit pas l'erreur — il ne réduit que le nombre de nœuds, ce qui reste le 
 - [ ] **P5** — rituel de fin (REPRISE.md §6).
 
 ### Notes de reprise
+
+P3a S187 : le support est étendu **à côté** du chemin isotrope — `axis_indices`,
+`axes_indices`, `lattice_points_indexed`, `scatter_indexed`, `indexed_count` dans
+`perturbative_block.rs`, et la reconstruction sortie dans
+`support/source_snapshots.rs` (S186 en avait une copie locale ; deux copies auraient
+divergé, L137). **Les deux vérifications passent** : la sortie **entière** de
+`composed_error` est identique au `diff` strict après le déplacement, et
+`cadence_error` rend `0x39567a1d4bc2ba4c`. Workspace **331 réussis / cinq ignorés** en
+debug et en release.
+Réception 2 : le réseau général reproduit l'uniforme — mêmes points **et** champ
+identique en bits pour `r ∈ {1,2,4,8}`. C'est exact et non fortuit : les poids valent
+`(i−idx)/span` contre `((i−1)%r)·(1/r)`, et `1/r` est exact pour une puissance de deux.
 
 S187 : master beadbf0 propre, quatre copies au même commit ; 117 ADR / 230 angles /
 266 leçons / 18 invariants / 6 SPEC / 23 cas. Démarrage à froid, copie principale.
