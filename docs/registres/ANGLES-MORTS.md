@@ -2827,3 +2827,9 @@ CFL/résolution non mesurées. Workspace342/cinq ignorés, trois tests globaux a
 release. Reste **S200-1** : pression f64 expérimentale sous I-08 et budget itérations
 sous I-05, explicitement non reçus pour production. S199-2 flux ouverts reste active.
 Aucun nouvel angle ; voir CONTRATS-DELTA-S200.
+
+**Suivi A228/A50 — S201.** B visible via IMAGE-B-S201, image CPU locale autorisée et
+inspectée. Le critère numérique2 % est acquis depuis ADR-120 ; une image n'est pas
+un protocole perceptuel reçu. A50 reste partielle, aucun seuil humain inventé.
+ADR-124 change la priorité de construction (budget image puis effets δ bornés),
+pas la validité physique des mesures. Aucun nouvel angle.

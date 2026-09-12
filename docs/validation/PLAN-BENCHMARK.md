@@ -104,6 +104,11 @@ conservation d'énergie sur 60 s ; coût pour 4096 paquets ; déterminisme crois
 
 ## B3 — Couche δ : technologie, coût et latence
 
+> **Direction S201 — ADR-124.** Budget d'image/coût par bloc avant sélection,
+> puis δ dimensionnée en effets bornés. Les scénarios historiques ci-dessous
+> restent des exigences de référence ; aucun solveur général n'est préalable
+> à l'affichage B/W. Le sous-ensemble à livrer doit être nommé avant réception.
+
 > **S200 — 2026-09-13 :** allocations globales du pas supprimées et refus numériques
 > atomiques reçus, capacités bornées à ce qui est testé. [CONTRATS-DELTA-S200](CONTRATS-DELTA-S200.md).
 > A244 partielle : précision f64 et budget temporel restent non reçus ; ordre du fond

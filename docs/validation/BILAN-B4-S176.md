@@ -3,7 +3,16 @@
 2026-09-11. Action S175-1. État du code vérifié sur master0b37fd2 àl’amorce.
 Ce bilan confronte les reçus S163–S175 au contrat ; aucune nouvelle simulation lancée.
 
-## État actif — S200, 2026-09-13
+## État actif — S201, 2026-09-13
+
+**B est visible** : caméra/rayons CPU, images locales PPM à deux instants et témoin
+plat, [IMAGE-B-S201](IMAGE-B-S201.md). Aucune réception perceptuelle déduite de l'image.
+Seuil numérique2 % acquis ; **B4/A50 restent partiels**. La direction utilisateur
+[ADR-124](../adr/ADR-124-image-budget-et-effets-bornes.md) place désormais budget
+d'image/coût par bloc puis effets δ bornés avant les reliquats du noyau général.
+V attend un besoin gameplay. Forces, perception et couplage non reçus restent nommés.
+
+## État historique — S200, 2026-09-13
 
 Le noyau δ reçoit zéro allocation globale pendant le pas et des refus numériques
 atomiques ; ses capacités ne surpromettent plus stabilité/référentiel.

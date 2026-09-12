@@ -1670,7 +1670,7 @@ entrée par entrée. Le fil reprend ci-dessous.
 
 ## File active
 
-Relue en S200, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+Relue en S201, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
 
 *Renommée de « File active S190 » en S193 : le contenu est daté ligne par ligne, le titre
 suivait un numéro de session et vieillissait seul (A185 — un état sans date se lit au
@@ -1683,11 +1683,14 @@ Porteur des travaux internes : l'agent de construction du dépôt, sous arbitrag
 l'utilisateur ; aucune équipe extérieure fictive. Cette file complète la prochaine
 action unique et doit être relue au rituel de fin (A211).
 
+**Direction utilisateur S201, ADR-124 : B visible → budget image → δ bornée/V au besoin gameplay.**
+
 | action / objet | état daté et ce qui reste | priorité / déclencheur |
 |---|---|---|
-| **S200-1 / A244 — B3 / δ** | **S200 : S199-1 partielle**, zéro allocation globale du pas et refus numériques atomiques reçus, capacités restreintes ;342 tests/cinq ignorés. Pression f64 expérimentale et plafond en itérations restent hors contrat de production | prochaine session : recevoir précision et budget temporel du noyau, sans convertir arbitrairement itérations en ms ; avance δ, compteur0 |
+| **S201-1 / budget image** | **S201** : B visible, caméra CPU et PPM reçus, ~12 s/image640×360 ; aucun budget production choisi | **S202 : budget image et coût par bloc**, sur cible/charge nommées, puis dimensionner les effets δ bornés (ADR-124) |
+| **S200-1 / A244 — B3 / δ** | **S200 : S199-1 partielle**, zéro allocation globale du pas et refus numériques atomiques reçus, capacités restreintes ;342 tests/cinq ignorés. Pression f64 expérimentale et plafond en itérations restent hors contrat de production | reportée derrière ADR-124 ; à recevoir si un effet borné retient le noyau, sans convertir arbitrairement itérations en ms |
 | **A241 / repli — reporté** | **S197** : suspect réfuté, la totalité de l'écart reste sans cause | deux candidats nommés (bande relative, termes triples), sous contrainte **L278** ; **n'avance aucune couche**, donc passe après B3/δ |
-| **S199-2 / B3 / δ — fond coupé** | **S199** : ordre1,947 plat,0,898 lisse,0,895 marche ; candidat non éligible. Fonctionnelle non pondérée par les ouvertures ; mécanisme de face à isoler | après S199-1 : reconstruire les flux ouverts et recevoir le triplet avant surface mobile ; aucune famille éliminée |
+| **S199-2 / B3 / δ — fond coupé** | **S199** : ordre1,947 plat,0,898 lisse,0,895 marche ; candidat non éligible. Fonctionnelle non pondérée par les ouvertures ; mécanisme de face à isoler | reportée derrière budget image ; requise si un effet retenu emploie ces faces coupées |
 | **B4 forces / perception** | aucun reçu complet ; la métrique de vitesse S190 ne les remplace pas | après montage commun surface/solide ; protocole perceptif conserve ses participants réels requis |
 | **A216** (A217 **close** en S194) | **S194** : A217 a sa réponse — la cambrure gouverne l'addition en eau profonde, plus la durée et le désaccord de triade ; A216, coefficient S161, reste inexpliquée | A216 avec un montage qui l'explique ; ne pas dériver 0,02/0,24 comme seuil, ADR-123 n'est pas une bascule |
 | **`n` sources / A240 — close** | **S195 : A240 close.** `n = 2..6` mesuré : à cambrure par train fixée l'écart croît en `n^0,75` (sous-linéaire, loin du `n²`) ; à cambrure **totale** fixée il **décroît** en `1/√n`. ADR-123 se transporte dans le sens favorable | rien à instruire ; limites conservées : `n ≤ 6`, colinéaire, fond plat, eau profonde |
@@ -1697,7 +1700,7 @@ action unique et doit être relue au rituel de fin (A211).
 | **λ_cut / B2 / coupure W–δ** | B2 partiel ; dispersion/dissipation et borne d'éponge A92 à assembler | choix du couple W/δ ; ne pas confondre réception source B4 et coupure |
 | **Bathymétrie / S116-2** | **S194** : fond plat seul, mais le couplage y est **8,6 fois plus fort** vers le rivage quand le désaccord de triade tombe ; et la faible profondeur non linéaire n'a aucun oracle de Stokes (A234) | lot de construction propre ; une frontière établie en eau profonde ne se transporte pas vers le rivage (ADR-123) |
 | **A98 / conformité multiplateforme** | aucune seconde cible testée par S190 ; debug/release locaux ne suffisent pas | réception sur seconde cible disponible ; I-03 maintenu |
-| **V / bancs restants** | V non construite ; B1/B2/B4 partiels, aucun banc complet, huit autres non lancés | arbitrer les lots système depuis cette file plutôt que prolonger par défaut la dernière sonde |
+| **V / bancs restants** | S201 : V non construite, attend un besoin gameplay nommé (ADR-124) ; B1/B2/B4 partiels, aucun banc complet, huit autres non lancés | arbitrer les lots système depuis cette file plutôt que prolonger par défaut la dernière sonde |
 | **A94/A95 / dossier de réunions** | quatorze fiches à traiter selon ADR-028 ; les qualifier en décisions internes ou faits externes | les intitulés « avant première ligne de code » ne bloquent pas rétroactivement le code autorisé depuis S20 |
 
 Les noms de personnes, l'état du terrain/projet extérieur et les actions d'infrastructure

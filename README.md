@@ -678,3 +678,16 @@ Filtre S199 inchangé : **0x0ad3f695685ca27a**, fond coupé toujours≈ordre0,90
 Compteur0, δ avance. B3 non admissible, B4/A50 partiels, seuil2 % inchangé.
 123 ADR,244 angles,279 leçons,18 invariants,6 SPEC,23 cas ; aucun ADR nouveau.
 Voir [contrats δ S200](docs/validation/CONTRATS-DELTA-S200.md).
+
+**S201 — 2026-09-13 : B visible, première image CPU locale.**
+Caméra/rayons et PPM640×360 depuis Background::eval/JONSWAP N32, sans dépendance.
+Deux instants et un plan témoin inspectés ; zéro rayon non résolu, tolérance3 mm.
+T12 empreinte **a52ff81902b150c3**, t13 **1df02ffb7c202b32**, environ12 s/image
+sur cette machine : référence d'observation, aucun budget temps réel reçu.
+Cinq tests exemple réussis ;342/cinq ignorés reste le reçu bibliothèque S200.
+**ADR-124 actée sur instruction utilisateur** : images locales permises, puis
+budget image/coût par bloc, puis δ en effets bornés et V au besoin gameplay.
+**Suite S202 : S201-1**, budget image. S200-1/S199-2 reportées, pas closes.
+B4/A50 partiels ; seuil numérique2 % acquis, aucune perception déclarée reçue.
+124 ADR,244 angles,279 leçons,18 invariants,6 SPEC,23 cas. Compteur0 : décision δ/V.
+Voir [image B S201](docs/validation/IMAGE-B-S201.md), [ADR-124](docs/adr/ADR-124-image-budget-et-effets-bornes.md).

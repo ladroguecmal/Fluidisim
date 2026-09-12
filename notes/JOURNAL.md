@@ -10486,3 +10486,44 @@ ni leçon distincte : l'instrument doit mesurer le phénomène revendiqué, prin
 appliqué ; le reçu global complète celui de l'hôte.123 ADR/244 angles/279 leçons/
 18 invariants/6 SPEC/23 cas vérifiés. B3/B4, registre, README/index/REPRISE mis à jour.
 Copies propres à avancer après commit final, aucune suppression.
+
+## S201 — 2026-09-13 — Première image du champ B, direction utilisateur
+
+**Entrée.** Après S200, l'utilisateur choisit image→budget→δ bornée/V au besoin.
+Autorisation d'image demandée conformément à son message, puis accordée (« oui »).
+Quatre copies9a25798 propres, aucun travail concurrent. Plan seul74bc6a7.
+S200-1 est reportée explicitement ; la suite ne vient pas du chaînage.
+
+**Construction.** render_background.rs, exemple CPU Rust zéro dépendance : vraie
+recette JONSWAP cuite N32, Background::eval pour chaque interrogation, hauteur et
+normale existantes, caméra perspective/rayons. Pas de nouvelle houle ni maillage de
+substitution. PPM P6 local640×360 à deux échantillons/pixel, sortie dans captures/
+ignoré. Preview PNG transcodée avec Pillow pour affichage, pixels sans retouche.
+
+**Réception.** Cinq tests debug passent (deux propres, trois hôte). Deux instants
+12/13 s et témoin plat inspectés, différents visuellement et en pixels. Premier jet
+256 étapes laissait997/1021 rayons rasants magenta ;4096 étapes donne zéro refus,
+tolérance verticale3 mm conservée. Répertoire de sortie créé après un premier échec
+explicite d'export. Reçu final : t12 hash a52ff81902b150c3,10021895 évaluations,
+11727,894 ms ; t13 hash1df02ffb7c202b32,10145445 évaluations,11925,566 ms ; plan
+hash dae2f2514cad0324,77,590 ms, sans évaluer B. Coûts locaux uniques, pas médianes
+ni garanties temps réel. Limite600 m, éclairage/brume de diagnostic, aucune calibration
+optique ni perception reçue. Images/paramètres dans IMAGE-B-S201.
+
+**Décision durable : ADR-124 actée**, direction explicite utilisateur. Image locale
+permise, budget d'image/coût par bloc ensuite, δ comme effets bornés, V au besoin
+gameplay. Aucune autorité ni persistance transférée à δ ; ADR-027 non rouvert.
+Les exigences B4 ne sont pas effacées, mais un δ général ne bloque plus les images
+et réceptions propres de B/W. Seuil2 % déjà acquis depuis S190 ; les vieux passages
+« critère manquant » sont historiques. Aucun effet mousse/spray/audio reçu par l'image.
+
+**Suite S202 : S201-1**, budget image et coût par bloc sur cible/charge nommées,
+puis détailler les effets δ bornés. S200-1 et S199-2 conservées et reportées ; ne pas
+réparer automatiquement le noyau général avant ce choix. A50/B4 partiels, A98 intacte.
+
+**Rituel.** File entière relue, V requalifiée par besoin gameplay, autres chantiers
+conservés ; AGENTS porte l'autorisation d'image (un seul texte d'amorce). Aucun
+angle/leçon distincts ;124 ADR/244 angles/279 leçons/18 invariants/6 SPEC/23 cas.
+Bibliothèques inchangées,342 tests/cinq ignorés reste reçu S200 non rejoué.
+Compteur0 : ADR-124 décide le périmètre δ/V, ce qui avance selon REPRISE §4.
+Journal/index/README/REPRISE et B3/B4 actualisés, copies à avancer après clôture.

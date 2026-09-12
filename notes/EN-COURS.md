@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S201 — en cours
+Session : S201 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : direction utilisateur, rendre B visible par un exemple CPU caméra/rayons
 et PPM local sans dépendance. Image explicitement autorisée après question, le13/09.
@@ -71,7 +71,7 @@ Priorité sur S200-1, conservée dans la file ; pas de critère perceptuel inven
   utiliser le vrai Background::eval, tests géométriques et export.
 - [x] **P3** — produire une vue lisible, inspection visuelle, témoin plat et second
   instant ; publier paramètres/coût sans prétendre recevoir la perception.
-- [ ] **P4** — documenter direction/autorisation et prochaines décisions budget puis
+- [x] **P4** — documenter direction/autorisation et prochaines décisions budget puis
   périmètre δ/V ; file/index/passation/journal, compteur et copies synchronisées.
 
 ### Notes de reprise
@@ -90,3 +90,8 @@ P3 : trois images640x360 inspectées, aucun rayon non résolu après correction.
 T12 a52ff81902b150c3, t13 1df02ffb7c202b32, plat dae2f2514cad0324.
 Cinq tests exemple passent (deux propres/trois hôte), aucun test bibliothèque refait.
 Preview PNG = transcodage fidèle PPM via Pillow, sans retouche ; code zéro dépendance.
+
+P4 : ADR-124 actée, autorisation persistante portée dans AGENTS, direction/file
+propagées. Journal/index/README/REPRISE et B3/B4 actualisés, aucun angle/leçon neuf.
+Décomptes124/244/279/18/6/23 vérifiés. Compteur0 car décision δ/V, jeton libre.
+Prochaine session budget image S201-1 ; copies à avancer après commit final.

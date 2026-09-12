@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 00:23 +02:00
+JETON            : libre
+Battement        : 2026-09-13 00:32 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S201 — rendre B visible, autorisation utilisateur
-Dernière session : S200 — pas δ sans allocation, refus atomiques ; A244 partielle
-Session suivante : S201 — S200-1/A244 : précision et budget temporel δ ; S199-2 flux ouverts reste dans la file
-Maillons        : 0 — S200 a avancé la couche δ, compteur à zéro (§6.8)
+Session en cours : aucune
+Dernière session : S201 — B visible en PPM ; ADR-124 image/budget/effets bornés
+Session suivante : S202 — S201-1 : budget image et coût par bloc ; direction ADR-124
+Maillons        : 0 — S201 acte le périmètre δ/V, ADR-124 (§6.8)
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 
@@ -139,9 +139,9 @@ une session ne peut signaler sa présence qu'en travaillant.
 
 ---
 
-## File active du projet — S200
+## File active du projet — S201
 
-**S200 : allocations/refus δ corrigés, noyau non admissible B3. S200-1/A244 reçoit précision/budget ;
+**S201 : priorité utilisateur à B visible (fait), budget image puis effets δ bornés/V au besoin. S200-1/A244 est reportée ;
 S199-2 garde le défaut des flux ouverts. Les acquis S194 ci-dessous restent datés ;
 la file liée porte aussi leurs suivis S195–S199.**
 
@@ -222,7 +222,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 123 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 124 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -241,6 +241,19 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S201 — 2026-09-13 : B visible, première image CPU locale.**
+Caméra/rayons et PPM640×360 depuis Background::eval/JONSWAP N32, sans dépendance.
+Deux instants et un plan témoin inspectés ; zéro rayon non résolu, tolérance3 mm.
+T12 empreinte **a52ff81902b150c3**, t13 **1df02ffb7c202b32**, environ12 s/image
+sur cette machine : référence d'observation, aucun budget temps réel reçu.
+Cinq tests exemple réussis ;342/cinq ignorés reste le reçu bibliothèque S200.
+**ADR-124 actée sur instruction utilisateur** : images locales permises, puis
+budget image/coût par bloc, puis δ en effets bornés et V au besoin gameplay.
+**Suite S202 : S201-1**, budget image. S200-1/S199-2 reportées, pas closes.
+B4/A50 partiels ; seuil numérique2 % acquis, aucune perception déclarée reçue.
+124 ADR,244 angles,279 leçons,18 invariants,6 SPEC,23 cas. Compteur0 : décision δ/V.
+Voir [image B S201](docs/validation/IMAGE-B-S201.md), [ADR-124](docs/adr/ADR-124-image-budget-et-effets-bornes.md).
 
 **S200 — 2026-09-13 : pas δ sans allocation, refus numériques atomiques.**
 Clones supprimés, sauvegardes préallouées, mémoire comptée à sa précision réelle.
