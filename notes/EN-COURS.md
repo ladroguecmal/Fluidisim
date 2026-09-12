@@ -94,7 +94,7 @@ quadratique et l'additive pour l'interpolation, et les écarts de 0,87 à 1,71 o
 - [x] **P2** — publier le protocole avant tout chiffre : familles graduée et ancrée, la
       localisation à la **maille**, l'identité d'additivité locale, ce qu'elle expliquerait,
       les réceptions, et ce que la mesure ne prouvera pas.
-- [ ] **P3a** — sortir dans `support/` le profil `∂²_z S` et les indices gradués que S187
+- [x] **P3a** — sortir dans `support/` le profil `∂²_z S` et les indices gradués que S187
       gardait locaux. Rejouer `graded_lattice` et vérifier `0x6cf13183b4a240df`.
 - [ ] **P3b** — écrire `graded_composition.rs` : champs d'écart conservés maille par maille,
       argmax localisés, résidu d'additivité locale, puis les trois lois de norme pour la
@@ -105,6 +105,17 @@ quadratique et l'additive pour l'interpolation, et les écarts de 0,87 à 1,71 o
 - [ ] **P5** — rituel de fin (REPRISE.md §6).
 
 ### Notes de reprise
+
+P3a S189 : `compact_index`, `d2z_profile` et `graded_indices` posés dans
+`support/perturbative_block.rs` ; `graded_lattice` y pointe et rend
+**0x6cf13183b4a240df** avec une sortie **entière** identique au `diff`. Les **quatre**
+empreintes publiées du support sont vérifiées d'un coup : `cadence_error`
+0x39567a1d4bc2ba4c, `composed_error` 0x0e743846d4656870, `graded_lattice`
+0x6cf13183b4a240df, `anchored_composition` 0x21bab548c7b9775c.
+*Incident de découpe, sans conséquence parce que le compilateur l'a vu* : la tranche
+retirée de `graded_lattice` emportait aussi `overshoot_indices`, qui vivait entre les deux
+fonctions déplacées. Restauré à l'identique, et l'empreinte le confirme. Une découpe par
+bornes textuelles se vérifie par compilation, pas par relecture.
 
 S189 : master 4b40410 propre, quatre copies au même commit ; 118 ADR / 232 angles /
 268 leçons / 18 invariants / 6 SPEC / 23 cas. Démarrage à froid, copie principale.

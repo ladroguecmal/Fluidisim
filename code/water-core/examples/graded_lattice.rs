@@ -141,65 +141,14 @@ fn evolve(
     Outcome { u: blk.u, es_max }
 }
 
-/// Dérivée seconde verticale de la source, par tranche, en maximum sur la tranche.
-/// Les deux tranches de bord emprunt leur valeur à leur voisine : la maille fantôme
-/// existe dans le bloc mais pas dans le réseau plein, et inventer une valeur serait pire
-/// que de recopier la voisine — le fait est déclaré plutôt que caché.
+/// Profil vertical et graduation : depuis S189 les deux vivent dans `support/`, parce que
+/// S189 pose le même réseau et que deux copies divergeraient (L137). L'empreinte de cette
+/// session vérifie que le déplacement n'a rien changé.
 fn d2z_profile(field: &[[f32; 3]]) -> Vec<f64> {
-    let inv = 1.0 / (DX * DX);
-    let mut p = vec![0.0f64; SIDE - 2];
-    for k in 2..SIDE - 2 {
-        let mut m = 0.0f64;
-        for i in 1..SIDE - 1 {
-            for j in 1..SIDE - 1 {
-                for x in 0..3 {
-                    let v = field[compact(i, j, k + 1)][x] as f64
-                        - 2.0 * field[compact(i, j, k)][x] as f64
-                        + field[compact(i, j, k - 1)][x] as f64;
-                    m = m.max((v * inv).abs());
-                }
-            }
-        }
-        p[k - 1] = m;
-    }
-    p[0] = p[1];
-    let last = p.len() - 1;
-    p[last] = p[last - 1];
-    p
+    block::d2z_profile(SIDE, field)
 }
-
-/// Indices verticaux équidistribués : `h·√|∂²_z S|` constant, donc des nœuds posés à
-/// incréments égaux de `Φ = ∫ √|∂²_z S| dz`. Accrochés aux indices de mailles, doublons
-/// fusionnés, extrémités forcées — §4 du protocole.
 fn graded_indices(profile: &[f64], want: usize) -> Vec<usize> {
-    let m = profile.len();
-    let mut phi = vec![0.0f64; m];
-    for k in 1..m {
-        phi[k] = phi[k - 1] + 0.5 * (profile[k - 1].sqrt() + profile[k].sqrt()) * DX;
-    }
-    let total = phi[m - 1];
-    let mut out = Vec::with_capacity(want);
-    for a in 0..want {
-        let target = a as f64 * total / (want - 1) as f64;
-        let mut best = (f64::INFINITY, 0usize);
-        for k in 0..m {
-            let d = (phi[k] - target).abs();
-            if d < best.0 {
-                best = (d, k);
-            }
-        }
-        let cell = 1 + best.1;
-        if out.last() != Some(&cell) {
-            out.push(cell);
-        }
-    }
-    if out[0] != 1 {
-        out.insert(0, 1);
-    }
-    if *out.last().unwrap() != SIDE - 2 {
-        out.push(SIDE - 2);
-    }
-    out
+    block::graded_indices(SIDE, profile, want)
 }
 
 /// Indices verticaux de la convention **historique** : uniformes de pas `r`, avec un

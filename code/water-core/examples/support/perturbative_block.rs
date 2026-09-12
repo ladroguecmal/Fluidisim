@@ -307,3 +307,74 @@ pub fn anchored_indices(n: usize, want: usize) -> Vec<usize> {
     out.dedup();
     out
 }
+
+/// Indice compact d'une maille intérieure, dans l'ordre de `interior_points`.
+pub fn compact_index(n: usize, i: usize, j: usize, k: usize) -> usize {
+    let m = n - 2;
+    ((i - 1) * m + (j - 1)) * m + (k - 1)
+}
+
+/// S189 : dérivée seconde **verticale** de la source, par tranche, en maximum sur la
+/// tranche — le profil dont la graduation d'ADR-118 a besoin. Sorti de `graded_lattice`
+/// (S187) pour être partagé avec `graded_composition` (S189) : deux copies du même profil
+/// poseraient deux réseaux différents, et les deux sessions ne se compareraient plus (L137).
+///
+/// Les deux tranches de bord empruntent leur valeur à leur voisine : la maille fantôme
+/// existe dans le bloc mais pas dans le réseau plein, et recopier la voisine vaut mieux
+/// qu'inventer une valeur. Le fait est déclaré plutôt que caché.
+pub fn d2z_profile(n: usize, field: &[[f32; 3]]) -> Vec<f64> {
+    let inv = 1.0 / (DX * DX);
+    let mut p = vec![0.0f64; n - 2];
+    for k in 2..n - 2 {
+        let mut m = 0.0f64;
+        for i in 1..n - 1 {
+            for j in 1..n - 1 {
+                for x in 0..3 {
+                    let v = field[compact_index(n, i, j, k + 1)][x] as f64
+                        - 2.0 * field[compact_index(n, i, j, k)][x] as f64
+                        + field[compact_index(n, i, j, k - 1)][x] as f64;
+                    m = m.max((v * inv).abs());
+                }
+            }
+        }
+        p[k - 1] = m;
+    }
+    p[0] = p[1];
+    let last = p.len() - 1;
+    p[last] = p[last - 1];
+    p
+}
+
+/// Indices verticaux **équidistribués** : `h·√|∂²_z S|` constant, donc des nœuds posés à
+/// incréments égaux de `Φ = ∫ √|∂²_z S| dz` (ADR-118, règle 2). Accrochés aux indices de
+/// mailles, doublons fusionnés, extrémités forcées.
+pub fn graded_indices(n: usize, profile: &[f64], want: usize) -> Vec<usize> {
+    let m = profile.len();
+    let mut phi = vec![0.0f64; m];
+    for k in 1..m {
+        phi[k] = phi[k - 1] + 0.5 * (profile[k - 1].sqrt() + profile[k].sqrt()) * DX;
+    }
+    let total = phi[m - 1];
+    let mut out = Vec::with_capacity(want);
+    for a in 0..want {
+        let target = a as f64 * total / (want - 1) as f64;
+        let mut best = (f64::INFINITY, 0usize);
+        for k in 0..m {
+            let d = (phi[k] - target).abs();
+            if d < best.0 {
+                best = (d, k);
+            }
+        }
+        let cell = 1 + best.1;
+        if out.last() != Some(&cell) {
+            out.push(cell);
+        }
+    }
+    if out[0] != 1 {
+        out.insert(0, 1);
+    }
+    if *out.last().unwrap() != n - 2 {
+        out.push(n - 2);
+    }
+    out
+}
