@@ -68,7 +68,7 @@ contre la correction croisée quadratique, qui reste portée par la file active.
 ### Plan
 
 - [x] **P1** — reprise, état réel (quatre copies au même commit), jeton et plan seuls.
-- [ ] **P2** — dérivation et protocole **avant tout code** : décomposition du forçage
+- [x] **P2** — dérivation et protocole **avant tout code** : décomposition du forçage
   croisé à `n` termes, les deux régimes d'addition — cohérent contre dispersé — et leurs
   prédictions **opposées**, les deux séries (cambrure totale fixée, cambrure par train
   fixée), exigence de bande, jeux de phases déterministes, réceptions chiffrées dont la
@@ -102,3 +102,24 @@ Leçons de S194 à appliquer : **L274** — déclarer la convergence en ordre et
 Richardson sur **trois** niveaux, jamais en taille de déplacement ; **L271** — déclarer au
 moins une configuration à effet nul par construction ; **A238** — ne pas établir un ordre
 de convergence sur un maximum de résidu, employer une fonctionnelle lisse.
+
+P2 : protocole dans SOURCES-MULTIPLES-S195. Derivation complete, sans coefficient
+libre : trois familles de termes croises, dont les **triples** C(ai,aj,ak) qui
+n'existent pas pour deux trains (apparaissent a n=3, nombres d'onde ki+-kj+-kk).
+Serie A, cambrure totale fixee : ecart/A = S(n-1)/n en coherent, 2S√(n(n-1)/2)/n²
+en disperse. Rapports n=6/n=2 : **1,667 contre 0,431**, facteur 3,87 et sens
+opposes. Serie B, cambrure par train fixee : s(n-1) contre s√(2(n-1)/n), rapports
+**5,0 contre 1,29**. A240 avait raison sur le comptage et tort sur la consequence :
+rapporte a l'amplitude totale le facteur est n, pas n².
+Troisieme prediction, sans ajustement : la part seculaire par train se dilue en
+(n-1)/n², donc ecart(N=10)/ecart(N=1) doit **decroitre** avec n en serie A.
+Choix de modes 2..7 : place n=2 sur le couple (2,3) de S194, donc continuite
+**attendue bit pour bit** avec son point Q=24 (3,612474e-1). Bande portee a Q=24
+car les produits cubiques atteignent 21.
+Phases : deux jeux deterministes, alignees et suite d'or a faible discrepance.
+Separation des mecanismes par la **duree** et non par les modes : a n trains les
+sommes ki+kj tombent sur des modes de train, il n'y a plus de mode exclusivement
+croise. Le banc en publiera le decompte.
+Convergence declaree des le protocole sous la forme de L274 : ordre et residu de
+Richardson sur trois niveaux de K, sur la moyenne quadratique (A238).
+
