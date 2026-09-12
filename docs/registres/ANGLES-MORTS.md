@@ -2001,7 +2001,7 @@ comparant `radial` et `radial+1` — fidèle à un facteur 2,5, et sous-estimant
   constante change. Mesuré, pas compris. Peu coûteux à instruire — la sonde `additivite_b4.rs`
   existe et le balayage tient en une étape.
 
-- **A217** *(sévérité 2, S161 ; ouverte)* — **En eau profonde, on ne sait pas quelle variable
+- **A217** *(sévérité 2, S161 ; **close S194 par ADR-123** — voir le suivi daté en fin de fichier)* — **En eau profonde, on ne sait pas quelle variable
   gouverne la validité de l'addition.** Le premier volet de B4 (ADR-111) l'établit en régime peu
   profond : c'est `max|δ|/h`, et non le rapport à `Hs` qu'ADR-001 proposait. Mais `B` est une houle
   **dispersive en eau profonde**, où la profondeur ne joue plus : la variable y serait
@@ -2562,3 +2562,115 @@ il y manque une **référence**, pas un solveur. Les six autres lignes sont cons
 leurs déclencheurs : forces/perception, A213, λ_cut/B2/coupure W–δ, A98 multiplateforme,
 V/bancs restants, A94/A95 dossier de réunions. Aucun chantier latéral déclaré clos par le
 présent essai. Le dispositif reste à éprouver.
+
+- **A238** *(sévérité 2, S194 ; ouverte)* — **Un maximum sur une fenêtre ne converge pas
+  quand la quantité mesurée est une différence de deux évolutions presque égales.** S194
+  raffine la profondeur discrète sur son écart de superposition et obtient, sur la
+  **moyenne quadratique**, un ordre de `1,9295` et un résidu de Richardson de `0,47 %` à
+  `K=64` — de la convergence propre. Sur le **maximum** de la même quantité, aux mêmes
+  points, les ordres valent `−0,7914`, `−0,3700`, `+0,6140`, et les valeurs ne sont même
+  pas monotones (`1,668 / 1,709 / 1,781 · 10⁻²` pour `K=32/64/128`). La cause n'est pas un
+  défaut de véhicule : un maximum est une **statistique d'ordre** sur un signal oscillant,
+  et un changement de fréquence de `6·10⁻⁴` suffit à déplacer l'endroit où il tombe. Ce
+  qui rend cet angle général : **S192 et S193 ont toutes deux reçu leur convergence
+  spatiale sur des maxima**, avec des ordres 2 impeccables — parce que leur erreur était
+  une fonction lisse et monotone du pas, et non un résidu de deux évolutions. Rien dans
+  leurs protocoles ne disait pourquoi cela marchait, donc rien n'avertit qu'ailleurs cela
+  ne marchera pas. Ce qui reste ouvert : aucune autre réception du dépôt n'a été relue sous
+  cet angle, et plusieurs bancs mesurent des **écarts** entre deux montages. Sévérité 2 :
+  aucun chiffre publié n'est faux — les maxima publiés restent les bons nombres pour juger
+  un budget, et leur incertitude de discrétisation est celle de la moyenne quadratique —
+  mais un *ordre de convergence* établi sur un maximum de résidu ne vaut rien.
+  Voir [COUPLAGE-DEUX-TRAINS-S194](../validation/COUPLAGE-DEUX-TRAINS-S194.md) §7.9.
+
+- **A239** *(sévérité 3, S194 ; ouverte)* — **Un contrôle de non-artefact qui juge la
+  *taille* d'un déplacement ne distingue pas un artefact d'une convergence.** Le protocole
+  de S194 exigeait que passer `K` de 32 à 64 ne déplace pas l'écart de plus de 2 % ; le
+  déplacement mesuré vaut `5,37 %`, et le contrôle est donc **non tenu tel qu'il était
+  écrit**. Or ce n'est pas un artefact : le rapport des déplacements successifs
+  `|K32−K64|/|K64−K128|` vaut `3,81`, c'est-à-dire 4, c'est-à-dire exactement ce que produit
+  un schéma d'ordre deux sur une grille grossière. **Un contrôle de ce genre échoue
+  d'autant plus que le schéma converge mieux**, ce qui est l'inverse de son intention. La
+  forme correcte juge l'**ordre** de la suite et le **résidu de Richardson** au pas retenu.
+  Ce qui reste ouvert : le dépôt compte d'autres contrôles formulés en « déplacement sous
+  x % » et aucun n'a été relu sous cet angle. Sévérité 3 : c'est une forme de contrôle à
+  corriger, non un résultat faux ; la mesure de S194 a été refaite dans la bonne forme dans
+  la même session.
+
+- **A240** *(sévérité 2, S194 ; ouverte)* — **Deux trains ne sont pas `n` sources, et le
+  nombre de paires croît comme `n²`.** ADR-123 chiffre le domaine de la superposition pour
+  **deux** trains : sous 2 % en dessous d'une cambrure de `0,009` par train, fautif avant
+  une période au-delà de `0,014`. Le chemin perturbatif du projet additionne en revanche
+  autant de sources qu'il y a d'événements et de contributions — et **rien de ce qui est
+  mesuré ne s'extrapole** : le forçage croisé compte un terme `2Q(a_i,a_j)` par paire, donc
+  `n(n−1)/2` termes, et la part cumulative en compte davantage encore. Trois régimes sont
+  concevables et aucun n'est mesuré : addition en racine si les phases sont décorrélées,
+  addition linéaire si elles ne le sont pas, ou saturation si le domaine du véhicule est
+  quitté avant. Ce qui rend l'angle lourd : c'est la **seule** limite d'ADR-123 qui touche
+  l'architecture plutôt que le banc, et la frontière de `0,009` pourrait être bien plus
+  basse pour un état de mer réel. Ce qui le borne : la mesure est à portée immédiate — trois
+  puis quatre trains à cambrure **totale** fixée, sur le véhicule et le banc existants, avec
+  la contre-épreuve `M=1` à écart nul déjà calibrée. **À instruire avant toute promesse sur
+  un état de mer complet.**
+
+**Suivi A217 — S194, 2026-09-12 : CLOSE par [ADR-123](../adr/ADR-123-le-domaine-de-validite-de-la-superposition.md).**
+A217 demandait, depuis S161, quelle variable gouverne la validité de l'addition en eau
+profonde, et supposait « vraisemblablement la cambrure, et rien ne le vérifie ». **C'est la
+cambrure**, et la loi est mesurée : `écart/A ≈ α s + β s² N` avec `α = 1,302602`,
+`β = 5,898728`, résidu à `1,82 %` de l'écart maximal. Le blocage qu'A217 nommait — « le
+dépôt n'a aucun solveur à la fois non linéaire et dispersif », et « un solveur linéaire ne
+peut pas servir, la superposition y étant vraie par construction » — est levé deux fois :
+S193 a construit le véhicule, et S194 a **vérifié** cette dernière remarque au lieu de la
+supposer, l'écart à `M=1` valant exactement zéro sur les modes.
+
+**A217 ignorait deux variables, et elles ne sont pas secondaires.** La **durée** : à
+cambrure `0,0125` la superposition tient `5,4` périodes et pas davantage, parce qu'une part
+de l'écart est séculaire. Et le **désaccord de triade**, donc la profondeur : `α` vaut
+`1,383` à `h=8 m` et `11,855` à `h=0,25 m`, facteur `8,6`, parce que la dispersion
+s'affaiblissant, les triades approchent la résonance. Une frontière établie en eau profonde
+ne se transporte donc pas vers le rivage.
+
+Ce qui **n'est pas** clos et se poursuit ailleurs : `n` sources (**A240**), l'obliquité en
+2D, et A216 qui reste inexpliquée et ne se dérive pas d'ici.
+
+**Suivi A218 — S194 : le cas profond dispersif est traité.** A218 demandait d'intégrer
+réellement le résidu de couplage et de le comparer au total avec témoin de couplage
+supprimé. S163 l'avait fait sur véhicule 1D peu profond ; S194 le fait en eau profonde et
+dispersive, avec `M=1` comme témoin exact à écart nul. Le résidu n'est pas intégré comme
+équation propre — c'est la différence de deux évolutions qui est mesurée — donc A218 garde
+son objet pour un montage à résidu explicite ; mais sa limite « aucune référence non
+linéaire dispersive » ne tient plus.
+
+**Suivi A50/B4 — S194.** Le chemin perturbatif a un domaine chiffré, et il est étroit : à
+`s=0,0125` S193 recevait un train **unique** contre Stokes à `0,4555 %` quand **deux**
+trains superposés franchissent 2 % en `5,4` périodes — facteur quarante à cambrure égale.
+A50 reste partielle : `n` sources non mesurées, obliquité non mesurée, fournisseur S191 non
+branché, forces et perception non reçues, frontières ouvertes absentes. Une **voie de
+correction est chiffrée** : l'écart est la réponse à un forçage croisé explicite, dont la
+part quadratique est bornée, non cumulative, et suffirait près de la frontière.
+
+**Suivi A234 — S194 : la faible profondeur est mesurable sans oracle.** A234 constate
+l'absence d'oracle de Stokes en faible profondeur. S194 y mesure pourtant le couplage,
+parce que la comparaison est **candidat contre candidat** — somme des évolutions contre
+évolution de la somme — et n'a besoin d'aucun oracle extérieur, seulement du domaine de
+validité du véhicule (`U ≤ 5,2·10⁻²` ici). A234 reste ouverte pour ce qu'elle dit — aucune
+réception **contre référence** n'y est possible — mais sa portée se restreint : elle ne
+bloque pas les mesures différentielles.
+
+**Suivi A236 — S194 : le mécanisme a été soupçonné, testé, et innocenté ici.** A236 dit
+qu'une grandeur du continu posée sur un véhicule semi-discret biaise l'estimateur qui la
+mesure. S194 a soupçonné ce mécanisme d'expliquer la sensibilité en `K` de son écart — la
+condition initiale employant le `b₂` du continu — et l'a **testé en retirant le terme** :
+résidu `0,4698 %` avec, `0,5026 %` sans, ordres `1,9295` et `1,8711`. Aucun changement :
+l'hypothèse est fausse pour ce cas, et la sensibilité vient de la dynamique, `G_h` étant le
+seul objet dépendant de `K`. A236 reste entière — elle a été vérifiée, pas confirmée — et
+c'est la première fois qu'elle est mise à l'épreuve plutôt qu'invoquée.
+
+**Suivi A211 — S194.** Toute la file active relue et **renommée S194**, comme en S193 et
+pour le même motif (A185) ; quatre ancres repointées. Lignes actualisées : S194-1/A50/B4,
+B3/δ, bathymétrie. Ligne **scindée** : A216/A217 devient A216 seule, A217 étant close.
+**Ligne neuve** : `n` sources / A240, avec son déclencheur. Conservées avec leurs
+déclencheurs : forces/perception, A213, λ_cut/B2/coupure W–δ, A98 multiplateforme, V/bancs
+restants, A94/A95 dossier de réunions. Aucun chantier latéral déclaré clos par le présent
+essai, et la suite est **à instruire** entre deux options — `n` sources ou la correction
+croisée — plutôt qu'imposée par proximité.

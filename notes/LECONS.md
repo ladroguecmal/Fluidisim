@@ -4377,3 +4377,50 @@ favorable de plusieurs ordres de grandeur se traite comme un résultat à expliq
 comme une bonne surprise. La prédiction fausse reste écrite dans le document, avec sa
 réfutation datée : c'est la prédiction qui a été prise, pas une rédaction à corriger après
 coup. Voir SURFACE-LIBRE-NL-S193 §7.3.
+
+## L274 — Un contrôle de convergence juge un ordre, jamais la taille d'un déplacement
+
+Le protocole de S194 déclarait, pour distinguer le couplage mesuré d'un artefact numérique,
+que passer `K` de 32 à 64 ne devait pas déplacer l'écart de plus de 2 %. Le déplacement
+mesuré vaut `5,37 %`. Le contrôle est donc non tenu — et il n'aurait jamais pu l'être, car
+ce qu'il mesurait était la **convergence** : le rapport des déplacements successifs
+`|K32−K64|/|K64−K128|` vaut `3,81`, soit 4, soit exactement l'ordre deux.
+
+Le défaut est logique et se dit en une phrase : sur une grille grossière, un déplacement de
+quelques pour cent est **ce que produit** un schéma qui converge. Un contrôle qui juge la
+taille du déplacement échoue donc d'autant plus que le schéma est meilleur, et il ne
+distingue pas les deux situations qu'il prétend séparer. La forme correcte comporte deux
+nombres, et ils demandent **trois** niveaux de raffinement et non deux : l'**ordre** de la
+suite des déplacements, et le **résidu de Richardson** au pas effectivement retenu — ici
+`1,93` et `0,47 %`, qui répondent à la question posée.
+
+Conséquence pratique : tout contrôle rédigé « le déplacement doit rester sous x % » est à
+reformuler en « l'ordre doit valoir y et le résidu rester sous x % », et il faut prévoir
+trois niveaux dès le protocole. Le dépôt en compte d'autres sous la première forme (A239).
+Voir COUPLAGE-DEUX-TRAINS-S194 §7.9.
+
+## L275 — Une hypothèse sur une cause numérique se teste en retirant le terme soupçonné, pas en raisonnant
+
+Devant une sensibilité de l'écart au raffinement vertical, S194 a formé une hypothèse
+solide et précise : la condition initiale emploie le coefficient `b₂` du **continu** sur un
+véhicule semi-discret, elle injecte donc une harmonique liée légèrement fausse, donc une
+onde libre parasite dont l'amplitude dépend de `K`. C'est exactement le mécanisme d'A236,
+déjà payé deux fois dans la session précédente, et le raisonnement était juste dans chacune
+de ses étapes.
+
+Elle est fausse. Le terme a été **retiré**, purement, et le résidu de discrétisation est
+passé de `0,4698 %` à `0,5026 %`, l'ordre de `1,9295` à `1,8711` : rien n'a bougé. La cause
+est ailleurs — dans la dynamique, `G_h` étant le seul objet dépendant de `K`.
+
+Ce que la leçon retient n'est pas « méfie-toi des hypothèses » mais quelque chose de plus
+utile : **une hypothèse de cause numérique est presque toujours testable par soustraction,
+pour bien moins cher que le raisonnement qui la défend**. Retirer le terme a coûté un
+paramètre booléen et trois exécutions. Un mécanisme déjà rencontré est le plus dangereux de
+tous, parce qu'il se reconnaît sans être vérifié — et A236 avait précisément été *invoquée*
+dans deux sessions avant d'être, ici, **mise à l'épreuve**. La variante sans le terme reste
+publiée dans les mesures : c'est la trace de la réfutation, et sans elle la prochaine
+session refera le même raisonnement.
+
+Même famille que L273 — une prédiction se mesure avant d'être commentée — dont c'est le
+versant causal : L273 portait sur un ordre de grandeur prédit, L275 porte sur un mécanisme
+désigné.

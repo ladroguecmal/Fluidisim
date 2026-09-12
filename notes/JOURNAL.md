@@ -9956,3 +9956,99 @@ seulement reconduit, il est vérifié. Point ouvert daté 2026-09-12 : `wake_pla
 porte un avertissement `unreachable_patterns` **préexistant**, relevé et non corrigé, hors
 lot S193. Trois copies isolées avancées sur `master`, aucune suppression : aucune n'est
 prouvée morte.
+
+## S194 — 2026-09-12 — La superposition a un domaine, et il est étroit
+
+**Entrée.** « Continue avec S193-1 ». Jeton `libre`, `master 34a7a32` propre, trois copies
+isolées au même commit. S193-1 recommandée ; seuil 2 % fixé (ADR-120), ordre trois fixé
+(ADR-122), aucun arbitrage redemandé. Agent : Claude Code (Opus 5) ; fichiers, git et cargo
+1.97.0. Plan seul `750221b`, protocole `39979f4`, banc `18a4082`, campagne `b8048ed`,
+propagation `f9e57ea`. Travail sur `master`, aucune copie isolée ouverte.
+
+**Dérivation.** `F(a+b) = F(a)+F(b) + 2Q(a,b) + 3C(a,a,b) + 3C(a,b,b)` : l'écart de
+superposition n'est pas une erreur, c'est la **réponse à un forçage croisé explicite**. Et
+ce forçage a deux parts que rien n'autorise à confondre. La quadratique porte `k₁±k₂` et
+reste **bornée** en eau profonde, parce qu'aucune triade n'y est résonante —
+`√(k₁+k₂)=√k₁+√k₂` impose `√(k₁k₂)=0`, argument vectoriel, donc l'obliquité n'y change
+rien. La cubique porte `k₁` et `k₂` eux-mêmes, elle est **résonante par construction**, et
+c'est la modulation croisée de fréquence. Les deux vivent sur des **modes différents** :
+elles se mesurent séparément, sans aucun ajustement. Thèse déclarée avant mesure : la
+validité de la superposition est un **domaine en (cambrure × durée)**.
+
+**Sorties.** COUPLAGE-DEUX-TRAINS-S194 et MESURES, ADR-123, SPEC-001 §1 quinquies,
+`examples/nl_coupling_2d.rs`. Le support S193 est **inchangé** : trois évolutions en
+parallèle sur le même véhicule, même bande, même profondeur discrète, même pas. Huit tests
+debug/release.
+
+**Réception.** `reception=true`, empreinte **`0x4bc0934d630c2c50`**, deux exécutions release
+identiques. Contre-épreuves nulles d'abord : train unique et `M=1` donnent un écart de modes
+**exactement nul** et des parts croisée et de train **exactement nulles**, si bien que tout
+écart au-dessus de `3·10⁻¹⁶` est du couplage. Puis les quatre prédictions de mécanisme, sur
+leurs propres modes : part croisée de pente **1,0041 / 1,0365** et **stationnaire** (rapport
+tardif/précoce 1,002 à 1,023) ; part de train de pente **2,0178 / 2,0627** et **croissante**
+d'un facteur **4,1**. Ajustement `α s + β s² N` : `α = 1,302602`, `β = 5,898728`, résidu à
+**1,82 %** de l'écart maximal. Écart insensible au couple — **13 %** au plus sur quatre
+géométries, contra-propagation comprise. Partage d'amplitude : zéros exacts aux extrêmes,
+maximum au partage égal, loi `f(1−f)` à `14,30 %` près.
+
+**Le livrable.** La superposition indépendante tient sous 2 % jusqu'à `s ≤ 0,008` sur au
+moins vingt périodes ; `19,8` périodes à `0,009` ; `11,7` à `0,010` ; **`5,4` à `0,0125`** ;
+**moins d'une période** à `0,014`. Le domaine existe donc en (cambrure × durée), comme
+annoncé, mais **le levier de la durée est étroit** : tout ce qui dépend du temps tient dans
+`0,009 ≤ s ≤ 0,014`, un facteur 1,6. On n'achète pas la validité en regardant brièvement.
+**Le chiffre qui met ADR-112 en regard de S193 :** à `s=0,0125`, S193 recevait un train
+**unique** contre Stokes à `0,4555 %` ; **deux** trains de la même cambrure franchissent le
+même budget en `5,4` périodes. Facteur **quarante** à cambrure égale. D'où **ADR-123**.
+
+**A217 est close.** Elle demandait depuis S161 quelle variable gouverne l'addition en eau
+profonde, et supposait la cambrure sans pouvoir le vérifier. C'est la cambrure — et elle
+ignorait deux variables qui ne sont pas secondaires : la **durée**, et le **désaccord de
+triade**, donc la profondeur. `α` vaut `1,383` à `h=8 m` et **`11,855`** à `h=0,25 m`,
+facteur `8,6` quand le désaccord tombe de `4,9` : une frontière établie en eau profonde ne
+se transporte pas vers le rivage. Le cas peu profond a pu être mesuré **sans oracle**, la
+comparaison étant candidat contre candidat — ce qui restreint la portée d'A234 sans la
+lever.
+
+**Deux réfutations, et elles valent le reste.** *Un* — le contrôle de non-artefact du
+protocole est **non tenu tel qu'il était écrit** (`5,37 %` contre 2 %), et il ne pouvait pas
+l'être : le rapport des déplacements successifs vaut `3,81`, soit 4, soit la convergence
+d'ordre deux. Un contrôle qui juge la **taille** d'un déplacement sur grille grossière
+échoue d'autant plus que le schéma converge mieux. Refait dans la bonne forme : ordre
+**1,93**, résidu de Richardson **0,47 %** à `K=64` (**A239**, **L274**). *Deux* — la cause
+soupçonnée de cette sensibilité était la condition initiale, qui emploie le `b₂` du continu
+sur un véhicule semi-discret : le mécanisme même d'A236, invoqué deux fois déjà. Testé en
+**retirant le terme** : `0,4698 %` avec, `0,5026 %` sans. **Hypothèse fausse** ; la cause est
+dans la dynamique (**L275**). Et un résultat de méthode par-dessus : le **maximum ne
+converge pas** — ordres `−0,79 / −0,37 / +0,61`, valeurs non monotones — parce qu'un maximum
+est une statistique d'ordre sur un résidu, alors que S192 et S193 avaient reçu leurs ordres 2
+sur des maxima sans que rien ne dise pourquoi cela marchait (**A238**).
+
+**Portée.** `s=0,1` par train à `M=3` est **hors domaine** — dérive d'énergie `4,643·10⁻³`,
+46 fois le seuil de S193 — et le §4 l'exigeait : deux trains à `ka=0,1` ne sont pas dans le
+domaine d'ADR-122, reçu pour un train unique. Publié, exclu des ajustements par la règle
+déclarée. `M=2` sous-estime `β` d'un facteur **3,4** : argument indépendant pour ADR-122,
+sur une grandeur qu'ADR-122 n'avait pas mesurée. Restent ouverts : **`n` sources**, seule
+limite d'ADR-123 qui touche l'architecture (**A240**) ; l'obliquité ; A216 ; forces et
+perception ; la source S191 non branchée ; le fond plat ; aucune seconde cible ; aucun coût
+CPU.
+
+**Suite S195 — à instruire, et non imposée par proximité :** ou bien **`n` sources**, trois
+puis quatre trains à cambrure totale fixée, parce que les paires croissent en `n²` et que
+c'est la limite la plus lourde d'ADR-123 ; ou bien la **correction croisée quadratique**,
+dont ADR-123 chiffre déjà le gain — à `s=0,0125` la part croisée vaut `1,478·10⁻²` et la
+part de train `1,166·10⁻²`, donc corriger la première ramènerait l'écart sous le budget sur
+toute la fenêtre. La file active porte les deux avec leurs déclencheurs.
+
+**Rituel.** File active relue entière et renommée S194 (A185), quatre ancres repointées,
+ligne A216/A217 **scindée** puisqu'A217 est close, **ligne neuve** pour `n` sources. Trois
+angles — **A238**, **A239**, **A240** — et deux leçons — **L274**, **L275**. Suivis datés
+A217 (close), A218, A50/B4, A234, A236, A211. Décomptes vérifiés par comptage :
+**123 ADR, 240 angles A1–A240, 275 leçons, 18 invariants, 6 SPEC, 23 cas**. Invariants
+relus : I-03/I-06/I-08 restent vrais — banc `f64` avec allocations, aucun contrat runtime —
+et I-14 est satisfait, SPEC-001 §1 quinquies donnant la provenance dérivée du désaccord de
+triade. Les 331 tests d'espace de travail et leurs cinq ignorés restent le reçu **vérifié en
+S193**, et **rejoués ici** : 238 + 93 réussis, 2 + 3 ignorés. `water-core` et le support
+S193 sont inchangés, seul un exemple est ajouté.
+Incident de procédure noté dans `EN-COURS` : le commit de P3a est parti sans sa case cochée,
+un `cd` ayant déplacé le répertoire ; réparé par amende du commit local non poussé. Trois
+copies isolées avancées sur `master`, aucune suppression : aucune n'est prouvée morte.

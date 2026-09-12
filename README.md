@@ -570,3 +570,37 @@ renommée S193 (A185), quatre ancres repointées ; aucun autre chantier effacé.
 **A234, A235, A236, A237** et **L271, L272, L273** :
 **122 ADR,237 angles,273 leçons,18 invariants,6 SPEC,23 cas**.
 Voir [surface libre non linéaire S193](docs/validation/SURFACE-LIBRE-NL-S193.md), [mesures](docs/validation/SURFACE-LIBRE-NL-S193-MESURES.md) et [ADR-122](docs/adr/ADR-122-l-ordre-en-amplitude-d-un-vehicule-non-lineaire.md).
+
+
+**S194 — 2026-09-12 : le couplage de deux trains est mesuré**, ADR-123, et **A217 est close**.
+S193-1 réalisée : somme des évolutions contre évolution de la somme, sur le véhicule S193
+inchangé. L'écart est la réponse à un forçage croisé explicite, en deux parts de mécanismes
+distincts qui vivent sur des modes différents : part croisée de pente **1,0041** et
+**stationnaire** (aucune triade résonante en eau profonde, redémontré), part de train de
+pente **2,0178** et **croissante d'un facteur 4,1**. Loi `écart/A ≈ α s + β s² N`,
+`α = 1,302602`, `β = 5,898728`, résidu à **1,82 %** de l'écart maximal.
+**Livrable — la frontière des 2 %** : la superposition indépendante tient au moins vingt
+périodes sous `s = 0,008`, **5,4 périodes** à `0,0125`, **moins d'une** à `0,014`. Le domaine
+existe en (cambrure × durée) mais le levier de la durée est étroit. À `s = 0,0125`, S193
+recevait un train **unique** à `0,4555 %` : facteur **quarante** à cambrure égale.
+Écart insensible au couple (**13 %** sur quatre géométries, contra-propagation comprise) et
+**8,6 fois plus fort** vers le rivage quand le désaccord de triade tombe de 4,9.
+**A217 close** : la variable est la cambrure, plus deux variables qu'A217 ignorait — la
+durée et le désaccord de triade. `M=2` sous-estime `β` d'un facteur **3,4** : argument
+indépendant pour ADR-122. `s=0,1` par train à `M=3` est **hors domaine** (énergie
+`4,643·10⁻³`), publié et exclu par la règle déclarée.
+**Deux réfutations publiées** : le contrôle de non-artefact du protocole est non tenu et ne
+pouvait pas l'être — il confond convergence et artefact, le rapport des déplacements valant
+`3,81` donc l'ordre deux, refait en ordre **1,93** et résidu **0,47 %** (**A239**, **L274**) ;
+et la cause soupçonnée, une condition initiale en `b₂` du continu, est **fausse**, testée en
+retirant le terme (**L275**). Résultat de méthode : le **maximum d'un résidu ne converge
+pas**, ordres `−0,79 / −0,37 / +0,61` (**A238**).
+Huit tests debug/release, deux campagnes release identiques **0x4bc0934d630c2c50**.
+`water-core` et le support S193 inchangés ; workspace **rejoué : 331 réussis / cinq
+ignorés**, identiques au reçu. Restent ouverts : **`n` sources** (**A240**, les paires croissent en
+`n²`), obliquité, A216, forces et perception, source S191 non branchée, fond plat.
+**Suite S195 — à instruire** : `n` sources, ou la correction croisée quadratique dont
+ADR-123 chiffre déjà le gain. File active relue et renommée S194 ; A217 retirée de sa ligne.
+**A238, A239, A240** et **L274, L275** :
+**123 ADR,240 angles,275 leçons,18 invariants,6 SPEC,23 cas**.
+Voir [couplage S194](docs/validation/COUPLAGE-DEUX-TRAINS-S194.md), [mesures](docs/validation/COUPLAGE-DEUX-TRAINS-S194-MESURES.md) et [ADR-123](docs/adr/ADR-123-le-domaine-de-validite-de-la-superposition.md).

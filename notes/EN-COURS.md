@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S194 — en cours
+Session : S194 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
 Objectif : S193-1, mesurer le **couplage de deux trains** sur le véhicule non linéaire
 dispersif de S193 — écart entre la **somme des évolutions** et l'**évolution de la
@@ -81,7 +81,7 @@ nomme ; elle n'était pas possible avant S193. Aucun choix δ, aucun seuil de ba
   `écart = α·s + β·s²·N` ; frontière des 2 % en (cambrure × durée) ; reproductibilité.
 - [x] **P4** — documenter, propager A217/A216/A50/B4 et la file ; ADR seulement si une
   décision de projet est prise ; ne **pas** dériver de seuil de bascule W/δ.
-- [ ] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes,
+- [x] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes,
   jeton `libre`, copies avancées sans suppression non prouvée.
 
 ### Notes de reprise
@@ -175,4 +175,16 @@ Angles et lecons en P5 : A238 (le maximum d'un residu ne converge pas), A239
 (controle de non-artefact mal forme), A240 (`n` sources non extrapolables),
 L274 (juger l'ordre et non la taille du deplacement), L275 (une hypothese de cause
 numerique se teste en retirant le terme soupconne).
+
+P5 : rituel execute. Journal, trois angles A238-A240, deux lecons L274-L275,
+suivis A217 (**close**), A218, A50/B4, A234, A236, A211. A217 marquee close dans
+son en-tete, par ADR-123. Bloc d'etat S194 dans INDEX, README, REPRISE ; titre de
+la file active porte a S194 dans les deux fichiers. Decomptes **comptes** :
+123 ADR, 240 angles A1-A240, 275 lecons, 18 invariants, 6 SPEC, 23 cas.
+Workspace rejoue en debug : 331 reussis / cinq ignores, identiques au recu ;
+les quatre textes qui annoncaient « non rejoue » ont ete corriges.
+Jeton libre. Suite S195 laissee **a instruire** entre deux options — `n` sources
+(A240) ou la correction croisee quadratique — plutot qu'imposee par proximite,
+ce qui est exactement ce qu'A211 reproche au chainage « suite Sxxx ».
+Trois copies a avancer sur master apres ce commit, aucune suppression autorisee.
 

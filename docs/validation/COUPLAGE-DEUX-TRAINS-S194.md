@@ -485,8 +485,9 @@ spatial — comme S193 l'avait conçu.
 
 Cible `x86_64-pc-windows-msvc`, rustc 1.97.0 (2d8144b78), cargo 1.97.0 (c980f4866) ; pas de
 seconde cible, aucune mesure de coût CPU. `water-core` et le support S193 sont **inchangés**
-— seul `examples/nl_coupling_2d.rs` est ajouté. Les 331 tests d'espace de travail et leurs
-cinq ignorés sont le reçu vérifié en S193.
+— seul `examples/nl_coupling_2d.rs` est ajouté. Les **331 tests** d'espace de travail et
+leurs **cinq ignorés ont été rejoués** en `debug` — 238 + 93 réussis, 2 + 3 ignorés —
+identiques au reçu de S190 vérifié en S193.
 
 Code : `code/water-core/examples/nl_coupling_2d.rs`.
 [Sorties intégrales](COUPLAGE-DEUX-TRAINS-S194-MESURES.md).
