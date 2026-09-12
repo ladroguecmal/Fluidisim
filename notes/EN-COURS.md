@@ -68,7 +68,7 @@ les volets restants. La projection S189-1 est réordonnée derrière cet arbitra
 ### Plan
 
 - [x] **P1** — lire la reprise, vérifier copies/branches/historique/état, prendre le jeton ; plan seul.
-- [ ] **P2** — confronter B4, SPEC-004, ADR-119 et mesures ; acter les 2 % par ADR,
+- [x] **P2** — confronter B4, SPEC-004, ADR-119 et mesures ; acter les 2 % par ADR,
   définir avant le rejeu la norme, la référence et la décision de réception.
 - [ ] **P3** — appliquer le critère aux campagnes existantes, produire une réception
   reproductible avec témoin admis et refusé ; fixer un profil recevable si les preuves suffisent.
