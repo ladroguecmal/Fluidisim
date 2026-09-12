@@ -4187,3 +4187,38 @@ serait lue comme une interaction entre les deux erreurs.
 Voir COMPOSITION-ERREURS-S186 §8.5 et §8.6, A229. Même famille que L265 — relier deux mesures
 indépendantes est ce qui révèle ce qu'aucune ne montre seule ; L265 le faisait dans une
 session, L266 le fait entre deux.
+
+## L267 — Une campagne qui balaie une résolution à convention de placement fixée mesure la convention autant que la résolution
+
+S170, S184, S186 ont balayé un ratio de décimation `r` sur des dizaines de configurations,
+avec le même réseau, et aucune n'a mis en doute **où** ce réseau posait ses nœuds. S187 a
+changé un seul indice — le dernier nœud, déplacé de l'extérieur du domaine vers sa maille
+de bord — et l'erreur est passée de **41,2 % à 6,8 %** à nombre de nœuds identique. Soit un
+facteur six, gratuit, invisible à quatre sessions de mesure parce que la convention était
+constante dans toutes.
+
+Ce qui généralise, en trois points :
+
+1. **Un paramètre balayé cache les paramètres tenus fixes.** Une courbe erreur-contre-`r`
+   très propre — et celles de S186 l'étaient, avec des lois d'ordre deux et des constantes
+   stables — ne dit rien sur ce qui n'a pas varié. La régularité d'une courbe n'est pas une
+   preuve que son ordonnée est la plus basse atteignable.
+2. **Quand la métrique est un maximum, `où` compte plus que `combien`.** Un maximum est
+   porté par un endroit ; échantillonner **cet** endroit supprime le terme dominant, et
+   ajouter des nœuds ailleurs ne le fait pas. C'est l'inverse d'une norme quadratique, où
+   la densité seule gouverne. Le dépôt mesure en maximum depuis S170 : la conséquence
+   valait d'être tirée plus tôt.
+3. **La contre-épreuve est ce qui transforme un effet en règle.** Ancrer horizontalement,
+   là où la source ne pique pas, vaut −2,5 %, −40 % et **+1,3 %** — non monotone, et une
+   fois défavorable. Sans cette mesure, la conclusion aurait été *« il faut ancrer »*, une
+   règle qui se serait trompée ailleurs. Avec elle, elle devient *« il faut poser un nœud
+   là où vit le maximum »*, qui est vraie parce qu'elle dit le mécanisme.
+
+Corollaire de méthode : **avant de raffiner un réglage, vérifier qu'aucune convention
+n'annule le gain attendu.** La graduation que S187 est venue chercher vaut 1,4 ; la
+convention qu'elle a trouvée en chemin valait 6. L'ordre de grandeur de ce qu'on ne
+questionne pas est rarement plus petit que celui de ce qu'on optimise.
+
+Voir RESEAU-GRADUE-S187 §8.4, ADR-118, A231. Même famille que L266 — une mesure n'est
+valide que dans le montage où elle a été prise, et une convention de montage en fait
+partie.

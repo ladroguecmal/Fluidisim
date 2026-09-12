@@ -336,3 +336,15 @@ réécrit ci-dessus ; §6.3 reste ce qu'il a mesuré, avec sa portée corrigée 
 l'erreur des deux axes ensemble et conclut que la composition suit le **maximum** pour les
 modes causaux : le gain de coût `r³ · c` publié ici est donc dépensable, à condition
 d'égaliser les erreurs des deux axes pris seuls. Voir COMPOSITION-ERREURS-S186 §8.5.
+
+**Suivi S187 — 2026-09-12 : le coût mesuré ici n'est pas affecté, l'erreur l'était.**
+[RESEAU-GRADUE-S187](RESEAU-GRADUE-S187.md) a trouvé que le réseau de `support/` pose son
+dernier nœud hors du bloc, ce qui coûte jusqu'à un facteur six sur l'**erreur** (A231,
+[ADR-118](../adr/ADR-118-le-reseau-d-echantillonnage-ancre-et-gradue.md)). Les mesures de
+**temps** publiées ici n'en dépendent pas : le coût suit le nombre de nœuds, et ancrer le
+dernier nœud n'en change aucun. La conversion « gain de coût = rapport des nœuds » établie
+ici reste donc valide, et elle devient plus utile : S187 obtient **−37,5 % de nœuds avec
+une erreur plus faible** que l'isotrope `r = 2`, et **−78,4 %** à erreur égale contre
+`r = 4`. Le facteur 64 de SPEC-004 §6.2 se paie donc moins cher qu'annoncé — mais le
+surcoût par maille d'une interpolation à poids non constants n'est pas chiffré, et ce
+document n'a mesuré que le réseau uniforme.

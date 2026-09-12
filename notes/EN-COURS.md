@@ -83,12 +83,26 @@ réduit pas l'erreur — il ne réduit que le nombre de nœuds, ce qui reste le 
       `0x0e743846d4656870`).
 - [x] **P3b** — attribuer l'erreur par axe, puis construire la graduation depuis le profil
       mesuré et relever la courbe iso-erreur. Relever.
-- [ ] **P4** — recevoir dans un document de validation ; angles, leçons, et **ADR si une
+- [x] **P4** — recevoir dans un document de validation ; angles, leçons, et **ADR si une
       décision de conception en sort** — un réseau d'échantillonnage gradué est un contrat
       pour le consommateur, pas un détail de banc.
 - [ ] **P5** — rituel de fin (REPRISE.md §6).
 
 ### Notes de reprise
+
+P4 S187 : RESEAU-GRADUE-S187 §8–§9 reçus. **ADR-118 actée** — premier ADR depuis S181 :
+le réseau d'échantillonnage s'ancre sur ses frontières, gradue son pas selon la courbure,
+et s'arrête quand son axe cesse d'être le plus grossier. **A231** écrite (le débordement
+du réseau, jusqu'à un facteur six), **L267** écrite (une campagne à convention fixée
+mesure la convention). Deux suivis datés portés sous **A50** et sous **A229** (la
+compensation vaut aussi entre axes d'espace). Quatre suivis datés ajoutés sans rien
+réécrire : COMPOSITION-ERREURS-S186 (portée des magnitudes, loi non rejouée),
+CONSOMMATION-S184 (le coût n'est pas affecté, l'erreur l'était), BILAN-B4-S176,
+SOURCE-DECIMEE-S170. Et une **note corrective datée dans SPEC-004 §6.2** : la contrainte
+`dx ≤ λ_cut/N` est nécessaire et insuffisante — `λ_cut` n'est pas la longueur d'onde qui
+compte (A230) et une densité ne dit rien du placement (A231).
+Décomptes à porter en P5, vérifiés contre le dépôt : **118 ADR, 231 angles, 267 leçons,
+18 invariants, 6 SPEC, 23 cas**.
 
 P3b S187 : `examples/graded_lattice.rs`. Deux exécutions, `diff` strict identique hors
 lignes de cargo ; aucune durée mesurée. Empreinte **0xf2dfa382290e3c64** puis

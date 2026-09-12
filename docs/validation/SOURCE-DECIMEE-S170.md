@@ -156,3 +156,12 @@ Et la composition avec l'erreur temporelle, que ce document ne pouvait pas mesur
 source figée, suit le **maximum** pour un consommateur causal : les deux erreurs ne
 s'additionnent pas (§8.5, **L266**). L'addition que §2.2 rendait douteuse est effectivement
 fausse — elle surestime jusqu'à 1,9 fois — mais elle reste une enveloppe sûre.
+
+**Suivi S187 — 2026-09-12 : le ratio ne dit rien du placement, et le placement pèse plus.**
+Le §2.2 de ce document avertissait qu'un ratio de décimation ne décrit pas à lui seul la
+précision. [RESEAU-GRADUE-S187](RESEAU-GRADUE-S187.md) en donne la forme la plus nette : à
+nombre de nœuds **identique**, déplacer le dernier nœud de l'extérieur du domaine vers sa
+maille de bord fait passer l'erreur de **41,2 % à 6,8 %**. Ce n'est donc pas seulement la
+taille physique du réseau qui compte, comme §2.2 le disait, mais **où ses nœuds se posent** —
+et quand la métrique est un maximum, là où vit ce maximum. Voir **A231**, **L267** et
+[ADR-118](../adr/ADR-118-le-reseau-d-echantillonnage-ancre-et-gradue.md).

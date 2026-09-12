@@ -178,3 +178,23 @@ construction.
 **Ce que B4 attend reste un critère**, inchangé depuis le suivi S185 : la composition est
 désormais connue, le seuil de justesse ne l'est pas, et aucun n'est adopté. S186-1 construit
 le réseau gradué ; A50/B4 restent partiels, aucun solveur choisi.
+
+**Suivi S187 — 2026-09-12 :** le réseau d'échantillonnage est **ancré et gradué**,
+[RESEAU-GRADUE-S187](RESEAU-GRADUE-S187.md) et
+[ADR-118](../adr/ADR-118-le-reseau-d-echantillonnage-ancre-et-gradue.md), actée. Premier ADR
+depuis S181 : les six sessions intermédiaires mesuraient, celle-ci décide **où** poser les
+nœuds — pas combien en payer. Trois acquis pour B4 : ancrer le dernier nœud sur la frontière
+du domaine vaut jusqu'à un facteur **six** et ne coûte aucun nœud (**A231**) ; la graduation
+selon la courbure vaut **1,4** de plus et bat deux témoins naïfs ; et raffiner un axe
+**sature** sur l'axe le plus grossier, ce qui donne un point d'arrêt au dimensionnement.
+
+**Et un avertissement pour ce bilan.** Les magnitudes d'erreur spatiale sur lesquelles les
+suivis S184 et S185 raisonnaient — la borne `r = 2`, la parité entre `r` et `c` — ont été
+mesurées sur le réseau débordant. Elles sont jusqu'à six fois trop grandes. La **loi** de
+composition de S186 n'est pas remise en cause par une magnitude, mais elle a été établie sur
+une erreur **concentrée** sur une tranche, et la graduation la répartit : elle n'est pas
+rejouée. S187-1 le fait.
+
+**Ce que B4 attend reste un critère**, inchangé depuis S185 : `N` de SPEC-004 §6.2 est le
+seul des trois paramètres du banc que personne n'a fixé, parce que fixer une erreur
+acceptable est une décision et non une mesure. A50/B4 restent partiels, aucun solveur choisi.

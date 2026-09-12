@@ -2319,3 +2319,44 @@ composition est connue, le seuil ne l'est pas.
   graduer son pas. Sévérité 2 : la borne `r = 2` publiée n'est pas fausse, c'est sa
   justification qui l'est, et elle circule depuis S184.
   Chiffres et conditions dans COMPOSITION-ERREURS-S186 §8.2 et §8.3.
+
+**Suivi A50 — S187 : le réseau d'échantillonnage est ancré et gradué, ADR-118.**
+[RESEAU-GRADUE-S187](../validation/RESEAU-GRADUE-S187.md) : l'axe vertical domine
+l'horizontal d'un facteur 1,6 à 3,4, mais le levier n'est pas celui qu'on cherchait.
+**Ancrer le dernier nœud sur la frontière du domaine vaut jusqu'à un facteur 6 et ne coûte
+aucun nœud** ; la graduation dérivée vaut 1,4 par-dessus, et bat les deux témoins naïfs.
+Gains à erreur égale : −37,5 % de nœuds contre l'isotrope `r = 2` (et −29 % d'erreur en
+même temps), −78,4 % contre `r = 4`, erreur divisée par 2,44 à nœuds identiques contre
+`r = 8`. Raffiner un axe **sature** sur l'axe le plus grossier : six nœuds verticaux
+suffisent à pas horizontal 2, quatre à 4, trois à 8. A50 attend toujours **un critère de
+justesse** : ADR-118 dit où poser les nœuds, pas combien en payer.
+
+**Suivi A229 — S187 : la compensation existe aussi entre les deux axes d'espace.** A229
+avait été écrite pour la paire espace/temps. Mesurée entre `z` et `x,y` : l'erreur
+isotrope est **sous** l'erreur de l'axe vertical seul aux trois ratios — 2,54 contre
+2,66 %, 13,60 contre 15,41 %, 32,96 contre 45,51 %. Décimer **aussi** horizontalement
+rend donc le champ plus juste que décimer verticalement seul. Le piège de réglage est le
+même, mais il est ici **interne à une seule grandeur** : un balayage qui raffine un axe
+d'espace en tenant l'autre peut voir l'erreur monter. Voir RESEAU-GRADUE-S187 §8.2.
+
+- **A231** *(sévérité 2, S187 ; ouverte)* — **Le réseau d'échantillonnage du dépôt posait
+  son dernier nœud hors du domaine mesuré, et cela coûtait jusqu'à un facteur six.**
+  `nodes_per_axis` déborde par construction : à `r = 8` sur un bloc de côté 16, le dernier
+  nœud tombe à l'indice 17 quand les mailles intérieures s'arrêtent à 14. La maille du
+  haut — celle qui, d'après S186 §8.3, porte **intégralement** le maximum — était donc
+  interpolée sur une portée de 2 m au lieu d'être échantillonnée. À nombre de nœuds
+  verticaux égal : **41,2 % contre 6,8 %** à trois nœuds, **13,6 % contre 2,5 %** à cinq,
+  **2,54 % contre 1,69 %** à huit. L'ancrage est **gratuit** — il ne change pas un nœud,
+  seulement l'endroit où on le pose — et il vaut cinq fois plus que la graduation que
+  cette session cherchait. Conséquence sur le corpus : **toutes les erreurs spatiales
+  publiées par S186 le sont pour un réseau inutilement mauvais**, et les raisonnements qui
+  s'appuyaient sur leur *magnitude* — la borne `r = 2`, la parité entre axe spatial et axe
+  temporel — doivent être relus. Ce qui reste ouvert : la loi de composition de S186, le
+  maximum pour les modes causaux, a été établie sur ce réseau débordant et sur une erreur
+  **concentrée** sur une tranche ; la graduation la **répartit** (§8.5, erreur de tranche
+  haute à zéro), et rien ne dit que la loi survit à cette redistribution. Sévérité 2 et
+  non 1 : aucune valeur publiée n'est fausse — elles mesurent correctement ce réseau-là —
+  aucun invariant ne tombe, et le code de bibliothèque n'est pas en cause. C'est
+  l'interprétation de magnitudes de conception qui l'est. Corrigé par
+  [ADR-118](../adr/ADR-118-le-reseau-d-echantillonnage-ancre-et-gradue.md).
+  Chiffres et conditions dans RESEAU-GRADUE-S187 §8.4.

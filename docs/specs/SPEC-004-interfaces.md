@@ -429,6 +429,34 @@ l'approximation.
 > direct (§10.3). `is_smooth_at(dx)` renvoie faux quand elle n'est pas satisfaite, et le solveur
 > retombe sur un échantillonnage plein — plus cher, mais juste.
 
+> **Note corrective (S187, 2026-09-12) — la contrainte de densité est nécessaire et
+> insuffisante.** Ce qui précède écrit la contrainte comme `dx ≤ λ_cut/N` : une **densité** de
+> points par longueur d'onde. Deux mesures la corrigent sans l'annuler.
+>
+> **1. La longueur d'onde qui compte n'est pas `λ_cut`.** Un mode profond décroît en
+> `exp(k z)`, donc les modes courts sont morts avant d'atteindre un consommateur en
+> profondeur. Mesuré sur la source réelle
+> ([COMPOSITION-ERREURS-S186](../validation/COMPOSITION-ERREURS-S186.md) §8.2), le contenu
+> présent à `z ∈ [−4,05 ; −0,80] m` est **5 à 16 fois plus lisse** que la coupure de la
+> recette. Compter les points par `λ_cut` est donc trop pessimiste pour un consommateur
+> profond — et trop optimiste pour un consommateur de surface. Le critère porte sur
+> l'échelle qui **survit à la profondeur du consommateur** (**A230**).
+>
+> **2. Une densité ne dit rien du placement, et le placement pèse plus.** La métrique du
+> dépôt est un **maximum**, et ce maximum vit sur la maille de bord la plus haute du domaine.
+> [RESEAU-GRADUE-S187](../validation/RESEAU-GRADUE-S187.md) §8.4 : à nombre de nœuds **égal**,
+> ancrer le dernier nœud sur cette maille au lieu de le laisser déborder du domaine fait
+> passer l'erreur de **41,2 % à 6,8 %** — un facteur six, gratuit. La graduation du pas selon
+> la courbure vaut 1,4 de plus. Les deux règles sont actées par
+> [ADR-118](../adr/ADR-118-le-reseau-d-echantillonnage-ancre-et-gradue.md) : **ancrer d'abord,
+> graduer ensuite, et s'arrêter quand l'axe cesse d'être le plus grossier** (**A231**).
+>
+> Ce que `N` reste : un paramètre de B4, et **le seul des trois que le banc n'a pas encore
+> fixé**, parce que fixer une erreur acceptable est une décision et non une mesure. Le
+> facteur 64 annoncé plus haut reste un objectif de coût, non une validité démontrée :
+> [CONSOMMATION-S184](../validation/CONSOMMATION-S184.md) a mesuré que le gain **est**
+> exactement le rapport des nœuds, et S186/S187 ce qu'il coûte en justesse.
+
 ---
 
 ## 7. Solides

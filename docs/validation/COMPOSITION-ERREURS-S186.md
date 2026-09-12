@@ -408,3 +408,37 @@ un réseau dont le pas suit `1/k_eff(z)` devrait rendre la même erreur pour une
 nœuds. C'est le premier lot où la mesure recommande une **construction**, et non un chiffre de
 plus. Il touche `nodes_per_axis` et `scatter`, donc il exige de rejouer S184 et S186 et de
 vérifier leurs empreintes, comme S186 l'a fait pour S185.
+
+---
+
+**Suivi S187 — 2026-09-12 : les erreurs spatiales de ce document valent pour un réseau
+inutilement mauvais.** Le réseau employé ici pose son dernier nœud **hors** du bloc —
+`nodes_per_axis` déborde, et à `r = 8` le dernier nœud vertical tombe à l'indice 17 quand
+les mailles intérieures s'arrêtent à 14. La tranche du haut, dont §8.3 montre qu'elle porte
+**intégralement** le maximum, était donc interpolée sur 2 m au lieu d'être échantillonnée.
+[RESEAU-GRADUE-S187](RESEAU-GRADUE-S187.md) §8.4 mesure le coût de cette convention : à
+nombre de nœuds verticaux égal, **41,2 % contre 6,8 %** à trois nœuds, **13,6 % contre
+2,5 %** à cinq, **2,54 % contre 1,69 %** à huit. Voir **A231** et
+[ADR-118](../adr/ADR-118-le-reseau-d-echantillonnage-ancre-et-gradue.md).
+
+Rien n'est réécrit : les chiffres de §8.3 et §8.5 mesurent correctement **ce** réseau, et la
+réception croisée de S187 les redonne à la décimale. Ce qui change est leur portée :
+
+- la **magnitude** de l'erreur spatiale est jusqu'à six fois plus faible sur un réseau
+  ancré, donc la parité entre axe spatial et axe temporel — qui est la règle de
+  dimensionnement de §8.5 — se déplace entièrement. L'exemple du maintien à `r = 2`, où la
+  cadence devient dominante à `c = 32`, ne tient pas sur un réseau ancré ;
+- la **loi** de composition — le maximum pour les modes causaux — a été établie sur une
+  erreur **concentrée** sur une tranche. La graduation la **répartit** (S187 §8.5 : erreur
+  de tranche haute nulle, maximum déplacé vers le milieu du bloc). Rien ne dit que la loi
+  survit à cette redistribution, et **elle n'est pas rejouée**. C'est la suite recommandée.
+
+L'avertissement de §8.2 sur le décompte « points par longueur d'onde » (**A230**) reste
+entier et se double : une densité ne dit rien du **placement**, et S187 mesure que le
+placement pèse plus.
+
+**Suivi S187 — la compensation entre axes vaut aussi dans l'espace.** §8.6 et A229 ont
+trouvé que dégrader la cadence peut réduire l'erreur totale. S187 §8.2 trouve le même
+phénomène entre les axes d'espace : l'erreur isotrope est **sous** celle de l'axe vertical
+seul aux trois ratios (2,54 contre 2,66 ; 13,60 contre 15,41 ; 32,96 contre 45,51 %).
+Le piège de réglage de A229 est donc aussi interne à une seule grandeur.
