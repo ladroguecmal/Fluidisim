@@ -376,7 +376,10 @@ dépensée.
 **Conclu.**
 
 1. **Un budget conjoint est licite pour un consommateur causal**, au sens du maximum. La règle
-   est d'égaliser les erreurs des deux axes pris seuls.
+   est d'égaliser les erreurs des deux axes pris seuls. — ***Remplacé en S189** : le maximum
+   n'est pas une estimation portable et la règle d'égalisation est abandonnée. La licéité du
+   budget conjoint, elle, reste. Voir le suivi daté en fin de document et
+   [ADR-119](../adr/ADR-119-le-budget-conjoint-se-borne-par-la-somme.md).*
 2. **L'additive est une enveloppe sûre** dans tous les cas, avec jusqu'à 1,9 fois de mou.
 3. **La loi dépend du mode de réemploi** — maximum pour maintien et extrapolation, quadratique
    pour l'interpolation. Un seul chiffre de composition n'existe pas.

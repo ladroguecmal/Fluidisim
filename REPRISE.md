@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-12 14:56 +02:00
+JETON            : libre
+Battement        : 2026-09-12 15:17 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S189 — S188-1/A50 : la composition sur réseau gradué
-Dernière session : S188 — la loi de composition tient sur réseau ancré, et l'on sait pourquoi
-Session suivante : à fixer par le rituel de fin de S189
+Session en cours : aucune
+Dernière session : S189 — la loi du maximum n'était pas une loi ; ADR-119, borner par la somme
+Session suivante : S190 — S189-1/A50 : l'additivité locale avec une projection de pression
 
 *S183 à S189 ont travaillé dans la **copie principale**, sur `master` : aucune copie isolée
 ouverte, donc rien à refermer (AGENTS.md). Les trois worktrees ont été **avancés sur master**
@@ -191,6 +191,47 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S189 — 2026-09-12 :** [COMPOSITION-GRADUEE-S189](docs/validation/COMPOSITION-GRADUEE-S189.md),
+[ADR-119](docs/adr/ADR-119-le-budget-conjoint-se-borne-par-la-somme.md), **actée**.
+**S188-1 réalisée : A232 est confirmée, et la loi du maximum n'était pas une loi.** Mesurée
+sur le réseau **gradué** d'ADR-118 — le seul qui **sépare** les deux pics d'erreur, de 6 à
+10 mailles — la loi du maximum est **rejetée pour le maintien** (0,730–1,000) alors qu'elle
+tient sur le réseau ancré (0,936–1,060). Même montage, même critère, même référence : c'est
+la **géométrie des pics** qui décide.
+**Et la révision de S188 était juste** : les deux pics ne coïncident **jamais** à la maille
+— 0 cas sur 78 jugés. La « coïncidence » de S188 était un effet de granularité, il
+localisait à la tranche (196 mailles).
+**Le mécanisme est l'additivité locale**, dérivée avant la mesure : l'écart de champ est
+additif **maille par maille** — résidu au plus 1,9263 % de `max|u'|`, **10,0 %** de
+l'erreur de sa propre case, et **exactement nul** dans les cas dégénérés. Les trois
+« lois » de S186 cessent donc d'être trois lois concurrentes : ce sont trois lectures de la
+position relative de deux champs qui s'additionnent. Pic composé sur le pic spatial 19 fois,
+sur le pic temporel 40 fois, ailleurs 19 fois ; et là où l'autre erreur est **nulle**, le
+rapport au maximum vaut exactement 1,000.
+**Ce qui survit à tout : l'additive** — rapport maximal 0,981 ici, 0,984 en S188, 0,988 en
+S186, jamais dépassé sur trois géométries. D'où **ADR-119** : le budget conjoint se **borne
+par la somme**, le maximum n'est pas une estimation portable, et la règle de dimensionnement
+de S186 §8.5 — « égaliser les deux axes puis s'arrêter » — est **abandonnée**. Un budget
+conjoint reste licite ; c'est sa répartition qui tombe. Premier ADR du dépôt qui remplace une
+règle de dimensionnement publiée par une session précédente ; ADR-118 reste entier et son
+suivi daté distingue sa règle 3, saturation interne à un axe, de la règle remplacée.
+**A233** : la seule borne portable est **lâche d'un facteur 2,3** (rapport jusqu'à 0,437), et
+aucune estimation plus serrée ne tient sur toutes les géométries — rien ne dit laquelle
+s'applique avant d'avoir mesuré. **A229 reçoit son mécanisme** : la compensation est une
+superposition à **signes opposés**, pas une propriété de la physique.
+Six réceptions ; empreinte `0x30b0b9eee43f6255`, `diff` identique sur deux exécutions.
+Les **quatre** empreintes du support tiennent : `0x39567a1d4bc2ba4c`, `0x0e743846d4656870`,
+`0x6cf13183b4a240df`, `0x21bab548c7b9775c`. Aucun nouveau test ; workspace 331 réussis/cinq
+ignorés en debug et release. Bibliothèque inchangée.
+119 ADR,233 angles,269 leçons,18 invariants,6 SPEC,23 cas. **A233** et **L269**.
+A50/B4 restent partiels : il manque toujours **un critère de justesse**.
+**Suite S190 : S189-1/A50**, mesurer l'additivité locale **avec une projection de pression**.
+C'est la seule limite qui menace l'ensemble : ADR-119 et l'explication des trois sessions
+précédentes reposent sur l'additivité, et la projection couple toutes les mailles à chaque
+pas. Si elle survit, ADR-119 vaut pour un solveur réaliste ; si elle tombe, la borne par la
+somme reste — elle ne suppose rien — mais l'explication tombe avec elle.
+**BILAN-B4-S176** reste le bilan actif et porté. Aucun arbitrage humain nouveau.
 
 **S188 — 2026-09-12 :** [COMPOSITION-ANCREE-S188](docs/validation/COMPOSITION-ANCREE-S188.md).
 **S187-1 réalisée : la loi de composition survit à l'ancrage, et le rejeu en livre la

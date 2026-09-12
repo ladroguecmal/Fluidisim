@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S189 — en cours
+Session : S189 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : S188-1/A50, **éprouver A232** — la loi du maximum ne vaudrait que tant que les
 maxima des deux erreurs coïncident. Le réseau **gradué** de S187 est la seule configuration
@@ -102,9 +102,30 @@ quadratique et l'additive pour l'interpolation, et les écarts de 0,87 à 1,71 o
 - [x] **P4** — recevoir dans un document de validation ; **note corrective datée** sur le
       raisonnement de S188 si l'additivité locale tranche ; angles, leçons, ADR si une
       décision en sort.
-- [ ] **P5** — rituel de fin (REPRISE.md §6).
+- [x] **P5** — rituel de fin (REPRISE.md §6).
 
 ### Notes de reprise
+
+P5 S189 : rituel terminé. Décomptes **vérifiés contre le dépôt** : 119 fichiers ADR,
+18 invariants, 6 SPEC (dont SPEC-003 dans `docs/validation/`), 23 cas, 269 leçons, A233 au
+plus haut — **119 ADR, 233 angles, 269 leçons, 18 invariants, 6 SPEC, 23 cas**, portés dans
+README, 00_INDEX et REPRISE ; décompte daté de la table des registres porté à 233 (S189).
+**Invariants relus, et c'était nécessaire cette fois** : ADR-119 cite SPEC-004 §6.2 et
+ADR-118, et remplace une règle de dimensionnement. Aucun invariant ne parle de composition
+d'erreurs ni de budget conjoint, donc aucun ne devient faux ; I-14 est respecté, tous les
+nombres viennent du programme. La note corrective de SPEC-004 §6.2 posée en S187 reste
+valide et se trouve renforcée : une densité ne dit rien du placement, et S189 ajoute qu'une
+norme ne dit rien de la géométrie.
+**Vérifié en recherche de texte** (L49, S11), et la vérification a servi : trois documents
+citaient la règle du maximum — S186, S188, ADR-118 — et tous trois portent un suivi daté.
+Mais la **liste de conclusions** de COMPOSITION-ERREURS-S186 §9 l'énonçait encore telle
+quelle, et un lecteur de ce seul paragraphe aurait été égaré. Elle reçoit donc un renvoi
+**visible et daté** sur place, en plus du suivi de fin de document — une correction se
+propage vers la prose qui l'explique, et les listes qui la réclamaient sont précisément ce
+qu'on oublie de parcourir.
+Jeton libre ; copie principale, aucune copie ouverte. Les trois worktrees ont été avancés
+sur master en fin de session.
+Suite S190 : S189-1, l'additivité locale avec projection de pression.
 
 P4 S189 : COMPOSITION-GRADUEE-S189 §7–§8 reçus. **ADR-119 actée** — le budget conjoint se
 borne par la somme, le maximum n'est pas portable, et la règle « égaliser les deux axes

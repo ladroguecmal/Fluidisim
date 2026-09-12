@@ -9585,3 +9585,129 @@ règle de dimensionnement s'applique. **Les deux issues instruisent**, et c'est 
 bonne mesure suivante. **BILAN-B4-S176** reste le bilan actif et porté, avec un suivi daté.
 
 **Décisions qui demandent un arbitrage humain :** aucune nouvelle. A107 reste ouverte.
+
+## S189 — 2026-09-12 — La loi du maximum n'était pas une loi
+
+**Entrée :** master 4b40410 propre, quatre copies au même commit, S188-1/A50. Copie principale.
+Plan seul 7975ee5 ; protocole 2414a31 ; support c83bfd2 ; mesure ee2f47b ; réception 5cda2f1.
+Code d'exécution de la bibliothèque inchangé.
+
+**Produit :** `compact_index`, `d2z_profile` et `graded_indices` dans
+`examples/support/perturbative_block.rs`, `examples/graded_composition.rs`,
+[COMPOSITION-GRADUEE-S189](../docs/validation/COMPOSITION-GRADUEE-S189.md) et
+[ADR-119](../docs/adr/ADR-119-le-budget-conjoint-se-borne-par-la-somme.md), **actée**.
+
+**Ce que la session venait faire.** S188 avait écrit **A232** : la loi du maximum ne vaudrait
+que tant que les maxima des deux erreurs coïncident. Le réseau **gradué** de S187 est la seule
+configuration connue qui les sépare — la graduation pose un nœud sur la tranche haute et y
+annule l'erreur spatiale, tandis que l'erreur temporelle reste accrochée au maximum du champ,
+qui est en haut quoi qu'on fasse du réseau.
+
+**Et une révision de mon propre raisonnement, déclarée avant la mesure.** S188 avait localisé
+les maxima à la **tranche** — un plan de 196 mailles — et conclu qu'ils coïncidaient. Si les
+deux erreurs culminaient réellement sur la même **maille**, elles s'y ajouteraient et la loi
+mesurée serait l'additive. Or c'était le maximum. La lecture la plus simple était donc
+l'inverse : **elles ne se rencontrent pas**. Mesuré à la maille : **les deux pics ne coïncident
+jamais — 0 cas sur 78 jugés**, y compris sur le réseau ancré, où ils partagent l'étage mais pas
+la colonne.
+
+**Chiffres qui ont orienté la conception.**
+
+L'hypothèse dérivée au protocole — l'écart de champ est **additif maille par maille**, parce
+que l'état part de zéro et que le pas est presque linéaire en la source — tient :
+
+- résidu `max |Δu(r,c) − Δu(r,1) − Δu(1,c)|` : **au plus 1,9263 %** de `max |u'|` en absolu, et
+  **au plus 10,0 %** de l'erreur de sa propre case ;
+- **exactement nul** partout où l'un des deux termes est nul, ce qui valide le calcul du résidu
+  avant de lui faire dire quoi que ce soit ;
+- le résidu croît avec l'erreur — signature du terme croisé advectif annoncé d'avance.
+
+**Et l'additivité locale explique tout.** Sur 78 cases jugées, le pic composé tombe sur le pic
+spatial 19 fois, sur le pic temporel 40 fois, ailleurs 19 fois. À `mnt / graduée Nz=5 / c=4`,
+il tombe en `(1,1,14)` avec une erreur spatiale locale de **0,0000 %** : supports disjoints, et
+le rapport au maximum vaut exactement **1,000**. À `int / graduée Nz=3 / c=64`, il reste en
+`(1,1,6)` avec 6,5503 de spatial et 2,8585 de temporel : ils s'**ajoutent** — 9,6129 mesuré
+contre 9,4088 sommé — et le rapport au maximum monte à **1,419**.
+
+**A232 est confirmée, et attribuée à la géométrie**, parce que deux familles ont été mesurées
+côte à côte :
+
+| famille | maintien | extrapolation | interpolation |
+|---|---|---|---|
+| **graduée**, pics séparés de 6 à 10 mailles | maximum **rejeté**, 0,730–1,000 | maximum, 0,811–1,000 | quadratique |
+| **ancrée**, pics au même étage | maximum, 0,936–1,060 | maximum, 0,869–1,000 | additive, quadratique |
+
+**Sur le réseau que recommande ADR-118, la loi du maximum tombe.** Et la direction compte :
+0,730 signifie que l'erreur composée est 30 % **au-dessous** du maximum des deux, donc la loi
+surestime — elle reste une borne mais cesse d'être une estimation.
+
+**Ce qui survit à tout : l'additive.** Rapport maximal 0,981 ici, 0,984 en S188, 0,988 en
+S186 — jamais dépassé, sur trois géométries de réseau et trois sessions.
+
+**Décision structurante : ADR-119, actée.** Le budget d'erreur conjoint se **borne par la
+somme**. Le maximum **n'est pas une estimation portable**. Et la règle de dimensionnement
+publiée par S186 §8.5 — « égaliser les erreurs des deux axes puis s'arrêter », « l'axe bon
+marché est gratuit jusqu'à la parité » — est **abandonnée** : elle supposait que le maximum
+gouverne, et sur le réseau gradué l'optimum n'est plus à la parité. Un budget conjoint reste
+**licite**, ce que S186 cherchait à établir ; c'est sa répartition qui tombe.
+
+C'est le premier ADR du dépôt qui remplace une **règle de dimensionnement** publiée par une
+session précédente. Il ne remplace aucun ADR : ADR-118 reste entier, et son suivi daté
+distingue sa règle 3 — une saturation interne à un axe, mesurée en S187 — de la règle de
+composition remplacée.
+
+**Ce que la session a trouvé et qui n'était pas cherché.**
+
+**A233** *(sévérité 2)* — **la seule borne portable est lâche d'un facteur 2,3.** Le rapport
+mesuré/prédit de l'additive descend à **0,437** : le total réel peut valoir moins de la moitié
+de la borne, donc dimensionner par elle coûte jusqu'à 2,3 fois la résolution nécessaire — et
+S184 a établi que le coût suit exactement ces nombres. Les deux estimations plus serrées sont
+inutilisables : le maximum est rejeté sur un réseau et dépassé jusqu'à 1,71 sur l'autre, la
+quadratique tient par mode et par famille mais pas sur l'ensemble, et **rien ne dit laquelle
+s'applique avant d'avoir mesuré**. Une estimation portable demanderait de prédire la position
+relative des deux pics, donc de connaître d'avance la géométrie du contenu et du réseau — ce
+qu'un consommateur ne sait pas.
+
+**Suivi A229** — le mécanisme de la compensation est trouvé. A229 relevait que dégrader un axe
+peut réduire l'erreur totale, sans savoir pourquoi. C'est l'additivité locale à **signes
+opposés** : là où les deux champs s'opposent, le composé passe sous le maximum des deux. Ni
+artefact ni physique — une superposition de signes, qui dépend du montage et ne se transporte
+pas.
+
+**L269** — **une loi mesurée en norme n'est pas une loi : regarder les champs avant de nommer
+une loi.** Trois sessions ont publié des rapports de normes en ayant les champs d'erreur en
+mémoire — il fallait bien les calculer pour en prendre la norme — et les deux premières ne les
+ont pas regardés. Trois corollaires : une norme est une projection, elle jette l'information
+qui explique son résultat ; **trois lois candidates qui se partagent les cas sont le signe
+qu'aucune n'est la bonne** ; et une granularité trop grossière ne rend pas une réponse
+imprécise, elle rend la **mauvaise** réponse avec l'apparence d'une confirmation.
+
+**Réception :** les six contrôles passent. Empreinte `0x30b0b9eee43f6255`, `diff` identique sur
+deux exécutions ; aucune durée mesurée. Le témoin ancré redonne S188 (1,7160 % et 3,6805 %) et
+la famille graduée redonne S187 §8.5 (6,5503 / 3,4373 / 1,7164 / 0,6393 %, erreur de tranche
+haute 0,0000–0,0001 %). Les **quatre** empreintes publiées du support tiennent après le
+déplacement du profil et des indices gradués : `0x39567a1d4bc2ba4c`, `0x0e743846d4656870`,
+`0x6cf13183b4a240df` (sortie entière identique), `0x21bab548c7b9775c`. Workspace **331 réussis
+/ cinq ignorés** en debug et en release. Aucun nouveau test unitaire.
+
+**Un incident de découpe, sans conséquence parce que le compilateur l'a vu.** La tranche
+retirée de `graded_lattice` pour déplacer deux fonctions emportait aussi `overshoot_indices`,
+qui vivait entre elles. Restauré à l'identique, et l'empreinte le confirme. Une découpe par
+bornes textuelles se vérifie par compilation, pas par relecture.
+
+**Ce que je n'ai pas fait.** **L'additivité locale n'est pas mesurée avec une projection de
+pression**, et c'est la limite qui domine tout : la projection couple toutes les mailles à
+chaque pas, et ADR-119 comme l'explication des trois sessions précédentes reposent sur
+l'additivité. Aucun seuil de justesse : A50 attend une décision, `N` de SPEC-004 §6.2 reste à
+fixer. Aucun coût : la famille graduée a plus de nœuds que l'ancrée, cette session sépare deux
+pics et ne compare pas des coûts. Un seul montage, une seule profondeur de bloc, un seul
+instant de profil. Le véhicule ne projette pas.
+
+**Prochaine session recommandée. S190 : S189-1**, mesurer l'additivité locale **avec une
+projection de pression** dans le véhicule. C'est la seule limite qui menace l'ensemble, et les
+deux issues instruisent : si l'additivité survit à la projection, ADR-119 vaut pour un solveur
+réaliste ; si elle tombe, la borne par la somme reste — elle ne suppose rien — mais
+l'explication tombe avec elle, et il faudra le dire. **BILAN-B4-S176** reste le bilan actif et
+porté, avec un suivi daté.
+
+**Décisions qui demandent un arbitrage humain :** aucune nouvelle. A107 reste ouverte.

@@ -471,3 +471,23 @@ l'optimum va vers plus de décimation spatiale et moins de réduction de cadence
 118 ADR,232 angles,268 leçons,18 invariants,6 SPEC,23 cas.
 Suite : la composition sur réseau gradué, seul endroit connu où les deux maxima se séparent.
 Voir [COMPOSITION-ANCREE-S188](docs/validation/COMPOSITION-ANCREE-S188.md).
+
+**S189 :** la loi de composition mesurée depuis S186 **n'était pas une loi**. Mesurée sur
+le réseau **gradué** que recommande ADR-118 — le seul qui sépare les deux pics d'erreur —
+la loi du maximum est **rejetée** pour le mode maintien, alors qu'elle tient sur un réseau
+ancré. Le mécanisme, dérivé avant la mesure et vérifié : les deux champs d'erreur
+s'**additionnent maille par maille**, à 10 % près et exactement dans les cas dégénérés.
+Ce que la norme maximum affichait n'était donc que la **position relative de leurs pics** —
+et ces pics ne coïncident **jamais** à la maille, 0 cas sur 78, ce qui corrige l'inférence
+de S188 sans toucher à ses mesures.
+D'où **ADR-119** : le budget d'erreur conjoint se **borne par la somme** — la seule forme
+jamais dépassée sur trois géométries de réseau et trois sessions — le maximum n'est pas une
+estimation portable, et la règle « égaliser les deux axes puis s'arrêter » est abandonnée.
+Un budget conjoint reste licite ; c'est sa répartition qui tombe.
+**A233** : cette borne est lâche d'un facteur 2,3, et aucune estimation plus serrée ne tient
+sur toutes les géométries. **L269** : une loi mesurée en norme n'est pas une loi — trois lois
+candidates qui se partagent les cas sont le signe qu'aucune n'est la bonne.
+119 ADR,233 angles,269 leçons,18 invariants,6 SPEC,23 cas.
+Suite : l'additivité locale avec une projection de pression — la seule limite qui menace
+l'ensemble.
+Voir [COMPOSITION-GRADUEE-S189](docs/validation/COMPOSITION-GRADUEE-S189.md).
