@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-12 12:23 +02:00
+JETON            : occupé
+Battement        : 2026-09-12 12:40 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S185 — S184-1/A50 : erreur de cadence temporelle en 3D
 Dernière session : S184 — la source coûte ~2100 fois le pas qu'elle alimente
-Session suivante : S185 — S184-1/A50 : erreur de cadence temporelle en 3D avec le fournisseur réel
+Session suivante : à fixer en fin de S185
 
 *S183 et S184 ont travaillé dans la **copie principale**, sur `master` : aucune copie isolée
 ouverte, donc rien à refermer (AGENTS.md). Les trois worktrees ont été **avancés sur master**

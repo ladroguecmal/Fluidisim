@@ -58,28 +58,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S184 — terminée
+Session : S185 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : S183-1/A50, mesurer la **consommation** perturbative de la source — un pas
-de solveur alimenté par `momentum_residual` contre le même pas sans elle, en 3D, puis
-ce que la décimation spatiale et la cadence temporelle achètent réellement en temps.
-S170 avait explicitement refusé de conclure là-dessus ; S183 fournit le chiffre manquant.
+Objectif : S184-1/A50, mesurer l'**erreur** de la cadence temporelle en 3D avec le
+fournisseur réel — et séparer ce qui est disponible au runtime de ce qui ne l'est pas.
+S174 avait interpolé entre deux instantanés en écrivant noir sur blanc que l'échantillon
+futur n'est pas disponible pour un événement inconnu. S185 mesure les modes **causaux**.
 
 ### Plan
 
-- [x] **P1** — état réel, jeton et plan seul.
-- [x] **P2** — publier le protocole **avant** tout chiffre : le véhicule, ce qui est
-      chronométré, la grille de décimation, et ce qu'un pas sans projection ne prouve pas.
-- [x] **P3** — écrire le véhicule `perturbative_step` : pas explicite sur un bloc 3D,
-      avec et sans source, source par maille puis décimée. Recevoir la consommation
-      (valeurs finies, chemin exercé, témoin direct) et relever les coûts.
-- [x] **P4** — chiffrer ce que la décimation achète, et dire ce que la part mesurée
-      devient si l'on ajoute une projection. Recevoir dans un document de validation.
-- [x] **P5** — mesurer le gain disponible d'une évaluation **par réseau** plutôt que par
-      point, pour B seul : récurrence de phase contre appel par point. Sizer l'occasion,
-      sans la proposer comme acquise — une récurrence ne rend pas les mêmes bits (I-03).
-- [x] **P6** — rituel de fin (REPRISE.md §6) : journal, angles, leçons, index, décomptes,
-      jeton et copies.
+- [>] **P1** — état réel, jeton et plan seul.
+- [ ] **P2** — publier le protocole avant tout chiffre : véhicule à instant qui avance,
+      trois modes de réemploi (maintien, extrapolation causale, interpolation à une
+      période de latence), métriques, et ce que la mesure ne prouvera pas.
+- [ ] **P3** — écrire `cadence_error` : l'instant avance, le contrôleur est actualisé à
+      chaque reconstruction. Réceptions : reproductibilité en bits, identité de
+      prédiction champ/intégrale de l'erreur de source, cadence 1 identique à la
+      référence. Relever.
+- [ ] **P4** — chiffrer le compromis cadence × mode, et le coût du mode lui-même.
+      Recevoir dans un document de validation.
+- [ ] **P5** — rituel de fin (REPRISE.md §6).
 
 ### Notes de reprise
 
