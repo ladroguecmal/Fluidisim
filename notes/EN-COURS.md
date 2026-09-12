@@ -71,7 +71,10 @@ futur n'est pas disponible pour un événement inconnu. S185 mesure les modes **
 - [x] **P2** — publier le protocole avant tout chiffre : véhicule à instant qui avance,
       trois modes de réemploi (maintien, extrapolation causale, interpolation à une
       période de latence), métriques, et ce que la mesure ne prouvera pas.
-- [>] **P3** — écrire `cadence_error` : l'instant avance, le contrôleur est actualisé à
+- [x] **P3a** — partager le véhicule : `support/` pour l'hôte, les paramètres de montage
+      et le bloc. S185 doit évoluer **le même pas** que S184, sinon la comparaison ne vaut
+      rien et deux copies divergeront (L137). Rejouer S184 et vérifier ses chiffres.
+- [>] **P3b** — écrire `cadence_error` : l'instant avance, le contrôleur est actualisé à
       chaque reconstruction. Réceptions : reproductibilité en bits, identité de
       prédiction champ/intégrale de l'erreur de source, cadence 1 identique à la
       référence. Relever.

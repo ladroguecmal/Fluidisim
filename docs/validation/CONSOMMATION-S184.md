@@ -132,6 +132,18 @@ cargo run --release --manifest-path code/Cargo.toml -p water-core --example latt
 Deux exécutions de chaque binaire, notées **E1 / E2**. Médianes des sept blocs sauf mention.
 Bibliothèque inchangée ; workspace **331 réussis / cinq ignorés** en debug et en release.
 
+> **Note S185 — le véhicule a été rejoué après refactorisation.** S185 a sorti l'hôte, les
+> paramètres de montage et le bloc dans `examples/support/`, pour que les deux sessions
+> évoluent le **même** pas plutôt que deux copies (L137). Le binaire qui a produit les
+> chiffres ci-dessous n'existe donc plus sous cette forme exacte, et il a été rejoué. Résultat,
+> au bloc 16 : source 34,81 µs (publié 34,48–35,16), décimation 6,26 / 1,62 / 0,356 (publié
+> 6,54 / 1,63 / 0,361), cadence 33,99 / 16,95 / 8,49 / 4,28 / 2,10 (publié 34,50–34,92 puis
+> 1/c), réceptions inchangées, zéro exemption. **Une seule grandeur bouge hors de sa plage
+> publiée** : le pas, à 15,33 ns contre 15,8–16,9 ci-dessous, soit ~4 % sous le plus rapide des
+> blocs publiés — la signature de `step` a gagné un paramètre `nu` et l'inlining a changé. Le
+> rapport source/pas passe de ~2150 à ~2270 : **lire « 2000 à 2300 » partout où ce document
+> écrit « ~2100 »**. Aucune conclusion ne change.
+
 ### 6.1 Réceptions, et une correction de protocole
 
 Les quatre contrôles de §5 passent aux trois tailles de bloc, **sans aucune composante
