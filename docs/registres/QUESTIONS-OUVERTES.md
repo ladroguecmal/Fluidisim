@@ -1668,7 +1668,7 @@ entrée par entrée. Le fil reprend ci-dessous.
   et allocations. Comparer àla surface àentrées identiques ; conditions/limites de
   mesure avant budget de consommation perturbative. BILAN-S145/BILAN-B4-S176 portés.
 
-## File active — relue en S195, 2026-09-12
+## File active — relue en S196, 2026-09-12
 
 *Renommée de « File active S190 » en S193 : le contenu est daté ligne par ligne, le titre
 suivait un numéro de session et vieillissait seul (A185 — un état sans date se lit au
@@ -1683,12 +1683,13 @@ action unique et doit être relue au rituel de fin (A211).
 
 | action / objet | état daté et ce qui reste | priorité / déclencheur |
 |---|---|---|
-| **S195-1 / A50 / B4** | **S195 : S194-1 réalisée**, `n` sources mesurées, **A240 close** ; ADR-123 se transporte à `n` sources dans le sens favorable | prochaine action à instruire : **A241** (densifier, savoir si la loi tend vers une limite) **ou** la correction croisée quadratique, chiffrée et bornée, qui redevient disponible |
+| **S196-1 / A50 / B4** | **S196 : A241 requalifiée**, le repli pèse un tiers et la limite existe ; **A242** ouverte sur le critère de domaine | prochaine action à instruire : **A242** d'abord (peu coûteuse, touche la méthode de trois sessions), puis A241 sur ses deux suspects ; la correction croisée quadratique reste disponible |
 | **B3 / δ** | **S194** : deux Saint-Venant 1D, bloc quantité de mouvement 3D, tranche linéaire S192, tranche non linéaire dispersive S193, couplage chiffré S194 ; aucun solveur δ choisi | construire/recevoir le candidat qui permet la comparaison B4 ; contrainte neuve d'ADR-123 sur tout candidat qui additionne des sources évoluées séparément |
 | **B4 forces / perception** | aucun reçu complet ; la métrique de vitesse S190 ne les remplace pas | après montage commun surface/solide ; protocole perceptif conserve ses participants réels requis |
 | **A216** (A217 **close** en S194) | **S194** : A217 a sa réponse — la cambrure gouverne l'addition en eau profonde, plus la durée et le désaccord de triade ; A216, coefficient S161, reste inexpliquée | A216 avec un montage qui l'explique ; ne pas dériver 0,02/0,24 comme seuil, ADR-123 n'est pas une bascule |
 | **`n` sources / A240 — close** | **S195 : A240 close.** `n = 2..6` mesuré : à cambrure par train fixée l'écart croît en `n^0,75` (sous-linéaire, loin du `n²`) ; à cambrure **totale** fixée il **décroît** en `1/√n`. ADR-123 se transporte dans le sens favorable | rien à instruire ; limites conservées : `n ≤ 6`, colinéaire, fond plat, eau profonde |
-| **Repli des croisées / A241** | **S195, neuf** : les harmoniques croisées retombent sur les modes de train, et cette part décroît 4,85 fois moins vite que celle des modes propres au couplage — elle domine dès `n = 4` et maintient la loi **entre** les deux bornes dérivées, qu'aucune n'encadre | étendre `n` au-delà de six et densifier la bande ; le banc existe et le diagnostic modal est disponible. Avant toute promesse sur un spectre |
+| **Repli des croisées / A241 — requalifiée** | **S196** : moitié « limite » **close** (l'exposant sature à `−0,52` dès `n ≈ 4`, immobile jusqu'à `n = 16`) ; moitié « cause » **partielle** — éteindre tout le repli des paires déplace l'exposant de 0,131, soit **32 %** du chemin jusqu'à la loi dispersée. Le repli déplace la loi, il ne la gouverne pas | deux suspects nommés et non séparés : le confondant de bande relative (24 % entre parités, borné) et les termes **triples**, que la parité ne neutralise pas |
+| **Critère de domaine / A242** | **S196, neuf** : la dérive d'énergie sous `10⁻⁴`, employée comme critère par S194/S195/S196, **ne détecte pas la sous-résolution** — contre-exemple faux d'un facteur cinq à 65× sous le seuil | apparier tout critère de conservation à un contrôle de raffinement dans les bancs existants ; peu coûteux, et touche la méthode de trois sessions |
 | **A213 / omega f32** | remède identifié, non appliqué, réception S95 à renouveler s'il est retenu | lot propre de précision/horizon, indépendant de l'arbitrage B4 |
 | **λ_cut / B2 / coupure W–δ** | B2 partiel ; dispersion/dissipation et borne d'éponge A92 à assembler | choix du couple W/δ ; ne pas confondre réception source B4 et coupure |
 | **Bathymétrie / S116-2** | **S194** : fond plat seul, mais le couplage y est **8,6 fois plus fort** vers le rivage quand le désaccord de triade tombe ; et la faible profondeur non linéaire n'a aucun oracle de Stokes (A234) | lot de construction propre ; une frontière établie en eau profonde ne se transporte pas vers le rivage (ADR-123) |

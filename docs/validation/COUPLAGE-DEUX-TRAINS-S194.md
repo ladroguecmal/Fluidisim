@@ -491,3 +491,11 @@ identiques au reçu de S190 vérifié en S193.
 
 Code : `code/water-core/examples/nl_coupling_2d.rs`.
 [Sorties intégrales](COUPLAGE-DEUX-TRAINS-S194-MESURES.md).
+
+**Note S196 — 2026-09-12 : lire « énergie sous `10⁻⁴` » pour ce que c'est.** Ce document
+emploie la dérive relative d'énergie comme critère de domaine. S196 a montré qu'un tel critère
+**ne détecte pas la sous-résolution** : il a trouvé une configuration fausse d'un facteur cinq
+dont l'énergie dérivait soixante-cinq fois sous le seuil (**A242**, **L277**). Les
+configurations publiées ici sont loin du bord de résolution et leurs valeurs ne sont pas
+remises en cause ; c'est la **phrase** qui ne doit plus être lue comme une garantie de
+justesse. Voir REPLI-CROISEES-S196 §8.5.

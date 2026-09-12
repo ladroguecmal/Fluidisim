@@ -413,3 +413,11 @@ gouvernent la loi à grand `n`, et aucune des deux bornes classiques ne les déc
 spectre dense, *tous* les modes croisés retombent sur des modes existants ; la question est
 donc de savoir si la loi mesurée ici tend vers quelque chose, ou si `n ≤ 6` en donne une image
 trompeuse.
+
+**Note S196 — 2026-09-12 : lire « énergie sous `10⁻⁴` » pour ce que c'est.** Ce document
+emploie la dérive relative d'énergie comme critère de domaine. S196 a montré qu'un tel critère
+**ne détecte pas la sous-résolution** : il a trouvé une configuration fausse d'un facteur cinq
+dont l'énergie dérivait soixante-cinq fois sous le seuil (**A242**, **L277**). Les
+configurations publiées ici sont loin du bord de résolution et leurs valeurs ne sont pas
+remises en cause ; c'est la **phrase** qui ne doit plus être lue comme une garantie de
+justesse. Voir REPLI-CROISEES-S196 §8.5.

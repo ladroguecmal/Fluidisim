@@ -602,7 +602,7 @@ ignorés**, identiques au reçu. Restent ouverts : **`n` sources** (**A240**, le
 **Suite S195 — à instruire** : `n` sources, ou la correction croisée quadratique dont
 ADR-123 chiffre déjà le gain. File active relue et renommée S194 ; A217 retirée de sa ligne.
 **A238, A239, A240** et **L274, L275** :
-**123 ADR,241 angles,276 leçons,18 invariants,6 SPEC,23 cas**.
+**123 ADR,242 angles,277 leçons,18 invariants,6 SPEC,23 cas**.
 Voir [couplage S194](docs/validation/COUPLAGE-DEUX-TRAINS-S194.md), [mesures](docs/validation/COUPLAGE-DEUX-TRAINS-S194-MESURES.md) et [ADR-123](docs/adr/ADR-123-le-domaine-de-validite-de-la-superposition.md).
 
 **S195 :** `n` sources mesurées, **A240 close**, aucun ADR. À cambrure par train fixée —
@@ -616,3 +616,15 @@ part gouverne la loi à grand `n`. **L276** : une variable de protocole peut êt
 par le véhicule avant d'être mesurée. Session **reprise après interruption** d'un autre
 compte ; P3a complétée, pas annulée.
 Voir [`n` sources S195](docs/validation/SOURCES-MULTIPLES-S195.md).
+
+**S196 :** le repli des harmoniques croisées est **séparé** de ce qu'il accompagnait, par
+un montage de parité — trains impairs, donc sommes et différences paires, donc aucun
+repli, par arithmétique. Verdict : il **déplace** la loi sans la **gouverner**, un tiers
+du chemin et pas plus ; la thèse de S195 était trop forte. La moitié « limite » d'A241 est
+close — l'exposant sature à `−0,52` dès `n ≈ 4`. Le protocole demandait `>0,20` ou
+`<0,10` d'écart : mesuré `0,131`, **ni l'un ni l'autre**, ce qu'une prédiction déclarée
+d'avance rend impossible à maquiller. **A242** : la dérive d'énergie, employée comme
+critère de domaine par trois sessions, **ne détecte pas la sous-résolution** — un résultat
+faux d'un facteur cinq passait 65× sous le seuil. **L277** : un invariant conservé ne dit
+rien de ce qui est résolu. Aucun ADR.
+Voir [repli des croisées S196](docs/validation/REPLI-CROISEES-S196.md).

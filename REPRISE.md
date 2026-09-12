@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-12 21:51 +02:00
+JETON            : libre
+Battement        : 2026-09-12 22:32 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
-Session en cours : S196 — A241 : le repli des harmoniques croisées sur les modes de train
-Dernière session : S195 — `n` sources mesurées, A240 close, A241 ouverte
-Session suivante : à fixer au rituel de fin ; relire la file plurielle
+Session en cours : aucune
+Dernière session : S196 — le repli pèse un tiers ; A241 requalifiée, A242 ouverte
+Session suivante : S197 — A242 : apparier les critères de conservation à un contrôle de raffinement ; puis A241 sur ses deux suspects
 
 *S195 a **changé de main en cours de route** : la session ouverte à 21:15 a été coupée par
 une limite d'usage sur un autre compte, et l'utilisateur l'a signalé. Le jeton disait donc
@@ -234,6 +234,38 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S196 — 2026-09-12 : le repli des croisées pèse un tiers, pas le tout.**
+[REPLI-CROISEES-S196](docs/validation/REPLI-CROISEES-S196.md), empreinte
+`0xbcf2911362458c13`, deux exécutions identiques. **A241 requalifiée, pas close.** S195
+avait proposé un mécanisme appuyé sur une **corrélation** — les harmoniques croisées
+retombent sur les modes de train, et les deux quantités croissent ensemble avec `n`.
+S196 les sépare par un montage de **parité** : le repli n'est pas physique, c'est une
+propriété arithmétique du jeu de modes. Trains tous **impairs** → somme et différence
+sont paires, donc **aucun terme croisé de paire ne retombe** ; repli nul, exact, testé.
+Témoin qui valide le montage : la famille **paire** est la dense aux modes doublés
+(même repli, même bande relative, échelle ×2) et les deux s'accordent à `0,057`.
+**Résultat : exposants `−0,394` (paire) contre `−0,525` (impaire), écart `0,131`.** Le
+protocole exigeait `>0,20` pour conclure, `<0,10` pour réfuter — **ni l'un ni l'autre**,
+ce qu'une prédiction déclarée d'avance rend impossible à maquiller. Le repli couvre
+**32 %** du chemin jusqu'à la loi dispersée : **il déplace la loi, il ne la gouverne
+pas**, et deux tiers restent sans cause. **La moitié « limite » d'A241 est close** :
+l'exposant sature à **`−0,52`** dès `n ≈ 4` et n'y bouge plus jusqu'à `n = 16` ; `n ≤ 6`
+la sous-estimait de `0,08`. Huit réceptions sur neuf ; **la 7 échoue** (ordre `1,268`,
+résidu `2,27 %`) mais le biais qu'elle laisse est **mesuré** et vaut `+0,010`, un
+centième contre les `0,131` du résultat. Continuité S195 à `5,03e-8`.
+**A242**, neuve et gênante : la dérive d'énergie sous `10⁻⁴`, employée comme critère de
+domaine par S194, S195 et S196, **ne détecte pas la sous-résolution** — contre-exemple
+faux d'un **facteur cinq** avec une énergie **65× sous le seuil**. Un schéma sous-résolu
+conserve parfaitement ses invariants sur le champ appauvri qu'il représente. **L277.**
+`water-core` et le support S193 inchangés ; la flottille de S195 est sortie dans
+`support/nl_fleet.rs` et **l'empreinte de S195 se reproduit à l'identique**, contrôle de
+la refactorisation. Workspace **331 réussis / cinq ignorés**, dix réceptions au banc.
+123 ADR,242 angles,277 leçons,18 invariants,6 SPEC,23 cas. **Aucun ADR.**
+**Suite S197 : A242 d'abord** — apparier les critères de conservation à un contrôle de
+raffinement, peu coûteux et touchant la méthode de trois sessions ; puis A241 sur ses
+deux suspects nommés, le confondant de bande relative et les termes triples. File
+plurielle relue.
 
 **S195 — 2026-09-12 : `n` sources mesurées, A240 close, aucun ADR.**
 [SOURCES-MULTIPLES-S195](docs/validation/SOURCES-MULTIPLES-S195.md), empreinte

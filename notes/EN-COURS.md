@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S196 — en cours
+Session : S196 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
 Objectif : **A241** — le repli des harmoniques croisées sur les modes de train. S195 a
 mesuré que cette part décroît 4,85 fois moins vite que celle des modes propres au couplage
@@ -80,10 +80,19 @@ tend-elle vers une **limite** quand `n` croît ?
       vérifiée par famille, deux exécutions identiques.
 - [x] **P4** — verdict sur A241 : le repli est-il la cause, la loi a-t-elle une limite.
       Documenter, propager la file ; ADR seulement si une décision de projet est prise.
-- [>] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes, jeton
+- [x] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes, jeton
       `libre`, copies avancées sans suppression non prouvée.
 
 ### Notes de reprise
+
+P5 S196 : rituel terminé. **123 ADR, 242 angles, 277 leçons, 18 invariants, 6 SPEC,
+23 cas**, vérifiés contre le dépôt. Workspace 331 réussis/cinq ignorés en debug et
+release. File plurielle relue (A211) : A241 requalifiée, ligne **A242** créée, tête
+devenue S196-1, titre redaté. **A242 propagée** par une note datée dans
+SOURCES-MULTIPLES-S195 et COUPLAGE-DEUX-TRAINS-S194 : leurs valeurs ne sont pas remises
+en cause — leurs configurations sont loin du bord — mais la phrase « énergie sous 1e-4 »
+ne doit plus se lire comme une garantie de justesse. Jeton libre ; trois copies avancées
+sur `master`, aucune suppression.
 
 P4 S196 : REPLI-CROISEES-S196 §8–§9 reçus. **A241 requalifiée** — moitié « limite »
 close (saturation à −0,52), moitié « cause » partielle (le repli pèse un tiers, la thèse

@@ -17,6 +17,20 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S196 — 2026-09-12 : le repli des croisées pèse un tiers ; A241 requalifiée, aucun ADR.**
+[REPLI-CROISEES-S196](validation/REPLI-CROISEES-S196.md), empreinte `0xbcf2911362458c13`.
+Montage de **parité** : trains impairs → somme et différence paires → **aucun repli**, par
+arithmétique et non par approximation. Exposants `−0,394` (repli plein) contre `−0,525`
+(repli nul), écart **0,131**, soit **32 %** du chemin jusqu'à la loi dispersée. Le
+protocole exigeait `>0,20` ou `<0,10` : **ni l'un ni l'autre**. **Le repli déplace la loi,
+il ne la gouverne pas.** Moitié « limite » **close** : l'exposant sature à `−0,52` dès
+`n ≈ 4`, immobile jusqu'à `n = 16`. Huit réceptions sur neuf ; la convergence échoue mais
+le biais qu'elle laisse est mesuré à `+0,010`. **A242** : la dérive d'énergie ne détecte
+pas la sous-résolution — contre-exemple faux d'un facteur cinq, énergie 65× sous le seuil.
+**L277.** Flottille sortie dans `support/nl_fleet.rs`, empreinte de S195 reproduite.
+123 ADR,242 angles,277 leçons,18 invariants,6 SPEC,23 cas.
+**Suite S197 : A242**, puis A241 sur ses deux suspects.
+
 **S195 — 2026-09-12 : `n` sources mesurées, **A240 close**, aucun ADR.**
 [SOURCES-MULTIPLES-S195](validation/SOURCES-MULTIPLES-S195.md), empreinte
 `0x5eb378f6ffe26c9f`, deux exécutions identiques. À cambrure **par train** fixée — la

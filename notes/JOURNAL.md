@@ -10141,3 +10141,87 @@ redevient disponible maintenant qu'A240 est close.
 
 **Décisions qui demandent un arbitrage humain :** aucune nouvelle. A107 reste un repère de
 fork historique.
+
+## S196 — 2026-09-12 — Le repli pèse un tiers, et le critère d'énergie ne voyait pas
+
+**Entrée :** master 25206a8, A241. Plan seul 78aeee4 ; protocole et prédictions 4e9f46b ;
+banc d5fef49 ; campagne 2af28b4 ; réception e3ec4f7. `water-core` et `support/nl_surface.rs`
+inchangés ; un exemple ajouté, un module de support extrait.
+
+**Produit :** `examples/nl_fallback_2d.rs`, `examples/support/nl_fleet.rs` et
+[REPLI-CROISEES-S196](../docs/validation/REPLI-CROISEES-S196.md), empreinte
+`0xbcf2911362458c13`, deux exécutions identiques ligne pour ligne.
+
+**Le montage.** S195 avait proposé un mécanisme — les harmoniques croisées `kᵢ±kⱼ` retombent
+sur des modes de train — et l'avait appuyé sur une **corrélation** : les deux quantités
+croissent ensemble avec `n`. Les séparer demandait d'éteindre le repli sans rien changer
+d'autre, et le repli n'est pas physique : c'est une propriété **arithmétique** du jeu de modes.
+Trois familles à `n` et cambrure totale égaux — dense `2..n+1`, **impaire** `3,5,…,2n+1`,
+paire `4,6,…,2n+2`. Impair ± impair = pair, et les trains sont impairs : **aucun terme croisé
+de paire ne peut retomber sur un mode de train.** Repli nul, exact, vérifié par test. Et la
+famille paire est la dense aux modes **doublés** : même repli, même bande relative, échelle
+doublée — c'est le témoin qui valide le montage.
+
+**Chiffres qui ont orienté la conception.** Exposants sur `n = 2..8` : paire `−0,394`, dense
+`−0,451`, **impaire `−0,525`**. Écart pair/impair **0,131**. Le protocole exigeait `> 0,20`
+pour conclure que le repli est la cause, `< 0,10` pour le réfuter : **ni l'un ni l'autre**, et
+c'est ce qu'une prédiction déclarée avant la mesure rend impossible à maquiller. Rapporté au
+chemin restant jusqu'à la loi dispersée (`−0,805` sur cette plage), le repli en couvre **32 %**.
+
+**Décision structurante :** aucune, **aucun ADR**. ADR-123 n'est pas touché.
+
+**A241 est requalifiée, pas close.** Sa moitié « limite » l'est : l'exposant **sature à
+`−0,52`** dès `n ≈ 4` et n'y bouge plus jusqu'à `n = 16` — la loi tend bien vers quelque
+chose, et `n ≤ 6` la sous-estimait de `0,08`, réel mais modeste. Sa moitié « cause » reçoit
+une réponse partielle : **le repli déplace la loi, il ne la gouverne pas**, et la thèse de
+S195 était trop forte. Deux tiers de l'écart restent sans cause. Signe supplémentaire, et il
+va dans le même sens : entre `n=8` et `n=16` la fraction de repli monte encore de `0,536` à
+`0,642` **pendant que l'exposant ne bouge plus du tout**. La prédiction 4 valide le montage —
+dense contre paire s'accordent à `0,057`, l'échelle absolue ne comptant pas en eau profonde.
+
+**Ce que la session a trouvé et qui n'était pas cherché.**
+
+**A242** *(sévérité 2)* — **le critère de conservation ne détecte pas la sous-résolution.**
+Trois sessions employaient « dérive d'énergie sous `10⁻⁴` » comme critère de domaine, et le
+lisaient comme une attestation de justesse. Contre-exemple trouvé ici : à `n = 16`, `K = 32`,
+la grandeur mesurée est **fausse d'un facteur cinq** — `1,3765e-2` contre `2,7174e-3` à
+`K = 64` — et l'énergie y dérive de `1,54e-6`, **soixante-cinq fois sous le seuil**. Aucun pas
+refusé, rien d'infini, une courbe lisse : un schéma sous-résolu ne viole pas ses invariants, il
+les conserve parfaitement sur le champ appauvri qu'il représente. Le triplet de Richardson en
+devient inutilisable — incréments de signes opposés — et la formule aurait imprimé « ordre
+6,552 » sans broncher si le banc ne l'en empêchait pas. Il le dit désormais au lieu de le
+calculer.
+
+**L277** — un invariant conservé ne dit rien de ce qui est résolu. La conservation mesure ce
+que le schéma **préserve**, jamais ce qu'il **résout**. Deux gestes : apparier tout critère de
+conservation à un contrôle de raffinement, et refuser d'imprimer un ordre depuis un triplet non
+monotone. Même famille qu'A238 et L274.
+
+**Réception : huit sur neuf.** Passent — décompte de repli par construction dans les trois
+familles, `n=1` exactement nul, `M=1` exact à `10⁻¹⁴`, continuité avec S195 à **`5,03e-8`**,
+bande `Q+8` à 0,001–0,032 %, énergie à `4,9e-8` max, phases dans un facteur 2 à `n=8` (0,747
+et 0,885), deux exécutions identiques. **Échoue — la 7** : à `n=6`, ordre `1,268` sous le
+`1,5` exigé et résidu de Richardson `2,27 %` au-dessus des 2 %. Ce qui sauve la conclusion
+n'est pas une indulgence mais **une borne mesurée** : la pente entre les deux bouts refaite à
+`K=64` puis `K=128` donne `−0,516` et `−0,506`, soit un biais de **`+0,010`** — un centième
+contre les `0,131` qui portent le résultat.
+
+**Refactorisation contrôlée.** La flottille et la mesure de S195 sont sorties dans
+`support/nl_fleet.rs` pour que les deux bancs portent un seul véhicule (L137). L'empreinte de
+S195 se reproduit à l'identique, `0x5eb378f6ffe26c9f` : aucune arithmétique n'a bougé, et
+c'était le contrôle de la manœuvre.
+
+**Ce que je n'ai pas fait.** Les deux tiers inexpliqués ne sont pas identifiés. Le confondant
+de bande relative entre parités (24 %) est **borné** par la famille dense — qui parcourt un
+facteur 5,7 de bande relative pour 0,08 d'exposant — mais **pas isolé**. Les termes triples,
+que la parité ne neutralise pas, ne sont pas séparés. Aucune loi n'est dérivée : la session
+montre que la variable compte, pas ce qu'elle donne. Une dimension horizontale, trains
+colinéaires, fond plat, eau profonde.
+
+**Prochaine session recommandée. S197 : A242 d'abord**, parce qu'elle touche la méthode de
+trois sessions et qu'elle est peu coûteuse — apparier les critères de conservation à un
+contrôle de raffinement dans les bancs existants, et vérifier que les configurations publiées
+par S194 et S195 étaient bien loin du bord. Ensuite A241, sur ses deux suspects nommés :
+isoler la bande relative, puis séparer les termes triples.
+
+**Décisions qui demandent un arbitrage humain :** aucune nouvelle.
