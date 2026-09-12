@@ -58,40 +58,27 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S201 — terminée
+Session : S202 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : direction utilisateur, rendre B visible par un exemple CPU caméra/rayons
-et PPM local sans dépendance. Image explicitement autorisée après question, le13/09.
-Priorité sur S200-1, conservée dans la file ; pas de critère perceptuel inventé.
+Objectif : S201-1, profil de budget image explicite et coût par bloc mesuré,
+conformément à ADR-124. Pas de réparation générale du solveur δ.
 
 ### Plan
 
-- [x] **P1** — état réel, quatre copies9a25798 propres ; jeton/plan seuls.
-- [x] **P2** — caméra, intersection de B par rayons, lumière de diagnostic et PPM ;
-  utiliser le vrai Background::eval, tests géométriques et export.
-- [x] **P3** — produire une vue lisible, inspection visuelle, témoin plat et second
-  instant ; publier paramètres/coût sans prétendre recevoir la perception.
-- [x] **P4** — documenter direction/autorisation et prochaines décisions budget puis
-  périmètre δ/V ; file/index/passation/journal, compteur et copies synchronisées.
+- [x] **P1** — état réel, quatre copiesf0fea77 propres, jeton/plan seuls ; préférence
+ 60Hz/2ms ou30Hz/4ms demandée, mesure indépendante de la réponse.
+- [ ] **P2** — horloge monotone injectée et coût du dernier pas exposé dans Caps ;
+ unité déclarée (domaine du candidat = bloc de banc), inconnu avant mesure ; tests.
+- [ ] **P3** — coût local sur16/32/64 et plafonds1/64/512, pas1/60, trois chauffes
+ et11 mesures par configuration ; médiane/max, résidu/dégradation, refus explicites.
+ Comparer au profil retenu, pas transposer le coût source S183 en coût solveur.
+- [ ] **P4** — acter budget de travail avec origine, préciser absence de budget GPU
+ mesuré et d'ordonnanceur ; résultats, suite effets bornés puis rituel complet.
 
 ### Notes de reprise
 
-REPRISE et invariants déjà lus dans cette conversation, état identique à9a25798.
-Seuil numérique2 % acquis depuis S190 ; le rendu permettra une appréciation humaine,
-aucune image seule ne ferme B4/A50 ni A98. V attend la demande gameplay selon nouvelle
-direction, le changement architectural détaillé devra être acté dans son ordre.
-
-P2 : rayons évaluent B JONSWAP N32 directement. Premier jet256 itérations
-laissait997/1021 rayons rasants en magenta ; plafond4096 supprime les refus
-sans modifier la tolérance3mm, t12=0xa52ff81902b150c3. Premier export échoué
-car captures absent ; création explicite du répertoire ajoutée.
-
-P3 : trois images640x360 inspectées, aucun rayon non résolu après correction.
-T12 a52ff81902b150c3, t13 1df02ffb7c202b32, plat dae2f2514cad0324.
-Cinq tests exemple passent (deux propres/trois hôte), aucun test bibliothèque refait.
-Preview PNG = transcodage fidèle PPM via Pillow, sans retouche ; code zéro dépendance.
-
-P4 : ADR-124 actée, autorisation persistante portée dans AGENTS, direction/file
-propagées. Journal/index/README/REPRISE et B3/B4 actualisés, aucun angle/leçon neuf.
-Décomptes124/244/279/18/6/23 vérifiés. Compteur0 car décision δ/V, jeton libre.
-Prochaine session budget image S201-1 ; copies à avancer après commit final.
+Reprise entière/invariants déjà lus dans cette conversation. Seuil numérique2 % acquis.
+Rendu CPU S201≈12s pour640×360, référence hors ligne, sans budget temps réel reçu.
+ADR-007 demande cost_per_block_ms mesuré ; Volume ne gère aucun add/remove_blocks.
+On doit nommer le domaine/charge de la mesure, jamais diviser par un nombre fictif
+ni présenter un coût de projection seule comme coût d'un pas complet.

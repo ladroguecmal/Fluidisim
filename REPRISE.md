@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-13 00:32 +02:00
+JETON            : occupé
+Battement        : 2026-09-13 00:34 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S202 — budget image et coût mesuré du bloc δ
 Dernière session : S201 — B visible en PPM ; ADR-124 image/budget/effets bornés
 Session suivante : S202 — S201-1 : budget image et coût par bloc ; direction ADR-124
 Maillons        : 0 — S201 acte le périmètre δ/V, ADR-124 (§6.8)
