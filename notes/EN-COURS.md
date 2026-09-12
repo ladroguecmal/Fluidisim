@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S190 — en cours
+Session : S190 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : appliquer l'arbitrage explicite de l'utilisateur du 2026-09-12 :
 « 2 % d'erreur acceptable, débloque B4 avec ça ». Définir la grandeur et le périmètre,
@@ -74,7 +74,7 @@ les volets restants. La projection S189-1 est réordonnée derrière cet arbitra
   reproductible avec témoin admis et refusé ; fixer un profil recevable si les preuves suffisent.
 - [x] **P4** — propager vers B4/SPEC-004/A50 et les points ouverts ; expliciter le reste
   du banc et tenir une liste plurielle des chantiers signalés par l'utilisateur.
-- [ ] **P5** — rituel de fin REPRISE §6, vérifications, journal, index, décomptes,
+- [x] **P5** — rituel de fin REPRISE §6, vérifications, journal, index, décomptes,
   jeton libre et copies existantes synchronisées sans suppression non justifiée.
 
 ### Notes de reprise
@@ -90,3 +90,10 @@ P4 : propagation préparée pendant les vérifications P3 ; à compléter et com
 P4 : seuil propagé à SPEC-004 §6.2/point ouvert, PLAN-BENCHMARK B4, état actif
 du bilan S176, suivi ADR-119 et A50. A211 reçoit une file plurielle, portée par
 REPRISE §6.7. Aucun nouvel angle ni leçon : défaut déjà nommé A211/L228.
+
+P5 : journal, index, README et reprise mis à jour ; liens locaux vérifiés,
+diff sans erreur. Décomptes 120 ADR/233 angles/269 leçons/18 invariants/6 SPEC/23 cas.
+Aucun nouvel angle/leçon, A211 déjà porteur du défaut signalé. Suite S190-1 reprend
+S189-1 avec seuil fixé ; file plurielle portée au rituel §6.7. Jeton libre.
+Les trois copies ont été revérifiées propres, au commit initial ac1ffb8 ; avance rapide
+sur le commit de clôture immédiatement après ce commit. Aucun répertoire créé ou supprimé.

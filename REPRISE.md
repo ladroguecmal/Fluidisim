@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-12 15:32 +02:00
+JETON            : libre
+Battement        : 2026-09-12 15:35 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S190 — arbitrage utilisateur : erreur acceptable de 2 % pour B4
-Dernière session : S189 — la loi du maximum n'était pas une loi ; ADR-119, borner par la somme
-Session suivante : S190 — S189-1/A50 : l'additivité locale avec une projection de pression
+Session en cours : aucune
+Dernière session : S190 — 2 % actés ; profil source B4 reçu, ADR-120
+Session suivante : S191 — S190-1 : projection au seuil B4 de 2 % ; relire aussi la file active plurielle
 
 *S183 à S189 ont travaillé dans la **copie principale**, sur `master` : aucune copie isolée
 ouverte, donc rien à refermer (AGENTS.md). Les trois worktrees ont été **avancés sur master**
@@ -183,7 +183,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 117 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 120 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -202,6 +202,22 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S190 — 2026-09-12 : tolérance B4 fixée à 2 % par l'utilisateur**, ADR-120.
+Attente du critère close ; volet d'échantillonnage source reçu sur le véhicule S185–S189.
+Profil de banc choisi : **14×14×8 nœuds gradués, extrapolation 80 ms** ; budget
+spatial+temporel+réserve **1,800653 %**, erreur composée+réserve **1,161371 %**.
+**12 couples reçus / 114 refusés**, omission de S refusée à 100 %. Réduction des
+évaluations de source **13,46 fois** sur la fenêtre, pas un gain CPU mesuré.
+Deux release et une debug identiques, empreinte `0x4b479c21a520cd7b` ; workspace
+**331 tests réussis, cinq ignorés**. Bibliothèques et supports inchangés.
+**B4 complet reste à recevoir** : projection/surface/frontières, substitutif intégral,
+forces et perception. A50 partielle ; N universel et seuil de bascule non déduits du 2 %.
+**Suite S191 : S190-1 (reprend S189-1)**, projection et profil sous le seuil fixé.
+File plurielle des autres chantiers portée par REPRISE §6.7 pour A211.
+**120 ADR, 233 angles, 269 leçons, 18 invariants, 6 SPEC, 23 cas** ; aucun banc complet.
+Voir [B4-TOLERANCE-S190](docs/validation/B4-TOLERANCE-S190.md) et [ADR-120](docs/adr/ADR-120-b4-tolerance-de-deux-pour-cent.md).
+
 
 **S189 — 2026-09-12 :** [COMPOSITION-GRADUEE-S189](docs/validation/COMPOSITION-GRADUEE-S189.md),
 [ADR-119](docs/adr/ADR-119-le-budget-conjoint-se-borne-par-la-somme.md), **actée**.

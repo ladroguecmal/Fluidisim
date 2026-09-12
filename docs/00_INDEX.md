@@ -17,6 +17,22 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S190 — 2026-09-12 : tolérance B4 fixée à 2 % par l'utilisateur**, ADR-120.
+Attente du critère close ; volet d'échantillonnage source reçu sur le véhicule S185–S189.
+Profil de banc choisi : **14×14×8 nœuds gradués, extrapolation 80 ms** ; budget
+spatial+temporel+réserve **1,800653 %**, erreur composée+réserve **1,161371 %**.
+**12 couples reçus / 114 refusés**, omission de S refusée à 100 %. Réduction des
+évaluations de source **13,46 fois** sur la fenêtre, pas un gain CPU mesuré.
+Deux release et une debug identiques, empreinte `0x4b479c21a520cd7b` ; workspace
+**331 tests réussis, cinq ignorés**. Bibliothèques et supports inchangés.
+**B4 complet reste à recevoir** : projection/surface/frontières, substitutif intégral,
+forces et perception. A50 partielle ; N universel et seuil de bascule non déduits du 2 %.
+**Suite S191 : S190-1 (reprend S189-1)**, projection et profil sous le seuil fixé.
+File plurielle des autres chantiers portée par REPRISE §6.7 pour A211.
+**120 ADR, 233 angles, 269 leçons, 18 invariants, 6 SPEC, 23 cas** ; aucun banc complet.
+Voir [B4-TOLERANCE-S190](validation/B4-TOLERANCE-S190.md), [mesures intégrales](validation/B4-TOLERANCE-S190-MESURES.md), [ADR-120](adr/ADR-120-b4-tolerance-de-deux-pour-cent.md).
+
+
 **S189 :** [COMPOSITION-GRADUEE-S189](validation/COMPOSITION-GRADUEE-S189.md),
 [ADR-119](adr/ADR-119-le-budget-conjoint-se-borne-par-la-somme.md), **actée**.
 **S188-1 réalisée : A232 est confirmée, et la loi du maximum n'était pas une loi.** Mesurée
@@ -1012,7 +1028,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`registres/BILAN-S69.md`](registres/BILAN-S69.md) | **bilan d'avancement** — ~85 % comme corpus de conception, **~15 % comme système** ; **onze cas sur 23 et onze bancs sur onze attendent une couche non écrite** ; **B1 est le seul banc exécutable et n'a jamais été lancé** |
 | [`registres/PRESCRIPTIONS-S63.md`](registres/PRESCRIPTIONS-S63.md) | **les prescriptions non éprouvées** — trois genres, dont un seul se vérifie ; **trois recettes mises à l'épreuve, trois fautives** ; les préalables de B2 périmés depuis quarante sessions (**A185**) |
 | [`registres/AUDIT-REFERENCES-S62.md`](registres/AUDIT-REFERENCES-S62.md) | **ce qu'une référence peut voir bouger** — 41 références, trois degrés, **une seule tautologie** ; `Hs` aveugle à `hs` et gouverné par sa fenêtre, première mesure d'**A102** ; la fenêtre était hors du scénario (**A184**) |
-| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **233 identifiants au 2026-09-12 (S189)** — le décompte se vérifie contre le fichier, il ne se recopie pas ; avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
+| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **233 identifiants au 2026-09-12 (S190)** — le décompte se vérifie contre le fichier, il ne se recopie pas ; avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
 | [`registres/FORK-S22-S26.md`](registres/FORK-S22-S26.md) | **le second fork** — constat, carte de renumérotation complète, la règle manquante, et ce qui reste à fusionner |
 | [`registres/AUDIT-ASSERTIONS-S29.md`](registres/AUDIT-ASSERTIONS-S29.md) | **ce que chaque assertion peut voir** — 23 cas classés, 5 fautifs, 1 mesure du harnais retirée ; **réécriture S30 sans aucun seuil inventé** |
 | [`registres/AUDIT-REPLIS-S44.md`](registres/AUDIT-REPLIS-S44.md) | **les valeurs de repli, inventoriées** — 49 recensées, deux fautives ; *quand la grandeur est un écart, zéro est son meilleur point* |
@@ -1073,6 +1089,11 @@ parfaitement stable ne pouvait pas distinguer.
 | [`../notes/JOURNAL.md`](../notes/JOURNAL.md) | historique des sessions, points de reprise |
 
 ## État d'avancement
+
+**État actif S190** : critère B4 fixé à 2 %, profil de source reçu localement ;
+B1/B2/B4 restent partiels, aucun banc complet. Voir le résultat en tête de cet index
+et la [file plurielle](registres/QUESTIONS-OUVERTES.md#file-active-s190--2026-09-12).
+
 
 **S129 :** [BILAN-CANDIDAT-ETENDU-S129](validation/BILAN-CANDIDAT-ETENDU-S129.md), cinétique
 et bilan total des nœuds construits N256/R80/48 reçus contre S127. Écart total maximal

@@ -491,3 +491,19 @@ candidates qui se partagent les cas sont le signe qu'aucune n'est la bonne.
 Suite : l'additivité locale avec une projection de pression — la seule limite qui menace
 l'ensemble.
 Voir [COMPOSITION-GRADUEE-S189](docs/validation/COMPOSITION-GRADUEE-S189.md).
+
+
+**S190 — 2026-09-12 : tolérance B4 fixée à 2 % par l'utilisateur**, ADR-120.
+Attente du critère close ; volet d'échantillonnage source reçu sur le véhicule S185–S189.
+Profil de banc choisi : **14×14×8 nœuds gradués, extrapolation 80 ms** ; budget
+spatial+temporel+réserve **1,800653 %**, erreur composée+réserve **1,161371 %**.
+**12 couples reçus / 114 refusés**, omission de S refusée à 100 %. Réduction des
+évaluations de source **13,46 fois** sur la fenêtre, pas un gain CPU mesuré.
+Deux release et une debug identiques, empreinte `0x4b479c21a520cd7b` ; workspace
+**331 tests réussis, cinq ignorés**. Bibliothèques et supports inchangés.
+**B4 complet reste à recevoir** : projection/surface/frontières, substitutif intégral,
+forces et perception. A50 partielle ; N universel et seuil de bascule non déduits du 2 %.
+**Suite S191 : S190-1 (reprend S189-1)**, projection et profil sous le seuil fixé.
+File plurielle des autres chantiers portée par REPRISE §6.7 pour A211.
+**120 ADR, 233 angles, 269 leçons, 18 invariants, 6 SPEC, 23 cas** ; aucun banc complet.
+Voir [réception B4 à 2 %](docs/validation/B4-TOLERANCE-S190.md) et [ADR-120](docs/adr/ADR-120-b4-tolerance-de-deux-pour-cent.md).

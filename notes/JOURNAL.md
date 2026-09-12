@@ -9711,3 +9711,58 @@ l'explication tombe avec elle, et il faudra le dire. **BILAN-B4-S176** reste le 
 porté, avec un suivi daté.
 
 **Décisions qui demandent un arbitrage humain :** aucune nouvelle. A107 reste ouverte.
+
+## S190 — 2026-09-12 — B4 reçoit son seuil et un profil de source
+
+**Entrée.** Reprise explicite de l'utilisateur et arbitrage « 2 % d'erreur acceptable,
+débloque B4 avec ça », avec alerte sur les autres axes oubliés depuis S158. État réel :
+master propre à ac1ffb8, trois copies au même commit, branche de la lignée B archivée.
+Codex, fichiers/git/cargo disponibles ; travail dans la copie principale, aucun sous-agent.
+
+**Décision structurante. ADR-120 actée.** Tolérance de champ perturbatif 2 %, appliquée
+à la métrique de vitesse maximum de S185. Budget conjoint, normalisation par la
+perturbation, référence/temps/domaine nommés. N est un nombre de points à dimensionner,
+pas la valeur du pourcentage. L'attente d'un arbitrage est close ; aucune permission
+supplémentaire demandée pour l'action déjà autorisée.
+
+**Sorties.** `b4_acceptance.rs`, B4-TOLERANCE-S190 et son relevé intégral. 126 couples,
+**12 reçus / 114 refusés**. Profil choisi **14×14×8 / extrapolation 80 ms**, vertical
+[1,4,7,9,11,12,13,14] ; 20384 évaluations contre 274400, réduction **13,461538**.
+Erreur composée **0,775379 %**, réserve de référence **0,385992 %**, somme conservatrice
+spatial+temporel+réserve **1,800653 %** ; marge **0,199347 point** sous le seuil.
+À 160 ms, refus (4,182307 %) ; source omise à 100 %, refusée. Le réseau ancré 8³
+reste refusé par la réserve malgré une erreur contre chaque référence sous 2 %.
+
+**Vérifications.** Deux exécutions release et une debug, sorties intégralement identiques,
+empreinte **0x4b479c21a520cd7b**. Plein/cadence 1 reçu en bits ; instants communs des
+références identiques ; non-finis/nul/seuil/dépassement/omission vérifiés. Workspace
+**331 tests réussis, cinq ignorés**, debug ; aucun code de bibliothèque ou support
+modifié, aucun besoin de renouveler les empreintes historiques. Mise en forme du seul
+nouvel exemple ; contrôles de liens locaux et de diff avant clôture.
+
+**Propagation.** État actif BILAN-B4-S176, PLAN-BENCHMARK B4, SPEC-004 §6.2 et son point
+ouvert, suivi daté ADR-119 et A50. A211 reçoit une file **plurielle** dans
+QUESTIONS-OUVERTES et une obligation de relecture dans REPRISE §6.7. A213,
+λ_cut/B2/coupure, bathymétrie, multiplateforme, V et les autres volets de B4 restent
+visibles. Aucun nouvel angle ni leçon : les mécanismes étaient déjà A211/L228 et
+la qualification de référence déjà prescrite par METHODE. I-03/I-04/I-15 relus et
+inchangés ; les 2 % sont un seuil de réception d'origine utilisateur explicitement
+tracé, pas une constante physique sans provenance (I-14).
+
+**Ce qui n'a pas été fait.** Projection, surface libre, frontières du candidat,
+comparaison au substitutif intégral, forces et perception ; aucun choix δ, aucun
+N universel, aucune tolérance transformée en seuil de bascule. La réserve mesurée
+contre un pas moitié n'est pas une borne au continu ; la réception est locale.
+Aucun travail d'infrastructure ni fusion de la branche archivée. Aucun banc complet.
+
+**Suite recommandée S191 : S190-1**, reprend S189-1 : projection avec le profil et
+le seuil de 2 % désormais fixés. La recommandation de S189 a été réordonnée, pas
+abandonnée, pour exécuter l'arbitrage utilisateur d'abord. BILAN-B4-S176 reste actif,
+avec son nouveau verdict. La file plurielle doit survivre à la suite de cette action.
+
+**Décomptes vérifiés.** 120 ADR, 233 identifiants d'angle, 269 leçons, 18 invariants,
+6 SPEC, 23 cas. Quatre angles (A15/A19/A20/A27) sont sans gras dans le tableau ;
+un comptage des seuls noms en gras en manquait quatre. Aucun identifiant absent.
+**Arbitrage de tolérance : clos**, sans nouvelle question humaine.
+Clôture : jeton libre ; trois copies revérifiées propres au commit d'entrée, à avancer
+sur ce commit final. Aucune copie créée ni supprimée ; aucune branche unique supprimée.
