@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-13 01:23 +02:00
+JETON            : occupé
+Battement        : 2026-09-13 01:28 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S204 — décision corrective d'ADR-124 (clarification utilisateur d'ambition)
 Dernière session : S203 — impact W visible, emprise par coutures (ADR-126) ; A245 trouvée
 Session suivante : S204 — A245 : composition B+W sur mer Hs > 1,1 m (file active, code src)
 Maillons        : 0 — ADR-126 fixe un élément de W (§6.8) ; l'outil, qui ne voit que le code, dirait 1
