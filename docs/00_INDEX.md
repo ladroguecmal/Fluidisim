@@ -17,6 +17,18 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S184 :** [CONSOMMATION-S184](validation/CONSOMMATION-S184.md), aucun ADR — le solveur
+reste à B3 (ADR-007 §5). **La source coûte ~2100 fois le pas explicite qu'elle alimente**
+(34–35 µs contre 14–17 ns par maille) ; le pas est 0,047–0,049 % du total. La décimation
+spatiale achète exactement le rapport des nœuds mais le contenu la plafonne à `r = 2`
+(λ_min = 1,081 m) ; la cadence divise exactement par `c` et le contenu temporel est lent.
+**L'axe cher est l'espace, l'axe bon marché est le temps.** Une récurrence de phase sur
+réseau ne retirerait que 12–15 % : le coût est le volume de sortie, pas la trigonométrie.
+Quatre réceptions au bit, aucune exemption ; deux corrections de protocole datées dans le
+document. Aucun nouveau test ; workspace331/cinq ignorés. Runtime inchangé.
+117 ADR,227 angles,264 leçons,18 invariants,6 SPEC,23 cas. **A227** et **L264**.
+**Suite S185 : S184-1**, erreur de cadence en 3D avec le fournisseur réel. A50/B4 partiels.
+
 **S183 :** [COUT-DIFFERENTIEL-S183](validation/COUT-DIFFERENTIEL-S183.md), aucun ADR —
 mesurer n'est pas décider. Conditions de mesure publiées **avant** les chiffres.
 Rapport différentiel/surface 3,0 à 4,3 (médiane ~3,4), **identique couche par couche** :

@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S184 — en cours
+Session : S184 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : S183-1/A50, mesurer la **consommation** perturbative de la source — un pas
 de solveur alimenté par `momentum_residual` contre le même pas sans elle, en 3D, puis
@@ -78,7 +78,7 @@ S170 avait explicitement refusé de conclure là-dessus ; S183 fournit le chiffr
 - [x] **P5** — mesurer le gain disponible d'une évaluation **par réseau** plutôt que par
       point, pour B seul : récurrence de phase contre appel par point. Sizer l'occasion,
       sans la proposer comme acquise — une récurrence ne rend pas les mêmes bits (I-03).
-- [>] **P6** — rituel de fin (REPRISE.md §6) : journal, angles, leçons, index, décomptes,
+- [x] **P6** — rituel de fin (REPRISE.md §6) : journal, angles, leçons, index, décomptes,
       jeton et copies.
 
 ### Notes de reprise

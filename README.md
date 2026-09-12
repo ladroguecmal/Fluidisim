@@ -289,7 +289,7 @@ Le juge de fidélité est B4, bloqué ailleurs. Suite S159 : le facteur 2,5 qui 
 L'une croyait la dernière session être **S44** : l'ouvrir aurait recréé cent quinze sessions parallèles.
 Avance rapide d'abord, suppressions ensuite ; six copies ramenées à trois, aucune histoire perdue, et la
 procédure de fermeture écrite dans l'amorce. Suite S160 : le facteur 2,5, S158-1.
-117 ADR,226 angles,263 leçons,18 invariants,6 SPEC,23 cas.
+117 ADR,227 angles,264 leçons,18 invariants,6 SPEC,23 cas.
 **S162 : diagnostic de Stokes et portée de B4 corrigée.**
 [Résultats](docs/validation/ADDITIVITE-PROFONDE-S162.md),
 [ADR-112](docs/adr/ADR-112-la-superposition-independante-ne-recoit-pas-le-couplage.md).
@@ -396,3 +396,12 @@ Aucun ADR, aucun budget. Deux trouvailles : **A226**, un refus porté par un poi
 payer le lot entier ; **L263**, un axe ne mesure son effet que s'il dépasse ce qu'il
 transporte. Suite : la consommation perturbative.
 Voir [COUT-DIFFERENTIEL-S183](docs/validation/COUT-DIFFERENTIEL-S183.md).
+
+**S184 :** la consommation est mesurée, pas seulement la production. La source coûte
+**~2100 fois** le pas de solveur qu'elle alimente. La décimation spatiale est plafonnée
+à `r = 2` par le contenu de la source, la cadence temporelle est l'axe bon marché, et
+une récurrence de phase sur réseau ne retirerait que 12–15 % — le coût est le volume de
+sortie, pas la trigonométrie. Aucun ADR. **A227** : le fournisseur a la forme d'une
+requête, pas d'un champ. **L264** : mesurer la part avant d'optimiser le parcours.
+Suite : l'erreur de cadence en 3D.
+Voir [CONSOMMATION-S184](docs/validation/CONSOMMATION-S184.md).

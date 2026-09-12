@@ -126,3 +126,15 @@ de S pour cacher son intégrale : l'amélioration doit venir d'une discrétisati
 [SOURCE-FLUX-PARTAGES-S171](SOURCE-FLUX-PARTAGES-S171.md). La différence de flux
 partagés ferme le bilan physique si ses bornes portent les flux exacts ; précision
 locale encore sensible àH et àla phase. A225 traitée dans ce périmètre, A50 partielle.
+
+**Suivi S184 — 2026-09-12 : le gain de temps que ce document refusait d'annoncer est mesuré.**
+§2.2 disait, et avait raison de le dire, que le nombre de nœuds est *« un coût géométrique, pas
+un gain de temps runtime mesuré »* et qu'il ne prouvait *« ni un gain de temps, ni le facteur 64
+en 3D »*. [CONSOMMATION-S184](CONSOMMATION-S184.md) le chiffre sur le fournisseur réel, en 3D :
+le gain **est exactement** le rapport des nombres de nœuds, à l'interpolation près (10–40 ns par
+maille). Ce que S170 ne pouvait pas savoir, et qui change la lecture : la décimation spatiale est
+plafonnée à `r = 2` par le **contenu** de la source — la coupure de pression donne
+`λ_min = 1,081 m`, soit 2,16 points par longueur d'onde à `H = 0,5 m`. La cadence temporelle, en
+revanche, divise exactement par `c` et porte sur un contenu lent. **L'avertissement de §2.2 —
+un ratio ne décrit pas à lui seul la précision — reste entier** : S184 mesure le temps, pas
+l'erreur, et ne recommande aucun `H`.

@@ -145,3 +145,12 @@ et la préservation physique du solveur, pas sur le fournisseur : c'est le coût
 la source qui est mesuré, pas celui de la consommer. Aucun budget n'en découle — une machine,
 une chaîne, pas de cycle vivant. S183-1 mesure la consommation perturbative ; A50/B4 restent
 partiels, aucun solveur volumétrique choisi.
+
+**Suivi S184 — 2026-09-12 :** la **consommation** est mesurée,
+[CONSOMMATION-S184](CONSOMMATION-S184.md) : la source coûte ~2100 fois le pas explicite
+qu'elle alimente ; la décimation spatiale est plafonnée à `r = 2` par le contenu, la cadence
+temporelle est l'axe disponible, et une récurrence de phase sur réseau ne retirerait que
+12–15 %. La mention « coût non reçu » du tableau §1 **est maintenant levée pour le
+fournisseur** — elle reste entière pour les quadratures et la préservation physique du
+solveur, qui ne sont toujours pas chiffrées. Voir **A227** sur la forme du fournisseur.
+A50/B4 restent partiels ; S184-1 mesure l'erreur de cadence en 3D. Aucun solveur choisi.

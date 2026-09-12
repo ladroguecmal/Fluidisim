@@ -18,16 +18,18 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-12 12:01 +02:00
+JETON            : libre
+Battement        : 2026-09-12 12:23 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S184 — S183-1/A50 : consommation perturbative de la source
-Dernière session : S183 — coût et allocations du consommateur différentiel mesurés
-Session suivante : à fixer en fin de S184
+Session en cours : aucune
+Dernière session : S184 — la source coûte ~2100 fois le pas qu'elle alimente
+Session suivante : S185 — S184-1/A50 : erreur de cadence temporelle en 3D avec le fournisseur réel
 
-*S183 a travaillé dans la **copie principale**, sur `master` : aucune copie isolée ouverte, donc
-rien à refermer (AGENTS.md). Les trois worktrees vus à son amorce étaient tous à jour, au même
-commit que `master` — constaté par `git worktree list`, pas recopié. (Même situation en S160.)*
+*S183 et S184 ont travaillé dans la **copie principale**, sur `master` : aucune copie isolée
+ouverte, donc rien à refermer (AGENTS.md). Les trois worktrees ont été **avancés sur master**
+en fin de S183 — ils portaient un jeton périmé annonçant S182, ce qui est exactement le
+mécanisme des trois forks. L'avance rapide ne détruit rien et suffit à l'éteindre (AGENTS.md).
+L'état se constate par `git worktree list` ; il ne se recopie pas.*
 
 **Copies de travail — ADR-110, S159.** Le décompte n'a plus sa place ici : il vieillissait de
 session en session et annonçait « cinq worktrees » quand il y en avait six. **L'état se constate**
@@ -188,6 +190,30 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S184 — 2026-09-12 :** [CONSOMMATION-S184](docs/validation/CONSOMMATION-S184.md).
+**S183-1 réalisée : ce que coûte de *consommer* la source, et non plus de la produire.**
+Véhicule d'essai en exemple — pas explicite de quantité de mouvement perturbative sur un
+bloc 3D, `− S` soustraite (SPEC-004 §6.1) ; le solveur du projet reste à B3 (ADR-007 §5).
+**La source coûte ~2100 fois le pas qu'elle alimente** : 34–35 µs contre 14–17 ns par
+maille, le pas étant 0,047–0,049 % du total aux trois tailles de bloc. La décimation
+spatiale achète **exactement** le rapport des nœuds, et le contenu la plafonne à `r = 2`
+(coupure de pression `k_max = 5,8125 rad/m`, donc `λ_min = 1,081 m`, soit 2,16 points par
+longueur d'onde). La cadence divise **exactement** par `c`, et le contenu temporel est lent
+(3–12 s). **L'axe cher est l'espace, l'axe bon marché est le temps** — l'inverse de
+l'intuition d'un réseau 3D. Une récurrence de phase sur réseau régulier ne retirerait que
+**12–15 %** : la trigonométrie ne pèse que 15–18 % du différentiel de B, le reste étant
+l'arithmétique des 26 scalaires par composante. Quatre réceptions au bit, aucune exemption.
+Deux corrections de protocole **datées et visibles** plutôt que réécrites. Aucun nouveau
+test ; workspace331 réussis/cinq ignorés en debug et release. Runtime inchangé, **aucun ADR**.
+117 ADR,227 angles,264 leçons,18 invariants,6 SPEC,23 cas. **A227** et **L264**.
+Aucun budget : une machine, pas de projection, pas de vectorisation, pas de cycle vivant.
+A50/B4 restent partiels — A50 n'attend plus un chiffre mais une **décision** de cadence et
+de réseau.
+**Suite S185 : S184-1/A50**, l'erreur de cadence temporelle en 3D avec le fournisseur réel,
+à `c` croissant, contre une reconstruction à chaque pas. S174 l'a fait en 1D sur instantanés
+connus ; la décimation spatiale suit, bornée à `r = 2`. **BILAN-B4-S176** reste le bilan
+actif et porté. Aucun arbitrage humain nouveau.
 
 **S183 — 2026-09-12 :** [COUT-DIFFERENTIEL-S183](docs/validation/COUT-DIFFERENTIEL-S183.md).
 **S182-1 réalisée : le coût du consommateur différentiel est mesuré, et rien d'autre.**

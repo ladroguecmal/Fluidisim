@@ -9054,3 +9054,84 @@ construit de S177 à S181, reçu vivant en S182 et chiffré ici ; il reçoit un 
 donc lui seul, et non les deux, que la ligne `Session suivante` doit continuer de porter.
 
 **Décisions qui demandent un arbitrage humain :** aucune nouvelle. A107 reste ouverte.
+
+## S184 — 2026-09-12 — Ce que coûte de consommer la source
+
+**Entrée :** master 0643cfb propre, quatre copies alignées, S183-1/A50. Copie principale,
+aucune copie nouvelle. Plan seul 2d64e76 ; protocole e8b6e7e ; véhicule 0139429 ; réseau
+6184bc5 ; réception 81c715d. Code d'exécution inchangé.
+
+**Produit :** `examples/perturbative_step.rs`, `examples/lattice_phase.rs` et
+[CONSOMMATION-S184](../docs/validation/CONSOMMATION-S184.md). S183 avait mesuré le coût de
+**produire** la source ; cette session mesure celui de **s'en servir**, ce qui ne s'en déduit
+pas — un coût ne devient une contrainte qu'une fois rapporté au travail qu'il accompagne.
+
+Le véhicule est un pas explicite de quantité de mouvement perturbative sur un bloc 3D
+(advection centrée, laplacien à sept points, `− S` soustraite selon SPEC-004 §6.1), écrit en
+exemple : le solveur du projet reste à B3 (ADR-007 §5). Trois axes : côté du bloc 10/16/20,
+décimation spatiale `r ∈ {1,2,4,8}`, cadence `c ∈ {1,2,4,8,16}`. Conditions publiées avant la
+première exécution, deux exécutions publiées.
+
+**Chiffres qui ont orienté la conception.**
+
+**~2100.** La source coûte 34–35 µs par maille, le pas qu'elle alimente 14–17 ns. Le pas
+explicite complet représente **0,047–0,049 %** du travail total, identiquement aux trois
+tailles de bloc. La décimation spatiale achète **exactement** le rapport des nombres de nœuds
+— rien de plus, rien de moins — et l'interpolation trilinéaire coûte 10–40 ns par maille, soit
+l'ordre du pas lui-même. La cadence divise **exactement** par `c`, à 1 % près de 1 à 16.
+
+Mais les deux axes ne sont pas également disponibles, et c'est **le contenu** qui en décide :
+la coupure de la recette de pression vaut `k_max = 5,8125 rad/m`, donc `λ_min = 1,081 m`, donc
+`r = 2` met déjà la plus courte longueur d'onde à 2,16 points — la limite de Nyquist. La
+décimation spatiale est plafonnée à ~5,4× par la physique. Le contenu temporel, lui, est lent
+(périodes 3–12 s, segments de pression 2 s). **L'axe cher est l'espace et l'axe bon marché est
+le temps**, l'inverse de ce que suggère un réseau 3D où l'on croit économiser `r³`.
+
+**Décision structurante :** aucune, et **aucun ADR**. Le choix du solveur reste à B3. Ce qui
+est produit est un ordre de grandeur, une asymétrie, et une hypothèse tuée.
+
+**Ce que la session a trouvé et qui n'était pas cherché.**
+
+**A227** *(sévérité 2)* — le fournisseur différentiel a la forme d'une **requête**, pas celle
+d'un **champ**, et sa forme ne se corrige pas par la traversée. Sept sessions l'ont construit
+par point en supposant qu'un solveur perturbatif le consommerait maille par maille ; il coûte
+2100 fois ce pas. L'optimisation évidente — amortir les sommes modales par récurrence de
+phase sur un réseau régulier — a été chiffrée et **ne rend que 12 à 15 %**. Le fournisseur
+reste bien dimensionné pour ce qu'il sert aujourd'hui, des consommateurs **épars** ;
+c'est l'usage volumétrique qui n'est pas dans son enveloppe, et personne ne l'avait écrit.
+
+**L264** — avant d'optimiser un parcours, mesurer la part qu'il peut atteindre. La
+trigonométrie ne pèse que 15–18 % du différentiel de B ; les 85 % restants sont l'arithmétique
+qui produit 26 scalaires par composante. L'optimisation visait le tiers **visible** du travail
+— celui qui a une table, un type dédié, un ADR — en croyant viser le tout. Le coût ne suit pas
+ce qu'il a coûté à écrire. Un facteur cinq sur un sixième du travail n'est pas un facteur cinq.
+
+**Réception :** les quatre contrôles passent aux trois tailles, **au bit et sans une seule
+exemption** : la source atteint l'état à `−dt·S` exactement, le chemin « avec source » rejoint
+le chemin « sans » quand la source est nulle, le réseau `r = 1` reproduit la source par maille,
+tout reste fini. Aucun nouveau test unitaire ; workspace **331 réussis / cinq ignorés** en
+debug et en release, exemples compilés dans les deux profils.
+
+**Deux corrections de protocole, rendues visibles plutôt que réécrites.** La réception 2
+publiée en P2 était fausse — la différence de deux pas ne vaut pas `−dt·S` en flottant, car
+`dt·(X−s) ≠ dt·X − dt·s` ; elle est remplacée par un contrôle strictement plus fort. Et la
+géométrie fixe du bloc ne tenait pas : le nœud supérieur d'un réseau grossier déborde du bloc
+et sortait du domaine. L'énoncé initial est conservé dans le document, la correction datée en
+regard. C'est le fait d'avoir publié le protocole **avant** qui a rendu les deux visibles.
+
+**Ce que je n'ai pas fait.** Aucune erreur de décimation n'est mesurée : S170 et S174 l'ont
+faite en 1D, et leur avertissement tient — un ratio ne décrit pas à lui seul la précision.
+Aucun `H` ni `c` recommandé. Le véhicule ne projette pas, ce qui sous-estime le pas et
+sur-estime la part de la source ; la borne promise est donnée : il faudrait un pas **2100 fois**
+plus cher pour que la source tombe sous la moitié à `r = 1`, mais seulement **25 fois** plus
+cher à `r = 2` et `c = 16` — ce qu'une projection multigrille peut plausiblement valoir. La
+conclusion n'est donc pas « impossible » mais « pas sans la cadence temporelle ». Vectorisation
+non mesurée, et c'est le seul levier qui s'attaque aux 85 %.
+
+**Prochaine session recommandée. S185 : S184-1**, l'erreur de cadence en 3D avec le
+fournisseur réel — le seul des deux axes qui soit à la fois bon marché et non mesuré. S174 l'a
+fait en 1D sur des instantanés connus ; refaire sur `B+W+pression`, à `c` croissant, en
+comparant le champ obtenu à une reconstruction à chaque pas. La décimation spatiale suit,
+bornée à `r = 2`. BILAN-B4-S176 reste le bilan actif et porté ; BILAN-S145 est soldé (S147).
+
+**Décisions qui demandent un arbitrage humain :** aucune nouvelle. A107 reste ouverte.
