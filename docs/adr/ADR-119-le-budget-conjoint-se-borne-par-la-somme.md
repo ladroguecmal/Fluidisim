@@ -102,3 +102,13 @@ et release.
 Aucun code de bibliothèque n'est modifié. Un seul montage, une seule profondeur de bloc, un
 seul instant de profil, et un véhicule qui ne projette pas. A50 et B4 restent partiels ;
 aucun solveur choisi.
+
+## Suivi daté — S190, 2026-09-12
+
+[ADR-120](ADR-120-b4-tolerance-de-deux-pour-cent.md) fixe, sur instruction de
+l'utilisateur, **2 % d'erreur acceptable**. Les mentions « aucun seuil » de cet ADR
+décrivent S189 ; elles ne constituent plus une attente. Sa règle de somme et sa demande
+de mesurer le couple retenu sont appliquées dans
+[B4-TOLERANCE-S190](../validation/B4-TOLERANCE-S190.md), avec réserve de référence.
+Le profil reçu ne généralise pas la somme des deux erreurs isolées à tout solveur ;
+la projection et le champ composé restent à contrôler dans leur propre montage.

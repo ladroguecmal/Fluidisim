@@ -117,6 +117,13 @@ l'autorise (ADR-007 §3).
 
 ## B4 — Validité du régime perturbatif
 
+> **État actif S190 — 2026-09-12.** Tolérance de champ perturbatif **2 %**, décidée
+> par l'utilisateur, [ADR-120](../adr/ADR-120-b4-tolerance-de-deux-pour-cent.md).
+> Volet source reçu sur le véhicule sans projection : profil gradué 14×14×8,
+> extrapolation 80 ms, budget conservateur 1,800653 % ;
+> [B4-TOLERANCE-S190](B4-TOLERANCE-S190.md). Le critère de vitesse n'est ni un seuil
+> de bascule, ni une réception des forces/surface/perception. B4 complet reste à recevoir.
+
 > **État S176 — 2026-09-11.** B4 complet non reçu. Le seuil0,35·Hs ci-dessous est une
 > proposition historique non reçue, pas une règle rétablie ; ADR-112 fait foi.
 > S163–S175 reçoivent des contrôles du résidu et de sa source sur véhicule1D, sans

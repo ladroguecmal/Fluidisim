@@ -402,6 +402,17 @@ hypothèse à écarter est un terme source incomplet.
 
 ### 6.2 L'optimisation qui rend le coût acceptable
 
+> **Décision active S190 — 2026-09-12 : le critère est fixé à 2 %** d'erreur de
+> champ perturbatif par l'utilisateur, [ADR-120](../adr/ADR-120-b4-tolerance-de-deux-pour-cent.md).
+> La réception conserve la norme maximum de vitesse `u'` de S185, normalisée par la
+> perturbation de référence ; budget conjoint espace+temps, référence qualifiée.
+> `N` est un nombre de points, pas le pourcentage. Il se dimensionne avec le placement,
+> la profondeur et la cadence sous ce seuil. [S190](../validation/B4-TOLERANCE-S190.md)
+> reçoit un profil de banc **14×14×8, extrapolation 80 ms**, budget 1,800653 % réserve
+> comprise. Pas de `N` universel ni de garantie runtime `is_smooth_at` déduite de ce
+> seul montage. Les mentions historiques « erreur acceptable à décider » ci-dessous
+> sont remplacées par cet arbitrage ; le facteur 64 reste non reçu.
+
 `BackgroundSample` est cher, et un domaine perturbatif en demande un par cellule et par sous-pas.
 
 Le fond est cependant **lisse à l'échelle de `dx`** : ses longueurs d'onde valent au minimum
@@ -644,7 +655,9 @@ sera formulée pendant le développement, et qui doit être refusée avec son mo
    *À noter : la contrainte énoncée ici — « il doit se relire sur une machine différente, donc pas
    de disposition mémoire brute » — était exactement celle d'un actif cuit, et dépourvue de sens
    pour une condensation en mémoire. Le point disait déjà ce qu'il était.*
-3. **Granularité de `is_smooth_at`** — à mesurer au banc B4, dont c'est un paramètre direct.
+3. **Granularité de `is_smooth_at`** — à dimensionner au banc B4 **sous le seuil de 2 %
+   acté en S190 (ADR-120)**. Profil local reçu dans B4-TOLERANCE-S190 ; généralisation
+   au solveur et aux autres contenus encore ouverte, aucune nouvelle décision de tolérance attendue.
    → **S11** : ce point proposait de mesurer « un point sur quatre ». Ce n'est plus le paramètre :
    la note corrective de §6.2 (S08, écart E08) a établi que le taux de décimation n'est pas une
    constante mais une **contrainte, `dx ≤ λ_cut/N`**, parce que le rapport `λ_cut/dx` passe de 40 à

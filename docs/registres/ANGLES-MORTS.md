@@ -1863,6 +1863,14 @@ croyant exercer la pente. Voir [REFUS-EMPRISE-S144](../validation/REFUS-EMPRISE-
   relit. À juger dans quelques sessions : si B1 n'est toujours pas lancé en S150, la réparation
   aura échoué et il faudra autre chose.
 
+**Suivi A211 — S190, 2026-09-12 : réparation étendue à une file plurielle.** L'utilisateur
+signale que la ligne unique de suite a de nouveau laissé disparaître les autres axes
+pendant la série B4. Pas de nouvel identifiant pour le même défaut de sévérité 1.
+La [file active S190](QUESTIONS-OUVERTES.md#file-active-s190--2026-09-12) porte désormais
+les chantiers, leurs limites et leurs déclencheurs ; REPRISE §6.7 exige sa relecture
+en plus de la prochaine action. A211 reste à éprouver sur les sessions suivantes,
+elle n'est pas fermée par la seule écriture du dispositif.
+
 **Suivi A187 — S146 : requalifiée par B1, ce n'était pas un défaut.** Les +6,612 % mesurés à 256
 composantes étaient **une réalisation à trois écarts-types sur une graine unique**. Douze graines
 par densité montrent qu'il n'y a **aucun biais** — moyenne des écarts dans ±0,42 % à toutes les
@@ -2441,3 +2449,11 @@ COMPOSITION-GRADUEE-S189 §7.4.
   couple retenu**, ce qu'ADR-119 §3 prescrit déjà faute de mieux. Sévérité 2 : la borne est
   sûre, aucun contrat n'est faux, et le coût du surdimensionnement est un gaspillage, pas une
   erreur de justesse. Chiffres et conditions dans COMPOSITION-GRADUEE-S189 §7.5.
+
+**Suivi A50 — S190, 2026-09-12 : attente du critère close, source reçue sur le montage.**
+L'utilisateur fixe **2 %**, ADR-120. B4-TOLERANCE-S190 reçoit 12 couples sur 126 ;
+profil choisi gradué 14×14×8, extrapolation 80 ms : budget spatial+temporel+réserve
+1,800653 %, composé+réserve 1,161371 %. Source omise à 100 %, refusée. Les dérivées
+et la consommation existantes ont désormais un critère de réception ; A50 reste
+partielle pour projection, surface libre, frontières et candidat δ. Ne plus reporter
+« quelle erreur est acceptable » ; S190-1 reprend S189-1 sous le seuil décidé.

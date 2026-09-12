@@ -1667,3 +1667,33 @@ entrée par entrée. Le fil reprend ci-dessous.
   source sur plusieurs lots/recettes : préparation, actualisation, évaluation, refus
   et allocations. Comparer àla surface àentrées identiques ; conditions/limites de
   mesure avant budget de consommation perturbative. BILAN-S145/BILAN-B4-S176 portés.
+
+## File active S190 — 2026-09-12
+
+**Arbitrage clos : 2 % d'erreur acceptable pour le champ perturbatif B4 (ADR-120).**
+La réception B4-TOLERANCE-S190 reçoit le profil de source gradué 14×14×8/extrapolation
+80 ms sur le véhicule existant. Aucun point ci-dessous ne doit redemander ce seuil.
+Porteur des travaux internes : l'agent de construction du dépôt, sous arbitrages de
+l'utilisateur ; aucune équipe extérieure fictive. Cette file complète la prochaine
+action unique et doit être relue au rituel de fin (A211).
+
+| action / objet | état constaté S190 et ce qui reste | priorité / déclencheur |
+|---|---|---|
+| **S190-1 / A50 / B4** | seuil clos, profil source reçu ; projection puis surface libre, frontières et comparaison au substitutif intégral manquantes | prochaine action : reprend S189-1 avec un seuil connu |
+| **B3 / δ** | deux Saint-Venant 1D et véhicule de quantité de mouvement sur bloc 3D ; aucun solveur volumétrique à surface libre choisi | construire/recevoir le candidat qui permet la comparaison B4 ; le 2 % ne choisit pas une technologie |
+| **B4 forces / perception** | aucun reçu complet ; la métrique de vitesse S190 ne les remplace pas | après montage commun surface/solide ; protocole perceptif conserve ses participants réels requis |
+| **A216 / A217** | coefficient S161 non expliqué ; référence évolutive profonde non linéaire/dispersive absente ; ADR-112 interdit d'en tirer la bascule | avec la comparaison couplée ; ne pas dériver 0,02/0,24 comme seuil |
+| **A213 / omega f32** | remède identifié, non appliqué, réception S95 à renouveler s'il est retenu | lot propre de précision/horizon, indépendant de l'arbitrage B4 |
+| **λ_cut / B2 / coupure W–δ** | B2 partiel ; dispersion/dissipation et borne d'éponge A92 à assembler | choix du couple W/δ ; ne pas confondre réception source B4 et coupure |
+| **Bathymétrie / S116-2** | profondeur finie et variation du fond hors du montage profond uniforme reçu | lot de construction propre ; reste visible même si S190-1 se prolonge |
+| **A98 / conformité multiplateforme** | aucune seconde cible testée par S190 ; debug/release locaux ne suffisent pas | réception sur seconde cible disponible ; I-03 maintenu |
+| **V / bancs restants** | V non construite ; B1/B2/B4 partiels, aucun banc complet, huit autres non lancés | arbitrer les lots système depuis cette file plutôt que prolonger par défaut la dernière sonde |
+| **A94/A95 / dossier de réunions** | quatorze fiches à traiter selon ADR-028 ; les qualifier en décisions internes ou faits externes | les intitulés « avant première ligne de code » ne bloquent pas rétroactivement le code autorisé depuis S20 |
+
+Les noms de personnes, l'état du terrain/projet extérieur et les actions d'infrastructure
+ne sont pas inférés de la connaissance du dépôt. A107 est un repère de fork historique
+réconcilié en S35/S39 ; aucune fusion supplémentaire ne découle de sa vieille mention.
+
+À chaque fin de session, **actualiser la ligne touchée et vérifier toute la file** ;
+si un point est différé, garder son objet et son déclencheur visibles. Pas de numérotation
+de session future pour les neuf autres lignes : ce serait un calendrier fictif.

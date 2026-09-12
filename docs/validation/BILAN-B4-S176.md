@@ -3,7 +3,29 @@
 2026-09-11. Action S175-1. État du code vérifié sur master0b37fd2 àl’amorce.
 Ce bilan confronte les reçus S163–S175 au contrat ; aucune nouvelle simulation lancée.
 
-## Verdict
+## État actif — S190, 2026-09-12
+
+**Le critère manquant est fixé : erreur acceptable de 2 %**, arbitrage explicite de
+l'utilisateur, [ADR-120](../adr/ADR-120-b4-tolerance-de-deux-pour-cent.md).
+**Le volet échantillonnage de source est reçu sur le montage S185–S189** : réseau
+gradué 14×14×8, extrapolation 80 ms, budget spatial+temporel+réserve **1,800653 %**,
+erreur composée avec réserve **1,161371 %**. 12 couples reçus / 114 refusés ; profil
+choisi par le nombre d'évaluations, réduit de **13,46 fois** sur la fenêtre.
+[Réception S190](B4-TOLERANCE-S190.md), commande `b4_acceptance`.
+
+**A50 reste partielle et B4 complet non reçu**, pour des objets désormais nommés :
+projection/surface libre/conditions aux limites du candidat δ, comparaison avec le
+substitutif intégral, forces sur coque, perception. Ces absences ne remettent pas le
+seuil « à fixer ». `N` se dimensionne selon contenu/profondeur/réseau/cadence sous ce
+seuil ; ni `N = 2`, ni seuil de bascule déduit du coefficient de S161.
+
+La suite active est **S190-1**, application du profil et du seuil avec projection,
+reprenant S189-1. Les autres chantiers restent portés dans la
+[file active S190](../registres/QUESTIONS-OUVERTES.md#file-active-s190--2026-09-12),
+à relire au rituel de fin. Les suivis ci-dessous sont datés et historiques ; leurs
+mentions « il manque un critère » ont expiré avec ADR-120.
+
+## Verdict initial (S176)
 
 **B4 complet reste non reçu. A50 est partiellement instruite sur un véhicule1D.**
 La source et les termes croisés ne sont plus seulement des formules : ils évoluent

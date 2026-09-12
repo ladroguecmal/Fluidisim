@@ -19,7 +19,7 @@ souvenir de conversation, **c'est lui qui fait foi**.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-12 15:31 +02:00
+Battement        : 2026-09-12 15:32 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Session en cours : S190 — arbitrage utilisateur : erreur acceptable de 2 % pour B4
 Dernière session : S189 — la loi du maximum n'était pas une loi ; ADR-119, borner par la somme
@@ -127,6 +127,17 @@ Le battement se met à jour à chaque commit d'étape. Il n'existe pas de proces
 une session ne peut signaler sa présence qu'en travaillant.
 
 ---
+
+## File active du projet — S190
+
+**Tolérance B4 fixée à 2 % par l'utilisateur (ADR-120).** Elle ne doit plus être
+redemandée. La réception et son profil sont dans B4-TOLERANCE-S190 ; B4 complet
+conserve ses volets physiques/perceptifs non reçus.
+
+En plus de l'action suivante, relire la [file active plurielle](docs/registres/QUESTIONS-OUVERTES.md#file-active-s190--2026-09-12) :
+A50/B4 et B3, forces/perception, A216/A217, A213, λ_cut/B2/coupure W–δ,
+bathymétrie, conformité multiplateforme, V/bancs restants, dossier de réunions.
+A211 est récurrente : un fil local ne remplace pas cette liste. Le §6.7 la porte.
 
 ## 1. Ce qu'est ce projet
 
@@ -2431,6 +2442,10 @@ Avant de rendre la main, dans cet ordre :
    quatre recommandations de [BILAN-S69](docs/registres/BILAN-S69.md) sont restées lettre morte
    pendant soixante-seize sessions, non par désaccord mais parce qu'aucun canal ne les portait
    (**A211**, **L228**). Le chaînage « suite Sxxx » propage la proximité, pas l'importance.*
+   **Extension S190 : vérifier aussi toute la file active plurielle de QUESTIONS-OUVERTES**
+   (lien en tête de REPRISE), actualiser chaque ligne touchée et conserver les autres avec
+   leur déclencheur. Une recommandation active unique ne doit plus effacer A213, B2/coupure,
+   bathymétrie, multiplateforme, V ou les volets restants de B4. A211 reste à éprouver.
 
 Une session qui n'exécute pas ce rituel laisse le projet dans un état où la suivante devra
 reconstituer ce qu'elle a fait — c'est-à-dire perdre l'essentiel de son apport.
