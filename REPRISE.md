@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-12 15:35 +02:00
+JETON            : occupé
+Battement        : 2026-09-12 16:00 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S191 — projection de pression et seuil B4 de 2 %
 Dernière session : S190 — 2 % actés ; profil source B4 reçu, ADR-120
 Session suivante : S191 — S190-1 : projection au seuil B4 de 2 % ; relire aussi la file active plurielle
 

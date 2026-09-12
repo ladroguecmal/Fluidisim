@@ -58,42 +58,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S190 — terminée
+Session : S191 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : appliquer l'arbitrage explicite de l'utilisateur du 2026-09-12 :
-« 2 % d'erreur acceptable, débloque B4 avec ça ». Définir la grandeur et le périmètre,
-recevoir les configurations mesurables au seuil, propager la décision et garder visibles
-les volets restants. La projection S189-1 est réordonnée derrière cet arbitrage.
+Objectif : S190-1 / S189-1, construire et recevoir une projection discrète compatible
+avec le véhicule de banc, puis éprouver le profil 14×14×8 / extrapolation 80 ms
+sous les 2 % actés. Ne pas confondre projecteur discret et solveur à surface libre.
 
 ### Plan
 
-- [x] **P1** — lire la reprise, vérifier copies/branches/historique/état, prendre le jeton ; plan seul.
-- [x] **P2** — confronter B4, SPEC-004, ADR-119 et mesures ; acter les 2 % par ADR,
-  définir avant le rejeu la norme, la référence et la décision de réception.
-- [x] **P3** — appliquer le critère aux campagnes existantes, produire une réception
-  reproductible avec témoin admis et refusé ; fixer un profil recevable si les preuves suffisent.
-- [x] **P4** — propager vers B4/SPEC-004/A50 et les points ouverts ; expliciter le reste
-  du banc et tenir une liste plurielle des chantiers signalés par l'utilisateur.
-- [x] **P5** — rituel de fin REPRISE §6, vérifications, journal, index, décomptes,
-  jeton libre et copies existantes synchronisées sans suppression non justifiée.
+- [x] **P1** — reprise et état réel, jeton/plan seul ; master propre 6684094 et trois copies à jour.
+- [ ] **P2** — dériver D/G et leurs conditions de bord ; protocole de projection,
+  critères indépendants, métriques B4 et portée avant simulation.
+- [ ] **P3a** — construire le projecteur de banc ; gradient, solénoïdal, référence
+  algébrique indépendante, refus/non-convergence ; un support sans mutation du précédent.
+- [ ] **P3b** — campagne projetée contre plein/raffiné, axes séparés, composition locale,
+  profil reçu S190 et témoins ; qualifier pression, divergence et réserve de référence.
+- [ ] **P4** — réception, correction datée des inférences invalidées, ADR si décision,
+  angles/leçons et propagation B4/A50/file plurielle ; aucune tolérance redemandée.
+- [ ] **P5** — rituel REPRISE §6, journal/index/README/décomptes, vérifications,
+  jeton libre et avance rapide des copies propres sans suppression.
 
 ### Notes de reprise
 
-Amorce : master propre à ac1ffb8, trois copies au même commit ; branche archivée conservée.
-Cargo disponible. Aucun fichier modifié à l'entrée. Aucun agent parallèle lancé.
-Dernier bilan actif : BILAN-B4-S176, à actualiser avec la réception au seuil de 2 %.
-P3 : 126 couples jugés, 12 reçus/114 refusés ; profil 14×14×8, ext c8, budget
-1,800653 %, composé+réserve 1,161371 %. Empreinte 0x4b479c21a520cd7b,
-deux release et une debug identiques. Workspace debug 331/cinq ignorés reçu.
-P4 : propagation préparée pendant les vérifications P3 ; à compléter et committer séparément.
-
-P4 : seuil propagé à SPEC-004 §6.2/point ouvert, PLAN-BENCHMARK B4, état actif
-du bilan S176, suivi ADR-119 et A50. A211 reçoit une file plurielle, portée par
-REPRISE §6.7. Aucun nouvel angle ni leçon : défaut déjà nommé A211/L228.
-
-P5 : journal, index, README et reprise mis à jour ; liens locaux vérifiés,
-diff sans erreur. Décomptes 120 ADR/233 angles/269 leçons/18 invariants/6 SPEC/23 cas.
-Aucun nouvel angle/leçon, A211 déjà porteur du défaut signalé. Suite S190-1 reprend
-S189-1 avec seuil fixé ; file plurielle portée au rituel §6.7. Jeton libre.
-Les trois copies ont été revérifiées propres, au commit initial ac1ffb8 ; avance rapide
-sur le commit de clôture immédiatement après ce commit. Aucun répertoire créé ou supprimé.
+REPRISE lue entièrement dans cette conversation ; les changements depuis sont ceux de
+S190, relus avec dernier journal/index/file active. Invariants, ADR-001 et METHODE déjà
+lus ; aucun changement depuis. B4-TOLERANCE-S190 porte le profil et la réserve mesurée.
+Autres lignes de la file active conservées : aucun déplacement de priorité implicite.
