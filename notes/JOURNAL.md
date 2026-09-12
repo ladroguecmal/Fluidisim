@@ -9868,3 +9868,91 @@ portée de réception déjà prescrites. Suivis A50/A217/A211, index/passation e
 actualisés :121ADR,233angles,270leçons,18invariants,6SPEC,23cas. I-03/I-06/I-08/I-14
 restent inchangés : banc f64 avec allocations, aucun contrat runtime revendiqué.
 Trois copies à avancer après le commit final, aucune suppression autorisée par preuve de mort.
+
+## S193 — 2026-09-12 — La surface non linéaire reçoit Stokes, et l'ordre deux rate la moitié
+
+**Entrée.** « Reprends le projet ». Jeton `libre`, battement de 16:35 vieux de 2 h 52 ;
+`master ca616d2` propre, trois copies isolées **au même commit**, aucun commit unique.
+Démarrage à froid. S192-1 recommandée, seuil 2 % déjà fixé (ADR-120), aucun arbitrage
+redemandé. Agent : Claude Code (Opus 5) ; fichiers, git et cargo 1.97.0 disponibles.
+Plan seul `6282d82`, protocole `9a9118c`, véhicule `eb8883f`, campagne `2935c0c`,
+propagation `0c82b5c`. Travail sur `master`, aucune copie isolée ouverte.
+
+**Construction.** Équations de Zakharov exactes dérivées sur place — `η_t = W(1+η_x²) −
+η_xψ_x`, `ψ_t = −gη − ½ψ_x² + ½W²(1+η_x²)` — puis développement en amplitude de `W`
+(HOS/Craig-Sulem) sur le relèvement tridiagonal de S192. Les dérivées verticales sont deux
+symboles, `A = G_h` et `B = k²`, et toutes les suivantes s'en déduisent **algébriquement**
+par l'équation de Laplace : la couche non linéaire n'ajoute aucune inconnue verticale.
+État spectral en bande `Q` avec **convolution tronquée** — ce qui supprime la question du
+repliement au lieu de la calibrer — horizontal exact pour ne laisser que `K` comme axe
+spatial, RK4, jauge `ψ₀` fixée à zéro et prouvée inerte par un test.
+
+**Sorties.** SURFACE-LIBRE-NL-S193 et MESURES, ADR-122, SPEC-001 §1 quater,
+`examples/nl_surface_2d.rs` et `support/nl_surface.rs`. Quatre tests debug/release :
+relèvement contre forme fermée et résidu de récurrence, réduction linéaire contre la
+**puissance fermée de l'amplification RK4**, convolution projetée sans repliement,
+invariances et refus atomiques, ordres distincts et jauge inerte.
+
+**Réception.** Deux profondeurs, quatre amplitudes, trois ordres, plus les axes `K`, `dt`,
+`Q` et cinq contre-épreuves. `reception=true`, empreinte **`0x41fc3b13793bee10`**, deux
+exécutions release identiques. À `kh=6,2832`, `M=3` : harmonique liée à **0,4555 %** de
+Stokes à la plus petite amplitude, décalage de fréquence à **1,6454 %** à la plus grande
+amplitude utile, tous deux sous 2 %. Ordres mesurés **2,059/1,992** en `K` et
+**4,015/4,026/4,098** en `dt` ; bande **identique au bit** de `Q=8` à `Q=16` ; énergie au
+plus `2,616146e-9`. Erreur de profil sur vingt périodes : **0,33 %** à `M=3`, **8,2 %** à
+`M=2`, **21,3 %** à `M=1`.
+
+**Le chiffre qui décide, et il était déclaré avant la mesure.** `M=2` rend le **bon
+profil** — `b₂` de `0,995269` à `1,002078`, indiscernable de `M=3` — et **la moitié** du
+décalage de fréquence, `0,4916 → 0,5004`. La conclusion naïve « une troncature quadratique
+ne décale pas la fréquence » était prédite fausse au §3.4 et l'est. Et la fraction captée
+**dépend du régime** : `0,663` à `kh=1,5708`. D'où **ADR-122** : l'ordre trois est retenu,
+l'ordre deux refusé — non pour sa précision de profil, mais parce que vérifier un profil ne
+suffit pas à recevoir un schéma tronqué en amplitude.
+
+**Trois choses trouvées que le protocole n'avait pas prévues.** *Un*, la **faible profondeur
+non linéaire n'a aucun oracle** : la borne d'Ursell est mesurée comme une **falaise** —
+juste à `6,4·10⁻⁵` près à `U=0,05` sur un coefficient de 101,6, faux d'un facteur 225 à
+`U=130`, divergent à `U=261` — et `U ≪ 1` exige à `h=0,25 m` une amplitude trois ordres
+sous celle que S192 y employait (**A234**). *Deux*, la contre-épreuve à **amplitude
+négligeable** a trouvé le seul défaut de la session : la condition initiale était bâtie sur
+`ω₀` du continu alors que le véhicule porte `ω_d`, ce qui rendait le mode fondamental
+elliptique et biaisait la fréquence de `−1,1125·10⁻⁷` — 0,14 % de la grandeur mesurée, et
+de même nature qu'elle. Signature : rapport **16,1** entre `h=8` et `h=2`, exactement le
+rapport des ellipticités. Corrigé, le biais résiduel vaut `−5,072982·10⁻¹⁰`, **égal à
+l'erreur de phase de RK4 prédite analytiquement** (**A236**, **L271**, **L272**). *Trois*,
+une **prédiction du protocole était fausse** : la dérive de volume annoncée en `a^{M+1}`
+vaut `2,85·10⁻¹⁸`, de l'arrondi, et zéro à `M=1`, parce que `(ηBψ)₀` et `(η_xψ_x)₀` sont la
+même somme et s'annulent identiquement. Le comptage d'ordres majorait ; la structure faisait
+mieux (**L273**). La phrase fausse reste écrite, avec sa réfutation datée.
+
+**Portée.** S192-1 close. Le dépôt possède un véhicule **à la fois non linéaire et
+dispersif**, d'ordre explicite et de domaine borné ; le manque structurel d'A217 tombe.
+**A217 reste ouverte** : aucun couplage de deux trains mesuré, ADR-112 intact. Source S191
+non branchée, aucune addition au budget `1,374540 %` — références différentes. A216
+inexplique, forces et perception non reçues, A50/B4 partiels, aucun solveur δ choisi, fond
+plat, surface graphe, aucune seconde cible (A98), aucun coût CPU.
+
+**Suite S193-1 : mesurer le couplage de deux trains** sur ce véhicule à `M=3` — écart entre
+la somme des évolutions et l'évolution de la somme, sous le critère d'ADR-120. Trois points
+à déclarer avant mesure : l'amplitude totale doit rester dans le domaine d'ADR-122 pour les
+**deux** nombres d'onde ; la bande doit contenir `k₁±k₂` et leurs harmoniques, ce que `Q=8`
+ne garantit pas ; et la contre-épreuve `M=1` est obligatoire, car l'écart y doit être
+**exactement nul** — c'est ce zéro qui étalonne la mesure.
+
+**Rituel.** File active relue entière et **renommée S193** — son titre portait encore S190
+quand son contenu est daté ligne par ligne, défaut exact d'A185 — avec quatre ancres
+repointées. Lignes actualisées : S193-1/A50/B4/A217, B3/δ, A216/A217, bathymétrie ; six
+autres conservées avec leurs déclencheurs. Recommandation de S192 exécutée. BILAN-B4,
+PLAN-BENCHMARK B3/B4, SPEC-004 et SPEC-001 actualisés. Quatre angles — **A234**, **A235**,
+**A236**, **A237** — et trois leçons — **L271**, **L272**, **L273**. Décomptes vérifiés par
+comptage et non recopiés : **122 ADR, 237 angles A1–A237, 273 leçons, 18 invariants,
+6 SPEC, 23 cas**. Invariants cités par ADR-122 relus : I-03/I-06/I-08 restent vrais — banc
+`f64` avec allocations, aucun contrat runtime revendiqué — et I-14 est **satisfait par
+construction**, SPEC-001 §1 quater donnant la provenance des trois grandeurs de Stokes
+employées. **Les 331 tests d'espace de travail ont été rejoués** cette fois, en `debug` :
+238 + 93 réussis et 2 + 3 ignorés, soit exactement le reçu S190 — il n'est donc plus
+seulement reconduit, il est vérifié. Point ouvert daté 2026-09-12 : `wake_plafond.rs:134`
+porte un avertissement `unreachable_patterns` **préexistant**, relevé et non corrigé, hors
+lot S193. Trois copies isolées avancées sur `master`, aucune suppression : aucune n'est
+prouvée morte.

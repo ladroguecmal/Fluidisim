@@ -542,3 +542,31 @@ Stokes, ordre en amplitude explicite, avant branchement/comparaison perturbatif-
 File plurielle relue et actualisée ; aucun autre chantier effacé. Aucun ADR/angle/leçon
 nouveau : **121 ADR,233 angles,270 leçons,18 invariants,6 SPEC,23 cas**.
 Voir [surface libre S192](docs/validation/SURFACE-LIBRE-2D-S192.md) et [mesures](docs/validation/SURFACE-LIBRE-2D-S192-MESURES.md).
+
+
+**S193 — 2026-09-12 : surface non linéaire dispersive reçue contre Stokes**, ADR-122.
+S192-1 réalisée : conditions de Zakharov exactes, développement en amplitude sur le
+relèvement de S192, bande spectrale à convolution tronquée, RK4. À kh=6,2832 et M=3 :
+harmonique liée à **0,4555 %** de Stokes, décalage de fréquence à **1,6454 %**, sous 2 %.
+Profil sur vingt périodes **0,33 %** à M=3 contre **21,3 %** au modèle linéaire.
+Ordres mesurés **2** en profondeur discrète, **4** en temps ; bande identique au bit de
+Q=8 à Q=16 ; énergie au plus 2,616146e-9. Quatre tests debug/release, deux campagnes
+release identiques **0x41fc3b13793bee10**.
+**ADR-122** : l'ordre trois est retenu, l'ordre deux refusé — il rend le bon profil mais
+**la moitié** du décalage de fréquence, et la fraction captée dépend du régime (0,663 à
+kh=1,5708). Vérifier un profil ne suffit pas à recevoir un schéma tronqué en amplitude.
+**A217 perd son manque structurel, pas son objet** : aucun couplage de deux trains n'est
+mesuré, ADR-112 intact. Source S191 non branchée, aucune addition au budget 1,374540 % ;
+A216 inexpliquée, forces et perception non reçues, A50/B4 partiels, aucun choix δ, fond
+plat, surface graphe. Workspace **331 réussis / cinq ignorés rejoués** en debug, identiques au reçu S190.
+**Trois trouvailles hors protocole** : la faible profondeur non linéaire **n'a aucun
+oracle** ici, la borne d'Ursell étant une falaise mesurée (**A234**) ; la contre-épreuve
+à amplitude négligeable a trouvé un biais d'estimateur de 1,1125e-7 dû à une condition
+initiale bâtie sur la fréquence du continu (**A236**) ; et la dérive de volume prédite en
+a^(M+1) vaut de l'arrondi, deux termes s'annulant identiquement au mode nul (**L273**).
+**Suite S193-1 : couplage de deux trains**, écart entre la somme des évolutions et
+l'évolution de la somme, contre-épreuve M=1 exactement nulle. File active relue et
+renommée S193 (A185), quatre ancres repointées ; aucun autre chantier effacé.
+**A234, A235, A236, A237** et **L271, L272, L273** :
+**122 ADR,237 angles,273 leçons,18 invariants,6 SPEC,23 cas**.
+Voir [surface libre non linéaire S193](docs/validation/SURFACE-LIBRE-NL-S193.md), [mesures](docs/validation/SURFACE-LIBRE-NL-S193-MESURES.md) et [ADR-122](docs/adr/ADR-122-l-ordre-en-amplitude-d-un-vehicule-non-lineaire.md).

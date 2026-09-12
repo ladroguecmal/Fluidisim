@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S193 — en cours
+Session : S193 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
 Objectif : S192-1, construire les conditions de surface **non linéaires** dispersives
 sur la tranche x-z de S192 et les recevoir contre une référence de **Stokes**, avec
@@ -81,7 +81,7 @@ non linéaire et dispersif (A217) ; aucune sélection de solveur δ, aucun seuil
   espace/temps, contre-épreuves par l'échelle M, reproductibilité deux exécutions.
 - [x] **P4** — documenter résultats, limites et suite ; propager A50/B4/A216/A217, file
   plurielle, angles et leçons. ADR seulement si une décision de projet est prise.
-- [ ] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes,
+- [x] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes,
   jeton `libre`, trois copies avancées sans suppression non prouvée.
 
 ### Notes de reprise
@@ -145,4 +145,13 @@ verifie par deux limites, nombre d'Ursell, et la frequence d'ordre trois avec la
 seule forme adoptee (provenance I-14). Portee et suite S193-1 ecrites en section 8
 du document. File active renommee S193 et quatre ancres repointees (A185).
 BILAN-B4, PLAN-BENCHMARK B3/B4 et SPEC-004 actualises. Angles et lecons en P5.
+
+P5 : rituel exécuté. Journal, quatre angles A234-A237, trois leçons L271-L273,
+suivis A50/A217/A216 et A211. INDEX/README/REPRISE reçoivent un bloc S193 neuf ;
+les décomptes sont **comptés** et non recopiés : 122 ADR, 237 angles A1-A237,
+273 leçons, 18 invariants, 6 SPEC, 23 cas. Jeton libre, suite S194 = S193-1.
+Workspace rejoué en debug : 331 réussis / cinq ignorés, identiques au reçu S190.
+Point ouvert daté : avertissement unreachable_patterns préexistant dans
+wake_plafond.rs:134, hors lot. Invariants cités relus, aucun ne devient faux.
+Trois copies à avancer sur master après ce commit, aucune suppression autorisée.
 

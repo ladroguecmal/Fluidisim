@@ -557,8 +557,11 @@ Deux exécutions `release` **identiques**, empreinte des indicateurs
 **`0x41fc3b13793bee10`**. Quatre tests propres réussis en `debug` **et** `release`. Cible
 `x86_64-pc-windows-msvc`, rustc 1.97.0 (2d8144b78), cargo 1.97.0 (c980f4866) ; pas de
 seconde cible, aucune mesure de coût CPU. Bibliothèque `water-core` inchangée : seuls
-`examples/nl_surface_2d.rs` et `examples/support/nl_surface.rs` sont ajoutés. Les 331 tests
-de l'espace de travail et leurs cinq ignorés restent le reçu S190, non rejoués ici.
+`examples/nl_surface_2d.rs` et `examples/support/nl_surface.rs` sont ajoutés. Les **331
+tests** de l'espace de travail et leurs **cinq ignorés ont été rejoués** en `debug` —
+238 + 93 réussis, 2 + 3 ignorés — et sont identiques au reçu S190 : il est vérifié, pas
+seulement reconduit. Un avertissement `unreachable_patterns` **préexistant** subsiste dans
+`examples/wake_plafond.rs:134` ; relevé, non corrigé, hors lot S193.
 
 Code : `code/water-core/examples/nl_surface_2d.rs` et `support/nl_surface.rs`.
 [Sorties intégrales](SURFACE-LIBRE-NL-S193-MESURES.md).

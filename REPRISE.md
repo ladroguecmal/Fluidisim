@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-12 19:32 +02:00
+JETON            : libre
+Battement        : 2026-09-12 20:07 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
-Session en cours : S193 — S192-1 : conditions de surface non linéaires et référence Stokes
-Dernière session : S192 — surface libre x-z linéaire reçue Airy sous 2 %
-Session suivante : à fixer au rituel de fin ; relire la file plurielle
+Session en cours : aucune
+Dernière session : S193 — surface non linéaire dispersive reçue Stokes sous 2 %, ADR-122
+Session suivante : S194 — S193-1 : couplage de deux trains, somme contre évolution de la somme ; relire la file plurielle
 
 *S183 à S189 ont travaillé dans la **copie principale**, sur `master` : aucune copie isolée
 ouverte, donc rien à refermer (AGENTS.md). Les trois worktrees ont été **avancés sur master**
@@ -128,16 +128,26 @@ une session ne peut signaler sa présence qu'en travaillant.
 
 ---
 
-## File active du projet — S190
+## File active du projet — S193
 
 **Tolérance B4 fixée à 2 % par l'utilisateur (ADR-120).** Elle ne doit plus être
 redemandée. La réception et son profil sont dans B4-TOLERANCE-S190 ; B4 complet
 conserve ses volets physiques/perceptifs non reçus.
 
+**Ordre en amplitude d'un véhicule non linéaire : trois (ADR-122, S193).** Ne pas le
+redemander non plus. L'ordre deux rend le bon profil et **la moitié** du décalage de
+fréquence, avec une fraction qui dépend du régime ; vérifier un profil ne reçoit pas un
+schéma tronqué en amplitude.
+
 En plus de l'action suivante, relire la [file active plurielle](docs/registres/QUESTIONS-OUVERTES.md#file-active-s193--2026-09-12) :
 A50/B4 et B3, forces/perception, A216/A217, A213, λ_cut/B2/coupure W–δ,
 bathymétrie, conformité multiplateforme, V/bancs restants, dossier de réunions.
 A211 est récurrente : un fil local ne remplace pas cette liste. Le §6.7 la porte.
+
+**Nouveau en S193, et il change la nature d'une ligne** : la faible profondeur non
+linéaire n'a **aucun oracle** dans ce dépôt — Stokes y sort de son domaine par le nombre
+d'Ursell aux amplitudes qu'un banc emploie (**A234**). Ce qui manque à la bathymétrie et
+aux hauts-fonds est donc une **référence** — cnoïdale ou Boussinesq — et non un solveur.
 
 ## 1. Ce qu'est ce projet
 
@@ -202,6 +212,33 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S193 — 2026-09-12 : surface non linéaire dispersive reçue contre Stokes**, ADR-122.
+S192-1 réalisée : conditions de Zakharov exactes, développement en amplitude sur le
+relèvement de S192, bande spectrale à convolution tronquée, RK4. À kh=6,2832 et M=3 :
+harmonique liée à **0,4555 %** de Stokes, décalage de fréquence à **1,6454 %**, sous 2 %.
+Profil sur vingt périodes **0,33 %** à M=3 contre **21,3 %** au modèle linéaire.
+Ordres mesurés **2** en profondeur discrète, **4** en temps ; bande identique au bit de
+Q=8 à Q=16 ; énergie au plus 2,616146e-9. Quatre tests debug/release, deux campagnes
+release identiques **0x41fc3b13793bee10**.
+**ADR-122** : l'ordre trois est retenu, l'ordre deux refusé — il rend le bon profil mais
+**la moitié** du décalage de fréquence, et la fraction captée dépend du régime (0,663 à
+kh=1,5708). Vérifier un profil ne suffit pas à recevoir un schéma tronqué en amplitude.
+**A217 perd son manque structurel, pas son objet** : aucun couplage de deux trains n'est
+mesuré, ADR-112 intact. Source S191 non branchée, aucune addition au budget 1,374540 % ;
+A216 inexpliquée, forces et perception non reçues, A50/B4 partiels, aucun choix δ, fond
+plat, surface graphe. Workspace **331 réussis / cinq ignorés rejoués** en debug, identiques au reçu S190.
+**Trois trouvailles hors protocole** : la faible profondeur non linéaire **n'a aucun
+oracle** ici, la borne d'Ursell étant une falaise mesurée (**A234**) ; la contre-épreuve
+à amplitude négligeable a trouvé un biais d'estimateur de 1,1125e-7 dû à une condition
+initiale bâtie sur la fréquence du continu (**A236**) ; et la dérive de volume prédite en
+a^(M+1) vaut de l'arrondi, deux termes s'annulant identiquement au mode nul (**L273**).
+**Suite S193-1 : couplage de deux trains**, écart entre la somme des évolutions et
+l'évolution de la somme, contre-épreuve M=1 exactement nulle. File active relue et
+renommée S193 (A185), quatre ancres repointées ; aucun autre chantier effacé.
+**A234, A235, A236, A237** et **L271, L272, L273** :
+**122 ADR,237 angles,273 leçons,18 invariants,6 SPEC,23 cas**.
+Voir [surface libre non linéaire S193](docs/validation/SURFACE-LIBRE-NL-S193.md), [mesures](docs/validation/SURFACE-LIBRE-NL-S193-MESURES.md) et [ADR-122](docs/adr/ADR-122-l-ordre-en-amplitude-d-un-vehicule-non-lineaire.md).
 
 **S192 — 2026-09-12 : tranche x-z à surface libre linéaire reçue contre Airy.**
 S191-1 réalisée : fond imperméable, dispersion finie/profonde et hauteur évolutive.

@@ -4315,3 +4315,65 @@ Avant de transporter une garantie : écrire l'opérateur et la décomposition ex
 sur lesquels elle repose. Un résultat numérique favorable ne remplace aucune des
 deux identités. Voir ADR-121 et PROJECTION-B4-S191 ; limite explicitée : grille,
 bords ou opérateurs dépendant de l'état peuvent changer cette conclusion.
+## L271 — Une contre-épreuve à signal nul trouve les biais que les lignes principales absorbent
+
+S193 déclarait, parmi ses contre-épreuves, une ligne sans intérêt apparent : mesurer le
+décalage de fréquence non linéaire à une amplitude **négligeable**, où il doit valoir zéro.
+C'est elle, et elle seule, qui a trouvé le seul défaut de la session — un biais d'estimateur
+de `−1,1125·10⁻⁷`, soit 0,14 % de la grandeur à mesurer à la plus petite amplitude, et **de
+même nature** qu'elle. Les vingt-quatre lignes principales l'avaient absorbé sans rien
+signaler, et leurs verdicts passaient.
+
+Le mécanisme est général : un biais additif constant se cache dans une mesure dont on attend
+une valeur non nulle, et il ne se cache nulle part dans une mesure dont on attend **zéro**.
+Une ligne à signal nul n'est donc pas une formalité de complétude : c'est le seul point du
+protocole où l'erreur systématique n'a aucun endroit où se dissimuler.
+
+Conséquence pratique : dans tout protocole qui mesure un effet, déclarer **avant** la mesure
+au moins une configuration où l'effet est nul par construction — amplitude négligeable, état
+au repos, ordre dégénéré — et lui donner un seuil serré. S192 en avait déjà l'esprit avec son
+« lac immobile », mais l'appliquait à la stabilité et non à l'estimateur. Voir A236 et
+SURFACE-LIBRE-NL-S193 §7.5.
+
+## L272 — Sur un modèle semi-discret, la ligne de base d'une mesure est ce que le modèle porte, pas ce que le continu dit
+
+Trois fois dans la même session, la même erreur a failli passer sous trois formes
+différentes : comparer la fréquence mesurée à `ω₀` du continu, alors que le véhicule porte
+`ω_d = √(g G_h(k))` ; ajuster l'harmonique libre sur `√(2gk tanh 2kh)` au lieu de
+`√(g G_h(2k))` ; et construire la condition initiale et la fenêtre d'observation sur `ω₀`.
+Les deux premières ont été corrigées par dérivation avant mesure ; la troisième est passée et
+a produit un biais, trouvé par la contre-épreuve de L271.
+
+L'ordre de grandeur explique pourquoi c'est un piège et non une maladresse : à `h=8 m` et
+`K=64`, l'écart `G_h` contre `k tanh(kh)` vaut `1,2·10⁻³`, soit un écart de fréquence de
+`6·10⁻⁴` — **16 % du décalage non linéaire à la plus grande amplitude, et dix fois le
+décalage entier à la plus petite**. Une ligne de base continue ne décale donc pas légèrement
+le résultat : elle mesure la discrétisation en croyant mesurer la physique.
+
+La règle : identifier, pour chaque grandeur mesurée, la version **que le candidat porte
+réellement**, et l'employer comme ligne de base ; garder l'oracle continu pour la grandeur
+**relative** qu'on veut recevoir. Le contrôle qui le valide est gratuit : à l'ordre
+dégénéré, l'écart à la ligne de base doit rentrer dans l'arrondi. Voir A236 et
+SURFACE-LIBRE-NL-S193 §5.3.
+
+## L273 — Le comptage d'ordres majore ; seule la mesure dit si une structure fait mieux
+
+Le protocole de S193 prédisait une dérive de volume d'ordre `a^{M+1}`, par simple comptage
+des ordres du système tronqué, et allait jusqu'à écrire qu'annoncer la conservation exacte de
+S192 « serait un aveu d'erreur ». La mesure a donné `2,85·10⁻¹⁸` — de l'arrondi — et
+**exactement zéro** à l'ordre un. Deux lignes d'algèbre, écrites après coup, en donnent la
+raison : au mode nul, `(η Bψ)₀` et `(η_x ψ_x)₀` sont **la même somme**, et les deux termes
+d'ordre deux de `η_t` s'annulent identiquement. Le système tronqué conserve `∫η` exactement.
+
+La leçon n'est pas « le comptage d'ordres est inutile » — il donne une borne sûre et il l'a
+donnée. Elle est que **le comptage d'ordres majore, parfois de très loin, parce qu'il ignore
+les annulations de structure**, et qu'une prédiction pessimiste tenue pour acquise fait
+manquer une propriété exacte. Le même schéma s'était déjà produit en sens inverse en S189 et
+S191 (L270) : une garantie transportée sans écrire sa décomposition. Ici c'est une limite
+transportée sans écrire son annulation.
+
+Conséquence : une prédiction d'ordre se **mesure** avant d'être commentée, et un écart
+favorable de plusieurs ordres de grandeur se traite comme un résultat à expliquer, jamais
+comme une bonne surprise. La prédiction fausse reste écrite dans le document, avec sa
+réfutation datée : c'est la prédiction qui a été prise, pas une rédaction à corriger après
+coup. Voir SURFACE-LIBRE-NL-S193 §7.3.

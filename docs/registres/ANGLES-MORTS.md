@@ -2478,3 +2478,87 @@ comparaison intégrale absente), A216 inexpliquée. Aucun nouvel angle.
 **Suivi A211 — S192.** Toute la file S190 relue ; B4/B3/A217/profondeur constante
 actualisés, fond variable et autres objets conservés. La file ne redemande pas le
 seuil2 %, et la suite construit une physique absente. Aucun chantier latéral clos.
+
+- **A234** *(sévérité 2, S193 ; ouverte)* — **La faible profondeur non linéaire n'a aucun
+  oracle dans ce dépôt, et ce n'est pas un manque de candidat.** S193 reçoit une surface non
+  linéaire dispersive contre Stokes, mais la théorie de Stokes est bornée par le nombre
+  d'Ursell `U = aL²/h³ ≪ 1`, et cette borne est **mesurée comme une falaise** :
+  à `U=0,05` le véhicule rend `b₂` à `6,4·10⁻⁵` près sur un coefficient de **101,6** ; à
+  `U=65` il est faux d'un facteur 2 ; à `U=130` d'un facteur 225 avec un décalage de
+  fréquence de `−51 %` ; à `U=261` l'état cesse d'être fini. Or `U ≪ 1` à `L=8 m` et
+  `h=0,25 m` exige `a ≲ 2,4·10⁻⁵ m` — **quatre ordres de grandeur sous l'amplitude qu'un
+  banc emploie**, et trois ordres sous celle que S192 employait pour son propre cas peu
+  profond. Conséquence : aucune réception non linéaire n'est possible en eau peu profonde,
+  donc aucune sur les zones côtières, les rivages et les hauts-fonds, qui sont précisément
+  là où une vague est visible et où le joueur la regarde. Ce qui manque est une **famille de
+  références** — cnoïdale, ou Boussinesq — et non un solveur. Sévérité 2 et non 1 : la borne
+  est connue, déclarée avant mesure, et aucun chiffre publié n'est faux ; ce qui est bloqué
+  est un pan de réception, pas un contrat. Voir
+  [SURFACE-LIBRE-NL-S193](../validation/SURFACE-LIBRE-NL-S193.md) §2.3 et §7.4,
+  [ADR-122](../adr/ADR-122-l-ordre-en-amplitude-d-un-vehicule-non-lineaire.md).
+
+- **A235** *(sévérité 3, S193 ; ouverte)* — **La fréquence de Stokes d'ordre trois en
+  profondeur finie dépend d'une convention de courant moyen, et un accord numérique ne
+  fournit pas la convention manquante.** À l'ordre trois, la fréquence d'une onde de Stokes
+  en profondeur finie diffère selon que l'on impose une vitesse eulérienne moyenne nulle
+  sous le creux ou un flux de masse moyen nul ; les deux conventions s'écartent d'un terme
+  **du même ordre que la correction mesurée**. Un candidat périodique à potentiel périodique
+  ne peut porter aucun courant moyen : sa convention est imposée par sa représentation. S193
+  a donc refusé d'adopter la formule en profondeur finie, et l'a publiée en regard — où elle
+  se trouve **reproduite à 0,013 % près**. C'est justement le piège : l'accord invite à
+  conclure, et il ne dit rien de la convention. Ce qui reste ouvert : quelle convention la
+  formule usuelle suppose, et si un montage à courant moyen imposé peut la départager. Tant
+  que ce n'est pas tranché, seule la profondeur infinie fournit un oracle de fréquence.
+
+- **A236** *(sévérité 2, S193 ; ouverte)* — **Une condition initiale bâtie sur une grandeur
+  du continu, posée sur un modèle semi-discret, biaise l'estimateur censé la mesurer — et le
+  biais imite un effet physique.** S193 construisait la trace `ψ` de son onde initiale avec
+  `ω₀ = √(gk tanh kh)` alors que le véhicule porte `ω_d = √(g G_h(k))`. L'écart, `6·10⁻⁴`
+  relatif à `K=64`, suffisait à rendre le mode fondamental **elliptique** au lieu de
+  circulaire ; combiné à une fenêtre non entière en cycles du modèle, il produisait un biais
+  de fréquence de `−1,1125·10⁻⁷` — **0,14 % du décalage non linéaire à mesurer à la plus
+  petite amplitude**, et de même nature que lui. Preuve de la cause : le biais valait
+  `1,1125·10⁻⁷` à `h=8` et `6,928·10⁻⁹` à `h=2`, **rapport 16,1**, exactement le rapport des
+  ellipticités. Corrigé, le résidu tombe à `−5,072982·10⁻¹⁰`, égal à l'erreur de phase de
+  RK4 prédite analytiquement. Ce qui rend cet angle général et non anecdotique : **toute**
+  réception de ce dépôt compare un candidat discret à un oracle continu, et rien ne garantit
+  que ses conditions initiales, ses fenêtres et ses lignes de base soient celles du candidat
+  plutôt que celles de l'oracle. Le cas trouvé ici l'a été par une contre-épreuve à signal
+  nul ; les montages qui n'en déclarent pas ne l'auraient pas vu. Sévérité 2 : aucun chiffre
+  publié n'est faux — le défaut a été trouvé et corrigé avant publication — mais le
+  mécanisme n'a été audité sur aucun autre banc du dépôt.
+
+- **A237** *(sévérité 3, S193 ; ouverte)* — **Un ordre de troncature n'a pas de taux de
+  fidélité propre : la part qu'il capture dépend du régime.** À `M=2`, le décalage de
+  fréquence vaut `0,4916 → 0,5004` fois celui de Stokes en profondeur infinie, et `0,663` à
+  `kh=1,5708`. Ce n'est donc ni zéro — la conclusion naïve, prédite fausse avant mesure — ni
+  une fraction transportable. Conséquence pour toute sélection : on ne peut pas caractériser
+  un schéma tronqué par un coefficient d'ordre mesuré une fois, puis l'appliquer ailleurs.
+  Ce qui reste ouvert : la loi qui donne cette fraction en fonction de `kh` n'est pas
+  dérivée, et deux points ne font pas une loi. ADR-122 tranche en retenant l'ordre trois, ce
+  qui rend la question non bloquante, mais elle redeviendra vive si le coût impose un jour de
+  redescendre d'un ordre.
+
+**Suivi A50/A217/A216 — S193, 2026-09-12.** Surface **non linéaire** dispersive reçue
+contre Stokes, [SURFACE-LIBRE-NL-S193](../validation/SURFACE-LIBRE-NL-S193.md) et
+[ADR-122](../adr/ADR-122-l-ordre-en-amplitude-d-un-vehicule-non-lineaire.md) : harmonique
+liée à **0,4555 %** et décalage de fréquence à **1,6454 %**, sous les 2 % d'ADR-120 ;
+ordres mesurés 2 en profondeur discrète et 4 en temps. S192-1 réalisée. **Le manque
+structurel d'A217 tombe** — le dépôt possède un véhicule à la fois non linéaire et
+dispersif — mais **A217 reste ouverte** : aucun couplage de deux trains n'est mesuré, et
+ADR-112 garde toute sa portée. A50 reste partielle (source S191 non branchée, comparaison
+intégrale absente, forces et perception non reçues) ; A216 reste inexpliquée et aucun seuil
+de bascule ne se dérive d'ici. Quatre angles nouveaux — **A234** faute d'oracle en faible
+profondeur, **A235** convention de courant moyen, **A236** ligne de base d'un modèle
+semi-discret, **A237** fidélité d'un ordre non portable. Suite S193-1 : deux trains,
+écart somme/évolution de la somme, contre-épreuve `M=1` exactement nulle.
+
+**Suivi A211 — S193.** Toute la file active relue, et **renommée S193** : son titre portait
+encore « S190 » alors que son contenu est daté ligne par ligne, ce qui est exactement le
+défaut qu'A185 décrit — un état dont l'étiquette vieillit seule. Quatre ancres repointées
+en conséquence (REPRISE, INDEX, ANGLES-MORTS, BILAN-B4). Lignes actualisées : S193-1/A50/B4
+/A217, B3/δ, A216/A217, bathymétrie — cette dernière reçoit A234, qui change sa nature :
+il y manque une **référence**, pas un solveur. Les six autres lignes sont conservées avec
+leurs déclencheurs : forces/perception, A213, λ_cut/B2/coupure W–δ, A98 multiplateforme,
+V/bancs restants, A94/A95 dossier de réunions. Aucun chantier latéral déclaré clos par le
+présent essai. Le dispositif reste à éprouver.
