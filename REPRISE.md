@@ -19,7 +19,7 @@ souvenir de conversation, **c'est lui qui fait foi**.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-12 16:00 +02:00
+Battement        : 2026-09-12 16:02 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Session en cours : S191 — projection de pression et seuil B4 de 2 %
 Dernière session : S190 — 2 % actés ; profil source B4 reçu, ADR-120

@@ -67,7 +67,7 @@ sous les 2 % actés. Ne pas confondre projecteur discret et solveur à surface l
 ### Plan
 
 - [x] **P1** — reprise et état réel, jeton/plan seul ; master propre 6684094 et trois copies à jour.
-- [ ] **P2** — dériver D/G et leurs conditions de bord ; protocole de projection,
+- [x] **P2** — dériver D/G et leurs conditions de bord ; protocole de projection,
   critères indépendants, métriques B4 et portée avant simulation.
 - [ ] **P3a** — construire le projecteur de banc ; gradient, solénoïdal, référence
   algébrique indépendante, refus/non-convergence ; un support sans mutation du précédent.
@@ -84,3 +84,6 @@ REPRISE lue entièrement dans cette conversation ; les changements depuis sont c
 S190, relus avec dernier journal/index/file active. Invariants, ADR-001 et METHODE déjà
 lus ; aucun changement depuis. B4-TOLERANCE-S190 porte le profil et la réserve mesurée.
 Autres lignes de la file active conservées : aucun déplacement de priorité implicite.
+P2 : PROJECTION-B4-S191 publié. D central/extension nulle et G=-D^T ; CG
+sur DD^T, dimensions intérieures paires. La projection fixe est linéaire ;
+la somme des erreurs des axes requiert leur additivité, correction de prémisse S189.
