@@ -18,18 +18,18 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-12 14:46 +02:00
+JETON            : occupé
+Battement        : 2026-09-12 14:56 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S189 — S188-1/A50 : la composition sur réseau gradué
 Dernière session : S188 — la loi de composition tient sur réseau ancré, et l'on sait pourquoi
-Session suivante : S189 — S188-1/A50 : la composition sur réseau gradué, là où les deux maxima se séparent
+Session suivante : à fixer par le rituel de fin de S189
 
-*S183 à S188 ont travaillé dans la **copie principale**, sur `master` : aucune copie isolée
+*S183 à S189 ont travaillé dans la **copie principale**, sur `master` : aucune copie isolée
 ouverte, donc rien à refermer (AGENTS.md). Les trois worktrees ont été **avancés sur master**
 en fin de S183 — ils portaient un jeton périmé annonçant S182, ce qui est exactement le
 mécanisme des trois forks. L'avance rapide ne détruit rien et suffit à l'éteindre (AGENTS.md).
-S186 et S187 les y ont ramenés en fin de session, et S188 les a retrouvés au commit de `master`. L'état se constate par
+S186 à S188 les y ont ramenés en fin de session, et S189 les a retrouvés au commit de `master`. L'état se constate par
 `git worktree list` ; il ne se recopie pas.*
 
 **Copies de travail — ADR-110, S159.** Le décompte n'a plus sa place ici : il vieillissait de

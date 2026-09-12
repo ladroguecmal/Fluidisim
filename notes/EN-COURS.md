@@ -58,7 +58,84 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S188 — terminée
+Session : S189 — en cours
+Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
+Objectif : S188-1/A50, **éprouver A232** — la loi du maximum ne vaudrait que tant que les
+maxima des deux erreurs coïncident. Le réseau **gradué** de S187 est la seule configuration
+connue qui les sépare : à horizontale pleine, la graduation verticale met l'erreur de la
+tranche haute à **zéro** et déplace le maximum spatial vers le milieu du bloc, tandis que le
+maximum temporel reste accroché à celui du champ, en haut.
+
+**Et une révision de mon propre raisonnement de S188, à instruire plutôt qu'à laisser
+passer.** S188 a conclu que la loi tient « parce que les deux maxima coïncident », en
+localisant à la **tranche** — un plan de 14×14 mailles. Or si les deux erreurs culminaient
+vraiment sur la **même maille**, elles s'y ajouteraient, et la loi mesurée serait l'additive,
+pas le maximum. Le fait que ce soit le maximum suggère l'inverse : **elles ne se rencontrent
+pas**. La tranche était une granularité trop grossière pour trancher, et S189 localise à la
+maille.
+
+**D'où l'hypothèse à mettre à l'épreuve, plus forte que la loi de norme.** L'état initial est
+nul et le pas est presque linéaire en la source (l'advection y est d'ordre supérieur). L'écart
+de champ devrait donc être **additif maille par maille** :
+
+```
+Δu(r,c)(x)  ≈  Δu(r,1)(x) + Δu(1,c)(x)     pour toute maille x
+```
+
+Si cette identité ferme, alors la loi de norme n'est pas une loi : c'est un **corollaire** de
+l'additivité locale et de la **disjonction des pics**. Le maximum d'une somme de deux champs
+vaut le plus grand des deux quand leurs pics ne se recouvrent pas, et leur somme quand ils se
+recouvrent. Cela expliquerait d'un coup : le maximum retenu pour les modes causaux, la
+quadratique et l'additive pour l'interpolation, et les écarts de 0,87 à 1,71 observés.
+
+### Plan
+
+- [x] **P1** — état réel, jeton et plan seul.
+- [ ] **P2** — publier le protocole avant tout chiffre : familles graduée et ancrée, la
+      localisation à la **maille**, l'identité d'additivité locale, ce qu'elle expliquerait,
+      les réceptions, et ce que la mesure ne prouvera pas.
+- [ ] **P3a** — sortir dans `support/` le profil `∂²_z S` et les indices gradués que S187
+      gardait locaux. Rejouer `graded_lattice` et vérifier `0x6cf13183b4a240df`.
+- [ ] **P3b** — écrire `graded_composition.rs` : champs d'écart conservés maille par maille,
+      argmax localisés, résidu d'additivité locale, puis les trois lois de norme pour la
+      continuité avec S186 et S188. Relever.
+- [ ] **P4** — recevoir dans un document de validation ; **note corrective datée** sur le
+      raisonnement de S188 si l'additivité locale tranche ; angles, leçons, ADR si une
+      décision en sort.
+- [ ] **P5** — rituel de fin (REPRISE.md §6).
+
+### Notes de reprise
+
+S189 : master 4b40410 propre, quatre copies au même commit ; 118 ADR / 232 angles /
+268 leçons / 18 invariants / 6 SPEC / 23 cas. Démarrage à froid, copie principale.
+
+**Entrées déjà acquises, ne pas les refaire.** S187 donne les erreurs spatiales graduées à
+horizontale pleine et `c = 1` : Nz=3 → 6,5503 % ; Nz=4 → 3,4373 ; Nz=5 → 1,7164 ; Nz=6 →
+1,5098 ; Nz=8 → 0,6393 — **avec une erreur de tranche haute de 0,0000 à 0,0001 %**, ce qui
+est exactement la séparation cherchée. S188 donne les erreurs temporelles pures (identiques à
+S186 et S185) et les erreurs ancrées uniformes 1,7160 / 3,6805 / 13,1488 %. Le plancher reste
+0,386 % et les dénominateurs `max|S| = 1,540547e-4`, `max|u'(T)| = 7,993168e-5`.
+
+**Les familles.** *Graduée* : horizontale **pleine** (14 nœuds ancrés par axe, donc erreur
+horizontale nulle) et `z` gradué à `Nz ∈ {3,4,5,8}` → 588, 784, 980, 1568 nœuds. C'est la
+seule qui sépare les maxima, précisément parce que l'horizontale n'apporte aucune erreur dont
+le pic serait en haut. *Ancrée uniforme*, en témoin de continuité : 8³ = 512 et 5³ = 125, les
+lignes de S188.
+
+**Piège anticipé.** Si l'additivité locale ferme à l'arrondi, les trois « lois » de S186 et
+S188 cessent d'être des lois concurrentes : elles deviennent trois lectures d'une même
+structure, et le verdict par mode s'explique par la géométrie des pics. Il faudra alors le
+dire des deux côtés — dans le document de S189 **et** en note datée sur S186 et S188 — sans
+réécrire leurs chiffres, qui restent exacts.
+
+**Second piège.** L'additivité locale ne peut pas fermer exactement : l'advection est
+quadratique et la viscosité linéaire mais couplée. Le résidu attendu est celui de la
+non-linéarité, et il doit être **comparé au plancher de la référence** (0,386 %) plutôt que
+déclaré petit à vue d'œil.
+
+---
+
+Session précédente : S188 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : S187-1/A50, **rejouer la composition de S186 sur un réseau ancré** (ADR-118).
 S187 a trouvé que le réseau du dépôt posait son dernier nœud hors du bloc, et que l'ancrer
