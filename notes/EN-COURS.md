@@ -70,7 +70,7 @@ erreurs se composent — additivement, quadratiquement, ou pas du tout.
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seul.
-- [ ] **P2** — publier le protocole avant tout chiffre : véhicule partagé, grille
+- [x] **P2** — publier le protocole avant tout chiffre : véhicule partagé, grille
       `r × mode × c`, **une seule** référence, métriques, les trois lois de composition
       mises à l'épreuve, les réceptions, et ce que la mesure ne prouvera pas.
 - [ ] **P3a** — écrire `examples/composed_error.rs` : source échantillonnée sur le réseau
