@@ -68,7 +68,7 @@ Airy et raffinement. Première étape physique, pas réception non linéaire B4.
 
 - [x] **P1** — reprise/état réel, master58e41bc propre, trois copies à jour ; jeton/plan seul.
 - [x] **P2** — équations, discrétisation x-z, opérateur de surface et protocole avant mesure.
-- [ ] **P3a** — véhicule potentiel 2D : relèvement elliptique réellement discrétisé,
+- [x] **P3a** — véhicule potentiel 2D : relèvement elliptique réellement discrétisé,
   conditions de surface, évolution et vitesses ; réception des bords/stencil/refus.
 - [ ] **P3b** — ondes Airy profond/peu profond/intermédiaire, raffinements espace/temps,
   vitesse/surface/énergie/volume, contre-épreuves, reproductibilité.
@@ -84,3 +84,5 @@ sections S191 et dernier journal/index/file relus. Seuil2 % connu, aucune redema
 Les opérateurs de S191 à extension nulle ne représentent pas une surface physique.
 Choix de banc : potentiel incompressible irrotationnel linéarisé, domaine x-z fixe,
 Laplace discret et élévation libre évolutive. A217 non linéaire restera ouverte.
+P3a : trois tests debug/release passent. Premier test de débordement trop faible
+(MAX multiplié par 0,098 reste fini) corrigé avec état ψ négatif extrême ; aucun seuil assoupli.
