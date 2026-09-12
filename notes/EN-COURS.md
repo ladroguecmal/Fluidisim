@@ -58,32 +58,44 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S196 — terminée
+Session : S197 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
-Objectif : **A241** — le repli des harmoniques croisées sur les modes de train. S195 a
-mesuré que cette part décroît 4,85 fois moins vite que celle des modes propres au couplage
-et domine dès `n = 4`, si bien que la loi tombe **entre** les deux bornes dérivées sans
-qu'aucune ne l'encadre. Deux questions : le repli est-il bien la **cause**, et la loi
-tend-elle vers une **limite** quand `n` croît ?
+Objectif : **A242**. S196 a montré que la dérive d'énergie, employée comme critère de
+domaine par S193 à S196, ne détecte pas la sous-résolution — contre-exemple faux d'un
+facteur cinq passant 65× sous le seuil. Deux devoirs : **auditer** les configurations
+déjà publiées, à commencer par celles qui portent **ADR-123, actée** ; et **apparier**
+le critère dans les bancs, pour que la faute ne puisse plus se répéter.
 
 ### Plan
 
-- [x] **P1** — état réel, jeton et plan seuls.
-- [x] **P2** — protocole **avant tout code** : le montage de parité qui sépare le repli du
-      reste, ce qu'il contrôle et ce qu'il ne contrôle pas, les prédictions **falsifiables**
-      déclarées d'avance, la fraction de repli comme covariable mesurée, les réceptions.
-- [x] **P3a** — banc `nl_fallback_2d.rs` réutilisant `support/nl_surface.rs` sans le
-      modifier ; tests propres dont le **décompte de repli par construction** pour les trois
-      familles, le cas nul, et la continuité avec S195 au point `n=6` dense.
-- [x] **P3b** — campagne : axe « limite » sur la famille dense jusqu'à `n` grand, axe
-      « mécanisme » sur le couple pair/impair, convergence sous la forme de L274, bande
-      vérifiée par famille, deux exécutions identiques.
-- [x] **P4** — verdict sur A241 : le repli est-il la cause, la loi a-t-elle une limite.
-      Documenter, propager la file ; ADR seulement si une décision de projet est prise.
-- [x] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes, jeton
-      `libre`, copies avancées sans suppression non prouvée.
+- [>] **P1** — état réel, jeton et plan seuls.
+- [ ] **P2** — protocole **avant tout code** : ce que « loin du bord » veut dire et se
+      mesure, le classement des cibles par enjeu, ce qui compte comme échec — un chiffre
+      qui bouge n'est pas une conclusion qui tombe — et ce qu'on fera si une cible échoue.
+- [ ] **P3a** — apparier le critère : garde partagée qui **refuse** un ordre tiré d'un
+      triplet non monotone, et contrôle de raffinement ajouté à chaque banc publié.
+      Assertions de continuité sur les valeurs déjà publiées.
+- [ ] **P3b** — exécuter l'audit : S194/ADR-123 d'abord, puis S195 et S193. Relever les
+      marges et, pour ADR-123, l'effet sur ses **seuils** et non sur ses décimales.
+- [ ] **P4** — verdict par cible. Note corrective datée là où il en faut ; un ADR n'est
+      jamais réécrit, et une décision qui changerait demanderait un ADR neuf.
+- [ ] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes,
+      jeton `libre`, copies avancées sans suppression non prouvée.
 
 ### Notes de reprise
+
+S197 : master 21763ab propre, quatre copies alignées ; 123 ADR/242 angles/277 leçons.
+**Ce que l'audit vise, par enjeu décroissant.** (1) **ADR-123, actée** : ses seuils
+(`0,009` par train pour 2 %, 19,8 périodes) et son ajustement `α=1,302602`,
+`β=5,898728` sortent de `nl_coupling_2d` à **Q=16, K=64**, couple (2,3), 20 périodes,
+`dt=T₁/400`. (2) S195/A240 : l'exposant des `n` sources, `Q≤24, K=64`. (3) S193/ADR-122.
+**Repère de coût déjà connu** : le cas qui a cassé en S196 était `Q=38, K=32`, soit
+`k_max h = 239`. S194 tourne à `Q=16` → `k_max h = 100`, bien moins exigeant ; S195 à
+`Q≤24`. L'hypothèse de travail est donc que S194 est loin du bord — **à vérifier, pas à
+supposer**, c'est tout l'objet de la session.
+**Piège de lecture à tenir** : ADR-123 publie `α` à sept chiffres. Ce nombre **va**
+bouger avec `K` ; ce qui compte est si ses **seuils** bougent. Ne pas confondre « le
+chiffre se déplace » et « la conclusion tombe ».
 
 P5 S196 : rituel terminé. **123 ADR, 242 angles, 277 leçons, 18 invariants, 6 SPEC,
 23 cas**, vérifiés contre le dépôt. Workspace 331 réussis/cinq ignorés en debug et

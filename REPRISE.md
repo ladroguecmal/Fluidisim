@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-12 22:32 +02:00
+JETON            : occupé
+Battement        : 2026-09-12 22:38 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
-Session en cours : aucune
+Session en cours : S197 — A242 : audit de résolution des configurations publiées
 Dernière session : S196 — le repli pèse un tiers ; A241 requalifiée, A242 ouverte
-Session suivante : S197 — A242 : apparier les critères de conservation à un contrôle de raffinement ; puis A241 sur ses deux suspects
+Session suivante : à fixer au rituel de fin ; relire la file plurielle
 
 *S195 a **changé de main en cours de route** : la session ouverte à 21:15 a été coupée par
 une limite d'usage sur un autre compte, et l'utilisateur l'a signalé. Le jeton disait donc
