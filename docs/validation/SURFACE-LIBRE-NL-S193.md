@@ -331,11 +331,32 @@ publiée comme mesure de la contamination.
    **Pente en amplitude déclarée : 2.** Un écart décroissant comme `(ka)¹` signerait un
    modèle linéaire ; c'est la contre-épreuve `M=1`, qui doit la produire.
 2. **Décalage de fréquence** — `ω` ajusté par moindres carrés sur la phase déroulée du mode
-   fondamental `η̂₁` sur la fenêtre. En profondeur infinie, `(ω−ω₀)/ω₀` divisé par `½(ka)²`
-   doit tendre vers 1 ; **reçu si** l'écart à ce rapport est sous 2 % à la plus grande
-   amplitude utile, pour `M=3`. Pour `M=1`, la valeur doit être **exactement nulle**. Pour
-   `M=2`, la valeur est **publiée sans verdict** et la prédiction du §3.4 est confirmée ou
-   réfutée par écrit.
+   fondamental `η̂₁` sur la fenêtre. Le décalage relatif mesuré est comparé au décalage
+   relatif de référence tiré de la formule du §2.2 ; le rapport doit tendre vers 1.
+   **Reçu si** l'écart à 1 est sous 2 % à la plus grande amplitude utile, **en profondeur
+   infinie seulement** (§2.2). Pour `M=1`, le décalage doit être nul. Pour `M=2`, la valeur
+   est **publiée sans verdict** et la prédiction du §3.4 est confirmée ou réfutée par écrit.
+
+   > **Précision P3b, 2026-09-12 — la ligne de base du décalage est semi-discrète, pas
+   > continue, et ce n'est pas un détail de commodité.** Le candidat ne porte pas `ω₀=√(gk
+   > tanh kh)` mais `ω_d=√(g G_h(k))`, et `G_h` s'écarte de `k tanh(kh)` à l'ordre `dz²`.
+   > À `h=8 m`, `K=64`, l'écart relatif de fréquence qui en résulte vaut environ `8·10⁻⁴` —
+   > c'est-à-dire **16 % du décalage de Stokes à `ka=0,1` et dix fois le décalage entier à
+   > `ka=0,0125`**. Mesurer `(ω−ω₀)/ω₀` mesurerait donc surtout la discrétisation
+   > verticale. Le décalage est pris comme `(ω−ω_d)/ω_d`, et `ω_d` est **vérifiée
+   > empiriquement** par la ligne `M=1`, qui doit rendre un décalage nul à la précision du
+   > pas et de l'ajustement. Cette précision remplace la formulation « exactement nulle »
+   > pour `M=1` : un intégrateur RK4 a sa propre erreur de phase, et prétendre l'exactitude
+   > serait faux.
+   >
+   > **Deuxième précision, même origine.** Le second harmonique **libre** du candidat
+   > oscille à `√(g G_h(2k))`, pas à `√(2gk tanh 2kh)`. C'est la fréquence discrète qui est
+   > employée comme colonne libre de l'ajustement du §5.3.1, sans quoi la séparation lié /
+   > libre porterait un biais de discrétisation. Conséquence remarquable, et vérifiable :
+   > à `M=1` la totalité du contenu du mode 2 est **libre** — le profil de Stokes initial y
+   > est déposé puis oscille à sa propre fréquence linéaire — donc l'ajustement doit
+   > attribuer `b₂≈0` au terme lié, et c'est bien la signature annoncée au §3.4, obtenue
+   > par un mécanisme que la prédiction n'avait pas détaillé.
 3. **Convergence** — ordre en `K` et en `dt` estimé aux deux derniers raffinements, sur
    l'écart à la configuration la plus fine ; ordre `>1,5` en `K`, `>3` en `dt`.
 4. **Conservation** — dérive relative d'énergie sous `10⁻⁴` ; dérive de volume relevée et
@@ -380,3 +401,164 @@ comparaison perturbatif/total cessera d'être interdite faute de véhicule.
    bathymétrie variable reste entière : le fond est plat.
 7. **La surface reste un graphe** : ni déferlement, ni rouleau, ni air.
 8. **Aucune seconde cible** (A98), aucune mesure de coût CPU.
+
+## 7. Résultats exécutés — 2026-09-12
+
+**S192-1 réalisée : l'échelle des ordres rend les trois signatures prédites au §3.4.**
+Aucun seuil n'a été relâché, aucune valeur du protocole n'a été changée après mesure ;
+les deux précisions datées (§5.1, §5.3) ont été écrites avant l'exécution correspondante.
+Diagnostics d'ouverture : résidu de relèvement `2,220e-16`, écart à la forme fermée
+`1,835e-15`, jauge `ψ₀` nulle, défaut de réalité nul.
+
+### 7.1 L'échelle des ordres, en profondeur infinie (`kh = 6,2832`)
+
+| M | `b₂` mesuré / Stokes, `ka=0,0125 → 0,1` | décalage / Stokes | profil à `ka=0,05` |
+|---|---|---|---|
+| **1** | `3·10⁻⁹` à toute amplitude | `−5,072982e-10`, constant | **21,3470 %** |
+| **2** | `0,995269 → 1,002078` | **`0,491635 → 0,500401`** | 8,2041 % |
+| **3** | `0,995445 → 1,013655` | `0,997788 → 1,016454` | **0,3313 %** |
+
+Les trois prédictions du §3.4 sont **tenues**, et la plus exposée — celle de `M=2` — l'est
+de la façon la plus nette possible : le décalage y est **non nul et non conforme**, et il
+vaut la **moitié** du décalage de Stokes, à `0,5004` près sur toute la plage d'amplitude.
+La conclusion naïve « une troncature quadratique ne produit aucun décalage » est donc
+fausse, comme annoncé, et la part manquante est exactement la moitié du total.
+
+La colonne de profil mérite d'être lue seule : sur vingt périodes, contre l'onde de Stokes
+progressive, la même donnée initiale donne **21,3 %** d'erreur au modèle linéaire, **8,2 %**
+à l'ordre deux et **0,33 %** à l'ordre trois — un facteur **64** entre les deux extrêmes.
+Cette métrique est dominée par l'accumulation de **phase**, pas par la forme : c'est
+pourquoi elle sépare si franchement `M=2` de `M=3`, dont les profils instantanés sont
+presque identiques mais dont les fréquences diffèrent de moitié du décalage.
+
+**Réceptions numériques.** À `M=3` : écart de `b₂` à la plus petite amplitude
+**0,4555 %**, sous 2 % (ADR-120) ; écart du rapport de décalage à 1 à la plus grande
+amplitude utile **1,6454 %**, sous 2 %. À `M=1`, `b₂` est **absent** — `3·10⁻⁹` — et le
+décalage est nul à `5,07·10⁻¹⁰` près.
+
+**La pente en amplitude déclarée est confirmée, et sous une forme plus informative qu'une
+pente logarithmique.** L'écart de `b₂` à 1 s'ajuste par `c₀ + c₂(ka)²` avec un résidu de
+`2,667e-5` sur quatre amplitudes — c'est-à-dire que l'écart est **exactement** un plancher
+constant plus un terme d'ordre deux, ce qui *est* la pente 2 :
+
+| | `c₀` | `c₂` | résidu |
+|---|---|---|---|
+| `M=1`, `h=8` | `−0,999999997` | `0,000000` | `0` |
+| `M=2`, `h=8` | `−0,004843456` | `+0,692003` | `6,910e-6` |
+| `M=3`, `h=8` | `−0,004861316` | `+1,851035` | `2,667e-5` |
+| `M=3`, `h=2` | `−0,000053775` | `+1,603918` | `9,683e-5` |
+
+À `M=1`, `c₀=−1` et `c₂` **exactement nul** : l'harmonique liée est absente à toute
+amplitude, ce qui est la contre-épreuve principale du §5.4 sous sa forme la plus dure.
+Et `c₀` n'est pas un défaut de modèle : c'est le **plancher de discrétisation verticale**,
+identifié comme tel par l'axe `K` (§7.3), qui le fait décroître à l'ordre 2 vers zéro.
+
+### 7.2 Profondeur intermédiaire, et ce que la convention ne permet pas de conclure
+
+À `kh = 1,5708`, `M=3` : `b₂` de `1,000144` à `1,015963`, décalage de `1,000129` à
+`1,024117`. La formule d'ordre trois en profondeur finie du §2.2 est donc **reproduite à
+0,013 % près** à la plus petite amplitude. **Ce n'est pas une réception**, et ce n'est pas
+de la prudence rhétorique : §2.2 n'adopte pas cette formule parce que sa convention de
+courant moyen n'est pas déclarée, et un accord numérique ne fournit pas la convention
+manquante. Le chiffre est publié ; il oriente, il ne conclut pas.
+
+À `M=2`, le rapport y vaut `0,663` — de nouveau une fraction stable, mais **différente** du
+`0,5` du cas profond : la part de décalage qu'une troncature quadratique capture **dépend
+de la profondeur**, ce que rien n'annonçait. Une troncature d'ordre `M` n'a donc pas de
+« taux de fidélité » propre ; son défaut est fonction du régime.
+
+Contamination libre du second harmonique : `3,4·10⁻³` à `2,5·10⁻²` en profondeur infinie,
+mais **`0,300`** à `kh=1,5708` — conséquence directe et annoncée du §5.2, la trace `ψ`
+initiale omettant le potentiel d'ordre deux propre à la profondeur finie. L'ajustement à
+trois colonnes sépare cette onde libre de l'harmonique liée, et c'est ce qui rend `b₂`
+mesurable malgré une contamination de 30 %. À `M=1`, la part libre vaut `1,418` (`h=8`) et
+`1,000` (`h=2`) : **la totalité** du contenu du mode 2 y est libre, exactement le mécanisme
+annoncé par la précision du §5.3.
+
+### 7.3 Convergence, conservation, bande
+
+| axe | valeurs | ordre mesuré |
+|---|---|---|
+| `K = 16 / 32 / 64` | `c₀ = −0,082211 / −0,019723 / −0,004960` | **2,059489 / 1,991564** |
+| `dt = T/100 … T/800` | écarts `3,917e-6 / 2,424e-7 / 1,488e-8 / 8,690e-10` | **4,014525 / 4,025907 / 4,097844** |
+| `Q = 8 / 12 / 16` | `b₂ = 0,999810417`, décalage `1,000758196` | **identiques au bit** |
+
+L'axe `K` fait donc deux choses d'un coup : il donne l'ordre 2 attendu, et il **prouve** que
+le plancher `c₀` du §7.1 est de la discrétisation verticale et non du modèle. L'axe `dt`
+donne l'ordre 4 de RK4. Et la bande est **saturée dès `Q=8`** : l'élargir ne déplace pas un
+bit, ce qui vaut mieux qu'un écart sous 2 % et confirme que `Q` est un axe de vérification,
+pas de convergence (§4).
+
+Dérive relative d'énergie sur toute la campagne : **au plus `2,616146e-9`**, sous le `10⁻⁴`
+déclaré.
+
+> **Une prédiction du protocole était fausse, et la mesure a livré le mécanisme.** Le §4
+> annonçait une dérive de volume d'ordre `a^{M+1}`, « diagnostic de troncature », et
+> écrivait qu'annoncer le `1,46·10⁻¹⁶` de S192 « serait un aveu d'erreur ». La dérive
+> mesurée vaut **au plus `2,85·10⁻¹⁸`** normalisée par `La`, et **exactement zéro** à `M=1`.
+> C'est l'arrondi, pas la troncature. La raison est algébrique et tient en deux lignes : au
+> mode nul, `(η Bψ)₀ = Σ_p k_p² η_p ψ̄_p` et `(η_x ψ_x)₀ = Σ_p k_p² η_p ψ̄_p` sont **la même
+> somme**, si bien que les deux termes d'ordre deux de `η_t` s'annulent identiquement. Le
+> système tronqué conserve donc `∫η` **exactement** à `M=2`, et à l'arrondi près à `M=3`. Le
+> comptage d'ordres majorait ; la structure faisait mieux. La phrase du §4 est donc
+> **fausse** et reste écrite : c'est la prédiction qui a été prise, pas une rédaction à
+> corriger après coup.
+
+### 7.4 Faible profondeur : le verdict d'Ursell, mesuré
+
+`kh = 0,196350`, `b₂ = 101,646136`. Le §2.3 annonçait que ce cas n'est pas recevable contre
+Stokes à amplitude utile. Il l'est en revanche **à l'intérieur** du domaine, et il ne l'est
+plus du tout au-dehors :
+
+| `ka` | Ursell `U` | état | `b₂` mesuré / Stokes | décalage |
+|---|---|---|---|---|
+| `1·10⁻⁵` | `0,0522` | fini | **`1,000064`** | `4,48e-8` |
+| `2·10⁻⁵` | `0,1043` | fini | **`1,000059`** | `1,81e-7` |
+| `1,25·10⁻²` | `65,19` | fini | `0,472165` | `4,48e-2` |
+| `2,5·10⁻²` | `130,38` | fini | `0,004439` | `−0,514382` |
+| `5·10⁻²` | `260,76` | **divergence** | — | — |
+
+Deux lectures, et la seconde est la plus utile. **Le véhicule est juste en faible
+profondeur** — `b₂` à `6,4·10⁻⁵` près, sur un coefficient de Stokes de 101,6 — dès que
+l'amplitude respecte `U ≪ 1`, ce qui est vérifié ici jusqu'à `U ≤ 0,15`. Et **il ne se
+dégrade pas, il s'effondre** : à `U=65` le coefficient est faux d'un facteur 2, à `U=130`
+d'un facteur 225 avec un décalage de fréquence de `−51 %`, et à `U=261` l'état cesse d'être
+fini. La borne d'Ursell n'est donc pas une précaution de rédaction : c'est une falaise, et
+elle tombe exactement là où le §2.3 la plaçait — **aux amplitudes mêmes qu'un banc peu
+profond emploierait naturellement**.
+
+La divergence n'est **pas** une instabilité de pas : à `h=0,25`, `K=64`, la borne du §4
+vaut `dt √(g G_h(k_Q)) < 2,5` et le pas employé en est à `0,0967`. C'est le paramètre du
+développement qui a quitté son domaine, pas le schéma en temps.
+
+### 7.5 Contre-épreuves et reproductibilité
+
+| contre-épreuve | valeur | attendu |
+|---|---|---|
+| amplitude négligeable (`ka=10⁻⁶`), décalage | `−5,067931e-10` | rentre dans l'arrondi |
+| rappel de gravité inversé | `2,509031727` (250,9 %) | doit dépasser 2 % |
+| oracle Saint-Venant appliqué au profond | `1,506637016` (150,7 %) | doit dépasser 2 % |
+
+> **La contre-épreuve d'amplitude négligeable a servi, et c'est elle qui a trouvé le seul
+> défaut de la session.** Au premier passage elle rendait `−1,1125·10⁻⁷` au lieu de zéro —
+> soit **0,14 % du décalage à mesurer à la plus petite amplitude**, un biais que les lignes
+> principales auraient absorbé sans rien signaler. Sa cause n'était pas le schéma mais la
+> **condition initiale** : sa trace `ψ` était construite avec `ω₀` du continu alors que le
+> véhicule porte `ω_d`, ce qui rendait le mode fondamental légèrement **elliptique** au lieu
+> de circulaire, et une fenêtre non entière en cycles du modèle transformait cette
+> ellipticité en biais de pente. La signature était nette : le biais valait `1,1125·10⁻⁷` à
+> `h=8` et `6,928·10⁻⁹` à `h=2`, **rapport 16,1**, exactement le rapport des ellipticités
+> `(ω_d/ω₀−1)`. Correctif : construire l'état **et** la fenêtre sur `ω_d`. Le biais résiduel
+> vaut alors `−5,072982·10⁻¹⁰`, à comparer à l'erreur de phase de RK4 prédite
+> analytiquement, `ω(ωdt)⁴/120 = 5,07·10⁻¹⁰` — **le même nombre**. Le résidu de l'ajustement
+> de phase est passé de `2,125·10⁻⁴` à `5,951·10⁻¹⁴`. Aucun seuil n'a été touché.
+
+Deux exécutions `release` **identiques**, empreinte des indicateurs
+**`0x41fc3b13793bee10`**. Quatre tests propres réussis en `debug` **et** `release`. Cible
+`x86_64-pc-windows-msvc`, rustc 1.97.0 (2d8144b78), cargo 1.97.0 (c980f4866) ; pas de
+seconde cible, aucune mesure de coût CPU. Bibliothèque `water-core` inchangée : seuls
+`examples/nl_surface_2d.rs` et `examples/support/nl_surface.rs` sont ajoutés. Les 331 tests
+de l'espace de travail et leurs cinq ignorés restent le reçu S190, non rejoués ici.
+
+Code : `code/water-core/examples/nl_surface_2d.rs` et `support/nl_surface.rs`.
+[Sorties intégrales](SURFACE-LIBRE-NL-S193-MESURES.md).

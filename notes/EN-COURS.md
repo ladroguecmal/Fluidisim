@@ -76,7 +76,7 @@ non linéaire et dispersif (A217) ; aucune sélection de solveur δ, aucun seuil
 - [x] **P3a** — véhicule : support non linéaire (état spectral, réutilisation du
   relèvement, vitesse verticale à l'ordre M, RK4, projection de bande), tests propres
   dont **réduction exacte à S192 à M=1** et refus atomiques.
-- [ ] **P3b** — campagne : erreur de profil contre Stokes-2 en fonction de l'amplitude
+- [x] **P3b** — campagne : erreur de profil contre Stokes-2 en fonction de l'amplitude
   (pente déclarée), décalage de fréquence contre Stokes-3, profondeurs, raffinements
   espace/temps, contre-épreuves par l'échelle M, reproductibilité deux exécutions.
 - [ ] **P4** — documenter résultats, limites et suite ; propager A50/B4/A216/A217, file
@@ -124,4 +124,18 @@ residu de relevement 2,220e-16. Le volume derive **bien moins** que l'ordre de
 troncature ne l'exigeait : prediction du protocole conservatrice, a dire en P4.
 Parti pris retenu : etat spectral en bande, convolution tronquee, psi_0 jauge a zero
 (prouve inerte par un test), symbole horizontal exact donc K seul axe spatial.
+
+P3b : campagne executee, reception=true, empreinte 0x41fc3b13793bee10, deux
+executions release identiques, quatre tests debug/release. L'echelle M=1/2/3 rend
+les trois signatures predites. M=2 donne **exactement la moitie** du decalage de
+Stokes en profond et **0,663** en intermediaire : la part captee depend du regime.
+Volume conserve **exactement** a M=2 (annulation algebrique des deux termes d'ordre
+deux au mode nul) : prediction du protocole fausse, mecanisme publie. Ursell mesure
+comme une falaise, et le vehicule est juste en faible profondeur dans le domaine.
+Le contre-epreuve d'amplitude negligeable a trouve le seul defaut : condition
+initiale batie sur omega0 du continu au lieu de omega_d, mode elliptique, biais
+1,1e-7 (rapport 16,1 entre h=8 et h=2, = rapport des ellipticites). Corrige ;
+biais residuel -5,0730e-10 = erreur de phase RK4 predite analytiquement.
+Candidats P4 : angles morts (oracle absent en faible profondeur ; convention de
+courant moyen ; condition initiale du continu sur modele semi-discret) et lecons.
 
