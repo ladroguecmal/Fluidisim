@@ -83,7 +83,7 @@ seconde est la vraie :
       ce que le rejeu ne prouvera pas.
 - [x] **P3a** — sortir dans `support/` ce que S187 gardait local : les indices ancrés
       uniformes. Rejouer `graded_lattice` et vérifier `0x6cf13183b4a240df`.
-- [ ] **P3b** — écrire `anchored_composition.rs` : la grille de S186, réseau ancré, même
+- [x] **P3b** — écrire `anchored_composition.rs` : la grille de S186, réseau ancré, même
       référence, mêmes métriques. Réceptions : `14³` ancré = réseau plein en bits, la
       ligne `c = 1` redonne S187 §8.4, la ligne `r` plein redonne les `eU` temporelles de
       S186. Relever.
@@ -92,6 +92,69 @@ seconde est la vraie :
 - [ ] **P5** — rituel de fin (REPRISE.md §6).
 
 ### Notes de reprise
+
+P3b S188 : `examples/anchored_composition.rs`. Deux exécutions, `diff` identique hors
+lignes de cargo ; aucune durée mesurée. Empreinte **0x21bab548c7b9775c**. Workspace
+**331 réussis / cinq ignorés** en debug et en release.
+
+**Réceptions, les six passent.** (2) le réseau plein ancré rend la référence **en bits**
+pour les trois modes — l'ancré à 14 nœuds *est* `axis_indices(r=1)`, donc la coïncidence
+attendue est vérifiée et non supposée. (3) les vingt-et-une erreurs temporelles pures
+redonnent **exactement** S186 §6.2 et donc S185 : mnt c=2 0,7700, mnt c=64 33,2115,
+ext c=8 0,7754, int c=64 6,7740. (4) l'erreur spatiale à 8 nœuds par axe vaut **1,7160 %**,
+la valeur ancrée de S187 §8.4. (5) plancher 0,386 %, celui de S186. (1) et (6) plus haut.
+
+**LA LOI NE CHANGE PAS, MODE PAR MODE.** Verdict global : les trois lois rejetées
+(additive 0,468–0,984, quadratique 0,659–1,245, maximum 0,869–1,707), exactement comme
+S186. Par mode :
+
+| mode | additive | quadratique | maximum | retenue S188 | retenue S186 |
+|---|---|---|---|---|---|
+| maintien | 0,500–0,951 | 0,702–0,999 | **0,895–1,060** | maximum | maximum |
+| extrapolation | 0,468–0,941 | 0,659–0,998 | **0,869–1,000** | maximum | maximum |
+| interpolation | **0,845–0,984** | **1,017–1,245** | 1,018–1,707 | additive, quadratique | additive, quadratique |
+
+Et **mieux satisfaite** qu'en S186 : la plage du maximum se resserre de 0,826–1,155 à
+0,895–1,060 pour le maintien, et de 0,860–1,034 à 0,869–1,000 pour l'extrapolation.
+L'erreur concentrée du réseau débordant rendait la composition **plus bruyante**, pas plus
+propre. Aux cadences hautes la loi est **exacte** : mnt/ext à `c = 64` rendent 33,2115 et
+27,3202, les valeurs temporelles pures, rapport 1,000 aux trois lignes.
+
+**Et la métrique ajoutée dit pourquoi.** La tranche qui porte le maximum est **14** dans
+tous les cas — spatial seul, temporel seul, et les 84 cases composées. Compte publié :
+**39 cases jugées sur 39 où les deux maxima vivent sur la même tranche.** L'ancrage a
+changé la **magnitude** de l'erreur spatiale, pas **l'endroit** de son maximum : le champ
+lui-même culmine en haut du bloc, parce que c'est là que `|S|` est le plus grand, et aucun
+réseau n'y change rien. C'est la première des trois issues déclarées en §4 — *la loi
+tient* — et la colonne de tranche montre qu'elle tient pour **la même** raison.
+
+**Les magnitudes, elles, bougent beaucoup.** Erreur spatiale seule, à nombre de nœuds
+identique :
+
+| ligne | nœuds | ancré | débordant (S186) | facteur |
+|---|---:|---:|---:|---:|
+| r=1 | 2744 | 0 | 0 | — |
+| r=2 | 512 | **1,7160 %** | 2,5401 % | 1,48 |
+| r=4 | 125 | **3,6805 %** | 13,6043 % | **3,70** |
+| r=8 | 27 | **13,1488 %** | 32,9593 % | 2,51 |
+
+Deux lectures utiles. **Mesurée, sans interpolation : 27 nœuds ancrés (13,1488 %) valent
+125 nœuds débordants (13,6043 %) — même erreur pour 4,6 fois moins de nœuds.** Et le point
+de parité entre les deux axes se déplace : à 125 nœuds, l'erreur spatiale débordante 13,60 %
+égalait le maintien vers `c ≈ 20` ; ancrée à 3,68 %, elle l'égale vers `c ≈ 6`. **La règle
+de dimensionnement de S186 §8.5 tient, son point d'application se déplace d'un facteur ~3.**
+Conséquence de conception : sur un réseau ancré, l'optimum va vers **plus** de décimation
+spatiale et **moins** de réduction de cadence.
+
+Indices ancrés obtenus, à noter parce qu'ils ne sont pas ceux qu'on poserait à la main :
+14 → [1..14] ; 8 → [1,3,5,7,8,10,12,14] ; 5 → [1,4,8,11,14] ; 3 → [1,8,14]. L'arrondi au
+plus proche produit un pas irrégulier (7→8 puis 8→10) ; c'est le prix de l'accrochage aux
+centres de mailles, et il est visible plutôt que lissé.
+
+**Ce qui n'est pas mesuré** : la composition sur un réseau **gradué** — celui qui répartit
+vraiment l'erreur, puisque S187 y relevait une tranche haute à zéro. C'est la seule
+configuration où les deux maxima pourraient cesser de coïncider, et c'est donc le seul
+endroit où la loi resterait à éprouver.
 
 P3a S188 : `anchored_indices(n, want)` posée dans `support/perturbative_block.rs` ;
 `graded_lattice` y pointe et rend **0x6cf13183b4a240df**, sa valeur publiée. Les deux
