@@ -67,10 +67,10 @@ S170 avait explicitement refusé de conclure là-dessus ; S183 fournit le chiffr
 
 ### Plan
 
-- [>] **P1** — état réel, jeton et plan seul.
-- [ ] **P2** — publier le protocole **avant** tout chiffre : le véhicule, ce qui est
+- [x] **P1** — état réel, jeton et plan seul.
+- [x] **P2** — publier le protocole **avant** tout chiffre : le véhicule, ce qui est
       chronométré, la grille de décimation, et ce qu'un pas sans projection ne prouve pas.
-- [ ] **P3** — écrire le véhicule `perturbative_step` : pas explicite sur un bloc 3D,
+- [>] **P3** — écrire le véhicule `perturbative_step` : pas explicite sur un bloc 3D,
       avec et sans source, source par maille puis décimée. Recevoir la consommation
       (valeurs finies, chemin exercé, témoin direct) et relever les coûts.
 - [ ] **P4** — chiffrer ce que la décimation achète, et dire ce que la part mesurée
