@@ -19,11 +19,19 @@ souvenir de conversation, **c'est lui qui fait foi**.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-12 21:15 +02:00
-Agent            : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
+Battement        : 2026-09-12 21:32 +02:00
+Agent            : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles) — **reprise**
 Session en cours : S195 — S194-1 : `n` sources, l'option tranchée par l'utilisateur
 Dernière session : S194 — couplage de deux trains mesuré, A217 close, ADR-123
 Session suivante : à fixer au rituel de fin ; relire la file plurielle
+
+*S195 a **changé de main en cours de route** : la session ouverte à 21:15 a été coupée par
+une limite d'usage sur un autre compte, et l'utilisateur l'a signalé. Le jeton disait donc
+`occupé` avec un battement de dix-sept minutes — le cas que le seuil de deux heures ne sait
+pas trancher, et que seul un humain pouvait lever (REPRISE.md §7). P3a était complète sur le
+disque mais non committée ; ses tests passant, elle a été **complétée** et non annulée,
+comme l'exige la procédure de EN-COURS.md. Le numéro de session ne change pas : c'est la
+même session, pas S196.*
 
 *S183 à S189 ont travaillé dans la **copie principale**, sur `master` : aucune copie isolée
 ouverte, donc rien à refermer (AGENTS.md). Les trois worktrees ont été **avancés sur master**

@@ -73,10 +73,10 @@ contre la correction croisée quadratique, qui reste portée par la file active.
   prédictions **opposées**, les deux séries (cambrure totale fixée, cambrure par train
   fixée), exigence de bande, jeux de phases déterministes, réceptions chiffrées dont la
   **continuité avec S194** et la convergence sous la forme exigée par **L274**.
-- [ ] **P3a** — banc `nl_sources_2d.rs` réutilisant `support/nl_surface.rs` sans le
+- [x] **P3a** — banc `nl_sources_2d.rs` réutilisant `support/nl_surface.rs` sans le
   modifier ; tests propres dont `n=1` à écart exactement nul, `M=1` à écart d'arrondi, et
   reproduction du point `n=2` de S194.
-- [ ] **P3b** — campagne : les deux séries × deux jeux de phases × `n = 2..6`, séparation
+- [>] **P3b** — campagne : les deux séries × deux jeux de phases × `n = 2..6`, séparation
   des mécanismes par la **durée**, convergence en `K` (ordre + Richardson), empreinte et
   deux exécutions identiques.
 - [ ] **P4** — documenter, propager A240/A50/B4 et la file ; ADR seulement si une décision
@@ -85,6 +85,15 @@ contre la correction croisée quadratique, qui reste portée par la file active.
   jeton `libre`, copies avancées sans suppression non prouvée.
 
 ### Notes de reprise
+
+**Reprise du 2026-09-12 21:32 — la session a changé de main.** La session ouverte à 21:15
+a été coupée par une limite d'usage sur un autre compte ; l'utilisateur l'a dit, sans quoi
+le battement récent aurait interdit la reprise. `nl_sources_2d.rs` était sur le disque,
+non committé : c'est l'étape P3a. Diff lu, exemple compilé, **neuf tests passent**, dont
+`single_source_gap_is_exactly_zero` (cas nul, L271), `linear_order_superposes_for_six_sources`
+(la réception `M=1`) et `two_sources_reproduce_s194` (la continuité déclarée au protocole).
+Étape donc **complétée**, pas annulée. Workspace 331 réussis/cinq ignorés. Rien d'autre
+n'était en suspens. Reste P3b, P4, P5.
 
 Hérité : véhicule `NlSurface` de S193 (bande spectrale, convolution tronquée, `M=3` par
 ADR-122) et banc de couplage de S194 (`nl_coupling_2d.rs`, trois évolutions en parallèle,
