@@ -4424,3 +4424,38 @@ session refera le même raisonnement.
 Même famille que L273 — une prédiction se mesure avant d'être commentée — dont c'est le
 versant causal : L273 portait sur un ordre de grandeur prédit, L275 porte sur un mécanisme
 désigné.
+
+## L276 — Une variable de protocole peut être réfutée par le véhicule avant d'être mesurée
+
+*(S195)* Le protocole de S195 désignait le **jeu de phases initial** comme la variable qui
+décide du régime d'addition, et l'écrivait en gras : *« une variable du protocole, pas un
+détail de mise en œuvre »*. Trois réceptions sur dix en dépendaient, dont la principale. La
+dérivation qui la soutenait était juste — les deux bornes, somme des amplitudes et racine de
+la somme des carrés, sont les bonnes.
+
+Elle était fausse sur le chemin qui y mène, et le véhicule le disait déjà. Chaque train
+avance à **sa propre pulsation** : sur une fenêtre de dix périodes, les phases relatives
+balaient toutes leurs valeurs, et une fonctionnelle qui prend un maximum sur l'espace *et sur
+le temps* échantillonne les deux régimes quel que soit le départ. L'alignement initial ne
+survit pas à la première période. Ce qui sépare réellement les régimes est la **fonctionnelle**
+— le maximum tend vers la borne cohérente, la norme L2 vaut la racine de la somme des carrés
+par construction.
+
+Le fait décisif n'a demandé ni campagne ni analyse : un seul point à `n=6`, deux jeux de
+phases, et le rapport valait `0,774` au lieu du `3,87` prédit. Il a été trouvé en écrivant les
+**tests propres** du banc, avant toute mesure — et fixé là, en test, plutôt que découvert dans
+une table à la fin.
+
+Écrire les contrôles de vie d'un banc **avant** la campagne, et y inclure au moins un point
+qui éprouve la variable dont le protocole fait dépendre sa conclusion principale. Une variable
+de protocole n'est pas une hypothèse physique : c'est une affirmation sur ce que le véhicule
+va faire, et le véhicule peut la contredire pour quelques lignes de test. Trois réceptions
+mal spécifiées coûtent une campagne entière quand on l'apprend à la fin ; elles ne coûtent
+qu'une note quand on l'apprend au début.
+
+Corollaire, et il vaut pour la lecture des sessions précédentes : quand une réception échoue,
+séparer d'abord **mauvaise spécification** et **défaut de banc**. Ici les sept réceptions
+indépendantes de la prémisse de phase passent toutes — cas nul exact, continuité avec S194 à
+`10⁻⁶`, convergence, bande, énergie. Le banc n'avait rien. Le protocole, si.
+
+Voir SOURCES-MULTIPLES-S195 §7.1 et §7.3, et A241 pour ce que la réfutation a ouvert.

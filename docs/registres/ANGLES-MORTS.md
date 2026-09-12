@@ -2597,7 +2597,7 @@ présent essai. Le dispositif reste à éprouver.
   corriger, non un résultat faux ; la mesure de S194 a été refaite dans la bonne forme dans
   la même session.
 
-- **A240** *(sévérité 2, S194 ; ouverte)* — **Deux trains ne sont pas `n` sources, et le
+- **A240** *(sévérité 2, S194 ; **close en S195**)* — **Deux trains ne sont pas `n` sources, et le
   nombre de paires croît comme `n²`.** ADR-123 chiffre le domaine de la superposition pour
   **deux** trains : sous 2 % en dessous d'une cambrure de `0,009` par train, fautif avant
   une période au-delà de `0,014`. Le chemin perturbatif du projet additionne en revanche
@@ -2674,3 +2674,35 @@ déclencheurs : forces/perception, A213, λ_cut/B2/coupure W–δ, A98 multiplat
 restants, A94/A95 dossier de réunions. Aucun chantier latéral déclaré clos par le présent
 essai, et la suite est **à instruire** entre deux options — `n` sources ou la correction
 croisée — plutôt qu'imposée par proximité.
+
+**Clôture A240 — S195 : mesurée sur `n = 2..6`, et la crainte est levée dans son ordre.**
+[SOURCES-MULTIPLES-S195](../validation/SOURCES-MULTIPLES-S195.md), empreinte
+`0x5eb378f6ffe26c9f`. Des trois régimes qu'A240 disait concevables, **aucun** n'est celui qui
+sort : à cambrure **par train** fixée l'écart croît en `n^0,75` — sous-linéaire, donc très loin
+du `n²` du comptage de paires et sous le `n` de l'addition cohérente ; à cambrure **totale**
+fixée il **décroît** en `1/√n`, si bien que répartir une même mer sur plus de composantes
+*améliore* la superposition. A240 avait raison sur le comptage et tort sur la conséquence, et
+la mesure va plus loin que la dérivation : même le régime cohérent était pessimiste.
+**ADR-123 se transporte donc à `n` sources dans le sens favorable**, avec les limites de la
+mesure : `n ≤ 6`, trains colinéaires, fond plat, eau profonde. Sept réceptions sur dix passent,
+dont le cas nul exact, la continuité avec S194 à `10⁻⁶`, la convergence d'ordre 1,756 à résidu
+de Richardson 0,892 %, et une bande neutre à `0,0000 %`. **A240 est close** ; ce qu'elle
+laisse ouvert est repris en **A241**.
+
+- **A241** *(sévérité 2, S195 ; ouverte)* — **Les harmoniques croisées retombent sur les modes
+  des trains, et c'est cette part-là qui gouverne la loi à grand `n`.** Les deux régimes
+  d'addition classiques — somme des amplitudes, racine de la somme des carrés — supposent
+  tous deux que l'écart vit sur des nombres d'onde **propres au couplage**. Il n'en vit
+  qu'une part. Mesuré en série A, phases alignées, de `n=2` à `n=6` : la part portée par les
+  modes exclusivement croisés chute d'un facteur **6,8**, celle portée par les modes de train
+  d'un facteur **1,4** seulement — un écart de **4,85** entre les deux vitesses. La seconde
+  domine dès `n = 4`, et c'est elle qui maintient la loi mesurée (`n^-0,46` en série A,
+  `n^0,75` en série B) **entre** les deux bornes dérivées, qu'aucune n'encadre. Ce qui rend
+  l'angle sérieux : sur un spectre dense, *tous* les modes croisés retombent sur des modes
+  existants, si bien que le régime mesuré ici sur six trains est le régime **naissant**, pas
+  une exception. On ne sait donc pas si la loi tend vers une limite quand le spectre se
+  peuple, ou si `n ≤ 6` en donne une image trompeuse — et c'est exactement ce qu'il faudrait
+  savoir avant de promettre quoi que ce soit sur un état de mer complet. Ce qui le borne : le
+  banc existe, le diagnostic modal est disponible (contrairement à ce que S195 §2.4 avait
+  annoncé), et la mesure demande d'étendre `n` et de densifier la bande, pas de construire.
+  Aucune décision de projet n'en dépend aujourd'hui ; aucune promesse de spectre non plus.

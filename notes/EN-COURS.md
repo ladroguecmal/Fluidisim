@@ -79,12 +79,19 @@ contre la correction croisée quadratique, qui reste portée par la file active.
 - [x] **P3b** — campagne : les deux séries × deux jeux de phases × `n = 2..6`, séparation
   des mécanismes par la **durée**, convergence en `K` (ordre + Richardson), empreinte et
   deux exécutions identiques.
-- [>] **P4** — documenter, propager A240/A50/B4 et la file ; ADR seulement si une décision
+- [x] **P4** — documenter, propager A240/A50/B4 et la file ; ADR seulement si une décision
   de projet est prise ; ne **pas** dériver de seuil de bascule W/δ.
-- [ ] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes,
+- [>] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes,
   jeton `libre`, copies avancées sans suppression non prouvée.
 
 ### Notes de reprise
+
+P4 S195 : SOURCES-MULTIPLES-S195 §7–§9 reçus. **A240 close**, **A241** ouverte (le repli
+des harmoniques croisées sur les modes de train gouverne la loi à grand n), **L276**
+écrite (une variable de protocole peut être réfutée par le véhicule avant d'être mesurée).
+**Aucun ADR** : ADR-123 se transporte dans le sens favorable, rien ne change de contrat.
+Décomptes à porter en P5 : **123 ADR, 241 angles, 276 leçons, 18 invariants, 6 SPEC,
+23 cas**. Les trois corrections de protocole de P3a sont publiées au §7.1, non réécrites.
 
 P3b S195 : campagne exécutée, **empreinte 0x5eb378f6ffe26c9f**, deux exécutions
 identiques ligne pour ligne. **Sept réceptions sur dix passent** : 1, 2, 3 (tests),

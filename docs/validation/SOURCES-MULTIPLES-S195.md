@@ -214,3 +214,202 @@ de phases. ADR-123 saura s'il se transporte à `n` sources ou non.
    perception ne sont pas reçues, aucun solveur δ n'est choisi.
 6. **Aucun contrat runtime** : `f64`, allocations de banc, `water-core` et le support S193
    inchangés. Aucune seconde cible (A98), aucune mesure de coût CPU.
+
+## 7. Relevés
+
+`cargo run --release --manifest-path code/Cargo.toml -p water-core --example nl_sources_2d`
+
+Empreinte **`0x5eb378f6ffe26c9f`**, deux exécutions `release` identiques ligne pour ligne.
+`water-core` et `support/nl_surface.rs` inchangés ; workspace **331 réussis / cinq ignorés**,
+et les **neuf** tests propres du banc passent.
+
+> **Cette session a changé de main.** La session ouverte à 21:15 a été coupée par une limite
+> d'usage sur un autre compte, P3a terminée sur le disque mais non committée. La procédure de
+> `notes/EN-COURS.md` a été suivie : diff lu, banc compilé, tests passants, étape **complétée**
+> plutôt qu'annulée. Le numéro de session ne change pas.
+
+### 7.1 Trois corrections contre ce protocole, portées par P3a avant toute campagne
+
+Elles sont dans le banc, chacune fixée par un test. Aucune n'est réécrite ci-dessus.
+
+1. **§2.4 annonçait la disparition des modes exclusivement croisés** quand `n` croît, et donc
+   l'indisponibilité du diagnostic modal. **Faux** : avec les modes `2..7` il en survit deux ou
+   trois à tout `n` — `{1,5}` à `n=2`, `{1,11,13}` à `n=6`. Le diagnostic modal reste
+   disponible et **s'ajoute** à la séparation par la durée au lieu de la remplacer.
+2. **§5, réception 3, exigeait « bit pour bit, toléré à 10⁻¹² »** pour la continuité avec
+   S194. **Invérifiable en l'état** : S194 publie sept chiffres significatifs et son banc est
+   un exemple, pas un module importable. La continuité est donc contrôlée à la précision
+   publiée, `10⁻⁶` relatif — décisif pour « la construction est inchangée », insuffisant pour
+   affirmer l'identité binaire, et cela est dit plutôt que tu.
+3. **§2.1 faisait du jeu de phases initial la variable qui décide du régime.** C'est la
+   correction qui compte, et elle est développée au §7.3.
+
+### 7.2 Campagne, série A et série B
+
+`Q=24`, `K=64`, `M=3`, `dt=T₁/400`, 10 périodes, `h=8 m`. Écarts rapportés à `A`.
+
+| série | phases | n | max | L2 | croisé | train | N10/N1 | modes | énergie |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| A | alignées | 2 | 2,4694e-2 | 7,2878e-3 | 1,417e-2 | 5,326e-3 | 1,4144 | 2 | 1,5e-9 |
+| A | alignées | 3 | 2,1217e-2 | 6,1625e-3 | 8,411e-3 | 3,740e-3 | 1,0906 | 3 | 2,3e-9 |
+| A | alignées | 4 | 2,0547e-2 | 5,4356e-3 | 6,812e-3 | 6,000e-3 | 1,0451 | 2 | 3,3e-9 |
+| A | alignées | 5 | 1,9610e-2 | 4,8138e-3 | 4,927e-3 | 4,002e-3 | 1,0000 | 3 | 4,5e-9 |
+| A | alignées | 6 | 1,9413e-2 | 4,2688e-3 | 2,080e-3 | 3,792e-3 | 1,0000 | 3 | 6,0e-9 |
+| A | dispersées | 2 | 2,2980e-2 | 7,3390e-3 | 1,417e-2 | 5,327e-3 | 1,2967 | 2 | 1,5e-9 |
+| A | dispersées | 6 | 2,5074e-2 | 4,5070e-3 | 2,081e-3 | 3,856e-3 | 1,0000 | 3 | 6,1e-9 |
+| B | alignées | 2 | 1,4786e-2 | 4,6794e-3 | 9,441e-3 | 2,364e-3 | 1,2925 | 2 | 1,5e-9 |
+| B | alignées | 6 | 4,4562e-2 | 1,0319e-2 | 4,220e-3 | 8,970e-3 | 1,1038 | 3 | 6,0e-9 |
+| B | dispersées | 2 | 1,4050e-2 | 4,7029e-3 | 9,441e-3 | 2,364e-3 | 1,2106 | 2 | 1,5e-9 |
+| B | dispersées | 6 | 5,2699e-2 | 1,1068e-2 | 4,323e-3 | 1,001e-2 | 1,0000 | 3 | 6,3e-9 |
+
+*Les `n` intermédiaires des séries A dispersées et B sont dans la sortie du banc ; seuls les
+points extrêmes sont repris ici, la monotonie étant vérifiée sur toute la suite.*
+
+**Aucune configuration hors domaine** : la dérive relative d'énergie va de `1,5e-9` à `6,3e-9`,
+quatre à cinq ordres sous le `10⁻⁴` exigé.
+
+### 7.3 La réception principale échoue, et pour une raison qui se démontre
+
+| série | fonctionnelle | phases alignées | phases dispersées | cohérent attendu | dispersé attendu |
+|---|---|---:|---:|---:|---:|
+| A | max | 0,7861 | 1,0911 | 1,6667 | 0,4303 |
+| A | L2 | 0,5857 | 0,6141 | 1,6667 | 0,4303 |
+| B | max | 3,0138 | 3,7509 | 5,0000 | 1,2910 |
+| B | L2 | 2,2052 | 2,3535 | 5,0000 | 1,2910 |
+
+**Réceptions 4, 5 et 6 échouent.** La 4 exigeait `1,667` en alignées et `0,431` en dispersées,
+à ±25 %, et un facteur supérieur à 2 entre les deux : les deux jeux de phases ne diffèrent que
+d'un facteur **1,39** sur le maximum et **1,05** sur la L2. La 5 exigeait une croissance en
+alignées et une décroissance en dispersées : la L2 **décroît dans les deux**, et le maximum ne
+suit ni l'une ni l'autre. La 6 exigeait `5,0` et `1,29` à ±30 % : mesuré 3,01 à 3,75.
+
+**Elles échouent par mauvaise spécification, pas par défaut de banc**, et la distinction n'est
+pas une consolation : les sept réceptions qui ne dépendent pas de la prémisse de phase passent
+toutes, dont la continuité avec S194 à `10⁻⁶`, le cas nul exact, la convergence et la bande.
+
+Le §2.1 tenait que le jeu de phases **initial** décide du régime. Il ne le peut pas, et la
+raison est dans le véhicule lui-même : **chaque train avance à sa propre pulsation**. Sur une
+fenêtre de dix périodes, les phases relatives balaient toutes leurs valeurs, et un maximum pris
+sur `x` **et sur le temps** échantillonne donc les deux régimes quel que soit le départ.
+L'alignement initial ne survit pas à la première période.
+
+Ce qui sépare réellement les deux régimes est la **fonctionnelle** :
+
+- le **maximum** sur `x` et `t` tend vers la borne cohérente, puisqu'il finit par trouver
+  l'instant où les harmoniques croisées culminent ensemble ;
+- la **norme L2** en espace et en temps vaut la racine de la somme des carrés *par
+  construction*, les harmoniques croisées vivant sur des nombres d'onde distincts.
+
+La dérivation du §2.1 était donc juste sur les deux bornes et fausse sur la variable qui y
+conduit. C'est une erreur de protocole, pas de physique, et elle est conservée telle quelle
+au-dessus.
+
+### 7.4 Ce que la loi est réellement
+
+Ajustement en puissance sur `n = 2..6`, moindres carrés en log-log :
+
+| série | fonctionnelle L2 | exposant mesuré | rapport 6/2 |
+|---|---|---:|---:|
+| A, cambrure totale fixée | alignées | **−0,479** | 0,586 |
+| A | dispersées | **−0,437** | 0,614 |
+| B, cambrure par train fixée | alignées | **+0,727** | 2,205 |
+| B | dispersées | **+0,783** | 2,354 |
+
+La série A décroît en `n^-0,46 ≈ 1/√n` là où le régime dispersé prédisait `≈ 1/n` et le régime
+cohérent une constante. La série B croît en `n^0,75`, entre le `√n` dispersé et le `n` cohérent.
+**Aucune des deux lois dérivées n'est reproduite** ; la mesure tombe entre elles, des deux côtés.
+
+**Le mécanisme que la dérivation a manqué** est lisible dans les colonnes `croisé` et `train`.
+Le §2.4 l'avait entrevu sans en tirer la conséquence : les sommes et différences `kᵢ±kⱼ`
+tombent en partie sur des **modes de train**. La dérivation supposait implicitement que tout
+l'écart vivait sur des modes propres au couplage ; il n'en vit qu'une part, et cette part
+décroît beaucoup plus vite que l'autre. Série A, phases alignées, de `n=2` à `n=6` :
+
+- part sur les modes **exclusivement croisés** : `1,417e-2 → 2,080e-3`, soit **÷6,8** ;
+- part sur les modes **de train** : `5,326e-3 → 3,792e-3`, soit **÷1,4**.
+
+Un facteur **4,85** entre les deux vitesses de chute. À `n` croissant, la seconde domine, et
+c'est elle qui soutient la loi au-dessus de la prédiction dispersée. Le maximum sature pour la
+même raison.
+
+### 7.5 Dilution séculaire, convergence, bande
+
+**Réception 7 — passe, et nettement.** En série A, `écart(N=10)/écart(N=1)` décroît de
+`1,4144` à `1,0000` en alignées et de `1,2967` à `1,0000` en dispersées. La valeur `1,0000`
+n'est pas un arrondi : à `n ≥ 5` le maximum de la fenêtre est atteint **dès la première
+période**, et la croissance séculaire a entièrement disparu. La prédiction du §2.4 — la part
+séculaire par train se dilue en `(n−1)/n²` — est donc confirmée dans son sens, et au-delà de
+sa lettre.
+
+**Réception 9 — passe.** Trois niveaux de `K`, sur la moyenne quadratique (A238), sous la forme
+qu'impose **L274** :
+
+| K | L2 | énergie |
+|---:|---:|---:|
+| 32 | 5,030690532e-3 | 3,8e-9 |
+| 64 | 5,428173150e-3 | 3,3e-9 |
+| 128 | 5,545832201e-3 | 3,2e-9 |
+
+**ordre 1,756** (exigé dans `[1,5 ; 2,5]`), **résidu de Richardson 0,892 %** à `K=64` (exigé
+sous 2 %).
+
+**Réception 10 — passe.** `Q=32` déplace le maximum de `2,422318e-2` à `2,422319e-2`, soit
+**0,0000 %**. La bande est large, et c'était le but : elle vérifie, elle ne converge pas.
+
+## 8. Ce qui est reçu, et ce qui ne l'est pas
+
+**Reçu.**
+
+1. **A240 reçoit sa réponse, et elle est rassurante sans être celle qu'on attendait.** À
+   cambrure par train fixée — la crainte d'A240 — l'écart croît en `n^0,75`, **sous-linéaire**.
+   Loin du `n²` que le comptage des paires suggérait, et sous le `n` du régime cohérent.
+   A240 avait raison sur le comptage, tort sur la conséquence, et la dérivation du protocole
+   l'avait déjà dit ; la mesure ajoute que même le régime cohérent est pessimiste.
+2. **À cambrure totale fixée, répartir une même mer sur plus de composantes réduit l'écart**,
+   en `1/√n`, dans les deux jeux de phases. Ce n'est pas neutre pour le choix d'un nombre de
+   composantes : ADR-099 le tranchait sur la dispersion de `Hs` et le coût, sans savoir ce que
+   la superposition en pensait.
+3. **Le jeu de phases initial ne décide de rien** sur une fenêtre de plusieurs périodes ; la
+   **fonctionnelle** décide. Le maximum tend vers la borne cohérente, la L2 vaut la racine de
+   la somme des carrés. C'est l'inverse de ce que le protocole déclarait.
+4. **L'écart ne vit pas seulement sur des modes propres au couplage.** La part qui retombe sur
+   les modes de train décroît 4,85 fois moins vite, et c'est elle qui gouverne le
+   comportement à grand `n`.
+5. **La croissance séculaire disparaît** quand `n` croît : à `n ≥ 5`, le maximum est atteint
+   dès la première période.
+6. **Le banc est sain** : cas nul exact, `M=1` exact à `10⁻¹⁴`, continuité avec S194 à
+   `10⁻⁶`, convergence d'ordre 1,76 à résidu 0,9 %, bande neutre à `0,0000 %`, énergie
+   conservée à `6e-9`, empreinte reproduite.
+
+**Non reçu.**
+
+- **Trois réceptions sur dix ont échoué**, et leur échec ne vaut rien contre le banc : elles
+  supposaient que le jeu de phases trancherait, ce que P3a avait réfuté avant la campagne.
+  Elles restent écrites au §5, non réécrites, et leur réfutation est au §7.3.
+- **Les lois dérivées ne sont pas reproduites.** Les exposants mesurés tombent entre les deux
+  bornes, et l'ajustement ne les explique pas : le mécanisme du §7.4 les qualifie, il ne les
+  dérive pas. Une dérivation qui tienne compte du repli des modes croisés sur les modes de
+  train reste à faire.
+- **Six trains ne sont pas un spectre.** La loi mesurée sur `n ≤ 6` est une tendance ; un état
+  de mer réel compte des centaines de composantes, et rien n'autorise à extrapoler.
+- **Un seul jeu de phases dispersées**, déterministe : la valeur « dispersée » est un point,
+  pas une moyenne d'ensemble — ce qui importe d'autant moins que les phases ne tranchent pas.
+- **Une dimension horizontale, trains colinéaires, fond plat, eau profonde.** L'obliquité
+  reste entière, et S194 a montré que le couplage est 8,6 fois plus fort vers le rivage.
+- **Aucun contrat runtime, aucun seuil de bascule W/δ, aucun solveur δ choisi.** `f64`,
+  allocations de banc, `water-core` et le support S193 inchangés.
+
+## 9. Suite
+
+**ADR-123 se transporte à `n` sources dans le sens favorable.** Son domaine, établi pour deux
+trains, n'est pas dégradé par l'addition de sources à cambrure totale constante — il
+s'améliore en `1/√n`. À cambrure par train constante il se dégrade, mais en `n^0,75` et non en
+`n²`. **A240 peut être close** sur ce constat, en gardant ses limites : `n ≤ 6`, colinéaire,
+eau profonde.
+
+Ce que la session laisse ouvert et qui mérite un porteur : **la dérivation du repli**. Les
+harmoniques croisées qui retombent sur des modes de train ne sont pas un détail de banc — elles
+gouvernent la loi à grand `n`, et aucune des deux bornes classiques ne les décrit. Sur un
+spectre dense, *tous* les modes croisés retombent sur des modes existants ; la question est
+donc de savoir si la loi mesurée ici tend vers quelque chose, ou si `n ≤ 6` en donne une image
+trompeuse.
