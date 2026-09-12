@@ -4561,3 +4561,44 @@ auteur peut la faire seul.
 Corollaire pour tout garde-fou déjà en place : vérifier qu'il **mesure** son effet et pas
 seulement sa présence. A211 était « à éprouver » depuis S145 et personne ne l'avait éprouvée,
 faute d'un chiffre à regarder. Il en coûtait une commande `git` et vingt lignes de script.
+
+## L280 — Une scène inspectée n'est pas reçue tant qu'elle n'a pas traversé le chemin qui la consommera
+
+*(S203)* S201 a rendu la mer de référence — JONSWAP, Hs 1,5 m — et l'a inspectée : caméra,
+intersections, zéro rayon non résolu, deux instants. Deux sessions plus tard, la première
+tentative d'y poser un impact découvre, **avant d'écrire une ligne de rendu**, que la
+composition B+W refuse chaque point de cette mer : son plancher de pente L1 vaut 0,608 contre
+une limite de 0,449. L'image était juste ; elle n'avait jamais été demandée au chemin qui
+compose.
+
+Le défaut n'était pas dans le rendu, ni dans la composition, ni même dans le budget de pente
+pris seul : il était dans leur **rencontre**, que personne n'avait provoquée. Chaque couche
+avait sa réception, et aucune réception ne portait sur la scène que toutes deux prétendent
+servir. Un corpus de réceptions par couche peut ainsi être complet et laisser le premier cas
+d'usage impossible.
+
+Le geste, et il coûte une commande : **dès qu'un chemin de consommation existe, y faire
+passer la scène de référence**, même sans rien lui ajouter. Ici, un journal vide et un appel à
+`compose` sur un point auraient suffi en S201. Et quand un budget indépendant du point est en
+jeu, calculer son plancher sur la scène **avant** de choisir les paramètres visibles : c'est
+un nombre, pas une campagne. Voir IMPACT-W-S203 §2 et A245.
+
+## L281 — Un domaine tronqué se reçoit à sa frontière, pas à son admission
+
+*(S203)* Le domaine d'un impact radial avait trois gardes — résolution, portée, régime — et
+chacune dit ce que le **calcul** tolère. Aucune ne disait ce qui se **voit** quand l'hôte rend
+le fond seul au-delà du disque ou après l'horizon. Mesurée, cette couture vaut 78 mm à un
+horizon de 2 s, et reste au-dessus de 3 mm jusqu'à 48 s pour tout rayon et tout nombre de
+modes : un champ linéaire dispersif s'étale, il ne s'éteint pas. L'admission acceptait
+8 m et 4 s ; l'image demande 52 m et 56 s.
+
+Ce qui généralise : **tout champ tronqué dans l'espace ou le temps** — domaine δ, niveau de
+détail, emprise, fenêtre de repli — a deux réceptions distinctes. L'admission répond à « le
+calcul est-il valide ici ? » ; la couture répond à « l'observateur voit-il où il s'arrête ? ».
+La seconde ne se déduit pas de la première, et c'est elle qui dimensionne.
+
+Le geste : pour chaque troncature, mesurer l'amplitude **sur** la frontière pendant toute la
+vie du domaine, et l'amplitude **dans** le domaine à l'instant où il disparaît ; déclarer le
+seuil avant. Et recevoir l'image contre un **témoin** qui exécute exactement la même marche
+avec le même prédicat de domaine : un pixel différent hors domaine est alors une preuve de
+fuite, pas une impression. Voir ADR-126, IMPACT-W-S203 §4–5 et A246.

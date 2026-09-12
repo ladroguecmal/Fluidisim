@@ -2839,3 +2839,39 @@ avec absence d'allocation et invariance du résultat ; **ce n'est pas le respect
 budget temporel**. A244 demeure partielle pour I-05 et pression f64. Profil utilisateur
 60Hz/eau2ms acté ADR-125 ; bloc64×32 convergé dépasse seul ce budget. Aucun autre
 contrat reçu par le seul chronométrage.
+
+- **A245** *(sévérité 1, S203 ; ouverte)* — **Le budget de pente de la composition refuse la mer
+  de référence avant tout impact.** `compose` somme `steepness_B·π = Σ aᵢkᵢ`, borne L1 du fond,
+  et la compare à π/7. ADR-094 et ADR-095 la tenaient pour la pente **exacte** de B, marge 1 :
+  c'est faux dès que les directions s'écartent. Recette JONSWAP de S201 à Hs 1,5 m : L1 0,6082,
+  majorant directionnel démontré 0,5733, pente échantillonnée 0,4215 (512 m, 120 s) — marge
+  ≥ 1,061 et ≤ 1,443. **Chaque point de toute composition B+W est refusé**, et même le
+  majorant directionnel refuse ; marge nulle à Hs ≈ 1,107 m pour cette recette. I-18
+  (« ce qui est comparé à `max_slope` est une pente réelle ») n'est donc pas tenu pour le terme
+  de B, et sa garde exécutable ne pouvait pas le voir : elle recense des **sites** de
+  comparaison, pas les **termes** sommés. Personne ne l'avait vu parce que l'image S201
+  n'évaluait que B. Gravité 1 : un impact ou un sillage W est impossible sur une mer modérée.
+  Remèdes à instruire, aucun choisi : terme directionnel (5,7 %, insuffisant seul), pente
+  réelle **au point** (connue depuis S144, mais le budget cesse d'être indépendant du point),
+  ou borne statistique (ne garantit rien). Lot bibliothèque, change des bits et des frontières.
+  Voir IMPACT-W-S203 §2, notes correctives ADR-062/094/095, L280.
+
+- **A246** *(sévérité 2, S203 ; traitée par ADR-126)* — **L'emprise d'un impact était
+  dimensionnée par son admission, jamais par ce qui se voit à sa frontière.** Les gardes de
+  `RadialImpact` (résolution, portée, régime) admettent R 8 m / A 4 s ; hors emprise l'hôte rend
+  B seul, et la couture temporelle vaut alors 78 mm à 2 s, encore 3,25 mm à 48 s, indépendamment
+  de N. Au critère de 2 %, l'image demande R ≥ 15,5 λ, A ≥ 96·√(λ/g), N ≥ 256 — et place
+  l'observateur S201 **dans** l'emprise. Ni ADR-060, ni ADR-066, ni ADR-085, ni ADR-105 ne
+  posaient la question. ADR-126 fixe la réception par coutures et le profil ; restent ouverts le
+  seuil perceptuel, le renouvellement d'horizon et plusieurs impacts. Voir IMPACT-W-S203 §4, L281.
+
+- **A247** *(sévérité 2, S203 ; ouverte)* — **Un impact visible coûte à lui seul plus que le
+  budget eau d'une image.** Mesuré sur ce CPU, un fil : B seul 1,6 µs par point (≈ 1 250 points
+  dans 2 ms), B+W N256 14 µs par point (≈ 140 points). La table radiale η(r), η'(r) rend le point
+  à 15 ns avec une erreur ≤ 0,006 mm, mais sa **construction** coûte 2,7 ms par image pour **un**
+  impact — N×M échantillons, au-delà des 2 ms d'ADR-125 — et croît linéairement avec le nombre
+  d'impacts. Aucun `paquets_W_max` n'a été confronté à ce budget. ADR-125 écartait déjà le
+  renderer CPU comme chemin de production ; ce qui est neuf, c'est que le **champ** lui-même,
+  évalué sur CPU, ne tient pas non plus. Leviers non mesurés : pas de table élargi, N réduit
+  loin des coutures, parallélisme, évaluation GPU des phases repliées (I-08). Voir
+  IMPACT-W-S203 §7.

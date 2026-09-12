@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 01:18 +02:00
+JETON            : libre
+Battement        : 2026-09-13 01:23 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S203 — impact visible porté par W, emprise et observateur (S202-1)
-Dernière session : S202 — profil60Hz eau2ms ; coût par domaine mesuré, ADR-125
-Session suivante : S203 — S202-1 : impact visible W, emprise et observateur ; ADR-124
-Maillons        : 0 — S202 avance le code δ, compteur à zéro (§6.8)
+Session en cours : aucune
+Dernière session : S203 — impact W visible, emprise par coutures (ADR-126) ; A245 trouvée
+Session suivante : S204 — A245 : composition B+W sur mer Hs > 1,1 m (file active, code src)
+Maillons        : 0 — ADR-126 fixe un élément de W (§6.8) ; l'outil, qui ne voit que le code, dirait 1
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 
@@ -139,10 +139,12 @@ une session ne peut signaler sa présence qu'en travaillant.
 
 ---
 
-## File active du projet — S202
+## File active du projet — S203
 
-**S202 : B visible, budget60Hz/eau2ms fixé et coût du domaine δ mesuré. Prochain lot impact W visible puis effets δ bornés/V au besoin. S200-1/A244 est reportée ;
-S199-2 garde le défaut des flux ouverts. Les acquis S194 ci-dessous restent datés ;
+**S203 : impact W visible dans une emprise reçue par ses coutures (ADR-126). Prochain lot
+A245 — la composition B+W refuse toute mer au-delà de Hs≈1,1 m, dont celle de S201 — puis
+A247 (coût d'un impact visible contre 2 ms) et choix de l'effet δ d'impact. V au besoin
+gameplay. S200-1/A244 et S199-2 restent reportées. Les acquis S194 ci-dessous restent datés ;
 la file liée porte aussi leurs suivis S195–S199.**
 
 **Tolérance B4 fixée à 2 % par l'utilisateur (ADR-120).** Elle ne doit plus être
@@ -222,7 +224,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 125 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 126 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -241,6 +243,23 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S203 — 2026-09-13 : un impact W visible, ADR-126 ; la mer S201 n'est pas composable.**
+Constat d'amorce, avant tout code : plancher de pente L1 de B 0,6082 à Hs1,5 > π/7 —
+`compose` refuse chaque point de la mer S201 ; le majorant directionnel démontré (0,5733)
+refuse encore, la pente échantillonnée vaut 0,4215. ADR-062/094/095 tenaient ce terme pour
+exact : notes correctives datées, **A245** gravité1, I-18 non tenu pour B. Scène à Hs0,5.
+Impact λ3,35 m/E164 J, budget de pente d'impact = π/7 − plancher de B.
+**ADR-126 actée** : emprise d'image reçue par ses deux coutures (spatiale ≈1/R, temporelle
+78 mm à 2 s → 2,80 mm à 56 s) ; R ≥ 15,5 λ, A ≥ 96√(λ/g), N ≥ 256, N512 recommandé.
+Images +1/+3/+6 s contre témoin à marche identique : **zéro pixel différent hors emprise**.
+L'observateur S201 est dans l'emprise ; λ sous 2 px le long de la visée dès 67 m.
+Coût CPU un fil : B 1,6 µs/pt, B+W 14 µs/pt, table radiale 2,7 ms/impact (**A247**).
+Bibliothèque inchangée, onze tests exemple, S201 reproduite au bit après extraction ;
+workspace rejoué **343 réussis / cinq ignorés**.
+**Suite S204 : A245**, composition B+W sur mer Hs>1,1 m ; puis A247 et effet δ d'impact.
+126 ADR,247 angles,281 leçons,18 invariants,6 SPEC,23 cas ; compteur0 (ADR-126 fixe W).
+Voir [impact W S203](docs/validation/IMPACT-W-S203.md), [ADR-126](docs/adr/ADR-126-emprise-d-un-impact-visible.md).
 
 **S202 — 2026-09-13 : budget60 images/s, eau2 ms par image, ADR-125.**
 Choix explicite utilisateur. `cost_per_block_ms` branché sur le pas complet via
@@ -315,15 +334,20 @@ attrapé trois erreurs en trois sessions, ni la qualité du travail sur W.
 
 ### Les quatre couches — l'état qui commande tout le reste
 
-**Recalculé le 2026-09-13 en S202 par `sh outils/velocite.sh`. Ne pas le recopier : le relancer.**
+**Recalculé le 2026-09-13 en S203 par `sh outils/velocite.sh`. Ne pas le recopier : le relancer.**
 Un état sans date se lit au présent, et il ne l'est plus (A185).
 
-| couche | modules | dernière avancée | depuis |
+| couche | modules | dernière avancée (code) | depuis |
 |---|---:|---|---:|
-| **B** — fond | 3 | S181 | 21 sessions |
-| **W** — perturbations | 23 | S181 | 21 sessions |
-| **δ** — volumique | 5 *(dont noyau à projection non encore admissible)* | **S202** | **0 session** |
-| **V** — réseaux | **0** | **jamais** | **202 sessions** |
+| **B** — fond | 3 | S181 | 22 sessions |
+| **W** — perturbations | 23 | S181 *(décision : ADR-126, S203)* | 22 sessions |
+| **δ** — volumique | 5 *(dont noyau à projection non encore admissible)* | **S202** | **1 session** |
+| **V** — réseaux | **0** | **jamais** | **203 sessions** |
+
+*S203 : l'outil ne voit que le code, et S203 n'en a ajouté aucun dans `src` ; ADR-126 est
+une décision qui fixe un élément de W, ce qui remet le compteur à zéro selon §6.8 comme
+ADR-124 l'avait fait en S201. Chaînage mesuré : 37 sessions sur 44 depuis S160, S203 comprise.
+Part système de l'ère S190–S199 : 6,9 %.*
 
 *« Avancer » a un sens mesurable et un seul : **ajouter du code d'exécution** dans
 `code/*/src`, ou **acter une décision** qui fixe un élément de la couche. Un banc, un

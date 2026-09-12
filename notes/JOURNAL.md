@@ -10569,3 +10569,50 @@ A244 suivie sans clôture ; aucun angle/leçon distincts.125 ADR/244 angles/279 
 coût séparée du temps de simulation, aucune autorité nouvelle. Compteur0 : code δ
 avancé. Journal/index/README/REPRISE, B3/B4 et file actualisés ; copies à synchroniser
 après clôture. Images S201 conservées, aucune image nouvelle nécessaire dans ce lot.
+
+## S203 — 2026-09-13 — Un impact W devient visible, et la mer de référence n'était pas composable
+
+**Entrée.** Claude Code (Opus 5), démarrage à froid, jeton libre une minute après S202 (Codex).
+Trois copies isolées à e13d212 propres, aucun travail concurrent. S202-1 sous ADR-124/125 :
+impact porté par W, emprise et observateur explicites. Plan seul 05b1f92. Compteur 0.
+
+**Constat d'amorce, avant tout code.** Crate jetable hors dépôt : le plancher de pente L1
+de B sur la recette S201 vaut 0,6082 à Hs 1,5 contre π/7 = 0,4488. `compose` refuse chaque
+point de la mer S201 avant tout impact. Majorant directionnel démontré 0,5733 (refuse encore),
+pente échantillonnée 0,4215. ADR-094/095 tenaient ce terme pour exact : notes correctives
+datées, A245 gravité 1, I-18 non tenu pour B, garde aveugle aux termes. Scène passée à
+Hs 0,5 m, dit comme choix de banc.
+
+**Construction.** `render_impact.rs`, exemple seul, bibliothèque inchangée. Impact par
+`impact_generator` (b 1 m, v 8 m/s, fraction 0,005 à calibrer B2 → λ 3,35 m, E 164 J), budget
+de pente alloué π/7 − plancher. Coutures d'emprise mesurées (critère déclaré avant : 3 mm et
+2 % du pic 0,15482 m) : temporelle 78 mm à 2 s → 2,80 mm à 56 s, indépendante de N ; spatiale
+≈ 1/R, 3,06 mm à 50 m. Premier passant N256 R52 A56 ; accord N512 à 0,1 µm ; homothétie λ×2 à
+0,019 point. Caméra/marche S201 extraites dans `support/ray_view.rs`, empreinte S201 reproduite
+au bit. Rendu B+W par `Prepared::sample_world_batch` contre un témoin à marche identique.
+
+**Réception.** +1/+3/+6 s : zéro non résolu, zéro refus, 6 780/8 640/15 737 px différents,
+**zéro hors emprise** ; anneaux visibles, reflet déformé à +6 s. Observateur : λ 11 px le long
+de la visée au point d'impact, sous 2 px dès 67 m ; l'observateur est dans l'emprise en plan
+(boîte englobante fausse retirée avant publication). Coût : B 1,6 µs/pt, B+W 14 µs/pt
+(≈ 140 pts dans 2 ms) ; table radiale Hermite ≤ 0,006 mm mais 2,7 ms de construction pour un
+impact (A247). Part non portée par W nommée : 32,6 kJ hors ondes, Fr 1,81, balistique
+3,26 m / 1,63 s, δ SPEC-001 §2.4 à 1,15 M cellules, aucun coût transposé. Onze tests exemple.
+
+**Décision durable : ADR-126 actée.** Une emprise d'image se reçoit par ses deux coutures ;
+R ≥ 15,5 λ, A ≥ 96·√(λ/g), N ≥ 256 (N512 recommandé) au critère 2 % ; budget de pente d'impact
+= ce que B laisse ; réception au pixel contre témoin. Valeurs suffisantes, pas minima.
+
+**Non fait.** Aucune migration du terme de B ; aucun δ ; renouvellement d'horizon non examiné ;
+un impact, une énergie, une recette ; aucun seuil perceptuel. Workspace **rejoué** en fin de
+session : 343 réussis / cinq ignorés (246+4+93), identique à S202 ; avertissement ancien du
+support `nl_surface` inchangé.
+
+**Suite S204 : A245**, rendre la composition B+W possible sur une mer de Hs > 1,1 m — lot
+bibliothèque qui fait avancer la composition B+W (code dans `src`), puis A247 et le choix de
+l'effet δ d'impact (cavité eulérienne ou gerbe particulaire). V attend un besoin gameplay.
+
+**Rituel.** File active entière relue : S202-1 close, A245/A247 ajoutées, autres lignes
+conservées. A246 traitée par ADR-126. L280, L281. 126 ADR, 247 angles, 281 leçons,
+18 invariants, 6 SPEC, 23 cas. Compteur 0 : ADR-126 fixe un élément de W (§4). I-18 relu :
+l'invariant est juste, le terme de B l'enfreint — rien à amender, un code à corriger.

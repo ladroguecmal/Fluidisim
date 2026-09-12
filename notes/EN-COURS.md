@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S203 — en cours
+Session : S203 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : S202-1 (ADR-124 étape 3, ADR-125) — rendre visible un **impact porté par W**,
 avec **emprise** (rayon, horizon, N) et **observateur** (caméra) explicites et mesurés ;
@@ -96,7 +96,7 @@ Le lot ne migre pas ce terme (bits changés, lot propre) ; il le chiffre et le s
  bornés, comparée au coût S202 ; aucun δ construit.
 - [x] **P6** — publication `IMPACT-W-S203` (+ mesures) ; note corrective datée ADR-094 si
  le facteur de B est confirmé > 1 ; ADR seulement si une règle d'emprise est retenue.
-- [ ] **P7** — rituel §6 complet : journal, angles morts, leçons, index/README/REPRISE,
+- [x] **P7** — rituel §6 complet : journal, angles morts, leçons, index/README/REPRISE,
  décomptes, `outils/velocite.sh`, file active entière, compteur, jeton libre, copies.
 
 ### Notes de reprise
@@ -199,3 +199,10 @@ ADR-094, ADR-095 et note S139 d'ADR-062 : `steepness_B·π` n'est pas la pente e
 à plusieurs directions. Angles à écrire au rituel : A245 (plancher B refuse Hs > 1,107 m),
 A246 (emprise dimensionnée par admission, jamais par couture), A247 (coût d'un impact
 visible contre 2 ms ; B seul 1,6 µs/pt). Décomptes attendus : 126 ADR, 247 angles.
+
+P7 : journal, A245–A247, L280–L281, index/README/REPRISE (§4, file, §3), file active
+(A245, A247, S202-1 réalisée ; autres lignes relues, conservées). velocite.sh : B/W S181 en
+code, δ S202, V jamais ; chaînage 37/44 ; part système S190–S199 6,9 %. Décomptes vérifiés
+126 ADR / 247 angles / 281 leçons / 18 invariants / 6 SPEC / 23 cas. Workspace rejoué
+343/cinq ignorés. I-18 relu : juste, enfreint par le terme de B (A245). Compteur 0 par
+ADR-126 (l'outil dirait 1 : pas de code src). Jeton libre ; copies à avancer après commit.

@@ -17,6 +17,20 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S203 — 2026-09-13 : un impact W visible, ADR-126 ; la mer S201 n'est pas composable.**
+Constat d'amorce : plancher de pente L1 de B 0,6082 à Hs1,5 > π/7 — `compose` refuse
+chaque point de la mer S201 ; majorant directionnel 0,5733 refuse encore, pente
+échantillonnée 0,4215. ADR-062/094/095 corrigés (note datée), **A245** gravité1, I-18 non
+tenu pour B. Scène à Hs0,5 : impact λ3,35 m/E164 J, budget de pente = π/7 − plancher.
+Coutures d'emprise : temporelle 78 mm (2 s) → 2,80 mm (56 s), spatiale ≈1/R.
+**ADR-126** : emprise d'image reçue par ses coutures, R ≥ 15,5 λ, A ≥ 96√(λ/g), N ≥ 256.
+Images +1/+3/+6 s contre témoin : zéro non résolu, zéro refus, **zéro pixel hors emprise**.
+Coût : B 1,6 µs/pt, B+W 14 µs/pt, table radiale 2,7 ms/impact (**A247**) contre 2 ms.
+Bibliothèque inchangée ; onze tests exemple ; S201 reproduite au bit après extraction.
+**Suite S204 : A245**, composition B+W sur mer Hs>1,1 m (lot bibliothèque).
+126 ADR,247 angles,281 leçons,18 invariants,6 SPEC,23 cas ; compteur0 (ADR-126, W).
+Voir [impact W S203](validation/IMPACT-W-S203.md), [mesures](validation/IMPACT-W-S203-MESURES.md), [ADR-126](adr/ADR-126-emprise-d-un-impact-visible.md).
+
 **S202 — 2026-09-13 : budget60 images/s, eau2 ms par image, ADR-125.**
 Choix explicite utilisateur. `cost_per_block_ms` branché sur le pas complet via
 horloge injectée ; inconnu avant mesure, aucune allocation ni physique modifiée.
@@ -1305,7 +1319,7 @@ parfaitement stable ne pouvait pas distinguer.
 
 ## État d'avancement
 
-**État actif S202** : B visible, profil60Hz/eau2ms fixé (ADR-125), coût par domaine δ exposé, prochaine étape impact W visible. Critère B4 fixé à2 %, noyau δ sans allocation dans le pas,
+**État actif S203** : impact W visible dans une emprise reçue par ses coutures (ADR-126) ; la composition B+W refuse toute mer au-delà de Hs≈1,1 m (A245, prochaine étape) ; un impact visible coûte plus que 2 ms sur CPU (A247). B visible, profil60Hz/eau2ms fixé (ADR-125), coût par domaine δ exposé. Critère B4 fixé à2 %, noyau δ sans allocation dans le pas,
 refus numériques atomiques reçus ; A244 partielle (précision/budget), fond coupé
 inchangé, B3 non admissible. Domaine de superposition S194 confirmé S197.
 B1/B2/B4 restent partiels, aucun banc complet. Voir le résultat en tête de cet index

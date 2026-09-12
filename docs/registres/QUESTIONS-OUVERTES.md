@@ -1670,7 +1670,7 @@ entrée par entrée. Le fil reprend ci-dessous.
 
 ## File active
 
-Relue en S202, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+Relue en S203, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
 
 *Renommée de « File active S190 » en S193 : le contenu est daté ligne par ligne, le titre
 suivait un numéro de session et vieillissait seul (A185 — un état sans date se lit au
@@ -1687,7 +1687,9 @@ action unique et doit être relue au rituel de fin (A211).
 
 | action / objet | état daté et ce qui reste | priorité / déclencheur |
 |---|---|---|
-| **S202-1 / effet borné visible** | **S202 : S201-1 réalisée**,60 images/s eau2ms décidés (ADR-125) et coût par domaine δ branché. Référence image CPU hors temps réel, aucun bloc reçu physiquement | **S203 : impact visible porté par W**, emprise et observateur nommés ; déterminer la part nécessitant δ, V au besoin gameplay |
+| **A245 / composition B+W sur mer réelle** | **S203 : ouverte, gravité 1.** Plancher de pente L1 de B 0,6082 à Hs 1,5 (recette S201) > π/7 : `compose` refuse chaque point ; majorant directionnel 0,5733 refuse encore, pente échantillonnée 0,4215. I-18 non tenu pour le terme de B ; ADR-062/094/095 corrigés par note | **S204 : lot bibliothèque**, fait avancer la composition B+W. Instruire terme directionnel, pente réelle au point (S144) ou borne statistique ; change des bits et des frontières d'admission |
+| **A247 / coût d'un impact visible** | **S203 : ouverte.** B 1,6 µs/pt, B+W N256 14 µs/pt (≈140 pts dans 2 ms), table radiale Hermite ≤0,006 mm mais 2,7 ms de construction par impact ; aucun `paquets_W_max` confronté à ADR-125 | après A245 ; leviers non mesurés : pas de table, N hors coutures, parallélisme, phases GPU (I-08) |
+| **S202-1 / effet borné visible — réalisée** | **S203 : réalisée.** Impact W visible (λ3,35 m, E164 J, Hs0,5), emprise reçue par coutures (ADR-126 : R ≥ 15,5 λ, A ≥ 96√(λ/g), N ≥ 256), zéro pixel hors emprise contre témoin ; part non portée par W nommée (32,6 kJ, Fr1,81, balistique 3,26 m/1,63 s) sans δ construit | effet δ d'impact à choisir après A245 : cavité eulérienne (SPEC-001 §2.4, 1,15 M cellules) ou gerbe particulaire (SPEC-002 §1) ; V au besoin gameplay |
 | **S200-1 / A244 — B3 / δ** | **S200 : S199-1 partielle**, zéro allocation globale du pas et refus numériques atomiques reçus, capacités restreintes ;342 tests/cinq ignorés. S202 : coût du pas mesuré, mais pression f64 expérimentale et respect du budget temporel restent hors contrat de production | reportée derrière ADR-124 ; à recevoir si un effet borné retient le noyau, sans convertir arbitrairement itérations en ms |
 | **A241 / repli — reporté** | **S197** : suspect réfuté, la totalité de l'écart reste sans cause | deux candidats nommés (bande relative, termes triples), sous contrainte **L278** ; **n'avance aucune couche**, donc passe après B3/δ |
 | **S199-2 / B3 / δ — fond coupé** | **S199** : ordre1,947 plat,0,898 lisse,0,895 marche ; candidat non éligible. Fonctionnelle non pondérée par les ouvertures ; mécanisme de face à isoler | reportée derrière budget image ; requise si un effet retenu emploie ces faces coupées |

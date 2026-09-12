@@ -704,3 +704,12 @@ Rendu CPU S201 hors ligne, aucun budget GPU reçu.2 % physique reste acquis.
 δ éventuellement nécessaire ; V au besoin gameplay selon ADR-124.
 125 ADR,244 angles,279 leçons,18 invariants,6 SPEC,23 cas ; compteur0 (δ avance).
 Voir [budget image S202](docs/validation/BUDGET-IMAGE-S202.md), [ADR-125](docs/adr/ADR-125-budget-image-60hz-deux-ms.md).
+
+**S203 — 2026-09-13 : un impact W visible, ADR-126 ; la mer S201 n'est pas composable.**
+Plancher de pente L1 de B 0,6082 à Hs1,5 > π/7 : `compose` refuse chaque point de la mer
+S201 (A245, gravité1 ; ADR-062/094/095 corrigés par note datée). Scène à Hs0,5, impact
+λ3,35 m/E164 J. ADR-126 : emprise d'image reçue par ses coutures, R ≥ 15,5 λ,
+A ≥ 96√(λ/g), N ≥ 256. Images +1/+3/+6 s : zéro pixel différent hors emprise.
+Coût B+W 14 µs/pt, table radiale 2,7 ms/impact contre 2 ms (A247). Bibliothèque inchangée.
+**Suite S204 : A245.** 126 ADR,247 angles,281 leçons,18 invariants,6 SPEC,23 cas.
+Voir [impact W S203](docs/validation/IMPACT-W-S203.md), [ADR-126](docs/adr/ADR-126-emprise-d-un-impact-visible.md).

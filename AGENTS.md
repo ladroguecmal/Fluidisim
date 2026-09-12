@@ -90,7 +90,7 @@ fournisseur : il repose sur des fichiers versionnés et sur `git`. Trois précis
 |---|---|
 | **lire et écrire les fichiers** du dépôt | le travail *est* les fichiers |
 | **exécuter `git`** | l'amorce, les commits d'étape, la détection de fork |
-| **exécuter `cargo`** *(souhaitable)* | vérifier que `code/` compile et que les 95 tests passent |
+| **exécuter `cargo`** *(souhaitable)* | vérifier que `code/` compile et que la suite de tests passe *(décompte au journal, pas ici : il se périme — S203)* |
 
 **Si l'un des trois te manque, dis-le dans ton premier message et n'ouvre pas de session.** Une
 session qui ne peut pas committer ses étapes ne laisse aucune trace d'intention, et c'est
