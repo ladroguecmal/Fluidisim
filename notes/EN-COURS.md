@@ -67,7 +67,7 @@ Airy et raffinement. Première étape physique, pas réception non linéaire B4.
 ### Plan
 
 - [x] **P1** — reprise/état réel, master58e41bc propre, trois copies à jour ; jeton/plan seul.
-- [ ] **P2** — équations, discrétisation x-z, opérateur de surface et protocole avant mesure.
+- [x] **P2** — équations, discrétisation x-z, opérateur de surface et protocole avant mesure.
 - [ ] **P3a** — véhicule potentiel 2D : relèvement elliptique réellement discrétisé,
   conditions de surface, évolution et vitesses ; réception des bords/stencil/refus.
 - [ ] **P3b** — ondes Airy profond/peu profond/intermédiaire, raffinements espace/temps,
