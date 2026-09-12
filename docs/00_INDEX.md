@@ -17,6 +17,32 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S187 :** [RESEAU-GRADUE-S187](validation/RESEAU-GRADUE-S187.md),
+[ADR-118](adr/ADR-118-le-reseau-d-echantillonnage-ancre-et-gradue.md), **actée** — premier
+ADR depuis S181. **La session cherchait la graduation ; elle a trouvé l'ancrage, qui vaut
+cinq fois plus.** Le réseau du dépôt posait son dernier nœud **hors** du bloc (indice 17,
+`z = −0,05 m`, quand les mailles s'arrêtent à 14) : la tranche qui porte intégralement le
+maximum (S186) était interpolée sur 2 m au lieu d'être échantillonnée. À nœuds verticaux
+**égaux** : **41,2 % contre 6,8 %** à trois nœuds, 13,6 contre 2,5 à cinq, 2,54 contre 1,69
+à huit — facteurs **6,07 / 5,34 / 1,50**, et **gratuits**. La graduation dérivée ne vaut
+**1,04 / 1,42 / 1,00** par-dessus, tout en battant deux témoins naïfs (1,79 % contre 2,55 %
+uniforme et 3,44 % géométrique, à nœuds égaux). Mécanisme mesuré : la métrique est un
+**maximum**, un nœud posé là où il vit supprime le terme dominant — **contre-épreuve
+horizontale** −2,5 % / −40 % / **+1,3 %**, non monotone, donc ce n'est pas l'ancrage en soi.
+L'axe vertical domine l'horizontal de 1,6 à 3,4 fois, et l'erreur **sature** sur l'axe le
+plus grossier : six nœuds verticaux suffisent à `rh = 2`, quatre à 4, trois à 8. Gains à
+erreur égale : **−37,5 %** de nœuds (et −29 % d'erreur) contre l'isotrope `r = 2`,
+**−78,4 %** contre `r = 4`, erreur **÷ 2,44** à nœuds identiques contre `r = 8`.
+**A231** (le débordement du réseau) et **L267** (une campagne à convention fixée mesure la
+convention). Note corrective datée dans **SPEC-004 §6.2** : `dx ≤ λ_cut/N` est nécessaire et
+insuffisante, une densité ne dit rien du placement. Six réceptions ; empreinte
+`0x6cf13183b4a240df` ; support historique intact, `cadence_error` et `composed_error`
+inchangés. Workspace 331 réussis/cinq ignorés en debug et release.
+118 ADR,231 angles,267 leçons,18 invariants,6 SPEC,23 cas. **A231** et **L267**.
+**Suite S188 : S187-1**, ancrer le réseau et **rejouer la composition de S186** dessus : les
+magnitudes ont changé jusqu'à six fois, et la loi avait été mesurée sur une erreur concentrée
+que la graduation répartit. A50/B4 partiels.
+
 **S186 :** [COMPOSITION-ERREURS-S186](validation/COMPOSITION-ERREURS-S186.md), aucun ADR.
 **Les deux erreurs sont composées sur un seul véhicule, et la loi dépend du mode de
 réemploi** : **maximum** pour le maintien (0,826–1,155) et l'extrapolation (0,860–1,034),
@@ -907,7 +933,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`registres/BILAN-S69.md`](registres/BILAN-S69.md) | **bilan d'avancement** — ~85 % comme corpus de conception, **~15 % comme système** ; **onze cas sur 23 et onze bancs sur onze attendent une couche non écrite** ; **B1 est le seul banc exécutable et n'a jamais été lancé** |
 | [`registres/PRESCRIPTIONS-S63.md`](registres/PRESCRIPTIONS-S63.md) | **les prescriptions non éprouvées** — trois genres, dont un seul se vérifie ; **trois recettes mises à l'épreuve, trois fautives** ; les préalables de B2 périmés depuis quarante sessions (**A185**) |
 | [`registres/AUDIT-REFERENCES-S62.md`](registres/AUDIT-REFERENCES-S62.md) | **ce qu'une référence peut voir bouger** — 41 références, trois degrés, **une seule tautologie** ; `Hs` aveugle à `hs` et gouverné par sa fenêtre, première mesure d'**A102** ; la fenêtre était hors du scénario (**A184**) |
-| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **230 identifiants au 2026-09-12 (S186)** — le décompte se vérifie contre le fichier, il ne se recopie pas ; avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
+| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **231 identifiants au 2026-09-12 (S187)** — le décompte se vérifie contre le fichier, il ne se recopie pas ; avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
 | [`registres/FORK-S22-S26.md`](registres/FORK-S22-S26.md) | **le second fork** — constat, carte de renumérotation complète, la règle manquante, et ce qui reste à fusionner |
 | [`registres/AUDIT-ASSERTIONS-S29.md`](registres/AUDIT-ASSERTIONS-S29.md) | **ce que chaque assertion peut voir** — 23 cas classés, 5 fautifs, 1 mesure du harnais retirée ; **réécriture S30 sans aucun seuil inventé** |
 | [`registres/AUDIT-REPLIS-S44.md`](registres/AUDIT-REPLIS-S44.md) | **les valeurs de repli, inventoriées** — 49 recensées, deux fautives ; *quand la grandeur est un écart, zéro est son meilleur point* |

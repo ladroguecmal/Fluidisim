@@ -9342,3 +9342,129 @@ de rejouer S184 et S186 et de vérifier leurs deux empreintes. **BILAN-B4-S176**
 actif et porté, avec un suivi daté : ce qu'il attend est toujours un critère.
 
 **Décisions qui demandent un arbitrage humain :** aucune nouvelle. A107 reste ouverte.
+
+## S187 — 2026-09-12 — L'ancrage, trouvé en cherchant la graduation
+
+**Entrée :** master beadbf0 propre, quatre copies au même commit, S186-1/A50. Copie principale.
+Plan seul 1c31068 ; protocole 9029be1 ; support c9d3d28 ; mesure c4155b6 ; réception 3880d14.
+Code d'exécution de la bibliothèque inchangé.
+
+**Produit :** `examples/support/source_snapshots.rs`, l'extension de
+`examples/support/perturbative_block.rs`, `examples/graded_lattice.rs`,
+[RESEAU-GRADUE-S187](../docs/validation/RESEAU-GRADUE-S187.md) et
+[ADR-118](../docs/adr/ADR-118-le-reseau-d-echantillonnage-ancre-et-gradue.md), **actée**.
+
+**Ce que la session venait chercher.** S186 avait trouvé, sans le chercher, que l'erreur d'un
+réseau isotrope est **intégralement** celle de sa tranche la plus haute, les treize autres sur
+quatorze étant surrésolues jusqu'à vingt-trois fois. La suite évidente était un réseau
+**gradué** : un pas vertical suivant la courbure du contenu, donc la même erreur pour une
+fraction des nœuds. La règle a été dérivée avant d'être codée — `h·√|∂²_z S| = constante`, donc
+des nœuds à incréments égaux de `∫√|∂²_z S| dz` — et le profil remesuré par le programme qui
+l'utilise retombe sur la dérivation faite depuis les `k_eff` de S186 : rapport extrême **12,63**,
+pas vertical profond jusqu'à **3,55 fois** celui du haut.
+
+**Ce qu'elle a trouvé à la place, et qui vaut cinq fois plus.** Avant de conclure, un doute :
+le réseau isotrope pose son dernier nœud **hors** du bloc — `nodes_per_axis` déborde, et à
+`r = 8` le dernier nœud vertical tombe à l'indice 17, `z = −0,05 m`, quand les mailles
+intérieures s'arrêtent à 14, `z = −0,80 m`. Une part du gain attribué à la graduation pouvait
+donc venir de l'**ancrage**. Mesuré à nombre de nœuds verticaux **égal**, pas horizontal 2 :
+
+| Nz | débordante (historique) | ancrée uniforme | ancrée dérivée | ancrage | graduation |
+|---:|---:|---:|---:|---:|---:|
+| 3 | **41,2153 %** | 6,7887 % | 6,5503 % | **× 6,07** | × 1,04 |
+| 5 | **13,6044 %** | 2,5458 % | **1,7919 %** | **× 5,34** | × 1,42 |
+| 8 | **2,5401 %** | 1,6947 % | 1,6947 % | **× 1,50** | × 1,00 |
+
+**L'ancrage vaut jusqu'à un facteur six, il est gratuit — il ne change pas un seul nœud — et il
+pèse cinq fois plus que la graduation que la session était venue construire.**
+
+**Le mécanisme, et sa contre-épreuve.** La métrique du dépôt est un **maximum**, et S186 avait
+montré que ce maximum vit intégralement sur la tranche haute. Un nœud posé exactement là
+supprime le terme dominant ; un réseau qui déborde l'interpole sur 2 m. Si *« ancrer est
+mieux »* était une règle générale, elle vaudrait aussi horizontalement — elle ne vaut pas :
+−2,5 %, −40 % puis **+1,3 %** selon le nombre de nœuds, non monotone et une fois défavorable.
+Donc ce n'est pas l'ancrage, c'est **poser un nœud là où vit le maximum de la métrique**.
+L'ancrage n'en est la forme pratique que pour une source qui décroît avec la profondeur.
+
+**Chiffres qui ont orienté la conception.** L'axe vertical domine l'horizontal d'un facteur
+1,57, 2,51 puis 3,37 aux trois ratios. L'erreur **sature** sur l'axe le plus grossier : à pas
+horizontal 2 le plancher est 1,6947 % — l'erreur horizontale seule — atteint dès **six** nœuds
+verticaux gradués, et `Nz = 8` ou `14` ne changent plus rien. À pas horizontal 4 le plancher est
+6,1256 % dès quatre nœuds ; à 8, c'est 13,4919 % dès trois. Gains à erreur égale : **−37,5 %**
+de nœuds et −29 % d'erreur en même temps contre l'isotrope `r = 2` ; **−78,4 %** contre `r = 4` ;
+et à nœuds identiques (27), erreur **divisée par 2,44** contre `r = 8`.
+
+La règle dérivée n'est pas fausse — le témoin déclaré ne l'a pas renversée — et elle bat les
+deux graduations naïves à nœuds égaux : à 320 nœuds, 1,79 % contre 2,55 % pour un pas uniforme
+et 3,44 % pour un pas géométrique de raison 2. Elle gagne là où elle sert, entre quatre et six
+nœuds. Elle vaut simplement 1,4, et non 6.
+
+**Décision structurante :** **ADR-118, actée** — premier ADR depuis S181. Le réseau
+d'échantillonnage s'ancre sur les frontières de son domaine, gradue son pas selon la courbure
+du contenu, et s'arrête quand son axe cesse d'être le plus grossier. Il ne fixe **ni pas, ni
+nombre de nœuds, ni erreur acceptable** : il dit où poser les nœuds qu'on a décidé de payer.
+Le solveur reste à B3 (ADR-007 §5).
+
+**Ce que la session a trouvé et qui n'était pas cherché.**
+
+**A231** *(sévérité 2)* — **le réseau du dépôt posait son dernier nœud hors du domaine
+mesuré**, et toutes les erreurs spatiales publiées par S186 le sont donc pour un réseau
+inutilement mauvais. Les raisonnements appuyés sur leur **magnitude** — la borne `r = 2`, la
+parité entre axe spatial et axe temporel — doivent être relus. Sévérité 2 et non 1 : aucune
+valeur publiée n'est fausse, elles mesurent correctement ce réseau-là, aucun invariant ne tombe
+et le code de bibliothèque n'est pas en cause.
+
+**Suivi A229** — la compensation entre approximations vaut aussi **entre les deux axes
+d'espace** : l'erreur isotrope est **sous** celle de l'axe vertical seul aux trois ratios (2,54
+contre 2,66 ; 13,60 contre 15,41 ; 32,96 contre 45,51 %). Décimer *aussi* horizontalement rend
+le champ plus juste que décimer verticalement seul. Le piège de réglage de A229 est donc aussi
+interne à une seule grandeur.
+
+**L267** — une campagne qui balaie une résolution **à convention de placement fixée mesure la
+convention autant que la résolution**. Quatre sessions ont balayé `r` sur des dizaines de
+configurations sans questionner où le réseau posait ses nœuds ; un seul indice déplacé valait un
+facteur six. Trois corollaires : la régularité d'une courbe ne prouve pas que son ordonnée est
+la plus basse atteignable ; quand la métrique est un maximum, **où** l'on échantillonne compte
+plus que **combien** ; et c'est la contre-épreuve qui transforme un effet en règle — sans la
+mesure horizontale, la conclusion aurait été *« il faut ancrer »*, qui se serait trompée
+ailleurs.
+
+**Réception :** les six contrôles passent. Empreinte `0x6cf13183b4a240df`, `diff` strict
+identique sur deux exécutions ; aucune durée n'est mesurée, donc la sortie entière est un
+résultat. Le réseau général reproduit l'uniforme **en bits** pour `r ∈ {1,2,4,8}` — exact et
+non fortuit, `1/r` étant exact pour une puissance de deux. Contrôle croisé : `max |S|`,
+`max |u'(T)|`, le plancher 0,386 % et les trois erreurs isotropes de S186 réapparaissent à la
+décimale. Le support historique est intact : `cadence_error` rend `0x39567a1d4bc2ba4c` et la
+sortie **entière** de `composed_error` est inchangée après le déplacement de la reconstruction
+dans `support/source_snapshots.rs`. Workspace **331 réussis / cinq ignorés** en debug et en
+release.
+
+**Un amendement de protocole, déclaré.** `rh = 8` a été ajouté après la première exécution : la
+famille graduée n'avait alors aucun point sous 75 nœuds, ce qui laissait l'isotrope `r = 8`
+(27 nœuds) sans comparaison et rendait Q2 inrépondable à son extrémité grossière. Extension du
+balayage, pas affaiblissement du critère, et écrit dans le document plutôt que dans un protocole
+réécrit après coup.
+
+**Actions relevées et leur sort.** Une seule, et elle n'est pas faite : **le réseau de
+`support/` déborde toujours.** Le corriger casserait les empreintes de S184 et de S186, qui sont
+des réceptions publiées ; c'est donc S188 qui l'ancre et rejoue, exactement comme S185 avait
+rejoué S184 et S186 rejoué S185. L'action est portée par la ligne `Session suivante` et par
+l'objectif de S188, pas par une phrase de prose (L55).
+
+**Ce que je n'ai pas fait.** Aucun seuil de justesse : ADR-118 dit où poser les nœuds, pas
+combien en payer, et A50 attend toujours une décision. **La loi de composition de S186 n'est pas
+rejouée sur un réseau ancré** — les magnitudes ont changé jusqu'à six fois, donc la parité entre
+`r` et `c` se déplace entièrement, et la loi elle-même a été établie sur une erreur
+**concentrée** que la graduation **répartit**. Le surcoût par maille d'une interpolation à poids
+non constants n'est pas chiffré. Un seul montage, une seule profondeur de bloc, un seul instant
+de profil. Pas de réseau horizontalement gradué ni d'arbre. Le véhicule ne projette pas.
+
+**Prochaine session recommandée. S188 : S187-1**, ancrer le réseau du support et **rejouer la
+composition de S186** dessus. Deux raisons, et la seconde est la vraie : les magnitudes
+spatiales ont changé d'un facteur allant jusqu'à six, donc la règle de dimensionnement par
+parité des axes se déplace entièrement ; et une loi de composition mesurée sur une erreur
+concentrée n'est pas nécessairement celle d'une erreur répartie. **BILAN-B4-S176** reste le
+bilan actif et porté, avec un suivi daté : ce qu'il attend est toujours un critère, et `N` de
+SPEC-004 §6.2 est le seul de ses trois paramètres que personne n'a fixé.
+
+**Décisions qui demandent un arbitrage humain :** aucune nouvelle. A107 reste ouverte.

@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-12 13:43 +02:00
+JETON            : libre
+Battement        : 2026-09-12 14:14 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S187 — S186-1/A50 : le réseau gradué en profondeur
-Dernière session : S186 — la loi de composition dépend du mode ; le maximum pour les modes causaux
-Session suivante : à fixer par le rituel de fin de S187
+Session en cours : aucune
+Dernière session : S187 — l'ancrage du réseau vaut six fois la graduation ; ADR-118
+Session suivante : S188 — S187-1/A50 : ancrer le réseau de `support/` et rejouer la composition de S186 dessus
 
 *S183 à S187 ont travaillé dans la **copie principale**, sur `master` : aucune copie isolée
 ouverte, donc rien à refermer (AGENTS.md). Les trois worktrees ont été **avancés sur master**
@@ -191,6 +191,51 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S187 — 2026-09-12 :** [RESEAU-GRADUE-S187](docs/validation/RESEAU-GRADUE-S187.md),
+[ADR-118](docs/adr/ADR-118-le-reseau-d-echantillonnage-ancre-et-gradue.md), **actée** —
+premier ADR depuis S181. **S186-1 réalisée, et le résultat n'est pas celui qu'elle
+cherchait.** La session venait construire un réseau gradué en profondeur, puisque S186
+avait montré que l'erreur vient d'une tranche sur quatorze. Avant de conclure, un doute :
+le réseau du dépôt pose son dernier nœud **hors** du bloc — `nodes_per_axis` déborde, et
+à `r = 8` le dernier nœud vertical tombe à l'indice 17 (`z = −0,05 m`) quand les mailles
+intérieures s'arrêtent à 14 (`z = −0,80 m`). Mesuré à nœuds verticaux **égaux** :
+**41,2 % contre 6,8 %** à trois nœuds, 13,60 contre 2,55 à cinq, 2,54 contre 1,69 à huit,
+soit des facteurs **6,07 / 5,34 / 1,50**. **L'ancrage est gratuit — il ne change pas un
+nœud, seulement l'endroit où on le pose — et il pèse cinq fois plus que la graduation.**
+Celle-ci vaut 1,04 / 1,42 / 1,00 par-dessus, tout en battant les deux témoins naïfs
+déclarés (1,79 % contre 2,55 % uniforme, 3,44 % géométrique, à nœuds égaux).
+**Le mécanisme est mesuré** : la métrique est un maximum, il vit sur la tranche la plus
+haute (S186 §8.3), et un nœud posé là supprime le terme dominant. **Contre-épreuve
+horizontale** — là où la source ne pique pas, l'ancrage ne donne que −2,5 %, −40 % puis
+**+1,3 %**, non monotone : ce n'est donc pas « ancrer est mieux », c'est **poser un nœud
+là où vit le maximum**. L'axe vertical domine l'horizontal de 1,57 à 3,37 fois, et
+l'erreur **sature** sur l'axe le plus grossier : six nœuds verticaux suffisent à
+`rh = 2`, quatre à 4, trois à 8 — le dimensionnement a donc un point d'arrêt. Gains à
+erreur égale : **−37,5 %** de nœuds *et* −29 % d'erreur contre l'isotrope `r = 2` ;
+**−78,4 %** contre `r = 4` ; erreur **÷ 2,44** à nœuds identiques contre `r = 8`.
+Profil vertical **remesuré** par le programme : rapport extrême 12,63, pas profond jusqu'à
+3,55 fois celui du haut — la dérivation faite avant la mesure depuis les `k_eff` de S186.
+Et la compensation de **A229** vaut aussi entre les deux axes d'espace : l'isotrope est
+sous l'axe vertical seul aux trois ratios.
+Six réceptions, dont la reproduction **en bits** du chemin uniforme par le chemin général
+et le contrôle croisé qui redonne S186 à la décimale. Empreinte `0x6cf13183b4a240df`,
+`diff` strict identique sur deux exécutions. Support historique intact : `cadence_error`
+rend `0x39567a1d4bc2ba4c` et la sortie entière de `composed_error` est inchangée.
+Aucun nouveau test ; workspace 331 réussis/cinq ignorés en debug et release. Bibliothèque
+inchangée. **Note corrective datée dans SPEC-004 §6.2** : `dx ≤ λ_cut/N` est nécessaire et
+insuffisante, une densité ne dit rien du placement.
+118 ADR,231 angles,267 leçons,18 invariants,6 SPEC,23 cas. **A231** et **L267**.
+A50/B4 restent partiels : il manque toujours **un critère de justesse**, et `N` de
+SPEC-004 §6.2 est le seul des trois paramètres de B4 que personne n'a fixé.
+**Suite S188 : S187-1/A50**, ancrer le réseau de `support/` et **rejouer la composition de
+S186** dessus. Le réseau déborde toujours : le corriger casse les empreintes publiées de
+S184 et S186, donc c'est à la session suivante de l'ancrer et de rejouer — comme S185
+avait rejoué S184 et S186 rejoué S185. Les magnitudes spatiales ont changé jusqu'à six
+fois, donc la parité entre `r` et `c` se déplace entièrement ; et une loi de composition
+mesurée sur une erreur **concentrée** n'est pas nécessairement celle d'une erreur
+**répartie**. **BILAN-B4-S176** reste le bilan actif et porté, avec un suivi daté. Aucun
+arbitrage humain nouveau.
 
 **S186 — 2026-09-12 :** [COMPOSITION-ERREURS-S186](docs/validation/COMPOSITION-ERREURS-S186.md).
 **S185-1 réalisée : les deux erreurs sont composées, et la loi dépend du mode de réemploi.**

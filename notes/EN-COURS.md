@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S187 — en cours
+Session : S187 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : S186-1/A50, le **réseau gradué en profondeur**. S186 a montré que l'erreur
 spatiale globale est **exactement** celle de la tranche la plus haute du bloc, et que les
@@ -86,9 +86,23 @@ réduit pas l'erreur — il ne réduit que le nombre de nœuds, ce qui reste le 
 - [x] **P4** — recevoir dans un document de validation ; angles, leçons, et **ADR si une
       décision de conception en sort** — un réseau d'échantillonnage gradué est un contrat
       pour le consommateur, pas un détail de banc.
-- [ ] **P5** — rituel de fin (REPRISE.md §6).
+- [x] **P5** — rituel de fin (REPRISE.md §6).
 
 ### Notes de reprise
+
+P5 S187 : rituel terminé. Décomptes **vérifiés contre le dépôt** : 118 fichiers ADR,
+18 invariants, 6 SPEC (dont SPEC-003 dans `docs/validation/`), 23 cas, 267 leçons, A231
+au plus haut — **118 ADR, 231 angles, 267 leçons, 18 invariants, 6 SPEC, 23 cas**, portés
+dans README, 00_INDEX et REPRISE, et le décompte daté de la table des registres passé à
+231 (S187). Invariants relus : aucun ne mentionne l'échantillonnage ni la décimation,
+donc aucun ne devient faux ; ADR-118 cite SPEC-004 §6.1/§6.2 et ADR-007 §5, et la §6.2
+reçoit une note corrective datée plutôt qu'une réécriture.
+**Action non faite et portée, pas perdue** : le réseau de `support/` déborde toujours.
+L'ancrer casse les empreintes publiées de S184 et S186 ; c'est donc l'objectif déclaré
+de S188, porté par la ligne `Session suivante` (L55).
+Jeton libre ; copie principale, aucune copie ouverte. Les trois worktrees ont été
+avancés sur master en fin de session.
+Suite S188 : S187-1, ancrer et rejouer la composition de S186.
 
 P4 S187 : RESEAU-GRADUE-S187 §8–§9 reçus. **ADR-118 actée** — premier ADR depuis S181 :
 le réseau d'échantillonnage s'ancre sur ses frontières, gradue son pas selon la courbure,

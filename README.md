@@ -432,3 +432,22 @@ séparément ne se composent pas ; leur somme est une enveloppe, jamais une pré
 117 ADR,230 angles,266 leçons,18 invariants,6 SPEC,23 cas.
 Suite : le réseau gradué en profondeur — l'erreur vient d'une tranche sur quatorze.
 Voir [COMPOSITION-ERREURS-S186](docs/validation/COMPOSITION-ERREURS-S186.md).
+
+**S187 :** la session venait construire un réseau d'échantillonnage **gradué** en
+profondeur ; elle a trouvé en chemin que le réseau du dépôt posait son dernier nœud
+**hors** du bloc, et que l'ancrer vaut **jusqu'à un facteur six** — gratuitement, sans
+changer un seul nœud — là où la graduation ne vaut que 1,4. Le mécanisme est mesuré et non
+supposé : la métrique est un **maximum**, il vit sur la tranche la plus haute, et un nœud
+posé là supprime le terme dominant ; la contre-épreuve horizontale, où la source ne pique
+pas, ne donne que −2,5 %, −40 % puis **+1,3 %**. D'où **ADR-118** : un réseau
+d'échantillonnage s'ancre sur ses frontières, gradue son pas selon la courbure du contenu,
+et s'arrête quand son axe cesse d'être le plus grossier. Gains à erreur égale : −37,5 % de
+nœuds contre l'isotrope `r = 2`, −78,4 % contre `r = 4`, erreur divisée par 2,44 à nœuds
+identiques contre `r = 8`.
+**A231** : le réseau débordait, et toutes les erreurs spatiales de S186 valent donc pour un
+réseau inutilement mauvais. **L267** : une campagne qui balaie une résolution à convention
+de placement fixée mesure la convention autant que la résolution — quatre sessions avaient
+balayé le ratio sans questionner où les nœuds se posaient.
+118 ADR,231 angles,267 leçons,18 invariants,6 SPEC,23 cas.
+Suite : ancrer le réseau et rejouer la composition de S186 dessus.
+Voir [RESEAU-GRADUE-S187](docs/validation/RESEAU-GRADUE-S187.md).
