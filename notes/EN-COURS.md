@@ -58,44 +58,45 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S192 — terminée
-Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S191-1, construire une tranche x-z à surface libre linéarisée, fond
-imperméable et pression atmosphérique, recevoir une onde de gravité par référence
-Airy et raffinement. Première étape physique, pas réception non linéaire B4.
+Session : S193 — en cours
+Agent : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
+Objectif : S192-1, construire les conditions de surface **non linéaires** dispersives
+sur la tranche x-z de S192 et les recevoir contre une référence de **Stokes**, avec
+ordre en amplitude explicite et domaine de validité déclaré. Premier véhicule à la fois
+non linéaire et dispersif (A217) ; aucune sélection de solveur δ, aucun seuil redemandé.
 
 ### Plan
 
-- [x] **P1** — reprise/état réel, master58e41bc propre, trois copies à jour ; jeton/plan seul.
-- [x] **P2** — équations, discrétisation x-z, opérateur de surface et protocole avant mesure.
-- [x] **P3a** — véhicule potentiel 2D : relèvement elliptique réellement discrétisé,
-  conditions de surface, évolution et vitesses ; réception des bords/stencil/refus.
-- [x] **P3b** — ondes Airy profond/peu profond/intermédiaire, raffinements espace/temps,
-  vitesse/surface/énergie/volume, contre-épreuves, reproductibilité.
-- [x] **P4** — documenter résultats/limites et suite couplée ; propager A50/B4/A217/file,
-  ADR seulement si décision de projet, jamais sélection δ par un essai linéaire.
-- [x] **P5** — rituel de fin, journal/index/README/décomptes, vérifications, jeton libre,
-  copies propres avancées sans suppression.
+- [x] **P1** — reprise, état réel (trois copies au commit de `master`), jeton et plan seuls.
+- [ ] **P2** — dérivation et protocole **avant tout code** : équations de Zakharov exactes,
+  développement en amplitude de la vitesse verticale de surface, symboles verticaux
+  discrets tirés du relèvement S192, échelle d'ordres M=1/2/3 et signature prédite de
+  chacun, références Stokes (profil d'ordre 2, correction de fréquence d'ordre 3),
+  convention de courant moyen, anti-repliement, réceptions chiffrées déclarées.
+- [ ] **P3a** — véhicule : support non linéaire (état spectral, réutilisation du
+  relèvement, vitesse verticale à l'ordre M, RK4, projection de bande), tests propres
+  dont **réduction exacte à S192 à M=1** et refus atomiques.
+- [ ] **P3b** — campagne : erreur de profil contre Stokes-2 en fonction de l'amplitude
+  (pente déclarée), décalage de fréquence contre Stokes-3, profondeurs, raffinements
+  espace/temps, contre-épreuves par l'échelle M, reproductibilité deux exécutions.
+- [ ] **P4** — documenter résultats, limites et suite ; propager A50/B4/A216/A217, file
+  plurielle, angles et leçons. ADR seulement si une décision de projet est prise.
+- [ ] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes,
+  jeton `libre`, trois copies avancées sans suppression non prouvée.
 
 ### Notes de reprise
 
-REPRISE entier, invariants/ADR-001/METHODE lus dans cette conversation ; nouvelles
-sections S191 et dernier journal/index/file relus. Seuil2 % connu, aucune redemande.
-Les opérateurs de S191 à extension nulle ne représentent pas une surface physique.
-Choix de banc : potentiel incompressible irrotationnel linéarisé, domaine x-z fixe,
-Laplace discret et élévation libre évolutive. A217 non linéaire restera ouverte.
-P3a : trois tests debug/release passent. Premier test de débordement trop faible
-(MAX multiplié par 0,098 reste fini) corrigé avec état ψ négatif extrême ; aucun seuil assoupli.
+Lu dans cette conversation : AGENTS.md, REPRISE.md entier, EN-COURS, dernier journal
+(S192), SURFACE-LIBRE-2D-S192, file active S190 de QUESTIONS-OUVERTES, libellés des
+18 invariants, `support/free_surface.rs` entier.
 
-P3b : 12 grilles/cas reçus selon protocole (grille fine <=2 %, convergence),
-quatre pas temporels ordre2 ; deux release identiques 0x4fc690d4ac035bf7.
-Pire grille fine vitesse1,732796 % profond. Trois tests debug/release passent.
+État hérité : S192 fournit un véhicule **linéaire** spectral (η, ψ en DFT horizontale,
+relèvement tridiagonal en profondeur, symbole `G_h`, Verlet). Erreurs Airy fines
+≤1,732796 % ; empreinte `0x4fc690d4ac035bf7`. Seuil B4 = 2 % fixé (ADR-120), **jamais
+redemandé**. ADR-112 interdit de conclure la bascule d'une superposition linéaire.
 
-P4 : BILAN-B4/PLAN-BENCHMARK/SPEC-004/file active propagés. S191-1 close,
-S192-1 surface non linéaire/Stokes ouverte ; pas d'ADR, aucun solveur δ choisi.
-Les 12 exécutions forment la campagne reçue ; seules les grilles fines sont exigées sous2 %.
-
-P5 : journal/suivis/index/README/REPRISE actualisés, invariants relus.
-Décomptes vérifiés :121 ADR,233 angles A1–A233,270 leçons,18 invariants,6 SPEC,23 cas.
-Aucune nouvelle leçon distincte ; prochain lot S192-1. Jeton libre.
-Copies à avancer après ce commit et propreté à vérifier avant réponse finale.
+Thèse de la session, déclarée avant mesure : une troncature en amplitude à l'ordre M
+donne trois signatures **distinctes et falsifiables** — M=1 ne produit aucune harmonique
+liée ni décalage de fréquence, M=2 produit l'harmonique liée mais pas la bonne
+fréquence, M=3 produit les deux. C'est l'échelle qui reçoit le véhicule, pas un seul
+chiffre. Détails dans le document de protocole écrit en P2.

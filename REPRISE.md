@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-12 16:35 +02:00
-Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-12 19:32 +02:00
+Agent            : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
+Session en cours : S193 — S192-1 : conditions de surface non linéaires et référence Stokes
 Dernière session : S192 — surface libre x-z linéaire reçue Airy sous 2 %
-Session suivante : S193 — S192-1 : surface non linéaire et référence Stokes ; relire la file plurielle
+Session suivante : à fixer au rituel de fin ; relire la file plurielle
 
 *S183 à S189 ont travaillé dans la **copie principale**, sur `master` : aucune copie isolée
 ouverte, donc rien à refermer (AGENTS.md). Les trois worktrees ont été **avancés sur master**
