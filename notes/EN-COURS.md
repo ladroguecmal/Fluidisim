@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S188 — en cours
+Session : S188 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : S187-1/A50, **rejouer la composition de S186 sur un réseau ancré** (ADR-118).
 S187 a trouvé que le réseau du dépôt posait son dernier nœud hors du bloc, et que l'ancrer
@@ -89,9 +89,24 @@ seconde est la vraie :
       S186. Relever.
 - [x] **P4** — recevoir dans un document de validation ; **note corrective datée** si la loi
       change ; ADR seulement si une décision nouvelle en sort. Angles et leçons.
-- [ ] **P5** — rituel de fin (REPRISE.md §6).
+- [x] **P5** — rituel de fin (REPRISE.md §6).
 
 ### Notes de reprise
+
+P5 S188 : rituel terminé. Décomptes **vérifiés contre le dépôt** : 118 fichiers ADR,
+18 invariants, 6 SPEC (dont SPEC-003 dans `docs/validation/`), 23 cas, 268 leçons, A232 au
+plus haut — **118 ADR, 232 angles, 268 leçons, 18 invariants, 6 SPEC, 23 cas**, portés dans
+README, 00_INDEX et REPRISE ; décompte daté de la table des registres porté à 232 (S188).
+Invariants relus : aucun ne mentionne l'échantillonnage ni la composition d'erreurs, donc
+aucun ne devient faux — et pour cause, aucun contrat n'a changé et aucun ADR n'a été écrit.
+**Aucune action laissée en prose** : le réseau de `support/` porte désormais les deux
+conventions côte à côte (`axis_indices` débordante, `anchored_indices` ancrée), ce qui est
+voulu — les empreintes de S184/S185/S186 dépendent de la première, et les trois sont
+vérifiées à chaque session. La seule suite est la mesure de S189, portée par la ligne
+`Session suivante`.
+Jeton libre ; copie principale, aucune copie ouverte. Les trois worktrees ont été avancés
+sur master en fin de session.
+Suite S189 : S188-1, la composition sur réseau gradué.
 
 P4 S188 : COMPOSITION-ANCREE-S188 §7–§8 reçus. **A232** écrite (la loi du maximum n'est
 valide que tant que les deux maxima coïncident) et **L268** écrite (un rejeu qui confirme

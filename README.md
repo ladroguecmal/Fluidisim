@@ -451,3 +451,23 @@ balayé le ratio sans questionner où les nœuds se posaient.
 118 ADR,231 angles,267 leçons,18 invariants,6 SPEC,23 cas.
 Suite : ancrer le réseau et rejouer la composition de S186 dessus.
 Voir [RESEAU-GRADUE-S187](docs/validation/RESEAU-GRADUE-S187.md).
+
+**S188 :** la grille de composition de S186 est **rejouée sur le réseau ancré** d'ADR-118,
+à nombre de nœuds identique et avec le critère de jugement déjà déclaré. **Le verdict ne
+change pas mode par mode** — le maximum pour les deux modes causaux — et il est **mieux
+satisfait** : corriger le placement des nœuds a resserré la loi au lieu de la casser.
+Le rejeu livre surtout ce que S186 ne pouvait pas dire : **pourquoi** la loi tient. La
+métrique ajoutée avant la mesure — la tranche qui porte le maximum — vaut la plus haute
+partout, et **39 cases jugées sur 39** voient les deux maxima au même endroit. L'ancrage a
+changé la magnitude de l'erreur spatiale, jusqu'à 3,7 fois, mais pas l'endroit de son
+maximum, qui est une propriété du contenu et non du réseau.
+**A232** : la loi du maximum n'est donc valide que **tant que les deux maxima coïncident**,
+et rien ne le disait. **L268** : un rejeu qui confirme n'est pas un rejeu inutile — il
+transforme une coïncidence en condition, à condition d'avoir déclaré d'avance la métrique
+qui distingue les explications.
+Conversion mesurée : **27 nœuds ancrés valent 125 nœuds débordants** à erreur égale. Et le
+point de parité entre axe spatial et axe temporel se déplace d'un facteur ~3, donc
+l'optimum va vers plus de décimation spatiale et moins de réduction de cadence.
+118 ADR,232 angles,268 leçons,18 invariants,6 SPEC,23 cas.
+Suite : la composition sur réseau gradué, seul endroit connu où les deux maxima se séparent.
+Voir [COMPOSITION-ANCREE-S188](docs/validation/COMPOSITION-ANCREE-S188.md).

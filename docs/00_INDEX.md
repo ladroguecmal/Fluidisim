@@ -17,6 +17,44 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S188 :** [COMPOSITION-ANCREE-S188](validation/COMPOSITION-ANCREE-S188.md), aucun ADR.
+**S187-1 réalisée : la loi de composition survit à l'ancrage, et le rejeu en livre la
+condition.** La grille de S186 est rejouée sur un réseau ancré (ADR-118), à nombre de nœuds
+identique, même référence, mêmes métriques, **même critère déjà déclaré** — une seule
+variable change, où le dernier nœud se pose. **Verdict inchangé mode par mode** : maximum
+pour le maintien (0,895–1,060) et l'extrapolation (0,869–1,000), additive et quadratique
+pour l'interpolation (0,845–0,984 et 1,017–1,245). Et **mieux satisfait** qu'en S186
+(0,826–1,155 pour le maintien) : corriger le placement des nœuds a **resserré** la loi.
+Aux cadences hautes elle est exacte — à `c = 64` les trois lignes rendent l'erreur
+temporelle pure, rapport 1,000.
+**Le chiffre qui décide** était déclaré avant la mesure : la **tranche qui porte le
+maximum** vaut 14 — la plus haute — partout, et **39 cases jugées sur 39** voient les deux
+maxima sur la même tranche. L'ancrage a changé la magnitude de l'erreur spatiale, pas
+l'endroit de son maximum, parce que cet endroit est une propriété du **contenu** : `|S|`
+culmine en haut, donc `|u'|`, donc tout écart. D'où **A232** : la loi du maximum n'est
+valide que **tant que les deux maxima coïncident**, ce que rien ne disait.
+**Les magnitudes, elles, bougent :** 1,7160 / 3,6805 / 13,1488 % ancrées contre
+2,5401 / 13,6043 / 32,9593 % débordantes à nœuds identiques — facteurs 1,48 / **3,70** /
+2,51. Conversion **mesurée** : **27 nœuds ancrés valent 125 nœuds débordants** à erreur
+égale, soit 4,6 fois moins de nœuds. Et le point de parité entre axes passe de `c ≈ 20` à
+`c ≈ 6` à 125 nœuds : la règle de dimensionnement d'ADR-118 tient, son point d'application
+se déplace d'un facteur ~3, et l'optimum va vers **plus** de décimation spatiale et
+**moins** de réduction de cadence. L'exemple de S186 (« dominante à `c = 32` ») devient
+`c ≈ 8`.
+Six réceptions ; empreinte `0x21bab548c7b9775c`, `diff` identique sur deux exécutions.
+Support historique intact : `cadence_error` `0x39567a1d4bc2ba4c`, `composed_error`
+`0x0e743846d4656870`, `graded_lattice` `0x6cf13183b4a240df`. Une **correction de protocole
+visible** : la réception 4 annonçait la mauvaise valeur de S187, et la bonne dit que la
+contribution verticale **disparaît entièrement** de la norme maximum une fois l'axe ancré.
+Aucun nouveau test ; workspace 331 réussis/cinq ignorés en debug et release. Runtime
+inchangé, **aucun ADR** — ADR-118 reçoit un suivi daté qui lève la limite qu'il déclarait.
+118 ADR,232 angles,268 leçons,18 invariants,6 SPEC,23 cas. **A232** et **L268**.
+A50/B4 restent partiels : il manque toujours **un critère de justesse**.
+**Suite S189 : S188-1/A50**, la composition sur réseau **gradué** — seul endroit connu où la
+condition d'A232 peut être éprouvée plutôt que constatée, la graduation déplaçant le maximum
+spatial vers le milieu du bloc quand le maximum temporel reste en haut. Les deux issues
+instruisent. **BILAN-B4-S176** reste le bilan actif et porté. Aucun arbitrage humain nouveau.
+
 **S187 :** [RESEAU-GRADUE-S187](validation/RESEAU-GRADUE-S187.md),
 [ADR-118](adr/ADR-118-le-reseau-d-echantillonnage-ancre-et-gradue.md), **actée** — premier
 ADR depuis S181. **La session cherchait la graduation ; elle a trouvé l'ancrage, qui vaut
@@ -933,7 +971,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`registres/BILAN-S69.md`](registres/BILAN-S69.md) | **bilan d'avancement** — ~85 % comme corpus de conception, **~15 % comme système** ; **onze cas sur 23 et onze bancs sur onze attendent une couche non écrite** ; **B1 est le seul banc exécutable et n'a jamais été lancé** |
 | [`registres/PRESCRIPTIONS-S63.md`](registres/PRESCRIPTIONS-S63.md) | **les prescriptions non éprouvées** — trois genres, dont un seul se vérifie ; **trois recettes mises à l'épreuve, trois fautives** ; les préalables de B2 périmés depuis quarante sessions (**A185**) |
 | [`registres/AUDIT-REFERENCES-S62.md`](registres/AUDIT-REFERENCES-S62.md) | **ce qu'une référence peut voir bouger** — 41 références, trois degrés, **une seule tautologie** ; `Hs` aveugle à `hs` et gouverné par sa fenêtre, première mesure d'**A102** ; la fenêtre était hors du scénario (**A184**) |
-| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **231 identifiants au 2026-09-12 (S187)** — le décompte se vérifie contre le fichier, il ne se recopie pas ; avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
+| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **232 identifiants au 2026-09-12 (S188)** — le décompte se vérifie contre le fichier, il ne se recopie pas ; avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
 | [`registres/FORK-S22-S26.md`](registres/FORK-S22-S26.md) | **le second fork** — constat, carte de renumérotation complète, la règle manquante, et ce qui reste à fusionner |
 | [`registres/AUDIT-ASSERTIONS-S29.md`](registres/AUDIT-ASSERTIONS-S29.md) | **ce que chaque assertion peut voir** — 23 cas classés, 5 fautifs, 1 mesure du harnais retirée ; **réécriture S30 sans aucun seuil inventé** |
 | [`registres/AUDIT-REPLIS-S44.md`](registres/AUDIT-REPLIS-S44.md) | **les valeurs de repli, inventoriées** — 49 recensées, deux fautives ; *quand la grandeur est un écart, zéro est son meilleur point* |

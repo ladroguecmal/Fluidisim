@@ -9468,3 +9468,120 @@ bilan actif et porté, avec un suivi daté : ce qu'il attend est toujours un cri
 SPEC-004 §6.2 est le seul de ses trois paramètres que personne n'a fixé.
 
 **Décisions qui demandent un arbitrage humain :** aucune nouvelle. A107 reste ouverte.
+
+## S188 — 2026-09-12 — Le rejeu confirme la loi, et en livre la condition
+
+**Entrée :** master 2d05c77 propre, quatre copies au même commit, S187-1/A50. Copie principale.
+Plan seul a85b5a9 ; protocole 9183635 ; support 9ff2755 ; mesure 5edb42e ; réception 8c73883.
+Code d'exécution de la bibliothèque inchangé.
+
+**Produit :** `anchored_indices` dans `examples/support/perturbative_block.rs`,
+`examples/anchored_composition.rs` et
+[COMPOSITION-ANCREE-S188](../docs/validation/COMPOSITION-ANCREE-S188.md).
+
+**Pourquoi rejouer.** S186 avait mesuré que l'erreur spatiale et l'erreur temporelle se
+composent selon le **maximum** pour les modes causaux. S187 a ensuite montré que le réseau sur
+lequel cette mesure avait été prise posait son dernier nœud **hors** du bloc, ce qui coûtait
+jusqu'à un facteur six et **concentrait** toute l'erreur sur une tranche unique. Or une
+composition en norme maximum dépend de **où** vivent les deux maxima : une loi mesurée sur une
+erreur concentrée n'est pas nécessairement celle d'une erreur répartie. Le rejeu ne change
+qu'une variable — où le dernier nœud se pose — en conservant les nombres de nœuds, la
+référence, les métriques, les trois lois et **le critère de jugement déjà déclaré**.
+
+**Résultat : la loi ne change pas, mode par mode.**
+
+| mode | maximum | S188 retient | S186 retenait |
+|---|---|---|---|
+| maintien | **0,895–1,060** | maximum | maximum |
+| extrapolation | **0,869–1,000** | maximum | maximum |
+| interpolation | 1,018–1,707 | additive, quadratique | additive, quadratique |
+
+Et **mieux satisfaite** : la plage du maximum se resserre de 0,826–1,155 à 0,895–1,060 pour le
+maintien, de 0,860–1,034 à 0,869–1,000 pour l'extrapolation. Corriger le placement des nœuds a
+donc **resserré** la loi — le réseau mal placé ajoutait de la dispersion, il ne créait pas la
+loi. Aux cadences hautes elle est exacte : à `c = 64`, le maintien rend 33,2115 % et
+l'extrapolation 27,3202 % **aux trois lignes de réseau**, c'est-à-dire l'erreur temporelle pure,
+rapport 1,000.
+
+**Le chiffre qui décide, et il avait été déclaré avant la mesure.** La métrique ajoutée par ce
+protocole était la **tranche qui porte le maximum**, absente de S186 comme de S187 dans le cas
+composé. Elle vaut **14 — la plus haute — partout** : axe spatial seul aux trois réseaux, axe
+temporel seul aux vingt-et-une cadences, et les 84 cases composées. Le compte publié :
+**39 cases jugées sur 39 où les deux maxima vivent sur la même tranche.** L'ancrage a changé la
+**magnitude** de l'erreur spatiale, pas **l'endroit** de son maximum — parce que cet endroit
+est une propriété du contenu et non du réseau : `|S|` culmine en haut du bloc, donc `|u'|` y
+culmine, donc tout écart relatif y culmine.
+
+C'est la première des trois issues déclarées, *la loi tient*, et la colonne de tranche montre
+qu'elle tient pour **la même** raison. Ce qui convertit le résultat de S186 d'une observation en
+une **condition** (**A232**).
+
+**Chiffres qui ont orienté la conception.** Erreur spatiale seule, à nombre de nœuds identique :
+**1,7160 / 3,6805 / 13,1488 %** ancrée contre 2,5401 / 13,6043 / 32,9593 % débordante, soit des
+facteurs 1,48 / **3,70** / 2,51. Deux conséquences.
+
+**Une conversion mesurée, sans interpolation : 27 nœuds ancrés (13,1488 %) valent 125 nœuds
+débordants (13,6043 %)** — la même erreur pour **4,6 fois moins de nœuds**, et le coût suit
+exactement le nombre de nœuds (S184).
+
+**Le point de parité se déplace d'un facteur ~3.** À 125 nœuds, l'erreur spatiale débordante de
+13,60 % égalait le maintien vers `c ≈ 20` ; ancrée à 3,68 %, elle l'égale vers `c ≈ 6`.
+L'exemple publié par S186 — « à `r = 2` la cadence ne devient dominante qu'à `c = 32` » — ne
+tient plus : c'est `c ≈ 8` à 512 nœuds ancrés. La règle de dimensionnement d'ADR-118 tient, son
+point d'application change, et l'optimum va vers **plus** de décimation spatiale et **moins** de
+réduction de cadence.
+
+**Décision structurante :** **aucune, aucun ADR.** La loi est confirmée ; confirmer n'est pas
+décider. ADR-118 reçoit en revanche un **suivi daté** qui lève la limite qu'il déclarait — « la
+loi de composition de S186 n'est pas rejouée sur un réseau ancré » — sans réécrire une ligne de
+son contrat.
+
+**Ce que la session a trouvé et qui n'était pas cherché.**
+
+**A232** *(sévérité 2)* — **la loi du maximum n'est valide que tant que les maxima des deux
+erreurs coïncident, et rien dans le corpus ne le disait.** Ils coïncident ici par une propriété
+du **contenu** — `|S|` culmine sur la frontière haute — et non de la composition. Ce qui n'est
+pas couvert : un contenu piqué au milieu du domaine, ou une configuration qui sépare les deux
+maxima. Le dépôt en connaît déjà une et ne l'a pas mesurée : le réseau **gradué** de S187, dont
+§8.5 relève une erreur de tranche haute **nulle**. Si la loi tombe là, la règle de
+dimensionnement d'ADR-118 devra dire sur quel réseau elle s'applique.
+
+**L268** — **un rejeu qui confirme n'est pas un rejeu inutile : il transforme une coïncidence en
+condition** — à la condition d'avoir déclaré, avant de mesurer, la métrique qui distingue les
+explications possibles. Trois corollaires : un rejeu qui ne mesure que ce que mesurait
+l'original ne peut répondre que « pareil » ou « différent », et « pareil » n'apprend rien ; une
+loi mesurée une fois reste une coïncidence tant qu'on n'a pas son mécanisme, et le mécanisme est
+ce qui dit son domaine ; **la dispersion autour d'une loi peut venir du montage et non de la
+loi** — corriger le banc a ici resserré la plage.
+
+**Réception :** les six contrôles passent. Empreinte `0x21bab548c7b9775c`, `diff` identique sur
+deux exécutions ; aucune durée mesurée. Le réseau plein ancré rend la référence **en bits** pour
+les trois modes. Les vingt-et-une erreurs temporelles pures redonnent **exactement** S186 §6.2
+et donc S185. Plancher 0,386 %. Le support historique est intact après le déplacement des
+indices ancrés : `cadence_error` `0x39567a1d4bc2ba4c`, `composed_error` `0x0e743846d4656870`
+avec sortie entière identique, `graded_lattice` `0x6cf13183b4a240df`. Workspace **331 réussis /
+cinq ignorés** en debug et en release. Aucun nouveau test unitaire.
+
+**Une correction de protocole, déclarée et visible.** La réception 4 annonçait 1,6947 % à huit
+nœuds par axe. C'était la mauvaise valeur de S187 : celle du tableau où seul l'axe **vertical**
+était ancré. La bonne est **1,7160 %**, celle du tableau d'ancrage horizontal, et c'est elle que
+la mesure redonne — ainsi que 3,6805 % et 13,1488 % aux deux autres densités. Le fait instruit :
+**une fois l'axe vertical ancré, sa contribution disparaît entièrement de la norme maximum**, et
+il ne reste que l'erreur horizontale.
+
+**Ce que je n'ai pas fait.** Aucun seuil de justesse : A50 attend une décision, et `N` de
+SPEC-004 §6.2 reste le seul de ses trois paramètres que personne n'a fixé. **Rien sur le réseau
+gradué** — le rejeu n'a bougé qu'une variable, volontairement, et c'est précisément le gradué
+qui pourrait séparer les deux maxima. Aucun coût remesuré : les nombres de nœuds sont ceux de
+S186 par construction. Le surcoût par maille d'un réseau à poids irréguliers n'est toujours pas
+chiffré. Un seul montage, une seule profondeur de bloc. Le véhicule ne projette pas.
+
+**Prochaine session recommandée. S189 : S188-1**, la composition sur réseau **gradué**. C'est le
+seul endroit connu où la condition d'**A232** peut être mise à l'épreuve plutôt que constatée :
+la graduation déplace le maximum de l'erreur spatiale vers le milieu du bloc tandis que le
+maximum temporel reste accroché à celui du champ, en haut. Si la loi survit à cette séparation
+elle est robuste ; si elle tombe, A232 est confirmée et ADR-118 devra dire sur quel réseau sa
+règle de dimensionnement s'applique. **Les deux issues instruisent**, et c'est ce qui en fait la
+bonne mesure suivante. **BILAN-B4-S176** reste le bilan actif et porté, avec un suivi daté.
+
+**Décisions qui demandent un arbitrage humain :** aucune nouvelle. A107 reste ouverte.
