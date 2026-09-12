@@ -122,3 +122,20 @@ Trois voies, et elles ne se valent pas.
   non de session ; ADR-120 fixe 2 % et n'est pas redemandé.
 - **Une observation brève.** Écartée par la mesure : au-dessus de `s=0,014` le budget est
   franchi avant la fin de la première période.
+
+---
+
+**Note S197 — 2026-09-12 : audit de résolution, la décision est confirmée.**
+A242 a montré que le critère d'énergie employé par S194 ne détecte pas la sous-résolution.
+La table mesurée du §7.8 de S194, qui porte cette décision, a donc été **rejouée** en ne
+changeant que le nombre de niveaux verticaux `K` — la seule chose dont dépende le symbole de
+dispersion. À `K = 64` elle reproduit exactement le publié ; à `K = 256` et `K = 1024`, deux
+résolutions qui donnent le même résultat, elle se déplace de **3,3 % au maximum**. Toutes les
+lignes du tableau ci-dessus tiennent : « jamais » sous `0,008`, ~19 périodes à `0,009`, ~5 à
+`0,0125`, sous une période à `0,014`. **Rien n'est réécrit ; la décision est confirmée.**
+
+Une réserve, et elle est neuve : l'ajustement `α·s + β·s²·N` se déplace davantage que la
+table — `α` de 3,7 % — et ses **extrapolations hors de sa plage de calibration**
+(`s ∈ [0,0125 ; 0,1]`) bougent jusqu'à 35 % à `s = 0,014`. Cette décision ne repose pas sur
+elles, mais une session qui emploierait la loi loin de sa calibration devrait le savoir.
+Voir [AUDIT-RESOLUTION-S197](../validation/AUDIT-RESOLUTION-S197.md) §8.1.

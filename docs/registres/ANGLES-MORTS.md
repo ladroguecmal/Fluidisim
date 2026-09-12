@@ -2730,7 +2730,7 @@ A241 reste **ouverte** sur sa moitié « cause ». Les deux suspects nommés et 
 confondant de bande relative (24 % entre les deux parités, borné mais pas isolé) et les termes
 **triples**, que la parité ne neutralise pas.
 
-- **A242** *(sévérité 2, S196 ; ouverte)* — **Le critère de conservation ne détecte pas la
+- **A242** *(sévérité 2, S196 ; **close en S197**)* — **Le critère de conservation ne détecte pas la
   sous-résolution.** S194, S195 et S196 déclarent hors domaine toute configuration dont la
   dérive relative d'énergie dépasse `10⁻⁴`, et s'en servent comme **du** critère de validité.
   S196 en a trouvé un contre-exemple net : à `n = 16`, `K = 32`, la moyenne quadratique de
@@ -2747,3 +2747,36 @@ confondant de bande relative (24 % entre les deux parités, borné mais pas isol
   coûteux : apparier tout critère de conservation à un contrôle de **raffinement**, et refuser
   d'imprimer un ordre depuis un triplet non monotone. Voir **L277** et
   REPLI-CROISEES-S196 §8.5.
+
+**Correction A241 — S197 : le verdict de S196 ne survit pas au raffinement, et le repli est
+réfuté.** [AUDIT-RESOLUTION-S197](../validation/AUDIT-RESOLUTION-S197.md) §8.3. S196 avait
+conclu que le repli des harmoniques croisées pèse **un tiers**, sur un écart pair/impair de
+`0,131` mesuré à `K = 64`. À `K = 1024`, où l'erreur du symbole de dispersion tombe de
+`120 %` à `0,75 %`, cet écart vaut **`0,005`** — les deux familles donnant `−0,432` et
+`−0,426`. À `K = 64` l'audit reproduit exactement les chiffres de S196 : il est fidèle, et
+c'est bien la conclusion qui tombe, pas la mesure qui diverge.
+
+**C'est la prédiction 2 de S196**, celle qui réfute : « les deux familles s'accordent à mieux
+que `0,10`, et l'explication de S195 tombe ». Elles s'accordent à `0,005`. **Le repli des
+harmoniques croisées sur les modes de train n'explique rien de mesurable.** La moitié
+« cause » d'A241 a donc sa réponse, et elle est négative ; la **totalité** de l'écart entre la
+mesure et l'addition dispersée reste sans explication. La moitié « limite » survit, sa valeur
+passant de `−0,52` à environ `−0,45`.
+
+Pourquoi ce verdict est tombé et pas ceux de S194 et S195 : ceux-là comparaient des
+configurations **à même bande**, où l'erreur de symbole est commune aux deux côtés et
+s'annule ; S196 comparait deux familles de bandes différentes — 38 contre 40 — donc
+d'exposition différente. Voir **L278**. A241 reste **ouverte** sur sa cause, avec un suspect
+de moins et aucun de plus.
+
+**Clôture A242 — S197 : traitée, et elle a servi dès le premier emploi.**
+L'audit a couvert les trois cibles publiées. **ADR-123 tient** — sa table mesurée est
+convergée dès `K = 256` et se déplace de 3,3 % au plus ; elle reçoit une note datée de
+confirmation. **A240 tient** — exposants déplacés de 1 à 3 %. **Le verdict de S196 tombe**
+(ci-dessus). Le remède est en place dans le support partagé et dans les trois bancs :
+`dispersion_error(upto)`, qui donne l'écart entre le symbole discret employé et le symbole
+continu **à la configuration réellement exécutée**, et `richardson()`, qui refuse de tirer un
+ordre d'un triplet non monotone. Deux tests neufs les fixent. **A242 est close** ; ce qu'elle
+laisse, c'est **L278**, et une réserve : le pas de temps `dt` n'a pas été audité, et S193 ne
+l'a pas été non plus — sa bande peuplée est la moins exposée des quatre, mais ce n'est pas
+une mesure.

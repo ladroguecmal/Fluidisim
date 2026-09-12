@@ -77,12 +77,20 @@ le critère dans les bancs, pour que la faute ne puisse plus se répéter.
       Assertions de continuité sur les valeurs déjà publiées.
 - [x] **P3b** — exécuter l'audit : S194/ADR-123 d'abord, puis S195 et S193. Relever les
       marges et, pour ADR-123, l'effet sur ses **seuils** et non sur ses décimales.
-- [>] **P4** — verdict par cible. Note corrective datée là où il en faut ; un ADR n'est
+- [x] **P4** — verdict par cible. Note corrective datée là où il en faut ; un ADR n'est
       jamais réécrit, et une décision qui changerait demanderait un ADR neuf.
-- [ ] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes,
+- [>] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes,
       jeton `libre`, copies avancées sans suppression non prouvée.
 
 ### Notes de reprise
+
+P4 S197 : AUDIT-RESOLUTION-S197 §8–§9 reçus. **A242 close** (traitée, remède en place).
+**A241 corrigée** : le repli est **réfuté**, pas « un tiers ». **L278** écrite.
+Corrections propagées : avertissement en tête de REPLI-CROISEES-S196, note de
+**confirmation** datée sur **ADR-123** (non réécrite), note sur SOURCES-MULTIPLES-S195.
+Décomptes à porter en P5 : **123 ADR, 242 angles, 278 leçons, 18 invariants, 6 SPEC,
+23 cas** — A242 est close, pas nouvelle, donc le compte d'angles ne bouge pas.
+**Aucun ADR** : ADR-123 est confirmée par l'audit.
 
 P3 S197 : `dispersion_error(upto)` et `richardson()` ajoutés au support partagé, deux
 tests neufs ; audit ajouté aux trois bancs publiés. Workspace 331 réussis/cinq ignorés,

@@ -123,10 +123,134 @@ Deux gestes, dans le support partagé, pour que la faute ne puisse plus se rép�
 3. **La bande n'est pas rouverte** : S195 et S196 l'ont vérifiée, `Q+8` ne déplaçant rien.
 4. **Aucun contrat runtime**, aucune mesure de coût, `water-core` inchangé.
 
+
 ## 8. Relevés
 
-*À recevoir en P3b. Aucun chiffre n'est écrit avant l'exécution.*
+Les trois bancs publiés ont reçu leur audit et le portent désormais eux-mêmes — c'est le
+remède du §6, appliqué là où le critère est employé.
+
+```
+cargo run --release --manifest-path code/Cargo.toml -p water-core --example nl_coupling_2d
+cargo run --release --manifest-path code/Cargo.toml -p water-core --example nl_sources_2d
+cargo run --release --manifest-path code/Cargo.toml -p water-core --example nl_fallback_2d
+```
+
+Empreintes **changées** par l'ajout de l'audit — les valeurs publiées, elles, sont
+reproduites à l'identique à `K = 64`, et le banc le vérifie : `0x4bc0934d630c2c50`,
+`0xb9b742189219c8ce`, `0xcbb87743073b703d`. Workspace **331 réussis / cinq ignorés**, et
+douze réceptions au banc S196, dont les deux gardes neuves.
+
+### 8.1 ADR-123 — la table mesurée tient
+
+La table du §7.8 de S194 est **mesurée, pas interpolée** ; c'est elle, et non l'extrapolation
+de la loi ajustée, que porte ADR-123. Rejouée en ne changeant que `K` :
+
+| `K` | erreur de symbole à `q=9` | `s=0,008` | `0,009` | `0,010` | `0,0125` | `0,014` | `0,015` | `0,020` |
+|---:|---:|---|---:|---:|---:|---:|---:|---:|
+| **64** *(publié)* | 9,32 % | jamais | 19,82 | 11,70 | 5,38 | 0,78 | 0,75 | 0,40 |
+| 256 | 0,608 % | jamais | 19,38 | 11,50 | 5,20 | 0,78 | 0,72 | 0,40 |
+| 1024 | 0,038 % | jamais | 19,38 | 11,50 | 5,20 | 0,78 | 0,72 | 0,40 |
+| *S194 §7.8* | | *jamais* | *19,8* | *11,7* | *5,4* | *0,8* | *0,8* | *0,4* |
+
+`K = 64` reproduit le publié **exactement** — l'audit est donc fidèle — et la table est
+**convergée dès `K = 256`**, les deux résolutions fines étant identiques. Le déplacement
+maximal vaut **3,3 %**, à `s = 0,0125`. Aucun énoncé ne bouge : toujours « jamais » sous
+`0,008`, toujours ~19 périodes à `0,009`, toujours ~5 à `0,0125`, toujours sous une période
+à `0,014`. **Chaque ligne du §4 survit.**
+
+**L'ajustement, lui, bouge davantage** — et c'est une mise en garde, pas un défaut :
+
+| `K` | `α` | `β` | résidu relatif | `s*(N=20)` |
+|---:|---:|---:|---:|---:|
+| 64 *(publié)* | +1,302602 | +5,898728 | 0,0182 | 0,008622 |
+| 256 | +1,254219 | +5,970032 | 0,0279 | 0,008715 |
+| 1024 | +1,257146 | +5,937021 | 0,0282 | 0,008723 |
+
+`α` se déplace de **3,7 %**, `β` de **1,2 %**, le seuil de cambrure de **1,2 %** — dans la
+fenêtre `0,0077 – 0,0104` du §4. Mais les **durées extrapolées** par cette loi hors de sa
+plage de calibration (elle est ajustée sur `s ∈ [0,0125 ; 0,1]`) bougent jusqu'à **35 %** à
+`s = 0,014`. ADR-123 ne repose pas dessus ; une session qui emploierait la loi loin de sa
+calibration, si.
+
+### 8.2 A240 — les deux séries tiennent
+
+| `K` | erreur de symbole à `q=21` | exposant série A | exposant série B |
+|---:|---:|---:|---:|
+| **64** *(publié)* | 43,62 % | **−0,437** | **+0,783** |
+| 512 | 0,83 % | **−0,425** | **+0,774** |
+
+Déplacements de **2,7 %** et **1,1 %**. Le signe, la sous-linéarité et la conclusion d'A240
+— répartir une même mer sur plus de composantes améliore la superposition, et la crainte du
+`n²` est levée — sont **intacts**.
+
+### 8.3 S196 — le verdict de la veille ne survit pas
+
+| `K` | erreur de symbole | impaire | paire | écart |
+|---:|---:|---:|---:|---:|
+| **64** *(publié)* | 120,35 % à `q=40` | **−0,525** | **−0,394** | **0,131** |
+| 1024 | 0,75 % à `q=40` | **−0,432** | **−0,426** | **0,005** |
+
+`K = 64` reproduit exactement les chiffres de S196 — l'audit est fidèle — et à résolution
+convergée **l'écart pair/impair s'effondre de `0,131` à `0,005`**.
+
+> **C'est la prédiction 2 de S196, celle qui réfute.** Son protocole déclarait : « les deux
+> familles s'accordent à mieux que `0,10`, et l'explication de S195 tombe ». Elles
+> s'accordent à `0,005`. **Le repli des harmoniques croisées n'explique pas un tiers de
+> l'écart : il n'en explique rien de mesurable.**
+
+L'autre moitié du verdict de S196 se déplace sans tomber :
+
+| `K` | erreur de symbole | exposant dense `n = 2..16` |
+|---:|---:|---:|
+| 64 | 111,65 % à `q=38` | −0,478 |
+| 1024 | 0,68 % à `q=38` | **−0,445** |
+
+La limite existe toujours — c'était la moitié « limite » d'A241 — mais sa valeur passe de
+`−0,52` à environ `−0,45`, dans la fenêtre `−0,42 … −0,62` du §4. *Réserve : l'audit rejoue
+l'exposant sur toute la plage, pas les fenêtres glissantes hautes dont S196 tirait son
+`−0,52` ; la valeur de saturation elle-même n'est donc pas remesurée directement.*
+
+### 8.4 Pourquoi S196 tombe et pas les deux autres
+
+La différence n'est pas dans l'ampleur de l'erreur de symbole — S195 en portait 43 % et tient.
+Elle est dans **la façon dont la comparaison la répartit**.
+
+- **S194 et S195 comparent des configurations à même bande.** L'erreur de symbole y est
+  **commune aux deux côtés** de la comparaison, et s'annule en grande partie. Il en reste
+  les 1 à 3 % mesurés.
+- **S196 comparait deux familles de modes et de bandes différents** — `3,5,…,17` sur une
+  bande de 38 contre `4,6,…,18` sur une bande de 40. Chaque famille subissait donc une
+  erreur de symbole **différente**, et ce qui était mesuré comme « effet du repli » était,
+  pour l'essentiel, l'écart entre deux défauts de dispersion.
+
+S196 avait pourtant contrôlé beaucoup : même `n`, même cambrure totale, bande relative
+bornée, échelle absolue éprouvée par un témoin. Il n'avait pas contrôlé **l'exposition à
+l'erreur de résolution**, parce que rien dans le corpus ne disait qu'il fallait le faire.
+C'est **L278**.
 
 ## 9. Verdict par cible
 
-*À recevoir en P4.*
+| cible | enjeu | verdict |
+|---|---|---|
+| **ADR-123** (S194) | ADR **acté** | **tient** — table convergée dès `K=256`, déplacement ≤ 3,3 % |
+| **A240** (S195) | angle **clos** | **tient** — exposants déplacés de 1 à 3 % |
+| **A241** (S196) | verdict de la veille | **tombe** — l'écart `0,131` devient `0,005` |
+
+**Ce que la session referme.** A242 est **traitée** : les configurations publiées ont été
+auditées, le remède est en place dans le support et dans les trois bancs, et deux gardes
+neuves empêchent la répétition — `dispersion_error(upto)`, qui dit l'écart au symbole continu
+**à la configuration employée**, et `richardson()`, qui refuse de tirer un ordre d'un triplet
+qui ne converge pas.
+
+**Ce que la session casse.** Le résultat central de S196 — « le repli pèse un tiers » — est
+**faux**, et il l'était pour la raison même qu'A242 nomme. A241 reçoit donc sa réponse, et ce
+n'est pas celle que S196 a publiée : sur sa moitié « cause », **le repli est réfuté**. La
+totalité de l'écart entre la mesure et l'addition dispersée reste sans explication.
+
+**Ce que la session ne fait pas.** Elle n'explique pas davantage cet écart ; elle retire
+seulement un suspect, et le retire proprement. Elle n'audite pas le pas de temps `dt`, hérité
+et hors du champ d'A242. Elle ne rejoue pas S193, dont la bande peuplée est la moins exposée
+des quatre. Et elle ne remesure pas les fenêtres glissantes hautes de S196 (§8.3).
+
+**Aucun ADR.** ADR-123 est **confirmée** par l'audit et reçoit une note datée qui le dit ;
+elle n'est pas réécrite. Aucune décision de projet ne change.

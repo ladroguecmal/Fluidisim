@@ -4495,3 +4495,37 @@ Corollaire pour la lecture des sessions passées : « énergie conservée à `10
 aucune de leurs valeurs. Il ne faut pas pour autant les suspecter en bloc — les configurations
 de S194 et S195 étaient loin du bord de résolution — mais la phrase ne doit plus être lue comme
 une garantie qu'elle n'a jamais été. Voir A242 et REPLI-CROISEES-S196 §8.5.
+
+## L278 — Une erreur systématique ne s'annule dans une comparaison que si les deux côtés la portent également
+
+*(S197)* S196 avait bâti un montage soigné : deux familles de modes, même `n`, même cambrure
+totale, bande relative bornée et déclarée comme confondant résiduel, échelle absolue éprouvée
+par un témoin dédié. Il en a tiré un écart de `0,131` et une conclusion — le repli des
+harmoniques croisées pèse un tiers. À résolution convergée, cet écart vaut `0,005`.
+
+Ce qui n'avait pas été contrôlé n'est aucune des variables du montage : c'est **l'exposition
+à une erreur de modèle**. Le symbole de dispersion se trompait de plus de 100 % en haut de
+bande, et les deux familles avaient des bandes différentes — 38 contre 40 — donc des erreurs
+différentes. L'« effet du repli » était, pour l'essentiel, l'écart entre deux défauts.
+
+Deux sessions voisines n'ont pas été touchées, et la raison est instructive. S194 et S195
+comparaient des configurations **à même bande** : l'erreur y était commune aux deux côtés et
+s'est annulée, laissant 1 à 3 %. S195 portait pourtant une erreur de symbole de 43 %, et sa
+conclusion tient. **Ce n'est donc pas l'ampleur de l'erreur qui décide, c'est sa répartition
+entre les termes comparés.**
+
+Une comparaison protège d'un défaut commun — c'est ce qui la rend puissante, et ce qui fait
+qu'on lui fait confiance. Mais elle ne protège que de ce qui est **commun**. Dès que les deux
+bras diffèrent par autre chose que la variable étudiée — une bande, une résolution, une
+taille de domaine, un nombre de modes — ils différent aussi par leur part d'erreur, et cette
+part entre directement dans le résultat.
+
+Le geste : pour chaque comparaison, lister ce qui **diffère** entre les deux bras, et pour
+chaque différence se demander non pas « est-ce physique ? » mais « **cela change-t-il la part
+d'erreur de modèle que ce bras porte ?** ». S196 avait bien listé les différences ; il les
+avait toutes jugées sur leur physique, aucune sur leur erreur.
+
+Corollaire pratique, et il est bon marché : mesurer l'exposition de chaque bras — ici
+`dispersion_error(upto)` — et la publier **à côté** du résultat, comme on publie une dérive
+d'énergie. Un écart de 120 % contre 112 % entre deux bras se voit alors avant de conclure,
+et non six sessions plus tard. Voir AUDIT-RESOLUTION-S197 §8.4, A242 et L277.

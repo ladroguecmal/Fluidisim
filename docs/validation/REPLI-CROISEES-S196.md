@@ -4,6 +4,27 @@
 mesure.** Aucun choix de solveur δ, aucun seuil de bascule W/δ, aucun ADR attendu : le seuil
 B4 de 2 % est fixé (ADR-120) et n'est pas redemandé.
 
+> ## ⚠ Correction S197 — le verdict de ce document ne survit pas au raffinement
+>
+> **L'écart pair/impair de `0,131`, sur lequel repose tout le §8.2, vaut `0,005` à résolution
+> convergée.** Mesuré en S197 : à `K = 1024`, où le symbole de dispersion ne se trompe plus
+> que de `0,75 %` au lieu de `120 %`, les deux familles donnent `−0,432` et `−0,426`. À
+> `K = 64` l'audit reproduit exactement les chiffres ci-dessous, donc il est fidèle.
+>
+> **C'est la prédiction 2 de ce document même** (§5) : « les deux familles s'accordent à mieux
+> que `0,10`, et l'explication de S195 tombe ». Elles s'accordent à `0,005`. **Le repli
+> n'explique pas un tiers de l'écart : il n'en explique rien de mesurable.**
+>
+> **Ce qui survit.** La moitié « limite » : l'exposant se stabilise, sa valeur passant de
+> `−0,52` à environ `−0,45`. Le montage de parité lui-même reste juste — l'arithmétique du
+> repli, les décomptes, le témoin dense/paire. **Ce qui tombe est la conclusion**, parce que
+> la comparaison n'était pas contrôlée pour la résolution : les deux familles portaient des
+> bandes différentes, 38 contre 40, donc des erreurs de symbole différentes, et l'effet mesuré
+> était l'écart entre deux défauts.
+>
+> Le texte ci-dessous n'est pas réécrit. Voir [AUDIT-RESOLUTION-S197](AUDIT-RESOLUTION-S197.md)
+> §8.3 et §8.4, **A242** et **L278**.
+
 ## 1. Ce que S195 a laissé, et pourquoi ce n'est pas suffisant
 
 [S195](SOURCES-MULTIPLES-S195.md) a mesuré `n` sources et clos A240. Mais il a fermé une

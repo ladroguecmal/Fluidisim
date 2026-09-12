@@ -421,3 +421,9 @@ dont l'énergie dérivait soixante-cinq fois sous le seuil (**A242**, **L277**).
 configurations publiées ici sont loin du bord de résolution et leurs valeurs ne sont pas
 remises en cause ; c'est la **phrase** qui ne doit plus être lue comme une garantie de
 justesse. Voir REPLI-CROISEES-S196 §8.5.
+
+**Note S197 — 2026-09-12 : audit de résolution, les deux séries tiennent.** Rejouées à
+`K = 512`, où l'erreur du symbole de dispersion tombe de `43,6 %` à `0,83 %` : série A
+`−0,437 → −0,425`, série B `+0,783 → +0,774`, soit 2,7 % et 1,1 % de déplacement. **La
+clôture d'A240 n'est pas affectée.** Voir
+[AUDIT-RESOLUTION-S197](AUDIT-RESOLUTION-S197.md) §8.2.
