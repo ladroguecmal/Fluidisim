@@ -58,61 +58,53 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S204 — terminée
+Session : S205 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : porter la **clarification de l'utilisateur** du 2026-09-13 — ambition finale
-complète, construction progressive par versions de plus en plus capables — dans une
-**décision corrective d'ADR-124** (nouvel ADR, ancien non réécrit), puis la propager à la
-feuille de route, à REPRISE et à la file active. Aucun code. Aucun travail antérieur supprimé.
+Objectif : **A245**, bloquant J1 (FEUILLE-DE-ROUTE) — la composition B+W refuse toute mer
+au-delà de Hs ≈ 1,1 m, dont la mer de référence S201. Lot bibliothèque : faire composer B+W
+sur une mer réelle sans affaiblir ce que le budget garantit pour les perturbations.
 
-### État réel constaté à l'amorce
+### État réel à l'amorce
 
-master = 5a4ba1e (S203 P7), status propre ; trois copies isolées à 5a4ba1e, propres ;
-branche archivée claude/reprise-projet-5134cd inchangée. Jeton libre depuis S203 (même
-agent, deux minutes plus tôt) ; aucun travail en cours, aucune session concurrente.
-Codex a reconnu la correction en conversation sans l'appliquer : **aucun fichier ne la
-porte**. Lecture restrictive recensée dans 18 fichiers (58 occurrences), dont ADR-124
-(« δ effet borné », « V attend un besoin gameplay nommé »), ADR-125 §35-36, REPRISE,
-file active (4 lignes), 00_INDEX, README, PLAN-BENCHMARK B3, BILAN-B4-S176, IMAGE-B-S201,
-BUDGET-IMAGE-S202, IMPACT-W-S203 et le journal — **y compris mes propres textes S203**.
-**Pas de fichier « roadmap »** : la trajectoire vit dans ADR-053 §3 (historique), ADR-054 §3
-(lots W), ADR-124 « Décision et ordre » et l'en-tête de REPRISE.
+master = copies isolées = 990e6ae (S204 P5), propres ; jeton libre depuis S204 (même agent).
+Arbitrage « hôte interactif de J1 » posé à l'utilisateur en S204, **non répondu** ; A245 n'en
+dépend pas.
+
+### Décision de conception, prise avant le plan (lecture du code)
+
+Quatre sites mettent `steepness_B·π` (borne L1 de B, 0,6082 à Hs 1,5) dans le budget de refus :
+`composition::compose`, `prepared_water::mixed::sample_world_batch`, `mixed_differential`,
+`bound_pressure::Prepared::sample_world_batch`. Aucune SPEC ne consomme une garantie « surface
+sous π/7 » : `steepness` sert à l'écume et au déferlement (SPEC-004 §2, SPEC-001 §3).
+Remèdes écartés : terme directionnel (refuse encore, 0,5733) ; refus sur la pente réelle au
+point (refus dispersés et causés par la mer, lot atomique perdu) ; borne statistique (ne
+garantit rien). **Retenu** : le budget de refus ne somme que les **perturbations** (impacts
+`slope_max`, pression `slope_envelope`) ; la raideur de B **reste publiée** dans `steepness`
+= (B + perturbations)/π, même ordre de somme ⇒ **bits inchangés pour tout lot déjà admis** ;
+`Slope`/`SlopeEnvelope` jugés sur la pente réelle **des perturbations** au point ;
+`slope_floor` devient exact dans les deux sens. Rugosité de la mer = fait d'environnement
+publié, pas une erreur de requête (ADR-127 D7 : pas de fonctionnalité retirée en silence).
 
 ### Plan
 
-- [x] **P1** — état réel, jeton, plan seul.
-- [x] **P2** — ADR-127, décision corrective d'ADR-124 : ambition finale complète (δ général,
- interactions volumiques, inondations complexes, V, grande échelle) ; ordre progressif en
- cinq versions ; V placée par dépendances, pas en fin ; responsabilités/interfaces/autorité
- (I-04, I-10, I-11, I-15, I-17)/conservation préservées ; bancs exécutés quand ils tranchent ;
- 60 Hz/2 ms et 2 % acquis, budget = cible à confronter, incompatibilité ⇒ arbitrage explicite.
- Note de renvoi datée en tête d'ADR-124 ; note corrective datée ADR-125 (§35-36).
-- [x] **P3** — `docs/FEUILLE-DE-ROUTE.md`, unique porteur de la trajectoire : cinq versions,
- dépendances, ce qui existe, déclencheurs de bancs, arbitrages ouverts (hôte interactif,
- A247). REPRISE, index et file active y renvoient sans la recopier (L137).
-- [x] **P4** — propagation : REPRISE (paragraphe de trajectoire, file active, §4 et marqueurs
- datés sur S201–S203), QUESTIONS-OUVERTES (direction, lignes δ/A244/S199-2/V/S202-1),
- AGENTS (« Ce que tu ne décides pas »), PLAN-BENCHMARK B3, BILAN-B4-S176, 00_INDEX, README,
- notes datées en fin d'IMAGE-B-S201, BUDGET-IMAGE-S202, IMPACT-W-S203.
-- [x] **P5** — rituel §6 : journal, angle mort, leçon, décomptes (127 ADR attendus), file
- active entière, invariants cités relus, compteur, jeton libre, copies avancées.
+- [x] **P1** — état réel, décision de conception, plan seul.
+- [ ] **P2** — code : quatre sites, budget = perturbations seules, nommage sur leur pente
+ réelle, publication inchangée ; documentation de `slope_floor` (exact) ; compilation.
+- [ ] **P3** — essais : rejouer water-core, trier **chaque** échec (attente liée à B dans le
+ budget → réécrite avec cas W et motif écrit ; autre → défaut à corriger) ; nouveaux essais :
+ mer S201 Hs 1,5 composable (journal vide et avec impact) par `compose` et `mixed` ;
+ `slope_floor` exact des deux côtés ; verdicts `Slope`/`SlopeEnvelope` atteints par W seul.
+- [ ] **P4** — gardes du contrat de pente (I-18) relues et mises à jour ; workspace debug
+ complet ; essais touchés en release.
+- [ ] **P5** — bout en bout : image S203 +3 s rejouée **au bit** (contrôle « admis inchangé ») ;
+ impact sur la mer S201 Hs 1,5 contre témoin, zéro pixel hors emprise ; budget d'impact π/7.
+- [ ] **P6** — ADR-128 ; notes datées ADR-080/095/098/126 ; A245 close ; COMPOSITION-MER-S205.
+- [ ] **P7** — rituel §6 : journal, angles, leçons, décomptes, feuille de route (état J1), file
+ active, index/README/REPRISE, compteur, jeton libre, copies.
 
 ### Notes de reprise
 
-Formulation de référence de l'utilisateur, à citer telle quelle : *« ambition finale
-complète, construction progressive par versions de plus en plus capables »*. Trajectoire
-utilisateur : (1) version visible et interactive B/W ; (2) domaines volumiques bornés comme
-cas de construction et de validation du système général ; (3) extension des phénomènes,
-interactions entre domaines, frontières mobiles ; (4) V et inondations complexes, puis
-articulation avec la représentation volumétrique ; (5) ambitions initiales complètes.
-« Leur ordre détaillé doit suivre les dépendances, sans repousser V artificiellement à la
-toute fin. » ADR-054 §1 : V constructible indépendamment de δ (C12 cas V seul).
-ADR-001 : δ solveur 3D à surface libre, jamais autoritaire ; V graphe entier, serveur
-autoritaire, peut exposer une surface et déclencher un domaine δ local.
-
-P2 e0f0a3c : ADR-127 (D1–D7, arbitrages §5, réversibilité §6), renvoi daté ADR-124, note
-ADR-125. P3 0005e9c : FEUILLE-DE-ROUTE (J1–J5, V-noyau au plus tard avec J2). P4 bb14888 :
-REPRISE, file active, AGENTS, PLAN-BENCHMARK, BILAN-B4-S176, index, README, notes S201–S203.
-P5 : journal, A248, L282 ; 127 ADR / 248 angles / 282 leçons vérifiés ; occurrences restantes
-toutes citées ou marquées. **Arbitrage remonté à l'utilisateur : hôte interactif de J1.**
-Non fait : recherche d'autres décisions de priorité ayant retiré du périmètre (A248).
+Critère de non-régression déclaré **avant** le code : pour tout lot admis par l'ancienne règle,
+`eta`, `deta_dt`, `u_total`, `normal`, `steepness`, `aeration` identiques au bit ; seuls des
+refus disparaissent. Si un hachage de campagne ou d'essai change, c'est un défaut du lot, pas
+une attente à réécrire.

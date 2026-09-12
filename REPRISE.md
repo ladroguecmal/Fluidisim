@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-13 01:37 +02:00
+JETON            : occupé
+Battement        : 2026-09-13 01:41 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S205 — A245 : composition B+W sur mer réelle (J1, lot bibliothèque)
 Dernière session : S204 — ADR-127 : ambition complète, construction progressive ; feuille de route
 Session suivante : S205 — A245 : composition B+W sur mer Hs > 1,1 m (J1, file active, code src)
 Maillons        : 0 — S204 sujet imposé par l'utilisateur, pas un reliquat ; ADR-127 fixe δ/V
