@@ -91,7 +91,7 @@ quadratique et l'additive pour l'interpolation, et les écarts de 0,87 à 1,71 o
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seul.
-- [ ] **P2** — publier le protocole avant tout chiffre : familles graduée et ancrée, la
+- [x] **P2** — publier le protocole avant tout chiffre : familles graduée et ancrée, la
       localisation à la **maille**, l'identité d'additivité locale, ce qu'elle expliquerait,
       les réceptions, et ce que la mesure ne prouvera pas.
 - [ ] **P3a** — sortir dans `support/` le profil `∂²_z S` et les indices gradués que S187
