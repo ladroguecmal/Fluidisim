@@ -114,6 +114,9 @@ pub struct Volume {
     res: Vec<f64>,
     dir: Vec<f64>,
     tmp: Vec<f64>,
+    saved_u: Vec<f32>,
+    saved_w: Vec<f32>,
+    saved_p: Vec<f64>,
 }
 
 impl Volume {
@@ -153,8 +156,20 @@ impl Volume {
             return Err(Error::NotFinite);
         }
         let (nx, nz) = (domain.nx, domain.nz);
-        let bytes = (nx * nz * 8 + (nx + 1) * nz * 3 + nx * (nz + 1) * 3 + 2 * nx)
-            * core::mem::size_of::<f32>();
+        // Compter tous les tampons à leur précision réelle, avant toute allocation.
+        let c = nx.checked_mul(nz).ok_or(Error::Domain)?;
+        let nu = nx.checked_add(1).and_then(|n| n.checked_mul(nz)).ok_or(Error::Domain)?;
+        let nw = nz.checked_add(1).and_then(|n| n.checked_mul(nx)).ok_or(Error::Domain)?;
+        let floats = nu.checked_add(nw).and_then(|n| n.checked_mul(4))
+            .and_then(|n| n.checked_add(c))
+            .and_then(|n| nx.checked_mul(2).and_then(|x| n.checked_add(x)))
+            .ok_or(Error::Domain)?;
+        let bytes = floats.checked_mul(core::mem::size_of::<f32>())
+            .and_then(|n| c.checked_mul(6 * core::mem::size_of::<f64>()).and_then(|p| n.checked_add(p)))
+            .ok_or(Error::Domain)?;
+        if !(domain.z0().is_finite() && (nx as f32 * domain.dx).is_finite()) {
+            return Err(Error::Domain);
+        }
         // I-06 : l'allocation est demandée à l'hôte, et elle échoue si le système est scellé.
         host.alloc
             .alloc_persistent(bytes)
@@ -180,6 +195,9 @@ impl Volume {
             res: vec![0.0f64; nx * nz],
             dir: vec![0.0f64; nx * nz],
             tmp: vec![0.0f64; nx * nz],
+            saved_u: vec![0.; nu],
+            saved_w: vec![0.; nw],
+            saved_p: vec![0.; c],
         };
         v.cut();
         v.seal_isolated();
@@ -500,9 +518,8 @@ impl Volume {
     fn project(&mut self, dt: f32, max_iters: u32, jobs: &dyn JobSystem) -> Report {
         let (nx, nz, dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
         let inv = 1. / (dx as f64 * dx as f64);
-        let (us, ws) = (self.us.clone(), self.ws.clone());
         let mut rhs = core::mem::take(&mut self.rhs);
-        self.divergence(&us, &ws, &mut rhs);
+        self.divergence(&self.us, &self.ws, &mut rhs);
         let scale = -self.rho as f64 / dt as f64;
         for i in 0..nx {
             for k in 0..nz {
@@ -533,10 +550,9 @@ impl Volume {
         let tol = 1e-12_f64;
         // Au repos, `b` est exactement nul : aucune itération, et la correction est nulle.
         while b2 > 0. && rr > tol * b2 && it < max_iters {
-            let dir = self.dir.clone();
             let mut tmp = core::mem::take(&mut self.tmp);
-            self.apply(&dir, &mut tmp);
-            let dq = self.dot(&dir, &tmp, jobs);
+            self.apply(&self.dir, &mut tmp);
+            let dq = self.dot(&self.dir, &tmp, jobs);
             if !(dq > 0.) {
                 self.tmp = tmp;
                 break;
@@ -544,7 +560,7 @@ impl Volume {
             let alpha = rr / dq;
             for c in 0..self.domain.cells() {
                 if self.frac[c] > 0. {
-                    self.p[c] += alpha * dir[c];
+                    self.p[c] += alpha * self.dir[c];
                     self.res[c] -= alpha * tmp[c];
                 }
             }
@@ -597,12 +613,11 @@ impl Volume {
             }
         }
         let residual = if b2 > 0. { (rr / b2).sqrt() } else { 0. };
-        let (uu, ww) = (self.u.clone(), self.w.clone());
         let mut tmp = core::mem::take(&mut self.tmp);
-        self.divergence(&uu, &ww, &mut tmp);
+        self.divergence(&self.u, &self.w, &mut tmp);
         let dmax = tmp.iter().fold(0f64, |m, v| m.max(v.abs()));
         self.tmp = tmp;
-        let umax = uu.iter().chain(&ww).fold(0f64, |m, v| m.max((*v as f64).abs()));
+        let umax = self.u.iter().chain(&self.w).fold(0f64, |m, v| m.max((*v as f64).abs()));
         Report {
             iterations: it,
             degraded: b2 > 0. && rr > tol * b2,
@@ -617,9 +632,19 @@ impl Volume {
         if !dt.is_finite() || dt <= 0. {
             return Err(Error::NotFinite);
         }
+        self.saved_u.copy_from_slice(&self.u);
+        self.saved_w.copy_from_slice(&self.w);
+        self.saved_p.copy_from_slice(&self.p);
         self.advect(dt);
         let r = self.project(dt, max_iters, jobs);
-        if self.u.iter().chain(&self.w).any(|v| !v.is_finite()) {
+        if self.u.iter().chain(&self.w).any(|v| !v.is_finite())
+            || self.p.iter().chain(&self.rhs).chain(&self.res).chain(&self.dir)
+                .chain(&self.tmp).any(|v| !v.is_finite())
+            || !r.residual.is_finite() || !r.divergence.is_finite()
+        {
+            self.u.copy_from_slice(&self.saved_u);
+            self.w.copy_from_slice(&self.saved_w);
+            self.p.copy_from_slice(&self.saved_p);
             return Err(Error::NotFinite);
         }
         Ok(r)

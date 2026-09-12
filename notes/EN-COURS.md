@@ -66,7 +66,7 @@ les capacités et la portée précision/budget aux garanties effectives.
 ### Plan
 
 - [x] **P1** — état réel, quatre copies961a2e5 propres, jeton et plan seuls.
-- [ ] **P2** — supprimer les clones du pas, tampons de restauration préalloués,
+- [x] **P2** — supprimer les clones du pas, tampons de restauration préalloués,
   comptabilité exacte et dimensions contrôlées ; conserver les opérations numériques.
 - [ ] **P3** — compteur global d'allocation avec contre-épreuve, refus après calcul
   atomique et récupération, nominal/dégradé/rejeu ; tests workspace et filtre S199.
@@ -80,3 +80,7 @@ Reprise et invariants lus dans cette conversation, pas de changement depuis961a2
 S199 complet ; pas de reprise P4/P5. Code: project clone us/ws, dir par itération,
 u/w diagnostic. Budget API en itérations seulement ; pression f64 expérimentale.
 Aucun solveur de production reçu. S199-2 flux coupés conservée dans la file.
+
+P2 : aucun clone dans project ; sauvegardes u/w/p préallouées, contrôle de fin
+et restauration sur refus. Octets f32/f64 corrigés, calculs de tailles checked.
+Huit tests historiques delta passent. Les nouveaux reçus globaux viennent en P3.
