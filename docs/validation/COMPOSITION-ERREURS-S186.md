@@ -172,3 +172,239 @@ rien : deux bruits ne composent pas. Elles sont marquées et exclues du verdict.
 - **Le véhicule ne projette pas** et ne modélise ni surface libre ni bord (S184 §3).
 - **L'interpolation temporelle n'est pas proposée** : elle exige une période de latence, et
   reste mesurée comme plafond (S185 §1).
+
+## 8. Relevés
+
+```
+cargo run --release --manifest-path code/Cargo.toml -p water-core --example composed_error
+```
+
+Bibliothèque inchangée ; workspace **331 réussis / cinq ignorés** en debug et en release.
+Bloc 16³, 2744 mailles intérieures, `dt = 10 ms`, 100 pas, 129 instantanés **par réseau** —
+2744 nœuds à `r = 1`, 512 à `r = 2`, 125 à `r = 4`, 27 à `r = 8`. Mailles intérieures à
+`z ∈ [−4,05 ; −0,80] m`. `max |S| = 1,540547e-4 m/s²`, `max |u'(T)| = 7,993168e-5 m/s`.
+
+Ce véhicule ne mesure **aucune durée** : sa sortie entière est un résultat, et un `diff`
+strict entre deux exécutions est vide. C'est une propriété plus forte que celle de S185, qui
+publiait trois lignes de durée.
+
+### 8.1 Réceptions — les six passent
+
+1. **Reproductibilité.** Empreinte `0x0e743846d4656870`, et un `diff` strict entre deux
+   exécutions est **vide**.
+2. **`scatter` à `r = 1` est le chargement direct**, bit pour bit. Le poids d'interpolation
+   vaut zéro et `a + 0·x == a` : il n'y a pas de cas particulier à écrire, et il n'y en a pas.
+3. **Contrôle croisé avec S185.** `max |S| = 1,540547e-4 m/s²` et
+   `max |u'(T)| = 7,993168e-5 m/s` — les valeurs de S185 §6. Et la ligne `r = 1` redonne
+   **exactement** les couples `eS/eU` de S185 §6.2 : maintien `c=2` 1,6894 / 0,7700 ;
+   maintien `c=64` 48,4130 / 33,2115 ; extrapolation `c=8` 4,7449 / 0,7754 ; interpolation
+   `c=64` 12,3586 / 6,7740. Deux véhicules écrits à une session d'intervalle, la même
+   référence, les mêmes chiffres : **c'est ce qui autorise à composer les deux mesures.**
+4. **À `c = 1` les trois modes rendent le même champ**, en bits, pour chacun des quatre `r`.
+   La colonne `c = 1` est donc purement spatiale, comme annoncé.
+5. **Plancher.** La référence à `dt/2` sur 200 pas s'écarte de **0,386 %** de `max |u'(T)|` —
+   à la décimale la valeur de S185, ce qui est attendu puisque c'est la même référence.
+6. **Tout est fini**, source et champ, sur les 84 cases.
+
+**Un déplacement, et sa vérification.** `Mode` et `build_source` vivaient dans
+`cadence_error.rs` ; ils sont désormais dans `examples/support/reuse_mode.rs`, parce que S186
+réemploie les mêmes trois modes et qu'une seconde copie aurait divergé (L137). `cadence_error`
+a été rejoué : **empreinte `0x39567a1d4bc2ba4c` inchangée**, celle que S185 a publiée. Le code
+est déplacé, pas réécrit, et ce n'est pas une affirmation mais un relevé.
+
+### 8.2 Le contenu réellement présent : la profondeur filtre
+
+`k_eff` par tranche à l'instant `T0`, sur le réseau plein. `λ_eff = 2π/k_eff`.
+
+| k | z (m) | max abs S (m/s²) | k_eff x | k_eff y | k_eff z | λ_eff z (m) |
+|---:|---:|---:|---:|---:|---:|---:|
+| 1 | −4,05 | 1,4495e-5 | 0,367 | 0,256 | — | — |
+| 2 | −3,80 | 1,5549e-5 | 0,362 | 0,261 | 0,496 | 12,66 |
+| 4 | −3,30 | 1,7884e-5 | 0,372 | 0,280 | 0,528 | 11,89 |
+| 6 | −2,80 | 2,0589e-5 | 0,382 | 0,305 | 0,573 | 10,97 |
+| 8 | −2,30 | 2,3781e-5 | 0,402 | 0,349 | 0,638 | 9,85 |
+| 10 | −1,80 | 2,7677e-5 | 0,471 | 0,434 | 0,743 | 8,46 |
+| 12 | −1,30 | 3,2630e-5 | 0,587 | 0,553 | 0,963 | 6,52 |
+| 13 | −1,05 | 3,5607e-5 | 0,674 | 0,643 | 1,166 | 5,39 |
+| 14 | −0,80 | 4,1412e-5 | 0,791 | 0,753 | — | — |
+
+*(table complète — quatorze tranches — dans la sortie du programme ; une ligne sur deux ici.)*
+
+**La branche verticale du §3 est réfutée, et l'autre est confirmée largement.** Le contenu
+présent au bloc varie sur `0,37` à `0,79 rad/m` horizontalement et `0,50` à `1,17` verticalement
+— soit `λ_eff` de **8 à 17 m** et de **5,4 à 12,7 m** — quand la recette annonce
+`λ_min = 1,081 m` (`k_max = 5,81 rad/m`) et que la décroissance verticale `1/k_max` vaudrait
+`0,172 m`. **Le contenu réellement présent est 5 à 16 fois plus lisse que la coupure de la
+recette.** L'amplitude confirme : le maximum de la source par tranche ne croît que d'un facteur
+2,86 de `z = −4,05` à `z = −0,80`, soit une longueur d'atténuation de **3,1 m**, et non 0,172 m.
+
+C'est le filtrage `exp(k z)` qui l'explique : à `z = −0,80 m`, le mode le plus court est déjà
+divisé par `exp(5,81 · 0,80)`, environ cent. Ce qui reste, ce sont les modes longs — et `B`,
+dont la composante la plus courte fait 14 m.
+
+**Conséquence, et c'est une correction de méthode :** les 2,16 points par longueur d'onde à
+`r = 2` annoncés en S184 §5 mesurent la recette, pas la source telle qu'un consommateur en
+profondeur la reçoit. Le critère doit porter sur **l'échelle qui survit à la profondeur du
+consommateur**. Ici il est **cinq à seize fois trop pessimiste** ; pour un consommateur de
+surface il serait juste, et pour un consommateur plus profond encore trop sévère. Un critère
+qui donne la bonne réponse par le mauvais chemin se trompera ailleurs (**A230**).
+
+### 8.3 L'erreur spatiale seule, et l'endroit où elle vit
+
+| r | h (m) | h/λ_min | eS % | eU % | eU/(h/λ_min)² |
+|---:|---:|---:|---:|---:|---:|
+| 1 | 0,25 | 0,2313 | 0 | 0 | — |
+| 2 | 0,50 | 0,4625 | 3,5922 | **2,5401** | 0,1187 |
+| 4 | 1,00 | 0,9251 | 17,8866 | **13,6043** | 0,1590 |
+| 8 | 2,00 | 1,8502 | 27,5989 | **32,9593** | *saturé* |
+
+À `r = 8` l'erreur de champ (32,96 %) **dépasse** l'erreur de source (27,60 %) : l'évolution
+n'atténue pas le défaut, elle l'accumule. Et `h/λ_min = 1,85` est au-delà de la limite où une
+loi d'ordre deux a cours ; la constante n'y est pas publiée.
+
+**Où l'erreur vit.** `eU` par tranche, en pourcentage du maximum **global** de `u'(T)`, à
+`c = 1` :
+
+| k | z (m) | max local de u' , % | r = 2 | r = 4 | r = 8 |
+|---:|---:|---:|---:|---:|---:|
+| 1 | −4,05 | 34,60 | 0,1124 | 0,4299 | 1,5372 |
+| 5 | −3,05 | 46,69 | 0,1791 | 0,6805 | 6,3102 |
+| 9 | −2,05 | 64,16 | 0,2981 | 1,1392 | 4,1665 |
+| 12 | −1,30 | 83,26 | 1,1622 | 2,8568 | 22,3447 |
+| 13 | −1,05 | 91,22 | 1,0506 | 3,6347 | 27,9292 |
+| 14 | −0,80 | 100,00 | **2,5401** | **13,6043** | **32,9593** |
+
+**L'erreur globale est exactement celle de la tranche la plus haute**, aux trois `r`. La tranche
+du fond ne vaut que 0,11 / 0,43 / 1,54 % — **vingt-trois fois moins à `r = 2`**. Un réseau
+isotrope dépense donc la même densité de nœuds là où le contenu est lisse et là où il ne l'est
+pas, et c'est la seconde qui fixe le résultat. Un réseau **gradué en profondeur** est la suite
+évidente, et elle n'est pas mesurée ici (§7).
+
+### 8.4 H1 : confirmée, au nombre d'axes près
+
+Les deux erreurs sont du second ordre dans un pas sans dimension. Leur **rapport de
+constantes** ne dépend donc pas du `λ` choisi pour normaliser : si le contenu effectif est plus
+lisse que `λ_min` — et §8.2 montre qu'il l'est d'un facteur 5 à 16 — les deux constantes sont
+multipliées par le **même** facteur. C'est ce rapport, et lui seul, qui juge H1.
+
+| r | h/λ_min | A_espace | A_espace / A_temps |
+|---:|---:|---:|---:|
+| 2 | 0,4625 | 0,1187 | **2,27** |
+| 4 | 0,9251 | 0,1590 | **3,05** |
+
+avec `A_temps = 0,0522`, relevé sur les cadences jugées du mode interpolation — le même
+opérateur que `scatter` : linéaire entre deux échantillons. S185 mesurait 0,052, stable de
+`c = 8` à `c = 32`.
+
+**2,27 et 3,05 : c'est le nombre d'axes interpolés.** `scatter` interpole linéairement sur
+trois axes et leurs erreurs s'ajoutent ; le temps n'en a qu'un. Interpoler en espace coûte donc
+ce qu'interpoler en temps coûte, **par axe** — et H1 est vraie à ce facteur près. La branche
+concurrente du §3, qui prédisait un facteur approchant 39 par la décroissance verticale, est
+écartée par un facteur quinze.
+
+L'interprétation par le nombre d'axes repose sur deux points de mesure ; elle est cohérente
+avec eux et avec la structure de `scatter`, elle n'est pas démontrée. Ce qui est mesuré, c'est
+le rapport.
+
+### 8.5 La composition : le verdict déclaré, puis ce qu'il cachait
+
+**Le critère de §5, appliqué tel qu'il a été déclaré, rejette les trois lois** sur l'ensemble
+des cases jugées :
+
+| loi | rapport mesuré/prédit | verdict |
+|---|---|---|
+| additive | 0,529 – 0,988 | **rejetée** |
+| quadratique | 0,749 – 1,209 | **rejetée** |
+| maximum | 0,826 – 1,489 | **rejetée** |
+
+Deux choses se lisent déjà là. L'additive n'est **jamais dépassée** — 0,988 au plus fort, sur
+les 84 cases : c'est une **enveloppe sûre**, avec jusqu'à 1,9 fois de mou. Et le maximum, lui,
+est dépassé jusqu'à 1,489 : il n'en est pas une.
+
+**Séparé par mode de réemploi, le même relevé devient net :**
+
+| mode | additive | quadratique | maximum | loi retenue |
+|---|---|---|---|---|
+| maintien | 0,529 – 0,976 | 0,749 – 0,999 | 0,826 – 1,155 | **maximum** |
+| extrapolation | 0,540 – 0,976 | 0,760 – 0,999 | 0,860 – 1,034 | **maximum** |
+| interpolation | 0,803 – 0,988 | 0,991 – 1,209 | 0,998 – 1,489 | **additive, quadratique** |
+
+**La loi de composition dépend du mode de réemploi.** Ce n'est pas une nuance : c'est pourquoi
+le verdict global rejetait tout. Et le partage est favorable, parce qu'il l'est du bon côté :
+
+- **Pour les deux modes causaux — les seuls dont un runtime dispose (S185 §1) — la loi est le
+  maximum.** Les deux erreurs ne s'ajoutent pas ; la plus grande gagne. **L'axe bon marché est
+  donc gratuit jusqu'à la parité avec l'axe dominant**, et le raffiner au-delà n'achète rien.
+- Pour l'interpolation, elles se composent quadratiquement (0,991–1,209), c'est-à-dire comme
+  deux erreurs indépendantes.
+
+C'est la réponse à la question de §1 : **un budget conjoint `r × c` est licite**, au sens du
+maximum, pour un consommateur causal. La règle de dimensionnement qui en découle est
+d'**égaliser** les deux erreurs seules, puis de s'arrêter.
+
+Exemple lu dans la grille, maintien, `r = 2` (erreur spatiale seule 2,54 %) : la cadence est
+invisible jusqu'à `c = 8` (4,54 % contre 5,05 % pour la cadence seule) et ne devient dominante
+qu'à `c = 32`. Le gain de coût entre `c = 1` et `c = 8` est exactement 8 (S184) ; il est obtenu
+pour un facteur 1,8 sur l'erreur, et **aucun** si l'on s'arrête à `c = 4`.
+
+### 8.6 Dégrader la cadence peut réduire l'erreur totale
+
+| mode | r | eU(c=1) % | minimum sur c % | c du minimum | gain |
+|---|---:|---:|---:|---:|---:|
+| maintien | 2 | 2,5401 | 2,2048 | 2 | **−13,20 %** |
+| maintien | 4 | 13,6043 | 11,2323 | 8 | **−17,44 %** |
+| extrapolation | 2 | 2,5401 | 2,1832 | 8 | **−14,05 %** |
+| extrapolation | 4 | 13,6043 | 11,9516 | 16 | **−12,15 %** |
+| interpolation | 2 | 2,5401 | 2,5401 | 1 | 0,00 % |
+| interpolation | 4 | 13,6043 | 13,5988 | 8 | −0,04 % |
+
+Sur un réseau décimé, **reconstruire moins souvent donne un champ plus juste**, jusqu'à 17 %
+de mieux. Les deux erreurs se compensent partiellement, et la compensation appartient aux
+**modes causaux** : elle disparaît avec l'interpolation, dont l'erreur temporelle est sept fois
+plus petite (S185). Elle est visible dans `eS` seule — interpolation `r = 4` passe de 17,89 %
+à 15,16 % à `c = 32` — donc ce n'est pas un artefact de l'évolution du champ, mais bien une
+propriété de la source appliquée.
+
+C'est un **piège de réglage**, et c'est l'angle mort de cette session (**A229**) : une
+procédure qui balaie un axe en tenant l'autre fixe trouve un optimum, croit avoir réglé, et a
+seulement trouvé l'endroit où deux erreurs s'annulent le mieux. La compensation dépend du
+contenu, du mode et de la métrique ; elle n'est pas un acquis de conception et ne doit pas être
+dépensée.
+
+## 9. Ce que la session conclut, et ce qu'elle laisse ouvert
+
+**Conclu.**
+
+1. **Un budget conjoint est licite pour un consommateur causal**, au sens du maximum. La règle
+   est d'égaliser les erreurs des deux axes pris seuls.
+2. **L'additive est une enveloppe sûre** dans tous les cas, avec jusqu'à 1,9 fois de mou.
+3. **La loi dépend du mode de réemploi** — maximum pour maintien et extrapolation, quadratique
+   pour l'interpolation. Un seul chiffre de composition n'existe pas.
+4. **Espace et temps sont le même opérateur, par axe** (H1), avec un facteur 2,3 à 3,1 pour les
+   trois axes de `scatter`.
+5. **Le contenu de la source, vu en profondeur, est 5 à 16 fois plus lisse que la coupure de sa
+   recette.** Compter les points par longueur d'onde de la recette est un critère faux — trop
+   pessimiste ici, trop optimiste près de la surface.
+6. **L'erreur spatiale est intégralement celle de la tranche la plus haute** du bloc.
+7. **Dégrader la cadence peut réduire l'erreur** de 12 à 17 % sur les modes causaux.
+
+**Non conclu, et pas contourné.**
+
+- **Aucun seuil de justesse.** A50 n'attend plus un chiffre mais une décision, et elle reste
+  entière : rien ici ne dit si 2,5 % est acceptable.
+- **Un seul montage, un seul couple d'échelles.** Les formes sans dimension voyagent, les
+  valeurs non.
+- **Réseau isotrope seulement.** Le réseau gradué en profondeur que §8.3 appelle n'est pas
+  mesuré, et `nodes_per_axis` / `scatter` ne savent pas le faire.
+- **Aucun coût conjoint annoncé.** Le gain reste le produit des nœuds par la cadence (S184) ;
+  la présente session dit seulement qu'on a le droit de le dépenser.
+- **Le véhicule ne projette pas**, et l'advection y reste d'ordre supérieur.
+- **`A_temps` est relevé sur deux cadences** seulement dans cette grille, faute de cases au-delà
+  du plancher et en deçà de la saturation. S185 en avait cinq, concordantes.
+
+**Suite recommandée — S187 : S186-1.** Le réseau **gradué en profondeur**. §8.3 montre que
+l'erreur vient d'une seule tranche sur quatorze et que les treize autres sont surrésolues :
+un réseau dont le pas suit `1/k_eff(z)` devrait rendre la même erreur pour une fraction des
+nœuds. C'est le premier lot où la mesure recommande une **construction**, et non un chiffre de
+plus. Il touche `nodes_per_axis` et `scatter`, donc il exige de rejouer S184 et S186 et de
+vérifier leurs empreintes, comme S186 l'a fait pour S185.

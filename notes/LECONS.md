@@ -4154,3 +4154,36 @@ Corollaire, appris ici aussi : quand l'identité échoue à 100 %, soupçonner l
 la physique. Un écart total, et non un écart grand, est la signature d'un appariement rompu.
 
 Voir CADENCE-3D-S185 §6.1 et A228.
+
+## L266 — Deux erreurs mesurées séparément ne se composent pas : leur somme est une enveloppe, jamais une prédiction
+
+Le dépôt avait deux mesures d'approximation portant sur la même source — la décimation
+spatiale (S170) et la cadence temporelle (S185) — et rien n'interdisait de les additionner
+pour dimensionner les deux à la fois. Mesurées **ensemble**, sur le même véhicule et contre
+une seule référence, elles ne s'additionnent sur aucune des 84 cases : l'additive surestime
+jusqu'à 1,9 fois, et la loi réelle **change avec le mode de réemploi** — le maximum pour les
+deux modes causaux, la quadratique pour l'interpolation. Sur un réseau décimé, dégrader la
+cadence peut même **réduire** l'erreur totale de 17 %.
+
+Ce qui généralise, en trois points :
+
+1. **La somme est une enveloppe sûre et rien de plus.** Elle n'a été dépassée nulle part, ce
+   qui en fait un outil de dimensionnement légitime — à condition de dire qu'on paie son mou.
+   La présenter comme une prédiction, c'est annoncer une erreur qu'on n'a pas.
+2. **La loi de composition est une quantité à mesurer, pas à choisir.** Additive, quadratique
+   et maximum donnent des conclusions de conception **opposées** : la première dit de réduire
+   les deux axes, la troisième dit que l'axe bon marché est gratuit jusqu'à la parité. Déclarer
+   les trois avant la mesure, et le critère qui les juge, coûte un paragraphe.
+3. **La composition peut dépendre d'un troisième paramètre**, ici le mode de réemploi. Un
+   verdict global rejetait les trois lois ; séparé par mode, il en retenait une par mode. Une
+   loi rejetée sur l'ensemble n'est pas une loi absente : c'est peut-être deux lois.
+
+Corollaire de méthode, et il vaut au-delà de ce cas : **une mesure de composition exige une
+référence unique et un contrôle croisé avec les mesures qu'elle compose.** Ici la ligne
+`r = 1` devait redonner, chiffre par chiffre, les quatorze valeurs publiées par S185 — et
+elle les redonne. Sans ce contrôle, une différence de montage entre les deux sessions se
+serait lue comme une interaction entre les deux erreurs.
+
+Voir COMPOSITION-ERREURS-S186 §8.5 et §8.6, A229. Même famille que L265 — relier deux mesures
+indépendantes est ce qui révèle ce qu'aucune ne montre seule ; L265 le faisait dans une
+session, L266 le fait entre deux.

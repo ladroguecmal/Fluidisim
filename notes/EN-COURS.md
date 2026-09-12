@@ -81,10 +81,18 @@ erreurs se composent — additivement, quadratiquement, ou pas du tout.
 - [x] **P3b** — chiffrer la composition et éprouver l'équivalence advective `h ↔ v·τ` :
       pour un contenu advecté, décimer en espace et retarder en temps pourraient être
       la **même** erreur, et alors elles ne s'additionnent pas.
-- [ ] **P4** — recevoir dans un document de validation ; angles et leçons.
+- [x] **P4** — recevoir dans un document de validation ; angles et leçons.
 - [ ] **P5** — rituel de fin (REPRISE.md §6).
 
 ### Notes de reprise
+
+P4 S186 : COMPOSITION-ERREURS-S186 §8–§9 reçus, **A229** et **A230** écrits, **L266**
+écrite. Trois suivis datés ajoutés sans rien réécrire : CONSOMMATION-S184 (la
+justification de `r = 2` est fausse, la borne tient), CADENCE-3D-S185 (S185-1 réalisée,
+empreinte inchangée après déplacement), SOURCE-DECIMEE-S170 (son avertissement §2.2
+est chiffré et il avait raison). Décomptes à porter en P5, **vérifiés contre le dépôt**
+et non recopiés : **117 ADR, 230 angles, 266 leçons, 18 invariants, 6 SPEC, 23 cas**.
+Aucun ADR : aucun contrat n'a changé, et mesurer n'est pas décider.
 
 P3b S186 : synthèse **calculée par le programme**, pas posée à la main. Empreinte
 **inchangée, 0x0e743846d4656870** — les blocs ajoutés n'impriment que des grandeurs

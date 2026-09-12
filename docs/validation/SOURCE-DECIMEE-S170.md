@@ -138,3 +138,21 @@ plafonnée à `r = 2` par le **contenu** de la source — la coupure de pression
 revanche, divise exactement par `c` et porte sur un contenu lent. **L'avertissement de §2.2 —
 un ratio ne décrit pas à lui seul la précision — reste entier** : S184 mesure le temps, pas
 l'erreur, et ne recommande aucun `H`.
+
+
+**Suivi S186 — 2026-09-12 : l'avertissement de §2.2 est désormais chiffré, et il avait
+raison.** §2.2 disait qu'un ratio de décimation ne décrit pas à lui seul la précision, parce
+que la taille physique du réseau devant la variation de `S` compte.
+[COMPOSITION-ERREURS-S186](COMPOSITION-ERREURS-S186.md) le mesure en 3D sur le fournisseur
+réel et le confirme deux fois :
+
+- **le ratio ne suffit pas**, et la grandeur qui gouverne est `h · k_eff` où `k_eff` est le
+  contenu **réellement présent** là où le consommateur se trouve — 5 à 16 fois plus lisse que
+  la coupure de la recette, parce qu'un mode profond décroît en `exp(k z)` (§8.2, **A230**) ;
+- **la précision n'est pas répartie** : l'erreur globale est intégralement celle de la tranche
+  la plus haute du bloc, les treize autres sur quatorze étant surrésolues (§8.3).
+
+Et la composition avec l'erreur temporelle, que ce document ne pouvait pas mesurer sur une
+source figée, suit le **maximum** pour un consommateur causal : les deux erreurs ne
+s'additionnent pas (§8.5, **L266**). L'addition que §2.2 rendait douteuse est effectivement
+fausse — elle surestime jusqu'à 1,9 fois — mais elle reste une enveloppe sûre.

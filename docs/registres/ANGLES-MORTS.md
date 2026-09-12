@@ -2272,3 +2272,50 @@ il lui manque **un critère de justesse** et un solveur. S185-1 compose les deux
   Sévérité 2 : aucune valeur publiée n'est fausse et aucun contrat ne change ; c'est un choix
   d'intégration qui, pris par défaut, coûterait un ordre de grandeur de justesse.
   Chiffres et conditions dans CADENCE-3D-S185 §6.2 et §6.3.
+
+**Suivi A50 — S186 : les deux erreurs sont composées, et la loi dépend du mode de réemploi.**
+[COMPOSITION-ERREURS-S186](../validation/COMPOSITION-ERREURS-S186.md) : sur la grille
+`r × mode × c`, la composition suit le **maximum** pour les deux modes causaux (maintien
+0,826–1,155 ; extrapolation 0,860–1,034) et la **quadratique** pour l'interpolation
+(0,991–1,209). L'additive n'est dépassée sur aucune des 84 cases : c'est une enveloppe sûre,
+avec jusqu'à 1,9 fois de mou. **Un budget conjoint `r × c` est donc licite pour un
+consommateur causal**, et la règle de dimensionnement est d'égaliser les erreurs des deux axes
+pris seuls puis de s'arrêter. A50 n'attend toujours que son **critère de justesse** : la
+composition est connue, le seuil ne l'est pas.
+
+- **A229** *(sévérité 2, S186 ; ouverte)* — **Dégrader un axe peut réduire l'erreur totale, et
+  un réglage à un axe à la fois trouve alors un optimum faux.** Sur un réseau décimé, réduire
+  la cadence de reconstruction rend le champ **plus juste** : maintien `r = 4` passe de 13,60 %
+  à `c = 1` à **11,23 %** à `c = 8`, soit −17,4 % ; maintien `r = 2` −13,2 % à `c = 2` ;
+  extrapolation `r = 2` −14,1 % et `r = 4` −12,2 %. Les deux erreurs se compensent
+  partiellement, et la compensation appartient aux **modes causaux** — elle disparaît avec
+  l'interpolation (−0,04 %), dont l'erreur temporelle est sept fois plus petite. Elle est déjà
+  visible dans l'erreur de **source** seule, donc ce n'est pas un artefact de l'évolution du
+  champ. **Le piège :** une procédure de calibration qui balaie `c` en tenant `r` fixe verra
+  l'erreur baisser, conclura que la cadence grossière est meilleure, et aura seulement trouvé
+  l'endroit où deux défauts s'annulent le mieux. Cet endroit dépend du contenu, du mode et de
+  la métrique ; il ne se transporte pas, et **il ne doit pas être dépensé comme une marge**.
+  Ce qui reste ouvert : aucune procédure de calibration n'est écrite dans le corpus, et la
+  première qui le sera aura ce piège devant elle. Sévérité 2 : aucune valeur publiée n'est
+  fausse, mais un réglage pris par cette voie serait faux et paraîtrait bon.
+  Chiffres et conditions dans COMPOSITION-ERREURS-S186 §8.6.
+
+- **A230** *(sévérité 2, S186 ; ouverte)* — **« Points par longueur d'onde » n'est pas un
+  critère valide pour une source 3D échantillonnée en profondeur : la longueur d'onde qui
+  compte n'est pas celle de la recette, mais celle qui survit à la profondeur du
+  consommateur.** S184 §5 bornait la décimation à `r = 2` en comptant 2,16 points par
+  `λ_min = 1,081 m`, la coupure de la recette de pression. Mesuré sur la source réelle au
+  bloc, le contenu présent vaut `k_eff` de 0,37 à 0,79 rad/m horizontalement et 0,50 à
+  1,17 verticalement, soit `λ_eff` de **8 à 17 m** et de **5,4 à 12,7 m** : le contenu est
+  **5 à 16 fois plus lisse** que la coupure, parce qu'un mode profond décroît en `exp(k z)` et
+  que les modes courts sont morts avant d'atteindre `z = −0,80 m`. Le critère de S184 donnait
+  la bonne réponse — `r = 2` reste le bon choix ici — **par le mauvais chemin**, et un chemin
+  faux se trompe ailleurs : près de la surface il serait optimiste, et plus profond encore plus
+  pessimiste. Corollaire inverse, et c'est lui qui coûte : la même mesure montre que **l'erreur
+  globale est exactement celle de la tranche la plus haute** du bloc (2,54 / 13,60 / 32,96 %
+  aux trois `r`, quand la tranche du fond ne vaut que 0,11 / 0,43 / 1,54 %). Un réseau isotrope
+  surrésout treize tranches sur quatorze. Ce qui reste ouvert : le critère correct porte sur
+  `k_eff(z)` du consommateur, il n'est écrit nulle part, et aucun réseau du dépôt ne sait
+  graduer son pas. Sévérité 2 : la borne `r = 2` publiée n'est pas fausse, c'est sa
+  justification qui l'est, et elle circule depuis S184.
+  Chiffres et conditions dans COMPOSITION-ERREURS-S186 §8.2 et §8.3.

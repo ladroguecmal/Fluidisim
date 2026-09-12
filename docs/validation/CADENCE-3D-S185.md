@@ -294,3 +294,27 @@ doit à un contrôle qu'elle avait failli ne pas écrire.
 
 Aucun ADR : rien n'a changé de contrat, et le choix du solveur reste à B3 (ADR-007 §5).
 Aucun arbitrage humain nouveau.
+
+---
+
+**Suivi S186 — 2026-09-12 : S185-1 est réalisée, et le véhicule de cette session a été
+déplacé sans changer d'un bit.** `Mode` et `build_source` vivent désormais dans
+`examples/support/reuse_mode.rs`, parce que S186 réemploie les mêmes trois modes ; garder deux
+copies les aurait fait diverger (L137). `cadence_error` a été rejoué après le déplacement et
+rend **la même empreinte, `0x39567a1d4bc2ba4c`**, celle publiée en §6.1. Toutes les valeurs de
+ce document restent celles du binaire courant.
+
+**Ce que la composition ajoute.** [COMPOSITION-ERREURS-S186](COMPOSITION-ERREURS-S186.md)
+mesure les deux erreurs ensemble sur le même véhicule, avec la **même** référence — les
+quatorze couples `eS/eU` de §6.2 y sont redonnés chiffre par chiffre, ce qui est le contrôle
+croisé qui autorise à composer. Trois résultats qui touchent la lecture de ce document :
+
+- la composition suit le **maximum** pour le maintien et l'extrapolation, la **quadratique**
+  pour l'interpolation : la loi dépend du mode, et l'axe bon marché est **gratuit** jusqu'à la
+  parité avec l'axe dominant ;
+- la constante d'ordre deux de l'interpolation temporelle (0,05 ici) est celle de
+  l'interpolation **spatiale divisée par le nombre d'axes** : rapport mesuré 2,27 et 3,05 pour
+  les trois axes de `scatter`. Espace et temps sont le même opérateur, par axe ;
+- sur un réseau décimé, **réduire la cadence peut réduire l'erreur totale** de 12 à 17 %, et
+  seulement pour les deux modes causaux. Voir **A229** : c'est un piège de calibration, pas
+  une marge.

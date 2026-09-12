@@ -312,3 +312,27 @@ méthode qui a évité d'optimiser le mauvais tiers.
 
 Aucun ADR : rien n'a changé de contrat, et le choix du solveur reste à B3 (ADR-007 §5).
 Aucun arbitrage humain nouveau.
+
+---
+
+**Suivi S186 — 2026-09-12 : la justification de la borne `r = 2` est fausse, la borne ne l'est
+pas.** Le tableau de §6.3 compte les points par `λ_min = 1,081 m`, la coupure de la recette de
+pression, et en déduit que la décimation est plafonnée à `r = 2`.
+[COMPOSITION-ERREURS-S186](COMPOSITION-ERREURS-S186.md) §8.2 mesure le contenu **réellement
+présent** dans la source au bloc, et il est **5 à 16 fois plus lisse** : `k_eff` de 0,37 à
+0,79 rad/m horizontalement, 0,50 à 1,17 verticalement, soit `λ_eff` de 8 à 17 m et de 5,4 à
+12,7 m. La raison est qu'un mode profond décroît en `exp(k z)` : à `z = −0,80 m`, le mode le
+plus court est déjà divisé par une centaine. Le décompte de §6.3 mesure donc la recette, pas
+ce qu'un consommateur en profondeur reçoit.
+
+**La conclusion, elle, tient** : l'erreur mesurée à `r = 2` vaut 2,54 % et à `r = 4` 13,60 %,
+donc `r = 2` reste bien le choix raisonnable sur ce montage. Mais elle tient pour une autre
+raison — l'erreur est **intégralement** celle de la tranche la plus haute du bloc — et un
+critère qui donne la bonne réponse par le mauvais chemin se trompera ailleurs : près de la
+surface il serait optimiste, plus profond encore plus pessimiste. Voir **A230**. Rien n'est
+réécrit ci-dessus ; §6.3 reste ce qu'il a mesuré, avec sa portée corrigée ici.
+
+**Suivi S186 — le rapport source/pas de §6 est confirmé dans son usage conjoint.** S186 mesure
+l'erreur des deux axes ensemble et conclut que la composition suit le **maximum** pour les
+modes causaux : le gain de coût `r³ · c` publié ici est donc dépensable, à condition
+d'égaliser les erreurs des deux axes pris seuls. Voir COMPOSITION-ERREURS-S186 §8.5.
