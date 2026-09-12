@@ -4459,3 +4459,39 @@ indépendantes de la prémisse de phase passent toutes — cas nul exact, contin
 `10⁻⁶`, convergence, bande, énergie. Le banc n'avait rien. Le protocole, si.
 
 Voir SOURCES-MULTIPLES-S195 §7.1 et §7.3, et A241 pour ce que la réfutation a ouvert.
+
+## L277 — Un invariant conservé ne dit rien de ce qui est résolu
+
+*(S196)* Trois sessions de suite ont employé la dérive relative d'énergie sous `10⁻⁴` comme
+critère de domaine, et l'ont traitée comme une attestation : sous le seuil, la configuration
+est saine. S196 en a trouvé le contre-exemple, et il n'est pas marginal — à `n = 16` et
+`K = 32`, la grandeur mesurée est **fausse d'un facteur cinq**, et l'énergie dérive de
+`1,54e-6`, soixante-cinq fois **sous** le seuil.
+
+Rien n'avait l'air cassé : aucun pas refusé, aucune valeur infinie, une courbe lisse. C'est la
+nature même du défaut. Un schéma sous-résolu ne viole pas ses invariants — il les conserve
+parfaitement sur le champ appauvri qu'il représente. La conservation mesure **ce que le schéma
+préserve**, jamais **ce qu'il résout**, et les deux questions sont indépendantes.
+
+Le symptôme, lui, était visible pour qui regardait au bon endroit : le triplet de convergence
+donnait des incréments de **signes opposés**, `−1,105e-2` puis `+1,178e-4`. Une suite qui
+converge ne fait pas cela. Mais la formule de Richardson, à qui on ne demande rien, aurait
+imprimé « ordre 6,552 » — un chiffre d'apparence excellente, tiré d'un niveau hors domaine.
+
+Deux gestes, et ils coûtent quelques lignes :
+
+- **apparier tout critère de conservation à un contrôle de raffinement.** Un invariant borne
+  les erreurs qu'il voit ; il faut un second contrôle pour celles qu'il ne voit pas ;
+- **refuser d'imprimer un ordre depuis un triplet non monotone.** Incréments de signes opposés,
+  ou second incrément plus grand que le premier : le niveau grossier est hors de son domaine,
+  et le chiffre qu'on en tirerait n'a pas d'objet. Le banc doit le **dire**, pas le calculer.
+
+C'est la même famille qu'**A238** — ne pas établir un ordre sur un maximum de résidu — et que
+**L274** — déclarer la convergence en ordre et résidu sur trois niveaux. Toutes trois disent
+qu'un chiffre de convergence est une affirmation sur un régime, et qu'il faut vérifier d'être
+dans ce régime avant de l'énoncer.
+
+Corollaire pour la lecture des sessions passées : « énergie conservée à `10⁻⁸` » ne certifie
+aucune de leurs valeurs. Il ne faut pas pour autant les suspecter en bloc — les configurations
+de S194 et S195 étaient loin du bord de résolution — mais la phrase ne doit plus être lue comme
+une garantie qu'elle n'a jamais été. Voir A242 et REPLI-CROISEES-S196 §8.5.

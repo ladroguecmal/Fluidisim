@@ -78,12 +78,19 @@ tend-elle vers une **limite** quand `n` croît ?
 - [x] **P3b** — campagne : axe « limite » sur la famille dense jusqu'à `n` grand, axe
       « mécanisme » sur le couple pair/impair, convergence sous la forme de L274, bande
       vérifiée par famille, deux exécutions identiques.
-- [>] **P4** — verdict sur A241 : le repli est-il la cause, la loi a-t-elle une limite.
+- [x] **P4** — verdict sur A241 : le repli est-il la cause, la loi a-t-elle une limite.
       Documenter, propager la file ; ADR seulement si une décision de projet est prise.
-- [ ] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes, jeton
+- [>] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes, jeton
       `libre`, copies avancées sans suppression non prouvée.
 
 ### Notes de reprise
+
+P4 S196 : REPLI-CROISEES-S196 §8–§9 reçus. **A241 requalifiée** — moitié « limite »
+close (saturation à −0,52), moitié « cause » partielle (le repli pèse un tiers, la thèse
+de S195 était trop forte). **A242** ouverte : le critère de conservation ne détecte pas
+la sous-résolution — contre-exemple à un facteur cinq avec une énergie 65× sous le seuil.
+**L277** écrite. **Aucun ADR.** Décomptes à porter en P5 : **123 ADR, 242 angles,
+277 leçons, 18 invariants, 6 SPEC, 23 cas**.
 
 P3b S196 : campagne exécutée, **empreinte 0xbcf2911362458c13**, deux exécutions
 identiques ligne pour ligne. **Verdict : ni la prédiction 1 ni la 2.** Exposants sur

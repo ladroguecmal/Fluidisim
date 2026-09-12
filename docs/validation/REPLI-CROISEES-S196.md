@@ -160,10 +160,169 @@ profonde pour les deux.
 5. **Aucun contrat runtime** : `f64`, allocations de banc, `water-core` et le support S193
    inchangés, aucune mesure de coût CPU, aucune seconde cible (A98).
 
+
 ## 8. Relevés
 
-*À recevoir en P3b. Aucun chiffre n'est écrit avant l'exécution.*
+`cargo run --release --manifest-path code/Cargo.toml -p water-core --example nl_fallback_2d`
+
+Empreinte **`0xbcf2911362458c13`**, deux exécutions `release` identiques ligne pour ligne.
+`water-core` et `support/nl_surface.rs` inchangés ; workspace **331 réussis / cinq ignorés**,
+et les **dix** réceptions propres au banc passent.
+
+> **Refactorisation contrôlée.** La flottille et la mesure de S195 ont été sorties dans
+> `support/nl_fleet.rs` pour que les deux bancs portent **un seul** véhicule (L137).
+> L'empreinte de S195 se reproduit à l'identique, `0x5eb378f6ffe26c9f` : aucune arithmétique
+> n'a bougé, et c'était le contrôle de la manœuvre.
+
+### 8.1 Les trois familles
+
+`S = 0,024` répartie sur `n` trains, `K = 64`, `M = 3`, `dt = T₁/400`, 10 périodes, phases
+dispersées, bande serrée. Écarts rapportés à `A`.
+
+| famille | n | modes | repli | max/A | **L2/A** | croisé | train |
+|---|---:|---|---:|---:|---:|---:|---:|
+| dense | 2 | 2..3 | 0,000 | 2,2985e-2 | **7,3390e-3** | 1,417e-2 | 5,327e-3 |
+| dense | 4 | 2..5 | 0,333 | 2,4230e-2 | **5,4282e-3** | 6,813e-3 | 6,229e-3 |
+| dense | 8 | 2..9 | 0,536 | 2,4600e-2 | **3,8835e-3** | 2,972e-3 | 3,022e-3 |
+| dense | 12 | 2..13 | 0,606 | 2,1456e-2 | **3,0665e-3** | 9,980e-4 | 2,258e-3 |
+| dense | 16 | 2..17 | 0,642 | 1,7695e-2 | **2,7174e-3** | 1,020e-3 | 1,676e-3 |
+| **impaire** | 2 | 3..5 | **0,000** | 2,5727e-2 | **7,1227e-3** | 1,367e-2 | 5,463e-3 |
+| **impaire** | 4 | 3..9 | **0,000** | 2,3878e-2 | **4,8078e-3** | 5,859e-3 | 2,488e-3 |
+| **impaire** | 8 | 3..17 | **0,000** | 2,3457e-2 | **3,4844e-3** | 3,106e-3 | 2,236e-3 |
+| paire | 2 | 4..6 | 0,000 | 2,2349e-2 | **6,9643e-3** | 1,328e-2 | 5,264e-3 |
+| paire | 4 | 4..10 | 0,333 | 2,1594e-2 | **5,0301e-3** | 5,697e-3 | 6,304e-3 |
+| paire | 8 | 4..18 | 0,536 | 2,3924e-2 | **4,1147e-3** | 2,342e-3 | 3,513e-3 |
+
+*Les `n = 3` et `n = 6` sont dans la sortie du banc ; seuls les points repères sont repris ici.*
+**Aucune configuration hors domaine** dans la campagne : dérive d'énergie de `1,4e-9` à
+`4,9e-8`, trois à cinq ordres sous le `10⁻⁴` exigé. Les décomptes de repli sont ceux du §2,
+reproduits **par construction** et vérifiés par test, famille par famille.
+
+### 8.2 Le verdict : ni la prédiction 1, ni la prédiction 2
+
+Exposants ajustés en log-log sur la moyenne quadratique, plage commune `n = 2..8` :
+
+| famille | repli | exposant | écart à la loi dispersée (`−0,805`) |
+|---|---:|---:|---:|
+| paire | 0 → 0,536 | **−0,394** | 0,411 |
+| dense | 0 → 0,536 | **−0,451** | 0,354 |
+| **impaire** | **0 partout** | **−0,525** | **0,280** |
+
+Écart pair/impair : **0,131**. Le protocole demandait **plus de 0,20** pour confirmer que le
+repli est la cause, **moins de 0,10** pour la réfuter. **Ni l'un ni l'autre.** Et c'est
+précisément la valeur d'une prédiction déclarée avant la mesure : aucune des deux conclusions
+préparées ne peut être revendiquée.
+
+Ce que la mesure dit, en propre :
+
+> **Le repli agit, dans le sens prédit, et il n'explique qu'un tiers.** Éteindre entièrement
+> le repli des termes de paire déplace l'exposant de `−0,394` à `−0,525`, soit **32 %** du
+> chemin qui reste à parcourir jusqu'à la loi dispersée. **Les deux autres tiers ont une
+> cause que cette session n'identifie pas.**
+
+La direction, elle, est sans ambiguïté : **moins de repli, décroissance plus rapide**. Le
+mécanisme proposé par S195 est réel ; ce qui était faux est son poids, que S195 avait déduit
+d'une corrélation — les deux quantités croissant ensemble avec `n`.
+
+**Prédiction 4 confirmée, et elle valide le montage.** Dense contre paire — même fraction de
+repli, même bande relative, échelle des nombres d'onde **doublée** — donnent `−0,451` et
+`−0,394`, soit **0,057** d'écart, sous le seuil de 0,10. L'échelle absolue ne compte pas en
+eau profonde, comme attendu, ce qui confirme que la comparaison pair/impair mesure bien le
+repli et non un artefact d'échelle.
+
+Reste le confondant déclaré au §3.1 : la bande relative diffère de 24 % entre pair et impair.
+La famille dense le borne par sa propre plage, où la bande relative va de 1,5 à 8,5 — soit un
+facteur **5,7** — pour un exposant qui ne varie que de `−0,438` à `−0,520`. Un confondant de
+24 % ne peut donc pas porter les 0,131 observés ; il peut en porter une petite part, et cette
+part n'est pas séparée.
+
+### 8.3 La limite existe, et `n ≤ 6` la sous-estimait
+
+Fenêtres glissantes sur la famille dense :
+
+| fenêtre | exposant | repli, début → fin |
+|---|---:|---|
+| `n = 2,3,4,6` | **−0,438** | 0,000 → 0,467 |
+| `n = 4,6,8,12` | **−0,520** | 0,333 → 0,606 |
+| `n = 8,12,16` | **−0,520** | 0,536 → 0,642 |
+
+**L'exposant sature à `−0,52` dès `n ≈ 4`.** La réponse à la moitié « limite » d'A241 est donc
+oui : la loi tend vers quelque chose, et `n ≤ 6` — la plage de S195 — la sous-estimait un peu,
+`−0,44` contre `−0,52`.
+
+Mais la lecture qui compte est ailleurs. Entre les deux dernières fenêtres, la fraction de
+repli monte encore de `0,536` à `0,642` — elle n'a pas fini de saturer, sa limite arithmétique
+étant `≈ 0,74` — **pendant que l'exposant ne bouge plus du tout**, à trois décimales près.
+Si le repli gouvernait, il resterait du mouvement. **Cette immobilité affaiblit le lien de
+cause davantage encore que le 0,131 du §8.2**, et dans une direction que la prédiction 3 avait
+anticipée sans en fixer le sens.
+
+### 8.4 Réceptions : huit sur neuf, et l'échec est instructif
+
+| # | réception | résultat |
+|---:|---|---|
+| 1 | décompte de repli par construction | **passe** (test, trois familles) |
+| 2 | `n=1` écart exactement nul | **passe** (test, trois familles) |
+| 3 | `M=1` exact à `10⁻¹⁴` | **passe** (test, trois familles) |
+| 4 | continuité S195 | **passe** — `4,507029e-3` contre `4,507029e-3`, écart **5,03e-8** |
+| 5 | bande `Q+8` sous 2 % | **passe** — 0,001 %, 0,008 %, 0,032 % |
+| 6 | énergie sous `10⁻⁴` | **passe** — max `4,9e-8` |
+| 7 | convergence en `K` | **ÉCHOUE** |
+| 8 | phases dans un facteur 2 | **passe** — 0,747 (max) et 0,885 (L2) à `n=8` |
+| 9 | deux exécutions identiques | **passe** — empreinte reproduite |
+
+**La réception 7 échoue, et il faut le dire clairement.** À `n = 6` : ordre **1,268**, sous le
+`1,5` exigé, et résidu de Richardson **2,27 %**, au-dessus des 2 % exigés. S195 passait cette
+même réception (ordre 1,756, résidu 0,892 %) sur une autre configuration ; l'ordre dépend donc
+du montage, et celui-ci est moins bien résolu verticalement.
+
+**Ce qui sauve la conclusion n'est pas une indulgence, c'est une borne mesurée.** La question
+n'est pas « `K=64` est-il convergé » mais « le défaut de résolution biaise-t-il l'exposant ».
+La pente entre les deux bouts de la plage a donc été refaite aux deux résolutions :
+
+| pente `n = 6 → 16` | valeur |
+|---|---:|
+| à `K = 64` | `−0,516` |
+| à `K = 128` | `−0,506` |
+| **biais** | **`+0,010`** |
+
+Un centième, contre les `0,131` qui portent le résultat. **La conclusion tient**, et elle tient
+parce qu'on a mesuré le biais au lieu de l'espérer petit.
+
+### 8.5 Ce que le critère d'énergie n'a pas vu
+
+À `n = 16`, le niveau `K = 32` rend une L2 de `1,3765e-2` là où `K = 64` donne `2,7174e-3` et
+`K = 128` `2,8352e-3` : **faux d'un facteur cinq**, et du mauvais côté. Ce n'est pas une
+divergence — aucun pas n'a été refusé, rien n'est infini, et la **dérive relative d'énergie
+vaut `1,54e-6`**, soit soixante-cinq fois sous le seuil de domaine de `10⁻⁴` que S194, S195 et
+cette session emploient.
+
+**Le critère de conservation a donc déclaré sain un résultat faux d'un facteur cinq.** Il
+détecte l'instabilité ; il est aveugle à la sous-résolution, qui produit une réponse lisse,
+conservative, et fausse.
+
+Le triplet de Richardson en devient inutilisable : ses incréments valent `−1,105e-2` puis
+`+1,178e-4` — signes opposés, donc pas de convergence monotone, donc **aucun ordre n'en sort**.
+Le banc le **dit** au lieu d'imprimer le `6,552` que la formule aurait rendu sans broncher.
+Voir **A242** et **L277**.
 
 ## 9. Verdict sur A241
 
-*À recevoir en P4.*
+**A241 n'est pas close ; elle est requalifiée, et ses deux moitiés n'ont pas le même sort.**
+
+**La moitié « limite » est close.** L'exposant sature à `−0,52` dès `n ≈ 4`, et reste immobile
+jusqu'à `n = 16`. La loi tend vers quelque chose. `n ≤ 6` la sous-estimait de `0,08`, ce qui
+est réel mais modeste : S195 ne trompait pas gravement.
+
+**La moitié « cause » reçoit une réponse partielle, et c'est le résultat de la session.** Le
+repli existe, agit dans le sens prédit, et pèse **un tiers**. La thèse de S195 — le repli
+gouverne la loi à grand `n` — est donc **trop forte** : il la déplace, il ne la gouverne pas.
+Deux tiers de l'écart entre la mesure et l'addition dispersée restent sans explication, et
+c'est désormais une question nette plutôt qu'un soupçon.
+
+Ce que la session ne fait pas, et qu'il faut redire : elle n'identifie pas les deux autres
+tiers, elle ne dérive aucune loi, et elle ne sépare pas la part du confondant de bande
+relative (§3.1) ni celle des termes triples (§3.2) — les deux premiers suspects pour la suite.
+
+**Aucun ADR.** Rien ne change de contrat ; ADR-123 n'est pas touché, aucun solveur δ n'est
+choisi, aucun seuil de bascule W/δ n'est dérivé.

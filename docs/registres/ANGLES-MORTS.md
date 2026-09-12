@@ -2706,3 +2706,44 @@ laisse ouvert est repris en **A241**.
   banc existe, le diagnostic modal est disponible (contrairement à ce que S195 §2.4 avait
   annoncé), et la mesure demande d'étendre `n` et de densifier la bande, pas de construire.
   Aucune décision de projet n'en dépend aujourd'hui ; aucune promesse de spectre non plus.
+
+**Suivi A241 — S196 : requalifiée, ses deux moitiés n'ayant pas le même sort.**
+[REPLI-CROISEES-S196](../validation/REPLI-CROISEES-S196.md), empreinte `0xbcf2911362458c13`.
+Montage de **parité** : trois familles de modes à `n` et cambrure totale égaux, dont une —
+les impairs `3,5,…,2n+1` — où somme et différence de deux trains sont paires et ne peuvent
+donc **jamais** retomber sur un mode de train. Repli nul par arithmétique, vérifié par test.
+
+- **Moitié « limite » : close.** L'exposant sature à **`−0,52`** dès `n ≈ 4` et n'y bouge plus
+  jusqu'à `n = 16`. La loi tend bien vers quelque chose ; `n ≤ 6` la sous-estimait de `0,08`.
+- **Moitié « cause » : réponse partielle, et la thèse de S195 était trop forte.** Éteindre
+  tout le repli des paires déplace l'exposant de `−0,394` à `−0,525` : **0,131**, soit **32 %**
+  du chemin jusqu'à la loi dispersée (`−0,805`). Le protocole exigeait `> 0,20` pour confirmer
+  et `< 0,10` pour réfuter : **ni l'un ni l'autre**, et c'est ce qu'une prédiction déclarée
+  d'avance rend impossible à maquiller. Le repli **déplace** la loi, il ne la **gouverne** pas ;
+  deux tiers de l'écart restent sans cause identifiée. Signe supplémentaire : entre `n=8` et
+  `n=16` la fraction de repli monte encore de `0,536` à `0,642` **pendant que l'exposant ne
+  bouge plus du tout**.
+- **Montage validé par son propre témoin** : dense contre paire — même repli, même bande
+  relative, échelle doublée — s'accordent à `0,057`, sous le seuil de 0,10.
+
+A241 reste **ouverte** sur sa moitié « cause ». Les deux suspects nommés et non séparés : le
+confondant de bande relative (24 % entre les deux parités, borné mais pas isolé) et les termes
+**triples**, que la parité ne neutralise pas.
+
+- **A242** *(sévérité 2, S196 ; ouverte)* — **Le critère de conservation ne détecte pas la
+  sous-résolution.** S194, S195 et S196 déclarent hors domaine toute configuration dont la
+  dérive relative d'énergie dépasse `10⁻⁴`, et s'en servent comme **du** critère de validité.
+  S196 en a trouvé un contre-exemple net : à `n = 16`, `K = 32`, la moyenne quadratique de
+  l'écart vaut `1,3765e-2` quand `K = 64` donne `2,7174e-3` et `K = 128` `2,8352e-3` — **fausse
+  d'un facteur cinq** — et la dérive d'énergie y vaut `1,54e-6`, soit **soixante-cinq fois sous
+  le seuil**. Aucun pas n'a été refusé, aucune valeur n'est infinie, rien n'a divergé : la
+  sous-résolution produit une réponse **lisse, conservative et fausse**, et un critère de
+  conservation y est aveugle par construction — il mesure ce que le schéma préserve, pas ce
+  qu'il résout. Conséquence immédiate dans ce banc : le triplet de Richardson y devient
+  inutilisable (incréments `−1,105e-2` puis `+1,178e-4`, signes opposés) et la formule
+  rendrait un « ordre 6,552 » sans broncher si on ne l'en empêchait pas. **Ce qui est en jeu
+  n'est pas ce banc-ci** — il le détecte désormais et le dit — mais toute session qui a lu
+  « énergie sous `10⁻⁴` » comme une attestation de justesse. Le correctif est connu et peu
+  coûteux : apparier tout critère de conservation à un contrôle de **raffinement**, et refuser
+  d'imprimer un ordre depuis un triplet non monotone. Voir **L277** et
+  REPLI-CROISEES-S196 §8.5.
