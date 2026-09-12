@@ -58,43 +58,25 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S200 — terminée
+Session : S201 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S199-1/A244, corriger allocations et atomicité du noyau δ, puis apparier
-les capacités et la portée précision/budget aux garanties effectives.
+Objectif : direction utilisateur, rendre B visible par un exemple CPU caméra/rayons
+et PPM local sans dépendance. Image explicitement autorisée après question, le13/09.
+Priorité sur S200-1, conservée dans la file ; pas de critère perceptuel inventé.
 
 ### Plan
 
-- [x] **P1** — état réel, quatre copies961a2e5 propres, jeton et plan seuls.
-- [x] **P2** — supprimer les clones du pas, tampons de restauration préalloués,
-  comptabilité exacte et dimensions contrôlées ; conserver les opérations numériques.
-- [x] **P3** — compteur global d'allocation avec contre-épreuve, refus après calcul
-  atomique et récupération, nominal/dégradé/rejeu ; tests workspace et filtre S199.
-- [x] **P4** — capacités honnêtes ; documenter précision et budget effectifs sans
-  dérogation implicite, reçus/limites et A244/file. Pas de sélection δ.
-- [x] **P5** — rituel, journal/index/README/REPRISE, compteur, copies synchronisées.
+- [x] **P1** — état réel, quatre copies9a25798 propres ; jeton/plan seuls.
+- [ ] **P2** — caméra, intersection de B par rayons, lumière de diagnostic et PPM ;
+  utiliser le vrai Background::eval, tests géométriques et export.
+- [ ] **P3** — produire une vue lisible, inspection visuelle, témoin plat et second
+  instant ; publier paramètres/coût sans prétendre recevoir la perception.
+- [ ] **P4** — documenter direction/autorisation et prochaines décisions budget puis
+  périmètre δ/V ; file/index/passation/journal, compteur et copies synchronisées.
 
 ### Notes de reprise
 
-Reprise et invariants lus dans cette conversation, pas de changement depuis961a2e5.
-S199 complet ; pas de reprise P4/P5. Code: project clone us/ws, dir par itération,
-u/w diagnostic. Budget API en itérations seulement ; pression f64 expérimentale.
-Aucun solveur de production reçu. S199-2 flux coupés conservée dans la file.
-
-P2 : aucun clone dans project ; sauvegardes u/w/p préallouées, contrôle de fin
-et restauration sur refus. Octets f32/f64 corrigés, calculs de tailles checked.
-Huit tests historiques delta passent. Les nouveaux reçus globaux viennent en P3.
-
-P3 : trois tests intégration debug/release passent ; workspace342 réussis/cinq
-ignorés (246+3+93). Filtre release empreinte S199 inchangée0x0ad3f695685ca27a.
-Compteur global vérifié par allocation témoin, refus après overflow reçu avec
-récupération exacte. Mesures archivées, aucun autre seuil modifié.
-
-P4 : Caps ne prétend plus recevoir référentiel général/plages CFL ; Option None
-pour les bornes inconnues. Huit tests noyau + trois intégration rejoués passent.
-Pression f64 et plafond itérations conservés explicitement expérimentaux, sans ADR
-de dérogation : A244 partielle, S200-1 reste à recevoir avant intégration.
-
-P5 : rituel terminé, décomptes123/244/279/18/6/23 vérifiés, file relue entière.
-Outil : B/W S181, δ S200, V jamais. Compteur0. Reçu342/cinq ignorés ; pas de
-remesure après les dernières éditions documentaires. Copies à avancer après commit.
+REPRISE et invariants déjà lus dans cette conversation, état identique à9a25798.
+Seuil numérique2 % acquis depuis S190 ; le rendu permettra une appréciation humaine,
+aucune image seule ne ferme B4/A50 ni A98. V attend la demande gameplay selon nouvelle
+direction, le changement architectural détaillé devra être acté dans son ordre.
