@@ -2468,3 +2468,13 @@ S190-1/S189-1 reçues sur véhicule ; suite S191-1 surface libre2D. Aucun nouvel
 les neuf autres conservées avec leurs déclencheurs. La prochaine action construit
 la surface libre, elle ne prolonge pas la seule campagne de réseaux. Le dispositif
 reste à éprouver, aucun chantier latéral déclaré clos par le présent essai.
+**Suivi A50/A217 — S192, 2026-09-12.** Tranche x-z à surface libre linéaire reçue
+contre Airy, trois profondeurs constantes, vitesse fine≤1,732796 %, cinq périodes.
+S191-1 réalisée ; le dépôt possède un véhicule2D dispersif, mais aucun véhicule
+reçu à la fois non linéaire et dispersif. A217 reste ouverte ; S192-1 reçoit ensuite
+la non-linéarité de surface contre Stokes. A50 reste partielle (source non branchée,
+comparaison intégrale absente), A216 inexpliquée. Aucun nouvel angle.
+
+**Suivi A211 — S192.** Toute la file S190 relue ; B4/B3/A217/profondeur constante
+actualisés, fond variable et autres objets conservés. La file ne redemande pas le
+seuil2 %, et la suite construit une physique absente. Aucun chantier latéral clos.

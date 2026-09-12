@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S192 — en cours
+Session : S192 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S191-1, construire une tranche x-z à surface libre linéarisée, fond
 imperméable et pression atmosphérique, recevoir une onde de gravité par référence
@@ -74,7 +74,7 @@ Airy et raffinement. Première étape physique, pas réception non linéaire B4.
   vitesse/surface/énergie/volume, contre-épreuves, reproductibilité.
 - [x] **P4** — documenter résultats/limites et suite couplée ; propager A50/B4/A217/file,
   ADR seulement si décision de projet, jamais sélection δ par un essai linéaire.
-- [ ] **P5** — rituel de fin, journal/index/README/décomptes, vérifications, jeton libre,
+- [x] **P5** — rituel de fin, journal/index/README/décomptes, vérifications, jeton libre,
   copies propres avancées sans suppression.
 
 ### Notes de reprise
@@ -94,3 +94,8 @@ Pire grille fine vitesse1,732796 % profond. Trois tests debug/release passent.
 P4 : BILAN-B4/PLAN-BENCHMARK/SPEC-004/file active propagés. S191-1 close,
 S192-1 surface non linéaire/Stokes ouverte ; pas d'ADR, aucun solveur δ choisi.
 Les 12 exécutions forment la campagne reçue ; seules les grilles fines sont exigées sous2 %.
+
+P5 : journal/suivis/index/README/REPRISE actualisés, invariants relus.
+Décomptes vérifiés :121 ADR,233 angles A1–A233,270 leçons,18 invariants,6 SPEC,23 cas.
+Aucune nouvelle leçon distincte ; prochain lot S192-1. Jeton libre.
+Copies à avancer après ce commit et propreté à vérifier avant réponse finale.

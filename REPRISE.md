@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-12 16:30 +02:00
+JETON            : libre
+Battement        : 2026-09-12 16:35 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S192 — tranche 2D à surface libre
-Dernière session : S191 — profil B4 projeté reçu à 2 % ; ADR-121
-Session suivante : S192 — S191-1 : tranche 2D à surface libre ; relire aussi la file active plurielle
+Session en cours : aucune
+Dernière session : S192 — surface libre x-z linéaire reçue Airy sous 2 %
+Session suivante : S193 — S192-1 : surface non linéaire et référence Stokes ; relire la file plurielle
 
 *S183 à S189 ont travaillé dans la **copie principale**, sur `master` : aucune copie isolée
 ouverte, donc rien à refermer (AGENTS.md). Les trois worktrees ont été **avancés sur master**
@@ -202,6 +202,22 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S192 — 2026-09-12 : tranche x-z à surface libre linéaire reçue contre Airy.**
+S191-1 réalisée : fond imperméable, dispersion finie/profonde et hauteur évolutive.
+Trois profondeurs0,25/2/8 m, quatre grilles, cinq périodes. À128×64 : hauteur
+au plus1,647737 %, vitesse au plus1,732796 %, sous2 %. Raffinements espace/temps
+proches de l'ordre2 ; dérive d'énergie maximale4,111837e-6 relatif.
+Trois tests debug/release ; deux campagnes release identiques **0x4fc690d4ac035bf7**.
+Workspace331/cinq ignorés reste le reçu S190, non rejoué. Bibliothèques inchangées.
+**B4/A50 partiels** : source S191 non branchée, comparaison intégrale, forces et
+perception absentes ; A216/A217 ouvertes. Aucun choix δ. Ne pas additionner ces
+écarts Airy au budget source S191, mesuré sur une autre référence.
+**Suite S193 : S192-1**, conditions de surface non linéaires dispersives reçues contre
+Stokes, ordre en amplitude explicite, avant branchement/comparaison perturbatif-total.
+File plurielle relue et actualisée ; aucun autre chantier effacé. Aucun ADR/angle/leçon
+nouveau : **121 ADR,233 angles,270 leçons,18 invariants,6 SPEC,23 cas**.
+Voir [surface libre S192](docs/validation/SURFACE-LIBRE-2D-S192.md) et [mesures](docs/validation/SURFACE-LIBRE-2D-S192-MESURES.md).
 
 **S191 — 2026-09-12 : profil B4 reçu avec projection**, ADR-121.
 **S190-1/S189-1 réalisées sur véhicule de banc** : projecteur D/G reçu contre matrice

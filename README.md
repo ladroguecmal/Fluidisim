@@ -525,3 +525,20 @@ de gravité avant comparaison perturbatif/total. Bords algébriques S191, surfac
 et B4 complet non reçus ; A50 partielle. File plurielle relue, autres chantiers conservés.
 **121 ADR,233 angles,270 leçons,18 invariants,6 SPEC,23 cas.**
 Voir [réception projetée S191](docs/validation/PROJECTION-B4-S191.md).
+
+
+**S192 — 2026-09-12 : tranche x-z à surface libre linéaire reçue contre Airy.**
+S191-1 réalisée : fond imperméable, dispersion finie/profonde et hauteur évolutive.
+Trois profondeurs0,25/2/8 m, quatre grilles, cinq périodes. À128×64 : hauteur
+au plus1,647737 %, vitesse au plus1,732796 %, sous2 %. Raffinements espace/temps
+proches de l'ordre2 ; dérive d'énergie maximale4,111837e-6 relatif.
+Trois tests debug/release ; deux campagnes release identiques **0x4fc690d4ac035bf7**.
+Workspace331/cinq ignorés reste le reçu S190, non rejoué. Bibliothèques inchangées.
+**B4/A50 partiels** : source S191 non branchée, comparaison intégrale, forces et
+perception absentes ; A216/A217 ouvertes. Aucun choix δ. Ne pas additionner ces
+écarts Airy au budget source S191, mesuré sur une autre référence.
+**Suite S193 : S192-1**, conditions de surface non linéaires dispersives reçues contre
+Stokes, ordre en amplitude explicite, avant branchement/comparaison perturbatif-total.
+File plurielle relue et actualisée ; aucun autre chantier effacé. Aucun ADR/angle/leçon
+nouveau : **121 ADR,233 angles,270 leçons,18 invariants,6 SPEC,23 cas**.
+Voir [surface libre S192](docs/validation/SURFACE-LIBRE-2D-S192.md) et [mesures](docs/validation/SURFACE-LIBRE-2D-S192-MESURES.md).

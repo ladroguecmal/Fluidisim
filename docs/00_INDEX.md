@@ -17,6 +17,22 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S192 — 2026-09-12 : tranche x-z à surface libre linéaire reçue contre Airy.**
+S191-1 réalisée : fond imperméable, dispersion finie/profonde et hauteur évolutive.
+Trois profondeurs0,25/2/8 m, quatre grilles, cinq périodes. À128×64 : hauteur
+au plus1,647737 %, vitesse au plus1,732796 %, sous2 %. Raffinements espace/temps
+proches de l'ordre2 ; dérive d'énergie maximale4,111837e-6 relatif.
+Trois tests debug/release ; deux campagnes release identiques **0x4fc690d4ac035bf7**.
+Workspace331/cinq ignorés reste le reçu S190, non rejoué. Bibliothèques inchangées.
+**B4/A50 partiels** : source S191 non branchée, comparaison intégrale, forces et
+perception absentes ; A216/A217 ouvertes. Aucun choix δ. Ne pas additionner ces
+écarts Airy au budget source S191, mesuré sur une autre référence.
+**Suite S193 : S192-1**, conditions de surface non linéaires dispersives reçues contre
+Stokes, ordre en amplitude explicite, avant branchement/comparaison perturbatif-total.
+File plurielle relue et actualisée ; aucun autre chantier effacé. Aucun ADR/angle/leçon
+nouveau : **121 ADR,233 angles,270 leçons,18 invariants,6 SPEC,23 cas**.
+Voir [surface libre S192](validation/SURFACE-LIBRE-2D-S192.md) et [mesures](validation/SURFACE-LIBRE-2D-S192-MESURES.md).
+
 **S191 — 2026-09-12 : profil B4 reçu avec projection**, ADR-121.
 **S190-1/S189-1 réalisées sur véhicule de banc** : projecteur D/G reçu contre matrice
 indépendante, 3 tests debug/release. Profil **14×14×8 / extrapolation 80 ms** conservé :
@@ -1046,7 +1062,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`registres/BILAN-S69.md`](registres/BILAN-S69.md) | **bilan d'avancement** — ~85 % comme corpus de conception, **~15 % comme système** ; **onze cas sur 23 et onze bancs sur onze attendent une couche non écrite** ; **B1 est le seul banc exécutable et n'a jamais été lancé** |
 | [`registres/PRESCRIPTIONS-S63.md`](registres/PRESCRIPTIONS-S63.md) | **les prescriptions non éprouvées** — trois genres, dont un seul se vérifie ; **trois recettes mises à l'épreuve, trois fautives** ; les préalables de B2 périmés depuis quarante sessions (**A185**) |
 | [`registres/AUDIT-REFERENCES-S62.md`](registres/AUDIT-REFERENCES-S62.md) | **ce qu'une référence peut voir bouger** — 41 références, trois degrés, **une seule tautologie** ; `Hs` aveugle à `hs` et gouverné par sa fenêtre, première mesure d'**A102** ; la fenêtre était hors du scénario (**A184**) |
-| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **233 identifiants au 2026-09-12 (S191)** — le décompte se vérifie contre le fichier, il ne se recopie pas ; avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
+| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **233 identifiants au 2026-09-12 (S192)** — le décompte se vérifie contre le fichier, il ne se recopie pas ; avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
 | [`registres/FORK-S22-S26.md`](registres/FORK-S22-S26.md) | **le second fork** — constat, carte de renumérotation complète, la règle manquante, et ce qui reste à fusionner |
 | [`registres/AUDIT-ASSERTIONS-S29.md`](registres/AUDIT-ASSERTIONS-S29.md) | **ce que chaque assertion peut voir** — 23 cas classés, 5 fautifs, 1 mesure du harnais retirée ; **réécriture S30 sans aucun seuil inventé** |
 | [`registres/AUDIT-REPLIS-S44.md`](registres/AUDIT-REPLIS-S44.md) | **les valeurs de repli, inventoriées** — 49 recensées, deux fautives ; *quand la grandeur est un écart, zéro est son meilleur point* |
@@ -1108,7 +1124,8 @@ parfaitement stable ne pouvait pas distinguer.
 
 ## État d'avancement
 
-**État actif S191** : critère B4 fixé à 2 %, profil de source reçu aussi sous projection ;
+**État actif S192** : critère B4 fixé à 2 %, profil source reçu sous projection (S191),
+tranche x-z à surface libre linéaire reçue Airy (S192), comparaison non linéaire absente ;
 B1/B2/B4 restent partiels, aucun banc complet. Voir le résultat en tête de cet index
 et la [file plurielle](registres/QUESTIONS-OUVERTES.md#file-active-s190--2026-09-12).
 

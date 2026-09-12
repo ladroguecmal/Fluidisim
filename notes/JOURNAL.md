@@ -9821,3 +9821,50 @@ de file plurielle restent avec leurs déclencheurs, A211 toujours à éprouver.
 runtime/autoritaire. 121ADR,233angles,270leçons,18invariants,6SPEC,23cas ; aucun banc
 complet. Aucun arbitrage humain nouveau, seuil de2 % maintenu. Journal/index/README
 et reprise mis à jour ; copies propres à avancer sur la clôture sans suppression.
+## S192 — 2026-09-12 — Une tranche à surface libre reçoit sa dispersion
+
+**Entrée.** « Continue » ; master58e41bc et trois copies propres identiques. S191-1,
+seuil2 % déjà fixé, aucun arbitrage redemandé. Plan seul bb31685, protocole ebbf08b,
+relèvement4b5c030, campagne8b89d32, propagation0bfe105. Travail sur master.
+
+**Construction.** Potentiel x-z linéaire, périodique horizontal, fond imperméable,
+hauteur η et potentiel de surface ψ évolutifs. DFT horizontale du Laplacien discret,
+relèvement tridiagonal dans la profondeur, flux de surface par demi-volume ; Verlet.
+La formule Airy continue reste l'oracle, elle ne remplit pas le domaine candidat.
+Aucun ADR nouveau : choix de véhicule de banc, pas choix de technologie δ.
+
+**Sorties.** SURFACE-LIBRE-2D-S192 et MESURES, exemple free_surface_2d et support
+free_surface.rs. Trois tests debug/release : stencil/bords, symbole indépendant,
+énergie volumique/surfacique, deux modes, pression, gravité, lac, refus atomiques.
+Une première épreuve d'overflow ne débordait pas ; fixture corrigée (ψ opposé extrême),
+aucun seuil relâché. Erreurs de syntaxe Rust corrigées avant réception.
+
+**Réception.** Douze exécutions (trois profondeurs, quatre grilles), cinq périodes,
+dt=T/1600, champs80 fois par période, énergie/volume à chaque pas. À N128/K64 :
+vitesses0,308062/0,091040/1,732796 % pour h0,25/2/8 m ; hauteurs0,292748/0,086520/
+1,647737 %. Les grilles grossières ne sont pas toutes sous2 % : le profond commence
+à93,19 % de vitesse. Les deux derniers raffinements sont tous d'ordre>1,95.
+Temps isolé T/50..T/400 : ordre final1,999920 contre évolution semi-discrète.
+Énergie relative max4,111837e-6 ; volume/(La) max1,456897e-16. Contre-épreuves
+surface figée200 %, rappel inversé250,9176 %, fréquence Saint-Venant profonde
+150,6637 % : rejetées. Deux release identiques 0x4fc690d4ac035bf7.
+Cible rustc1.97.0 x86_64-pc-windows-msvc ; aucune seconde cible ni mesure CPU.
+Workspace331/cinq ignorés reste la réception S190, non rejouée ; bibliothèques intactes.
+
+**Portée.** S191-1 close : tranche2D dispersive linéaire reçue, donc « aucun domaine2D »
+ne vaut plus pour les véhicules. A50/B4 partiels ; source B+W non branchée, aucun
+montage total/perturbatif non linéaire reçu. Pas d'addition des erreurs Airy au budget
+source S191 : références différentes. A216/A217, forces, perception restent ouverts.
+
+**Suite S193 : S192-1**, conditions de surface non linéaires dispersives et référence
+Stokes, ordre en amplitude et raffinement, avant branchement/comparaison intégrale.
+La superposition linéaire ne ferme pas A217 (ADR-112). Aucun arbitrage neuf.
+
+**Rituel.** File plurielle relue entière : B4/B3/A217 et profondeur uniforme actualisés ;
+A213, coupure/B2, fond variable, seconde cible, V/bancs, A94/A95 conservés. Recommandation
+du bilan S191 exécutée ; BILAN-S145 reste porté via construction, B1 déjà lancé S146.
+Aucun angle nouveau ni leçon distincte : application de référence indépendante et
+portée de réception déjà prescrites. Suivis A50/A217/A211, index/passation et décomptes
+actualisés :121ADR,233angles,270leçons,18invariants,6SPEC,23cas. I-03/I-06/I-08/I-14
+restent inchangés : banc f64 avec allocations, aucun contrat runtime revendiqué.
+Trois copies à avancer après le commit final, aucune suppression autorisée par preuve de mort.
