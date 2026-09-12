@@ -68,11 +68,11 @@ le critère dans les bancs, pour que la faute ne puisse plus se répéter.
 
 ### Plan
 
-- [>] **P1** — état réel, jeton et plan seuls.
-- [ ] **P2** — protocole **avant tout code** : ce que « loin du bord » veut dire et se
+- [x] **P1** — état réel, jeton et plan seuls.
+- [x] **P2** — protocole **avant tout code** : ce que « loin du bord » veut dire et se
       mesure, le classement des cibles par enjeu, ce qui compte comme échec — un chiffre
       qui bouge n'est pas une conclusion qui tombe — et ce qu'on fera si une cible échoue.
-- [ ] **P3a** — apparier le critère : garde partagée qui **refuse** un ordre tiré d'un
+- [>] **P3a** — apparier le critère : garde partagée qui **refuse** un ordre tiré d'un
       triplet non monotone, et contrôle de raffinement ajouté à chaque banc publié.
       Assertions de continuité sur les valeurs déjà publiées.
 - [ ] **P3b** — exécuter l'audit : S194/ADR-123 d'abord, puis S195 et S193. Relever les
@@ -83,6 +83,22 @@ le critère dans les bancs, pour que la faute ne puisse plus se répéter.
       jeton `libre`, copies avancées sans suppression non prouvée.
 
 ### Notes de reprise
+
+P2 S197 : protocole dans AUDIT-RESOLUTION-S197. **Découverte structurante faite avant
+toute mesure, et par arithmétique pure** : `K` n'entre dans le véhicule que par le
+symbole de dispersion `dn[q]`, précalculé — le pas de temps ne le voit jamais. Donc
+(a) le défaut se calcule en forme fermée sans simuler, (b) monter `K` ne coûte qu'à la
+construction, l'audit est bon marché.
+Écart `|G_h − k tanh kh|/(k tanh kh)` à **K=64**, la valeur de S193 à S196 : q=2 **0,48 %**,
+q=3 **1,08 %**, q=9 **9,32 %**, q=16 27 %, q=24 55 %, q=38 112 %. Sur la bande peuplée :
+**S194/ADR-123 9,3 %**, S195 n=6 **43,6 %**, S196 n=16 **112 %**. Pour tenir 1 % il
+faudrait K=256 / 512 / 1024. Le symbole converge à l'ordre deux.
+**Ne pas surinterpréter** : les deux évolutions comparées partagent le même symbole, et
+l'amplitude est aux modes porteurs (0,5–1,1 %). Mais S194 dit que le couplage est
+gouverné par le **désaccord de triade**, une différence de fréquences — donc exactement
+ce qu'un symbole biaisé déplace. D'où les deux prédictions opposées déclarées.
+Critères posés sur les **énoncés** et non sur les décimales : `α=1,302602` va bouger,
+ce n'est pas le sujet ; le seuil de cambrure doit rester dans 0,0077–0,0104.
 
 S197 : master 21763ab propre, quatre copies alignées ; 123 ADR/242 angles/277 leçons.
 **Ce que l'audit vise, par enjeu décroissant.** (1) **ADR-123, actée** : ses seuils
