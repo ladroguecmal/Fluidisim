@@ -66,11 +66,11 @@ la vélocité elle-même, et il est traité comme tout le reste : mesuré d'abor
 
 ### Plan
 
-- [>] **P1** — état réel, jeton et plan seuls.
-- [ ] **P2** — le diagnostic **chiffré**, depuis le dépôt et son historique git : où va le
+- [x] **P1** — état réel, jeton et plan seuls.
+- [x] **P2** — le diagnostic **chiffré**, depuis le dépôt et son historique git : où va le
       temps des sessions, qui choisit leur sujet, ce que coûte la reprise de soi. Pas
       d'impression, pas de jugement : des comptages reproductibles.
-- [ ] **P3** — les correctifs **appliqués** : la règle qui casse le chaînage, le tableau de
+- [>] **P3** — les correctifs **appliqués** : la règle qui casse le chaînage, le tableau de
       bord des quatre couches, une définition mesurable d'« avancer », et l'outil qui rend
       la dérive visible sans qu'on ait à y penser.
 - [ ] **P4** — appliquer la règle neuve à la session suivante, et propager la file.
