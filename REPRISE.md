@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-12 21:09 +02:00
+JETON            : occupé
+Battement        : 2026-09-12 21:15 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
-Session en cours : aucune
+Session en cours : S195 — S194-1 : `n` sources, l'option tranchée par l'utilisateur
 Dernière session : S194 — couplage de deux trains mesuré, A217 close, ADR-123
-Session suivante : S195 — **à instruire** : `n` sources (A240) ou la correction croisée quadratique ; relire la file plurielle
+Session suivante : à fixer au rituel de fin ; relire la file plurielle
 
 *S183 à S189 ont travaillé dans la **copie principale**, sur `master` : aucune copie isolée
 ouverte, donc rien à refermer (AGENTS.md). Les trois worktrees ont été **avancés sur master**
