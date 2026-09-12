@@ -73,7 +73,7 @@ non linéaire et dispersif (A217) ; aucune sélection de solveur δ, aucun seuil
   discrets tirés du relèvement S192, échelle d'ordres M=1/2/3 et signature prédite de
   chacun, références Stokes (profil d'ordre 2, correction de fréquence d'ordre 3),
   convention de courant moyen, anti-repliement, réceptions chiffrées déclarées.
-- [ ] **P3a** — véhicule : support non linéaire (état spectral, réutilisation du
+- [x] **P3a** — véhicule : support non linéaire (état spectral, réutilisation du
   relèvement, vitesse verticale à l'ordre M, RK4, projection de bande), tests propres
   dont **réduction exacte à S192 à M=1** et refus atomiques.
 - [ ] **P3b** — campagne : erreur de profil contre Stokes-2 en fonction de l'amplitude
@@ -113,4 +113,15 @@ d'ordre 3 en profondeur finie **dépend d'une convention de courant moyen**, don
 seul le cas profond peut servir d'oracle de fréquence ; (3) volume et énergie ne
 sont plus conservés exactement — la dérive est un diagnostic de troncature.
 Ces trois points sont des candidats d'angle mort à instruire en P4.
+
+P3a : support/nl_surface.rs + coquille d'exemple. Quatre tests passent en debug
+et release, build sans avertissement. L'oracle du test M=1 a dû être **corrigé
+avant d'être écrit** : RK4 n'intègre pas exactement l'oscillateur, l'oracle exact
+est la puissance fermée de son amplification (precision datee dans le document).
+Controle de vie, h=8, ka=0,05, 1 periode, K=64 : |eta2| **exactement nul** a M=1,
+1,579404e-3 a M=2, 1,585220e-3 a M=3 ; energie -8,0e-11 relatif ; volume 1,9e-19 ;
+residu de relevement 2,220e-16. Le volume derive **bien moins** que l'ordre de
+troncature ne l'exigeait : prediction du protocole conservatrice, a dire en P4.
+Parti pris retenu : etat spectral en bande, convolution tronquee, psi_0 jauge a zero
+(prouve inerte par un test), symbole horizontal exact donc K seul axe spatial.
 

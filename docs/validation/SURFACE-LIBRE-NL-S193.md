@@ -275,10 +275,20 @@ prétendre le même chiffre ici serait un aveu d'erreur, pas une qualité.
 1. **Relèvement** — `G_h` du système tridiagonal contre sa forme fermée
    `sinh(γ)tanh(Kγ)/dz` ; résidu de la récurrence intérieure ; condition de fond
    `(1+μ/2)φ_0=φ_1` ; `G_h(0)=0` traité exactement ; `G_h>0` ailleurs.
-2. **Réduction à `M=1`** — à `M=1`, chaque mode doit suivre **exactement** la solution
-   analytique de l'oscillateur `η̈=−g G_h η`, à l'arrondi près, sur un millier de pas, pour
-   deux modes de phases distinctes simultanément. C'est l'équivalence semi-discrète avec
-   S192.
+2. **Réduction à `M=1`** — à `M=1` le système est linéaire et découplé mode à mode, et son
+   évolution doit être **exacte à l'arrondi près** contre un oracle indépendant, sur un
+   millier de pas, pour plusieurs modes de phases distinctes simultanément. C'est
+   l'équivalence semi-discrète avec S192.
+
+   > **Précision P3a, 2026-09-12.** La formulation initiale de ce test disait « contre la
+   > solution analytique de l'oscillateur `η̈=−gG_hη` ». Elle était fausse : RK4 n'intègre
+   > pas exactement un oscillateur, son écart à la solution continue est `O(dt⁴)` et non
+   > de l'ordre de l'arrondi. Ce qui *est* exact, c'est la **puissance de l'amplification
+   > RK4** elle-même. Pour `J=[[0,G_h],[−g,0]]`, on a `J²=−ω²I` avec `ω²=gG_h`, donc
+   > `R = cI + sJ` avec `c = 1−(ωdt)²/2+(ωdt)⁴/24` et `s = dt(1−(ωdt)²/6)`, puis
+   > `Rⁿ = ρⁿ(cos nθ·I + sin nθ·J/ω)`, `ρ=√(c²+s²ω²)`, `θ=atan2(sω,c)`. C'est cette forme
+   > fermée — indépendante du code de pas — qui sert d'oracle. L'écart à l'oscillateur
+   > continu reste mesuré, mais par l'axe de convergence en `dt` du §5.2, à sa place.
 3. **Convolution tronquée** — un produit de deux champs à bande étroite doit égaler la
    convolution analytique de leurs modes ; un couple choisi pour déborder la bande doit être
    **projeté et non replié**.
