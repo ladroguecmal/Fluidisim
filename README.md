@@ -416,3 +416,19 @@ disait. **L265** : un contrôle qui relie deux mesures attrape ce qu'aucune ne m
 il a trouvé un défaut d'indexation que deux tables plausibles cachaient.
 Suite : composer l'erreur spatiale et l'erreur temporelle.
 Voir [CADENCE-3D-S185](docs/validation/CADENCE-3D-S185.md).
+
+**S186 :** l'erreur spatiale et l'erreur temporelle sont composées sur un seul véhicule,
+et **la loi de composition dépend du mode de réemploi** : le **maximum** pour les deux
+modes causaux — les seuls dont un runtime dispose — la quadratique pour l'interpolation.
+Un budget conjoint est donc licite, et la règle est d'égaliser les deux erreurs prises
+seules puis de s'arrêter ; l'axe bon marché est gratuit jusqu'à la parité. Espace et
+temps sont le même opérateur **par axe** : rapport de constantes 2,27 et 3,05 pour les
+trois axes d'une interpolation trilinéaire. Aucun ADR.
+**A229** : dégrader un axe peut réduire l'erreur totale — jusqu'à −17 % — donc un réglage
+à un axe à la fois trouve un optimum faux. **A230** : « points par longueur d'onde » n'est
+pas un critère pour une source échantillonnée en profondeur, où le contenu présent est 5 à
+16 fois plus lisse que la coupure de la recette. **L266** : deux erreurs mesurées
+séparément ne se composent pas ; leur somme est une enveloppe, jamais une prédiction.
+117 ADR,230 angles,266 leçons,18 invariants,6 SPEC,23 cas.
+Suite : le réseau gradué en profondeur — l'erreur vient d'une tranche sur quatorze.
+Voir [COMPOSITION-ERREURS-S186](docs/validation/COMPOSITION-ERREURS-S186.md).

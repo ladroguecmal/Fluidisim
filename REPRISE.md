@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-12 13:09 +02:00
+JETON            : libre
+Battement        : 2026-09-12 13:37 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S186 — S185-1/A50 : composer l'erreur spatiale et l'erreur temporelle
-Dernière session : S185 — le maintien est d'ordre un ; une latence vaut 2,6 en cadence
-Session suivante : à fixer par le rituel de fin de S186
+Session en cours : aucune
+Dernière session : S186 — la loi de composition dépend du mode ; le maximum pour les modes causaux
+Session suivante : S187 — S186-1/A50 : le réseau gradué en profondeur (l'erreur vient d'une tranche sur quatorze)
 
 *S183 à S186 ont travaillé dans la **copie principale**, sur `master` : aucune copie isolée
 ouverte, donc rien à refermer (AGENTS.md). Les trois worktrees ont été **avancés sur master**
@@ -191,6 +191,40 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S186 — 2026-09-12 :** [COMPOSITION-ERREURS-S186](docs/validation/COMPOSITION-ERREURS-S186.md).
+**S185-1 réalisée : les deux erreurs sont composées, et la loi dépend du mode de réemploi.**
+Le dépôt avait deux mesures d'approximation de la même source — décimation spatiale
+(S170, 1D, figée) et cadence temporelle (S185, 3D, réseau plein) — sans savoir les
+composer. Mesurées ensemble, 84 cases contre **une seule** référence : le critère déclaré
+avant les chiffres rejette les trois lois, mais **séparé par mode** il en retient une par
+mode — **maximum** pour maintien (0,826–1,155) et extrapolation (0,860–1,034),
+quadratique pour l'interpolation (0,991–1,209). Donc **un budget conjoint `r × c` est
+licite pour un consommateur causal**, et la règle est d'**égaliser** les erreurs des deux
+axes pris seuls puis de s'arrêter : l'axe bon marché est gratuit jusqu'à la parité.
+L'additive n'est dépassée sur aucune case — enveloppe sûre à 1,9× de mou.
+**H1 confirmée au nombre d'axes près** : rapport de constantes 2,27 et 3,05 contre
+`A_temps = 0,0522`, soit les trois axes de `scatter` contre un pour le temps.
+**La profondeur filtre le contenu** : `k_eff` mesuré 0,37–0,79 rad/m horizontal et
+0,50–1,17 vertical, soit `λ_eff` 8–17 m et 5,4–12,7 m contre `λ_min = 1,081 m` de la
+recette — 5 à 16 fois plus lisse, d'où **A230** : « points par longueur d'onde » n'est pas
+un critère pour un consommateur en profondeur, et la borne `r = 2` de S184 est juste par
+le mauvais chemin. **L'erreur spatiale est intégralement celle de la tranche la plus haute**
+(2,54 / 13,60 / 32,96 % aux trois `r`, contre 0,11 / 0,43 / 1,54 % au fond) : un réseau
+isotrope surrésout treize tranches sur quatorze. Et **A229** : dégrader la cadence peut
+**réduire** l'erreur de 12 à 17 % sur les modes causaux — piège de calibration, pas marge.
+Six réceptions, dont le **contrôle croisé** qui redonne les quatorze couples de S185 §6.2
+chiffre par chiffre ; empreinte `0x0e743846d4656870`, `diff` strict vide sur deux
+exécutions. `Mode`/`build_source` déplacés dans `support/reuse_mode.rs`, `cadence_error`
+rejoué, empreinte `0x39567a1d4bc2ba4c` inchangée. Aucun nouveau test ; workspace
+331 réussis/cinq ignorés en debug et release. Runtime inchangé, **aucun ADR**.
+117 ADR,230 angles,266 leçons,18 invariants,6 SPEC,23 cas. **A229**, **A230** et **L266**.
+A50/B4 restent partiels : il manque toujours **un critère de justesse**, pas un chiffre.
+**Suite S187 : S186-1/A50**, le **réseau gradué en profondeur** — premier lot où la mesure
+recommande une construction et non un chiffre de plus. Il touche `nodes_per_axis` et
+`scatter`, donc il exige de rejouer S184 et S186 et de vérifier leurs deux empreintes.
+**BILAN-B4-S176** reste le bilan actif et porté, avec un suivi daté. Aucun arbitrage
+humain nouveau.
 
 **S185 — 2026-09-12 :** [CADENCE-3D-S185](docs/validation/CADENCE-3D-S185.md).
 **S184-1 réalisée : l'erreur de cadence est mesurée en 3D, et les trois modes séparés.**

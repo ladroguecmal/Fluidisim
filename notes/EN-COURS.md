@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S186 — en cours
+Session : S186 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : S185-1/A50, **composer** l'erreur spatiale et l'erreur temporelle sur le
 **même** véhicule 3D. S170 a mesuré la décimation spatiale en 1D sur une source figée,
@@ -82,9 +82,22 @@ erreurs se composent — additivement, quadratiquement, ou pas du tout.
       pour un contenu advecté, décimer en espace et retarder en temps pourraient être
       la **même** erreur, et alors elles ne s'additionnent pas.
 - [x] **P4** — recevoir dans un document de validation ; angles et leçons.
-- [ ] **P5** — rituel de fin (REPRISE.md §6).
+- [x] **P5** — rituel de fin (REPRISE.md §6).
 
 ### Notes de reprise
+
+P5 S186 : rituel terminé. Décomptes **vérifiés contre le dépôt** et non recopiés —
+117 fichiers ADR, 18 invariants (I-01 à I-18), 6 SPEC (dont SPEC-003 qui vit dans
+`docs/validation/`), 23 cas, 266 leçons, A230 au plus haut : **117 ADR, 230 angles,
+266 leçons, 18 invariants, 6 SPEC, 23 cas**, portés dans README, 00_INDEX et REPRISE.
+Un décompte périmé corrigé au passage : la table des registres de 00_INDEX annonçait
+« 193 points » pour ANGLES-MORTS, quarante de moins que la réalité ; il est maintenant
+**daté** plutôt que recopié (A185). Invariants relus : I-01, I-03, I-06, I-14, I-15 —
+aucun ne devient faux, et pour cause, aucun contrat n'a changé.
+Jeton libre ; copie principale, aucune copie ouverte. Les trois worktrees ont été
+**avancés sur master** en fin de session : ils annonçaient « suivante S186 » avec un
+jeton libre, exactement le mécanisme des trois forks.
+Suite S187 : S186-1, le réseau gradué en profondeur.
 
 P4 S186 : COMPOSITION-ERREURS-S186 §8–§9 reçus, **A229** et **A230** écrits, **L266**
 écrite. Trois suivis datés ajoutés sans rien réécrire : CONSOMMATION-S184 (la

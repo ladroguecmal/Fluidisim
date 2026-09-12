@@ -162,3 +162,19 @@ réduction sont désormais chiffrés en **temps et en justesse**. Ce que B4 atte
 plus une mesure de réduction mais **un critère** : rien ne dit si 3 %, 1 % ou 0,1 % d'erreur
 de champ perturbatif est acceptable, et aucun seuil B4 n'est adopté. S185-1 compose l'erreur
 spatiale et l'erreur temporelle ; A50/B4 restent partiels, aucun solveur choisi.
+
+**Suivi S186 — 2026-09-12 :** les deux erreurs sont **composées**,
+[COMPOSITION-ERREURS-S186](COMPOSITION-ERREURS-S186.md). La loi dépend du mode de réemploi :
+**maximum** pour les deux modes causaux — les seuls dont un runtime dispose — et quadratique
+pour l'interpolation. Donc **un budget conjoint est licite**, et la règle est d'égaliser les
+erreurs des deux axes pris seuls puis de s'arrêter. Trois acquis de plus pour B4 : espace et
+temps sont le même opérateur par axe (rapport de constantes 2,27 et 3,05 pour trois axes) ;
+le contenu de la source vu en profondeur est 5 à 16 fois plus lisse que la coupure de sa
+recette, ce qui invalide le décompte « points par longueur d'onde » sans changer la borne
+`r = 2` (**A230**) ; et l'erreur spatiale est **intégralement** celle de la tranche la plus
+haute du bloc, ce qui désigne un réseau gradué en profondeur comme prochain lot de
+construction.
+
+**Ce que B4 attend reste un critère**, inchangé depuis le suivi S185 : la composition est
+désormais connue, le seuil de justesse ne l'est pas, et aucun n'est adopté. S186-1 construit
+le réseau gradué ; A50/B4 restent partiels, aucun solveur choisi.

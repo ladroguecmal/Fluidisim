@@ -17,6 +17,25 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S186 :** [COMPOSITION-ERREURS-S186](validation/COMPOSITION-ERREURS-S186.md), aucun ADR.
+**Les deux erreurs sont composées sur un seul véhicule, et la loi dépend du mode de
+réemploi** : **maximum** pour le maintien (0,826–1,155) et l'extrapolation (0,860–1,034),
+quadratique pour l'interpolation (0,991–1,209). Donc **un budget conjoint `r × c` est
+licite pour un consommateur causal**, et la règle est d'égaliser les erreurs des deux axes
+seuls puis de s'arrêter ; l'additive n'est dépassée sur aucune des 84 cases, c'est une
+enveloppe sûre à 1,9× de mou. **Espace et temps sont le même opérateur, par axe** :
+rapport de constantes 2,27 et 3,05 pour les trois axes de `scatter` contre un pour le
+temps. **Le contenu vu en profondeur est 5 à 16 fois plus lisse que la coupure de sa
+recette** (`λ_eff` 8–17 m contre `λ_min` 1,081 m), ce qui invalide le décompte « points
+par longueur d'onde » sans changer la borne `r = 2` ; et **l'erreur spatiale est
+intégralement celle de la tranche la plus haute** du bloc. Enfin **dégrader la cadence
+peut réduire l'erreur** de 12 à 17 % sur les modes causaux — piège de calibration.
+Six réceptions, dont le contrôle croisé qui redonne S185 chiffre par chiffre ; empreinte
+`0x0e743846d4656870`, `diff` strict vide sur deux exécutions. Aucun nouveau test ;
+workspace331/cinq ignorés en debug et release. Runtime inchangé.
+117 ADR,230 angles,266 leçons,18 invariants,6 SPEC,23 cas. **A229**, **A230** et **L266**.
+**Suite S187 : S186-1**, le réseau gradué en profondeur. A50/B4 partiels.
+
 **S185 :** [CADENCE-3D-S185](validation/CADENCE-3D-S185.md), aucun ADR. **L'erreur de
 cadence est mesurée en 3D, et les trois modes de réemploi séparés** — S174 n'avait
 mesuré que l'interpolé, en écrivant que le runtime n'aurait pas l'instantané suivant.
@@ -888,7 +907,7 @@ Aucun ADR n'est encore *accepté* : le statut passera à « accepté » après l
 | [`registres/BILAN-S69.md`](registres/BILAN-S69.md) | **bilan d'avancement** — ~85 % comme corpus de conception, **~15 % comme système** ; **onze cas sur 23 et onze bancs sur onze attendent une couche non écrite** ; **B1 est le seul banc exécutable et n'a jamais été lancé** |
 | [`registres/PRESCRIPTIONS-S63.md`](registres/PRESCRIPTIONS-S63.md) | **les prescriptions non éprouvées** — trois genres, dont un seul se vérifie ; **trois recettes mises à l'épreuve, trois fautives** ; les préalables de B2 périmés depuis quarante sessions (**A185**) |
 | [`registres/AUDIT-REFERENCES-S62.md`](registres/AUDIT-REFERENCES-S62.md) | **ce qu'une référence peut voir bouger** — 41 références, trois degrés, **une seule tautologie** ; `Hs` aveugle à `hs` et gouverné par sa fenêtre, première mesure d'**A102** ; la fenêtre était hors du scénario (**A184**) |
-| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **193 points**, avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
+| [`registres/ANGLES-MORTS.md`](registres/ANGLES-MORTS.md) | **230 identifiants au 2026-09-12 (S186)** — le décompte se vérifie contre le fichier, il ne se recopie pas ; avec sévérité — dont douze importés de la lignée B en S35, **cinq de sévérité 1 non relus** |
 | [`registres/FORK-S22-S26.md`](registres/FORK-S22-S26.md) | **le second fork** — constat, carte de renumérotation complète, la règle manquante, et ce qui reste à fusionner |
 | [`registres/AUDIT-ASSERTIONS-S29.md`](registres/AUDIT-ASSERTIONS-S29.md) | **ce que chaque assertion peut voir** — 23 cas classés, 5 fautifs, 1 mesure du harnais retirée ; **réécriture S30 sans aucun seuil inventé** |
 | [`registres/AUDIT-REPLIS-S44.md`](registres/AUDIT-REPLIS-S44.md) | **les valeurs de repli, inventoriées** — 49 recensées, deux fautives ; *quand la grandeur est un écart, zéro est son meilleur point* |

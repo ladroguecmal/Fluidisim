@@ -9224,3 +9224,121 @@ un sens, et S170 avertit déjà qu'un ratio de décimation ne décrit pas à lui
 ce qui rend l'addition douteuse. BILAN-B4-S176 reste le bilan actif et porté.
 
 **Décisions qui demandent un arbitrage humain :** aucune nouvelle. A107 reste ouverte.
+
+## S186 — 2026-09-12 — Composer les deux erreurs, et découvrir que la loi dépend du mode
+
+**Entrée :** master e46de38 propre, quatre copies au même commit, S185-1/A50. Copie principale.
+Plan seul 541d075 ; protocole d6a61fd ; véhicule ab9f341 ; synthèse d869ea9 ; réception 2209682.
+Code d'exécution de la bibliothèque inchangé.
+
+**Produit :** `examples/support/reuse_mode.rs`, `examples/composed_error.rs` et
+[COMPOSITION-ERREURS-S186](../docs/validation/COMPOSITION-ERREURS-S186.md).
+
+**L'écart que la session ferme.** Le dépôt avait deux mesures d'approximation portant sur la
+même source — la décimation spatiale ([S170](../docs/validation/SOURCE-DECIMEE-S170.md), 1D,
+source figée) et la cadence temporelle ([S185](../docs/validation/CADENCE-3D-S185.md), 3D,
+réseau plein) — et rien n'interdisait de les additionner pour dimensionner les deux à la fois.
+S170 avait pourtant écrit qu'« un ratio de décimation ne décrit pas à lui seul la précision ».
+S186 les mesure **ensemble**, sur un seul véhicule et contre une **seule** référence : 84 cases
+`r ∈ {1,2,4,8}` × `c ∈ {1,…,64}` × trois modes de réemploi.
+
+**Chiffres qui ont orienté la conception.**
+
+Le critère de jugement avait été déclaré avant les chiffres — une loi est retenue si son
+rapport mesuré/prédit reste dans `[0,80 ; 1,25]` partout. **Appliqué tel quel, il rejette les
+trois lois** : additive 0,529–0,988, quadratique 0,749–1,209, maximum 0,826–1,489. Séparé par
+mode de réemploi, le même relevé devient net :
+
+| mode | additive | quadratique | maximum | retenue |
+|---|---|---|---|---|
+| maintien | 0,529–0,976 | 0,749–0,999 | 0,826–1,155 | **maximum** |
+| extrapolation | 0,540–0,976 | 0,760–0,999 | 0,860–1,034 | **maximum** |
+| interpolation | 0,803–0,988 | 0,991–1,209 | 0,998–1,489 | **additive, quadratique** |
+
+**La loi de composition dépend du mode de réemploi**, et le partage tombe du bon côté : pour
+les deux modes **causaux** — les seuls dont un runtime dispose — c'est le **maximum**. Les deux
+erreurs ne s'ajoutent pas, la plus grande gagne, et **l'axe bon marché est gratuit jusqu'à la
+parité avec l'axe dominant**. Un budget conjoint `r × c` est donc licite, et la règle de
+dimensionnement est d'égaliser les deux erreurs prises seules puis de s'arrêter. L'additive
+n'est dépassée sur **aucune** des 84 cases : c'est une enveloppe sûre, à 1,9 fois de mou près.
+
+**H1 est confirmée, au nombre d'axes près.** L'hypothèse déclarée en §3 — interpoler entre deux
+nœuds et interpoler entre deux instants sont le même opérateur sur un contenu advecté — se juge
+par le **rapport** des constantes d'ordre deux, qui ne dépend pas du `λ` de normalisation.
+Mesuré : `A_espace / A_temps` = **2,27** à `r = 2` et **3,05** à `r = 4`, pour `A_temps = 0,0522`
+(S185 mesurait 0,052). C'est le nombre d'axes : `scatter` interpole sur trois, le temps sur un.
+La branche concurrente, qui prédisait un facteur approchant 39 par la décroissance verticale
+`exp(k z)`, est écartée d'un facteur quinze.
+
+**Et la raison de cet écart est un résultat à part entière.** Le contenu **réellement présent**
+dans la source au bloc vaut `k_eff` de 0,37 à 0,79 rad/m horizontalement et 0,50 à 1,17
+verticalement — `λ_eff` de 8 à 17 m et de 5,4 à 12,7 m — quand la recette de pression annonce
+`λ_min = 1,081 m`. **La profondeur filtre : le contenu est 5 à 16 fois plus lisse que la
+coupure.** L'amplitude le confirme, avec une longueur d'atténuation de 3,1 m et non les 0,172 m
+de `1/k_max`.
+
+Dernier chiffre, et c'est celui qui désigne la suite : **l'erreur spatiale globale est
+exactement celle de la tranche la plus haute du bloc** — 2,54 / 13,60 / 32,96 % aux trois `r`,
+quand la tranche du fond ne vaut que 0,11 / 0,43 / 1,54 %. Vingt-trois fois moins à `r = 2`.
+Un réseau isotrope surrésout treize tranches sur quatorze.
+
+**Décision structurante :** aucune, **aucun ADR**. Mesurer n'est pas décider, et le solveur
+reste à B3 (ADR-007 §5).
+
+**Ce que la session a trouvé et qui n'était pas cherché.**
+
+**A229** *(sévérité 2)* — **dégrader un axe peut réduire l'erreur totale.** Sur un réseau
+décimé, réduire la cadence rend le champ plus juste : maintien `r = 4` passe de 13,60 % à
+`c = 1` à **11,23 %** à `c = 8`, soit −17,4 % ; maintien `r = 2` −13,2 %, extrapolation `r = 2`
+−14,1 % et `r = 4` −12,2 %. La compensation appartient aux modes causaux et disparaît avec
+l'interpolation (−0,04 %). Elle est déjà visible dans l'erreur de **source** seule, donc ce
+n'est pas un artefact de l'évolution. Le piège : une procédure de calibration qui balaie un axe
+en tenant l'autre fixe verra l'erreur baisser et croira avoir réglé, alors qu'elle aura trouvé
+l'endroit où deux défauts s'annulent le mieux — un endroit qui ne se transporte pas.
+
+**A230** *(sévérité 2)* — **« points par longueur d'onde » n'est pas un critère pour une source
+échantillonnée en profondeur.** S184 §6.3 bornait la décimation à `r = 2` en comptant 2,16
+points par `λ_min`. La borne tient — 2,54 % à `r = 2` contre 13,60 % à `r = 4` — mais **par le
+mauvais chemin** : le contenu présent est 5 à 16 fois plus lisse, et le critère correct porte
+sur `k_eff(z)` du consommateur. Près de la surface il serait optimiste, plus profond encore
+plus pessimiste. Un critère juste par accident se trompe ailleurs.
+
+**L266** — deux erreurs mesurées séparément ne se composent pas ; leur somme est une enveloppe,
+jamais une prédiction. Trois corollaires : la loi de composition est une quantité à **mesurer**
+et non à choisir, parce que les trois candidates donnent des conseils de conception opposés ;
+elle peut dépendre d'un **troisième** paramètre, ici le mode, et un verdict global rejetant tout
+peut cacher une loi par mode ; et une mesure de composition exige une **référence unique** plus
+un **contrôle croisé** avec les mesures qu'elle compose.
+
+**Réception :** les six contrôles passent. Empreinte `0x0e743846d4656870`, et un `diff` strict
+entre deux exécutions est **vide** — ce véhicule ne mesure aucune durée, donc sa sortie entière
+est un résultat. `scatter` à `r = 1` est le chargement direct, en bits. À `c = 1` les trois
+modes rendent le même champ, en bits, pour chacun des quatre `r`. Plancher `dt/2` à **0,386 %**,
+la valeur de S185. Et le **contrôle croisé** : la ligne `r = 1` redonne les quatorze couples
+`eS/eU` de S185 §6.2 chiffre par chiffre — c'est ce qui autorise à composer deux mesures écrites
+à une session d'intervalle. Aucun nouveau test unitaire ; workspace **331 réussis / cinq
+ignorés** en debug et en release.
+
+**Un déplacement, et sa vérification.** `Mode` et `build_source` ont quitté `cadence_error.rs`
+pour `examples/support/reuse_mode.rs`, parce que S186 réemploie les mêmes trois modes et que
+deux copies auraient divergé (L137). `cadence_error` a été rejoué : **empreinte
+`0x39567a1d4bc2ba4c` inchangée**, celle publiée par S185. Le code est déplacé, pas réécrit, et
+c'est un relevé et non une affirmation. C'est le même geste que S185 avait fait pour S184, et
+il coûte une exécution.
+
+**Ce que je n'ai pas fait.** Aucun seuil de justesse : A50 n'attend plus un chiffre mais une
+décision, et rien ici ne dit si 2,5 % est acceptable. Un seul montage, donc un seul couple
+d'échelles — les formes sans dimension voyagent, les valeurs non. **Réseau isotrope seulement** :
+le réseau gradué que §8.3 appelle n'est pas mesuré, et `nodes_per_axis`/`scatter` ne savent pas
+le faire. Aucun budget conjoint annoncé : le gain de coût reste celui de S184, et cette session
+dit seulement qu'on a le droit de le dépenser. Le véhicule ne projette toujours pas.
+`A_temps` n'a que deux cadences jugées dans cette grille, contre cinq concordantes en S185.
+
+**Prochaine session recommandée. S187 : S186-1**, le **réseau gradué en profondeur**. C'est le
+premier lot où la mesure recommande une construction plutôt qu'un chiffre de plus : l'erreur
+vient d'une tranche sur quatorze, et un réseau dont le pas suit `1/k_eff(z)` devrait rendre la
+même erreur pour une fraction des nœuds. Il touche `nodes_per_axis` et `scatter`, donc il exige
+de rejouer S184 et S186 et de vérifier leurs deux empreintes. **BILAN-B4-S176** reste le bilan
+actif et porté, avec un suivi daté : ce qu'il attend est toujours un critère.
+
+**Décisions qui demandent un arbitrage humain :** aucune nouvelle. A107 reste ouverte.
