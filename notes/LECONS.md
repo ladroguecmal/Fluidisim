@@ -4123,3 +4123,34 @@ fraction ; un facteur cinq sur un sixième du travail n'est pas un facteur cinq.
 
 Voir CONSOMMATION-S184 §6.4 et A227. Même famille que L263 — un axe ne mesure son effet que
 s'il dépasse ce qu'il transporte ; ici, une optimisation ne vaut que la part qu'elle touche.
+
+## L265 — Un contrôle qui relie deux mesures indépendantes attrape ce qu'aucune des deux ne montre
+
+*(S185)* La session mesurait deux grandeurs : l'erreur de **source** introduite par le
+réemploi, et l'erreur de **champ** qui en résulte après cent pas. Les deux tables étaient
+plausibles — monotones en cadence, ordonnées comme attendu entre les trois modes, du bon
+ordre de grandeur. Publiées telles quelles, elles n'auraient éveillé aucun soupçon.
+
+Une troisième colonne les reliait : avec un état initial nul et une advection d'ordre
+supérieur, l'écart de champ **doit** être l'intégrale en temps de l'écart de source. Elle
+affichait 100 % d'écart sur toutes les lignes. Le défaut n'était pas dans la physique mais
+dans le harnais — la fonction qui construisait les instantanés rangeait la source par indice
+de bloc, celle qui la chargeait la lisait **compacte**, et chaque maille recevait donc la
+source d'une autre. Les erreurs de source restaient justes (elles comparaient deux tableaux
+dans le même rangement faux) et les erreurs de champ restaient vraisemblables.
+
+Ce qui a sauvé la session n'est pas d'avoir vérifié chaque mesure, c'est d'avoir vérifié une
+**relation entre** elles. Une mesure isolée ne peut être fausse que d'une façon qui se voit ;
+deux mesures liées par une identité connue se contredisent dès que l'une dérape.
+
+Chercher, dans tout protocole, la quantité qu'on peut calculer **de deux façons
+indépendantes** et publier leur écart. S170 le faisait déjà avec son bilan de volume prédit —
+le défaut signé contre l'intégrale de l'erreur de source — et le désignait comme le contrôle
+central plutôt que comme un ornement. Une identité qui ferme à l'arrondi ne coûte presque
+rien à écrire et ne se contente pas de rassurer : elle est le seul contrôle qui détecte une
+erreur de **plomberie**, celle que les valeurs ne trahissent pas.
+
+Corollaire, appris ici aussi : quand l'identité échoue à 100 %, soupçonner l'indexation avant
+la physique. Un écart total, et non un écart grand, est la signature d'un appariement rompu.
+
+Voir CADENCE-3D-S185 §6.1 et A228.

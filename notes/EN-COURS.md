@@ -78,9 +78,9 @@ futur n'est pas disponible pour un événement inconnu. S185 mesure les modes **
       chaque reconstruction. Réceptions : reproductibilité en bits, identité de
       prédiction champ/intégrale de l'erreur de source, cadence 1 identique à la
       référence. Relever.
-- [>] **P4** — chiffrer le compromis cadence × mode, et le coût du mode lui-même.
+- [x] **P4** — chiffrer le compromis cadence × mode, et le coût du mode lui-même.
       Recevoir dans un document de validation.
-- [ ] **P5** — rituel de fin (REPRISE.md §6).
+- [>] **P5** — rituel de fin (REPRISE.md §6).
 
 ### Notes de reprise
 

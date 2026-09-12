@@ -2246,3 +2246,29 @@ mesurée qu'en 1D (S170, S174). S184-1 mesure l'erreur de cadence en 3D avec le 
   l'usage volumétrique qui n'est pas dans son enveloppe, et personne ne l'avait écrit.
   Sévérité 2 et non 1 : la décomposition B/W/δ/V (ADR-001) n'est pas en cause, c'est la manière
   dont δ consomme B+W qui l'est. Chiffres et conditions dans CONSOMMATION-S184 §6.2 et §6.4.
+
+**Suivi A50 — S185 : l'erreur de cadence est mesurée en 3D, et les trois modes séparés.**
+[CADENCE-3D-S185](../validation/CADENCE-3D-S185.md) : maintien `0,35·(τ/T)`, extrapolation
+`0,35·(τ/T)²`, interpolation `0,05·(τ/T)²`, avec `T` la plus courte période du contenu
+(0,5405 s ici). Une période de latence vaut `√7 ≈ 2,6` sur la cadence à erreur égale.
+Combinée à `r = 2`, une cadence `τ ≈ 0,3·T` place la source à ~26 fois le pas pour 3,2 %
+d'erreur en extrapolation, 0,46 % en interpolation. A50 n'attend plus d'ordre de grandeur :
+il lui manque **un critère de justesse** et un solveur. S185-1 compose les deux erreurs.
+
+- **A228** *(sévérité 2, S185 ; ouverte)* — **Réemployer une source en la maintenant
+  constante est d'ordre un, et rien dans le corpus ne le disait.** Toutes les études de
+  cadence du dépôt — S174 en tête — ont mesuré le régime **interpolé**, parce que le véhicule
+  analytique connaissait l'instantané suivant. S174 l'a écrit honnêtement, et l'écart est
+  resté ouvert onze sessions. Mesuré en 3D sur le fournisseur réel : le **maintien**, seul
+  mode qui ne demande rien au runtime, est d'ordre **un** en `τ/T` quand les deux autres sont
+  d'ordre **deux**. À `τ/T = 0,3` cela fait 10,4 % contre 3,2 % et 0,46 %. Un système qui
+  réemploierait naïvement la dernière source publiée paierait donc un ordre entier, et le
+  corpus ne contenait aucun chiffre pour l'en dissuader. **Le correctif est disponible et
+  presque gratuit** : l'extrapolation causale à partir des deux dernières reconstructions
+  coûte 1,9 ns par maille et un instantané de plus (32 ko par bloc de 2744 mailles), et gagne
+  un facteur `T/τ`. Ce qui reste ouvert n'est donc pas quoi faire mais **ce qui l'exige** :
+  aucun critère ne dit si 3 %, 1 % ou 0,1 % d'erreur de champ perturbatif est acceptable, et
+  la latence que l'interpolation réclamerait n'a pas de prix connu ailleurs dans le système.
+  Sévérité 2 : aucune valeur publiée n'est fausse et aucun contrat ne change ; c'est un choix
+  d'intégration qui, pris par défaut, coûterait un ordre de grandeur de justesse.
+  Chiffres et conditions dans CADENCE-3D-S185 §6.2 et §6.3.

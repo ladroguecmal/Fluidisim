@@ -317,7 +317,23 @@ fn main() {
     println!(
         "\n-- erreur de cadence, etat initial au repos ; eS et eU en % de max |S| et max |u'(T)|"
     );
-    println!("mode | c | maintien (ms) | eS % | eU % | ecart a la prediction %");
+    // Échelle de temps la plus courte du contenu : le mode de pression le plus court,
+    // advecté par sa source. `k_max = (radial-1+0.5)·cutoff/radial` dans gaussian_spectrum.
+    let r = recipe();
+    let k_max = (r.radial as f64 - 0.5) * r.cutoff as f64 / r.radial as f64;
+    let lambda_min = std::f64::consts::TAU / k_max;
+    let speed = {
+        let v = segments()[0][0].velocity;
+        ((v[0] * v[0] + v[1] * v[1]) as f64).sqrt()
+    };
+    let t_content = lambda_min / speed;
+    println!(
+        "periode la plus courte du contenu : lambda_min {lambda_min:.4} m / {speed} m/s \
+         = {t_content:.4} s"
+    );
+    println!(
+        "mode | c | maintien (ms) | tau/T | eS % | eU % | eU/(tau/T)^p | ecart a la prediction %"
+    );
     for mode in [Mode::Hold, Mode::Extrapolate, Mode::Interpolate] {
         for c in CADENCES {
             let o = evolve(&cache, mode, c, STEPS, DT, true);
@@ -344,12 +360,24 @@ fn main() {
                     }
                 }
             }
+            // Forme transportable : l'erreur suit le rapport de la période de maintien à
+            // la plus courte période du contenu, au premier ordre pour le maintien et au
+            // second pour les deux autres. La constante est ce qui voyage, pas les µs.
+            let ratio = c as f64 * DT as f64 / t_content;
+            let power = if mode == Mode::Hold { 1.0 } else { 2.0 };
+            let fitted = if c == 1 {
+                0.0
+            } else {
+                (eu / u_max) / ratio.powf(power)
+            };
             println!(
-                "{} | {c} | {:.0} | {:.4} | {:.4} | {:.3}",
+                "{} | {c} | {:.0} | {:.3} | {:.4} | {:.4} | {:.3} | {:.3}",
                 mode.label(),
                 c as f32 * DT * 1000.0,
+                ratio,
                 100.0 * o.es_max / s_max,
                 100.0 * eu / u_max,
+                fitted,
                 if pmax > 0.0 { 100.0 * dev / pmax } else { 0.0 }
             );
             h.write_f32(o.es_max as f32);
