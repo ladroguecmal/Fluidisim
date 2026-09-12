@@ -68,7 +68,7 @@ non linéaire et dispersif (A217) ; aucune sélection de solveur δ, aucun seuil
 ### Plan
 
 - [x] **P1** — reprise, état réel (trois copies au commit de `master`), jeton et plan seuls.
-- [ ] **P2** — dérivation et protocole **avant tout code** : équations de Zakharov exactes,
+- [x] **P2** — dérivation et protocole **avant tout code** : équations de Zakharov exactes,
   développement en amplitude de la vitesse verticale de surface, symboles verticaux
   discrets tirés du relèvement S192, échelle d'ordres M=1/2/3 et signature prédite de
   chacun, références Stokes (profil d'ordre 2, correction de fréquence d'ordre 3),
@@ -100,3 +100,17 @@ donne trois signatures **distinctes et falsifiables** — M=1 ne produit aucune 
 liée ni décalage de fréquence, M=2 produit l'harmonique liée mais pas la bonne
 fréquence, M=3 produit les deux. C'est l'échelle qui reçoit le véhicule, pas un seul
 chiffre. Détails dans le document de protocole écrit en P2.
+
+P2 : protocole écrit dans SURFACE-LIBRE-NL-S193. Choix arrêtés avant code —
+équations de Zakharov exactes dérivées sur place ; développement HOS/Craig-Sulem
+avec symboles verticaux A=G_h et B=k², dérivées supérieures algébriques ;
+**représentation spectrale en bande Q avec convolution tronquée**, ce qui supprime
+la question du repliement au lieu de la calibrer ; horizontal exact (µ=k_q²dz²,
+changement assumé vis-à-vis de S192) pour ne laisser que K comme axe spatial ; RK4.
+Trouvé en dérivant, non anticipé : (1) le peu profond de S192 **n'a pas d'oracle**
+de Stokes à amplitude utile, borne d'Ursell U=aL²/h³ ; (2) la fréquence de Stokes
+d'ordre 3 en profondeur finie **dépend d'une convention de courant moyen**, donc
+seul le cas profond peut servir d'oracle de fréquence ; (3) volume et énergie ne
+sont plus conservés exactement — la dérive est un diagnostic de troncature.
+Ces trois points sont des candidats d'angle mort à instruire en P4.
+
