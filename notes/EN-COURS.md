@@ -96,7 +96,7 @@ quadratique et l'additive pour l'interpolation, et les écarts de 0,87 à 1,71 o
       les réceptions, et ce que la mesure ne prouvera pas.
 - [x] **P3a** — sortir dans `support/` le profil `∂²_z S` et les indices gradués que S187
       gardait locaux. Rejouer `graded_lattice` et vérifier `0x6cf13183b4a240df`.
-- [ ] **P3b** — écrire `graded_composition.rs` : champs d'écart conservés maille par maille,
+- [x] **P3b** — écrire `graded_composition.rs` : champs d'écart conservés maille par maille,
       argmax localisés, résidu d'additivité locale, puis les trois lois de norme pour la
       continuité avec S186 et S188. Relever.
 - [ ] **P4** — recevoir dans un document de validation ; **note corrective datée** sur le
@@ -105,6 +105,70 @@ quadratique et l'additive pour l'interpolation, et les écarts de 0,87 à 1,71 o
 - [ ] **P5** — rituel de fin (REPRISE.md §6).
 
 ### Notes de reprise
+
+P3b S189 : `examples/graded_composition.rs`. Deux exécutions, `diff` identique hors lignes
+de cargo ; aucune durée mesurée. Empreinte **0x30b0b9eee43f6255** — inchangée après l'ajout
+des verdicts par famille, qui n'impriment que des grandeurs dérivées. Workspace **331
+réussis / cinq ignorés** en debug et en release.
+
+**Réceptions, les six passent.** (2) le témoin ancré redonne S188 : 1,7160 % à 512 nœuds,
+3,6805 % à 125. (3) la famille graduée redonne S187 §8.5 : 6,5503 / 3,4373 / 1,7164 /
+0,6393 % à `Nz = 3/4/5/8`, avec une erreur de tranche haute de 0,0000–0,0001 %. (4) le
+résidu d'additivité est **exactement nul** partout où l'un des deux termes est nul —
+contrôle du calcul du résidu avant de lui faire dire quoi que ce soit. (5) les quatre
+empreintes du support tiennent. (1) et (6) plus haut.
+
+**LA SÉPARATION EST OBTENUE, ET ELLE EST NETTE.** Famille graduée : le pic spatial tombe à
+`(1,1,6)`, `(1,1,5)`, `(1,1,8)`, `(1,1,6)` — **au milieu du bloc** — quand le pic temporel
+reste à `(1,1,14)` ou `(1,2,14)` pour les vingt-et-une cadences. Famille ancrée : le pic
+spatial est en `k = 14` comme le temporel. Distance des pics : **6 à 10 mailles** en graduée.
+
+**MA RÉVISION DE S188 ÉTAIT JUSTE : les deux pics ne tombent JAMAIS sur la même maille —
+0 cas jugé sur 78.** La « coïncidence des maxima » de S188 était un artefact de la
+granularité à la tranche. Au niveau de la maille, ils sont toujours distincts.
+
+**H1 — l'additivité locale — tient, et c'est elle qui explique tout.** Résidu
+`max |Δu(r,c) − Δu(r,1) − Δu(1,c)|` : **au plus 1,9263 %** de `max|u'|` en absolu, et au
+plus **10,0 %** de l'erreur de sa propre case. Exactement nul dans les cas dégénérés. Le
+résidu croît avec l'erreur, ce qui est la signature du terme croisé advectif annoncé au
+protocole.
+
+**Où tombe le pic composé** (78 cases jugées) : sur le pic **spatial** 19 fois, sur le pic
+**temporel** 40 fois, **ailleurs** 19 fois. Les colonnes locales le montrent directement :
+à `mnt / graduée Nz=5 / c=4`, le pic composé est en `(1,1,14)` avec **spatial local
+0,0000 %** et temporel 2,3000 % — supports disjoints, et le rapport au maximum vaut
+exactement **1,000**. À `int / graduée Nz=3 / c=64`, le pic reste en `(1,1,6)` avec spatial
+6,5503 et temporel 2,8585 : ils s'**ajoutent** localement (9,6129 mesuré contre 9,4088
+sommé), et le rapport au maximum monte à **1,419**.
+
+**A232 EST CONFIRMÉE, ET ATTRIBUÉE À LA GÉOMÉTRIE.** Verdicts par famille :
+
+| famille | mode | additive | quadratique | maximum | retenue |
+|---|---|---|---|---|---|
+| **graduée** (pics séparés) | maintien | 0,437–0,981 | 0,607–1,000 | **0,730–1,000** | **aucune** |
+| | extrapolation | 0,479–0,977 | 0,676–1,000 | 0,811–1,000 | maximum |
+| | interpolation | 0,663–0,963 | 0,892–1,102 | 1,000–1,511 | quadratique |
+| **ancrée** (pics au même étage) | maintien | 0,576–0,951 | 0,794–0,999 | **0,936–1,060** | **maximum** |
+| | extrapolation | 0,468–0,941 | 0,659–0,998 | 0,869–1,000 | maximum |
+| | interpolation | 0,845–0,955 | 1,066–1,245 | 1,074–1,707 | additive, quadratique |
+
+**Sur le réseau que recommande ADR-118 — le gradué — la loi du maximum est rejetée pour le
+maintien**, à 0,730. Sur le réseau ancré elle tient, à 0,936. Même montage, même critère,
+même référence : **c'est la géométrie des pics qui change le verdict**, exactement ce
+qu'A232 annonçait.
+
+Direction de l'échec, et elle compte : 0,730 signifie que l'erreur composée est **30 %
+au-dessous** du maximum des deux. La loi **surestime** — elle reste donc une borne, mais
+cesse d'être une estimation, et la règle « égaliser les deux axes puis s'arrêter » perd sa
+justification, puisque l'optimum n'est plus à la parité.
+
+**Ce qui survit à tout : l'additive.** Rapport maximal **0,981** ici, 0,984 en S188,
+0,988 en S186 — jamais dépassé sur aucune case jugée, sur **trois** géométries de réseau et
+trois sessions. C'est la seule forme portable, et c'est ce que doit dire un ADR.
+
+**Ce qui n'est pas mesuré** : H1 sur un solveur qui **projette**. La projection couple
+toutes les mailles à chaque pas, et l'additivité locale y serait à remesurer — c'est la
+limite déclarée au protocole, et elle borne toute la portée de cette session.
 
 P3a S189 : `compact_index`, `d2z_profile` et `graded_indices` posés dans
 `support/perturbative_block.rs` ; `graded_lattice` y pointe et rend
