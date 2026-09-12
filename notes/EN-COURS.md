@@ -66,11 +66,11 @@ sous la règle des deux maillons (§6.8), et non par le chaînage.
 
 ### Plan
 
-- [>] **P1** — état réel, jeton et plan seuls.
-- [ ] **P2** — déclarer **avant tout code** : quel candidat, **pourquoi celui-là**, ce qu'il
+- [x] **P1** — état réel, jeton et plan seuls.
+- [x] **P2** — déclarer **avant tout code** : quel candidat, **pourquoi celui-là**, ce qu'il
       doit satisfaire (les deux filtres d'ADR-038 §4, le contrat d'ADR-007 §2, I-03/I-06/I-07),
       et ce qu'il ne traitera pas — les quatre scénarios de B3 restent hors de portée.
-- [ ] **P3a** — construire le noyau dans `code/water-core/src/` : grille décalée, opérateurs
+- [>] **P3a** — construire le noyau dans `code/water-core/src/` : grille décalée, opérateurs
       d'ordre deux, fond coupé, surface libre par fluide fantôme, projection de pression.
       **C'est l'étape qui fait avancer la couche.**
 - [ ] **P3b** — passer les deux filtres et recevoir : lac au repos à l'arrondi sur fond non
@@ -81,6 +81,22 @@ sous la règle des deux maillons (§6.8), et non par le chaînage.
 - [ ] **P5** — rituel de fin (§6), compteur `Maillons` mis à jour selon la règle.
 
 ### Notes de reprise
+
+P2 S199 : protocole dans CANDIDAT-DELTA-S199. **Argument de choix** : le noyau à projection
+n'est **aucune** des cinq familles, c'est ce que trois d'entre elles partagent (FLIP et APIC
+*sont* des solveurs à projection à advection particulaire ; MPM projette ; l'eulérien aussi).
+Le bâtir ne parie donc sur rien, et lève en passant la réserve que S184 déclarait sur son
+propre véhicule — « il ne projette pas ».
+**Décision technique clé, à ne pas perdre** : l'équilibrage est gagné **par construction** en
+portant `p = p_hydro + p_dyn` avec `p_hydro = ρ·g_eff·(z₀−z)` **analytique**, jamais
+différenciée. Seul `p_dyn` entre dans le gradient discret ; au repos `p_dyn ≡ 0` et
+l'accélération est exactement nulle, quel que soit le fond. C'est le même procédé qu'ADR-114
+emploie déjà dans B ; on hérite au lieu d'inventer.
+Réception 1 exigée **en bits**, pas « petite » : une seule composante non nulle disqualifie.
+Réception 3 : ordre ≥ 1,8 attendu, **élimination sous 1,5** (ADR-038 §4), sous la garde de
+Richardson de S197.
+Portée déclarée : 2D x–z, couvercle plat à `z₀`, **aucun** des quatre scénarios de B3, aucune
+famille éliminée, aucun coût mesuré.
 
 S199 : master 71b3595 propre, quatre copies alignées ; 123 ADR/243 angles/279 leçons.
 **Ce que le corpus a déjà tranché, à ne pas redécouvrir.**
