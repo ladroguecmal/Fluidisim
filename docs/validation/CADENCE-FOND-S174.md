@@ -139,3 +139,14 @@ poursuite B4/BILAN-S145.
 [FRONTIERE-FOND-DECIME-S175](FRONTIERE-FOND-DECIME-S175.md). Comparaison de champs
 appariés, sortie effective de la crête, témoins totaux aux mêmes frontières. A50 reste
 partielle ; suite S175-1, bilan de réception B4 et prochain lot de construction.
+
+**Suivi S185 — 2026-09-12 : la réserve de ce document est levée, et elle avait raison.**
+Les Conclusions écrivaient que *« l'échantillon futur utilisé pour interpoler est connu dans
+ce cas analytique ; le protocole ne reçoit pas l'anticipation d'un événement extérieur
+inconnu »*. [CADENCE-3D-S185](CADENCE-3D-S185.md) mesure les modes **causaux** sur le
+fournisseur réel en 3D et confirme que la réserve n'était pas une précaution de style :
+l'interpolation ici mesurée est d'ordre deux avec une constante **sept fois** plus petite que
+l'extrapolation causale, et **quatorze à quarante fois** plus petite que le maintien à cadence
+utile. Autrement dit, le régime que S174 a mesuré est le plus favorable des trois, et un
+runtime qui ne peut pas payer une période de latence n'y a pas accès. Ce document reste juste
+sur son véhicule ; ce sont ses chiffres qu'il ne faut pas transposer à un consommateur causal.

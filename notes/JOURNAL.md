@@ -9135,3 +9135,92 @@ comparant le champ obtenu à une reconstruction à chaque pas. La décimation sp
 bornée à `r = 2`. BILAN-B4-S176 reste le bilan actif et porté ; BILAN-S145 est soldé (S147).
 
 **Décisions qui demandent un arbitrage humain :** aucune nouvelle. A107 reste ouverte.
+
+## S185 — 2026-09-12 — L'erreur de cadence en 3D, et le prix d'une période de latence
+
+**Entrée :** master e147a42 propre, quatre copies alignées, S184-1/A50. Copie principale.
+Plan seul 6448e88 ; protocole cc75321 ; véhicule partagé 07107cf ; mesure f15babc ;
+réception 760d69b. Code d'exécution inchangé.
+
+**Produit :** `examples/support/water_montage.rs`, `examples/support/perturbative_block.rs`,
+`examples/cadence_error.rs` et [CADENCE-3D-S185](../docs/validation/CADENCE-3D-S185.md).
+
+**L'écart que la session ferme.** S174 avait mesuré la cadence temporelle en 1D **par
+interpolation entre deux instantanés**, et l'avait écrit : *« l'échantillon futur utilisé pour
+interpoler est connu dans ce cas analytique ; le protocole ne reçoit pas l'anticipation d'un
+événement extérieur inconnu »*. Onze sessions plus tard, c'est toujours le seul régime mesuré.
+Or interpoler exige l'instantané **suivant**, qu'un runtime recevant un `WaveEvent` imprévu
+n'a pas. La cadence est donc trois régimes, pas un : maintien et extrapolation sont causaux,
+l'interpolation demande une période de latence.
+
+**Chiffres qui ont orienté la conception.** Avec `τ` la période de maintien et `T = 0,5405 s`
+la plus courte période du contenu — le mode de pression `λ_min = 1,081 m` advecté à 2 m/s —
+les erreurs de champ suivent, constantes calculées par le programme et stables de
+`τ/T = 0,07` à `0,6` :
+
+- **maintien** `eU ≈ 0,35·(τ/T)` — **ordre un** ;
+- **extrapolation** `eU ≈ 0,35·(τ/T)²` — ordre deux, *même constante* ;
+- **interpolation** `eU ≈ 0,05·(τ/T)²` — ordre deux, constante **sept fois** plus petite.
+
+Trois conséquences. Le maintien perd un ordre entier. L'extrapolation gagne exactement `T/τ`
+sur lui — de 3 à 13 sur la plage utile — pour 1,9 ns par maille et un instantané de plus
+(32 ko par bloc de 2744 mailles) : **il n'y a pas d'arbitrage, c'est un gain sans
+contrepartie mesurable**. Et une période de latence vaut `√7 ≈ 2,6` sur la cadence à erreur
+égale, donc 2,6 fois moins de reconstructions — c'est le prix de l'interpolation, et il se
+compare désormais à d'autres coûts de latence.
+
+Combiné à S184 (`r = 2` plafonné par le contenu, pas 15,3 ns/maille) : à `r = 2` et
+`τ ≈ 0,3·T`, la source tombe à **26 fois** le pas pour 3,2 % d'erreur en extrapolation ou
+0,46 % en interpolation. Le rapport de 2 274 mesuré en S184 descend à 6,4 en bas de la grille.
+
+**Décision structurante :** aucune, **aucun ADR**. Le solveur reste à B3 (ADR-007 §5).
+
+**Ce que la session a trouvé et qui n'était pas cherché.**
+
+**A228** *(sévérité 2)* — le réemploi par maintien est d'ordre un, et **rien dans le corpus ne
+le disait**, parce que toutes les études de cadence avaient mesuré le régime interpolé. Un
+système qui réemploierait naïvement la dernière source publiée paierait un ordre entier, sans
+qu'aucun chiffre existant l'en dissuade. Le correctif est causal et presque gratuit ; ce qui
+reste ouvert n'est pas quoi faire mais **ce qui l'exige** — aucun critère ne dit si 3 %, 1 %
+ou 0,1 % est acceptable.
+
+**L265** — un contrôle qui relie deux mesures indépendantes attrape ce qu'aucune des deux ne
+montre. L'identité de prédiction — l'écart de champ doit être l'intégrale en temps de l'écart
+de source — affichait 100 % d'écart et a trouvé un vrai défaut **du harnais** : `snapshots`
+rangeait la source par indice de bloc, `load_direct` la lit compacte, et chaque maille
+recevait la source d'une autre. Les deux tables restaient plausibles, monotones, bien
+ordonnées ; rien ne les trahissait. Corrigée, l'identité ferme à 0,01–0,5 %. Corollaire :
+un écart **total** plutôt que grand est la signature d'un appariement rompu, pas d'une erreur
+de physique.
+
+**Réception :** les quatre contrôles passent. Empreinte `0x39567a1d4bc2ba4c` reproduite sur
+quatre exécutions, `diff` strict ne montrant que les trois lignes de durée. Cadence 1
+identique à la référence **en bits** pour les trois modes. Référence qualifiée : à `dt/2` elle
+bouge de **0,386 %**, et les lignes qui passent sous ce plancher sont marquées comme
+indiscernables plutôt que lues comme des victoires. Contrôle à état initial non nul : même
+ordonnancement, mêmes ordres. Aucun nouveau test unitaire ; workspace **331 réussis / cinq
+ignorés** en debug et en release.
+
+**Une refactorisation, et sa vérification.** L'hôte, les paramètres de montage et le bloc ont
+été sortis dans `examples/support/` pour que S184 et S185 évoluent **le même** pas : deux
+copies auraient divergé, et la comparaison entre les deux sessions n'aurait plus rien valu
+(L137). S184 a été rejoué : tout retombe dans les plages publiées sauf le pas, 15,33 ns contre
+15,8–16,9, parce que `step` a gagné un paramètre `nu`. Le rapport source/pas passe de ~2150 à
+~2270 ; une note datée dans CONSOMMATION-S184 §6 dit de lire « 2000 à 2300 ». Aucune
+conclusion ne change, et le binaire qui a produit les chiffres publiés n'existant plus sous
+cette forme, le dire valait mieux que le taire.
+
+**Ce que je n'ai pas fait.** Aucun seuil de justesse : savoir si 3 % est acceptable est une
+question perceptuelle ou un critère B4, et aucun n'est adopté. Un seul montage, donc un seul
+`T` — les constantes sont données sous forme transportable pour cette raison, mais n'ont été
+vérifiées que sur ce contenu. L'erreur spatiale n'est pas composée avec l'erreur temporelle :
+S170 a mesuré la première en 1D, et leur addition n'est ni mesurée ni supposée. Le véhicule ne
+projette toujours pas, et l'advection y reste d'ordre supérieur — ce qui rend l'identité de
+prédiction si nette et borne en même temps la portée.
+
+**Prochaine session recommandée. S186 : S185-1**, composer les deux erreurs — spatiale et
+temporelle — sur le même véhicule. C'est le dernier contrôle avant qu'un budget conjoint ait
+un sens, et S170 avertit déjà qu'un ratio de décimation ne décrit pas à lui seul la précision,
+ce qui rend l'addition douteuse. BILAN-B4-S176 reste le bilan actif et porté.
+
+**Décisions qui demandent un arbitrage humain :** aucune nouvelle. A107 reste ouverte.

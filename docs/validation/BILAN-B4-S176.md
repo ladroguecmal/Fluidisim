@@ -154,3 +154,11 @@ temporelle est l'axe disponible, et une récurrence de phase sur réseau ne reti
 fournisseur** — elle reste entière pour les quadratures et la préservation physique du
 solveur, qui ne sont toujours pas chiffrées. Voir **A227** sur la forme du fournisseur.
 A50/B4 restent partiels ; S184-1 mesure l'erreur de cadence en 3D. Aucun solveur choisi.
+
+**Suivi S185 — 2026-09-12 :** l'erreur de la cadence temporelle est mesurée en 3D,
+[CADENCE-3D-S185](CADENCE-3D-S185.md) : maintien d'ordre un, extrapolation et interpolation
+d'ordre deux, une période de latence valant 2,6 sur la cadence. Avec S184, les deux axes de
+réduction sont désormais chiffrés en **temps et en justesse**. Ce que B4 attend n'est donc
+plus une mesure de réduction mais **un critère** : rien ne dit si 3 %, 1 % ou 0,1 % d'erreur
+de champ perturbatif est acceptable, et aucun seuil B4 n'est adopté. S185-1 compose l'erreur
+spatiale et l'erreur temporelle ; A50/B4 restent partiels, aucun solveur choisi.

@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-12 12:40 +02:00
+JETON            : libre
+Battement        : 2026-09-12 13:04 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S185 — S184-1/A50 : erreur de cadence temporelle en 3D
-Dernière session : S184 — la source coûte ~2100 fois le pas qu'elle alimente
-Session suivante : à fixer en fin de S185
+Session en cours : aucune
+Dernière session : S185 — le maintien est d'ordre un ; une latence vaut 2,6 en cadence
+Session suivante : S186 — S185-1/A50 : composer l'erreur spatiale et l'erreur temporelle sur le même véhicule
 
 *S183 et S184 ont travaillé dans la **copie principale**, sur `master` : aucune copie isolée
 ouverte, donc rien à refermer (AGENTS.md). Les trois worktrees ont été **avancés sur master**
@@ -190,6 +190,31 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S185 — 2026-09-12 :** [CADENCE-3D-S185](docs/validation/CADENCE-3D-S185.md).
+**S184-1 réalisée : l'erreur de cadence est mesurée en 3D, et les trois modes séparés.**
+S174 n'avait mesuré que le régime **interpolé**, en écrivant lui-même que le runtime
+n'aurait pas l'instantané suivant ; l'écart est resté ouvert onze sessions. Avec `τ` la
+période de maintien et `T = 0,5405 s` la plus courte période du contenu :
+**maintien `0,35·(τ/T)` — ordre un** ; extrapolation `0,35·(τ/T)²`, même constante ;
+interpolation `0,05·(τ/T)²`, constante sept fois plus petite. Donc : **le maintien n'est
+jamais le bon choix** — l'extrapolation est causale, coûte 1,9 ns par maille et 32 ko,
+et gagne un facteur `T/τ`, soit 3 à 13 sur la plage utile. Et **une période de latence
+vaut `√7 ≈ 2,6` sur la cadence** à erreur égale. Combiné à S184 : à `r = 2` et
+`τ ≈ 0,3·T`, la source tombe à **26 fois** le pas pour 3,2 % d'erreur en extrapolation,
+0,46 % en interpolation — le rapport de 2274 de S184 descend à 6,4 en bas de grille.
+Quatre réceptions, empreinte `0x39567a1d4bc2ba4c` reproduite sur quatre exécutions ;
+référence qualifiée à 0,386 %, et les lignes sous ce plancher sont marquées plutôt que
+lues comme des victoires. Le véhicule est sorti dans `examples/support/` pour que les
+deux sessions évoluent le même pas, et **S184 a été rejoué et vérifié** (note datée dans
+CONSOMMATION-S184 §6 : lire « 2000 à 2300 » au lieu de « ~2100 »).
+Aucun nouveau test ; workspace331 réussis/cinq ignorés. Runtime inchangé, **aucun ADR**.
+117 ADR,228 angles,265 leçons,18 invariants,6 SPEC,23 cas. **A228** et **L265**.
+A50/B4 restent partiels : il manque désormais **un critère de justesse**, pas un chiffre.
+**Suite S186 : S185-1/A50**, composer l'erreur spatiale (connue en 1D seulement, S170)
+et l'erreur temporelle sur le même véhicule — dernier contrôle avant qu'un budget
+conjoint ait un sens, S170 avertissant qu'un ratio ne décrit pas à lui seul la précision.
+**BILAN-B4-S176** reste le bilan actif et porté. Aucun arbitrage humain nouveau.
 
 **S184 — 2026-09-12 :** [CONSOMMATION-S184](docs/validation/CONSOMMATION-S184.md).
 **S183-1 réalisée : ce que coûte de *consommer* la source, et non plus de la produire.**

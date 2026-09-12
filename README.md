@@ -289,7 +289,7 @@ Le juge de fidélité est B4, bloqué ailleurs. Suite S159 : le facteur 2,5 qui 
 L'une croyait la dernière session être **S44** : l'ouvrir aurait recréé cent quinze sessions parallèles.
 Avance rapide d'abord, suppressions ensuite ; six copies ramenées à trois, aucune histoire perdue, et la
 procédure de fermeture écrite dans l'amorce. Suite S160 : le facteur 2,5, S158-1.
-117 ADR,227 angles,264 leçons,18 invariants,6 SPEC,23 cas.
+117 ADR,228 angles,265 leçons,18 invariants,6 SPEC,23 cas.
 **S162 : diagnostic de Stokes et portée de B4 corrigée.**
 [Résultats](docs/validation/ADDITIVITE-PROFONDE-S162.md),
 [ADR-112](docs/adr/ADR-112-la-superposition-independante-ne-recoit-pas-le-couplage.md).
@@ -405,3 +405,14 @@ sortie, pas la trigonométrie. Aucun ADR. **A227** : le fournisseur a la forme d
 requête, pas d'un champ. **L264** : mesurer la part avant d'optimiser le parcours.
 Suite : l'erreur de cadence en 3D.
 Voir [CONSOMMATION-S184](docs/validation/CONSOMMATION-S184.md).
+
+**S185 :** l'erreur de la cadence temporelle est mesurée en 3D, et les trois modes de
+réemploi séparés — le corpus n'avait mesuré que celui qui exige de connaître l'avenir.
+Le **maintien est d'ordre un**, l'extrapolation et l'interpolation d'ordre deux ;
+l'extrapolation est causale et presque gratuite, donc le maintien n'est jamais le bon
+choix. Une période de latence vaut un facteur 2,6 sur la cadence. Aucun ADR.
+**A228** : réemployer une source en la maintenant coûte un ordre entier, et rien ne le
+disait. **L265** : un contrôle qui relie deux mesures attrape ce qu'aucune ne montre —
+il a trouvé un défaut d'indexation que deux tables plausibles cachaient.
+Suite : composer l'erreur spatiale et l'erreur temporelle.
+Voir [CADENCE-3D-S185](docs/validation/CADENCE-3D-S185.md).

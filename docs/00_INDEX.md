@@ -17,6 +17,20 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S185 :** [CADENCE-3D-S185](validation/CADENCE-3D-S185.md), aucun ADR. **L'erreur de
+cadence est mesurée en 3D, et les trois modes de réemploi séparés** — S174 n'avait
+mesuré que l'interpolé, en écrivant que le runtime n'aurait pas l'instantané suivant.
+Avec `T` la plus courte période du contenu : maintien `0,35·(τ/T)` **ordre un**,
+extrapolation `0,35·(τ/T)²`, interpolation `0,05·(τ/T)²`. L'extrapolation est causale,
+coûte 1,9 ns/maille et 32 ko, et gagne `T/τ` : **le maintien n'est jamais le bon choix**.
+Une période de latence vaut `√7 ≈ 2,6` sur la cadence. À `r = 2` et `τ ≈ 0,3·T`, la
+source tombe à 26 fois le pas pour 3,2 % d'erreur. Quatre réceptions, empreinte
+reproduite ; l'identité de prédiction a rattrapé un défaut d'indexation du harnais.
+Véhicule sorti dans `examples/support/` et S184 rejoué et vérifié. Aucun nouveau test ;
+workspace331/cinq ignorés. Runtime inchangé.
+117 ADR,228 angles,265 leçons,18 invariants,6 SPEC,23 cas. **A228** et **L265**.
+**Suite S186 : S185-1**, composer erreur spatiale et erreur temporelle. A50/B4 partiels.
+
 **S184 :** [CONSOMMATION-S184](validation/CONSOMMATION-S184.md), aucun ADR — le solveur
 reste à B3 (ADR-007 §5). **La source coûte ~2100 fois le pas explicite qu'elle alimente**
 (34–35 µs contre 14–17 ns par maille) ; le pas est 0,047–0,049 % du total. La décimation

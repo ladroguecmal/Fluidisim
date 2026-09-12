@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S185 — en cours
+Session : S185 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : S184-1/A50, mesurer l'**erreur** de la cadence temporelle en 3D avec le
 fournisseur réel — et séparer ce qui est disponible au runtime de ce qui ne l'est pas.
@@ -80,7 +80,7 @@ futur n'est pas disponible pour un événement inconnu. S185 mesure les modes **
       référence. Relever.
 - [x] **P4** — chiffrer le compromis cadence × mode, et le coût du mode lui-même.
       Recevoir dans un document de validation.
-- [>] **P5** — rituel de fin (REPRISE.md §6).
+- [x] **P5** — rituel de fin (REPRISE.md §6).
 
 ### Notes de reprise
 
