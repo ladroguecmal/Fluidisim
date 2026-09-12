@@ -3,7 +3,22 @@
 2026-09-11. Action S175-1. État du code vérifié sur master0b37fd2 àl’amorce.
 Ce bilan confronte les reçus S163–S175 au contrat ; aucune nouvelle simulation lancée.
 
-## État actif — S190, 2026-09-12
+## État actif — S191, 2026-09-12
+
+**Le profil source de S190 est reçu avec projection discrète**, sous le même seuil
+de 2 % : budget **1,371947 %**, erreur avec réserves **0,948047 %**, ou borne avec
+résidu d'additivité **1,374540 %**. 16 couples reçus / 4 refusés ; 80 ms conservés,
+160 ms refusés. Projecteur reçu contre matrice indépendante, divergence normalisée
+au plus 4,922e-8. [PROJECTION-B4-S191](PROJECTION-B4-S191.md),
+[ADR-121](../adr/ADR-121-la-projection-lineaire-et-la-borne-de-composition.md).
+
+**S190-1/S189-1 closes dans ce périmètre**, pas de solveur physique complet : extension
+nulle aux bords, aucune surface libre. A50/B4 restent partiels. **Suite S191-1 :
+tranche 2D à surface libre et onde de gravité reçue**, avant comparaison couplée/total.
+Le seuil n'attend plus d'arbitrage et l'échantillonnage n'est plus le prochain lot.
+La file plurielle S190 reste active avec la ligne B4 actualisée.
+
+## État historique — S190, 2026-09-12
 
 **Le critère manquant est fixé : erreur acceptable de 2 %**, arbitrage explicite de
 l'utilisateur, [ADR-120](../adr/ADR-120-b4-tolerance-de-deux-pour-cent.md).

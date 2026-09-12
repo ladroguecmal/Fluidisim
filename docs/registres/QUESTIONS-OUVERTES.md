@@ -1679,7 +1679,7 @@ action unique et doit être relue au rituel de fin (A211).
 
 | action / objet | état constaté S190 et ce qui reste | priorité / déclencheur |
 |---|---|---|
-| **S190-1 / A50 / B4** | seuil clos, profil source reçu ; projection puis surface libre, frontières et comparaison au substitutif intégral manquantes | prochaine action : reprend S189-1 avec un seuil connu |
+| **S191-1 / A50 / B4** | **S191 : S190-1/S189-1 reçues sur projecteur de banc**, profil 80 ms sous 2 % ; surface libre, frontières physiques et comparaison intégrale manquantes | prochaine action : tranche 2D à surface libre et onde de gravité, avant comparaison perturbatif/total |
 | **B3 / δ** | deux Saint-Venant 1D et véhicule de quantité de mouvement sur bloc 3D ; aucun solveur volumétrique à surface libre choisi | construire/recevoir le candidat qui permet la comparaison B4 ; le 2 % ne choisit pas une technologie |
 | **B4 forces / perception** | aucun reçu complet ; la métrique de vitesse S190 ne les remplace pas | après montage commun surface/solide ; protocole perceptif conserve ses participants réels requis |
 | **A216 / A217** | coefficient S161 non expliqué ; référence évolutive profonde non linéaire/dispersive absente ; ADR-112 interdit d'en tirer la bascule | avec la comparaison couplée ; ne pas dériver 0,02/0,24 comme seuil |

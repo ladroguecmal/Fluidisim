@@ -311,3 +311,12 @@ détruire — elle couple tout le bloc à chaque pas. Deux issues, et les deux i
 l'additivité survit à la projection, ADR-119 vaut pour un solveur réaliste ; si elle tombe,
 la borne par la somme reste — elle ne suppose rien — mais l'explication tombe avec elle, et
 il faudra le dire. **BILAN-B4-S176** reste le bilan actif et porté.
+
+## Suivi S191 — 2026-09-12 : projection et portée de la somme
+
+Le profil S190 est reçu avec projection discrète : budget 1,371947 %, ou 1,374540 %
+avec résidu d'additivité, sous 2 %. Voir [PROJECTION-B4-S191](PROJECTION-B4-S191.md).
+La projection à opérateur fixe est linéaire ; sa globalité ne détruit pas l'addition.
+La somme des erreurs des axes ne découle de la triangulaire qu'avec le résidu de leur
+décomposition : ADR-121 restreint cette revendication d'ADR-119. Les mesures antérieures
+ne changent pas. S190-1/S189-1 closes sur le véhicule ; suite S191-1, surface libre2D.

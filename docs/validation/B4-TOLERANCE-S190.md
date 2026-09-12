@@ -109,3 +109,12 @@ elle ne justifie plus de demander quelle erreur est acceptable.
 
 Suite workspace debug : **331 tests réussis, cinq ignorés**, aucun échec. Aucun code
 de bibliothèque ni support historique modifié ; pas de nouvelle réception multiplateforme.
+
+## Suivi S191 — 2026-09-12 : projection et portée de la somme
+
+Le profil S190 est reçu avec projection discrète : budget 1,371947 %, ou 1,374540 %
+avec résidu d'additivité, sous 2 %. Voir [PROJECTION-B4-S191](PROJECTION-B4-S191.md).
+La projection à opérateur fixe est linéaire ; sa globalité ne détruit pas l'addition.
+La somme des erreurs des axes ne découle de la triangulaire qu'avec le résidu de leur
+décomposition : ADR-121 restreint cette revendication d'ADR-119. Les mesures antérieures
+ne changent pas. S190-1/S189-1 closes sur le véhicule ; suite S191-1, surface libre2D.

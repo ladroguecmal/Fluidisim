@@ -4296,3 +4296,22 @@ de son domaine, et c'est pourquoi elle a survécu deux sessions de trop.
 Voir COMPOSITION-GRADUEE-S189 §7.4, ADR-119, A232 et A233. Même famille que L268 — un rejeu
 transforme une coïncidence en condition — dont c'est ici la suite : S188 avait obtenu la
 condition, S189 a obtenu le mécanisme, et le mécanisme a réfuté la loi.
+
+## L270 — Un opérateur global n'est pas nécessairement non linéaire ; une borne de norme requiert la bonne décomposition
+
+S189 attendait de la projection une menace sur l'additivité parce qu'elle couple toutes
+les mailles. S191 dérive P avant de le programmer : à opérateurs et bords fixes,
+P(a+b)=Pa+Pb. Le couplage spatial décrit la portée, pas la linéarité. L'évolution
+complète comporte encore l'advection et les erreurs de résolution : son additivité
+se mesure séparément de celle de P.
+
+L'autre confusion allait dans le sens rassurant : « la somme borne sans rien supposer ».
+La triangulaire borne une somme de champs ; elle ne prouve pas que l'erreur d'une
+évolution composée est la somme des erreurs de deux autres évolutions. Écrire le
+résidu de cette identité manquante rend la borne exacte : e≤s+t+r. Sur le profil
+S191, r ajoute0,002594 point, faible mais conceptuellement indispensable.
+
+Avant de transporter une garantie : écrire l'opérateur et la décomposition exacte
+sur lesquels elle repose. Un résultat numérique favorable ne remplace aucune des
+deux identités. Voir ADR-121 et PROJECTION-B4-S191 ; limite explicitée : grille,
+bords ou opérateurs dépendant de l'état peuvent changer cette conclusion.

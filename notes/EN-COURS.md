@@ -73,7 +73,7 @@ sous les 2 % actés. Ne pas confondre projecteur discret et solveur à surface l
   algébrique indépendante, refus/non-convergence ; un support sans mutation du précédent.
 - [x] **P3b** — campagne projetée contre plein/raffiné, axes séparés, composition locale,
   profil reçu S190 et témoins ; qualifier pression, divergence et réserve de référence.
-- [ ] **P4** — réception, correction datée des inférences invalidées, ADR si décision,
+- [x] **P4** — réception, correction datée des inférences invalidées, ADR si décision,
   angles/leçons et propagation B4/A50/file plurielle ; aucune tolérance redemandée.
 - [ ] **P5** — rituel REPRISE §6, journal/index/README/décomptes, vérifications,
   jeton libre et avance rapide des copies propres sans suppression.
@@ -99,3 +99,6 @@ Pire divergence 4,921623567e-8, max44 itérations. Tests propres debug/release :
 Incident de montage tracé : demande Nz14 dédoublonnée à12, témoin plein corrigé
 explicitement, assertions conservées ; demandes10/12 donnent9/11 nœuds réels.
 ADR-121 préparée P4, non comprise dans ce commit P3b ; prochaine construction surface2D.
+P4 : ADR-121 restreint la portée de la somme (résidu requis pour borne algébrique),
+L270 ajoutée. Suivis B4/A50/A233/S189/S190/SPEC-004/file active propagés.
+121 ADR/233 angles/270 leçons/18 invariants/6 SPEC/23 cas à porter en clôture.

@@ -402,6 +402,12 @@ hypothèse à écarter est un terme source incomplet.
 
 ### 6.2 L'optimisation qui rend le coût acceptable
 
+> **Suivi S191 — 2026-09-12 :** le profil S190 est reçu avec projection discrète,
+> [PROJECTION-B4-S191](../validation/PROJECTION-B4-S191.md), budget **1,371947 %**
+> sous 2 %. [ADR-121](../adr/ADR-121-la-projection-lineaire-et-la-borne-de-composition.md)
+> distingue l'enveloppe mesurée s+t de la borne algébrique avec résidu. Aucun `N`
+> universel ni `is_smooth_at` runtime reçu ; surface libre et bords physiques à construire.
+
 > **Décision active S190 — 2026-09-12 : le critère est fixé à 2 %** d'erreur de
 > champ perturbatif par l'utilisateur, [ADR-120](../adr/ADR-120-b4-tolerance-de-deux-pour-cent.md).
 > La réception conserve la norme maximum de vitesse `u'` de S185, normalisée par la

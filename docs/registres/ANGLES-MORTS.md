@@ -2457,3 +2457,14 @@ profil choisi gradué 14×14×8, extrapolation 80 ms : budget spatial+temporel+r
 et la consommation existantes ont désormais un critère de réception ; A50 reste
 partielle pour projection, surface libre, frontières et candidat δ. Ne plus reporter
 « quelle erreur est acceptable » ; S190-1 reprend S189-1 sous le seuil décidé.
+**Suivi A50/A233 — S191, 2026-09-12.** Projecteur D/G reçu contre matrice dense ;
+profil 14×14×8/c8 reçu projeté avec budget1,371947 %, 1,374540 % en incluant le
+résidu d'additivité, sous les2 % inchangés. A50 reste partielle : surface libre et
+bords physiques manquent. A233 conserve son problème d'enveloppe large ; ADR-121
+corrige sa portée, la somme seule est mesurée et non universelle sans résidu.
+S190-1/S189-1 reçues sur véhicule ; suite S191-1 surface libre2D. Aucun nouvel angle.
+
+**Suivi A211 — S191.** File active S190 relue entière. Ligne A50/B4 actualisée ;
+les neuf autres conservées avec leurs déclencheurs. La prochaine action construit
+la surface libre, elle ne prolonge pas la seule campagne de réseaux. Le dispositif
+reste à éprouver, aucun chantier latéral déclaré clos par le présent essai.

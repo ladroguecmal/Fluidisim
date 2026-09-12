@@ -117,6 +117,11 @@ l'autorise (ADR-007 §3).
 
 ## B4 — Validité du régime perturbatif
 
+> **État actif S191 — 2026-09-12.** Profil 14×14×8/extrapolation 80 ms reçu aussi
+> avec projection discrète, budget 1,371947 % sous les **2 % inchangés** ;
+> [PROJECTION-B4-S191](PROJECTION-B4-S191.md). Bords algébriques, aucune surface
+> libre reçue. Suite : tranche 2D surface libre (S191-1), puis comparaison au total.
+
 > **État actif S190 — 2026-09-12.** Tolérance de champ perturbatif **2 %**, décidée
 > par l'utilisateur, [ADR-120](../adr/ADR-120-b4-tolerance-de-deux-pour-cent.md).
 > Volet source reçu sur le véhicule sans projection : profil gradué 14×14×8,

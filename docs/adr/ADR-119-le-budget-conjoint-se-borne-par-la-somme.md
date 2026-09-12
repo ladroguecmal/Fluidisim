@@ -9,6 +9,12 @@
 
 ## Contrat
 
+> **Portée corrigée S191, 2026-09-12 :** [ADR-121](ADR-121-la-projection-lineaire-et-la-borne-de-composition.md)
+> restreint la règle 1 ci-dessous : sans additivité exacte des champs d'erreur, la
+> borne algébrique contient aussi le résidu d'additivité. La somme seule reste une
+> enveloppe mesurée. La projection à opérateur fixe est linéaire ; sa globalité ne
+> menace pas cette propriété. Mesures historiques conservées.
+
 Un consommateur qui réduit **deux** axes à la fois — décimation spatiale `r` et cadence
 temporelle `c` — dimensionne son budget d'erreur comme suit.
 
