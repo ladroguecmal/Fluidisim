@@ -83,6 +83,9 @@ pub struct Scene {
 /// Le budget de pente laissé à l'impact est ce que B n'a pas consommé : l'hôte le déclare dans
 /// `Medium::max_slope`, pour que la construction refuse plutôt que chaque point de la requête.
 pub fn scene(hs: f32, ttl_us: u64) -> Result<Scene, String> {
+    scene_with(hs, ttl_us, ENTRY_HALF_WIDTH_M)
+}
+pub fn scene_with(hs: f32, ttl_us: u64, half_width_m: f32) -> Result<Scene, String> {
     let cooked = background_spectrum::bake(recipe(hs)).map_err(|e| format!("recette {e:?}"))?;
     let floor = slope_floor(&cooked);
     if !(floor < BREAKING_SLOPE) {
@@ -97,7 +100,7 @@ pub fn scene(hs: f32, ttl_us: u64) -> Result<Scene, String> {
         max_slope: BREAKING_SLOPE - floor,
     };
     let entry = Entry {
-        half_width_m: ENTRY_HALF_WIDTH_M,
+        half_width_m,
         speed_ms: ENTRY_SPEED_MS,
         transferred_fraction: TRANSFERRED_FRACTION,
     };
@@ -369,6 +372,93 @@ fn seams_report() -> Result<(), String> {
     Ok(())
 }
 
+/// Écart maximal entre deux discrétisations du même événement, sur un rayon, à un âge donné.
+pub fn radial_disagreement<const A: usize, const B: usize>(
+    a: &RadialImpact<A>,
+    b: &RadialImpact<B>,
+    radius: f32,
+    age_us: u64,
+) -> Result<(f64, f64), String> {
+    let v = *a.event().data();
+    let t = SimTime(v.birth.0 + age_us);
+    let (mut eta, mut slope) = (0.0f64, 0.0f64);
+    for i in 0..(radius / 0.02) as u32 {
+        let p = [v.position[0] + i as f32 * 0.02, v.position[1]];
+        let sa = a.sample(v.frame, v.cell, p, t).map_err(|e| format!("{e:?}"))?;
+        let sb = b.sample(v.frame, v.cell, p, t).map_err(|e| format!("{e:?}"))?;
+        eta = eta.max((sa.eta as f64 - sb.eta as f64).abs());
+        slope = slope.max((sa.slope[0] as f64 - sb.slope[0] as f64).abs());
+    }
+    Ok((eta, slope))
+}
+
+fn controls_report() -> Result<(), String> {
+    let sc = scene(HS, 120_000_000)?;
+    let a56 = 56_000_000;
+    let n256 = RadialImpact::<256>::new(sc.event, sc.medium, Domain { radius: 52.0, age_us: a56 })
+        .map_err(|e| format!("{e:?}"))?;
+    let n512 = RadialImpact::<512>::new(sc.event, sc.medium, Domain { radius: 52.0, age_us: a56 })
+        .map_err(|e| format!("{e:?}"))?;
+    println!("# P3b-1 accord N256/N512, A56 R52");
+    for age in [1_000_000u64, 3_000_000, 6_000_000, 30_000_000, 56_000_000] {
+        let (eta, slope) = radial_disagreement(&n256, &n512, 52.0, age)?;
+        println!(
+            "age={:.0}s max|d_eta|={:.4}mm max|d_pente_x|={:.6} accord={}",
+            age as f64 / 1e6,
+            eta * 1e3,
+            slope,
+            eta <= RAY_TOLERANCE_M
+        );
+    }
+    println!("# P3b-2 homothetie lambda x2 (b=2 m), coutures relatives");
+    let big = scene_with(HS, 200_000_000, 2.0 * ENTRY_HALF_WIDTH_M)?;
+    let reference = [
+        (256usize, 52.0f32, a56, seams(&n256, 52.0, a56)?),
+        (512, 55.0, 64_000_000, {
+            let f = RadialImpact::<512>::new(sc.event, sc.medium, Domain { radius: 55.0, age_us: 64_000_000 })
+                .map_err(|e| format!("{e:?}"))?;
+            seams(&f, 55.0, 64_000_000)?
+        }),
+    ];
+    println!(
+        "lambda'={:.4}m E'={:.1}J (lambda={:.4}m E={:.1}J)",
+        big.wavelength_m, big.energy_j, sc.wavelength_m, sc.energy_j
+    );
+    for (n, radius, age_us, s) in reference {
+        let scale = big.wavelength_m / sc.wavelength_m;
+        let r2 = radius * scale;
+        let a2 = (age_us as f64 * (scale as f64).sqrt()).round() as u64;
+        let s2 = match n {
+            256 => {
+                let f = RadialImpact::<256>::new(big.event, big.medium, Domain { radius: r2, age_us: a2 })
+                    .map_err(|e| format!("N256 {e:?}"))?;
+                seams(&f, r2, a2)?
+            }
+            _ => {
+                let f = RadialImpact::<512>::new(big.event, big.medium, Domain { radius: r2, age_us: a2 })
+                    .map_err(|e| format!("N512 {e:?}"))?;
+                seams(&f, r2, a2)?
+            }
+        };
+        let rel = |x: f64, c: f64| 100.0 * x / c;
+        let d_edge = rel(s2.edge_eta, s2.eta_centre) - rel(s.edge_eta, s.eta_centre);
+        let d_hor = rel(s2.horizon_eta, s2.eta_centre) - rel(s.horizon_eta, s.eta_centre);
+        println!(
+            "N={n} R={radius}->{r2:.2}m A={:.3}->{:.3}s bord {:.4}%->{:.4}% horizon {:.4}%->{:.4}% eta0 {:.5}->{:.5}m homothetie={}",
+            age_us as f64 / 1e6,
+            a2 as f64 / 1e6,
+            rel(s.edge_eta, s.eta_centre),
+            rel(s2.edge_eta, s2.eta_centre),
+            rel(s.horizon_eta, s.eta_centre),
+            rel(s2.horizon_eta, s2.eta_centre),
+            s.eta_centre,
+            s2.eta_centre,
+            d_edge.abs() < 0.1 && d_hor.abs() < 0.1
+        );
+    }
+    Ok(())
+}
+
 fn scene_report() -> Result<(), String> {
     println!("# constats de construction S203");
     for hs in [0.25f32, 0.5, 1.0, 1.5] {
@@ -468,7 +558,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     match args.get(1).map(String::as_str) {
         Some("scene") => scene_report()?,
         Some("seams") => seams_report()?,
-        _ => return Err("mode : scene | seams".into()),
+        Some("controls") => controls_report()?,
+        _ => return Err("mode : scene | seams | controls".into()),
     }
     Ok(())
 }

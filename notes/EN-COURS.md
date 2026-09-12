@@ -84,7 +84,7 @@ Le lot ne migre pas ce terme (bits changés, lot propre) ; il le chiffre et le s
  [naissance, +A]) et temporelle (max|η_W| dans R à +A) pour candidats (N, R, A) admis ;
  critères déclarés **avant** mesure : ≤3 mm (tolérance du rendu) et ≤2 % du pic central
  (seuil ADR-120 emprunté comme choix de banc). Tests de la fonction de couture.
-- [ ] **P3b** *(ajoutée après P3)* — deux contrôles avant de retenir l'emprise : accord
+- [x] **P3b** *(ajoutée après P3)* — deux contrôles avant de retenir l'emprise : accord
  N256/N512 dans R aux instants rendus (+1/+3/+6 s) ; homothétie à λ×2 sur le critère
  relatif (R×2, A×√2, même N attendu). Si l'un échoue, retenir N512 A64 R60 et le dire.
 - [ ] **P4** — image : B+W par `Prepared::sample_world_batch` dans R, B seul hors R ;
@@ -136,3 +136,17 @@ selon la règle : N256, A56 s, R52 m** (bord 2,937 mm, horizon 2,255 mm, marge 2
 échoue à A48 (R65 : horizon 3,246) et A64 (R39 : bord 3,935) → fenêtre étroite. N512 passe
 pour tout R ≥ 55 m et A ≥ 56 s. Lecture : seuil relatif 2 % ⇒ R ≈ 15,5 λ ; énergie et λ
 sortent du critère relatif si l'homothétie S136 tient (non vérifiée ici → P3b).
+
+P3b, écrit **avant** exécution : (1) N256 et N512 à A56 R52, r ∈ [0 ; R) pas 2 cm, instants
++1/+3/+6 s : accord si max|Δη| ≤ 3 mm (tolérance du rendu). (2) b = 2 m ⇒ λ = 6,70 m, même
+fraction : coutures **relatives** à R = 104 m, A = 56·√2 s (N256) et R = 110 m, A = 64·√2 s
+(N512) ; homothétie reçue si chaque rapport couture/η centre diffère de moins de 0,1 point
+de pourcentage de celui mesuré à λ = 3,35 m.
+
+P3b résultats (`controls`) : (1) max|Δη| N256/N512 = 0,0000 mm à +1/+3/+6/+30 s, 0,0001 mm
+à +56 s — **accord**. (2) λ' = 6,70 m, E' = 1312 J, η₀ 0,15482 → 0,21895 m (= √2, η ∝ √E/λ) ;
+N256 bord 1,8971 → 1,8971 %, horizon 1,4563 → 1,4753 % ; N512 (R55→110, A64→90,51 s) bord
+1,7900 → 1,7904 %, horizon 0,6334 → 0,6420 % — **homothétie reçue** (écart ≤ 0,019 point).
+**Emprise retenue : N256, R = 52 m, A = 56 s.** Forme sans dimension, pour le critère relatif
+2 % : R ≈ 15,5 λ, A ≈ 96·√(λ/g), N ≥ 256 ; le seuil absolu 3 mm devient liant quand
+η₀ > 0,15 m (η₀ ∝ √E/λ). Aucun contrôle ne porte sur l'observabilité réelle de 3 mm.
