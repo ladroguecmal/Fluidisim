@@ -58,100 +58,47 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S193 — terminée
+Session : S194 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
-Objectif : S192-1, construire les conditions de surface **non linéaires** dispersives
-sur la tranche x-z de S192 et les recevoir contre une référence de **Stokes**, avec
-ordre en amplitude explicite et domaine de validité déclaré. Premier véhicule à la fois
-non linéaire et dispersif (A217) ; aucune sélection de solveur δ, aucun seuil redemandé.
+Objectif : S193-1, mesurer le **couplage de deux trains** sur le véhicule non linéaire
+dispersif de S193 — écart entre la **somme des évolutions** et l'**évolution de la
+somme** — sous le critère d'ADR-120. C'est la mesure qu'ADR-112 attend et qu'A217
+nomme ; elle n'était pas possible avant S193. Aucun choix δ, aucun seuil de bascule.
 
 ### Plan
 
-- [x] **P1** — reprise, état réel (trois copies au commit de `master`), jeton et plan seuls.
-- [x] **P2** — dérivation et protocole **avant tout code** : équations de Zakharov exactes,
-  développement en amplitude de la vitesse verticale de surface, symboles verticaux
-  discrets tirés du relèvement S192, échelle d'ordres M=1/2/3 et signature prédite de
-  chacun, références Stokes (profil d'ordre 2, correction de fréquence d'ordre 3),
-  convention de courant moyen, anti-repliement, réceptions chiffrées déclarées.
-- [x] **P3a** — véhicule : support non linéaire (état spectral, réutilisation du
-  relèvement, vitesse verticale à l'ordre M, RK4, projection de bande), tests propres
-  dont **réduction exacte à S192 à M=1** et refus atomiques.
-- [x] **P3b** — campagne : erreur de profil contre Stokes-2 en fonction de l'amplitude
-  (pente déclarée), décalage de fréquence contre Stokes-3, profondeurs, raffinements
-  espace/temps, contre-épreuves par l'échelle M, reproductibilité deux exécutions.
-- [x] **P4** — documenter résultats, limites et suite ; propager A50/B4/A216/A217, file
-  plurielle, angles et leçons. ADR seulement si une décision de projet est prise.
-- [x] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes,
-  jeton `libre`, trois copies avancées sans suppression non prouvée.
+- [x] **P1** — reprise, état réel (quatre copies au même commit), jeton et plan seuls.
+- [ ] **P2** — dérivation et protocole **avant tout code** : décomposition des termes
+  croisés, deux régimes prédits (harmoniques liées croisées, non cumulatives, pente 1 ;
+  modulation croisée de fréquence, cumulative en temps, pente 2), exigence de bande
+  pour contenir k₁±k₂ et leurs harmoniques, couples résonants et non résonants,
+  normalisation, réceptions chiffrées et contre-épreuves déclarées.
+- [ ] **P3a** — banc de couplage `nl_coupling_2d.rs` réutilisant `support/nl_surface.rs`
+  sans le modifier ; tests propres dont **train unique** et **M=1** à écart nul, et
+  couple à modes disjoints exact au bit.
+- [ ] **P3b** — campagne : échelle d'amplitude, partage d'amplitude, croissance en
+  temps, échelle M, couples résonant/non résonant, deux profondeurs ; ajustement
+  `écart = α·s + β·s²·N` ; frontière des 2 % en (cambrure × durée) ; reproductibilité.
+- [ ] **P4** — documenter, propager A217/A216/A50/B4 et la file ; ADR seulement si une
+  décision de projet est prise ; ne **pas** dériver de seuil de bascule W/δ.
+- [ ] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes,
+  jeton `libre`, copies avancées sans suppression non prouvée.
 
 ### Notes de reprise
 
-Lu dans cette conversation : AGENTS.md, REPRISE.md entier, EN-COURS, dernier journal
-(S192), SURFACE-LIBRE-2D-S192, file active S190 de QUESTIONS-OUVERTES, libellés des
-18 invariants, `support/free_surface.rs` entier.
+Hérité de S193 : véhicule `NlSurface` (bande spectrale Q, convolution tronquée,
+relèvement de S192 à symbole horizontal exact, ordres M=1/2/3, RK4), reçu contre
+Stokes — `b₂` à 0,4555 %, décalage de fréquence à 1,6454 %, empreinte
+`0x41fc3b13793bee10`. ADR-122 retient **M=3**. Seuil 2 % d'ADR-120 fixé, jamais
+redemandé. ADR-112 : une superposition indépendante ne reçoit pas le couplage.
 
-État hérité : S192 fournit un véhicule **linéaire** spectral (η, ψ en DFT horizontale,
-relèvement tridiagonal en profondeur, symbole `G_h`, Verlet). Erreurs Airy fines
-≤1,732796 % ; empreinte `0x4fc690d4ac035bf7`. Seuil B4 = 2 % fixé (ADR-120), **jamais
-redemandé**. ADR-112 interdit de conclure la bascule d'une superposition linéaire.
+Thèse déclarée avant mesure : l'écart de superposition n'est **pas un nombre** mais un
+domaine en (cambrure × durée), parce qu'il a deux parts de natures différentes — une
+part instantanée non cumulative d'ordre un en cambrure, et une part de phase cumulative
+d'ordre deux multipliée par le nombre de périodes observées. Le détail est écrit en P2
+avant tout code.
 
-Thèse de la session, déclarée avant mesure : une troncature en amplitude à l'ordre M
-donne trois signatures **distinctes et falsifiables** — M=1 ne produit aucune harmonique
-liée ni décalage de fréquence, M=2 produit l'harmonique liée mais pas la bonne
-fréquence, M=3 produit les deux. C'est l'échelle qui reçoit le véhicule, pas un seul
-chiffre. Détails dans le document de protocole écrit en P2.
-
-P2 : protocole écrit dans SURFACE-LIBRE-NL-S193. Choix arrêtés avant code —
-équations de Zakharov exactes dérivées sur place ; développement HOS/Craig-Sulem
-avec symboles verticaux A=G_h et B=k², dérivées supérieures algébriques ;
-**représentation spectrale en bande Q avec convolution tronquée**, ce qui supprime
-la question du repliement au lieu de la calibrer ; horizontal exact (µ=k_q²dz²,
-changement assumé vis-à-vis de S192) pour ne laisser que K comme axe spatial ; RK4.
-Trouvé en dérivant, non anticipé : (1) le peu profond de S192 **n'a pas d'oracle**
-de Stokes à amplitude utile, borne d'Ursell U=aL²/h³ ; (2) la fréquence de Stokes
-d'ordre 3 en profondeur finie **dépend d'une convention de courant moyen**, donc
-seul le cas profond peut servir d'oracle de fréquence ; (3) volume et énergie ne
-sont plus conservés exactement — la dérive est un diagnostic de troncature.
-Ces trois points sont des candidats d'angle mort à instruire en P4.
-
-P3a : support/nl_surface.rs + coquille d'exemple. Quatre tests passent en debug
-et release, build sans avertissement. L'oracle du test M=1 a dû être **corrigé
-avant d'être écrit** : RK4 n'intègre pas exactement l'oscillateur, l'oracle exact
-est la puissance fermée de son amplification (precision datee dans le document).
-Controle de vie, h=8, ka=0,05, 1 periode, K=64 : |eta2| **exactement nul** a M=1,
-1,579404e-3 a M=2, 1,585220e-3 a M=3 ; energie -8,0e-11 relatif ; volume 1,9e-19 ;
-residu de relevement 2,220e-16. Le volume derive **bien moins** que l'ordre de
-troncature ne l'exigeait : prediction du protocole conservatrice, a dire en P4.
-Parti pris retenu : etat spectral en bande, convolution tronquee, psi_0 jauge a zero
-(prouve inerte par un test), symbole horizontal exact donc K seul axe spatial.
-
-P3b : campagne executee, reception=true, empreinte 0x41fc3b13793bee10, deux
-executions release identiques, quatre tests debug/release. L'echelle M=1/2/3 rend
-les trois signatures predites. M=2 donne **exactement la moitie** du decalage de
-Stokes en profond et **0,663** en intermediaire : la part captee depend du regime.
-Volume conserve **exactement** a M=2 (annulation algebrique des deux termes d'ordre
-deux au mode nul) : prediction du protocole fausse, mecanisme publie. Ursell mesure
-comme une falaise, et le vehicule est juste en faible profondeur dans le domaine.
-Le contre-epreuve d'amplitude negligeable a trouve le seul defaut : condition
-initiale batie sur omega0 du continu au lieu de omega_d, mode elliptique, biais
-1,1e-7 (rapport 16,1 entre h=8 et h=2, = rapport des ellipticites). Corrige ;
-biais residuel -5,0730e-10 = erreur de phase RK4 predite analytiquement.
-Candidats P4 : angles morts (oracle absent en faible profondeur ; convention de
-courant moyen ; condition initiale du continu sur modele semi-discret) et lecons.
-
-P4 : ADR-122 acte l'ordre trois, avec son domaine (cambrure, Ursell) et ce qu'il
-faudrait pour l'inverser. SPEC-001 gagne un 1 quater : b2 en profondeur finie
-verifie par deux limites, nombre d'Ursell, et la frequence d'ordre trois avec la
-seule forme adoptee (provenance I-14). Portee et suite S193-1 ecrites en section 8
-du document. File active renommee S193 et quatre ancres repointees (A185).
-BILAN-B4, PLAN-BENCHMARK B3/B4 et SPEC-004 actualises. Angles et lecons en P5.
-
-P5 : rituel exécuté. Journal, quatre angles A234-A237, trois leçons L271-L273,
-suivis A50/A217/A216 et A211. INDEX/README/REPRISE reçoivent un bloc S193 neuf ;
-les décomptes sont **comptés** et non recopiés : 122 ADR, 237 angles A1-A237,
-273 leçons, 18 invariants, 6 SPEC, 23 cas. Jeton libre, suite S194 = S193-1.
-Workspace rejoué en debug : 331 réussis / cinq ignorés, identiques au reçu S190.
-Point ouvert daté : avertissement unreachable_patterns préexistant dans
-wake_plafond.rs:134, hors lot. Invariants cités relus, aucun ne devient faux.
-Trois copies à avancer sur master après ce commit, aucune suppression autorisée.
-
+Leçons de S193 à appliquer ici : **L271** — déclarer au moins une configuration où
+l'effet est nul par construction (ici train unique, et M=1) ; **L272** — toute ligne de
+base doit être la grandeur que le véhicule porte, pas celle du continu ; **L273** — une
+prédiction d'ordre se mesure avant d'être commentée.

@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-12 20:07 +02:00
+JETON            : occupé
+Battement        : 2026-09-12 20:26 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
-Session en cours : aucune
+Session en cours : S194 — S193-1 : couplage de deux trains sur le véhicule non linéaire
 Dernière session : S193 — surface non linéaire dispersive reçue Stokes sous 2 %, ADR-122
-Session suivante : S194 — S193-1 : couplage de deux trains, somme contre évolution de la somme ; relire la file plurielle
+Session suivante : à fixer au rituel de fin ; relire la file plurielle
 
 *S183 à S189 ont travaillé dans la **copie principale**, sur `master` : aucune copie isolée
 ouverte, donc rien à refermer (AGENTS.md). Les trois worktrees ont été **avancés sur master**
