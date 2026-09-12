@@ -18,9 +18,9 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : interrompu
-Battement        : 2026-09-13 00:01 +02:00
-Agent            : Claude Code (Opus 5) jusqu'à P3 ; **la suite revient à Codex, sur demande de l'utilisateur**
+JETON            : occupé
+Battement        : 2026-09-13 00:03 +02:00
+Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles), reprise P4/P5 après Claude
 Session en cours : S199 — **B3/δ : premier candidat volumétrique**, P1–P3 committés, **P4 et P5 restent**
 Dernière session : S198 — vélocité mesurée ; règle des deux maillons, la file reprend la main
 Session suivante : à fixer au rituel de fin de S199, sous la règle des deux maillons (§6.8)

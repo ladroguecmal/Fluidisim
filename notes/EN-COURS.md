@@ -59,7 +59,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 ## Session en cours
 
 Session : S199 — en cours
-Agent : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
+Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles), après Claude P1–P3
 Objectif : **B3 / δ — construire le premier candidat volumétrique**, celui qui manque depuis
 S01. La couche δ n'a pas reçu de code d'exécution depuis S161. Session choisie **par la file**
 sous la règle des deux maillons (§6.8), et non par le chaînage.
@@ -453,3 +453,8 @@ croise. Le banc en publiera le decompte.
 Convergence declaree des le protocole sous la forme de L274 : ordre et residu de
 Richardson sur trois niveaux de K, sur la moyenne quadratique (A238).
 
+
+Reprise Codex — 2026-09-13 00:03 : passation volontaire vérifiée, quatre copies
+à0c143a8, arbre propre. Même session S199, P4/P5 uniquement, pas de remesure.
+Contrôler la portée des contrats à la lecture du code et vérifier les identifiants
+d'angles : le compte236 par puces peut différer des identifiants243.
