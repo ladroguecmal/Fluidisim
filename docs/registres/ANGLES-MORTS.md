@@ -2219,3 +2219,30 @@ la consommation.
   avant l'évaluation de B. La seconde ne couvre pas tous les refus par point — `NonFinite` ne se
   prévoit pas — donc aucune des deux ne supprime le cas ; elles en réduisent la fréquence.
   Chiffrage et conditions dans COUT-DIFFERENTIEL-S183 §6.5.
+
+**Suivi A50 — S184 : la consommation est mesurée, et elle déplace la question.**
+[CONSOMMATION-S184](../validation/CONSOMMATION-S184.md) : la source coûte **~2100 fois** le pas
+explicite qu'elle alimente (34–35 µs contre 14–17 ns par maille). La décimation spatiale achète
+exactement le rapport des nœuds mais le contenu la plafonne à `r = 2` (λ_min = 1,081 m, coupure
+de pression) ; la cadence divise exactement par `c` et le contenu temporel est lent. A50 n'attend
+plus un chiffre mais une **décision** de cadence et de réseau ; l'erreur des deux axes n'est
+mesurée qu'en 1D (S170, S174). S184-1 mesure l'erreur de cadence en 3D avec le fournisseur réel.
+
+- **A227** *(sévérité 2, S184 ; ouverte)* — **Le fournisseur différentiel a la forme d'une
+  requête, pas celle d'un champ, et sa forme ne se corrige pas par la traversée.** Sept sessions
+  (S177–S183) ont construit un fournisseur **par point**, en supposant implicitement qu'un
+  solveur perturbatif le consommerait maille par maille. Mesuré : il coûte 2100 fois le pas
+  qu'il alimente. L'optimisation évidente — amortir les sommes modales sur un réseau régulier
+  par récurrence de phase — a été chiffrée et **ne rend que 12 à 15 %** : la trigonométrie ne
+  pèse que 15–18 % du différentiel de B, le reste étant l'arithmétique qui produit les 26
+  scalaires de `BackgroundSample` par composante (140 ns par composante et par nœud, dont 21 de
+  phase). **Le coût est le volume de sortie, pas la manière d'y arriver** ; changer le parcours
+  ne changera pas l'ordre de grandeur. Ce qui reste disponible : la cadence temporelle (exacte
+  en `1/c`, et le contenu temporel est lent), la décimation spatiale jusqu'à `r = 2` seulement
+  (au-delà, le contenu de pression est replié), et la vectorisation — non mesurée, et le seul
+  levier qui s'attaque aux 85 %. **Ce n'est pas un défaut de correction** : les valeurs sont
+  justes, les contrats tenus, et le fournisseur reste bien dimensionné pour ce qu'il sert
+  aujourd'hui — des consommateurs **épars** : flottabilité, véhicules, quelques sondes. C'est
+  l'usage volumétrique qui n'est pas dans son enveloppe, et personne ne l'avait écrit.
+  Sévérité 2 et non 1 : la décomposition B/W/δ/V (ADR-001) n'est pas en cause, c'est la manière
+  dont δ consomme B+W qui l'est. Chiffres et conditions dans CONSOMMATION-S184 §6.2 et §6.4.

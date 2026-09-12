@@ -73,12 +73,12 @@ S170 avait explicitement refusé de conclure là-dessus ; S183 fournit le chiffr
 - [x] **P3** — écrire le véhicule `perturbative_step` : pas explicite sur un bloc 3D,
       avec et sans source, source par maille puis décimée. Recevoir la consommation
       (valeurs finies, chemin exercé, témoin direct) et relever les coûts.
-- [>] **P4** — chiffrer ce que la décimation achète, et dire ce que la part mesurée
+- [x] **P4** — chiffrer ce que la décimation achète, et dire ce que la part mesurée
       devient si l'on ajoute une projection. Recevoir dans un document de validation.
 - [x] **P5** — mesurer le gain disponible d'une évaluation **par réseau** plutôt que par
       point, pour B seul : récurrence de phase contre appel par point. Sizer l'occasion,
       sans la proposer comme acquise — une récurrence ne rend pas les mêmes bits (I-03).
-- [ ] **P6** — rituel de fin (REPRISE.md §6) : journal, angles, leçons, index, décomptes,
+- [>] **P6** — rituel de fin (REPRISE.md §6) : journal, angles, leçons, index, décomptes,
       jeton et copies.
 
 ### Notes de reprise

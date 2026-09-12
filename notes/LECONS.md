@@ -4096,3 +4096,30 @@ Corollaire immédiat, et coûteux à ignorer : **multiplier un coût par point p
 points sous-estime un grand lot** — de 13 à 16 % en différentiel et de 39 à 43 % en surface
 entre le lot 1 et le lot 256. S125 le disait déjà d'une autre manière, en refusant d'extrapoler
 un rapport hors de sa grille.
+
+## L264 — Avant d'optimiser un parcours, mesurer la part qu'il peut atteindre
+
+*(S184)* Le fournisseur différentiel coûte 2100 fois le pas de solveur qu'il alimente. La
+réaction naturelle était évidente et elle avait même l'air élégante : sur un réseau régulier,
+la phase de chaque mode avance d'un incrément constant, donc une récurrence remplace la
+trigonométrie par une rotation, et le coût des sommes modales s'effondre. Le raisonnement est
+juste. Il ne sert à rien.
+
+Mesuré : la phase et la trigonométrie ne pèsent que **15 à 18 %** du différentiel de B, et la
+récurrence n'en retire que **12 à 15 %**. À 32 composantes, un nœud coûte 140 ns par
+composante, dont 21 de phase ; les 119 restants sont l'arithmétique ordinaire qui produit les
+26 scalaires de sortie, et aucune traversée ne les supprime. L'optimisation visait le tiers
+visible du travail en croyant viser le tout.
+
+Ce qui a trompé n'est pas un calcul faux, c'est une **saillance** : la trigonométrie est la
+partie difficile à écrire, celle qui a une table, un type dédié, un ADR. L'addition de
+vingt-six flottants n'a rien de tout cela. Le coût, lui, ne suit pas ce qu'il a coûté à écrire.
+
+Mesurer la part **avant** d'optimiser vaut une demi-heure et évite de construire une
+optimisation correcte et inutile — et de la défendre ensuite, parce qu'elle marche. Le chiffre
+utile n'est pas « combien la récurrence est plus rapide » (5,6×, et c'est vrai), c'est
+« combien elle retire au total » (12 %). Toujours rapporter un gain à ce dont il est une
+fraction ; un facteur cinq sur un sixième du travail n'est pas un facteur cinq.
+
+Voir CONSOMMATION-S184 §6.4 et A227. Même famille que L263 — un axe ne mesure son effet que
+s'il dépasse ce qu'il transporte ; ici, une optimisation ne vaut que la part qu'elle touche.
