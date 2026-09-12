@@ -17,6 +17,24 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S195 — 2026-09-12 : `n` sources mesurées, **A240 close**, aucun ADR.**
+[SOURCES-MULTIPLES-S195](validation/SOURCES-MULTIPLES-S195.md), empreinte
+`0x5eb378f6ffe26c9f`, deux exécutions identiques. À cambrure **par train** fixée — la
+crainte d'A240 — l'écart croît en **`n^0,75`**, sous-linéaire, loin du `n²` du comptage
+de paires et sous le `n` du régime cohérent. À cambrure **totale** fixée il **décroît**
+en **`1/√n`** : répartir une même mer sur plus de composantes *améliore* la superposition.
+**ADR-123 se transporte donc à `n` sources dans le sens favorable.** Sept réceptions sur
+dix passent — cas nul exact, `M=1` à `10⁻¹⁴`, continuité S194 à `10⁻⁶`, dilution séculaire,
+énergie à `6e-9`, convergence d'ordre **1,756** à résidu de Richardson **0,892 %**, bande
+neutre à `0,0000 %`. Les trois qui échouent tenaient au **jeu de phases**, que le banc avait
+réfuté avant la campagne : c'est la **fonctionnelle** qui sépare les régimes, pas les phases.
+Nouveau : **A241**, les harmoniques croisées retombent sur les modes de train et cette part
+décroît 4,85 fois moins vite — elle gouverne la loi à grand `n`. **L276.**
+`water-core` inchangé ; workspace331 réussis/cinq ignorés.
+123 ADR,241 angles,276 leçons,18 invariants,6 SPEC,23 cas.
+**Suite S196 : A241**, densifier pour savoir si la loi tend vers une limite ; ou la
+correction croisée quadratique, qui redevient disponible.
+
 **S194 — 2026-09-12 : le couplage de deux trains est mesuré**, ADR-123, et **A217 est close**.
 S193-1 réalisée : somme des évolutions contre évolution de la somme, sur le véhicule S193
 inchangé. L'écart est la réponse à un forçage croisé explicite, en deux parts de mécanismes
@@ -1187,7 +1205,7 @@ parfaitement stable ne pouvait pas distinguer.
 **État actif S192** : critère B4 fixé à 2 %, profil source reçu sous projection (S191),
 tranche x-z à surface libre linéaire reçue Airy (S192), comparaison non linéaire absente ;
 B1/B2/B4 restent partiels, aucun banc complet. Voir le résultat en tête de cet index
-et la [file plurielle](registres/QUESTIONS-OUVERTES.md#file-active-s194--2026-09-12).
+et la [file plurielle](registres/QUESTIONS-OUVERTES.md#file-active--relue-en-s195-2026-09-12).
 
 
 **S129 :** [BILAN-CANDIDAT-ETENDU-S129](validation/BILAN-CANDIDAT-ETENDU-S129.md), cinétique

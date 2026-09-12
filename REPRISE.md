@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-12 21:32 +02:00
-Agent            : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles) — **reprise**
-Session en cours : S195 — S194-1 : `n` sources, l'option tranchée par l'utilisateur
-Dernière session : S194 — couplage de deux trains mesuré, A217 close, ADR-123
-Session suivante : à fixer au rituel de fin ; relire la file plurielle
+JETON            : libre
+Battement        : 2026-09-12 21:49 +02:00
+Agent            : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
+Session en cours : aucune
+Dernière session : S195 — `n` sources mesurées, A240 close, A241 ouverte
+Session suivante : S196 — A241 : densifier `n` et la bande, savoir si la loi tend vers une limite ; ou la correction croisée quadratique
 
 *S195 a **changé de main en cours de route** : la session ouverte à 21:15 a été coupée par
 une limite d'usage sur un autre compte, et l'utilisateur l'a signalé. Le jeton disait donc
@@ -234,6 +234,38 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S195 — 2026-09-12 : `n` sources mesurées, A240 close, aucun ADR.**
+[SOURCES-MULTIPLES-S195](docs/validation/SOURCES-MULTIPLES-S195.md), empreinte
+`0x5eb378f6ffe26c9f`, deux exécutions identiques. **S194-1 réalisée**, sur l'option `n`
+sources tranchée par l'utilisateur. À cambrure **par train** fixée — la crainte d'A240 —
+l'écart croît en **`n^0,75`**, sous-linéaire : loin du `n²` du comptage de paires, et sous
+le `n` du régime cohérent. À cambrure **totale** fixée il **décroît en `1/√n`**, si bien que
+répartir une même mer sur plus de composantes *améliore* la superposition — ce qu'ADR-099
+ignorait en tranchant le nombre de composantes. **ADR-123 se transporte donc à `n` sources
+dans le sens favorable**, avec ses limites : `n ≤ 6`, colinéaire, fond plat, eau profonde.
+**Sept réceptions sur dix passent** : cas nul exact, `M=1` à `10⁻¹⁴`, continuité S194 à
+`10⁻⁶`, dilution séculaire (à `n ≥ 5` le maximum est atteint dès la première période),
+énergie à `6e-9` sans configuration hors domaine, convergence sur trois niveaux de `K`
+— **ordre 1,756, résidu de Richardson 0,892 %** (L274) — et bande `Q=32` neutre à
+`0,0000 %`. **Les trois qui échouent — 4, 5, 6 — tenaient toutes au jeu de phases**, que le
+banc avait réfuté **avant** la campagne : chaque train avance à sa propre pulsation, donc
+l'alignement initial ne survit pas, et c'est la **fonctionnelle** qui sépare les régimes —
+le maximum tend vers la borne cohérente, la L2 vaut la racine de la somme des carrés. Elles
+restent écrites au protocole, non réécrites ; réfutation au §7.3. Le banc n'avait rien.
+**A241** ouverte : les harmoniques croisées **retombent sur les modes de train**, et cette
+part décroît **4,85 fois moins vite** que celle des modes propres au couplage — elle domine
+dès `n = 4` et maintient la loi **entre** les deux bornes dérivées, qu'aucune n'encadre.
+Sur un spectre dense, tout y retombe : le régime mesuré est le régime naissant. **L276.**
+`water-core` et le support S193 inchangés, un exemple ajouté ; workspace **331 réussis /
+cinq ignorés**, neuf tests propres au banc.
+123 ADR,241 angles,276 leçons,18 invariants,6 SPEC,23 cas.
+*Session **reprise après interruption** : celle ouverte à 21:15 a été coupée par une limite
+d'usage sur un autre compte, l'utilisateur l'a signalé, et P3a — complète sur le disque,
+sans commit — a été **complétée** après lecture du diff et passage des tests, non annulée.*
+**Suite S196 : A241**, étendre `n` au-delà de six et densifier la bande pour savoir si la
+loi tend vers une limite ; **ou** la correction croisée quadratique, chiffrée et bornée,
+qui redevient disponible maintenant qu'A240 est close. File plurielle relue.
 
 **S194 — 2026-09-12 : le couplage de deux trains est mesuré**, ADR-123, et **A217 est close**.
 S193-1 réalisée : somme des évolutions contre évolution de la somme, sur le véhicule S193

@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S195 — en cours
+Session : S195 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
 Objectif : S194-1, **`n` sources** — A240. ADR-123 chiffre le domaine de la superposition
 pour **deux** trains ; le nombre de paires croît comme `n²` et rien ne s'extrapole. C'est
@@ -81,10 +81,16 @@ contre la correction croisée quadratique, qui reste portée par la file active.
   deux exécutions identiques.
 - [x] **P4** — documenter, propager A240/A50/B4 et la file ; ADR seulement si une décision
   de projet est prise ; ne **pas** dériver de seuil de bascule W/δ.
-- [>] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes,
+- [x] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes,
   jeton `libre`, copies avancées sans suppression non prouvée.
 
 ### Notes de reprise
+
+P5 S195 : rituel terminé. **123 ADR, 241 angles, 276 leçons, 18 invariants, 6 SPEC,
+23 cas**, vérifiés contre le dépôt. File plurielle relue (A211) : ligne A240 passée à
+close, ligne **A241** créée, ligne de tête devenue S195-1, titre redaté. Journal, index,
+README et REPRISE portés. Jeton libre. Trois copies isolées avancées sur `master`,
+aucune suppression — aucune n'est prouvée morte.
 
 P4 S195 : SOURCES-MULTIPLES-S195 §7–§9 reçus. **A240 close**, **A241** ouverte (le repli
 des harmoniques croisées sur les modes de train gouverne la loi à grand n), **L276**

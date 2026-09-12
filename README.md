@@ -602,5 +602,17 @@ ignorés**, identiques au reçu. Restent ouverts : **`n` sources** (**A240**, le
 **Suite S195 — à instruire** : `n` sources, ou la correction croisée quadratique dont
 ADR-123 chiffre déjà le gain. File active relue et renommée S194 ; A217 retirée de sa ligne.
 **A238, A239, A240** et **L274, L275** :
-**123 ADR,240 angles,275 leçons,18 invariants,6 SPEC,23 cas**.
+**123 ADR,241 angles,276 leçons,18 invariants,6 SPEC,23 cas**.
 Voir [couplage S194](docs/validation/COUPLAGE-DEUX-TRAINS-S194.md), [mesures](docs/validation/COUPLAGE-DEUX-TRAINS-S194-MESURES.md) et [ADR-123](docs/adr/ADR-123-le-domaine-de-validite-de-la-superposition.md).
+
+**S195 :** `n` sources mesurées, **A240 close**, aucun ADR. À cambrure par train fixée —
+ce qu'A240 craignait — l'écart croît en **n^0,75**, sous-linéaire, loin du `n²` du
+comptage de paires. À cambrure **totale** fixée il **décroît en 1/√n** : répartir une même
+mer sur plus de composantes améliore la superposition. ADR-123 se transporte à `n` sources
+dans le sens favorable. Sept réceptions sur dix ; les trois autres tenaient au jeu de
+phases, que le banc avait réfuté avant la campagne — c'est la **fonctionnelle** qui sépare
+les régimes. **A241** : les harmoniques croisées retombent sur les modes de train et cette
+part gouverne la loi à grand `n`. **L276** : une variable de protocole peut être réfutée
+par le véhicule avant d'être mesurée. Session **reprise après interruption** d'un autre
+compte ; P3a complétée, pas annulée.
+Voir [`n` sources S195](docs/validation/SOURCES-MULTIPLES-S195.md).

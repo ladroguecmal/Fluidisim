@@ -10052,3 +10052,92 @@ S193 sont inchangés, seul un exemple est ajouté.
 Incident de procédure noté dans `EN-COURS` : le commit de P3a est parti sans sa case cochée,
 un `cd` ayant déplacé le répertoire ; réparé par amende du commit local non poussé. Trois
 copies isolées avancées sur `master`, aucune suppression : aucune n'est prouvée morte.
+
+## S195 — 2026-09-12 — `n` sources : A240 avait raison de compter, tort de conclure
+
+**Entrée :** master f7b7999, S194-1, option `n` sources tranchée par l'utilisateur. Plan seul
+a56f758 ; dérivation et protocole f7b7999 ; banc 9f982d9 ; campagne c67b622 ; réception
+2608c69. `water-core` et `support/nl_surface.rs` inchangés ; un exemple ajouté.
+
+**Session reprise après interruption.** Celle ouverte à 21:15 a été coupée par une limite
+d'usage sur un autre compte ; l'utilisateur l'a signalé, faute de quoi un battement de
+dix-sept minutes aurait interdit la reprise — c'est précisément le cas que le seuil de deux
+heures ne sait pas trancher et que seul un humain peut lever (REPRISE §7). `nl_sources_2d.rs`
+était sur le disque sans commit : diff lu, banc compilé, **neuf tests passants**, étape P3a
+**complétée** et non annulée, comme l'exige `EN-COURS`. Le numéro de session n'a pas changé.
+
+**Produit :** `examples/nl_sources_2d.rs` et
+[SOURCES-MULTIPLES-S195](../docs/validation/SOURCES-MULTIPLES-S195.md), empreinte
+`0x5eb378f6ffe26c9f`, deux exécutions `release` identiques ligne pour ligne.
+
+**Chiffres qui ont orienté la conception.** Série A, cambrure **totale** fixée à `0,024`,
+`n = 2..6` : la norme L2 de l'écart **décroît** en `n^-0,46`. Série B, cambrure **par train**
+fixée à `0,008` — la crainte d'A240 : elle **croît** en `n^0,75`, sous-linéaire. Les deux lois
+dérivées avant mesure donnaient `1,667` et `0,431` pour le rapport `n=6/n=2` en série A ; le
+mesuré vaut `0,586` à `0,614`. En série B, `5,0` et `1,29` attendus, `2,21` à `2,35` mesurés.
+**La mesure tombe entre les deux bornes, des deux côtés, et aucune ne l'encadre.**
+
+**Décision structurante :** aucune, **aucun ADR**. ADR-123 se transporte à `n` sources dans le
+sens favorable ; rien ne change de contrat, aucun solveur δ n'est choisi, aucun seuil de
+bascule W/δ n'est dérivé.
+
+**A240 est close.** Des trois régimes qu'elle disait concevables, aucun n'est celui qui sort.
+Le comptage des paires en `n²` était juste ; la conséquence ne l'était pas, et la mesure va
+plus loin que la dérivation — même le régime cohérent, qui donnait `n`, était pessimiste.
+Conséquence pratique et non anticipée : **à cambrure totale fixée, répartir une même mer sur
+plus de composantes améliore la superposition**, en `1/√n`. ADR-099 tranchait le nombre de
+composantes sur la dispersion de `Hs` et le coût, sans savoir ce que la superposition en
+pensait ; elle en pense du bien.
+
+**Ce que la session a trouvé et qui n'était pas cherché.**
+
+**A241** *(sévérité 2)* — les harmoniques croisées **retombent sur les modes des trains**, et
+c'est cette part-là qui gouverne la loi à grand `n`. Les deux régimes classiques supposent
+tous deux que l'écart vit sur des nombres d'onde propres au couplage ; il n'en vit qu'une
+part. De `n=2` à `n=6`, la part sur modes exclusivement croisés chute d'un facteur **6,8**,
+celle sur modes de train d'un facteur **1,4** — un écart de **4,85** entre les deux vitesses,
+et la seconde domine dès `n = 4`. Sur un spectre dense, *tous* les modes croisés retombent sur
+des modes existants : le régime mesuré ici sur six trains est donc le régime **naissant**, pas
+une exception, et on ne sait pas s'il tend vers une limite.
+
+**L276** — une variable de protocole peut être réfutée par le véhicule **avant** d'être
+mesurée. Le §2.1 faisait du jeu de phases initial la variable décisive, en gras, et trois
+réceptions sur dix en dépendaient. Mais chaque train avance à sa propre pulsation : sur dix
+périodes les phases relatives balaient toutes leurs valeurs, et un maximum pris sur l'espace
+*et* le temps échantillonne les deux régimes quel que soit le départ. Ce qui sépare réellement
+les régimes est la **fonctionnelle** — le maximum tend vers la borne cohérente, la L2 vaut la
+racine de la somme des carrés par construction. Le fait décisif n'a demandé ni campagne ni
+analyse : un point à `n=6`, deux jeux de phases, rapport `0,774` au lieu du `3,87` prédit —
+trouvé en écrivant les **tests propres** du banc, avant toute mesure, et fixé là.
+
+**Réception : sept sur dix.** Passent — le cas nul exact à tout ordre, `M=1` exact à `10⁻¹⁴`
+jusqu'à six trains, la continuité avec S194 à `10⁻⁶` relatif, la dilution séculaire (le
+rapport `N=10/N=1` tombe de `1,4144` à `1,0000`, et à `n ≥ 5` le maximum est atteint dès la
+première période), la conservation d'énergie à `6e-9` sans aucune configuration hors domaine,
+la convergence en `K` sur trois niveaux — **ordre 1,756, résidu de Richardson 0,892 %** — et
+la bande, `Q=32` déplaçant l'écart de `0,0000 %`. Échouent — les réceptions 4, 5 et 6, **toutes
+les trois** adossées à la dichotomie de phases que P3a avait déjà réfutée. Elles restent
+écrites au protocole, non réécrites, et leur réfutation est au §7.3. **Le banc n'avait rien ;
+le protocole, si** — et les sept réceptions indépendantes de la prémisse le prouvent.
+
+**Trois corrections de protocole publiées au §7.1**, chacune fixée par un test : les modes
+exclusivement croisés ne disparaissent pas quand `n` croît (deux ou trois survivent, le
+diagnostic modal reste donc disponible) ; l'exigence « bit pour bit à `10⁻¹²` » de la
+continuité S194 était invérifiable, S194 ne publiant que sept chiffres, et elle est contrôlée
+à `10⁻⁶` en le disant ; et la réfutation du jeu de phases.
+
+**Ce que je n'ai pas fait.** Les exposants mesurés ne sont pas dérivés : le mécanisme du repli
+les qualifie, il ne les explique pas, et une dérivation qui en tienne compte reste à écrire.
+Six trains ne sont pas un spectre — `n ≤ 6` est une tendance, pas une extrapolation. Une seule
+dimension horizontale, trains colinéaires, fond plat, eau profonde ; S194 a montré que le
+couplage est 8,6 fois plus fort vers le rivage. A216 reste inexpliquée, la source B+W de
+S190/S191 n'est pas branchée, forces et perception ne sont pas reçues.
+
+**Prochaine session recommandée. S196 : A241**, la densification — étendre `n` au-delà de six
+et densifier la bande, pour savoir si la loi tend vers une limite ou si `n ≤ 6` trompe. Le banc
+existe et le diagnostic modal est disponible ; la mesure ne demande pas de construire. L'autre
+branche de la file — la correction croisée quadratique, chiffrée et bornée — reste portée et
+redevient disponible maintenant qu'A240 est close.
+
+**Décisions qui demandent un arbitrage humain :** aucune nouvelle. A107 reste un repère de
+fork historique.
