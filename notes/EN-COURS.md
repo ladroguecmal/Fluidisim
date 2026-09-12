@@ -67,7 +67,7 @@ conformément à ADR-124. Pas de réparation générale du solveur δ.
 
 - [x] **P1** — état réel, quatre copiesf0fea77 propres, jeton/plan seuls ; préférence
  60Hz/2ms ou30Hz/4ms demandée, mesure indépendante de la réponse.
-- [ ] **P2** — horloge monotone injectée et coût du dernier pas exposé dans Caps ;
+- [x] **P2** — horloge monotone injectée et coût du dernier pas exposé dans Caps ;
  unité déclarée (domaine du candidat = bloc de banc), inconnu avant mesure ; tests.
 - [ ] **P3** — coût local sur16/32/64 et plafonds1/64/512, pas1/60, trois chauffes
  et11 mesures par configuration ; médiane/max, résidu/dégradation, refus explicites.
@@ -82,3 +82,9 @@ Rendu CPU S201≈12s pour640×360, référence hors ligne, sans budget temps ré
 ADR-007 demande cost_per_block_ms mesuré ; Volume ne gère aucun add/remove_blocks.
 On doit nommer le domaine/charge de la mesure, jamais diviser par un nombre fictif
 ni présenter un coût de projection seule comme coût d'un pas complet.
+
+Utilisateur :60 images/s, eau2ms/image, réponse reçue pendant P2.
+P2 : MonotonicClock injectée ; step_measured expose coût du domaine entier via Caps,
+None si inconnu/horloge invalide/refus ; pas de seuil appliqué au solveur.
+Quatre tests intégration passent, coût factice1,5ms vérifié, zéro allocation
+et sorties identiques au pas non chronométré. Pas de garantie temporelle inventée.

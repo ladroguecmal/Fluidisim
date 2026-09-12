@@ -1,6 +1,7 @@
 use std::alloc::{GlobalAlloc, Layout, System};
 use std::cell::Cell;
 use water_core::delta_projection::{Domain, Error, Volume};
+use water_core::host::MonotonicClock;
 thread_local! {
     static TRACK: Cell<bool> = const { Cell::new(false) };
     static CALLS: Cell<usize> = const { Cell::new(0) };
@@ -229,4 +230,36 @@ fn allocation_accounting_matches_requested_typed_storage() {
     );
     assert_eq!(result.err(), Some(Error::Domain));
     assert_eq!(arena.stats().persistent_calls, 0);
+}
+
+struct Clock { first:u64, second:u64, calls:Cell<u32> }
+impl Clock { fn new(first:u64,second:u64)->Self {Self{first,second,calls:Cell::new(0)}} }
+impl MonotonicClock for Clock {
+    fn now_ns(&self)->u64 { let call=self.calls.get(); self.calls.set(call+1); if call==0 {self.first}else{self.second} }
+}
+#[test]
+fn measured_cost_is_scoped_and_does_not_change_the_step() {
+    let (mut timed,mut arena)=build(32,16,0.25,9.81);
+    let (mut plain,_)=build(32,16,0.25,9.81);
+    let eta:Vec<_>=(0..32).map(|i|timed.domain().z0()+0.02*(i as f32*0.3).sin()).collect();
+    assert_eq!(timed.caps().cost_per_block_ms,None);
+    timed.set_surface(&eta).unwrap(); plain.set_surface(&eta).unwrap(); arena.seal();
+    let clock=Clock::new(10_000,1_510_000);
+    let (r,count)=measured(||timed.step_measured(0.002,500,&Jobs,&clock));
+    assert_eq!(count,0); assert_eq!(clock.calls.get(),2);
+    assert_eq!(r.unwrap(),plain.step(0.002,500,&Jobs).unwrap());
+    assert_eq!(timed.caps().cost_per_block_ms,Some(1.5));
+    assert_eq!(timed.velocity_u(),plain.velocity_u());
+    assert_eq!(timed.velocity_w(),plain.velocity_w()); assert_eq!(timed.pressure(),plain.pressure());
+    timed.set_surface(&eta).unwrap(); assert_eq!(timed.caps().cost_per_block_ms,None);
+    for (first,second) in [(1,1),(2,1)] {
+        timed.step_measured(0.002,1,&Jobs,&Clock::new(first,second)).unwrap();
+        assert_eq!(timed.caps().cost_per_block_ms,None);
+    }
+    let r=timed.step_measured(0.002,1,&Jobs,&Clock::new(0,500_000)).unwrap();
+    assert!(r.degraded); assert_eq!(timed.caps().cost_per_block_ms,Some(0.5));
+    assert!(timed.step_measured(0.,1,&Jobs,&Clock::new(0,100)).is_err());
+    assert_eq!(timed.caps().cost_per_block_ms,None);
+    timed.step_measured(0.002,1,&Jobs,&Clock::new(0,100)).unwrap();
+    timed.step(0.002,1,&Jobs).unwrap(); assert_eq!(timed.caps().cost_per_block_ms,None);
 }

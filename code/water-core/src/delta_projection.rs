@@ -37,7 +37,7 @@
 //! `g_eff` entre par la **condition de couvercle** : `p_dyn = ρ·g_eff·(η(x) − z₀)` à
 //! `z = z₀`, où `η` est l'élévation de surface **fournie** (W peut la publier). Elle est
 //! donc portante, et non décorative.
-use crate::host::{AllocError, HostServices, JobSystem};
+use crate::host::{AllocError, HostServices, JobSystem, MonotonicClock};
 
 /// Domaine local, cellules carrées. `z₀ = nz·dx` est le couvercle.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -60,6 +60,10 @@ impl Domain {
 /// `None` indique une borne non reçue ; aucune plage de stabilité n'est inventée.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Caps {
+    /// Coût du dernier `step_measured` réussi, en ms, pour le domaine entier.
+    /// S202 : un domaine = un bloc de banc ; pas de moyenne entre blocs fictifs.
+    /// `None` avant mesure, après modification des entrées, pas non mesuré ou refus.
+    pub cost_per_block_ms: Option<f32>,
     pub supports_substitutive: bool,
     pub supports_air_phase: bool,
     pub supports_moving_solid: bool,
@@ -122,6 +126,7 @@ pub struct Volume {
     saved_u: Vec<f32>,
     saved_w: Vec<f32>,
     saved_p: Vec<f64>,
+    last_cost_ms: Option<f32>,
 }
 
 impl Volume {
@@ -203,6 +208,7 @@ impl Volume {
             saved_u: vec![0.; nu],
             saved_w: vec![0.; nw],
             saved_p: vec![0.; c],
+            last_cost_ms: None,
         };
         v.cut();
         v.seal_isolated();
@@ -298,6 +304,7 @@ impl Volume {
 
     pub fn caps(&self) -> Caps {
         Caps {
+            cost_per_block_ms: self.last_cost_ms,
             // Aucun de ces trois-là n'est traité, et le dire est le rôle de ce type.
             supports_substitutive: false,
             supports_air_phase: false,
@@ -321,6 +328,7 @@ impl Volume {
             return Err(Error::NotFinite);
         }
         self.eta.copy_from_slice(eta);
+        self.last_cost_ms = None;
         Ok(())
     }
 
@@ -356,6 +364,7 @@ impl Volume {
         }
         self.u.copy_from_slice(u);
         self.w.copy_from_slice(w);
+        self.last_cost_ms = None;
         Ok(())
     }
 }
@@ -637,6 +646,7 @@ impl Volume {
     /// À zéro, advection et diagnostics restent exécutés ; `degraded` annonce
     /// la non-convergence, sans garantie sur le coût de ces phases.
     pub fn step(&mut self, dt: f32, max_iters: u32, jobs: &dyn JobSystem) -> Result<Report, Error> {
+        self.last_cost_ms = None;
         if !dt.is_finite() || dt <= 0. {
             return Err(Error::NotFinite);
         }
@@ -656,6 +666,21 @@ impl Volume {
             return Err(Error::NotFinite);
         }
         Ok(r)
+    }
+
+    /// Pas complet chronométré : sauvegarde, advection, pression, diagnostic et
+    /// contrôle numérique inclus. Configuration, dessin et I/O sont hors fenêtre.
+    /// Une horloge égale/reculant invalide la mesure, pas le résultat physique.
+    /// Coût observé uniquement : aucune garantie de respecter un budget futur.
+    pub fn step_measured(&mut self, dt: f32, max_iters: u32, jobs: &dyn JobSystem,
+        clock: &dyn MonotonicClock) -> Result<Report, Error> {
+        let start=clock.now_ns();
+        let result=self.step(dt,max_iters,jobs);
+        let end=clock.now_ns();
+        if result.is_ok() {
+            self.last_cost_ms=end.checked_sub(start).filter(|n|*n>0).map(|n|n as f32/1_000_000.);
+        }
+        result
     }
 }
 

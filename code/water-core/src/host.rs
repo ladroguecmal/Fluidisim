@@ -11,6 +11,13 @@ pub trait Sink {
     fn metric(&self, name: &str, value: f64);
 }
 
+/// Horloge monotone fournie par l'hôte, en nanosecondes depuis une origine arbitraire.
+/// Lecture sans allocation ni blocage ; aucune horloge système implicite dans le cœur.
+/// Cette horloge mesure un coût, elle ne remplace jamais `SimTime`.
+pub trait MonotonicClock {
+    fn now_ns(&self) -> u64;
+}
+
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct AllocStats {
     /// Octets alloués pendant la phase d'initialisation.
