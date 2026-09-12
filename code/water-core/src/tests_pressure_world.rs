@@ -186,9 +186,10 @@ fn world_refusals_are_atomic_and_context_checked_even_empty() {
         Err(WorldError::Capacity)
     );
     // S144 : ce lot mélangeait deux causes sous un seul nom. `0.0` et `NAN` sont des **limites
-    // inutilisables** — une faute d'entrée de l'hôte ; `envelope/2` est un vrai dépassement, et
-    // au point d'origine la pente réelle passe elle aussi au-dessus, d'où `Slope` et non
-    // `SlopeEnvelope` : le champ y est réellement trop raide pour cette limite-là.
+    // inutilisables** — une faute d'entrée de l'hôte ; `envelope/2` est un vrai dépassement.
+    // S205, ADR-128 : au point d'origine, c'était la pente **de B** ajoutée à celle de la
+    // pression qui passait au-dessus et faisait dire `Slope`. Jugée sur la pression seule, elle
+    // tient sous la limite : le verdict désigne désormais le majorant.
     for cap in [0.0, f32::NAN] {
         assert_eq!(
             f.sample_world_batch(&bound, &ctx, t, &[origin], cap, &mut scratch, &mut out),
@@ -206,7 +207,7 @@ fn world_refusals_are_atomic_and_context_checked_even_empty() {
             &mut scratch,
             &mut out
         ),
-        Err(WorldError::Slope)
+        Err(WorldError::SlopeEnvelope)
     );
     assert_eq!(out.map(bits), saved);
     let invalid = bg(origin, f32::NAN);
@@ -255,6 +256,10 @@ fn the_same_envelope_names_the_field_or_itself_depending_on_the_point_s144() {
     let f = Prepared::build(ctx, &half, &source(), t, &mut pool).unwrap();
     let b = bg(WorldPos::from_units(0, 0, 0), 0.01);
     let bound = BoundBackground::new(&b, FrameId(2), 3);
+    // S205, ADR-128 : le verdict se juge sur la pente **de la pression seule**. On la mesure
+    // sur un fond d'amplitude nulle ; les refus, eux, restent posés sur le fond de 0,01.
+    let calm = bg(WorldPos::from_units(0, 0, 0), 0.0);
+    let calm_bound = BoundBackground::new(&calm, FrameId(2), 3);
     let mut scratch = [WaterSample::default(); 1];
     let mut out = scratch;
 
@@ -262,7 +267,7 @@ fn the_same_envelope_names_the_field_or_itself_depending_on_the_point_s144() {
     // elle, ne dépend pas du point. On cherche un exemplaire de chaque.
     let mut pente = |x: f32| {
         f.sample_world_batch(
-            &bound,
+            &calm_bound,
             &ctx,
             t,
             &[WorldPos::from_metres(x as f64, 0.0, 0.0)],
@@ -294,6 +299,7 @@ fn the_same_envelope_names_the_field_or_itself_depending_on_the_point_s144() {
     // Une limite entre les deux pentes réelles, et sous l'enveloppe : les deux points sont
     // refusés — l'enveloppe dépasse partout — mais **pas pour la même raison**.
     let limite = 0.5 * (fort + faible);
+    assert!(limite < f.slope_envelope());
     let mut refus = |x: f32| {
         f.sample_world_batch(
             &bound,
@@ -341,9 +347,25 @@ fn normal_matches_spatial_difference_and_envelope_sees_cancellation() {
         let derivative = (out[pos].eta - out[neg].eta) / dx;
         assert!((derivative + out[0].normal[axis] / out[0].normal[2]).abs() < 2e-5);
     }
-    let local_slope =
-        (out[0].normal[0].powi(2) + out[0].normal[1].powi(2)).sqrt() / out[0].normal[2];
-    let envelope = out[0].steepness * core::f32::consts::PI;
+    // S205, ADR-128 : le budget ne porte plus B. Pente de la pression seule, mesurée sur un fond
+    // d'amplitude nulle, contre son propre majorant ; la raideur publiée, elle, garde B.
+    let calm = bg(WorldPos::from_units(0, 0, 0), 0.0);
+    let mut calm_out = [WaterSample::default(); 1];
+    let mut calm_scratch = calm_out;
+    f.sample_world_batch(
+        &BoundBackground::new(&calm, FrameId(2), 3),
+        &ctx,
+        t,
+        &points[..1],
+        1.0,
+        &mut calm_scratch,
+        &mut calm_out,
+    )
+    .unwrap();
+    let local_slope = (calm_out[0].normal[0].powi(2) + calm_out[0].normal[1].powi(2)).sqrt()
+        / calm_out[0].normal[2];
+    let envelope = f.slope_envelope();
+    assert!(out[0].steepness * core::f32::consts::PI > envelope);
     assert!(local_slope < envelope * 0.9);
     let cap = (local_slope + envelope) * 0.5;
     // S144, A208 : ce cas **est** celui qu'A208 décrivait, et cet essai le construisait déjà sans

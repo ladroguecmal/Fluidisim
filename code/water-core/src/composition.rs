@@ -12,7 +12,8 @@ pub enum Error {
     /// d'entrée**, pas verdict sur le champ — S144 l'a séparée de `Slope`, qui la portait.
     MaxSlope,
     /// La pente **réelle au point demandé** dépasse `max_slope` : le champ est vraiment trop
-    /// raide ici.
+    /// raide ici. Depuis S205 (ADR-128), celle des **perturbations** : la pente de B n'est ni
+    /// au budget ni dans ce verdict.
     Slope,
     /// La pente réelle au point tient, et seule la **somme des majorants** dépasse. Ce n'est pas
     /// la pente qui refuse, c'est l'enveloppe : emprise publiée, spectre, ou marge acceptée
@@ -191,10 +192,10 @@ mod tests {
     /// propre cause.** Un nom qu'aucune entrée ne produit serait une promesse vide ; un nom que
     /// deux causes produisent est le fourre-tout qu'ADR-082 démonte.
     ///
-    /// Le montage est minimal — journal vide, aucun champ — parce que les trois cas ne tiennent
-    /// qu'au fond : `steepness` porte le majorant, la normale porte la pente réelle, et les deux
-    /// sont indépendants dans un `WaterSample`. C'est exactement la situation d'A208, en trois
-    /// lignes au lieu d'une emprise de pression.
+    /// Le montage était minimal — journal vide, aucun champ — parce que les trois cas tenaient
+    /// au fond : `steepness` portait le majorant, la normale la pente réelle. **S205, ADR-128** :
+    /// B est sorti du budget, les verdicts `Slope` et `SlopeEnvelope` se construisent désormais
+    /// avec un champ d'impact, et une pente de B de 0,5 est vérifiée sans effet sur eux.
     #[test]
     fn each_slope_verdict_is_reachable_and_names_its_own_cause_s144() {
         let mut slots = [None; 1];
@@ -218,22 +219,38 @@ mod tests {
             );
         }
 
-        // 2. La pente réelle au point dépasse : le champ est vraiment trop raide ici.
+        // S205, ADR-128 : les cas 2 et 3 tenaient au fond seul (`steepness` et normale de B).
+        // B est sorti du budget : une mer raide n'est plus un refus, et ces deux verdicts ne sont
+        // plus atteignables par B. Ils le sont par la perturbation, ci-dessous.
+        let raide = compose(fond(0.5, 0.5), &j, vide(), FrameId(0), 0, p, t, 0.1).unwrap();
+        assert_eq!(raide.steepness.to_bits(), 0.5f32.to_bits(), "la raideur de B reste publiée");
+
+        let mut slots = [None; 1];
+        let mut jw = Journal::new(0, &mut slots);
+        jw.confirm(0, cause(1), e(1)).unwrap();
+        let champ = [field(e(1))];
+        let limite = 0.9 * champ[0].slope_max();
+        let t0 = SimTime(0);
+
+        // 2. La pente réelle **de la perturbation** au point dépasse : à la naissance, en
+        //    r = 0,2062 λ, elle atteint `slope_max` (S139). Le champ est vraiment trop raide ici.
         assert_eq!(
-            compose(fond(0.5, 0.5), &j, vide(), FrameId(0), 0, p, t, 0.1).err(),
+            compose(fond(0.0, 0.0), &jw, &champ, FrameId(0), 0, [0.2062 * 4.0, 0.0], t0, limite)
+                .err(),
             Some(Error::Slope)
         );
 
-        // 3. La pente au point tient, seul le majorant dépasse : l'enveloppe est en cause. Même
-        //    `steepness` qu'au cas 2, donc le même budget consommé — seule la pente réelle change.
+        // 3. Même budget, au centre : la pente de la perturbation y est nulle par symétrie, seul
+        //    le majorant dépasse. Et une pente de B de 0,5 au même point n'y change rien.
         assert_eq!(
-            compose(fond(0.5, 0.0), &j, vide(), FrameId(0), 0, p, t, 0.1).err(),
+            compose(fond(0.5, 0.5), &jw, &champ, FrameId(0), 0, [0.0, 0.0], t0, limite).err(),
             Some(Error::SlopeEnvelope)
         );
 
-        // 4. Et sous la limite, le montage passe : les trois refus ci-dessus tiennent chacun à un
-        //    seul écart par rapport à celui-ci.
-        compose(fond(0.01, 0.0), &j, vide(), FrameId(0), 0, p, t, 0.1).unwrap();
+        // 4. Et sous la limite, le montage passe : les refus ci-dessus tiennent chacun à un seul
+        //    écart par rapport à celui-ci.
+        compose(fond(0.5, 0.5), &jw, &champ, FrameId(0), 0, [0.0, 0.0], t0, champ[0].slope_max())
+            .unwrap();
     }
     #[test]
     fn sums_physical_values_and_rebuilds_normal() {

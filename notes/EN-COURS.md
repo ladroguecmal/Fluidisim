@@ -90,7 +90,7 @@ publié, pas une erreur de requête (ADR-127 D7 : pas de fonctionnalité retiré
 - [x] **P1** — état réel, décision de conception, plan seul.
 - [x] **P2** — code : quatre sites, budget = perturbations seules, nommage sur leur pente
  réelle, publication inchangée ; documentation de `slope_floor` (exact) ; compilation.
-- [ ] **P3** — essais : rejouer water-core, trier **chaque** échec (attente liée à B dans le
+- [x] **P3** — essais : rejouer water-core, trier **chaque** échec (attente liée à B dans le
  budget → réécrite avec cas W et motif écrit ; autre → défaut à corriger) ; nouveaux essais :
  mer S201 Hs 1,5 composable (journal vide et avec impact) par `compose` et `mixed` ;
  `slope_floor` exact des deux côtés ; verdicts `Slope`/`SlopeEnvelope` atteints par W seul.
@@ -115,3 +115,20 @@ sortie (le refus ne le garantissait plus). `Background::differential_slope_envel
 seul usage = budget différentiel ; son assertion d'essai remplacée par l'équivalence des deux
 chemins au plancher exact (`slope_floor` et son prédécesseur flottant). Compilation sans
 avertissement. Essais non encore rejoués.
+
+P3 : premier passage **7 échecs / 246**, tous triés, **aucun hachage ni valeur publiée** en
+cause. (1) garde I-18 : noms `bound`/`envelope` → `budget` dans les trois budgets, liste
+`SITES_CONNUS` mise à jour avec motif. (2) `composition::each_slope_verdict…` : cas 2/3
+tenaient à B seul → reconstruits avec un champ d'impact (r = 0,2062 λ à la naissance pour
+`Slope`, centre pour `SlopeEnvelope`), et une pente de B de 0,5 vérifiée sans effet.
+(3) pression `world_refusals…` : `Slope` → `SlopeEnvelope` — la pente de B (0,00628) faisait
+passer la somme au-dessus ; la pression seule tient. (4) `the_same_envelope…` : balayage de la
+pente mesuré sur fond d'amplitude nulle, refus posés sur le fond de 0,01. (5)
+`normal_matches…cancellation` : plafond entre pente de la pression seule et son majorant.
+(6) `mixed_rejects…` : limite sans terme de B ; nom accepté `Slope|SlopeEnvelope`, atomicité
+conservée. (7) `slope_floor_refuses…` : « au-dessus c'est B qui décide » remplacé par
+« au plancher et au-dessus tout lot passe » (1 à 3 points, trois limites). Plus
+`differential_slope_envelope` retirée (P2) et son assertion remplacée par l'équivalence des
+deux chemins au plancher exact. **Neuf** : `reference_sea_s201_composes_with_an_impact_s205`.
+Après réécriture : **246 réussis + 1 neuf**, deux ignorés (lib). Commentaires de doc des
+erreurs `Slope` mis à jour dans les trois modules.

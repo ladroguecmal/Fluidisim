@@ -428,11 +428,13 @@ fn mixed_rejects_context_time_capacity_domains_and_total_slope_atomically() {
             sample_world_batch(&bound, &wrong, Some(p), t, &[], 0.1, &mut work, &mut out),
             Err(Error::Context)
         );
-        let base = b.eval(points[0], t).unwrap().steepness * std::f32::consts::PI;
-        let limit = base + impact.slope_max().max(p.slope_envelope());
+        // S205, ADR-128 : la limite ne contient plus la raideur de B, qui n'est plus au budget.
+        let limit = impact.slope_max().max(p.slope_envelope());
         // Chaque contribution séparée tient, leur somme dépasse la même limite.
-        assert!(base + impact.slope_max() <= limit && base + p.slope_envelope() <= limit);
-        assert_eq!(
+        assert!(impact.slope_max() <= limit && p.slope_envelope() <= limit);
+        assert!(impact.slope_max() + p.slope_envelope() > limit);
+        // Le nom dépend de la pente des perturbations au point ; le lot est refusé en entier.
+        assert!(matches!(
             sample_world_batch(
                 &bound,
                 i,
@@ -443,8 +445,8 @@ fn mixed_rejects_context_time_capacity_domains_and_total_slope_atomically() {
                 &mut work,
                 &mut out
             ),
-            Err(Error::SlopeEnvelope)
-        );
+            Err(Error::SlopeEnvelope) | Err(Error::Slope)
+        ));
         assert_eq!(out.map(|s| vals(s).map(f32::to_bits)), before);
         sample_world_batch(&bound, i, Some(p), t, &points, 0.1, &mut work, &mut out).unwrap();
         assert_ne!(out.map(|s| vals(s).map(f32::to_bits)), before);
@@ -740,7 +742,120 @@ fn admits_matches_the_geometric_refusals_of_the_request() {
         );
     })
 }
-/// S120 : le plancher de pente refuse tout lot non vide, et ne prétend rien au-dessus.
+/// S205, A245, ADR-128 : **la mer de référence S201 se compose.** Recette JONSWAP N32, Hs 1,5 m,
+/// Tp 6 s : borne L1 de B 0,6082 > π/7. Avant ADR-128, tout lot était refusé avant même le
+/// premier impact. Désormais : admis, raideur de B toujours publiée, budget de l'impact toujours
+/// appliqué — juste sous `slope_max`, le lot est refusé comme avant.
+#[test]
+fn reference_sea_s201_composes_with_an_impact_s205() {
+    use crate::background_spectrum::{bake as bake_sea, Recipe as SeaRecipe};
+    use crate::impact_field::BREAKING_SLOPE;
+    let cooked = bake_sea(SeaRecipe {
+        sea: SeaState {
+            hs: 1.5,
+            tp: 6.0,
+            theta_turns: 0.12,
+            components: 32,
+            graine: 201,
+        },
+        gravity: 9.81,
+        gamma: 3.3,
+        min_ratio: 0.5,
+        max_ratio: 4.0,
+        spread_turns: 0.25,
+    })
+    .unwrap();
+    assert_eq!(cooked.hash(), 0x7e5c_c322_75cc_ce4e, "recette de l'image S201");
+    let mut alloc = Host;
+    let services = Host;
+    let b = Background::from_spectrum(
+        &mut HostServices {
+            alloc: &mut alloc,
+            jobs: &services,
+            sink: &services,
+        },
+        &cooked,
+        world(0.0, 0.0),
+    )
+    .unwrap();
+    let event = WaveEvent::impact(Impact {
+        id: 205,
+        frame: FrameId(7),
+        cell: 9,
+        birth: SimTime(0),
+        ttl_us: 4_000_000,
+        position: [0.0, 10.0, 0.0],
+        energy_j: 164.0,
+        wavelength_m: 3.35,
+        direction_turns: 0.0,
+        anisotropy: 0.0,
+        displaced_l: 0.0,
+        material: 0,
+        origin: Origin::Server,
+        above_surface: true,
+    })
+    .unwrap();
+    let mut records = [None; 1];
+    let mut journal = Journal::new(0, &mut records);
+    journal
+        .confirm(
+            0,
+            Cause {
+                entity: 1,
+                command: 1,
+                emission: 0,
+            },
+            event,
+        )
+        .unwrap();
+    let mut ctx = context();
+    ctx.medium.max_slope = BREAKING_SLOPE;
+    let mut pool = [const { None }; 1];
+    let impacts = Prepared::<64>::build(&journal, &mut pool, ctx).unwrap();
+    let impact = RadialImpact::<64>::new(event, ctx.medium, ctx.domain).unwrap();
+    let bound = BoundBackground::new(&b, FrameId(7), 9);
+    let t = SimTime(3_000_000);
+    let xy = [[0.5f32, 10.0], [3.0, 12.0], [-6.0, 4.0]];
+    let points = xy.map(|p| world(p[0] as f64, p[1] as f64));
+    let floor_b = b.eval(points[0], t).unwrap().steepness * core::f32::consts::PI;
+    assert!(floor_b > BREAKING_SLOPE, "la mer S201 dépasse seule la limite : {floor_b}");
+    assert_eq!(slope_floor(&impacts, None).to_bits(), impact.slope_max().to_bits());
+
+    let mut work = [WaterSample::default(); 3];
+    let mut out = work;
+    sample_world_batch(&bound, &impacts, None, t, &points, BREAKING_SLOPE, &mut work, &mut out)
+        .unwrap();
+    let mut single = work;
+    let mut scratch = work;
+    impacts
+        .sample_world_batch(&bound, &points, t, BREAKING_SLOPE, &mut single, &mut scratch)
+        .unwrap();
+    for (n, p) in xy.iter().enumerate() {
+        let base = b.eval(points[n], t).unwrap();
+        let w = impact.sample(FrameId(7), 9, *p, t).unwrap();
+        // Valeurs publiées : B + W, et la raideur de B conservée dans `steepness`.
+        assert_eq!(out[n].eta.to_bits(), (base.eta + w.eta).to_bits());
+        assert_eq!(
+            out[n].steepness.to_bits(),
+            ((base.steepness * core::f32::consts::PI + impact.slope_max()) / core::f32::consts::PI)
+                .to_bits()
+        );
+        assert_eq!(single[n].eta.to_bits(), out[n].eta.to_bits());
+        assert_eq!(single[n].steepness.to_bits(), out[n].steepness.to_bits());
+    }
+    // Le budget de l'impact s'applique toujours, sur la mer raide comme ailleurs.
+    let below = f32::from_bits(impact.slope_max().to_bits() - 1);
+    assert!(matches!(
+        sample_world_batch(&bound, &impacts, None, t, &points, below, &mut work, &mut out),
+        Err(Error::Slope) | Err(Error::SlopeEnvelope)
+    ));
+    assert!(impacts
+        .sample_world_batch(&bound, &points, t, below, &mut single, &mut scratch)
+        .is_err());
+}
+/// S120 : le plancher de pente refuse tout lot non vide.
+/// S205, ADR-128 : **et il admet tout lot au-dessus** — la raideur de B n'est plus au budget,
+/// l'annonce devient exacte dans les deux sens.
 #[test]
 fn slope_floor_refuses_every_batch_below_it() {
     fixture(|b, impacts, p, impact| {
@@ -783,34 +898,26 @@ fn slope_floor_refuses_every_batch_below_it() {
             sample_world_batch(&bound, impacts, Some(p), t, &[], floor * 0.5, &mut work, &mut out),
             Ok(())
         );
-        // Au-dessus, c'est la raideur de B qui décide : le plancher ne promet rien. Le refus
-        // porte sur le majorant — la pente réelle au point tient à cette limite-là (S144).
+        // Jusqu'en S205 : « au-dessus, c'est la raideur de B qui décide », et `floor + base/2`
+        // était refusé. ADR-128 : **au plancher exactement, et au-dessus, tout lot passe**, même
+        // là où l'ancienne enveloppe (B comprise) dépassait la limite.
         let base = b.eval(points[0], t).unwrap().steepness * core::f32::consts::PI;
         assert!(base > 0.0);
-        assert_eq!(
-            sample_world_batch(
-                &bound,
-                impacts,
-                Some(p),
-                t,
-                &points[..1],
-                floor + base * 0.5,
-                &mut work,
-                &mut out
-            ),
-            Err(Error::SlopeEnvelope)
-        );
-        sample_world_batch(
-            &bound,
-            impacts,
-            Some(p),
-            t,
-            &points[..1],
-            floor + base * 2.0,
-            &mut work,
-            &mut out,
-        )
-        .unwrap();
+        for above in [floor, floor + base * 0.5, floor + base * 2.0] {
+            for n in 1..=3 {
+                sample_world_batch(
+                    &bound,
+                    impacts,
+                    Some(p),
+                    t,
+                    &points[..n],
+                    above,
+                    &mut work,
+                    &mut out,
+                )
+                .unwrap();
+            }
+        }
     })
 }
 /// S135, ADR-091 : le scénario que la décision rend possible. Un même événement de jeu produit

@@ -25,7 +25,7 @@ pub enum Error {
     Capacity,
     /// Paramètre `max_slope` inutilisable — faute d'entrée de l'hôte (S144).
     MaxSlope,
-    /// La pente réelle au point demandé dépasse `max_slope`.
+    /// La pente réelle **des perturbations** au point demandé dépasse `max_slope` (ADR-128).
     Slope,
     /// La pente au point tient ; seule la somme des majorants dépasse (A208, ADR-098).
     SlopeEnvelope,
