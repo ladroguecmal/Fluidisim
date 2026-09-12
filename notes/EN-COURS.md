@@ -68,7 +68,7 @@ les capacités et la portée précision/budget aux garanties effectives.
 - [x] **P1** — état réel, quatre copies961a2e5 propres, jeton et plan seuls.
 - [x] **P2** — supprimer les clones du pas, tampons de restauration préalloués,
   comptabilité exacte et dimensions contrôlées ; conserver les opérations numériques.
-- [ ] **P3** — compteur global d'allocation avec contre-épreuve, refus après calcul
+- [x] **P3** — compteur global d'allocation avec contre-épreuve, refus après calcul
   atomique et récupération, nominal/dégradé/rejeu ; tests workspace et filtre S199.
 - [ ] **P4** — capacités honnêtes ; documenter précision et budget effectifs sans
   dérogation implicite, reçus/limites et A244/file. Pas de sélection δ.
@@ -84,3 +84,8 @@ Aucun solveur de production reçu. S199-2 flux coupés conservée dans la file.
 P2 : aucun clone dans project ; sauvegardes u/w/p préallouées, contrôle de fin
 et restauration sur refus. Octets f32/f64 corrigés, calculs de tailles checked.
 Huit tests historiques delta passent. Les nouveaux reçus globaux viennent en P3.
+
+P3 : trois tests intégration debug/release passent ; workspace342 réussis/cinq
+ignorés (246+3+93). Filtre release empreinte S199 inchangée0x0ad3f695685ca27a.
+Compteur global vérifié par allocation témoin, refus après overflow reçu avec
+récupération exacte. Mesures archivées, aucun autre seuil modifié.
