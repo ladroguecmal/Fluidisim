@@ -58,7 +58,71 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S186 — terminée
+Session : S187 — en cours
+Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
+Objectif : S186-1/A50, le **réseau gradué en profondeur**. S186 a montré que l'erreur
+spatiale globale est **exactement** celle de la tranche la plus haute du bloc, et que les
+treize autres sur quatorze sont surrésolues d'un facteur pouvant atteindre vingt-trois.
+Un réseau isotrope dépense donc la même densité de nœuds là où le contenu est lisse et là
+où il ne l'est pas. Question mesurée : **à erreur égale, combien de nœuds un réseau gradué
+économise-t-il ?** Et avant elle, celle que S186 a laissée ouverte : **quelle part de
+l'erreur du haut vient de l'axe vertical ?** Si elle est horizontale, graduer en `z` ne
+réduit pas l'erreur — il ne réduit que le nombre de nœuds, ce qui reste le but.
+
+### Plan
+
+- [x] **P1** — état réel, jeton et plan seul.
+- [ ] **P2** — publier le protocole avant tout chiffre : attribution par axe, règle de
+      graduation **dérivée** de la mesure (équidistribution de `h²·∂²S`), la courbe
+      erreur/nombre de nœuds comme livrable, les réceptions, et ce que la mesure ne
+      prouvera pas.
+- [ ] **P3a** — étendre `support/perturbative_block.rs` **sans toucher au chemin
+      isotrope** : réseau à pas par axe, puis réseau à indices quelconques par axe.
+      Réception : le chemin général doit reproduire le chemin uniforme **en bits**, et
+      S185/S186 doivent rendre leurs empreintes publiées (`0x39567a1d4bc2ba4c`,
+      `0x0e743846d4656870`).
+- [ ] **P3b** — attribuer l'erreur par axe, puis construire la graduation depuis le profil
+      mesuré et relever la courbe iso-erreur. Relever.
+- [ ] **P4** — recevoir dans un document de validation ; angles, leçons, et **ADR si une
+      décision de conception en sort** — un réseau d'échantillonnage gradué est un contrat
+      pour le consommateur, pas un détail de banc.
+- [ ] **P5** — rituel de fin (REPRISE.md §6).
+
+### Notes de reprise
+
+S187 : master beadbf0 propre, quatre copies au même commit ; 117 ADR / 230 angles /
+266 leçons / 18 invariants / 6 SPEC / 23 cas. Démarrage à froid, copie principale.
+
+**Entrées déjà acquises, ne pas les refaire.** S186 donne, au même montage et au même
+bloc : l'erreur spatiale isotrope (r=2 → 2,54 % ; r=4 → 13,60 % ; r=8 → 32,96 %), son
+lieu (intégralement la tranche k=14, z=−0,80), le profil `k_eff` par tranche et par axe
+(horizontal 0,37→0,79 rad/m du fond vers le haut, vertical 0,496→1,166), et `max|S|` par
+tranche (1,45e-5 → 4,14e-5, longueur d'atténuation 3,1 m). Le plancher de la référence
+est 0,386 % et il ne bouge pas : c'est la même référence.
+
+**La graduation se dérive avant de se coder.** L'erreur d'une interpolation linéaire vaut
+`≈ (1/8)·Σ_axes h_axe²·|∂²S/∂x_axe²|`. Égaliser la contribution d'une tranche à l'autre
+demande donc `h_z(z) = C/√|∂²_z S(z)|`, c'est-à-dire de placer les nœuds à **incréments
+égaux de `Φ(z) = ∫ √|∂²_z S| dz`**. Le nombre de nœuds `N` fixe `C` ; balayer `N` donne la
+courbe. Avec les chiffres de S186, `|∂²_z S| = k_eff_z²·max|S|` passe de 3,83e-6 (k=2) à
+4,84e-5 (k=13), soit un rapport **12,6** : le pas vertical profond peut être **√12,6 ≈ 3,5
+fois** celui du haut. À pas horizontal `r = 2` et huit nœuds verticaux uniformes (512
+nœuds), la graduation devrait tenir en quatre ou cinq — soit **−37 % de nœuds à erreur
+égale**, si la tranche haute reste la contrainte.
+
+**Piège anticipé.** Si l'erreur de la tranche haute est majoritairement **horizontale**,
+aucune graduation verticale ne l'abaisse — et le gain est alors uniquement en nœuds, à
+erreur inchangée. C'est précisément pourquoi l'attribution par axe passe **avant** la
+graduation, et non après : elle décide si la courbe se lit comme un gain d'erreur ou comme
+un gain de coût.
+
+**Second piège.** Le réseau gradué ne doit pas changer le chemin isotrope : S184 et S186
+en dépendent, et S186 a publié deux empreintes. Écrire à côté, pas dedans, et vérifier
+par exécution — c'est ce que S185 et S186 ont fait tous les deux.
+
+---
+
+Session précédente : S186 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : S185-1/A50, **composer** l'erreur spatiale et l'erreur temporelle sur le
 **même** véhicule 3D. S170 a mesuré la décimation spatiale en 1D sur une source figée,
