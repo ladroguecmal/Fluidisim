@@ -47,6 +47,8 @@ pub mod host;
 pub mod phase;
 pub mod shallow;
 pub mod types;
+/// δ — premier candidat volumétrique (S199, B3). Voir CANDIDAT-DELTA-S199.
+pub mod volume;
 
 pub use background::{Background, Component, SeaState};
 pub use body::{FloatingBox, Milieu};

@@ -70,17 +70,43 @@ sous la règle des deux maillons (§6.8), et non par le chaînage.
 - [x] **P2** — déclarer **avant tout code** : quel candidat, **pourquoi celui-là**, ce qu'il
       doit satisfaire (les deux filtres d'ADR-038 §4, le contrat d'ADR-007 §2, I-03/I-06/I-07),
       et ce qu'il ne traitera pas — les quatre scénarios de B3 restent hors de portée.
-- [>] **P3a** — construire le noyau dans `code/water-core/src/` : grille décalée, opérateurs
+- [x] **P3a** — construire le noyau dans `code/water-core/src/` : grille décalée, opérateurs
       d'ordre deux, fond coupé, surface libre par fluide fantôme, projection de pression.
       **C'est l'étape qui fait avancer la couche.**
-- [ ] **P3b** — passer les deux filtres et recevoir : lac au repos à l'arrondi sur fond non
+- [x] **P3b** — passer les deux filtres et recevoir : lac au repos à l'arrondi sur fond non
       plat, ordre en espace sur trois résolutions, `g_eff` injectée, zéro allocation après
       `seal`, déterminisme, budget respecté.
-- [ ] **P4** — documenter ; ADR **seulement** si une décision durable est prise, et elle ne
+- [>] **P4** — documenter ; ADR **seulement** si une décision durable est prise, et elle ne
       doit pas préempter le verdict de B3.
 - [ ] **P5** — rituel de fin (§6), compteur `Maillons` mis à jour selon la règle.
 
 ### Notes de reprise
+
+P3 S199 : **`code/water-core/src/volume.rs` — la couche δ reçoit du code d'exécution pour
+la première fois depuis S161.** Huit réceptions unitaires + l'exemple `delta_filters`.
+**Filtre 1 : PASSÉ, et exactement.** Lac au repos sur fond coupé, 1000 pas : vitesse
+**nulle en bits**, à g = 1,62 / 9,81 / 24,79. Le procédé est la séparation
+`p = p_hydro + p_dyn` avec `p_hydro` analytique jamais différenciée — la gravité n'entre
+pas dans la quantité de mouvement, donc aucune annulation n'est demandée à deux termes
+discrets. Aussi reçus : zéro allocation après `seal` (I-06), déterminisme bit à bit,
+budget respecté avec `degraded` annoncé, divergence < 1e-5, refus atomiques, `Caps` qui
+déclare ses trois `false`.
+**Filtre 2 : ÉCHOUÉ, et le défaut est localisé.** Fond **plat** : ordre **1,947**, résidu
+de Richardson 0,025 % — l'opérateur intérieur et le couvercle **sont** d'ordre deux.
+Fond **découpé** : ordre **0,90**. ADR-038 §4 dit qu'un ordre un ne passe pas C04.
+**Deux hypothèses testées, la première fausse** : (1) j'ai cru que la mantisse f32 du
+solveur de Poisson limitait — passé le champ de pression en f64, les valeurs n'ont **pas
+bougé** (2,264122231e-4 contre 2,264121986e-4). Faux, et la mesure l'a dit. Le f64 est
+conservé quand même, il est correct. (2) la géométrie en escalier : le premier jet prenait
+`max(b[i−1],b[i])` pour la face verticale et un tout-ou-rien pour l'horizontale ; les
+triplets ne **convergeaient pas du tout**, incréments de signes opposés. Fond rendu
+**linéaire par morceaux** (arêtes interpolées, fraction d'ouverture en forme fermée) → la
+convergence revient, à l'ordre un.
+**Cause restante, identifiée et non corrigée** : la vitesse est stockée au **centre
+géométrique** de la face, alors que le flux demande sa moyenne sur la **partie ouverte** ;
+les deux diffèrent d'un O(dx) dès que l'ouverture est partielle. C'est le point à traiter
+pour un bord d'ordre deux.
+Empreinte `0x0ad3f695685ca27a`.
 
 P2 S199 : protocole dans CANDIDAT-DELTA-S199. **Argument de choix** : le noyau à projection
 n'est **aucune** des cinq familles, c'est ce que trois d'entre elles partagent (FLIP et APIC
