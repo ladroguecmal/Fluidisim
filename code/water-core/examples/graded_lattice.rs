@@ -18,7 +18,7 @@ mod montage;
 mod snaps;
 
 use block::{
-    axes_indices, axis_indices, indexed_count, interior_points, lattice_points,
+    anchored_indices, axes_indices, axis_indices, indexed_count, interior_points, lattice_points,
     lattice_points_indexed, load_direct, scatter, scatter_indexed, Block, DX, RATIOS,
 };
 use snaps::snapshots;
@@ -215,14 +215,11 @@ fn overshoot_indices(want: usize) -> Option<Vec<usize>> {
         .find(|v| v.len() == want)
 }
 
-/// Indices verticaux uniformes couvrant `[1, SIDE-2]` avec `want` nœuds. Témoin naïf 1.
+/// Témoin naïf 1 : indices verticaux uniformes **ancrés**. Depuis S188 la définition vit
+/// dans `support/` — les deux sessions doivent poser le même réseau, sinon leurs mesures
+/// ne se comparent plus (L137). L'empreinte de cette session le vérifie.
 fn uniform_indices(want: usize) -> Vec<usize> {
-    let span = (SIDE - 3) as f64;
-    let mut out: Vec<usize> = (0..want)
-        .map(|a| 1 + (a as f64 * span / (want - 1) as f64).round() as usize)
-        .collect();
-    out.dedup();
-    out
+    anchored_indices(SIDE, want)
 }
 
 /// Indices verticaux à pas géométrique de raison 2, fin en haut. Témoin naïf 2 : une

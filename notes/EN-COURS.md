@@ -81,7 +81,7 @@ seconde est la vraie :
       nœuds identique** à S186, la grille `r × mode × c` rejouée à l'identique, les trois
       mêmes lois avec le **même critère déjà déclaré** `[0,80 ; 1,25]`, les réceptions, et
       ce que le rejeu ne prouvera pas.
-- [ ] **P3a** — sortir dans `support/` ce que S187 gardait local : les indices ancrés
+- [x] **P3a** — sortir dans `support/` ce que S187 gardait local : les indices ancrés
       uniformes. Rejouer `graded_lattice` et vérifier `0x6cf13183b4a240df`.
 - [ ] **P3b** — écrire `anchored_composition.rs` : la grille de S186, réseau ancré, même
       référence, mêmes métriques. Réceptions : `14³` ancré = réseau plein en bits, la
@@ -92,6 +92,12 @@ seconde est la vraie :
 - [ ] **P5** — rituel de fin (REPRISE.md §6).
 
 ### Notes de reprise
+
+P3a S188 : `anchored_indices(n, want)` posée dans `support/perturbative_block.rs` ;
+`graded_lattice` y pointe et rend **0x6cf13183b4a240df**, sa valeur publiée. Les deux
+autres empreintes du support sont vérifiées par la même occasion : `cadence_error`
+**0x39567a1d4bc2ba4c**, `composed_error` **0x0e743846d4656870** et sa sortie entière
+identique au `diff`. Les trois réceptions publiées tiennent après le déplacement.
 
 S188 : master 2d05c77 propre, quatre copies au même commit ; 118 ADR / 231 angles /
 267 leçons / 18 invariants / 6 SPEC / 23 cas. Démarrage à froid, copie principale.

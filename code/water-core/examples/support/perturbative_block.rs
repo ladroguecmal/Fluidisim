@@ -293,3 +293,17 @@ pub fn axes_indices(n: usize, r: [usize; 3]) -> [Vec<usize>; 3] {
 pub fn indexed_count(idx: &[Vec<usize>; 3]) -> usize {
     idx[0].len() * idx[1].len() * idx[2].len()
 }
+
+/// S188 : indices de mailles d'un réseau **ancré** — `want` nœuds couvrant `[1, n-2]`,
+/// arrondi au plus proche, doublons fusionnés. C'est la règle 1 d'ADR-118 : le premier et
+/// le dernier nœud se posent **sur** les mailles extrêmes du domaine, au lieu de déborder
+/// comme `axis_indices`. S187 mesurait cet écart à un facteur six ; S188 rejoue la
+/// composition dessus. Une seule définition pour les deux sessions (L137).
+pub fn anchored_indices(n: usize, want: usize) -> Vec<usize> {
+    let span = (n - 3) as f64;
+    let mut out: Vec<usize> = (0..want)
+        .map(|a| 1 + (a as f64 * span / (want - 1) as f64).round() as usize)
+        .collect();
+    out.dedup();
+    out
+}
