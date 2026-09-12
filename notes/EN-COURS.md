@@ -58,33 +58,49 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S195 — terminée
+Session : S196 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
-Objectif : S194-1, **`n` sources** — A240. ADR-123 chiffre le domaine de la superposition
-pour **deux** trains ; le nombre de paires croît comme `n²` et rien ne s'extrapole. C'est
-la seule limite d'ADR-123 qui touche l'architecture. **Option tranchée par l'utilisateur**
-contre la correction croisée quadratique, qui reste portée par la file active.
+Objectif : **A241** — le repli des harmoniques croisées sur les modes de train. S195 a
+mesuré que cette part décroît 4,85 fois moins vite que celle des modes propres au couplage
+et domine dès `n = 4`, si bien que la loi tombe **entre** les deux bornes dérivées sans
+qu'aucune ne l'encadre. Deux questions : le repli est-il bien la **cause**, et la loi
+tend-elle vers une **limite** quand `n` croît ?
 
 ### Plan
 
-- [x] **P1** — reprise, état réel (quatre copies au même commit), jeton et plan seuls.
-- [x] **P2** — dérivation et protocole **avant tout code** : décomposition du forçage
-  croisé à `n` termes, les deux régimes d'addition — cohérent contre dispersé — et leurs
-  prédictions **opposées**, les deux séries (cambrure totale fixée, cambrure par train
-  fixée), exigence de bande, jeux de phases déterministes, réceptions chiffrées dont la
-  **continuité avec S194** et la convergence sous la forme exigée par **L274**.
-- [x] **P3a** — banc `nl_sources_2d.rs` réutilisant `support/nl_surface.rs` sans le
-  modifier ; tests propres dont `n=1` à écart exactement nul, `M=1` à écart d'arrondi, et
-  reproduction du point `n=2` de S194.
-- [x] **P3b** — campagne : les deux séries × deux jeux de phases × `n = 2..6`, séparation
-  des mécanismes par la **durée**, convergence en `K` (ordre + Richardson), empreinte et
-  deux exécutions identiques.
-- [x] **P4** — documenter, propager A240/A50/B4 et la file ; ADR seulement si une décision
-  de projet est prise ; ne **pas** dériver de seuil de bascule W/δ.
-- [x] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes,
-  jeton `libre`, copies avancées sans suppression non prouvée.
+- [>] **P1** — état réel, jeton et plan seuls.
+- [ ] **P2** — protocole **avant tout code** : le montage de parité qui sépare le repli du
+      reste, ce qu'il contrôle et ce qu'il ne contrôle pas, les prédictions **falsifiables**
+      déclarées d'avance, la fraction de repli comme covariable mesurée, les réceptions.
+- [ ] **P3a** — banc `nl_fallback_2d.rs` réutilisant `support/nl_surface.rs` sans le
+      modifier ; tests propres dont le **décompte de repli par construction** pour les trois
+      familles, le cas nul, et la continuité avec S195 au point `n=6` dense.
+- [ ] **P3b** — campagne : axe « limite » sur la famille dense jusqu'à `n` grand, axe
+      « mécanisme » sur le couple pair/impair, convergence sous la forme de L274, bande
+      vérifiée par famille, deux exécutions identiques.
+- [ ] **P4** — verdict sur A241 : le repli est-il la cause, la loi a-t-elle une limite.
+      Documenter, propager la file ; ADR seulement si une décision de projet est prise.
+- [ ] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes, jeton
+      `libre`, copies avancées sans suppression non prouvée.
 
 ### Notes de reprise
+
+S196 : master 25206a8 propre, quatre copies alignées ; 123 ADR/241 angles/276 leçons.
+**Acquis à ne pas refaire.** S195 : série A (cambrure totale fixée) décroît en `n^-0,46`,
+série B (par train) croît en `n^0,75` ; les deux bornes dérivées donnaient −1 et 0 pour A.
+Le jeu de phases **ne tranche pas** (facteur 1,05 à 1,39) — une seule série de phases
+suffit donc ici, avec un point de contrôle à grand `n`. La bande ne déplace rien
+(`Q=32` contre `Q=24` : 0,0000 %), donc elle peut être **serrée** : c'est ce qui rend `n`
+grand abordable, le coût allant comme `Q²·(n+1)`.
+**Idée du montage, à éprouver en P2** : la parité sépare le repli du reste. Trains tous
+**impairs** → somme et différence de deux impairs sont paires, donc aucun terme croisé de
+paire ne retombe sur un mode de train : **repli nul**. Trains tous **pairs** → tout y
+retombe : **repli plein**. Même `n`, même cambrure totale, indices décalés de 1 seulement.
+**Piège déjà repéré** : les termes **triples** `k_i±k_j±k_k` de trois impairs sont impairs
+et retombent, eux. La parité ne supprime donc le repli que pour les termes de **paire**,
+qui dominent — à dire dans le protocole, pas à découvrir après.
+Stabilité vérifiée d'avance : `dt = T₁/400` reste sous `2,5/√(g k_Q)` tant que
+`k_Q/k_1 < 25300` ; aucune contrainte pratique.
 
 P5 S195 : rituel terminé. **123 ADR, 241 angles, 276 leçons, 18 invariants, 6 SPEC,
 23 cas**, vérifiés contre le dépôt. File plurielle relue (A211) : ligne A240 passée à

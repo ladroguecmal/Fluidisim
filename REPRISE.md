@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-12 21:49 +02:00
+JETON            : occupé
+Battement        : 2026-09-12 21:51 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
-Session en cours : aucune
+Session en cours : S196 — A241 : le repli des harmoniques croisées sur les modes de train
 Dernière session : S195 — `n` sources mesurées, A240 close, A241 ouverte
-Session suivante : S196 — A241 : densifier `n` et la bande, savoir si la loi tend vers une limite ; ou la correction croisée quadratique
+Session suivante : à fixer au rituel de fin ; relire la file plurielle
 
 *S195 a **changé de main en cours de route** : la session ouverte à 21:15 a été coupée par
 une limite d'usage sur un autre compte, et l'utilisateur l'a signalé. Le jeton disait donc
