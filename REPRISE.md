@@ -139,7 +139,7 @@ redemander non plus. L'ordre deux rend le bon profil et **la moitié** du décal
 fréquence, avec une fraction qui dépend du régime ; vérifier un profil ne reçoit pas un
 schéma tronqué en amplitude.
 
-En plus de l'action suivante, relire la [file active plurielle](docs/registres/QUESTIONS-OUVERTES.md#file-active-s193--2026-09-12) :
+En plus de l'action suivante, relire la [file active plurielle](docs/registres/QUESTIONS-OUVERTES.md#file-active-s194--2026-09-12) :
 A50/B4 et B3, forces/perception, A216/A217, A213, λ_cut/B2/coupure W–δ,
 bathymétrie, conformité multiplateforme, V/bancs restants, dossier de réunions.
 A211 est récurrente : un fil local ne remplace pas cette liste. Le §6.7 la porte.

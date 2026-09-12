@@ -104,6 +104,12 @@ conservation d'énergie sur 60 s ; coût pour 4096 paquets ; déterminisme crois
 
 ## B3 — Couche δ : technologie, coût et latence
 
+> **S194 — 2026-09-12 :** le couplage de deux trains est mesuré sur ce véhicule
+> (ADR-123). Ce lot n'apporte toujours **aucun candidat** aux quatre scénarios ci-dessous,
+> mais il ajoute une **contrainte de sélection** chiffrée : tout candidat qui additionne
+> des sources évoluées séparément hérite de l'écart d'ADR-123, et la voie de correction
+> passe par la part **quadratique** du forçage croisé, bornée et non cumulative.
+
 > **S193 — 2026-09-12 :** un véhicule x-z **non linéaire et dispersif** est reçu
 > contre Stokes (ADR-122, ordre `M=3`) ; il ne traite toujours aucun des quatre
 > scénarios complets ci-dessous — ni coque mobile, ni bathymétrie, ni coût CPU.
@@ -129,6 +135,17 @@ l'autorise (ADR-007 §3).
 
 ## B4 — Validité du régime perturbatif
 
+> **État actif S194 — 2026-09-12.** Couplage de deux trains mesuré, **ADR-123** :
+> la superposition indépendante tient sous 2 % en dessous d'une cambrure de **0,009** par
+> train en eau profonde, **5,4 périodes** à `0,0125`, moins d'une à `0,014`. Deux mécanismes
+> séparés sur leurs propres modes — part croisée de pente 1 et stationnaire, part de train
+> de pente 2 et croissante d'un facteur 4,1. `α` croît de **8,6 fois** vers le rivage quand
+> le désaccord de triade tombe de 4,9. Écart insensible au couple à 13 % près.
+> [COUPLAGE-DEUX-TRAINS-S194](COUPLAGE-DEUX-TRAINS-S194.md).
+> **A217 est close** ; A218 reçoit son cas profond dispersif. S193-1 réalisée ; suite
+> **S194-1** : `n` sources, ou la correction croisée quadratique. B4 complet, forces et
+> perception non reçus ; source S191 non branchée. Seuil 2 % inchangé.
+>
 > **État actif S193 — 2026-09-12.** Surface **non linéaire** dispersive reçue contre
 > Stokes : harmonique liée à **0,4555 %**, décalage de fréquence à **1,6454 %**, sous
 > 2 % ; ordres mesurés 2 en profondeur discrète et 4 en temps, bande saturée.

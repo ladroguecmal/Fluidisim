@@ -1668,7 +1668,7 @@ entrée par entrée. Le fil reprend ci-dessous.
   et allocations. Comparer àla surface àentrées identiques ; conditions/limites de
   mesure avant budget de consommation perturbative. BILAN-S145/BILAN-B4-S176 portés.
 
-## File active S193 — 2026-09-12
+## File active S194 — 2026-09-12
 
 *Renommée de « File active S190 » en S193 : le contenu est daté ligne par ligne, le titre
 suivait un numéro de session et vieillissait seul (A185 — un état sans date se lit au
@@ -1683,13 +1683,14 @@ action unique et doit être relue au rituel de fin (A211).
 
 | action / objet | état daté et ce qui reste | priorité / déclencheur |
 |---|---|---|
-| **S193-1 / A50 / B4 / A217** | **S193 : S192-1 réalisée**, surface non linéaire dispersive reçue Stokes (ADR-122) — `b₂` à 0,4555 % et décalage de fréquence à 1,6454 %, sous 2 % ; source S191 toujours non branchée, couplage non mesuré | prochaine action : deux trains de Stokes sur le véhicule M=3, écart somme/évolution de la somme, contre-épreuve M=1 exactement nulle (ADR-112) |
-| **B3 / δ** | **S193** : deux Saint-Venant 1D, bloc quantité de mouvement 3D, tranche potentielle linéaire S192 et tranche **non linéaire dispersive** S193 ; aucun solveur δ choisi | construire/recevoir le candidat qui permet la comparaison B4 ; le 2 % ne choisit pas une technologie, et ADR-122 ne choisit pas δ |
+| **S194-1 / A50 / B4** | **S194 : S193-1 réalisée**, couplage de deux trains mesuré (ADR-123) — superposition sous 2 % en dessous d'une cambrure de 0,009 par train, 5,4 périodes à 0,0125, moins d'une à 0,014 ; **A217 close** | prochaine action à instruire : **`n` sources** (A240, les paires croissent en `n²`) **ou** la correction croisée quadratique, chiffrée et bornée |
+| **B3 / δ** | **S194** : deux Saint-Venant 1D, bloc quantité de mouvement 3D, tranche linéaire S192, tranche non linéaire dispersive S193, couplage chiffré S194 ; aucun solveur δ choisi | construire/recevoir le candidat qui permet la comparaison B4 ; contrainte neuve d'ADR-123 sur tout candidat qui additionne des sources évoluées séparément |
 | **B4 forces / perception** | aucun reçu complet ; la métrique de vitesse S190 ne les remplace pas | après montage commun surface/solide ; protocole perceptif conserve ses participants réels requis |
-| **A216 / A217** | **S193** : coefficient S161 non expliqué ; véhicule non linéaire **et** dispersif désormais reçu (ADR-122), mais aucun couplage de deux trains mesuré ; ADR-112 interdit toujours d'en tirer la bascule | avec la comparaison couplée S193-1 ; ne pas dériver 0,02/0,24 comme seuil |
+| **A216** (A217 **close** en S194) | **S194** : A217 a sa réponse — la cambrure gouverne l'addition en eau profonde, plus la durée et le désaccord de triade ; A216, coefficient S161, reste inexpliquée | A216 avec un montage qui l'explique ; ne pas dériver 0,02/0,24 comme seuil, ADR-123 n'est pas une bascule |
+| **`n` sources / A240** | **S194** : deux trains mesurés ; le nombre de paires croît en `n²` et rien ne s'extrapole. C'est la limite la plus lourde d'ADR-123 | mesurer trois puis quatre trains à cambrure totale fixée, avant toute promesse sur un état de mer complet |
 | **A213 / omega f32** | remède identifié, non appliqué, réception S95 à renouveler s'il est retenu | lot propre de précision/horizon, indépendant de l'arbitrage B4 |
 | **λ_cut / B2 / coupure W–δ** | B2 partiel ; dispersion/dissipation et borne d'éponge A92 à assembler | choix du couple W/δ ; ne pas confondre réception source B4 et coupure |
-| **Bathymétrie / S116-2** | **S193** : fond plat seul ; et la faible profondeur non linéaire **n'a aucun oracle** dans le dépôt — Stokes y est hors domaine par Ursell aux amplitudes utiles (A234) | lot de construction propre ; il faut d'abord une référence cnoïdale ou Boussinesq, pas seulement un candidat |
+| **Bathymétrie / S116-2** | **S194** : fond plat seul, mais le couplage y est **8,6 fois plus fort** vers le rivage quand le désaccord de triade tombe ; et la faible profondeur non linéaire n'a aucun oracle de Stokes (A234) | lot de construction propre ; une frontière établie en eau profonde ne se transporte pas vers le rivage (ADR-123) |
 | **A98 / conformité multiplateforme** | aucune seconde cible testée par S190 ; debug/release locaux ne suffisent pas | réception sur seconde cible disponible ; I-03 maintenu |
 | **V / bancs restants** | V non construite ; B1/B2/B4 partiels, aucun banc complet, huit autres non lancés | arbitrer les lots système depuis cette file plutôt que prolonger par défaut la dernière sonde |
 | **A94/A95 / dossier de réunions** | quatorze fiches à traiter selon ADR-028 ; les qualifier en décisions internes ou faits externes | les intitulés « avant première ligne de code » ne bloquent pas rétroactivement le code autorisé depuis S20 |

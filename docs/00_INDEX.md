@@ -1154,7 +1154,7 @@ parfaitement stable ne pouvait pas distinguer.
 **État actif S192** : critère B4 fixé à 2 %, profil source reçu sous projection (S191),
 tranche x-z à surface libre linéaire reçue Airy (S192), comparaison non linéaire absente ;
 B1/B2/B4 restent partiels, aucun banc complet. Voir le résultat en tête de cet index
-et la [file plurielle](registres/QUESTIONS-OUVERTES.md#file-active-s193--2026-09-12).
+et la [file plurielle](registres/QUESTIONS-OUVERTES.md#file-active-s194--2026-09-12).
 
 
 **S129 :** [BILAN-CANDIDAT-ETENDU-S129](validation/BILAN-CANDIDAT-ETENDU-S129.md), cinétique

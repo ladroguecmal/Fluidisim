@@ -3,7 +3,35 @@
 2026-09-11. Action S175-1. État du code vérifié sur master0b37fd2 àl’amorce.
 Ce bilan confronte les reçus S163–S175 au contrat ; aucune nouvelle simulation lancée.
 
-## État actif — S193, 2026-09-12
+## État actif — S194, 2026-09-12
+
+**S193-1 réalisée : le couplage de deux trains est mesuré**, et
+[ADR-123](../adr/ADR-123-le-domaine-de-validite-de-la-superposition.md) en fixe le domaine.
+Additionner deux sources évoluées indépendamment tient sous les 2 % d'ADR-120 seulement en
+dessous d'une cambrure de **0,009** par train en eau profonde ; **5,4 périodes** à `0,0125`,
+**moins d'une période** à `0,014`. Loi mesurée `écart/A ≈ α s + β s² N` avec
+`α = 1,302602`, `β = 5,898728`, résidu à **1,82 %** de l'écart maximal. Les deux mécanismes
+dérivés avant mesure se séparent sur leurs propres modes : part croisée de pente `1,0041` et
+**stationnaire**, part de train de pente `2,0178` et **croissante d'un facteur 4,1**.
+Huit tests debug/release, deux campagnes release identiques, empreinte `0x4bc0934d630c2c50`.
+[COUPLAGE-DEUX-TRAINS-S194](COUPLAGE-DEUX-TRAINS-S194.md).
+
+**Ce que ce reçu change pour B4.** Le chemin perturbatif du projet a désormais un **domaine
+chiffré**, et il est étroit : à `s=0,0125` S193 recevait un train unique à `0,4555 %` quand
+**deux** trains superposés franchissent 2 % en 5,4 périodes — un facteur quarante à cambrure
+égale. **A217 est close** : la variable qui gouverne l'addition en eau profonde est la
+cambrure, plus deux variables qu'A217 ignorait, la durée et le désaccord de triade. L'écart
+est insensible à la géométrie du couple (13 % sur quatre configurations, contra-propagation
+comprise) et très sensible à la profondeur (`α` ×8,6 vers le rivage). Une voie de correction
+est chiffrée : l'écart est la réponse à un forçage croisé explicite, dont la part quadratique
+est bornée et non cumulative.
+**A50/B4 restent partiels** : `n` sources non mesurées (**A240**), obliquité non mesurée,
+fournisseur S191 non branché, forces et perception non reçues. Seuil 2 % maintenu, B3 non
+choisi, A216 inexpliquée.
+**Suite S194-1 : `n` sources, ou la correction croisée quadratique** — la file active porte
+les deux, et le choix est à instruire.
+
+## État historique — S193, 2026-09-12## État actif — S193, 2026-09-12
 
 **S192-1 réalisée : surface non linéaire dispersive reçue contre Stokes**, ordre en
 amplitude `M=3` acté par [ADR-122](../adr/ADR-122-l-ordre-en-amplitude-d-un-vehicule-non-lineaire.md).
@@ -77,7 +105,7 @@ seuil ; ni `N = 2`, ni seuil de bascule déduit du coefficient de S161.
 
 La suite active est **S190-1**, application du profil et du seuil avec projection,
 reprenant S189-1. Les autres chantiers restent portés dans la
-[file active S193](../registres/QUESTIONS-OUVERTES.md#file-active-s193--2026-09-12),
+[file active S194](../registres/QUESTIONS-OUVERTES.md#file-active-s194--2026-09-12),
 à relire au rituel de fin. Les suivis ci-dessous sont datés et historiques ; leurs
 mentions « il manque un critère » ont expiré avec ADR-120.
 

@@ -402,6 +402,18 @@ hypothèse à écarter est un terme source incomplet.
 
 ### 6.2 L'optimisation qui rend le coût acceptable
 
+> **Suivi S194 — 2026-09-12 :** [le couplage de deux trains est mesuré](../validation/COUPLAGE-DEUX-TRAINS-S194.md),
+> [ADR-123](../adr/ADR-123-le-domaine-de-validite-de-la-superposition.md). Additionner deux
+> sources évoluées indépendamment tient sous 2 % seulement en dessous d'une cambrure de
+> **0,009** par train en eau profonde ; à **0,0125** le budget est franchi en **5,4
+> périodes**, à **0,014** avant la fin de la première. **A217 reçoit sa réponse** : la
+> variable qui gouverne l'addition en eau profonde est la cambrure, avec la durée et le
+> désaccord de triade comme deux variables supplémentaires qu'A217 ignorait. L'écart varie
+> de 13 % au plus sur quatre géométries de couple : la cambrure décide, pas la géométrie.
+> **Voie de correction chiffrée** : l'écart est la réponse à un forçage croisé explicite,
+> et corriger sa seule part quadratique suffirait près de la frontière. `n` sources ne sont
+> pas extrapolables (A240).
+
 > **Suivi S193 — 2026-09-12 :** [surface non linéaire dispersive reçue contre Stokes](../validation/SURFACE-LIBRE-NL-S193.md),
 > ordre en amplitude **M=3** acté par [ADR-122](../adr/ADR-122-l-ordre-en-amplitude-d-un-vehicule-non-lineaire.md) :
 > harmonique liée à **0,4555 %** et décalage de fréquence à **1,6454 %**, sous 2 %.

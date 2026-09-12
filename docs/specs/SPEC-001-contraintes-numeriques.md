@@ -124,6 +124,32 @@ correction. Elle peut servir d'indication ; elle ne conclut pas. Voir **A235**.
 Ces expressions tronquées ne sont pas des solutions exactes à amplitude finie, et ce
 complément n'ajoute ni seuil de bascule ni modèle de production.
 
+## 1 quinquies. Résonance des triades de gravité — S194, hors runtime
+
+Grandeur employée par [COUPLAGE-DEUX-TRAINS-S194](../validation/COUPLAGE-DEUX-TRAINS-S194.md)
+pour prédire si l'interaction de deux trains est **bornée** ou **croissante en temps**.
+
+**Désaccord de triade** : `Δ = ω₁ + ω₂ − ω(k₁+k₂)`, les `ω` par la dispersion du milieu.
+Une interaction quadratique est séculaire — sa réponse croît linéairement en temps — si et
+seulement si `Δ = 0`. Sinon elle est **liée** : bornée et oscillante.
+
+**En profondeur infinie, aucune triade de gravité n'est résonante.** `ω=√(gk)` donne
+`ω(k₁+k₂)=ω₁+ω₂ ⟺ √(k₁+k₂)=√k₁+√k₂ ⟺ √(k₁k₂)=0`. L'interaction de différence ne l'est pas
+davantage : `(√k₂−√k₁)² = k₁+k₂−2√(k₁k₂) < k₂−k₁` dès que `k₂>k₁`. **L'argument est
+vectoriel** — `|k₁+k₂| ≤ |k₁|+|k₂|` alors que la résonance exigerait
+`|k₁+k₂| = |k₁|+|k₂|+2√(|k₁||k₂|)` — donc il vaut en deux dimensions horizontales et aucune
+obliquité n'y crée de triade résonante. L'interaction résonante la plus basse en eau
+profonde est le **quatuor**. Résultat classique (Phillips), redérivé ici.
+
+**En faible profondeur, la conclusion s'inverse.** Quand `ω ≈ √(gh)k` devient linéaire en
+`k`, `ω₁+ω₂ = √(gh)(k₁+k₂) = ω(k₁+k₂)` exactement : **toutes** les triades sont résonantes.
+C'est pourquoi la génération d'harmoniques y est forte, et pourquoi le couplage de deux
+trains y croît en temps au lieu d'être borné. Mesuré : `Δ` de `2,470` à `0,508` entre
+`h=8 m` et `h=0,25 m` fait croître le coefficient de couplage d'un facteur **8,6**
+(S194 §7.7).
+
+Ce complément n'ajoute ni seuil de bascule ni modèle de production.
+
 ## 2. Stabilité et coût d'un solveur volumétrique
 
 ### 2.1 CFL

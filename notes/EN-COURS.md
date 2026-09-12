@@ -79,7 +79,7 @@ nomme ; elle n'était pas possible avant S193. Aucun choix δ, aucun seuil de ba
 - [x] **P3b** — campagne : échelle d'amplitude, partage d'amplitude, croissance en
   temps, échelle M, couples résonant/non résonant, deux profondeurs ; ajustement
   `écart = α·s + β·s²·N` ; frontière des 2 % en (cambrure × durée) ; reproductibilité.
-- [ ] **P4** — documenter, propager A217/A216/A50/B4 et la file ; ADR seulement si une
+- [x] **P4** — documenter, propager A217/A216/A50/B4 et la file ; ADR seulement si une
   décision de projet est prise ; ne **pas** dériver de seuil de bascule W/δ.
 - [ ] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes,
   jeton `libre`, copies avancées sans suppression non prouvée.
@@ -163,4 +163,16 @@ en b2 du continu cause la sensibilite en K » est FAUSSE (0,4698 % vs 0,5026 % s
 le terme). Et un resultat de methode : le **maximum sur fenetre ne converge pas**
 (ordres -0,79/-0,37/+0,61) parce que c'est une statistique d'ordre sur un residu.
 Candidats P4 : ADR-123 (domaine de validite de la superposition), angles et lecons.
+
+P4 : ADR-123 acte le domaine de validite de la superposition et donne a ADR-112 sa
+grandeur. **A217 close** : la variable est la cambrure, plus deux variables qu'A217
+ignorait (duree, desaccord de triade). SPEC-001 gagne un 1 quinquies : non-resonance
+des triades en eau profonde, derivee et vectorielle, resonance generale en faible
+profondeur — c'est la provenance du mecanisme. SPEC-004, PLAN-BENCHMARK B3/B4 et
+BILAN-B4 actualises. File active renommee S194, ancres repointees, ligne neuve
+`n` sources / A240, ligne A216/A217 scindee (A217 close, A216 seule reste).
+Angles et lecons en P5 : A238 (le maximum d'un residu ne converge pas), A239
+(controle de non-artefact mal forme), A240 (`n` sources non extrapolables),
+L274 (juger l'ordre et non la taille du deplacement), L275 (une hypothese de cause
+numerique se teste en retirant le terme soupconne).
 
