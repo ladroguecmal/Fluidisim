@@ -58,27 +58,42 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S183 — terminée
+Session : S184 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : S182-1/A50, mesurer le coût complet et les allocations du consommateur
-différentiel — préparation, actualisation, évaluation, refus — contre le chemin de
-surface à entrées identiques, sur plusieurs lots et recettes.
+Objectif : S183-1/A50, mesurer la **consommation** perturbative de la source — un pas
+de solveur alimenté par `momentum_residual` contre le même pas sans elle, en 3D, puis
+ce que la décimation spatiale et la cadence temporelle achètent réellement en temps.
+S170 avait explicitement refusé de conclure là-dessus ; S183 fournit le chiffre manquant.
 
 ### Plan
 
-- [x] **P1** — état réel, jeton et plan seul.
-- [x] **P2** — publier les conditions de mesure et le protocole **avant** tout chiffre :
-      montages, lots, recettes, ce qui est chronométré et ce qui ne l'est pas, ce qu'un
-      écart mesuré ici ne prouve pas. Aucun budget cible.
-- [x] **P3** — écrire l'exemple de mesure (`differential_cost`) : préparation, évaluation
-      différentielle contre surface à entrées identiques, chemins de refus, empreinte
-      mémoire et allocations. Exécuter, relever.
-- [x] **P4** — recevoir les chiffres dans un document de validation, dire ce qu'ils ne
-      disent pas ; suite perturbative déclarée.
-- [x] **P5** — rituel de fin (REPRISE.md §6) : journal, angles, leçons, index, décomptes,
+- [>] **P1** — état réel, jeton et plan seul.
+- [ ] **P2** — publier le protocole **avant** tout chiffre : le véhicule, ce qui est
+      chronométré, la grille de décimation, et ce qu'un pas sans projection ne prouve pas.
+- [ ] **P3** — écrire le véhicule `perturbative_step` : pas explicite sur un bloc 3D,
+      avec et sans source, source par maille puis décimée. Recevoir la consommation
+      (valeurs finies, chemin exercé, témoin direct) et relever les coûts.
+- [ ] **P4** — chiffrer ce que la décimation achète, et dire ce que la part mesurée
+      devient si l'on ajoute une projection. Recevoir dans un document de validation.
+- [ ] **P5** — mesurer le gain disponible d'une évaluation **par réseau** plutôt que par
+      point, pour B seul : récurrence de phase contre appel par point. Sizer l'occasion,
+      sans la proposer comme acquise — une récurrence ne rend pas les mêmes bits (I-03).
+- [ ] **P6** — rituel de fin (REPRISE.md §6) : journal, angles, leçons, index, décomptes,
       jeton et copies.
 
 ### Notes de reprise
+
+S184 : master 0643cfb propre, quatre copies alignées ; 117 ADR/226 angles/263 leçons.
+Démarrage à froid, copie principale. **Entrées déjà acquises, ne pas les refaire :**
+S183 donne le coût de produire la source — 37 µs par point différentiel au montage de
+référence (B16, 1 impact, 192 créneaux), 30 µs pour la seule pression. S170 donne
+l'erreur de la décimation spatiale en 1D et dit explicitement qu'elle ne prouve « ni un
+gain de temps, ni le facteur 64 en 3D » ; S174 fait de même pour la cadence temporelle.
+S184 n'a donc **pas** à remesurer l'erreur de décimation : elle mesure le temps.
+Le dépôt n'a aucun véhicule 3D ; `delta`/`shallow`/`dispersif` sont 1D. Le véhicule de
+S184 est un exemple, pas de la bibliothèque — précédent `source_decimee.rs` (S170).
+Piège anticipé : un pas sans projection de pression sous-estime le coût du solveur et
+**sur**-estime donc la part de la source ; le dire, et borner la projection.
 
 P5 S183 : rituel terminé. **117 ADR, 226 angles, 263 leçons, 18 invariants, 6 SPEC,
 23 cas**, vérifiés contre le dépôt (117 fichiers ADR, 18 invariants, 6 SPEC, 23 cas)
