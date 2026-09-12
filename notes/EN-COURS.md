@@ -74,11 +74,11 @@ futur n'est pas disponible pour un événement inconnu. S185 mesure les modes **
 - [x] **P3a** — partager le véhicule : `support/` pour l'hôte, les paramètres de montage
       et le bloc. S185 doit évoluer **le même pas** que S184, sinon la comparaison ne vaut
       rien et deux copies divergeront (L137). Rejouer S184 et vérifier ses chiffres.
-- [>] **P3b** — écrire `cadence_error` : l'instant avance, le contrôleur est actualisé à
+- [x] **P3b** — écrire `cadence_error` : l'instant avance, le contrôleur est actualisé à
       chaque reconstruction. Réceptions : reproductibilité en bits, identité de
       prédiction champ/intégrale de l'erreur de source, cadence 1 identique à la
       référence. Relever.
-- [ ] **P4** — chiffrer le compromis cadence × mode, et le coût du mode lui-même.
+- [>] **P4** — chiffrer le compromis cadence × mode, et le coût du mode lui-même.
       Recevoir dans un document de validation.
 - [ ] **P5** — rituel de fin (REPRISE.md §6).
 
