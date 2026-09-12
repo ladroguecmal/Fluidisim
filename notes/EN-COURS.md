@@ -69,7 +69,7 @@ conformément à ADR-124. Pas de réparation générale du solveur δ.
  60Hz/2ms ou30Hz/4ms demandée, mesure indépendante de la réponse.
 - [x] **P2** — horloge monotone injectée et coût du dernier pas exposé dans Caps ;
  unité déclarée (domaine du candidat = bloc de banc), inconnu avant mesure ; tests.
-- [ ] **P3** — coût local sur16/32/64 et plafonds1/64/512, pas1/60, trois chauffes
+- [>] **P3** — coût local sur16/32/64 et plafonds1/64/512, pas1/60, trois chauffes
  et11 mesures par configuration ; médiane/max, résidu/dégradation, refus explicites.
  Comparer au profil retenu, pas transposer le coût source S183 en coût solveur.
 - [ ] **P4** — acter budget de travail avec origine, préciser absence de budget GPU
@@ -88,3 +88,8 @@ P2 : MonotonicClock injectée ; step_measured expose coût du domaine entier via
 None si inconnu/horloge invalide/refus ; pas de seuil appliqué au solveur.
 Quatre tests intégration passent, coût factice1,5ms vérifié, zéro allocation
 et sorties identiques au pas non chronométré. Pas de garantie temporelle inventée.
+
+P3 :9 configurations, médianes/max reçus,32x16≈0,59ms vs64x32≈4,79ms
+convergés ; début compilation refusé (trait Allocator absent), import corrigé.
+Workspace343/cinq ignorés ; quatre tests intégration debug/release. Mesures
+archivées, profil user60Hz/2ms appliqué aux comparaisons sans admission physique.
