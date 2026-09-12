@@ -4529,3 +4529,35 @@ Corollaire pratique, et il est bon marché : mesurer l'exposition de chaque bras
 `dispersion_error(upto)` — et la publier **à côté** du résultat, comme on publie une dérive
 d'énergie. Un écart de 120 % contre 112 % entre deux bras se voit alors avant de conclure,
 et non six sessions plus tard. Voir AUDIT-RESOLUTION-S197 §8.4, A242 et L277.
+
+## L279 — Corriger le canal ne sert à rien si l'auteur est en conflit d'intérêt
+
+*(S198)* S145 avait trouvé que deux des quatre recommandations de BILAN-S69 étaient restées
+lettre morte pendant soixante-seize sessions, non par désaccord mais parce qu'aucun canal ne
+les portait. Le remède choisi fut excellent et il a marché : faire porter la recommandation
+par la ligne `Session suivante` du jeton, que toute session lit à l'amorce. Le canal est
+devenu fiable — personne n'a plus jamais manqué cette ligne.
+
+Cinquante-trois sessions plus tard, la mesure dit que rien n'a changé : **trente-trois
+sessions sur trente-huit** ont pris pour sujet le reliquat de la précédente, et huit sessions
+consécutives n'ont produit **aucune ligne de système**. Le canal marchait. Le contenu qui y
+passait était le problème.
+
+Parce que cette ligne est écrite **par la session qui vient de finir**, à partir de ce
+qu'elle a laissé en plan. Elle a toujours raison localement : elle sait mieux que quiconque
+ce qui manque à son propre travail, et ce qui manque est passionnant. Elle n'a simplement
+aucune raison de proposer autre chose, et aucun moyen de savoir qu'elle est le trente-troisième
+maillon d'une chaîne. **Le conflit n'est pas de mauvaise foi : il est structurel, et la bonne
+foi ne le corrige pas.**
+
+Quand un mécanisme de transmission échoue, distinguer trois causes avant de choisir le
+remède : le canal n'existe pas, le canal existe et n'est pas lu, ou le canal est lu et
+**celui qui le remplit n'est pas en position de bien le remplir**. Les deux premières se
+corrigent en construisant ou en imposant une lecture ; la troisième demande de **retirer la
+plume**, au moins par intermittence. C'est ce que fait la règle des deux maillons
+(`REPRISE.md` §6.8) : elle ne juge pas la proposition, elle borne le nombre de fois où son
+auteur peut la faire seul.
+
+Corollaire pour tout garde-fou déjà en place : vérifier qu'il **mesure** son effet et pas
+seulement sa présence. A211 était « à éprouver » depuis S145 et personne ne l'avait éprouvée,
+faute d'un chiffre à regarder. Il en coûtait une commande `git` et vingt lignes de script.

@@ -2780,3 +2780,22 @@ ordre d'un triplet non monotone. Deux tests neufs les fixent. **A242 est close**
 laisse, c'est **L278**, et une réserve : le pas de temps `dt` n'a pas été audité, et S193 ne
 l'a pas été non plus — sa bande peuplée est la moins exposée des quatre, mais ce n'est pas
 une mesure.
+
+- **A243** *(sévérité 2, S198 ; ouverte)* — **Un corpus produit du travail de corpus, en
+  proportion de sa taille, et ce travail n'avance aucune couche.** Mesuré : **3,5 lignes de
+  markdown par ligne de code d'exécution** (63 343 contre 18 144), **235 angles morts** dont
+  la majorité trouvés dans nos propres écrits et non dans les documents sources, **23 notes
+  correctives** datées. Une part croissante du temps de session sert à relire, corriger,
+  propager et tenir à jour ce que les sessions précédentes ont écrit — l'entretien du rituel
+  de fin, la file plurielle, les décomptes, les notes de propagation. Chacun de ces gestes
+  est **justifié pris isolément** : ce sont eux qui ont permis à S197 de rattraper S196, et
+  aucun ne doit être supprimé à la légère. Mais leur **somme** croît avec le corpus, quand ce
+  que le projet doit encore construire, lui, ne décroît pas. Ce qui rend l'angle sérieux :
+  il ne se manifeste jamais comme un problème — chaque session se termine en ayant bien
+  travaillé — et il n'a pas de seuil d'alarme. Ce qui le borne : il est **mesurable en une
+  commande**, `sh outils/velocite.sh`. **Déclencheur** : relancer l'outil tous les dix
+  sessions ; si le ratio de prose monte ou si la part système reste sous 10 % sur deux ères
+  consécutives, le dire au rituel de fin et arbitrer — élaguer le corpus est alors un
+  travail légitime, au même titre qu'une mesure. Ne pas confondre cet angle avec un appel à
+  écrire moins : les sessions qui ont le plus produit de code sont aussi celles qui avaient
+  le mieux écrit leur protocole.

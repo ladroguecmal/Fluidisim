@@ -18,11 +18,11 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-12 23:27 +02:00
+JETON            : libre
+Battement        : 2026-09-12 23:37 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
-Session en cours : S198 — **ce qui ralentit le projet**, mesuré puis corrigé (demande de l'utilisateur)
-Dernière session : S197 — audit de résolution ; ADR-123 confirmée, le verdict de S196 tombe
+Session en cours : aucune
+Dernière session : S198 — vélocité mesurée ; règle des deux maillons, la file reprend la main
 Session suivante : S199 — **B3/δ : choisir et construire un premier candidat de solveur volumétrique** (avance la couche δ, arrêtée depuis S161)
 Maillons        : 0 — remis à zéro par la règle §6.8 ; la file a repris la main sur le chaînage
 
@@ -235,6 +235,25 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S198 — 2026-09-12 : ce qui ralentit le projet, mesuré puis corrigé.**
+[BILAN-VELOCITE-S198](docs/registres/BILAN-VELOCITE-S198.md), `outils/velocite.sh`, **à la
+demande de l'utilisateur**. Aucun ADR : la décision est **procédurale**, et appliquée.
+Le diagnostic tient dans le tableau ci-dessous. Le **mécanisme** qui l'a produit :
+**33 sessions sur 38** depuis S160 ont pris pour sujet le reliquat de la précédente, et
+**S190–S197 n'ont ajouté aucune ligne de bibliothèque** pour 4 509 lignes de bancs. A211
+l'avait nommé en S145 ; son remède a corrigé le **canal** — la ligne `Session suivante`,
+que tout le monde lit — sans toucher à l'**auteur** : cette ligne est écrite par la session
+qui finit, à partir de ses propres reliquats, et elle a toujours raison localement.
+**Quatre correctifs appliqués** : la **règle des deux maillons** (§6.8, compteur `Maillons`
+au jeton, remis à zéro dès qu'une couche avance), ce **tableau**, une **définition mesurable
+d'« avancer »**, et l'**outil** qui recalcule tout et fait foi contre les documents — il a
+d'ailleurs corrigé les premiers comptages de S198 dès son premier emploi.
+**L279** (corriger le canal ne sert à rien si l'auteur est en conflit d'intérêt) et **A243**
+(un corpus produit du travail de corpus). Ce qui n'est **pas** en cause : la méthode, qui a
+attrapé trois erreurs en trois sessions, ni la qualité du travail sur W.
+123 ADR,243 angles,279 leçons,18 invariants,6 SPEC,23 cas.
+**Suite S199 : B3/δ**, choisie **par la règle** et non par le chaînage.
 
 ### Les quatre couches — l'état qui commande tout le reste
 

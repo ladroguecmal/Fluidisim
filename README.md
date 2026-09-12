@@ -602,7 +602,7 @@ ignorés**, identiques au reçu. Restent ouverts : **`n` sources** (**A240**, le
 **Suite S195 — à instruire** : `n` sources, ou la correction croisée quadratique dont
 ADR-123 chiffre déjà le gain. File active relue et renommée S194 ; A217 retirée de sa ligne.
 **A238, A239, A240** et **L274, L275** :
-**123 ADR,242 angles,278 leçons,18 invariants,6 SPEC,23 cas**.
+**123 ADR,243 angles,279 leçons,18 invariants,6 SPEC,23 cas**.
 Voir [couplage S194](docs/validation/COUPLAGE-DEUX-TRAINS-S194.md), [mesures](docs/validation/COUPLAGE-DEUX-TRAINS-S194-MESURES.md) et [ADR-123](docs/adr/ADR-123-le-domaine-de-validite-de-la-superposition.md).
 
 **S195 :** `n` sources mesurées, **A240 close**, aucun ADR. À cambrure par train fixée —
@@ -640,3 +640,15 @@ prédiction *réfutante* de S196 lui-même. Le repli n'explique rien de mesurabl
 **L278** : une erreur systématique ne s'annule dans une comparaison que si les deux côtés la
 portent également — ce n'est pas son ampleur qui décide, c'est sa répartition. Aucun ADR.
 Voir [audit de résolution S197](docs/validation/AUDIT-RESOLUTION-S197.md).
+
+**S198 :** à la demande de l'utilisateur, **ce qui ralentit le projet** — mesuré, puis
+corrigé. Dernière session ayant ajouté du code d'exécution par couche : **B S181, W S182,
+δ S161, V jamais**. δ est arrêtée depuis 37 sessions, V n'a jamais commencé en 198, et
+**S190–S197 n'ont produit aucune ligne de bibliothèque** pour 4 509 lignes de bancs. Le
+mécanisme : **33 sessions sur 38** ont pris pour sujet le reliquat de la précédente — A211
+l'avait nommé en S145, mais son remède avait corrigé le *canal* sans toucher à l'*auteur*.
+Quatre correctifs appliqués, dont la **règle des deux maillons** et `outils/velocite.sh`,
+qui recalcule tout et fait foi contre les documents. **L279** : corriger le canal ne sert à
+rien si l'auteur est en conflit d'intérêt. **A243** : un corpus produit du travail de corpus.
+Aucun ADR. Suite : **B3/δ**, choisie par la règle et non par le chaînage.
+Voir [bilan de vélocité S198](docs/registres/BILAN-VELOCITE-S198.md).

@@ -10306,3 +10306,86 @@ termes triples — et il faut maintenant les éprouver dans un montage qui contr
 est un lot propre, peu coûteux, qui peut passer avant.
 
 **Décisions qui demandent un arbitrage humain :** aucune nouvelle.
+
+## S198 — 2026-09-12 — Ce qui ralentit le projet, mesuré puis corrigé
+
+**Entrée :** master 7e1a9f1, **demande explicite de l'utilisateur** : établir ce qui ralentit
+le projet et le corriger. La file annonçait A241 ; elle a attendu. Plan seul 3034842 ;
+diagnostic 4edd795 ; correctifs 15bcd9a ; application 9b41263.
+
+**Produit :** [BILAN-VELOCITE-S198](../docs/registres/BILAN-VELOCITE-S198.md) et
+`outils/velocite.sh`, qui recalcule tout et **fait foi** contre le document.
+
+**Le diagnostic, en quatre lignes.** Dernière session ayant ajouté du **code d'exécution** à
+chaque couche d'ADR-001 : **B S181**, **W S182**, **δ S161** — trente-sept sessions — et
+**V jamais**, en cent quatre-vingt-dix-huit. W a reçu vingt-trois modules jusqu'à voir son
+coût mesuré à la nanoseconde ; δ n'a toujours pas de solveur et ses quatre modules sont des
+véhicules d'essai depuis S22 ; V n'a jamais été commencée.
+
+**Où va le temps.** Lignes ajoutées par ère : **S190–S197, zéro ligne de bibliothèque** pour
+4 509 de bancs et 6 280 de documents. S160–S169 : 0,7 %. Le corpus compte **3,5 lignes de
+markdown par ligne de code d'exécution**. Ces sessions n'ont rien gaspillé — elles ont produit
+ADR-120 à ADR-123 et l'audit qui a sauvé ADR-123 — mais elles ont toutes mesuré **le modèle
+contre lui-même**, ce que BILAN-S145 avait déjà écrit.
+
+**Le mécanisme, et il était déjà nommé.** **Trente-trois sessions sur trente-huit** depuis
+S160 ont pris pour sujet le reliquat de la précédente. A211 et L228 l'avaient identifié en
+S145 ; le remède choisi alors — faire porter la recommandation par la ligne `Session
+suivante`, que toute session lit à l'amorce — **a corrigé le canal sans toucher à l'auteur**.
+Cette ligne est écrite par la session qui finit, à partir de ses propres reliquats. Elle a
+toujours raison localement, et le projet dérive globalement. La chaîne S193 → S197 l'illustre :
+cinq sessions, un ADR, un angle clos, un réfuté, un audit décisif — et zéro ligne de système.
+
+**Décision structurante :** aucune de conception. La décision est **procédurale**, et elle
+est appliquée, pas proposée.
+
+**Quatre correctifs, appliqués.**
+
+1. **La règle des deux maillons**, `REPRISE.md` §6.8. Une session qui termine peut proposer
+   son propre reliquat **au plus deux fois de suite**. Le jeton porte un compteur `Maillons`
+   qui **retombe à zéro dès qu'une couche avance**, et s'incrémente sinon ; au-delà de deux,
+   la ligne `Session suivante` doit nommer une ligne de la file **et dire quelle couche elle
+   fait avancer**. La session qui prend le jeton vérifie le compteur à l'amorce. La règle
+   n'interdit pas de suivre un fil — la plupart des bons résultats viennent de là — elle
+   interdit de le faire indéfiniment **sans que rien n'avance**, et rend le cas visible.
+2. **Le tableau des quatre couches** en tête de `REPRISE.md` §4, avec l'ordre de le
+   **recalculer** et non de le recopier (A185).
+3. **Une définition mesurable d'« avancer »** : du code d'exécution dans `code/*/src`, ou une
+   décision actée. Un banc **éclaire** une couche, il ne l'avance pas.
+4. **`outils/velocite.sh`.** Il a d'ailleurs immédiatement servi : mes premiers comptages à la
+   main différaient des siens — 20 modules W au lieu de 23, 30 sessions chaînées au lieu de
+   33, un ratio de 3,8 au lieu de 3,5. Le document a été aligné sur l'outil, pas l'inverse.
+
+**Ce que la session a trouvé et qui n'était pas cherché.**
+
+**L279** — corriger le canal ne sert à rien si l'auteur est en conflit d'intérêt. Quand une
+transmission échoue, distinguer trois causes : le canal n'existe pas, il existe et n'est pas
+lu, ou il est lu et **celui qui le remplit n'est pas en position de bien le remplir**. Les
+deux premières se corrigent en construisant ou en imposant une lecture ; la troisième demande
+de **retirer la plume**, au moins par intermittence. Corollaire : vérifier qu'un garde-fou
+**mesure** son effet et pas seulement sa présence — A211 était « à éprouver » depuis S145 et
+personne ne l'avait éprouvée, faute d'un chiffre à regarder ; il en coûtait vingt lignes.
+
+**A243** *(sévérité 2)* — un corpus produit du travail de corpus, en proportion de sa taille,
+et ce travail n'avance aucune couche. Chaque geste d'entretien est justifié isolément — ce
+sont eux qui ont permis à S197 de rattraper S196 — mais leur somme croît avec le corpus quand
+ce qui reste à construire ne décroît pas. L'angle ne se manifeste jamais comme un problème :
+chaque session se termine en ayant bien travaillé. Déclencheur posé : relancer l'outil toutes
+les dix sessions et arbitrer si la part système reste sous 10 % sur deux ères.
+
+**La règle appliquée à elle-même.** Compteur à **5**, quota dépassé : la file a repris la
+main. **S199 = B3/δ**, construire un premier candidat de solveur volumétrique — la couche
+bloquée depuis S161, et la plus actionnable des deux en retard (V demanderait une conception
+neuve ; δ a déjà ses véhicules et un banc qui attend un candidat). A241 est **reportée**, et
+la file dit pourquoi : elle n'avance aucune couche.
+
+**Ce que je n'ai pas fait.** Je n'ai pas élagué le corpus — A243 est ouverte, pas traitée. Je
+n'ai touché ni à AGENTS.md ni à la méthode de travail elle-même : la règle est rituelle, elle
+vit dans `REPRISE.md` §6 que l'amorce impose déjà de lire en entier, et la dupliquer aurait
+été exactement la faute qui a forké le dépôt trois fois (L137). Je n'ai pas jugé la qualité
+des sessions S190–S197 : elles sont bonnes, et c'est précisément ce qui rend le constat utile.
+
+**Prochaine session recommandée. S199 : B3/δ**, par la règle et non par le chaînage.
+
+**Décisions qui demandent un arbitrage humain :** aucune nouvelle. L'utilisateur a déjà acté
+le passage à la construction (ADR-053, S70) ; cette session en applique la conséquence.

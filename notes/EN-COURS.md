@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S198 — en cours
+Session : S198 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
 Objectif : **demande explicite de l'utilisateur** — établir ce qui ralentit le projet, et
 **corriger**, pas seulement constater. La file annonçait A241 ; elle attendra. Le sujet est
@@ -74,10 +74,16 @@ la vélocité elle-même, et il est traité comme tout le reste : mesuré d'abor
       bord des quatre couches, une définition mesurable d'« avancer », et l'outil qui rend
       la dérive visible sans qu'on ait à y penser.
 - [x] **P4** — appliquer la règle neuve à la session suivante, et propager la file.
-- [>] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes, jeton
+- [x] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes, jeton
       `libre`, copies avancées sans suppression non prouvée.
 
 ### Notes de reprise
+
+P5 S198 : rituel terminé. **123 ADR, 243 angles, 279 leçons, 18 invariants, 6 SPEC,
+23 cas**. **L279** et **A243** écrites. File plurielle relue : tête devenue S198-1 = B3/δ,
+A241 explicitement **reportée** avec son motif. Jeton libre, **`Maillons` remis à zéro**.
+Pour la session suivante : le tableau des quatre couches est en tête de REPRISE §4 et se
+**recalcule** (`sh outils/velocite.sh`), il ne se recopie pas.
 
 P4 S198 : la règle appliquée à elle-même. Compteur à **5**, quota dépassé, donc la file
 reprend la main : **S199 = B3/δ**, construire un premier candidat de solveur volumétrique —

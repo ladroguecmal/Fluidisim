@@ -17,6 +17,25 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S198 — 2026-09-12 : ce qui ralentit le projet, mesuré puis corrigé.**
+[BILAN-VELOCITE-S198](registres/BILAN-VELOCITE-S198.md) et `outils/velocite.sh`, **à la
+demande de l'utilisateur**. Aucun ADR, aucune décision de conception : la décision est
+**procédurale** et elle est appliquée.
+**Le diagnostic en quatre lignes** — dernière session ayant ajouté du code d'exécution :
+**B S181, W S182, δ S161, V jamais**. δ est arrêtée depuis 37 sessions, V n'a jamais été
+commencée en 198. **S190–S197 : zéro ligne de bibliothèque** pour 4 509 de bancs.
+**Le mécanisme** : 33 sessions sur 38 ont pris pour sujet le reliquat de la précédente.
+A211 l'avait nommé en S145 ; son remède a corrigé le **canal** sans toucher à l'**auteur**,
+la ligne `Session suivante` étant écrite par la session qui finit.
+**Quatre correctifs appliqués** : la **règle des deux maillons** (REPRISE §6.8, avec un
+compteur au jeton qui retombe à zéro dès qu'une couche avance), le **tableau des quatre
+couches** en tête de REPRISE §4 à recalculer et non recopier, une **définition mesurable
+d'« avancer »** (code d'exécution ou décision actée — un banc éclaire, il n'avance pas), et
+l'**outil** qui fait foi contre les documents. **L279**, **A243**.
+123 ADR,243 angles,279 leçons,18 invariants,6 SPEC,23 cas.
+**Suite S199 : B3/δ**, choisie par la règle et non par le chaînage — construire un premier
+candidat de solveur volumétrique.
+
 **S197 — 2026-09-12 : audit de résolution ; ADR-123 confirmée, le verdict de S196 tombe.**
 [AUDIT-RESOLUTION-S197](validation/AUDIT-RESOLUTION-S197.md), **A242 close**, aucun ADR.
 `K` n'entre dans le véhicule que par le symbole de dispersion, précalculé : le défaut se
