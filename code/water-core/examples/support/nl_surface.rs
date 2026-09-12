@@ -119,6 +119,47 @@ impl NlSurface {
         (1. - shape[levels - 1]) / dz + dz * kq * kq / 2.
     }
 
+    /// **A242, S197.** Écart relatif maximal entre le symbole **discret** que ce véhicule
+    /// emploie et le symbole **continu** `k·tanh(k·h)` qu'il approche, sur les modes
+    /// `1..=upto`. Rend `(écart, mode fautif)`.
+    ///
+    /// Le module vérifiait déjà que `G_h` tend vers `k tanh(k h)` quand `K` croît — mais à
+    /// `K = 512` sur une bande de 8, une configuration que personne n'exécute. Il ne disait
+    /// nulle part ce que vaut l'écart **à la configuration employée**, et c'est là que
+    /// S196 s'est fait prendre : un symbole faux donne une évolution lisse, conservative et
+    /// fausse, qu'aucun critère d'énergie ne signale (**L277**).
+    ///
+    /// À déclarer par tout banc, **à côté** de sa dérive d'énergie et jamais à sa place.
+    /// Gratuit : le symbole est précalculé, `K` n'entre pas dans le coût d'un pas.
+    pub fn dispersion_error(&self, upto: usize) -> (f64, usize) {
+        let top = upto.min(self.band);
+        let mut worst = (0., 0);
+        for q in 1..=top {
+            let exact = self.wave[q] * (self.wave[q] * self.h).tanh();
+            let rel = (self.dn[q] - exact).abs() / exact;
+            if rel > worst.0 {
+                worst = (rel, q);
+            }
+        }
+        worst
+    }
+
+    /// **A242, S197.** Ordre et résidu de Richardson d'un triplet de raffinement, ou `None`
+    /// si le triplet ne converge pas — incréments de signes opposés, ou second incrément
+    /// plus grand que le premier. Dans ce cas le niveau grossier est hors de son domaine,
+    /// et la formule rendrait un chiffre d'apparence excellente sans objet : S196 a vu
+    /// « ordre 6,552 » sortir d'un niveau faux d'un facteur cinq.
+    ///
+    /// Rend `(ordre, résidu relatif au niveau fin)`. Même famille qu'**A238** et **L274**.
+    pub fn richardson(coarse: f64, mid: f64, fine: f64) -> Option<(f64, f64)> {
+        let (d1, d2) = (mid - coarse, fine - mid);
+        if d1 * d2 <= 0. || d1.abs() <= d2.abs() || fine == 0. {
+            return None;
+        }
+        let order = (d1 / d2).abs().log2();
+        Some((order, (d2 / (2f64.powf(order) - 1.)).abs() / fine.abs()))
+    }
+
     /// Profil du relèvement d'un mode, `phi_j/psi`, pour la vérification algébrique.
     pub fn lift_profile(&self, q: usize) -> Vec<f64> {
         let dz = self.h / self.levels as f64;
@@ -332,6 +373,45 @@ mod tests {
         let mut eta = vec![[0.; 2]; 9];
         eta[1] = [0.001, 0.];
         NlSurface::new(8, 16, 8., 2., g, order, &eta, &vec![[0.; 2]; 9]).unwrap()
+    }
+
+    /// **A242, S197.** Le véhicule doit pouvoir dire de combien son symbole discret
+    /// s'écarte du symbole continu **à la configuration employée**, et non seulement à une
+    /// configuration bien résolue que personne n'exécute.
+    #[test]
+    fn dispersion_error_names_the_offending_mode() {
+        // `L = h = 8`, `K = 64` : la configuration de S193 à S196.
+        let zeros = vec![[0.; 2]; 25];
+        let m = NlSurface::new(24, 64, 8., 8., 9.81, 3, &zeros, &zeros).unwrap();
+        // Valeurs arithmétiques du protocole S197 §2.1, indépendantes de toute simulation.
+        for (upto, want) in [(2usize, 0.0048), (3, 0.0108), (9, 0.0932), (24, 0.5453)] {
+            let (err, mode) = m.dispersion_error(upto);
+            assert!(
+                (err - want).abs() < 0.001,
+                "q<={upto} : {err} attendu {want}"
+            );
+            // Le pire mode est toujours le plus haut : l'écart croît avec `k·dz`.
+            assert_eq!(mode, upto);
+        }
+        // Ordre deux : quadrupler `K` divise l'écart par seize.
+        let fine = NlSurface::new(24, 256, 8., 8., 9.81, 3, &zeros, &zeros).unwrap();
+        let ratio = m.dispersion_error(9).0 / fine.dispersion_error(9).0;
+        assert!((ratio - 16.).abs() < 1.5, "ordre deux attendu, rapport {ratio}");
+    }
+
+    /// **A242, S197.** Un triplet qui ne converge pas ne porte pas d'ordre. Le cas est
+    /// celui que S196 a rencontré : `K=32` hors domaine, incréments de signes opposés,
+    /// et la formule aurait rendu « ordre 6,552 ».
+    #[test]
+    fn richardson_refuses_a_triple_that_does_not_converge() {
+        // Cas sain : incréments de même signe, décroissants d'un facteur quatre.
+        let (order, residue) = NlSurface::richardson(1.0, 1.4, 1.5).unwrap();
+        assert!((order - 2.).abs() < 1e-12, "ordre {order}");
+        assert!(residue > 0. && residue < 0.05, "residu {residue}");
+        // Le triplet de S196, aux valeurs mesurées.
+        assert!(NlSurface::richardson(1.376549713e-2, 2.717401225e-3, 2.835160449e-3).is_none());
+        // Incréments croissants : le raffinement éloigne, il ne converge pas.
+        assert!(NlSurface::richardson(1.0, 1.1, 1.5).is_none());
     }
 
     #[test]

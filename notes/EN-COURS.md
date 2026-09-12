@@ -72,17 +72,40 @@ le critère dans les bancs, pour que la faute ne puisse plus se répéter.
 - [x] **P2** — protocole **avant tout code** : ce que « loin du bord » veut dire et se
       mesure, le classement des cibles par enjeu, ce qui compte comme échec — un chiffre
       qui bouge n'est pas une conclusion qui tombe — et ce qu'on fera si une cible échoue.
-- [>] **P3a** — apparier le critère : garde partagée qui **refuse** un ordre tiré d'un
+- [x] **P3a** — apparier le critère : garde partagée qui **refuse** un ordre tiré d'un
       triplet non monotone, et contrôle de raffinement ajouté à chaque banc publié.
       Assertions de continuité sur les valeurs déjà publiées.
-- [ ] **P3b** — exécuter l'audit : S194/ADR-123 d'abord, puis S195 et S193. Relever les
+- [x] **P3b** — exécuter l'audit : S194/ADR-123 d'abord, puis S195 et S193. Relever les
       marges et, pour ADR-123, l'effet sur ses **seuils** et non sur ses décimales.
-- [ ] **P4** — verdict par cible. Note corrective datée là où il en faut ; un ADR n'est
+- [>] **P4** — verdict par cible. Note corrective datée là où il en faut ; un ADR n'est
       jamais réécrit, et une décision qui changerait demanderait un ADR neuf.
 - [ ] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes,
       jeton `libre`, copies avancées sans suppression non prouvée.
 
 ### Notes de reprise
+
+P3 S197 : `dispersion_error(upto)` et `richardson()` ajoutés au support partagé, deux
+tests neufs ; audit ajouté aux trois bancs publiés. Workspace 331 réussis/cinq ignorés,
+12 tests au banc S196. Empreintes **changées** par l'ajout de l'audit : coupling
+`0x4bc0934d630c2c50`, sources `0xb9b742189219c8ce`, fallback `0xcbb87743073b703d`.
+
+**RÉSULTATS DE L'AUDIT — deux cibles tiennent, une tombe.**
+(1) **ADR-123 tient.** La table **mesurée** de S194 §7.8 rejouée : à K=64 elle reproduit
+exactement le publié (jamais/19,82/11,70/5,38/0,78/0,75/0,40) ; à K=256 et K=1024, toutes
+deux identiques, elle donne jamais/19,38/11,50/5,20/0,78/0,72/0,40. **Déplacement maximal
+3,3 %**, aucun énoncé qualitatif ne bouge. Convergée dès K=256. Note : l'ajustement
+`α` bouge plus (1,302602 → 1,257, soit 3,7 %) et ses extrapolations sous s=0,0125 bien
+davantage — mais ADR-123 ne repose pas dessus, sa table est mesurée.
+(2) **A240/S195 tient.** Série A −0,437 → **−0,425** ; série B +0,783 → **+0,774**.
+(3) **S196 TOMBE.** L'écart pair/impair de **0,131** devient **0,005** à K=1024 — c'est
+la prédiction 2 de S196, celle qui **réfute** A241 : le repli n'explique **rien**. À K=64
+l'audit reproduit exactement −0,525/−0,394, donc l'audit est fidèle. L'exposant dense
+n=2..16 passe de −0,478 à **−0,445** (dans la tolérance déclarée −0,42…−0,62, donc la
+moitié « limite » survit, sa valeur passant de −0,52 à ~−0,45).
+**Pourquoi S196 tombe et pas les autres** : S194 et S195 comparent des configurations à
+**même bande**, l'erreur de symbole y est commune aux deux côtés et s'annule. S196
+comparait deux familles de **modes et bandes différents** — 38 contre 40 — donc
+d'exposition différente à l'erreur. C'est la leçon à écrire.
 
 P2 S197 : protocole dans AUDIT-RESOLUTION-S197. **Découverte structurante faite avant
 toute mesure, et par arithmétique pure** : `K` n'entre dans le véhicule que par le

@@ -136,6 +136,46 @@ fn main() {
         100. * (band[1] - band[0]).abs() / band[0]
     );
 
+    // **A242, S197.** A240 a été close sur ces exposants, mesurés à `K = 64` où le symbole
+    // de dispersion se trompe de 43 % en haut de la bande peuplée. On rejoue à `K = 512`.
+    // `K` n'entre pas dans le coût d'un pas : seul le symbole précalculé change.
+    println!("\n-- S197 audit A242 : les deux series rejouees a K croissant");
+    println!("K | err_symbole | exposant serie A | exposant serie B");
+    for levels in [64usize, 512] {
+        let mut exps = Vec::new();
+        let mut worst = (0f64, 0usize);
+        for (si, (_, steep)) in SERIES.iter().enumerate() {
+            let mut pts: Vec<(f64, f64)> = Vec::new();
+            for n in 2..=6usize {
+                let each = if si == 0 { steep / n as f64 } else { *steep };
+                let f = fleet(n, each, false);
+                let r = sources(24, levels, 8., &f, 3, 10, 400, &MARKS);
+                assert!(!r.diverged);
+                let e = fleetmod::build(24, levels, 8., 3, &f).dispersion_error(3 * (n + 1));
+                if e.0 > worst.0 {
+                    worst = e;
+                }
+                pts.push((n as f64, r.gap_l2));
+                h.write_f32(r.gap_l2 as f32);
+            }
+            let m = pts.len() as f64;
+            let lx: Vec<f64> = pts.iter().map(|p| p.0.ln()).collect();
+            let ly: Vec<f64> = pts.iter().map(|p| p.1.ln()).collect();
+            let (mx, my) = (lx.iter().sum::<f64>() / m, ly.iter().sum::<f64>() / m);
+            let num: f64 = lx.iter().zip(&ly).map(|(a, b)| (a - mx) * (b - my)).sum();
+            let den: f64 = lx.iter().map(|a| (a - mx) * (a - mx)).sum();
+            exps.push(num / den);
+        }
+        println!(
+            "{levels} | {:.2} % (q={}) | {:+.3} | {:+.3}",
+            100. * worst.0,
+            worst.1,
+            exps[0],
+            exps[1]
+        );
+    }
+    println!("  publie par S195 : serie A -0,437 | serie B +0,783 (phases dispersees)");
+
     println!("\nempreinte (deux executions doivent la reproduire) : {:#018x}", h.finish());
 }
 

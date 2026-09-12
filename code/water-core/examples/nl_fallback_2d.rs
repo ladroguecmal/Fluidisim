@@ -268,6 +268,78 @@ fn main() {
         s128 - s64
     );
 
+    // **A242, S197.** Le verdict de S196 repose sur un écart pair/impair de 0,131, mesuré à
+    // `K = 64` où le symbole de dispersion se trompe de 112 % en haut de la bande peuplée.
+    // On rejoue la comparaison à `K = 1024`, où il se trompe de moins d'un pour cent.
+    // `K` n'entre pas dans le coût d'un pas : seul le symbole précalculé change.
+    println!("\n-- S197 audit A242 : la comparaison de parite rejouee a K croissant");
+    println!("K | err_symbole | impaire | paire | ecart | verdict");
+    for levels in [64usize, 1024] {
+        let mut exps = Vec::new();
+        let mut worst = (0f64, 0usize);
+        for fam in [Family::Odd, Family::Even] {
+            let mut pts = Vec::new();
+            for n in PARITY_N {
+                let modes = fam.modes(n);
+                let q = band_of(&modes);
+                let f = fleet_from_modes(&modes, TOTAL / n as f64, false);
+                let r = sources(q, levels, 8., &f, 3, PERIODS, PER, &MARKS);
+                assert!(!r.diverged);
+                let e = fleetmod::build(q, levels, 8., 3, &f).dispersion_error(q);
+                if e.0 > worst.0 {
+                    worst = e;
+                }
+                pts.push((n, r.gap_l2));
+                h.write_f32(r.gap_l2 as f32);
+            }
+            exps.push(exponent(&pts));
+        }
+        let gap = (exps[0] - exps[1]).abs();
+        println!(
+            "{levels} | {:.2} % (q={}) | {:+.3} | {:+.3} | {gap:.3} | {}",
+            100. * worst.0,
+            worst.1,
+            exps[0],
+            exps[1],
+            if gap > 0.10 {
+                "le repli agit encore"
+            } else {
+                "VERDICT S196 RENVERSE"
+            }
+        );
+    }
+    println!("  publie par S196 : impaire -0,525 | paire -0,394 | ecart 0,131");
+
+    // L'autre moitié du verdict de S196 : la saturation à `−0,52`, lue sur les grands `n`
+    // — c'est-à-dire là où le symbole se trompe le plus. Elle doit être auditée aussi.
+    println!("
+-- saturation de la famille dense, n=2,4,8,16, rejouee a K croissant");
+    println!("K | err_symbole | exposant dense n=2..16");
+    for levels in [64usize, 1024] {
+        let mut pts = Vec::new();
+        let mut worst = (0f64, 0usize);
+        for n in [2usize, 4, 8, 16] {
+            let modes = Family::Dense.modes(n);
+            let q = band_of(&modes);
+            let f = fleet_from_modes(&modes, TOTAL / n as f64, false);
+            let r = sources(q, levels, 8., &f, 3, PERIODS, PER, &MARKS);
+            assert!(!r.diverged);
+            let e = fleetmod::build(q, levels, 8., 3, &f).dispersion_error(q);
+            if e.0 > worst.0 {
+                worst = e;
+            }
+            pts.push((n, r.gap_l2));
+            h.write_f32(r.gap_l2 as f32);
+        }
+        println!(
+            "{levels} | {:.2} % (q={}) | {:+.3}",
+            100. * worst.0,
+            worst.1,
+            exponent(&pts)
+        );
+    }
+    println!("  publie par S196 : saturation a -0,52 sur les fenetres hautes");
+
     println!(
         "\nempreinte (deux executions doivent la reproduire) : {:#018x}",
         h.finish()

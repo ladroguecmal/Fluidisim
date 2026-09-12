@@ -414,6 +414,8 @@ fn main() {
     println!("  loi f(1-f) : dispersion {:.4} sur {} points", hi / lo - 1., shape.len());
     accepted &= hi / lo - 1. < 0.20;
 
+    audit_resolution(&steeps, &marks);
+
     println!("Couples M=3 h=8 s=0.05 N=20 ; q1 q2 sens ecart croise train");
     for (q1, q2, dir) in [(2, 3, 1.), (1, 2, 1.), (1, 3, 1.), (2, 3, -1.)] {
         let a = Train { q: q1, steep: 0.05, dir: 1. };
@@ -509,6 +511,77 @@ fn main() {
         accepted,
         "reception du couplage refusee ; conserver les mesures et diagnostiquer"
     );
+}
+
+/// **A242, S197.** Audit de résolution : la campagne d'ADR-123 rejouée en ne changeant que
+/// `K`. Le symbole de dispersion est la **seule** chose que `K` déplace, et il n'entre pas
+/// dans le coût d'un pas ; monter `K` est donc presque gratuit.
+///
+/// Ce qu'on regarde n'est pas la dérive des décimales de `α` et `β` — elles vont bouger —
+/// mais ce que la loi ajustée fait des **seuils** publiés par ADR-123.
+fn audit_resolution(steeps: &[f64], marks: &[usize]) {
+    println!("
+S197 audit A242 : campagne M=3 rejouee a K croissant, Q=16, couple (2,3)");
+    // La table d'ADR-123 est **mesurée, pas interpolée** (S194 §7.8) : c'est elle qu'il faut
+    // rejouer, et non l'extrapolation de la loi ajustée. Les deux sont donc auditées, dans
+    // cet ordre d'importance.
+    println!("-- frontiere des 2 %, la table mesuree d'ADR-123, rejouee a K croissant");
+    println!("K | err_symbole@q9 | s=0.008 | 0.009 | 0.010 | 0.0125 | 0.014 | 0.015 | 0.020");
+    for levels in [64usize, 256, 1024] {
+        let probe = build(16, levels, 8., 3, &[Train { q: 2, steep: 0.01, dir: 1. }]);
+        let (err, mode) = probe.dispersion_error(9);
+        print!("{levels} | {:.3} % (q={mode})", 100. * err);
+        for s in [0.008, 0.009, 0.01, 0.0125, 0.014, 0.015, 0.02] {
+            let a = Train { q: 2, steep: s, dir: 1. };
+            let b = Train { q: 3, steep: s, dir: 1. };
+            let c = couple(16, levels, 8., a, b, 3, 20, 400, marks);
+            assert!(!c.diverged);
+            if c.first_cross < 0. {
+                print!(" | jamais");
+            } else {
+                print!(" | {:.2}", c.first_cross);
+            }
+        }
+        println!();
+    }
+    println!("  publie par S194 §7.8 : jamais | 19,8 | 11,7 | 5,4 | 0,8 | 0,8 | 0,4");
+
+    println!("
+-- la loi ajustee, pour memoire : ses seuils sont extrapoles, pas mesures");
+    println!("K | alpha | beta | residu | s*(N=20)");
+    let target = 0.02;
+    for levels in [64usize, 256, 1024] {
+        let mut points = Vec::new();
+        let mut n20 = Vec::new();
+        for s in steeps {
+            let a = Train { q: 2, steep: *s, dir: 1. };
+            let b = Train { q: 3, steep: *s, dir: 1. };
+            let c = couple(16, levels, 8., a, b, 3, 20, 400, marks);
+            assert!(!c.diverged);
+            if c.energy < 1e-4 {
+                for (slot, n) in marks.iter().enumerate() {
+                    points.push((*s, *n as f64, c.gap_at[slot]));
+                }
+                n20.push((*s, c.gap_at[marks.len() - 1]));
+            }
+        }
+        let (alpha, beta, worst) = fit_two(&points);
+        let peak = points.iter().map(|p| p.2).fold(0., f64::max);
+        // Le seuil de cambrure qui tient 2 % sur vingt periodes, par la loi ajustee.
+        let duration = |s: f64| (target - alpha * s) / (beta * s * s);
+        // s* : racine de alpha·s + beta·s²·20 = 0.02, positive.
+        let (aa, bb, cc) = (beta * 20., alpha, -target);
+        let star = (-bb + (bb * bb - 4. * aa * cc).sqrt()) / (2. * aa);
+        // L'écart de symbole sur la bande que M=3 peut peupler : 3·max(q_train) = 9.
+        let probe = build(16, levels, 8., 3, &[Train { q: 2, steep: 0.01, dir: 1. }]);
+        let (err, mode) = probe.dispersion_error(9);
+        let _ = (&n20, duration(0.009), err, mode);
+        println!(
+            "{levels} | {alpha:+.6} | {beta:+.6} | {:.4} | {star:.6}",
+            worst / peak
+        );
+    }
+    println!("  publie par ADR-123 : alpha=+1.302602 beta=+5.898728 ; seuil de cambrure ~0,009");
 }
 
 #[cfg(test)]
