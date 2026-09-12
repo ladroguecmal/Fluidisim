@@ -1670,7 +1670,7 @@ entrée par entrée. Le fil reprend ci-dessous.
 
 ## File active
 
-Relue en S203, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+Relue en S204, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
 
 *Renommée de « File active S190 » en S193 : le contenu est daté ligne par ligne, le titre
 suivait un numéro de session et vieillissait seul (A185 — un état sans date se lit au
@@ -1683,16 +1683,22 @@ Porteur des travaux internes : l'agent de construction du dépôt, sous arbitrag
 l'utilisateur ; aucune équipe extérieure fictive. Cette file complète la prochaine
 action unique et doit être relue au rituel de fin (A211).
 
-**Direction utilisateur S201, ADR-124 : B visible → budget image → δ bornée/V au besoin gameplay.**
+**Ambition finale complète, construction progressive par versions de plus en plus capables**
+— clarification de l'utilisateur, ADR-127 (S204), qui corrige la lecture d'ADR-124 : δ général,
+V, inondations complexes et grande échelle sont **obligatoires**, les effets bornés sont des
+étapes. Trajectoire J1 → J5 et noyau V dans [FEUILLE-DE-ROUTE](../FEUILLE-DE-ROUTE.md) ; cette
+file porte les actions, pas l'ordre des jalons. *Ligne S201 retirée : « B visible → budget
+image → δ bornée/V au besoin gameplay » — son dernier segment était la lecture fautive.*
 
 | action / objet | état daté et ce qui reste | priorité / déclencheur |
 |---|---|---|
-| **A245 / composition B+W sur mer réelle** | **S203 : ouverte, gravité 1.** Plancher de pente L1 de B 0,6082 à Hs 1,5 (recette S201) > π/7 : `compose` refuse chaque point ; majorant directionnel 0,5733 refuse encore, pente échantillonnée 0,4215. I-18 non tenu pour le terme de B ; ADR-062/094/095 corrigés par note | **S204 : lot bibliothèque**, fait avancer la composition B+W. Instruire terme directionnel, pente réelle au point (S144) ou borne statistique ; change des bits et des frontières d'admission |
-| **A247 / coût d'un impact visible** | **S203 : ouverte.** B 1,6 µs/pt, B+W N256 14 µs/pt (≈140 pts dans 2 ms), table radiale Hermite ≤0,006 mm mais 2,7 ms de construction par impact ; aucun `paquets_W_max` confronté à ADR-125 | après A245 ; leviers non mesurés : pas de table, N hors coutures, parallélisme, phases GPU (I-08) |
-| **S202-1 / effet borné visible — réalisée** | **S203 : réalisée.** Impact W visible (λ3,35 m, E164 J, Hs0,5), emprise reçue par coutures (ADR-126 : R ≥ 15,5 λ, A ≥ 96√(λ/g), N ≥ 256), zéro pixel hors emprise contre témoin ; part non portée par W nommée (32,6 kJ, Fr1,81, balistique 3,26 m/1,63 s) sans δ construit | effet δ d'impact à choisir après A245 : cavité eulérienne (SPEC-001 §2.4, 1,15 M cellules) ou gerbe particulaire (SPEC-002 §1) ; V au besoin gameplay |
-| **S200-1 / A244 — B3 / δ** | **S200 : S199-1 partielle**, zéro allocation globale du pas et refus numériques atomiques reçus, capacités restreintes ;342 tests/cinq ignorés. S202 : coût du pas mesuré, mais pression f64 expérimentale et respect du budget temporel restent hors contrat de production | reportée derrière ADR-124 ; à recevoir si un effet borné retient le noyau, sans convertir arbitrairement itérations en ms |
+| **A245 / composition B+W sur mer réelle** | **S203 : ouverte, gravité 1.** Plancher de pente L1 de B 0,6082 à Hs 1,5 (recette S201) > π/7 : `compose` refuse chaque point ; majorant directionnel 0,5733 refuse encore, pente échantillonnée 0,4215. I-18 non tenu pour le terme de B ; ADR-062/094/095 corrigés par note | **S205 : lot bibliothèque, bloquant J1**, fait avancer la composition B+W. Instruire terme directionnel, pente réelle au point (S144) ou borne statistique ; change des bits et des frontières d'admission |
+| **A247 / coût d'un impact visible** | **S203 : ouverte.** B 1,6 µs/pt, B+W N256 14 µs/pt (≈140 pts dans 2 ms), table radiale Hermite ≤0,006 mm mais 2,7 ms de construction par impact ; aucun `paquets_W_max` confronté à ADR-125 | après A245, sur une scène représentative de J1 ; **incompatibilité à arbitrer explicitement** (ADR-127 D7), aucune fonctionnalité retirée en silence. Leviers non mesurés : pas de table, N hors coutures, parallélisme, phases GPU (I-08) |
+| **Hôte interactif / J1** | **S204 : ouvert.** Images hors ligne seulement (S201, S203) ; le workspace est sans dépendance (ADR-020) | **arbitrage explicite** : hôte séparé avec dépendances (téléchargement, infrastructure — **l'utilisateur tranche**) ou hôte sans dépendance par appels système ; condition de sortie de J1 |
+| **S202-1 / effet borné visible — réalisée** | **S203 : réalisée.** Impact W visible (λ3,35 m, E164 J, Hs0,5), emprise reçue par coutures (ADR-126 : R ≥ 15,5 λ, A ≥ 96√(λ/g), N ≥ 256), zéro pixel hors emprise contre témoin ; part non portée par W nommée (32,6 kJ, Fr1,81, balistique 3,26 m/1,63 s) sans δ construit | premier domaine δ borné de J2 à choisir — cavité eulérienne (SPEC-001 §2.4, 1,15 M cellules) ou gerbe particulaire (SPEC-002 §1) — **comme cas du δ général** (ADR-127 D3) ; *« V au besoin gameplay » retiré en S204 (ADR-127)* |
+| **S200-1 / A244 — B3 / δ** | **S200 : S199-1 partielle**, zéro allocation globale du pas et refus numériques atomiques reçus, capacités restreintes ;342 tests/cinq ignorés. S202 : coût du pas mesuré, mais pression f64 expérimentale et respect du budget temporel restent hors contrat de production | **S204 : sur le chemin de J2** (ADR-127 D3), plus conditionnelle ; à recevoir quand J2 emploie le noyau, sans convertir arbitrairement itérations en ms |
 | **A241 / repli — reporté** | **S197** : suspect réfuté, la totalité de l'écart reste sans cause | deux candidats nommés (bande relative, termes triples), sous contrainte **L278** ; **n'avance aucune couche**, donc passe après B3/δ |
-| **S199-2 / B3 / δ — fond coupé** | **S199** : ordre1,947 plat,0,898 lisse,0,895 marche ; candidat non éligible. Fonctionnelle non pondérée par les ouvertures ; mécanisme de face à isoler | reportée derrière budget image ; requise si un effet retenu emploie ces faces coupées |
+| **S199-2 / B3 / δ — fond coupé** | **S199** : ordre1,947 plat,0,898 lisse,0,895 marche ; candidat non éligible. Fonctionnelle non pondérée par les ouvertures ; mécanisme de face à isoler | **S204 : sur le chemin de J2**, requise pour tout domaine à fond ou paroi coupés ; plus conditionnelle à un effet |
 | **B4 forces / perception** | aucun reçu complet ; la métrique de vitesse S190 ne les remplace pas | après montage commun surface/solide ; protocole perceptif conserve ses participants réels requis |
 | **A216** (A217 **close** en S194) | **S194** : A217 a sa réponse — la cambrure gouverne l'addition en eau profonde, plus la durée et le désaccord de triade ; A216, coefficient S161, reste inexpliquée | A216 avec un montage qui l'explique ; ne pas dériver 0,02/0,24 comme seuil, ADR-123 n'est pas une bascule |
 | **`n` sources / A240 — close** | **S195 : A240 close.** `n = 2..6` mesuré : à cambrure par train fixée l'écart croît en `n^0,75` (sous-linéaire, loin du `n²`) ; à cambrure **totale** fixée il **décroît** en `1/√n`. ADR-123 se transporte dans le sens favorable | rien à instruire ; limites conservées : `n ≤ 6`, colinéaire, fond plat, eau profonde |
@@ -1702,7 +1708,8 @@ action unique et doit être relue au rituel de fin (A211).
 | **λ_cut / B2 / coupure W–δ** | B2 partiel ; dispersion/dissipation et borne d'éponge A92 à assembler | choix du couple W/δ ; ne pas confondre réception source B4 et coupure |
 | **Bathymétrie / S116-2** | **S194** : fond plat seul, mais le couplage y est **8,6 fois plus fort** vers le rivage quand le désaccord de triade tombe ; et la faible profondeur non linéaire n'a aucun oracle de Stokes (A234) | lot de construction propre ; une frontière établie en eau profonde ne se transporte pas vers le rivage (ADR-123) |
 | **A98 / conformité multiplateforme** | aucune seconde cible testée par S190 ; debug/release locaux ne suffisent pas | réception sur seconde cible disponible ; I-03 maintenu |
-| **V / bancs restants** | S201 : V non construite, attend un besoin gameplay nommé (ADR-124) ; B1/B2/B4 partiels, aucun banc complet, huit autres non lancés | arbitrer les lots système depuis cette file plutôt que prolonger par défaut la dernière sonde |
+| **V-noyau / J4** | **S204 : obligatoire** (ADR-127 D4). Aucun module ; conception acquise (ADR-010, SPEC-004/006). *S201 le disait « en attente d'un besoin gameplay » : lecture corrigée* | **s'ouvre au plus tard avec J2**, en parallèle des domaines bornés (C12, branche V de C19) ; inondations complexes et articulation V↔δ à J4 |
+| **Bancs restants** | B1/B2/B4 partiels, aucun banc complet, huit autres non lancés | exécutés quand un composant construit tranche une décision (ADR-127 D6), pas tous avant une version utilisable |
 | **A94/A95 / dossier de réunions** | quatorze fiches à traiter selon ADR-028 ; les qualifier en décisions internes ou faits externes | les intitulés « avant première ligne de code » ne bloquent pas rétroactivement le code autorisé depuis S20 |
 
 Les noms de personnes, l'état du terrain/projet extérieur et les actions d'infrastructure

@@ -90,7 +90,7 @@ BUDGET-IMAGE-S202, IMPACT-W-S203 et le journal — **y compris mes propres texte
 - [x] **P3** — `docs/FEUILLE-DE-ROUTE.md`, unique porteur de la trajectoire : cinq versions,
  dépendances, ce qui existe, déclencheurs de bancs, arbitrages ouverts (hôte interactif,
  A247). REPRISE, index et file active y renvoient sans la recopier (L137).
-- [ ] **P4** — propagation : REPRISE (paragraphe de trajectoire, file active, §4 et marqueurs
+- [x] **P4** — propagation : REPRISE (paragraphe de trajectoire, file active, §4 et marqueurs
  datés sur S201–S203), QUESTIONS-OUVERTES (direction, lignes δ/A244/S199-2/V/S202-1),
  AGENTS (« Ce que tu ne décides pas »), PLAN-BENCHMARK B3, BILAN-B4-S176, 00_INDEX, README,
  notes datées en fin d'IMAGE-B-S201, BUDGET-IMAGE-S202, IMPACT-W-S203.

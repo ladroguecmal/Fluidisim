@@ -94,3 +94,12 @@ Vérification : workspace debug343 réussis/cinq ignorés (246+4+93), quatre tes
 intégration aussi en release. Avertissements préexistants du harnais/exemples.
 Premier essai de compilation : import du trait Allocator manquant pour seal,
 corrigé avant la campagne. [Relevés bruts](BUDGET-IMAGE-S202-MESURES.md).
+
+## Note datée du 2026-09-13 (S204)
+
+« Premier effet borné visible » reste l'étape réalisée en S203 ; « V attend le besoin
+gameplay » est corrigé par [ADR-127](../adr/ADR-127-ambition-complete-construction-progressive.md) :
+V s'ouvre au plus tard avec les domaines bornés, δ général reste obligatoire. Le profil
+60 images/s / eau 2 ms est une **cible à confronter aux scènes représentatives** : un domaine
+qui dépasse 2 ms est une incompatibilité à arbitrer explicitement, pas une fonctionnalité à
+retirer. Mesures inchangées.

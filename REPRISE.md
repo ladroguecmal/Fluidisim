@@ -19,7 +19,7 @@ souvenir de conversation, **c'est lui qui fait foi**.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-13 01:33 +02:00
+Battement        : 2026-09-13 01:35 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Session en cours : S204 — décision corrective d'ADR-124 (clarification utilisateur d'ambition)
 Dernière session : S203 — impact W visible, emprise par coutures (ADR-126) ; A245 trouvée
@@ -60,6 +60,12 @@ seul endroit, parce que le dépôt a déjà forké pour avoir dupliqué une proc
 *Battements relevés par `date` dans un appel **séparé**, puis recopiés — L237 et son addendum S158,
 après trois battements faux en deux sessions pour avoir écrit la valeur avant de lire l'horloge.*
 
+
+**Ambition finale complète, construction progressive par versions de plus en plus capables**
+— clarification de l'utilisateur du 2026-09-13,
+[`ADR-127`](docs/adr/ADR-127-ambition-complete-construction-progressive.md), **actée**. La
+trajectoire vit dans [`FEUILLE-DE-ROUTE`](docs/FEUILLE-DE-ROUTE.md) et nulle part ailleurs ; les
+paragraphes de trajectoire ci-dessous sont historiques.
 
 **Le projet construit désormais le système** — arbitrage de l'utilisateur du 2026-09-08,
 [`ADR-053`](docs/adr/ADR-053-le-projet-passe-a-la-construction.md), **actée**. Trajectoire :
@@ -139,13 +145,20 @@ une session ne peut signaler sa présence qu'en travaillant.
 
 ---
 
-## File active du projet — S203
+## File active du projet — S204
 
-**S203 : impact W visible dans une emprise reçue par ses coutures (ADR-126). Prochain lot
-A245 — la composition B+W refuse toute mer au-delà de Hs≈1,1 m, dont celle de S201 — puis
-A247 (coût d'un impact visible contre 2 ms) et choix de l'effet δ d'impact. V au besoin
-gameplay. S200-1/A244 et S199-2 restent reportées. Les acquis S194 ci-dessous restent datés ;
-la file liée porte aussi leurs suivis S195–S199.**
+**Ambition finale complète, construction progressive par versions de plus en plus capables**
+— clarification de l'utilisateur, [ADR-127](docs/adr/ADR-127-ambition-complete-construction-progressive.md).
+δ général, V, inondations complexes et grande échelle sont **obligatoires** ; les effets bornés
+sont des étapes. Trajectoire J1 → J5 et noyau V : **[FEUILLE-DE-ROUTE](docs/FEUILLE-DE-ROUTE.md)**,
+seul document qui la porte — ne pas la recopier ici.
+
+**S204 : jalon en cours J1** (B/W visible et interactif). Prochain lot **A245** — la composition
+B+W refuse toute mer au-delà de Hs≈1,1 m, dont celle de S201 — puis A247 (coût d'un impact
+visible contre 2 ms, à arbitrer explicitement). **Hôte interactif : arbitrage ouvert**, qui
+revient à l'utilisateur s'il demande des dépendances. V-noyau s'ouvre au plus tard avec J2 ;
+S200-1/A244 et S199-2 sont sur le chemin de J2, plus « reportées ». Les acquis S194 ci-dessous
+restent datés ; la file liée porte aussi leurs suivis S195–S199.**
 
 **Tolérance B4 fixée à 2 % par l'utilisateur (ADR-120).** Elle ne doit plus être
 redemandée. La réception et son profil sont dans B4-TOLERANCE-S190 ; B4 complet
@@ -223,8 +236,9 @@ pièges déjà payés.
 
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
+docs/FEUILLE-DE-ROUTE.md  ← trajectoire J1 → J5 et noyau V, seul porteur (ADR-127)
 docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 126 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 127 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -243,6 +257,22 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S204 — 2026-09-13 : ambition complète rétablie, ADR-127 corrige ADR-124.**
+Clarification de l'utilisateur : *ambition finale complète, construction progressive par
+versions de plus en plus capables*. ADR-124 avait été lu — et écrit — comme une réduction :
+« δ effet borné », « V attend un besoin gameplay nommé ». **Corrigé** : δ général, V,
+inondations complexes et grande échelle obligatoires ; effets bornés = étapes ; V-noyau ouvert
+au plus tard avec J2 (il ne dépend pas de δ) ; responsabilités, interfaces, autorité (I-04,
+I-10, I-11, I-15, I-17) et conservation inchangées ; bancs exécutés quand ils tranchent une
+décision ; 60 Hz/eau 2 ms et 2 % acquis, budget = cible, incompatibilité ⇒ arbitrage explicite.
+Nouvelle **[FEUILLE-DE-ROUTE](docs/FEUILLE-DE-ROUTE.md)**, seul porteur de la trajectoire.
+Notes datées ADR-124/125 ; propagation file active, index, README, AGENTS, PLAN-BENCHMARK,
+BILAN-B4-S176, IMAGE-B-S201, BUDGET-IMAGE-S202, IMPACT-W-S203. Aucun code, rien supprimé.
+**A248** (un ordre inscrit comme périmètre), **L282**.
+**Suite S205 : A245** (J1, lot bibliothèque) ; arbitrage de l'hôte interactif à obtenir.
+127 ADR,248 angles,282 leçons,18 invariants,6 SPEC,23 cas ; compteur0 (sujet imposé).
+Voir [ADR-127](docs/adr/ADR-127-ambition-complete-construction-progressive.md), [feuille de route](docs/FEUILLE-DE-ROUTE.md).
 
 **S203 — 2026-09-13 : un impact W visible, ADR-126 ; la mer S201 n'est pas composable.**
 Constat d'amorce, avant tout code : plancher de pente L1 de B 0,6082 à Hs1,5 > π/7 —
@@ -271,6 +301,8 @@ Le coût mesuré ne garantit ni qualité ni délai ; A244 reste partielle, B3 no
 Rendu CPU S201 hors ligne, aucun budget GPU reçu.2 % physique reste acquis.
 **Suite S203 : S202-1**, impact visible W, emprise/observateur explicites, puis part
 δ éventuellement nécessaire ; V au besoin gameplay selon ADR-124.
+*⚠ S204 : « δ éventuellement nécessaire » et « V au besoin gameplay » sont corrigés par
+ADR-127 — δ général et V obligatoires. Bloc d'origine conservé.*
 125 ADR,244 angles,279 leçons,18 invariants,6 SPEC,23 cas ; compteur0 (δ avance).
 Voir [budget image S202](docs/validation/BUDGET-IMAGE-S202.md), [ADR-125](docs/adr/ADR-125-budget-image-60hz-deux-ms.md).
 
@@ -282,6 +314,8 @@ sur cette machine : référence d'observation, aucun budget temps réel reçu.
 Cinq tests exemple réussis ;342/cinq ignorés reste le reçu bibliothèque S200.
 **ADR-124 actée sur instruction utilisateur** : images locales permises, puis
 budget image/coût par bloc, puis δ en effets bornés et V au besoin gameplay.
+*⚠ S204 : lecture corrigée par ADR-127 — c'était un ordre de construction, pas une
+réduction ; δ général et V restent obligatoires. Bloc d'origine conservé.*
 **Suite S202 : S201-1**, budget image. S200-1/S199-2 reportées, pas closes.
 B4/A50 partiels ; seuil numérique2 % acquis, aucune perception déclarée reçue.
 124 ADR,244 angles,279 leçons,18 invariants,6 SPEC,23 cas. Compteur0 : décision δ/V.

@@ -687,6 +687,7 @@ sur cette machine : référence d'observation, aucun budget temps réel reçu.
 Cinq tests exemple réussis ;342/cinq ignorés reste le reçu bibliothèque S200.
 **ADR-124 actée sur instruction utilisateur** : images locales permises, puis
 budget image/coût par bloc, puis δ en effets bornés et V au besoin gameplay.
+*⚠ S204 : lecture corrigée par ADR-127 — ordre de construction, pas réduction.*
 **Suite S202 : S201-1**, budget image. S200-1/S199-2 reportées, pas closes.
 B4/A50 partiels ; seuil numérique2 % acquis, aucune perception déclarée reçue.
 124 ADR,244 angles,279 leçons,18 invariants,6 SPEC,23 cas. Compteur0 : décision δ/V.
@@ -702,6 +703,7 @@ Le coût mesuré ne garantit ni qualité ni délai ; A244 reste partielle, B3 no
 Rendu CPU S201 hors ligne, aucun budget GPU reçu.2 % physique reste acquis.
 **Suite S203 : S202-1**, impact visible W, emprise/observateur explicites, puis part
 δ éventuellement nécessaire ; V au besoin gameplay selon ADR-124.
+*⚠ S204 : corrigé par ADR-127 — δ général et V obligatoires.*
 125 ADR,244 angles,279 leçons,18 invariants,6 SPEC,23 cas ; compteur0 (δ avance).
 Voir [budget image S202](docs/validation/BUDGET-IMAGE-S202.md), [ADR-125](docs/adr/ADR-125-budget-image-60hz-deux-ms.md).
 
@@ -713,3 +715,11 @@ A ≥ 96√(λ/g), N ≥ 256. Images +1/+3/+6 s : zéro pixel différent hors em
 Coût B+W 14 µs/pt, table radiale 2,7 ms/impact contre 2 ms (A247). Bibliothèque inchangée.
 **Suite S204 : A245.** 126 ADR,247 angles,281 leçons,18 invariants,6 SPEC,23 cas.
 Voir [impact W S203](docs/validation/IMPACT-W-S203.md), [ADR-126](docs/adr/ADR-126-emprise-d-un-impact-visible.md).
+
+**S204 — 2026-09-13 : ambition complète rétablie, ADR-127 corrige ADR-124.**
+Clarification de l'utilisateur : *ambition finale complète, construction progressive par
+versions de plus en plus capables*. δ général, V, inondations complexes et grande échelle
+obligatoires ; effets bornés = étapes ; V-noyau au plus tard avec J2. Budget 60 Hz/eau 2 ms
+et seuil 2 % acquis, incompatibilité ⇒ arbitrage explicite. Nouvelle feuille de route.
+**Suite S205 : A245.** 127 ADR,248 angles,282 leçons,18 invariants,6 SPEC,23 cas.
+Voir [ADR-127](docs/adr/ADR-127-ambition-complete-construction-progressive.md), [feuille de route](docs/FEUILLE-DE-ROUTE.md).

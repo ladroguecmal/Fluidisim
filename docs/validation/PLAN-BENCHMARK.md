@@ -104,6 +104,13 @@ conservation d'énergie sur 60 s ; coût pour 4096 paquets ; déterminisme crois
 
 ## B3 — Couche δ : technologie, coût et latence
 
+> **S204 — ADR-127 : ambition complète, construction progressive.** La note S201 ci-dessous
+> est corrigée : δ n'est pas « dimensionnée en effets bornés » — les domaines bornés sont le
+> jalon J2, **cas de construction et de validation du δ général**, qui reste obligatoire avec
+> tous les scénarios de ce banc. B3 s'exécute quand les candidats construits permettent de
+> trancher la famille de δ, sans attendre la fermeture des autres bancs pour construire une
+> version utilisable. [FEUILLE-DE-ROUTE](../FEUILLE-DE-ROUTE.md).
+
 > **S202 — ADR-125 : profil60 images/s, eau2 ms/image**, choix utilisateur.
 > `cost_per_block_ms` est mesuré autour du pas complet, horloge injectée ; unité
 > de banc=un domaine x-z.32×16 convergé≈0,59 ms médiane,64×32≈4,79 ms, hors budget

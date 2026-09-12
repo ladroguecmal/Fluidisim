@@ -215,3 +215,11 @@ Deux lignes nouvelles dans la file active : **A245**, rendre la composition poss
 une mer de Hs > 1,1 m (lot bibliothèque, change des bits) ; **A247**, le coût par image d'un
 impact visible (table 2,7 ms, point 14 µs) contre 2 ms. L'effet δ borné d'impact reste à
 choisir entre cavité eulérienne et gerbe particulaire, après A245.
+
+## Note datée du 2026-09-13 (S204)
+
+Écrit sous la lecture d'ADR-124 que [ADR-127](../adr/ADR-127-ambition-complete-construction-progressive.md)
+corrige. « Effet δ borné » (§8, §10) désigne désormais le premier **domaine borné du jalon J2**,
+cas de construction du δ général et non produit à part. A247 est une incompatibilité à
+**arbitrer explicitement** (ADR-127 D7), aucun levier ne retire l'impact. Mesures, images et
+ADR-126 inchangés. Trajectoire : [FEUILLE-DE-ROUTE](../FEUILLE-DE-ROUTE.md).

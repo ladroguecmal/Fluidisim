@@ -13,9 +13,24 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 3. [`specs/SPEC-001`](specs/SPEC-001-contraintes-numeriques.md) et
    [`SPEC-002`](specs/SPEC-002-phenomenes-secondaires.md) — les fiches chiffrées à citer plutôt
    que de réinventer un nombre.
-4. Le reste selon le besoin.
+4. [`FEUILLE-DE-ROUTE.md`](FEUILLE-DE-ROUTE.md) — **ambition finale complète, construction
+   progressive par versions de plus en plus capables** (ADR-127) : jalons J1 → J5, noyau V,
+   arbitrages ouverts. Seul document qui porte la trajectoire.
+5. Le reste selon le besoin.
 
 ## Décisions d'architecture
+
+**S204 — 2026-09-13 : ambition complète rétablie, ADR-127 corrige ADR-124.**
+Clarification de l'utilisateur : ambition finale complète, construction progressive par
+versions de plus en plus capables. La lecture « δ effet borné / V au besoin gameplay »
+d'ADR-124 est **corrigée** : δ général, V, inondations complexes et grande échelle
+obligatoires ; effets bornés = étapes (J2) ; V-noyau ouvert au plus tard avec J2.
+Responsabilités, interfaces, autorité et conservation inchangées ; bancs exécutés quand ils
+tranchent ; 60 Hz/eau 2 ms et 2 % acquis, incompatibilité ⇒ arbitrage explicite.
+Nouvelle [feuille de route](FEUILLE-DE-ROUTE.md). Aucun code ; A248, L282.
+**Suite S205 : A245** (J1) ; arbitrage de l'hôte interactif à obtenir de l'utilisateur.
+127 ADR,248 angles,282 leçons,18 invariants,6 SPEC,23 cas.
+Voir [ADR-127](adr/ADR-127-ambition-complete-construction-progressive.md).
 
 **S203 — 2026-09-13 : un impact W visible, ADR-126 ; la mer S201 n'est pas composable.**
 Constat d'amorce : plancher de pente L1 de B 0,6082 à Hs1,5 > π/7 — `compose` refuse
@@ -41,6 +56,7 @@ Le coût mesuré ne garantit ni qualité ni délai ; A244 reste partielle, B3 no
 Rendu CPU S201 hors ligne, aucun budget GPU reçu.2 % physique reste acquis.
 **Suite S203 : S202-1**, impact visible W, emprise/observateur explicites, puis part
 δ éventuellement nécessaire ; V au besoin gameplay selon ADR-124.
+*⚠ S204 : corrigé par ADR-127 — δ général et V obligatoires.*
 125 ADR,244 angles,279 leçons,18 invariants,6 SPEC,23 cas ; compteur0 (δ avance).
 Voir [budget image S202](validation/BUDGET-IMAGE-S202.md), [mesures](validation/BUDGET-IMAGE-S202-MESURES.md), [ADR-125](adr/ADR-125-budget-image-60hz-deux-ms.md).
 
@@ -52,6 +68,7 @@ sur cette machine : référence d'observation, aucun budget temps réel reçu.
 Cinq tests exemple réussis ;342/cinq ignorés reste le reçu bibliothèque S200.
 **ADR-124 actée sur instruction utilisateur** : images locales permises, puis
 budget image/coût par bloc, puis δ en effets bornés et V au besoin gameplay.
+*⚠ S204 : lecture corrigée par ADR-127 — ordre de construction, pas réduction.*
 **Suite S202 : S201-1**, budget image. S200-1/S199-2 reportées, pas closes.
 B4/A50 partiels ; seuil numérique2 % acquis, aucune perception déclarée reçue.
 124 ADR,244 angles,279 leçons,18 invariants,6 SPEC,23 cas. Compteur0 : décision δ/V.
@@ -1319,7 +1336,7 @@ parfaitement stable ne pouvait pas distinguer.
 
 ## État d'avancement
 
-**État actif S203** : impact W visible dans une emprise reçue par ses coutures (ADR-126) ; la composition B+W refuse toute mer au-delà de Hs≈1,1 m (A245, prochaine étape) ; un impact visible coûte plus que 2 ms sur CPU (A247). B visible, profil60Hz/eau2ms fixé (ADR-125), coût par domaine δ exposé. Critère B4 fixé à2 %, noyau δ sans allocation dans le pas,
+**État actif S204** : ambition finale complète, jalon en cours J1 (B/W visible et interactif) selon la [feuille de route](FEUILLE-DE-ROUTE.md) (ADR-127) ; hôte interactif à arbitrer. Impact W visible dans une emprise reçue par ses coutures (ADR-126) ; la composition B+W refuse toute mer au-delà de Hs≈1,1 m (A245, prochaine étape) ; un impact visible coûte plus que 2 ms sur CPU (A247, à arbitrer). B visible, profil60Hz/eau2ms fixé (ADR-125), coût par domaine δ exposé. Critère B4 fixé à2 %, noyau δ sans allocation dans le pas,
 refus numériques atomiques reçus ; A244 partielle (précision/budget), fond coupé
 inchangé, B3 non admissible. Domaine de superposition S194 confirmé S197.
 B1/B2/B4 restent partiels, aucun banc complet. Voir le résultat en tête de cet index

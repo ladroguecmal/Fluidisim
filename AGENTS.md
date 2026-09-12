@@ -131,6 +131,14 @@ Un agent qui ouvre une copie isolée reforke, quel que soit son nom.
 
 ## Ce que tu ne décides pas
 
+**L'ambition finale est complète, et une session ne la réduit pas** *(S204,
+[`ADR-127`](docs/adr/ADR-127-ambition-complete-construction-progressive.md))*. δ général, V,
+inondations complexes et grande échelle sont obligatoires ; la construction progresse par
+versions de plus en plus capables, selon [`FEUILLE-DE-ROUTE`](docs/FEUILLE-DE-ROUTE.md). Un
+ordre, un budget ou une priorité ne retirent rien : ADR-124 a été lu ainsi pendant trois
+sessions, et l'utilisateur a dû le corriger. Une incompatibilité mesurée se remonte comme
+arbitrage explicite.
+
 **Les cinq arbitrages de design ont été tranchés en S18** ([`ADR-027`](docs/adr/ADR-027-les-cinq-arbitrages-tranches.md)),
 sur délégation explicite de l'utilisateur. Ne les rouvre pas sans qu'il le demande ; s'il les rouvre,
 ADR-027 dit pour chacun ce qu'il faudrait changer pour l'inverser.

@@ -3,7 +3,17 @@
 2026-09-11. Action S175-1. État du code vérifié sur master0b37fd2 àl’amorce.
 Ce bilan confronte les reçus S163–S175 au contrat ; aucune nouvelle simulation lancée.
 
-## État actif — S202, 2026-09-13
+## État actif — S204, 2026-09-13
+
+**Ambition complète rétablie** ([ADR-127](../adr/ADR-127-ambition-complete-construction-progressive.md),
+clarification de l'utilisateur). Les deux états précédents disaient « δ limitée au besoin
+d'effet établi » et « V attend un besoin gameplay » : **lecture corrigée**. δ général et V sont
+obligatoires ; les domaines bornés (J2) sont des cas du δ général, où B4 recevra ses volets sur
+les cas livrés sans réception globale revendiquée. S203 : impact W visible, emprise reçue par
+coutures (ADR-126). **B4/A50 partiels**, seuil 2 % acquis. Trajectoire :
+[FEUILLE-DE-ROUTE](../FEUILLE-DE-ROUTE.md).
+
+## État historique — S202, 2026-09-13
 
 **Budget d'image fixé :60 images/s, eau2 ms** (ADR-125). Le noyau publie son coût
 par domaine, pas complet mesuré ; [BUDGET-IMAGE-S202](BUDGET-IMAGE-S202.md).

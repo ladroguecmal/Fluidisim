@@ -83,3 +83,10 @@ Suite choisie par l'utilisateur : **budget d'image et cost_per_block_ms**, sur u
 cible et une charge nommées ; les≈12 s de cette référence CPU ne sont pas une promesse
 de production. Puis cadrage détaillé de δ en effets bornés et V déclenchée par besoin
 gameplay. S200-1 et S199-2 passent derrière cette direction, sans être déclarés résolus.
+
+## Note datée du 2026-09-13 (S204)
+
+« Cadrage détaillé de δ en effets bornés et V déclenchée par besoin gameplay » est une lecture
+corrigée par [ADR-127](../adr/ADR-127-ambition-complete-construction-progressive.md) sur
+clarification de l'utilisateur : la direction était un ordre de construction ; δ général et V
+restent obligatoires. Les images, paramètres et empreintes de ce document sont inchangés.
