@@ -87,11 +87,29 @@ seconde est la vraie :
       référence, mêmes métriques. Réceptions : `14³` ancré = réseau plein en bits, la
       ligne `c = 1` redonne S187 §8.4, la ligne `r` plein redonne les `eU` temporelles de
       S186. Relever.
-- [ ] **P4** — recevoir dans un document de validation ; **note corrective datée** si la loi
+- [x] **P4** — recevoir dans un document de validation ; **note corrective datée** si la loi
       change ; ADR seulement si une décision nouvelle en sort. Angles et leçons.
 - [ ] **P5** — rituel de fin (REPRISE.md §6).
 
 ### Notes de reprise
+
+P4 S188 : COMPOSITION-ANCREE-S188 §7–§8 reçus. **A232** écrite (la loi du maximum n'est
+valide que tant que les deux maxima coïncident) et **L268** écrite (un rejeu qui confirme
+transforme une coïncidence en condition — à condition d'avoir déclaré la métrique qui
+distingue les explications). **Aucun ADR** : la loi est confirmée, aucune décision
+nouvelle. ADR-118 reçoit un **suivi daté** qui lève la limite qu'il déclarait — la loi de
+S186 n'était pas rejouée sur réseau ancré, elle l'est — sans réécrire une ligne du contrat.
+Trois autres suivis datés : COMPOSITION-ERREURS-S186 (verdict confirmé, magnitudes périmées,
+exemple de dimensionnement corrigé), RESEAU-GRADUE-S187 (sa suite est réalisée, et ses
+valeurs horizontales ancrées se retrouvent exactement), BILAN-B4-S176.
+**Une correction de protocole déclarée et visible** : la réception 4 de §5 annonçait
+1,6947 % à huit nœuds par axe. C'était la mauvaise valeur de S187 — celle du tableau où
+seul le vertical était ancré. La bonne est **1,7160 %**, celle de l'ancrage horizontal, et
+c'est elle que la mesure redonne. Le fait est instructif : **une fois le vertical ancré, sa
+contribution disparaît entièrement de la norme maximum**, et les trois lignes ancrées
+(1,7160 / 3,6805 / 13,1488) sont exactement les valeurs horizontales de S187 §8.4.
+Décomptes à porter en P5, vérifiés contre le dépôt : **118 ADR, 232 angles, 268 leçons,
+18 invariants, 6 SPEC, 23 cas**.
 
 P3b S188 : `examples/anchored_composition.rs`. Deux exécutions, `diff` identique hors
 lignes de cargo ; aucune durée mesurée. Empreinte **0x21bab548c7b9775c**. Workspace

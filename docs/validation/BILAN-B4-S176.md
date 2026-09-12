@@ -198,3 +198,17 @@ rejouée. S187-1 le fait.
 **Ce que B4 attend reste un critère**, inchangé depuis S185 : `N` de SPEC-004 §6.2 est le
 seul des trois paramètres du banc que personne n'a fixé, parce que fixer une erreur
 acceptable est une décision et non une mesure. A50/B4 restent partiels, aucun solveur choisi.
+
+**Suivi S188 — 2026-09-12 :** la composition est **rejouée sur un réseau ancré**,
+[COMPOSITION-ANCREE-S188](COMPOSITION-ANCREE-S188.md). Le verdict de S186 est **inchangé mode
+par mode** et mieux satisfait, et l'on sait désormais pourquoi il tient : les maxima des deux
+erreurs vivent sur la même tranche dans 39 cases jugées sur 39, parce que `|S|` culmine sur la
+frontière haute du bloc. C'est une **condition** de validité, écrite en **A232**, et non plus
+une coïncidence. Ce que B4 y gagne : la règle de dimensionnement par parité des axes est valide
+sur les deux réseaux mesurés, et son point d'application se déplace d'un facteur ~3 avec
+l'ancrage — `c ≈ 6` au lieu de `c ≈ 20` à 125 nœuds. Conversion mesurée : **27 nœuds ancrés
+valent 125 nœuds débordants** à erreur égale.
+
+**Ce que B4 attend reste un critère**, inchangé depuis S185. S188-1 éprouve la loi sur le
+réseau **gradué**, seule configuration connue susceptible de séparer les deux maxima.
+A50/B4 restent partiels, aucun solveur choisi.

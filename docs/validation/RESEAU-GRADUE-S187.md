@@ -374,3 +374,25 @@ maximum pour les modes causaux, a été mesurée sur un réseau dont on sait mai
 concentrait son erreur sur une seule tranche. Une loi de composition mesurée sur une erreur
 concentrée n'est pas nécessairement celle d'une erreur répartie, et §8.5 montre que la
 graduation **répartit** — l'erreur de tranche haute tombe à zéro et le maximum se déplace.
+
+---
+
+**Suivi S188 — 2026-09-12 : la suite recommandée par ce document est réalisée, et une limite
+est levée.** [COMPOSITION-ANCREE-S188](COMPOSITION-ANCREE-S188.md) rejoue la composition de
+S186 sur un réseau ancré. **Le verdict est inchangé mode par mode** et mieux satisfait
+(0,895–1,060 contre 0,826–1,155 pour le maintien) : corriger le placement des nœuds a
+**resserré** la loi au lieu de la casser. La limite « la loi de composition n'est pas rejouée
+sur un réseau ancré » est donc levée.
+
+Deux chiffres de ce document se retrouvent ailleurs qu'attendu, et cela instruit. Les erreurs
+spatiales ancrées sur les **trois** axes — 1,7160 / 3,6805 / 13,1488 % à 8, 5 et 3 nœuds par
+axe — sont, au chiffre près, les valeurs du **second** tableau de §8.4, celui de l'ancrage
+horizontal à vertical plein, et non celles du premier. Autrement dit : **une fois l'axe
+vertical ancré, sa contribution disparaît entièrement de la norme maximum**, et il ne reste que
+l'erreur horizontale. C'est cohérent avec §8.4, qui relevait déjà une erreur de tranche haute
+égale à l'erreur horizontale seule dès que le vertical était ancré.
+
+Et la condition que S188 en tire (**A232**) désigne le réseau **gradué** de ce document comme
+la prochaine épreuve : c'est la seule configuration connue où le maximum de l'erreur spatiale
+se déplace vers le milieu du bloc (§8.5, tranche haute à zéro) tandis que le maximum temporel
+reste accroché à celui du champ. La loi du maximum n'y est pas mesurée.

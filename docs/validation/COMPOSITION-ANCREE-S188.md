@@ -140,3 +140,171 @@ Trois issues possibles, déclarées avant la mesure :
 - **Aucun coût.** Les nombres de nœuds sont identiques à ceux de S186 par construction, donc le
   coût de S184 s'applique sans changement. Rien n'est remesuré.
 - **Le véhicule ne projette pas** et l'advection y reste d'ordre supérieur.
+
+## 7. Relevés
+
+```
+cargo run --release --manifest-path code/Cargo.toml -p water-core --example anchored_composition
+```
+
+Bibliothèque inchangée ; workspace **331 réussis / cinq ignorés** en debug et en release.
+Bloc 16³, 2744 mailles intérieures, `dx = 0,25 m`, `dt = 10 ms`, 100 pas, mailles intérieures
+à `z ∈ [−4,05 ; −0,80] m`. `max |S| = 1,540547e-4 m/s²`,
+`max |u'(T)| = 7,993168e-5 m/s` — les valeurs de S186 et S187.
+
+Les réseaux ancrés obtenus, et il vaut la peine de les regarder : 14 nœuds → `1…14` ;
+8 → `[1, 3, 5, 7, 8, 10, 12, 14]` ; 5 → `[1, 4, 8, 11, 14]` ; 3 → `[1, 8, 14]`. L'accrochage
+aux centres de mailles produit un pas **irrégulier** — 7 puis 8 puis 10 — parce qu'un réseau
+de huit nœuds ne divise pas treize intervalles en parts égales. Ce n'est pas ce qu'on poserait
+à la main, et c'est visible plutôt que lissé.
+
+### 7.1 Réceptions — les six passent
+
+1. **Reproductibilité.** Empreinte `0x21bab548c7b9775c`, `diff` identique sur deux exécutions.
+   Aucune durée n'est mesurée : la sortie entière est un résultat.
+2. **La ligne pleine est la référence, en bits**, pour les trois modes. L'ancré à quatorze
+   nœuds *est* `axis_indices(r = 1)` : la coïncidence attendue est vérifiée, pas supposée.
+3. **Les erreurs temporelles pures sont celles de S186**, aux vingt-et-une cases : maintien
+   `c = 2` 0,7700 % et `c = 64` 33,2115 % ; extrapolation `c = 8` 0,7754 % ; interpolation
+   `c = 64` 6,7740 %. Donc aussi celles de S185. C'est le contrôle croisé qui autorise à
+   comparer les deux grilles.
+4. **L'erreur spatiale à huit nœuds par axe vaut 1,7160 %.** *Correction de protocole, à
+   déclarer et non à taire : §5 annonçait 1,6947 %, et c'était la mauvaise valeur de S187.*
+   1,6947 % est la ligne « ancrée » du premier tableau de S187 §8.4, où seul l'axe **vertical**
+   était ancré et l'horizontal restait débordant ; 1,7160 % est la ligne à huit nœuds du
+   **second** tableau, celui de l'ancrage horizontal. C'est cette dernière que S188 doit
+   redonner, puisqu'il ancre les **trois** axes — et il la redonne exactement.
+
+   Et le fait que ce soit exactement elle dit quelque chose : avec l'axe vertical ancré, la
+   contribution verticale **disparaît entièrement** de la norme maximum, et il ne reste que
+   l'erreur horizontale. Les lignes à cinq et trois nœuds sont nouvelles — S187 n'avait pas
+   mesuré l'ancrage simultané des trois axes à ces densités — et elles se lisent de la même
+   façon : 3,6805 % et 13,1488 % sont, au chiffre près, les valeurs horizontales ancrées de
+   S187 §8.4.
+5. **Plancher** de la référence à `dt/2` : **0,386 %**, celui de S186, puisque c'est la même
+   référence.
+6. **Tout est fini**, source et champ, sur les 84 cases.
+
+Et le support historique est intact : après le déplacement des indices ancrés dans `support/`,
+`cadence_error` rend `0x39567a1d4bc2ba4c`, `composed_error` rend `0x0e743846d4656870` avec une
+sortie entière identique au `diff`, et `graded_lattice` rend `0x6cf13183b4a240df`.
+
+### 7.2 L'axe spatial : les magnitudes bougent beaucoup
+
+À nombre de nœuds **identique**, `c = 1` :
+
+| ligne | nœuds/axe | nœuds | eS % | eU ancré % | eU débordant (S186) % | facteur |
+|---|---:|---:|---:|---:|---:|---:|
+| `r = 1` | 14 | 2744 | 0 | 0 | 0 | — |
+| `r = 2` | 8 | 512 | 2,0782 | **1,7160** | 2,5401 | 1,48 |
+| `r = 4` | 5 | 125 | 3,7502 | **3,6805** | 13,6043 | **3,70** |
+| `r = 8` | 3 | 27 | 13,8404 | **13,1488** | 32,9593 | 2,51 |
+
+Une conversion **mesurée**, sans interpolation : **27 nœuds ancrés (13,1488 %) valent 125
+nœuds débordants (13,6043 %)** — la même erreur pour **4,6 fois moins de nœuds**. C'est le
+gain d'ADR-118 exprimé dans la monnaie de S184, où le coût suit exactement le nombre de nœuds.
+
+**Et le point de parité se déplace.** La règle de dimensionnement de S186 §8.5 — égaliser les
+erreurs des deux axes pris seuls, puis s'arrêter — tient, mais son point d'application change.
+À 125 nœuds, l'erreur spatiale débordante de 13,60 % égalait le maintien vers `c ≈ 20` ;
+ancrée à 3,68 %, elle l'égale vers `c ≈ 6`. **Un facteur ~3 sur la cadence admissible**, et la
+conséquence de conception est directe : sur un réseau ancré, l'optimum se déplace vers **plus**
+de décimation spatiale et **moins** de réduction de cadence. L'exemple publié par S186 — « à
+`r = 2` la cadence ne devient dominante qu'à `c = 32` » — ne tient donc plus ; il devient
+`c ≈ 8` à 512 nœuds ancrés.
+
+### 7.3 Le verdict : la loi ne change pas, mode par mode
+
+Verdict global, cases jugées, avec le critère **déjà déclaré** en S186 §5 et repris tel quel :
+
+| loi | S188 (ancré) | S186 (débordant) | verdict |
+|---|---|---|---|
+| additive | 0,468 – 0,984 | 0,529 – 0,988 | **rejetée** dans les deux |
+| quadratique | 0,659 – 1,245 | 0,749 – 1,209 | **rejetée** dans les deux |
+| maximum | 0,869 – 1,707 | 0,826 – 1,489 | **rejetée** dans les deux |
+
+Par mode — le découpage qui avait rendu S186 lisible :
+
+| mode | additive | quadratique | maximum | retenue S188 | retenue S186 |
+|---|---|---|---|---|---|
+| maintien | 0,500–0,951 | 0,702–0,999 | **0,895–1,060** | **maximum** | maximum |
+| extrapolation | 0,468–0,941 | 0,659–0,998 | **0,869–1,000** | **maximum** | maximum |
+| interpolation | **0,845–0,984** | **1,017–1,245** | 1,018–1,707 | **additive, quadratique** | additive, quadratique |
+
+**Le verdict est identique, mode par mode.** Et il est **mieux satisfait** : la plage du
+maximum se resserre de 0,826–1,155 à **0,895–1,060** pour le maintien, et de 0,860–1,034 à
+**0,869–1,000** pour l'extrapolation. L'erreur concentrée du réseau débordant rendait donc la
+composition **plus bruyante**, pas plus propre — c'est l'inverse de ce qu'on pourrait craindre
+en corrigeant un montage après coup.
+
+Aux cadences hautes la loi est **exacte** : à `c = 64`, le maintien rend 33,2115 % et
+l'extrapolation 27,3202 % **aux trois lignes de réseau** — c'est-à-dire l'erreur temporelle
+pure, rapport 1,000. L'axe dominant emporte tout, littéralement.
+
+### 7.4 Pourquoi elle tient : les deux maxima n'ont pas bougé l'un par rapport à l'autre
+
+C'est la métrique ajoutée en §3 qui tranche, et elle tranche sans ambiguïté.
+
+> **La tranche qui porte le maximum est la 14 — la plus haute — dans tous les cas :** axe
+> spatial seul aux trois réseaux, axe temporel seul aux vingt-et-une cadences, et les 84 cases
+> composées. Le compte publié par le programme : **39 cases jugées sur 39 où les deux maxima
+> vivent sur la même tranche.**
+
+L'ancrage a changé la **magnitude** de l'erreur spatiale — jusqu'à 3,7 fois — mais pas
+**l'endroit** de son maximum. La raison est que cet endroit n'est pas une propriété du réseau :
+`|S|` culmine en haut du bloc parce qu'un mode profond décroît en `exp(k z)`, donc `|u'(T)|`
+culmine en haut, donc tout écart relatif à la référence y culmine aussi. Aucun réseau n'y
+change rien.
+
+C'est la **première** des trois issues déclarées en §4 — *la loi tient* — et la colonne de
+tranche montre qu'elle tient pour **la même** raison qu'en S186, pas par accident. Ce qui
+transforme le résultat de S186 d'une observation en une **condition** :
+
+> **La loi du maximum vaut tant que les maxima des deux erreurs coïncident.** Ils coïncident
+> ici parce que l'amplitude du champ est maximale sur une frontière du domaine, et que les deux
+> erreurs sont relatives à ce champ. Un contenu dont la source culminerait au **milieu** du
+> domaine, ou dont l'erreur temporelle culminerait ailleurs que l'erreur spatiale, n'est pas
+> couvert — et rien dans le corpus ne le disait (**A232**).
+
+## 8. Ce que la session conclut, et ce qu'elle laisse ouvert
+
+**Conclu.**
+
+1. **La loi de composition de S186 survit à l'ancrage**, mode par mode, sans changement :
+   maximum pour les deux modes causaux, additive et quadratique pour l'interpolation. Un
+   budget conjoint reste licite.
+2. **Elle est mieux satisfaite qu'en S186** — 0,895–1,060 contre 0,826–1,155 pour le maintien.
+   Le réseau mal placé ajoutait de la dispersion à la loi.
+3. **Elle tient parce que les deux maxima coïncident**, et ils coïncident sur la tranche haute
+   dans 39 cases jugées sur 39. C'est désormais une **condition écrite**, pas une coïncidence
+   tacite.
+4. **Les magnitudes se déplacent jusqu'à 3,7 fois**, donc le point de parité aussi : `c ≈ 20`
+   devient `c ≈ 6` à 125 nœuds. L'optimum va vers plus de décimation spatiale et moins de
+   réduction de cadence.
+5. **27 nœuds ancrés valent 125 nœuds débordants** à erreur égale — mesuré, sans interpolation.
+6. **La limite déclarée par ADR-118 est levée** : sa réception disait que la loi de S186
+   n'était pas rejouée sur un réseau ancré. Elle l'est.
+
+**Non conclu, et pas contourné.**
+
+- **Aucun seuil de justesse.** A50 attend une décision ; ce rejeu ne la prend pas, et `N` de
+  SPEC-004 §6.2 reste le seul des trois paramètres de B4 que personne n'a fixé.
+- **Rien sur le réseau gradué.** Le rejeu n'a bougé qu'une variable, volontairement. Or c'est
+  le réseau **gradué** qui répartit vraiment l'erreur — S187 §8.5 y relevait une tranche haute
+  à **zéro** — et c'est donc la seule configuration connue où les deux maxima pourraient cesser
+  de coïncider. La loi y reste à éprouver.
+- **Un seul montage, une seule profondeur de bloc.** La coïncidence des maxima est une
+  propriété de ce contenu ; §7.4 dit ce qu'il faudrait pour la rompre, la session ne le
+  construit pas.
+- **Aucun coût remesuré.** Les nombres de nœuds sont ceux de S186 par construction, donc S184
+  s'applique sans changement. Le surcoût par maille d'un réseau à poids irréguliers n'est
+  toujours pas chiffré.
+- **Le véhicule ne projette pas** et l'advection y reste d'ordre supérieur.
+
+**Suite recommandée — S189 : S188-1.** La composition sur réseau **gradué**. C'est le seul
+endroit où la condition de §7.4 peut être mise à l'épreuve plutôt que constatée : la
+graduation déplace le maximum de l'erreur spatiale vers le milieu du bloc, tandis que l'erreur
+temporelle reste accrochée au maximum du champ, en haut. Si la loi du maximum survit à cette
+séparation, elle est robuste ; si elle tombe, **A232** est confirmée et la règle de
+dimensionnement d'ADR-118 devra dire sur quel réseau elle s'applique. Les deux issues
+instruisent, et c'est ce qui fait de cette mesure la bonne suivante.

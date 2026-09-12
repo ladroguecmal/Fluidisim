@@ -100,3 +100,33 @@ contrat s'adresse au consommateur qui reste à écrire. La loi de composition de
 maximum pour les modes causaux — a été établie sur le réseau **débordant** et n'est pas
 rejouée sur un réseau ancré. Un seul montage, une seule profondeur de bloc, un seul
 instant de profil. A50 et B4 restent partiels ; aucun solveur choisi.
+
+## Suivi daté — S188, 2026-09-12 : une limite déclarée est levée
+
+*Cette section n'amende pas le contrat ci-dessus et n'en corrige aucune erreur : elle lève une
+limite que la réception déclarait, et elle est datée pour cette raison. Un ADR ne se réécrit
+pas.*
+
+La réception disait : *« La loi de composition de S186 — le maximum pour les modes causaux — a
+été établie sur le réseau débordant et n'est pas rejouée sur un réseau ancré. »*
+[COMPOSITION-ANCREE-S188](../validation/COMPOSITION-ANCREE-S188.md) l'a rejouée, à nombre de
+nœuds identique et avec le même critère de jugement. **Le verdict est inchangé mode par mode**,
+et mieux satisfait qu'en S186 : 0,895–1,060 contre 0,826–1,155 pour le maintien. La règle de
+dimensionnement par parité des axes, que le contrat suppose, est donc valide **sur les deux
+réseaux mesurés**.
+
+Deux précisions que le rejeu ajoute au contrat sans le changer.
+
+**La règle 3 — le point d'arrêt — se déplace avec l'ancrage.** L'erreur spatiale ancrée est
+jusqu'à 3,7 fois plus faible à nombre de nœuds égal, donc la parité avec l'axe temporel arrive
+plus tôt : à 125 nœuds, `c ≈ 6` au lieu de `c ≈ 20`. Le contrat dit de s'arrêter à la parité ;
+il faut la recalculer sur le réseau qu'on emploie, et non reprendre un chiffre mesuré sur un
+autre.
+
+**La règle 1 — l'ancrage — a une raison plus précise que celle écrite ci-dessus.** Le contrat
+dit de poser un nœud là où vit le maximum de la métrique. S188 mesure que ce maximum **ne
+bouge pas** quand le réseau change : il vit sur la frontière haute parce que `|S|` y culmine,
+et 39 cases jugées sur 39 le confirment. L'ancrage est donc sûr pour ce contenu, et la
+condition de validité de la loi de composition qui en découle est écrite en **A232** : elle
+demande que les maxima des deux erreurs coïncident. Le réseau **gradué** de la règle 2 est la
+seule configuration connue susceptible de les séparer, et il n'est pas mesuré.

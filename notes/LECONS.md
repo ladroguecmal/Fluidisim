@@ -4222,3 +4222,41 @@ questionne pas est rarement plus petit que celui de ce qu'on optimise.
 Voir RESEAU-GRADUE-S187 §8.4, ADR-118, A231. Même famille que L266 — une mesure n'est
 valide que dans le montage où elle a été prise, et une convention de montage en fait
 partie.
+
+## L268 — Un rejeu qui confirme n'est pas un rejeu inutile : il transforme une coïncidence en condition
+
+S188 a rejoué la grille de S186 sur un réseau corrigé, et le verdict est revenu **identique,
+mode par mode**. Un tel résultat ressemble à une session perdue. Il ne l'est pas, et ce qui
+fait la différence tient en une ligne de protocole : **la métrique ajoutée avant la mesure**.
+
+S186 publiait l'erreur par tranche, mais jamais **où** vivait le maximum dans le cas composé.
+S188 l'a relevé, et la réponse — la même tranche pour les deux erreurs, dans 39 cases jugées
+sur 39 — a converti la conclusion de S186 d'un fait mesuré en une **condition de validité** :
+la loi du maximum vaut *tant que les deux maxima coïncident*, ce qui est une propriété du
+contenu et non de la composition. Le corpus a donc gagné, sans un chiffre nouveau sur la loi,
+la connaissance de ce qui la casserait.
+
+Ce qui généralise :
+
+1. **Avant de rejouer, écrire la métrique qui distinguerait les explications possibles.** Un
+   rejeu qui ne mesure que ce que mesurait l'original ne peut rendre que deux réponses — pareil,
+   ou différent — et « pareil » n'apprend rien. S188 a déclaré trois issues en §4, dont une
+   troisième : *la loi tient mais pour une autre raison*. C'est la colonne de tranche qui
+   permettait de la distinguer, et elle a été ajoutée pour cela.
+2. **Une loi mesurée une fois est une coïncidence tant qu'on ne connaît pas son mécanisme.**
+   Le mécanisme est ce qui dit son domaine. Sans lui, on transporte la loi partout ; avec lui,
+   on sait où elle cesse — ici, dès que les deux maxima se séparent, ce que le réseau gradué de
+   S187 fait déjà.
+3. **La dispersion autour d'une loi peut venir du montage, pas de la loi.** Le réseau mal placé
+   de S186 donnait 0,826–1,155 ; le réseau ancré donne 0,895–1,060. Corriger le montage a
+   **resserré** la loi. Une plage large n'est donc pas nécessairement le bruit de la nature :
+   c'est peut-être un défaut du banc, et cela se vérifie en corrigeant le banc.
+
+Corollaire : **ne pas changer deux variables dans un rejeu.** S188 n'a bougé que le placement
+des nœuds, en conservant les nombres de nœuds, la référence, les métriques et le critère de
+jugement déjà déclarés. C'est ce qui permet d'attribuer l'écart de magnitude — jusqu'à 3,7 fois
+— au seul ancrage, et donc de lire le verdict inchangé comme une information.
+
+Voir COMPOSITION-ANCREE-S188 §7.3, §7.4 et A232. Même famille que L266 — une mesure ne vaut
+que dans son montage — et que L267, qui en est le cas où la convention du montage était
+l'erreur.

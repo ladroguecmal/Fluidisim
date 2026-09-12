@@ -442,3 +442,36 @@ trouvé que dégrader la cadence peut réduire l'erreur totale. S187 §8.2 trouv
 phénomène entre les axes d'espace : l'erreur isotrope est **sous** celle de l'axe vertical
 seul aux trois ratios (2,54 contre 2,66 ; 13,60 contre 15,41 ; 32,96 contre 45,51 %).
 Le piège de réglage de A229 est donc aussi interne à une seule grandeur.
+
+---
+
+**Suivi S188 — 2026-09-12 : la loi de ce document survit à l'ancrage, ses magnitudes non.**
+[COMPOSITION-ANCREE-S188](COMPOSITION-ANCREE-S188.md) rejoue la grille ci-dessus sur un réseau
+**ancré** (ADR-118), à nombre de nœuds identique et avec la même référence, les mêmes
+métriques et le **même** critère de jugement.
+
+**Le verdict est inchangé, mode par mode** — maximum pour le maintien (0,895–1,060) et
+l'extrapolation (0,869–1,000), additive et quadratique pour l'interpolation (0,845–0,984 et
+1,017–1,245) — et il est **mieux satisfait** : la plage du maximum se resserre de 0,826–1,155 à
+0,895–1,060. Le réseau débordant ajoutait de la dispersion à la loi, il ne la créait pas.
+
+**Et l'on sait maintenant pourquoi elle tient.** La tranche qui porte le maximum est la plus
+haute du bloc — la 14 — pour l'axe spatial seul, pour l'axe temporel seul et pour les 84 cases
+composées : **39 cases jugées sur 39**. L'ancrage a changé la magnitude de l'erreur spatiale,
+pas l'endroit de son maximum, parce que cet endroit est une propriété du **contenu** et non du
+réseau. D'où une condition, désormais écrite (**A232**) : **la loi du maximum vaut tant que les
+deux maxima coïncident.**
+
+**Ce qui est périmé ici, et qu'il faut lire dans S188 :**
+
+- §8.3, les trois erreurs spatiales 2,5401 / 13,6043 / 32,9593 % valent pour le réseau
+  débordant. Ancrées, à nombre de nœuds identique : **1,7160 / 3,6805 / 13,1488 %**, soit des
+  facteurs 1,48 / **3,70** / 2,51 ;
+- §8.5, l'exemple de dimensionnement — « à `r = 2` la cadence ne devient dominante qu'à
+  `c = 32` » — **ne tient plus** : c'est `c ≈ 8` à 512 nœuds ancrés. Plus généralement le point
+  de parité passe de `c ≈ 20` à `c ≈ 6` à 125 nœuds. **La règle tient, son point d'application
+  se déplace d'un facteur ~3**, et l'optimum va vers plus de décimation spatiale et moins de
+  réduction de cadence.
+
+Rien n'est réécrit : les chiffres ci-dessus mesurent correctement le réseau qu'ils ont employé,
+et la réception croisée de S188 les redonne à la décimale.

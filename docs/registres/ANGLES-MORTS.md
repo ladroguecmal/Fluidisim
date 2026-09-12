@@ -2360,3 +2360,35 @@ d'espace en tenant l'autre peut voir l'erreur monter. Voir RESEAU-GRADUE-S187 §
   l'interprétation de magnitudes de conception qui l'est. Corrigé par
   [ADR-118](../adr/ADR-118-le-reseau-d-echantillonnage-ancre-et-gradue.md).
   Chiffres et conditions dans RESEAU-GRADUE-S187 §8.4.
+
+**Suivi A50 — S188 : la loi de composition survit à l'ancrage, et l'on sait maintenant
+pourquoi.** [COMPOSITION-ANCREE-S188](../validation/COMPOSITION-ANCREE-S188.md) rejoue la
+grille de S186 sur un réseau ancré (ADR-118), à nombre de nœuds identique. Verdict
+**inchangé mode par mode** — maximum pour les deux modes causaux, additive et quadratique
+pour l'interpolation — et **mieux satisfait** : 0,895–1,060 contre 0,826–1,155 pour le
+maintien. Les magnitudes, elles, changent jusqu'à **3,7 fois**, donc le point de parité
+entre les deux axes passe de `c ≈ 20` à `c ≈ 6` à 125 nœuds : l'optimum va vers **plus** de
+décimation spatiale et **moins** de réduction de cadence. Conversion mesurée : **27 nœuds
+ancrés valent 125 nœuds débordants** à erreur égale. La limite déclarée par ADR-118 — la loi
+non rejouée sur un réseau ancré — est **levée**. A50 attend toujours son seul manque : un
+**critère de justesse**.
+
+- **A232** *(sévérité 2, S188 ; ouverte)* — **La loi de composition en norme maximum n'est
+  valide que tant que les maxima des deux erreurs coïncident, et rien dans le corpus ne le
+  disait.** S186 avait conclu que l'erreur spatiale et l'erreur temporelle se composent
+  selon le **maximum** pour les modes causaux ; S188 confirme le verdict et en trouve la
+  raison : la tranche qui porte le maximum est la même — la plus haute du bloc — pour l'axe
+  spatial seul, pour l'axe temporel seul et pour les 84 cases composées (**39 cases jugées
+  sur 39**). Ce n'est pas une propriété de la composition, c'est une propriété du
+  **contenu** : `|S|` culmine en haut parce qu'un mode profond décroît en `exp(k z)`, donc
+  `|u'|` y culmine, donc tout écart relatif y culmine. Deux erreurs qui culminent au même
+  endroit s'y rencontrent, et la plus grande gagne — d'où le maximum. **Ce qui n'est pas
+  couvert** : un contenu dont la source culminerait au milieu du domaine, ou une
+  configuration qui séparerait les deux maxima. Le dépôt en connaît déjà une, et elle n'est
+  pas mesurée : le réseau **gradué** de S187, dont §8.5 relève une erreur de tranche haute
+  **nulle** — le maximum spatial se déplace vers le milieu du bloc tandis que le maximum
+  temporel reste accroché à celui du champ, en haut. Si la loi tombe là, la règle de
+  dimensionnement d'ADR-118 devra dire **sur quel réseau** elle s'applique. Sévérité 2 :
+  aucune valeur publiée n'est fausse, aucun contrat ne change, et la loi est vérifiée sur
+  les deux réseaux mesurés ; c'est son domaine de validité qui était tacite.
+  Chiffres et conditions dans COMPOSITION-ANCREE-S188 §7.3 et §7.4.
