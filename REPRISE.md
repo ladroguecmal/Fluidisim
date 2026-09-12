@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 01:35 +02:00
+JETON            : libre
+Battement        : 2026-09-13 01:37 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S204 — décision corrective d'ADR-124 (clarification utilisateur d'ambition)
-Dernière session : S203 — impact W visible, emprise par coutures (ADR-126) ; A245 trouvée
-Session suivante : S204 — A245 : composition B+W sur mer Hs > 1,1 m (file active, code src)
-Maillons        : 0 — ADR-126 fixe un élément de W (§6.8) ; l'outil, qui ne voit que le code, dirait 1
+Session en cours : aucune
+Dernière session : S204 — ADR-127 : ambition complète, construction progressive ; feuille de route
+Session suivante : S205 — A245 : composition B+W sur mer Hs > 1,1 m (J1, file active, code src)
+Maillons        : 0 — S204 sujet imposé par l'utilisateur, pas un reliquat ; ADR-127 fixe δ/V
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 

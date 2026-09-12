@@ -10616,3 +10616,50 @@ l'effet δ d'impact (cavité eulérienne ou gerbe particulaire). V attend un bes
 conservées. A246 traitée par ADR-126. L280, L281. 126 ADR, 247 angles, 281 leçons,
 18 invariants, 6 SPEC, 23 cas. Compteur 0 : ADR-126 fixe un élément de W (§4). I-18 relu :
 l'invariant est juste, le terme de B l'enfreint — rien à amender, un code à corriger.
+
+## S204 — 2026-09-13 — Ambition finale complète, construction progressive : ADR-127 corrige ADR-124
+
+**Entrée.** Clarification de l'utilisateur, reçue après S203 : les ambitions initiales restent
+intégralement maintenues — interactions volumiques générales, inondations complexes, V, grande
+échelle ; « image → budget → effets bornés » est un ordre de construction, pas une réduction ;
+Codex a interprété trop largement ADR-124 et l'a reconnu en conversation sans l'appliquer.
+Formulation de référence : *ambition finale complète, construction progressive par versions de
+plus en plus capables*. État réel vérifié avant tout : master 5a4ba1e propre, trois copies
+isolées à 5a4ba1e propres, jeton libre, aucun travail concurrent. Plan seul 9edc116.
+
+**Constat.** Lecture restrictive dans 18 fichiers (58 occurrences), dont ADR-124, ADR-125
+§35-36, la file active, REPRISE, l'index, PLAN-BENCHMARK, BILAN-B4-S176, IMAGE-B-S201,
+BUDGET-IMAGE-S202 et **IMPACT-W-S203, écrit par cet agent en S203**. Aucun fichier
+« roadmap » : la trajectoire était dispersée entre ADR-053 §3, ADR-054 §3, ADR-124 et
+l'en-tête de REPRISE.
+
+**Décision : ADR-127 actée.** D1 ambition complète obligatoire ; D2 jalons J1 (B/W visible et
+interactif) → J2 (domaines bornés, cas du δ général) → J3 (phénomènes, interactions, frontières
+mobiles) → J4 (V et inondations complexes, articulation volumétrique) → J5 (ambition complète) ;
+D3 un domaine borné passe par les interfaces du système, S199-2/S200-1 sur le chemin ; D4
+V-noyau ouvert au plus tard avec J2, il ne dépend pas de δ (ADR-054 §1, C12) ; D5 rôles,
+autorité (I-04, I-10, I-11, I-15, I-17), conservation inchangés ; D6 bancs exécutés quand ils
+tranchent ; D7 budget = cible confrontée aux scènes représentatives, incompatibilité ⇒
+arbitrage explicite, à l'utilisateur si l'option retire de l'ambition. §6 : réduire l'ambition
+n'appartient à aucune session.
+
+**Propagation.** Note de renvoi datée en tête d'ADR-124, note corrective ADR-125. Nouvelle
+`docs/FEUILLE-DE-ROUTE.md`, seul porteur de la trajectoire (état daté par jalon, bancs rattachés
+aux décisions, arbitrages). REPRISE (en-tête, file active, §3, §4, marqueurs sur S201/S202),
+file active (direction, A245 bloquant J1, A247 à arbitrer, hôte interactif, S200-1 et S199-2 sur
+le chemin de J2, V-noyau obligatoire, bancs), AGENTS (« Ce que tu ne décides pas »),
+PLAN-BENCHMARK B3, BILAN-B4-S176 état actif, index, README, notes datées S201–S203.
+Rien supprimé, aucun ADR réécrit, aucun code.
+
+**Arbitrage à obtenir de l'utilisateur : l'hôte interactif de J1.** Le workspace est sans
+dépendance (ADR-020) ; une fenêtre temps réel demande soit des dépendances (téléchargement,
+infrastructure), soit des appels système sans dépendance. Non tranché, remonté.
+
+**Suite S205 : A245**, composition B+W sur mer Hs > 1,1 m — bloquant J1, lot bibliothèque.
+
+**Rituel.** A248 (un ordre inscrit comme périmètre, propagé sous l'autorité de l'utilisateur),
+L282. 127 ADR, 248 angles, 282 leçons, 18 invariants, 6 SPEC, 23 cas. Invariants cités relus
+(I-03, I-04, I-05, I-10, I-11, I-15, I-17) : aucun ne devient faux ; I-05 (sous-résoudre pour
+tenir le budget) est cohérent avec D7. File active entière relue. Compteur 0 : sujet imposé par
+l'utilisateur, pas un reliquat ; ADR-127 fixe le périmètre de δ et V. Mémoire privée du compte
+mise à jour (pointeur, le dépôt fait foi).

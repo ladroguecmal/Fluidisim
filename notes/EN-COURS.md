@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S204 — en cours
+Session : S204 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : porter la **clarification de l'utilisateur** du 2026-09-13 — ambition finale
 complète, construction progressive par versions de plus en plus capables — dans une
@@ -94,7 +94,7 @@ BUDGET-IMAGE-S202, IMPACT-W-S203 et le journal — **y compris mes propres texte
  datés sur S201–S203), QUESTIONS-OUVERTES (direction, lignes δ/A244/S199-2/V/S202-1),
  AGENTS (« Ce que tu ne décides pas »), PLAN-BENCHMARK B3, BILAN-B4-S176, 00_INDEX, README,
  notes datées en fin d'IMAGE-B-S201, BUDGET-IMAGE-S202, IMPACT-W-S203.
-- [ ] **P5** — rituel §6 : journal, angle mort, leçon, décomptes (127 ADR attendus), file
+- [x] **P5** — rituel §6 : journal, angle mort, leçon, décomptes (127 ADR attendus), file
  active entière, invariants cités relus, compteur, jeton libre, copies avancées.
 
 ### Notes de reprise
@@ -109,3 +109,10 @@ articulation avec la représentation volumétrique ; (5) ambitions initiales com
 toute fin. » ADR-054 §1 : V constructible indépendamment de δ (C12 cas V seul).
 ADR-001 : δ solveur 3D à surface libre, jamais autoritaire ; V graphe entier, serveur
 autoritaire, peut exposer une surface et déclencher un domaine δ local.
+
+P2 e0f0a3c : ADR-127 (D1–D7, arbitrages §5, réversibilité §6), renvoi daté ADR-124, note
+ADR-125. P3 0005e9c : FEUILLE-DE-ROUTE (J1–J5, V-noyau au plus tard avec J2). P4 bb14888 :
+REPRISE, file active, AGENTS, PLAN-BENCHMARK, BILAN-B4-S176, index, README, notes S201–S203.
+P5 : journal, A248, L282 ; 127 ADR / 248 angles / 282 leçons vérifiés ; occurrences restantes
+toutes citées ou marquées. **Arbitrage remonté à l'utilisateur : hôte interactif de J1.**
+Non fait : recherche d'autres décisions de priorité ayant retiré du périmètre (A248).

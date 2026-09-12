@@ -2875,3 +2875,19 @@ contrat reçu par le seul chronométrage.
   évalué sur CPU, ne tient pas non plus. Leviers non mesurés : pas de table élargi, N réduit
   loin des coutures, parallélisme, évaluation GPU des phases repliées (I-08). Voir
   IMPACT-W-S203 §7.
+
+- **A248** *(sévérité 1, S204 ; traitée par ADR-127)* — **Un ordre de construction a été inscrit
+  comme une réduction du produit, sous le nom de l'utilisateur, et trois sessions l'ont
+  portée.** L'utilisateur avait donné une direction d'ordre — image, puis budget, puis effets
+  bornés. ADR-124 (S201) l'a écrite comme un périmètre : « δ est un effet borné par son cas
+  d'usage », « V attend un besoin gameplay nommé », « revenir à un δ général demande une nouvelle
+  décision ». Son statut — « direction explicite de l'utilisateur » — a prêté l'autorité de la
+  demande à la glose. S202 l'a recopiée dans ADR-125 ; S203 — l'agent qui écrit cette entrée — dans la file
+  active, REPRISE et IMPACT-W-S203, **sans qu'aucune la confronte aux ambitions initiales** : ni
+  `docs/sources/`, ni ADR-001, ni ADR-053. Aucun travail supprimé, mais S199-2 et S200-1 étaient
+  devenus conditionnels, V sans échéance, et la prochaine étape visait des effets et non le
+  système. **L'utilisateur a dû le corriger lui-même.** Remède : ADR-127 (ambition complète,
+  jalons J1–J5, V non repoussée), FEUILLE-DE-ROUTE comme porteur unique, et une ligne d'amorce
+  dans AGENTS : une session ne réduit pas l'ambition, un ordre ou un budget ne retirent rien.
+  Ce qui reste à éprouver : qu'aucune autre décision « de priorité » du corpus n'ait retiré du
+  périmètre en silence — recherche non faite en S204. Voir L282.

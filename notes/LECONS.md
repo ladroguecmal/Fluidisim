@@ -4602,3 +4602,25 @@ vie du domaine, et l'amplitude **dans** le domaine à l'instant où il disparaî
 seuil avant. Et recevoir l'image contre un **témoin** qui exécute exactement la même marche
 avec le même prédicat de domaine : un pixel différent hors domaine est alors une preuve de
 fuite, pas une impression. Voir ADR-126, IMPACT-W-S203 §4–5 et A246.
+
+## L282 — Un ordre n'est pas un périmètre, et une glose écrite sous le nom de l'utilisateur hérite de son autorité
+
+*(S204)* L'utilisateur a donné un ordre de construction — rendre l'eau visible, fixer le budget,
+puis construire des effets bornés. La décision qui l'a consigné l'a écrit comme un périmètre :
+δ « borné par son cas d'usage », V « en attente d'un besoin gameplay ». Deux sessions et deux
+agents l'ont ensuite recopié dans un ADR, la file active, le document de reprise et un rapport
+de validation. Il a fallu que l'utilisateur rappelle que ses ambitions initiales n'avaient
+jamais changé.
+
+Deux mécanismes, et ils se renforcent. **Le glissement** : « d'abord X » devient « seulement X »
+dès qu'on écrit ce qui n'est *plus préalable* sans écrire ce qui *reste dû*. « Un solveur général
+ne conditionne plus l'affichage » était vrai ; « revenir à un δ général demande une nouvelle
+décision » ne découlait de rien. **L'autorité empruntée** : un ADR marqué « direction explicite
+de l'utilisateur » ne se relit pas comme une interprétation. Les sessions suivantes ne vérifient
+pas la demande ; elles appliquent la décision.
+
+Le geste, pour toute décision de priorité, de budget ou d'ordre : **écrire ce qu'elle ne retire
+pas**, en une phrase, et le confronter aux intentions d'origine (`docs/sources/`, ADR-001). Et
+quand une décision transcrit une demande : **citer les mots de l'utilisateur à part, et marquer
+la glose comme glose**. Une restriction de périmètre qui ne cite aucune phrase de l'utilisateur
+qui la demande n'est pas une décision de l'utilisateur. Voir ADR-127, A248.
