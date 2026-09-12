@@ -87,7 +87,7 @@ Le lot ne migre pas ce terme (bits changés, lot propre) ; il le chiffre et le s
 - [x] **P3b** *(ajoutée après P3)* — deux contrôles avant de retenir l'emprise : accord
  N256/N512 dans R aux instants rendus (+1/+3/+6 s) ; homothétie à λ×2 sur le critère
  relatif (R×2, A×√2, même N attendu). Si l'un échoue, retenir N512 A64 R60 et le dire.
-- [ ] **P4** — image : B+W par `Prepared::sample_world_batch` dans R, B seul hors R ;
+- [x] **P4** — image : B+W par `Prepared::sample_world_batch` dans R, B seul hors R ;
  bornes de marche B+W conservatrices ; trois instants + témoin sans impact ; zéro rayon
  non résolu ; tout pixel différent du témoin doit avoir échantillonné dans R (contrôle).
 - [ ] **P5** — observateur et coût : pixels par λ au point d'impact, distance où λ < 2 px
@@ -150,3 +150,19 @@ N256 bord 1,8971 → 1,8971 %, horizon 1,4563 → 1,4753 % ; N512 (R55→110, A6
 **Emprise retenue : N256, R = 52 m, A = 56 s.** Forme sans dimension, pour le critère relatif
 2 % : R ≈ 15,5 λ, A ≈ 96·√(λ/g), N ≥ 256 ; le seuil absolu 3 mm devient liant quand
 η₀ > 0,15 m (η₀ ∝ √E/λ). Aucun contrôle ne porte sur l'observabilité réelle de 3 mm.
+
+P4 : caméra/marche/PPM S201 sortis dans `examples/support/ray_view.rs` (une implémentation) ;
+**S201 reproduite au bit** après extraction : t12 Hs1,5 0xa52ff81902b150c3, 10 021 895 évals
+(11 787 ms). `render <dir> <âge>` rend impact (B+W par `Prepared::sample_world_batch` dans
+R, B hors R) et témoin (même marche, mêmes bornes B+W, même prédicat, B partout). Neuf tests
+exemple. **+3 s** (t = 15 s) : impact 289 260 rayons eau, 0 non résolu, 0 refus, 9 495 898 évals
+dont 5 062 984 B+W, 125 979 px touchés, 56 739 ms, 0x3dba0d3acf15447a ; témoin 10 583 ms,
+0x14271a7145740ba1 ; **8 640 px différents, 0 hors emprise** ; écart max 18 niveaux (L),
+1 902 px ≥ 3 niveaux. Anneaux lisibles à l'œil au centre (≈320,220), zoom ×3 inspecté.
+**+1 s** (t = 13 s) : impact 289 269 eau, 0/0, 9 499 461 évals dont 5 075 829 B+W, 55 191 ms,
+0xae92143729673447 ; témoin 10 508 ms, 0xdb298dee39248f0d ; 6 780 px différents, 0 hors R.
+**+6 s** (t = 18 s) : impact 289 245 eau, 0/0, 9 490 157 évals dont 5 064 027 B+W, 58 172 ms,
+0x7e057b5f0ccac53e ; témoin 10 621 ms, 0x590a5964b0a93cf0 ; 15 737 px différents, 0 hors R.
+Résidu max 3 mm partout ; 125 979 px touchent l'emprise (27,3 % de l'image). Anneaux plus
+discrets à +1 s, étendus et déformant le reflet solaire à +6 s (zooms inspectés).
+Coût image B+W ≈ 5,3× le témoin : ≈ 9 µs par évaluation B+W N256 sur ce CPU (brut, P5 mesure).

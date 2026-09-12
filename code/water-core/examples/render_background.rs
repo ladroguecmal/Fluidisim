@@ -1,9 +1,12 @@
 //! S201 : image locale CPU du vrai champ B. Aucun GPU, aucune dépendance.
 #[path = "../../water-harness/src/host_impl.rs"]
 mod host_impl;
+#[path = "support/ray_view.rs"]
+mod ray_view;
+use ray_view::*;
 use std::{
     fs::File,
-    io::{self, BufWriter, Write},
+    io::{BufWriter, Write},
     time::Instant,
 };
 use water_core::{
@@ -11,134 +14,6 @@ use water_core::{
     background_spectrum::{self, Recipe},
     HostServices, SeaState, SimTime, WorldPos,
 };
-type V = [f64; 3];
-fn dot(a: V, b: V) -> f64 {
-    a.iter().zip(b).map(|(x, y)| x * y).sum()
-}
-fn add(a: V, b: V) -> V {
-    [a[0] + b[0], a[1] + b[1], a[2] + b[2]]
-}
-fn mul(a: V, s: f64) -> V {
-    [a[0] * s, a[1] * s, a[2] * s]
-}
-fn unit(a: V) -> V {
-    mul(a, 1. / dot(a, a).sqrt())
-}
-fn cross(a: V, b: V) -> V {
-    [
-        a[1] * b[2] - a[2] * b[1],
-        a[2] * b[0] - a[0] * b[2],
-        a[0] * b[1] - a[1] * b[0],
-    ]
-}
-fn mix(a: V, b: V, t: f64) -> V {
-    add(mul(a, 1. - t), mul(b, t))
-}
-struct Camera {
-    origin: V,
-    forward: V,
-    right: V,
-    up: V,
-}
-impl Camera {
-    fn new(origin: V, target: V) -> Self {
-        let forward = unit(add(target, mul(origin, -1.)));
-        let right = unit(cross(forward, [0., 0., 1.]));
-        let up = cross(right, forward);
-        Self {
-            origin,
-            forward,
-            right,
-            up,
-        }
-    }
-    fn ray(&self, x: f64, y: f64, w: usize, h: usize) -> V {
-        let half = (50f64.to_radians() / 2.).tan();
-        unit(add(
-            self.forward,
-            add(
-                mul(
-                    self.right,
-                    (2. * x / w as f64 - 1.) * w as f64 / h as f64 * half,
-                ),
-                mul(self.up, (1. - 2. * y / h as f64) * half),
-            ),
-        ))
-    }
-}
-enum Trace {
-    Water {
-        distance: f64,
-        normal: V,
-        residual: f64,
-    },
-    Sky,
-    Unresolved,
-}
-// Pas conservatif : |d(z-eta)/ds| <= |dz| + borne_pente*|dxy|.
-// La borne vient des composantes réellement cuites, aucun maillage approximant B.
-fn trace(
-    origin: V,
-    dir: V,
-    height: f64,
-    slope: f64,
-    mut sample: impl FnMut(V) -> (f64, V),
-) -> Trace {
-    if dir[2] >= -1e-8 {
-        return Trace::Sky;
-    }
-    let mut distance = ((origin[2] - height) / -dir[2]).max(0.);
-    let end = ((origin[2] + height) / -dir[2]).min(600.);
-    let speed = dir[2].abs() + slope * dir[0].hypot(dir[1]);
-    for _ in 0..4096 {
-        if distance > end {
-            return Trace::Sky;
-        }
-        let p = add(origin, mul(dir, distance));
-        let (eta, n) = sample(p);
-        let f = p[2] - eta;
-        if f.abs() < 0.003 {
-            return Trace::Water {
-                distance,
-                normal: n,
-                residual: f.abs(),
-            };
-        }
-        if f < 0. {
-            return Trace::Unresolved;
-        }
-        distance += 0.85 * f / speed;
-    }
-    Trace::Unresolved
-}
-fn sky(d: V) -> V {
-    let t = d[2].max(0.).sqrt();
-    let base = mix([0.66, 0.78, 0.84], [0.10, 0.28, 0.49], t);
-    let sun = unit([0.22, 0.95, 0.25]);
-    add(base, mul([5., 3.6, 2.1], dot(d, sun).max(0.).powf(900.)))
-}
-fn shade(dir: V, n: V, distance: f64) -> V {
-    let reflection = add(dir, mul(n, -2. * dot(dir, n)));
-    let fresnel = 0.02 + 0.98 * (1. - (-dot(dir, n)).clamp(0., 1.)).powi(5);
-    let light = 0.45 + 0.55 * dot(n, unit([-0.4, 0.1, 1.])).max(0.);
-    let water = mix(mul([0.012, 0.15, 0.18], light), sky(reflection), fresnel);
-    mix(water, [0.66, 0.78, 0.84], 1. - (-distance / 230.).exp())
-}
-fn byte(x: f64) -> u8 {
-    (255. * (x / (1. + x)).max(0.).powf(1. / 2.2))
-        .round()
-        .clamp(0., 255.) as u8
-}
-fn ppm(mut w: impl Write, width: usize, height: usize, rgb: &[u8]) -> io::Result<()> {
-    if rgb.len() != width * height * 3 {
-        return Err(io::Error::new(
-            io::ErrorKind::InvalidInput,
-            "dimensions RGB",
-        ));
-    }
-    write!(w, "P6\n{width} {height}\n255\n")?;
-    w.write_all(rgb)
-}
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<_> = std::env::args().collect();
     let path = args.get(1).map(String::as_str).unwrap_or("background.ppm");
@@ -250,9 +125,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut file = BufWriter::new(File::create(path)?);
     ppm(&mut file, w, h, &rgb)?;
     file.flush()?;
-    let hash = rgb.iter().fold(0xcbf29ce484222325u64, |h, b| {
-        (h ^ *b as u64).wrapping_mul(0x100000001b3)
-    });
+    let hash = fnv(&rgb);
     println!(
         "image={path} {w}x{h} t={seconds}s Hs={hs}m Tp=6s N=32 seed=201 recipe=0x{:016x}",
         cooked.hash()

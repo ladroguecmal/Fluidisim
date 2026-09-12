@@ -6,15 +6,36 @@
 //! `render <ppm> <secondes après naissance> [temoin]`, `cost` (coût par point).
 #[path = "../../water-harness/src/host_impl.rs"]
 mod host_impl;
+#[path = "support/ray_view.rs"]
+mod ray_view;
+use ray_view::*;
+use std::{
+    fs::File,
+    io::{BufWriter, Write},
+    time::Instant,
+};
 use water_core::{
     background::Background,
     background_spectrum::{self, Cooked, Recipe},
     impact_field::{Medium, BREAKING_SLOPE},
     impact_generator::{self, Entry},
+    prepared_water::{BoundBackground, Context, Prepared},
     radial_impact::{Domain, RadialImpact},
     wave_event::{Impact, Origin, WaveEvent},
-    FrameId, HostServices, SeaState, SimTime, WorldPos,
+    wave_journal::{Cause, Journal},
+    FrameId, HostServices, SeaState, SimTime, WaterSample, WorldPos,
 };
+
+/// Emprise retenue en S203 (P3/P3b) : premier candidat qui passe les deux coutures au critère
+/// déclaré, accord N256/N512 à 0,1 µm, homothétie reçue à λ×2.
+pub const EMPRISE_N: usize = 256;
+pub const EMPRISE_RADIUS_M: f32 = 52.0;
+pub const EMPRISE_AGE_US: u64 = 56_000_000;
+/// Observateur S201, inchangé : la comparaison des images reste possible.
+pub const CAMERA_ORIGIN: V = [0., -18., 7.];
+pub const CAMERA_TARGET: V = [0., 35., 0.];
+pub const WIDTH: usize = 640;
+pub const HEIGHT: usize = 360;
 
 /// Recette S201 inchangée sauf Hs : à 1,5 m le plancher L1 de B vaut 0,6082 > π/7 et la
 /// composition refuse chaque point avant tout impact (constat S203, EN-COURS).
@@ -459,6 +480,183 @@ fn controls_report() -> Result<(), String> {
     Ok(())
 }
 
+#[derive(Default, Debug)]
+pub struct RenderStats {
+    pub water: u64,
+    pub unresolved: u64,
+    pub refused: u64,
+    pub evaluations: u64,
+    pub w_evaluations: u64,
+    pub max_residual: f64,
+    pub touched_pixels: u64,
+    pub render_ms: f64,
+}
+
+/// Rend l'observateur S201 à `naissance + age`. Dans l'emprise, B+W par le chemin hôte
+/// `Prepared::sample_world_batch` ; hors emprise, B seul. `with_w = false` rend le **témoin** :
+/// même marche, mêmes bornes, même prédicat d'emprise, mais B partout. Hors emprise, les deux
+/// rendus exécutent donc exactement les mêmes opérations.
+pub fn render(sc: &Scene, age_us: u64, with_w: bool) -> Result<(Vec<u8>, Vec<bool>, RenderStats), String> {
+    if age_us > EMPRISE_AGE_US {
+        return Err("instant hors de l'horizon de l'emprise".into());
+    }
+    let domain = Domain {
+        radius: EMPRISE_RADIUS_M,
+        age_us: EMPRISE_AGE_US,
+    };
+    let field = RadialImpact::<EMPRISE_N>::new(sc.event, sc.medium, domain).map_err(|e| format!("champ {e:?}"))?;
+    let mut slots = vec![None; 1];
+    let mut journal = Journal::new(0, &mut slots);
+    journal
+        .confirm(
+            0,
+            Cause {
+                entity: 0,
+                command: 0,
+                emission: 0,
+            },
+            sc.event,
+        )
+        .map_err(|e| format!("journal {e:?}"))?;
+    let mut pool: Vec<Option<RadialImpact<EMPRISE_N>>> = (0..1).map(|_| None).collect();
+    let context = Context {
+        frame: FRAME,
+        cell: CELL,
+        medium: sc.medium,
+        domain,
+    };
+    let prepared = Prepared::build(&journal, &mut pool, context).map_err(|e| format!("préparation {e:?}"))?;
+    let bound = BoundBackground::new(&sc.background, FRAME, CELL);
+    let time = SimTime(BIRTH.0 + age_us);
+    // Bornes de marche B+W dans les deux rendus : c'est ce qui rend le témoin comparable.
+    let height = height_bound(&sc.cooked) + radial_height_bound(&field)?;
+    let slope = sc
+        .cooked
+        .components()
+        .iter()
+        .map(|c| c.amplitude.abs() as f64 * c.k_turns_per_m as f64 * std::f64::consts::TAU)
+        .sum::<f64>()
+        + field.slope_bound() as f64;
+    let camera = Camera::new(CAMERA_ORIGIN, CAMERA_TARGET);
+    let mut stats = RenderStats::default();
+    let mut rgb = Vec::with_capacity(WIDTH * HEIGHT * 3);
+    let mut touched_map = Vec::with_capacity(WIDTH * HEIGHT);
+    let mut out = [WaterSample::default()];
+    let mut scratch = [WaterSample::default()];
+    let start = Instant::now();
+    for y in 0..HEIGHT {
+        for x in 0..WIDTH {
+            let mut color = [0.; 3];
+            let mut touched = false;
+            for (ox, oy) in [(0.25, 0.25), (0.75, 0.75)] {
+                let dir = camera.ray(x as f64 + ox, y as f64 + oy, WIDTH, HEIGHT);
+                let hit = trace(camera.origin, dir, height, slope, |p| {
+                    stats.evaluations += 1;
+                    let world = WorldPos::from_metres(p[0], p[1], 0.);
+                    let local = sc.background.local_point(world).expect("rayon dans le référentiel");
+                    let inside = field.admits(FRAME, CELL, [local[0], local[1]]);
+                    touched |= inside;
+                    if with_w && inside {
+                        stats.w_evaluations += 1;
+                        match prepared.sample_world_batch(&bound, &[world], time, BREAKING_SLOPE, &mut out, &mut scratch) {
+                            Ok(_) => (out[0].eta as f64, out[0].normal.map(|v| v as f64)),
+                            Err(_) => {
+                                // Refus de composition : le rayon est déclaré non résolu, jamais
+                                // remplacé par B en silence.
+                                stats.refused += 1;
+                                (p[2] + 1.0, [0., 0., 1.])
+                            }
+                        }
+                    } else {
+                        let s = sc.background.eval(world, time).expect("rayon dans le domaine de B");
+                        (s.eta as f64, s.normal.map(|v| v as f64))
+                    }
+                });
+                let c = match hit {
+                    Trace::Water {
+                        distance,
+                        normal,
+                        residual,
+                    } => {
+                        stats.water += 1;
+                        stats.max_residual = stats.max_residual.max(residual);
+                        shade(dir, normal, distance)
+                    }
+                    Trace::Sky => sky(dir),
+                    Trace::Unresolved => {
+                        stats.unresolved += 1;
+                        [1., 0., 1.]
+                    }
+                };
+                color = add(color, mul(c, 0.5));
+            }
+            stats.touched_pixels += touched as u64;
+            touched_map.push(touched);
+            rgb.extend(color.map(byte));
+        }
+    }
+    stats.render_ms = start.elapsed().as_secs_f64() * 1000.;
+    Ok((rgb, touched_map, stats))
+}
+
+fn write_ppm(path: &std::path::Path, rgb: &[u8]) -> Result<(), String> {
+    if let Some(parent) = path.parent().filter(|p| !p.as_os_str().is_empty()) {
+        std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+    }
+    let mut file = BufWriter::new(File::create(path).map_err(|e| e.to_string())?);
+    ppm(&mut file, WIDTH, HEIGHT, rgb).map_err(|e| e.to_string())?;
+    file.flush().map_err(|e| e.to_string())
+}
+
+/// Pixels différents du témoin dont aucun échantillon n'est tombé dans l'emprise : doit valoir 0.
+pub fn differing_outside(a: &[u8], b: &[u8], touched: &[bool]) -> (u64, u64) {
+    let mut differing = 0;
+    let mut outside = 0;
+    for (i, t) in touched.iter().enumerate() {
+        if a[3 * i..3 * i + 3] != b[3 * i..3 * i + 3] {
+            differing += 1;
+            outside += !*t as u64;
+        }
+    }
+    (differing, outside)
+}
+
+fn render_report(dir: &str, age_s: f64) -> Result<(), String> {
+    if !age_s.is_finite() || age_s < 0.0 {
+        return Err("âge invalide".into());
+    }
+    let age_us = (age_s * 1e6).round() as u64;
+    let sc = scene(HS, EMPRISE_AGE_US)?;
+    let (impact, touched, s) = render(&sc, age_us, true)?;
+    let (temoin, touched_t, st) = render(&sc, age_us, false)?;
+    if touched != touched_t {
+        return Err("prédicat d'emprise différent entre rendu et témoin".into());
+    }
+    let (differing, outside) = differing_outside(&impact, &temoin, &touched);
+    let base = std::path::Path::new(dir);
+    let tag = format!("{:05.1}", age_s).replace('.', "_");
+    write_ppm(&base.join(format!("impact-s203-a{tag}.ppm")), &impact)?;
+    write_ppm(&base.join(format!("temoin-s203-a{tag}.ppm")), &temoin)?;
+    println!(
+        "age={age_s}s t={:.3}s hs={HS} N={EMPRISE_N} R={EMPRISE_RADIUS_M}m A={}s lambda={:.3}m E={:.1}J",
+        (BIRTH.0 + age_us) as f64 / 1e6,
+        EMPRISE_AGE_US / 1_000_000,
+        sc.wavelength_m,
+        sc.energy_j
+    );
+    for (name, rgb, st) in [("impact", &impact, &s), ("temoin", &temoin, &st)] {
+        println!(
+            "{name} water={} unresolved={} refused={} evals={} w_evals={} touched_px={} residual_max={:.6}m render_ms={:.3} rgb_fnv=0x{:016x}",
+            st.water, st.unresolved, st.refused, st.evaluations, st.w_evaluations, st.touched_pixels, st.max_residual, st.render_ms, fnv(rgb)
+        );
+    }
+    println!("pixels_differents={differing} dont_hors_emprise={outside}");
+    if s.unresolved + st.unresolved + s.refused > 0 || outside > 0 {
+        return Err("réception image refusée : rayon non résolu, refus de composition ou pixel hors emprise".into());
+    }
+    Ok(())
+}
+
 fn scene_report() -> Result<(), String> {
     println!("# constats de construction S203");
     for hs in [0.25f32, 0.5, 1.0, 1.5] {
@@ -559,7 +757,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some("scene") => scene_report()?,
         Some("seams") => seams_report()?,
         Some("controls") => controls_report()?,
-        _ => return Err("mode : scene | seams | controls".into()),
+        Some("render") => {
+            let dir = args.get(2).map(String::as_str).unwrap_or("../captures");
+            let age: f64 = args.get(3).map(|s| s.parse()).transpose()?.unwrap_or(3.0);
+            render_report(dir, age)?
+        }
+        _ => return Err("mode : scene | seams | controls | render <dir> <age_s>".into()),
     }
     Ok(())
 }
@@ -585,6 +788,39 @@ mod tests {
         let sampled = sampled_real_slope(&sc.background, 16.0, 0.5, 4);
         assert!(sampled <= d, "{sampled} > {d}");
         assert!(d < sc.floor as f64, "{d} >= {}", sc.floor);
+    }
+    #[test]
+    fn a_differing_pixel_outside_the_footprint_is_counted() {
+        let a = [1u8, 2, 3, 4, 5, 6, 7, 8, 9];
+        let mut b = a;
+        b[4] = 0; // pixel 1, dans l'emprise
+        b[8] = 0; // pixel 2, hors emprise
+        assert_eq!(differing_outside(&a, &b, &[false, true, false]), (2, 1));
+        assert_eq!(differing_outside(&a, &a, &[false, false, false]), (0, 0));
+    }
+    #[test]
+    fn composed_sample_inside_footprint_differs_from_b_and_matches_outside() {
+        // Le chemin hôte rend B+W dans l'emprise ; le prédicat `admits` borne exactement où.
+        let sc = scene(HS, EMPRISE_AGE_US).unwrap();
+        let domain = Domain { radius: EMPRISE_RADIUS_M, age_us: EMPRISE_AGE_US };
+        let field = RadialImpact::<EMPRISE_N>::new(sc.event, sc.medium, domain).unwrap();
+        let mut slots = vec![None; 1];
+        let mut journal = Journal::new(0, &mut slots);
+        journal.confirm(0, Cause { entity: 0, command: 0, emission: 0 }, sc.event).unwrap();
+        let mut pool: Vec<Option<RadialImpact<EMPRISE_N>>> = (0..1).map(|_| None).collect();
+        let prepared = Prepared::build(&journal, &mut pool, Context { frame: FRAME, cell: CELL, medium: sc.medium, domain }).unwrap();
+        let bound = BoundBackground::new(&sc.background, FRAME, CELL);
+        let t = SimTime(BIRTH.0 + 1_000_000);
+        let (mut out, mut scratch) = ([WaterSample::default()], [WaterSample::default()]);
+        let inside = WorldPos::from_metres(IMPACT_XY[0] as f64 + 0.5, IMPACT_XY[1] as f64, 0.);
+        prepared.sample_world_batch(&bound, &[inside], t, BREAKING_SLOPE, &mut out, &mut scratch).unwrap();
+        let b = sc.background.eval(inside, t).unwrap();
+        let w = field.sample(FRAME, CELL, [IMPACT_XY[0] + 0.5, IMPACT_XY[1]], t).unwrap();
+        assert_eq!(out[0].eta.to_bits(), (b.eta + w.eta).to_bits());
+        assert!(w.eta.abs() > 1e-3);
+        let outside = WorldPos::from_metres(IMPACT_XY[0] as f64 + 53.0, IMPACT_XY[1] as f64, 0.);
+        assert!(!field.admits(FRAME, CELL, [IMPACT_XY[0] + 53.0, IMPACT_XY[1]]));
+        assert!(prepared.sample_world_batch(&bound, &[outside], t, BREAKING_SLOPE, &mut out, &mut scratch).is_err());
     }
     #[test]
     fn seams_see_a_truncated_field_and_the_radius_is_maximal() {
