@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-13 00:41 +02:00
-Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-13 00:48 +02:00
+Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
+Session en cours : S203 — impact visible porté par W, emprise et observateur (S202-1)
 Dernière session : S202 — profil60Hz eau2ms ; coût par domaine mesuré, ADR-125
 Session suivante : S203 — S202-1 : impact visible W, emprise et observateur ; ADR-124
 Maillons        : 0 — S202 avance le code δ, compteur à zéro (§6.8)

@@ -58,43 +58,49 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S202 — terminée
-Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S201-1, profil de budget image explicite et coût par bloc mesuré,
-conformément à ADR-124. Pas de réparation générale du solveur δ.
+Session : S203 — en cours
+Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
+Objectif : S202-1 (ADR-124 étape 3, ADR-125) — rendre visible un **impact porté par W**,
+avec **emprise** (rayon, horizon, N) et **observateur** (caméra) explicites et mesurés ;
+nommer la part qui exigerait un effet δ borné, sans le construire. V hors sujet.
+
+### Constat d'amorce, avant plan (crate jetable hors dépôt)
+
+Recette S201 (JONSWAP N32, Tp6, bande0,5–4 fp) : plancher de pente **L1** de B
+`steepness·π` = 0,1014 (Hs0,25) · 0,2027 (0,5) · 0,4055 (1,0) · **0,6082 (1,5)**,
+contre `max_slope` = π/7 = 0,4488. **`compose` refuse donc chaque point de la mer S201**
+avant tout impact (SlopeEnvelope). ADR-094 tient `steepness_B·π` pour la pente *exacte*
+du fond (facteur 1) : vrai pour une composante, non établi pour32 composantes étalées.
+Le lot ne migre pas ce terme (bits changés, lot propre) ; il le chiffre et le signale.
 
 ### Plan
 
-- [x] **P1** — état réel, quatre copiesf0fea77 propres, jeton/plan seuls ; préférence
- 60Hz/2ms ou30Hz/4ms demandée, mesure indépendante de la réponse.
-- [x] **P2** — horloge monotone injectée et coût du dernier pas exposé dans Caps ;
- unité déclarée (domaine du candidat = bloc de banc), inconnu avant mesure ; tests.
-- [x] **P3** — coût local sur16/32/64 et plafonds1/64/512, pas1/60, trois chauffes
- et11 mesures par configuration ; médiane/max, résidu/dégradation, refus explicites.
- Comparer au profil retenu, pas transposer le coût source S183 en coût solveur.
-- [x] **P4** — acter budget de travail avec origine, préciser absence de budget GPU
- mesuré et d'ordonnanceur ; résultats, suite effets bornés puis rituel complet.
+- [x] **P1** — amorce : trois copies isolées à e13d212 propres, jeton pris, plan seul.
+- [ ] **P2** — exemple `render_impact.rs`, partie scène : mer Hs0,5 (recette S201 sinon
+ inchangée), impact par `impact_generator` (b=1 m, v=8 m/s, fraction déclarée choix de
+ banc), milieu profond20 m, `max_slope` de l'impact = π/7 − plancher B (budget alloué,
+ dit). Pente réelle de B échantillonnée sur la fenêtre de l'image : facteur L1/réel chiffré.
+- [ ] **P3** — emprise mesurée : coutures spatiale (max|η_W|, |∇η_W| sur r=R, fenêtre
+ [naissance, +A]) et temporelle (max|η_W| dans R à +A) pour candidats (N, R, A) admis ;
+ critères déclarés **avant** mesure : ≤3 mm (tolérance du rendu) et ≤2 % du pic central
+ (seuil ADR-120 emprunté comme choix de banc). Tests de la fonction de couture.
+- [ ] **P4** — image : B+W par `Prepared::sample_world_batch` dans R, B seul hors R ;
+ bornes de marche B+W conservatrices ; trois instants + témoin sans impact ; zéro rayon
+ non résolu ; tout pixel différent du témoin doit avoir échantillonné dans R (contrôle).
+- [ ] **P5** — observateur et coût : pixels par λ au point d'impact, distance où λ < 2 px
+ pour cette caméra ; coût par point B seul vs B+W (4096 points, 3 chauffes/11 mesures),
+ points tenant dans 2 ms. Part δ nommée (cavité/gerbe/1−fraction) avec domaine et durée
+ bornés, comparée au coût S202 ; aucun δ construit.
+- [ ] **P6** — publication `IMPACT-W-S203` (+ mesures) ; note corrective datée ADR-094 si
+ le facteur de B est confirmé > 1 ; ADR seulement si une règle d'emprise est retenue.
+- [ ] **P7** — rituel §6 complet : journal, angles morts, leçons, index/README/REPRISE,
+ décomptes, `outils/velocite.sh`, file active entière, compteur, jeton libre, copies.
 
 ### Notes de reprise
 
-Reprise entière/invariants déjà lus dans cette conversation. Seuil numérique2 % acquis.
-Rendu CPU S201≈12s pour640×360, référence hors ligne, sans budget temps réel reçu.
-ADR-007 demande cost_per_block_ms mesuré ; Volume ne gère aucun add/remove_blocks.
-On doit nommer le domaine/charge de la mesure, jamais diviser par un nombre fictif
-ni présenter un coût de projection seule comme coût d'un pas complet.
-
-Utilisateur :60 images/s, eau2ms/image, réponse reçue pendant P2.
-P2 : MonotonicClock injectée ; step_measured expose coût du domaine entier via Caps,
-None si inconnu/horloge invalide/refus ; pas de seuil appliqué au solveur.
-Quatre tests intégration passent, coût factice1,5ms vérifié, zéro allocation
-et sorties identiques au pas non chronométré. Pas de garantie temporelle inventée.
-
-P3 :9 configurations, médianes/max reçus,32x16≈0,59ms vs64x32≈4,79ms
-convergés ; début compilation refusé (trait Allocator absent), import corrigé.
-Workspace343/cinq ignorés ; quatre tests intégration debug/release. Mesures
-archivées, profil user60Hz/2ms appliqué aux comparaisons sans admission physique.
-
-P4 : ADR-125 actée sur réponse utilisateur, file/journal/index/README/REPRISE
-et B3/B4 propagés. Décomptes125/244/279/18/6/23 vérifiés ; aucun angle/leçon neuf.
-P3 était committée a852b88 mais sa case était restée en cours ; corrigée ici.
-Compteur0, jeton libre ; synchroniser les copies propres après commit final.
+Lus : AGENTS, REPRISE (jeton, §1–3, §4 S188–S202, §5–9), journal S201–S202, ADR-124/125,
+BUDGET-IMAGE-S202, IMAGE-B-S201, invariants, file active, radial_impact, composition,
+prepared_water, impact_generator, render_background. S202 finie à 00:42, jeton libre.
+Admission RadialImpact λ=3,35 m : Regime profondeur > 3,35 m ; cg_max≈1,62 m/s ;
+Resolution dk·(R+cg_max·A) ≤ π/2 → R+1,62A ≤ 35,7 (N64), 71,4 (N128), 143 (N256).
+Borne de hauteur W = η(0, naissance) = Σ coefficients (tous positifs) : pas d'accesseur.
