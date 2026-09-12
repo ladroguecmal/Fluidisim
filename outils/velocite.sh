@@ -54,7 +54,10 @@ for f in $(ls code/water-core/src/*.rs code/water-harness/src/*.rs | grep -v "/t
   rt=$((rt + ${t:-$((n+1))} - 1))
 done
 echo "  markdown=$md  code d'execution=$rt  ratio=$(awk -v a="$md" -v b="$rt" 'BEGIN{printf "%.1f", a/b}') lignes de prose par ligne de code"
-echo "  angles morts=$(grep -c '^- \*\*A[0-9]' docs/registres/ANGLES-MORTS.md)  notes correctives=$(grep -rho '^\*\*Note S[0-9]*\|^> \*\*Correction' docs --include=*.md | wc -l)"
+# Le registre mêle lignes de tableau et puces ; compter les identifiants uniques,
+# pas une seule présentation Markdown (236 puces pour 243 identifiants avant P4 S199).
+angles=$(grep -E '^(\|[[:space:]]*|-[[:space:]]+)(\*\*)?A[0-9]+' docs/registres/ANGLES-MORTS.md | grep -oE 'A[0-9]+' | sort -u | wc -l)
+echo "  angles morts=$angles  notes correctives=$(grep -rho '^\*\*Note S[0-9]*\|^> \*\*Correction' docs --include=*.md | wc -l)"
 
 echo
 echo "== Le chainage : combien de sessions ont pris le reliquat de la precedente =="

@@ -124,8 +124,83 @@ Il faut l'écrire avant, pour que personne ne le lise comme davantage.
 
 ## 7. Relevés
 
-*À recevoir en P3b. Aucun chiffre n'est écrit avant l'exécution.*
+**Relevés de Claude, P3, repris par Codex le 2026-09-13 sans remesure.**
+Commits9df2aa2,81f8d03,0c143a8 ; passation dans `notes/EN-COURS.md`.
+Module final : `code/water-core/src/delta_projection.rs` ; huit tests dans
+`tests_delta_projection.rs`, campagne `code/water-core/examples/delta_filters.rs`.
+
+| contrôle | résultat transmis | portée vérifiée à la lecture des tests |
+|---|---|---|
+| lac au repos, fond coupé | vitesse exactement nulle en bits | 1000 pas à g=9,81 ; **50 pas** à chacune des gravités1,62/9,81/24,79 |
+| gravité agissante | rapport de vitesse proche de2 quand g double | premier pas depuis le repos, surface inclinée ; pas seulement un lac immobile |
+| fond plat, trois résolutions | ordre1,947 ; résidu Richardson0,025 % | filtre2 passé sur la fonctionnelle mesurée |
+| fond lisse découpé | ordre0,898 ; résidu0,963 % | filtre2 échoué |
+| fond avec marche | ordre0,895 ; résidu0,961 % | filtre2 échoué |
+| projection | divergence rapportée<1e-5 | configuration unitaire testée ; diagnostic pondéré par ouvertures, pas borne universelle |
+| rejeu | deux exécutions identiques, empreinte0x0ad3f695685ca27a | cible locale uniquement, pas conformité multiplateforme I-03 |
+| workspace | **339 réussis, cinq ignorés** (246+93) | reçu transmis P3, huit tests supplémentaires ; non rejoué par Codex en P4/P5 |
+
+Le triplet utilise32/64/128 cellules horizontales. La garde S197 refuse les
+incréments de signes opposés ; elle ne transforme pas un triplet non convergent en ordre.
+Le code mesure `Σ u_face·dx` au plan médian, **sans pondérer par l'ouverture**.
+C'est la fonctionnelle publiée ; l'appeler débit physique sur les faces coupées serait
+plus fort que ce que le programme calcule. L'ordre du flux ouvert reste à recevoir.
+Le premier pas part du repos : l'advection y est nulle, donc ce filtre ne reçoit pas
+son ordre ni sa stabilité en mouvement.
+
+### Deux pistes éprouvées pendant P3
+
+1. **Mantisse f32 de pression : hypothèse réfutée sur le relevé.** Le passage de la
+   pression en f64 donne2,264122231e-4 contre2,264121986e-4 ; il ne résout pas le défaut.
+   Ce changement reste dans le code, mais ne constitue pas une dérogation à I-08.
+2. **Fond en escalier : correction partielle mesurée.** Le tout-ou-rien et
+   `max(b[i−1],b[i])` produisaient des triplets non monotones. Le fond linéaire par
+   morceaux avec fractions ouvertes rétablit une convergence, d'ordre un seulement.
+
+Claude a identifié le décalage entre centre géométrique de face et moyenne sur sa
+partie ouverte comme mécanisme restant : un champ variant sur la face peut produire
+un écart O(dx). **Piste localisée, non corrigée ni isolée par une contre-épreuve** ;
+la concordance de l'ordre ne démontre pas encore qu'elle explique tout le défaut.
+
+### Rectifications de portée à la reprise P4
+
+Ces constats viennent du code committé, sans nouvelle campagne :
+
+- **I-06 n'est pas reçu.** `no_host_allocation_after_seal` compte les demandes à
+  `Arena`, pas l'allocateur global. `project` clone `us/ws`, `dir` à chaque itération,
+  puis `u/w` pour le diagnostic. Le pas alloue donc après scellement. La comptabilité
+  initiale annonce aussi des tampons en unités f32 alors que cinq sont désormais f64.
+- **Le plafond d'itérations est reçu ; le budget en millisecondes ne l'est pas.**
+  `step(dt,max_iters,jobs)` ne reçoit aucune échéance. `degraded` annonce correctement
+  la non-convergence testée, sans prouver le respect du contrat temporel ADR-007.
+- **Les refus d'entrée testés ne prouvent pas l'atomicité générale.** Un non-fini
+  produit pendant le pas est détecté après mutation de la vitesse, sans restauration.
+- **Le couvercle est fixe, mais sa pression n'est pas toujours nulle** :
+  `p_dyn=ρ g_eff(η−z₀)` y impose une hauteur fournie. `η` n'est pas intégrée.
+  `supports_frame_accel=true` ne reçoit pas un référentiel accéléré général : g est
+  un scalaire fourni à la construction. Les bornes de `Caps`, dont CFL0,5, ne sont
+  pas une mesure de stabilité. Le schéma déclare lui-même celle-ci non reçue.
+
+Ces restrictions remplacent les promesses des §4–§6 et de la passation lorsqu'elles
+dépassent les contrôles effectifs. Elles sont portées par **A244** ; aucune correction
+de solveur n'est cachée dans cette étape documentaire.
 
 ## 8. Ce qui est reçu
 
-*À recevoir en P4.*
+**Filtre1 passé ; filtre2 passé sur fond plat, échoué au fond découpé.** Le premier
+jet n'est **pas encore éligible à B3**. Aucune famille n'est éliminée et aucun
+solveur de production n'est retenu. Aucun ADR nouveau : ADR-038 §4 porte déjà ce verdict.
+Le critère2 % de B4 reste acquis ; ces filtres ne constituent pas sa réception complète.
+
+**La couche δ a avancé** : un noyau MAC x-z avec advection/projection, fond fourni et
+couvercle imposé existe dans la bibliothèque. Il reste un candidat incomplet :
+surface mobile, source B+W, coque, air, coût et quatre scénarios B3 non reçus.
+Le compteur `Maillons` revient à zéro selon REPRISE §6.8.
+
+**S199-1 / prochaine session : corriger les contrats du noyau en bibliothèque (A244)**,
+en priorité supprimer les allocations du pas et les mesurer avec un compteur global,
+apparier les capacités et refus au comportement réel ; choisir explicitement le
+traitement du f64 et du budget temporel sans les déclarer conformes par défaut.
+**S199-2 : reconstruire les flux sur faces partiellement ouvertes**, contrôler leur
+intégrale et refaire le triplet fond plat/lisse/marche avant surface libre mobile.
+Ce second lot reste nommé dans la file ; il ne disparaît pas derrière les contrats.

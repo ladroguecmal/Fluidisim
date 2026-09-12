@@ -76,7 +76,7 @@ sous la règle des deux maillons (§6.8), et non par le chaînage.
 - [x] **P3b** — passer les deux filtres et recevoir : lac au repos à l'arrondi sur fond non
       plat, ordre en espace sur trois résolutions, `g_eff` injectée, zéro allocation après
       `seal`, déterminisme, budget respecté.
-- [>] **P4** — documenter ; ADR **seulement** si une décision durable est prise, et elle ne
+- [x] **P4** — documenter ; ADR **seulement** si une décision durable est prise, et elle ne
       doit pas préempter le verdict de B3.
 - [ ] **P5** — rituel de fin (§6), compteur `Maillons` mis à jour selon la règle.
 
@@ -458,3 +458,11 @@ Reprise Codex — 2026-09-13 00:03 : passation volontaire vérifiée, quatre cop
 à0c143a8, arbre propre. Même session S199, P4/P5 uniquement, pas de remesure.
 Contrôler la portée des contrats à la lecture du code et vérifier les identifiants
 d'angles : le compte236 par puces peut différer des identifiants243.
+
+P4 Codex : CANDIDAT-DELTA §7/8 complétés avec relevés P3, sans remesure.
+Lecture du code : I-06 non reçu (Vec::clone), budget seulement en itérations,
+refus après mutation, f64 et Caps à cadrer : A244 ouverte. Repos1000 pas à9,81,
+50 aux trois gravités ; pas1000 chacune. Fonctionnelle du filtre2 non pondérée
+par ouverture ; diagnostic de face reste une piste à isoler. Aucun ADR ni code
+numérique modifié. Décompte corrigé dans outil :243 identifiants avant A244,244 après.
+Suite choisie S199-1 contrats runtime puis S199-2 flux coupés ; compteur0.

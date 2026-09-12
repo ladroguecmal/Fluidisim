@@ -2799,3 +2799,22 @@ une mesure.
   travail légitime, au même titre qu'une mesure. Ne pas confondre cet angle avec un appel à
   écrire moins : les sessions qui ont le plus produit de code sont aussi celles qui avaient
   le mieux écrit leur protocole.
+
+- **A244** *(sévérité 1, S199 ; ouverte)* — **Un noyau peut réussir ses tests de
+  contrat tout en violant le contrat annoncé.** La reprise de delta_projection.rs
+  trouve des Vec::clone dans le pas, y compris par itération de pression, alors que
+  le reçu « zéro allocation » ne compte que les appels à l'allocateur d'hôte.
+  Le plafond d'itérations n'est pas une durée garantie ; le refus de non-fini après
+  mutation n'est pas atomique ; la pression f64 dans src n'est pas conforme à I-08
+  par le seul fait que le calcul soit juste. Le scalaire g injecté ne reçoit pas un
+  référentiel accéléré général malgré supports_frame_accel=true. Voir les preuves
+  de lecture et restrictions dans CANDIDAT-DELTA-S199 §7. Gravité1 pour le contrat
+  d'exécution, pas pour un accident observé en jeu : ce candidat n'est pas intégré.
+  **S199-1** : corriger le noyau, recevoir les allocations globales et refus réels,
+  borner les capacités et régler explicitement précision/budget. Le défaut spatial
+  du fond reste un lot distinct **S199-2**, aucune famille éliminée.
+
+**Note de comptage — S199, 2026-09-13.** Avant A244, le registre porte243 identifiants
+A1–A243 sans trou ;236 était le nombre de puces reconnues par velocite.sh, qui omettait
+les identifiants restés uniquement en tableau. L'outil compte désormais les identifiants
+uniques. Le nombre235 cité dans A243 est historique et ne constitue pas un total exact.
