@@ -23,8 +23,8 @@ Battement        : 2026-09-12 23:27 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
 Session en cours : S198 — **ce qui ralentit le projet**, mesuré puis corrigé (demande de l'utilisateur)
 Dernière session : S197 — audit de résolution ; ADR-123 confirmée, le verdict de S196 tombe
-Session suivante : à fixer au rituel de fin, **sous la règle des deux maillons** (§6.8)
-Maillons        : 5 — S193→S197, aucune couche avancée. **Le quota est dépassé** (§6.8)
+Session suivante : S199 — **B3/δ : choisir et construire un premier candidat de solveur volumétrique** (avance la couche δ, arrêtée depuis S161)
+Maillons        : 0 — remis à zéro par la règle §6.8 ; la file a repris la main sur le chaînage
 
 *S195 a **changé de main en cours de route** : la session ouverte à 21:15 a été coupée par
 une limite d'usage sur un autre compte, et l'utilisateur l'a signalé. Le jeton disait donc

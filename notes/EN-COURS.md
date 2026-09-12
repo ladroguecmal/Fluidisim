@@ -73,11 +73,17 @@ la vélocité elle-même, et il est traité comme tout le reste : mesuré d'abor
 - [x] **P3** — les correctifs **appliqués** : la règle qui casse le chaînage, le tableau de
       bord des quatre couches, une définition mesurable d'« avancer », et l'outil qui rend
       la dérive visible sans qu'on ait à y penser.
-- [>] **P4** — appliquer la règle neuve à la session suivante, et propager la file.
-- [ ] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes, jeton
+- [x] **P4** — appliquer la règle neuve à la session suivante, et propager la file.
+- [>] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes, jeton
       `libre`, copies avancées sans suppression non prouvée.
 
 ### Notes de reprise
+
+P4 S198 : la règle appliquée à elle-même. Compteur à **5**, quota dépassé, donc la file
+reprend la main : **S199 = B3/δ**, construire un premier candidat de solveur volumétrique —
+la couche bloquée depuis S161 et la plus actionnable (V demanderait une conception neuve,
+δ a déjà deux véhicules et un banc qui attend un candidat). A241 est **reportée** et le dit
+dans la file, avec son motif : elle n'avance aucune couche. Compteur remis à zéro.
 
 P3 S198 : quatre correctifs appliqués. (1) **Règle des deux maillons**, REPRISE §6.8 : une
 session qui finit ne peut proposer son propre reliquat que **deux fois de suite** ; le jeton
