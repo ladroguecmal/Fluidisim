@@ -2818,3 +2818,12 @@ une mesure.
 A1–A243 sans trou ;236 était le nombre de puces reconnues par velocite.sh, qui omettait
 les identifiants restés uniquement en tableau. L'outil compte désormais les identifiants
 uniques. Le nombre235 cité dans A243 est historique et ne constitue pas un total exact.
+
+**Suivi A244 — S200, 2026-09-13 : partiellement traitée.** Les clones du pas sont
+supprimés, allocations globales nulles mesurées y compris au premier pas et en mode
+dégradé. Refus après overflow : u/w/p conservés et récupération au pas suivant reçue.
+Réservation de mémoire typée corrigée ; Caps retire référentiel général et plages
+CFL/résolution non mesurées. Workspace342/cinq ignorés, trois tests globaux aussi
+release. Reste **S200-1** : pression f64 expérimentale sous I-08 et budget itérations
+sous I-05, explicitement non reçus pour production. S199-2 flux ouverts reste active.
+Aucun nouvel angle ; voir CONTRATS-DELTA-S200.

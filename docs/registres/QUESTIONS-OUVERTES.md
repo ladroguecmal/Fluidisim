@@ -1670,7 +1670,7 @@ entrée par entrée. Le fil reprend ci-dessous.
 
 ## File active
 
-Relue en S199, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+Relue en S200, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
 
 *Renommée de « File active S190 » en S193 : le contenu est daté ligne par ligne, le titre
 suivait un numéro de session et vieillissait seul (A185 — un état sans date se lit au
@@ -1685,7 +1685,7 @@ action unique et doit être relue au rituel de fin (A211).
 
 | action / objet | état daté et ce qui reste | priorité / déclencheur |
 |---|---|---|
-| **S199-1 / A244 — B3 / δ** | **S199 : S198-1 réalisée**, noyau MAC en bibliothèque. Filtre1 passé, filtre2 échoué au fond coupé ; allocations du pas et contrats non reçus révélés à la reprise | **S200 : corriger les contrats du noyau** : allocations globales, capacités/refus, précision/budget explicites. Avance δ ; compteur0 |
+| **S200-1 / A244 — B3 / δ** | **S200 : S199-1 partielle**, zéro allocation globale du pas et refus numériques atomiques reçus, capacités restreintes ;342 tests/cinq ignorés. Pression f64 expérimentale et plafond en itérations restent hors contrat de production | prochaine session : recevoir précision et budget temporel du noyau, sans convertir arbitrairement itérations en ms ; avance δ, compteur0 |
 | **A241 / repli — reporté** | **S197** : suspect réfuté, la totalité de l'écart reste sans cause | deux candidats nommés (bande relative, termes triples), sous contrainte **L278** ; **n'avance aucune couche**, donc passe après B3/δ |
 | **S199-2 / B3 / δ — fond coupé** | **S199** : ordre1,947 plat,0,898 lisse,0,895 marche ; candidat non éligible. Fonctionnelle non pondérée par les ouvertures ; mécanisme de face à isoler | après S199-1 : reconstruire les flux ouverts et recevoir le triplet avant surface mobile ; aucune famille éliminée |
 | **B4 forces / perception** | aucun reçu complet ; la métrique de vitesse S190 ne les remplace pas | après montage commun surface/solide ; protocole perceptif conserve ses participants réels requis |

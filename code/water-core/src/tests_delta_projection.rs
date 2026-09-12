@@ -185,9 +185,9 @@ fn projection_removes_divergence_and_reports_it() {
     assert!(r.iterations > 0);
 }
 
-/// **ADR-007 §2 : le budget doit être respecté, et la dégradation dite.** À une seule
+/// Plafond d'itérations, pas réception du budget temporel ADR-007 §2. À une seule
 /// itération, le solveur rend la main sans converger **et l'annonce** ; à budget large, il
-/// converge. Les deux états sont observables de l'extérieur, ce qui est l'exigence.
+/// converge. S200 conserve cette réception restreinte ; aucun temps mural n'est mesuré.
 #[test]
 fn a_tight_budget_degrades_and_says_so() {
     let jobs = Jobs;
@@ -242,6 +242,9 @@ fn caps_declare_what_is_not_supported() {
     let (v, _) = build(8, 4, 0.25, 9.81);
     let c = v.caps();
     assert!(!c.supports_substitutive && !c.supports_air_phase && !c.supports_moving_solid);
-    assert!(c.supports_frame_accel);
+    assert!(!c.supports_frame_accel);
+    assert_eq!(c.min_dx,None);
+    assert_eq!(c.max_dx,None);
+    assert_eq!(c.stability_cfl_max,None);
     assert_eq!(c.latency_frames, 0);
 }

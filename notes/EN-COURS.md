@@ -70,7 +70,7 @@ les capacités et la portée précision/budget aux garanties effectives.
   comptabilité exacte et dimensions contrôlées ; conserver les opérations numériques.
 - [x] **P3** — compteur global d'allocation avec contre-épreuve, refus après calcul
   atomique et récupération, nominal/dégradé/rejeu ; tests workspace et filtre S199.
-- [ ] **P4** — capacités honnêtes ; documenter précision et budget effectifs sans
+- [x] **P4** — capacités honnêtes ; documenter précision et budget effectifs sans
   dérogation implicite, reçus/limites et A244/file. Pas de sélection δ.
 - [ ] **P5** — rituel, journal/index/README/REPRISE, compteur, copies synchronisées.
 
@@ -89,3 +89,8 @@ P3 : trois tests intégration debug/release passent ; workspace342 réussis/cinq
 ignorés (246+3+93). Filtre release empreinte S199 inchangée0x0ad3f695685ca27a.
 Compteur global vérifié par allocation témoin, refus après overflow reçu avec
 récupération exacte. Mesures archivées, aucun autre seuil modifié.
+
+P4 : Caps ne prétend plus recevoir référentiel général/plages CFL ; Option None
+pour les bornes inconnues. Huit tests noyau + trois intégration rejoués passent.
+Pression f64 et plafond itérations conservés explicitement expérimentaux, sans ADR
+de dérogation : A244 partielle, S200-1 reste à recevoir avant intégration.

@@ -9,8 +9,12 @@
 //! advection. Le bâtir ne parie donc sur aucune, et **n'élimine aucune**.
 //!
 //! Il ne traite **aucun** des quatre scénarios de B3 — ni coque mobile, ni impact, ni
-//! déferlement, ni référentiel accéléré. Il rend le projet **éligible** à B3 ; il n'y
-//! répond pas.
+//! déferlement, ni référentiel accéléré. Le filtre spatial S199 échoue au fond coupé :
+//! ce candidat n'est pas encore éligible à B3.
+//!
+//! S200 : pas sans allocation et refus numériques atomiques reçus. La pression reste
+//! expérimentale en f64 (I-08 non reçu) et la limite d'itérations n'est pas le budget
+//! temporel I-05. Voir `docs/validation/CONTRATS-DELTA-S200.md`.
 //!
 //! # L'équilibrage, gagné par construction
 //!
@@ -53,16 +57,16 @@ impl Domain {
 }
 
 /// `SolverCaps` d'ADR-007 §2, restreint à ce que ce noyau peut honnêtement déclarer.
-/// Les trois `false` ne sont pas des oublis : c'est le rôle de ce type de les dire.
+/// `None` indique une borne non reçue ; aucune plage de stabilité n'est inventée.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Caps {
     pub supports_substitutive: bool,
     pub supports_air_phase: bool,
     pub supports_moving_solid: bool,
     pub supports_frame_accel: bool,
-    pub min_dx: f32,
-    pub max_dx: f32,
-    pub stability_cfl_max: f32,
+    pub min_dx: Option<f32>,
+    pub max_dx: Option<f32>,
+    pub stability_cfl_max: Option<f32>,
     pub latency_frames: u8,
 }
 
@@ -81,7 +85,7 @@ pub enum Error {
 pub struct Report {
     /// Itérations de pression réellement faites.
     pub iterations: u32,
-    /// `true` si le budget a coupé avant convergence — ADR-007 §2 exige que ce soit dit.
+    /// `true` si le solveur n'a pas convergé, notamment au plafond d'itérations.
     pub degraded: bool,
     /// Résidu relatif atteint par le solveur de pression.
     pub residual: f64,
@@ -89,7 +93,8 @@ pub struct Report {
     pub divergence: f64,
 }
 
-/// Le candidat. Tous les tampons viennent de l'hôte **avant** `seal()` — I-06.
+/// Le candidat. Stockage réservé auprès de l'hôte et Vec construits avant `seal()`.
+/// Aucun appel à l'allocateur global dans le pas ; réception S200.
 pub struct Volume {
     domain: Domain,
     rho: f32,
@@ -297,11 +302,11 @@ impl Volume {
             supports_substitutive: false,
             supports_air_phase: false,
             supports_moving_solid: false,
-            // `g_eff` est injectée et portée par la condition de couvercle.
-            supports_frame_accel: true,
-            min_dx: 0.01,
-            max_dx: 1.0,
-            stability_cfl_max: 0.5,
+            // Une gravité scalaire constante ne reçoit pas un référentiel accéléré général.
+            supports_frame_accel: false,
+            min_dx: None,
+            max_dx: None,
+            stability_cfl_max: None,
             latency_frames: 0,
         }
     }
@@ -626,8 +631,11 @@ impl Volume {
         }
     }
 
-    /// Un pas complet. `max_iters` porte le **budget** : ADR-007 §2 exige qu'un solveur
-    /// puisse sous-résoudre plutôt que déborder, et qu'il le **dise** — `Report::degraded`.
+    /// Un pas à plafond d'itérations, sans allocation. Un `Err` numérique conserve
+    /// u/w/p ; les tampons internes sont recalculés lors du prochain appel.
+    /// `max_iters` n'est PAS un budget en millisecondes (I-05 reste non reçu).
+    /// À zéro, advection et diagnostics restent exécutés ; `degraded` annonce
+    /// la non-convergence, sans garantie sur le coût de ces phases.
     pub fn step(&mut self, dt: f32, max_iters: u32, jobs: &dyn JobSystem) -> Result<Report, Error> {
         if !dt.is_finite() || dt <= 0. {
             return Err(Error::NotFinite);

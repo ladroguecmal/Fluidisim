@@ -187,6 +187,12 @@ de solveur n'est cachée dans cette étape documentaire.
 
 ## 8. Ce qui est reçu
 
+**Suivi S200 — 2026-09-13.** [CONTRATS-DELTA-S200](CONTRATS-DELTA-S200.md) corrige
+les allocations du pas, la restauration sur refus numérique et les capacités non
+reçues. Trois tests avec compteur global, workspace342/cinq ignorés ; empreinte
+S199 inchangée. A244 partielle pour précision et budget temporel ; les défauts
+énumérés au §7 restent le constat historique S199, pas tous l'état du code actuel.
+
 **Filtre1 passé ; filtre2 passé sur fond plat, échoué au fond découpé.** Le premier
 jet n'est **pas encore éligible à B3**. Aucune famille n'est éliminée et aucun
 solveur de production n'est retenu. Aucun ADR nouveau : ADR-038 §4 porte déjà ce verdict.
