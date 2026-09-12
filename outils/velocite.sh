@@ -9,8 +9,8 @@ cd "$(dirname "$0")/.."
 echo "== Les quatre couches : derniere session ayant ajoute du code d'execution =="
 for lay in "B          :background" \
            "W          :impact|wake|pressure|radial|modal|spectral|composition|prepared|mixed|wave_" \
-           "delta      :delta|shallow|dispersif|eponge" \
-           "V          :volume|network|reseau"; do
+           "delta      :delta|shallow|dispersif|eponge|projection" \
+           "V          :network|reseau|pipe|conduite"; do
   name=${lay%%:*}; pat=${lay#*:}
   last=$(git log --numstat --pretty=format:"%s" --all \
     | awk -v p="$pat" '/^S[0-9]+ P/{s=$1; next}

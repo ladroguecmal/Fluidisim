@@ -48,7 +48,10 @@ pub mod phase;
 pub mod shallow;
 pub mod types;
 /// δ — premier candidat volumétrique (S199, B3). Voir CANDIDAT-DELTA-S199.
-pub mod volume;
+/// **Nommé `delta_projection` et non `volume`** : « volume » désigne la couche **V**
+/// (réseaux) dans le vocabulaire d'ADR-001, et `outils/velocite.sh` classait le module
+/// dans la mauvaise couche. Un nom qui trompe un outil trompera un lecteur (S199).
+pub mod delta_projection;
 
 pub use background::{Background, Component, SeaState};
 pub use body::{FloatingBox, Milieu};

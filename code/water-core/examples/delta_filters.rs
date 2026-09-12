@@ -3,7 +3,7 @@
 //! `cargo run -p water-core --release --example delta_filters`
 use water_core::{
     host::{AllocError, AllocStats, Allocator, HostServices, JobSystem, Sink},
-    volume::{Domain, Volume},
+    delta_projection::{Domain, Volume},
     Hasher64,
 };
 

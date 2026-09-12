@@ -627,5 +627,5 @@ impl Volume {
 }
 
 #[cfg(test)]
-#[path = "tests_volume.rs"]
+#[path = "tests_delta_projection.rs"]
 mod tests;
