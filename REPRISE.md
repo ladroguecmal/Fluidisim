@@ -18,19 +18,15 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 00:03 +02:00
+JETON            : libre
+Battement        : 2026-09-13 00:09 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles), reprise P4/P5 après Claude
-Session en cours : S199 — **B3/δ : premier candidat volumétrique**, P1–P3 committés, **P4 et P5 restent**
-Dernière session : S198 — vélocité mesurée ; règle des deux maillons, la file reprend la main
-Session suivante : à fixer au rituel de fin de S199, sous la règle des deux maillons (§6.8)
+Session en cours : aucune
+Dernière session : S199 — noyau δ construit ; filtres partiels, contrats A244 à corriger
+Session suivante : S200 — S199-1/A244 : corriger les contrats du noyau δ ; S199-2 flux ouverts reste dans la file
 Maillons        : 0 — S199 **a avancé la couche δ**, le compteur reste à zéro (§6.8)
 
-*Passation volontaire, pas une coupure : l'utilisateur termine S199 avec un autre agent.
-Rien n'est en suspens — l'arbre est propre, `cargo test --workspace` passe à 339/cinq
-ignorés. **Tout ce qu'il reste à faire, et tous les chiffres pour le faire, sont en tête de
-[`notes/EN-COURS.md`](notes/EN-COURS.md)**, sous « PASSATION ». Ne pas remesurer : les
-relevés y sont.*
+*Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 
 *S195 a **changé de main en cours de route** : la session ouverte à 21:15 a été coupée par
 une limite d'usage sur un autre compte, et l'utilisateur l'a signalé. Le jeton disait donc
@@ -143,7 +139,11 @@ une session ne peut signaler sa présence qu'en travaillant.
 
 ---
 
-## File active du projet — S194
+## File active du projet — S199
+
+**S199 : noyau δ construit, non admissible B3. S199-1/A244 corrige ses contrats ;
+S199-2 garde le défaut des flux ouverts. Les acquis S194 ci-dessous restent datés ;
+la file liée porte aussi leurs suivis S195–S199.**
 
 **Tolérance B4 fixée à 2 % par l'utilisateur (ADR-120).** Elle ne doit plus être
 redemandée. La réception et son profil sont dans B4-TOLERANCE-S190 ; B4 complet
@@ -161,7 +161,7 @@ train en eau profonde, **5,4 périodes** à `0,0125`, moins d'une à `0,014`. **
 close** : la variable est la cambrure, plus la durée et le désaccord de triade. Ce n'est
 **pas** un seuil de bascule W/δ.
 
-En plus de l'action suivante, relire la [file active plurielle](docs/registres/QUESTIONS-OUVERTES.md#file-active-s194--2026-09-12) :
+En plus de l'action suivante, relire la [file active plurielle](docs/registres/QUESTIONS-OUVERTES.md#file-active) :
 A50/B4 et B3, forces/perception, A216/A217, A213, λ_cut/B2/coupure W–δ,
 bathymétrie, conformité multiplateforme, V/bancs restants, dossier de réunions.
 A211 est récurrente : un fil local ne remplace pas cette liste. Le §6.7 la porte.
@@ -222,7 +222,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 121 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 123 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -241,6 +241,19 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S199 — 2026-09-13 : premier noyau δ MAC x-z en bibliothèque.**
+Claude construit P1–P3 ; Codex termine la passation P4/P5 sans remesure.
+Lac au repos reçu exactement ; filtre spatial passé sur fond plat (ordre1,947),
+échoué au fond coupé (≈0,90). **Candidat non éligible B3**, aucune famille éliminée.
+339 tests réussis/cinq ignorés, empreinte0x0ad3f695685ca27a : reçus Claude P3.
+**A244** : le test de mémoire ne voit pas les allocations du pas ; plafond
+d'itérations sans budget temporel, refus/capacités et f64 à mettre en conformité.
+**Suite S200 : S199-1**, corriger ces contrats dans la bibliothèque ; **S199-2**
+conserve la reconstruction des flux ouverts avant surface mobile. Compteur **0**,
+δ a avancé ; B4/A50 partiels, seuil2 % acquis. A217 reste close (S194).
+123 ADR,244 angles,279 leçons,18 invariants,6 SPEC,23 cas. Aucun ADR nouveau.
+Voir [candidat δ S199](docs/validation/CANDIDAT-DELTA-S199.md).
 
 **S198 — 2026-09-12 : ce qui ralentit le projet, mesuré puis corrigé.**
 [BILAN-VELOCITE-S198](docs/registres/BILAN-VELOCITE-S198.md), `outils/velocite.sh`, **à la
@@ -263,15 +276,15 @@ attrapé trois erreurs en trois sessions, ni la qualité du travail sur W.
 
 ### Les quatre couches — l'état qui commande tout le reste
 
-**Recalculé le 2026-09-12 par `sh outils/velocite.sh`. Ne pas le recopier : le relancer.**
+**Recalculé le 2026-09-13 en S199 par `sh outils/velocite.sh`. Ne pas le recopier : le relancer.**
 Un état sans date se lit au présent, et il ne l'est plus (A185).
 
 | couche | modules | dernière avancée | depuis |
 |---|---:|---|---:|
-| **B** — fond | 3 | S181 | 17 sessions |
-| **W** — perturbations | 23 | S182 | 16 sessions |
-| **δ** — volumique | 4 *(véhicules d'essai ; aucun solveur choisi)* | **S161** | **37 sessions** |
-| **V** — réseaux | **0** | **jamais** | **198 sessions** |
+| **B** — fond | 3 | S181 | 18 sessions |
+| **W** — perturbations | 23 | S181 | 18 sessions |
+| **δ** — volumique | 5 *(dont noyau à projection non encore admissible)* | **S199** | **0 session** |
+| **V** — réseaux | **0** | **jamais** | **199 sessions** |
 
 *« Avancer » a un sens mesurable et un seul : **ajouter du code d'exécution** dans
 `code/*/src`, ou **acter une décision** qui fixe un élément de la couche. Un banc, un

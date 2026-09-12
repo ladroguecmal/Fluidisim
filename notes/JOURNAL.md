@@ -10389,3 +10389,54 @@ des sessions S190–S197 : elles sont bonnes, et c'est précisément ce qui rend
 
 **Décisions qui demandent un arbitrage humain :** aucune nouvelle. L'utilisateur a déjà acté
 le passage à la construction (ADR-053, S70) ; cette session en applique la conséquence.
+
+## S199 — 2026-09-12/13 — Le noyau δ existe ; ses reçus restent partiels
+
+**Entrée.** B3/δ choisie par la file sous la règle des deux maillons (S198).
+Claude Code a construit P1–P3, puis passé volontairement la main à Codex pour P4/P5.
+Reprise à0c143a8 : quatre copies alignées, propres, aucune étape de code en suspens.
+Même S199. Le noyau MAC x-z est dans `water-core/src/delta_projection.rs`, accompagné
+de huit tests et de `delta_filters`. δ avance, compteur Maillons remis à0.
+
+**Reçus transmis, sans remesure.** Lac exactement immobile :1000 pas à9,81 ;50 pas
+aux trois gravités1,62/9,81/24,79 (rectification de la passation). Fond plat ordre1,947,
+résidu Richardson0,025 % ; lisse0,898/0,963 % ; marche0,895/0,961 %. Filtre1 passé,
+filtre2 échoué au fond coupé, aucune famille éliminée. Empreinte0x0ad3f695685ca27a,
+deux exécutions identiques ; workspace339 réussis/cinq ignorés (246+93), reçu Claude P3.
+Codex ne rejoue pas cette campagne inchangée.
+
+**Hypothèses P3.** Pression f64 :2,264122231e-4 contre2,264121986e-4, n'explique pas
+le défaut. Géométrie en escalier→linéaire par morceaux : convergence restaurée, ordre1.
+Centre de face/partie ouverte : piste localisée, pas encore isolée par contre-épreuve.
+La fonctionnelle publiée Σu·dx n'est pas pondérée par l'ouverture ; son ordre ne
+reçoit pas directement le flux ouvert. Advection nulle sur ce premier pas au repos.
+
+**P4 Codex : A244, sévérité1.** Le test d'allocation ne voit que l'hôte alors que le
+pas clone plusieurs tableaux, dont un par itération de pression. I-06 non reçu ;
+comptabilité initiale f32 périmée pour cinq tampons f64. Budget reçu = itérations,
+pas millisecondes. Non-fini détecté après mutation sans restauration. Pression f64
+à régler sous I-08 ; Caps trop large pour g scalaire constant. Documentation §7/8
+corrigée, aucun code numérique modifié. Tests verts ne valent pas conformité.
+Aucun ADR : ni choix de famille ni dérogation implicite aux invariants.
+
+**Outil.** Claude renomme volume→delta_projection (sinon classé dans V), puis
+corrige le suivi des renommages avec --follow. Codex corrige le compte236 puces :
+il y avait243 identifiants uniques avant A244, désormais244. Sortie relue : modules
+B3/W23/δ5/V0 ; dernières avancées S181/S181/S199/jamais. W S182 du tableau S198
+expire sous la méthode corrigée. Part système S190–S199≈7 % avant clôture, contre0 %
+pour S190–S197 ; le ratio dépend aussi du volume documentaire de clôture.
+
+**Suite S200 : S199-1/A244**, corriger les contrats dans la bibliothèque : allocations
+globales, capacités/refus, précision et budget explicitement réglés. **S199-2** reste
+nommée : reconstruire les flux ouverts et les recevoir avant surface mobile. Priorité
+aux défauts d'exécution constatés, puis au défaut spatial ; deux lots qui avancent δ.
+B3 non éligible, B4/A50 partiels, seuil2 % inchangé ; A217 reste close S194,
+ADR-123 confirmé S197. Aucun arbitrage utilisateur supplémentaire.
+
+**Rituel.** File plurielle relue entière, A241 reportée, A213/B2/coupure/bathymétrie/
+seconde cible/V/dossier de réunions conservés. I-03/I-06/I-07/I-08/I-17 relus,
+aucun amendement implicite. Recommandation S198 exécutée ; compteur0.
+123 ADR,244 angles sans trou,279 leçons,18 invariants,6 SPEC,23 cas vérifiés.
+Pas de leçon distincte : hypothèse réfutée applique L75, portée des assertions déjà
+enseignée. Index/README/REPRISE et B3/B4 actualisés ; copies propres à avancer après
+commit final sans suppression. P4/P5 terminent la passation, sans refaire P1–P3.

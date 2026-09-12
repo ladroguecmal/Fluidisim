@@ -1668,7 +1668,9 @@ entrée par entrée. Le fil reprend ci-dessous.
   et allocations. Comparer àla surface àentrées identiques ; conditions/limites de
   mesure avant budget de consommation perturbative. BILAN-S145/BILAN-B4-S176 portés.
 
-## File active — relue en S198, 2026-09-12
+## File active
+
+Relue en S199, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
 
 *Renommée de « File active S190 » en S193 : le contenu est daté ligne par ligne, le titre
 suivait un numéro de session et vieillissait seul (A185 — un état sans date se lit au
@@ -1683,9 +1685,9 @@ action unique et doit être relue au rituel de fin (A211).
 
 | action / objet | état daté et ce qui reste | priorité / déclencheur |
 |---|---|---|
-| **S198-1 — B3 / δ** *(choisie par la règle des deux maillons)* | **S198 : la vélocité mesurée.** δ n'a pas reçu de code d'exécution depuis **S161**, soit 37 sessions ; V jamais en 198 ; S190–S197 ont produit **zéro ligne de système**. Le compteur `Maillons` était à **5** : la file reprend la main | **construire un premier candidat de solveur volumétrique δ** — c'est la couche la plus longuement bloquée qui soit actionnable. Contrainte neuve d'ADR-123 sur tout candidat qui additionne des sources évoluées séparément |
+| **S199-1 / A244 — B3 / δ** | **S199 : S198-1 réalisée**, noyau MAC en bibliothèque. Filtre1 passé, filtre2 échoué au fond coupé ; allocations du pas et contrats non reçus révélés à la reprise | **S200 : corriger les contrats du noyau** : allocations globales, capacités/refus, précision/budget explicites. Avance δ ; compteur0 |
 | **A241 / repli — reporté** | **S197** : suspect réfuté, la totalité de l'écart reste sans cause | deux candidats nommés (bande relative, termes triples), sous contrainte **L278** ; **n'avance aucune couche**, donc passe après B3/δ |
-| **B3 / δ — action courante** | **S198** : dernière avancée de code **S161**, 37 sessions ; deux Saint-Venant 1D et deux tranches non linéaires, tous **véhicules d'essai**, aucun solveur choisi depuis ADR-007 §5 (S01) | **S198-1** : choisir et construire un candidat, celui qui permet la comparaison B4. Le banc l'attend ; c'est la couche bloquée la plus actionnable |
+| **S199-2 / B3 / δ — fond coupé** | **S199** : ordre1,947 plat,0,898 lisse,0,895 marche ; candidat non éligible. Fonctionnelle non pondérée par les ouvertures ; mécanisme de face à isoler | après S199-1 : reconstruire les flux ouverts et recevoir le triplet avant surface mobile ; aucune famille éliminée |
 | **B4 forces / perception** | aucun reçu complet ; la métrique de vitesse S190 ne les remplace pas | après montage commun surface/solide ; protocole perceptif conserve ses participants réels requis |
 | **A216** (A217 **close** en S194) | **S194** : A217 a sa réponse — la cambrure gouverne l'addition en eau profonde, plus la durée et le désaccord de triade ; A216, coefficient S161, reste inexpliquée | A216 avec un montage qui l'explique ; ne pas dériver 0,02/0,24 comme seuil, ADR-123 n'est pas une bascule |
 | **`n` sources / A240 — close** | **S195 : A240 close.** `n = 2..6` mesuré : à cambrure par train fixée l'écart croît en `n^0,75` (sous-linéaire, loin du `n²`) ; à cambrure **totale** fixée il **décroît** en `1/√n`. ADR-123 se transporte dans le sens favorable | rien à instruire ; limites conservées : `n ≤ 6`, colinéaire, fond plat, eau profonde |

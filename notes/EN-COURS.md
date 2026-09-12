@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S199 — en cours
+Session : S199 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles), après Claude P1–P3
 Objectif : **B3 / δ — construire le premier candidat volumétrique**, celui qui manque depuis
 S01. La couche δ n'a pas reçu de code d'exécution depuis S161. Session choisie **par la file**
@@ -78,9 +78,11 @@ sous la règle des deux maillons (§6.8), et non par le chaînage.
       `seal`, déterminisme, budget respecté.
 - [x] **P4** — documenter ; ADR **seulement** si une décision durable est prise, et elle ne
       doit pas préempter le verdict de B3.
-- [ ] **P5** — rituel de fin (§6), compteur `Maillons` mis à jour selon la règle.
+- [x] **P5** — rituel de fin (§6), compteur `Maillons` mis à jour selon la règle.
 
-**PASSATION — 2026-09-13 00:01. La session change de main : Codex termine S199.**
+**PASSATION HISTORIQUE — 2026-09-13 00:01. Terminée par Codex en P4/P5.**
+Le texte ci-dessous est conservé comme entrée de reprise ; CANDIDAT-DELTA-S199 §7/8
+corrige ses reçus trop larges. Prochaine session S200, pas de reprise P4/P5 à refaire.
 P1 à P3 sont **committés et complets** ; il reste **P4** (documenter) et **P5** (rituel).
 Tout ce qui suit est écrit pour que rien ne soit à refaire ni à remesurer.
 
@@ -466,3 +468,8 @@ refus après mutation, f64 et Caps à cadrer : A244 ouverte. Repos1000 pas à9,8
 par ouverture ; diagnostic de face reste une piste à isoler. Aucun ADR ni code
 numérique modifié. Décompte corrigé dans outil :243 identifiants avant A244,244 après.
 Suite choisie S199-1 contrats runtime puis S199-2 flux coupés ; compteur0.
+
+P5 terminé : journal, index, README, REPRISE, B3/B4 et file propagés. A244 ouverte ;
+123 ADR/244 angles/279 leçons/18 invariants/6 SPEC/23 cas vérifiés. Outil exécuté,
+compte244 confirmé ; aucune campagne ni test numérique relancé. Compteur0, jeton libre.
+Après commit : avancer les trois copies propres vers master et vérifier leur propreté.

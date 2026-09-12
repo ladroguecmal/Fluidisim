@@ -652,3 +652,16 @@ qui recalcule tout et fait foi contre les documents. **L279** : corriger le cana
 rien si l'auteur est en conflit d'intérêt. **A243** : un corpus produit du travail de corpus.
 Aucun ADR. Suite : **B3/δ**, choisie par la règle et non par le chaînage.
 Voir [bilan de vélocité S198](docs/registres/BILAN-VELOCITE-S198.md).
+
+**S199 — 2026-09-13 : premier noyau δ MAC x-z en bibliothèque.**
+Claude construit P1–P3 ; Codex termine la passation P4/P5 sans remesure.
+Lac au repos reçu exactement ; filtre spatial passé sur fond plat (ordre1,947),
+échoué au fond coupé (≈0,90). **Candidat non éligible B3**, aucune famille éliminée.
+339 tests réussis/cinq ignorés, empreinte0x0ad3f695685ca27a : reçus Claude P3.
+**A244** : le test de mémoire ne voit pas les allocations du pas ; plafond
+d'itérations sans budget temporel, refus/capacités et f64 à mettre en conformité.
+**Suite S200 : S199-1**, corriger ces contrats dans la bibliothèque ; **S199-2**
+conserve la reconstruction des flux ouverts avant surface mobile. Compteur **0**,
+δ a avancé ; B4/A50 partiels, seuil2 % acquis. A217 reste close (S194).
+123 ADR,244 angles,279 leçons,18 invariants,6 SPEC,23 cas. Aucun ADR nouveau.
+Voir [candidat δ S199](docs/validation/CANDIDAT-DELTA-S199.md).

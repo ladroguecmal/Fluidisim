@@ -17,6 +17,19 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S199 — 2026-09-13 : premier noyau δ MAC x-z en bibliothèque.**
+Claude construit P1–P3 ; Codex termine la passation P4/P5 sans remesure.
+Lac au repos reçu exactement ; filtre spatial passé sur fond plat (ordre1,947),
+échoué au fond coupé (≈0,90). **Candidat non éligible B3**, aucune famille éliminée.
+339 tests réussis/cinq ignorés, empreinte0x0ad3f695685ca27a : reçus Claude P3.
+**A244** : le test de mémoire ne voit pas les allocations du pas ; plafond
+d'itérations sans budget temporel, refus/capacités et f64 à mettre en conformité.
+**Suite S200 : S199-1**, corriger ces contrats dans la bibliothèque ; **S199-2**
+conserve la reconstruction des flux ouverts avant surface mobile. Compteur **0**,
+δ a avancé ; B4/A50 partiels, seuil2 % acquis. A217 reste close (S194).
+123 ADR,244 angles,279 leçons,18 invariants,6 SPEC,23 cas. Aucun ADR nouveau.
+Voir [candidat δ S199](validation/CANDIDAT-DELTA-S199.md).
+
 **S198 — 2026-09-12 : ce qui ralentit le projet, mesuré puis corrigé.**
 [BILAN-VELOCITE-S198](registres/BILAN-VELOCITE-S198.md) et `outils/velocite.sh`, **à la
 demande de l'utilisateur**. Aucun ADR, aucune décision de conception : la décision est
@@ -1253,10 +1266,10 @@ parfaitement stable ne pouvait pas distinguer.
 
 ## État d'avancement
 
-**État actif S192** : critère B4 fixé à 2 %, profil source reçu sous projection (S191),
-tranche x-z à surface libre linéaire reçue Airy (S192), comparaison non linéaire absente ;
+**État actif S199** : critère B4 fixé à2 %, domaine de superposition chiffré S194 et
+confirmé S197 ; noyau δ construit S199, non admissible B3 (fond coupé et A244).
 B1/B2/B4 restent partiels, aucun banc complet. Voir le résultat en tête de cet index
-et la [file plurielle](registres/QUESTIONS-OUVERTES.md#file-active--relue-en-s195-2026-09-12).
+et la [file plurielle](registres/QUESTIONS-OUVERTES.md#file-active).
 
 
 **S129 :** [BILAN-CANDIDAT-ETENDU-S129](validation/BILAN-CANDIDAT-ETENDU-S129.md), cinétique

@@ -3,7 +3,16 @@
 2026-09-11. Action S175-1. État du code vérifié sur master0b37fd2 àl’amorce.
 Ce bilan confronte les reçus S163–S175 au contrat ; aucune nouvelle simulation lancée.
 
-## État actif — S194, 2026-09-12
+## État actif — S199, 2026-09-13
+
+Un noyau δ MAC x-z existe désormais en bibliothèque, mais reste non éligible B3 :
+repos reçu, ordre spatial≈0,90 sur fond coupé ; contrats d'exécution à corriger
+(A244). [CANDIDAT-DELTA-S199](CANDIDAT-DELTA-S199.md). Couvercle imposé, pas de
+surface mobile intégrée ni fournisseur B+W branché ; **B4/A50 restent partiels**.
+Le seuil2 % demeure acquis, A217 close S194 et ADR-123 confirmé par S197.
+Suite : S199-1 contrats du noyau, S199-2 flux ouverts ; forces/perception non reçues.
+
+## État historique — S194, 2026-09-12
 
 **S193-1 réalisée : le couplage de deux trains est mesuré**, et
 [ADR-123](../adr/ADR-123-le-domaine-de-validite-de-la-superposition.md) en fixe le domaine.

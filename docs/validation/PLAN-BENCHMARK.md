@@ -104,6 +104,13 @@ conservation d'énergie sur 60 s ; coût pour 4096 paquets ; déterminisme crois
 
 ## B3 — Couche δ : technologie, coût et latence
 
+> **S199 — 2026-09-13 :** premier noyau MAC x-z en bibliothèque, filtre1 passé,
+> filtre2 ordre1,947 au fond plat mais≈0,90 au fond coupé : **non éligible à B3**.
+> [CANDIDAT-DELTA-S199](CANDIDAT-DELTA-S199.md) §7/8 précise les autres limites :
+> allocations dans le pas, plafond d'itérations sans budget temporel, capacités et
+> refus non entièrement reçus (A244). Suite S199-1 : contrats d'exécution ; S199-2 :
+> flux coupés, puis surface mobile. Aucune famille éliminée ni technologie retenue.
+
 > **S194 — 2026-09-12 :** le couplage de deux trains est mesuré sur ce véhicule
 > (ADR-123). Ce lot n'apporte toujours **aucun candidat** aux quatre scénarios ci-dessous,
 > mais il ajoute une **contrainte de sélection** chiffrée : tout candidat qui additionne
