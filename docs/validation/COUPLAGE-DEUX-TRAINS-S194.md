@@ -261,3 +261,232 @@ ses deux mécanismes séparés. ADR-112 cessera d'être une interdiction sans gr
    d'un couple **colinéaire** ; sa dépendance angulaire reste entière.
 5. **Fond plat, surface graphe**, pas de déferlement, pas de forces, pas de perception,
    aucune seconde cible (A98), aucun coût CPU.
+
+## 7. Résultats exécutés — 2026-09-12
+
+**S193-1 réalisée : l'écart de la superposition indépendante est mesuré, ses deux
+mécanismes sont séparés, et sa frontière à 2 % est chiffrée.** `reception=true`, empreinte
+**`0x4bc0934d630c2c50`**, deux exécutions `release` identiques, huit tests propres en
+`debug` et `release`. Deux précisions datées (§5.1, §5.2) ont été écrites avant l'exécution
+correspondante ; une prédiction et un contrôle déclarés sont **réfutés**, et le §7.7 le dit.
+
+### 7.1 Les contre-épreuves nulles : le banc se mesure d'abord lui-même
+
+| contre-épreuve | écart de modes | écart de champ | croisé | train |
+|---|---|---|---|---|
+| train unique (`f=0` et `f=1`), `M=1..3` | **0** exact | **0** exact | **0** exact | **0** exact |
+| `M=1`, couple `(2,3)`, `s=0,0125..0,1` | **0** exact | `1,96·10⁻¹⁶` à `2,62·10⁻¹⁶` | **0** exact | **0** exact |
+
+Tout écart mesuré au-dessus de `3·10⁻¹⁶` est donc du couplage, et rien d'autre. C'est ce
+que L271 réclamait, et c'est la condition de lecture de tout ce qui suit.
+
+### 7.2 Les deux mécanismes se séparent, avec les pentes et les croissances prédites
+
+`M=3`, `h=8`, couple `(2,3)`, fenêtre de 20 périodes. Les colonnes « croisé » et « train »
+sont les amplitudes physiques aux modes `q₁±q₂` et aux modes `q₁, q₂`, rapportées à `A`.
+
+| `s` | croisé | pente | rapport tardif/précoce | train | pente | rapport tardif/précoce |
+|---|---|---|---|---|---|---|
+| 0,0125 | `1,478·10⁻²` | — | **1,002** | `1,166·10⁻²` | — | **4,088** |
+| 0,025 | `2,965·10⁻²` | **1,0041** | **1,003** | `4,722·10⁻²` | **2,0178** | **4,116** |
+| 0,05 | `6,081·10⁻²` | **1,0365** | **1,023** | `1,973·10⁻¹` | **2,0627** | **4,197** |
+
+**Les quatre prédictions du §2.3 sont tenues, chacune sur son propre mode et sans aucun
+ajustement.** La part croisée est de **pente 1** et **stationnaire** — rapport 1,002 à
+1,023 entre le dernier et le premier quart de la fenêtre — exactement ce qu'impose
+l'absence de triade résonante en eau profonde. La part de train est de **pente 2** et
+**croît** d'un facteur 4,1 sur la même fenêtre, exactement ce qu'impose un forçage cubique
+résonant. Deux mécanismes dérivés avant mesure, deux signatures indépendantes, deux
+confirmations.
+
+### 7.3 La structure, et ce qu'elle dit de l'ordre du modèle
+
+Ajustement `écart = α·s + β·s²·N` sur la grille cambrure × durée, points **dans le
+domaine** seulement (§7.4) :
+
+| | `α` | `β` | résidu | résidu / écart maximal |
+|---|---|---|---|---|
+| `M=2` | `+1,235616` | `+1,744764` | `2,710·10⁻²` | 5,66 % |
+| `M=3` | `+1,302602` | `+5,898728` | `6,587·10⁻³` | **1,82 %** |
+
+Le résidu de `M=3` est à **1,82 %** de l'écart maximal, sous les 10 % déclarés : la forme
+en deux termes est la bonne.
+
+**Et la comparaison des deux lignes est un argument indépendant pour ADR-122.** Le
+coefficient `α` — la part liée croisée, effet quadratique — est le **même** à 5 % près aux
+deux ordres, ce qui est attendu : il est présent dès `M=2`. Le coefficient `β` — la part
+cumulative — vaut `1,745` à `M=2` contre `5,899` à `M=3`, soit un facteur **3,4**. Lu
+directement sur la colonne « train » à `s=0,05` : `6,391·10⁻²` contre `1,973·10⁻¹`,
+facteur 3,09. **Un véhicule tronqué à l'ordre deux sous-estime donc la part cumulative du
+couplage d'un facteur trois**, c'est-à-dire qu'il fait paraître la superposition
+*meilleure* qu'elle n'est. ADR-122 refusait l'ordre deux sur la fréquence d'un train seul ;
+la même troncature falsifie la modulation croisée de deux trains, dans le sens rassurant.
+
+### 7.4 Une configuration hors domaine, et le protocole l'exigeait
+
+À `M=3` et `s=0,1` par train, la dérive d'énergie du véhicule vaut **`4,643·10⁻³`**, soit
+46 fois le `10⁻⁴` de S193, et l'écart atteint **181 % de `A`**. Le §4 exigeait que la
+configuration reste dans le domaine d'ADR-122 pour les deux nombres d'onde : deux trains à
+`ka=0,1` chacun n'y sont pas, ADR-122 n'ayant été reçu que pour un train unique à cette
+cambrure. **Ce point est donc publié et exclu des ajustements par la règle déclarée**, pas
+par convenance — et sa mesure d'énergie est ce qui établit le fait. À `M=2` la même
+configuration reste dans le domaine (`7,363·10⁻⁹`) : c'est l'ordre trois, plus non
+linéaire, qui sort du domaine le premier.
+
+### 7.5 Le partage d'amplitude suit la loi prédite, et se dégrade aux extrêmes
+
+`A = 0,05 m`, `M=3`, `h=8`, `N=20` :
+
+| `f` | 0 | 0,1 | 0,25 | 0,5 | 0,75 | 0,9 | 1 |
+|---|---|---|---|---|---|---|---|
+| écart | **0** exact | `1,569·10⁻¹` | `2,836·10⁻¹` | **`3,424·10⁻¹`** | `2,481·10⁻¹` | `1,194·10⁻¹` | **0** exact |
+| écart/`f(1−f)` | — | 1,743 | 1,513 | 1,370 | 1,323 | 1,327 | — |
+
+**Les deux zéros sont exacts et le maximum est bien au partage égal**, comme prédit. La loi
+`f(1−f)` tient à **14,30 %** sur `f ∈ {0,25 ; 0,5 ; 0,75}`, sous les 20 % déclarés. Elle se
+dégrade vers les partages très inégaux — 1,743 à `f=0,1`, soit 27 % au-dessus du centre —
+ce que la dérivation n'annonçait pas et qui s'explique : à `f=0,1` le train dominant porte
+presque toute la cambrure, et sa propre non-linéarité n'est plus du même ordre que le
+produit croisé. La loi est donc une bonne description au voisinage du partage égal, et une
+borne optimiste aux extrêmes.
+
+### 7.6 Le couple importe peu ; la cambrure totale décide
+
+`M=3`, `h=8`, `s=0,05` par train, `N=20` :
+
+| couple | sens | écart | croisé | train |
+|---|---|---|---|---|
+| `(2,3)` | même | `3,612·10⁻¹` | `6,081·10⁻²` | `1,973·10⁻¹` |
+| `(1,2)` | même | `3,203·10⁻¹` | *aucun mode exclusif* | `2,179·10⁻¹` |
+| `(1,3)` | même | `3,342·10⁻¹` | `5,943·10⁻²` | `2,292·10⁻¹` |
+| `(2,3)` | **opposé** | `3,478·10⁻¹` | `4,938·10⁻²` | `1,872·10⁻¹` |
+
+**L'écart varie de 13 % au plus sur quatre géométries de couple**, dont un renversement de
+sens de propagation. C'est le résultat le plus utile au projet de toute la série : pour
+décider si deux sources peuvent être superposées, **il suffit de connaître leurs cambrures,
+pas leur géométrie relative** — au moins dans cette famille colinéaire. La
+contra-propagation réduit la part croisée de 19 % sans changer le total, la part de train
+compensant.
+
+La ligne `(1,2)` porte `0` dans la colonne « croisé », et ce **zéro ne signifie pas
+l'absence de couplage croisé** : pour ce couple, `q₂−q₁=1` et `q₁+q₂=3` sont aussi des
+modes du train A ou de ses harmoniques, donc aucun mode n'est **exclusivement** croisé et
+le diagnostic par mode ne s'applique pas. Son écart total, `3,203·10⁻¹`, est le plus faible
+des quatre — pas le plus fort, contrairement à ce qu'une coïncidence de modes pouvait
+laisser craindre. Le §3 ne prédisait aucune magnitude pour ce cas ; il est relevé.
+
+### 7.7 Profondeur : la prédiction tient largement, avec une exception nommée
+
+`s = 2·10⁻⁵`, `M=3`, couple `(2,3)`, `N=20`. Désaccord de triade `Δ` calculé sur la
+dispersion **semi-discrète** du véhicule, `α` lu comme `écart(N=1)/s` :
+
+| `h` (m) | Ursell | `Δ` | `α` |
+|---|---|---|---|
+| 8 | `1,59·10⁻⁶` | 2,470321 | **1,382753** |
+| 2 | `1,02·10⁻⁴` | 2,515140 | **1,416284** |
+| 0,5 | `6,52·10⁻³` | 1,464762 | **4,083342** |
+| 0,25 | `5,22·10⁻²` | 0,508191 | **11,855349** |
+
+**`α` croît de 8,6 fois quand `Δ` décroît de 4,9 fois : la prédiction du §2.1 est tenue, et
+largement.** Le mécanisme dérivé avant mesure — l'approche de la résonance de triade quand
+la dispersion s'affaiblit — rend donc compte d'un facteur près de neuf sur le couplage,
+et il rend aussi le cas peu profond **mesurable sans oracle de Stokes** (A234), ce qui était
+l'autre pari du §2.1.
+
+**Exception, à dire plutôt qu'à lisser.** Entre `h=8` et `h=2`, `Δ` croît de 1,8 % et `α`
+croît de 2,4 % — donc **dans le même sens**, ce qu'une lecture strictement monotone de la
+prédiction interdit. Les deux profondeurs sont effectivement profondes (`kh` de 12,6 et
+3,14), leur `Δ` ne diffère que de 1,8 %, et leur `dz` diffère d'un facteur 4, si bien que le
+`Δ` semi-discret de `h=8` est le moins exact des deux. Ce couple ne teste donc pas la
+prédiction ; il la contredit faiblement, et rien dans la mesure ne permet de trancher entre
+une vraie non-monotonie et un effet de discrétisation. **Statut de la réception 9 :
+partielle** — reçue sur la plage où `Δ` varie, non testée entre les deux cas profonds.
+
+Repère de cohérence : `α = 1,383` mesuré ici à `s = 2·10⁻⁵` contre `α = 1,303` ajusté au
+§7.3 sur des cambrures mille fois plus grandes — 6 % d'écart entre deux mesures
+indépendantes du même coefficient.
+
+### 7.8 La frontière des 2 % — le livrable de la session
+
+`M=3`, `h=8`, couple `(2,3)`, cambrure `s` par train. « Franchissement » est le nombre de
+périodes au bout duquel l'écart dépasse le critère d'ADR-120, mesuré et non interpolé.
+
+| `s` | écart à `N=1` | écart à `N=20` | franchissement des 2 % |
+|---|---|---|---|
+| 0,002 | `2,789·10⁻³` | `3,206·10⁻³` | **jamais** |
+| 0,004 | `5,625·10⁻³` | `6,998·10⁻³` | **jamais** |
+| 0,006 | `8,509·10⁻³` | `1,150·10⁻²` | **jamais** |
+| 0,008 | `1,144·10⁻²` | `1,709·10⁻²` | **jamais** |
+| 0,009 | `1,292·10⁻²` | `2,023·10⁻²` | 19,8 périodes |
+| 0,010 | `1,442·10⁻²` | `2,358·10⁻²` | 11,7 périodes |
+| 0,0125 | `1,823·10⁻²` | `3,294·10⁻²` | 5,4 périodes |
+| 0,014 | `2,055·10⁻²` | `3,921·10⁻²` | **0,8 période** |
+| 0,015 | `2,212·10⁻²` | `4,371·10⁻²` | **0,8 période** |
+| 0,020 | `3,017·10⁻²` | `6,964·10⁻²` | **0,4 période** |
+
+**La thèse du §2.3 est confirmée dans sa forme et corrigée dans son ampleur.** Le domaine
+existe bien en (cambrure × durée) — à `s=0,009` la superposition tient vingt périodes, à
+`s=0,0125` cinq, à `s=0,014` pas même une. Mais **le levier de la durée est étroit** :
+toute la dépendance temporelle utile est enfermée dans la bande `0,009 ≤ s ≤ 0,014`, un
+facteur 1,6 en cambrure. En dessous, la superposition tient indéfiniment sur l'horizon
+mesuré ; au-dessus, elle est fautive avant la fin de la première période. **On ne peut donc
+pas acheter la validité en regardant brièvement.**
+
+**Le chiffre qui met ADR-112 en regard de S193.** À `s = 0,0125`, S193 recevait un train
+**unique** contre Stokes à **0,4555 %** d'erreur — excellent. **Deux** trains de cette même
+cambrure, superposés indépendamment, franchissent le même budget de 2 % en **5,4 périodes**.
+Ce n'est pas la précision du modèle qui manque, c'est la superposition qui est fausse :
+d'un facteur 40 entre les deux erreurs, à cambrure égale.
+
+### 7.9 Convergence, et deux réfutations à publier
+
+| configuration | ordre en `K` sur la **moyenne quadratique** | résidu à `K=64` | ordre en `K` sur le **maximum** |
+|---|---|---|---|
+| `s=0,008`, condition initiale Stokes-2 | **1,9295** | **0,4698 %** | **−0,7914** |
+| `s=0,008`, condition initiale d'ordre un | 1,8711 | 0,5026 % | −0,3700 |
+| `s=0,05`, condition initiale Stokes-2 | 1,7233 | 0,0942 % | +0,6140 |
+
+Déplacements sur les autres axes, en moyenne quadratique : `dt` de `T₁/200` à `T₁/400`,
+`4,07·10⁻⁷` et `7,32·10⁻⁷` ; `Q` de 16 à 24, `1,5·10⁻⁸` et `1,93·10⁻⁵`. Le temps et la
+bande sont donc convergés à l'arrondi près, et la profondeur discrète est le seul axe
+spatial — comme S193 l'avait conçu.
+
+> **Réfutation 1 — le contrôle de non-artefact, tel que le §5.2 l'écrivait, ne peut pas
+> fonctionner, et il est publié comme non tenu.** Il exigeait que passer `K` de 32 à 64 ne
+> déplace pas l'écart de plus de 2 % ; le déplacement mesuré vaut **5,37 %**. Mais ce n'est
+> pas un artefact : le rapport des déplacements successifs `|K32−K64| / |K64−K128|` vaut
+> **3,81**, c'est-à-dire **4**, c'est-à-dire la **convergence d'ordre deux**. Un contrôle qui
+> juge la *taille* d'un déplacement sur une grille grossière ne distingue pas un artefact
+> d'une convergence — il confond les deux par construction. Ce qui répond à la question
+> posée est l'**ordre** de la suite et la part de discrétisation qui reste au pas retenu :
+> ordre **1,93**, résidu de Richardson **0,47 %** à `K=64`. L'écart mesuré est donc bien du
+> couplage, et le contrôle déclaré était mal formé.
+>
+> **Réfutation 2 — la cause soupçonnée n'était pas la bonne.** L'hypothèse posée en séance
+> était que la sensibilité en `K` venait de la **condition initiale**, dont le terme d'ordre
+> deux emploie le `b₂` du continu sur un véhicule semi-discret et injecte donc une onde
+> libre parasite dépendante de `K` — le mécanisme même d'A236, pour la troisième fois. Elle
+> a été testée en retirant purement ce terme : le résidu passe de `0,4698 %` à `0,5026 %`,
+> et l'ordre de `1,9295` à `1,8711`. **Aucun changement** : l'hypothèse est fausse, la
+> sensibilité est dans la dynamique — `G_h` est le seul objet dépendant de `K` — et non dans
+> la condition initiale. La variante d'ordre un reste publiée pour cette raison.
+>
+> **Et un résultat méthodologique qui ne concerne pas que cette session.** Le **maximum sur
+> la fenêtre ne converge pas** : ordres `−0,79`, `−0,37`, `+0,61`, et valeurs non monotones
+> (`1,668 / 1,709 / 1,781 · 10⁻²` pour `K=32/64/128`). Ce n'est pas un défaut du véhicule :
+> un maximum est une **statistique d'ordre** sur un signal oscillant, et un changement de
+> fréquence de `6·10⁻⁴` suffit à déplacer l'endroit où le maximum tombe. La même
+> fonctionnelle avait donné des ordres 2 impeccables en S192 et S193 — parce que l'erreur y
+> était une fonction lisse et monotone du pas, non un résidu de deux évolutions presque
+> égales. **Un maximum ne se raffine proprement que s'il porte sur une quantité qui n'est
+> pas une différence.** Les écarts publiés aux §7.2 à §7.8 restent des maxima, parce que
+> c'est le maximum qui décide d'un budget ; leur incertitude de discrétisation est celle de
+> la moyenne quadratique, `0,47 %` relatifs, très loin de changer une conclusion.
+
+Cible `x86_64-pc-windows-msvc`, rustc 1.97.0 (2d8144b78), cargo 1.97.0 (c980f4866) ; pas de
+seconde cible, aucune mesure de coût CPU. `water-core` et le support S193 sont **inchangés**
+— seul `examples/nl_coupling_2d.rs` est ajouté. Les 331 tests d'espace de travail et leurs
+cinq ignorés sont le reçu vérifié en S193.
+
+Code : `code/water-core/examples/nl_coupling_2d.rs`.
+[Sorties intégrales](COUPLAGE-DEUX-TRAINS-S194-MESURES.md).

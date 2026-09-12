@@ -76,7 +76,7 @@ nomme ; elle n'était pas possible avant S193. Aucun choix δ, aucun seuil de ba
 - [x] **P3a** — banc de couplage `nl_coupling_2d.rs` réutilisant `support/nl_surface.rs`
   sans le modifier ; tests propres dont **train unique** et **M=1** à écart nul, et
   couple à modes disjoints exact au bit.
-- [ ] **P3b** — campagne : échelle d'amplitude, partage d'amplitude, croissance en
+- [x] **P3b** — campagne : échelle d'amplitude, partage d'amplitude, croissance en
   temps, échelle M, couples résonant/non résonant, deux profondeurs ; ajustement
   `écart = α·s + β·s²·N` ; frontière des 2 % en (cambrure × durée) ; reproductibilité.
 - [ ] **P4** — documenter, propager A217/A216/A50/B4 et la file ; ADR seulement si une
@@ -136,4 +136,31 @@ Incident de procedure, P3a : le commit d'etape est parti **sans** la case cochee
 un `cd` ayant deplace le repertoire avant l'ecriture du plan. Repare par amende
 du commit local non pousse, la regle du depot exigeant le travail et la case dans
 le meme commit. A retenir : ecrire le plan **avant** `git add`, pas apres.
+
+P3b : campagne executee, reception=true, empreinte 0x4bc0934d630c2c50, deux
+executions release identiques, huit tests debug/release.
+Les quatre predictions de mecanisme tiennent : part croisee pente 1,0041/1,0365 et
+**stationnaire** (rapport 1,002-1,023) ; part de train pente 2,0178/2,0627 et
+**croissante** (rapport 4,088-4,197). Ajustement alpha=1,3026 beta=5,8987,
+residu 1,82 % de l'ecart maximal.
+LIVRABLE : frontiere des 2 %. s<=0,008 tient au moins 20 periodes ; 0,009 -> 19,8 ;
+0,010 -> 11,7 ; 0,0125 -> 5,4 ; s>=0,014 -> moins d'une periode. Le domaine existe
+mais la duree ne s'achete pas : tout le levier est dans 0,009-0,014.
+Contraste a retenir : a s=0,0125 S193 recevait UN train a 0,4555 % ; DEUX trains
+franchissent 2 % en 5,4 periodes. Facteur 40 a cambrure egale.
+Profondeur : alpha 1,383/1,416/4,083/11,855 pour h=8/2/0,5/0,25, desaccord
+2,470/2,515/1,465/0,508 -> prediction tenue (x8,6 pour /4,9), **exception** entre
+h=8 et h=2 ou les deux varient dans le meme sens (1,8 % et 2,4 %). Reception 9
+partielle, dit comme tel.
+Couple : ecart varie de 13 % seulement sur quatre geometries, contra-propagation
+comprise. La cambrure decide, pas la geometrie.
+M=2 sous-estime beta d'un facteur 3,4 : argument independant pour ADR-122.
+s=0,1 a M=3 hors domaine (energie 4,64e-3), publie et exclu par la regle declaree.
+DEUX REFUTATIONS publiees : (1) le controle de non-artefact du protocole confond
+convergence et artefact — le rapport des deplacements vaut 3,81 donc ordre 2,
+ordre mesure 1,93, residu 0,47 % a K=64 ; (2) l'hypothese « la condition initiale
+en b2 du continu cause la sensibilite en K » est FAUSSE (0,4698 % vs 0,5026 % sans
+le terme). Et un resultat de methode : le **maximum sur fenetre ne converge pas**
+(ordres -0,79/-0,37/+0,61) parce que c'est une statistique d'ordre sur un residu.
+Candidats P4 : ADR-123 (domaine de validite de la superposition), angles et lecons.
 
