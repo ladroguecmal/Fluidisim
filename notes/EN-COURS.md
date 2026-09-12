@@ -72,7 +72,7 @@ Airy et raffinement. Première étape physique, pas réception non linéaire B4.
   conditions de surface, évolution et vitesses ; réception des bords/stencil/refus.
 - [x] **P3b** — ondes Airy profond/peu profond/intermédiaire, raffinements espace/temps,
   vitesse/surface/énergie/volume, contre-épreuves, reproductibilité.
-- [ ] **P4** — documenter résultats/limites et suite couplée ; propager A50/B4/A217/file,
+- [x] **P4** — documenter résultats/limites et suite couplée ; propager A50/B4/A217/file,
   ADR seulement si décision de projet, jamais sélection δ par un essai linéaire.
 - [ ] **P5** — rituel de fin, journal/index/README/décomptes, vérifications, jeton libre,
   copies propres avancées sans suppression.
@@ -90,3 +90,7 @@ P3a : trois tests debug/release passent. Premier test de débordement trop faibl
 P3b : 12 grilles/cas reçus selon protocole (grille fine <=2 %, convergence),
 quatre pas temporels ordre2 ; deux release identiques 0x4fc690d4ac035bf7.
 Pire grille fine vitesse1,732796 % profond. Trois tests debug/release passent.
+
+P4 : BILAN-B4/PLAN-BENCHMARK/SPEC-004/file active propagés. S191-1 close,
+S192-1 surface non linéaire/Stokes ouverte ; pas d'ADR, aucun solveur δ choisi.
+Les 12 exécutions forment la campagne reçue ; seules les grilles fines sont exigées sous2 %.

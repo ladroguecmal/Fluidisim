@@ -104,6 +104,10 @@ conservation d'énergie sur 60 s ; coût pour 4096 paquets ; déterminisme crois
 
 ## B3 — Couche δ : technologie, coût et latence
 
+> **S192 — 2026-09-12 :** un véhicule potentiel x-z à surface libre linéaire est
+> reçu contre Airy ; il ne traite aucun des quatre scénarios complets ci-dessous.
+> Aucun solveur de production choisi, aucun verdict B3 acquis.
+
 **Question.** Quel solveur volumétrique ?
 **Protocole.** Quatre scénarios imposés, identiques pour tous les candidats :
 1. coque en mouvement, `dx` = 0,10 m — mesure du couplage solide et de la stabilité ;
@@ -117,7 +121,14 @@ l'autorise (ADR-007 §3).
 
 ## B4 — Validité du régime perturbatif
 
-> **État actif S191 — 2026-09-12.** Profil 14×14×8/extrapolation 80 ms reçu aussi
+> **État actif S192 — 2026-09-12.** Tranche x-z à surface libre linéaire reçue
+> contre Airy aux profondeurs0,25/2/8 m : vitesse fine au plus1,732796 %, cinq
+> périodes, convergence d'ordre2. [SURFACE-LIBRE-2D-S192](SURFACE-LIBRE-2D-S192.md).
+> S191-1 réalisée ; suite S192-1 : surface non linéaire/référence Stokes, avant
+> source et comparaison perturbatif/total. B4 complet, forces/perception non reçus.
+> Seuil2 % inchangé ; ces erreurs et le budget source S191 ne s'additionnent pas.
+>
+> **État historique S191 — 2026-09-12.** Profil 14×14×8/extrapolation 80 ms reçu aussi
 > avec projection discrète, budget 1,371947 % sous les **2 % inchangés** ;
 > [PROJECTION-B4-S191](PROJECTION-B4-S191.md). Bords algébriques, aucune surface
 > libre reçue. Suite : tranche 2D surface libre (S191-1), puis comparaison au total.

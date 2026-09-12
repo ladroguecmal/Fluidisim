@@ -3,7 +3,23 @@
 2026-09-11. Action S175-1. État du code vérifié sur master0b37fd2 àl’amorce.
 Ce bilan confronte les reçus S163–S175 au contrat ; aucune nouvelle simulation lancée.
 
-## État actif — S191, 2026-09-12
+## État actif — S192, 2026-09-12
+
+**S191-1 réalisée : tranche x-z à surface libre linéaire reçue contre Airy.**
+Fond imperméable, rappel de gravité et profondeur discrétisée. Aux trois profondeurs
+0,25/2/8 m, grille128×64, erreurs de vitesse0,308062/0,091040/1,732796 % sur cinq
+périodes ; hauteur au plus1,647737 %, convergence espace/temps d'ordre2.
+Trois tests debug/release et deux campagnes release identiques.
+[SURFACE-LIBRE-2D-S192](SURFACE-LIBRE-2D-S192.md).
+
+**A50/B4 restent partiels** : ce montage dispersif est linéaire, sans injection du
+fournisseur S191 ni comparaison perturbatif/total ; forces et perception non reçues.
+Ses erreurs ne se composent pas avec le budget S191 (références différentes).
+**Suite S192-1 : conditions de surface non linéaires et réception Stokes**, avec
+ordre en amplitude explicite, avant branchement et comparaison intégrale.
+Seuil2 % maintenu, B3 non choisi, A216/A217 ouvertes. File plurielle S190 relue.
+
+## État historique — S191, 2026-09-12
 
 **Le profil source de S190 est reçu avec projection discrète**, sous le même seuil
 de 2 % : budget **1,371947 %**, erreur avec réserves **0,948047 %**, ou borne avec

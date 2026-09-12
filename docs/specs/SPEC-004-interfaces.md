@@ -402,6 +402,12 @@ hypothèse à écarter est un terme source incomplet.
 
 ### 6.2 L'optimisation qui rend le coût acceptable
 
+> **Suivi S192 — 2026-09-12 :** [surface libre x-z linéaire reçue Airy](../validation/SURFACE-LIBRE-2D-S192.md),
+> trois profondeurs, cinq périodes, vitesse fine≤1,732796 %. Ce véhicule n'injecte
+> pas encore le fournisseur S191 ; aucune réception couplée ni addition de ces
+> erreurs au budget source. Suite S192-1 : non-linéarité de surface/référence Stokes,
+> puis comparaison perturbatif/total. Seuil2 % acquis ; A50 reste partielle.
+
 > **Suivi S191 — 2026-09-12 :** le profil S190 est reçu avec projection discrète,
 > [PROJECTION-B4-S191](../validation/PROJECTION-B4-S191.md), budget **1,371947 %**
 > sous 2 %. [ADR-121](../adr/ADR-121-la-projection-lineaire-et-la-borne-de-composition.md)

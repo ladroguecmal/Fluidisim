@@ -1677,15 +1677,15 @@ Porteur des travaux internes : l'agent de construction du dépôt, sous arbitrag
 l'utilisateur ; aucune équipe extérieure fictive. Cette file complète la prochaine
 action unique et doit être relue au rituel de fin (A211).
 
-| action / objet | état constaté S190 et ce qui reste | priorité / déclencheur |
+| action / objet | état daté et ce qui reste | priorité / déclencheur |
 |---|---|---|
-| **S191-1 / A50 / B4** | **S191 : S190-1/S189-1 reçues sur projecteur de banc**, profil 80 ms sous 2 % ; surface libre, frontières physiques et comparaison intégrale manquantes | prochaine action : tranche 2D à surface libre et onde de gravité, avant comparaison perturbatif/total |
-| **B3 / δ** | deux Saint-Venant 1D et véhicule de quantité de mouvement sur bloc 3D ; aucun solveur volumétrique à surface libre choisi | construire/recevoir le candidat qui permet la comparaison B4 ; le 2 % ne choisit pas une technologie |
+| **S192-1 / A50 / B4** | **S192 : S191-1 réalisée**, surface libre x-z linéaire reçue Airy, vitesse fine≤1,732796 % ; source S191 non branchée, comparaison intégrale absente | prochaine action : conditions de surface non linéaires dispersives/référence Stokes, ordre en amplitude explicite, puis comparaison perturbatif/total |
+| **B3 / δ** | **S192** : deux Saint-Venant 1D, bloc quantité de mouvement3D et tranche potentielle x-z à surface libre linéaire ; aucun solveur δ choisi | construire/recevoir le candidat qui permet la comparaison B4 ; le 2 % ne choisit pas une technologie |
 | **B4 forces / perception** | aucun reçu complet ; la métrique de vitesse S190 ne les remplace pas | après montage commun surface/solide ; protocole perceptif conserve ses participants réels requis |
-| **A216 / A217** | coefficient S161 non expliqué ; référence évolutive profonde non linéaire/dispersive absente ; ADR-112 interdit d'en tirer la bascule | avec la comparaison couplée ; ne pas dériver 0,02/0,24 comme seuil |
+| **A216 / A217** | **S192** : coefficient S161 non expliqué ; Airy dispersif linéaire reçu mais référence à la fois non linéaire/dispersive absente ; ADR-112 interdit d'en tirer la bascule | avec la comparaison couplée ; ne pas dériver 0,02/0,24 comme seuil |
 | **A213 / omega f32** | remède identifié, non appliqué, réception S95 à renouveler s'il est retenu | lot propre de précision/horizon, indépendant de l'arbitrage B4 |
 | **λ_cut / B2 / coupure W–δ** | B2 partiel ; dispersion/dissipation et borne d'éponge A92 à assembler | choix du couple W/δ ; ne pas confondre réception source B4 et coupure |
-| **Bathymétrie / S116-2** | profondeur finie et variation du fond hors du montage profond uniforme reçu | lot de construction propre ; reste visible même si S190-1 se prolonge |
+| **Bathymétrie / S116-2** | **S192** : trois profondeurs finies uniformes reçues dans le modèle linéaire ; aucune variation du fond reçue | lot de construction propre ; la profondeur constante ne ferme pas la bathymétrie |
 | **A98 / conformité multiplateforme** | aucune seconde cible testée par S190 ; debug/release locaux ne suffisent pas | réception sur seconde cible disponible ; I-03 maintenu |
 | **V / bancs restants** | V non construite ; B1/B2/B4 partiels, aucun banc complet, huit autres non lancés | arbitrer les lots système depuis cette file plutôt que prolonger par défaut la dernière sonde |
 | **A94/A95 / dossier de réunions** | quatorze fiches à traiter selon ADR-028 ; les qualifier en décisions internes ou faits externes | les intitulés « avant première ligne de code » ne bloquent pas rétroactivement le code autorisé depuis S20 |
