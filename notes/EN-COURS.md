@@ -67,7 +67,7 @@ Priorité sur S200-1, conservée dans la file ; pas de critère perceptuel inven
 ### Plan
 
 - [x] **P1** — état réel, quatre copies9a25798 propres ; jeton/plan seuls.
-- [ ] **P2** — caméra, intersection de B par rayons, lumière de diagnostic et PPM ;
+- [x] **P2** — caméra, intersection de B par rayons, lumière de diagnostic et PPM ;
   utiliser le vrai Background::eval, tests géométriques et export.
 - [ ] **P3** — produire une vue lisible, inspection visuelle, témoin plat et second
   instant ; publier paramètres/coût sans prétendre recevoir la perception.
@@ -80,3 +80,8 @@ REPRISE et invariants déjà lus dans cette conversation, état identique à9a25
 Seuil numérique2 % acquis depuis S190 ; le rendu permettra une appréciation humaine,
 aucune image seule ne ferme B4/A50 ni A98. V attend la demande gameplay selon nouvelle
 direction, le changement architectural détaillé devra être acté dans son ordre.
+
+P2 : rayons évaluent B JONSWAP N32 directement. Premier jet256 itérations
+laissait997/1021 rayons rasants en magenta ; plafond4096 supprime les refus
+sans modifier la tolérance3mm, t12=0xa52ff81902b150c3. Premier export échoué
+car captures absent ; création explicite du répertoire ajoutée.
