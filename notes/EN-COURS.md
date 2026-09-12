@@ -58,31 +58,42 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S197 — terminée
+Session : S198 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
-Objectif : **A242**. S196 a montré que la dérive d'énergie, employée comme critère de
-domaine par S193 à S196, ne détecte pas la sous-résolution — contre-exemple faux d'un
-facteur cinq passant 65× sous le seuil. Deux devoirs : **auditer** les configurations
-déjà publiées, à commencer par celles qui portent **ADR-123, actée** ; et **apparier**
-le critère dans les bancs, pour que la faute ne puisse plus se répéter.
+Objectif : **demande explicite de l'utilisateur** — établir ce qui ralentit le projet, et
+**corriger**, pas seulement constater. La file annonçait A241 ; elle attendra. Le sujet est
+la vélocité elle-même, et il est traité comme tout le reste : mesuré d'abord.
 
 ### Plan
 
-- [x] **P1** — état réel, jeton et plan seuls.
-- [x] **P2** — protocole **avant tout code** : ce que « loin du bord » veut dire et se
-      mesure, le classement des cibles par enjeu, ce qui compte comme échec — un chiffre
-      qui bouge n'est pas une conclusion qui tombe — et ce qu'on fera si une cible échoue.
-- [x] **P3a** — apparier le critère : garde partagée qui **refuse** un ordre tiré d'un
-      triplet non monotone, et contrôle de raffinement ajouté à chaque banc publié.
-      Assertions de continuité sur les valeurs déjà publiées.
-- [x] **P3b** — exécuter l'audit : S194/ADR-123 d'abord, puis S195 et S193. Relever les
-      marges et, pour ADR-123, l'effet sur ses **seuils** et non sur ses décimales.
-- [x] **P4** — verdict par cible. Note corrective datée là où il en faut ; un ADR n'est
-      jamais réécrit, et une décision qui changerait demanderait un ADR neuf.
-- [x] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes,
-      jeton `libre`, copies avancées sans suppression non prouvée.
+- [>] **P1** — état réel, jeton et plan seuls.
+- [ ] **P2** — le diagnostic **chiffré**, depuis le dépôt et son historique git : où va le
+      temps des sessions, qui choisit leur sujet, ce que coûte la reprise de soi. Pas
+      d'impression, pas de jugement : des comptages reproductibles.
+- [ ] **P3** — les correctifs **appliqués** : la règle qui casse le chaînage, le tableau de
+      bord des quatre couches, une définition mesurable d'« avancer », et l'outil qui rend
+      la dérive visible sans qu'on ait à y penser.
+- [ ] **P4** — appliquer la règle neuve à la session suivante, et propager la file.
+- [ ] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes, jeton
+      `libre`, copies avancées sans suppression non prouvée.
 
 ### Notes de reprise
+
+S198 : master 7e1a9f1 propre, quatre copies alignées ; 123 ADR/242 angles/278 leçons.
+**Mesures déjà faites à l'amorce, à ne pas refaire** (tout est reproductible par git) :
+— lignes ajoutées par ère : S190–S197 **0** ligne de bibliothèque contre 4509 de bancs et
+  6246 de docs ; S160–S169 **0,7 %**. Ratio global **3,8 lignes de markdown par ligne de
+  code d'exécution**.
+— dernière session ayant ajouté du code d'exécution, par couche : **B S181, W S182,
+  δ S161, V jamais**. δ n'a pas bougé depuis 37 sessions, V en 198.
+— modules par couche : B 4, W **20**, δ 2 (les deux déclarés « véhicules d'essai »), V **0**.
+— **30 sessions sur 38** (S160–S197) ont pris pour sujet le reliquat de la précédente.
+— 235 angles morts, 26 notes correctives datées dans `docs/`.
+**Thèse à éprouver en P2** : ce n'est pas la lenteur du travail, c'est le **choix du sujet**.
+Le chaînage « Suite S(n)-1 » fait marcher le projet là où la dernière mesure pointait.
+A211/L228 l'avaient nommé en S145 et le remède choisi — porter la recommandation par la
+ligne `Session suivante` — a échoué parce que cette ligne est écrite par la session qui
+finit, à partir de ses propres reliquats : on a corrigé le canal, pas l'auteur.
 
 P5 S197 : rituel terminé. **123 ADR, 242 angles, 278 leçons, 18 invariants, 6 SPEC,
 23 cas**, vérifiés contre le dépôt. Workspace 331 réussis/cinq ignorés. File plurielle
