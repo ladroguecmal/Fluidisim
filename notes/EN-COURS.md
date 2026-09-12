@@ -71,7 +71,7 @@ sous les 2 % actés. Ne pas confondre projecteur discret et solveur à surface l
   critères indépendants, métriques B4 et portée avant simulation.
 - [x] **P3a** — construire le projecteur de banc ; gradient, solénoïdal, référence
   algébrique indépendante, refus/non-convergence ; un support sans mutation du précédent.
-- [ ] **P3b** — campagne projetée contre plein/raffiné, axes séparés, composition locale,
+- [x] **P3b** — campagne projetée contre plein/raffiné, axes séparés, composition locale,
   profil reçu S190 et témoins ; qualifier pression, divergence et réserve de référence.
 - [ ] **P4** — réception, correction datée des inférences invalidées, ADR si décision,
   angles/leçons et propagation B4/A50/file plurielle ; aucune tolérance redemandée.
@@ -91,3 +91,11 @@ la somme des erreurs des axes requiert leur additivité, correction de prémisse
 P3a : pressure_projection.rs, 3 tests debug/release reçus : gradient/curl/adjoint/
 linéarité/idempotence/L2 ; matrice dense indépendante ; zéro/refus atomiques.
 Aucun support historique touché. projected_b4 porte les tests ; campagne à écrire P3b.
+
+P3b : campagne corrigée et rejouée deux fois, 0x52d7645d4548ebb2, sorties identiques.
+16/20 couples reçus ; profil S190 Nz8/c8 conservé : budget 1,371947 %, e+réserve
+0,948047 %, résidu additif 0,002593561 %. q=0,407704413 %, qP=0,000011025 %.
+Pire divergence 4,921623567e-8, max44 itérations. Tests propres debug/release : 3 reçus.
+Incident de montage tracé : demande Nz14 dédoublonnée à12, témoin plein corrigé
+explicitement, assertions conservées ; demandes10/12 donnent9/11 nœuds réels.
+ADR-121 préparée P4, non comprise dans ce commit P3b ; prochaine construction surface2D.

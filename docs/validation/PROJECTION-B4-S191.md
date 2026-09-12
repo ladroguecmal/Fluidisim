@@ -102,3 +102,83 @@ contre une référence algébrique indépendante ? L'additivité et sa borne sur
 sur ce montage ? Les résultats négatifs se publient avec leur cause mesurée.
 Surface libre, bords physiques, comparaison substitutive, forces et perception restent
 hors de ce lot ; la file plurielle S190 conserve les autres chantiers.
+
+### Correction de montage pendant P3b — 2026-09-12
+
+Le premier passage est **interrompu par son témoin plein** : demander 14 nœuds au
+générateur gradué en rend 12 après dédoublonnage ; le programme l'avait nommé plein
+à tort, et son contrôle d'additivité dégénérée échoue. Le témoin 14 est corrigé en
+indices pleins explicites `[1..14]`, comme le protocole l'exigeait. Aucune assertion
+assouplie, aucun changement du générateur historique. Les demandes 10 et 12 rendent
+respectivement **9 et 11 nœuds réels**, qui sont ceux comptés dans le coût. Les
+étiquettes Nz désignent la demande ; les indices publiés désignent le réseau réel.
+La première sortie incomplète n'est pas une réception. Rejeu intégral requis.
+
+## 6. Résultats et réception
+
+Commande : `cargo run --release --manifest-path code/Cargo.toml -p water-core --example projected_b4`.
+Contrôles : `cargo test [--release] --manifest-path code/Cargo.toml -p water-core --example projected_b4`.
+Les trois tests passent en debug et release. La campagne corrigée s'achève sans
+refus du projecteur ; maximum **44 itérations**, divergence normalisée maximale
+**4,921623567e-8**, sous le seuil d'instrument 2e-6. Le resserrement de pression
+donne **qP=0,000011025 %**, sous 0,001 %. Aucune durée CPU n'est revendiquée.
+
+Le témoin sans projection retrouve S190 : spatial **0,639282 %**, temporel et composé
+**0,775379 %**. La référence projetée est non nulle :
+`M=1,319937583e-4 m/s`, contre `7,993167674e-5` sans projection, rapport **1,651332283**.
+Ce sont deux évolutions distinctes ; le projecteur est contractant en L2 à chaque
+application, pas dans la norme maximum du champ final. Un dénominateur non projeté
+aurait changé silencieusement le sens de « 2 % ». La réserve temporelle projetée
+vaut **q=0,407704413 %**, elle ne se recopie pas de S190.
+
+| réseau réel / cadence | s % | t % | e % | s+t+q+qP % | e+q+qP % | contre R2 % | verdict |
+|---|---:|---:|---:|---:|---:|---:|---|
+| **14×14×8 / 80 ms** | **0,368754** | **0,595477** | **0,540332** | **1,371947** | **0,948047** | **0,948036** | **reçu, retenu** |
+| 14×14×8 / 160 ms | 0,368754 | 2,445069 | 2,391037 | 3,221538 | 2,798752 | 2,798741 | refusé |
+| 14×14×9 (demande 10) / 80 ms | 0,240134 | 0,595477 | 0,484458 | 1,243327 | 0,892174 | 0,868647 | reçu |
+| 14×14×11 (demande 12) / 80 ms | 0,122280 | 0,595477 | 0,595179 | 1,125473 | 1,002895 | 1,002884 | reçu |
+| plein / 80 ms | 0 | 0,595477 | 0,595477 | 1,003193 | 1,003193 | 1,003182 | reçu |
+
+**16 couples reçus / 4 refusés**. Le profil S190 reste le moins coûteux en évaluations
+de source parmi les réseaux déclarés : 20384 contre 274400, réduction **13,461538**.
+La projection ne justifie aucune économie supplémentaire de cadence : **160 ms est
+refusé sur les quatre réseaux**. Les champs reçus n'impliquent pas une réception
+temps réel, et les deux références partagent encore leur modèle spatial.
+
+### Additivité et portée d'ADR-119
+
+Le résidu d'additivité locale est **exactement nul** pour c=1 et le réseau plein.
+Sur le profil retenu il vaut **0,002593561 % de M** ; maximum de campagne
+**0,012774871 %**, sur demande Nz10/c16. L'enveloppe sans résidu est respectée
+sur les vingt cases ; **ce constat ne la transforme pas en théorème**.
+Avec le résidu mesuré du profil, la borne algébrique composée et les réserves valent
+**1,374540 %**, toujours sous 2 % (marge **0,625460 point**).
+
+[ADR-121](../adr/ADR-121-la-projection-lineaire-et-la-borne-de-composition.md) corrige
+la portée d'ADR-119 : globalité et non-linéarité ne se confondent pas ; la triangulaire
+entre trois évolutions requiert le résidu de leur décomposition. La projection fixe
+préserve l'addition, l'évolution complète seulement approximativement sur ce montage.
+
+## 7. Verdict et suite système
+
+**S190-1/S189-1 réalisées dans le périmètre déclaré.** Projecteur reçu indépendamment,
+profil S190 reçu avec projection sous les 2 % inchangés. A50 reste partielle ; ni
+surface libre, ni bords physiques, ni comparaison substitutive complète reçus.
+
+**S191-1 : construire une tranche 2D à surface libre du véhicule**, avec pression
+atmosphérique et condition cinématique explicites, puis recevoir une onde de gravité
+contre la relation analytique et son raffinement avant comparaison perturbatif/total.
+Il s'agit d'un candidat de construction pour B3/B4, pas d'une sélection technologique
+par cet essai. Le projecteur collocatif S191 ne se transfère pas implicitement : ses
+bords n'étaient qu'un montage algébrique et le choix D/G doit être redérivé pour la
+surface. Ne pas prolonger la seule campagne de réseaux une fois ce lot reçu.
+
+Autres lignes de la file S190 relues et conservées : A213, B2/λ_cut/coupure,
+bathymétrie, multiplateforme, V, forces/perception et dossier de réunions. Aucun
+nouveau blocage humain ; aucun de ces points n'est déclaré clos par la projection.
+
+Reproductibilité : **deux sorties release intégralement identiques**, empreinte
+**0x52d7645d4548ebb2**. [Mesures intégrales](PROJECTION-B4-S191-MESURES.md).
+Tests propres debug/release reçus (trois) ; campagne complète debug non relancée.
+Les 331 tests workspace/cinq ignorés restent la réception S190, non rejouée :
+bibliothèques et supports historiques inchangés. Aucun reçu interplateforme.
