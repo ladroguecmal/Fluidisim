@@ -81,7 +81,7 @@ BUDGET-IMAGE-S202, IMPACT-W-S203 et le journal — **y compris mes propres texte
 ### Plan
 
 - [x] **P1** — état réel, jeton, plan seul.
-- [ ] **P2** — ADR-127, décision corrective d'ADR-124 : ambition finale complète (δ général,
+- [x] **P2** — ADR-127, décision corrective d'ADR-124 : ambition finale complète (δ général,
  interactions volumiques, inondations complexes, V, grande échelle) ; ordre progressif en
  cinq versions ; V placée par dépendances, pas en fin ; responsabilités/interfaces/autorité
  (I-04, I-10, I-11, I-15, I-17)/conservation préservées ; bancs exécutés quand ils tranchent ;

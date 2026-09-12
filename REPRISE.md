@@ -19,7 +19,7 @@ souvenir de conversation, **c'est lui qui fait foi**.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-13 01:28 +02:00
+Battement        : 2026-09-13 01:31 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Session en cours : S204 — décision corrective d'ADR-124 (clarification utilisateur d'ambition)
 Dernière session : S203 — impact W visible, emprise par coutures (ADR-126) ; A245 trouvée

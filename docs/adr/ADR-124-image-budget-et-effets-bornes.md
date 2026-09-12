@@ -6,6 +6,15 @@
 - Autorisation supplémentaire explicite : exemple CPU produisant une image locale
   PPM, sans dépendance ni publication. Elle a été demandée puis accordée.
 
+> **Note de renvoi du 2026-09-13 (S204) — corrigée par
+> [ADR-127](ADR-127-ambition-complete-construction-progressive.md), clarification de
+> l'utilisateur.** La direction était un **ordre de construction**, pas une réduction du
+> produit. Sont corrigés : « restreint le périmètre de livraison de δ » ci-dessus, le point 3
+> (« δ est un effet borné », « V attend un besoin gameplay nommé ») et la clause « revenir à un
+> δ général demande une nouvelle décision ». **δ général et V restent obligatoires** ; les
+> effets bornés sont des étapes. Les points 1 et 2 et l'autorisation d'image restent valables.
+> Texte d'origine conservé, non réécrit.
+
 ## Décision et ordre
 
 1. **Rendre B visible**, depuis le champ du projet : caméra, rayons et image de banc.

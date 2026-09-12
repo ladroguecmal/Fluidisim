@@ -38,3 +38,14 @@ retenu pour un effet, pas des préalables à tout affichage de l'eau.
 
 Changer ce profil de travail demandera une décision nommant la nouvelle fréquence,
 le temps eau et la cible ; aucun seuil ne sera changé pour faire passer une mesure.
+
+## Note corrective du 2026-09-13 (S204)
+
+« V attend un besoin gameplay » et « S200-1 et S199-2 restent des défauts à résoudre si le
+noyau est retenu pour un effet » reprenaient une lecture d'ADR-124 que
+[ADR-127](ADR-127-ambition-complete-construction-progressive.md) corrige sur clarification de
+l'utilisateur : **V et δ général sont obligatoires**, V s'ouvre au plus tard avec les domaines
+bornés, et S199-2/S200-1 sont sur le chemin de δ. Le profil lui-même — 60 images/s, eau 2 ms —
+est **inchangé et acquis**. Précision de portée : « une configuration dépassant déjà 2 ms est
+incompatible avec ce profil » constate une incompatibilité ; elle n'autorise pas à retirer une
+fonctionnalité. Toute incompatibilité donne lieu à un arbitrage explicite (ADR-127 D7).
