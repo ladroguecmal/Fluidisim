@@ -87,7 +87,7 @@ BUDGET-IMAGE-S202, IMPACT-W-S203 et le journal — **y compris mes propres texte
  (I-04, I-10, I-11, I-15, I-17)/conservation préservées ; bancs exécutés quand ils tranchent ;
  60 Hz/2 ms et 2 % acquis, budget = cible à confronter, incompatibilité ⇒ arbitrage explicite.
  Note de renvoi datée en tête d'ADR-124 ; note corrective datée ADR-125 (§35-36).
-- [ ] **P3** — `docs/FEUILLE-DE-ROUTE.md`, unique porteur de la trajectoire : cinq versions,
+- [x] **P3** — `docs/FEUILLE-DE-ROUTE.md`, unique porteur de la trajectoire : cinq versions,
  dépendances, ce qui existe, déclencheurs de bancs, arbitrages ouverts (hôte interactif,
  A247). REPRISE, index et file active y renvoient sans la recopier (L137).
 - [ ] **P4** — propagation : REPRISE (paragraphe de trajectoire, file active, §4 et marqueurs
