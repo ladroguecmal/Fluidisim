@@ -70,10 +70,10 @@ S170 avait explicitement refusé de conclure là-dessus ; S183 fournit le chiffr
 - [x] **P1** — état réel, jeton et plan seul.
 - [x] **P2** — publier le protocole **avant** tout chiffre : le véhicule, ce qui est
       chronométré, la grille de décimation, et ce qu'un pas sans projection ne prouve pas.
-- [>] **P3** — écrire le véhicule `perturbative_step` : pas explicite sur un bloc 3D,
+- [x] **P3** — écrire le véhicule `perturbative_step` : pas explicite sur un bloc 3D,
       avec et sans source, source par maille puis décimée. Recevoir la consommation
       (valeurs finies, chemin exercé, témoin direct) et relever les coûts.
-- [ ] **P4** — chiffrer ce que la décimation achète, et dire ce que la part mesurée
+- [>] **P4** — chiffrer ce que la décimation achète, et dire ce que la part mesurée
       devient si l'on ajoute une projection. Recevoir dans un document de validation.
 - [ ] **P5** — mesurer le gain disponible d'une évaluation **par réseau** plutôt que par
       point, pour B seul : récurrence de phase contre appel par point. Sizer l'occasion,
@@ -82,6 +82,23 @@ S170 avait explicitement refusé de conclure là-dessus ; S183 fournit le chiffr
       jeton et copies.
 
 ### Notes de reprise
+
+P3 S184 : `examples/perturbative_step.rs`, deux exécutions concordantes. Les quatre
+réceptions passent, **zéro composante exemptée par ±0**. Chiffres, à publier en P4 :
+le pas coûte **14–17 ns par maille**, la source **34–35 µs par maille** — rapport
+**~2100**, le pas est **0,047–0,049 %** du total. Décimation spatiale : le gain est
+exactement le rapport de nœuds (r=2 → 6,0–8,7 µs ; r=4 → 1,3–1,8 ; r=8 → 0,36–0,41) ;
+l'interpolation trilinéaire ajoute ~20 ns/maille, du même ordre que le pas. Cadence :
+divise exactement par c (34,5 / 17,4 / 8,6 / 4,3 / 2,2). **r=8 et c=16 combinés
+ramènent la source à ~21 ns/maille/pas**, soit la parité avec le pas — donc 8192× de
+décimation pour égaler un pas explicite nu. Or la source contient des modes de
+pression jusqu'à la coupure 6 rad/m, soit λ≈1,05 m : à dx=0,25 m, r=2 met déjà la
+plus courte longueur d'onde à deux points. Le contenu interdit la décimation dont le
+coût aurait besoin. **Correction de protocole** : la réception 2 telle que publiée en
+P2 était fausse (la différence des deux pas ne vaut pas −dt·S en flottant à état non
+nul) ; elle est remplacée par un contrôle exact — source forcée à zéro, le chemin
+« avec » rejoint le chemin « sans » en bits. À noter dans le document, pas à réécrire
+en silence.
 
 S184 : master 0643cfb propre, quatre copies alignées ; 117 ADR/226 angles/263 leçons.
 Démarrage à froid, copie principale. **Entrées déjà acquises, ne pas les refaire :**
