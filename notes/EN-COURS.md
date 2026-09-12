@@ -68,7 +68,7 @@ nomme ; elle n'était pas possible avant S193. Aucun choix δ, aucun seuil de ba
 ### Plan
 
 - [x] **P1** — reprise, état réel (quatre copies au même commit), jeton et plan seuls.
-- [ ] **P2** — dérivation et protocole **avant tout code** : décomposition des termes
+- [x] **P2** — dérivation et protocole **avant tout code** : décomposition des termes
   croisés, deux régimes prédits (harmoniques liées croisées, non cumulatives, pente 1 ;
   modulation croisée de fréquence, cumulative en temps, pente 2), exigence de bande
   pour contenir k₁±k₂ et leurs harmoniques, couples résonants et non résonants,
@@ -102,3 +102,19 @@ Leçons de S193 à appliquer ici : **L271** — déclarer au moins une configura
 l'effet est nul par construction (ici train unique, et M=1) ; **L272** — toute ligne de
 base doit être la grandeur que le véhicule porte, pas celle du continu ; **L273** — une
 prédiction d'ordre se mesure avant d'être commentée.
+
+P2 : protocole dans COUPLAGE-DEUX-TRAINS-S194. Derivation : F(a+b)=F(a)+F(b)+2Q(a,b)
++3C(a,a,b)+3C(a,b,b), donc l'ecart est la reponse a un forcage croise explicite.
+Deux parts de natures differentes, sur des modes differents, donc mesurables
+separement sans ajustement : quadratique liee sur k1+-k2 (pente 1, non cumulative
+car aucune triade resonante en eau profonde, redemontre ici) et cubique seculaire
+sur k1 et k2 (pente 2, lineaire en N). These : la validite de la superposition est
+un **domaine en cambrure x duree**, pas un seuil.
+Prediction de profondeur : desaccord de triade Delta calcule d'avance (2,526 / 2,519
+/ 1,464 / 0,509 pour h=8/2/0,5/0,25), alpha doit croitre quand Delta decroit ; le
+peu profond est mesurable ici car la comparaison n'a pas besoin d'oracle (A234).
+Une affirmation fausse corrigee avant commit : j'avais ecrit que la 2D cree des
+triades resonantes en eau profonde ; l'argument de non-resonance est vectoriel et
+survit a l'obliquite. Ce que la 2D change est le desaccord et les quatuors.
+Bande portee a Q=16 (Q=8 n'aurait pas contenu les produits cubiques jusqu'a q=9).
+
