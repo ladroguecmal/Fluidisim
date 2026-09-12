@@ -18,18 +18,19 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-12 13:04 +02:00
+JETON            : occupé
+Battement        : 2026-09-12 13:09 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S186 — S185-1/A50 : composer l'erreur spatiale et l'erreur temporelle
 Dernière session : S185 — le maintien est d'ordre un ; une latence vaut 2,6 en cadence
-Session suivante : S186 — S185-1/A50 : composer l'erreur spatiale et l'erreur temporelle sur le même véhicule
+Session suivante : à fixer par le rituel de fin de S186
 
-*S183 et S184 ont travaillé dans la **copie principale**, sur `master` : aucune copie isolée
+*S183 à S186 ont travaillé dans la **copie principale**, sur `master` : aucune copie isolée
 ouverte, donc rien à refermer (AGENTS.md). Les trois worktrees ont été **avancés sur master**
 en fin de S183 — ils portaient un jeton périmé annonçant S182, ce qui est exactement le
 mécanisme des trois forks. L'avance rapide ne détruit rien et suffit à l'éteindre (AGENTS.md).
-L'état se constate par `git worktree list` ; il ne se recopie pas.*
+S186 les a retrouvés au commit de `master` à l'amorce. L'état se constate par
+`git worktree list` ; il ne se recopie pas.*
 
 **Copies de travail — ADR-110, S159.** Le décompte n'a plus sa place ici : il vieillissait de
 session en session et annonçait « cinq worktrees » quand il y en avait six. **L'état se constate**

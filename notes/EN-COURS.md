@@ -58,7 +58,51 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S185 — terminée
+Session : S186 — en cours
+Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
+Objectif : S185-1/A50, **composer** l'erreur spatiale et l'erreur temporelle sur le
+**même** véhicule 3D. S170 a mesuré la décimation spatiale en 1D sur une source figée,
+S185 la cadence temporelle en 3D sur un réseau plein. Les deux erreurs n'ont jamais été
+mesurées ensemble, et S170 avertit qu'« un ratio de décimation ne décrit pas à lui seul
+la précision ». Un budget conjoint `r × c` n'a de sens que si l'on sait comment les deux
+erreurs se composent — additivement, quadratiquement, ou pas du tout.
+
+### Plan
+
+- [x] **P1** — état réel, jeton et plan seul.
+- [ ] **P2** — publier le protocole avant tout chiffre : véhicule partagé, grille
+      `r × mode × c`, **une seule** référence, métriques, les trois lois de composition
+      mises à l'épreuve, les réceptions, et ce que la mesure ne prouvera pas.
+- [ ] **P3a** — écrire `examples/composed_error.rs` : source échantillonnée sur le réseau
+      `r` aux seuls instants de cadence, `scatter` trilinéaire, puis le même pas.
+      Réceptions : `(r=1, c=1)` identique **en bits** à la référence ; la ligne `c=1`
+      redonne l'erreur spatiale pure ; la ligne `r=1` redonne les constantes de S185 ;
+      empreinte reproductible.
+- [ ] **P3b** — chiffrer la composition et éprouver l'équivalence advective `h ↔ v·τ` :
+      pour un contenu advecté, décimer en espace et retarder en temps pourraient être
+      la **même** erreur, et alors elles ne s'additionnent pas.
+- [ ] **P4** — recevoir dans un document de validation ; angles et leçons.
+- [ ] **P5** — rituel de fin (REPRISE.md §6).
+
+### Notes de reprise
+
+S186 : master e46de38 propre, quatre copies au même commit ; 117 ADR / 228 angles /
+265 leçons / 18 invariants / 6 SPEC / 23 cas. Démarrage à froid, copie principale.
+**Entrées déjà acquises, ne pas les refaire :** le support `examples/support/` porte
+déjà `lattice_points`, `nodes_per_axis` et `scatter` (trilinéaire, borné au coin
+supérieur) — S184 s'en sert pour le **coût**, S186 s'en sert pour l'**erreur**, sans
+écrire un second réseau. `RATIOS = [1,2,4,8]`, `DX = 0,25 m`. Les échelles du contenu
+sont calculées et non posées : pression `λ_min = 1,081 m` (coupure 6 rad/m, 16 radiaux),
+impact `λ = 4 m`, `B` le plus court `λ = 14,05 m` (période `Tp/2 = 3 s`, eau profonde).
+Donc **c'est la pression qui fixe les deux échelles à la fois** — spatiale par
+`λ_min`, temporelle par `T = λ_min / 2 m/s = 0,5405 s`. C'est précisément pourquoi les
+deux erreurs risquent de ne pas être indépendantes.
+Piège anticipé : une seule référence pour tout le tableau, sinon les erreurs se
+comparent à des choses différentes et leur composition n'a aucun sens.
+
+---
+
+Session précédente : S185 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : S184-1/A50, mesurer l'**erreur** de la cadence temporelle en 3D avec le
 fournisseur réel — et séparer ce qui est disponible au runtime de ce qui ne l'est pas.
