@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-13 00:09 +02:00
+JETON            : occupé
+Battement        : 2026-09-13 00:12 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles), reprise P4/P5 après Claude
-Session en cours : aucune
+Session en cours : S200 — contrats du noyau δ
 Dernière session : S199 — noyau δ construit ; filtres partiels, contrats A244 à corriger
 Session suivante : S200 — S199-1/A244 : corriger les contrats du noyau δ ; S199-2 flux ouverts reste dans la file
 Maillons        : 0 — S199 **a avancé la couche δ**, le compteur reste à zéro (§6.8)
