@@ -3,7 +3,15 @@
 2026-09-11. Action S175-1. État du code vérifié sur master0b37fd2 àl’amorce.
 Ce bilan confronte les reçus S163–S175 au contrat ; aucune nouvelle simulation lancée.
 
-## État actif — S199, 2026-09-13
+## État actif — S200, 2026-09-13
+
+Le noyau δ reçoit zéro allocation globale pendant le pas et des refus numériques
+atomiques ; ses capacités ne surpromettent plus stabilité/référentiel.
+[CONTRATS-DELTA-S200](CONTRATS-DELTA-S200.md). A244 reste partielle pour précision
+et budget temporel, fond coupé toujours d'ordre≈0,90. **B4/A50 restent partiels**,
+seuil2 % acquis ; aucune réception physique supplémentaire déduite de ces contrats.
+
+## État historique — S199, 2026-09-13
 
 Un noyau δ MAC x-z existe désormais en bibliothèque, mais reste non éligible B3 :
 repos reçu, ordre spatial≈0,90 sur fond coupé ; contrats d'exécution à corriger

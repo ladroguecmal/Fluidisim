@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 00:12 +02:00
-Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles), reprise P4/P5 après Claude
-Session en cours : S200 — contrats du noyau δ
-Dernière session : S199 — noyau δ construit ; filtres partiels, contrats A244 à corriger
-Session suivante : S200 — S199-1/A244 : corriger les contrats du noyau δ ; S199-2 flux ouverts reste dans la file
-Maillons        : 0 — S199 **a avancé la couche δ**, le compteur reste à zéro (§6.8)
+JETON            : libre
+Battement        : 2026-09-13 00:20 +02:00
+Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
+Session en cours : aucune
+Dernière session : S200 — pas δ sans allocation, refus atomiques ; A244 partielle
+Session suivante : S201 — S200-1/A244 : précision et budget temporel δ ; S199-2 flux ouverts reste dans la file
+Maillons        : 0 — S200 a avancé la couche δ, compteur à zéro (§6.8)
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 
@@ -139,9 +139,9 @@ une session ne peut signaler sa présence qu'en travaillant.
 
 ---
 
-## File active du projet — S199
+## File active du projet — S200
 
-**S199 : noyau δ construit, non admissible B3. S199-1/A244 corrige ses contrats ;
+**S200 : allocations/refus δ corrigés, noyau non admissible B3. S200-1/A244 reçoit précision/budget ;
 S199-2 garde le défaut des flux ouverts. Les acquis S194 ci-dessous restent datés ;
 la file liée porte aussi leurs suivis S195–S199.**
 
@@ -242,6 +242,19 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
+**S200 — 2026-09-13 : pas δ sans allocation, refus numériques atomiques.**
+Clones supprimés, sauvegardes préallouées, mémoire comptée à sa précision réelle.
+Compteur global avec témoin : zéro allocation au premier pas, nominal/dégradé et refus.
+Après débordement, u/w/p restaurés et récupération identique à un noyau neuf.
+Caps restreint ses promesses (référentiel général faux, bornes inconnues absentes).
+**342 tests réussis, cinq ignorés** ; trois nouveaux tests aussi en release.
+Filtre S199 inchangé : **0x0ad3f695685ca27a**, fond coupé toujours≈ordre0,90.
+**A244 partielle** : pression f64 expérimentale et budget temporel non reçus.
+**Suite S201 : S200-1**, recevoir ces deux contrats ; S199-2 flux ouverts conservée.
+Compteur0, δ avance. B3 non admissible, B4/A50 partiels, seuil2 % inchangé.
+123 ADR,244 angles,279 leçons,18 invariants,6 SPEC,23 cas ; aucun ADR nouveau.
+Voir [contrats δ S200](docs/validation/CONTRATS-DELTA-S200.md).
+
 **S199 — 2026-09-13 : premier noyau δ MAC x-z en bibliothèque.**
 Claude construit P1–P3 ; Codex termine la passation P4/P5 sans remesure.
 Lac au repos reçu exactement ; filtre spatial passé sur fond plat (ordre1,947),
@@ -276,15 +289,15 @@ attrapé trois erreurs en trois sessions, ni la qualité du travail sur W.
 
 ### Les quatre couches — l'état qui commande tout le reste
 
-**Recalculé le 2026-09-13 en S199 par `sh outils/velocite.sh`. Ne pas le recopier : le relancer.**
+**Recalculé le 2026-09-13 en S200 par `sh outils/velocite.sh`. Ne pas le recopier : le relancer.**
 Un état sans date se lit au présent, et il ne l'est plus (A185).
 
 | couche | modules | dernière avancée | depuis |
 |---|---:|---|---:|
-| **B** — fond | 3 | S181 | 18 sessions |
-| **W** — perturbations | 23 | S181 | 18 sessions |
-| **δ** — volumique | 5 *(dont noyau à projection non encore admissible)* | **S199** | **0 session** |
-| **V** — réseaux | **0** | **jamais** | **199 sessions** |
+| **B** — fond | 3 | S181 | 19 sessions |
+| **W** — perturbations | 23 | S181 | 19 sessions |
+| **δ** — volumique | 5 *(dont noyau à projection non encore admissible)* | **S200** | **0 session** |
+| **V** — réseaux | **0** | **jamais** | **200 sessions** |
 
 *« Avancer » a un sens mesurable et un seul : **ajouter du code d'exécution** dans
 `code/*/src`, ou **acter une décision** qui fixe un élément de la couche. Un banc, un

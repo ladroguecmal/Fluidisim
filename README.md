@@ -665,3 +665,16 @@ conserve la reconstruction des flux ouverts avant surface mobile. Compteur **0**
 δ a avancé ; B4/A50 partiels, seuil2 % acquis. A217 reste close (S194).
 123 ADR,244 angles,279 leçons,18 invariants,6 SPEC,23 cas. Aucun ADR nouveau.
 Voir [candidat δ S199](docs/validation/CANDIDAT-DELTA-S199.md).
+
+**S200 — 2026-09-13 : pas δ sans allocation, refus numériques atomiques.**
+Clones supprimés, sauvegardes préallouées, mémoire comptée à sa précision réelle.
+Compteur global avec témoin : zéro allocation au premier pas, nominal/dégradé et refus.
+Après débordement, u/w/p restaurés et récupération identique à un noyau neuf.
+Caps restreint ses promesses (référentiel général faux, bornes inconnues absentes).
+**342 tests réussis, cinq ignorés** ; trois nouveaux tests aussi en release.
+Filtre S199 inchangé : **0x0ad3f695685ca27a**, fond coupé toujours≈ordre0,90.
+**A244 partielle** : pression f64 expérimentale et budget temporel non reçus.
+**Suite S201 : S200-1**, recevoir ces deux contrats ; S199-2 flux ouverts conservée.
+Compteur0, δ avance. B3 non admissible, B4/A50 partiels, seuil2 % inchangé.
+123 ADR,244 angles,279 leçons,18 invariants,6 SPEC,23 cas ; aucun ADR nouveau.
+Voir [contrats δ S200](docs/validation/CONTRATS-DELTA-S200.md).

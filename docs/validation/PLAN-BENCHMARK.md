@@ -104,6 +104,11 @@ conservation d'énergie sur 60 s ; coût pour 4096 paquets ; déterminisme crois
 
 ## B3 — Couche δ : technologie, coût et latence
 
+> **S200 — 2026-09-13 :** allocations globales du pas supprimées et refus numériques
+> atomiques reçus, capacités bornées à ce qui est testé. [CONTRATS-DELTA-S200](CONTRATS-DELTA-S200.md).
+> A244 partielle : précision f64 et budget temporel restent non reçus ; ordre du fond
+> coupé inchangé. Candidat toujours non admissible B3, aucun choix technologique.
+
 > **S199 — 2026-09-13 :** premier noyau MAC x-z en bibliothèque, filtre1 passé,
 > filtre2 ordre1,947 au fond plat mais≈0,90 au fond coupé : **non éligible à B3**.
 > [CANDIDAT-DELTA-S199](CANDIDAT-DELTA-S199.md) §7/8 précise les autres limites :

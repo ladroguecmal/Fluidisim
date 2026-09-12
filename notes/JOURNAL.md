@@ -10440,3 +10440,49 @@ aucun amendement implicite. Recommandation S198 exécutée ; compteur0.
 Pas de leçon distincte : hypothèse réfutée applique L75, portée des assertions déjà
 enseignée. Index/README/REPRISE et B3/B4 actualisés ; copies propres à avancer après
 commit final sans suppression. P4/P5 terminent la passation, sans refaire P1–P3.
+
+## S200 — 2026-09-13 — Le pas δ cesse d'allouer et restaure ses refus
+
+**Entrée.** Continue, S199-1/A244 ; quatre copies961a2e5 propres. Reprise/invariants
+lus dans cette conversation ; aucun travail concurrent. Plan seul a23bf00.
+
+**Code construit.** project ne clone plus us/ws, dir par itération ni u/w pour le
+diagnostic. Trois tampons préalloués sauvegardent u/w/p ; toute sortie numérique
+non finie restaure les champs publics avant Err. Réservation corrigée à la précision
+réelle des tableaux (six f64/cellule avec sauvegarde), tailles checked avant allocation.
+Les opérations de calcul nominales restent dans leur ordre S199.
+
+**Réception qui manquait.** Nouveau test d'intégration delta_runtime avec allocateur
+global System instrumenté par thread, JobSystem synchrone. Une vraie allocation témoin
+est détectée ; pas nominaux/dégradés500/1/0/500 sans allocation, premier pas inclus.
+Overflow pendant le calcul : u/w/p inchangés, zéro allocation, puis récupération
+exacte face à un noyau neuf. Réservation exacte et débordement de dimensions contrôlés.
+Trois tests debug/release. Test limité au thread exécutant ces réductions ; pas de
+preuve sur un JobSystem tiers qui allouerait ou sur un panic de l'hôte.
+
+**Validation.** Workspace debug342 réussis/cinq ignorés (246+3+93), aucun échec.
+Huit tests noyau et trois intégration rejoués après correction de Caps. Avertissements
+anciens dans exemples/harnais conservés. Filtre delta_filters release : empreinte
+**0x0ad3f695685ca27a**, inchangée ; ordres plat1,947/lisse0,898/marche0,895. Aucun
+gain de justesse spatiale ni mesure CPU. Relevés CONTRATS-DELTA-S200-MESURES.
+
+**Contrats publiés.** supports_frame_accel devient false ; min_dx/max_dx/CFL deviennent
+Option avec None (inconnus), au lieu de bornes sans réception. Aucune consommation de
+ces champs hors test dans le dépôt, recherche effectuée. API de candidat modifiée,
+pas interface de production figée. Pression f64 conservée expérimentalement et plafond
+d'itérations nommé comme tel : I-08/I-05 restent non reçus. Pas d'ADR dérogeant aux
+invariants par simple commodité, aucun solveur retenu. L'advection/diagnostic coûtent
+même à zéro itération : ne pas assimiler ce plafond au budget en millisecondes.
+
+**A244 partielle.** S199-1 a corrigé mémoire/refus et restreint les capacités ;
+**S200-1**, prochaine session, reçoit précision de pression et budget temporel.
+**S199-2** reste nommée : flux sur faces coupées et réception avant surface mobile.
+B3 non admissible, B4/A50 partiels, seuil2 % inchangé. A217 reste close S194.
+
+**Rituel.** Recommandation S199 exécutée partiellement et reliquat explicite, compteur0
+car δ avance en bibliothèque. File entière relue, aucun autre chantier clos : A241,
+A213, B2/coupure, bathymétrie, seconde cible, V, réunions restent portés. Aucun angle
+ni leçon distincte : l'instrument doit mesurer le phénomène revendiqué, principe déjà
+appliqué ; le reçu global complète celui de l'hôte.123 ADR/244 angles/279 leçons/
+18 invariants/6 SPEC/23 cas vérifiés. B3/B4, registre, README/index/REPRISE mis à jour.
+Copies propres à avancer après commit final, aucune suppression.

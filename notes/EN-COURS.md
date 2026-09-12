@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S200 — en cours
+Session : S200 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S199-1/A244, corriger allocations et atomicité du noyau δ, puis apparier
 les capacités et la portée précision/budget aux garanties effectives.
@@ -72,7 +72,7 @@ les capacités et la portée précision/budget aux garanties effectives.
   atomique et récupération, nominal/dégradé/rejeu ; tests workspace et filtre S199.
 - [x] **P4** — capacités honnêtes ; documenter précision et budget effectifs sans
   dérogation implicite, reçus/limites et A244/file. Pas de sélection δ.
-- [ ] **P5** — rituel, journal/index/README/REPRISE, compteur, copies synchronisées.
+- [x] **P5** — rituel, journal/index/README/REPRISE, compteur, copies synchronisées.
 
 ### Notes de reprise
 
@@ -94,3 +94,7 @@ P4 : Caps ne prétend plus recevoir référentiel général/plages CFL ; Option 
 pour les bornes inconnues. Huit tests noyau + trois intégration rejoués passent.
 Pression f64 et plafond itérations conservés explicitement expérimentaux, sans ADR
 de dérogation : A244 partielle, S200-1 reste à recevoir avant intégration.
+
+P5 : rituel terminé, décomptes123/244/279/18/6/23 vérifiés, file relue entière.
+Outil : B/W S181, δ S200, V jamais. Compteur0. Reçu342/cinq ignorés ; pas de
+remesure après les dernières éditions documentaires. Copies à avancer après commit.

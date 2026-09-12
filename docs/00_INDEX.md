@@ -17,6 +17,19 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S200 — 2026-09-13 : pas δ sans allocation, refus numériques atomiques.**
+Clones supprimés, sauvegardes préallouées, mémoire comptée à sa précision réelle.
+Compteur global avec témoin : zéro allocation au premier pas, nominal/dégradé et refus.
+Après débordement, u/w/p restaurés et récupération identique à un noyau neuf.
+Caps restreint ses promesses (référentiel général faux, bornes inconnues absentes).
+**342 tests réussis, cinq ignorés** ; trois nouveaux tests aussi en release.
+Filtre S199 inchangé : **0x0ad3f695685ca27a**, fond coupé toujours≈ordre0,90.
+**A244 partielle** : pression f64 expérimentale et budget temporel non reçus.
+**Suite S201 : S200-1**, recevoir ces deux contrats ; S199-2 flux ouverts conservée.
+Compteur0, δ avance. B3 non admissible, B4/A50 partiels, seuil2 % inchangé.
+123 ADR,244 angles,279 leçons,18 invariants,6 SPEC,23 cas ; aucun ADR nouveau.
+Voir [contrats δ S200](validation/CONTRATS-DELTA-S200.md), [relevés](validation/CONTRATS-DELTA-S200-MESURES.md).
+
 **S199 — 2026-09-13 : premier noyau δ MAC x-z en bibliothèque.**
 Claude construit P1–P3 ; Codex termine la passation P4/P5 sans remesure.
 Lac au repos reçu exactement ; filtre spatial passé sur fond plat (ordre1,947),
@@ -1266,8 +1279,9 @@ parfaitement stable ne pouvait pas distinguer.
 
 ## État d'avancement
 
-**État actif S199** : critère B4 fixé à2 %, domaine de superposition chiffré S194 et
-confirmé S197 ; noyau δ construit S199, non admissible B3 (fond coupé et A244).
+**État actif S200** : critère B4 fixé à2 %, noyau δ sans allocation dans le pas,
+refus numériques atomiques reçus ; A244 partielle (précision/budget), fond coupé
+inchangé, B3 non admissible. Domaine de superposition S194 confirmé S197.
 B1/B2/B4 restent partiels, aucun banc complet. Voir le résultat en tête de cet index
 et la [file plurielle](registres/QUESTIONS-OUVERTES.md#file-active).
 
