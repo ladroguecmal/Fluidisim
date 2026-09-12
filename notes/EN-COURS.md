@@ -58,53 +58,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S191 — terminée
+Session : S192 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : S190-1 / S189-1, construire et recevoir une projection discrète compatible
-avec le véhicule de banc, puis éprouver le profil 14×14×8 / extrapolation 80 ms
-sous les 2 % actés. Ne pas confondre projecteur discret et solveur à surface libre.
+Objectif : S191-1, construire une tranche x-z à surface libre linéarisée, fond
+imperméable et pression atmosphérique, recevoir une onde de gravité par référence
+Airy et raffinement. Première étape physique, pas réception non linéaire B4.
 
 ### Plan
 
-- [x] **P1** — reprise et état réel, jeton/plan seul ; master propre 6684094 et trois copies à jour.
-- [x] **P2** — dériver D/G et leurs conditions de bord ; protocole de projection,
-  critères indépendants, métriques B4 et portée avant simulation.
-- [x] **P3a** — construire le projecteur de banc ; gradient, solénoïdal, référence
-  algébrique indépendante, refus/non-convergence ; un support sans mutation du précédent.
-- [x] **P3b** — campagne projetée contre plein/raffiné, axes séparés, composition locale,
-  profil reçu S190 et témoins ; qualifier pression, divergence et réserve de référence.
-- [x] **P4** — réception, correction datée des inférences invalidées, ADR si décision,
-  angles/leçons et propagation B4/A50/file plurielle ; aucune tolérance redemandée.
-- [x] **P5** — rituel REPRISE §6, journal/index/README/décomptes, vérifications,
-  jeton libre et avance rapide des copies propres sans suppression.
+- [x] **P1** — reprise/état réel, master58e41bc propre, trois copies à jour ; jeton/plan seul.
+- [ ] **P2** — équations, discrétisation x-z, opérateur de surface et protocole avant mesure.
+- [ ] **P3a** — véhicule potentiel 2D : relèvement elliptique réellement discrétisé,
+  conditions de surface, évolution et vitesses ; réception des bords/stencil/refus.
+- [ ] **P3b** — ondes Airy profond/peu profond/intermédiaire, raffinements espace/temps,
+  vitesse/surface/énergie/volume, contre-épreuves, reproductibilité.
+- [ ] **P4** — documenter résultats/limites et suite couplée ; propager A50/B4/A217/file,
+  ADR seulement si décision de projet, jamais sélection δ par un essai linéaire.
+- [ ] **P5** — rituel de fin, journal/index/README/décomptes, vérifications, jeton libre,
+  copies propres avancées sans suppression.
 
 ### Notes de reprise
 
-REPRISE lue entièrement dans cette conversation ; les changements depuis sont ceux de
-S190, relus avec dernier journal/index/file active. Invariants, ADR-001 et METHODE déjà
-lus ; aucun changement depuis. B4-TOLERANCE-S190 porte le profil et la réserve mesurée.
-Autres lignes de la file active conservées : aucun déplacement de priorité implicite.
-P2 : PROJECTION-B4-S191 publié. D central/extension nulle et G=-D^T ; CG
-sur DD^T, dimensions intérieures paires. La projection fixe est linéaire ;
-la somme des erreurs des axes requiert leur additivité, correction de prémisse S189.
-
-P3a : pressure_projection.rs, 3 tests debug/release reçus : gradient/curl/adjoint/
-linéarité/idempotence/L2 ; matrice dense indépendante ; zéro/refus atomiques.
-Aucun support historique touché. projected_b4 porte les tests ; campagne à écrire P3b.
-
-P3b : campagne corrigée et rejouée deux fois, 0x52d7645d4548ebb2, sorties identiques.
-16/20 couples reçus ; profil S190 Nz8/c8 conservé : budget 1,371947 %, e+réserve
-0,948047 %, résidu additif 0,002593561 %. q=0,407704413 %, qP=0,000011025 %.
-Pire divergence 4,921623567e-8, max44 itérations. Tests propres debug/release : 3 reçus.
-Incident de montage tracé : demande Nz14 dédoublonnée à12, témoin plein corrigé
-explicitement, assertions conservées ; demandes10/12 donnent9/11 nœuds réels.
-ADR-121 préparée P4, non comprise dans ce commit P3b ; prochaine construction surface2D.
-P4 : ADR-121 restreint la portée de la somme (résidu requis pour borne algébrique),
-L270 ajoutée. Suivis B4/A50/A233/S189/S190/SPEC-004/file active propagés.
-121 ADR/233 angles/270 leçons/18 invariants/6 SPEC/23 cas à porter en clôture.
-
-P5 : journal/index/README/reprise mis à jour. Liens locaux et diff vérifiés.
-121 ADR, A1-A233 présents,270leçons ; invariants18/SPEC6/cas23 inchangés.
-File plurielle relue et portée ; suite S191-1 surface libre2D. Jeton libre.
-Trois copies revérifiées propres au commit6684094, à avancer sur ce commit final
-immédiatement après clôture. Aucune nouvelle copie, aucune suppression.
+REPRISE entier, invariants/ADR-001/METHODE lus dans cette conversation ; nouvelles
+sections S191 et dernier journal/index/file relus. Seuil2 % connu, aucune redemande.
+Les opérateurs de S191 à extension nulle ne représentent pas une surface physique.
+Choix de banc : potentiel incompressible irrotationnel linéarisé, domaine x-z fixe,
+Laplace discret et élévation libre évolutive. A217 non linéaire restera ouverte.
