@@ -90,7 +90,7 @@ Le lot ne migre pas ce terme (bits changés, lot propre) ; il le chiffre et le s
 - [x] **P4** — image : B+W par `Prepared::sample_world_batch` dans R, B seul hors R ;
  bornes de marche B+W conservatrices ; trois instants + témoin sans impact ; zéro rayon
  non résolu ; tout pixel différent du témoin doit avoir échantillonné dans R (contrôle).
-- [ ] **P5** — observateur et coût : pixels par λ au point d'impact, distance où λ < 2 px
+- [x] **P5** — observateur et coût : pixels par λ au point d'impact, distance où λ < 2 px
  pour cette caméra ; coût par point B seul vs B+W (4096 points, 3 chauffes/11 mesures),
  points tenant dans 2 ms. Part δ nommée (cavité/gerbe/1−fraction) avec domaine et durée
  bornés, comparée au coût S202 ; aucun δ construit.
@@ -166,3 +166,27 @@ dont 5 062 984 B+W, 125 979 px touchés, 56 739 ms, 0x3dba0d3acf15447a ; témoin
 Résidu max 3 mm partout ; 125 979 px touchent l'emprise (27,3 % de l'image). Anneaux plus
 discrets à +1 s, étendus et déformant le reflet solaire à +6 s (zooms inspectés).
 Coût image B+W ≈ 5,3× le témoin : ≈ 9 µs par évaluation B+W N256 sur ce CPU (brut, P5 mesure).
+
+P5, écrit **avant** mesure : coût par point sur 4096 points dans R (B seul, W seul, B+W par
+`sample_world_batch`), 3 chauffes/11 mesures, médiane et max. Piste hôte, pas bibliothèque :
+le champ étant radial, une **table η(r), η'(r)** au pas λ_min/8 = 0,209 m reconstruite par
+image, puis Hermite cubique par point ; recevable pour le rendu si max|Δη| ≤ 3 mm contre
+l'échantillon direct aux âges 1/3/6/30 s (20 000 rayons). Observateur : pixels par λ et λ/2
+(le long de la visée et en travers) au point d'impact et distance où ils passent sous 2 px.
+
+P5 résultats. **Observateur** : impact au pixel (320,0 ; 224,1), 28,86 m ; λ = 11,05 px le long
+de la visée, 45,10 px en travers ; λ/2 = 5,51 / 22,55 px. Sous 2 px le long : λ dès 67 m,
+λ/2 dès 47,5 m (horizontal, même azimut) ; en travers : λ jamais avant 600 m, λ/2 dès 325,5 m.
+**L'observateur est dans l'emprise en plan** (28 m < 52 m) : sa projection n'est pas bornée,
+première boîte englobante fausse retirée ; 27,3 % des pixels touchent R (P4).
+**Coût** (4096 pts dans R, âges 1/3/6/30 s, médianes) : B 6,50–6,70 ms = 1,6 µs/pt ;
+W N256 50,0–56,2 ms ≈ 12–14 µs/pt ; B+W `sample_world_batch` 57,1–59,3 ms = 13,95–14,49 µs/pt
+→ **138–143 points dans 2 ms**. Table radiale M = 249, pas 0,209 m : construction 2,66–2,76 ms
+(> 2 ms à elle seule pour un impact), évaluation 62–83 µs les 4096 = 15–20 ns/pt, erreur max
+0,0014–0,0062 mm ≪ 3 mm → **recevable pour le rendu**, pas au budget. B seul : ~1250 points
+dans 2 ms sur ce CPU, un fil — l'évaluation CPU par point ne tient pas 60 Hz, même sans W.
+**Part non portée par W** : Fr = 1,806 (< 5, pas de cavité franche, SPEC-002 §3) ; 32 636 J
+sur 32 800 hors ondes (f à calibrer B2) ; majorant balistique 3,262 m / 1,631 s ;
+b = 1 m = 0,2985 λ. SPEC-001 §2.4 dimensionne déjà un δ impact 6×6×4 m à dx 0,05 :
+1,15 M cellules, ≈37 Mo — rapport 2 246 aux 512 cellules x–z de S202 (0,59 ms) ; **aucun
+coût transposé**, noyau 3D ou axisymétrique absent.

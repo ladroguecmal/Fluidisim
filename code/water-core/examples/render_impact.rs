@@ -657,6 +657,189 @@ fn render_report(dir: &str, age_s: f64) -> Result<(), String> {
     Ok(())
 }
 
+/// Projection d'un point monde sur l'image de l'observateur, en pixels (même convention que
+/// `Camera::ray`). `None` derrière la caméra.
+pub fn project(camera: &Camera, p: V) -> Option<[f64; 2]> {
+    let d = add(p, mul(camera.origin, -1.));
+    let z = dot(d, camera.forward);
+    if z <= 0. {
+        return None;
+    }
+    let half = (FIELD_OF_VIEW_DEG.to_radians() / 2.).tan();
+    let aspect = WIDTH as f64 / HEIGHT as f64;
+    let x = (dot(d, camera.right) / z / (aspect * half) + 1.) * WIDTH as f64 / 2.;
+    let y = (1. - dot(d, camera.up) / z / half) * HEIGHT as f64 / 2.;
+    Some([x, y])
+}
+
+/// Longueur apparente en pixels d'un segment horizontal centré en `centre` : orienté vers
+/// l'observateur (le long de la visée), puis perpendiculairement (en travers).
+pub fn apparent_pixels(camera: &Camera, centre: [f64; 2], length: f64) -> Option<(f64, f64)> {
+    let to_camera = unit([camera.origin[0] - centre[0], camera.origin[1] - centre[1], 0.]);
+    let across = [-to_camera[1], to_camera[0], 0.];
+    let c = [centre[0], centre[1], 0.];
+    let span = |axis: V| -> Option<f64> {
+        let a = project(camera, add(c, mul(axis, length / 2.)))?;
+        let b = project(camera, add(c, mul(axis, -length / 2.)))?;
+        Some((a[0] - b[0]).hypot(a[1] - b[1]))
+    };
+    Some((span(to_camera)?, span(across)?))
+}
+
+fn observer_report() -> Result<(), String> {
+    let sc = scene(HS, EMPRISE_AGE_US)?;
+    let camera = Camera::new(CAMERA_ORIGIN, CAMERA_TARGET);
+    let centre = [IMPACT_XY[0] as f64, IMPACT_XY[1] as f64];
+    let lambda = sc.wavelength_m as f64;
+    let p = project(&camera, [centre[0], centre[1], 0.]).ok_or("impact derrière la caméra")?;
+    let dist = ((centre[0] - CAMERA_ORIGIN[0]).powi(2) + (centre[1] - CAMERA_ORIGIN[1]).powi(2) + CAMERA_ORIGIN[2].powi(2)).sqrt();
+    println!("# observateur S203 : camera {CAMERA_ORIGIN:?} -> {CAMERA_TARGET:?}, {WIDTH}x{HEIGHT}, champ vertical {FIELD_OF_VIEW_DEG} deg");
+    println!("impact pixel=({:.1},{:.1}) distance={dist:.2}m", p[0], p[1]);
+    for (name, l) in [("lambda", lambda), ("lambda/2", lambda / 2.)] {
+        let (along, across) = apparent_pixels(&camera, centre, l).ok_or("projection")?;
+        println!("{name}={l:.4}m au point d'impact : le_long={along:.2}px en_travers={across:.2}px");
+    }
+    // Même azimut que l'impact, distance horizontale croissante depuis la caméra.
+    let azimuth = unit([centre[0] - CAMERA_ORIGIN[0], centre[1] - CAMERA_ORIGIN[1], 0.]);
+    for (name, l) in [("lambda", lambda), ("lambda/2", lambda / 2.)] {
+        let mut along_limit = None;
+        let mut across_limit = None;
+        let mut d = 5.0;
+        while d <= 600.0 {
+            let c = [CAMERA_ORIGIN[0] + azimuth[0] * d, CAMERA_ORIGIN[1] + azimuth[1] * d];
+            if let Some((along, across)) = apparent_pixels(&camera, c, l) {
+                if along_limit.is_none() && along < 2.0 {
+                    along_limit = Some(d);
+                }
+                if across_limit.is_none() && across < 2.0 {
+                    across_limit = Some(d);
+                }
+            }
+            d += 0.5;
+        }
+        println!("{name} sous 2 px : le_long a partir de {along_limit:?} m, en_travers a partir de {across_limit:?} m (horizontal depuis la camera, marche limitee a 600 m)");
+    }
+    // L'emprise se projette sans borne quand l'observateur est dedans en plan : on le dit
+    // plutôt que de publier une boîte englobante de points derrière le plan image.
+    let horizontal = (centre[0] - CAMERA_ORIGIN[0]).hypot(centre[1] - CAMERA_ORIGIN[1]);
+    println!(
+        "emprise R={EMPRISE_RADIUS_M} m, observateur a {horizontal:.2} m du centre en plan : observateur_dans_emprise={}",
+        horizontal < EMPRISE_RADIUS_M as f64
+    );
+    // Part non portée par W — grandeurs dérivées, provenance citée.
+    let v = ENTRY_SPEED_MS as f64;
+    let b = ENTRY_HALF_WIDTH_M as f64;
+    let g = sc.medium.gravity as f64;
+    let e_ref = impact_generator::reference_energy_j(
+        &Entry { half_width_m: ENTRY_HALF_WIDTH_M, speed_ms: ENTRY_SPEED_MS, transferred_fraction: TRANSFERRED_FRACTION },
+        &sc.medium,
+    ) as f64;
+    println!("# part non portee par W");
+    println!("Froude d'entree v/sqrt(g*2b)={:.3} (cavite franche au-dela de ~5, SPEC-002 §3)", v / (g * 2. * b).sqrt());
+    println!("energie hors ondes (1-f)*E_ref={:.0}J sur E_ref={e_ref:.0}J (f a calibrer B2)", (1. - TRANSFERRED_FRACTION as f64) * e_ref);
+    println!("majorant balistique d'une projection a v : hauteur v^2/2g={:.3}m, duree 2v/g={:.3}s", v * v / (2. * g), 2. * v / g);
+    println!("demi-largeur mouillee b={b}m = 0,2985 lambda (impact_generator::ALPHA)");
+    Ok(())
+}
+
+/// Table radiale η(r), η'(r) d'un champ à un instant : piste hôte pour le coût par point.
+pub fn radial_table<const N: usize>(field: &RadialImpact<N>, time: SimTime, step: f32, table: &mut Vec<(f32, f32)>) -> Result<(), String> {
+    let v = *field.event().data();
+    table.clear();
+    let count = (EMPRISE_RADIUS_M / step) as usize + 1;
+    for i in 0..count {
+        let r = (i as f32 * step).min(EMPRISE_RADIUS_M - 1e-3);
+        let s = field.sample(v.frame, v.cell, [v.position[0] + r, v.position[1]], time).map_err(|e| format!("{e:?}"))?;
+        table.push((s.eta, s.slope[0]));
+    }
+    Ok(())
+}
+/// Hermite cubique sur la table ; au-delà du dernier nœud, refus (hors emprise).
+pub fn table_eta(table: &[(f32, f32)], step: f32, r: f32) -> Option<f32> {
+    let x = r / step;
+    let i = x as usize;
+    if i + 1 >= table.len() {
+        return None;
+    }
+    let t = x - i as f32;
+    let (y0, d0) = table[i];
+    let (y1, d1) = table[i + 1];
+    let (t2, t3) = (t * t, t * t * t);
+    Some((2. * t3 - 3. * t2 + 1.) * y0 + (t3 - 2. * t2 + t) * step * d0 + (-2. * t3 + 3. * t2) * y1 + (t3 - t2) * step * d1)
+}
+
+fn timed(mut action: impl FnMut(), repeats: usize) -> (f64, f64) {
+    for _ in 0..3 {
+        action();
+    }
+    let mut v = Vec::with_capacity(repeats);
+    for _ in 0..repeats {
+        let t = Instant::now();
+        action();
+        v.push(t.elapsed().as_secs_f64() * 1e6);
+    }
+    v.sort_by(f64::total_cmp);
+    (v[repeats / 2], v[repeats - 1])
+}
+
+fn cost_report() -> Result<(), String> {
+    use std::hint::black_box;
+    let sc = scene(HS, EMPRISE_AGE_US)?;
+    let domain = Domain { radius: EMPRISE_RADIUS_M, age_us: EMPRISE_AGE_US };
+    let field = RadialImpact::<EMPRISE_N>::new(sc.event, sc.medium, domain).map_err(|e| format!("{e:?}"))?;
+    let mut slots = vec![None; 1];
+    let mut journal = Journal::new(0, &mut slots);
+    journal.confirm(0, Cause { entity: 0, command: 0, emission: 0 }, sc.event).map_err(|e| format!("{e:?}"))?;
+    let mut pool: Vec<Option<RadialImpact<EMPRISE_N>>> = (0..1).map(|_| None).collect();
+    let prepared = Prepared::build(&journal, &mut pool, Context { frame: FRAME, cell: CELL, medium: sc.medium, domain })
+        .map_err(|e| format!("{e:?}"))?;
+    let bound = BoundBackground::new(&sc.background, FRAME, CELL);
+    // 4096 points déterministes dans le disque de rayon 0,99 R (spirale de Vogel).
+    let n = 4096usize;
+    let golden = std::f64::consts::PI * (3. - 5f64.sqrt());
+    let local: Vec<[f32; 2]> = (0..n)
+        .map(|i| {
+            let r = 0.99 * EMPRISE_RADIUS_M as f64 * ((i as f64 + 0.5) / n as f64).sqrt();
+            let a = i as f64 * golden;
+            [IMPACT_XY[0] + (r * a.cos()) as f32, IMPACT_XY[1] + (r * a.sin()) as f32]
+        })
+        .collect();
+    let world: Vec<WorldPos> = local.iter().map(|p| WorldPos::from_metres(p[0] as f64, p[1] as f64, 0.)).collect();
+    let mut out = vec![WaterSample::default(); n];
+    let mut scratch = out.clone();
+    println!("# cout par point S203 : {n} points dans R, 3 chauffes / 11 mesures, release, un fil");
+    println!("age_s B_med_us B_max_us W_med_us W_max_us BW_med_us BW_max_us BW_us_par_point points_BW_dans_2ms table_build_med_us table_M table_eval_med_us table_us_par_point max_err_table_mm");
+    let step = sc.wavelength_m / 2. / 8.;
+    let mut table = Vec::with_capacity((EMPRISE_RADIUS_M / step) as usize + 2);
+    for age_s in [1u64, 3, 6, 30] {
+        let t = SimTime(BIRTH.0 + age_s * 1_000_000);
+        let b = timed(|| { for p in &world { black_box(sc.background.eval(*p, t)); } }, 11);
+        let w = timed(|| { for p in &local { black_box(field.sample(FRAME, CELL, *p, t).ok()); } }, 11);
+        let bw = timed(|| { black_box(prepared.sample_world_batch(&bound, &world, t, BREAKING_SLOPE, &mut out, &mut scratch).unwrap()); }, 11);
+        let build = timed(|| { radial_table(&field, t, step, &mut table).unwrap(); black_box(&table); }, 11);
+        radial_table(&field, t, step, &mut table)?;
+        let eval = timed(|| {
+            for p in &local {
+                let r = (p[0] - IMPACT_XY[0]).hypot(p[1] - IMPACT_XY[1]);
+                black_box(table_eta(&table, step, r));
+            }
+        }, 11);
+        let mut max_err = 0.0f64;
+        for i in 0..20_000u32 {
+            let r = (i as f32 + 0.37) / 20_000. * (EMPRISE_RADIUS_M - step - 1e-3);
+            let direct = field.sample(FRAME, CELL, [IMPACT_XY[0] + r, IMPACT_XY[1]], t).map_err(|e| format!("{e:?}"))?;
+            let interp = table_eta(&table, step, r).ok_or("table")?;
+            max_err = max_err.max((direct.eta as f64 - interp as f64).abs());
+        }
+        let per_point = bw.0 / n as f64;
+        println!(
+            "{age_s} {:.1} {:.1} {:.1} {:.1} {:.1} {:.1} {:.3} {:.0} {:.1} {} {:.1} {:.4} {:.4}",
+            b.0, b.1, w.0, w.1, bw.0, bw.1, per_point, 2000. / per_point, build.0, table.len(), eval.0, eval.0 / n as f64, max_err * 1e3
+        );
+    }
+    Ok(())
+}
+
 fn scene_report() -> Result<(), String> {
     println!("# constats de construction S203");
     for hs in [0.25f32, 0.5, 1.0, 1.5] {
@@ -757,12 +940,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some("scene") => scene_report()?,
         Some("seams") => seams_report()?,
         Some("controls") => controls_report()?,
+        Some("observer") => observer_report()?,
+        Some("cost") => cost_report()?,
         Some("render") => {
             let dir = args.get(2).map(String::as_str).unwrap_or("../captures");
             let age: f64 = args.get(3).map(|s| s.parse()).transpose()?.unwrap_or(3.0);
             render_report(dir, age)?
         }
-        _ => return Err("mode : scene | seams | controls | render <dir> <age_s>".into()),
+        _ => return Err("mode : scene | seams | controls | observer | cost | render <dir> <age_s>".into()),
     }
     Ok(())
 }
@@ -788,6 +973,24 @@ mod tests {
         let sampled = sampled_real_slope(&sc.background, 16.0, 0.5, 4);
         assert!(sampled <= d, "{sampled} > {d}");
         assert!(d < sc.floor as f64, "{d} >= {}", sc.floor);
+    }
+    #[test]
+    fn projection_agrees_with_the_camera_rays() {
+        // Un point de la surface plane touché par le rayon du pixel (x, y) se projette sur (x, y).
+        let camera = Camera::new(CAMERA_ORIGIN, CAMERA_TARGET);
+        for (x, y) in [(320.5, 250.5), (10.25, 359.75), (600.0, 200.0)] {
+            let dir = camera.ray(x, y, WIDTH, HEIGHT);
+            let s = -camera.origin[2] / dir[2];
+            let p = project(&camera, add(camera.origin, mul(dir, s))).unwrap();
+            assert!((p[0] - x).abs() < 1e-9 && (p[1] - y).abs() < 1e-9, "{p:?}");
+        }
+    }
+    #[test]
+    fn hermite_table_is_exact_on_nodes_and_refuses_outside() {
+        let table = vec![(0.0f32, 1.0f32), (1.0, 0.0), (0.5, -1.0)];
+        assert_eq!(table_eta(&table, 0.5, 0.0), Some(0.0));
+        assert_eq!(table_eta(&table, 0.5, 0.5), Some(1.0));
+        assert!(table_eta(&table, 0.5, 1.0).is_none());
     }
     #[test]
     fn a_differing_pixel_outside_the_footprint_is_counted() {
