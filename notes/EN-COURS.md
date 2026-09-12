@@ -70,15 +70,31 @@ surface à entrées identiques, sur plusieurs lots et recettes.
 - [x] **P2** — publier les conditions de mesure et le protocole **avant** tout chiffre :
       montages, lots, recettes, ce qui est chronométré et ce qui ne l'est pas, ce qu'un
       écart mesuré ici ne prouve pas. Aucun budget cible.
-- [>] **P3** — écrire l'exemple de mesure (`differential_cost`) : préparation, évaluation
+- [x] **P3** — écrire l'exemple de mesure (`differential_cost`) : préparation, évaluation
       différentielle contre surface à entrées identiques, chemins de refus, empreinte
       mémoire et allocations. Exécuter, relever.
-- [ ] **P4** — recevoir les chiffres dans un document de validation, dire ce qu'ils ne
+- [>] **P4** — recevoir les chiffres dans un document de validation, dire ce qu'ils ne
       disent pas ; suite perturbative déclarée.
 - [ ] **P5** — rituel de fin (REPRISE.md §6) : journal, angles, leçons, index, décomptes,
       jeton et copies.
 
 ### Notes de reprise
+
+P3 S183 : `examples/differential_cost.rs`, deux exécutions concordantes, aucun
+changement de bibliothèque ; workspace 331 réussis/cinq ignorés debug et release.
+Chiffres tenus hors document tant que P4 n'a pas été committé — les voici :
+rapport différentiel/surface **3,0 à 4,3** selon lot et montage, médiane ~3,4 ;
+il est **le même couche par couche** (B 3,4 ; impact 3,1 ; pression 3,4), donc il
+suit le nombre de scalaires publiés (31 contre 10), pas la nature du calcul.
+Préparation et actualisation sont **identiques** aux deux chemins : le contrôleur
+de pression coûte 168-178 µs par instant publié à 192 créneaux, 41 µs à 48, 355 µs
+à 384 — linéaire, ~0,9 µs par créneau, et c'est le poste dominant du cycle.
+Refus de montage 0,025-0,097 µs. **Refus au dernier point d'un lot 64 : 2 232-2 400 µs**,
+soit le prix du lot entier ; au premier point : 2,0 µs. Un point hors domaine paie
+quand même le différentiel de B (2,0 µs à 16 composantes, 7,6-8,4 à 64), parce que
+le test de rayon des impacts vient après. Allocations hôte : 512 octets/1 appel
+(2048 à 64 composantes), zéro refus après seal. Inspection de source : le seul tas
+du chemin d'exécution est `Background.components`, déclaré à l'hôte.
 
 S183 : master 541ebc5 propre, trois copies alignées ; 117 ADR/225 angles/262 leçons.
 Démarrage à froid, copie principale, aucune copie nouvelle. Précédent de méthode :
