@@ -77,7 +77,7 @@ seconde est la vraie :
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seul.
-- [ ] **P2** — publier le protocole avant tout chiffre : la famille ancrée à **nombre de
+- [x] **P2** — publier le protocole avant tout chiffre : la famille ancrée à **nombre de
       nœuds identique** à S186, la grille `r × mode × c` rejouée à l'identique, les trois
       mêmes lois avec le **même critère déjà déclaré** `[0,80 ; 1,25]`, les réceptions, et
       ce que le rejeu ne prouvera pas.
