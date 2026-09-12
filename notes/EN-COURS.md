@@ -76,7 +76,7 @@ Le lot ne migre pas ce terme (bits changés, lot propre) ; il le chiffre et le s
 ### Plan
 
 - [x] **P1** — amorce : trois copies isolées à e13d212 propres, jeton pris, plan seul.
-- [ ] **P2** — exemple `render_impact.rs`, partie scène : mer Hs0,5 (recette S201 sinon
+- [x] **P2** — exemple `render_impact.rs`, partie scène : mer Hs0,5 (recette S201 sinon
  inchangée), impact par `impact_generator` (b=1 m, v=8 m/s, fraction déclarée choix de
  banc), milieu profond20 m, `max_slope` de l'impact = π/7 − plancher B (budget alloué,
  dit). Pente réelle de B échantillonnée sur la fenêtre de l'image : facteur L1/réel chiffré.
@@ -104,3 +104,14 @@ prepared_water, impact_generator, render_background. S202 finie à 00:42, jeton 
 Admission RadialImpact λ=3,35 m : Regime profondeur > 3,35 m ; cg_max≈1,62 m/s ;
 Resolution dk·(R+cg_max·A) ≤ π/2 → R+1,62A ≤ 35,7 (N64), 71,4 (N128), 143 (N256).
 Borne de hauteur W = η(0, naissance) = Σ coefficients (tous positifs) : pas d'accesseur.
+
+P2 (`render_impact scene`, release) : recette1,5 = 0x7e5cc32275ccce4e (S201 retrouvée).
+Hs0,5 : 0xae7cc08b64111fda, plancher L1 0,202731, budget impact 0,246068. Générateur :
+λ=3,35 m, E=164 J (fraction0,005 ; max0,006698 ; E_ref32800 J). RadialImpact N64/128/256
+R8 A4 s : slope_max0,212607, L1 0,381646, plancher+slope_max0,415338 ≤ π/7, η centre
+0,15482 m. Pente de B, trois grandeurs, homothétiques en Hs (rapports identiques) :
+L1 0,6082 / **directionnelle exacte 0,5733** (−5,7 %) / échantillonnée 0,4215 (512 m, pas
+1 m, 0–120 s ; L1/échantillon = 1,4428). **Même le majorant directionnel refuse la mer S201** :
+aucun budget indépendant du point ne l'admet ; seul un maximum local ou statistique le
+ferait, et il ne garantit rien. Hs max composable (marge nulle, L1) : 0,4488/0,4055 ≈ 1,107 m.
+Six tests exemple passent (debug). Aucune bibliothèque modifiée.
