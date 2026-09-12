@@ -73,7 +73,7 @@ erreurs se composent — additivement, quadratiquement, ou pas du tout.
 - [x] **P2** — publier le protocole avant tout chiffre : véhicule partagé, grille
       `r × mode × c`, **une seule** référence, métriques, les trois lois de composition
       mises à l'épreuve, les réceptions, et ce que la mesure ne prouvera pas.
-- [ ] **P3a** — écrire `examples/composed_error.rs` : source échantillonnée sur le réseau
+- [x] **P3a** — écrire `examples/composed_error.rs` : source échantillonnée sur le réseau
       `r` aux seuls instants de cadence, `scatter` trilinéaire, puis le même pas.
       Réceptions : `(r=1, c=1)` identique **en bits** à la référence ; la ligne `c=1`
       redonne l'erreur spatiale pure ; la ligne `r=1` redonne les constantes de S185 ;
@@ -85,6 +85,44 @@ erreurs se composent — additivement, quadratiquement, ou pas du tout.
 - [ ] **P5** — rituel de fin (REPRISE.md §6).
 
 ### Notes de reprise
+
+P3a S186 : `examples/composed_error.rs` + `examples/support/reuse_mode.rs`. Deux
+exécutions, `diff` strict **identique** — aucune durée n'est mesurée dans ce véhicule,
+donc la sortie entière est un résultat. Empreinte **0x0e743846d4656870**.
+Les `Mode` et `build_source` de S185 ont été **déplacés** dans `support/reuse_mode.rs` ;
+`cadence_error` rejoué, empreinte **0x39567a1d4bc2ba4c inchangée** — le déplacement est
+vérifié, pas supposé. Workspace **331 réussis / cinq ignorés** en debug et en release.
+
+**Réceptions, les six passent.** (2) `scatter` à `r=1` identique au chargement direct en
+bits. (3) contrôle croisé : `max|S| = 1,540547e-4`, `max|u'(T)| = 7,993168e-5`, et la
+ligne `r=1` redonne **exactement** les quatorze `eS/eU` de S185 §6.2 (mnt c=2
+1,6894/0,7700 … int c=64 12,3586/6,7740). (4) à `c=1` les trois modes sont identiques en
+bits pour chaque `r`. (5) plancher `dt/2` = **0,386 %**, la valeur de S185 à la décimale.
+(6) tout fini.
+
+**Chiffres bruts, à publier en P4 :**
+*Contenu effectif* — `k_eff` mesuré au bloc : horizontal 0,367 → 0,791 rad/m du fond
+(z −4,05) vers le haut (z −0,80), vertical 0,496 → 1,166. Soit `λ_eff` de **17 m à 8 m**
+horizontalement et **12,7 m à 5,4 m** verticalement, contre `λ_min = 1,081 m` de la
+recette. **La profondeur filtre : le contenu présent est 5 à 16 fois plus lisse que la
+coupure.** `max|S|` par tranche passe de 1,45e-5 à 4,14e-5 — facteur 2,86 sur 3,25 m,
+donc une longueur d'atténuation de 3,1 m, pas les 0,172 m de `1/k_max`.
+*Erreur spatiale seule* — r=2 : eS 3,59 % / eU **2,54 %** ; r=4 : 17,89 / **13,60** ;
+r=8 : 27,60 / **32,96**. Constante en `(h/λ_min)²` : 0,1187 / 0,1590 / 0,0963.
+*Par tranche* — l'erreur globale est **exactement** celle de la tranche la plus haute
+(k=14, z=−0,80) aux trois `r` : 2,5401 / 13,6043 / 32,9593. La tranche du fond ne vaut
+que 0,11 / 0,43 / 1,54. **Un réseau isotrope gaspille en profondeur ce qui manque en
+surface.**
+*Composition* — **les trois lois sont rejetées** par le critère déclaré `[0,80 ; 1,25]` :
+additive 0,529–0,988, quadratique 0,749–1,209, maximum 0,826–1,489. Mais l'additive
+n'est **jamais dépassée** (max 0,988) : c'est une enveloppe sûre à 1,9× de mou près.
+La quadratique vaut 1,000 quand un axe domine (`r=8`, ou mode interpolation) et casse
+quand les deux sont comparables.
+*Non-monotonie, le résultat inattendu* — **dégrader la cadence réduit l'erreur totale** :
+mnt r=4 passe de 13,6043 (c=1) à **11,2323** (c=8), soit **−17,4 %** ; ext r=4 à 11,9516
+(c=16), −12,1 % ; mnt r=2 à 2,2048 (c=2), −13,2 %. Visible aussi dans `eS` seule
+(int r=4 : 17,89 → 15,16 à c=32), donc ce n'est pas un artefact de l'évolution.
+Un balayage à un axe à la fois trouve donc un optimum **faux**.
 
 S186 : master e46de38 propre, quatre copies au même commit ; 117 ADR / 228 angles /
 265 leçons / 18 invariants / 6 SPEC / 23 cas. Démarrage à froid, copie principale.

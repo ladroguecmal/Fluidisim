@@ -7,12 +7,16 @@ mod block;
 #[path = "support/water_montage.rs"]
 #[allow(dead_code)]
 mod montage;
+#[path = "support/reuse_mode.rs"]
+#[allow(dead_code)]
+mod reuse;
 
 use block::{interior_points, load_direct, point, Block, DX, NU};
 use montage::{
     event, impact_context, recipe, sea, segments, settings, Arena, Services, CELL, FRAME,
     MAX_SLOPE, T0,
 };
+use reuse::{build_source, Mode};
 use water_core::{
     bound_pressure,
     gaussian_spectrum::bake,
@@ -32,54 +36,6 @@ const STEPS: usize = 100;
 const DT: f32 = 1.0e-2;
 const DT_US: u64 = 10_000;
 const CADENCES: [usize; 7] = [1, 2, 4, 8, 16, 32, 64];
-
-#[derive(Clone, Copy, PartialEq, Eq)]
-enum Mode {
-    Hold,
-    Extrapolate,
-    Interpolate,
-}
-impl Mode {
-    fn label(self) -> &'static str {
-        match self {
-            Mode::Hold => "maintien",
-            Mode::Extrapolate => "extrapolation",
-            Mode::Interpolate => "interpolation",
-        }
-    }
-}
-
-/// Source réemployée au pas `n` selon le mode et la cadence. À `c = 1` les trois modes
-/// donnent `cache[n]` **exactement** : la fraction vaut zéro, et `a + 0·x == a`.
-fn build_source(cache: &[Vec<[f32; 3]>], mode: Mode, c: usize, n: usize, out: &mut [[f32; 3]]) {
-    let k = (n / c) * c;
-    let frac = (n - k) as f32 / c as f32;
-    let a = &cache[k];
-    match mode {
-        Mode::Hold => out.copy_from_slice(a),
-        Mode::Extrapolate => {
-            if k >= c {
-                let b = &cache[k - c];
-                for i in 0..out.len() {
-                    for x in 0..3 {
-                        out[i][x] = a[i][x] + frac * (a[i][x] - b[i][x]);
-                    }
-                }
-            } else {
-                // Avant la deuxième reconstruction, il n'y a rien à extrapoler.
-                out.copy_from_slice(a);
-            }
-        }
-        Mode::Interpolate => {
-            let b = &cache[k + c];
-            for i in 0..out.len() {
-                for x in 0..3 {
-                    out[i][x] = a[i][x] + frac * (b[i][x] - a[i][x]);
-                }
-            }
-        }
-    }
-}
 
 struct Outcome {
     /// Champ final, indexé comme le bloc.
