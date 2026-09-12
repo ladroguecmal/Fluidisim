@@ -218,23 +218,54 @@ fn main() {
     );
     h.write_f32(al.gap_l2 as f32);
 
-    // Réception 7 : convergence sous la forme de L274, trois niveaux de K.
-    println!("\n-- convergence en K, dense n=6, sur la moyenne quadratique");
-    let modes = Family::Dense.modes(6);
-    let q = band_of(&modes);
-    let f = fleet_from_modes(&modes, TOTAL / 6., false);
-    let mut lv = Vec::new();
-    for k in [32usize, 64, 128] {
-        let r = sources(q, k, 8., &f, 3, PERIODS, PER, &MARKS);
-        println!("K={k} | L2={:.9e} | energie={:.2e}", r.gap_l2, r.energy);
-        h.write_f32(r.gap_l2 as f32);
-        lv.push(r.gap_l2);
+    // Réception 7 : convergence sous la forme de L274, trois niveaux de K. Mesurée aux
+    // **deux bouts** de la plage de `n` : si `K=64` sous-résolvait davantage à grand `n`,
+    // l'exposant ajusté serait biaisé, et c'est cette borne-là qui décide si la mesure tient.
+    println!("\n-- convergence en K, sur la moyenne quadratique, aux deux bouts de la plage");
+    let mut residues = Vec::new();
+    for n in [6usize, 16] {
+        let modes = Family::Dense.modes(n);
+        let q = band_of(&modes);
+        let f = fleet_from_modes(&modes, TOTAL / n as f64, false);
+        let mut lv = Vec::new();
+        for k in [32usize, 64, 128] {
+            let r = sources(q, k, 8., &f, 3, PERIODS, PER, &MARKS);
+            println!("n={n} K={k} | L2={:.9e} | energie={:.2e}", r.gap_l2, r.energy);
+            h.write_f32(r.gap_l2 as f32);
+            lv.push(r.gap_l2);
+        }
+        let (d1, d2) = (lv[1] - lv[0], lv[2] - lv[1]);
+        // Un triplet ne porte un ordre que s'il converge : mêmes signes, incréments
+        // décroissants. Sinon le niveau grossier est hors de son domaine, et l'« ordre »
+        // qu'on en tirerait serait un chiffre sans objet — A238 dans un autre habit.
+        let usable = d1 * d2 > 0. && d1.abs() > d2.abs();
+        if usable {
+            let order = (d1 / d2).abs().log2();
+            let residue = (d2 / (2f64.powf(order) - 1.)).abs() / lv[2].abs();
+            println!(
+                "n={n} | ordre={order:.3} | residu de Richardson a K=64 = {:.4} %",
+                100. * residue
+            );
+        } else {
+            println!(
+                "n={n} | TRIPLET INUTILISABLE : increments {d1:+.3e} puis {d2:+.3e} — \
+                 le niveau K=32 est hors de son domaine, aucun ordre n'en sort"
+            );
+        }
+        // Ce qui décide vraiment : de combien K=64 diffère de K=128, aux deux bouts.
+        let shift = (lv[2] - lv[1]) / lv[1];
+        println!("n={n} | K=64 -> K=128 : {:+.3} %", 100. * shift);
+        residues.push((n, lv[1], lv[2]));
     }
-    let order = ((lv[0] - lv[1]) / (lv[1] - lv[2])).abs().log2();
-    let residue = ((lv[1] - lv[2]) / (2f64.powf(order) - 1.)).abs() / lv[2].abs();
+    // Le défaut de résolution biaise-t-il l'exposant ? Refaire la pente entre les deux
+    // bouts à `K=64` puis à `K=128` : l'écart est le biais, et il se lit sans extrapoler.
+    let (n0, a64, a128) = residues[0];
+    let (n1, b64, b128) = residues[1];
+    let r = (n1 as f64 / n0 as f64).ln();
+    let (s64, s128) = ((b64 / a64).ln() / r, (b128 / a128).ln() / r);
     println!(
-        "ordre={order:.3} | residu de Richardson a K=64 = {:.4} %",
-        100. * residue
+        "pente n={n0}->{n1} : a K=64 {s64:+.3} | a K=128 {s128:+.3} | biais {:+.3}",
+        s128 - s64
     );
 
     println!(

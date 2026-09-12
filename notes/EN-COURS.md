@@ -75,15 +75,34 @@ tend-elle vers une **limite** quand `n` croît ?
 - [x] **P3a** — banc `nl_fallback_2d.rs` réutilisant `support/nl_surface.rs` sans le
       modifier ; tests propres dont le **décompte de repli par construction** pour les trois
       familles, le cas nul, et la continuité avec S195 au point `n=6` dense.
-- [>] **P3b** — campagne : axe « limite » sur la famille dense jusqu'à `n` grand, axe
+- [x] **P3b** — campagne : axe « limite » sur la famille dense jusqu'à `n` grand, axe
       « mécanisme » sur le couple pair/impair, convergence sous la forme de L274, bande
       vérifiée par famille, deux exécutions identiques.
-- [ ] **P4** — verdict sur A241 : le repli est-il la cause, la loi a-t-elle une limite.
+- [>] **P4** — verdict sur A241 : le repli est-il la cause, la loi a-t-elle une limite.
       Documenter, propager la file ; ADR seulement si une décision de projet est prise.
 - [ ] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes, jeton
       `libre`, copies avancées sans suppression non prouvée.
 
 ### Notes de reprise
+
+P3b S196 : campagne exécutée, **empreinte 0xbcf2911362458c13**, deux exécutions
+identiques ligne pour ligne. **Verdict : ni la prédiction 1 ni la 2.** Exposants sur
+n=2..8 : dense −0,451, **impaire −0,525**, **paire −0,394**. Écart pair/impair =
+**0,131** — au-dessus du seuil de réfutation (0,10), sous le seuil de confirmation
+(0,20). Le repli agit **dans le sens prédit** mais n'explique que **32 %** de l'écart
+à la loi dispersée (−0,805 sur cette plage) : les 68 % restants ont une autre cause.
+**Prédiction 3 (limite) : confirmée** — fenêtres glissantes −0,438 / −0,520 / −0,520,
+l'exposant sature vers **−0,52** dès n≈4, et `n ≤ 6` sous-estimait donc la pente
+(−0,44 contre −0,52). **Prédiction 4 : confirmée** — dense contre paire, écart 0,057
+sous le seuil de 0,10 : l'échelle absolue ne compte pas.
+Réceptions : 1,2,3,4,5,6,8,9 passent (continuité S195 à **5,03e-8**, bande 0,001 à
+0,032 %, phases 0,747 et 0,885). **La 7 échoue** : à n=6, ordre 1,268 (<1,5) et résidu
+2,27 % (>2 %). Biais mesuré directement K=64→K=128 aux deux bouts : **+0,010** sur
+l'exposant — négligeable devant 0,131, donc la conclusion tient.
+**À retenir pour P4** : à n=16, K=32 donne une L2 fausse d'un **facteur 5** et la dérive
+d'énergie ne l'a pas signalé (1,54e-6, sous le seuil de 1e-4). Le critère de domaine a
+laissé passer une configuration cassée ; le triplet de Richardson y est inutilisable et
+le banc le **dit** au lieu d'en tirer un ordre fictif.
 
 P3a S196 : `support/nl_fleet.rs` extrait de `nl_sources_2d.rs` — flottille, `Spread`,
 `sources`, plus `fleet_from_modes` général. **L'empreinte de S195 se reproduit à
