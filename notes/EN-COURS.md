@@ -70,9 +70,9 @@ les volets restants. La projection S189-1 est réordonnée derrière cet arbitra
 - [x] **P1** — lire la reprise, vérifier copies/branches/historique/état, prendre le jeton ; plan seul.
 - [x] **P2** — confronter B4, SPEC-004, ADR-119 et mesures ; acter les 2 % par ADR,
   définir avant le rejeu la norme, la référence et la décision de réception.
-- [ ] **P3** — appliquer le critère aux campagnes existantes, produire une réception
+- [x] **P3** — appliquer le critère aux campagnes existantes, produire une réception
   reproductible avec témoin admis et refusé ; fixer un profil recevable si les preuves suffisent.
-- [ ] **P4** — propager vers B4/SPEC-004/A50 et les points ouverts ; expliciter le reste
+- [>] **P4** — propager vers B4/SPEC-004/A50 et les points ouverts ; expliciter le reste
   du banc et tenir une liste plurielle des chantiers signalés par l'utilisateur.
 - [ ] **P5** — rituel de fin REPRISE §6, vérifications, journal, index, décomptes,
   jeton libre et copies existantes synchronisées sans suppression non justifiée.
@@ -82,3 +82,7 @@ les volets restants. La projection S189-1 est réordonnée derrière cet arbitra
 Amorce : master propre à ac1ffb8, trois copies au même commit ; branche archivée conservée.
 Cargo disponible. Aucun fichier modifié à l'entrée. Aucun agent parallèle lancé.
 Dernier bilan actif : BILAN-B4-S176, à actualiser avec la réception au seuil de 2 %.
+P3 : 126 couples jugés, 12 reçus/114 refusés ; profil 14×14×8, ext c8, budget
+1,800653 %, composé+réserve 1,161371 %. Empreinte 0x4b479c21a520cd7b,
+deux release et une debug identiques. Workspace debug 331/cinq ignorés reçu.
+P4 : propagation préparée pendant les vérifications P3 ; à compléter et committer séparément.
