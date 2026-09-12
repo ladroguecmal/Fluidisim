@@ -68,11 +68,11 @@ tend-elle vers une **limite** quand `n` croît ?
 
 ### Plan
 
-- [>] **P1** — état réel, jeton et plan seuls.
-- [ ] **P2** — protocole **avant tout code** : le montage de parité qui sépare le repli du
+- [x] **P1** — état réel, jeton et plan seuls.
+- [x] **P2** — protocole **avant tout code** : le montage de parité qui sépare le repli du
       reste, ce qu'il contrôle et ce qu'il ne contrôle pas, les prédictions **falsifiables**
       déclarées d'avance, la fraction de repli comme covariable mesurée, les réceptions.
-- [ ] **P3a** — banc `nl_fallback_2d.rs` réutilisant `support/nl_surface.rs` sans le
+- [>] **P3a** — banc `nl_fallback_2d.rs` réutilisant `support/nl_surface.rs` sans le
       modifier ; tests propres dont le **décompte de repli par construction** pour les trois
       familles, le cas nul, et la continuité avec S195 au point `n=6` dense.
 - [ ] **P3b** — campagne : axe « limite » sur la famille dense jusqu'à `n` grand, axe
@@ -84,6 +84,19 @@ tend-elle vers une **limite** quand `n` croît ?
       `libre`, copies avancées sans suppression non prouvée.
 
 ### Notes de reprise
+
+P2 S196 : protocole dans REPLI-CROISEES-S196. Le montage de parité est vérifié par
+arithmétique **avant** d'être codé : repli 0,000 chez les impairs à tout `n` ; la famille
+paire est **exactement** la dense aux modes doublés, donc même fraction de repli *et* même
+bande relative, seule l'échelle change. Trois comparaisons : dense/paire (échelle),
+paire/impaire (repli), dense seule (limite). Confondant résiduel déclaré : la bande
+relative diffère de 24 % entre pair et impair, et c'est irréductible — deux parités ne
+portent pas les mêmes nombres d'onde. Piège déclaré aussi : les termes **triples** de trois
+impairs sont impairs et retombent, donc la parité n'éteint le repli que sur les paires.
+**Quatre prédictions chiffrées d'avance**, dont la clé : la fraction de repli sature vers
+**0,74** (arithmétique pure, calculée sans mesure), donc si le repli gouverne l'exposant,
+l'exposant doit saturer aussi. Seuils : écart > 0,20 entre exposants pair/impair confirme ;
+< 0,10 réfute A241. Continuité S195 à viser : L2 dense n=6 = **4,507029e-3**.
 
 S196 : master 25206a8 propre, quatre copies alignées ; 123 ADR/241 angles/276 leçons.
 **Acquis à ne pas refaire.** S195 : série A (cambrure totale fixée) décroît en `n^-0,46`,
