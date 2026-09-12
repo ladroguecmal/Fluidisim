@@ -69,7 +69,7 @@ sous les 2 % actés. Ne pas confondre projecteur discret et solveur à surface l
 - [x] **P1** — reprise et état réel, jeton/plan seul ; master propre 6684094 et trois copies à jour.
 - [x] **P2** — dériver D/G et leurs conditions de bord ; protocole de projection,
   critères indépendants, métriques B4 et portée avant simulation.
-- [ ] **P3a** — construire le projecteur de banc ; gradient, solénoïdal, référence
+- [x] **P3a** — construire le projecteur de banc ; gradient, solénoïdal, référence
   algébrique indépendante, refus/non-convergence ; un support sans mutation du précédent.
 - [ ] **P3b** — campagne projetée contre plein/raffiné, axes séparés, composition locale,
   profil reçu S190 et témoins ; qualifier pression, divergence et réserve de référence.
@@ -87,3 +87,7 @@ Autres lignes de la file active conservées : aucun déplacement de priorité im
 P2 : PROJECTION-B4-S191 publié. D central/extension nulle et G=-D^T ; CG
 sur DD^T, dimensions intérieures paires. La projection fixe est linéaire ;
 la somme des erreurs des axes requiert leur additivité, correction de prémisse S189.
+
+P3a : pressure_projection.rs, 3 tests debug/release reçus : gradient/curl/adjoint/
+linéarité/idempotence/L2 ; matrice dense indépendante ; zéro/refus atomiques.
+Aucun support historique touché. projected_b4 porte les tests ; campagne à écrire P3b.
