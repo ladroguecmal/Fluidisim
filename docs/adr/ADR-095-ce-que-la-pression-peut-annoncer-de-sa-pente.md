@@ -91,3 +91,15 @@ champ n'en est plus un), et l'enveloppe L1 ne dépasse jamais son double, c'est-
 reste dans le facteur 2 que la théorie autorise.
 
 Aucun comportement modifié, aucun hachage touché : la méthode est additive.
+
+## Note corrective du 2026-09-13 (S203)
+
+La ligne « fond B | `steepness_B · π`, sa pente exacte | 1 » et la phrase « elle est exacte pour
+le B minimal actuel » sont fausses dès que les composantes de B n'ont pas toutes la même
+direction. Sur la recette JONSWAP de S201 (éventail 0,25 tour), un majorant **exactement
+calculable** et strictement meilleur existe — `max_u Σ aᵢkᵢ|dᵢ·u|`, 0,5733 contre 0,6082 à
+Hs 1,5 m — et la pente échantillonnée vaut 0,4215 : marge résiduelle ≥ 1,061, ≤ 1,443 sur la
+fenêtre mesurée. Le principe de cette décision (« chaque terme publie le meilleur majorant
+exact qu'il sait calculer ») désigne donc pour B un autre terme que celui qu'elle nomme ; il
+n'est pas migré, et même lui refuse la mer de S201. Voir
+[IMPACT-W-S203](../validation/IMPACT-W-S203.md) §2 et **A245**.

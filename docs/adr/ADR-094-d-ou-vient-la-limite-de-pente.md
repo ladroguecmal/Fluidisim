@@ -133,3 +133,15 @@ La formulation juste est celle d'[ADR-095](ADR-095-ce-que-la-pression-peut-annon
 **la même grandeur majorée par tous les termes, le meilleur majorant exact de chacun, la marge
 résiduelle mesurée.** Le reste de cette décision — `max_slope = 0,4488` avec provenance,
 `ρ = 1,7950713`, l'hétérogénéité du budget comme cause de l'absence de provenance — est inchangé.
+
+## Note corrective du 2026-09-13 (S203)
+
+La table de la décision 3 donne `steepness_B · π` pour la « pente **exacte** du fond », facteur 1.
+C'est vrai d'une composante, **faux pour un B à plusieurs directions** : `Σ aᵢkᵢ` n'est atteint
+que si toutes les pentes s'alignent dans une même direction, ce qu'un éventail interdit. Sur la
+recette JONSWAP de S201, le majorant directionnel démontré `max_u Σ aᵢkᵢ|dᵢ·u|` vaut 0,5733 contre
+0,6082 en L1 (Hs 1,5 m), et la pente échantillonnée sur 512 m et 120 s vaut 0,4215 : la marge de
+la borne L1 sur le maximum réel est **au moins 1,061**, et **au plus 1,443** sur cette fenêtre.
+Conséquence mesurée : la mer de S201 fait refuser chaque point de toute composition B+W. La
+décision — dériver `max_slope` — n'est pas touchée ; le terme de B n'est pas « exact ». Voir
+[IMPACT-W-S203](../validation/IMPACT-W-S203.md) §2 et **A245**.

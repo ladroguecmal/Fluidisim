@@ -82,3 +82,11 @@ d'un impact radial. Mais la borne d'ensemble `π·B.steepness + Σ bornes W` **a
 exacte et des bornes L1 de facteurs différents** : aucun seuil unique ne peut être physiquement
 juste pour tous ses termes tant qu'elle reste hétérogène. Voir
 [PENTE-REELLE-S139](../validation/PENTE-REELLE-S139.md) §5.
+
+## Note corrective du 2026-09-13 (S203)
+
+« Une pente exacte » dans la note précédente est faux pour B : `π·B.steepness = Σ aᵢkᵢ` est une
+borne L1, ce que §52 disait déjà (« borne conservative »). Sa marge sur la pente réelle est
+≥ 1,061 et ≤ 1,443 sur la recette S201, et elle suffit à faire refuser chaque point d'une
+composition sur une mer de Hs > 1,107 m (recette JONSWAP de S201, Tp 6 s). Voir
+[IMPACT-W-S203](../validation/IMPACT-W-S203.md) §2 et **A245**.

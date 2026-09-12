@@ -94,7 +94,7 @@ Le lot ne migre pas ce terme (bits changés, lot propre) ; il le chiffre et le s
  pour cette caméra ; coût par point B seul vs B+W (4096 points, 3 chauffes/11 mesures),
  points tenant dans 2 ms. Part δ nommée (cavité/gerbe/1−fraction) avec domaine et durée
  bornés, comparée au coût S202 ; aucun δ construit.
-- [ ] **P6** — publication `IMPACT-W-S203` (+ mesures) ; note corrective datée ADR-094 si
+- [x] **P6** — publication `IMPACT-W-S203` (+ mesures) ; note corrective datée ADR-094 si
  le facteur de B est confirmé > 1 ; ADR seulement si une règle d'emprise est retenue.
 - [ ] **P7** — rituel §6 complet : journal, angles morts, leçons, index/README/REPRISE,
  décomptes, `outils/velocite.sh`, file active entière, compteur, jeton libre, copies.
@@ -190,3 +190,12 @@ sur 32 800 hors ondes (f à calibrer B2) ; majorant balistique 3,262 m / 1,631 s
 b = 1 m = 0,2985 λ. SPEC-001 §2.4 dimensionne déjà un δ impact 6×6×4 m à dx 0,05 :
 1,15 M cellules, ≈37 Mo — rapport 2 246 aux 512 cellules x–z de S202 (0,59 ms) ; **aucun
 coût transposé**, noyau 3D ou axisymétrique absent.
+
+P6 : IMPACT-W-S203 (+ MESURES, 232 lignes, BOM/CRLF des sorties PowerShell retirés) ;
+**ADR-126 actée** — emprise d'image reçue par ses coutures, profil R ≥ 15,5 λ, A ≥ 96√(λ/g),
+N ≥ 256 (N512 recommandé), budget de pente d'impact = π/7 − plancher B, témoin au pixel.
+Valeurs suffisantes, pas minima (R 14,9 λ et A 82√(λ/g) échouent). Notes correctives datées
+ADR-094, ADR-095 et note S139 d'ADR-062 : `steepness_B·π` n'est pas la pente exacte d'un B
+à plusieurs directions. Angles à écrire au rituel : A245 (plancher B refuse Hs > 1,107 m),
+A246 (emprise dimensionnée par admission, jamais par couture), A247 (coût d'un impact
+visible contre 2 ms ; B seul 1,6 µs/pt). Décomptes attendus : 126 ADR, 247 angles.
