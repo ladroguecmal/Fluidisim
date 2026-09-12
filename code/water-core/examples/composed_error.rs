@@ -477,6 +477,9 @@ fn main() {
     for i in 0..3 {
         worst[i] = (f64::INFINITY, 0.0);
     }
+    // Le même rapport, séparé par mode de réemploi : une loi peut valoir pour l'un et pas
+    // pour l'autre, et le verdict global le cacherait.
+    let mut per_mode = [[(f64::INFINITY, 0.0f64); 3]; 3];
     let mut temporal = [[0.0f64; 7]; 3];
     for (mi, mode) in MODES.iter().enumerate() {
         for (ci, c) in CADENCES.iter().enumerate() {
@@ -484,11 +487,15 @@ fn main() {
             temporal[mi][ci] = field_gap(&o.u, &reference.u);
         }
     }
+    // Grille conservee pour la synthese : les lois se jugent sur l'ensemble, pas ligne
+    // par ligne, et la non-monotonie ne se voit qu'en comparant une ligne a son c = 1.
+    let mut grid = [[[0.0f64; 7]; 4]; 3];
     for (mi, mode) in MODES.iter().enumerate() {
         for (ri, r) in RATIOS.iter().enumerate() {
             for (ci, c) in CADENCES.iter().enumerate() {
                 let o = evolve(&caches[ri], *r, *mode, *c, STEPS, DT, true, Some(full));
                 let eu = field_gap(&o.u, &reference.u) / u_max;
+                grid[mi][ri][ci] = eu;
                 let (es, et) = (spatial[ri] / u_max, temporal[mi][ci] / u_max);
                 let laws = [
                     es + et,
@@ -505,6 +512,8 @@ fn main() {
                     if judged {
                         worst[li].0 = worst[li].0.min(ratio);
                         worst[li].1 = worst[li].1.max(ratio);
+                        per_mode[mi][li].0 = per_mode[mi][li].0.min(ratio);
+                        per_mode[mi][li].1 = per_mode[mi][li].1.max(ratio);
                     }
                 }
                 println!(
@@ -531,6 +540,90 @@ fn main() {
                 "rejetee"
             }
         );
+    }
+
+
+    // -- H1 : espace et temps sont-ils le meme operateur ? ------------------------------
+    // Les deux erreurs sont du second ordre en un pas sans dimension : `h/lambda_min` pour
+    // l'espace, `v*tau/lambda_min = tau/T` pour le temps. Leur **rapport de constantes** ne
+    // depend donc pas du normalisateur choisi : si le contenu effectif est plus lisse que
+    // `lambda_min`, les deux constantes sont multipliees par le meme facteur. C'est ce
+    // rapport, et lui seul, qui juge H1.
+    println!("\n-- le meme verdict, mode par mode");
+    println!("mode | additive | quadratique | maximum | loi retenue");
+    for (mi, mode) in MODES.iter().enumerate() {
+        let mut kept = String::new();
+        for (li, nom) in ["additive", "quadratique", "maximum"].iter().enumerate() {
+            let (lo, hi) = per_mode[mi][li];
+            if lo.is_finite() && lo >= 0.8 && hi <= 1.25 {
+                if !kept.is_empty() {
+                    kept.push_str(", ");
+                }
+                kept.push_str(nom);
+            }
+        }
+        println!(
+            "{} | {:.3}-{:.3} | {:.3}-{:.3} | {:.3}-{:.3} | {}",
+            mode.label(),
+            per_mode[mi][0].0,
+            per_mode[mi][0].1,
+            per_mode[mi][1].0,
+            per_mode[mi][1].1,
+            per_mode[mi][2].0,
+            per_mode[mi][2].1,
+            if kept.is_empty() { "aucune".into() } else { kept }
+        );
+    }
+
+    println!("\n-- H1 : constantes du second ordre, et leur rapport (independant du normalisateur)");
+    // Mode interpolation, meme operateur que `scatter` : lineaire entre deux echantillons.
+    // Moyenne sur les cadences au-dessus du plancher et sous la saturation `tau/T < 1`.
+    let mut acc = Vec::new();
+    for (ci, c) in CADENCES.iter().enumerate() {
+        let st = *c as f64 * DT as f64 / t_content;
+        if st < 1.0 && 100.0 * temporal[2][ci] / u_max > floor {
+            acc.push((temporal[2][ci] / u_max) / (st * st));
+        }
+    }
+    let a_time = acc.iter().sum::<f64>() / acc.len().max(1) as f64;
+    println!(
+        "  A_temps (interpolation lineaire en temps) = {a_time:.4} sur {} cadences jugees",
+        acc.len()
+    );
+    println!("r | h/lambda_min | A_espace | A_espace / A_temps | axes interpoles");
+    for (ri, r) in RATIOS.iter().enumerate() {
+        let ss = *r as f64 * DX / lambda_min;
+        if *r == 1 || ss >= 1.0 {
+            // `r = 1` n'a pas d'erreur ; `h/lambda_min >= 1` est sature, la loi d'ordre
+            // deux n'y a plus cours et sa constante ne veut rien dire.
+            println!("{r} | {ss:.4} | - | - | 3 (sature ou nul)");
+            continue;
+        }
+        let a_space = (spatial[ri] / u_max) / (ss * ss);
+        println!("{r} | {ss:.4} | {a_space:.4} | {:.2} | 3", a_space / a_time);
+    }
+
+    // -- Non-monotonie : degrader la cadence peut-il reduire l'erreur totale ? ----------
+    println!("\n-- degrader la cadence reduit-elle l'erreur ? (minimum sur c, par mode et r)");
+    println!("mode | r | eU(c=1) % | min sur c % | c du minimum | gain %");
+    for (mi, mode) in MODES.iter().enumerate() {
+        for (ri, r) in RATIOS.iter().enumerate() {
+            let start = grid[mi][ri][0];
+            let mut best = (start, 1usize);
+            for (ci, c) in CADENCES.iter().enumerate() {
+                if grid[mi][ri][ci] < best.0 {
+                    best = (grid[mi][ri][ci], *c);
+                }
+            }
+            println!(
+                "{} | {r} | {:.4} | {:.4} | {} | {:.2}",
+                mode.short(),
+                100.0 * start,
+                100.0 * best.0,
+                best.1,
+                if start > 0.0 { 100.0 * (best.0 - start) / start } else { 0.0 }
+            );
+        }
     }
 
     println!(

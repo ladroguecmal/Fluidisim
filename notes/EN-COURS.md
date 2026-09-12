@@ -78,13 +78,46 @@ erreurs se composent — additivement, quadratiquement, ou pas du tout.
       Réceptions : `(r=1, c=1)` identique **en bits** à la référence ; la ligne `c=1`
       redonne l'erreur spatiale pure ; la ligne `r=1` redonne les constantes de S185 ;
       empreinte reproductible.
-- [ ] **P3b** — chiffrer la composition et éprouver l'équivalence advective `h ↔ v·τ` :
+- [x] **P3b** — chiffrer la composition et éprouver l'équivalence advective `h ↔ v·τ` :
       pour un contenu advecté, décimer en espace et retarder en temps pourraient être
       la **même** erreur, et alors elles ne s'additionnent pas.
 - [ ] **P4** — recevoir dans un document de validation ; angles et leçons.
 - [ ] **P5** — rituel de fin (REPRISE.md §6).
 
 ### Notes de reprise
+
+P3b S186 : synthèse **calculée par le programme**, pas posée à la main. Empreinte
+**inchangée, 0x0e743846d4656870** — les blocs ajoutés n'impriment que des grandeurs
+dérivées, aucun nouveau `write_f32`, et deux exécutions restent identiques au `diff`.
+
+**Le verdict global est celui déclaré : les trois lois sont rejetées.** Mais séparé par
+mode, il devient net et utilisable :
+
+| mode | additive | quadratique | maximum | retenue |
+|---|---|---|---|---|
+| maintien | 0,529–0,976 | 0,749–0,999 | 0,826–1,155 | **maximum** |
+| extrapolation | 0,540–0,976 | 0,760–0,999 | 0,860–1,034 | **maximum** |
+| interpolation | 0,803–0,988 | 0,991–1,209 | 0,998–1,489 | **additive, quadratique** |
+
+Donc : **pour les deux modes causaux — les seuls dont le runtime dispose — la loi est le
+maximum.** Les deux erreurs ne s'ajoutent pas : la plus grande gagne. Conséquence de
+conception directe : l'axe bon marché est **gratuit** jusqu'à la parité avec l'axe
+dominant, et raffiner au-delà n'achète rien. C'est la réponse à « un budget conjoint
+est-il licite » : oui, au sens du maximum, pour un consommateur causal.
+L'additive n'est dépassée **nulle part** (max 0,988 sur les 84 cases) : enveloppe sûre.
+
+**H1 est confirmée, au nombre d'axes près.** `A_temps = 0,0522` (interpolation
+temporelle, deux cadences jugées ; S185 mesurait 0,052 stable). `A_espace = 0,1187`
+à `r=2`, `0,1590` à `r=4`. Rapport **2,27 et 3,05** — et ce rapport ne dépend pas du
+normalisateur, puisque les deux constantes sont du second ordre dans le même `λ`.
+`scatter` interpole sur **trois** axes, le temps sur un : le facteur ~3 est le nombre
+d'axes. La branche verticale du protocole — un facteur approchant `(2π)² ≈ 39` par la
+décroissance `exp(kz)` — est **réfutée**, et la raison est le filtrage par la profondeur.
+
+**Non-monotonie, par mode** : mnt r=4 −17,44 % à c=8 ; mnt r=2 −13,20 % à c=2 ;
+ext r=2 −14,05 % à c=8 ; ext r=4 −12,15 % à c=16. Interpolation : −0,04 à −0,16 %,
+donc rien. **La compensation partielle appartient aux modes causaux** et disparaît avec
+le mode qui n'a presque pas d'erreur temporelle. À publier comme piège de réglage.
 
 P3a S186 : `examples/composed_error.rs` + `examples/support/reuse_mode.rs`. Deux
 exécutions, `diff` strict **identique** — aucune durée n'est mesurée dans ce véhicule,
