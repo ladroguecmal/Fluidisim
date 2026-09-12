@@ -2833,3 +2833,9 @@ inspectée. Le critère numérique2 % est acquis depuis ADR-120 ; une image n'es
 un protocole perceptuel reçu. A50 reste partielle, aucun seuil humain inventé.
 ADR-124 change la priorité de construction (budget image puis effets δ bornés),
 pas la validité physique des mesures. Aucun nouvel angle.
+
+**Suivi A244 — S202.** Mesure du coût du pas reçue via horloge injectée et Caps,
+avec absence d'allocation et invariance du résultat ; **ce n'est pas le respect du
+budget temporel**. A244 demeure partielle pour I-05 et pression f64. Profil utilisateur
+60Hz/eau2ms acté ADR-125 ; bloc64×32 convergé dépasse seul ce budget. Aucun autre
+contrat reçu par le seul chronométrage.

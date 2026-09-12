@@ -691,3 +691,16 @@ budget image/coût par bloc, puis δ en effets bornés et V au besoin gameplay.
 B4/A50 partiels ; seuil numérique2 % acquis, aucune perception déclarée reçue.
 124 ADR,244 angles,279 leçons,18 invariants,6 SPEC,23 cas. Compteur0 : décision δ/V.
 Voir [image B S201](docs/validation/IMAGE-B-S201.md), [ADR-124](docs/adr/ADR-124-image-budget-et-effets-bornes.md).
+
+**S202 — 2026-09-13 : budget60 images/s, eau2 ms par image, ADR-125.**
+Choix explicite utilisateur. `cost_per_block_ms` branché sur le pas complet via
+horloge injectée ; inconnu avant mesure, aucune allocation ni physique modifiée.
+Un bloc de banc=un domaine x-z, pas une maille ou un bloc3D fictif.
+32×16 convergé≈0,59 ms médiane,64×32≈4,79 ms : trop cher même isolé.
+**343 tests réussis, cinq ignorés**, quatre tests intégration aussi en release.
+Le coût mesuré ne garantit ni qualité ni délai ; A244 reste partielle, B3 non admis.
+Rendu CPU S201 hors ligne, aucun budget GPU reçu.2 % physique reste acquis.
+**Suite S203 : S202-1**, impact visible W, emprise/observateur explicites, puis part
+δ éventuellement nécessaire ; V au besoin gameplay selon ADR-124.
+125 ADR,244 angles,279 leçons,18 invariants,6 SPEC,23 cas ; compteur0 (δ avance).
+Voir [budget image S202](docs/validation/BUDGET-IMAGE-S202.md), [ADR-125](docs/adr/ADR-125-budget-image-60hz-deux-ms.md).

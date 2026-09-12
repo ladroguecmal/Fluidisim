@@ -1670,7 +1670,7 @@ entrée par entrée. Le fil reprend ci-dessous.
 
 ## File active
 
-Relue en S201, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+Relue en S202, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
 
 *Renommée de « File active S190 » en S193 : le contenu est daté ligne par ligne, le titre
 suivait un numéro de session et vieillissait seul (A185 — un état sans date se lit au
@@ -1687,8 +1687,8 @@ action unique et doit être relue au rituel de fin (A211).
 
 | action / objet | état daté et ce qui reste | priorité / déclencheur |
 |---|---|---|
-| **S201-1 / budget image** | **S201** : B visible, caméra CPU et PPM reçus, ~12 s/image640×360 ; aucun budget production choisi | **S202 : budget image et coût par bloc**, sur cible/charge nommées, puis dimensionner les effets δ bornés (ADR-124) |
-| **S200-1 / A244 — B3 / δ** | **S200 : S199-1 partielle**, zéro allocation globale du pas et refus numériques atomiques reçus, capacités restreintes ;342 tests/cinq ignorés. Pression f64 expérimentale et plafond en itérations restent hors contrat de production | reportée derrière ADR-124 ; à recevoir si un effet borné retient le noyau, sans convertir arbitrairement itérations en ms |
+| **S202-1 / effet borné visible** | **S202 : S201-1 réalisée**,60 images/s eau2ms décidés (ADR-125) et coût par domaine δ branché. Référence image CPU hors temps réel, aucun bloc reçu physiquement | **S203 : impact visible porté par W**, emprise et observateur nommés ; déterminer la part nécessitant δ, V au besoin gameplay |
+| **S200-1 / A244 — B3 / δ** | **S200 : S199-1 partielle**, zéro allocation globale du pas et refus numériques atomiques reçus, capacités restreintes ;342 tests/cinq ignorés. S202 : coût du pas mesuré, mais pression f64 expérimentale et respect du budget temporel restent hors contrat de production | reportée derrière ADR-124 ; à recevoir si un effet borné retient le noyau, sans convertir arbitrairement itérations en ms |
 | **A241 / repli — reporté** | **S197** : suspect réfuté, la totalité de l'écart reste sans cause | deux candidats nommés (bande relative, termes triples), sous contrainte **L278** ; **n'avance aucune couche**, donc passe après B3/δ |
 | **S199-2 / B3 / δ — fond coupé** | **S199** : ordre1,947 plat,0,898 lisse,0,895 marche ; candidat non éligible. Fonctionnelle non pondérée par les ouvertures ; mécanisme de face à isoler | reportée derrière budget image ; requise si un effet retenu emploie ces faces coupées |
 | **B4 forces / perception** | aucun reçu complet ; la métrique de vitesse S190 ne les remplace pas | après montage commun surface/solide ; protocole perceptif conserve ses participants réels requis |

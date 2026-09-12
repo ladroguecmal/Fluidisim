@@ -10527,3 +10527,45 @@ angle/leçon distincts ;124 ADR/244 angles/279 leçons/18 invariants/6 SPEC/23 c
 Bibliothèques inchangées,342 tests/cinq ignorés reste reçu S200 non rejoué.
 Compteur0 : ADR-124 décide le périmètre δ/V, ce qui avance selon REPRISE §4.
 Journal/index/README/REPRISE et B3/B4 actualisés, copies à avancer après clôture.
+
+## S202 — 2026-09-13 — Le budget est choisi, le bloc publie son coût
+
+**Entrée.** Continue, S201-1 sous ADR-124 ; quatre copiesf0fea77 propres. L'utilisateur
+répond à la préférence de profil : **60 images/s, eau2 ms/image**. Plan seul194aa1d.
+Le budget couvre toute l'eau, pas chaque couche ni chaque bloc ; ADR-125 actée.
+
+**Code.** MonotonicClock injectée dans host, Volume::step_measured enveloppe le pas
+complet ; Caps::cost_per_block_ms publie Option. Un bloc de banc=un domaine Volume,
+dimensions/charge/plafond explicités ; aucun add/remove_blocks fictif. Pas d'horloge
+système dans le cœur. Coût inconnu avant mesure, invalidé sur modification d'entrées,
+pas non mesuré, refus ou horloge égale/reculant. Une mesure dégradée porte son report.
+Coût observé, aucune garantie de délai ni conversion arbitraire itérations→ms.
+
+**Vérification.** Horloge factice reçoit1,5ms et deux lectures ; u/w/p/report identiques
+au pas non instrumenté, zéro allocation globale. Invalidations et cas dégradé reçus.
+Quatre tests intégration debug/release, workspace343 réussis/cinq ignorés (246+4+93).
+Premier import Allocator oublié dans exemple : erreur de compilation corrigée avant
+mesure ; avertissements anciens exemples/harnais inchangés. Aucun seuil physique modifié.
+
+**Coût.** AMD Ryzen AI7 350, CPU séquentiel, domaine8×4m fond0,4m, surface sinusoïdale
+amplitude0,02m, pas1/60 ; trois chauffes/onze mesures avec vitesses initiales rétablies.
+Neuf configurations16/32/64 colonnes × plafonds1/64/512.32×16 convergé médiane0,5865ms,
+max0,6567ms (plafond512) ;64×32 médiane4,7886ms, max5,3201ms : dépasse2ms à lui seul.
+Plafond64 sur64×32 :2,4051ms médiane ET dégradation ; aucune solution rapide recevable
+par cela. Plafond1 résidu≈0,33 : faible coût n'est pas qualité. Même report entre
+répétitions. Maximum observé, pas borne ni p99. Rendu S201≈11728ms reste hors ligne.
+Relevés complets BUDGET-IMAGE-S202 et MESURES ; coût B/W/rendu absent du tableau δ.
+
+**Décision et limites.** ADR-125 fixe le profil utilisateur, pas une cible matérielle
+de livraison ni un moteur GPU. Coût seul sous2ms ne reçoit pas B3 ; A244 partielle,
+précision et respect temporel restent ouverts. Le seuil physique2 % est distinct.
+**Suite S203 : S202-1**, premier impact visible W, emprise et observateur explicites,
+identifier la part nécessitant un effet δ borné ; V attend besoin gameplay. Pas de
+retour automatique à la réparation du noyau général, S200-1/S199-2 restent reportées.
+
+**Rituel.** File entière relue, budget clos par décision, autres points conservés.
+A244 suivie sans clôture ; aucun angle/leçon distincts.125 ADR/244 angles/279 leçons/
+18 invariants/6 SPEC/23 cas vérifiés. I-05 reste exigé, pas déclaré reçu ; horloge
+coût séparée du temps de simulation, aucune autorité nouvelle. Compteur0 : code δ
+avancé. Journal/index/README/REPRISE, B3/B4 et file actualisés ; copies à synchroniser
+après clôture. Images S201 conservées, aucune image nouvelle nécessaire dans ce lot.

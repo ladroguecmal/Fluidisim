@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 00:34 +02:00
+JETON            : libre
+Battement        : 2026-09-13 00:41 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S202 — budget image et coût mesuré du bloc δ
-Dernière session : S201 — B visible en PPM ; ADR-124 image/budget/effets bornés
-Session suivante : S202 — S201-1 : budget image et coût par bloc ; direction ADR-124
-Maillons        : 0 — S201 acte le périmètre δ/V, ADR-124 (§6.8)
+Session en cours : aucune
+Dernière session : S202 — profil60Hz eau2ms ; coût par domaine mesuré, ADR-125
+Session suivante : S203 — S202-1 : impact visible W, emprise et observateur ; ADR-124
+Maillons        : 0 — S202 avance le code δ, compteur à zéro (§6.8)
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 
@@ -139,9 +139,9 @@ une session ne peut signaler sa présence qu'en travaillant.
 
 ---
 
-## File active du projet — S201
+## File active du projet — S202
 
-**S201 : priorité utilisateur à B visible (fait), budget image puis effets δ bornés/V au besoin. S200-1/A244 est reportée ;
+**S202 : B visible, budget60Hz/eau2ms fixé et coût du domaine δ mesuré. Prochain lot impact W visible puis effets δ bornés/V au besoin. S200-1/A244 est reportée ;
 S199-2 garde le défaut des flux ouverts. Les acquis S194 ci-dessous restent datés ;
 la file liée porte aussi leurs suivis S195–S199.**
 
@@ -222,7 +222,7 @@ pièges déjà payés.
 ```
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 124 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 125 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -241,6 +241,19 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S202 — 2026-09-13 : budget60 images/s, eau2 ms par image, ADR-125.**
+Choix explicite utilisateur. `cost_per_block_ms` branché sur le pas complet via
+horloge injectée ; inconnu avant mesure, aucune allocation ni physique modifiée.
+Un bloc de banc=un domaine x-z, pas une maille ou un bloc3D fictif.
+32×16 convergé≈0,59 ms médiane,64×32≈4,79 ms : trop cher même isolé.
+**343 tests réussis, cinq ignorés**, quatre tests intégration aussi en release.
+Le coût mesuré ne garantit ni qualité ni délai ; A244 reste partielle, B3 non admis.
+Rendu CPU S201 hors ligne, aucun budget GPU reçu.2 % physique reste acquis.
+**Suite S203 : S202-1**, impact visible W, emprise/observateur explicites, puis part
+δ éventuellement nécessaire ; V au besoin gameplay selon ADR-124.
+125 ADR,244 angles,279 leçons,18 invariants,6 SPEC,23 cas ; compteur0 (δ avance).
+Voir [budget image S202](docs/validation/BUDGET-IMAGE-S202.md), [ADR-125](docs/adr/ADR-125-budget-image-60hz-deux-ms.md).
 
 **S201 — 2026-09-13 : B visible, première image CPU locale.**
 Caméra/rayons et PPM640×360 depuis Background::eval/JONSWAP N32, sans dépendance.
@@ -302,15 +315,15 @@ attrapé trois erreurs en trois sessions, ni la qualité du travail sur W.
 
 ### Les quatre couches — l'état qui commande tout le reste
 
-**Recalculé le 2026-09-13 en S200 par `sh outils/velocite.sh`. Ne pas le recopier : le relancer.**
+**Recalculé le 2026-09-13 en S202 par `sh outils/velocite.sh`. Ne pas le recopier : le relancer.**
 Un état sans date se lit au présent, et il ne l'est plus (A185).
 
 | couche | modules | dernière avancée | depuis |
 |---|---:|---|---:|
-| **B** — fond | 3 | S181 | 19 sessions |
-| **W** — perturbations | 23 | S181 | 19 sessions |
-| **δ** — volumique | 5 *(dont noyau à projection non encore admissible)* | **S200** | **0 session** |
-| **V** — réseaux | **0** | **jamais** | **200 sessions** |
+| **B** — fond | 3 | S181 | 21 sessions |
+| **W** — perturbations | 23 | S181 | 21 sessions |
+| **δ** — volumique | 5 *(dont noyau à projection non encore admissible)* | **S202** | **0 session** |
+| **V** — réseaux | **0** | **jamais** | **202 sessions** |
 
 *« Avancer » a un sens mesurable et un seul : **ajouter du code d'exécution** dans
 `code/*/src`, ou **acter une décision** qui fixe un élément de la couche. Un banc, un

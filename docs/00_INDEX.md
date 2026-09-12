@@ -17,6 +17,19 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S202 — 2026-09-13 : budget60 images/s, eau2 ms par image, ADR-125.**
+Choix explicite utilisateur. `cost_per_block_ms` branché sur le pas complet via
+horloge injectée ; inconnu avant mesure, aucune allocation ni physique modifiée.
+Un bloc de banc=un domaine x-z, pas une maille ou un bloc3D fictif.
+32×16 convergé≈0,59 ms médiane,64×32≈4,79 ms : trop cher même isolé.
+**343 tests réussis, cinq ignorés**, quatre tests intégration aussi en release.
+Le coût mesuré ne garantit ni qualité ni délai ; A244 reste partielle, B3 non admis.
+Rendu CPU S201 hors ligne, aucun budget GPU reçu.2 % physique reste acquis.
+**Suite S203 : S202-1**, impact visible W, emprise/observateur explicites, puis part
+δ éventuellement nécessaire ; V au besoin gameplay selon ADR-124.
+125 ADR,244 angles,279 leçons,18 invariants,6 SPEC,23 cas ; compteur0 (δ avance).
+Voir [budget image S202](validation/BUDGET-IMAGE-S202.md), [mesures](validation/BUDGET-IMAGE-S202-MESURES.md), [ADR-125](adr/ADR-125-budget-image-60hz-deux-ms.md).
+
 **S201 — 2026-09-13 : B visible, première image CPU locale.**
 Caméra/rayons et PPM640×360 depuis Background::eval/JONSWAP N32, sans dépendance.
 Deux instants et un plan témoin inspectés ; zéro rayon non résolu, tolérance3 mm.
@@ -1292,7 +1305,7 @@ parfaitement stable ne pouvait pas distinguer.
 
 ## État d'avancement
 
-**État actif S201** : B visible (IMAGE-B-S201), direction ADR-124 vers budget image et effets bornés. Critère B4 fixé à2 %, noyau δ sans allocation dans le pas,
+**État actif S202** : B visible, profil60Hz/eau2ms fixé (ADR-125), coût par domaine δ exposé, prochaine étape impact W visible. Critère B4 fixé à2 %, noyau δ sans allocation dans le pas,
 refus numériques atomiques reçus ; A244 partielle (précision/budget), fond coupé
 inchangé, B3 non admissible. Domaine de superposition S194 confirmé S197.
 B1/B2/B4 restent partiels, aucun banc complet. Voir le résultat en tête de cet index

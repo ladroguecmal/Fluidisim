@@ -3,7 +3,15 @@
 2026-09-11. Action S175-1. État du code vérifié sur master0b37fd2 àl’amorce.
 Ce bilan confronte les reçus S163–S175 au contrat ; aucune nouvelle simulation lancée.
 
-## État actif — S201, 2026-09-13
+## État actif — S202, 2026-09-13
+
+**Budget d'image fixé :60 images/s, eau2 ms** (ADR-125). Le noyau publie son coût
+par domaine, pas complet mesuré ; [BUDGET-IMAGE-S202](BUDGET-IMAGE-S202.md).
+Le critère physique2 % demeure distinct. **B4/A50 partiels**, aucune réception
+perceptuelle ou admission physique déduite du coût. Suite : impact visible W,
+emprise/observateur explicites ; δ limitée au besoin d'effet établi (ADR-124).
+
+## État historique — S201, 2026-09-13
 
 **B est visible** : caméra/rayons CPU, images locales PPM à deux instants et témoin
 plat, [IMAGE-B-S201](IMAGE-B-S201.md). Aucune réception perceptuelle déduite de l'image.

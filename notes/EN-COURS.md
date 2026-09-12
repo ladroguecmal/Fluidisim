@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S202 — en cours
+Session : S202 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : S201-1, profil de budget image explicite et coût par bloc mesuré,
 conformément à ADR-124. Pas de réparation générale du solveur δ.
@@ -69,10 +69,10 @@ conformément à ADR-124. Pas de réparation générale du solveur δ.
  60Hz/2ms ou30Hz/4ms demandée, mesure indépendante de la réponse.
 - [x] **P2** — horloge monotone injectée et coût du dernier pas exposé dans Caps ;
  unité déclarée (domaine du candidat = bloc de banc), inconnu avant mesure ; tests.
-- [>] **P3** — coût local sur16/32/64 et plafonds1/64/512, pas1/60, trois chauffes
+- [x] **P3** — coût local sur16/32/64 et plafonds1/64/512, pas1/60, trois chauffes
  et11 mesures par configuration ; médiane/max, résidu/dégradation, refus explicites.
  Comparer au profil retenu, pas transposer le coût source S183 en coût solveur.
-- [ ] **P4** — acter budget de travail avec origine, préciser absence de budget GPU
+- [x] **P4** — acter budget de travail avec origine, préciser absence de budget GPU
  mesuré et d'ordonnanceur ; résultats, suite effets bornés puis rituel complet.
 
 ### Notes de reprise
@@ -93,3 +93,8 @@ P3 :9 configurations, médianes/max reçus,32x16≈0,59ms vs64x32≈4,79ms
 convergés ; début compilation refusé (trait Allocator absent), import corrigé.
 Workspace343/cinq ignorés ; quatre tests intégration debug/release. Mesures
 archivées, profil user60Hz/2ms appliqué aux comparaisons sans admission physique.
+
+P4 : ADR-125 actée sur réponse utilisateur, file/journal/index/README/REPRISE
+et B3/B4 propagés. Décomptes125/244/279/18/6/23 vérifiés ; aucun angle/leçon neuf.
+P3 était committée a852b88 mais sa case était restée en cours ; corrigée ici.
+Compteur0, jeton libre ; synchroniser les copies propres après commit final.

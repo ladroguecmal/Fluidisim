@@ -104,6 +104,12 @@ conservation d'énergie sur 60 s ; coût pour 4096 paquets ; déterminisme crois
 
 ## B3 — Couche δ : technologie, coût et latence
 
+> **S202 — ADR-125 : profil60 images/s, eau2 ms/image**, choix utilisateur.
+> `cost_per_block_ms` est mesuré autour du pas complet, horloge injectée ; unité
+> de banc=un domaine x-z.32×16 convergé≈0,59 ms médiane,64×32≈4,79 ms, hors budget
+> même isolé. [BUDGET-IMAGE-S202](BUDGET-IMAGE-S202.md). Aucun candidat admis par
+> le seul coût ; qualité et coût des autres couches restent à recevoir.
+
 > **Direction S201 — ADR-124.** Budget d'image/coût par bloc avant sélection,
 > puis δ dimensionnée en effets bornés. Les scénarios historiques ci-dessous
 > restent des exigences de référence ; aucun solveur général n'est préalable

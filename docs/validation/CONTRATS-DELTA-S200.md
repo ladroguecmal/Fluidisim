@@ -43,6 +43,10 @@ mais le test global est celui qui reçoit désormais l'absence d'allocation du p
 
 ## Précision, capacités et budget : portée explicite
 
+**Suivi S202 :** coût du dernier pas désormais exposé par `step_measured` et
+`Caps::cost_per_block_ms`, horloge monotone injectée. Voir BUDGET-IMAGE-S202.
+La mesure est reçue ; **le respect d'un budget temporel reste non reçu**.
+
 Le solveur de pression garde ses tableaux f64 expérimentaux afin que ce lot ne change
 pas la méthode numérique. **I-08 reste non reçu pour l'intégration de production** :
 aucune dérogation n'est actée en documentant ce fait. Les sommes ordonnées de l'hôte
