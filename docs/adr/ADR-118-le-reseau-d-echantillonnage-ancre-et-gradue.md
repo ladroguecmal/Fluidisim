@@ -130,3 +130,25 @@ et 39 cases jugées sur 39 le confirment. L'ancrage est donc sûr pour ce conten
 condition de validité de la loi de composition qui en découle est écrite en **A232** : elle
 demande que les maxima des deux erreurs coïncident. Le réseau **gradué** de la règle 2 est la
 seule configuration connue susceptible de les séparer, et il n'est pas mesuré.
+
+## Suivi daté — S189, 2026-09-12 : la règle de dimensionnement qu'évoquait le suivi précédent est remplacée
+
+*Le contrat ci-dessus — ancrer, graduer, s'arrêter au point de saturation — n'est pas touché.
+Ce qui est remplacé est la **règle de composition** entre axe spatial et axe temporel, que le
+suivi S188 déclarait « valide sur les deux réseaux mesurés ».*
+
+[COMPOSITION-GRADUEE-S189](../validation/COMPOSITION-GRADUEE-S189.md) a mesuré la composition
+sur le réseau **gradué** que la règle 2 recommande, et la loi du maximum y est **rejetée** pour
+le mode maintien (0,730–1,000), quand elle tient sur le réseau ancré (0,936–1,060). La raison
+est que la graduation **sépare** les deux pics d'erreur — elle annule l'erreur spatiale sur la
+tranche haute, où le pic temporel reste accroché.
+
+Conséquence, actée par
+[ADR-119](ADR-119-le-budget-conjoint-se-borne-par-la-somme.md) : le budget conjoint se **borne
+par la somme** des deux erreurs prises seules, le maximum n'est pas une estimation portable, et
+la règle « égaliser les deux axes puis s'arrêter » est abandonnée.
+
+**La règle 3 de ce contrat n'est pas cette règle-là**, et elle reste valide : elle dit qu'à
+l'intérieur d'un même axe, raffiner cesse de payer quand la contribution de cet axe passe sous
+celle de l'axe le plus grossier du **réseau**. C'est une saturation géométrique mesurée en
+S187 §8.5, indépendante de la composition avec le temps.

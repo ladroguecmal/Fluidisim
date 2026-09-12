@@ -308,3 +308,28 @@ temporelle reste accrochée au maximum du champ, en haut. Si la loi du maximum s
 séparation, elle est robuste ; si elle tombe, **A232** est confirmée et la règle de
 dimensionnement d'ADR-118 devra dire sur quel réseau elle s'applique. Les deux issues
 instruisent, et c'est ce qui fait de cette mesure la bonne suivante.
+
+---
+
+**Suivi S189 — 2026-09-12 : l'inférence de §7.4 est corrigée, ses mesures ne le sont pas.**
+§7.4 expliquait la survie de la loi du maximum par la coïncidence des deux maxima, localisés à
+la **tranche**. [COMPOSITION-GRADUEE-S189](COMPOSITION-GRADUEE-S189.md) localise à la
+**maille** et trouve que les deux pics ne coïncident **jamais** — 0 cas sur 78 jugés, y compris
+sur le réseau ancré, où ils partagent l'étage 14 mais pas la colonne. La tranche était une
+granularité trop grossière : un plan de 196 mailles.
+
+Le fait que §7.4 relevait — la tranche du maximum est la 14 dans les 84 cases — reste exact.
+C'est le pas de raisonnement suivant qui était trop rapide, et le protocole de S189 §1 l'avait
+annoncé avant de mesurer.
+
+**Ce qui gouverne réellement** est l'**additivité locale** : les deux champs d'erreur
+s'additionnent maille par maille, à 10 % de l'erreur de chaque case près et exactement dans les
+cas dégénérés. La norme maximum n'en est qu'une lecture, et elle dépend de la position
+relative des pics. Sur le réseau **gradué** d'ADR-118, qui les sépare, la loi du maximum est
+**rejetée** pour le maintien (0,730). D'où
+[ADR-119](../adr/ADR-119-le-budget-conjoint-se-borne-par-la-somme.md) : borner par la somme,
+ne pas estimer par le maximum.
+
+La conclusion 1 de §8 — « la loi survit à l'ancrage » — reste vraie **sur le réseau ancré**, et
+c'est tout ce qu'elle pouvait dire. La conclusion 3 — « elle tient parce que les deux maxima
+coïncident » — est remplacée par le mécanisme ci-dessus.

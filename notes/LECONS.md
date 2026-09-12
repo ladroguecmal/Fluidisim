@@ -4260,3 +4260,39 @@ jugement déjà déclarés. C'est ce qui permet d'attribuer l'écart de magnitud
 Voir COMPOSITION-ANCREE-S188 §7.3, §7.4 et A232. Même famille que L266 — une mesure ne vaut
 que dans son montage — et que L267, qui en est le cas où la convention du montage était
 l'erreur.
+
+## L269 — Une loi mesurée en norme n'est pas une loi : regarder les champs avant de nommer une loi
+
+Trois sessions ont mesuré comment deux erreurs se composent en publiant des **rapports de
+normes** : S186 a retenu le maximum pour les modes causaux, S188 l'a confirmé, S189 l'a réfuté
+sur un autre réseau. Les trois avaient les **champs d'erreur en mémoire** — il fallait bien les
+calculer pour en prendre la norme — et aucune des deux premières ne les a regardés.
+
+Quand S189 l'a fait, la « loi » s'est dissoute en une structure plus simple et plus solide :
+les deux champs s'**additionnent maille par maille**, à 10 % près, et exactement dans les cas
+dégénérés. Tout le reste — maximum, additive, quadratique, et les rapports de 0,437 à 1,71 —
+n'est que la **position relative de leurs pics** vue à travers une norme maximum.
+
+Ce qui généralise :
+
+1. **Une norme est une projection : elle jette l'information qui explique son résultat.**
+   Nommer « loi » ce qu'une norme affiche, c'est nommer une ombre. Le coût de regarder le champ
+   est nul quand on l'a déjà calculé, et c'est le seul niveau où une explication existe.
+2. **Trois lois candidates qui se partagent les cas sont le signe qu'aucune n'est la bonne.**
+   S186 retenait le maximum pour deux modes et la quadratique pour le troisième, et
+   s'en félicitait comme d'un découpage éclairant. C'était un indice : une structure unique
+   plus fine se cachait dessous, et le découpage par mode n'en était qu'une manifestation.
+3. **La localisation doit être à la granularité de l'objet, pas à celle qui est commode.**
+   S188 a localisé les maxima à la **tranche** — 196 mailles — et conclu qu'ils coïncidaient.
+   À la maille, ils ne coïncident jamais. Une granularité trop grossière ne rend pas une
+   réponse imprécise : elle rend la **mauvaise** réponse, avec l'apparence d'une confirmation.
+
+Corollaire qui vaut pour la conception, et non seulement pour la méthode : **ce qui se
+transporte, c'est le mécanisme, pas la loi.** L'additivité locale est une propriété du pas de
+temps — explicite, presque linéaire — et elle dit d'elle-même où elle cesserait : une
+projection de pression couple toutes les mailles. La « loi du maximum », elle, ne disait rien
+de son domaine, et c'est pourquoi elle a survécu deux sessions de trop.
+
+Voir COMPOSITION-GRADUEE-S189 §7.4, ADR-119, A232 et A233. Même famille que L268 — un rejeu
+transforme une coïncidence en condition — dont c'est ici la suite : S188 avait obtenu la
+condition, S189 a obtenu le mécanisme, et le mécanisme a réfuté la loi.

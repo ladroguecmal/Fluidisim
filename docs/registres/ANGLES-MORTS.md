@@ -2392,3 +2392,52 @@ non rejouée sur un réseau ancré — est **levée**. A50 attend toujours son s
   aucune valeur publiée n'est fausse, aucun contrat ne change, et la loi est vérifiée sur
   les deux réseaux mesurés ; c'est son domaine de validité qui était tacite.
   Chiffres et conditions dans COMPOSITION-ANCREE-S188 §7.3 et §7.4.
+
+**Suivi A50 — S189 : la loi du maximum est réfutée sur le réseau recommandé ; ADR-119.**
+[COMPOSITION-GRADUEE-S189](../validation/COMPOSITION-GRADUEE-S189.md) mesure la composition
+sur le réseau **gradué** d'ADR-118, qui sépare les deux pics d'erreur de 6 à 10 mailles.
+**Le maximum y est rejeté pour le maintien** (0,730–1,000) quand il tient sur le réseau
+ancré (0,936–1,060) : même montage, même critère, la géométrie change le verdict. Seule
+l'**additive** survit — rapport maximal 0,981 ici, 0,984 en S188, 0,988 en S186, jamais
+dépassé sur trois géométries. D'où
+[ADR-119](../adr/ADR-119-le-budget-conjoint-se-borne-par-la-somme.md), qui **remplace la
+règle de dimensionnement** de S186 §8.5 : borner par la somme, ne pas estimer par le
+maximum, abandonner « égaliser les deux axes puis s'arrêter ». Un budget conjoint reste
+licite — c'est sa répartition qui change. A50 attend toujours son **critère de justesse**.
+
+**Suivi A232 — S189 : confirmée, et le mécanisme est mesuré.** A232 disait que la loi du
+maximum n'était valide que tant que les deux maxima coïncidaient. Deux corrections et une
+confirmation. *Correction 1* : les deux pics ne coïncident **jamais** à la maille — 0 cas sur
+78 — la « coïncidence » de S188 était un effet de granularité, il localisait à la tranche
+(196 mailles). *Correction 2* : ce qui gouverne n'est pas la coïncidence des maxima mais
+l'**additivité locale** des deux champs d'erreur, vérifiée à 10 % de l'erreur de chaque case
+et exactement dans les cas dégénérés ; la norme maximum n'en est qu'une lecture.
+*Confirmation* : séparer les pics **change bien le verdict**, et A232 avait donc raison sur
+la conclusion. Elle reste ouverte sur un point, et c'est le plus lourd : l'additivité n'a été
+mesurée que sur un véhicule **sans projection de pression**.
+
+**Suivi A229 — S189 : le mécanisme de la compensation est trouvé.** A229 relevait que dégrader
+un axe peut réduire l'erreur totale, sans savoir pourquoi. La cause est l'additivité locale à
+**signes opposés** : les deux champs d'erreur s'ajoutent maille par maille, et là où ils
+s'opposent le composé passe **sous** le maximum des deux — jusqu'à 0,730 fois sur le réseau
+gradué. La compensation n'est donc ni un artefact ni une propriété de la physique : c'est une
+superposition de signes, qui dépend du montage et ne se transporte pas. Voir
+COMPOSITION-GRADUEE-S189 §7.4.
+
+- **A233** *(sévérité 2, S189 ; ouverte)* — **La seule borne portable est lâche d'un facteur
+  2,3, et aucune estimation ne tient sur toutes les géométries.** ADR-119 impose de
+  dimensionner un budget conjoint par `eU(r,1) + eU(1,c)`, parce que c'est la seule forme
+  jamais dépassée sur les trois géométries de réseau mesurées. Mais son rapport
+  mesuré/prédit descend à **0,437** : le total réel peut valoir moins de la moitié de la
+  borne. Dimensionner par elle coûte donc jusqu'à **2,3 fois** la résolution nécessaire — en
+  nœuds, en cadence, ou dans le produit des deux, et S184 a établi que le coût suit
+  exactement ces nombres. Les deux estimations plus serrées sont inutilisables telles quelles :
+  le **maximum** est rejeté sur le réseau gradué et dépassé jusqu'à 1,71 sur l'ancré ; la
+  **quadratique** tient par mode et par famille mais pas sur l'ensemble, et rien ne dit
+  laquelle s'applique **avant** d'avoir mesuré. Ce qui reste ouvert : une estimation portable
+  demanderait de prédire la position relative des deux pics, donc de connaître la géométrie du
+  contenu et du réseau avant de mesurer — et c'est précisément ce qu'un consommateur ne sait
+  pas. La voie praticable n'est peut-être pas une meilleure formule mais une **mesure du
+  couple retenu**, ce qu'ADR-119 §3 prescrit déjà faute de mieux. Sévérité 2 : la borne est
+  sûre, aucun contrat n'est faux, et le coût du surdimensionnement est un gaspillage, pas une
+  erreur de justesse. Chiffres et conditions dans COMPOSITION-GRADUEE-S189 §7.5.

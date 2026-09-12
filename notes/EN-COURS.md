@@ -99,12 +99,29 @@ quadratique et l'additive pour l'interpolation, et les écarts de 0,87 à 1,71 o
 - [x] **P3b** — écrire `graded_composition.rs` : champs d'écart conservés maille par maille,
       argmax localisés, résidu d'additivité locale, puis les trois lois de norme pour la
       continuité avec S186 et S188. Relever.
-- [ ] **P4** — recevoir dans un document de validation ; **note corrective datée** sur le
+- [x] **P4** — recevoir dans un document de validation ; **note corrective datée** sur le
       raisonnement de S188 si l'additivité locale tranche ; angles, leçons, ADR si une
       décision en sort.
 - [ ] **P5** — rituel de fin (REPRISE.md §6).
 
 ### Notes de reprise
+
+P4 S189 : COMPOSITION-GRADUEE-S189 §7–§8 reçus. **ADR-119 actée** — le budget conjoint se
+borne par la somme, le maximum n'est pas portable, et la règle « égaliser les deux axes
+puis s'arrêter » est **abandonnée**. C'est le premier ADR qui **remplace une règle de
+dimensionnement** publiée par une session précédente (S186 §8.5) ; il ne remplace aucun
+ADR et ADR-118 reste entier. **A233** écrite (la seule borne portable est lâche d'un
+facteur 2,3, et aucune estimation ne tient sur toutes les géométries) et **L269** écrite
+(une loi mesurée en norme n'est pas une loi — regarder les champs avant de nommer une loi).
+Trois suivis datés portés sous **A50**, **A232** (confirmée, avec deux corrections) et
+**A229** (le mécanisme de la compensation est trouvé : superposition à signes opposés).
+Quatre suivis datés ailleurs, aucune réécriture : COMPOSITION-ERREURS-S186 (sa règle est
+remplacée, ses mesures restent), COMPOSITION-ANCREE-S188 (son inférence est corrigée, ses
+mesures restent), ADR-118 (la règle de composition qu'évoquait son suivi S188 est
+remplacée ; sa règle 3, qui est une saturation interne à un axe, reste valide),
+BILAN-B4-S176.
+Décomptes à porter en P5, vérifiés contre le dépôt : **119 ADR, 233 angles, 269 leçons,
+18 invariants, 6 SPEC, 23 cas**.
 
 P3b S189 : `examples/graded_composition.rs`. Deux exécutions, `diff` identique hors lignes
 de cargo ; aucune durée mesurée. Empreinte **0x30b0b9eee43f6255** — inchangée après l'ajout

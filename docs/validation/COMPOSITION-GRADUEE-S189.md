@@ -143,3 +143,171 @@ graduée est la réponse littérale à A232.
   famille ancrée : cette session ne compare pas des coûts, elle sépare deux pics.
 - **Le véhicule ne projette pas** et l'advection y reste d'ordre supérieur — c'est
   précisément ce qui rend H1 plausible, et donc ce qui en borne la portée.
+
+## 7. Relevés
+
+```
+cargo run --release --manifest-path code/Cargo.toml -p water-core --example graded_composition
+```
+
+Bibliothèque inchangée ; workspace **331 réussis / cinq ignorés** en debug et en release.
+Même bloc, même référence, mêmes dénominateurs que S186 et S188 :
+`max |S| = 1,540547e-4 m/s²`, `max |u'(T)| = 7,993168e-5 m/s`, plancher 0,386 %.
+
+Les réseaux éprouvés, et les indices que la graduation produit :
+
+| réseau | nœuds | indices `z` |
+|---|---:|---|
+| plein | 2744 | 1…14 |
+| graduée `Nz = 3` | 588 | `[1, 10, 14]` |
+| graduée `Nz = 4` | 784 | `[1, 8, 12, 14]` |
+| graduée `Nz = 5` | 980 | `[1, 6, 10, 12, 14]` |
+| graduée `Nz = 8` | 1568 | `[1, 4, 7, 9, 11, 12, 13, 14]` |
+| ancrée 8³ *(témoin S188)* | 512 | `[1, 3, 5, 7, 8, 10, 12, 14]` |
+| ancrée 5³ *(témoin S188)* | 125 | `[1, 4, 8, 11, 14]` |
+
+### 7.1 Réceptions — les six passent
+
+1. **Reproductibilité.** Empreinte `0x30b0b9eee43f6255`, `diff` identique sur deux
+   exécutions ; aucune durée mesurée.
+2. **Le témoin ancré redonne S188** : 1,7160 % à 512 nœuds et 3,6805 % à 125 nœuds à `c = 1`,
+   et les vingt-et-une erreurs temporelles pures redonnent S186 §6.2 — donc S185.
+3. **La famille graduée redonne S187 §8.5** : 6,5503 / 3,4373 / 1,7164 / 0,6393 % pour
+   `Nz = 3 / 4 / 5 / 8`, avec une erreur de tranche haute de **0,0000 à 0,0001 %**.
+4. **Le résidu d'additivité est exactement nul** partout où l'un des deux termes est nul —
+   à `c = 1` et au réseau plein. C'est le contrôle du calcul du résidu lui-même, avant de lui
+   faire dire quoi que ce soit.
+5. **Les quatre empreintes du support tiennent** après le déplacement du profil et des indices
+   gradués : `cadence_error` `0x39567a1d4bc2ba4c`, `composed_error` `0x0e743846d4656870`,
+   `graded_lattice` `0x6cf13183b4a240df` (sortie **entière** identique),
+   `anchored_composition` `0x21bab548c7b9775c`.
+6. **Tout reste fini.**
+
+### 7.2 La séparation des pics est obtenue, et elle est nette
+
+| réseau | pic spatial `(i,j,k)` | eU spatiale % | eU tranche 14 % |
+|---|---|---:|---:|
+| graduée `Nz = 3` | **(1, 1, 6)** | 6,5503 | 0,0001 |
+| graduée `Nz = 4` | **(1, 1, 5)** | 3,4373 | 0,0001 |
+| graduée `Nz = 5` | **(1, 1, 8)** | 1,7164 | 0,0001 |
+| graduée `Nz = 8` | **(1, 1, 6)** | 0,6393 | 0,0000 |
+| ancrée 8³ | (11, 4, **14**) | 1,7160 | 1,7160 |
+| ancrée 5³ | (10, 6, **14**) | 3,6805 | 3,6805 |
+
+Le pic **temporel** reste en `(1,1,14)` ou `(1,2,14)` pour les vingt-et-une cadences, tous
+modes confondus : il est accroché au maximum du **champ**, qui est en haut du bloc quoi qu'on
+fasse du réseau. La famille graduée sépare donc les deux pics de **6 à 10 mailles**, la
+famille ancrée les laisse au même étage. C'est exactement l'épreuve qu'A232 réclamait, et elle
+est obtenue par construction plutôt que par chance.
+
+### 7.3 La révision de §1 est confirmée : les deux pics ne coïncident jamais
+
+> **Sur 78 cases jugées, les deux pics tombent sur la même maille : 0 fois.**
+
+La « coïncidence des maxima » qu'avançait S188 était un effet de **granularité** : il
+localisait à la tranche, un plan de 196 mailles. Au niveau de la maille, les deux erreurs sont
+toujours distinctes — y compris dans la famille ancrée, où elles partagent l'étage 14 mais pas
+la colonne.
+
+Rien de ce que S188 a mesuré n'est faux ; c'est son inférence qui allait trop vite, et §1
+l'avait annoncé avant la mesure.
+
+### 7.4 H1 : l'additivité locale tient, et elle explique tout
+
+Résidu `max_x |Δu(r,c)(x) − Δu(r,1)(x) − Δu(1,c)(x)|` :
+
+- **au plus 1,9263 %** de `max |u'(T)|` en absolu ;
+- **au plus 10,0 %** de l'erreur de sa propre case ;
+- **exactement nul** dans les cas dégénérés (réception 4).
+
+Le résidu croît avec l'erreur, ce qui est la signature du terme croisé **advectif** annoncé au
+protocole. H1 ne ferme donc pas à l'arrondi — elle n'était pas censée le faire — mais elle
+tient à 10 %, et cela suffit pour que le comportement en norme en découle.
+
+**Où tombe le pic composé**, sur 78 cases jugées : sur le pic **spatial** 19 fois, sur le pic
+**temporel** 40 fois, **ailleurs** 19 fois. Les colonnes locales du relevé le montrent sans
+détour :
+
+| cas | pic composé | spatial **au pic** | temporel **au pic** | eU | rapport au max |
+|---|---|---:|---:|---:|---:|
+| mnt · graduée `Nz=5` · `c=4` | (1,1,14) | **0,0000** | 2,3000 | 2,3000 | **1,000** |
+| mnt · graduée `Nz=5` · `c=8` | (1,1,14) | **0,0000** | 5,0549 | 5,0549 | **1,000** |
+| mnt · graduée `Nz=5` · `c=2` | (14,4,13) | 1,2631 | 0,3106 | 1,5731 | 0,917 |
+| int · graduée `Nz=3` · `c=64` | (1,1,6) | 6,5503 | 2,8585 | 9,6129 | **1,419** |
+
+La lecture est mécanique. Quand le pic composé tombe sur le pic temporel et que l'erreur
+spatiale y est **nulle**, le maximum est exact — rapport 1,000, et cela arrive 40 fois sur 78.
+Quand les deux erreurs sont non nulles au même point, elles s'**ajoutent** localement — 9,6129
+mesuré contre 9,4088 sommé — et le rapport au maximum monte à 1,419. Et quand elles s'y
+opposent, le composé passe **sous** le maximum.
+
+**Les trois « lois » de S186 cessent donc d'être trois lois concurrentes.** Ce sont trois
+lectures d'une même structure : deux champs qui s'additionnent, et dont la position relative
+des pics décide de ce que la norme maximum affiche.
+
+### 7.5 A232 est confirmée, et attribuée à la géométrie
+
+Deux familles mesurées côte à côte, mêmes cadences, même critère, même référence :
+
+| famille | mode | additive | quadratique | maximum | retenue |
+|---|---|---|---|---|---|
+| **graduée** (pics séparés) | maintien | 0,437–0,981 | 0,607–1,000 | **0,730–1,000** | **aucune** |
+| | extrapolation | 0,479–0,977 | 0,676–1,000 | 0,811–1,000 | maximum |
+| | interpolation | 0,663–0,963 | 0,892–1,102 | 1,000–1,511 | quadratique |
+| **ancrée** (pics au même étage) | maintien | 0,576–0,951 | 0,794–0,999 | **0,936–1,060** | **maximum** |
+| | extrapolation | 0,468–0,941 | 0,659–0,998 | 0,869–1,000 | maximum |
+| | interpolation | 0,845–0,955 | 1,066–1,245 | 1,074–1,707 | additive, quadratique |
+
+**Sur le réseau que recommande ADR-118 — le gradué — la loi du maximum est rejetée pour le
+maintien**, à 0,730 ; sur le réseau ancré elle tient, à 0,936. Même montage, même critère,
+même référence : **la géométrie des pics change le verdict.** A232 n'était pas une précaution
+de style.
+
+**La direction de l'échec compte.** 0,730 signifie que l'erreur composée est **30 % au-dessous**
+du maximum des deux. La loi **surestime** : elle demeure une borne, mais cesse d'être une
+estimation — et la règle « égaliser les deux axes puis s'arrêter » perd sa justification,
+puisque l'optimum n'est plus à la parité.
+
+**Ce qui survit à tout : l'additive.** Rapport maximal **0,981** ici, 0,984 en S188, 0,988 en
+S186 : jamais dépassé, sur trois géométries de réseau et trois sessions. C'est la seule forme
+portable, et c'est ce que fixe
+[ADR-119](../adr/ADR-119-le-budget-conjoint-se-borne-par-la-somme.md).
+
+## 8. Ce que la session conclut, et ce qu'elle laisse ouvert
+
+**Conclu**, et acté par [ADR-119](../adr/ADR-119-le-budget-conjoint-se-borne-par-la-somme.md).
+
+1. **La somme borne le total**, sur les trois géométries mesurées, sans exception. C'est la
+   seule forme portable.
+2. **Le maximum n'est pas une loi de composition** : c'est ce qu'affiche la norme quand les
+   deux pics sont disjoints. Il est rejeté sur le réseau gradué pour le maintien.
+3. **La règle « égaliser les deux axes puis s'arrêter » est abandonnée** (ADR-119 §3). Elle
+   supposait le maximum.
+4. **Le mécanisme est l'additivité locale** : les deux champs d'erreur s'additionnent maille
+   par maille à 10 % près, et exactement dans les cas dégénérés.
+5. **Les deux pics ne coïncident jamais** — 0 cas sur 78 — ce qui corrige l'inférence de S188
+   sans toucher à ses mesures.
+6. **Un budget conjoint reste licite**, ce que S186 cherchait à établir ; c'est sa répartition
+   qui change.
+
+**Non conclu, et pas contourné.**
+
+- **H1 sur un solveur qui projette n'est pas mesurée**, et c'est la limite la plus sérieuse :
+  la projection couple toutes les mailles à chaque pas, et toute la structure décrite ici
+  découle de l'additivité. Le véhicule est explicite, sans projection ni surface libre.
+- **La borne est lâche** : son rapport descend à 0,437, donc dimensionner par elle peut coûter
+  jusqu'à **2,3 fois** la résolution nécessaire, et aucune estimation portable n'est connue
+  (**A233**).
+- **Aucun seuil de justesse.** A50 attend une décision ; `N` de SPEC-004 §6.2 reste à fixer.
+- **Un seul montage, une seule profondeur de bloc, un seul instant de profil.**
+- **Aucun coût.** La famille graduée a plus de nœuds que la famille ancrée : cette session
+  sépare deux pics, elle ne compare pas des coûts.
+
+**Suite recommandée — S190 : S189-1.** Mesurer l'additivité locale **avec une projection de
+pression** dans le véhicule. C'est la seule limite qui menace l'ensemble : ADR-119, la lecture
+mécanique de §7.4 et l'explication des trois sessions précédentes reposent toutes sur
+l'additivité maille par maille, et la projection est exactement l'opération qui pourrait la
+détruire — elle couple tout le bloc à chaque pas. Deux issues, et les deux instruisent : si
+l'additivité survit à la projection, ADR-119 vaut pour un solveur réaliste ; si elle tombe,
+la borne par la somme reste — elle ne suppose rien — mais l'explication tombe avec elle, et
+il faudra le dire. **BILAN-B4-S176** reste le bilan actif et porté.

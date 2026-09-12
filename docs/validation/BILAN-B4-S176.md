@@ -212,3 +212,18 @@ valent 125 nœuds débordants** à erreur égale.
 **Ce que B4 attend reste un critère**, inchangé depuis S185. S188-1 éprouve la loi sur le
 réseau **gradué**, seule configuration connue susceptible de séparer les deux maxima.
 A50/B4 restent partiels, aucun solveur choisi.
+
+**Suivi S189 — 2026-09-12 :** la loi de composition est **réfutée sur le réseau que B4
+recommanderait**, [COMPOSITION-GRADUEE-S189](COMPOSITION-GRADUEE-S189.md), et remplacée par
+[ADR-119](../adr/ADR-119-le-budget-conjoint-se-borne-par-la-somme.md). Le maximum tient sur un
+réseau ancré (0,936–1,060) et tombe sur un réseau gradué (0,730–1,000) : c'est la géométrie des
+deux pics d'erreur qui décide, et ils ne coïncident jamais à la maille. Le mécanisme est
+l'**additivité locale** des deux champs d'erreur, vérifiée à 10 % près et exactement dans les
+cas dégénérés. Ce que B4 y gagne : une borne **portable** — la somme, jamais dépassée sur trois
+géométries — et la fin d'une règle de répartition qui n'était valable que sur un réseau.
+Ce qu'il y perd : la borne est lâche d'un facteur 2,3 (**A233**), et aucune estimation plus
+serrée ne tient sur toutes les géométries.
+
+**Et la limite qui domine désormais tout le lot** : l'additivité locale n'a été mesurée que sur
+un véhicule **sans projection de pression**. S189-1 la mesure avec projection. A50/B4 restent
+partiels, aucun solveur choisi.

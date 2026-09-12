@@ -475,3 +475,30 @@ deux maxima coïncident.**
 
 Rien n'est réécrit : les chiffres ci-dessus mesurent correctement le réseau qu'ils ont employé,
 et la réception croisée de S188 les redonne à la décimale.
+
+---
+
+**Suivi S189 — 2026-09-12 : la règle de dimensionnement de §8.5 est remplacée ; les mesures
+restent.** [COMPOSITION-GRADUEE-S189](COMPOSITION-GRADUEE-S189.md) mesure la composition sur
+le réseau **gradué** d'ADR-118, qui sépare les deux pics d'erreur de 6 à 10 mailles. **La loi
+du maximum y est rejetée pour le maintien** (0,730–1,000) alors qu'elle tient sur le réseau
+ancré (0,936–1,060). Même montage, même critère : c'est la **géométrie des pics** qui change
+le verdict.
+
+**Le mécanisme, que ce document n'avait pas cherché.** Les deux champs d'erreur
+s'**additionnent maille par maille**, à 10 % de l'erreur de chaque case près et exactement
+dans les cas dégénérés. Les trois « lois » de §5 ne sont donc pas trois lois concurrentes :
+ce sont trois lectures d'une même structure, et ce que la norme maximum affiche dépend de la
+position relative des deux pics — qui ne coïncident **jamais** à la maille (0 cas sur 78).
+
+**Ce qui est remplacé, et par quoi.**
+[ADR-119](../adr/ADR-119-le-budget-conjoint-se-borne-par-la-somme.md) remplace la règle de
+§8.5 — « égaliser les erreurs des deux axes pris seuls puis s'arrêter », et « l'axe bon marché
+est gratuit jusqu'à la parité ». Elle supposait que le maximum gouverne. Le budget conjoint
+reste **licite**, ce que ce document cherchait à établir, mais il se **borne par la somme** et
+ne s'estime pas par le maximum.
+
+**Ce qui reste entier ici.** Les 84 cases, leurs erreurs et leurs rapports : ils mesurent
+correctement ce réseau-là, et S189 les redonne par ses témoins. Et l'observation que
+l'additive n'est **jamais dépassée** — 0,988 ici, 0,984 en S188, 0,981 en S189 — est
+justement ce qu'ADR-119 retient comme seule forme portable.
