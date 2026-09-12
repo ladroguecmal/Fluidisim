@@ -1668,7 +1668,11 @@ entrée par entrée. Le fil reprend ci-dessous.
   et allocations. Comparer àla surface àentrées identiques ; conditions/limites de
   mesure avant budget de consommation perturbative. BILAN-S145/BILAN-B4-S176 portés.
 
-## File active S190 — 2026-09-12
+## File active S193 — 2026-09-12
+
+*Renommée de « File active S190 » en S193 : le contenu est daté ligne par ligne, le titre
+suivait un numéro de session et vieillissait seul (A185 — un état sans date se lit au
+présent). Le lien de REPRISE pointe désormais ici.*
 
 **Arbitrage clos : 2 % d'erreur acceptable pour le champ perturbatif B4 (ADR-120).**
 La réception B4-TOLERANCE-S190 reçoit le profil de source gradué 14×14×8/extrapolation
@@ -1679,13 +1683,13 @@ action unique et doit être relue au rituel de fin (A211).
 
 | action / objet | état daté et ce qui reste | priorité / déclencheur |
 |---|---|---|
-| **S192-1 / A50 / B4** | **S192 : S191-1 réalisée**, surface libre x-z linéaire reçue Airy, vitesse fine≤1,732796 % ; source S191 non branchée, comparaison intégrale absente | prochaine action : conditions de surface non linéaires dispersives/référence Stokes, ordre en amplitude explicite, puis comparaison perturbatif/total |
-| **B3 / δ** | **S192** : deux Saint-Venant 1D, bloc quantité de mouvement3D et tranche potentielle x-z à surface libre linéaire ; aucun solveur δ choisi | construire/recevoir le candidat qui permet la comparaison B4 ; le 2 % ne choisit pas une technologie |
+| **S193-1 / A50 / B4 / A217** | **S193 : S192-1 réalisée**, surface non linéaire dispersive reçue Stokes (ADR-122) — `b₂` à 0,4555 % et décalage de fréquence à 1,6454 %, sous 2 % ; source S191 toujours non branchée, couplage non mesuré | prochaine action : deux trains de Stokes sur le véhicule M=3, écart somme/évolution de la somme, contre-épreuve M=1 exactement nulle (ADR-112) |
+| **B3 / δ** | **S193** : deux Saint-Venant 1D, bloc quantité de mouvement 3D, tranche potentielle linéaire S192 et tranche **non linéaire dispersive** S193 ; aucun solveur δ choisi | construire/recevoir le candidat qui permet la comparaison B4 ; le 2 % ne choisit pas une technologie, et ADR-122 ne choisit pas δ |
 | **B4 forces / perception** | aucun reçu complet ; la métrique de vitesse S190 ne les remplace pas | après montage commun surface/solide ; protocole perceptif conserve ses participants réels requis |
-| **A216 / A217** | **S192** : coefficient S161 non expliqué ; Airy dispersif linéaire reçu mais référence à la fois non linéaire/dispersive absente ; ADR-112 interdit d'en tirer la bascule | avec la comparaison couplée ; ne pas dériver 0,02/0,24 comme seuil |
+| **A216 / A217** | **S193** : coefficient S161 non expliqué ; véhicule non linéaire **et** dispersif désormais reçu (ADR-122), mais aucun couplage de deux trains mesuré ; ADR-112 interdit toujours d'en tirer la bascule | avec la comparaison couplée S193-1 ; ne pas dériver 0,02/0,24 comme seuil |
 | **A213 / omega f32** | remède identifié, non appliqué, réception S95 à renouveler s'il est retenu | lot propre de précision/horizon, indépendant de l'arbitrage B4 |
 | **λ_cut / B2 / coupure W–δ** | B2 partiel ; dispersion/dissipation et borne d'éponge A92 à assembler | choix du couple W/δ ; ne pas confondre réception source B4 et coupure |
-| **Bathymétrie / S116-2** | **S192** : trois profondeurs finies uniformes reçues dans le modèle linéaire ; aucune variation du fond reçue | lot de construction propre ; la profondeur constante ne ferme pas la bathymétrie |
+| **Bathymétrie / S116-2** | **S193** : fond plat seul ; et la faible profondeur non linéaire **n'a aucun oracle** dans le dépôt — Stokes y est hors domaine par Ursell aux amplitudes utiles (A234) | lot de construction propre ; il faut d'abord une référence cnoïdale ou Boussinesq, pas seulement un candidat |
 | **A98 / conformité multiplateforme** | aucune seconde cible testée par S190 ; debug/release locaux ne suffisent pas | réception sur seconde cible disponible ; I-03 maintenu |
 | **V / bancs restants** | V non construite ; B1/B2/B4 partiels, aucun banc complet, huit autres non lancés | arbitrer les lots système depuis cette file plutôt que prolonger par défaut la dernière sonde |
 | **A94/A95 / dossier de réunions** | quatorze fiches à traiter selon ADR-028 ; les qualifier en décisions internes ou faits externes | les intitulés « avant première ligne de code » ne bloquent pas rétroactivement le code autorisé depuis S20 |

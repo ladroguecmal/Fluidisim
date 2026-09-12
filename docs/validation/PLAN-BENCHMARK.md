@@ -104,6 +104,14 @@ conservation d'énergie sur 60 s ; coût pour 4096 paquets ; déterminisme crois
 
 ## B3 — Couche δ : technologie, coût et latence
 
+> **S193 — 2026-09-12 :** un véhicule x-z **non linéaire et dispersif** est reçu
+> contre Stokes (ADR-122, ordre `M=3`) ; il ne traite toujours aucun des quatre
+> scénarios complets ci-dessous — ni coque mobile, ni bathymétrie, ni coût CPU.
+> Aucun solveur de production choisi, aucun verdict B3 acquis. Ce que ce lot apporte
+> à B3 est une **contrainte de sélection** et non un candidat : tout candidat
+> construit sur un développement en amplitude doit déclarer son ordre et la grandeur
+> que cet ordre manque.
+
 > **S192 — 2026-09-12 :** un véhicule potentiel x-z à surface libre linéaire est
 > reçu contre Airy ; il ne traite aucun des quatre scénarios complets ci-dessous.
 > Aucun solveur de production choisi, aucun verdict B3 acquis.
@@ -121,6 +129,17 @@ l'autorise (ADR-007 §3).
 
 ## B4 — Validité du régime perturbatif
 
+> **État actif S193 — 2026-09-12.** Surface **non linéaire** dispersive reçue contre
+> Stokes : harmonique liée à **0,4555 %**, décalage de fréquence à **1,6454 %**, sous
+> 2 % ; ordres mesurés 2 en profondeur discrète et 4 en temps, bande saturée.
+> [SURFACE-LIBRE-NL-S193](SURFACE-LIBRE-NL-S193.md), [ADR-122](../adr/ADR-122-l-ordre-en-amplitude-d-un-vehicule-non-lineaire.md).
+> S192-1 réalisée ; suite **S193-1** : couplage de deux trains, écart entre la somme
+> des évolutions et l'évolution de la somme, contre-épreuve `M=1` exactement nulle.
+> B4 complet, forces et perception non reçus ; source S191 non branchée et ces
+> erreurs ne s'additionnent pas au budget source. Seuil 2 % inchangé.
+> **Et une limite neuve, mesurée** : la faible profondeur non linéaire n'a aucun
+> oracle ici — Stokes y sort de son domaine par Ursell aux amplitudes utiles (A234).
+>
 > **État actif S192 — 2026-09-12.** Tranche x-z à surface libre linéaire reçue
 > contre Airy aux profondeurs0,25/2/8 m : vitesse fine au plus1,732796 %, cinq
 > périodes, convergence d'ordre2. [SURFACE-LIBRE-2D-S192](SURFACE-LIBRE-2D-S192.md).

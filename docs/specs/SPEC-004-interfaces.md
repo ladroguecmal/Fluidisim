@@ -402,6 +402,14 @@ hypothèse à écarter est un terme source incomplet.
 
 ### 6.2 L'optimisation qui rend le coût acceptable
 
+> **Suivi S193 — 2026-09-12 :** [surface non linéaire dispersive reçue contre Stokes](../validation/SURFACE-LIBRE-NL-S193.md),
+> ordre en amplitude **M=3** acté par [ADR-122](../adr/ADR-122-l-ordre-en-amplitude-d-un-vehicule-non-lineaire.md) :
+> harmonique liée à **0,4555 %** et décalage de fréquence à **1,6454 %**, sous 2 %.
+> L'ordre deux rend le bon profil mais **la moitié** du décalage de fréquence, et la
+> fraction captée dépend du régime : vérifier un profil ne suffit pas à recevoir un
+> schéma tronqué en amplitude. Le fournisseur S191 n'est toujours pas injecté, aucun
+> couplage de deux trains n'est mesuré, A217 reste ouverte. Suite S193-1.
+
 > **Suivi S192 — 2026-09-12 :** [surface libre x-z linéaire reçue Airy](../validation/SURFACE-LIBRE-2D-S192.md),
 > trois profondeurs, cinq périodes, vitesse fine≤1,732796 %. Ce véhicule n'injecte
 > pas encore le fournisseur S191 ; aucune réception couplée ni addition de ces

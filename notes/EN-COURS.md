@@ -79,7 +79,7 @@ non linéaire et dispersif (A217) ; aucune sélection de solveur δ, aucun seuil
 - [x] **P3b** — campagne : erreur de profil contre Stokes-2 en fonction de l'amplitude
   (pente déclarée), décalage de fréquence contre Stokes-3, profondeurs, raffinements
   espace/temps, contre-épreuves par l'échelle M, reproductibilité deux exécutions.
-- [ ] **P4** — documenter résultats, limites et suite ; propager A50/B4/A216/A217, file
+- [x] **P4** — documenter résultats, limites et suite ; propager A50/B4/A216/A217, file
   plurielle, angles et leçons. ADR seulement si une décision de projet est prise.
 - [ ] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes,
   jeton `libre`, trois copies avancées sans suppression non prouvée.
@@ -138,4 +138,11 @@ initiale batie sur omega0 du continu au lieu de omega_d, mode elliptique, biais
 biais residuel -5,0730e-10 = erreur de phase RK4 predite analytiquement.
 Candidats P4 : angles morts (oracle absent en faible profondeur ; convention de
 courant moyen ; condition initiale du continu sur modele semi-discret) et lecons.
+
+P4 : ADR-122 acte l'ordre trois, avec son domaine (cambrure, Ursell) et ce qu'il
+faudrait pour l'inverser. SPEC-001 gagne un 1 quater : b2 en profondeur finie
+verifie par deux limites, nombre d'Ursell, et la frequence d'ordre trois avec la
+seule forme adoptee (provenance I-14). Portee et suite S193-1 ecrites en section 8
+du document. File active renommee S193 et quatre ancres repointees (A185).
+BILAN-B4, PLAN-BENCHMARK B3/B4 et SPEC-004 actualises. Angles et lecons en P5.
 

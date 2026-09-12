@@ -562,3 +562,45 @@ de l'espace de travail et leurs cinq ignorés restent le reçu S190, non rejoué
 
 Code : `code/water-core/examples/nl_surface_2d.rs` et `support/nl_surface.rs`.
 [Sorties intégrales](SURFACE-LIBRE-NL-S193-MESURES.md).
+
+## 8. Portée acquise et prochaine construction
+
+**Ce que le dépôt possède désormais.** Un véhicule **à la fois non linéaire et
+dispersif** en profondeur finie, d'ordre en amplitude explicite (`M=3`), reçu contre
+Stokes sur deux grandeurs indépendantes — l'harmonique liée et la dépendance de la
+fréquence à l'amplitude — avec deux axes de convergence d'ordre mesuré 2 et 4, une bande
+saturée, et une échelle d'ordres dont les trois signatures étaient prédites avant mesure.
+L'affirmation « aucun véhicule reçu à la fois non linéaire et dispersif » **expire**, et
+[ADR-122](../adr/ADR-122-l-ordre-en-amplitude-d-un-vehicule-non-lineaire.md) fixe l'ordre
+retenu et ce qu'un ordre inférieur manque.
+
+**Ce qui n'est pas acquis, et que la suite ne doit pas supposer acquis.**
+
+1. **A217 reste ouverte.** Le véhicule qui manquait existe ; le couplage n'est pas mesuré.
+   ADR-112 garde toute sa portée.
+2. **La source B+W de S190/S191 n'est pas branchée.** Aucun montage couplé complet. Les
+   écarts mesurés ici **ne s'ajoutent pas** au budget projeté `1,374540 %` : modèles,
+   références et conditions aux limites différents.
+3. **A216 reste inexpliquée** ; aucun seuil de bascule ne se dérive d'ici.
+4. **A50/B4 restent partiels** : forces et perception non reçues, frontières ouvertes
+   absentes.
+5. **Aucun solveur δ n'est choisi**, aucune mesure de coût CPU, aucune seconde cible
+   (A98).
+6. **Le fond reste plat** : la bathymétrie variable est entière, et la faible profondeur
+   non linéaire n'a **pas d'oracle** dans ce dépôt (A234).
+7. **La surface reste un graphe** : ni déferlement, ni rouleau, ni air.
+
+**S193-1 : mesurer le couplage de deux trains sur ce véhicule, et confronter
+perturbatif et total sous le critère d'ADR-120.** C'est la mesure qu'ADR-112 attend et
+qu'A217 nomme, et c'est la première fois qu'elle est possible : faire évoluer deux trains
+de Stokes de nombres d'onde distincts séparément puis ensemble, sur le même véhicule à
+`M=3`, à la même amplitude totale, et mesurer l'écart entre la somme des deux évolutions
+et l'évolution de la somme. Trois points à déclarer **avant** la mesure : l'amplitude
+totale doit rester dans le domaine de validité d'ADR-122 pour les deux nombres d'onde à la
+fois ; la bande `Q` doit contenir les interactions croisées, dont `k₁±k₂` et leurs
+harmoniques, ce que `Q=8` ne garantit pas pour un couple quelconque ; et la contre-épreuve
+`M=1` est obligatoire, puisqu'à cet ordre l'écart doit être **exactement nul** — la
+superposition y est exacte par construction, et c'est ce zéro qui étalonne la mesure.
+
+Les autres chantiers de la file active restent portés et ne sont pas effacés par cette
+suite ; la file plurielle est relue au rituel de fin (A211).

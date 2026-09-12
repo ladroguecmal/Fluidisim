@@ -134,7 +134,7 @@ une session ne peut signaler sa présence qu'en travaillant.
 redemandée. La réception et son profil sont dans B4-TOLERANCE-S190 ; B4 complet
 conserve ses volets physiques/perceptifs non reçus.
 
-En plus de l'action suivante, relire la [file active plurielle](docs/registres/QUESTIONS-OUVERTES.md#file-active-s190--2026-09-12) :
+En plus de l'action suivante, relire la [file active plurielle](docs/registres/QUESTIONS-OUVERTES.md#file-active-s193--2026-09-12) :
 A50/B4 et B3, forces/perception, A216/A217, A213, λ_cut/B2/coupure W–δ,
 bathymétrie, conformité multiplateforme, V/bancs restants, dossier de réunions.
 A211 est récurrente : un fil local ne remplace pas cette liste. Le §6.7 la porte.

@@ -3,7 +3,32 @@
 2026-09-11. Action S175-1. État du code vérifié sur master0b37fd2 àl’amorce.
 Ce bilan confronte les reçus S163–S175 au contrat ; aucune nouvelle simulation lancée.
 
-## État actif — S192, 2026-09-12
+## État actif — S193, 2026-09-12
+
+**S192-1 réalisée : surface non linéaire dispersive reçue contre Stokes**, ordre en
+amplitude `M=3` acté par [ADR-122](../adr/ADR-122-l-ordre-en-amplitude-d-un-vehicule-non-lineaire.md).
+En profondeur infinie : harmonique liée à **0,4555 %** de la valeur de Stokes à la plus
+petite amplitude, décalage de fréquence à **1,6454 %** à la plus grande amplitude utile,
+tous deux sous 2 %. Erreur de profil sur vingt périodes **0,33 %** à `M=3` contre
+**21,3 %** au modèle linéaire sur la même donnée. Ordres mesurés **2** en profondeur
+discrète et **4** en temps ; bande identique au bit de `Q=8` à `Q=16` ; dérive d'énergie
+au plus `2,616146e-9`. Quatre tests debug/release, deux campagnes release identiques,
+empreinte `0x41fc3b13793bee10`. [SURFACE-LIBRE-NL-S193](SURFACE-LIBRE-NL-S193.md).
+
+**Ce que ce reçu change pour B4, et ce qu'il ne change pas.** Il fournit le véhicule qui
+manquait à A217 — non linéaire **et** dispersif — et il pose une contrainte de sélection :
+l'ordre deux rend le bon profil mais **la moitié** du décalage de fréquence, avec une
+fraction qui **dépend du régime** (0,5 en profond, 0,663 en intermédiaire). Vérifier un
+profil ne suffit donc pas à recevoir un schéma tronqué en amplitude.
+**A50/B4 restent partiels** : aucun couplage de deux trains mesuré, fournisseur S191 non
+injecté, forces et perception non reçues, frontières ouvertes absentes. Ces erreurs ne se
+composent pas avec le budget S191 (références différentes). Seuil 2 % maintenu, B3 non
+choisi, A216 inexpliquée. Limite neuve et mesurée : la faible profondeur non linéaire n'a
+aucun oracle dans ce dépôt (**A234**).
+**Suite S193-1 : couplage de deux trains**, écart entre la somme des évolutions et
+l'évolution de la somme, sous le critère d'ADR-120, contre-épreuve `M=1` exactement nulle.
+
+## État historique — S192, 2026-09-12## État actif — S192, 2026-09-12
 
 **S191-1 réalisée : tranche x-z à surface libre linéaire reçue contre Airy.**
 Fond imperméable, rappel de gravité et profondeur discrétisée. Aux trois profondeurs
@@ -52,7 +77,7 @@ seuil ; ni `N = 2`, ni seuil de bascule déduit du coefficient de S161.
 
 La suite active est **S190-1**, application du profil et du seuil avec projection,
 reprenant S189-1. Les autres chantiers restent portés dans la
-[file active S190](../registres/QUESTIONS-OUVERTES.md#file-active-s190--2026-09-12),
+[file active S193](../registres/QUESTIONS-OUVERTES.md#file-active-s193--2026-09-12),
 à relire au rituel de fin. Les suivis ci-dessous sont datés et historiques ; leurs
 mentions « il manque un critère » ont expiré avec ADR-120.
 

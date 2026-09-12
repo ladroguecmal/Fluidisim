@@ -79,6 +79,51 @@ comme diagnostic d'interaction et leurs résidus aux limites sont documentés da
 [ADDITIVITE-PROFONDE-S162](../validation/ADDITIVITE-PROFONDE-S162.md).
 Ce complément n'ajoute ni seuil de bascule ni modèle de production.
 
+## 1 quater. Stokes en profondeur finie — S193, hors runtime
+
+Le §1 ter ne donne Stokes qu'en profondeur **infinie**. Les deux grandeurs employées en
+profondeur finie par [SURFACE-LIBRE-NL-S193](../validation/SURFACE-LIBRE-NL-S193.md) sont
+ajoutées ici avec leur provenance, comme I-14 l'exige.
+
+**Second harmonique lié, ordre deux.** Onde progressive, `θ=kx−ωt`, `ω²=gk tanh(kh)` :
+
+```
+η = a cos θ + k a² b₂(kh) cos 2θ ,   b₂(kh) = cosh(kh)(2+cosh 2kh) / (4 sinh³(kh))
+```
+
+Source : Dean & Dalrymple, *Water Wave Mechanics for Engineers and Scientists*, théorie de
+Stokes du second ordre. **Deux limites la vérifient**, et elles sont calculées et non
+citées : `b₂ → 1/2` en profondeur infinie, ce qui redonne exactement le `(ka²/2)cos 2θ`
+du §1 ter ; et `b₂ → 3/(4(kh)³)` en faible profondeur, si bien que
+`η₂/η₁ = 3aL²/(16π²h³)` est **proportionnel au nombre d'Ursell** `U = aL²/h³`. La
+condition de validité `U ≪ 1` sort donc de la formule elle-même.
+
+**Nombre d'Ursell.** `U = a L² / h³`, avec `a` l'amplitude de premier ordre, `L` la
+longueur d'onde et `h` la profondeur. C'est la borne de validité **la plus contraignante**
+de la théorie de Stokes pour ce dépôt : à `L=8 m` et `h=0,25 m`, `U ≪ 1` exige
+`a ≲ 2,4·10⁻⁵ m`. S193 §7.4 la mesure comme une falaise et non comme une dégradation.
+
+**Fréquence d'ordre trois — une seule forme adoptée.** En profondeur infinie :
+
+```
+ω = ω₀ (1 + ½ (ka)²) ,   ω₀ = √(gk)          (adoptée comme oracle)
+```
+
+La forme usuelle en profondeur finie, avec `σ = tanh(kh)`,
+
+```
+ω² = gkσ [ 1 + (ka)² (9 − 10σ² + 9σ⁴)/(8σ⁴) ]
+```
+
+se réduit bien à la précédente pour `σ=1`, mais **n'est pas adoptée comme oracle** : à
+l'ordre trois et en profondeur finie, la fréquence d'une onde de Stokes dépend de la
+**convention de courant moyen** (vitesse eulérienne moyenne nulle sous le creux, ou flux
+de masse moyen nul), et les deux conventions diffèrent d'un terme du même ordre que la
+correction. Elle peut servir d'indication ; elle ne conclut pas. Voir **A235**.
+
+Ces expressions tronquées ne sont pas des solutions exactes à amplitude finie, et ce
+complément n'ajoute ni seuil de bascule ni modèle de production.
+
 ## 2. Stabilité et coût d'un solveur volumétrique
 
 ### 2.1 CFL
