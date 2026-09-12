@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S197 — en cours
+Session : S197 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
 Objectif : **A242**. S196 a montré que la dérive d'énergie, employée comme critère de
 domaine par S193 à S196, ne détecte pas la sous-résolution — contre-exemple faux d'un
@@ -79,10 +79,18 @@ le critère dans les bancs, pour que la faute ne puisse plus se répéter.
       marges et, pour ADR-123, l'effet sur ses **seuils** et non sur ses décimales.
 - [x] **P4** — verdict par cible. Note corrective datée là où il en faut ; un ADR n'est
       jamais réécrit, et une décision qui changerait demanderait un ADR neuf.
-- [>] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes,
+- [x] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes,
       jeton `libre`, copies avancées sans suppression non prouvée.
 
 ### Notes de reprise
+
+P5 S197 : rituel terminé. **123 ADR, 242 angles, 278 leçons, 18 invariants, 6 SPEC,
+23 cas**, vérifiés contre le dépôt. Workspace 331 réussis/cinq ignorés. File plurielle
+relue (A211) : A242 passée à close, A241 devenue « suspect réfuté », tête en S197-1,
+titre redaté. **Correction propagée partout où S196 annonçait « un tiers »** — en-tête
+du document S196, bloc S196 de REPRISE §4, bloc S196 de l'index, paragraphe S196 du
+README : chacun garde son texte d'origine avec un avertissement daté en tête, aucun
+n'est réécrit. Jeton libre ; trois copies avancées sur `master`, aucune suppression.
 
 P4 S197 : AUDIT-RESOLUTION-S197 §8–§9 reçus. **A242 close** (traitée, remède en place).
 **A241 corrigée** : le repli est **réfuté**, pas « un tiers ». **L278** écrite.

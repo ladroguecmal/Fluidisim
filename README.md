@@ -602,7 +602,7 @@ ignorés**, identiques au reçu. Restent ouverts : **`n` sources** (**A240**, le
 **Suite S195 — à instruire** : `n` sources, ou la correction croisée quadratique dont
 ADR-123 chiffre déjà le gain. File active relue et renommée S194 ; A217 retirée de sa ligne.
 **A238, A239, A240** et **L274, L275** :
-**123 ADR,242 angles,277 leçons,18 invariants,6 SPEC,23 cas**.
+**123 ADR,242 angles,278 leçons,18 invariants,6 SPEC,23 cas**.
 Voir [couplage S194](docs/validation/COUPLAGE-DEUX-TRAINS-S194.md), [mesures](docs/validation/COUPLAGE-DEUX-TRAINS-S194-MESURES.md) et [ADR-123](docs/adr/ADR-123-le-domaine-de-validite-de-la-superposition.md).
 
 **S195 :** `n` sources mesurées, **A240 close**, aucun ADR. À cambrure par train fixée —
@@ -617,7 +617,7 @@ par le véhicule avant d'être mesurée. Session **reprise après interruption**
 compte ; P3a complétée, pas annulée.
 Voir [`n` sources S195](docs/validation/SOURCES-MULTIPLES-S195.md).
 
-**S196 :** le repli des harmoniques croisées est **séparé** de ce qu'il accompagnait, par
+**S196 :** *(verdict renversé par S197 — lire la suite)* le repli des harmoniques croisées est **séparé** de ce qu'il accompagnait, par
 un montage de parité — trains impairs, donc sommes et différences paires, donc aucun
 repli, par arithmétique. Verdict : il **déplace** la loi sans la **gouverner**, un tiers
 du chemin et pas plus ; la thèse de S195 était trop forte. La moitié « limite » d'A241 est
@@ -628,3 +628,15 @@ critère de domaine par trois sessions, **ne détecte pas la sous-résolution** 
 faux d'un facteur cinq passait 65× sous le seuil. **L277** : un invariant conservé ne dit
 rien de ce qui est résolu. Aucun ADR.
 Voir [repli des croisées S196](docs/validation/REPLI-CROISEES-S196.md).
+
+**S197 :** audit de résolution, **A242 close**. Le nombre de niveaux verticaux n'entre dans
+le véhicule que par le **symbole de dispersion**, précalculé — le défaut se calcule donc en
+forme fermée, sans rien simuler, et l'audit est bon marché. À la résolution employée depuis
+S193, ce symbole se trompait de 9 % sur la bande peuplée de S194, 44 % de S195, **112 %** de
+S196. **ADR-123 tient** — sa table mesurée est convergée dès `K=256`, déplacement ≤ 3,3 % —
+et reçoit une note de confirmation. **A240 tient.** **Le verdict de S196 tombe** :
+son écart pair/impair de `0,131` vaut **`0,005`** à résolution convergée, ce qui est la
+prédiction *réfutante* de S196 lui-même. Le repli n'explique rien de mesurable.
+**L278** : une erreur systématique ne s'annule dans une comparaison que si les deux côtés la
+portent également — ce n'est pas son ampleur qui décide, c'est sa répartition. Aucun ADR.
+Voir [audit de résolution S197](docs/validation/AUDIT-RESOLUTION-S197.md).

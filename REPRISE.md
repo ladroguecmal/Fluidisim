@@ -18,12 +18,12 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-12 22:38 +02:00
+JETON            : libre
+Battement        : 2026-09-12 23:24 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
-Session en cours : S197 — A242 : audit de résolution des configurations publiées
-Dernière session : S196 — le repli pèse un tiers ; A241 requalifiée, A242 ouverte
-Session suivante : à fixer au rituel de fin ; relire la file plurielle
+Session en cours : aucune
+Dernière session : S197 — audit de résolution ; ADR-123 confirmée, le verdict de S196 tombe
+Session suivante : S198 — A241 sans son suspect (bande relative, termes triples) sous contrainte L278 ; ou auditer `dt` et S193
 
 *S195 a **changé de main en cours de route** : la session ouverte à 21:15 a été coupée par
 une limite d'usage sur un autre compte, et l'utilisateur l'a signalé. Le jeton disait donc
@@ -235,7 +235,46 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
-**S196 — 2026-09-12 : le repli des croisées pèse un tiers, pas le tout.**
+**S197 — 2026-09-12 : l'audit de résolution ; ADR-123 confirmée, le verdict de la veille
+tombe.** [AUDIT-RESOLUTION-S197](docs/validation/AUDIT-RESOLUTION-S197.md), **A242 close**,
+**aucun ADR**. Découverte qui a tout orienté, faite **avant** toute mesure et par
+arithmétique : `K` n'entre dans le véhicule **que** par le symbole de dispersion `dn[q]`,
+précalculé — le pas de temps ne le voit jamais. Donc le défaut se calcule en **forme fermée
+sans simuler**, et monter `K` ne coûte qu'à la construction : l'audit qu'on croyait cher
+était bon marché. Écart au symbole continu `k·tanh(k·h)` à `K = 64`, la valeur employée de
+S193 à S196 : **0,48 %** au mode 2, **1,08 %** au mode 3, **9,32 %** au mode 9, puis 27 %,
+55 %, 112 % plus haut ; sur la bande **peuplée**, 9,3 % (S194), 43,6 % (S195), 112 % (S196).
+Le banc vérifiait que son symbole discret est celui qu'il croit calculer, jamais qu'il
+**approche la physique** — et le contrôle qui existait pour cela portait sur `K = 512`, une
+configuration que personne n'exécute.
+**Trois verdicts, et ils ne sont pas uniformes.** **ADR-123 tient** : sa table est *mesurée*
+et non interpolée, elle reproduit le publié exactement à `K = 64`, est **convergée dès
+`K = 256`** et se déplace de **3,3 %** au maximum ; elle reçoit une **note datée de
+confirmation** et n'est pas réécrite. Réserve neuve : son ajustement `α` bouge de 3,7 % et
+ses extrapolations hors calibration jusqu'à 35 % — la décision ne repose pas dessus.
+**A240 tient** : série A `−0,437 → −0,425`, série B `+0,783 → +0,774`.
+**Le verdict de S196 tombe** : son écart pair/impair de `0,131` vaut **`0,005`** à
+`K = 1024`, ce qui est la prédiction **réfutante** de S196 lui-même. **Le repli des
+harmoniques croisées n'explique rien de mesurable** ; A241 perd un suspect, n'en gagne
+aucun, et la totalité de son écart reste sans cause. Sa moitié « limite » survit, la valeur
+passant de `−0,52` à ~`−0,45`.
+**Pourquoi celui-là tombe et pas les autres** : S194 et S195 comparent à **même bande**, où
+l'erreur de symbole est commune aux deux côtés et s'annule — S195 en portait 43 % et tient.
+S196 comparait deux familles de bandes différentes, 38 contre 40, donc d'**exposition**
+différente, et mesurait l'écart entre deux défauts. **L278.**
+Remède en place dans le support et les trois bancs : `dispersion_error(upto)`, qui donne
+l'écart **à la configuration exécutée** et nomme le mode fautif, et `richardson()`, qui
+refuse de tirer un ordre d'un triplet non monotone ; deux tests neufs les fixent.
+Workspace **331 réussis / cinq ignorés**, douze réceptions au banc S196.
+123 ADR,242 angles,278 leçons,18 invariants,6 SPEC,23 cas.
+Non audités, et dits : le pas de temps `dt`, et S193.
+**Suite S198 : A241 sans son suspect** — bande relative et termes triples, dans un montage
+qui contrôle l'exposition à l'erreur de modèle, ce que **L278** impose désormais ; ou
+auditer `dt` et S193, lot propre et peu coûteux. File plurielle relue.
+
+**S196 — 2026-09-12 : ⚠ verdict renversé par S197.** *Le « tiers » annoncé ci-dessous vaut
+`0,005` à résolution convergée : le repli n'explique rien de mesurable. Le montage de parité
+et la moitié « limite » survivent. Bloc d'origine conservé, non réécrit :*
 [REPLI-CROISEES-S196](docs/validation/REPLI-CROISEES-S196.md), empreinte
 `0xbcf2911362458c13`, deux exécutions identiques. **A241 requalifiée, pas close.** S195
 avait proposé un mécanisme appuyé sur une **corrélation** — les harmoniques croisées

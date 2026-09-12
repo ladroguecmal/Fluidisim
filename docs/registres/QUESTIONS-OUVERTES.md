@@ -1668,7 +1668,7 @@ entrée par entrée. Le fil reprend ci-dessous.
   et allocations. Comparer àla surface àentrées identiques ; conditions/limites de
   mesure avant budget de consommation perturbative. BILAN-S145/BILAN-B4-S176 portés.
 
-## File active — relue en S196, 2026-09-12
+## File active — relue en S197, 2026-09-12
 
 *Renommée de « File active S190 » en S193 : le contenu est daté ligne par ligne, le titre
 suivait un numéro de session et vieillissait seul (A185 — un état sans date se lit au
@@ -1683,13 +1683,13 @@ action unique et doit être relue au rituel de fin (A211).
 
 | action / objet | état daté et ce qui reste | priorité / déclencheur |
 |---|---|---|
-| **S196-1 / A50 / B4** | **S196 : A241 requalifiée**, le repli pèse un tiers et la limite existe ; **A242** ouverte sur le critère de domaine | prochaine action à instruire : **A242** d'abord (peu coûteuse, touche la méthode de trois sessions), puis A241 sur ses deux suspects ; la correction croisée quadratique reste disponible |
+| **S197-1 / A50 / B4** | **S197 : A242 close**, ADR-123 confirmée par audit, A240 confirmée, verdict de S196 **renversé** | prochaine action à instruire : **A241 sans son suspect** — bande relative et termes triples, sous contrainte L278 ; ou auditer `dt` et S193 ; la correction croisée quadratique reste disponible |
 | **B3 / δ** | **S194** : deux Saint-Venant 1D, bloc quantité de mouvement 3D, tranche linéaire S192, tranche non linéaire dispersive S193, couplage chiffré S194 ; aucun solveur δ choisi | construire/recevoir le candidat qui permet la comparaison B4 ; contrainte neuve d'ADR-123 sur tout candidat qui additionne des sources évoluées séparément |
 | **B4 forces / perception** | aucun reçu complet ; la métrique de vitesse S190 ne les remplace pas | après montage commun surface/solide ; protocole perceptif conserve ses participants réels requis |
 | **A216** (A217 **close** en S194) | **S194** : A217 a sa réponse — la cambrure gouverne l'addition en eau profonde, plus la durée et le désaccord de triade ; A216, coefficient S161, reste inexpliquée | A216 avec un montage qui l'explique ; ne pas dériver 0,02/0,24 comme seuil, ADR-123 n'est pas une bascule |
 | **`n` sources / A240 — close** | **S195 : A240 close.** `n = 2..6` mesuré : à cambrure par train fixée l'écart croît en `n^0,75` (sous-linéaire, loin du `n²`) ; à cambrure **totale** fixée il **décroît** en `1/√n`. ADR-123 se transporte dans le sens favorable | rien à instruire ; limites conservées : `n ≤ 6`, colinéaire, fond plat, eau profonde |
-| **Repli des croisées / A241 — requalifiée** | **S196** : moitié « limite » **close** (l'exposant sature à `−0,52` dès `n ≈ 4`, immobile jusqu'à `n = 16`) ; moitié « cause » **partielle** — éteindre tout le repli des paires déplace l'exposant de 0,131, soit **32 %** du chemin jusqu'à la loi dispersée. Le repli déplace la loi, il ne la gouverne pas | deux suspects nommés et non séparés : le confondant de bande relative (24 % entre parités, borné) et les termes **triples**, que la parité ne neutralise pas |
-| **Critère de domaine / A242** | **S196, neuf** : la dérive d'énergie sous `10⁻⁴`, employée comme critère par S194/S195/S196, **ne détecte pas la sous-résolution** — contre-exemple faux d'un facteur cinq à 65× sous le seuil | apparier tout critère de conservation à un contrôle de raffinement dans les bancs existants ; peu coûteux, et touche la méthode de trois sessions |
+| **Repli des croisées / A241 — suspect réfuté** | **S197** : le verdict de S196 ne survit pas au raffinement — l'écart pair/impair de `0,131` vaut **`0,005`** à résolution convergée, ce qui est la prédiction *réfutante* de S196 lui-même. **Le repli n'explique rien de mesurable.** La moitié « limite » survit, sa valeur passant de `−0,52` à ~`−0,45` | la **totalité** de l'écart reste sans cause ; deux candidats nommés et non séparés (bande relative, termes triples), à éprouver dans un montage qui contrôle l'exposition à l'erreur de modèle (**L278**) |
+| **Critère de domaine / A242 — close** | **S197 : traitée, et elle a servi dès le premier emploi.** Audit des trois cibles publiées : ADR-123 **tient** (table convergée dès `K=256`, ≤3,3 %), A240 **tient** (1–3 %), **le verdict de S196 tombe** (écart 0,131 → 0,005). Remède en place : `dispersion_error` et garde de Richardson dans le support et les trois bancs | rien à instruire ; restent non audités le pas de temps `dt` et S193, lot propre et peu coûteux |
 | **A213 / omega f32** | remède identifié, non appliqué, réception S95 à renouveler s'il est retenu | lot propre de précision/horizon, indépendant de l'arbitrage B4 |
 | **λ_cut / B2 / coupure W–δ** | B2 partiel ; dispersion/dissipation et borne d'éponge A92 à assembler | choix du couple W/δ ; ne pas confondre réception source B4 et coupure |
 | **Bathymétrie / S116-2** | **S194** : fond plat seul, mais le couplage y est **8,6 fois plus fort** vers le rivage quand le désaccord de triade tombe ; et la faible profondeur non linéaire n'a aucun oracle de Stokes (A234) | lot de construction propre ; une frontière établie en eau profonde ne se transporte pas vers le rivage (ADR-123) |

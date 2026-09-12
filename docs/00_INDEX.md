@@ -17,7 +17,25 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
-**S196 — 2026-09-12 : le repli des croisées pèse un tiers ; A241 requalifiée, aucun ADR.**
+**S197 — 2026-09-12 : audit de résolution ; ADR-123 confirmée, le verdict de S196 tombe.**
+[AUDIT-RESOLUTION-S197](validation/AUDIT-RESOLUTION-S197.md), **A242 close**, aucun ADR.
+`K` n'entre dans le véhicule que par le symbole de dispersion, précalculé : le défaut se
+calcule donc **en forme fermée sans simuler**, et monter `K` ne coûte qu'à la construction.
+Écart au symbole continu à `K=64` — la valeur de S193 à S196 : 0,48 % au mode 2, **9,3 %**
+sur la bande peuplée de S194, **43,6 %** de S195, **112 %** de S196.
+**ADR-123 tient** : sa table *mesurée* est convergée dès `K=256` et se déplace de 3,3 % au
+plus ; note datée de confirmation, ADR non réécrite. **A240 tient** (1–3 %).
+**Le verdict de S196 tombe** : l'écart pair/impair `0,131` vaut **`0,005`** à `K=1024` —
+c'est la prédiction *réfutante* de S196 lui-même. **A241 perd son suspect** et la totalité
+de l'écart reste sans cause. Pourquoi les deux autres tiennent : ils comparent à **même
+bande**, où l'erreur est commune et s'annule — **L278**. Remède en place :
+`dispersion_error` et garde de Richardson dans le support et les trois bancs.
+123 ADR,242 angles,278 leçons,18 invariants,6 SPEC,23 cas.
+**Suite S198 : A241 sans son suspect**, sous contrainte L278 ; ou auditer `dt` et S193.
+
+**S196 — 2026-09-12 : ⚠ verdict renversé par S197.** *Le « tiers » ci-dessous vaut `0,005`
+à résolution convergée : le repli n'explique rien de mesurable. Ce qui survit est le montage
+de parité et la moitié « limite ». Voir S197.* Texte d'origine conservé :
 [REPLI-CROISEES-S196](validation/REPLI-CROISEES-S196.md), empreinte `0xbcf2911362458c13`.
 Montage de **parité** : trains impairs → somme et différence paires → **aucun repli**, par
 arithmétique et non par approximation. Exposants `−0,394` (repli plein) contre `−0,525`

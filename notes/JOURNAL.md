@@ -10225,3 +10225,84 @@ par S194 et S195 étaient bien loin du bord. Ensuite A241, sur ses deux suspects
 isoler la bande relative, puis séparer les termes triples.
 
 **Décisions qui demandent un arbitrage humain :** aucune nouvelle.
+
+## S197 — 2026-09-12 — L'audit de résolution : ADR-123 tient, le verdict de la veille tombe
+
+**Entrée :** master 21763ab, A242. Plan seul 382da59 ; protocole 5513f42 ; remède et audit
+cb63c18 ; réception e9c5ace. `water-core` inchangé ; le support d'exemples gagne deux gardes.
+
+**Produit :** [AUDIT-RESOLUTION-S197](../docs/validation/AUDIT-RESOLUTION-S197.md), et les
+trois bancs publiés portent désormais leur propre audit.
+
+**La découverte qui a tout orienté, faite avant toute mesure et par arithmétique pure.**
+`K` — le nombre de niveaux verticaux — n'entre dans le véhicule **que** par le symbole de
+dispersion `dn[q]`, précalculé à la construction ; le pas de temps ne le voit jamais. Deux
+conséquences : le défaut se calcule en **forme fermée** sans rien simuler, et monter `K` ne
+coûte qu'à la construction. L'audit, qu'on pouvait croire cher, était bon marché.
+
+L'écart entre le symbole discret employé et le symbole continu `k·tanh(k·h)`, à `K = 64` —
+la valeur de S193 à S196 : **0,48 %** au mode 2, **1,08 %** au mode 3, **9,32 %** au mode 9,
+puis 27 %, 55 %, 112 % plus haut. Sur la bande réellement peuplée : **9,3 %** pour S194,
+**43,6 %** pour S195, **112 %** pour S196. Le banc vérifiait déjà que son symbole discret est
+celui qu'il croit calculer ; il ne vérifiait nulle part qu'il **approche la physique** — et
+le contrôle qui existait pour cela portait sur `K = 512`, une configuration que personne
+n'exécute.
+
+**Verdict par cible, et il n'est pas uniforme.**
+
+**ADR-123 tient.** Sa table est **mesurée, pas interpolée** — c'est ce qu'il fallait rejouer,
+et la première version de l'audit visait à tort l'extrapolation de la loi ajustée. Rejouée :
+à `K = 64` elle reproduit le publié exactement, à `K = 256` et `K = 1024` — identiques entre
+elles, donc convergées — elle se déplace de **3,3 % au maximum**. Toutes les lignes tiennent.
+L'ADR reçoit une note datée de **confirmation** ; elle n'est pas réécrite. Réserve neuve :
+l'ajustement `α` bouge de 3,7 % et ses extrapolations hors calibration jusqu'à 35 % — la
+décision ne repose pas dessus, mais qui emploierait la loi loin de sa plage devrait le savoir.
+
+**A240 tient.** Série A `−0,437 → −0,425`, série B `+0,783 → +0,774` à `K = 512`.
+
+**Le verdict de S196 tombe.** Son écart pair/impair de `0,131` vaut **`0,005`** à `K = 1024`.
+À `K = 64` l'audit reproduit ses chiffres exactement, donc il est fidèle et c'est bien la
+conclusion qui cède. **C'est la prédiction 2 de S196 lui-même**, celle qui réfute : les deux
+familles s'accordent à mieux que `0,10`. **Le repli des harmoniques croisées n'explique pas
+un tiers de l'écart — il n'en explique rien de mesurable.** A241 perd un suspect et n'en
+gagne aucun ; la totalité de l'écart reste sans cause. Sa moitié « limite » survit, la valeur
+passant de `−0,52` à environ `−0,45`.
+
+**Pourquoi S196 tombe et pas les deux autres**, et c'est la leçon : S194 et S195 comparent des
+configurations **à même bande**, où l'erreur de symbole est commune aux deux côtés et
+s'annule — S195 en portait 43 % et tient. S196 comparait deux familles de bandes différentes,
+38 contre 40, donc d'**exposition différente**, et ce qu'il mesurait comme « effet du repli »
+était l'écart entre deux défauts.
+
+**L278** — une erreur systématique ne s'annule dans une comparaison que si les deux côtés la
+portent également. Ce n'est pas l'ampleur de l'erreur qui décide, c'est sa **répartition**.
+S196 avait listé ce qui différait entre ses deux bras et jugé chaque différence sur sa
+physique ; aucune sur sa part d'erreur de modèle. Le geste correctif est bon marché :
+mesurer l'exposition de chaque bras et la publier **à côté** du résultat, comme une dérive
+d'énergie.
+
+**A242 est close.** Le remède est dans le support partagé et dans les trois bancs :
+`dispersion_error(upto)`, qui donne l'écart au symbole continu **à la configuration
+exécutée** et nomme le mode fautif, et `richardson()`, qui refuse de tirer un ordre d'un
+triplet non monotone. Deux tests neufs les fixent, dont l'un rejoue le triplet exact sur
+lequel S196 se serait trompé.
+
+**Réception :** workspace **331 réussis / cinq ignorés**, douze réceptions au banc S196. Les
+trois empreintes **changent** — l'audit ajoute des valeurs mesurées — mais les chiffres
+publiés sont reproduits à l'identique à `K = 64`, et c'est le banc qui le vérifie, ce qui
+vaut mieux qu'un hash.
+
+**Ce que je n'ai pas fait.** Le pas de temps `dt = T₁/400` n'est pas audité : hérité, et hors
+du champ d'A242, qui vise la résolution verticale. S193 n'est pas rejoué — sa bande peuplée
+est la moins exposée des quatre, mais ce n'est pas une mesure. Les fenêtres glissantes hautes
+de S196, dont sortait le `−0,52`, ne sont pas remesurées à `K = 1024` : seul l'exposant sur
+toute la plage l'est. Et rien n'explique davantage l'écart d'A241 — la session retire un
+suspect, proprement, sans en proposer d'autre.
+
+**Prochaine session recommandée. S198 : A241 sans son suspect.** Les deux candidats restants
+ont été nommés par S196 et ne sont pas séparés — le confondant de bande relative et les
+termes triples — et il faut maintenant les éprouver dans un montage qui contrôle
+**l'exposition à l'erreur de modèle**, ce que L278 impose désormais. Auditer `dt` et S193
+est un lot propre, peu coûteux, qui peut passer avant.
+
+**Décisions qui demandent un arbitrage humain :** aucune nouvelle.
