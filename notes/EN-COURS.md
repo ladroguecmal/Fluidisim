@@ -94,7 +94,7 @@ publié, pas une erreur de requête (ADR-127 D7 : pas de fonctionnalité retiré
  budget → réécrite avec cas W et motif écrit ; autre → défaut à corriger) ; nouveaux essais :
  mer S201 Hs 1,5 composable (journal vide et avec impact) par `compose` et `mixed` ;
  `slope_floor` exact des deux côtés ; verdicts `Slope`/`SlopeEnvelope` atteints par W seul.
-- [ ] **P4** — gardes du contrat de pente (I-18) relues et mises à jour ; workspace debug
+- [x] **P4** — gardes du contrat de pente (I-18) relues et mises à jour ; workspace debug
  complet ; essais touchés en release.
 - [ ] **P5** — bout en bout : image S203 +3 s rejouée **au bit** (contrôle « admis inchangé ») ;
  impact sur la mer S201 Hs 1,5 contre témoin, zéro pixel hors emprise ; budget d'impact π/7.
@@ -132,3 +132,9 @@ conservée. (7) `slope_floor_refuses…` : « au-dessus c'est B qui décide » r
 deux chemins au plancher exact. **Neuf** : `reference_sea_s201_composes_with_an_impact_s205`.
 Après réécriture : **246 réussis + 1 neuf**, deux ignorés (lib). Commentaires de doc des
 erreurs `Slope` mis à jour dans les trois modules.
+
+P4 : garde `every_field_places_its_limit_at_stokes_steepness_s143` inchangée et verte ; garde
+des sites mise à jour en P3. Workspace debug **344 réussis / cinq ignorés** (247+4+93), un de
+plus que S203 (l'essai neuf). Release : 28 essais `composition|mixed|pressure_world|
+contrat_pente` verts. Harnais release : **C18 0x85c8bc610f551d11, C02 0x0a3a3bcc945db263**,
+identiques aux reçus S179–S182 ; zéro échec. Avertissements anciens du harnais inchangés.
