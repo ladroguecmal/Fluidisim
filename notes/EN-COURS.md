@@ -70,7 +70,7 @@ Airy et raffinement. Première étape physique, pas réception non linéaire B4.
 - [x] **P2** — équations, discrétisation x-z, opérateur de surface et protocole avant mesure.
 - [x] **P3a** — véhicule potentiel 2D : relèvement elliptique réellement discrétisé,
   conditions de surface, évolution et vitesses ; réception des bords/stencil/refus.
-- [ ] **P3b** — ondes Airy profond/peu profond/intermédiaire, raffinements espace/temps,
+- [x] **P3b** — ondes Airy profond/peu profond/intermédiaire, raffinements espace/temps,
   vitesse/surface/énergie/volume, contre-épreuves, reproductibilité.
 - [ ] **P4** — documenter résultats/limites et suite couplée ; propager A50/B4/A217/file,
   ADR seulement si décision de projet, jamais sélection δ par un essai linéaire.
@@ -86,3 +86,7 @@ Choix de banc : potentiel incompressible irrotationnel linéarisé, domaine x-z 
 Laplace discret et élévation libre évolutive. A217 non linéaire restera ouverte.
 P3a : trois tests debug/release passent. Premier test de débordement trop faible
 (MAX multiplié par 0,098 reste fini) corrigé avec état ψ négatif extrême ; aucun seuil assoupli.
+
+P3b : 12 grilles/cas reçus selon protocole (grille fine <=2 %, convergence),
+quatre pas temporels ordre2 ; deux release identiques 0x4fc690d4ac035bf7.
+Pire grille fine vitesse1,732796 % profond. Trois tests debug/release passent.

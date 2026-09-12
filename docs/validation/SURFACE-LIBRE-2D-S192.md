@@ -108,3 +108,60 @@ elle ne reçoit pas A217 ni B4 non linéaire (ADR-112). Le fournisseur B+W et le
 de source80ms de S191 ne sont pas encore branchés à ce nouveau modèle.
 Les autres chantiers de la file S190 restent portés. La suite devra nommer les
 termes physiques manquants avant de prétendre comparer perturbatif et total.
+
+## 5. Résultats exécutés — 2026-09-12
+
+**S191-1 réalisée : onde de gravité reçue sur la tranche linéaire x-z.**
+Les quatre grilles ont été exécutées aux trois profondeurs, sans modifier le protocole.
+À N128/K64, erreurs maximales sur cinq périodes :
+
+| h (m) | hauteur / a | vitesse / (agk/ω) | erreur de fréquence | ordre final hauteur / vitesse |
+|---|---:|---:|---:|---:|
+| 0,25 | 0,292748 % | 0,308062 % | 0,009809 % | 2,0069 / 2,0056 |
+| 2 | 0,086520 % | 0,091040 % | 0,002899 % | 2,0256 / 2,0240 |
+| 8 | 1,647737 % | 1,732796 % | 0,055212 % | 1,9923 / 1,9883 |
+
+Le profond échoue nettement sur grille grossière (vitesse93,19 % à N16/K8),
+puis converge ; une seule grille aurait confondu modèle dispersif et précision.
+Les deux derniers ordres spatiaux sont tous >1,95. En temps isolé, erreurs de
+hauteur semi-discrète1,965157/0,490840/0,122681/0,030672 % ; ordres finaux
+2,000345 et1,999920. Au pas T/1600, le défaut temporel semi-discret de vitesse
+reste au plus2,03423e-5 relatif sur l'ensemble des grilles.
+
+Dérive maximale d'énergie de toute la campagne : **4,111837e-6 relatif**
+(0,000411184 %), volume normalisé ≤1,456897e-16. Énergie contrôlée à chaque pas,
+champs toutes les20 étapes ; les maxima de champ sont ceux de ces observations,
+pas une borne analytique entre deux observations. Surface figée : erreur200 % ;
+rappel inversé au quart de période :250,9176 %. Fréquence Saint-Venant au profond :
+écart150,6637 % ; ce véhicule ne converge donc pas vers la dispersion peu profonde.
+
+Trois tests propres **debug et release réussis**, dont récurrence indépendante,
+identité énergétique volumique, deux fréquences simultanées, pression et refus
+atomiques. Deux campagnes release ont des sorties identiques, empreinte des
+indicateurs **0x4fc690d4ac035bf7**. Cible x86_64-pc-windows-msvc, rustc1.97.0
+(2d8144b78), LLVM22.1.6. Pas de seconde cible, pas de mesure CPU.
+Les331 tests workspace/cinq ignorés restent le reçu S190, non rejoués ici ;
+seuls de nouveaux fichiers d'exemple/support ont été ajoutés.
+
+Code : `code/water-core/examples/free_surface_2d.rs` et `support/free_surface.rs`.
+[Sorties intégrales](SURFACE-LIBRE-2D-S192-MESURES.md).
+
+## 6. Portée et prochaine construction
+
+Le dépôt possède désormais une tranche2D **dispersive linéaire** avec fond physique
+et surface évolutive ; l'affirmation « aucun domaine2D » expire pour les véhicules
+de banc. Aucun solveur δ de production n'est choisi. A217 conserve exactement son
+manque : aucun véhicule **à la fois non linéaire et dispersif** reçu. A216 reste
+inexpliquée, forces et perception restent non reçues, A50 partielle.
+
+La source S190/S191 n'est pas injectée ici. Ces erreurs Airy, normalisées par une
+amplitude analytique, **ne s'ajoutent pas** au budget projeté1,374540 % : modèles,
+champs de référence et conditions aux limites différents. Aucun montage couplé
+complet n'a été déclaré sous2 %.
+
+**S192-1 : construire les conditions de surface non linéaires dispersives et les
+recevoir contre une référence de Stokes avec raffinement**, avant de brancher
+B+W et de comparer perturbatif/total sous le critère ADR-120. Expliciter l'ordre
+en amplitude retenu et son domaine de validité ; une superposition linéaire ne
+fermera pas B4 (ADR-112). Il s'agit d'une prochaine tâche de construction, pas
+d'une nouvelle campagne du réseau source. Aucun nouvel arbitrage demandé.
