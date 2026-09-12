@@ -75,13 +75,30 @@ S170 avait explicitement refusé de conclure là-dessus ; S183 fournit le chiffr
       (valeurs finies, chemin exercé, témoin direct) et relever les coûts.
 - [>] **P4** — chiffrer ce que la décimation achète, et dire ce que la part mesurée
       devient si l'on ajoute une projection. Recevoir dans un document de validation.
-- [ ] **P5** — mesurer le gain disponible d'une évaluation **par réseau** plutôt que par
+- [x] **P5** — mesurer le gain disponible d'une évaluation **par réseau** plutôt que par
       point, pour B seul : récurrence de phase contre appel par point. Sizer l'occasion,
       sans la proposer comme acquise — une récurrence ne rend pas les mêmes bits (I-03).
 - [ ] **P6** — rituel de fin (REPRISE.md §6) : journal, angles, leçons, index, décomptes,
       jeton et copies.
 
 ### Notes de reprise
+
+P5 S184 *(exécuté avant P4 : la mesure devait exister pour que le document puisse la
+recevoir ; le plan et git disent la même chose, dans cet ordre)*.
+`examples/lattice_phase.rs`, deux exécutions. **Résultat négatif, et c'est l'utile.**
+La phase et la trigonométrie ne pèsent que **15–18 %** du différentiel de B, et une
+récurrence de réseau n'en retire que **12–15 %**. Le coût n'est pas la trigonométrie :
+c'est produire 26 scalaires par composante — 140 ns par composante et par nœud, dont
+21 seulement de phase. Changer la traversée ne sauve rien ; il faudrait changer ce
+qu'on calcule. Le levier non testé est la vectorisation, pas le parcours.
+Chiffres du contenu, calculés et non posés à la main : coupure de pression
+k_max=5,8125 rad/m → **λ_min = 1,081 m**. Points par λ_min : H=0,25 → 4,32 ;
+H=0,50 → 2,16 ; H=1,00 → 1,08 ; H=2,00 → 0,54. **La décimation spatiale est donc
+bornée à r=2 par le contenu**, soit 5,3× seulement. La cadence, elle, divise
+exactement par c et le contenu temporel est lent (périodes 3–12 s, segments 2 s) :
+c'est l'axe bon marché. Asymétrie à publier.
+Note : ce montage utilise le spectre JONSWAP (`from_spectrum`, 32 composantes minimum),
+pas le `configure` historique à 16 de S183 ; les parts sont donc internes à ce montage.
 
 P3 S184 : `examples/perturbative_step.rs`, deux exécutions concordantes. Les quatre
 réceptions passent, **zéro composante exemptée par ±0**. Chiffres, à publier en P4 :
