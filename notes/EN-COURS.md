@@ -73,12 +73,18 @@ surface à entrées identiques, sur plusieurs lots et recettes.
 - [x] **P3** — écrire l'exemple de mesure (`differential_cost`) : préparation, évaluation
       différentielle contre surface à entrées identiques, chemins de refus, empreinte
       mémoire et allocations. Exécuter, relever.
-- [>] **P4** — recevoir les chiffres dans un document de validation, dire ce qu'ils ne
+- [x] **P4** — recevoir les chiffres dans un document de validation, dire ce qu'ils ne
       disent pas ; suite perturbative déclarée.
-- [ ] **P5** — rituel de fin (REPRISE.md §6) : journal, angles, leçons, index, décomptes,
+- [>] **P5** — rituel de fin (REPRISE.md §6) : journal, angles, leçons, index, décomptes,
       jeton et copies.
 
 ### Notes de reprise
+
+P4 S183 : COUT-DIFFERENTIEL-S183 §6-§8 reçus, **A226** et **L263** écrits. Décomptes
+à porter en P5 : **117 ADR, 226 angles, 263 leçons, 18 invariants, 6 SPEC, 23 cas**
+(README, 00_INDEX, REPRISE). Aucun ADR : aucun contrat n'a changé. Deux pourcentages
+recalculés avant publication — l'écart lot1→lot256 vaut +13 à 16 % en différentiel et
++39 à 43 % en surface, pas les valeurs posées de tête au premier jet.
 
 P3 S183 : `examples/differential_cost.rs`, deux exécutions concordantes, aucun
 changement de bibliothèque ; workspace 331 réussis/cinq ignorés debug et release.

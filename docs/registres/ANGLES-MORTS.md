@@ -2192,3 +2192,30 @@ A50 reste partielle, aucun nouvel angle ; S181-1 reçoit le cycle vivant du cons
 admission, saturation/reprise, renouvellement et restauration identiques àla préparation
 directe, dérivées/source comprises. Trois nouveaux tests, aucun nouvel angle.
 A50/B4 partiels ; S182-1 mesure coût et allocations avant budget de consommation.
+
+**Suivi A50 — S183 : coût et allocations du consommateur différentiel mesurés, reste partielle.**
+[COUT-DIFFERENTIEL-S183](../validation/COUT-DIFFERENTIEL-S183.md) : rapport différentiel/surface
+**3,0 à 4,3** (médiane ~3,4), **identique couche par couche** (B 3,3 ; impact 3,6 ; pression 3,4),
+donc porté par les 31 scalaires publiés contre 10 et non par la nature du calcul dérivé.
+Préparation et actualisation inchangées entre les deux chemins ; zéro allocation d'hôte après
+`seal()` sur six montages. A50 reste partielle : le solveur perturbatif qui consommerait
+`momentum_residual` n'existe pas, et produire la source n'est pas s'en servir. S183-1 mesure
+la consommation.
+
+- **A226** *(sévérité 2, S183 ; ouverte)* — **Un refus porté par un point fait payer le lot
+  entier, et le contrôle le moins cher est évalué en dernier.** Le lot est atomique (ADR-063) :
+  sur refus, rien n'est publié. Mais le refus survient **pendant** la boucle, après que tous les
+  points précédents ont été calculés. Mesuré : un lot de 64 dont le dernier point sort du domaine
+  coûte 2232–2399 µs, soit **95 %** du même lot réussi, pour zéro sortie ; le même point placé
+  en tête coûte 2,0 µs — rapport **1150**. Et ces 2,0 µs ne sont pas le plancher : un point hors
+  du rayon d'un impact paie d'abord `differential_local` de B en entier (2,0 µs à 16 composantes,
+  **7,6–8,4 µs à 64**), parce que le test géométrique du domaine d'impact vient après. Les refus
+  indépendants des points, eux, sont gratuits (0,025–0,097 µs) et refusent avant tout calcul :
+  c'est le contraste qui rend l'asymétrie visible. **Ce n'est pas un défaut de correction** —
+  aucune valeur n'est fausse, aucune publication n'est altérée — mais un hôte qui interroge des
+  points dont il n'a pas garanti l'appartenance au domaine paie le prix plein d'un lot pour rien,
+  et le paie d'autant plus que le montage est gros. Deux voies, non tranchées : une passe
+  géométrique préalable sur tous les points, ou la remontée des tests de domaine les moins chers
+  avant l'évaluation de B. La seconde ne couvre pas tous les refus par point — `NonFinite` ne se
+  prévoit pas — donc aucune des deux ne supprime le cas ; elles en réduisent la fréquence.
+  Chiffrage et conditions dans COUT-DIFFERENTIEL-S183 §6.5.

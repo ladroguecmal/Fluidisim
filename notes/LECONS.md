@@ -4071,3 +4071,28 @@ Voir COMPOSITION-DIFFERENTIELLE-S181 ; aucune nouvelle leçon numérotée.
 comprise : l'identité antérieure de la seule surface ne prouve pas celle des dérivées.
 Trente-quatre scalaires confrontés en bits après publication et restauration ; voir
 CYCLE-DIFFERENTIEL-S182. Application des exigences existantes, pas de nouvelle leçon.
+
+## L263 — Un axe de mesure ne mesure son effet que s'il dépasse ce qu'il transporte
+
+*(S183)* Le protocole de S183 faisait varier la taille du lot pour mesurer l'amortissement des
+contrôles de montage, payés une fois par lot. L'axe a bien produit des chiffres, réguliers et
+reproductibles sur deux exécutions — et ils ne disaient pas ce qu'on lisait dedans. Les contrôles
+coûtent 0,025 à 0,097 µs, soit moins de 0,4 ‰ d'un lot de 256 points : leur amortissement est
+sous le bruit. Ce que l'axe montrait, c'était l'effet inverse et cent fois plus grand — le coût
+par point **augmente** avec le lot (8,59 → 12,26 µs), parce qu'un lot plus grand visite des points
+plus nombreux et plus dispersés et perd en localité. L'axe mesurait la distribution des points.
+
+Ce qui a sauvé la lecture n'est pas la prudence : c'est qu'une **autre** table donnait le coût
+des contrôles directement. Les refus indépendants des points sont exactement ces contrôles, sans
+les points ; leur chiffre a rendu l'interprétation impossible à tenir.
+
+Avant de faire varier un axe, chiffrer l'effet attendu et le comparer à ce que l'axe déplace en
+même temps ; quand le confondant domine, prévoir une seconde voie qui isole l'effet — ici les
+chemins de refus. Et écrire dans le document ce que l'axe a réellement mesuré, pas ce qu'il
+devait mesurer : le protocole de S183 avait été publié avant l'exécution (§3), ce qui a rendu
+l'écart lisible au lieu de le laisser se réécrire. Voir COUT-DIFFERENTIEL-S183 §6.7.
+
+Corollaire immédiat, et coûteux à ignorer : **multiplier un coût par point par un nombre de
+points sous-estime un grand lot** — de 13 à 16 % en différentiel et de 39 à 43 % en surface
+entre le lot 1 et le lot 256. S125 le disait déjà d'une autre manière, en refusant d'extrapoler
+un rapport hors de sa grille.
