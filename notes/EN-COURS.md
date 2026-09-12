@@ -58,7 +58,72 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S187 — terminée
+Session : S188 — en cours
+Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
+Objectif : S187-1/A50, **rejouer la composition de S186 sur un réseau ancré** (ADR-118).
+S187 a trouvé que le réseau du dépôt posait son dernier nœud hors du bloc, et que l'ancrer
+divise l'erreur spatiale par jusqu'à six, gratuitement. Deux conséquences pour S186, et la
+seconde est la vraie :
+
+1. **les magnitudes** — la règle de dimensionnement de S186 §8.5 est d'égaliser les erreurs
+   des deux axes pris seuls. L'axe spatial vient de perdre un facteur allant jusqu'à six :
+   le point de parité se déplace entièrement, et l'exemple publié (« la cadence devient
+   dominante à `c = 32` ») ne tient plus ;
+2. **la loi elle-même** — le maximum pour les modes causaux a été mesuré sur une erreur
+   **concentrée** sur une tranche unique. Un réseau ancré la **répartit** (S187 §8.5 :
+   erreur de tranche haute nulle, maximum déplacé vers le milieu). Rien ne dit qu'une loi
+   de composition mesurée sur une erreur concentrée soit celle d'une erreur répartie.
+
+### Plan
+
+- [x] **P1** — état réel, jeton et plan seul.
+- [ ] **P2** — publier le protocole avant tout chiffre : la famille ancrée à **nombre de
+      nœuds identique** à S186, la grille `r × mode × c` rejouée à l'identique, les trois
+      mêmes lois avec le **même critère déjà déclaré** `[0,80 ; 1,25]`, les réceptions, et
+      ce que le rejeu ne prouvera pas.
+- [ ] **P3a** — sortir dans `support/` ce que S187 gardait local : les indices ancrés
+      uniformes. Rejouer `graded_lattice` et vérifier `0x6cf13183b4a240df`.
+- [ ] **P3b** — écrire `anchored_composition.rs` : la grille de S186, réseau ancré, même
+      référence, mêmes métriques. Réceptions : `14³` ancré = réseau plein en bits, la
+      ligne `c = 1` redonne S187 §8.4, la ligne `r` plein redonne les `eU` temporelles de
+      S186. Relever.
+- [ ] **P4** — recevoir dans un document de validation ; **note corrective datée** si la loi
+      change ; ADR seulement si une décision nouvelle en sort. Angles et leçons.
+- [ ] **P5** — rituel de fin (REPRISE.md §6).
+
+### Notes de reprise
+
+S188 : master 2d05c77 propre, quatre copies au même commit ; 118 ADR / 231 angles /
+267 leçons / 18 invariants / 6 SPEC / 23 cas. Démarrage à froid, copie principale.
+
+**Entrées déjà acquises, ne pas les refaire.** S186 donne la grille complète sur réseau
+débordant : erreurs spatiales seules 2,5401 / 13,6043 / 32,9593 % à `r = 2/4/8`, erreurs
+temporelles par mode et par cadence, et les trois lois avec leur verdict par mode (maximum
+pour maintien et extrapolation, quadratique pour l'interpolation). S187 donne les erreurs
+ancrées à nœuds égaux, mais **seulement à `c = 1`** : 8³ ancré → 1,6947 %, et le plancher
+horizontal de son propre réseau. Le plancher de référence est 0,386 % et ne bouge pas —
+même référence, mêmes dénominateurs `max|S| = 1,540547e-4`, `max|u'(T)| = 7,993168e-5`.
+
+**Le réseau ancré à comparer.** Pour que le rejeu soit lisible, la famille ancrée doit
+avoir **exactement les nombres de nœuds** de la famille isotrope de S186 : 14³ = 2744,
+8³ = 512, 5³ = 125, 3³ = 27. Ce sont les `uniform_indices` de S187 à 14, 8, 5 et 3 nœuds
+par axe, appliqués aux trois axes. Une seule variable change entre S186 et S188 : **où le
+dernier nœud se pose**. Si l'on changeait aussi la graduation, on ne saurait pas à quoi
+attribuer l'écart.
+
+**Piège anticipé.** À 14 nœuds par axe, l'ancré et le débordant coïncident (`axis_indices`
+à `r = 1` donne déjà 1..14) : la ligne `14³` doit donc être **identique en bits** à la
+référence et à la ligne `r = 1` de S186. C'est la réception la moins chère et la plus
+parlante — si elle échoue, le réseau ancré n'est pas ce qu'on croit.
+
+**Second piège.** `scatter_indexed` n'est pas `scatter`. S187 a reçu leur identité en bits
+sur les indices uniformes **débordants** ; le rejeu utilise les indices **ancrés**, pour
+lesquels aucun `scatter` historique n'existe. L'identité ne peut donc être vérifiée qu'au
+cas `r = 1`, et c'est une limite du contrôle, pas une échappatoire.
+
+---
+
+Session précédente : S187 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : S186-1/A50, le **réseau gradué en profondeur**. S186 a montré que l'erreur
 spatiale globale est **exactement** celle de la tranche la plus haute du bloc, et que les

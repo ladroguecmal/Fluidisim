@@ -18,18 +18,18 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-12 14:14 +02:00
+JETON            : occupé
+Battement        : 2026-09-12 14:29 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S188 — S187-1/A50 : rejouer la composition de S186 sur réseau ancré
 Dernière session : S187 — l'ancrage du réseau vaut six fois la graduation ; ADR-118
-Session suivante : S188 — S187-1/A50 : ancrer le réseau de `support/` et rejouer la composition de S186 dessus
+Session suivante : à fixer par le rituel de fin de S188
 
-*S183 à S187 ont travaillé dans la **copie principale**, sur `master` : aucune copie isolée
+*S183 à S188 ont travaillé dans la **copie principale**, sur `master` : aucune copie isolée
 ouverte, donc rien à refermer (AGENTS.md). Les trois worktrees ont été **avancés sur master**
 en fin de S183 — ils portaient un jeton périmé annonçant S182, ce qui est exactement le
 mécanisme des trois forks. L'avance rapide ne détruit rien et suffit à l'éteindre (AGENTS.md).
-S186 les y a ramenés en fin de session, et S187 les a retrouvés au commit de `master`. L'état se constate par
+S186 et S187 les y ont ramenés en fin de session, et S188 les a retrouvés au commit de `master`. L'état se constate par
 `git worktree list` ; il ne se recopie pas.*
 
 **Copies de travail — ADR-110, S159.** Le décompte n'a plus sa place ici : il vieillissait de
