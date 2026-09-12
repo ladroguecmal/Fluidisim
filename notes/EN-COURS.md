@@ -80,6 +80,58 @@ sous la règle des deux maillons (§6.8), et non par le chaînage.
       doit pas préempter le verdict de B3.
 - [ ] **P5** — rituel de fin (§6), compteur `Maillons` mis à jour selon la règle.
 
+**PASSATION — 2026-09-13 00:01. La session change de main : Codex termine S199.**
+P1 à P3 sont **committés et complets** ; il reste **P4** (documenter) et **P5** (rituel).
+Tout ce qui suit est écrit pour que rien ne soit à refaire ni à remesurer.
+
+**Ce que P4 doit écrire**, dans `docs/validation/CANDIDAT-DELTA-S199.md`, aux §7 et §8 qui
+attendent (« à recevoir ») :
+— **Filtre 1 : PASSÉ, exactement.** Lac au repos sur fond coupé, 1000 pas, vitesse **nulle
+  en bits**, aux trois gravités 1,62 / 9,81 / 24,79.
+— **Filtre 2 : mesuré, et il élimine ce premier jet.** Fond **plat** ordre **1,947**,
+  résidu de Richardson **0,025 %** — l'opérateur intérieur et le couvercle **sont** d'ordre
+  deux. Fond **lisse** ordre **0,898** (résidu 0,963 %) ; fond **avec marche** ordre
+  **0,895** (0,961 %). ADR-038 §4 : un ordre un ne passe pas C04.
+— **Verdict à formuler** : le candidat **passe le filtre 1 et échoue le filtre 2 au fond
+  coupé**. Il n'est donc **pas encore éligible** à B3, et le défaut est **localisé** à un
+  seul mécanisme. Ne pas écrire « éliminé » sans dire que l'intérieur passe.
+— **Cause nommée, non corrigée** : la vitesse est stockée au **centre géométrique** de la
+  face alors que le flux demande sa moyenne sur la **partie ouverte** ; l'écart est un
+  O(dx) dès que l'ouverture est partielle. C'est le point à traiter pour un bord d'ordre
+  deux, et c'est la suite naturelle.
+— **Deux hypothèses testées, la première fausse, à publier comme telle** : (1) j'ai cru que
+  la mantisse f32 du solveur de Poisson limitait ; le champ de pression passé en f64, les
+  valeurs n'ont **pas bougé** (2,264122231e-4 contre 2,264121986e-4). Le f64 est conservé
+  car correct, mais il n'explique rien. (2) la géométrie en escalier : le premier jet
+  prenait `max(b[i−1],b[i])` et un tout-ou-rien ; les triplets **ne convergeaient pas du
+  tout**, incréments de signes opposés, et la garde de S197 l'a dit. Fond rendu **linéaire
+  par morceaux** → la convergence revient, à l'ordre un.
+— Empreinte `0x0ad3f695685ca27a`, deux exécutions identiques. Workspace **339 réussis /
+  cinq ignorés** (246 + 93), soit huit de plus qu'avant la session.
+— **ADR** : n'en écrire un que s'il décide quelque chose de durable. Mon avis, à prendre ou
+  à laisser : **pas d'ADR**. Le candidat n'est pas retenu, aucune famille n'est éliminée,
+  et ADR-038 §4 suffit à porter le verdict. Un ADR ici préempterait B3.
+
+**Ce que P5 doit faire** : rituel §6 complet. Décomptes attendus **124 ADR si ADR il y a,
+sinon 123 / 236 angles / 279 leçons** — A244 a été écrite par l'outil ? **non** : le compte
+d'angles est passé à 236 parce qu'A243 a été ajoutée en S198 ; vérifier avec
+`sh outils/velocite.sh`, qui **fait foi**. Angles et leçons de S199 : à décider par Codex —
+il y a matière pour une leçon sur « un nom qui trompe un outil trompera un lecteur »
+(le module s'appelait `volume.rs` et l'outil le classait dans la couche V), et pour une
+autre sur « la première hypothèse était fausse et la mesure l'a dit en trois minutes ».
+**Compteur `Maillons`** : S199 **a avancé une couche** (δ, code d'exécution), donc la règle
+§6.8 le remet à **zéro** — quelle que soit la suite proposée.
+
+**Où en est le tableau des couches** (recalculé) : B S181, W S181, **δ S199**, V jamais.
+L'ère S190–S199 est passée de **0,0 %** à **7,1 %** de part système. C'est le premier
+mouvement de la couche δ depuis S161.
+
+**Deux corrections de l'outil faites en passant, et à ne pas défaire** : `velocite.sh`
+classait `volume.rs` dans la couche **V** (collision de vocabulaire : « volume » désigne
+les réseaux dans ADR-001), d'où le renommage en `delta_projection.rs` ; et il ne comptait
+que les **ajouts**, donc un renommage faisait disparaître une couche de l'historique — il
+suit désormais les fichiers avec `--follow`. Le tableau mentait deux fois.
+
 ### Notes de reprise
 
 P3 S199 : **`code/water-core/src/volume.rs` — la couche δ reçoit du code d'exécution pour

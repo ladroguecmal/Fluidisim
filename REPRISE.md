@@ -18,13 +18,19 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-12 23:41 +02:00
-Agent            : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
-Session en cours : S199 — **B3/δ : premier candidat volumétrique**, le noyau à projection
+JETON            : interrompu
+Battement        : 2026-09-13 00:01 +02:00
+Agent            : Claude Code (Opus 5) jusqu'à P3 ; **la suite revient à Codex, sur demande de l'utilisateur**
+Session en cours : S199 — **B3/δ : premier candidat volumétrique**, P1–P3 committés, **P4 et P5 restent**
 Dernière session : S198 — vélocité mesurée ; règle des deux maillons, la file reprend la main
-Session suivante : à fixer au rituel de fin, sous la règle des deux maillons (§6.8)
-Maillons        : 0 — S199 est choisie par la file, pas par le chaînage
+Session suivante : à fixer au rituel de fin de S199, sous la règle des deux maillons (§6.8)
+Maillons        : 0 — S199 **a avancé la couche δ**, le compteur reste à zéro (§6.8)
+
+*Passation volontaire, pas une coupure : l'utilisateur termine S199 avec un autre agent.
+Rien n'est en suspens — l'arbre est propre, `cargo test --workspace` passe à 339/cinq
+ignorés. **Tout ce qu'il reste à faire, et tous les chiffres pour le faire, sont en tête de
+[`notes/EN-COURS.md`](notes/EN-COURS.md)**, sous « PASSATION ». Ne pas remesurer : les
+relevés y sont.*
 
 *S195 a **changé de main en cours de route** : la session ouverte à 21:15 a été coupée par
 une limite d'usage sur un autre compte, et l'utilisateur l'a signalé. Le jeton disait donc

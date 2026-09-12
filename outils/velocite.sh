@@ -6,17 +6,24 @@
 set -e
 cd "$(dirname "$0")/.."
 
-echo "== Les quatre couches : derniere session ayant ajoute du code d'execution =="
-for lay in "B          :background" \
-           "W          :impact|wake|pressure|radial|modal|spectral|composition|prepared|mixed|wave_" \
-           "delta      :delta|shallow|dispersif|eponge|projection" \
-           "V          :network|reseau|pipe|conduite"; do
+echo "== Les quatre couches : derniere session ayant touche leur code d'execution =="
+# `--follow` par fichier : un renommage est un changement de la couche, pas une disparition.
+# S199 a paye cette lecon — le module s'appelait `volume.rs`, l'outil le classait en V, et
+# apres renommage il le declarait « jamais avance ».
+for lay in "B          :background"            "W          :impact|wake|pressure|radial|modal|spectral|composition|prepared|mixed|wave_"            "delta      :delta|shallow|dispersif|eponge|projection"            "V          :network|reseau|pipe|conduite"; do
   name=${lay%%:*}; pat=${lay#*:}
-  last=$(git log --numstat --pretty=format:"%s" --all \
-    | awk -v p="$pat" '/^S[0-9]+ P/{s=$1; next}
-        NF==3 && $3 ~ /^code\/water-core\/src\// && $1+0>0 { if ($3 ~ p) print s }' \
-    | sort -u -V | tail -1)
-  n=$(ls code/water-core/src/*.rs 2>/dev/null | grep -v "/tests_" | grep -Ec "$pat" || true)
+  # La bibliotheque seule : le harnais est de la machinerie de validation, pas la couche.
+  files=$(ls code/water-core/src/*.rs 2>/dev/null | grep -v "/tests_" | grep -E "$pat" || true)
+  n=0; last=""
+  for f in $files; do
+    n=$((n+1))
+    s=$(git log --follow --format='%s' -- "$f" | grep -oE '^S[0-9]+' | sort -u -V | tail -1)
+    if [ -n "$s" ]; then
+      last=$(printf '%s
+%s
+' "$last" "$s" | grep -v '^$' | sort -u -V | tail -1)
+    fi
+  done
   echo "  $name modules=$n  derniere avancee=${last:-jamais}"
 done
 
