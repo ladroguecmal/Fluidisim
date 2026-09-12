@@ -72,7 +72,7 @@ réduit pas l'erreur — il ne réduit que le nombre de nœuds, ce qui reste le 
 ### Plan
 
 - [x] **P1** — état réel, jeton et plan seul.
-- [ ] **P2** — publier le protocole avant tout chiffre : attribution par axe, règle de
+- [x] **P2** — publier le protocole avant tout chiffre : attribution par axe, règle de
       graduation **dérivée** de la mesure (équidistribution de `h²·∂²S`), la courbe
       erreur/nombre de nœuds comme livrable, les réceptions, et ce que la mesure ne
       prouvera pas.
