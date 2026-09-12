@@ -70,14 +70,24 @@ la vélocité elle-même, et il est traité comme tout le reste : mesuré d'abor
 - [x] **P2** — le diagnostic **chiffré**, depuis le dépôt et son historique git : où va le
       temps des sessions, qui choisit leur sujet, ce que coûte la reprise de soi. Pas
       d'impression, pas de jugement : des comptages reproductibles.
-- [>] **P3** — les correctifs **appliqués** : la règle qui casse le chaînage, le tableau de
+- [x] **P3** — les correctifs **appliqués** : la règle qui casse le chaînage, le tableau de
       bord des quatre couches, une définition mesurable d'« avancer », et l'outil qui rend
       la dérive visible sans qu'on ait à y penser.
-- [ ] **P4** — appliquer la règle neuve à la session suivante, et propager la file.
+- [>] **P4** — appliquer la règle neuve à la session suivante, et propager la file.
 - [ ] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes, jeton
       `libre`, copies avancées sans suppression non prouvée.
 
 ### Notes de reprise
+
+P3 S198 : quatre correctifs appliqués. (1) **Règle des deux maillons**, REPRISE §6.8 : une
+session qui finit ne peut proposer son propre reliquat que **deux fois de suite** ; le jeton
+porte un compteur `Maillons` qui retombe à zéro dès qu'une couche avance, et la session
+suivante le vérifie à l'amorce. (2) **Tableau des quatre couches** en tête de REPRISE §4,
+avec l'ordre de le **recalculer** et non de le recopier. (3) **Définition mesurable
+d'« avancer »** : code d'exécution ou décision actée — un banc éclaire une couche, il ne
+l'avance pas. (4) **`outils/velocite.sh`**, qui recalcule tout et **fait foi** contre le
+document. Rien n'est ajouté à AGENTS.md : la règle est rituelle, elle vit dans REPRISE §6,
+et l'amorce impose déjà de lire REPRISE en entier (pas de duplication, L137).
 
 S198 : master 7e1a9f1 propre, quatre copies alignées ; 123 ADR/242 angles/278 leçons.
 **Mesures déjà faites à l'amorce, à ne pas refaire** (tout est reproductible par git) :

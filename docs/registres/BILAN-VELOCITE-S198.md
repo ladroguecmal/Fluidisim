@@ -77,7 +77,7 @@ corrige une session antérieure.
 
 C'est en partie sain — c'est le dispositif qui fonctionne, et S197 en est le meilleur exemple.
 Mais il faut voir ce que cela implique : **un corpus qui grandit produit du travail de
-corpus**, proportionnellement à sa taille, et ce travail ne fait avancer aucune couche. À 3,8
+corpus**, proportionnellement à sa taille, et ce travail ne fait avancer aucune couche. À 3,5
 lignes de prose par ligne de code, la part du corpus qui s'entretient lui-même croît.
 
 ## 5. Ce que le diagnostic n'accuse pas

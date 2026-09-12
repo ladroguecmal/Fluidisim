@@ -23,7 +23,8 @@ Battement        : 2026-09-12 23:27 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo 1.97.0 disponibles)
 Session en cours : S198 — **ce qui ralentit le projet**, mesuré puis corrigé (demande de l'utilisateur)
 Dernière session : S197 — audit de résolution ; ADR-123 confirmée, le verdict de S196 tombe
-Session suivante : à fixer au rituel de fin, **sous la règle neuve** de §6
+Session suivante : à fixer au rituel de fin, **sous la règle des deux maillons** (§6.8)
+Maillons        : 5 — S193→S197, aucune couche avancée. **Le quota est dépassé** (§6.8)
 
 *S195 a **changé de main en cours de route** : la session ouverte à 21:15 a été coupée par
 une limite d'usage sur un autre compte, et l'utilisateur l'a signalé. Le jeton disait donc
@@ -234,6 +235,25 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+### Les quatre couches — l'état qui commande tout le reste
+
+**Recalculé le 2026-09-12 par `sh outils/velocite.sh`. Ne pas le recopier : le relancer.**
+Un état sans date se lit au présent, et il ne l'est plus (A185).
+
+| couche | modules | dernière avancée | depuis |
+|---|---:|---|---:|
+| **B** — fond | 3 | S181 | 17 sessions |
+| **W** — perturbations | 23 | S182 | 16 sessions |
+| **δ** — volumique | 4 *(véhicules d'essai ; aucun solveur choisi)* | **S161** | **37 sessions** |
+| **V** — réseaux | **0** | **jamais** | **198 sessions** |
+
+*« Avancer » a un sens mesurable et un seul : **ajouter du code d'exécution** dans
+`code/*/src`, ou **acter une décision** qui fixe un élément de la couche. Un banc, un
+exemple, une mesure, un document ne font pas avancer une couche — ils l'éclairent, et c'est
+utile, mais ce n'est pas la même chose. `outils/velocite.sh` est le juge, et il ne se
+discute pas. Voir [BILAN-VELOCITE-S198](docs/registres/BILAN-VELOCITE-S198.md).*
+
 
 **S197 — 2026-09-12 : l'audit de résolution ; ADR-123 confirmée, le verdict de la veille
 tombe.** [AUDIT-RESOLUTION-S197](docs/validation/AUDIT-RESOLUTION-S197.md), **A242 close**,
@@ -2691,6 +2711,32 @@ Avant de rendre la main, dans cet ordre :
    (lien en tête de REPRISE), actualiser chaque ligne touchée et conserver les autres avec
    leur déclencheur. Une recommandation active unique ne doit plus effacer A213, B2/coupure,
    bathymétrie, multiplateforme, V ou les volets restants de B4. A211 reste à éprouver.
+
+8. **La règle des deux maillons** — *ajoutée en S198, sur demande de l'utilisateur, après
+   mesure.* Le point 7 a corrigé le **canal** ; il n'a pas touché à l'**auteur**. La ligne
+   `Session suivante` est écrite par la session qui finit, à partir de ses propres reliquats,
+   et **trente-trois sessions sur trente-huit** depuis S160 ont ainsi pris pour sujet le
+   reliquat de la précédente. Résultat mesuré : S190–S197, **zéro ligne de système** pour
+   4 509 lignes de bancs ; δ sans solveur depuis 37 sessions ; V jamais commencée en 198.
+   Voir [BILAN-VELOCITE-S198](docs/registres/BILAN-VELOCITE-S198.md).
+
+   **La règle.** Une session qui termine peut proposer la suite de son propre travail —
+   « S(n)-1 » — **au plus deux fois de suite**. Le jeton porte un compteur `Maillons`.
+
+   - Si le travail de la session **a avancé une couche** (§4 : code d'exécution dans
+     `code/*/src`, ou décision actée), le compteur **retombe à zéro**, quoi qu'elle propose.
+   - Sinon il **s'incrémente**. À `Maillons ≥ 2`, la ligne `Session suivante` ne peut plus
+     être un reliquat : elle doit nommer **une ligne de la file active** et **dire quelle
+     couche elle fait avancer**.
+   - La session qui prend le jeton **vérifie le compteur à l'amorce**. S'il est dépassé et
+     que la ligne `Session suivante` est encore un reliquat, elle le signale et choisit dans
+     la file.
+
+   **Ce que la règle n'interdit pas.** Poursuivre un fil pendant deux sessions reste normal —
+   la plupart des bons résultats du dépôt viennent de là. Elle interdit seulement de le faire
+   **indéfiniment sans que rien n'avance**, et elle rend ce cas visible plutôt que
+   discutable. Un troisième maillon reste possible : il demande de l'écrire dans le journal
+   et de dire pourquoi il passe avant la file, ce qui est un coût honnête, pas un interdit.
 
 Une session qui n'exécute pas ce rituel laisse le projet dans un état où la suivante devra
 reconstituer ce qu'elle a fait — c'est-à-dire perdre l'essentiel de son apport.
