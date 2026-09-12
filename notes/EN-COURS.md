@@ -76,15 +76,33 @@ contre la correction croisée quadratique, qui reste portée par la file active.
 - [x] **P3a** — banc `nl_sources_2d.rs` réutilisant `support/nl_surface.rs` sans le
   modifier ; tests propres dont `n=1` à écart exactement nul, `M=1` à écart d'arrondi, et
   reproduction du point `n=2` de S194.
-- [>] **P3b** — campagne : les deux séries × deux jeux de phases × `n = 2..6`, séparation
+- [x] **P3b** — campagne : les deux séries × deux jeux de phases × `n = 2..6`, séparation
   des mécanismes par la **durée**, convergence en `K` (ordre + Richardson), empreinte et
   deux exécutions identiques.
-- [ ] **P4** — documenter, propager A240/A50/B4 et la file ; ADR seulement si une décision
+- [>] **P4** — documenter, propager A240/A50/B4 et la file ; ADR seulement si une décision
   de projet est prise ; ne **pas** dériver de seuil de bascule W/δ.
 - [ ] **P5** — rituel de fin (§6) : journal, angles, leçons, index/README/décomptes,
   jeton `libre`, copies avancées sans suppression non prouvée.
 
 ### Notes de reprise
+
+P3b S195 : campagne exécutée, **empreinte 0x5eb378f6ffe26c9f**, deux exécutions
+identiques ligne pour ligne. **Sept réceptions sur dix passent** : 1, 2, 3 (tests),
+7 (dilution séculaire, décroissance nette et saturation à 1,0000), 8 (dérive d'énergie
+1,5e-9 à 6,3e-9, aucune configuration hors domaine), 9 (ordre **1,756**, résidu de
+Richardson **0,892 %** à K=64), 10 (bande Q=32 déplace de **0,0000 %**).
+**Trois échouent — 4, 5, 6 — et par mauvaise spécification, pas par défaut de banc** :
+elles reposaient toutes sur la dichotomie de phases que P3a avait déjà réfutée.
+Série A, rapport n=6/n=2 : max 0,786 alignées / 1,091 dispersées ; L2 0,586 / 0,614.
+Attendu 1,667 et 0,431 ; les deux jeux de phases ne diffèrent que d'un facteur 1,39,
+pas >2. Série B : max 3,014 / 3,751 ; L2 2,205 / 2,354 ; attendu 5,0 et 1,29.
+**Ce que ça donne vraiment** : sur L2, série A décroît en ~n^-0,49 et série B croît en
+~n^0,72 — entre les deux lois, jamais l'une d'elles. Le maximum, lui, sature : il ne
+décroît pas avec n. **Mécanisme que la dérivation a manqué** : l'amplitude produite par
+le couplage tombe en partie sur les **modes de train**, et cette part décroît beaucoup
+moins vite — série A alignées, `croise` chute de 6,8× de n=2 à n=6 quand `train` ne
+chute que de 1,4×. Réponse à A240 : à cambrure par train fixée la croissance est
+**sous-linéaire** (~n^0,72), loin du n² craint et sous le n du régime cohérent.
 
 **Reprise du 2026-09-12 21:32 — la session a changé de main.** La session ouverte à 21:15
 a été coupée par une limite d'usage sur un autre compte ; l'utilisateur l'a dit, sans quoi

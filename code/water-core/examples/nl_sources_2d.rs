@@ -6,6 +6,7 @@
 #[path = "support/nl_surface.rs"]
 mod nl;
 use nl::{cabs, NlSurface, C};
+use water_core::Hasher64;
 use std::f64::consts::TAU;
 const L: f64 = 8.;
 const G: f64 = 9.81;
@@ -264,27 +265,134 @@ pub fn sources(
     out
 }
 
+/// Loi cohérente et loi dispersée, série A (cambrure totale `S` fixée) — protocole §2.2.
+fn law_a(s: f64, n: usize) -> (f64, f64) {
+    let n = n as f64;
+    (
+        s * (n - 1.) / n,
+        2. * s * (n * (n - 1.) / 2.).sqrt() / (n * n),
+    )
+}
+/// Loi cohérente et loi dispersée, série B (cambrure `s` par train fixée) — §2.3.
+fn law_b(s: f64, n: usize) -> (f64, f64) {
+    let n = n as f64;
+    (s * (n - 1.), s * (2. * (n - 1.) / n).sqrt())
+}
+
+const MARKS: [usize; 4] = [1, 2, 5, 10];
+const SERIES: [(&str, f64); 2] = [("A", 0.024), ("B", 0.008)];
+
 fn main() {
-    // P3a : contrôle de vie du banc. La campagne déclarée arrive en P3b.
-    let marks = [1, 2, 5, 10];
-    for aligned in [true, false] {
-        for n in [2, 4, 6] {
-            let f = fleet(n, 0.024 / n as f64, aligned);
-            let r = sources(24, 64, 8., &f, 3, 10, 400, &marks);
-            println!(
-                "phases={} n={n} max={:.6e} l2={:.6e} croise={:.6e} train={:.6e} \
-                 croissance={:.3} modes_croises={} energie={:.3e}",
-                if aligned { "alignees" } else { "dispersees" },
-                r.gap,
-                r.gap_l2,
-                r.cross,
-                r.train,
-                r.gap_at[3] / r.gap_at[0],
-                r.exclusive,
-                r.energy
-            );
+    let mut h = Hasher64::new();
+    println!("-- campagne S195 : Q=24, K=64, M=3, dt=T1/400, 10 periodes, h=8 m");
+    println!(
+        "serie | phases | n | max/A | L2/A | croise | train | N10/N1 | modes | energie | \
+         hors domaine"
+    );
+    // `ratios[serie][phases]` garde `n=2` et `n=6` pour les deux fonctionnelles.
+    let mut keep: Vec<(usize, usize, usize, f64, f64)> = Vec::new();
+    for (si, (name, steep)) in SERIES.iter().enumerate() {
+        for (pi, aligned) in [true, false].into_iter().enumerate() {
+            for n in 2..=6 {
+                let each = if si == 0 { steep / n as f64 } else { *steep };
+                let f = fleet(n, each, aligned);
+                let r = sources(24, 64, 8., &f, 3, 10, 400, &MARKS);
+                let out = r.diverged || r.energy >= 1e-4;
+                println!(
+                    "{name} | {} | {n} | {:.6e} | {:.6e} | {:.3e} | {:.3e} | {:.4} | {} | \
+                     {:.3e} | {}",
+                    if aligned { "alignees" } else { "dispersees" },
+                    r.gap,
+                    r.gap_l2,
+                    r.cross,
+                    r.train,
+                    r.gap_at[3] / r.gap_at[0],
+                    r.exclusive,
+                    r.energy,
+                    if out { "OUI" } else { "non" }
+                );
+                h.write_f32(r.gap as f32);
+                h.write_f32(r.gap_l2 as f32);
+                if n == 2 || n == 6 {
+                    keep.push((si, pi, n, r.gap, r.gap_l2));
+                }
+            }
         }
     }
+
+    // Réception 4 et 6, lues sur la **fonctionnelle** et non sur le jeu de phases : c'est
+    // la correction que P3a a portée contre le §2.1 du protocole.
+    println!("\n-- rapport n=6 / n=2, contre les deux lois derivees");
+    println!("serie | phases | fonctionnelle | mesure | coherent | disperse | plus proche de");
+    for (si, (name, steep)) in SERIES.iter().enumerate() {
+        let (c2, d2) = if si == 0 {
+            law_a(*steep, 2)
+        } else {
+            law_b(*steep, 2)
+        };
+        let (c6, d6) = if si == 0 {
+            law_a(*steep, 6)
+        } else {
+            law_b(*steep, 6)
+        };
+        let (rc, rd) = (c6 / c2, d6 / d2);
+        for pi in 0..2 {
+            let get = |n: usize| {
+                keep.iter()
+                    .find(|k| k.0 == si && k.1 == pi && k.2 == n)
+                    .map(|k| (k.3, k.4))
+                    .unwrap()
+            };
+            let (g2, l2) = get(2);
+            let (g6, l6) = get(6);
+            for (label, m) in [("max", g6 / g2), ("L2", l6 / l2)] {
+                let closer = if (m - rc).abs() <= (m - rd).abs() {
+                    "coherent"
+                } else {
+                    "disperse"
+                };
+                println!(
+                    "{name} | {} | {label} | {m:.4} | {rc:.4} | {rd:.4} | {closer}",
+                    if pi == 0 { "alignees" } else { "dispersees" }
+                );
+            }
+        }
+    }
+
+    // Réception 9, sous la forme de L274 : ordre et résidu de Richardson sur trois niveaux
+    // de `K`, sur la fonctionnelle lisse (A238).
+    println!("\n-- convergence en K, serie A n=4 dispersees, sur la moyenne quadratique L2");
+    let f = fleet(4, 0.024 / 4., false);
+    let mut lv = Vec::new();
+    for k in [32usize, 64, 128] {
+        let r = sources(24, k, 8., &f, 3, 10, 400, &MARKS);
+        println!("K={k} | L2={:.9e} | energie={:.3e}", r.gap_l2, r.energy);
+        h.write_f32(r.gap_l2 as f32);
+        lv.push(r.gap_l2);
+    }
+    let (d1, d2) = (lv[0] - lv[1], lv[1] - lv[2]);
+    let order = (d1 / d2).abs().log2();
+    let residue = (d2 / (2f64.powf(order) - 1.)).abs() / lv[2].abs();
+    println!(
+        "ordre={order:.3} | residu de Richardson a K=64 = {:.4} %",
+        100. * residue
+    );
+
+    // Réception 10 : la bande vérifie, elle ne converge pas.
+    println!("\n-- bande : Q=24 contre Q=32, serie A n=4 dispersees");
+    let mut band = Vec::new();
+    for q in [24usize, 32] {
+        let r = sources(q, 64, 8., &f, 3, 10, 400, &MARKS);
+        println!("Q={q} | max={:.6e} | L2={:.6e}", r.gap, r.gap_l2);
+        h.write_f32(r.gap as f32);
+        band.push(r.gap);
+    }
+    println!(
+        "deplacement de bande = {:.4} %",
+        100. * (band[1] - band[0]).abs() / band[0]
+    );
+
+    println!("\nempreinte (deux executions doivent la reproduire) : {:#018x}", h.finish());
 }
 
 #[cfg(test)]
