@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-12 15:17 +02:00
-Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-12 15:22 +02:00
+Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
+Session en cours : S190 — arbitrage utilisateur : erreur acceptable de 2 % pour B4
 Dernière session : S189 — la loi du maximum n'était pas une loi ; ADR-119, borner par la somme
 Session suivante : S190 — S189-1/A50 : l'additivité locale avec une projection de pression
 
