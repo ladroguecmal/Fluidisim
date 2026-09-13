@@ -77,7 +77,7 @@ Réponse reçue par la question structurée, après le commit de S206 : option (
  conséquences techniques déléguées (hôte hors du workspace sans dépendance, `water-core` inchangé
  sous ADR-020, données publiées vers le GPU selon I-08) ; ce qui reste ouvert (budget GPU de
  l'eau, pile exacte, permission de téléchargement). Notes datées ADR-125 et ADR-020 si touchés.
-- [ ] **P3** — propagation : feuille de route (§4, J1), file active, REPRISE, index, README.
+- [x] **P3** — propagation : feuille de route (§4, J1), file active, REPRISE, index, README.
 - [ ] **P4** — rituel §6 : journal, décomptes, compteur, jeton libre, copies.
 
 ### Notes de reprise
@@ -88,3 +88,5 @@ P2 : ADR-130 actée (choix de l'utilisateur : GPU, hôte séparé ; `water-core`
 publie ce que le GPU consomme ; hôte hors du workspace sans réseau ; cosmétique ; aucune
 dépendance sans autorisation nommée ; budget GPU et pile ouverts). Note datée ADR-125. ADR-020
 non touché : il prévoyait déjà `IGpuBackend` fourni par l'hôte.
+P3 : feuille de route (J1, §4 tranché + lignes dépendances et budget GPU), file active (chemin
+de rendu tranché, S208 = ADR-129 puis hôte GPU), REPRISE, index, README.

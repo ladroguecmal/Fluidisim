@@ -49,13 +49,16 @@ et restauration du service. Images **hors ligne** seulement : B (S201), impact W
 *S205* : la composition B+W admet toute mer — le budget de pente ne borne plus que les
 perturbations (ADR-128) ; impact rendu sur la mer S201.
 *S206* : coût d'image mesuré sur la scène J1 — **incompatible sur CPU** avec 2 ms à toute
-densité qui montre l'impact ; chemin d'image de W par table de Bessel décidé (ADR-129, à
-construire en S207) ; `paquets_W_max` retiré du profil (I-16).
+densité qui montre l'impact ; chemin d'image de W par table de Bessel décidé (ADR-129) ;
+`paquets_W_max` retiré du profil (I-16).
+*S207* : **rendu J1 sur GPU par un hôte séparé**, arbitrage de l'utilisateur (ADR-130) ;
+`water-core` reste sans dépendance et publie ce que le GPU consomme.
 
 *Bloquants nommés* :
 - ~~**A245**~~ — **levé en S205** (ADR-128) : la mer S201 (Hs 1,5 m) se compose, impact compris,
   zéro refus ; [COMPOSITION-MER-S205](validation/COMPOSITION-MER-S205.md) ;
-- **hôte interactif** — arbitrage ouvert, §4 ;
+- **hôte interactif** — **tranché S207 par l'utilisateur : GPU, hôte séparé** (ADR-130) ; reste à
+  construire, dépendances soumises à autorisation nommée au début du lot ;
 - **A247** — **mesuré en S206** ([COUT-IMAGE-S206](validation/COUT-IMAGE-S206.md)) : à la
   densité qui montre l'impact, l'image coûte 280 ms sur un fil et 36 ms sur seize. W n'est plus
   le goulot avec la table de Bessel précalculée (ADR-129, facteur 100) ; **B évalué par sommet sur
@@ -130,7 +133,9 @@ Les protocoles restent ceux de [PLAN-BENCHMARK](validation/PLAN-BENCHMARK.md).
 
 | arbitrage | pourquoi il est explicite | qui tranche |
 |---|---|---|
-| **Chemin de rendu et hôte de J1** *(fusionne « hôte interactif » et A247, S206)* | Mesuré : B sur CPU coûte 42 ms par image à la densité qui montre l'impact (2 px), 36 ms sur 16 fils ; W est ramené à 27 µs par impact (ADR-129). Options : **(A)** hôte séparé qui évalue B et les tables W sur **GPU** — prévu par ADR-003 et I-08 (« seules des phases repliées passent au GPU ») et par `gpu_sim_ms = 2,5` d'ADR-012 ; `water-core` reste sans dépendance, l'hôte en a (téléchargement) ; **(B)** CPU seul sans dépendance — exige B vectorisé (non mesuré), un groupe de fils persistant, et que les 2 ms se comptent en **temps mur sur tous les cœurs**, ce qu'ADR-125 ne dit pas ; **(C)** changer le profil ADR-125 (fréquence ou temps eau) ; **(D)** grille à 8 px — **perd les anneaux**, donc retire l'impact visible | **l'utilisateur** : (A) demande des dépendances, (B) réinterprète son profil, (C) le change, (D) retire de l'ambition. Recommandation technique : (A) |
+| ~~Chemin de rendu et hôte de J1~~ — **tranché S207 : (A) GPU, hôte séparé** ([ADR-130](adr/ADR-130-rendu-j1-sur-gpu-par-un-hote-separe.md)) *(fusionnait « hôte interactif » et A247, S206)* | Mesuré : B sur CPU coûte 42 ms par image à la densité qui montre l'impact (2 px), 36 ms sur 16 fils ; W est ramené à 27 µs par impact (ADR-129). Options : **(A)** hôte séparé qui évalue B et les tables W sur **GPU** — prévu par ADR-003 et I-08 (« seules des phases repliées passent au GPU ») et par `gpu_sim_ms = 2,5` d'ADR-012 ; `water-core` reste sans dépendance, l'hôte en a (téléchargement) ; **(B)** CPU seul sans dépendance — exige B vectorisé (non mesuré), un groupe de fils persistant, et que les 2 ms se comptent en **temps mur sur tous les cœurs**, ce qu'ADR-125 ne dit pas ; **(C)** changer le profil ADR-125 (fréquence ou temps eau) ; **(D)** grille à 8 px — **perd les anneaux**, donc retire l'impact visible | **l'utilisateur** — a retenu (A) |
+| **Dépendances de l'hôte GPU** *(S207)* | ADR-130 : aucune bibliothèque téléchargée sans autorisation nommée (bibliothèques, versions, taille, source) | **l'utilisateur**, au début du lot de l'hôte |
+| **Budget GPU de l'eau** *(S207)* | ADR-125 ne dit pas où l'eau s'évalue ; ADR-012 déclarait `gpu_sim_ms = 2,5` ; aucune valeur inventée | la première mesure de l'hôte GPU ; arbitrage explicite si incompatible |
 | ~~A247 — coût d'un impact visible~~ | **mesuré S206** ; part technique tranchée par ADR-129, part d'arbitrage fusionnée ci-dessus | — |
 | ~~A245 — mer composable~~ | **tranché S205, ADR-128** : B hors du budget de refus, bits publiés inchangés | — |
 
@@ -141,4 +146,5 @@ préalable. ADR-124 (S201) : image, puis budget, puis effets bornés — **lu à
 réduction**, corrigé par ADR-127 (S204). ADR-125 (S202) : profil 60 images/s, eau 2 ms.
 ADR-126 (S203) : emprise d'un impact visible. ADR-128 (S205) : le budget de pente borne les
 perturbations, pas la mer — A245 levé. ADR-129 (S206) : chemin d'image de W par table de
-Bessel ; coût d'image J1 incompatible sur CPU, arbitrage de rendu posé.
+Bessel ; coût d'image J1 incompatible sur CPU, arbitrage de rendu posé. ADR-130 (S207) : rendu J1
+sur GPU par un hôte séparé, choix de l'utilisateur.

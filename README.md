@@ -736,3 +736,9 @@ Incompatible sur CPU à la densité qui montre l'impact ; W divisé par 100 par 
 l'utilisateur, GPU recommandé. **Suite S207 : construire ADR-129.**
 129 ADR,250 angles,283 leçons,18 invariants,6 SPEC,23 cas.
 Voir [coût d'image S206](docs/validation/COUT-IMAGE-S206.md), [ADR-129](docs/adr/ADR-129-chemin-image-de-w-par-table-de-bessel.md).
+
+**S207 — 2026-09-13 : rendu J1 sur GPU par un hôte séparé, ADR-130 (arbitrage utilisateur).**
+`water-core` reste sans dépendance ; l'hôte GPU vit hors du workspace ; aucune dépendance sans
+autorisation nommée. **Suite S208 : construire ADR-129.**
+130 ADR,250 angles,283 leçons,18 invariants,6 SPEC,23 cas.
+Voir [ADR-130](docs/adr/ADR-130-rendu-j1-sur-gpu-par-un-hote-separe.md).

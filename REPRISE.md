@@ -156,7 +156,7 @@ seul document qui la porte — ne pas la recopier ici.
 **S206 : jalon en cours J1** (B/W visible et interactif). Coût d'image mesuré : **incompatible
 sur CPU** à la densité qui montre l'impact ; W réduit d'un facteur 100 par table de Bessel
 (ADR-129, à construire en **S207**) ; **B par sommet sur CPU est le goulot**. **Arbitrage « chemin
-de rendu et hôte » posé à l'utilisateur** (GPU recommandé). **Hôte interactif : arbitrage ouvert**, qui
+de rendu et hôte » tranché par l'utilisateur en S207 : GPU, hôte séparé** (ADR-130). **Hôte interactif : arbitrage ouvert**, qui
 revient à l'utilisateur s'il demande des dépendances. V-noyau s'ouvre au plus tard avec J2 ;
 S200-1/A244 et S199-2 sont sur le chemin de J2, plus « reportées ». Les acquis S194 ci-dessous
 restent datés ; la file liée porte aussi leurs suivis S195–S199.**
@@ -239,7 +239,7 @@ pièges déjà payés.
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/FEUILLE-DE-ROUTE.md  ← trajectoire J1 → J5 et noyau V, seul porteur (ADR-127)
 docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 129 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 130 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -258,6 +258,15 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S207 — 2026-09-13 : rendu J1 sur GPU par un hôte séparé, ADR-130 (arbitrage utilisateur).**
+Réponse à la question de fin de S206 : option (A), recommandée. `water-core` reste sans
+dépendance et publie recettes, phases repliées et tables d'impact ; l'hôte d'affichage vit hors
+du workspace sans réseau ; chemin cosmétique. ADR-125 inchangé. Ouverts : pile exacte, budget
+GPU de l'eau (aucune valeur inventée), **autorisation nommée avant tout téléchargement**.
+**Suite S208 : construire ADR-129**, puis lot de l'hôte GPU.
+130 ADR,250 angles,283 leçons,18 invariants,6 SPEC,23 cas ; compteur0.
+Voir [ADR-130](docs/adr/ADR-130-rendu-j1-sur-gpu-par-un-hote-separe.md).
 
 **S206 — 2026-09-13 : coût d'image de la scène J1, ADR-129 ; arbitrage de rendu posé.**
 Scène déclarée avant mesure (observateur S201, mer S201, impact S203, grille projetée).

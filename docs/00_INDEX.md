@@ -20,6 +20,12 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S207 — 2026-09-13 : rendu J1 sur GPU par un hôte séparé, ADR-130 (arbitrage utilisateur).**
+`water-core` sans dépendance publie ce que le GPU consomme ; hôte hors du workspace sans réseau ;
+dépendances sur autorisation nommée ; budget GPU de l'eau à mesurer. **Suite S208 : ADR-129.**
+130 ADR,250 angles,283 leçons,18 invariants,6 SPEC,23 cas.
+Voir [ADR-130](adr/ADR-130-rendu-j1-sur-gpu-par-un-hote-separe.md).
+
 **S206 — 2026-09-13 : coût d'image de la scène J1, ADR-129 ; arbitrage de rendu posé.**
 Incompatible sur CPU à la densité qui montre l'impact (280 ms un fil, 36 ms seize fils).
 W divisé par 100 par table de Bessel précalculée (ADR-129, construction S207) ;
@@ -1352,7 +1358,7 @@ parfaitement stable ne pouvait pas distinguer.
 
 ## État d'avancement
 
-**État actif S206** : coût d'image J1 incompatible sur CPU (COUT-IMAGE-S206), arbitrage de rendu posé à l'utilisateur, ADR-129 à construire ; ambition finale complète, jalon en cours J1 (B/W visible et interactif) selon la [feuille de route](FEUILLE-DE-ROUTE.md) (ADR-127). Impact W visible dans une emprise reçue par ses coutures (ADR-126) ; la composition B+W admet toute mer depuis S205 (ADR-128, A245 close) ; un impact visible coûte plus que 2 ms sur CPU (A247, prochaine étape, à arbitrer). B visible, profil60Hz/eau2ms fixé (ADR-125), coût par domaine δ exposé. Critère B4 fixé à2 %, noyau δ sans allocation dans le pas,
+**État actif S207** : rendu J1 sur GPU par un hôte séparé (ADR-130, choix de l'utilisateur) ; coût d'image J1 incompatible sur CPU (COUT-IMAGE-S206) ; ADR-129 à construire ; ambition finale complète, jalon en cours J1 (B/W visible et interactif) selon la [feuille de route](FEUILLE-DE-ROUTE.md) (ADR-127). Impact W visible dans une emprise reçue par ses coutures (ADR-126) ; la composition B+W admet toute mer depuis S205 (ADR-128, A245 close) ; un impact visible coûte plus que 2 ms sur CPU (A247, prochaine étape, à arbitrer). B visible, profil60Hz/eau2ms fixé (ADR-125), coût par domaine δ exposé. Critère B4 fixé à2 %, noyau δ sans allocation dans le pas,
 refus numériques atomiques reçus ; A244 partielle (précision/budget), fond coupé
 inchangé, B3 non admissible. Domaine de superposition S194 confirmé S197.
 B1/B2/B4 restent partiels, aucun banc complet. Voir le résultat en tête de cet index
