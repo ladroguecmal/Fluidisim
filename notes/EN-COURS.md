@@ -95,7 +95,7 @@ rayon non résolu, écart maximal par canal publié, zéro pixel différent hors
 - [x] **P3** — essais unitaires (a), (b), (d) ; essai d'intégration (c).
 - [x] **P4** — banc : noyau réel dans `frame_cost` (coût par image, construction, mémoire) ; image
  S205 par la table dans `render_impact` contre le chemin direct (e).
-- [ ] **P5** — recommandation de pile GPU : critères (ADR-020/130, hors réseau pour le cœur,
+- [x] **P5** — recommandation de pile GPU : critères (ADR-020/130, hors réseau pour le cœur,
  portabilité, licences, maintenance), versions vérifiées en ligne **sans téléchargement** ;
  demande d'autorisation nommée formulée pour le lot suivant. Document `HOTE-GPU-S208`.
 - [ ] **P6** — rituel §6 : journal, angles, leçons, notes ADR-129, feuille de route, file active,
@@ -133,3 +133,9 @@ W par image : ~0,4–0,9 ms à 2 px, dont profil 0,04 ms ; **B = 97 % de l'image
 15 841 760 évals (direct 15 841 764), **18 523 ms** (direct S205 102 218 ms), FNV 0xf78a4221c46add31
 contre direct 0x0b13a4c1e39a2a3e : **27 pixels différents, 0 hors emprise, écart max 1 niveau,
 0 pixel > 2 niveaux**. Reçu.
+P5 : HOTE-GPU-S208. crates.io lu le 2026-09-13, sans téléchargement : wgpu 30.0.1 (2026-08-22,
+MIT OR Apache-2.0, MSRV 1.87, 231 Ko, 28 dépendances directes dont 19 non optionnelles), winit
+0.30.13 (2026-09-04, Apache-2.0, MSRV 1.86, 434 Ko), pollster 1.0.1 (2026-07-10, 10 Ko). Rust local
+1.97. **Recommandé : wgpu + winit + pollster**, espace de travail séparé `viewer/`, `code/` inchangé.
+Demande d'autorisation en deux temps (résolution de l'arbre, puis sources) ; question vendoring
+laissée à l'utilisateur. Arbre transitif non chiffré (pas inventé).
