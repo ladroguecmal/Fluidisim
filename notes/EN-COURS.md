@@ -124,7 +124,7 @@ limiteur devra mordre sur les derniers pas, et c'est là que se joue le respect 
 - [x] **P3** — construire le noyau : nœuds, arêtes d'orifice, pas à 100 ms, quantification à report de reste, limiteur avec normalisation.
 - [x] **P4** — recevoir C12 : temps de vidange contre 728 s, conservation, non-négativité, capacité.
 - [x] **P5** — déterminisme et refus atomiques ; aucune allocation dans le pas.
-- [ ] **P6** — déversoir de débordement et chaîne de nœuds (Gauss-Seidel), si P4 et P5 tiennent ; sinon dire ce qui manque.
+- [x] **P6** — déversoir de débordement et chaîne de nœuds (Gauss-Seidel), si P4 et P5 tiennent ; sinon dire ce qui manque.
 - [ ] **P7** — document de réception ; suite complète `code/`.
 - [ ] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
@@ -194,3 +194,25 @@ Reçus : déterminisme (deux exécutions, 500 pas, traces identiques), refus **a
 (`Domain`, `Capacity`, `Shape`) sans qu'aucun volume bouge, capacité aval jamais dépassée,
 non-négativité sous trois fuites concurrentes. Aucune allocation dans le pas : nœuds, arêtes,
 formes et scratch viennent de l'appelant (I-06).
+
+P6 : **déversoir construit, et la question Gauss-Seidel mesurée plutôt que supposée.**
+
+L'arête devient `Opening { flow: Flow::Orifice { area_mm2 } | Flow::Weir { width_mm }, … }` — le
+nom suit ADR-010, qui écrit « Edge = ouverture » et donne **deux** lois. Le déversoir applique
+`Q = (2/3)·C_d·b·√(2g)·H^{3/2}` avec `WEIR_DISCHARGE = 0,60`.
+
+**Les deux lois se distinguent par leur exposant, et le test le mesure** plutôt que de relire la
+formule : doubler la charge multiplie le débit par **2,8284** au déversoir — `2^{3/2} = 2,8284` — et
+par **1,4151** à l'orifice — `√2 = 1,4142`. C'est le contrôle qui attrape une loi recopiée dans la
+mauvaise branche.
+
+**Gauss-Seidel : ADR-010 §4 dit « 2 à 4 itérations par pas suffisent pour un réseau ouvert ». Ce
+module n'en fait aucune** — un seul passage explicite depuis l'état du début de pas. Plutôt que de
+supposer que c'est assez, le test compare le pas de 100 ms à une intégration **cent fois plus
+fine** : chaîne de trois contenants, 60 s, 600 pas contre 60 000. Écart maximal **0,0058 % de la
+capacité** — [532351, 300688, 166961] contre [532392, 300630, 166978] ml.
+**Un seul passage explicite suffit donc à 10 Hz sur cette configuration.** Ce n'est pas une preuve
+générale : un réseau plus raide — grandes sections, faibles volumes — n'est pas couvert, et le
+réseau **fermé sous pression** reste hors de portée par décision d'ADR-010 §4.
+
+Neuf tests ; suite complète **379 réussis, 5 ignorés**.

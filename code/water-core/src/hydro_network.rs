@@ -30,6 +30,10 @@ pub const SHAPE_ENTRIES: usize = 64;
 /// de l'ADR, qui le tient de la littérature ; l'hôte peut le remplacer par arête.
 pub const SHARP_EDGE_DISCHARGE: f32 = 0.62;
 
+/// Coefficient de débit d'un déversoir rectangulaire (ADR-010 §3). Même statut que le précédent :
+/// il vient de l'ADR, et l'hôte peut le remplacer par arête.
+pub const WEIR_DISCHARGE: f32 = 0.60;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Error {
     /// Indice de nœud ou de forme hors des tranches fournies.
@@ -59,13 +63,28 @@ pub struct HydroNode {
 /// quantifié en millilitres, et la fraction perdue est conservée d'un pas au suivant. Sans lui, la
 /// troncature ne perd aucune masse — un transfert entier reste entier des deux côtés — mais elle
 /// **biaise le débit** à chaque pas, toujours dans le même sens.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Flow {
+    /// Orifice noyé ou dénoyé, loi de Torricelli (ADR-010 §3). Section en millimètres carrés.
+    Orifice { area_mm2: i64 },
+    /// Déversoir rectangulaire, `Q = (2/3)·C_d·b·√(2g)·H^{3/2}` (ADR-010 §3). Largeur en
+    /// millimètres. La charge `H` est comptée **au-dessus du seuil**, et c'est ce qui distingue
+    /// cette loi de la précédente : un orifice garde sa section quand la charge monte, un
+    /// déversoir élargit sa lame.
+    Weir { width_mm: i64 },
+}
+impl Default for Flow {
+    fn default() -> Self {
+        Flow::Orifice { area_mm2: 0 }
+    }
+}
+
 #[derive(Clone, Copy, Debug, Default)]
-pub struct Orifice {
+pub struct Opening {
     pub from: u16,
     /// `None` : rejet hors réseau. Le volume sort du bilan, et c'est voulu.
     pub to: Option<u16>,
-    /// Section, en millimètres carrés.
-    pub area_mm2: i64,
+    pub flow: Flow,
     /// Hauteur du seuil au-dessus du fond du nœud amont, en micromètres.
     pub sill_um: i64,
     pub discharge: f32,
@@ -145,7 +164,7 @@ impl<'a> Shapes<'a> {
 /// `scratch` reçoit un transfert par arête ; il appartient à l'appelant (I-06).
 pub fn step(
     nodes: &mut [HydroNode],
-    edges: &mut [Orifice],
+    edges: &mut [Opening],
     shapes: &Shapes<'_>,
     g_eff: f32,
     dt: SimTime,
@@ -158,9 +177,13 @@ pub fn step(
         return Err(Error::Domain);
     }
     for e in edges.iter() {
+        let size = match e.flow {
+            Flow::Orifice { area_mm2 } => area_mm2,
+            Flow::Weir { width_mm } => width_mm,
+        };
         if e.from as usize >= nodes.len()
             || e.to.is_some_and(|t| t as usize >= nodes.len())
-            || e.area_mm2 < 0
+            || size < 0
             || !(e.discharge >= 0.0)
             || !e.discharge.is_finite()
         {
@@ -197,8 +220,20 @@ pub fn step(
             continue;
         }
         let head_m = (surface_up - downstream) as f64 * 1e-6;
-        // Torricelli, ADR-010 §3. Section en mm² → m² : 1e-6.
-        let q_m3s = e.discharge as f64 * (e.area_mm2 as f64 * 1e-6) * (2.0 * g_eff as f64 * head_m).sqrt();
+        let g = 2.0 * g_eff as f64;
+        let q_m3s = match e.flow {
+            // Torricelli, ADR-010 §3. Section en mm² → m² : 1e-6.
+            Flow::Orifice { area_mm2 } => {
+                e.discharge as f64 * (area_mm2 as f64 * 1e-6) * (g * head_m).sqrt()
+            }
+            // Déversoir rectangulaire, ADR-010 §3. Largeur en mm → m : 1e-3. La charge est comptée
+            // au-dessus du **seuil** ; `head_m` la porte déjà, le seuil entrant dans `downstream`.
+            Flow::Weir { width_mm } => {
+                (2.0 / 3.0) * e.discharge as f64 * (width_mm as f64 * 1e-3)
+                    * g.sqrt()
+                    * head_m.powf(1.5)
+            }
+        };
         if !q_m3s.is_finite() {
             return Err(Error::NonFinite);
         }

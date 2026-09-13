@@ -12,7 +12,7 @@ fn prism(height_um: i64) -> [i64; SHAPE_ENTRIES] {
 }
 
 /// Montage de C12 : réservoir de 1 m² de section, 1 m d'eau, orifice de 10 cm² au fond.
-fn c12() -> ([HydroNode; 1], [Orifice; 1], [i64; SHAPE_ENTRIES]) {
+fn c12() -> ([HydroNode; 1], [Opening; 1], [i64; SHAPE_ENTRIES]) {
     let table = prism(1_000_000); // 1 m en micromètres
     let node = HydroNode {
         volume_ml: 1_000_000, // 1 m³ = 1e6 ml
@@ -20,10 +20,10 @@ fn c12() -> ([HydroNode; 1], [Orifice; 1], [i64; SHAPE_ENTRIES]) {
         floor_um: 0,
         shape: 0,
     };
-    let edge = Orifice {
+    let edge = Opening {
         from: 0,
         to: None,
-        area_mm2: 1_000, // 10 cm² = 1000 mm²
+        flow: Flow::Orifice { area_mm2: 1_000 }, // 10 cm²
         sill_um: 0,
         discharge: SHARP_EDGE_DISCHARGE,
         residue_nl: 0,
@@ -85,10 +85,10 @@ fn closed_network_conserves_volume_exactly_s224() {
             shape: 0,
         },
     ];
-    let mut edges = [Orifice {
+    let mut edges = [Opening {
         from: 0,
         to: Some(1),
-        area_mm2: 1_000,
+        flow: Flow::Orifice { area_mm2: 1_000 },
         sill_um: 0,
         discharge: SHARP_EDGE_DISCHARGE,
         residue_nl: 0,
@@ -143,10 +143,10 @@ fn three_leaks_on_a_nearly_empty_node_stay_non_negative_s224() {
             shape: 0,
         },
     ];
-    let mut edges = [1u16, 2, 3].map(|to| Orifice {
+    let mut edges = [1u16, 2, 3].map(|to| Opening {
         from: 0,
         to: Some(to),
-        area_mm2: 100_000,
+        flow: Flow::Orifice { area_mm2: 100_000 },
         sill_um: 0,
         discharge: SHARP_EDGE_DISCHARGE,
         residue_nl: 0,
@@ -182,10 +182,10 @@ fn downstream_capacity_is_never_exceeded_s224() {
             shape: 0,
         },
     ];
-    let mut edges = [Orifice {
+    let mut edges = [Opening {
         from: 0,
         to: Some(1),
-        area_mm2: 100_000,
+        flow: Flow::Orifice { area_mm2: 100_000 },
         sill_um: 0,
         discharge: SHARP_EDGE_DISCHARGE,
         residue_nl: 0,
@@ -289,4 +289,86 @@ fn without_the_residue_carry_the_drain_stalls_s224() {
         "l'arret doit venir du dernier centimetre d'eau, pas d'un defaut plus tot : {} ml",
         nodes[0].volume_ml
     );
+}
+
+/// Le déversoir suit `Q = (2/3)·C_d·b·√(2g)·H^{3/2}` (ADR-010 §3), et il se distingue de l'orifice
+/// par son exposant : doubler la charge multiplie le débit par `2^{3/2} = 2,83`, contre `√2 = 1,41`.
+/// Le test mesure ce rapport sur le premier pas, où la charge est encore celle qu'on a posée.
+#[test]
+fn the_weir_follows_the_three_halves_law_s224() {
+    let table = prism(2_000_000);
+    let shapes = Shapes::new(&table).unwrap();
+    let transfer = |volume_ml: i64, flow: Flow| {
+        let mut nodes = [
+            HydroNode { volume_ml, capacity_ml: 2_000_000, floor_um: 0, shape: 0 },
+            HydroNode { volume_ml: 0, capacity_ml: 2_000_000, floor_um: 0, shape: 0 },
+        ];
+        let mut edges = [Opening {
+            from: 0,
+            to: None,
+            flow,
+            sill_um: 0,
+            discharge: WEIR_DISCHARGE,
+            residue_nl: 0,
+        }];
+        let mut scratch = [0i64; 1];
+        step(&mut nodes, &mut edges, &shapes, 9.81, SimTime(STEP_US), &mut scratch).unwrap();
+        volume_ml - nodes[0].volume_ml
+    };
+    // Prisme de 2 m sur 2e6 ml : 1e6 ml = 1 m de charge, 2e6 ml = 2 m.
+    let weir = Flow::Weir { width_mm: 1_000 };
+    let (q1, q2) = (transfer(1_000_000, weir), transfer(2_000_000, weir));
+    let ratio = q2 as f64 / q1 as f64;
+    println!("deversoir : Q(2 m)/Q(1 m) = {ratio:.4}, attendu 2^1.5 = {:.4}", 2f64.powf(1.5));
+    assert!((ratio - 2f64.powf(1.5)).abs() < 0.02, "exposant du deversoir : {ratio}");
+
+    let orifice = Flow::Orifice { area_mm2: 1_000 };
+    let (o1, o2) = (transfer(1_000_000, orifice), transfer(2_000_000, orifice));
+    let oratio = o2 as f64 / o1 as f64;
+    println!("orifice : Q(2 m)/Q(1 m) = {oratio:.4}, attendu sqrt(2) = {:.4}", 2f64.sqrt());
+    assert!((oratio - 2f64.sqrt()).abs() < 0.02, "exposant de l'orifice : {oratio}");
+}
+
+/// Chaîne de trois contenants, et la question qu'ADR-010 §4 laisse ouverte : « 2 à 4 itérations de
+/// Gauss-Seidel par pas suffisent pour un réseau ouvert ». Ce module n'en fait **aucune** — un seul
+/// passage explicite, depuis l'état du début de pas. Le test ne suppose pas que c'est assez : il
+/// compare le pas de 100 ms à une intégration **cent fois plus fine**, et publie l'écart.
+#[test]
+fn an_open_chain_tracks_a_hundredfold_finer_step_s224() {
+    let table = prism(1_000_000);
+    let shapes = Shapes::new(&table).unwrap();
+    let build = || {
+        (
+            [
+                HydroNode { volume_ml: 800_000, capacity_ml: 1_000_000, floor_um: 2_000_000, shape: 0 },
+                HydroNode { volume_ml: 200_000, capacity_ml: 1_000_000, floor_um: 1_000_000, shape: 0 },
+                HydroNode { volume_ml: 0, capacity_ml: 1_000_000, floor_um: 0, shape: 0 },
+            ],
+            [
+                Opening { from: 0, to: Some(1), flow: Flow::Orifice { area_mm2: 2_000 }, sill_um: 0, discharge: SHARP_EDGE_DISCHARGE, residue_nl: 0 },
+                Opening { from: 1, to: Some(2), flow: Flow::Orifice { area_mm2: 2_000 }, sill_um: 0, discharge: SHARP_EDGE_DISCHARGE, residue_nl: 0 },
+            ],
+        )
+    };
+    let run = |dt_us: u64, steps: u64| {
+        let (mut nodes, mut edges) = build();
+        let mut scratch = [0i64; 2];
+        let total: i64 = nodes.iter().map(|n| n.volume_ml).sum();
+        for _ in 0..steps {
+            step(&mut nodes, &mut edges, &shapes, 9.81, SimTime(dt_us), &mut scratch).unwrap();
+            assert_eq!(nodes.iter().map(|n| n.volume_ml).sum::<i64>(), total, "masse perdue");
+            for n in &nodes {
+                assert!(n.volume_ml >= 0 && n.volume_ml <= n.capacity_ml, "hors bornes : {n:?}");
+            }
+        }
+        nodes.map(|n| n.volume_ml)
+    };
+    // 60 s des deux côtés : 600 pas de 100 ms contre 60 000 pas de 1 ms.
+    let coarse = run(STEP_US, 600);
+    let fine = run(1_000, 60_000);
+    let worst = (0..3)
+        .map(|i| (coarse[i] - fine[i]).abs() as f64 / 1_000_000.0)
+        .fold(0.0f64, f64::max);
+    println!("chaine a 60 s : 100 ms {coarse:?} contre 1 ms {fine:?}, ecart max {:.4} % de la capacite", worst * 100.0);
+    assert!(worst < 0.02, "le pas de 100 ms ne suit pas le pas fin : {worst}");
 }
