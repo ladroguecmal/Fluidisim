@@ -90,3 +90,11 @@ borne L1, ce que §52 disait déjà (« borne conservative »). Sa marge sur la 
 ≥ 1,061 et ≤ 1,443 sur la recette S201, et elle suffit à faire refuser chaque point d'une
 composition sur une mer de Hs > 1,107 m (recette JONSWAP de S201, Tp 6 s). Voir
 [IMPACT-W-S203](../validation/IMPACT-W-S203.md) §2 et **A245**.
+
+## Note datée du 2026-09-13 (S205) — ADR-128
+
+« La borne d'ensemble vaut pi*B.steepness + somme des bornes spectrales W. Elle doit respecter
+max_slope hôte » est **remplacée** pour le refus : le budget ne somme plus que les perturbations
+([ADR-128](ADR-128-le-budget-de-pente-borne-les-perturbations.md)). La cambrure publiée reste
+cette borne d'ensemble divisée par π, B comprise, dans le même ordre ; aucun bit publié ne change
+pour un lot que l'ancienne règle admettait.

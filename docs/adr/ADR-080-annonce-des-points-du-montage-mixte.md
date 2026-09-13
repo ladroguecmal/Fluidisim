@@ -100,3 +100,12 @@ Aucune boîte englobante n'est fournie. Un hôte qui voudrait **engendrer** des 
 zone servable, plutôt que les tester, n'a pas de quoi la situer : `Background` n'expose pas son
 ancre, et sans elle une boîte en coordonnées locales n'est pas convertible en positions monde.
 Exposer l'ancre est une décision sur B, à prendre le jour où un consommateur la demande.
+
+## Note datée du 2026-09-13 (S205) — ADR-128
+
+« La réciproque est fausse et n'est pas revendiquée : au-dessus du plancher, c'est la raideur de
+B au point qui décide » **ne vaut plus**. [ADR-128](ADR-128-le-budget-de-pente-borne-les-perturbations.md)
+retire la raideur de B du budget de refus : la requête somme exactement les termes de
+`slope_floor`, dans le même ordre, à partir de zéro. `slope_floor` est donc **exact dans les deux
+sens** — au-dessous tout lot non vide est refusé, au plancher et au-dessus aucun refus de pente.
+Le refus de pente devient entièrement annonçable, ce que la décision ne pouvait pas offrir.

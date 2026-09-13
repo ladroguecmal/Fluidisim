@@ -103,3 +103,13 @@ fenêtre mesurée. Le principe de cette décision (« chaque terme publie le mei
 exact qu'il sait calculer ») désigne donc pour B un autre terme que celui qu'elle nomme ; il
 n'est pas migré, et même lui refuse la mer de S201. Voir
 [IMPACT-W-S203](../validation/IMPACT-W-S203.md) §2 et **A245**.
+
+## Note datée du 2026-09-13 (S205) — ADR-128
+
+La garantie « *aucun point de la surface ne dépasse la cambrure limite de Stokes* » et la ligne
+« fond B » de la table sont **remplacées** par
+[ADR-128](ADR-128-le-budget-de-pente-borne-les-perturbations.md) : le budget ne somme plus que les
+perturbations — impacts et pression, avec leurs meilleurs majorants exacts, principe de cette
+décision inchangé. La garantie devient : *aucune perturbation composée ne dépasse la limite* ; la
+raideur de B reste publiée dans `steepness`. Motif : le terme de B refusait toute mer au-delà de
+Hs ≈ 1,1 m (A245).

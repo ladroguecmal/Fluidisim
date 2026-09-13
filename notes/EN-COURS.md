@@ -98,7 +98,7 @@ publié, pas une erreur de requête (ADR-127 D7 : pas de fonctionnalité retiré
  complet ; essais touchés en release.
 - [x] **P5** — bout en bout : image S203 +3 s rejouée **au bit** (contrôle « admis inchangé ») ;
  impact sur la mer S201 Hs 1,5 contre témoin, zéro pixel hors emprise ; budget d'impact π/7.
-- [ ] **P6** — ADR-128 ; notes datées ADR-080/095/098/126 ; A245 close ; COMPOSITION-MER-S205.
+- [x] **P6** — ADR-128 ; notes datées ADR-080/095/098/126 ; A245 close ; COMPOSITION-MER-S205.
 - [ ] **P7** — rituel §6 : journal, angles, leçons, décomptes, feuille de route (état J1), file
  active, index/README/REPRISE, compteur, jeton libre, copies.
 
@@ -151,3 +151,7 @@ eau, 0/0, 15 571 336 évals dont 8 879 321 B+W, 100 389 ms, 0x935223a0f507aac7 ;
 0xb25f06a61b0cc543 ; **16 251 px, 0 hors emprise** ; max 29 niveaux, 2 513 px ≥ 3. Anneaux nets à
 +3 s sur la mer raide, discrets et déformant le reflet à +6 s (zooms inspectés). Marche ×1,67
 plus d'évaluations qu'à Hs 0,5 : borne de pente B+W 0,99 contre 0,58.
+
+P6 : ADR-128 actée ; notes datées ADR-062, 080, 095, 098, 126 ; COMPOSITION-MER-S205 (défaut,
+remèdes pesés, changements, tri des sept essais, réception, image, non reçu) ; clôture A245 au
+registre. Décompte attendu : 128 ADR.

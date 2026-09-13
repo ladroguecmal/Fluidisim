@@ -59,3 +59,12 @@ Changer la règle 2 demande une nouvelle campagne de coutures à seuil nommé, o
 d'extinction (renouvellement, atténuation) reçu contre le même témoin. Revenir à un
 dimensionnement par admission seule demande de montrer qu'aucune couture n'est visible,
 pas qu'aucun refus n'a lieu.
+
+## Note datée du 2026-09-13 (S205) — ADR-128
+
+La **règle 3** — « budget de pente de l'impact = π/7 − `steepness_B·π` » — est remplacée par
+[ADR-128](ADR-128-le-budget-de-pente-borne-les-perturbations.md) : B ne consomme plus le budget,
+l'impact dispose de π/7 moins ce que prennent les autres perturbations. Les règles 1, 2 et 4
+(coutures, profil R ≥ 15,5 λ / A ≥ 96·√(λ/g) / N ≥ 256, témoin au pixel) sont inchangées : le champ
+W et donc ses coutures ne dépendent pas de B. Le banc `render_impact` garde la règle S203 pour
+reproduire ses images, et ajoute `render-s205` pour la nouvelle.

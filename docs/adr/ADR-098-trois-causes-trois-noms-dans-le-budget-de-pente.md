@@ -67,3 +67,12 @@ d'A208 bien avant qu'elle soit ouverte — son nom dit « l'enveloppe voit une c
 pouvoir le nommer autrement que `Slope`.
 
 Aucun hachage touché, harnais H1 inchangé : les noms de refus ne sont pas des bits publiés.
+
+## Note datée du 2026-09-13 (S205) — ADR-128
+
+Les trois noms restent. Le sens de **`Slope`** se précise : la pente réelle **des perturbations**
+au point dépasse `max_slope` — celle de B n'est plus ni au budget ni dans le verdict
+([ADR-128](ADR-128-le-budget-de-pente-borne-les-perturbations.md)). L'essai
+`each_slope_verdict_is_reachable_and_names_its_own_cause_s144` construisait ses verdicts avec le
+fond seul ; il les construit désormais avec un champ d'impact, et vérifie qu'une pente de B de
+0,5 ne change aucun verdict.

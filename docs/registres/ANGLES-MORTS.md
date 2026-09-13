@@ -2891,3 +2891,12 @@ contrat reçu par le seul chronométrage.
   dans AGENTS : une session ne réduit pas l'ambition, un ordre ou un budget ne retirent rien.
   Ce qui reste à éprouver : qu'aucune autre décision « de priorité » du corpus n'ait retiré du
   périmètre en silence — recherche non faite en S204. Voir L282.
+
+**Clôture A245 — S205, 2026-09-13 : traitée par ADR-128.** La raideur de B sort du budget de
+refus des quatre sites de composition ; elle reste publiée dans `steepness`, même ordre de somme,
+et aucun bit publié ne change pour un lot que l'ancienne règle admettait (image S203 et hachages
+C18/C02 reproduits). La mer S201 (Hs 1,5 m) se compose, impact compris : zéro refus, zéro pixel
+hors emprise. I-18 est tenu pour le terme de B, qui n'est plus comparé. `slope_floor` devient
+exact dans les deux sens. **Ce qui ne l'est pas** : la garantie « B+W sous π/7 », retirée par
+décision ; la validité de la superposition sur mer raide (ADR-123, A207). Voir
+COMPOSITION-MER-S205.
