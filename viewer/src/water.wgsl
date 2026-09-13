@@ -1,11 +1,13 @@
 // S211 : image cosmétique seulement. B et W proviennent du cœur.
+// S212 : sillage = coefficients [A, B, kx, ky] rebasés à la caméra par le cœur.
 struct Params {
     eye: vec4<f32>, forward: vec4<f32>, right: vec4<f32>, up: vec4<f32>,
-    impact: vec4<f32>, info: vec4<f32>,
+    impact: vec4<f32>, info: vec4<f32>, wake_rect: vec4<f32>, wake_info: vec4<f32>,
 }
 @group(0) @binding(0) var<uniform> p: Params;
 @group(0) @binding(1) var<storage, read> waves: array<vec4<f32>>;
 @group(0) @binding(2) var<storage, read> profile: array<vec2<f32>>;
+@group(0) @binding(3) var<storage, read> wake: array<vec4<f32>>;
 @group(1) @binding(0) var<storage, read> probes: array<vec4<f32>>;
 @group(1) @binding(1) var<storage, read_write> results: array<vec4<f32>>;
 
@@ -32,6 +34,16 @@ fn water(q: vec2<f32>) -> vec3<f32> {
         var gradient = vec2<f32>(0.0);
         if (r > 0.0) { gradient = slope*d/r; }
         v += vec3<f32>(h, gradient);
+    }
+    // Même emprise que le cœur ; hors emprise le sillage ne contribue pas (couture publiée).
+    if (p.wake_info.y > 0.5 && all(q >= p.wake_rect.xy) && all(q <= p.wake_rect.zw)) {
+        for (var i = 0u; i < u32(p.wake_info.x); i++) {
+            let c = wake[i];
+            let phase = dot(c.zw, q);
+            let s = sin(phase);
+            let co = cos(phase);
+            v += vec3<f32>(c.x*co - c.y*s, -(c.x*s + c.y*co)*c.zw);
+        }
     }
     return v;
 }

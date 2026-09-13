@@ -15,6 +15,7 @@ pub struct Gpu {
     uniform: wgpu::Buffer,
     waves: wgpu::Buffer,
     profile: wgpu::Buffer,
+    wake: wgpu::Buffer,
     indices: wgpu::Buffer,
     pub nx: u32,
     pub ny: u32,
@@ -57,6 +58,30 @@ fn depth(device: &wgpu::Device, w: u32, h: u32) -> wgpu::TextureView {
         })
         .create_view(&Default::default())
 }
+/// Sondes relatives à la caméra : grille S211, impact, et coutures de l'emprise du sillage (S212).
+pub fn probes(eye: [f32; 3]) -> Vec<[f32; 2]> {
+    use crate::scene::{WAKE_MAX, WAKE_MIN};
+    let mut world = Vec::new();
+    for y in -20..=60 {
+        for x in -40..=40 {
+            world.push([x as f32 * 1.3, y as f32 * 1.3]);
+        }
+    }
+    world.extend([[0., 10.], [52., 10.], [52.01, 10.]]);
+    for i in 0..=52 {
+        let y = WAKE_MIN[1] + i as f32 * (WAKE_MAX[1] - WAKE_MIN[1]) / 52.;
+        let x = WAKE_MIN[0] + i as f32 * (WAKE_MAX[0] - WAKE_MIN[0]) / 52.;
+        for d in [-0.01, 0.01] {
+            world.extend([
+                [WAKE_MIN[0] + d, y],
+                [WAKE_MAX[0] + d, y],
+                [x, WAKE_MIN[1] + d],
+                [x, WAKE_MAX[1] + d],
+            ]);
+        }
+    }
+    world.into_iter().map(|p| [p[0] - eye[0], p[1] - eye[1]]).collect()
+}
 pub fn floats(values: impl IntoIterator<Item = f32>) -> Vec<u8> {
     values.into_iter().flat_map(f32::to_le_bytes).collect()
 }
@@ -67,6 +92,7 @@ impl Gpu {
         width: u32,
         height: u32,
         profile_len: usize,
+        wake_len: usize,
     ) -> Result<Self, String> {
         let adapter = instance
             .request_adapter(&wgpu::RequestAdapterOptions {
@@ -101,7 +127,7 @@ impl Gpu {
         let uniform = buffer(
             &device,
             "camera",
-            96,
+            128,
             wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         );
         let waves = buffer(
@@ -114,6 +140,12 @@ impl Gpu {
             &device,
             "W radial profile",
             profile_len as u64 * 8,
+            wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+        );
+        let wake = buffer(
+            &device,
+            "W wake components",
+            wake_len as u64 * 16,
             wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
         );
         let binding = |i, ty| wgpu::BindGroupLayoutEntry {
@@ -132,6 +164,7 @@ impl Gpu {
                 binding(0, wgpu::BufferBindingType::Uniform),
                 binding(1, wgpu::BufferBindingType::Storage { read_only: true }),
                 binding(2, wgpu::BufferBindingType::Storage { read_only: true }),
+                binding(3, wgpu::BufferBindingType::Storage { read_only: true }),
             ],
         });
         let bind = device.create_bind_group(&wgpu::BindGroupDescriptor {
@@ -149,6 +182,10 @@ impl Gpu {
                 wgpu::BindGroupEntry {
                     binding: 2,
                     resource: profile.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 3,
+                    resource: wake.as_entire_binding(),
                 },
             ],
         });
@@ -258,13 +295,14 @@ impl Gpu {
             uniform,
             waves,
             profile,
+            wake,
             indices,
             nx,
             ny,
             width,
             height,
             depth: d,
-            bytes: Vec::with_capacity(profile_len * 8 + 512),
+            bytes: Vec::with_capacity((profile_len * 8).max(wake_len * 16) + 512),
             query,
             query_resolve,
             query_read,
@@ -310,6 +348,8 @@ impl Gpu {
             self.ny,
             frame.table.step(),
             frame.active,
+            frame.wake.len(),
+            frame.wake_active,
         ) {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
@@ -328,6 +368,15 @@ impl Gpu {
                 self.bytes.extend_from_slice(&b.to_le_bytes());
             }
             self.queue.write_buffer(&self.profile, 0, &self.bytes);
+        }
+        if frame.wake_active {
+            self.bytes.clear();
+            for row in &frame.wake {
+                for v in row {
+                    self.bytes.extend_from_slice(&v.to_le_bytes());
+                }
+            }
+            self.queue.write_buffer(&self.wake, 0, &self.bytes);
         }
     }
     pub fn draw(&self, view: &wgpu::TextureView, measure: bool) {
@@ -438,21 +487,8 @@ impl Gpu {
                 / 1e6,
         ))
     }
-    pub fn verify(&self, frame: &FrameData<'_>) -> Result<(), String> {
-        let mut points = Vec::new();
-        for y in -20..=60 {
-            for x in -40..=40 {
-                points.push([
-                    x as f32 * 1.3 - frame.camera.eye[0],
-                    y as f32 * 1.3 - frame.camera.eye[1],
-                ]);
-            }
-        }
-        points.extend([
-            [0. - frame.camera.eye[0], 10. - frame.camera.eye[1]],
-            [52. - frame.camera.eye[0], 10. - frame.camera.eye[1]],
-            [52.01 - frame.camera.eye[0], 10. - frame.camera.eye[1]],
-        ]);
+    pub fn verify(&self, frame: &mut FrameData<'_>) -> Result<(), String> {
+        let points = probes(frame.camera.eye);
         let data = floats(points.iter().flat_map(|p| [p[0], p[1], 0., 0.]));
         let size = data.len() as u64;
         let src = self
@@ -501,8 +537,8 @@ impl Gpu {
         let data = self.read(&read)?;
         let mut max = [0.0f32; 3];
         let mut squares = 0.0f64;
-        for (point, row) in points.iter().zip(data.chunks_exact(16)) {
-            let expected = frame.reference(*point);
+        let references = frame.references(&points)?;
+        for (expected, row) in references.iter().zip(data.chunks_exact(16)) {
             for k in 0..3 {
                 let actual = f32::from_le_bytes(row[4 * k..4 * k + 4].try_into().unwrap());
                 if !actual.is_finite() {
@@ -515,7 +551,7 @@ impl Gpu {
                 }
             }
         }
-        println!("VERIFY age={} t_us={} impact={} points={} max_eta_m={:.9} rms_eta_m={:.9} max_slopes={:?}",frame.age,frame.time.0,frame.active,points.len(),max[0],(squares/points.len() as f64).sqrt(),&max[1..]);
+        println!("VERIFY age={} t_us={} impact={} wake={} points={} max_eta_m={:.9} rms_eta_m={:.9} max_slopes={:?}",frame.age,frame.time.0,frame.active,frame.wake_active,points.len(),max[0],(squares/points.len() as f64).sqrt(),&max[1..]);
         if max[0] > 0.003 {
             return Err(format!("hauteur GPU hors tolérance 3 mm : {}", max[0]));
         }
@@ -592,9 +628,13 @@ impl Gpu {
         let view = target.create_view(&Default::default());
         let mut cpu = Vec::new();
         let mut gpu = Vec::new();
+        let mut wake_cpu = Vec::new();
         for i in 0..130 {
             let start = Instant::now();
             frame.update(3. + i as f64 / 60., 3. + i as f64 / 60., true);
+            if i >= 10 {
+                wake_cpu.push(frame.wake_cpu_ms);
+            }
             self.upload(frame);
             self.draw(&view, true);
             let cpu_ms = start.elapsed().as_secs_f64() * 1000.;
@@ -613,7 +653,9 @@ impl Gpu {
         }
         cpu.sort_by(f64::total_cmp);
         gpu.sort_by(f64::total_cmp);
-        println!("BENCH {}x{} grid={}x{} samples=120 CPU_prepare_upload_submit_ms median={:.6} max={:.6}",self.width,self.height,self.nx,self.ny,cpu[60],cpu[119]);
+        wake_cpu.sort_by(f64::total_cmp);
+        println!("BENCH {}x{} grid={}x{} wake_components={} samples=120 CPU_prepare_upload_submit_ms median={:.6} max={:.6}",self.width,self.height,self.nx,self.ny,frame.wake.len(),cpu[60],cpu[119]);
+        println!("CPU_wake_prepare_publish_ms median={:.6} max={:.6} (inclus ci-dessus)",wake_cpu[60],wake_cpu[119]);
         if !gpu.is_empty() {
             println!("GPU_water_ms median={:.6} p95={:.6} max={:.6} (sky, upload, readback, presentation excluded)",gpu[60],gpu[114],gpu[119]);
         } else {

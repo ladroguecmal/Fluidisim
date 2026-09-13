@@ -1,6 +1,7 @@
 mod gpu;
 mod scene;
-use scene::{Camera, FrameData, Scene};
+use scene::{Camera, FrameData, Scene, WakeInput};
+use water_core::pressure_journal::Journal;
 use std::{sync::Arc, time::Instant};
 use winit::{
     application::ApplicationHandler,
@@ -88,7 +89,7 @@ impl ApplicationHandler for App<'_> {
         if self.window.is_some() {
             return;
         }
-        let w=match e.create_window(Window::default_attributes().with_title("Fluidisim — mer + impact | Espace pause · R impact · B témoin · clic droit caméra · flèches déplacement").with_inner_size(winit::dpi::PhysicalSize::new(960,540))) {Ok(w)=>Arc::new(w),Err(error)=>{self.fail(e,error);return;}};
+        let w=match e.create_window(Window::default_attributes().with_title("Fluidisim — mer + impact + sillage | Espace pause · R relance · B témoin · clic droit caméra · flèches déplacement").with_inner_size(winit::dpi::PhysicalSize::new(960,540))) {Ok(w)=>Arc::new(w),Err(error)=>{self.fail(e,error);return;}};
         let instance = instance();
         let surface = match instance.create_surface(w.clone()) {
             Ok(s) => s,
@@ -104,6 +105,7 @@ impl ApplicationHandler for App<'_> {
             size.width,
             size.height,
             self.frame.profile.len(),
+            scene::WAKE_CAPACITY,
         )) {
             Ok(g) => g,
             Err(error) => {
@@ -210,9 +212,24 @@ fn run() -> Result<(), String> {
     let scene = Scene::new();
     let mut storage = vec![[0.; 2]; 256 * scene.impact.table_len(scene.step).unwrap()];
     let table = scene.impact.bake_table(scene.step, &mut storage).unwrap();
-    let mut frame = FrameData::new(&scene.background, table);
+    // S212 : sillage prescrit admis au journal de pression du cœur, préparé à chaque image.
+    let recipe = scene::wake_recipe(64, 128);
+    let wake = scene::wake(recipe);
+    let mut records = [None];
+    let mut journal = Journal::new(1, &mut records);
+    journal
+        .admit_authenticated(wake.source())
+        .map_err(|e| format!("admission sillage : {e:?}"))?;
+    let mut pools = scene::Pools::new(recipe);
+    let spectrum = pools.spectrum(recipe);
+    let input = WakeInput {
+        journal: &journal,
+        spectrum: &spectrum,
+        context: wake.source().context(),
+    };
+    let mut frame = FrameData::new(&scene.background, table, input);
     if args.iter().any(|a| a == "--verify") {
-        std::fs::create_dir_all("captures/s211").map_err(|e| e.to_string())?;
+        std::fs::create_dir_all("captures/s212").map_err(|e| e.to_string())?;
         let instance = instance();
         let mut g = pollster::block_on(gpu::Gpu::new(
             &instance,
@@ -220,29 +237,30 @@ fn run() -> Result<(), String> {
             640,
             360,
             frame.profile.len(),
+            scene::WAKE_CAPACITY,
         ))?;
-        for age in [0., 1., 3., 6., 56., 56.01] {
+        for age in [0., 1., 3., 4., 6., 8., 16., 24., 39., 40.01, 56., 56.01] {
             frame.update(age, age, true);
             g.upload(&frame);
-            g.verify(&frame)?;
+            g.verify(&mut frame)?;
         }
         frame.camera.eye = [125., -330., 12.];
         frame.update(1_000_000., 3., true);
         g.upload(&frame);
-        g.verify(&frame)?;
+        g.verify(&mut frame)?;
         frame.camera = Camera::default();
         for enabled in [true, false] {
-            frame.update(3., 3., enabled);
+            frame.update(8., 8., enabled);
             g.upload(&frame);
-            g.verify(&frame)?;
+            g.verify(&mut frame)?;
             let target = g.target();
             g.draw(&target.create_view(&Default::default()), false);
             g.capture(
                 &target,
                 if enabled {
-                    "captures/s211/impact.ppm"
+                    "captures/s212/scene.ppm"
                 } else {
-                    "captures/s211/background.ppm"
+                    "captures/s212/background.ppm"
                 },
             )?;
         }
