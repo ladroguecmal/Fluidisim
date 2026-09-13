@@ -769,6 +769,21 @@ DX12/RTX5070 Laptop : erreur hauteur max0,077657 mm ; passe eau960×540 médiane
 349 tests réussis/cinq ignorés. A250 close, A247 partielle ; sillage et coût complet encore dus.
 **Suite S212 : file J1/W, intégrer le sillage au GPU.** 130/250/284/18/6/23 inchangés.
 
+**S226 — 2026-09-13 : [la surface libre en référentiel accéléré](docs/validation/GRAVITE-DIRIGEE-S226.md).**
+Deuxième brique de V. `g_eff` devient un **vecteur** : le plan d'eau est perpendiculaire à la
+gravité effective, une ouverture est **quelque part** et non à une hauteur. **I-07 cessait d'être
+tenu** — l'axe était en dur —, et **C12 passait quand même à 0,08 %** : un cas canonique bien choisi
+peut être muet sur un invariant (**L310**). Réduction au cas vertical **exacte** : tous les nombres
+de S224 sont identiques. La phrase d'ADR-010 §2 est éprouvée telle qu'elle est écrite — hublot
+latéral, **0 ml** sous gravité verticale, **1 829 ml** sous 0,3 g — et C16 part V tient à
+**0,0002°** pour un degré exigé.
+**Et la construction révèle une incohérence dans ADR-010 §2 elle-même (A266, gravité 1)** : le même
+paragraphe veut une table cuite par coupes **horizontales** et un plan d'eau perpendiculaire à
+`g_eff`. Mesuré à 0,3 g — prisme **exact** au milieu de sa course, **coque en V fausse de 9,89 %
+partout**, et c'est la cale qui justifie la table (**L311**). 383 tests release réussis, 5 ignorés.
+**Suite S227 : trancher A266**, puis l'état répliqué.
+138 ADR,266 angles,311 leçons,18 invariants,6 SPEC,23 cas ; compteur 0 (V code src).
+
 **S225 — 2026-09-13 : [la cadence complète de l'hôte](docs/validation/CADENCE-HOTE-S225.md).**
 Travail nécessaire de J1 nommé depuis S213, jamais mesuré. Fenêtre ouverte, **`AutoNoVsync`** — sous
 vsync l'intervalle mesure l'écran, pas le coût — et **deux phases**, la relecture d'horodatage

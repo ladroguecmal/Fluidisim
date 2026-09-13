@@ -11663,3 +11663,54 @@ graphique restent non reçues, et la cadence ne les mesure pas davantage), I-03 
 ici : aucune constante posée, aucun bit publié. Aucun devenu faux, aucun amendé, aucun ADR réécrit
 ni acté. **Maillons : 1** — ni code d'exécution dans `code/*/src`, ni décision actée.
 138 ADR, 265 angles, 309 leçons, 18 invariants, 6 SPEC, 23 cas. Jeton libre, copies avancées.
+
+## S226 — 2026-09-13 — La surface libre en référentiel accéléré, et une incohérence d'ADR-010
+
+**Entrée.** « Continue avec S226 », même conversation. Ligne `Session suivante` de S225 : **V, sans
+faute** — la consigne de S224 arrivait à échéance. Maillons **1** à l'amorce. Claude Code, Opus 5 ;
+master et trois copies à e75f6aa. Plan 6aae62c, P2 355e10a, P3 f42cbdf, P4 7e5144a, P5 fe81735.
+
+**Décision structurante : aucun ADR.** ADR-010 §2 écrivait déjà ce qu'il fallait ; la session le
+construit — et met au jour que le paragraphe se contredit lui-même (**A266**).
+
+**Chiffres qui orientent.**
+- **Le module violait I-07**, et pas par inadvertance de lecture : il recevait `g_eff` en **module**,
+  donc l'axe était en dur, ce que l'invariant appelle « un défaut bloquant ». **C12 passait quand
+  même, à 0,08 %** — un réservoir posé à plat ne distingue pas les deux. **L310.**
+- **Réduction exacte** : sous `g_eff = [0, 0, −9,81]`, tous les nombres de S224 sont **identiques**
+  — C12 à 727,4 s, l'arrêt sans report à 13 ml, la chaîne à [532 351, 300 688, 166 961], les
+  exposants 2,8284 et 1,4151. C'est le garde-fou qui sépare une généralisation d'une réécriture.
+- **La phrase d'ADR-010 §2 est éprouvée telle qu'elle est écrite** : hublot latéral à 1,2 m,
+  surface au repos à 1 m — **0 ml** sous gravité verticale, **1 829 ml** sous 0,3 g latéral.
+- **C16, part V** : inclinaison **déduite du comportement** par dichotomie sur la cote de mise en
+  débit, à deux abscisses — **16,6990°** contre 16,6992° attendus, soit **0,0002°** pour un degré
+  exigé.
+- **Erreur de ma part, dans le test et non dans le code** : le premier attendu posait `atan(−a/g)`
+  et se trompait de signe. L'eau s'accumule du côté où le « bas » penche, donc la surface y monte ;
+  la pente vaut `−g_x/g_z`. Corrigé, avec la raison écrite dans le test.
+- **Prédiction contredite pour le prisme, confirmée pour la cale.** J'annonçais la table de forme
+  fausse dès l'inclinaison. Mesuré à 0,3 g : **prisme exact à 0,0000 %** au milieu de sa course
+  (1 à 4 % aux extrêmes), **coque en V fausse de 9,89 % partout**. Or la cale est le cas qui
+  justifie la table. **A266, gravité 1**, et **L311**.
+
+**Ce qui n'a pas été fait.** A266 n'est pas tranchée — trois voies nommées, aucune choisie, et c'est
+une décision de conception. La brique suivante de V, l'**état répliqué et restauré** (ADR-022 §5.1),
+n'est pas commencée : C19-V et C21 restent hors d'atteinte. `liquid_id` (A17), `sky_exposure`,
+`absorb_rate`, vannes, pompes, réseau fermé sous pression et **A264** restent tous dus. Rien de
+neuf sur A265, A261, A258, A263 ni sur la loi GPU.
+
+**Suite S227.** **A266 d'abord** : elle est de gravité 1, elle porte sur un **volume** — donc sur une
+conséquence de jeu (I-10) —, et elle bloque tout usage de V sur un contenant non prismatique,
+c'est-à-dire sur le cas nominal. Trancher entre table à deux entrées, correction analytique pour les
+sections convexes, et restriction déclarée aux prismes ; l'ADR qui en sortira remplacera la
+disposition d'ADR-010 §2, sans la réécrire. **Puis** l'état répliqué. A265 reste à instruire avant
+toute optimisation CPU.
+
+**Rituel.** A266 (gravité 1) ; suivi I-07 (violation levée) ; L310, L311 ; file plurielle relue ;
+feuille de route V-noyau ; index, README, REPRISE §4, file active et jeton. Invariants relus —
+**I-07**, levé et vérifié par le comportement et non par la lecture ; **I-03** (projection en `f64`
+depuis des différences entières, IEEE strict, réduction au bit sous gravité verticale) ; **I-10**
+(l'état reste entier) ; **I-06** (aucune allocation ajoutée). Aucun devenu faux ; **I-07 cesse d'être
+violé**, ce qui est un changement d'état et non un amendement. Aucun ADR réécrit ni acté.
+**Compteur 0** : V avancée dans `code/water-core/src`. 138 ADR, 266 angles, 311 leçons,
+18 invariants, 6 SPEC, 23 cas. Jeton libre, copies avancées.

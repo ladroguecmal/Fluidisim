@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 19:10 +02:00
+JETON            : libre
+Battement        : 2026-09-13 19:19 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
-Session en cours : S226 — V : direction de `g_eff`, surface libre en référentiel accéléré
-Dernière session : S225 — cadence complète de l'hôte mesurée (198 Hz) ; exclusions chiffrées à 2 % ; la pose de mesure héritée de S201 était proche du pire cas (GPU d'eau 2,85 ms en médiane de balayage contre 4,16 fixe) ; A265 ouverte
-Session suivante : S226 — **V, sans faute** : la consigne de S224 — « ne pas laisser passer plus d'une session » — arrive à échéance, et S225 en a consommé une. **Direction de `g_eff`** d'abord : la surface libre en référentiel accéléré est spécifiée à ADR-010 §2 et absente, le module ne prenant aujourd'hui que le **module** de `g_eff`, de sorte qu'un vaisseau qui accélère ne voit pas son réservoir fuir par ce qui se retrouve en bas. Puis **état répliqué et restauré** (ADR-022 §5.1), qui ouvre la branche V de C19 et C21. **A265 est à instruire avant toute optimisation CPU** : la trame pourrait avoir un plancher que le travail n'explique pas. La suite GPU de J1-bis — espace, LOD, visibilité, mutualisation — reste nommée, et la pose de mesure doit y être balayée et non héritée (L309). A264, A261, A258, A263 sans ordre imposé ; J2/δ général conservé
-Maillons        : **1** — S225 n'a ni ajouté de code d'exécution dans `code/*/src`, ni acté d'ADR : elle a mesuré. À 2, la session suivante devra nommer une ligne de la file et la couche qu'elle avance — c'est déjà le cas, la suite nomme **V**
+Session en cours : —
+Dernière session : S226 — V reçoit `g_eff` en vecteur, I-07 cesse d'être violé, C16 part V à 0,0002° ; **A266 ouverte (gravité 1)** : ADR-010 §2 se contredit — table par coupes horizontales contre plan perpendiculaire à `g_eff`, 9,89 % d'écart sur une cale
+Session suivante : S227 — **trancher A266**, gravité 1. ADR-010 §2 demande une table `volume → hauteur` cuite « par coupes horizontales » **et** un plan d'eau perpendiculaire à `g_eff` : mesuré à 0,3 g, un prisme reste exact au milieu de sa course mais une **coque en V se trompe de 9,89 % partout**, et c'est la cale qui justifie l'existence de la table. L'erreur porte sur un **volume**, donc sur une conséquence de jeu (I-10), et elle bloque l'usage de V sur tout contenant non prismatique — le cas nominal. Trois voies nommées, aucune choisie : table à deux entrées (volume, inclinaison) ; correction analytique pour les sections convexes ; restriction déclarée de V aux prismes, qui retirerait à `shape_lut` sa raison d'être. L'ADR qui en sortira **remplace** la disposition, sans réécrire ADR-010. **Puis** l'état répliqué et restauré (ADR-022 §5.1), qui ouvre C19-V et C21. A265 reste à instruire avant toute optimisation CPU ; A264, A261, A258, A263 et la loi GPU de J1-bis sans ordre imposé ; J2/δ général conservé
+Maillons        : 0 — V avancée dans `code/water-core/src` (hydro_network, `g_eff` vectoriel)
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 
@@ -191,6 +191,13 @@ demande la campagne d'ADR-133 transposée. **Prochain lot J1 : la part dynamique
 toute scène à plusieurs sillages et donc avant la mutualisation de J1-bis ; puis la loi GPU
 (espace, LOD, visibilité, mutualisation), chaque mesure avec son en-tête (ADR-131 D3).
 
+**S226 : V reçoit `g_eff` en vecteur** ([GRAVITE-DIRIGEE-S226](docs/validation/GRAVITE-DIRIGEE-S226.md)) —
+**I-07 cessait d'être tenu**, il l'est. Le hublot latéral fuit sous accélération et pas à plat ;
+C16 part V tient à 0,0002°. **Et la construction met au jour A266, gravité 1** : ADR-010 §2 veut à
+la fois une table cuite par coupes horizontales et un plan d'eau perpendiculaire à `g_eff`, et les
+deux se contredisent de **9,89 %** sur une cale — le cas qui justifie la table. **Prochain lot :
+trancher A266**, avant tout usage de V sur un contenant non prismatique.
+
 **S225 : la cadence complète est mesurée** ([CADENCE-HOTE-S225](docs/validation/CADENCE-HOTE-S225.md)).
 198 Hz, exclusions chiffrées à 2 % de la trame GPU, et deux corrections : le CPU d'une trame est à
 moitié de l'attente, et la pose héritée de S201 était proche du **pire cas** — le GPU d'eau médian
@@ -338,6 +345,21 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S226 — 2026-09-13 : [la surface libre en référentiel accéléré](docs/validation/GRAVITE-DIRIGEE-S226.md).**
+Deuxième brique de V. `g_eff` devient un **vecteur** : le plan d'eau est perpendiculaire à la
+gravité effective, une ouverture est **quelque part** et non à une hauteur. **I-07 cessait d'être
+tenu** — l'axe était en dur —, et **C12 passait quand même à 0,08 %** : un cas canonique bien choisi
+peut être muet sur un invariant (**L310**). Réduction au cas vertical **exacte** : tous les nombres
+de S224 sont identiques. La phrase d'ADR-010 §2 est éprouvée telle qu'elle est écrite — hublot
+latéral, **0 ml** sous gravité verticale, **1 829 ml** sous 0,3 g — et C16 part V tient à
+**0,0002°** pour un degré exigé.
+**Et la construction révèle une incohérence dans ADR-010 §2 elle-même (A266, gravité 1)** : le même
+paragraphe veut une table cuite par coupes **horizontales** et un plan d'eau perpendiculaire à
+`g_eff`. Mesuré à 0,3 g — prisme **exact** au milieu de sa course, **coque en V fausse de 9,89 %
+partout**, et c'est la cale qui justifie la table (**L311**). 383 tests release réussis, 5 ignorés.
+**Suite S227 : trancher A266**, puis l'état répliqué.
+138 ADR,266 angles,311 leçons,18 invariants,6 SPEC,23 cas ; compteur 0 (V code src).
 
 **S225 — 2026-09-13 : [la cadence complète de l'hôte](docs/validation/CADENCE-HOTE-S225.md).**
 Travail nécessaire de J1 nommé depuis S213, jamais mesuré. Fenêtre ouverte, **`AutoNoVsync`** — sous

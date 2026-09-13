@@ -3299,3 +3299,29 @@ S211, est mesurée : la passe d'eau vaut **97,95 à 98,06 %** de la trame GPU, t
 **0,087 ms**. Les verdicts de S211 à S224 portaient donc bien sur l'essentiel. En revanche la pose de
 mesure était **proche du pire cas** sans que personne l'ait choisie : à caméra balayée le GPU d'eau
 médian vaut 2,85 ms contre 4,16 à la pose héritée de S201 (L309). A247 reste partielle.
+
+- **A266** *(sévérité 1, S226 ; ouverte)* — **ADR-010 §2 pose deux dispositions incompatibles, et
+  leur désaccord est maximal là où chacune sert.** Le même paragraphe demande que `shape_lut` soit
+  cuite « à partir du maillage (**coupes horizontales**) » et que le plan d'eau soit
+  « **perpendiculaire à `g_eff`**, pas à Z ». Mesuré en S226 à 0,3 g latéral (16,7°, le montage de
+  C16), par intégration numérique : pour un **prisme** à parois verticales la table reste **exacte**
+  (0,0000 %) tant que le plan ne touche ni le fond ni le plafond, et dérape de 1 à 4 % aux extrêmes ;
+  pour une **coque en V** elle se trompe de **9,89 % partout**, milieu compris. Or c'est
+  précisément la cale que l'ADR invoque pour justifier la table — *« Un compartiment n'est pas un
+  prisme »*. Sur la charge, 9,9 % d'erreur de hauteur donnent environ **5 %** sur le débit, qui va
+  comme `√h`. **Gravité 1** : V est destinée aux cales, compartiments et dépressions de terrain,
+  c'est-à-dire au cas faux, et l'erreur porte sur un volume — donc sur une conséquence de jeu
+  (I-10). Ce n'est **pas** un défaut du module : c'est une incohérence de la conception, restée
+  invisible vingt-cinq sessions parce que personne n'avait construit les deux ensemble (L311).
+  **À trancher avant toute utilisation de V sur un contenant non prismatique.** Trois voies, aucune
+  choisie : table à deux entrées (volume, inclinaison) ; correction analytique pour les sections
+  convexes ; ou restriction déclarée de V aux prismes — ce qui retirerait à `shape_lut` sa raison
+  d'être. Voir L310, L311, GRAVITE-DIRIGEE-S226 §4.
+
+**Suivi I-07 — S226, 2026-09-13 : la violation est levée.** `hydro_network::step` reçoit désormais
+`g_eff` en **vecteur**, et la charge à une ouverture est sa distance signée au plan perpendiculaire
+à `g_eff`. Le hublot latéral ne fuit pas sous gravité verticale et fuit sous 0,3 g (1 829 ml en dix
+pas) ; l'inclinaison de surface vaut 16,6990° contre 16,6992° attendus, à **0,0002°** du degré
+qu'exige C16. Réduction au cas vertical **exacte** : tous les nombres de S224 sont identiques.
+**Ce que le passage enseigne** : C12 passait à 0,08 % avec l'axe en dur — un cas canonique bien
+choisi peut être muet sur un invariant (**L310**).

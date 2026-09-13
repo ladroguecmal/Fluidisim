@@ -1670,7 +1670,20 @@ entrée par entrée. Le fil reprend ci-dessous.
 
 ## File active
 
-Relue en S225, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+Relue en S226, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+
+**Suivi V S226 — la direction de `g_eff` est construite, et elle révèle une incohérence de l'ADR.**
+[GRAVITE-DIRIGEE-S226](../validation/GRAVITE-DIRIGEE-S226.md). `g_eff` devient un **vecteur** ;
+**I-07 cessait d'être tenu** puisque l'axe était en dur, et **C12 passait quand même à 0,08 %** —
+un cas canonique bien choisi peut être muet sur un invariant (**L310**). Réduction au cas vertical
+**exacte** ; hublot latéral **0 ml** à plat, **1 829 ml** sous 0,3 g ; C16 part V à **0,0002°** pour
+un degré exigé. *Une erreur de signe s'est glissée dans l'attendu du test, pas dans le code, et la
+correction est écrite dans le test.*
+**Ligne neuve, gravité 1 : A266.** ADR-010 §2 demande une table cuite par coupes **horizontales**
+et un plan d'eau perpendiculaire à `g_eff`. Mesuré à 0,3 g : prisme **exact** au milieu de sa
+course, **coque en V fausse de 9,89 % partout** — et c'est la cale qui justifie la table (**L311**).
+L'erreur porte sur un **volume**, donc sur une conséquence de jeu (I-10).
+**Suite S227 : trancher A266**, puis l'état répliqué (ADR-022 §5.1). Autres lignes conservées.
 
 **Suivi J1 S225 — la cadence complète est mesurée, et elle corrige deux choses.**
 [CADENCE-HOTE-S225](../validation/CADENCE-HOTE-S225.md). Fenêtre ouverte, `AutoNoVsync`, deux phases

@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S226 — en cours
+Session : S226 — terminée
 Agent : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
 Entrée : « Continue avec S226 », même conversation. master et trois copies à e75f6aa, jeton libre,
 **maillons 1**. Copie principale.
@@ -124,7 +124,7 @@ vrai, c'est un angle mort et il vaut d'être nommé.
 - [x] **P3** — éprouver la phrase d'ADR-010 : hublot latéral, sous gravité verticale puis sous accélération latérale ; part V de C16.
 - [x] **P4** — mesurer ce que la table de forme perd quand `g_eff` s'incline, et le nommer.
 - [x] **P5** — document de réception ; suite complète `code/`.
-- [ ] **P6** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
+- [x] **P6** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
 
@@ -202,3 +202,21 @@ l'erreur de signe qui était dans le test et non dans le code ; §4 **l'incohér
 mesurée ; §5 les contrôles. Suite : A266 à trancher avant tout contenant non prismatique, puis
 l'état répliqué.
 Suite complète `code/` : **383 réussis, 5 ignorés**, aucun avertissement neuf.
+
+P6 : rituel §6 exécuté. Journal S226 ; **A266** (gravité 1 — ADR-010 §2 se contredit : table par
+coupes horizontales contre plan perpendiculaire à `g_eff`, 9,89 % d'écart sur une cale) ; suivi
+**I-07** (violation levée, et vérifiée par le comportement) ; **L310, L311**. Index, README, REPRISE
+(§4, file active, jeton), feuille de route (V-noyau), file plurielle.
+**Invariants relus** — **I-07** en premier, puisque c'est lui que la session répare : il ne suffit
+pas de dire qu'on ne prend que le module, il faut ne pas le faire ; **I-03** (projection en `f64`
+depuis des différences entières, IEEE strict, réduction **au bit** sous gravité verticale) ;
+**I-10** (l'état demeure entier) ; **I-06** (aucune allocation ajoutée). Aucun n'est devenu faux ;
+I-07 **cesse d'être violé**, ce qui est un changement d'état et non un amendement, et le suivi le
+consigne comme tel.
+**Règle des deux maillons : compteur remis à 0**, et par le code — `outils/velocite.sh` donne
+**`V ... derniere avancee=S226`**. Le compteur était à 1 en entrant.
+**Recommandation portée** : la consigne de S224, reprise par S225, est tenue — V a avancé. La ligne
+`Session suivante` nomme A266, qui est la conséquence directe de ce qui vient d'être construit et
+une ligne de gravité 1, avant de reprendre l'état répliqué.
+Décomptes vérifiés : 138 fichiers dans `docs/adr` (inchangé), 311 leçons, 266 angles.
+Jeton libre, battement 19:19. Copies de travail avancées sur master après ce commit.

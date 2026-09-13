@@ -245,8 +245,7 @@ pas serveur à basse fréquence, état répliqué et restauré (ADR-010, ADR-022
 (vidange en 727,4 s contre 728 s analytiques, 0,0824 %) ;
 [NOYAU-V-S224](validation/NOYAU-V-S224.md). Nœuds en millilitres entiers, orifice et déversoir, pas
 de 100 ms, report de reste, normalisation par arrondi cumulatif, refus atomiques, déterminisme
-vérifié. *Restent, tous spécifiés par ADR-010 et non construits* : **direction de `g_eff`** (surface
-libre en référentiel accéléré — le module n'en prend que le module), `liquid_id` (A17),
+vérifié. *S226* : **direction de `g_eff` construite** — I-07 cesse d'être violé ; **A266** ouverte. *Restent* : `liquid_id` (A17),
 `sky_exposure` et `absorb_rate`, vannes et pompes, **réseau fermé sous pression** (reporté en v2 par
 l'ADR), et l'**état répliqué et restauré** d'ADR-022 §5.1, sans lequel la branche V de C19 et C21
 restent hors d'atteinte. **A264** : le plancher de vidange croît avec la surface du contenant.

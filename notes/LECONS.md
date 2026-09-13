@@ -5111,3 +5111,42 @@ Le geste : pour toute grandeur mesurée sur une pose, une graine ou un instant h
 paramètre au moins une fois** et publier médiane et maximum plutôt qu'une valeur unique. Si la
 valeur héritée se révèle extrême, le dire — elle reste utile comme borne, à condition d'être nommée
 comme telle.
+
+## L310 — Un cas canonique bien choisi peut être muet sur un invariant
+
+*(S226)* Le premier module de V recevait `g_eff` en **module** : la direction était en dur, ce
+qu'I-07 qualifie de « défaut bloquant ». **C12 passait quand même**, à 0,08 % de sa référence
+analytique, parce qu'un réservoir posé à plat ne distingue pas une gravité dirigée d'une gravité
+scalaire. Le cas était bien conçu, la mesure honnête, la réception réelle — et l'invariant violé.
+
+Ce qui généralise : **un cas de validation éprouve ce qu'il met en jeu, et rien d'autre**. Un
+invariant qui porte sur une **généralité** — un référentiel quelconque, une orientation quelconque,
+un nombre quelconque de sources — n'est pas éprouvé par un cas qui fixe ce paramètre à sa valeur la
+plus simple, même quand ce cas est exigeant par ailleurs. Le danger particulier est que la réussite
+du cas donne l'impression d'une couverture qu'elle n'a pas, et d'autant plus qu'elle est serrée.
+
+Le geste : pour chaque invariant, tenir la **liste des cas qui le mettraient en défaut**, séparément
+de la liste des cas qui valident la physique. Quand aucun cas n'y figure, l'écrire — c'est une
+dette, pas un silence. Ici, C16 était ce cas et il existait depuis S01 ; personne ne l'avait relié à
+V. Voir I-07, C12, C16.
+
+## L311 — Deux dispositions d'un même paragraphe peuvent se contredire là où chacune sert
+
+*(S226)* ADR-010 §2 demande deux choses : que la table `volume → hauteur` soit cuite hors ligne « par
+coupes **horizontales** », et que le plan d'eau soit « perpendiculaire à `g_eff`, pas à `Z` ». Les
+deux sont justes, écrites à trois paragraphes d'écart, et **incompatibles dès que `g_eff` penche**.
+Mesuré : pour un prisme la table reste exacte au milieu de sa course — le coin gagné d'un côté vaut
+celui perdu de l'autre —, mais pour une **coque en V** elle se trompe de **9,89 %**, et c'est
+exactement le cas que l'ADR invoque pour justifier la table.
+
+Ce qui généralise : **une contradiction entre deux dispositions d'un même document ne se voit pas à
+la lecture**, parce que chacune est lue dans son propre contexte et paraît raisonnable. Elle
+n'apparaît qu'à la construction, et seulement si l'on construit les deux **ensemble** — ici, vingt-
+cinq sessions après l'ADR, et seulement parce qu'une session a implémenté la seconde en ayant déjà
+la première. Le cas le plus traître est celui où les deux coïncident dans le cas trivial : le prisme
+cache l'incohérence, la cale la révèle.
+
+Le geste : quand une décision pose une **représentation** (une table, un format, un repère) et,
+ailleurs, une **généralité** (un référentiel quelconque, une orientation quelconque), vérifier
+explicitement que la représentation survit à la généralité — et mesurer l'écart sur le cas qui a
+justifié la représentation, pas sur le cas facile. Voir A266.
