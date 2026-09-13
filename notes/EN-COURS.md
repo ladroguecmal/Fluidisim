@@ -58,52 +58,36 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S217 — terminée
+Session : S218 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : instruire la part dynamique d'A255, file J1, sans présumer une loi universelle.
+Objectif : file J1/W, construire une borne locale de pente avec reste spatial démontré,
+puis mesurer son resserrement et son coût sur les sillages S217.
 
 ### Entrée et état réel
 
-Reprise demandée par l'utilisateur. Master et trois copies propres à b1860c1 ; branche B
-archivée conservée. Jeton libre à l'entrée ; maillons 0. Travail dans la copie principale.
-Aucune dépendance nouvelle. Lecture d'amorce effectuée ; approfondissement ci-dessous.
+Utilisateur : « Continue ». Master et trois copies propres à af1212b ; jeton libre,
+maillons 1. Lectures de reprise S217 conservées dans cette conversation, état revérifié.
+Travail dans la copie principale ; aucune dépendance ni copie nouvelle.
 
-### Thèse et critères avant mesure
+### Thèse avant construction
 
-Après extinction, l'échelle sqrt(sigma/g) peut réduire le temps seulement à géométrie
-adimensionnée constante : vitesse/sqrt(g sigma), durée/sqrt(sigma/g), cutoff*sigma et
-trajectoire/sigma restent des paramètres indépendants. Une similitude n'est pas une loi
-universelle sur des histoires de forçage différentes. Comparer d'abord des homothéties,
-puis faire varier vitesse et durée séparément. Pendant le forçage : série distincte.
-Les maxima échantillonnés sont des minorants ; aucune table de sûreté ne sera déduite d'un
-seul balayage. Raffiner recherche spatiale et quadrature avant d'interpréter un écart.
+Sur un rectangle centré en c de demi-côtés hx,hy, la variation de pente d'un mode est
+bornée par |eta_k| |k| (|kx|hx+|ky|hy), via sa Hessienne. On peut aussi la borner par
+2|eta_k||k|. Donc norme(pente(c)) + somme des restes borne tout le rectangle.
+L'intersection avec le majorant directionnel existant garde le meilleur des deux.
+Le maximum des bornes sur une partition complète borne l'emprise, contrairement au
+maximum des seuls échantillons. La sûreté algébrique et l'arrondi f32 restent distingués.
+Ne pas modifier les bits du champ ni les anciens contrats d'admission sans réception.
 
 ### Plan
 
 - [x] **P1** — jeton, thèse et plan seuls.
-- [x] **P2** — lectures ciblées, dérivation des groupes et protocole de campagne reproductible.
-- [x] **P3** — instrument et campagne : similitudes, variations indépendantes, contrôles de résolution et forçage.
-- [x] **P4** — publier le verdict et ses limites ; construire seulement ce que les preuves autorisent.
-- [x] **P5** — rituel de fin §6, file plurielle, journal, index, jeton libre et copies synchronisées.
+- [ ] **P2** — lire les chemins réels, préciser la preuve et le contrat ; ADR si adoption justifiée.
+- [ ] **P3** — construire l'annonce locale dans le cœur, refus et contre-épreuves (centre trompeur compris).
+- [ ] **P4** — recevoir sur une partition des emprises S217 ; coût complet et resserrement, sans promesse de budget GPU.
+- [ ] **P5** — rituel §6, journal, file plurielle, index, reprise, jeton libre et copies synchronisées.
 
 ### Notes de reprise
 
-Les reçus S216 restent ceux de la session précédente : 356 tests réussis et cinq ignorés.
-P3 : 54 mesures initiales et neuf contrôles. À tau=4, 256×512/pas0,5 :
-base1,637275, lent2,272143, long2,005464 ; écart de maximum128→256 <0,002 %.
-Homothéties conservées à ~1e-6 du rapport imprimé, charge et découpage aussi.
-Reconstruction/cœur max2,383e-6, sous1e-5. Deux tests d'instrument réussis en release.
-La réponse libre mélange eta et vitesse : son module eta n'est pas invariant ;
-test mono-mode reçu avec énergie conservée. Correction documentaire nécessaire en P4.
-La suite workspace est encore en cours (sortie code/target/s217-workspace-tests.log).
-P4 : verdict publié, notes correctives ADR-133 et reçus S215/S216. Aucun changement
-src ni nouvel ADR : la courbe à un âge est réfutée, une borne locale avec reste spatial
-est la suite de construction proposée. Deux tests d'exemple debug/release passent.
-Suite workspace toujours en cours ; ne pas recopier356 comme résultat S217 avant sa fin.
-
-P5 : rituel terminé ; suite complète release356 réussis/cinq ignorés, deux tests
-propres debug/release. Suite debug globale arrêtée pour coût des balayages hérités,
-pas un reçu debug complet. A257 corrigée, L296, notes L290 et ADR-133/S215/S216.
-File plurielle, index, README, feuille de route, journal et reprise actualisés.
-134 ADR,257 angles,296 leçons,18 invariants,6 SPEC,23 cas. Maillons1.
-Jeton libre ; synchronisation des trois copies après le commit final.
+Point d'entrée : spectral_pressure::Field et bound_pressure::Prepared ; les 356 tests
+workspace release et deux tests exemple S217 sont les reçus précédents.

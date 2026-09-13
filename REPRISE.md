@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-13 14:52 +02:00
+JETON            : occupé
+Battement        : 2026-09-13 14:54 +02:00
 Agent            : Codex (fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S218
 Dernière session : S217 — similitude conditionnelle du sillage reçue ; courbe à un âge réfutée ; A255 ouverte, A257 corrigée ; aucun changement de production
 Session suivante : S218 — file J1/W : construire et recevoir une borne locale de pente depuis le champ préparé avec reste spatial démontré (piste : borne de Hessienne), puis mesurer le gain de budget et le coût ; ne pas tabuler les maxima S217 comme bornes. A255 et la somme A254 restent ouvertes ; loi GPU ensuite, J2/δ et V-noyau conservés
 Maillons        : 1 — étude et instrument S217 ; aucune couche avancée au sens de §6.8
