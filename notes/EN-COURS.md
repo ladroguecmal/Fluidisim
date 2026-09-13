@@ -122,7 +122,7 @@ vrai, c'est un angle mort et il vaut d'être nommé.
 - [x] **P1** — jeton, la violation d'I-07, la forme, la thèse, la prédiction, le plan seuls.
 - [x] **P2** — généraliser : `g_eff` vectoriel, points de référence et positions d'ouverture ; réduction au cas vertical vérifiée **au bit**.
 - [x] **P3** — éprouver la phrase d'ADR-010 : hublot latéral, sous gravité verticale puis sous accélération latérale ; part V de C16.
-- [ ] **P4** — mesurer ce que la table de forme perd quand `g_eff` s'incline, et le nommer.
+- [x] **P4** — mesurer ce que la table de forme perd quand `g_eff` s'incline, et le nommer.
 - [ ] **P5** — document de réception ; suite complète `code/`.
 - [ ] **P6** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
@@ -164,3 +164,33 @@ surface y **monte**. Le code rendait la bonne valeur ; c'est l'attendu qui a dû
 raison est écrite dans le test — la pente d'un plan perpendiculaire à `g` vaut `−g_x/g_z`.
 
 Onze tests passent.
+
+P4 : **ma prédiction est contredite pour le prisme, et confirmée là où la table existe justement.**
+
+J'annonçais que la table de forme deviendrait fausse dès que `g_eff` s'incline. Intégration
+numérique de l'aire sous un plan incliné de 0,3 g, deux sections, 200 001 tranches :
+
+| section | surface au centre | aire à plat | aire inclinée | écart |
+|---|---:|---:|---:|---:|
+| prisme | 0,4 m | 1,600000 | 1,666667 | 4,17 % |
+| prisme | **1,0 m** | 4,000000 | 4,000000 | **0,0000 %** |
+| prisme | 1,6 m | 6,400000 | 6,333333 | 1,04 % |
+| coque en V | 0,4 m | 0,160000 | 0,175824 | **9,89 %** |
+| coque en V | **1,0 m** | 1,000000 | 1,098901 | **9,89 %** |
+| coque en V | 1,6 m | 2,560000 | 2,717949 | 6,17 % |
+
+**Pour un prisme à parois verticales, la table reste exacte** tant que le plan incliné ne touche ni
+le fond ni le plafond : le coin gagné d'un côté vaut exactement celui perdu de l'autre. Elle ne
+dérape qu'aux extrêmes — 4,17 % près du fond, 1,04 % près du plafond, là où un coin est tronqué.
+
+**Pour une coque en V, elle se trompe de 9,89 % partout, y compris en plein milieu.** Et c'est
+exactement le cas pour lequel `shape_lut` existe : ADR-010 §2 la justifie en écrivant *« Un
+compartiment n'est pas un prisme : la relation volume → hauteur d'une cale, d'un fond de citerne
+bombé ou d'une dépression de terrain est non linéaire. »*
+
+**Les deux dispositions d'ADR-010 §2 sont donc incohérentes là où l'une comme l'autre servent** :
+la table est cuite par coupes **horizontales**, et le plan d'eau est perpendiculaire à `g_eff`.
+Tant que le contenant est un prisme et que l'eau n'est ni au fond ni au plafond, les deux
+coïncident ; dès que le contenant est une cale, non. Sur la charge, 9,9 % d'erreur de hauteur
+donnent environ 5 % sur le débit, qui va comme `√h`. **A266**, et ce n'est pas un défaut du module :
+c'est une incohérence de la conception, que la construction a rendue visible.

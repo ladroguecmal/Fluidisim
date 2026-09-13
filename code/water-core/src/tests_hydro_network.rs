@@ -468,3 +468,61 @@ fn the_free_surface_is_perpendicular_to_g_eff_s226() {
         "inclinaison hors du degre exige par C16 : {measured_deg} contre {expected_deg}"
     );
 }
+
+/// Ce que la table de forme perd quand `g_eff` s'incline — et la réponse n'est pas celle prédite.
+///
+/// ADR-010 §2 cuit `shape_lut` « à partir du maillage (**coupes horizontales**) » : la relation
+/// volume → hauteur y suppose une orientation. Quand `g_eff` penche, le plan d'eau penche avec lui,
+/// et rien ne dit que la table reste valable. Ce test l'intègre numériquement, pour deux sections.
+#[test]
+fn what_the_shape_table_loses_when_gravity_tilts_s226() {
+    // Aire de la section sous la droite `z = zc + x·pente`, dans un contenant décrit par sa
+    // demi-largeur `half(z)`. Intégration en `z`, 200 001 tranches : l'erreur d'intégration est
+    // très en dessous des écarts qu'on cherche.
+    let area_below = |half: &dyn Fn(f64) -> f64, height: f64, zc: f64, slope: f64| {
+        let n = 200_000;
+        let mut a = 0.0;
+        for i in 0..n {
+            let z = height * (i as f64 + 0.5) / n as f64;
+            let w = half(z);
+            if w <= 0.0 {
+                continue;
+            }
+            // Portion de la tranche `[−w, w]` qui est sous la droite : `x` tel que
+            // `z < zc + x·slope`, soit `x > (z − zc)/slope` si `slope > 0`.
+            let wet = if slope.abs() < 1e-12 {
+                if z < zc { 2.0 * w } else { 0.0 }
+            } else {
+                let x0 = (z - zc) / slope;
+                if slope > 0.0 {
+                    (w - x0.clamp(-w, w)).max(0.0)
+                } else {
+                    (x0.clamp(-w, w) + w).max(0.0)
+                }
+            };
+            a += wet * height / n as f64;
+        }
+        a
+    };
+    let slope = 0.3f64; // 0,3 g latéral, la pente de C16
+    let height = 2.0f64;
+    for (nom, half) in [
+        ("prisme", &(|_z: f64| 2.0) as &dyn Fn(f64) -> f64),
+        ("coque_en_V", &(|z: f64| 2.0 * z / 2.0) as &dyn Fn(f64) -> f64),
+    ] {
+        for zc in [0.4f64, 1.0, 1.6] {
+            let flat = area_below(half, height, zc, 0.0);
+            let tilted = area_below(half, height, zc, slope);
+            let error = if flat > 0.0 { (tilted - flat).abs() / flat } else { 0.0 };
+            println!(
+                "TABLE_FORME section={nom} hauteur_centre={zc} aire_plate={flat:.6} aire_inclinee={tilted:.6} ecart={:.4} %",
+                error * 100.0
+            );
+            if nom == "prisme" && zc == 1.0 {
+                // Parois verticales, surface qui ne touche ni le fond ni le plafond : le coin gagné
+                // d'un côté vaut exactement celui perdu de l'autre. La table reste **exacte**.
+                assert!(error < 1e-4, "prisme centre : la table devrait rester exacte, {error}");
+            }
+        }
+    }
+}
