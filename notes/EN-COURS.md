@@ -118,7 +118,7 @@ ce résultat-là qu'il faut savoir écrire s'il se produit.
 - [x] **P4** — borne locale conjointe : partition spectrale à budget d'évaluations égal ; gain, reste au-dessus du maximum, **coût de passe**.
 - [x] **P5** — part de π/7 : budget d'admission complet avec les impacts sommés ; combien de sources passent, avant et après.
 - [x] **P6** — décider : ADR si quelque chose est rendu **et** utilisable ; sinon constat motivé, et retour à la file (cadence complète de l'hôte, V-noyau).
-- [ ] **P7** — document de réception (en-tête ADR-131 D3) ; suite complète `code/`.
+- [x] **P7** — document de réception (en-tête ADR-131 D3) ; suite complète `code/`.
 - [ ] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
@@ -275,3 +275,11 @@ pression, c'est le **majorant de naissance de l'impact**, et ADR-133 ne peut rie
 Ce que cette décision ne fait pas : elle ne retire rien à ADR-135/136/137, qui restent publiées et
 mesurées ; elle ne dit pas que la borne locale est inutile — elle dit qu'elle n'est pas un **terme
 d'admission par image**. Un usage hors image (validation, outillage auteur, banc) reste ouvert.
+
+P7 : [SOMME-SILLAGES-S222](../docs/validation/SOMME-SILLAGES-S222.md) — en-tête ADR-131 D3 avec
+rang de passage ; §1 le témoin de composition partagée ; §2 la sous-additivité et la pénalité de
+séparation ; §3 la borne locale, sa requête locale écartée et sa loi d'échelle ; §4 la réponse en
+part de π/7 **avec son domaine en âge**, qui corrige l'annonce ; §5 la décision de ne rien migrer.
+Suite nommée : la somme spatiale sur les impacts.
+Suite complète `code/` hors réseau : **370 réussis (272+4+1+93), 5 ignorés**, aucun échec —
+identique à S221 : cette session n'a ajouté aucune ligne à `code/*/src`, seulement un exemple.
