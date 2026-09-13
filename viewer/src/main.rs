@@ -10,6 +10,16 @@ use winit::{
     window::{Window, WindowId},
 };
 
+fn instance() -> wgpu::Instance {
+    let mut descriptor = wgpu::InstanceDescriptor::new_without_display_handle();
+    // S211 : la découverte multibackend plante nativement sur la machine de banc.
+    // DX12 est reçu sur Windows ; les autres systèmes restent à recevoir.
+    if cfg!(target_os = "windows") {
+        descriptor.backends = wgpu::Backends::DX12;
+    }
+    wgpu::Instance::new(descriptor)
+}
+
 struct App<'a> {
     frame: FrameData<'a>,
     window: Option<Arc<Window>>,
@@ -79,7 +89,7 @@ impl ApplicationHandler for App<'_> {
             return;
         }
         let w=match e.create_window(Window::default_attributes().with_title("Fluidisim — mer + impact | Espace pause · R impact · B témoin · clic droit caméra · flèches déplacement").with_inner_size(winit::dpi::PhysicalSize::new(960,540))) {Ok(w)=>Arc::new(w),Err(error)=>{self.fail(e,error);return;}};
-        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor::new_without_display_handle());
+        let instance = instance();
         let surface = match instance.create_surface(w.clone()) {
             Ok(s) => s,
             Err(error) => {
@@ -203,7 +213,7 @@ fn run() -> Result<(), String> {
     let mut frame = FrameData::new(&scene.background, table);
     if args.iter().any(|a| a == "--verify") {
         std::fs::create_dir_all("captures/s211").map_err(|e| e.to_string())?;
-        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor::new_without_display_handle());
+        let instance = instance();
         let mut g = pollster::block_on(gpu::Gpu::new(
             &instance,
             None,
@@ -236,6 +246,8 @@ fn run() -> Result<(), String> {
                 },
             )?;
         }
+        g.benchmark(&mut frame)?;
+        g.resize(960, 540);
         g.benchmark(&mut frame)?;
         return Ok(());
     }

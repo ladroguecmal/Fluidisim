@@ -431,7 +431,11 @@ impl Gpu {
         let a = u64::from_le_bytes(b[..8].try_into().unwrap());
         let z = u64::from_le_bytes(b[8..16].try_into().unwrap());
         Ok(Some(
-            z.saturating_sub(a) as f64 * self.queue.get_timestamp_period() as f64 / 1e6,
+            z.checked_sub(a)
+                .filter(|&ticks| ticks > 0)
+                .ok_or("horodatage GPU nul ou inversé")? as f64
+                * self.queue.get_timestamp_period() as f64
+                / 1e6,
         ))
     }
     pub fn verify(&self, frame: &FrameData<'_>) -> Result<(), String> {

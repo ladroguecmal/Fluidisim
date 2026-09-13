@@ -73,7 +73,7 @@ Compteur 2 : file J1, couches B/W, construction effective.
 - [x] **P1** — accord et plan seul, jeton occupé.
 - [x] **P2** — sources verrouillées, API et données GPU B/W depuis le cœur ; réception CPU.
 - [x] **P3** — fenêtre, pipeline GPU, caméra interactive et B+impact ; compilation.
-- [>] **P4** — comparaison GPU/CPU, capture locale, mesures distinctes CPU/GPU et contrôles ciblés.
+- [x] **P4** — comparaison GPU/CPU, capture locale, mesures distinctes CPU/GPU et contrôles ciblés.
 - [ ] **P5** — rituel §6, lancement, file active, passation, jeton libre, copies synchronisées.
 
 ### Notes de reprise
@@ -91,3 +91,7 @@ Test ciblé reçu aux temps 15 s, 1e6 s et u64::MAX, deux origines, refus domain
 P3 : hôte winit/wgpu compilé hors réseau. API wgpu30 adaptée (CurrentSurfaceTexture,
 Queue::present, InstanceDescriptor explicite). Grille projetée 2 px, shader partagé compute/rendu.
 Modes --verify et --smoke ; Espace pause, R relance, B témoin, flèches déplacement, clic droit rotation.
+
+P4 : DX12 reçu ; découverte multibackend arrêt natif 0xc0000005, cause non isolée.
+Hauteur max 0,077657 mm ; GPU eau 960×540 médiane 0,048576 ms, pas de cadence complète reçue.
+349 tests réussis/cinq ignorés ; fenêtre inspectée et fermée normalement. Voir HOTE-GPU-S211.
