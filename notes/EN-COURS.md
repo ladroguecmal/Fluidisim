@@ -108,3 +108,10 @@ formule). Type d'erreur propre `TableError { Step, Storage, Profile, Field(Error
 variant ajouté à l'erreur partagée des champs (ADR-082). `profile` garde les opérations de
 `sample` (`coef·J0·ct`, `coef·k·J1·ct`) pour l'égalité au bit aux nœuds. Compilation sans
 avertissement.
+
+P3 premier passage : (a) égalité au bit aux nœuds **passe** ; (c) zéro allocation **passe**
+(témoin > 0) ; (d) refus nommés **passe**. **(b) ÉCHOUE** : à λ/8, max|Δη| = **0,1820 mm à l'âge
+0 s** > 0,09 mm déclarés ; max|Δpente| = 0,001357 ≤ 0,004252 (2 % de slope_max) passe. Le seuil
+0,09 mm venait de S206, mesuré à +3 s seulement : la naissance (pic central compact) est plus
+exigeante. **Non déplacé.** Mesure ajoutée *après* l'échec, dite comme telle : erreur par âge à
+λ/8 et à λ/16 ; décision de pas à corriger par note datée d'ADR-129, pas par l'essai.
