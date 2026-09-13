@@ -72,7 +72,7 @@ par le seul message « Reprends le projet ». Maillons 0, suite J1 cohérente av
 ### Plan
 
 - [x] **P1** — déclarer le plan et prendre le jeton, commit seul.
-- [ ] **P2** — préparer un dossier de résolution : manifeste exact, emplacement,
+- [x] **P2** — préparer un dossier de résolution : manifeste exact, emplacement,
  commandes, contrôles hors réseau et inventaire attendu avant téléchargement des sources.
  Aucun accès au registre ni source externe sans accord.
 - [ ] **P3** — rituel §6 : journal, file active, index, REPRISE, décomptes ; jeton libre,
@@ -83,3 +83,5 @@ par le seul message « Reprends le projet ». Maillons 0, suite J1 cohérente av
 Ce lot prépare la résolution ; il ne reçoit ni application interactive ni performance GPU.
 Versions héritées de S208, à vérifier lors de la résolution autorisée.
 L'implémentation GPU suivra l'accord sur les sources ; aucun nouveau seuil physique.
+P2 : PREPARATION-HOTE-S209.md prêt ; métadonnées locales de code/ reçues hors réseau.
+Aucun registre contacté. Pas de code GPU ni de nouvelle réception numérique.
