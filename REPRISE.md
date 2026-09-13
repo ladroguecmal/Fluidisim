@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-13 08:53 +02:00
+JETON            : occupé
+Battement        : 2026-09-13 08:56 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S208 — construire ADR-129 (table de Bessel de W) ; recommandation de pile GPU
 Dernière session : S207 — ADR-130 : rendu J1 sur GPU par un hôte séparé (choix de l'utilisateur)
 Session suivante : S208 — construire ADR-129 (chemin d'image de W, code src), puis lot de l'hôte GPU
 Maillons        : 0 — S207 sujet imposé par l'utilisateur ; ADR-130 décision de J1

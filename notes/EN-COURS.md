@@ -58,37 +58,48 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S207 — terminée
+Session : S208 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : **archiver la réponse de l'utilisateur** à l'arbitrage posé en fin de S206 — « GPU,
-hôte séparé » — dans une décision (ADR-130), et la propager. Session courte, **aucun code**, aucune
-dépendance téléchargée : le téléchargement d'une bibliothèque se demandera nommément quand le lot
-de l'hôte commencera.
+Objectif : (1) **construire ADR-129** dans `water-core` — table radiale à matrice de Bessel
+précalculée pour le chemin d'image de W, avec la réception écrite dans l'ADR ; (2) **recommander
+la pile de l'hôte GPU** (ADR-130), à la demande de l'utilisateur, **sans rien télécharger**.
 
 ### État réel à l'amorce
 
-master = copies = 94dd705 (S206 P6), propres ; S206 terminée à 08:49, jeton libre.
-Réponse reçue par la question structurée, après le commit de S206 : option (A), recommandée.
+master = copies = 79bfda6 (S207 P4), propres ; jeton libre depuis 08:53. Message utilisateur :
+« pour la décision de l'hôte je pensais à l'option 1 mais à voir via ta recommandation » —
+l'option 1 de S204 (application séparée avec dépendances) est celle qu'ADR-130 acte.
+
+### Conception, fixée avant le code
+
+Sous-module `radial_table.rs` de `radial_impact` (accès aux nœuds privés, pas de copie de la
+formule). `RadialImpact::table_len(step)` ; `bake_table(step, &mut [[f32;2]])` remplit
+`(J0, J1)(k_n r_i)`, `r_i = i·step`, i ∈ 0..M, M = ⌊R/step⌋ + 2 (un nœud au-delà de R pour
+l'Hermite du dernier intervalle, dans la portée de Bessel déjà contrôlée) ; `RadialTable::profile
+(time, &mut [(f32, f32)])` rend η(r_i) et pente radiale par image, **même ordre de sommation que
+`sample`** ; `RadialTable::eval(profile, frame, cell, point)` : refus hors emprise comme `admits`,
+Hermite cubique pour η et sa dérivée pour la pente. Aucune allocation ; stockage et profil fournis
+par l'hôte (I-06). Chemin cosmétique (ADR-129 §3).
+
+**Critères déclarés avant mesure** : (a) aux nœuds, pour une source en position 0, η et pente
+égaux **au bit** à `sample` ; (b) à λ/8 sur le champ S203, max|Δη| ≤ 0,09 mm et max|Δpente| ≤ 2 %
+de `slope_max`, sur toute l'emprise et l'horizon (âges 0–56 s) ; (c) zéro allocation dans
+`profile` et `eval` (essai d'intégration à compteur global) ; (d) refus `Time`, `Domain` et
+stockage insuffisant nommés ; (e) image S205 +3 s par la table contre le chemin direct : zéro
+rayon non résolu, écart maximal par canal publié, zéro pixel différent hors emprise.
 
 ### Plan
 
-- [x] **P1** — état réel, plan seul.
-- [x] **P2** — ADR-130 : décision de l'utilisateur (chemin de rendu J1 sur GPU, hôte séparé) ;
- conséquences techniques déléguées (hôte hors du workspace sans dépendance, `water-core` inchangé
- sous ADR-020, données publiées vers le GPU selon I-08) ; ce qui reste ouvert (budget GPU de
- l'eau, pile exacte, permission de téléchargement). Notes datées ADR-125 et ADR-020 si touchés.
-- [x] **P3** — propagation : feuille de route (§4, J1), file active, REPRISE, index, README.
-- [x] **P4** — rituel §6 : journal, décomptes, compteur, jeton libre, copies.
+- [x] **P1** — état réel, conception et critères, plan seul.
+- [ ] **P2** — `radial_table.rs` : `table_len`, `bake_table`, `profile`, `eval` ; compilation.
+- [ ] **P3** — essais unitaires (a), (b), (d) ; essai d'intégration (c).
+- [ ] **P4** — banc : noyau réel dans `frame_cost` (coût par image, construction, mémoire) ; image
+ S205 par la table dans `render_impact` contre le chemin direct (e).
+- [ ] **P5** — recommandation de pile GPU : critères (ADR-020/130, hors réseau pour le cœur,
+ portabilité, licences, maintenance), versions vérifiées en ligne **sans téléchargement** ;
+ demande d'autorisation nommée formulée pour le lot suivant. Document `HOTE-GPU-S208`.
+- [ ] **P6** — rituel §6 : journal, angles, leçons, notes ADR-129, feuille de route, file active,
+ index/README/REPRISE, décomptes, velocite, compteur, jeton libre, copies.
 
 ### Notes de reprise
 
-Formulation de la question et des options : S206, FEUILLE-DE-ROUTE §4 avant cette session.
-
-P2 : ADR-130 actée (choix de l'utilisateur : GPU, hôte séparé ; `water-core` sans dépendance
-publie ce que le GPU consomme ; hôte hors du workspace sans réseau ; cosmétique ; aucune
-dépendance sans autorisation nommée ; budget GPU et pile ouverts). Note datée ADR-125. ADR-020
-non touché : il prévoyait déjà `IGpuBackend` fourni par l'hôte.
-P3 : feuille de route (J1, §4 tranché + lignes dépendances et budget GPU), file active (chemin
-de rendu tranché, S208 = ADR-129 puis hôte GPU), REPRISE, index, README.
-P4 : journal S207, suivi A250 ; aucun angle ni leçon nouveaux ; décomptes 130/250/283/18/6/23.
-Jeton libre, copies à avancer.
