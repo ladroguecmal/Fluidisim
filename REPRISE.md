@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-13 09:24 +02:00
+JETON            : occupé
+Battement        : 2026-09-13 09:36 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S211 — construction GPU B/W
 Dernière session : S210 — verrou GPU et inventaire des 254 archives, sources non téléchargées
 Session suivante : S211 — file J1, couches B/W : construire l'hôte GPU après accord sur les sources (DEPENDANCES-HOTE-S210)
 Maillons        : 2 — S209/S210 préparent l'hôte ; suite imposée sur J1 B/W, pas une étude supplémentaire
