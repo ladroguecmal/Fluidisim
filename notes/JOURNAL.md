@@ -11016,7 +11016,9 @@ recevoir S211 à S214. `water-core` intact ; aucun bit publié ne change. **A251
 - **Budget conjoint 0,3477 à 0,3776 contre π/7 = 0,4488** — 77,5 à **84,1 %** — pour *une* source de
   chaque type. Pente réelle des perturbations 0,0929 à 0,0352 : **majorant 3,7 à 10,5 fois** le réel.
   Marge 0,0712 : une troisième source refuse toute l'image, et par `SlopeEnvelope` (vérifié :
-  4 477/4 477, zéro `Slope`). **A254, sévérité 1.**
+  4 477/4 477, zéro `Slope`). **A254, sévérité 1.** La pente réelle citée est un maximum
+  **échantillonné**, pas le maximum sur l'emprise (S140) : le rapport majore le pessimisme sans le
+  chiffrer exactement. **I-18 tenu** — les deux termes sommés sont déjà convertis (S141).
 - **Le cœur ne compose que sur l'intersection** des domaines (ADR-077, ADR-080) : 4 477 sondes sur
   6 988. Le chemin mixte ne peut donc pas être le chemin de rendu — ce n'est pas un défaut, c'est la
   sémantique de service, et c'est pourquoi l'hôte sommait à la main.

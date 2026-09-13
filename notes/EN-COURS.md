@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S214 — en cours
+Session : S214 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : **validité avant accélération** (ADR-131 D6) — faire composer l'impact et le sillage par
 le cœur (`mixed_water`) sur la scène J1, exercer le budget conjoint, puis instruire A251 (emprise et
@@ -120,7 +120,7 @@ cœur refuserait.
 - [x] **P6** — A251 : emprise et durée honnêtes déduites de la recette et de la vitesse ; couture spatiale et temporelle mesurées comme ADR-126.
 - [x] **P7** — A251 : réception des coutures et refus nommé ou garde ; publication avec la fixture.
 - [x] **P8** — document de réception (en-tête ADR-131) ; suite complète `code/`.
-- [ ] **P9** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
+- [x] **P9** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
 
@@ -263,3 +263,30 @@ rang de passage ; §1 pourquoi le chemin mixte n'est pas le chemin de rendu (int
 4 477/6 988) ; §2 composition exacte au bit, point corrigé ; §3 budget conjoint et refus par
 majorant ; §4 domaine d'image et ADR-132 ; §5 contrôles, coût, variabilité de 20 %.
 Suite `code/` : 354 réussis (256+4+1+93), 5 ignorés, aucun échec ; viewer sans avertissement neuf.
+
+P9 : rituel §6 exécuté. Journal S214 ; **A253** (sévérité 2, corrigée dans l'hôte, ouverte pour
+l'interface) et **A254** (sévérité 1) ; suivis A251 (traitée par ADR-132), A214 (troisième point de
+calibration, toujours pas de garde), A247 (l'écart de S213 était un rang de passage) ; **L287, L288,
+L289**. Index, README, REPRISE (§3 « 132 décisions », §4, file active, jeton), feuille de route
+(J1, J1-bis, travaux nécessaires, deux lignes du tableau), file plurielle de QUESTIONS-OUVERTES,
+viewer/README. Notes datées là où S214 invalide une phrase : HOTE-GPU-S212 §Admission (« non
+exercé ») et TEMPS-SILLAGE-S213 §Suite. Aucun ADR réécrit.
+**Invariants relus** — I-04 (l'hôte annonce, il ne décide pas de la physique : ADR-132 n'introduit
+aucun refus), I-06 (aucune allocation ajoutée au pas ; pile graphique toujours non reçue), I-08
+(une seule conversion monde → local, aucun temps `f32`), I-14 (les deux lois d'ADR-132 citent leur
+provenance : mécanismes d'ADR-107, calibrage S156 et S214), **I-18** — celui-ci a été vérifié et
+non supposé : les deux termes sommés par le budget sont **déjà convertis** en pente réelle
+(`RadialImpact` divise sa borne L1 par son rapport mesuré, `bound_pressure` retient l'enveloppe
+resserrée, S141), donc I-18 tient et A254 est un pessimisme d'emprise et d'alignement, pas d'unité.
+Aucun invariant amendé.
+**Correction apportée après première rédaction** : la « pente réelle » est un maximum
+**échantillonné** sur 4 477 sondes, pas le maximum sur l'emprise (S140 : il se cherche, il ne se
+calcule pas). Le rapport 3,7–10,5 majore donc le pessimisme sans le chiffrer. Corrigé dans A254, la
+réception §3 et le journal avant clôture.
+**Règle des deux maillons** : compteur **0**. ADR-132 fixe un élément de W — même lecture qu'ADR-126
+en S203 — bien que S214 n'ait ajouté aucune ligne à `code/*/src` ; `outils/velocite.sh` relancé
+(W = S213, B = S211, δ = S202, V = jamais ; 37 sessions sur 54 en chaînage depuis S160).
+**Recommandation du dernier bilan portée** : BILAN-VELOCITE-S198 demandait qu'une suite nomme une
+ligne de file et la couche qu'elle avance — la suite S215 nomme **A254**, ligne de la file J1, et
+la couche W.
+Jeton libre, battement 11:37. Copies de travail avancées sur master après ce commit.

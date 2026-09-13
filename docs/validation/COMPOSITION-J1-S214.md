@@ -101,6 +101,15 @@ seul et par le choix d'emprise ; ici c'est l'**additivité sur le nombre de sour
 ADR-119 règle 1) qui borne la scène, et elle n'avait jamais été mesurée composée. Consigné en
 **A254**.
 
+**Ce que ces chiffres ne disent pas.** La « pente réelle » est le maximum **échantillonné** sur les
+4 477 sondes — grille de 1,3 m plus les bords d'emprise —, pas le maximum sur l'emprise : S140 a
+établi qu'il ne se calcule pas, il se cherche. Le rapport 3,7–10,5 est donc un majorant du
+pessimisme et non sa valeur ; à titre de calibrage, S203 mesurait 1,36 entre majorant directionnel
+et pente échantillonnée sur B, ce qui laisse l'essentiel de l'écart debout. **I-18 reste tenu** :
+les deux termes sommés sont déjà convertis en pente réelle — `RadialImpact` divise sa borne L1 par
+son rapport mesuré et `bound_pressure` retient l'enveloppe resserrée, tous deux depuis S141. Le
+pessimisme est d'emprise et d'alignement (A208), pas d'unité.
+
 ## 4. Domaine d'image du sillage — A251, ADR-132
 
 Deux lois déduites de la recette, et reçues par trois critères indépendants. Elles sont les deux

@@ -3017,6 +3017,14 @@ techniques présentes, absentes et domaine (ADR-131) ; A247 reste partielle. Voi
   décider si le majorant se resserre (le rapport mesuré dit qu'il le peut), s'il se compose
   autrement que par la somme (ADR-119 règle 1 l'interdit sans mesure), ou si `max_slope` cesse
   d'être une constante de milieu. Voir L288, ADR-098, COMPOSITION-J1-S214 §3.
+  *Précision S214, à ne pas lire trop fort* : la « pente réelle » citée est le **maximum
+  échantillonné sur 4 477 sondes** (grille de 1,3 m plus les bords d'emprise), pas le maximum sur
+  l'emprise — S140 a montré qu'il ne se calcule pas, il se cherche. Le rapport 3,7–10,5 est donc un
+  majorant du pessimisme, pas sa valeur exacte ; pour calibrer, S203 mesurait un facteur 1,36 entre
+  majorant directionnel et pente échantillonnée sur B, ce qui laisse l'essentiel de l'écart debout.
+  **I-18 est tenu** : les deux termes sommés sont déjà convertis en pente réelle — `RadialImpact`
+  divise sa borne L1 par son rapport mesuré (S141), `bound_pressure` retient l'enveloppe resserrée
+  (S141). Le pessimisme est donc d'emprise et d'alignement (A208), pas d'unité.
 
 **Suivi A251 — S214, 2026-09-13 : traitée par [ADR-132](../adr/ADR-132-domaine-d-image-d-un-sillage.md).**
 Le domaine d'image d'un sillage se calcule depuis sa recette — `rayon = 2π·angular/(3·cutoff)`,
