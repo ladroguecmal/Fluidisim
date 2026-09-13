@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-13 19:05 +02:00
+JETON            : occupé
+Battement        : 2026-09-13 19:10 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
-Session en cours : —
+Session en cours : S226 — V : direction de `g_eff`, surface libre en référentiel accéléré
 Dernière session : S225 — cadence complète de l'hôte mesurée (198 Hz) ; exclusions chiffrées à 2 % ; la pose de mesure héritée de S201 était proche du pire cas (GPU d'eau 2,85 ms en médiane de balayage contre 4,16 fixe) ; A265 ouverte
 Session suivante : S226 — **V, sans faute** : la consigne de S224 — « ne pas laisser passer plus d'une session » — arrive à échéance, et S225 en a consommé une. **Direction de `g_eff`** d'abord : la surface libre en référentiel accéléré est spécifiée à ADR-010 §2 et absente, le module ne prenant aujourd'hui que le **module** de `g_eff`, de sorte qu'un vaisseau qui accélère ne voit pas son réservoir fuir par ce qui se retrouve en bas. Puis **état répliqué et restauré** (ADR-022 §5.1), qui ouvre la branche V de C19 et C21. **A265 est à instruire avant toute optimisation CPU** : la trame pourrait avoir un plancher que le travail n'explique pas. La suite GPU de J1-bis — espace, LOD, visibilité, mutualisation — reste nommée, et la pose de mesure doit y être balayée et non héritée (L309). A264, A261, A258, A263 sans ordre imposé ; J2/δ général conservé
 Maillons        : **1** — S225 n'a ni ajouté de code d'exécution dans `code/*/src`, ni acté d'ADR : elle a mesuré. À 2, la session suivante devra nommer une ligne de la file et la couche qu'elle avance — c'est déjà le cas, la suite nomme **V**

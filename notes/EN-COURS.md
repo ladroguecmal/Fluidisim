@@ -58,169 +58,74 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S225 — terminée
+Session : S226 — en cours
 Agent : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
-Entrée : « Continue avec S225 », même conversation. master et trois copies à 59116c8, jeton libre,
-maillons 0. Copie principale.
-Objectif : **cadence complète de l'hôte** — travail nécessaire de J1 (ADR-131 D6), nommé depuis
-S213, jamais mesuré, reporté explicitement par S224. La promesse se tient ici.
+Entrée : « Continue avec S226 », même conversation. master et trois copies à e75f6aa, jeton libre,
+**maillons 1**. Copie principale.
+Objectif : **V — direction de `g_eff`**. La consigne de S224 arrive à échéance ; S225 en a consommé
+la session de battement.
 
-### Ce que l'hôte mesure aujourd'hui, et ce qui manque
+### Ce que le module viole aujourd'hui, et il faut le dire ainsi
 
-`Gpu::benchmark` dessine **hors écran**, sur une texture créée pour l'occasion, et publie deux
-nombres : `CPU_prepare_upload_submit_ms` et `GPU_water_ms`, ce dernier avec une réserve écrite dans
-la ligne elle-même — *« sky, upload, readback, presentation excluded »*. La paire d'horodatages
-n'entoure que la passe « water only » ; le ciel est dessiné et **non chronométré**.
+`hydro_network::step` prend `g_eff: f32` — un **module**. La direction est donc en dur : les
+hauteurs sont des scalaires comptés le long de `+Z`, et rien dans le code ne dit lequel.
 
-Il manque donc trois choses, et ce sont exactement celles qu'une cadence exige :
+> **I-07** — « Tout domaine appartient à un référentiel. Il reçoit `g_eff` par injection. Une
+> constante `−9,81·Z` écrite en dur dans un solveur est un **défaut bloquant**. »
 
-1. **La chaîne d'échange.** Acquérir une image, présenter, et le coût de ces deux gestes.
-2. **Le coût de ce qui a été exclu.** Ciel, transferts, présentation : la réserve est écrite depuis
-   S211 et n'a **jamais été chiffrée**. Une exclusion annoncée n'est pas une exclusion mesurée.
-3. **La cadence elle-même** — l'intervalle réel entre deux images, et non la somme de passes
-   isolées, dont rien ne dit qu'elle est atteinte.
+La constante n'est pas écrite, mais l'axe l'est, ce qui revient au même. S224 l'avait noté en
+réserve — « en module seulement, et c'est dit » — et c'était insuffisant : I-07 ne demande pas qu'on
+le dise, il demande que ce ne soit pas le cas. **C12 passait quand même**, parce qu'un réservoir posé
+à plat ne distingue pas les deux.
 
-**Le piège est dans la fenêtre.** Le mode de présentation est `AutoVsync` : l'intervalle entre deux
-images y mesure **l'écran**, pas le coût. Mesurer la cadence sous vsync donnerait 60 ou 120 Hz quel
-que soit le travail, et ce serait un chiffre vide. La mesure se fera donc **sans vsync**, et le
-dira.
+Ce qu'ADR-010 §2 exige, mot pour mot : *« Le plan d'eau est perpendiculaire à `g_eff`, pas à Z. La
+hauteur d'une ouverture est donc évaluée par sa distance signée au plan de surface orienté selon
+`g_eff`. Sans cela, un vaisseau qui accélère ne verrait pas son réservoir fuir par le hublot latéral
+qui se retrouve "en bas". »*
+
+### Forme déclarée avant d'écrire
+
+- `g_eff: [f32; 3]`, et `u = −g_eff/‖g_eff‖` la verticale locale.
+- `HydroNode.origin_um: [i64; 3]` remplace `floor_um` : le point de référence depuis lequel la table
+  de forme compte la hauteur de surface le long de `u`.
+- `Opening.position_um: [i64; 3]` remplace `sill_um` : une ouverture est **quelque part**, pas à une
+  hauteur.
+- Charge à un point `q` pour le nœud `n` : `h_n − (q − c_n)·u`, avec `h_n` la hauteur donnée par la
+  table. Projection calculée en `f64` depuis des différences entières — le module emploie déjà `f64`
+  pour le débit, et IEEE strict le rend reproductible (I-03).
 
 ### Thèse et critères, déclarés avant toute mesure
 
-1. **Une cadence est un intervalle, pas une somme.** Publier la distribution des intervalles réels
-   entre présentations — médiane, p95, maximum — sur une fenêtre ouverte, sans vsync.
-2. **Chiffrer les exclusions.** Horodater la **trame entière** (ciel + eau) en plus de la passe
-   d'eau seule, et mesurer séparément l'acquisition d'image et la présentation. La part de l'eau
-   dans la trame devient alors un fait, pas une hypothèse.
-3. **Confronter à ADR-125, dans ses propres termes** : 60 images/s, soit **16,67 ms** par image, et
-   **2 ms** pour l'eau. Dire les deux — l'hôte tient-il 60 Hz, et l'eau tient-elle sa part ?
-4. **Rang de passage** (L289) : au moins deux passages séparés, écart publié. Une cadence est une
-   mesure de temps, et cette machine varie de 20 % entre passages.
-5. Publication avec en-tête ADR-131 D3 : techniques présentes, absentes, domaine.
+1. **Réduction exacte.** À `g_eff = [0, 0, −9,81]`, le module rend **exactement** ce qu'il rendait :
+   C12 à la même seconde, mêmes volumes pas à pas. Une généralisation qui déplace le cas plat serait
+   refusée — c'est le contrôle qui sépare une généralisation d'une réécriture.
+2. **La phrase d'ADR-010, éprouvée telle qu'elle est écrite** : un réservoir dont l'ouverture est
+   **latérale** ne fuit pas sous gravité verticale, et **fuit** sous accélération latérale. C'est le
+   test que le module actuel ne peut pas passer, quelle que soit sa précision.
+3. **C16, part V.** Le cas exige « inclinaison de la surface au repos à ±1° de la normale à
+   `g_eff` ». La part ballottement relève de δ ; la part V est l'orientation du plan, et elle se
+   vérifie sur la charge aux ouvertures.
+4. Déterminisme, refus atomiques et absence d'allocation **conservés** : ce sont des acquis de S224,
+   pas des objectifs neufs, et une généralisation qui les casserait serait un recul.
 
-**Prédiction écrite pour être contredite** : la trame complète à 960×540 coûtera 6 à 7 ms de GPU —
-eau 4,2 plus ciel et présentation — et 2,5 ms de CPU, donc une cadence sans vsync autour de
-**150 Hz**, largement au-dessus des 60 Hz d'ADR-125. Et les exclusions de S211–S213 se révéleront
-**petites devant l'eau** : je prédis que ciel, transferts et présentation pèsent ensemble moins que
-la passe d'eau, donc que les mesures antérieures n'ont rien caché de matériel. Si c'est faux — si
-l'exclu pèse autant que le mesuré — alors tous les verdicts de coût depuis S211 portent sur une
-fraction du problème, et c'est la découverte de la session.
+**Prédiction écrite pour être contredite** : la réduction au cas vertical sera exacte au bit, et la
+fuite latérale apparaîtra. Mais je prédis surtout un **obstacle que la construction va révéler** :
+la table de forme d'ADR-010 §2 est cuite « par coupes **horizontales** », donc valable pour **une
+seule orientation**. Dès que `g_eff` s'incline, la relation volume → hauteur change, et à 0,3 g
+latéral l'inclinaison vaut `atan(0,3) = 16,7°` — ce n'est pas un petit angle. Je prédis donc que la
+direction se corrige pour les **ouvertures** — ce qu'ADR-010 nomme — et **pas** pour le volume, et
+que l'incohérence est dans l'ADR elle-même, pas dans le module. Si c'est faux, tant mieux ; si c'est
+vrai, c'est un angle mort et il vaut d'être nommé.
 
 ### Plan
 
-- [x] **P1** — jeton, ce qui manque, thèse, critères, prédiction, plan seuls.
-- [x] **P2** — instrumenter : horodatage de la trame entière, acquisition et présentation séparées, intervalle réel ; mode sans vsync déclaré.
-- [x] **P3** — mesurer la cadence sur fenêtre ouverte, deux passages, aux deux formats ; publier les distributions.
-- [x] **P4** — chiffrer les exclusions : part de l'eau dans la trame, coût du ciel, des transferts et de la présentation.
-- [x] **P5** — confronter à ADR-125 : 16,67 ms et 2 ms, et dire ce que la scène J1 tient et ne tient pas.
-- [x] **P6** — document de réception (en-tête ADR-131 D3, rang de passage) ; suite complète `code/`.
-- [x] **P7** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
+- [x] **P1** — jeton, la violation d'I-07, la forme, la thèse, la prédiction, le plan seuls.
+- [ ] **P2** — généraliser : `g_eff` vectoriel, points de référence et positions d'ouverture ; réduction au cas vertical vérifiée **au bit**.
+- [ ] **P3** — éprouver la phrase d'ADR-010 : hublot latéral, sous gravité verticale puis sous accélération latérale ; part V de C16.
+- [ ] **P4** — mesurer ce que la table de forme perd quand `g_eff` s'incline, et le nommer.
+- [ ] **P5** — document de réception ; suite complète `code/`.
+- [ ] **P6** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
 
 *(vide : le travail commence en P2)*
-
-P2+P3+P4 : un seul programme instrumenté porte les trois étapes. `Gpu` passe à **quatre**
-horodatages — eau en 0/1, ciel en 2/3 — et `gpu_breakdown` rend la passe d'eau **et** la trame
-complète, du début du ciel à la fin de l'eau. Le mode `--cadence` ouvre une vraie fenêtre en
-**`AutoNoVsync`**, et il le dit dans sa ligne : sous vsync, l'intervalle mesure l'écran et non le
-coût.
-
-**Deux phases, et la séparation n'est pas un confort.** Relire un horodatage appelle
-`poll(wait_indefinitely)`, qui **sérialise** CPU et GPU : mesurer la décomposition à chaque image
-détruit le recouvrement, donc la cadence qu'on prétend mesurer. Phase 1 — 590 images, aucune
-relecture : l'intervalle réel. Phase 2 — 200 images avec relecture : la décomposition, publiée sous
-le nom `DECOMPOSITION_serialisee`, qui n'est **pas** une cadence.
-
-| grandeur | médiane | p95 | max |
-|---|---:|---:|---:|
-| intervalle | **5,0450 ms** (198,2 Hz) | 5,8988 | 6,5087 |
-| CPU de trame | 4,3160 | 5,1743 | 5,8655 |
-| — dont acquisition d'image | **2,2212** | — | 3,9164 |
-| — dont sillage (cœur) | 1,2453 | — | 2,2971 |
-| — dont transfert | 0,2076 | — | 0,4883 |
-| — reste (B, profil, soumission) | 0,6419 | — | — |
-| présentation | 0,5989 | — | 1,8279 |
-| GPU eau | 4,1585 | — | 4,8583 |
-| GPU trame entière | 4,2455 | — | 4,9569 |
-
-**Rang de passage** (L289) : quatre passages, intervalle 4,9187 / 4,9560 / 4,9433 / 5,0450 ms —
-**écart 2,6 %**, et 0,4 % sur le GPU d'eau. C'est bien plus reproductible que les 20 à 40 % que S213
-avait relevés sur son CPU : une mesure prise **sous charge soutenue** ne varie pas comme une mesure
-prise en rafales courtes. À verser à L289.
-
-**La prédiction est confirmée sur une moitié et contredite sur l'autre.**
-
-- **Confirmée, et plus fortement que prédit** : les exclusions de S211–S213 — ciel, transferts,
-  relecture, présentation — ne pèsent **rien** sur le GPU. La part de l'eau dans la trame vaut
-  **0,9795 à 0,9806** sur quatre passages : tout le reste du GPU fait **0,087 ms**. La réserve
-  écrite dans la ligne depuis S211 était honnête et, maintenant, chiffrée : elle ne cachait rien.
-- **Contredite** : j'annonçais 6 à 7 ms de GPU pour la trame complète et ~150 Hz. La trame coûte
-  **4,25 ms** et la cadence atteint **198 à 203 Hz**.
-- **Non prédit, et c'est le fait neuf** : le CPU d'une vraie trame est dominé par **l'attente**.
-  L'acquisition d'image vaut **2,22 ms sur 4,32**, soit **51 %** — et ce n'est pas du travail, c'est
-  la contre-pression du GPU. Le travail réel du CPU fait 2,10 ms. Aucun banc hors écran ne pouvait
-  le voir : `benchmark` dessine sur une texture et n'acquiert jamais rien.
-
-Contrôles : `VERIFY` inchangé (7,2271e-5 m à 16 s), `BENCH` inchangé (GPU eau 4,2037 ms),
-`--smoke` 120 images — les quatre horodatages n'ont pas déplacé les chemins existants.
-
-P5 : **ADR-125 pose deux nombres, et la cadence en éclaire un troisième.**
-
-| grandeur | mesurée | part d'une trame de 60 Hz (16,67 ms) | budget ADR-125 |
-|---|---:|---:|---|
-| GPU eau | **4,1585 ms** | **24,9 %** | 2 ms, soit 12 % — **dépassé 2,08 ×** |
-| GPU trame (eau + ciel) | 4,2455 | 25,5 % | — |
-| trame complète (intervalle) | 5,0450 | **30,3 %** | — |
-| travail réel du CPU | 2,10 | 12,6 % | — |
-
-**La question « l'hôte tient-il 60 Hz » a une réponse, et ce n'est pas la bonne question.** Il les
-tient trois fois — 198 Hz. Mais ADR-125 ne demande pas que l'eau tourne seule à 60 Hz : elle lui
-accorde **2 ms d'une trame de 16,67** qui doit aussi porter un jeu. L'eau en prend 4,16, et la scène
-entière 5,05 : il resterait **11,6 ms** pour tout le reste au lieu des 14,67 prévus.
-
-Le verdict de coût ne bouge donc pas — il est **confirmé par un autre chemin**, et le rapport 2,08
-recoupe les 4,18 ms de S213 à 0,5 % près.
-
-**Ce que la cadence ajoute, et que les passes isolées ne pouvaient pas dire : où optimiser.** Le
-travail réel du CPU tient dans **2,10 ms**, entièrement recouvert par les 4,16 ms du GPU — la trame
-est **bornée par le GPU**, et l'acquisition d'image (2,22 ms) en est la contre-pression, pas un
-coût. Toute seconde gagnée sur le CPU serait donc **invisible** tant que le GPU domine. Les quatre
-techniques qui restent à J1-bis — espace, LOD, visibilité, mutualisation — sont toutes du côté GPU :
-la mesure confirme la trajectoire au lieu de la contredire, et c'est la première fois qu'elle est
-confirmée **par une cadence** et non par une passe.
-
-Réserve à ne pas franchir : l'hôte ne dessine **que** de l'eau et un ciel, sur une caméra fixe, sans
-interface, sans ombres, sans autre géométrie. Les 198 Hz ne disent rien d'un jeu ; ils disent que
-l'eau, seule, laisse 11,6 ms.
-
-P6 : [CADENCE-HOTE-S225](../docs/validation/CADENCE-HOTE-S225.md) — en-tête ADR-131 D3 avec rang de
-passage ; §1 ce qui manquait et pourquoi une passe isolée ne pouvait pas le dire, vsync et
-sérialisation comprises ; §2 la cadence et ses quatre passages ; §3 les exclusions chiffrées à
-2 % ; §4 le fait neuf — le CPU d'une trame est à 51 % de l'attente, et la trame est bornée par le
-GPU ; §5 la confrontation à ADR-125 ; §6 les contrôles.
-Suite complète `code/` : **379 réussis, 5 ignorés** — la bibliothèque n'a pas bougé cette session,
-tout le travail est dans `viewer/`.
-
-P6-bis (ajouté après P6, avant P7) : la réserve « caméra fixe » de l'en-tête méritait d'être mesurée
-plutôt qu'écrite. `--sweep` fait tourner la caméra sur les mêmes 590 images. **Le GPU d'eau tombe à
-2,85 ms de médiane contre 4,16 fixe** — la pose héritée de S201 était donc proche du **pire cas**, et
-le facteur au budget passe de 2,08 à **1,42 ×** en médiane (2,12 × au pire). **Et la cadence ne bouge
-presque pas** — 205 Hz contre 198 —, ce qui **réfute la conclusion que j'avais écrite au §4** : la
-trame n'est pas purement bornée par le GPU, et dire qu'une optimisation CPU serait invisible allait
-plus loin que la mesure. §4 et §5 du document corrigés, §4-bis ajouté, en-tête rectifié. **A265**.
-
-P7 : rituel §6 exécuté. Journal S225 ; **A265** (sévérité 3 — le recouvrement CPU/GPU varie avec la
-charge sans que la mesure l'explique) ; suivi **A247** (exclusions chiffrées, pose de mesure
-requalifiée) ; **L308, L309**. Index, README, REPRISE (§4, file active, jeton), feuille de route
-(**« cadence complète mesurée » barrée dans les travaux nécessaires de J1-bis**), file plurielle.
-**Invariants relus** — **I-06** : les allocations de la pile graphique restent non reçues, et une
-cadence ne les mesure pas davantage ; I-03 et I-14 sans objet, aucune constante posée et aucun bit
-publié. Aucun devenu faux, aucun amendé, aucun ADR réécrit ni acté.
-**Règle des deux maillons : compteur 1.** Ni code d'exécution dans `code/*/src`, ni décision actée —
-tout le travail est dans `viewer/`. Le compteur monte honnêtement, et la ligne `Session suivante`
-nomme déjà **V**, ligne de la file, avec la couche qu'elle avance.
-**Recommandation portée** : la consigne de S224 — « ne pas laisser passer plus d'une session sans
-revenir à V » — est arrivée à échéance ; S226 la tient, et la ligne le dit en toutes lettres.
-Décomptes vérifiés : 138 fichiers dans `docs/adr` (inchangé), 309 leçons, 265 angles.
-Jeton libre, battement 19:05. Copies de travail avancées sur master après ce commit.
