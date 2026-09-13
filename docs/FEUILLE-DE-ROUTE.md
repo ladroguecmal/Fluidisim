@@ -83,6 +83,13 @@ l'implémentation qui dépassait, pas le sillage ni l'objectif.*
 dans le cœur ([TEMPS-SILLAGE-S213](validation/TEMPS-SILLAGE-S213.md)) : CPU sillage 1,26 ms pendant
 le forçage et 0,36 ms après (préparation 7,70 / 13,36), hôte 1,7 ms, exact à 6e-8 ; GPU inchangé.
 Coordonnée de l'espace, pas verdict. Suite : composition impact+sillage, puis A251.
+*S221* : [coupure spectrale](validation/COUPURE-SPECTRALE-S221.md), ADR-137. A259 levée à 4096
+feuilles, intacte à 1024 : aucune enveloppe de modules ne voit la localisation d'un paquet (A261).
+**La part dynamique d'A255 est résorbée en précision à l'instant, pas en coût** (≈26 s CPU un fil par
+instant). Ce qui bloquera la scène J1 à plusieurs sources est la **part somme d'A254**. Les
+sources de pression forment déjà un seul champ préparé, dont la borne locale est conjointe.
+**Suite S222 J1/W : scène à plusieurs sillages**, borne conjointe contre le terme actuel du
+budget ; impacts toujours additionnés.
 *S220* : [borne locale d'ordre deux](validation/ORDRE-DEUX-S220.md), ADR-136. Hessienne
 signée, jamais pire qu'ADR-135 ; partition à 32767 évaluations à 1,006–1,012 × le maximum,
 mieux que l'ordre un à 65535 en moins de temps. Le pessimisme n'est plus l'obstacle sur ces

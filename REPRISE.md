@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 16:57 +02:00
+JETON            : libre
+Battement        : 2026-09-13 17:00 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
-Session en cours : S221 — A260, enveloppe directionnelle des modes non résolus dans la borne locale
-Dernière session : S220 — borne locale d'ordre deux (ADR-136) : partition à 32767 évaluations à 1,006–1,012 × le maximum ; plancher = réserve numérique (A258) ; grosses mailles plafonnées par les modes non résolus (A260)
-Session suivante : S221 — file J1/W : A260, enveloppe directionnelle du sous-ensemble non résolu dans la borne locale, mesurer C_U par taille de maille avant toute prédiction chiffrée, recevoir à 2047/8191 évaluations via S219/S220 ; puis A258, borne d'erreur courante dans la passe. Aucune migration d'admission avant A258 ; A254, loi GPU, J2/δ et V-noyau conservés
-Maillons        : 0 — W avancée dans src et ADR-136 actée
+Session en cours : —
+Dernière session : S221 — coupure spectrale de la borne locale (ADR-137) : A259 levée à 4096 feuilles, mécanisme d'A260 corrigé (classe [1, 2), pas les exclus), A261 ouverte (localisation spatiale)
+Session suivante : S222 — file J1/W, A254 part somme : scène à deux et trois sillages dans un même journal, proches puis éloignés ; enveloppe directionnelle conjointe (terme actuel de mixed_water::slope_floor) contre borne locale conjointe (ordre deux, spectrale) et maximum, à budget égal ; dire la part de π/7 rendue et ce qu'il faut aux impacts, toujours additionnés. Si rien n'est rendu, revenir à la file (cadence complète de l'hôte, V-noyau). A261, coût de passe et A258 nommés sans ordre imposé ; δ/V conservés
+Maillons        : 0 — W avancée dans src et ADR-137 actée
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 
@@ -191,6 +191,8 @@ demande la campagne d'ADR-133 transposée. **Prochain lot J1 : la part dynamique
 toute scène à plusieurs sillages et donc avant la mutualisation de J1-bis ; puis la loi GPU
 (espace, LOD, visibilité, mutualisation), chaque mesure avec son en-tête (ADR-131 D3).
 
+**S221 : coupure spectrale construite (ADR-137)** : A259 levée à 4096 feuilles (gain 1,12–1,23 à 8191 évaluations) ; A261, la localisation spatiale manque aux grandes mailles. Suite S222 J1/W : scène à plusieurs sillages, borne locale conjointe contre le terme actuel du budget (A254). Voir [réception S221](docs/validation/COUPURE-SPECTRALE-S221.md).
+
 **S220 : borne d'ordre deux construite (ADR-136)** : 1,006–1,012 × maximum à 32767 évaluations, plancher = réserve numérique (A258) ; grosses mailles plafonnées par les modes non résolus (A260). Suite S221 J1/W : A260, puis A258. Voir [réception S220](docs/validation/ORDRE-DEUX-S220.md).
 
 **S219 : partition adaptative construite**, plafond d'évaluations et couverture conservée ; A255 partielle, A258 ouverte. Suite S220 J1/W : borne locale avec Hessienne signée et reste supérieur, gain/coût à recevoir ; A259 nomme le plateau des grandes mailles. Voir [réception S219](docs/validation/PARTITION-S219.md).
@@ -282,7 +284,7 @@ pièges déjà payés.
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/FEUILLE-DE-ROUTE.md  ← trajectoire J1 → J5 et noyau V, seul porteur (ADR-127)
 docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 136 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 137 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -302,6 +304,16 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
+**S221 — 2026-09-13 : [coupure spectrale](docs/validation/COUPURE-SPECTRALE-S221.md), [ADR-137](docs/adr/ADR-137-coupure-spectrale-de-la-borne-locale.md).**
+W publie une borne à coupure spectrale (ADR-136 sur les modes résolus, enveloppe ADR-134 des non
+résolus), ordre deux figé au bit. Partition à 8191 évaluations : gain 1,115–1,230 là où ADR-136
+restait au plafond — **A259 levée à 4096 feuilles**, intacte à 1024 ; 32767 inchangé (plancher
+A258). Mécanisme d'A260 corrigé : à 2 × 1,5 m, les modes exclus portent 1–2 % de la masse, la
+classe `[1, 2)` 44–67 % ; coupure utile `D* = 1`. **A261** : aucune enveloppe de modules ne voit
+la localisation spatiale. Passe spectrale 16 % moins chère que l'ordre deux, écart de code
+machine (L300). Suite S222 J1/W : scène à plusieurs sillages, borne locale conjointe contre le
+terme actuel du budget (A254). 370 tests release réussis, 5 ignorés. 137 ADR, 261 angles,
+301 leçons, 18 invariants, 6 SPEC, 23 cas ; maillons 0. δ/V conservés.
 **S220 — 2026-09-13 : [borne locale d'ordre deux](docs/validation/ORDRE-DEUX-S220.md), [ADR-136](docs/adr/ADR-136-borne-locale-d-ordre-deux-a-hessienne-signee.md).**
 W publie une borne à Hessienne signée, minimum avec ADR-135 recalculé au bit. Partition à
 32767 évaluations : 1,006–1,012 × maximum de référence sur les quatre fixtures, mieux que

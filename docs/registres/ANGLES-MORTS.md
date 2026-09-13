@@ -3176,3 +3176,21 @@ reste géométrique. A259 partielle : levée au-dessus de ≈16 000 feuilles, in
   ne jamais perdre. Aucun gain chiffré avant mesure de `C_U` par taille de maille. Toute
   partition des modes est valide ; le tri éventuel vit dans la mémoire de l'appelant.
   Voir ORDRE-DEUX-S220 §Suite, L299.
+**Suivi A259/A260 — S221, 2026-09-13.** ADR-137, coupure spectrale. **A259 levée à 4096
+feuilles** : à 8191 évaluations, gain 1,115–1,230 sur la globale là où ADR-136 restait à 0,998 ;
+intacte à 1024 feuilles (gain ≤ 1,024). **A260 traitée, mécanisme corrigé** : à 2 × 1,5 m, les
+modes exclus (`D ≥ 2`) portent 1,1–2,2 % de la masse ; le reste venait de la classe `[1, 2)`
+(44–67 % de la masse, reste résolu 0,0919 → 0,0138 quand on la retire, base). La coupure utile est
+`D* = 1`. Voir COUPURE-SPECTRALE-S221, L301.
+
+- **A261** *(sévérité 2, S221 ; ouverte)* — **Aucune enveloppe de modules ne voit la localisation
+  spatiale d'un paquet.** ADR-135, ADR-136 et ADR-137 bornent chaque mode, ou chaque sous-ensemble,
+  par des modules `|η_k|` indépendants du point. Quand une cellule est assez grande pour que la
+  plupart de la masse y soit non résolue, sa borne vaut presque la globale **où qu'elle soit**,
+  même loin du sillage : pire rectangle 2 × 1,5 m, `C_U` = 94 % de `C`, `G(U)` = 0,1097
+  pour une globale de 0,1152 (base). La localisation vit dans la cohérence des phases entre modes
+  voisins. Conséquence : en dessous d'environ 4096 feuilles sur 128 × 96 m, aucun ordonnancement ni
+  aucune coupure de modules ne réduit le travail. Pistes non dérivées : champ lointain par sommation
+  par parties sur la quadrature polaire, localisation par vitesse de groupe. Vérifier d'abord
+  l'uniformité radiale de la quadrature et la phase `ω(k) t` d'un nœud au suivant.
+  Voir COUPURE-SPECTRALE-S221, ADR-137 « Limite annoncée ».

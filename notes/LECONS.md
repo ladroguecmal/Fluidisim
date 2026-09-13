@@ -4931,3 +4931,26 @@ Quand une grandeur est un minimum, un maximum ou une somme de termes hétérogè
 **décomposition sur l'élément qui la fixe** — quelle branche, quel terme, à quelle échelle —
 avant d'interpréter l'agrégat ou de choisir le levier suivant. Le calculer hors
 chronométrage coûte une évaluation ; le deviner a coûté une campagne arrêtée.
+## L300 — Un écart de coût entre variantes peut être du code machine
+
+*(S221)* La passe spectrale, qui fait plus d'opérations que la passe d'ordre deux, coûtait 16 %
+de moins, dans les deux ordres d'une micro-mesure alternée. En faisant passer l'ordre deux par la
+même version compilée (classes calculées puis jetées), il est tombé au même coût, à bits
+identiques. L'écart venait de la génération de code, pas de l'algorithme.
+
+Avant d'attribuer un écart de coût à ce que fait une variante, le mesurer en alterné dans un même
+processus, puis **échanger le chemin compilé à sémantique égale**. Si l'écart suit le chemin, c'est
+une marge d'implémentation, réelle mais fragile. Il faut la publier comme telle, et ne pas l'adopter
+sans en comprendre la cause.
+
+## L301 — Compter n'est pas peser
+
+*(S221)* S220 avait attribué le reste des grosses mailles aux « 1608 modes exclus sur 4096 », le
+groupe le plus nombreux. Ils portaient 1,1 à 2,2 % de la masse, et le remède qu'on en tirait, la
+coupure garantie à `D ≥ 2`, n'a presque rien apporté. La contribution venait d'une classe moins
+nombreuse et beaucoup plus lourde. S220 avait écrit « répartition non mesurée », et c'est ce qui a
+permis de ne pas bâtir la décision sur la seule coupure fausse.
+
+Quand un agrégat est une somme pondérée, l'attribuer par la **masse** de chaque groupe, jamais par
+son effectif. Et quand la décision doit précéder la mesure, construire une famille qui contient
+l'hypothèse et ses voisines, plutôt que la seule hypothèse.

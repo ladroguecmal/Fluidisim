@@ -20,6 +20,16 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S221 — 2026-09-13 : [coupure spectrale](validation/COUPURE-SPECTRALE-S221.md), [ADR-137](adr/ADR-137-coupure-spectrale-de-la-borne-locale.md).**
+W publie une borne à coupure spectrale (ADR-136 sur les modes résolus, enveloppe ADR-134 des non
+résolus), ordre deux figé au bit. Partition à 8191 évaluations : gain 1,115–1,230 là où ADR-136
+restait au plafond — **A259 levée à 4096 feuilles**, intacte à 1024 ; 32767 inchangé (plancher
+A258). Mécanisme d'A260 corrigé : à 2 × 1,5 m, les modes exclus portent 1–2 % de la masse, la
+classe `[1, 2)` 44–67 % ; coupure utile `D* = 1`. **A261** : aucune enveloppe de modules ne voit
+la localisation spatiale. Passe spectrale 16 % moins chère que l'ordre deux, écart de code
+machine (L300). Suite S222 J1/W : scène à plusieurs sillages, borne locale conjointe contre le
+terme actuel du budget (A254). 370 tests release réussis, 5 ignorés. 137 ADR, 261 angles,
+301 leçons, 18 invariants, 6 SPEC, 23 cas ; maillons 0. δ/V conservés.
 **S220 — 2026-09-13 : [borne locale d'ordre deux](validation/ORDRE-DEUX-S220.md), [ADR-136](adr/ADR-136-borne-locale-d-ordre-deux-a-hessienne-signee.md).**
 W publie une borne à Hessienne signée, minimum avec ADR-135 recalculé au bit. Partition à
 32767 évaluations : 1,006–1,012 × maximum de référence sur les quatre fixtures, mieux que

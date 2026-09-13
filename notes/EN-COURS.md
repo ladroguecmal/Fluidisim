@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S221 — en cours
+Session : S221 — terminée
 Agent : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
 Entrée : « Continue » juste après S220, même conversation ; master et trois copies à 32e7afd,
 jeton libre, maillons 0. Lectures S220 conservées, état réel revérifié. Copie principale.
@@ -86,7 +86,7 @@ bit, décomposition `C_U`/`G(U)` publiée par classe.
 - [x] **P4** — tests : couverture, domination, gain strict, identité S220, refus, partition.
 - [x] **P5** — exemple S221 : décomposition par taille de maille, partitions 2047→32767 ; campagne isolée.
 - [x] **P6** — publier la réception S221 et ses relevés bruts.
-- [>] **P7** — rituel §6, journal, registres, index, file active, jeton et copies.
+- [x] **P7** — rituel §6, journal, registres, index, file active, jeton et copies.
 
 ### Notes de reprise
 
@@ -103,3 +103,5 @@ P5 : exemple `coupure_spectrale_s221` — grilles 4×3, 2×1,5 et 1×0,75 m (les
 P5 fin : campagne 16:42:33–16:52:42, cinq processus, base1/base2 identiques au bit. **Hypothèse du plan réfutée sur son mécanisme** : à 2×1,5 m, la classe D ≥ 2 ne porte que 1,1–2,2 % de la masse (lent/base/long) ; la classe [1, 2) en porte 44–67 %. La coupure utile est **D* = 1** (gagne sur les feuilles maximales). Partition Spectral contre Second : 2047 → gain 1,003–1,024 (quasi nul) ; **8191 → 0,1020/0,02654/0,1205/0,1031 contre plafond** (gain 1,115–1,230) ; 16383 → 0,0919/0,02083/0,1107/0,09139 contre 0,0987/0,02456/0,1178/0,09142 ; 32767 → identiques au plancher de réserve. Pire rectangle 2×1,5 m base : G(U) = 0,1097 pour C_U = 0,1267 (94 % de C) — la limite spatiale annoncée dans ADR-137. Coût : Spectral 26,1–26,3 s contre Second 31,5–32,1 s à 32767. Micro-mesure alternée (2000 appels × 6 tours, 2×1,5 m) : ordre un 485–528 µs, ordre deux 845–922 µs, spectrale 709–758 µs. **Expérience** : ordre deux passé par `second_order_pass::<true>` → 710 µs, bits inchangés (le test figé garantit) ; donc écart de **code machine**, pas d'opérations. Rétabli `<false>` (ADR-137 §5, comparabilité S220), consigné comme levier de coût.
 
 P6 : COUPURE-SPECTRALE-S221 et relevés bruts (dont micro-mesure et expérience `<true>`) publiés. Relus contre les relevés et corrigés avant commit : victoires de la coupure 1 « 96–100 % » (et non 97–100), feuille maximale tardive à 16383 gagnée par la coupure 2 d'un arrondi, ordre un micro 491–528 µs, part de masse tardive 63 % ; attribution à [1, 2) appuyée par les restes mesurés (0,0919 contre 0,0138). À porter au rituel : suivis A259/A260 (mécanisme corrigé), A261 (localisation spatiale), L300 (code machine), L301 (compter/peser).
+
+P7 : journal (avec bilan de ligne S215–S221, A211), suivis A259/A260, A261, L300/L301, index, README, REPRISE (§3, §4, file active, jeton), feuille de route et file active plurielle. Suite S222 **vérifiée dans le code avant publication** : `mixed_water::slope_floor` additionne les impacts et prend un seul champ de pression conjoint — la première formulation (« somme des majorants par source ») était inexacte pour les sillages et a été corrigée. Maillons 0. Jeton libre ; copies à avancer après le commit de clôture.

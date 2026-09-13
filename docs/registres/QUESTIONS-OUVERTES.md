@@ -1670,7 +1670,15 @@ entrée par entrée. Le fil reprend ci-dessous.
 
 ## File active
 
-Relue en S220, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+Relue en S221, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+
+**Suivi J1 S221 — A259 levée à 4096 feuilles ; A261 ouverte ; la ligne se tourne vers A254.**
+[Réception S221](../validation/COUPURE-SPECTRALE-S221.md), ADR-137 : coupure spectrale, gain
+1,12–1,23 à 8191 évaluations, aucun à 2047 (localisation spatiale absente de toute enveloppe de
+modules, **A261**). A260 traitée, mécanisme corrigé (L301). Bilan de ligne S215–S221 dans le
+journal. **Suite S222 J1/W : A254 part somme sur une scène à plusieurs sillages**, borne locale
+conjointe contre `mixed_water::slope_floor`. A258, coût de passe (L300) et A261 nommés ; autres
+lignes et déclencheurs conservés, δ/V obligatoires.
 
 **Suivi J1 S220 — A255 : le pessimisme résorbé sur ces fixtures, le coût reste.**
 [Réception S220](../validation/ORDRE-DEUX-S220.md), ADR-136 : borne d'ordre deux à Hessienne

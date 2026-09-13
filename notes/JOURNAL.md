@@ -11380,3 +11380,57 @@ W avancée dans src et ADR-136 actée. Procédure : un commit P3 d'abord créé 
 campagne détachée bloqué par `tail -f`, surveillance restée ouverte 23 minutes après la fin.
 136 ADR, 260 angles, 299 leçons, 18 invariants, 6 SPEC, 23 cas. Jeton libéré ; copies avancées
 après le commit de clôture.
+## S221 — 2026-09-13 — La coupure spectrale lève le plateau à 4096 feuilles ; la localisation manque
+
+**Entrée.** « Continue » dans la même conversation, juste après S220 ; Claude Code (Opus 5),
+copie principale, master et trois copies à 32e7afd, jeton libre, maillons 0. Plan 17b9494, ADR
+7005f68, construction 9cd5636, tests dcb5a91, campagne 8422cdb, réception 2fca93a.
+
+**Construction W.** [ADR-137](../docs/adr/ADR-137-coupure-spectrale-de-la-borne-locale.md) actée :
+`|S(p)| ≤ |S_R(p)| + |S_U(p)|`, `|S_U| ≤ G(U)` (ADR-134 sur le sous-ensemble), ADR-136 sur `R`.
+Quatre classes de largeur de phase accumulées dans la passe d'ADR-136, rendue générique sur une
+constante ; coupures `D* ∈ {2, 1, ½}` ; minimum avec ADR-135/136. **Bits de l'ordre deux figés
+avant refactorisation** par un test. `Field`/`Prepared` publient
+`local_slope_envelope_spectral` et `SlopeOrder::Spectral`. Aucune admission migrée.
+
+**Mesures déterminantes.** [COUPURE-SPECTRALE-S221](../docs/validation/COUPURE-SPECTRALE-S221.md).
+Partition à 8191 évaluations : **0,1020 / 0,02654 / 0,1205 / 0,1031** contre le plafond global
+d'ADR-136 — gain 1,115–1,230, **A259 levée à 4096 feuilles** ; 16383 : gain 1,00–1,18 sur
+ADR-136 ; 2047 : 1,003–1,024 ; 32767 : identiques au plancher de réserve. **Hypothèse du plan
+juste sur l'effet, fausse sur le mécanisme** : à 2 × 1,5 m les modes `D ≥ 2` portent 1,1–2,2 %
+de la masse, la classe `[1, 2)` 44–67 % ; la coupure utile est `D* = 1`. Pire rectangle base :
+`C_U` = 94 % de `C`, `G(U)` = 0,1097 pour une globale de 0,1152 — la limite spatiale écrite
+dans ADR-137 avant mesure (A261). Coût : spectrale 26,1–26,3 s contre ordre deux 31,5–32,1 s à
+32767 ; micro-mesure 709–758 µs contre 845–922 µs ; ordre deux passé par la passe `<true>` →
+710 µs à bits identiques : **écart de code machine**, source rétabli en `<false>` (L300).
+
+**Vérification.** Cinq tests S221 (dont bits figés) et contrôles Prepared ; release 370 réussis
+(272+4+1+93), 5 ignorés, zéro échec. Une attente fausse (masse d'une classe arrondie, un ulp)
+corrigée avant campagne. Base jouée deux fois, bornes identiques au bit.
+
+**Bilan de ligne, A211.** S215–S221 : sept sessions chaînées sur le budget de pente du sillage,
+chacune a fait avancer W (maillons 0), et le chaînage était donc permis. Où en est la ligne : pessimisme résorbé à
+l'instant (1,006–1,012 × le maximum), plateau levé à 4096 feuilles. Restent le coût, A258,
+A261 — **aucun de ces trois ne bloque la scène J1 actuelle**, qui passe avec une source de chaque type.
+Ce qui la bloquera est **A254, part somme**, dès plusieurs sources. Vérifié dans
+`mixed_water::slope_floor` : les impacts y sont **additionnés** champ par champ (`slope_max_at`),
+tandis que toutes les sources de pression forment **un seul** `bound_pressure::Prepared`, dont
+l'enveloppe directionnelle est déjà conjointe mode par mode. Mais cette enveloppe ne voit pas
+que deux sillages sont éloignés l'un de l'autre (A261), alors que la partition sur le champ
+conjoint le voit. Suite S222 choisie pour convertir la ligne en livrable J1, pas par proximité.
+
+**Non fait et suite S222, file J1/W.** Scène à deux et trois sillages dans un même journal,
+proches puis éloignés : enveloppe directionnelle conjointe (terme actuel du budget) contre borne
+locale conjointe (ordre deux et spectrale) et maximum de référence, à budget d'évaluations égal.
+Dire combien de π/7 la borne conjointe rendrait, et ce qu'il faudrait pour les impacts, qui restent
+additionnés. Si la scène n'apporte rien, revenir à la file (cadence complète de l'hôte, V-noyau). A261,
+coût de passe (table par champ, code machine) et A258 restent nommés, sans ordre imposé.
+
+**Rituel.** Suivis A259 (levée à 4096 feuilles) et A260 (traitée, mécanisme corrigé) ; **A261**
+sévérité 2 ; **L300** (code machine), **L301** (compter n'est pas peser). File active entière
+relue : A244/S200-1 et S199-2 à J2, V-noyau au plus tard J2 ; B4 forces/perception, A216, A241,
+A213, B2/coupure, bathymétrie, multiplateforme, bancs et réunions gardent leurs déclencheurs.
+I-03 (échantillons inchangés), I-06 (aucune allocation, par inspection), I-14 (seuils `½, 1, 2`
+nommés comme choix de famille, sans calibration), I-18 (aucune admission élargie) relus. Maillons
+0 : W avancée dans src et ADR-137 actée. 137 ADR, 261 angles, 301 leçons, 18 invariants, 6 SPEC,
+23 cas. Jeton libéré ; copies avancées après le commit de clôture.
