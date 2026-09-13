@@ -108,8 +108,8 @@ mutualisation) et domaine de validité (fixture S212, une source, machine, insta
 - [x] **P4** — cœur : `pressure_timeline` (modes préconstruits, repli des tronçons achevés, publication par image, refus atomiques) ; compilation, test minimal.
 - [x] **P5** — réception contre `from_journal` : instants déclarés, bornes, retour arrière, deux recettes, refus, témoin.
 - [x] **P6** — mesure du levier seul (exemple release, sans GPU) : par image, pic aux bornes, construction, mémoire ; techniques et domaine.
-- [ ] **P7** — hôte : levier par image ; `--verify` contre `from_journal`, contrôles S212 conservés ; coûts GPU/CPU.
-- [ ] **P8** — réception TEMPS-SILLAGE-S213 (techniques, domaine) ; suite complète. *(P7 d'origine scindé en P7/P8 au constat de sa taille, avant de le commencer.)*
+- [x] **P7** — hôte : levier par image ; `--verify` contre `from_journal`, contrôles S212 conservés ; coûts GPU/CPU.
+- [>] **P8** — réception TEMPS-SILLAGE-S213 (techniques, domaine) ; suite complète. *(P7 d'origine scindé en P7/P8 au constat de sa taille, avant de le commencer.)*
 - [ ] **P9** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
@@ -150,3 +150,12 @@ ordinaires 1,4109/5,4802/9,2431 ; fin franchie 6,0305/6,5263 ; sauts 9,4620 et 3
 d'origine et sortie ; parts non séparées. La préparation S212 est plus chère après forçage (8
 tronçons nés) qu'au début : le gain croît avec l'âge (6× pendant, 37× après). Max 7,3 ms parmi
 les images ordinaires non attribué (bruit d'ordonnancement probable, non vérifié).
+
+P7 : `FrameData` porte un `Timeline` construit dans `run()` (pools NodeState/modes), plus de
+`from_journal` par image ; la référence de `--verify` reste `from_journal` (chemin indépendant).
+GPU/cœur : lignes VERIFY identiques à S212 au µm près (max 0,089370 mm à 40,01 s ; sauts arrière
+compris). Lignes WAKE identiques (cœur seul). Coûts médiane/max (ms) : 4 096 — CPU sillage 1,6736/
+2,9732 (640), 1,7769/2,8927 (960) ; CPU total 2,2863 / 2,4914 ; GPU eau 1,9072 / 4,1846. 16 384 —
+CPU sillage 6,9033/11,5140 (640), 6,8202/9,3126 (960) ; GPU 8,1805 / 17,4118. Hôte plus lent que
+l'exemple (1,67–1,78 contre 1,26 ms) : cause non attribuée (contention GPU/pilote, état thermique ?).
+`--smoke` 120 images, code 0. Captures toujours écrites sous `captures/s212/` (nom non changé).

@@ -1,7 +1,11 @@
 mod gpu;
 mod scene;
 use scene::{Camera, FrameData, Scene, WakeInput};
-use water_core::{pressure_journal::Journal, spectral_pressure::Slot};
+use water_core::{
+    pressure_journal::Journal,
+    pressure_timeline::{NodeState, Timeline},
+    spectral_pressure::Slot,
+};
 use std::{sync::Arc, time::Instant};
 use winit::{
     application::ApplicationHandler,
@@ -227,7 +231,12 @@ fn run() -> Result<(), String> {
         spectrum: &spectrum,
         context: wake.source().context(),
     };
-    let mut frame = FrameData::new(&scene.background, table, input);
+    // S213 : levier temporel construit une fois (modes préconstruits), publié à chaque image.
+    let mut nodes = vec![NodeState::default(); input.count()];
+    let mut modes = vec![None; Timeline::mode_capacity(&spectrum, &journal)];
+    let timeline = Timeline::build(input.context, &spectrum, &journal, &mut nodes, &mut modes)
+        .map_err(|e| format!("levier temporel : {e:?}"))?;
+    let mut frame = FrameData::new(&scene.background, table, input, timeline);
     if args.iter().any(|a| a == "--verify") {
         std::fs::create_dir_all("captures/s212").map_err(|e| e.to_string())?;
         let instance = instance();
@@ -311,7 +320,17 @@ fn run() -> Result<(), String> {
         g.benchmark(&mut frame)?;
         let mut fine_storage = vec![[0.; 2]; storage.len()];
         let fine_table = scene.impact.bake_table(scene.step, &mut fine_storage).unwrap();
-        let mut fine_frame = FrameData::new(&scene.background, fine_table, fine);
+        let mut fine_nodes = vec![NodeState::default(); fine.count()];
+        let mut fine_modes = vec![None; Timeline::mode_capacity(&fine_spectrum, &fine_journal)];
+        let fine_timeline = Timeline::build(
+            fine.context,
+            &fine_spectrum,
+            &fine_journal,
+            &mut fine_nodes,
+            &mut fine_modes,
+        )
+        .map_err(|e| format!("levier temporel fin : {e:?}"))?;
+        let mut fine_frame = FrameData::new(&scene.background, fine_table, fine, fine_timeline);
         g.benchmark(&mut fine_frame)?;
         g.resize(640, 360);
         g.benchmark(&mut fine_frame)?;

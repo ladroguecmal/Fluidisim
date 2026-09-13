@@ -9,6 +9,7 @@ use water_core::{
     prepared_water::BoundBackground,
     pressure_journal::Journal,
     pressure_source::Metadata,
+    pressure_timeline::Timeline,
     radial_impact::{Domain, RadialImpact, RadialTable},
     spectral_pressure::{Node, Slot},
     wake_source::{Leg, Wake},
@@ -264,6 +265,8 @@ pub struct FrameData<'a> {
     pub time: SimTime,
     pub age: f64,
     pub wake_input: WakeInput<'a>,
+    /// S213 : levier temporel du cœur, préparé une fois ; `slots` ne sert qu'à la référence.
+    pub timeline: Timeline<'a>,
     pub slots: Vec<Slot>,
     pub wake: Vec<[f32; 4]>,
     pub wake_active: bool,
@@ -274,6 +277,7 @@ impl<'a> FrameData<'a> {
         background: &'a Background,
         table: RadialTable<'a, 256>,
         wake_input: WakeInput<'a>,
+        timeline: Timeline<'a>,
     ) -> Self {
         let profile = vec![(0., 0.); table.len()];
         let n = wake_input.count();
@@ -287,6 +291,7 @@ impl<'a> FrameData<'a> {
             time: SimTime(BIRTH),
             age: 0.,
             wake_input,
+            timeline,
             slots: vec![Slot::default(); n],
             wake: vec![[0.; 4]; n],
             wake_active: false,
@@ -314,17 +319,9 @@ impl<'a> FrameData<'a> {
         self.wake_active = wake_time.is_some();
         if let Some(t) = wake_time {
             let start = Instant::now();
-            let input = self.wake_input;
-            let prepared = bound_pressure::Prepared::from_journal(
-                input.context,
-                input.spectrum,
-                input.journal,
-                t,
-                &mut self.slots,
-            )
-            .expect("sillage préparé");
-            prepared
-                .render_components(&input.context, t, [eye[0], eye[1]], &mut self.wake)
+            // S213 : plus de préparation modale par image — repli temporel (ADR-131, J1-bis).
+            self.timeline
+                .render_components(&self.wake_input.context, t, [eye[0], eye[1]], &mut self.wake)
                 .expect("coefficients du sillage");
             self.wake_cpu_ms = start.elapsed().as_secs_f64() * 1000.;
         }
