@@ -56,9 +56,9 @@ fn hull_oracle(plane: SurfacePlane) -> f64 {
     let h = plane.offset_um * 1e-6 / plane.up[2];
     let slope = -plane.up[0] / plane.up[2];
     let mut cuts = vec![-2.0, 0.0, 2.0];
-    for denominator in [slope, 1.0 - slope, -1.0 - slope] {
+    for (numerator, denominator) in [(2.0 - h, slope), (h, 1.0 - slope), (h, -1.0 - slope)] {
         if denominator != 0.0 {
-            let x = if denominator == slope { (2.0 - h) / denominator } else { h / denominator };
+            let x = numerator / denominator;
             if (-2.0..2.0).contains(&x) { cuts.push(x); }
         }
     }
@@ -94,7 +94,7 @@ fn oriented_hull_preserves_volume_at_floor_and_roof_s228() {
     let shape = VolumeShape::new(&cells).unwrap();
     assert_eq!(shape.capacity_ml(), 4_000_000);
     let mut worst: f64 = 0.0;
-    for gx in [-19.62, -9.81, -2.943, 0.0, 2.943, 9.81, 19.62] {
+    for gx in [-19.62, -9.81, -4.905, -2.943, 0.0, 2.943, 4.905, 9.81, 19.62] {
         for ml in [0, 1, 1_000, 160_000, 1_000_000, 2_560_000, 3_999_999, 4_000_000] {
             let plane = shape.plane(ml, [gx, 0., -9.81]).unwrap();
             let got = hull_oracle(plane);

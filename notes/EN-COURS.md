@@ -79,8 +79,8 @@ lot suivant, sauf dépendance technique indispensable découverte ici.
 - [x] **P2** — lecture ciblée et choix du contrat géométrique ; ADR remplaçant la disposition incompatible d'ADR-010, oracle et limites déclarés.
 - [x] **P3** — construire le calcul géométrique orienté, sans allocation au pas ; tests indépendants des volumes et plans.
 - [x] **P4** — brancher le contrat dans V ; activer la régression A266, préserver l'atomicité et les domaines compatibles.
-- [>] **P5** — réception complète, coût et limites du chemin consommé ; publication concise de la preuve.
-- [ ] **P6** — rituel §6 : journal, file, angles/leçons utiles, trajectoire, index, jeton libre et synchronisation des copies.
+- [x] **P5** — réception complète, coût et limites du chemin consommé ; publication concise de la preuve.
+- [>] **P6** — rituel §6 : journal, file, angles/leçons utiles, trajectoire, index, jeton libre et synchronisation des copies.
 
 Chaque étape reste sous quinze minutes ; découpage déclaré ici si nécessaire.
 
@@ -110,3 +110,10 @@ latéral 1736 ml (ancien 1829, faux décalage corrigé), seuils C16 400007/15999
 16,6990°. C12 727,4 s et chaîne S224 inchangés. Cale à 1 m³ : hublot central 0,96 m sec,
 0,94 m mouillé. Receveur orienté : 38 ml contre l'oracle. Refus Orientation, Capacity et
 Resolution tardif sans mutation des nœuds/restes. Prochain : compteur d'allocations et coût.
+
+P5 : suite release hors réseau 398 réussis, 5 ignorés ; A266 est active. Compteur positif puis
+zéro allocation sur plans/pas/refus. Reçu VOLUME-ORIENTE-S228 : domaine et coût complet publiés,
+64 nœuds/64 arêtes en anneau 812,6 µs médiane, 1366 p95, 1807,4 max observé, aucune garantie
+I-05. Deux pentes supplémentaires corrigent un branchement ambigu de l'oracle de cale, pas du
+calcul de production. Navigation active vérifiée. Seul le libellé de nombre de séries du banc
+a été précisé après mesure ; calcul chronométré inchangé. A269 à consigner au rituel.

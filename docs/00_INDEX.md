@@ -22,6 +22,7 @@
 - [Plan des benchmarks](validation/PLAN-BENCHMARK.md).
 - [Réception du noyau V](validation/NOYAU-V-S224.md).
 - [Gravité dirigée et A266](validation/GRAVITE-DIRIGEE-S226.md).
+- [Volume et plan orienté de V](validation/VOLUME-ORIENTE-S228.md).
 - [Cadence de l’hôte](validation/CADENCE-HOTE-S225.md).
 - [Candidat δ](validation/CANDIDAT-DELTA-S199.md).
 - [Contrats δ](validation/CONTRATS-DELTA-S200.md).
