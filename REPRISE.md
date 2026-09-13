@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-13 09:17 +02:00
+JETON            : occupé
+Battement        : 2026-09-13 09:18 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S210 — résolution autorisée des dépendances GPU
 Dernière session : S209 — dossier de résolution GPU prêt ; aucun téléchargement
 Session suivante : S210 — J1 : résoudre les dépendances après accord nommé, puis soumettre les sources (PREPARATION-HOTE-S209)
 Maillons        : 1 — S209 prépare l'hôte, aucune couche avancée

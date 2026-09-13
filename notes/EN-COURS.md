@@ -58,30 +58,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S209 — terminée
+Session : S210 — en cours
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : préparer localement le lot de l'hôte GPU de J1, puis présenter la demande
-nommée de résolution prévue par HOTE-GPU-S208 §4 et ADR-130 D5.
+Objectif : résolution autorisée, inventaire des sources avant leur accord.
 
-### État réel à l'amorce
+### État réel
 
-master et trois copies à 28bf6a5, propres ; branche historique B conservée.
-Jeton libre S208 ; fichiers, git, cargo 1.97 disponibles. Aucun téléchargement autorisé
-par le seul message « Reprends le projet ». Maillons 0, suite J1 cohérente avec la file.
+master et trois copies propres à 3b5e34c à l'entrée, jeton libre S209.
+Accord utilisateur « Oui » : index/métadonnées crates.io pour les trois versions S209.
+Sources non autorisées. Cible x86_64-pc-windows-msvc, rustc 1.97.0.
 
 ### Plan
 
-- [x] **P1** — déclarer le plan et prendre le jeton, commit seul.
-- [x] **P2** — préparer un dossier de résolution : manifeste exact, emplacement,
- commandes, contrôles hors réseau et inventaire attendu avant téléchargement des sources.
- Aucun accès au registre ni source externe sans accord.
-- [x] **P3** — rituel §6 : journal, file active, index, REPRISE, décomptes ; jeton libre,
- copies synchronisées et demande de résolution présentée à l'utilisateur.
+- [x] **P1** — consigner accord et plan seul.
+- [>] **P2** — créer viewer séparé selon S209 et résoudre le verrou sans sources.
+- [ ] **P3** — inventorier versions, licences, tailles et checksums depuis les métadonnées publiques.
+- [ ] **P4** — rituel §6, demande sources, jeton libre, copies à jour.
 
 ### Notes de reprise
 
-Ce lot prépare la résolution ; il ne reçoit ni application interactive ni performance GPU.
-Versions héritées de S208, à vérifier lors de la résolution autorisée.
-L'implémentation GPU suivra l'accord sur les sources ; aucun nouveau seuil physique.
-P2 : PREPARATION-HOTE-S209.md prêt ; métadonnées locales de code/ reçues hors réseau.
-Aucun registre contacté. Pas de code GPU ni de nouvelle réception numérique.
+Manquement : la commande initiale du plan a échoué (code 1 sans sortie) ; la résolution
+suivante a été lancée avant contrôle de cet échec. Plan réparé dès constat ; aucune source
+récupérée, résolution autorisée réussie (255 paquets externes). Ne pas refaire la résolution.
+Maillons 1 à l'entrée. Aucun fetch/build/run/vendor avant accord des sources.
