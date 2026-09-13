@@ -109,8 +109,8 @@ mutualisation) et domaine de validité (fixture S212, une source, machine, insta
 - [x] **P5** — réception contre `from_journal` : instants déclarés, bornes, retour arrière, deux recettes, refus, témoin.
 - [x] **P6** — mesure du levier seul (exemple release, sans GPU) : par image, pic aux bornes, construction, mémoire ; techniques et domaine.
 - [x] **P7** — hôte : levier par image ; `--verify` contre `from_journal`, contrôles S212 conservés ; coûts GPU/CPU.
-- [>] **P8** — réception TEMPS-SILLAGE-S213 (techniques, domaine) ; suite complète. *(P7 d'origine scindé en P7/P8 au constat de sa taille, avant de le commencer.)*
-- [ ] **P9** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
+- [x] **P8** — réception TEMPS-SILLAGE-S213 (techniques, domaine) ; suite complète. *(P7 d'origine scindé en P7/P8 au constat de sa taille, avant de le commencer.)*
+- [>] **P9** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
 
@@ -159,3 +159,8 @@ compris). Lignes WAKE identiques (cœur seul). Coûts médiane/max (ms) : 4 096 
 CPU sillage 6,9033/11,5140 (640), 6,8202/9,3126 (960) ; GPU 8,1805 / 17,4118. Hôte plus lent que
 l'exemple (1,67–1,78 contre 1,26 ms) : cause non attribuée (contention GPU/pilote, état thermique ?).
 `--smoke` 120 images, code 0. Captures toujours écrites sous `captures/s212/` (nom non changé).
+
+P8 : TEMPS-SILLAGE-S213 (en-tête ADR-131, construction, réception, coûts levier seul et hôte, ce
+que le résultat ne dit pas, suite validité avant accélération) ; viewer/README. Suite complète :
+354 réussis (256+4+1+93), 5 ignorés, aucun échec ; avertissements préexistants seulement.
+Suite proposée S214 : composition impact+sillage par `mixed_water`, puis A251 (ADR-131 D6).

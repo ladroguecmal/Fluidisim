@@ -69,9 +69,12 @@ dans la passe de rendu et le contrôle compute. Les références CPU utilisent l
 direct, sans interpolation. Soleil, ciel, couleurs et brouillard sont un habillage de banc.
 
 Le sillage est une source `Wake` (huit tronçons de 2 s à 3 m/s, 19 620 N, σ 2 m) admise au journal
-de pression, préparée à chaque image par `bound_pressure::Prepared::from_journal`, publiée par
-`render_components` en `[A, B, kx, ky]` rebasés à la caméra (4 096 nœuds), et sommée par sommet
-dans l'emprise [−64, −48]–[64, 56] m. La recette 64×128 tient 2 % de la recette fine pendant les
+de pression. Depuis S213, l'image n'est plus préparée à chaque image : `pressure_timeline::Timeline`
+replie les tronçons achevés et ne fait qu'une rotation par nœud plus le tronçon en cours
+([TEMPS-SILLAGE-S213](../docs/validation/TEMPS-SILLAGE-S213.md)). Il publie `[A, B, kx, ky]`
+rebasés à la caméra (4 096 nœuds), sommés par sommet dans l'emprise [−64, −48]–[64, 56] m. La
+référence de `--verify` reste la préparation `bound_pressure::Prepared::from_journal`, chemin
+indépendant. La recette 64×128 tient 2 % de la recette fine pendant les
 16 s de forçage, pas au-delà ; la couture au bord de l'emprise dépasse 3 mm après 24 s.
 
 La grille projetée a un pas nominal de deux pixels et un surbalayage de 18 % ; elle s'arrête à
