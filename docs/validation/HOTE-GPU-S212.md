@@ -1,13 +1,22 @@
 # Sillage du cœur dans l'hôte GPU — S212, 2026-09-13
 
+> **Note corrective datée du 2026-09-13 (S213), sur demande de l'utilisateur —
+> [ADR-131](../adr/ADR-131-un-depassement-qualifie-une-implementation.md).** Ce document écrivait
+> « coût refusé » et « chemin refusé en coût », et bornait la suite à deux leviers avant un
+> arbitrage. **C'est l'implémentation mesurée ici qui dépasse le budget, pas le sillage ni
+> l'objectif final.** Les mesures sont exactes et inchangées ; les énoncés de verdict sont barrés
+> et recadrés en place, le texte d'origine reste lisible. Techniques présentes, absentes et domaine
+> de validité : §« Coût local ». Espace d'optimisation : FEUILLE-DE-ROUTE, J1-bis.
+
 ## Résultat et portée
 
 `viewer/` affiche maintenant, en plus de la mer S201 et de l'impact S203, un **sillage prescrit
 issu du cœur** : source `wake_source::Wake` (ADR-103) admise au journal de pression, préparée à
 chaque image par `bound_pressure::Prepared::from_journal`, publiée par la méthode neuve
-`render_components` et sommée par sommet sur GPU. **Exactitude reçue, coût refusé** : le GPU
-reproduit le cœur à 0,09 mm près, mais ce chemin coûte 10,9 ms de CPU et jusqu'à 4,1 ms de GPU
-par image contre 2 ms d'eau (ADR-125). **J1 reste partiel.** Aucun résultat GPU n'est autoritaire
+`render_components` et sommée par sommet sur GPU. **Exactitude reçue, ~~coût refusé~~
+*(S213)* l'implémentation dépasse le budget** : le GPU reproduit le cœur à 0,09 mm près, mais
+cette implémentation coûte 10,9 ms de CPU et jusqu'à 4,1 ms de GPU par image contre 2 ms d'eau
+(ADR-125). **J1 reste partiel.** Aucun résultat GPU n'est autoritaire
 (I-04, I-15). Aucun ADR ajouté ou modifié ; aucune dépendance ajoutée.
 
 ## Publication du cœur
@@ -87,6 +96,21 @@ emprise. Aucun garde ne le refuse, conformément à ADR-107 (A214) ; c'est consi
 
 ## Coût local
 
+*Bloc ajouté en S213 (ADR-131 D3).*
+
+- **Techniques présentes** : phases repliées de B au GPU ; table de Bessel de l'impact (λ/16) ;
+  préparation modale complète **à chaque image** ; somme modale **par sommet** dans l'emprise
+  rectangulaire du sillage ; grille projetée à 2 px.
+- **Techniques absentes** : repli temporel des tronçons achevés ; grille et transformée ; LOD
+  spatial (densité ou emprise selon la distance) ; LOD spectral (nœuds selon la distance) ; LOD
+  temporel ; visibilité (frustum, hors écran) ; mutualisation (nœuds partagés, passe commune).
+- **Domaine de validité** : scène J1 S201/S203 + une source prescrite (8 × 2 s, 3 m/s, 19 620 N,
+  σ 2 m), recettes 64×128 et 128×256, âges 3,17 à 5,15 s — pendant le forçage, un tronçon actif
+  (fenêtre de 120 images) —, formats 640×360 et
+  960×540, caméra S201 ; AMD Ryzen AI 7 350 et RTX 5070 Laptop, DX12 ; CPU = préparation et
+  publication du sillage, GPU = passe d'eau seule. Ne dit rien d'une autre machine, d'un autre
+  nombre de sources, ni d'une autre combinaison.
+
 Windows x86_64, Rust 1.97, release, RTX 5070 Laptop, DX12. `--verify` : 10 images de mise en
 régime puis 120 échantillons. CPU sillage = `from_journal` + `render_components`, inclus dans le
 CPU total. GPU = passe d'eau seule, comme S211.
@@ -109,8 +133,11 @@ Deux lois, chacune linéaire, et elles ne portent pas sur la même variable :
 
 ## Verdict
 
-1. **Le chemin « préparer à chaque image, sommer par sommet » est reçu en exactitude et refusé en
-   coût.** À la recette la plus grossière qui tienne 2 % pendant le forçage, la préparation CPU
+*Recadré en S213 (ADR-131) : les points 1 et 2 portent sur l'implémentation mesurée ; la liste
+des leviers n'était pas l'espace d'optimisation, et la dernière phrase du point 2 est retirée.*
+
+1. **Le chemin « préparer à chaque image, sommer par sommet » est reçu en exactitude ~~et refusé en
+   coût~~ *(S213)* ; cette implémentation dépasse le budget.** À la recette la plus grossière qui tienne 2 % pendant le forçage, la préparation CPU
    seule dépasse cinq fois le budget eau de 2 ms ; la passe GPU l'atteint à 640×360 (1,90 ms) et le
    double à 960×540 (4,10 ms) — un seul sillage, aucune marge pour un second.
    Un sillage de jeu plus long exige plus de nœuds (ADR-107), donc ce chemin empire.
@@ -125,7 +152,10 @@ Deux lois, chacune linéaire, et elles ne portent pas sur la même variable :
      (texels × nœuds) ; une **grille cartésienne de nœuds et une transformée** rend le coût
      proportionnel à la taille de grille. Change la quadrature du sillage d'image : exige sa propre
      réception contre le cœur, à la manière d'ADR-129.
-   Si les deux leviers mesurés ne tiennent pas 2 ms, l'arbitrage revient à l'utilisateur.
+   ~~Si les deux leviers mesurés ne tiennent pas 2 ms, l'arbitrage revient à l'utilisateur.~~
+   *(S213, ADR-131 D4–D5)* Ces deux leviers s'ajoutent aux LOD spatial, spectral et temporel, à la
+   visibilité et à la mutualisation ; 2 ms s'éprouve sur leur combinaison, et aucune demande de
+   réduction ne se fonde sur l'échec d'optimisations prises isolément.
 
 ## Image, fenêtre et contrôles
 

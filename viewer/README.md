@@ -2,8 +2,9 @@
 
 Application locale séparée du cœur. Mer JONSWAP S201, impact S203/S205, sillage prescrit S212,
 caméra interactive. Les résultats GPU servent uniquement à l'image ; les requêtes de jeu restent
-dans `water-core`. **J1 reste partiel** : le sillage est exact mais son chemin d'image coûte
-plusieurs fois le budget eau ([HOTE-GPU-S212](../docs/validation/HOTE-GPU-S212.md)).
+dans `water-core`. **J1 reste partiel** : le sillage est exact, mais l'implémentation actuelle de
+son chemin d'image dépasse le budget eau ([HOTE-GPU-S212](../docs/validation/HOTE-GPU-S212.md)) ;
+l'espace d'optimisation est nommé dans ADR-131 et la feuille de route (J1-bis).
 
 ## Lancer depuis la racine du dépôt
 

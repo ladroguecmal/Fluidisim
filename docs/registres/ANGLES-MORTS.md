@@ -2964,3 +2964,21 @@ mesurés ; A247 reste partielle. Voir [HOTE-GPU-S212](../validation/HOTE-GPU-S21
   qu'ADR-107 attache à la recette. Gravité 2 : l'image ment sans refus, mais cosmétiquement (I-04).
   **À faire** : déduire l'emprise et la durée d'image d'un sillage de sa recette et de sa vitesse,
   les recevoir par coutures comme ADR-126, et les publier avec la fixture. Voir A214, L281.
+  *S213 (ADR-131 D6) : travail nécessaire de J1, indépendant du coût — un LOD spectral réduirait
+  encore la durée et le rayon honnêtes, ce qui rend A251 plus pressante, pas moins.*
+
+- **A252** *(sévérité 2, S213 ; traitée par ADR-131)* — **Un dépassement de budget mesuré sur une
+  implémentation presque dépourvue d'optimisation a été écrit comme un verdict sur la
+  fonctionnalité, et sa suite comme un compte à rebours vers une réduction d'ambition.**
+  HOTE-GPU-S212 : « coût refusé », « chemin refusé en coût », « si les deux leviers mesurés ne
+  tiennent pas 2 ms, l'arbitrage revient à l'utilisateur » — alors que la mesure ne comportait ni
+  LOD, ni visibilité, ni mutualisation, ni repli temporel. L'utilisateur a corrigé le jour même.
+  C'est le mécanisme d'A248 sous une forme nouvelle : le vocabulaire de réception (« reçu /
+  refusé ») appliqué au budget, et ADR-127 D7 (« toute incompatibilité donne lieu à un
+  arbitrage ») lu comme un déclencheur après deux essais. Le corpus porte d'autres verdicts du
+  même type, **non réécrits** et désormais lus comme portant sur l'implémentation de leur date :
+  le bloc S202 de REPRISE et du README (« trop cher même isolé » pour un bloc δ de 64×32) ;
+  COUT-IMAGE-S206, qui disait déjà mieux — « incompatible … sur cette machine, pour cette scène,
+  sur CPU » — sans lister les techniques absentes. Remède : ADR-131 — techniques présentes, absentes et domaine avec chaque mesure ; espace
+  d'optimisation nommé (J1-bis) ; 2 ms éprouvé sur la combinaison. **Reste à éprouver** : que les
+  mesures de δ (B3, coût du pas) adoptent le même en-tête quand J2 les reprend. Voir L286, L282.

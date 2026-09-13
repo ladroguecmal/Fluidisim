@@ -20,6 +20,8 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+*⚠ S213 ([ADR-131](adr/ADR-131-un-depassement-qualifie-une-implementation.md)) : « trop cher » et
+« refusé en coût » ci-dessous portent sur l'implémentation S212, pas sur le sillage ni l'objectif.*
 **S212 — 2026-09-13 : [sillage du cœur dans l'hôte GPU, exact et trop cher](validation/HOTE-GPU-S212.md).**
 `render_components` du champ de pression ; sillage 4 096 nœuds préparé par image, sommé par sommet.
 Hauteur GPU/cœur max 0,089 mm ; CPU sillage 10,9 ms, GPU eau 4,10 ms à 960×540 : refusé en coût,

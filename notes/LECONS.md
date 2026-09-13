@@ -4688,3 +4688,24 @@ quoi elle dépend — instant, point, ni l'un ni l'autre — et sortir de la bou
 ne dépend pas de ce qu'elle fait varier. Mesurer ensuite à deux formats et deux résolutions de
 recette : deux lois linéaires sur des variables différentes s'y séparent, une seule mesure les
 confond. Voir HOTE-GPU-S212, ADR-129, L283.
+
+## L286 — Un verdict de coût porte le nom de l'implémentation mesurée, et la liste de ce qui lui manque
+
+*(S213)* S212 a mesuré juste et conclu faux : « coût refusé » pour un sillage dont
+l'implémentation n'avait ni LOD, ni visibilité, ni mutualisation, ni repli du temps, puis « si les
+deux leviers ne tiennent pas 2 ms, l'arbitrage revient à l'utilisateur ». L'utilisateur a corrigé
+le jour même (ADR-131). Le glissement tient à deux mots. **« Refusé »** vient du vocabulaire de
+réception, où il juge un critère ; appliqué à un budget, il juge la fonctionnalité. **« Les
+leviers »** au pluriel défini laisse croire que les deux premières idées épuisent l'espace, et
+transforme leur échec éventuel en fin de partie. C'est A248 — un ordre lu comme un périmètre — par
+le chemin du coût.
+
+Ce qui généralise : **une mesure de coût est une coordonnée dans un espace de techniques, pas un
+verdict sur ce qu'on voulait construire**. Sans la liste des techniques absentes, un lecteur ne
+peut pas distinguer « impossible » de « pas encore optimisé », et l'auteur non plus.
+
+Le geste : ouvrir chaque mesure de coût par trois lignes — techniques présentes, techniques
+absentes, domaine de validité — et réserver « reçu / refusé » aux critères déclarés. Avant de
+proposer une suite, énumérer l'espace entier (temps, espace, LOD spatial, spectral, temporel,
+visibilité, mutualisation, et ce que le cas ajoute) plutôt que les deux idées les plus proches. Ne
+jamais écrire la condition sous laquelle on demanderait de réduire l'ambition. Voir ADR-131, A252.
