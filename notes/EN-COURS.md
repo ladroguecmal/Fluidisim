@@ -92,7 +92,7 @@ rayon non résolu, écart maximal par canal publié, zéro pixel différent hors
 
 - [x] **P1** — état réel, conception et critères, plan seul.
 - [x] **P2** — `radial_table.rs` : `table_len`, `bake_table`, `profile`, `eval` ; compilation.
-- [ ] **P3** — essais unitaires (a), (b), (d) ; essai d'intégration (c).
+- [x] **P3** — essais unitaires (a), (b), (d) ; essai d'intégration (c).
 - [ ] **P4** — banc : noyau réel dans `frame_cost` (coût par image, construction, mémoire) ; image
  S205 par la table dans `render_impact` contre le chemin direct (e).
 - [ ] **P5** — recommandation de pile GPU : critères (ADR-020/130, hors réseau pour le cœur,
@@ -115,3 +115,9 @@ P3 premier passage : (a) égalité au bit aux nœuds **passe** ; (c) zéro alloc
 0,09 mm venait de S206, mesuré à +3 s seulement : la naissance (pic central compact) est plus
 exigeante. **Non déplacé.** Mesure ajoutée *après* l'échec, dite comme telle : erreur par âge à
 λ/8 et à λ/16 ; décision de pas à corriger par note datée d'ADR-129, pas par l'essai.
+P3 après échec (mesure ajoutée, release) : **λ/16 : max|Δη| 0,0127 mm** (âge 0), pente 0,000190 ;
+0,0043 mm à 2 s → 0,0008 mm à 56 s. **λ/8 : 0,1820 mm à 0 s**, 0,0689 à 2 s, 0,0731 à 4 s → 0,0123 à
+56 s ; pente 0,001357. Rapport 14,3 ≈ h⁴ = 16. Essai réécrit : λ/16 exigé ≤ 0,09 mm ; λ/8 gardé
+sous 3 mm (tolérance de marche) et sous 2 % en pente, **sans le présenter comme la réception**.
+ADR-129 §2 (« pas ≤ λ/8 ») à corriger par note datée : réception à 0,09 mm = λ/16. Trois essais
+unitaires + un d'intégration (zéro allocation) verts.
