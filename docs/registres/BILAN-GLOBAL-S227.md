@@ -111,6 +111,24 @@ Cela vérifie les assertions présentes, pas les propriétés absentes de ces as
   confrontée au chemin complet, avec frontières et retour en visibilité ; pas à une micro-mesure
   supplémentaire de préparation. A265 ne bloque que les conclusions dépendant du recouvrement.
 
+### Réception des corrections de code (P4)
+
+Deux défauts vus échouer avant correction : **3 ml dans une capacité de 1 ml**, et panique
+`attempt to subtract with overflow`. Après correction, quatre régressions S227 passent en
+debug et release : confluence (cinq capacités, plusieurs pas, témoin non saturé), coordonnées
+extrêmes, réseau avec entrées/sorties/rejet extérieur (deux ordres), refus numérique tardif
+préservant nœuds et restes. Les seize tests V ordinaires passent en release ; C12 reste à
+727,4 s, la chaîne et les valeurs S226 sont inchangées. Aucun calcul B/W ni seuil modifié.
+
+Limites du correctif : réduction des demandes déjà bornées, place libre prise au début du pas,
+pas de redistribution itérative. Parcours O(nœuds × arêtes), sans allocation ajoutée par
+inspection ; pas de budget grande échelle ni de nouvelle campagne de coût reçus ici.
+
+**A266 élargie, pas corrigée** : prisme central à 1,01 m, **506 ml de fuite au lieu de zéro**.
+Le plan du module décale la cote centrale de +4,403 % à pente 0,3, car il confond hauteur verticale
+et distance normale. Un test ignoré nommé A266 conserve l'attendu correct ; il a été exécuté et
+vu échouer. Note factuelle ajoutée à ADR-010 et au reçu S226, sans réécriture de la décision.
+
 ## 4. Changements et vérification
 
 À compléter après application P3–P5. Les anciens points d'entrée restent consultables dans Git

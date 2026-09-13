@@ -526,3 +526,128 @@ fn what_the_shape_table_loses_when_gravity_tilts_s226() {
         }
     }
 }
+
+/// Trois arrivées se partagent la place du même receveur, y compris à un millilitre près.
+/// Le témoin non saturé doit aussi débiter : refuser tous les transferts ne suffit pas.
+#[test]
+fn confluence_never_overfills_the_receiver_s227() {
+    let table = prism(1_000_000);
+    let shapes = Shapes::new(&table).unwrap();
+    for free in [1, 2, 53, 1_001, 1_000_000] {
+        let source = HydroNode {
+            volume_ml: 1_000_000, capacity_ml: 1_000_000,
+            origin_um: [0, 0, 2_000_000], shape: 0,
+        };
+        let mut nodes = [source; 4];
+        nodes[3] = HydroNode {
+            volume_ml: 0, capacity_ml: free, origin_um: [0; 3], shape: 0,
+        };
+        let mut edges = [0, 1, 2].map(|from| Opening {
+            from, to: Some(3), flow: Flow::Orifice { area_mm2: 100_000 },
+            position_um: [0, 0, 2_000_000], discharge: SHARP_EDGE_DISCHARGE,
+            residue_nl: 0,
+        });
+        let mut scratch = [0; 3];
+        for tick in 0..4 {
+            step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut scratch).unwrap();
+            assert!(nodes.iter().all(|n| (0..=n.capacity_ml).contains(&n.volume_ml)),
+                    "capacite depassee : libre={free}, pas={tick}, noeuds={nodes:?}");
+            assert_eq!(nodes.iter().map(|n| n.volume_ml).sum::<i64>(), 3_000_000);
+            if tick == 0 {
+                assert!(nodes[3].volume_ml > 0, "le temoin doit debiter");
+                if free <= 1_001 {
+                    assert_eq!(nodes[3].volume_ml, free);
+                    assert!(scratch.iter().max().unwrap() - scratch.iter().min().unwrap() <= 1);
+                }
+            }
+        }
+    }
+}
+
+/// Une grande différence sur l'axe horizontal ne change rien à la charge verticale.
+/// La différence doit être calculée en entier avant conversion : pas de panique i64.
+#[test]
+fn extreme_coordinates_preserve_vertical_transfers_s227() {
+    let table = prism(1_000_000);
+    let shapes = Shapes::new(&table).unwrap();
+    let run = |x_from, x_to| {
+        let mut nodes = [
+            HydroNode { volume_ml: 1_000_000, capacity_ml: 1_000_000,
+                        origin_um: [x_from, 0, 2_000_000], shape: 0 },
+            HydroNode { volume_ml: 0, capacity_ml: 1_000_000,
+                        origin_um: [x_to, 0, 0], shape: 0 },
+        ];
+        let mut edges = [Opening {
+            from: 0, to: Some(1), flow: Flow::Orifice { area_mm2: 1_000 },
+            position_um: [x_to, 0, 2_000_000], discharge: SHARP_EDGE_DISCHARGE,
+            residue_nl: 0,
+        }];
+        let mut scratch = [0];
+        step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut scratch).unwrap();
+        (nodes.map(|n| n.volume_ml), edges[0].residue_nl)
+    };
+    let reference = run(0, 0);
+    assert!(reference.0[1] > 0);
+    assert_eq!(run(i64::MAX, i64::MIN), reference);
+    assert_eq!(run(i64::MIN, i64::MAX), reference);
+}
+
+/// Un nœud peut recevoir, émettre et déborder vers l'extérieur au même pas. L'intégrité ne
+/// dépend pas de l'ordre d'application des arêtes, même si l'arrondi peut dépendre de cet ordre.
+#[test]
+fn mixed_network_keeps_bounds_and_accounts_for_external_loss_s227() {
+    let table = prism(1_000_000);
+    let shapes = Shapes::new(&table).unwrap();
+    for reverse in [false, true] {
+        let mut nodes = [50, 70, 10, 0].map(|volume_ml| HydroNode {
+            volume_ml, capacity_ml: 100, origin_um: [0; 3], shape: 0,
+        });
+        nodes[0].origin_um[2] = 3_000_000;
+        nodes[1].origin_um[2] = 2_000_000;
+        nodes[2].origin_um[2] = 1_000_000;
+        let mut edges = [(0, Some(2)), (1, Some(2)), (2, Some(3)), (2, None)]
+            .map(|(from, to)| Opening {
+                from, to, flow: Flow::Orifice { area_mm2: 100_000 },
+                position_um: nodes[from as usize].origin_um,
+                discharge: SHARP_EDGE_DISCHARGE, residue_nl: 0,
+            });
+        if reverse { edges.reverse(); }
+        let mut scratch = [0; 4];
+        let mut lost = 0;
+        for _ in 0..10 {
+            step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut scratch).unwrap();
+            lost += edges.iter().zip(scratch).filter(|(e, _)| e.to.is_none())
+                .map(|(_, ml)| ml).sum::<i64>();
+            assert_eq!(nodes.iter().map(|n| n.volume_ml).sum::<i64>() + lost, 130);
+            assert!(nodes.iter().all(|n| (0..=n.capacity_ml).contains(&n.volume_ml)));
+        }
+        assert!(lost > 0, "le temoin doit effectivement rejeter hors reseau");
+    }
+}
+
+#[test]
+fn late_numeric_refusal_keeps_all_nodes_and_residues_s227() {
+    let (mut nodes, base, table) = c12();
+    let original_nodes = nodes;
+    let shapes = Shapes::new(&table).unwrap();
+    let mut edges = [base[0]; 2];
+    edges[0].residue_nl = 123;
+    edges[1].residue_nl = 456;
+    edges[1].flow = Flow::Orifice { area_mm2: i64::MAX };
+    edges[1].discharge = f32::MAX;
+    assert_eq!(step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut [0; 2]),
+               Err(Error::NonFinite));
+    assert_eq!(nodes, original_nodes);
+    assert_eq!(edges.map(|e| e.residue_nl), [123, 456]);
+}
+
+/// Cas attendu pour la future correction A266. Un prisme symétrique à mi-remplissage garde
+/// sa cote centrale à 1 m tant que le plan ne coupe ni fond ni plafond. S226 testait seulement
+/// une aire sous une droite imposée, sans passer par la relation hauteur/volume du module.
+#[test]
+#[ignore = "A266 ouverte : la table doit fournir un plan oriente conservant le volume"]
+fn tilted_prism_volume_regression_a266_s227() {
+    assert!(leaked([0, 0, 990_000], TILTED) > 0, "temoin sous la surface");
+    assert_eq!(leaked([0, 0, 1_010_000], TILTED), 0,
+               "un hublot central au-dessus de 1 m ne doit pas fuir");
+}

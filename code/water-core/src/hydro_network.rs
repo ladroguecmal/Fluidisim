@@ -20,6 +20,10 @@
 //!
 //! Ce que ce module ne fait pas : ni réseau fermé sous pression (ADR-010 §4 le reporte
 //! explicitement en v2), ni pompe, ni matériau poreux, ni pluie, ni absorption.
+//!
+//! **A266 ouverte (S226, précisée S227)** : une table cuite à l'horizontale ne fournit pas le
+//! bon décalage du plan sous gravité inclinée, même pour un prisme. L'orientation est reçue,
+//! pas la cohérence géométrique volume/plan. Voir `GRAVITE-DIRIGEE-S226.md`, note S227.
 
 use crate::SimTime;
 
@@ -161,11 +165,14 @@ impl<'a> Shapes<'a> {
 /// Calculée en `f64` depuis des différences **entières** : sous `u = (0, 0, 1)` elle rend
 /// exactement `q_z − c_z`, donc la généralisation se réduit au bit au cas vertical. IEEE strict la
 /// rend reproductible (I-03) ; le module emploie déjà `f64` pour le débit.
-fn sub(a: [i64; 3], b: [i64; 3]) -> [i64; 3] {
-    [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
+fn sub(a: [i64; 3], b: [i64; 3]) -> [i128; 3] {
+    // Élargir AVANT la soustraction : deux coordonnées valides peuvent avoir une différence
+    // hors i64. Convertir chaque coordonnée en flottant avant soustraction perdrait les petits
+    // déplacements à grande origine ; i128 conserve les deux propriétés.
+    [a[0] as i128 - b[0] as i128, a[1] as i128 - b[1] as i128, a[2] as i128 - b[2] as i128]
 }
 
-fn along(delta: [i64; 3], u: [f64; 3]) -> f64 {
+fn along(delta: [i128; 3], u: [f64; 3]) -> f64 {
     delta[0] as f64 * u[0] + delta[1] as f64 * u[1] + delta[2] as f64 * u[2]
 }
 
@@ -178,7 +185,8 @@ fn along(delta: [i64; 3], u: [f64; 3]) -> f64 {
 /// 3. **Normalisation** : quand plusieurs arêtes vident le même nœud au-delà de ce qu'il contient,
 ///    toutes sont réduites dans la même proportion. Sans cela un nœud presque vide alimente trois
 ///    fuites et devient négatif.
-/// 4. Limiteur d'arrivée : `transfert ≤ capacité libre aval`, appliqué après la normalisation.
+/// 4. Limiteur d'arrivée : **somme des transferts entrants ≤ capacité libre aval**. Un plafond
+///    par arête seul n'empêche pas plusieurs arrivées de remplir la même place (S227).
 /// 5. Application.
 ///
 /// `scratch` reçoit un transfert par arête ; il appartient à l'appelant (I-06).
@@ -335,7 +343,32 @@ pub fn step(
         }
     }
 
-    // --- 5. Application, dans l'ordre du tableau. Le retrait précède l'ajout ; la somme des
+    // --- 5. Capacité collective des receveurs (S227).
+    // Chaque arête a déjà été bornée et chaque source normalisée. Réduire encore ses transferts
+    // ne peut donc rendre une source négative. Le receveur partage sa place libre initiale par
+    // le même arrondi cumulatif ; la place libérée pendant ce pas ne sera disponible qu'au pas
+    // suivant. Pas de redistribution itérative ni de dette accumulée pour le transfert refusé.
+    for (i, node) in nodes.iter().enumerate() {
+        let asked: i128 = edges.iter().zip(scratch.iter())
+            .filter(|(e, _)| e.to.is_some_and(|t| t as usize == i))
+            .map(|(_, ml)| *ml as i128).sum();
+        let free = (node.capacity_ml - node.volume_ml) as i128;
+        if asked <= free {
+            continue;
+        }
+        let (mut cumulative, mut given) = (0i128, 0i128);
+        for (e, ml) in edges.iter().zip(scratch.iter_mut()) {
+            if !e.to.is_some_and(|t| t as usize == i) {
+                continue;
+            }
+            cumulative += *ml as i128;
+            let target = cumulative * free / asked;
+            *ml = (target - given) as i64;
+            given = target;
+        }
+    }
+
+    // --- 6. Application, dans l'ordre du tableau. Le retrait précède l'ajout ; la somme des
     // volumes est conservée par construction, et rien ne dépasse ce qui a été normalisé.
     for (e, ml) in edges.iter().zip(scratch.iter()) {
         if *ml <= 0 {

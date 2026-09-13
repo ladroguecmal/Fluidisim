@@ -182,3 +182,19 @@ Un nœud V est un objet persistant du monde, indexé par cellule `HydroGrid`. Po
    extérieur, absent de la liste de `00_INDEX.md` jusqu'en S11.
 4. Mélange de liquides différents dans un même nœud (eau + carburant) : autorisé ou interdit ?
    Interdire est plus simple et probablement suffisant ; à confirmer.
+
+
+## Note factuelle S227 — 2026-09-13 : géométrie et limiteur du noyau construit
+
+**A266 reste ouverte.** La table horizontale du §2 ne donne pas le décalage normal du plan sous
+une gravité inclinée. La réserve touche **aussi les prismes** dans le module S226 : à pente 0,3,
+la cote centrale y vaut 1,04403 m pour 1 m attendu ; hublot central à 1,01 m, fuite de 506 ml en
+dix pas. Voir la [correction de portée S227](../validation/GRAVITE-DIRIGEE-S226.md#note-corrective-s227--2026-09-13--la-portée-da266-comprend-les-prismes).
+L'orientation correcte ne suffit pas à recevoir le volume géométrique. Cette note ne choisit
+pas la nouvelle représentation ; le prochain ADR doit remplacer cette disposition.
+
+**Le limiteur du §4 porte aussi sur les sommes entrantes.** Le noyau S224–S226 bornait chaque
+arrivée séparément : trois sources remplissaient trois fois une même capacité libre. S227 ajoute
+une réduction collective après les limites existantes, sans masse perdue ; la place libérée par
+les sorties n'est disponible qu'au pas suivant. Cette correction d'implémentation ne reçoit pas
+encore le réseau pressurisé ni les grandes topologies. Les parcours restent en O(nœuds × arêtes).

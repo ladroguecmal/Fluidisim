@@ -135,3 +135,32 @@ vidange proportionnel à la surface.
 
 Ailleurs, inchangés : A265 (à instruire avant toute optimisation CPU), A261, A258, A263, la loi GPU
 de J1-bis, J2/δ général.
+
+## Note corrective S227 — 2026-09-13 : la portée d'A266 comprend les prismes
+
+Le §4 mesure l'aire sous une droite dont la **cote verticale centrale** est imposée. Il ne fait
+pas passer cette cote par `hydro_network::step`. Le module interprète pourtant `shape_lut` comme
+une **distance normale** : son plan vérifie `u·(q-origin)=h_lut`.
+
+Pour un prisme symétrique rempli à 1 m, sous pente 0,3, `u_z=1/sqrt(1+0,3²)` ; le module place
+le centre à `h_lut/u_z = 1,04403065 m`, au lieu de 1 m. Tant que ni fond ni plafond ne sont
+coupés, le volume géométrique représenté dépasse donc le volume stocké de **4,403 %**. Cette
+valeur est dérivée du plan exécuté, pas de la seule intégration de S226. Le même raisonnement
+sur la cale en V non tronquée donne `(1+0,3²)/(1-0,3²)-1 = 19,78 %`, pas 9,89 %.
+
+**Reproduction par le consommateur réel** : le réservoir de `hull` (4 m², 1 m d'eau), hublot
+central à 1,01 m, perd **506 ml en dix pas** sous gravité inclinée, alors qu'il devrait rester sec.
+Le test `tilted_prism_volume_regression_a266_s227` exige zéro, et **échoue comme attendu**.
+Il est ignoré nommément dans la suite normale tant qu'A266 reste ouverte ; commande :
+
+```text
+cargo test -p water-core --lib tilted_prism_volume_regression --offline -- --ignored --nocapture
+```
+
+L'orientation reçue par C16 demeure correcte ; elle ne reçoit pas le décalage du plan. Le
+« prisme exact » de S226 reste une propriété de la droite imposée, **pas du module**. Les valeurs
+9,89 % de la cale concernent les lignes à 0,4 et 1 m, pas toute la course (6,17 % à 1,6 m dans le
+tableau d'origine). Une restriction provisoire aux prismes inclinés ne suffit donc pas.
+A266 doit recevoir une relation volume/plan orienté, avec les deux composantes indépendantes
+de direction pour un contenant général, les extrêmes de remplissage et une géométrie indépendante.
+La correction de conception n'est pas faite dans cet audit ; elle reste le prochain lot V.
