@@ -112,7 +112,7 @@ fraction du problème, et c'est la découverte de la session.
 - [x] **P2** — instrumenter : horodatage de la trame entière, acquisition et présentation séparées, intervalle réel ; mode sans vsync déclaré.
 - [x] **P3** — mesurer la cadence sur fenêtre ouverte, deux passages, aux deux formats ; publier les distributions.
 - [x] **P4** — chiffrer les exclusions : part de l'eau dans la trame, coût du ciel, des transferts et de la présentation.
-- [ ] **P5** — confronter à ADR-125 : 16,67 ms et 2 ms, et dire ce que la scène J1 tient et ne tient pas.
+- [x] **P5** — confronter à ADR-125 : 16,67 ms et 2 ms, et dire ce que la scène J1 tient et ne tient pas.
 - [ ] **P6** — document de réception (en-tête ADR-131 D3, rang de passage) ; suite complète `code/`.
 - [ ] **P7** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
@@ -164,3 +164,32 @@ prise en rafales courtes. À verser à L289.
 
 Contrôles : `VERIFY` inchangé (7,2271e-5 m à 16 s), `BENCH` inchangé (GPU eau 4,2037 ms),
 `--smoke` 120 images — les quatre horodatages n'ont pas déplacé les chemins existants.
+
+P5 : **ADR-125 pose deux nombres, et la cadence en éclaire un troisième.**
+
+| grandeur | mesurée | part d'une trame de 60 Hz (16,67 ms) | budget ADR-125 |
+|---|---:|---:|---|
+| GPU eau | **4,1585 ms** | **24,9 %** | 2 ms, soit 12 % — **dépassé 2,08 ×** |
+| GPU trame (eau + ciel) | 4,2455 | 25,5 % | — |
+| trame complète (intervalle) | 5,0450 | **30,3 %** | — |
+| travail réel du CPU | 2,10 | 12,6 % | — |
+
+**La question « l'hôte tient-il 60 Hz » a une réponse, et ce n'est pas la bonne question.** Il les
+tient trois fois — 198 Hz. Mais ADR-125 ne demande pas que l'eau tourne seule à 60 Hz : elle lui
+accorde **2 ms d'une trame de 16,67** qui doit aussi porter un jeu. L'eau en prend 4,16, et la scène
+entière 5,05 : il resterait **11,6 ms** pour tout le reste au lieu des 14,67 prévus.
+
+Le verdict de coût ne bouge donc pas — il est **confirmé par un autre chemin**, et le rapport 2,08
+recoupe les 4,18 ms de S213 à 0,5 % près.
+
+**Ce que la cadence ajoute, et que les passes isolées ne pouvaient pas dire : où optimiser.** Le
+travail réel du CPU tient dans **2,10 ms**, entièrement recouvert par les 4,16 ms du GPU — la trame
+est **bornée par le GPU**, et l'acquisition d'image (2,22 ms) en est la contre-pression, pas un
+coût. Toute seconde gagnée sur le CPU serait donc **invisible** tant que le GPU domine. Les quatre
+techniques qui restent à J1-bis — espace, LOD, visibilité, mutualisation — sont toutes du côté GPU :
+la mesure confirme la trajectoire au lieu de la contredire, et c'est la première fois qu'elle est
+confirmée **par une cadence** et non par une passe.
+
+Réserve à ne pas franchir : l'hôte ne dessine **que** de l'eau et un ciel, sur une caméra fixe, sans
+interface, sans ombres, sans autre géométrie. Les 198 Hz ne disent rien d'un jeu ; ils disent que
+l'eau, seule, laisse 11,6 ms.
