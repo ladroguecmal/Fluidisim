@@ -72,8 +72,8 @@ Compteur 2 : file J1, couches B/W, construction effective.
 
 - [x] **P1** — accord et plan seul, jeton occupé.
 - [x] **P2** — sources verrouillées, API et données GPU B/W depuis le cœur ; réception CPU.
-- [>] **P3** — fenêtre, pipeline GPU, caméra interactive et B+impact ; compilation.
-- [ ] **P4** — comparaison GPU/CPU, capture locale, mesures distinctes CPU/GPU et contrôles ciblés.
+- [x] **P3** — fenêtre, pipeline GPU, caméra interactive et B+impact ; compilation.
+- [>] **P4** — comparaison GPU/CPU, capture locale, mesures distinctes CPU/GPU et contrôles ciblés.
 - [ ] **P5** — rituel §6, lancement, file active, passation, jeton libre, copies synchronisées.
 
 ### Notes de reprise
@@ -87,3 +87,7 @@ J1 reste ouvert si le sillage ou une réception manque.
 P2 : sources verrouillées récupérées. Background::render_components publie amplitude, kx/ky et phase
 repliée relative à une origine monde ; refus atomique, stockage hôte, aucune allocation.
 Test ciblé reçu aux temps 15 s, 1e6 s et u64::MAX, deux origines, refus domaine/capacité.
+
+P3 : hôte winit/wgpu compilé hors réseau. API wgpu30 adaptée (CurrentSurfaceTexture,
+Queue::present, InstanceDescriptor explicite). Grille projetée 2 px, shader partagé compute/rendu.
+Modes --verify et --smoke ; Espace pause, R relance, B témoin, flèches déplacement, clic droit rotation.
