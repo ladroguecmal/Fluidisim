@@ -58,85 +58,59 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S212 — terminée
+Session : S213 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : file J1, couche W — sillage issu du cœur dans l'hôte GPU, comparé au cœur, coût mesuré.
+Objectif : corriger le cadrage du coût (demande utilisateur), inscrire l'espace d'optimisation dans
+la trajectoire, puis construire et mesurer le levier temporel du sillage dans le cœur.
+
+### Entrée utilisateur (2026-09-13, après S212)
+
+« Continue avec la piste CPU en S213, mais corrige le cadrage : c'est l'implémentation actuelle
+qui dépasse le budget, pas le sillage ni l'objectif final qui sont refusés. » Intégrer à la
+trajectoire LOD spatiaux, spectraux et temporels, visibilité, mutualisation ; ne pas attendre
+l'échec de deux optimisations pour demander de réduire l'ambition ; chaque mesure précise
+techniques présentes, absentes et domaine de validité ; 2 ms = objectif à éprouver sur leur
+combinaison, sans présumer succès ni échec ; conserver A251 et la vérification de la composition
+impact+sillage dans les travaux nécessaires.
 
 ### État réel
 
-master et trois copies propres à 0e204ad (S211 close 10:04, jeton libre). Maillons 0 ; la suite
-S211 nomme une ligne de la file (J1/W), pas un reliquat. Aucune dépendance nouvelle prévue.
+master et trois copies propres à 1da11b6 (S212 close 10:30). Maillons 0. Machine : AMD Ryzen AI 7
+350, RTX 5070 Laptop (DX12). Aucune dépendance nouvelle prévue.
 
-### Thèse et critères, déclarés avant toute mesure
+### Thèse et critères du levier temporel, déclarés avant toute mesure
 
-Le sillage du cœur est une somme modale (`spectral_pressure::Field`) : ADR-107 chiffre 25,6 ms
-de préparation CPU pour 8 192 nœuds. Il n'a pas la forme de B (32 composantes). **Hypothèse à
-éprouver, pas à croire** : publié en coefficients rebasés `[A, B, kx, ky]`, il se rend par somme
-par sommet ; le coût dira si ce chemin tient ou s'il faut un autre chemin d'image (grille/texture,
-transformée), à la manière d'ADR-129 pour l'impact.
+Dans la solution de Duhamel (ADR-069), un tronçon achevé ne fait plus que tourner : `(η, v/ω)`
+subit la rotation `R(ω·Δt)`. Par nœud, les tronçons achevés se replient donc en **un état à
+l'instant de référence** (début du contexte), tourné par image d'une phase entière
+`phase(fréquence, t − t_réf)` ; seuls les tronçons **en cours** s'évaluent par
+`ModalPressure::sample`, sur des modes **préconstruits** à la construction. Résonance `Ω = ±ω` :
+aucune décomposition en phaseurs du tronçon actif (mal conditionnée là où vit le sillage de
+Kelvin) — la forme sinc du cœur est conservée. Chemin cosmétique (ADR-129 §3), pas `sample` au bit.
 
-Publication : `η(q) = Σ A cos(k·q) − B sin(k·q)`, pente `−k (A sin + B cos)`, où `(A + iB)` est
-la réponse pondérée tournée de la phase repliée `k·origine` (PhaseQ32, aucun atan2, aucun temps
-absolu au GPU — I-08). Emprise du champ appliquée au GPU comme au cœur.
+Réception contre `bound_pressure::Prepared::from_journal` + `render_components` : reconstruction
+de η et des pentes à 1e-5 de la norme L1 des coefficients ; instants naissance, milieu de tronçon,
+bornes exactes de tronçon (±1 µs), fin de forçage, fin de contexte, **retour arrière** ; deux
+recettes ; refus atomiques (contexte, instant, capacité, origine) ; témoin vérifié.
 
-Fixture sillage J1 (Froude de S156, lois de domaine transportées par similitude — **à vérifier**) :
-σ 2 m, coupure 3 rad/m (σk 6), recette 64×128 (4 096 nœuds du demi-spectre) ; huit tronçons de
-2 s à [3, 0] m/s sous 19 620 N (≈ 2 t), départ (−24, 4) m à la naissance de l'impact ; contexte
-de 40 s ; emprise [−64, −48]–[64, 56] m ; repère/cellule 0, milieu 9,81 / 1025.
-
-Critères : hauteur GPU contre cœur (B `eval` + impact direct + pression `sample_batch`) ≤ 3 mm
-aux sondes, âges sillage 0/4/8/16/24/39 s ; témoin de résolution 64×128 contre 128×256 publié
-(pas de seuil inventé, écart max rapporté à l'amplitude max) ; couture au bord de l'emprise
-publiée ; admission `bound_pressure::Prepared::sample_world_batch` à `BREAKING_SLOPE` rapportée,
-refus publié et non contourné ; coûts séparés CPU (préparation + publication) et GPU (passe
-d'eau) en 640×360 et 960×540, deux recettes. Toute incompatibilité avec 2 ms est publiée ; une
-issue technique va en ADR, une incompatibilité sans issue technique va à l'utilisateur (ADR-127 D7).
+Mesure : coût par image médiane/max, **pic aux bornes de tronçon**, construction, mémoire, à 4 096
+et 16 384 nœuds, pendant et après forçage. **Aucun seuil de réussite** : 2 ms est l'objectif de la
+combinaison (ADR-131), pas d'un levier seul. Prédiction écrite pour être contredite : quelques
+dixièmes de ms à 4 096 nœuds pendant le forçage, dizaines de µs après. Chaque résultat publié avec
+techniques présentes (temps), absentes (espace, LOD spatial/spectral/temporel, visibilité,
+mutualisation) et domaine de validité (fixture S212, une source, machine, instants).
 
 ### Plan
 
-- [x] **P1** — jeton, thèse, critères et plan seuls.
-- [x] **P2** — cœur : `bound_pressure::Prepared::render_components` rebasé, refus atomiques, test contre `sample_batch`.
-- [x] **P3** — hôte : fixture sillage, préparation par image, buffer GPU, somme modale bornée à l'emprise ; R/B/Home ; compilation.
-- [x] **P4** — `--verify` : GPU contre cœur, témoin de résolution, couture, admission, coûts deux recettes, captures, fenêtre.
-- [x] **P5** — réception HOTE-GPU-S212, décision chiffrée du chemin d'image du sillage, suite complète des tests.
-- [x] **P6** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
+- [x] **P1** — jeton, entrée utilisateur, thèse, critères et plan seuls.
+- [>] **P2** — ADR-131 (clarification utilisateur) ; note datée ADR-127 D7 ; FEUILLE-DE-ROUTE : espace d'optimisation, protocole de mesure, travaux nécessaires de J1 (A251, composition impact+sillage), §4 corrigé.
+- [ ] **P3** — propagation du cadrage : HOTE-GPU-S212 (note corrective, techniques/domaine), file active, REPRISE, index, README, viewer/README ; A252, L286.
+- [ ] **P4** — cœur : `pressure_timeline` (modes préconstruits, repli des tronçons achevés, publication par image, refus atomiques) ; compilation, test minimal.
+- [ ] **P5** — réception contre `from_journal` : instants déclarés, bornes, retour arrière, deux recettes, refus, témoin.
+- [ ] **P6** — mesure du levier seul (exemple release, sans GPU) : par image, pic aux bornes, construction, mémoire ; techniques et domaine.
+- [ ] **P7** — hôte : levier par image ; `--verify` contre `from_journal`, contrôles S212 conservés ; coûts ; réception TEMPS-SILLAGE-S213 ; suite complète.
+- [ ] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
 
-P2 : `Field::render_components` / `bound_pressure::Prepared::render_components` + `component_count`.
-Test contre `sample_batch` à 1e-5 relatif (norme L1 des coefficients), trois origines, quatre
-décalages ; refus Context/Time/Capacity/origine sans écriture. Témoin : signe de B inversé → échec.
-
-P3 : un seul `Wake` de huit tronçons suffit — un tronçon futur rend une réponse nulle
-(`ModalPressure::sample`), l'émetteur progressif n'est pas requis pour un trajet scripté.
-Journal de pression (époque 1), `Prepared::from_journal` + `render_components` par image ;
-uniforme 128 octets, buffer sillage 16 384 × 16 octets (binding 3). R/B/Home inchangés : même
-naissance que l'impact, B masque impact et sillage. Captures `captures/s212/`. Compilé release.
-Piège : `R` est un alias PowerShell (Invoke-History) — une fonction nommée R n'écrit rien.
-
-P4, RTX5070 Laptop/DX12, `--verify` (6 988 sondes, dont 424 de couture) :
-hauteur GPU/cœur max 0,000089370 m (âge 40,01), 0,0000707–0,0000773 m sillage actif ; pentes ≤ 1,24e-4.
-Témoin 64×128 / 128×256, amplitude max du fin : 4 s 0,567 mm/154,3 mm ; 8 s 1,355/117,0 ;
-16 s 2,180/132,8 ; 24 s 4,324/45,4 ; 39 s 8,768/31,5 (0,37 %, 1,2 %, 1,6 %, 9,5 %, 28 %).
-Couture (|η| au bord intérieur, 64×128 / fin) : 0,53/0,18 ; 1,37/0,59 ; 2,28/2,00 ; 5,62/3,35 ;
-12,70/14,48 mm — contenu physique au bord, pas seulement récurrence. Enveloppe 0,135–0,165 ;
-admission B+pression à BREAKING_SLOPE Ok aux cinq âges (impact non inclus dans ce contrôle).
-Coûts médiane/max (ms) — 4 096 : CPU sillage 10,851/27,313 (640) 10,577/14,328 (960) ; GPU eau
-1,902/1,913 (640) 4,103/4,143 (960). 16 384 : CPU 38,376/46,308 (640) 41,504/62,042 (960) ;
-GPU 7,770/15,852 (640) 16,946/27,973 (960). Sans sillage S211 : GPU 0,018 / 0,049.
-⇒ 7,6–7,9 ps par sommet×composante, 317–331 ns par nœud×tronçon CPU.
-Captures 8 s scène/témoin : 60 182 pixels différents, max 28 niveaux, lignes 161–359 ; image de
-différence : anneaux d'impact + motif de Kelvin derrière la source. `--smoke` : 120 images, code 0.
-
-P5 : HOTE-GPU-S212 et viewer/README. Verdict : exact, refusé en coût ; incompatibilité mesurée
-mais **pas encore un arbitrage** — deux leviers techniques non mesurés (temps dans le cœur :
-états tournés + tronçon actif préconstruit ; espace dans l'hôte : grille cartésienne + transformée,
-une somme polaire par texel ne gagne rien). Aucun ADR : le levier positif n'est pas mesuré.
-Suite complète `code/` : 350 réussis (252+4+1+93), 5 ignorés (2+3), aucun échec.
-A251 à ouvrir : durée honnête de recette et couture d'emprise du sillage visible non gardées.
-Suite S213 : levier temporel dans le cœur (compteur 0, W avancée par P2).
-
-P6 : journal S212, A251 + suivi A247, L285 (L248 couvrait déjà l'accord sur couche partagée),
-index, README, REPRISE §4 et note sur le paragraphe S208 dépassé, feuille de route J1/§4, file
-plurielle entière relue (A247, A249, J1, λ_cut/B2 datées S212 ; autres conservées). Invariants
-I-03/I-04/I-06/I-08/I-15 relus, aucun devenu faux. Jeton libre ; copies avancées après ce commit.
+*(vide)*

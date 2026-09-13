@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-13 10:30 +02:00
+JETON            : occupé
+Battement        : 2026-09-13 10:36 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S213 — cadrage du coût corrigé (ADR-131), espace d'optimisation, levier temporel du sillage
 Dernière session : S212 — sillage du cœur dans l'hôte GPU, exact (0,089 mm) mais refusé en coût (CPU 10,9 ms, GPU 4,1 ms)
 Session suivante : S213 — file J1, couche W : levier temporel du sillage dans le cœur — ne plus refaire la préparation modale par image, recevoir contre from_journal, mesurer (HOTE-GPU-S212 §Verdict)
 Maillons        : 0 — W avancée dans code/water-core/src (render_components du champ de pression)
