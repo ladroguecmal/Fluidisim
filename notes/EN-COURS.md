@@ -116,7 +116,7 @@ ce résultat-là qu'il faut savoir écrire s'il se produit.
 - [x] **P2** — fixture multi-sillages : deux et trois sources dans un même journal, proches puis éloignées ; témoin que la composition est bien partagée par emplacement, et refus éventuels de la bibliothèque.
 - [x] **P3** — enveloppe globale et maximum réel par configuration ; sur-additivité mesurée.
 - [x] **P4** — borne locale conjointe : partition spectrale à budget d'évaluations égal ; gain, reste au-dessus du maximum, **coût de passe**.
-- [ ] **P5** — part de π/7 : budget d'admission complet avec les impacts sommés ; combien de sources passent, avant et après.
+- [x] **P5** — part de π/7 : budget d'admission complet avec les impacts sommés ; combien de sources passent, avant et après.
 - [ ] **P6** — décider : ADR si quelque chose est rendu **et** utilisable ; sinon constat motivé, et retour à la file (cadence complète de l'hôte, V-noyau).
 - [ ] **P7** — document de réception (en-tête ADR-131 D3) ; suite complète `code/`.
 - [ ] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
@@ -197,3 +197,28 @@ de constante ne franchit quatre ordres de grandeur** jusqu'au budget de 2 ms.
 résolus, `G(U)`, ne dépend ni du point ni des phases : il est spatialement aveugle par construction,
 et c'est lui qui plafonne tout. Une borne qui décroîtrait avec la distance au support de la source
 n'existe pas dans cette représentation — le champ, lui, est bien localisé.
+
+P5 : **A254, la part somme, traduite dans la monnaie qui décide.** Budget d'admission complet à
+l'instant de la fixture : `π/7 = 0,448799`, terme d'impact unitaire `slope_max_at` = **0,030069**
+(ADR-133 à τ ≈ 16,8), impacts toujours sommés.
+
+| config | sillages | enveloppe actuelle | part | impacts admis | borne partitionnée | part | impacts | maximum réel | impacts |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| proches | 1 | 0,115171 | 25,7 % | **11** | 0,070740 | 15,8 % | 12 | 0,070316 | 12 |
+| proches | 2 | 0,165659 | 36,9 % | **9** | 0,112379 | 25,0 % | 11 | 0,111800 | 11 |
+| proches | 3 | 0,192466 | **42,9 %** | **8** | 0,131362 | 29,3 % | 10 | 0,130667 | 10 |
+| éloignées | 2 | 0,146879 | 32,7 % | **10** | 0,071014 | 15,8 % | 12 | 0,070390 | 12 |
+| éloignées | 3 | 0,165357 | 36,8 % | **9** | 0,071160 | **15,9 %** | **12** | 0,070463 | 12 |
+
+**La part somme d'A254 n'est plus contraignante sur cette scène, et c'est la réponse.** En S214,
+*une* source de chaque type consommait 84 % de π/7 et la deuxième refusait l'image. Après ADR-133 et
+ADR-134, **trois sillages et huit impacts passent** — et neuf s'ils sont éloignés. Le budget a cessé
+d'être le goulot ; ce n'est plus lui qui décide de ce qu'une scène peut porter.
+
+**Ce que la borne partitionnée rendrait en plus : deux à trois impacts.** De 8 à 10 (proches), de 9
+à 12 (éloignées) — 18 à 33 % de sources en plus. Et elle est **à un impact près du maximum réel dans
+toutes les configurations** : il n'y a pas de troisième chemin à chercher, l'instrument est aussi
+bon qu'il peut l'être. C'est son **prix** qui le disqualifie, pas sa qualité.
+
+Le gain est donc réel, borné, et connu : **+2 à +3 impacts pour 25 secondes de calcul**, contre un
+budget d'image de 2 ms. Quatre ordres de grandeur, et une loi d'échelle qui les défend (P4).

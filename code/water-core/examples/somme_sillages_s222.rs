@@ -11,6 +11,10 @@
 use std::time::Instant;
 use water_core::{
     bound_pressure::{self, Prepared, Settings},
+    impact_field::{Medium, BREAKING_SLOPE},
+    impact_generator::{self, Entry},
+    radial_impact::{Domain, RadialImpact},
+    wave_event::{Impact, Origin, WaveEvent},
     gaussian_spectrum::{self, Recipe},
     pressure_journal::Journal,
     pressure_source::Metadata,
@@ -193,6 +197,61 @@ fn local_query(
     }
 }
 
+
+/// Terme d'impact du budget a cet instant : `slope_max_at` (ADR-133), pour la scene J1.
+fn impact_term(time: SimTime) -> f32 {
+    let m = Medium {
+        gravity: 9.81,
+        density: 1025.,
+        depth: 20.,
+        max_slope: BREAKING_SLOPE,
+    };
+    let (energy_j, wavelength_m) = impact_generator::impact_from_entry(
+        &Entry {
+            half_width_m: 1.,
+            speed_ms: 8.,
+            transferred_fraction: 0.005,
+        },
+        &m,
+    )
+    .unwrap();
+    let event = WaveEvent::impact(Impact {
+        id: 203,
+        frame: FrameId(0),
+        cell: 0,
+        birth: SimTime(START),
+        ttl_us: 56_000_000,
+        position: [0., 10., 0.],
+        energy_j,
+        wavelength_m,
+        direction_turns: 0.,
+        anisotropy: 0.,
+        displaced_l: 0.,
+        material: 0,
+        origin: Origin::Server,
+        above_surface: true,
+    })
+    .unwrap();
+    let field = RadialImpact::<256>::new(
+        event,
+        m,
+        Domain {
+            radius: 52.,
+            age_us: 56_000_000,
+        },
+    )
+    .unwrap();
+    field.slope_max_at(time)
+}
+
+/// Combien d'impacts tiennent encore sous `pi/7` une fois le terme de pression paye.
+fn impacts_that_fit(pressure: f32, impact: f32) -> i32 {
+    if impact <= 0.0 {
+        return -1;
+    }
+    (((BREAKING_SLOPE - pressure) / impact).floor()).max(0.0) as i32
+}
+
 fn main() {
     let step: f32 = std::env::args()
         .nth(1)
@@ -266,6 +325,7 @@ fn main() {
                 global / peak.max(f32::MIN_POSITIVE)
             );
             local_query(&f, &ctx, time, label, count, global, argmax, step);
+            let mut partitioned = global;
             for budget in [2047usize, 8191, 32767] {
                 let start = Instant::now();
                 let r = f
@@ -290,7 +350,19 @@ fn main() {
                     r.bound / peak.max(f32::MIN_POSITIVE),
                     r.stop
                 );
+                partitioned = r.bound;
             }
+            // P5 : la meme mesure traduite dans le contrat d'admission, impacts sommes (ADR-133).
+            let imp = impact_term(time);
+            println!(
+                "  ADMISSION={label} sources={count} pi_sur_7={BREAKING_SLOPE:.9} impact_unitaire={imp:.9} pression_enveloppe={global:.9} part={:.4} impacts_admis={} | pression_partitionnee={partitioned:.9} part={:.4} impacts_admis={} | maximum_reel={peak:.9} part={:.4} impacts_admis={}",
+                global / BREAKING_SLOPE,
+                impacts_that_fit(global, imp),
+                partitioned / BREAKING_SLOPE,
+                impacts_that_fit(partitioned, imp),
+                peak / BREAKING_SLOPE,
+                impacts_that_fit(peak, imp)
+            );
         }
     }
 }
