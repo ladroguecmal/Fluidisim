@@ -45,6 +45,7 @@ struct App<'a> {
     /// avec relecture, qui **sérialise** et ne mesure donc plus une cadence, seulement une
     /// décomposition.
     cadence: bool,
+    sweep: bool,
     interval: Vec<f64>,
     cpu: Vec<f64>,
     acquire: Vec<f64>,
@@ -81,6 +82,14 @@ impl App<'_> {
         }
         // Phase 2 de la mesure de cadence : la relecture d'horodatage commence après 600 images.
         let measuring = self.cadence && self.frames >= 600;
+        // S225 : la cadence a d'abord ete mesuree camera fixe. La grille est projetee depuis la
+        // camera : ce qui tombe dans l'emprise du sillage depend donc de l'orientation, et le cout
+        // GPU est proportionnel aux sommets qui y tombent. `--sweep` fait tourner la camera pour
+        // que la reserve soit mesuree au lieu d'etre ecrite.
+        if self.sweep {
+            self.frame.camera.yaw = (self.frames as f32) * 0.004;
+            self.frame.camera.pitch = -0.15 + 0.25 * ((self.frames as f32) * 0.011).sin();
+        }
         let cpu_start = Instant::now();
         self.frame
             .update(self.seconds, self.seconds - self.birth, self.enabled);
@@ -152,7 +161,7 @@ impl App<'_> {
             let (c50, c95, cmax) = quantiles(&mut self.cpu);
             let (a50, _, amax) = quantiles(&mut self.acquire);
             let (p50, _, pmax) = quantiles(&mut self.present);
-            println!("CADENCE {}x{} images={} presentation=AutoNoVsync intervalle_ms median={i50:.4} p95={i95:.4} max={imax:.4} hz_median={:.1}", size.width, size.height, self.interval.len(), 1000.0 / i50);
+            println!("CADENCE camera={} {}x{} images={} presentation=AutoNoVsync intervalle_ms median={i50:.4} p95={i95:.4} max={imax:.4} hz_median={:.1}", if self.sweep { "balayee" } else { "fixe" }, size.width, size.height, self.interval.len(), 1000.0 / i50);
             let (u50, _, umax) = quantiles(&mut self.upload);
             let (k50, _, kmax) = quantiles(&mut self.wake);
             println!("CADENCE_CPU_ms median={c50:.4} p95={c95:.4} max={cmax:.4} | acquisition median={a50:.4} max={amax:.4} | presentation median={p50:.4} max={pmax:.4}");
@@ -529,6 +538,7 @@ fn run() -> Result<(), String> {
         frames: 0,
         smoke: args.iter().any(|a| a == "--smoke"),
         cadence: args.iter().any(|a| a == "--cadence"),
+        sweep: args.iter().any(|a| a == "--sweep"),
         interval: Vec::new(),
         cpu: Vec::new(),
         acquire: Vec::new(),

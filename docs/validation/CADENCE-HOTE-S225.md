@@ -81,18 +81,49 @@ Aucun banc hors écran ne pouvait le voir, puisqu'il dessine sur une texture et 
 rien. La ligne `CPU_prepare_upload_submit_ms` de `benchmark` — 2,43 ms au même format — mesurait donc
 le **travail**, et une trame réelle en passe la moitié à attendre.
 
-**Conséquence directe, et c'est ce qu'une cadence apporte qu'une passe ne peut pas : la trame est
-bornée par le GPU.** Les 2,10 ms de travail CPU sont entièrement recouverts par les 4,16 ms de GPU.
-Une seconde gagnée sur le CPU serait **invisible** tant que le GPU domine — et les quatre techniques
-qui restent à J1-bis (espace, LOD, visibilité, mutualisation) sont toutes du côté GPU. La mesure
-confirme la trajectoire au lieu de la contredire, et c'est la première fois qu'elle est confirmée
-par une **cadence** et non par une passe.
+**Première conclusion, et elle a été corrigée dans la même session — voir §4-bis.** À caméra fixe,
+les 2,10 ms de travail CPU sont recouverts par les 4,16 ms de GPU, ce qui donnait « la trame est
+bornée par le GPU, une seconde gagnée sur le CPU serait invisible ». La mesure à caméra balayée
+montre que ce n'est vrai qu'à cette charge-là.
+
+## 4-bis. La caméra balayée, qui corrige la conclusion précédente
+
+La réserve « caméra fixe » du §En-tête méritait d'être mesurée plutôt qu'écrite. La grille est
+projetée depuis la caméra : ce qui tombe dans l'emprise du sillage dépend de l'orientation, et le
+coût GPU est proportionnel aux sommets qui s'y trouvent. Même protocole, caméra tournant en lacet et
+en tangage :
+
+| | caméra fixe | caméra balayée |
+|---|---:|---:|
+| GPU eau, médiane | **4,1585 ms** | **2,8479 ms** |
+| GPU eau, maximum | 4,8583 | 4,2347 |
+| GPU trame | 4,2455 | 2,9314 |
+| intervalle | 5,0450 ms — 198,2 Hz | **4,8773 ms — 205,0 Hz** |
+| travail CPU | 2,10 | 2,08 |
+
+**Deux choses, et aucune n'était prévue.**
+
+1. **La pose fixe de la fixture est proche du pire cas, pas du cas courant.** En balayage, la
+   médiane du GPU d'eau tombe à **2,85 ms** et son maximum vaut 4,23 — c'est-à-dire que la valeur
+   publiée depuis S212 est à peu près le maximum d'un balayage, non sa médiane. Le facteur au budget
+   de 2 ms passe de **2,08 ×** à **1,42 ×** en médiane, et reste 2,12 × au pire.
+2. **La cadence, elle, ne bouge presque pas** — 205 Hz contre 198 — alors que le GPU a perdu un
+   tiers. La trame n'est donc **pas** purement bornée par le GPU à cette charge : en balayage,
+   `travail CPU + GPU` vaut 2,08 + 2,93 = 5,01 ms pour un intervalle de 4,88, c'est-à-dire **presque
+   aucun recouvrement**, tandis qu'à caméra fixe 2,10 + 4,25 = 6,35 ms donnent 5,05 — donc un
+   recouvrement partiel. Le degré de recouvrement change avec la charge, et rien dans la mesure ne
+   l'explique. Consigné en **A265**.
+
+La conclusion du §4 doit donc se lire ainsi : **à caméra fixe et à cette charge, le GPU domine** ;
+il ne suit pas qu'une optimisation CPU serait toujours invisible, et le dire aurait été aller plus
+loin que la mesure.
 
 ## 5. Confrontation à ADR-125
 
 | grandeur | mesurée | part d'une trame de 60 Hz (16,67 ms) | budget |
 |---|---:|---:|---|
-| GPU eau | **4,1585 ms** | **24,9 %** | 2 ms, soit 12 % — **dépassé 2,08 ×** |
+| GPU eau, caméra fixe | **4,1585 ms** | **24,9 %** | 2 ms — **dépassé 2,08 ×** |
+| GPU eau, caméra balayée (médiane) | 2,8479 | 17,1 % | **dépassé 1,42 ×** |
 | GPU trame (eau + ciel) | 4,2455 | 25,5 % | — |
 | trame complète | 5,0450 | **30,3 %** | — |
 | travail réel du CPU | 2,10 | 12,6 % | — |
@@ -115,10 +146,10 @@ modifiée cette session.
 
 ## Suite
 
-**Ce que cette mesure ne couvre pas** : un autre format que 960 × 540, une **caméra en mouvement**
-(la cadence est mesurée à caméra fixe, et le repli temporel du sillage rebase ses phases sur l'œil —
-une caméra qui bouge pourrait coûter davantage), l'interaction manuelle, les angles rasants, et les
-allocations de la pile graphique (I-06, toujours non reçues).
+**Ce que cette mesure ne couvre pas** : un autre format que 960 × 540, l'interaction manuelle, les
+angles rasants soutenus, et les allocations de la pile graphique (I-06, toujours non reçues). La
+caméra en mouvement, elle, **a** été mesurée (§4-bis) et elle a corrigé une conclusion.
+**A265** reste ouverte : le recouvrement CPU/GPU varie avec la charge sans que la mesure l'explique.
 
 **Ce qu'elle oriente** : les quatre techniques restantes de J1-bis sont du côté GPU, et la mesure le
 confirme. C'est là que le facteur 2,08 se joue.
