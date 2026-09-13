@@ -1,142 +1,77 @@
 # Méthode de travail
 
-Protocole que je suis pour concevoir un système à partir de documents d'intention. Il évolue ;
-chaque révision est datée dans `JOURNAL.md`.
+Révision S227, 2026-09-13, demandée par l'utilisateur lors de l'audit global.
+L'ancienne méthode de conception est conservée dans Git à `dfd1507`. Les précautions qui ont
+trouvé des erreurs restent ; l'obligation implicite d'en trouver ou d'ouvrir une suite disparaît.
 
----
+## Choisir un lot utile
 
-## Phase 0 — Trier les sources
+1. Partir de la demande actuelle, des intentions et de la file active, puis vérifier le blocage
+   dans le **code présent** et son contrat. Ne pas hériter d'une absence sans la constater.
+2. Nommer la capacité visée et le consommateur : joueur, hôte, serveur V ou prochaine brique.
+3. Écrire le critère de réception et d'arrêt avant le code ou la campagne. Si la réponse ne
+   change aucune décision ou intégration, différer cette recherche avec son déclencheur.
+4. Déclarer le plan dans EN-COURS selon REPRISE. Le plan doit être assez court pour montrer ce
+   qui sera fini ; pas un traité préalable à une correction.
 
-Séparer trois choses que les documents mélangent presque toujours :
+Avant de poursuivre un même sujet une troisième session, comparer sa suite à au moins une
+capacité de la file encore absente. Le compteur de REPRISE n'est pas un concours de lignes.
+Une grande amélioration locale peut ne plus être prioritaire une fois son usage débloqué.
 
-- **exigence** — validée par l'équipe, non négociable ;
-- **proposition** — suggérée, souvent par un assistant précédent, jamais validée ;
-- **question** — reconnue comme ouverte.
+## Construire et éprouver
 
-Puis ajouter une quatrième catégorie que les documents ne contiennent jamais :
+| nature du travail | vérification proportionnée |
+|---|---|
+| Correction de code | cas reproduisant le défaut, témoin nominal, assertions du contrat affecté |
+| Propriété numérique ou modèle nouveau | référence indépendante ou identité justifiée ; raffinement des paramètres qui peuvent biaiser le verdict |
+| Optimisation | même charge utile, même qualité, coût du chemin consommé ; techniques présentes/absentes et domaine (ADR-131) |
+| Intégration | scénario traversant les composants réels, avec refus et reprise si le contrat l'exige |
+| Documentation/procédure | liens, cohérence des états actifs, possibilité réelle d'exécuter la consigne |
 
-- **question mal posée** — formulée d'une manière qui empêche d'y répondre.
+Chercher d'abord si la réponse se **calcule** avant de lancer une campagne. Distinguer le modèle,
+son implémentation, l'instrument et la métrique. Une conservation ou un hash stable ne démontre
+pas une précision physique. Un échec utile reste visible ; ne pas changer le seuil pour le vert.
+Le seuil physique vient d'une formule ou d'un banc identifié, jamais d'un chiffre choisi après coup.
 
-## Phase 1 — Chercher les impasses, en chiffres
+Une contre-épreuve se justifie par le défaut qu'elle distingue ; pas de variante automatique à
+chaque étape. Rejouer les tests affectés, puis la suite requise avant livraison du code. Éviter de
+répéter des campagnes inchangées ou toute la suite après une retouche documentaire ; citer le reçu
+antérieur avec sa révision quand il reste applicable. Les exemples ne sont pas tous exécutés par
+`cargo test --workspace` : cibler explicitement ceux qui portent la propriété étudiée.
 
-Avant toute proposition, tester l'architecture existante par des ordres de grandeur. Une seule
-formule suffit souvent à éliminer une direction entière.
+Un changement de hash n'interdit pas un correctif : conserver l'ancien reçu, expliquer les champs
+qui bougent et recevoir la nouvelle référence. Un changement de protocole réseau ou de décision
+architecturale reste une migration explicitement documentée, pas une mise à jour silencieuse.
 
-> S01 : `λ = 2πv²/g` a supprimé en une ligne l'idée d'un sillage simulé volumétriquement, que les
-> documents sources tenaient pour acquise.
+## Ce qu'il faut lire
 
-Si aucune impasse n'apparaît, c'est le signe que je n'ai pas assez cherché, pas que le document
-est bon.
+Le socle de reprise est dans REPRISE §3. Pour le lot : contrats, ADR cités et corrections datées,
+consommateurs et preuves existantes. Chercher les leçons pertinentes plutôt que lire le registre
+entier. Repères utiles : L137 (source unique), L176/L243 (blocage à vérifier), L195 (coût complet),
+L244 (couplage), L258 (consommateur), L278 (exposition au biais), L280 (intégration), L310 (couverture).
 
-## Phase 2 — Chercher la décomposition qui dissout
+Distinguer exigence, proposition et question. Les sources sont des intentions et des propositions,
+pas un ensemble de contraintes déjà validées. Les décisions ultérieures de l'utilisateur et les
+ADR les arbitrent. Les rôles des couches et les invariants ne se réduisent pas en cours de lot.
 
-Face à une longue liste de questions ouvertes hétérogènes, ne pas répondre question par question.
-Chercher **la** décision qui en rend une fraction caduque.
+## Ce qui s'écrit, et où
 
-Indice fiable : plusieurs questions qui semblent indépendantes ont la même cause structurelle.
+| information | porteur unique |
+|---|---|
+| règle opérationnelle de reprise/clôture | REPRISE ; amorce/fermeture des copies dans AGENTS |
+| objectif et étapes de la session | EN-COURS |
+| décision d'architecture | nouvel ADR ; note datée pour correction factuelle |
+| preuve détaillée utile à une décision | document de validation, réutilisable |
+| capacité présente et limite | FEUILLE-DE-ROUTE, état remplacé et daté |
+| travail à faire, motif et déclencheur | file active de QUESTIONS-OUVERTES |
+| histoire et résultat de session | JOURNAL, une entrée concise |
+| navigation | index, liens plutôt que récits copiés |
 
-> S01 : §3, §4, §9, §13, §19, §21 étaient six questions distinctes ; elles avaient une seule
-> cause — l'absence de séparation entre le champ de fond et sa perturbation.
+**Aucune obligation de nouvelle anomalie, leçon, ADR ou document de mesure.** Une vérification
+sans anomalie est un résultat recevable. Un document de validation n'est nécessaire que si le
+journal et les tests ne suffisent pas à transmettre le domaine, la preuve ou la décision.
+Clore un lot à son critère d'arrêt ; les questions supplémentaires passent par la file.
 
-## Phase 3 — Dériver plutôt que choisir
-
-Quand une question demande « quel seuil ? », chercher d'abord si le seuil est **dérivable** d'une
-grandeur physique ou économique. Un seuil dérivé se défend, se recalcule quand le contexte change,
-et n'a pas à être re-débattu.
-
-> S01 : les paliers de confiance de la prédiction ne sont pas choisis, ils sortent de
-> `Δ(t) = ½·a_max·t² ≤ R_domaine`.
-
-## Phase 4 — Chercher les contraintes qui ne viennent pas du domaine
-
-Les angles morts les plus coûteux ne sont presque jamais dans la physique. Ils sont dans :
-
-- le **déterminisme** et l'arithmétique flottante ;
-- la **latence** (lecture GPU, réseau, threads) ;
-- la **précision** numérique aux grandes coordonnées ;
-- le **référentiel** (rien n'est immobile) ;
-- l'**outillage** et le pipeline d'auteur ;
-- les **autres équipes** (audio, IA, terrain, anti-triche) ;
-- la **persistance** et la propriété des données dans un monde partagé.
-
-Passer explicitement cette liste, à chaque système conçu.
-
-## Phase 5 — Écrire ce qui peut me contredire
-
-Pour chaque thèse structurante, produire trois choses :
-
-1. l'**invariant** qu'elle impose ;
-2. son **point de rupture** — le régime où elle cesse d'être vraie ;
-3. le **banc d'essai conçu pour l'infirmer**.
-
-Une architecture sans critère de falsification est une croyance. En S01, c'est le rôle de B4.
-
-## Phase 5 bis — Concevoir l'instrument de mesure, et le laisser remonter
-
-*(ajoutée en S03)*
-
-Avant de considérer une conception comme finie, écrire **comment on saura qu'elle est juste**, puis
-laisser les contraintes de cette mesure remonter dans la conception elle-même.
-
-Deux effets, tous deux observés en S03 :
-
-- **La formulation d'une assertion vérifie la valeur.** Écrire la référence d'un test oblige à
-  refaire le calcul, et la relecture ne l'aurait jamais fait — c'est ainsi qu'une erreur d'un
-  facteur deux a été trouvée dans un document relu plusieurs fois.
-- **L'outil de mesure impose des contraintes que l'analyse directe ne trouve pas.** L'exigence de
-  milliers d'exécutions rapides a imposé que le système soit instanciable sans le moteur, ce
-  qu'aucun raisonnement partant de l'architecture n'aurait produit.
-
-Corollaire de méthode : tout protocole de comparaison doit produire **son propre plancher de
-bruit** avant d'interpréter quoi que ce soit.
-
-## Phase 6 — Tracer
-
-Chaque section du document source reçoit un statut et un pointeur. Chaque proposition antérieure
-reçoit un verdict explicite, y compris quand le verdict est « la question a disparu ». Sans cela,
-l'équipe ne peut pas vérifier que rien n'a été perdu, et le travail devient invérifiable.
-
----
-
-## Règles d'écriture
-
-- **Aucun nombre sans provenance.** Formule citée, ou étiquette « à calibrer » avec le banc qui le
-  fixera. (Invariant I-14.)
-- **Chaque ADR se termine par « ce qui reste ouvert ».** Un ADR sans questions résiduelles est
-  suspect.
-- **Distinguer résolu / dissous / partiel / ouvert.** « Ouvert par décision » est un statut
-  légitime et doit être dit.
-- **Ne jamais présenter une estimation comme une mesure.** Les ordres de grandeur portent leur
-  incertitude dans le texte.
-- **Concision.** Un paragraphe qui n'apporte ni contrainte, ni chiffre, ni décision est supprimé.
-
-
-## Phase 7 — Auditer les absences, pas seulement les affirmations
-
-*(ajoutée en S11)*
-
-Un audit vérifie ce qui est **affirmé**. Les listes « ce qui reste ouvert » n'affirment rien : elles
-déclarent des absences, et se lisent comme des lacunes connues et suivies. Personne ne va y vérifier
-qu'une question **a encore un objet**.
-
-En S11, sur 110 points ouverts, **un sur trois n'était pas dans l'état où son document le
-présentait** : trois dissous, huit répondus ailleurs sans être marqués, treize dupliqués, quinze à
-la formulation périmée. L'un d'eux réclamait un format pour un mécanisme qu'un autre document de la
-**même session** avait dissous, et avait traversé neuf sessions et deux revues croisées.
-
-Trois questions par point, dans cet ordre :
-
-1. **A-t-il encore un objet ?**
-2. **Sa formulation tient-elle encore ?** — chiffres périmés, renvois cassés, prémisse changée.
-3. **Qui attend, et quoi ?** — une mesure, une équipe, un arbitrage humain, du code, personne.
-
-Deux règles d'écriture en découlent, gratuites si on y pense au moment d'écrire :
-
-- **tout point ouvert nomme son porteur** quand un autre document pose la même question. SPEC-006 le
-  fait pour quatre de ses huit points ; c'est une ligne ;
-- **une session qui décide ou corrige quelque chose parcourt les points ouverts qui le citaient.**
-  C'est une recherche de texte, pas une relecture.
-
-La troisième question produit un livrable que rien d'autre ne produit : la liste de **qui attend
-quoi**. En S11, elle a fait apparaître sept destinataires extérieurs jamais listés, un cinquième
-arbitrage humain, et quatre travaux de conception que personne n'avait planifiés.
+Les inconnues externes restent inconnues. Les « autres équipes » ne sont pas des interlocuteurs
+présents (ADR-028). Les règles d'autorisation acquises sont dans REPRISE §5 ; ne pas les recréer
+à partir d'une réserve historique.

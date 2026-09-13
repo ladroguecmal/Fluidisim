@@ -37,7 +37,7 @@ Mesure des fichiers suivis à l'entrée, sans `target/`, cache ni copies de trav
 
 | fichier | lignes | octets UTF-8 |
 |---|---:|---:|
-| REPRISE | 3 273 | 265 261 avant prise du jeton |
+| REPRISE | 3 273 | 265 222 (Git, LF) |
 | README | 956 | 80 686 |
 | Index | 1 932 | 162 805 |
 | Journal | 11 716 | 794 330 |

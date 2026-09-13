@@ -1,5 +1,48 @@
 # Traçabilité des questions ouvertes du document source
 
+## File active
+
+**État relu en S227, 2026-09-13.** Porteur des travaux internes : la session du dépôt.
+Trajectoire : [FEUILLE-DE-ROUTE](../FEUILLE-DE-ROUTE.md). Priorité et protocole d'arrêt :
+[BILAN-GLOBAL-S227](BILAN-GLOBAL-S227.md). Remplacer les états touchés ; ne plus empiler ici des
+suivis de session. Les preuves et l'histoire restent dans le journal et Git.
+
+| travail | état et preuve | déclencheur / prochain résultat utile |
+|---|---|---|
+| **Intégrité V — audit S227** | Confluence et différences de coordonnées en cours de reproduction/correction | Avant toute utilisation d'un réseau à plusieurs arrivées ; conservation et bornes sur le pas réel |
+| **A266 / géométrie V** | Ouverte, gravité 1 (S226) ; table horizontale incompatible avec l'orientation, et distance normale à distinguer de la cote centrale | **Prochain lot de construction V** : relation volume/plan orienté correcte, cas prisme et cale, remplissages extrêmes ; pas de restriction définitive aux prismes |
+| **État V restaurable** | Absent (S226), ADR-022 §5.1 | Après contrat géométrique : snapshot et restauration des nœuds **et des restes d'arêtes**, continuation identique ; ouvre C19-V |
+| **V restant / A17 / A264** | Noyau présent depuis S224 ; `liquid_id`, pluie/exposition, absorption, pompes, pression fermée non construits ; plancher de hauteur dépend de la surface | Extension V selon les usages ; test de bilan par liquide et échelle. Articulation V↔δ à J4 |
+| **S200-1 / A244 / budget δ** | S200 : pas sans allocation, refus atomiques ; S202 : coût mesuré, pression f64 expérimentale et budget temporel non reçus | **Lot J2 exécutable indépendamment des raffinements W** : interruption sous budget injecté, état réutilisable et dégradation déclarée ; qualification de précision |
+| **S199-2 / faces coupées δ** | S199 : ordre 1,947 plat, ≈0,90 coupé ; candidat non admissible B3 | Isoler les flux pondérés par ouvertures, comparaison indépendante sur fond coupé, puis surface mobile et 3D |
+| **J1-bis / coût et qualité du rendu / A247** | S225 : passe eau 4,16 ms fixe, 2,85 médiane caméra balayée à 960×540 ; cadence ≈198 Hz ; J1 partiel | Stratégie spatiale/LOD/visibilité intégrée ; scène, qualité et coût complet face aux 2 ms. Les techniques s'éprouvent ensemble (ADR-131) |
+| **A265 / recouvrement CPU–GPU** | Non expliqué (S225) ; acquisition d'image et cadence modifient le coût observé | Avant une conclusion de gain CPU dépendant du recouvrement ; ne bloque pas par principe l'optimisation d'une passe GPU mesurée |
+| **A255 / A261 / A258 / A263** | Bornes locales S218–S221 construites, non intégrées à l'admission ; S222 coût ≈25 s. Réserve f32 et constante Bessel à qualifier | Approfondir seulement si un usage échoue à l'admission actuelle ou si une borne exploitable sous budget est proposée ; plus un préalable générique à la mutualisation |
+| **A249 / représentativité des refus** | S205 : mers jouets dans les tests ; scène S212/S214 apporte un premier témoin réel | Ajouter des cas représentatifs au banc touché, y compris sources simultanées et saturation ; pas de campagne générale préalable |
+| **A50 / B4 couplage** | Source différentielle B/W construite ; preuves S191–S194 sur véhicules, pas δ général intégré | Au branchement B+W→δ : réception sur le consommateur réel ; 2 % acquis, pas de nouveau seuil de bascule déduit d'ADR-123 |
+| **B4 forces et perception** | Non reçus ; le score de vitesse ne les remplace pas | Montage commun surface/solide, puis participants réels au protocole perceptif |
+| **A216 / A241** | Coefficient S161 inexpliqué ; suspect de repli S196 réfuté par S197 | Recherche différée tant qu'aucune décision de construction n'en dépend ; conserver contrôle d'exposition au biais (L278) |
+| **A213 / précision de omega** | Remède identifié, non appliqué ; reçu S95 à renouveler si retenu | Extension d'horizon ou consommateur sensible à la phase ; préserver le reçu ancien et expliquer les nouveaux bits |
+| **λ_cut / B2 / coupure W–δ** | B2 partiel ; dispersion, dissipation et éponge A92 restent à assembler | Choix du couple W/δ sur scénarios communs ; ne pas confondre ce choix avec la réception d'une source B4 |
+| **Bathymétrie / S116-2 / A234** | Fond uniforme seulement ; référence non linéaire peu profonde manquante | Lot de modèle/référence aux hauts-fonds ; ne pas transporter la réception profonde au rivage |
+| **A98 / multiplateforme** | Aucune seconde cible reçue ; les tests locaux ne prouvent pas I-03 | Seconde cible réellement disponible, comparer les mêmes entrées et hash ; pas d'infrastructure inventée |
+| **Bancs restants** | B1/B2/B4 partiels ; les autres attendent leurs composants | Chaque banc entre lorsqu'il tranche une décision du composant construit, selon la feuille de route |
+| **A94/A95 / dossier de réunions** | Quatorze fiches historiques, aucune autre équipe présente (ADR-028) | Traiter les décisions internes au lot concerné ; seuls les faits externes et actions d'infrastructure nécessitent l'utilisateur |
+| **A211 / A243 / pilotage** | Reprise et choix de lot refondus S227 ; indicateur Git corrigé, efficacité à éprouver | Avant la troisième session d'un même fil : vérifier la capacité livrée et comparer à la file ; le code de banc ne vaut pas intégration |
+| **A215 / copies de travail** | Jeton versionné, donc non atomique entre copies ; contrôles Git conservés | Toute reprise et fin de session selon AGENTS ; aucune suppression sans preuve de copie morte |
+
+**Clos et à ne pas redemander** : A245 (S205), A250 (S211), A251 (S214), A254/A262 (S223),
+A217 (S194), A240 (S195), A242 (S197) ; leurs limites restent dans les preuves. Les 2 % de B4,
+60 Hz / eau 2 ms, GPU séparé et sources du verrou S210/S211 sont acquis. A107 est un repère
+historique de fork réconcilié S35/S39, pas une fusion encore attendue.
+
+## Traçabilité historique — états à leur date
+
+Les tableaux ci-dessous conservent la trace des décisions et actions d'origine. Leur mot
+« ouvert » n'est pas un ordre actuel : consulter la file ci-dessus et les suivis datés.
+La version de la file antérieure à la refonte S227 reste dans Git à `dfd1507`.
+
+
 Correspondance section par section avec `systeme_eau_zones_ouvertes_et_decisions_a_valider.md`.
 
 Statuts : **Résolu** (décision prise, ADR écrit) · **Dissous** (la question n'existe plus dans la
@@ -1668,251 +1711,3 @@ entrée par entrée. Le fil reprend ci-dessous.
   et allocations. Comparer àla surface àentrées identiques ; conditions/limites de
   mesure avant budget de consommation perturbative. BILAN-S145/BILAN-B4-S176 portés.
 
-## File active
-
-Relue en S226, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
-
-**Suivi V S226 — la direction de `g_eff` est construite, et elle révèle une incohérence de l'ADR.**
-[GRAVITE-DIRIGEE-S226](../validation/GRAVITE-DIRIGEE-S226.md). `g_eff` devient un **vecteur** ;
-**I-07 cessait d'être tenu** puisque l'axe était en dur, et **C12 passait quand même à 0,08 %** —
-un cas canonique bien choisi peut être muet sur un invariant (**L310**). Réduction au cas vertical
-**exacte** ; hublot latéral **0 ml** à plat, **1 829 ml** sous 0,3 g ; C16 part V à **0,0002°** pour
-un degré exigé. *Une erreur de signe s'est glissée dans l'attendu du test, pas dans le code, et la
-correction est écrite dans le test.*
-**Ligne neuve, gravité 1 : A266.** ADR-010 §2 demande une table cuite par coupes **horizontales**
-et un plan d'eau perpendiculaire à `g_eff`. Mesuré à 0,3 g : prisme **exact** au milieu de sa
-course, **coque en V fausse de 9,89 % partout** — et c'est la cale qui justifie la table (**L311**).
-L'erreur porte sur un **volume**, donc sur une conséquence de jeu (I-10).
-**Suite S227 : trancher A266**, puis l'état répliqué (ADR-022 §5.1). Autres lignes conservées.
-
-**Suivi J1 S225 — la cadence complète est mesurée, et elle corrige deux choses.**
-[CADENCE-HOTE-S225](../validation/CADENCE-HOTE-S225.md). Fenêtre ouverte, `AutoNoVsync`, deux phases
-— la relecture d'horodatage sérialise ce qu'elle chronomètre (**L308**). **198,2 Hz**, écart 2,6 %
-sur quatre passages. **Les exclusions écrites depuis S211 sont chiffrées** : la passe d'eau vaut
-**98 %** de la trame GPU, tout le reste 0,087 ms — elles ne cachaient rien.
-**Deux corrections.** Le **CPU** d'une trame est à **51 % de l'attente** (acquisition 2,22 ms sur
-4,32), ce qu'aucun banc hors écran ne pouvait voir. Et la **pose de mesure héritée de S201 était
-proche du pire cas** : à caméra balayée le GPU d'eau médian vaut **2,85 ms** contre 4,16 fixe, donc
-**1,42 ×** le budget de 2 ms au lieu de 2,08 (**L309**). La cadence ne suit pas le GPU pour autant —
-**A265**, gravité 3 : la trame pourrait avoir un plancher que le travail n'explique pas, à instruire
-**avant** toute optimisation CPU.
-**Suite S226 : V, sans faute** — direction de `g_eff` puis état répliqué ; la consigne de S224
-arrive à échéance. Autres lignes et déclencheurs conservés.
-
-**Suivi S224 — la couche V est ouverte, et la ligne qui l'attendait depuis le début est tenue.**
-[NOYAU-V-S224](../validation/NOYAU-V-S224.md). Premier module du graphe hydraulique d'ADR-010,
-actée depuis S01 : `velocite.sh` passe de `V ... jamais` à **`V modules=1`**. **C12 reçu** —
-vidange en 727,4 s contre 728 s analytiques, **0,0824 %**, pour un cas qui exige ±3 %. Masse
-conservée exactement, déterminisme vérifié (I-03), refus atomiques nommés, aucune allocation (I-06).
-Déversoir et orifice séparés par leur exposant ; **Gauss-Seidel mesuré et non supposé** — un passage
-explicite suit un pas cent fois plus fin à 0,0058 % de la capacité.
-**Deux défauts trouvés en construisant** (L306, L307) et **A264** ouverte : le plancher de vidange
-vaut la surface du contenant fois un micromètre — 1 ml pour 1 m², **10 L pour un hectare**.
-**La cadence complète de l'hôte a été reportée explicitement** pour ouvrir V, et la ligne de suite
-la reprend : **S225 = cadence de l'hôte**, puis direction de `g_eff` et état répliqué pour V, sans
-laisser passer plus d'une session. Autres lignes et déclencheurs conservés.
-
-**Suivi J1 S223 — A262 traitée, et le budget de pente cesse d'être le goulot.**
-[COURONNE-IMPACT-S223](../validation/COURONNE-IMPACT-S223.md),
-[ADR-138](../adr/ADR-138-le-budget-de-pente-tient-compte-de-la-position-relative.md).
-`slope_max_beyond(t, r)` majore la pente sur la **couronne** — décroissance en `1/√r` —, et
-`slope_floor_joint` en tire un plancher conjoint par inégalité triangulaire, avec un balayage sûr
-**entre** ses échantillons. Gain **1,0000 exactement** à séparation nulle, **1,76** à deux impacts
-à 50 m, **2,37** à trois ; maximal **à la naissance**, là où ADR-133 ne donne rien. **Trois impacts
-frais à 50 m passaient de 142,1 % de π/7, refusés, à 60,0 %, admis.** Coût **13,3 µs** — huit
-intervalles rendent 96,5 % du gain de soixante-quatre pour 11 % du prix.
-**Deux découvertes de route** : l'inégalité `|J_ν| ≤ √(2/πx)` vaut pour `ν = 1/2` et **pas pour
-`ν = 1`** (dépassée de 3,4 %) — constante relevée sur la fonction exécutée (**L304**) ; et
-`SLOPE_L1_RATIO = 1,795071` est **le pic de `J₁`** que S141 mesurait sans le nommer (**A263**,
-sévérité 3).
-**A254 est close** : ses deux termes ont chacun leur limite connue, de nature différente — une
-**inégalité** à 13 µs côté impact, une **loi d'échelle** à 25 s côté pression (A261).
-**Suite S224 : revenir à la file** — cadence complète de l'hôte, puis **V-noyau**, zéro module en
-223 sessions. Autres lignes et déclencheurs conservés.
-
-**Suivi J1 S222 — la part somme d'A254 change de côté, et rien n'est migré.**
-[SOMME-SILLAGES-S222](../validation/SOMME-SILLAGES-S222.md). Une à trois sources de sillage dans un
-**même journal** — témoin : `modes = 4096` pour une comme pour trois, les amplitudes s'additionnent
-en complexe. **Côté sillages la somme est absorbée** : 1,67 fois une source pour trois proches,
-**1,44** pour trois éloignées. Ce qui y reste est **spatial** : le maximum réel ne bouge pas avec la
-séparation (0,0703 / 0,0704 / 0,0705) pendant que l'enveloppe croît de 44 %, d'où un pessimisme de
-1,64 à **2,35** — A261 mesurée sur une scène. La borne locale partitionnée le rend en entier
-(**1,005–1,010** du maximum) pour **25 s** ; et **il n'y a pas de raccourci local** — au-delà d'un
-mètre de demi-côté elle vaut l'enveloppe globale, un appel coûtant 640–700 µs quelle que soit la
-taille (L302, L303). **Aucun ADR, aucune migration d'admission** : le prix est une loi d'échelle.
-**Traduction en admission** : trois sillages et **huit** impacts passent, là où S214 voyait la
-deuxième source refuser — mais un impact **neuf** vaut **47,4 %** de π/7, donc sous deux secondes un
-seul passe, et aucune borne de pression n'y change rien. **Ligne neuve : A262** — la somme des
-majorants d'impact ignore la distance entre champs, et c'est le goulot. **Suite S223 : A262**,
-chercher une inégalité conjointe (support compact, pente maximale en r = 0,2062 λ), pas une table.
-Autres lignes et déclencheurs conservés.
-
-**Suivi J1 S221 — A259 levée à 4096 feuilles ; A261 ouverte ; la ligne se tourne vers A254.**
-[Réception S221](../validation/COUPURE-SPECTRALE-S221.md), ADR-137 : coupure spectrale, gain
-1,12–1,23 à 8191 évaluations, aucun à 2047 (localisation spatiale absente de toute enveloppe de
-modules, **A261**). A260 traitée, mécanisme corrigé (L301). Bilan de ligne S215–S221 dans le
-journal. **Suite S222 J1/W : A254 part somme sur une scène à plusieurs sillages**, borne locale
-conjointe contre `mixed_water::slope_floor`. A258, coût de passe (L300) et A261 nommés ; autres
-lignes et déclencheurs conservés, δ/V obligatoires.
-
-**Suivi J1 S220 — A255 : le pessimisme résorbé sur ces fixtures, le coût reste.**
-[Réception S220](../validation/ORDRE-DEUX-S220.md), ADR-136 : borne d'ordre deux à Hessienne
-signée ; partition à 32767 évaluations à 1,006–1,012 × le maximum, mieux que l'ordre un à 65535.
-Évaluation 1,6–2,0 × ADR-135 ; ≈30 s CPU un fil par instant. **A258 devient le plancher de
-précision** (réserve 0,38–1,26 %), toujours prérequis de migration. A259 partielle, mécanisme
-nommé **A260** (modes non résolus à grosse maille). **Suite S221 J1/W : A260, puis A258.**
-A254, loi GPU et migration ouvertes ; autres lignes et déclencheurs conservés, δ/V obligatoires.
-
-**Suivi J1 S219 — A255 : partition adaptative construite.**
-[Réception S219](../validation/PARTITION-S219.md) : couverture conservée, plafond strict
-en évaluations ; gain1,48–1,52 à65535 évaluations,35–36s. A259 : grandes mailles encore
-plafonnées par la borne globale, aucun gain à8191. **Suite S220 J1/W : borne locale
-avec Hessienne signée et reste supérieur**, quantification à couvrir, gain/coût à
-recevoir via S219. A258 reste avant migration d'admission ; reprise inter-appels non
-construite. A255 partielle, somme A254 et loi GPU ouvertes ; autres déclencheurs conservés.
-
-**Suivi J1 S218 — A255 : borne locale construite, parcours adaptatif à construire.**
-[Réception S218](../validation/BORNE-LOCALE-S218.md), ADR-135 : reste spatial sur les
-phases exécutées, réserve numérique distincte. Gain1,026–1,224 à0,5m dans les cas
-recevables, mais27,5–28,2s sur la base CPU uniforme. **S219 : partition adaptative avec
-pool de l'appelant et plafond de travail**, conservant la couverture aux arrêts.
-Aucune admission migrée, certification f32 ouverte (A258). A255 partielle, A254 et loi
-GPU ouvertes ; autres lignes et déclencheurs conservés, δ/V obligatoires.
-
-**Suivi J1 S217 — A255 : une similitude conditionnelle, pas une courbe universelle.**
-[DECOHERENCE-SILLAGE-S217](../validation/DECOHERENCE-SILLAGE-S217.md) : à âge réduit
-après extinction égal, vitesse et durée déplacent le rapport majorant/pente de 38,8 %
-et 22,5 %, après raffinement. Aucun resserrement de production ajouté. **Suite S218 :
-borne locale de pente avec reste spatial démontré**, puis gain/coût, sans prendre le
-maximum d'une grille pour un majorant. A255 et la somme d'A254 restent ouvertes ;
-A257 corrige l'explication de la réponse libre. Autres lignes et déclencheurs conservés.
-
-**Suivi J1 S216 — la moitié d'A255 ne demandait aucune mesure.**
-[ENVELOPPE-SILLAGE-S216](../validation/ENVELOPPE-SILLAGE-S216.md),
-[ADR-134](../adr/ADR-134-l-enveloppe-de-pente-tient-compte-des-directions.md). `slope_envelope_tight`
-sommait **scalairement** des contributions **vectorielles** de directions différentes : une
-inégalité de Cauchy–Schwarz en `O(N)`, sans table, sans garde et sans domaine, en retire 20 %.
-Part statique **1,2586 à 4 s, 1,1979 à 39 s**, identique à quatre décimales sur toute la quadrature
-(`angular` 64/128/256, `radial` 32/128, `cutoff` 2/4) — propriété du champ, donc calculable et non
-tabulable. Gain reçu 1,155 à 1,200, soit **79 à 87 %** de ce qu'un maximum exact rendrait ; le
-maximum exact reste disponible (`O(A²)`, `A = angular/2`) et l'ADR dit pourquoi il a été écarté.
-Occupation de π/7 sur la scène J1 : **84,1 % (S214) → 41,6 % (ADR-133) → 36,3 %**. Aucun bit publié
-changé, 356 tests réussis.
-**Discriminant tranché** : seize fois l'aire d'emprise, à pas de grille constant, laisse le maximum
-réel identique à six décimales — le résidu n'est **pas** A208, c'est la décohérence de L290.
-**A255 reste ouverte et ne contient plus que sa part dynamique. Ligne neuve : A256** — une annonce
-qui nomme le facteur qu'elle retire sans dire à quelle échelle il porte se lit comme complète ;
-c'est ce qui a caché ce gain depuis S141. **Suite S217 : la part dynamique d'A255.**
-Autres lignes et déclencheurs conservés.
-
-**Suivi J1 S215 — A254 traitée pour moitié, et elle en ouvre une autre.**
-[BUDGET-PENTE-S215](../validation/BUDGET-PENTE-S215.md),
-[ADR-133](../adr/ADR-133-le-majorant-de-pente-suit-la-dispersion.md). Le pessimisme du budget de
-pente n'était ni l'emprise (A208) ni un défaut d'unité (I-18 tenu) : c'est la **dispersion**, et il
-venait presque entièrement de l'impact — 1,00 à la naissance, 10,05 à 16 s, **30,44 à 56 s** —
-quand le sillage était serré (1,39 à 1,90 pendant son forçage). La décroissance est **universelle**
-en âge adimensionné `τ = (t−birth)/√(λ/g)`, indépendante de l'amplitude et de la profondeur là où
-le champ existe. `RadialImpact::slope_max_at(t)` et la table `RHO_DISPERSION` ; le budget de
-composition est câblé dessus, `slope_max()` et `Steepness` inchangés, aucun bit publié changé.
-Refus **exercé puis levé** : deux impacts et un sillage refusaient à 0,5902 contre 0,4488, ils
-passent à 0,2081 ; occupation de la scène J1 **84 % → 42 %**.
-**Ligne neuve : A255** *(sévérité 2)* — le sillage pèse maintenant **88 %** du budget et sa famille
-n'a aucune loi ; son majorant **croît** pendant que la source émet, ce que le cas de l'impact ne
-présentait pas. **Suite S216 : A255**, avant toute scène à plusieurs sillages et donc avant la
-mutualisation de J1-bis. Autres lignes et déclencheurs conservés.
-
-**Suivi J1 S214 — les deux travaux de validité sont faits, et ils en ouvrent un plus lourd.**
-[COMPOSITION-J1-S214](../validation/COMPOSITION-J1-S214.md). La composition du cœur
-(`mixed_water`) est **exacte au bit** contre la somme de l'hôte, une fois les trois couches
-évaluées au **même point** — l'écart de 1,78e-5 m mesuré d'abord venait de deux positions pour une
-sonde (**A253**, corrigé dans l'hôte, ouvert pour l'interface). Le cœur ne compose toutefois que
-sur l'**intersection** des domaines (ADR-077, ADR-080) : 4 477 sondes sur 6 988 — le chemin mixte
-n'est pas le chemin de rendu, et c'est une sémantique de service, pas un défaut.
-**A251 traitée** par [ADR-132](../adr/ADR-132-domaine-d-image-d-un-sillage.md) : le domaine d'image
-d'un sillage se calcule depuis sa recette (89,36 m, 18,53 s contre 102,22 m et 40 s déclarés),
-l'hôte l'annonce et ne refuse pas ; A214 gagne un troisième point de calibration, pas un garde.
-**Ligne neuve, sévérité 1 : A254** — le budget de pente est une **somme sur les sources**, 84 % de
-π/7 consommés par un impact et un sillage, majorant 3,7 à 10,5 fois la pente réelle, marge 0,0712 ;
-la troisième source refuse toute l'image, par `SlopeEnvelope`. **Suite S215 : A254**, avant toute
-scène à plusieurs sources et donc avant la mutualisation de J1-bis ; ensuite la loi GPU.
-Autres lignes et déclencheurs conservés.
-
-**Suivi J1 S213 — cadrage corrigé par l'utilisateur ([ADR-131](../adr/ADR-131-un-depassement-qualifie-une-implementation.md)).**
-Un dépassement qualifie l'implémentation mesurée, pas le sillage ni l'objectif. Espace
-d'optimisation nommé dans [FEUILLE-DE-ROUTE J1-bis](../FEUILLE-DE-ROUTE.md) : temps, espace, LOD
-spatial, spectral et temporel, visibilité, mutualisation ; 2 ms s'éprouve sur leur combinaison ;
-chaque mesure publie techniques présentes, absentes et domaine. A251 et composition
-impact+sillage : **travaux nécessaires** de J1. S213 construit le levier temporel :
-[TEMPS-SILLAGE-S213](../validation/TEMPS-SILLAGE-S213.md), CPU sillage 1,26 ms pendant forçage et
-0,36 ms après à 4 096 nœuds (préparation 7,70 / 13,36), hôte 1,7 ms, GPU inchangé — coordonnée de
-l'espace, pas verdict. **Suite S214 : composition impact+sillage, puis A251** (ADR-131 D6).
-
-**Suivi J1 S212 :** [sillage du cœur intégré à l'hôte](../validation/HOTE-GPU-S212.md), exact à
-0,089 mm, ~~refusé en coût~~ *(S213 : l'implémentation S212 dépasse le budget)* (CPU 10,9 ms, GPU
-4,10 ms à 960×540). Leviers temps (cœur) et espace (hôte) nommés, non mesurés : pas encore un
-arbitrage. A251 ouverte (durée et couture du sillage visible). **Suite S213 : levier temporel dans
-le cœur.** Autres lignes et déclencheurs conservés.
-
-**Suivi J1 S211 :** [hôte B+impact reçu](../validation/HOTE-GPU-S211.md), caméra interactive,
-sources autorisées récupérées. A250 close pour le chemin GPU mesuré ; A247 partielle pour
-le coût complet. **Suite S212 : W, sillage issu du cœur dans l'hôte**, puis mesures de scène.
-J1 reste partiel ; toutes les autres lignes et leurs déclencheurs sont conservés.
-
-**Suivi J1 S210 :** résolution autorisée faite ;
-[254 archives inventoriées](../validation/DEPENDANCES-HOTE-S210.md), 49 174 790 octets.
-Accord sur les sources exactes et choix cache/vendoring attendus. Suite S211 : construire
-l'hôte B/W GPU (file J1, compteur 2), pas prolonger l'étude de dépendances. A247/A250 ouvertes.
-
-**Suivi J1 S209 :** [lot de résolution préparé](../validation/PREPARATION-HOTE-S209.md),
-aucun téléchargement. Suite S210 : accord sur index/métadonnées, résolution, puis présentation
-des sources nommées avec licences et tailles. A247/A250 restent ouvertes ; autres lignes
-conservées avec leurs déclencheurs.
-
-*Renommée de « File active S190 » en S193 : le contenu est daté ligne par ligne, le titre
-suivait un numéro de session et vieillissait seul (A185 — un état sans date se lit au
-présent). Le lien de REPRISE pointe désormais ici.*
-
-**Arbitrage clos : 2 % d'erreur acceptable pour le champ perturbatif B4 (ADR-120).**
-La réception B4-TOLERANCE-S190 reçoit le profil de source gradué 14×14×8/extrapolation
-80 ms sur le véhicule existant. Aucun point ci-dessous ne doit redemander ce seuil.
-Porteur des travaux internes : l'agent de construction du dépôt, sous arbitrages de
-l'utilisateur ; aucune équipe extérieure fictive. Cette file complète la prochaine
-action unique et doit être relue au rituel de fin (A211).
-
-**Ambition finale complète, construction progressive par versions de plus en plus capables**
-— clarification de l'utilisateur, ADR-127 (S204), qui corrige la lecture d'ADR-124 : δ général,
-V, inondations complexes et grande échelle sont **obligatoires**, les effets bornés sont des
-étapes. Trajectoire J1 → J5 et noyau V dans [FEUILLE-DE-ROUTE](../FEUILLE-DE-ROUTE.md) ; cette
-file porte les actions, pas l'ordre des jalons. *Ligne S201 retirée : « B visible → budget
-image → δ bornée/V au besoin gameplay » — son dernier segment était la lecture fautive.*
-
-| action / objet | état daté et ce qui reste | priorité / déclencheur |
-|---|---|---|
-| **A245 / composition B+W sur mer réelle — close** | **S205 : close par ADR-128.** B hors du budget de refus, raideur publiée, bits inchangés pour tout lot déjà admis (image S203, C18/C02 reproduits) ; mer S201 Hs 1,5 composée avec impact, zéro refus, zéro pixel hors emprise. *État S203 :* ouverte, gravité 1. Plancher de pente L1 de B 0,6082 à Hs 1,5 (recette S201) > π/7 : `compose` refuse chaque point ; majorant directionnel 0,5733 refuse encore, pente échantillonnée 0,4215. I-18 non tenu pour le terme de B ; ADR-062/094/095 corrigés par note | rien à instruire ; reste A249 (bancs de refus à mers jouets) et la validité de la superposition sur mer raide (ADR-123). *Déclencheur S204 :* lot bibliothèque, bloquant J1. Instruire terme directionnel, pente réelle au point (S144) ou borne statistique ; change des bits et des frontières d'admission |
-| **A247 / coût d'un impact visible** | **S213 : techniques présentes/absentes et domaine exigés pour chaque mesure (ADR-131)** ; levier temporel construit — loi CPU du sillage déplacée (1,26 / 0,36 ms à 4 096 nœuds), loi GPU `sommets × nœuds` inchangée. **S212 : le sillage rouvre le coût** — dans l'implémentation S212, CPU ∝ nœuds × tronçons (10,9 ms), GPU ∝ sommets × nœuds (4,10 ms à 960×540) ; espace d'optimisation de J1-bis, S213 commence par le temps. **S211 : B+impact reçus sur GPU local**, passe960×540 médiane0,048576 ms ; coût complet encore ouvert.  **S206 : mesurée, part technique tranchée (ADR-129).** Scène J1 (mer S201, impact S203, grille projetée) : 17–18 ms à 8 px, 72–74 ms à 4 px, 280–293 ms à 2 px sur un fil ; 3,6 / 10 / 36 ms sur 16 fils, bits identiques ; table de Bessel précalculée : 27 µs/impact/image, 502 Ko, 0,006 mm — W n'est plus le goulot, **B par sommet sur CPU l'est** ; `paquets_W_max = 4096` = 109 ms et 2 Go, retiré du profil (I-16). *État S203 :* ouverte. B 1,6 µs/pt, B+W N256 14 µs/pt (≈140 pts dans 2 ms), table radiale Hermite ≤0,006 mm mais 2,7 ms de construction par impact ; aucun `paquets_W_max` confronté à ADR-125 | **S211 : reste scène complète avec sillage et coût CPU/transfert/GPU/présentation.** S208 : part W construite (`RadialTable`, 5 critères dont1 échec, pas λ/16) ; S211 : B passé au GPU. *Déclencheur S207 :* construire ADR-129 ; l'incompatibilité de B est l'arbitrage « chemin de rendu » ci-dessous. *Déclencheur S205 :* sur une scène représentative de J1 ; **incompatibilité à arbitrer explicitement** (ADR-127 D7), aucune fonctionnalité retirée en silence. Leviers non mesurés : pas de table, N hors coutures, parallélisme, phases GPU (I-08) |
-| **A249 / bancs de refus à mers jouets** | **S212 : un point de jeu pour la pression** — mer S201 et sillage 19,6 kN admis par `bound_pressure::Prepared::sample_world_batch` dans `--verify` de l'hôte, pas dans un banc du cœur. **S205 : ouverte.** Tous les essais de refus de composition employaient Hs 0,01–0,1 ; un essai à la recette S201 ajouté | recenser pression, sillage, profils N/R/A et fixtures `max_slope` 0,1 ; ajouter un point à paramètres de jeu par banc de refus |
-| **Chemin de rendu et hôte / J1** | **S213 : ADR-131** — budget éprouvé sur la combinaison de J1-bis ; hôte alimenté par le levier temporel, GPU/cœur 0,089 mm ; A251 et composition impact+sillage restent nécessaires, S214 commence par la composition. **S212 : sillage intégré, exact ; l'implémentation S212 dépasse le budget** *(S212 écrivait « trop cher »)* ; J1 partiel, A251 ouverte ; composition mixte impact+sillage non exercée. **S211 : A250 close**, hôte B+impact construit et GPU mesuré ; J1 reste partiel.  **S207 : tranché par l'utilisateur — GPU, hôte séparé (ADR-130).** `water-core` sans dépendance publie recettes, phases repliées et tables d'impact ; l'hôte vit hors du workspace sans réseau ; dépendances soumises à autorisation nommée ; budget GPU de l'eau à mesurer. *État S206 :* arbitrage posé, fusionné avec A247. B sur CPU = 42 ms/image à la densité qui montre l'impact ; options (A) GPU par hôte séparé avec dépendances — recommandée, prévue par ADR-003/I-08 et `gpu_sim_ms` d'ADR-012 ; (B) CPU seul, B vectorisé + fils, 2 ms en temps mur multi-cœurs ; (C) profil ADR-125 changé ; (D) densité 8 px, perd l'impact visible. *État S204 :* hôte interactif ouvert | **S212 : file J1/W, intégrer le sillage et recevoir la scène complète.** Accords résolution/sources reçus S210/S211, cache local et verrou versionné ; aucune nouvelle demande pour ce lot |
-| **S202-1 / effet borné visible — réalisée** | **S203 : réalisée.** Impact W visible (λ3,35 m, E164 J, Hs0,5), emprise reçue par coutures (ADR-126 : R ≥ 15,5 λ, A ≥ 96√(λ/g), N ≥ 256), zéro pixel hors emprise contre témoin ; part non portée par W nommée (32,6 kJ, Fr1,81, balistique 3,26 m/1,63 s) sans δ construit | premier domaine δ borné de J2 à choisir — cavité eulérienne (SPEC-001 §2.4, 1,15 M cellules) ou gerbe particulaire (SPEC-002 §1) — **comme cas du δ général** (ADR-127 D3) ; *« V au besoin gameplay » retiré en S204 (ADR-127)* |
-| **S200-1 / A244 — B3 / δ** | **S200 : S199-1 partielle**, zéro allocation globale du pas et refus numériques atomiques reçus, capacités restreintes ;342 tests/cinq ignorés. S202 : coût du pas mesuré, mais pression f64 expérimentale et respect du budget temporel restent hors contrat de production | **S204 : sur le chemin de J2** (ADR-127 D3), plus conditionnelle ; à recevoir quand J2 emploie le noyau, sans convertir arbitrairement itérations en ms |
-| **A241 / repli — reporté** | **S197** : suspect réfuté, la totalité de l'écart reste sans cause | deux candidats nommés (bande relative, termes triples), sous contrainte **L278** ; **n'avance aucune couche**, donc passe après B3/δ |
-| **S199-2 / B3 / δ — fond coupé** | **S199** : ordre1,947 plat,0,898 lisse,0,895 marche ; candidat non éligible. Fonctionnelle non pondérée par les ouvertures ; mécanisme de face à isoler | **S204 : sur le chemin de J2**, requise pour tout domaine à fond ou paroi coupés ; plus conditionnelle à un effet |
-| **B4 forces / perception** | aucun reçu complet ; la métrique de vitesse S190 ne les remplace pas | après montage commun surface/solide ; protocole perceptif conserve ses participants réels requis |
-| **A216** (A217 **close** en S194) | **S194** : A217 a sa réponse — la cambrure gouverne l'addition en eau profonde, plus la durée et le désaccord de triade ; A216, coefficient S161, reste inexpliquée | A216 avec un montage qui l'explique ; ne pas dériver 0,02/0,24 comme seuil, ADR-123 n'est pas une bascule |
-| **`n` sources / A240 — close** | **S195 : A240 close.** `n = 2..6` mesuré : à cambrure par train fixée l'écart croît en `n^0,75` (sous-linéaire, loin du `n²`) ; à cambrure **totale** fixée il **décroît** en `1/√n`. ADR-123 se transporte dans le sens favorable | rien à instruire ; limites conservées : `n ≤ 6`, colinéaire, fond plat, eau profonde |
-| **Repli des croisées / A241 — suspect réfuté** | **S197** : le verdict de S196 ne survit pas au raffinement — l'écart pair/impair de `0,131` vaut **`0,005`** à résolution convergée, ce qui est la prédiction *réfutante* de S196 lui-même. **Le repli n'explique rien de mesurable.** La moitié « limite » survit, sa valeur passant de `−0,52` à ~`−0,45` | la **totalité** de l'écart reste sans cause ; deux candidats nommés et non séparés (bande relative, termes triples), à éprouver dans un montage qui contrôle l'exposition à l'erreur de modèle (**L278**) |
-| **Critère de domaine / A242 — close** | **S197 : traitée, et elle a servi dès le premier emploi.** Audit des trois cibles publiées : ADR-123 **tient** (table convergée dès `K=256`, ≤3,3 %), A240 **tient** (1–3 %), **le verdict de S196 tombe** (écart 0,131 → 0,005). Remède en place : `dispersion_error` et garde de Richardson dans le support et les trois bancs | rien à instruire ; restent non audités le pas de temps `dt` et S193, lot propre et peu coûteux |
-| **A213 / omega f32** | remède identifié, non appliqué, réception S95 à renouveler s'il est retenu | lot propre de précision/horizon, indépendant de l'arbitrage B4 |
-| **λ_cut / B2 / coupure W–δ** | **S212 : coût d'image du sillage spectral mesuré sur la scène J1** (HOTE-GPU-S212) — donnée pour la représentation de W, pas un verdict B2. B2 partiel ; dispersion/dissipation et borne d'éponge A92 à assembler | choix du couple W/δ ; ne pas confondre réception source B4 et coupure |
-| **Bathymétrie / S116-2** | **S194** : fond plat seul, mais le couplage y est **8,6 fois plus fort** vers le rivage quand le désaccord de triade tombe ; et la faible profondeur non linéaire n'a aucun oracle de Stokes (A234) | lot de construction propre ; une frontière établie en eau profonde ne se transporte pas vers le rivage (ADR-123) |
-| **A98 / conformité multiplateforme** | aucune seconde cible testée par S190 ; debug/release locaux ne suffisent pas | réception sur seconde cible disponible ; I-03 maintenu |
-| **V-noyau / J4** | **S204 : obligatoire** (ADR-127 D4). Aucun module ; conception acquise (ADR-010, SPEC-004/006). *S201 le disait « en attente d'un besoin gameplay » : lecture corrigée* | **s'ouvre au plus tard avec J2**, en parallèle des domaines bornés (C12, branche V de C19) ; inondations complexes et articulation V↔δ à J4 |
-| **Bancs restants** | B1/B2/B4 partiels, aucun banc complet, huit autres non lancés | exécutés quand un composant construit tranche une décision (ADR-127 D6), pas tous avant une version utilisable |
-| **A94/A95 / dossier de réunions** | quatorze fiches à traiter selon ADR-028 ; les qualifier en décisions internes ou faits externes | les intitulés « avant première ligne de code » ne bloquent pas rétroactivement le code autorisé depuis S20 |
-
-Les noms de personnes, l'état du terrain/projet extérieur et les actions d'infrastructure
-ne sont pas inférés de la connaissance du dépôt. A107 est un repère de fork historique
-réconcilié en S35/S39 ; aucune fusion supplémentaire ne découle de sa vieille mention.
-
-À chaque fin de session, **actualiser la ligne touchée et vérifier toute la file** ;
-si un point est différé, garder son objet et son déclencheur visibles. Pas de numérotation
-de session future pour les neuf autres lignes : ce serait un calendrier fictif.

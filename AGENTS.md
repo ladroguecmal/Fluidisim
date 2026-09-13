@@ -10,8 +10,8 @@ fichier d'amorce à venir doit l'être aussi.
 > jour où ils divergeront, chaque agent suivra le sien. **Un renvoi d'une ligne, jamais une copie.**
 
 Ce dépôt est la connaissance projet du **système de gestion de l'eau** d'un jeu de très grande
-échelle. Il contient d'abord la **conception** ; depuis S20, il contient aussi `code/` — le harnais
-de validation et deux δ d'essai, en Rust, sans aucune dépendance.
+échelle. Il contient d'abord la **conception** ; depuis S20, il contient aussi `code/` — le cœur, le harnais
+de validation et des candidats δ, en Rust, sans aucune dépendance.
 
 ## Ce que tu fais en premier, sans exception
 
