@@ -81,7 +81,7 @@ seul balayage. Raffiner recherche spatiale et quadrature avant d'interpréter un
 ### Plan
 
 - [x] **P1** — jeton, thèse et plan seuls.
-- [ ] **P2** — lectures ciblées, dérivation des groupes et protocole de campagne reproductible.
+- [x] **P2** — lectures ciblées, dérivation des groupes et protocole de campagne reproductible.
 - [ ] **P3** — instrument et campagne : similitudes, variations indépendantes, contrôles de résolution et forçage.
 - [ ] **P4** — publier le verdict et ses limites ; construire seulement ce que les preuves autorisent.
 - [ ] **P5** — rituel de fin §6, file plurielle, journal, index, jeton libre et copies synchronisées.
