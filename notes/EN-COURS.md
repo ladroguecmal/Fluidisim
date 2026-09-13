@@ -119,7 +119,7 @@ cœur refuserait.
 - [x] **P5** — hôte : `--verify` passe par la composition du cœur ; contrôles S212/S213 conservés ; coût publié avec son en-tête.
 - [x] **P6** — A251 : emprise et durée honnêtes déduites de la recette et de la vitesse ; couture spatiale et temporelle mesurées comme ADR-126.
 - [x] **P7** — A251 : réception des coutures et refus nommé ou garde ; publication avec la fixture.
-- [ ] **P8** — document de réception (en-tête ADR-131) ; suite complète `code/`.
+- [x] **P8** — document de réception (en-tête ADR-131) ; suite complète `code/`.
 - [ ] **P9** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
@@ -257,3 +257,9 @@ seule fois ; `--verify` publie `WAKE_LOI` avec la fixture. Vérifié : l'annonce
 âge du témoin au-delà de 18,53), `--smoke` 120 images code 0, `VERIFY` inchangé.
 **A214 reste ouverte** avec un troisième point de calibration : la dépendance à `sigma` n'est
 toujours pas mesurée, et un garde dans la bibliothèque refuserait la fixture S212 elle-même.
+
+P8 : [COMPOSITION-J1-S214](../docs/validation/COMPOSITION-J1-S214.md) — en-tête ADR-131 D3 avec
+rang de passage ; §1 pourquoi le chemin mixte n'est pas le chemin de rendu (intersection,
+4 477/6 988) ; §2 composition exacte au bit, point corrigé ; §3 budget conjoint et refus par
+majorant ; §4 domaine d'image et ADR-132 ; §5 contrôles, coût, variabilité de 20 %.
+Suite `code/` : 354 réussis (256+4+1+93), 5 ignorés, aucun échec ; viewer sans avertissement neuf.
