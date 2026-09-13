@@ -177,7 +177,100 @@ fn wake(recipe: Recipe) -> Wake {
     Wake::build(metadata, SimTime(BIRTH), [-24., 4.], &legs).expect("sillage S212")
 }
 
+/// Génère la table sûre `ρ(τ)` : un intervalle par unité d'âge adimensionné, et dans chaque
+/// intervalle le **minimum** de ρ sur `sub` sous-échantillons. Le minimum, parce que diviser le
+/// majorant par un ρ trop grand le ferait cesser d'en être un — et parce que ρ n'est pas
+/// monotone (elle plonge puis remonte entre τ = 0 et τ = 1).
+/// Longueurs d'onde **génératrices**. La table est le minimum sur elles toutes : l'effondrement
+/// en `τ` est exact à trois décimales, mais l'âge transite en microsecondes entières, et cette
+/// quantification suffit à faire varier le rapport de quelques ppm d'un λ à l'autre. Prendre le
+/// minimum sur la famille mesurée borne ce résidu par construction, au lieu d'inventer une marge
+/// sans provenance (I-14). Le contrôle se fait ensuite sur des λ **hors** de cette liste.
+const GENERATRICES: [(f32, f32); 4] = [(0.5, 0.05), (1.0, 0.5), (3.35, 164.0), (8.0, 4_000.0)];
+
+fn generate_table(samples: u32, sub: u32, upto: u32) -> Vec<f32> {
+    let fields: Vec<_> = GENERATRICES
+        .iter()
+        .map(|&(l, e)| {
+            let f = family_field(l, e).expect("champ générateur");
+            let annonce = f.slope_max();
+            (f, (l / 9.81f32).sqrt(), annonce, 15.5 * l)
+        })
+        .collect();
+    (0..upto)
+        .map(|k| {
+            let mut lowest = f32::INFINITY;
+            for j in 0..=sub {
+                let tau = k as f32 + j as f32 / sub as f32;
+                for (field, scale, annonce, radius) in &fields {
+                    let t = SimTime(BIRTH + (tau * scale * 1e6) as u64);
+                    let peak = peak_within(field, [0., 0.], t, samples, *radius);
+                    lowest = lowest.min(annonce / peak.max(f32::MIN_POSITIVE));
+                }
+            }
+            // Garde. L'effondrement en `τ` est exact, mais l'âge transite en microsecondes
+            // entières : sur trois λ **hors** famille génératrice, le majorant resserré est
+            // dépassé d'au plus **3,0e-6**. La garde vaut `1e-4`, soit trente-trois fois ce
+            // dépassement mesuré — c'est sa provenance (I-14), et le banc qui la fixe est cet
+            // exemple. Elle ne mord pas à `τ = 0`, où `ρ = 1` et où l'annonce d'origine n'est
+            // pas dépassée (0,999983).
+            (lowest / 1.0001).max(1.0)
+        })
+        .collect()
+}
+
 fn main() {
+    if std::env::args().nth(1).as_deref() == Some("--table") {
+        let table = generate_table(4_000, 20, 96);
+        println!("// ρ(τ) sûre, S215 : minimum sur chaque intervalle unité d'âge adimensionné.");
+        for (k, chunk) in table.chunks(8).enumerate() {
+            let row: Vec<String> = chunk.iter().map(|v| format!("{v:.4}")).collect();
+            println!("    /* τ {:>2}.. */ {},", k * 8, row.join(", "));
+        }
+        // Contre-vérification sur des longueurs d'onde **hors** de la famille génératrice, à des
+        // τ qui ne tombent pas sur la grille : la table doit rester un majorant.
+        for (l, e) in [(2.0f32, 20.0f32), (5.0, 900.0), (0.75, 0.2)] {
+            let Some(other) = family_field(l, e) else {
+                println!("TABLE_CONTROLE lambda={l} E={e} refusee");
+                continue;
+            };
+            let scale = (l / 9.81f32).sqrt();
+            let annonce = other.slope_max();
+            let (mut worst, mut worst_plain, mut worst_tau) = (0.0f32, 0.0f32, 0.0f32);
+            for i in 0..=960 {
+                let tau = i as f32 * 0.1;
+                let t = SimTime(BIRTH + (tau * scale * 1e6) as u64);
+                let peak = peak_within(&other, [0., 0.], t, 4_000, 15.5 * l);
+                let serre = annonce / table[(tau as usize).min(95)];
+                if peak / serre > worst {
+                    worst = peak / serre;
+                    worst_tau = tau;
+                }
+                worst_plain = worst_plain.max(peak / annonce);
+            }
+            println!("TABLE_CONTROLE lambda={l} E={e} max(reelle/resserre)={worst:.6} a tau={worst_tau:.1} ; max(reelle/origine)={worst_plain:.6}");
+        }
+        let other = family_field(1.0, 0.5).expect("champ de contrôle");
+        let scale = (1.0f32 / 9.81).sqrt();
+        let annonce = other.slope_max();
+        let (mut worst, mut worst_plain, mut worst_tau) = (0.0f32, 0.0f32, 0.0f32);
+        for i in 0..=960 {
+            let tau = i as f32 * 0.1;
+            let t = SimTime(BIRTH + (tau * scale * 1e6) as u64);
+            let peak = peak_within(&other, [0., 0.], t, 4_000, 15.5);
+            let serre = annonce / table[(tau as usize).min(95)];
+            if peak / serre > worst {
+                worst = peak / serre;
+                worst_tau = tau;
+            }
+            worst_plain = worst_plain.max(peak / annonce);
+        }
+        // Le témoin qui décide : le majorant **non resserré** est-il lui-même dépassé, et de
+        // combien ? Si les deux excès sont du même ordre, le resserrement n'ajoute aucun risque
+        // — il hérite de la précision de l'annonce d'origine (ADR-094, « atteinte à 1e-3 »).
+        println!("TABLE_CONTROLE lambda=1 E=0.5 max(reelle/majorant_resserre)={worst:.6} a tau={worst_tau:.1} ; max(reelle/majorant_origine)={worst_plain:.6}");
+        return;
+    }
     let samples: u32 = std::env::args()
         .nth(1)
         .and_then(|s| s.parse().ok())

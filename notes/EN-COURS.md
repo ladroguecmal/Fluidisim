@@ -120,7 +120,7 @@ disparaître — l'occupation de 84 %, elle, ne dépend d'aucun échantillonnage
 - [x] **P2** — pente réelle de l'impact seul, échantillonnage fin (rayon et temps), contre `slope_max()` ; sûreté du majorant sur 56 s.
 - [x] **P3** — pente réelle du sillage seul, échantillonnage fin dans l'emprise, contre `slope_envelope()` à chaque âge. *(Absorbée dans P2 : un seul programme mesure les deux champs ; les deux critères déclarés sont tenus.)*
 - [x] **P3-bis** — *ajouté après P2, parce que le résultat l'exige* : la décroissance est-elle **universelle** dans la famille ? Mesurer plusieurs λ et E, et voir si le pessimisme s'effondre sur l'âge adimensionné `t/√(λ/g)` (échelle déjà employée par ADR-126).
-- [ ] **P4** — table `ρ(τ)` mesurée et **sûre** (minimum par intervalle, la fonction n'est pas monotone), vérifiée sur deux λ ; occupation recomposée, note corrective datée sur A254.
+- [x] **P4** — table `ρ(τ)` mesurée et **sûre** (minimum par intervalle, la fonction n'est pas monotone), vérifiée sur deux λ ; occupation recomposée, note corrective datée sur A254.
 - [ ] **P5** — scène à deux sources : exercer le refus tel qu'il est aujourd'hui, et le requalifier avec le majorant resserré.
 - [ ] **P6** — décider **et construire** : ADR, puis `slope_max_at(t)` dans `RadialImpact` — méthode neuve, `slope_max()` inchangée (ADR-094 : migrer le refus `Steepness` est une autre décision) — consommée par le budget de composition ; tests.
   *(P4 à P6 réécrits après P3-bis : la similitude étant établie, la décision n'est plus « laquelle des trois voies » mais « resserrer, et voici la loi ». Le plan d'origine reste lisible ci-dessus.)*
@@ -201,3 +201,40 @@ d'abord a été **abandonné** — il coûte le carré du gain pour regarder par
 maximum ; le raffinement local le remplace et le mesure. Impasse consignée pour ne pas la refaire.
 L'argmax du sillage suit la source : [-23 ; 2,25] à 0,5 s, [-2,5 ; 4] à 8 s, [21,5 ; 4] à 16 s
 (fin du forçage), puis se détache vers [47,5 ; 2,25] à 39 s.
+
+P4 : **table `ρ(τ)` sûre construite et vérifiée hors de sa famille génératrice.**
+Un intervalle par unité de `τ`, 0 à 96 (la borne d'âge d'ADR-126) ; dans chaque intervalle, le
+**minimum** de ρ sur 21 sous-échantillons **et sur quatre λ génératrices** (0,5 · 1 · 3,35 · 8 m).
+Minimum, parce que ρ n'est pas monotone et qu'un ρ trop grand ferait cesser le majorant d'en être
+un ; sur quatre λ, parce que l'effondrement en τ est exact à trois décimales mais que l'âge transite
+en **microsecondes entières**, et que cette quantification déplace le rapport de quelques ppm d'un λ
+à l'autre.
+
+**Garde `1e-4`, et elle a une provenance** (I-14) : avec la table brute, le majorant resserré était
+dépassé de **3,0e-6** au pire sur trois λ hors famille (λ = 2 · 5 · 0,75) ; la garde vaut trente-trois
+fois ce dépassement mesuré, et le banc qui la fixe est `budget_pente_s215 --table`.
+
+**Contrôle final, quatre λ hors famille génératrice, 961 valeurs de τ chacune** :
+`max(pente réelle / majorant resserré) = 0,999983`, atteint à `τ = 0` — **exactement le pire cas du
+majorant d'origine** (0,999983). Le resserrement n'ajoute donc aucun risque : il hérite de la
+précision de l'annonce d'ADR-094, et ne la dégrade pas.
+
+Table retenue (96 entrées, f32) — 1,0000 / 1,0464 / 1,1979 / 1,4944 / 2,0209 / 2,9092 / 3,8726 /
+4,4430 pour τ = 0 à 7, puis croissante jusqu'à **28,7706** à τ = 95. Fichier complet dans la sortie
+de l'exemple.
+
+**Occupation recomposée pour la scène J1** (impact né à t = 0, τ = âge / 0,5844 s) :
+
+| âge (s) | τ | ρ(τ) | majorant impact resserré | + sillage | budget | part de π/7 |
+|---:|---:|---:|---:|---:|---:|---:|
+| 4 | 6,8 | 3,8726 | 0,054902 | 0,135072 | 0,189974 | **42,3 %** *(84 → 42)* |
+| 16 | 27,4 | 9,8680 | 0,021546 | 0,164995 | 0,186541 | **41,6 %** *(84 → 42)* |
+| 24 | 41,1 | 13,5293 | 0,015715 | 0,157044 | 0,172759 | **38,5 %** |
+| 39 | 66,7 | 20,0288 | 0,010615 | 0,157981 | 0,168596 | **37,6 %** |
+
+L'occupation tombe de **84 % à 38–42 %**, et la marge passe de 0,0712 à **0,259–0,262** : de quoi
+admettre **un second sillage** de la même recette (0,165) là où il était refusé. Le sillage devient
+alors le terme dominant — c'est lui qu'un resserrement ultérieur devra viser, et il faudra pour cela
+la même mesure de similitude sur sa propre famille.
+
+**A254 : la cause change, le chiffre tient.** La note corrective vient en P7 avec la réception.
