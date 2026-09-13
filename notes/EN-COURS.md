@@ -83,8 +83,8 @@ en ordre un au bit. Gain de partition non promis. Aucune admission migrée, A258
 - [x] **P1** — jeton et plan seuls.
 - [x] **P2** — ADR-136 : dérivation, écart de phase quantifiée, choix par mode, réserve, limites.
 - [x] **P3** — construire la branche ordre deux (Field, Prepared) sans changer ADR-135 ni S219.
-- [ ] **P4** — tests : couverture, domination, gain près du maximum, 4000 m, refus, identité S219.
-- [ ] **P5** — exemple S220 : même rectangles S218 et partition S219 par ordre ; campagne isolée.
+- [x] **P4** — tests : couverture, domination, gain près du maximum, 4000 m, refus, identité S219.
+- [>] **P5** — exemple S220 : même rectangles S218 et partition S219 par ordre ; campagne isolée.
 - [ ] **P6** — publier la réception S220 et ses relevés bruts.
 - [ ] **P7** — rituel §6, journal, registres, index, file active, jeton et copies.
 
@@ -93,3 +93,5 @@ en ordre un au bit. Gain de partition non promis. Aucune admission migrée, A258
 Suite S219 : partition adaptative disponible, A259 (plateau des grandes mailles) ouverte.
 
 P3 : une passe O(N) ; `Slot::accumulate` rend (sin, cos) sans changer ses opérations. Branche ADR-135 recalculée dans la même passe (identité au bit à recevoir P4). Partition : `partition_slope_envelope_order`, l'appel S219 délègue en `First`. Compilation debug sans erreur.
+
+P4 : quatre tests S220 debug réussis. Deux attentes du test « quadratique » étaient fausses et ont été corrigées **avant** toute mesure de campagne, sans toucher au code : (1) avec un seul mode, la borne globale est exacte et plafonne les deux branches, donc on compare les branches sans elle ; (2) le demi-côté `h` donne un excès ADR-135 ≈ `h` (et non `2h`), et un excès ADR-136 ≈ `h²/2` plus la réserve (≈ 7e-5) plus un plancher `E` ≈ 6e-6, la marge `8ε` de la phase quantifiée. Mesuré : h = 0,05 → 1,3263e-3 au total. Interruption utilisateur au milieu de P4 pour régler le niveau d'effort (xhigh constaté), puis reprise. Suite release complète : 366 réussis (268 cœur + 4 + 1 + 93), 5 ignorés, zéro échec.

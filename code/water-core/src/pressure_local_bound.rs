@@ -396,6 +396,159 @@ mod tests {
             }
         }
     }
+    fn norm(s: [f32; 2]) -> f32 {
+        (s[0] * s[0] + s[1] * s[1]).sqrt()
+    }
+    /// ADR-136 : sondes sous la borne, domination et branche ADR-135 au bit.
+    #[test]
+    fn second_order_covers_and_dominates_s220() {
+        let slots = [
+            slot([0.6, 0.8], Complex { re: 0.3, im: -0.2 }),
+            slot([-1.2, 0.4], Complex { re: 0.5, im: 0.1 }),
+            slot([2., -1.], Complex { re: 0.1, im: 0.3 }),
+            slot([0.62, 0.79], Complex { re: -0.28, im: 0.21 }),
+        ];
+        let f = Field::from_slots(&slots, [-4.; 2], [4.; 2]);
+        let mut strict = 0;
+        for size in [2.0f32, 1.0, 0.25, 0.05] {
+            let cells = (8.0 / size) as i32;
+            for ix in 0..cells.min(40) {
+                for iy in 0..cells.min(40) {
+                    let lo = [-4. + ix as f32 * size, -4. + iy as f32 * size];
+                    let hi = [lo[0] + size, lo[1] + size];
+                    let one = f.local_slope_envelope(lo, hi).unwrap();
+                    let two = f.local_slope_envelope_second_order(lo, hi).unwrap();
+                    assert_eq!(one.bound.to_bits(), two.first_order.bound.to_bits());
+                    assert_eq!(one.center_slope.to_bits(), two.first_order.center_slope.to_bits());
+                    assert!(two.bound <= one.bound);
+                    strict += (two.bound < one.bound) as usize;
+                    for i in 0..=10 {
+                        for j in 0..=10 {
+                            let p = [lo[0] + i as f32 * size / 10., lo[1] + j as f32 * size / 10.];
+                            let p = [p[0].min(hi[0]), p[1].min(hi[1])];
+                            assert!(norm(f.sample(p).unwrap().slope) <= two.bound);
+                        }
+                    }
+                }
+            }
+        }
+        assert!(strict > 0);
+    }
+    /// Au maximum de pente, l'excès d'ADR-135 est d'ordre un, celui d'ADR-136 d'ordre deux.
+    #[test]
+    fn second_order_is_quadratic_at_the_slope_maximum_s220() {
+        let slots = [slot([1., 0.], Complex { re: 1., im: 0. })];
+        let peak = -core::f32::consts::FRAC_PI_2;
+        let f = Field::from_slots(&slots, [-3.; 2], [3.; 2]);
+        let truth = f.sample([peak, 0.]).unwrap().slope[0].abs();
+        for h in [0.1f32, 0.05, 0.025] {
+            let one = f.local_slope_envelope([peak - h, -h], [peak + h, h]).unwrap();
+            let two = f
+                .local_slope_envelope_second_order([peak - h, -h], [peak + h, h])
+                .unwrap();
+            assert_eq!(two.hessian_modes, 1);
+            // Un seul mode : la borne globale est exacte et plafonne les deux branches.
+            // Les branches se comparent donc avant ce plafond. Demi-côté h, k = 1 :
+            // ADR-135 paie D ≈ h ; ADR-136 paie D²/2 ≈ h²/2, réserve comprise.
+            let first = one.center_slope + one.spatial_remainder;
+            assert!(first - truth > 0.99 * h, "h={h} {}", first - truth);
+            let second = two.second_order_bound - truth;
+            assert!(second >= two.second_order_reserve);
+            // Plancher E ≈ 2π·8ε ≈ 6e-6 : phase quantifiée (ADR-136 §3), indépendant de h.
+            let excess = second - two.second_order_reserve;
+            assert!((excess - 0.5 * h * h).abs() < 0.01 * h * h + 1e-5, "h={h} {excess}");
+        }
+    }
+    /// Phase quantifiée près de 4000 m : toutes les abscisses représentables sont sondées.
+    #[test]
+    fn second_order_covers_quantized_phase_near_4000_m_s220() {
+        let slots = [
+            slot([6., 0.], Complex { re: 0.7, im: 0.2 }),
+            slot([5.5, 0.3], Complex { re: -0.4, im: 0.5 }),
+        ];
+        let f = Field::from_slots(&slots, [3990., -1.], [4010., 1.]);
+        let mut hessian = 0;
+        for start in 0..40 {
+            let lo = [4000. + start as f32 * 0.137, 0.];
+            let hi = [lo[0] + 0.02, 0.];
+            let two = f.local_slope_envelope_second_order(lo, hi).unwrap();
+            hessian += two.hessian_modes;
+            assert!(two.bound <= two.first_order.bound);
+            let mut x = lo[0];
+            while x <= hi[0] {
+                assert!(norm(f.sample([x, 0.]).unwrap().slope) <= two.bound);
+                x = f32::from_bits(x.to_bits() + 1);
+            }
+        }
+        assert!(hessian > 0);
+    }
+    #[test]
+    fn second_order_refusals_and_partition_order_s220() {
+        use crate::spectral_pressure::{PartitionStop, SlopeCell};
+        let slots = [slot([1., 0.], Complex::default())];
+        let f = Field::from_slots(&slots, [-1.; 2], [1.; 2]);
+        assert_eq!(
+            f.local_slope_envelope_second_order([-1.; 2], [1.; 2]).unwrap().bound,
+            0.
+        );
+        for (min, max) in [
+            ([f32::NAN, 0.], [0.; 2]),
+            ([0.; 2], [f32::INFINITY, 0.]),
+            ([0.; 2], [-0.1, 0.]),
+            ([-2., 0.], [0.; 2]),
+        ] {
+            assert_eq!(
+                f.local_slope_envelope_second_order(min, max).unwrap_err(),
+                Error::Domain
+            );
+        }
+        for eta in [
+            Complex { re: f32::MAX, im: f32::MAX },
+            Complex { re: 1e-30, im: 0. },
+        ] {
+            let bad = [slot([1., 0.], eta)];
+            let f = Field::from_slots(&bad, [-1.; 2], [1.; 2]);
+            assert_eq!(
+                f.local_slope_envelope_second_order([-1.; 2], [1.; 2]).unwrap_err(),
+                Error::NonFinite
+            );
+        }
+        let slots = [
+            slot([1., 0.], Complex { re: 1., im: 0. }),
+            slot([0., 0.7], Complex { re: 0.2, im: 0.3 }),
+        ];
+        let f = Field::from_slots(&slots, [-2.; 2], [2.; 2]);
+        for budget in [1, 31, 127] {
+            let mut a = [SlopeCell::default(); 64];
+            let mut b = [SlopeCell::default(); 64];
+            let r1 = f.partition_slope_envelope([-2.; 2], [2.; 2], &mut a, budget).unwrap();
+            let r2 = f
+                .partition_slope_envelope_order([-2.; 2], [2.; 2], &mut b, budget, SlopeOrder::First)
+                .unwrap();
+            assert_eq!(r1.bound.to_bits(), r2.bound.to_bits());
+            for (x, y) in a.iter().zip(&b) {
+                assert_eq!(x.rectangle(), y.rectangle());
+                assert_eq!(x.bound().to_bits(), y.bound().to_bits());
+            }
+            let mut c = [SlopeCell::default(); 64];
+            let r = f
+                .partition_slope_envelope_order([-2.; 2], [2.; 2], &mut c, budget, SlopeOrder::Second)
+                .unwrap();
+            assert_eq!(r.stop, PartitionStop::Evaluations);
+            let mut area = 0.0;
+            for cell in &c[..r.leaves] {
+                let (lo, hi) = cell.rectangle();
+                area += (hi[0] - lo[0]) * (hi[1] - lo[1]);
+            }
+            assert_eq!(area, 16.0);
+            for y in 0..=40 {
+                for x in 0..=40 {
+                    let p = [-2. + x as f32 / 10., -2. + y as f32 / 10.];
+                    assert!(norm(f.sample(p).unwrap().slope) <= r.bound);
+                }
+            }
+        }
+    }
     #[test]
     fn partition_s219_coverage_monotonicity_and_budget() {
         use crate::spectral_pressure::{PartitionStop, SlopeCell};
