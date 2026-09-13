@@ -314,7 +314,15 @@ impl<'a> Prepared<'a> {
         self.field.local_slope_envelope_second_order(min,max)
             .map_err(|e| Error::Preparation(e.into()))
     }
-    /// ADR-136 : partition S219 avec l'ordre de borne demandé.
+    /// ADR-137 : annonce à coupure spectrale, liée au même contexte et instant.
+    pub fn local_slope_envelope_spectral(
+        &self, context: &Context, time: SimTime, min: [f32;2], max: [f32;2],
+    ) -> Result<spectral_pressure::SpectralSlopeEnvelope, Error> {
+        if !self.context.matches(context) { return Err(Error::Context); }
+        if time != self.time { return Err(Error::Time); }
+        self.field.local_slope_envelope_spectral(min,max)
+            .map_err(|e| Error::Preparation(e.into()))
+    }    /// ADR-136 : partition S219 avec l'ordre de borne demandé.
     pub fn partition_slope_envelope_order(
         &self, context: &Context, time: SimTime, min: [f32;2], max: [f32;2],
         pool: &mut [spectral_pressure::SlopeCell], budget: usize,

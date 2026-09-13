@@ -82,7 +82,7 @@ bit, décomposition `C_U`/`G(U)` publiée par classe.
 
 - [x] **P1** — jeton et plan seuls.
 - [x] **P2** — ADR-137 : coupure spectrale, famille de seuils, domination, réserve, limite spatiale.
-- [ ] **P3** — construire la passe générique (ordre deux inchangé au bit), ordre `Spectral`, Prepared.
+- [x] **P3** — construire la passe générique (ordre deux inchangé au bit), ordre `Spectral`, Prepared.
 - [ ] **P4** — tests : couverture, domination, gain strict, identité S220, refus, partition.
 - [ ] **P5** — exemple S221 : décomposition par taille de maille, partitions 2047→32767 ; campagne isolée.
 - [ ] **P6** — publier la réception S221 et ses relevés bruts.
@@ -93,3 +93,5 @@ bit, décomposition `C_U`/`G(U)` publiée par classe.
 Suite S220 : ordre deux à 1,006–1,012 × maximum à 32767 évaluations ; plateau à 8191 (A260).
 Campagne détachée : signaler la fin par un fichier marqueur, **pas** par `tail -f` d'un journal
 écrit par un autre processus (verrou Windows constaté S220).
+
+P3 : bits de l'ordre deux figés **avant** refactorisation (test `second_order_bits_frozen_before_spectral_s221`, 6 modes dont deux courts, 5 rectangles), puis passe générique `second_order_pass::<SPECTRAL>` ; classes accumulées derrière la constante. Module `pressure_spectral_bound.rs` : trois coupures D* = 2/1/½, `SlopeOrder::Spectral`, exposition Prepared. 11 tests de borne debug réussis, bits figés compris.

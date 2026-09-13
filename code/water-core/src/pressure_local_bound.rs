@@ -12,20 +12,20 @@ pub struct LocalSlopeEnvelope {
 }
 
 // Majorations des opérations positives ; zéro exact reste zéro.
-fn up(x: f32) -> f32 {
+pub(super) fn up(x: f32) -> f32 {
     if x > 0.0 && x.is_finite() {
         f32::from_bits(x.to_bits() + 1)
     } else {
         x
     }
 }
-fn add(a: f32, b: f32) -> f32 {
+pub(super) fn add(a: f32, b: f32) -> f32 {
     up(a + b)
 }
-fn mul(a: f32, b: f32) -> f32 {
+pub(super) fn mul(a: f32, b: f32) -> f32 {
     up(a * b)
 }
-fn length(x: f32, y: f32) -> f32 {
+pub(super) fn length(x: f32, y: f32) -> f32 {
     up(add(mul(x.abs(), x.abs()), mul(y.abs(), y.abs())).sqrt())
 }
 
@@ -50,6 +50,28 @@ pub struct SecondOrderSlopeEnvelope {
 pub enum SlopeOrder {
     First,
     Second,
+    /// ADR-137 : minimum d'ADR-135, d'ADR-136 et des coupures spectrales.
+    Spectral,
+}
+
+/// ADR-137 : sommes d'une classe de largeur de phase, accumulées dans la passe d'ADR-136.
+#[derive(Clone, Copy, Default)]
+pub(super) struct PhaseClass {
+    pub(super) slope: [f32; 2],
+    pub(super) hessian: [[f32; 2]; 2],
+    pub(super) remainder: f32,
+    pub(super) linear: f32,
+    pub(super) mass: f32,
+    pub(super) moment: [f32; 2],
+}
+
+/// Sortie interne de la passe : l'annonce d'ordre deux et ce que les coupures réutilisent.
+pub(super) struct Pass {
+    pub(super) envelope: SecondOrderSlopeEnvelope,
+    pub(super) center: [f32; 2],
+    pub(super) scalar: f32,
+    /// `8γ_(N+64) + 32ε`, facteur de la réserve d'ordre deux.
+    pub(super) factor: f32,
 }
 
 impl Field<'_> {
@@ -58,6 +80,7 @@ impl Field<'_> {
         match order {
             SlopeOrder::First => self.local_slope_envelope(min, max).map(|b| b.bound),
             SlopeOrder::Second => self.local_slope_envelope_second_order(min, max).map(|b| b.bound),
+            SlopeOrder::Spectral => self.local_slope_envelope_spectral(min, max).map(|b| b.bound),
         }
     }
 
@@ -71,6 +94,19 @@ impl Field<'_> {
         min: [f32; 2],
         max: [f32; 2],
     ) -> Result<SecondOrderSlopeEnvelope, Error> {
+        let mut classes = [PhaseClass::default(); 4];
+        self.second_order_pass::<false>(min, max, &mut classes)
+            .map(|pass| pass.envelope)
+    }
+
+    /// Passe d'ADR-136. Avec `SPECTRAL`, accumule aussi les classes d'ADR-137 ; sans, les
+    /// accumulateurs de classes sont éliminés à la compilation et l'ordre deux reste au bit.
+    pub(super) fn second_order_pass<const SPECTRAL: bool>(
+        &self,
+        min: [f32; 2],
+        max: [f32; 2],
+        classes: &mut [PhaseClass; 4],
+    ) -> Result<Pass, Error> {
         if !self.admits(min) || !self.admits(max) || (0..2).any(|i| min[i] > max[i]) {
             return Err(Error::Domain);
         }
@@ -128,18 +164,52 @@ impl Field<'_> {
             // ADR-136 §3–4 : écart exécuté/linéaire, puis choix du terme le plus petit.
             let e = mul(tau, add(quantization, 8.0 * f32::EPSILON));
             let taylor = add(e, mul(0.5, mul(phase, phase)));
+            // ADR-137 §2 : classe de largeur de phase D < 1/2, [1/2, 1), [1, 2), >= 2.
+            let class = if phase < 0.5 {
+                0
+            } else if phase < 1.0 {
+                1
+            } else if phase < 2.0 {
+                2
+            } else {
+                3
+            };
+            if SPECTRAL {
+                let c = &mut classes[class];
+                let g = s.response.eta.re * sn + s.response.eta.im * cs;
+                c.slope[0] -= s.weighted_k[0] * g;
+                c.slope[1] -= s.weighted_k[1] * g;
+                c.mass = add(c.mass, contribution);
+                if weighted_length > 0.0 {
+                    let (kx, ky) = (s.weighted_k[0], s.weighted_k[1]);
+                    c.moment[0] += amplitude * (kx * kx - ky * ky) / weighted_length;
+                    c.moment[1] += amplitude * 2.0 * kx * ky / weighted_length;
+                }
+            }
             if taylor < phase.min(2.0) {
                 let eta_c = s.response.eta.re * cs - s.response.eta.im * sn;
                 for i in 0..2 {
                     for j in 0..2 {
-                        hessian[i][j] -= s.weighted_k[i] * eta_c * (core::f32::consts::TAU * s.turns[j]);
+                        let h = s.weighted_k[i] * eta_c * (core::f32::consts::TAU * s.turns[j]);
+                        hessian[i][j] -= h;
+                        if SPECTRAL {
+                            classes[class].hessian[i][j] -= h;
+                        }
                     }
                 }
                 remainder2 = add(remainder2, mul(contribution, taylor));
                 linear_mass = add(linear_mass, mul(contribution, add(phase, e)));
                 hessian_modes += 1;
+                if SPECTRAL {
+                    let c = &mut classes[class];
+                    c.remainder = add(c.remainder, mul(contribution, taylor));
+                    c.linear = add(c.linear, mul(contribution, add(phase, e)));
+                }
             } else {
                 remainder2 = add(remainder2, first);
+                if SPECTRAL {
+                    classes[class].remainder = add(classes[class].remainder, first);
+                }
             }
         }
         if ![out.eta, out.vertical_velocity, out.potential]
@@ -190,10 +260,8 @@ impl Field<'_> {
             return Err(Error::NonFinite);
         }
         let gamma2 = up(nu2 / (1.0 - nu2));
-        let reserve2 = mul(
-            add(scalar, linear_mass),
-            add(mul(8.0, gamma2), 32.0 * f32::EPSILON),
-        );
+        let factor = add(mul(8.0, gamma2), 32.0 * f32::EPSILON);
+        let reserve2 = mul(add(scalar, linear_mass), factor);
         let bound2 = add(add(corner_slope, remainder2), reserve2);
         if ![corner_slope, remainder2, reserve2, bound2]
             .iter()
@@ -201,14 +269,19 @@ impl Field<'_> {
         {
             return Err(Error::NonFinite);
         }
-        Ok(SecondOrderSlopeEnvelope {
-            bound: bound1.min(bound2),
-            first_order,
-            corner_slope,
-            second_order_remainder: remainder2,
-            second_order_reserve: reserve2,
-            second_order_bound: bound2,
-            hessian_modes,
+        Ok(Pass {
+            envelope: SecondOrderSlopeEnvelope {
+                bound: bound1.min(bound2),
+                first_order,
+                corner_slope,
+                second_order_remainder: remainder2,
+                second_order_reserve: reserve2,
+                second_order_bound: bound2,
+                hessian_modes,
+            },
+            center,
+            scalar,
+            factor,
         })
     }
 
@@ -433,6 +506,51 @@ mod tests {
             }
         }
         assert!(strict > 0);
+    }
+    fn frozen_field_s221() -> [Slot; 6] {
+        [
+            slot([0.6, 0.8], Complex { re: 0.3, im: -0.2 }),
+            slot([-1.2, 0.4], Complex { re: 0.5, im: 0.1 }),
+            slot([2., -1.], Complex { re: 0.1, im: 0.3 }),
+            slot([0.62, 0.79], Complex { re: -0.28, im: 0.21 }),
+            slot([5.5, 3.1], Complex { re: 0.05, im: -0.04 }),
+            slot([-7.2, 6.4], Complex { re: 0.02, im: 0.03 }),
+        ]
+    }
+    const FROZEN_RECTANGLES_S221: [([f32; 2], [f32; 2]); 5] = [
+        ([-4., -4.], [4., 4.]),
+        ([-1., -0.5], [1., 1.]),
+        ([0.25, -2.], [0.75, -1.5]),
+        ([3., 2.9], [3.05, 3.]),
+        ([-0.3, 0.1], [-0.3, 0.1]),
+    ];
+    /// S221 : bits de l'ordre deux figés avant la passe générique d'ADR-137.
+    #[test]
+    fn second_order_bits_frozen_before_spectral_s221() {
+        let slots = frozen_field_s221();
+        let f = Field::from_slots(&slots, [-4.; 2], [4.; 2]);
+        let got: Vec<[u32; 5]> = FROZEN_RECTANGLES_S221
+            .iter()
+            .map(|(lo, hi)| {
+                let b = f.local_slope_envelope_second_order(*lo, *hi).unwrap();
+                [
+                    b.bound.to_bits(),
+                    b.second_order_bound.to_bits(),
+                    b.corner_slope.to_bits(),
+                    b.second_order_remainder.to_bits(),
+                    b.second_order_reserve.to_bits(),
+                ]
+            })
+            .collect();
+        // Capturés sur le code S220 (commit 7005f68), avant toute modification de la passe.
+        let frozen: [[u32; 5]; 5] = [
+            [1075125589, 1085958732, 1044806633, 1085551818, 961568126],
+            [1075125589, 1084959781, 1066928733, 1082468061, 967557607],
+            [1075125589, 1075573119, 1059292322, 1072043967, 965647093],
+            [1050980482, 1050980482, 1048752910, 1032289672, 963673276],
+            [1053561700, 1053566296, 1053559060, 932022430, 961568126],
+        ];
+        assert_eq!(got, frozen);
     }
     /// Au maximum de pente, l'excès d'ADR-135 est d'ordre un, celui d'ADR-136 d'ordre deux.
     #[test]

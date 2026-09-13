@@ -5,6 +5,9 @@ pub use differential::PressureDifferential;
 #[path = "pressure_local_bound.rs"]
 mod local_bound;
 pub use local_bound::{LocalSlopeEnvelope, SecondOrderSlopeEnvelope, SlopeOrder};
+#[path = "pressure_spectral_bound.rs"]
+mod spectral_bound;
+pub use spectral_bound::{SpectralCut, SpectralSlopeEnvelope};
 #[path = "pressure_partition.rs"]
 mod partition;
 pub use partition::{PartitionError, PartitionStop, SlopeCell, SlopePartition};
