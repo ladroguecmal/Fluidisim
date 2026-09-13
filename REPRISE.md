@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-13 17:59 +02:00
+JETON            : occupé
+Battement        : 2026-09-13 18:10 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
-Session en cours : —
+Session en cours : S223 — A262 : une inégalité conjointe pour la somme spatiale des impacts
 Dernière session : S222 — part somme d'A254 mesurée sur plusieurs sillages : absorbée côté sillages, littérale côté impacts (A262) ; borne locale disqualifiée par son prix (loi d'échelle) ; aucune migration, aucun ADR
 Session suivante : S223 — file J1/W, **A262** : la somme des majorants d'impact ignore la distance entre champs, et c'est le goulot mesuré (un impact neuf vaut 47,4 % de π/7 ; deux éclaboussures simultanées saturent, quelle que soit la borne de pression). Chercher une **inégalité** conjointe qui tienne compte de la position relative — la géométrie s'y prête, support compact déclaré et pente maximale en r = 0,2062 λ (ADR-094), donc deux disques disjoints ne peuvent pas atteindre leur maximum au même point —, comme ADR-134 l'a fait pour les directions, et **non** une table. Si l'inégalité ne vient pas, revenir à la file : cadence complète de l'hôte, V-noyau. A261, A258 et le coût de passe nommés sans ordre imposé ; usage hors image de la borne locale ouvert ; δ/V conservés
 Maillons        : **1** — S222 n'a ni ajouté de code d'exécution dans `code/*/src`, ni acté d'ADR : elle a mesuré et décidé de ne rien changer. À 2, la session suivante ne pourra plus proposer un reliquat et devra nommer une ligne de la file et la couche qu'elle avance
