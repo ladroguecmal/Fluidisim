@@ -11274,3 +11274,48 @@ avancés. Erreur de procédure : battement P2 recopié14:59 après lecture14:57,
 battements mesurés ; diff P4 signalait deux lignes finales vides, nettoyées au rituel.
 135 ADR,258 angles,297 leçons,18 invariants,6 SPEC,23 cas. Jeton libéré en fin de session,
 avance rapide des copies après vérification de leur propreté.
+
+## S219 — 2026-09-13 — Partition adaptative à couverture conservée
+
+**Entrée.** Continue, Codex ; master et trois copies propres à4f9841f, jeton libre,
+maillons0. Lectures de S218 conservées, état réel revérifié. Copie principale,
+aucune dépendance ni nouvelle copie. Plan3a7cf59, construction e8eb0fb, réception8819b6b.
+
+**Construction W.** `partition_slope_envelope` sur Field/Prepared, tas maximal dans
+le pool fourni par l'appelant. Division du grand côté, priorité à la borne puis à
+la largeur, minimum des bornes enfant/parent. Couverture complète et maximum non
+croissant ; budget1+2 par division. Arrêt explicite capacité/évaluations/précision/zéro,
+refus pool vide/budget nul/erreurs locales. Contexte et instant contrôlés.
+Pas de reprise entre appels : repartir du champ courant évite un cache périmé ;
+une future reprise doit lier le pool à la publication. Aucune admission migrée.
+Implémentation d'ADR-135, aucun nouvel ADR ; A258 reste ouverte.
+
+**Mesures.** [PARTITION-S219](../docs/validation/PARTITION-S219.md), deux passages
+isolés base et un passage quatre fixtures. À65535 évaluations : globale/borne1,488482
+(base),1,520529 (lente),1,480557 (longue), soit32,5–34,2 % de réduction. Base35,637 et
+35,754s, valeurs imprimées identiques ; pool640Kio, préparation6,491/6,454ms séparée.
+À32767 évaluations : base0,098479681 en17,79–17,97s, contre0,112293623 en27,55–28,21s
+uniforme S218 ; mais lente moins serrée à ce plafond que la grille0,5m. À8191 : aucun
+gain sur les quatre cas, encore4,4–4,5s. Diagnostic tardif hors durée d'image conservé.
+Aucun verdict GPU ni retrait de fonctionnalité ; coût de cette implémentation seulement.
+
+**Obstacle.** A259 : la borne globale commune masque les différences spatiales aux
+grandes mailles. Le tas ne peut hiérarchiser une information absente. **Suite S220,
+file J1/W : construire une borne locale conservant les annulations** (pente et Hessienne
+signée au centre, reste supérieur borné), avec traitement des phases quantifiées ;
+recevoir gain/coût via S219. Garder ADR-135 comme repli, ne pas promettre de gain.
+A258 avant migration d'admission ; somme A254 et loi GPU restent ouvertes.
+
+**Vérification.** Deux nouveaux tests debug ; suite complète release362 réussis
+(264+4+1+93),5 ignorés, zéro échec ; test Prepared existant étendu contexte/temps.
+Couverture, aire, sondes, budgets pairs/impairs, capacité, point, zéro, refus et
+identité bits/rectangles exercés. Allocation absente par inspection, sans instrumentation.
+Aucun changement du calcul historique des échantillons.
+
+**Rituel.** A259 sévérité2, L298 ; file active relue, A255 partielle, A258 ouverte.
+A244/S200-1 et S199-2 à J2, V-noyau au plus tard J2 ; B4 forces/perception, A216,
+A241, A213, B2/coupure, bathymétrie, multiplateforme, bancs et réunions gardent leurs
+déclencheurs. I-03/04/06/08/14/18 restent applicables ; I-05 ne transforme pas ce plafond
+d'évaluations en budget temporel, explicitement non reçu. Aucun arbitrage humain nouveau.
+Maillons0 : W avancée dans src. 135 ADR,259 angles,298 leçons,18 invariants,6 SPEC,23 cas.
+Jeton libéré, copies à avancer après le commit de clôture et vérification de propreté.

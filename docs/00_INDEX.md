@@ -20,6 +20,16 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S219 — 2026-09-13 : [partition adaptative](validation/PARTITION-S219.md).**
+W construit un tas de rectangles dans le pool de l'appelant, avec plafond d'évaluations
+et couverture conservée aux arrêts. Gain globale/borne1,48–1,52 sur trois sillages
+recevables à65535 évaluations,35–36s ; aucun gain à8191 (A259). Base à32767 : meilleure
+borne en18s que la grille S218 en28s, sans gain universel. A255 partielle, A258 ouverte,
+aucune admission migrée ni reprise inter-appels. Suite S220 J1/W : borne locale avec
+Hessienne signée et reste supérieur, phases quantifiées couvertes, gain/coût à recevoir.
+362 tests release réussis,5 ignorés. 135 ADR,259 angles,298 leçons,18 invariants,6 SPEC,
+23 cas ; maillons0. Somme A254, loi GPU, J2/δ et V-noyau conservés.
+
 **S218 — 2026-09-13 : [borne locale de pente](validation/BORNE-LOCALE-S218.md),
 [ADR-135](adr/ADR-135-borne-locale-de-pente-du-champ-prepare.md).**
 W publie une borne sur rectangle avec reste spatial et réserve numérique ; aucune admission

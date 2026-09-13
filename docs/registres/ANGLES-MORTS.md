@@ -3144,3 +3144,16 @@ en travail ; somme A254, scènes à plusieurs sillages et mutualisation restent 
   ne certifie pas tout l'arrondi de la norme et des sommes. Avant une migration des
   admissions, recevoir ou démontrer cette chaîne, sans faire passer le maximum d'une
   grille pour une preuve continue. Voir BORNE-LOCALE-S218 et L297.
+
+**Suivi A255/A258 — S219.** Partition adaptative construite ; gain multiplicatif1,48–1,52
+à65535 évaluations sur les trois cas recevables,35–36s. A255 partielle, aucune admission
+migrée ; A258 (certification numérique) reste ouverte. Pas de reprise inter-appels.
+
+- **A259** *(sévérité 2, S219 ; ouverte)* — **La borne qui écrête tout au même niveau
+  prive l'adaptation de priorité spatiale.** À8191 évaluations, les quatre partitions
+  retiennent encore la même borne globale qu'à la racine, pour4,4–4,5s. Le tas ne
+  distingue les régions qu'après raffinement suffisant. Il améliore les résultats
+  ensuite, mais changer l'ordre des égalités ne produit pas les annulations absentes
+  de la borne. Suite J1/W : borne locale avec Hessienne signée et reste supérieur,
+  quantification couverte, puis coût et gain reçus sur S219. Ce mécanisme ne préjuge
+  ni d'un gain de cette piste ni du coût d'un chemin GPU. Voir PARTITION-S219, L298.

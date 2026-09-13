@@ -1670,7 +1670,15 @@ entrée par entrée. Le fil reprend ci-dessous.
 
 ## File active
 
-Relue en S218, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+Relue en S219, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+
+**Suivi J1 S219 — A255 : partition adaptative construite.**
+[Réception S219](../validation/PARTITION-S219.md) : couverture conservée, plafond strict
+en évaluations ; gain1,48–1,52 à65535 évaluations,35–36s. A259 : grandes mailles encore
+plafonnées par la borne globale, aucun gain à8191. **Suite S220 J1/W : borne locale
+avec Hessienne signée et reste supérieur**, quantification à couvrir, gain/coût à
+recevoir via S219. A258 reste avant migration d'admission ; reprise inter-appels non
+construite. A255 partielle, somme A254 et loi GPU ouvertes ; autres déclencheurs conservés.
 
 **Suivi J1 S218 — A255 : borne locale construite, parcours adaptatif à construire.**
 [Réception S218](../validation/BORNE-LOCALE-S218.md), ADR-135 : reste spatial sur les

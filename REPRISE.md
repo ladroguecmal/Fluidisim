@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 15:25 +02:00
+JETON            : libre
+Battement        : 2026-09-13 15:26 +02:00
 Agent            : Codex (fichiers, git et cargo disponibles)
-Session en cours : S219
-Dernière session : S218 — borne locale W construite, ADR-135 ; gain et coût uniforme reçus ; A255 partielle, aucune admission migrée
-Session suivante : S219 — file J1/W : construire et recevoir une partition adaptative sur pool fourni par l'appelant, avec plafond de travail et couverture conservée par les bornes des rectangles non raffinés ; mesurer gain/coût. Certification f32 A258, admission, somme A254 et loi GPU restent ouvertes ; J2/δ et V-noyau conservés
-Maillons        : 0 — W avancée dans src et ADR-135 actée
+Session en cours : —
+Dernière session : S219 — partition adaptative W construite et reçue ; couverture conservée, plafond en évaluations ; A255 partielle, A259 ouverte
+Session suivante : S220 — file J1/W : construire et recevoir une borne locale avec pente/Hessienne signée au centre et reste supérieur borné, en couvrant les phases quantifiées ; conserver ADR-135 comme repli, mesurer gain/coût via S219. A258 avant migration d'admission ; A255, somme A254 et loi GPU ouvertes ; J2/δ et V-noyau conservés
+Maillons        : 0 — W avancée dans src par la partition adaptative
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 
@@ -191,6 +191,8 @@ demande la campagne d'ADR-133 transposée. **Prochain lot J1 : la part dynamique
 toute scène à plusieurs sillages et donc avant la mutualisation de J1-bis ; puis la loi GPU
 (espace, LOD, visibilité, mutualisation), chaque mesure avec son en-tête (ADR-131 D3).
 
+**S219 : partition adaptative construite**, plafond d'évaluations et couverture conservée ; A255 partielle, A258 ouverte. Suite S220 J1/W : borne locale avec Hessienne signée et reste supérieur, gain/coût à recevoir ; A259 nomme le plateau des grandes mailles. Voir [réception S219](docs/validation/PARTITION-S219.md).
+
 **S218 : borne locale construite (ADR-135), A255 partielle.** Partition uniforme reçue mais coûteuse ; suite J1/W S219 : partition adaptative avec pool et plafond de travail. Aucun changement d'admission ; certification f32 ouverte (A258). Voir [réception S218](docs/validation/BORNE-LOCALE-S218.md).
 
 **S217 : la part dynamique d'A255 est instruite, sans resserrement adopté.**
@@ -297,6 +299,16 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S219 — 2026-09-13 : [partition adaptative](docs/validation/PARTITION-S219.md).**
+W construit un tas de rectangles dans le pool de l'appelant, avec plafond d'évaluations
+et couverture conservée aux arrêts. Gain globale/borne1,48–1,52 sur trois sillages
+recevables à65535 évaluations,35–36s ; aucun gain à8191 (A259). Base à32767 : meilleure
+borne en18s que la grille S218 en28s, sans gain universel. A255 partielle, A258 ouverte,
+aucune admission migrée ni reprise inter-appels. Suite S220 J1/W : borne locale avec
+Hessienne signée et reste supérieur, phases quantifiées couvertes, gain/coût à recevoir.
+362 tests release réussis,5 ignorés. 135 ADR,259 angles,298 leçons,18 invariants,6 SPEC,
+23 cas ; maillons0. Somme A254, loi GPU, J2/δ et V-noyau conservés.
 
 **S218 — 2026-09-13 : [borne locale de pente](docs/validation/BORNE-LOCALE-S218.md),
 [ADR-135](docs/adr/ADR-135-borne-locale-de-pente-du-champ-prepare.md).**

@@ -4906,3 +4906,15 @@ aux extrémités du domaine permet de borner leur variation sans supposer leur c
 Avant de transporter une preuve dans le code, lister les transformations entre l'objet
 mathématique et sa représentation. Séparer preuve algébrique, réserve d'arrondi et
 contre-épreuves ; une campagne favorable ne convertit pas la troisième en la première.
+
+## L298 — L'adaptation ne crée pas l'information de sa priorité
+
+*(S219)* Le tas raffine la plus grande borne, mais les grandes régions publient toutes
+le même plafond global.8191 évaluations ne resserrent rien. Le parcours devient utile
+plus tard : il fallait d'abord payer des raffinements essentiellement géométriques.
+
+Avant de changer un ordonnanceur, vérifier que son indicateur distingue effectivement
+les objets au niveau où il les choisit. S'il est saturé, améliorer l'indicateur ou sa
+résolution peut être nécessaire ; réordonner ses égalités ne révèle aucune information
+nouvelle. Publier aussi le coût d'obtention de cette information, pas seulement celui
+de la sélection qui la consomme.

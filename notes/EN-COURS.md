@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S219 — en cours
+Session : S219 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Entrée : Continue ; master et trois copies propres à4f9841f, jeton libre, maillons0.
 Lectures du projet conservées de S218 ; état réel revérifié. Copie principale.
@@ -74,7 +74,7 @@ Pas de migration d'admission ni de certificat f32 ajouté.
 - [x] **P1** — jeton et plan seuls.
 - [x] **P2** — construire le parcours borné et recevoir couverture, arrêts et déterminisme.
 - [x] **P3** — mesurer gain/coût sur fixtures S218 et publier le contrat et ses limites.
-- [ ] **P4** — rituel §6, journal, registres, index, file active, jeton et copies.
+- [x] **P4** — rituel §6, journal, registres, index, file active, jeton et copies.
 
 ### Notes de reprise
 
@@ -84,3 +84,5 @@ Un arrêt retourne la meilleure couverture obtenue ; aucun rectangle ne dispara�
 P2 : tas maximal, division binaire grand côté, borne héritée du parent. Deux tests ciblés reçus debug ; couverture/aire, budget pair, capacité, point, zéro, refus, déterminisme. Reprise inter-appels non construite : chaque appel repart de la racine du champ courant, ce qui évite des bornes périmées. Suite release lancée, reçu à P3.
 
 P3 : 362 tests release passent/5 ignorés. Deux passages isolés base identiques en valeurs ;35,64/35,75s à65535 évaluations. Gain1,48–1,52 sur3 cas recevables ; aucun gain à8191. A259 : bornes grossières plafonnées identiques, priorité spatiale indisponible. Suite proposée S220 : borne de Taylor avec Hessienne signée et reste, phases quantifiées à couvrir. Aucune admission ni reprise inter-appels.
+
+P4 : journal, A259/L298, index et file plurielle actualisés ; S220 portée au jeton, maillons0. Jeton libre, copies à avancer après commit de clôture. Aucun travail S219 non consigné.

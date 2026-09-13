@@ -83,6 +83,12 @@ l'implémentation qui dépassait, pas le sillage ni l'objectif.*
 dans le cœur ([TEMPS-SILLAGE-S213](validation/TEMPS-SILLAGE-S213.md)) : CPU sillage 1,26 ms pendant
 le forçage et 0,36 ms après (préparation 7,70 / 13,36), hôte 1,7 ms, exact à 6e-8 ; GPU inchangé.
 Coordonnée de l'espace, pas verdict. Suite : composition impact+sillage, puis A251.
+*S219* : [partition adaptative construite](validation/PARTITION-S219.md), pool et
+plafond d'évaluations, couverture conservée. Gain1,48–1,52 à65535 évaluations mais
+35–36s ; à8191, bornes identiques au plafond global (A259). **Suite S220 J1/W : borne
+locale avec Hessienne signée et reste supérieur**, phases quantifiées couvertes,
+gain/coût via S219. A255 partielle, A258 ouverte ; aucune admission migrée. A254 et GPU
+restent ouverts ; δ/V conservent les jalons obligatoires.
 *S218* : [borne locale construite](validation/BORNE-LOCALE-S218.md), ADR-135.
 Reste spatial et réserve numérique publiés, aucune admission migrée ; certification
 f32 ouverte. La partition uniforme resserre de facteur1,026–1,224 dans les cas
