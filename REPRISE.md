@@ -19,7 +19,7 @@ souvenir de conversation, **c'est lui qui fait foi**.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-13 10:11 +02:00
+Battement        : 2026-09-13 10:15 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Session en cours : S212 — sillage du cœur dans l'hôte GPU, comparé et mesuré
 Dernière session : S211 — hôte GPU B+impact reçu sous DX12, J1 partiel

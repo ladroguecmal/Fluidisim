@@ -95,12 +95,14 @@ issue technique va en ADR, une incompatibilité sans issue technique va à l'uti
 ### Plan
 
 - [x] **P1** — jeton, thèse, critères et plan seuls.
-- [>] **P2** — cœur : `bound_pressure::Prepared::render_components` rebasé, refus atomiques, test contre `sample_batch`.
-- [ ] **P3** — hôte : fixture sillage, préparation par image, buffer GPU, somme modale bornée à l'emprise ; R/B/Home ; compilation.
+- [x] **P2** — cœur : `bound_pressure::Prepared::render_components` rebasé, refus atomiques, test contre `sample_batch`.
+- [>] **P3** — hôte : fixture sillage, préparation par image, buffer GPU, somme modale bornée à l'emprise ; R/B/Home ; compilation.
 - [ ] **P4** — `--verify` : GPU contre cœur, témoin de résolution, couture, admission, coûts deux recettes, captures, fenêtre.
 - [ ] **P5** — réception HOTE-GPU-S212, décision chiffrée du chemin d'image du sillage, suite complète des tests.
 - [ ] **P6** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
 
-*(vide)*
+P2 : `Field::render_components` / `bound_pressure::Prepared::render_components` + `component_count`.
+Test contre `sample_batch` à 1e-5 relatif (norme L1 des coefficients), trois origines, quatre
+décalages ; refus Context/Time/Capacity/origine sans écriture. Témoin : signe de B inversé → échec.

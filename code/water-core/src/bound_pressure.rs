@@ -254,6 +254,28 @@ impl<'a> Prepared<'a> {
     pub fn time(&self) -> SimTime {
         self.time
     }
+    /// S212 : coefficients d'image du champ publié, voir `Field::render_components`. Même
+    /// désignation du champ et de l'instant que `sample_batch` ; `origin` est locale au contexte.
+    pub fn render_components(
+        &self,
+        context: &Context,
+        time: SimTime,
+        origin: [f32; 2],
+        out: &mut [[f32; 4]],
+    ) -> Result<(), Error> {
+        if !self.context.matches(context) {
+            return Err(Error::Context);
+        }
+        if time != self.time {
+            return Err(Error::Time);
+        }
+        self.field
+            .render_components(origin, out)
+            .map_err(Error::Preparation)
+    }
+    pub fn component_count(&self) -> usize {
+        self.field.component_count()
+    }
     /// ADR-117 : consommateur mixte ; contexte et instant contrôlés par classify.
     pub(crate) fn differential_local(
         &self,
@@ -582,6 +604,72 @@ mod tests {
                 baseline = Some(value);
             }
         }
+    }
+    #[test]
+    fn render_components_rebase_against_sample_s212() {
+        let mut nodes = [Node::default(); 64];
+        let mut hn = [Node::default(); 32];
+        let full = bake(recipe(), &mut nodes).unwrap();
+        let half = full.half_into(&mut hn).unwrap();
+        let ctx = Context::new(settings(), &half).unwrap();
+        let mut pool = [Slot::default(); 32];
+        let time = SimTime(3_000_000);
+        let f = Prepared::build(ctx, &half, &path(), time, &mut pool).unwrap();
+        assert_eq!(f.component_count(), 32);
+        let mut out = [[0.0f32; 4]; 33];
+        let (mut scratch, mut sample) = ([Surface::default(); 1], [Surface::default(); 1]);
+        for origin in [[0.0, 0.0], [5.0, -3.0], [-5.0, 9.0]] {
+            f.render_components(&ctx, time, origin, &mut out).unwrap();
+            assert_eq!(out[32], [0.0; 4]);
+            let (norm, slope_norm) = out[..32].iter().fold((0.0f64, 0.0f64), |(n, s), c| {
+                let a = (c[0] as f64).hypot(c[1] as f64);
+                (n + a, s + a * (c[2] as f64).hypot(c[3] as f64))
+            });
+            assert!(norm > 0.0);
+            for q in [[0.0f32, 0.0], [1.25, -2.5], [-3.0, 0.75], [2.5, 1.0]] {
+                let p = [origin[0] + q[0], origin[1] + q[1]];
+                f.sample_batch(&ctx, time, &[p], &mut scratch, &mut sample)
+                    .unwrap();
+                let mut v = [0.0f64; 3];
+                for c in &out[..32] {
+                    let [a, b, kx, ky] = c.map(|x| x as f64);
+                    let phase = kx * q[0] as f64 + ky * q[1] as f64;
+                    let (s, co) = phase.sin_cos();
+                    v[0] += a * co - b * s;
+                    v[1] -= kx * (a * s + b * co);
+                    v[2] -= ky * (a * s + b * co);
+                }
+                let s = sample[0];
+                assert!((v[0] - s.eta as f64).abs() <= 1e-5 * norm, "{origin:?} {q:?}");
+                for i in 0..2 {
+                    assert!((v[1 + i] - s.slope[i] as f64).abs() <= 1e-5 * slope_norm);
+                }
+            }
+        }
+        // Refus atomiques : champ, instant, capacité, origine.
+        let before = out;
+        let mut other = settings();
+        other.cell += 1;
+        let wrong = Context::new(other, &half).unwrap();
+        assert_eq!(
+            f.render_components(&wrong, time, [0.0; 2], &mut out),
+            Err(Error::Context)
+        );
+        assert_eq!(
+            f.render_components(&ctx, SimTime(3_000_001), [0.0; 2], &mut out),
+            Err(Error::Time)
+        );
+        assert_eq!(
+            f.render_components(&ctx, time, [0.0; 2], &mut out[..31]),
+            Err(Error::Preparation(spectral_pressure::PrepareError::Capacity))
+        );
+        for origin in [[f32::NAN, 0.0], [0.0, 4096.0], [-4096.0, 0.0]] {
+            assert!(matches!(
+                f.render_components(&ctx, time, origin, &mut out),
+                Err(Error::Preparation(_))
+            ));
+        }
+        assert_eq!(out, before);
     }
 }
 

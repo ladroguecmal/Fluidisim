@@ -412,6 +412,40 @@ impl Field<'_> {
         output[..count].copy_from_slice(&scratch[..count]);
         Ok(())
     }
+    /// S212, ADR-130 : coefficients d'image `[A, B, kx, ky]` rebasés à `origin`, un par slot,
+    /// tels que `η(origin + q) ≈ Σ A cos(k·q) − B sin(k·q)` et pente `−k (A sin + B cos)`.
+    /// `A + iB` est la réponse pondérée tournée de la phase repliée `k·origin` : aucun temps ni
+    /// aucune coordonnée absolue ne quitte le cœur (I-08). Chemin cosmétique, pas `sample` au bit.
+    /// Tous les contrôles précèdent l'écriture ; sortie inchangée au refus.
+    pub fn render_components(
+        &self,
+        origin: [f32; 2],
+        out: &mut [[f32; 4]],
+    ) -> Result<(), PrepareError> {
+        if out.len() < self.slots.len() {
+            return Err(PrepareError::Capacity);
+        }
+        if !origin.iter().all(|v| v.is_finite() && v.abs() < 4096.0) {
+            return Err(Error::Domain.into());
+        }
+        for slot in self.slots {
+            slot.spatial_phase(origin, false)?;
+        }
+        for (slot, dst) in self.slots.iter().zip(out.iter_mut()) {
+            let (s, c) = slot.spatial_phase(origin, false)?.sin_cos();
+            let r = slot.response.eta;
+            *dst = [
+                slot.weight * (r.re * c - r.im * s),
+                slot.weight * (r.re * s + r.im * c),
+                slot.k[0],
+                slot.k[1],
+            ];
+        }
+        Ok(())
+    }
+    pub fn component_count(&self) -> usize {
+        self.slots.len()
+    }
     /// Emprise déclarée du champ, posée une fois et appliquée par `sample` (ADR-080).
     pub fn admits(&self, p: [f32; 2]) -> bool {
         (0..2).all(|i| p[i].is_finite() && p[i] >= self.min[i] && p[i] <= self.max[i])
