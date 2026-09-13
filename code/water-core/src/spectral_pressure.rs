@@ -2,6 +2,9 @@
 #[path = "pressure_differential.rs"]
 mod differential;
 pub use differential::PressureDifferential;
+#[path = "pressure_local_bound.rs"]
+mod local_bound;
+pub use local_bound::LocalSlopeEnvelope;
 use crate::{
     modal_pressure::{scale_integer, Complex, Error, ModalPressure, Response, Segment},
     PhaseQ32, SimTime,

@@ -285,6 +285,16 @@ impl<'a> Prepared<'a> {
     pub fn component_count(&self) -> usize {
         self.field.component_count()
     }
+    /// ADR-135 : annonce locale liée au même contexte et instant que les échantillons.
+    /// Ne change pas le plancher global ni les refus de composition.
+    pub fn local_slope_envelope(
+        &self, context: &Context, time: SimTime, min: [f32;2], max: [f32;2],
+    ) -> Result<spectral_pressure::LocalSlopeEnvelope, Error> {
+        if !self.context.matches(context) { return Err(Error::Context); }
+        if time != self.time { return Err(Error::Time); }
+        self.field.local_slope_envelope(min,max)
+            .map_err(|e| Error::Preparation(e.into()))
+    }
     /// ADR-117 : consommateur mixte ; contexte et instant contrôlés par classify.
     pub(crate) fn differential_local(
         &self,
@@ -382,6 +392,24 @@ mod tests {
             slope: [20.0, 21.0],
             horizontal_velocity: [22.0, 23.0],
         }
+    }
+    #[test]
+    fn local_bound_checks_context_time_and_domain_s218() {
+        let mut nodes = [Node::default();64];
+        let mut half_nodes = [Node::default();32];
+        let full = bake(recipe(), &mut nodes).unwrap();
+        let half = full.half_into(&mut half_nodes).unwrap();
+        let ctx = Context::new(settings(), &half).unwrap();
+        let mut pool = [Slot::default();32];
+        let time = SimTime(3_000_000);
+        let f = Prepared::build(ctx,&half,&path(),time,&mut pool).unwrap();
+        let mut changed = settings(); changed.cell += 1;
+        let wrong = Context::new(changed,&half).unwrap();
+        assert!(matches!(f.local_slope_envelope(&wrong,time,[0.;2],[0.;2]),Err(Error::Context)));
+        assert!(matches!(f.local_slope_envelope(&ctx,SimTime(0),[0.;2],[0.;2]),Err(Error::Time)));
+        assert!(matches!(f.local_slope_envelope(&ctx,time,[-9.;2],[0.;2]),Err(Error::Preparation(_))));
+        let b = f.local_slope_envelope(&ctx,time,[0.;2],[0.1;2]).unwrap();
+        assert!(b.bound>0.);
     }
     #[test]
     fn context_rejects_every_changed_coordinate_and_recipe() {
