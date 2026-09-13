@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S205 — en cours
+Session : S205 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : **A245**, bloquant J1 (FEUILLE-DE-ROUTE) — la composition B+W refuse toute mer
 au-delà de Hs ≈ 1,1 m, dont la mer de référence S201. Lot bibliothèque : faire composer B+W
@@ -99,7 +99,7 @@ publié, pas une erreur de requête (ADR-127 D7 : pas de fonctionnalité retiré
 - [x] **P5** — bout en bout : image S203 +3 s rejouée **au bit** (contrôle « admis inchangé ») ;
  impact sur la mer S201 Hs 1,5 contre témoin, zéro pixel hors emprise ; budget d'impact π/7.
 - [x] **P6** — ADR-128 ; notes datées ADR-080/095/098/126 ; A245 close ; COMPOSITION-MER-S205.
-- [ ] **P7** — rituel §6 : journal, angles, leçons, décomptes, feuille de route (état J1), file
+- [x] **P7** — rituel §6 : journal, angles, leçons, décomptes, feuille de route (état J1), file
  active, index/README/REPRISE, compteur, jeton libre, copies.
 
 ### Notes de reprise
@@ -155,3 +155,7 @@ plus d'évaluations qu'à Hs 0,5 : borne de pente B+W 0,99 contre 0,58.
 P6 : ADR-128 actée ; notes datées ADR-062, 080, 095, 098, 126 ; COMPOSITION-MER-S205 (défaut,
 remèdes pesés, changements, tri des sept essais, réception, image, non reçu) ; clôture A245 au
 registre. Décompte attendu : 128 ADR.
+
+P7 : journal S205, A245 close, A249 ouverte, corollaire L280 ; feuille de route (J1 : A245 levé),
+file active (A245 close, A247 prochain lot S206, A249), index, README, REPRISE (§3, §4, table
+velocite.sh : B et W S205). Décomptes 128/249/282/18/6/23 vérifiés. Jeton libre, copies à avancer.

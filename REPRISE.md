@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 01:41 +02:00
+JETON            : libre
+Battement        : 2026-09-13 02:06 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S205 — A245 : composition B+W sur mer réelle (J1, lot bibliothèque)
-Dernière session : S204 — ADR-127 : ambition complète, construction progressive ; feuille de route
-Session suivante : S205 — A245 : composition B+W sur mer Hs > 1,1 m (J1, file active, code src)
-Maillons        : 0 — S204 sujet imposé par l'utilisateur, pas un reliquat ; ADR-127 fixe δ/V
+Session en cours : aucune
+Dernière session : S205 — A245 close : la mer S201 se compose, ADR-128 (budget = perturbations)
+Session suivante : S206 — A247 : coût d'un impact visible contre 2 ms, puis arbitrage explicite (J1)
+Maillons        : 0 — S205 avance B et W (code src, velocite.sh)
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 
@@ -153,9 +153,9 @@ une session ne peut signaler sa présence qu'en travaillant.
 sont des étapes. Trajectoire J1 → J5 et noyau V : **[FEUILLE-DE-ROUTE](docs/FEUILLE-DE-ROUTE.md)**,
 seul document qui la porte — ne pas la recopier ici.
 
-**S204 : jalon en cours J1** (B/W visible et interactif). Prochain lot **A245** — la composition
-B+W refuse toute mer au-delà de Hs≈1,1 m, dont celle de S201 — puis A247 (coût d'un impact
-visible contre 2 ms, à arbitrer explicitement). **Hôte interactif : arbitrage ouvert**, qui
+**S205 : jalon en cours J1** (B/W visible et interactif). **A245 levé** (ADR-128) : la mer S201
+se compose. Prochain lot **A247** — coût d'un impact visible contre 2 ms, à arbitrer
+explicitement. **Hôte interactif : arbitrage ouvert**, qui
 revient à l'utilisateur s'il demande des dépendances. V-noyau s'ouvre au plus tard avec J2 ;
 S200-1/A244 et S199-2 sont sur le chemin de J2, plus « reportées ». Les acquis S194 ci-dessous
 restent datés ; la file liée porte aussi leurs suivis S195–S199.**
@@ -238,7 +238,7 @@ pièges déjà payés.
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/FEUILLE-DE-ROUTE.md  ← trajectoire J1 → J5 et noyau V, seul porteur (ADR-127)
 docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 127 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 128 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -257,6 +257,20 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S205 — 2026-09-13 : la mer de référence se compose, ADR-128 ; A245 close.**
+Le budget de pente de la composition ne somme plus que les **perturbations** : la raideur L1 de
+B (0,6082 à Hs 1,5) en sort, reste publiée dans `steepness`, même ordre de somme. `Slope`/
+`SlopeEnvelope` jugés sur la pente des perturbations ; `slope_floor` exact dans les deux sens ;
+budget d'impact = π/7 moins les autres perturbations (remplace ADR-126 règle 3). Quatre sites
+modifiés, `differential_slope_envelope` retirée. Critère déclaré avant le code et tenu : **aucun
+bit publié ne change** pour un lot déjà admis — image S203 au bit, C18/C02 inchangés.
+Sept attentes réécrites, toutes liées à B ; workspace **344 réussis / cinq ignorés**.
+Impact sur la mer S201 Hs 1,5 à +3/+6 s : **zéro refus, zéro pixel hors emprise**.
+**A249** (bancs de refus à mers jouets), corollaire de L280. I-18 désormais tenu pour B.
+**Suite S206 : A247**, coût d'un impact visible contre 2 ms, puis arbitrage explicite.
+128 ADR,249 angles,282 leçons,18 invariants,6 SPEC,23 cas ; compteur0 (B/W code src).
+Voir [composition mer S205](docs/validation/COMPOSITION-MER-S205.md), [ADR-128](docs/adr/ADR-128-le-budget-de-pente-borne-les-perturbations.md).
 
 **S204 — 2026-09-13 : ambition complète rétablie, ADR-127 corrige ADR-124.**
 Clarification de l'utilisateur : *ambition finale complète, construction progressive par
@@ -368,15 +382,15 @@ attrapé trois erreurs en trois sessions, ni la qualité du travail sur W.
 
 ### Les quatre couches — l'état qui commande tout le reste
 
-**Recalculé le 2026-09-13 en S203 par `sh outils/velocite.sh`. Ne pas le recopier : le relancer.**
+**Recalculé le 2026-09-13 en S205 par `sh outils/velocite.sh`. Ne pas le recopier : le relancer.**
 Un état sans date se lit au présent, et il ne l'est plus (A185).
 
 | couche | modules | dernière avancée (code) | depuis |
 |---|---:|---|---:|
-| **B** — fond | 3 | S181 | 22 sessions |
-| **W** — perturbations | 23 | S181 *(décision : ADR-126, S203)* | 22 sessions |
-| **δ** — volumique | 5 *(dont noyau à projection non encore admissible)* | **S202** | **1 session** |
-| **V** — réseaux | **0** | **jamais** | **203 sessions** |
+| **B** — fond | 3 | **S205** | **0 session** |
+| **W** — perturbations | 23 | **S205** | **0 session** |
+| **δ** — volumique | 5 *(dont noyau à projection non encore admissible)* | S202 | 3 sessions |
+| **V** — réseaux | **0** | **jamais** | **205 sessions** — noyau à ouvrir au plus tard avec J2 (ADR-127) |
 
 *S203 : l'outil ne voit que le code, et S203 n'en a ajouté aucun dans `src` ; ADR-126 est
 une décision qui fixe un élément de W, ce qui remet le compteur à zéro selon §6.8 comme

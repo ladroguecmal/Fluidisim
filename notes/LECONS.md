@@ -4624,3 +4624,9 @@ pas**, en une phrase, et le confronter aux intentions d'origine (`docs/sources/`
 quand une décision transcrit une demande : **citer les mots de l'utilisateur à part, et marquer
 la glose comme glose**. Une restriction de périmètre qui ne cite aucune phrase de l'utilisateur
 qui la demande n'est pas une décision de l'utilisateur. Voir ADR-127, A248.
+
+**Corollaire S205 à L280.** Le même défaut vit dans les **essais** : sept essais de refus de la
+composition produisaient leurs verdicts avec des mers de 1 à 10 cm, choisies pour isoler un
+mécanisme, et aucun ne pouvait voir qu'une mer de jeu dépassait seule la limite. Un essai qui
+isole un mécanisme doit être accompagné d'**un point à paramètres du produit** — pas pour tester
+le mécanisme, pour tester que le mécanisme laisse passer le produit. Voir A249.

@@ -10663,3 +10663,44 @@ L282. 127 ADR, 248 angles, 282 leçons, 18 invariants, 6 SPEC, 23 cas. Invariant
 tenir le budget) est cohérent avec D7. File active entière relue. Compteur 0 : sujet imposé par
 l'utilisateur, pas un reliquat ; ADR-127 fixe le périmètre de δ et V. Mémoire privée du compte
 mise à jour (pointeur, le dépôt fait foi).
+
+## S205 — 2026-09-13 — La mer de référence se compose : B sort du budget de refus
+
+**Entrée.** « Enchaîne sur S205 ». État réel : master et trois copies à 990e6ae, propres ; jeton
+libre (S204, même agent). Arbitrage de l'hôte interactif posé en S204, non répondu ; A245 n'en
+dépend pas. Plan seul 60e1b58, avec la décision de conception et le critère de non-régression
+écrits **avant** le code : tout lot déjà admis publie les mêmes bits.
+
+**Décision.** Quatre sites mettaient `steepness_B·π` (borne L1 de B, 0,6082 à Hs 1,5) dans le
+budget de refus. Remèdes pesés : majorant directionnel (refuse encore), refus sur pente réelle
+au point (dispersé, causé par la mer, lot atomique perdu), borne statistique (ne garantit rien).
+Retenu, **ADR-128** : le budget ne somme que les perturbations ; la raideur de B reste publiée ;
+`Slope`/`SlopeEnvelope` jugés sur la pente des perturbations ; `slope_floor` exact dans les deux
+sens ; budget d'impact = π/7 moins les autres perturbations (remplace ADR-126 règle 3). Aucune
+SPEC ne consommait la garantie « B+W sous π/7 » ; `steepness` sert à l'écume et au déferlement.
+
+**Construction.** `composition`, `mixed_water`, `mixed_differential`, `bound_pressure` :
+accumulateur `budget` et pente `perturbation` séparés, publication inchangée, finitude de
+`steepness` contrôlée en sortie de `compose`. `Background::differential_slope_envelope` retirée.
+
+**Réception.** Premier passage 7 échecs sur 246, **tous** liés à B dans le budget ou le verdict :
+garde I-18 (noms des sites), verdicts S144 reconstruits avec un impact, deux verdicts de pression
+passés de `Slope` à `SlopeEnvelope` (la pente de B faisait la différence), plancher désormais
+admettant tout au-dessus. Essai neuf `reference_sea_s201_composes_with_an_impact_s205`. Workspace
+**344 réussis / cinq ignorés** ; release vert ; C18 `0x85c8bc610f551d11`, C02 `0x0a3a3bcc945db263`
+inchangés ; **image S203 +3 s reproduite au bit**. Impact sur la mer S201 Hs 1,5 à +3 s et +6 s :
+**zéro refus, zéro non résolu, zéro pixel hors emprise** (7 342 et 16 251 px différents),
+anneaux visibles ; la marche coûte 1,67 fois plus, sa borne de pente passant de 0,58 à 0,99.
+
+**Non fait.** Aucune image au-delà de Hs 1,5, ni de sillage ou de pression sur mer raide (essais
+verts seulement) ; validité de la superposition sur mer raide non reçue (ADR-123, A207) ; A247 et
+hôte interactif, les deux autres bloquants de J1, intacts.
+
+**Suite S206 : A247**, coût d'un impact visible confronté au budget eau 2 ms sur une scène
+représentative de J1 — mesurer les leviers (pas de table radiale, N hors coutures, parallélisme)
+puis **arbitrage explicite** (ADR-127 D7). L'hôte interactif attend toujours l'utilisateur.
+
+**Rituel.** A245 close (ADR-128) ; **A249** (bancs de refus à mers jouets) ; L280 reçoit un
+corollaire plutôt qu'une leçon quasi dupliquée. 128 ADR, 249 angles, 282 leçons, 18 invariants,
+6 SPEC, 23 cas. I-18 relu : désormais tenu pour B. velocite.sh : B et W avancent en S205, δ S202,
+V jamais. Compteur 0 (code `src`). Feuille de route : J1 perd A245. File active entière relue.

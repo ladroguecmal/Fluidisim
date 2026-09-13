@@ -723,3 +723,9 @@ obligatoires ; effets bornés = étapes ; V-noyau au plus tard avec J2. Budget 6
 et seuil 2 % acquis, incompatibilité ⇒ arbitrage explicite. Nouvelle feuille de route.
 **Suite S205 : A245.** 127 ADR,248 angles,282 leçons,18 invariants,6 SPEC,23 cas.
 Voir [ADR-127](docs/adr/ADR-127-ambition-complete-construction-progressive.md), [feuille de route](docs/FEUILLE-DE-ROUTE.md).
+
+**S205 — 2026-09-13 : la mer de référence se compose, ADR-128 ; A245 close.**
+Budget de pente = perturbations seules ; raideur de B publiée ; aucun bit publié changé pour un
+lot déjà admis. Mer S201 Hs 1,5 composée avec impact, zéro refus. 344 réussis/cinq ignorés.
+**Suite S206 : A247.** 128 ADR,249 angles,282 leçons,18 invariants,6 SPEC,23 cas.
+Voir [composition mer S205](docs/validation/COMPOSITION-MER-S205.md), [ADR-128](docs/adr/ADR-128-le-budget-de-pente-borne-les-perturbations.md).

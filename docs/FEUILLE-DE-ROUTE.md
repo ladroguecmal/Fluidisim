@@ -46,9 +46,12 @@ réel**, composée B+W sans refus, coût mesuré face au profil 60 images/s / ea
 journal rejouable, impact radial, sources de pression et sillages, composition B+W, préparation
 et restauration du service. Images **hors ligne** seulement : B (S201), impact W dans son emprise
 (S203, ADR-126). Profil ADR-125 acquis, seuil 2 % acquis. **Aucun hôte interactif.**
+*S205* : la composition B+W admet toute mer — le budget de pente ne borne plus que les
+perturbations (ADR-128) ; impact rendu sur la mer S201.
 
 *Bloquants nommés* :
-- **A245** — la composition refuse toute mer au-delà de Hs ≈ 1,1 m, dont celle de S201 ;
+- ~~**A245**~~ — **levé en S205** (ADR-128) : la mer S201 (Hs 1,5 m) se compose, impact compris,
+  zéro refus ; [COMPOSITION-MER-S205](validation/COMPOSITION-MER-S205.md) ;
 - **hôte interactif** — arbitrage ouvert, §4 ;
 - **A247** — un impact visible coûte plus que 2 ms sur CPU ; à confronter à la scène
   représentative puis à arbitrer (ADR-127 D7), pas à contourner.
@@ -124,11 +127,12 @@ Les protocoles restent ceux de [PLAN-BENCHMARK](validation/PLAN-BENCHMARK.md).
 |---|---|---|
 | **Hôte interactif de J1** | le workspace est sans dépendance (ADR-020) ; une fenêtre temps réel demande un hôte séparé avec dépendances — téléchargement, infrastructure — ou un hôte sans dépendance par appels système | **l'utilisateur**, s'il faut des dépendances |
 | **A247 — coût d'un impact visible** | 14 µs par point B+W, table radiale 2,7 ms par impact, contre 2 ms d'eau par image | la session sur mesure de scène ; l'utilisateur si une option retire de l'ambition |
-| **A245 — mer composable** | le budget de pente refuse Hs > 1,1 m ; migrer le terme de B change des bits | session (technique déléguée), lot bibliothèque |
+| ~~A245 — mer composable~~ | **tranché S205, ADR-128** : B hors du budget de refus, bits publiés inchangés | — |
 
 ## 5. Historique de la trajectoire
 
 ADR-053 (S70) : construire, en commençant par W. ADR-054 (S71) : ordre des lots W sans faux
 préalable. ADR-124 (S201) : image, puis budget, puis effets bornés — **lu à tort comme une
 réduction**, corrigé par ADR-127 (S204). ADR-125 (S202) : profil 60 images/s, eau 2 ms.
-ADR-126 (S203) : emprise d'un impact visible.
+ADR-126 (S203) : emprise d'un impact visible. ADR-128 (S205) : le budget de pente borne les
+perturbations, pas la mer — A245 levé.

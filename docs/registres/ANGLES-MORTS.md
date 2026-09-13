@@ -2900,3 +2900,15 @@ hors emprise. I-18 est tenu pour le terme de B, qui n'est plus comparé. `slope_
 exact dans les deux sens. **Ce qui ne l'est pas** : la garantie « B+W sous π/7 », retirée par
 décision ; la validité de la superposition sur mer raide (ADR-123, A207). Voir
 COMPOSITION-MER-S205.
+
+- **A249** *(sévérité 2, S205 ; ouverte)* — **Les bancs et essais de refus de la composition
+  n'employaient que des mers jouets.** Hs 0,01 (`bench_water`, fond de pression d'amplitude
+  0,01), Hs 0,1 (`tests_mixed_water`), une composante de 1 cm : sur aucun, la borne L1 de B
+  n'approchait π/7. Le terme de B est entré dans le budget en S79 (ADR-062) ; il a fallu S203 et
+  un rendu pour découvrir qu'il interdisait toute mer au-delà de Hs ≈ 1,1 m. Sept essais
+  exerçaient même leurs verdicts **par la raideur de B** sans que personne ne se demande ce
+  qu'elle vaut sur une mer de jeu. Le défaut général : un banc de refus dont les paramètres sont
+  choisis pour isoler un mécanisme ne dit rien des frontières que le produit franchit. Remède
+  partiel S205 : un essai à la recette S201. **À faire** : recenser les autres bancs de refus
+  (pression, sillage, profils N/R/A, `max_slope` des fixtures à 0,1) et y ajouter au moins un point
+  à paramètres de jeu. Voir L280.

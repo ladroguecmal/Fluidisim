@@ -20,6 +20,14 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S205 — 2026-09-13 : la mer de référence se compose, ADR-128 ; A245 close.**
+Le budget de pente ne somme plus que les perturbations ; la raideur de B reste publiée.
+Aucun bit publié ne change pour un lot déjà admis (image S203, C18/C02 reproduits).
+Mer S201 Hs 1,5 composée avec impact : zéro refus, zéro pixel hors emprise.
+344 réussis/cinq ignorés. A249. **Suite S206 : A247** (J1).
+128 ADR,249 angles,282 leçons,18 invariants,6 SPEC,23 cas.
+Voir [composition mer S205](validation/COMPOSITION-MER-S205.md), [ADR-128](adr/ADR-128-le-budget-de-pente-borne-les-perturbations.md).
+
 **S204 — 2026-09-13 : ambition complète rétablie, ADR-127 corrige ADR-124.**
 Clarification de l'utilisateur : ambition finale complète, construction progressive par
 versions de plus en plus capables. La lecture « δ effet borné / V au besoin gameplay »
@@ -1336,7 +1344,7 @@ parfaitement stable ne pouvait pas distinguer.
 
 ## État d'avancement
 
-**État actif S204** : ambition finale complète, jalon en cours J1 (B/W visible et interactif) selon la [feuille de route](FEUILLE-DE-ROUTE.md) (ADR-127) ; hôte interactif à arbitrer. Impact W visible dans une emprise reçue par ses coutures (ADR-126) ; la composition B+W refuse toute mer au-delà de Hs≈1,1 m (A245, prochaine étape) ; un impact visible coûte plus que 2 ms sur CPU (A247, à arbitrer). B visible, profil60Hz/eau2ms fixé (ADR-125), coût par domaine δ exposé. Critère B4 fixé à2 %, noyau δ sans allocation dans le pas,
+**État actif S205** : ambition finale complète, jalon en cours J1 (B/W visible et interactif) selon la [feuille de route](FEUILLE-DE-ROUTE.md) (ADR-127) ; hôte interactif à arbitrer. Impact W visible dans une emprise reçue par ses coutures (ADR-126) ; la composition B+W admet toute mer depuis S205 (ADR-128, A245 close) ; un impact visible coûte plus que 2 ms sur CPU (A247, prochaine étape, à arbitrer). B visible, profil60Hz/eau2ms fixé (ADR-125), coût par domaine δ exposé. Critère B4 fixé à2 %, noyau δ sans allocation dans le pas,
 refus numériques atomiques reçus ; A244 partielle (précision/budget), fond coupé
 inchangé, B3 non admissible. Domaine de superposition S194 confirmé S197.
 B1/B2/B4 restent partiels, aucun banc complet. Voir le résultat en tête de cet index
