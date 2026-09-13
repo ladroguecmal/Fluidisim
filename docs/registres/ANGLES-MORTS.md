@@ -3157,3 +3157,22 @@ migrée ; A258 (certification numérique) reste ouverte. Pas de reprise inter-ap
   de la borne. Suite J1/W : borne locale avec Hessienne signée et reste supérieur,
   quantification couverte, puis coût et gain reçus sur S219. Ce mécanisme ne préjuge
   ni d'un gain de cette piste ni du coût d'un chemin GPU. Voir PARTITION-S219, L298.
+
+**Suivi A255/A258/A259 — S220, 2026-09-13.** ADR-136 : borne d'ordre deux à Hessienne signée.
+Partition à 32767 évaluations : 1,006–1,012 × maximum de référence sur les quatre fixtures ;
+**le pessimisme d'A255 n'est plus l'obstacle sur ces fixtures, le coût l'est** (≈30 s CPU un
+fil par instant). A258 devient aussi le **plancher de précision** : sur les feuilles
+millimétriques, la réserve `γ_N·C` (0,38–1,26 % du maximum) dépasse de 160 à 360 fois le
+reste géométrique. A259 partielle : levée au-dessus de ≈16 000 feuilles, intacte à 8191
+évaluations, mécanisme nommé A260. Voir ORDRE-DEUX-S220.
+
+- **A260** *(sévérité 2, S220 ; ouverte)* — **Un mode non résolu payé isolément coûte deux
+  fois sa masse.** ADR-135 et ADR-136 bornent la variation d'un mode à `D_k ≥ 2` par
+  `2 c_k`, mode par mode, et ADR-136 paie `D_k²/2` presque autant aux modes inclus proches
+  de `D = 2`. Sur une maille 2 × 1,5 m, 1608 modes sur 4096 sont exclus et le reste total pèse
+  74–87 % de la borne globale — la répartition entre exclus et inclus n'est pas mesurée : la
+  borne locale ne peut alors pas descendre sous la globale, quel que soit l'ordre. L'enveloppe directionnelle du seul sous-ensemble `U`
+  (ADR-134) les paie au plus `C_U` ensemble, et `G(U) + |S_U(c)| ≤ 2 C_U` garantit de
+  ne jamais perdre. Aucun gain chiffré avant mesure de `C_U` par taille de maille. Toute
+  partition des modes est valide ; le tri éventuel vit dans la mémoire de l'appelant.
+  Voir ORDRE-DEUX-S220 §Suite, L299.

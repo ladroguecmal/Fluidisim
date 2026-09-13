@@ -1670,7 +1670,15 @@ entrée par entrée. Le fil reprend ci-dessous.
 
 ## File active
 
-Relue en S219, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+Relue en S220, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+
+**Suivi J1 S220 — A255 : le pessimisme résorbé sur ces fixtures, le coût reste.**
+[Réception S220](../validation/ORDRE-DEUX-S220.md), ADR-136 : borne d'ordre deux à Hessienne
+signée ; partition à 32767 évaluations à 1,006–1,012 × le maximum, mieux que l'ordre un à 65535.
+Évaluation 1,6–2,0 × ADR-135 ; ≈30 s CPU un fil par instant. **A258 devient le plancher de
+précision** (réserve 0,38–1,26 %), toujours prérequis de migration. A259 partielle, mécanisme
+nommé **A260** (modes non résolus à grosse maille). **Suite S221 J1/W : A260, puis A258.**
+A254, loi GPU et migration ouvertes ; autres lignes et déclencheurs conservés, δ/V obligatoires.
 
 **Suivi J1 S219 — A255 : partition adaptative construite.**
 [Réception S219](../validation/PARTITION-S219.md) : couverture conservée, plafond strict

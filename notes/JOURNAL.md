@@ -11319,3 +11319,64 @@ déclencheurs. I-03/04/06/08/14/18 restent applicables ; I-05 ne transforme pas 
 d'évaluations en budget temporel, explicitement non reçu. Aucun arbitrage humain nouveau.
 Maillons0 : W avancée dans src. 135 ADR,259 angles,298 leçons,18 invariants,6 SPEC,23 cas.
 Jeton libéré, copies à avancer après le commit de clôture et vérification de propreté.
+
+## S220 — 2026-09-13 — L'ordre deux rejoint le maximum ; la réserve devient le plancher
+
+**Entrée.** « Reprends le projet », Claude Code (Opus 5), copie principale ; master et trois
+copies propres à 8ef0c64, jeton libre, maillons 0. Plan 94df5ff, ADR 5df7a18, construction
+3ae9150, tests 9d1b08d, campagne 0430776, réception d3a57a3. Aucun téléchargement ni copie.
+Interruption utilisateur pendant P4 : niveau d'effort du modèle constaté `xhigh`, réglé par
+l'utilisateur dans l'app (une session ne peut pas changer le sien), puis reprise.
+
+**Construction W.** [ADR-136](../docs/adr/ADR-136-borne-locale-d-ordre-deux-a-hessienne-signee.md)
+actée : chaque mode développé à l'ordre deux autour de la phase exécutée au centre ; la dérivée
+est `η_k(c)`, d'où une Hessienne **signée** `M = −Σ w_k ⊗ 2π t_k η_k(c)` dont le maximum
+convexe est aux quatre coins. Écart phase exécutée/linéaire `E_k` (produits `t·x`, fraction,
+Q32, coins) payé par mode ; mode dans `M` si `E + D²/2 < min(2, D)`. Une passe `O(N)` :
+`Slot::accumulate` rend `(sin, cos)` sans changer une opération, la branche ADR-135 est
+recalculée au bit, `bound = min(ordre un, ordre deux)`. `Field`/`Prepared` publient
+`local_slope_envelope_second_order` et `partition_slope_envelope_order` ; l'appel S219
+délègue en `First`. Aucune admission migrée ; réserve non certifiée (A258).
+
+**Mesures déterminantes.** [ORDRE-DEUX-S220](../docs/validation/ORDRE-DEUX-S220.md), cinq
+processus isolés. Ordre un reproduit S218 et S219 au bit. Grille 0,5 m ordre deux : gain 1,41 à
+1,61 sur l'ordre un ; à 1 m, déjà meilleure que l'ordre un à 0,5 m en 11,5–11,9 s contre
+27,5–28,2 s. Partition : **à 32767 évaluations, ordre deux 1,006 à 1,012 × maximum de
+référence**, mieux que l'ordre un à 65535 sur les quatre fixtures, en 29,7–33,8 s contre
+34,7–37,2 s ; 65535 n'apporte presque rien (1,005–1,011). Gain sur la globale 1,63 à 2,58.
+À 2047 et 8191 évaluations, aucun gain dans les deux ordres. Évaluation d'ordre deux 1,6 à
+2,0 × ADR-135. Base passage 2 identique au bit.
+
+**Deux régimes identifiés par la feuille maximale.** Feuilles millimétriques : plafonnées par
+la **réserve numérique** — reste 160–360 × plus petit qu'elle sur les feuilles d'ordre deux,
+réserve 0,38 % (ordre un, base) à 1,26 % (ordre deux, lente) de la référence. Mailles
+2 × 1,5 m : le reste d'ordre deux vaut 74–87 % de la globale, fait des modes à grande largeur
+de phase — exclus à `2 c_k`, inclus proches de `D = 2` ; répartition non mesurée (A260). Fausse alerte de sûreté examinée avant publication : un agrégat
+laissait croire la borne sous « maximum + réserve d'ordre deux » ; la feuille était plafonnée
+par l'ordre un, dont la réserve est deux fois plus petite (L299).
+
+**Vérification.** Quatre tests S220 debug ; suite release 366 réussis (268+4+1+93), 5 ignorés,
+zéro échec. Deux attentes fausses du test quadratique corrigées avant campagne, sans toucher
+au code : borne globale exacte pour un mode unique (elle plafonnait les deux branches), et
+excès d'ordre un `h` et non `2h` ; plancher `E ≈ 6·10⁻⁶` mesuré. Toutes les abscisses
+f32 sondées près de 4000 m. Allocation absente par inspection, sans instrumentation.
+
+**Non fait et suite S221, file J1/W.** Trois leviers publiés dans la réception, sans
+prédiction chiffrée : **A260** enveloppe directionnelle du sous-ensemble non résolu
+(`G(U) + |S_U(c)| ≤ 2 C_U` : jamais pire que le traitement actuel) pour lever A259 sous
+16 000 feuilles ; **A258** borne d'erreur courante dans la passe, prérequis de migration et
+plancher de précision ; coût (×1,7) et validité temporelle d'une borne d'instant. Recommandé :
+A260 d'abord, parce qu'il réduit le travail nécessaire, ce que les deux autres ne font pas.
+A254, loi GPU, migration d'admission restent ouvertes. Aucun arbitrage humain nouveau.
+
+**Rituel.** A260 sévérité 2 ; suivis A255 (pessimisme résorbé sur ces fixtures, coût restant),
+A258 (plancher), A259 (partielle) ; L299. File active entière relue : A244/S200-1 et S199-2
+à J2, V-noyau au plus tard J2 ; B4 forces/perception, A216, A241, A213, B2/coupure,
+bathymétrie, multiplateforme, bancs et réunions gardent leurs déclencheurs.
+I-03/04/06/08/14/18 relus : la passe ne change aucun échantillon (I-03), les marges `8ε`,
+`32ε`, `γ` sont dérivées et datées (I-14), aucune admission élargie (I-18). Maillons 0 :
+W avancée dans src et ADR-136 actée. Procédure : un commit P3 d'abord créé sans sa case cochée
+(chemin relatif .NET faux), complété par `--amend` avant tout autre commit ; journal de
+campagne détachée bloqué par `tail -f`, surveillance restée ouverte 23 minutes après la fin.
+136 ADR, 260 angles, 299 leçons, 18 invariants, 6 SPEC, 23 cas. Jeton libéré ; copies avancées
+après le commit de clôture.

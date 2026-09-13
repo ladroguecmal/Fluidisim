@@ -769,6 +769,16 @@ DX12/RTX5070 Laptop : erreur hauteur max0,077657 mm ; passe eau960×540 médiane
 349 tests réussis/cinq ignorés. A250 close, A247 partielle ; sillage et coût complet encore dus.
 **Suite S212 : file J1/W, intégrer le sillage au GPU.** 130/250/284/18/6/23 inchangés.
 
+**S220 — 2026-09-13 : [borne locale d'ordre deux](docs/validation/ORDRE-DEUX-S220.md), [ADR-136](docs/adr/ADR-136-borne-locale-d-ordre-deux-a-hessienne-signee.md).**
+W publie une borne à Hessienne signée, minimum avec ADR-135 recalculé au bit. Partition à
+32767 évaluations : 1,006–1,012 × maximum de référence sur les quatre fixtures, mieux que
+l'ordre un à 65535 en moins de temps (29,7–33,8 s) ; évaluation 1,6–2,0 × ADR-135. Plancher :
+la réserve numérique (A258, 0,38–1,26 % du maximum). A259 levée au-dessus de ≈16 000 feuilles
+seulement ; à grosse maille, les modes non résolus dominent (A260). A255 : reste le coût, plus
+le pessimisme. Suite S221 J1/W : A260, enveloppe directionnelle des non résolus, puis A258,
+borne d'erreur courante. Aucune admission migrée. 366 tests release réussis, 5 ignorés.
+136 ADR, 260 angles, 299 leçons, 18 invariants, 6 SPEC, 23 cas ; maillons 0. Somme A254,
+loi GPU, J2/δ et V-noyau conservés.
 **S219 — 2026-09-13 : [partition adaptative](docs/validation/PARTITION-S219.md).**
 W construit un tas de rectangles dans le pool de l'appelant, avec plafond d'évaluations
 et couverture conservée aux arrêts. Gain globale/borne1,48–1,52 sur trois sillages

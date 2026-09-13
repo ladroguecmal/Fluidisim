@@ -4918,3 +4918,16 @@ les objets au niveau où il les choisit. S'il est saturé, améliorer l'indicate
 résolution peut être nécessaire ; réordonner ses égalités ne révèle aucune information
 nouvelle. Publier aussi le coût d'obtention de cette information, pas seulement celui
 de la sélection qui la consomme.
+
+## L299 — Un minimum de branches cache celle qui a gagné
+
+*(S220)* La borne publiée est le minimum de plusieurs branches, chacune avec sa réserve. En
+cours de campagne, un agrégat semblait placer la borne sous « maximum + réserve d'ordre
+deux » — donc une branche fausse. La feuille maximale était en fait plafonnée par l'autre
+branche, dont la réserve est deux fois plus petite. Le même relevé a ensuite montré le vrai
+plancher (la réserve, pas la géométrie) et la vraie cause du plateau (les modes non résolus).
+
+Quand une grandeur est un minimum, un maximum ou une somme de termes hétérogènes, publier sa
+**décomposition sur l'élément qui la fixe** — quelle branche, quel terme, à quelle échelle —
+avant d'interpréter l'agrégat ou de choisir le levier suivant. Le calculer hors
+chronométrage coûte une évaluation ; le deviner a coûté une campagne arrêtée.

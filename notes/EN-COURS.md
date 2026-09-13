@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S220 — en cours
+Session : S220 — terminée
 Agent : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
 Entrée : « Reprends le projet » ; master et trois copies propres à 8ef0c64, jeton libre,
 maillons 0. AGENTS, REPRISE (jeton, file active, §4 S219–S217, §5–§9), EN-COURS, journal
@@ -86,7 +86,7 @@ en ordre un au bit. Gain de partition non promis. Aucune admission migrée, A258
 - [x] **P4** — tests : couverture, domination, gain près du maximum, 4000 m, refus, identité S219.
 - [x] **P5** — exemple S220 : même rectangles S218 et partition S219 par ordre ; campagne isolée.
 - [x] **P6** — publier la réception S220 et ses relevés bruts.
-- [>] **P7** — rituel §6, journal, registres, index, file active, jeton et copies.
+- [x] **P7** — rituel §6, journal, registres, index, file active, jeton et copies.
 
 ### Notes de reprise
 
@@ -101,3 +101,5 @@ P5 : exemple `ordre_deux_s220` (grilles S218 2/1/0,5 m en ordre deux avec ordre 
 P5 fin : campagne relancée terminée à 16:02:29 (lent 15:51, long 15:55, base_tard 15:58, base passage 2 16:02). Journal de campagne resté à « fin lent » : `Add-Content` a échoué pendant que `tail -f` tenait le fichier, et la surveillance a attendu en vain jusqu'à 16:25 (impasse de procédure, pas de mesure). Base passage 2 : bornes identiques au bit au passage 1, 30,8/59,8 s contre 33,8/63,5 s. **Hypothèse du plancher confirmée** par la feuille maximale : base 32767, branche un 0,070740171 = centre 0,070322238 + reste 1,51e-4 + réserve 2,67e-4 ; branche deux 0,070861 (réserve 5,37e-4). Lent/long/base_tard à 65535 : ordre deux 1,0101/1,0063/1,0111 × référence, écart ≈ réserve. Grosses mailles 2×1,5 m : reste d'ordre deux 0,024 (lent) à 0,116 (long), dominé par les modes exclus (2488 dans M sur 4096).
 
 P6 : ORDRE-DEUX-S220 et relevés bruts publiés. Corrections avant publication, relues contre les relevés : branche 2 m « 1,5–1,8 × globale » (et non 0,17–0,23, faux pour lent), coût « 1,6–2,0 × » (et non 1,69–1,78), rapport reste/réserve « 160–360 × » sur les trois feuilles d'ordre deux (la base est plafonnée par l'ordre un). Suite proposée : A260 (enveloppe spectrale des non résolus), A258 (borne d'erreur courante), coût et validité temporelle. À porter au rituel : A260, suivi A255/A258/A259, L299.
+
+P7 : journal, A260 et suivis A255/A258/A259, L299, index, README, REPRISE (§3, §4, file active, jeton), feuille de route et file active plurielle actualisés. Une attribution non mesurée (reste des grosses mailles « fait des modes exclus ») corrigée avant commit dans la réception, A260 et le journal. Maillons 0. Jeton libre ; copies à avancer après le commit de clôture.

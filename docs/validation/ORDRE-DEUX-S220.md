@@ -161,8 +161,9 @@ d'arrondi plus fine ne rendrait pas seulement la réserve plus sûre, elle la re
 | tardive | 0,0974 | 0,1162 | 84 % |
 
 Le reste tombe à 35 % de la globale à 1 × 1,5 m (3418 modes) et à 21 % à 1 × 0,75 m (4096 modes),
-sur la base. **Il n'est pas fait des annulations manquantes, que la Hessienne apporte** : il est
-fait des modes exclus, qui paient chacun `2 c_k` (**A260**).
+sur la base. Aux coins, la pente linéarisée vaut 0,008 à 0,076 sur ces feuilles, soit 21 à 57 % de la globale,
+contre 74 à 87 % pour le reste : **le reste domine**. Il est fait des modes à grande largeur de phase — les 1608 exclus paient `2 c_k`, les
+inclus proches de `D = 2` paient `D²/2` presque autant ; la répartition n'est pas mesurée (**A260**).
 
 ## Verdict
 

@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 16:29 +02:00
+JETON            : libre
+Battement        : 2026-09-13 16:31 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
-Session en cours : S220 — borne locale d'ordre deux (Hessienne signée, reste supérieur)
-Dernière session : S219 — partition adaptative W construite et reçue ; couverture conservée, plafond en évaluations ; A255 partielle, A259 ouverte
-Session suivante : S220 — file J1/W : construire et recevoir une borne locale avec pente/Hessienne signée au centre et reste supérieur borné, en couvrant les phases quantifiées ; conserver ADR-135 comme repli, mesurer gain/coût via S219. A258 avant migration d'admission ; A255, somme A254 et loi GPU ouvertes ; J2/δ et V-noyau conservés
-Maillons        : 0 — W avancée dans src par la partition adaptative
+Session en cours : —
+Dernière session : S220 — borne locale d'ordre deux (ADR-136) : partition à 32767 évaluations à 1,006–1,012 × le maximum ; plancher = réserve numérique (A258) ; grosses mailles plafonnées par les modes non résolus (A260)
+Session suivante : S221 — file J1/W : A260, enveloppe directionnelle du sous-ensemble non résolu dans la borne locale, mesurer C_U par taille de maille avant toute prédiction chiffrée, recevoir à 2047/8191 évaluations via S219/S220 ; puis A258, borne d'erreur courante dans la passe. Aucune migration d'admission avant A258 ; A254, loi GPU, J2/δ et V-noyau conservés
+Maillons        : 0 — W avancée dans src et ADR-136 actée
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 
@@ -191,6 +191,8 @@ demande la campagne d'ADR-133 transposée. **Prochain lot J1 : la part dynamique
 toute scène à plusieurs sillages et donc avant la mutualisation de J1-bis ; puis la loi GPU
 (espace, LOD, visibilité, mutualisation), chaque mesure avec son en-tête (ADR-131 D3).
 
+**S220 : borne d'ordre deux construite (ADR-136)** : 1,006–1,012 × maximum à 32767 évaluations, plancher = réserve numérique (A258) ; grosses mailles plafonnées par les modes non résolus (A260). Suite S221 J1/W : A260, puis A258. Voir [réception S220](docs/validation/ORDRE-DEUX-S220.md).
+
 **S219 : partition adaptative construite**, plafond d'évaluations et couverture conservée ; A255 partielle, A258 ouverte. Suite S220 J1/W : borne locale avec Hessienne signée et reste supérieur, gain/coût à recevoir ; A259 nomme le plateau des grandes mailles. Voir [réception S219](docs/validation/PARTITION-S219.md).
 
 **S218 : borne locale construite (ADR-135), A255 partielle.** Partition uniforme reçue mais coûteuse ; suite J1/W S219 : partition adaptative avec pool et plafond de travail. Aucun changement d'admission ; certification f32 ouverte (A258). Voir [réception S218](docs/validation/BORNE-LOCALE-S218.md).
@@ -280,7 +282,7 @@ pièges déjà payés.
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/FEUILLE-DE-ROUTE.md  ← trajectoire J1 → J5 et noyau V, seul porteur (ADR-127)
 docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 135 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 136 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -300,6 +302,16 @@ gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
 
+**S220 — 2026-09-13 : [borne locale d'ordre deux](docs/validation/ORDRE-DEUX-S220.md), [ADR-136](docs/adr/ADR-136-borne-locale-d-ordre-deux-a-hessienne-signee.md).**
+W publie une borne à Hessienne signée, minimum avec ADR-135 recalculé au bit. Partition à
+32767 évaluations : 1,006–1,012 × maximum de référence sur les quatre fixtures, mieux que
+l'ordre un à 65535 en moins de temps (29,7–33,8 s) ; évaluation 1,6–2,0 × ADR-135. Plancher :
+la réserve numérique (A258, 0,38–1,26 % du maximum). A259 levée au-dessus de ≈16 000 feuilles
+seulement ; à grosse maille, les modes non résolus dominent (A260). A255 : reste le coût, plus
+le pessimisme. Suite S221 J1/W : A260, enveloppe directionnelle des non résolus, puis A258,
+borne d'erreur courante. Aucune admission migrée. 366 tests release réussis, 5 ignorés.
+136 ADR, 260 angles, 299 leçons, 18 invariants, 6 SPEC, 23 cas ; maillons 0. Somme A254,
+loi GPU, J2/δ et V-noyau conservés.
 **S219 — 2026-09-13 : [partition adaptative](docs/validation/PARTITION-S219.md).**
 W construit un tas de rectangles dans le pool de l'appelant, avec plafond d'évaluations
 et couverture conservée aux arrêts. Gain globale/borne1,48–1,52 sur trois sillages

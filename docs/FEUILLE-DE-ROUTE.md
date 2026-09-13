@@ -83,6 +83,12 @@ l'implémentation qui dépassait, pas le sillage ni l'objectif.*
 dans le cœur ([TEMPS-SILLAGE-S213](validation/TEMPS-SILLAGE-S213.md)) : CPU sillage 1,26 ms pendant
 le forçage et 0,36 ms après (préparation 7,70 / 13,36), hôte 1,7 ms, exact à 6e-8 ; GPU inchangé.
 Coordonnée de l'espace, pas verdict. Suite : composition impact+sillage, puis A251.
+*S220* : [borne locale d'ordre deux](validation/ORDRE-DEUX-S220.md), ADR-136. Hessienne
+signée, jamais pire qu'ADR-135 ; partition à 32767 évaluations à 1,006–1,012 × le maximum,
+mieux que l'ordre un à 65535 en moins de temps. Le pessimisme n'est plus l'obstacle sur ces
+fixtures : **le coût l'est** (≈30 s CPU un fil par instant, aucune technique de J1-bis). Plancher
+= réserve numérique (A258) ; grosses mailles plafonnées par les modes non résolus (A260).
+**Suite S221 J1/W : A260 puis A258** ; A254, migration d'admission et loi GPU restent ouvertes.
 *S219* : [partition adaptative construite](validation/PARTITION-S219.md), pool et
 plafond d'évaluations, couverture conservée. Gain1,48–1,52 à65535 évaluations mais
 35–36s ; à8191, bornes identiques au plafond global (A259). **Suite S220 J1/W : borne
