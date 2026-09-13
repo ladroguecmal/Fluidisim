@@ -122,8 +122,9 @@ disparaître — l'occupation de 84 %, elle, ne dépend d'aucun échantillonnage
 - [x] **P3-bis** — *ajouté après P2, parce que le résultat l'exige* : la décroissance est-elle **universelle** dans la famille ? Mesurer plusieurs λ et E, et voir si le pessimisme s'effondre sur l'âge adimensionné `t/√(λ/g)` (échelle déjà employée par ADR-126).
 - [x] **P4** — table `ρ(τ)` mesurée et **sûre** (minimum par intervalle, la fonction n'est pas monotone), vérifiée sur deux λ ; occupation recomposée, note corrective datée sur A254.
 - [x] **P5** — scène à deux sources : exercer le refus tel qu'il est aujourd'hui, et le requalifier avec le majorant resserré.
-- [ ] **P6** — décider **et construire** : ADR, puis `slope_max_at(t)` dans `RadialImpact` — méthode neuve, `slope_max()` inchangée (ADR-094 : migrer le refus `Steepness` est une autre décision) — consommée par le budget de composition ; tests.
+- [x] **P6** — décider **et construire** : ADR, puis `slope_max_at(t)` dans `RadialImpact` — méthode neuve, `slope_max()` inchangée (ADR-094 : migrer le refus `Steepness` est une autre décision) — consommée par le budget de composition ; tests.
   *(P4 à P6 réécrits après P3-bis : la similitude étant établie, la décision n'est plus « laquelle des trois voies » mais « resserrer, et voici la loi ». Le plan d'origine reste lisible ci-dessus.)*
+- [ ] **P6-bis** — *scindé de P6 au constat de sa taille, avant de le commencer* : câbler le budget de composition sur `slope_max_at`, instant porté par `slope_floor` ; rattraper les attentes de tests que la frontière déplace.
 - [ ] **P7** — document de réception (en-tête ADR-131, rang de passage) ; suite complète `code/`.
 - [ ] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
@@ -254,3 +255,20 @@ A254 est confirmée dans les termes exacts où elle avait été écrite : **la d
 l'image**, et le verdict rendu est bien `SlopeEnvelope` — le majorant, pas la raideur. Avec le
 majorant resserré par la table, trois impacts et un sillage n'occupent que 51 % : la marge redevient
 celle d'une scène, pas d'un cas limite.
+
+P6 : **ADR-133 actée**, et la moitié bibliothèque construite.
+Avant d'acter, une vérification qui pouvait tout invalider : **la profondeur**. La relation de
+dispersion en dépend, et toutes les mesures étaient à 20 m. Résultat : colonnes **identiques** de
+20 m à 4 m, et à 2 m et moins `RadialImpact::new` **refuse le champ lui-même** (`depth ≤ π/lo`).
+Le domaine où la similitude vaut est exactement celui où le champ existe — il n'y a donc pas de
+réserve de profondeur à porter dans l'ADR. Anisotropie : refusée à la construction elle aussi.
+
+Code : `radial_impact::RHO_DISPERSION` (96 f32, provenance et domaine en doc) et
+`RadialImpact::slope_max_at(t)`. Hors du domaine mesuré — avant la naissance, au-delà de τ = 96 —
+la méthode rend `slope_max()` **telle quelle** : pas d'extrapolation, donc pas de majorant qui
+cesse d'en être un. `slope_max()` et le refus `Steepness` sont inchangés (ADR-094 : les migrer est
+une autre décision).
+Test `slope_max_at_is_a_tighter_bound_at_every_instant_s215`, sur quatre λ dont **trois hors famille
+génératrice** (0,75 · 2 · 5 m) : égalité au bit à la naissance, égalité au bit hors domaine dans les
+deux sens, **jamais dépassé** sur 481 instants × 2 001 rayons, et resserrement > 4 au-delà de τ = 8.
+Passe en 44 s.

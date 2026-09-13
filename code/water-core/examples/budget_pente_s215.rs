@@ -152,6 +152,68 @@ fn peak_within(
     peak
 }
 
+/// Le meme champ, a une profondeur imposee : la relation de dispersion en depend, donc la
+/// decroissance peut en dependre aussi. L'effondrement en `tau` a ete mesure a 20 m, ou tous les
+/// membres de la famille sont en eau profonde (`kh > pi`). Ce controle le met a l'epreuve.
+fn field_at_depth(wavelength_m: f32, energy_j: f32, depth: f32) -> Option<RadialImpact<256>> {
+    let m = Medium {
+        gravity: 9.81,
+        density: 1025.,
+        depth,
+        max_slope: BREAKING_SLOPE,
+    };
+    let scale = (wavelength_m / m.gravity).sqrt();
+    let event = WaveEvent::impact(Impact {
+        id: 215,
+        frame: FrameId(0),
+        cell: 0,
+        birth: SimTime(BIRTH),
+        ttl_us: (96. * scale * 1e6) as u64,
+        position: [0., 0., 0.],
+        energy_j,
+        wavelength_m,
+        direction_turns: 0.,
+        anisotropy: 0.,
+        displaced_l: 0.,
+        material: 0,
+        origin: Origin::Server,
+        above_surface: true,
+    })
+    .ok()?;
+    RadialImpact::new(
+        event,
+        m,
+        Domain {
+            radius: 15.5 * wavelength_m,
+            age_us: (96. * scale * 1e6) as u64,
+        },
+    )
+    .ok()
+}
+
+fn depth_control(samples: u32) {
+    const TAUS: [f32; 8] = [0., 1., 4., 8., 16., 27.4, 48., 96.];
+    println!("PROFONDEUR lambda=3.35 ; kh = 2*pi*h/lambda ; eau profonde si kh > pi = 3.1416");
+    for depth in [20.0f32, 8.0, 4.0, 2.0, 1.0, 0.6] {
+        let Some(field) = field_at_depth(3.35, 164., depth) else {
+            println!("PROFONDEUR h={depth} refusee_a_la_construction");
+            continue;
+        };
+        let scale = (3.35f32 / 9.81).sqrt();
+        let annonce = field.slope_max();
+        let mut line = String::new();
+        for tau in TAUS {
+            let t = SimTime(BIRTH + (tau * scale * 1e6) as u64);
+            let peak = peak_within(&field, [0., 0.], t, samples, 15.5 * 3.35);
+            line.push_str(&format!(" {:.3}", annonce / peak.max(f32::MIN_POSITIVE)));
+        }
+        println!(
+            "PROFONDEUR h={depth} kh={:.4} slope_max={annonce:.6} pessimisme_par_tau ={line}",
+            2. * core::f32::consts::PI * depth / 3.35
+        );
+    }
+}
+
 /// Majorant resserre du champ a un age donne, par la table.
 fn tightened(annonce: f32, wavelength_m: f32, age_s: f32) -> f32 {
     let tau = age_s / (wavelength_m / 9.81f32).sqrt();
@@ -572,6 +634,8 @@ fn main() {
     // rapport mesuré `ρ(τ)` suffit à resserrer `slope_max` pour toute la famille — exactement
     // ce que `SLOPE_L1_RATIO` est déjà pour `τ = 0` (ADR-094, S141), une dimension plus riche.
     // Deux énergies à λ égal éprouvent au passage la linéarité : le rapport doit être identique.
+    depth_control(samples);
+
     // --- P5 : le refus a plusieurs sources, exerce et non deduit.
     two_source_refusal();
 

@@ -23,6 +23,45 @@ pub const BESSEL_MAX: f32 = 2048.0;
 /// Il vaut ce qu'il vaut parce que `|J1| ≤ 1` majore chaque terme, quand le maximum réel de la
 /// somme est atteint en `r = 0,2062 λ`, à `t = birth`.
 pub const SLOPE_L1_RATIO: f32 = 1.795_071_3;
+
+/// S215, ADR-133 : facteur de resserrement du majorant de pente, par age **adimensionne**
+/// `tau = (t - birth) / sqrt(lambda/g)`, un intervalle par unite de tau.
+///
+/// **Ce que c'est.** `slope_max()` est la pente reelle maximale du champ **a sa naissance**
+/// (ADR-094) : une somme de modules modaux, invariante par dispersion. Le maximum spatial, lui,
+/// decroit a mesure que les phases se decoherent. `RHO_DISPERSION[k]` est le rapport mesure entre
+/// les deux sur l'intervalle `[k, k+1[` de tau.
+///
+/// **Pourquoi une table et pas une formule.** Le rapport n'est pas monotone : il plonge puis
+/// remonte entre tau = 0 et tau = 1, la perturbation s'aplatissant avant de se reformer. Chaque
+/// entree est donc le **minimum** du rapport sur son intervalle, et non sa valeur en un point.
+///
+/// **Provenance** (I-14) : `examples/budget_pente_s215.rs --table`. Minimum sur 21
+/// sous-echantillons et sur quatre longueurs d'onde generatrices (0,5 / 1 / 3,35 / 8 m), puis
+/// garde de `1e-4` — trente-trois fois le depassement maximal mesure (3,0e-6) sur trois longueurs
+/// d'onde **hors** famille generatrice. Controle final sur quatre lambda hors famille et 961
+/// valeurs de tau : `max(pente reelle / majorant resserre) = 0,999983`, exactement le pire cas du
+/// majorant d'origine. Le resserrement n'ajoute aucun risque.
+///
+/// **Domaine.** `tau` de 0 a 96 — la borne d'age d'ADR-126, `A >= 96 sqrt(lambda/g)`. Au-dela,
+/// `slope_max_at` ne resserre plus : rien n'y est mesure, et une extrapolation ferait cesser le
+/// majorant d'en etre un. La profondeur n'y entre pas : de 4 a 20 m les colonnes sont identiques,
+/// et en deca `RadialImpact::new` refuse le champ lui-meme.
+pub const RHO_DISPERSION: [f32; 96] = [
+    1.0000, 1.0464, 1.1979, 1.4944, 2.0209, 2.9092, 3.8726, 4.4430,
+    4.8234, 5.1032, 5.5618, 5.6788, 6.0734, 6.2731, 6.5697, 6.9068,
+    7.0707, 7.4902, 7.5702, 8.0718, 8.0913, 8.4915, 8.6388, 8.9340,
+    9.1950, 9.3914, 9.7438, 9.8680, 10.2953, 10.3682, 10.8369, 10.8802,
+    11.3674, 11.3980, 11.8112, 11.9242, 12.2721, 12.4596, 12.7465, 12.9957,
+    13.2255, 13.5293, 13.7156, 14.0661, 14.2129, 14.6001, 14.7193, 15.1364,
+    15.2264, 15.6757, 15.7429, 16.2142, 16.2675, 16.7551, 16.7932, 17.2649,
+    17.3239, 17.7614, 17.8609, 18.2648, 18.3995, 18.7723, 18.9392, 19.2866,
+    19.4818, 19.8048, 20.0288, 20.3266, 20.5791, 20.8533, 21.1294, 21.3852,
+    21.6811, 21.9188, 22.2368, 22.4563, 22.7945, 22.9980, 23.3531, 23.5440,
+    23.9135, 24.0949, 24.4763, 24.6468, 25.0398, 25.1992, 25.6043, 25.7548,
+    26.1716, 26.3141, 26.7403, 26.8759, 27.3100, 27.4401, 27.8952, 28.7706,
+];
+
 #[cfg(test)]
 #[path = "tests_radial_energy.rs"]
 mod energy_tests;
@@ -230,6 +269,40 @@ impl<const N: usize> RadialImpact<N> {
     /// — c'est une décision d'ADR-094, pas un effet de bord de cette méthode.
     pub fn slope_max(&self) -> f32 {
         self.slope_bound / SLOPE_L1_RATIO
+    }
+
+    /// S215, ADR-133 : pente reelle maximale du champ **a l'instant demande**.
+    ///
+    /// `slope_max()` vaut a la naissance et majore ensuite — de 4 fois a 4 s et de 30 fois a 56 s
+    /// sur la fixture J1, parce qu'une somme de modules modaux ne voit pas la dispersion. Cette
+    /// methode divise par le rapport mesure `RHO_DISPERSION` a l'age adimensionne du champ.
+    ///
+    /// Garanties, dans les deux sens :
+    /// - `slope_max_at(birth) == slope_max()` exactement ;
+    /// - la pente reelle du champ a `t` ne depasse jamais la valeur rendue, dans le domaine
+    ///   mesure — meme pire cas que `slope_max()` elle-meme ;
+    /// - hors du domaine mesure (avant la naissance, ou au-dela de `tau = 96`), la valeur rendue
+    ///   **est** `slope_max()` : on ne resserre pas ce qu'on n'a pas mesure.
+    ///
+    /// Ne change ni `slope_max()` ni le refus `Steepness`, qui compare toujours la borne L1 :
+    /// migrer ce refus deplacerait la frontiere d'admission de tous les champs, et ADR-094 a pose
+    /// que c'est une decision distincte.
+    pub fn slope_max_at(&self, time: SimTime) -> f32 {
+        let annonce = self.slope_max();
+        let v = self.event.data();
+        if time.0 < v.birth.0 {
+            return annonce;
+        }
+        let seconds = (time.0 - v.birth.0) as f32 * 1e-6;
+        let scale = (v.wavelength_m / self.gravity).sqrt();
+        if !(scale > 0.0) {
+            return annonce;
+        }
+        let tau = seconds / scale;
+        if !(tau < RHO_DISPERSION.len() as f32) {
+            return annonce;
+        }
+        annonce / RHO_DISPERSION[tau as usize]
     }
     /// Domaine géométrique exact appliqué par `sample`, posé une fois (ADR-080).
     /// Ne dit rien du temps ni de la finitude du résultat : `sample` rend aussi `Domain`
@@ -877,6 +950,87 @@ mod tests {
             assert!((s.deta_dt - (after.eta - before.eta) / 0.002).abs() < 2e-6);
         }
     }
+
+    /// S215, ADR-133 : `slope_max_at` est un majorant **a chaque instant**, et il resserre.
+    ///
+    /// Trois moities, comme le test S139 : egalite exacte a la naissance, jamais depassee sur
+    /// toute la vie du champ, et strictement plus serree que `slope_max()` des que l'age compte.
+    /// La derniere est ce qui justifie la methode ; les deux premieres sont ce qui la rend
+    /// utilisable comme borne.
+    #[test]
+    fn slope_max_at_is_a_tighter_bound_at_every_instant_s215() {
+        for (wavelength_m, energy_j) in [(0.75f32, 0.2f32), (2.0, 20.0), (3.35, 164.0), (5.0, 900.0)]
+        {
+            let mut v = source_data();
+            v.wavelength_m = wavelength_m;
+            v.energy_j = energy_j;
+            v.anisotropy = 0.0;
+            v.direction_turns = 0.0;
+            let scale = (wavelength_m / 9.81f32).sqrt();
+            let radius = 15.5 * wavelength_m;
+            let age_us = (96.0 * scale * 1e6) as u64;
+            v.ttl_us = age_us;
+            let birth = v.birth.0;
+            let field = RadialImpact::<256>::new(
+                WaveEvent::impact(v).unwrap(),
+                Medium {
+                    gravity: 9.81,
+                    density: 1025.0,
+                    depth: 20.0,
+                    max_slope: 1.0e6,
+                },
+                Domain { radius, age_us },
+            )
+            .unwrap();
+
+            // 1. Egalite exacte a la naissance : la table vaut 1 sur le premier intervalle.
+            assert_eq!(
+                field.slope_max_at(SimTime(birth)).to_bits(),
+                field.slope_max().to_bits(),
+                "lambda {wavelength_m} : aucun resserrement a la naissance"
+            );
+            // Et hors du domaine mesure, l'annonce d'origine est rendue telle quelle.
+            assert_eq!(
+                field.slope_max_at(SimTime(birth.saturating_sub(1))).to_bits(),
+                field.slope_max().to_bits()
+            );
+            assert_eq!(
+                field
+                    .slope_max_at(SimTime(birth + (200.0 * scale * 1e6) as u64))
+                    .to_bits(),
+                field.slope_max().to_bits(),
+                "lambda {wavelength_m} : au-dela de tau = 96, rien n'est resserre"
+            );
+
+            // 2. Jamais depasse, sur toute la vie et tout le rayon.
+            let mut serre = 0.0f32;
+            for i in 0..=480u32 {
+                let tau = 96.0 * i as f32 / 480.0;
+                let t = SimTime(birth + (tau * scale * 1e6) as u64);
+                let borne = field.slope_max_at(t);
+                let mut peak = 0.0f32;
+                for j in 0..=2000u32 {
+                    let r = radius * j as f32 / 2000.0;
+                    if let Ok(s) = field.sample(FrameId(0), 0, [r, 0.0], t) {
+                        peak = peak.max((s.slope[0] * s.slope[0] + s.slope[1] * s.slope[1]).sqrt());
+                    }
+                }
+                assert!(
+                    peak <= borne,
+                    "lambda {wavelength_m}, tau {tau} : pente reelle {peak} au-dessus du majorant resserre {borne}"
+                );
+                if tau > 8.0 {
+                    serre = serre.max(field.slope_max() / borne);
+                }
+            }
+            // 3. Le resserrement est reel, pas cosmetique : au-dela de tau = 8 il depasse 4.
+            assert!(
+                serre > 4.0,
+                "lambda {wavelength_m} : resserrement maximal {serre}, attendu bien au-dessus de 4"
+            );
+        }
+    }
+
     /// S139, ADR-094 : `slope_max()` annonce la pente réelle du champ. Le test vérifie les deux
     /// moitiés de cette annonce — **atteinte** à l'instant initial, et **jamais dépassée**
     /// ailleurs ni plus tard. La seconde est une propriété de sûreté : si un instant la
