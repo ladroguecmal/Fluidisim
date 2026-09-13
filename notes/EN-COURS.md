@@ -58,104 +58,44 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S205 — terminée
+Session : S206 — en cours
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : **A245**, bloquant J1 (FEUILLE-DE-ROUTE) — la composition B+W refuse toute mer
-au-delà de Hs ≈ 1,1 m, dont la mer de référence S201. Lot bibliothèque : faire composer B+W
-sur une mer réelle sans affaiblir ce que le budget garantit pour les perturbations.
+Objectif : **A247**, bloquant J1 — confronter le coût de l'eau **par image** au profil ADR-125
+(60 images/s, eau 2 ms) sur une **scène représentative** déclarée, mesurer les leviers, puis
+poser l'**arbitrage explicite** (ADR-127 D7) : options, coûts mesurés, ce que chacune dégrade,
+qui tranche. Aucune fonctionnalité retirée ; aucun seuil changé pour faire passer une mesure.
 
 ### État réel à l'amorce
 
-master = copies isolées = 990e6ae (S204 P5), propres ; jeton libre depuis S204 (même agent).
-Arbitrage « hôte interactif de J1 » posé à l'utilisateur en S204, **non répondu** ; A245 n'en
-dépend pas.
+master = copies = ef447fc (S205 P7), propres ; jeton libre depuis 02:06. Arbitrage « hôte
+interactif » toujours sans réponse. Acquis à ne pas remesurer : B 48 ns par composante par
+point (BANC-B1-S146) ; S203 : B 1,6 µs/pt, B+W N256 14 µs/pt, table radiale 2,7 ms/impact,
+erreur Hermite ≤ 0,006 mm. `paquets_W_max = 4096` déclaré par ADR-012 §3, jamais confronté.
 
-### Décision de conception, prise avant le plan (lecture du code)
+### Scène représentative déclarée avant mesure
 
-Quatre sites mettent `steepness_B·π` (borne L1 de B, 0,6082 à Hs 1,5) dans le budget de refus :
-`composition::compose`, `prepared_water::mixed::sample_world_batch`, `mixed_differential`,
-`bound_pressure::Prepared::sample_world_batch`. Aucune SPEC ne consomme une garantie « surface
-sous π/7 » : `steepness` sert à l'écume et au déferlement (SPEC-004 §2, SPEC-001 §3).
-Remèdes écartés : terme directionnel (refuse encore, 0,5733) ; refus sur la pente réelle au
-point (refus dispersés et causés par la mer, lot atomique perdu) ; borne statistique (ne
-garantit rien). **Retenu** : le budget de refus ne somme que les **perturbations** (impacts
-`slope_max`, pression `slope_envelope`) ; la raideur de B **reste publiée** dans `steepness`
-= (B + perturbations)/π, même ordre de somme ⇒ **bits inchangés pour tout lot déjà admis** ;
-`Slope`/`SlopeEnvelope` jugés sur la pente réelle **des perturbations** au point ;
-`slope_floor` devient exact dans les deux sens. Rugosité de la mer = fait d'environnement
-publié, pas une erreur de requête (ADR-127 D7 : pas de fonctionnalité retirée en silence).
+Observateur S201 (640×360, 50°), mer S201 Hs 1,5 m (N32), un impact S203 (N256, R 52 m,
+A 56 s) à +3 s, composé par le chemin hôte (`Prepared::sample_world_batch` dans R, B hors R).
+**Charge = sommets d'une grille projetée** : un sommet par `c` pixels, intersection du rayon
+avec z = 0 jusqu'à 600 m, `c` ∈ {8, 4, 2}. C'est la charge d'un maillage de surface évalué sur
+CPU, pas celle du lancer de rayons hors ligne. Critère : temps mur médian et maximum sur 11
+images après 3 de chauffe, comparé à 2 ms. Machine : celle de S202 (Ryzen AI 7 350).
 
 ### Plan
 
-- [x] **P1** — état réel, décision de conception, plan seul.
-- [x] **P2** — code : quatre sites, budget = perturbations seules, nommage sur leur pente
- réelle, publication inchangée ; documentation de `slope_floor` (exact) ; compilation.
-- [x] **P3** — essais : rejouer water-core, trier **chaque** échec (attente liée à B dans le
- budget → réécrite avec cas W et motif écrit ; autre → défaut à corriger) ; nouveaux essais :
- mer S201 Hs 1,5 composable (journal vide et avec impact) par `compose` et `mixed` ;
- `slope_floor` exact des deux côtés ; verdicts `Slope`/`SlopeEnvelope` atteints par W seul.
-- [x] **P4** — gardes du contrat de pente (I-18) relues et mises à jour ; workspace debug
- complet ; essais touchés en release.
-- [x] **P5** — bout en bout : image S203 +3 s rejouée **au bit** (contrôle « admis inchangé ») ;
- impact sur la mer S201 Hs 1,5 contre témoin, zéro pixel hors emprise ; budget d'impact π/7.
-- [x] **P6** — ADR-128 ; notes datées ADR-080/095/098/126 ; A245 close ; COMPOSITION-MER-S205.
-- [x] **P7** — rituel §6 : journal, angles, leçons, décomptes, feuille de route (état J1), file
- active, index/README/REPRISE, compteur, jeton libre, copies.
+- [x] **P1** — état réel, scène déclarée, plan seul.
+- [ ] **P2** — banc `frame_cost.rs` : grille projetée, décompte des sommets (total, dans R),
+ coût par image un fil : B seul partout ; B+W chemin hôte. Essais du banc.
+- [ ] **P3** — leviers : (L1) parallélisme `std::thread::scope` 1/2/4/8/16 fils, temps mur ;
+ (L2) table radiale à matrice de Bessel précalculée — noyau N×M mesuré sur tableaux de la
+ bonne taille, précalcul et mémoire par impact ; (L3) densité `c`. Nombre de composantes de B :
+ déduit de B1 (48 ns), pas remesuré.
+- [ ] **P4** — campagne release et publication `COUT-IMAGE-S206` : tableau par configuration
+ contre 2 ms, compatible / incompatible, `paquets_W_max` confronté.
+- [ ] **P5** — arbitrage explicite : options mesurées, dégradations, décideur ; ce qui est
+ technique se tranche (ADR si décision), ce qui touche l'ambition, les dépendances ou le sens
+ du budget (temps mur ou CPU) remonte à l'utilisateur. Feuille de route et file active.
+- [ ] **P6** — rituel §6 complet.
 
 ### Notes de reprise
 
-Critère de non-régression déclaré **avant** le code : pour tout lot admis par l'ancienne règle,
-`eta`, `deta_dt`, `u_total`, `normal`, `steepness`, `aeration` identiques au bit ; seuls des
-refus disparaissent. Si un hachage de campagne ou d'essai change, c'est un défaut du lot, pas
-une attente à réécrire.
-
-P2 : quatre sites modifiés (`budget` = perturbations, `perturbation` = leur pente au point,
-`bound`/`envelope` publiés inchangés). `composition` contrôle désormais `steepness` fini à la
-sortie (le refus ne le garantissait plus). `Background::differential_slope_envelope` retirée :
-seul usage = budget différentiel ; son assertion d'essai remplacée par l'équivalence des deux
-chemins au plancher exact (`slope_floor` et son prédécesseur flottant). Compilation sans
-avertissement. Essais non encore rejoués.
-
-P3 : premier passage **7 échecs / 246**, tous triés, **aucun hachage ni valeur publiée** en
-cause. (1) garde I-18 : noms `bound`/`envelope` → `budget` dans les trois budgets, liste
-`SITES_CONNUS` mise à jour avec motif. (2) `composition::each_slope_verdict…` : cas 2/3
-tenaient à B seul → reconstruits avec un champ d'impact (r = 0,2062 λ à la naissance pour
-`Slope`, centre pour `SlopeEnvelope`), et une pente de B de 0,5 vérifiée sans effet.
-(3) pression `world_refusals…` : `Slope` → `SlopeEnvelope` — la pente de B (0,00628) faisait
-passer la somme au-dessus ; la pression seule tient. (4) `the_same_envelope…` : balayage de la
-pente mesuré sur fond d'amplitude nulle, refus posés sur le fond de 0,01. (5)
-`normal_matches…cancellation` : plafond entre pente de la pression seule et son majorant.
-(6) `mixed_rejects…` : limite sans terme de B ; nom accepté `Slope|SlopeEnvelope`, atomicité
-conservée. (7) `slope_floor_refuses…` : « au-dessus c'est B qui décide » remplacé par
-« au plancher et au-dessus tout lot passe » (1 à 3 points, trois limites). Plus
-`differential_slope_envelope` retirée (P2) et son assertion remplacée par l'équivalence des
-deux chemins au plancher exact. **Neuf** : `reference_sea_s201_composes_with_an_impact_s205`.
-Après réécriture : **246 réussis + 1 neuf**, deux ignorés (lib). Commentaires de doc des
-erreurs `Slope` mis à jour dans les trois modules.
-
-P4 : garde `every_field_places_its_limit_at_stokes_steepness_s143` inchangée et verte ; garde
-des sites mise à jour en P3. Workspace debug **344 réussis / cinq ignorés** (247+4+93), un de
-plus que S203 (l'essai neuf). Release : 28 essais `composition|mixed|pressure_world|
-contrat_pente` verts. Harnais release : **C18 0x85c8bc610f551d11, C02 0x0a3a3bcc945db263**,
-identiques aux reçus S179–S182 ; zéro échec. Avertissements anciens du harnais inchangés.
-
-P5 : image S203 +3 s rejouée **au bit** avec la bibliothèque modifiée (impact
-0x3dba0d3acf15447a, témoin 0x14271a7145740ba1, 9 495 898 / 9 495 848 évals, 8 640 px, 0 hors R).
-Banc : `SlopeRule` (S203 conservée pour reproduction ; ADR-128 = π/7), mode `render-s205 <dir>
-<âge> [hs]`, essai `adr128_rule_composes_the_reference_sea_s205` (12 essais exemple). Mer S201
-Hs 1,5, plancher B 0,608192, budget impact 0,448799, même W (E 164 J, λ 3,35 m, N256 R52 A56).
-**+3 s** : impact 289 462 eau, **0 non résolu, 0 refus**, 15 841 764 évals dont 9 165 220 B+W,
-131 483 px touchés, 102 218 ms, 0x0b13a4c1e39a2a3e ; témoin 17 921 ms, 0x0d8495b6adf64de3 ;
-**7 342 px différents, 0 hors emprise** ; écart max 17 niveaux, 1 676 px ≥ 3. **+6 s** : 289 456
-eau, 0/0, 15 571 336 évals dont 8 879 321 B+W, 100 389 ms, 0x935223a0f507aac7 ; témoin 17 881 ms,
-0xb25f06a61b0cc543 ; **16 251 px, 0 hors emprise** ; max 29 niveaux, 2 513 px ≥ 3. Anneaux nets à
-+3 s sur la mer raide, discrets et déformant le reflet à +6 s (zooms inspectés). Marche ×1,67
-plus d'évaluations qu'à Hs 0,5 : borne de pente B+W 0,99 contre 0,58.
-
-P6 : ADR-128 actée ; notes datées ADR-062, 080, 095, 098, 126 ; COMPOSITION-MER-S205 (défaut,
-remèdes pesés, changements, tri des sept essais, réception, image, non reçu) ; clôture A245 au
-registre. Décompte attendu : 128 ADR.
-
-P7 : journal S205, A245 close, A249 ouverte, corollaire L280 ; feuille de route (J1 : A245 levé),
-file active (A245 close, A247 prochain lot S206, A249), index, README, REPRISE (§3, §4, table
-velocite.sh : B et W S205). Décomptes 128/249/282/18/6/23 vérifiés. Jeton libre, copies à avancer.

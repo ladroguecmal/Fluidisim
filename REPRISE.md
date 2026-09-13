@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-13 02:06 +02:00
+JETON            : occupé
+Battement        : 2026-09-13 08:38 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S206 — A247 : coût d'image d'une scène J1 et leviers, arbitrage explicite
 Dernière session : S205 — A245 close : la mer S201 se compose, ADR-128 (budget = perturbations)
 Session suivante : S206 — A247 : coût d'un impact visible contre 2 ms, puis arbitrage explicite (J1)
 Maillons        : 0 — S205 avance B et W (code src, velocite.sh)
