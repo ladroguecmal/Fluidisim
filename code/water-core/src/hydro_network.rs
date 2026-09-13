@@ -21,9 +21,10 @@
 //! Ce que ce module ne fait pas : ni réseau fermé sous pression (ADR-010 §4 le reporte
 //! explicitement en v2), ni pompe, ni matériau poreux, ni pluie, ni absorption.
 //!
-//! **A266 ouverte (S226, précisée S227)** : une table cuite à l'horizontale ne fournit pas le
-//! bon décalage du plan sous gravité inclinée, même pour un prisme. L'orientation est reçue,
-//! pas la cohérence géométrique volume/plan. Voir `GRAVITE-DIRIGEE-S226.md`, note S227.
+//! **ADR-139, S228** : les formes géométriques fournissent un plan orienté conservant le volume.
+//! Les anciennes tables n'acceptent que leur orientation cuite +Z. Géométrie, précision et coût
+//! restent à recevoir dans le domaine de chaque nouvel usage ; le noyau n'est pas un solveur de
+//! ballottement ni un budget temporel certifié.
 
 use crate::SimTime;
 
@@ -33,7 +34,7 @@ pub mod geometry;
 /// Pas de la couche V — 100 ms, 10 Hz (ADR-010 §4, I-10). Aligné sur `T_sim`.
 pub const STEP_US: u64 = 100_000;
 
-/// Entrées d'une table de forme : volume → hauteur (ADR-010 §2). Soixante-quatre suffisent.
+/// Entrées des tables historiques volume → hauteur, limitées à +Z par ADR-139.
 pub const SHAPE_ENTRIES: usize = 64;
 
 /// Coefficient de débit d'un orifice à arête vive (ADR-010 §3). Sans provenance propre : il vient
@@ -65,9 +66,9 @@ pub enum Error {
 pub struct HydroNode {
     pub volume_ml: i64,
     pub capacity_ml: i64,
-    /// Point de référence du contenant, en micromètres, dans le repère du référentiel : celui
-    /// depuis lequel la table de forme compte la hauteur de surface, le long de la verticale
-    /// locale `u = −g_eff/‖g_eff‖`. Sous gravité verticale, c'est le fond.
+    /// Origine FIXE de la géométrie du contenant, en micromètres dans le référentiel.
+    /// Le plan local est `u·x = d`, puis translaté par cette origine (ADR-139).
+    /// Pour une ancienne table +Z, l'origine est au niveau de son fond.
     pub origin_um: [i64; 3],
     /// Indice de la forme dans la table fournie.
     pub shape: u16,
@@ -110,13 +111,15 @@ pub struct Opening {
     pub residue_nl: i64,
 }
 
-/// Tables de forme de l'hôte : `shapes[s * SHAPE_ENTRIES + i]` est la hauteur en micromètres au
-/// volume `i / (SHAPE_ENTRIES - 1)` de la capacité. Croissantes, cuites hors ligne (ADR-010 §2).
+/// Formes empruntées à l'hôte : géométrie orientable (ADR-139) ou anciennes tables +Z.
+/// Aucun mélange implicite : l'hôte choisit la représentation à la construction.
 pub struct Shapes<'a> {
     table: &'a [i64],
+    volumes: &'a [geometry::VolumeShape<'a>],
 }
 impl<'a> Shapes<'a> {
-    /// Contrôle une fois, à la construction : croissance et dimension. Le pas n'y revient pas.
+    /// Anciennes tables : hauteur verticale en µm, au volume `i/(SHAPE_ENTRIES-1)` de la capacité.
+    /// Croissance et dimension contrôlées une fois ; autre orientation refusée par le pas.
     pub fn new(table: &'a [i64]) -> Result<Self, Error> {
         if table.is_empty() || table.len() % SHAPE_ENTRIES != 0 {
             return Err(Error::Shape);
@@ -131,13 +134,47 @@ impl<'a> Shapes<'a> {
                 }
             }
         }
-        Ok(Self { table })
+        Ok(Self { table, volumes: &[] })
+    }
+    /// Géométries validées avant le pas ; leurs capacités proviennent de leur volume intérieur.
+    pub fn from_volumes(volumes: &'a [geometry::VolumeShape<'a>]) -> Result<Self, Error> {
+        if volumes.is_empty() { return Err(Error::Shape); }
+        Ok(Self { table: &[], volumes })
     }
     pub fn count(&self) -> usize {
-        self.table.len() / SHAPE_ENTRIES
+        if self.table.is_empty() { self.volumes.len() } else { self.table.len() / SHAPE_ENTRIES }
+    }
+    fn validate_node(&self, node: &HydroNode, up: [f64; 3]) -> Result<(), Error> {
+        if node.shape as usize >= self.count() || node.capacity_ml <= 0
+            || !(0..=node.capacity_ml).contains(&node.volume_ml) {
+            return Err(Error::Capacity);
+        }
+        if self.volumes.is_empty() {
+            if up != [0.0, 0.0, 1.0] { return Err(Error::Orientation); }
+        } else if node.capacity_ml != self.volumes[node.shape as usize].capacity_ml() {
+            return Err(Error::Capacity);
+        }
+        Ok(())
+    }
+    /// Plan exposé par V, dans les coordonnées locales fixes de la forme. Le pas utilise
+    /// exactement le même calcul : aucune reconstruction indépendante par son consommateur.
+    pub fn surface_plane(&self, node: &HydroNode, g_eff: [f32; 3]) -> Result<geometry::SurfacePlane, Error> {
+        let (up, _) = geometry::vertical(g_eff)?;
+        self.validate_node(node, up)?;
+        self.surface_up(node, up)
+    }
+    fn surface_up(&self, node: &HydroNode, up: [f64; 3]) -> Result<geometry::SurfacePlane, Error> {
+        if self.volumes.is_empty() {
+            Ok(geometry::SurfacePlane {
+                up,
+                offset_um: self.height_um(node.shape, node.volume_ml, node.capacity_ml)? as f64,
+            })
+        } else {
+            self.volumes[node.shape as usize].plane_up(node.volume_ml, up)
+        }
     }
     /// Hauteur de la surface libre au-dessus du fond, en micromètres, par interpolation linéaire
-    /// en volume. Un prisme a une table linéaire, donc cette lecture y est **exacte**.
+    /// en volume, avec les arrondis en µm des échantillons et du résultat.
     fn height_um(&self, shape: u16, volume_ml: i64, capacity_ml: i64) -> Result<i64, Error> {
         let s = shape as usize;
         if s >= self.count() || capacity_ml <= 0 {
@@ -208,18 +245,10 @@ pub fn step(
     if scratch.len() < edges.len() {
         return Err(Error::Capacity);
     }
-    let norm2 = g_eff.iter().map(|v| *v as f64 * *v as f64).sum::<f64>();
-    if !(norm2 > 0.0) || !norm2.is_finite() || dt.0 == 0 {
+    if dt.0 == 0 {
         return Err(Error::Domain);
     }
-    let magnitude = norm2.sqrt();
-    // Verticale locale : l'opposé de `g_eff`, normalisé. Sous `g_eff = (0, 0, −g)` elle vaut
-    // exactement `(0, 0, 1)`, et la projection redevient une soustraction d'altitudes.
-    let up = [
-        -(g_eff[0] as f64) / magnitude,
-        -(g_eff[1] as f64) / magnitude,
-        -(g_eff[2] as f64) / magnitude,
-    ];
+    let (up, magnitude) = geometry::vertical(g_eff)?;
     for e in edges.iter() {
         let size = match e.flow {
             Flow::Orifice { area_mm2 } => area_mm2,
@@ -235,12 +264,7 @@ pub fn step(
         }
     }
     for n in nodes.iter() {
-        if n.capacity_ml <= 0 || n.volume_ml < 0 || n.volume_ml > n.capacity_ml {
-            return Err(Error::Capacity);
-        }
-        if n.shape as usize >= shapes.count() {
-            return Err(Error::Capacity);
-        }
+        shapes.validate_node(n, up)?;
     }
     let dt_s = dt.0 as f64 * 1e-6;
 
@@ -248,7 +272,7 @@ pub fn step(
     for (e, out) in edges.iter().zip(scratch.iter_mut()) {
         *out = 0;
         let src = nodes[e.from as usize];
-        let h_up = shapes.height_um(src.shape, src.volume_ml, src.capacity_ml)? as f64;
+        let h_up = shapes.surface_up(&src, up)?.offset_um;
         // Cote de l'ouverture au-dessus du point de référence amont, **le long de la verticale
         // locale** : c'est la « distance signée au plan de surface » d'ADR-010 §2.
         let sill = along(sub(e.position_um, src.origin_um), up);
@@ -258,7 +282,7 @@ pub fn step(
         let downstream = match e.to {
             Some(t) => {
                 let dn = nodes[t as usize];
-                let h_dn = shapes.height_um(dn.shape, dn.volume_ml, dn.capacity_ml)? as f64;
+                let h_dn = shapes.surface_up(&dn, up)?.offset_um;
                 let dn_surface = along(sub(dn.origin_um, src.origin_um), up) + h_dn;
                 dn_surface.max(sill)
             }

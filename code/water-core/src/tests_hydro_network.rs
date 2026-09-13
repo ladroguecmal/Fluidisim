@@ -406,8 +406,10 @@ fn hull(position_um: [i64; 3]) -> ([HydroNode; 1], [Opening; 1], [i64; SHAPE_ENT
 
 /// Un pas, et le volume qui en sort. Sert à savoir si une ouverture débite, sans exposer la charge.
 fn leaked(position_um: [i64; 3], g: [f32; 3]) -> i64 {
-    let (mut nodes, mut edges, table) = hull(position_um);
-    let shapes = Shapes::new(&table).unwrap();
+    let (mut nodes, mut edges, _) = hull(position_um);
+    let cells = oriented_box_cells_s228([-2_000_000, -500_000, 0], [2_000_000, 500_000, 2_000_000]);
+    let volumes = [geometry::VolumeShape::new(&cells).unwrap()];
+    let shapes = Shapes::from_volumes(&volumes).unwrap();
     let mut scratch = [0i64; 1];
     let before = nodes[0].volume_ml;
     // Dix pas : le report de reste fait franchir le millilitre même à charge faible.
@@ -641,13 +643,105 @@ fn late_numeric_refusal_keeps_all_nodes_and_residues_s227() {
     assert_eq!(edges.map(|e| e.residue_nl), [123, 456]);
 }
 
-/// Cas attendu pour la future correction A266. Un prisme symétrique à mi-remplissage garde
+/// Régression A266, activée S228. Un prisme symétrique à mi-remplissage garde
 /// sa cote centrale à 1 m tant que le plan ne coupe ni fond ni plafond. S226 testait seulement
 /// une aire sous une droite imposée, sans passer par la relation hauteur/volume du module.
 #[test]
-#[ignore = "A266 ouverte : la table doit fournir un plan oriente conservant le volume"]
 fn tilted_prism_volume_regression_a266_s227() {
     assert!(leaked([0, 0, 990_000], TILTED) > 0, "temoin sous la surface");
     assert_eq!(leaked([0, 0, 1_010_000], TILTED), 0,
                "un hublot central au-dessus de 1 m ne doit pas fuir");
+}
+
+fn oriented_box_cells_s228(lo: [i64; 3], hi: [i64; 3]) -> [geometry::Tetrahedron; 6] {
+    let v: [[i64; 3]; 8] = std::array::from_fn(|bits|
+        std::array::from_fn(|axis| if bits & (1 << axis) == 0 { lo[axis] } else { hi[axis] }));
+    [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]].map(|p|
+        geometry::Tetrahedron::new([v[0], v[1 << p[0]], v[(1 << p[0]) | (1 << p[1])], v[7]]).unwrap())
+}
+
+#[test]
+fn receiving_surface_and_large_origin_use_the_same_plane_s228() {
+    let cells = oriented_box_cells_s228([-2_000_000, -500_000, 0], [2_000_000, 500_000, 2_000_000]);
+    let volumes = [geometry::VolumeShape::new(&cells).unwrap()];
+    let shapes = Shapes::from_volumes(&volumes).unwrap();
+    let run = |origin_um| {
+        let mut nodes = [4_080_000, 4_000_000].map(|volume_ml| HydroNode {
+            volume_ml, capacity_ml: 8_000_000, origin_um, shape: 0,
+        });
+        let mut edges = [Opening {
+            from: 0, to: Some(1), flow: Flow::Orifice { area_mm2: 1_000 },
+            position_um: origin_um, discharge: SHARP_EDGE_DISCHARGE, residue_nl: 0,
+        }];
+        step(&mut nodes, &mut edges, &shapes, TILTED, SimTime(STEP_US), &mut [0]).unwrap();
+        assert_eq!(nodes.iter().map(|n| n.volume_ml).sum::<i64>(), 8_080_000);
+        (nodes[1].volume_ml - 4_000_000, edges[0].residue_nl)
+    };
+    let reference = run([0; 3]);
+    // Deux surfaces centrales à 1,02 et 1 m : |g_eff| Δh_normal = |g_z| 0,02 m.
+    let expected = (SHARP_EDGE_DISCHARGE as f64 * 1e-3
+        * (2.0 * -(TILTED[2] as f64) * 0.02).sqrt() * 0.1 * 1e6) as i64;
+    assert_eq!(reference.0, expected);
+    assert_eq!(expected, 38, "le temoin doit effectivement transferer");
+    assert_eq!(run([i64::MAX, i64::MIN, 0]), reference);
+}
+
+#[test]
+fn a_real_hull_does_not_leak_above_its_volume_surface_s228() {
+    let v = [[0, -500_000, 0], [-2_000_000, -500_000, 2_000_000], [2_000_000, -500_000, 2_000_000],
+             [0, 500_000, 0], [-2_000_000, 500_000, 2_000_000], [2_000_000, 500_000, 2_000_000]];
+    let cells = [[0, 1, 2, 3], [1, 2, 3, 4], [2, 3, 4, 5]].map(|ids|
+        geometry::Tetrahedron::new(ids.map(|i| v[i])).unwrap());
+    let volumes = [geometry::VolumeShape::new(&cells).unwrap()];
+    let shapes = Shapes::from_volumes(&volumes).unwrap();
+    // Cale |x| <= z <= 2, longueur 1 : sous pente 0,3 et 1 m³, cote centrale sqrt(1-0,3²).
+    let run = |z| {
+        let mut nodes = [HydroNode { volume_ml: 1_000_000, capacity_ml: 4_000_000,
+                                    origin_um: [0; 3], shape: 0 }];
+        let mut edges = [Opening { from: 0, to: None, flow: Flow::Orifice { area_mm2: 1_000 },
+            position_um: [0, 0, z], discharge: SHARP_EDGE_DISCHARGE, residue_nl: 0 }];
+        for _ in 0..10 {
+            step(&mut nodes, &mut edges, &shapes, TILTED, SimTime(STEP_US), &mut [0]).unwrap();
+        }
+        1_000_000 - nodes[0].volume_ml
+    };
+    assert!(run(940_000) > 0);
+    assert_eq!(run(960_000), 0);
+}
+
+#[test]
+fn geometric_refusals_leave_nodes_and_residues_untouched_s228() {
+    let (nodes0, edges0, table) = c12();
+    let legacy = Shapes::new(&table).unwrap();
+    let mut nodes = nodes0;
+    let mut edges = edges0;
+    edges[0].residue_nl = 123;
+    assert_eq!(step(&mut nodes, &mut edges, &legacy, TILTED, SimTime(STEP_US), &mut [0]),
+               Err(Error::Orientation));
+    assert_eq!(nodes, nodes0);
+    assert_eq!(edges[0].residue_nl, 123);
+
+    let small = oriented_box_cells_s228([0; 3], [1_000_000; 3]);
+    let large = oriented_box_cells_s228([0; 3], [3_000_000_000; 3]);
+    let volumes = [geometry::VolumeShape::new(&small).unwrap(), geometry::VolumeShape::new(&large).unwrap()];
+    let shapes = Shapes::from_volumes(&volumes).unwrap();
+    let initial = [nodes0[0], HydroNode {
+        volume_ml: (1i64 << 53) + 1, capacity_ml: volumes[1].capacity_ml(),
+        origin_um: [0; 3], shape: 1,
+    }];
+    let mut nodes = initial;
+    let mut edges = [edges0[0]; 2];
+    edges[0].residue_nl = 123;
+    edges[1].from = 1;
+    edges[1].residue_nl = 456;
+    assert_eq!(step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut [0; 2]),
+               Err(Error::Resolution));
+    assert_eq!(nodes, initial);
+    assert_eq!(edges.map(|e| e.residue_nl), [123, 456]);
+    nodes[1].capacity_ml -= 1;
+    let invalid = nodes;
+    assert_eq!(step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut [0; 2]),
+               Err(Error::Capacity));
+    assert_eq!(nodes, invalid);
+    assert_eq!(edges.map(|e| e.residue_nl), [123, 456]);
 }

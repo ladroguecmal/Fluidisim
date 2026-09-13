@@ -78,8 +78,8 @@ lot suivant, sauf dépendance technique indispensable découverte ici.
 - [x] **P1** — amorce, état réel, jeton et plan seuls.
 - [x] **P2** — lecture ciblée et choix du contrat géométrique ; ADR remplaçant la disposition incompatible d'ADR-010, oracle et limites déclarés.
 - [x] **P3** — construire le calcul géométrique orienté, sans allocation au pas ; tests indépendants des volumes et plans.
-- [>] **P4** — brancher le contrat dans V ; activer la régression A266, préserver l'atomicité et les domaines compatibles.
-- [ ] **P5** — réception complète, coût et limites du chemin consommé ; publication concise de la preuve.
+- [x] **P4** — brancher le contrat dans V ; activer la régression A266, préserver l'atomicité et les domaines compatibles.
+- [>] **P5** — réception complète, coût et limites du chemin consommé ; publication concise de la preuve.
 - [ ] **P6** — rituel §6 : journal, file, angles/leçons utiles, trajectoire, index, jeton libre et synchronisation des copies.
 
 Chaque étape reste sous quinze minutes ; découpage déclaré ici si nécessaire.
@@ -103,3 +103,10 @@ pentes), forme en L, 24 permutations de sommets, invalides/recouvrements, dalle 
 Erreurs maximales des oracles imprimées : boîte 3e-9 ml, cale 1e-9 ml (arrondies). Un volume
 2^53+1 ml dans un cube de 3 km est refusé Resolution, au lieu de convertir silencieusement la
 consigne entière. Le domaine de précision générale reste à qualifier au-delà des cas reçus.
+
+P4 : Shapes::from_volumes et surface_plane, utilisés par les deux extrémités du pas ; tables
+historiques +Z seulement. A266 activée et passée ; 26 tests V/geometry debug passent. Hublot
+latéral 1736 ml (ancien 1829, faux décalage corrigé), seuils C16 400007/1599989 µm ; pente
+16,6990°. C12 727,4 s et chaîne S224 inchangés. Cale à 1 m³ : hublot central 0,96 m sec,
+0,94 m mouillé. Receveur orienté : 38 ml contre l'oracle. Refus Orientation, Capacity et
+Resolution tardif sans mutation des nœuds/restes. Prochain : compteur d'allocations et coût.
