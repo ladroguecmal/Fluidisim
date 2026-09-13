@@ -727,7 +727,13 @@ fn admits_matches_the_geometric_refusals_of_the_request() {
         assert!(admits(&bound, impacts, Some(p), inside));
         let floor = slope_floor(impacts, Some(p), p.time());
         assert!(floor > 0.0);
-        assert_eq!(
+        // S216, ADR-134 : le verdict est passé de `SlopeEnvelope` à `Slope`, et c'est l'effet
+        // recherché. À majorant plus serré, une limite fixée sous le plancher tombe désormais
+        // **sous la pente réelle au point**, et le refus devient attribuable au champ plutôt
+        // qu'à la marge (ADR-098). Ce que le test éprouve — un point admis géométriquement que
+        // la requête refuse tout de même sur la pente — ne change pas ; seule sa cause bouge,
+        // et figer la cause ici ferait de ce test un test du pessimisme du majorant.
+        assert!(matches!(
             sample_world_batch(
                 &bound,
                 impacts,
@@ -738,8 +744,8 @@ fn admits_matches_the_geometric_refusals_of_the_request() {
                 &mut work,
                 &mut out
             ),
-            Err(Error::SlopeEnvelope)
-        );
+            Err(Error::Slope) | Err(Error::SlopeEnvelope)
+        ));
     })
 }
 /// S205, A245, ADR-128 : **la mer de référence S201 se compose.** Recette JONSWAP N32, Hs 1,5 m,

@@ -133,7 +133,7 @@ décohérence est immédiate et la part statique marginale — et le sujet redev
 - [x] **P2** — décomposer : somme scalaire, majorant directionnel (balayage fin hors ligne) et pente réelle, aux âges de la fixture ; les deux rapports.
 - [x] **P3** — *fusionné avec P4 après P2, un seul balayage les porte* : la part statique est-elle une propriété de la recette (`angular`, `radial`, `cutoff`, σ, tronçons) ? combien de directions distinctes le demi-spectre porte-t-il ? et le discriminant d'emprise — à âge fixé, agrandir l'emprise fait-il monter le maximum réel ?
 - [x] ~~**P4**~~ — fusionné dans P3.
-- [ ] **P5** — décider et construire ce que le verdict autorise : enveloppe directionnelle exacte dans le cœur si la part statique le mérite (maximum exact sur la grille angulaire, sans balayage), sinon dire pourquoi.
+- [x] **P5** — décider et construire ce que le verdict autorise : enveloppe directionnelle exacte dans le cœur si la part statique le mérite (maximum exact sur la grille angulaire, sans balayage), sinon dire pourquoi.
 - [ ] **P6** — recevoir : jamais dépassée, plus serrée, coût de préparation ; budget recomposé sur la scène J1.
 - [ ] **P7** — document de réception (en-tête ADR-131) ; suite complète `code/`.
 - [ ] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
@@ -198,3 +198,33 @@ décimales** : 0,097428 à 4 s, 0,038229 à 30 s. Le maximum est intérieur et s
 **Le résidu n'est donc pas une limite d'emprise (A208) : c'est bien la décohérence de phase
 (L290).** Un remède côté hôte — publier sur une emprise plus large — n'y ferait rien ; il faut une
 loi mesurée comme ADR-133, et c'est une campagne à part.
+
+P5 : **ADR-134 actée et construite.** `Field::slope_envelope_directional()` — Cauchy–Schwarz sur
+`Σ c_i |cos(θ−θ_i)|`, soit `√(C·(C+R)/2)` avec `C = Σ c_i` et `R = |Σ c_i e^{2iθ_i}|`. Un seul
+passage, deux accumulateurs, **aucune arc-tangente** (`c_i cos2θ_i = |η_i|(k_x²−k_y²)/|k_i|`), donc
+`O(N)` sans grille, sans table, sans garde et sans domaine de validité. `R` ramené à `C` par `min` :
+l'inégalité triangulaire le garantit, l'arrondi pouvait le franchir de quelques ulps et la borne
+aurait alors pu dépasser la somme scalaire.
+
+**Le maximum exact était possible et n'a pas été retenu**, et c'est un arbitrage à dire : le
+demi-spectre ne porte que `angular/2` directions distinctes (64 mesurées), donc `O(A²)` ≈ quelques
+milliers d'opérations. Cauchy–Schwarz est préférée parce qu'elle ne suppose rien sur la disposition
+des emplacements et n'a besoin d'aucun tableau intermédiaire. Écart : `0,707 C` contre `0,637 C` à
+directions équiréparties. Noté dans l'ADR comme chemin disponible si la marge redevient
+contraignante.
+
+Test `directional_envelope_brackets_the_real_slope_s216` : jamais sous la pente réelle (40 401
+points), jamais au-dessus de la resserrée, gain réel (> 5 %), et le **bout analytique** — directions
+toutes alignées ⟹ la borne vaut exactement la somme scalaire, à 1e-5.
+
+Câblage aux **trois** sites de `bound_pressure` (le premier compte en annonçait deux ; `add_source`
+portait le troisième). Une seule attente de test a bougé, et pour une bonne raison : à
+`max_slope = plancher/2`, le verdict passe de `SlopeEnvelope` à **`Slope`** — à majorant plus serré,
+la limite tombe sous la **pente réelle au point**, et le refus devient attribuable au champ plutôt
+qu'à la marge (ADR-098). Figer la cause dans ce test en aurait fait un test du pessimisme du
+majorant ; l'assertion porte désormais sur les deux verdicts de pente.
+Suite complète : **356 réussis (258+4+1+93), 5 ignorés**.
+
+*Note de procédure : ce commit a été poussé sans les notes ci-dessus (erreur de répertoire courant
+au moment du patch), puis complété par `--amend` — la règle du dépôt veut que le travail et la case
+cochée voyagent dans le même commit, sinon l'historique ment dans un sens ou dans l'autre.*

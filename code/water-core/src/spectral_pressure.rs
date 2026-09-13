@@ -618,6 +618,65 @@ mod tests {
         println!("S140 large={large:.6e} tight={tight:.6e} reelle={worst:.6e}");
         assert!(worst <= tight);
     }
+
+    /// S216, ADR-134 : l'enveloppe **directionnelle** reste entre la pente réelle et l'enveloppe
+    /// resserrée, et elle retire ce que celle-ci ne retire pas — l'étalement des directions
+    /// **entre** modes. Trois moitiés, comme le test S140, plus les deux bouts analytiques.
+    #[test]
+    fn directional_envelope_brackets_the_real_slope_s216() {
+        let nodes = [
+            Node { k: [0.6, 0.8], transform: 1.0, weight: 0.7 },
+            Node { k: [1.2, -0.4], transform: 0.8, weight: 0.2 },
+            Node { k: [-0.9, 1.7], transform: 0.5, weight: 0.4 },
+        ];
+        let mut pool = [Slot::default(); 3];
+        let path = [source()];
+        let f = prepare(
+            &nodes, &path, 9.81, 1025.0,
+            SimTime(1_000_000), SimTime(8_000_000),
+            [-8.0; 2], [12.0; 2], &mut pool,
+        )
+        .unwrap();
+        let tight = f.slope_envelope_tight().unwrap();
+        let directional = f.slope_envelope_directional().unwrap();
+        // 1. Elle ne relâche jamais : c'est un majorant du même objet, jamais plus grand.
+        assert!(directional <= tight, "directionnel {directional} > resserré {tight}");
+        // 2. Elle ne descend jamais sous le champ — propriété de sûreté.
+        let mut worst = 0.0f32;
+        for i in 0..=200 {
+            for j in 0..=200 {
+                let p = [-8.0 + i as f32 * 0.1, -8.0 + j as f32 * 0.1];
+                let s = f.sample(p).unwrap();
+                worst = worst.max((s.slope[0] * s.slope[0] + s.slope[1] * s.slope[1]).sqrt());
+            }
+        }
+        println!("S216 resserre={tight:.6e} directionnel={directional:.6e} reelle={worst:.6e}");
+        assert!(worst <= directional, "pente réelle {worst} au-dessus du majorant {directional}");
+        // 3. Sur ce jeu, les directions sont étalées : le gain doit être réel, pas cosmétique.
+        assert!(directional < 0.95 * tight, "aucun gain : {directional} contre {tight}");
+
+        // Bout analytique bas — directions **toutes égales** : la somme scalaire est atteignable,
+        // et la borne doit lui être égale plutôt que de prétendre faire mieux.
+        let aligned = [
+            Node { k: [0.6, 0.8], transform: 1.0, weight: 0.7 },
+            Node { k: [1.2, 1.6], transform: 0.8, weight: 0.2 },
+            Node { k: [1.8, 2.4], transform: 0.5, weight: 0.4 },
+        ];
+        let mut pool = [Slot::default(); 3];
+        let g = prepare(
+            &aligned, &path, 9.81, 1025.0,
+            SimTime(1_000_000), SimTime(8_000_000),
+            [-8.0; 2], [12.0; 2], &mut pool,
+        )
+        .unwrap();
+        let t2 = g.slope_envelope_tight().unwrap();
+        let d2 = g.slope_envelope_directional().unwrap();
+        assert!(
+            (d2 - t2).abs() <= 1e-5 * t2,
+            "directions alignées : {d2} devrait valoir {t2}"
+        );
+    }
+
     #[test]
     fn batch_identity_and_atomic_refusals_s101() {
         let nodes = [

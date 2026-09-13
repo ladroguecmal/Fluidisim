@@ -142,10 +142,13 @@ impl<'a> Prepared<'a> {
             pool,
         )
         .map_err(Error::Preparation)?;
-        // S141, ADR-095 : la préparation retient la borne **resserrée**, seul majorant exact
-        // que la pression sache calculer. Même coût, et le facteur de forme disparaît.
+        // S141, ADR-095 : la préparation retenait la borne **resserrée**, seul majorant exact
+        // que la pression sût calculer. S216, ADR-134 : elle retient la borne **directionnelle**,
+        // qui retire en plus l'étalement des directions **entre** modes — ce que la resserrée ne
+        // touche pas (elle ne retire que la direction interne à un mode et la phase de sa réponse).
+        // Même passage, deux accumulateurs de plus, aucune calibration.
         let slope_envelope = field
-            .slope_envelope_tight()
+            .slope_envelope_directional()
             .map_err(|e| Error::Preparation(spectral_pressure::PrepareError::Calculation(e)))?;
         Ok(Self {
             context,
@@ -184,10 +187,13 @@ impl<'a> Prepared<'a> {
             pool,
         )
         .map_err(Error::Preparation)?;
-        // S141, ADR-095 : la préparation retient la borne **resserrée**, seul majorant exact
-        // que la pression sache calculer. Même coût, et le facteur de forme disparaît.
+        // S141, ADR-095 : la préparation retenait la borne **resserrée**, seul majorant exact
+        // que la pression sût calculer. S216, ADR-134 : elle retient la borne **directionnelle**,
+        // qui retire en plus l'étalement des directions **entre** modes — ce que la resserrée ne
+        // touche pas (elle ne retire que la direction interne à un mode et la phase de sa réponse).
+        // Même passage, deux accumulateurs de plus, aucune calibration.
         let slope_envelope = field
-            .slope_envelope_tight()
+            .slope_envelope_directional()
             .map_err(|e| Error::Preparation(spectral_pressure::PrepareError::Calculation(e)))?;
         Ok(Self {
             context,
@@ -236,10 +242,13 @@ impl<'a> Prepared<'a> {
             pool,
         )
         .map_err(Error::Preparation)?;
-        // S141, ADR-095 : la préparation retient la borne **resserrée**, seul majorant exact
-        // que la pression sache calculer. Même coût, et le facteur de forme disparaît.
+        // S141, ADR-095 : la préparation retenait la borne **resserrée**, seul majorant exact
+        // que la pression sût calculer. S216, ADR-134 : elle retient la borne **directionnelle**,
+        // qui retire en plus l'étalement des directions **entre** modes — ce que la resserrée ne
+        // touche pas (elle ne retire que la direction interne à un mode et la phase de sa réponse).
+        // Même passage, deux accumulateurs de plus, aucune calibration.
         let slope_envelope = field
-            .slope_envelope_tight()
+            .slope_envelope_directional()
             .map_err(|e| Error::Preparation(spectral_pressure::PrepareError::Calculation(e)))?;
         Ok(Self {
             context,
