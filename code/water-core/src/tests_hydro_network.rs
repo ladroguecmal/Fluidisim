@@ -378,3 +378,93 @@ fn an_open_chain_tracks_a_hundredfold_finer_step_s224() {
     println!("chaine a 60 s : 100 ms {coarse:?} contre 1 ms {fine:?}, ecart max {:.4} % de la capacite", worst * 100.0);
     assert!(worst < 0.02, "le pas de 100 ms ne suit pas le pas fin : {worst}");
 }
+
+/// Gravité effective d'un vaisseau accéléré : `0,3 g` latéral, le montage de **C16**.
+/// Le « bas » penche vers `+X`, donc l'eau s'accumule de ce côté.
+const TILTED: [f32; 3] = [0.3 * 9.81, 0.0, -9.81];
+
+/// Cuve de 4 m² de section et 2 m de haut, remplie à 1 m, avec un hublot **latéral** à `x = +2 m`
+/// et `z = 1,2 m` — au-dessus de la surface au repos.
+fn hull(position_um: [i64; 3]) -> ([HydroNode; 1], [Opening; 1], [i64; SHAPE_ENTRIES]) {
+    let table = prism(2_000_000); // 2 m
+    let node = HydroNode {
+        volume_ml: 4_000_000, // 4 m³ sur 8 de capacité : surface à 1 m
+        capacity_ml: 8_000_000,
+        origin_um: [0, 0, 0],
+        shape: 0,
+    };
+    let edge = Opening {
+        from: 0,
+        to: None,
+        flow: Flow::Orifice { area_mm2: 1_000 },
+        position_um,
+        discharge: SHARP_EDGE_DISCHARGE,
+        residue_nl: 0,
+    };
+    ([node], [edge], table)
+}
+
+/// Un pas, et le volume qui en sort. Sert à savoir si une ouverture débite, sans exposer la charge.
+fn leaked(position_um: [i64; 3], g: [f32; 3]) -> i64 {
+    let (mut nodes, mut edges, table) = hull(position_um);
+    let shapes = Shapes::new(&table).unwrap();
+    let mut scratch = [0i64; 1];
+    let before = nodes[0].volume_ml;
+    // Dix pas : le report de reste fait franchir le millilitre même à charge faible.
+    for _ in 0..10 {
+        step(&mut nodes, &mut edges, &shapes, g, SimTime(STEP_US), &mut scratch).unwrap();
+    }
+    before - nodes[0].volume_ml
+}
+
+/// ADR-010 §2, mot pour mot : *« un vaisseau qui accélère ne verrait pas son réservoir fuir par le
+/// hublot latéral qui se retrouve en bas »*. C'est le test que le module de S224 ne pouvait pas
+/// passer, quelle que soit sa précision : il ne recevait que le **module** de `g_eff`.
+#[test]
+fn a_side_port_leaks_only_when_gravity_tilts_s226() {
+    let port = [2_000_000, 0, 1_200_000]; // x = +2 m, z = 1,2 m
+    let upright = leaked(port, DOWN);
+    let tilted = leaked(port, TILTED);
+    println!("hublot lateral : vertical={upright} ml, incline={tilted} ml");
+    assert_eq!(upright, 0, "le hublot est au-dessus de la surface au repos");
+    assert!(tilted > 0, "sous 0,3 g lateral le hublot passe sous la surface");
+}
+
+/// C16, part V : *« inclinaison de la surface au repos à ±1° de la normale à `g_eff` »*.
+///
+/// L'inclinaison n'est pas lue dans le code — elle est **déduite du comportement** : à deux
+/// abscisses, on encadre par dichotomie la cote à laquelle une ouverture se met à débiter. La
+/// frontière entre « débite » et « ne débite pas » **est** le plan de surface, et sa pente entre
+/// les deux abscisses donne l'inclinaison.
+#[test]
+fn the_free_surface_is_perpendicular_to_g_eff_s226() {
+    let threshold = |x_um: i64| {
+        let (mut lo, mut hi) = (-2_000_000i64, 4_000_000i64);
+        while hi - lo > 100 {
+            let mid = (lo + hi) / 2;
+            if leaked([x_um, 0, mid], TILTED) > 0 {
+                lo = mid;
+            } else {
+                hi = mid;
+            }
+        }
+        (lo + hi) / 2
+    };
+    let (xa, xb) = (-2_000_000i64, 2_000_000i64);
+    let (za, zb) = (threshold(xa), threshold(xb));
+    let slope = (zb - za) as f64 / (xb - xa) as f64;
+    let measured_deg = slope.atan().to_degrees();
+    // Pente du plan perpendiculaire à `g_eff`, en fonction de `x` : avec `u = −g/‖g‖`, la cote
+    // vaut `z = (h − u_x·x)/u_z`, donc la pente est `−u_x/u_z = −g_x/g_z`. Elle est **positive**
+    // ici : l'eau s'accumule du côté où le « bas » penche, et la surface y monte. La première
+    // écriture de ce test posait `−a/g` et se trompait donc de signe — le code rendait la bonne
+    // valeur, l'attendu non.
+    let expected_deg = (-(TILTED[0] as f64) / (TILTED[2] as f64)).atan().to_degrees();
+    println!(
+        "surface : seuils z({xa})={za} um, z({xb})={zb} um, inclinaison={measured_deg:.4}° contre {expected_deg:.4}°"
+    );
+    assert!(
+        (measured_deg - expected_deg).abs() <= 1.0,
+        "inclinaison hors du degre exige par C16 : {measured_deg} contre {expected_deg}"
+    );
+}

@@ -121,7 +121,7 @@ vrai, c'est un angle mort et il vaut d'être nommé.
 
 - [x] **P1** — jeton, la violation d'I-07, la forme, la thèse, la prédiction, le plan seuls.
 - [x] **P2** — généraliser : `g_eff` vectoriel, points de référence et positions d'ouverture ; réduction au cas vertical vérifiée **au bit**.
-- [ ] **P3** — éprouver la phrase d'ADR-010 : hublot latéral, sous gravité verticale puis sous accélération latérale ; part V de C16.
+- [x] **P3** — éprouver la phrase d'ADR-010 : hublot latéral, sous gravité verticale puis sous accélération latérale ; part V de C16.
 - [ ] **P4** — mesurer ce que la table de forme perd quand `g_eff` s'incline, et le nommer.
 - [ ] **P5** — document de réception ; suite complète `code/`.
 - [ ] **P6** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
@@ -145,3 +145,22 @@ l'arrêt sans report à 13 ml, la chaîne à [532351, 300688, 166961], les expos
 l'orifice à 2,8284 et 1,4151. Neuf tests, rien n'a bougé.
 
 Les refus gagnent une cause : `g_eff` de norme nulle ou non finie rend `Domain`, comme un pas nul.
+
+P3 : **la phrase d'ADR-010 §2 est éprouvée telle qu'elle est écrite.** Cuve de 4 m² de section et
+2 m de haut, remplie à 1 m, hublot **latéral** à `x = +2 m`, `z = 1,2 m` — au-dessus de la surface
+au repos. Sous gravité verticale : **0 ml**. Sous 0,3 g latéral — le montage de C16 : **1 829 ml en
+dix pas**. C'est exactement le test que le module de S224 ne pouvait pas passer, quelle que soit sa
+précision, puisqu'il ne recevait que le module de `g_eff`.
+
+**C16, part V** : l'inclinaison n'est pas lue dans le code, elle est **déduite du comportement**. À
+deux abscisses, la cote à laquelle une ouverture se met à débiter est encadrée par dichotomie ; la
+frontière entre « débite » et « ne débite pas » **est** le plan de surface. Seuils 444 045 µm à
+`x = −2 m` et 1 644 026 µm à `x = +2 m`, soit **16,6990°** contre **16,6992°** attendus — à
+**0,0002°**, très loin du degré qu'exige C16.
+
+**Erreur de ma part, et elle était dans le test, pas dans le code.** Le premier attendu posait
+`atan(−a/g)` et se trompait de **signe** : l'eau s'accumule du côté où le « bas » penche, donc la
+surface y **monte**. Le code rendait la bonne valeur ; c'est l'attendu qui a dû être corrigé, et la
+raison est écrite dans le test — la pente d'un plan perpendiculaire à `g` vaut `−g_x/g_z`.
+
+Onze tests passent.
