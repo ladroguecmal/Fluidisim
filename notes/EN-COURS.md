@@ -121,7 +121,7 @@ disparaître — l'occupation de 84 %, elle, ne dépend d'aucun échantillonnage
 - [x] **P3** — pente réelle du sillage seul, échantillonnage fin dans l'emprise, contre `slope_envelope()` à chaque âge. *(Absorbée dans P2 : un seul programme mesure les deux champs ; les deux critères déclarés sont tenus.)*
 - [x] **P3-bis** — *ajouté après P2, parce que le résultat l'exige* : la décroissance est-elle **universelle** dans la famille ? Mesurer plusieurs λ et E, et voir si le pessimisme s'effondre sur l'âge adimensionné `t/√(λ/g)` (échelle déjà employée par ADR-126).
 - [x] **P4** — table `ρ(τ)` mesurée et **sûre** (minimum par intervalle, la fonction n'est pas monotone), vérifiée sur deux λ ; occupation recomposée, note corrective datée sur A254.
-- [ ] **P5** — scène à deux sources : exercer le refus tel qu'il est aujourd'hui, et le requalifier avec le majorant resserré.
+- [x] **P5** — scène à deux sources : exercer le refus tel qu'il est aujourd'hui, et le requalifier avec le majorant resserré.
 - [ ] **P6** — décider **et construire** : ADR, puis `slope_max_at(t)` dans `RadialImpact` — méthode neuve, `slope_max()` inchangée (ADR-094 : migrer le refus `Steepness` est une autre décision) — consommée par le budget de composition ; tests.
   *(P4 à P6 réécrits après P3-bis : la similitude étant établie, la décision n'est plus « laquelle des trois voies » mais « resserrer, et voici la loi ». Le plan d'origine reste lisible ci-dessus.)*
 - [ ] **P7** — document de réception (en-tête ADR-131, rang de passage) ; suite complète `code/`.
@@ -238,3 +238,19 @@ alors le terme dominant — c'est lui qu'un resserrement ultérieur devra viser,
 la même mesure de similitude sur sa propre famille.
 
 **A254 : la cause change, le chiffre tient.** La note corrective vient en P7 avec la réception.
+
+P5 : **le refus est exercé, pas déduit.** Scène J1 à 16 s, un sillage prescrit et n impacts voisins
+(positions [0;10], [3;10], [-3;10] — l'intersection des disques de 52 m reste large, donc c'est le
+budget qui décide et non la géométrie), composée par `mixed_water::sample_world_batch` au point
+[0;10] avec `max_slope = π/7`.
+
+| impacts | budget | part de π/7 | verdict du cœur | budget resserré | part | admis |
+|---:|---:|---:|---|---:|---:|---|
+| 1 | 0,377603 | 84,1 % | `Ok(())` | 0,186540 | 41,6 % | oui |
+| **2** | **0,590210** | **131,5 %** | **`Err(SlopeEnvelope)`** | 0,208085 | 46,4 % | oui |
+| 3 | 0,802818 | 178,9 % | `Err(SlopeEnvelope)` | 0,229631 | 51,2 % | oui |
+
+A254 est confirmée dans les termes exacts où elle avait été écrite : **la deuxième source refuse
+l'image**, et le verdict rendu est bien `SlopeEnvelope` — le majorant, pas la raideur. Avec le
+majorant resserré par la table, trois impacts et un sillage n'occupent que 51 % : la marge redevient
+celle d'une scène, pas d'un cas limite.
