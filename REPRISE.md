@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-13 18:30 +02:00
+JETON            : occupé
+Battement        : 2026-09-13 18:34 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
-Session en cours : —
+Session en cours : S224 — **V-noyau** : premier module de la couche V, reçu par C12
 Dernière session : S223 — ADR-138, le budget de pente tient compte de la position relative des impacts ; A262 traitée (trois impacts frais séparés passent, 13,3 µs) ; A263 ouverte
 Session suivante : S224 — **revenir à la file**. Le budget de pente n'est plus le goulot d'une scène J1 : ses deux termes ont chacun leur limite connue, l'impact par une inégalité à 13 µs (ADR-138), la pression par une loi d'échelle à 25 s (A261, S222). Deux lignes attendent, et la seconde attend depuis le début : **cadence complète de l'hôte** (travail nécessaire de J1, jamais mesurée) et **V-noyau**, qu'ADR-127 demande au plus tard avec J2 — **zéro module, jamais commencé en 223 sessions**. Si l'hôte passe d'abord, le dire dans le journal et ne pas laisser V glisser d'une session de plus. A261, A258, A263, l'ancrage du balayage et le cas à plus de trois champs restent nommés sans ordre imposé ; δ/V conservés
 Maillons        : 0 — W avancée dans `code/water-core/src` (radial_impact, mixed_water) **et** ADR-138 actée
