@@ -6,6 +6,7 @@ use water_core::{
     gaussian_spectrum::{self, HalfSpectrum},
     impact_field::{Medium, BREAKING_SLOPE},
     impact_generator::{self, Entry},
+    composition,
     prepared_water::{self, mixed, BoundBackground},
     pressure_journal::Journal,
     pressure_source::Metadata,
@@ -313,6 +314,13 @@ pub struct MixedOutcome {
     pub batch: Result<(), String>,
     /// Refus localisés, point par point : (point monde, cause rendue par le cœur).
     pub refusals: Vec<([f32; 2], String)>,
+    /// Refus comptés par cause (ADR-098, A208) : la pente **réelle** des perturbations dépasse,
+    /// ou seuls leurs **majorants** dépassent. Les deux n'ont pas le même remède.
+    pub refused_slope: usize,
+    pub refused_envelope: usize,
+    /// Norme maximale de la pente **réelle** des perturbations sur les points admis — la
+    /// grandeur que le majorant `floor` borne, et dont l'écart dit la marge perdue.
+    pub max_perturbation_slope: f32,
 }
 /// Composition de la scène par le cœur à un instant, point par point puis en lot.
 ///
@@ -367,6 +375,7 @@ pub fn mixed_compose(
     let mut admitted_points = Vec::new();
     let mut outside = [0usize; 3];
     let mut hand_local = Vec::with_capacity(world.len());
+    let (mut refused_slope, mut refused_envelope, mut real) = (0usize, 0usize, 0.0f32);
     for &p in world {
         let point = WorldPos::from_metres(p[0] as f64, p[1] as f64, 0.);
         if !mixed::admits(&bound, &impacts, Some(&pressure), point) {
@@ -391,10 +400,13 @@ pub fn mixed_compose(
             let b = scene.background.eval(point, time)?;
             let flat = [local[0], local[1]];
             let mut v = [b.eta, -b.normal[0] / b.normal[2], -b.normal[1] / b.normal[2]];
+            let mut d = [0.0f32; 2];
             let w = scene.impact.sample(FrameId(0), 0, flat, time).ok()?;
             v[0] += w.eta;
             v[1] += w.slope[0];
             v[2] += w.slope[1];
+            d[0] += w.slope[0];
+            d[1] += w.slope[1];
             let mut scratch = [Default::default(); 1];
             let mut out = [Default::default(); 1];
             pressure
@@ -403,6 +415,9 @@ pub fn mixed_compose(
             v[0] += out[0].eta;
             v[1] += out[0].slope[0];
             v[2] += out[0].slope[1];
+            d[0] += out[0].slope[0];
+            d[1] += out[0].slope[1];
+            real = real.max((d[0] * d[0] + d[1] * d[1]).sqrt());
             Some(v)
         })());
         match mixed::sample_world_batch(
@@ -425,7 +440,21 @@ pub fn mixed_compose(
             }
             Err(e) => {
                 values.push(None);
-                refusals.push((p, format!("{e:?}")));
+                if let mixed::Error::Point { error, .. } = &e {
+                    match error {
+                        composition::Error::Slope => refused_slope += 1,
+                        composition::Error::SlopeEnvelope => refused_envelope += 1,
+                        _ => {}
+                    }
+                }
+                match &e {
+                    mixed::Error::Slope => refused_slope += 1,
+                    mixed::Error::SlopeEnvelope => refused_envelope += 1,
+                    _ => {}
+                }
+                if refusals.len() < 4 {
+                    refusals.push((p, format!("{e:?}")));
+                }
             }
         }
     }
@@ -450,6 +479,9 @@ pub fn mixed_compose(
         hand_local,
         batch,
         refusals,
+        refused_slope,
+        refused_envelope,
+        max_perturbation_slope: real,
     })
 }
 pub struct FrameData<'a> {

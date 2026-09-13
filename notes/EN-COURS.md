@@ -115,7 +115,7 @@ cœur refuserait.
 - [x] **P1** — jeton, entrée, défaut visé, thèse, critères et plan seuls.
 - [x] **P2** — scène : journal d'impact et montage `mixed_water` (`prepared_water::Prepared::build`) ; compilation, test minimal.
 - [x] **P3** — accord : composition du cœur contre la somme à la main, aux âges déclarés, sur la grille projetée ; écart publié.
-- [ ] **P4** — budget conjoint : `slope_floor` impact + sillage à chaque âge contre π/7 ; refus localisés et qualifiés.
+- [x] **P4** — budget conjoint : `slope_floor` impact + sillage à chaque âge contre π/7 ; refus localisés et qualifiés.
 - [ ] **P5** — hôte : `--verify` passe par la composition du cœur ; contrôles S212/S213 conservés ; coût publié avec son en-tête.
 - [ ] **P6** — A251 : emprise et durée honnêtes déduites de la recette et de la vitesse ; couture spatiale et temporelle mesurées comme ADR-126.
 - [ ] **P7** — A251 : réception des coutures et refus nommé ou garde ; publication avec la fixture.
@@ -161,3 +161,27 @@ perturbations donne les 18 µm mesurés.
 Portée : 0,6 % de la tolérance de 3 mm de `--verify`, donc jamais visible — mais c'est la
 **référence** qui est fausse, pas le GPU, et un LOD spatial (J1-bis) qui creuserait la pente
 augmenterait l'écart. À ouvrir en angle mort (A253) et à corriger en P5.
+
+P4 : budget conjoint mesuré aux cinq âges, et **les deux causes de refus séparées** par deux seuils
+déduits des mesures (le budget étant point-indépendant, `floor` **est** le seuil de bascule).
+
+| âge (s) | floor | impact | sillage | part de π/7 | pente réelle max | majorant / réel |
+|---:|---:|---:|---:|---:|---:|---:|
+| 4 | 0,347679 | 0,212607 | 0,135072 | 77,5 % | 0,092876 | **3,74** |
+| 8 | 0,357528 | 0,212607 | 0,144921 | 79,7 % | 0,089615 | 3,99 |
+| 16 | **0,377603** | 0,212607 | 0,164995 | **84,1 %** | 0,073979 | 5,10 |
+| 24 | 0,369652 | 0,212607 | 0,157044 | 82,4 % | 0,051954 | 7,11 |
+| 39 | 0,370588 | 0,212607 | 0,157981 | 82,6 % | 0,035240 | **10,52** |
+
+Seuils : à `max_slope` entre la pente réelle et `floor` (0,2028–0,2258 selon l'âge), **4 477 points
+sur 4 477 refusés, tous `SlopeEnvelope`, zéro `Slope`** — le refus vient entièrement de la marge.
+À la moitié de la pente réelle, 16 à 182 points passent en `Slope` selon l'âge, le reste reste
+`SlopeEnvelope`. Le lot rend `SlopeEnvelope` dans les deux cas : c'est le premier point qui parle.
+
+**Ce que cela dit, et qui n'était pas connu.** Le majorant conjoint est **3,7 à 10,5 fois** la pente
+réelle, et la scène J1 — *une* source de chaque type — occupe déjà **84 %** de π/7. Marge restante
+0,0712 : un second sillage de la même recette (0,165) ou un second impact (0,213) **refuserait toute
+l'image**, et par majorant, pas par raideur — la physique garde un facteur dix. A208 nommait le
+mécanisme sur un champ seul et par le choix d'emprise ; ici c'est **l'additivité sur le nombre de
+sources** (ADR-128, ADR-119 règle 1) qui borne la scène, et elle n'a jamais été mesurée composée.
+Angle mort à ouvrir (A254, sévérité 1 : c'est un refus, pas un défaut cosmétique).

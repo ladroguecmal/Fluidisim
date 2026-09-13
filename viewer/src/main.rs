@@ -354,6 +354,20 @@ fn run() -> Result<(), String> {
             for (p, cause) in m.refusals.iter().take(4) {
                 println!("  MIXED_REFUS age={age} point={p:?} cause={cause}");
             }
+            // S214 : le budget est point-indépendant (ADR-128), donc le seuil de bascule est
+            // `floor` lui-même. Deux seuils déduits des mesures l'éprouvent, et séparent les
+            // deux causes de refus qu'ADR-098/A208 distinguent — majorant contre pente réelle.
+            let real = m.max_perturbation_slope;
+            for (nom, seuil) in [
+                ("sous_majorant", 0.5 * (real + m.floor)),
+                ("sous_reelle", 0.5 * real),
+            ] {
+                let r = scene::mixed_compose(&scene, input, &mut store, t, &world, seuil)?;
+                println!(
+                    "  MIXED_SEUIL age={age} cas={nom} max_slope={seuil:.6} pente_reelle_max={real:.6} floor={:.6} refus_pente={} refus_majorant={} batch={:?}",
+                    r.floor, r.refused_slope, r.refused_envelope, r.batch
+                );
+            }
         }
         g.benchmark(&mut frame)?;
         g.resize(960, 540);
