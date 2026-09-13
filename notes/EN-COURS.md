@@ -131,7 +131,7 @@ décohérence est immédiate et la part statique marginale — et le sujet redev
 
 - [x] **P1** — jeton, entrée, relecture du majorant, thèse, critères et plan seuls.
 - [x] **P2** — décomposer : somme scalaire, majorant directionnel (balayage fin hors ligne) et pente réelle, aux âges de la fixture ; les deux rapports.
-- [ ] **P3** — *fusionné avec P4 après P2, un seul balayage les porte* : la part statique est-elle une propriété de la recette (`angular`, `radial`, `cutoff`, σ, tronçons) ? combien de directions distinctes le demi-spectre porte-t-il ? et le discriminant d'emprise — à âge fixé, agrandir l'emprise fait-il monter le maximum réel ?
+- [x] **P3** — *fusionné avec P4 après P2, un seul balayage les porte* : la part statique est-elle une propriété de la recette (`angular`, `radial`, `cutoff`, σ, tronçons) ? combien de directions distinctes le demi-spectre porte-t-il ? et le discriminant d'emprise — à âge fixé, agrandir l'emprise fait-il monter le maximum réel ?
 - [x] ~~**P4**~~ — fusionné dans P3.
 - [ ] **P5** — décider et construire ce que le verdict autorise : enveloppe directionnelle exacte dans le cœur si la part statique le mérite (maximum exact sur la grille angulaire, sans balayage), sinon dire pourquoi.
 - [ ] **P6** — recevoir : jamais dépassée, plus serrée, coût de préparation ; budget recomposé sur la scène J1.
@@ -171,3 +171,30 @@ dans un cône, et c'est cette concentration que le 1,20 mesure.
 - Le **résidu** porte tout le reste et croît sans borne visible : 1,10 à 4 s, 1,56 à 16 s,
   **3,98 à 39 s**. C'est la décohérence de L290, et elle demande une loi mesurée comme ADR-133 —
   donc sa propre campagne, pas une inégalité.
+
+P3 (avec P4 fusionné) : `--famille` dans le même exemple.
+
+**La part statique ne dépend pas de la quadrature.** À 4 s elle vaut **1,2586** pour `angular`
+64 / 128 / 256, `radial` 32 / 128 et `cutoff` 2 / 4 — identique à quatre décimales. C'est une
+propriété du champ, pas de sa discrétisation, et c'est ce qui autorise à la calculer plutôt qu'à
+la tabuler. Elle **bouge** avec ce qui change le champ : σ = 1 → 1,31 ; vitesse 1,5 m/s → 1,40 à
+1,52 ; vitesse 6 m/s → 1,44 à 1,48 ; et avec la phase (1,26 pendant le forçage, 1,20 après).
+σ = 4 est **refusée à la construction** — la bibliothèque borne sa famille elle-même, comme pour
+l'impact en S215.
+
+**Le demi-spectre ne porte que `angular/2` directions distinctes** — 32 / 64 / 128 mesurées pour
+`angular` 64 / 128 / 256. Un maximum exact sur ces directions coûterait `O(A²)`, soit quelques
+milliers d'opérations : le coût n'est pas l'obstacle.
+
+**Le résidu suit le temps depuis l'extinction, pas l'âge absolu** : à 30 s, 1,75 pour seize
+tronçons (encore en forçage), 3,43 pour huit, **6,29 pour deux** (28 s après extinction). Il est
+par ailleurs insensible à la recette (3,43 / 3,46 / 3,45 / 3,46 pour radial 128, cutoff 2, cutoff 4,
+angular 256) — sauf radial 32, à 2,89, qui est la recette que S212 savait déjà décrocher.
+
+**Discriminant d'emprise — et il tranche.** À âge fixé et **à pas de grille constant** (0,5 m ;
+le faire croître avec l'emprise aurait rendu le test vide), agrandir l'emprise d'un facteur 2 puis
+4 en côté — **seize fois en aire**, 512 × 416 m — laisse le maximum réel **identique à six
+décimales** : 0,097428 à 4 s, 0,038229 à 30 s. Le maximum est intérieur et saturé.
+**Le résidu n'est donc pas une limite d'emprise (A208) : c'est bien la décohérence de phase
+(L290).** Un remède côté hôte — publier sur une emprise plus large — n'y ferait rien ; il faut une
+loi mesurée comme ADR-133, et c'est une campagne à part.

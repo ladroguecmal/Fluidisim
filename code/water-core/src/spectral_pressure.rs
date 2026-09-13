@@ -388,6 +388,56 @@ impl Field<'_> {
         }
         Ok(bound)
     }
+
+    /// S216, ADR-134 : majorant **directionnel** de la pente — plus serré que la somme scalaire,
+    /// exact, et sans calibration.
+    ///
+    /// **Pourquoi la somme scalaire est lâche.** `slope_envelope_tight` somme `|k_i| · |eta_i|`
+    /// sur des modes dont les vecteurs d'onde pointent dans des directions **différentes**. La
+    /// pente est un vecteur : sa norme est celle de la somme vectorielle, jamais la somme des
+    /// normes dès que les directions sont étalées. Ce défaut ne dépend ni du temps ni du point —
+    /// il est dans la recette, et aucune mesure ne le corrige : c'est une inégalité qui le fait.
+    ///
+    /// **La borne.** Pour toute direction `e`, la pente projetée vaut au plus
+    /// `Σ c_i |cos(θ − θ_i)|` avec `c_i = |k_i| |η_i|`, et la norme de la pente est le maximum de
+    /// cette quantité sur `θ`. Par Cauchy–Schwarz,
+    /// `Σ c_i |cos| ≤ √(C · Σ c_i cos²) = √(C · (C + R cos 2(θ−φ)) / 2) ≤ √(C · (C + R) / 2)`,
+    /// où `C = Σ c_i` et `R = |Σ c_i e^{2iθ_i}|`. **`R` est la seule quantité à calculer**, en un
+    /// seul passage et sans arc-tangente : `c_i cos 2θ_i = |η_i| (kx² − ky²)/|k_i|` et
+    /// `c_i sin 2θ_i = |η_i| · 2 kx ky / |k_i|`.
+    ///
+    /// Les deux bouts se vérifient : directions toutes égales ⟹ `R = C` ⟹ borne `= C`, la somme
+    /// scalaire, et elle est alors atteignable ; directions équiréparties ⟹ `R = 0` ⟹ borne
+    /// `= C/√2 ≈ 0,707 C`, quand le maximum vrai vaut `2C/π ≈ 0,637 C`. La borne n'est donc pas
+    /// la plus serrée possible — elle est **prouvée**, en `O(N)`, sans grille de directions, sans
+    /// table et sans garde.
+    pub fn slope_envelope_directional(&self) -> Result<f32, Error> {
+        let (mut total, mut px, mut py) = (0.0f32, 0.0f32, 0.0f32);
+        for s in self.slots {
+            let kx = s.weighted_k[0];
+            let ky = s.weighted_k[1];
+            let k2 = kx * kx + ky * ky;
+            let k = k2.sqrt();
+            let a = (s.response.eta.re * s.response.eta.re
+                + s.response.eta.im * s.response.eta.im)
+                .sqrt();
+            total += k * a;
+            if k > 0.0 {
+                // c_i cos 2θ_i et c_i sin 2θ_i, sans arc-tangente ni division par zéro.
+                px += a * (kx * kx - ky * ky) / k;
+                py += a * 2.0 * kx * ky / k;
+            }
+        }
+        let r = (px * px + py * py).sqrt();
+        // `R ≤ C` par inégalité triangulaire ; l'arrondi peut le franchir de quelques ulps, et
+        // la borne cesserait alors d'être ≤ somme scalaire. On le ramène, sans rien élargir.
+        let r = r.min(total);
+        let bound = (total * (total + r) * 0.5).sqrt();
+        if !bound.is_finite() {
+            return Err(Error::NonFinite);
+        }
+        Ok(bound)
+    }
     /// Scratch modifiable au refus, sortie inchangée jusqu'au succès intégral.
     /// Préfixe points.len() seulement ; lot vide accepté sans mutation.
     pub fn sample_batch(
