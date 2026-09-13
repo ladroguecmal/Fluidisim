@@ -2927,3 +2927,12 @@ COMPOSITION-MER-S205.
 rendu J1 sur GPU par un hôte séparé ([ADR-130](../adr/ADR-130-rendu-j1-sur-gpu-par-un-hote-separe.md)).
 A250 reste ouverte tant qu'aucun hôte n'exerce le GPU et que le budget GPU de l'eau n'est pas
 confronté à une mesure.
+
+**Suivi A247 — S208, 2026-09-13 : part W construite.** `RadialTable` (ADR-129) : l'impact coûte
+0,04 ms de profil et ~43 ns par sommet ; sur 36 160 sommets, W passe de ~240 ms à ~0,95 ms par image,
+image par la table à un niveau près de l'image directe. **A247 reste ouverte pour B** (41–42 ms sur
+CPU à la même densité), dont le chemin est décidé par ADR-130 : GPU, hôte séparé.
+
+**Suivi A250 — S208.** Pile recommandée pour l'hôte GPU (HOTE-GPU-S208) : wgpu 30.0.1, winit
+0.30.13, pollster 1.0.1, espace de travail séparé. Rien téléchargé ; A250 reste ouverte jusqu'à un
+hôte qui exerce le GPU et une mesure du budget GPU de l'eau.

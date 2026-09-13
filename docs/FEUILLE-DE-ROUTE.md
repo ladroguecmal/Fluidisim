@@ -53,6 +53,9 @@ densité qui montre l'impact ; chemin d'image de W par table de Bessel décidé 
 `paquets_W_max` retiré du profil (I-16).
 *S207* : **rendu J1 sur GPU par un hôte séparé**, arbitrage de l'utilisateur (ADR-130) ;
 `water-core` reste sans dépendance et publie ce que le GPU consomme.
+*S208* : **table de Bessel construite** (`RadialTable`, ADR-129) — W à ~0,95 ms par image sur
+36 160 sommets, image à un niveau près du chemin direct, pas de réception λ/16 ; pile de l'hôte
+recommandée : wgpu 30.0.1 + winit 0.30.13 ([HOTE-GPU-S208](validation/HOTE-GPU-S208.md)).
 
 *Bloquants nommés* :
 - ~~**A245**~~ — **levé en S205** (ADR-128) : la mer S201 (Hs 1,5 m) se compose, impact compris,
@@ -134,7 +137,7 @@ Les protocoles restent ceux de [PLAN-BENCHMARK](validation/PLAN-BENCHMARK.md).
 | arbitrage | pourquoi il est explicite | qui tranche |
 |---|---|---|
 | ~~Chemin de rendu et hôte de J1~~ — **tranché S207 : (A) GPU, hôte séparé** ([ADR-130](adr/ADR-130-rendu-j1-sur-gpu-par-un-hote-separe.md)) *(fusionnait « hôte interactif » et A247, S206)* | Mesuré : B sur CPU coûte 42 ms par image à la densité qui montre l'impact (2 px), 36 ms sur 16 fils ; W est ramené à 27 µs par impact (ADR-129). Options : **(A)** hôte séparé qui évalue B et les tables W sur **GPU** — prévu par ADR-003 et I-08 (« seules des phases repliées passent au GPU ») et par `gpu_sim_ms = 2,5` d'ADR-012 ; `water-core` reste sans dépendance, l'hôte en a (téléchargement) ; **(B)** CPU seul sans dépendance — exige B vectorisé (non mesuré), un groupe de fils persistant, et que les 2 ms se comptent en **temps mur sur tous les cœurs**, ce qu'ADR-125 ne dit pas ; **(C)** changer le profil ADR-125 (fréquence ou temps eau) ; **(D)** grille à 8 px — **perd les anneaux**, donc retire l'impact visible | **l'utilisateur** — a retenu (A) |
-| **Dépendances de l'hôte GPU** *(S207)* | ADR-130 : aucune bibliothèque téléchargée sans autorisation nommée (bibliothèques, versions, taille, source) | **l'utilisateur**, au début du lot de l'hôte |
+| **Dépendances de l'hôte GPU** *(S207 ; recommandation S208)* | ADR-130 : aucune bibliothèque téléchargée sans autorisation nommée. S208 recommande wgpu 30.0.1, winit 0.30.13, pollster 1.0.1 ; demande en deux temps — résolution de l'arbre (index), puis sources ; vendoring ou non | **l'utilisateur**, au début de S209 |
 | **Budget GPU de l'eau** *(S207)* | ADR-125 ne dit pas où l'eau s'évalue ; ADR-012 déclarait `gpu_sim_ms = 2,5` ; aucune valeur inventée | la première mesure de l'hôte GPU ; arbitrage explicite si incompatible |
 | ~~A247 — coût d'un impact visible~~ | **mesuré S206** ; part technique tranchée par ADR-129, part d'arbitrage fusionnée ci-dessus | — |
 | ~~A245 — mer composable~~ | **tranché S205, ADR-128** : B hors du budget de refus, bits publiés inchangés | — |

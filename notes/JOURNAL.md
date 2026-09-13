@@ -10772,3 +10772,37 @@ l'hôte GPU, qui commence par proposer la pile et demander l'autorisation de té
 dépendances, budget GPU), file active, index, README, REPRISE. A250 reçoit sa décision, reste
 ouverte jusqu'à l'hôte construit. Aucun angle, aucune leçon nouveaux. 130 ADR, 250 angles,
 283 leçons, 18 invariants, 6 SPEC, 23 cas. Compteur 0 (décision de l'utilisateur, sujet imposé).
+
+## S208 — 2026-09-13 — La table de Bessel construite ; wgpu et winit recommandés pour l'hôte GPU
+
+**Entrée.** « Enchaîne sur S208, et pour la décision de l'hôte je pensais à l'option 1 mais à voir
+via ta recommandation. » L'option 1 de S204 est celle qu'ADR-130 acte. État : master et copies à
+79bfda6, propres. Plan seul c30515c avec conception et **cinq critères déclarés avant mesure**.
+
+**Construction.** `radial_table.rs`, sous-module de `radial_impact` : `table_len`, `bake_table`
+(stockage fourni par l'hôte), `profile` (mêmes opérations et même ordre que `sample`), `eval`
+(Hermite et sa dérivée, refus exactement là où `admits` est faux), erreur `TableError`. Aucune
+formule recopiée, aucune allocation.
+
+**Réception.** (a) égalité **au bit** aux nœuds — reçue. (c) zéro allocation, témoin > 0 — reçue.
+(d) refus nommés — reçus. (e) image S205 +3 s par la table : 27 pixels différents de l'image
+directe, écart maximal 1 niveau, 0 hors emprise, 18,5 s contre 102 s — reçue. **(b) précision à
+λ/8 ≤ 0,09 mm — ÉCHOUE** : 0,1820 mm à la naissance. Échec consigné et committé **avant** retouche
+(b0aaa00) ; mesure ajoutée ensuite et dite comme telle : λ/16 = 0,0127 mm au pire, λ/8 sous
+0,09 mm dès 2 s, rapport 14,3 ≈ h⁴. Le seuil n'a pas bougé ; le pas de réception devient λ/16
+(note datée ADR-129). Coût par image à 2 px : profil 0,04 ms, évaluation 0,91 ms, image 43 ms dont
+B 41,7 ms — contre 280 ms en direct. Workspace **348 réussis / cinq ignorés** ; C18/C02 inchangés.
+
+**Recommandation (à la demande de l'utilisateur).** HOTE-GPU-S208 : **wgpu 30.0.1 + winit 0.30.13
++ pollster 1.0.1**, versions et licences lues sur crates.io sans téléchargement ; espace de travail
+`viewer/` séparé, `code/` inchangé et hors réseau ; B évalué sur GPU depuis des phases repliées et
+en coordonnées relatives à la caméra, W depuis les profils de table. Options écartées : D3D12 brut,
+Vulkan brut, OpenGL, moteur. Arbre transitif **non chiffré** faute de résolution.
+
+**Suite S209 : lot de l'hôte GPU**, qui commence par demander l'autorisation de **résolution**
+(Cargo.lock de `viewer/`, index seulement) puis, liste et taille en main, celle des **sources** ;
+question du vendoring à l'utilisateur.
+
+**Rituel.** L284 ; suivis A247 (part W construite, B reste) et A250 (pile recommandée) ; aucun angle
+nouveau. 130 ADR, 250 angles, 284 leçons, 18 invariants, 6 SPEC, 23 cas. velocite.sh : W avance
+en S208 (24 modules). Compteur 0. Invariants relus : I-03, I-06, I-08, I-15 — tenus.

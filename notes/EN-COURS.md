@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S208 — en cours
+Session : S208 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : (1) **construire ADR-129** dans `water-core` — table radiale à matrice de Bessel
 précalculée pour le chemin d'image de W, avec la réception écrite dans l'ADR ; (2) **recommander
@@ -98,7 +98,7 @@ rayon non résolu, écart maximal par canal publié, zéro pixel différent hors
 - [x] **P5** — recommandation de pile GPU : critères (ADR-020/130, hors réseau pour le cœur,
  portabilité, licences, maintenance), versions vérifiées en ligne **sans téléchargement** ;
  demande d'autorisation nommée formulée pour le lot suivant. Document `HOTE-GPU-S208`.
-- [ ] **P6** — rituel §6 : journal, angles, leçons, notes ADR-129, feuille de route, file active,
+- [x] **P6** — rituel §6 : journal, angles, leçons, notes ADR-129, feuille de route, file active,
  index/README/REPRISE, décomptes, velocite, compteur, jeton libre, copies.
 
 ### Notes de reprise
@@ -139,3 +139,6 @@ MIT OR Apache-2.0, MSRV 1.87, 231 Ko, 28 dépendances directes dont 19 non optio
 1.97. **Recommandé : wgpu + winit + pollster**, espace de travail séparé `viewer/`, `code/` inchangé.
 Demande d'autorisation en deux temps (résolution de l'arbre, puis sources) ; question vendoring
 laissée à l'utilisateur. Arbre transitif non chiffré (pas inventé).
+P6 : workspace 348/cinq ignorés (250+4+1+93) ; C18/C02 inchangés ; velocite : W S208 (24 modules).
+Note datée ADR-129 (construite, échec λ/8 consigné, réception λ/16) ; L284 ; suivis A247, A250 ;
+feuille de route, file active, index, README, REPRISE. Décomptes 130/250/284/18/6/23. Jeton libre.

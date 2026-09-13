@@ -4649,3 +4649,22 @@ Le geste : avant toute campagne de coût, écrire la chaîne observateur → plu
 d'onde à conserver → densité de Nyquist → nombre de points, et mesurer **à** cette densité ; les
 densités plus lâches se publient comme bornes basses, jamais comme options. Et vérifier où tombe
 la charge : ici, dans l'emprise la plus chère. Voir COUT-IMAGE-S206 §2, A250.
+
+## L284 — Un seuil de réception tiré d'un instant ne vaut pas pour l'horizon
+
+*(S208)* S206 avait mesuré l'erreur d'une table radiale à λ/8 : 0,090 mm, à un instant, +3 s. S208
+en a fait un critère de réception « sur toute l'emprise et tout l'horizon », déclaré avant la mesure
+comme il se doit — et il a échoué à l'instant zéro, 0,182 mm, parce qu'un impact naît compact : son
+pic central a la courbure la plus forte de toute sa vie, et l'erreur d'Hermite croît comme la
+dérivée quatrième.
+
+La déclaration préalable a fait son travail : l'échec a été vu, consigné avant retouche, et c'est
+le pas qui a changé, pas le seuil. Ce qui a manqué est en amont : **un seuil se tire du pire cas
+du domaine qu'il couvre**, pas d'un point de mesure pris pour commode. Pour un champ qui évolue, le
+pire cas se cherche dans le temps comme dans l'espace ; pour une interpolation, il est là où la
+courbure est maximale, et on sait souvent où c'est avant de mesurer.
+
+Le geste : quand un seuil déclaré vient d'une mesure antérieure, relire **sur quel sous-domaine**
+cette mesure portait. S'il est plus petit que celui du critère, mesurer d'abord le pire cas connu
+— ici l'instant initial — ou déclarer le critère sur le sous-domaine réellement couvert. Voir
+ADR-129 (note S208).

@@ -742,3 +742,9 @@ Voir [coût d'image S206](docs/validation/COUT-IMAGE-S206.md), [ADR-129](docs/ad
 autorisation nommée. **Suite S208 : construire ADR-129.**
 130 ADR,250 angles,283 leçons,18 invariants,6 SPEC,23 cas.
 Voir [ADR-130](docs/adr/ADR-130-rendu-j1-sur-gpu-par-un-hote-separe.md).
+
+**S208 — 2026-09-13 : table de Bessel construite (ADR-129) ; pile GPU recommandée.**
+W par image divisé par ~250 à 2 px, image à un niveau près du chemin direct ; critère λ/8 échoué
+à la naissance, pas de réception λ/16. Hôte GPU : wgpu 30.0.1 + winit 0.30.13, rien téléchargé.
+**Suite S209 : hôte GPU.** 130 ADR,250 angles,284 leçons,18 invariants,6 SPEC,23 cas.
+Voir [ADR-129](docs/adr/ADR-129-chemin-image-de-w-par-table-de-bessel.md), [hôte GPU S208](docs/validation/HOTE-GPU-S208.md).

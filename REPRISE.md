@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 08:56 +02:00
+JETON            : libre
+Battement        : 2026-09-13 09:11 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S208 — construire ADR-129 (table de Bessel de W) ; recommandation de pile GPU
-Dernière session : S207 — ADR-130 : rendu J1 sur GPU par un hôte séparé (choix de l'utilisateur)
-Session suivante : S208 — construire ADR-129 (chemin d'image de W, code src), puis lot de l'hôte GPU
-Maillons        : 0 — S207 sujet imposé par l'utilisateur ; ADR-130 décision de J1
+Session en cours : aucune
+Dernière session : S208 — table de Bessel construite (ADR-129) ; pile GPU recommandée (wgpu + winit)
+Session suivante : S209 — hôte GPU de J1 : demander l'autorisation de résolution puis de sources (ADR-130)
+Maillons        : 0 — S208 avance W (code src, velocite.sh)
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 
@@ -153,9 +153,10 @@ une session ne peut signaler sa présence qu'en travaillant.
 sont des étapes. Trajectoire J1 → J5 et noyau V : **[FEUILLE-DE-ROUTE](docs/FEUILLE-DE-ROUTE.md)**,
 seul document qui la porte — ne pas la recopier ici.
 
-**S206 : jalon en cours J1** (B/W visible et interactif). Coût d'image mesuré : **incompatible
-sur CPU** à la densité qui montre l'impact ; W réduit d'un facteur 100 par table de Bessel
-(ADR-129, à construire en **S207**) ; **B par sommet sur CPU est le goulot**. **Arbitrage « chemin
+**S208 : jalon en cours J1** (B/W visible et interactif). Coût d'image mesuré : **incompatible
+sur CPU** à la densité qui montre l'impact ; W construit par table de Bessel (ADR-129, S208, image
+à un niveau près) ; **B par sommet sur CPU est le goulot**, chemin GPU décidé. Prochain lot :
+**hôte GPU**, pile recommandée (HOTE-GPU-S208), autorisation de téléchargement à demander d'abord. **Arbitrage « chemin
 de rendu et hôte » tranché par l'utilisateur en S207 : GPU, hôte séparé** (ADR-130). **Hôte interactif : arbitrage ouvert**, qui
 revient à l'utilisateur s'il demande des dépendances. V-noyau s'ouvre au plus tard avec J2 ;
 S200-1/A244 et S199-2 sont sur le chemin de J2, plus « reportées ». Les acquis S194 ci-dessous
@@ -258,6 +259,16 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S208 — 2026-09-13 : table de Bessel construite (ADR-129) ; pile GPU recommandée.**
+`RadialTable` dans `radial_impact` : au bit aux nœuds, zéro allocation, refus nommés, image S205
+à un niveau près du direct (27 px, 18,5 s contre 102 s). **Critère λ/8 ≤ 0,09 mm échoué** à la
+naissance (0,182 mm), consigné avant retouche ; pas de réception λ/16 (0,0127 mm). W par image
+à 2 px : ~0,95 ms contre ~240 ms ; B reste 41,7 ms sur CPU. Workspace **348 / cinq ignorés**.
+Recommandation : **wgpu 30.0.1 + winit 0.30.13 + pollster 1.0.1**, `viewer/` séparé, rien
+téléchargé. **L284**. **Suite S209 : hôte GPU**, autorisation de résolution puis de sources.
+130 ADR,250 angles,284 leçons,18 invariants,6 SPEC,23 cas ; compteur0 (W code src).
+Voir [ADR-129](docs/adr/ADR-129-chemin-image-de-w-par-table-de-bessel.md), [hôte GPU S208](docs/validation/HOTE-GPU-S208.md).
 
 **S207 — 2026-09-13 : rendu J1 sur GPU par un hôte séparé, ADR-130 (arbitrage utilisateur).**
 Réponse à la question de fin de S206 : option (A), recommandée. `water-core` reste sans
@@ -404,15 +415,15 @@ attrapé trois erreurs en trois sessions, ni la qualité du travail sur W.
 
 ### Les quatre couches — l'état qui commande tout le reste
 
-**Recalculé le 2026-09-13 en S205 par `sh outils/velocite.sh` ; S206 n'a pas touché `src`. Ne pas le recopier : le relancer.**
+**Recalculé le 2026-09-13 en S208 par `sh outils/velocite.sh`. Ne pas le recopier : le relancer.**
 Un état sans date se lit au présent, et il ne l'est plus (A185).
 
 | couche | modules | dernière avancée (code) | depuis |
 |---|---:|---|---:|
-| **B** — fond | 3 | **S205** | **0 session** |
-| **W** — perturbations | 23 | **S205** | **0 session** |
-| **δ** — volumique | 5 *(dont noyau à projection non encore admissible)* | S202 | 3 sessions |
-| **V** — réseaux | **0** | **jamais** | **205 sessions** — noyau à ouvrir au plus tard avec J2 (ADR-127) |
+| **B** — fond | 3 | S205 | 3 sessions |
+| **W** — perturbations | 24 | **S208** | **0 session** |
+| **δ** — volumique | 5 *(dont noyau à projection non encore admissible)* | S202 | 6 sessions |
+| **V** — réseaux | **0** | **jamais** | **208 sessions** — noyau à ouvrir au plus tard avec J2 (ADR-127) |
 
 *S203 : l'outil ne voit que le code, et S203 n'en a ajouté aucun dans `src` ; ADR-126 est
 une décision qui fixe un élément de W, ce qui remet le compteur à zéro selon §6.8 comme
