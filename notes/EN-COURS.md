@@ -84,8 +84,8 @@ bit, décomposition `C_U`/`G(U)` publiée par classe.
 - [x] **P2** — ADR-137 : coupure spectrale, famille de seuils, domination, réserve, limite spatiale.
 - [x] **P3** — construire la passe générique (ordre deux inchangé au bit), ordre `Spectral`, Prepared.
 - [x] **P4** — tests : couverture, domination, gain strict, identité S220, refus, partition.
-- [>] **P5** — exemple S221 : décomposition par taille de maille, partitions 2047→32767 ; campagne isolée.
-- [ ] **P6** — publier la réception S221 et ses relevés bruts.
+- [x] **P5** — exemple S221 : décomposition par taille de maille, partitions 2047→32767 ; campagne isolée.
+- [>] **P6** — publier la réception S221 et ses relevés bruts.
 - [ ] **P7** — rituel §6, journal, registres, index, file active, jeton et copies.
 
 ### Notes de reprise
@@ -97,3 +97,7 @@ Campagne détachée : signaler la fin par un fichier marqueur, **pas** par `tail
 P3 : bits de l'ordre deux figés **avant** refactorisation (test `second_order_bits_frozen_before_spectral_s221`, 6 modes dont deux courts, 5 rectangles), puis passe générique `second_order_pass::<SPECTRAL>` ; classes accumulées derrière la constante. Module `pressure_spectral_bound.rs` : trois coupures D* = 2/1/½, `SlopeOrder::Spectral`, exposition Prepared. 11 tests de borne debug réussis, bits figés compris.
 
 P4 : quatre tests S221 (bits figés, couverture/domination sur 14 modes dont 8 courts à k = 9, gain strict un long + huit courts isotropes — borne < 0,85 × globale, 160 801 sondes —, refus et partition Spectral) + contrôles contexte/instant/domaine de Prepared pour l'ordre deux et la coupure. Une attente fausse corrigée : la masse d'une classe unique arrondie vers le haut est un ulp au-dessus (encadrement, pas égalité). Release : 370 réussis (272+4+1+93), 5 ignorés, zéro échec.
+
+P5 : exemple `coupure_spectrale_s221` — grilles 4×3, 2×1,5 et 1×0,75 m (les partitions uniformes de 1024/4096/16384 feuilles) avec fractions de masse par classe, branche gagnante et détail du pire rectangle ; partitions Second puis Spectral à 2047/8191/16383/32767 avec détail de feuille maximale hors chronométrage. Campagne détachée lancée 16:42:33 (`scratchpad/campagne_s221.ps1`, sorties `scratchpad/s221`) : base1, lent, long, base_tard, base2 ; fin signalée par `fin_*.txt` et `TERMINE.txt`.
+
+P5 fin : campagne 16:42:33–16:52:42, cinq processus, base1/base2 identiques au bit. **Hypothèse du plan réfutée sur son mécanisme** : à 2×1,5 m, la classe D ≥ 2 ne porte que 1,1–2,2 % de la masse (lent/base/long) ; la classe [1, 2) en porte 44–67 %. La coupure utile est **D* = 1** (gagne sur les feuilles maximales). Partition Spectral contre Second : 2047 → gain 1,003–1,024 (quasi nul) ; **8191 → 0,1020/0,02654/0,1205/0,1031 contre plafond** (gain 1,115–1,230) ; 16383 → 0,0919/0,02083/0,1107/0,09139 contre 0,0987/0,02456/0,1178/0,09142 ; 32767 → identiques au plancher de réserve. Pire rectangle 2×1,5 m base : G(U) = 0,1097 pour C_U = 0,1267 (94 % de C) — la limite spatiale annoncée dans ADR-137. Coût : Spectral 26,1–26,3 s contre Second 31,5–32,1 s à 32767. Micro-mesure alternée (2000 appels × 6 tours, 2×1,5 m) : ordre un 485–528 µs, ordre deux 845–922 µs, spectrale 709–758 µs. **Expérience** : ordre deux passé par `second_order_pass::<true>` → 710 µs, bits inchangés (le test figé garantit) ; donc écart de **code machine**, pas d'opérations. Rétabli `<false>` (ADR-137 §5, comparabilité S220), consigné comme levier de coût.
