@@ -133,3 +133,10 @@ Restent, inchangés : le budget est toujours une **somme**, et le resserrement r
 la supprimer ; **A253** côté interface (`eval_local` est `pub(crate)`) ; la cadence complète,
 l'interaction manuelle et les poses de caméra ; les allocations de la pile graphique (I-06) ; la
 seconde cible (B7). Puis la loi GPU — espace, LOD, visibilité, mutualisation.
+
+## Note corrective S217 — 2026-09-13
+
+« Le majorant reste figé » ne vaut pas comme invariant du sillage : la réponse libre
+mélange hauteur et vitesse complexes, et |eta| peut varier. L'énergie conservée ne
+rend pas constante l'enveloppe des hauteurs. ADR-133 reçoit une note datée ; les
+mesures et la décision d'impact sont conservées. Voir [S217](DECOHERENCE-SILLAGE-S217.md).

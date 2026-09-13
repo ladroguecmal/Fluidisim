@@ -107,3 +107,15 @@ Une table, une méthode, et un paramètre d'instant sur `slope_floor`. Revenir e
 faire lire `slope_max()` aux quatre sites du budget ; rien d'autre n'en dépend. Remplacer la table
 par une loi dérivée — une analyse de phase stationnaire donnerait l'exposant plutôt que les
 valeurs — est le chemin attendu, et demande alors un ADR qui remplace celui-ci.
+
+## Note corrective du 2026-09-13 (S217) — portée du mécanisme libre
+
+Le constat « son majorant reste figé à 0,157 » est approximatif pour cette fixture,
+pas un invariant du sillage. Le code évolue le couple complexe (eta, velocity) :
+eta(t)=eta(D)cos(omega s)+velocity(D)/omega sin(omega s). Le module de hauteur
+peut varier après extinction ; seuls les deux modes propres tournent séparément.
+Un test mono-mode conserve l'énergie tout en faisant varier |eta|². La campagne
+S217 réfute aussi une courbe unique du rapport en (t-D)/sqrt(sigma/g) : à âge
+réduit égal, vitesse et durée déplacent ce rapport de 38,8 % et 22,5 % après
+raffinement. La décision concernant l'impact et ses réceptions ne changent pas.
+Voir [DECOHERENCE-SILLAGE-S217](../validation/DECOHERENCE-SILLAGE-S217.md).

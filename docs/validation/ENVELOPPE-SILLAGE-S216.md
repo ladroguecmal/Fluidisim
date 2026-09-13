@@ -147,3 +147,13 @@ partie du pessimisme n'en demandait pas.
 Restent, inchangés : le budget est toujours une **somme** (A254) ; **A253** côté interface ; la
 cadence complète, l'interaction manuelle et les poses de caméra ; les allocations de la pile
 graphique (I-06) ; la seconde cible (B7). Puis la loi GPU — espace, LOD, visibilité, mutualisation.
+
+## Suivi S217 — 2026-09-13 : l'âge après extinction ne suffit pas
+
+Les chiffres de S216 sont conservés. Comparer à âge absolu égal des durées différentes
+ne séparait pas l'effet de l'âge après extinction de celui de l'histoire du forçage.
+S217 les sépare : à même âge réduit depuis extinction, vitesse et durée font varier
+le rapport majorant publié/maximum de 38,8 % et 22,5 %, après raffinement. La similitude
+ne vaut qu'à groupes adimensionnés constants ; aucune table universelle ajoutée.
+Une source active peut également voir son majorant diminuer (fixture lente S217).
+ADR-134 reste valide ; A255 reste ouverte. Voir [S217](DECOHERENCE-SILLAGE-S217.md).

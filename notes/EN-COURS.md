@@ -83,7 +83,7 @@ seul balayage. Raffiner recherche spatiale et quadrature avant d'interpréter un
 - [x] **P1** — jeton, thèse et plan seuls.
 - [x] **P2** — lectures ciblées, dérivation des groupes et protocole de campagne reproductible.
 - [x] **P3** — instrument et campagne : similitudes, variations indépendantes, contrôles de résolution et forçage.
-- [ ] **P4** — publier le verdict et ses limites ; construire seulement ce que les preuves autorisent.
+- [x] **P4** — publier le verdict et ses limites ; construire seulement ce que les preuves autorisent.
 - [ ] **P5** — rituel de fin §6, file plurielle, journal, index, jeton libre et copies synchronisées.
 
 ### Notes de reprise
@@ -96,3 +96,7 @@ Reconstruction/cœur max2,383e-6, sous1e-5. Deux tests d'instrument réussis en 
 La réponse libre mélange eta et vitesse : son module eta n'est pas invariant ;
 test mono-mode reçu avec énergie conservée. Correction documentaire nécessaire en P4.
 La suite workspace est encore en cours (sortie code/target/s217-workspace-tests.log).
+P4 : verdict publié, notes correctives ADR-133 et reçus S215/S216. Aucun changement
+src ni nouvel ADR : la courbe à un âge est réfutée, une borne locale avec reste spatial
+est la suite de construction proposée. Deux tests d'exemple debug/release passent.
+Suite workspace toujours en cours ; ne pas recopier356 comme résultat S217 avant sa fin.
