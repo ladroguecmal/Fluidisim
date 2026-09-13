@@ -48,13 +48,18 @@ et restauration du service. Images **hors ligne** seulement : B (S201), impact W
 (S203, ADR-126). Profil ADR-125 acquis, seuil 2 % acquis. **Aucun hôte interactif.**
 *S205* : la composition B+W admet toute mer — le budget de pente ne borne plus que les
 perturbations (ADR-128) ; impact rendu sur la mer S201.
+*S206* : coût d'image mesuré sur la scène J1 — **incompatible sur CPU** avec 2 ms à toute
+densité qui montre l'impact ; chemin d'image de W par table de Bessel décidé (ADR-129, à
+construire en S207) ; `paquets_W_max` retiré du profil (I-16).
 
 *Bloquants nommés* :
 - ~~**A245**~~ — **levé en S205** (ADR-128) : la mer S201 (Hs 1,5 m) se compose, impact compris,
   zéro refus ; [COMPOSITION-MER-S205](validation/COMPOSITION-MER-S205.md) ;
 - **hôte interactif** — arbitrage ouvert, §4 ;
-- **A247** — un impact visible coûte plus que 2 ms sur CPU ; à confronter à la scène
-  représentative puis à arbitrer (ADR-127 D7), pas à contourner.
+- **A247** — **mesuré en S206** ([COUT-IMAGE-S206](validation/COUT-IMAGE-S206.md)) : à la
+  densité qui montre l'impact, l'image coûte 280 ms sur un fil et 36 ms sur seize. W n'est plus
+  le goulot avec la table de Bessel précalculée (ADR-129, facteur 100) ; **B évalué par sommet sur
+  CPU l'est** (1,2–1,3 µs). Incompatibilité posée en arbitrage §4, pas contournée ;
 
 *Bancs qui tranchent à ce jalon* : **B1** (nombre de composantes et coût de B, dès qu'un LOD
 existe dans l'hôte) ; **B2** partiel (représentation de W, dès que le coût B+W par image est
@@ -125,8 +130,8 @@ Les protocoles restent ceux de [PLAN-BENCHMARK](validation/PLAN-BENCHMARK.md).
 
 | arbitrage | pourquoi il est explicite | qui tranche |
 |---|---|---|
-| **Hôte interactif de J1** | le workspace est sans dépendance (ADR-020) ; une fenêtre temps réel demande un hôte séparé avec dépendances — téléchargement, infrastructure — ou un hôte sans dépendance par appels système | **l'utilisateur**, s'il faut des dépendances |
-| **A247 — coût d'un impact visible** | 14 µs par point B+W, table radiale 2,7 ms par impact, contre 2 ms d'eau par image | la session sur mesure de scène ; l'utilisateur si une option retire de l'ambition |
+| **Chemin de rendu et hôte de J1** *(fusionne « hôte interactif » et A247, S206)* | Mesuré : B sur CPU coûte 42 ms par image à la densité qui montre l'impact (2 px), 36 ms sur 16 fils ; W est ramené à 27 µs par impact (ADR-129). Options : **(A)** hôte séparé qui évalue B et les tables W sur **GPU** — prévu par ADR-003 et I-08 (« seules des phases repliées passent au GPU ») et par `gpu_sim_ms = 2,5` d'ADR-012 ; `water-core` reste sans dépendance, l'hôte en a (téléchargement) ; **(B)** CPU seul sans dépendance — exige B vectorisé (non mesuré), un groupe de fils persistant, et que les 2 ms se comptent en **temps mur sur tous les cœurs**, ce qu'ADR-125 ne dit pas ; **(C)** changer le profil ADR-125 (fréquence ou temps eau) ; **(D)** grille à 8 px — **perd les anneaux**, donc retire l'impact visible | **l'utilisateur** : (A) demande des dépendances, (B) réinterprète son profil, (C) le change, (D) retire de l'ambition. Recommandation technique : (A) |
+| ~~A247 — coût d'un impact visible~~ | **mesuré S206** ; part technique tranchée par ADR-129, part d'arbitrage fusionnée ci-dessus | — |
 | ~~A245 — mer composable~~ | **tranché S205, ADR-128** : B hors du budget de refus, bits publiés inchangés | — |
 
 ## 5. Historique de la trajectoire
@@ -135,4 +140,5 @@ ADR-053 (S70) : construire, en commençant par W. ADR-054 (S71) : ordre des lots
 préalable. ADR-124 (S201) : image, puis budget, puis effets bornés — **lu à tort comme une
 réduction**, corrigé par ADR-127 (S204). ADR-125 (S202) : profil 60 images/s, eau 2 ms.
 ADR-126 (S203) : emprise d'un impact visible. ADR-128 (S205) : le budget de pente borne les
-perturbations, pas la mer — A245 levé.
+perturbations, pas la mer — A245 levé. ADR-129 (S206) : chemin d'image de W par table de
+Bessel ; coût d'image J1 incompatible sur CPU, arbitrage de rendu posé.

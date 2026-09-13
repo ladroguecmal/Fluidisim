@@ -182,3 +182,14 @@ maximum, avec un temps de rechargement de 5 s), utilisable uniquement par un dom
 3. Politique quand le budget est saturé par un seul événement légitime (bataille navale) :
    dégradation homogène ou sacrifice des acteurs distants ? Proposition : sacrifice des distants,
    à confronter au ressenti.
+
+## Note datée du 2026-09-13 (S206) — ADR-129
+
+`paquets_W_max = 4096` **n'est plus une valeur de profil**. Mesuré sur la scène représentative de
+J1 : 4 096 impacts radiaux coûtent 109 ms par image et 2,0 Go avec le chemin d'image le plus
+économe (table de Bessel précalculée, λ/16), contre `cpu_sim_ms = 2,0` et `memoire_blocs =
+384 Mo`. Comme `domaines_max` avant elle, c'est une capacité qui doit être cohérente avec deux
+valeurs déjà déclarées : elle se **calcule** à l'initialisation depuis le coût mesuré par impact
+(I-16). Voir [ADR-129](ADR-129-chemin-image-de-w-par-table-de-bessel.md) et
+[COUT-IMAGE-S206](../validation/COUT-IMAGE-S206.md). Le profil prévoyait aussi `gpu_sim_ms = 2,5` :
+aucun hôte du dépôt ne l'exerce, et c'est l'objet de l'arbitrage posé à l'utilisateur en S206.

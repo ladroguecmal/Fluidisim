@@ -92,7 +92,7 @@ images après 3 de chauffe, comparé à 2 ms. Machine : celle de S202 (Ryzen AI 
  déduit de B1 (48 ns), pas remesuré.
 - [x] **P4** — campagne release et publication `COUT-IMAGE-S206` : tableau par configuration
  contre 2 ms, compatible / incompatible, `paquets_W_max` confronté.
-- [ ] **P5** — arbitrage explicite : options mesurées, dégradations, décideur ; ce qui est
+- [x] **P5** — arbitrage explicite : options mesurées, dégradations, décideur ; ce qui est
  technique se tranche (ADR si décision), ce qui touche l'ambition, les dépendances ou le sens
  du budget (temps mur ou CPU) remonte à l'utilisateur. Feuille de route et file active.
 - [ ] **P6** — rituel §6 complet.
@@ -123,3 +123,10 @@ anneaux à 28 m —, un fil, L1, L2, `paquets_W_max`, B sur CPU, verdict, non me
 exécution un fil archivée : 8 px 18,45 ms, 4 px 72,42 ms, 2 px 293,15 ms (écart ≤ 7 %).
 Verdict : **incompatible sur CPU à toute densité qui montre l'impact** ; W n'est plus le goulot
 avec L2, B l'est (1,2–1,3 µs/sommet).
+P5 : **ADR-129 actée** (chemin d'image de W par table de Bessel précalculée, pas ≤ λ/8,
+cosmétique jamais autoritaire, `paquets_W_max` retiré du profil par I-16, construction S207 avec
+réception écrite). Note datée ADR-012 (qui prévoyait `gpu_sim_ms = 2,5`, jamais exercé).
+**Arbitrage « chemin de rendu et hôte de J1 »** fusionné avec A247 et posé : (A) GPU par hôte
+avec dépendances — recommandé ; (B) CPU seul, 2 ms en temps mur multi-cœurs ; (C) profil changé ;
+(D) 8 px, perd l'impact. Feuille de route §4 et J1, file active mises à jour. À poser à
+l'utilisateur en fin de session, après le rituel committé.
