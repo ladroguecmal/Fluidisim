@@ -106,8 +106,8 @@ mutualisation) et domaine de validité (fixture S212, une source, machine, insta
 - [x] **P2** — ADR-131 (clarification utilisateur) ; note datée ADR-127 D7 ; FEUILLE-DE-ROUTE : espace d'optimisation, protocole de mesure, travaux nécessaires de J1 (A251, composition impact+sillage), §4 corrigé.
 - [x] **P3** — propagation du cadrage : HOTE-GPU-S212 (note corrective, techniques/domaine), file active, REPRISE, index, README, viewer/README ; A252, L286.
 - [x] **P4** — cœur : `pressure_timeline` (modes préconstruits, repli des tronçons achevés, publication par image, refus atomiques) ; compilation, test minimal.
-- [>] **P5** — réception contre `from_journal` : instants déclarés, bornes, retour arrière, deux recettes, refus, témoin.
-- [ ] **P6** — mesure du levier seul (exemple release, sans GPU) : par image, pic aux bornes, construction, mémoire ; techniques et domaine.
+- [x] **P5** — réception contre `from_journal` : instants déclarés, bornes, retour arrière, deux recettes, refus, témoin.
+- [>] **P6** — mesure du levier seul (exemple release, sans GPU) : par image, pic aux bornes, construction, mémoire ; techniques et domaine.
 - [ ] **P7** — hôte : levier par image ; `--verify` contre `from_journal`, contrôles S212 conservés ; coûts ; réception TEMPS-SILLAGE-S213 ; suite complète.
 - [ ] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
@@ -129,3 +129,8 @@ Repli `{j : fin_j ≤ t}` sur `(η, v/ω)` ramené par `R(−ω(fin−réf))` ; 
 les anciens en ordre canonique, complet sinon (retour arrière). Garde naissance < début : inatteignable
 par Wake (Source::new refuse `Trajectory`), test réécrit en conséquence. 4 tests verts : 19 instants à
 1e-5, repli incrémental = complet au bit, refus atomiques, refus amont.
+
+P5 : deux recettes (8×16, 32×64), 19 instants dont bornes ±1 µs, retour arrière et répétition :
+écart relatif max **6,07e-8** et **2,23e-8** (critère 1e-5). Témoin : rotation de repli inversée →
+échec à 2 000 000 µs, écart 0,365. Code restauré. Piège : guillemets mêlés dans `Get-Date -Format`
+font échouer tout le bloc PowerShell au parsing, sans rien exécuter.

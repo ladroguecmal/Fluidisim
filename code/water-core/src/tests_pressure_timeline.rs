@@ -25,15 +25,21 @@ fn settings(start: u64) -> Settings {
     }
 }
 fn recipe() -> Recipe {
+    recipe_of(8, 16)
+}
+fn recipe_of(radial: usize, angular: usize) -> Recipe {
     Recipe {
         sigma: 1.0,
         cutoff: 6.0,
-        radial: 8,
-        angular: 16,
+        radial,
+        angular,
     }
 }
 /// Quatre tronçons : virages, un arrêt sous charge, une charge nulle.
 fn wake(birth: u64, start: u64) -> Wake {
+    wake_with(recipe(), birth, start)
+}
+fn wake_with(recipe: Recipe, birth: u64, start: u64) -> Wake {
     let metadata = Metadata {
         epoch: 1,
         id: 213,
@@ -43,7 +49,7 @@ fn wake(birth: u64, start: u64) -> Wake {
             emission: 0,
         },
         settings: settings(start),
-        recipe: recipe(),
+        recipe,
     };
     let leg = |ms: u64, v: [f32; 2], f: f32| Leg {
         duration_us: ms * 1000,
@@ -107,8 +113,19 @@ impl Fixture {
 
 #[test]
 fn timeline_matches_prepared_across_instants_and_jumps_s213() {
-    let mut fx = Fixture::new();
-    let spectrum = bake(recipe(), &mut fx.full)
+    for (radial, angular) in [(8, 16), (32, 64)] {
+        let worst = matches_prepared(radial, angular);
+        println!("S213 recette {radial}x{angular} : écart relatif max {worst:e}");
+    }
+}
+fn matches_prepared(radial: usize, angular: usize) -> f64 {
+    let r = recipe_of(radial, angular);
+    let mut fx = Fixture {
+        wake: wake_with(r, START, START),
+        full: vec![Node::default(); radial * angular],
+        half: vec![Node::default(); radial * angular / 2],
+    };
+    let spectrum = bake(r, &mut fx.full)
         .unwrap()
         .half_into(&mut fx.half)
         .unwrap();
@@ -156,6 +173,7 @@ fn timeline_matches_prepared_across_instants_and_jumps_s213() {
         worst = worst.max(gap);
     }
     assert!(worst > 0.0, "le chemin replié n'est pas le chemin préparé au bit");
+    worst
 }
 
 #[test]
