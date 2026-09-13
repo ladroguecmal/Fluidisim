@@ -148,8 +148,8 @@ devant 2 ms.
 - [x] **P1** — jeton, entrée, lecture du champ radial, thèse, risque, critères, prédiction, plan seuls.
 - [x] **P2** — sûreté de `B(x)` contre `J₁` **exécutée** : balayage du domaine, dépassement mesuré, garde si nécessaire.
 - [x] **P3** — enveloppe par couronne dans le cœur : `min(slope_max_at, L(r₀))` ; test de sûreté et de resserrement.
-- [ ] **P4** — inégalité conjointe par balayage à une dimension ; sûreté contre le maximum réel de la composition, à plusieurs séparations et instants.
-- [ ] **P5** — gain et coût ; traduction en impacts admis.
+- [x] **P4** — inégalité conjointe par balayage à une dimension ; sûreté contre le maximum réel de la composition, à plusieurs séparations et instants.
+- [x] **P5** — gain et coût ; traduction en impacts admis.
 - [ ] **P6** — décider : ADR et câblage du budget si la borne tient et le prix passe ; sinon constat motivé.
 - [ ] **P7** — document de réception (en-tête ADR-131 D3) ; suite complète `code/`.
 - [ ] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
@@ -211,3 +211,54 @@ rien (ρ = 1). Passe en 12,4 s.
 
 Les chiffres de resserrement par rayon viennent avec P4 : un seul programme porte la mesure de
 l'enveloppe seule et celle de l'inégalité conjointe, qui la consomme.
+
+P4+P5 : `mixed::slope_floor_joint(impacts, pressure, time, samples)` — un seul programme porte les
+deux étapes. **Le balayage est sûr entre ses échantillons, pas seulement dessus** : sur une cellule
+`[a, b]` de `r₁`, `F₁` est majorée par `F₁(a)` — elle décroît — et `F_i(|d_i − r₁|)` par `F_i(δ)`
+avec `δ` la plus petite distance atteignable sur la cellule, **nulle si `d_i ∈ [a, b]`**. Aucune
+constante de Lipschitz : les deux termes sont monotones du bon côté. Résultat pris en **minimum**
+avec la somme d'origine — jamais plus lâche. Un seul champ ou `samples = 0` rendent `slope_floor`.
+
+**Sûreté** : l'assertion `conjointe ≥ maximum réel` tient sur les 30 configurations — deux et trois
+impacts, séparations 0 / 5 / 20 / 50 / 90 m, âges 0 / 2 / 8 s, maximum relevé au pas de 0,25 m sur
+**l'intersection des disques**, seule région que la composition admet.
+
+**Gain**, et il est maximal exactement là où ADR-133 ne donne rien — à la naissance :
+
+| impacts | d (m) | âge | somme | conjointe | gain | maximum réel |
+|---:|---:|---:|---:|---:|---:|---:|
+| 2 | 0 | 0 s | 0,425215 | 0,425215 | **1,0000** | 0,424938 |
+| 2 | 20 | 0 s | 0,425215 | 0,258735 | 1,6434 | 0,212491 |
+| 2 | 50 | 0 s | 0,425215 | 0,241167 | **1,7632** | 0,212470 |
+| 3 | 20 | 0 s | 0,637822 | 0,302775 | 2,1066 | 0,212500 |
+| 3 | 50 | 0 s | 0,637822 | 0,269244 | **2,3689** | 0,212471 |
+| 3 | 90 | 0 s | 0,637822 | 0,248618 | **2,5655** | ~0 |
+
+**À séparation nulle, le gain est exactement 1,0000** — la prédiction le disait, et c'est la
+propriété qui rend la borne crédible : elle ne gagne que là où la géométrie le permet.
+
+**Admission — et c'est A262 dans ses propres termes.** Part de π/7 :
+
+| impacts | d (m) | âge | part avec la somme | part avec l'inégalité |
+|---:|---:|---:|---:|---:|
+| 2 | 50 | 0 s | 94,8 % | **53,7 %** |
+| 3 | 50 | 0 s | **142,1 % — refusé** | **60,0 % — admis** |
+| 3 | 90 | 0 s | 142,1 % — refusé | **55,4 % — admis** |
+
+**Trois impacts frais séparés de cinquante mètres dépassent π/7 aujourd'hui et passent avec
+l'inégalité.** C'est exactement le blocage que S222 avait nommé.
+
+**Coût** : linéaire en échantillons, et la qualité ne l'est pas.
+
+| échantillons | borne (2 impacts, d = 20, âge 0) | coût |
+|---:|---:|---:|
+| 4 | 0,287975 | 6,3 µs |
+| **8** | **0,267912** | **13,3 µs** |
+| 16 | 0,262073 | 28,2 µs |
+| 64 | 0,258735 | 121,3 µs |
+| 128 | 0,258241 | 262,3 µs |
+
+**Huit échantillons rendent 96,5 % du gain pour 11 % du coût de soixante-quatre.** À 13–28 µs,
+c'est 0,7 à 1,4 % du budget d'image de 2 ms — négligeable, comme la prédiction l'annonçait, mais
+**seulement à cet échantillonnage** : à 64 le coût monte à 6 % et à 128 à 13 %. Le défaut par
+défaut doit donc être bas, et c'est une décision de P6.

@@ -205,6 +205,99 @@ pub fn slope_floor<const N: usize>(
     }
     floor
 }
+
+/// S223, ADR-138 : plancher de pente **conscient de la position relative** des champs d'impact.
+///
+/// `slope_floor` additionne le majorant global de chaque champ : deux impacts distants de cent
+/// mètres consomment le même budget que deux impacts confondus, alors qu'aucun point ne voit les
+/// deux maxima (**A262**). Cette fonction remplace cette somme par une inégalité.
+///
+/// **L'inégalité.** Soit `c₁` le centre du champ d'ancrage et `r₁ = |p − c₁|`. Pour tout autre
+/// champ `i`, l'inégalité triangulaire donne `r_i ≥ |d_i − r₁|`, où `d_i = |c_i − c₁|`. Comme
+/// `slope_max_beyond(t, ·)` est **décroissante**, il vient, pour tout point `p` :
+///
+/// ```
+/// Σ_i F_i(r_i)  ≤  F₁(r₁) + Σ_{i≠1} F_i(|d_i − r₁|).
+/// ```
+///
+/// **Le balayage est sûr entre ses échantillons, pas seulement dessus.** Sur une cellule
+/// `[a, b]` de `r₁`, `F₁` est majorée par `F₁(a)` — elle décroît — et `F_i(|d_i − r₁|)` par
+/// `F_i(δ)` avec `δ` la **plus petite** distance atteinte sur la cellule, nulle si `d_i ∈ [a, b]`.
+/// Aucune constante de Lipschitz n'est nécessaire : les deux termes sont monotones du bon côté.
+///
+/// Le résultat est le **minimum** de cette borne et de la somme d'origine : jamais plus lâche.
+/// `samples = 0` ou un seul champ rendent exactement `slope_floor`. Aucune allocation ; coût
+/// `O(samples · champs · N)`.
+pub fn slope_floor_joint<const N: usize>(
+    impacts: &Prepared<'_, '_, N>,
+    pressure: Option<&bound_pressure::Prepared<'_>>,
+    time: SimTime,
+    samples: usize,
+) -> f32 {
+    let plain = slope_floor(impacts, pressure, time);
+    let count = impacts.fields.iter().flatten().count();
+    if count < 2 || samples == 0 {
+        return plain;
+    }
+    // Ancrage : le champ au plus grand majorant global, à index égal le premier. Déterministe.
+    let mut anchor = 0usize;
+    let mut best = f32::NEG_INFINITY;
+    for (i, f) in impacts.fields.iter().flatten().enumerate() {
+        let v = f.slope_max_at(time);
+        if v > best {
+            best = v;
+            anchor = i;
+        }
+    }
+    let centre = |f: &crate::radial_impact::RadialImpact<N>| {
+        let p = f.event().data().position;
+        [p[0], p[1]]
+    };
+    let Some(anchor_field) = impacts.fields.iter().flatten().nth(anchor) else {
+        return plain;
+    };
+    let c1 = centre(anchor_field);
+    let reach = anchor_field.domain_radius();
+    if !(reach > 0.0) {
+        return plain;
+    }
+    let mut worst = 0.0f32;
+    for s in 0..samples {
+        let a = reach * s as f32 / samples as f32;
+        let b = reach * (s + 1) as f32 / samples as f32;
+        // `F₁` décroît : son maximum sur la cellule est en `a`.
+        let mut total = anchor_field.slope_max_beyond(time, a);
+        for (i, f) in impacts.fields.iter().flatten().enumerate() {
+            if i == anchor {
+                continue;
+            }
+            let c = centre(f);
+            let dx = c[0] - c1[0];
+            let dy = c[1] - c1[1];
+            let d = (dx * dx + dy * dy).sqrt();
+            // Plus petite distance à `c_i` atteignable depuis la cellule `[a, b]` de `r₁`.
+            let delta = if d >= a && d <= b {
+                0.0
+            } else if d < a {
+                a - d
+            } else {
+                d - b
+            };
+            total += f.slope_max_beyond(time, delta);
+        }
+        if total > worst {
+            worst = total;
+        }
+    }
+    if let Some(p) = pressure {
+        worst += p.slope_envelope();
+    }
+    if !worst.is_finite() {
+        return plain;
+    }
+    plain.min(worst)
+}
+
 /// Les vues empruntées protègent leurs journaux/pools ; None signifie absence explicite
 /// de pression, jamais récupération d'une préparation refusée. Aucun bilan mixte produit.
 pub fn sample_world_batch<const N: usize>(

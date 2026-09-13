@@ -290,6 +290,10 @@ impl<const N: usize> RadialImpact<N> {
     pub fn valid_until(&self) -> SimTime {
         SimTime(self.event.data().birth.0 + self.domain.age_us)
     }
+    /// S223 : rayon du domaine déclaré, nécessaire pour balayer une position relative.
+    pub fn domain_radius(&self) -> f32 {
+        self.domain.radius
+    }
     pub fn slope_bound(&self) -> f32 {
         self.slope_bound
     }
