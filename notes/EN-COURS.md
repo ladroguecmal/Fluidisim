@@ -123,7 +123,7 @@ vrai, c'est un angle mort et il vaut d'être nommé.
 - [x] **P2** — généraliser : `g_eff` vectoriel, points de référence et positions d'ouverture ; réduction au cas vertical vérifiée **au bit**.
 - [x] **P3** — éprouver la phrase d'ADR-010 : hublot latéral, sous gravité verticale puis sous accélération latérale ; part V de C16.
 - [x] **P4** — mesurer ce que la table de forme perd quand `g_eff` s'incline, et le nommer.
-- [ ] **P5** — document de réception ; suite complète `code/`.
+- [x] **P5** — document de réception ; suite complète `code/`.
 - [ ] **P6** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
@@ -194,3 +194,11 @@ Tant que le contenant est un prisme et que l'eau n'est ni au fond ni au plafond,
 coïncident ; dès que le contenant est une cale, non. Sur la charge, 9,9 % d'erreur de hauteur
 donnent environ 5 % sur le débit, qui va comme `√h`. **A266**, et ce n'est pas un défaut du module :
 c'est une incohérence de la conception, que la construction a rendue visible.
+
+P5 : [GRAVITE-DIRIGEE-S226](../docs/validation/GRAVITE-DIRIGEE-S226.md) — en-tête ADR-131 D3 ;
+§1 ce que le module violait, et le fait qu'un cas canonique bien choisi puisse être **muet** sur un
+invariant ; §2 la généralisation et sa réduction exacte ; §3 la phrase d'ADR-010 et C16, avec
+l'erreur de signe qui était dans le test et non dans le code ; §4 **l'incohérence d'ADR-010 §2**,
+mesurée ; §5 les contrôles. Suite : A266 à trancher avant tout contenant non prismatique, puis
+l'état répliqué.
+Suite complète `code/` : **383 réussis, 5 ignorés**, aucun avertissement neuf.
