@@ -134,7 +134,7 @@ décohérence est immédiate et la part statique marginale — et le sujet redev
 - [x] **P3** — *fusionné avec P4 après P2, un seul balayage les porte* : la part statique est-elle une propriété de la recette (`angular`, `radial`, `cutoff`, σ, tronçons) ? combien de directions distinctes le demi-spectre porte-t-il ? et le discriminant d'emprise — à âge fixé, agrandir l'emprise fait-il monter le maximum réel ?
 - [x] ~~**P4**~~ — fusionné dans P3.
 - [x] **P5** — décider et construire ce que le verdict autorise : enveloppe directionnelle exacte dans le cœur si la part statique le mérite (maximum exact sur la grille angulaire, sans balayage), sinon dire pourquoi.
-- [ ] **P6** — recevoir : jamais dépassée, plus serrée, coût de préparation ; budget recomposé sur la scène J1.
+- [x] **P6** — recevoir : jamais dépassée, plus serrée, coût de préparation ; budget recomposé sur la scène J1.
 - [ ] **P7** — document de réception (en-tête ADR-131) ; suite complète `code/`.
 - [ ] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
@@ -228,3 +228,24 @@ Suite complète : **356 réussis (258+4+1+93), 5 ignorés**.
 *Note de procédure : ce commit a été poussé sans les notes ci-dessus (erreur de répertoire courant
 au moment du patch), puis complété par `--amend` — la règle du dépôt veut que le travail et la case
 cochée voyagent dans le même commit, sinon l'historique ment dans un sens ou dans l'autre.*
+
+P6 : réception sur la scène J1.
+
+| âge (s) | enveloppe avant | après | gain obtenu | gain disponible (max exact) | part captée |
+|---:|---:|---:|---:|---:|---:|
+| 4 | 0,135072 | **0,112538** | 1,2002 | 1,2586 | 87 % |
+| 16 | 0,164995 | **0,141372** | 1,1671 | 1,2154 | 81 % |
+| 39 | 0,157981 | **0,136760** | 1,1552 | 1,1979 | 79 % |
+
+Cauchy–Schwarz capte donc **79 à 87 %** du gain que le maximum exact sur `θ` rendrait — l'écart est
+celui qu'annonce l'ADR (`0,707 C` contre `0,637 C` à directions équiréparties), et il est mesuré au
+lieu d'être supposé.
+
+**Budget de la scène J1** (impact déjà resserré par ADR-133) : 0,186540 → **0,162917** à 16 s, soit
+une occupation de π/7 qui passe de 41,6 % à **36,3 %** ; 37,6 % → **32,8 %** à 39 s. Rappel du
+chemin parcouru sur cette scène : **84,1 % en S214, 41,6 % après ADR-133, 36,3 % après ADR-134.**
+
+Contrôles : `d_eta_m = 0,000000000` aux cinq âges — **aucun bit publié n'a changé** ; `VERIFY`
+inchangé (7,2271e-5 m à 16 s, 7,4625e-5 à 39 s) ; GPU eau 4,185 ms inchangé ; `--smoke` 120 images.
+Les lignes `WAKE` bougent à la seule colonne `envelope`, comme attendu, et l'admission B + pression
+reste `Ok(())` aux cinq âges.
