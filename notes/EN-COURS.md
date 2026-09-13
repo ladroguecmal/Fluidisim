@@ -113,8 +113,8 @@ ce résultat-là qu'il faut savoir écrire s'il se produit.
 ### Plan
 
 - [x] **P1** — jeton, entrée, ce que la relecture établit, thèse, critères, prédiction, plan seuls.
-- [ ] **P2** — fixture multi-sillages : deux et trois sources dans un même journal, proches puis éloignées ; témoin que la composition est bien partagée par emplacement, et refus éventuels de la bibliothèque.
-- [ ] **P3** — enveloppe globale et maximum réel par configuration ; sur-additivité mesurée.
+- [x] **P2** — fixture multi-sillages : deux et trois sources dans un même journal, proches puis éloignées ; témoin que la composition est bien partagée par emplacement, et refus éventuels de la bibliothèque.
+- [x] **P3** — enveloppe globale et maximum réel par configuration ; sur-additivité mesurée.
 - [ ] **P4** — borne locale conjointe : partition spectrale à budget d'évaluations égal ; gain, reste au-dessus du maximum, **coût de passe**.
 - [ ] **P5** — part de π/7 : budget d'admission complet avec les impacts sommés ; combien de sources passent, avant et après.
 - [ ] **P6** — décider : ADR si quelque chose est rendu **et** utilisable ; sinon constat motivé, et retour à la file (cadence complète de l'hôte, V-noyau).
@@ -124,3 +124,33 @@ ce résultat-là qu'il faut savoir écrire s'il se produit.
 ### Notes de reprise
 
 *(vide : le travail commence en P2)*
+
+P2+P3 : `code/water-core/examples/somme_sillages_s222.rs` — un seul programme porte les deux
+étapes, la fixture n'ayant d'intérêt que mesurée. Recette et emprise de S219–S221, instant de la
+fixture « base » (8 s de forçage puis τ = 4), sources sur des trajectoires parallèles écartées de
+4 m (« proches », deux fois σ) ou 30 m (« éloignées »).
+
+**Témoin de composition partagée** : `modes=4096` pour une, deux et trois sources. Les emplacements
+du demi-spectre sont bien communs, donc les amplitudes modales s'additionnent **en complexe** — ce
+que la relecture annonçait est vérifié plutôt que supposé. Aucun refus, ni à la construction, ni au
+journal, ni à la préparation. Préparation 6,3 / 13,4 / 18,9 ms : elle, en revanche, est **linéaire**
+en nombre de sources.
+
+| config | sources | enveloppe globale | × une source | maximum réel | pessimisme |
+|---|---:|---:|---:|---:|---:|
+| proches (4 m) | 1 | 0,115171 | 1,0000 | 0,070316 | 1,6379 |
+| proches | 2 | 0,165659 | 1,4384 | 0,111800 | 1,4818 |
+| proches | 3 | 0,192466 | **1,6711** | 0,130667 | 1,4730 |
+| éloignées (30 m) | 2 | 0,146879 | 1,2753 | 0,070390 | 2,0867 |
+| éloignées | 3 | 0,165357 | **1,4358** | 0,070463 | **2,3467** |
+
+**A254 n'a pas de « part somme » du côté des sillages, et c'est la première réponse.** Trois sources
+coûtent 1,67 fois une seule quand elles sont proches, **1,44** quand elles sont éloignées — très
+loin du facteur 3 que subissent les impacts. La composition modale complexe absorbe l'essentiel.
+
+**Mais le pessimisme, lui, empire avec la séparation, et c'est le fait neuf.** Éloignées, le
+maximum réel **ne bouge pas** — 0,070316 / 0,070390 / 0,070463 pour une, deux et trois sources :
+chaque sillage a sa région, et le maximum reste celui d'un seul. L'enveloppe, elle, croît de 44 %.
+Le pessimisme passe donc de 1,64 à **2,35**. **L'enveloppe pénalise la séparation**, exactement
+parce qu'aucune enveloppe de modules ne voit la localisation spatiale — c'est A261, mesurée ici
+pour la première fois sur une scène et non sur une maille.

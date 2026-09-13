@@ -1,0 +1,212 @@
+//! S222 — A254, part somme : ce que coûte une scène à plusieurs sillages dans le budget de pente,
+//! et ce qu'une borne locale conjointe lui rendrait.
+//!
+//! `mixed_water::slope_floor` somme **un majorant par impact** (ADR-133) plus **un seul** terme de
+//! pression : plusieurs sillages n'entrent donc au budget qu'en partageant un journal, une recette
+//! et une emprise. Dans cette configuration ils partagent aussi les **emplacements** du
+//! demi-spectre — leurs amplitudes modales s'additionnent en complexe —, donc le terme de pression
+//! est sous-additif par construction. De combien, c'est ce que cet exemple mesure, proches puis
+//! éloignés, contre le maximum réel et contre la borne locale partitionnée (ADR-137).
+
+use std::time::Instant;
+use water_core::{
+    bound_pressure::{self, Prepared, Settings},
+    gaussian_spectrum::{self, Recipe},
+    pressure_journal::Journal,
+    pressure_source::Metadata,
+    spectral_pressure::{Node, SlopeCell, SlopeOrder, Slot},
+    wake_source::{Leg, Wake},
+    wave_journal::Cause,
+    FrameId, SimTime,
+};
+
+const START: u64 = 12_000_000;
+const MIN: [f32; 2] = [-64., -48.];
+const MAX: [f32; 2] = [64., 48.];
+/// Recette S219–S221, pour que le champ d'une source soit comparable au bit à leurs relevés.
+const RECIPE: Recipe = Recipe {
+    sigma: 2.,
+    cutoff: 3.,
+    radial: 64,
+    angular: 128,
+};
+
+fn settings() -> Settings {
+    Settings {
+        frame: FrameId(0),
+        cell: 0,
+        gravity: 9.81,
+        density: 1025.,
+        min: MIN,
+        max: MAX,
+        start: SimTime(START),
+        end: SimTime(72_000_000),
+    }
+}
+
+/// Une source de sillage, identifiée à part, sur la trajectoire `y = offset`.
+fn wake(index: u64, offset: f32, speed: f32, duration: f32) -> Option<Wake> {
+    let metadata = Metadata {
+        epoch: 1,
+        id: 222 + index,
+        cause: Cause {
+            entity: 222 + index,
+            command: 1,
+            emission: 0,
+        },
+        settings: settings(),
+        recipe: RECIPE,
+    };
+    let legs = [Leg {
+        duration_us: (duration * 1e6 / 4.) as u64,
+        velocity: [speed, 0.],
+        downward_force_n: 19620.,
+    }; 4];
+    Wake::build(metadata, SimTime(START), [-12., offset], &legs).ok()
+}
+
+/// Maximum réel de la pente dans l'emprise : balayage puis raffinement local (méthode S215/S216).
+fn real_peak(
+    f: &Prepared<'_>,
+    ctx: &bound_pressure::Context,
+    time: SimTime,
+    step: f32,
+) -> (f32, [f32; 2]) {
+    let nx = ((MAX[0] - MIN[0]) / step) as usize;
+    let ny = ((MAX[1] - MIN[1]) / step) as usize;
+    let mut scratch = [Default::default(); 1];
+    let mut out = [Default::default(); 1];
+    let mut slope_at = |p: [f32; 2]| {
+        f.sample_batch(ctx, time, &[p], &mut scratch, &mut out)
+            .ok()
+            .map(|()| {
+                let s = out[0].slope;
+                (s[0] * s[0] + s[1] * s[1]).sqrt()
+            })
+    };
+    let (mut peak, mut argmax) = (0.0f32, [0.0f32; 2]);
+    for iy in 0..=ny {
+        for ix in 0..=nx {
+            let p = [MIN[0] + ix as f32 * step, MIN[1] + iy as f32 * step];
+            if let Some(v) = slope_at(p) {
+                if v > peak {
+                    peak = v;
+                    argmax = p;
+                }
+            }
+        }
+    }
+    for iy in -50..=50i32 {
+        for ix in -50..=50i32 {
+            let p = [argmax[0] + ix as f32 * 0.02, argmax[1] + iy as f32 * 0.02];
+            if let Some(v) = slope_at(p) {
+                if v > peak {
+                    peak = v;
+                    argmax = p;
+                }
+            }
+        }
+    }
+    (peak, argmax)
+}
+
+fn main() {
+    let step: f32 = std::env::args()
+        .nth(1)
+        .and_then(|a| a.parse().ok())
+        .unwrap_or(0.5);
+    println!("S222 CPU release un fil; sources gaussiennes dans un meme journal, meme recette et meme emprise; enveloppe directionnelle ADR-134 (terme actuel du budget) contre borne locale partitionnee ADR-137 et maximum reel; aucune technique GPU/LOD/visibilite/mutualisation; pas_m={step}");
+
+    // Instant : celui de la fixture « base » de S219–S221 — 8 s de forçage puis tau = 4.
+    let age = 8.0f64 + 4.0 * (2.0f64 / 9.81).sqrt();
+    let time = SimTime(START + (age * 1e6).round() as u64);
+
+    let mut nodes = vec![Node::default(); 8192];
+    let mut half = vec![Node::default(); 4096];
+    let spectrum = gaussian_spectrum::bake(RECIPE, &mut nodes)
+        .unwrap()
+        .half_into(&mut half)
+        .unwrap();
+    let mut pool = vec![SlopeCell::default(); 32768];
+
+    // Trajectoires : écart en y entre sources. « proches » = deux fois sigma, « eloignes » = 30 m,
+    // soit bien au-delà de la largeur du sillage de Kelvin à cette vitesse.
+    let mut single = 0.0f32;
+    for (label, spacing) in [("proches", 4.0f32), ("eloignes", 30.0)] {
+        for count in 1..=3u64 {
+            let offsets: Vec<f32> = (0..count)
+                .map(|i| (i as f32 - (count as f32 - 1.) / 2.) * spacing)
+                .collect();
+            let sources: Vec<Wake> = offsets
+                .iter()
+                .enumerate()
+                .filter_map(|(i, &o)| wake(i as u64, o, 3., 8.))
+                .collect();
+            if sources.len() != count as usize {
+                println!("config={label} sources={count} refusee_a_la_construction");
+                continue;
+            }
+            let mut records = [None; 3];
+            let mut journal = Journal::new(1, &mut records);
+            let mut admitted = 0usize;
+            for w in &sources {
+                if journal.admit_authenticated(w.source()).is_ok() {
+                    admitted += 1;
+                }
+            }
+            if admitted != sources.len() {
+                println!("config={label} sources={count} admises={admitted} refus_journal");
+                continue;
+            }
+            let ctx = sources[0].source().context();
+            let mut slots = vec![Slot::default(); 4096];
+            let start = Instant::now();
+            let f = match Prepared::from_journal(ctx, &spectrum, &journal, time, &mut slots) {
+                Ok(f) => f,
+                Err(e) => {
+                    println!("config={label} sources={count} preparation_refusee={e:?}");
+                    continue;
+                }
+            };
+            let prep_ms = start.elapsed().as_secs_f64() * 1e3;
+            let global = f.slope_envelope();
+            if count == 1 && label == "proches" {
+                single = global;
+            }
+            let (peak, argmax) = real_peak(&f, &ctx, time, step);
+            println!(
+                "CONFIG={label} sources={count} ecart_m={spacing} modes={} global={global:.9} global_sur_une_source={:.4} maximum={peak:.9} argmax=[{:.2},{:.2}] pessimisme_global={:.4} preparation_ms={prep_ms:.3}",
+                f.component_count(),
+                global / single.max(f32::MIN_POSITIVE),
+                argmax[0],
+                argmax[1],
+                global / peak.max(f32::MIN_POSITIVE)
+            );
+            for budget in [2047usize, 8191, 32767] {
+                let start = Instant::now();
+                let r = f
+                    .partition_slope_envelope_order(
+                        &ctx,
+                        time,
+                        MIN,
+                        MAX,
+                        &mut pool,
+                        budget,
+                        SlopeOrder::Spectral,
+                    )
+                    .unwrap();
+                let ms = start.elapsed().as_secs_f64() * 1e3;
+                assert!(r.bound >= peak, "borne {} sous le maximum {peak}", r.bound);
+                println!(
+                    "  PARTITION={label} sources={count} budget={budget} evaluations={} feuilles={} borne={:.9} gain_sur_global={:.4} borne_sur_maximum={:.4} arret={:?} ms={ms:.1}",
+                    r.evaluations,
+                    r.leaves,
+                    r.bound,
+                    global / r.bound,
+                    r.bound / peak.max(f32::MIN_POSITIVE),
+                    r.stop
+                );
+            }
+        }
+    }
+}
