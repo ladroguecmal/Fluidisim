@@ -11180,3 +11180,55 @@ rien à calibrer) ; I-04 et I-08 inchangés. Aucun devenu faux, aucun amendé, a
 **Compteur 0** : W avancée dans `code/water-core/src` (`spectral_pressure`, `bound_pressure`) **et**
 ADR-134 actée. 134 ADR, 256 angles, 295 leçons, 18 invariants, 6 SPEC, 23 cas. Jeton libre, copies
 avancées.
+
+## S217 — 2026-09-13 — Le temps depuis extinction ne suffit pas à décrire le sillage
+
+**Entrée.** Reprise demandée par l'utilisateur ; file J1/A255 après S216. Codex,
+fichiers/git/cargo disponibles. Master et trois copies propres à b1860c1 ; maillons0.
+Plan d875a46, protocole e08fb8b, instrument/campagne dfaa24d, verdict8866fec.
+Travail dans la copie principale, aucune dépendance ni nouvelle copie.
+
+**Résultat structurant.** Similitude conditionnelle reçue sous sigma→a sigma,
+x→a x, v→sqrt(a)v, durée→sqrt(a)durée, cutoff→cutoff/a, charge→a³charge.
+Mais vitesse réduite et durée réduite restent indépendantes : **la courbe unique en
+(t-D)/sqrt(sigma/g) est réfutée**, pas toute possibilité d'une famille paramétrée.
+Voir [DECOHERENCE-SILLAGE-S217](../docs/validation/DECOHERENCE-SILLAGE-S217.md).
+Aucun ADR nouveau ni code d'exécution modifié ; A255 reste ouverte.
+
+**Mesures.** 54 lignes initiales, neuf contrôles affinés. À tau = 4 et256×512,
+majorant publié/maximum : base1,637275, vitesse divisée par deux2,272143 (+38,8 %),
+durée doublée2,005464 (+22,5 %). Variation des maxima128→256 <0,002 % ; contrôle
+spatial <0,025 %. Homothéties, charge et découpage reçus sous0,1 %. Reconstruction
+f64/cœur <=2,383e-6 (seuil de banc1e-5). Les cas discriminants sont dans la durée
+d'image annoncée ; les lignes plus tardives hors durée restent diagnostiques.
+Aucun temps ni gain GPU mesuré. Deux tests d'instrument réussis debug et release.
+
+**Correction non prévue.** La réponse libre de pression mélange hauteur et vitesse
+complexes : |eta| n'est pas invariant ; l'énergie l'est. Le test mono-mode le
+vérifie. « Majorant figé » de S215/L290 et « majorant croît pendant le forçage »
+comme règle générale sont corrigés, avec notes datées ADR-133 et reçus S215/S216.
+L'inégalité ADR-134 et la réception de l'impact ADR-133 ne sont pas invalidées.
+
+**Non fait.** Pas de table sûre, pas de borne locale construite, pas de scène à
+plusieurs sillages ni loi GPU. Cutoff et géométrie du trajet non balayés indépendamment ;
+ils ne sont pas nécessaires à cette réfutation, mais restent requis pour une autre loi.
+Le maximum échantillonné demeure un minorant, pas une preuve de sûreté continue.
+
+**Suite S218.** File J1/W : construire et recevoir une borne locale de pente depuis
+le champ préparé, avec reste spatial démontré (borne de Hessienne comme piste), puis
+mesurer le gain de budget et le coût. Ne pas tabuler les maxima S217 comme bornes.
+A254 reste la somme des sources ; GPU/espace/LOD/visibilité/mutualisation ensuite.
+J2/δ général et V-noyau obligatoires conservés. Aucun arbitrage humain nouveau.
+
+**Rituel.** A257 (sévérité2, explication corrigée) ; suivi A255 ; L296 et note L290.
+File plurielle relue : A244/S200-1 et S199-2 à J2, V-noyau au plus tard J2 ; B4
+forces/perception, A216, A241, A213, B2/coupure, bathymétrie, multiplateforme et
+réunions gardent leurs déclencheurs. Invariants I-03/04/06/08/14/18 relus et inchangés :
+l'instrument f64 reste un exemple hors exécution, aucune garantie de production élargie.
+Maillons **1** : cette session éclaire W sans l'avancer au sens de REPRISE §6.8.
+**Vérification finale.** Suite complète `cargo test --offline --release --workspace` :
+356 réussis (258+4+1+93), cinq ignorés, zéro échec ; deux tests d'exemple supplémentaires
+réussis en debug et release. La suite debug complète a été arrêtée pendant les anciens
+balayages coûteux, sans verdict complet ; elle n'est pas comptée comme reçue. Les avertissements
+préexistants du harnais/exemples sont conservés. 134 ADR,257 angles,296 leçons,
+18 invariants,6 SPEC,23 cas ; compte des angles incluant les entrées de tableau héritées.

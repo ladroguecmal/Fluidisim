@@ -1672,6 +1672,14 @@ entrée par entrée. Le fil reprend ci-dessous.
 
 Relue en S216, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
 
+**Suivi J1 S217 — A255 : une similitude conditionnelle, pas une courbe universelle.**
+[DECOHERENCE-SILLAGE-S217](../validation/DECOHERENCE-SILLAGE-S217.md) : à âge réduit
+après extinction égal, vitesse et durée déplacent le rapport majorant/pente de 38,8 %
+et 22,5 %, après raffinement. Aucun resserrement de production ajouté. **Suite S218 :
+borne locale de pente avec reste spatial démontré**, puis gain/coût, sans prendre le
+maximum d'une grille pour un majorant. A255 et la somme d'A254 restent ouvertes ;
+A257 corrige l'explication de la réponse libre. Autres lignes et déclencheurs conservés.
+
 **Suivi J1 S216 — la moitié d'A255 ne demandait aucune mesure.**
 [ENVELOPPE-SILLAGE-S216](../validation/ENVELOPPE-SILLAGE-S216.md),
 [ADR-134](../adr/ADR-134-l-enveloppe-de-pente-tient-compte-des-directions.md). `slope_envelope_tight`

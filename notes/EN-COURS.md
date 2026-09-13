@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S217 — en cours
+Session : S217 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : instruire la part dynamique d'A255, file J1, sans présumer une loi universelle.
 
@@ -84,7 +84,7 @@ seul balayage. Raffiner recherche spatiale et quadrature avant d'interpréter un
 - [x] **P2** — lectures ciblées, dérivation des groupes et protocole de campagne reproductible.
 - [x] **P3** — instrument et campagne : similitudes, variations indépendantes, contrôles de résolution et forçage.
 - [x] **P4** — publier le verdict et ses limites ; construire seulement ce que les preuves autorisent.
-- [ ] **P5** — rituel de fin §6, file plurielle, journal, index, jeton libre et copies synchronisées.
+- [x] **P5** — rituel de fin §6, file plurielle, journal, index, jeton libre et copies synchronisées.
 
 ### Notes de reprise
 
@@ -100,3 +100,10 @@ P4 : verdict publié, notes correctives ADR-133 et reçus S215/S216. Aucun chang
 src ni nouvel ADR : la courbe à un âge est réfutée, une borne locale avec reste spatial
 est la suite de construction proposée. Deux tests d'exemple debug/release passent.
 Suite workspace toujours en cours ; ne pas recopier356 comme résultat S217 avant sa fin.
+
+P5 : rituel terminé ; suite complète release356 réussis/cinq ignorés, deux tests
+propres debug/release. Suite debug globale arrêtée pour coût des balayages hérités,
+pas un reçu debug complet. A257 corrigée, L296, notes L290 et ADR-133/S215/S216.
+File plurielle, index, README, feuille de route, journal et reprise actualisés.
+134 ADR,257 angles,296 leçons,18 invariants,6 SPEC,23 cas. Maillons1.
+Jeton libre ; synchronisation des trois copies après le commit final.

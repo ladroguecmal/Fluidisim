@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 14:48 +02:00
+JETON            : libre
+Battement        : 2026-09-13 14:52 +02:00
 Agent            : Codex (fichiers, git et cargo disponibles)
-Session en cours : S217
-Dernière session : S216 — ADR-134, l'enveloppe de pente tient compte des directions ; part statique d'A255 traitée par une inégalité, sans mesure ; occupation de π/7 sur la scène J1 à 36,3 %
-Session suivante : S217 — file J1, **la part dynamique d'A255** : le résidu de décohérence vaut 1,10 à 4 s et 3,98 à 39 s, il est gouverné par le temps écoulé **depuis l'extinction** de la source, et il n'est pas une limite d'emprise (vérifié : seize fois l'aire, maximum identique). Chercher s'il admet une échelle de temps propre sur la famille du sillage, la phase de forçage traitée à part — le majorant y **croît** —, et **ne pas présumer qu'elle existe** : S216 a montré qu'une partie du pessimisme n'en demandait pas. Ensuite la loi GPU (espace, LOD, visibilité, mutualisation), chaque mesure avec son en-tête (ADR-131 D3)
-Maillons        : 0 — W avancée dans `code/water-core/src` (spectral_pressure, bound_pressure) **et** ADR-134 actée
+Session en cours : aucune
+Dernière session : S217 — similitude conditionnelle du sillage reçue ; courbe à un âge réfutée ; A255 ouverte, A257 corrigée ; aucun changement de production
+Session suivante : S218 — file J1/W : construire et recevoir une borne locale de pente depuis le champ préparé avec reste spatial démontré (piste : borne de Hessienne), puis mesurer le gain de budget et le coût ; ne pas tabuler les maxima S217 comme bornes. A255 et la somme A254 restent ouvertes ; loi GPU ensuite, J2/δ et V-noyau conservés
+Maillons        : 1 — étude et instrument S217 ; aucune couche avancée au sens de §6.8
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 
@@ -191,6 +191,13 @@ demande la campagne d'ADR-133 transposée. **Prochain lot J1 : la part dynamique
 toute scène à plusieurs sillages et donc avant la mutualisation de J1-bis ; puis la loi GPU
 (espace, LOD, visibilité, mutualisation), chaque mesure avec son en-tête (ADR-131 D3).
 
+**S217 : la part dynamique d'A255 est instruite, sans resserrement adopté.**
+La similitude exige de conserver vitesse et durée réduites ; une courbe unique en âge
+depuis extinction est réfutée (38,8 % et 22,5 % d'écart après raffinement).
+**Prochain lot J1/W : borne locale avec reste spatial démontré**, depuis le champ
+préparé ; mesurer gain et coût avant la mutualisation. Voir
+[DECOHERENCE-SILLAGE-S217](docs/validation/DECOHERENCE-SILLAGE-S217.md).
+
 **Tolérance B4 fixée à 2 % par l'utilisateur (ADR-120).** Elle ne doit plus être
 redemandée. La réception et son profil sont dans B4-TOLERANCE-S190 ; B4 complet
 conserve ses volets physiques/perceptifs non reçus.
@@ -288,6 +295,15 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S217 — 2026-09-13 : [décohérence du sillage](docs/validation/DECOHERENCE-SILLAGE-S217.md).**
+Similitude conditionnelle reçue, courbe unique en temps réduit depuis extinction réfutée :
+à tau = 4, vitesse divisée par deux **+38,8 %**, durée doublée **+22,5 %** sur le rapport
+majorant/maximum ; maxima convergés à <0,002 %. A255 reste ouverte ; aucun code de
+production ni ADR nouveau. **A257** corrige l'invariance attribuée au module de hauteur ;
+**L296** distingue similitude et suppression de paramètres. Deux tests d'exemple passent
+en debug/release ; suite complète release : 356 réussis, cinq ignorés. **Suite S218 : file J1/W, borne locale avec reste spatial démontré**,
+puis coût et loi GPU. 134 ADR,257 angles,296 leçons,18 invariants,6 SPEC,23 cas ; maillons 1.
 
 **S216 — 2026-09-13 : [l'enveloppe de pente tient compte des directions](docs/validation/ENVELOPPE-SILLAGE-S216.md), [ADR-134](docs/adr/ADR-134-l-enveloppe-de-pente-tient-compte-des-directions.md).**
 A255 traitée pour moitié, et cette moitié ne demandait **aucune mesure**. `slope_envelope_tight`

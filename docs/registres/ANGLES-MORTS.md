@@ -3112,3 +3112,21 @@ Voir L293, L295, ENVELOPPE-SILLAGE-S216.
   source, par lot — et vérifier que les autres échelles sont nommées comme non traitées. Le corpus
   en porte probablement d'autres : `slope_bound`, `steepness`, les enveloppes de composition.
   Voir L293, ADR-095, ADR-134.
+
+**Suivi A255 — S217, 2026-09-13 : similitude conditionnelle reçue, courbe unique réfutée.**
+À tau=(t-D)/sqrt(sigma/g)=4, majorant ADR-134/maximum : base1,637275, vitesse divisée
+par deux2,272143, durée doublée2,005464. Écarts38,8 % et 22,5 %, maxima convergés à
+<0,002 % entre128×256 et256×512. Homothéties, amplitude et découpage reçus. Les
+comparaisons à âge absolu égal de S216 ne séparaient pas âge après extinction et
+histoire du forçage. **Reste ouverte** : borne plus serrée ; prochaine piste J1/W,
+borne locale avec reste spatial démontré, sans table à un seul âge. Voir
+[DECOHERENCE-SILLAGE-S217](../validation/DECOHERENCE-SILLAGE-S217.md).
+
+- **A257** *(sévérité 2, S217 ; explication corrigée et contre-épreuve reçue)* —
+  **L'invariance de l'énergie a été attribuée au module de hauteur.** S215/L290
+  décrivaient le sillage éteint comme une somme de modules figés ; le code évolue
+  eta et velocity ensemble. |eta| peut osciller, tandis que omega²|eta|²+|velocity|²
+  reste constant. Le test mono-mode S217 vérifie les deux simultanément. Le majorant
+  d'une source encore active peut aussi diminuer (fixture lente :0,059152→0,052456).
+  Notes datées ADR-133, S215, S216 et L290 ; décisions d'impact et inégalité ADR-134
+  inchangées. Toute future borne temporelle doit porter la réponse libre complète.

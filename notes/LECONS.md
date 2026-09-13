@@ -4782,6 +4782,13 @@ Le geste : pour toute grandeur annoncée comme borne, mesurer **son rapport à l
 fonction du temps**, pas seulement à l'instant où elle est établie. Si le rapport dérive, chercher
 l'échelle de temps propre du phénomène et l'annoncer en fonction d'elle. Voir ADR-133, A254.
 
+**Note corrective S217 — 2026-09-13 (A257).** L290 suppose des coefficients qui
+évoluent chacun par une rotation pure. La hauteur complexe d'un mode de pression
+ne satisfait pas cette hypothèse : elle mélange hauteur et vitesse de l'instant
+d'extinction. Son module peut varier ; les deux amplitudes propres tournent, et
+l'énergie du couple est conservée. Le constat de pessimisme demeure, l'énoncé
+« somme des modules ne bouge plus » ne se transporte pas à ce coefficient.
+
 ## L291 — Une grille qui n'a pas la résolution du pic attribue le pessimisme au mauvais terme
 
 *(S215)* S214 a relevé la pente réelle d'une scène composée sur une grille de 1,3 m. Le maximum de
@@ -4875,3 +4882,16 @@ Le geste : écrire les hypothèses concurrentes, puis pour chacune la **prédict
 autres, et exécuter d'abord celle qui est la moins chère. Veiller à ce que le protocole ne rende pas
 le test vide : ici, faire croître le pas de grille avec l'emprise aurait fait lire un maximum manqué
 comme un maximum absent.
+
+## L296 — Une similitude ne supprime pas les paramètres qu'elle conserve
+
+*(S217)* Trois tailles de sillage rendent les mêmes rapports à six décimales quand
+longueurs, durées, vitesses, bande et charge sont mises à l'échelle ensemble. Mais
+faire varier seulement la vitesse ou la durée déplace le rapport de 38,8 % et 22,5 %
+à âge réduit égal, après raffinement. Les courbes coïncidaient parce que les groupes
+sans dimension restaient identiques, pas parce qu'ils avaient disparu du problème.
+
+Avant de déclarer une loi universelle, écrire les groupes que la transformation
+**conserve**, puis en varier un indépendamment. Comparer à âge absolu égal des
+sources de durées différentes confond aussi deux effets : âge depuis extinction
+et histoire du forçage. Un temps réduit organise une famille ; il ne la remplace pas.

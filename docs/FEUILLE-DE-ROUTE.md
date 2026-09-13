@@ -83,6 +83,13 @@ l'implémentation qui dépassait, pas le sillage ni l'objectif.*
 dans le cœur ([TEMPS-SILLAGE-S213](validation/TEMPS-SILLAGE-S213.md)) : CPU sillage 1,26 ms pendant
 le forçage et 0,36 ms après (préparation 7,70 / 13,36), hôte 1,7 ms, exact à 6e-8 ; GPU inchangé.
 Coordonnée de l'espace, pas verdict. Suite : composition impact+sillage, puis A251.
+*S217* : [part dynamique d'A255 instruite](validation/DECOHERENCE-SILLAGE-S217.md).
+La similitude tient à vitesse et durée réduites constantes ; une courbe unique en âge
+depuis extinction est réfutée (38,8 % et 22,5 % d'écart après raffinement). A255 reste
+ouverte, bibliothèque inchangée. Prochain lot W : borne locale dépendant du champ avec
+reste spatial démontré, puis mesurer resserrement/coût avant mutualisation. La loi GPU
+reste à construire ; aucun gain d'image déduit de cette étude.
+
 *S216* : **part statique d'A255 traitée sans mesure**
 ([ENVELOPPE-SILLAGE-S216](validation/ENVELOPPE-SILLAGE-S216.md),
 [ADR-134](adr/ADR-134-l-enveloppe-de-pente-tient-compte-des-directions.md)) : occupation de π/7
@@ -125,9 +132,9 @@ marge 0,0712. Elle passe avant toute scène à plusieurs sources.
   [ADR-134](adr/ADR-134-l-enveloppe-de-pente-tient-compte-des-directions.md) : l'enveloppe sommait
   scalairement des contributions vectorielles, et une inégalité en `O(N)` en retire 20 %, sans
   table ni garde. **Reste sa part dynamique** — la décohérence, 1,10 à 4 s et **3,98 à 39 s**,
-  gouvernée par le temps depuis l'extinction et **non** par l'emprise (vérifié : seize fois l'aire,
+  liée au temps depuis l'extinction et **non** à l'emprise dans le montage S216 (vérifié : seize fois l'aire,
   maximum identique à six décimales). **Avant toute scène à plusieurs sillages, donc avant la
-  mutualisation ci-dessous** ;
+  mutualisation ci-dessous** ; **S217** : courbe à un seul âge réfutée après contrôle de vitesse/durée ; suite de construction : borne locale avec reste spatial démontré ;
 
 #### J1-bis — Espace d'optimisation du rendu et travaux nécessaires (ADR-131, S213)
 

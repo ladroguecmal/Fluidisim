@@ -164,3 +164,8 @@ cargo run --offline --release -p water-core --example decoherence_sillage_s217 -
 cargo run --offline --release -p water-core --example decoherence_sillage_s217 -- 128 256 0.5 all --check
 cargo run --offline --release -p water-core --example decoherence_sillage_s217 -- 256 512 0.5 all --check
 ```
+
+**Vérification d'intégration S217** : suite workspace complète release hors réseau,
+356 tests réussis, cinq ignorés, aucun échec. Deux tests d'exemple en plus, debug/release.
+La suite debug complète a été interrompue pendant les balayages hérités, puis remplacée
+par la suite complète optimisée ; aucun succès debug global revendiqué.

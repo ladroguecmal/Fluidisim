@@ -20,6 +20,15 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S217 — 2026-09-13 : [décohérence du sillage](validation/DECOHERENCE-SILLAGE-S217.md).**
+Similitude conditionnelle reçue, courbe unique en temps réduit depuis extinction réfutée :
+à tau = 4, vitesse divisée par deux **+38,8 %**, durée doublée **+22,5 %** sur le rapport
+majorant/maximum ; maxima convergés à <0,002 %. A255 reste ouverte ; aucun code de
+production ni ADR nouveau. **A257** corrige l'invariance attribuée au module de hauteur ;
+**L296** distingue similitude et suppression de paramètres. Deux tests d'exemple passent
+en debug/release ; suite complète release : 356 réussis, cinq ignorés. **Suite S218 : file J1/W, borne locale avec reste spatial démontré**,
+puis coût et loi GPU. 134 ADR,257 angles,296 leçons,18 invariants,6 SPEC,23 cas ; maillons 1.
+
 **S216 — 2026-09-13 : [l'enveloppe de pente tient compte des directions](validation/ENVELOPPE-SILLAGE-S216.md), [ADR-134](adr/ADR-134-l-enveloppe-de-pente-tient-compte-des-directions.md).**
 A255 traitée pour moitié, et cette moitié ne demandait **aucune mesure**. `slope_envelope_tight`
 sommait **scalairement** des contributions **vectorielles** de directions différentes : une
