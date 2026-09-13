@@ -130,9 +130,9 @@ décohérence est immédiate et la part statique marginale — et le sujet redev
 ### Plan
 
 - [x] **P1** — jeton, entrée, relecture du majorant, thèse, critères et plan seuls.
-- [ ] **P2** — décomposer : somme scalaire, majorant directionnel (balayage fin hors ligne) et pente réelle, aux âges de la fixture ; les deux rapports.
-- [ ] **P3** — la part statique est-elle une propriété de la recette ? Varier `angular`, `radial`, `cutoff`, σ et le découpage en tronçons.
-- [ ] **P4** — ce qui reste : échelle de temps éventuelle, forçage et extinction séparés ; et le discriminant d'emprise — à âge fixé, agrandir l'emprise fait-il monter le maximum réel ?
+- [x] **P2** — décomposer : somme scalaire, majorant directionnel (balayage fin hors ligne) et pente réelle, aux âges de la fixture ; les deux rapports.
+- [ ] **P3** — *fusionné avec P4 après P2, un seul balayage les porte* : la part statique est-elle une propriété de la recette (`angular`, `radial`, `cutoff`, σ, tronçons) ? combien de directions distinctes le demi-spectre porte-t-il ? et le discriminant d'emprise — à âge fixé, agrandir l'emprise fait-il monter le maximum réel ?
+- [x] ~~**P4**~~ — fusionné dans P3.
 - [ ] **P5** — décider et construire ce que le verdict autorise : enveloppe directionnelle exacte dans le cœur si la part statique le mérite (maximum exact sur la grille angulaire, sans balayage), sinon dire pourquoi.
 - [ ] **P6** — recevoir : jamais dépassée, plus serrée, coût de préparation ; budget recomposé sur la scène J1.
 - [ ] **P7** — document de réception (en-tête ADR-131) ; suite complète `code/`.
@@ -141,3 +141,33 @@ décohérence est immédiate et la part statique marginale — et le sujet redev
 ### Notes de reprise
 
 *(vide : le travail commence en P2)*
+
+P2 : `code/water-core/examples/enveloppe_sillage_s216.rs`. Contrôle de lecture d'abord : la somme
+scalaire reconstruite depuis `render_components` reproduit `slope_envelope()` à **1e-7** — ce que
+l'exemple manipule est bien ce que le budget consomme.
+
+| âge (s) | phase | scalaire | directionnel | réel | part statique | résidu | total |
+|---:|---|---:|---:|---:|---:|---:|---:|
+| 0,5 | forçage | 0,038037 | 0,024464 | 0,019385 | **1,5548** | 1,2620 | 1,9621 |
+| 2 | forçage | 0,107494 | 0,077957 | 0,064453 | 1,3789 | 1,2095 | 1,6678 |
+| 4 | forçage | 0,135072 | 0,107316 | 0,097430 | 1,2586 | **1,1015** | 1,3864 |
+| 8 | forçage | 0,144921 | 0,116545 | 0,085966 | 1,2435 | 1,3557 | 1,6858 |
+| 16 | forçage | 0,164995 | 0,135757 | 0,086934 | 1,2154 | 1,5616 | 1,8979 |
+| 18 | après | 0,156797 | 0,131175 | 0,069110 | 1,1953 | 1,8981 | 2,2688 |
+| 24 | après | 0,157044 | 0,131058 | 0,043181 | 1,1983 | 3,0351 | 3,6369 |
+| 39 | après | 0,157981 | 0,131885 | 0,033152 | **1,1979** | **3,9782** | 4,7654 |
+
+**Prédiction partiellement contredite.** J'avais écrit « part statique ≈ 1,5, et elle explique
+l'essentiel du pessimisme pendant le forçage ». Elle vaut 1,55 à la naissance mais **retombe à
+1,20 et s'y fixe** ; elle explique l'essentiel à 4 s (1,26 sur 1,39) et **moins de la moitié** à
+16 s (1,22 sur 1,90). Le demi-spectre du sillage n'est donc **pas** étalé uniformément sur un
+demi-disque — sinon le rapport vaudrait π/2 ≈ 1,571 : le sillage de Kelvin concentre son énergie
+dans un cône, et c'est cette concentration que le 1,20 mesure.
+
+**Deux enseignements qui séparent les deux remèdes.**
+- La part statique est **stable après extinction** (1,195 à 1,198 de 18 à 39 s) : c'est une
+  propriété de la **recette et de la trajectoire**, pas de l'âge. Un gain de 20 %, exact, sans
+  calibration ni domaine de validité — à prendre si son calcul est bon marché.
+- Le **résidu** porte tout le reste et croît sans borne visible : 1,10 à 4 s, 1,56 à 16 s,
+  **3,98 à 39 s**. C'est la décohérence de L290, et elle demande une loi mesurée comme ADR-133 —
+  donc sa propre campagne, pas une inégalité.
