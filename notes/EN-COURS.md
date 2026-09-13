@@ -120,7 +120,7 @@ limiteur devra mordre sur les derniers pas, et c'est là que se joue le respect 
 ### Plan
 
 - [x] **P1** — jeton, choix motivé, ce que la conception donne, thèse, critères, prédiction, plan seuls.
-- [ ] **P2** — lire SPEC-004/006 sur ce que V publie, et fixer la forme du module : types, pools, refus. Déclarer avant d'écrire.
+- [x] **P2** — lire SPEC-004/006 sur ce que V publie, et fixer la forme du module : types, pools, refus. Déclarer avant d'écrire.
 - [ ] **P3** — construire le noyau : nœuds, arêtes d'orifice, pas à 100 ms, quantification à report de reste, limiteur avec normalisation.
 - [ ] **P4** — recevoir C12 : temps de vidange contre 728 s, conservation, non-négativité, capacité.
 - [ ] **P5** — déterminisme et refus atomiques ; aucune allocation dans le pas.
@@ -131,3 +131,31 @@ limiteur devra mordre sur les derniers pas, et c'est là que se joue le respect 
 ### Notes de reprise
 
 *(vide : le travail commence en P2)*
+
+P2 : SPEC-004 §unités ne donne qu'une ligne sur V — `Volume | i64 | millilitres | couche V
+uniquement (ADR-010)` — et SPEC-006 confirme que le millilitre est « la convention de la couche V,
+qui compte des volumes de **contenants** ». Aucune forme d'interface n'est prescrite ailleurs :
+ADR-010 et les invariants sont donc tout le cahier des charges, et il est complet.
+
+**Forme déclarée avant d'écrire** — `code/water-core/src/hydro_network.rs` :
+
+- `HydroNode { volume_ml: i64, capacity_ml: i64, shape: u16 }` — l'état est **entier**, la forme est
+  un indice dans une table de l'hôte.
+- `ShapeTable` : hauteurs en **micromètres**, 64 entrées par forme, croissantes, fournies par
+  l'hôte (ADR-010 : `shape_lut` est cuite hors ligne). Hauteur par interpolation linéaire en
+  volume ; un prisme y est donc **exact**, ce dont C12 a besoin.
+- `Orifice { from: u16, to: Option<u16>, area_mm2: i32, sill_um: i32, discharge: f32, residue: i64 }`
+  — `to = None` est le rejet hors réseau, dont C12 a besoin ; `residue` porte le report de reste
+  d'ADR-010 §4.
+- `step(nodes, edges, shapes, g_eff, dt_us) -> Result<(), Error>` : pas fixe de 100 ms, tranches
+  fournies par l'appelant — **aucune allocation** (I-06) — et parcours des arêtes dans l'ordre du
+  tableau, fixé, sans adresse (I-03).
+- Refus : `Capacity`, `Shape` (table non croissante ou mal dimensionnée), `Domain` (`g_eff` ou pas
+  non finis, aires négatives), `NonFinite`. **Atomiques** : un pas refusé ne modifie aucun volume.
+
+**Une correction à ma propre prédiction, avant de mesurer.** J'ai écrit en P1 que sans report de
+reste « la masse ne sera pas conservée ». C'est faux par construction : un transfert **entier**
+retiré d'un nœud et ajouté à l'autre conserve la masse exactement, quelle que soit la troncature.
+Ce que la troncature dégrade, c'est le **débit** — donc le temps de vidange, donc les ±3 %. Le
+report de reste sert à la précision du débit et au déterminisme, pas à la conservation. Je mesurerai
+les deux variantes pour le dire avec un chiffre plutôt qu'avec un raisonnement.
