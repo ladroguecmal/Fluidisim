@@ -556,22 +556,38 @@ impl<'a> FrameData<'a> {
         }
     }
     /// Référence CPU par point relatif à la caméra : B `eval`, impact direct, sillage `sample_batch`.
+    ///
+    /// **S214 : une seule conversion monde → local, partagée par les trois couches.** Jusqu'ici
+    /// B était évalué au point monde quantifié (`WorldPos`, 1/2048 m) et l'impact comme le sillage
+    /// au point `f32` brut : une même sonde avait deux positions, distantes de ≤ 244 µm, et la
+    /// référence portait jusqu'à 18 µm de hauteur d'écart avec la composition du cœur, qui sert
+    /// les trois couches au même point (`eval_local`). Le point du réseau est le seul que
+    /// l'interface publique de B sache servir ; c'est donc lui qui est retenu pour tous.
     pub fn references(&mut self, q: &[[f32; 2]]) -> Result<Vec<[f32; 3]>, String> {
         let eye = self.camera.eye;
-        let world: Vec<[f32; 2]> = q.iter().map(|q| [q[0] + eye[0], q[1] + eye[1]]).collect();
+        let anchors: Vec<WorldPos> = q
+            .iter()
+            .map(|q| WorldPos::from_metres((q[0] + eye[0]) as f64, (q[1] + eye[1]) as f64, 0.))
+            .collect();
+        let world: Vec<[f32; 2]> = anchors
+            .iter()
+            .map(|p| {
+                self.background
+                    .local_point(*p)
+                    .map(|l| [l[0], l[1]])
+                    .ok_or_else(|| format!("point hors du référentiel local de B : {p:?}"))
+            })
+            .collect::<Result<_, String>>()?;
         let wake = match wake_time(self.age).filter(|_| self.wake_active) {
             Some(t) => wake_reference(self.wake_input, &mut self.slots, t, &world)?.0,
             None => vec![None; world.len()],
         };
         let mut values = Vec::with_capacity(world.len());
-        for (xy, w) in world.iter().zip(wake) {
+        for ((xy, w), anchor) in world.iter().zip(wake).zip(&anchors) {
             let b = self
                 .background
-                .eval(
-                    WorldPos::from_metres(xy[0] as f64, xy[1] as f64, 0.),
-                    self.time,
-                )
-                .unwrap();
+                .eval(*anchor, self.time)
+                .ok_or_else(|| format!("B hors domaine en {anchor:?}"))?;
             let mut v = [
                 b.eta,
                 -b.normal[0] / b.normal[2],

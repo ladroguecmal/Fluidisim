@@ -116,7 +116,7 @@ cœur refuserait.
 - [x] **P2** — scène : journal d'impact et montage `mixed_water` (`prepared_water::Prepared::build`) ; compilation, test minimal.
 - [x] **P3** — accord : composition du cœur contre la somme à la main, aux âges déclarés, sur la grille projetée ; écart publié.
 - [x] **P4** — budget conjoint : `slope_floor` impact + sillage à chaque âge contre π/7 ; refus localisés et qualifiés.
-- [ ] **P5** — hôte : `--verify` passe par la composition du cœur ; contrôles S212/S213 conservés ; coût publié avec son en-tête.
+- [x] **P5** — hôte : `--verify` passe par la composition du cœur ; contrôles S212/S213 conservés ; coût publié avec son en-tête.
 - [ ] **P6** — A251 : emprise et durée honnêtes déduites de la recette et de la vitesse ; couture spatiale et temporelle mesurées comme ADR-126.
 - [ ] **P7** — A251 : réception des coutures et refus nommé ou garde ; publication avec la fixture.
 - [ ] **P8** — document de réception (en-tête ADR-131) ; suite complète `code/`.
@@ -185,3 +185,27 @@ l'image**, et par majorant, pas par raideur — la physique garde un facteur dix
 mécanisme sur un champ seul et par le choix d'emprise ; ici c'est **l'additivité sur le nombre de
 sources** (ADR-128, ADR-119 règle 1) qui borne la scène, et elle n'a jamais été mesurée composée.
 Angle mort à ouvrir (A254, sévérité 1 : c'est un refus, pas un défaut cosmétique).
+
+P5 : **la référence de l'hôte ne peut pas passer par `mixed_water`** — le cœur ne compose que sur
+l'**intersection** des domaines (ADR-077, ADR-080 : lot atomique), soit 4 477 sondes sur 6 988,
+quand l'image en dessine 6 988. Ce qui est corrigeable, et l'a été, est le **point** :
+`FrameData::references` construit désormais un `WorldPos` par sonde, en tire **une** fois le point
+local, et sert B, l'impact et le sillage avec celui-là. Le point du réseau (1/2048 m) est le seul
+que l'interface publique de B sache servir — `eval_local` est `pub(crate)`.
+**Effet mesuré** : `d_eta_m` entre la composition du cœur et la somme de l'hôte passe de
+1,78e-5 m à **0,000000000** aux cinq âges (bit à bit) ; `d_slope` 1,5e-8 (aller-retour normale).
+Contrôles S212/S213 conservés : `VERIFY` max 8,03e-5 m à 0 s (avant 7,77e-5), 7,29e-5 à 4 s
+(identique), 7,27e-5 à 16 s (identique), 8,94e-5 à 40,01 s (identique) — variation ≤ 3 µm sur un
+écart de 77 µm dominé par autre chose, tolérance 3 mm tenue ; lignes WAKE identiques ; `--smoke`
+120 images, code 0. Suite `code/` : **354 réussis (256+4+1+93), 5 ignorés** — la bibliothèque n'a
+pas bougé cette session.
+**Coûts (en-tête ADR-131 dans le document)** : GPU eau 1,897 / 4,183 ms (4 096 nœuds, 640 et 960),
+inchangés depuis S213 ; CPU sillage 1,58–1,84 ms.
+**Et cela referme un point que S213 laissait ouvert.** Trois passages du **même binaire** ont donné
+1,2555 / 1,2458 (premier passage, machine froide), 1,6477 / 1,7760, puis 1,5820 / 1,8398 ms. L'écart
+« hôte 1,7 contre exemple 1,26 » que S213 ne savait pas attribuer **se reproduit entre deux passages
+du même programme**, la valeur basse tombant sur le passage à froid. Il n'y a donc pas lieu
+d'invoquer une différence entre l'exemple et l'hôte. *Ce n'est pas une attribution nommée* : aucun
+compteur de fréquence ni de température n'a été lu. Conséquence de méthode : une médiane sur 120
+images de cette machine porte ±20 % selon l'état thermique, et une mesure de coût doit dire son rang
+de passage (L287).
