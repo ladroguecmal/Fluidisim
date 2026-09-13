@@ -73,7 +73,7 @@ Pas de migration d'admission ni de certificat f32 ajouté.
 
 - [x] **P1** — jeton et plan seuls.
 - [x] **P2** — construire le parcours borné et recevoir couverture, arrêts et déterminisme.
-- [ ] **P3** — mesurer gain/coût sur fixtures S218 et publier le contrat et ses limites.
+- [x] **P3** — mesurer gain/coût sur fixtures S218 et publier le contrat et ses limites.
 - [ ] **P4** — rituel §6, journal, registres, index, file active, jeton et copies.
 
 ### Notes de reprise
@@ -82,3 +82,5 @@ Suite S218 : borne locale ADR-135 disponible, réserve non certifiée A258.
 Un arrêt retourne la meilleure couverture obtenue ; aucun rectangle ne disparaît.
 
 P2 : tas maximal, division binaire grand côté, borne héritée du parent. Deux tests ciblés reçus debug ; couverture/aire, budget pair, capacité, point, zéro, refus, déterminisme. Reprise inter-appels non construite : chaque appel repart de la racine du champ courant, ce qui évite des bornes périmées. Suite release lancée, reçu à P3.
+
+P3 : 362 tests release passent/5 ignorés. Deux passages isolés base identiques en valeurs ;35,64/35,75s à65535 évaluations. Gain1,48–1,52 sur3 cas recevables ; aucun gain à8191. A259 : bornes grossières plafonnées identiques, priorité spatiale indisponible. Suite proposée S220 : borne de Taylor avec Hessienne signée et reste, phases quantifiées à couvrir. Aucune admission ni reprise inter-appels.
