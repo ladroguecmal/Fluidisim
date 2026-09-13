@@ -114,7 +114,7 @@ cœur refuserait.
 
 - [x] **P1** — jeton, entrée, défaut visé, thèse, critères et plan seuls.
 - [x] **P2** — scène : journal d'impact et montage `mixed_water` (`prepared_water::Prepared::build`) ; compilation, test minimal.
-- [ ] **P3** — accord : composition du cœur contre la somme à la main, aux âges déclarés, sur la grille projetée ; écart publié.
+- [x] **P3** — accord : composition du cœur contre la somme à la main, aux âges déclarés, sur la grille projetée ; écart publié.
 - [ ] **P4** — budget conjoint : `slope_floor` impact + sillage à chaque âge contre π/7 ; refus localisés et qualifiés.
 - [ ] **P5** — hôte : `--verify` passe par la composition du cœur ; contrôles S212/S213 conservés ; coût publié avec son en-tête.
 - [ ] **P6** — A251 : emprise et durée honnêtes déduites de la recette et de la vitesse ; couture spatiale et temporelle mesurées comme ADR-126.
@@ -143,3 +143,21 @@ Ligne `MIXED` dans `--verify`, aux cinq âges du témoin S212.
    mixte du cœur **ne peut donc pas être** le chemin de rendu tel quel, et c'est précisément
    pourquoi l'hôte sommait à la main. À qualifier : décision de service (ADR-077) contre besoin
    d'image (ADR-129 §3), pas un défaut d'implémentation.
+
+P3 : accord mesuré aux cinq âges, sur les 4 477 points admis. **Le critère déclaré (1e-6 de
+l'amplitude) échoue, et la prédiction est contredite** : `d_eta` max **1,78e-5 m** à 4 s pour une
+amplitude de 0,968 m, soit **1,8e-5** relatif — 18× le critère ; `d_slope` max 2,44e-5. Aux autres
+âges 1,25e-5 / 1,34e-5 / 9,5e-6 / 6,9e-6 m.
+**Cause isolée et prouvée dans le même passage** : `MIXED_POINT` compare le cœur à la **même somme
+à la main, au point local que le cœur emploie** — `d_eta_local = 0,000000000` aux cinq âges (bit à
+bit sur η) et `d_slope_local = 1,5e-8` (aller-retour pente → normale → pente, 1 ulp). **La
+composition du cœur est donc exacte ; tout l'écart vient du point d'évaluation.**
+Mécanisme : `FrameData::references` évalue **B** au point monde quantifié (`WorldPos::from_metres`,
+`WORLD_UNITS_PER_METRE = 2048`, pas de 488 µm, erreur ≤ 244 µm) et **l'impact et le sillage** au
+point `f32` brut. Le cœur, lui, convertit **une seule fois** monde → local et sert les trois couches
+au même point (`eval_local` : « chemin interne après conversion commune B/W »). Une même sonde a
+donc deux positions dans la référence de l'hôte, distantes de ≤ 244 µm ; le produit par la pente des
+perturbations donne les 18 µm mesurés.
+Portée : 0,6 % de la tolérance de 3 mm de `--verify`, donc jamais visible — mais c'est la
+**référence** qui est fausse, pas le GPU, et un LOD spatial (J1-bis) qui creuserait la pente
+augmenterait l'écart. À ouvrir en angle mort (A253) et à corriger en P5.

@@ -299,8 +299,16 @@ pub struct MixedOutcome {
     pub pressure_envelope: f32,
     /// Points admis par les trois domaines géométriques (`mixed::admits`).
     pub admitted: usize,
+    /// Points **non** admis, répartis par couche qui les écarte — B, impact, sillage. Les
+    /// prédicats employés sont ceux de l'hôte (`Background::admits`, `RadialImpact::admits`,
+    /// `admits_wake`) : `mixed::admits` reste le juge, ceci n'explique que son verdict.
+    pub outside: [usize; 3],
     /// Hauteur et pentes composées par le cœur ; `None` hors du montage.
     pub values: Vec<Option<[f32; 3]>>,
+    /// La même somme faite à la main, mais **au point que le cœur emploie** — le point monde
+    /// converti une fois en local (I-08). Sert à séparer ce que la composition change de ce
+    /// que change le point d'évaluation.
+    pub hand_local: Vec<Option<[f32; 3]>>,
     /// Verdict du **lot entier** sur les points admis, tel que l'hôte le recevrait.
     pub batch: Result<(), String>,
     /// Refus localisés, point par point : (point monde, cause rendue par le cœur).
@@ -357,13 +365,46 @@ pub fn mixed_compose(
     let mut values = Vec::with_capacity(world.len());
     let mut refusals = Vec::new();
     let mut admitted_points = Vec::new();
+    let mut outside = [0usize; 3];
+    let mut hand_local = Vec::with_capacity(world.len());
     for &p in world {
         let point = WorldPos::from_metres(p[0] as f64, p[1] as f64, 0.);
         if !mixed::admits(&bound, &impacts, Some(&pressure), point) {
+            if !scene.background.admits(point) {
+                outside[0] += 1;
+            }
+            if !scene.impact.admits(FrameId(0), 0, p) {
+                outside[1] += 1;
+            }
+            if !admits_wake(p) {
+                outside[2] += 1;
+            }
             values.push(None);
+            hand_local.push(None);
             continue;
         }
         admitted_points.push(point);
+        // Somme à la main **au point local du cœur** : B, impact, sillage, dans l'ordre de
+        // `mixed_water`. Aucune quantité nouvelle — c'est le chemin de l'hôte, au bon point.
+        hand_local.push((|| {
+            let local = scene.background.local_point(point)?;
+            let b = scene.background.eval(point, time)?;
+            let flat = [local[0], local[1]];
+            let mut v = [b.eta, -b.normal[0] / b.normal[2], -b.normal[1] / b.normal[2]];
+            let w = scene.impact.sample(FrameId(0), 0, flat, time).ok()?;
+            v[0] += w.eta;
+            v[1] += w.slope[0];
+            v[2] += w.slope[1];
+            let mut scratch = [Default::default(); 1];
+            let mut out = [Default::default(); 1];
+            pressure
+                .sample_batch(&input.context, time, &[flat], &mut scratch, &mut out)
+                .ok()?;
+            v[0] += out[0].eta;
+            v[1] += out[0].slope[0];
+            v[2] += out[0].slope[1];
+            Some(v)
+        })());
         match mixed::sample_world_batch(
             &bound,
             &impacts,
@@ -404,7 +445,9 @@ pub fn mixed_compose(
         impact_envelope,
         pressure_envelope,
         admitted: admitted_points.len(),
+        outside,
         values,
+        hand_local,
         batch,
         refusals,
     })

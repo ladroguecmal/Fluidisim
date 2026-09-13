@@ -319,14 +319,41 @@ fn run() -> Result<(), String> {
         // S214 : la scène composée **par le cœur** — B, impact et sillage ensemble — et son
         // budget conjoint de pente, que l'hôte n'avait jamais exercé (HOTE-GPU-S212 §Admission).
         let mut store = scene::MixedStore::new(input.count(), world.len());
+        let relative = gpu::probes(frame.camera.eye);
         for age in [4., 8., 16., 24., 39.] {
             let t = scene::wake_time(age).unwrap();
             let m = scene::mixed_compose(&scene, input, &mut store, t, &world, BREAKING_SLOPE)?;
+            // Somme à la main de l'hôte, aux mêmes points et au même instant : `update(age, age)`
+            // aligne B, impact et sillage sur un seul instant, comme le fait `mixed_water`.
+            frame.update(age, age, true);
+            let hand = frame.references(&relative)?;
+            let (mut d_eta, mut d_slope, mut amplitude) = (0f32, 0f32, 0f32);
+            let (mut l_eta, mut l_slope) = (0f32, 0f32);
+            for ((core, hand), local) in m.values.iter().zip(&hand).zip(&m.hand_local) {
+                let Some(core) = core else { continue };
+                amplitude = amplitude.max(hand[0].abs());
+                d_eta = d_eta.max((core[0] - hand[0]).abs());
+                for k in 1..3 {
+                    d_slope = d_slope.max((core[k] - hand[k]).abs());
+                }
+                if let Some(local) = local {
+                    l_eta = l_eta.max((core[0] - local[0]).abs());
+                    for k in 1..3 {
+                        l_slope = l_slope.max((core[k] - local[k]).abs());
+                    }
+                }
+            }
             println!(
-                "MIXED age={age} floor={:.6} impact={:.6} pressure={:.6} max_slope={:.6} admitted={} refused={} batch={:?}",
-                m.floor, m.impact_envelope, m.pressure_envelope, BREAKING_SLOPE, m.admitted,
-                m.refusals.len(), m.batch
+                "MIXED age={age} floor={:.6} impact={:.6} pressure={:.6} max_slope={:.6} part_budget={:.4} admitted={} outside_B_impact_wake={:?} refused={} batch={:?} amp_m={amplitude:.6} d_eta_m={d_eta:.9} d_slope={d_slope:.9}",
+                m.floor, m.impact_envelope, m.pressure_envelope, BREAKING_SLOPE,
+                m.floor / BREAKING_SLOPE, m.admitted, m.outside, m.refusals.len(), m.batch
             );
+            println!(
+                "  MIXED_POINT age={age} d_eta_local_m={l_eta:.9} d_slope_local={l_slope:.9}"
+            );
+            for (p, cause) in m.refusals.iter().take(4) {
+                println!("  MIXED_REFUS age={age} point={p:?} cause={cause}");
+            }
         }
         g.benchmark(&mut frame)?;
         g.resize(960, 540);
