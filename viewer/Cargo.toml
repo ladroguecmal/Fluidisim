@@ -1,0 +1,18 @@
+[workspace]
+resolver = "2"
+members = ["."]
+
+[package]
+name = "water-viewer"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+water-core = { path = "../code/water-core" }
+wgpu = "=30.0.1"
+winit = "=0.30.13"
+pollster = "=1.0.1"
+
+[profile.release]
+overflow-checks = true

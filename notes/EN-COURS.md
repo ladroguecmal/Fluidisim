@@ -71,7 +71,7 @@ Sources non autorisées. Cible x86_64-pc-windows-msvc, rustc 1.97.0.
 ### Plan
 
 - [x] **P1** — consigner accord et plan seul.
-- [>] **P2** — créer viewer séparé selon S209 et résoudre le verrou sans sources.
+- [x] **P2** — créer viewer séparé selon S209 et résoudre le verrou sans sources.
 - [ ] **P3** — inventorier versions, licences, tailles et checksums depuis les métadonnées publiques.
 - [ ] **P4** — rituel §6, demande sources, jeton libre, copies à jour.
 
