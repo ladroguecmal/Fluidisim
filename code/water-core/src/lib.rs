@@ -75,6 +75,7 @@ pub mod modal_pressure;
 pub mod spectral_pressure;
 pub mod gaussian_spectrum;
 pub mod bound_pressure;
+pub mod pressure_timeline;
 pub mod pressure_source;
 pub mod wake_source;
 pub mod pressure_journal;

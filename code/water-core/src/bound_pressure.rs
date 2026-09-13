@@ -36,7 +36,7 @@ pub enum Error {
     Preparation(spectral_pressure::PrepareError),
 }
 
-fn same_recipe(a: Recipe, b: Recipe) -> bool {
+pub(crate) fn same_recipe(a: Recipe, b: Recipe) -> bool {
     a.sigma.to_bits() == b.sigma.to_bits()
         && a.cutoff.to_bits() == b.cutoff.to_bits()
         && a.radial == b.radial

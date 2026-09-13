@@ -9,7 +9,7 @@ pub struct Complex {
 }
 
 impl Complex {
-    fn phase(p: PhaseQ32) -> Self {
+    pub(crate) fn phase(p: PhaseQ32) -> Self {
         // Éviter la soustraction de deux angles proches de pi/2 pour un angle négatif minuscule.
         let (positive, sign) = if p.0 > 0x8000_0000 {
             (negative(p), -1.0)
@@ -21,19 +21,19 @@ impl Complex {
             im: sign * positive.sin(),
         }
     }
-    fn scale(self, s: f32) -> Self {
+    pub(crate) fn scale(self, s: f32) -> Self {
         Self {
             re: self.re * s,
             im: self.im * s,
         }
     }
-    fn add(self, b: Self) -> Self {
+    pub(crate) fn add(self, b: Self) -> Self {
         Self {
             re: self.re + b.re,
             im: self.im + b.im,
         }
     }
-    fn mul(self, b: Self) -> Self {
+    pub(crate) fn mul(self, b: Self) -> Self {
         Self {
             re: self.re * b.re - self.im * b.im,
             im: self.re * b.im + self.im * b.re,
@@ -64,6 +64,7 @@ pub enum Error {
 /// Préparation d'un mode et d'un segment. **Horizon d'observation <=64 s, durée active <=16 s**
 /// depuis ADR-106 : les deux bornes ne suivent pas le même chemin numérique, et « 16 s » les
 /// confondait. Budget mesuré S155 : erreur relative <4e-5 à 64 s d'âge.
+#[derive(Clone, Copy)]
 pub struct ModalPressure {
     birth: SimTime,
     duration: u64,
@@ -77,7 +78,7 @@ pub struct ModalPressure {
     doppler: i64,
 }
 // Conversion d'une fréquence signée ; marge pour somme et différence sans débordement.
-fn frequency(rate: f32) -> Result<i64, Error> {
+pub(crate) fn frequency(rate: f32) -> Result<i64, Error> {
     let q = rate / TAU * 4_294_967_296.0;
     if !q.is_finite() || q.abs() >= (1u64 << 61) as f32 {
         return Err(Error::Domain);
@@ -99,7 +100,7 @@ fn frequency(rate: f32) -> Result<i64, Error> {
     };
     Ok(if rate < 0.0 { -value } else { value })
 }
-fn phase(rate: i64, us: u64, divisor: i128) -> PhaseQ32 {
+pub(crate) fn phase(rate: i64, us: u64, divisor: i128) -> PhaseQ32 {
     PhaseQ32(((rate as i128 * us as i128) / divisor) as u32)
 }
 fn negative(p: PhaseQ32) -> PhaseQ32 {
@@ -199,6 +200,13 @@ impl ModalPressure {
             pressure: Complex::phase(negative(origin)).scale(s.pressure_pa),
             doppler,
         })
+    }
+    /// S213 : fin du forçage, instant après lequel le mode ne fait plus que tourner.
+    pub(crate) fn forcing_end(&self) -> SimTime {
+        SimTime(self.birth.0 + self.duration)
+    }
+    pub(crate) fn birth(&self) -> SimTime {
+        self.birth
     }
     pub fn valid_until(&self) -> SimTime {
         SimTime(self.birth.0 + self.horizon)
