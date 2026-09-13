@@ -147,7 +147,7 @@ devant 2 ms.
 
 - [x] **P1** — jeton, entrée, lecture du champ radial, thèse, risque, critères, prédiction, plan seuls.
 - [x] **P2** — sûreté de `B(x)` contre `J₁` **exécutée** : balayage du domaine, dépassement mesuré, garde si nécessaire.
-- [ ] **P3** — enveloppe par couronne dans le cœur : `min(slope_max_at, L(r₀))` ; test de sûreté et de resserrement.
+- [x] **P3** — enveloppe par couronne dans le cœur : `min(slope_max_at, L(r₀))` ; test de sûreté et de resserrement.
 - [ ] **P4** — inégalité conjointe par balayage à une dimension ; sûreté contre le maximum réel de la composition, à plusieurs séparations et instants.
 - [ ] **P5** — gain et coût ; traduction en impacts admis.
 - [ ] **P6** — décider : ADR et câblage du budget si la borne tient et le prix passe ; sinon constat motivé.
@@ -194,3 +194,20 @@ l'égalité par construction sur la branche en `1/√x` ; provenance : `examples
 convertir la borne L1 en pente réelle, vaut `1/0,5819 × 1,045` : **c'était le pic de `J₁` que la
 mesure retrouvait**, à 4,5 % près. Le code posait `|J₁| ≤ 1` en commentaire — « borne
 conservative » — et la calibration rattrapait le facteur derrière.
+
+P3 : `RadialImpact::slope_max_beyond(time, radius)` dans le cœur, avec ses trois constantes —
+`J1_PEAK_BOUND = 0,5818650`, `J1_DECAY_BOUND = 0,8250310`, `RADIAL_ENVELOPE_GUARD = 1e-4` — et leur
+provenance en documentation. Elle rend le **minimum** de `slope_max_at(time)` et de
+`(1+g)·Σ |c_n| k_n · min(J1_PEAK, J1_DECAY/√(k_n r))` : deux majorants du même champ, l'un calibré
+et reçu (ADR-133), l'autre une inégalité à constante mesurée. Leur minimum ne mélange pas preuve et
+calibration, il choisit la meilleure des deux. `radius ≤ 0` rend le global **au bit**. `O(N)`, aucune
+allocation.
+
+Test `slope_max_beyond_bounds_the_annulus_and_tightens_s223` : quatre longueurs d'onde (0,75 · 2 ·
+3,35 · 5 m), six instants adimensionnés, **25 couronnes** par instant et 1 501 points de rayon
+chacune — jamais dépassée ; jamais au-dessus de `slope_max_at` ; égalité au bit à `radius = 0` ; et
+resserrement **supérieur à 3** à la naissance sur la couronne `r ≥ 15,5 λ`, là où ADR-133 ne donne
+rien (ρ = 1). Passe en 12,4 s.
+
+Les chiffres de resserrement par rayon viennent avec P4 : un seul programme porte la mesure de
+l'enveloppe seule et celle de l'inégalité conjointe, qui la consomme.

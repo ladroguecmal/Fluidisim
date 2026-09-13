@@ -24,6 +24,37 @@ pub const BESSEL_MAX: f32 = 2048.0;
 /// somme est atteint en `r = 0,2062 λ`, à `t = birth`.
 pub const SLOPE_L1_RATIO: f32 = 1.795_071_3;
 
+/// S223, ADR-138 : maximum de `|J1|`, atteint en `x ≈ 1,8412`.
+///
+/// La construction du majorant de pente pose `|J1| ≤ 1` (« borne conservative »), et
+/// `SLOPE_L1_RATIO` rattrape le facteur derrière, par mesure. Ces deux constantes-ci le posent
+/// devant, et permettent en plus de faire **décroître** la borne avec le rayon.
+pub const J1_PEAK_BOUND: f32 = 0.581_865_0;
+
+/// S223, ADR-138 : `sup_x |J1(x)| · √x` sur le domaine **exécuté** de `bessel`.
+///
+/// **L'asymptote n'est pas une borne.** `√(2/πx)` — soit `0,797885/√x` — est la limite en `+∞` ;
+/// `|J1|` la dépasse de **3,4 %** en `x = 2,166`, et l'inégalité classique `|J_ν| ≤ √(2/πx)` ne
+/// vaut que pour `ν = 1/2`, où elle est une égalité. La constante ci-dessous est relevée sur
+/// `bessel` telle que le programme la calcule — table de Hermite puis développement asymptotique —
+/// et c'est ce qui rend la borne vraie **pour le programme** et pas seulement en mathématiques.
+/// Provenance (I-14) : `examples/couronne_impact_s223.rs`.
+pub const J1_DECAY_BOUND: f32 = 0.825_031_0;
+
+/// S223, ADR-138 : garde de l'enveloppe radiale, `275` fois le plus grand dépassement mesuré du
+/// palier (0,36 ppm) ; elle couvre aussi l'égalité par construction sur la branche en `1/√x`.
+pub const RADIAL_ENVELOPE_GUARD: f32 = 1.0e-4;
+
+/// Borne sur `|J1(x)|` pour tout `x ≥ x0` : plate jusqu'au pic, en `1/√x` ensuite.
+/// Décroissante en `x0`, donc utilisable telle quelle sur une couronne `r ≥ r0`.
+fn j1_bound_beyond(x0: f32) -> f32 {
+    if !(x0 > 0.0) {
+        return J1_PEAK_BOUND;
+    }
+    J1_PEAK_BOUND.min(J1_DECAY_BOUND / x0.sqrt())
+}
+
+
 /// S215, ADR-133 : facteur de resserrement du majorant de pente, par age **adimensionne**
 /// `tau = (t - birth) / sqrt(lambda/g)`, un intervalle par unite de tau.
 ///
@@ -303,6 +334,45 @@ impl<const N: usize> RadialImpact<N> {
             return annonce;
         }
         annonce / RHO_DISPERSION[tau as usize]
+    }
+
+    /// S223, ADR-138 : majorant de la pente réelle **sur la couronne `r ≥ radius`**, à l'instant
+    /// demandé.
+    ///
+    /// **Pourquoi une couronne.** `slope_max_at` majore le champ *partout dans son disque* : deux
+    /// impacts distants consomment donc le même budget que deux impacts confondus, alors qu'aucun
+    /// point ne voit les deux maxima (**A262**). La pente radiale vaut
+    /// `Σ_n c_n k_n J1(k_n r) cos(ω_n t)` ; en majorant chaque `|J1(k_n r)|` par une fonction
+    /// **décroissante** du rayon, la borne devient consciente de la distance.
+    ///
+    /// ```
+    /// |dη/dr| ≤ (1 + garde) · Σ_n |c_n| k_n · min(J1_PEAK_BOUND, J1_DECAY_BOUND / √(k_n r))
+    /// ```
+    ///
+    /// La valeur rendue est le **minimum** de cette borne et de `slope_max_at(time)` : deux
+    /// majorants du même champ, l'un calibré et reçu (ADR-133), l'autre une inégalité à constante
+    /// mesurée. Prendre leur minimum ne mélange pas preuve et calibration — il choisit la meilleure
+    /// des deux, et près du centre c'est la première, loin c'est la seconde.
+    ///
+    /// `radius ≤ 0` ou non fini rend `slope_max_at(time)` : aucune couronne, aucune promesse en
+    /// plus. Aucune allocation, `O(N)`.
+    pub fn slope_max_beyond(&self, time: SimTime, radius: f32) -> f32 {
+        let global = self.slope_max_at(time);
+        if !(radius > 0.0) {
+            return global;
+        }
+        let mut sum = 0.0f32;
+        for node in &self.nodes {
+            if node.k <= 0.0 {
+                continue;
+            }
+            sum += node.coefficient.abs() * node.k * j1_bound_beyond(node.k * radius);
+        }
+        let local = sum * (1.0 + RADIAL_ENVELOPE_GUARD);
+        if !local.is_finite() {
+            return global;
+        }
+        global.min(local)
     }
     /// Domaine géométrique exact appliqué par `sample`, posé une fois (ADR-080).
     /// Ne dit rien du temps ni de la finitude du résultat : `sample` rend aussi `Domain`
@@ -948,6 +1018,85 @@ mod tests {
                 .sample(FrameId(0), 0, [1.0, 0.0], SimTime(us + 1000))
                 .unwrap();
             assert!((s.deta_dt - (after.eta - before.eta) / 0.002).abs() < 2e-6);
+        }
+    }
+
+
+    /// S223, ADR-138 : `slope_max_beyond` majore la pente **sur la couronne**, et elle resserre.
+    ///
+    /// Trois moitiés, comme les tests S139 et S215 : jamais dépassée par le champ exécuté sur la
+    /// couronne, jamais au-dessus de `slope_max_at` (c'est un minimum des deux), et un
+    /// resserrement réel dès que le rayon dépasse quelques longueurs d'onde — ce dernier point
+    /// étant ce qui justifie la méthode.
+    #[test]
+    fn slope_max_beyond_bounds_the_annulus_and_tightens_s223() {
+        for (wavelength_m, energy_j) in [(0.75f32, 0.2f32), (2.0, 20.0), (3.35, 164.0), (5.0, 900.0)]
+        {
+            let mut v = source_data();
+            v.wavelength_m = wavelength_m;
+            v.energy_j = energy_j;
+            v.anisotropy = 0.0;
+            v.direction_turns = 0.0;
+            let scale = (wavelength_m / 9.81f32).sqrt();
+            let radius = 15.5 * wavelength_m;
+            let age_us = (96.0 * scale * 1e6) as u64;
+            v.ttl_us = age_us;
+            let birth = v.birth.0;
+            let field = RadialImpact::<256>::new(
+                WaveEvent::impact(v).unwrap(),
+                Medium {
+                    gravity: 9.81,
+                    density: 1025.0,
+                    depth: 20.0,
+                    max_slope: 1.0e6,
+                },
+                Domain { radius, age_us },
+            )
+            .unwrap();
+
+            // 1. Jamais au-dessus du majorant global : c'est un minimum des deux.
+            for tau in [0.0f32, 1.0, 8.0, 40.0] {
+                let t = SimTime(birth + (tau * scale * 1e6) as u64);
+                assert!(field.slope_max_beyond(t, 0.0).to_bits() == field.slope_max_at(t).to_bits());
+                for r0 in [0.1f32, 1.0, 5.0, radius] {
+                    assert!(
+                        field.slope_max_beyond(t, r0) <= field.slope_max_at(t),
+                        "lambda {wavelength_m} tau {tau} r0 {r0} : couronne au-dessus du global"
+                    );
+                }
+            }
+
+            // 2. Jamais sous le champ exécuté, sur la couronne, à plusieurs instants.
+            for tau in [0.0f32, 0.5, 2.0, 8.0, 24.0, 64.0] {
+                let t = SimTime(birth + (tau * scale * 1e6) as u64);
+                for k in 0..=24u32 {
+                    let r0 = radius * k as f32 / 24.0;
+                    let borne = field.slope_max_beyond(t, r0);
+                    // Le champ, sur toute la couronne `r >= r0`.
+                    let mut worst = 0.0f32;
+                    for j in 0..=1500u32 {
+                        let r = r0 + (radius - r0) * j as f32 / 1500.0;
+                        if let Ok(s) = field.sample(FrameId(0), 0, [r, 0.0], t) {
+                            worst = worst
+                                .max((s.slope[0] * s.slope[0] + s.slope[1] * s.slope[1]).sqrt());
+                        }
+                    }
+                    assert!(
+                        worst <= borne,
+                        "lambda {wavelength_m} tau {tau} r0 {r0} : pente {worst} au-dessus de {borne}"
+                    );
+                }
+            }
+
+            // 3. Le resserrement est réel là où il compte : à la naissance, ADR-133 ne donne rien,
+            //    et c'est la couronne qui doit porter le gain.
+            let t0 = SimTime(birth);
+            let loin = field.slope_max_beyond(t0, 15.0 * wavelength_m);
+            assert!(
+                field.slope_max_at(t0) > 3.0 * loin,
+                "lambda {wavelength_m} : resserrement {} insuffisant a la naissance",
+                field.slope_max_at(t0) / loin
+            );
         }
     }
 
