@@ -769,6 +769,22 @@ DX12/RTX5070 Laptop : erreur hauteur max0,077657 mm ; passe eau960×540 médiane
 349 tests réussis/cinq ignorés. A250 close, A247 partielle ; sillage et coût complet encore dus.
 **Suite S212 : file J1/W, intégrer le sillage au GPU.** 130/250/284/18/6/23 inchangés.
 
+**S223 — 2026-09-13 : [le budget de pente tient compte de la position relative](docs/validation/COURONNE-IMPACT-S223.md), [ADR-138](docs/adr/ADR-138-le-budget-de-pente-tient-compte-de-la-position-relative.md).**
+**A262 traitée.** `slope_max_beyond(t, r)` majore la pente sur la **couronne** — décroissance en
+`1/√r`, minimum avec `slope_max_at` — et `slope_floor_joint` en tire un plancher conjoint par
+inégalité triangulaire, avec un balayage **sûr entre ses échantillons** (deux termes monotones, pas
+de Lipschitz). Gain **1,0000 exactement** à séparation nulle, **1,76** à deux impacts / 50 m et
+**2,37** à trois — maximal **à la naissance**, là où ADR-133 ne donne rien. **Trois impacts frais à
+50 m passent de 142,1 % de π/7, refusés, à 60,0 %, admis.** Coût **13,3 µs** (huit intervalles :
+96,5 % du gain de soixante-quatre pour 11 % du prix) contre les 25 s de la borne de pression en
+S222 — six ordres de grandeur, parce qu'un champ radial décroît (**L305**).
+**Découverte de route** : l'inégalité `|J_ν| ≤ √(2/πx)` vaut pour `ν = 1/2` et **pas pour `ν = 1`**
+— dépassée de 3,4 % ; constante relevée sur `bessel` exécutée (**L304**). Et
+`SLOPE_L1_RATIO = 1,795071` est **le pic de `J₁`** que S141 mesurait sans le nommer (**A263**).
+Zéro attente de test modifiée ; 371 tests release réussis, 5 ignorés ; hôte inchangé au bit.
+**Suite S224 : revenir à la file** — cadence complète de l'hôte, puis **V-noyau**, jamais commencé.
+138 ADR,263 angles,305 leçons,18 invariants,6 SPEC,23 cas ; compteur 0 (W code src + ADR-138).
+
 **S222 — 2026-09-13 : [la part somme d'A254 change de côté](docs/validation/SOMME-SILLAGES-S222.md) ; rien n'est migré.**
 Une à trois sources de sillage dans un même journal. **L'enveloppe est sous-additive** — trois
 sillages coûtent 1,67 fois un seul (proches), **1,44** (éloignés) — mais elle **pénalise la

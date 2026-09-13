@@ -4994,3 +4994,42 @@ Le geste : devant une annonce « locale », demander séparément **à partir de
 resserre** et **ce que son calcul coûte en fonction de la taille**. Si le coût est indépendant de la
 région, la localité est un gain de précision, pas un gain de travail — et elle ne s'oppose pas à une
 partition, elle en est la brique.
+
+## L304 — Une inégalité de manuel a un rang, et ce n'est pas toujours celui qu'on emploie
+
+*(S223)* J'ai fondé toute une session sur `|J_ν(x)| ≤ √(2/πx)`, souvenue comme « la » borne des
+fonctions de Bessel. Elle est vraie pour `ν = 1/2`, où elle est une **égalité** — `J_{1/2}(x) =
+√(2/πx)·sin x` —, et **fausse pour `ν = 1`** : `|J₁|` la dépasse de 3,4 % en `x = 2,166`.
+L'asymptote est la limite en `+∞`, pas un majorant, et la mémoire les confond d'autant plus
+volontiers que le cas `ν = 1/2` la rend exacte.
+
+Ce qui généralise : **une inégalité classique se souvient sans ses hypothèses**, et l'hypothèse
+oubliée est presque toujours le paramètre auquel on ne pensait pas — l'ordre, le signe, le domaine.
+Le danger particulier est qu'une borne fausse « de peu » ne se voit pas : elle produit des résultats
+plausibles partout sauf sur un intervalle étroit, et le programme y ment sans échouer.
+
+Le geste : **vérifier numériquement toute inégalité empruntée, sur le domaine exact où on l'emploie
+et sur la fonction que le programme exécute**, avant de bâtir dessus. Le coût est une boucle ; le
+coût de ne pas le faire est une borne qui n'en est pas une. Et si la vérification échoue, relever
+la constante qui la rend vraie plutôt que d'abandonner la forme : ici `sup |J₁|·√x = 0,825031` a
+sauvé toute la construction. Voir ADR-138, COURONNE-IMPACT-S223 §1.
+
+## L305 — Un majorant qui décroît vaut mieux qu'un majorant plus serré
+
+*(S223)* Deux bornes du même champ radial : `slope_max_at` — calibrée, mesurée, serrée à 4,5 % près
+au centre — et l'enveloppe par couronne, une inégalité *plus lâche au centre* mais **décroissante en
+`1/√r`**. C'est la seconde qui a débloqué A262, parce que la question n'était pas « quelle est la
+pente maximale ? » mais « deux champs distants peuvent-ils atteindre leur maximum ensemble ? ». Une
+borne plate ne peut pas répondre non ; une borne décroissante le peut, même mal.
+
+Ce qui généralise : **la qualité d'un majorant ne se mesure pas seulement à sa valeur, mais à ce
+qu'il fait varier**. Une borne constante est inexploitable par toute inégalité géométrique, quelle
+que soit sa finesse ; une borne monotone en un paramètre autorise l'inégalité triangulaire, la
+composition, le balayage — et donc des gains qu'aucun resserrement de la borne plate n'atteindrait.
+La comparaison entre S222 et S223 le chiffre : même gain d'environ 2,3, obtenu en 25 s côté
+pression (où la borne est plate en espace) et en 13 µs côté impact (où elle décroît).
+
+Le geste : devant une borne à améliorer, demander d'abord **de quoi elle pourrait dépendre** — le
+temps (ADR-133), la direction (ADR-134), la distance (ADR-138) — avant de chercher à la resserrer à
+paramètre fixé. Et garder les deux : leur **minimum** choisit la meilleure sans mélanger preuve et
+calibration.

@@ -1670,7 +1670,25 @@ entrée par entrée. Le fil reprend ci-dessous.
 
 ## File active
 
-Relue en S222, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+Relue en S223, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+
+**Suivi J1 S223 — A262 traitée, et le budget de pente cesse d'être le goulot.**
+[COURONNE-IMPACT-S223](../validation/COURONNE-IMPACT-S223.md),
+[ADR-138](../adr/ADR-138-le-budget-de-pente-tient-compte-de-la-position-relative.md).
+`slope_max_beyond(t, r)` majore la pente sur la **couronne** — décroissance en `1/√r` —, et
+`slope_floor_joint` en tire un plancher conjoint par inégalité triangulaire, avec un balayage sûr
+**entre** ses échantillons. Gain **1,0000 exactement** à séparation nulle, **1,76** à deux impacts
+à 50 m, **2,37** à trois ; maximal **à la naissance**, là où ADR-133 ne donne rien. **Trois impacts
+frais à 50 m passaient de 142,1 % de π/7, refusés, à 60,0 %, admis.** Coût **13,3 µs** — huit
+intervalles rendent 96,5 % du gain de soixante-quatre pour 11 % du prix.
+**Deux découvertes de route** : l'inégalité `|J_ν| ≤ √(2/πx)` vaut pour `ν = 1/2` et **pas pour
+`ν = 1`** (dépassée de 3,4 %) — constante relevée sur la fonction exécutée (**L304**) ; et
+`SLOPE_L1_RATIO = 1,795071` est **le pic de `J₁`** que S141 mesurait sans le nommer (**A263**,
+sévérité 3).
+**A254 est close** : ses deux termes ont chacun leur limite connue, de nature différente — une
+**inégalité** à 13 µs côté impact, une **loi d'échelle** à 25 s côté pression (A261).
+**Suite S224 : revenir à la file** — cadence complète de l'hôte, puis **V-noyau**, zéro module en
+223 sessions. Autres lignes et déclencheurs conservés.
 
 **Suivi J1 S222 — la part somme d'A254 change de côté, et rien n'est migré.**
 [SOMME-SILLAGES-S222](../validation/SOMME-SILLAGES-S222.md). Une à trois sources de sillage dans un

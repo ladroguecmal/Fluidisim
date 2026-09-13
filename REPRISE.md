@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 18:10 +02:00
+JETON            : libre
+Battement        : 2026-09-13 18:30 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
-Session en cours : S223 — A262 : une inégalité conjointe pour la somme spatiale des impacts
-Dernière session : S222 — part somme d'A254 mesurée sur plusieurs sillages : absorbée côté sillages, littérale côté impacts (A262) ; borne locale disqualifiée par son prix (loi d'échelle) ; aucune migration, aucun ADR
-Session suivante : S223 — file J1/W, **A262** : la somme des majorants d'impact ignore la distance entre champs, et c'est le goulot mesuré (un impact neuf vaut 47,4 % de π/7 ; deux éclaboussures simultanées saturent, quelle que soit la borne de pression). Chercher une **inégalité** conjointe qui tienne compte de la position relative — la géométrie s'y prête, support compact déclaré et pente maximale en r = 0,2062 λ (ADR-094), donc deux disques disjoints ne peuvent pas atteindre leur maximum au même point —, comme ADR-134 l'a fait pour les directions, et **non** une table. Si l'inégalité ne vient pas, revenir à la file : cadence complète de l'hôte, V-noyau. A261, A258 et le coût de passe nommés sans ordre imposé ; usage hors image de la borne locale ouvert ; δ/V conservés
-Maillons        : **1** — S222 n'a ni ajouté de code d'exécution dans `code/*/src`, ni acté d'ADR : elle a mesuré et décidé de ne rien changer. À 2, la session suivante ne pourra plus proposer un reliquat et devra nommer une ligne de la file et la couche qu'elle avance
+Session en cours : —
+Dernière session : S223 — ADR-138, le budget de pente tient compte de la position relative des impacts ; A262 traitée (trois impacts frais séparés passent, 13,3 µs) ; A263 ouverte
+Session suivante : S224 — **revenir à la file**. Le budget de pente n'est plus le goulot d'une scène J1 : ses deux termes ont chacun leur limite connue, l'impact par une inégalité à 13 µs (ADR-138), la pression par une loi d'échelle à 25 s (A261, S222). Deux lignes attendent, et la seconde attend depuis le début : **cadence complète de l'hôte** (travail nécessaire de J1, jamais mesurée) et **V-noyau**, qu'ADR-127 demande au plus tard avec J2 — **zéro module, jamais commencé en 223 sessions**. Si l'hôte passe d'abord, le dire dans le journal et ne pas laisser V glisser d'une session de plus. A261, A258, A263, l'ancrage du balayage et le cas à plus de trois champs restent nommés sans ordre imposé ; δ/V conservés
+Maillons        : 0 — W avancée dans `code/water-core/src` (radial_impact, mixed_water) **et** ADR-138 actée
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 
@@ -191,6 +191,16 @@ demande la campagne d'ADR-133 transposée. **Prochain lot J1 : la part dynamique
 toute scène à plusieurs sillages et donc avant la mutualisation de J1-bis ; puis la loi GPU
 (espace, LOD, visibilité, mutualisation), chaque mesure avec son en-tête (ADR-131 D3).
 
+**S223 : A262 traitée** ([ADR-138](docs/adr/ADR-138-le-budget-de-pente-tient-compte-de-la-position-relative.md),
+[COURONNE-IMPACT-S223](docs/validation/COURONNE-IMPACT-S223.md)). Le budget de pente tient compte de
+la **position relative** des impacts : gain 1,76 à 2,57 selon la séparation, **exactement 1,0000**
+quand les champs sont confondus, pour **13,3 µs**. Trois impacts frais à 50 m passaient de 142 % de
+π/7 — refusés — à 60 %, admis. **Le budget de pente n'est donc plus le goulot d'une scène J1** : ses
+deux termes ont des limites de nature différente, l'impact borné par une **inégalité** à 13 µs, la
+pression par une **loi d'échelle** à 25 s (A261). **Prochain lot : revenir à la file** — cadence
+complète de l'hôte, puis **V-noyau**, qu'ADR-127 demande au plus tard avec J2 et qui n'a jamais été
+commencé.
+
 **S222 : la part somme d'A254 change de côté** ([SOMME-SILLAGES-S222](docs/validation/SOMME-SILLAGES-S222.md)).
 Côté sillages elle est **absorbée** — trois sources coûtent 1,44 à 1,67 fois une seule, contre un
 facteur 3 chez les impacts — et ce qui y reste est **spatial** (A261, pessimisme 2,35 quand les
@@ -294,7 +304,7 @@ pièges déjà payés.
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/FEUILLE-DE-ROUTE.md  ← trajectoire J1 → J5 et noyau V, seul porteur (ADR-127)
 docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 137 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 138 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -313,6 +323,22 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S223 — 2026-09-13 : [le budget de pente tient compte de la position relative](docs/validation/COURONNE-IMPACT-S223.md), [ADR-138](docs/adr/ADR-138-le-budget-de-pente-tient-compte-de-la-position-relative.md).**
+**A262 traitée.** `slope_max_beyond(t, r)` majore la pente sur la **couronne** — décroissance en
+`1/√r`, minimum avec `slope_max_at` — et `slope_floor_joint` en tire un plancher conjoint par
+inégalité triangulaire, avec un balayage **sûr entre ses échantillons** (deux termes monotones, pas
+de Lipschitz). Gain **1,0000 exactement** à séparation nulle, **1,76** à deux impacts / 50 m et
+**2,37** à trois — maximal **à la naissance**, là où ADR-133 ne donne rien. **Trois impacts frais à
+50 m passent de 142,1 % de π/7, refusés, à 60,0 %, admis.** Coût **13,3 µs** (huit intervalles :
+96,5 % du gain de soixante-quatre pour 11 % du prix) contre les 25 s de la borne de pression en
+S222 — six ordres de grandeur, parce qu'un champ radial décroît (**L305**).
+**Découverte de route** : l'inégalité `|J_ν| ≤ √(2/πx)` vaut pour `ν = 1/2` et **pas pour `ν = 1`**
+— dépassée de 3,4 % ; constante relevée sur `bessel` exécutée (**L304**). Et
+`SLOPE_L1_RATIO = 1,795071` est **le pic de `J₁`** que S141 mesurait sans le nommer (**A263**).
+Zéro attente de test modifiée ; 371 tests release réussis, 5 ignorés ; hôte inchangé au bit.
+**Suite S224 : revenir à la file** — cadence complète de l'hôte, puis **V-noyau**, jamais commencé.
+138 ADR,263 angles,305 leçons,18 invariants,6 SPEC,23 cas ; compteur 0 (W code src + ADR-138).
 
 **S222 — 2026-09-13 : [la part somme d'A254 change de côté](docs/validation/SOMME-SILLAGES-S222.md) ; rien n'est migré.**
 Une à trois sources de sillage dans un même journal. **L'enveloppe est sous-additive** — trois

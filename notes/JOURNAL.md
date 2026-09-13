@@ -11489,3 +11489,61 @@ honnêtement ; la suite nomme **A262**, ligne née de la mesure mais rattachée 
 ligne de la file active. À `Maillons ≥ 2`, la suivante devra choisir dans la file.
 370 tests release réussis, 5 ignorés — identique à S221. 137 ADR, 262 angles, 303 leçons,
 18 invariants, 6 SPEC, 23 cas. Jeton libre, copies avancées.
+
+## S223 — 2026-09-13 — Le budget de pente tient compte de la position relative (ADR-138) ; A262 traitée
+
+**Entrée.** « Continue avec S223 », même conversation que S222. Ligne `Session suivante` : A262,
+chercher une **inégalité**, pas une table. Maillons **1** à l'amorce. Claude Code, Opus 5 ; master
+et trois copies à 416daa3. Plan 900a6f7, P2 765ca33, P3 ae600a3, P4+P5 91145a2, P6 7a84e08,
+P7 4067160.
+
+**Décision structurante. ADR-138 actée et câblée** : `RadialImpact::slope_max_beyond(t, r)` majore
+la pente sur la **couronne**, et `mixed::slope_floor_joint` en tire un plancher conscient de la
+position relative, par inégalité triangulaire et balayage à huit intervalles. `slope_floor` aiguille
+dès deux champs ; `sample_world_batch` calcule son budget **une fois** par `slope_floor`, sans quoi
+l'annonce et le refus liraient deux quantités et la garantie d'ADR-128 tomberait. `slope_max()`,
+`slope_max_at()`, `Steepness` et `steepness` publiée sont inchangés.
+
+**Chiffres qui orientent.**
+- **La prédiction est contredite dès P2, et pas là où je l'attendais** : j'annonçais un dépassement
+  de la borne par l'approximation d'Hermite ; c'est **l'inégalité supposée qui est fausse**.
+  `|J_ν(x)| ≤ √(2/πx)` vaut pour `ν = 1/2` (égalité) et **pas pour `ν = 1`** : dépassement de
+  **3,4 %** en `x = 2,166`, plus 44 ppm dans le régime asymptotique. **L304.**
+- Constante retenue : `sup |J₁(x)|·√x = 0,825031` sur `bessel` exécutée ; palier 0,5818650 dépassé
+  de **0,36 ppm** ; garde `1e-4` = 275 fois ce dépassement.
+- **Cela éclaire `SLOPE_L1_RATIO = 1,795071`** : c'est `1/0,5819 × 1,045`, **le pic de `J₁`** que la
+  mesure de S141 retrouvait sans le nommer. **A263.**
+- **Réception de la couronne** : quatre λ, six instants, 25 couronnes × 1 501 rayons — jamais
+  dépassée ; égalité au bit à `radius = 0` ; resserrement > 3 à la naissance sur `r ≥ 15,5 λ`.
+- **Gain conjoint** : **1,0000 exactement** à séparation nulle ; 1,76 (deux impacts, 50 m, âge 0) ;
+  **2,37** (trois, 50 m) ; 2,57 (trois, 90 m). Maximal **à la naissance**, là où ADR-133 ne donne
+  rien.
+- **Admission** : trois impacts frais à 50 m passent de **142,1 % de π/7, refusés**, à **60,0 %,
+  admis**. C'est A262 dans ses propres termes.
+- **Coût** : huit intervalles rendent **96,5 %** du gain de soixante-quatre pour **11 %** du coût —
+  13,3 µs, 0,7 % du budget d'image. À comparer aux **25 s** de la borne de pression en S222 pour un
+  gain équivalent : six ordres de grandeur, parce qu'un champ radial décroît et qu'une somme de
+  modules non. **L305.**
+- **Zéro attente de test modifiée** ; 371 réussis (273+4+1+93), 5 ignorés. Hôte inchangé au bit
+  (la scène J1 ne porte qu'un impact, l'aiguillage n'y joue pas).
+
+**Ce qui n'a pas été fait.** L'**ancrage** du balayage n'est pas instruit : le champ au plus grand
+majorant global est un choix, pas un optimum, et rien ne dit lequel resserre le plus. Le cas de
+**plus de trois champs** n'est pas mesuré. L'usage de la borne hors admission n'est pas ouvert.
+A261, A258, le coût de passe, la cadence complète de l'hôte, la loi GPU, J2/δ et V-noyau conservés.
+
+**Suite S224.** Les deux termes du budget ont désormais des limites de **nature différente** :
+l'impact est borné par une inégalité à 13 µs, la pression par une loi d'échelle à 25 s (A261). Le
+budget de pente n'est donc plus le goulot d'une scène J1. **Revenir à la file** : cadence complète
+de l'hôte, puis **V-noyau**, qu'ADR-127 demande au plus tard avec J2 et qui n'a **jamais** été
+commencé — 0 module, 223 sessions. Si l'hôte passe avant, le dire et ne pas laisser V glisser.
+
+**Rituel.** A263 (sévérité 3) ; suivi A262 (traitée) ; L304, L305 ; file plurielle relue ; feuille
+de route J1/J1-bis ; index, README, REPRISE §4, file active et jeton. Invariants relus que la
+décision cite — **I-18** (ce qui est comparé à `max_slope` est une pente réelle : la couronne majore
+la pente réelle, pas une borne L1, et le minimum avec `slope_max_at` conserve la conversion) ;
+**I-06** (aucune allocation : le balayage est une boucle sur deux accumulateurs scalaires) ;
+**I-14** (deux constantes neuves, toutes deux avec leur banc) ; I-04 et I-08 inchangés. Aucun devenu
+faux, aucun amendé, aucun ADR réécrit. **Compteur 0** : W avancée dans `code/water-core/src`
+(`radial_impact`, `mixed_water`) **et** ADR-138 actée. 138 ADR, 263 angles, 305 leçons,
+18 invariants, 6 SPEC, 23 cas. Jeton libre, copies avancées.

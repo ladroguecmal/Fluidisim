@@ -88,6 +88,13 @@ feuilles, intacte à 1024 : aucune enveloppe de modules ne voit la localisation 
 **La part dynamique d'A255 est résorbée en précision à l'instant, pas en coût** (≈26 s CPU un fil par
 instant). Ce qui bloquera la scène J1 à plusieurs sources est la **part somme d'A254**. Les
 sources de pression forment déjà un seul champ préparé, dont la borne locale est conjointe.
+*S223* : [inégalité de position relative](validation/COURONNE-IMPACT-S223.md),
+[ADR-138](adr/ADR-138-le-budget-de-pente-tient-compte-de-la-position-relative.md). **A262 traitée** :
+le budget tient compte de la distance entre champs d'impact — gain 1,76 à 2,57 selon la séparation,
+**exactement 1,0000** à séparation nulle, pour **13,3 µs**. Trois impacts frais à 50 m passaient de
+142 % de π/7 — refusés — à 60 %, admis. **Le budget de pente cesse d'être le goulot de J1.**
+**Suite S224 : revenir à la file** — cadence complète de l'hôte, puis **V-noyau**.
+
 *S222* : [scène à plusieurs sillages](validation/SOMME-SILLAGES-S222.md). **La part somme d'A254
 change de côté.** Côté sillages elle est **absorbée** — trois sources dans un même journal coûtent
 1,44 à 1,67 fois une seule, contre un facteur 3 chez les impacts — et ce qui y reste est spatial
@@ -163,7 +170,11 @@ marge 0,0712. Elle passe avant toute scène à plusieurs sources.
   refusaient (`SlopeEnvelope`), passent. **S222 : la part somme est mesurée et elle change de
   côté** — absorbée chez les sillages (1,44 à 1,67 pour trois sources partageant un journal),
   **littérale chez les impacts**, où `slope_floor` somme sans conscience de la distance. Ce qui
-  reste ouvert d'A254 est donc **A262** ;
+  reste ouvert d'A254 est donc **A262** — **traitée en S223** par
+  [ADR-138](adr/ADR-138-le-budget-de-pente-tient-compte-de-la-position-relative.md), qui rend le
+  budget conscient de la position relative. **A254 est close** : ses deux termes ont désormais leur
+  limite connue, l'impact par une inégalité à 13 µs, la pression par une loi d'échelle à 25 s
+  (A261) ;
 - **A255** *(S215, sévérité 2)* — **part statique traitée en S216** par
   [ADR-134](adr/ADR-134-l-enveloppe-de-pente-tient-compte-des-directions.md) : l'enveloppe sommait
   scalairement des contributions vectorielles, et une inégalité en `O(N)` en retire 20 %, sans

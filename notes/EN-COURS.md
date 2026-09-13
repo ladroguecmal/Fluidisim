@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S223 — en cours
+Session : S223 — terminée
 Agent : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
 Entrée : « Continue avec S223 », même conversation que S222. master et trois copies à 416daa3,
 jeton libre, **maillons 1**. Copie principale.
@@ -152,7 +152,7 @@ devant 2 ms.
 - [x] **P5** — gain et coût ; traduction en impacts admis.
 - [x] **P6** — décider : ADR et câblage du budget si la borne tient et le prix passe ; sinon constat motivé.
 - [x] **P7** — document de réception (en-tête ADR-131 D3) ; suite complète `code/`.
-- [ ] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
+- [x] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
 
@@ -290,3 +290,22 @@ couronne et sa réception ; §3 l'inégalité conjointe et sa sûreté **entre**
 §4 ce qu'elle rend, en gain et en admission ; §5 le coût et le choix de huit intervalles, comparé
 aux 25 s de S222 ; §6 les contrôles. Suite nommée : ce qui reste d'A254 est le terme de pression,
 et les deux termes ont désormais des limites de nature différente.
+
+P8 : rituel §6 exécuté. Journal S223 ; **A263** (sévérité 3 — une constante calibrée rattrapait un
+facteur calculable que personne n'avait nommé) ; suivi **A262** (traitée) ; **L304, L305**. Index,
+README, REPRISE (§3 « 138 décisions », §4, file active, jeton), feuille de route (bloc J1, ligne
+A254 désormais close), file plurielle de QUESTIONS-OUVERTES.
+**Invariants relus** — **I-18** : c'est lui que la décision touche, et il est **mieux servi** qu'avant
+(la couronne majore une pente **réelle**, pas une borne L1, et son minimum avec `slope_max_at`
+conserve la conversion mesurée) ; **I-06** (aucune allocation : le balayage est une boucle sur deux
+accumulateurs) ; **I-14** (deux constantes neuves, `J1_PEAK_BOUND` et `J1_DECAY_BOUND`, chacune avec
+son banc ; la garde aussi) ; I-04 et I-08 inchangés. Aucun devenu faux, aucun amendé, aucun ADR
+réécrit.
+**Règle des deux maillons : compteur remis à 0**, et par le code — `outils/velocite.sh` donne
+**W = S223** (contre S221 avant la session). Le compteur était à 1 en entrant ; S223 l'a fait
+retomber en construisant.
+**Recommandation portée** : la ligne `Session suivante` ne nomme plus un reliquat — elle renvoie à
+la **file**, et nomme V-noyau, zéro module en 223 sessions, avec la consigne de ne pas le laisser
+glisser si l'hôte passe d'abord.
+Décomptes vérifiés : 138 fichiers dans `docs/adr`, 305 leçons, 263 angles.
+Jeton libre, battement 18:30. Copies de travail avancées sur master après ce commit.

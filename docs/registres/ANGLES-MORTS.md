@@ -3234,3 +3234,28 @@ sous-ondulatoire (λ_min = 2,09 m) ou elle ne sert à rien, ce qui fixe la loi d
   de se mesurer. **À faire** : une annonce conjointe qui tienne compte de la position relative des
   champs — pas une table, une inégalité, comme ADR-134 l'a été pour les directions. Voir A254, A261,
   SOMME-SILLAGES-S222 §5.
+
+**Suivi A262 — S223, 2026-09-13 : traitée par [ADR-138](../adr/ADR-138-le-budget-de-pente-tient-compte-de-la-position-relative.md).**
+Le budget de pente tient désormais compte de la **position relative** des champs d'impact.
+`RadialImpact::slope_max_beyond(t, r)` majore la pente sur la **couronne** `r ≥ r₀` — décroissance
+en `1/√r`, minimum avec `slope_max_at` — et `mixed::slope_floor_joint` en tire, par l'inégalité
+triangulaire et un balayage à huit intervalles **sûr entre ses échantillons**, un plancher conjoint.
+Gain **1,76** (deux impacts, 50 m, à la naissance) à **2,57** (trois, 90 m), **exactement 1,0000 à
+séparation nulle** ; coût **13,3 µs**, soit 0,7 % du budget d'image. **Trois impacts frais séparés
+de 50 m passaient de 142,1 % de π/7 — refusés — à 60,0 % — admis.** Zéro attente de test modifiée :
+à un champ le chemin est celui d'avant au bit. Voir COURONNE-IMPACT-S223.
+**Ce qui n'a pas été instruit** : l'**ancrage** du balayage (le plus grand majorant global est un
+choix, pas un optimum) ; le cas de **plus de trois champs**, où la perte de l'inégalité triangulaire
+pourrait croître ; l'usage de la borne hors admission.
+
+- **A263** *(sévérité 3, S223 ; ouverte)* — **Une constante mesurée du dépôt rattrapait un facteur
+  que personne n'avait nommé.** `SLOPE_L1_RATIO = 1,795071`, calibré en S141 pour convertir la borne
+  L1 d'un champ radial en pente réelle, vaut `1/0,581865 × 1,045` : c'est le **pic de `J₁`**, que la
+  mesure retrouvait sans le dire. Le code posait `|J₁| ≤ 1` avec, en commentaire, « borne
+  conservative », et la calibration payait la différence derrière. Rien n'est faux — mais un facteur
+  **calculable** a été mesuré pendant quatre-vingts sessions, et sa nature est restée invisible
+  jusqu'à ce qu'on ait besoin de le faire **varier** avec le rayon. Gravité 3 : aucun défaut
+  numérique, un coût d'occasion. **À faire** : passer en revue les constantes calibrées du dépôt et,
+  pour chacune, se demander **quelle quantité analytique elle approche** — c'est la question qui a
+  ouvert ADR-138. Candidats nommés : les deux `SLOPE_L1_RATIO` (`radial_impact` 1,795071 et
+  `impact_field` 1,701591), la réserve trigonométrique `32·ε` d'ADR-135. Voir L304, L305, ADR-138.
