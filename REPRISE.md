@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-13 15:26 +02:00
-Agent            : Codex (fichiers, git et cargo disponibles)
-Session en cours : —
+JETON            : occupé
+Battement        : 2026-09-13 15:30 +02:00
+Agent            : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
+Session en cours : S220 — borne locale d'ordre deux (Hessienne signée, reste supérieur)
 Dernière session : S219 — partition adaptative W construite et reçue ; couverture conservée, plafond en évaluations ; A255 partielle, A259 ouverte
 Session suivante : S220 — file J1/W : construire et recevoir une borne locale avec pente/Hessienne signée au centre et reste supérieur borné, en couvrant les phases quantifiées ; conserver ADR-135 comme repli, mesurer gain/coût via S219. A258 avant migration d'admission ; A255, somme A254 et loi GPU ouvertes ; J2/δ et V-noyau conservés
 Maillons        : 0 — W avancée dans src par la partition adaptative

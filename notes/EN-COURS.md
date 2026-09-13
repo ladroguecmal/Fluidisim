@@ -58,31 +58,36 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S219 — terminée
-Agent : Codex (fichiers, git et cargo disponibles)
-Entrée : Continue ; master et trois copies propres à4f9841f, jeton libre, maillons0.
-Lectures du projet conservées de S218 ; état réel revérifié. Copie principale.
+Session : S220 — en cours
+Agent : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
+Entrée : « Reprends le projet » ; master et trois copies propres à 8ef0c64, jeton libre,
+maillons 0. AGENTS, REPRISE (jeton, file active, §4 S219–S217, §5–§9), EN-COURS, journal
+S218–S219, PARTITION-S219, ADR-135, code local_bound/partition/phase lus. Copie principale.
 
 ### Thèse et plan
 
-Un tas de rectangles classés par borne permet de raffiner le maximum sans perdre
-la couverture. Les enfants héritent aussi de la borne du parent : le maximum ne
-peut augmenter. Budget explicite en évaluations, pas promesse de millisecondes.
-Pool de l'appelant ; arrêt avant une division si capacité ou budget insuffisants.
-Pas de migration d'admission ni de certificat f32 ajouté.
+A259 : la borne ADR-135 somme des **modules** de variation, `c_k·min(2,D_k)` ; aux mailles
+moyennes cette somme ne voit aucune annulation entre modes. Développer chaque mode à l'ordre
+deux autour de la phase **exécutée** au centre : `a sin(ψ+δ) = a sin ψ + a cos ψ·δ + R`,
+`|R| ≤ a·δ²/2`. Le terme `a cos ψ` est exactement `η_k(c)` : la Hessienne de la pente vaut
+`M = −Σ w_k ⊗ (2π t_k) η_k(c)`, **signée**, et `|S(c) + M u|` est convexe en `u`, donc son
+maximum sur le rectangle est à un coin. Écart exécuté/linéaire `e_k` (arrondi des produits
+`t·x`, fraction, Q32, arrondi des coins) majoré par `E_k` et payé `c_k E_k`. Choix par mode :
+dans `M` si `E_k + D_k²/2 < min(2, D_k)`, sinon terme ADR-135. Retenir le minimum des branches
+ordre un, ordre deux et globale, chacune avec sa réserve : jamais pire qu'ADR-135.
+Au maximum de `|S|`, `S·Mu = 0` : l'excès devient quadratique, ce qu'ADR-135 ne peut pas.
+Critères déclarés avant mesure : sondes sous la borne (pic manqué, multidirectionnel, 4000 m) ;
+borne ordre deux ≤ ordre un sur tout rectangle ; gain strict près d'un maximum ; S219 inchangée
+en ordre un au bit. Gain de partition non promis. Aucune admission migrée, A258 reste ouverte.
 
 - [x] **P1** — jeton et plan seuls.
-- [x] **P2** — construire le parcours borné et recevoir couverture, arrêts et déterminisme.
-- [x] **P3** — mesurer gain/coût sur fixtures S218 et publier le contrat et ses limites.
-- [x] **P4** — rituel §6, journal, registres, index, file active, jeton et copies.
+- [ ] **P2** — ADR-136 : dérivation, écart de phase quantifiée, choix par mode, réserve, limites.
+- [ ] **P3** — construire la branche ordre deux (Field, Prepared) sans changer ADR-135 ni S219.
+- [ ] **P4** — tests : couverture, domination, gain près du maximum, 4000 m, refus, identité S219.
+- [ ] **P5** — exemple S220 : même rectangles S218 et partition S219 par ordre ; campagne isolée.
+- [ ] **P6** — publier la réception S220 et ses relevés bruts.
+- [ ] **P7** — rituel §6, journal, registres, index, file active, jeton et copies.
 
 ### Notes de reprise
 
-Suite S218 : borne locale ADR-135 disponible, réserve non certifiée A258.
-Un arrêt retourne la meilleure couverture obtenue ; aucun rectangle ne disparaît.
-
-P2 : tas maximal, division binaire grand côté, borne héritée du parent. Deux tests ciblés reçus debug ; couverture/aire, budget pair, capacité, point, zéro, refus, déterminisme. Reprise inter-appels non construite : chaque appel repart de la racine du champ courant, ce qui évite des bornes périmées. Suite release lancée, reçu à P3.
-
-P3 : 362 tests release passent/5 ignorés. Deux passages isolés base identiques en valeurs ;35,64/35,75s à65535 évaluations. Gain1,48–1,52 sur3 cas recevables ; aucun gain à8191. A259 : bornes grossières plafonnées identiques, priorité spatiale indisponible. Suite proposée S220 : borne de Taylor avec Hessienne signée et reste, phases quantifiées à couvrir. Aucune admission ni reprise inter-appels.
-
-P4 : journal, A259/L298, index et file plurielle actualisés ; S220 portée au jeton, maillons0. Jeton libre, copies à avancer après commit de clôture. Aucun travail S219 non consigné.
+Suite S219 : partition adaptative disponible, A259 (plateau des grandes mailles) ouverte.
