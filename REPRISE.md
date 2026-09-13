@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-13 13:09 +02:00
+JETON            : occupé
+Battement        : 2026-09-13 13:17 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S216 — A255 : la famille du sillage, et d'abord la part du majorant qui ne dépend pas du temps
 Dernière session : S215 — ADR-133, le majorant de pente suit la dispersion ; A254 traitée pour moitié (occupation 84 % → 42 %, le refus à deux sources est levé) ; A255 ouverte : le sillage pèse désormais 88 % du budget
 Session suivante : S216 — file J1, **A255** : refaire sur la **famille du sillage** la campagne qui a traité l'impact en S215 — varier σ, cutoff, radial, angular et le découpage en tronçons, chercher une échelle de temps propre, ne pas présumer qu'elle existe, et traiter la phase de forçage à part (pendant qu'une source émet, son majorant **croît**). C'est elle qui décide de ce que coûte une scène à plusieurs sillages, donc de la mutualisation de J1-bis. Ensuite la loi GPU (espace, LOD, visibilité, mutualisation), chaque mesure avec son en-tête (ADR-131 D3)
 Maillons        : 0 — W avancée dans `code/water-core/src` (radial_impact, composition, mixed_water, mixed_differential) **et** ADR-133 actée
