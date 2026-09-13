@@ -113,7 +113,7 @@ fraction du problème, et c'est la découverte de la session.
 - [x] **P3** — mesurer la cadence sur fenêtre ouverte, deux passages, aux deux formats ; publier les distributions.
 - [x] **P4** — chiffrer les exclusions : part de l'eau dans la trame, coût du ciel, des transferts et de la présentation.
 - [x] **P5** — confronter à ADR-125 : 16,67 ms et 2 ms, et dire ce que la scène J1 tient et ne tient pas.
-- [ ] **P6** — document de réception (en-tête ADR-131 D3, rang de passage) ; suite complète `code/`.
+- [x] **P6** — document de réception (en-tête ADR-131 D3, rang de passage) ; suite complète `code/`.
 - [ ] **P7** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
@@ -193,3 +193,11 @@ confirmée **par une cadence** et non par une passe.
 Réserve à ne pas franchir : l'hôte ne dessine **que** de l'eau et un ciel, sur une caméra fixe, sans
 interface, sans ombres, sans autre géométrie. Les 198 Hz ne disent rien d'un jeu ; ils disent que
 l'eau, seule, laisse 11,6 ms.
+
+P6 : [CADENCE-HOTE-S225](../docs/validation/CADENCE-HOTE-S225.md) — en-tête ADR-131 D3 avec rang de
+passage ; §1 ce qui manquait et pourquoi une passe isolée ne pouvait pas le dire, vsync et
+sérialisation comprises ; §2 la cadence et ses quatre passages ; §3 les exclusions chiffrées à
+2 % ; §4 le fait neuf — le CPU d'une trame est à 51 % de l'attente, et la trame est bornée par le
+GPU ; §5 la confrontation à ADR-125 ; §6 les contrôles.
+Suite complète `code/` : **379 réussis, 5 ignorés** — la bibliothèque n'a pas bougé cette session,
+tout le travail est dans `viewer/`.
