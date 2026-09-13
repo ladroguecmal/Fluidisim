@@ -82,7 +82,7 @@ Ne pas modifier les bits du champ ni les anciens contrats d'admission sans réce
 ### Plan
 
 - [x] **P1** — jeton, thèse et plan seuls.
-- [ ] **P2** — lire les chemins réels, préciser la preuve et le contrat ; ADR si adoption justifiée.
+- [x] **P2** — lire les chemins réels, préciser la preuve et le contrat ; ADR si adoption justifiée.
 - [ ] **P3** — construire l'annonce locale dans le cœur, refus et contre-épreuves (centre trompeur compris).
 - [ ] **P4** — recevoir sur une partition des emprises S217 ; coût complet et resserrement, sans promesse de budget GPU.
 - [ ] **P5** — rituel §6, journal, file plurielle, index, reprise, jeton libre et copies synchronisées.
@@ -91,3 +91,5 @@ Ne pas modifier les bits du champ ni les anciens contrats d'admission sans réce
 
 Point d'entrée : spectral_pressure::Field et bound_pressure::Prepared ; les 356 tests
 workspace release et deux tests exemple S217 sont les reçus précédents.
+
+P2 : ADR-135 actée ; le reste porte les phases arrondies réelles (monotonie des produits aux bornes), avec réserve f32 distincte. API locale uniquement, aucune migration des admissions.
