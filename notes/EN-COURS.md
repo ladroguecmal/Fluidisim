@@ -90,7 +90,7 @@ images après 3 de chauffe, comparé à 2 ms. Machine : celle de S202 (Ryzen AI 
  (L2) table radiale à matrice de Bessel précalculée — noyau N×M mesuré sur tableaux de la
  bonne taille, précalcul et mémoire par impact ; (L3) densité `c`. Nombre de composantes de B :
  déduit de B1 (48 ns), pas remesuré.
-- [ ] **P4** — campagne release et publication `COUT-IMAGE-S206` : tableau par configuration
+- [x] **P4** — campagne release et publication `COUT-IMAGE-S206` : tableau par configuration
  contre 2 ms, compatible / incompatible, `paquets_W_max` confronté.
 - [ ] **P5** — arbitrage explicite : options mesurées, dégradations, décideur ; ce qui est
  technique se tranche (ADR si décision), ce qui touche l'ambition, les dépendances ou le sens
@@ -118,3 +118,8 @@ Hermite 8,1 ns/pt, 75 impacts dans 2 ms, **4096 impacts = 109 ms et 2,0 Go** ;
 pas λ/8 = 0,419 m, M 125 : 0,0164 ms, 254 Ko, erreur 0,0901 mm, 8,8 ns/pt, 122 impacts, 67 ms.
 Lecture : avec L2, W passe de ~9 µs/sommet à 27 µs/impact + 8 ns/sommet — **B (1,3 µs/sommet,
 N32) devient le goulot**. Estimation 4 px un fil avec L2 : 12,0 + 0,03 + 0,06 ≈ 12,1 ms.
+P4 : COUT-IMAGE-S206 publié (scène, densité exigée — c ≤ 5,8 px pour B, ≤ 2,75 px pour les
+anneaux à 28 m —, un fil, L1, L2, `paquets_W_max`, B sur CPU, verdict, non mesuré). Seconde
+exécution un fil archivée : 8 px 18,45 ms, 4 px 72,42 ms, 2 px 293,15 ms (écart ≤ 7 %).
+Verdict : **incompatible sur CPU à toute densité qui montre l'impact** ; W n'est plus le goulot
+avec L2, B l'est (1,2–1,3 µs/sommet).
