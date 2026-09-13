@@ -72,7 +72,7 @@ Sources non autorisées. Cible x86_64-pc-windows-msvc, rustc 1.97.0.
 
 - [x] **P1** — consigner accord et plan seul.
 - [x] **P2** — créer viewer séparé selon S209 et résoudre le verrou sans sources.
-- [ ] **P3** — inventorier versions, licences, tailles et checksums depuis les métadonnées publiques.
+- [x] **P3** — inventorier versions, licences, tailles et checksums depuis les métadonnées publiques.
 - [ ] **P4** — rituel §6, demande sources, jeton libre, copies à jour.
 
 ### Notes de reprise
@@ -81,3 +81,8 @@ Manquement : la commande initiale du plan a échoué (code 1 sans sortie) ; la r
 suivante a été lancée avant contrôle de cet échec. Plan réparé dès constat ; aucune source
 récupérée, résolution autorisée réussie (255 paquets externes). Ne pas refaire la résolution.
 Maillons 1 à l'entrée. Aucun fetch/build/run/vendor avant accord des sources.
+Correction de comptage : 256 paquets au verrou = 254 externes + water-core + water-viewer.
+Le message P2 a repris à tort les 255 annoncés par Cargo comme tous externes.
+
+P3 : 254 métadonnées reçues, 49 174 790 octets, licences complètes, checksums concordants.
+DEPENDANCES-HOTE-S210.md prêt. Régénération verrouillée en ligne réussie ; hors réseau refusée.
