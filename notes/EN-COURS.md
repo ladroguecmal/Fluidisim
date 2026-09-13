@@ -58,50 +58,69 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S221 — terminée
+Session : S222 — en cours
 Agent : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
-Entrée : « Continue » juste après S220, même conversation ; master et trois copies à 32e7afd,
-jeton libre, maillons 0. Lectures S220 conservées, état réel revérifié. Copie principale.
+Entrée : « Reprends le projet », conversation neuve — **aucune mémoire de S217 à S221**, tout a été
+relu depuis `AGENTS.md`, `REPRISE.md` §4 et les trois ADR 135/136/137. master et trois copies à
+c33953a, jeton libre, maillons 0. Copie principale.
+Objectif : **A254, la part somme** — ce que coûte une scène à plusieurs sillages dans le budget de
+pente, et ce qu'une borne locale conjointe lui rendrait.
 
-### Thèse et plan
+### Ce que la relecture établit avant toute mesure
 
-A260 : un mode à grande largeur de phase paie `2 c_k` (exclu) ou `D²/2` presque autant (inclu),
-**mode par mode**. Toute partition des modes en `R ∪ U` donne `|S(p)| ≤ |S_R(p)| + |S_U(p)|`,
-et `|S_U(p)| ≤ G(U)`, l'enveloppe directionnelle ADR-134 du seul sous-ensemble, valable en tout
-point. Famille de coupures `U_j = {D_k ≥ D*_j}`, `D* ∈ {2, 1, 1/2}`, accumulée par classes
-dans la même passe O(N) ; minimum avec ADR-135 et ADR-136, qui restent **au bit**. Pour la coupure
-`D* = 2`, gain garanti non négatif sur les exclus à `2 c_k` : `G(U) + |S_U(c)| ≤ 2 C_U`.
+`mixed_water::slope_floor(impacts, pressure, time)` somme **un majorant par impact**
+(`slope_max_at`, ADR-133) **plus un seul terme de pression** — la signature ne prend qu'un
+`Option<&bound_pressure::Prepared>`. Donc :
 
-**Limite annoncée avant mesure** : `G(U)` ne dépend pas du point. Une grande cellule loin du
-sillage garde `G(U)` si `U` porte l'essentiel de la masse — l'enveloppe ne voit pas la
-localisation spatiale du paquet, qui vit dans la cohérence des phases. Hypothèse testée, sans
-chiffre : gain à 8191 évaluations seulement si la masse `C_U` de `D ≥ 2` porte la majorité
-de `C` sur les feuilles 2 × 1,5 m ; aucun gain attendu à 2047. Critères : sondes sous la borne,
-domination au bit sur ADR-136, gain strict sur un rectangle à spectre étalé, S220 inchangée au
-bit, décomposition `C_U`/`G(U)` publiée par classe.
+- **plusieurs sillages ne peuvent entrer dans le budget qu'en partageant un journal**, une recette
+  et une emprise ; c'est cette configuration que la ligne de suite nomme, et c'est la seule que le
+  cœur sache composer aujourd'hui ;
+- dans cette configuration, les sources partagent les **emplacements** du demi-spectre : leurs
+  amplitudes modales s'additionnent **en complexe**, donc le terme de pression est déjà
+  sous-additif par construction. La « part somme » d'A254 ne se lit donc pas sur le nombre de
+  sillages de la même façon que sur le nombre d'impacts, et il faut le mesurer avant de le dire.
 
-- [x] **P1** — jeton et plan seuls.
-- [x] **P2** — ADR-137 : coupure spectrale, famille de seuils, domination, réserve, limite spatiale.
-- [x] **P3** — construire la passe générique (ordre deux inchangé au bit), ordre `Spectral`, Prepared.
-- [x] **P4** — tests : couverture, domination, gain strict, identité S220, refus, partition.
-- [x] **P5** — exemple S221 : décomposition par taille de maille, partitions 2047→32767 ; campagne isolée.
-- [x] **P6** — publier la réception S221 et ses relevés bruts.
-- [x] **P7** — rituel §6, journal, registres, index, file active, jeton et copies.
+Les bornes locales (ADR-135, 136, 137) et leur partition (S219) **ne sont branchées sur aucune
+admission** : elles publient, elles ne refusent pas. La question de la session est de savoir si
+elles ont de quoi le faire.
+
+### Thèse et critères, déclarés avant toute mesure
+
+1. **Ce que l'enveloppe globale fait du nombre de sources**, mesuré et non supposé : à deux et
+   trois sillages, proches puis éloignés, le rapport de `slope_envelope()` à sa valeur pour une
+   seule source. Si la composition complexe la rend franchement sous-additive, A254 n'a pas de
+   « part somme » du côté des sillages, et c'est la réponse.
+2. **Ce qu'une borne locale conjointe rendrait** : partition spectrale (ADR-137) sur l'emprise, à
+   **budget d'évaluations égal** d'une configuration à l'autre, contre le **maximum réel**
+   échantillonné finement. Gain, et ce qui reste au-dessus du maximum.
+3. **Traduire en part de π/7** : le budget d'admission complet — impacts toujours sommés
+   (ADR-133) plus le terme de pression — avec l'enveloppe actuelle puis avec la borne partitionnée.
+   Dire combien de sources passent dans chaque cas. C'est la seule forme qui réponde à A254.
+4. **Le coût de passe fait partie du verdict.** S219 mesure 18 à 36 s pour 32 767 évaluations : un
+   gain réel peut être **inutilisable** comme terme d'admission par image. Le dire, plutôt que
+   publier un gain sans son prix.
+5. Aucun seuil de réussite présumé ; publication avec techniques, domaine et rang de passage
+   (L289). Aucune admission migrée avant P6.
+
+**Prédiction écrite pour être contredite** : éloignés, deux et trois sillages donnent une enveloppe
+globale qui croît nettement moins vite que le nombre de sources (facteur ≤ 1,6 à trois), parce que
+les phases modales se désalignent ; le maximum réel, lui, reste proche de celui d'une source.
+La borne locale partitionnée rend alors l'essentiel de l'écart — moins d'un facteur 1,5 au-dessus
+du maximum — mais **à un coût de plusieurs secondes**, donc sans usage possible comme terme
+d'admission par image. Autrement dit : je prédis un gain réel et inutilisable en l'état, et c'est
+ce résultat-là qu'il faut savoir écrire s'il se produit.
+
+### Plan
+
+- [x] **P1** — jeton, entrée, ce que la relecture établit, thèse, critères, prédiction, plan seuls.
+- [ ] **P2** — fixture multi-sillages : deux et trois sources dans un même journal, proches puis éloignées ; témoin que la composition est bien partagée par emplacement, et refus éventuels de la bibliothèque.
+- [ ] **P3** — enveloppe globale et maximum réel par configuration ; sur-additivité mesurée.
+- [ ] **P4** — borne locale conjointe : partition spectrale à budget d'évaluations égal ; gain, reste au-dessus du maximum, **coût de passe**.
+- [ ] **P5** — part de π/7 : budget d'admission complet avec les impacts sommés ; combien de sources passent, avant et après.
+- [ ] **P6** — décider : ADR si quelque chose est rendu **et** utilisable ; sinon constat motivé, et retour à la file (cadence complète de l'hôte, V-noyau).
+- [ ] **P7** — document de réception (en-tête ADR-131 D3) ; suite complète `code/`.
+- [ ] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
 
-Suite S220 : ordre deux à 1,006–1,012 × maximum à 32767 évaluations ; plateau à 8191 (A260).
-Campagne détachée : signaler la fin par un fichier marqueur, **pas** par `tail -f` d'un journal
-écrit par un autre processus (verrou Windows constaté S220).
-
-P3 : bits de l'ordre deux figés **avant** refactorisation (test `second_order_bits_frozen_before_spectral_s221`, 6 modes dont deux courts, 5 rectangles), puis passe générique `second_order_pass::<SPECTRAL>` ; classes accumulées derrière la constante. Module `pressure_spectral_bound.rs` : trois coupures D* = 2/1/½, `SlopeOrder::Spectral`, exposition Prepared. 11 tests de borne debug réussis, bits figés compris.
-
-P4 : quatre tests S221 (bits figés, couverture/domination sur 14 modes dont 8 courts à k = 9, gain strict un long + huit courts isotropes — borne < 0,85 × globale, 160 801 sondes —, refus et partition Spectral) + contrôles contexte/instant/domaine de Prepared pour l'ordre deux et la coupure. Une attente fausse corrigée : la masse d'une classe unique arrondie vers le haut est un ulp au-dessus (encadrement, pas égalité). Release : 370 réussis (272+4+1+93), 5 ignorés, zéro échec.
-
-P5 : exemple `coupure_spectrale_s221` — grilles 4×3, 2×1,5 et 1×0,75 m (les partitions uniformes de 1024/4096/16384 feuilles) avec fractions de masse par classe, branche gagnante et détail du pire rectangle ; partitions Second puis Spectral à 2047/8191/16383/32767 avec détail de feuille maximale hors chronométrage. Campagne détachée lancée 16:42:33 (`scratchpad/campagne_s221.ps1`, sorties `scratchpad/s221`) : base1, lent, long, base_tard, base2 ; fin signalée par `fin_*.txt` et `TERMINE.txt`.
-
-P5 fin : campagne 16:42:33–16:52:42, cinq processus, base1/base2 identiques au bit. **Hypothèse du plan réfutée sur son mécanisme** : à 2×1,5 m, la classe D ≥ 2 ne porte que 1,1–2,2 % de la masse (lent/base/long) ; la classe [1, 2) en porte 44–67 %. La coupure utile est **D* = 1** (gagne sur les feuilles maximales). Partition Spectral contre Second : 2047 → gain 1,003–1,024 (quasi nul) ; **8191 → 0,1020/0,02654/0,1205/0,1031 contre plafond** (gain 1,115–1,230) ; 16383 → 0,0919/0,02083/0,1107/0,09139 contre 0,0987/0,02456/0,1178/0,09142 ; 32767 → identiques au plancher de réserve. Pire rectangle 2×1,5 m base : G(U) = 0,1097 pour C_U = 0,1267 (94 % de C) — la limite spatiale annoncée dans ADR-137. Coût : Spectral 26,1–26,3 s contre Second 31,5–32,1 s à 32767. Micro-mesure alternée (2000 appels × 6 tours, 2×1,5 m) : ordre un 485–528 µs, ordre deux 845–922 µs, spectrale 709–758 µs. **Expérience** : ordre deux passé par `second_order_pass::<true>` → 710 µs, bits inchangés (le test figé garantit) ; donc écart de **code machine**, pas d'opérations. Rétabli `<false>` (ADR-137 §5, comparabilité S220), consigné comme levier de coût.
-
-P6 : COUPURE-SPECTRALE-S221 et relevés bruts (dont micro-mesure et expérience `<true>`) publiés. Relus contre les relevés et corrigés avant commit : victoires de la coupure 1 « 96–100 % » (et non 97–100), feuille maximale tardive à 16383 gagnée par la coupure 2 d'un arrondi, ordre un micro 491–528 µs, part de masse tardive 63 % ; attribution à [1, 2) appuyée par les restes mesurés (0,0919 contre 0,0138). À porter au rituel : suivis A259/A260 (mécanisme corrigé), A261 (localisation spatiale), L300 (code machine), L301 (compter/peser).
-
-P7 : journal (avec bilan de ligne S215–S221, A211), suivis A259/A260, A261, L300/L301, index, README, REPRISE (§3, §4, file active, jeton), feuille de route et file active plurielle. Suite S222 **vérifiée dans le code avant publication** : `mixed_water::slope_floor` additionne les impacts et prend un seul champ de pression conjoint — la première formulation (« somme des majorants par source ») était inexacte pour les sillages et a été corrigée. Maillons 0. Jeton libre ; copies à avancer après le commit de clôture.
+*(vide : le travail commence en P2)*

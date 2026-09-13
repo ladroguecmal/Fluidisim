@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-13 17:00 +02:00
+JETON            : occupé
+Battement        : 2026-09-13 17:22 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
-Session en cours : —
+Session en cours : S222 — A254 part somme : plusieurs sillages, enveloppe conjointe contre borne locale conjointe
 Dernière session : S221 — coupure spectrale de la borne locale (ADR-137) : A259 levée à 4096 feuilles, mécanisme d'A260 corrigé (classe [1, 2), pas les exclus), A261 ouverte (localisation spatiale)
 Session suivante : S222 — file J1/W, A254 part somme : scène à deux et trois sillages dans un même journal, proches puis éloignés ; enveloppe directionnelle conjointe (terme actuel de mixed_water::slope_floor) contre borne locale conjointe (ordre deux, spectrale) et maximum, à budget égal ; dire la part de π/7 rendue et ce qu'il faut aux impacts, toujours additionnés. Si rien n'est rendu, revenir à la file (cadence complète de l'hôte, V-noyau). A261, coût de passe et A258 nommés sans ordre imposé ; δ/V conservés
 Maillons        : 0 — W avancée dans src et ADR-137 actée
