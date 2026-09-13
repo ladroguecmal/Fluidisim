@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-13 10:04 +02:00
-Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-13 10:11 +02:00
+Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
+Session en cours : S212 — sillage du cœur dans l'hôte GPU, comparé et mesuré
 Dernière session : S211 — hôte GPU B+impact reçu sous DX12, J1 partiel
 Session suivante : S212 — file J1, couche W : intégrer le sillage issu du cœur dans l'hôte GPU, puis recevoir la scène complète (HOTE-GPU-S211)
 Maillons        : 0 — B avancée dans code/water-core/src ; B/W affichés sur GPU

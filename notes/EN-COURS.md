@@ -58,44 +58,49 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S211 — terminée
-Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Objectif : premier hôte GPU B/W de J1 après accord des sources.
+Session : S212 — en cours
+Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
+Objectif : file J1, couche W — sillage issu du cœur dans l'hôte GPU, comparé au cœur, coût mesuré.
 
-### État réel et accord
+### État réel
 
-master et trois copies propres à de63a00 ; jeton libre. Accord « oui » sur les 254 sources
-crates.io S210, cache Cargo local et verrou versionné. Aucun vendoring.
-Compteur 2 : file J1, couches B/W, construction effective.
+master et trois copies propres à 0e204ad (S211 close 10:04, jeton libre). Maillons 0 ; la suite
+S211 nomme une ligne de la file (J1/W), pas un reliquat. Aucune dépendance nouvelle prévue.
+
+### Thèse et critères, déclarés avant toute mesure
+
+Le sillage du cœur est une somme modale (`spectral_pressure::Field`) : ADR-107 chiffre 25,6 ms
+de préparation CPU pour 8 192 nœuds. Il n'a pas la forme de B (32 composantes). **Hypothèse à
+éprouver, pas à croire** : publié en coefficients rebasés `[A, B, kx, ky]`, il se rend par somme
+par sommet ; le coût dira si ce chemin tient ou s'il faut un autre chemin d'image (grille/texture,
+transformée), à la manière d'ADR-129 pour l'impact.
+
+Publication : `η(q) = Σ A cos(k·q) − B sin(k·q)`, pente `−k (A sin + B cos)`, où `(A + iB)` est
+la réponse pondérée tournée de la phase repliée `k·origine` (PhaseQ32, aucun atan2, aucun temps
+absolu au GPU — I-08). Emprise du champ appliquée au GPU comme au cœur.
+
+Fixture sillage J1 (Froude de S156, lois de domaine transportées par similitude — **à vérifier**) :
+σ 2 m, coupure 3 rad/m (σk 6), recette 64×128 (4 096 nœuds du demi-spectre) ; huit tronçons de
+2 s à [3, 0] m/s sous 19 620 N (≈ 2 t), départ (−24, 4) m à la naissance de l'impact ; contexte
+de 40 s ; emprise [−64, −48]–[64, 56] m ; repère/cellule 0, milieu 9,81 / 1025.
+
+Critères : hauteur GPU contre cœur (B `eval` + impact direct + pression `sample_batch`) ≤ 3 mm
+aux sondes, âges sillage 0/4/8/16/24/39 s ; témoin de résolution 64×128 contre 128×256 publié
+(pas de seuil inventé, écart max rapporté à l'amplitude max) ; couture au bord de l'emprise
+publiée ; admission `bound_pressure::Prepared::sample_world_batch` à `BREAKING_SLOPE` rapportée,
+refus publié et non contourné ; coûts séparés CPU (préparation + publication) et GPU (passe
+d'eau) en 640×360 et 960×540, deux recettes. Toute incompatibilité avec 2 ms est publiée ; une
+issue technique va en ADR, une incompatibilité sans issue technique va à l'utilisateur (ADR-127 D7).
 
 ### Plan
 
-- [x] **P1** — accord et plan seul, jeton occupé.
-- [x] **P2** — sources verrouillées, API et données GPU B/W depuis le cœur ; réception CPU.
-- [x] **P3** — fenêtre, pipeline GPU, caméra interactive et B+impact ; compilation.
-- [x] **P4** — comparaison GPU/CPU, capture locale, mesures distinctes CPU/GPU et contrôles ciblés.
-- [x] **P5** — rituel §6, lancement, file active, passation, jeton libre, copies synchronisées.
+- [x] **P1** — jeton, thèse, critères et plan seuls.
+- [>] **P2** — cœur : `bound_pressure::Prepared::render_components` rebasé, refus atomiques, test contre `sample_batch`.
+- [ ] **P3** — hôte : fixture sillage, préparation par image, buffer GPU, somme modale bornée à l'emprise ; R/B/Home ; compilation.
+- [ ] **P4** — `--verify` : GPU contre cœur, témoin de résolution, couture, admission, coûts deux recettes, captures, fenêtre.
+- [ ] **P5** — réception HOTE-GPU-S212, décision chiffrée du chemin d'image du sillage, suite complète des tests.
+- [ ] **P6** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
 
-Critères avant mesures : B issu du même spectre que la bibliothèque, phases repliées,
-aucun temps absolu f32 envoyé au GPU. Impact RadialTable à lambda/16.
-Comparaison hauteur GPU/CPU sur scène S201+S203 : tolérance 3 mm (marche S201),
-max/RMS publiés, pente mesurée sans réception physique par image.
-Horodatage GPU si disponible, sinon indisponible explicite. Aucun ajout hors verrou.
-J1 reste ouvert si le sillage ou une réception manque.
-P2 : sources verrouillées récupérées. Background::render_components publie amplitude, kx/ky et phase
-repliée relative à une origine monde ; refus atomique, stockage hôte, aucune allocation.
-Test ciblé reçu aux temps 15 s, 1e6 s et u64::MAX, deux origines, refus domaine/capacité.
-
-P3 : hôte winit/wgpu compilé hors réseau. API wgpu30 adaptée (CurrentSurfaceTexture,
-Queue::present, InstanceDescriptor explicite). Grille projetée 2 px, shader partagé compute/rendu.
-Modes --verify et --smoke ; Espace pause, R relance, B témoin, flèches déplacement, clic droit rotation.
-
-P4 : DX12 reçu ; découverte multibackend arrêt natif 0xc0000005, cause non isolée.
-Hauteur max 0,077657 mm ; GPU eau 960×540 médiane 0,048576 ms, pas de cadence complète reçue.
-349 tests réussis/cinq ignorés ; fenêtre inspectée et fermée normalement. Voir HOTE-GPU-S211.
-
-P5 : journal, index, README, feuille de route, file plurielle et angles actualisés.
-A250 close ; A247 partielle. S212 porte W/sillage, J1 reste partiel. Compteur0.
-Jeton libre ; avance rapide des trois copies après commit final, aucune copie créée.
+*(vide)*
