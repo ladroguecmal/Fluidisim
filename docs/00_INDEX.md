@@ -20,6 +20,21 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S216 — 2026-09-13 : [l'enveloppe de pente tient compte des directions](validation/ENVELOPPE-SILLAGE-S216.md), [ADR-134](adr/ADR-134-l-enveloppe-de-pente-tient-compte-des-directions.md).**
+A255 traitée pour moitié, et cette moitié ne demandait **aucune mesure**. `slope_envelope_tight`
+sommait **scalairement** des contributions **vectorielles** de directions différentes : une
+inégalité de Cauchy–Schwarz en `O(N)` — sans table, sans garde, sans domaine — en retire 20 %
+(**L293**). Part statique **1,2586 à 4 s, 1,1979 à 39 s**, identique à quatre décimales pour
+`angular` 64/128/256, `radial` 32/128 et `cutoff` 2/4 : propriété du champ, pas de sa
+discrétisation. Le reste est la décohérence — **3,98 à 39 s** —, et le discriminant tranche : seize
+fois l'aire d'emprise laisse le maximum réel identique à six décimales, ce n'est **pas** A208
+(**L295**). Gain reçu 1,155 à 1,200, soit **79 à 87 %** de ce qu'un maximum exact rendrait ;
+occupation de π/7 sur la scène J1 **84,1 % (S214) → 41,6 % (ADR-133) → 36,3 %**. Aucun bit publié
+changé. **A256** ouverte : une annonce qui nomme le facteur qu'elle retire sans dire à quelle
+échelle il porte se lit comme complète. 356 tests réussis/cinq ignorés.
+**Suite S217 : la part dynamique d'A255.**
+134 ADR,256 angles,295 leçons,18 invariants,6 SPEC,23 cas ; compteur 0 (W code src + ADR-134).
+
 **S215 — 2026-09-13 : [le majorant de pente suit la dispersion](validation/BUDGET-PENTE-S215.md), [ADR-133](adr/ADR-133-le-majorant-de-pente-suit-la-dispersion.md).**
 A254 traitée pour moitié. À échantillonnage fin, le pessimisme du budget vient **presque
 entièrement de l'impact** — 1,00 à la naissance, 10,05 à 16 s, **30,44 à 56 s** — et non du sillage

@@ -11115,3 +11115,68 @@ dépassement mesuré), I-04, I-06 (aucune allocation : la table est une constant
 devenu faux, aucun amendé. Aucun ADR réécrit. **Compteur 0** : W avancée dans `code/water-core/src`
 (`radial_impact`, `composition`, `mixed_water`, `mixed_differential`) **et** ADR-133 actée.
 133 ADR, 255 angles, 292 leçons, 18 invariants, 6 SPEC, 23 cas. Jeton libre, copies avancées.
+
+## S216 — 2026-09-13 — L'enveloppe de pente tient compte des directions (ADR-134) ; A255 pour moitié
+
+**Entrée.** Ligne `Session suivante` de S215 : A255, la famille du sillage. Maillons 0 à l'amorce.
+Claude Code (Opus 5) ; `master` et trois copies propres à bd4030b. Plan 7da10d2, P2 4d25e25,
+P3 39d569a, P5 a7e8785, P6 5a6018e, P7 faf4129.
+
+**Décision structurante.** **ADR-134 actée** : `Field::slope_envelope_directional()` — majorant de
+pente qui tient compte de l'**étalement des directions entre modes**, par Cauchy–Schwarz, en `O(N)`
+et sans aucune calibration ; `bound_pressure::Prepared` la retient aux trois sites de préparation.
+`slope_envelope_tight()` reste publiée et sert de témoin. Aucun bit publié ne change.
+
+**Ce qui a orienté la session, et ce n'était pas prévu.** La suite écrite en S215 demandait de
+refaire sur le sillage la campagne **mesurée** de l'impact. La lecture du code l'a déplacée avant
+toute mesure : `slope_envelope_tight` somme **scalairement** des contributions **vectorielles** de
+directions différentes. Une partie du pessimisme ne demandait donc pas une table mais une
+inégalité. **L293.**
+
+**Chiffres qui orientent.**
+- **Décomposition** (contrôle de lecture : somme reconstruite = publiée à 1e-7). Part statique
+  1,5548 à 0,5 s, **1,2586 à 4 s**, 1,2154 à 16 s, **1,1979 à 39 s** ; résidu 1,1015 à 4 s,
+  1,5616 à 16 s, **3,9782 à 39 s**. **Prédiction contredite pour moitié** : j'avais écrit « part
+  statique ≈ 1,5 expliquant l'essentiel pendant le forçage » — elle retombe à 1,20 et explique
+  moins de la moitié à 16 s. Le sillage de Kelvin concentre son énergie dans un cône ; un demi-disque
+  uniforme aurait donné π/2 ≈ 1,571.
+- **La part statique ne dépend pas de la quadrature** : 1,2586 à quatre décimales pour `angular`
+  64/128/256, `radial` 32/128, `cutoff` 2/4 — donc elle se **calcule**, elle ne se tabule pas. Elle
+  bouge avec le champ : 1,31 à σ = 1, 1,40–1,52 à 1,5 m/s, 1,44–1,48 à 6 m/s. σ = 4 refusée à la
+  construction.
+- **Le demi-spectre ne porte que `angular/2` directions distinctes** (32/64/128 mesurées) : un
+  maximum exact coûterait `O(A²)`. Écarté au profit de Cauchy–Schwarz, qui ne suppose rien sur la
+  disposition des emplacements — arbitrage écrit dans l'ADR.
+- **Discriminant d'emprise, et il tranche** : à pas de grille **constant**, seize fois l'aire
+  (512 × 416 m) laisse le maximum réel identique à six décimales. Le résidu n'est **pas** une limite
+  d'emprise (A208) : c'est la décohérence de L290. **L295.**
+- **Réception** : gain 1,2002 / 1,1671 / 1,1552 à 4 / 16 / 39 s, soit **79 à 87 %** du gain qu'un
+  maximum exact rendrait. Budget de la scène J1 0,186540 → **0,162917** à 16 s ; occupation de π/7
+  **84,1 % (S214) → 41,6 % (ADR-133) → 36,3 % (ADR-134)**.
+- Hôte : `d_eta_m = 0,000000000`, `VERIFY` et GPU inchangés, `--smoke` code 0. Suite `code/` :
+  **356 réussis (258+4+1+93), 5 ignorés** — un de plus, le test des deux bouts d'ADR-134.
+
+**Ce qui n'a pas été fait.** **A255 reste ouverte sur sa part dynamique**, et ne contient plus que
+cela : le résidu monte à 3,98 à 39 s, il est gouverné par le temps depuis l'extinction, et rien ne
+dit qu'il admette une échelle propre — la campagne d'ADR-133 transposée reste à faire, avec la phase
+de forçage traitée à part puisque le majorant y **croît**. Le budget reste une **somme** (A254).
+**A256 ouverte** : une annonce qui nomme le facteur qu'elle retire sans dire à quelle échelle il
+s'applique se lit comme complète — c'est ce qui a caché ce gain depuis S141. A253 inchangée. Aucune
+mesure de coût d'image : ADR-134 est un contrat d'admission.
+
+**Suite S217.** File J1 : **la part dynamique d'A255** — chercher si le résidu de décohérence admet
+une échelle de temps propre depuis l'extinction, sur la famille du sillage, forçage traité à part ;
+et ne pas présumer qu'elle existe, S216 ayant montré qu'une partie du pessimisme n'en demandait pas.
+Ensuite la loi GPU (espace, LOD, visibilité, mutualisation). J2/δ général et V-noyau restent dus
+(ADR-127).
+
+**Rituel.** A256 (sévérité 2) ; suivi A255 (part statique traitée) ; L293, L294, L295 ; file
+plurielle entière relue ; feuille de route J1/J1-bis ; index, README, REPRISE §3/§4 et jeton.
+Invariants relus que la décision cite — **I-18** (ce qui est comparé à `max_slope` est une pente
+réelle : ADR-134 le sert mieux, le majorant étant plus proche de la pente réelle) ; I-06 (aucune
+allocation : deux accumulateurs scalaires, aucun tableau intermédiaire — c'est d'ailleurs pourquoi
+le maximum exact a été écarté) ; I-14 (aucun nombre nouveau : la borne est une inégalité, elle n'a
+rien à calibrer) ; I-04 et I-08 inchangés. Aucun devenu faux, aucun amendé, aucun ADR réécrit.
+**Compteur 0** : W avancée dans `code/water-core/src` (`spectral_pressure`, `bound_pressure`) **et**
+ADR-134 actée. 134 ADR, 256 angles, 295 leçons, 18 invariants, 6 SPEC, 23 cas. Jeton libre, copies
+avancées.

@@ -1670,7 +1670,25 @@ entrée par entrée. Le fil reprend ci-dessous.
 
 ## File active
 
-Relue en S215, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+Relue en S216, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+
+**Suivi J1 S216 — la moitié d'A255 ne demandait aucune mesure.**
+[ENVELOPPE-SILLAGE-S216](../validation/ENVELOPPE-SILLAGE-S216.md),
+[ADR-134](../adr/ADR-134-l-enveloppe-de-pente-tient-compte-des-directions.md). `slope_envelope_tight`
+sommait **scalairement** des contributions **vectorielles** de directions différentes : une
+inégalité de Cauchy–Schwarz en `O(N)`, sans table, sans garde et sans domaine, en retire 20 %.
+Part statique **1,2586 à 4 s, 1,1979 à 39 s**, identique à quatre décimales sur toute la quadrature
+(`angular` 64/128/256, `radial` 32/128, `cutoff` 2/4) — propriété du champ, donc calculable et non
+tabulable. Gain reçu 1,155 à 1,200, soit **79 à 87 %** de ce qu'un maximum exact rendrait ; le
+maximum exact reste disponible (`O(A²)`, `A = angular/2`) et l'ADR dit pourquoi il a été écarté.
+Occupation de π/7 sur la scène J1 : **84,1 % (S214) → 41,6 % (ADR-133) → 36,3 %**. Aucun bit publié
+changé, 356 tests réussis.
+**Discriminant tranché** : seize fois l'aire d'emprise, à pas de grille constant, laisse le maximum
+réel identique à six décimales — le résidu n'est **pas** A208, c'est la décohérence de L290.
+**A255 reste ouverte et ne contient plus que sa part dynamique. Ligne neuve : A256** — une annonce
+qui nomme le facteur qu'elle retire sans dire à quelle échelle il porte se lit comme complète ;
+c'est ce qui a caché ce gain depuis S141. **Suite S217 : la part dynamique d'A255.**
+Autres lignes et déclencheurs conservés.
 
 **Suivi J1 S215 — A254 traitée pour moitié, et elle en ouvre une autre.**
 [BUDGET-PENTE-S215](../validation/BUDGET-PENTE-S215.md),

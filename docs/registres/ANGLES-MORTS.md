@@ -3081,3 +3081,34 @@ Le pessimisme d'emprise et d'alignement qu'A208 décrit existe toujours ; S215 m
 qu'ici il était masqué par un facteur trente venu du temps. Rien n'est clos : après ADR-133, le
 majorant resserré d'un impact reste un majorant **sur toute son emprise**, et A208 s'applique à
 lui comme avant.
+
+**Suivi A255 — S216, 2026-09-13 : la part statique est traitée, et elle ne demandait aucune mesure.**
+Le pessimisme du majorant du sillage se décompose en deux. **Directionnel** : `slope_envelope_tight`
+sommait **scalairement** des contributions vectorielles de directions différentes — 1,2586 à 4 s,
+1,1979 à 39 s, et **identique à quatre décimales** pour `angular` 64/128/256, `radial` 32/128 et
+`cutoff` 2/4, donc propriété du champ et non de sa discrétisation. **Traité par
+[ADR-134](../adr/ADR-134-l-enveloppe-de-pente-tient-compte-des-directions.md)** : une inégalité de
+Cauchy–Schwarz en `O(N)`, sans table, sans garde, sans domaine ; gain obtenu 1,155 à 1,200, soit
+**79 à 87 %** du gain qu'un maximum exact rendrait. **De phase** : le reste, 1,10 à 4 s et **3,98 à
+39 s**, gouverné par le temps écoulé **depuis l'extinction** (6,29 à 30 s pour deux tronçons, 1,75
+pour seize encore en forçage) et insensible à la recette.
+**Discriminant tranché** : agrandir l'emprise d'un facteur 4 en côté — **seize fois en aire** —, à
+pas de grille constant, laisse le maximum réel identique à six décimales. Ce n'est donc **pas** une
+limite d'emprise (A208) mais bien la décohérence de L290. **A255 reste ouverte, et ne contient plus
+que cela.** Occupation de la scène J1 : 84,1 % (S214) → 41,6 % (ADR-133) → **36,3 %** (ADR-134).
+Voir L293, L295, ENVELOPPE-SILLAGE-S216.
+
+- **A256** *(sévérité 2, S216 ; ouverte)* — **Une annonce qui nomme le facteur qu'elle retire sans
+  dire à quelle échelle il s'applique se lit comme complète.** La documentation de
+  `slope_envelope_tight` disait, depuis S141 : « elle retire exactement deux facteurs indépendants
+  valant chacun 1 à √2 : **la direction du vecteur d'onde** et la phase de la réponse ». C'est vrai
+  — mais de la direction **au sein d'un mode** (`|kx|+|ky| → |k|`), pas de l'étalement des
+  directions **entre** modes, qui valait encore 20 % et qu'une inégalité retire gratuitement. Un
+  lecteur qui cherchait où gagner lisait « la direction est traitée » et passait. Le défaut n'est ni
+  une erreur ni une omission : c'est une **portée non dite**, et elle a coûté le temps qui sépare
+  S141 de S216 sur un gain qui ne demandait aucune mesure. Même famille qu'A248 (un ordre lu comme
+  un périmètre) et A252 (un verdict lu plus large que sa mesure). **À faire** : quand une annonce
+  dit retirer un facteur, lui faire dire **sur quel domaine de sommation** il porte — par mode, par
+  source, par lot — et vérifier que les autres échelles sont nommées comme non traitées. Le corpus
+  en porte probablement d'autres : `slope_bound`, `steepness`, les enveloppes de composition.
+  Voir L293, ADR-095, ADR-134.

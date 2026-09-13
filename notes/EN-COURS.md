@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S216 — en cours
+Session : S216 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : **A255** — le majorant du sillage pèse désormais 88 % du budget de pente et sa famille
 n'a aucune loi. Comprendre d'où vient son pessimisme avant de chercher à le mesurer.
@@ -136,7 +136,7 @@ décohérence est immédiate et la part statique marginale — et le sujet redev
 - [x] **P5** — décider et construire ce que le verdict autorise : enveloppe directionnelle exacte dans le cœur si la part statique le mérite (maximum exact sur la grille angulaire, sans balayage), sinon dire pourquoi.
 - [x] **P6** — recevoir : jamais dépassée, plus serrée, coût de préparation ; budget recomposé sur la scène J1.
 - [x] **P7** — document de réception (en-tête ADR-131) ; suite complète `code/`.
-- [ ] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
+- [x] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
 
@@ -255,3 +255,23 @@ P7 : [ENVELOPPE-SILLAGE-S216](../docs/validation/ENVELOPPE-SILLAGE-S216.md) — 
 séparation et la prédiction contredite pour moitié ; §3 ce que la famille dit de chaque part ;
 §4 le discriminant d'emprise ; §5 ce qui a été construit et ce qui a été écarté ; §6 la réception.
 Suite nommée : A255 ne contient plus que sa part dynamique.
+
+P8 : rituel §6 exécuté. Journal S216 ; **A256** (sévérité 2 — une annonce qui nomme le facteur
+qu'elle retire sans dire à quelle échelle il porte se lit comme complète ; c'est ce qui a caché ce
+gain depuis S141) ; suivi **A255** (part statique traitée, ne contient plus que sa part dynamique) ;
+**L293, L294, L295**. Index, README, REPRISE (§3 « 134 décisions », §4, file active, jeton), feuille
+de route (J1, ligne A255, travaux nécessaires, ligne mutualisation), file plurielle de
+QUESTIONS-OUVERTES.
+**Invariants relus** — **I-18** (ce qui est comparé à `max_slope` est une pente réelle : ADR-134 le
+sert mieux, le majorant étant plus proche du champ) ; **I-06** — celui-ci a pesé sur la décision et
+non seulement sur sa relecture : deux accumulateurs scalaires, aucun tableau intermédiaire, et c'est
+l'une des raisons pour lesquelles le maximum exact `O(A²)` a été écarté ; **I-14** (aucun nombre
+nouveau : une inégalité n'a rien à calibrer — à comparer avec ADR-133, dont la table et la garde
+devaient citer leur banc) ; I-04 et I-08 inchangés. Aucun devenu faux, aucun amendé, aucun ADR
+réécrit.
+**Règle des deux maillons** : compteur **0**, par le code — `outils/velocite.sh` donne **W = S216**
+(contre S215 avant la session), B = S211, δ = S202, V = jamais.
+**Recommandation portée** : la suite S217 nomme la part dynamique d'A255, ligne de la file J1, et
+la couche W.
+Décomptes vérifiés : 134 fichiers dans `docs/adr`, 295 leçons, 256 angles.
+Jeton libre, battement 14:06. Copies de travail avancées sur master après ce commit.

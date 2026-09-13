@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 13:17 +02:00
+JETON            : libre
+Battement        : 2026-09-13 14:06 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S216 — A255 : la famille du sillage, et d'abord la part du majorant qui ne dépend pas du temps
-Dernière session : S215 — ADR-133, le majorant de pente suit la dispersion ; A254 traitée pour moitié (occupation 84 % → 42 %, le refus à deux sources est levé) ; A255 ouverte : le sillage pèse désormais 88 % du budget
-Session suivante : S216 — file J1, **A255** : refaire sur la **famille du sillage** la campagne qui a traité l'impact en S215 — varier σ, cutoff, radial, angular et le découpage en tronçons, chercher une échelle de temps propre, ne pas présumer qu'elle existe, et traiter la phase de forçage à part (pendant qu'une source émet, son majorant **croît**). C'est elle qui décide de ce que coûte une scène à plusieurs sillages, donc de la mutualisation de J1-bis. Ensuite la loi GPU (espace, LOD, visibilité, mutualisation), chaque mesure avec son en-tête (ADR-131 D3)
-Maillons        : 0 — W avancée dans `code/water-core/src` (radial_impact, composition, mixed_water, mixed_differential) **et** ADR-133 actée
+Session en cours : aucune
+Dernière session : S216 — ADR-134, l'enveloppe de pente tient compte des directions ; part statique d'A255 traitée par une inégalité, sans mesure ; occupation de π/7 sur la scène J1 à 36,3 %
+Session suivante : S217 — file J1, **la part dynamique d'A255** : le résidu de décohérence vaut 1,10 à 4 s et 3,98 à 39 s, il est gouverné par le temps écoulé **depuis l'extinction** de la source, et il n'est pas une limite d'emprise (vérifié : seize fois l'aire, maximum identique). Chercher s'il admet une échelle de temps propre sur la famille du sillage, la phase de forçage traitée à part — le majorant y **croît** —, et **ne pas présumer qu'elle existe** : S216 a montré qu'une partie du pessimisme n'en demandait pas. Ensuite la loi GPU (espace, LOD, visibilité, mutualisation), chaque mesure avec son en-tête (ADR-131 D3)
+Maillons        : 0 — W avancée dans `code/water-core/src` (spectral_pressure, bound_pressure) **et** ADR-134 actée
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 
@@ -181,10 +181,15 @@ majorant et non par raideur. **S215 : A254 est traitée pour moitié**
 [BUDGET-PENTE-S215](docs/validation/BUDGET-PENTE-S215.md)). Le pessimisme venait de la
 **dispersion** et presque entièrement de l'impact ; son majorant suit désormais le temps, et
 l'occupation tombe de 84 % à 42 % — deux impacts et un sillage, qui refusaient, passent.
-**Reste** : le budget est toujours une **somme**, et le sillage en pèse maintenant **88 %** sans
-qu'aucune loi ne borne sa famille (**A255**). **Prochain lot J1 : A255**, avant toute scène à
-plusieurs sillages et donc avant la mutualisation de J1-bis ; puis la loi GPU (espace, LOD,
-visibilité, mutualisation), chaque mesure avec son en-tête (ADR-131 D3).
+**S216 : la moitié statique d'A255 est traitée sans aucune mesure**
+([ADR-134](docs/adr/ADR-134-l-enveloppe-de-pente-tient-compte-des-directions.md),
+[ENVELOPPE-SILLAGE-S216](docs/validation/ENVELOPPE-SILLAGE-S216.md)) — l'enveloppe sommait
+scalairement des contributions vectorielles ; une inégalité en retire 20 %, et l'occupation de π/7
+tombe à **36,3 %**. **Reste** : le budget est toujours une **somme** (A254), et **A255 ne contient
+plus que sa part dynamique** — la décohérence, 3,98 à 39 s, qui n'est pas une limite d'emprise et
+demande la campagne d'ADR-133 transposée. **Prochain lot J1 : la part dynamique d'A255**, avant
+toute scène à plusieurs sillages et donc avant la mutualisation de J1-bis ; puis la loi GPU
+(espace, LOD, visibilité, mutualisation), chaque mesure avec son en-tête (ADR-131 D3).
 
 **Tolérance B4 fixée à 2 % par l'utilisateur (ADR-120).** Elle ne doit plus être
 redemandée. La réception et son profil sont dans B4-TOLERANCE-S190 ; B4 complet
@@ -264,7 +269,7 @@ pièges déjà payés.
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/FEUILLE-DE-ROUTE.md  ← trajectoire J1 → J5 et noyau V, seul porteur (ADR-127)
 docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 133 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 134 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -283,6 +288,21 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S216 — 2026-09-13 : [l'enveloppe de pente tient compte des directions](docs/validation/ENVELOPPE-SILLAGE-S216.md), [ADR-134](docs/adr/ADR-134-l-enveloppe-de-pente-tient-compte-des-directions.md).**
+A255 traitée pour moitié, et cette moitié ne demandait **aucune mesure**. `slope_envelope_tight`
+sommait **scalairement** des contributions **vectorielles** de directions différentes : une
+inégalité de Cauchy–Schwarz en `O(N)` — sans table, sans garde, sans domaine — en retire 20 %
+(**L293**). Part statique **1,2586 à 4 s, 1,1979 à 39 s**, identique à quatre décimales pour
+`angular` 64/128/256, `radial` 32/128 et `cutoff` 2/4 : propriété du champ, pas de sa
+discrétisation. Le reste est la décohérence — **3,98 à 39 s** —, et le discriminant tranche : seize
+fois l'aire d'emprise laisse le maximum réel identique à six décimales, ce n'est **pas** A208
+(**L295**). Gain reçu 1,155 à 1,200, soit **79 à 87 %** de ce qu'un maximum exact rendrait ;
+occupation de π/7 sur la scène J1 **84,1 % (S214) → 41,6 % (ADR-133) → 36,3 %**. Aucun bit publié
+changé. **A256** ouverte : une annonce qui nomme le facteur qu'elle retire sans dire à quelle
+échelle il porte se lit comme complète. 356 tests réussis/cinq ignorés.
+**Suite S217 : la part dynamique d'A255.**
+134 ADR,256 angles,295 leçons,18 invariants,6 SPEC,23 cas ; compteur 0 (W code src + ADR-134).
 
 **S215 — 2026-09-13 : [le majorant de pente suit la dispersion](docs/validation/BUDGET-PENTE-S215.md), [ADR-133](docs/adr/ADR-133-le-majorant-de-pente-suit-la-dispersion.md).**
 A254 traitée pour moitié. À échantillonnage fin, le pessimisme du budget vient **presque

@@ -4819,3 +4819,59 @@ Le geste : avant d'acter une loi d'échelle, **lister les paramètres du problè
 sont restés constants**. Faire varier chacun au moins une fois. Et regarder si l'objet se refuse
 lui-même hors du domaine mesuré : une réserve qu'un constructeur applique déjà n'a pas à être
 écrite dans l'ADR.
+
+## L293 — Avant de calibrer une loi, chercher la part que l'algèbre retire gratuitement
+
+*(S216)* La suite prescrite était de refaire sur le sillage la campagne mesurée qui avait traité
+l'impact : varier les paramètres, chercher une échelle de temps, tabuler un rapport, poser une
+garde. La lecture du majorant a montré qu'une partie de son pessimisme ne demandait **aucune
+mesure** : il sommait scalairement des contributions vectorielles de directions différentes, et une
+inégalité de Cauchy–Schwarz en retire 20 % en un passage, sans table, sans garde, sans domaine de
+validité. Calibrer d'abord aurait fait payer une campagne pour un écart dont une partie s'annule
+par le calcul — et l'aurait fait payer **deux fois**, puisque la table aurait ensuite dû être
+refaite sur le majorant resserré.
+
+Ce qui généralise : **un écart mesuré entre une borne et ce qu'elle borne se décompose avant de se
+calibrer**. Certaines parts sont structurelles — une inégalité trop lâche, une norme mal choisie,
+une projection oubliée — et se corrigent exactement ; d'autres sont physiques et ne se connaissent
+que par la mesure. La tentation est d'attaquer le total, parce que c'est lui qu'on a mesuré.
+
+Le geste : devant un majorant trop large, écrire **ce qu'il suppose** — ici, un alignement
+simultané en phase et en direction — puis se demander, pour chaque hypothèse, si elle est fausse
+*par construction* ou seulement *en général*. Les premières se retirent gratuitement. Ne mesurer
+que ce qui reste. Voir ADR-134, A255.
+
+## L294 — Un test qui fige la cause d'un refus devient un test du pessimisme du majorant
+
+*(S216)* Resserrer une borne a fait passer un verdict de `SlopeEnvelope` à `Slope` : à limite
+fixée sous le plancher, la limite tombait désormais sous la **pente réelle au point**, et le refus
+devenait attribuable au champ plutôt qu'à la marge. Le test qui exigeait `SlopeEnvelope` a cassé,
+alors que ce qu'il éprouvait — un point admis géométriquement que la requête refuse tout de même —
+n'avait pas bougé.
+
+Ce qui généralise : **quand deux causes de refus se distinguent par la position d'un seuil, figer
+laquelle survient fait du test une mesure de ce seuil**, c'est-à-dire exactement de la quantité
+qu'on cherche à améliorer. Le test se met alors à défendre le défaut : toute amélioration le casse,
+et la pression est de renoncer à l'amélioration plutôt qu'au test.
+
+Le geste : dans un test dont le sujet est *qu'il y a refus*, assertez l'ensemble des verdicts
+acceptables, et réservez l'égalité stricte aux tests dont le sujet **est** la cause — ceux-là
+doivent alors construire le cas qui la force, pas l'obtenir par hasard.
+
+## L295 — Un discriminant coûte moins qu'une campagne, et il en supprime une
+
+*(S216)* Deux mécanismes pouvaient expliquer le pessimisme résiduel : la décohérence des phases, ou
+une emprise trop petite pour contenir le point où elles s'alignent. Le second relève de l'hôte et
+d'aucune loi mesurée ; le premier demande une campagne complète. Les distinguer a coûté une boucle
+de trois lignes — agrandir l'emprise à âge fixé, à pas de grille **constant** — et le résultat est
+tombé net : maximum identique à six décimales pour seize fois l'aire.
+
+Ce qui généralise : **avant d'ouvrir une campagne, chercher l'expérience qui élimine l'une des
+hypothèses**. Elle est presque toujours beaucoup moins chère que la campagne, parce qu'elle n'a pas
+besoin d'être précise — seulement discriminante. Et elle protège d'un gaspillage asymétrique :
+mesurer finement un phénomène qui n'est pas la cause ne produit rien du tout.
+
+Le geste : écrire les hypothèses concurrentes, puis pour chacune la **prédiction qui la sépare** des
+autres, et exécuter d'abord celle qui est la moins chère. Veiller à ce que le protocole ne rende pas
+le test vide : ici, faire croître le pas de grille avec l'emprise aurait fait lire un maximum manqué
+comme un maximum absent.
