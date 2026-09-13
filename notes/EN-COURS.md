@@ -125,7 +125,7 @@ limiteur devra mordre sur les derniers pas, et c'est là que se joue le respect 
 - [x] **P4** — recevoir C12 : temps de vidange contre 728 s, conservation, non-négativité, capacité.
 - [x] **P5** — déterminisme et refus atomiques ; aucune allocation dans le pas.
 - [x] **P6** — déversoir de débordement et chaîne de nœuds (Gauss-Seidel), si P4 et P5 tiennent ; sinon dire ce qui manque.
-- [ ] **P7** — document de réception ; suite complète `code/`.
+- [x] **P7** — document de réception ; suite complète `code/`.
 - [ ] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
@@ -216,3 +216,10 @@ générale : un réseau plus raide — grandes sections, faibles volumes — n'e
 réseau **fermé sous pression** reste hors de portée par décision d'ADR-010 §4.
 
 Neuf tests ; suite complète **379 réussis, 5 ignorés**.
+
+P7 : [NOYAU-V-S224](../docs/validation/NOYAU-V-S224.md) — en-tête ADR-131 D3 ; §1 ce que le module
+est et quels invariants ont dicté sa forme ; §2 C12 reçu à 0,0824 % ; §3 les deux défauts trouvés en
+construisant ; §4 le report de reste et le seuil de 13 ml ; §5 le déversoir par son exposant et la
+question Gauss-Seidel **mesurée** ; §6 les neuf réceptions ; suite : ce qu'ADR-010 contient encore
+et n'est pas construit — dont la **surface libre en référentiel accéléré**, spécifiée et absente.
+Suite complète `code/` : **379 réussis, 5 ignorés**, aucun avertissement neuf.
