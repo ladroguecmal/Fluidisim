@@ -96,7 +96,7 @@ publié, pas une erreur de requête (ADR-127 D7 : pas de fonctionnalité retiré
  `slope_floor` exact des deux côtés ; verdicts `Slope`/`SlopeEnvelope` atteints par W seul.
 - [x] **P4** — gardes du contrat de pente (I-18) relues et mises à jour ; workspace debug
  complet ; essais touchés en release.
-- [ ] **P5** — bout en bout : image S203 +3 s rejouée **au bit** (contrôle « admis inchangé ») ;
+- [x] **P5** — bout en bout : image S203 +3 s rejouée **au bit** (contrôle « admis inchangé ») ;
  impact sur la mer S201 Hs 1,5 contre témoin, zéro pixel hors emprise ; budget d'impact π/7.
 - [ ] **P6** — ADR-128 ; notes datées ADR-080/095/098/126 ; A245 close ; COMPOSITION-MER-S205.
 - [ ] **P7** — rituel §6 : journal, angles, leçons, décomptes, feuille de route (état J1), file
@@ -138,3 +138,16 @@ des sites mise à jour en P3. Workspace debug **344 réussis / cinq ignorés** (
 plus que S203 (l'essai neuf). Release : 28 essais `composition|mixed|pressure_world|
 contrat_pente` verts. Harnais release : **C18 0x85c8bc610f551d11, C02 0x0a3a3bcc945db263**,
 identiques aux reçus S179–S182 ; zéro échec. Avertissements anciens du harnais inchangés.
+
+P5 : image S203 +3 s rejouée **au bit** avec la bibliothèque modifiée (impact
+0x3dba0d3acf15447a, témoin 0x14271a7145740ba1, 9 495 898 / 9 495 848 évals, 8 640 px, 0 hors R).
+Banc : `SlopeRule` (S203 conservée pour reproduction ; ADR-128 = π/7), mode `render-s205 <dir>
+<âge> [hs]`, essai `adr128_rule_composes_the_reference_sea_s205` (12 essais exemple). Mer S201
+Hs 1,5, plancher B 0,608192, budget impact 0,448799, même W (E 164 J, λ 3,35 m, N256 R52 A56).
+**+3 s** : impact 289 462 eau, **0 non résolu, 0 refus**, 15 841 764 évals dont 9 165 220 B+W,
+131 483 px touchés, 102 218 ms, 0x0b13a4c1e39a2a3e ; témoin 17 921 ms, 0x0d8495b6adf64de3 ;
+**7 342 px différents, 0 hors emprise** ; écart max 17 niveaux, 1 676 px ≥ 3. **+6 s** : 289 456
+eau, 0/0, 15 571 336 évals dont 8 879 321 B+W, 100 389 ms, 0x935223a0f507aac7 ; témoin 17 881 ms,
+0xb25f06a61b0cc543 ; **16 251 px, 0 hors emprise** ; max 29 niveaux, 2 513 px ≥ 3. Anneaux nets à
++3 s sur la mer raide, discrets et déformant le reflet à +6 s (zooms inspectés). Marche ×1,67
+plus d'évaluations qu'à Hs 0,5 : borne de pente B+W 0,99 contre 0,58.

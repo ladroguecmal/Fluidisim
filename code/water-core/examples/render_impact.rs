@@ -3,7 +3,8 @@
 //! l'hôte déclare la scène, la bibliothèque compose B+W dans l'emprise (ADR-062/063).
 //!
 //! Modes : `scene` (constats de construction), `seams` (coutures d'emprise),
-//! `render <ppm> <secondes après naissance> [temoin]`, `cost` (coût par point).
+//! `render <dir> <âge>` (règle de budget S203, reproduction), `cost` (coût par point),
+//! `render-s205 <dir> <âge> [hs]` (S205, ADR-128 : budget d'impact π/7, mer S201 par défaut).
 #[path = "../../water-harness/src/host_impl.rs"]
 mod host_impl;
 #[path = "support/ray_view.rs"]
@@ -90,6 +91,15 @@ pub fn height_bound(cooked: &Cooked) -> f64 {
         .sum()
 }
 
+/// Allocation du budget de pente de l'impact par l'hôte.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum SlopeRule {
+    /// S203, ADR-126 règle 3 : π/7 moins le plancher L1 de B. Conservée pour reproduire S203.
+    MinusBackgroundS203,
+    /// S205, ADR-128 : B n'est plus au budget de refus ; un impact seul dispose de π/7.
+    PerturbationsAdr128,
+}
+
 pub struct Scene {
     pub cooked: Cooked,
     pub background: Background,
@@ -104,21 +114,31 @@ pub struct Scene {
 /// Le budget de pente laissé à l'impact est ce que B n'a pas consommé : l'hôte le déclare dans
 /// `Medium::max_slope`, pour que la construction refuse plutôt que chaque point de la requête.
 pub fn scene(hs: f32, ttl_us: u64) -> Result<Scene, String> {
-    scene_with(hs, ttl_us, ENTRY_HALF_WIDTH_M)
+    scene_with(hs, ttl_us, ENTRY_HALF_WIDTH_M, SlopeRule::MinusBackgroundS203)
 }
-pub fn scene_with(hs: f32, ttl_us: u64, half_width_m: f32) -> Result<Scene, String> {
+/// S205 : même scène, budget d'impact selon ADR-128.
+pub fn scene_s205(hs: f32, ttl_us: u64) -> Result<Scene, String> {
+    scene_with(hs, ttl_us, ENTRY_HALF_WIDTH_M, SlopeRule::PerturbationsAdr128)
+}
+pub fn scene_with(hs: f32, ttl_us: u64, half_width_m: f32, rule: SlopeRule) -> Result<Scene, String> {
     let cooked = background_spectrum::bake(recipe(hs)).map_err(|e| format!("recette {e:?}"))?;
     let floor = slope_floor(&cooked);
-    if !(floor < BREAKING_SLOPE) {
-        return Err(format!(
-            "plancher L1 de B {floor} >= pi/7 {BREAKING_SLOPE} : aucune composition possible"
-        ));
-    }
+    let max_slope = match rule {
+        SlopeRule::MinusBackgroundS203 => {
+            if !(floor < BREAKING_SLOPE) {
+                return Err(format!(
+                    "plancher L1 de B {floor} >= pi/7 {BREAKING_SLOPE} : aucune composition possible"
+                ));
+            }
+            BREAKING_SLOPE - floor
+        }
+        SlopeRule::PerturbationsAdr128 => BREAKING_SLOPE,
+    };
     let medium = Medium {
         gravity: 9.81,
         density: 1025.0,
         depth: DEPTH_M,
-        max_slope: BREAKING_SLOPE - floor,
+        max_slope,
     };
     let entry = Entry {
         half_width_m,
@@ -432,7 +452,7 @@ fn controls_report() -> Result<(), String> {
         );
     }
     println!("# P3b-2 homothetie lambda x2 (b=2 m), coutures relatives");
-    let big = scene_with(HS, 200_000_000, 2.0 * ENTRY_HALF_WIDTH_M)?;
+    let big = scene_with(HS, 200_000_000, 2.0 * ENTRY_HALF_WIDTH_M, SlopeRule::MinusBackgroundS203)?;
     let reference = [
         (256usize, 52.0f32, a56, seams(&n256, 52.0, a56)?),
         (512, 55.0, 64_000_000, {
@@ -621,12 +641,12 @@ pub fn differing_outside(a: &[u8], b: &[u8], touched: &[bool]) -> (u64, u64) {
     (differing, outside)
 }
 
-fn render_report(dir: &str, age_s: f64) -> Result<(), String> {
+fn render_report(dir: &str, age_s: f64, hs: f32, rule: SlopeRule) -> Result<(), String> {
     if !age_s.is_finite() || age_s < 0.0 {
         return Err("âge invalide".into());
     }
     let age_us = (age_s * 1e6).round() as u64;
-    let sc = scene(HS, EMPRISE_AGE_US)?;
+    let sc = scene_with(hs, EMPRISE_AGE_US, ENTRY_HALF_WIDTH_M, rule)?;
     let (impact, touched, s) = render(&sc, age_us, true)?;
     let (temoin, touched_t, st) = render(&sc, age_us, false)?;
     if touched != touched_t {
@@ -635,11 +655,17 @@ fn render_report(dir: &str, age_s: f64) -> Result<(), String> {
     let (differing, outside) = differing_outside(&impact, &temoin, &touched);
     let base = std::path::Path::new(dir);
     let tag = format!("{:05.1}", age_s).replace('.', "_");
-    write_ppm(&base.join(format!("impact-s203-a{tag}.ppm")), &impact)?;
-    write_ppm(&base.join(format!("temoin-s203-a{tag}.ppm")), &temoin)?;
+    let prefix = match rule {
+        SlopeRule::MinusBackgroundS203 => "s203".to_string(),
+        SlopeRule::PerturbationsAdr128 => format!("s205-hs{}", hs.to_string().replace('.', "_")),
+    };
+    write_ppm(&base.join(format!("impact-{prefix}-a{tag}.ppm")), &impact)?;
+    write_ppm(&base.join(format!("temoin-{prefix}-a{tag}.ppm")), &temoin)?;
     println!(
-        "age={age_s}s t={:.3}s hs={HS} N={EMPRISE_N} R={EMPRISE_RADIUS_M}m A={}s lambda={:.3}m E={:.1}J",
+        "age={age_s}s t={:.3}s hs={hs} regle={rule:?} budget_impact={:.6} plancher_B={:.6} N={EMPRISE_N} R={EMPRISE_RADIUS_M}m A={}s lambda={:.3}m E={:.1}J",
         (BIRTH.0 + age_us) as f64 / 1e6,
+        sc.medium.max_slope,
+        sc.floor,
         EMPRISE_AGE_US / 1_000_000,
         sc.wavelength_m,
         sc.energy_j
@@ -945,9 +971,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some("render") => {
             let dir = args.get(2).map(String::as_str).unwrap_or("../captures");
             let age: f64 = args.get(3).map(|s| s.parse()).transpose()?.unwrap_or(3.0);
-            render_report(dir, age)?
+            render_report(dir, age, HS, SlopeRule::MinusBackgroundS203)?
         }
-        _ => return Err("mode : scene | seams | controls | observer | cost | render <dir> <age_s>".into()),
+        Some("render-s205") => {
+            let dir = args.get(2).map(String::as_str).unwrap_or("../captures");
+            let age: f64 = args.get(3).map(|s| s.parse()).transpose()?.unwrap_or(3.0);
+            let hs: f32 = args.get(4).map(|s| s.parse()).transpose()?.unwrap_or(1.5);
+            render_report(dir, age, hs, SlopeRule::PerturbationsAdr128)?
+        }
+        _ => return Err("mode : scene | seams | controls | observer | cost | render <dir> <age_s> | render-s205 <dir> <age_s> [hs]".into()),
     }
     Ok(())
 }
@@ -965,6 +997,29 @@ mod tests {
             .unwrap();
         assert_eq!((s.steepness * core::f32::consts::PI).to_bits(), sc.floor.to_bits());
         assert!(scene(1.5, 10_000_000).is_err());
+    }
+    #[test]
+    fn adr128_rule_composes_the_reference_sea_s205() {
+        // S205 : la règle S203 refuse la mer S201 ; celle d'ADR-128 la compose, impact compris.
+        let sc = scene_s205(1.5, EMPRISE_AGE_US).unwrap();
+        assert!(sc.floor > BREAKING_SLOPE);
+        assert_eq!(sc.medium.max_slope.to_bits(), BREAKING_SLOPE.to_bits());
+        let domain = Domain { radius: EMPRISE_RADIUS_M, age_us: EMPRISE_AGE_US };
+        let mut slots = vec![None; 1];
+        let mut journal = Journal::new(0, &mut slots);
+        journal.confirm(0, Cause { entity: 0, command: 0, emission: 0 }, sc.event).unwrap();
+        let mut pool: Vec<Option<RadialImpact<EMPRISE_N>>> = (0..1).map(|_| None).collect();
+        let prepared = Prepared::build(&journal, &mut pool, Context { frame: FRAME, cell: CELL, medium: sc.medium, domain }).unwrap();
+        let bound = BoundBackground::new(&sc.background, FRAME, CELL);
+        let (mut out, mut scratch) = ([WaterSample::default()], [WaterSample::default()]);
+        let p = WorldPos::from_metres(IMPACT_XY[0] as f64 + 0.5, IMPACT_XY[1] as f64, 0.);
+        prepared
+            .sample_world_batch(&bound, &[p], SimTime(BIRTH.0 + 3_000_000), BREAKING_SLOPE, &mut out, &mut scratch)
+            .unwrap();
+        // Même champ W que S203 : l'énergie et la longueur d'onde ne dépendent pas de la règle.
+        let s203 = scene(HS, EMPRISE_AGE_US).unwrap();
+        assert_eq!(sc.energy_j.to_bits(), s203.energy_j.to_bits());
+        assert_eq!(sc.wavelength_m.to_bits(), s203.wavelength_m.to_bits());
     }
     #[test]
     fn directional_bound_sits_between_sample_and_l1() {
