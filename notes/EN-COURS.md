@@ -58,87 +58,28 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S208 — terminée
-Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : (1) **construire ADR-129** dans `water-core` — table radiale à matrice de Bessel
-précalculée pour le chemin d'image de W, avec la réception écrite dans l'ADR ; (2) **recommander
-la pile de l'hôte GPU** (ADR-130), à la demande de l'utilisateur, **sans rien télécharger**.
+Session : S209 — en cours
+Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
+Objectif : préparer localement le lot de l'hôte GPU de J1, puis présenter la demande
+nommée de résolution prévue par HOTE-GPU-S208 §4 et ADR-130 D5.
 
 ### État réel à l'amorce
 
-master = copies = 79bfda6 (S207 P4), propres ; jeton libre depuis 08:53. Message utilisateur :
-« pour la décision de l'hôte je pensais à l'option 1 mais à voir via ta recommandation » —
-l'option 1 de S204 (application séparée avec dépendances) est celle qu'ADR-130 acte.
-
-### Conception, fixée avant le code
-
-Sous-module `radial_table.rs` de `radial_impact` (accès aux nœuds privés, pas de copie de la
-formule). `RadialImpact::table_len(step)` ; `bake_table(step, &mut [[f32;2]])` remplit
-`(J0, J1)(k_n r_i)`, `r_i = i·step`, i ∈ 0..M, M = ⌊R/step⌋ + 2 (un nœud au-delà de R pour
-l'Hermite du dernier intervalle, dans la portée de Bessel déjà contrôlée) ; `RadialTable::profile
-(time, &mut [(f32, f32)])` rend η(r_i) et pente radiale par image, **même ordre de sommation que
-`sample`** ; `RadialTable::eval(profile, frame, cell, point)` : refus hors emprise comme `admits`,
-Hermite cubique pour η et sa dérivée pour la pente. Aucune allocation ; stockage et profil fournis
-par l'hôte (I-06). Chemin cosmétique (ADR-129 §3).
-
-**Critères déclarés avant mesure** : (a) aux nœuds, pour une source en position 0, η et pente
-égaux **au bit** à `sample` ; (b) à λ/8 sur le champ S203, max|Δη| ≤ 0,09 mm et max|Δpente| ≤ 2 %
-de `slope_max`, sur toute l'emprise et l'horizon (âges 0–56 s) ; (c) zéro allocation dans
-`profile` et `eval` (essai d'intégration à compteur global) ; (d) refus `Time`, `Domain` et
-stockage insuffisant nommés ; (e) image S205 +3 s par la table contre le chemin direct : zéro
-rayon non résolu, écart maximal par canal publié, zéro pixel différent hors emprise.
+master et trois copies à 28bf6a5, propres ; branche historique B conservée.
+Jeton libre S208 ; fichiers, git, cargo 1.97 disponibles. Aucun téléchargement autorisé
+par le seul message « Reprends le projet ». Maillons 0, suite J1 cohérente avec la file.
 
 ### Plan
 
-- [x] **P1** — état réel, conception et critères, plan seul.
-- [x] **P2** — `radial_table.rs` : `table_len`, `bake_table`, `profile`, `eval` ; compilation.
-- [x] **P3** — essais unitaires (a), (b), (d) ; essai d'intégration (c).
-- [x] **P4** — banc : noyau réel dans `frame_cost` (coût par image, construction, mémoire) ; image
- S205 par la table dans `render_impact` contre le chemin direct (e).
-- [x] **P5** — recommandation de pile GPU : critères (ADR-020/130, hors réseau pour le cœur,
- portabilité, licences, maintenance), versions vérifiées en ligne **sans téléchargement** ;
- demande d'autorisation nommée formulée pour le lot suivant. Document `HOTE-GPU-S208`.
-- [x] **P6** — rituel §6 : journal, angles, leçons, notes ADR-129, feuille de route, file active,
- index/README/REPRISE, décomptes, velocite, compteur, jeton libre, copies.
+- [x] **P1** — déclarer le plan et prendre le jeton, commit seul.
+- [ ] **P2** — préparer un dossier de résolution : manifeste exact, emplacement,
+ commandes, contrôles hors réseau et inventaire attendu avant téléchargement des sources.
+ Aucun accès au registre ni source externe sans accord.
+- [ ] **P3** — rituel §6 : journal, file active, index, REPRISE, décomptes ; jeton libre,
+ copies synchronisées et demande de résolution présentée à l'utilisateur.
 
 ### Notes de reprise
 
-P2 : `radial_table.rs`, sous-module de `radial_impact` (accès aux nœuds, pas de copie de la
-formule). Type d'erreur propre `TableError { Step, Storage, Profile, Field(Error) }` plutôt qu'un
-variant ajouté à l'erreur partagée des champs (ADR-082). `profile` garde les opérations de
-`sample` (`coef·J0·ct`, `coef·k·J1·ct`) pour l'égalité au bit aux nœuds. Compilation sans
-avertissement.
-
-P3 premier passage : (a) égalité au bit aux nœuds **passe** ; (c) zéro allocation **passe**
-(témoin > 0) ; (d) refus nommés **passe**. **(b) ÉCHOUE** : à λ/8, max|Δη| = **0,1820 mm à l'âge
-0 s** > 0,09 mm déclarés ; max|Δpente| = 0,001357 ≤ 0,004252 (2 % de slope_max) passe. Le seuil
-0,09 mm venait de S206, mesuré à +3 s seulement : la naissance (pic central compact) est plus
-exigeante. **Non déplacé.** Mesure ajoutée *après* l'échec, dite comme telle : erreur par âge à
-λ/8 et à λ/16 ; décision de pas à corriger par note datée d'ADR-129, pas par l'essai.
-P3 après échec (mesure ajoutée, release) : **λ/16 : max|Δη| 0,0127 mm** (âge 0), pente 0,000190 ;
-0,0043 mm à 2 s → 0,0008 mm à 56 s. **λ/8 : 0,1820 mm à 0 s**, 0,0689 à 2 s, 0,0731 à 4 s → 0,0123 à
-56 s ; pente 0,001357. Rapport 14,3 ≈ h⁴ = 16. Essai réécrit : λ/16 exigé ≤ 0,09 mm ; λ/8 gardé
-sous 3 mm (tolérance de marche) et sous 2 % en pente, **sans le présenter comme la réception**.
-ADR-129 §2 (« pas ≤ λ/8 ») à corriger par note datée : réception à 0,09 mm = λ/16. Trois essais
-unitaires + un d'intégration (zéro allocation) verts.
-P4 (release, un fil). `frame_cost table` — chemin construit, table réelle :
-| pas | M | mémoire | cuisson | grille | B | profil | éval (dans R) | image méd/max | ÷ 2 ms | direct S206 |
-| λ/16 | 250 | 500 Ko | 1,299 ms | 4 px | 11,441 | 0,0462 | 0,329 | 11,476 / 12,745 | 5,7 | 72,4 |
-| λ/16 | 250 | 500 Ko | 1,299 ms | 2 px | 41,741 | 0,0386 | 0,908 | 43,021 / 52,453 | 21,5 | 280 |
-| λ/8 | 126 | 252 Ko | 0,830 ms | 4 px | 11,761 | 0,0273 | 0,343 | 11,791 / 16,103 | 5,9 | 72,4 |
-| λ/8 | 126 | 252 Ko | 0,830 ms | 2 px | 41,429 | 0,0270 | 0,834 | 42,637 / 44,811 | 21,3 | 280 |
-Éval ≈ 43 ns/sommet dans R (prédicat d'emprise, racine, pente incluse ; S206 : 8 ns Hermite nu).
-W par image : ~0,4–0,9 ms à 2 px, dont profil 0,04 ms ; **B = 97 % de l'image**.
-`render-table ../captures 3 1.5 16` — critère (e) : 289 462 eau, **0 non résolu, 0 refus**,
-15 841 760 évals (direct 15 841 764), **18 523 ms** (direct S205 102 218 ms), FNV 0xf78a4221c46add31
-contre direct 0x0b13a4c1e39a2a3e : **27 pixels différents, 0 hors emprise, écart max 1 niveau,
-0 pixel > 2 niveaux**. Reçu.
-P5 : HOTE-GPU-S208. crates.io lu le 2026-09-13, sans téléchargement : wgpu 30.0.1 (2026-08-22,
-MIT OR Apache-2.0, MSRV 1.87, 231 Ko, 28 dépendances directes dont 19 non optionnelles), winit
-0.30.13 (2026-09-04, Apache-2.0, MSRV 1.86, 434 Ko), pollster 1.0.1 (2026-07-10, 10 Ko). Rust local
-1.97. **Recommandé : wgpu + winit + pollster**, espace de travail séparé `viewer/`, `code/` inchangé.
-Demande d'autorisation en deux temps (résolution de l'arbre, puis sources) ; question vendoring
-laissée à l'utilisateur. Arbre transitif non chiffré (pas inventé).
-P6 : workspace 348/cinq ignorés (250+4+1+93) ; C18/C02 inchangés ; velocite : W S208 (24 modules).
-Note datée ADR-129 (construite, échec λ/8 consigné, réception λ/16) ; L284 ; suivis A247, A250 ;
-feuille de route, file active, index, README, REPRISE. Décomptes 130/250/284/18/6/23. Jeton libre.
+Ce lot prépare la résolution ; il ne reçoit ni application interactive ni performance GPU.
+Versions héritées de S208, à vérifier lors de la résolution autorisée.
+L'implémentation GPU suivra l'accord sur les sources ; aucun nouveau seuil physique.

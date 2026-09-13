@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-13 09:11 +02:00
-Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-13 09:14 +02:00
+Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
+Session en cours : S209 — préparation locale de la résolution GPU
 Dernière session : S208 — table de Bessel construite (ADR-129) ; pile GPU recommandée (wgpu + winit)
 Session suivante : S209 — hôte GPU de J1 : demander l'autorisation de résolution puis de sources (ADR-130)
 Maillons        : 0 — S208 avance W (code src, velocite.sh)
