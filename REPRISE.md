@@ -19,7 +19,7 @@ souvenir de conversation, **c'est lui qui fait foi**.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-13 16:54 +02:00
+Battement        : 2026-09-13 16:57 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
 Session en cours : S221 — A260, enveloppe directionnelle des modes non résolus dans la borne locale
 Dernière session : S220 — borne locale d'ordre deux (ADR-136) : partition à 32767 évaluations à 1,006–1,012 × le maximum ; plancher = réserve numérique (A258) ; grosses mailles plafonnées par les modes non résolus (A260)
