@@ -3259,3 +3259,24 @@ pourrait croître ; l'usage de la borne hors admission.
   pour chacune, se demander **quelle quantité analytique elle approche** — c'est la question qui a
   ouvert ADR-138. Candidats nommés : les deux `SLOPE_L1_RATIO` (`radial_impact` 1,795071 et
   `impact_field` 1,701591), la réserve trigonométrique `32·ε` d'ADR-135. Voir L304, L305, ADR-138.
+
+- **A264** *(sévérité 2, S224 ; ouverte)* — **Le plancher de vidange d'un contenant croît avec sa
+  surface, et rien ne l'annonce.** La hauteur d'eau est dérivée du volume et portée en micromètres
+  entiers (ADR-010 §2, `shape_lut`). Un contenant cesse donc de se vider quand sa hauteur tombe sous
+  l'unité de représentation, c'est-à-dire quand son volume tombe sous **sa surface × 1 µm** : un
+  millilitre pour un réservoir d'un mètre carré — mesuré en S224 —, **cent millilitres pour une
+  piscine de cent mètres carrés, dix litres pour un pont inondé d'un hectare**. Le reliquat n'est
+  pas une erreur de calcul : il est exactement représenté, et il ne part jamais. Gravité 2 : sur les
+  grandes surfaces que le jeu vise — cales, ponts, compartiments inondés —, une flaque résiduelle
+  d'une dizaine de litres qu'aucune pompe ne peut vider est un symptôme de jeu, pas un détail
+  numérique. **Ce qui a été fait** : l'interpolation arrondit au plus proche au lieu de tronquer, ce
+  qui divise le plancher par deux — pas davantage. **À faire** : décider si la table de forme doit
+  porter une unité plus fine pour les grandes surfaces (le nanomètre donnerait un facteur mille),
+  si un seuil de « contenant vide » doit être déclaré par l'hôte, ou si le reliquat doit être
+  absorbé par `absorb_rate`, qu'ADR-010 §2 prévoit et qui n'est pas construit. Voir L306,
+  NOYAU-V-S224 §3.
+
+**Suivi A17 — S224, 2026-09-13 : toujours ouverte, et désormais visible dans du code.**
+`liquid_id` figure dans ADR-010 §2 et **pas** dans `HydroNode` : le premier module ne connaît qu'un
+liquide. Ce n'est pas une régression — c'est la même question qu'A17 posait, maintenant attachée à
+une structure qu'il faudra étendre plutôt qu'à un paragraphe.

@@ -11547,3 +11547,67 @@ la pente réelle, pas une borne L1, et le minimum avec `slope_max_at` conserve l
 faux, aucun amendé, aucun ADR réécrit. **Compteur 0** : W avancée dans `code/water-core/src`
 (`radial_impact`, `mixed_water`) **et** ADR-138 actée. 138 ADR, 263 angles, 305 leçons,
 18 invariants, 6 SPEC, 23 cas. Jeton libre, copies avancées.
+
+## S224 — 2026-09-13 — La couche V existe : premier module, C12 reçu à 0,08 %
+
+**Entrée.** « Continue avec S224 », même conversation. Ligne `Session suivante` de S223 : revenir à
+la file, deux lignes possibles — cadence complète de l'hôte, ou V-noyau. Maillons 0. Claude Code,
+Opus 5 ; master et trois copies à 71555d0. Plan 9109d54, P2 e3fc84d, P3+P4+P5 2f64748, P6 17fa8be,
+P7 c2a7a77.
+
+**Décision structurante : aucun ADR — ADR-010 est actée depuis S01 et complète. Cette session la
+construit.** `code/water-core/src/hydro_network.rs` : nœuds en millilitres entiers, ouvertures à
+deux lois (orifice de Torricelli, déversoir en `H^{3/2}`), pas fixe de 100 ms, quantification à
+report de reste, normalisation par arrondi cumulatif, limiteur d'arrivée. **`outils/velocite.sh`
+affiche désormais `V modules=1`** au lieu de `jamais`.
+
+**Le choix de la ligne, et il n'était pas le plus confortable.** La cadence de l'hôte était
+adjacente à tout ce que S220–S223 venaient de faire ; V avait **zéro module en 223 sessions** alors
+qu'ADR-127 la rend obligatoire et que la feuille de route écrit « rien ne l'empêche de commencer ».
+C'est exactement le mécanisme que BILAN-VELOCITE-S198 a mesuré — 33 sessions sur 38 prenant le
+reliquat de la précédente — et j'avais écrit en S223 « ne pas laisser V glisser d'une session de
+plus ». La cadence est **reportée explicitement**, pas oubliée, et la ligne de suite la reprend.
+
+**Chiffres qui orientent.**
+- **C12 : 727,4 s contre 728 s de référence analytique — écart 0,0824 %**, pour un cas qui exige
+  ±3 %. Masse conservée exactement, volumes dans leurs bornes à chaque pas.
+- **Deux défauts trouvés en construisant.** L'interpolation de hauteur **tronquait** : à un
+  millilitre dans un réservoir d'un mètre carré la hauteur vaut un micromètre, et
+  `999999/1000000 = 0` — charge nulle, vidange arrêtée. Et la **normalisation en nanolitres**,
+  faite avant quantification, donnait à chaque arête une part sous le millilitre qui s'arrondissait
+  à zéro : un nœud de 2 ml avec trois fuites les gardait indéfiniment. Normalisation passée après
+  quantification, **en millilitres, par arrondi cumulatif**. **L306, L307.**
+- **Report de reste : prédiction confirmée avec son chiffre.** Sans lui, la vidange **s'arrête à
+  13 ml** — exactement le seuil dérivé (`Q·dt < 1 ml` quand `h < 13,3 µm`). La moitié de la
+  prédiction que P2 avait déjà corrigée reste fausse : la masse est conservée par construction.
+- **Déversoir séparé de l'orifice par son exposant** : `Q(2 m)/Q(1 m)` vaut **2,8284** contre
+  `2^{3/2} = 2,8284`, et 1,4151 contre `√2` pour l'orifice.
+- **Gauss-Seidel mesuré plutôt que supposé.** ADR-010 §4 annonce « 2 à 4 itérations suffisent » ; ce
+  module n'en fait **aucune**. Chaîne de trois contenants, 60 s, 100 ms contre **1 ms** : écart
+  maximal **0,0058 % de la capacité**. Un passage explicite suffit à 10 Hz *sur cette
+  configuration* — pas une preuve générale.
+- Neuf tests neufs ; suite complète **379 réussis, 5 ignorés**, aucun avertissement neuf.
+
+**Ce qui n'a pas été fait.** **A264 ouverte** : le plancher de vidange croît avec la surface du
+contenant — 1 ml pour 1 m², **10 L pour un hectare** —, et rien ne l'annonce. Non construits, et
+tous présents dans ADR-010 : `liquid_id` (A17), `sky_exposure`, `absorb_rate`, vannes, pompes,
+réseau fermé sous pression (reporté en v2 par l'ADR elle-même), et surtout la **surface libre en
+référentiel accéléré** — le module prend `g_eff` en **module**, pas en direction, ce qui suffit à un
+vaisseau immobile et pas à un vaisseau qui accélère. Aucun état répliqué ni restauré (ADR-022 §5.1),
+donc la branche V de C19 reste hors d'atteinte. La cadence de l'hôte est reportée.
+
+**Suite S225.** **Cadence complète de l'hôte** — travail nécessaire de J1 (ADR-131 D6), nommé depuis
+S213, jamais mesuré, et reporté explicitement par S224 : la promesse se tient. **Et la brique
+suivante de V est nommée dès maintenant pour qu'elle ne refroidisse pas** : direction de `g_eff`
+(surface libre en référentiel accéléré, ADR-010 §2, spécifiée et absente) puis état répliqué et
+restauré (ADR-022 §5.1), qui ouvre la branche V de C19 et C21. **Ne pas laisser passer plus d'une
+session sans y revenir.**
+
+**Rituel.** A264 (sévérité 2) ; suivi A17 (visible dans du code désormais) ; L306, L307 ; file
+plurielle relue ; feuille de route V-noyau et J1 ; index, README, REPRISE §4, file active et jeton.
+Invariants relus, et ils ont **dicté la forme** plutôt que d'être relus après : **I-03** (ordre du
+tableau, arrondi cumulatif sans reste stocké, deux exécutions identiques au bit), **I-10** (entier,
+10 Hz), **I-06** (aucune allocation, tout vient de l'appelant), **I-07** (`g_eff` injectée — en
+module seulement, et c'est dit). Aucun devenu faux, aucun amendé, aucun ADR réécrit ni acté.
+**Compteur 0** : V **et** W avancées dans `code/water-core/src`. 138 ADR, 264 angles, 307 leçons,
+18 invariants, 6 SPEC, 23 cas. Jeton libre, copies avancées.

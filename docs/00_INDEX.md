@@ -20,6 +20,22 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S224 — 2026-09-13 : [la couche V existe](validation/NOYAU-V-S224.md).**
+Premier module du graphe hydraulique d'ADR-010, actée depuis S01 et jamais construite : **zéro
+module en 223 sessions**, un désormais — `outils/velocite.sh` affiche `V modules=1`. Nœuds en
+millilitres entiers, ouvertures à deux lois, pas de 100 ms, report de reste, normalisation par
+arrondi cumulatif. **C12 reçu : vidange en 727,4 s contre 728 s analytiques — 0,0824 %**, pour un
+cas qui exige ±3 %. Aucun ADR : la conception était complète, la session la construit.
+**Deux défauts trouvés en construisant** : l'interpolation de hauteur **tronquait** et arrêtait la
+vidange à un millilitre (**L306**) ; la normalisation faite **avant** quantification donnait des
+parts sous le millilitre qui s'arrondissaient à zéro (**L307**). Report de reste : sans lui la
+vidange s'arrête à **13 ml**, le seuil exact que la loi donne. Déversoir séparé de l'orifice par son
+exposant (2,8284 contre 1,4151). **Gauss-Seidel mesuré et non supposé** : un passage explicite suit
+un pas cent fois plus fin à **0,0058 %** de la capacité. **A264** : le plancher de vidange croît
+avec la surface — 1 ml pour 1 m², **10 L pour un hectare**. 379 tests release réussis, 5 ignorés.
+**Suite S225 : cadence complète de l'hôte**, puis direction de `g_eff` et état répliqué pour V.
+138 ADR,264 angles,307 leçons,18 invariants,6 SPEC,23 cas ; compteur 0 (V **et** W code src).
+
 **S223 — 2026-09-13 : [le budget de pente tient compte de la position relative](validation/COURONNE-IMPACT-S223.md), [ADR-138](adr/ADR-138-le-budget-de-pente-tient-compte-de-la-position-relative.md).**
 **A262 traitée.** `slope_max_beyond(t, r)` majore la pente sur la **couronne** — décroissance en
 `1/√r`, minimum avec `slope_max_at` — et `slope_floor_joint` en tire un plancher conjoint par

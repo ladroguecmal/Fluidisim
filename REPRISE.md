@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 18:34 +02:00
+JETON            : libre
+Battement        : 2026-09-13 18:51 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
-Session en cours : S224 — **V-noyau** : premier module de la couche V, reçu par C12
-Dernière session : S223 — ADR-138, le budget de pente tient compte de la position relative des impacts ; A262 traitée (trois impacts frais séparés passent, 13,3 µs) ; A263 ouverte
-Session suivante : S224 — **revenir à la file**. Le budget de pente n'est plus le goulot d'une scène J1 : ses deux termes ont chacun leur limite connue, l'impact par une inégalité à 13 µs (ADR-138), la pression par une loi d'échelle à 25 s (A261, S222). Deux lignes attendent, et la seconde attend depuis le début : **cadence complète de l'hôte** (travail nécessaire de J1, jamais mesurée) et **V-noyau**, qu'ADR-127 demande au plus tard avec J2 — **zéro module, jamais commencé en 223 sessions**. Si l'hôte passe d'abord, le dire dans le journal et ne pas laisser V glisser d'une session de plus. A261, A258, A263, l'ancrage du balayage et le cas à plus de trois champs restent nommés sans ordre imposé ; δ/V conservés
-Maillons        : 0 — W avancée dans `code/water-core/src` (radial_impact, mixed_water) **et** ADR-138 actée
+Session en cours : —
+Dernière session : S224 — **la couche V existe** : premier module d'ADR-010, C12 reçu à 0,0824 %, `velocite.sh` passe de `jamais` à `V modules=1` ; A264 ouverte (plancher de vidange proportionnel à la surface)
+Session suivante : S225 — **cadence complète de l'hôte**, travail nécessaire de J1 (ADR-131 D6) nommé depuis S213, jamais mesuré, et **reporté explicitement par S224** pour ouvrir V : la promesse se tient ici. Mesurer une cadence réelle bout en bout, pas une passe isolée, avec son en-tête et son rang de passage. **Et la brique suivante de V est nommée dès maintenant pour qu'elle ne refroidisse pas** : direction de `g_eff` — surface libre en référentiel accéléré, ADR-010 §2, spécifiée et absente, le module ne prenant que le module de `g_eff` — puis état répliqué et restauré (ADR-022 §5.1), qui ouvre la branche V de C19 et C21. **Ne pas laisser passer plus d'une session sans y revenir.** A264, A261, A258, A263 nommées sans ordre imposé ; J2/δ général conservé
+Maillons        : 0 — **V** ouverte dans `code/water-core/src` (hydro_network) et W touchée (mixed_water)
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 
@@ -191,6 +191,14 @@ demande la campagne d'ADR-133 transposée. **Prochain lot J1 : la part dynamique
 toute scène à plusieurs sillages et donc avant la mutualisation de J1-bis ; puis la loi GPU
 (espace, LOD, visibilité, mutualisation), chaque mesure avec son en-tête (ADR-131 D3).
 
+**S224 : la couche V est ouverte** ([NOYAU-V-S224](docs/validation/NOYAU-V-S224.md)). Premier
+module du graphe hydraulique (ADR-010), **C12 reçu à 0,0824 %** ; `velocite.sh` affiche
+`V modules=1` après 223 sessions à `jamais`. La cadence complète de l'hôte a été **reportée
+explicitement** pour cela, et la ligne de suite la reprend. **A264** : le plancher de vidange croît
+avec la surface du contenant. **Prochain lot : cadence complète de l'hôte**, puis les deux briques
+suivantes de V — direction de `g_eff` (surface libre en référentiel accéléré, spécifiée et absente)
+et état répliqué (ADR-022 §5.1), qui ouvre C19-V et C21.
+
 **S223 : A262 traitée** ([ADR-138](docs/adr/ADR-138-le-budget-de-pente-tient-compte-de-la-position-relative.md),
 [COURONNE-IMPACT-S223](docs/validation/COURONNE-IMPACT-S223.md)). Le budget de pente tient compte de
 la **position relative** des impacts : gain 1,76 à 2,57 selon la séparation, **exactement 1,0000**
@@ -323,6 +331,22 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S224 — 2026-09-13 : [la couche V existe](docs/validation/NOYAU-V-S224.md).**
+Premier module du graphe hydraulique d'ADR-010, actée depuis S01 et jamais construite : **zéro
+module en 223 sessions**, un désormais — `outils/velocite.sh` affiche `V modules=1`. Nœuds en
+millilitres entiers, ouvertures à deux lois, pas de 100 ms, report de reste, normalisation par
+arrondi cumulatif. **C12 reçu : vidange en 727,4 s contre 728 s analytiques — 0,0824 %**, pour un
+cas qui exige ±3 %. Aucun ADR : la conception était complète, la session la construit.
+**Deux défauts trouvés en construisant** : l'interpolation de hauteur **tronquait** et arrêtait la
+vidange à un millilitre (**L306**) ; la normalisation faite **avant** quantification donnait des
+parts sous le millilitre qui s'arrondissaient à zéro (**L307**). Report de reste : sans lui la
+vidange s'arrête à **13 ml**, le seuil exact que la loi donne. Déversoir séparé de l'orifice par son
+exposant (2,8284 contre 1,4151). **Gauss-Seidel mesuré et non supposé** : un passage explicite suit
+un pas cent fois plus fin à **0,0058 %** de la capacité. **A264** : le plancher de vidange croît
+avec la surface — 1 ml pour 1 m², **10 L pour un hectare**. 379 tests release réussis, 5 ignorés.
+**Suite S225 : cadence complète de l'hôte**, puis direction de `g_eff` et état répliqué pour V.
+138 ADR,264 angles,307 leçons,18 invariants,6 SPEC,23 cas ; compteur 0 (V **et** W code src).
 
 **S223 — 2026-09-13 : [le budget de pente tient compte de la position relative](docs/validation/COURONNE-IMPACT-S223.md), [ADR-138](docs/adr/ADR-138-le-budget-de-pente-tient-compte-de-la-position-relative.md).**
 **A262 traitée.** `slope_max_beyond(t, r)` majore la pente sur la **couronne** — décroissance en

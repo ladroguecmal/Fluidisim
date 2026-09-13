@@ -5033,3 +5033,42 @@ Le geste : devant une borne à améliorer, demander d'abord **de quoi elle pourr
 temps (ADR-133), la direction (ADR-134), la distance (ADR-138) — avant de chercher à la resserrer à
 paramètre fixé. Et garder les deux : leur **minimum** choisit la meilleure sans mélanger preuve et
 calibration.
+
+## L306 — Un état entier a un plancher, et il n'est pas dans l'état mais dans ce qu'on en dérive
+
+*(S224)* Le noyau V porte son état en millilitres entiers, et c'est là qu'on cherche naturellement
+les effets de quantification. Le plancher était ailleurs : dans la **hauteur**, dérivée du volume et
+exprimée en micromètres entiers. À un millilitre dans un réservoir d'un mètre carré, la hauteur vaut
+un micromètre ; l'interpolation la rendait nulle, la charge s'annulait, et le contenant cessait de
+se vider tout en contenant de l'eau. Le symptôme — une vidange qui s'arrête — ressemble à une erreur
+de physique et n'en est pas une.
+
+Ce qui généralise : **quand une grandeur dérivée rentre dans le calcul du taux qui fait évoluer
+l'état, c'est sa résolution à elle qui fixe le point mort**, pas celle de l'état. Le piège est que
+la grandeur dérivée est souvent choisie plus fine que l'état — ici micromètres contre millilitres —
+ce qui donne l'impression rassurante d'être du bon côté, alors que le rapport des deux dépend de la
+**géométrie** : le plancher vaut la surface du contenant multipliée par une unité de hauteur, donc
+un millilitre pour un mètre carré et **dix litres pour un hectare**.
+
+Le geste : pour chaque grandeur dérivée qui reboucle sur le taux, écrire **à quelle valeur de l'état
+elle devient nulle**, et vérifier que ce point est bien là où on l'accepte. Arrondir au plus proche
+plutôt que tronquer recule le plancher d'un facteur deux, jamais davantage. Voir A264, ADR-010 §2.
+
+## L307 — Normaliser avant de quantifier annule ce que la quantification devait produire
+
+*(S224)* ADR-010 demande que plusieurs arêtes vidant le même contenant soient réduites « dans la
+même proportion ». Fait avant la quantification — sur les nanolitres —, ce partage donne à chaque
+arête une part inférieure au millilitre, qui s'arrondit à zéro : un nœud de deux millilitres avec
+trois fuites les gardait indéfiniment, avec de la charge, sans que rien ne signale d'anomalie.
+Chaque étape était correcte ; leur ordre ne l'était pas.
+
+Ce qui généralise : **un partage proportionnel et une quantification ne commutent pas**, et
+l'ordre qui paraît naturel — répartir finement, puis arrondir — est celui qui perd. Il faut
+quantifier d'abord, puis répartir **dans l'unité que l'état porte réellement**, sinon la
+répartition distribue des quantités que l'état ne sait pas représenter. Le même piège guette partout
+où une ressource entière est partagée : budgets, emplacements, jetons.
+
+Le geste : répartir par **arrondi cumulatif** — la part du `k`-ième est la différence des sommes
+proportionnelles arrondies jusqu'à `k` et jusqu'à `k−1`. Les parts somment exactement au total,
+chacune est à moins d'une unité de sa valeur proportionnelle, et l'ordre du tableau suffit à la
+reproduire : aucun reste à stocker, donc aucune source de divergence. Voir NOYAU-V-S224 §3.

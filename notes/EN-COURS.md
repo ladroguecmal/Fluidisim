@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S224 — en cours
+Session : S224 — terminée
 Agent : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
 Entrée : « Continue avec S224 », même conversation. master et trois copies à 71555d0, jeton libre,
 maillons 0. Copie principale.
@@ -126,7 +126,7 @@ limiteur devra mordre sur les derniers pas, et c'est là que se joue le respect 
 - [x] **P5** — déterminisme et refus atomiques ; aucune allocation dans le pas.
 - [x] **P6** — déversoir de débordement et chaîne de nœuds (Gauss-Seidel), si P4 et P5 tiennent ; sinon dire ce qui manque.
 - [x] **P7** — document de réception ; suite complète `code/`.
-- [ ] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
+- [x] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
 
@@ -223,3 +223,22 @@ construisant ; §4 le report de reste et le seuil de 13 ml ; §5 le déversoir p
 question Gauss-Seidel **mesurée** ; §6 les neuf réceptions ; suite : ce qu'ADR-010 contient encore
 et n'est pas construit — dont la **surface libre en référentiel accéléré**, spécifiée et absente.
 Suite complète `code/` : **379 réussis, 5 ignorés**, aucun avertissement neuf.
+
+P8 : rituel §6 exécuté. Journal S224 ; **A264** (sévérité 2 — le plancher de vidange croît avec la
+surface : 1 ml pour 1 m², 10 L pour un hectare) ; suivi **A17** (`liquid_id` est désormais une
+structure à étendre, plus un paragraphe) ; **L306, L307**. Index, README, REPRISE (§4, file active,
+jeton), feuille de route (**V-noyau passe de « aucun module » à sa liste de restes**), file plurielle
+de QUESTIONS-OUVERTES.
+**Invariants relus — et ils ont dicté la forme, pas été relus après** : **I-03** (ordre du tableau,
+arrondi cumulatif sans reste stocké ; deux exécutions identiques au bit), **I-10** (état entier,
+10 Hz), **I-06** (aucune allocation : nœuds, arêtes, formes et scratch viennent de l'appelant),
+**I-07** (`g_eff` injectée — **en module seulement**, et c'est dit dans la réception comme dans la
+feuille de route). Aucun devenu faux, aucun amendé, aucun ADR réécrit ni acté : ADR-010 était
+complète.
+**Règle des deux maillons : compteur 0**, et par le code — `outils/velocite.sh` donne **`V
+modules=1 derniere avancee=S224`** là où il affichait `jamais` depuis 223 sessions, et W = S224.
+**Recommandation portée** : la ligne `Session suivante` tient la promesse faite en P1 — la cadence
+de l'hôte, reportée explicitement et non oubliée — **et** nomme dès maintenant les deux briques
+suivantes de V, avec la consigne de ne pas laisser passer plus d'une session.
+Décomptes vérifiés : 138 fichiers dans `docs/adr` (inchangé), 307 leçons, 264 angles.
+Jeton libre, battement 18:51. Copies de travail avancées sur master après ce commit.

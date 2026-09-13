@@ -1670,7 +1670,20 @@ entrée par entrée. Le fil reprend ci-dessous.
 
 ## File active
 
-Relue en S223, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+Relue en S224, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+
+**Suivi S224 — la couche V est ouverte, et la ligne qui l'attendait depuis le début est tenue.**
+[NOYAU-V-S224](../validation/NOYAU-V-S224.md). Premier module du graphe hydraulique d'ADR-010,
+actée depuis S01 : `velocite.sh` passe de `V ... jamais` à **`V modules=1`**. **C12 reçu** —
+vidange en 727,4 s contre 728 s analytiques, **0,0824 %**, pour un cas qui exige ±3 %. Masse
+conservée exactement, déterminisme vérifié (I-03), refus atomiques nommés, aucune allocation (I-06).
+Déversoir et orifice séparés par leur exposant ; **Gauss-Seidel mesuré et non supposé** — un passage
+explicite suit un pas cent fois plus fin à 0,0058 % de la capacité.
+**Deux défauts trouvés en construisant** (L306, L307) et **A264** ouverte : le plancher de vidange
+vaut la surface du contenant fois un micromètre — 1 ml pour 1 m², **10 L pour un hectare**.
+**La cadence complète de l'hôte a été reportée explicitement** pour ouvrir V, et la ligne de suite
+la reprend : **S225 = cadence de l'hôte**, puis direction de `g_eff` et état répliqué pour V, sans
+laisser passer plus d'une session. Autres lignes et déclencheurs conservés.
 
 **Suivi J1 S223 — A262 traitée, et le budget de pente cesse d'être le goulot.**
 [COURONNE-IMPACT-S223](../validation/COURONNE-IMPACT-S223.md),
