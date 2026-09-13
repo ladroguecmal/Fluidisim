@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-13 16:31 +02:00
+JETON            : occupé
+Battement        : 2026-09-13 16:34 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
-Session en cours : —
+Session en cours : S221 — A260, enveloppe directionnelle des modes non résolus dans la borne locale
 Dernière session : S220 — borne locale d'ordre deux (ADR-136) : partition à 32767 évaluations à 1,006–1,012 × le maximum ; plancher = réserve numérique (A258) ; grosses mailles plafonnées par les modes non résolus (A260)
 Session suivante : S221 — file J1/W : A260, enveloppe directionnelle du sous-ensemble non résolu dans la borne locale, mesurer C_U par taille de maille avant toute prédiction chiffrée, recevoir à 2047/8191 évaluations via S219/S220 ; puis A258, borne d'erreur courante dans la passe. Aucune migration d'admission avant A258 ; A254, loi GPU, J2/δ et V-noyau conservés
 Maillons        : 0 — W avancée dans src et ADR-136 actée

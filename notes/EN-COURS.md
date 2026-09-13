@@ -58,48 +58,38 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S220 — terminée
+Session : S221 — en cours
 Agent : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
-Entrée : « Reprends le projet » ; master et trois copies propres à 8ef0c64, jeton libre,
-maillons 0. AGENTS, REPRISE (jeton, file active, §4 S219–S217, §5–§9), EN-COURS, journal
-S218–S219, PARTITION-S219, ADR-135, code local_bound/partition/phase lus. Copie principale.
+Entrée : « Continue » juste après S220, même conversation ; master et trois copies à 32e7afd,
+jeton libre, maillons 0. Lectures S220 conservées, état réel revérifié. Copie principale.
 
 ### Thèse et plan
 
-A259 : la borne ADR-135 somme des **modules** de variation, `c_k·min(2,D_k)` ; aux mailles
-moyennes cette somme ne voit aucune annulation entre modes. Développer chaque mode à l'ordre
-deux autour de la phase **exécutée** au centre : `a sin(ψ+δ) = a sin ψ + a cos ψ·δ + R`,
-`|R| ≤ a·δ²/2`. Le terme `a cos ψ` est exactement `η_k(c)` : la Hessienne de la pente vaut
-`M = −Σ w_k ⊗ (2π t_k) η_k(c)`, **signée**, et `|S(c) + M u|` est convexe en `u`, donc son
-maximum sur le rectangle est à un coin. Écart exécuté/linéaire `e_k` (arrondi des produits
-`t·x`, fraction, Q32, arrondi des coins) majoré par `E_k` et payé `c_k E_k`. Choix par mode :
-dans `M` si `E_k + D_k²/2 < min(2, D_k)`, sinon terme ADR-135. Retenir le minimum des branches
-ordre un, ordre deux et globale, chacune avec sa réserve : jamais pire qu'ADR-135.
-Au maximum de `|S|`, `S·Mu = 0` : l'excès devient quadratique, ce qu'ADR-135 ne peut pas.
-Critères déclarés avant mesure : sondes sous la borne (pic manqué, multidirectionnel, 4000 m) ;
-borne ordre deux ≤ ordre un sur tout rectangle ; gain strict près d'un maximum ; S219 inchangée
-en ordre un au bit. Gain de partition non promis. Aucune admission migrée, A258 reste ouverte.
+A260 : un mode à grande largeur de phase paie `2 c_k` (exclu) ou `D²/2` presque autant (inclu),
+**mode par mode**. Toute partition des modes en `R ∪ U` donne `|S(p)| ≤ |S_R(p)| + |S_U(p)|`,
+et `|S_U(p)| ≤ G(U)`, l'enveloppe directionnelle ADR-134 du seul sous-ensemble, valable en tout
+point. Famille de coupures `U_j = {D_k ≥ D*_j}`, `D* ∈ {2, 1, 1/2}`, accumulée par classes
+dans la même passe O(N) ; minimum avec ADR-135 et ADR-136, qui restent **au bit**. Pour la coupure
+`D* = 2`, gain garanti non négatif sur les exclus à `2 c_k` : `G(U) + |S_U(c)| ≤ 2 C_U`.
+
+**Limite annoncée avant mesure** : `G(U)` ne dépend pas du point. Une grande cellule loin du
+sillage garde `G(U)` si `U` porte l'essentiel de la masse — l'enveloppe ne voit pas la
+localisation spatiale du paquet, qui vit dans la cohérence des phases. Hypothèse testée, sans
+chiffre : gain à 8191 évaluations seulement si la masse `C_U` de `D ≥ 2` porte la majorité
+de `C` sur les feuilles 2 × 1,5 m ; aucun gain attendu à 2047. Critères : sondes sous la borne,
+domination au bit sur ADR-136, gain strict sur un rectangle à spectre étalé, S220 inchangée au
+bit, décomposition `C_U`/`G(U)` publiée par classe.
 
 - [x] **P1** — jeton et plan seuls.
-- [x] **P2** — ADR-136 : dérivation, écart de phase quantifiée, choix par mode, réserve, limites.
-- [x] **P3** — construire la branche ordre deux (Field, Prepared) sans changer ADR-135 ni S219.
-- [x] **P4** — tests : couverture, domination, gain près du maximum, 4000 m, refus, identité S219.
-- [x] **P5** — exemple S220 : même rectangles S218 et partition S219 par ordre ; campagne isolée.
-- [x] **P6** — publier la réception S220 et ses relevés bruts.
-- [x] **P7** — rituel §6, journal, registres, index, file active, jeton et copies.
+- [ ] **P2** — ADR-137 : coupure spectrale, famille de seuils, domination, réserve, limite spatiale.
+- [ ] **P3** — construire la passe générique (ordre deux inchangé au bit), ordre `Spectral`, Prepared.
+- [ ] **P4** — tests : couverture, domination, gain strict, identité S220, refus, partition.
+- [ ] **P5** — exemple S221 : décomposition par taille de maille, partitions 2047→32767 ; campagne isolée.
+- [ ] **P6** — publier la réception S221 et ses relevés bruts.
+- [ ] **P7** — rituel §6, journal, registres, index, file active, jeton et copies.
 
 ### Notes de reprise
 
-Suite S219 : partition adaptative disponible, A259 (plateau des grandes mailles) ouverte.
-
-P3 : une passe O(N) ; `Slot::accumulate` rend (sin, cos) sans changer ses opérations. Branche ADR-135 recalculée dans la même passe (identité au bit à recevoir P4). Partition : `partition_slope_envelope_order`, l'appel S219 délègue en `First`. Compilation debug sans erreur.
-
-P4 : quatre tests S220 debug réussis. Deux attentes du test « quadratique » étaient fausses et ont été corrigées **avant** toute mesure de campagne, sans toucher au code : (1) avec un seul mode, la borne globale est exacte et plafonne les deux branches, donc on compare les branches sans elle ; (2) le demi-côté `h` donne un excès ADR-135 ≈ `h` (et non `2h`), et un excès ADR-136 ≈ `h²/2` plus la réserve (≈ 7e-5) plus un plancher `E` ≈ 6e-6, la marge `8ε` de la phase quantifiée. Mesuré : h = 0,05 → 1,3263e-3 au total. Interruption utilisateur au milieu de P4 pour régler le niveau d'effort (xhigh constaté), puis reprise. Suite release complète : 366 réussis (268 cœur + 4 + 1 + 93), 5 ignorés, zéro échec.
-
-P5 : exemple `ordre_deux_s220` (grilles S218 2/1/0,5 m en ordre deux avec ordre un publié dans la même passe ; partitions S219 ordre un puis deux à 2047/8191/32767/65535). Base, passage 1 isolé (15:43) : ordre un redonne S218 et S219 **au bit** (0,112293623 à 0,5 m ; 0,115437612/0,098479681/0,077374868). Grille ordre deux : 2 m aucun gain (branche 0,2093 au pire rectangle, 1332/3072 plus serrés) ; 1 m 0,109988 (×1,0495) ; 0,5 m **0,079501** (×1,4125 sur ordre un) en 47,3 s contre 27,5 s S218. Coût par évaluation ≈ ×1,72. Partition ordre deux : 2047 et 8191 au plafond (A259 persiste sous ≈3 m² par feuille) ; **32767 : 0,070740 (1,0059 × référence) en 33,8 s**, meilleur que l'ordre un à 65535 (0,077375, 37,2 s) ; 65535 : 0,070666 (1,0049) en 63,5 s — saturation. Hypothèse à vérifier : plancher = réserve numérique (ordre un 2,67e-4, ordre deux ≥ 5,4e-4, donc la branche un gagne sur les feuilles minuscules). Fausse alerte de sûreté examinée : aucune contradiction, la feuille maximale peut être plafonnée par la branche un. Campagne détachée arrêtée pendant `lent` pour ajouter le diagnostic de feuille maximale (hors chronométrage), relancée 15:47:55 : lent, long, base_tard, base passage 2. Lent partiel conservé : 0,5 m ordre deux 0,017091 contre 0,026653 (×1,5595). Les campagnes détachées passent par `scratchpad/campagne_s220.ps1` (le délai d'un appel d'outil est de 10 min).
-
-P5 fin : campagne relancée terminée à 16:02:29 (lent 15:51, long 15:55, base_tard 15:58, base passage 2 16:02). Journal de campagne resté à « fin lent » : `Add-Content` a échoué pendant que `tail -f` tenait le fichier, et la surveillance a attendu en vain jusqu'à 16:25 (impasse de procédure, pas de mesure). Base passage 2 : bornes identiques au bit au passage 1, 30,8/59,8 s contre 33,8/63,5 s. **Hypothèse du plancher confirmée** par la feuille maximale : base 32767, branche un 0,070740171 = centre 0,070322238 + reste 1,51e-4 + réserve 2,67e-4 ; branche deux 0,070861 (réserve 5,37e-4). Lent/long/base_tard à 65535 : ordre deux 1,0101/1,0063/1,0111 × référence, écart ≈ réserve. Grosses mailles 2×1,5 m : reste d'ordre deux 0,024 (lent) à 0,116 (long), dominé par les modes exclus (2488 dans M sur 4096).
-
-P6 : ORDRE-DEUX-S220 et relevés bruts publiés. Corrections avant publication, relues contre les relevés : branche 2 m « 1,5–1,8 × globale » (et non 0,17–0,23, faux pour lent), coût « 1,6–2,0 × » (et non 1,69–1,78), rapport reste/réserve « 160–360 × » sur les trois feuilles d'ordre deux (la base est plafonnée par l'ordre un). Suite proposée : A260 (enveloppe spectrale des non résolus), A258 (borne d'erreur courante), coût et validité temporelle. À porter au rituel : A260, suivi A255/A258/A259, L299.
-
-P7 : journal, A260 et suivis A255/A258/A259, L299, index, README, REPRISE (§3, §4, file active, jeton), feuille de route et file active plurielle actualisés. Une attribution non mesurée (reste des grosses mailles « fait des modes exclus ») corrigée avant commit dans la réception, A260 et le journal. Maillons 0. Jeton libre ; copies à avancer après le commit de clôture.
+Suite S220 : ordre deux à 1,006–1,012 × maximum à 32767 évaluations ; plateau à 8191 (A260).
+Campagne détachée : signaler la fin par un fichier marqueur, **pas** par `tail -f` d'un journal
+écrit par un autre processus (verrou Windows constaté S220).
