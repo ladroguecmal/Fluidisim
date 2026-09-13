@@ -74,8 +74,24 @@ replie les tronçons achevés et ne fait qu'une rotation par nœud plus le tron�
 ([TEMPS-SILLAGE-S213](../docs/validation/TEMPS-SILLAGE-S213.md)). Il publie `[A, B, kx, ky]`
 rebasés à la caméra (4 096 nœuds), sommés par sommet dans l'emprise [−64, −48]–[64, 56] m. La
 référence de `--verify` reste la préparation `bound_pressure::Prepared::from_journal`, chemin
-indépendant. La recette 64×128 tient 2 % de la recette fine pendant les
-16 s de forçage, pas au-delà ; la couture au bord de l'emprise dépasse 3 mm après 24 s.
+indépendant.
+
+**Domaine d'image du sillage (S214, [ADR-132](../docs/adr/ADR-132-domaine-d-image-d-un-sillage.md)).**
+Il se calcule depuis la recette : `rayon = 2π·angular/(3·cutoff)` et `durée = 4π/√(g·cutoff/radial)`,
+soit **89,36 m** et **18,53 s** pour la recette 64×128 à cutoff 3 — contre un coin d'emprise à
+102,22 m et un contexte déclaré de 40 s. `--verify` publie `WAKE_LOI` avec la fixture, et l'hôte
+imprime `WAKE_HORS_DOMAINE` une fois au premier instant qui dépasse. **Il n'y a pas de refus** :
+le chemin est cosmétique. Mesures : 2 % de la recette fine franchi entre 16 et 18 s, couture au
+bord de 3 mm entre 18 et 20 s, rayon d'accord à 10 % effondré entre 24 et 30 s.
+
+**Composition par le cœur (S214).** `--verify` publie aussi des lignes `MIXED` : la scène composée
+par `mixed_water` — B, impact et sillage ensemble — son budget de pente conjoint et ses refus.
+La référence CPU évalue désormais les trois couches **au même point local**, tiré d'une seule
+conversion monde → local ; auparavant B était pris au point du réseau monde et les perturbations au
+point `f32` brut, ce qui écartait la référence de la composition du cœur de 18 µm (A253). Le cœur
+ne compose que sur l'**intersection** des domaines (4 477 sondes sur 6 988) : c'est pourquoi il ne
+peut pas servir de chemin de rendu. Voir
+[COMPOSITION-J1-S214](../docs/validation/COMPOSITION-J1-S214.md).
 
 La grille projetée a un pas nominal de deux pixels et un surbalayage de 18 % ; elle s'arrête à
 1500 m. La précision de hauteur aux sondes ne valide pas à elle seule toute cette géométrie,

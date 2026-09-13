@@ -83,6 +83,14 @@ l'implémentation qui dépassait, pas le sillage ni l'objectif.*
 dans le cœur ([TEMPS-SILLAGE-S213](validation/TEMPS-SILLAGE-S213.md)) : CPU sillage 1,26 ms pendant
 le forçage et 0,36 ms après (préparation 7,70 / 13,36), hôte 1,7 ms, exact à 6e-8 ; GPU inchangé.
 Coordonnée de l'espace, pas verdict. Suite : composition impact+sillage, puis A251.
+*S214* : **les deux travaux de validité sont faits**
+([COMPOSITION-J1-S214](validation/COMPOSITION-J1-S214.md)). La composition du cœur est exacte au
+bit une fois le point d'évaluation commun rétabli (**A253**) ; le cœur ne compose toutefois que sur
+l'**intersection** des domaines (4 477 sondes sur 6 988), donc le chemin mixte n'est pas le chemin
+de rendu. Domaine d'image du sillage calculé, annoncé, publié avec sa fixture
+([ADR-132](adr/ADR-132-domaine-d-image-d-un-sillage.md)) : **A251 traitée**. Et une ligne neuve,
+plus lourde : **A254** — le budget de pente est une somme sur les sources, 84 % de π/7 pour deux,
+marge 0,0712. Elle passe avant toute scène à plusieurs sources.
 
 - ~~**A245**~~ — **levé en S205** (ADR-128) : la mer S201 (Hs 1,5 m) se compose, impact compris,
   zéro refus ; [COMPOSITION-MER-S205](validation/COMPOSITION-MER-S205.md) ;
@@ -95,7 +103,14 @@ Coordonnée de l'espace, pas verdict. Suite : composition impact+sillage, puis A
   **S212 : le sillage rouvre le coût** — dans l'implémentation S212, préparation par image (CPU ∝
   nœuds × tronçons) et somme par sommet (GPU ∝ sommets × nœuds) dépassent 5× et 2× le budget ;
   espace d'optimisation ci-dessous (ADR-131) ;
-- **A251** *(S212)* — durée honnête et couture d'un sillage visible ni déduites ni reçues ;
+- ~~**A251**~~ *(S212)* — **traitée en S214** par [ADR-132](adr/ADR-132-domaine-d-image-d-un-sillage.md) :
+  `rayon = 2π·angular/(3·cutoff)`, `durée = 4π/√(g·cutoff/radial)`, annoncées et publiées avec la
+  fixture ; 89,36 m et 18,53 s contre 102,22 m et 40 s déclarés. Une durée honnête porte le critère
+  qui l'a calibrée ;
+- **A254** *(S214, sévérité 1)* — **le budget de pente ne passe pas à l'échelle en nombre de
+  sources** : 84 % de π/7 consommés par un impact et un sillage, majorant 3,7 à 10,5 fois la pente
+  réelle, marge 0,0712 ; la troisième source refuse toute l'image, par `SlopeEnvelope`. **Avant
+  toute scène à plusieurs sources, donc avant la mutualisation ci-dessous** ;
 
 #### J1-bis — Espace d'optimisation du rendu et travaux nécessaires (ADR-131, S213)
 
@@ -111,18 +126,20 @@ l'échec d'optimisations prises isolément. La liste est ouverte.
 | **temps** — sillage : tronçons achevés repliés, modes préconstruits | **présente** (S213) : 1,26 ms forçage / 0,36 ms après à 4 096 nœuds, un fil ; 6e-8 du chemin préparé | écart au chemin préparé, pic aux bornes (2,12 ms), retour arrière (3,10 ms) |
 | **espace** — grille locale et transformée | absente, nommée S212 | quadrature d'image, coutures et période |
 | **LOD spatial** — densité, emprise selon distance et écran | absente | Nyquist par distance (L283), coutures entre niveaux |
-| **LOD spectral** — nœuds par source selon distance et visibilité | absente | écart à la recette pleine, durée et rayon honnêtes (ADR-107, A251) |
+| **LOD spectral** — nœuds par source selon distance et visibilité | absente | écart à la recette pleine, durée et rayon honnêtes (ADR-107, **ADR-132** : les deux lois se recalculent depuis la recette réduite) |
 | **LOD temporel** — cadence de mise à jour selon distance, vitesse, régime | absente | erreur de phase, I-09 |
 | **visibilité** — frustum, occlusion, hors écran | absente | exactitude au retour dans le champ |
-| **mutualisation** — nœuds partagés par sources de même recette, passe/grille communes B/W | absente | superposition dans son domaine (ADR-123) |
+| **mutualisation** — nœuds partagés par sources de même recette, passe/grille communes B/W | absente ; **conditionnée par A254** (S214) | superposition dans son domaine (ADR-123), et part du budget de pente consommée |
 
 **Chaque mesure de coût publie** techniques présentes, techniques absentes et domaine de validité
 (scène, recette, sources, formats, instants, machine, grandeur mesurée) — ADR-131 D3.
 
-**Travaux nécessaires de J1, indépendants du coût** (ADR-131 D6) — accélérer ne les remplace pas :
-**A251** (durée honnête et coutures du sillage visible) ; **composition impact + sillage** par le
-cœur (`mixed_water`, budget conjoint ADR-119) ; cadence complète mesurée ; interaction manuelle,
-angles rasants et poses de caméra ; allocations de la pile graphique (I-06) ; seconde cible (B7).
+**Travaux nécessaires de J1, indépendants du coût** (ADR-131 D6) — accélérer ne les remplace pas.
+*Faits en S214* : ~~A251~~ (ADR-132) et ~~composition impact + sillage par le cœur~~ — exacte au
+bit, budget conjoint exercé, et **A254** ouverte par cette mesure. *Restent* : **A254** (le budget
+de pente ne passe pas à l'échelle en nombre de sources — elle conditionne la mutualisation) ;
+cadence complète mesurée ; interaction manuelle, angles rasants et poses de caméra ; allocations de
+la pile graphique (I-06) ; seconde cible (B7).
 
 *Bancs qui tranchent à ce jalon* : **B1** (nombre de composantes et coût de B, dès qu'un LOD
 existe dans l'hôte) ; **B2** partiel (représentation de W, dès que le coût B+W par image est

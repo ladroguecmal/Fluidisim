@@ -769,6 +769,19 @@ DX12/RTX5070 Laptop : erreur hauteur max0,077657 mm ; passe eau960×540 médiane
 349 tests réussis/cinq ignorés. A250 close, A247 partielle ; sillage et coût complet encore dus.
 **Suite S212 : file J1/W, intégrer le sillage au GPU.** 130/250/284/18/6/23 inchangés.
 
+**S214 — 2026-09-13 : [composition par le cœur](docs/validation/COMPOSITION-J1-S214.md) et [ADR-132](docs/adr/ADR-132-domaine-d-image-d-un-sillage.md).**
+Validité avant accélération (ADR-131 D6). `mixed_water` compose B + impact + sillage : **exact au
+bit** contre la somme de l'hôte **au même point** ; l'écart de 1,78e-5 m mesuré d'abord venait de
+deux positions pour une sonde — B quantifié au réseau monde, perturbations en `f32` brut (**A253**,
+corrigé). **Budget conjoint 84 % de π/7 avec *une* source de chaque type** ; majorant 3,7 à 10,5 ×
+la pente réelle ; une troisième source refuserait tout, par `SlopeEnvelope` (**A254**, sévérité 1).
+Le cœur ne compose que sur l'intersection des domaines : 4 477 sondes sur 6 988 — le chemin mixte
+n'est pas le chemin de rendu. **ADR-132** : domaine d'image du sillage calculé depuis sa recette
+(89,36 m, 18,53 s contre 102,22 m et 40 s déclarés), annoncé et non refusé ; **A251 traitée**.
+Coût variable de 20 % entre passages : l'écart hôte/exemple de S213 était un rang de passage
+(**L289**). 354 tests réussis/cinq ignorés. **Suite S215 : A254**, puis la loi GPU.
+132 ADR,254 angles,289 leçons,18 invariants,6 SPEC,23 cas ; compteur 0 (ADR-132 fixe W).
+
 *⚠ S213 ([ADR-131](docs/adr/ADR-131-un-depassement-qualifie-une-implementation.md)) : « trop cher » et
 « refusé en coût » ci-dessous portent sur l'implémentation S212, pas sur le sillage ni l'objectif.*
 **S212 — 2026-09-13 : [sillage du cœur dans l'hôte GPU](docs/validation/HOTE-GPU-S212.md), exact et trop cher.**

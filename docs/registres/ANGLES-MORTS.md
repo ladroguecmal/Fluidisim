@@ -2987,3 +2987,55 @@ mesurés ; A247 reste partielle. Voir [HOTE-GPU-S212](../validation/HOTE-GPU-S21
 (`pressure_timeline`) : 1,26 ms pendant le forçage, 0,36 ms après, contre 7,70 / 13,36 ms pour la
 préparation par image (4 096 nœuds, un fil) ; hôte 1,7 ms. Loi GPU inchangée. Mesure publiée avec
 techniques présentes, absentes et domaine (ADR-131) ; A247 reste partielle. Voir TEMPS-SILLAGE-S213.
+
+- **A253** *(sévérité 2, S214 ; traitée dans l'hôte, ouverte pour l'interface)* — **Une même sonde
+  avait deux positions : B au point du réseau monde, les perturbations au point `f32` brut.**
+  `FrameData::references` — la référence contre laquelle `--verify` juge le GPU — convertissait le
+  point en `WorldPos` pour B (quantification 1/2048 m, erreur ≤ 244 µm) et gardait le `f32` brut
+  pour l'impact et le sillage. Écart mesuré contre la composition du cœur : **1,78e-5 m** de hauteur
+  et 2,4e-5 de pente, quand la même somme faite **au point du cœur** est exacte au bit. Le cœur s'en
+  protège par construction (`eval_local`, « conversion commune B/W ») ; l'hôte contournait cette
+  protection en reconstruisant ses points. Portée : 0,6 % de la tolérance de 3 mm, jamais visible —
+  mais c'est la **référence** qui mentait, pas le GPU, et l'écart croît avec la pente, donc avec un
+  LOD spatial. **Corrigé dans l'hôte en S214** (une conversion, trois couches). **Reste ouvert** :
+  `Background::eval` n'accepte qu'un `WorldPos` et `eval_local` est `pub(crate)`, donc un hôte qui
+  veut évaluer B hors du réseau — ce que fait le GPU, à des décalages bruts depuis un œil quantifié
+  — ne le peut pas par l'interface publique. Voir L287, COMPOSITION-J1-S214 §2.
+
+- **A254** *(sévérité 1, S214 ; ouverte)* — **Le budget de pente est une somme sur les sources : la
+  scène J1 en consomme 84 % avec deux, et la troisième refuserait toute l'image.** Mesuré sur la
+  composition du cœur (`mixed_water`, ADR-128, ADR-119 règle 1) : budget conjoint 0,3477 à 0,3776
+  contre `max_slope = π/7 = 0,4488`, soit **77,5 à 84,1 %**, pour **une** source de chaque type —
+  impact 0,2126, sillage 0,1350 à 0,1650. Marge restante **0,0712** : un second sillage de la même
+  recette ou un second impact refuse tout lot non vide. Et le refus serait **`SlopeEnvelope`** —
+  vérifié, 4 477 points sur 4 477, zéro `Slope` — car la pente **réelle** des perturbations vaut
+  0,0929 à 0,0352, soit **3,7 à 10,5 fois moins** que son majorant. La physique garde un facteur
+  dix ; le contrat n'a plus rien. Gravité 1 : ce n'est pas un défaut cosmétique mais un refus, et il
+  tombe sur la trajectoire — toute scène à plusieurs sources, donc la mutualisation de J1-bis, J3 et
+  les inondations de J4. A208 nommait le mécanisme par le choix d'emprise, sur un champ seul ;
+  ici c'est le **cardinal** qui consomme, et il n'avait jamais été mesuré composé. **À faire** :
+  décider si le majorant se resserre (le rapport mesuré dit qu'il le peut), s'il se compose
+  autrement que par la somme (ADR-119 règle 1 l'interdit sans mesure), ou si `max_slope` cesse
+  d'être une constante de milieu. Voir L288, ADR-098, COMPOSITION-J1-S214 §3.
+
+**Suivi A251 — S214, 2026-09-13 : traitée par [ADR-132](../adr/ADR-132-domaine-d-image-d-un-sillage.md).**
+Le domaine d'image d'un sillage se calcule depuis sa recette — `rayon = 2π·angular/(3·cutoff)`,
+`durée = 4π/√(g·cutoff/radial)` —, il est publié avec la fixture (`WAKE_LOI`) et l'hôte annonce une
+fois quand l'instant montré en sort (`WAKE_HORS_DOMAINE`). Fixture S212 : 89,36 m et 18,53 s contre
+un coin d'emprise à 102,22 m et un contexte de 40 s, soit **2,2 fois** sa durée honnête ; conservée
+telle quelle, parce qu'elle a servi à recevoir S211 à S214. Trois critères l'encadrent : 2 % franchi
+entre 16 et 18 s, couture de 3 mm entre 18 et 20 s, rayon d'accord à 10 % entre 24 et 30 s — **une
+durée honnête porte le critère qui l'a calibrée**. Voir COMPOSITION-J1-S214 §4.
+
+**Suivi A214 — S214, 2026-09-13 : un troisième point de calibration, et toujours pas de garde.**
+La récurrence radiale, refusée par S156 sous la forme qui donnait 13,1 s pour un encadrement de
+15–20 s, est juste sous la forme `4π/√(g·dk)` : 18,53 s à radial 128/cutoff 6 (encadré 15–20 s),
+26,2 s à radial 256 (conservateur contre 45–50 s), 18,53 s à radial 64/cutoff 3 (encadré 16–30 s
+selon le critère, S214). **Reste dû** : la dépendance à `sigma`, aucun point entre radial 256 et
+512, et la décision de bibliothèque — un garde à l'admission refuserait la fixture S212 elle-même.
+
+**Suivi A247 — S214, 2026-09-13 : l'écart hôte/exemple de S213 n'avait pas de cause à chercher.**
+Trois passages du même binaire donnent 1,2555 / 1,2458, puis 1,6477 / 1,7760, puis 1,5820 / 1,8398 ms
+de sillage CPU, la valeur basse sur le passage à froid. L'écart « 1,7 contre 1,26 » que S213 laissait
+non attribué se reproduit **entre deux passages du même programme**. Ce n'est pas une attribution
+nommée — aucun compteur thermique n'a été lu. A247 reste partielle. Voir L289.

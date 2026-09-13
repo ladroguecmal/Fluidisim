@@ -90,6 +90,9 @@ reçoit la sommation GPU, pas la fidélité du sillage. Celle-ci ne se lit que d
 - **Admission** : `bound_pressure::Prepared::sample_world_batch` à `BREAKING_SLOPE` admet B +
   sillage aux cinq âges (enveloppe ≤ 0,165 contre 0,449). **Non exercé** : la composition mixte
   impact + pression (`mixed_water`), où le budget conjoint est une somme (ADR-119).
+  *Note datée du 2026-09-13 (S214) : exercée depuis, et le résultat est plus serré qu'attendu —
+  budget conjoint 0,3477 à 0,3776 contre 0,4488, soit **84 % de π/7 pour deux sources**, zéro refus
+  mais une marge de 0,0712. Voir [COMPOSITION-J1-S214](COMPOSITION-J1-S214.md) §3 et **A254**.*
 
 Le contexte de 40 s de la fixture excède donc la durée honnête de sa recette et la tenue de son
 emprise. Aucun garde ne le refuse, conformément à ADR-107 (A214) ; c'est consigné en **A251**.

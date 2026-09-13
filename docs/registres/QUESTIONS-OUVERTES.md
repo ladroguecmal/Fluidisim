@@ -1670,7 +1670,23 @@ entrée par entrée. Le fil reprend ci-dessous.
 
 ## File active
 
-Relue en S213, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+Relue en S214, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+
+**Suivi J1 S214 — les deux travaux de validité sont faits, et ils en ouvrent un plus lourd.**
+[COMPOSITION-J1-S214](../validation/COMPOSITION-J1-S214.md). La composition du cœur
+(`mixed_water`) est **exacte au bit** contre la somme de l'hôte, une fois les trois couches
+évaluées au **même point** — l'écart de 1,78e-5 m mesuré d'abord venait de deux positions pour une
+sonde (**A253**, corrigé dans l'hôte, ouvert pour l'interface). Le cœur ne compose toutefois que
+sur l'**intersection** des domaines (ADR-077, ADR-080) : 4 477 sondes sur 6 988 — le chemin mixte
+n'est pas le chemin de rendu, et c'est une sémantique de service, pas un défaut.
+**A251 traitée** par [ADR-132](../adr/ADR-132-domaine-d-image-d-un-sillage.md) : le domaine d'image
+d'un sillage se calcule depuis sa recette (89,36 m, 18,53 s contre 102,22 m et 40 s déclarés),
+l'hôte l'annonce et ne refuse pas ; A214 gagne un troisième point de calibration, pas un garde.
+**Ligne neuve, sévérité 1 : A254** — le budget de pente est une **somme sur les sources**, 84 % de
+π/7 consommés par un impact et un sillage, majorant 3,7 à 10,5 fois la pente réelle, marge 0,0712 ;
+la troisième source refuse toute l'image, par `SlopeEnvelope`. **Suite S215 : A254**, avant toute
+scène à plusieurs sources et donc avant la mutualisation de J1-bis ; ensuite la loi GPU.
+Autres lignes et déclencheurs conservés.
 
 **Suivi J1 S213 — cadrage corrigé par l'utilisateur ([ADR-131](../adr/ADR-131-un-depassement-qualifie-une-implementation.md)).**
 Un dépassement qualifie l'implémentation mesurée, pas le sillage ni l'objectif. Espace

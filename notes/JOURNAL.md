@@ -10992,3 +10992,64 @@ A247, suivi S213 ; autres déclencheurs conservés) ; feuille de route J1/J1-bis
 I-05/I-06/I-08/I-09/I-12 relus : repli sans allocation dans le rendu, phases entières, aucun temps
 f32 ; aucun amendé. Suite complète `code/` : **354 réussis (256+4+1+93), 5 ignorés**, aucun échec. 131 ADR,252 angles,286 leçons,18 invariants,
 6 SPEC,23 cas. Compteur 0 : W avancée (code src) et ADR-131 actée. Jeton libre, copies avancées.
+
+## S214 — 2026-09-13 — Composition par le cœur (exacte au bit), budget conjoint à 84 %, ADR-132
+
+**Entrée.** Ligne `Session suivante` de S213, conforme à ADR-131 D6 et à la §Suite de
+TEMPS-SILLAGE-S213 : validité avant accélération — composition impact + sillage par `mixed_water`
+sur la scène, puis A251. Aucune entrée utilisateur nouvelle. Maillons 0 à l'amorce. Claude Code
+(Opus 5) ; `master` et trois copies propres à 08c2011. Plan b82b325, P2 879774c, P3 9bd3175,
+P4 8f7fc3b, P5 fba6d08, P6 0f97ead, P7 0c4b12b, P8 88b8a02.
+
+**Décision structurante.** **ADR-132 actée** : le domaine d'image d'un sillage se calcule depuis sa
+recette — `rayon = 2π·angular/(3·cutoff)`, `durée = 4π/√(g·cutoff/radial)` — et l'hôte l'**annonce**
+sans refuser (ADR-091, chemin cosmétique ADR-129 §3). Une durée honnête porte le critère qui l'a
+calibrée. La fixture S212 est déclarée hors domaine et **conservée**, parce qu'elle a servi à
+recevoir S211 à S214. `water-core` intact ; aucun bit publié ne change. **A251 traitée.**
+
+**Chiffres qui orientent.**
+- **La composition du cœur est exacte au bit** contre la somme à la main de l'hôte, quand les deux
+  évaluent au **même point** : écart η `0,000000000` aux cinq âges, pentes 1,5e-8 (un ulp).
+- Avant correction, la même comparaison donnait **1,78e-5 m** — 18× le critère déclaré de 1e-6. La
+  prédiction écrite pour être contredite l'a été. Cause : B au point monde quantifié (1/2048 m,
+  ≤ 244 µm), impact et sillage au `f32` brut. **A253**, corrigé dans l'hôte.
+- **Budget conjoint 0,3477 à 0,3776 contre π/7 = 0,4488** — 77,5 à **84,1 %** — pour *une* source de
+  chaque type. Pente réelle des perturbations 0,0929 à 0,0352 : **majorant 3,7 à 10,5 fois** le réel.
+  Marge 0,0712 : une troisième source refuse toute l'image, et par `SlopeEnvelope` (vérifié :
+  4 477/4 477, zéro `Slope`). **A254, sévérité 1.**
+- **Le cœur ne compose que sur l'intersection** des domaines (ADR-077, ADR-080) : 4 477 sondes sur
+  6 988. Le chemin mixte ne peut donc pas être le chemin de rendu — ce n'est pas un défaut, c'est la
+  sémantique de service, et c'est pourquoi l'hôte sommait à la main.
+- **Domaine du sillage** : 89,36 m et 18,53 s contre un coin d'emprise à 102,22 m et un contexte de
+  40 s (**2,2×**). Trois critères : 2 % franchi entre 16 et 18 s, couture de 3 mm entre 18 et 20 s,
+  rayon d'accord à 10 % entre 24 et 30 s. Le rayon ne mord jamais ici.
+- **Coût variable de 20 % entre passages** du même binaire : 1,2555 / 1,2458 (froid), 1,6477 /
+  1,7760, 1,5820 / 1,8398 ms. **L'écart hôte/exemple non attribué de S213 n'avait pas de cause à
+  chercher** : c'était un rang de passage. **L289**, suivi A247.
+- GPU eau 1,897 / 4,183 ms inchangé ; `VERIFY` max 8,03e-5 m, tolérance 3 mm tenue ; `--smoke` 120
+  images code 0. Suite `code/` : **354 réussis (256+4+1+93), 5 ignorés**.
+
+**Ce qui n'a pas été fait.** A254 ouverte le jour de sa découverte, non traitée — elle demande une
+décision sur le majorant, sa composition ou `max_slope`, et elle passe avant toute scène à plusieurs
+sources. A253 reste ouverte du côté de l'interface (`eval_local` est `pub(crate)` ; un hôte ne peut
+pas évaluer B hors du réseau monde). A214 gagne un point de calibration, pas un garde. Aucune ligne
+de `code/*/src` ajoutée : tout le travail est dans `viewer/` et dans la conception. Cadence
+complète, interaction manuelle, poses de caméra, allocations de la pile (I-06), seconde cible (B7)
+toujours dus. Captures toujours sous `captures/s212/`.
+
+**Suite S215.** File J1, et **A254 d'abord** : le budget de pente ne passe pas à l'échelle en nombre
+de sources. Mesurer une scène à deux impacts ou deux sillages, décider si le majorant se resserre
+(le rapport 3,7–10,5 dit qu'il le peut), s'il se compose autrement que par la somme, ou si
+`max_slope` cesse d'être une constante de milieu — puis reprendre la loi GPU (espace, LOD,
+visibilité, mutualisation), chaque mesure avec son en-tête (ADR-131 D3). J2/δ général et V-noyau
+restent dus (ADR-127).
+
+**Rituel.** A253 (sévérité 2, traitée dans l'hôte), A254 (sévérité 1) ; suivis A251 (traitée par
+ADR-132), A214, A247 ; L287, L288, L289 ; file plurielle entière relue ; feuille de route J1/J1-bis
+datées S214 ; index, README, REPRISE §3/§4 et jeton. Invariants relus que la décision cite —
+I-04 (autorité : l'hôte annonce, ne décide pas de la physique), I-06 (aucune allocation ajoutée au
+pas ; pile graphique toujours non reçue), I-08 (une conversion monde → local, aucun temps `f32`),
+I-14 (les deux lois citent leur provenance : ADR-107 et les mesures S156/S214), I-18 : aucun n'est
+devenu faux, aucun amendé. Aucun ADR réécrit. Suite complète `code/` : **354 réussis, 5 ignorés**,
+aucun échec. 132 ADR, 254 angles, 289 leçons, 18 invariants, 6 SPEC, 23 cas. **Compteur 0** :
+ADR-132 fixe un élément de W, comme ADR-126 l'avait fait en S203. Jeton libre, copies avancées.

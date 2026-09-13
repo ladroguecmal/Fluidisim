@@ -20,6 +20,19 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S214 — 2026-09-13 : [composition par le cœur](validation/COMPOSITION-J1-S214.md) et [ADR-132](adr/ADR-132-domaine-d-image-d-un-sillage.md).**
+Validité avant accélération (ADR-131 D6). `mixed_water` compose B + impact + sillage : **exact au
+bit** contre la somme de l'hôte **au même point** ; l'écart de 1,78e-5 m mesuré d'abord venait de
+deux positions pour une sonde — B quantifié au réseau monde, perturbations en `f32` brut (**A253**,
+corrigé). **Budget conjoint 84 % de π/7 avec *une* source de chaque type** ; majorant 3,7 à 10,5 ×
+la pente réelle ; une troisième source refuserait tout, par `SlopeEnvelope` (**A254**, sévérité 1).
+Le cœur ne compose que sur l'intersection des domaines : 4 477 sondes sur 6 988 — le chemin mixte
+n'est pas le chemin de rendu. **ADR-132** : domaine d'image du sillage calculé depuis sa recette
+(89,36 m, 18,53 s contre 102,22 m et 40 s déclarés), annoncé et non refusé ; **A251 traitée**.
+Coût variable de 20 % entre passages : l'écart hôte/exemple de S213 était un rang de passage
+(**L289**). 354 tests réussis/cinq ignorés. **Suite S215 : A254**, puis la loi GPU.
+132 ADR,254 angles,289 leçons,18 invariants,6 SPEC,23 cas ; compteur 0 (ADR-132 fixe W).
+
 **S213 — 2026-09-13 : [ADR-131](adr/ADR-131-un-depassement-qualifie-une-implementation.md) et [levier temporel du sillage](validation/TEMPS-SILLAGE-S213.md).**
 Un dépassement qualifie l'implémentation ; espace d'optimisation nommé (J1-bis) ; techniques
 présentes/absentes/domaine avec chaque mesure ; 2 ms sur la combinaison. `pressure_timeline` :

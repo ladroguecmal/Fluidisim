@@ -4709,3 +4709,56 @@ absentes, domaine de validité — et réserver « reçu / refusé » aux critè
 proposer une suite, énumérer l'espace entier (temps, espace, LOD spatial, spectral, temporel,
 visibilité, mutualisation, et ce que le cas ajoute) plutôt que les deux idées les plus proches. Ne
 jamais écrire la condition sous laquelle on demanderait de réduire l'ambition. Voir ADR-131, A252.
+
+## L287 — Deux couches évaluées au même endroit logique ne le sont pas au même point numérique
+
+*(S214)* La composition du cœur et la somme à la main de l'hôte donnaient la même eau à 1,8e-5 m
+près — dix-huit fois le critère déclaré, sur une scène où tout le reste était exact au bit. La
+cause n'était dans aucune des deux physiques : l'hôte évaluait **B** au point monde quantifié
+(`WorldPos`, 1/2048 m) et les **perturbations** au point `f32` brut. Une même sonde avait deux
+positions, distantes d'au plus 244 µm, et le produit par la pente rendait les 18 µm.
+
+Ce qui généralise : **quand deux couches d'un même modèle acceptent des représentations de position
+différentes, un appelant les mélange sans le voir**, et l'écart qui en résulte imite exactement une
+erreur de physique — il est petit, lisse, et croît avec la pente. Aucun test de couche ne l'attrape,
+parce que chaque couche est juste à son point. Le cœur s'en protégeait déjà par construction — une
+conversion monde → local servie aux trois couches — et c'est précisément cette protection que
+l'hôte contournait en reconstruisant ses points lui-même.
+
+Le geste : quand deux chemins qui doivent dire la même chose divergent au-delà de leur arrondi,
+**comparer d'abord au même point, avant de soupçonner le calcul**. Et, en composant, dériver tous
+les points d'une conversion unique — même quand l'interface publique de chaque couche accepte
+volontiers un point brut.
+
+## L288 — Un majorant additif transforme le nombre de sources en budget, et personne ne le mesure composé
+
+*(S214)* Le budget de pente refuse sur la **somme** des majorants des perturbations, source par
+source. Chaque moitié avait été admise seule — l'impact en S205, le sillage en S212 — et chacune
+passait largement. Composées, elles occupent **84 %** de π/7, pour une pente réelle dix fois plus
+faible : la troisième source refuserait toute l'image, par marge et non par raideur. Le défaut
+n'est visible dans aucune mesure de source unique, et il ne se déduit d'aucune d'elles sans faire
+l'addition explicitement.
+
+Ce qui généralise : **une borne additive fait du nombre d'éléments une ressource rare, et un banc
+qui n'exerce qu'un élément ne peut pas le montrer**. Le pessimisme de chaque majorant, inoffensif
+seul, devient le facteur d'échelle du système entier. C'est A208 vue par l'autre bout : là où A208
+regardait ce qu'une emprise consomme, ici c'est le **cardinal** qui consomme.
+
+Le geste : pour toute grandeur bornée par une somme de majorants, publier **l'occupation** —
+part du budget consommée — et non seulement le verdict d'admission, et mesurer au moins deux
+éléments ensemble avant de conclure qu'une couche tient. Voir A254, ADR-119 règle 1, ADR-128.
+
+## L289 — Une mesure de coût sur une machine portable dit son rang de passage
+
+*(S214)* Le même binaire, trois passages : 1,25 ms, puis 1,65, puis 1,58–1,84 — 20 à 40 % d'écart
+sur une médiane de 120 images, la valeur basse tombant sur le passage à froid. S213 avait attribué
+un écart de cette taille à une différence entre son exemple et son hôte, et l'avait laissé « non
+attribué ». Il n'y avait pas de différence à expliquer : il y avait un ordre de passage.
+
+Ce qui généralise : **sur une machine à gestion thermique agressive, la répétition intra-passage ne
+mesure pas la dispersion inter-passage**. Cent vingt images consécutives donnent une médiane serrée
+et fausse ; c'est entre les exécutions que vit la variance. Un bloc de chauffe (A195) protège du
+premier effet, pas de celui-ci.
+
+Le geste : exécuter au moins deux passages séparés avant de publier un coût, publier leur écart, et
+dire le rang du passage cité. Ne comparer deux chemins qu'à rang égal.

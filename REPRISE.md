@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 11:00 +02:00
+JETON            : libre
+Battement        : 2026-09-13 11:37 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S214 — validité avant accélération (ADR-131 D6) : composition impact + sillage par `mixed_water` sur la scène, puis A251
-Dernière session : S213 — ADR-131 (un dépassement qualifie l'implémentation, espace d'optimisation J1-bis) ; levier temporel du sillage construit, CPU 1,26 / 0,36 ms, GPU inchangé
-Session suivante : S214 — file J1, validité avant accélération (ADR-131 D6) : composition impact + sillage par mixed_water sur la scène (budget conjoint ADR-119), puis A251 ; chaque mesure avec techniques présentes/absentes et domaine (TEMPS-SILLAGE-S213 §Suite)
-Maillons        : 0 — W avancée dans code/water-core/src (pressure_timeline) et ADR-131 actée
+Session en cours : aucune
+Dernière session : S214 — composition par le cœur exacte au bit (A253 corrigé) ; budget conjoint à 84 % de π/7 pour deux sources (A254, sévérité 1) ; ADR-132, domaine d'image du sillage (A251 traitée)
+Session suivante : S215 — file J1, **A254 d'abord** : le budget de pente est une somme sur les sources et n'a plus que 0,0712 de marge. Mesurer une scène à deux sources, puis décider — resserrer le majorant (rapport mesuré 3,7 à 10,5), composer autrement que par la somme (ADR-119 règle 1 l'interdit sans mesure), ou retirer à `max_slope` son statut de constante de milieu. Ensuite la loi GPU (espace, LOD, visibilité, mutualisation), chaque mesure avec son en-tête (ADR-131 D3)
+Maillons        : 0 — ADR-132 actée (fixe un élément de W, comme ADR-126 en S203) ; aucune ligne de `code/*/src` cette session
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 
@@ -168,8 +168,17 @@ restent datés ; la file liée porte aussi leurs suivis S195–S199.**
 levier temporel du sillage dans le cœur, **un** des éléments de l'espace d'optimisation (J1-bis de
 la feuille de route) ; 2 ms s'éprouve sur leur combinaison ; A251 et composition impact+sillage
 restent nécessaires ([HOTE-GPU-S212](docs/validation/HOTE-GPU-S212.md)).
-**S213 : levier temporel construit** ([TEMPS-SILLAGE-S213](docs/validation/TEMPS-SILLAGE-S213.md)) ;
-prochain lot J1 : composition impact+sillage par le cœur, puis A251.
+**S213 : levier temporel construit** ([TEMPS-SILLAGE-S213](docs/validation/TEMPS-SILLAGE-S213.md)).
+**S214 : les deux travaux de validité de J1 sont faits**
+([COMPOSITION-J1-S214](docs/validation/COMPOSITION-J1-S214.md)) — la composition du cœur est exacte
+au bit une fois le point commun rétabli (**A253**), et le domaine d'image du sillage est calculé,
+annoncé et publié avec sa fixture ([ADR-132](docs/adr/ADR-132-domaine-d-image-d-un-sillage.md),
+**A251 traitée**). **Ils ont ouvert une ligne plus lourde qu'eux : A254.** Le budget de pente est
+une **somme sur les sources** — 84 % de π/7 consommés par *une* source de chaque type, majorant
+3,7 à 10,5 fois la pente réelle, marge 0,0712 : la troisième source refuse toute l'image, par
+majorant et non par raideur. **Prochain lot J1 : A254**, avant toute scène à plusieurs sources et
+donc avant la mutualisation de J1-bis ; puis la loi GPU (espace, LOD, visibilité, mutualisation),
+chaque mesure avec son en-tête (ADR-131 D3).
 
 **Tolérance B4 fixée à 2 % par l'utilisateur (ADR-120).** Elle ne doit plus être
 redemandée. La réception et son profil sont dans B4-TOLERANCE-S190 ; B4 complet
@@ -249,7 +258,7 @@ pièges déjà payés.
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/FEUILLE-DE-ROUTE.md  ← trajectoire J1 → J5 et noyau V, seul porteur (ADR-127)
 docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 131 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 132 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -268,6 +277,19 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S214 — 2026-09-13 : [composition par le cœur](docs/validation/COMPOSITION-J1-S214.md) et [ADR-132](docs/adr/ADR-132-domaine-d-image-d-un-sillage.md).**
+Validité avant accélération (ADR-131 D6). `mixed_water` compose B + impact + sillage : **exact au
+bit** contre la somme de l'hôte **au même point** ; l'écart de 1,78e-5 m mesuré d'abord venait de
+deux positions pour une sonde — B quantifié au réseau monde, perturbations en `f32` brut (**A253**,
+corrigé). **Budget conjoint 84 % de π/7 avec *une* source de chaque type** ; majorant 3,7 à 10,5 ×
+la pente réelle ; une troisième source refuserait tout, par `SlopeEnvelope` (**A254**, sévérité 1).
+Le cœur ne compose que sur l'intersection des domaines : 4 477 sondes sur 6 988 — le chemin mixte
+n'est pas le chemin de rendu. **ADR-132** : domaine d'image du sillage calculé depuis sa recette
+(89,36 m, 18,53 s contre 102,22 m et 40 s déclarés), annoncé et non refusé ; **A251 traitée**.
+Coût variable de 20 % entre passages : l'écart hôte/exemple de S213 était un rang de passage
+(**L289**). 354 tests réussis/cinq ignorés. **Suite S215 : A254**, puis la loi GPU.
+132 ADR,254 angles,289 leçons,18 invariants,6 SPEC,23 cas ; compteur 0 (ADR-132 fixe W).
 
 **S213 — 2026-09-13 : cadrage du coût corrigé ([ADR-131](docs/adr/ADR-131-un-depassement-qualifie-une-implementation.md)) et [levier temporel du sillage](docs/validation/TEMPS-SILLAGE-S213.md).**
 Clarification utilisateur : un dépassement qualifie l'implémentation ; espace d'optimisation nommé

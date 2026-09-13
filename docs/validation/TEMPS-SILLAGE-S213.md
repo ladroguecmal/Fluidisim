@@ -122,6 +122,12 @@ contre 1,26 ms) : cause non attribuée.
 
 ## Suite
 
+*Note datée du 2026-09-13 (S214) : les deux travaux nommés ci-dessous sont faits —
+[COMPOSITION-J1-S214](COMPOSITION-J1-S214.md). La composition est exacte au bit une fois le point
+commun rétabli (A253) ; A251 est traitée par [ADR-132](../adr/ADR-132-domaine-d-image-d-un-sillage.md).
+La mesure a ouvert **A254** (sévérité 1), qui passe avant la loi GPU : le budget de pente est une
+somme sur les sources, et deux en consomment 84 %.*
+
 Travaux nécessaires de J1 avant d'accélérer davantage, pour que l'accélération ne masque rien :
 **composition impact + sillage** par `mixed_water` sur la scène (budget conjoint ADR-119), et
 **A251** — emprise et durée d'image du sillage déduites de sa recette et reçues par coutures.
