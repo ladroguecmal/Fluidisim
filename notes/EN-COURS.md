@@ -58,62 +58,36 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S227 — terminée
+Session : S228 — en cours
 Agent : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
-Entrée : audit global demandé par l’utilisateur : intentions, dérives, procédure, documentation,
-zones d’ombre, améliorations et correctifs du code. Copie principale, master à dfd1507, propre ;
-trois copies propres au même commit, lignée B archivée. Aucun distant. Maillons 0 à l’entrée.
+Entrée : « Continue », après S227. Copie principale et trois copies propres à a86bd43,
+lignée B archivée. Jeton libre ; maillons 0. Suite déclarée : A266, puis V restaurable.
 
-**Objectif.** Produire un diagnostic fondé sur le dépôt et appliquer les corrections bornées qui
-rendent la reprise et le prochain lot de construction plus fiables. L’audit demandé prend la
-place de la suite automatique A266 ; celle-ci reste prioritaire pour V, sans réduction d’ambition.
+**Objectif.** Construire une relation volume/plan orienté correcte pour V, compatible avec les
+contenants non prismatiques, et la consommer dans le pas réel. Recevoir prisme, cale, extrêmes
+et changements de direction contre des références indépendantes. Ne pas réduire l'ambition.
 
-**Hypothèses à éprouver.** L’histoire est recopiée dans les points d’entrée ; le compteur de
-maillons mesure des fichiers touchés plutôt qu’une capacité utilisable ; des blocages hérités
-peuvent être périmés. Le code sera examiné sur ses chemins exécutés, et un défaut ne sera corrigé
-qu’avec un cas qui le reproduit. Aucun objectif physique ni seuil ne sera réduit pour faciliter
-l’audit. Pas de réécriture d’ADR ou des sources initiales.
+**Critère d'arrêt.** Le test A266 passe sans être ignoré ; la position de la surface préserve le
+volume géométrique dans une précision explicitée, y compris près des fonds et plafonds. Une
+géométrie insuffisante est refusée explicitement. Le chemin vertical ancien reste reçu dans son
+domaine. Les refus restent atomiques ; pas d'allocation ajoutée au pas. La restauration V est le
+lot suivant, sauf dépendance technique indispensable découverte ici.
 
 ### Plan
 
 - [x] **P1** — amorce, état réel, jeton et plan seuls.
-- [x] **P2** — intentions initiales, feuille de route, file active, métriques documentaires et code ; consigner le diagnostic factuel.
-- [x] **P3a** — points d’entrée et file active réécrits au présent ; méthode proportionnée et critère de capacité reçue.
-- [x] **P3b** — remplacer l’indicateur de vélocité par un inventaire portable, sans faux score de productivité.
-- [x] **P4** — reproduire et corriger les défauts de code bornés issus de l’audit ; sinon documenter les correctifs prioritaires avec critères de réception.
-- [x] **P5** — vérifier les changements, achever le bilan global et ordonner les prochains lots selon leur effet sur le système.
-- [x] **P6** — rituel de fin §6 : journal, angles/leçons utiles, file active, index, jeton libre et copies synchronisées.
+- [>] **P2** — lecture ciblée et choix du contrat géométrique ; ADR remplaçant la disposition incompatible d'ADR-010, oracle et limites déclarés.
+- [ ] **P3** — construire le calcul géométrique orienté, sans allocation au pas ; tests indépendants des volumes et plans.
+- [ ] **P4** — brancher le contrat dans V ; activer la régression A266, préserver l'atomicité et les domaines compatibles.
+- [ ] **P5** — réception complète, coût et limites du chemin consommé ; publication concise de la preuve.
+- [ ] **P6** — rituel §6 : journal, file, angles/leçons utiles, trajectoire, index, jeton libre et synchronisation des copies.
 
 Chaque étape reste sous quinze minutes ; découpage déclaré ici si nécessaire.
 
 ### Notes de reprise
 
-REPRISE lu intégralement malgré sa taille. Git/cargo/Python disponibles ; Git Bash disponible hors
-PATH. Aucune campagne historique n’a été relancée.
-
-
-P2 : bilan préliminaire dans docs/registres/BILAN-GLOBAL-S227.md ; base release 383 réussis,
-5 ignorés. Confluence V et soustraction i64 ciblées ; A266 a aussi un écart de convention à vérifier.
-P3 découpée en P3a (documentation/procédure), P3b (indicateur portable corrigé).
-
-P3a : historique conservé dans Git dfd1507 et le journal ; ADR/sources intacts. Feuille de route
-J1 réconciliée avec S223/S225 ; autorisations et périmètre conservés.
-
-P3b : outils/etat_projet.py en lecture seule, quatre tests de classement/historique passés ;
-0 lien de chemin actif manquant. REPRISE/README/index = 148/47/189 lignes, contre 3273/956/1932.
-Ancres non couvertes par le contrôle automatique, à examiner en P5.
-
-P4 : deux défauts vus échouer puis corrigés. Confluence 3 ml dans 1 ml ; soustraction i64
-panique. Quatre nouvelles régressions passent debug/release, seize tests V release passent.
-A266 : hublot central à 1,01 m fuit de 506 ml, attendu zéro ; nouveau test ignoré explicitement
-et exécuté en échec connu. Note datée ADR-010 et réception S226. Pas de représentation choisie.
-
-P5 : suite complète release hors réseau : 387 réussis, 6 ignorés (dont le nouvel A266 connu).
-Quatre tests de l'indicateur passent ; chemins actifs vérifiés et deux anciennes ancres réparées.
-Bilan achevé : A266, état V restaurable, budget/précision δ, espace/LOD/visibilité ; autres
-déclencheurs conservés dans la file. A267/A268 y sont closes ; leurs fiches arrivent au rituel P6.
-
-P6 : journal, A267/A268 et suivi A266/A211/A243 ; L312 et correction datée L311 ; trajectoire et
-file active relues, invariants touchés vérifiés. S228 : A266, puis V restaurable ; autres lots
-conservés. Jeton libre. Fin matérielle : commit du rituel, puis avance rapide des trois copies
-propres sur master ; aucune copie incertaine supprimée, lignée B archivée conservée.
+S227 a isolé deux erreurs : table horizontale insuffisante pour les formes inclinées ; hauteur
+verticale consommée comme distance normale. Sous pente 0,3, le prisme à mi-remplissage fuit de
+506 ml à un hublot central situé à 1,01 m au lieu de zéro. Le test ignoré porte A266 dans son nom.
+Base de validation S227 : 387 réussis, 6 ignorés ; quatre tests d'inventaire passent. Pas de
+nouvelle suite générale lancée à l'amorce : la base vient d'être vérifiée et les copies sont identiques.
