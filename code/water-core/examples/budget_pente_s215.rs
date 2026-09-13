@@ -44,6 +44,41 @@ fn medium() -> Medium {
     }
 }
 
+/// Champ radial d'une longueur d'onde et d'une énergie données, avec le domaine que **la
+/// fixture elle-même suit** : ADR-126 demande `R ≥ 15,5 λ` et `A ≥ 96 √(λ/g)`, et la scène J1
+/// (λ 3,35 m, rayon 52 m, ttl 56 s) est exactement à ces deux bornes. La famille les reprend,
+/// pour que chaque membre soit observé sur la même portion de sa propre vie.
+fn family_field(wavelength_m: f32, energy_j: f32) -> Option<RadialImpact<256>> {
+    let m = medium();
+    let scale = (wavelength_m / m.gravity).sqrt();
+    let event = WaveEvent::impact(Impact {
+        id: 215,
+        frame: FrameId(0),
+        cell: 0,
+        birth: SimTime(BIRTH),
+        ttl_us: (96. * scale * 1e6) as u64,
+        position: [0., 0., 0.],
+        energy_j,
+        wavelength_m,
+        direction_turns: 0.,
+        anisotropy: 0.,
+        displaced_l: 0.,
+        material: 0,
+        origin: Origin::Server,
+        above_surface: true,
+    })
+    .ok()?;
+    RadialImpact::new(
+        event,
+        m,
+        Domain {
+            radius: 15.5 * wavelength_m,
+            age_us: (96. * scale * 1e6) as u64,
+        },
+    )
+    .ok()
+}
+
 fn impact() -> (RadialImpact<256>, f32, f32) {
     let m = medium();
     let (energy_j, wavelength_m) = impact_generator::impact_from_entry(
@@ -90,9 +125,19 @@ fn impact() -> (RadialImpact<256>, f32, f32) {
 /// c'est ainsi qu'ADR-094 l'a reçu. `samples` points sur `[0, RADIUS]` : à 20 000, le pas vaut
 /// 2,6 mm, soit λ/1288, et le pic de `0,2062 λ` est traversé par plus de 260 points.
 fn impact_peak(field: &RadialImpact<256>, position: [f32; 2], t: SimTime, samples: u32) -> f32 {
+    peak_within(field, position, t, samples, RADIUS)
+}
+
+fn peak_within(
+    field: &RadialImpact<256>,
+    position: [f32; 2],
+    t: SimTime,
+    samples: u32,
+    radius: f32,
+) -> f32 {
     let mut peak = 0.0f32;
     for i in 0..=samples {
-        let r = RADIUS * i as f32 / samples as f32;
+        let r = radius * i as f32 / samples as f32;
         let p = [position[0] + r, position[1]];
         if let Ok(s) = field.sample(FrameId(0), 0, p, t) {
             peak = peak.max((s.slope[0] * s.slope[0] + s.slope[1] * s.slope[1]).sqrt());
@@ -202,28 +247,89 @@ fn main() {
             bound_pressure::Prepared::from_journal(context, &spectrum, &journal, t, &mut slots)
                 .unwrap();
         let envelope = prepared.slope_envelope();
-        let mut peak = 0.0f32;
+        let mut slope_at = |p: [f32; 2]| {
+            prepared
+                .sample_batch(&context, t, &[p], &mut scratch, &mut out)
+                .ok()
+                .map(|()| {
+                    let s = out[0].slope;
+                    (s[0] * s[0] + s[1] * s[1]).sqrt()
+                })
+        };
+        // Balayage grossier pour localiser, puis **raffinement local** : un balayage global plus
+        // fin coûte le carré du gain et ne regarde que le voisinage du maximum pour rien. La
+        // fenêtre fait ±1 m — plus que le demi-pas grossier — au pas de 2 cm, soit λ_min/105.
+        let (mut peak, mut argmax) = (0.0f32, [0.0f32; 2]);
         for iy in 0..=ny {
             for ix in 0..=nx {
                 let p = [
                     WAKE_MIN[0] + ix as f32 * step,
                     WAKE_MIN[1] + iy as f32 * step,
                 ];
-                if prepared
-                    .sample_batch(&context, t, &[p], &mut scratch, &mut out)
-                    .is_ok()
-                {
-                    let s = out[0].slope;
-                    peak = peak.max((s[0] * s[0] + s[1] * s[1]).sqrt());
+                if let Some(v) = slope_at(p) {
+                    if v > peak {
+                        peak = v;
+                        argmax = p;
+                    }
+                }
+            }
+        }
+        let coarse = peak;
+        let fine = 0.02f32;
+        for iy in -50..=50i32 {
+            for ix in -50..=50i32 {
+                let p = [
+                    argmax[0] + ix as f32 * fine,
+                    argmax[1] + iy as f32 * fine,
+                ];
+                if let Some(v) = slope_at(p) {
+                    peak = peak.max(v);
                 }
             }
         }
         worst_wake = worst_wake.max(peak / envelope);
         println!(
-            "SILLAGE age={age} pente_reelle={peak:.6} majorant={envelope:.6} pessimisme={:.4} points={}",
+            "SILLAGE age={age} pente_reelle={peak:.6} grossier={coarse:.6} gain_raffinement={:.4} argmax=[{:.2},{:.2}] majorant={envelope:.6} pessimisme={:.4} points={}",
+            peak / coarse.max(f32::MIN_POSITIVE),
+            argmax[0],
+            argmax[1],
             envelope / peak.max(f32::MIN_POSITIVE),
-            (nx + 1) * (ny + 1)
+            (nx + 1) * (ny + 1) + 101 * 101
         );
     }
     println!("SILLAGE_SURETE max(pente_reelle/majorant)={worst_wake:.6} (doit rester <= 1)");
+
+    // --- P3-bis : la décroissance est-elle universelle dans la famille ?
+    //
+    // Si le pessimisme ne dépend que de l'âge **adimensionné** `τ = t/√(λ/g)`, alors un seul
+    // rapport mesuré `ρ(τ)` suffit à resserrer `slope_max` pour toute la famille — exactement
+    // ce que `SLOPE_L1_RATIO` est déjà pour `τ = 0` (ADR-094, S141), une dimension plus riche.
+    // Deux énergies à λ égal éprouvent au passage la linéarité : le rapport doit être identique.
+    println!("FAMILLE tau=t/sqrt(lambda/g) ; domaine ADR-126 (R=15,5λ, A=96√(λ/g))");
+    const TAUS: [f32; 11] = [0., 0.5, 1., 2., 4., 8., 16., 27.4, 48., 66.8, 96.];
+    for (wavelength_m, energy_j) in [
+        (0.5f32, 0.05f32),
+        (1.0, 0.5),
+        (3.35, 164.0),
+        (3.35, 16.4),
+        (8.0, 4_000.0),
+        (20.0, 100_000.0),
+    ] {
+        let Some(field) = family_field(wavelength_m, energy_j) else {
+            println!("FAMILLE lambda={wavelength_m} E={energy_j} refusee_a_la_construction");
+            continue;
+        };
+        let scale = (wavelength_m / 9.81f32).sqrt();
+        let annonce = field.slope_max();
+        let radius = 15.5 * wavelength_m;
+        let mut line = String::new();
+        for tau in TAUS {
+            let t = SimTime(BIRTH + (tau * scale * 1e6) as u64);
+            let peak = peak_within(&field, [0., 0.], t, samples, radius);
+            line.push_str(&format!(" {:.3}", annonce / peak.max(f32::MIN_POSITIVE)));
+        }
+        println!(
+            "FAMILLE lambda={wavelength_m} E={energy_j} echelle_s={scale:.4} slope_max={annonce:.6} pessimisme_par_tau ={line}"
+        );
+    }
 }

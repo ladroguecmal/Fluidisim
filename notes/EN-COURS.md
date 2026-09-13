@@ -119,10 +119,11 @@ disparaître — l'occupation de 84 %, elle, ne dépend d'aucun échantillonnage
 - [x] **P1** — jeton, entrée, doute, thèse, critères et plan seuls.
 - [x] **P2** — pente réelle de l'impact seul, échantillonnage fin (rayon et temps), contre `slope_max()` ; sûreté du majorant sur 56 s.
 - [x] **P3** — pente réelle du sillage seul, échantillonnage fin dans l'emprise, contre `slope_envelope()` à chaque âge. *(Absorbée dans P2 : un seul programme mesure les deux champs ; les deux critères déclarés sont tenus.)*
-- [ ] **P3-bis** — *ajouté après P2, parce que le résultat l'exige* : la décroissance est-elle **universelle** dans la famille ? Mesurer plusieurs λ et E, et voir si le pessimisme s'effondre sur l'âge adimensionné `t/√(λ/g)` (échelle déjà employée par ADR-126).
-- [ ] **P4** — recomposer : occupation réelle, pessimisme par champ et conjoint ; note corrective datée sur A254 si le chiffre bouge.
-- [ ] **P5** — scène à deux sources : construire, exercer le refus, le qualifier.
-- [ ] **P6** — décider : ADR, ou constat motivé qu'aucune des trois voies ne s'impose encore.
+- [x] **P3-bis** — *ajouté après P2, parce que le résultat l'exige* : la décroissance est-elle **universelle** dans la famille ? Mesurer plusieurs λ et E, et voir si le pessimisme s'effondre sur l'âge adimensionné `t/√(λ/g)` (échelle déjà employée par ADR-126).
+- [ ] **P4** — table `ρ(τ)` mesurée et **sûre** (minimum par intervalle, la fonction n'est pas monotone), vérifiée sur deux λ ; occupation recomposée, note corrective datée sur A254.
+- [ ] **P5** — scène à deux sources : exercer le refus tel qu'il est aujourd'hui, et le requalifier avec le majorant resserré.
+- [ ] **P6** — décider **et construire** : ADR, puis `slope_max_at(t)` dans `RadialImpact` — méthode neuve, `slope_max()` inchangée (ADR-094 : migrer le refus `Steepness` est une autre décision) — consommée par le budget de composition ; tests.
+  *(P4 à P6 réécrits après P3-bis : la similitude étant établie, la décision n'est plus « laquelle des trois voies » mais « resserrer, et voici la loi ». Le plan d'origine reste lisible ci-dessus.)*
 - [ ] **P7** — document de réception (en-tête ADR-131, rang de passage) ; suite complète `code/`.
 - [ ] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
@@ -172,3 +173,31 @@ d'abord — sa `slope_max()` est figée à la naissance et se trompe d'un facteu
 sillage ensuite, après extinction. `SLOPE_L1_RATIO` est déjà un **rapport mesuré** entre borne L1
 et pente réelle (ADR-094, S141) : un `ratio(t)` est le même objet, une dimension plus riche. Reste
 à savoir s'il est universel dans la famille — c'est P3-bis, et sans cela il n'y a pas d'ADR.
+
+P3-bis : **la décroissance est universelle dans la famille.** Domaine ADR-126 pour chaque membre
+(`R = 15,5 λ`, `A = 96 √(λ/g)`) ; le pessimisme relevé à onze âges adimensionnés `τ = t/√(λ/g)`
+est **identique à trois décimales** pour λ = 0,5 · 1 · 3,35 · 8 m et pour E = 0,05 · 0,5 · 16,4 ·
+164 · 4 000 J :
+
+```
+τ        0     0,5      1      2      4      8     16    27,4     48    66,8     96
+ρ(τ)  1,000  8,713  1,063  1,273  2,409  4,823  7,071  10,066  15,228  20,227  30,243
+```
+
+Deux énergies à λ = 3,35 donnent la même colonne : le rapport est **indépendant de l'amplitude**,
+comme la linéarité l'exige, et c'est le contrôle qui le dit plutôt qu'une supposition.
+λ = 20 m à 100 kJ est **refusée à la construction** (`Steepness`) : la borne L1 y dépasse π/7 —
+comportement attendu, pas un échec de mesure.
+Recoupement : ρ(27,4) = 10,066 contre 10,0537 mesuré directement à 16 s ; ρ(66,8) = 20,227 contre
+20,1998 à 39 s ; ρ(96) = 30,243 contre 30,4354 à 56 s. Les deux chemins se rejoignent.
+
+**ρ n'est pas monotone** : elle vaut 8,713 à τ = 0,5 puis retombe à 1,063 à τ = 1 — la perturbation
+s'aplatit puis se reforme. Une table sûre doit donc prendre le **minimum par intervalle**, pas
+interpoler : sur `[0 ; 1]` le gain est nul, et c'est correct.
+
+Raffinement local du maximum du sillage (±1 m au pas de 2 cm autour de l'argmax grossier) : gain
+≤ **1,0034**, donc le balayage à 0,25 m avait déjà convergé. Le balayage global à 0,125 m lancé
+d'abord a été **abandonné** — il coûte le carré du gain pour regarder partout ailleurs que le
+maximum ; le raffinement local le remplace et le mesure. Impasse consignée pour ne pas la refaire.
+L'argmax du sillage suit la source : [-23 ; 2,25] à 0,5 s, [-2,5 ; 4] à 8 s, [21,5 ; 4] à 16 s
+(fin du forçage), puis se détache vers [47,5 ; 2,25] à 39 s.
