@@ -76,8 +76,8 @@ lot suivant, sauf dépendance technique indispensable découverte ici.
 ### Plan
 
 - [x] **P1** — amorce, état réel, jeton et plan seuls.
-- [>] **P2** — lecture ciblée et choix du contrat géométrique ; ADR remplaçant la disposition incompatible d'ADR-010, oracle et limites déclarés.
-- [ ] **P3** — construire le calcul géométrique orienté, sans allocation au pas ; tests indépendants des volumes et plans.
+- [x] **P2** — lecture ciblée et choix du contrat géométrique ; ADR remplaçant la disposition incompatible d'ADR-010, oracle et limites déclarés.
+- [>] **P3** — construire le calcul géométrique orienté, sans allocation au pas ; tests indépendants des volumes et plans.
 - [ ] **P4** — brancher le contrat dans V ; activer la régression A266, préserver l'atomicité et les domaines compatibles.
 - [ ] **P5** — réception complète, coût et limites du chemin consommé ; publication concise de la preuve.
 - [ ] **P6** — rituel §6 : journal, file, angles/leçons utiles, trajectoire, index, jeton libre et synchronisation des copies.
@@ -91,3 +91,9 @@ verticale consommée comme distance normale. Sous pente 0,3, le prisme à mi-rem
 506 ml à un hublot central situé à 1,01 m au lieu de zéro. Le test ignoré porte A266 dans son nom.
 Base de validation S227 : 387 réussis, 6 ignorés ; quatre tests d'inventaire passent. Pas de
 nouvelle suite générale lancée à l'amorce : la base vient d'être vérifiée et les copies sont identiques.
+
+P2 : ADR-139 acté, partition tétraédrique sans recouvrement, capacité géométrique entière ;
+inversion du volume coupé, anciennes tables +Z seulement. I-08 amendé explicitement pour les
+intermédiaires f64 de V, sans dérogation au déterminisme ; SPEC-001 dérive les fractions et
+SPEC-005 corrige la portée de son test d'étanchéité. Oracle boîte par intégrales séparées, cale
+par sections linéaires indépendantes ; pas de dépendance ajoutée.

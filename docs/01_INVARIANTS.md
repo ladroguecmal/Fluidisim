@@ -63,6 +63,11 @@ jamais de la mémoire. *(Ce qu'un profil a le droit de déclarer est fixé par *
 au GPU.
 → ADR-002, ADR-003
 
+*Amendement S228 ([ADR-139](adr/ADR-139-volume-et-plan-oriente-des-contenants.md)) : pour V,
+l'état reste entier ; ses intermédiaires locaux de géométrie, projection et débit utilisent
+`f64`, afin de ne pas réduire la précision des volumes entiers à celle de f32. Cette exception
+ne change ni le domaine local ni I-03 et ne s'étend pas aux autres couches.*
+
 **I-09 — On interpole des paramètres, jamais des réalisations.** Deux champs stochastiques ne se
 mélangent pas ; on mélange les paramètres qui les engendrent.
 → ADR-004

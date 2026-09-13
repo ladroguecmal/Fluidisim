@@ -198,3 +198,9 @@ arrivée séparément : trois sources remplissaient trois fois une même capacit
 une réduction collective après les limites existantes, sans masse perdue ; la place libérée par
 les sorties n'est disponible qu'au pas suivant. Cette correction d'implémentation ne reçoit pas
 encore le réseau pressurisé ni les grandes topologies. Les parcours restent en O(nœuds × arêtes).
+
+## Remplacement ciblé S228 — 2026-09-13
+
+[ADR-139](ADR-139-volume-et-plan-oriente-des-contenants.md) remplace l'usage universel de la
+table horizontale du §2 : le plan orienté est désormais inversé depuis le volume de la géométrie.
+Les anciennes tables gardent leur seul domaine +Z. Lois de débit, autorité et état entier restent.

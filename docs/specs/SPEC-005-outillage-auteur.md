@@ -39,7 +39,7 @@ bête et la plus coûteuse d'un pipeline.
 | Ressauts hydrauliques | dérivé | profil `Fr` le long du tronçon | ADR-011 §3.2 |
 | Sites turbulents permanents | dérivé + validation auteur | géométrie immergée + houle | ADR-013 §7 |
 | `sky_exposure` d'un nœud V | dérivé | géométrie au-dessus | pluie (ADR-010 §5) |
-| `shape_lut` d'un contenant | dérivé | maillage du contenant | ADR-010 §2, ADR-008 §4 |
+| Géométrie V ; `shape_lut` historique limitée à +Z | dérivé | volume intérieur partitionné, capacité et identifiant de cuisson | ADR-139, ADR-010 §2, ADR-008 §4 |
 | Proxy de flottabilité d'un archétype | dérivé + réglage auteur | coque | ADR-008 §2 |
 | Régions hydrographiques | dérivé | tessellation cube-sphère | ADR-002 §2.4 |
 | Modes propres de bassin (seiche) | dérivé | géométrie du lac | ADR-011 §5 |
@@ -316,6 +316,12 @@ endroit et forcerait à recuire des cases entières sans rapport.
 est monotone par construction physique. Si le calcul par tranches horizontales produit une courbe
 non monotone, le maillage fuit. La cuisson devient ainsi un **test d'étanchéité** sans écrire de
 test d'étanchéité.
+
+*Correction S228, ADR-139* : une courbe monotone ne **prouve pas** l'étanchéité ; elle n'est
+qu'un contrôle nécessaire du calcul. La géométrie orientée demande une partition intérieure
+sans cellules dégénérées ni recouvrements. L'adéquation de cette partition au maillage d'auteur
+et son erreur pour une frontière courbe se valident à la cuisson. Une cellule manquante n'est
+pas détectée par la seule monotonie.
 
 **La gravure détecte les pentes impossibles.** Si la gravure d'une ligne d'eau demande de creuser
 au-delà d'un seuil, c'est que le tracé et le terrain sont incompatibles. L'outil le signale pendant

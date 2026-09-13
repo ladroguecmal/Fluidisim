@@ -338,6 +338,35 @@ par la masse d'eau réellement accélérée, là où la pression de pic publiera
   `T = 2π / √( g·(π/L)·tanh(π·h/L) )`.
 - Seiche d'un bassin fermé : `T = 2L/√(g·h)`.
 
+### Géométrie orientée de V — S228, ADR-139
+
+`u = −g_eff/|g_eff|`, `F(d) = volume(Ω ∩ {u·x ≤ d})` ; chercher `F(d) = volume_ml`.
+Pour une partition tétraédrique, sommer les contributions. Le volume d'un tétraèdre de sommets
+`a,b,c,d` vaut `|det(b−a,c−a,d−a)|/6` ; **1 ml = 10¹² µm³**. Déterminants et capacité entière
+arrondie sont calculés avant toute conversion flottante.
+
+Fraction d'un tétraèdre sous le plan, obtenue par rapports de déterminants dans ses coordonnées
+barycentriques (pas d'intégration spatiale échantillonnée) :
+
+- Aucun sommet dessous : 0 ; tous dessous : 1.
+- Un seul sommet A dessous : `t_AB · t_AC · t_AD`, où `t_ij = (d − u·i)/(u·j − u·i)`
+  est la fraction de l'arête de i vers j qui va du sommet mouillé à l'intersection.
+- Trois dessous : retrancher à 1 le tétraèdre sec adjacent à l'unique sommet au-dessus.
+- Deux dessous A,B et deux au-dessus C,D : poser `a=t_AC, b=t_AD, c=t_BC, e=t_BD`.
+  La fraction est **`ab + ae(1−b) + ce(1−a)`**. Dans le tétraèdre de référence
+  `A=(0,0,0), B=(1,0,0), C=(0,1,0), D=(0,0,1)`, les trois termes sont les volumes relatifs
+  de `(A,B,AC,AD)`, `(B,AC,AD,BD)` et `(B,AC,BC,BD)`. Ils sont non négatifs et partitionnent
+  le polyèdre mouillé. Les arêtes interpolées relient toujours deux côtés différents du plan.
+
+Ce problème direct/inverse existe aussi en reconstruction d'interface :
+[Yang et James, JCP 214 (2006), 41–54](https://www.sciencedirect.com/science/article/abs/pii/S0021999105004225).
+Les formules ci-dessus sont dérivées ici ; aucune implémentation externe n'est importée.
+
+Soixante-quatre dichotomies bornent le travail : en arithmétique exacte, l'intervalle de position
+initial L est divisé par 2⁶⁴. En flottant, arrêter à stagnation ; vérifier le résidu calculé à
+**0,5 ml**, demi-unité de l'état entier. Cela n'est pas un certificat d'erreur de l'évaluation
+directe ; les oracles indépendants qualifient la précision dans le domaine publié (ADR-139).
+
 ## 7. Précision et temps
 
 - ulp d'un `f32` à distance `d` : `d·2⁻²³`. → origine flottante obligatoire au-delà de 4 096 m

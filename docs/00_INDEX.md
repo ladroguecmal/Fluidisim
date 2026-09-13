@@ -179,6 +179,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-136](adr/ADR-136-borne-locale-d-ordre-deux-a-hessienne-signee.md) | Borne locale de pente d'ordre deux, à Hessienne signée |
 | [ADR-137](adr/ADR-137-coupure-spectrale-de-la-borne-locale.md) | Coupure spectrale de la borne locale de pente |
 | [ADR-138](adr/ADR-138-le-budget-de-pente-tient-compte-de-la-position-relative.md) | Le budget de pente tient compte de la position relative des impacts |
+| [ADR-139](adr/ADR-139-volume-et-plan-oriente-des-contenants.md) | Le plan orienté se déduit du volume de la géométrie du contenant |
 
 ## Travail et historique
 
