@@ -10747,3 +10747,28 @@ suivant de J1.
 I-16 — aucun ne devient faux ; I-16 est précisément ce qui retire `paquets_W_max`. Aucun code
 `src` : compteur 0 par ADR-129 (décision qui fixe un élément de W), l'outil dirait 1. File active
 entière relue. Feuille de route J1 à jour.
+
+## S207 — 2026-09-13 — L'utilisateur tranche : l'eau de J1 se rend sur GPU, par un hôte séparé
+
+**Entrée.** Réponse de l'utilisateur, par question structurée après le commit de S206, à
+l'arbitrage « chemin de rendu et hôte de J1 » : **(A) GPU, hôte séparé**, l'option recommandée.
+État : master et copies à 94dd705, propres. Session courte d'archivage, plan seul 9f9abfa.
+
+**Décision : ADR-130 actée**, arbitrage de l'utilisateur. B et W s'évaluent sur GPU dans un hôte
+d'affichage séparé ; (B) CPU multi-cœurs, (C) changement de profil et (D) densité réduite non
+retenus ; ADR-125 inchangé. Conséquences techniques déléguées : `water-core` reste sans
+dépendance et publie ce que le GPU consomme (recettes, phases repliées I-08, tables ADR-129) ;
+l'hôte vit hors du workspace sans réseau ; chemin cosmétique (I-04, I-15). La réponse s'inscrit
+dans ce que le corpus prévoyait : ADR-020 (`IGpuBackend` fourni par l'hôte), ADR-003, ADR-012
+(`gpu_sim_ms = 2,5`).
+
+**Ouvert.** Pile exacte ; budget GPU de l'eau, qu'aucune valeur ne fixe (première mesure de
+l'hôte) ; **aucune dépendance téléchargée sans autorisation nommée**, demandée au début du lot.
+
+**Suite S208 : construire ADR-129** (W, code `src`, indépendant de la pile) ; puis le lot de
+l'hôte GPU, qui commence par proposer la pile et demander l'autorisation de téléchargement.
+
+**Rituel.** Note datée ADR-125 ; feuille de route (§4 : arbitrage tranché, deux lignes nouvelles —
+dépendances, budget GPU), file active, index, README, REPRISE. A250 reçoit sa décision, reste
+ouverte jusqu'à l'hôte construit. Aucun angle, aucune leçon nouveaux. 130 ADR, 250 angles,
+283 leçons, 18 invariants, 6 SPEC, 23 cas. Compteur 0 (décision de l'utilisateur, sujet imposé).

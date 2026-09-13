@@ -2922,3 +2922,8 @@ COMPOSITION-MER-S205.
   CPU, et toutes les mesures de coût du dépôt étaient CPU par construction. Gravité 1 : bloque la
   sortie de J1. Remède : l'arbitrage « chemin de rendu et hôte » (FEUILLE-DE-ROUTE §4) ; la part
   W est déjà réduite d'un facteur 100 (ADR-129). Voir COUT-IMAGE-S206, L283.
+
+**Suivi A250 — S207, 2026-09-13 : décision prise, pas encore traitée.** L'utilisateur retient le
+rendu J1 sur GPU par un hôte séparé ([ADR-130](../adr/ADR-130-rendu-j1-sur-gpu-par-un-hote-separe.md)).
+A250 reste ouverte tant qu'aucun hôte n'exerce le GPU et que le budget GPU de l'eau n'est pas
+confronté à une mesure.

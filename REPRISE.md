@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 08:51 +02:00
+JETON            : libre
+Battement        : 2026-09-13 08:53 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S207 — acter l'arbitrage de rendu J1 (GPU, hôte séparé), réponse de l'utilisateur
-Dernière session : S206 — coût d'image J1 incompatible sur CPU ; ADR-129 ; arbitrage de rendu posé
-Session suivante : S207 — construire ADR-129 : chemin d'image de W par table de Bessel (J1, code src)
-Maillons        : 0 — ADR-129 fixe un élément de W (§6.8) ; S206 sans code src, l'outil dirait 1
+Session en cours : aucune
+Dernière session : S207 — ADR-130 : rendu J1 sur GPU par un hôte séparé (choix de l'utilisateur)
+Session suivante : S208 — construire ADR-129 (chemin d'image de W, code src), puis lot de l'hôte GPU
+Maillons        : 0 — S207 sujet imposé par l'utilisateur ; ADR-130 décision de J1
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 

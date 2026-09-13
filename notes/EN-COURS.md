@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S207 — en cours
+Session : S207 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : **archiver la réponse de l'utilisateur** à l'arbitrage posé en fin de S206 — « GPU,
 hôte séparé » — dans une décision (ADR-130), et la propager. Session courte, **aucun code**, aucune
@@ -78,7 +78,7 @@ Réponse reçue par la question structurée, après le commit de S206 : option (
  sous ADR-020, données publiées vers le GPU selon I-08) ; ce qui reste ouvert (budget GPU de
  l'eau, pile exacte, permission de téléchargement). Notes datées ADR-125 et ADR-020 si touchés.
 - [x] **P3** — propagation : feuille de route (§4, J1), file active, REPRISE, index, README.
-- [ ] **P4** — rituel §6 : journal, décomptes, compteur, jeton libre, copies.
+- [x] **P4** — rituel §6 : journal, décomptes, compteur, jeton libre, copies.
 
 ### Notes de reprise
 
@@ -90,3 +90,5 @@ dépendance sans autorisation nommée ; budget GPU et pile ouverts). Note datée
 non touché : il prévoyait déjà `IGpuBackend` fourni par l'hôte.
 P3 : feuille de route (J1, §4 tranché + lignes dépendances et budget GPU), file active (chemin
 de rendu tranché, S208 = ADR-129 puis hôte GPU), REPRISE, index, README.
+P4 : journal S207, suivi A250 ; aucun angle ni leçon nouveaux ; décomptes 130/250/283/18/6/23.
+Jeton libre, copies à avancer.
