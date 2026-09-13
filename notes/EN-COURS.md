@@ -113,7 +113,7 @@ cœur refuserait.
 ### Plan
 
 - [x] **P1** — jeton, entrée, défaut visé, thèse, critères et plan seuls.
-- [ ] **P2** — scène : journal d'impact et montage `mixed_water` (`prepared_water::Prepared::build`) ; compilation, test minimal.
+- [x] **P2** — scène : journal d'impact et montage `mixed_water` (`prepared_water::Prepared::build`) ; compilation, test minimal.
 - [ ] **P3** — accord : composition du cœur contre la somme à la main, aux âges déclarés, sur la grille projetée ; écart publié.
 - [ ] **P4** — budget conjoint : `slope_floor` impact + sillage à chaque âge contre π/7 ; refus localisés et qualifiés.
 - [ ] **P5** — hôte : `--verify` passe par la composition du cœur ; contrôles S212/S213 conservés ; coût publié avec son en-tête.
@@ -124,4 +124,22 @@ cœur refuserait.
 
 ### Notes de reprise
 
-*(vide : le travail commence en P2)*
+P2 : `scene::MixedStore` / `MixedOutcome` / `mixed_compose` — journal d'événements (`confirm`,
+Origin::Server), `prepared_water::Prepared::<256>::build`, `bound_pressure::Prepared::from_journal`,
+puis `mixed::admits` point par point, `mixed::sample_world_batch` par point (pour localiser) **et**
+en lot (verdict que l'hôte recevrait). `Scene` porte désormais `event`, `medium`, `domain`.
+Ligne `MIXED` dans `--verify`, aux cinq âges du témoin S212.
+**Premiers chiffres** : floor 0,347679 (4 s) · 0,357528 (8 s) · **0,377603 (16 s)** · 0,369652 (24 s)
+· 0,370588 (39 s) contre max_slope 0,448799 ; impact seul **0,212607** (constant), sillage 0,135072
+à 0,164995. **Zéro refus**, lot admis aux cinq âges — la prédiction tient.
+**Mais deux constats non prédits, à instruire en P3/P4** :
+1. **84 % du budget conjoint est consommé à 16 s** par *une* source de chaque type. La marge est
+   0,0712 ; un second sillage de la même recette (0,165) ou un second impact (0,213) refuserait
+   **tout** lot non vide. Le budget est une somme (ADR-119 règle 1, ADR-128) : il ne passe pas à
+   l'échelle en nombre de sources, et la scène J1 est déjà à la limite avec deux.
+2. **`admitted = 4477 / 6988`.** `mixed::admits` exige le point dans **l'intersection** de tous les
+   domaines (ADR-077 « leur intersection détermine », ADR-080 : lot atomique). Hors du disque de
+   52 m de l'impact, le cœur ne compose pas — alors que l'hôte y dessine B + sillage. Le chemin
+   mixte du cœur **ne peut donc pas être** le chemin de rendu tel quel, et c'est précisément
+   pourquoi l'hôte sommait à la main. À qualifier : décision de service (ADR-077) contre besoin
+   d'image (ADR-129 §3), pas un défaut d'implémentation.

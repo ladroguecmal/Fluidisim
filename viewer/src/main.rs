@@ -2,6 +2,7 @@ mod gpu;
 mod scene;
 use scene::{Camera, FrameData, Scene, WakeInput};
 use water_core::{
+    impact_field::BREAKING_SLOPE,
     pressure_journal::Journal,
     pressure_timeline::{NodeState, Timeline},
     spectral_pressure::Slot,
@@ -314,6 +315,18 @@ fn run() -> Result<(), String> {
             let admission =
                 scene::wake_admission(&scene.background, input, &mut coarse_slots, t, &world);
             println!("WAKE age={age} amp_max_128x256_m={amplitude:.6} diff_64x128_vs_128x256_m={difference:.6} seam_eta_m={seam:.6} seam_fine_m={fine_seam:.6} envelope={envelope:.6} fine_envelope={fine_envelope:.6} admission_B_plus_pressure={admission:?}");
+        }
+        // S214 : la scène composée **par le cœur** — B, impact et sillage ensemble — et son
+        // budget conjoint de pente, que l'hôte n'avait jamais exercé (HOTE-GPU-S212 §Admission).
+        let mut store = scene::MixedStore::new(input.count(), world.len());
+        for age in [4., 8., 16., 24., 39.] {
+            let t = scene::wake_time(age).unwrap();
+            let m = scene::mixed_compose(&scene, input, &mut store, t, &world, BREAKING_SLOPE)?;
+            println!(
+                "MIXED age={age} floor={:.6} impact={:.6} pressure={:.6} max_slope={:.6} admitted={} refused={} batch={:?}",
+                m.floor, m.impact_envelope, m.pressure_envelope, BREAKING_SLOPE, m.admitted,
+                m.refusals.len(), m.batch
+            );
         }
         g.benchmark(&mut frame)?;
         g.resize(960, 540);

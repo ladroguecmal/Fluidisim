@@ -6,7 +6,7 @@ use water_core::{
     gaussian_spectrum::{self, HalfSpectrum},
     impact_field::{Medium, BREAKING_SLOPE},
     impact_generator::{self, Entry},
-    prepared_water::BoundBackground,
+    prepared_water::{self, mixed, BoundBackground},
     pressure_journal::Journal,
     pressure_source::Metadata,
     pressure_timeline::Timeline,
@@ -14,7 +14,7 @@ use water_core::{
     spectral_pressure::{Node, Slot},
     wake_source::{Leg, Wake},
     wave_event::{Impact, Origin, WaveEvent},
-    wave_journal::Cause,
+    wave_journal::{self, Cause},
     FrameId, HostServices, SeaState, SimTime, WaterSample, WorldPos,
 };
 #[allow(dead_code)]
@@ -33,6 +33,10 @@ pub struct Scene {
     pub background: Background,
     pub impact: RadialImpact<256>,
     pub step: f32,
+    /// S214 : de quoi reconstruire l'impact **par le cœur**, depuis un journal d'événements.
+    pub event: WaveEvent,
+    pub medium: Medium,
+    pub domain: Domain,
 }
 impl Scene {
     pub fn new() -> Self {
@@ -108,6 +112,12 @@ impl Scene {
             background,
             impact,
             step: wavelength_m / 16.,
+            event,
+            medium,
+            domain: Domain {
+                radius: RADIUS,
+                age_us: 56_000_000,
+            },
         }
     }
 }
@@ -254,6 +264,150 @@ pub fn wake_admission(
             &mut out,
         )
         .map_err(|e| format!("{e:?}"))
+}
+/// S214 — montage mixte du cœur : B, impact **et** sillage composés par `mixed_water`.
+///
+/// L'hôte sommait jusqu'ici les trois couches de sa propre main (`FrameData::references`, shader) ;
+/// aucun budget conjoint n'était donc exercé. Ici c'est le cœur qui compose et qui refuse, avec le
+/// budget de pente des **perturbations** (ADR-128) : `slope_max()` de chaque champ d'impact plus
+/// `slope_envelope()` de la pression, comparé à `max_slope` — la somme, seule forme portable
+/// (ADR-119 règle 1).
+pub struct MixedStore {
+    records: [Option<wave_journal::Record>; 1],
+    pool: [Option<RadialImpact<256>>; 1],
+    slots: Vec<Slot>,
+    scratch: Vec<WaterSample>,
+    output: Vec<WaterSample>,
+}
+impl MixedStore {
+    pub fn new(nodes: usize, points: usize) -> Self {
+        Self {
+            records: [None],
+            pool: [None],
+            slots: vec![Slot::default(); nodes],
+            scratch: vec![WaterSample::default(); points.max(1)],
+            output: vec![WaterSample::default(); points.max(1)],
+        }
+    }
+}
+/// Ce que le cœur dit de la scène à un instant : budget annoncé, valeurs composées, refus.
+pub struct MixedOutcome {
+    /// Budget conjoint annoncé avant tout point : `mixed::slope_floor`.
+    pub floor: f32,
+    /// Ses deux parts, pour savoir laquelle pèse.
+    pub impact_envelope: f32,
+    pub pressure_envelope: f32,
+    /// Points admis par les trois domaines géométriques (`mixed::admits`).
+    pub admitted: usize,
+    /// Hauteur et pentes composées par le cœur ; `None` hors du montage.
+    pub values: Vec<Option<[f32; 3]>>,
+    /// Verdict du **lot entier** sur les points admis, tel que l'hôte le recevrait.
+    pub batch: Result<(), String>,
+    /// Refus localisés, point par point : (point monde, cause rendue par le cœur).
+    pub refusals: Vec<([f32; 2], String)>,
+}
+/// Composition de la scène par le cœur à un instant, point par point puis en lot.
+///
+/// `max_slope` n'est pas déduit d'une mesure : c'est l'entrée d'hôte que la scène emploie
+/// déjà partout (`BREAKING_SLOPE`, π/7). Le lot est évalué **après** les points pour que son
+/// refus éventuel soit déjà localisé.
+pub fn mixed_compose(
+    scene: &Scene,
+    input: WakeInput<'_>,
+    store: &mut MixedStore,
+    time: SimTime,
+    world: &[[f32; 2]],
+    max_slope: f32,
+) -> Result<MixedOutcome, String> {
+    let mut journal = wave_journal::Journal::new(1, &mut store.records);
+    journal
+        .confirm(
+            1,
+            Cause {
+                entity: 203,
+                command: 1,
+                emission: 0,
+            },
+            scene.event,
+        )
+        .map_err(|e| format!("journal d'impact : {e:?}"))?;
+    let impacts = prepared_water::Prepared::<256>::build(
+        &journal,
+        &mut store.pool,
+        prepared_water::Context {
+            frame: FrameId(0),
+            cell: 0,
+            medium: scene.medium,
+            domain: scene.domain,
+        },
+    )
+    .map_err(|e| format!("préparation impact : {e:?}"))?;
+    let pressure = bound_pressure::Prepared::from_journal(
+        input.context,
+        input.spectrum,
+        input.journal,
+        time,
+        &mut store.slots,
+    )
+    .map_err(|e| format!("préparation sillage : {e:?}"))?;
+    let bound = BoundBackground::new(&scene.background, FrameId(0), 0);
+    let floor = mixed::slope_floor(&impacts, Some(&pressure));
+    let impact_envelope = mixed::slope_floor(&impacts, None);
+    let pressure_envelope = pressure.slope_envelope();
+    let mut values = Vec::with_capacity(world.len());
+    let mut refusals = Vec::new();
+    let mut admitted_points = Vec::new();
+    for &p in world {
+        let point = WorldPos::from_metres(p[0] as f64, p[1] as f64, 0.);
+        if !mixed::admits(&bound, &impacts, Some(&pressure), point) {
+            values.push(None);
+            continue;
+        }
+        admitted_points.push(point);
+        match mixed::sample_world_batch(
+            &bound,
+            &impacts,
+            Some(&pressure),
+            time,
+            &[point],
+            max_slope,
+            &mut store.scratch[..1],
+            &mut store.output[..1],
+        ) {
+            Ok(()) => {
+                let s = store.output[0];
+                values.push(Some([
+                    s.eta,
+                    -s.normal[0] / s.normal[2],
+                    -s.normal[1] / s.normal[2],
+                ]));
+            }
+            Err(e) => {
+                values.push(None);
+                refusals.push((p, format!("{e:?}")));
+            }
+        }
+    }
+    let batch = mixed::sample_world_batch(
+        &bound,
+        &impacts,
+        Some(&pressure),
+        time,
+        &admitted_points,
+        max_slope,
+        &mut store.scratch,
+        &mut store.output,
+    )
+    .map_err(|e| format!("{e:?}"));
+    Ok(MixedOutcome {
+        floor,
+        impact_envelope,
+        pressure_envelope,
+        admitted: admitted_points.len(),
+        values,
+        batch,
+        refusals,
+    })
 }
 pub struct FrameData<'a> {
     pub background: &'a Background,
