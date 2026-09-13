@@ -81,7 +81,7 @@ borne ordre deux ≤ ordre un sur tout rectangle ; gain strict près d'un maximu
 en ordre un au bit. Gain de partition non promis. Aucune admission migrée, A258 reste ouverte.
 
 - [x] **P1** — jeton et plan seuls.
-- [ ] **P2** — ADR-136 : dérivation, écart de phase quantifiée, choix par mode, réserve, limites.
+- [x] **P2** — ADR-136 : dérivation, écart de phase quantifiée, choix par mode, réserve, limites.
 - [ ] **P3** — construire la branche ordre deux (Field, Prepared) sans changer ADR-135 ni S219.
 - [ ] **P4** — tests : couverture, domination, gain près du maximum, 4000 m, refus, identité S219.
 - [ ] **P5** — exemple S220 : même rectangles S218 et partition S219 par ordre ; campagne isolée.
