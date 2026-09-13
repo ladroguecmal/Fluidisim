@@ -58,220 +58,34 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S216 — terminée
-Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Objectif : **A255** — le majorant du sillage pèse désormais 88 % du budget de pente et sa famille
-n'a aucune loi. Comprendre d'où vient son pessimisme avant de chercher à le mesurer.
+Session : S217 — en cours
+Agent : Codex (fichiers, git et cargo disponibles)
+Objectif : instruire la part dynamique d'A255, file J1, sans présumer une loi universelle.
 
-### Entrée
+### Entrée et état réel
 
-Ligne `Session suivante` de S215. Maillons 0 à l'amorce (W avancée dans `code/*/src` **et** ADR-133
-actée). A255 est une ligne de la file active J1 et conditionne la mutualisation de J1-bis.
+Reprise demandée par l'utilisateur. Master et trois copies propres à b1860c1 ; branche B
+archivée conservée. Jeton libre à l'entrée ; maillons 0. Travail dans la copie principale.
+Aucune dépendance nouvelle. Lecture d'amorce effectuée ; approfondissement ci-dessous.
 
-### État réel constaté à l'amorce
+### Thèse et critères avant mesure
 
-`master` et trois copies de travail propres au même commit `bd4030b`. Jeton `libre`, battement
-13:09. Machine : AMD Ryzen AI 7 350, RTX 5070 Laptop (DX12). Aucune dépendance nouvelle prévue.
-
-### Ce que la lecture du code change au sujet, avant toute mesure
-
-La suite S216 telle que S215 l'a écrite disait : « refaire sur la famille du sillage la campagne qui
-a traité l'impact ». **La lecture de `slope_envelope_tight` déplace la question.**
-
-```rust
-for s in self.slots { bound += |k_s| * |eta_s|; }
-```
-
-C'est une somme **scalaire** de contributions dont les vecteurs d'onde pointent dans des
-**directions différentes** — le demi-spectre couvre un demi-disque. Or la pente est un **vecteur** :
-sa norme est celle de la somme vectorielle, pas la somme des normes. Ce majorant ne peut donc être
-atteint que si tous les modes s'alignent *en phase* **et** *en direction*, et la seconde condition
-ne dépend ni du temps ni du point : **elle est fausse par construction de la recette**.
-
-Il y a donc **deux pessimismes distincts**, et les confondre ferait chercher une loi mesurée là où
-une inégalité exacte suffit :
-
-1. **Directionnel — statique, prouvable, sans calibration.** Pour toute direction `θ`, la pente
-   projetée vaut au plus `Σ |a_i| |k_i| |cos(θ − θ_i)|`. Le maximum de cette quantité sur `θ` est un
-   majorant **exact** de la norme de la pente, plus serré que la somme scalaire dès que les
-   directions sont étalées. Pour un étalement uniforme sur un demi-disque, le rapport vaut `π/2`
-   ≈ 1,571. **Le pessimisme mesuré pendant le forçage vaut 1,39 à 1,90** : le même ordre.
-2. **De phase — dynamique.** Ce qui reste une fois le directionnel retiré : la décohérence de
-   L290, qui croît avec l'âge (4,77 à 39 s).
-
-**Conséquence sur l'ordre des travaux.** Le premier ne demande **aucune mesure, aucune table,
-aucune garde, aucun domaine de validité** : il est exact par construction, et les directions `θ_i`
-vivent sur la grille angulaire **fixe** de la recette, donc le maximum se calcule exactement et non
-par balayage. Le chercher en second serait une faute de méthode : on calibrerait une table sur un
-écart dont une partie s'annule gratuitement.
-
-### Thèse et critères, déclarés avant toute mesure
-
-1. **Décomposer avant de mesurer une loi.** Trois grandeurs à chaque âge : somme scalaire
-   (`slope_envelope_tight`, ce que le budget consomme aujourd'hui), **majorant directionnel**, et
-   **pente réelle** échantillonnée finement. Deux rapports : `scalaire/directionnel` — la part
-   statique — et `directionnel/réel` — ce qui reste à expliquer.
-2. **Un majorant reste un majorant** : le directionnel n'est jamais dépassé par la pente réelle,
-   à aucun âge ni aucun point. Un seul dépassement invalide le raisonnement, pas la mesure.
-3. **La part statique est-elle une propriété de la recette ?** Si `scalaire/directionnel` ne dépend
-   que de `angular` et du profil spectral — et non de l'âge, ni des tronçons, ni de σ —, alors elle
-   se calcule, et rien n'a besoin d'être calibré.
-4. **Ce qui reste a-t-il une échelle ?** Seulement ensuite, et en séparant **forçage** (le majorant
-   croît pendant que la source émet) et **après extinction**.
-5. Aucun seuil de réussite présumé ; publication avec techniques, domaine et — si un temps est
-   mesuré — rang de passage (L289).
-
-**Prédiction écrite pour être contredite** : la part statique vaut environ 1,5 et **explique
-l'essentiel du pessimisme pendant le forçage** (mesuré 1,39 à 1,90) ; après extinction le résidu
-`directionnel/réel` croît quand même, jusqu'à 3 environ à 39 s. Si elle tient, le remède est une
-inégalité exacte et non une table. Si le résidu est déjà grand pendant le forçage, c'est que la
-décohérence est immédiate et la part statique marginale — et le sujet redevient celui de S215.
+Après extinction, l'échelle sqrt(sigma/g) peut réduire le temps seulement à géométrie
+adimensionnée constante : vitesse/sqrt(g sigma), durée/sqrt(sigma/g), cutoff*sigma et
+trajectoire/sigma restent des paramètres indépendants. Une similitude n'est pas une loi
+universelle sur des histoires de forçage différentes. Comparer d'abord des homothéties,
+puis faire varier vitesse et durée séparément. Pendant le forçage : série distincte.
+Les maxima échantillonnés sont des minorants ; aucune table de sûreté ne sera déduite d'un
+seul balayage. Raffiner recherche spatiale et quadrature avant d'interpréter un écart.
 
 ### Plan
 
-- [x] **P1** — jeton, entrée, relecture du majorant, thèse, critères et plan seuls.
-- [x] **P2** — décomposer : somme scalaire, majorant directionnel (balayage fin hors ligne) et pente réelle, aux âges de la fixture ; les deux rapports.
-- [x] **P3** — *fusionné avec P4 après P2, un seul balayage les porte* : la part statique est-elle une propriété de la recette (`angular`, `radial`, `cutoff`, σ, tronçons) ? combien de directions distinctes le demi-spectre porte-t-il ? et le discriminant d'emprise — à âge fixé, agrandir l'emprise fait-il monter le maximum réel ?
-- [x] ~~**P4**~~ — fusionné dans P3.
-- [x] **P5** — décider et construire ce que le verdict autorise : enveloppe directionnelle exacte dans le cœur si la part statique le mérite (maximum exact sur la grille angulaire, sans balayage), sinon dire pourquoi.
-- [x] **P6** — recevoir : jamais dépassée, plus serrée, coût de préparation ; budget recomposé sur la scène J1.
-- [x] **P7** — document de réception (en-tête ADR-131) ; suite complète `code/`.
-- [x] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
+- [x] **P1** — jeton, thèse et plan seuls.
+- [ ] **P2** — lectures ciblées, dérivation des groupes et protocole de campagne reproductible.
+- [ ] **P3** — instrument et campagne : similitudes, variations indépendantes, contrôles de résolution et forçage.
+- [ ] **P4** — publier le verdict et ses limites ; construire seulement ce que les preuves autorisent.
+- [ ] **P5** — rituel de fin §6, file plurielle, journal, index, jeton libre et copies synchronisées.
 
 ### Notes de reprise
 
-*(vide : le travail commence en P2)*
-
-P2 : `code/water-core/examples/enveloppe_sillage_s216.rs`. Contrôle de lecture d'abord : la somme
-scalaire reconstruite depuis `render_components` reproduit `slope_envelope()` à **1e-7** — ce que
-l'exemple manipule est bien ce que le budget consomme.
-
-| âge (s) | phase | scalaire | directionnel | réel | part statique | résidu | total |
-|---:|---|---:|---:|---:|---:|---:|---:|
-| 0,5 | forçage | 0,038037 | 0,024464 | 0,019385 | **1,5548** | 1,2620 | 1,9621 |
-| 2 | forçage | 0,107494 | 0,077957 | 0,064453 | 1,3789 | 1,2095 | 1,6678 |
-| 4 | forçage | 0,135072 | 0,107316 | 0,097430 | 1,2586 | **1,1015** | 1,3864 |
-| 8 | forçage | 0,144921 | 0,116545 | 0,085966 | 1,2435 | 1,3557 | 1,6858 |
-| 16 | forçage | 0,164995 | 0,135757 | 0,086934 | 1,2154 | 1,5616 | 1,8979 |
-| 18 | après | 0,156797 | 0,131175 | 0,069110 | 1,1953 | 1,8981 | 2,2688 |
-| 24 | après | 0,157044 | 0,131058 | 0,043181 | 1,1983 | 3,0351 | 3,6369 |
-| 39 | après | 0,157981 | 0,131885 | 0,033152 | **1,1979** | **3,9782** | 4,7654 |
-
-**Prédiction partiellement contredite.** J'avais écrit « part statique ≈ 1,5, et elle explique
-l'essentiel du pessimisme pendant le forçage ». Elle vaut 1,55 à la naissance mais **retombe à
-1,20 et s'y fixe** ; elle explique l'essentiel à 4 s (1,26 sur 1,39) et **moins de la moitié** à
-16 s (1,22 sur 1,90). Le demi-spectre du sillage n'est donc **pas** étalé uniformément sur un
-demi-disque — sinon le rapport vaudrait π/2 ≈ 1,571 : le sillage de Kelvin concentre son énergie
-dans un cône, et c'est cette concentration que le 1,20 mesure.
-
-**Deux enseignements qui séparent les deux remèdes.**
-- La part statique est **stable après extinction** (1,195 à 1,198 de 18 à 39 s) : c'est une
-  propriété de la **recette et de la trajectoire**, pas de l'âge. Un gain de 20 %, exact, sans
-  calibration ni domaine de validité — à prendre si son calcul est bon marché.
-- Le **résidu** porte tout le reste et croît sans borne visible : 1,10 à 4 s, 1,56 à 16 s,
-  **3,98 à 39 s**. C'est la décohérence de L290, et elle demande une loi mesurée comme ADR-133 —
-  donc sa propre campagne, pas une inégalité.
-
-P3 (avec P4 fusionné) : `--famille` dans le même exemple.
-
-**La part statique ne dépend pas de la quadrature.** À 4 s elle vaut **1,2586** pour `angular`
-64 / 128 / 256, `radial` 32 / 128 et `cutoff` 2 / 4 — identique à quatre décimales. C'est une
-propriété du champ, pas de sa discrétisation, et c'est ce qui autorise à la calculer plutôt qu'à
-la tabuler. Elle **bouge** avec ce qui change le champ : σ = 1 → 1,31 ; vitesse 1,5 m/s → 1,40 à
-1,52 ; vitesse 6 m/s → 1,44 à 1,48 ; et avec la phase (1,26 pendant le forçage, 1,20 après).
-σ = 4 est **refusée à la construction** — la bibliothèque borne sa famille elle-même, comme pour
-l'impact en S215.
-
-**Le demi-spectre ne porte que `angular/2` directions distinctes** — 32 / 64 / 128 mesurées pour
-`angular` 64 / 128 / 256. Un maximum exact sur ces directions coûterait `O(A²)`, soit quelques
-milliers d'opérations : le coût n'est pas l'obstacle.
-
-**Le résidu suit le temps depuis l'extinction, pas l'âge absolu** : à 30 s, 1,75 pour seize
-tronçons (encore en forçage), 3,43 pour huit, **6,29 pour deux** (28 s après extinction). Il est
-par ailleurs insensible à la recette (3,43 / 3,46 / 3,45 / 3,46 pour radial 128, cutoff 2, cutoff 4,
-angular 256) — sauf radial 32, à 2,89, qui est la recette que S212 savait déjà décrocher.
-
-**Discriminant d'emprise — et il tranche.** À âge fixé et **à pas de grille constant** (0,5 m ;
-le faire croître avec l'emprise aurait rendu le test vide), agrandir l'emprise d'un facteur 2 puis
-4 en côté — **seize fois en aire**, 512 × 416 m — laisse le maximum réel **identique à six
-décimales** : 0,097428 à 4 s, 0,038229 à 30 s. Le maximum est intérieur et saturé.
-**Le résidu n'est donc pas une limite d'emprise (A208) : c'est bien la décohérence de phase
-(L290).** Un remède côté hôte — publier sur une emprise plus large — n'y ferait rien ; il faut une
-loi mesurée comme ADR-133, et c'est une campagne à part.
-
-P5 : **ADR-134 actée et construite.** `Field::slope_envelope_directional()` — Cauchy–Schwarz sur
-`Σ c_i |cos(θ−θ_i)|`, soit `√(C·(C+R)/2)` avec `C = Σ c_i` et `R = |Σ c_i e^{2iθ_i}|`. Un seul
-passage, deux accumulateurs, **aucune arc-tangente** (`c_i cos2θ_i = |η_i|(k_x²−k_y²)/|k_i|`), donc
-`O(N)` sans grille, sans table, sans garde et sans domaine de validité. `R` ramené à `C` par `min` :
-l'inégalité triangulaire le garantit, l'arrondi pouvait le franchir de quelques ulps et la borne
-aurait alors pu dépasser la somme scalaire.
-
-**Le maximum exact était possible et n'a pas été retenu**, et c'est un arbitrage à dire : le
-demi-spectre ne porte que `angular/2` directions distinctes (64 mesurées), donc `O(A²)` ≈ quelques
-milliers d'opérations. Cauchy–Schwarz est préférée parce qu'elle ne suppose rien sur la disposition
-des emplacements et n'a besoin d'aucun tableau intermédiaire. Écart : `0,707 C` contre `0,637 C` à
-directions équiréparties. Noté dans l'ADR comme chemin disponible si la marge redevient
-contraignante.
-
-Test `directional_envelope_brackets_the_real_slope_s216` : jamais sous la pente réelle (40 401
-points), jamais au-dessus de la resserrée, gain réel (> 5 %), et le **bout analytique** — directions
-toutes alignées ⟹ la borne vaut exactement la somme scalaire, à 1e-5.
-
-Câblage aux **trois** sites de `bound_pressure` (le premier compte en annonçait deux ; `add_source`
-portait le troisième). Une seule attente de test a bougé, et pour une bonne raison : à
-`max_slope = plancher/2`, le verdict passe de `SlopeEnvelope` à **`Slope`** — à majorant plus serré,
-la limite tombe sous la **pente réelle au point**, et le refus devient attribuable au champ plutôt
-qu'à la marge (ADR-098). Figer la cause dans ce test en aurait fait un test du pessimisme du
-majorant ; l'assertion porte désormais sur les deux verdicts de pente.
-Suite complète : **356 réussis (258+4+1+93), 5 ignorés**.
-
-*Note de procédure : ce commit a été poussé sans les notes ci-dessus (erreur de répertoire courant
-au moment du patch), puis complété par `--amend` — la règle du dépôt veut que le travail et la case
-cochée voyagent dans le même commit, sinon l'historique ment dans un sens ou dans l'autre.*
-
-P6 : réception sur la scène J1.
-
-| âge (s) | enveloppe avant | après | gain obtenu | gain disponible (max exact) | part captée |
-|---:|---:|---:|---:|---:|---:|
-| 4 | 0,135072 | **0,112538** | 1,2002 | 1,2586 | 87 % |
-| 16 | 0,164995 | **0,141372** | 1,1671 | 1,2154 | 81 % |
-| 39 | 0,157981 | **0,136760** | 1,1552 | 1,1979 | 79 % |
-
-Cauchy–Schwarz capte donc **79 à 87 %** du gain que le maximum exact sur `θ` rendrait — l'écart est
-celui qu'annonce l'ADR (`0,707 C` contre `0,637 C` à directions équiréparties), et il est mesuré au
-lieu d'être supposé.
-
-**Budget de la scène J1** (impact déjà resserré par ADR-133) : 0,186540 → **0,162917** à 16 s, soit
-une occupation de π/7 qui passe de 41,6 % à **36,3 %** ; 37,6 % → **32,8 %** à 39 s. Rappel du
-chemin parcouru sur cette scène : **84,1 % en S214, 41,6 % après ADR-133, 36,3 % après ADR-134.**
-
-Contrôles : `d_eta_m = 0,000000000` aux cinq âges — **aucun bit publié n'a changé** ; `VERIFY`
-inchangé (7,2271e-5 m à 16 s, 7,4625e-5 à 39 s) ; GPU eau 4,185 ms inchangé ; `--smoke` 120 images.
-Les lignes `WAKE` bougent à la seule colonne `envelope`, comme attendu, et l'admission B + pression
-reste `Ok(())` aux cinq âges.
-
-P7 : [ENVELOPPE-SILLAGE-S216](../docs/validation/ENVELOPPE-SILLAGE-S216.md) — en-tête ADR-131 D3 ;
-§1 pourquoi la question a changé avant la première mesure, avec le contrôle de lecture ; §2 la
-séparation et la prédiction contredite pour moitié ; §3 ce que la famille dit de chaque part ;
-§4 le discriminant d'emprise ; §5 ce qui a été construit et ce qui a été écarté ; §6 la réception.
-Suite nommée : A255 ne contient plus que sa part dynamique.
-
-P8 : rituel §6 exécuté. Journal S216 ; **A256** (sévérité 2 — une annonce qui nomme le facteur
-qu'elle retire sans dire à quelle échelle il porte se lit comme complète ; c'est ce qui a caché ce
-gain depuis S141) ; suivi **A255** (part statique traitée, ne contient plus que sa part dynamique) ;
-**L293, L294, L295**. Index, README, REPRISE (§3 « 134 décisions », §4, file active, jeton), feuille
-de route (J1, ligne A255, travaux nécessaires, ligne mutualisation), file plurielle de
-QUESTIONS-OUVERTES.
-**Invariants relus** — **I-18** (ce qui est comparé à `max_slope` est une pente réelle : ADR-134 le
-sert mieux, le majorant étant plus proche du champ) ; **I-06** — celui-ci a pesé sur la décision et
-non seulement sur sa relecture : deux accumulateurs scalaires, aucun tableau intermédiaire, et c'est
-l'une des raisons pour lesquelles le maximum exact `O(A²)` a été écarté ; **I-14** (aucun nombre
-nouveau : une inégalité n'a rien à calibrer — à comparer avec ADR-133, dont la table et la garde
-devaient citer leur banc) ; I-04 et I-08 inchangés. Aucun devenu faux, aucun amendé, aucun ADR
-réécrit.
-**Règle des deux maillons** : compteur **0**, par le code — `outils/velocite.sh` donne **W = S216**
-(contre S215 avant la session), B = S211, δ = S202, V = jamais.
-**Recommandation portée** : la suite S217 nomme la part dynamique d'A255, ligne de la file J1, et
-la couche W.
-Décomptes vérifiés : 134 fichiers dans `docs/adr`, 295 leçons, 256 angles.
-Jeton libre, battement 14:06. Copies de travail avancées sur master après ce commit.
+Les reçus S216 restent ceux de la session précédente : 356 tests réussis et cinq ignorés.

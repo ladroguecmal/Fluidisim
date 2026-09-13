@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-13 14:06 +02:00
-Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-13 14:38 +02:00
+Agent            : Codex (fichiers, git et cargo disponibles)
+Session en cours : S217
 Dernière session : S216 — ADR-134, l'enveloppe de pente tient compte des directions ; part statique d'A255 traitée par une inégalité, sans mesure ; occupation de π/7 sur la scène J1 à 36,3 %
 Session suivante : S217 — file J1, **la part dynamique d'A255** : le résidu de décohérence vaut 1,10 à 4 s et 3,98 à 39 s, il est gouverné par le temps écoulé **depuis l'extinction** de la source, et il n'est pas une limite d'emprise (vérifié : seize fois l'aire, maximum identique). Chercher s'il admet une échelle de temps propre sur la famille du sillage, la phase de forçage traitée à part — le majorant y **croît** —, et **ne pas présumer qu'elle existe** : S216 a montré qu'une partie du pessimisme n'en demandait pas. Ensuite la loi GPU (espace, LOD, visibilité, mutualisation), chaque mesure avec son en-tête (ADR-131 D3)
 Maillons        : 0 — W avancée dans `code/water-core/src` (spectral_pressure, bound_pressure) **et** ADR-134 actée
