@@ -58,50 +58,25 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S218 — terminée
+Session : S219 — en cours
 Agent : Codex (fichiers, git et cargo disponibles)
-Objectif : file J1/W, construire une borne locale de pente avec reste spatial démontré,
-puis mesurer son resserrement et son coût sur les sillages S217.
+Entrée : Continue ; master et trois copies propres à4f9841f, jeton libre, maillons0.
+Lectures du projet conservées de S218 ; état réel revérifié. Copie principale.
 
-### Entrée et état réel
+### Thèse et plan
 
-Utilisateur : « Continue ». Master et trois copies propres à af1212b ; jeton libre,
-maillons 1. Lectures de reprise S217 conservées dans cette conversation, état revérifié.
-Travail dans la copie principale ; aucune dépendance ni copie nouvelle.
+Un tas de rectangles classés par borne permet de raffiner le maximum sans perdre
+la couverture. Les enfants héritent aussi de la borne du parent : le maximum ne
+peut augmenter. Budget explicite en évaluations, pas promesse de millisecondes.
+Pool de l'appelant ; arrêt avant une division si capacité ou budget insuffisants.
+Pas de migration d'admission ni de certificat f32 ajouté.
 
-### Thèse avant construction
-
-Sur un rectangle centré en c de demi-côtés hx,hy, la variation de pente d'un mode est
-bornée par |eta_k| |k| (|kx|hx+|ky|hy), via sa Hessienne. On peut aussi la borner par
-2|eta_k||k|. Donc norme(pente(c)) + somme des restes borne tout le rectangle.
-L'intersection avec le majorant directionnel existant garde le meilleur des deux.
-Le maximum des bornes sur une partition complète borne l'emprise, contrairement au
-maximum des seuls échantillons. La sûreté algébrique et l'arrondi f32 restent distingués.
-Ne pas modifier les bits du champ ni les anciens contrats d'admission sans réception.
-
-### Plan
-
-- [x] **P1** — jeton, thèse et plan seuls.
-- [x] **P2** — lire les chemins réels, préciser la preuve et le contrat ; ADR si adoption justifiée.
-- [x] **P3** — construire l'annonce locale dans le cœur, refus et contre-épreuves (centre trompeur compris).
-- [x] **P4** — recevoir sur une partition des emprises S217 ; coût complet et resserrement, sans promesse de budget GPU.
-- [x] **P5** — rituel §6, journal, file plurielle, index, reprise, jeton libre et copies synchronisées.
+- [x] **P1** — jeton et plan seuls.
+- [>] **P2** — construire le parcours borné et recevoir couverture, arrêts et déterminisme.
+- [ ] **P3** — mesurer gain/coût sur fixtures S218 et publier le contrat et ses limites.
+- [ ] **P4** — rituel §6, journal, registres, index, file active, jeton et copies.
 
 ### Notes de reprise
 
-Point d'entrée : spectral_pressure::Field et bound_pressure::Prepared ; les 356 tests
-workspace release et deux tests exemple S217 sont les reçus précédents.
-
-P2 : ADR-135 actée ; le reste porte les phases arrondies réelles (monotonie des produits aux bornes), avec réserve f32 distincte. API locale uniquement, aucune migration des admissions.
-
-P3 : annonce locale construite, quatre tests ciblés debug passent. Refus contexte/temps/domaine/non-fini, zéro, centre trompeur, phases à4000m, couverture multidirectionnelle. Aucun calcul historique modifié. Battement P2 avait été écrit14:59 après horloge14:57 : erreur de recopie corrigée au prochain battement mesuré.
-
-P4 en cours : premier passage complet (coût perturbé par compilation/tests simultanés,
-ne pas en tirer un temps nominal). Gains à0,5m : base1,025625/lente1,224415/longue1,156292,
-base tardive1,343845 hors durée. Toutes les bornes >= références S217. Deux passages
-isolés de la base prévus pour coût. Correction P4 : refuser la norme qui sous-passe
-à zéro ; quatre tests ciblés debug/release passent. Workspace release360/cinq ignorés
-reçu avant cette dernière protection ; seuls ciblés rejoués ensuite, champs historiques intacts.
-P4 reçue : passages isolés base 27,546–28,209s à0,5m ; valeurs imprimées identiques. Reçus et limites dans BORNE-LOCALE-S218. Suite adaptative portée à P5.
-
-P5 : journal, A258/L297, index et file active actualisés. Prochaine S219 : partition adaptative à travail plafonné ; maillons0, jeton libre. Copies à avancer sur le commit de clôture après constat de propreté. Aucun travail de construction en attente dans S218.
+Suite S218 : borne locale ADR-135 disponible, réserve non certifiée A258.
+Un arrêt retourne la meilleure couverture obtenue ; aucun rectangle ne disparaît.

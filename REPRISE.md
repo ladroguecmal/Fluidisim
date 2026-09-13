@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-13 15:12 +02:00
+JETON            : occupé
+Battement        : 2026-09-13 15:14 +02:00
 Agent            : Codex (fichiers, git et cargo disponibles)
-Session en cours : —
+Session en cours : S219
 Dernière session : S218 — borne locale W construite, ADR-135 ; gain et coût uniforme reçus ; A255 partielle, aucune admission migrée
 Session suivante : S219 — file J1/W : construire et recevoir une partition adaptative sur pool fourni par l'appelant, avec plafond de travail et couverture conservée par les bornes des rectangles non raffinés ; mesurer gain/coût. Certification f32 A258, admission, somme A254 et loi GPU restent ouvertes ; J2/δ et V-noyau conservés
 Maillons        : 0 — W avancée dans src et ADR-135 actée
