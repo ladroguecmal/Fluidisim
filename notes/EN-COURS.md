@@ -84,7 +84,7 @@ Ne pas modifier les bits du champ ni les anciens contrats d'admission sans réce
 - [x] **P1** — jeton, thèse et plan seuls.
 - [x] **P2** — lire les chemins réels, préciser la preuve et le contrat ; ADR si adoption justifiée.
 - [x] **P3** — construire l'annonce locale dans le cœur, refus et contre-épreuves (centre trompeur compris).
-- [ ] **P4** — recevoir sur une partition des emprises S217 ; coût complet et resserrement, sans promesse de budget GPU.
+- [x] **P4** — recevoir sur une partition des emprises S217 ; coût complet et resserrement, sans promesse de budget GPU.
 - [ ] **P5** — rituel §6, journal, file plurielle, index, reprise, jeton libre et copies synchronisées.
 
 ### Notes de reprise
@@ -95,3 +95,12 @@ workspace release et deux tests exemple S217 sont les reçus précédents.
 P2 : ADR-135 actée ; le reste porte les phases arrondies réelles (monotonie des produits aux bornes), avec réserve f32 distincte. API locale uniquement, aucune migration des admissions.
 
 P3 : annonce locale construite, quatre tests ciblés debug passent. Refus contexte/temps/domaine/non-fini, zéro, centre trompeur, phases à4000m, couverture multidirectionnelle. Aucun calcul historique modifié. Battement P2 avait été écrit14:59 après horloge14:57 : erreur de recopie corrigée au prochain battement mesuré.
+
+P4 en cours : premier passage complet (coût perturbé par compilation/tests simultanés,
+ne pas en tirer un temps nominal). Gains à0,5m : base1,025625/lente1,224415/longue1,156292,
+base tardive1,343845 hors durée. Toutes les bornes >= références S217. Deux passages
+isolés de la base prévus pour coût. Correction P4 : refuser la norme qui sous-passe
+à zéro ; quatre tests ciblés debug/release passent. Workspace release360/cinq ignorés
+reçu avant cette dernière protection ; seuls ciblés rejoués ensuite, champs historiques intacts.
+P4 reçue : passages isolés base 27,546–28,209s à0,5m ; valeurs imprimées identiques. Reçus et limites dans BORNE-LOCALE-S218. Suite adaptative portée à P5.
+

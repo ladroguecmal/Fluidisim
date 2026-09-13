@@ -68,3 +68,12 @@ Coût d'une partition assez fine et choix de sa géométrie ; migration des admi
 seul resserrement de la borne. Seconde cible et preuve formelle des arrondis restent
 hors réception. Une annonce globale inchangée ne bénéficie pas automatiquement de
 cette nouvelle annonce locale.
+
+## Précisions d'implémentation S218 — 2026-09-13
+
+La réserve employée vaut `C*(4*gamma_(N+32)+32*EPSILON)` : les deux composantes,
+leur norme et l'évaluation de la branche globale partagent cette réserve. La largeur
+de phase ajoute `8*EPSILON` tours pour fractions et Q32 avant conversion en radians.
+Une norme ou contribution non nulle qui sous-passe exactement à zéro est refusée par
+`NonFinite`, comme un débordement ; ce refus ne constitue toujours pas une certification
+formelle de toutes les valeurs sous-normales. Les quatre tests S218 reçoivent ces refus.

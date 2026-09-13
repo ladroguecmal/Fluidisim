@@ -51,7 +51,16 @@ impl Field<'_> {
         let (mut remainder, mut scalar) = (0.0, 0.0);
         for s in self.slots {
             let amplitude = length(s.response.eta.re, s.response.eta.im);
-            let contribution = mul(length(s.weighted_k[0], s.weighted_k[1]), amplitude);
+            let weighted_length = length(s.weighted_k[0], s.weighted_k[1]);
+            if (amplitude == 0.0 && (s.response.eta.re != 0.0 || s.response.eta.im != 0.0))
+                || (weighted_length == 0.0 && s.weighted_k != [0.0; 2])
+            {
+                return Err(Error::NonFinite);
+            }
+            let contribution = mul(weighted_length, amplitude);
+            if contribution == 0.0 && weighted_length > 0.0 && amplitude > 0.0 {
+                return Err(Error::NonFinite);
+            }
             scalar = add(scalar, contribution);
             let mut turns = 0.0;
             for axis in 0..2 {
@@ -169,6 +178,12 @@ mod tests {
             },
         )];
         let f = Field::from_slots(&bad, [-1.; 2], [1.; 2]);
+        assert_eq!(
+            f.local_slope_envelope([-1.; 2], [1.; 2]).unwrap_err(),
+            Error::NonFinite
+        );
+        let tiny = [slot([1., 0.], Complex { re: 1e-30, im: 0. })];
+        let f = Field::from_slots(&tiny, [-1.; 2], [1.; 2]);
         assert_eq!(
             f.local_slope_envelope([-1.; 2], [1.; 2]).unwrap_err(),
             Error::NonFinite
