@@ -516,7 +516,21 @@ pub struct RenderStats {
 /// `Prepared::sample_world_batch` ; hors emprise, B seul. `with_w = false` rend le **témoin** :
 /// même marche, mêmes bornes, même prédicat d'emprise, mais B partout. Hors emprise, les deux
 /// rendus exécutent donc exactement les mêmes opérations.
+/// Chemin d'évaluation de W dans l'emprise.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum WPath {
+    /// Témoin : B partout, même marche et même prédicat.
+    Temoin,
+    /// Composition directe par `Prepared::sample_world_batch` (S203, S205).
+    Direct,
+    /// S208, ADR-129 : table de Bessel au pas λ/diviseur, B + W composés par l'hôte.
+    Table(f32),
+}
 pub fn render(sc: &Scene, age_us: u64, with_w: bool) -> Result<(Vec<u8>, Vec<bool>, RenderStats), String> {
+    render_path(sc, age_us, if with_w { WPath::Direct } else { WPath::Temoin })
+}
+pub fn render_path(sc: &Scene, age_us: u64, path: WPath) -> Result<(Vec<u8>, Vec<bool>, RenderStats), String> {
+    let with_w = path != WPath::Temoin;
     if age_us > EMPRISE_AGE_US {
         return Err("instant hors de l'horizon de l'emprise".into());
     }
@@ -548,6 +562,17 @@ pub fn render(sc: &Scene, age_us: u64, with_w: bool) -> Result<(Vec<u8>, Vec<boo
     let prepared = Prepared::build(&journal, &mut pool, context).map_err(|e| format!("préparation {e:?}"))?;
     let bound = BoundBackground::new(&sc.background, FRAME, CELL);
     let time = SimTime(BIRTH.0 + age_us);
+    // S208 : table et profil construits avant l'image, jamais dans la marche.
+    let divisor = match path {
+        WPath::Table(d) => d,
+        _ => 16.0,
+    };
+    let step = sc.wavelength_m / divisor;
+    let len = field.table_len(step).map_err(|e| format!("table {e:?}"))?;
+    let mut storage = vec![[0.0f32; 2]; EMPRISE_N * len];
+    let table = field.bake_table(step, &mut storage).map_err(|e| format!("table {e:?}"))?;
+    let mut profile = vec![(0.0f32, 0.0f32); len];
+    table.profile(time, &mut profile).map_err(|e| format!("profil {e:?}"))?;
     // Bornes de marche B+W dans les deux rendus : c'est ce qui rend le témoin comparable.
     let height = height_bound(&sc.cooked) + radial_height_bound(&field)?;
     let slope = sc
@@ -576,7 +601,23 @@ pub fn render(sc: &Scene, age_us: u64, with_w: bool) -> Result<(Vec<u8>, Vec<boo
                     let local = sc.background.local_point(world).expect("rayon dans le référentiel");
                     let inside = field.admits(FRAME, CELL, [local[0], local[1]]);
                     touched |= inside;
-                    if with_w && inside {
+                    if with_w && inside && matches!(path, WPath::Table(_)) {
+                        stats.w_evaluations += 1;
+                        let b = sc.background.eval(world, time).expect("rayon dans le domaine de B");
+                        match table.eval(&profile, FRAME, CELL, [local[0], local[1]]) {
+                            Ok((eta, w)) => {
+                                // Même normalisation que `compose` : pentes sommées, puis normale.
+                                let sx = -b.normal[0] / b.normal[2] + w[0];
+                                let sy = -b.normal[1] / b.normal[2] + w[1];
+                                let norm = (1.0 + sx * sx + sy * sy).sqrt();
+                                ((b.eta + eta) as f64, [-sx / norm, -sy / norm, 1.0 / norm].map(|v| v as f64))
+                            }
+                            Err(_) => {
+                                stats.refused += 1;
+                                (p[2] + 1.0, [0., 0., 1.])
+                            }
+                        }
+                    } else if with_w && inside {
                         stats.w_evaluations += 1;
                         match prepared.sample_world_batch(&bound, &[world], time, BREAKING_SLOPE, &mut out, &mut scratch) {
                             Ok(_) => (out[0].eta as f64, out[0].normal.map(|v| v as f64)),
@@ -639,6 +680,45 @@ pub fn differing_outside(a: &[u8], b: &[u8], touched: &[bool]) -> (u64, u64) {
         }
     }
     (differing, outside)
+}
+
+/// Lecture d'un PPM P6 écrit par ce banc ; refuse tout autre format.
+fn read_ppm(path: &std::path::Path) -> Result<Vec<u8>, String> {
+    let bytes = std::fs::read(path).map_err(|e| format!("{}: {e}", path.display()))?;
+    let header = format!("P6\n{WIDTH} {HEIGHT}\n255\n");
+    if !bytes.starts_with(header.as_bytes()) || bytes.len() != header.len() + WIDTH * HEIGHT * 3 {
+        return Err(format!("{} : PPM inattendu", path.display()));
+    }
+    Ok(bytes[header.len()..].to_vec())
+}
+
+/// S208, critère (e) : image par la table contre l'image directe S205 du même instant.
+fn render_table_report(dir: &str, age_s: f64, hs: f32, divisor: f32) -> Result<(), String> {
+    let age_us = (age_s * 1e6).round() as u64;
+    let sc = scene_with(hs, EMPRISE_AGE_US, ENTRY_HALF_WIDTH_M, SlopeRule::PerturbationsAdr128)?;
+    let base = std::path::Path::new(dir);
+    let tag = format!("{:05.1}", age_s).replace('.', "_");
+    let hs_tag = hs.to_string().replace('.', "_");
+    let direct_path = base.join(format!("impact-s205-hs{hs_tag}-a{tag}.ppm"));
+    let direct = read_ppm(&direct_path).map_err(|e| format!("{e} — rendre d'abord render-s205"))?;
+    let (rgb, touched, st) = render_path(&sc, age_us, WPath::Table(divisor))?;
+    write_ppm(&base.join(format!("impact-s208-table{divisor}-hs{hs_tag}-a{tag}.ppm")), &rgb)?;
+    let (differing, outside) = differing_outside(&rgb, &direct, &touched);
+    let max_channel = rgb.iter().zip(&direct).map(|(a, b)| a.abs_diff(*b)).max().unwrap_or(0);
+    let over2 = rgb
+        .chunks(3)
+        .zip(direct.chunks(3))
+        .filter(|(a, b)| a.iter().zip(b.iter()).any(|(x, y)| x.abs_diff(*y) > 2))
+        .count();
+    println!(
+        "table λ/{divisor} age={age_s}s hs={hs} water={} unresolved={} refused={} evals={} w_evals={} render_ms={:.3} rgb_fnv=0x{:016x} direct_fnv=0x{:016x}",
+        st.water, st.unresolved, st.refused, st.evaluations, st.w_evaluations, st.render_ms, fnv(&rgb), fnv(&direct)
+    );
+    println!("pixels_differents_du_direct={differing} dont_hors_emprise={outside} ecart_max_canal={max_channel} pixels_ecart_sup_2={over2}");
+    if st.unresolved + st.refused > 0 || outside > 0 {
+        return Err("réception refusée : rayon non résolu, refus, ou différence hors emprise".into());
+    }
+    Ok(())
 }
 
 fn render_report(dir: &str, age_s: f64, hs: f32, rule: SlopeRule) -> Result<(), String> {
@@ -972,6 +1052,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let dir = args.get(2).map(String::as_str).unwrap_or("../captures");
             let age: f64 = args.get(3).map(|s| s.parse()).transpose()?.unwrap_or(3.0);
             render_report(dir, age, HS, SlopeRule::MinusBackgroundS203)?
+        }
+        Some("render-table") => {
+            let dir = args.get(2).map(String::as_str).unwrap_or("../captures");
+            let age: f64 = args.get(3).map(|s| s.parse()).transpose()?.unwrap_or(3.0);
+            let hs: f32 = args.get(4).map(|s| s.parse()).transpose()?.unwrap_or(1.5);
+            let divisor: f32 = args.get(5).map(|s| s.parse()).transpose()?.unwrap_or(16.0);
+            render_table_report(dir, age, hs, divisor)?
         }
         Some("render-s205") => {
             let dir = args.get(2).map(String::as_str).unwrap_or("../captures");

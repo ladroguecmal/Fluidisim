@@ -93,7 +93,7 @@ rayon non résolu, écart maximal par canal publié, zéro pixel différent hors
 - [x] **P1** — état réel, conception et critères, plan seul.
 - [x] **P2** — `radial_table.rs` : `table_len`, `bake_table`, `profile`, `eval` ; compilation.
 - [x] **P3** — essais unitaires (a), (b), (d) ; essai d'intégration (c).
-- [ ] **P4** — banc : noyau réel dans `frame_cost` (coût par image, construction, mémoire) ; image
+- [x] **P4** — banc : noyau réel dans `frame_cost` (coût par image, construction, mémoire) ; image
  S205 par la table dans `render_impact` contre le chemin direct (e).
 - [ ] **P5** — recommandation de pile GPU : critères (ADR-020/130, hors réseau pour le cœur,
  portabilité, licences, maintenance), versions vérifiées en ligne **sans téléchargement** ;
@@ -121,3 +121,15 @@ P3 après échec (mesure ajoutée, release) : **λ/16 : max|Δη| 0,0127 mm** (�
 sous 3 mm (tolérance de marche) et sous 2 % en pente, **sans le présenter comme la réception**.
 ADR-129 §2 (« pas ≤ λ/8 ») à corriger par note datée : réception à 0,09 mm = λ/16. Trois essais
 unitaires + un d'intégration (zéro allocation) verts.
+P4 (release, un fil). `frame_cost table` — chemin construit, table réelle :
+| pas | M | mémoire | cuisson | grille | B | profil | éval (dans R) | image méd/max | ÷ 2 ms | direct S206 |
+| λ/16 | 250 | 500 Ko | 1,299 ms | 4 px | 11,441 | 0,0462 | 0,329 | 11,476 / 12,745 | 5,7 | 72,4 |
+| λ/16 | 250 | 500 Ko | 1,299 ms | 2 px | 41,741 | 0,0386 | 0,908 | 43,021 / 52,453 | 21,5 | 280 |
+| λ/8 | 126 | 252 Ko | 0,830 ms | 4 px | 11,761 | 0,0273 | 0,343 | 11,791 / 16,103 | 5,9 | 72,4 |
+| λ/8 | 126 | 252 Ko | 0,830 ms | 2 px | 41,429 | 0,0270 | 0,834 | 42,637 / 44,811 | 21,3 | 280 |
+Éval ≈ 43 ns/sommet dans R (prédicat d'emprise, racine, pente incluse ; S206 : 8 ns Hermite nu).
+W par image : ~0,4–0,9 ms à 2 px, dont profil 0,04 ms ; **B = 97 % de l'image**.
+`render-table ../captures 3 1.5 16` — critère (e) : 289 462 eau, **0 non résolu, 0 refus**,
+15 841 760 évals (direct 15 841 764), **18 523 ms** (direct S205 102 218 ms), FNV 0xf78a4221c46add31
+contre direct 0x0b13a4c1e39a2a3e : **27 pixels différents, 0 hors emprise, écart max 1 niveau,
+0 pixel > 2 niveaux**. Reçu.

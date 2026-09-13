@@ -441,11 +441,84 @@ fn levers() -> Result<(), String> {
     Ok(())
 }
 
+/// S208 : le chemin d'image construit (ADR-129) — table réelle de la bibliothèque, pas le noyau
+/// synthétique de S206. Par image : B sur tous les sommets, un profil, une évaluation d'Hermite
+/// par sommet dans l'emprise.
+fn table_frames() -> Result<(), String> {
+    let sc = scene_s205(1.5, EMPRISE_AGE_US)?;
+    let mut slots = vec![None; 1];
+    let m = mount(&sc, &mut slots);
+    let time = SimTime(BIRTH.0 + AGE_US);
+    println!("# S208 chemin d'image par table (bibliotheque), un fil, release");
+    println!("pas_table M memoire_ko cuisson_ms | pas_px sommets dans_R | B_med_ms profil_med_ms eval_med_ms image_med_ms image_max_ms | image/budget | direct_S206_ms");
+    for divisor in [16.0f32, 8.0] {
+        let step = sc.wavelength_m / divisor;
+        let len = m.field.table_len(step).map_err(|e| format!("{e:?}"))?;
+        let mut storage = vec![[0.0f32; 2]; EMPRISE_N * len];
+        let bake = {
+            let t = Instant::now();
+            m.field.bake_table(step, &mut storage).map_err(|e| format!("{e:?}"))?;
+            t.elapsed().as_secs_f64() * 1000.0
+        };
+        let memory_kb = (storage.len() * std::mem::size_of::<[f32; 2]>()) as f64 / 1024.0;
+        let table = m.field.bake_table(step, &mut storage).map_err(|e| format!("{e:?}"))?;
+        let mut profile = vec![(0.0f32, 0.0f32); len];
+        for (px, direct) in [(4usize, 72.4f64), (2, 280.0)] {
+            let g = grid(&sc, &m.field, px);
+            let local: Vec<[f32; 2]> = g
+                .inside
+                .iter()
+                .map(|&i| {
+                    let l = sc.background.local_point(g.world[i]).unwrap();
+                    [l[0], l[1]]
+                })
+                .collect();
+            let b = timed(|| {
+                for w in &g.world {
+                    black_box(sc.background.eval(*w, time));
+                }
+            });
+            let p = timed(|| {
+                table.profile(time, &mut profile).unwrap();
+                black_box(&profile);
+            });
+            table.profile(time, &mut profile).map_err(|e| format!("{e:?}"))?;
+            let e = timed(|| {
+                for l in &local {
+                    black_box(table.eval(&profile, FRAME, CELL, *l).unwrap());
+                }
+            });
+            let full = timed(|| {
+                for w in &g.world {
+                    black_box(sc.background.eval(*w, time));
+                }
+                table.profile(time, &mut profile).unwrap();
+                for l in &local {
+                    black_box(table.eval(&profile, FRAME, CELL, *l).unwrap());
+                }
+            });
+            println!(
+                "{step:.6} {len} {memory_kb:.0} {bake:.3} | {px} {} {} | {:.3} {:.4} {:.3} {:.3} {:.3} | {:.1} | {direct}",
+                g.world.len(),
+                g.inside.len(),
+                b.0,
+                p.0,
+                e.0,
+                full.0,
+                full.1,
+                full.0 / BUDGET_MS
+            );
+        }
+    }
+    Ok(())
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     match std::env::args().nth(1).as_deref() {
         None | Some("frame") => run()?,
         Some("levers") => levers()?,
-        Some(other) => return Err(format!("mode inconnu {other} : frame | levers").into()),
+        Some("table") => table_frames()?,
+        Some(other) => return Err(format!("mode inconnu {other} : frame | levers | table").into()),
     }
     Ok(())
 }
