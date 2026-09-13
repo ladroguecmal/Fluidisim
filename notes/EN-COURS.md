@@ -117,8 +117,9 @@ disparaître — l'occupation de 84 %, elle, ne dépend d'aucun échantillonnage
 ### Plan
 
 - [x] **P1** — jeton, entrée, doute, thèse, critères et plan seuls.
-- [ ] **P2** — pente réelle de l'impact seul, échantillonnage fin (rayon et temps), contre `slope_max()` ; sûreté du majorant sur 56 s.
-- [ ] **P3** — pente réelle du sillage seul, échantillonnage fin dans l'emprise, contre `slope_envelope()` à chaque âge.
+- [x] **P2** — pente réelle de l'impact seul, échantillonnage fin (rayon et temps), contre `slope_max()` ; sûreté du majorant sur 56 s.
+- [x] **P3** — pente réelle du sillage seul, échantillonnage fin dans l'emprise, contre `slope_envelope()` à chaque âge. *(Absorbée dans P2 : un seul programme mesure les deux champs ; les deux critères déclarés sont tenus.)*
+- [ ] **P3-bis** — *ajouté après P2, parce que le résultat l'exige* : la décroissance est-elle **universelle** dans la famille ? Mesurer plusieurs λ et E, et voir si le pessimisme s'effondre sur l'âge adimensionné `t/√(λ/g)` (échelle déjà employée par ADR-126).
 - [ ] **P4** — recomposer : occupation réelle, pessimisme par champ et conjoint ; note corrective datée sur A254 si le chiffre bouge.
 - [ ] **P5** — scène à deux sources : construire, exercer le refus, le qualifier.
 - [ ] **P6** — décider : ADR, ou constat motivé qu'aucune des trois voies ne s'impose encore.
@@ -128,3 +129,46 @@ disparaître — l'occupation de 84 %, elle, ne dépend d'aucun échantillonnage
 ### Notes de reprise
 
 *(vide : le travail commence en P2)*
+
+P2+P3 : `code/water-core/examples/budget_pente_s215.rs`, release. Impact échantillonné sur 20 001
+points de rayon (pas 2,6 mm = λ/1288, le pic d'ADR-094 à 0,691 m est traversé par 266 points) ;
+sillage sur une grille de 0,25 m dans l'emprise (213 921 points, λ_min/8,4).
+Fixture reproduite : λ 3,350000 m, E 164,000000 J — identiques à `viewer/src/scene.rs`.
+
+**Critère 1 tenu, et c'était la question de sûreté** : `max(pente_réelle / majorant)` vaut
+**0,999998** pour l'impact et **0,718847** pour le sillage. Aucun majorant n'est dépassé, sur 56 s
+et non plus sur 2 s. L'annonce d'ADR-094 est **exactement atteinte à la naissance** (1,0000) : le
+majorant de l'impact est serré à `t = birth` et à cet instant seulement.
+
+**Prédiction contredite, et exactement inversée.** J'avais écrit : impact serré (< 1,5), sillage
+lâche (> 3). C'est le contraire.
+
+| âge (s) | impact réel | pessimisme | sillage réel | pessimisme |
+|---:|---:|---:|---:|---:|
+| 0 | 0,212607 | **1,0000** | 0 | — |
+| 2 | 0,105857 | 2,0084 | 0,064453 | 1,6678 |
+| 4 | 0,049488 | 4,2962 | 0,097096 | **1,3911** |
+| 8 | 0,033053 | 6,4324 | 0,085892 | 1,6872 |
+| 16 | 0,021147 | 10,0537 | 0,086914 | 1,8984 |
+| 24 | 0,015711 | 13,5322 | 0,043166 | 3,6382 |
+| 39 | 0,010525 | **20,1998** | 0,033093 | 4,7739 |
+| 56 | 0,006986 | **30,4354** | — | — |
+
+**Le mécanisme est un seul, et il est général.** Un majorant bâti comme une **somme de modules
+modaux** — une norme L1 — est **invariant par dispersion** : après extinction de la source, chaque
+mode ne fait que tourner, donc la somme des modules ne bouge plus. Le maximum **spatial**, lui,
+décroît à mesure que les phases se décohèrent. Le pessimisme croît donc avec l'âge de la
+perturbation, mécaniquement, pour **tout** champ de W. On le voit sur les deux : l'impact part de 1
+et monte à 30 en 56 s ; le sillage reste sous 2 tant que la source force (16 s) puis monte à 4,8
+une fois son enveloppe figée (majorant 0,1570 / 0,1568 / 0,1580 à 24 / 30 / 39 s, constant, pendant
+que le champ décroît).
+
+Ce n'est donc **ni** l'alignement d'A208, **ni** un choix d'emprise, **ni** l'additivité d'A254 :
+c'est la **dispersion**. A254 avait raison sur le chiffre et se trompait de cause ; la note
+corrective vient en P4.
+
+**Conséquence immédiate sur le remède** : la voie « resserrer le majorant » vise `RadialImpact`
+d'abord — sa `slope_max()` est figée à la naissance et se trompe d'un facteur 4 à 30 — et le
+sillage ensuite, après extinction. `SLOPE_L1_RATIO` est déjà un **rapport mesuré** entre borne L1
+et pente réelle (ADR-094, S141) : un `ratio(t)` est le même objet, une dimension plus riche. Reste
+à savoir s'il est universel dans la famille — c'est P3-bis, et sans cela il n'y a pas d'ADR.
