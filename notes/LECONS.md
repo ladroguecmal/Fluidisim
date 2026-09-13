@@ -4668,3 +4668,23 @@ Le geste : quand un seuil déclaré vient d'une mesure antérieure, relire **sur
 cette mesure portait. S'il est plus petit que celui du critère, mesurer d'abord le pire cas connu
 — ici l'instant initial — ou déclarer le critère sur le sous-domaine réellement couvert. Voir
 ADR-129 (note S208).
+
+## L285 — Une interface pensée pour la requête ponctuelle se paie par image quand l'image la consomme telle quelle
+
+*(S212)* Deux fois de suite, une couche W a été branchée dans l'image par son interface de
+service, et deux fois le coût dominant était un travail **qui ne dépend pas de l'image**. En S203,
+l'impact réévaluait par sommet 256 fonctions de Bessel de `k·r`, indépendantes du temps : la table
+d'ADR-129 l'a divisé par cent. En S212, le sillage refait à chaque image la préparation modale de
+4 096 nœuds × 8 tronçons (10,9 ms), alors que dans la solution de Duhamel un tronçon achevé ne
+fait plus que tourner. Dans les deux cas l'interface était juste pour ce qu'elle servait : une
+requête à un instant, sur quelques points, où préparer est gratuit rapporté à l'appel.
+
+Ce qui généralise : **une requête ponctuelle amortit sa préparation sur un appel ; l'image
+l'appelle à tous les points et à tous les instants**. Ce qui est constant par requête devient
+proportionnel à la cadence, et ce qui est constant par point devient proportionnel aux sommets.
+
+Le geste : avant de brancher une couche dans l'image, écrire pour chaque étape de sa requête de
+quoi elle dépend — instant, point, ni l'un ni l'autre — et sortir de la boucle d'image tout ce qui
+ne dépend pas de ce qu'elle fait varier. Mesurer ensuite à deux formats et deux résolutions de
+recette : deux lois linéaires sur des variables différentes s'y séparent, une seule mesure les
+confond. Voir HOTE-GPU-S212, ADR-129, L283.

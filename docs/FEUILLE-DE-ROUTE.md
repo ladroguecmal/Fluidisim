@@ -71,6 +71,12 @@ voir [réception GPU](validation/HOTE-GPU-S211.md). Erreur max0,077657 mm ; pass
 médiane0,048576 ms. **A250 close pour le chemin GPU**. Sillage absent et cadence complète
 non mesurée : J1 reste partiel. Suite : intégrer le sillage issu du cœur, puis recevoir la scène.
 
+*S212* : **sillage du cœur intégré à l'hôte**, exact (0,089 mm) mais **refusé en coût** — CPU
+10,9 ms de préparation par image, GPU eau 4,10 ms à 960×540 pour 4 096 nœuds
+([HOTE-GPU-S212](validation/HOTE-GPU-S212.md)). Leviers nommés, non mesurés : temps (cœur, ne plus
+préparer par image) et espace (hôte, grille et transformée). Recette honnête ~16 s, couture
+12,7 mm à 39 s (A251) ; composition mixte impact+sillage non exercée. Suite : levier temporel.
+
 - ~~**A245**~~ — **levé en S205** (ADR-128) : la mer S201 (Hs 1,5 m) se compose, impact compris,
   zéro refus ; [COMPOSITION-MER-S205](validation/COMPOSITION-MER-S205.md) ;
 - **hôte interactif** — **tranché S207 par l'utilisateur : GPU, hôte séparé** (ADR-130) ; **construit B+impact en S211**, dépendances autorisées ; reste le sillage et la réception complète ;
@@ -79,6 +85,9 @@ non mesurée : J1 reste partiel. Suite : intégrer le sillage issu du cœur, pui
   le goulot avec la table de Bessel précalculée (ADR-129, facteur 100) ; **B évalué par sommet sur
   CPU l'est** (1,2–1,3 µs). **S211 : retiré du chemin d'image CPU**, passe GPU B+impact mesurée ;
   A247 reste partielle tant que le coût complet et le sillage ne sont pas reçus ;
+  **S212 : le sillage rouvre le coût** — préparation par image (CPU ∝ nœuds × tronçons) et somme
+  par sommet (GPU ∝ sommets × nœuds), 5× et 2× le budget ; leviers à mesurer ;
+- **A251** *(S212)* — durée honnête et couture d'un sillage visible ni déduites ni reçues ;
 
 *Bancs qui tranchent à ce jalon* : **B1** (nombre de composantes et coût de B, dès qu'un LOD
 existe dans l'hôte) ; **B2** partiel (représentation de W, dès que le coût B+W par image est
@@ -151,7 +160,7 @@ Les protocoles restent ceux de [PLAN-BENCHMARK](validation/PLAN-BENCHMARK.md).
 |---|---|---|
 | ~~Chemin de rendu et hôte de J1~~ — **tranché S207 : (A) GPU, hôte séparé** ([ADR-130](adr/ADR-130-rendu-j1-sur-gpu-par-un-hote-separe.md)) *(fusionnait « hôte interactif » et A247, S206)* | Mesuré : B sur CPU coûte 42 ms par image à la densité qui montre l'impact (2 px), 36 ms sur 16 fils ; W est ramené à 27 µs par impact (ADR-129). Options : **(A)** hôte séparé qui évalue B et les tables W sur **GPU** — prévu par ADR-003 et I-08 (« seules des phases repliées passent au GPU ») et par `gpu_sim_ms = 2,5` d'ADR-012 ; `water-core` reste sans dépendance, l'hôte en a (téléchargement) ; **(B)** CPU seul sans dépendance — exige B vectorisé (non mesuré), un groupe de fils persistant, et que les 2 ms se comptent en **temps mur sur tous les cœurs**, ce qu'ADR-125 ne dit pas ; **(C)** changer le profil ADR-125 (fréquence ou temps eau) ; **(D)** grille à 8 px — **perd les anneaux**, donc retire l'impact visible | **l'utilisateur** — a retenu (A) |
 | ~~Dépendances de l'hôte GPU~~ **autorisées S210/S211**, sources récupérées, cache local/verrou versionné *(état initial S207/S208)* | ADR-130 : aucune bibliothèque téléchargée sans autorisation nommée. S208 recommande wgpu 30.0.1, winit 0.30.13, pollster 1.0.1 ; demande en deux temps — résolution de l'arbre (index), puis sources ; vendoring ou non | **l'utilisateur** — accords reçus |
-| **Budget GPU de l'eau** *(S207)* | ADR-125 ne dit pas où l'eau s'évalue ; ADR-012 déclarait `gpu_sim_ms = 2,5` ; aucune valeur inventée | **S211 : passe GPU locale mesurée**, budget complet encore à recevoir ; arbitrage si incompatible |
+| **Budget GPU de l'eau** *(S207)* | ADR-125 ne dit pas où l'eau s'évalue ; ADR-012 déclarait `gpu_sim_ms = 2,5` ; aucune valeur inventée | **S211 : passe GPU locale mesurée**, budget complet encore à recevoir ; arbitrage si incompatible. **S212 : incompatibilité mesurée pour le sillage** (CPU 10,9 ms, GPU 4,10 ms, un seul sillage) ; deux leviers techniques non mesurés — **pas encore un arbitrage** ; il revient à l'utilisateur si les leviers mesurés ne tiennent pas 2 ms |
 | ~~A247 — coût d'un impact visible~~ | **mesuré S206** ; part technique tranchée par ADR-129, part d'arbitrage fusionnée ci-dessus | — |
 | ~~A245 — mer composable~~ | **tranché S205, ADR-128** : B hors du budget de refus, bits publiés inchangés | — |
 

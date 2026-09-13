@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 10:27 +02:00
+JETON            : libre
+Battement        : 2026-09-13 10:30 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S212 — sillage du cœur dans l'hôte GPU, comparé et mesuré
-Dernière session : S211 — hôte GPU B+impact reçu sous DX12, J1 partiel
-Session suivante : S212 — file J1, couche W : intégrer le sillage issu du cœur dans l'hôte GPU, puis recevoir la scène complète (HOTE-GPU-S211)
-Maillons        : 0 — B avancée dans code/water-core/src ; B/W affichés sur GPU
+Session en cours : aucune
+Dernière session : S212 — sillage du cœur dans l'hôte GPU, exact (0,089 mm) mais refusé en coût (CPU 10,9 ms, GPU 4,1 ms)
+Session suivante : S213 — file J1, couche W : levier temporel du sillage dans le cœur — ne plus refaire la préparation modale par image, recevoir contre from_journal, mesurer (HOTE-GPU-S212 §Verdict)
+Maillons        : 0 — W avancée dans code/water-core/src (render_components du champ de pression)
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 
@@ -162,6 +162,10 @@ revient à l'utilisateur s'il demande des dépendances. V-noyau s'ouvre au plus 
 S200-1/A244 et S199-2 sont sur le chemin de J2, plus « reportées ». Les acquis S194 ci-dessous
 restent datés ; la file liée porte aussi leurs suivis S195–S199.**
 
+**S212 : le paragraphe S208 ci-dessus est dépassé sur son « prochain lot ».** Hôte GPU construit
+(S211, B+impact) ; sillage intégré en S212, exact mais **trop cher** (CPU 10,9 ms, GPU 4,1 ms).
+Prochain lot J1 : levier temporel du sillage dans le cœur ([HOTE-GPU-S212](docs/validation/HOTE-GPU-S212.md)).
+
 **Tolérance B4 fixée à 2 % par l'utilisateur (ADR-120).** Elle ne doit plus être
 redemandée. La réception et son profil sont dans B4-TOLERANCE-S190 ; B4 complet
 conserve ses volets physiques/perceptifs non reçus.
@@ -259,6 +263,14 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S212 — 2026-09-13 : [sillage du cœur dans l'hôte GPU](docs/validation/HOTE-GPU-S212.md), exact et trop cher.**
+`Prepared::render_components` publie `[A, B, kx, ky]` rebasés (I-08) ; sillage prescrit 64×128
+admis au journal, préparé par image, sommé par sommet. GPU/cœur max 0,089 mm. **CPU sillage
+10,9 ms, GPU eau 4,10 ms à 960×540** : refusé en coût ; leviers temps (cœur) et espace (hôte)
+nommés, non mesurés — pas encore un arbitrage. Recette honnête ~16 s ; couture 12,7 mm à 39 s,
+**A251**. Composition mixte impact+sillage non exercée. **L285**. 350 tests réussis/cinq ignorés.
+**Suite S213 : file J1/W, levier temporel dans le cœur.** 130 ADR,251 angles,285 leçons,18 invariants,6 SPEC,23 cas ; compteur 0.
 
 **S211 — 2026-09-13 : [premier hôte GPU B + impact](docs/validation/HOTE-GPU-S211.md).**
 Fenêtre locale, caméra, pause, témoin ; sources autorisées récupérées, cœur sans dépendance.

@@ -10901,3 +10901,49 @@ cosmétique sans autorité ; I-08 : phases repliées, domaine local ; I-06 : mé
 pile graphique non reçue, aucune prétention de production. Aucun invariant ni ADR changé.
 130 ADR,250 angles,284 leçons,18 invariants,6 SPEC,23 cas. Compteur0 : couche B avancée dans
 code/water-core/src et B/W affichés. Jeton libéré ; copies à avancer après ce commit final.
+
+## S212 — 2026-09-13 — Sillage du cœur dans l'hôte GPU : exact, trop cher
+
+**Entrée.** « Reprends le projet ». Claude Code (Opus 5). master et trois copies propres à 0e204ad,
+jeton libre (S211 close à 10:04). Maillons 0 ; suite S211 = ligne de file J1/W. Plan seul ba915ed,
+P2 d398a90, P3 248814b, P4 8afa22f, P5 f060608. Aucune dépendance ajoutée.
+
+**Sorties.** Cœur : `spectral_pressure::Field::render_components` et
+`bound_pressure::Prepared::render_components` publient `[A, B, kx, ky]` par nœud, réponse pondérée
+tournée de la phase repliée `k·origine` — ni temps ni coordonnée absolue au GPU (I-08), refus
+atomiques, test contre `sample_batch` à 1e-5 et témoin vérifié. Hôte : `Wake` de huit tronçons
+(3 m/s, 19 620 N, σ 2 m, 64×128) admis au journal, préparé par image, sommé par sommet dans son
+emprise ; `--verify` étendu (coutures, témoin 128×256, admission, coûts deux recettes). Réception
+[HOTE-GPU-S212](../docs/validation/HOTE-GPU-S212.md), viewer/README.
+
+**Chiffres qui orientent.** Hauteur GPU/cœur max 0,089 mm (tolérance 3 mm) avec un sillage de
+15 cm. Témoin 64×128/128×256 : 0,37 % à 4 s, 1,6 % à 16 s, **9,5 % à 24 s, 28 % à 39 s**. Couture
+au bord de l'emprise : 2,3 mm à 16 s, **12,7 mm à 39 s**, plus forte sur la recette fine — contenu
+physique. Admission B+pression Ok (enveloppe ≤ 0,165). Coûts médians RTX5070 Laptop/DX12, 4 096
+nœuds : **CPU sillage 10,6–10,9 ms**, GPU eau 1,90 ms (640×360) / **4,10 ms** (960×540), contre
+0,018/0,049 sans sillage ; 16 384 nœuds : CPU 38–42 ms, GPU 7,8/16,9 ms. Deux lois : GPU
+7,6–7,9 ps par sommet×nœud, CPU 317–331 ns par nœud×tronçon. 60 182 pixels différents à 8 s,
+motif de Kelvin visible dans l'image de différence, discret à l'œil.
+
+**Décision structurante.** Aucun ADR. Le chemin « préparer à chaque image, sommer par sommet » est
+**reçu en exactitude, refusé en coût**. Incompatibilité mesurée **mais pas encore un arbitrage** :
+deux leviers techniques, un par loi, aucun mesuré ni retirant de fonction — temps dans le cœur
+(tronçons achevés réduits à un état tourné par nœud, tronçon actif préconstruit) ; espace dans
+l'hôte (grille cartésienne et transformée ; une somme polaire par texel ne gagne rien). Un ADR
+attend la mesure du levier positif, comme ADR-129 a attendu celle de la table.
+
+**Ce qui n'a pas été fait.** Composition mixte impact + sillage (`mixed_water`, budget conjoint
+ADR-119) non exercée ; interaction manuelle non rejouée (`--smoke` seul) ; aucune cadence complète ;
+fixture de 40 s au-delà de la durée honnête de sa recette, sans garde (A214) — consigné A251.
+L248 couvre déjà « l'accord GPU/cœur ne reçoit que la couche non partagée » : pas de doublon.
+
+**Suite S213.** File J1/W : **levier temporel dans le cœur** — l'image ne refait plus la préparation
+modale ; recevoir contre `from_journal`, mesurer par image. Puis levier spatial, composition mixte,
+coutures (A251). J2/δ général et V-noyau restent dus (ADR-127).
+
+**Rituel.** A251 ouverte ; suivi A247 ; L285 ; file plurielle relue (lignes A247 et J1 datées
+S212, autres déclencheurs conservés) ; feuille de route J1 et §4 datées. I-03/I-04/I-15 : GPU
+cosmétique ; I-08 tenu (amplitudes complexes, aucun temps f32) ; I-06 : méthode cœur sans
+allocation, pile graphique non reçue. Aucun invariant ni ADR changé. Suite complète `code/` :
+**350 réussis (252+4+1+93), 5 ignorés**, aucun échec. 130 ADR,251 angles,285 leçons,18 invariants,
+6 SPEC,23 cas. Compteur 0 : W avancée dans code/water-core/src. Jeton libre, copies avancées.

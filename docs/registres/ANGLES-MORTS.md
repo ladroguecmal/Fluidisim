@@ -2946,3 +2946,21 @@ cadence complète et budget total encore à recevoir. Voir [HOTE-GPU-S211](../va
 contre3 mm déclarés, passe eau max0,059008 ms à960×540. Le goulot CPU par sommet est retiré
 de l'image ; reste le coût complet CPU/transfert/GPU/présentation et la scène avec sillage.
 Ne pas lire une mesure de passe comme un reçu du profil complet60 images/s / eau2 ms.
+
+**Suivi A247 — S212, 2026-09-13 : le sillage rouvre le coût, par deux autres lois.** Sillage du
+cœur (4 096 nœuds) rendu exact à 0,089 mm, mais la préparation modale refaite par image coûte
+10,6–10,9 ms de CPU et la somme par sommet porte la passe GPU de 0,049 à 4,10 ms à 960×540. GPU
+∝ sommets × nœuds (7,6–7,9 ps), CPU ∝ nœuds × tronçons (317–331 ns). Leviers nommés, non
+mesurés ; A247 reste partielle. Voir [HOTE-GPU-S212](../validation/HOTE-GPU-S212.md).
+
+- **A251** *(sévérité 2, S212 ; ouverte)* — **Un sillage visible n'a ni durée honnête ni couture
+  reçues, et rien n'empêche l'hôte de le montrer au-delà.** La fixture S212 déclare un contexte de
+  40 s sur une recette 64×128 qui ne tient 2 % de la recette fine que pendant les 16 s de forçage
+  (9,5 % à 24 s, 28 % à 39 s), et une emprise dont le bord porte 12,7 mm à 39 s — plus encore sur la
+  recette fine, donc du contenu physique, pas seulement la récurrence d'ADR-107. L'impact a reçu
+  ses coutures spatiale et temporelle par ADR-126 ; le sillage n'a rien d'équivalent, et A214 dit
+  pourquoi aucun garde n'existe (loi en durée encadrée seulement). Le défaut général : une scène
+  d'image hérite des horizons du service (64 s d'ADR-106) sans hériter des domaines de validité
+  qu'ADR-107 attache à la recette. Gravité 2 : l'image ment sans refus, mais cosmétiquement (I-04).
+  **À faire** : déduire l'emprise et la durée d'image d'un sillage de sa recette et de sa vitesse,
+  les recevoir par coutures comme ADR-126, et les publier avec la fixture. Voir A214, L281.

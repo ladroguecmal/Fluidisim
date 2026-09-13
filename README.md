@@ -768,3 +768,9 @@ Fenêtre locale, caméra, pause, témoin ; sources autorisées récupérées, c�
 DX12/RTX5070 Laptop : erreur hauteur max0,077657 mm ; passe eau960×540 médiane0,048576 ms.
 349 tests réussis/cinq ignorés. A250 close, A247 partielle ; sillage et coût complet encore dus.
 **Suite S212 : file J1/W, intégrer le sillage au GPU.** 130/250/284/18/6/23 inchangés.
+
+**S212 — 2026-09-13 : [sillage du cœur dans l'hôte GPU](docs/validation/HOTE-GPU-S212.md), exact et trop cher.**
+Coefficients rebasés publiés par le cœur ; hauteur GPU/cœur max 0,089 mm avec un sillage de 15 cm.
+CPU sillage 10,9 ms par image, GPU eau 4,10 ms à 960×540 : chemin refusé en coût, leviers temps
+(cœur) et espace (hôte) nommés. Recette honnête ~16 s, couture 12,7 mm à 39 s (A251). 350/cinq
+ignorés. **Suite S213 : levier temporel dans le cœur.** 130 ADR,251 angles,285 leçons,18 invariants,6 SPEC,23 cas.

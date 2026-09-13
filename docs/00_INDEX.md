@@ -20,6 +20,13 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S212 — 2026-09-13 : [sillage du cœur dans l'hôte GPU, exact et trop cher](validation/HOTE-GPU-S212.md).**
+`render_components` du champ de pression ; sillage 4 096 nœuds préparé par image, sommé par sommet.
+Hauteur GPU/cœur max 0,089 mm ; CPU sillage 10,9 ms, GPU eau 4,10 ms à 960×540 : refusé en coût,
+deux leviers nommés non mesurés, pas encore d'arbitrage. Recette honnête ~16 s, couture 12,7 mm
+à 39 s (A251). 350 tests réussis/cinq ignorés. L285. **Suite S213 : levier temporel dans le cœur.**
+130 ADR,251 angles,285 leçons,18 invariants,6 SPEC,23 cas.
+
 **S211 — 2026-09-13 : [premier hôte GPU B + impact](validation/HOTE-GPU-S211.md).**
 Fenêtre locale, caméra, pause, témoin ; sources autorisées récupérées, cœur sans dépendance.
 DX12/RTX5070 Laptop : erreur hauteur max0,077657 mm ; passe eau960×540 médiane0,048576 ms.

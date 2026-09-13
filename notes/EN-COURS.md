@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S212 — en cours
+Session : S212 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : file J1, couche W — sillage issu du cœur dans l'hôte GPU, comparé au cœur, coût mesuré.
 
@@ -99,7 +99,7 @@ issue technique va en ADR, une incompatibilité sans issue technique va à l'uti
 - [x] **P3** — hôte : fixture sillage, préparation par image, buffer GPU, somme modale bornée à l'emprise ; R/B/Home ; compilation.
 - [x] **P4** — `--verify` : GPU contre cœur, témoin de résolution, couture, admission, coûts deux recettes, captures, fenêtre.
 - [x] **P5** — réception HOTE-GPU-S212, décision chiffrée du chemin d'image du sillage, suite complète des tests.
-- [>] **P6** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
+- [x] **P6** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
 
@@ -135,3 +135,8 @@ une somme polaire par texel ne gagne rien). Aucun ADR : le levier positif n'est 
 Suite complète `code/` : 350 réussis (252+4+1+93), 5 ignorés (2+3), aucun échec.
 A251 à ouvrir : durée honnête de recette et couture d'emprise du sillage visible non gardées.
 Suite S213 : levier temporel dans le cœur (compteur 0, W avancée par P2).
+
+P6 : journal S212, A251 + suivi A247, L285 (L248 couvrait déjà l'accord sur couche partagée),
+index, README, REPRISE §4 et note sur le paragraphe S208 dépassé, feuille de route J1/§4, file
+plurielle entière relue (A247, A249, J1, λ_cut/B2 datées S212 ; autres conservées). Invariants
+I-03/I-04/I-06/I-08/I-15 relus, aucun devenu faux. Jeton libre ; copies avancées après ce commit.
