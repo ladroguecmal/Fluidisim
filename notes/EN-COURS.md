@@ -115,7 +115,7 @@ ce résultat-là qu'il faut savoir écrire s'il se produit.
 - [x] **P1** — jeton, entrée, ce que la relecture établit, thèse, critères, prédiction, plan seuls.
 - [x] **P2** — fixture multi-sillages : deux et trois sources dans un même journal, proches puis éloignées ; témoin que la composition est bien partagée par emplacement, et refus éventuels de la bibliothèque.
 - [x] **P3** — enveloppe globale et maximum réel par configuration ; sur-additivité mesurée.
-- [ ] **P4** — borne locale conjointe : partition spectrale à budget d'évaluations égal ; gain, reste au-dessus du maximum, **coût de passe**.
+- [x] **P4** — borne locale conjointe : partition spectrale à budget d'évaluations égal ; gain, reste au-dessus du maximum, **coût de passe**.
 - [ ] **P5** — part de π/7 : budget d'admission complet avec les impacts sommés ; combien de sources passent, avant et après.
 - [ ] **P6** — décider : ADR si quelque chose est rendu **et** utilisable ; sinon constat motivé, et retour à la file (cadence complète de l'hôte, V-noyau).
 - [ ] **P7** — document de réception (en-tête ADR-131 D3) ; suite complète `code/`.
@@ -154,3 +154,46 @@ chaque sillage a sa région, et le maximum reste celui d'un seul. L'enveloppe, e
 Le pessimisme passe donc de 1,64 à **2,35**. **L'enveloppe pénalise la séparation**, exactement
 parce qu'aucune enveloppe de modules ne voit la localisation spatiale — c'est A261, mesurée ici
 pour la première fois sur une scène et non sur une maille.
+
+P4 : **la borne locale rend tout, et son prix est structurel.**
+
+**Partition sur l'emprise**, budget d'évaluations égal d'une configuration à l'autre :
+
+| config | sources | 2 047 éval. | 8 191 éval. | 32 767 éval. | gain final | coût |
+|---|---:|---:|---:|---:|---:|---:|
+| proches | 3 | 1,0097 | 1,2206 | **borne/max 1,0053** | 1,4652 | 25,0 s |
+| éloignées | 2 | 1,0031 | 1,1310 | **1,0088** | **2,0683** | 24,2 s |
+| éloignées | 3 | 1,0023 | 1,1319 | **1,0099** | **2,3237** | 25,1 s |
+
+À 32 767 évaluations la borne colle au maximum à **0,5–1,0 %** dans *toutes* les configurations, et
+le gain sur l'enveloppe suit exactement le pessimisme mesuré en P3 : **2,32 quand les sources sont
+éloignées**. La borne locale voit donc précisément ce que l'enveloppe ne voit pas.
+
+**Mais j'avais supposé qu'une requête locale serait bon marché, et c'est faux sur les deux plans.**
+Mesure ajoutée en P4 : un seul appel `local_slope_envelope_spectral` sur un rectangle.
+
+| demi-côté | borne / enveloppe globale | borne / maximum local | µs par appel |
+|---:|---:|---:|---:|
+| 1 m (au pire point) | 1,03 à **1,09** | 1,41 à 2,15 | ~670 |
+| 4 m | **0,9977** | 1,48 à 2,09 | ~650 |
+| 16 m | **0,9977** | 1,48 à 2,09 | ~640 |
+
+- **Au-delà d'environ un mètre de demi-côté, la borne locale *est* l'enveloppe globale** — 0,9977,
+  c'est-à-dire l'enveloppe **plus sa réserve numérique**. La raison est dans ADR-137 : au-delà d'une
+  demi-longueur d'onde, tous les modes tombent dans la classe non résolue `D ≥ 2`, la coupure les
+  renvoie à `G(U)` — l'enveloppe ADR-134 —, et il ne reste rien à gagner. La plus courte longueur
+  d'onde représentée vaut `2π/cutoff = 2,09 m` : **la maille doit être sous-ondulatoire ou elle ne
+  sert à rien**.
+- **Un appel coûte 640 à 700 µs**, pas quelques microsecondes : il est `O(N)` à 4 096 modes, soit
+  ~160 ns par mode. Il n'y a donc pas de « requête locale bon marché » à opposer à la partition.
+
+**Le prix est une loi d'échelle, pas un défaut d'implémentation.** Les mailles utiles font ≈ 2 m ;
+couvrir l'emprise de 128 × 96 m en demande ~3 000, et atteindre 1,006 en demande 16 384. À
+640 µs l'unité, cela fait 2 s et 25 s — exactement ce que la partition mesure. **Aucune optimisation
+de constante ne franchit quatre ordres de grandeur** jusqu'au budget de 2 ms.
+
+**Et A261 se chiffre au passage.** Loin de la source, à 2 × 2 m, la meilleure borne disponible vaut
+**213 à 757 fois** le maximum local (0,0967 contre 0,000147 pour une source). Le terme des modes non
+résolus, `G(U)`, ne dépend ni du point ni des phases : il est spatialement aveugle par construction,
+et c'est lui qui plafonne tout. Une borne qui décroîtrait avec la distance au support de la source
+n'existe pas dans cette représentation — le champ, lui, est bien localisé.

@@ -110,6 +110,89 @@ fn real_peak(
     (peak, argmax)
 }
 
+
+/// Maximum reel dans un rectangle, meme methode que `real_peak` mais borne a la region.
+fn peak_in(
+    f: &Prepared<'_>,
+    ctx: &bound_pressure::Context,
+    time: SimTime,
+    lo: [f32; 2],
+    hi: [f32; 2],
+    step: f32,
+) -> f32 {
+    let nx = ((hi[0] - lo[0]) / step) as usize;
+    let ny = ((hi[1] - lo[1]) / step) as usize;
+    let mut scratch = [Default::default(); 1];
+    let mut out = [Default::default(); 1];
+    let mut peak = 0.0f32;
+    for iy in 0..=ny {
+        for ix in 0..=nx {
+            let p = [
+                (lo[0] + ix as f32 * step).min(hi[0]),
+                (lo[1] + iy as f32 * step).min(hi[1]),
+            ];
+            if f.sample_batch(ctx, time, &[p], &mut scratch, &mut out).is_ok() {
+                let s = out[0].slope;
+                peak = peak.max((s[0] * s[0] + s[1] * s[1]).sqrt());
+            }
+        }
+    }
+    peak
+}
+
+/// S222 P4 — ce qu'une **requete locale** paierait et gagnerait.
+///
+/// La partition borne toute l'emprise et coute des secondes. Un hote qui interroge une region
+/// bornee n'a pas besoin de cela : un seul appel `local_slope_envelope_spectral` sur le rectangle
+/// demande suffit, en O(N). Cette fonction mesure les deux cotes — ce que la borne rend contre
+/// l'enveloppe globale, et ce que l'appel coute — sur une region centree au pire point et sur une
+/// region quelconque.
+fn local_query(
+    f: &Prepared<'_>,
+    ctx: &bound_pressure::Context,
+    time: SimTime,
+    label: &str,
+    count: u64,
+    global: f32,
+    argmax: [f32; 2],
+    step: f32,
+) {
+    for (nom, centre) in [("au_pire", argmax), ("ailleurs", [-40.0f32, 30.0])] {
+        for half in [1.0f32, 4.0, 16.0] {
+            let lo = [
+                (centre[0] - half).max(MIN[0]),
+                (centre[1] - half).max(MIN[1]),
+            ];
+            let hi = [
+                (centre[0] + half).min(MAX[0]),
+                (centre[1] + half).min(MAX[1]),
+            ];
+            let Ok(e) = f.local_slope_envelope_spectral(ctx, time, lo, hi) else {
+                println!("  LOCALE={label} sources={count} region={nom} demi={half} refusee");
+                continue;
+            };
+            // Cout : meilleure de plusieurs rafales, l'appel etant court (methode micro S221).
+            let mut best = f64::INFINITY;
+            for _ in 0..5 {
+                let start = Instant::now();
+                for _ in 0..2000 {
+                    std::hint::black_box(
+                        f.local_slope_envelope_spectral(ctx, time, lo, hi).unwrap(),
+                    );
+                }
+                best = best.min(start.elapsed().as_secs_f64() * 1e6 / 2000.);
+            }
+            let local_max = peak_in(f, ctx, time, lo, hi, step);
+            println!(
+                "  LOCALE={label} sources={count} region={nom} demi={half} borne={:.9} gain_sur_global={:.4} maximum_local={local_max:.9} borne_sur_maximum_local={:.4} us_par_appel={best:.1}",
+                e.bound,
+                global / e.bound,
+                e.bound / local_max.max(f32::MIN_POSITIVE)
+            );
+        }
+    }
+}
+
 fn main() {
     let step: f32 = std::env::args()
         .nth(1)
@@ -182,6 +265,7 @@ fn main() {
                 argmax[1],
                 global / peak.max(f32::MIN_POSITIVE)
             );
+            local_query(&f, &ctx, time, label, count, global, argmax, step);
             for budget in [2047usize, 8191, 32767] {
                 let start = Instant::now();
                 let r = f
