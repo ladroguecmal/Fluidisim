@@ -71,11 +71,15 @@ voir [réception GPU](validation/HOTE-GPU-S211.md). Erreur max0,077657 mm ; pass
 médiane0,048576 ms. **A250 close pour le chemin GPU**. Sillage absent et cadence complète
 non mesurée : J1 reste partiel. Suite : intégrer le sillage issu du cœur, puis recevoir la scène.
 
-*S212* : **sillage du cœur intégré à l'hôte**, exact (0,089 mm) mais **refusé en coût** — CPU
-10,9 ms de préparation par image, GPU eau 4,10 ms à 960×540 pour 4 096 nœuds
-([HOTE-GPU-S212](validation/HOTE-GPU-S212.md)). Leviers nommés, non mesurés : temps (cœur, ne plus
-préparer par image) et espace (hôte, grille et transformée). Recette honnête ~16 s, couture
-12,7 mm à 39 s (A251) ; composition mixte impact+sillage non exercée. Suite : levier temporel.
+*S212* : **sillage du cœur intégré à l'hôte**, exact (0,089 mm). **L'implémentation S212** —
+préparation modale à chaque image, somme par sommet, aucune autre technique de §J1-bis —
+**dépasse le budget** : CPU 10,9 ms, GPU eau 4,10 ms à 960×540 pour 4 096 nœuds, un sillage, sur
+la machine locale ([HOTE-GPU-S212](validation/HOTE-GPU-S212.md)). Recette honnête ~16 s, couture
+12,7 mm à 39 s (A251) ; composition mixte impact+sillage non exercée.
+*Cadrage corrigé en S213 par l'utilisateur ([ADR-131](adr/ADR-131-un-depassement-qualifie-une-implementation.md)) :
+S212 écrivait « refusé en coût » et bornait la suite à deux leviers avant arbitrage — c'était
+l'implémentation qui dépassait, pas le sillage ni l'objectif.*
+*S213* : levier temporel en construction dans le cœur ; cadrage et espace d'optimisation ci-dessous.
 
 - ~~**A245**~~ — **levé en S205** (ADR-128) : la mer S201 (Hs 1,5 m) se compose, impact compris,
   zéro refus ; [COMPOSITION-MER-S205](validation/COMPOSITION-MER-S205.md) ;
@@ -85,9 +89,37 @@ préparer par image) et espace (hôte, grille et transformée). Recette honnête
   le goulot avec la table de Bessel précalculée (ADR-129, facteur 100) ; **B évalué par sommet sur
   CPU l'est** (1,2–1,3 µs). **S211 : retiré du chemin d'image CPU**, passe GPU B+impact mesurée ;
   A247 reste partielle tant que le coût complet et le sillage ne sont pas reçus ;
-  **S212 : le sillage rouvre le coût** — préparation par image (CPU ∝ nœuds × tronçons) et somme
-  par sommet (GPU ∝ sommets × nœuds), 5× et 2× le budget ; leviers à mesurer ;
+  **S212 : le sillage rouvre le coût** — dans l'implémentation S212, préparation par image (CPU ∝
+  nœuds × tronçons) et somme par sommet (GPU ∝ sommets × nœuds) dépassent 5× et 2× le budget ;
+  espace d'optimisation ci-dessous (ADR-131) ;
 - **A251** *(S212)* — durée honnête et couture d'un sillage visible ni déduites ni reçues ;
+
+#### J1-bis — Espace d'optimisation du rendu et travaux nécessaires (ADR-131, S213)
+
+Un dépassement mesuré qualifie l'implémentation, pas la fonctionnalité. **2 ms (ADR-125) est un
+objectif éprouvé sur la combinaison** des techniques ci-dessous, sur des scènes représentatives,
+sans présumer qu'elle réussira ou échouera. Aucune demande de réduction d'ambition ne se fonde sur
+l'échec d'optimisations prises isolément. La liste est ouverte.
+
+| technique | état au 2026-09-13 | publie avec elle |
+|---|---|---|
+| phases repliées de B au GPU | **présente** (S211) | écart GPU/cœur |
+| table de Bessel d'un impact (ADR-129) | **présente** (S208, S211) | écart au champ direct, pas λ/16 |
+| **temps** — sillage : tronçons achevés repliés, modes préconstruits | **en construction S213** | écart au chemin préparé, pic aux bornes |
+| **espace** — grille locale et transformée | absente, nommée S212 | quadrature d'image, coutures et période |
+| **LOD spatial** — densité, emprise selon distance et écran | absente | Nyquist par distance (L283), coutures entre niveaux |
+| **LOD spectral** — nœuds par source selon distance et visibilité | absente | écart à la recette pleine, durée et rayon honnêtes (ADR-107, A251) |
+| **LOD temporel** — cadence de mise à jour selon distance, vitesse, régime | absente | erreur de phase, I-09 |
+| **visibilité** — frustum, occlusion, hors écran | absente | exactitude au retour dans le champ |
+| **mutualisation** — nœuds partagés par sources de même recette, passe/grille communes B/W | absente | superposition dans son domaine (ADR-123) |
+
+**Chaque mesure de coût publie** techniques présentes, techniques absentes et domaine de validité
+(scène, recette, sources, formats, instants, machine, grandeur mesurée) — ADR-131 D3.
+
+**Travaux nécessaires de J1, indépendants du coût** (ADR-131 D6) — accélérer ne les remplace pas :
+**A251** (durée honnête et coutures du sillage visible) ; **composition impact + sillage** par le
+cœur (`mixed_water`, budget conjoint ADR-119) ; cadence complète mesurée ; interaction manuelle,
+angles rasants et poses de caméra ; allocations de la pile graphique (I-06) ; seconde cible (B7).
 
 *Bancs qui tranchent à ce jalon* : **B1** (nombre de composantes et coût de B, dès qu'un LOD
 existe dans l'hôte) ; **B2** partiel (représentation de W, dès que le coût B+W par image est
@@ -154,13 +186,17 @@ concrète**, et il la nomme avant de mesurer. On ne ferme pas tous les bancs ava
 utilisable ; une version ne revendique aucune réception qu'un banc n'a pas rendue (ADR-127 D6).
 Les protocoles restent ceux de [PLAN-BENCHMARK](validation/PLAN-BENCHMARK.md).
 
+**Une mesure de coût**, à tout jalon, publie les techniques présentes, les techniques absentes et
+son domaine de validité ; son verdict porte sur l'implémentation mesurée, jamais sur une
+fonctionnalité ; le budget s'éprouve sur la combinaison des techniques (ADR-131).
+
 ## 4. Arbitrages explicites ouverts
 
 | arbitrage | pourquoi il est explicite | qui tranche |
 |---|---|---|
 | ~~Chemin de rendu et hôte de J1~~ — **tranché S207 : (A) GPU, hôte séparé** ([ADR-130](adr/ADR-130-rendu-j1-sur-gpu-par-un-hote-separe.md)) *(fusionnait « hôte interactif » et A247, S206)* | Mesuré : B sur CPU coûte 42 ms par image à la densité qui montre l'impact (2 px), 36 ms sur 16 fils ; W est ramené à 27 µs par impact (ADR-129). Options : **(A)** hôte séparé qui évalue B et les tables W sur **GPU** — prévu par ADR-003 et I-08 (« seules des phases repliées passent au GPU ») et par `gpu_sim_ms = 2,5` d'ADR-012 ; `water-core` reste sans dépendance, l'hôte en a (téléchargement) ; **(B)** CPU seul sans dépendance — exige B vectorisé (non mesuré), un groupe de fils persistant, et que les 2 ms se comptent en **temps mur sur tous les cœurs**, ce qu'ADR-125 ne dit pas ; **(C)** changer le profil ADR-125 (fréquence ou temps eau) ; **(D)** grille à 8 px — **perd les anneaux**, donc retire l'impact visible | **l'utilisateur** — a retenu (A) |
 | ~~Dépendances de l'hôte GPU~~ **autorisées S210/S211**, sources récupérées, cache local/verrou versionné *(état initial S207/S208)* | ADR-130 : aucune bibliothèque téléchargée sans autorisation nommée. S208 recommande wgpu 30.0.1, winit 0.30.13, pollster 1.0.1 ; demande en deux temps — résolution de l'arbre (index), puis sources ; vendoring ou non | **l'utilisateur** — accords reçus |
-| **Budget GPU de l'eau** *(S207)* | ADR-125 ne dit pas où l'eau s'évalue ; ADR-012 déclarait `gpu_sim_ms = 2,5` ; aucune valeur inventée | **S211 : passe GPU locale mesurée**, budget complet encore à recevoir ; arbitrage si incompatible. **S212 : incompatibilité mesurée pour le sillage** (CPU 10,9 ms, GPU 4,10 ms, un seul sillage) ; deux leviers techniques non mesurés — **pas encore un arbitrage** ; il revient à l'utilisateur si les leviers mesurés ne tiennent pas 2 ms |
+| **Budget GPU de l'eau** *(S207)* | ADR-125 ne dit pas où l'eau s'évalue ; ADR-012 déclarait `gpu_sim_ms = 2,5` ; aucune valeur inventée | **S211 : passe GPU locale mesurée**, budget complet encore à recevoir ; arbitrage si incompatible. **S212 : l'implémentation S212 du sillage dépasse** (CPU 10,9 ms, GPU 4,10 ms, un sillage, sans LOD, visibilité ni mutualisation). **S213, ADR-131** : pas un arbitrage ; 2 ms s'éprouve sur la combinaison de J1-bis ; aucune demande de réduction fondée sur l'échec d'optimisations isolées. *S212 écrivait « il revient à l'utilisateur si les leviers mesurés ne tiennent pas 2 ms » : cadrage retiré.* |
 | ~~A247 — coût d'un impact visible~~ | **mesuré S206** ; part technique tranchée par ADR-129, part d'arbitrage fusionnée ci-dessus | — |
 | ~~A245 — mer composable~~ | **tranché S205, ADR-128** : B hors du budget de refus, bits publiés inchangés | — |
 
@@ -172,4 +208,7 @@ réduction**, corrigé par ADR-127 (S204). ADR-125 (S202) : profil 60 images/s, 
 ADR-126 (S203) : emprise d'un impact visible. ADR-128 (S205) : le budget de pente borne les
 perturbations, pas la mer — A245 levé. ADR-129 (S206) : chemin d'image de W par table de
 Bessel ; coût d'image J1 incompatible sur CPU, arbitrage de rendu posé. ADR-130 (S207) : rendu J1
-sur GPU par un hôte séparé, choix de l'utilisateur.
+sur GPU par un hôte séparé, choix de l'utilisateur. ADR-131 (S213) : un dépassement qualifie une
+implémentation ; espace d'optimisation nommé ; 2 ms éprouvé sur la combinaison — clarification de
+l'utilisateur. *Les verdicts « incompatible » de S206 à S212 se lisent désormais comme portant sur
+les implémentations mesurées à leur date.*

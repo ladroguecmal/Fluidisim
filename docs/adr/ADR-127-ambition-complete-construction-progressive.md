@@ -105,3 +105,12 @@ explicite de l'utilisateur qui **nomme ce qui est retiré**. Changer l'ordre des
 montrer une dépendance, pas une préférence.
 
 Invariants relus : I-03, I-04, I-05, I-10, I-11, I-15, I-17 ; aucun amendé.
+
+## Note datée du 2026-09-13 (S213) — D7 précisé par ADR-131
+
+Sur clarification de l'utilisateur : une incompatibilité mesurée qualifie **l'implémentation
+mesurée**, jamais la fonctionnalité ; l'espace d'optimisation (temps, espace, LOD spatial,
+spectral et temporel, visibilité, mutualisation) est nommé dans la trajectoire ; chaque mesure
+publie techniques présentes, absentes et domaine de validité ; 2 ms s'éprouve sur leur
+combinaison ; aucune demande de réduction ne se fonde sur l'échec d'optimisations isolées. D7
+n'est pas réécrit. Voir [ADR-131](ADR-131-un-depassement-qualifie-une-implementation.md).

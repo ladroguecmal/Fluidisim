@@ -103,8 +103,8 @@ mutualisation) et domaine de validité (fixture S212, une source, machine, insta
 ### Plan
 
 - [x] **P1** — jeton, entrée utilisateur, thèse, critères et plan seuls.
-- [>] **P2** — ADR-131 (clarification utilisateur) ; note datée ADR-127 D7 ; FEUILLE-DE-ROUTE : espace d'optimisation, protocole de mesure, travaux nécessaires de J1 (A251, composition impact+sillage), §4 corrigé.
-- [ ] **P3** — propagation du cadrage : HOTE-GPU-S212 (note corrective, techniques/domaine), file active, REPRISE, index, README, viewer/README ; A252, L286.
+- [x] **P2** — ADR-131 (clarification utilisateur) ; note datée ADR-127 D7 ; FEUILLE-DE-ROUTE : espace d'optimisation, protocole de mesure, travaux nécessaires de J1 (A251, composition impact+sillage), §4 corrigé.
+- [>] **P3** — propagation du cadrage : HOTE-GPU-S212 (note corrective, techniques/domaine), file active, REPRISE, index, README, viewer/README ; A252, L286.
 - [ ] **P4** — cœur : `pressure_timeline` (modes préconstruits, repli des tronçons achevés, publication par image, refus atomiques) ; compilation, test minimal.
 - [ ] **P5** — réception contre `from_journal` : instants déclarés, bornes, retour arrière, deux recettes, refus, témoin.
 - [ ] **P6** — mesure du levier seul (exemple release, sans GPU) : par image, pic aux bornes, construction, mémoire ; techniques et domaine.
@@ -113,4 +113,7 @@ mutualisation) et domaine de validité (fixture S212, une source, machine, insta
 
 ### Notes de reprise
 
-*(vide)*
+P2 : ADR-131 actée (D1 implémentation, D2 espace d'optimisation ouvert, D3 techniques présentes/absentes/domaine,
+D4 2 ms sur la combinaison, D5 aucune réduction fondée sur des optimisations isolées, D6 validité
+conservée : A251 et composition impact+sillage). Note datée ADR-127 D7. Feuille de route : S212
+recadré, J1-bis (tableau des techniques et travaux nécessaires), §3, §4, §5.
