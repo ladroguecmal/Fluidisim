@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-13 10:56 +02:00
+JETON            : occupé
+Battement        : 2026-09-13 11:00 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S214 — validité avant accélération (ADR-131 D6) : composition impact + sillage par `mixed_water` sur la scène, puis A251
 Dernière session : S213 — ADR-131 (un dépassement qualifie l'implémentation, espace d'optimisation J1-bis) ; levier temporel du sillage construit, CPU 1,26 / 0,36 ms, GPU inchangé
 Session suivante : S214 — file J1, validité avant accélération (ADR-131 D6) : composition impact + sillage par mixed_water sur la scène (budget conjoint ADR-119), puis A251 ; chaque mesure avec techniques présentes/absentes et domaine (TEMPS-SILLAGE-S213 §Suite)
 Maillons        : 0 — W avancée dans code/water-core/src (pressure_timeline) et ADR-131 actée
