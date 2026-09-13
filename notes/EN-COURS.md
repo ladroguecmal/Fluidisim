@@ -71,8 +71,8 @@ Compteur 2 : file J1, couches B/W, construction effective.
 ### Plan
 
 - [x] **P1** — accord et plan seul, jeton occupé.
-- [ ] **P2** — sources verrouillées, API et données GPU B/W depuis le cœur ; réception CPU.
-- [ ] **P3** — fenêtre, pipeline GPU, caméra interactive et B+impact ; compilation.
+- [x] **P2** — sources verrouillées, API et données GPU B/W depuis le cœur ; réception CPU.
+- [>] **P3** — fenêtre, pipeline GPU, caméra interactive et B+impact ; compilation.
 - [ ] **P4** — comparaison GPU/CPU, capture locale, mesures distinctes CPU/GPU et contrôles ciblés.
 - [ ] **P5** — rituel §6, lancement, file active, passation, jeton libre, copies synchronisées.
 
@@ -84,3 +84,6 @@ Comparaison hauteur GPU/CPU sur scène S201+S203 : tolérance 3 mm (marche S201)
 max/RMS publiés, pente mesurée sans réception physique par image.
 Horodatage GPU si disponible, sinon indisponible explicite. Aucun ajout hors verrou.
 J1 reste ouvert si le sillage ou une réception manque.
+P2 : sources verrouillées récupérées. Background::render_components publie amplitude, kx/ky et phase
+repliée relative à une origine monde ; refus atomique, stockage hôte, aucune allocation.
+Test ciblé reçu aux temps 15 s, 1e6 s et u64::MAX, deux origines, refus domaine/capacité.

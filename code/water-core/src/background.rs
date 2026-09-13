@@ -201,6 +201,24 @@ impl Background {
     pub fn component_count(&self) -> usize {
         self.components.len()
     }
+
+    /// Publication cosmétique pour l'image (ADR-130, I-08), sans allocation.
+    /// Chaque ligne contient [amplitude, k_x, k_y, phase] : k en radians/m,
+    /// phase repliée dans [-pi, pi] à `origin`. Le GPU ajoute k·(point-origin).
+    /// Aucun temps absolu flottant n'est publié. L'arithmétique GPU n'est pas autoritaire.
+    /// Refus atomique si l'origine sort du domaine de B ou le stockage est insuffisant.
+    pub fn render_components(&self, origin: WorldPos, time: SimTime, out: &mut [[f32; 4]]) -> Option<()> {
+        let local = self.local_point(origin)?;
+        if !admits_local(local) || out.len() < self.component_count() { return None; }
+        for (c, dst) in self.components.iter().zip(out.iter_mut()) {
+            let phase = phase_spatiale(c, [local[0], local[1]])
+                .wrapping_add(PhaseQ32(c.phase0.0.wrapping_sub(PhaseQ32::from_time(c.freq_q32, time).0)));
+            let k = c.k_turns_per_m * core::f32::consts::TAU;
+            *dst = [c.amplitude, k * c.dir[0], k * c.dir[1],
+                (phase.0 as i32) as f32 * (core::f32::consts::TAU / 4_294_967_296.0)];
+        }
+        Some(())
+    }
     /// Coordonnées dans les axes locaux de ce B ; refus d'écart ou soustraction hors domaine.
     pub fn local_point(&self, p: WorldPos) -> Option<[f32; 3]> { p.to_local(self.anchor) }
 
@@ -568,6 +586,29 @@ mod diagnostic_homogeneite_s66 {
             assert!((sample.u_total[2]-finite).abs()<0.001);
             assert_eq!(sample.u_total[2],sample.deta_dt);
         }
+    }
+    #[test]
+    fn render_components_rebase_and_fold_s211() {
+        let bg = fond(201, 32);
+        let mut out = [[0.; 4]; 33];
+        for time in [SimTime(15_000_000), SimTime(1_000_000_000_000), SimTime(u64::MAX)] {
+            for origin in [[0., 0.], [125., -330.]] {
+                bg.render_components(WorldPos::from_metres(origin[0], origin[1], 0.), time, &mut out).unwrap();
+                assert_eq!(out[32], [0.; 4]);
+                assert!(out[..32].iter().all(|c| c[3].abs() <= core::f32::consts::PI));
+                for d in [[0.,0.], [30., -20.], [-50., 200.]] {
+                    let mut eta = 0.;
+                    for c in &out[..32] { eta += c[0] * (c[1]*d[0]+c[2]*d[1]+c[3]).sin(); }
+                    let p = WorldPos::from_metres(origin[0]+d[0] as f64, origin[1]+d[1] as f64, 0.);
+                    assert!((eta-bg.eval(p,time).unwrap().eta).abs() < 0.003);
+                }
+            }
+        }
+        let before = out;
+        assert!(bg.render_components(WorldPos::from_metres(4096.,0.,0.),SimTime(0),&mut out).is_none());
+        assert_eq!(out,before);
+        assert!(bg.render_components(WorldPos::from_units(0,0,0),SimTime(0),&mut out[..31]).is_none());
+        assert_eq!(out,before);
     }
     #[test]
     fn actual_background_and_confirmed_impact_compose_s79() {
