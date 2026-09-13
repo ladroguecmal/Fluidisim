@@ -125,7 +125,7 @@ disparaître — l'occupation de 84 %, elle, ne dépend d'aucun échantillonnage
 - [x] **P6** — décider **et construire** : ADR, puis `slope_max_at(t)` dans `RadialImpact` — méthode neuve, `slope_max()` inchangée (ADR-094 : migrer le refus `Steepness` est une autre décision) — consommée par le budget de composition ; tests.
   *(P4 à P6 réécrits après P3-bis : la similitude étant établie, la décision n'est plus « laquelle des trois voies » mais « resserrer, et voici la loi ». Le plan d'origine reste lisible ci-dessus.)*
 - [x] **P6-bis** — *scindé de P6 au constat de sa taille, avant de le commencer* : câbler le budget de composition sur `slope_max_at`, instant porté par `slope_floor` ; rattraper les attentes de tests que la frontière déplace.
-- [ ] **P7** — document de réception (en-tête ADR-131, rang de passage) ; suite complète `code/`.
+- [x] **P7** — document de réception (en-tête ADR-131, rang de passage) ; suite complète `code/`.
 - [ ] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
@@ -300,3 +300,9 @@ Hôte : occupation 42,3 / 39,8 / 41,6 / 38,5 / 37,6 % aux cinq âges (contre 77,
 `VERIFY` **inchangé** (7,2271e-5 m à 16 s, 7,4625e-5 à 39 s) ; GPU eau 1,904 / 4,187 ms inchangé ;
 `--smoke` 120 images. Suite `code/` : **355 réussis (257+4+1+93), 5 ignorés** — un de plus qu'en
 S214, celui d'ADR-133.
+
+P7 : [BUDGET-PENTE-S215](../docs/validation/BUDGET-PENTE-S215.md) — en-tête ADR-131 D3 (et la
+mention que le rang de passage ne s'applique pas : aucune mesure de temps ici) ; §1 l'issue du
+doute d'échantillonnage ; §2 les deux majorants et le mécanisme ; §3 la similitude et ses trois
+indépendances ; §4 la table et sa sûreté ; §5 le refus exercé puis levé ; §6 les contrôles.
+Suite nommée : **la famille du sillage**, qui domine désormais le budget.
