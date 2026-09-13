@@ -107,9 +107,10 @@ mutualisation) et domaine de validité (fixture S212, une source, machine, insta
 - [x] **P3** — propagation du cadrage : HOTE-GPU-S212 (note corrective, techniques/domaine), file active, REPRISE, index, README, viewer/README ; A252, L286.
 - [x] **P4** — cœur : `pressure_timeline` (modes préconstruits, repli des tronçons achevés, publication par image, refus atomiques) ; compilation, test minimal.
 - [x] **P5** — réception contre `from_journal` : instants déclarés, bornes, retour arrière, deux recettes, refus, témoin.
-- [>] **P6** — mesure du levier seul (exemple release, sans GPU) : par image, pic aux bornes, construction, mémoire ; techniques et domaine.
-- [ ] **P7** — hôte : levier par image ; `--verify` contre `from_journal`, contrôles S212 conservés ; coûts ; réception TEMPS-SILLAGE-S213 ; suite complète.
-- [ ] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
+- [x] **P6** — mesure du levier seul (exemple release, sans GPU) : par image, pic aux bornes, construction, mémoire ; techniques et domaine.
+- [ ] **P7** — hôte : levier par image ; `--verify` contre `from_journal`, contrôles S212 conservés ; coûts GPU/CPU.
+- [ ] **P8** — réception TEMPS-SILLAGE-S213 (techniques, domaine) ; suite complète. *(P7 d'origine scindé en P7/P8 au constat de sa taille, avant de le commencer.)*
+- [ ] **P9** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
 
@@ -134,3 +135,18 @@ P5 : deux recettes (8×16, 32×64), 19 instants dont bornes ±1 µs, retour arri
 écart relatif max **6,07e-8** et **2,23e-8** (critère 1e-5). Témoin : rotation de repli inversée →
 échec à 2 000 000 µs, écart 0,365. Code restauré. Piège : guillemets mêlés dans `Get-Date -Format`
 font échouer tout le bloc PowerShell au parsing, sans rien exécuter.
+
+P6 : `examples/wake_timeline_cost.rs`, release, un fil, Ryzen AI 7 350. Médiane/p95/max (ms).
+64×128 (4 096 nœuds, 32 768 modes) : construction 4,433 ; mémoire 3 112 960 o (56/nœud, 88/mode).
+Fenêtre S212 3,17–5,15 s : repli 1,2604/1,6863/2,0921 contre préparation 7,6962/9,4765/14,6585.
+Après forçage 24,17–26,15 s : repli 0,3601/0,4484/0,8297 contre préparation 13,3565/15,0908/17,8338.
+Balayage 0–40 s : ordinaires (2 392) 0,4634/1,8344/7,2989 ; fin franchie (8) 2,1190/2,1617/2,1617.
+Saut 39→3 s : 3,1006 (max 3,3909) ; saut 0,5→39 s : 12,1231 (max 12,3450).
+128×256 (16 384, 131 072) : construction 18,651 ; 12 451 840 o. Forçage 4,9943/5,8540/10,2174
+contre 30,8954/37,3003/57,6987 ; après 1,3859/1,6243/2,2741 contre 52,8939/57,2894/74,6659 ;
+ordinaires 1,4109/5,4802/9,2431 ; fin franchie 6,0305/6,5263 ; sauts 9,4620 et 37,9204.
+**Prédiction contredite** (quelques dixièmes pendant forçage, dizaines de µs après) : 1,26 et
+0,36 ms. Après forçage ≈ 88 ns/nœud — phase temporelle en i128 divisé par 1e6, rotation, phase
+d'origine et sortie ; parts non séparées. La préparation S212 est plus chère après forçage (8
+tronçons nés) qu'au début : le gain croît avec l'âge (6× pendant, 37× après). Max 7,3 ms parmi
+les images ordinaires non attribué (bruit d'ordonnancement probable, non vérifié).
