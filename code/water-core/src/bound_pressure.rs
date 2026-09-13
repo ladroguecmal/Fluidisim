@@ -305,6 +305,25 @@ impl<'a> Prepared<'a> {
         if time != self.time { return Err(Error::Time); }
         self.field.partition_slope_envelope(min,max,pool,budget).map_err(Error::Partition)
     }
+    /// ADR-136 : annonce d'ordre deux, liée au même contexte et instant.
+    pub fn local_slope_envelope_second_order(
+        &self, context: &Context, time: SimTime, min: [f32;2], max: [f32;2],
+    ) -> Result<spectral_pressure::SecondOrderSlopeEnvelope, Error> {
+        if !self.context.matches(context) { return Err(Error::Context); }
+        if time != self.time { return Err(Error::Time); }
+        self.field.local_slope_envelope_second_order(min,max)
+            .map_err(|e| Error::Preparation(e.into()))
+    }
+    /// ADR-136 : partition S219 avec l'ordre de borne demandé.
+    pub fn partition_slope_envelope_order(
+        &self, context: &Context, time: SimTime, min: [f32;2], max: [f32;2],
+        pool: &mut [spectral_pressure::SlopeCell], budget: usize,
+        order: spectral_pressure::SlopeOrder,
+    ) -> Result<spectral_pressure::SlopePartition, Error> {
+        if !self.context.matches(context) { return Err(Error::Context); }
+        if time != self.time { return Err(Error::Time); }
+        self.field.partition_slope_envelope_order(min,max,pool,budget,order).map_err(Error::Partition)
+    }
     /// ADR-117 : consommateur mixte ; contexte et instant contrôlés par classify.
     pub(crate) fn differential_local(
         &self,

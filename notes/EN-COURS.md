@@ -82,7 +82,7 @@ en ordre un au bit. Gain de partition non promis. Aucune admission migrée, A258
 
 - [x] **P1** — jeton et plan seuls.
 - [x] **P2** — ADR-136 : dérivation, écart de phase quantifiée, choix par mode, réserve, limites.
-- [ ] **P3** — construire la branche ordre deux (Field, Prepared) sans changer ADR-135 ni S219.
+- [x] **P3** — construire la branche ordre deux (Field, Prepared) sans changer ADR-135 ni S219.
 - [ ] **P4** — tests : couverture, domination, gain près du maximum, 4000 m, refus, identité S219.
 - [ ] **P5** — exemple S220 : même rectangles S218 et partition S219 par ordre ; campagne isolée.
 - [ ] **P6** — publier la réception S220 et ses relevés bruts.
@@ -91,3 +91,5 @@ en ordre un au bit. Gain de partition non promis. Aucune admission migrée, A258
 ### Notes de reprise
 
 Suite S219 : partition adaptative disponible, A259 (plateau des grandes mailles) ouverte.
+
+P3 : une passe O(N) ; `Slot::accumulate` rend (sin, cos) sans changer ses opérations. Branche ADR-135 recalculée dans la même passe (identité au bit à recevoir P4). Partition : `partition_slope_envelope_order`, l'appel S219 délègue en `First`. Compilation debug sans erreur.

@@ -4,7 +4,7 @@ mod differential;
 pub use differential::PressureDifferential;
 #[path = "pressure_local_bound.rs"]
 mod local_bound;
-pub use local_bound::LocalSlopeEnvelope;
+pub use local_bound::{LocalSlopeEnvelope, SecondOrderSlopeEnvelope, SlopeOrder};
 #[path = "pressure_partition.rs"]
 mod partition;
 pub use partition::{PartitionError, PartitionStop, SlopeCell, SlopePartition};
@@ -537,8 +537,14 @@ impl Slot {
         Ok(PhaseQ32::from_distance(self.turns[0], p[0])
             .wrapping_add(PhaseQ32::from_distance(self.turns[1], p[1])))
     }
+    /// Rend aussi `(sin, cos)` de la phase exécutée (ADR-136), sans changer l'accumulation.
     #[inline]
-    fn accumulate(&self, p: [f32; 2], phase_safe: bool, out: &mut Surface) -> Result<(), Error> {
+    fn accumulate(
+        &self,
+        p: [f32; 2],
+        phase_safe: bool,
+        out: &mut Surface,
+    ) -> Result<(f32, f32), Error> {
         let slot = self;
         let r = slot.response;
         let k = slot.magnitude;
@@ -554,7 +560,7 @@ impl Slot {
             out.horizontal_velocity[i] -=
                 slot.weighted_k[i] * ((r.velocity.re * s + r.velocity.im * c) / k);
         }
-        Ok(())
+        Ok((s, c))
     }
 }
 #[cfg(test)]

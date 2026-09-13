@@ -29,7 +29,189 @@ fn length(x: f32, y: f32) -> f32 {
     up(add(mul(x.abs(), x.abs()), mul(y.abs(), y.abs())).sqrt())
 }
 
+/// ADR-136 : borne d'ordre deux, dominée par la branche ADR-135 calculée au bit.
+/// Même statut numérique qu'ADR-135 : réception, pas certificat f32 (A258).
+#[derive(Clone, Copy, Debug)]
+pub struct SecondOrderSlopeEnvelope {
+    /// `min(first_order.bound, second_order_bound)`.
+    pub bound: f32,
+    pub first_order: LocalSlopeEnvelope,
+    /// Maximum aux coins de `|S(c) + M u|`, réserve comprise dans `second_order_bound`.
+    pub corner_slope: f32,
+    pub second_order_remainder: f32,
+    pub second_order_reserve: f32,
+    pub second_order_bound: f32,
+    /// Modes admis dans la Hessienne signée.
+    pub hessian_modes: usize,
+}
+
+/// Ordre de la borne employée par la partition S219.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum SlopeOrder {
+    First,
+    Second,
+}
+
 impl Field<'_> {
+    /// Branche d'évaluation de la partition : ordre un au bit d'ADR-135, ou ordre deux.
+    pub(super) fn local_bound(&self, min: [f32; 2], max: [f32; 2], order: SlopeOrder) -> Result<f32, Error> {
+        match order {
+            SlopeOrder::First => self.local_slope_envelope(min, max).map(|b| b.bound),
+            SlopeOrder::Second => self.local_slope_envelope_second_order(min, max).map(|b| b.bound),
+        }
+    }
+
+    /// ADR-136 : une passe O(N) ; centre, branche ADR-135 identique au bit, Hessienne signée
+    /// assemblée sur les modes où `E + D²/2 < min(2, D)`, maximum aux quatre coins.
+    /// Refus de même nature que `local_slope_envelope` ; sur un champ à plusieurs défauts,
+    /// l'ordre de détection peut en nommer un autre. Hessienne non finie : `NonFinite`.
+    /// Aucune allocation.
+    pub fn local_slope_envelope_second_order(
+        &self,
+        min: [f32; 2],
+        max: [f32; 2],
+    ) -> Result<SecondOrderSlopeEnvelope, Error> {
+        if !self.admits(min) || !self.admits(max) || (0..2).any(|i| min[i] > max[i]) {
+            return Err(Error::Domain);
+        }
+        let center = [
+            min[0] + (max[0] - min[0]) * 0.5,
+            min[1] + (max[1] - min[1]) * 0.5,
+        ];
+        if !self.admits(center) {
+            return Err(Error::Domain);
+        }
+        // Rayon des coordonnées pour l'arrondi des produits t·x et des coins (ADR-136 §3).
+        let span = [
+            add(min[0].abs().max(max[0].abs()), center[0].abs()),
+            add(min[1].abs().max(max[1].abs()), center[1].abs()),
+        ];
+        let tau = up(core::f32::consts::TAU);
+        let mut out = super::Surface::default();
+        let (mut remainder, mut scalar) = (0.0, 0.0);
+        let (mut remainder2, mut linear_mass) = (0.0, 0.0);
+        let mut hessian = [[0.0f32; 2]; 2];
+        let mut hessian_modes = 0;
+        for s in self.slots {
+            // Même accumulation que `sample`, dans le même ordre : pente au bit.
+            let (sn, cs) = s.accumulate(center, self.phase_safe, &mut out)?;
+            let amplitude = length(s.response.eta.re, s.response.eta.im);
+            let weighted_length = length(s.weighted_k[0], s.weighted_k[1]);
+            if (amplitude == 0.0 && (s.response.eta.re != 0.0 || s.response.eta.im != 0.0))
+                || (weighted_length == 0.0 && s.weighted_k != [0.0; 2])
+            {
+                return Err(Error::NonFinite);
+            }
+            let contribution = mul(weighted_length, amplitude);
+            if contribution == 0.0 && weighted_length > 0.0 && amplitude > 0.0 {
+                return Err(Error::NonFinite);
+            }
+            scalar = add(scalar, contribution);
+            let mut turns = 0.0;
+            let mut quantization = 0.0;
+            for axis in 0..2 {
+                let low = s.turns[axis] * min[axis];
+                let high = s.turns[axis] * max[axis];
+                let mid = s.turns[axis] * center[axis];
+                if ![low, high, mid]
+                    .iter()
+                    .all(|x| x.is_finite() && x.abs() < 1_048_576.0)
+                {
+                    return Err(Error::Domain);
+                }
+                turns = add(turns, up((low - mid).abs().max((high - mid).abs())));
+                quantization = add(quantization, mul(s.turns[axis].abs(), mul(f32::EPSILON, span[axis])));
+            }
+            let phase = mul(up(core::f32::consts::TAU), add(turns, 8.0 * f32::EPSILON));
+            let first = mul(contribution, phase.min(2.0));
+            remainder = add(remainder, first);
+            // ADR-136 §3–4 : écart exécuté/linéaire, puis choix du terme le plus petit.
+            let e = mul(tau, add(quantization, 8.0 * f32::EPSILON));
+            let taylor = add(e, mul(0.5, mul(phase, phase)));
+            if taylor < phase.min(2.0) {
+                let eta_c = s.response.eta.re * cs - s.response.eta.im * sn;
+                for i in 0..2 {
+                    for j in 0..2 {
+                        hessian[i][j] -= s.weighted_k[i] * eta_c * (core::f32::consts::TAU * s.turns[j]);
+                    }
+                }
+                remainder2 = add(remainder2, mul(contribution, taylor));
+                linear_mass = add(linear_mass, mul(contribution, add(phase, e)));
+                hessian_modes += 1;
+            } else {
+                remainder2 = add(remainder2, first);
+            }
+        }
+        if ![out.eta, out.vertical_velocity, out.potential]
+            .iter()
+            .chain(out.slope.iter())
+            .chain(out.horizontal_velocity.iter())
+            .all(|x| x.is_finite())
+        {
+            return Err(Error::NonFinite);
+        }
+        // Branche ADR-135, opérations et ordre identiques à `local_slope_envelope`.
+        let center_slope = length(out.slope[0], out.slope[1]);
+        let n = up(self.slots.len() as f32 + 32.0);
+        let nu = mul(n, f32::EPSILON);
+        if !nu.is_finite() || nu >= 0.5 {
+            return Err(Error::NonFinite);
+        }
+        let gamma = up(nu / (1.0 - nu));
+        let reserve = mul(scalar, add(mul(4.0, gamma), 32.0 * f32::EPSILON));
+        let global = self.slope_envelope_directional()?;
+        let bound1 = add(add(center_slope, remainder).min(global), reserve);
+        if ![center_slope, remainder, reserve, bound1]
+            .iter()
+            .all(|v| v.is_finite())
+        {
+            return Err(Error::NonFinite);
+        }
+        let first_order = LocalSlopeEnvelope {
+            bound: bound1,
+            center_slope,
+            spatial_remainder: remainder,
+            numerical_reserve: reserve,
+        };
+        // ADR-136 §2 : maximum convexe aux quatre coins. `f32::max` ignorerait un NaN.
+        if !hessian.iter().flatten().all(|v| v.is_finite()) {
+            return Err(Error::NonFinite);
+        }
+        let mut corner_slope = 0.0f32;
+        for ux in [min[0] - center[0], max[0] - center[0]] {
+            for uy in [min[1] - center[1], max[1] - center[1]] {
+                let x = out.slope[0] + hessian[0][0] * ux + hessian[0][1] * uy;
+                let y = out.slope[1] + hessian[1][0] * ux + hessian[1][1] * uy;
+                corner_slope = corner_slope.max(length(x, y));
+            }
+        }
+        let nu2 = mul(up(self.slots.len() as f32 + 64.0), f32::EPSILON);
+        if !nu2.is_finite() || nu2 >= 0.5 {
+            return Err(Error::NonFinite);
+        }
+        let gamma2 = up(nu2 / (1.0 - nu2));
+        let reserve2 = mul(
+            add(scalar, linear_mass),
+            add(mul(8.0, gamma2), 32.0 * f32::EPSILON),
+        );
+        let bound2 = add(add(corner_slope, remainder2), reserve2);
+        if ![corner_slope, remainder2, reserve2, bound2]
+            .iter()
+            .all(|v| v.is_finite())
+        {
+            return Err(Error::NonFinite);
+        }
+        Ok(SecondOrderSlopeEnvelope {
+            bound: bound1.min(bound2),
+            first_order,
+            corner_slope,
+            second_order_remainder: remainder2,
+            second_order_reserve: reserve2,
+            second_order_bound: bound2,
+            hessian_modes,
+        })
+    }
+
     /// ADR-135 : pente du centre + reste de variation sur le rectangle, limitée par
     /// l'enveloppe globale. Les deux branches reçoivent la réserve numérique.
     /// Coût O(N), aucune allocation. Rectangle inclus dans l'emprise ; axes dégénérés admis.

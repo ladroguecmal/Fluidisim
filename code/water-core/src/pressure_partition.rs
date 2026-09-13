@@ -1,5 +1,5 @@
 //! S219 : partition complète, tas maximal dans la mémoire de l'appelant.
-use super::{Error, Field};
+use super::{local_bound::SlopeOrder, Error, Field};
 
 #[derive(Clone, Copy, Debug, Default)]
 pub struct SlopeCell {
@@ -75,6 +75,17 @@ impl Field<'_> {
         pool: &mut [SlopeCell],
         budget: usize,
     ) -> Result<SlopePartition, PartitionError> {
+        self.partition_slope_envelope_order(min, max, pool, budget, SlopeOrder::First)
+    }
+    /// ADR-136 : même parcours, borne locale de l'ordre demandé. `First` est l'appel S219.
+    pub fn partition_slope_envelope_order(
+        &self,
+        min: [f32; 2],
+        max: [f32; 2],
+        pool: &mut [SlopeCell],
+        budget: usize,
+        order: SlopeOrder,
+    ) -> Result<SlopePartition, PartitionError> {
         if pool.is_empty() {
             return Err(PartitionError::EmptyPool);
         }
@@ -82,12 +93,12 @@ impl Field<'_> {
             return Err(PartitionError::ZeroBudget);
         }
         let root = self
-            .local_slope_envelope(min, max)
+            .local_bound(min, max, order)
             .map_err(PartitionError::Evaluation)?;
         pool[0] = SlopeCell {
             min,
             max,
-            bound: root.bound,
+            bound: root,
         };
         let (mut count, mut evaluations) = (1, 1);
         let stop = loop {
@@ -114,14 +125,12 @@ impl Field<'_> {
             a.max[axis] = middle;
             b.min[axis] = middle;
             a.bound = self
-                .local_slope_envelope(a.min, a.max)
+                .local_bound(a.min, a.max, order)
                 .map_err(PartitionError::Evaluation)?
-                .bound
                 .min(parent.bound);
             b.bound = self
-                .local_slope_envelope(b.min, b.max)
+                .local_bound(b.min, b.max, order)
                 .map_err(PartitionError::Evaluation)?
-                .bound
                 .min(parent.bound);
             // Les deux évaluations réussissent avant toute mutation de la couverture.
             pool[0] = a;
