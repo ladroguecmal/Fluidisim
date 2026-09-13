@@ -349,7 +349,7 @@ impl<const N: usize> RadialImpact<N> {
     /// `Σ_n c_n k_n J1(k_n r) cos(ω_n t)` ; en majorant chaque `|J1(k_n r)|` par une fonction
     /// **décroissante** du rayon, la borne devient consciente de la distance.
     ///
-    /// ```
+    /// ```text
     /// |dη/dr| ≤ (1 + garde) · Σ_n |c_n| k_n · min(J1_PEAK_BOUND, J1_DECAY_BOUND / √(k_n r))
     /// ```
     ///

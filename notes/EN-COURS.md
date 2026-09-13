@@ -150,7 +150,7 @@ devant 2 ms.
 - [x] **P3** — enveloppe par couronne dans le cœur : `min(slope_max_at, L(r₀))` ; test de sûreté et de resserrement.
 - [x] **P4** — inégalité conjointe par balayage à une dimension ; sûreté contre le maximum réel de la composition, à plusieurs séparations et instants.
 - [x] **P5** — gain et coût ; traduction en impacts admis.
-- [ ] **P6** — décider : ADR et câblage du budget si la borne tient et le prix passe ; sinon constat motivé.
+- [x] **P6** — décider : ADR et câblage du budget si la borne tient et le prix passe ; sinon constat motivé.
 - [ ] **P7** — document de réception (en-tête ADR-131 D3) ; suite complète `code/`.
 - [ ] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
@@ -262,3 +262,24 @@ l'inégalité.** C'est exactement le blocage que S222 avait nommé.
 c'est 0,7 à 1,4 % du budget d'image de 2 ms — négligeable, comme la prédiction l'annonçait, mais
 **seulement à cet échantillonnage** : à 64 le coût monte à 6 % et à 128 à 13 %. Le défaut par
 défaut doit donc être bas, et c'est une décision de P6.
+
+P6 : **ADR-138 actée et câblée.** `RadialImpact::slope_max_beyond`, `mixed::slope_floor_joint`,
+`JOINT_SLOPE_SAMPLES = 8`. `slope_floor` aiguille vers l'inégalité **dès deux champs**, et
+`sample_world_batch` calcule son budget **une fois, hors de la boucle des points**, par
+`slope_floor` — sans quoi l'annonce et le refus liraient deux quantités différentes et la garantie
+d'ADR-128 dans les deux sens tomberait. `steepness` publiée continue de sommer `slope_max()` : seul
+le **budget de refus** emprunte l'inégalité, aucun bit publié ne change.
+
+**Zéro attente de test à changer**, et la raison est structurelle : à un seul champ le chemin est
+celui d'avant **au bit** (l'aiguillage ne se déclenche qu'à deux), et le résultat est pris en
+minimum avec la somme d'origine, donc jamais plus lâche. Suite complète : **371 réussis
+(273+4+1+93), 5 ignorés** — un de plus qu'en S222, le test de la couronne.
+
+*Incident de route, consigné pour ne pas le refaire* : mes blocs de formules en commentaire de doc
+étaient compilés par `rustdoc` comme du Rust — sept erreurs de jeton sur des caractères
+mathématiques. Un bloc nu dans un `///` est du code ; il faut `` ```text ``. Les doctests le disent
+tout de suite, la suite unitaire non.
+
+Hôte : la scène J1 ne porte qu'**un** impact, donc l'aiguillage ne s'y déclenche pas — `floor`
+0,167438 et 0,162917 aux deux âges, `d_eta_m = 0,000000000`, `VERIFY` 7,2271e-5 m : **identiques à
+S222**. C'est le contrôle qu'il fallait : la voie neuve ne perturbe pas la voie existante.

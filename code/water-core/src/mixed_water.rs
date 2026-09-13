@@ -196,6 +196,13 @@ pub fn slope_floor<const N: usize>(
     pressure: Option<&bound_pressure::Prepared<'_>>,
     time: SimTime,
 ) -> f32 {
+    // S223, ADR-138 : à plusieurs champs, l'annonce passe par l'inégalité de position relative.
+    // Elle est prise en minimum avec la somme, donc ce chemin n'est jamais plus lâche, et la
+    // requête lit **la même** quantité — sans quoi la garantie d'ADR-128 dans les deux sens
+    // cesserait de tenir.
+    if impacts.fields.iter().flatten().count() >= 2 {
+        return slope_floor_joint(impacts, pressure, time, JOINT_SLOPE_SAMPLES);
+    }
     let mut floor = 0.0f32;
     for f in impacts.fields.iter().flatten() {
         floor += f.slope_max_at(time);
@@ -205,6 +212,14 @@ pub fn slope_floor<const N: usize>(
     }
     floor
 }
+
+/// S223, ADR-138 : nombre d'intervalles du balayage de position relative.
+///
+/// Provenance (I-14) : `examples/couronne_impact_s223.rs`. Huit intervalles rendent **96,5 %** du
+/// gain de soixante-quatre pour **11 %** de son coût — 13,3 µs contre 121,3 µs à deux champs, soit
+/// 0,7 % du budget d'image de 2 ms. Monter à 64 porterait le coût à 6 % du budget pour 3,5 % de
+/// borne en plus : le balayage est linéaire en intervalles, la qualité ne l'est pas.
+pub const JOINT_SLOPE_SAMPLES: usize = 8;
 
 /// S223, ADR-138 : plancher de pente **conscient de la position relative** des champs d'impact.
 ///
@@ -216,7 +231,7 @@ pub fn slope_floor<const N: usize>(
 /// champ `i`, l'inégalité triangulaire donne `r_i ≥ |d_i − r₁|`, où `d_i = |c_i − c₁|`. Comme
 /// `slope_max_beyond(t, ·)` est **décroissante**, il vient, pour tout point `p` :
 ///
-/// ```
+/// ```text
 /// Σ_i F_i(r_i)  ≤  F₁(r₁) + Σ_{i≠1} F_i(|d_i − r₁|).
 /// ```
 ///
@@ -234,7 +249,13 @@ pub fn slope_floor_joint<const N: usize>(
     time: SimTime,
     samples: usize,
 ) -> f32 {
-    let plain = slope_floor(impacts, pressure, time);
+    let mut plain = 0.0f32;
+    for f in impacts.fields.iter().flatten() {
+        plain += f.slope_max_at(time);
+    }
+    if let Some(p) = pressure {
+        plain += p.slope_envelope();
+    }
     let count = impacts.fields.iter().flatten().count();
     if count < 2 || samples == 0 {
         return plain;
@@ -330,6 +351,7 @@ pub fn sample_world_batch<const N: usize>(
     if points.len() > scratch.len() || points.len() > output.len() {
         return Err(Error::Capacity);
     }
+    let joint_budget = slope_floor(impacts, pressure, time);
     for (index, point) in points.iter().enumerate() {
         let fail = |error| Error::Point { index, error };
         let local = background
@@ -345,7 +367,10 @@ pub fn sample_world_batch<const N: usize>(
         // S205, ADR-128 : `envelope` reste la raideur publiée, B compris, même ordre qu'avant ;
         // `budget` est ce que le refus consomme — les perturbations seules, comme `slope_floor`.
         let mut envelope = s.steepness * core::f32::consts::PI;
-        let mut budget = 0.0f32;
+        // S223, ADR-138 : le budget est celui de `slope_floor`, calculé une fois hors de la
+        // boucle des points — il est point-indépendant par construction, et l'annonce et le
+        // refus doivent lire la même quantité (ADR-128).
+        let mut budget = joint_budget;
         let mut perturbation = [0.0f32; 2];
         let mut fields = impacts.fields.iter().flatten();
         for event in impacts.journal.confirmed() {
@@ -377,7 +402,6 @@ pub fn sample_world_batch<const N: usize>(
             // S215, ADR-133 : `envelope` reste la raideur publiée (bit publié, inchangé) ;
             // `budget` suit la dispersion, dans le même ordre de somme que `slope_floor`.
             envelope += f.slope_max();
-            budget += f.slope_max_at(time);
         }
         if fields.next().is_some() {
             return Err(fail(composition::Error::FieldsMismatch));
@@ -399,7 +423,6 @@ pub fn sample_world_batch<const N: usize>(
             perturbation[0] += w.slope[0];
             perturbation[1] += w.slope[1];
             envelope += p.slope_envelope();
-            budget += p.slope_envelope();
         }
         check_slope(perturbation, budget, max_slope)?;
         let norm = (1.0 + slope[0] * slope[0] + slope[1] * slope[1]).sqrt();
