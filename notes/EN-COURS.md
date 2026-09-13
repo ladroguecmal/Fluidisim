@@ -118,7 +118,7 @@ cœur refuserait.
 - [x] **P4** — budget conjoint : `slope_floor` impact + sillage à chaque âge contre π/7 ; refus localisés et qualifiés.
 - [x] **P5** — hôte : `--verify` passe par la composition du cœur ; contrôles S212/S213 conservés ; coût publié avec son en-tête.
 - [x] **P6** — A251 : emprise et durée honnêtes déduites de la recette et de la vitesse ; couture spatiale et temporelle mesurées comme ADR-126.
-- [ ] **P7** — A251 : réception des coutures et refus nommé ou garde ; publication avec la fixture.
+- [x] **P7** — A251 : réception des coutures et refus nommé ou garde ; publication avec la fixture.
 - [ ] **P8** — document de réception (en-tête ADR-131) ; suite complète `code/`.
 - [ ] **P9** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
@@ -246,3 +246,14 @@ avec elle.
 soit au-delà du coin à 102,22 m) jusqu'à 24 s, alors que la loi annonce 89,36 m : conservatrice de
 15 %, comme à angular 256 chez S156. Le contexte déclaré de 40 s, lui, vaut **2,2 fois** la durée
 honnête — c'est exactement le reproche d'A251, maintenant chiffré.
+
+P7 : **ADR-132 actée** — le domaine d'image d'un sillage se calcule depuis sa recette, et l'hôte
+l'annonce. Quatre points : les deux lois ; une durée honnête porte le critère qui l'a calibrée
+(tableau des trois franchissements) ; l'hôte annonce et ne refuse pas (ADR-091, chemin cosmétique
+ADR-129 §3) ; la fixture S212 est déclarée hors domaine **et conservée** — la raccourcir
+invaliderait les réceptions S211–S214. Aucun bit publié ne change, `water-core` intact.
+Hôte : `FrameData` porte `honest_radius` / `honest_duration` et publie `WAKE_HORS_DOMAINE` une
+seule fois ; `--verify` publie `WAKE_LOI` avec la fixture. Vérifié : l'annonce tombe à 24 s (premier
+âge du témoin au-delà de 18,53), `--smoke` 120 images code 0, `VERIFY` inchangé.
+**A214 reste ouverte** avec un troisième point de calibration : la dépendance à `sigma` n'est
+toujours pas mesurée, et un garde dans la bibliothèque refuserait la fixture S212 elle-même.

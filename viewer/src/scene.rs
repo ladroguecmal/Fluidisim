@@ -526,6 +526,11 @@ pub struct FrameData<'a> {
     pub wake: Vec<[f32; 4]>,
     pub wake_active: bool,
     pub wake_cpu_ms: f64,
+    /// S214, ADR-132 : domaine d'image du sillage déduit de sa recette, et annonce unique
+    /// quand l'instant montré en sort. L'hôte ne refuse pas — il dit qu'il ment.
+    pub honest_radius: f32,
+    pub honest_duration: f32,
+    announced: bool,
 }
 impl<'a> FrameData<'a> {
     pub fn new(
@@ -533,6 +538,7 @@ impl<'a> FrameData<'a> {
         table: RadialTable<'a, 256>,
         wake_input: WakeInput<'a>,
         timeline: Timeline<'a>,
+        recipe: gaussian_spectrum::Recipe,
     ) -> Self {
         let profile = vec![(0., 0.); table.len()];
         let n = wake_input.count();
@@ -551,6 +557,9 @@ impl<'a> FrameData<'a> {
             wake: vec![[0.; 4]; n],
             wake_active: false,
             wake_cpu_ms: 0.,
+            honest_radius: wake_honest_radius(recipe),
+            honest_duration: wake_honest_duration(recipe, 9.81),
+            announced: false,
         }
     }
     pub fn update(&mut self, seconds: f64, age: f64, enabled: bool) {
@@ -572,6 +581,15 @@ impl<'a> FrameData<'a> {
         }
         let wake_time = wake_time(age).filter(|_| enabled);
         self.wake_active = wake_time.is_some();
+        // ADR-132 : une annonce, une seule, au premier instant hors domaine. Le sillage reste
+        // affiché — le chemin est cosmétique (ADR-129 §3) et rien ne le refuse (A214).
+        if self.wake_active && age > self.honest_duration as f64 && !self.announced {
+            self.announced = true;
+            println!(
+                "WAKE_HORS_DOMAINE age={age:.2}s > duree_honnete={:.2}s (rayon honnete {:.2} m) — image hors domaine de la recette",
+                self.honest_duration, self.honest_radius
+            );
+        }
         if let Some(t) = wake_time {
             let start = Instant::now();
             // S213 : plus de préparation modale par image — repli temporel (ADR-131, J1-bis).

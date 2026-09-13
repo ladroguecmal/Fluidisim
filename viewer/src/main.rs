@@ -237,7 +237,7 @@ fn run() -> Result<(), String> {
     let mut modes = vec![None; Timeline::mode_capacity(&spectrum, &journal)];
     let timeline = Timeline::build(input.context, &spectrum, &journal, &mut nodes, &mut modes)
         .map_err(|e| format!("levier temporel : {e:?}"))?;
-    let mut frame = FrameData::new(&scene.background, table, input, timeline);
+    let mut frame = FrameData::new(&scene.background, table, input, timeline, recipe);
     if args.iter().any(|a| a == "--verify") {
         std::fs::create_dir_all("captures/s212").map_err(|e| e.to_string())?;
         let instance = instance();
@@ -423,7 +423,8 @@ fn run() -> Result<(), String> {
             &mut fine_modes,
         )
         .map_err(|e| format!("levier temporel fin : {e:?}"))?;
-        let mut fine_frame = FrameData::new(&scene.background, fine_table, fine, fine_timeline);
+        let mut fine_frame =
+            FrameData::new(&scene.background, fine_table, fine, fine_timeline, fine_recipe);
         g.benchmark(&mut fine_frame)?;
         g.resize(640, 360);
         g.benchmark(&mut fine_frame)?;
