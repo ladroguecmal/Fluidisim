@@ -146,7 +146,7 @@ devant 2 ms.
 ### Plan
 
 - [x] **P1** — jeton, entrée, lecture du champ radial, thèse, risque, critères, prédiction, plan seuls.
-- [ ] **P2** — sûreté de `B(x)` contre `J₁` **exécutée** : balayage du domaine, dépassement mesuré, garde si nécessaire.
+- [x] **P2** — sûreté de `B(x)` contre `J₁` **exécutée** : balayage du domaine, dépassement mesuré, garde si nécessaire.
 - [ ] **P3** — enveloppe par couronne dans le cœur : `min(slope_max_at, L(r₀))` ; test de sûreté et de resserrement.
 - [ ] **P4** — inégalité conjointe par balayage à une dimension ; sûreté contre le maximum réel de la composition, à plusieurs séparations et instants.
 - [ ] **P5** — gain et coût ; traduction en impacts admis.
@@ -157,3 +157,40 @@ devant 2 ms.
 ### Notes de reprise
 
 *(vide : le travail commence en P2)*
+
+P2 : **la prédiction est contredite, et pas là où je l'attendais.** J'annonçais un dépassement aux
+petits `x`, dû à l'interpolation d'Hermite. Le dépassement est ailleurs et sa cause est plus grave :
+**l'inégalité que j'ai supposée est fausse en mathématiques**.
+
+`|J_ν(x)| ≤ √(2/πx)` vaut pour `ν = 1/2` — où `J_{1/2}(x) = √(2/πx)·sin x`, donc avec égalité — et
+**pas pour `ν = 1`**. Mesuré sur `bessel` exécutée, domaine [0 ; 2048], 4 millions d'échantillons
+par régime :
+
+| régime | pire rapport à l'asymptote | en | dépassement |
+|---|---:|---:|---:|
+| table de Hermite (x ≤ 64) | **1,034023** | x = 2,1656 | **3,4 %** |
+| asymptotique (x > 64) | 1,000044 | x = 65,18 | 44 ppm |
+
+Le dépassement de 3,4 % est **la fonction elle-même**, pas son approximation : `√(2/πx)` est la
+limite en `+∞`, pas un majorant, et `|J₁|` la dépasse aux `x` modérés. Les 44 ppm du régime
+asymptotique, eux, viennent bien des termes correctifs de l'expansion (A&S 9.2.1).
+
+**La constante qu'il faut** : `sup_x |J₁(x)|·√x = 0,825031`, atteint en `x = 2,165952`, contre
+l'asymptote `√(2/π) = 0,797885` — 3,4 % au-dessus, cohérent avec la ligne précédente. Et le pic
+plat : la table rend `0,581865191` en `x = 1,840658` contre `J1_PEAK = 0,581865013`, soit
+**0,36 ppm** de dépassement.
+
+**Forme retenue** — allure **prouvée**, constante **mesurée**, et c'est à dire ainsi :
+
+```
+B(x) = (1 + g) · min( 0,5818650 ;  0,8250310 / √x ),     g = 1e-4
+```
+
+La garde `1e-4` vaut **275 fois** le plus grand dépassement mesuré du palier (0,36 ppm) et couvre
+l'égalité par construction sur la branche en `1/√x` ; provenance : `examples/couronne_impact_s223.rs`
+(méthode ADR-133).
+
+**Et cela éclaire une constante du dépôt.** `SLOPE_L1_RATIO = 1,795071`, mesuré en S141 pour
+convertir la borne L1 en pente réelle, vaut `1/0,5819 × 1,045` : **c'était le pic de `J₁` que la
+mesure retrouvait**, à 4,5 % près. Le code posait `|J₁| ≤ 1` en commentaire — « borne
+conservative » — et la calibration rattrapait le facteur derrière.
