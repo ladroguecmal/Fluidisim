@@ -98,8 +98,8 @@ issue technique va en ADR, une incompatibilité sans issue technique va à l'uti
 - [x] **P2** — cœur : `bound_pressure::Prepared::render_components` rebasé, refus atomiques, test contre `sample_batch`.
 - [x] **P3** — hôte : fixture sillage, préparation par image, buffer GPU, somme modale bornée à l'emprise ; R/B/Home ; compilation.
 - [x] **P4** — `--verify` : GPU contre cœur, témoin de résolution, couture, admission, coûts deux recettes, captures, fenêtre.
-- [>] **P5** — réception HOTE-GPU-S212, décision chiffrée du chemin d'image du sillage, suite complète des tests.
-- [ ] **P6** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
+- [x] **P5** — réception HOTE-GPU-S212, décision chiffrée du chemin d'image du sillage, suite complète des tests.
+- [>] **P6** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
 
@@ -127,3 +127,11 @@ GPU 7,770/15,852 (640) 16,946/27,973 (960). Sans sillage S211 : GPU 0,018 / 0,04
 ⇒ 7,6–7,9 ps par sommet×composante, 317–331 ns par nœud×tronçon CPU.
 Captures 8 s scène/témoin : 60 182 pixels différents, max 28 niveaux, lignes 161–359 ; image de
 différence : anneaux d'impact + motif de Kelvin derrière la source. `--smoke` : 120 images, code 0.
+
+P5 : HOTE-GPU-S212 et viewer/README. Verdict : exact, refusé en coût ; incompatibilité mesurée
+mais **pas encore un arbitrage** — deux leviers techniques non mesurés (temps dans le cœur :
+états tournés + tronçon actif préconstruit ; espace dans l'hôte : grille cartésienne + transformée,
+une somme polaire par texel ne gagne rien). Aucun ADR : le levier positif n'est pas mesuré.
+Suite complète `code/` : 350 réussis (252+4+1+93), 5 ignorés (2+3), aucun échec.
+A251 à ouvrir : durée honnête de recette et couture d'emprise du sillage visible non gardées.
+Suite S213 : levier temporel dans le cœur (compteur 0, W avancée par P2).
