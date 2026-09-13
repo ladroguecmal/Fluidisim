@@ -210,7 +210,7 @@ l'échec d'optimisations prises isolément. La liste est ouverte.
 bit, budget conjoint exercé, et **A254** ouverte par cette mesure. *Fait en S215* : ~~la moitié impact d'A254~~ (ADR-133), qui ouvre **A255**. *Fait en S216* : ~~la
 part statique d'A255~~ (ADR-134). *Restent* : **la part dynamique d'A255** (la décohérence du
 sillage — elle conditionne la mutualisation) ; la part somme d'A254 ;
-cadence complète mesurée ; interaction manuelle, angles rasants et poses de caméra ; allocations de
+~~cadence complète mesurée~~ — **faite en S225** ([CADENCE-HOTE-S225](validation/CADENCE-HOTE-S225.md)) : 198 Hz, exclusions chiffrées à 2 %, et la pose de mesure héritée de S201 requalifiée en pire cas (GPU d'eau 2,85 ms en médiane de balayage contre 4,16 fixe, soit 1,42 × le budget au lieu de 2,08) ; interaction manuelle, angles rasants et poses de caméra ; allocations de
 la pile graphique (I-06) ; seconde cible (B7).
 
 *Bancs qui tranchent à ce jalon* : **B1** (nombre de composantes et coût de B, dès qu'un LOD

@@ -5072,3 +5072,42 @@ Le geste : répartir par **arrondi cumulatif** — la part du `k`-ième est la d
 proportionnelles arrondies jusqu'à `k` et jusqu'à `k−1`. Les parts somment exactement au total,
 chacune est à moins d'une unité de sa valeur proportionnelle, et l'ordre du tableau suffit à la
 reproduire : aucun reste à stocker, donc aucune source de divergence. Voir NOYAU-V-S224 §3.
+
+## L308 — Une cadence est un intervalle, et mesurer ses parties les change
+
+*(S225)* Le coût d'une image était connu depuis S211 par deux nombres — un CPU, un GPU — obtenus
+hors écran, sur une texture, avec une réserve écrite dans la ligne : *« sky, upload, readback,
+presentation excluded »*. La cadence réelle, elle, n'avait jamais été mesurée, et trois obstacles
+expliquent pourquoi personne ne s'y était risqué : sous **vsync** l'intervalle mesure l'écran et non
+le coût ; **relire un horodatage GPU sérialise** le processeur et la carte, donc détruit le
+recouvrement que l'on prétend chronométrer ; et **acquérir une image de la chaîne d'échange bloque**,
+de sorte que le temps « CPU » d'une trame réelle est à moitié de l'attente — 2,22 ms sur 4,32 ici.
+
+Ce qui généralise : **une cadence n'est pas la somme de ses passes**, et l'instrumentation qui la
+décompose la modifie. Les deux mesures — le rythme et sa répartition — ne peuvent pas être prises
+dans le même passage, et présenter l'une sous le nom de l'autre est une erreur de catégorie, pas
+d'arrondi. Le symptôme est qu'un banc hors écran donne des chiffres **plus petits et plus stables**
+que la réalité, ce qui les rend d'autant plus convaincants.
+
+Le geste : mesurer le rythme **sans instrumentation fine**, présentation comprise et synchronisation
+d'écran désactivée ; mesurer la répartition dans un **second passage**, et l'étiqueter comme
+sérialisée. Puis vérifier que la somme des parties approche le tout — si elle ne l'approche pas, ce
+n'est pas la mesure qui est fausse, c'est le modèle de recouvrement qu'on avait en tête. Voir A265.
+
+## L309 — La pose d'une fixture peut être son pire cas sans que personne ne l'ait choisi
+
+*(S225)* Le coût GPU de l'eau valait 4,16 ms depuis S212, mesuré à la caméra de la scène S201, fixe.
+En faisant tourner la caméra sur les mêmes 590 images, la médiane tombe à **2,85 ms** et le maximum
+atteint 4,23 : la valeur publiée pendant treize sessions était à peu près le **maximum** d'un
+balayage, pas sa médiane. Le facteur au budget passe de 2,08 à 1,42 en médiane. Personne n'avait
+choisi cette pose pour sa sévérité — elle venait de S201, où elle servait à regarder une image.
+
+Ce qui généralise : **une fixture héritée porte les intentions de la session qui l'a créée, pas
+celles de la session qui la mesure**. Une pose choisie pour montrer un phénomène le cadre au mieux,
+donc met le plus de travail à l'écran ; reprise telle quelle comme point de mesure, elle devient un
+pire cas silencieux. Le biais est systématique et va toujours dans le même sens.
+
+Le geste : pour toute grandeur mesurée sur une pose, une graine ou un instant hérités, **balayer ce
+paramètre au moins une fois** et publier médiane et maximum plutôt qu'une valeur unique. Si la
+valeur héritée se révèle extrême, le dire — elle reste utile comme borne, à condition d'être nommée
+comme telle.

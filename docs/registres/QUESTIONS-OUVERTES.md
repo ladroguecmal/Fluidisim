@@ -1670,7 +1670,21 @@ entrée par entrée. Le fil reprend ci-dessous.
 
 ## File active
 
-Relue en S224, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+Relue en S225, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+
+**Suivi J1 S225 — la cadence complète est mesurée, et elle corrige deux choses.**
+[CADENCE-HOTE-S225](../validation/CADENCE-HOTE-S225.md). Fenêtre ouverte, `AutoNoVsync`, deux phases
+— la relecture d'horodatage sérialise ce qu'elle chronomètre (**L308**). **198,2 Hz**, écart 2,6 %
+sur quatre passages. **Les exclusions écrites depuis S211 sont chiffrées** : la passe d'eau vaut
+**98 %** de la trame GPU, tout le reste 0,087 ms — elles ne cachaient rien.
+**Deux corrections.** Le **CPU** d'une trame est à **51 % de l'attente** (acquisition 2,22 ms sur
+4,32), ce qu'aucun banc hors écran ne pouvait voir. Et la **pose de mesure héritée de S201 était
+proche du pire cas** : à caméra balayée le GPU d'eau médian vaut **2,85 ms** contre 4,16 fixe, donc
+**1,42 ×** le budget de 2 ms au lieu de 2,08 (**L309**). La cadence ne suit pas le GPU pour autant —
+**A265**, gravité 3 : la trame pourrait avoir un plancher que le travail n'explique pas, à instruire
+**avant** toute optimisation CPU.
+**Suite S226 : V, sans faute** — direction de `g_eff` puis état répliqué ; la consigne de S224
+arrive à échéance. Autres lignes et déclencheurs conservés.
 
 **Suivi S224 — la couche V est ouverte, et la ligne qui l'attendait depuis le début est tenue.**
 [NOYAU-V-S224](../validation/NOYAU-V-S224.md). Premier module du graphe hydraulique d'ADR-010,

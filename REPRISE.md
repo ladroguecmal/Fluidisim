@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 18:53 +02:00
+JETON            : libre
+Battement        : 2026-09-13 19:05 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
-Session en cours : S225 — cadence complète de l'hôte, mesurée bout en bout
-Dernière session : S224 — **la couche V existe** : premier module d'ADR-010, C12 reçu à 0,0824 %, `velocite.sh` passe de `jamais` à `V modules=1` ; A264 ouverte (plancher de vidange proportionnel à la surface)
-Session suivante : S225 — **cadence complète de l'hôte**, travail nécessaire de J1 (ADR-131 D6) nommé depuis S213, jamais mesuré, et **reporté explicitement par S224** pour ouvrir V : la promesse se tient ici. Mesurer une cadence réelle bout en bout, pas une passe isolée, avec son en-tête et son rang de passage. **Et la brique suivante de V est nommée dès maintenant pour qu'elle ne refroidisse pas** : direction de `g_eff` — surface libre en référentiel accéléré, ADR-010 §2, spécifiée et absente, le module ne prenant que le module de `g_eff` — puis état répliqué et restauré (ADR-022 §5.1), qui ouvre la branche V de C19 et C21. **Ne pas laisser passer plus d'une session sans y revenir.** A264, A261, A258, A263 nommées sans ordre imposé ; J2/δ général conservé
-Maillons        : 0 — **V** ouverte dans `code/water-core/src` (hydro_network) et W touchée (mixed_water)
+Session en cours : —
+Dernière session : S225 — cadence complète de l'hôte mesurée (198 Hz) ; exclusions chiffrées à 2 % ; la pose de mesure héritée de S201 était proche du pire cas (GPU d'eau 2,85 ms en médiane de balayage contre 4,16 fixe) ; A265 ouverte
+Session suivante : S226 — **V, sans faute** : la consigne de S224 — « ne pas laisser passer plus d'une session » — arrive à échéance, et S225 en a consommé une. **Direction de `g_eff`** d'abord : la surface libre en référentiel accéléré est spécifiée à ADR-010 §2 et absente, le module ne prenant aujourd'hui que le **module** de `g_eff`, de sorte qu'un vaisseau qui accélère ne voit pas son réservoir fuir par ce qui se retrouve en bas. Puis **état répliqué et restauré** (ADR-022 §5.1), qui ouvre la branche V de C19 et C21. **A265 est à instruire avant toute optimisation CPU** : la trame pourrait avoir un plancher que le travail n'explique pas. La suite GPU de J1-bis — espace, LOD, visibilité, mutualisation — reste nommée, et la pose de mesure doit y être balayée et non héritée (L309). A264, A261, A258, A263 sans ordre imposé ; J2/δ général conservé
+Maillons        : **1** — S225 n'a ni ajouté de code d'exécution dans `code/*/src`, ni acté d'ADR : elle a mesuré. À 2, la session suivante devra nommer une ligne de la file et la couche qu'elle avance — c'est déjà le cas, la suite nomme **V**
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 
@@ -191,6 +191,13 @@ demande la campagne d'ADR-133 transposée. **Prochain lot J1 : la part dynamique
 toute scène à plusieurs sillages et donc avant la mutualisation de J1-bis ; puis la loi GPU
 (espace, LOD, visibilité, mutualisation), chaque mesure avec son en-tête (ADR-131 D3).
 
+**S225 : la cadence complète est mesurée** ([CADENCE-HOTE-S225](docs/validation/CADENCE-HOTE-S225.md)).
+198 Hz, exclusions chiffrées à 2 % de la trame GPU, et deux corrections : le CPU d'une trame est à
+moitié de l'attente, et la pose héritée de S201 était proche du **pire cas** — le GPU d'eau médian
+vaut 2,85 ms à caméra balayée contre 4,16 à la pose fixe, soit **1,42 ×** le budget au lieu de 2,08.
+La trame n'est pas purement bornée par le GPU (**A265**). **Prochain lot : V**, dont la consigne de
+S224 arrive à échéance.
+
 **S224 : la couche V est ouverte** ([NOYAU-V-S224](docs/validation/NOYAU-V-S224.md)). Premier
 module du graphe hydraulique (ADR-010), **C12 reçu à 0,0824 %** ; `velocite.sh` affiche
 `V modules=1` après 223 sessions à `jamais`. La cadence complète de l'hôte a été **reportée
@@ -331,6 +338,21 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S225 — 2026-09-13 : [la cadence complète de l'hôte](docs/validation/CADENCE-HOTE-S225.md).**
+Travail nécessaire de J1 nommé depuis S213, jamais mesuré. Fenêtre ouverte, **`AutoNoVsync`** — sous
+vsync l'intervalle mesure l'écran, pas le coût — et **deux phases**, la relecture d'horodatage
+sérialisant ce qu'elle chronomètre (**L308**). **198,2 Hz**, écart 2,6 % sur quatre passages.
+**Les exclusions de S211–S224 sont chiffrées et ne cachaient rien** : la passe d'eau vaut **98 %**
+de la trame GPU, tout le reste 0,087 ms. **Fait neuf** : le CPU d'une trame est à **51 % de
+l'attente** (acquisition 2,22 ms sur 4,32), le travail réel faisant 2,10 ms — invisible à tout banc
+hors écran. **Et une conclusion corrigée dans la même session** : à caméra **balayée** le GPU d'eau
+tombe à **2,85 ms** (contre 4,16 à la pose héritée de S201, qui était donc proche du **pire cas** —
+**L309**), et la cadence ne bouge presque pas, donc la trame n'est pas purement bornée par le GPU
+(**A265**). ADR-125 : l'eau prend 4,16 ms d'une trame de 16,67 au lieu de 2 — **2,08 ×**, 1,42 × en
+médiane de balayage. 379 tests release réussis, 5 ignorés ; aucune ligne de `code/*/src`.
+**Suite S226 : V sans faute** — direction de `g_eff`, puis état répliqué.
+138 ADR,265 angles,309 leçons,18 invariants,6 SPEC,23 cas ; **maillons 1** (ni src, ni ADR).
 
 **S224 — 2026-09-13 : [la couche V existe](docs/validation/NOYAU-V-S224.md).**
 Premier module du graphe hydraulique d'ADR-010, actée depuis S01 et jamais construite : **zéro

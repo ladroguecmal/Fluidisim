@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S225 — en cours
+Session : S225 — terminée
 Agent : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
 Entrée : « Continue avec S225 », même conversation. master et trois copies à 59116c8, jeton libre,
 maillons 0. Copie principale.
@@ -114,7 +114,7 @@ fraction du problème, et c'est la découverte de la session.
 - [x] **P4** — chiffrer les exclusions : part de l'eau dans la trame, coût du ciel, des transferts et de la présentation.
 - [x] **P5** — confronter à ADR-125 : 16,67 ms et 2 ms, et dire ce que la scène J1 tient et ne tient pas.
 - [x] **P6** — document de réception (en-tête ADR-131 D3, rang de passage) ; suite complète `code/`.
-- [ ] **P7** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
+- [x] **P7** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
 
@@ -201,3 +201,26 @@ sérialisation comprises ; §2 la cadence et ses quatre passages ; §3 les exclu
 GPU ; §5 la confrontation à ADR-125 ; §6 les contrôles.
 Suite complète `code/` : **379 réussis, 5 ignorés** — la bibliothèque n'a pas bougé cette session,
 tout le travail est dans `viewer/`.
+
+P6-bis (ajouté après P6, avant P7) : la réserve « caméra fixe » de l'en-tête méritait d'être mesurée
+plutôt qu'écrite. `--sweep` fait tourner la caméra sur les mêmes 590 images. **Le GPU d'eau tombe à
+2,85 ms de médiane contre 4,16 fixe** — la pose héritée de S201 était donc proche du **pire cas**, et
+le facteur au budget passe de 2,08 à **1,42 ×** en médiane (2,12 × au pire). **Et la cadence ne bouge
+presque pas** — 205 Hz contre 198 —, ce qui **réfute la conclusion que j'avais écrite au §4** : la
+trame n'est pas purement bornée par le GPU, et dire qu'une optimisation CPU serait invisible allait
+plus loin que la mesure. §4 et §5 du document corrigés, §4-bis ajouté, en-tête rectifié. **A265**.
+
+P7 : rituel §6 exécuté. Journal S225 ; **A265** (sévérité 3 — le recouvrement CPU/GPU varie avec la
+charge sans que la mesure l'explique) ; suivi **A247** (exclusions chiffrées, pose de mesure
+requalifiée) ; **L308, L309**. Index, README, REPRISE (§4, file active, jeton), feuille de route
+(**« cadence complète mesurée » barrée dans les travaux nécessaires de J1-bis**), file plurielle.
+**Invariants relus** — **I-06** : les allocations de la pile graphique restent non reçues, et une
+cadence ne les mesure pas davantage ; I-03 et I-14 sans objet, aucune constante posée et aucun bit
+publié. Aucun devenu faux, aucun amendé, aucun ADR réécrit ni acté.
+**Règle des deux maillons : compteur 1.** Ni code d'exécution dans `code/*/src`, ni décision actée —
+tout le travail est dans `viewer/`. Le compteur monte honnêtement, et la ligne `Session suivante`
+nomme déjà **V**, ligne de la file, avec la couche qu'elle avance.
+**Recommandation portée** : la consigne de S224 — « ne pas laisser passer plus d'une session sans
+revenir à V » — est arrivée à échéance ; S226 la tient, et la ligne le dit en toutes lettres.
+Décomptes vérifiés : 138 fichiers dans `docs/adr` (inchangé), 309 leçons, 265 angles.
+Jeton libre, battement 19:05. Copies de travail avancées sur master après ce commit.

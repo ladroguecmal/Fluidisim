@@ -769,6 +769,21 @@ DX12/RTX5070 Laptop : erreur hauteur max0,077657 mm ; passe eau960×540 médiane
 349 tests réussis/cinq ignorés. A250 close, A247 partielle ; sillage et coût complet encore dus.
 **Suite S212 : file J1/W, intégrer le sillage au GPU.** 130/250/284/18/6/23 inchangés.
 
+**S225 — 2026-09-13 : [la cadence complète de l'hôte](docs/validation/CADENCE-HOTE-S225.md).**
+Travail nécessaire de J1 nommé depuis S213, jamais mesuré. Fenêtre ouverte, **`AutoNoVsync`** — sous
+vsync l'intervalle mesure l'écran, pas le coût — et **deux phases**, la relecture d'horodatage
+sérialisant ce qu'elle chronomètre (**L308**). **198,2 Hz**, écart 2,6 % sur quatre passages.
+**Les exclusions de S211–S224 sont chiffrées et ne cachaient rien** : la passe d'eau vaut **98 %**
+de la trame GPU, tout le reste 0,087 ms. **Fait neuf** : le CPU d'une trame est à **51 % de
+l'attente** (acquisition 2,22 ms sur 4,32), le travail réel faisant 2,10 ms — invisible à tout banc
+hors écran. **Et une conclusion corrigée dans la même session** : à caméra **balayée** le GPU d'eau
+tombe à **2,85 ms** (contre 4,16 à la pose héritée de S201, qui était donc proche du **pire cas** —
+**L309**), et la cadence ne bouge presque pas, donc la trame n'est pas purement bornée par le GPU
+(**A265**). ADR-125 : l'eau prend 4,16 ms d'une trame de 16,67 au lieu de 2 — **2,08 ×**, 1,42 × en
+médiane de balayage. 379 tests release réussis, 5 ignorés ; aucune ligne de `code/*/src`.
+**Suite S226 : V sans faute** — direction de `g_eff`, puis état répliqué.
+138 ADR,265 angles,309 leçons,18 invariants,6 SPEC,23 cas ; **maillons 1** (ni src, ni ADR).
+
 **S224 — 2026-09-13 : [la couche V existe](docs/validation/NOYAU-V-S224.md).**
 Premier module du graphe hydraulique d'ADR-010, actée depuis S01 et jamais construite : **zéro
 module en 223 sessions**, un désormais — `outils/velocite.sh` affiche `V modules=1`. Nœuds en

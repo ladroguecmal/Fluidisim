@@ -3280,3 +3280,22 @@ pourrait croître ; l'usage de la borne hors admission.
 `liquid_id` figure dans ADR-010 §2 et **pas** dans `HydroNode` : le premier module ne connaît qu'un
 liquide. Ce n'est pas une régression — c'est la même question qu'A17 posait, maintenant attachée à
 une structure qu'il faudra étendre plutôt qu'à un paragraphe.
+
+- **A265** *(sévérité 3, S225 ; ouverte)* — **Le recouvrement CPU/GPU varie avec la charge, et la
+  mesure ne l'explique pas.** À caméra fixe, `travail CPU + GPU` vaut 2,10 + 4,25 = 6,35 ms pour un
+  intervalle de **5,05** : recouvrement partiel. À caméra balayée, où le GPU perd un tiers,
+  2,08 + 2,93 = 5,01 ms pour un intervalle de **4,88** : **presque aucun recouvrement**. La cadence
+  ne suit donc pas le GPU — elle passe de 198 à 205 Hz quand la passe d'eau tombe de 4,16 à 2,85 ms.
+  Quelque chose borne la trame autour de 4,9 ms que ni le travail CPU ni la passe GPU n'expliquent :
+  profondeur de la chaîne d'échange, cadencement du pilote, `AutoNoVsync` qui n'est pas
+  nécessairement immédiat. Gravité 3 : aucune décision n'en dépend aujourd'hui, et le verdict de
+  coût s'appuie sur le GPU, mesuré directement. **À faire** avant d'optimiser le CPU : savoir si la
+  trame a un plancher indépendant du travail, sinon une seconde gagnée pourrait ne rien rendre.
+  Voir L308, CADENCE-HOTE-S225 §4-bis.
+
+**Suivi A247 — S225, 2026-09-13 : les exclusions du coût sont chiffrées, et elles ne cachaient rien.**
+La réserve « sky, upload, readback, presentation excluded », écrite dans chaque ligne de coût depuis
+S211, est mesurée : la passe d'eau vaut **97,95 à 98,06 %** de la trame GPU, tout le reste faisant
+**0,087 ms**. Les verdicts de S211 à S224 portaient donc bien sur l'essentiel. En revanche la pose de
+mesure était **proche du pire cas** sans que personne l'ait choisie : à caméra balayée le GPU d'eau
+médian vaut 2,85 ms contre 4,16 à la pose héritée de S201 (L309). A247 reste partielle.

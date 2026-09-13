@@ -10,11 +10,12 @@ mesure, et le verdict de coût qu'elle confirme est celui d'ADR-125.
   par sommet sur GPU dans l'emprise ; grille projetée à 2 px.
 - **Techniques absentes** : espace (grille et transformée) ; LOD spatial, spectral, temporel ;
   visibilité ; mutualisation ; parallélisme CPU (un fil). Ce sont les quatre premières qui restent à
-  J1-bis, et **toutes sont du côté GPU** — §4.
+  J1-bis, et toutes sont du côté GPU — mais §4-bis montre que « le GPU domine » ne vaut qu'à la
+  charge mesurée.
 - **Domaine de validité** : scène J1 (mer S201, un impact, un sillage prescrit 64×128), fenêtre
   960 × 540, **caméra fixe**, aucune interface, aucune ombre, aucune autre géométrie ; AMD Ryzen
-  AI 7 350, RTX 5070 Laptop, DX12, Windows, release, un fil. **Ne dit rien** d'un jeu, ni d'un autre
-  format, ni d'une caméra en mouvement.
+  AI 7 350, RTX 5070 Laptop, DX12, Windows, release, un fil. La **caméra balayée** est mesurée à
+  part (§4-bis). **Ne dit rien** d'un jeu, ni d'un autre format.
 - **Rang de passage** : quatre passages séparés ; écarts publiés au §2.
 
 ## 1. Ce qui manquait, et pourquoi une passe isolée ne pouvait pas le dire

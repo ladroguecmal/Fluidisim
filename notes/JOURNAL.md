@@ -11611,3 +11611,55 @@ tableau, arrondi cumulatif sans reste stocké, deux exécutions identiques au bi
 module seulement, et c'est dit). Aucun devenu faux, aucun amendé, aucun ADR réécrit ni acté.
 **Compteur 0** : V **et** W avancées dans `code/water-core/src`. 138 ADR, 264 angles, 307 leçons,
 18 invariants, 6 SPEC, 23 cas. Jeton libre, copies avancées.
+
+## S225 — 2026-09-13 — La cadence complète de l'hôte, mesurée bout en bout
+
+**Entrée.** « Continue avec S225 », même conversation. Ligne `Session suivante` de S224 : cadence
+complète de l'hôte, reportée explicitement pour ouvrir V. Maillons 0. Claude Code, Opus 5 ; master
+et trois copies à 59116c8. Plan 917f0dd, P2+P3+P4 421fb85, P5 eef0a99, P6 850053e, P6-bis 4efc922.
+
+**Décision structurante : aucune.** La session mesure ; le verdict de coût qu'elle confirme est
+celui d'ADR-125, et ADR-131 D1 lui garde son statut — il qualifie l'implémentation mesurée.
+
+**Chiffres qui orientent.**
+- **Cadence : 5,0450 ms d'intervalle, soit 198,2 Hz** à 960 × 540, fenêtre ouverte, `AutoNoVsync`.
+  Quatre passages : écart **2,6 %** sur l'intervalle, **0,7 %** sur le GPU d'eau — bien plus stable
+  que les 20 à 40 % de S213, parce que la charge est **soutenue** et non en rafales.
+- **Les exclusions de S211–S224 sont chiffrées et ne cachaient rien** : la passe d'eau vaut
+  **97,95 à 98,06 %** de la trame GPU ; ciel, cibles et résolutions font **0,087 ms**.
+- **Fait neuf : le CPU d'une trame est à moitié de l'attente.** Acquisition d'image **2,22 ms sur
+  4,32**, soit 51 % — contre-pression du GPU, pas travail. Le travail réel fait 2,10 ms (sillage
+  1,25, transfert 0,21, reste 0,64). Aucun banc hors écran ne pouvait le voir. **L308.**
+- **Et une conclusion corrigée dans la même session.** J'avais écrit « la trame est bornée par le
+  GPU, une seconde gagnée sur le CPU serait invisible ». La caméra **balayée** le réfute : le GPU
+  d'eau tombe à **2,85 ms** (max 4,23) et la cadence ne bouge presque pas — 205 Hz contre 198.
+  En balayage `CPU + GPU` ≈ l'intervalle, donc **presque aucun recouvrement** ; à caméra fixe il y
+  en a. **A265**, gravité 3.
+- **La pose héritée de S201 est proche du pire cas.** 4,16 ms à la pose fixe contre 2,85 en médiane
+  de balayage : la valeur publiée depuis S212 était à peu près le **maximum**. Le facteur au budget
+  de 2 ms passe de **2,08 ×** à **1,42 ×** en médiane, 2,12 × au pire. **L309.**
+- **ADR-125** : l'hôte tient 60 Hz trois fois, mais ce n'est pas la question — l'eau prend 4,16 ms
+  d'une trame de 16,67 au lieu de 2, et la scène entière 5,05 : il resterait **11,6 ms** pour le
+  reste au lieu de 14,67.
+- Contrôles : `VERIFY` inchangé, `BENCH` inchangé, `--smoke` code 0 ; suite `code/` **379 réussis,
+  5 ignorés** — la bibliothèque n'a pas bougé.
+
+**Ce qui n'a pas été fait.** Aucune ligne de `code/*/src` : tout est dans `viewer/`. Un autre format
+que 960 × 540, l'interaction manuelle, les angles rasants soutenus et les allocations de la pile
+graphique (I-06) restent non mesurés. **A265** ouverte et non instruite. Les deux briques suivantes
+de V — direction de `g_eff`, état répliqué — n'ont pas été touchées, et la consigne de S224 était de
+ne pas laisser passer plus d'une session.
+
+**Suite S226.** **V, sans faute** : la consigne de S224 arrive à échéance. Direction de `g_eff` —
+surface libre en référentiel accéléré, ADR-010 §2, spécifiée et absente, le module ne prenant
+aujourd'hui que le **module** de `g_eff` — puis état répliqué et restauré (ADR-022 §5.1), qui ouvre
+la branche V de C19 et C21. La suite GPU de J1-bis (espace, LOD, visibilité, mutualisation) reste
+nommée, et A265 est à instruire **avant** toute optimisation CPU.
+
+**Rituel.** A265 (sévérité 3) ; suivi A247 (exclusions chiffrées, pose de mesure requalifiée) ;
+L308, L309 ; file plurielle relue ; feuille de route J1 et J1-bis ; index, README, REPRISE §4, file
+active et jeton. Invariants relus que la mesure touche — **I-06** (les allocations de la pile
+graphique restent non reçues, et la cadence ne les mesure pas davantage), I-03 et I-14 sans objet
+ici : aucune constante posée, aucun bit publié. Aucun devenu faux, aucun amendé, aucun ADR réécrit
+ni acté. **Maillons : 1** — ni code d'exécution dans `code/*/src`, ni décision actée.
+138 ADR, 265 angles, 309 leçons, 18 invariants, 6 SPEC, 23 cas. Jeton libre, copies avancées.
