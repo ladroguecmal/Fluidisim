@@ -370,7 +370,7 @@ pub fn sample_world_batch<const N: usize>(
         // S223, ADR-138 : le budget est celui de `slope_floor`, calculé une fois hors de la
         // boucle des points — il est point-indépendant par construction, et l'annonce et le
         // refus doivent lire la même quantité (ADR-128).
-        let mut budget = joint_budget;
+        let budget = joint_budget;
         let mut perturbation = [0.0f32; 2];
         let mut fields = impacts.fields.iter().flatten();
         for event in impacts.journal.confirmed() {

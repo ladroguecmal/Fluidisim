@@ -121,9 +121,9 @@ limiteur devra mordre sur les derniers pas, et c'est là que se joue le respect 
 
 - [x] **P1** — jeton, choix motivé, ce que la conception donne, thèse, critères, prédiction, plan seuls.
 - [x] **P2** — lire SPEC-004/006 sur ce que V publie, et fixer la forme du module : types, pools, refus. Déclarer avant d'écrire.
-- [ ] **P3** — construire le noyau : nœuds, arêtes d'orifice, pas à 100 ms, quantification à report de reste, limiteur avec normalisation.
-- [ ] **P4** — recevoir C12 : temps de vidange contre 728 s, conservation, non-négativité, capacité.
-- [ ] **P5** — déterminisme et refus atomiques ; aucune allocation dans le pas.
+- [x] **P3** — construire le noyau : nœuds, arêtes d'orifice, pas à 100 ms, quantification à report de reste, limiteur avec normalisation.
+- [x] **P4** — recevoir C12 : temps de vidange contre 728 s, conservation, non-négativité, capacité.
+- [x] **P5** — déterminisme et refus atomiques ; aucune allocation dans le pas.
 - [ ] **P6** — déversoir de débordement et chaîne de nœuds (Gauss-Seidel), si P4 et P5 tiennent ; sinon dire ce qui manque.
 - [ ] **P7** — document de réception ; suite complète `code/`.
 - [ ] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
@@ -159,3 +159,38 @@ retiré d'un nœud et ajouté à l'autre conserve la masse exactement, quelle qu
 Ce que la troncature dégrade, c'est le **débit** — donc le temps de vidange, donc les ±3 %. Le
 report de reste sert à la précision du débit et au déterminisme, pas à la conservation. Je mesurerai
 les deux variantes pour le dire avec un chiffre plutôt qu'avec un raisonnement.
+
+P3+P4+P5 : `code/water-core/src/hydro_network.rs` — **la couche V existe**. Un seul programme porte
+les trois étapes, la construction n'ayant de sens que reçue.
+
+**C12 : vidange en 727,4 s contre 728 s de référence analytique — écart 0,0824 %**, très loin des
+±3 % du cas. Masse conservée exactement, volumes dans leurs bornes à chaque pas, réservoir vide à la
+fin. Sept tests passent ; suite complète **377 réussis (279+4+1+93), 5 ignorés** — six de plus que
+S223, aucun avertissement neuf.
+
+**Deux défauts trouvés en construisant, et ils valaient le détour.**
+
+1. **L'interpolation de hauteur tronquait, et cela arrêtait la vidange.** À un millilitre dans un
+   réservoir de 1 m², la hauteur vaut un micromètre ; l'interpolation entière rendait
+   `999999/1000000 = 0`. Charge nulle, débit nul, contenant qui ne se vide plus. **Arrondi au plus
+   proche** au lieu de troncature : le plancher de représentation demeure — la hauteur est
+   entière — mais il vaut une unité et non deux.
+2. **La normalisation en nanolitres empêchait la quantification d'aboutir.** ADR-010 §4 demande que
+   plusieurs arêtes vidant le même nœud soient réduites « dans la même proportion ». Faite **avant**
+   la quantification, elle donne à chaque arête une part sous le millilitre, qui s'arrondit à zéro :
+   un nœud de 2 ml avec trois fuites gardait 2 ml indéfiniment. La normalisation est passée **après**
+   quantification et **en millilitres**, par **arrondi cumulatif** — les parts somment alors
+   exactement au volume disponible, chacune est à moins d'un millilitre de sa valeur
+   proportionnelle, et l'ordre du tableau suffit à la reproduire (I-03), sans reste à stocker.
+
+**Prédiction confirmée, avec son chiffre.** J'annonçais que le report de reste serait nécessaire et
+que le pas de 100 ms mordrait près de la fin. Le test `without_the_residue_carry_the_drain_stalls`
+le mesure : sans report, **la vidange s'arrête à 13 ml** — et c'est exactement le seuil dérivé, le
+débit d'un pas passant sous le millilitre quand la charge descend sous ≈13 µm. La moitié de la
+prédiction que P2 avait déjà corrigée — « la masse ne sera pas conservée » — reste fausse : la masse
+l'est par construction.
+
+Reçus : déterminisme (deux exécutions, 500 pas, traces identiques), refus **atomiques** nommés
+(`Domain`, `Capacity`, `Shape`) sans qu'aucun volume bouge, capacité aval jamais dépassée,
+non-négativité sous trois fuites concurrentes. Aucune allocation dans le pas : nœuds, arêtes,
+formes et scratch viennent de l'appelant (I-06).

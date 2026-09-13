@@ -62,6 +62,8 @@ pub use host::{AllocError, AllocStats, Allocator, HostServices, JobSystem, Sink}
 pub use phase::PhaseQ32;
 pub use shallow::{Flux, Shallow1D};
 pub use types::{Saturations, FrameId, LayerMask, SimTime, WaterSample, WorldPos, WORLD_UNITS_PER_METRE};
+/// S224, ADR-010 : couche **V** — graphe hydraulique des volumes finis. Premier module.
+pub mod hydro_network;
 pub mod wave_event;
 pub mod wave_journal;
 pub mod impact_field;

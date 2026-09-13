@@ -1,0 +1,286 @@
+//! Couche **V** — graphe hydraulique des volumes finis (ADR-010), premier module.
+//!
+//! Les volumes finis ne sont pas de petits océans : ce sont des **contenants** reliés par des
+//! **ouvertures**, résolus à basse fréquence et en arithmétique entière, séparément de toute
+//! surface libre. Ce module en construit le noyau : nœuds, orifices, pas fixe de 100 ms,
+//! quantification en millilitres à report de reste, limiteur avec normalisation.
+//!
+//! **Ce que les invariants imposent ici, et qui a dicté la forme.**
+//! - **I-03** : V est déterministe bit à bit. L'ordre de parcours des arêtes est celui du tableau
+//!   fourni, jamais une adresse ni un ordre de conteneur ; les sommes sont faites dans cet ordre.
+//! - **I-10** : le serveur exécute V, en arithmétique entière et à 10 Hz. L'état d'un nœud est un
+//!   `i64` de millilitres ; aucun flottant ne le porte jamais.
+//! - **I-06** : aucune allocation à l'exécution. Nœuds, arêtes et formes sont des tranches de
+//!   l'appelant ; le pas n'en demande pas d'autres.
+//! - **I-07** : `g_eff` est **injectée**. Un vaisseau qui accélère doit voir son réservoir fuir par
+//!   ce qui se retrouve en bas.
+//!
+//! Ce que ce module ne fait pas : ni réseau fermé sous pression (ADR-010 §4 le reporte
+//! explicitement en v2), ni pompe, ni matériau poreux, ni pluie, ni absorption.
+
+use crate::SimTime;
+
+/// Pas de la couche V — 100 ms, 10 Hz (ADR-010 §4, I-10). Aligné sur `T_sim`.
+pub const STEP_US: u64 = 100_000;
+
+/// Entrées d'une table de forme : volume → hauteur (ADR-010 §2). Soixante-quatre suffisent.
+pub const SHAPE_ENTRIES: usize = 64;
+
+/// Coefficient de débit d'un orifice à arête vive (ADR-010 §3). Sans provenance propre : il vient
+/// de l'ADR, qui le tient de la littérature ; l'hôte peut le remplacer par arête.
+pub const SHARP_EDGE_DISCHARGE: f32 = 0.62;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Error {
+    /// Indice de nœud ou de forme hors des tranches fournies.
+    Capacity,
+    /// Table de forme mal dimensionnée, non croissante, ou hauteurs non finies.
+    Shape,
+    /// Pas, gravité ou géométrie inutilisables — faute d'entrée de l'hôte, pas verdict physique.
+    Domain,
+    /// Un débit calculé n'est pas représentable.
+    NonFinite,
+}
+
+/// Contenant. L'état est **entier** : `volume_ml`, et rien d'autre.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct HydroNode {
+    pub volume_ml: i64,
+    pub capacity_ml: i64,
+    /// Altitude du fond, en micromètres, dans le repère du référentiel.
+    pub floor_um: i64,
+    /// Indice de la forme dans la table fournie.
+    pub shape: u16,
+}
+
+/// Ouverture entre deux contenants, ou vers l'extérieur.
+///
+/// `residue_nl` porte le **report de reste** d'ADR-010 §4 : le débit est calculé en flottant puis
+/// quantifié en millilitres, et la fraction perdue est conservée d'un pas au suivant. Sans lui, la
+/// troncature ne perd aucune masse — un transfert entier reste entier des deux côtés — mais elle
+/// **biaise le débit** à chaque pas, toujours dans le même sens.
+#[derive(Clone, Copy, Debug, Default)]
+pub struct Orifice {
+    pub from: u16,
+    /// `None` : rejet hors réseau. Le volume sort du bilan, et c'est voulu.
+    pub to: Option<u16>,
+    /// Section, en millimètres carrés.
+    pub area_mm2: i64,
+    /// Hauteur du seuil au-dessus du fond du nœud amont, en micromètres.
+    pub sill_um: i64,
+    pub discharge: f32,
+    /// Reste fractionnaire, en nanolitres (10⁻⁶ ml). Entretenu par `step`.
+    pub residue_nl: i64,
+}
+
+/// Tables de forme de l'hôte : `shapes[s * SHAPE_ENTRIES + i]` est la hauteur en micromètres au
+/// volume `i / (SHAPE_ENTRIES - 1)` de la capacité. Croissantes, cuites hors ligne (ADR-010 §2).
+pub struct Shapes<'a> {
+    table: &'a [i64],
+}
+impl<'a> Shapes<'a> {
+    /// Contrôle une fois, à la construction : croissance et dimension. Le pas n'y revient pas.
+    pub fn new(table: &'a [i64]) -> Result<Self, Error> {
+        if table.is_empty() || table.len() % SHAPE_ENTRIES != 0 {
+            return Err(Error::Shape);
+        }
+        for chunk in table.chunks_exact(SHAPE_ENTRIES) {
+            if chunk[0] != 0 {
+                return Err(Error::Shape);
+            }
+            for w in chunk.windows(2) {
+                if w[1] < w[0] {
+                    return Err(Error::Shape);
+                }
+            }
+        }
+        Ok(Self { table })
+    }
+    pub fn count(&self) -> usize {
+        self.table.len() / SHAPE_ENTRIES
+    }
+    /// Hauteur de la surface libre au-dessus du fond, en micromètres, par interpolation linéaire
+    /// en volume. Un prisme a une table linéaire, donc cette lecture y est **exacte**.
+    fn height_um(&self, shape: u16, volume_ml: i64, capacity_ml: i64) -> Result<i64, Error> {
+        let s = shape as usize;
+        if s >= self.count() || capacity_ml <= 0 {
+            return Err(Error::Capacity);
+        }
+        let row = &self.table[s * SHAPE_ENTRIES..(s + 1) * SHAPE_ENTRIES];
+        if volume_ml <= 0 {
+            return Ok(row[0]);
+        }
+        if volume_ml >= capacity_ml {
+            return Ok(row[SHAPE_ENTRIES - 1]);
+        }
+        // Position dans la table, en unités de (SHAPE_ENTRIES - 1) fractions de capacité.
+        let steps = (SHAPE_ENTRIES - 1) as i128;
+        let pos = volume_ml as i128 * steps;
+        let i = (pos / capacity_ml as i128) as usize;
+        let i = i.min(SHAPE_ENTRIES - 2);
+        let frac = pos - i as i128 * capacity_ml as i128;
+        let lo = row[i] as i128;
+        let hi = row[i + 1] as i128;
+        // Arrondi **au plus proche**, pas troncature. Avec la troncature, une tranche de fluide
+        // qui vaut un micromètre se lit zéro — la charge s'annule et le contenant cesse de se
+        // vider, à un millilitre près sur un million. Le plancher de vidange existe quand même
+        // (la hauteur est entière), mais il vaut alors une unité de représentation, pas deux.
+        let cap = capacity_ml as i128;
+        Ok((lo + ((hi - lo) * frac + cap / 2) / cap) as i64)
+    }
+}
+
+/// Un pas de la couche V.
+///
+/// **Déroulé, et chaque étape répond à une ligne d'ADR-010 §4.**
+/// 1. Contrôles d'entrée, avant toute écriture — le refus est **atomique**.
+/// 2. Pour chaque arête, dans l'ordre du tableau : charge `Δh`, débit de Torricelli, volume du pas,
+///    ajout du reste, quantification en millilitres, reste conservé.
+/// 3. **Normalisation** : quand plusieurs arêtes vident le même nœud au-delà de ce qu'il contient,
+///    toutes sont réduites dans la même proportion. Sans cela un nœud presque vide alimente trois
+///    fuites et devient négatif.
+/// 4. Limiteur d'arrivée : `transfert ≤ capacité libre aval`, appliqué après la normalisation.
+/// 5. Application.
+///
+/// `scratch` reçoit un transfert par arête ; il appartient à l'appelant (I-06).
+pub fn step(
+    nodes: &mut [HydroNode],
+    edges: &mut [Orifice],
+    shapes: &Shapes<'_>,
+    g_eff: f32,
+    dt: SimTime,
+    scratch: &mut [i64],
+) -> Result<(), Error> {
+    if scratch.len() < edges.len() {
+        return Err(Error::Capacity);
+    }
+    if !(g_eff > 0.0) || !g_eff.is_finite() || dt.0 == 0 {
+        return Err(Error::Domain);
+    }
+    for e in edges.iter() {
+        if e.from as usize >= nodes.len()
+            || e.to.is_some_and(|t| t as usize >= nodes.len())
+            || e.area_mm2 < 0
+            || !(e.discharge >= 0.0)
+            || !e.discharge.is_finite()
+        {
+            return Err(Error::Capacity);
+        }
+    }
+    for n in nodes.iter() {
+        if n.capacity_ml <= 0 || n.volume_ml < 0 || n.volume_ml > n.capacity_ml {
+            return Err(Error::Capacity);
+        }
+        if n.shape as usize >= shapes.count() {
+            return Err(Error::Capacity);
+        }
+    }
+    let dt_s = dt.0 as f64 * 1e-6;
+
+    // --- 2. Débit par arête, dans l'ordre du tableau (I-03).
+    for (e, out) in edges.iter().zip(scratch.iter_mut()) {
+        *out = 0;
+        let up = nodes[e.from as usize];
+        let h_up = shapes.height_um(up.shape, up.volume_ml, up.capacity_ml)?;
+        let surface_up = up.floor_um + h_up;
+        let sill = up.floor_um + e.sill_um;
+        // Charge en aval : la surface du contenant receveur, ou le seuil si l'arête rejette dehors.
+        let downstream = match e.to {
+            Some(t) => {
+                let dn = nodes[t as usize];
+                let h_dn = shapes.height_um(dn.shape, dn.volume_ml, dn.capacity_ml)?;
+                (dn.floor_um + h_dn).max(sill)
+            }
+            None => sill,
+        };
+        if surface_up <= downstream {
+            continue;
+        }
+        let head_m = (surface_up - downstream) as f64 * 1e-6;
+        // Torricelli, ADR-010 §3. Section en mm² → m² : 1e-6.
+        let q_m3s = e.discharge as f64 * (e.area_mm2 as f64 * 1e-6) * (2.0 * g_eff as f64 * head_m).sqrt();
+        if !q_m3s.is_finite() {
+            return Err(Error::NonFinite);
+        }
+        // Volume du pas, en **nanolitres** : m³ → ml est 1e6, ml → nl est 1e6.
+        let nl = q_m3s * dt_s * 1e12;
+        if !nl.is_finite() || nl.abs() >= i64::MAX as f64 {
+            return Err(Error::NonFinite);
+        }
+        *out = nl as i64;
+    }
+
+    // --- 3. Quantification avec report de reste, puis limiteur d'arrivée par arête.
+    for (e, want) in edges.iter_mut().zip(scratch.iter_mut()) {
+        let total_nl = (*want as i128) + (e.residue_nl as i128);
+        if total_nl <= 0 {
+            e.residue_nl = 0;
+            *want = 0;
+            continue;
+        }
+        let mut ml = (total_nl / 1_000_000) as i64;
+        if let Some(t) = e.to {
+            let free = nodes[t as usize].capacity_ml - nodes[t as usize].volume_ml;
+            if ml > free {
+                ml = free.max(0);
+            }
+        }
+        // Le reste est ce qui n'a pas franchi le millilitre, **borné à un millilitre** : une arête
+        // affamée ne doit pas accumuler une dette qu'elle déverserait d'un coup au premier
+        // millilitre disponible. Ce qu'une vidange n'a pas eu lieu de faire n'a pas eu lieu.
+        e.residue_nl = (total_nl - ml as i128 * 1_000_000).clamp(0, 999_999) as i64;
+        *want = ml;
+    }
+
+    // --- 4. Normalisation par nœud amont, **en millilitres**.
+    //
+    // ADR-010 §4 : quand plusieurs arêtes vident le même nœud au-delà de ce qu'il contient, toutes
+    // sont réduites dans la même proportion. La normalisation se fait ici **après** quantification
+    // et non avant : à l'échelle du nanolitre, répartir proportionnellement un contenant presque
+    // vide donne à chaque arête une part inférieure au millilitre, qui s'arrondit à zéro — et le
+    // contenant cesse de se vider tout en gardant de la charge.
+    //
+    // La répartition se fait par **arrondi cumulatif** : la part de l'arête `k` est la différence
+    // des sommes proportionnelles arrondies jusqu'à `k` et jusqu'à `k-1`. Les parts somment alors
+    // **exactement** au volume disponible, chacune est à moins d'un millilitre de sa valeur
+    // proportionnelle, et l'ordre du tableau suffit à la reproduire (I-03) — aucun reste à stocker.
+    for i in 0..nodes.len() {
+        let mut asked: i128 = 0;
+        for (e, ml) in edges.iter().zip(scratch.iter()) {
+            if e.from as usize == i {
+                asked += *ml as i128;
+            }
+        }
+        let available = nodes[i].volume_ml as i128;
+        if asked <= available || asked <= 0 {
+            continue;
+        }
+        let (mut cum, mut cum_given) = (0i128, 0i128);
+        for (e, ml) in edges.iter().zip(scratch.iter_mut()) {
+            if e.from as usize != i {
+                continue;
+            }
+            cum += *ml as i128;
+            let target = cum * available / asked;
+            *ml = (target - cum_given) as i64;
+            cum_given = target;
+        }
+    }
+
+    // --- 5. Application, dans l'ordre du tableau. Le retrait précède l'ajout ; la somme des
+    // volumes est conservée par construction, et rien ne dépasse ce qui a été normalisé.
+    for (e, ml) in edges.iter().zip(scratch.iter()) {
+        if *ml <= 0 {
+            continue;
+        }
+        nodes[e.from as usize].volume_ml -= *ml;
+        if let Some(t) = e.to {
+            nodes[t as usize].volume_ml += *ml;
+        }
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+#[path = "tests_hydro_network.rs"]
+mod tests;
