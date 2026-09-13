@@ -6,6 +6,10 @@ use crate::{FrameId, PhaseQ32, SimTime};
 #[path = "radial_differential.rs"]
 mod differential;
 pub use differential::DifferentialError;
+/// ADR-129 (S208) : chemin d'image par table de Bessel précalculée, cosmétique.
+#[path = "radial_table.rs"]
+mod table;
+pub use table::{RadialTable, TableError};
 
 /// Borne du domaine de `bessel`, portée de 64 à 2048 par ADR-084. La valeur est **mesurée** :
 /// au-delà, la précision de la phase spatiale en `f32` fait sortir l'erreur de la tolérance de

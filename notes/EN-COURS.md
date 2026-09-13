@@ -91,7 +91,7 @@ rayon non résolu, écart maximal par canal publié, zéro pixel différent hors
 ### Plan
 
 - [x] **P1** — état réel, conception et critères, plan seul.
-- [ ] **P2** — `radial_table.rs` : `table_len`, `bake_table`, `profile`, `eval` ; compilation.
+- [x] **P2** — `radial_table.rs` : `table_len`, `bake_table`, `profile`, `eval` ; compilation.
 - [ ] **P3** — essais unitaires (a), (b), (d) ; essai d'intégration (c).
 - [ ] **P4** — banc : noyau réel dans `frame_cost` (coût par image, construction, mémoire) ; image
  S205 par la table dans `render_impact` contre le chemin direct (e).
@@ -103,3 +103,8 @@ rayon non résolu, écart maximal par canal publié, zéro pixel différent hors
 
 ### Notes de reprise
 
+P2 : `radial_table.rs`, sous-module de `radial_impact` (accès aux nœuds, pas de copie de la
+formule). Type d'erreur propre `TableError { Step, Storage, Profile, Field(Error) }` plutôt qu'un
+variant ajouté à l'erreur partagée des champs (ADR-082). `profile` garde les opérations de
+`sample` (`coef·J0·ct`, `coef·k·J1·ct`) pour l'égalité au bit aux nœuds. Compilation sans
+avertissement.
