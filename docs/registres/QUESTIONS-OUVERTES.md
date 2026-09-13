@@ -9,8 +9,7 @@ suivis de session. Les preuves et l'histoire restent dans le journal et Git.
 
 | travail | état et preuve | déclencheur / prochain résultat utile |
 |---|---|---|
-| **Intégrité V — audit S227** | Confluence et différences de coordonnées en cours de reproduction/correction | Avant toute utilisation d'un réseau à plusieurs arrivées ; conservation et bornes sur le pas réel |
-| **A266 / géométrie V** | Ouverte, gravité 1 (S226) ; table horizontale incompatible avec l'orientation, et distance normale à distinguer de la cote centrale | **Prochain lot de construction V** : relation volume/plan orienté correcte, cas prisme et cale, remplissages extrêmes ; pas de restriction définitive aux prismes |
+| **A266 / géométrie V** | Ouverte, gravité 1 ; S227 reproduit aussi une fuite de 506 ml au-dessus de la vraie surface d'un prisme (test explicitement ignoré) ; distance normale distincte de la cote centrale | **Prochain lot de construction V** : relation volume/plan orienté correcte, cas prisme et cale, remplissages extrêmes, directions et azimuts ; pas de restriction définitive aux prismes |
 | **État V restaurable** | Absent (S226), ADR-022 §5.1 | Après contrat géométrique : snapshot et restauration des nœuds **et des restes d'arêtes**, continuation identique ; ouvre C19-V |
 | **V restant / A17 / A264** | Noyau présent depuis S224 ; `liquid_id`, pluie/exposition, absorption, pompes, pression fermée non construits ; plancher de hauteur dépend de la surface | Extension V selon les usages ; test de bilan par liquide et échelle. Articulation V↔δ à J4 |
 | **S200-1 / A244 / budget δ** | S200 : pas sans allocation, refus atomiques ; S202 : coût mesuré, pression f64 expérimentale et budget temporel non reçus | **Lot J2 exécutable indépendamment des raffinements W** : interruption sous budget injecté, état réutilisable et dégradation déclarée ; qualification de précision |
@@ -31,7 +30,8 @@ suivis de session. Les preuves et l'histoire restent dans le journal et Git.
 | **A211 / A243 / pilotage** | Reprise et choix de lot refondus S227 ; indicateur Git corrigé, efficacité à éprouver | Avant la troisième session d'un même fil : vérifier la capacité livrée et comparer à la file ; le code de banc ne vaut pas intégration |
 | **A215 / copies de travail** | Jeton versionné, donc non atomique entre copies ; contrôles Git conservés | Toute reprise et fin de session selon AGENTS ; aucune suppression sans preuve de copie morte |
 
-**Clos et à ne pas redemander** : A245 (S205), A250 (S211), A251 (S214), A254/A262 (S223),
+**Clos et à ne pas redemander** : intégrité V A267/A268 (S227 : arrivées collectives et coordonnées
+extrêmes, quatre régressions) ; A245 (S205), A250 (S211), A251 (S214), A254/A262 (S223),
 A217 (S194), A240 (S195), A242 (S197) ; leurs limites restent dans les preuves. Les 2 % de B4,
 60 Hz / eau 2 ms, GPU séparé et sources du verrou S210/S211 sont acquis. A107 est un repère
 historique de fork réconcilié S35/S39, pas une fusion encore attendue.

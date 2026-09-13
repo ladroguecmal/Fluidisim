@@ -81,8 +81,8 @@ l’audit. Pas de réécriture d’ADR ou des sources initiales.
 - [x] **P3a** — points d’entrée et file active réécrits au présent ; méthode proportionnée et critère de capacité reçue.
 - [x] **P3b** — remplacer l’indicateur de vélocité par un inventaire portable, sans faux score de productivité.
 - [x] **P4** — reproduire et corriger les défauts de code bornés issus de l’audit ; sinon documenter les correctifs prioritaires avec critères de réception.
-- [>] **P5** — vérifier les changements, achever le bilan global et ordonner les prochains lots selon leur effet sur le système.
-- [ ] **P6** — rituel de fin §6 : journal, angles/leçons utiles, file active, index, jeton libre et copies synchronisées.
+- [x] **P5** — vérifier les changements, achever le bilan global et ordonner les prochains lots selon leur effet sur le système.
+- [>] **P6** — rituel de fin §6 : journal, angles/leçons utiles, file active, index, jeton libre et copies synchronisées.
 
 Chaque étape reste sous quinze minutes ; découpage déclaré ici si nécessaire.
 
@@ -107,3 +107,8 @@ P4 : deux défauts vus échouer puis corrigés. Confluence 3 ml dans 1 ml ; sous
 panique. Quatre nouvelles régressions passent debug/release, seize tests V release passent.
 A266 : hublot central à 1,01 m fuit de 506 ml, attendu zéro ; nouveau test ignoré explicitement
 et exécuté en échec connu. Note datée ADR-010 et réception S226. Pas de représentation choisie.
+
+P5 : suite complète release hors réseau : 387 réussis, 6 ignorés (dont le nouvel A266 connu).
+Quatre tests de l'indicateur passent ; chemins actifs vérifiés et deux anciennes ancres réparées.
+Bilan achevé : A266, état V restaurable, budget/précision δ, espace/LOD/visibilité ; autres
+déclencheurs conservés dans la file. A267/A268 y sont closes ; leurs fiches arrivent au rituel P6.

@@ -1866,7 +1866,7 @@ croyant exercer la pente. Voir [REFUS-EMPRISE-S144](../validation/REFUS-EMPRISE-
 **Suivi A211 — S190, 2026-09-12 : réparation étendue à une file plurielle.** L'utilisateur
 signale que la ligne unique de suite a de nouveau laissé disparaître les autres axes
 pendant la série B4. Pas de nouvel identifiant pour le même défaut de sévérité 1.
-La [file active S194](QUESTIONS-OUVERTES.md#file-active-s194--2026-09-12) porte désormais
+La [file active](QUESTIONS-OUVERTES.md#file-active) porte désormais
 les chantiers, leurs limites et leurs déclencheurs ; REPRISE §6.7 exige sa relecture
 en plus de la prochaine action. A211 reste à éprouver sur les sessions suivantes,
 elle n'est pas fermée par la seule écriture du dispositif.

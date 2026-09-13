@@ -49,7 +49,7 @@ REPRISE oblige à absorber l'histoire avant de travailler. La taille totale n'es
 un journal peut être long. C'est l'histoire **dans le chemin obligatoire**, et son état répété,
 qui coûtent. Les références scientifiques, ADR et preuves ne sont pas à supprimer.
 
-Contradictions actuelles vérifiées : REPRISE annonce encore un hôte à autoriser après son
+Contradictions vérifiées à l'entrée et corrigées en P3 : REPRISE annonce encore un hôte à autoriser après son
 autorisation S210/S211 ; sa table S208 dit V absent ; la table de la file active dit aussi
 « aucun module » après les ajouts S224/S226. La feuille de route dit A254 close puis la donne
 encore à faire ; elle conditionne encore la mutualisation à A255 alors que S222 a levé ce
@@ -57,7 +57,7 @@ préalable. Une date historique ne suffit pas si la phrase garde la fonction de 
 
 ### Un indicateur d'activité pris pour un indicateur d'avancement
 
-`outils/velocite.sh` compte les ajouts dans le harnais comme « bibliothèque / part système »,
+L'ancien `outils/velocite.sh` compte les ajouts dans le harnais comme « bibliothèque / part système »,
 ignore les sous-répertoires de `src`, ignore l'afficheur dans cette part, arrête ses ères à S199
 et cherche chaque lien de suite dans **tout le journal**, pas dans l'entrée correspondante.
 Une modification de commentaire suffit aussi à changer sa « dernière avancée ».
@@ -131,11 +131,50 @@ vu échouer. Note factuelle ajoutée à ADR-010 et au reçu S226, sans réécrit
 
 ## 4. Changements et vérification
 
-À compléter après application P3–P5. Les anciens points d'entrée restent consultables dans Git
-au commit `dfd1507`, et les preuves dans les ADR, documents de validation et le journal.
-Le nettoyage des pages actives ne réécrit ni un ADR ni une source initiale.
+Les trois points d'entrée passent de **6 161 à 384 lignes** (REPRISE 148, README 47, index 189),
+soit **94 % de réduction**. L'index conserve les liens des 138 ADR. Les anciens points d'entrée
+restent consultables dans Git au commit `dfd1507` ; les preuves restent dans leurs documents.
+Ni source initiale ni décision d'ADR réécrite : seule une note factuelle est ajoutée à ADR-010.
+
+- **Passation** : règles présentes et lecture ciblée ; plus de récit ajouté à chaque session.
+  Un seul porteur par information : trajectoire, file de travaux, preuves, histoire, navigation.
+- **File et feuille de route** : états périmés remplacés, accords acquis conservés, J1 reconnu
+  partiel et dépendances de J2/V distinguées du perfectionnement des bornes W.
+- **Méthode** : lot relié à un usage, décision aval et critère d'arrêt avant mesure. Une absence
+  d'anomalie est un résultat permis. Les maillons reposent sur une capacité reçue explicitée au
+  journal ; avant une troisième session d'un même fil, sa priorité est comparée aux reliquats.
+- **Indicateur** : [etat_projet.py](../../outils/etat_projet.py), Python standard en lecture seule,
+  distingue cœur, harnais, exemples et afficheur, suit les sous-répertoires et les sessions
+  réelles. L'ancien point d'appel reste compatible. Il annonce son approximation : fichiers
+  repérés et activité Git, jamais couverture fonctionnelle, temps de travail ou productivité.
+
+**Vérifications finales P5** : `cargo test --workspace --release --offline --quiet`, depuis
+`code/` : **387 réussis, 6 ignorés**, contre 383/5 à l'entrée. Le nouvel ignoré est le défaut
+**A266 non corrigé**, exécuté séparément en échec connu (506 ml contre zéro), et non un test
+réussi. Les quatre tests de l'indicateur passent. Contrôle des chemins actifs sans lien
+manquant ; les ancres vers les pages remaniées ont aussi été examinées et deux renvois réparés.
+
+**Limites** : revue transversale, inspection approfondie concentrée sur V et les chemins cités ;
+pas de réception nouvelle du GPU, du multiplateforme, du budget δ ou de la physique générale.
+Les avertissements de compilation préexistants ne sont pas traités. Le gain documentaire est
+mesuré en lignes ; un gain de temps de reprise ou une amélioration de livraison reste à constater.
 
 ## 5. Suite priorisée
 
-À fixer après reproduction des défauts. A266, V restaurable et les contrats de J2 restent des
-lots de construction ; les raffinements de bornes non intégrées ne prennent pas leur place.
+| ordre proposé | lot concret | réception et arrêt du lot |
+|---|---|---|
+| **1 — prochaine session** | **A266 : relation volume / plan orienté**, convention d'origine et de distance explicite ; remplacer la disposition incompatible par un ADR et construire la première version dans le même lot | Oracle géométrique indépendant confronté au module : prisme, cale, fonds/plafonds, remplissages extrêmes, directions et azimuts. Débit nul au-dessus de la surface réelle. Aucune restriction définitive aux prismes |
+| **2 — V** | **État restaurable**, nœuds et restes d'arêtes, identité des données de forme, selon ADR-022 §5.1 | Interrompre un scénario, restaurer, continuer et retrouver les mêmes états et transferts que sans interruption ; ouvrir C19-V |
+| **3 — J2** | **Budget δ et qualification de précision**, puis flux aux faces coupées | Budget injecté, sortie exploitable sous interruption, refus atomique et dégradation annoncée ; ordre spatial reçu sur fond coupé avant extension de cette brique. Un lot par propriété, sans campagne W préalable |
+| **4 — J1-bis** | **Espace / LOD / visibilité intégrés au rendu** | Scène représentative, qualité aux coutures et au retour visible, coût complet confronté aux 2 ms ; A265 seulement pour les conclusions CPU qui en dépendent |
+
+Cet ordre est une priorité de travail, pas une nouvelle dépendance : J2 reste exécutable pendant
+la progression de V ; J1-bis ne doit pas attendre l'achèvement du δ général. Si A266 nécessite
+plusieurs lots, chacun livre une preuve ou une capacité nommée et sa suite est comparée à J2
+avant une troisième session sur le sujet. Les autres obligations et leurs déclencheurs restent
+dans la [file active](QUESTIONS-OUVERTES.md#file-active), sans campagne générale préalable.
+
+Ne rouvrir A255/A261/A263 qu'à partir d'un blocage mesuré d'un consommateur ou d'une proposition
+exploitable sous budget. Ne pas créer une session de revue périodique pour appliquer cette
+méthode : le choix normal du lot et son rituel suffisent. L'efficacité de la refonte (A211/A243)
+s'évalue aux prochaines capacités livrées, pas à la production d'un nouvel audit.

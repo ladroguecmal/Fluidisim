@@ -149,7 +149,7 @@ seuil ; ni `N = 2`, ni seuil de bascule déduit du coefficient de S161.
 
 La suite active est **S190-1**, application du profil et du seuil avec projection,
 reprenant S189-1. Les autres chantiers restent portés dans la
-[file active S194](../registres/QUESTIONS-OUVERTES.md#file-active-s194--2026-09-12),
+[file active](../registres/QUESTIONS-OUVERTES.md#file-active),
 à relire au rituel de fin. Les suivis ci-dessous sont datés et historiques ; leurs
 mentions « il manque un critère » ont expiré avec ADR-120.
 
