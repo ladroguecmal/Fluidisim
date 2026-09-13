@@ -20,6 +20,11 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S210 — 2026-09-13 : [dépendances GPU résolues et inventoriées](validation/DEPENDANCES-HOTE-S210.md).**
+254 archives, 49 174 790 octets, licences et checksums reçus ; sources non téléchargées.
+`viewer/` séparé avec verrou ; cible vide seulement, cœur inchangé. Suite S211 : file J1,
+construction B/W GPU après accord des sources. Compteurs et reçu numérique S208 inchangés.
+
 **S209 — 2026-09-13 : [lot de résolution GPU préparé](validation/PREPARATION-HOTE-S209.md).**
 Manifeste et commandes prêts ; aucun téléchargement. Accord sur l'index et les métadonnées
 attendu, puis inventaire exact avant accord sur les sources. Hôte non construit, compteurs

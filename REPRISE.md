@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 09:22 +02:00
+JETON            : libre
+Battement        : 2026-09-13 09:24 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S210 — résolution autorisée des dépendances GPU
-Dernière session : S209 — dossier de résolution GPU prêt ; aucun téléchargement
-Session suivante : S210 — J1 : résoudre les dépendances après accord nommé, puis soumettre les sources (PREPARATION-HOTE-S209)
-Maillons        : 1 — S209 prépare l'hôte, aucune couche avancée
+Session en cours : aucune
+Dernière session : S210 — verrou GPU et inventaire des 254 archives, sources non téléchargées
+Session suivante : S211 — file J1, couches B/W : construire l'hôte GPU après accord sur les sources (DEPENDANCES-HOTE-S210)
+Maillons        : 2 — S209/S210 préparent l'hôte ; suite imposée sur J1 B/W, pas une étude supplémentaire
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 
@@ -259,6 +259,13 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S210 — 2026-09-13 : résolution GPU autorisée et inventaire complet.**
+`viewer/` séparé, trois versions exactes S208 ; verrou de 254 paquets externes et deux locaux.
+[DEPENDANCES-HOTE-S210](docs/validation/DEPENDANCES-HOTE-S210.md) : licences, tailles et checksums,
+**49 174 790 octets** d'archives portables, aucune source téléchargée. Accord des sources et
+choix cache/vendoring attendus ; cœur inchangé. Suite S211 : **file J1, construire B/W sur GPU**.
+Compteur 2 ; aucune couche avancée par la cible vide. 130/250/284/18/6/23 inchangés.
 
 **S209 — 2026-09-13 : préparation locale du lot de résolution GPU.**
 Manifeste exact et commandes dans [PREPARATION-HOTE-S209](docs/validation/PREPARATION-HOTE-S209.md).

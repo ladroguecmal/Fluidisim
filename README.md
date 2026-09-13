@@ -753,3 +753,7 @@ Voir [ADR-129](docs/adr/ADR-129-chemin-image-de-w-par-table-de-bessel.md), [hôt
 Manifeste et commandes dans [PREPARATION-HOTE-S209](docs/validation/PREPARATION-HOTE-S209.md).
 Suite S210 : accord index/métadonnées, résolution, puis accord sur les sources exactes.
 Hôte non construit ; compteurs et reçu numérique S208 inchangés.
+**S210 — 2026-09-13 : dépendances GPU résolues, sources encore non téléchargées.**
+[Inventaire exact](docs/validation/DEPENDANCES-HOTE-S210.md) : 254 archives, 49 174 790 octets,
+licences et checksums reçus ; viewer/ séparé avec verrou, cible vide seulement.
+Suite S211 : file J1, construire B/W sur GPU après accord des sources. Cœur et compteurs inchangés.

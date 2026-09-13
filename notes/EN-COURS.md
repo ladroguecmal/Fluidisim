@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S210 — en cours
+Session : S210 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : résolution autorisée, inventaire des sources avant leur accord.
 
@@ -73,7 +73,7 @@ Sources non autorisées. Cible x86_64-pc-windows-msvc, rustc 1.97.0.
 - [x] **P1** — consigner accord et plan seul.
 - [x] **P2** — créer viewer séparé selon S209 et résoudre le verrou sans sources.
 - [x] **P3** — inventorier versions, licences, tailles et checksums depuis les métadonnées publiques.
-- [ ] **P4** — rituel §6, demande sources, jeton libre, copies à jour.
+- [x] **P4** — rituel §6, demande sources, jeton libre, copies à jour.
 
 ### Notes de reprise
 
@@ -86,3 +86,5 @@ Le message P2 a repris à tort les 255 annoncés par Cargo comme tous externes.
 
 P3 : 254 métadonnées reçues, 49 174 790 octets, licences complètes, checksums concordants.
 DEPENDANCES-HOTE-S210.md prêt. Régénération verrouillée en ligne réussie ; hors réseau refusée.
+
+P4 : inventaire et demande de sources transmis ; compteur 2, suite J1 B/W.

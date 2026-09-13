@@ -10835,3 +10835,33 @@ chantier actif ; sillages, J2 et V restent dus selon la feuille de route.
 ou leçon généralisable, aucun ADR changé. I-03/I-06/I-08/I-15 inchangés. Index, feuille
 et REPRISE actualisés. 130 ADR,250 angles,284 leçons,18 invariants,6 SPEC,23 cas.
 Compteur 1 : aucune couche avancée. Jeton libre, copies synchronisées en avance rapide.
+## S210 — 2026-09-13 — Résolution autorisée et inventaire des dépendances GPU
+
+**Entrée.** « Oui » à la demande S209 : index et métadonnées crates.io, sources distinctes.
+master/copies propres à 3b5e34c, jeton libre. Rust 1.97.0, x86_64-pc-windows-msvc.
+
+**Sortie.** viewer/ séparé, versions exactes wgpu 30.0.1, winit 0.30.13, pollster 1.0.1.
+Cargo.lock : 256 paquets, dont 254 externes et deux locaux. DEPENDANCES-HOTE-S210 liste
+les licences déclarées, tailles, sources et checksums. 254 réponses de métadonnées,
+aucune manquante, aucun paquet retiré, checksums tous concordants. Archives portables :
+49 174 790 octets ; pas la taille Windows seule, ni la taille extraite. Aucun source
+externe téléchargé, aucune compilation ; main.rs vide sert seulement à la résolution.
+
+**Vérification.** Régénération verrouillée en ligne réussie, verrou inchangé. Tentative
+hors réseau verrouillée refusée, sans modification ; cause précise non diagnostiquée.
+Métadonnées de code/ reçues hors réseau, fichiers code/ intacts. Tests numériques non
+rejoués : 348/cinq ignorés reste le reçu S208. Aucun budget GPU nouveau.
+
+**Manquements consignés.** La commande P1 initiale a échoué sans sortie et son statut
+n'a pas été contrôlé avant la résolution ; plan réparé dès constat dans 378b11d.
+Le message P2 dit 255 externes : il confond les dépendances annoncées par Cargo avec
+les paquets du registre. Recompte réel 254, corrigé dans l'inventaire sans réécrire le commit.
+
+**Suite S211.** File active J1, couches B/W : construire l'hôte GPU dès accord sur les
+254 sources nommées. Proposer verrou versionné et cache Cargo local ; vendoring reste
+au choix de l'utilisateur. Sillages dus pour J1, J2 et V maintenus selon ADR-127.
+
+**Rituel.** File plurielle entière relue, autres déclencheurs conservés, A247/A250 ouvertes.
+Aucun nouvel ADR, angle ou leçon ; I-03/I-06/I-08/I-15 inchangés. 130 ADR,250 angles,
+284 leçons,18 invariants,6 SPEC,23 cas. Compteur 2, aucune couche avancée par un binaire
+vide : la suite nomme explicitement J1 B/W. Jeton libre et copies avancées sur master.

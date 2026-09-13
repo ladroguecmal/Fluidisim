@@ -1670,7 +1670,12 @@ entrée par entrée. Le fil reprend ci-dessous.
 
 ## File active
 
-Relue en S209, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+Relue en S210, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+
+**Suivi J1 S210 :** résolution autorisée faite ;
+[254 archives inventoriées](../validation/DEPENDANCES-HOTE-S210.md), 49 174 790 octets.
+Accord sur les sources exactes et choix cache/vendoring attendus. Suite S211 : construire
+l'hôte B/W GPU (file J1, compteur 2), pas prolonger l'étude de dépendances. A247/A250 ouvertes.
 
 **Suivi J1 S209 :** [lot de résolution préparé](../validation/PREPARATION-HOTE-S209.md),
 aucun téléchargement. Suite S210 : accord sur index/métadonnées, résolution, puis présentation
