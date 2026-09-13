@@ -273,6 +273,32 @@ pub fn wake_admission(
 /// budget de pente des **perturbations** (ADR-128) : `slope_max()` de chaque champ d'impact plus
 /// `slope_envelope()` de la pression, comparé à `max_slope` — la somme, seule forme portable
 /// (ADR-119 règle 1).
+/// S214 — A251 : position de la source prescrite à un instant. Huit tronçons de 2 s à 3 m/s
+/// depuis `[-24, 4]` ; au-delà du forçage elle ne bouge plus.
+pub fn wake_source_position(age: f64) -> [f32; 2] {
+    [-24. + 3. * age.clamp(0., 16.) as f32, 4.]
+}
+/// S214 — A251 : **rayon honnête** déduit de la recette, `2π·angular/(3·cutoff)`.
+///
+/// C'est la colonne « théorique » de [SILLAGE-DOMAINE-S156] écrite en formule : 22 / 45 / 90 m
+/// pour angular 64 / 128 / 256 à cutoff 6, contre 20 / 45 / « au-delà de 200 » mesurés. Elle
+/// colle à 128, dépasse de 10 % à 64, et reste conservatrice à 256. Ce n'est donc pas une borne
+/// démontrée : c'est la loi d'échantillonnage de `exp(i k·x)` sur le cercle, encadrée en deux
+/// points et conservatrice au troisième.
+pub fn wake_honest_radius(recipe: gaussian_spectrum::Recipe) -> f32 {
+    2. * core::f32::consts::PI * recipe.angular as f32 / (3. * recipe.cutoff)
+}
+/// S214 — A251 : **durée honnête** déduite de la recette, `4π/√(g·dk)` avec `dk = cutoff/radial`.
+///
+/// Le pas radial rend le champ périodique de période `L = 2π/dk` (ADR-107) ; la composante la
+/// plus rapide représentée voyage à `c_g = ½√(g/dk)`, et revient par l'autre bord après `L/c_g`.
+/// S156 avait écrit cette récurrence avec une autre constante (13,1 s là où celle-ci donne 18,5)
+/// et l'avait **refusée** faute d'accord. Sous cette forme : radial 128/cutoff 6 → 18,5 s, dans
+/// l'encadrement mesuré 15–20 s ; radial 256/cutoff 6 → 26,2 s, conservateur contre 45–50 s.
+pub fn wake_honest_duration(recipe: gaussian_spectrum::Recipe, gravity: f32) -> f32 {
+    let dk = recipe.cutoff / recipe.radial as f32;
+    4. * core::f32::consts::PI / (gravity * dk).sqrt()
+}
 pub struct MixedStore {
     records: [Option<wave_journal::Record>; 1],
     pool: [Option<RadialImpact<256>>; 1],

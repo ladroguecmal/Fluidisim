@@ -117,7 +117,7 @@ cœur refuserait.
 - [x] **P3** — accord : composition du cœur contre la somme à la main, aux âges déclarés, sur la grille projetée ; écart publié.
 - [x] **P4** — budget conjoint : `slope_floor` impact + sillage à chaque âge contre π/7 ; refus localisés et qualifiés.
 - [x] **P5** — hôte : `--verify` passe par la composition du cœur ; contrôles S212/S213 conservés ; coût publié avec son en-tête.
-- [ ] **P6** — A251 : emprise et durée honnêtes déduites de la recette et de la vitesse ; couture spatiale et temporelle mesurées comme ADR-126.
+- [x] **P6** — A251 : emprise et durée honnêtes déduites de la recette et de la vitesse ; couture spatiale et temporelle mesurées comme ADR-126.
 - [ ] **P7** — A251 : réception des coutures et refus nommé ou garde ; publication avec la fixture.
 - [ ] **P8** — document de réception (en-tête ADR-131) ; suite complète `code/`.
 - [ ] **P9** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
@@ -209,3 +209,40 @@ d'invoquer une différence entre l'exemple et l'hôte. *Ce n'est pas une attribu
 compteur de fréquence ni de température n'a été lu. Conséquence de méthode : une médiane sur 120
 images de cette machine porte ±20 % selon l'état thermique, et une mesure de coût doit dire son rang
 de passage (L287).
+
+P6 (A251) : **deux lois déduites de la recette, et reçues par trois critères indépendants.**
+
+`wake_honest_radius = 2π·angular/(3·cutoff)` — c'est la colonne « théorique » de
+SILLAGE-DOMAINE-S156 écrite en formule (22 / 45 / 90 m à angular 64 / 128 / 256, cutoff 6, contre
+20 / 45 / « > 200 » mesurés). Fixture : **89,36 m**, coin d'emprise le plus lointain **102,22 m**.
+`wake_honest_duration = 4π/√(g·dk)`, `dk = cutoff/radial` — la récurrence d'ADR-107 (`L = 2π/dk`,
+`c_g,max = ½√(g/dk)`) avec **une autre constante que celle de S156** : S156 publiait 13,1 s pour
+radial 128/cutoff 6 et la refusait ; cette forme donne **18,53 s**, dans l'encadrement mesuré
+15–20 s, et 26,2 s à radial 256 contre 45–50 s mesurés (conservatrice). Fixture : **18,53 s** pour
+un contexte déclaré de **40 s**.
+
+Mesures S214 (9 âges, 64×128 contre 128×256, mêmes 6 988 sondes) :
+
+| âge (s) | écart / amplitude | couture bord (mm) | rayon d'accord 10 % (m) |
+|---:|---:|---:|---:|
+| 4 | 0,37 % | 0,53 | ≥ 105 |
+| 8 | 1,16 % | 1,37 | ≥ 105 |
+| 12 | 1,40 % | 1,73 | ≥ 105 |
+| 16 | 1,64 % | 2,28 | ≥ 105 |
+| 18 | **3,55 %** | 2,54 | ≥ 105 |
+| 20 | 3,63 % | **3,23** | ≥ 105 |
+| 24 | 9,53 % | 5,62 | ≥ 105 |
+| 30 | 20,2 % | 7,57 | **40** |
+| 39 | 27,9 % | 12,70 | 30 |
+
+**Trois critères, trois encadrements, et la loi tombe dedans.** 2 % (ADR-120) franchi entre 16 et
+18 s ; couture de 3 mm (tolérance S201) franchie entre 18 et 20 s ; rayon d'accord à 10 % (critère
+S156) effondré entre 24 et 30 s. La durée dérivée **18,53 s** est dans les trois encadrements, mais
+**elle n'est pas conservatrice au critère le plus strict** : à 2 % elle dépasse d'au moins 3 %.
+Une garde doit donc porter une marge, et **la durée honnête dépend du critère** — une loi la porte
+avec elle.
+
+**Le rayon n'est pas ce qui borne cette fixture.** L'accord tient sur toute l'emprise (≥ 105 m,
+soit au-delà du coin à 102,22 m) jusqu'à 24 s, alors que la loi annonce 89,36 m : conservatrice de
+15 %, comme à angular 256 chez S156. Le contexte déclaré de 40 s, lui, vaut **2,2 fois** la durée
+honnête — c'est exactement le reproche d'A251, maintenant chiffré.

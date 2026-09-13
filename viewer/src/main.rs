@@ -297,7 +297,26 @@ fn run() -> Result<(), String> {
         };
         let mut coarse_slots = vec![Slot::default(); input.count()];
         let mut fine_slots = vec![Slot::default(); fine.count()];
-        for age in [4., 8., 16., 24., 39.] {
+        // S214 (A251) : lois d'emprise et de durée déduites de la recette, à recevoir ci-dessous.
+        let r_honest = scene::wake_honest_radius(recipe);
+        let d_honest = scene::wake_honest_duration(recipe, 9.81);
+        let corner = {
+            let mut m = 0f32;
+            for age in [0., 16.] {
+                let s = scene::wake_source_position(age);
+                for x in [scene::WAKE_MIN[0], scene::WAKE_MAX[0]] {
+                    for y in [scene::WAKE_MIN[1], scene::WAKE_MAX[1]] {
+                        m = m.max(((x - s[0]).powi(2) + (y - s[1]).powi(2)).sqrt());
+                    }
+                }
+            }
+            m
+        };
+        println!(
+            "WAKE_LOI recette={}x{} cutoff={} rayon_honnete_m={r_honest:.2} coin_emprise_m={corner:.2} duree_honnete_s={d_honest:.2} contexte_s={}",
+            recipe.radial, recipe.angular, recipe.cutoff, scene::WAKE_SPAN_US as f64 / 1e6
+        );
+        for age in [4., 8., 12., 16., 18., 20., 24., 30., 39.] {
             let t = scene::wake_time(age).unwrap();
             let (c, envelope) = scene::wake_reference(input, &mut coarse_slots, t, &world)?;
             let (f, fine_envelope) = scene::wake_reference(fine, &mut fine_slots, t, &world)?;
@@ -312,9 +331,29 @@ fn run() -> Result<(), String> {
                     }
                 }
             }
+            // Rayon d'accord à 10 % de l'amplitude (critère S156) : plus grand rayon tel que la
+            // recette grossière tienne la fine partout en deçà, par anneaux de 5 m autour de la
+            // source à cet instant. `aucun` = l'écart dépasse déjà dans le premier anneau.
+            let source = scene::wake_source_position(age);
+            let bins = 1 + (corner / 5.) as usize;
+            let mut worst = vec![0f32; bins];
+            for ((p, a), b) in world.iter().zip(&c).zip(&f) {
+                if let (Some(a), Some(b)) = (a, b) {
+                    let r = ((p[0] - source[0]).powi(2) + (p[1] - source[1]).powi(2)).sqrt();
+                    let k = ((r / 5.) as usize).min(bins - 1);
+                    worst[k] = worst[k].max((a[0] - b[0]).abs());
+                }
+            }
+            let mut agreed = 0f32;
+            for (k, w) in worst.iter().enumerate() {
+                if *w > 0.1 * amplitude {
+                    break;
+                }
+                agreed = (k + 1) as f32 * 5.;
+            }
             let admission =
                 scene::wake_admission(&scene.background, input, &mut coarse_slots, t, &world);
-            println!("WAKE age={age} amp_max_128x256_m={amplitude:.6} diff_64x128_vs_128x256_m={difference:.6} seam_eta_m={seam:.6} seam_fine_m={fine_seam:.6} envelope={envelope:.6} fine_envelope={fine_envelope:.6} admission_B_plus_pressure={admission:?}");
+            println!("WAKE age={age} amp_max_128x256_m={amplitude:.6} diff_64x128_vs_128x256_m={difference:.6} part_amp={:.4} seam_eta_m={seam:.6} seam_fine_m={fine_seam:.6} rayon_accord_10pc_m={agreed} envelope={envelope:.6} fine_envelope={fine_envelope:.6} admission_B_plus_pressure={admission:?}", difference / amplitude);
         }
         // S214 : la scène composée **par le cœur** — B, impact et sillage ensemble — et son
         // budget conjoint de pente, que l'hôte n'avait jamais exercé (HOTE-GPU-S212 §Admission).
