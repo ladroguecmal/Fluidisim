@@ -1,7 +1,7 @@
 mod gpu;
 mod scene;
 use scene::{Camera, FrameData, Scene, WakeInput};
-use water_core::pressure_journal::Journal;
+use water_core::{pressure_journal::Journal, spectral_pressure::Slot};
 use std::{sync::Arc, time::Instant};
 use winit::{
     application::ApplicationHandler,
@@ -264,9 +264,57 @@ fn run() -> Result<(), String> {
                 },
             )?;
         }
+        // S212 : témoin de résolution, couture et admission du sillage, sur le cœur seul.
+        let fine_recipe = scene::wake_recipe(128, 256);
+        let fine_wake = scene::wake(fine_recipe);
+        let mut fine_records = [None];
+        let mut fine_journal = Journal::new(1, &mut fine_records);
+        fine_journal
+            .admit_authenticated(fine_wake.source())
+            .map_err(|e| format!("admission sillage fin : {e:?}"))?;
+        let mut fine_pools = scene::Pools::new(fine_recipe);
+        let fine_spectrum = fine_pools.spectrum(fine_recipe);
+        let fine = WakeInput {
+            journal: &fine_journal,
+            spectrum: &fine_spectrum,
+            context: fine_wake.source().context(),
+        };
+        let world = gpu::probes([0.; 3]);
+        let edge = |p: &[f32; 2]| {
+            (0..2).any(|i| {
+                (p[i] - scene::WAKE_MIN[i]).abs() < 0.02 || (p[i] - scene::WAKE_MAX[i]).abs() < 0.02
+            })
+        };
+        let mut coarse_slots = vec![Slot::default(); input.count()];
+        let mut fine_slots = vec![Slot::default(); fine.count()];
+        for age in [4., 8., 16., 24., 39.] {
+            let t = scene::wake_time(age).unwrap();
+            let (c, envelope) = scene::wake_reference(input, &mut coarse_slots, t, &world)?;
+            let (f, fine_envelope) = scene::wake_reference(fine, &mut fine_slots, t, &world)?;
+            let (mut amplitude, mut difference, mut seam, mut fine_seam) = (0f32, 0f32, 0f32, 0f32);
+            for ((p, a), b) in world.iter().zip(&c).zip(&f) {
+                if let (Some(a), Some(b)) = (a, b) {
+                    amplitude = amplitude.max(b[0].abs());
+                    difference = difference.max((a[0] - b[0]).abs());
+                    if edge(p) {
+                        seam = seam.max(a[0].abs());
+                        fine_seam = fine_seam.max(b[0].abs());
+                    }
+                }
+            }
+            let admission =
+                scene::wake_admission(&scene.background, input, &mut coarse_slots, t, &world);
+            println!("WAKE age={age} amp_max_128x256_m={amplitude:.6} diff_64x128_vs_128x256_m={difference:.6} seam_eta_m={seam:.6} seam_fine_m={fine_seam:.6} envelope={envelope:.6} fine_envelope={fine_envelope:.6} admission_B_plus_pressure={admission:?}");
+        }
         g.benchmark(&mut frame)?;
         g.resize(960, 540);
         g.benchmark(&mut frame)?;
+        let mut fine_storage = vec![[0.; 2]; storage.len()];
+        let fine_table = scene.impact.bake_table(scene.step, &mut fine_storage).unwrap();
+        let mut fine_frame = FrameData::new(&scene.background, fine_table, fine);
+        g.benchmark(&mut fine_frame)?;
+        g.resize(640, 360);
+        g.benchmark(&mut fine_frame)?;
         return Ok(());
     }
     let e = EventLoop::new().map_err(|e| e.to_string())?;

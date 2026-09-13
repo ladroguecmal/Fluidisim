@@ -97,8 +97,8 @@ issue technique va en ADR, une incompatibilité sans issue technique va à l'uti
 - [x] **P1** — jeton, thèse, critères et plan seuls.
 - [x] **P2** — cœur : `bound_pressure::Prepared::render_components` rebasé, refus atomiques, test contre `sample_batch`.
 - [x] **P3** — hôte : fixture sillage, préparation par image, buffer GPU, somme modale bornée à l'emprise ; R/B/Home ; compilation.
-- [>] **P4** — `--verify` : GPU contre cœur, témoin de résolution, couture, admission, coûts deux recettes, captures, fenêtre.
-- [ ] **P5** — réception HOTE-GPU-S212, décision chiffrée du chemin d'image du sillage, suite complète des tests.
+- [x] **P4** — `--verify` : GPU contre cœur, témoin de résolution, couture, admission, coûts deux recettes, captures, fenêtre.
+- [>] **P5** — réception HOTE-GPU-S212, décision chiffrée du chemin d'image du sillage, suite complète des tests.
 - [ ] **P6** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
@@ -113,3 +113,17 @@ Journal de pression (époque 1), `Prepared::from_journal` + `render_components` 
 uniforme 128 octets, buffer sillage 16 384 × 16 octets (binding 3). R/B/Home inchangés : même
 naissance que l'impact, B masque impact et sillage. Captures `captures/s212/`. Compilé release.
 Piège : `R` est un alias PowerShell (Invoke-History) — une fonction nommée R n'écrit rien.
+
+P4, RTX5070 Laptop/DX12, `--verify` (6 988 sondes, dont 424 de couture) :
+hauteur GPU/cœur max 0,000089370 m (âge 40,01), 0,0000707–0,0000773 m sillage actif ; pentes ≤ 1,24e-4.
+Témoin 64×128 / 128×256, amplitude max du fin : 4 s 0,567 mm/154,3 mm ; 8 s 1,355/117,0 ;
+16 s 2,180/132,8 ; 24 s 4,324/45,4 ; 39 s 8,768/31,5 (0,37 %, 1,2 %, 1,6 %, 9,5 %, 28 %).
+Couture (|η| au bord intérieur, 64×128 / fin) : 0,53/0,18 ; 1,37/0,59 ; 2,28/2,00 ; 5,62/3,35 ;
+12,70/14,48 mm — contenu physique au bord, pas seulement récurrence. Enveloppe 0,135–0,165 ;
+admission B+pression à BREAKING_SLOPE Ok aux cinq âges (impact non inclus dans ce contrôle).
+Coûts médiane/max (ms) — 4 096 : CPU sillage 10,851/27,313 (640) 10,577/14,328 (960) ; GPU eau
+1,902/1,913 (640) 4,103/4,143 (960). 16 384 : CPU 38,376/46,308 (640) 41,504/62,042 (960) ;
+GPU 7,770/15,852 (640) 16,946/27,973 (960). Sans sillage S211 : GPU 0,018 / 0,049.
+⇒ 7,6–7,9 ps par sommet×composante, 317–331 ns par nœud×tronçon CPU.
+Captures 8 s scène/témoin : 60 182 pixels différents, max 28 niveaux, lignes 161–359 ; image de
+différence : anneaux d'impact + motif de Kelvin derrière la source. `--smoke` : 120 images, code 0.
