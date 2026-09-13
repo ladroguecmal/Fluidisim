@@ -274,10 +274,178 @@ fn run() -> Result<(), String> {
     Ok(())
 }
 
+/// Tampons préalloués d'un fil : aucune allocation pendant la mesure.
+pub struct Lane {
+    pub outside: Vec<usize>,
+    pub inside_world: Vec<WorldPos>,
+    pub inside: Vec<usize>,
+    pub out: Vec<WaterSample>,
+    pub scratch: Vec<WaterSample>,
+}
+pub fn lanes(g: &Grid, parts: usize) -> Vec<Lane> {
+    let co = chunks(g.outside.len(), parts);
+    let ci = chunks(g.inside.len(), parts);
+    co.into_iter()
+        .zip(ci)
+        .map(|(o, i)| {
+            let outside = g.outside[o].to_vec();
+            let inside = g.inside[i].to_vec();
+            let n = outside.len() + inside.len();
+            Lane {
+                inside_world: inside.iter().map(|&k| g.world[k]).collect(),
+                outside,
+                inside,
+                out: vec![WaterSample::default(); n],
+                scratch: vec![WaterSample::default(); n],
+            }
+        })
+        .collect()
+}
+/// Une image répartie sur `lanes.len()` fils, lancés et rejoints dans l'image — ce qu'un hôte
+/// sans groupe de fils persistant paierait. Le coût de lancement est mesuré à part.
+pub fn frame_parallel(
+    sc: &Scene,
+    prepared: &Prepared<'_, '_, EMPRISE_N>,
+    bound: &BoundBackground<'_>,
+    g: &Grid,
+    lanes: &mut [Lane],
+    time: SimTime,
+) {
+    std::thread::scope(|s| {
+        for lane in lanes.iter_mut() {
+            s.spawn(move || {
+                let Lane {
+                    outside,
+                    inside_world,
+                    out,
+                    scratch,
+                    ..
+                } = lane;
+                frame_slice(sc, prepared, bound, g, outside, inside_world, time, out, scratch);
+            });
+        }
+    });
+}
+/// Résultat par sommet, quel que soit le découpage : pour vérifier qu'il ne change rien.
+pub fn by_vertex(g: &Grid, lanes: &[Lane]) -> Vec<[u32; 10]> {
+    let mut v = vec![[0u32; 10]; g.world.len()];
+    for lane in lanes {
+        for (slot, &k) in lane.outside.iter().chain(lane.inside.iter()).enumerate() {
+            let s = lane.out[slot];
+            v[k] = [
+                s.eta, s.deta_dt, s.u_total[0], s.u_total[1], s.u_total[2], s.normal[0], s.normal[1],
+                s.normal[2], s.steepness, s.aeration,
+            ]
+            .map(f32::to_bits);
+        }
+    }
+    v
+}
+
+fn levers() -> Result<(), String> {
+    let sc = scene_s205(1.5, EMPRISE_AGE_US)?;
+    let mut slots = vec![None; 1];
+    let mut m = mount(&sc, &mut slots);
+    let prepared = Prepared::build(&m.journal, &mut m.pool, m.context).map_err(|e| format!("{e:?}"))?;
+    let bound = BoundBackground::new(&sc.background, FRAME, CELL);
+    let time = SimTime(BIRTH.0 + AGE_US);
+
+    println!("# L1 parallelisme, temps mur par image (fils lances et rejoints dans l'image)");
+    println!("pas_px fils | image_med_ms image_max_ms | lancement_seul_med_ms | acceleration | image/budget | identique_1fil");
+    for step in [8usize, 4, 2] {
+        let g = grid(&sc, &m.field, step);
+        let mut reference = lanes(&g, 1);
+        frame_parallel(&sc, &prepared, &bound, &g, &mut reference, time);
+        let reference_bits = by_vertex(&g, &reference);
+        let mut one = 0.0;
+        for threads in [1usize, 2, 4, 8, 16] {
+            let mut ls = lanes(&g, threads);
+            let t = timed(|| frame_parallel(&sc, &prepared, &bound, &g, &mut ls, time));
+            let spawn = timed(|| {
+                std::thread::scope(|s| {
+                    for _ in 0..threads {
+                        s.spawn(|| black_box(0));
+                    }
+                })
+            });
+            if threads == 1 {
+                one = t.0;
+            }
+            let same = by_vertex(&g, &ls) == reference_bits;
+            println!(
+                "{step} {threads} | {:.3} {:.3} | {:.3} | {:.2} | {:.1} | {same}",
+                t.0,
+                t.1,
+                spawn.0,
+                one / t.0,
+                t.0 / BUDGET_MS
+            );
+            if !same {
+                return Err("le decoupage en fils change un resultat".into());
+            }
+        }
+    }
+
+    println!("# L2 table radiale a matrice de Bessel precalculee (noyau N x M, valeurs synthetiques)");
+    println!("pas_table_m M | noyau_image_med_ms noyau_max_ms | memoire_ko_par_impact | erreur_max_table_mm | hermite_ns_pt | impacts_dans_2ms_noyau_seul | paquets_W_max_4096_ms");
+    let lambda = sc.wavelength_m;
+    let age = SimTime(AGE_US);
+    for divisor in [16.0f32, 8.0] {
+        let step = lambda / divisor;
+        let m_count = (EMPRISE_RADIUS_M / step) as usize + 1;
+        let mut kernel = BesselKernel::synthetic(EMPRISE_N, m_count);
+        let k = timed(|| {
+            kernel.frame(black_box(age));
+            black_box(&kernel.eta);
+        });
+        // Exactitude : table construite par échantillons directs aux nœuds (S203), même valeurs
+        // qu'une matrice précalculée à l'ordre de sommation près, puis Hermite entre les nœuds.
+        let mut table = Vec::with_capacity(m_count + 1);
+        impact::radial_table(&m.field, time, step, &mut table)?;
+        let v = *m.field.event().data();
+        let mut err = 0.0f64;
+        for i in 0..20_000u32 {
+            let r = (i as f32 + 0.37) / 20_000.0 * (EMPRISE_RADIUS_M - step - 1e-3);
+            let d = m
+                .field
+                .sample(FRAME, CELL, [v.position[0] + r, v.position[1]], time)
+                .map_err(|e| format!("{e:?}"))?;
+            let t = impact::table_eta(&table, step, r).ok_or("table")?;
+            err = err.max((d.eta as f64 - t as f64).abs());
+        }
+        let g = grid(&sc, &m.field, 4);
+        let radii: Vec<f32> = g
+            .inside
+            .iter()
+            .map(|&i| {
+                let l = sc.background.local_point(g.world[i]).unwrap();
+                (l[0] - v.position[0]).hypot(l[1] - v.position[1])
+            })
+            .collect();
+        let h = timed(|| {
+            for r in &radii {
+                black_box(impact::table_eta(&table, step, *r));
+            }
+        });
+        println!(
+            "{step:.6} {m_count} | {:.4} {:.4} | {:.0} | {:.4} | {:.1} | {:.0} | {:.1}",
+            k.0,
+            k.1,
+            kernel.bytes() as f64 / 1024.0,
+            err * 1e3,
+            h.0 * 1e6 / radii.len() as f64,
+            BUDGET_MS / k.0,
+            4096.0 * k.0
+        );
+    }
+    Ok(())
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     match std::env::args().nth(1).as_deref() {
         None | Some("frame") => run()?,
-        Some(other) => return Err(format!("mode inconnu {other} : frame").into()),
+        Some("levers") => levers()?,
+        Some(other) => return Err(format!("mode inconnu {other} : frame | levers").into()),
     }
     Ok(())
 }
@@ -307,6 +475,23 @@ mod frame_tests {
         assert_eq!(g.inside.len() + g.outside.len(), g.world.len());
         assert!(!g.inside.is_empty() && !g.outside.is_empty());
         assert!(g.world.len() <= (WIDTH / 16) * (HEIGHT / 16));
+    }
+    #[test]
+    fn threads_do_not_change_any_bit() {
+        let sc = scene_s205(1.5, EMPRISE_AGE_US).unwrap();
+        let mut slots = vec![None; 1];
+        let mut m = mount(&sc, &mut slots);
+        let prepared = Prepared::build(&m.journal, &mut m.pool, m.context).unwrap();
+        let bound = BoundBackground::new(&sc.background, FRAME, CELL);
+        let g = grid(&sc, &m.field, 32);
+        let time = SimTime(BIRTH.0 + AGE_US);
+        let mut one = lanes(&g, 1);
+        frame_parallel(&sc, &prepared, &bound, &g, &mut one, time);
+        let mut three = lanes(&g, 3);
+        frame_parallel(&sc, &prepared, &bound, &g, &mut three, time);
+        assert_eq!(by_vertex(&g, &one), by_vertex(&g, &three));
+        // Et chaque sommet est bien calculé : aucun reste à zéro.
+        assert!(by_vertex(&g, &three).iter().all(|b| b[7] != 0));
     }
     #[test]
     fn bessel_kernel_sums_rows_in_order() {
