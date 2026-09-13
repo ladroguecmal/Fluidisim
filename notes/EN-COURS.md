@@ -58,165 +58,34 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S226 — terminée
-Agent : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
-Entrée : « Continue avec S226 », même conversation. master et trois copies à e75f6aa, jeton libre,
-**maillons 1**. Copie principale.
-Objectif : **V — direction de `g_eff`**. La consigne de S224 arrive à échéance ; S225 en a consommé
-la session de battement.
+Session : S227 — en cours
+Agent : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
+Entrée : audit global demandé par l’utilisateur : intentions, dérives, procédure, documentation,
+zones d’ombre, améliorations et correctifs du code. Copie principale, master à dfd1507, propre ;
+trois copies propres au même commit, lignée B archivée. Aucun distant. Maillons 0 à l’entrée.
 
-### Ce que le module viole aujourd'hui, et il faut le dire ainsi
+**Objectif.** Produire un diagnostic fondé sur le dépôt et appliquer les corrections bornées qui
+rendent la reprise et le prochain lot de construction plus fiables. L’audit demandé prend la
+place de la suite automatique A266 ; celle-ci reste prioritaire pour V, sans réduction d’ambition.
 
-`hydro_network::step` prend `g_eff: f32` — un **module**. La direction est donc en dur : les
-hauteurs sont des scalaires comptés le long de `+Z`, et rien dans le code ne dit lequel.
-
-> **I-07** — « Tout domaine appartient à un référentiel. Il reçoit `g_eff` par injection. Une
-> constante `−9,81·Z` écrite en dur dans un solveur est un **défaut bloquant**. »
-
-La constante n'est pas écrite, mais l'axe l'est, ce qui revient au même. S224 l'avait noté en
-réserve — « en module seulement, et c'est dit » — et c'était insuffisant : I-07 ne demande pas qu'on
-le dise, il demande que ce ne soit pas le cas. **C12 passait quand même**, parce qu'un réservoir posé
-à plat ne distingue pas les deux.
-
-Ce qu'ADR-010 §2 exige, mot pour mot : *« Le plan d'eau est perpendiculaire à `g_eff`, pas à Z. La
-hauteur d'une ouverture est donc évaluée par sa distance signée au plan de surface orienté selon
-`g_eff`. Sans cela, un vaisseau qui accélère ne verrait pas son réservoir fuir par le hublot latéral
-qui se retrouve "en bas". »*
-
-### Forme déclarée avant d'écrire
-
-- `g_eff: [f32; 3]`, et `u = −g_eff/‖g_eff‖` la verticale locale.
-- `HydroNode.origin_um: [i64; 3]` remplace `floor_um` : le point de référence depuis lequel la table
-  de forme compte la hauteur de surface le long de `u`.
-- `Opening.position_um: [i64; 3]` remplace `sill_um` : une ouverture est **quelque part**, pas à une
-  hauteur.
-- Charge à un point `q` pour le nœud `n` : `h_n − (q − c_n)·u`, avec `h_n` la hauteur donnée par la
-  table. Projection calculée en `f64` depuis des différences entières — le module emploie déjà `f64`
-  pour le débit, et IEEE strict le rend reproductible (I-03).
-
-### Thèse et critères, déclarés avant toute mesure
-
-1. **Réduction exacte.** À `g_eff = [0, 0, −9,81]`, le module rend **exactement** ce qu'il rendait :
-   C12 à la même seconde, mêmes volumes pas à pas. Une généralisation qui déplace le cas plat serait
-   refusée — c'est le contrôle qui sépare une généralisation d'une réécriture.
-2. **La phrase d'ADR-010, éprouvée telle qu'elle est écrite** : un réservoir dont l'ouverture est
-   **latérale** ne fuit pas sous gravité verticale, et **fuit** sous accélération latérale. C'est le
-   test que le module actuel ne peut pas passer, quelle que soit sa précision.
-3. **C16, part V.** Le cas exige « inclinaison de la surface au repos à ±1° de la normale à
-   `g_eff` ». La part ballottement relève de δ ; la part V est l'orientation du plan, et elle se
-   vérifie sur la charge aux ouvertures.
-4. Déterminisme, refus atomiques et absence d'allocation **conservés** : ce sont des acquis de S224,
-   pas des objectifs neufs, et une généralisation qui les casserait serait un recul.
-
-**Prédiction écrite pour être contredite** : la réduction au cas vertical sera exacte au bit, et la
-fuite latérale apparaîtra. Mais je prédis surtout un **obstacle que la construction va révéler** :
-la table de forme d'ADR-010 §2 est cuite « par coupes **horizontales** », donc valable pour **une
-seule orientation**. Dès que `g_eff` s'incline, la relation volume → hauteur change, et à 0,3 g
-latéral l'inclinaison vaut `atan(0,3) = 16,7°` — ce n'est pas un petit angle. Je prédis donc que la
-direction se corrige pour les **ouvertures** — ce qu'ADR-010 nomme — et **pas** pour le volume, et
-que l'incohérence est dans l'ADR elle-même, pas dans le module. Si c'est faux, tant mieux ; si c'est
-vrai, c'est un angle mort et il vaut d'être nommé.
+**Hypothèses à éprouver.** L’histoire est recopiée dans les points d’entrée ; le compteur de
+maillons mesure des fichiers touchés plutôt qu’une capacité utilisable ; des blocages hérités
+peuvent être périmés. Le code sera examiné sur ses chemins exécutés, et un défaut ne sera corrigé
+qu’avec un cas qui le reproduit. Aucun objectif physique ni seuil ne sera réduit pour faciliter
+l’audit. Pas de réécriture d’ADR ou des sources initiales.
 
 ### Plan
 
-- [x] **P1** — jeton, la violation d'I-07, la forme, la thèse, la prédiction, le plan seuls.
-- [x] **P2** — généraliser : `g_eff` vectoriel, points de référence et positions d'ouverture ; réduction au cas vertical vérifiée **au bit**.
-- [x] **P3** — éprouver la phrase d'ADR-010 : hublot latéral, sous gravité verticale puis sous accélération latérale ; part V de C16.
-- [x] **P4** — mesurer ce que la table de forme perd quand `g_eff` s'incline, et le nommer.
-- [x] **P5** — document de réception ; suite complète `code/`.
-- [x] **P6** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
+- [x] **P1** — amorce, état réel, jeton et plan seuls.
+- [ ] **P2** — intentions initiales, feuille de route, file active, métriques documentaires et code ; consigner le diagnostic factuel.
+- [ ] **P3** — alléger les points d’entrée et refondre la procédure de lecture, de choix du lot et de validation ; historique accessible et preuves conservées.
+- [ ] **P4** — reproduire et corriger les défauts de code bornés issus de l’audit ; sinon documenter les correctifs prioritaires avec critères de réception.
+- [ ] **P5** — vérifier les changements, achever le bilan global et ordonner les prochains lots selon leur effet sur le système.
+- [ ] **P6** — rituel de fin §6 : journal, angles/leçons utiles, file active, index, jeton libre et copies synchronisées.
+
+Chaque étape reste sous quinze minutes ; découpage déclaré ici si nécessaire.
 
 ### Notes de reprise
 
-*(vide : le travail commence en P2)*
-
-P2 : `g_eff` devient `[f32; 3]`, `HydroNode.floor_um` devient `origin_um: [i64; 3]`, et
-`Opening.sill_um` devient `position_um: [i64; 3]` — **une ouverture est quelque part, pas à une
-hauteur**. La charge se calcule comme ADR-010 §2 l'écrit : cote de l'ouverture **le long de la
-verticale locale** `u = −g_eff/‖g_eff‖`, retranchée à la hauteur de surface donnée par la table.
-
-La projection se fait en `f64` depuis des **différences entières** : sous `u = (0, 0, 1)` elle rend
-exactement `q_z − c_z`, donc la soustraction d'altitudes d'avant. Le module employait déjà `f64`
-pour le débit ; IEEE strict le garde reproductible (I-03).
-
-**Critère 1 tenu, et c'est le garde-fou qui sépare une généralisation d'une réécriture** : sous
-`g_eff = [0, 0, −9,81]`, **tous les nombres de S224 sont identiques** — C12 à 727,4 s et 0,0824 %,
-l'arrêt sans report à 13 ml, la chaîne à [532351, 300688, 166961], les exposants du déversoir et de
-l'orifice à 2,8284 et 1,4151. Neuf tests, rien n'a bougé.
-
-Les refus gagnent une cause : `g_eff` de norme nulle ou non finie rend `Domain`, comme un pas nul.
-
-P3 : **la phrase d'ADR-010 §2 est éprouvée telle qu'elle est écrite.** Cuve de 4 m² de section et
-2 m de haut, remplie à 1 m, hublot **latéral** à `x = +2 m`, `z = 1,2 m` — au-dessus de la surface
-au repos. Sous gravité verticale : **0 ml**. Sous 0,3 g latéral — le montage de C16 : **1 829 ml en
-dix pas**. C'est exactement le test que le module de S224 ne pouvait pas passer, quelle que soit sa
-précision, puisqu'il ne recevait que le module de `g_eff`.
-
-**C16, part V** : l'inclinaison n'est pas lue dans le code, elle est **déduite du comportement**. À
-deux abscisses, la cote à laquelle une ouverture se met à débiter est encadrée par dichotomie ; la
-frontière entre « débite » et « ne débite pas » **est** le plan de surface. Seuils 444 045 µm à
-`x = −2 m` et 1 644 026 µm à `x = +2 m`, soit **16,6990°** contre **16,6992°** attendus — à
-**0,0002°**, très loin du degré qu'exige C16.
-
-**Erreur de ma part, et elle était dans le test, pas dans le code.** Le premier attendu posait
-`atan(−a/g)` et se trompait de **signe** : l'eau s'accumule du côté où le « bas » penche, donc la
-surface y **monte**. Le code rendait la bonne valeur ; c'est l'attendu qui a dû être corrigé, et la
-raison est écrite dans le test — la pente d'un plan perpendiculaire à `g` vaut `−g_x/g_z`.
-
-Onze tests passent.
-
-P4 : **ma prédiction est contredite pour le prisme, et confirmée là où la table existe justement.**
-
-J'annonçais que la table de forme deviendrait fausse dès que `g_eff` s'incline. Intégration
-numérique de l'aire sous un plan incliné de 0,3 g, deux sections, 200 001 tranches :
-
-| section | surface au centre | aire à plat | aire inclinée | écart |
-|---|---:|---:|---:|---:|
-| prisme | 0,4 m | 1,600000 | 1,666667 | 4,17 % |
-| prisme | **1,0 m** | 4,000000 | 4,000000 | **0,0000 %** |
-| prisme | 1,6 m | 6,400000 | 6,333333 | 1,04 % |
-| coque en V | 0,4 m | 0,160000 | 0,175824 | **9,89 %** |
-| coque en V | **1,0 m** | 1,000000 | 1,098901 | **9,89 %** |
-| coque en V | 1,6 m | 2,560000 | 2,717949 | 6,17 % |
-
-**Pour un prisme à parois verticales, la table reste exacte** tant que le plan incliné ne touche ni
-le fond ni le plafond : le coin gagné d'un côté vaut exactement celui perdu de l'autre. Elle ne
-dérape qu'aux extrêmes — 4,17 % près du fond, 1,04 % près du plafond, là où un coin est tronqué.
-
-**Pour une coque en V, elle se trompe de 9,89 % partout, y compris en plein milieu.** Et c'est
-exactement le cas pour lequel `shape_lut` existe : ADR-010 §2 la justifie en écrivant *« Un
-compartiment n'est pas un prisme : la relation volume → hauteur d'une cale, d'un fond de citerne
-bombé ou d'une dépression de terrain est non linéaire. »*
-
-**Les deux dispositions d'ADR-010 §2 sont donc incohérentes là où l'une comme l'autre servent** :
-la table est cuite par coupes **horizontales**, et le plan d'eau est perpendiculaire à `g_eff`.
-Tant que le contenant est un prisme et que l'eau n'est ni au fond ni au plafond, les deux
-coïncident ; dès que le contenant est une cale, non. Sur la charge, 9,9 % d'erreur de hauteur
-donnent environ 5 % sur le débit, qui va comme `√h`. **A266**, et ce n'est pas un défaut du module :
-c'est une incohérence de la conception, que la construction a rendue visible.
-
-P5 : [GRAVITE-DIRIGEE-S226](../docs/validation/GRAVITE-DIRIGEE-S226.md) — en-tête ADR-131 D3 ;
-§1 ce que le module violait, et le fait qu'un cas canonique bien choisi puisse être **muet** sur un
-invariant ; §2 la généralisation et sa réduction exacte ; §3 la phrase d'ADR-010 et C16, avec
-l'erreur de signe qui était dans le test et non dans le code ; §4 **l'incohérence d'ADR-010 §2**,
-mesurée ; §5 les contrôles. Suite : A266 à trancher avant tout contenant non prismatique, puis
-l'état répliqué.
-Suite complète `code/` : **383 réussis, 5 ignorés**, aucun avertissement neuf.
-
-P6 : rituel §6 exécuté. Journal S226 ; **A266** (gravité 1 — ADR-010 §2 se contredit : table par
-coupes horizontales contre plan perpendiculaire à `g_eff`, 9,89 % d'écart sur une cale) ; suivi
-**I-07** (violation levée, et vérifiée par le comportement) ; **L310, L311**. Index, README, REPRISE
-(§4, file active, jeton), feuille de route (V-noyau), file plurielle.
-**Invariants relus** — **I-07** en premier, puisque c'est lui que la session répare : il ne suffit
-pas de dire qu'on ne prend que le module, il faut ne pas le faire ; **I-03** (projection en `f64`
-depuis des différences entières, IEEE strict, réduction **au bit** sous gravité verticale) ;
-**I-10** (l'état demeure entier) ; **I-06** (aucune allocation ajoutée). Aucun n'est devenu faux ;
-I-07 **cesse d'être violé**, ce qui est un changement d'état et non un amendement, et le suivi le
-consigne comme tel.
-**Règle des deux maillons : compteur remis à 0**, et par le code — `outils/velocite.sh` donne
-**`V ... derniere avancee=S226`**. Le compteur était à 1 en entrant.
-**Recommandation portée** : la consigne de S224, reprise par S225, est tenue — V a avancé. La ligne
-`Session suivante` nomme A266, qui est la conséquence directe de ce qui vient d'être construit et
-une ligne de gravité 1, avant de reprendre l'état répliqué.
-Décomptes vérifiés : 138 fichiers dans `docs/adr` (inchangé), 311 leçons, 266 angles.
-Jeton libre, battement 19:19. Copies de travail avancées sur master après ce commit.
+REPRISE lu intégralement malgré sa taille. Git/cargo/Python disponibles ; Git Bash disponible hors
+PATH. Aucune campagne historique n’a été relancée.

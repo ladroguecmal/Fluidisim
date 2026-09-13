@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-13 19:19 +02:00
-Agent            : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
-Session en cours : —
+JETON            : occupé
+Battement        : 2026-09-13 19:45 +02:00
+Agent            : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
+Session en cours : S227 — audit global demandé par l’utilisateur
 Dernière session : S226 — V reçoit `g_eff` en vecteur, I-07 cesse d'être violé, C16 part V à 0,0002° ; **A266 ouverte (gravité 1)** : ADR-010 §2 se contredit — table par coupes horizontales contre plan perpendiculaire à `g_eff`, 9,89 % d'écart sur une cale
 Session suivante : S227 — **trancher A266**, gravité 1. ADR-010 §2 demande une table `volume → hauteur` cuite « par coupes horizontales » **et** un plan d'eau perpendiculaire à `g_eff` : mesuré à 0,3 g, un prisme reste exact au milieu de sa course mais une **coque en V se trompe de 9,89 % partout**, et c'est la cale qui justifie l'existence de la table. L'erreur porte sur un **volume**, donc sur une conséquence de jeu (I-10), et elle bloque l'usage de V sur tout contenant non prismatique — le cas nominal. Trois voies nommées, aucune choisie : table à deux entrées (volume, inclinaison) ; correction analytique pour les sections convexes ; restriction déclarée de V aux prismes, qui retirerait à `shape_lut` sa raison d'être. L'ADR qui en sortira **remplace** la disposition, sans réécrire ADR-010. **Puis** l'état répliqué et restauré (ADR-022 §5.1), qui ouvre C19-V et C21. A265 reste à instruire avant toute optimisation CPU ; A264, A261, A258, A263 et la loi GPU de J1-bis sans ordre imposé ; J2/δ général conservé
 Maillons        : 0 — V avancée dans `code/water-core/src` (hydro_network, `g_eff` vectoriel)
