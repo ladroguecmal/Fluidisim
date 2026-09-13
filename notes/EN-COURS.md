@@ -77,8 +77,8 @@ l’audit. Pas de réécriture d’ADR ou des sources initiales.
 ### Plan
 
 - [x] **P1** — amorce, état réel, jeton et plan seuls.
-- [ ] **P2** — intentions initiales, feuille de route, file active, métriques documentaires et code ; consigner le diagnostic factuel.
-- [ ] **P3** — alléger les points d’entrée et refondre la procédure de lecture, de choix du lot et de validation ; historique accessible et preuves conservées.
+- [x] **P2** — intentions initiales, feuille de route, file active, métriques documentaires et code ; consigner le diagnostic factuel.
+- [>] **P3** — alléger les points d’entrée et refondre la procédure de lecture, de choix du lot et de validation ; historique accessible et preuves conservées.
 - [ ] **P4** — reproduire et corriger les défauts de code bornés issus de l’audit ; sinon documenter les correctifs prioritaires avec critères de réception.
 - [ ] **P5** — vérifier les changements, achever le bilan global et ordonner les prochains lots selon leur effet sur le système.
 - [ ] **P6** — rituel de fin §6 : journal, angles/leçons utiles, file active, index, jeton libre et copies synchronisées.
@@ -89,3 +89,8 @@ Chaque étape reste sous quinze minutes ; découpage déclaré ici si nécessair
 
 REPRISE lu intégralement malgré sa taille. Git/cargo/Python disponibles ; Git Bash disponible hors
 PATH. Aucune campagne historique n’a été relancée.
+
+
+P2 : bilan préliminaire dans docs/registres/BILAN-GLOBAL-S227.md ; base release 383 réussis,
+5 ignorés. Confluence V et soustraction i64 ciblées ; A266 a aussi un écart de convention à vérifier.
+P3 découpée en P3a (documentation/procédure), P3b (indicateur portable corrigé).

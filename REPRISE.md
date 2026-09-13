@@ -19,7 +19,7 @@ souvenir de conversation, **c'est lui qui fait foi**.
 
 ```
 JETON            : occupé
-Battement        : 2026-09-13 19:45 +02:00
+Battement        : 2026-09-13 19:48 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
 Session en cours : S227 — audit global demandé par l’utilisateur
 Dernière session : S226 — V reçoit `g_eff` en vecteur, I-07 cesse d'être violé, C16 part V à 0,0002° ; **A266 ouverte (gravité 1)** : ADR-010 §2 se contredit — table par coupes horizontales contre plan perpendiculaire à `g_eff`, 9,89 % d'écart sur une cale
