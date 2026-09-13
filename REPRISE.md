@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 10:54 +02:00
+JETON            : libre
+Battement        : 2026-09-13 10:56 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S213 — cadrage du coût corrigé (ADR-131), espace d'optimisation, levier temporel du sillage
-Dernière session : S212 — sillage du cœur dans l'hôte GPU, exact (0,089 mm) ; l'implémentation S212 dépasse le budget (CPU 10,9 ms, GPU 4,1 ms) — cadrage corrigé par ADR-131
-Session suivante : S213 — file J1, couche W : levier temporel du sillage dans le cœur — ne plus refaire la préparation modale par image, recevoir contre from_journal, mesurer (HOTE-GPU-S212 §Verdict)
-Maillons        : 0 — W avancée dans code/water-core/src (render_components du champ de pression)
+Session en cours : aucune
+Dernière session : S213 — ADR-131 (un dépassement qualifie l'implémentation, espace d'optimisation J1-bis) ; levier temporel du sillage construit, CPU 1,26 / 0,36 ms, GPU inchangé
+Session suivante : S214 — file J1, validité avant accélération (ADR-131 D6) : composition impact + sillage par mixed_water sur la scène (budget conjoint ADR-119), puis A251 ; chaque mesure avec techniques présentes/absentes et domaine (TEMPS-SILLAGE-S213 §Suite)
+Maillons        : 0 — W avancée dans code/water-core/src (pressure_timeline) et ADR-131 actée
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 
@@ -168,6 +168,8 @@ restent datés ; la file liée porte aussi leurs suivis S195–S199.**
 levier temporel du sillage dans le cœur, **un** des éléments de l'espace d'optimisation (J1-bis de
 la feuille de route) ; 2 ms s'éprouve sur leur combinaison ; A251 et composition impact+sillage
 restent nécessaires ([HOTE-GPU-S212](docs/validation/HOTE-GPU-S212.md)).
+**S213 : levier temporel construit** ([TEMPS-SILLAGE-S213](docs/validation/TEMPS-SILLAGE-S213.md)) ;
+prochain lot J1 : composition impact+sillage par le cœur, puis A251.
 
 **Tolérance B4 fixée à 2 % par l'utilisateur (ADR-120).** Elle ne doit plus être
 redemandée. La réception et son profil sont dans B4-TOLERANCE-S190 ; B4 complet
@@ -247,7 +249,7 @@ pièges déjà payés.
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/FEUILLE-DE-ROUTE.md  ← trajectoire J1 → J5 et noyau V, seul porteur (ADR-127)
 docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 130 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 131 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -266,6 +268,17 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S213 — 2026-09-13 : cadrage du coût corrigé ([ADR-131](docs/adr/ADR-131-un-depassement-qualifie-une-implementation.md)) et [levier temporel du sillage](docs/validation/TEMPS-SILLAGE-S213.md).**
+Clarification utilisateur : un dépassement qualifie l'implémentation ; espace d'optimisation nommé
+(temps, espace, LOD spatial/spectral/temporel, visibilité, mutualisation — FEUILLE-DE-ROUTE J1-bis) ;
+techniques présentes/absentes/domaine avec chaque mesure ; 2 ms éprouvé sur la combinaison ; aucune
+réduction fondée sur des optimisations isolées ; A251 et composition impact+sillage nécessaires.
+`pressure_timeline::Timeline` : tronçons achevés repliés, 6,1e-8 du chemin préparé, témoin vérifié.
+Levier seul 64×128 : **1,26 ms** pendant forçage (7,70 préparé), **0,36 ms** après (13,36) ; hôte
+CPU sillage 1,7 ms (S212 : 10,9), GPU inchangé 4,18 ms — **pas un verdict de budget**. A252, L286.
+354 tests réussis/cinq ignorés. **Suite S214 : composition impact+sillage, puis A251.**
+131 ADR,252 angles,286 leçons,18 invariants,6 SPEC,23 cas ; compteur 0.
 
 *⚠ S213 : ce bloc disait « trop cher » et « refusé en coût » — c'est l'implémentation S212 qui
 dépasse le budget, pas le sillage ni l'objectif ; espace d'optimisation et protocole de mesure

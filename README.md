@@ -776,3 +776,10 @@ Coefficients rebasés publiés par le cœur ; hauteur GPU/cœur max 0,089 mm ave
 CPU sillage 10,9 ms par image, GPU eau 4,10 ms à 960×540 : chemin refusé en coût, leviers temps
 (cœur) et espace (hôte) nommés. Recette honnête ~16 s, couture 12,7 mm à 39 s (A251). 350/cinq
 ignorés. **Suite S213 : levier temporel dans le cœur.** 130 ADR,251 angles,285 leçons,18 invariants,6 SPEC,23 cas.
+
+**S213 — 2026-09-13 : [ADR-131](docs/adr/ADR-131-un-depassement-qualifie-une-implementation.md) et [levier temporel du sillage](docs/validation/TEMPS-SILLAGE-S213.md).**
+Clarification utilisateur : un dépassement qualifie l'implémentation, l'espace d'optimisation est
+nommé (temps, espace, LOD spatial/spectral/temporel, visibilité, mutualisation), 2 ms s'éprouve sur
+leur combinaison. Repli temporel dans le cœur : CPU sillage 1,26 ms pendant forçage, 0,36 ms après
+(préparation 7,7 / 13,4 ms), hôte 1,7 ms, GPU inchangé ; exact à 6e-8 du chemin préparé. A252,
+L286. 354/cinq ignorés. **Suite S214 : composition impact+sillage, puis A251.** 131 ADR,252 angles,286 leçons,18 invariants,6 SPEC,23 cas.

@@ -79,7 +79,10 @@ la machine locale ([HOTE-GPU-S212](validation/HOTE-GPU-S212.md)). Recette honnê
 *Cadrage corrigé en S213 par l'utilisateur ([ADR-131](adr/ADR-131-un-depassement-qualifie-une-implementation.md)) :
 S212 écrivait « refusé en coût » et bornait la suite à deux leviers avant arbitrage — c'était
 l'implémentation qui dépassait, pas le sillage ni l'objectif.*
-*S213* : levier temporel en construction dans le cœur ; cadrage et espace d'optimisation ci-dessous.
+*S213* : cadrage et espace d'optimisation ci-dessous (ADR-131). **Levier temporel construit**
+dans le cœur ([TEMPS-SILLAGE-S213](validation/TEMPS-SILLAGE-S213.md)) : CPU sillage 1,26 ms pendant
+le forçage et 0,36 ms après (préparation 7,70 / 13,36), hôte 1,7 ms, exact à 6e-8 ; GPU inchangé.
+Coordonnée de l'espace, pas verdict. Suite : composition impact+sillage, puis A251.
 
 - ~~**A245**~~ — **levé en S205** (ADR-128) : la mer S201 (Hs 1,5 m) se compose, impact compris,
   zéro refus ; [COMPOSITION-MER-S205](validation/COMPOSITION-MER-S205.md) ;
@@ -105,7 +108,7 @@ l'échec d'optimisations prises isolément. La liste est ouverte.
 |---|---|---|
 | phases repliées de B au GPU | **présente** (S211) | écart GPU/cœur |
 | table de Bessel d'un impact (ADR-129) | **présente** (S208, S211) | écart au champ direct, pas λ/16 |
-| **temps** — sillage : tronçons achevés repliés, modes préconstruits | **en construction S213** | écart au chemin préparé, pic aux bornes |
+| **temps** — sillage : tronçons achevés repliés, modes préconstruits | **présente** (S213) : 1,26 ms forçage / 0,36 ms après à 4 096 nœuds, un fil ; 6e-8 du chemin préparé | écart au chemin préparé, pic aux bornes (2,12 ms), retour arrière (3,10 ms) |
 | **espace** — grille locale et transformée | absente, nommée S212 | quadrature d'image, coutures et période |
 | **LOD spatial** — densité, emprise selon distance et écran | absente | Nyquist par distance (L283), coutures entre niveaux |
 | **LOD spectral** — nœuds par source selon distance et visibilité | absente | écart à la recette pleine, durée et rayon honnêtes (ADR-107, A251) |

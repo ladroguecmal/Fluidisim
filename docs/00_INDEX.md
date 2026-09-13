@@ -20,6 +20,13 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S213 — 2026-09-13 : [ADR-131](adr/ADR-131-un-depassement-qualifie-une-implementation.md) et [levier temporel du sillage](validation/TEMPS-SILLAGE-S213.md).**
+Un dépassement qualifie l'implémentation ; espace d'optimisation nommé (J1-bis) ; techniques
+présentes/absentes/domaine avec chaque mesure ; 2 ms sur la combinaison. `pressure_timeline` :
+CPU sillage 1,26 ms pendant forçage, 0,36 ms après (préparation 7,7 / 13,4), hôte 1,7 ms ; GPU
+inchangé. A252, L286. 354/cinq ignorés. **Suite S214 : composition impact+sillage, puis A251.**
+131 ADR,252 angles,286 leçons,18 invariants,6 SPEC,23 cas.
+
 *⚠ S213 ([ADR-131](adr/ADR-131-un-depassement-qualifie-une-implementation.md)) : « trop cher » et
 « refusé en coût » ci-dessous portent sur l'implémentation S212, pas sur le sillage ni l'objectif.*
 **S212 — 2026-09-13 : [sillage du cœur dans l'hôte GPU, exact et trop cher](validation/HOTE-GPU-S212.md).**

@@ -2982,3 +2982,8 @@ mesurés ; A247 reste partielle. Voir [HOTE-GPU-S212](../validation/HOTE-GPU-S21
   sur CPU » — sans lister les techniques absentes. Remède : ADR-131 — techniques présentes, absentes et domaine avec chaque mesure ; espace
   d'optimisation nommé (J1-bis) ; 2 ms éprouvé sur la combinaison. **Reste à éprouver** : que les
   mesures de δ (B3, coût du pas) adoptent le même en-tête quand J2 les reprend. Voir L286, L282.
+
+**Suivi A247 — S213, 2026-09-13 : loi CPU du sillage déplacée.** Repli temporel
+(`pressure_timeline`) : 1,26 ms pendant le forçage, 0,36 ms après, contre 7,70 / 13,36 ms pour la
+préparation par image (4 096 nœuds, un fil) ; hôte 1,7 ms. Loi GPU inchangée. Mesure publiée avec
+techniques présentes, absentes et domaine (ADR-131) ; A247 reste partielle. Voir TEMPS-SILLAGE-S213.

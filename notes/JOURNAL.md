@@ -10947,3 +10947,48 @@ cosmétique ; I-08 tenu (amplitudes complexes, aucun temps f32) ; I-06 : méthod
 allocation, pile graphique non reçue. Aucun invariant ni ADR changé. Suite complète `code/` :
 **350 réussis (252+4+1+93), 5 ignorés**, aucun échec. 130 ADR,251 angles,285 leçons,18 invariants,
 6 SPEC,23 cas. Compteur 0 : W avancée dans code/water-core/src. Jeton libre, copies avancées.
+
+## S213 — 2026-09-13 — Cadrage du coût corrigé (ADR-131) et levier temporel du sillage
+
+**Entrée.** Réponse de l'utilisateur au compte rendu S212 : continuer la piste CPU, **mais corriger
+le cadrage** — c'est l'implémentation qui dépasse le budget, pas le sillage ni l'objectif ; intégrer
+LOD spatiaux, spectraux et temporels, visibilité et mutualisation ; ne pas attendre l'échec de deux
+optimisations pour demander de réduire l'ambition ; chaque mesure précise techniques présentes,
+absentes et domaine ; 2 ms à éprouver sur la combinaison ; conserver A251 et la composition
+impact+sillage. Claude Code (Opus 5), master et copies à 1da11b6. Plan d7837ed, P2 f6d18d0, P3
+358998a, P4 681fc5a, P5 0441412, P6 d6b547e, P7 f3d4053.
+
+**Décision structurante.** **ADR-131 actée** sur clarification de l'utilisateur : D1 un dépassement
+qualifie l'implémentation mesurée ; D2 espace d'optimisation nommé et ouvert (temps, espace, LOD
+spatial, spectral, temporel, visibilité, mutualisation) ; D3 techniques présentes, absentes et
+domaine avec chaque mesure ; D4 2 ms éprouvé sur la combinaison ; D5 aucune demande de réduction
+fondée sur l'échec d'optimisations isolées ; D6 validité conservée — A251 et composition
+impact+sillage restent travaux nécessaires de J1. Note datée ADR-127 D7. Feuille de route : J1-bis.
+Cadrage S212 recadré en place (notes datées, verdicts barrés, texte d'origine lisible).
+
+**Sorties code.** `pressure_timeline::Timeline` : tronçons achevés repliés par nœud sur `(η, v/ω)`
+à l'instant de référence, rotation entière par image, modes préconstruits, tronçon en cours par
+`ModalPressure::sample` (forme sinc gardée à la résonance) ; repli incrémental ou complet ; refus
+atomiques. Hôte alimenté par ce levier ; référence `--verify` inchangée (`from_journal`). Exemple
+`wake_timeline_cost`. Réception [TEMPS-SILLAGE-S213](../docs/validation/TEMPS-SILLAGE-S213.md).
+
+**Chiffres qui orientent.** Écart relatif au chemin préparé 6,07e-8 / 2,23e-8 (critère 1e-5) ;
+repli incrémental = complet au bit ; témoin : 0,365. Levier seul, 64×128, un fil : **1,26 ms**
+pendant forçage contre 7,70 (préparation), **0,36 ms** après contre 13,36 ; pic de borne 2,12 ms ;
+retour arrière 3,10 ms ; construction 4,43 ms ; 3,1 Mo. 128×256 : 4,99 / 1,39 contre 30,9 / 52,9.
+Hôte : CPU sillage 1,67–1,78 ms (S212 : 10,6–10,9), GPU inchangé 1,91 / 4,18 ms, GPU/cœur 0,089 mm.
+**Prédiction contredite** (dixièmes / dizaines de µs) : publiée.
+
+**Ce qui n'a pas été fait.** Composition impact+sillage et A251 : non traitées, maintenues en
+travaux nécessaires. Aucune technique GPU. Écart hôte/exemple (1,7 contre 1,26 ms) non attribué ;
+max 7,3 ms isolé non attribué. Captures toujours sous `captures/s212/`.
+
+**Suite S214.** File J1, validité avant accélération (ADR-131 D6) : composition impact + sillage par
+`mixed_water` sur la scène, puis A251 (emprise et durée d'image déduites de la recette, coutures).
+Ensuite la loi GPU (espace, LOD, visibilité, mutualisation), chaque mesure avec son en-tête.
+
+**Rituel.** A252 (sévérité 2, traitée), L286 ; A251 note S213 ; file plurielle entière relue (J1,
+A247, suivi S213 ; autres déclencheurs conservés) ; feuille de route J1/J1-bis/§3/§4/§5. Invariants
+I-05/I-06/I-08/I-09/I-12 relus : repli sans allocation dans le rendu, phases entières, aucun temps
+f32 ; aucun amendé. Suite complète `code/` : **354 réussis (256+4+1+93), 5 ignorés**, aucun échec. 131 ADR,252 angles,286 leçons,18 invariants,
+6 SPEC,23 cas. Compteur 0 : W avancée (code src) et ADR-131 actée. Jeton libre, copies avancées.

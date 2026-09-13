@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S213 — en cours
+Session : S213 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : corriger le cadrage du coût (demande utilisateur), inscrire l'espace d'optimisation dans
 la trajectoire, puis construire et mesurer le levier temporel du sillage dans le cœur.
@@ -110,7 +110,7 @@ mutualisation) et domaine de validité (fixture S212, une source, machine, insta
 - [x] **P6** — mesure du levier seul (exemple release, sans GPU) : par image, pic aux bornes, construction, mémoire ; techniques et domaine.
 - [x] **P7** — hôte : levier par image ; `--verify` contre `from_journal`, contrôles S212 conservés ; coûts GPU/CPU.
 - [x] **P8** — réception TEMPS-SILLAGE-S213 (techniques, domaine) ; suite complète. *(P7 d'origine scindé en P7/P8 au constat de sa taille, avant de le commencer.)*
-- [>] **P9** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
+- [x] **P9** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
 
@@ -164,3 +164,8 @@ P8 : TEMPS-SILLAGE-S213 (en-tête ADR-131, construction, réception, coûts levi
 que le résultat ne dit pas, suite validité avant accélération) ; viewer/README. Suite complète :
 354 réussis (256+4+1+93), 5 ignorés, aucun échec ; avertissements préexistants seulement.
 Suite proposée S214 : composition impact+sillage par `mixed_water`, puis A251 (ADR-131 D6).
+
+P9 : journal S213 ; suivi A247 S213 (A252 et L286 écrits en P3) ; index, README, REPRISE §3 (131
+décisions), §4, note de file et jeton ; feuille de route J1 S213 et ligne « temps » présente ; file
+plurielle relue (suivi S213, A247, J1 ; autres conservées). Invariants I-05/I-06/I-08/I-09/I-12
+relus, aucun devenu faux. Jeton libre ; copies avancées après ce commit.
