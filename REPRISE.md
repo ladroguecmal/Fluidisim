@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-13 18:51 +02:00
+JETON            : occupé
+Battement        : 2026-09-13 18:53 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
-Session en cours : —
+Session en cours : S225 — cadence complète de l'hôte, mesurée bout en bout
 Dernière session : S224 — **la couche V existe** : premier module d'ADR-010, C12 reçu à 0,0824 %, `velocite.sh` passe de `jamais` à `V modules=1` ; A264 ouverte (plancher de vidange proportionnel à la surface)
 Session suivante : S225 — **cadence complète de l'hôte**, travail nécessaire de J1 (ADR-131 D6) nommé depuis S213, jamais mesuré, et **reporté explicitement par S224** pour ouvrir V : la promesse se tient ici. Mesurer une cadence réelle bout en bout, pas une passe isolée, avec son en-tête et son rang de passage. **Et la brique suivante de V est nommée dès maintenant pour qu'elle ne refroidisse pas** : direction de `g_eff` — surface libre en référentiel accéléré, ADR-010 §2, spécifiée et absente, le module ne prenant que le module de `g_eff` — puis état répliqué et restauré (ADR-022 §5.1), qui ouvre la branche V de C19 et C21. **Ne pas laisser passer plus d'une session sans y revenir.** A264, A261, A258, A263 nommées sans ordre imposé ; J2/δ général conservé
 Maillons        : 0 — **V** ouverte dans `code/water-core/src` (hydro_network) et W touchée (mixed_water)
