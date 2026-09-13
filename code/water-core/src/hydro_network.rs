@@ -12,8 +12,11 @@
 //!   `i64` de millilitres ; aucun flottant ne le porte jamais.
 //! - **I-06** : aucune allocation à l'exécution. Nœuds, arêtes et formes sont des tranches de
 //!   l'appelant ; le pas n'en demande pas d'autres.
-//! - **I-07** : `g_eff` est **injectée**. Un vaisseau qui accélère doit voir son réservoir fuir par
-//!   ce qui se retrouve en bas.
+//! - **I-07** : `g_eff` est injectée **en vecteur**, direction comprise (S226). Le plan d'eau est
+//!   perpendiculaire à `g_eff`, pas à `Z` : sans cela un vaisseau qui accélère ne verrait pas son
+//!   réservoir fuir par le hublot latéral qui se retrouve « en bas » (ADR-010 §2). Le premier
+//!   module (S224) n'en prenait que le **module**, ce qui revenait à écrire l'axe en dur — le
+//!   défaut qu'I-07 qualifie de bloquant.
 //!
 //! Ce que ce module ne fait pas : ni réseau fermé sous pression (ADR-010 §4 le reporte
 //! explicitement en v2), ni pompe, ni matériau poreux, ni pluie, ni absorption.
@@ -51,8 +54,10 @@ pub enum Error {
 pub struct HydroNode {
     pub volume_ml: i64,
     pub capacity_ml: i64,
-    /// Altitude du fond, en micromètres, dans le repère du référentiel.
-    pub floor_um: i64,
+    /// Point de référence du contenant, en micromètres, dans le repère du référentiel : celui
+    /// depuis lequel la table de forme compte la hauteur de surface, le long de la verticale
+    /// locale `u = −g_eff/‖g_eff‖`. Sous gravité verticale, c'est le fond.
+    pub origin_um: [i64; 3],
     /// Indice de la forme dans la table fournie.
     pub shape: u16,
 }
@@ -85,8 +90,10 @@ pub struct Opening {
     /// `None` : rejet hors réseau. Le volume sort du bilan, et c'est voulu.
     pub to: Option<u16>,
     pub flow: Flow,
-    /// Hauteur du seuil au-dessus du fond du nœud amont, en micromètres.
-    pub sill_um: i64,
+    /// Position de l'ouverture, en micromètres, dans le repère du référentiel. **Une ouverture est
+    /// quelque part**, pas à une hauteur : c'est ce qui permet à un hublot latéral de se retrouver
+    /// « en bas » quand `g_eff` s'incline.
+    pub position_um: [i64; 3],
     pub discharge: f32,
     /// Reste fractionnaire, en nanolitres (10⁻⁶ ml). Entretenu par `step`.
     pub residue_nl: i64,
@@ -149,6 +156,19 @@ impl<'a> Shapes<'a> {
     }
 }
 
+/// Projection d'un déplacement entier sur la verticale locale, en micromètres.
+///
+/// Calculée en `f64` depuis des différences **entières** : sous `u = (0, 0, 1)` elle rend
+/// exactement `q_z − c_z`, donc la généralisation se réduit au bit au cas vertical. IEEE strict la
+/// rend reproductible (I-03) ; le module emploie déjà `f64` pour le débit.
+fn sub(a: [i64; 3], b: [i64; 3]) -> [i64; 3] {
+    [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
+}
+
+fn along(delta: [i64; 3], u: [f64; 3]) -> f64 {
+    delta[0] as f64 * u[0] + delta[1] as f64 * u[1] + delta[2] as f64 * u[2]
+}
+
 /// Un pas de la couche V.
 ///
 /// **Déroulé, et chaque étape répond à une ligne d'ADR-010 §4.**
@@ -166,16 +186,25 @@ pub fn step(
     nodes: &mut [HydroNode],
     edges: &mut [Opening],
     shapes: &Shapes<'_>,
-    g_eff: f32,
+    g_eff: [f32; 3],
     dt: SimTime,
     scratch: &mut [i64],
 ) -> Result<(), Error> {
     if scratch.len() < edges.len() {
         return Err(Error::Capacity);
     }
-    if !(g_eff > 0.0) || !g_eff.is_finite() || dt.0 == 0 {
+    let norm2 = g_eff.iter().map(|v| *v as f64 * *v as f64).sum::<f64>();
+    if !(norm2 > 0.0) || !norm2.is_finite() || dt.0 == 0 {
         return Err(Error::Domain);
     }
+    let magnitude = norm2.sqrt();
+    // Verticale locale : l'opposé de `g_eff`, normalisé. Sous `g_eff = (0, 0, −g)` elle vaut
+    // exactement `(0, 0, 1)`, et la projection redevient une soustraction d'altitudes.
+    let up = [
+        -(g_eff[0] as f64) / magnitude,
+        -(g_eff[1] as f64) / magnitude,
+        -(g_eff[2] as f64) / magnitude,
+    ];
     for e in edges.iter() {
         let size = match e.flow {
             Flow::Orifice { area_mm2 } => area_mm2,
@@ -203,24 +232,28 @@ pub fn step(
     // --- 2. Débit par arête, dans l'ordre du tableau (I-03).
     for (e, out) in edges.iter().zip(scratch.iter_mut()) {
         *out = 0;
-        let up = nodes[e.from as usize];
-        let h_up = shapes.height_um(up.shape, up.volume_ml, up.capacity_ml)?;
-        let surface_up = up.floor_um + h_up;
-        let sill = up.floor_um + e.sill_um;
-        // Charge en aval : la surface du contenant receveur, ou le seuil si l'arête rejette dehors.
+        let src = nodes[e.from as usize];
+        let h_up = shapes.height_um(src.shape, src.volume_ml, src.capacity_ml)? as f64;
+        // Cote de l'ouverture au-dessus du point de référence amont, **le long de la verticale
+        // locale** : c'est la « distance signée au plan de surface » d'ADR-010 §2.
+        let sill = along(sub(e.position_um, src.origin_um), up);
+        // Charge en aval : la surface du receveur ramenée au même repère, ou le seuil si l'arête
+        // rejette hors réseau. Le maximum interdit une charge négative — une ouverture au-dessus
+        // de la surface aval ne débite pas plus qu'à l'air libre.
         let downstream = match e.to {
             Some(t) => {
                 let dn = nodes[t as usize];
-                let h_dn = shapes.height_um(dn.shape, dn.volume_ml, dn.capacity_ml)?;
-                (dn.floor_um + h_dn).max(sill)
+                let h_dn = shapes.height_um(dn.shape, dn.volume_ml, dn.capacity_ml)? as f64;
+                let dn_surface = along(sub(dn.origin_um, src.origin_um), up) + h_dn;
+                dn_surface.max(sill)
             }
             None => sill,
         };
-        if surface_up <= downstream {
+        if h_up <= downstream {
             continue;
         }
-        let head_m = (surface_up - downstream) as f64 * 1e-6;
-        let g = 2.0 * g_eff as f64;
+        let head_m = (h_up - downstream) * 1e-6;
+        let g = 2.0 * magnitude;
         let q_m3s = match e.flow {
             // Torricelli, ADR-010 §3. Section en mm² → m² : 1e-6.
             Flow::Orifice { area_mm2 } => {

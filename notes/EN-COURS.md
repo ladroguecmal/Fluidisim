@@ -120,7 +120,7 @@ vrai, c'est un angle mort et il vaut d'être nommé.
 ### Plan
 
 - [x] **P1** — jeton, la violation d'I-07, la forme, la thèse, la prédiction, le plan seuls.
-- [ ] **P2** — généraliser : `g_eff` vectoriel, points de référence et positions d'ouverture ; réduction au cas vertical vérifiée **au bit**.
+- [x] **P2** — généraliser : `g_eff` vectoriel, points de référence et positions d'ouverture ; réduction au cas vertical vérifiée **au bit**.
 - [ ] **P3** — éprouver la phrase d'ADR-010 : hublot latéral, sous gravité verticale puis sous accélération latérale ; part V de C16.
 - [ ] **P4** — mesurer ce que la table de forme perd quand `g_eff` s'incline, et le nommer.
 - [ ] **P5** — document de réception ; suite complète `code/`.
@@ -129,3 +129,19 @@ vrai, c'est un angle mort et il vaut d'être nommé.
 ### Notes de reprise
 
 *(vide : le travail commence en P2)*
+
+P2 : `g_eff` devient `[f32; 3]`, `HydroNode.floor_um` devient `origin_um: [i64; 3]`, et
+`Opening.sill_um` devient `position_um: [i64; 3]` — **une ouverture est quelque part, pas à une
+hauteur**. La charge se calcule comme ADR-010 §2 l'écrit : cote de l'ouverture **le long de la
+verticale locale** `u = −g_eff/‖g_eff‖`, retranchée à la hauteur de surface donnée par la table.
+
+La projection se fait en `f64` depuis des **différences entières** : sous `u = (0, 0, 1)` elle rend
+exactement `q_z − c_z`, donc la soustraction d'altitudes d'avant. Le module employait déjà `f64`
+pour le débit ; IEEE strict le garde reproductible (I-03).
+
+**Critère 1 tenu, et c'est le garde-fou qui sépare une généralisation d'une réécriture** : sous
+`g_eff = [0, 0, −9,81]`, **tous les nombres de S224 sont identiques** — C12 à 727,4 s et 0,0824 %,
+l'arrêt sans report à 13 ml, la chaîne à [532351, 300688, 166961], les exposants du déversoir et de
+l'orifice à 2,8284 et 1,4151. Neuf tests, rien n'a bougé.
+
+Les refus gagnent une cause : `g_eff` de norme nulle ou non finie rend `Domain`, comme un pas nul.

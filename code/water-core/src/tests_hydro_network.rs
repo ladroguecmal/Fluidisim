@@ -1,6 +1,12 @@
 //! S224 — réception du noyau V (ADR-010), autour du cas canonique **C12**.
+//! S226 — `g_eff` devient un vecteur ; ces cas-ci le prennent vertical, et leur invariance est le
+//! contrôle qui sépare une généralisation d'une réécriture.
 use super::*;
 use crate::SimTime;
+
+/// Gravité verticale de référence. Sous elle, la verticale locale vaut exactement `(0, 0, 1)` et
+/// la projection redevient une soustraction d'altitudes.
+const DOWN: [f32; 3] = [0.0, 0.0, -9.81];
 
 /// Prisme : table de forme linéaire, donc lecture de hauteur **exacte**.
 fn prism(height_um: i64) -> [i64; SHAPE_ENTRIES] {
@@ -17,14 +23,14 @@ fn c12() -> ([HydroNode; 1], [Opening; 1], [i64; SHAPE_ENTRIES]) {
     let node = HydroNode {
         volume_ml: 1_000_000, // 1 m³ = 1e6 ml
         capacity_ml: 1_000_000,
-        floor_um: 0,
+        origin_um: [0, 0, 0],
         shape: 0,
     };
     let edge = Opening {
         from: 0,
         to: None,
         flow: Flow::Orifice { area_mm2: 1_000 }, // 10 cm²
-        sill_um: 0,
+        position_um: [0, 0, 0],
         discharge: SHARP_EDGE_DISCHARGE,
         residue_nl: 0,
     };
@@ -45,7 +51,7 @@ fn c12_drain_time_matches_the_variable_head_integral_s224() {
     let mut steps = 0u64;
     let limit = (4.0 * reference_s * 1e6 / STEP_US as f64) as u64;
     while nodes[0].volume_ml > 0 && steps < limit {
-        step(&mut nodes, &mut edges, &shapes, 9.81, SimTime(STEP_US), &mut scratch).unwrap();
+        step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut scratch).unwrap();
         steps += 1;
     }
     let drained_s = steps as f64 * STEP_US as f64 * 1e-6;
@@ -75,13 +81,13 @@ fn closed_network_conserves_volume_exactly_s224() {
         HydroNode {
             volume_ml: 900_000,
             capacity_ml: 1_000_000,
-            floor_um: 500_000,
+            origin_um: [0, 0, 500_000],
             shape: 0,
         },
         HydroNode {
             volume_ml: 100_000,
             capacity_ml: 1_000_000,
-            floor_um: 0,
+            origin_um: [0, 0, 0],
             shape: 0,
         },
     ];
@@ -89,14 +95,14 @@ fn closed_network_conserves_volume_exactly_s224() {
         from: 0,
         to: Some(1),
         flow: Flow::Orifice { area_mm2: 1_000 },
-        sill_um: 0,
+        position_um: [0, 0, 500_000],
         discharge: SHARP_EDGE_DISCHARGE,
         residue_nl: 0,
     }];
     let mut scratch = [0i64; 1];
     let total = nodes[0].volume_ml + nodes[1].volume_ml;
     for _ in 0..20_000 {
-        step(&mut nodes, &mut edges, &shapes, 9.81, SimTime(STEP_US), &mut scratch).unwrap();
+        step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut scratch).unwrap();
         assert_eq!(
             nodes[0].volume_ml + nodes[1].volume_ml,
             total,
@@ -121,25 +127,25 @@ fn three_leaks_on_a_nearly_empty_node_stay_non_negative_s224() {
         HydroNode {
             volume_ml: 50,
             capacity_ml: 1_000_000,
-            floor_um: 1_000_000,
+            origin_um: [0, 0, 1_000_000],
             shape: 0,
         },
         HydroNode {
             volume_ml: 0,
             capacity_ml: 1_000_000,
-            floor_um: 0,
+            origin_um: [0, 0, 0],
             shape: 0,
         },
         HydroNode {
             volume_ml: 0,
             capacity_ml: 1_000_000,
-            floor_um: 0,
+            origin_um: [0, 0, 0],
             shape: 0,
         },
         HydroNode {
             volume_ml: 0,
             capacity_ml: 1_000_000,
-            floor_um: 0,
+            origin_um: [0, 0, 0],
             shape: 0,
         },
     ];
@@ -147,14 +153,14 @@ fn three_leaks_on_a_nearly_empty_node_stay_non_negative_s224() {
         from: 0,
         to: Some(to),
         flow: Flow::Orifice { area_mm2: 100_000 },
-        sill_um: 0,
+        position_um: [0, 0, 1_000_000],
         discharge: SHARP_EDGE_DISCHARGE,
         residue_nl: 0,
     });
     let mut scratch = [0i64; 3];
     let total: i64 = nodes.iter().map(|n| n.volume_ml).sum();
     for _ in 0..100 {
-        step(&mut nodes, &mut edges, &shapes, 9.81, SimTime(STEP_US), &mut scratch).unwrap();
+        step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut scratch).unwrap();
         assert_eq!(nodes.iter().map(|n| n.volume_ml).sum::<i64>(), total);
         for n in &nodes {
             assert!(n.volume_ml >= 0, "volume negatif : {n:?}");
@@ -172,13 +178,13 @@ fn downstream_capacity_is_never_exceeded_s224() {
         HydroNode {
             volume_ml: 1_000_000,
             capacity_ml: 1_000_000,
-            floor_um: 2_000_000,
+            origin_um: [0, 0, 2_000_000],
             shape: 0,
         },
         HydroNode {
             volume_ml: 0,
             capacity_ml: 1_000,
-            floor_um: 0,
+            origin_um: [0, 0, 0],
             shape: 0,
         },
     ];
@@ -186,13 +192,13 @@ fn downstream_capacity_is_never_exceeded_s224() {
         from: 0,
         to: Some(1),
         flow: Flow::Orifice { area_mm2: 100_000 },
-        sill_um: 0,
+        position_um: [0, 0, 2_000_000],
         discharge: SHARP_EDGE_DISCHARGE,
         residue_nl: 0,
     }];
     let mut scratch = [0i64; 1];
     for _ in 0..50 {
-        step(&mut nodes, &mut edges, &shapes, 9.81, SimTime(STEP_US), &mut scratch).unwrap();
+        step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut scratch).unwrap();
         assert!(nodes[1].volume_ml <= nodes[1].capacity_ml);
     }
     assert_eq!(nodes[1].volume_ml, 1_000, "le receveur devrait etre plein");
@@ -207,7 +213,7 @@ fn the_step_is_deterministic_s224() {
         let mut scratch = [0i64; 1];
         let mut trace = Vec::new();
         for _ in 0..500 {
-            step(&mut nodes, &mut edges, &shapes, 9.81, SimTime(STEP_US), &mut scratch).unwrap();
+            step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut scratch).unwrap();
             trace.push((nodes[0].volume_ml, edges[0].residue_nl));
         }
         trace
@@ -222,7 +228,7 @@ fn refusals_are_atomic_and_named_s224() {
     let shapes = Shapes::new(&table).unwrap();
     let mut scratch = [0i64; 1];
 
-    for (g, dt) in [(0.0f32, STEP_US), (f32::NAN, STEP_US), (9.81, 0)] {
+    for (g, dt) in [([0.0f32; 3], STEP_US), ([0., 0., f32::NAN], STEP_US), (DOWN, 0)] {
         let mut nodes = nodes0;
         let mut edges = edges0;
         assert_eq!(
@@ -238,7 +244,7 @@ fn refusals_are_atomic_and_named_s224() {
     let mut edges = edges0;
     edges[0].from = 7;
     assert_eq!(
-        step(&mut nodes, &mut edges, &shapes, 9.81, SimTime(STEP_US), &mut scratch),
+        step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut scratch),
         Err(Error::Capacity)
     );
     assert_eq!(nodes[0].volume_ml, nodes0[0].volume_ml);
@@ -246,7 +252,7 @@ fn refusals_are_atomic_and_named_s224() {
     let mut nodes = nodes0;
     let mut edges = edges0;
     assert_eq!(
-        step(&mut nodes, &mut edges, &shapes, 9.81, SimTime(STEP_US), &mut []),
+        step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut []),
         Err(Error::Capacity)
     );
     assert_eq!(nodes[0].volume_ml, nodes0[0].volume_ml);
@@ -271,7 +277,7 @@ fn without_the_residue_carry_the_drain_stalls_s224() {
     let mut steps = 0u64;
     let limit = (4.0 * 728.0 * 1e6 / STEP_US as f64) as u64;
     while nodes[0].volume_ml > 0 && steps < limit {
-        step(&mut nodes, &mut edges, &shapes, 9.81, SimTime(STEP_US), &mut scratch).unwrap();
+        step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut scratch).unwrap();
         edges[0].residue_nl = 0; // l'hôte jette le reste : c'est le cas que l'ADR interdit
         steps += 1;
     }
@@ -300,19 +306,19 @@ fn the_weir_follows_the_three_halves_law_s224() {
     let shapes = Shapes::new(&table).unwrap();
     let transfer = |volume_ml: i64, flow: Flow| {
         let mut nodes = [
-            HydroNode { volume_ml, capacity_ml: 2_000_000, floor_um: 0, shape: 0 },
-            HydroNode { volume_ml: 0, capacity_ml: 2_000_000, floor_um: 0, shape: 0 },
+            HydroNode { volume_ml, capacity_ml: 2_000_000, origin_um: [0, 0, 0], shape: 0 },
+            HydroNode { volume_ml: 0, capacity_ml: 2_000_000, origin_um: [0, 0, 0], shape: 0 },
         ];
         let mut edges = [Opening {
             from: 0,
             to: None,
             flow,
-            sill_um: 0,
+            position_um: [0, 0, 0],
             discharge: WEIR_DISCHARGE,
             residue_nl: 0,
         }];
         let mut scratch = [0i64; 1];
-        step(&mut nodes, &mut edges, &shapes, 9.81, SimTime(STEP_US), &mut scratch).unwrap();
+        step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(STEP_US), &mut scratch).unwrap();
         volume_ml - nodes[0].volume_ml
     };
     // Prisme de 2 m sur 2e6 ml : 1e6 ml = 1 m de charge, 2e6 ml = 2 m.
@@ -340,13 +346,13 @@ fn an_open_chain_tracks_a_hundredfold_finer_step_s224() {
     let build = || {
         (
             [
-                HydroNode { volume_ml: 800_000, capacity_ml: 1_000_000, floor_um: 2_000_000, shape: 0 },
-                HydroNode { volume_ml: 200_000, capacity_ml: 1_000_000, floor_um: 1_000_000, shape: 0 },
-                HydroNode { volume_ml: 0, capacity_ml: 1_000_000, floor_um: 0, shape: 0 },
+                HydroNode { volume_ml: 800_000, capacity_ml: 1_000_000, origin_um: [0, 0, 2_000_000], shape: 0 },
+                HydroNode { volume_ml: 200_000, capacity_ml: 1_000_000, origin_um: [0, 0, 1_000_000], shape: 0 },
+                HydroNode { volume_ml: 0, capacity_ml: 1_000_000, origin_um: [0, 0, 0], shape: 0 },
             ],
             [
-                Opening { from: 0, to: Some(1), flow: Flow::Orifice { area_mm2: 2_000 }, sill_um: 0, discharge: SHARP_EDGE_DISCHARGE, residue_nl: 0 },
-                Opening { from: 1, to: Some(2), flow: Flow::Orifice { area_mm2: 2_000 }, sill_um: 0, discharge: SHARP_EDGE_DISCHARGE, residue_nl: 0 },
+                Opening { from: 0, to: Some(1), flow: Flow::Orifice { area_mm2: 2_000 }, position_um: [0, 0, 2_000_000], discharge: SHARP_EDGE_DISCHARGE, residue_nl: 0 },
+                Opening { from: 1, to: Some(2), flow: Flow::Orifice { area_mm2: 2_000 }, position_um: [0, 0, 1_000_000], discharge: SHARP_EDGE_DISCHARGE, residue_nl: 0 },
             ],
         )
     };
@@ -355,7 +361,7 @@ fn an_open_chain_tracks_a_hundredfold_finer_step_s224() {
         let mut scratch = [0i64; 2];
         let total: i64 = nodes.iter().map(|n| n.volume_ml).sum();
         for _ in 0..steps {
-            step(&mut nodes, &mut edges, &shapes, 9.81, SimTime(dt_us), &mut scratch).unwrap();
+            step(&mut nodes, &mut edges, &shapes, DOWN, SimTime(dt_us), &mut scratch).unwrap();
             assert_eq!(nodes.iter().map(|n| n.volume_ml).sum::<i64>(), total, "masse perdue");
             for n in &nodes {
                 assert!(n.volume_ml >= 0 && n.volume_ml <= n.capacity_ml, "hors bornes : {n:?}");
