@@ -72,7 +72,7 @@ Pool de l'appelant ; arrêt avant une division si capacité ou budget insuffisan
 Pas de migration d'admission ni de certificat f32 ajouté.
 
 - [x] **P1** — jeton et plan seuls.
-- [>] **P2** — construire le parcours borné et recevoir couverture, arrêts et déterminisme.
+- [x] **P2** — construire le parcours borné et recevoir couverture, arrêts et déterminisme.
 - [ ] **P3** — mesurer gain/coût sur fixtures S218 et publier le contrat et ses limites.
 - [ ] **P4** — rituel §6, journal, registres, index, file active, jeton et copies.
 
@@ -80,3 +80,5 @@ Pas de migration d'admission ni de certificat f32 ajouté.
 
 Suite S218 : borne locale ADR-135 disponible, réserve non certifiée A258.
 Un arrêt retourne la meilleure couverture obtenue ; aucun rectangle ne disparaît.
+
+P2 : tas maximal, division binaire grand côté, borne héritée du parent. Deux tests ciblés reçus debug ; couverture/aire, budget pair, capacité, point, zéro, refus, déterminisme. Reprise inter-appels non construite : chaque appel repart de la racine du champ courant, ce qui évite des bornes périmées. Suite release lancée, reçu à P3.

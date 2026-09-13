@@ -5,6 +5,9 @@ pub use differential::PressureDifferential;
 #[path = "pressure_local_bound.rs"]
 mod local_bound;
 pub use local_bound::LocalSlopeEnvelope;
+#[path = "pressure_partition.rs"]
+mod partition;
+pub use partition::{PartitionError, PartitionStop, SlopeCell, SlopePartition};
 use crate::{
     modal_pressure::{scale_integer, Complex, Error, ModalPressure, Response, Segment},
     PhaseQ32, SimTime,

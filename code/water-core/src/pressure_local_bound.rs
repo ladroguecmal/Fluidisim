@@ -214,4 +214,91 @@ mod tests {
             }
         }
     }
+    #[test]
+    fn partition_s219_coverage_monotonicity_and_budget() {
+        use crate::spectral_pressure::{PartitionStop, SlopeCell};
+        let slots = [
+            slot([1., 0.], Complex { re: 1., im: 0. }),
+            slot([0., 0.7], Complex { re: 0.2, im: 0.3 }),
+        ];
+        let f = Field::from_slots(&slots, [-2.; 2], [2.; 2]);
+        let mut last = f32::INFINITY;
+        for budget in [1, 2, 3, 7, 31, 127] {
+            let mut pool = [SlopeCell::default(); 64];
+            let r = f
+                .partition_slope_envelope([-2.; 2], [2.; 2], &mut pool, budget)
+                .unwrap();
+            assert!(r.evaluations <= budget);
+            assert_eq!(r.evaluations, 2 * r.leaves - 1);
+            assert!(r.bound <= last);
+            last = r.bound;
+            let mut area = 0.0;
+            for cell in &pool[..r.leaves] {
+                let (lo, hi) = cell.rectangle();
+                area += (hi[0] - lo[0]) * (hi[1] - lo[1]);
+            }
+            assert_eq!(area, 16.0);
+            for y in 0..=40 {
+                for x in 0..=40 {
+                    let p = [-2. + x as f32 / 10., -2. + y as f32 / 10.];
+                    assert!(pool[..r.leaves].iter().any(|c| {
+                        let (lo, hi) = c.rectangle();
+                        (0..2).all(|i| p[i] >= lo[i] && p[i] <= hi[i])
+                    }));
+                    let s = f.sample(p).unwrap().slope;
+                    assert!((s[0] * s[0] + s[1] * s[1]).sqrt() <= r.bound);
+                }
+            }
+            let mut copy = [SlopeCell::default(); 64];
+            let same = f
+                .partition_slope_envelope([-2.; 2], [2.; 2], &mut copy, budget)
+                .unwrap();
+            assert_eq!(r.bound.to_bits(), same.bound.to_bits());
+            assert_eq!(r.stop, same.stop);
+            for (a, b) in pool[..r.leaves].iter().zip(&copy) {
+                assert_eq!(a.rectangle(), b.rectangle());
+                assert_eq!(a.bound().to_bits(), b.bound().to_bits());
+            }
+            assert_eq!(r.stop, PartitionStop::Evaluations);
+        }
+    }
+    #[test]
+    fn partition_s219_limits_and_errors() {
+        use crate::spectral_pressure::{PartitionError, PartitionStop, SlopeCell};
+        let slots = [slot([1., 0.], Complex { re: 1., im: 0. })];
+        let f = Field::from_slots(&slots, [-2.; 2], [2.; 2]);
+        assert_eq!(
+            f.partition_slope_envelope([-1.; 2], [1.; 2], &mut [], 1)
+                .unwrap_err(),
+            PartitionError::EmptyPool
+        );
+        let mut pool = [SlopeCell::default(); 2];
+        assert_eq!(
+            f.partition_slope_envelope([-1.; 2], [1.; 2], &mut pool, 0)
+                .unwrap_err(),
+            PartitionError::ZeroBudget
+        );
+        assert_eq!(
+            f.partition_slope_envelope([-3.; 2], [1.; 2], &mut pool, 1)
+                .unwrap_err(),
+            PartitionError::Evaluation(Error::Domain)
+        );
+        let r = f
+            .partition_slope_envelope([-1.; 2], [1.; 2], &mut pool, 100)
+            .unwrap();
+        assert_eq!(r.stop, PartitionStop::Capacity);
+        assert_eq!(r.leaves, 2);
+        assert_eq!(r.evaluations, 3);
+        let r = f
+            .partition_slope_envelope([0.3; 2], [0.3; 2], &mut pool, 100)
+            .unwrap();
+        assert_eq!(r.stop, PartitionStop::Precision);
+        let empty = Field::from_slots(&[], [-2.; 2], [2.; 2]);
+        let r = empty
+            .partition_slope_envelope([-1.; 2], [1.; 2], &mut pool, 100)
+            .unwrap();
+        assert_eq!(r.stop, PartitionStop::Zero);
+        assert_eq!(r.bound, 0.);
+        assert_eq!(r.evaluations, 1);
+    }
 }

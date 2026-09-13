@@ -33,6 +33,7 @@ pub enum Error {
     Time,
     Pending,
     Empty,
+    Partition(spectral_pressure::PartitionError),
     Preparation(spectral_pressure::PrepareError),
 }
 
@@ -295,6 +296,15 @@ impl<'a> Prepared<'a> {
         self.field.local_slope_envelope(min,max)
             .map_err(|e| Error::Preparation(e.into()))
     }
+    /// S219 : partition locale à cet instant, travail plafonné en évaluations.
+    pub fn partition_slope_envelope(
+        &self, context: &Context, time: SimTime, min: [f32;2], max: [f32;2],
+        pool: &mut [spectral_pressure::SlopeCell], budget: usize,
+    ) -> Result<spectral_pressure::SlopePartition, Error> {
+        if !self.context.matches(context) { return Err(Error::Context); }
+        if time != self.time { return Err(Error::Time); }
+        self.field.partition_slope_envelope(min,max,pool,budget).map_err(Error::Partition)
+    }
     /// ADR-117 : consommateur mixte ; contexte et instant contrôlés par classify.
     pub(crate) fn differential_local(
         &self,
@@ -408,6 +418,11 @@ mod tests {
         assert!(matches!(f.local_slope_envelope(&wrong,time,[0.;2],[0.;2]),Err(Error::Context)));
         assert!(matches!(f.local_slope_envelope(&ctx,SimTime(0),[0.;2],[0.;2]),Err(Error::Time)));
         assert!(matches!(f.local_slope_envelope(&ctx,time,[-9.;2],[0.;2]),Err(Error::Preparation(_))));
+        let mut pool=[spectral_pressure::SlopeCell::default();4];
+        assert!(matches!(f.partition_slope_envelope(&wrong,time,[0.;2],[0.;2],&mut pool,7),Err(Error::Context)));
+        assert!(matches!(f.partition_slope_envelope(&ctx,SimTime(0),[0.;2],[0.;2],&mut pool,7),Err(Error::Time)));
+        let partition=f.partition_slope_envelope(&ctx,time,[0.;2],[0.1;2],&mut pool,7).unwrap();
+        assert!(partition.bound>=0.0);
         let b = f.local_slope_envelope(&ctx,time,[0.;2],[0.1;2]).unwrap();
         assert!(b.bound>0.);
     }
