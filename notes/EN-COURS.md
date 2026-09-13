@@ -151,7 +151,7 @@ devant 2 ms.
 - [x] **P4** — inégalité conjointe par balayage à une dimension ; sûreté contre le maximum réel de la composition, à plusieurs séparations et instants.
 - [x] **P5** — gain et coût ; traduction en impacts admis.
 - [x] **P6** — décider : ADR et câblage du budget si la borne tient et le prix passe ; sinon constat motivé.
-- [ ] **P7** — document de réception (en-tête ADR-131 D3) ; suite complète `code/`.
+- [x] **P7** — document de réception (en-tête ADR-131 D3) ; suite complète `code/`.
 - [ ] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
@@ -283,3 +283,10 @@ tout de suite, la suite unitaire non.
 Hôte : la scène J1 ne porte qu'**un** impact, donc l'aiguillage ne s'y déclenche pas — `floor`
 0,167438 et 0,162917 aux deux âges, `d_eta_m = 0,000000000`, `VERIFY` 7,2271e-5 m : **identiques à
 S222**. C'est le contrôle qu'il fallait : la voie neuve ne perturbe pas la voie existante.
+
+P7 : [COURONNE-IMPACT-S223](../docs/validation/COURONNE-IMPACT-S223.md) — en-tête ADR-131 D3 ;
+§1 l'inégalité supposée est fausse, et ce que cela dit de `SLOPE_L1_RATIO` ; §2 l'enveloppe par
+couronne et sa réception ; §3 l'inégalité conjointe et sa sûreté **entre** les échantillons ;
+§4 ce qu'elle rend, en gain et en admission ; §5 le coût et le choix de huit intervalles, comparé
+aux 25 s de S222 ; §6 les contrôles. Suite nommée : ce qui reste d'A254 est le terme de pression,
+et les deux termes ont désormais des limites de nature différente.
