@@ -81,7 +81,7 @@ domination au bit sur ADR-136, gain strict sur un rectangle à spectre étalé, 
 bit, décomposition `C_U`/`G(U)` publiée par classe.
 
 - [x] **P1** — jeton et plan seuls.
-- [ ] **P2** — ADR-137 : coupure spectrale, famille de seuils, domination, réserve, limite spatiale.
+- [x] **P2** — ADR-137 : coupure spectrale, famille de seuils, domination, réserve, limite spatiale.
 - [ ] **P3** — construire la passe générique (ordre deux inchangé au bit), ordre `Spectral`, Prepared.
 - [ ] **P4** — tests : couverture, domination, gain strict, identité S220, refus, partition.
 - [ ] **P5** — exemple S221 : décomposition par taille de maille, partitions 2047→32767 ; campagne isolée.
