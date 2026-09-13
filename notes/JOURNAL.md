@@ -10806,3 +10806,32 @@ question du vendoring à l'utilisateur.
 **Rituel.** L284 ; suivis A247 (part W construite, B reste) et A250 (pile recommandée) ; aucun angle
 nouveau. 130 ADR, 250 angles, 284 leçons, 18 invariants, 6 SPEC, 23 cas. velocite.sh : W avance
 en S208 (24 modules). Compteur 0. Invariants relus : I-03, I-06, I-08, I-15 — tenus.
+
+## S209 — 2026-09-13 — Préparation locale de la résolution GPU
+
+**Entrée.** « Reprends le projet ». REPRISE et passation S208 lues ; état réel :
+master et trois copies à 28bf6a5, propres, jeton libre ; cargo 1.97 disponible.
+Plan seul 35de6b9 ; dossier committé en 1bce2a8.
+
+**Sortie.** PREPARATION-HOTE-S209 : manifeste à versions exactes héritées de S208,
+commande de résolution et inventaire nom/version/source/licence/taille/checksum attendu.
+Le verrou ne porte ni licence ni taille : les métadonnées publiques seront nécessaires,
+avec distinction arbre portable / sources Windows et archives / espace extrait.
+
+**Vérification.** Métadonnées de code/ reçues hors réseau : deux membres, cœur sans
+aucune dépendance externe, harnais avec chemin local seulement. Aucun code modifié,
+aucun test numérique rejoué ; 348 réussis/cinq ignorés reste le reçu S208.
+
+**Limite explicite.** ADR-130 D5 et HOTE-GPU-S208 §4 demandent un accord nommé :
+la reprise générale ne le fournit pas. Aucun registre contacté, aucune archive téléchargée,
+aucune application GPU construite. Demande finale : index et métadonnées crates.io pour
+wgpu 30.0.1, winit 0.30.13, pollster 1.0.1 et leur arbre ; sources soumises ensuite.
+
+**Suite S210.** Résoudre dès cet accord, établir liste/licences/tailles, puis obtenir
+l'accord sur les sources et le choix de leur conservation. La construction J1 reste le
+chantier actif ; sillages, J2 et V restent dus selon la feuille de route.
+
+**Rituel.** File active plurielle relue, autres déclencheurs conservés ; aucun nouvel angle
+ou leçon généralisable, aucun ADR changé. I-03/I-06/I-08/I-15 inchangés. Index, feuille
+et REPRISE actualisés. 130 ADR,250 angles,284 leçons,18 invariants,6 SPEC,23 cas.
+Compteur 1 : aucune couche avancée. Jeton libre, copies synchronisées en avance rapide.

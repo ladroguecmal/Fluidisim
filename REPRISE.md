@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 09:16 +02:00
+JETON            : libre
+Battement        : 2026-09-13 09:17 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S209 — préparation locale de la résolution GPU
-Dernière session : S208 — table de Bessel construite (ADR-129) ; pile GPU recommandée (wgpu + winit)
-Session suivante : S209 — hôte GPU de J1 : demander l'autorisation de résolution puis de sources (ADR-130)
-Maillons        : 0 — S208 avance W (code src, velocite.sh)
+Session en cours : aucune
+Dernière session : S209 — dossier de résolution GPU prêt ; aucun téléchargement
+Session suivante : S210 — J1 : résoudre les dépendances après accord nommé, puis soumettre les sources (PREPARATION-HOTE-S209)
+Maillons        : 1 — S209 prépare l'hôte, aucune couche avancée
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 
@@ -259,6 +259,13 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S209 — 2026-09-13 : préparation locale du lot de résolution GPU.**
+Manifeste exact et commandes dans [PREPARATION-HOTE-S209](docs/validation/PREPARATION-HOTE-S209.md).
+Métadonnées du workspace `code/` reçues hors réseau ; aucun registre contacté ni code modifié.
+**Suite S210 : accord nommé sur l'index/métadonnées**, résolution, puis inventaire des sources
+avec licences et tailles avant leur accord. Hôte GPU toujours à construire. Compteur 1.
+130 ADR,250 angles,284 leçons,18 invariants,6 SPEC,23 cas ; reçu numérique S208 inchangé.
 
 **S208 — 2026-09-13 : table de Bessel construite (ADR-129) ; pile GPU recommandée.**
 `RadialTable` dans `radial_impact` : au bit aux nœuds, zéro allocation, refus nommés, image S205

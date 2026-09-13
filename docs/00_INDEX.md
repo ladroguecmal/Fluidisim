@@ -20,6 +20,11 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S209 — 2026-09-13 : [lot de résolution GPU préparé](validation/PREPARATION-HOTE-S209.md).**
+Manifeste et commandes prêts ; aucun téléchargement. Accord sur l'index et les métadonnées
+attendu, puis inventaire exact avant accord sur les sources. Hôte non construit, compteurs
+et reçu numérique S208 inchangés. **Suite S210 : résolution autorisée de J1.**
+
 **S208 — 2026-09-13 : table de Bessel construite (ADR-129) ; pile GPU recommandée.**
 `RadialTable` : au bit aux nœuds, zéro allocation, image à un niveau près du direct ; critère λ/8
 échoué à la naissance, pas de réception λ/16. W ~0,95 ms par image à 2 px. 348/cinq ignorés.

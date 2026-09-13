@@ -1670,7 +1670,12 @@ entrée par entrée. Le fil reprend ci-dessous.
 
 ## File active
 
-Relue en S208, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+Relue en S209, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+
+**Suivi J1 S209 :** [lot de résolution préparé](../validation/PREPARATION-HOTE-S209.md),
+aucun téléchargement. Suite S210 : accord sur index/métadonnées, résolution, puis présentation
+des sources nommées avec licences et tailles. A247/A250 restent ouvertes ; autres lignes
+conservées avec leurs déclencheurs.
 
 *Renommée de « File active S190 » en S193 : le contenu est daté ligne par ligne, le titre
 suivait un numéro de session et vieillissait seul (A185 — un état sans date se lit au

@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S209 — en cours
+Session : S209 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : préparer localement le lot de l'hôte GPU de J1, puis présenter la demande
 nommée de résolution prévue par HOTE-GPU-S208 §4 et ADR-130 D5.
@@ -75,7 +75,7 @@ par le seul message « Reprends le projet ». Maillons 0, suite J1 cohérente av
 - [x] **P2** — préparer un dossier de résolution : manifeste exact, emplacement,
  commandes, contrôles hors réseau et inventaire attendu avant téléchargement des sources.
  Aucun accès au registre ni source externe sans accord.
-- [ ] **P3** — rituel §6 : journal, file active, index, REPRISE, décomptes ; jeton libre,
+- [x] **P3** — rituel §6 : journal, file active, index, REPRISE, décomptes ; jeton libre,
  copies synchronisées et demande de résolution présentée à l'utilisateur.
 
 ### Notes de reprise

@@ -748,3 +748,8 @@ W par image divisé par ~250 à 2 px, image à un niveau près du chemin direct 
 à la naissance, pas de réception λ/16. Hôte GPU : wgpu 30.0.1 + winit 0.30.13, rien téléchargé.
 **Suite S209 : hôte GPU.** 130 ADR,250 angles,284 leçons,18 invariants,6 SPEC,23 cas.
 Voir [ADR-129](docs/adr/ADR-129-chemin-image-de-w-par-table-de-bessel.md), [hôte GPU S208](docs/validation/HOTE-GPU-S208.md).
+
+**S209 — 2026-09-13 : lot de résolution GPU préparé, aucun téléchargement.**
+Manifeste et commandes dans [PREPARATION-HOTE-S209](docs/validation/PREPARATION-HOTE-S209.md).
+Suite S210 : accord index/métadonnées, résolution, puis accord sur les sources exactes.
+Hôte non construit ; compteurs et reçu numérique S208 inchangés.

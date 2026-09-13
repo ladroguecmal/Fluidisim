@@ -58,6 +58,10 @@ densité qui montre l'impact ; chemin d'image de W par table de Bessel décidé 
 recommandée : wgpu 30.0.1 + winit 0.30.13 ([HOTE-GPU-S208](validation/HOTE-GPU-S208.md)).
 
 *Bloquants nommés* :
+
+*S209* : [lot de résolution prêt](validation/PREPARATION-HOTE-S209.md), sans accès au registre ;
+accord index/métadonnées attendu, puis accord sur les sources exactes. Aucun hôte construit.
+
 - ~~**A245**~~ — **levé en S205** (ADR-128) : la mer S201 (Hs 1,5 m) se compose, impact compris,
   zéro refus ; [COMPOSITION-MER-S205](validation/COMPOSITION-MER-S205.md) ;
 - **hôte interactif** — **tranché S207 par l'utilisateur : GPU, hôte séparé** (ADR-130) ; reste à
