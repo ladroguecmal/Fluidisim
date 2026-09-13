@@ -263,9 +263,12 @@ impl Gpu {
             None
         } else {
             Some(device.create_query_set(&wgpu::QuerySetDescriptor {
-                label: Some("water GPU duration"),
+                // S225 : quatre horodatages — eau en 0/1, ciel en 2/3. La trame complète va donc
+                // du début du ciel à la fin de l'eau, et ce que S211–S213 excluaient devient
+                // mesurable au lieu d'être seulement annoncé.
+                label: Some("frame GPU durations"),
                 ty: wgpu::QueryType::Timestamp,
-                count: 2,
+                count: 4,
             }))
         };
         let query_resolve = buffer(
@@ -277,7 +280,7 @@ impl Gpu {
         let query_read = buffer(
             &device,
             "timestamps read",
-            16,
+            32,
             wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_DST,
         );
         let (nx, ny, indices) = Self::grid(&device, width, height);
@@ -401,6 +404,17 @@ impl Gpu {
                     }),
                     stencil_ops: None,
                 }),
+                timestamp_writes: if measure {
+                    self.query
+                        .as_ref()
+                        .map(|q| wgpu::RenderPassTimestampWrites {
+                            query_set: q,
+                            beginning_of_pass_write_index: Some(2),
+                            end_of_pass_write_index: Some(3),
+                        })
+                } else {
+                    None
+                },
                 ..Default::default()
             });
             pass.set_pipeline(&self.sky);
@@ -447,8 +461,8 @@ impl Gpu {
         }
         if measure {
             if let Some(q) = &self.query {
-                encoder.resolve_query_set(q, 0..2, &self.query_resolve, 0);
-                encoder.copy_buffer_to_buffer(&self.query_resolve, 0, &self.query_read, 0, 16);
+                encoder.resolve_query_set(q, 0..4, &self.query_resolve, 0);
+                encoder.copy_buffer_to_buffer(&self.query_resolve, 0, &self.query_read, 0, 32);
             }
         }
         self.queue.submit([encoder.finish()]);
@@ -473,19 +487,35 @@ impl Gpu {
         Ok(data)
     }
     pub fn gpu_ms(&self) -> Result<Option<f64>, String> {
+        Ok(self.gpu_breakdown()?.map(|(water, _)| water))
+    }
+    /// S225 : durée de la passe d'eau **et** de la trame complète — du début du ciel à la fin de
+    /// l'eau —, en millisecondes.
+    ///
+    /// **Lire ces horodatages sérialise.** `read` attend la fin des travaux GPU ; appelée à chaque
+    /// image, elle détruit le recouvrement CPU/GPU et donc la cadence qu'on prétendrait mesurer.
+    /// C'est pourquoi la cadence et la décomposition se mesurent en **deux passages distincts**.
+    pub fn gpu_breakdown(&self) -> Result<Option<(f64, f64)>, String> {
         if self.query.is_none() {
             return Ok(None);
         }
         let b = self.read(&self.query_read)?;
-        let a = u64::from_le_bytes(b[..8].try_into().unwrap());
-        let z = u64::from_le_bytes(b[8..16].try_into().unwrap());
-        Ok(Some(
-            z.checked_sub(a)
-                .filter(|&ticks| ticks > 0)
-                .ok_or("horodatage GPU nul ou inversé")? as f64
-                * self.queue.get_timestamp_period() as f64
-                / 1e6,
-        ))
+        let at = |i: usize| u64::from_le_bytes(b[i * 8..i * 8 + 8].try_into().unwrap());
+        let period = self.queue.get_timestamp_period() as f64 / 1e6;
+        let (water_a, water_z, sky_a) = (at(0), at(1), at(2));
+        let water = water_z
+            .checked_sub(water_a)
+            .filter(|&t| t > 0)
+            .ok_or("horodatage GPU nul ou inversé")? as f64
+            * period;
+        // La trame va du début du ciel à la fin de l'eau : les deux passes sont soumises dans cet
+        // ordre dans le même encodeur.
+        let frame = water_z
+            .checked_sub(sky_a)
+            .filter(|&t| t > 0)
+            .ok_or("horodatage de trame nul ou inversé")? as f64
+            * period;
+        Ok(Some((water, frame)))
     }
     pub fn verify(&self, frame: &mut FrameData<'_>) -> Result<(), String> {
         let points = probes(frame.camera.eye);

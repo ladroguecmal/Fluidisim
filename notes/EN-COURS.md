@@ -109,9 +109,9 @@ fraction du problème, et c'est la découverte de la session.
 ### Plan
 
 - [x] **P1** — jeton, ce qui manque, thèse, critères, prédiction, plan seuls.
-- [ ] **P2** — instrumenter : horodatage de la trame entière, acquisition et présentation séparées, intervalle réel ; mode sans vsync déclaré.
-- [ ] **P3** — mesurer la cadence sur fenêtre ouverte, deux passages, aux deux formats ; publier les distributions.
-- [ ] **P4** — chiffrer les exclusions : part de l'eau dans la trame, coût du ciel, des transferts et de la présentation.
+- [x] **P2** — instrumenter : horodatage de la trame entière, acquisition et présentation séparées, intervalle réel ; mode sans vsync déclaré.
+- [x] **P3** — mesurer la cadence sur fenêtre ouverte, deux passages, aux deux formats ; publier les distributions.
+- [x] **P4** — chiffrer les exclusions : part de l'eau dans la trame, coût du ciel, des transferts et de la présentation.
 - [ ] **P5** — confronter à ADR-125 : 16,67 ms et 2 ms, et dire ce que la scène J1 tient et ne tient pas.
 - [ ] **P6** — document de réception (en-tête ADR-131 D3, rang de passage) ; suite complète `code/`.
 - [ ] **P7** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
@@ -119,3 +119,48 @@ fraction du problème, et c'est la découverte de la session.
 ### Notes de reprise
 
 *(vide : le travail commence en P2)*
+
+P2+P3+P4 : un seul programme instrumenté porte les trois étapes. `Gpu` passe à **quatre**
+horodatages — eau en 0/1, ciel en 2/3 — et `gpu_breakdown` rend la passe d'eau **et** la trame
+complète, du début du ciel à la fin de l'eau. Le mode `--cadence` ouvre une vraie fenêtre en
+**`AutoNoVsync`**, et il le dit dans sa ligne : sous vsync, l'intervalle mesure l'écran et non le
+coût.
+
+**Deux phases, et la séparation n'est pas un confort.** Relire un horodatage appelle
+`poll(wait_indefinitely)`, qui **sérialise** CPU et GPU : mesurer la décomposition à chaque image
+détruit le recouvrement, donc la cadence qu'on prétend mesurer. Phase 1 — 590 images, aucune
+relecture : l'intervalle réel. Phase 2 — 200 images avec relecture : la décomposition, publiée sous
+le nom `DECOMPOSITION_serialisee`, qui n'est **pas** une cadence.
+
+| grandeur | médiane | p95 | max |
+|---|---:|---:|---:|
+| intervalle | **5,0450 ms** (198,2 Hz) | 5,8988 | 6,5087 |
+| CPU de trame | 4,3160 | 5,1743 | 5,8655 |
+| — dont acquisition d'image | **2,2212** | — | 3,9164 |
+| — dont sillage (cœur) | 1,2453 | — | 2,2971 |
+| — dont transfert | 0,2076 | — | 0,4883 |
+| — reste (B, profil, soumission) | 0,6419 | — | — |
+| présentation | 0,5989 | — | 1,8279 |
+| GPU eau | 4,1585 | — | 4,8583 |
+| GPU trame entière | 4,2455 | — | 4,9569 |
+
+**Rang de passage** (L289) : quatre passages, intervalle 4,9187 / 4,9560 / 4,9433 / 5,0450 ms —
+**écart 2,6 %**, et 0,4 % sur le GPU d'eau. C'est bien plus reproductible que les 20 à 40 % que S213
+avait relevés sur son CPU : une mesure prise **sous charge soutenue** ne varie pas comme une mesure
+prise en rafales courtes. À verser à L289.
+
+**La prédiction est confirmée sur une moitié et contredite sur l'autre.**
+
+- **Confirmée, et plus fortement que prédit** : les exclusions de S211–S213 — ciel, transferts,
+  relecture, présentation — ne pèsent **rien** sur le GPU. La part de l'eau dans la trame vaut
+  **0,9795 à 0,9806** sur quatre passages : tout le reste du GPU fait **0,087 ms**. La réserve
+  écrite dans la ligne depuis S211 était honnête et, maintenant, chiffrée : elle ne cachait rien.
+- **Contredite** : j'annonçais 6 à 7 ms de GPU pour la trame complète et ~150 Hz. La trame coûte
+  **4,25 ms** et la cadence atteint **198 à 203 Hz**.
+- **Non prédit, et c'est le fait neuf** : le CPU d'une vraie trame est dominé par **l'attente**.
+  L'acquisition d'image vaut **2,22 ms sur 4,32**, soit **51 %** — et ce n'est pas du travail, c'est
+  la contre-pression du GPU. Le travail réel du CPU fait 2,10 ms. Aucun banc hors écran ne pouvait
+  le voir : `benchmark` dessine sur une texture et n'acquiert jamais rien.
+
+Contrôles : `VERIFY` inchangé (7,2271e-5 m à 16 s), `BENCH` inchangé (GPU eau 4,2037 ms),
+`--smoke` 120 images — les quatre horodatages n'ont pas déplacé les chemins existants.
