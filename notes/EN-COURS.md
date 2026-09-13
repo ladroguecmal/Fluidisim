@@ -77,8 +77,8 @@ lot suivant, sauf dépendance technique indispensable découverte ici.
 
 - [x] **P1** — amorce, état réel, jeton et plan seuls.
 - [x] **P2** — lecture ciblée et choix du contrat géométrique ; ADR remplaçant la disposition incompatible d'ADR-010, oracle et limites déclarés.
-- [>] **P3** — construire le calcul géométrique orienté, sans allocation au pas ; tests indépendants des volumes et plans.
-- [ ] **P4** — brancher le contrat dans V ; activer la régression A266, préserver l'atomicité et les domaines compatibles.
+- [x] **P3** — construire le calcul géométrique orienté, sans allocation au pas ; tests indépendants des volumes et plans.
+- [>] **P4** — brancher le contrat dans V ; activer la régression A266, préserver l'atomicité et les domaines compatibles.
 - [ ] **P5** — réception complète, coût et limites du chemin consommé ; publication concise de la preuve.
 - [ ] **P6** — rituel §6 : journal, file, angles/leçons utiles, trajectoire, index, jeton libre et synchronisation des copies.
 
@@ -97,3 +97,9 @@ inversion du volume coupé, anciennes tables +Z seulement. I-08 amendé explicit
 intermédiaires f64 de V, sans dérogation au déterminisme ; SPEC-001 dérive les fractions et
 SPEC-005 corrige la portée de son test d'étanchéité. Oracle boîte par intégrales séparées, cale
 par sections linéaires indépendantes ; pas de dépendance ajoutée.
+
+P3 : hydro_network::geometry construit. Six tests passent : boîte (10 directions), cale (7
+pentes), forme en L, 24 permutations de sommets, invalides/recouvrements, dalle fine à 3 km.
+Erreurs maximales des oracles imprimées : boîte 3e-9 ml, cale 1e-9 ml (arrondies). Un volume
+2^53+1 ml dans un cube de 3 km est refusé Resolution, au lieu de convertir silencieusement la
+consigne entière. Le domaine de précision générale reste à qualifier au-delà des cas reçus.

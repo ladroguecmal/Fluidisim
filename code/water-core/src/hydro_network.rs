@@ -27,6 +27,9 @@
 
 use crate::SimTime;
 
+#[path = "hydro_geometry.rs"]
+pub mod geometry;
+
 /// Pas de la couche V — 100 ms, 10 Hz (ADR-010 §4, I-10). Aligné sur `T_sim`.
 pub const STEP_US: u64 = 100_000;
 
@@ -51,6 +54,10 @@ pub enum Error {
     Domain,
     /// Un débit calculé n'est pas représentable.
     NonFinite,
+    /// Une table horizontale ne définit pas la géométrie sous cette orientation (ADR-139).
+    Orientation,
+    /// L'inversion géométrique ne tient pas le demi-millilitre de résidu calculé.
+    Resolution,
 }
 
 /// Contenant. L'état est **entier** : `volume_ml`, et rien d'autre.
