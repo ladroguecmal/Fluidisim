@@ -18,10 +18,10 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-13 11:37 +02:00
+JETON            : occupé
+Battement        : 2026-09-13 11:42 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : aucune
+Session en cours : S215 — A254 : le budget de pente est une somme sur les sources ; mesurer avant de décider
 Dernière session : S214 — composition par le cœur exacte au bit (A253 corrigé) ; budget conjoint à 84 % de π/7 pour deux sources (A254, sévérité 1) ; ADR-132, domaine d'image du sillage (A251 traitée)
 Session suivante : S215 — file J1, **A254 d'abord** : le budget de pente est une somme sur les sources et n'a plus que 0,0712 de marge. Mesurer une scène à deux sources, puis décider — resserrer le majorant (rapport mesuré 3,7 à 10,5), composer autrement que par la somme (ADR-119 règle 1 l'interdit sans mesure), ou retirer à `max_slope` son statut de constante de milieu. Ensuite la loi GPU (espace, LOD, visibilité, mutualisation), chaque mesure avec son en-tête (ADR-131 D3)
 Maillons        : 0 — ADR-132 actée (fixe un élément de W, comme ADR-126 en S203) ; aucune ligne de `code/*/src` cette session
