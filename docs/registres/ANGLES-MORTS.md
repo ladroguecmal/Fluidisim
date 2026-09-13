@@ -2936,3 +2936,13 @@ CPU à la même densité), dont le chemin est décidé par ADR-130 : GPU, hôte 
 **Suivi A250 — S208.** Pile recommandée pour l'hôte GPU (HOTE-GPU-S208) : wgpu 30.0.1, winit
 0.30.13, pollster 1.0.1, espace de travail séparé. Rien téléchargé ; A250 reste ouverte jusqu'à un
 hôte qui exerce le GPU et une mesure du budget GPU de l'eau.
+
+**Clôture A250 — S211, 2026-09-13 : chemin GPU exercé et mesuré.** `viewer/` séparé,
+mer B et impact W reçus sous DX12 ; passe eau médiane0,048576 ms à960×540 sur RTX5070 Laptop.
+L'objet « aucun chemin GPU ni mesure » est traité. Cela ne clôt pas J1 : sillage absent,
+cadence complète et budget total encore à recevoir. Voir [HOTE-GPU-S211](../validation/HOTE-GPU-S211.md).
+
+**Suivi A247 — S211 : part B+impact traitée sur le GPU local.** Maximum de hauteur0,077657 mm
+contre3 mm déclarés, passe eau max0,059008 ms à960×540. Le goulot CPU par sommet est retiré
+de l'image ; reste le coût complet CPU/transfert/GPU/présentation et la scène avec sillage.
+Ne pas lire une mesure de passe comme un reçu du profil complet60 images/s / eau2 ms.

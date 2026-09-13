@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 10:02 +02:00
+JETON            : libre
+Battement        : 2026-09-13 10:04 +02:00
 Agent            : Codex (GPT-6 ; fichiers, git et cargo disponibles)
-Session en cours : S211 — construction GPU B/W
-Dernière session : S210 — verrou GPU et inventaire des 254 archives, sources non téléchargées
-Session suivante : S211 — file J1, couches B/W : construire l'hôte GPU après accord sur les sources (DEPENDANCES-HOTE-S210)
-Maillons        : 2 — S209/S210 préparent l'hôte ; suite imposée sur J1 B/W, pas une étude supplémentaire
+Session en cours : aucune
+Dernière session : S211 — hôte GPU B+impact reçu sous DX12, J1 partiel
+Session suivante : S212 — file J1, couche W : intégrer le sillage issu du cœur dans l'hôte GPU, puis recevoir la scène complète (HOTE-GPU-S211)
+Maillons        : 0 — B avancée dans code/water-core/src ; B/W affichés sur GPU
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 
@@ -259,6 +259,12 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S211 — 2026-09-13 : [premier hôte GPU B + impact](docs/validation/HOTE-GPU-S211.md).**
+Fenêtre locale, caméra, pause, témoin ; sources autorisées récupérées, cœur sans dépendance.
+DX12/RTX5070 Laptop : erreur hauteur max0,077657 mm ; passe eau960×540 médiane0,048576 ms.
+349 tests réussis/cinq ignorés. A250 close, A247 partielle ; sillage et coût complet encore dus.
+**Suite S212 : file J1/W, intégrer le sillage au GPU.** 130/250/284/18/6/23 inchangés.
 
 **S210 — 2026-09-13 : résolution GPU autorisée et inventaire complet.**
 `viewer/` séparé, trois versions exactes S208 ; verrou de 254 paquets externes et deux locaux.

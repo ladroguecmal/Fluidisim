@@ -9,6 +9,10 @@ existe pour que le travail survive au changement de conversation, de session et 
   **[`REPRISE.md`](REPRISE.md)**, à lire en entier avant toute action.
 - **Vous cherchez une décision ou une donnée** → [`docs/00_INDEX.md`](docs/00_INDEX.md)
 
+## Afficher la mer
+
+[Lancer l’afficheur GPU et utiliser ses commandes](viewer/README.md).
+
 ## Organisation
 
 ```
@@ -29,6 +33,7 @@ notes/
   JOURNAL.md           historique des sessions et points de reprise
   EN-COURS.md          plan de la session en cours, déclaré avant le travail
 code/                  le harnais et deux δ d'essai — Rust, sans dépendance moteur
+viewer/                hôte GPU séparé — mer et impact interactifs, mode d'emploi local
 ```
 
 ## Règles de tenue
@@ -757,3 +762,9 @@ Hôte non construit ; compteurs et reçu numérique S208 inchangés.
 [Inventaire exact](docs/validation/DEPENDANCES-HOTE-S210.md) : 254 archives, 49 174 790 octets,
 licences et checksums reçus ; viewer/ séparé avec verrou, cible vide seulement.
 Suite S211 : file J1, construire B/W sur GPU après accord des sources. Cœur et compteurs inchangés.
+
+**S211 — 2026-09-13 : [premier hôte GPU B + impact](docs/validation/HOTE-GPU-S211.md).**
+Fenêtre locale, caméra, pause, témoin ; sources autorisées récupérées, cœur sans dépendance.
+DX12/RTX5070 Laptop : erreur hauteur max0,077657 mm ; passe eau960×540 médiane0,048576 ms.
+349 tests réussis/cinq ignorés. A250 close, A247 partielle ; sillage et coût complet encore dus.
+**Suite S212 : file J1/W, intégrer le sillage au GPU.** 130/250/284/18/6/23 inchangés.

@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S211 — en cours
+Session : S211 — terminée
 Agent : Codex (GPT-6 ; fichiers, git et cargo disponibles)
 Objectif : premier hôte GPU B/W de J1 après accord des sources.
 
@@ -74,7 +74,7 @@ Compteur 2 : file J1, couches B/W, construction effective.
 - [x] **P2** — sources verrouillées, API et données GPU B/W depuis le cœur ; réception CPU.
 - [x] **P3** — fenêtre, pipeline GPU, caméra interactive et B+impact ; compilation.
 - [x] **P4** — comparaison GPU/CPU, capture locale, mesures distinctes CPU/GPU et contrôles ciblés.
-- [ ] **P5** — rituel §6, lancement, file active, passation, jeton libre, copies synchronisées.
+- [x] **P5** — rituel §6, lancement, file active, passation, jeton libre, copies synchronisées.
 
 ### Notes de reprise
 
@@ -95,3 +95,7 @@ Modes --verify et --smoke ; Espace pause, R relance, B témoin, flèches déplac
 P4 : DX12 reçu ; découverte multibackend arrêt natif 0xc0000005, cause non isolée.
 Hauteur max 0,077657 mm ; GPU eau 960×540 médiane 0,048576 ms, pas de cadence complète reçue.
 349 tests réussis/cinq ignorés ; fenêtre inspectée et fermée normalement. Voir HOTE-GPU-S211.
+
+P5 : journal, index, README, feuille de route, file plurielle et angles actualisés.
+A250 close ; A247 partielle. S212 porte W/sillage, J1 reste partiel. Compteur0.
+Jeton libre ; avance rapide des trois copies après commit final, aucune copie créée.

@@ -20,6 +20,12 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S211 — 2026-09-13 : [premier hôte GPU B + impact](validation/HOTE-GPU-S211.md).**
+Fenêtre locale, caméra, pause, témoin ; sources autorisées récupérées, cœur sans dépendance.
+DX12/RTX5070 Laptop : erreur hauteur max0,077657 mm ; passe eau960×540 médiane0,048576 ms.
+349 tests réussis/cinq ignorés. A250 close, A247 partielle ; sillage et coût complet encore dus.
+**Suite S212 : file J1/W, intégrer le sillage au GPU.** 130/250/284/18/6/23 inchangés.
+
 **S210 — 2026-09-13 : [dépendances GPU résolues et inventoriées](validation/DEPENDANCES-HOTE-S210.md).**
 254 archives, 49 174 790 octets, licences et checksums reçus ; sources non téléchargées.
 `viewer/` séparé avec verrou ; cible vide seulement, cœur inchangé. Suite S211 : file J1,

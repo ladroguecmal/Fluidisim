@@ -66,14 +66,19 @@ accord index/métadonnées attendu, puis accord sur les sources exactes. Aucun h
 [254 archives inventoriées](validation/DEPENDANCES-HOTE-S210.md), 49 174 790 octets portables.
 Accord des sources et choix cache/vendoring attendus ; cible vide, aucun hôte construit.
 
+*S211* : sources autorisées récupérées, **hôte B+impact construit et exercé sur DX12** ;
+voir [réception GPU](validation/HOTE-GPU-S211.md). Erreur max0,077657 mm ; passe eau960×540
+médiane0,048576 ms. **A250 close pour le chemin GPU**. Sillage absent et cadence complète
+non mesurée : J1 reste partiel. Suite : intégrer le sillage issu du cœur, puis recevoir la scène.
+
 - ~~**A245**~~ — **levé en S205** (ADR-128) : la mer S201 (Hs 1,5 m) se compose, impact compris,
   zéro refus ; [COMPOSITION-MER-S205](validation/COMPOSITION-MER-S205.md) ;
-- **hôte interactif** — **tranché S207 par l'utilisateur : GPU, hôte séparé** (ADR-130) ; reste à
-  construire, dépendances soumises à autorisation nommée au début du lot ;
+- **hôte interactif** — **tranché S207 par l'utilisateur : GPU, hôte séparé** (ADR-130) ; **construit B+impact en S211**, dépendances autorisées ; reste le sillage et la réception complète ;
 - **A247** — **mesuré en S206** ([COUT-IMAGE-S206](validation/COUT-IMAGE-S206.md)) : à la
   densité qui montre l'impact, l'image coûte 280 ms sur un fil et 36 ms sur seize. W n'est plus
   le goulot avec la table de Bessel précalculée (ADR-129, facteur 100) ; **B évalué par sommet sur
-  CPU l'est** (1,2–1,3 µs). Incompatibilité posée en arbitrage §4, pas contournée ;
+  CPU l'est** (1,2–1,3 µs). **S211 : retiré du chemin d'image CPU**, passe GPU B+impact mesurée ;
+  A247 reste partielle tant que le coût complet et le sillage ne sont pas reçus ;
 
 *Bancs qui tranchent à ce jalon* : **B1** (nombre de composantes et coût de B, dès qu'un LOD
 existe dans l'hôte) ; **B2** partiel (représentation de W, dès que le coût B+W par image est
@@ -145,8 +150,8 @@ Les protocoles restent ceux de [PLAN-BENCHMARK](validation/PLAN-BENCHMARK.md).
 | arbitrage | pourquoi il est explicite | qui tranche |
 |---|---|---|
 | ~~Chemin de rendu et hôte de J1~~ — **tranché S207 : (A) GPU, hôte séparé** ([ADR-130](adr/ADR-130-rendu-j1-sur-gpu-par-un-hote-separe.md)) *(fusionnait « hôte interactif » et A247, S206)* | Mesuré : B sur CPU coûte 42 ms par image à la densité qui montre l'impact (2 px), 36 ms sur 16 fils ; W est ramené à 27 µs par impact (ADR-129). Options : **(A)** hôte séparé qui évalue B et les tables W sur **GPU** — prévu par ADR-003 et I-08 (« seules des phases repliées passent au GPU ») et par `gpu_sim_ms = 2,5` d'ADR-012 ; `water-core` reste sans dépendance, l'hôte en a (téléchargement) ; **(B)** CPU seul sans dépendance — exige B vectorisé (non mesuré), un groupe de fils persistant, et que les 2 ms se comptent en **temps mur sur tous les cœurs**, ce qu'ADR-125 ne dit pas ; **(C)** changer le profil ADR-125 (fréquence ou temps eau) ; **(D)** grille à 8 px — **perd les anneaux**, donc retire l'impact visible | **l'utilisateur** — a retenu (A) |
-| **Dépendances de l'hôte GPU** *(S207 ; recommandation S208)* | ADR-130 : aucune bibliothèque téléchargée sans autorisation nommée. S208 recommande wgpu 30.0.1, winit 0.30.13, pollster 1.0.1 ; demande en deux temps — résolution de l'arbre (index), puis sources ; vendoring ou non | **l'utilisateur**, au début de S209 |
-| **Budget GPU de l'eau** *(S207)* | ADR-125 ne dit pas où l'eau s'évalue ; ADR-012 déclarait `gpu_sim_ms = 2,5` ; aucune valeur inventée | la première mesure de l'hôte GPU ; arbitrage explicite si incompatible |
+| ~~Dépendances de l'hôte GPU~~ **autorisées S210/S211**, sources récupérées, cache local/verrou versionné *(état initial S207/S208)* | ADR-130 : aucune bibliothèque téléchargée sans autorisation nommée. S208 recommande wgpu 30.0.1, winit 0.30.13, pollster 1.0.1 ; demande en deux temps — résolution de l'arbre (index), puis sources ; vendoring ou non | **l'utilisateur** — accords reçus |
+| **Budget GPU de l'eau** *(S207)* | ADR-125 ne dit pas où l'eau s'évalue ; ADR-012 déclarait `gpu_sim_ms = 2,5` ; aucune valeur inventée | **S211 : passe GPU locale mesurée**, budget complet encore à recevoir ; arbitrage si incompatible |
 | ~~A247 — coût d'un impact visible~~ | **mesuré S206** ; part technique tranchée par ADR-129, part d'arbitrage fusionnée ci-dessus | — |
 | ~~A245 — mer composable~~ | **tranché S205, ADR-128** : B hors du budget de refus, bits publiés inchangés | — |
 

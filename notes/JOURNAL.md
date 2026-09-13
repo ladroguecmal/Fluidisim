@@ -10865,3 +10865,39 @@ au choix de l'utilisateur. Sillages dus pour J1, J2 et V maintenus selon ADR-127
 Aucun nouvel ADR, angle ou leçon ; I-03/I-06/I-08/I-15 inchangés. 130 ADR,250 angles,
 284 leçons,18 invariants,6 SPEC,23 cas. Compteur 2, aucune couche avancée par un binaire
 vide : la suite nomme explicitement J1 B/W. Jeton libre et copies avancées sur master.
+
+## S211 — 2026-09-13 — Premier hôte GPU B + impact
+
+**Entrée.** « oui » aux 254 sources S210, cache Cargo local et verrou versionné ; puis
+« continue ». master et trois copies propres à de63a00. Plan seul aa1ecd3, P2 999dba6,
+P3 e85a564, P4 fc9c0ba. Sources autorisées récupérées ; aucune extension de l'arbre.
+
+**Sorties.** `Background::render_components` publie les phases repliées et vecteurs d'onde
+sans allocation, avec refus atomiques. `viewer/` séparé affiche la mer S201 et l'impact
+S203/S205, shader commun calcul/rendu, caméra, pause, relance, témoin, capture et mesures.
+Mode d'emploi dans viewer/README ; protocole et résultats dans HOTE-GPU-S211.
+
+**Réception.** 349 tests réussis/cinq ignorés, aucun échec ; compilation release hors réseau.
+Sur RTX5070 Laptop/DX12 : hauteur max0,077657 mm contre3 mm déclarés ; pente max0,000123650.
+640×360 : GPU eau médiane0,018304 ms ; 960×540 :0,048576 ms, max0,059008 ms.
+CPU préparation/transfert/soumission médiane0,470200/0,460600 ms, maxima2,109700/1,953400 ms.
+La passe d'eau exclut ciel, transferts et présentation ; **pas de réception 60 images/s / eau
+complète2 ms**. Deux captures locales inspectées. Fenêtre ouverte, commandes exercées,
+agrandissement observé et fermeture Échap reçue, rotation droite non testée.
+
+**Défaut rencontré.** Instance multibackend : arrêt natif0xc0000005 ; DX12 seul réussit.
+Windows sélectionne DX12 ; cause exacte non isolée, autres plateformes non reçues.
+La mise à jour des cases P4 par Set-Content -NoNewline a échoué : corrigée immédiatement
+et incluse dans le commit P4 amendé avant toute poursuite. Utiliser apply_patch ici.
+
+**Limites et suite.** Sillage absent : **S212, file J1/W, intégrer le sillage du cœur au GPU**,
+comparer au CPU et mesurer la scène complète. Angles rasants/caméra, cadence, allocations
+de la pile graphique et seconde cible restent ouverts ; J2/δ général et V restent dus.
+A250 close pour son objet (chemin GPU enfin exercé et mesuré) ; A247 partiellement traitée,
+coût complet encore à recevoir. Aucun nouvel angle ou leçon indépendante des existants.
+
+**Rituel.** File plurielle entière relue, autres déclencheurs conservés. I-03/I-15 : GPU
+cosmétique sans autorité ; I-08 : phases repliées, domaine local ; I-06 : méthode cœur reçue,
+pile graphique non reçue, aucune prétention de production. Aucun invariant ni ADR changé.
+130 ADR,250 angles,284 leçons,18 invariants,6 SPEC,23 cas. Compteur0 : couche B avancée dans
+code/water-core/src et B/W affichés. Jeton libéré ; copies à avancer après ce commit final.
