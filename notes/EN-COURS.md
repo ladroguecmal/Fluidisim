@@ -82,10 +82,17 @@ seul balayage. Raffiner recherche spatiale et quadrature avant d'interpréter un
 
 - [x] **P1** — jeton, thèse et plan seuls.
 - [x] **P2** — lectures ciblées, dérivation des groupes et protocole de campagne reproductible.
-- [ ] **P3** — instrument et campagne : similitudes, variations indépendantes, contrôles de résolution et forçage.
+- [x] **P3** — instrument et campagne : similitudes, variations indépendantes, contrôles de résolution et forçage.
 - [ ] **P4** — publier le verdict et ses limites ; construire seulement ce que les preuves autorisent.
 - [ ] **P5** — rituel de fin §6, file plurielle, journal, index, jeton libre et copies synchronisées.
 
 ### Notes de reprise
 
 Les reçus S216 restent ceux de la session précédente : 356 tests réussis et cinq ignorés.
+P3 : 54 mesures initiales et neuf contrôles. À tau=4, 256×512/pas0,5 :
+base1,637275, lent2,272143, long2,005464 ; écart de maximum128→256 <0,002 %.
+Homothéties conservées à ~1e-6 du rapport imprimé, charge et découpage aussi.
+Reconstruction/cœur max2,383e-6, sous1e-5. Deux tests d'instrument réussis en release.
+La réponse libre mélange eta et vitesse : son module eta n'est pas invariant ;
+test mono-mode reçu avec énergie conservée. Correction documentaire nécessaire en P4.
+La suite workspace est encore en cours (sortie code/target/s217-workspace-tests.log).

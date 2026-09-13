@@ -1,0 +1,59 @@
+# Relevé brut S217
+
+```text
+S217 offline prepared + render_components + f64 grid; no GPU/LOD/visibility/sharing; no timing claim
+base phase=after a=1 v=3 D=8.000000 tau=0.000000 age=8.000000 R=64 A=128 h=1 bound=0.122009255 peak=0.085966124 ratio=1.419271 x=9.5500 y=0.0000 core_error=5.966e-8 image_horizon=18.5313 inside_time=true
+base phase=after a=1 v=3 D=8.000000 tau=4.000001 age=9.806095 R=64 A=128 h=1 bound=0.115171090 peak=0.070323104 ratio=1.637742 x=9.2000 y=0.0000 core_error=3.490e-8 image_horizon=18.5313 inside_time=true
+base phase=after a=1 v=3 D=8.000000 tau=12.000001 age=13.418284 R=64 A=128 h=1 bound=0.116167679 peak=0.057021842 ratio=2.037249 x=14.3000 y=0.0000 core_error=1.072e-7 image_horizon=18.5313 inside_time=true
+base phase=after a=1 v=3 D=8.000000 tau=23.999999 age=18.836567 R=64 A=128 h=1 bound=0.116219424 peak=0.044552853 ratio=2.608574 x=24.9000 y=0.0000 core_error=6.790e-8 image_horizon=18.5313 inside_time=false
+base phase=forcing a=1 v=3 D=8.000000 tau=-13.288341 age=2.000000 R=64 A=128 h=1 bound=0.082825258 peak=0.064452457 ratio=1.285060 x=-9.0000 y=0.0000 core_error=3.251e-7 image_horizon=18.5313 inside_time=true
+base phase=forcing a=1 v=3 D=8.000000 tau=-4.429447 age=6.000000 R=64 A=128 h=1 bound=0.119596176 peak=0.095660911 ratio=1.250209 x=3.5000 y=0.0000 core_error=1.928e-7 image_horizon=18.5313 inside_time=true
+scale_half phase=after a=0.5 v=2.121320343559643 D=5.656856 tau=0.000000 age=5.656856 R=64 A=128 h=0.5 bound=0.122009292 peak=0.085966099 ratio=1.419272 x=4.7750 y=0.0000 core_error=1.143e-7 image_horizon=13.1036 inside_time=true
+scale_half phase=after a=0.5 v=2.121320343559643 D=5.656856 tau=4.000001 age=6.933958 R=64 A=128 h=0.5 bound=0.115171060 peak=0.070323082 ratio=1.637742 x=4.6000 y=0.0000 core_error=4.773e-8 image_horizon=13.1036 inside_time=true
+scale_half phase=after a=0.5 v=2.121320343559643 D=5.656856 tau=12.000000 age=9.488161 R=64 A=128 h=0.5 bound=0.116167672 peak=0.057021841 ratio=2.037249 x=7.1500 y=0.0000 core_error=2.985e-8 image_horizon=13.1036 inside_time=true
+scale_half phase=after a=0.5 v=2.121320343559643 D=5.656856 tau=23.999999 age=13.319466 R=64 A=128 h=0.5 bound=0.116219386 peak=0.044552834 ratio=2.608575 x=12.4500 y=0.0000 core_error=7.489e-8 image_horizon=13.1036 inside_time=false
+scale_half phase=forcing a=0.5 v=2.121320343559643 D=5.656856 tau=-13.288345 age=1.414214 R=64 A=128 h=0.5 bound=0.082825266 peak=0.064452475 ratio=1.285059 x=-4.5000 y=0.0000 core_error=3.143e-7 image_horizon=13.1036 inside_time=true
+scale_half phase=forcing a=0.5 v=2.121320343559643 D=5.656856 tau=-4.429448 age=4.242642 R=64 A=128 h=0.5 bound=0.119596191 peak=0.095660881 ratio=1.250210 x=1.7500 y=0.0000 core_error=1.671e-7 image_horizon=13.1036 inside_time=true
+scale_double phase=after a=2 v=4.242640687119286 D=11.313708 tau=0.000000 age=11.313708 R=64 A=128 h=2 bound=0.122009240 peak=0.085966113 ratio=1.419271 x=19.1000 y=0.0000 core_error=5.441e-8 image_horizon=26.2071 inside_time=true
+scale_double phase=after a=2 v=4.242640687119286 D=11.313708 tau=3.999999 age=13.867911 R=64 A=128 h=2 bound=0.115171045 peak=0.070323070 ratio=1.637742 x=18.4000 y=0.0000 core_error=3.404e-8 image_horizon=26.2071 inside_time=true
+scale_double phase=after a=2 v=4.242640687119286 D=11.313708 tau=12.000000 age=18.976318 R=64 A=128 h=2 bound=0.116167665 peak=0.057021838 ratio=2.037249 x=28.6000 y=0.0000 core_error=1.223e-7 image_horizon=26.2071 inside_time=true
+scale_double phase=after a=2 v=4.242640687119286 D=11.313708 tau=24.000001 age=26.638929 R=64 A=128 h=2 bound=0.116219394 peak=0.044552843 ratio=2.608574 x=49.8000 y=0.0000 core_error=9.923e-8 image_horizon=26.2071 inside_time=false
+scale_double phase=forcing a=2 v=4.242640687119286 D=11.313708 tau=-13.288340 age=2.828427 R=64 A=128 h=2 bound=0.082825258 peak=0.064452453 ratio=1.285060 x=-18.0000 y=0.0000 core_error=3.215e-7 image_horizon=26.2071 inside_time=true
+scale_double phase=forcing a=2 v=4.242640687119286 D=11.313708 tau=-4.429447 age=8.485281 R=64 A=128 h=2 bound=0.119596153 peak=0.095660904 ratio=1.250209 x=7.0000 y=0.0000 core_error=1.853e-7 image_horizon=26.2071 inside_time=true
+load_half phase=after a=1 v=3 D=8.000000 tau=0.000000 age=8.000000 R=64 A=128 h=1 bound=0.061004627 peak=0.042983062 ratio=1.419271 x=9.5500 y=0.0000 core_error=2.983e-8 image_horizon=18.5313 inside_time=true
+load_half phase=after a=1 v=3 D=8.000000 tau=4.000001 age=9.806095 R=64 A=128 h=1 bound=0.057585545 peak=0.035161552 ratio=1.637742 x=9.2000 y=0.0000 core_error=1.745e-8 image_horizon=18.5313 inside_time=true
+load_half phase=after a=1 v=3 D=8.000000 tau=12.000001 age=13.418284 R=64 A=128 h=1 bound=0.058083840 peak=0.028510921 ratio=2.037249 x=14.3000 y=0.0000 core_error=5.358e-8 image_horizon=18.5313 inside_time=true
+load_half phase=after a=1 v=3 D=8.000000 tau=23.999999 age=18.836567 R=64 A=128 h=1 bound=0.058109712 peak=0.022276426 ratio=2.608574 x=24.9000 y=0.0000 core_error=3.395e-8 image_horizon=18.5313 inside_time=false
+load_half phase=forcing a=1 v=3 D=8.000000 tau=-13.288341 age=2.000000 R=64 A=128 h=1 bound=0.041412629 peak=0.032226229 ratio=1.285060 x=-9.0000 y=0.0000 core_error=1.625e-7 image_horizon=18.5313 inside_time=true
+load_half phase=forcing a=1 v=3 D=8.000000 tau=-4.429447 age=6.000000 R=64 A=128 h=1 bound=0.059798088 peak=0.047830455 ratio=1.250209 x=3.5000 y=0.0000 core_error=9.640e-8 image_horizon=18.5313 inside_time=true
+split phase=after a=1 v=3 D=8.000000 tau=0.000000 age=8.000000 R=64 A=128 h=1 bound=0.122009240 peak=0.085966122 ratio=1.419271 x=9.5500 y=0.0000 core_error=6.094e-8 image_horizon=18.5313 inside_time=true
+split phase=after a=1 v=3 D=8.000000 tau=4.000001 age=9.806095 R=64 A=128 h=1 bound=0.115171082 peak=0.070323103 ratio=1.637742 x=9.2000 y=0.0000 core_error=3.276e-8 image_horizon=18.5313 inside_time=true
+split phase=after a=1 v=3 D=8.000000 tau=12.000001 age=13.418284 R=64 A=128 h=1 bound=0.116167672 peak=0.057021841 ratio=2.037249 x=14.3000 y=0.0000 core_error=9.311e-8 image_horizon=18.5313 inside_time=true
+split phase=after a=1 v=3 D=8.000000 tau=23.999999 age=18.836567 R=64 A=128 h=1 bound=0.116219424 peak=0.044552851 ratio=2.608574 x=24.9000 y=0.0000 core_error=6.672e-8 image_horizon=18.5313 inside_time=false
+split phase=forcing a=1 v=3 D=8.000000 tau=-13.288341 age=2.000000 R=64 A=128 h=1 bound=0.082825258 peak=0.064452456 ratio=1.285060 x=-9.0000 y=0.0000 core_error=3.261e-7 image_horizon=18.5313 inside_time=true
+split phase=forcing a=1 v=3 D=8.000000 tau=-4.429447 age=6.000000 R=64 A=128 h=1 bound=0.119596191 peak=0.095660910 ratio=1.250210 x=3.5000 y=0.0000 core_error=1.716e-7 image_horizon=18.5313 inside_time=true
+slow phase=after a=1 v=1.5 D=8.000000 tau=0.000000 age=8.000000 R=64 A=128 h=1 bound=0.040687840 peak=0.025948937 ratio=1.567996 x=0.0500 y=2.0000 core_error=1.891e-8 image_horizon=18.5313 inside_time=true
+slow phase=after a=1 v=1.5 D=8.000000 tau=4.000001 age=9.806095 R=64 A=128 h=1 bound=0.032634243 peak=0.014352005 ratio=2.273846 x=1.6000 y=4.3000 core_error=1.218e-8 image_horizon=18.5313 inside_time=true
+slow phase=after a=1 v=1.5 D=8.000000 tau=12.000001 age=13.418284 R=64 A=128 h=1 bound=0.033152394 peak=0.011579465 ratio=2.863033 x=5.4000 y=7.8000 core_error=7.201e-9 image_horizon=18.5313 inside_time=true
+slow phase=after a=1 v=1.5 D=8.000000 tau=23.999999 age=18.836567 R=64 A=128 h=1 bound=0.032832049 peak=0.007965188 ratio=4.121943 x=12.9000 y=15.8000 core_error=6.397e-9 image_horizon=18.5313 inside_time=false
+slow phase=forcing a=1 v=1.5 D=8.000000 tau=-13.288341 age=2.000000 R=64 A=128 h=1 bound=0.059151880 peak=0.042775359 ratio=1.382849 x=-10.6000 y=0.0000 core_error=1.268e-7 image_horizon=18.5313 inside_time=true
+slow phase=forcing a=1 v=1.5 D=8.000000 tau=-4.429447 age=6.000000 R=64 A=128 h=1 bound=0.052456446 peak=0.036320791 ratio=1.444254 x=-0.9000 y=0.0000 core_error=1.201e-7 image_horizon=18.5313 inside_time=true
+fast phase=after a=1 v=6 D=8.000000 tau=0.000000 age=8.000000 R=64 A=128 h=1 bound=0.099678829 peak=0.045539025 ratio=2.188866 x=33.2000 y=-1.9000 core_error=9.141e-8 image_horizon=18.5313 inside_time=true
+fast phase=after a=1 v=6 D=8.000000 tau=4.000001 age=9.806095 R=64 A=128 h=1 bound=0.097427770 peak=0.041546712 ratio=2.345018 x=34.4500 y=-4.0000 core_error=2.634e-8 image_horizon=18.5313 inside_time=true
+fast phase=after a=1 v=6 D=8.000000 tau=12.000001 age=13.418284 R=64 A=128 h=1 bound=0.097417861 peak=0.041871213 ratio=2.326607 x=34.4500 y=9.6500 core_error=3.325e-8 image_horizon=18.5313 inside_time=true
+fast phase=after a=1 v=6 D=8.000000 tau=23.999999 age=18.836567 R=64 A=128 h=1 bound=0.097304516 peak=0.034258742 ratio=2.840283 x=40.5000 y=19.1000 core_error=2.921e-8 image_horizon=18.5313 inside_time=false
+fast phase=forcing a=1 v=6 D=8.000000 tau=-13.288341 age=2.000000 R=64 A=128 h=1 bound=0.065276377 peak=0.043708055 ratio=1.493463 x=-2.7500 y=1.9000 core_error=6.462e-8 image_horizon=18.5313 inside_time=true
+fast phase=forcing a=1 v=6 D=8.000000 tau=-4.429447 age=6.000000 R=64 A=128 h=1 bound=0.092670247 peak=0.045564705 ratio=2.033816 x=21.2000 y=1.9000 core_error=3.765e-8 image_horizon=18.5313 inside_time=true
+short phase=after a=1 v=3 D=4.000000 tau=0.000000 age=4.000000 R=64 A=128 h=1 bound=0.112537660 peak=0.097429583 ratio=1.155067 x=-2.6500 y=0.0000 core_error=6.894e-8 image_horizon=18.5313 inside_time=true
+short phase=after a=1 v=3 D=4.000000 tau=4.000001 age=5.806095 R=64 A=128 h=1 bound=0.103632569 peak=0.071391969 ratio=1.451600 x=0.0000 y=0.0000 core_error=1.801e-7 image_horizon=18.5313 inside_time=true
+short phase=after a=1 v=3 D=4.000000 tau=12.000001 age=9.418284 R=64 A=128 h=1 bound=0.105548464 peak=0.046344002 ratio=2.277500 x=5.0500 y=0.0000 core_error=4.569e-8 image_horizon=18.5313 inside_time=true
+short phase=after a=1 v=3 D=4.000000 tau=23.999999 age=14.836567 R=64 A=128 h=1 bound=0.105430380 peak=0.033075858 ratio=3.187533 x=15.7500 y=0.0000 core_error=1.564e-7 image_horizon=18.5313 inside_time=true
+short phase=forcing a=1 v=3 D=4.000000 tau=-6.644170 age=1.000000 R=64 A=128 h=1 bound=0.057751402 peak=0.041870654 ratio=1.379281 x=-9.3500 y=-1.6000 core_error=6.010e-8 image_horizon=18.5313 inside_time=true
+short phase=forcing a=1 v=3 D=4.000000 tau=-2.214723 age=3.000000 R=64 A=128 h=1 bound=0.101846114 peak=0.086852322 ratio=1.172635 x=-5.8000 y=0.0000 core_error=9.472e-8 image_horizon=18.5313 inside_time=true
+long phase=after a=1 v=3 D=16.000000 tau=0.000000 age=16.000000 R=64 A=128 h=1 bound=0.141372129 peak=0.086913959 ratio=1.626576 x=33.5000 y=0.0000 core_error=1.571e-7 image_horizon=18.5313 inside_time=true
+long phase=after a=1 v=3 D=16.000000 tau=4.000001 age=17.806095 R=64 A=128 h=1 bound=0.134346545 peak=0.066971006 ratio=2.006040 x=36.2500 y=0.0000 core_error=8.017e-8 image_horizon=18.5313 inside_time=true
+long phase=after a=1 v=3 D=16.000000 tau=12.000001 age=21.418284 R=64 A=128 h=1 bound=0.134840071 peak=0.051766890 ratio=2.604755 x=41.3500 y=0.0000 core_error=5.430e-9 image_horizon=18.5313 inside_time=false
+long phase=after a=1 v=3 D=16.000000 tau=23.999999 age=26.836567 R=64 A=128 h=1 bound=0.135186255 peak=0.039316178 ratio=3.438438 x=40.4000 y=0.0000 core_error=9.749e-8 image_horizon=18.5313 inside_time=false
+long phase=forcing a=1 v=3 D=16.000000 tau=-26.576682 age=4.000000 R=64 A=128 h=1 bound=0.112537660 peak=0.097429585 ratio=1.155067 x=-2.6500 y=0.0000 core_error=7.359e-8 image_horizon=18.5313 inside_time=true
+long phase=forcing a=1 v=3 D=16.000000 tau=-8.858894 age=12.000000 R=64 A=128 h=1 bound=0.136570826 peak=0.089775788 ratio=1.521243 x=21.5000 y=0.0000 core_error=1.811e-7 image_horizon=18.5313 inside_time=true
+```
