@@ -73,7 +73,7 @@ Réponse reçue par la question structurée, après le commit de S206 : option (
 ### Plan
 
 - [x] **P1** — état réel, plan seul.
-- [ ] **P2** — ADR-130 : décision de l'utilisateur (chemin de rendu J1 sur GPU, hôte séparé) ;
+- [x] **P2** — ADR-130 : décision de l'utilisateur (chemin de rendu J1 sur GPU, hôte séparé) ;
  conséquences techniques déléguées (hôte hors du workspace sans dépendance, `water-core` inchangé
  sous ADR-020, données publiées vers le GPU selon I-08) ; ce qui reste ouvert (budget GPU de
  l'eau, pile exacte, permission de téléchargement). Notes datées ADR-125 et ADR-020 si touchés.
@@ -83,3 +83,8 @@ Réponse reçue par la question structurée, après le commit de S206 : option (
 ### Notes de reprise
 
 Formulation de la question et des options : S206, FEUILLE-DE-ROUTE §4 avant cette session.
+
+P2 : ADR-130 actée (choix de l'utilisateur : GPU, hôte séparé ; `water-core` sans dépendance
+publie ce que le GPU consomme ; hôte hors du workspace sans réseau ; cosmétique ; aucune
+dépendance sans autorisation nommée ; budget GPU et pile ouverts). Note datée ADR-125. ADR-020
+non touché : il prévoyait déjà `IGpuBackend` fourni par l'hôte.

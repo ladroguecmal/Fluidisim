@@ -49,3 +49,11 @@ bornés, et S199-2/S200-1 sont sur le chemin de δ. Le profil lui-même — 60 i
 est **inchangé et acquis**. Précision de portée : « une configuration dépassant déjà 2 ms est
 incompatible avec ce profil » constate une incompatibilité ; elle n'autorise pas à retirer une
 fonctionnalité. Toute incompatibilité donne lieu à un arbitrage explicite (ADR-127 D7).
+
+## Note datée du 2026-09-13 (S207) — ADR-130
+
+Le profil est **inchangé**. Par arbitrage de l'utilisateur, la version interactive J1 évalue l'eau
+sur **GPU** dans un hôte séparé ([ADR-130](ADR-130-rendu-j1-sur-gpu-par-un-hote-separe.md)) : les
+options « compter les 2 ms en temps mur sur tous les cœurs » et « changer le profil » n'ont pas
+été retenues. La répartition CPU/GPU des 2 ms n'est pas fixée ici ; la première mesure de l'hôte
+GPU la confrontera au profil.
