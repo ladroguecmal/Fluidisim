@@ -4630,3 +4630,22 @@ composition produisaient leurs verdicts avec des mers de 1 à 10 cm, choisies po
 mécanisme, et aucun ne pouvait voir qu'une mer de jeu dépassait seule la limite. Un essai qui
 isole un mécanisme doit être accompagné d'**un point à paramètres du produit** — pas pour tester
 le mécanisme, pour tester que le mécanisme laisse passer le produit. Voir A249.
+
+## L283 — Un coût unitaire ne se confronte à un budget qu'à travers la charge que l'observateur exige
+
+*(S206)* S203 avait mesuré 14 µs par point B+W et écrit « environ 140 points dans 2 ms ». Le
+nombre était juste, et il ne disait rien : combien de points l'image demande-t-elle ? S206 l'a
+dérivé de l'observateur — deux échantillons par plus courte longueur d'onde visible, soit un
+sommet tous les 2,75 px au point d'impact — et la charge est de 36 000 sommets, dont 86 % dans
+l'emprise parce qu'une grille projetée est dense là où l'observateur regarde. À cette charge, le
+coût unitaire donne 280 ms ; à une charge choisie pour être confortable, 17 ms.
+
+Ce qui généralise : **un budget ne se confronte ni à un coût par point, ni à une charge choisie,
+mais à la charge dérivée de ce qui doit rester visible**. Une densité réduite n'est pas une
+dégradation neutre si elle passe sous la fréquence de ce qu'on voulait montrer : elle retire la
+fonctionnalité en silence, ce qu'ADR-127 interdit.
+
+Le geste : avant toute campagne de coût, écrire la chaîne observateur → plus courte longueur
+d'onde à conserver → densité de Nyquist → nombre de points, et mesurer **à** cette densité ; les
+densités plus lâches se publient comme bornes basses, jamais comme options. Et vérifier où tombe
+la charge : ici, dans l'emprise la plus chère. Voir COUT-IMAGE-S206 §2, A250.

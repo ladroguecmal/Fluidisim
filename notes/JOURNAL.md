@@ -10704,3 +10704,46 @@ puis **arbitrage explicite** (ADR-127 D7). L'hôte interactif attend toujours l'
 corollaire plutôt qu'une leçon quasi dupliquée. 128 ADR, 249 angles, 282 leçons, 18 invariants,
 6 SPEC, 23 cas. I-18 relu : désormais tenu pour B. velocite.sh : B et W avancent en S205, δ S202,
 V jamais. Compteur 0 (code `src`). Feuille de route : J1 perd A245. File active entière relue.
+
+## S206 — 2026-09-13 — Ce que l'eau coûte par image : W se divise par cent, B sur CPU ne tient pas
+
+**Entrée.** « Enchaîne sur S206 ». État réel : master et trois copies à ef447fc, propres ; jeton
+libre depuis 02:06. Arbitrage de l'hôte interactif toujours sans réponse. Plan seul c13d968, avec
+la **scène représentative déclarée avant mesure** : observateur S201, mer S201 Hs 1,5, impact
+S203 à +3 s, chemin hôte ; charge = grille de sommets projetée à 8, 4 et 2 px.
+
+**Mesure.** Banc `frame_cost.rs`, qui inclut `render_impact.rs` comme module plutôt que de
+recopier la scène. Un fil : 2 240 / 9 044 / 36 160 sommets, dont 86 % dans l'emprise ; image
+17–18 / 72–74 / 280–293 ms ; **B seul dépasse 2 ms dès 8 px**. Densité exigée par l'observateur
+au point d'impact : c ≤ 5,8 px pour B, ≤ 2,75 px pour les anneaux — la grille à 8 px perd
+l'impact. Parallélisme (fils lancés dans l'image) : 3,6 / 10,0 / 36,2 ms à 16 fils, accélération
+plafonnant vers ×8, bits identiques dans les quinze cas ; lancement seul 1,2–1,6 ms. Table de
+Bessel précalculée (noyau N×M sur tableaux de la bonne taille) : **0,027 ms par impact et par
+image**, 502 Ko, erreur 0,006 mm (λ/16) ; 0,016 ms, 254 Ko, 0,09 mm (λ/8). `paquets_W_max = 4096`
+= 109 ms et 2 Go.
+
+**Décision : ADR-129 actée.** Chemin d'image de W radial par table de Bessel précalculée, pas
+≤ λ/8, cosmétique et jamais autoritaire (I-15), construit en S207 avec réception écrite ;
+`paquets_W_max` retiré du profil, capacité calculée (I-16). Note datée ADR-012, qui prévoyait
+`gpu_sim_ms = 2,5` jamais exercé.
+
+**Verdict et arbitrage.** Incompatible avec 60 images/s / eau 2 ms sur CPU à toute densité qui
+montre l'impact. L'écart est **B évalué par sommet sur CPU** (1,2–1,3 µs), plus W. Arbitrage
+« chemin de rendu et hôte de J1 », fusionné avec A247, posé à l'utilisateur : (A) GPU par un hôte
+séparé avec dépendances — recommandé, prévu par ADR-003/I-08/ADR-012 ; (B) CPU seul, B vectorisé
+et 2 ms en temps mur multi-cœurs ; (C) profil changé ; (D) densité 8 px, qui retire l'impact
+visible. Aucune option retenue sans lui ; aucune fonctionnalité retirée.
+
+**Non fait.** Aucun GPU ni groupe de fils persistant ; B vectorisé, densité adaptative et nombre
+de composantes par distance non mesurés ; noyau L2 sur valeurs synthétiques, pas encore dans la
+bibliothèque ; un seul observateur, un impact, sans sillage ni pression.
+
+**Suite S207 : construire ADR-129** dans `water-core` (W avance), réception écrite dans l'ADR ;
+indépendante de la réponse à l'arbitrage. Si l'utilisateur tranche (A), l'hôte GPU devient le lot
+suivant de J1.
+
+**Rituel.** A247 mesurée et transformée (ADR-129 + arbitrage) ; **A250** ; **L283**. 129 ADR,
+250 angles, 283 leçons, 18 invariants, 6 SPEC, 23 cas. Invariants relus : I-03, I-06, I-08, I-15,
+I-16 — aucun ne devient faux ; I-16 est précisément ce qui retire `paquets_W_max`. Aucun code
+`src` : compteur 0 par ADR-129 (décision qui fixe un élément de W), l'outil dirait 1. File active
+entière relue. Feuille de route J1 à jour.

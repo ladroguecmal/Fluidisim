@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 08:38 +02:00
+JETON            : libre
+Battement        : 2026-09-13 08:49 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S206 — A247 : coût d'image d'une scène J1 et leviers, arbitrage explicite
-Dernière session : S205 — A245 close : la mer S201 se compose, ADR-128 (budget = perturbations)
-Session suivante : S206 — A247 : coût d'un impact visible contre 2 ms, puis arbitrage explicite (J1)
-Maillons        : 0 — S205 avance B et W (code src, velocite.sh)
+Session en cours : aucune
+Dernière session : S206 — coût d'image J1 incompatible sur CPU ; ADR-129 ; arbitrage de rendu posé
+Session suivante : S207 — construire ADR-129 : chemin d'image de W par table de Bessel (J1, code src)
+Maillons        : 0 — ADR-129 fixe un élément de W (§6.8) ; S206 sans code src, l'outil dirait 1
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 
@@ -153,9 +153,10 @@ une session ne peut signaler sa présence qu'en travaillant.
 sont des étapes. Trajectoire J1 → J5 et noyau V : **[FEUILLE-DE-ROUTE](docs/FEUILLE-DE-ROUTE.md)**,
 seul document qui la porte — ne pas la recopier ici.
 
-**S205 : jalon en cours J1** (B/W visible et interactif). **A245 levé** (ADR-128) : la mer S201
-se compose. Prochain lot **A247** — coût d'un impact visible contre 2 ms, à arbitrer
-explicitement. **Hôte interactif : arbitrage ouvert**, qui
+**S206 : jalon en cours J1** (B/W visible et interactif). Coût d'image mesuré : **incompatible
+sur CPU** à la densité qui montre l'impact ; W réduit d'un facteur 100 par table de Bessel
+(ADR-129, à construire en **S207**) ; **B par sommet sur CPU est le goulot**. **Arbitrage « chemin
+de rendu et hôte » posé à l'utilisateur** (GPU recommandé). **Hôte interactif : arbitrage ouvert**, qui
 revient à l'utilisateur s'il demande des dépendances. V-noyau s'ouvre au plus tard avec J2 ;
 S200-1/A244 et S199-2 sont sur le chemin de J2, plus « reportées ». Les acquis S194 ci-dessous
 restent datés ; la file liée porte aussi leurs suivis S195–S199.**
@@ -238,7 +239,7 @@ pièges déjà payés.
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/FEUILLE-DE-ROUTE.md  ← trajectoire J1 → J5 et noyau V, seul porteur (ADR-127)
 docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 128 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 129 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -257,6 +258,18 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S206 — 2026-09-13 : coût d'image de la scène J1, ADR-129 ; arbitrage de rendu posé.**
+Scène déclarée avant mesure (observateur S201, mer S201, impact S203, grille projetée).
+Un fil : 17–18 ms à 8 px, 72–74 ms à 4 px, 280–293 ms à 2 px ; 86 % des sommets dans
+l'emprise ; B seul dépasse 2 ms dès 8 px. La densité qui montre les anneaux est ≤ 2,75 px.
+16 fils : 3,6 / 10 / 36 ms, bits identiques. Table de Bessel précalculée : 27 µs/impact,
+502 Ko, 0,006 mm — **ADR-129** (chemin d'image de W, S207) ; `paquets_W_max` retiré (I-16).
+Verdict : incompatible sur CPU ; **B par sommet l'est** (1,2–1,3 µs). Arbitrage à l'utilisateur :
+GPU (recommandé), CPU multi-cœurs, profil changé, ou densité qui perd l'impact.
+**A250**, **L283**. **Suite S207 : construire ADR-129** (W, code src).
+129 ADR,250 angles,283 leçons,18 invariants,6 SPEC,23 cas ; compteur0 (ADR-129).
+Voir [coût d'image S206](docs/validation/COUT-IMAGE-S206.md), [ADR-129](docs/adr/ADR-129-chemin-image-de-w-par-table-de-bessel.md).
 
 **S205 — 2026-09-13 : la mer de référence se compose, ADR-128 ; A245 close.**
 Le budget de pente de la composition ne somme plus que les **perturbations** : la raideur L1 de
@@ -382,7 +395,7 @@ attrapé trois erreurs en trois sessions, ni la qualité du travail sur W.
 
 ### Les quatre couches — l'état qui commande tout le reste
 
-**Recalculé le 2026-09-13 en S205 par `sh outils/velocite.sh`. Ne pas le recopier : le relancer.**
+**Recalculé le 2026-09-13 en S205 par `sh outils/velocite.sh` ; S206 n'a pas touché `src`. Ne pas le recopier : le relancer.**
 Un état sans date se lit au présent, et il ne l'est plus (A185).
 
 | couche | modules | dernière avancée (code) | depuis |

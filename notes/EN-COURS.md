@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S206 — en cours
+Session : S206 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : **A247**, bloquant J1 — confronter le coût de l'eau **par image** au profil ADR-125
 (60 images/s, eau 2 ms) sur une **scène représentative** déclarée, mesurer les leviers, puis
@@ -95,7 +95,7 @@ images après 3 de chauffe, comparé à 2 ms. Machine : celle de S202 (Ryzen AI 
 - [x] **P5** — arbitrage explicite : options mesurées, dégradations, décideur ; ce qui est
  technique se tranche (ADR si décision), ce qui touche l'ambition, les dépendances ou le sens
  du budget (temps mur ou CPU) remonte à l'utilisateur. Feuille de route et file active.
-- [ ] **P6** — rituel §6 complet.
+- [x] **P6** — rituel §6 complet.
 
 ### Notes de reprise
 
@@ -130,3 +130,6 @@ réception écrite). Note datée ADR-012 (qui prévoyait `gpu_sim_ms = 2,5`, jam
 avec dépendances — recommandé ; (B) CPU seul, 2 ms en temps mur multi-cœurs ; (C) profil changé ;
 (D) 8 px, perd l'impact. Feuille de route §4 et J1, file active mises à jour. À poser à
 l'utilisateur en fin de session, après le rituel committé.
+P6 : journal, A250, L283 ; index, README, REPRISE (§3, §4, file active), feuille de route et
+file active faites en P5. Décomptes 129/250/283/18/6/23 vérifiés. Jeton libre. Arbitrage de rendu
+à poser à l'utilisateur après ce commit.

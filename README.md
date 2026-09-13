@@ -729,3 +729,10 @@ Budget de pente = perturbations seules ; raideur de B publiée ; aucun bit publi
 lot déjà admis. Mer S201 Hs 1,5 composée avec impact, zéro refus. 344 réussis/cinq ignorés.
 **Suite S206 : A247.** 128 ADR,249 angles,282 leçons,18 invariants,6 SPEC,23 cas.
 Voir [composition mer S205](docs/validation/COMPOSITION-MER-S205.md), [ADR-128](docs/adr/ADR-128-le-budget-de-pente-borne-les-perturbations.md).
+
+**S206 — 2026-09-13 : coût d'image de la scène J1, ADR-129 ; arbitrage de rendu posé.**
+Incompatible sur CPU à la densité qui montre l'impact ; W divisé par 100 par table de Bessel
+(ADR-129) ; B par sommet sur CPU est le goulot ; `paquets_W_max` retiré (I-16). Arbitrage à
+l'utilisateur, GPU recommandé. **Suite S207 : construire ADR-129.**
+129 ADR,250 angles,283 leçons,18 invariants,6 SPEC,23 cas.
+Voir [coût d'image S206](docs/validation/COUT-IMAGE-S206.md), [ADR-129](docs/adr/ADR-129-chemin-image-de-w-par-table-de-bessel.md).

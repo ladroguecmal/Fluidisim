@@ -2912,3 +2912,13 @@ COMPOSITION-MER-S205.
   partiel S205 : un essai à la recette S201. **À faire** : recenser les autres bancs de refus
   (pression, sillage, profils N/R/A, `max_slope` des fixtures à 0,1) et y ajouter au moins un point
   à paramètres de jeu. Voir L280.
+
+- **A250** *(sévérité 1, S206 ; ouverte, arbitrage posé)* — **Le dépôt n'a jamais eu de chemin
+  GPU, et le budget d'image a été fixé comme s'il n'en fallait pas.** ADR-003 et I-08 prévoient
+  que « seules des phases repliées passent au GPU » ; ADR-012 déclarait `gpu_sim_ms = 2,5` à côté
+  de `cpu_sim_ms = 2,0`. En 206 sessions, aucun hôte n'a exercé de GPU, et ADR-125 a fixé « eau
+  2 ms par image » sans dire où B s'évalue. Mesuré en S206 : B par sommet sur CPU coûte 42 ms à la
+  densité qui montre un impact, 36 ms sur seize fils — l'eau visible ne tient pas le profil sur
+  CPU, et toutes les mesures de coût du dépôt étaient CPU par construction. Gravité 1 : bloque la
+  sortie de J1. Remède : l'arbitrage « chemin de rendu et hôte » (FEUILLE-DE-ROUTE §4) ; la part
+  W est déjà réduite d'un facteur 100 (ADR-129). Voir COUT-IMAGE-S206, L283.
