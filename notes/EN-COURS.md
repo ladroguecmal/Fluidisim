@@ -135,7 +135,7 @@ décohérence est immédiate et la part statique marginale — et le sujet redev
 - [x] ~~**P4**~~ — fusionné dans P3.
 - [x] **P5** — décider et construire ce que le verdict autorise : enveloppe directionnelle exacte dans le cœur si la part statique le mérite (maximum exact sur la grille angulaire, sans balayage), sinon dire pourquoi.
 - [x] **P6** — recevoir : jamais dépassée, plus serrée, coût de préparation ; budget recomposé sur la scène J1.
-- [ ] **P7** — document de réception (en-tête ADR-131) ; suite complète `code/`.
+- [x] **P7** — document de réception (en-tête ADR-131) ; suite complète `code/`.
 - [ ] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
@@ -249,3 +249,9 @@ Contrôles : `d_eta_m = 0,000000000` aux cinq âges — **aucun bit publié n'a 
 inchangé (7,2271e-5 m à 16 s, 7,4625e-5 à 39 s) ; GPU eau 4,185 ms inchangé ; `--smoke` 120 images.
 Les lignes `WAKE` bougent à la seule colonne `envelope`, comme attendu, et l'admission B + pression
 reste `Ok(())` aux cinq âges.
+
+P7 : [ENVELOPPE-SILLAGE-S216](../docs/validation/ENVELOPPE-SILLAGE-S216.md) — en-tête ADR-131 D3 ;
+§1 pourquoi la question a changé avant la première mesure, avec le contrôle de lecture ; §2 la
+séparation et la prédiction contredite pour moitié ; §3 ce que la famille dit de chaque part ;
+§4 le discriminant d'emprise ; §5 ce qui a été construit et ce qui a été écarté ; §6 la réception.
+Suite nommée : A255 ne contient plus que sa part dynamique.
