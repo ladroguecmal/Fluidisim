@@ -769,6 +769,22 @@ DX12/RTX5070 Laptop : erreur hauteur max0,077657 mm ; passe eau960×540 médiane
 349 tests réussis/cinq ignorés. A250 close, A247 partielle ; sillage et coût complet encore dus.
 **Suite S212 : file J1/W, intégrer le sillage au GPU.** 130/250/284/18/6/23 inchangés.
 
+**S215 — 2026-09-13 : [le majorant de pente suit la dispersion](docs/validation/BUDGET-PENTE-S215.md), [ADR-133](docs/adr/ADR-133-le-majorant-de-pente-suit-la-dispersion.md).**
+A254 traitée pour moitié. À échantillonnage fin, le pessimisme du budget vient **presque
+entièrement de l'impact** — 1,00 à la naissance, 10,05 à 16 s, **30,44 à 56 s** — et non du sillage
+(1,39 à 1,90 pendant son forçage) : la prédiction inverse, écrite avant mesure, est contredite.
+Cause : **la dispersion** — une somme de modules modaux est invariante quand les modes ne font plus
+que tourner, le maximum spatial ne l'est pas (**L290**). La décroissance est **universelle** en âge
+adimensionné `τ = (t−birth)/√(λ/g)` : identique à trois décimales sur quatre λ et cinq E,
+indépendante de la profondeur là où le champ existe. **ADR-133** : `slope_max_at(t)`, table sûre
+`RHO_DISPERSION` (minimum par intervalle, garde `1e-4` = 33 × le dépassement mesuré), budget de
+composition câblé dessus ; `slope_max()` et `Steepness` inchangés, aucun bit publié changé.
+Refus **exercé puis levé** : deux impacts + un sillage refusaient (0,5902 contre 0,4488,
+`SlopeEnvelope`), ils passent à 0,2081 ; occupation **84 % → 42 %**, trois impacts à 51 %.
+**A255** ouverte : le sillage pèse désormais 88 % du budget et sa famille n'a aucune loi.
+355 tests réussis/cinq ignorés. **Suite S216 : A255**, la même campagne sur la famille du sillage.
+133 ADR,255 angles,292 leçons,18 invariants,6 SPEC,23 cas ; compteur 0 (W code src + ADR-133).
+
 **S214 — 2026-09-13 : [composition par le cœur](docs/validation/COMPOSITION-J1-S214.md) et [ADR-132](docs/adr/ADR-132-domaine-d-image-d-un-sillage.md).**
 Validité avant accélération (ADR-131 D6). `mixed_water` compose B + impact + sillage : **exact au
 bit** contre la somme de l'hôte **au même point** ; l'écart de 1,78e-5 m mesuré d'abord venait de

@@ -1670,7 +1670,23 @@ entrée par entrée. Le fil reprend ci-dessous.
 
 ## File active
 
-Relue en S214, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+Relue en S215, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+
+**Suivi J1 S215 — A254 traitée pour moitié, et elle en ouvre une autre.**
+[BUDGET-PENTE-S215](../validation/BUDGET-PENTE-S215.md),
+[ADR-133](../adr/ADR-133-le-majorant-de-pente-suit-la-dispersion.md). Le pessimisme du budget de
+pente n'était ni l'emprise (A208) ni un défaut d'unité (I-18 tenu) : c'est la **dispersion**, et il
+venait presque entièrement de l'impact — 1,00 à la naissance, 10,05 à 16 s, **30,44 à 56 s** —
+quand le sillage était serré (1,39 à 1,90 pendant son forçage). La décroissance est **universelle**
+en âge adimensionné `τ = (t−birth)/√(λ/g)`, indépendante de l'amplitude et de la profondeur là où
+le champ existe. `RadialImpact::slope_max_at(t)` et la table `RHO_DISPERSION` ; le budget de
+composition est câblé dessus, `slope_max()` et `Steepness` inchangés, aucun bit publié changé.
+Refus **exercé puis levé** : deux impacts et un sillage refusaient à 0,5902 contre 0,4488, ils
+passent à 0,2081 ; occupation de la scène J1 **84 % → 42 %**.
+**Ligne neuve : A255** *(sévérité 2)* — le sillage pèse maintenant **88 %** du budget et sa famille
+n'a aucune loi ; son majorant **croît** pendant que la source émet, ce que le cas de l'impact ne
+présentait pas. **Suite S216 : A255**, avant toute scène à plusieurs sillages et donc avant la
+mutualisation de J1-bis. Autres lignes et déclencheurs conservés.
 
 **Suivi J1 S214 — les deux travaux de validité sont faits, et ils en ouvrent un plus lourd.**
 [COMPOSITION-J1-S214](../validation/COMPOSITION-J1-S214.md). La composition du cœur

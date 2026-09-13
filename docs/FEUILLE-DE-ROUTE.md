@@ -83,6 +83,10 @@ l'implémentation qui dépassait, pas le sillage ni l'objectif.*
 dans le cœur ([TEMPS-SILLAGE-S213](validation/TEMPS-SILLAGE-S213.md)) : CPU sillage 1,26 ms pendant
 le forçage et 0,36 ms après (préparation 7,70 / 13,36), hôte 1,7 ms, exact à 6e-8 ; GPU inchangé.
 Coordonnée de l'espace, pas verdict. Suite : composition impact+sillage, puis A251.
+*S215* : **A254 traitée pour moitié** ([BUDGET-PENTE-S215](validation/BUDGET-PENTE-S215.md),
+[ADR-133](adr/ADR-133-le-majorant-de-pente-suit-la-dispersion.md)). Le majorant de pente d'un
+impact suit la dispersion ; occupation 84 % → 42 %, le refus à deux sources est levé, trois impacts
+et un sillage passent à 51 %. Ouvre **A255** : le sillage domine désormais le budget.
 *S214* : **les deux travaux de validité sont faits**
 ([COMPOSITION-J1-S214](validation/COMPOSITION-J1-S214.md)). La composition du cœur est exacte au
 bit une fois le point d'évaluation commun rétabli (**A253**) ; le cœur ne compose toutefois que sur
@@ -107,10 +111,17 @@ marge 0,0712. Elle passe avant toute scène à plusieurs sources.
   `rayon = 2π·angular/(3·cutoff)`, `durée = 4π/√(g·cutoff/radial)`, annoncées et publiées avec la
   fixture ; 89,36 m et 18,53 s contre 102,22 m et 40 s déclarés. Une durée honnête porte le critère
   qui l'a calibrée ;
-- **A254** *(S214, sévérité 1)* — **le budget de pente ne passe pas à l'échelle en nombre de
-  sources** : 84 % de π/7 consommés par un impact et un sillage, majorant 3,7 à 10,5 fois la pente
-  réelle, marge 0,0712 ; la troisième source refuse toute l'image, par `SlopeEnvelope`. **Avant
-  toute scène à plusieurs sources, donc avant la mutualisation ci-dessous** ;
+- **A254** *(S214, sévérité 1)* — **traitée pour moitié en S215** par
+  [ADR-133](adr/ADR-133-le-majorant-de-pente-suit-la-dispersion.md). Le pessimisme était de la
+  **dispersion** et venait presque entièrement de l'impact ; son majorant suit désormais le temps
+  (`slope_max_at`), et l'occupation tombe de **84 % à 42 %** — deux impacts et un sillage, qui
+  refusaient (`SlopeEnvelope`), passent. **Reste ouvert** : le budget est toujours une **somme**,
+  donc le nombre de sources reste borné ;
+- **A255** *(S215, sévérité 2)* — **le sillage pèse désormais 88 % du budget, et sa famille n'a
+  aucune loi.** Même mécanisme (L290), pessimisme mesuré (1,4 pendant le forçage, 4,8 après), mais
+  aucune similitude établie : σ, cutoff, radial, angular et le découpage en tronçons, et un majorant
+  qui **croît** pendant l'émission. **Avant toute scène à plusieurs sillages, donc avant la
+  mutualisation ci-dessous** ;
 
 #### J1-bis — Espace d'optimisation du rendu et travaux nécessaires (ADR-131, S213)
 
@@ -129,15 +140,16 @@ l'échec d'optimisations prises isolément. La liste est ouverte.
 | **LOD spectral** — nœuds par source selon distance et visibilité | absente | écart à la recette pleine, durée et rayon honnêtes (ADR-107, **ADR-132** : les deux lois se recalculent depuis la recette réduite) |
 | **LOD temporel** — cadence de mise à jour selon distance, vitesse, régime | absente | erreur de phase, I-09 |
 | **visibilité** — frustum, occlusion, hors écran | absente | exactitude au retour dans le champ |
-| **mutualisation** — nœuds partagés par sources de même recette, passe/grille communes B/W | absente ; **conditionnée par A254** (S214) | superposition dans son domaine (ADR-123), et part du budget de pente consommée |
+| **mutualisation** — nœuds partagés par sources de même recette, passe/grille communes B/W | absente ; **conditionnée par A255** (S215 ; A254 levée pour l'impact par ADR-133) | superposition dans son domaine (ADR-123), et part du budget de pente consommée |
 
 **Chaque mesure de coût publie** techniques présentes, techniques absentes et domaine de validité
 (scène, recette, sources, formats, instants, machine, grandeur mesurée) — ADR-131 D3.
 
 **Travaux nécessaires de J1, indépendants du coût** (ADR-131 D6) — accélérer ne les remplace pas.
 *Faits en S214* : ~~A251~~ (ADR-132) et ~~composition impact + sillage par le cœur~~ — exacte au
-bit, budget conjoint exercé, et **A254** ouverte par cette mesure. *Restent* : **A254** (le budget
-de pente ne passe pas à l'échelle en nombre de sources — elle conditionne la mutualisation) ;
+bit, budget conjoint exercé, et **A254** ouverte par cette mesure. *Fait en S215* : ~~la moitié
+impact d'A254~~ (ADR-133), qui ouvre **A255**. *Restent* : **A255** (la famille du sillage, qui
+pèse maintenant 88 % du budget — elle conditionne la mutualisation) ; la part somme d'A254 ;
 cadence complète mesurée ; interaction manuelle, angles rasants et poses de caméra ; allocations de
 la pile graphique (I-06) ; seconde cible (B7).
 

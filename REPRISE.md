@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 11:42 +02:00
+JETON            : libre
+Battement        : 2026-09-13 13:09 +02:00
 Agent            : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
-Session en cours : S215 — A254 : le budget de pente est une somme sur les sources ; mesurer avant de décider
-Dernière session : S214 — composition par le cœur exacte au bit (A253 corrigé) ; budget conjoint à 84 % de π/7 pour deux sources (A254, sévérité 1) ; ADR-132, domaine d'image du sillage (A251 traitée)
-Session suivante : S215 — file J1, **A254 d'abord** : le budget de pente est une somme sur les sources et n'a plus que 0,0712 de marge. Mesurer une scène à deux sources, puis décider — resserrer le majorant (rapport mesuré 3,7 à 10,5), composer autrement que par la somme (ADR-119 règle 1 l'interdit sans mesure), ou retirer à `max_slope` son statut de constante de milieu. Ensuite la loi GPU (espace, LOD, visibilité, mutualisation), chaque mesure avec son en-tête (ADR-131 D3)
-Maillons        : 0 — ADR-132 actée (fixe un élément de W, comme ADR-126 en S203) ; aucune ligne de `code/*/src` cette session
+Session en cours : aucune
+Dernière session : S215 — ADR-133, le majorant de pente suit la dispersion ; A254 traitée pour moitié (occupation 84 % → 42 %, le refus à deux sources est levé) ; A255 ouverte : le sillage pèse désormais 88 % du budget
+Session suivante : S216 — file J1, **A255** : refaire sur la **famille du sillage** la campagne qui a traité l'impact en S215 — varier σ, cutoff, radial, angular et le découpage en tronçons, chercher une échelle de temps propre, ne pas présumer qu'elle existe, et traiter la phase de forçage à part (pendant qu'une source émet, son majorant **croît**). C'est elle qui décide de ce que coûte une scène à plusieurs sillages, donc de la mutualisation de J1-bis. Ensuite la loi GPU (espace, LOD, visibilité, mutualisation), chaque mesure avec son en-tête (ADR-131 D3)
+Maillons        : 0 — W avancée dans `code/water-core/src` (radial_impact, composition, mixed_water, mixed_differential) **et** ADR-133 actée
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 
@@ -176,9 +176,15 @@ annoncé et publié avec sa fixture ([ADR-132](docs/adr/ADR-132-domaine-d-image-
 **A251 traitée**). **Ils ont ouvert une ligne plus lourde qu'eux : A254.** Le budget de pente est
 une **somme sur les sources** — 84 % de π/7 consommés par *une* source de chaque type, majorant
 3,7 à 10,5 fois la pente réelle, marge 0,0712 : la troisième source refuse toute l'image, par
-majorant et non par raideur. **Prochain lot J1 : A254**, avant toute scène à plusieurs sources et
-donc avant la mutualisation de J1-bis ; puis la loi GPU (espace, LOD, visibilité, mutualisation),
-chaque mesure avec son en-tête (ADR-131 D3).
+majorant et non par raideur. **S215 : A254 est traitée pour moitié**
+([ADR-133](docs/adr/ADR-133-le-majorant-de-pente-suit-la-dispersion.md),
+[BUDGET-PENTE-S215](docs/validation/BUDGET-PENTE-S215.md)). Le pessimisme venait de la
+**dispersion** et presque entièrement de l'impact ; son majorant suit désormais le temps, et
+l'occupation tombe de 84 % à 42 % — deux impacts et un sillage, qui refusaient, passent.
+**Reste** : le budget est toujours une **somme**, et le sillage en pèse maintenant **88 %** sans
+qu'aucune loi ne borne sa famille (**A255**). **Prochain lot J1 : A255**, avant toute scène à
+plusieurs sillages et donc avant la mutualisation de J1-bis ; puis la loi GPU (espace, LOD,
+visibilité, mutualisation), chaque mesure avec son en-tête (ADR-131 D3).
 
 **Tolérance B4 fixée à 2 % par l'utilisateur (ADR-120).** Elle ne doit plus être
 redemandée. La réception et son profil sont dans B4-TOLERANCE-S190 ; B4 complet
@@ -258,7 +264,7 @@ pièges déjà payés.
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/FEUILLE-DE-ROUTE.md  ← trajectoire J1 → J5 et noyau V, seul porteur (ADR-127)
 docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 132 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 133 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -277,6 +283,22 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S215 — 2026-09-13 : [le majorant de pente suit la dispersion](docs/validation/BUDGET-PENTE-S215.md), [ADR-133](docs/adr/ADR-133-le-majorant-de-pente-suit-la-dispersion.md).**
+A254 traitée pour moitié. À échantillonnage fin, le pessimisme du budget vient **presque
+entièrement de l'impact** — 1,00 à la naissance, 10,05 à 16 s, **30,44 à 56 s** — et non du sillage
+(1,39 à 1,90 pendant son forçage) : la prédiction inverse, écrite avant mesure, est contredite.
+Cause : **la dispersion** — une somme de modules modaux est invariante quand les modes ne font plus
+que tourner, le maximum spatial ne l'est pas (**L290**). La décroissance est **universelle** en âge
+adimensionné `τ = (t−birth)/√(λ/g)` : identique à trois décimales sur quatre λ et cinq E,
+indépendante de la profondeur là où le champ existe. **ADR-133** : `slope_max_at(t)`, table sûre
+`RHO_DISPERSION` (minimum par intervalle, garde `1e-4` = 33 × le dépassement mesuré), budget de
+composition câblé dessus ; `slope_max()` et `Steepness` inchangés, aucun bit publié changé.
+Refus **exercé puis levé** : deux impacts + un sillage refusaient (0,5902 contre 0,4488,
+`SlopeEnvelope`), ils passent à 0,2081 ; occupation **84 % → 42 %**, trois impacts à 51 %.
+**A255** ouverte : le sillage pèse désormais 88 % du budget et sa famille n'a aucune loi.
+355 tests réussis/cinq ignorés. **Suite S216 : A255**, la même campagne sur la famille du sillage.
+133 ADR,255 angles,292 leçons,18 invariants,6 SPEC,23 cas ; compteur 0 (W code src + ADR-133).
 
 **S214 — 2026-09-13 : [composition par le cœur](docs/validation/COMPOSITION-J1-S214.md) et [ADR-132](docs/adr/ADR-132-domaine-d-image-d-un-sillage.md).**
 Validité avant accélération (ADR-131 D6). `mixed_water` compose B + impact + sillage : **exact au

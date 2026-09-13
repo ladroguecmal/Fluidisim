@@ -11055,3 +11055,63 @@ I-14 (les deux lois citent leur provenance : ADR-107 et les mesures S156/S214), 
 devenu faux, aucun amendé. Aucun ADR réécrit. Suite complète `code/` : **354 réussis, 5 ignorés**,
 aucun échec. 132 ADR, 254 angles, 289 leçons, 18 invariants, 6 SPEC, 23 cas. **Compteur 0** :
 ADR-132 fixe un élément de W, comme ADR-126 l'avait fait en S203. Jeton libre, copies avancées.
+
+## S215 — 2026-09-13 — Le majorant de pente suit la dispersion (ADR-133) ; A254 traitée pour moitié
+
+**Entrée.** Ligne `Session suivante` de S214 : A254, le budget de pente est une somme sur les
+sources. Maillons 0 à l'amorce. Claude Code (Opus 5) ; `master` et trois copies propres à 70d2b36.
+Plan 4bb9d9b, P2 0e6dad3, P3-bis a659ae6, P4 c4ed436, P5 a2756b7, P6 effceaf, P6-bis 5fa3567,
+P7 fb3d5e4.
+
+**Décision structurante.** **ADR-133 actée** : `RadialImpact` publie `slope_max_at(t)` — le majorant
+de pente **à l'instant demandé** — et le budget de composition le consomme ; `slope_floor` reçoit
+l'instant, sans quoi la garantie dans les deux sens d'ADR-128 cesserait de tenir. `slope_max()` et
+le refus `Steepness` sont **inchangés** : ADR-094 a posé que les migrer est une décision distincte,
+et elle le reste. Aucun bit publié ne change — `steepness` continue de lire `slope_max()`.
+
+**Chiffres qui orientent.**
+- **Le doute d'échantillonnage de S214 était fondé, et il a changé la cause.** À échantillonnage
+  fin (20 001 points de rayon ; pic en `r = 0,2062 λ` = 0,69 m), le pessimisme vient **presque
+  entièrement de l'impact** : 1,00 à la naissance, 4,30 à 4 s, 10,05 à 16 s, 20,20 à 39 s,
+  **30,44 à 56 s**. Le sillage est **serré** : 1,39 à 4 s, 1,90 à 16 s, 4,77 à 39 s.
+  **Prédiction écrite avant mesure — impact serré, sillage lâche — exactement inversée.**
+- **Sûreté vérifiée sur 56 s** là où ADR-094 n'avait vu que 2 s : `max(réel/majorant)` = 0,999998
+  (impact) et 0,718847 (sillage). Aucun majorant dépassé.
+- **Le mécanisme est la dispersion**, et il est général à W : une somme de modules modaux est
+  invariante quand les modes ne font plus que tourner, le maximum spatial ne l'est pas. **L290.**
+- **La décroissance est universelle** : identique à trois décimales pour λ ∈ {0,5 ; 1 ; 3,35 ; 8} m
+  et E ∈ {0,05 ; 0,5 ; 16,4 ; 164 ; 4 000} J, en âge adimensionné `τ = (t−birth)/√(λ/g)`.
+  Indépendante de l'amplitude (deux E à λ égal), et **indépendante de la profondeur** de 20 à 4 m —
+  en deçà `RadialImpact::new` refuse le champ lui-même. **L292.**
+- **Table sûre** `RHO_DISPERSION` : minimum par intervalle (ρ n'est pas monotone : 8,713 à τ = 0,5
+  puis 1,063 à τ = 1) sur 21 sous-échantillons et quatre λ génératrices, garde `1e-4` = 33 × le
+  dépassement maximal mesuré (3,0e-6). Contrôle sur **quatre λ hors famille**, 961 τ chacune :
+  `max(réel/resserré) = 0,999983`, **exactement** le pire cas du majorant d'origine.
+- **Le refus a été exercé puis levé.** Deux impacts + un sillage : budget 0,590210 contre 0,448799,
+  `Err(SlopeEnvelope)` — A254 confirmée dans ses termes. Après ADR-133 : 0,208086, **`Ok(())`**, et
+  trois impacts passent à 51 %. Occupation de la scène J1 : **84 % → 42 %**.
+- Hôte : `d_eta_m = 0,000000000` (aucun bit publié changé), `VERIFY` et GPU inchangés, `--smoke`
+  code 0. Suite `code/` : **355 réussis (257+4+1+93), 5 ignorés** — un de plus, le test de sûreté.
+
+**Ce qui n'a pas été fait.** **A255 ouverte le jour même** : le sillage pèse maintenant 88 % du
+budget et sa famille n'a aucune loi — le forçage y complique le cas, puisqu'un majorant **croît**
+pendant qu'une source émet. Le budget reste une **somme** : A254 n'est traitée que pour moitié, le
+nombre de sources demeure une ressource bornée. A253 reste ouverte côté interface. A208 est
+inchangée : elle n'était pas le terme dominant, elle n'est pas close. Aucune mesure de coût
+d'image : ADR-133 est un contrat d'admission, pas une optimisation.
+
+**Suite S216.** File J1 : **A255** — la même campagne que S215 sur la famille du sillage (varier σ,
+cutoff, radial, angular et le découpage en tronçons ; chercher une échelle de temps propre ; ne pas
+présumer qu'elle existe ; traiter la phase de forçage séparément). C'est elle qui décide de ce que
+coûte une scène à plusieurs sillages, et donc de la mutualisation de J1-bis. Ensuite la loi GPU.
+J2/δ général et V-noyau restent dus (ADR-127).
+
+**Rituel.** A255 (sévérité 2) ; suivis A254 (traitée pour moitié, cause corrigée), A208 (non close,
+non dominante) ; L290, L291, L292 ; file plurielle entière relue ; feuille de route J1/J1-bis ;
+index, README, REPRISE §3/§4 et jeton. Invariants relus que la décision cite — **I-18** (ce qui est
+comparé à `max_slope` est une pente réelle : ADR-133 le sert mieux qu'avant, le majorant étant plus
+proche de la pente réelle à chaque instant), I-14 (la table cite son banc et sa garde son
+dépassement mesuré), I-04, I-06 (aucune allocation : la table est une constante), I-08 : aucun n'est
+devenu faux, aucun amendé. Aucun ADR réécrit. **Compteur 0** : W avancée dans `code/water-core/src`
+(`radial_impact`, `composition`, `mixed_water`, `mixed_differential`) **et** ADR-133 actée.
+133 ADR, 255 angles, 292 leçons, 18 invariants, 6 SPEC, 23 cas. Jeton libre, copies avancées.

@@ -4762,3 +4762,60 @@ premier effet, pas de celui-ci.
 
 Le geste : exécuter au moins deux passages séparés avant de publier un coût, publier leur écart, et
 dire le rang du passage cité. Ne comparer deux chemins qu'à rang égal.
+
+## L290 — Un majorant en norme L1 est invariant par dispersion ; le champ qu'il borne ne l'est pas
+
+*(S215)* Le budget de pente de la composition refusait une scène à deux sources alors que la pente
+réelle y était dix fois plus faible. La cause n'était ni l'emprise, ni l'alignement, ni l'unité :
+le majorant est une **somme de modules modaux**, et après extinction de la source chaque mode ne
+fait plus que tourner — la somme des modules ne bouge donc plus, tandis que le maximum **spatial**
+décroît à mesure que les phases se décohèrent. Mesuré : facteur 1 à la naissance, 4 à quatre
+secondes, 30 à cinquante-six.
+
+Ce qui généralise : **toute annonce construite comme une somme de modules se périme avec l'âge de
+ce qu'elle décrit**, et elle se périme d'autant plus vite que le milieu est dispersif. L'annonce
+reste vraie — c'est bien un majorant — mais elle cesse d'être informative, et un contrat qui la
+consomme devient progressivement un contrat sur le passé. Le piège est qu'elle passe tous les tests
+de sûreté : on ne vérifie jamais qu'un majorant est *serré*, seulement qu'il n'est pas dépassé.
+
+Le geste : pour toute grandeur annoncée comme borne, mesurer **son rapport à la grandeur bornée en
+fonction du temps**, pas seulement à l'instant où elle est établie. Si le rapport dérive, chercher
+l'échelle de temps propre du phénomène et l'annoncer en fonction d'elle. Voir ADR-133, A254.
+
+## L291 — Une grille qui n'a pas la résolution du pic attribue le pessimisme au mauvais terme
+
+*(S215)* S214 a relevé la pente réelle d'une scène composée sur une grille de 1,3 m. Le maximum de
+pente d'un impact radial est atteint en `r = 0,2062 λ`, soit 0,69 m : la grille passait à côté par
+construction. Le **chiffre conjoint** s'en est trouvé à peu près juste — le sillage, mieux résolu,
+dominait le relevé — mais l'**attribution** était fausse de bout en bout : le pessimisme venait
+presque entièrement de l'impact, que la grille ne voyait pas, et non du terme qu'elle mesurait.
+
+Ce qui généralise : **un maximum sous-échantillonné ne se trompe pas au hasard, il se trompe en
+faveur du terme le mieux résolu**. Le total peut rester plausible alors que sa décomposition est
+inversée — et c'est la décomposition qui dit où porter le remède. Un remède dirigé par un relevé
+trop grossier vise le mauvais champ.
+
+Le geste : avant de relever un maximum, écrire **où il est censé se trouver et à quelle échelle**,
+puis vérifier que le pas y met plusieurs points. Quand la structure est connue — ici, un profil
+radial dont ADR-094 donne le rayon du pic —, échantillonner le long de cette structure plutôt que
+sur une grille uniforme. Et raffiner localement autour de l'argmax plutôt que raffiner partout :
+c'est le carré du gain en moins pour le même résultat.
+
+## L292 — Avant d'acter une similitude, faire varier le paramètre qu'on n'a pas fait varier
+
+*(S215)* La décroissance du pessimisme s'effondrait parfaitement sur l'âge adimensionné `t/√(λ/g)`
+— identique à trois décimales sur quatre longueurs d'onde et cinq énergies. Tout était prêt pour
+l'ADR. Restait une dimension jamais variée : **la profondeur**, dont la relation de dispersion
+dépend, et qui valait 20 m dans toutes les mesures. Trois minutes pour la faire varier, et deux
+réponses : les colonnes sont identiques de 20 à 4 m, et sous 4 m le constructeur **refuse le champ
+lui-même**. Le domaine où la similitude vaut est donc exactement celui où l'objet existe.
+
+Ce qui généralise : **un effondrement parfait sur les paramètres qu'on a variés ne dit rien de
+ceux qu'on n'a pas variés**, et la conviction qu'il procure est exactement ce qui dissuade d'aller
+voir. La vérification manquante est en général bon marché — c'est le même banc avec une valeur de
+plus — et son résultat est utile dans les deux sens : elle élargit le domaine, ou elle le borne.
+
+Le geste : avant d'acter une loi d'échelle, **lister les paramètres du problème et pointer ceux qui
+sont restés constants**. Faire varier chacun au moins une fois. Et regarder si l'objet se refuse
+lui-même hors du domaine mesuré : une réserve qu'un constructeur applique déjà n'a pas à être
+écrite dans l'ADR.

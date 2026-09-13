@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S215 — en cours
+Session : S215 — terminée
 Agent : Claude Code (Opus 5 ; fichiers, git et cargo disponibles)
 Objectif : **A254** — le budget de pente est une somme sur les sources et la scène J1 en consomme
 84 % avec deux. Mesurer d'abord ce que vaut réellement chaque majorant, puis décider.
@@ -126,7 +126,7 @@ disparaître — l'occupation de 84 %, elle, ne dépend d'aucun échantillonnage
   *(P4 à P6 réécrits après P3-bis : la similitude étant établie, la décision n'est plus « laquelle des trois voies » mais « resserrer, et voici la loi ». Le plan d'origine reste lisible ci-dessus.)*
 - [x] **P6-bis** — *scindé de P6 au constat de sa taille, avant de le commencer* : câbler le budget de composition sur `slope_max_at`, instant porté par `slope_floor` ; rattraper les attentes de tests que la frontière déplace.
 - [x] **P7** — document de réception (en-tête ADR-131, rang de passage) ; suite complète `code/`.
-- [ ] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
+- [x] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
 
@@ -306,3 +306,20 @@ mention que le rang de passage ne s'applique pas : aucune mesure de temps ici) ;
 doute d'échantillonnage ; §2 les deux majorants et le mécanisme ; §3 la similitude et ses trois
 indépendances ; §4 la table et sa sûreté ; §5 le refus exercé puis levé ; §6 les contrôles.
 Suite nommée : **la famille du sillage**, qui domine désormais le budget.
+
+P8 : rituel §6 exécuté. Journal S215 ; **A255** (sévérité 2) ; suivis **A254** (traitée pour moitié,
+cause corrigée : dispersion et non emprise) et **A208** (non close, non dominante) ; **L290, L291,
+L292**. Index, README, REPRISE (§3 « 133 décisions », §4, file active, jeton), feuille de route
+(J1, J1-bis, travaux nécessaires, ligne mutualisation désormais conditionnée par A255), file
+plurielle de QUESTIONS-OUVERTES.
+**Invariants relus** — **I-18** en premier, puisque c'est lui que le sujet touche : ce qui est
+comparé à `max_slope` doit être une pente réelle, et ADR-133 le sert **mieux** qu'avant, le majorant
+étant désormais proche de la pente réelle à chaque instant au lieu de celle de la naissance ; I-14
+(la table cite son banc, la garde cite le dépassement qu'elle couvre) ; I-06 (aucune allocation :
+`RHO_DISPERSION` est une constante) ; I-04 et I-08 inchangés. Aucun devenu faux, aucun amendé, aucun
+ADR réécrit.
+**Règle des deux maillons** : compteur **0**, et cette fois par le code — `outils/velocite.sh`
+relancé donne **W = S215** (contre S213 avant la session), B = S211, δ = S202, V = jamais.
+**Recommandation portée** : la suite S216 nomme A255, ligne de la file J1, et la couche W.
+Décomptes vérifiés : 133 fichiers dans `docs/adr`, 292 leçons, 255 angles.
+Jeton libre, battement 13:09. Copies de travail avancées sur master après ce commit.

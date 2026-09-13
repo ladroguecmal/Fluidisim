@@ -3047,3 +3047,37 @@ Trois passages du même binaire donnent 1,2555 / 1,2458, puis 1,6477 / 1,7760, p
 de sillage CPU, la valeur basse sur le passage à froid. L'écart « 1,7 contre 1,26 » que S213 laissait
 non attribué se reproduit **entre deux passages du même programme**. Ce n'est pas une attribution
 nommée — aucun compteur thermique n'a été lu. A247 reste partielle. Voir L289.
+
+**Suivi A254 — S215, 2026-09-13 : le chiffre tenait, la cause était fausse, la moitié est traitée.**
+Le pessimisme mesuré à échantillonnage fin (20 001 points de rayon ; le pic d'un impact radial est
+en `r = 0,2062 λ` = 0,69 m, invisible à la grille de 1,3 m de S214) **n'est ni l'emprise d'A208 ni
+un défaut d'unité — I-18 est tenu — mais la dispersion** : un majorant en somme de modules modaux
+est invariant quand les modes ne font plus que tourner, tandis que le maximum spatial décroît. Il
+vient presque entièrement de l'impact (facteur 1 à la naissance, 4,3 à 4 s, 30,4 à 56 s) et non du
+sillage (1,4 à 1,9 pendant le forçage). Le refus a été **exercé** : deux impacts et un sillage,
+budget 0,590210 contre 0,448799, `Err(SlopeEnvelope)`.
+**Traitée par [ADR-133](../adr/ADR-133-le-majorant-de-pente-suit-la-dispersion.md)** : le majorant
+d'un impact suit la dispersion (`slope_max_at`, table `RHO_DISPERSION` en âge adimensionné, sûre et
+vérifiée hors famille génératrice), et le budget de composition le consomme. Occupation 84 % → 42 %,
+et trois impacts avec un sillage passent désormais à 51 %. **Reste ouvert dans A254** : le budget
+demeure une **somme**, donc le nombre de sources reste une ressource bornée — le resserrement recule
+la limite, il ne la supprime pas. Voir L290, L291, BUDGET-PENTE-S215.
+
+- **A255** *(sévérité 2, S215 ; ouverte)* — **Le majorant du sillage domine désormais le budget, et
+  sa famille n'a aucune loi.** Après ADR-133, l'impact ne pèse plus que 0,0215 à 16 s quand le
+  sillage prescrit en pèse 0,1650 — soit **88 %** du budget de la scène. Le mécanisme y est le même
+  (L290) et le pessimisme est mesuré — 1,39 à 4 s pendant le forçage, 4,77 à 39 s une fois la source
+  éteinte, son majorant restant figé à 0,157 — mais aucune similitude n'y a été établie : sa famille
+  est paramétrée par σ, cutoff, radial, angular **et le découpage en tronçons**, et rien ne dit que
+  le rapport s'effondre sur un âge adimensionné comme celui de l'impact. Sans cela, une scène à
+  plusieurs sillages retrouve le refus qu'ADR-133 vient de lever pour les impacts. **À faire** : la
+  même campagne que S215 sur la famille du sillage — faire varier chaque paramètre, chercher
+  l'échelle de temps propre, et ne pas présumer qu'elle existe. Le forçage complique le cas :
+  pendant qu'une source émet, son majorant **croît** au lieu de décroître. Voir ADR-133 §« ne fait
+  pas », A254, L290.
+
+**Suivi A208 — S215, 2026-09-13 : ce n'était pas le terme dominant, et A208 reste entière.**
+Le pessimisme d'emprise et d'alignement qu'A208 décrit existe toujours ; S215 montre seulement
+qu'ici il était masqué par un facteur trente venu du temps. Rien n'est clos : après ADR-133, le
+majorant resserré d'un impact reste un majorant **sur toute son emprise**, et A208 s'applique à
+lui comme avant.
