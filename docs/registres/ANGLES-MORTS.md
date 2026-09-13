@@ -3325,3 +3325,37 @@ pas) ; l'inclinaison de surface vaut 16,6990° contre 16,6992° attendus, à **0
 qu'exige C16. Réduction au cas vertical **exacte** : tous les nombres de S224 sont identiques.
 **Ce que le passage enseigne** : C12 passait à 0,08 % avec l'axe en dur — un cas canonique bien
 choisi peut être muet sur un invariant (**L310**).
+
+**Suivi A266 — S227, 2026-09-13 : domaine du défaut élargi par le pas réel.** Le diagnostic S226
+imposait une cote verticale centrale, alors que le module utilise la hauteur tabulée comme une
+distance normale au plan. Même le prisme à mi-remplissage est donc faux dans le module : à pente
+0,3, sa cote centrale passe de 1 m à 1,04403065 m. Un hublot central à 1,01 m laisse partir **506 ml
+en dix pas**, au lieu de zéro. Le test `tilted_prism_volume_regression_a266_s227` conserve cet
+attendu correct, reste explicitement ignoré et a été exécuté en échec connu. La phrase S226
+« 9,89 % partout » était aussi trop générale : elle ne vaut que dans le domaine non tronqué de
+son montage ; sa dernière hauteur mesure 6,17 %. Avec la convention du module, l'écart de volume
+de la cale non tronquée vaut 19,78 %. Dérivation et correction datée dans
+[GRAVITE-DIRIGEE-S226](../validation/GRAVITE-DIRIGEE-S226.md). **Toujours ouverte, sévérité 1** :
+prochain lot, relation volume/plan orienté construite et éprouvée sur les données réellement
+consommées. Une restriction définitive aux prismes ne répondrait pas à ADR-127.
+
+- **A267** *(sévérité 1, S227 ; corrigée en S227)* — **La capacité d'un receveur était réservée
+  séparément par chaque arrivée.** Trois sources pouvaient transférer chacune 1 ml dans le même
+  contenant de capacité 1 ml : le pas réussissait à 3 ml, puis le suivant refusait cet état.
+  La masse totale restait exacte : sa conservation seule ne protège pas les capacités.
+  Ajout d'une réduction collective des arrivées après la normalisation des sources, par arrondi
+  cumulatif entier. Régressions sur cinq capacités, plusieurs pas, réseau avec sorties et rejet
+  extérieur, deux ordres d'arêtes ; volumes bornés et bilan exact. Voir L312 et
+  [BILAN-GLOBAL-S227](BILAN-GLOBAL-S227.md#réception-des-corrections-de-code-p4).
+
+- **A268** *(sévérité 2, S227 ; corrigée en S227)* — **La différence de coordonnées débordait
+  avant son élargissement.** Deux valeurs `i64` extrêmes pouvaient faire paniquer le pas, en
+  debug comme en release, même sous gravité verticale où leur composante horizontale n'influe
+  pas sur le débit. Soustraction faite désormais en `i128` avant projection. Les deux sens des
+  extrêmes retrouvent les transferts et restes du témoin ordinaire. Aucun seuil ou repère changé.
+
+**Suivi A211 / A243 — S227, 2026-09-13 : pilotage refondu, efficacité encore à constater.**
+Les points d'entrée passent de 6 161 à 384 lignes ; la file remplace ses états périmés, l'indicateur
+sépare activité et capacité, les maillons exigent un effet aval prouvé. La troisième session d'un
+même fil oblige à comparer sa suite aux autres capacités. Le dépôt ne déclare pas ces angles
+clos : les prochaines livraisons permettront d'évaluer la mesure, sans ajouter un audit périodique.

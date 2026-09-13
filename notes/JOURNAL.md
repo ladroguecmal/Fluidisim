@@ -11714,3 +11714,41 @@ depuis des différences entières, IEEE strict, réduction au bit sous gravité 
 violé**, ce qui est un changement d'état et non un amendement. Aucun ADR réécrit ni acté.
 **Compteur 0** : V avancée dans `code/water-core/src`. 138 ADR, 266 angles, 311 leçons,
 18 invariants, 6 SPEC, 23 cas. Jeton libre, copies avancées.
+
+## S227 — 2026-09-13 — Audit global, reprise allégée et intégrité du réseau V
+
+**Entrée.** Audit demandé par l'utilisateur : intentions, dérives, gestion, documentation, zones
+d'ombre et code. Codex, GPT-6 ; master et trois copies propres à dfd1507, lignée B archivée,
+aucun distant. L'audit prend explicitement la place de la suite automatique A266 de S226.
+
+**Diagnostic et changements.** L'ambition des sources reste entière ; la livraison privilégie
+B/W et leurs validations, tandis que δ général, adaptation et inondations restent à construire.
+[BILAN-GLOBAL-S227](../docs/registres/BILAN-GLOBAL-S227.md) porte les preuves et la suite priorisée.
+Les trois points d'entrée passent de **6 161 à 384 lignes**, sans supprimer ADR ni sources.
+File et trajectoire remplacent leurs états périmés. La méthode exige un effet aval et un arrêt
+du lot ; elle n'impose plus de trouver une impasse. L'indicateur Git distingue cœur, harnais,
+exemples et afficheur, sans prétendre mesurer la productivité. L'histoire reste dans Git/journal.
+
+**Capacité reçue.** Le pas réel de V peut recevoir plusieurs arrivées sans dépasser la capacité
+commune : le cas **3 ml dans 1 ml**, vu échouer, est corrigé par limite collective. Les différences
+de coordonnées extrêmes ne paniquent plus. Quatre régressions couvrent confluences, entrées/sorties,
+rejet extérieur, coordonnées et refus tardif atomique. C'est une correction d'intégrité consommée
+par `hydro_network::step`, pas une réception des inondations complètes. **Maillons : 0** selon le
+critère révisé ; le nettoyage documentaire seul n'aurait pas remis le compteur à zéro.
+
+**Preuves.** Suite complète `code/`, release hors réseau : **387 réussis, 6 ignorés**, contre
+383/5 à l'entrée. Quatre tests de l'indicateur passent ; navigation active vérifiée, deux ancres
+réparées. C12 et les témoins V antérieurs restent inchangés. **A266 reste en échec connu** : sous
+gravité inclinée, un hublot central à 1,01 m fuit de **506 ml**, au lieu de zéro. Le nouveau test
+ignoré conserve l'attendu correct ; la convention distance normale / cote centrale est explicitée
+par notes datées à ADR-010, au reçu S226 et à L311. A267/A268 corrigées ; L312 ajoutée.
+
+**Limites et suite.** Aucun nouvel ADR ni invariant modifié, aucune valeur physique abaissée.
+I-03, I-06, I-07, I-08, I-10 et I-14 relus : état entier, ordre fixé, pas d'allocation ajoutée par
+inspection ; le multiplateforme, le budget et la géométrie générale ne sont pas reçus par ces
+tests. Pas de nouvelle réception GPU ou δ. **S228 : A266**, relation volume/plan orienté correcte
+et première version construite ; puis état V restaurable. Budget/précision δ et J1-bis demeurent
+des lots indépendants ; les raffinements de bornes n'en sont plus un préalable générique.
+A211/A243 restent à éprouver par les livraisons suivantes. File plurielle relue, feuille de route,
+index et passation actualisés. Jeton libéré ; après ce commit, les trois copies propres doivent
+être avancées sur master selon l'amorce, sans suppression de copie dont l'inactivité est incertaine.

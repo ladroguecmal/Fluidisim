@@ -5150,3 +5150,22 @@ Le geste : quand une décision pose une **représentation** (une table, un forma
 ailleurs, une **généralité** (un référentiel quelconque, une orientation quelconque), vérifier
 explicitement que la représentation survit à la généralité — et mesurer l'écart sur le cas qui a
 justifié la représentation, pas sur le cas facile. Voir A266.
+
+*Correction factuelle S227, 2026-09-13.* Les mesures ci-dessus imposaient une cote centrale
+verticale. Le module la consomme comme une distance normale : son prisme incliné est donc faux
+aussi. Le « 9,89 % » de la cale est limité au domaine non tronqué du montage S226. Voir la note
+corrective de [GRAVITE-DIRIGEE-S226](../docs/validation/GRAVITE-DIRIGEE-S226.md) et le suivi A266.
+La leçon rejoint L258/L280 : éprouver la représentation **sur le chemin qui la consomme**.
+
+## L312 — Borner chaque accès ne réserve pas une ressource partagée
+
+*(S227)* Le limiteur de V comparait chaque arrivée à la place libre du receveur. Trois arêtes
+voyaient chacune 1 ml libre et y plaçaient ensemble 3 ml. La conservation de masse passait :
+elle ne contraint pas la répartition. La normalisation des sorties protégeait les sources,
+pas le contenant qu'elles partageaient.
+
+Le geste : lorsqu'une limite porte sur une ressource commune, vérifier **la somme des accès**
+après leurs limites individuelles. Éprouver aussi un nœud qui reçoit et émet dans le même pas,
+la saturation et un témoin non saturé. La réduction cumulative entière réserve ici exactement
+la place disponible ; son ordre déterministe ne constitue pas une preuve multiplateforme.
+Ce principe vaut pour un volume, un pool de mémoire ou un budget consommé par plusieurs tâches.

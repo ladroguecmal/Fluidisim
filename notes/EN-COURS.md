@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S227 — en cours
+Session : S227 — terminée
 Agent : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
 Entrée : audit global demandé par l’utilisateur : intentions, dérives, procédure, documentation,
 zones d’ombre, améliorations et correctifs du code. Copie principale, master à dfd1507, propre ;
@@ -82,7 +82,7 @@ l’audit. Pas de réécriture d’ADR ou des sources initiales.
 - [x] **P3b** — remplacer l’indicateur de vélocité par un inventaire portable, sans faux score de productivité.
 - [x] **P4** — reproduire et corriger les défauts de code bornés issus de l’audit ; sinon documenter les correctifs prioritaires avec critères de réception.
 - [x] **P5** — vérifier les changements, achever le bilan global et ordonner les prochains lots selon leur effet sur le système.
-- [>] **P6** — rituel de fin §6 : journal, angles/leçons utiles, file active, index, jeton libre et copies synchronisées.
+- [x] **P6** — rituel de fin §6 : journal, angles/leçons utiles, file active, index, jeton libre et copies synchronisées.
 
 Chaque étape reste sous quinze minutes ; découpage déclaré ici si nécessaire.
 
@@ -112,3 +112,8 @@ P5 : suite complète release hors réseau : 387 réussis, 6 ignorés (dont le no
 Quatre tests de l'indicateur passent ; chemins actifs vérifiés et deux anciennes ancres réparées.
 Bilan achevé : A266, état V restaurable, budget/précision δ, espace/LOD/visibilité ; autres
 déclencheurs conservés dans la file. A267/A268 y sont closes ; leurs fiches arrivent au rituel P6.
+
+P6 : journal, A267/A268 et suivi A266/A211/A243 ; L312 et correction datée L311 ; trajectoire et
+file active relues, invariants touchés vérifiés. S228 : A266, puis V restaurable ; autres lots
+conservés. Jeton libre. Fin matérielle : commit du rituel, puis avance rapide des trois copies
+propres sur master ; aucune copie incertaine supprimée, lignée B archivée conservée.

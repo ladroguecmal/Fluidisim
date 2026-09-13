@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 20:11 +02:00
+JETON            : libre
+Battement        : 2026-09-13 20:15 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
-Session en cours : S227 — audit global demandé par l’utilisateur
-Dernière session : S226 — V reçoit la gravité dirigée ; A266 ouverte
-Session suivante : à fixer au bilan S227 ; A266 reste prioritaire pour V
+Session en cours : —
+Dernière session : S227 — audit global, reprise allégée et intégrité V corrigée
+Session suivante : S228 — A266, relation volume/plan orienté construite ; puis V restaurable
 Maillons        : 0
 
 ```
@@ -75,8 +75,8 @@ Ne pas relire le journal, les leçons ou tous les ADR intégralement à chaque r
 
 ## 4. Où en est le projet
 
-État des capacités à S226 : B/W et un afficheur interactif existent ; δ est un candidat MAC x-z
-non admissible à B3 ; V dispose du graphe hydraulique et de la gravité dirigée, sans restauration.
+État des capacités à S227 : B/W et un afficheur interactif existent ; δ est un candidat MAC x-z
+non admissible à B3 ; V reçoit les arrivées collectives bornées ; A266 et restauration restent dues.
 Les réceptions et limites courantes sont dans la feuille de route. Le nombre de tests ne mesure
 pas la couverture des intentions, et une exécution locale ne reçoit pas le multiplateforme.
 
