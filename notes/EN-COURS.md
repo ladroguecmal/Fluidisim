@@ -84,7 +84,7 @@ images après 3 de chauffe, comparé à 2 ms. Machine : celle de S202 (Ryzen AI 
 ### Plan
 
 - [x] **P1** — état réel, scène déclarée, plan seul.
-- [ ] **P2** — banc `frame_cost.rs` : grille projetée, décompte des sommets (total, dans R),
+- [x] **P2** — banc `frame_cost.rs` : grille projetée, décompte des sommets (total, dans R),
  coût par image un fil : B seul partout ; B+W chemin hôte. Essais du banc.
 - [ ] **P3** — leviers : (L1) parallélisme `std::thread::scope` 1/2/4/8/16 fils, temps mur ;
  (L2) table radiale à matrice de Bessel précalculée — noyau N×M mesuré sur tableaux de la
@@ -99,3 +99,11 @@ images après 3 de chauffe, comparé à 2 ms. Machine : celle de S202 (Ryzen AI 
 
 ### Notes de reprise
 
+P2 (`frame_cost`, release, un fil, 3 chauffes/11 images) — la scène vient de `render_impact.rs`
+inclus comme module, pas recopiée ; 15 essais. Grille projetée :
+| pas | sommets | dans R | B seul méd/max ms | image méd/max ms | B ns/pt | B+W ns/pt | image/budget |
+| 8 px | 2 240 | 1 918 | 2,942 / 3,039 | 17,195 / 18,715 | 1 314 | 8 744 | 8,6 |
+| 4 px | 9 044 | 7 652 | 12,012 / 17,666 | 74,013 / 84,157 | 1 328 | 9 431 | 37,0 |
+| 2 px | 36 160 | 30 614 | 42,798 / 46,337 | 279,755 / 306,646 | 1 184 | 8 924 | 139,9 |
+**86 % des sommets sont dans l'emprise** (grille projetée dense au premier plan, R 52 m autour
+d'un point à 28 m). **B seul dépasse déjà 2 ms à 8 px.** 16 fils matériels disponibles.
