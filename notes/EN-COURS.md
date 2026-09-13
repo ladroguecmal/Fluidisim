@@ -83,8 +83,8 @@ bit, décomposition `C_U`/`G(U)` publiée par classe.
 - [x] **P1** — jeton et plan seuls.
 - [x] **P2** — ADR-137 : coupure spectrale, famille de seuils, domination, réserve, limite spatiale.
 - [x] **P3** — construire la passe générique (ordre deux inchangé au bit), ordre `Spectral`, Prepared.
-- [ ] **P4** — tests : couverture, domination, gain strict, identité S220, refus, partition.
-- [ ] **P5** — exemple S221 : décomposition par taille de maille, partitions 2047→32767 ; campagne isolée.
+- [x] **P4** — tests : couverture, domination, gain strict, identité S220, refus, partition.
+- [>] **P5** — exemple S221 : décomposition par taille de maille, partitions 2047→32767 ; campagne isolée.
 - [ ] **P6** — publier la réception S221 et ses relevés bruts.
 - [ ] **P7** — rituel §6, journal, registres, index, file active, jeton et copies.
 
@@ -95,3 +95,5 @@ Campagne détachée : signaler la fin par un fichier marqueur, **pas** par `tail
 écrit par un autre processus (verrou Windows constaté S220).
 
 P3 : bits de l'ordre deux figés **avant** refactorisation (test `second_order_bits_frozen_before_spectral_s221`, 6 modes dont deux courts, 5 rectangles), puis passe générique `second_order_pass::<SPECTRAL>` ; classes accumulées derrière la constante. Module `pressure_spectral_bound.rs` : trois coupures D* = 2/1/½, `SlopeOrder::Spectral`, exposition Prepared. 11 tests de borne debug réussis, bits figés compris.
+
+P4 : quatre tests S221 (bits figés, couverture/domination sur 14 modes dont 8 courts à k = 9, gain strict un long + huit courts isotropes — borne < 0,85 × globale, 160 801 sondes —, refus et partition Spectral) + contrôles contexte/instant/domaine de Prepared pour l'ordre deux et la coupure. Une attente fausse corrigée : la masse d'une classe unique arrondie vers le haut est un ulp au-dessus (encadrement, pas égalité). Release : 370 réussis (272+4+1+93), 5 ignorés, zéro échec.

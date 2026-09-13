@@ -452,6 +452,15 @@ mod tests {
         assert!(partition.bound>=0.0);
         let b = f.local_slope_envelope(&ctx,time,[0.;2],[0.1;2]).unwrap();
         assert!(b.bound>0.);
+        // S221, ADR-136/137 : mêmes contrôles pour l'ordre deux et la coupure spectrale.
+        assert!(matches!(f.local_slope_envelope_second_order(&wrong,time,[0.;2],[0.;2]),Err(Error::Context)));
+        assert!(matches!(f.local_slope_envelope_spectral(&wrong,time,[0.;2],[0.;2]),Err(Error::Context)));
+        assert!(matches!(f.local_slope_envelope_spectral(&ctx,SimTime(0),[0.;2],[0.;2]),Err(Error::Time)));
+        assert!(matches!(f.local_slope_envelope_spectral(&ctx,time,[-9.;2],[0.;2]),Err(Error::Preparation(_))));
+        let order = spectral_pressure::SlopeOrder::Spectral;
+        assert!(matches!(f.partition_slope_envelope_order(&wrong,time,[0.;2],[0.;2],&mut pool,7,order),Err(Error::Context)));
+        let s = f.local_slope_envelope_spectral(&ctx,time,[0.;2],[0.1;2]).unwrap();
+        assert!(s.bound>0. && s.bound<=b.bound);
     }
     #[test]
     fn context_rejects_every_changed_coordinate_and_recipe() {

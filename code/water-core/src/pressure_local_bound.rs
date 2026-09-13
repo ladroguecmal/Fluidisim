@@ -552,6 +552,132 @@ mod tests {
         ];
         assert_eq!(got, frozen);
     }
+    /// ADR-137 : sondes, domination au bit sur ADR-136, cohérence des masses de classes.
+    #[test]
+    fn spectral_covers_and_dominates_s221() {
+        let mut slots = [Slot::default(); 14];
+        slots[..6].copy_from_slice(&frozen_field_s221());
+        for (i, s) in slots[6..].iter_mut().enumerate() {
+            let a = i as f32 * core::f32::consts::TAU / 8.0 + 0.3;
+            let eta = Complex { re: 0.01 * (i as f32 + 1.0), im: -0.004 * i as f32 };
+            *s = slot([9.0 * a.cos(), 9.0 * a.sin()], eta);
+        }
+        let f = Field::from_slots(&slots, [-4.; 2], [4.; 2]);
+        let (mut strict, mut cut_strict) = (0, 0);
+        for size in [4.0f32, 2.0, 1.0, 0.5, 0.1] {
+            let cells = (8.0 / size) as i32;
+            for ix in 0..cells.min(24) {
+                for iy in 0..cells.min(24) {
+                    let lo = [-4. + ix as f32 * size, -4. + iy as f32 * size];
+                    let hi = [lo[0] + size, lo[1] + size];
+                    let two = f.local_slope_envelope_second_order(lo, hi).unwrap();
+                    let s = f.local_slope_envelope_spectral(lo, hi).unwrap();
+                    assert_eq!(s.second_order.bound.to_bits(), two.bound.to_bits());
+                    assert_eq!(
+                        s.second_order.second_order_bound.to_bits(),
+                        two.second_order_bound.to_bits()
+                    );
+                    assert!(s.bound <= two.bound);
+                    strict += (s.bound < two.bound) as usize;
+                    let m = s.cuts.map(|c| c.unresolved_mass);
+                    assert!(m[0] <= m[1] && m[1] <= m[2]);
+                    if s.class_mass[3] > 0.0 {
+                        // ADR-137 §3 : la coupure à 2 ne perd pas sur les exclus (arrondi près).
+                        assert!(s.cuts[0].bound <= two.second_order_bound * 1.0001);
+                        cut_strict += (s.cuts[0].bound < two.second_order_bound) as usize;
+                    }
+                    for i in 0..=20 {
+                        for j in 0..=20 {
+                            let p = [lo[0] + i as f32 * size / 20., lo[1] + j as f32 * size / 20.];
+                            let p = [p[0].min(hi[0]), p[1].min(hi[1])];
+                            assert!(norm(f.sample(p).unwrap().slope) <= s.bound);
+                        }
+                    }
+                }
+            }
+        }
+        assert!(strict > 0 && cut_strict > 0);
+    }
+    /// Un mode long et huit modes courts isotropes : la globale et ADR-136 plafonnent,
+    /// la coupure borne le long localement et les courts ensemble.
+    #[test]
+    fn spectral_gains_where_short_modes_dominate_s221() {
+        let mut slots = [Slot::default(); 9];
+        slots[0] = slot([0.2, 0.], Complex { re: 1., im: 0. });
+        for (i, s) in slots[1..].iter_mut().enumerate() {
+            let a = i as f32 * core::f32::consts::TAU / 8.0;
+            *s = slot([10. * a.cos(), 10. * a.sin()], Complex { re: 0.01, im: 0. });
+        }
+        let f = Field::from_slots(&slots, [-4.; 2], [4.; 2]);
+        let (lo, hi) = ([-1., -1.], [1., 1.]);
+        let s = f.local_slope_envelope_spectral(lo, hi).unwrap();
+        let global = f.slope_envelope_directional().unwrap();
+        assert!(s.second_order.bound >= global);
+        assert!(s.bound < 0.85 * global, "{} {}", s.bound, global);
+        // Somme d'une seule classe arrondie vers le haut : un ulp au plus au-dessus.
+        let (class, cut) = (s.class_mass[3], s.cuts[0].unresolved_mass);
+        assert!(cut >= class && cut <= up(class), "{class} {cut}");
+        let mut worst = 0.0f32;
+        for i in 0..=400 {
+            for j in 0..=400 {
+                let p = [-1. + i as f32 / 200., -1. + j as f32 / 200.];
+                worst = worst.max(norm(f.sample(p).unwrap().slope));
+            }
+        }
+        assert!(worst <= s.bound);
+    }
+    #[test]
+    fn spectral_refusals_and_partition_s221() {
+        use crate::spectral_pressure::{PartitionStop, SlopeCell};
+        let slots = [slot([1., 0.], Complex::default())];
+        let f = Field::from_slots(&slots, [-1.; 2], [1.; 2]);
+        assert_eq!(f.local_slope_envelope_spectral([-1.; 2], [1.; 2]).unwrap().bound, 0.);
+        for (min, max) in [
+            ([f32::NAN, 0.], [0.; 2]),
+            ([0.; 2], [f32::INFINITY, 0.]),
+            ([0.; 2], [-0.1, 0.]),
+            ([-2., 0.], [0.; 2]),
+        ] {
+            assert_eq!(f.local_slope_envelope_spectral(min, max).unwrap_err(), Error::Domain);
+        }
+        for eta in [
+            Complex { re: f32::MAX, im: f32::MAX },
+            Complex { re: 1e-30, im: 0. },
+        ] {
+            let bad = [slot([1., 0.], eta)];
+            let f = Field::from_slots(&bad, [-1.; 2], [1.; 2]);
+            assert_eq!(
+                f.local_slope_envelope_spectral([-1.; 2], [1.; 2]).unwrap_err(),
+                Error::NonFinite
+            );
+        }
+        let slots = frozen_field_s221();
+        let f = Field::from_slots(&slots, [-2.; 2], [2.; 2]);
+        for budget in [1, 31, 127] {
+            let mut c = [SlopeCell::default(); 64];
+            let r = f
+                .partition_slope_envelope_order([-2.; 2], [2.; 2], &mut c, budget, SlopeOrder::Spectral)
+                .unwrap();
+            assert_eq!(r.stop, PartitionStop::Evaluations);
+            let mut again = [SlopeCell::default(); 64];
+            let same = f
+                .partition_slope_envelope_order([-2.; 2], [2.; 2], &mut again, budget, SlopeOrder::Spectral)
+                .unwrap();
+            assert_eq!(r.bound.to_bits(), same.bound.to_bits());
+            let mut area = 0.0;
+            for cell in &c[..r.leaves] {
+                let (lo, hi) = cell.rectangle();
+                area += (hi[0] - lo[0]) * (hi[1] - lo[1]);
+            }
+            assert_eq!(area, 16.0);
+            for y in 0..=80 {
+                for x in 0..=80 {
+                    let p = [-2. + x as f32 / 20., -2. + y as f32 / 20.];
+                    assert!(norm(f.sample(p).unwrap().slope) <= r.bound);
+                }
+            }
+        }
+    }
     /// Au maximum de pente, l'excès d'ADR-135 est d'ordre un, celui d'ADR-136 d'ordre deux.
     #[test]
     fn second_order_is_quadratic_at_the_slope_maximum_s220() {
