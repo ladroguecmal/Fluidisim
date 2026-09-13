@@ -81,8 +81,12 @@ pub fn compose<'a, const N: usize>(
             .sample(frame, cell, point, time)
             .map_err(|_| Error::Domain)?;
         // S141 : chaque terme consomme le meilleur majorant exact de sa pente réelle (ADR-095).
+        // S215, ADR-133 : le **budget** prend le majorant à l'instant demandé — une somme de
+        // modules modaux ne voit pas la dispersion, et se trompe d'un facteur 4 à 30 sur la vie
+        // du champ. `bound` reste la raideur **publiée** : la changer changerait `steepness`,
+        // c'est-à-dire un bit publié, et ADR-133 n'en change aucun.
         bound += field.slope_max();
-        budget += field.slope_max();
+        budget += field.slope_max_at(time);
         base.eta += w.eta;
         base.deta_dt += w.deta_dt;
         base.u_total[0] += w.horizontal_velocity[0];

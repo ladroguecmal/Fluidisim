@@ -202,7 +202,7 @@ fn reductions_and_world_surface_keep_values_and_density() {
         // S205, ADR-128 : l'égalité `differential_slope_envelope == steepness·π` gardait que les
         // deux chemins consommaient le même budget, B compris. B sorti du budget, l'équivalence
         // se garde sur le budget lui-même : `slope_floor` décide les deux chemins à l'identique.
-        let floor = crate::prepared_water::mixed::slope_floor(i, Some(p));
+        let floor = crate::prepared_water::mixed::slope_floor(i, Some(p), t);
         assert!(floor > 0.0);
         let bound = BoundBackground::new(b, FrameId(7), 9);
         for cap in [floor, f32::from_bits(floor.to_bits() - 1)] {

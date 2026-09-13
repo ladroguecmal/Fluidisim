@@ -725,7 +725,7 @@ fn admits_matches_the_geometric_refusals_of_the_request() {
         // quand même, sur la pente totale. La garantie porte sur la géométrie, pas au-delà.
         let inside = world(1.0, 0.0);
         assert!(admits(&bound, impacts, Some(p), inside));
-        let floor = slope_floor(impacts, Some(p));
+        let floor = slope_floor(impacts, Some(p), p.time());
         assert!(floor > 0.0);
         assert_eq!(
             sample_world_batch(
@@ -819,7 +819,8 @@ fn reference_sea_s201_composes_with_an_impact_s205() {
     let points = xy.map(|p| world(p[0] as f64, p[1] as f64));
     let floor_b = b.eval(points[0], t).unwrap().steepness * core::f32::consts::PI;
     assert!(floor_b > BREAKING_SLOPE, "la mer S201 dépasse seule la limite : {floor_b}");
-    assert_eq!(slope_floor(&impacts, None).to_bits(), impact.slope_max().to_bits());
+    // S215, ADR-133 : le plancher prend le majorant **à l'instant**, plus celui de la naissance.
+    assert_eq!(slope_floor(&impacts, None, t).to_bits(), impact.slope_max_at(t).to_bits());
 
     let mut work = [WaterSample::default(); 3];
     let mut out = work;
@@ -844,7 +845,10 @@ fn reference_sea_s201_composes_with_an_impact_s205() {
         assert_eq!(single[n].steepness.to_bits(), out[n].steepness.to_bits());
     }
     // Le budget de l'impact s'applique toujours, sur la mer raide comme ailleurs.
-    let below = f32::from_bits(impact.slope_max().to_bits() - 1);
+    // S215, ADR-133 : le budget est celui de l'instant, donc la limite qui doit refuser aussi.
+    // À 3 s ce majorant vaut une fraction de celui de la naissance ; prendre `slope_max()` ici
+    // n'éprouverait plus rien, puisqu'il est désormais **au-dessus** du budget.
+    let below = f32::from_bits(impact.slope_max_at(t).to_bits() - 1);
     assert!(matches!(
         sample_world_batch(&bound, &impacts, None, t, &points, below, &mut work, &mut out),
         Err(Error::Slope) | Err(Error::SlopeEnvelope)
@@ -864,9 +868,10 @@ fn slope_floor_refuses_every_batch_below_it() {
         let mut work = [WaterSample::default(); 3];
         let mut out = work;
         let points = [world(1.0, 0.0), world(2.0, 1.0), world(-3.0, 2.0)];
-        let floor = slope_floor(impacts, Some(p));
+        let floor = slope_floor(impacts, Some(p), t);
         // Le plancher est bien la somme des parts constantes, dans l'ordre de la requête.
-        assert_eq!(floor.to_bits(), (impact.slope_max() + p.slope_envelope()).to_bits());
+        // S215, ADR-133 : « constantes » veut dire indépendantes du **point**, plus de l'instant.
+        assert_eq!(floor.to_bits(), (impact.slope_max_at(t) + p.slope_envelope()).to_bits());
         // Sous le plancher, chaque lot non vide est refusé — un point comme trois.
         for below in [floor * 0.999, floor * 0.5, f32::MIN_POSITIVE] {
             assert!(below < floor);

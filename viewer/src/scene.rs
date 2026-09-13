@@ -393,8 +393,10 @@ pub fn mixed_compose(
     )
     .map_err(|e| format!("préparation sillage : {e:?}"))?;
     let bound = BoundBackground::new(&scene.background, FrameId(0), 0);
-    let floor = mixed::slope_floor(&impacts, Some(&pressure));
-    let impact_envelope = mixed::slope_floor(&impacts, None);
+    // S215, ADR-133 : le plancher se lit à l'instant demandé — le majorant d'un impact suit
+    // désormais la dispersion, et l'annonce doit être calculée là où le refus l'est.
+    let floor = mixed::slope_floor(&impacts, Some(&pressure), time);
+    let impact_envelope = mixed::slope_floor(&impacts, None, time);
     let pressure_envelope = pressure.slope_envelope();
     let mut values = Vec::with_capacity(world.len());
     let mut refusals = Vec::new();

@@ -342,7 +342,7 @@ fn two_source_refusal() {
             },
         )
         .unwrap();
-        let floor = mixed::slope_floor(&impacts, Some(&prepared));
+        let floor = mixed::slope_floor(&impacts, Some(&prepared), t);
         let mut scratch = [Default::default(); 1];
         let mut out = [Default::default(); 1];
         let verdict = mixed::sample_world_batch(

@@ -182,6 +182,10 @@ pub fn admits<const N: usize>(
 /// ADR-080 : part de l'enveloppe de pente qui ne dépend d'aucun point, sommée dans l'ordre
 /// exact de la requête.
 ///
+/// **S215, ADR-133 : l'instant est un paramètre**, parce que le majorant d'un champ d'impact
+/// suit désormais la dispersion (`slope_max_at`). Sans lui, l'annonce et le refus seraient
+/// calculés à deux instants différents et la garantie ci-dessous cesserait de tenir.
+///
 /// **S205, ADR-128 : c'est désormais le budget de refus lui-même**, et l'annonce est exacte
 /// dans les deux sens. La requête somme les mêmes termes, dans le même ordre, à partir de zéro :
 /// B n'y entre plus. Donc `max_slope < slope_floor(...)` ⟹ tout lot non vide est refusé
@@ -190,10 +194,11 @@ pub fn admits<const N: usize>(
 pub fn slope_floor<const N: usize>(
     impacts: &Prepared<'_, '_, N>,
     pressure: Option<&bound_pressure::Prepared<'_>>,
+    time: SimTime,
 ) -> f32 {
     let mut floor = 0.0f32;
     for f in impacts.fields.iter().flatten() {
-        floor += f.slope_max();
+        floor += f.slope_max_at(time);
     }
     if let Some(p) = pressure {
         floor += p.slope_envelope();
@@ -276,8 +281,10 @@ pub fn sample_world_batch<const N: usize>(
             slope[1] += w.slope[1];
             perturbation[0] += w.slope[0];
             perturbation[1] += w.slope[1];
+            // S215, ADR-133 : `envelope` reste la raideur publiée (bit publié, inchangé) ;
+            // `budget` suit la dispersion, dans le même ordre de somme que `slope_floor`.
             envelope += f.slope_max();
-            budget += f.slope_max();
+            budget += f.slope_max_at(time);
         }
         if fields.next().is_some() {
             return Err(fail(composition::Error::FieldsMismatch));

@@ -95,7 +95,7 @@ pub fn differential_world_batch<const N: usize>(
             total.water.add(&w);
             perturbation[0] += w.grad_eta[0];
             perturbation[1] += w.grad_eta[1];
-            budget += f.slope_max();
+            budget += f.slope_max_at(time);
         }
         if fields.next().is_some() {
             return Err(fail(composition::Error::FieldsMismatch));

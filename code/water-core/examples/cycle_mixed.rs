@@ -526,7 +526,7 @@ fn main() {
             (
                 q,
                 a,
-                prepared_water::mixed::slope_floor(&impacts, Some(&view)),
+                prepared_water::mixed::slope_floor(&impacts, Some(&view), SimTime(1_500_000)),
             )
         };
         let reference: Vec<_> = output[..64].iter().copied().map(bits).collect();

@@ -124,7 +124,7 @@ disparaître — l'occupation de 84 %, elle, ne dépend d'aucun échantillonnage
 - [x] **P5** — scène à deux sources : exercer le refus tel qu'il est aujourd'hui, et le requalifier avec le majorant resserré.
 - [x] **P6** — décider **et construire** : ADR, puis `slope_max_at(t)` dans `RadialImpact` — méthode neuve, `slope_max()` inchangée (ADR-094 : migrer le refus `Steepness` est une autre décision) — consommée par le budget de composition ; tests.
   *(P4 à P6 réécrits après P3-bis : la similitude étant établie, la décision n'est plus « laquelle des trois voies » mais « resserrer, et voici la loi ». Le plan d'origine reste lisible ci-dessus.)*
-- [ ] **P6-bis** — *scindé de P6 au constat de sa taille, avant de le commencer* : câbler le budget de composition sur `slope_max_at`, instant porté par `slope_floor` ; rattraper les attentes de tests que la frontière déplace.
+- [x] **P6-bis** — *scindé de P6 au constat de sa taille, avant de le commencer* : câbler le budget de composition sur `slope_max_at`, instant porté par `slope_floor` ; rattraper les attentes de tests que la frontière déplace.
 - [ ] **P7** — document de réception (en-tête ADR-131, rang de passage) ; suite complète `code/`.
 - [ ] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
@@ -272,3 +272,31 @@ Test `slope_max_at_is_a_tighter_bound_at_every_instant_s215`, sur quatre λ dont
 génératrice** (0,75 · 2 · 5 m) : égalité au bit à la naissance, égalité au bit hors domaine dans les
 deux sens, **jamais dépassé** sur 481 instants × 2 001 rayons, et resserrement > 4 au-delà de τ = 8.
 Passe en 44 s.
+
+P6-bis : **le budget est câblé, et le refus a disparu.**
+Quatre sites : `composition::compose`, `mixed_water::sample_world_batch`, `mixed_water::slope_floor`
+(qui prend désormais l'instant) et `mixed_differential`. Dans les trois premiers, seul `budget`
+change : `bound` / `envelope` restent sur `slope_max()`, parce qu'ils alimentent `steepness`, qui
+est un **bit publié** — et ADR-133 n'en change aucun. Vérifié : `d_eta_m = 0,000000000` dans l'hôte,
+inchangé depuis S214.
+
+**Trois attentes de tests seulement ont bougé, toutes portant sur le budget lui-même** — pas de
+cascade : le plancher à l'instant (`slope_floor_refuses_every_batch_below_it`), le plancher sans
+pression (S205), et la limite « juste sous le budget » du test de la mer S201, qui à 3 s devait
+descendre avec lui : prendre `slope_max()` n'y éprouvait plus rien, puisqu'il est désormais
+**au-dessus** du budget.
+
+Démonstration finale, même scène qu'en P5 :
+
+| impacts | budget avant | verdict avant | budget après | part | verdict après |
+|---:|---:|---|---:|---:|---|
+| 1 | 0,377603 | `Ok(())` | 0,186540 | 41,6 % | `Ok(())` |
+| **2** | **0,590210** | **`Err(SlopeEnvelope)`** | **0,208086** | **46,4 %** | **`Ok(())`** |
+| 3 | 0,802818 | `Err(SlopeEnvelope)` | 0,229631 | 51,2 % | `Ok(())` |
+
+Le budget rendu par la bibliothèque et celui calculé à la main depuis la table coïncident à 1e-6 :
+le câblage fait bien ce que la table dit.
+Hôte : occupation 42,3 / 39,8 / 41,6 / 38,5 / 37,6 % aux cinq âges (contre 77,5 à 84,1 en S214) ;
+`VERIFY` **inchangé** (7,2271e-5 m à 16 s, 7,4625e-5 à 39 s) ; GPU eau 1,904 / 4,187 ms inchangé ;
+`--smoke` 120 images. Suite `code/` : **355 réussis (257+4+1+93), 5 ignorés** — un de plus qu'en
+S214, celui d'ADR-133.
