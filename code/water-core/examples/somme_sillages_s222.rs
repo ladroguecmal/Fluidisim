@@ -252,6 +252,21 @@ fn impacts_that_fit(pressure: f32, impact: f32) -> i32 {
     (((BREAKING_SLOPE - pressure) / impact).floor()).max(0.0) as i32
 }
 
+/// S222 P6 — le terme d'impact depend fortement de l'age (ADR-133). La conclusion de P5 tient a
+/// l'instant mesure ; ce balayage en dit le domaine, au lieu de le supposer.
+fn impact_by_age(pressure: f32) {
+    println!("AGE_IMPACT pression_3_sillages_eloignes={pressure:.9} pi_sur_7={BREAKING_SLOPE:.9}");
+    for age_s in [0.0f64, 0.5, 1., 2., 4., 8., 16., 32., 56.] {
+        let t = SimTime(START + (age_s * 1e6) as u64);
+        let imp = impact_term(t);
+        println!(
+            "AGE_IMPACT age_s={age_s} impact_unitaire={imp:.9} part_d_un_impact={:.4} impacts_admis={}",
+            imp / BREAKING_SLOPE,
+            impacts_that_fit(pressure, imp)
+        );
+    }
+}
+
 fn main() {
     let step: f32 = std::env::args()
         .nth(1)
@@ -270,6 +285,7 @@ fn main() {
         .half_into(&mut half)
         .unwrap();
     let mut pool = vec![SlopeCell::default(); 32768];
+    impact_by_age(0.165356964);
 
     // Trajectoires : écart en y entre sources. « proches » = deux fois sigma, « eloignes » = 30 m,
     // soit bien au-delà de la largeur du sillage de Kelvin à cette vitesse.

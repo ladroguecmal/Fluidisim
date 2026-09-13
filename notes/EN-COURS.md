@@ -117,7 +117,7 @@ ce résultat-là qu'il faut savoir écrire s'il se produit.
 - [x] **P3** — enveloppe globale et maximum réel par configuration ; sur-additivité mesurée.
 - [x] **P4** — borne locale conjointe : partition spectrale à budget d'évaluations égal ; gain, reste au-dessus du maximum, **coût de passe**.
 - [x] **P5** — part de π/7 : budget d'admission complet avec les impacts sommés ; combien de sources passent, avant et après.
-- [ ] **P6** — décider : ADR si quelque chose est rendu **et** utilisable ; sinon constat motivé, et retour à la file (cadence complète de l'hôte, V-noyau).
+- [x] **P6** — décider : ADR si quelque chose est rendu **et** utilisable ; sinon constat motivé, et retour à la file (cadence complète de l'hôte, V-noyau).
 - [ ] **P7** — document de réception (en-tête ADR-131 D3) ; suite complète `code/`.
 - [ ] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
@@ -222,3 +222,56 @@ bon qu'il peut l'être. C'est son **prix** qui le disqualifie, pas sa qualité.
 
 Le gain est donc réel, borné, et connu : **+2 à +3 impacts pour 25 secondes de calcul**, contre un
 budget d'image de 2 ms. Quatre ordres de grandeur, et une loi d'échelle qui les défend (P4).
+
+P6 : **avant de décider, j'ai vérifié le domaine de la conclusion de P5 — et il la corrige.**
+
+Le terme d'impact dépend fortement de l'âge (ADR-133). Balayé contre le terme de pression de trois
+sillages éloignés (0,165357) :
+
+| âge de l'impact (s) | terme unitaire | part de π/7 | impacts admis |
+|---:|---:|---:|---:|
+| 0 à 0,5 | 0,212607 | **47,4 %** | **1** |
+| 1 | 0,203180 | 45,3 % | 1 |
+| 2 | 0,142269 | 31,7 % | 1 |
+| 4 | 0,054900 | 12,2 % | 5 |
+| 8 | 0,033892 | 7,6 % | 8 |
+| 16 | 0,021545 | 4,8 % | 13 |
+| 56 | 0,007390 | 1,7 % | 38 |
+
+**Correction de P5.** J'y ai écrit « la part somme n'est plus contraignante ». C'est vrai à
+l'instant mesuré, où les impacts ont une dizaine de secondes — et **faux pour des impacts jeunes** :
+sous deux secondes, **un seul** impact passe à côté de trois sillages. Une scène à deux
+éclaboussures simultanées est toujours refusée.
+
+**Et la borne partitionnée n'y change rien** : avec la pression à 0,071160 au lieu de 0,165357, un
+impact neuf (0,212607) laisse 0,166 — soit **un** impact encore. Le terme qui sature n'est pas la
+pression, c'est le **majorant de naissance de l'impact**, et ADR-133 ne peut rien pour lui : à
+τ = 0 il est **exactement atteint** (S215 : 0,999998). Ce n'est pas du pessimisme, c'est la physique
+— une éclaboussure fraîche a vraiment une pente de 47 % de la cambrure de déferlement.
+
+**La part somme d'A254 a donc changé de côté, et c'est le résultat de la session.**
+- **Côté sillages** : elle est absorbée par la composition modale (1,44 à 1,67 pour trois sources),
+  et ce qui reste est **spatial** (A261) — la borne locale le rend en entier, à un prix
+  structurellement interdit.
+- **Côté impacts** : elle est **littérale**. `slope_floor` somme `slope_max_at` par champ, **sans
+  aucune conscience de la distance** : deux impacts frais à cent mètres l'un de l'autre s'ajoutent
+  exactement comme s'ils étaient au même point. Rien dans S215–S222 ne l'a touchée — ADR-133 a
+  resserré chaque majorant **dans le temps**, jamais leur **somme dans l'espace**.
+
+### Décision
+
+**Aucun ADR, aucune migration d'admission.** Trois raisons, dans cet ordre :
+
+1. **Le prix disqualifie la borne partitionnée** : +2 à +3 impacts pour 25 s, contre un budget
+   d'image de 2 ms. Quatre ordres de grandeur, et P4 montre que c'est une **loi d'échelle** — la
+   maille utile est sous-ondulatoire, leur nombre croît comme l'aire divisée par λ_min², et chaque
+   maille est `O(N)`. Aucune constante ne franchit cela.
+2. **Le terme de pression n'est plus le goulot** : 16 à 43 % de π/7 pour un à trois sillages, et la
+   borne le porterait à 16 %. Migrer coûterait des secondes pour desserrer ce qui ne serre plus.
+3. **Le goulot est ailleurs, et il est nommé** : la somme spatiale sur les impacts. C'est là que la
+   mesure envoie la suite, et non « retour à la file » — la file elle-même désignait A254, et A254
+   n'est pas close : elle a changé de terme.
+
+Ce que cette décision ne fait pas : elle ne retire rien à ADR-135/136/137, qui restent publiées et
+mesurées ; elle ne dit pas que la borne locale est inutile — elle dit qu'elle n'est pas un **terme
+d'admission par image**. Un usage hors image (validation, outillage auteur, banc) reste ouvert.
