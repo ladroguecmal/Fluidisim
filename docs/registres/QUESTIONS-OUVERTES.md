@@ -1710,4 +1710,3 @@ entrée par entrée. Le fil reprend ci-dessous.
   source sur plusieurs lots/recettes : préparation, actualisation, évaluation, refus
   et allocations. Comparer àla surface àentrées identiques ; conditions/limites de
   mesure avant budget de consommation perturbative. BILAN-S145/BILAN-B4-S176 portés.
-

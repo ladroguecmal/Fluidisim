@@ -1,0 +1,29 @@
+"""Contre-exemples des erreurs de classement et d'historique de l'ancien indicateur."""
+import unittest
+from etat_projet import activity, category, history, layer
+
+
+class InventoryTests(unittest.TestCase):
+    def test_harness_viewer_and_nested_sources_are_separate(self):
+        self.assertEqual(category("code/water-harness/src/physics.rs"), "harnais_src")
+        self.assertEqual(category("viewer/src/water.wgsl"), "afficheur_src")
+        self.assertEqual(category("code/water-core/src/radial_impact/table.rs"), "coeur_src")
+
+    def test_non_session_commit_does_not_inherit_the_previous_session(self):
+        raw = ("\x1ea\tS227 P1 — plan\n2\t1\tnotes/EN-COURS.md\n"
+               "\x1eb\tMaintenance\n99\t0\tcode/water-core/src/hydro_network.rs\n"
+               "\x1ec\tS226 P6 — fin\n3\t0\tviewer/src/main.rs\n")
+        self.assertEqual(activity(history(raw), 227), {"S220–S229": {"markdown": 2}})
+
+    def test_eras_continue_after_the_old_hardcoded_limit(self):
+        raw = "\x1ez\tS301 P2 — suite\n5\t0\tviewer/src/main.rs\n"
+        self.assertEqual(activity(history(raw), 290), {"S300–S309": {"afficheur_src": 5}})
+
+    def test_layer_is_explicitly_only_a_filename_hint(self):
+        self.assertEqual(layer("code/water-core/src/hydro_network.rs"), "V")
+        self.assertIsNone(layer("code/water-core/src/tests_hydro_network.rs"))
+        self.assertIsNone(layer("code/water-core/src/host.rs"))
+
+
+if __name__ == "__main__":
+    unittest.main()
