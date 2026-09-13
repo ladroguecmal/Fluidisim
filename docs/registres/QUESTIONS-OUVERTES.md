@@ -1670,7 +1670,24 @@ entrée par entrée. Le fil reprend ci-dessous.
 
 ## File active
 
-Relue en S221, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+Relue en S222, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+
+**Suivi J1 S222 — la part somme d'A254 change de côté, et rien n'est migré.**
+[SOMME-SILLAGES-S222](../validation/SOMME-SILLAGES-S222.md). Une à trois sources de sillage dans un
+**même journal** — témoin : `modes = 4096` pour une comme pour trois, les amplitudes s'additionnent
+en complexe. **Côté sillages la somme est absorbée** : 1,67 fois une source pour trois proches,
+**1,44** pour trois éloignées. Ce qui y reste est **spatial** : le maximum réel ne bouge pas avec la
+séparation (0,0703 / 0,0704 / 0,0705) pendant que l'enveloppe croît de 44 %, d'où un pessimisme de
+1,64 à **2,35** — A261 mesurée sur une scène. La borne locale partitionnée le rend en entier
+(**1,005–1,010** du maximum) pour **25 s** ; et **il n'y a pas de raccourci local** — au-delà d'un
+mètre de demi-côté elle vaut l'enveloppe globale, un appel coûtant 640–700 µs quelle que soit la
+taille (L302, L303). **Aucun ADR, aucune migration d'admission** : le prix est une loi d'échelle.
+**Traduction en admission** : trois sillages et **huit** impacts passent, là où S214 voyait la
+deuxième source refuser — mais un impact **neuf** vaut **47,4 %** de π/7, donc sous deux secondes un
+seul passe, et aucune borne de pression n'y change rien. **Ligne neuve : A262** — la somme des
+majorants d'impact ignore la distance entre champs, et c'est le goulot. **Suite S223 : A262**,
+chercher une inégalité conjointe (support compact, pente maximale en r = 0,2062 λ), pas une table.
+Autres lignes et déclencheurs conservés.
 
 **Suivi J1 S221 — A259 levée à 4096 feuilles ; A261 ouverte ; la ligne se tourne vers A254.**
 [Réception S221](../validation/COUPURE-SPECTRALE-S221.md), ADR-137 : coupure spectrale, gain

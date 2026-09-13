@@ -3194,3 +3194,43 @@ modes exclus (`D ≥ 2`) portent 1,1–2,2 % de la masse ; le reste venait de la
   par parties sur la quadrature polaire, localisation par vitesse de groupe. Vérifier d'abord
   l'uniformité radiale de la quadrature et la phase `ω(k) t` d'un nœud au suivant.
   Voir COUPURE-SPECTRALE-S221, ADR-137 « Limite annoncée ».
+**Suivi A254 — S222, 2026-09-13 : la part somme change de côté, et c'est le résultat.**
+Mesurée sur une scène à une, deux et trois sources de sillage dans un **même journal**
+([SOMME-SILLAGES-S222](../validation/SOMME-SILLAGES-S222.md)).
+**Côté sillages, elle est absorbée** : les sources partagent les emplacements du demi-spectre
+(témoin : `modes = 4096` pour une comme pour trois), leurs amplitudes s'additionnent en complexe,
+et trois sources coûtent **1,67** fois une seule quand elles sont proches, **1,44** quand elles sont
+éloignées — loin du facteur 3 des impacts. Ce qui reste de pessimisme y est **spatial** (A261) : le
+maximum réel ne bouge pas avec la séparation (0,070316 / 0,070390 / 0,070463) pendant que
+l'enveloppe croît de 44 %, d'où un pessimisme qui passe de 1,64 à **2,35**.
+**Côté impacts, elle est littérale et intacte.** `slope_floor` somme `slope_max_at` par champ **sans
+aucune conscience de la distance** ; ADR-133 a resserré chaque majorant dans le **temps**, jamais
+leur somme dans l'**espace**. Voir **A262**.
+**Traduction en admission** : trois sillages et **huit** impacts passent aujourd'hui (neuf si
+éloignés), là où S214 voyait la deuxième source refuser l'image. La part somme n'est donc plus
+contraignante **pour des impacts d'une dizaine de secondes** — mais sous deux secondes, un impact
+neuf vaut **47,4 %** de π/7 à lui seul et un seul passe, ce qu'aucune borne ne change (à τ = 0 le
+majorant est exactement atteint, S215). Voir L302, L303.
+
+**Suivi A261 — S222, 2026-09-13 : chiffré sur une scène, et il plafonne tout.**
+Loin de la source, sur un rectangle de 2 × 2 m, la meilleure borne disponible vaut **213 à 757 fois**
+le maximum local. Le terme des modes non résolus `G(U)` (ADR-137) ne dépend ni du point ni des
+phases : il est spatialement aveugle par construction. Conséquence mesurée : **au-delà d'un mètre de
+demi-côté, la borne locale vaut exactement l'enveloppe globale** — la maille doit être
+sous-ondulatoire (λ_min = 2,09 m) ou elle ne sert à rien, ce qui fixe la loi d'échelle du prix
+(L302). A261 reste ouverte.
+
+- **A262** *(sévérité 2, S222 ; ouverte)* — **La somme des majorants d'impact ignore la distance
+  entre les champs.** `mixed_water::slope_floor` additionne `slope_max_at` pour chaque
+  `RadialImpact` admis : deux impacts frais à **cent mètres** l'un de l'autre consomment exactement
+  le même budget que deux impacts au même point, alors qu'aucun point du domaine ne voit plus de la
+  moitié de cette pente. C'est le **goulot mesuré** depuis S222 : un impact neuf vaut 47,4 % de π/7,
+  donc deux éclaboussures simultanées saturent, et la borne locale de pression n'y change rien —
+  elle desserre un terme qui ne serre plus. Rien dans S215 à S222 ne l'a touchée.
+  **Ce qui rend la ligne traitable, et la distingue d'A261** : un `RadialImpact` n'est pas une somme
+  de modules à support infini. Il a un **support compact et déclaré** — un disque de rayon connu —
+  et sa pente décroît avec la distance à son centre (ADR-094 : maximum en `r = 0,2062 λ`). Deux
+  disques disjoints ne peuvent pas atteindre leur maximum au même point, et cela se démontre au lieu
+  de se mesurer. **À faire** : une annonce conjointe qui tienne compte de la position relative des
+  champs — pas une table, une inégalité, comme ADR-134 l'a été pour les directions. Voir A254, A261,
+  SOMME-SILLAGES-S222 §5.

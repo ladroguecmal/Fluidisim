@@ -11434,3 +11434,58 @@ I-03 (échantillons inchangés), I-06 (aucune allocation, par inspection), I-14 
 nommés comme choix de famille, sans calibration), I-18 (aucune admission élargie) relus. Maillons
 0 : W avancée dans src et ADR-137 actée. 137 ADR, 261 angles, 301 leçons, 18 invariants, 6 SPEC,
 23 cas. Jeton libéré ; copies avancées après le commit de clôture.
+## S222 — 2026-09-13 — La part somme d'A254 change de côté ; rien n'est migré
+
+**Entrée.** « Reprends le projet », conversation neuve — **aucune mémoire de S217 à S221**, tout
+relu depuis `AGENTS.md`, `REPRISE.md` §4 et les ADR 135/136/137. Ligne `Session suivante` de S221 :
+A254 part somme. Maillons 0 à l'amorce. Claude Code, Opus 5 ; master et trois copies à c33953a.
+Plan 86d4ddd, P2+P3 8d4747d, P4 60e7e4d, P5 8dda318, P6 df69a4a, P7 12e3db4.
+
+**Décision structurante : aucune, et c'est la décision.** Aucun ADR, aucune migration d'admission.
+La borne locale partitionnée rend exactement ce que l'enveloppe perd, et son prix est une **loi
+d'échelle** qui interdit l'usage par image. Le terme de pression n'est plus le goulot. Le goulot a
+changé de côté et il est nommé : la somme **spatiale** sur les impacts (**A262**).
+
+**Chiffres qui orientent.**
+- **Témoin de composition partagée** : `modes = 4096` pour une, deux et trois sources dans un même
+  journal. Les amplitudes modales s'additionnent en complexe ; la préparation, elle, est linéaire
+  (6,3 / 13,4 / 18,9 ms).
+- **L'enveloppe est sous-additive** : trois sillages coûtent **1,67** fois un seul (proches),
+  **1,44** (éloignés). La prédiction écrite avant mesure — « ≤ 1,6 à trois » — tient de justesse
+  pour les éloignés et est dépassée de 4 % pour les proches.
+- **Mais elle pénalise la séparation** : maximum réel **constant** à 0,0703 / 0,0704 / 0,0705 quand
+  les sources s'éloignent, enveloppe +44 %, pessimisme de 1,64 à **2,35**. C'est A261 sur une scène.
+- **La borne partitionnée rend tout** : borne/maximum **1,0053 à 1,0099** à 32 767 évaluations,
+  gain jusqu'à **2,32** — mais **24 à 25 s**.
+- **Et il n'y a pas de raccourci local** : au-delà d'un mètre de demi-côté la borne locale **vaut
+  l'enveloppe globale** (0,9977), parce que tous les modes retombent alors dans la classe non
+  résolue ; et un appel coûte **640–700 µs**, `O(N)` quelle que soit la taille. Hypothèse de départ
+  contredite sur ses deux moitiés. **L303.**
+- **Admission** : trois sillages et **huit** impacts passent (neuf si éloignés), contre une scène
+  refusée en S214. La borne en rendrait deux à trois de plus, à un impact près du maximum réel.
+- **Domaine de cette conclusion, et il la corrige** : un impact **neuf** vaut **47,4 %** de π/7, donc
+  sous deux secondes **un seul** passe — et la borne n'y change rien, le majorant de naissance étant
+  exactement atteint (S215). Le goulot n'est pas la pression.
+
+**Ce qui n'a pas été fait.** Aucune ligne de `code/*/src` : la session mesure et décide de ne rien
+changer. **A262 ouverte** et non traitée — c'est la suite. A261 reste ouverte, désormais chiffrée
+sur une scène. A258, le coût de passe, la cadence complète de l'hôte, la loi GPU, J2/δ et V-noyau
+conservés. Aucun usage hors image de la borne locale n'a été instruit, alors qu'il reste ouvert.
+
+**Suite S223.** File J1/W : **A262**, la somme spatiale sur les impacts. La géométrie y est
+favorable — support compact et déclaré, pente décroissante depuis `r = 0,2062 λ` (ADR-094) — donc
+deux disques disjoints ne peuvent pas atteindre leur maximum au même point, et **cela se démontre
+au lieu de se mesurer**. Chercher l'inégalité, comme ADR-134 l'a fait pour les directions, et non
+une table. Si elle ne vient pas, revenir à la file (cadence complète de l'hôte, V-noyau).
+
+**Rituel.** A262 (sévérité 2) ; suivis A254 (change de côté) et A261 (chiffré, plafonne tout) ;
+L302, L303 ; file plurielle relue ; feuille de route J1/J1-bis ; index, README, REPRISE §4, file
+active et jeton. Invariants relus que la mesure touche — **I-18** (ce qui est comparé à `max_slope`
+est une pente réelle : rien n'a bougé, aucun terme n'a été substitué) ; I-06 (aucune allocation
+ajoutée ; la partition emprunte le pool de l'appelant) ; I-14 (aucun nombre nouveau : rien n'a été
+calibré). Aucun devenu faux, aucun amendé, aucun ADR réécrit ni acté.
+**Maillons : 1** — ni code d'exécution dans `code/*/src`, ni décision actée. Le compteur monte
+honnêtement ; la suite nomme **A262**, ligne née de la mesure mais rattachée à A254, qui est une
+ligne de la file active. À `Maillons ≥ 2`, la suivante devra choisir dans la file.
+370 tests release réussis, 5 ignorés — identique à S221. 137 ADR, 262 angles, 303 leçons,
+18 invariants, 6 SPEC, 23 cas. Jeton libre, copies avancées.

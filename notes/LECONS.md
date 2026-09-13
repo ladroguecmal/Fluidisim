@@ -4954,3 +4954,43 @@ permis de ne pas bâtir la décision sur la seule coupure fausse.
 Quand un agrégat est une somme pondérée, l'attribuer par la **masse** de chaque groupe, jamais par
 son effectif. Et quand la décision doit précéder la mesure, construire une famille qui contient
 l'hypothèse et ses voisines, plutôt que la seule hypothèse.
+## L302 — Un gain réel peut être structurellement inutilisable ; publier sa loi d'échelle, pas son facteur
+
+*(S222)* La borne locale partitionnée rend exactement ce que l'enveloppe globale perd : 2,32 fois le
+budget sur une scène à trois sillages séparés, et elle colle au maximum réel à 1 %. Publier ce
+facteur seul aurait annoncé un progrès. Il coûte **25 secondes** contre un budget d'image de 2 ms,
+et ce prix n'est pas une constante à optimiser : les mailles utiles doivent être **sous-ondulatoires**
+— au-delà d'une demi-longueur d'onde, tous les modes retombent dans la classe non résolue et la
+borne redevient l'enveloppe globale —, leur nombre croît donc comme l'aire divisée par `λ_min²`, et
+chaque maille est `O(N)`. Quatre ordres de grandeur, défendus par une loi.
+
+Ce qui généralise : **un facteur de gain sans son exposant de coût n'est pas un résultat, c'est une
+moitié de résultat** — et c'est la moitié qui donne envie de construire. Quand le prix suit une loi
+d'échelle imposée par la physique du problème (une longueur d'onde, un rayon de corrélation, une
+échelle de maillage), aucune optimisation d'implémentation ne la franchit, et le dire économise la
+session qui aurait essayé.
+
+Le geste : à côté de tout gain, écrire **ce qui fixe son prix** et si ce quelque chose est une
+constante ou un exposant. Chercher la taille de maille à laquelle le gain disparaît — elle existe
+presque toujours, et elle est la loi. Voir ADR-137, A261, SOMME-SILLAGES-S222 §3.
+
+## L303 — Une borne « locale » ne l'est que sous l'échelle du phénomène qu'elle borne
+
+*(S222)* J'attendais d'un appel sur un petit rectangle qu'il soit à la fois serré et bon marché, et
+qu'on puisse donc opposer « requête locale » à « partition coûteuse ». Les deux attentes sont
+fausses. **Serré** : au-delà d'un mètre de demi-côté — la plus courte longueur d'onde représentée
+valant 2,09 m —, la borne locale **vaut exactement l'enveloppe globale**, à la réserve numérique
+près ; elle ne devient informative qu'en dessous. **Bon marché** : l'appel est `O(N)` sur tous les
+modes quelle que soit la taille du rectangle, donc 670 µs et non quelques microsecondes — la
+localité du rectangle ne réduit pas le travail, elle ne fait que resserrer le résultat.
+
+Ce qui généralise : **le mot « local » recouvre deux propriétés indépendantes** — la borne est-elle
+plus serrée sur une petite région, et coûte-t-elle moins cher à y calculer ? Une représentation
+spectrale donne la première sous l'échelle de son mode le plus court, et **jamais** la seconde,
+puisque chaque mode a un support infini. Supposer les deux ensemble fait espérer un raccourci qui
+n'existe pas.
+
+Le geste : devant une annonce « locale », demander séparément **à partir de quelle taille elle
+resserre** et **ce que son calcul coûte en fonction de la taille**. Si le coût est indépendant de la
+région, la localité est un gain de précision, pas un gain de travail — et elle ne s'oppose pas à une
+partition, elle en est la brique.

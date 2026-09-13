@@ -88,8 +88,17 @@ feuilles, intacte à 1024 : aucune enveloppe de modules ne voit la localisation 
 **La part dynamique d'A255 est résorbée en précision à l'instant, pas en coût** (≈26 s CPU un fil par
 instant). Ce qui bloquera la scène J1 à plusieurs sources est la **part somme d'A254**. Les
 sources de pression forment déjà un seul champ préparé, dont la borne locale est conjointe.
-**Suite S222 J1/W : scène à plusieurs sillages**, borne conjointe contre le terme actuel du
-budget ; impacts toujours additionnés.
+*S222* : [scène à plusieurs sillages](validation/SOMME-SILLAGES-S222.md). **La part somme d'A254
+change de côté.** Côté sillages elle est **absorbée** — trois sources dans un même journal coûtent
+1,44 à 1,67 fois une seule, contre un facteur 3 chez les impacts — et ce qui y reste est spatial
+(A261 : pessimisme 1,64 → **2,35** quand les sources s'éloignent, alors que le maximum réel ne bouge
+pas). La borne locale partitionnée le rend en entier (**1,005–1,010** du maximum, gain jusqu'à 2,32)
+mais **à 25 s**, et il n'y a pas de raccourci local : au-delà d'un mètre de demi-côté elle vaut
+l'enveloppe globale, et un appel coûte 640–700 µs quelle que soit la taille. **Aucune migration
+d'admission** — le prix est une loi d'échelle (L302, L303). **Côté impacts elle est littérale** :
+un impact neuf vaut 47,4 % de π/7 et deux éclaboussures simultanées saturent, quelle que soit la
+borne de pression. **Suite S223 J1/W : A262**, la somme spatiale sur les impacts — chercher une
+**inégalité**, pas une table.
 *S220* : [borne locale d'ordre deux](validation/ORDRE-DEUX-S220.md), ADR-136. Hessienne
 signée, jamais pire qu'ADR-135 ; partition à 32767 évaluations à 1,006–1,012 × le maximum,
 mieux que l'ordre un à 65535 en moins de temps. Le pessimisme n'est plus l'obstacle sur ces
@@ -151,8 +160,10 @@ marge 0,0712. Elle passe avant toute scène à plusieurs sources.
   [ADR-133](adr/ADR-133-le-majorant-de-pente-suit-la-dispersion.md). Le pessimisme était de la
   **dispersion** et venait presque entièrement de l'impact ; son majorant suit désormais le temps
   (`slope_max_at`), et l'occupation tombe de **84 % à 42 %** — deux impacts et un sillage, qui
-  refusaient (`SlopeEnvelope`), passent. **Reste ouvert** : le budget est toujours une **somme**,
-  donc le nombre de sources reste borné ;
+  refusaient (`SlopeEnvelope`), passent. **S222 : la part somme est mesurée et elle change de
+  côté** — absorbée chez les sillages (1,44 à 1,67 pour trois sources partageant un journal),
+  **littérale chez les impacts**, où `slope_floor` somme sans conscience de la distance. Ce qui
+  reste ouvert d'A254 est donc **A262** ;
 - **A255** *(S215, sévérité 2)* — **part statique traitée en S216** par
   [ADR-134](adr/ADR-134-l-enveloppe-de-pente-tient-compte-des-directions.md) : l'enveloppe sommait
   scalairement des contributions vectorielles, et une inégalité en `O(N)` en retire 20 %, sans
@@ -178,7 +189,7 @@ l'échec d'optimisations prises isolément. La liste est ouverte.
 | **LOD spectral** — nœuds par source selon distance et visibilité | absente | écart à la recette pleine, durée et rayon honnêtes (ADR-107, **ADR-132** : les deux lois se recalculent depuis la recette réduite) |
 | **LOD temporel** — cadence de mise à jour selon distance, vitesse, régime | absente | erreur de phase, I-09 |
 | **visibilité** — frustum, occlusion, hors écran | absente | exactitude au retour dans le champ |
-| **mutualisation** — nœuds partagés par sources de même recette, passe/grille communes B/W | absente ; **conditionnée par la part dynamique d'A255** (S216 ; part statique levée par ADR-134, impact par ADR-133) | superposition dans son domaine (ADR-123), et part du budget de pente consommée |
+| **mutualisation** — nœuds partagés par sources de même recette, passe/grille communes B/W | absente ; **plus conditionnée par le budget de pente** (S222 : trois sillages et huit impacts passent), désormais par le coût de passe seul | superposition dans son domaine (ADR-123), et part du budget de pente consommée |
 
 **Chaque mesure de coût publie** techniques présentes, techniques absentes et domaine de validité
 (scène, recette, sources, formats, instants, machine, grandeur mesurée) — ADR-131 D3.

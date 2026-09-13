@@ -20,6 +20,22 @@ Point d'entrée unique. Toute conversation qui reprend le projet commence ici.
 
 ## Décisions d'architecture
 
+**S222 — 2026-09-13 : [la part somme d'A254 change de côté](validation/SOMME-SILLAGES-S222.md) ; rien n'est migré.**
+Une à trois sources de sillage dans un même journal. **L'enveloppe est sous-additive** — trois
+sillages coûtent 1,67 fois un seul (proches), **1,44** (éloignés) — mais elle **pénalise la
+séparation** : maximum réel constant à 0,0703–0,0705 quand les sources s'éloignent, pessimisme de
+1,64 à **2,35** (A261 sur une scène). La borne locale partitionnée rend tout — borne/maximum
+**1,005–1,010**, gain jusqu'à **2,32** — pour **25 s**, et **il n'y a pas de raccourci local** :
+au-delà d'un mètre de demi-côté elle vaut l'enveloppe globale, et un appel coûte 640–700 µs quelle
+que soit la taille (**L303**). Le prix est une **loi d'échelle** — mailles sous-ondulatoires
+(λ_min = 2,09 m), nombre en aire/λ_min², chacune `O(N)` (**L302**). Admission : trois sillages et
+**huit** impacts passent, là où S214 voyait la deuxième source refuser. **Mais un impact neuf vaut
+47,4 % de π/7** : sous deux secondes un seul passe, et aucune borne n'y change rien. **Décision :
+aucun ADR, aucune migration** — le goulot a changé de côté, c'est **A262**, la somme spatiale sur
+les impacts, que rien depuis S215 n'a touchée. 370 tests release réussis, 5 ignorés.
+**Suite S223 : A262**, chercher l'inégalité, pas une table.
+137 ADR,262 angles,303 leçons,18 invariants,6 SPEC,23 cas ; **maillons 1** (ni src, ni ADR).
+
 **S221 — 2026-09-13 : [coupure spectrale](validation/COUPURE-SPECTRALE-S221.md), [ADR-137](adr/ADR-137-coupure-spectrale-de-la-borne-locale.md).**
 W publie une borne à coupure spectrale (ADR-136 sur les modes résolus, enveloppe ADR-134 des non
 résolus), ordre deux figé au bit. Partition à 8191 évaluations : gain 1,115–1,230 là où ADR-136

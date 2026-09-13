@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 17:22 +02:00
+JETON            : libre
+Battement        : 2026-09-13 17:59 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
-Session en cours : S222 — A254 part somme : plusieurs sillages, enveloppe conjointe contre borne locale conjointe
-Dernière session : S221 — coupure spectrale de la borne locale (ADR-137) : A259 levée à 4096 feuilles, mécanisme d'A260 corrigé (classe [1, 2), pas les exclus), A261 ouverte (localisation spatiale)
-Session suivante : S222 — file J1/W, A254 part somme : scène à deux et trois sillages dans un même journal, proches puis éloignés ; enveloppe directionnelle conjointe (terme actuel de mixed_water::slope_floor) contre borne locale conjointe (ordre deux, spectrale) et maximum, à budget égal ; dire la part de π/7 rendue et ce qu'il faut aux impacts, toujours additionnés. Si rien n'est rendu, revenir à la file (cadence complète de l'hôte, V-noyau). A261, coût de passe et A258 nommés sans ordre imposé ; δ/V conservés
-Maillons        : 0 — W avancée dans src et ADR-137 actée
+Session en cours : —
+Dernière session : S222 — part somme d'A254 mesurée sur plusieurs sillages : absorbée côté sillages, littérale côté impacts (A262) ; borne locale disqualifiée par son prix (loi d'échelle) ; aucune migration, aucun ADR
+Session suivante : S223 — file J1/W, **A262** : la somme des majorants d'impact ignore la distance entre champs, et c'est le goulot mesuré (un impact neuf vaut 47,4 % de π/7 ; deux éclaboussures simultanées saturent, quelle que soit la borne de pression). Chercher une **inégalité** conjointe qui tienne compte de la position relative — la géométrie s'y prête, support compact déclaré et pente maximale en r = 0,2062 λ (ADR-094), donc deux disques disjoints ne peuvent pas atteindre leur maximum au même point —, comme ADR-134 l'a fait pour les directions, et **non** une table. Si l'inégalité ne vient pas, revenir à la file : cadence complète de l'hôte, V-noyau. A261, A258 et le coût de passe nommés sans ordre imposé ; usage hors image de la borne locale ouvert ; δ/V conservés
+Maillons        : **1** — S222 n'a ni ajouté de code d'exécution dans `code/*/src`, ni acté d'ADR : elle a mesuré et décidé de ne rien changer. À 2, la session suivante ne pourra plus proposer un reliquat et devra nommer une ligne de la file et la couche qu'elle avance
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 
@@ -191,6 +191,16 @@ demande la campagne d'ADR-133 transposée. **Prochain lot J1 : la part dynamique
 toute scène à plusieurs sillages et donc avant la mutualisation de J1-bis ; puis la loi GPU
 (espace, LOD, visibilité, mutualisation), chaque mesure avec son en-tête (ADR-131 D3).
 
+**S222 : la part somme d'A254 change de côté** ([SOMME-SILLAGES-S222](docs/validation/SOMME-SILLAGES-S222.md)).
+Côté sillages elle est **absorbée** — trois sources coûtent 1,44 à 1,67 fois une seule, contre un
+facteur 3 chez les impacts — et ce qui y reste est **spatial** (A261, pessimisme 2,35 quand les
+sources s'éloignent). La borne locale le rend en entier (1,005–1,010 du maximum) mais **à 25 s**,
+prix défendu par une loi d'échelle : aucune migration d'admission. **Côté impacts elle est
+littérale** : `slope_floor` somme sans conscience de la distance, et un impact neuf vaut 47,4 % de
+π/7 — deux éclaboussures simultanées saturent. **Prochain lot J1/W : A262**, la somme spatiale sur
+les impacts, où la géométrie est favorable (support compact, pente décroissante) et où l'on cherche
+une **inégalité** et non une table.
+
 **S221 : coupure spectrale construite (ADR-137)** : A259 levée à 4096 feuilles (gain 1,12–1,23 à 8191 évaluations) ; A261, la localisation spatiale manque aux grandes mailles. Suite S222 J1/W : scène à plusieurs sillages, borne locale conjointe contre le terme actuel du budget (A254). Voir [réception S221](docs/validation/COUPURE-SPECTRALE-S221.md).
 
 **S220 : borne d'ordre deux construite (ADR-136)** : 1,006–1,012 × maximum à 32767 évaluations, plancher = réserve numérique (A258) ; grosses mailles plafonnées par les modes non résolus (A260). Suite S221 J1/W : A260, puis A258. Voir [réception S220](docs/validation/ORDRE-DEUX-S220.md).
@@ -303,6 +313,22 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S222 — 2026-09-13 : [la part somme d'A254 change de côté](docs/validation/SOMME-SILLAGES-S222.md) ; rien n'est migré.**
+Une à trois sources de sillage dans un même journal. **L'enveloppe est sous-additive** — trois
+sillages coûtent 1,67 fois un seul (proches), **1,44** (éloignés) — mais elle **pénalise la
+séparation** : maximum réel constant à 0,0703–0,0705 quand les sources s'éloignent, pessimisme de
+1,64 à **2,35** (A261 sur une scène). La borne locale partitionnée rend tout — borne/maximum
+**1,005–1,010**, gain jusqu'à **2,32** — pour **25 s**, et **il n'y a pas de raccourci local** :
+au-delà d'un mètre de demi-côté elle vaut l'enveloppe globale, et un appel coûte 640–700 µs quelle
+que soit la taille (**L303**). Le prix est une **loi d'échelle** — mailles sous-ondulatoires
+(λ_min = 2,09 m), nombre en aire/λ_min², chacune `O(N)` (**L302**). Admission : trois sillages et
+**huit** impacts passent, là où S214 voyait la deuxième source refuser. **Mais un impact neuf vaut
+47,4 % de π/7** : sous deux secondes un seul passe, et aucune borne n'y change rien. **Décision :
+aucun ADR, aucune migration** — le goulot a changé de côté, c'est **A262**, la somme spatiale sur
+les impacts, que rien depuis S215 n'a touchée. 370 tests release réussis, 5 ignorés.
+**Suite S223 : A262**, chercher l'inégalité, pas une table.
+137 ADR,262 angles,303 leçons,18 invariants,6 SPEC,23 cas ; **maillons 1** (ni src, ni ADR).
 
 **S221 — 2026-09-13 : [coupure spectrale](docs/validation/COUPURE-SPECTRALE-S221.md), [ADR-137](docs/adr/ADR-137-coupure-spectrale-de-la-borne-locale.md).**
 W publie une borne à coupure spectrale (ADR-136 sur les modes résolus, enveloppe ADR-134 des non

@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S222 — en cours
+Session : S222 — terminée
 Agent : Claude Code, Opus 5 (fichiers, git et cargo disponibles)
 Entrée : « Reprends le projet », conversation neuve — **aucune mémoire de S217 à S221**, tout a été
 relu depuis `AGENTS.md`, `REPRISE.md` §4 et les trois ADR 135/136/137. master et trois copies à
@@ -119,7 +119,7 @@ ce résultat-là qu'il faut savoir écrire s'il se produit.
 - [x] **P5** — part de π/7 : budget d'admission complet avec les impacts sommés ; combien de sources passent, avant et après.
 - [x] **P6** — décider : ADR si quelque chose est rendu **et** utilisable ; sinon constat motivé, et retour à la file (cadence complète de l'hôte, V-noyau).
 - [x] **P7** — document de réception (en-tête ADR-131 D3) ; suite complète `code/`.
-- [ ] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
+- [x] **P8** — rituel §6, file plurielle, passation, jeton libre, copies avancées.
 
 ### Notes de reprise
 
@@ -283,3 +283,21 @@ part de π/7 **avec son domaine en âge**, qui corrige l'annonce ; §5 la décis
 Suite nommée : la somme spatiale sur les impacts.
 Suite complète `code/` hors réseau : **370 réussis (272+4+1+93), 5 ignorés**, aucun échec —
 identique à S221 : cette session n'a ajouté aucune ligne à `code/*/src`, seulement un exemple.
+
+P8 : rituel §6 exécuté. Journal S222 ; **A262** (sévérité 2) ; suivis **A254** (change de côté) et
+**A261** (chiffré sur une scène, 213 à 757 fois le maximum local loin de la source) ; **L302, L303**.
+Index, README, REPRISE (§4, file active, jeton), feuille de route (bloc J1, ligne A254, ligne
+mutualisation — elle n'est plus conditionnée par le budget de pente mais par le seul coût de passe),
+file plurielle de QUESTIONS-OUVERTES.
+**Invariants relus** — I-18 (rien n'a été substitué au terme comparé à `max_slope` : la mesure n'a
+migré aucune admission) ; I-06 (aucune allocation ajoutée ; la partition emprunte le pool de
+l'appelant) ; I-14 (aucun nombre calibré — la session ne pose aucune constante). Aucun devenu faux,
+aucun amendé, aucun ADR réécrit ni acté.
+**Règle des deux maillons : compteur 1.** Ni code d'exécution dans `code/*/src`, ni décision actée ;
+`outils/velocite.sh` le confirme — **W = S221**, inchangé. Le compteur monte, et c'est correct : une
+session qui mesure et conclut de ne rien changer n'avance aucune couche, même quand sa conclusion
+est utile. La suite nomme **A262**, née de la mesure mais rattachée à **A254**, ligne de la file
+active ; à 2, la session suivante devra choisir dans la file et dire la couche qu'elle avance.
+**Recommandation portée** : la ligne `Session suivante` nomme A262 et la couche W.
+Décomptes vérifiés : 137 fichiers dans `docs/adr` (inchangé), 303 leçons, 262 angles.
+Jeton libre, battement 17:59. Copies de travail avancées sur master après ce commit.
