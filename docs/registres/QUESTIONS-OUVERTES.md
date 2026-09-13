@@ -1670,7 +1670,15 @@ entrée par entrée. Le fil reprend ci-dessous.
 
 ## File active
 
-Relue en S216, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+Relue en S218, le 2026-09-13. Ancre stable ; états datés ligne par ligne.
+
+**Suivi J1 S218 — A255 : borne locale construite, parcours adaptatif à construire.**
+[Réception S218](../validation/BORNE-LOCALE-S218.md), ADR-135 : reste spatial sur les
+phases exécutées, réserve numérique distincte. Gain1,026–1,224 à0,5m dans les cas
+recevables, mais27,5–28,2s sur la base CPU uniforme. **S219 : partition adaptative avec
+pool de l'appelant et plafond de travail**, conservant la couverture aux arrêts.
+Aucune admission migrée, certification f32 ouverte (A258). A255 partielle, A254 et loi
+GPU ouvertes ; autres lignes et déclencheurs conservés, δ/V obligatoires.
 
 **Suivi J1 S217 — A255 : une similitude conditionnelle, pas une courbe universelle.**
 [DECOHERENCE-SILLAGE-S217](../validation/DECOHERENCE-SILLAGE-S217.md) : à âge réduit

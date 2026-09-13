@@ -83,6 +83,12 @@ l'implémentation qui dépassait, pas le sillage ni l'objectif.*
 dans le cœur ([TEMPS-SILLAGE-S213](validation/TEMPS-SILLAGE-S213.md)) : CPU sillage 1,26 ms pendant
 le forçage et 0,36 ms après (préparation 7,70 / 13,36), hôte 1,7 ms, exact à 6e-8 ; GPU inchangé.
 Coordonnée de l'espace, pas verdict. Suite : composition impact+sillage, puis A251.
+*S218* : [borne locale construite](validation/BORNE-LOCALE-S218.md), ADR-135.
+Reste spatial et réserve numérique publiés, aucune admission migrée ; certification
+f32 ouverte. La partition uniforme resserre de facteur1,026–1,224 dans les cas
+recevables mais coûte27,5–28,2s sur la base. **Suite J1/W S219 : partition adaptative,
+pool fourni par l'appelant, plafond de travail et couverture conservée** ; gain/coût
+à recevoir. A255 partielle ; somme A254, mutualisation et loi GPU restent ouvertes.
 *S217* : [part dynamique d'A255 instruite](validation/DECOHERENCE-SILLAGE-S217.md).
 La similitude tient à vitesse et durée réduites constantes ; une courbe unique en âge
 depuis extinction est réfutée (38,8 % et 22,5 % d'écart après raffinement). A255 reste

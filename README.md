@@ -769,6 +769,16 @@ DX12/RTX5070 Laptop : erreur hauteur max0,077657 mm ; passe eau960×540 médiane
 349 tests réussis/cinq ignorés. A250 close, A247 partielle ; sillage et coût complet encore dus.
 **Suite S212 : file J1/W, intégrer le sillage au GPU.** 130/250/284/18/6/23 inchangés.
 
+**S218 — 2026-09-13 : [borne locale de pente](docs/validation/BORNE-LOCALE-S218.md),
+[ADR-135](docs/adr/ADR-135-borne-locale-de-pente-du-champ-prepare.md).**
+W publie une borne sur rectangle avec reste spatial et réserve numérique ; aucune admission
+migrée. Gain globale/locale1,026–1,224 sur trois sillages recevables à0,5m ; parcours
+uniforme base27,5–28,2s, donc suite S219 : partition adaptative à travail plafonné,
+pool fourni par l'appelant et couverture conservée. A255 partielle, A254/GPU restent
+ouverts ; J2/δ et V-noyau conservés. Certification f32 ouverte (A258), L297.
+Workspace release360 réussis/5 ignorés ; protection finale vérifiée par4 tests ciblés
+debug/release. 135 ADR,258 angles,297 leçons,18 invariants,6 SPEC,23 cas ; maillons0.
+
 **S217 — 2026-09-13 : [décohérence du sillage](docs/validation/DECOHERENCE-SILLAGE-S217.md).**
 Similitude conditionnelle reçue, courbe unique en temps réduit depuis extinction réfutée :
 à tau = 4, vitesse divisée par deux **+38,8 %**, durée doublée **+22,5 %** sur le rapport

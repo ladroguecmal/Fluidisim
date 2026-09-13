@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S218 — en cours
+Session : S218 — terminée
 Agent : Codex (fichiers, git et cargo disponibles)
 Objectif : file J1/W, construire une borne locale de pente avec reste spatial démontré,
 puis mesurer son resserrement et son coût sur les sillages S217.
@@ -85,7 +85,7 @@ Ne pas modifier les bits du champ ni les anciens contrats d'admission sans réce
 - [x] **P2** — lire les chemins réels, préciser la preuve et le contrat ; ADR si adoption justifiée.
 - [x] **P3** — construire l'annonce locale dans le cœur, refus et contre-épreuves (centre trompeur compris).
 - [x] **P4** — recevoir sur une partition des emprises S217 ; coût complet et resserrement, sans promesse de budget GPU.
-- [ ] **P5** — rituel §6, journal, file plurielle, index, reprise, jeton libre et copies synchronisées.
+- [x] **P5** — rituel §6, journal, file plurielle, index, reprise, jeton libre et copies synchronisées.
 
 ### Notes de reprise
 
@@ -104,3 +104,4 @@ isolés de la base prévus pour coût. Correction P4 : refuser la norme qui sous
 reçu avant cette dernière protection ; seuls ciblés rejoués ensuite, champs historiques intacts.
 P4 reçue : passages isolés base 27,546–28,209s à0,5m ; valeurs imprimées identiques. Reçus et limites dans BORNE-LOCALE-S218. Suite adaptative portée à P5.
 
+P5 : journal, A258/L297, index et file active actualisés. Prochaine S219 : partition adaptative à travail plafonné ; maillons0, jeton libre. Copies à avancer sur le commit de clôture après constat de propreté. Aucun travail de construction en attente dans S218.

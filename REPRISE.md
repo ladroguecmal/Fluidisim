@@ -18,13 +18,13 @@ souvenir de conversation, **c'est lui qui fait foi**.
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-13 15:10 +02:00
+JETON            : libre
+Battement        : 2026-09-13 15:12 +02:00
 Agent            : Codex (fichiers, git et cargo disponibles)
-Session en cours : S218
-Dernière session : S217 — similitude conditionnelle du sillage reçue ; courbe à un âge réfutée ; A255 ouverte, A257 corrigée ; aucun changement de production
-Session suivante : S218 — file J1/W : construire et recevoir une borne locale de pente depuis le champ préparé avec reste spatial démontré (piste : borne de Hessienne), puis mesurer le gain de budget et le coût ; ne pas tabuler les maxima S217 comme bornes. A255 et la somme A254 restent ouvertes ; loi GPU ensuite, J2/δ et V-noyau conservés
-Maillons        : 1 — étude et instrument S217 ; aucune couche avancée au sens de §6.8
+Session en cours : —
+Dernière session : S218 — borne locale W construite, ADR-135 ; gain et coût uniforme reçus ; A255 partielle, aucune admission migrée
+Session suivante : S219 — file J1/W : construire et recevoir une partition adaptative sur pool fourni par l'appelant, avec plafond de travail et couverture conservée par les bornes des rectangles non raffinés ; mesurer gain/coût. Certification f32 A258, admission, somme A254 et loi GPU restent ouvertes ; J2/δ et V-noyau conservés
+Maillons        : 0 — W avancée dans src et ADR-135 actée
 
 *Passation volontaire S199 terminée : Claude P1–P3, Codex P4/P5. Les relevés sont publiés dans CANDIDAT-DELTA-S199 §7/8, avec les restrictions découvertes à la lecture du code ; aucune campagne refaite.*
 
@@ -191,6 +191,8 @@ demande la campagne d'ADR-133 transposée. **Prochain lot J1 : la part dynamique
 toute scène à plusieurs sillages et donc avant la mutualisation de J1-bis ; puis la loi GPU
 (espace, LOD, visibilité, mutualisation), chaque mesure avec son en-tête (ADR-131 D3).
 
+**S218 : borne locale construite (ADR-135), A255 partielle.** Partition uniforme reçue mais coûteuse ; suite J1/W S219 : partition adaptative avec pool et plafond de travail. Aucun changement d'admission ; certification f32 ouverte (A258). Voir [réception S218](docs/validation/BORNE-LOCALE-S218.md).
+
 **S217 : la part dynamique d'A255 est instruite, sans resserrement adopté.**
 La similitude exige de conserver vitesse et durée réduites ; une courbe unique en âge
 depuis extinction est réfutée (38,8 % et 22,5 % d'écart après raffinement).
@@ -276,7 +278,7 @@ pièges déjà payés.
 docs/00_INDEX.md          ← point d'entrée, état d'avancement, arbitrages en attente
 docs/FEUILLE-DE-ROUTE.md  ← trajectoire J1 → J5 et noyau V, seul porteur (ADR-127)
 docs/01_INVARIANTS.md     ← 18 règles non négociables, à connaître avant toute proposition
-docs/adr/                 ← 134 décisions d'architecture, numérotées, jamais réécrites
+docs/adr/                 ← 135 décisions d'architecture, numérotées, jamais réécrites
 code/                     ← water-core et water-harness (Rust, sans dépendance) — étage H1
 docs/specs/               ← SPEC-001 hydrodynamique · 002 phénomènes secondaires
                             004 interfaces (chemin tiré) · 005 outillage auteur
@@ -295,6 +297,16 @@ décisions ne se comprennent que par leur motif, et refaire un raisonnement déj
 gaspillage le plus fréquent d'un projet de ce type.
 
 ## 4. Où en est le projet
+
+**S218 — 2026-09-13 : [borne locale de pente](docs/validation/BORNE-LOCALE-S218.md),
+[ADR-135](docs/adr/ADR-135-borne-locale-de-pente-du-champ-prepare.md).**
+W publie une borne sur rectangle avec reste spatial et réserve numérique ; aucune admission
+migrée. Gain globale/locale1,026–1,224 sur trois sillages recevables à0,5m ; parcours
+uniforme base27,5–28,2s, donc suite S219 : partition adaptative à travail plafonné,
+pool fourni par l'appelant et couverture conservée. A255 partielle, A254/GPU restent
+ouverts ; J2/δ et V-noyau conservés. Certification f32 ouverte (A258), L297.
+Workspace release360 réussis/5 ignorés ; protection finale vérifiée par4 tests ciblés
+debug/release. 135 ADR,258 angles,297 leçons,18 invariants,6 SPEC,23 cas ; maillons0.
 
 **S217 — 2026-09-13 : [décohérence du sillage](docs/validation/DECOHERENCE-SILLAGE-S217.md).**
 Similitude conditionnelle reçue, courbe unique en temps réduit depuis extinction réfutée :
@@ -3103,4 +3115,3 @@ travail, et il ne l'a peut-être jamais vu.
   `git log` plutôt que se fier à un souvenir.
 - **Le battement n'est pas une preuve de vie.** Une session peut être coupée juste après un commit
   et paraître active pendant deux heures. Le seuil protège du conflit, il ne le supprime pas.
-

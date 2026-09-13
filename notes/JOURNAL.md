@@ -11232,3 +11232,45 @@ réussis en debug et release. La suite debug complète a été arrêtée pendant
 balayages coûteux, sans verdict complet ; elle n'est pas comptée comme reçue. Les avertissements
 préexistants du harnais/exemples sont conservés. 134 ADR,257 angles,296 leçons,
 18 invariants,6 SPEC,23 cas ; compte des angles incluant les entrées de tableau héritées.
+
+## S218 — 2026-09-13 — Une borne locale construite, un parcours uniforme trop coûteux
+
+**Entrée.** Utilisateur « Continue », Codex, copie principale ; master et trois copies
+propres à af1212b, jeton libre, maillons1. Plan f326d4f, ADR7351760,
+construction e2a2eda, réception71cc850. Aucun téléchargement ni nouvelle copie.
+
+**Construction W.** ADR-135 actée ; Field et Prepared publient une annonce locale
+avec pente centrale, reste spatial et réserve numérique. Les phases réellement
+arrondies aux bornes remplacent une simple variation continue k·dx. Refus domaine,
+contexte, temps, débordement et norme sous-passant à zéro. Aucune allocation d'après
+inspection du code, sans instrumentation. Échantillons et admissions historiques inchangés.
+La preuve trigonométrique et la réception empirique ne certifient pas toute la chaîne f32.
+Voir [BORNE-LOCALE-S218](../docs/validation/BORNE-LOCALE-S218.md) et ses relevés bruts.
+
+**Mesures déterminantes.** À0,5m, globale/partition vaut1,025625 (base),1,224415
+(lente),1,156292 (longue) ; base tardive1,343845 hors durée recevable. Les partitions
+2m/1m ne resserrent pas. Deux passages isolés de la base : 27,546 et28,209s pour49152
+rectangles, préparation6,279/6,957ms séparée ; valeurs imprimées identiques.
+Le premier passage complet partageait la machine avec compilation/tests : coût non nominal.
+Verdict sur cette implémentation uniforme CPU, sans retirer de fonctionnalité ni conclure GPU.
+
+**Vérification.** Workspace release360 réussis (262+4+1+93),5 ignorés ; après protection
+finale de sous-passement,4 tests ciblés debug/release rejoués et réussis. Zéro, centre
+manquant le pic, translation4000m, coins et rectangles multidirectionnels, refus et
+identité des échantillons. Avertissements préexistants conservés.
+
+**Non fait et suite S219.** File J1/W, construire une partition adaptative dans un pool
+fourni par l'appelant, avec plafond de travail et couverture conservée par les bornes
+des rectangles non raffinés ; recevoir sûreté de couverture, capacité, gain et coût.
+Migration d'admission non décidée, certification f32 ouverte (A258). A255 partielle,
+somme A254 et loi GPU toujours ouvertes. Aucun arbitrage humain nouveau.
+
+**Rituel.** A258 sévérité2, L297 ; file active entière relue, autres déclencheurs
+conservés : A244/S200-1 et S199-2 à J2, V-noyau au plus tard J2 ; B4 forces/perception,
+A216, A241, A213, B2/coupure, bathymétrie, multiplateforme et réunions.
+I-03/04/06/08/14/18 restent applicables ; aucune admission élargie, aucune promesse de
+seconde cible, réserve numérique explicitement non certifiée. Maillons0 : W src et ADR
+avancés. Erreur de procédure : battement P2 recopié14:59 après lecture14:57, corrigé par
+battements mesurés ; diff P4 signalait deux lignes finales vides, nettoyées au rituel.
+135 ADR,258 angles,297 leçons,18 invariants,6 SPEC,23 cas. Jeton libéré en fin de session,
+avance rapide des copies après vérification de leur propreté.

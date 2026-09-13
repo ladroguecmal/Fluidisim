@@ -3130,3 +3130,17 @@ borne locale avec reste spatial démontré, sans table à un seul âge. Voir
   d'une source encore active peut aussi diminuer (fixture lente :0,059152→0,052456).
   Notes datées ADR-133, S215, S216 et L290 ; décisions d'impact et inégalité ADR-134
   inchangées. Toute future borne temporelle doit porter la réponse libre complète.
+
+**Suivi A255 — S218, 2026-09-13.** Capacité locale construite (ADR-135), aucune
+migration d'admission. Partition0,5m : gain multiplicatif1,026–1,224 dans les trois
+cas recevables ; coût uniforme base27,5–28,2s. Suite J1/W : partition adaptative bornée
+en travail ; somme A254, scènes à plusieurs sillages et mutualisation restent ouvertes.
+
+- **A258** *(sévérité 2, S218 ; quantification traitée, certification f32 ouverte)* —
+  **Une borne du champ continu ne couvre pas automatiquement sa représentation exécutée.**
+  Le produit f32 `turns*x` suivi de Q32 peut sauter même sur un petit rectangle translaté.
+  ADR-135 borne les produits arrondis aux extrémités et ajoute une réserve numérique ;
+  centre trompeur et translation4000m éprouvés. La preuve de variation trigonométrique
+  ne certifie pas tout l'arrondi de la norme et des sommes. Avant une migration des
+  admissions, recevoir ou démontrer cette chaîne, sans faire passer le maximum d'une
+  grille pour une preuve continue. Voir BORNE-LOCALE-S218 et L297.

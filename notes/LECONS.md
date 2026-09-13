@@ -4895,3 +4895,14 @@ Avant de déclarer une loi universelle, écrire les groupes que la transformatio
 **conserve**, puis en varier un indépendamment. Comparer à âge absolu égal des
 sources de durées différentes confond aussi deux effets : âge depuis extinction
 et histoire du forçage. Un temps réduit organise une famille ; il ne la remplace pas.
+
+## L297 — Une borne doit porter la représentation exécutée
+
+*(S218)* Une borne de Hessienne couvre une somme trigonométrique continue. Le code
+évalue des produits f32 puis des phases Q32 : la fonction exécutée comporte des sauts
+que la seule distance géométrique ne décrit pas. La monotonie des produits arrondis
+aux extrémités du domaine permet de borner leur variation sans supposer leur continuité.
+
+Avant de transporter une preuve dans le code, lister les transformations entre l'objet
+mathématique et sa représentation. Séparer preuve algébrique, réserve d'arrondi et
+contre-épreuves ; une campagne favorable ne convertit pas la troisième en la première.
