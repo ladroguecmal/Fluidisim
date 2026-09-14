@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-15 00:08 +02:00
+Battement        : 2026-09-15 00:11 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python et GPU local disponibles)
 Session en cours : S236 — A255/A261 : admettre la scène S235 en resserrant les bornes
 Dernière session : S235 — scène multi-sources et visibilité ; admission refusée par majorants

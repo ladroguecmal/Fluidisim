@@ -89,9 +89,12 @@ seuil changé, aucune scène réduite.
 - [x] **P2** — diagnostic sur la série S235 : plancher actuel ; ADR-138 étendu à l'union ;
   plancher 2D par séparation (pression globale, puis nulle hors emprise du sillage) ; bornes contre
   la pente réelle S235 ; contre-exemple du trou d'ADR-138 sur l'union.
-- [ ] **P3** — décision et ADR-142 si P2 conclut ; sinon bascule déclarée.
-- [ ] **P4** — cœur : mode de couverture de la composition, plancher sur l'union ; tests (bit
-  intersection, zéro hors emprise, borne ≥ réelle, contre-exemple, deux sens d'ADR-128).
+- [x] **P3** — décision et ADR-142 si P2 conclut ; sinon bascule déclarée.
+- [ ] **P4a** — cœur : `admits_union`, `slope_floor_union` (séparation, pool hôte, pression
+  locale ADR-137 sur cellules critiques), tests de la borne (≥ réelle, contre-exemple du trou
+  d'ADR-138 sur l'union, pool épuisé, chemin rapide).
+- [ ] **P4b** — cœur : `sample_world_batch_union` ; tests (zéro hors emprise contre somme à la
+  main, intersection inchangée, deux sens d'ADR-128 au seuil) ; suite complète.
 - [ ] **P5** — réception : série S235 admise par le cœur, marges réelles, coût du plancher,
   suite complète du cœur.
 - [ ] **P6** — rituel §6, file, feuille de route, jeton ; copies à synchroniser.
