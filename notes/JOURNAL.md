@@ -12083,3 +12083,58 @@ utilisateur nécessaire.
 route (visibilité et mutualisation présentes, J1 remplacé, ligne CPU ajoutée), file active (J1-bis,
 A255/A261, CPU, A258/A263, A270), index et README. Aucun ADR. Maillons 0 : scène multi-sources et
 visibilité au bit consommées par la fenêtre, reçues contre le cœur et un passage continu.
+
+## S236 — 2026-09-15 — Le cœur admet la scène, parce qu'il sert enfin l'eau que l'image dessine
+
+**Entrée.** « Continue », master propre à `5744c8d`, trois copies au même commit, jeton libre,
+secteur ; cœur à 413 réussis, 5 ignorés. Claude Code, Opus 5. Plan `209f99f`, bornes `a46563f`,
+ADR-142 `58109ad`, plancher `2ebd8f2`, requête `25f98e2`, réception `6c27787`.
+
+**Ce que la lecture a changé avant le plan.** La requête mixte ne compose que l'**intersection** des
+emprises : sur huit disques répartis sur 70 m, presque aucun point de la scène S235 n'était servable,
+avant même la pente. L'image, elle, rend « hors emprise, B seul » depuis ADR-126 (A271). Et le balayage
+d'ADR-138 ne couvre que le disque de l'ancre : sûr pour l'intersection, faux pour l'union.
+
+**Calculé avant de construire** (`--bornes-union`). Sur l'union : plancher actuel 49 refus, ADR-138
+étendu 40, séparation 2D 32, **valeur atteinte par la fonction bornée 31** — une somme d'impacts exacte
+en position refuse encore : les termes sont trop larges. Avec la pression **locale** d'ADR-137 sur les
+seules cellules critiques (≤ 1 m), **les 32 instants restants se certifient** (92–128 cellules,
+3–13 ms). La thèse déclarée prévoyait la bascule vers la pression locale ; elle a suffi sans localisation
+générale (A261 reste vraie ailleurs).
+
+**Capacité reçue.** ADR-142 : mode union ajouté à la requête mixte, mode intersection intact au bit.
+`slope_floor_union` certifie par séparation (pool hôte, pression locale sur cellules critiques, arrêt à
+1 cm ou pool plein) ; annonce et refus au même `max_slope`. **Le cœur admet S235 aux 161 instants**,
+pire plancher 0,9995 π/7, **0 requête refusée** sur 6 988 sondes, et **sa requête est à < 1e-9 m de la
+somme de référence de l'image**. Consommateur : l'hôte J1 et tout consommateur de la requête mixte.
+
+**Preuves** ([ADMISSION-UNION-S236](../docs/validation/ADMISSION-UNION-S236.md)). Six tests du cœur :
+**trou d'ADR-138 sur l'union reproduit** (réelle 0,4252 contre plancher 0,2837) ; échelle de seuils
+(certifié ⟹ réelle ≤ plancher ≤ seuil, un certificat par séparation exigé) ; pool plein et vide ;
+chemin rapide au bit ; couverture au bit contre une somme à la main ; deux sens d'ADR-128 sur 25 seuils,
+pression locale sollicitée. Suite du cœur **419 réussis, 5 ignorés**.
+
+**Défauts rencontrés.** Garde de contrat S143 échouée : la sélection des cellules critiques comparait à
+`max_slope` sans déclaration — sites réécrits `budget > max_slope` et inscrits (11). Premier contre-exemple
+mal construit (impacts d'une seconde, bornes lâches, pas de violation). Échelle de seuils qui ne
+certifiait que par le chemin rapide — seuils ajoutés. Test de couverture en échec sur un point non
+représentable au 1/2048 m (piège S214).
+
+**Coût et limites.** Plancher médiane 0,001 ms (chemin rapide), max **12 ms** avec pression locale ;
+requête ≈ **0,2 ms par point** (pression 4 096 modes sur CPU, un fil) — hors du chemin d'image. Pression
+locale : réception numérique d'ADR-137, pas certificat f32 (A258). Aucun cache entre lots. Choix du mode
+par un hôte autoritaire non tranché (A271).
+
+**Suite comparée.** Troisième session J1-bis consécutive : la scène représentative est désormais rendue,
+visible et admise par le cœur ; ce qui reste de J1 — CPU de préparation, angles rasants, interaction,
+I-06, seconde cible — ne débloque plus l'usage visé par la file et relève d'approfondissements datés.
+J2 n'a pas avancé depuis S233. **S237 : J2 — surface géométriquement mobile dans le candidat δ, contre
+référence non linéaire** (lot annoncé par S233). V, B2, bathymétrie et seconde cible gardent leurs
+déclencheurs. Aucune ambition réduite ni arbitrage utilisateur nécessaire.
+
+**Rituel.** ADR-142 ; note corrective datée d'ADR-138 ; A271 ouverte et corrigée par le mode union ;
+suivis A255/A261 et A258 ; L315 ; feuille de route (J1 remplacé, mutualisation, travaux nécessaires),
+file active (admission, coût de la requête, A258, CPU, J2 → S237), index. Invariants relus : I-18
+(seuls des majorants de pente réelle comparés à `max_slope`), I-06 (pool hôte), I-04 inchangé.
+Maillons 0 : composition et admission de la scène par le cœur, consommées par la requête, reçues contre
+la pente réelle et l'image.

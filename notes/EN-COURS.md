@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S236 — en cours
+Session : S236 — terminée
 Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python et GPU local disponibles)
 Entrée : « Continue », master propre à 5744c8d, trois copies au même commit, jeton libre,
 secteur. Base du cœur : 413 réussis, 5 ignorés.
@@ -97,7 +97,7 @@ seuil changé, aucune scène réduite.
   main, intersection inchangée, deux sens d'ADR-128 au seuil) ; suite complète.
 - [x] **P5** — réception : série S235 admise par le cœur, marges réelles, coût du plancher,
   suite complète du cœur.
-- [ ] **P6** — rituel §6, file, feuille de route, jeton ; copies à synchroniser.
+- [x] **P6** — rituel §6, file, feuille de route, jeton ; copies à synchroniser.
 
 ### Notes de reprise
 

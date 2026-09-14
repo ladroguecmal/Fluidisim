@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-15 00:34 +02:00
+JETON            : libre
+Battement        : 2026-09-15 00:37 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python et GPU local disponibles)
-Session en cours : S236 — A255/A261 : admettre la scène S235 en resserrant les bornes
-Dernière session : S235 — scène multi-sources et visibilité ; admission refusée par majorants
-Session suivante : S236 — A255/A261 : admettre la scène S235 en resserrant les bornes
+Session en cours : aucune
+Dernière session : S236 — composition sur l'union ; scène S235 admise par le cœur
+Session suivante : S237 — J2 : surface géométriquement mobile dans le candidat δ
 Maillons        : 0
 
 ```
@@ -75,10 +75,10 @@ Ne pas relire le journal, les leçons ou tous les ADR intégralement à chaque r
 
 ## 4. Où en est le projet
 
-État à S235 : B/W et un afficheur existent ; scène multi-sources (trois sillages, huit impacts)
-dessinée contre le cœur, passe GPU ≤0,47 ms, visibilité au bit ; admission de cette scène refusée
-par les seuls majorants de pente. δ MAC x-z fait évoluer une surface linéarisée, sans géométrie
-mobile, scénario B3 ni I-05 complet. V : plans orientés et restauration locale reçus.
+État à S236 : B/W et un afficheur existent ; scène multi-sources (trois sillages, huit impacts)
+dessinée, passe GPU ≤0,47 ms, visibilité au bit, et **composée et admise par le cœur** en mode union
+(ADR-142). δ MAC x-z fait évoluer une surface linéarisée, sans géométrie mobile, scénario B3 ni I-05
+complet. V : plans orientés et restauration locale reçus.
 Les réceptions et limites courantes sont dans la feuille de route. Le nombre de tests ne mesure
 pas la couverture des intentions, et une exécution locale ne reçoit pas le multiplateforme.
 

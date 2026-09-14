@@ -5200,3 +5200,18 @@ compris**, et un « passe » publié porte l'instant et l'état des sources qui 
 Quand ensuite le verdict tombe, **séparer la grandeur réelle du majorant avant de conclure** : ici
 aucune des 49 pentes réelles n'approchait le seuil, et c'est ce qui transforme un refus de scène en
 travail de bornes au lieu d'une réduction d'ambition. Voir L283, A208, SCENE-MULTI-S235 §2.
+
+## L315 — Une borne prouvée « pour tout point » l'est sur le domaine qu'on servait
+
+*(S236)* ADR-138 écrivait que son inégalité valait « pour tout point ». Elle valait pour tous les
+points que la requête **acceptait** : l'intersection des disques, donc le disque de l'ancre, que son
+balayage parcourait. Personne ne l'avait écrit, parce que personne n'imaginait servir autre chose. Le
+jour où le mode union est envisagé, la même borne devient fausse d'un tiers sur un contre-exemple de
+trois impacts. Symétriquement, la requête et l'image décrivaient deux domaines différents depuis
+trente-trois sessions (A271), sans qu'aucun test ne compare les deux sur une scène où ils diffèrent.
+
+Ce qui généralise : **toute garantie porte le domaine qui la rend vraie, écrit à côté d'elle** — et
+changer le domaine servi, même par ajout d'un mode, rouvre chaque preuve qui en dépendait avant la
+première ligne de code. Le geste qui a suffi ici : chercher, pour chaque borne réemployée, le point du
+nouveau domaine qu'elle ne regarde pas, et construire l'essai qui s'y place. Voir L310, ADR-138 note
+S236, ADR-142.

@@ -109,3 +109,16 @@ séparés de 50 m et **2,37** pour trois. En admission : trois impacts frais à 
 Une méthode, une fonction, une constante d'échantillonnage, et un `slope_floor` qui aiguille au-delà
 de deux champs. Revenir consiste à retirer l'aiguillage : la somme d'origine est toujours calculée,
 puisque le résultat est son minimum avec l'inégalité.
+
+## Note corrective datée du 2026-09-15 (S236) — la garantie vaut sur l'intersection, pas « pour tout point »
+
+La décision écrit que l'inégalité vaut « pour **tout** point `p` ». L'inégalité, oui ; **le balayage,
+non** : il parcourt `r₁ ∈ [0 ; R₁]`, le disque de l'ancre, et ne dit rien des points au-delà. Le
+plancher reste juste pour la requête d'ADR-080, qui refuse tout point hors du disque d'un seul impact :
+les points admis sont tous dans le disque de l'ancre. Il est **faux** dès qu'on sert l'union des
+emprises : test `adr138_sweep_misses_the_union_and_the_union_floor_does_not` — ancre plus énergique en
+(0, 0), deux impacts confondus à 100 m nés au même instant, pente réelle **0,4252** contre plancher
+**0,2837**. Aucun refus existant n'est changé ; le mode union reçoit son propre plancher
+([ADR-142](ADR-142-composition-sur-l-union-des-emprises.md)). Second fait relevé au même passage :
+les termes d'un champ dont la distance minimale dépasse son domaine sont ajoutés, alors que ce champ
+est nul là — pessimisme sans faute, mesuré sur S235 (49 refus, 40 sans ces termes).

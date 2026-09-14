@@ -27,6 +27,7 @@
 - [Cadence de l’hôte](validation/CADENCE-HOTE-S225.md).
 - [LOD spatial du sillage : grille locale, reconstruction bicubique, coût](validation/LOD-SILLAGE-S234.md).
 - [Scène multi-sources : admission, pente réelle, visibilité et retour au bit](validation/SCENE-MULTI-S235.md).
+- [Composition sur l'union et admission de la scène S235 par le cœur](validation/ADMISSION-UNION-S236.md).
 - [Candidat δ](validation/CANDIDAT-DELTA-S199.md).
 - [Contrats δ](validation/CONTRATS-DELTA-S200.md).
 - [Arrêt coopératif sous budget de δ](validation/BUDGET-DELTA-S230.md).
@@ -190,6 +191,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-139](adr/ADR-139-volume-et-plan-oriente-des-contenants.md) | Le plan orienté se déduit du volume de la géométrie du contenant |
 | [ADR-140](adr/ADR-140-restauration-du-graphe-V.md) | Restaurer les écarts de V et ses restes de débit |
 | [ADR-141](adr/ADR-141-surface-linearisee-et-coefficients-temporels.md) | Surface linéarisée et coefficients temporels de δ |
+| [ADR-142](adr/ADR-142-composition-sur-l-union-des-emprises.md) | Composition mixte sur l'union des emprises, sous plancher certifié |
 
 ## Travail et historique
 

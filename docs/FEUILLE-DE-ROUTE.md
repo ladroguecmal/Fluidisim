@@ -57,18 +57,22 @@ huit impacts nés toutes les 4 s — vérifiée contre le cœur (≤0,368 mm) ; 
 visibilité par emprise de la grille : hors champ 0,06 ms GPU, **retour dans le champ identique au
 bit**. Voir [SCENE-MULTI-S235](validation/SCENE-MULTI-S235.md).
 
-**J1 reste partiel, et deux limites sont désormais mesurées.** (1) **Admission** : le budget de
-pente du cœur refuse la scène sur 49 instants sur 161, **tous par majorant seul** — pente réelle
-≤48 % de π/7, plancher 2,1 à 8,2 fois la réelle ; S222 (« huit impacts passent ») valait pour des
-impacts âgés. (2) **CPU** : l'implémentation mono-fil prépare le sillage en 3,1 ms pendant le
-forçage de trois sillages ; somme CPU+GPU 4,5 ms alors, 2,1–2,6 ms hors forçage (ADR-125 ne fixe
-pas la répartition). Restent aussi angles rasants, interaction représentative, allocations de la
-pile graphique et seconde cible.
+*S236, 2026-09-15* : **le cœur compose et admet la scène représentative** — mode union de la
+requête mixte (ADR-142 : chaque perturbation contribue là où son emprise couvre le point), plancher
+de pente certifié par séparation avec pression locale ADR-137 sur les cellules critiques. S235
+admise aux **161 instants** (0 refus contre 49), requête à < 1e-9 m de la somme de référence de
+l'image. Voir [ADMISSION-UNION-S236](validation/ADMISSION-UNION-S236.md).
 
-A255/A261 **ne sont plus des approfondissements différables** : leur déclencheur — un usage qui
-échoue à l'admission — est atteint par la scène S235. A258 suit la réserve numérique des bornes
-locales, A263 la constante Bessel. Les déclencheurs de reprise vivent uniquement dans la file
-active. L'ordre de livraison n'interdit pas de construire les briques indépendantes de J2 ou V
+**J1 reste partiel.** (1) **CPU** : l'implémentation mono-fil prépare le sillage en 3,1 ms pendant le
+forçage de trois sillages ; somme CPU+GPU 4,5 ms alors, 2,1–2,6 ms hors forçage (ADR-125 ne fixe pas
+la répartition). (2) **Requête** : ≈0,2 ms par point (pression 4 096 modes sur CPU) et plancher
+jusqu'à 12 ms quand la pression locale intervient — hors du chemin d'image, borne de ce qu'un
+consommateur gameplay peut demander. Restent aussi angles rasants, interaction représentative,
+allocations de la pile graphique et seconde cible.
+
+A261 reste vraie hors des cellules critiques ; A258 porte désormais sur une borne employée à
+l'admission ; A263 suit la constante Bessel. Les déclencheurs de reprise vivent uniquement dans la
+file active. L'ordre de livraison n'interdit pas de construire les briques indépendantes de J2 ou V
 pendant que J1-bis progresse.
 
 #### J1-bis — Espace d'optimisation du rendu et travaux nécessaires (ADR-131, S213)
@@ -88,7 +92,7 @@ l'échec d'optimisations prises isolément. La liste est ouverte.
 | **LOD spectral** — nœuds par source selon distance et visibilité | absente | écart à la recette pleine, durée et rayon honnêtes (ADR-107, **ADR-132** : les deux lois se recalculent depuis la recette réduite) |
 | **LOD temporel** — cadence de mise à jour selon distance, vitesse, régime | absente | erreur de phase, I-09 |
 | **visibilité** — frustum, occlusion, hors écran | **présente pour sillage et impacts** (S235) : emprise de la grille sur l'eau, marge par arête ; hors champ 0,448 → 0,062 ms GPU, 1,59 → 0,67 ms CPU ; +0,05 ms CPU dans le champ. Occlusion et composantes de B absentes | **retour au bit** vérifié (31 images, fin de tronçon incluse) |
-| **mutualisation** — nœuds partagés par sources de même recette, passe/grille communes B/W | **présente pour les sillages d'un même journal** (cœur, S222 ; hôte S235 : trois sillages, 4 096 modes, +0,01–0,03 ms GPU) ; table de Bessel partagée par les impacts de même entrée (S235) ; passe commune B/W absente | superposition dans son domaine (ADR-123) ; **budget de pente : refus par majorants sur une scène qui se renouvelle** (S235, A255/A261) |
+| **mutualisation** — nœuds partagés par sources de même recette, passe/grille communes B/W | **présente pour les sillages d'un même journal** (cœur, S222 ; hôte S235 : trois sillages, 4 096 modes, +0,01–0,03 ms GPU) ; table de Bessel partagée par les impacts de même entrée (S235) ; passe commune B/W absente | superposition dans son domaine (ADR-123) ; budget de pente : **admis sur l'union sous plancher certifié** (S236, ADR-142) — refusé par majorants en S235 |
 | **parallélisme CPU / LOD temporel de la préparation** | absents ; préparation du sillage 3,1 ms pendant le forçage de trois sillages, un fil (S235) | écart au chemin séquentiel, au bit si possible ; I-09 |
 
 **Chaque mesure de coût publie** techniques présentes, techniques absentes et domaine de validité
@@ -97,8 +101,8 @@ l'échec d'optimisations prises isolément. La liste est ouverte.
 **Travaux nécessaires de J1, indépendants du coût** (ADR-131 D6) : A251 et composition faites
 S214, A254 close S223, cadence complète faite S225. Restent l'interaction manuelle représentative,
 angles rasants et poses de caméra, allocations de la pile graphique (I-06), seconde cible (B7).
-La part dynamique d'A255 n'était pas un blocage tant que le scénario restait admis : la scène
-représentative S235 ne l'est pas, par majorants seuls — c'est désormais un travail nécessaire.
+Composition de la scène représentative par le cœur : faite S236 (mode union, ADR-142). Le choix du
+mode par un hôte autoritaire reste à trancher avec lui (A271).
 
 *Bancs qui tranchent à ce jalon* : **B1** (nombre de composantes et coût de B, dès qu'un LOD
 existe dans l'hôte) ; **B2** partiel (représentation de W, dès que le coût B+W par image est

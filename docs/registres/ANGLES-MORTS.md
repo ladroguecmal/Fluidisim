@@ -3461,3 +3461,23 @@ pas pour une scène dont les naissances se renouvellent. Voir
 **Suivi A265 — S235, 2026-09-14.** Scène multi-sources pendant le forçage : la trame est bornée par
 le CPU (préparation du sillage 3,12 ms, 204 Hz) et hors forçage 415 Hz ; hors champ 727 Hz. Le
 recouvrement à GPU chargé n'est toujours pas expliqué, et aucune décision n'en dépend.
+
+- **A271** *(sévérité 2, S236 ; corrigée par ADR-142 pour qui emploie le mode union)* — **La requête
+  composée du cœur et l'image ne décrivaient pas la même eau.** Depuis ADR-126 (S203), l'image rend
+  « hors emprise, B seul » ; la requête mixte d'ADR-080 refuse tout point qu'une seule emprise ne couvre
+  pas. À un impact la différence était invisible ; sur la scène représentative S235, huit disques sur
+  70 m, l'intersection est presque vide et la requête ne sert presque aucun point que l'image dessine.
+  Trente-trois sessions l'ont laissée passer parce que les montages vérifiés n'avaient qu'un impact, ou
+  des impacts confondus. Mode union ajouté (ADR-142) : **écart à la somme de référence de l'image
+  < 1e-9 m** sur 6 988 sondes et 161 instants. Le mode intersection reste celui des consommateurs
+  existants ; le choix du mode par un hôte autoritaire n'est pas tranché. Voir L315,
+  [ADMISSION-UNION-S236](../validation/ADMISSION-UNION-S236.md).
+
+**Suivi A255 / A261 — S236, 2026-09-15 : la scène représentative est admise, A261 reste entière.**
+Sur l'union et sous plancher certifié (séparation 2D, pression locale ADR-137 sur les cellules
+critiques), S235 est admise aux **161 instants** par le cœur, pire plancher 0,9995 π/7. Une somme
+d'impacts exacte en position refusait encore 31 instants : c'est la pression **locale** qui suffit, et
+seulement près des impacts forts. A261 — aucune enveloppe de modules ne voit la localisation d'un
+paquet — reste vraie partout ailleurs ; une scène où la pression seule sature n'y gagnerait rien.
+Sévérité d'A255 ramenée à 2 pour J1. **A258 entre dans l'admission** : ADR-137 est une réception
+numérique, pas un certificat f32, et le plancher en hérite sur les cellules critiques.
