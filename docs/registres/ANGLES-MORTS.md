@@ -3393,3 +3393,11 @@ Premier passage64×32/2ms : maximum15,8501ms ; second2,0732ms. Cause du premier 
 identifiée ; sa non-répétition ne le réfute pas. Admission de blocs/charge viable, marges et
 qualification de l'hôte restent dues avant I-05 ; pression f32 reste le prochain lot I-08.
 La file donne les déclencheurs, [BUDGET-DELTA-S230](../validation/BUDGET-DELTA-S230.md) les preuves.
+
+**Suivi A244 — S231, 2026-09-14 : pression f32 reçue sur le domaine comparé.**
+La conversion seule produisait une fausse convergence : résidu récurrent petit mais b−Ap
+jusqu'à4,45e-6. Contrôle réel et correction CG sous plafond global conservent le seuil1e-6 ;
+oracle indépendant, continuation, refus et zéro allocation reçus. Stockage réduit d'environ28%,
+aucun gain de vitesse. [PRESSION-F32-S231](../validation/PRESSION-F32-S231.md).
+I-05 reste ouvert ; I-08 global aussi, puisque l'API temporelle transporte encore du f32.
+Les domaines non éprouvés ne bénéficient pas automatiquement de cette réception.

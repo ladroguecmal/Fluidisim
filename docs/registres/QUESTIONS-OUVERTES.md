@@ -2,19 +2,19 @@
 
 ## File active
 
-**État relu en S230, clôture 2026-09-14.** Porteur des travaux internes : la session du dépôt.
+**État relu en S231, clôture 2026-09-14.** Porteur des travaux internes : la session du dépôt.
 Trajectoire : [FEUILLE-DE-ROUTE](../FEUILLE-DE-ROUTE.md). Priorité et protocole d'arrêt :
 [BILAN-GLOBAL-S227](BILAN-GLOBAL-S227.md). Remplacer les états touchés ; ne plus empiler ici des
 suivis de session. Les preuves et l'histoire restent dans le journal et Git.
 
 | travail | état et preuve | déclencheur / prochain résultat utile |
 |---|---|---|
-| **S200-1 / A244 / précision δ** | Pression f64 expérimentale ; I-08 non reçu. Arrêt coopératif construit S230, sans changer les bits du filtre S199 | **Prochain lot S231 — J2** : construire/qualifier la pression f32 sur le candidat réel ; comparer précision et coût au témoin f64, refus/budget conservés. Si insuffisante, arbitrage technique explicite par ADR, aucune exception implicite |
+| **S200-1 / A244 / précision δ** | **Pression f32 reçue S231** sur les domaines testés : vrai résidu contrôlé, refus/budget conservés ; [preuve](../validation/PRESSION-F32-S231.md). I-08 global non reçu : API temps encore f32 | À l'intégration temporelle : remplacer le transit du temps f32 et recevoir son consommateur. À une extension de domaine : précision contre oracle indépendant ; aucune exception implicite |
 | **A244 / admission et budget δ** | [S230](../validation/BUDGET-DELTA-S230.md) : arrêt atomique, dt restant explicite, zéro allocation testé ; maximum observé15,8501ms sous2ms au premier passage, cause inconnue. I-05 complet non reçu | Avant intégration de domaines : admission des charges viables, dégradation/fréquence explicite, marge et profil de l’hôte. Un bloc trop coûteux ne progresse pas par répétition d’abandons ; isoler le pic avant de l’attribuer au système ou au noyau |
 | **État V restaurable / intégration** | **Noyau reçu S229** : écarts auteur et restes, identité/révision et empreinte des géométries, C19-V local ; [réception](../validation/RESTAURATION-V-S229.md), ADR-140 | À l’intégration d’un hôte autoritaire : assemblage B/W/V, transport/stockage durable et autorité ; à l’évolution du graphe : migration et identité des nœuds dynamiques. Aucun prolongement générique du codec avant J2 |
 | **Géométrie V / A269 / cuisson** | A266 corrigée sur les polyèdres reçus ; résidu f64 insuffisant à `2^53+1 ml` dans un cube de 3 km, refus `Resolution` ; approximation des frontières courbes et correspondance aux assets non reçues | Nouveau contenant ou taille hors du domaine de [S228](../validation/VOLUME-ORIENTE-S228.md) : oracle, précision et coût du pas réel ; qualifier la cuisson. Aucun préalable générique à la restauration |
 | **V restant / A17 / A264** | `liquid_id`, pluie/exposition, absorption, pompes, pression fermée non construits ; A264 concerne le plancher en µm des anciennes tables ; nouvelle géométrie sans cet arrondi, vidange à qualifier | Extension V selon les usages ; test de bilan par liquide et échelle. Articulation V↔δ à J4 |
-| **S199-2 / faces coupées δ** | S199 : ordre 1,947 plat, ≈0,90 coupé ; candidat non admissible B3 | Isoler les flux pondérés par ouvertures, comparaison indépendante sur fond coupé, puis surface mobile et 3D |
+| **S199-2 / faces coupées δ** | S231 confirme les ordres S199 : 1,947 plat, ≈0,90 coupé ; candidat non admissible B3 | **Prochain lot S232 — J2** : isoler les flux pondérés par ouvertures, comparaison indépendante sur fond coupé et correction consommée par le pas ; puis surface mobile et 3D |
 | **J1-bis / coût et qualité du rendu / A247** | S225 : passe eau 4,16 ms fixe, 2,85 médiane caméra balayée à 960×540 ; cadence ≈198 Hz ; J1 partiel | Stratégie spatiale/LOD/visibilité intégrée ; scène, qualité et coût complet face aux 2 ms. Les techniques s'éprouvent ensemble (ADR-131) |
 | **A265 / recouvrement CPU–GPU** | Non expliqué (S225) ; acquisition d'image et cadence modifient le coût observé | Avant une conclusion de gain CPU dépendant du recouvrement ; ne bloque pas par principe l'optimisation d'une passe GPU mesurée |
 | **A255 / A261 / A258 / A263** | Bornes locales S218–S221 construites, non intégrées à l'admission ; S222 coût ≈25 s. Réserve f32 et constante Bessel à qualifier | Approfondir seulement si un usage échoue à l'admission actuelle ou si une borne exploitable sous budget est proposée ; plus un préalable générique à la mutualisation |

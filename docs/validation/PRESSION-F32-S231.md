@@ -80,7 +80,7 @@ statistique ni borne murale. Le bloc 64×32 dépasse encore les 2 ms ; limites S
 ## Reproduction et portée
 
 Depuis `code/` : `cargo run -p water-core --release --offline --example delta_precision`,
-`cargo run -p water-core --release --offline --example delta_filter`, puis
+`cargo run -p water-core --release --offline --example delta_filters`, puis
 `cargo test --workspace --release --offline --quiet` : **409 réussis, 5 ignorés**.
 Deux tests ajoutés : oracle indépendant et refus de sous-débordement. Les sept tests runtime
 confirment refus atomiques, reprise, réductions bornées et absence d'allocation.

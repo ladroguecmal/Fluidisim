@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S231 — en cours
+Session : S231 — terminée
 Agent : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
 Entrée : « Continue », quatre copies à88b98fe, master propre, jeton libre.
 
@@ -71,7 +71,7 @@ Entrée : « Continue », quatre copies à88b98fe, master propre, jeton libre.
 - [x] **P2** — lectures ciblées, critères et référence f64 avant modification.
 - [x] **P3** — construire la pression f32 et ses contrôles numériques sur le chemin réel.
 - [x] **P4** — réception comparée, coûts, suite et preuve des limites.
-- [>] **P5** — rituel §6, priorité comparée, journal, file, jeton et copies synchronisées.
+- [x] **P5** — rituel §6, priorité comparée, journal, file, jeton ; synchroniser les copies après ce commit.
 
 P4 : 409 tests réussis, 5 ignorés. Réception et mesures dans PRESSION-F32-S231 ; économie24octets/cellule, aucun gain de vitesse reçu. Filtre0x3710c97033f99db7. Comparateur de coût exécuté sur88b98fe et candidat courant. I-08 global non reçu (API temps f32).
 

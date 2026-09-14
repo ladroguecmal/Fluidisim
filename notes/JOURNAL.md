@@ -11874,3 +11874,34 @@ remplace pas le contrat de précision ; aucune réduction d'ambition.
 aucun ADR ni leçon artificiels. Maillons 0 : capacité d'abandon consommée dans le pas réel,
 preuves d'intégrité et de reprise, distinctes d'I-05 complet. Jeton libre ; après commit,
 synchroniser les trois copies propres en avance rapide, sans suppression incertaine.
+
+## S231 — 2026-09-14 — Pression δ en f32, convergence vérifiée
+
+**Entrée.** « Continue », quatre copies propres à88b98fe, jeton libre. Codex, GPT-6.
+Plan61bfb95, critères/témoin82c3ae8, construction262969c, réception9c8a006.
+
+**Capacité reçue.** Le pas réel calcule pression, opérateur, projection et réductions en f32.
+La conversion naïve révélait une fausse convergence (vrai résidu jusqu'à4,45e-6) ; contrôle
+de b−Ap et correction CG conservent le seuil1e-6 et le plafond global. Refus des normes
+sous-débordantes non nulles. Transport exact par callback hôte f64, pas accumulation f64.
+
+**Preuves.** [PRESSION-F32-S231](../docs/validation/PRESSION-F32-S231.md) : dix comparaisons
+contre f64, continuation100pas, oracle indépendant aux quatre résolutions ; vitesse différente
+d'au plus6,16e-6 relatif normalisé. Verdicts spatiaux conservés, nouveaux bits documentés.
+24octets/cellule économisés, environ28% du stockage ; **aucun gain de vitesse reçu**.
+Suite release hors réseau : **409 réussis, 5 ignorés**, dont les sept tests runtime
+(budget/refus/reprise/zéro allocation). Deux nouvelles régressions, avertissements préexistants.
+
+**Limites et suite comparée.** I-08 pression reçu sur ces domaines seulement ; API temps f32
+encore à remplacer à l'intégration. I-05 complet, flux coupés, surface mobile, 3D et B3 non reçus.
+Avant une troisième session J2, comparaison à la file : **S232, flux des faces coupées**
+débloque la précision physique du candidat, là où prolonger les micro-mesures de pression
+ne livre plus de capacité utile. J1-bis apporterait du rendu moins coûteux, mais ne corrigerait
+pas ce défaut physique mesuré ; extensions V différables après restauration reçue.
+B2, bathymétrie, seconde cible et autres déclencheurs conservés. Aucun arbitrage utilisateur.
+
+**Rituel.** File entière relue, états remplacés, A244 et index actualisés ; invariants I-05/06/08
+relus, aucun ADR réécrit ni leçon forcée. Maillons0 : pression f32 consommée dans le pas et
+fausse convergence reproduite puis corrigée. Jeton libre ; après commit, avance rapide des
+trois copies propres, sans suppression incertaine. Le dépassement mural de P2 est consigné
+dans EN-COURS, sans le masquer comme conformité de procédure.
