@@ -349,3 +349,46 @@ fn cut_fraction_integrates_clipped_linear_profiles_s232() {
         assert!((whole-split).abs() <= 16.*f32::EPSILON*whole);
     }
 }
+
+struct StillClock;
+impl crate::host::MonotonicClock for StillClock { fn now_ns(&self) -> u64 {0} }
+
+#[test]
+fn linear_surface_matches_standing_wave_and_preserves_rest_s233() {
+    for g in [9.81f32,1.62] {
+        let mut errors = Vec::new();
+        for (n,us) in [(16,2000u64),(32,2000),(64,2000),(64,1000)] {
+            let mut arena = Arena { stats: AllocStats::default(), sealed:false };
+            let mut v = Volume::configure(&mut HostServices {alloc:&mut arena,jobs:&Jobs,sink:&Jobs},
+                Domain{nx:n,nz:n/2,dx:8./n as f32},1025.,g,&vec![0.;n]).unwrap();
+            let eta:Vec<_>=(0..n).map(|i|4.+0.01*(std::f64::consts::PI*(i as f64+0.5)/n as f64).cos() as f32).collect();
+            v.set_surface(&eta).unwrap();
+            let initial_sum:f64=eta.iter().map(|v|*v as f64).sum();
+            let omega=(g as f64*std::f64::consts::PI/8.*(std::f64::consts::PI*0.5).tanh()).sqrt();
+            let mut error=0f64;
+            for step in 1..=1_000_000/us {
+                let r=v.step_surface_linear(us,2000,1_000_000,&Jobs,&StillClock).unwrap_or_else(|e|panic!("n={n} us={us} step={step} g={g} {e:?}"));
+                assert_eq!(r.advanced_us,us);
+                let time=(step*us) as f64*1e-6;
+                for (i,h) in v.surface().iter().enumerate() {
+                    let oracle=0.01*(std::f64::consts::PI*(i as f64+0.5)/n as f64).cos()*(omega*time).cos();
+                    error=error.max(((*h as f64-4.)-oracle).abs()/0.01);
+                }
+            }
+            let drift=(v.surface().iter().map(|v|*v as f64).sum::<f64>()-initial_sum).abs()/n as f64;
+            println!("S233 g={g} n={n} dt_us={us} error={error:e} mean_drift={drift:e}");
+            assert!(drift < 64.*f32::EPSILON as f64*4.);
+            errors.push(error);
+            if g>9. && n==64 { assert!(v.surface()[0]<4., "retour de signe absent"); }
+        }
+        assert!(errors[2]<errors[0],"{errors:?}");
+        assert!(errors[3]<errors[2],"le raffinement temporel doit reduire l'erreur : {errors:?}");
+        assert!(errors[3]<0.01,"{errors:?}");
+    }
+    let (mut rest,_) = build(8,4,1.,9.81);
+    for _ in 0..100 {
+        rest.step_surface_linear(2000,100,1_000_000,&Jobs,&StillClock).unwrap();
+        assert!(rest.surface().iter().all(|v|*v==4.));
+        assert!(rest.velocity_u().iter().chain(rest.velocity_w()).all(|v|v.to_bits()==0));
+    }
+}

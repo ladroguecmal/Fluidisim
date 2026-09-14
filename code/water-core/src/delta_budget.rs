@@ -31,8 +31,11 @@ impl<'a> Control<'a> {
     pub fn new(clock: &'a dyn MonotonicClock, budget_ms: f32) -> Result<Self, Error> {
         let ns = budget_ms as f64 * 1_000_000.;
         if !budget_ms.is_finite() || budget_ms < 0. || ns >= u64::MAX as f64 { return Err(Error::NotFinite); }
+        Ok(Self::from_ns(clock, ns as u64))
+    }
+    pub fn from_ns(clock: &'a dyn MonotonicClock, limit: u64) -> Self {
         let start = clock.now_ns();
-        Ok(Self { clock: Some(clock), start, last: start, limit: ns as u64, left: 0, phase: Phase::Prepare })
+        Self { clock: Some(clock), start, last: start, limit, left: 0, phase: Phase::Prepare }
     }
     pub fn limited(&self) -> bool { self.clock.is_some() }
     pub fn elapsed(&self) -> u64 { self.last - self.start }

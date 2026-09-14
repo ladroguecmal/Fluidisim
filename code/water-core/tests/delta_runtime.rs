@@ -206,7 +206,7 @@ fn allocation_accounting_matches_requested_typed_storage() {
     let (v, arena) = build(32, 16, 0.25, 9.81);
     let (n, k) = (v.domain().nx, v.domain().nz);
     // Quatre tableaux f32 par famille de faces, fond+surface, fraction ; six f32 par cellule.
-    let bytes = (4 * ((n + 1) * k + n * (k + 1)) + 2 * n + n * k) * 4 + 6 * n * k * 4;
+    let bytes = (4 * ((n + 1) * k + n * (k + 1)) + 5 * n + n * k) * 4 + 6 * n * k * 4;
     assert_eq!(arena.stats().persistent_bytes, bytes);
     assert_eq!(arena.stats().persistent_calls, 1);
     let mut arena = Arena {
@@ -366,4 +366,48 @@ fn budgeted_reductions_are_bounded_and_keep_the_unlimited_bits_s230() {
         if limit <= 1 { assert!(reference.degraded); }
     }
     assert!(jobs.0.get() > 100, "le consommateur doit passer par plusieurs petits appels");
+}
+
+
+fn surface_bits(v:&Volume)->Vec<u32> {v.surface().iter().map(|v|v.to_bits()).collect()}
+#[test]
+fn evolving_surface_is_atomic_at_every_checkpoint_and_allocation_free_s233() {
+    let mut reference=prepared();
+    reference.step_surface_linear(2000,100,1000,&Jobs,&DeadlineClock::new(usize::MAX)).unwrap();
+    let make=|| {
+        let mut v=prepared();
+        v.step_surface_linear(2000,100,1000,&Jobs,&DeadlineClock::new(usize::MAX)).unwrap(); v
+    };
+    let before=bits(&reference); let eta_before=surface_bits(&reference);
+    let clock=DeadlineClock::new(usize::MAX);
+    let (r,allocs)=measured(||reference.step_surface_linear(2000,100,1000,&Jobs,&clock));
+    assert_eq!(allocs,0); let report=r.unwrap();
+    let after=bits(&reference); let eta_after=surface_bits(&reference);
+    assert_ne!(eta_before,eta_after);
+    let (_,positive)=measured(||std::hint::black_box(vec![0u8;8])); assert!(positive>0);
+    for cutoff in 1..clock.calls.get() {
+        let mut v=make();
+        let (r,allocs)=measured(||v.step_surface_linear(2000,100,1000,&Jobs,&DeadlineClock::new(cutoff)));
+        assert_eq!(allocs,0); let r=r.unwrap();
+        assert_eq!((r.advanced_us,r.remaining_us),(0,2000)); assert!(r.report.is_none());
+        assert_eq!(bits(&v),before); assert_eq!(surface_bits(&v),eta_before);
+        let (r,allocs)=measured(||v.step_surface_linear(2000,100,1000,&Jobs,&DeadlineClock::new(usize::MAX)));
+        assert_eq!(allocs,0); assert_eq!(r.unwrap(),report);
+        assert_eq!(bits(&v),after); assert_eq!(surface_bits(&v),eta_after);
+    }
+    for (duration,iterations,budget,error) in [(0,100,1000,Error::NotFinite),
+        (1u64<<54,100,1000,Error::NotFinite),(1_000_000,100,1000,Error::Domain),
+        (2000,0,1000,Error::Convergence),(2000,100,u64::MAX,Error::NotFinite)] {
+        let mut v=make();
+        let (r,allocs)=measured(||v.step_surface_linear(duration,iterations,budget,&Jobs,&DeadlineClock::new(usize::MAX)));
+        assert_eq!(r,Err(error)); assert_eq!(allocs,0);
+        assert_eq!(bits(&v),before); assert_eq!(surface_bits(&v),eta_before);
+    }
+    let mut v=make();
+    let backward=DeadlineClock{backward:true,..DeadlineClock::new(clock.calls.get()-1)};
+    assert_eq!(v.step_surface_linear(2000,100,1000,&Jobs,&backward),Err(Error::Clock));
+    assert_eq!(bits(&v),before); assert_eq!(surface_bits(&v),eta_before);
+    let r=v.step_surface_linear(2000,100,0,&Jobs,&DeadlineClock::new(usize::MAX)).unwrap();
+    assert_eq!(r.remaining_us,2000); assert_eq!(surface_bits(&v),eta_before);
+    println!("S233: {} expirations, surface incluse, zero allocation et reprise identique",clock.calls.get()-1);
 }

@@ -93,6 +93,18 @@ pub enum Error {
     Budget,
     /// L'horloge injectée a reculé pendant le pas.
     Clock,
+    /// Le mode évolutif refuse de transporter la surface avec une pression non convergée.
+    Convergence,
+}
+
+/// Pas de surface linéarisée : durée exacte, zéro avancée sur expiration.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct SurfaceReport {
+    pub advanced_us: u64,
+    pub remaining_us: u64,
+    pub elapsed_ns: u64,
+    pub stopped_at: Option<Phase>,
+    pub report: Option<Report>,
 }
 
 /// Ce qu'un pas rend à l'appelant, sans qu'il ait à deviner.
@@ -137,6 +149,9 @@ pub struct Volume {
     saved_u: Vec<f32>,
     saved_w: Vec<f32>,
     saved_p: Vec<f32>,
+    saved_eta: Vec<f32>,
+    eta_roundoff: Vec<f32>,
+    saved_eta_roundoff: Vec<f32>,
     last_cost_ms: Option<f32>,
 }
 
@@ -183,7 +198,7 @@ impl Volume {
         let nw = nz.checked_add(1).and_then(|n| n.checked_mul(nx)).ok_or(Error::Domain)?;
         let floats = nu.checked_add(nw).and_then(|n| n.checked_mul(4))
             .and_then(|n| n.checked_add(c))
-            .and_then(|n| nx.checked_mul(2).and_then(|x| n.checked_add(x)))
+            .and_then(|n| nx.checked_mul(5).and_then(|x| n.checked_add(x)))
             .ok_or(Error::Domain)?;
         let bytes = floats.checked_mul(core::mem::size_of::<f32>())
             .and_then(|n| c.checked_mul(6 * core::mem::size_of::<f32>()).and_then(|p| n.checked_add(p)))
@@ -219,6 +234,9 @@ impl Volume {
             saved_u: vec![0.; nu],
             saved_w: vec![0.; nw],
             saved_p: vec![0.; c],
+            saved_eta: vec![domain.z0(); nx],
+            eta_roundoff: vec![0.; nx],
+            saved_eta_roundoff: vec![0.; nx],
             last_cost_ms: None,
         };
         v.cut();
@@ -345,6 +363,7 @@ impl Volume {
             return Err(Error::NotFinite);
         }
         self.eta.copy_from_slice(eta);
+        self.eta_roundoff.fill(0.);
         self.last_cost_ms = None;
         Ok(())
     }
@@ -352,7 +371,7 @@ impl Volume {
     /// Pression dynamique imposée au couvercle de la colonne `i`.
     #[inline]
     fn lid(&self, i: usize) -> f32 {
-        self.rho * self.g_eff * (self.eta[i] - self.domain.z0())
+        self.rho * self.g_eff * ((self.eta[i] - self.domain.z0()) - self.eta_roundoff[i])
     }
 
     pub fn velocity_u(&self) -> &[f32] {
@@ -364,6 +383,8 @@ impl Volume {
     pub fn pressure(&self) -> &[f32] {
         &self.p
     }
+    /// Hauteur imposée ou évoluée par step_surface_linear ; pas une frontière mobile 3D.
+    pub fn surface(&self) -> &[f32] { &self.eta }
     pub fn fluid_fraction(&self) -> &[f32] {
         &self.frac
     }
@@ -575,7 +596,7 @@ impl Volume {
 
     /// Projection : résout `L p = −(ρ/dt)·div(u*)` plus le couvercle, puis corrige.
     /// `max_iters` **est** la variable de dégradation exigée par ADR-007 §2.
-    fn project(&mut self, dt: f32, max_iters: u32, jobs: &dyn JobSystem, ctl: &mut Control) -> Result<Report, Error> {
+    fn project(&mut self, scale: f32, k1: f32, max_iters: u32, jobs: &dyn JobSystem, ctl: &mut Control) -> Result<Report, Error> {
         ctl.check(Phase::Rhs)?;
         let (nx, nz, dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
         let inv = 1. / (dx * dx);
@@ -583,7 +604,6 @@ impl Volume {
         let result = self.divergence(&self.us, &self.ws, &mut rhs, ctl, Phase::Rhs);
         self.rhs = rhs;
         result?;
-        let scale = -self.rho / dt;
         for i in 0..nx {
             for k in 0..nz {
                 ctl.poll(Phase::Rhs)?;
@@ -614,7 +634,8 @@ impl Volume {
         let tol = 1e-12_f32;
         // À convergence récurrente, vérifier b-Ap puis redémarrer depuis le vrai résidu.
         // Le plafond porte sur toutes les itérations, corrections comprises.
-        let mut previous_actual = f32::INFINITY;
+        // S233 : une hausse isolée du résidu arrondi n'est pas une preuve de stagnation.
+        // Continuer sous le plafond global ; arrêt si CG ne peut faire aucune itération.
         let actual_rr = loop {
             let before_iterations = it;
             // Au repos, `b` est exactement nul : aucune itération, et la correction est nulle.
@@ -655,16 +676,14 @@ impl Volume {
                 self.res[c] = self.rhs[c] - self.tmp[c];
             }
             let actual = self.norm2(&self.res, jobs, ctl)?;
-            if actual <= tol * b2 || it >= max_iters || it == before_iterations || actual >= previous_actual {
+            if actual <= tol * b2 || it >= max_iters || it == before_iterations {
                 break actual;
             }
-            previous_actual = actual;
             rr = actual;
             budget::copy(&self.res, &mut self.dir, ctl, Phase::Pressure)?;
         };
         // Correction : `u = u* − (dt/ρ)·∂p/∂x`, demi-maille au couvercle.
         ctl.check(Phase::Correct)?;
-        let k1 = (dt / self.rho) as f32;
         budget::copy(&self.us, &mut self.u, ctl, Phase::Correct)?;
         budget::copy(&self.ws, &mut self.w, ctl, Phase::Correct)?;
         for i in 1..nx {
@@ -745,7 +764,7 @@ impl Volume {
         self.swap_state();
         let result = (|| {
             self.advect(dt, ctl)?;
-            let r = self.project(dt, max_iters, jobs, ctl)?;
+            let r = self.project(-self.rho / dt, dt / self.rho, max_iters, jobs, ctl)?;
             ctl.check(Phase::Validate)?;
             for v in self.u.iter().chain(&self.w) {
                 ctl.poll(Phase::Validate)?;
@@ -781,6 +800,93 @@ impl Volume {
             Err(Error::Budget) => Ok(BudgetReport { advanced_dt: 0., remaining_dt: dt,
                 elapsed_ns: ctl.elapsed(), stopped_at: Some(ctl.phase), report: None }),
             Err(e) => Err(e),
+        }
+    }
+
+    /// Surface linéarisée sur géométrie fixe (ADR-141). La durée et le budget entrent
+    /// en microsecondes entières. Aucune advection quadratique ; ni déferlement ni air.
+    /// Une pression non convergée rend Convergence et conserve u/w/p/eta.
+    pub fn step_surface_linear(&mut self, duration_us: u64, max_iters: u32, budget_us: u64,
+        jobs: &dyn JobSystem, clock: &dyn MonotonicClock) -> Result<SurfaceReport, Error> {
+        self.last_cost_ms = None;
+        let limit = budget_us.checked_mul(1000).ok_or(Error::NotFinite)?;
+        // Entier exactement représentable en f64 ; aucun temps n'est arrondi en f32.
+        if duration_us == 0 || duration_us > (1u64 << 53) { return Err(Error::NotFinite); }
+        let dt = duration_us as f64 * 1e-6;
+        let dx = self.domain.dx;
+        if self.g_eff <= 0. || dt*dt*self.g_eff as f64/dx as f64 > 1. { return Err(Error::Domain); }
+        // ADR-141 : seuls les coefficients dimensionnés atteignent les champs f32.
+        let scale = (-self.rho as f64/dt) as f32;
+        let correction = (dt/self.rho as f64) as f32;
+        let transport = (dt/dx as f64) as f32;
+        if !scale.is_finite() || !correction.is_finite() || correction == 0.
+            || !transport.is_finite() || transport == 0. { return Err(Error::NotFinite); }
+        let mut ctl = Control::from_ns(clock, limit);
+        let mut swapped = false;
+        let result = (|| {
+            ctl.check(Phase::Prepare)?;
+            for i in 0..self.domain.nx {
+                ctl.poll(Phase::Prepare)?;
+                if self.open_w[self.fw(i,self.domain.nz)] != 1. { return Err(Error::Domain); }
+            }
+            budget::copy(&self.u,&mut self.saved_u,&mut ctl,Phase::Prepare)?;
+            budget::copy(&self.w,&mut self.saved_w,&mut ctl,Phase::Prepare)?;
+            budget::copy(&self.p,&mut self.saved_p,&mut ctl,Phase::Prepare)?;
+            budget::copy(&self.eta,&mut self.saved_eta,&mut ctl,Phase::Prepare)?;
+            budget::copy(&self.eta_roundoff,&mut self.saved_eta_roundoff,&mut ctl,Phase::Prepare)?;
+            self.swap_state();
+            core::mem::swap(&mut self.eta,&mut self.saved_eta);
+            core::mem::swap(&mut self.eta_roundoff,&mut self.saved_eta_roundoff);
+            swapped = true;
+            // Le modèle est entièrement linéaire : ne pas garder seulement une partie
+            // des termes quadratiques en réutilisant l'advection du mode imposé.
+            budget::copy(&self.u,&mut self.us,&mut ctl,Phase::Advect)?;
+            budget::copy(&self.w,&mut self.ws,&mut ctl,Phase::Advect)?;
+            let report = self.project(scale,correction,max_iters,jobs,&mut ctl)?;
+            if report.degraded { return Err(Error::Convergence); }
+            ctl.check(Phase::Correct)?;
+            let mut left = 0f32; // mur latéral ; même flux partagé par les deux colonnes.
+            for i in 0..self.domain.nx {
+                let mut right = 0f32;
+                for k in 0..self.domain.nz {
+                    ctl.poll(Phase::Correct)?;
+                    let face = self.fu(i+1,k);
+                    right += self.open_u[face]*self.u[face]*dx;
+                }
+                // Somme compensée f32 : un déplacement plus petit que l'ulp de z0
+                // survit au pas suivant et participe également à la pression.
+                let increment = -transport*(right-left)-self.eta_roundoff[i];
+                let height = self.eta[i]+increment;
+                self.eta_roundoff[i] = (height-self.eta[i])-increment;
+                self.eta[i] = height;
+                left = right;
+            }
+            ctl.check(Phase::Validate)?;
+            for value in self.u.iter().chain(&self.w).chain(&self.p).chain(&self.eta)
+                .chain(&self.eta_roundoff)
+                .chain(&self.rhs).chain(&self.res).chain(&self.dir).chain(&self.tmp) {
+                ctl.poll(Phase::Validate)?;
+                if !value.is_finite() { return Err(Error::NotFinite); }
+            }
+            if !report.residual.is_finite() || !report.divergence.is_finite() { return Err(Error::NotFinite); }
+            ctl.check(Phase::Publish)?;
+            Ok(report)
+        })();
+        if result.is_err() && swapped {
+            self.swap_state();
+            core::mem::swap(&mut self.eta,&mut self.saved_eta);
+            core::mem::swap(&mut self.eta_roundoff,&mut self.saved_eta_roundoff);
+        }
+        match result {
+            Ok(report) => {
+                let elapsed_ns = ctl.elapsed();
+                self.last_cost_ms = (elapsed_ns>0).then_some(elapsed_ns as f32/1_000_000.);
+                Ok(SurfaceReport {advanced_us:duration_us,remaining_us:0,elapsed_ns,
+                    stopped_at:None,report:Some(report)})
+            }
+            Err(Error::Budget) => Ok(SurfaceReport {advanced_us:0,remaining_us:duration_us,
+                elapsed_ns:ctl.elapsed(),stopped_at:Some(ctl.phase),report:None}),
+            Err(error) => Err(error),
         }
     }
 

@@ -69,8 +69,8 @@ Entrée : « continue », quatre copies propres à46851ce, jeton libre.
 
 - [x] **P1** — amorce, jeton, plan seuls.
 - [x] **P2** — lectures ciblées, modèle/temps, critères et référence déclarés.
-- [>] **P3** — construire le chemin évolutif et les refus atomiques.
-- [ ] **P4** — recevoir dynamique, budget, allocations et suite ; preuve des limites.
+- [x] **P3** — construire le chemin évolutif et les refus atomiques.
+- [>] **P4** — recevoir dynamique, budget, allocations et suite ; preuve des limites.
 - [ ] **P5** — rituel §6, file, priorité comparée, jeton et copies synchronisées.
 
 ### Notes de reprise
@@ -79,3 +79,11 @@ Base :411 tests réussis,5 ignorés ; S232 reçoit le débit ouvert, pas la dyna
 
 P2 : ADR-141 précise coefficients temporels f64 vers f32, jamais dt f32 dans le nouveau
 chemin. Mode linéaire explicite, protocole onde stationnaire dans SURFACE-LINEARISEE-S233.
+
+P3 : boucle pression/flux/hauteur construite avec durée/budget entiers, refus atomique
+u/w/p/eta et compensation f32. Premier essai64/1ms refusait Convergence au pas307
+(résidu1,02063e-6), une hausse isolée arrondie n'étant pas stagnation : corrections continuent
+sous plafond global inchangé. Sans compensation de hauteur, l'erreur lunaire augmentait
+en raffinant (0,597% à64/1ms). Avec compensation consommée par la pression : erreurs fines
+0,0659% Terre et0,0173% Lune ; dérive moyenne≤4,47e-8m. Test onde/rest reçu.
+Huit tests runtime reçus AVANT compensation, à rejouer ; 211 expirations déjà testées.
