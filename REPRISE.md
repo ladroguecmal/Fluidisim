@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-14 23:56 +02:00
+JETON            : occupé
+Battement        : 2026-09-15 00:01 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python et GPU local disponibles)
-Session en cours : aucune
+Session en cours : S236 — A255/A261 : admettre la scène S235 en resserrant les bornes
 Dernière session : S235 — scène multi-sources et visibilité ; admission refusée par majorants
 Session suivante : S236 — A255/A261 : admettre la scène S235 en resserrant les bornes
 Maillons        : 0
