@@ -549,10 +549,48 @@ pub fn mixed_compose(
         max_perturbation_slope: real,
     })
 }
+/// S235 — un impact de l'image : champ du cœur (référence directe) et état de l'instant.
+///
+/// Tous les impacts de la scène ont l'entrée S203 : une seule table radiale sert pour tous, le
+/// profil de chacun étant celui de la table à **son** âge.
+pub struct ImpactSlot {
+    pub field: RadialImpact<256>,
+    /// Naissance relative au début de la scène (µs).
+    pub birth_us: u64,
+    pub active: bool,
+}
+impl ImpactSlot {
+    pub fn center(&self) -> [f32; 2] {
+        let p = self.field.event().data().position;
+        [p[0], p[1]]
+    }
+    /// Âge de l'impact en µs à l'âge de scène `age` (s), `None` avant sa naissance.
+    fn local_us(&self, age: f64) -> Option<u64> {
+        let local = age - self.birth_us as f64 / 1e6;
+        (local >= 0.).then(|| (local * 1e6) as u64)
+    }
+}
+/// Impacts de l'image : le seul impact S203 (`count = 1`, chemin S211–S234) ou les huit de S235.
+pub fn scene_impacts(scene: &Scene, count: usize) -> Vec<ImpactSlot> {
+    (0..count)
+        .map(|i| {
+            let event = if count == 1 { scene.event } else { scene_impact(scene, i, None) };
+            ImpactSlot {
+                field: RadialImpact::new(event, scene.medium, scene.domain).expect("impact de scène"),
+                birth_us: event.data().birth.0 - BIRTH,
+                active: false,
+            }
+        })
+        .collect()
+}
+pub const IMPACT_CAPACITY: usize = 8;
+
 pub struct FrameData<'a> {
     pub background: &'a Background,
     pub table: RadialTable<'a, 256>,
+    /// S235 : profils concaténés, `table.len()` couples par impact, dans l'ordre de `impacts`.
     pub profile: Vec<(f32, f32)>,
+    pub impacts: Vec<ImpactSlot>,
     pub components: [[f32; 4]; 32],
     pub camera: Camera,
     pub active: bool,
@@ -583,13 +621,16 @@ impl<'a> FrameData<'a> {
         wake_input: WakeInput<'a>,
         timeline: Timeline<'a>,
         recipe: gaussian_spectrum::Recipe,
+        impacts: Vec<ImpactSlot>,
     ) -> Self {
-        let profile = vec![(0., 0.); table.len()];
+        assert!((1..=IMPACT_CAPACITY).contains(&impacts.len()), "impacts de scène : 1 à {IMPACT_CAPACITY}");
+        let profile = vec![(0., 0.); table.len() * impacts.len()];
         let n = wake_input.count();
         Self {
             background,
             table,
             profile,
+            impacts,
             components: [[0.; 4]; 32],
             camera: Camera::default(),
             active: true,
@@ -620,11 +661,18 @@ impl<'a> FrameData<'a> {
                 &mut self.components,
             )
             .expect("caméra dans le domaine B");
-        self.active = enabled && (0.0..=HORIZON).contains(&age);
-        if self.active {
-            self.table
-                .profile(SimTime(BIRTH + (age * 1e6) as u64), &mut self.profile)
-                .unwrap();
+        // S235 : chaque impact à son âge ; un seul impact né à 0 retrouve le calcul S211–S234.
+        let len = self.table.len();
+        self.active = false;
+        for (m, slot) in self.impacts.iter_mut().enumerate() {
+            let local = slot.local_us(age).filter(|&us| enabled && us as f64 <= HORIZON * 1e6);
+            slot.active = local.is_some();
+            if let Some(us) = local {
+                self.table
+                    .profile(SimTime(BIRTH + us), &mut self.profile[m * len..(m + 1) * len])
+                    .unwrap();
+                self.active = true;
+            }
         }
         let wake_time = wake_time(age).filter(|_| enabled);
         self.wake_active = wake_time.is_some();
@@ -703,12 +751,15 @@ impl<'a> FrameData<'a> {
                 -b.normal[0] / b.normal[2],
                 -b.normal[1] / b.normal[2],
             ];
-            if self.active && self.table.field().admits(FrameId(0), 0, *xy) {
-                // Référence directe indépendante de l'interpolation GPU.
-                let w = self
-                    .table
-                    .field()
-                    .sample(FrameId(0), 0, *xy, SimTime(BIRTH + (self.age * 1e6) as u64))
+            for slot in &self.impacts {
+                if !slot.active || !slot.field.admits(FrameId(0), 0, *xy) {
+                    continue;
+                }
+                // Référence directe indépendante de l'interpolation GPU, au même âge que le profil.
+                let us = slot.local_us(self.age).expect("impact actif né");
+                let w = slot
+                    .field
+                    .sample(FrameId(0), 0, *xy, SimTime(BIRTH + slot.birth_us + us))
                     .unwrap();
                 v[0] += w.eta;
                 v[1] += w.slope[0];
@@ -755,7 +806,8 @@ impl Camera {
         nx: u32,
         ny: u32,
         step: f32,
-        active: bool,
+        profile_len: usize,
+        impact_count: usize,
         wake_count: usize,
         wake_active: bool,
         lattice: Option<crate::lod::Lattice>,
@@ -779,14 +831,16 @@ impl Camera {
             u[1],
             u[2],
             0.,
-            -self.eye[0],
-            10. - self.eye[1],
+            // S235 : centres et activité des impacts passent au tampon `impacts` ; ici la longueur
+            // d'un profil, qui indexe les profils concaténés.
+            profile_len as f32,
+            0.,
             RADIUS,
             step,
             32.,
             nx as f32,
             ny as f32,
-            if active { 1. } else { 0. },
+            impact_count as f32,
             WAKE_MIN[0] - self.eye[0],
             WAKE_MIN[1] - self.eye[1],
             WAKE_MAX[0] - self.eye[0],

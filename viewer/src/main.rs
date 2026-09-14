@@ -316,7 +316,7 @@ fn lod_charge(frame: &mut FrameData<'_>) {
         let b = lod::background(&frame.components);
         let k = if frame.wake_active { lod::wake(&frame.wake) } else { Default::default() };
         let i = if frame.active {
-            lod::impact(&frame.profile, frame.table.step())
+            lod::impact(&frame.profile[..frame.table.len()], frame.table.step())
         } else {
             Some(Default::default())
         };
@@ -346,7 +346,8 @@ fn lod_charge(frame: &mut FrameData<'_>) {
     frame.update(8., 8., true);
     let b = lod::background(&frame.components).hessian;
     let wake = lod::wake(&frame.wake).hessian;
-    let impact = lod::impact(&frame.profile, frame.table.step()).map_or(f32::NAN, |x| x.hessian);
+    let impact = lod::impact(&frame.profile[..frame.table.len()], frame.table.step())
+        .map_or(f32::NAN, |x| x.hessian);
     let poses: [(&str, [f32; 3], f32, f32); 6] = [
         ("S212", [0., -18., 7.], 0., -(7.0f32 / 53.).atan()),
         ("balayage200", [0., -18., 7.], 0.8, -0.15 + 0.25 * 2.2f32.sin()),
@@ -506,32 +507,94 @@ fn scene_admission(scene: &Scene, recipe: water_core::gaussian_spectrum::Recipe)
     Ok(())
 }
 
+/// S235 — vérification de la scène multi-sources : les contrôles de S211–S234, rejoués sur huit
+/// impacts et trois sillages, sur les deux chemins du sillage.
+///
+/// Âges choisis avant mesure : chaque naissance (0, 4, 8… 28 s) et une seconde après, le pire
+/// plancher prédit (28,25 s), la fin du forçage (16 s), du contexte (40 s) et de l'horizon du
+/// dernier impact (84 s). Le rendu est cosmétique : les refus du budget se publient à part
+/// (`--scene-admission`), ils n'arrêtent pas la vérification.
+fn verify_multi(frame: &mut FrameData<'_>) -> Result<(), String> {
+    std::fs::create_dir_all("captures/s235").map_err(|e| e.to_string())?;
+    let instance = instance();
+    let mut g = pollster::block_on(gpu::Gpu::new(
+        &instance,
+        None,
+        640,
+        360,
+        frame.profile.len(),
+        scene::WAKE_CAPACITY,
+    ))?;
+    let ages = [
+        0., 1., 4., 5., 8., 9., 12., 13., 16., 17., 20., 21., 24., 25., 28., 28.25, 29., 32., 39.,
+        40.01, 56.01, 60.01, 84.01,
+    ];
+    for lod in [true, false] {
+        frame.lod = lod;
+        frame.camera = Camera::default();
+        for age in ages {
+            frame.update(age, age, true);
+            g.upload(frame);
+            let live = frame.impacts.iter().filter(|s| s.active).count();
+            print!("MULTI impacts_actifs={live} ");
+            g.verify(frame)?;
+        }
+    }
+    frame.lod = true;
+    frame.camera = Camera::default();
+    for age in [4., 8., 16., 24., 28.25, 39.] {
+        frame.update(age, age, true);
+        g.verify_lattice(frame)?;
+    }
+    frame.update(29., 29., true);
+    g.upload(frame);
+    let target = g.target();
+    g.draw(&target.create_view(&Default::default()), false);
+    g.capture(&target, "captures/s235/scene.ppm")?;
+    for lod in [true, false] {
+        frame.lod = lod;
+        for (w, h) in [(640, 360), (960, 540)] {
+            g.resize(w, h);
+            for age0 in [3., 29.] {
+                g.benchmark(frame, age0)?;
+            }
+        }
+    }
+    Ok(())
+}
+
 fn run() -> Result<(), String> {
     let args: Vec<_> = std::env::args().collect();
     let scene = Scene::new();
     let mut storage = vec![[0.; 2]; 256 * scene.impact.table_len(scene.step).unwrap()];
     let table = scene.impact.bake_table(scene.step, &mut storage).unwrap();
     // S212 : sillage prescrit admis au journal de pression du cœur, préparé à chaque image.
+    // S235 : `--multi` — trois sillages dans ce même journal et huit impacts (scène déclarée).
+    let multi = args.iter().any(|a| a == "--multi");
     let recipe = scene::wake_recipe(64, 128);
-    let wake = scene::wake(recipe);
-    let mut records = [None];
-    let mut journal = Journal::new(1, &mut records);
-    journal
-        .admit_authenticated(wake.source())
-        .map_err(|e| format!("admission sillage : {e:?}"))?;
+    let wake_count = if multi { scene::WAKE_OFFSETS.len() } else { 1 };
+    let wakes: Vec<_> = (0..wake_count).map(|i| scene::wake_at(recipe, i)).collect();
+    let mut records = [None; 3];
+    let mut journal = Journal::new(1, &mut records[..wake_count]);
+    for w in &wakes {
+        journal
+            .admit_authenticated(w.source())
+            .map_err(|e| format!("admission sillage : {e:?}"))?;
+    }
     let mut pools = scene::Pools::new(recipe);
     let spectrum = pools.spectrum(recipe);
     let input = WakeInput {
         journal: &journal,
         spectrum: &spectrum,
-        context: wake.source().context(),
+        context: wakes[0].source().context(),
     };
     // S213 : levier temporel construit une fois (modes préconstruits), publié à chaque image.
     let mut nodes = vec![NodeState::default(); input.count()];
     let mut modes = vec![None; Timeline::mode_capacity(&spectrum, &journal)];
     let timeline = Timeline::build(input.context, &spectrum, &journal, &mut nodes, &mut modes)
         .map_err(|e| format!("levier temporel : {e:?}"))?;
-    let mut frame = FrameData::new(&scene.background, table, input, timeline, recipe);
+    let impacts = scene::scene_impacts(&scene, if multi { scene::IMPACTS.len() } else { 1 });
+    let mut frame = FrameData::new(&scene.background, table, input, timeline, recipe, impacts);
     // S234 : grille locale du sillage par défaut ; `--no-lod` rend le chemin direct S212–S225.
     frame.lod = !args.iter().any(|a| a == "--no-lod");
     if args.iter().any(|a| a == "--lod-charge") {
@@ -540,6 +603,9 @@ fn run() -> Result<(), String> {
     }
     if args.iter().any(|a| a == "--scene-admission") {
         return scene_admission(&scene, recipe);
+    }
+    if multi && args.iter().any(|a| a == "--verify") {
+        return verify_multi(&mut frame);
     }
     if args.iter().any(|a| a == "--verify") {
         std::fs::create_dir_all("captures/s212").map_err(|e| e.to_string())?;
@@ -744,7 +810,14 @@ fn run() -> Result<(), String> {
         )
         .map_err(|e| format!("levier temporel fin : {e:?}"))?;
         let mut fine_frame =
-            FrameData::new(&scene.background, fine_table, fine, fine_timeline, fine_recipe);
+            FrameData::new(
+                &scene.background,
+                fine_table,
+                fine,
+                fine_timeline,
+                fine_recipe,
+                scene::scene_impacts(&scene, 1),
+            );
         g.benchmark(&mut fine_frame, 3.)?;
         g.resize(640, 360);
         g.benchmark(&mut fine_frame, 3.)?;

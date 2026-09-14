@@ -85,7 +85,7 @@ ADR-131 D1 avec les techniques absentes, sans réduire la scène pour passer.
 - [x] **P2** — lectures ciblées (profil radial, `mixed_compose`, `Timeline` multi-sources,
   S222/S223) ; déclarer la scène (positions, naissances, trajectoires) et prédire son admission
   par le cœur avant de construire.
-- [ ] **P3** — impacts multiples : profils et centres en tableau au GPU, références CPU et
+- [x] **P3** — impacts multiples : profils et centres en tableau au GPU, références CPU et
   composition du cœur à N impacts ; `--verify` vert.
 - [ ] **P4** — sillages multiples dans un journal : grille, bornes, `verify_lattice` sur la scène.
   **Amendement P2 (23:27)** : aux instants refusés par le budget, séparer pente **réelle** et
@@ -117,3 +117,18 @@ pire 1,251 π/7 à 28,25 s. À chaque naissance : pression 0,175–0,202 (39–4
 passent ») valait pour des impacts âgés, pas pour des naissances renouvelées.
 Décision : scène conservée (critère « sans réduire la scène pour passer ») ; rendu cosmétique
 qui annonce ; classification réelle/majorant en P4.
+
+P3 : `ImpactSlot` (champ du cœur, naissance, actif) ; une table radiale, profils concaténés à
+l'âge de chaque impact ; tampon GPU `impacts` (groupe 0, liaison 4 : centre relatif, actif) ;
+`p.impact.x` = longueur de profil, `p.info.w` = nombre d'impacts. `--multi` : trois sillages
+dans le journal commun + huit impacts ; `verify_multi` (23 âges déclarés, deux chemins,
+`verify_lattice` à 6 âges, capture `captures/s235/scene.ppm`, bancs 3 s et 29 s).
+**Mono identique au bit à S234** : toutes les lignes `VERIFY` et `LOD_INTERIEUR` (log
+`verify_s235.log`, secteur). **Multi** : grille max η **0,368 mm** (12 s, 4 impacts), direct
+≤0,091 mm ; tous âges sous 3 mm. Intérieurs : grille − direct 0,212–0,392 mm, bornes 2,45–
+2,98 mm (rapports 0,07–0,16) ; pas 1,125–1,1875 m, **10 810 nœuds au plus** (capacité 16 384) ;
+sauts ≤7 µm. Ce passage couvre aussi la partie « vérification » de P4 (sillages multiples).
+Bancs multi (secteur, non encore alternés avec un témoin) : 960×540 grille **0,441 ms à 3 s,
+0,459 à 29 s** (mono 0,427) ; direct 4,40 / 4,28 (mono 4,32 / 4,29). CPU sillage **3,12 ms à
+3 s** (forçage de trois sillages ; mono 1,3), 0,45 ms à 29 s ; un pic isolé 53 ms au premier
+banc 640×360 (mise en régime probable, non attribué).

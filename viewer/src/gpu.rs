@@ -25,6 +25,8 @@ pub struct Gpu {
     waves: wgpu::Buffer,
     profile: wgpu::Buffer,
     wake: wgpu::Buffer,
+    /// S235 : centres et activité des impacts, `IMPACT_CAPACITY` lignes.
+    impacts: wgpu::Buffer,
     indices: wgpu::Buffer,
     pub nx: u32,
     pub ny: u32,
@@ -157,6 +159,12 @@ impl Gpu {
             wake_len as u64 * 16,
             wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
         );
+        let impacts = buffer(
+            &device,
+            "W impact centres",
+            crate::scene::IMPACT_CAPACITY as u64 * 16,
+            wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+        );
         let binding = |i, ty| wgpu::BindGroupLayoutEntry {
             binding: i,
             visibility: wgpu::ShaderStages::VERTEX_FRAGMENT | wgpu::ShaderStages::COMPUTE,
@@ -174,6 +182,7 @@ impl Gpu {
                 binding(1, wgpu::BufferBindingType::Storage { read_only: true }),
                 binding(2, wgpu::BufferBindingType::Storage { read_only: true }),
                 binding(3, wgpu::BufferBindingType::Storage { read_only: true }),
+                binding(4, wgpu::BufferBindingType::Storage { read_only: true }),
             ],
         });
         let bind = device.create_bind_group(&wgpu::BindGroupDescriptor {
@@ -195,6 +204,10 @@ impl Gpu {
                 wgpu::BindGroupEntry {
                     binding: 3,
                     resource: wake.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 4,
+                    resource: impacts.as_entire_binding(),
                 },
             ],
         });
@@ -367,6 +380,7 @@ impl Gpu {
             waves,
             profile,
             wake,
+            impacts,
             indices,
             nx,
             ny,
@@ -420,7 +434,8 @@ impl Gpu {
             self.nx,
             self.ny,
             frame.table.step(),
-            frame.active,
+            frame.table.len(),
+            frame.impacts.len(),
             frame.wake.len(),
             frame.wake_active,
             lattice,
@@ -428,6 +443,16 @@ impl Gpu {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
         self.queue.write_buffer(&self.uniform, 0, &self.bytes);
+        self.bytes.clear();
+        let eye = frame.camera.eye;
+        for slot in &frame.impacts {
+            let c = slot.center();
+            let row = [c[0] - eye[0], c[1] - eye[1], if slot.active { 1. } else { 0. }, 0.];
+            for v in row {
+                self.bytes.extend_from_slice(&v.to_le_bytes());
+            }
+        }
+        self.queue.write_buffer(&self.impacts, 0, &self.bytes);
         self.bytes.clear();
         for row in frame.components {
             for v in row {

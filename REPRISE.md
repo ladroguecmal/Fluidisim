@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-14 23:27 +02:00
+Battement        : 2026-09-14 23:36 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python et GPU local disponibles)
 Session en cours : S235 — J1-bis : scène multi-sources, visibilité et retour dans le champ
 Dernière session : S234 — grille locale du sillage : passe d'eau J1 sous 2 ms

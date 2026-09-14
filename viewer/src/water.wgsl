@@ -13,6 +13,9 @@ struct Params {
 @group(0) @binding(3) var<storage, read> wake: array<vec4<f32>>;
 @group(1) @binding(0) var<storage, read> probes: array<vec4<f32>>;
 @group(1) @binding(1) var<storage, read_write> results: array<vec4<f32>>;
+// S235 : un impact par ligne — centre relatif à la caméra, actif (1/0). `p.impact.x` : longueur
+// d'un profil ; `p.info.w` : nombre d'impacts.
+@group(0) @binding(4) var<storage, read> impacts: array<vec4<f32>>;
 @group(2) @binding(0) var<storage, read> lattice: array<vec4<f32>>;
 @group(3) @binding(0) var<storage, read_write> lattice_out: array<vec4<f32>>;
 
@@ -75,15 +78,18 @@ fn water(q: vec2<f32>) -> vec3<f32> {
         let phase = dot(c.yz, q) + c.w;
         v += vec3<f32>(c.x * sin(phase), c.x * cos(phase) * c.yz);
     }
-    let d = q - p.impact.xy;
-    let r = length(d);
-    if (p.info.w > 0.5 && r <= p.impact.z) {
+    for (var m = 0u; m < u32(p.info.w); m++) {
+        let c = impacts[m];
+        let d = q - c.xy;
+        let r = length(d);
+        if (c.z < 0.5 || r > p.impact.z) { continue; }
+        let base = m*u32(p.impact.x);
         let x = r / p.impact.w;
         let i = u32(x);
         let t = x - f32(i);
         let t2 = t*t;
         let t3 = t2*t;
-        let a = profile[i]; let b = profile[i+1u];
+        let a = profile[base+i]; let b = profile[base+i+1u];
         let m0 = a.y*p.impact.w; let m1 = b.y*p.impact.w;
         let h = (2*t3-3*t2+1)*a.x + (t3-2*t2+t)*m0 + (-2*t3+3*t2)*b.x + (t3-t2)*m1;
         let slope = ((6*t2-6*t)*a.x+(3*t2-4*t+1)*m0+(-6*t2+6*t)*b.x+(3*t2-2*t)*m1)/p.impact.w;
