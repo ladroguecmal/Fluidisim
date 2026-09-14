@@ -460,6 +460,382 @@ fn scene_admission(scene: &Scene, recipe: water_core::gaussian_spectrum::Recipe)
     Ok(())
 }
 
+/// S236 P2 — majorant **sûr sur l'union** des emprises, par séparation de cellules du plan.
+///
+/// `G(p) = Σ_i [r_i ≤ R_i] F_i(t, r_i) + P(p)`, avec `F_i = slope_max_beyond` décroissante en `r`
+/// et nulle hors du disque (image : « hors emprise, B seul », ADR-126). Sur une cellule, chaque
+/// terme est majoré à la **distance minimale** de la cellule au centre, et `P` par la pression
+/// globale si la cellule touche l'emprise du sillage (`rect`), zéro sinon — ou partout si `rect`
+/// vaut `None`. Aucune constante de Lipschitz : les termes sont monotones. On sépare la cellule au
+/// plus grand majorant jusqu'à ce qu'il rejoigne la meilleure valeur atteinte à un centre à `tol`
+/// près, ou jusqu'au budget de cellules. Rend (majorant, minorant atteint, cellules évaluées).
+fn union_bound(
+    fields: &[water_core::radial_impact::RadialImpact<256>],
+    time: water_core::SimTime,
+    pressure: f32,
+    rect: Option<([f32; 2], [f32; 2])>,
+    tol: f32,
+    budget: usize,
+) -> (f32, f32, usize) {
+    let centres: Vec<[f32; 2]> = fields
+        .iter()
+        .map(|f| {
+            let p = f.event().data().position;
+            [p[0], p[1]]
+        })
+        .collect();
+    let term = |i: usize, d: f32| {
+        if d <= fields[i].domain_radius() {
+            fields[i].slope_max_beyond(time, d)
+        } else {
+            0.
+        }
+    };
+    let touches = |min: [f32; 2], max: [f32; 2]| {
+        rect.map_or(true, |(a, b)| min[0] <= b[0] && max[0] >= a[0] && min[1] <= b[1] && max[1] >= a[1])
+    };
+    let upper = |min: [f32; 2], max: [f32; 2]| {
+        let mut s = if touches(min, max) { pressure } else { 0. };
+        for (i, c) in centres.iter().enumerate() {
+            let dx = (min[0] - c[0]).max(0.).max(c[0] - max[0]);
+            let dy = (min[1] - c[1]).max(0.).max(c[1] - max[1]);
+            s += term(i, dx.hypot(dy));
+        }
+        s
+    };
+    let at = |p: [f32; 2]| {
+        let mut s = if touches(p, p) { pressure } else { 0. };
+        for (i, c) in centres.iter().enumerate() {
+            s += term(i, (p[0] - c[0]).hypot(p[1] - c[1]));
+        }
+        s
+    };
+    if fields.is_empty() {
+        return (pressure, pressure, 1);
+    }
+    let (mut lo, mut hi) = ([f32::INFINITY; 2], [f32::NEG_INFINITY; 2]);
+    for (f, c) in fields.iter().zip(&centres) {
+        let r = f.domain_radius();
+        lo = [lo[0].min(c[0] - r), lo[1].min(c[1] - r)];
+        hi = [hi[0].max(c[0] + r), hi[1].max(c[1] + r)];
+    }
+    let mut open: Vec<(f32, [f32; 2], [f32; 2])> = Vec::new();
+    let (mut best, mut evaluated) = (0f32, 0usize);
+    let n = 8;
+    for j in 0..n {
+        for i in 0..n {
+            let min = [lo[0] + (hi[0] - lo[0]) * i as f32 / n as f32, lo[1] + (hi[1] - lo[1]) * j as f32 / n as f32];
+            let max = [lo[0] + (hi[0] - lo[0]) * (i + 1) as f32 / n as f32, lo[1] + (hi[1] - lo[1]) * (j + 1) as f32 / n as f32];
+            open.push((upper(min, max), min, max));
+            best = best.max(at([(min[0] + max[0]) / 2., (min[1] + max[1]) / 2.]));
+            evaluated += 1;
+        }
+    }
+    loop {
+        let k = (0..open.len()).max_by(|&a, &b| open[a].0.total_cmp(&open[b].0)).unwrap();
+        let (u, min, max) = open.swap_remove(k);
+        if u - best <= tol || evaluated >= budget {
+            return (u, best, evaluated);
+        }
+        let mid = [(min[0] + max[0]) / 2., (min[1] + max[1]) / 2.];
+        for (a, b) in [
+            (min, mid),
+            ([mid[0], min[1]], [max[0], mid[1]]),
+            ([min[0], mid[1]], [mid[0], max[1]]),
+            (mid, max),
+        ] {
+            open.push((upper(a, b), a, b));
+            best = best.max(at([(a[0] + b[0]) / 2., (a[1] + b[1]) / 2.]));
+            evaluated += 1;
+        }
+    }
+}
+
+/// S236 P2 — **certification** sur l'union : séparation jusqu'à ce que la plus grande cellule passe
+/// sous `threshold` (admis), ou qu'une cellule de demi-côté `min_half` reste au-dessus (non
+/// certifiable), ou épuisement du budget. Sur une cellule au-dessus du seuil et de demi-côté au plus
+/// `local_half`, la pression globale est remplacée par `min(globale, borne locale ADR-137)`.
+/// Rend (majorant final, admis, cellules, appels locaux).
+#[allow(clippy::too_many_arguments)]
+fn certify_union(
+    fields: &[water_core::radial_impact::RadialImpact<256>],
+    time: water_core::SimTime,
+    pressure: &water_core::bound_pressure::Prepared<'_>,
+    global: f32,
+    rect: ([f32; 2], [f32; 2]),
+    threshold: f32,
+    local_half: f32,
+    min_half: f32,
+    budget: usize,
+) -> (f32, bool, usize, usize) {
+    let centres: Vec<[f32; 2]> = fields
+        .iter()
+        .map(|f| {
+            let p = f.event().data().position;
+            [p[0], p[1]]
+        })
+        .collect();
+    let context = pressure.context();
+    let mut locals = 0usize;
+    let upper = |min: [f32; 2], max: [f32; 2], locals: &mut usize| {
+        let mut s = 0f32;
+        for (f, c) in fields.iter().zip(&centres) {
+            let dx = (min[0] - c[0]).max(0.).max(c[0] - max[0]);
+            let dy = (min[1] - c[1]).max(0.).max(c[1] - max[1]);
+            let d = dx.hypot(dy);
+            if d <= f.domain_radius() {
+                s += f.slope_max_beyond(time, d);
+            }
+        }
+        let (a, b) = rect;
+        let touches = min[0] <= b[0] && max[0] >= a[0] && min[1] <= b[1] && max[1] >= a[1];
+        if !touches {
+            return s;
+        }
+        let half = 0.5 * (max[0] - min[0]).max(max[1] - min[1]);
+        if s + global > threshold && half <= local_half {
+            *locals += 1;
+            let lo = [min[0].max(a[0]), min[1].max(a[1])];
+            let hi = [max[0].min(b[0]), max[1].min(b[1])];
+            if let Ok(e) = pressure.local_slope_envelope_spectral(&context, time, lo, hi) {
+                return s + global.min(e.bound);
+            }
+        }
+        s + global
+    };
+    let (mut lo, mut hi) = ([f32::INFINITY; 2], [f32::NEG_INFINITY; 2]);
+    for (f, c) in fields.iter().zip(&centres) {
+        let r = f.domain_radius();
+        lo = [lo[0].min(c[0] - r), lo[1].min(c[1] - r)];
+        hi = [hi[0].max(c[0] + r), hi[1].max(c[1] + r)];
+    }
+    let mut open: Vec<(f32, [f32; 2], [f32; 2])> = Vec::new();
+    let n = 8;
+    for j in 0..n {
+        for i in 0..n {
+            let min = [lo[0] + (hi[0] - lo[0]) * i as f32 / n as f32, lo[1] + (hi[1] - lo[1]) * j as f32 / n as f32];
+            let max = [lo[0] + (hi[0] - lo[0]) * (i + 1) as f32 / n as f32, lo[1] + (hi[1] - lo[1]) * (j + 1) as f32 / n as f32];
+            open.push((upper(min, max, &mut locals), min, max));
+        }
+    }
+    let mut evaluated = open.len();
+    loop {
+        let k = (0..open.len()).max_by(|&a, &b| open[a].0.total_cmp(&open[b].0)).unwrap();
+        let (u, min, max) = open.swap_remove(k);
+        let half = 0.5 * (max[0] - min[0]).max(max[1] - min[1]);
+        if u <= threshold {
+            return (u, true, evaluated, locals);
+        }
+        if half <= min_half || evaluated >= budget {
+            return (u, false, evaluated, locals);
+        }
+        let mid = [(min[0] + max[0]) / 2., (min[1] + max[1]) / 2.];
+        for (a, b) in [
+            (min, mid),
+            ([mid[0], min[1]], [max[0], mid[1]]),
+            ([min[0], mid[1]], [mid[0], max[1]]),
+            (mid, max),
+        ] {
+            open.push((upper(a, b, &mut locals), a, b));
+            evaluated += 1;
+        }
+    }
+}
+
+/// S236 P2 — balayage d'ADR-138 **étendu à l'union** : `r₁` jusqu'à `max_i(d_i + R_i)`, terme
+/// d'ancrage nul au-delà de son rayon, termes nuls au-delà de leur domaine. Même largeur de
+/// cellule que le cœur (`R₁ / 8`).
+fn anchored_union(fields: &[water_core::radial_impact::RadialImpact<256>], time: water_core::SimTime, pressure: f32) -> f32 {
+    let anchor = (0..fields.len())
+        .max_by(|&a, &b| fields[a].slope_max_at(time).total_cmp(&fields[b].slope_max_at(time)).then(b.cmp(&a)))
+        .unwrap();
+    let centre = |i: usize| {
+        let p = fields[i].event().data().position;
+        [p[0], p[1]]
+    };
+    let c1 = centre(anchor);
+    let reach = fields[anchor].domain_radius();
+    let width = reach / water_core::prepared_water::mixed::JOINT_SLOPE_SAMPLES as f32;
+    let far = (0..fields.len())
+        .map(|i| {
+            let c = centre(i);
+            (c[0] - c1[0]).hypot(c[1] - c1[1]) + fields[i].domain_radius()
+        })
+        .fold(reach, f32::max);
+    let cells = (far / width).ceil() as usize;
+    let mut worst = 0f32;
+    for s in 0..cells {
+        let (a, b) = (width * s as f32, width * (s + 1) as f32);
+        let mut total = if a <= reach { fields[anchor].slope_max_beyond(time, a) } else { 0. };
+        for i in (0..fields.len()).filter(|&i| i != anchor) {
+            let c = centre(i);
+            let d = (c[0] - c1[0]).hypot(c[1] - c1[1]);
+            let delta = if d >= a && d <= b { 0. } else if d < a { a - d } else { d - b };
+            if delta <= fields[i].domain_radius() {
+                total += fields[i].slope_max_beyond(time, delta);
+            }
+        }
+        worst = worst.max(total);
+    }
+    worst + pressure
+}
+
+/// S236 P2 — bornes de la scène S235 sur l'union des emprises, et contre-exemple du balayage
+/// d'ADR-138 servi sur l'union.
+fn bounds_union(scene: &Scene, recipe: water_core::gaussian_spectrum::Recipe) -> Result<(), String> {
+    use water_core::{
+        bound_pressure,
+        prepared_water::{self, mixed},
+        radial_impact::RadialImpact,
+        wave_journal::{self, Cause},
+        FrameId, SimTime,
+    };
+    let wakes: Vec<_> = (0..scene::WAKE_OFFSETS.len()).map(|i| scene::wake_at(recipe, i)).collect();
+    let mut records = [None; 3];
+    let mut journal = Journal::new(1, &mut records);
+    for w in &wakes {
+        journal.admit_authenticated(w.source()).map_err(|e| format!("{e:?}"))?;
+    }
+    let mut pools = scene::Pools::new(recipe);
+    let spectrum = pools.spectrum(recipe);
+    let context = wakes[0].source().context();
+    let mut slots = vec![Slot::default(); spectrum.nodes().len()];
+    let rect = Some((scene::WAKE_MIN, scene::WAKE_MAX));
+    let mut refused = [0usize; 5];
+    let mut worst = [0f32; 5];
+    let (mut cells_max, mut micros_max, mut mismatch) = (0usize, 0f64, 0usize);
+    let (mut certified, mut certify_ms_max) = (0usize, 0f64);
+    for step in 0..=160u32 {
+        let age = step as f64 * 0.25;
+        let time = SimTime(scene::BIRTH + (age * 1e6) as u64);
+        let mut impact_records: [Option<wave_journal::Record>; 8] = std::array::from_fn(|_| None);
+        let mut impacts_journal = wave_journal::Journal::new(1, &mut impact_records);
+        let mut fields = Vec::new();
+        for i in 0..scene::IMPACTS.len() {
+            let event = scene::scene_impact(scene, i, None);
+            if event.data().birth.0 > time.0 {
+                continue;
+            }
+            let cause = Cause { entity: 203 + i as u64, command: 1, emission: 0 };
+            impacts_journal.confirm(1, cause, event).map_err(|e| format!("{e:?}"))?;
+            fields.push(RadialImpact::<256>::new(event, scene.medium, scene.domain).map_err(|e| format!("{e:?}"))?);
+        }
+        let mut pool: [Option<RadialImpact<256>>; 8] = std::array::from_fn(|_| None);
+        let impacts = prepared_water::Prepared::<256>::build(
+            &impacts_journal,
+            &mut pool,
+            prepared_water::Context { frame: FrameId(0), cell: 0, medium: scene.medium, domain: scene.domain },
+        )
+        .map_err(|e| format!("{e:?}"))?;
+        let pressure = bound_pressure::Prepared::from_journal(context, &spectrum, &journal, time, &mut slots)
+            .map_err(|e| format!("{e:?}"))?;
+        let p = pressure.slope_envelope();
+        let current = mixed::slope_floor(&impacts, Some(&pressure), time);
+        let plain: f32 = fields.iter().map(|f| f.slope_max_at(time)).sum::<f32>() + p;
+        if fields.len() == 1 && (current - plain).abs() > 0. {
+            mismatch += 1;
+        }
+        let anchored = anchored_union(&fields, time, p).min(plain);
+        let start = Instant::now();
+        let (global, global_lo, cells) = union_bound(&fields, time, p, None, 1e-3, 20_000);
+        micros_max = micros_max.max(start.elapsed().as_secs_f64() * 1e6);
+        let (local, local_lo, cells_l) = union_bound(&fields, time, p, rect, 1e-3, 20_000);
+        cells_max = cells_max.max(cells).max(cells_l);
+        // Certification avec pression locale sur les petites cellules critiques.
+        if global.min(plain) > BREAKING_SLOPE {
+            let start = Instant::now();
+            let (bound, admitted, cells, locals) = certify_union(
+                &fields,
+                time,
+                &pressure,
+                p,
+                (scene::WAKE_MIN, scene::WAKE_MAX),
+                BREAKING_SLOPE,
+                1.0,
+                0.01,
+                200_000,
+            );
+            let ms = start.elapsed().as_secs_f64() * 1e3;
+            certified += admitted as usize;
+            certify_ms_max = certify_ms_max.max(ms);
+            println!(
+                "CERTIFICATION age_s={age} admis={admitted} majorant_final={bound:.6} part={:.4} cellules={cells} appels_pression_locale={locals} ms={ms:.1}",
+                bound / BREAKING_SLOPE
+            );
+        }
+        let values = [current, anchored, global.min(plain), local.min(plain), global_lo];
+        for (k, v) in values.iter().enumerate() {
+            if *v > BREAKING_SLOPE {
+                refused[k] += 1;
+            }
+            worst[k] = worst[k].max(*v);
+        }
+        if step % 4 == 0 || current > BREAKING_SLOPE && step % 4 == 1 {
+            println!(
+                "BORNES age_s={age} nes={} pression={p:.6} actuel_intersection={current:.6} ancre_union={anchored:.6} separation_pression_globale={:.6} (atteint {global_lo:.6}, {cells} cellules) separation_pression_emprise={:.6} (atteint {local_lo:.6})",
+                fields.len(), global.min(plain), local.min(plain)
+            );
+        }
+    }
+    let pi7 = BREAKING_SLOPE;
+    println!(
+        "BORNES_BILAN instants=161 refus actuel={} ancre_union={} separation_globale={} separation_emprise={} valeur_atteinte={} | pires/pi7 {:.4} {:.4} {:.4} {:.4} {:.4} | cellules_max={cells_max} separation_us_max={micros_max:.0} ecart_mono={mismatch}",
+        refused[0], refused[1], refused[2], refused[3], refused[4],
+        worst[0] / pi7, worst[1] / pi7, worst[2] / pi7, worst[3] / pi7, worst[4] / pi7
+    );
+    println!("CERTIFICATION_BILAN refus_separation={} certifies_avec_pression_locale={certified} ms_max={certify_ms_max:.1}", refused[2]);
+
+    // Contre-exemple : ancre neuve en (0, 0) ; deux impacts d'une seconde, confondus, à 100 m.
+    let t0 = SimTime(scene::BIRTH + 10_000_000);
+    let make = |id: u64, pos: [f32; 2], birth: u64| -> Result<water_core::wave_event::WaveEvent, String> {
+        let mut d = *scene.event.data();
+        d.id = id;
+        d.position = [pos[0], pos[1], 0.];
+        d.birth = SimTime(birth);
+        water_core::wave_event::WaveEvent::impact(d).map_err(|e| format!("{e:?}"))
+    };
+    let events = [
+        make(901, [0., 0.], t0.0)?,
+        make(902, [100., 0.], t0.0 - 1_000_000)?,
+        make(903, [100., 0.], t0.0 - 1_000_000)?,
+    ];
+    let mut rec: [Option<wave_journal::Record>; 3] = std::array::from_fn(|_| None);
+    let mut j = wave_journal::Journal::new(1, &mut rec);
+    for (k, e) in events.iter().enumerate() {
+        j.confirm(1, Cause { entity: 901 + k as u64, command: 1, emission: 0 }, *e).map_err(|e| format!("{e:?}"))?;
+    }
+    let mut pool: [Option<RadialImpact<256>>; 3] = std::array::from_fn(|_| None);
+    let prepared = prepared_water::Prepared::<256>::build(
+        &j,
+        &mut pool,
+        prepared_water::Context { frame: FrameId(0), cell: 0, medium: scene.medium, domain: scene.domain },
+    )
+    .map_err(|e| format!("{e:?}"))?;
+    let fields: Vec<_> = events.iter().map(|e| RadialImpact::<256>::new(*e, scene.medium, scene.domain)).collect::<Result<_, _>>().map_err(|e| format!("{e:?}"))?;
+    let joint = mixed::slope_floor(&prepared, None, t0);
+    let (sep, sep_lo, _) = union_bound(&fields, t0, 0., None, 1e-4, 20_000);
+    let mut real = 0f32;
+    for jy in -300..=300 {
+        for ix in -300..=300 {
+            let q = [100. + ix as f32 * 0.01, jy as f32 * 0.01];
+            let mut s = [0f32; 2];
+            for f in &fields[1..] {
+                if let Ok(v) = f.sample(FrameId(0), 0, q, t0) {
+                    s[0] += v.slope[0];
+                    s[1] += v.slope[1];
+                }
+            }
+            real = real.max(s[0].hypot(s[1]));
+        }
+    }
+    println!(
+        "CONTRE_EXEMPLE plancher_adr138={joint:.6} pente_reelle_union_pres_des_deux={real:.6} separation_union={sep:.6} (atteint {sep_lo:.6}) globaux={:?} trou={}",
+        fields.iter().map(|f| f.slope_max_at(t0)).collect::<Vec<_>>(),
+        real > joint
+    );
+    Ok(())
+}
+
 /// Plancher de pente du cœur à un instant de la scène, et ses deux parts.
 struct Admission {
     age: f64,
@@ -819,6 +1195,9 @@ fn run() -> Result<(), String> {
     }
     if args.iter().any(|a| a == "--scene-admission") {
         return scene_admission(&scene, recipe);
+    }
+    if args.iter().any(|a| a == "--bornes-union") {
+        return bounds_union(&scene, recipe);
     }
     if multi && args.iter().any(|a| a == "--retour") {
         return verify_return(&mut frame);

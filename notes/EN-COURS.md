@@ -86,7 +86,7 @@ seuil changé, aucune scène réduite.
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [ ] **P2** — diagnostic sur la série S235 : plancher actuel ; ADR-138 étendu à l'union ;
+- [x] **P2** — diagnostic sur la série S235 : plancher actuel ; ADR-138 étendu à l'union ;
   plancher 2D par séparation (pression globale, puis nulle hors emprise du sillage) ; bornes contre
   la pente réelle S235 ; contre-exemple du trou d'ADR-138 sur l'union.
 - [ ] **P3** — décision et ADR-142 si P2 conclut ; sinon bascule déclarée.
@@ -101,3 +101,22 @@ seuil changé, aucune scène réduite.
 Base : S235 — 49 refus / 161 instants, tous par majorant ; pente réelle ≤0,2154 ; plancher aux
 naissances = pression 0,175–0,202 + impacts 0,28–0,37. `mixed_water.rs` : `admits` (intersection,
 l. 158), `slope_floor_joint` (ancre, 8 cellules sur le rayon de l'ancre, l. 246).
+
+P2 (`--bornes-union`, logs `bornes_s236.log` puis `bornes_s236b.log`, CPU, viewer seul) :
+champs reconstruits comme `Prepared::build` (écart mono 0). Refus sur 161 instants et pire/π/7 :
+**actuel 49 (1,2510)** ; ADR-138 étendu à l'union 40 (1,1904) — plus serré que le cœur car il
+annule les termes au-delà de leur domaine, que `slope_floor_joint` ajoute ; **séparation 2D,
+pression globale : 32 (1,1528)**, 64–244 cellules, ≤2,7 ms ; pression nulle hors emprise du
+sillage : identique (tous les impacts sont dans l'emprise) ; **valeur atteinte par G : 31
+(1,1515)** → même une somme d'impacts exacte en position refuse : les termes eux-mêmes sont trop
+larges (pression 0,19 contre ≈0,07 réelle ; impacts anciens ≈0,11 au centre du neuf).
+**Certification** (séparation arrêtée dès que la plus grande cellule ≤ π/7 ; sur cellule ≤1 m de
+demi-côté au-dessus du seuil, pression = min(globale, ADR-137 locale)) : **32 / 32 instants
+certifiés**, majorants finaux 0,9835–0,9994 π/7, 92–128 cellules, 3–15 appels locaux, **3,0–
+13,4 ms**. Donc scène S235 admissible aux 161 instants : 129 par séparation à pression globale,
+32 avec pression locale sur cellules critiques. Réserve : ADR-137 = réception numérique, pas
+certificat f32 (**A258** entre dans le lot).
+Contre-exemple mal construit : ancre (0,0) neuve, deux impacts d'1 s confondus à 100 m → réelle
+0,1225 < plancher ADR-138 0,2539 (globaux 0,2126 / 0,2032 / 0,2032, bornes lâches à 1 s). Le trou
+de l'union demande deux impacts **nés au même instant** que l'ancre, ancre plus énergique — à
+construire en test du cœur (P4).
