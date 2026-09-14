@@ -11752,3 +11752,46 @@ des lots indépendants ; les raffinements de bornes n'en sont plus un préalable
 A211/A243 restent à éprouver par les livraisons suivantes. File plurielle relue, feuille de route,
 index et passation actualisés. Jeton libéré ; après ce commit, les trois copies propres doivent
 être avancées sur master selon l'amorce, sans suppression de copie dont l'inactivité est incertaine.
+
+## S228 — 2026-09-13 — Le volume du contenant détermine sa surface inclinée
+
+**Entrée.** « Continue », suite A266 de S227. Codex, GPT-6 ; master et trois copies propres à
+a86bd43, lignée B archivée, maillons 0. Plan 0b868cb ; décision 2fbead9 ; géométrie ac39870 ;
+consommation par V 6e64d99 ; réception 2ab4c65.
+
+**Décision et capacité reçue.** ADR-139 remplace la table horizontale universelle d'ADR-010 par
+une relation volume/plan sur partition tétraédrique. La surface inclinée d'un prisme, d'une cale
+et d'une forme non convexe préserve désormais leur volume dans les cas reçus ; le pas réel
+consomme ce plan pour source et receveur. **A266 active passe : 0 ml au lieu de 506** au hublot
+central à 1,01 m. Les tables historiques refusent les directions hors +Z. Les origines sont
+fixes dans la géométrie, pas déplacées avec la gravité. I-08 reçoit une exception explicite
+pour les intermédiaires f64 de V ; état/échanges restent entiers, I-03 demeure obligatoire.
+
+**Preuves et portée.** [VOLUME-ORIENTE-S228](../docs/validation/VOLUME-ORIENTE-S228.md) publie les
+oracles indépendants, domaines et coûts. **398 tests réussis, 5 ignorés**, aucun nouvel ignoré ;
+compteur positif puis zéro allocation sur les plans/pas/refus. Refus tardifs sans mutation.
+C12 à 727,4 s et chaîne S224 inchangés ; hublot latéral **1 736 ml** contre 1 829 avant correction,
+pente C16 conservée. Anneau de 64 nœuds/64 arêtes, six tétraèdres partagés par forme : **812,6 µs
+médiane**, 1 366 µs p95, 1 807,4 µs maximum observé ; aucune garantie de budget I-05.
+
+**Non-fait.** État restaurable, cuisson d'assets réels/courbes, budget et seconde cible non reçus.
+**A269** ouverte : à `2^53+1 ml` dans un cube de 3 km, la précision f64 ne suffit plus ; refus
+nommé, demande entière préservée. La précision des formes/tailles supplémentaires se qualifie
+lorsqu'un consommateur en dépend. Ni la grande échelle ni les formes générales ne sont retirées.
+A264 reste sur le chemin tabulé ; aucune réception de sa vidange n'est déduite du nouveau plan.
+
+**Suite S229 et comparaison des priorités.** La restauration V complète une capacité durable
+attendue depuis S224 et ouvre C19-V ; elle est retenue pour un lot borné avant le budget δ de J2.
+Même en regroupant les correctifs V de l'audit S227 avec S228, cette comparaison justifie la
+suite : persister/restaurer le graphe et ses restes, avec identité/version des géométries, sans
+nouvelle campagne de géométrie. Après réception, comparer la suite V à **J2 budget/précision**.
+Les obligations J1-bis, B2, bathymétrie et multiplateforme gardent leur place dans la file.
+
+**Rituel.** File plurielle relue, trajectoire et index actualisés ; A266 corrigée, A269 consignée,
+aucune nouvelle leçon forcée. L'indicateur repère le nouveau fichier de géométrie V ; quatre
+contrôles de l'outil passent. **Maillons 0** : plan correct consommé par le pas, avec défaut
+reproduit puis levé. Jeton libéré ; après le commit du rituel, avance rapide des trois copies
+propres, sans suppression des copies dont l'inactivité n'est pas prouvée.
+
+*Clôture le 2026-09-14 après interruption en P6* : diff relu et complété ; aucun travail
+concurrent constaté. Code Rust de P5 inchangé, reçu 398/5 conservé ; navigation active vérifiée.

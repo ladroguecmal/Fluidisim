@@ -3359,3 +3359,22 @@ Les points d'entrée passent de 6 161 à 384 lignes ; la file remplace ses état
 sépare activité et capacité, les maillons exigent un effet aval prouvé. La troisième session d'un
 même fil oblige à comparer sa suite aux autres capacités. Le dépôt ne déclare pas ces angles
 clos : les prochaines livraisons permettront d'évaluer la mesure, sans ajouter un audit périodique.
+
+**Suivi A266 — S228, 2026-09-13 : corrigée par ADR-139 et consommée dans le pas réel.**
+Le plan est inversé depuis le volume coupé d'une partition tétraédrique, dans le repère fixe du
+contenant. Prisme, cale, forme non convexe, fonds/plafonds et directions/azimuts reçus ; A266
+active passe à **0 ml** au lieu de 506. L'ancienne table est refusée hors +Z. Le hublot S226 passe
+de 1 829 à 1 736 ml parce que son décalage faux a disparu ; sa pente reste reçue. La conception
+n'est plus limitée aux prismes. Voir [VOLUME-ORIENTE-S228](../validation/VOLUME-ORIENTE-S228.md).
+L'état restaurable est désormais le prochain lot exécutable ; pas de campagne géométrique préalable.
+
+- **A269** *(sévérité 2, S228 ; ouverte, refus explicite construit)* — **Un état en millilitres
+  entiers ne rend pas son inversion géométrique précise au millilitre à toute échelle.** Un cube
+  de 3 km admet la géométrie locale, mais `2^53+1 ml` n'est plus distinct de ses voisins en f64.
+  Le contrôle compare au véritable entier et refuse `Resolution`, sans arrondir la demande.
+  Les petits contenants reçus tiennent le demi-millilitre contre leurs oracles ; ce résultat
+  ne borne ni l'erreur directe de toute partition ni les tailles encore non éprouvées. **À faire
+  quand un consommateur sort du domaine reçu** : qualifier forme/taille contre une référence
+  indépendante, puis construire une représentation ou un calcul suffisamment précis si le
+  refus bloque cet usage. Le coût du pas complet se reçoit avec cette extension. La grande
+  échelle reste obligatoire ; cet angle ne bloque pas par principe la restauration de V.

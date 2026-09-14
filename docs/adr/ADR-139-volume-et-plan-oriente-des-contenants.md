@@ -76,3 +76,9 @@ d'allocation positif et pas sans allocation. Le coût reçu reste celui du monta
 
 Aucune nouvelle obligation d'audit : après réception, la suite est l'état V restaurable, avec
 comparaison à J2 selon la règle de reprise.
+
+## Réception datée S228 — 2026-09-13
+
+La première version est construite et consommée par le pas de V. La régression A266 est active
+et passe. [VOLUME-ORIENTE-S228](../validation/VOLUME-ORIENTE-S228.md) porte les oracles, refus,
+allocations et coûts. A269 garde ouverte la qualification de précision des tailles supplémentaires.

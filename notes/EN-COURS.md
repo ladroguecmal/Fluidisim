@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S228 — en cours
+Session : S228 — terminée
 Agent : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
 Entrée : « Continue », après S227. Copie principale et trois copies propres à a86bd43,
 lignée B archivée. Jeton libre ; maillons 0. Suite déclarée : A266, puis V restaurable.
@@ -80,7 +80,7 @@ lot suivant, sauf dépendance technique indispensable découverte ici.
 - [x] **P3** — construire le calcul géométrique orienté, sans allocation au pas ; tests indépendants des volumes et plans.
 - [x] **P4** — brancher le contrat dans V ; activer la régression A266, préserver l'atomicité et les domaines compatibles.
 - [x] **P5** — réception complète, coût et limites du chemin consommé ; publication concise de la preuve.
-- [>] **P6** — rituel §6 : journal, file, angles/leçons utiles, trajectoire, index, jeton libre et synchronisation des copies.
+- [x] **P6** — rituel §6 : journal, file, angles/leçons utiles, trajectoire, index, jeton libre et synchronisation des copies.
 
 Chaque étape reste sous quinze minutes ; découpage déclaré ici si nécessaire.
 
@@ -117,3 +117,9 @@ zéro allocation sur plans/pas/refus. Reçu VOLUME-ORIENTE-S228 : domaine et co�
 I-05. Deux pentes supplémentaires corrigent un branchement ambigu de l'oracle de cale, pas du
 calcul de production. Navigation active vérifiée. Seul le libellé de nombre de séries du banc
 a été précisé après mesure ; calcul chronométré inchangé. A269 à consigner au rituel.
+
+P6 : reprise à chaud le 2026-09-14 après interruption pendant la clôture. Diff relu et complété,
+aucun travail concurrent ; code Rust de P5 inchangé, validation 398/5 conservée. Journal et
+file plurielle relus ; A266 corrigée, A269 consignée ; trajectoire, index et indicateur actualisés.
+Jeton libre. S229 : état V restaurable ; priorité comparée à J2 au journal. Après ce commit,
+avance rapide des trois copies propres sur master, sans suppression de copie incertaine.

@@ -2,16 +2,16 @@
 
 ## File active
 
-**État relu en S227, 2026-09-13.** Porteur des travaux internes : la session du dépôt.
+**État relu en S228, clôture 2026-09-14.** Porteur des travaux internes : la session du dépôt.
 Trajectoire : [FEUILLE-DE-ROUTE](../FEUILLE-DE-ROUTE.md). Priorité et protocole d'arrêt :
 [BILAN-GLOBAL-S227](BILAN-GLOBAL-S227.md). Remplacer les états touchés ; ne plus empiler ici des
 suivis de session. Les preuves et l'histoire restent dans le journal et Git.
 
 | travail | état et preuve | déclencheur / prochain résultat utile |
 |---|---|---|
-| **A266 / géométrie V** | Ouverte, gravité 1 ; S227 reproduit aussi une fuite de 506 ml au-dessus de la vraie surface d'un prisme (test explicitement ignoré) ; distance normale distincte de la cote centrale | **Prochain lot de construction V** : relation volume/plan orienté correcte, cas prisme et cale, remplissages extrêmes, directions et azimuts ; pas de restriction définitive aux prismes |
-| **État V restaurable** | Absent (S226), ADR-022 §5.1 | Après contrat géométrique : snapshot et restauration des nœuds **et des restes d'arêtes**, continuation identique ; ouvre C19-V |
-| **V restant / A17 / A264** | Noyau présent depuis S224 ; `liquid_id`, pluie/exposition, absorption, pompes, pression fermée non construits ; plancher de hauteur dépend de la surface | Extension V selon les usages ; test de bilan par liquide et échelle. Articulation V↔δ à J4 |
+| **État V restaurable** | Absent ; contrat géométrique construit S228 (ADR-139), ADR-022 §5.1 exécutable | **Prochain lot S229** : snapshot et restauration des nœuds **et des restes d'arêtes**, identité/version des géométries, continuation identique ; ouvre C19-V. Comparer ensuite la suite V à J2 |
+| **Géométrie V / A269 / cuisson** | A266 corrigée sur les polyèdres reçus ; résidu f64 insuffisant à `2^53+1 ml` dans un cube de 3 km, refus `Resolution` ; approximation des frontières courbes et correspondance aux assets non reçues | Nouveau contenant ou taille hors du domaine de [S228](../validation/VOLUME-ORIENTE-S228.md) : oracle, précision et coût du pas réel ; qualifier la cuisson. Aucun préalable générique à la restauration |
+| **V restant / A17 / A264** | `liquid_id`, pluie/exposition, absorption, pompes, pression fermée non construits ; A264 concerne le plancher en µm des anciennes tables ; nouvelle géométrie sans cet arrondi, vidange à qualifier | Extension V selon les usages ; test de bilan par liquide et échelle. Articulation V↔δ à J4 |
 | **S200-1 / A244 / budget δ** | S200 : pas sans allocation, refus atomiques ; S202 : coût mesuré, pression f64 expérimentale et budget temporel non reçus | **Lot J2 exécutable indépendamment des raffinements W** : interruption sous budget injecté, état réutilisable et dégradation déclarée ; qualification de précision |
 | **S199-2 / faces coupées δ** | S199 : ordre 1,947 plat, ≈0,90 coupé ; candidat non admissible B3 | Isoler les flux pondérés par ouvertures, comparaison indépendante sur fond coupé, puis surface mobile et 3D |
 | **J1-bis / coût et qualité du rendu / A247** | S225 : passe eau 4,16 ms fixe, 2,85 médiane caméra balayée à 960×540 ; cadence ≈198 Hz ; J1 partiel | Stratégie spatiale/LOD/visibilité intégrée ; scène, qualité et coût complet face aux 2 ms. Les techniques s'éprouvent ensemble (ADR-131) |
@@ -30,7 +30,8 @@ suivis de session. Les preuves et l'histoire restent dans le journal et Git.
 | **A211 / A243 / pilotage** | Reprise et choix de lot refondus S227 ; indicateur Git corrigé, efficacité à éprouver | Avant la troisième session d'un même fil : vérifier la capacité livrée et comparer à la file ; le code de banc ne vaut pas intégration |
 | **A215 / copies de travail** | Jeton versionné, donc non atomique entre copies ; contrôles Git conservés | Toute reprise et fin de session selon AGENTS ; aucune suppression sans preuve de copie morte |
 
-**Clos et à ne pas redemander** : intégrité V A267/A268 (S227 : arrivées collectives et coordonnées
+**Clos et à ne pas redemander** : A266 (S228, géométrie polyédrique reçue ; tables historiques +Z) ;
+intégrité V A267/A268 (S227 : arrivées collectives et coordonnées
 extrêmes, quatre régressions) ; A245 (S205), A250 (S211), A251 (S214), A254/A262 (S223),
 A217 (S194), A240 (S195), A242 (S197) ; leurs limites restent dans les preuves. Les 2 % de B4,
 60 Hz / eau 2 ms, GPU séparé et sources du verrou S210/S211 sont acquis. A107 est un repère

@@ -118,13 +118,15 @@ pas serveur à basse fréquence, état répliqué et restauré (ADR-010, ADR-022
 (vidange en 727,4 s contre 728 s analytiques, 0,0824 %) ;
 [NOYAU-V-S224](validation/NOYAU-V-S224.md). Nœuds en millilitres entiers, orifice et déversoir, pas
 de 100 ms, report de reste, normalisation par arrondi cumulatif, refus atomiques, répétabilité
-locale vérifiée (seconde cible non reçue). *S227* : arrivées collectives bornées et différences
-de coordonnées élargies. La direction de `g_eff` est construite depuis S226 ; **A266 reste ouverte,
-y compris pour un prisme incliné**, voir [BILAN-GLOBAL-S227](registres/BILAN-GLOBAL-S227.md).
+locale vérifiée (seconde cible non reçue). *S228* : **géométrie orientée consommée dans le pas**,
+prisme, cale et forme non convexe reçus ; **A266 corrigée**, tables historiques limitées à +Z.
+Arrivées collectives bornées (S227), gravité dirigée (S226). Voir
+[VOLUME-ORIENTE-S228](validation/VOLUME-ORIENTE-S228.md) pour précision, refus et coût complet.
 *Restent* : `liquid_id` (A17),
 `sky_exposure` et `absorb_rate`, vannes et pompes, **réseau fermé sous pression** (reporté en v2 par
 l'ADR), et l'**état répliqué et restauré** d'ADR-022 §5.1, sans lequel la branche V de C19 et C21
-restent hors d'atteinte. **A264** : le plancher de vidange croît avec la surface du contenant.
+restent hors d'atteinte. **A264** : plancher des anciennes tables ; **A269** : précision des
+géométries et tailles supplémentaires. Cuisson réelle et budget encore à recevoir selon l'usage.
 
 *Cas* : C12 ; branche V de C19.
 

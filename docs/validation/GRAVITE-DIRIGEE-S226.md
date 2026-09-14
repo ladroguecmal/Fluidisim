@@ -1,5 +1,10 @@
 # La surface libre en référentiel accéléré — S226, 2026-09-13
 
+*Suite reçue S228* : [ADR-139](../adr/ADR-139-volume-et-plan-oriente-des-contenants.md) remplace
+la table universelle ; [VOLUME-ORIENTE-S228](VOLUME-ORIENTE-S228.md) reçoit le volume et le plan
+consommés ensemble. A266 est corrigée dans ce domaine. Les chiffres ci-dessous restent ceux du
+chemin S226, y compris les écarts corrigés ensuite.
+
 Deuxième brique de la couche V. `g_eff` devient un **vecteur** : le plan d'eau est perpendiculaire à
 la gravité effective et non à `Z`, comme ADR-010 §2 l'exige depuis S01.
 
