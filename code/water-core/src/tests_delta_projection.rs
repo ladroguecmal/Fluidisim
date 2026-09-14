@@ -298,3 +298,35 @@ fn underflowing_nonzero_rhs_is_not_reported_as_rest_s231() {
     assert!(v.pressure().iter().all(|p| p.to_bits()==0));
     assert!(v.velocity_w().iter().all(|p| p.to_bits()==0));
 }
+
+#[test]
+fn thin_cut_wedges_remain_fluid_and_project_their_open_flux_s232() {
+    for b in [[1.4, 1., 0.98], [0.98, 1., 1.4]] {
+        let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+        let mut v = Volume::configure(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs },
+            Domain { nx: 3, nz: 3, dx: 1. }, 1025., 9.81, &b).unwrap();
+        // Triangle indépendant : aire = base * hauteur / 2, depuis les arêtes f32 fournies.
+        let a = (0.5f32 * (b[0]+b[1])) as f64;
+        let z = (0.5f32 * (b[1]+b[2])) as f64;
+        let height = 1. - a.min(z);
+        let expected = 0.5 * height * height / (a-z).abs();
+        let fraction = v.fluid_fraction()[1] as f64;
+        assert!(fraction > 0., "triangle perdu : aire={expected:e}");
+        assert!((fraction-expected).abs() <= 64.*f32::EPSILON as f64*expected);
+        let u: Vec<_> = v.open_u.iter().map(|a| if *a>0. {0.001} else {0.}).collect();
+        let w = vec![0.; v.w.len()];
+        v.set_velocity(&u,&w).unwrap();
+        let r = v.step(0.002,2000,&Jobs).unwrap();
+        assert!(!r.degraded, "{r:?}");
+        let peak = v.u.iter().chain(&v.w).fold(0f64,|m,x|m.max(x.abs() as f64));
+        // Somme indépendante des quatre débits orientés, toutes cellules fluides incluses.
+        for k in 0..3 { for i in 0..3 {
+            if v.frac[k*3+i] == 0. {continue;}
+            let flux = v.open_u[k*4+i+1] as f64*v.u[k*4+i+1] as f64
+                -v.open_u[k*4+i] as f64*v.u[k*4+i] as f64
+                +v.open_w[(k+1)*3+i] as f64*v.w[(k+1)*3+i] as f64
+                -v.open_w[k*3+i] as f64*v.w[k*3+i] as f64;
+            assert!(flux.abs()/peak < 1e-5, "i={i} k={k} flux={flux:e}");
+        }}
+    }
+}

@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-14 21:46 +02:00
+Battement        : 2026-09-14 21:48 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
 Session en cours : S232 — flux des faces coupées
 Dernière session : S231 — pression f32 reçue, vrai résidu contrôlé

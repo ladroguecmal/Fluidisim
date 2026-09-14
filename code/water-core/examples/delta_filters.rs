@@ -137,7 +137,9 @@ fn flux_through_middle(shape: Shape, cells_x: usize) -> (f64, f64, u32, bool) {
     let i = nx / 2;
     let mut q = 0.0f64;
     for k in 0..nz {
-        q += v.velocity_u()[k * (nx + 1) + i] as f64 * dx as f64;
+        let edge = 0.5 * (bottom[i - 1] + bottom[i]);
+        let open = (((k + 1) as f32 * dx - edge) / dx).clamp(0., 1.);
+        q += v.velocity_u()[k * (nx + 1) + i] as f64 * open as f64 * dx as f64;
     }
     (q, r.residual, r.iterations, r.degraded)
 }
@@ -214,3 +216,4 @@ fn main() {
         h.finish()
     );
 }
+
