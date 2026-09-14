@@ -58,32 +58,21 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S232 — terminée
+Session : S233 — en cours
 Agent : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
-Entrée : « continue », quatre copies à4a48c74, master propre, jeton libre.
+Entrée : « continue », quatre copies propres à46851ce, jeton libre.
 
-**Objectif.** Isoler le défaut des flux coupés, corriger un défaut reproduit dans le pas réel et qualifier sa portée. Ne pas déduire une correction physique d'un seul ordre de convergence.
-**Arrêt.** Preuve indépendante, correction et régressions si défaut confirmé ; sinon diagnostic discriminant et suite de construction explicite. Budget, f32 et refus atomiques conservés.
+**Objectif.** Construire une première surface évolutive dans le candidat δ, consommée par la pression et les flux. Définir explicitement le domaine physique reçu et le contrat du temps.
+**Arrêt.** Mode évolutif testé contre référence indépendante, intégrité/budget conservés et limites transmises ; ne pas confondre surface linéarisée et δ général.
 
 ### Plan
 
-- [x] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — lectures ciblées, bilan discret et reproduction indépendante du défaut.
-- [x] **P3** — correction consommée par le pas, tests ciblés et contrôle spatial.
-- [x] **P4** — réception complète et limites dans un document de preuve.
-- [x] **P5** — rituel §6, file et priorité comparée, jeton ; synchronisation des copies après commit.
+- [x] **P1** — amorce, jeton, plan seuls.
+- [>] **P2** — lectures ciblées, modèle/temps, critères et référence déclarés.
+- [ ] **P3** — construire le chemin évolutif et les refus atomiques.
+- [ ] **P4** — recevoir dynamique, budget, allocations et suite ; preuve des limites.
+- [ ] **P5** — rituel §6, file, priorité comparée, jeton et copies synchronisées.
 
 ### Notes de reprise
 
-Base :409 tests réussis,5 ignorés ; pression f32 reçue S231. Flux coupés encore ouverts.
-
-P2 : débit pondéré seul restaure les ordres1,947/1,955/1,981 sans changer le noyau.
-Triangle fluide d'aire2,380947407e-4 perdu par SUB8 ; régression rouge volontairement
-committée avant correction P3. Preuve/critères dans FLUX-COUPES-S232.
-
-P3 : intégrale géométrique f32 rectangle/trapèze remplace SUB8. Deux nouvelles régressions
-passent, dont triangle miroir puis bilan réel après projection. Douze tests δ unitaires verts.
-Filtre corrigé final :1,947/1,957/1,966 ; empreinte0xc5ab1eadb094d058.
-
-P4 :411 tests réussis,5 ignorés ; filtre exécuté avec assertions1,8/rejeu. Réception dans
-FLUX-COUPES-S232 ; mesure historique rectifiée, pas de revendication d'ordre local.
+Base :411 tests réussis,5 ignorés ; S232 reçoit le débit ouvert, pas la dynamique de surface.
