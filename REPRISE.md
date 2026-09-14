@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-14 23:20 +02:00
+JETON            : occupé
+Battement        : 2026-09-14 23:22 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python et GPU local disponibles)
-Session en cours : aucune
+Session en cours : S235 — J1-bis : scène multi-sources, visibilité et retour dans le champ
 Dernière session : S234 — grille locale du sillage : passe d'eau J1 sous 2 ms
 Session suivante : S235 — J1-bis : scène multi-sources, visibilité et retour dans le champ
 Maillons        : 0
