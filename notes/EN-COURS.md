@@ -58,29 +58,21 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S231 — terminée
+Session : S232 — en cours
 Agent : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
-Entrée : « Continue », quatre copies à88b98fe, master propre, jeton libre.
+Entrée : « continue », quatre copies à4a48c74, master propre, jeton libre.
 
-**Objectif.** Construire et qualifier la pression f32 de δ sur le candidat réel, en comparant au témoin f64 avant modification. Conserver abandon atomique et absence d'allocation.
-**Critère d'arrêt.** Réception numérique (repos, projection, raffinement plat/coupé et continuation), comparaison du coût/stockage, limites et nouveaux bits explicites. Ne pas masquer le défaut spatial connu ni déclarer B3/I-05 reçus. Si f32 échoue, conserver la preuve et décider explicitement du contrat requis.
+**Objectif.** Isoler le défaut des flux coupés, corriger un défaut reproduit dans le pas réel et qualifier sa portée. Ne pas déduire une correction physique d'un seul ordre de convergence.
+**Arrêt.** Preuve indépendante, correction et régressions si défaut confirmé ; sinon diagnostic discriminant et suite de construction explicite. Budget, f32 et refus atomiques conservés.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — lectures ciblées, critères et référence f64 avant modification.
-- [x] **P3** — construire la pression f32 et ses contrôles numériques sur le chemin réel.
-- [x] **P4** — réception comparée, coûts, suite et preuve des limites.
-- [x] **P5** — rituel §6, priorité comparée, journal, file, jeton ; synchroniser les copies après ce commit.
-
-P4 : 409 tests réussis, 5 ignorés. Réception et mesures dans PRESSION-F32-S231 ; économie24octets/cellule, aucun gain de vitesse reçu. Filtre0x3710c97033f99db7. Comparateur de coût exécuté sur88b98fe et candidat courant. I-08 global non reçu (API temps f32).
-
-Étapes sous quinze minutes ; découpage déclaré si nécessaire.
+- [>] **P2** — lectures ciblées, bilan discret et reproduction indépendante du défaut.
+- [ ] **P3** — correction consommée par le pas, tests ciblés et contrôle spatial.
+- [ ] **P4** — réception complète et limites dans un document de preuve.
+- [ ] **P5** — rituel §6, file et priorité comparée, jeton, synchronisation des copies.
 
 ### Notes de reprise
 
-Base :407 tests réussis,5 ignorés. S230 reçoit l'arrêt coopératif, pas I-05 complet. Empreinte filtre f64 :0x0ad3f695685ca27a, ordre plat1,947, lisse0,898, marche0,895. Aucun nouveau test général à l'amorce.
-
-P2 : référence f64 exécutée avant modification, code/target/s231-f64.txt (dix cas et champs complets) ; protocole PRESSION-F32-S231. Stockage32×16=44032octets,128×64=692224octets. Divergence premier pas f64 entre2,27e-6 et8,07e-6 ; continuation100pas reçue. Horloge de clôture21:33, décalage mural depuis amorce21:01 : étape trop longue au regard du quart d’heure, prochaines modifications découpées si nécessaire. Aucun changement numérique encore fait.
-
-P3 : tableaux/opérateur/projection/réductions f32 construits ; f64 uniquement transport exact des callbacks et élargissement des rapports. Première conversion naïve : résidu vrai1,00e-6 à4,45e-6, fausse convergence détectée. Correction depuis b-Ap avec plafond global/stagnation, sans changer1e-6 ; dix cas comparatifs désormais convergés. Oracle indépendant de lignes en f64 :4,94e-7 à8,75e-7 sur16/32/64/128 ; dix tests unitaires passent. Norme sous-débordante non nulle refusée. Sept tests runtime précédents passent (209 expirations) ; à rejouer après garde norme. Dernières retouches de lisibilité sans changement numérique.
+Base :409 tests réussis,5 ignorés ; pression f32 reçue S231. Flux coupés encore ouverts.

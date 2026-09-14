@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-14 21:44 +02:00
+JETON            : occupé
+Battement        : 2026-09-14 21:46 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
-Session en cours : aucune
+Session en cours : S232 — flux des faces coupées
 Dernière session : S231 — pression f32 reçue, vrai résidu contrôlé
 Session suivante : S232 — J2 : flux des faces coupées et précision spatiale
 Maillons        : 0
@@ -146,3 +146,4 @@ L'état des branches, copies et remotes se **constate** avec Git. Aucun distant 
 S227 : la création ou publication distante reste une action d'infrastructure à autoriser.
 Le jeton versionné ne verrouille pas plusieurs copies atomiquement ; garder les vérifications
 Git de l'amorce. A215 reste ouverte. Les mémoires privées ne constituent jamais une passation.
+
