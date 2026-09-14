@@ -44,7 +44,7 @@ def layer(path: str) -> str | None:
     for label, pattern in (("B", r"^background"),
                            ("W", r"impact|wake|pressure|radial|modal|spectral|composition|prepared|mixed|wave_"),
                            ("delta", r"delta|shallow|dispersif|eponge|projection"),
-                           ("V", r"hydro_geometry|network|reseau|pipe|conduite")):
+                           ("V", r"hydro_geometry|hydro_snapshot|network|reseau|pipe|conduite")):
         if re.search(pattern, name):
             return label
     return None

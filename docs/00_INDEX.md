@@ -23,6 +23,7 @@
 - [Réception du noyau V](validation/NOYAU-V-S224.md).
 - [Gravité dirigée et A266](validation/GRAVITE-DIRIGEE-S226.md).
 - [Volume et plan orienté de V](validation/VOLUME-ORIENTE-S228.md).
+- [Restauration du réseau V](validation/RESTAURATION-V-S229.md).
 - [Cadence de l’hôte](validation/CADENCE-HOTE-S225.md).
 - [Candidat δ](validation/CANDIDAT-DELTA-S199.md).
 - [Contrats δ](validation/CONTRATS-DELTA-S200.md).
@@ -181,6 +182,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-137](adr/ADR-137-coupure-spectrale-de-la-borne-locale.md) | Coupure spectrale de la borne locale de pente |
 | [ADR-138](adr/ADR-138-le-budget-de-pente-tient-compte-de-la-position-relative.md) | Le budget de pente tient compte de la position relative des impacts |
 | [ADR-139](adr/ADR-139-volume-et-plan-oriente-des-contenants.md) | Le plan orienté se déduit du volume de la géométrie du contenant |
+| [ADR-140](adr/ADR-140-restauration-du-graphe-V.md) | Restaurer les écarts de V et ses restes de débit |
 
 ## Travail et historique
 

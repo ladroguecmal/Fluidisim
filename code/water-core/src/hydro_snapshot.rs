@@ -43,7 +43,7 @@ pub struct Baseline<'a> {
 
 fn valid_edge(e: &Opening, nodes: usize) -> bool {
     let size = match e.flow { Flow::Orifice { area_mm2 } => area_mm2, Flow::Weir { width_mm } => width_mm };
-    (e.from as usize) < nodes && e.to.is_none_or(|t| (t as usize) < nodes)
+    (e.from as usize) < nodes && e.to.map_or(true, |t| (t as usize) < nodes)
         && size >= 0 && e.discharge.is_finite() && e.discharge >= 0.0
         && (0..1_000_000).contains(&e.residue_nl)
 }
