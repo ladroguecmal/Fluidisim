@@ -49,6 +49,23 @@ cargo test --release --offline --locked --manifest-path viewer/Cargo.toml
 comme témoin. `--lod-charge` publie les bornes de courbure des trois couches et la charge de
 maillage qu'elles exigent par pose (S234), sans GPU.
 
+**Scène multi-sources (S235).** `--multi` remplace le sillage et l'impact uniques par la scène
+déclarée dans `scene.rs` : trois sillages d'un journal commun et huit impacts nés toutes les 4 s.
+
+| option | effet |
+|---|---|
+| `--multi --verify` | contrôles `VERIFY` sur 23 âges et deux chemins, intérieurs de grille, capture `captures/s235/`, bancs 3 s et 29 s |
+| `--scene-admission` | plancher de pente du cœur tous les 0,25 s, scène et variante dense, sans GPU |
+| `--multi --admission-reelle` | pente réelle des perturbations aux instants refusés, contre le plancher |
+| `--multi --retour` | caméra détournée puis revenue : comparaison au bit avec un passage continu |
+| `--start=N` | ouvre la fenêtre à N secondes de scène |
+| `--away` | caméra hors champ (0, −300, 12), dos à la scène |
+| `--no-cull` | fenêtre sans visibilité (toutes les sources préparées à chaque image) |
+
+La fenêtre ne prépare que ce que la grille voit : emprise de la grille projetée sur l'eau, contour
+exact aux sommets de bord, marge par arête. Les vérifications gardent la visibilité coupée, leurs
+sondes étant hors de l'emprise de la caméra.
+
 `--verify` compare le shader avec le cœur sur plusieurs âges, l'emprise de l'impact, les coutures
 de l'emprise du sillage et un temps long ; mesure la fidélité de la recette du sillage contre une
 recette quatre fois plus fine, sa couture et son admission par le cœur ; écrit deux PPM dans

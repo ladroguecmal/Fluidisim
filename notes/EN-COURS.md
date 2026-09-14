@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S235 — en cours
+Session : S235 — terminée
 Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python et GPU local disponibles)
 Entrée : « Continue », master propre à f0159ca, trois copies au même commit, jeton libre,
 alimentation secteur (BatteryStatus 2).
@@ -95,7 +95,7 @@ ADR-131 D1 avec les techniques absentes, sans réduire la scène pour passer.
   sautées hors champ ; retour dans le champ comparé à un passage continu.
 - [x] **P6** — coût : banc et cadence, scène mono et multi, visible et hors champ, alimentation
   publiée ; document de validation.
-- [ ] **P7** — rituel §6, file, feuille de route, jeton ; copies à synchroniser.
+- [x] **P7** — rituel §6, file, feuille de route, jeton ; copies à synchroniser.
 
 ### Notes de reprise
 

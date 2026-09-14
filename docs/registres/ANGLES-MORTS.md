@@ -3444,3 +3444,20 @@ du sillage à pas borné et reconstruction bicubique : 0,426 ms au banc, 0,429/0
 fenêtre fixe/balayée, contre 4,24/4,14/2,87 pour le témoin S233 ; recette 128×256 à 1,51 ms. Le
 verdict porte sur cette implémentation et ce domaine — un sillage, un impact, une machine
 sur secteur. A247 reste partielle : scène multi-sources, visibilité, CPU et seconde cible.
+
+**Suivi A255 / A261 — S235, 2026-09-14 : le déclencheur est atteint, et par les majorants seuls.**
+Scène déclarée avant mesure : trois sillages d'un journal commun, huit impacts nés toutes les 4 s.
+Le budget de pente refuse **49 instants sur 161** (pire 1,251 π/7 à 28,25 s). La pente réelle des
+perturbations, balayée au GPU sur l'union des domaines puis raffinée à 2 cm, reste **≤ 0,2154 —
+48 % de π/7** aux 49 instants : **aucun** refus de pente réelle, plancher 2,1 à 8,2 fois la
+réelle. À chaque naissance le maximum réel est celui de l'impact neuf (exact à la naissance) ; le
+plancher y ajoute l'enveloppe des trois sillages (0,175–0,202, réelle ≈0,07 en S222) et les
+majorants des impacts anciens que l'inégalité d'ADR-138 ne retire pas. **Sévérité portée à 1 pour
+J1** : une scène représentative ne passe pas l'admission, sans qu'aucune pente réelle ne
+l'explique. Correction de portée de S222 : « huit impacts passent » valait pour des impacts âgés,
+pas pour une scène dont les naissances se renouvellent. Voir
+[SCENE-MULTI-S235](../validation/SCENE-MULTI-S235.md) §2, L314.
+
+**Suivi A265 — S235, 2026-09-14.** Scène multi-sources pendant le forçage : la trame est bornée par
+le CPU (préparation du sillage 3,12 ms, 204 Hz) et hors forçage 415 Hz ; hors champ 727 Hz. Le
+recouvrement à GPU chargé n'est toujours pas expliqué, et aucune décision n'en dépend.

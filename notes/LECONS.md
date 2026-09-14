@@ -5185,3 +5185,18 @@ support commun ne touche le produit qui coûte : il faut découpler les densité
 l'ordre de reconstruction compte autant que la grille : en linéaire, le même critère demandait
 183 825 nœuds ; en bicubique avec dérivées exactes, 9 701. Voir L283 (la charge dérivée de
 l'observateur), LOD-SILLAGE-S234 §1.
+
+## L314 — Un verdict d'admission pris sur une scène âgée ne dit rien d'une scène qui se renouvelle
+
+*(S235)* S222 avait écrit « trois sillages et huit impacts passent », et la file en avait tiré que
+le budget de pente ne conditionnait plus la mutualisation. La phrase était juste à l'instant mesuré,
+où tous les impacts étaient âgés. La scène S235, déclarée avant mesure avec des naissances toutes
+les 4 s, est refusée sur 49 instants sur 161 : à chaque naissance, un impact neuf pèse 47 % du
+budget, et les majorants des anciens n'ont pas le temps de décroître. Un premier essai de prédiction
+avait lui aussi faussé l'instant, dans l'autre sens, en inscrivant les huit impacts dès 0 s.
+
+Ce qui généralise : **un budget se juge sur la série temporelle de l'usage, renouvellements
+compris**, et un « passe » publié porte l'instant et l'état des sources qui le rendent vrai.
+Quand ensuite le verdict tombe, **séparer la grandeur réelle du majorant avant de conclure** : ici
+aucune des 49 pentes réelles n'approchait le seuil, et c'est ce qui transforme un refus de scène en
+travail de bornes au lieu d'une réduction d'ambition. Voir L283, A208, SCENE-MULTI-S235 §2.

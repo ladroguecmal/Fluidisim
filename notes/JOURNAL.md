@@ -12033,3 +12033,53 @@ arbitrage utilisateur nécessaire.
 **Rituel.** A270 ouverte, suivis A265/A247 ; L313 ; feuille de route (LOD spatial présent,
 J1 remplacé), file active, index et README. Aucun ADR. Maillons 0 : passe d'eau J1 sous 2 ms,
 consommée par la fenêtre, reçue contre le cœur et le témoin S233.
+
+## S235 — 2026-09-14 — La scène représentative se dessine, et le budget la refuse sans raison physique
+
+**Entrée.** « Continue », master propre à `f0159ca`, trois copies au même commit, jeton libre,
+secteur. Claude Code, Opus 5. Plan `d760c93`, admission `e28aba7`, rendu `c64a5b8`, pente réelle
+`bfbf3c7`, visibilité `d459c22`, coût `8524cf5`.
+
+**Scène déclarée avant mesure.** Trois sillages d'un journal commun (espacement « éloignés » de
+S222) et huit impacts de l'entrée S203 nés toutes les 4 s ; variante dense à 1 s.
+
+**Capacités reçues.** (1) **Rendu multi-sources** : une table radiale pour les huit impacts, profils
+à l'âge de chacun, tampon GPU des centres ; mono identique au bit à S234. `--multi --verify` :
+≤0,368 mm contre le cœur sur 23 âges, grille ≤0,16 de sa borne, sauts ≤7 µm. (2) **Visibilité** :
+emprise de la grille sur l'eau (contour aux sommets de bord, marge par arête) ; hors champ ni
+préparation, ni cuisson, ni profil ; **retour dans le champ identique au bit** sur 31 images après
+150 images cachées, fin de tronçon comprise. Consommateur : la fenêtre J1.
+
+**Ce que la mesure a trouvé.** Le budget de pente du cœur **refuse la scène sur 49 instants sur
+161** (pire 1,251 π/7) — et **tous par majorant seul** : pente réelle des perturbations ≤0,2154,
+soit 48 % de π/7, sur 447 161 points raffinés à 2 cm ; plancher 2,1 à 8,2 fois la réelle. À chaque
+naissance, le maximum réel est celui de l'impact neuf ; le plancher y ajoute l'enveloppe des trois
+sillages et les majorants des impacts anciens. S222 (« huit impacts passent ») valait pour des
+impacts âgés (L314). Premier essai de prédiction faux : impacts futurs inscrits dès 0 s, que
+`slope_max_at` compte à leur maximum de naissance (ADR-133, voulu).
+
+**Coût** ([SCENE-MULTI-S235](../docs/validation/SCENE-MULTI-S235.md), secteur relevé à chaque
+passage). GPU d'eau ≤0,47 ms dans toutes les poses, +0,01–0,03 ms pour huit impacts et trois
+sillages (nœuds mutualisés). Hors champ : GPU 0,448 → **0,062 ms**, CPU 1,59 → 0,67, 727 Hz ;
+dans le champ la visibilité coûte ≈0,05 ms de CPU. **CPU de préparation 3,12 ms pendant le forçage
+de trois sillages** (204 Hz), 0,48 ms après (415 Hz). ADR-125 ne fixe pas la répartition : somme
+CPU+GPU 4,5 ms en forçage, 2,1–2,6 ms hors forçage — verdict sur l'implémentation mono-fil sans
+LOD temporel. Non-régression : 86 lignes de vérification identiques avant et après la visibilité.
+
+**Limites.** Maximum réel échantillonné (marge ×2,06). Mono 341 Hz contre 384 en S234, non attribué
+au-delà de la visibilité. Occlusion, composantes de B, angles rasants, interaction, I-06 de la pile,
+seconde cible non reçus.
+
+**Suite comparée.** Deuxième session J1-bis. La suite ne relève pas d'un approfondissement : la
+scène représentative est **refusée à l'admission** alors qu'aucune pente réelle ne le justifie, et
+c'est le déclencheur écrit d'A255/A261. **S236 : resserrer les bornes d'admission de la scène S235**
+— enveloppe de pression à sources séparées, majorants d'impacts anciens à distance du maximum —
+sans substituer une mesure à une borne (I-18), garantie d'ADR-128 conservée. Travail dans
+`code/water-core`. Le CPU de préparation attend l'admission ; J2 (géométrie mobile), V, B2,
+bathymétrie et seconde cible gardent leurs déclencheurs. Aucune ambition réduite ni arbitrage
+utilisateur nécessaire.
+
+**Rituel.** Suivis A255/A261 (sévérité portée à 1 pour J1), A265, A270 appliquée ; L314 ; feuille de
+route (visibilité et mutualisation présentes, J1 remplacé, ligne CPU ajoutée), file active (J1-bis,
+A255/A261, CPU, A258/A263, A270), index et README. Aucun ADR. Maillons 0 : scène multi-sources et
+visibilité au bit consommées par la fenêtre, reçues contre le cœur et un passage continu.
