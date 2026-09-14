@@ -58,37 +58,46 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S233 — terminée
-Agent : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
-Entrée : « continue », quatre copies propres à46851ce, jeton libre.
+Session : S234 — en cours
+Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python et GPU local disponibles)
+Entrée : « Reprends le projet », master propre à98430a1, trois copies propres au même commit
+(avancées par S233 à 22:12), jeton libre.
 
-**Objectif.** Construire une première surface évolutive dans le candidat δ, consommée par la pression et les flux. Définir explicitement le domaine physique reçu et le contrat du temps.
-**Arrêt.** Mode évolutif testé contre référence indépendante, intégrité/budget conservés et limites transmises ; ne pas confondre surface linéarisée et δ général.
+**Objectif.** Premier LOD spatial **intégré à l'hôte GPU** : la densité du maillage d'eau suit
+la charge que le contenu exige, et non plus seulement le pas de 2 px. Qualité entre sommets,
+coutures entre niveaux et coût complet publiés face aux 2 ms (ADR-125, ADR-131 D3).
+**Thèse, calculée avant construction (P1, script hors dépôt).** Pose S212 : 86,2 % des
+129 600 sommets dans l'emprise du sillage ; 67 % espacés de moins de 0,25 m, soit plus de
+8 échantillons par λ_min = 2,09 m. Couper les modes au-delà de Nyquist ne retire que ≈2 % du
+travail (7,5 % de sommets sous-échantillonnés, en fond de scène) : c'est une correction de
+repliement, pas un levier de coût. Le levier est la **densité près de la caméra**.
+**Critère de qualité, à provenance.** Erreur d'interpolation linéaire bornée par
+`h²/8 · Σ|a|·k²` (B, impact et sillage publiés), confrontée à la tolérance de 3 mm déjà reçue
+aux sommets (`Gpu::verify`, S211). Pentes : erreur publiée contre la grille 2 px, sans seuil
+inventé. Référence : cœur aux points **intérieurs** des triangles, pas seulement aux sommets.
+**Arrêt.** LOD intégré, vérification sommets + intérieurs + coutures (aucune fissure), coût
+fixe/balayé et cadence mesurés avec techniques présentes/absentes. Si la borne de P2 ne
+permet aucune réduction de charge, ce constat est le résultat : ne pas assouplir la
+tolérance pour obtenir un gain, et reporter le lot vers la technique suivante.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [x] **P2** — lectures ciblées, modèle/temps, critères et référence déclarés.
-- [x] **P3** — construire le chemin évolutif et les refus atomiques.
-- [x] **P4** — recevoir dynamique, budget, allocations et suite ; preuve des limites.
-- [x] **P5** — rituel §6, file, priorité comparée, jeton ; copies à synchroniser après commit.
+- [ ] **P2** — lectures ciblées (ADR-129/131/132, HOTE-GPU-S212) ; calculer `Σ|a|k²` et
+  `Σ|a|k³` réels des trois couches sur la fixture ; charge réductible par pose ; choisir la
+  forme (rangées seules, ou bandes de colonnes cousues) et déclarer le protocole.
+- [ ] **P3** — planificateur CPU du maillage (rangées et bandes), sans allocation par image,
+  index cousus sans jonction en T ; tests unitaires de couverture et de couture.
+- [ ] **P4** — shader et passe consomment le plan ; `--verify` inchangé aux sommets ; nouvelle
+  vérification aux intérieurs et aux coutures contre le cœur, LOD contre grille 2 px.
+- [ ] **P5** — coût : `BENCH`, cadence fixe et balayée, avec et sans LOD ; document de
+  validation, en-tête ADR-131 D3.
+- [ ] **P6** — rituel §6, file, feuille de route, jeton ; copies à synchroniser.
 
 ### Notes de reprise
 
-Base :411 tests réussis,5 ignorés ; S232 reçoit le débit ouvert, pas la dynamique de surface.
-
-P2 : ADR-141 précise coefficients temporels f64 vers f32, jamais dt f32 dans le nouveau
-chemin. Mode linéaire explicite, protocole onde stationnaire dans SURFACE-LINEARISEE-S233.
-
-P3 : boucle pression/flux/hauteur construite avec durée/budget entiers, refus atomique
-u/w/p/eta et compensation f32. Premier essai64/1ms refusait Convergence au pas307
-(résidu1,02063e-6), une hausse isolée arrondie n'étant pas stagnation : corrections continuent
-sous plafond global inchangé. Sans compensation de hauteur, l'erreur lunaire augmentait
-en raffinant (0,597% à64/1ms). Avec compensation consommée par la pression : erreurs fines
-0,0659% Terre et0,0173% Lune ; dérive moyenne≤4,47e-8m. Test onde/rest reçu.
-Huit tests runtime reçus AVANT compensation, à rejouer ; 211 expirations déjà testées.
-
-P4 : suite413 réussis/5 ignorés, huit runtime après compensation reçus. Deux tests S233
-renforcés sur refus puis rejoués ;213 expirations, zéro allocation, reprise identique.
-Coût64 : médianes2,8638 puis6,2104ms, pics3,8652 puis8,9980ms ; pas de borne reçue.
-Stockage+12nx octets. Filtre S232 inchangé. Navigation active sans erreur.
+Base : S233 413 tests réussis, 5 ignorés ; S225 passe eau 4,1585 ms fixe, 2,8479 balayée.
+P1 : script `grid_geom.py` (bloc-notes de session) reproduit `ocean_vertex` sans hauteur.
+Pose S201 : h>λ_min/2 sur 7,5 % des sommets de l'emprise, travail Nyquist/plein 0,978 ;
+pose 30 m / tangage −0,5 : 60 % dans l'emprise, 0 % sous-échantillonné. Histogramme des pas
+(0,25 m) : 75 463 sommets sous 0,25 m sur 111 715 dans l'emprise.

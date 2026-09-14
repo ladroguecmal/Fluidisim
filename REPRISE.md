@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-14 22:10 +02:00
-Agent            : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-14 22:18 +02:00
+Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python et GPU local disponibles)
+Session en cours : S234 — J1-bis : premier LOD spatial intégré, qualité et coût
 Dernière session : S233 — surface linéarisée évolutive reçue
 Session suivante : S234 — J1-bis : premier LOD spatial intégré, qualité et coût
 Maillons        : 0
