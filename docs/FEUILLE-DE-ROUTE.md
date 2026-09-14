@@ -114,7 +114,7 @@ plusieurs blocs existent ; **B10** (cavité d'entrée) avec le premier domaine d
 *Livre* : graphe de contenants et d'arêtes (fuites, vannes, débordements), arithmétique entière,
 pas serveur à basse fréquence, état répliqué et restauré (ADR-010, ADR-022, I-03, I-10).
 
-*État au 2026-09-13* : **ouverte en S224** — un module, `hydro_network`, reçu par **C12**
+*État au 2026-09-14* : **ouverte en S224** — un module, `hydro_network`, reçu par **C12**
 (vidange en 727,4 s contre 728 s analytiques, 0,0824 %) ;
 [NOYAU-V-S224](validation/NOYAU-V-S224.md). Nœuds en millilitres entiers, orifice et déversoir, pas
 de 100 ms, report de reste, normalisation par arrondi cumulatif, refus atomiques, répétabilité
@@ -122,10 +122,13 @@ locale vérifiée (seconde cible non reçue). *S228* : **géométrie orientée c
 prisme, cale et forme non convexe reçus ; **A266 corrigée**, tables historiques limitées à +Z.
 Arrivées collectives bornées (S227), gravité dirigée (S226). Voir
 [VOLUME-ORIENTE-S228](validation/VOLUME-ORIENTE-S228.md) pour précision, refus et coût complet.
+*S229* : **capture/restauration du noyau reçue**, écarts aux valeurs d’auteur et restes conservés,
+base géométrique identifiée, continuation C19-V locale identique ;
+[RESTAURATION-V-S229](validation/RESTAURATION-V-S229.md).
 *Restent* : `liquid_id` (A17),
 `sky_exposure` et `absorb_rate`, vannes et pompes, **réseau fermé sous pression** (reporté en v2 par
-l'ADR), et l'**état répliqué et restauré** d'ADR-022 §5.1, sans lequel la branche V de C19 et C21
-restent hors d'atteinte. **A264** : plancher des anciennes tables ; **A269** : précision des
+l'ADR), et l’**intégration réseau/stockage** du codec, l’assemblage B/W/V de C19
+et le couplage V↔δ de C21. **A264** : plancher des anciennes tables ; **A269** : précision des
 géométries et tailles supplémentaires. Cuisson réelle et budget encore à recevoir selon l'usage.
 
 *Cas* : C12 ; branche V de C19.

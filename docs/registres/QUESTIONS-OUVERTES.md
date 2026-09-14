@@ -2,17 +2,17 @@
 
 ## File active
 
-**État relu en S228, clôture 2026-09-14.** Porteur des travaux internes : la session du dépôt.
+**État relu en S229, clôture 2026-09-14.** Porteur des travaux internes : la session du dépôt.
 Trajectoire : [FEUILLE-DE-ROUTE](../FEUILLE-DE-ROUTE.md). Priorité et protocole d'arrêt :
 [BILAN-GLOBAL-S227](BILAN-GLOBAL-S227.md). Remplacer les états touchés ; ne plus empiler ici des
 suivis de session. Les preuves et l'histoire restent dans le journal et Git.
 
 | travail | état et preuve | déclencheur / prochain résultat utile |
 |---|---|---|
-| **État V restaurable** | Absent ; contrat géométrique construit S228 (ADR-139), ADR-022 §5.1 exécutable | **Prochain lot S229** : snapshot et restauration des nœuds **et des restes d'arêtes**, identité/version des géométries, continuation identique ; ouvre C19-V. Comparer ensuite la suite V à J2 |
+| **S200-1 / A244 / budget δ** | S200 : pas sans allocation, refus atomiques ; S202 : coût mesuré, pression f64 expérimentale et budget temporel non reçus | **Prochain lot S230 — J2** : interruption sous budget injecté, état réutilisable et dégradation déclarée ; qualification de précision |
+| **État V restaurable / intégration** | **Noyau reçu S229** : écarts auteur et restes, identité/révision et empreinte des géométries, C19-V local ; [réception](../validation/RESTAURATION-V-S229.md), ADR-140 | À l’intégration d’un hôte autoritaire : assemblage B/W/V, transport/stockage durable et autorité ; à l’évolution du graphe : migration et identité des nœuds dynamiques. Aucun prolongement générique du codec avant J2 |
 | **Géométrie V / A269 / cuisson** | A266 corrigée sur les polyèdres reçus ; résidu f64 insuffisant à `2^53+1 ml` dans un cube de 3 km, refus `Resolution` ; approximation des frontières courbes et correspondance aux assets non reçues | Nouveau contenant ou taille hors du domaine de [S228](../validation/VOLUME-ORIENTE-S228.md) : oracle, précision et coût du pas réel ; qualifier la cuisson. Aucun préalable générique à la restauration |
 | **V restant / A17 / A264** | `liquid_id`, pluie/exposition, absorption, pompes, pression fermée non construits ; A264 concerne le plancher en µm des anciennes tables ; nouvelle géométrie sans cet arrondi, vidange à qualifier | Extension V selon les usages ; test de bilan par liquide et échelle. Articulation V↔δ à J4 |
-| **S200-1 / A244 / budget δ** | S200 : pas sans allocation, refus atomiques ; S202 : coût mesuré, pression f64 expérimentale et budget temporel non reçus | **Lot J2 exécutable indépendamment des raffinements W** : interruption sous budget injecté, état réutilisable et dégradation déclarée ; qualification de précision |
 | **S199-2 / faces coupées δ** | S199 : ordre 1,947 plat, ≈0,90 coupé ; candidat non admissible B3 | Isoler les flux pondérés par ouvertures, comparaison indépendante sur fond coupé, puis surface mobile et 3D |
 | **J1-bis / coût et qualité du rendu / A247** | S225 : passe eau 4,16 ms fixe, 2,85 médiane caméra balayée à 960×540 ; cadence ≈198 Hz ; J1 partiel | Stratégie spatiale/LOD/visibilité intégrée ; scène, qualité et coût complet face aux 2 ms. Les techniques s'éprouvent ensemble (ADR-131) |
 | **A265 / recouvrement CPU–GPU** | Non expliqué (S225) ; acquisition d'image et cadence modifient le coût observé | Avant une conclusion de gain CPU dépendant du recouvrement ; ne bloque pas par principe l'optimisation d'une passe GPU mesurée |

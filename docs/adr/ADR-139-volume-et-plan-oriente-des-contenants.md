@@ -82,3 +82,9 @@ comparaison à J2 selon la règle de reprise.
 La première version est construite et consommée par le pas de V. La régression A266 est active
 et passe. [VOLUME-ORIENTE-S228](../validation/VOLUME-ORIENTE-S228.md) porte les oracles, refus,
 allocations et coûts. A269 garde ouverte la qualification de précision des tailles supplémentaires.
+
+## Réception datée S229 — 2026-09-14
+
+La restauration du noyau identifie désormais la base et sa révision, avec une empreinte de
+ses géométries ordonnées. Plans toujours dérivés, aucun état δ écrit ; contrat ADR-140 et
+[réception C19-V](../validation/RESTAURATION-V-S229.md).

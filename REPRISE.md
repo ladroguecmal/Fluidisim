@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-14 06:57 +02:00
+JETON            : libre
+Battement        : 2026-09-14 06:59 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
-Session en cours : S229 — état V restaurable
-Dernière session : S228 — volume et plan orienté construits ; A266 corrigée
-Session suivante : S229 — état V restaurable, nœuds/restes et identité des géométries
+Session en cours : —
+Dernière session : S229 — restauration V reçue, continuation C19-V locale
+Session suivante : S230 — J2 : arrêt de δ sous budget injecté et état réutilisable
 Maillons        : 0
 
 ```
@@ -75,8 +75,8 @@ Ne pas relire le journal, les leçons ou tous les ADR intégralement à chaque r
 
 ## 4. Où en est le projet
 
-État des capacités à S228 : B/W et un afficheur interactif existent ; δ est un candidat MAC x-z
-non admissible à B3 ; V dispose de plans orientés reçus et de débits bornés, sans restauration.
+État des capacités à S229 : B/W et un afficheur interactif existent ; δ est un candidat MAC x-z
+non admissible à B3 ; V dispose de plans orientés, débits bornés et restauration reçue localement.
 Les réceptions et limites courantes sont dans la feuille de route. Le nombre de tests ne mesure
 pas la couverture des intentions, et une exécution locale ne reçoit pas le multiplateforme.
 

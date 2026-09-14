@@ -502,3 +502,11 @@ propriété qui, autrement, ne l'aurait pas été.
    être bit à bit. Les deux usages du même objet n'ont donc pas la même tolérance aux versions, et
    il vaut mieux l'écrire maintenant que le découvrir quand une campagne de non-régression cassera
    sur un changement de plage.
+
+## Précision datée S229 — 2026-09-14
+
+[ADR-140](ADR-140-restauration-du-graphe-V.md) complète la charge utile V des §4.2–4.3 :
+les restes fractionnaires des ouvertures sont nécessaires à la continuation exacte, en plus des
+écarts de volumes aux valeurs d'auteur. Le premier codec du noyau et sa branche locale C19-V
+sont reçus dans [RESTAURATION-V-S229](../validation/RESTAURATION-V-S229.md). Ni les champs
+encore absents du noyau, ni le montage B/W/V complet, ni le transport/stockage ne sont reçus.

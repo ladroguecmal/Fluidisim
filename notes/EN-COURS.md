@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S229 — en cours
+Session : S229 — terminée
 Agent : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
 Entrée : « Continue », après S228 ; quatre copies à c2e9a56, master propre, jeton libre.
 
@@ -71,7 +71,7 @@ Entrée : « Continue », après S228 ; quatre copies à c2e9a56, master propre,
 - [x] **P2** — lectures prescrites puis contrat de restauration et réutilisation des mécanismes existants.
 - [x] **P3** — construire sauvegarde/restauration de V et refus atomiques.
 - [x] **P4** — recevoir la continuation et les données invalides ; publier la preuve.
-- [>] **P5** — rituel §6, file entière, priorité suivante, journal, jeton et synchronisation.
+- [x] **P5** — rituel §6, file entière, priorité suivante, journal, jeton et synchronisation.
 
 Chaque étape reste sous quinze minutes ; découpage déclaré si nécessaire.
 
@@ -84,3 +84,5 @@ P2 : ADR-140 précise ADR-022 : écarts à la base auteur, restes non nuls, empr
 P3 : hydro_network::snapshot construit, WVST V1 (88 + 12 par écart), base empruntée et FNV calculé une fois, capture/restauration atomiques. Cinq tests ciblés passent : continuation tabulée 1000 pas avec témoin sans reste divergent, reconstruction depuis pools sales et bits de contexte, configurations incompatibles, troncatures et altérations de chaque octet, erreurs sémantiques avec contrôle recalculé. Seul avertissement neuf (mut inutile du test) retiré. Reste réception orientée/allocations puis suite complète.
 
 P4 : réception orientée : 200 pas, cinq gravités, trois restaurations ; volumes/transferts/restes/plans et octets identiques, 148 octets initiaux, 3492 ml rejetés, bilan exact. Témoin de sortie rendu effectivement actif (receveur initialement rempli, orifice plus grand), production inchangée. Zéro allocation mesurée. Appel Option récent remplacé par map_or pour ne pas relever Rust 1.75 déclaré ; suite finale après retouche : 404 réussis, 5 ignorés. Quatre tests Python passent ; index complété, navigation sans erreur, inventaire repère le codec. Trois copies toujours propres à c2e9a56.
+
+P5 : rituel terminé : journal, états actifs et trajectoire remplacés, ADR complétés seulement par notes datées, aucune leçon artificielle. File entière relue ; prochaine capacité S230 J2/A244 : arrêt sous budget injecté, état réutilisable. Extensions V et intégration du codec ont leurs déclencheurs. Maillons 0, jeton libre. Après commit, synchroniser les trois copies propres par avance rapide ; aucune suppression.

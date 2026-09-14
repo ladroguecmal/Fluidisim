@@ -3378,3 +3378,9 @@ L'état restaurable est désormais le prochain lot exécutable ; pas de campagne
   indépendante, puis construire une représentation ou un calcul suffisamment précis si le
   refus bloque cet usage. Le coût du pas complet se reçoit avec cette extension. La grande
   échelle reste obligatoire ; cet angle ne bloque pas par principe la restauration de V.
+
+**Suivi A211 / A243 et A266 — S229, 2026-09-14.** La suite bornée « V restaurable » de S228
+est construite et consommée dans C19-V local, sans campagne géométrique supplémentaire.
+La priorité revient maintenant à J2/A244 (budget δ), comparaison portée au journal et à la file.
+A269 reste ouverte sur son domaine ; ni les angles de pilotage ni I-03 multiplateforme ne sont
+clos par cette seule livraison.

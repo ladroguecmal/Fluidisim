@@ -11795,3 +11795,43 @@ propres, sans suppression des copies dont l'inactivité n'est pas prouvée.
 
 *Clôture le 2026-09-14 après interruption en P6* : diff relu et complété ; aucun travail
 concurrent constaté. Code Rust de P5 inchangé, reçu 398/5 conservé ; navigation active vérifiée.
+
+## S229 — 2026-09-14 — Reprendre V sans perdre ses restes de débit
+
+**Entrée.** « Continue », suite de S228. Codex, GPT-6 ; master propre et trois copies à
+c2e9a56, jeton libre, maillons 0. Plan 36bccc8 ; contrat 3e90405 ; construction b172258 ;
+réception 2db39a7. Aucune autre session ni branche avancée constatée.
+
+**Capacité reçue.** Une instance neuve du noyau V reprend depuis une charge utile versionnée,
+puis consomme le contexte restauré dans le pas réel. ADR-140 précise ADR-022 : écarts aux
+volumes d'auteur **et restes des ouvertures**, base immuable empruntée, identité/révision et
+empreinte des géométries. WVST V1 ne recopie ni données cuites ni état δ. Refus atomiques,
+reconstruction depuis la base plutôt que conservation des anciennes valeurs des pools.
+
+**Preuves.** [RESTAURATION-V-S229](../docs/validation/RESTAURATION-V-S229.md) : 1 000 pas tabulés
+avec témoin sans reste divergent ; 200 pas orientés sous cinq gravités, trois restaurations,
+volumes/transferts/restes/plans/octets identiques, 3 492 ml rejetés, bilan entier exact. Capture
+initiale de 148 octets. Compteur positif puis zéro allocation pour capture, restauration,
+continuation et refus testés. Troncatures, corruptions et configurations modifiées refusées.
+Suite finale release hors réseau : **404 réussis, 5 ignorés**, six nouveaux tests ; quatre
+contrôles Python et navigation active reçus. Aucun avertissement neuf. L'appel standard trop
+récent a été remplacé avant la dernière suite ; Rust 1.75 déclaré conservé, pas exécuté ici.
+
+**Portée/non-fait.** C19-V local du noyau, pas C19 B/W/V complet ni réception multiplateforme.
+Transport/autorité, stockage durable, migrations et nœuds dynamiques sont portés dans la file
+avec leurs déclencheurs d'intégration. A17/A269 et budget V inchangés. FNV détecte les erreurs
+accidentelles, pas une attaque ni toute collision ; aucune fausse garantie d'authentification.
+Aucun nouvel angle ni leçon forcés : limites nommées et suivies dans les porteurs existants.
+
+**Priorité suivante comparée.** Le lot borné de restauration attendu depuis S224 est reçu ;
+prolonger le codec ou la géométrie ne débloquerait pas un consommateur actuellement construit.
+**S230 : J2 / S200-1 / A244**, arrêt sous budget injecté, état réutilisable et dégradation
+explicite, puis qualification de précision. δ n'a toujours pas ce contrat I-05 ; cette capacité
+prime maintenant sur les extensions V et raffinements W. J1-bis, faces coupées, B2, bathymétrie,
+forces/perception et seconde cible conservent leurs déclencheurs dans la file entière relue.
+Aucun arbitrage utilisateur requis ni réduction d'ambition.
+
+**Rituel.** ADR complétés par notes datées seulement, index et trajectoire actualisés en
+remplacement, file relue. Maillons **0** : persistance consommée par une continuation réelle
+avec témoin discriminant. Jeton libre ; après ce commit, avance rapide des trois copies propres
+sur master, sans suppression de copie dont l'inactivité n'est pas prouvée.

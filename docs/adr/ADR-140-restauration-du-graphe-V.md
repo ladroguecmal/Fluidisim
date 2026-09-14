@@ -52,3 +52,9 @@ Réception : continuation C19-V sur le pas réel, restes non nuls, témoin d'omi
 tables et géométrie orientée, reconstruction depuis une destination sale, refus atomiques de
 corruptions/troncatures/configurations modifiées, et compteur d'allocation positif puis nul.
 La comparaison bit à bit locale ne reçoit pas I-03 sur une seconde plateforme.
+
+## Réception datée S229 — 2026-09-14
+
+Construit dans `hydro_network::snapshot`. [RESTAURATION-V-S229](../validation/RESTAURATION-V-S229.md)
+reçoit la continuation locale tabulée et orientée, les refus et l'absence d'allocation testée.
+Les exclusions ci-dessus restent explicites ; suite générale : 404 réussis, 5 ignorés.
