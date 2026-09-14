@@ -11983,3 +11983,53 @@ Aucune ambition réduite ni arbitrage utilisateur nécessaire.
 nouvel ADR141, aucun ADR réécrit. Maillons0 : surface évolutive consommée par pression
 et reçue contre référence indépendante. Jeton libre ; après commit, synchroniser les trois
 copies propres en avance rapide, sans suppression incertaine.
+
+## S234 — 2026-09-14 — La densité du maillage venait de B, le coût venait du sillage
+
+**Entrée.** « Reprends le projet », master propre à `98430a1`, trois copies propres au même
+commit, jeton libre. Claude Code, Opus 5. Plan `430ed8c`, charge `a53eef8`, grille `225bf14`,
+GPU `a25a7ad`, intérieurs `c029af0`, coût `401ae8f`.
+
+**Ce que la charge exigeait, calculé avant de construire.** Sous le critère d'interpolation
+linéaire `½·M·R²` et la tolérance de 3 mm de l'image S201, la hessienne de **B** (0,349,
+32 composantes) dicte la densité du maillage ; alléger le maillage retire ≤35 % en pose S212 et
+rien en vue haute. Nyquist par sommet : ≈2 % du travail. Le coût, lui, vient du sillage
+(4 096 modes par sommet). D'où la construction : **découpler la densité d'évaluation du sillage
+de celle du maillage** (L313).
+
+**Capacité reçue.** Grille locale du sillage cuite en compute, pas borné par
+`h⁴/384·(2Σ|a|k⁴ + h/4·Σ|a|k⁵)` ≤ 3 mm (1,1875–1,5625 m, ≤9 701 nœuds), reconstruction Hermite
+bicubique par sommet ; chemin direct conservé (`--no-lod`). Consommateur : l'hôte J1, fenêtre et
+banc. **La passe d'eau de la scène J1 passe sous 2 ms** sur ce domaine.
+
+**Preuves.** [LOD-SILLAGE-S234](../docs/validation/LOD-SILLAGE-S234.md). Référence CPU testée
+(pire/borne 0,118 au pas de la borne). Centres et milieux d'arêtes, six âges : grille − direct
+GPU 0,19 à 0,68 mm, 0,07 à 0,26 de la borne ; grille − cœur identique à 1 µm ; saut à travers les
+arêtes ≤6 µm. `--verify` vert sur les deux chemins (0,400 mm grille, 0,089 direct). Sur
+secteur, 960×540 : témoin S233 **4,24 ms**, grille **0,426 ms** cuisson comprise (×10,0) ; recette
+128×256 17,6 → 1,51 ms. Cadence 194 → **384 Hz** fixe, 197 → **398 Hz** balayée ; la pose ne
+compte plus (0,43/0,46 ms). Neuf tests de l'hôte ; `code/` non modifié.
+
+**Défauts et limites.** Le ciel partage la mise en page : groupe de la grille à poser (panique
+wgpu corrigée). Script de campagne à paramètre `$args` : témoin lancé en fenêtre interactive,
+≈20 min perdues, garde ajoutée. **Alimentation** : témoin 7,01 ms sur batterie contre 4,24 sur
+secteur ; aucun en-tête S211–S225 ne la publiait (A270). Erreur de pente jusqu'à 1,14e-3 aux
+sondes irrégulières (maximum Hermite vers t≈0,21), publiée sans seuil. Cuisson insensible à
++21–33 % de nœuds, non expliquée. Un pic d'acquisition de 30 ms en balayage. Trame désormais
+bornée par le CPU (sillage 1,3 ms) : A265 partielle. Un sillage, un impact, une machine.
+
+**Non fait.** LOD de maillage par rangées (mesuré, non construit) ; visibilité et retour visible
+de la grille ; plusieurs sources ; transformée ; angles rasants, interaction, I-06 de la pile
+graphique, seconde cible.
+
+**Suite comparée.** La priorité 4 du bilan S227 (J1-bis) est servie pour moitié : LOD et coutures
+reçus, **scène représentative et retour visible** non. S222 a admis trois sillages et huit
+impacts ; la cuisson suit les modes et croîtra avec les sources. **S235 : J1-bis, scène
+multi-sources dans l'hôte** — cuisson par source ou mutualisée, visibilité et retour dans le
+champ, coût GPU et CPU du sillage. J2 garde son prochain lot (géométrie mobile, oracle propre) ;
+V, B2, bathymétrie et seconde cible gardent leurs déclencheurs. Aucune ambition réduite ni
+arbitrage utilisateur nécessaire.
+
+**Rituel.** A270 ouverte, suivis A265/A247 ; L313 ; feuille de route (LOD spatial présent,
+J1 remplacé), file active, index et README. Aucun ADR. Maillons 0 : passe d'eau J1 sous 2 ms,
+consommée par la fenêtre, reçue contre le cœur et le témoin S233.

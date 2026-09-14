@@ -3419,3 +3419,28 @@ de la hauteur sont compensés en f32 et consommés par la pression. Onde sur1s r
 maximum8,998ms au second passage ; I-05 complet non reçu. Géométrie mobile/non-linéaire
 et domaine d'amplitude/horizon restent à construire/qualifier ;
 [SURFACE-LINEARISEE-S233](../validation/SURFACE-LINEARISEE-S233.md).
+
+- **A270** *(sévérité 2, S234 ; ouverte)* — **L'alimentation du portable change le coût GPU d'un
+  facteur 1,65, et aucun en-tête de mesure ne la publiait.** Même binaire S233, même pose,
+  960×540 : **7,0145 ms sur batterie**, **4,2448 sur secteur**. ADR-131 D3 exige « machine » dans
+  le domaine ; l'état d'alimentation n'y figurait pas, de S211 à S225. Les valeurs de S225
+  (4,16 ms) sont retrouvées sur secteur à 1–2 % : il est **probable, non vérifié**, qu'elles aient
+  été prises ainsi. La bascule a eu lieu *pendant* une campagne S234 et a rendu deux bancs
+  incomparables ; elle n'aurait pas été vue sans le témoin rejoué en alternance. Gravité 2 : un
+  verdict de coût comparé à une mesure prise dans l'autre état serait faux d'un facteur 1,65,
+  dans un sens ou dans l'autre. **À faire à chaque mesure de coût** : publier l'état
+  (`Win32_Battery.BatteryStatus`) au début et à la fin ; comparer à un témoin mesuré dans le
+  même état ; profil d'alimentation et pilote restent non contrôlés. Voir
+  [LOD-SILLAGE-S234](../validation/LOD-SILLAGE-S234.md) §4.3.
+
+**Suivi A265 — S234, 2026-09-14 : pas de plancher indépendant du travail.** Avec la grille du
+sillage, la passe d'eau tombe à 0,43 ms et l'intervalle de 5,16 à **2,60 ms** (384 Hz) ;
+l'acquisition d'image passe de 2,43 à 0,02 ms. La borne vers 4,9 ms était donc l'attente du GPU,
+pas un plancher de la chaîne d'échange. La trame est désormais bornée par le CPU (sillage 1,3 ms,
+présentation 0,5). Reste ouvert : pourquoi le recouvrement variait avec la charge à GPU chargé.
+
+**Suivi A247 — S234, 2026-09-14 : la passe d'eau de la scène J1 passe sous 2 ms.** Grille locale
+du sillage à pas borné et reconstruction bicubique : 0,426 ms au banc, 0,429/0,456 ms en
+fenêtre fixe/balayée, contre 4,24/4,14/2,87 pour le témoin S233 ; recette 128×256 à 1,51 ms. Le
+verdict porte sur cette implémentation et ce domaine — un sillage, un impact, une machine
+sur secteur. A247 reste partielle : scène multi-sources, visibilité, CPU et seconde cible.

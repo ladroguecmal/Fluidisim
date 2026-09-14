@@ -47,11 +47,16 @@ mer JONSWAP, composition par le cœur reçue S214. Budget de pente resserré S21
 **A254/A262 closes**, l'admission ne bloque plus par principe une scène à plusieurs sources.
 Le domaine honnête du sillage est publié (ADR-132) ; l'hôte avertit lorsqu'il en sort.
 
-**J1 reste partiel** : passe GPU d'eau 4,16 ms à caméra fixe et 2,85 ms en médiane de balayage
-à 960×540 ; cadence complète ≈198 Hz (S225). Ces mesures qualifient cette implémentation,
-pas l'objectif. LOD/visibilité/mutualisation restent à construire ; qualité aux angles rasants,
-interaction représentative, allocations de la pile graphique et seconde cible non reçues.
-Voir [CADENCE-HOTE-S225](validation/CADENCE-HOTE-S225.md) et la table ci-dessous.
+*S234, 2026-09-14* : **la passe d'eau de la scène J1 passe sous 2 ms** — grille locale du sillage
+à pas borné (3 mm) et reconstruction Hermite bicubique : **0,426 ms** cuisson comprise à 960×540
+(témoin S233 4,24), 0,43/0,46 ms en fenêtre fixe/balayée, cadence 384/398 Hz ; recette 128×256 à
+1,51 ms. Mesures sur secteur (A270). Voir [LOD-SILLAGE-S234](validation/LOD-SILLAGE-S234.md).
+
+**J1 reste partiel** : un sillage et un impact seulement ; la cuisson suit les modes et croîtra
+avec les sources. Scène multi-sources, visibilité et retour dans le champ, CPU du sillage
+(1,3 ms, désormais borne de cadence), angles rasants, interaction représentative, allocations
+de la pile graphique et seconde cible non reçus. Mesures S225 :
+[CADENCE-HOTE-S225](validation/CADENCE-HOTE-S225.md).
 
 A255/A261 restent des limites de bornes, **pas un préalable générique à la mutualisation** :
 S222 a déjà admis plusieurs sillages ; ses bornes locales à ≈25 s ne sont pas intégrées.
@@ -66,16 +71,16 @@ objectif éprouvé sur la combinaison** des techniques ci-dessous, sur des scèn
 sans présumer qu'elle réussira ou échouera. Aucune demande de réduction d'ambition ne se fonde sur
 l'échec d'optimisations prises isolément. La liste est ouverte.
 
-| technique | état au 2026-09-13 | publie avec elle |
+| technique | état au 2026-09-14 | publie avec elle |
 |---|---|---|
 | phases repliées de B au GPU | **présente** (S211) | écart GPU/cœur |
 | table de Bessel d'un impact (ADR-129) | **présente** (S208, S211) | écart au champ direct, pas λ/16 |
 | **temps** — sillage : tronçons achevés repliés, modes préconstruits | **présente** (S213) : 1,26 ms forçage / 0,36 ms après à 4 096 nœuds, un fil ; 6e-8 du chemin préparé | écart au chemin préparé, pic aux bornes (2,12 ms), retour arrière (3,10 ms) |
-| **espace** — grille locale et transformée | absente, nommée S212 | quadrature d'image, coutures et période |
-| **LOD spatial** — densité, emprise selon distance et écran | absente | Nyquist par distance (L283), coutures entre niveaux |
+| **espace** — grille locale et transformée | **grille locale présente** (S234, évaluation directe des modes aux nœuds) ; **transformée absente** | quadrature d'image, coutures et période |
+| **LOD spatial** — densité, emprise selon distance et écran | **présent pour le sillage** (S234) : densité d'évaluation selon sa borne bicubique, indépendante du maillage ; 0,426 ms contre 4,24. **LOD du maillage absent** (≤35 % mesurés, rien en vue haute : B dicte la densité) | borne et erreur aux intérieurs, coutures entre mailles (≤6 µm), rapport au témoin ; Nyquist par distance non construit (≈2 % du travail) |
 | **LOD spectral** — nœuds par source selon distance et visibilité | absente | écart à la recette pleine, durée et rayon honnêtes (ADR-107, **ADR-132** : les deux lois se recalculent depuis la recette réduite) |
 | **LOD temporel** — cadence de mise à jour selon distance, vitesse, régime | absente | erreur de phase, I-09 |
-| **visibilité** — frustum, occlusion, hors écran | absente | exactitude au retour dans le champ |
+| **visibilité** — frustum, occlusion, hors écran | absente (la grille du sillage est cuite même hors champ) | exactitude au retour dans le champ |
 | **mutualisation** — nœuds partagés par sources de même recette, passe/grille communes B/W | absente ; **plus conditionnée par le budget de pente** (S222 : trois sillages et huit impacts passent), désormais par le coût de passe seul | superposition dans son domaine (ADR-123), et part du budget de pente consommée |
 
 **Chaque mesure de coût publie** techniques présentes, techniques absentes et domaine de validité

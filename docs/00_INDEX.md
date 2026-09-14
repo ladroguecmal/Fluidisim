@@ -25,6 +25,7 @@
 - [Volume et plan orienté de V](validation/VOLUME-ORIENTE-S228.md).
 - [Restauration du réseau V](validation/RESTAURATION-V-S229.md).
 - [Cadence de l’hôte](validation/CADENCE-HOTE-S225.md).
+- [LOD spatial du sillage : grille locale, reconstruction bicubique, coût](validation/LOD-SILLAGE-S234.md).
 - [Candidat δ](validation/CANDIDAT-DELTA-S199.md).
 - [Contrats δ](validation/CONTRATS-DELTA-S200.md).
 - [Arrêt coopératif sous budget de δ](validation/BUDGET-DELTA-S230.md).

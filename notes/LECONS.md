@@ -5169,3 +5169,19 @@ après leurs limites individuelles. Éprouver aussi un nœud qui reçoit et éme
 la saturation et un témoin non saturé. La réduction cumulative entière réserve ici exactement
 la place disponible ; son ordre déterministe ne constitue pas une preuve multiplateforme.
 Ce principe vaut pour un volume, un pool de mémoire ou un budget consommé par plusieurs tâches.
+
+## L313 — Une densité partagée obéit à la couche la plus exigeante, le coût à la plus chère
+
+*(S234)* Le projet cherchait depuis S212 un LOD « de la grille » : moins de sommets, moins de
+coût. Le calcul fait avant de construire a montré que, sous la tolérance de l'image, la densité
+du maillage était dictée par **B** — hessienne 0,349 sur 32 composantes —, alors que le coût
+venait du **sillage** — 4 096 modes par sommet. Alléger le maillage retirait au mieux 35 %, et rien
+en vue haute. Évaluer le sillage sur sa propre grille, au pas que **son** contenu autorise, puis le
+reconstruire à chaque sommet, a divisé la passe par dix.
+
+Ce qui généralise : **quand plusieurs couches partagent un échantillonnage, chercher d'abord
+laquelle impose la densité et laquelle impose le coût.** Si ce ne sont pas les mêmes, aucun LOD du
+support commun ne touche le produit qui coûte : il faut découpler les densités d'évaluation. Et
+l'ordre de reconstruction compte autant que la grille : en linéaire, le même critère demandait
+183 825 nœuds ; en bicubique avec dérivées exactes, 9 701. Voir L283 (la charge dérivée de
+l'observateur), LOD-SILLAGE-S234 §1.

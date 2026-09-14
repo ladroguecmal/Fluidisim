@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-14 23:17 +02:00
+JETON            : libre
+Battement        : 2026-09-14 23:20 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python et GPU local disponibles)
-Session en cours : S234 — J1-bis : premier LOD spatial intégré, qualité et coût
-Dernière session : S233 — surface linéarisée évolutive reçue
-Session suivante : S234 — J1-bis : premier LOD spatial intégré, qualité et coût
+Session en cours : aucune
+Dernière session : S234 — grille locale du sillage : passe d'eau J1 sous 2 ms
+Session suivante : S235 — J1-bis : scène multi-sources, visibilité et retour dans le champ
 Maillons        : 0
 
 ```
@@ -75,8 +75,9 @@ Ne pas relire le journal, les leçons ou tous les ADR intégralement à chaque r
 
 ## 4. Où en est le projet
 
-État à S233 : B/W et un afficheur existent ; δ MAC x-z fait évoluer une surface linéarisée,
-sans géométrie mobile, scénario B3 ni I-05 complet. V : plans orientés et restauration locale reçus.
+État à S234 : B/W et un afficheur existent ; passe d'eau J1 sous 2 ms pour un sillage et un
+impact (grille locale du sillage). δ MAC x-z fait évoluer une surface linéarisée, sans géométrie
+mobile, scénario B3 ni I-05 complet. V : plans orientés et restauration locale reçus.
 Les réceptions et limites courantes sont dans la feuille de route. Le nombre de tests ne mesure
 pas la couverture des intentions, et une exécution locale ne reçoit pas le multiplateforme.
 

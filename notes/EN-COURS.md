@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S234 — en cours
+Session : S234 — terminée
 Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python et GPU local disponibles)
 Entrée : « Reprends le projet », master propre à98430a1, trois copies propres au même commit
 (avancées par S233 à 22:12), jeton libre.
@@ -98,7 +98,7 @@ tolérance pour obtenir un gain, et reporter le lot vers la technique suivante.
   maille, LOD contre direct.
 - [x] **P5** — coût : `BENCH`, cadence fixe et balayée, avec et sans LOD ; document de
   validation, en-tête ADR-131 D3.
-- [ ] **P6** — rituel §6, file, feuille de route, jeton ; copies à synchroniser.
+- [x] **P6** — rituel §6, file, feuille de route, jeton ; copies à synchroniser.
 
 ### Notes de reprise
 
