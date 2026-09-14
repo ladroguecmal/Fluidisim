@@ -58,31 +58,23 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S229 — terminée
+Session : S230 — en cours
 Agent : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
-Entrée : « Continue », après S228 ; quatre copies à c2e9a56, master propre, jeton libre.
+Entrée : « Continue », quatre copies à d6ff35d, master propre et jeton libre.
 
-**Objectif.** Sauvegarder puis restaurer V avec ses nœuds, ses restes et l'identité de sa configuration géométrique ; recevoir la continuation dans le chemin réel.
-**Critère d'arrêt.** Une simulation interrompue puis restaurée reprend à l'identique ; une configuration incompatible ou une sauvegarde invalide est refusée sans mutation. Portée et exclusions explicites. Comparer ensuite la priorité de J2 aux reliquats de V.
+**Objectif.** Construire l'arrêt de δ sous budget injecté dans le candidat réel, préserver un état réutilisable et annoncer la dégradation. Qualifier la portée de la garantie temporelle sans déclarer I-05 reçu par une simple horloge mesurée.
+**Critère d'arrêt.** Expiration exercée dans les phases coûteuses ; aucun état partiellement publié, reprise utilisable, pas d'allocation ; témoin non limité inchangé. Distinguer précision expérimentale f64 et contrat temporel, sans réduire δ général.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — lectures prescrites puis contrat de restauration et réutilisation des mécanismes existants.
-- [x] **P3** — construire sauvegarde/restauration de V et refus atomiques.
-- [x] **P4** — recevoir la continuation et les données invalides ; publier la preuve.
-- [x] **P5** — rituel §6, file entière, priorité suivante, journal, jeton et synchronisation.
+- [>] **P2** — contrat et chemin existants, preuves S199–S202, choix de l'arrêt et granularité.
+- [ ] **P3** — construire le budget coopératif dans le candidat et ses sorties explicites.
+- [ ] **P4** — réception sur horloge injectée, intégrité/reprise/allocations et coût réel ; preuve et limites.
+- [ ] **P5** — rituel §6, file entière, priorité suivante, journal, jeton et copies synchronisées.
 
-Chaque étape reste sous quinze minutes ; découpage déclaré si nécessaire.
+Étapes sous quinze minutes ; découpage déclaré si nécessaire.
 
 ### Notes de reprise
 
-Base S228 : 398 tests réussis, 5 ignorés ; A266 corrigée dans le domaine reçu. Aucun nouveau test général à l'amorce. Aucun travail dans une nouvelle copie.
-
-P2 : ADR-140 précise ADR-022 : écarts à la base auteur, restes non nuls, empreinte de toute la géométrie et contexte de reprise. Mécanisme FNV existant réutilisé, sans garantie cryptographique ; aucun asset ni champ δ écrit. Base immutable empruntée, reconstruction totale des sorties depuis la base après validation. Priorité V bornée justifiée en S228, ensuite J2.
-
-P3 : hydro_network::snapshot construit, WVST V1 (88 + 12 par écart), base empruntée et FNV calculé une fois, capture/restauration atomiques. Cinq tests ciblés passent : continuation tabulée 1000 pas avec témoin sans reste divergent, reconstruction depuis pools sales et bits de contexte, configurations incompatibles, troncatures et altérations de chaque octet, erreurs sémantiques avec contrôle recalculé. Seul avertissement neuf (mut inutile du test) retiré. Reste réception orientée/allocations puis suite complète.
-
-P4 : réception orientée : 200 pas, cinq gravités, trois restaurations ; volumes/transferts/restes/plans et octets identiques, 148 octets initiaux, 3492 ml rejetés, bilan exact. Témoin de sortie rendu effectivement actif (receveur initialement rempli, orifice plus grand), production inchangée. Zéro allocation mesurée. Appel Option récent remplacé par map_or pour ne pas relever Rust 1.75 déclaré ; suite finale après retouche : 404 réussis, 5 ignorés. Quatre tests Python passent ; index complété, navigation sans erreur, inventaire repère le codec. Trois copies toujours propres à c2e9a56.
-
-P5 : rituel terminé : journal, états actifs et trajectoire remplacés, ADR complétés seulement par notes datées, aucune leçon artificielle. File entière relue ; prochaine capacité S230 J2/A244 : arrêt sous budget injecté, état réutilisable. Extensions V et intégration du codec ont leurs déclencheurs. Maillons 0, jeton libre. Après commit, synchroniser les trois copies propres par avance rapide ; aucune suppression.
+Base S229 : 404 réussis, 5 ignorés. J2 prioritaire après lot V borné reçu ; A244 et S200-1 présents dans la file. Aucun test général répété à l'amorce.

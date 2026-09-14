@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-14 06:59 +02:00
+JETON            : occupé
+Battement        : 2026-09-14 07:00 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
-Session en cours : —
+Session en cours : S230 — J2, arrêt sous budget
 Dernière session : S229 — restauration V reçue, continuation C19-V locale
 Session suivante : S230 — J2 : arrêt de δ sous budget injecté et état réutilisable
 Maillons        : 0
