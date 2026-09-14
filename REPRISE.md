@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-14 22:09 +02:00
+JETON            : libre
+Battement        : 2026-09-14 22:10 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
-Session en cours : S233 — première surface évolutive
-Dernière session : S232 — débit ouvert reçu, triangles fluides conservés
-Session suivante : S233 — J2 : première surface évolutive consommant les flux
+Session en cours : aucune
+Dernière session : S233 — surface linéarisée évolutive reçue
+Session suivante : S234 — J1-bis : premier LOD spatial intégré, qualité et coût
 Maillons        : 0
 
 ```
@@ -75,8 +75,8 @@ Ne pas relire le journal, les leçons ou tous les ADR intégralement à chaque r
 
 ## 4. Où en est le projet
 
-État à S232 : B/W et un afficheur existent ; δ MAC x-z reçoit son débit ouvert et conserve les petites
-cellules testées, sans scénario B3 ni I-05 complet. V : plans orientés, débits bornés et restauration locale reçus.
+État à S233 : B/W et un afficheur existent ; δ MAC x-z fait évoluer une surface linéarisée,
+sans géométrie mobile, scénario B3 ni I-05 complet. V : plans orientés et restauration locale reçus.
 Les réceptions et limites courantes sont dans la feuille de route. Le nombre de tests ne mesure
 pas la couverture des intentions, et une exécution locale ne reçoit pas le multiplateforme.
 

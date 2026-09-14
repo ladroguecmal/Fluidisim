@@ -11942,3 +11942,44 @@ Pas de réduction d'ambition ni arbitrage utilisateur nécessaire.
 nouvelle règle de méthode : distinguer instrument et modèle était déjà prescrit et a suffi.
 Maillons0 : correction d'intégrité reproduite, consommée et testée dans le pas réel.
 Jeton libre ; après commit, avance rapide des trois copies propres, sans suppression incertaine.
+
+## S233 — 2026-09-14 — La surface linéarisée évolue dans le pas δ
+
+**Entrée.** « continue », quatre copies propres à46851ce, jeton libre. Codex, GPT-6.
+Plan02a3f05, contrat02188ba, construction64815ab, réception76f2e02.
+
+**Capacité reçue.** `step_surface_linear` boucle pression, flux ouverts et hauteur ; η
+modifiée alimente le pas suivant. Modèle linéaire sans advection quadratique, géométrie fixe.
+ADR-141 précise I-08 : durée/budget en microsecondes entières, coefficients dimensionnés
+construits en f64 puis arrondis en f32 ; pas de temps f32 ni accumulateur caché sur ce chemin.
+Compensation f32 des déplacements consommée par la pression ; sauvegarde atomique incluse.
+
+**Preuves.** [SURFACE-LINEARISEE-S233](../docs/validation/SURFACE-LINEARISEE-S233.md) : onde
+stationnaire analytique sur1s, g9,81/1,62, trois résolutions et deux pas. Erreurs fines
+0,0659%/0,0173%, dérive moyenne≤4,48e-8m ; raffinement temporel utile, pas d'ordre spatial
+déduit d'une compensation d'erreurs. Repos exact et retour de signe terrestre reçus.
+213 expirations, reprise en bits et zéro allocation avec témoin. **413 tests réussis,
+5 ignorés** ; deux tests S233 renforcés sur refus puis rejoués seuls, code inchangé.
+Filtre S232 inchangé, navigation active valide, avertissements préexistants seulement.
+
+**Défauts discriminés.** L'arrêt dès une hausse isolée du vrai résidu refusait le pas307
+à64/1ms ; le seuil reste1e-6, les corrections continuent sous plafond global. Sans reste
+de hauteur, le raffinement lunaire empirait l'erreur jusqu'à0,597% ; compensation construite
+et testée. Trois tableaux nx f32 ajoutés, +12nx octets. Aucun état δ sérialisé.
+
+**Coût/limites.** Pas64×32 : médiane2,8638/max3,8652ms au premier passage,6,2104/8,9980ms
+au second. Variation conservée, pas de cause attribuée ni I-05 reçu. Pas de géométrie
+mobile, cavité, non-linéaire, 3D ou couplage B/W. Les anciennes API dt f32 restent suivies.
+
+**Suite comparée.** Le lot évolutif borné est reçu ; après quatre sessions J2, prolonger
+l'onde ou sa micro-mesure retarderait une autre capacité absente. **S234 : J1-bis, premier
+LOD spatial intégré à l'hôte**, qualité/coutures et coût complet. J1 dispose déjà d'une scène
+dont le rendu dépasse sa cible ; ce consommateur immédiat prime sur une campagne supplémentaire
+de surface linéarisée. Le prochain lot physique δ reste géométrie mobile puis3D/cavité,
+avec oracle propre ; V, B2, bathymétrie et seconde cible gardent leurs déclencheurs.
+Aucune ambition réduite ni arbitrage utilisateur nécessaire.
+
+**Rituel.** File entière relue, trajectoire remplacée, A244/index/invariant actualisés ;
+nouvel ADR141, aucun ADR réécrit. Maillons0 : surface évolutive consommée par pression
+et reçue contre référence indépendante. Jeton libre ; après commit, synchroniser les trois
+copies propres en avance rapide, sans suppression incertaine.

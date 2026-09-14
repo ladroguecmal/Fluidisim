@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S233 — en cours
+Session : S233 — terminée
 Agent : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
 Entrée : « continue », quatre copies propres à46851ce, jeton libre.
 
@@ -71,7 +71,7 @@ Entrée : « continue », quatre copies propres à46851ce, jeton libre.
 - [x] **P2** — lectures ciblées, modèle/temps, critères et référence déclarés.
 - [x] **P3** — construire le chemin évolutif et les refus atomiques.
 - [x] **P4** — recevoir dynamique, budget, allocations et suite ; preuve des limites.
-- [>] **P5** — rituel §6, file, priorité comparée, jeton et copies synchronisées.
+- [x] **P5** — rituel §6, file, priorité comparée, jeton ; copies à synchroniser après commit.
 
 ### Notes de reprise
 

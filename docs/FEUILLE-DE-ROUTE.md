@@ -103,13 +103,16 @@ Un domaine borné est une **étape** du δ général, jamais un produit à part 
 temps restant explicite**, reprise reçue ; [budget δ](validation/BUDGET-DELTA-S230.md).
 I-05 complet non reçu : retards réels observés, admission/marges encore absentes.
 Non admissible B3. **Sur le chemin** : A244 /
-S200-1 (API temps encore f32, respect temporel I-05). **Pression f32 reçue S231** sur les
+S200-1 (anciennes API temps f32, respect temporel I-05). **Pression f32 reçue S231** sur les
 domaines éprouvés, résidu réel contrôlé, stockage réduit sans gain de vitesse reçu ;
 [preuve](validation/PRESSION-F32-S231.md). **S232 : débit ouvert reçu** sur trois fonds lisses,
 ordres1,947/1,957/1,966 ; triangles fluides perdus corrigés. L'ancien≈0,90 mesurait une somme
 sans ouvertures ; [preuve et limites](validation/FLUX-COUPES-S232.md).
-Restent ordre local/stabilité aux géométries nouvelles, surface libre mobile (couvercle imposé
-aujourd'hui), passage à la 3D, couplage de l'écart à B+W. Part d'un
+**S233 : hauteur évolutive linéarisée**, consommée par pression/flux du pas suivant ; durée
+entière et compensation f32, onde stationnaire reçue, abandon atomique hauteur comprise.
+[Preuve](validation/SURFACE-LINEARISEE-S233.md), ADR-141. Géométrie encore fixe ; restent
+ordre local/stabilité aux géométries nouvelles, surface géométriquement mobile, passage à
+la 3D et couplage de l'écart à B+W. Part d'un
 impact que W ne porte pas nommée en S203 (énergie hors ondes, cavité, gerbe).
 
 *Bancs* : **B3** (famille de δ) quand un candidat atteint ses critères ou qu'un second existe ;

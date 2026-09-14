@@ -3409,3 +3409,13 @@ supprimait des triangles fluides tout en gardant leurs faces ouvertes. Intégral
 linéaire et bilan du pas reçus sur triangle et miroir. La portée reste celle de
 [FLUX-COUPES-S232](../validation/FLUX-COUPES-S232.md) : ordre local, cellules extrêmes et
 discontinuités non reçus. I-05/I-08 temporel inchangés ; ne pas prolonger un faux diagnostic.
+
+**Suivi A244 — S233, 2026-09-14.** La première surface linéarisée évolue réellement :
+pression, flux et hauteur du pas suivant. Durée/budget entiers, coefficients selon ADR-141 ;
+anciennes API temporelles f32 toujours à migrer. Une hausse isolée du résidu f32 ne reçoit
+pas une stagnation : corrections sous plafond global conservé. Les déplacements sous l'ulp
+de la hauteur sont compensés en f32 et consommés par la pression. Onde sur1s reçue,
+213 expirations atomiques, aucun stockage persistant δ. Coût64×32 : médianes2,86 puis6,21ms,
+maximum8,998ms au second passage ; I-05 complet non reçu. Géométrie mobile/non-linéaire
+et domaine d'amplitude/horizon restent à construire/qualifier ;
+[SURFACE-LINEARISEE-S233](../validation/SURFACE-LINEARISEE-S233.md).
