@@ -171,7 +171,8 @@ impl App<'_> {
             let (c50, c95, cmax) = quantiles(&mut self.cpu);
             let (a50, _, amax) = quantiles(&mut self.acquire);
             let (p50, _, pmax) = quantiles(&mut self.present);
-            println!("CADENCE camera={} {}x{} images={} presentation=AutoNoVsync intervalle_ms median={i50:.4} p95={i95:.4} max={imax:.4} hz_median={:.1}", if self.sweep { "balayee" } else { "fixe" }, size.width, size.height, self.interval.len(), 1000.0 / i50);
+            println!("CADENCE camera={} {}x{} images={} presentation=AutoNoVsync intervalle_ms median={i50:.4} p95={i95:.4} max={imax:.4} hz_median={:.1}", if self.away { "hors_champ" } else if self.sweep { "balayee" } else { "fixe" }, size.width, size.height, self.interval.len(), 1000.0 / i50);
+            println!("CADENCE_SCENE impacts={} sillages_journal={} visibilite={} age_fin_s={:.2} impacts_actifs_fin={} sillage_retire_fin={} impacts_retires_fin={}", self.frame.impacts.len(), self.frame.wake_input.journal.published().count(), self.frame.cull, self.seconds - self.birth, self.frame.impacts.iter().filter(|s| s.active).count(), self.frame.culled_wake, self.frame.culled_impacts);
             let (u50, _, umax) = quantiles(&mut self.upload);
             let (k50, _, kmax) = quantiles(&mut self.wake);
             println!("CADENCE_CPU_ms median={c50:.4} p95={c95:.4} max={cmax:.4} | acquisition median={a50:.4} max={amax:.4} | presentation median={p50:.4} max={pmax:.4}");
@@ -1056,7 +1057,11 @@ fn run() -> Result<(), String> {
         gpu: None,
         config: None,
         last: Instant::now(),
-        seconds: 3.,
+        // S235 : `--start=N` ouvre la scène à N secondes (3 s depuis S201).
+        seconds: args
+            .iter()
+            .find_map(|a| a.strip_prefix("--start=").and_then(|v| v.parse().ok()))
+            .unwrap_or(3.),
         birth: 0.,
         paused: false,
         enabled: true,

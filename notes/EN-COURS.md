@@ -93,7 +93,7 @@ ADR-131 D1 avec les techniques absentes, sans réduire la scène pour passer.
   plancher ; c'est le déclencheur écrit d'A255/A261.
 - [x] **P5** — visibilité : emprise et disques contre le cône de vue, cuisson et préparation CPU
   sautées hors champ ; retour dans le champ comparé à un passage continu.
-- [ ] **P6** — coût : banc et cadence, scène mono et multi, visible et hors champ, alimentation
+- [x] **P6** — coût : banc et cadence, scène mono et multi, visible et hors champ, alimentation
   publiée ; document de validation.
 - [ ] **P7** — rituel §6, file, feuille de route, jeton ; copies à synchroniser.
 
@@ -163,3 +163,15 @@ de grille, ni cuisson, ni profil. Fenêtre : visibilité active, `--no-cull`, `-
 caché sur [11 ; 13,5[ s, fin de tronçon à 12 s incluse) : 150 images cachées, sillage retiré
 150 fois, jusqu'à 4 impacts retirés ; **31 images comparées, 0 différente au bit**
 (coefficients, plan, profils, activités, 6 988 valeurs GPU) ; première image revue identique.
+
+P6 (`bench_s235.log`, 23:46–23:52, douze passages, **secteur** au début et à la fin de chacun) :
+`--start=N` et ligne `CADENCE_SCENE` ajoutés. Non-régression : 86 lignes `VERIFY` /
+`LOD_INTERIEUR` (mono + multi) **identiques** avant et après P5. Témoin S233 191,1 / 194,8 Hz,
+GPU 4,155 / 4,163. Multi 29 s : 415 Hz, GPU 0,4665, CPU 1,62 ; sans visibilité 428,5 Hz.
+Multi 3 s (forçage) : **204 Hz, CPU sillage 3,12 ms**. Hors champ : **GPU 0,0616, CPU 0,67,
+727 Hz** contre 0,448 / 1,59 / 423 sans visibilité. Balayée : 425 / 437 Hz, GPU 0,450 / 0,451.
+Mono 341 Hz (S234 : 384), non attribué au-delà de ≈0,05 ms de visibilité. Banc 960×540 multi :
+grille 0,4478 (3 s) / 0,4731 (29 s), direct 4,40 / 4,34 ; mono 0,4371 / 0,4406.
+ADR-125 : « l'eau couvre B/W/δ et le rendu associé sur le chemin critique », répartition CPU/GPU
+non fixée → publié GPU et somme : mono 2,57, multi forçage **4,49**, multi 29 s 2,07, hors champ
+0,71 ms. Document : [SCENE-MULTI-S235](../docs/validation/SCENE-MULTI-S235.md).
