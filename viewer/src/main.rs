@@ -632,9 +632,10 @@ fn run() -> Result<(), String> {
         for lod in [true, false] {
             frame.lod = lod;
             g.resize(640, 360);
-            g.benchmark(&mut frame)?;
+            g.benchmark(&mut frame, 3.)?;
             g.resize(960, 540);
-            g.benchmark(&mut frame)?;
+            g.benchmark(&mut frame, 3.)?;
+            g.benchmark(&mut frame, 16.)?;
         }
         frame.lod = true;
         let mut fine_storage = vec![[0.; 2]; storage.len()];
@@ -651,9 +652,9 @@ fn run() -> Result<(), String> {
         .map_err(|e| format!("levier temporel fin : {e:?}"))?;
         let mut fine_frame =
             FrameData::new(&scene.background, fine_table, fine, fine_timeline, fine_recipe);
-        g.benchmark(&mut fine_frame)?;
+        g.benchmark(&mut fine_frame, 3.)?;
         g.resize(640, 360);
-        g.benchmark(&mut fine_frame)?;
+        g.benchmark(&mut fine_frame, 3.)?;
         return Ok(());
     }
     let e = EventLoop::new().map_err(|e| e.to_string())?;

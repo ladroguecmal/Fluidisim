@@ -41,7 +41,13 @@ contexte de 40 s, sans boucle cachée.
 ```powershell
 cargo run --release --offline --locked --manifest-path viewer/Cargo.toml -- --verify
 cargo run --release --offline --locked --manifest-path viewer/Cargo.toml -- --smoke
+cargo run --release --offline --locked --manifest-path viewer/Cargo.toml -- --lod-charge
+cargo test --release --offline --locked --manifest-path viewer/Cargo.toml
 ```
+
+`--no-lod` (avec la fenêtre ou `--cadence`) rend le chemin direct du sillage S212–S225, conservé
+comme témoin. `--lod-charge` publie les bornes de courbure des trois couches et la charge de
+maillage qu'elles exigent par pose (S234), sans GPU.
 
 `--verify` compare le shader avec le cœur sur plusieurs âges, l'emprise de l'impact, les coutures
 de l'emprise du sillage et un temps long ; mesure la fidélité de la recette du sillage contre une
@@ -92,6 +98,14 @@ point `f32` brut, ce qui écartait la référence de la composition du cœur de 
 ne compose que sur l'**intersection** des domaines (4 477 sondes sur 6 988) : c'est pourquoi il ne
 peut pas servir de chemin de rendu. Voir
 [COMPOSITION-J1-S214](../docs/validation/COMPOSITION-J1-S214.md).
+
+**Grille locale du sillage (S234, LOD spatial de couche).** Par défaut, le sillage n'est plus
+sommé à chaque sommet : une passe compute évalue `(η, ηx, ηy, ηxy)` sur une grille de l'emprise
+dont le pas vient de sa borne Hermite bicubique `h⁴/384·(2Σ|a|k⁴ + h/4·Σ|a|k⁵)` ≤ 3 mm
+(tolérance S201), arrondi au 1/16 m inférieur ; les sommets reconstruisent par Hermite bicubique
+(`lod::hermite` en est la référence CPU testée). Capacité 16 384 nœuds ; `LOD_CAPACITE` annonce un
+pas imposé par la capacité. La cuisson est chronométrée et incluse dans `GPU_water_ms`. Voir
+[LOD-SILLAGE-S234](../docs/validation/LOD-SILLAGE-S234.md).
 
 La grille projetée a un pas nominal de deux pixels et un surbalayage de 18 % ; elle s'arrête à
 1500 m. La précision de hauteur aux sondes ne valide pas à elle seule toute cette géométrie,

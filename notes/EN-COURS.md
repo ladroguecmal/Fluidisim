@@ -96,7 +96,7 @@ tolérance pour obtenir un gain, et reporter le lot vers la technique suivante.
 - [x] **P4b** — contrôles aux centres et milieux d'arêtes des mailles : grille contre somme
   directe GPU (isole la reconstruction) et contre le cœur (3 mm) ; saut à travers les arêtes de
   maille, LOD contre direct.
-- [ ] **P5** — coût : `BENCH`, cadence fixe et balayée, avec et sans LOD ; document de
+- [x] **P5** — coût : `BENCH`, cadence fixe et balayée, avec et sans LOD ; document de
   validation, en-tête ADR-131 D3.
 - [ ] **P6** — rituel §6, file, feuille de route, jeton ; copies à synchroniser.
 
@@ -150,3 +150,34 @@ d'une Hermite cubique est vers t≈0,21/0,79, pas au centre : `VERIFY` (sondes i
 voit jusqu'à 1,14e-3 (3 s). **Saut à travers les arêtes** (10 839 à 18 812 paires, ±1 mm),
 grille moins direct : η ≤6 µm, pentes ≤1,9e-5, pour une variation propre du champ ≈0,5 mm
 sur 2 mm — continuité C¹ reçue au bruit f32. Pas 1,5625 → 1,1875 m, 83×68 → 109×89 nœuds.
+
+P5 — impasse coûteuse : le script de campagne nommait un paramètre `$args` (variable
+automatique PowerShell) ; le témoin est parti sans argument en fenêtre interactive, ≈20 min
+perdues (22:43→23:04). Garde ajoutée : arguments vides refusés. **Alimentation changée en
+cours de campagne** (batterie → secteur vers 23:06–23:08) : bancs `--verify` de 23:04/23:05
+non comparables entre eux, rejoués sur secteur. Cadences toutes sur secteur (log
+`bench_s234.log`), 960×540, 590 images d'intervalle, 200 sérialisées :
+
+| passage | intervalle méd. | Hz | GPU eau méd./max | CPU méd. | acquisition |
+|---|---:|---:|---:|---:|---:|
+| témoin S233 fixe (1) | 5,1601 | 193,8 | 4,1413 / 4,9504 | 4,4373 | 2,4255 |
+| S234 grille fixe | **2,6038** | **384,1** | **0,4288 / 0,4714** | 1,9560 | 0,0216 |
+| S234 direct fixe | 5,1999 | 192,3 | 4,2263 / 5,0640 | 4,4833 | 2,5403 |
+| témoin balayé | 5,0752 | 197,0 | 2,8650 / 4,4414 | 4,3368 | 2,3058 |
+| S234 grille balayée | **2,5112** | **398,2** | **0,4560 / 0,4655** | 1,9081 | 0,0192 |
+| S234 direct balayé | 5,0942 | 196,3 | 2,9175 / 4,1615 | 4,3855 | 2,3593 |
+| témoin fixe (2) | 5,2385 | 190,9 | 4,1771 / 4,9868 | 4,4905 | 2,4832 |
+
+Grille balayée : un intervalle max 33,23 ms (acquisition max 30,14), p95 3,55 — pic isolé
+non attribué. Direct S234 à +1,2–2 % du témoin : le shader modifié ne ralentit pas le chemin
+témoin. La trame devient **bornée par le CPU** (acquisition 2,4 → 0,02 ms ; sillage CPU
+1,29 ms inchangé) : A265 reçoit une réponse partielle, pas de plancher indépendant du travail
+vers 4,9 ms.
+
+Bancs sur secteur (`bench_s234_secteur.log`, 23:09–23:16, témoin/S234/témoin) : 960×540
+64×128 témoin 4,2448/4,2426 ; direct 4,2916 (3 s) 4,2841 (16 s) ; **grille 0,4260 (3 s,
+cuisson 0,3697), 0,4242 (16 s, 0,3678)**. 640×360 : témoin 1,9123/1,9138, direct 1,9491,
+grille 0,3905. 128×256 : témoin 17,56/17,72 et 8,05/8,44 ; grille 1,5061 et 1,4686. Batterie
+(premier passage) : témoin 960×540 **7,0145** — facteur 1,65 d'alimentation, jamais publié
+de S211 à S225 → A270. Cuisson insensible à +21–33 % de nœuds (non expliqué).
+Document : [LOD-SILLAGE-S234](../docs/validation/LOD-SILLAGE-S234.md).

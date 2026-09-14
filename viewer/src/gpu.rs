@@ -853,7 +853,9 @@ impl Gpu {
         }
         Ok(())
     }
-    pub fn benchmark(&mut self, frame: &mut FrameData<'_>) -> Result<(), String> {
+    /// Banc hors écran. S234 : `start` fixe l'âge de départ (3 s depuis S211) ; 16 s est l'âge où
+    /// la borne du sillage impose la maille la plus fine.
+    pub fn benchmark(&mut self, frame: &mut FrameData<'_>, age0: f64) -> Result<(), String> {
         let target = self.target();
         let view = target.create_view(&Default::default());
         let mut cpu = Vec::new();
@@ -863,7 +865,7 @@ impl Gpu {
         let mut steps = (f32::INFINITY, 0f32);
         for i in 0..130 {
             let start = Instant::now();
-            frame.update(3. + i as f64 / 60., 3. + i as f64 / 60., true);
+            frame.update(age0 + i as f64 / 60., age0 + i as f64 / 60., true);
             if i >= 10 {
                 wake_cpu.push(frame.wake_cpu_ms);
             }
@@ -894,7 +896,7 @@ impl Gpu {
         gpu.sort_by(f64::total_cmp);
         bakes.sort_by(f64::total_cmp);
         wake_cpu.sort_by(f64::total_cmp);
-        println!("BENCH {}x{} grid={}x{} wake_components={} lod={} pas_grille_m={:?} samples=120 CPU_prepare_upload_submit_ms median={:.6} max={:.6}",self.width,self.height,self.nx,self.ny,frame.wake.len(),frame.lod,steps,cpu[60],cpu[119]);
+        println!("BENCH {}x{} grid={}x{} wake_components={} lod={} age_s={age0} pas_grille_m={:?} samples=120 CPU_prepare_upload_submit_ms median={:.6} max={:.6}",self.width,self.height,self.nx,self.ny,frame.wake.len(),frame.lod,steps,cpu[60],cpu[119]);
         println!("CPU_wake_prepare_publish_ms median={:.6} max={:.6} (inclus ci-dessus)",wake_cpu[60],wake_cpu[119]);
         if !gpu.is_empty() {
             println!("GPU_water_ms median={:.6} p95={:.6} max={:.6} dont_cuisson_grille median={:.6} max={:.6} (sky, upload, readback, presentation excluded)",gpu[60],gpu[114],gpu[119],bakes[60],bakes[119]);
