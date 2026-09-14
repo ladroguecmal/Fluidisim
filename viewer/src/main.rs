@@ -416,6 +416,96 @@ fn lod_charge(frame: &mut FrameData<'_>) {
     }
 }
 
+/// S235 P2 — admission de la scène déclarée, **prédite avant de la construire dans l'image**.
+///
+/// Budget conjoint du cœur (`mixed::slope_floor` : ADR-128, ADR-133, ADR-138) pour les huit
+/// impacts et le journal commun des trois sillages, tous les quarts de seconde sur le contexte du
+/// sillage. Le plancher est indépendant du point : `floor ≤ π/7` ⟺ aucun refus de pente.
+fn scene_admission(scene: &Scene, recipe: water_core::gaussian_spectrum::Recipe) -> Result<(), String> {
+    use water_core::{
+        bound_pressure,
+        prepared_water::{self, mixed},
+        radial_impact::RadialImpact,
+        wave_journal::{self, Cause},
+        FrameId, SimTime,
+    };
+    let wakes: Vec<_> = (0..scene::WAKE_OFFSETS.len()).map(|i| scene::wake_at(recipe, i)).collect();
+    let mut records = [None; 3];
+    let mut journal = Journal::new(1, &mut records);
+    for w in &wakes {
+        journal
+            .admit_authenticated(w.source())
+            .map_err(|e| format!("admission sillage {:?} : {e:?}", w.source().context()))?;
+    }
+    let mut pools = scene::Pools::new(recipe);
+    let spectrum = pools.spectrum(recipe);
+    let context = wakes[0].source().context();
+    let mut slots = vec![Slot::default(); spectrum.nodes().len()];
+    for (label, spacing) in [("scene", None), ("dense", Some(scene::DENSE_SPACING_US))] {
+        let (mut worst, mut worst_age, mut refused, mut first_refused) = (0f32, 0f64, 0usize, None);
+        for step in 0..=160u32 {
+            let age = step as f64 * 0.25;
+            let time = SimTime(scene::BIRTH + (age * 1e6) as u64);
+            // Un hôte n'inscrit un impact qu'à sa naissance : avant elle, `slope_max_at` rend le
+            // maximum de naissance (ADR-133, « on ne resserre pas ce qu'on n'a pas mesuré »), et un
+            // journal chargé d'impacts futurs refuserait une scène qui n'existe pas encore.
+            let mut impact_records: [Option<wave_journal::Record>; 8] = std::array::from_fn(|_| None);
+            let mut impacts_journal = wave_journal::Journal::new(1, &mut impact_records);
+            for i in 0..scene::IMPACTS.len() {
+                let event = scene::scene_impact(scene, i, spacing);
+                if event.data().birth.0 > time.0 {
+                    continue;
+                }
+                let cause = Cause {
+                    entity: 203 + i as u64,
+                    command: 1,
+                    emission: 0,
+                };
+                impacts_journal
+                    .confirm(1, cause, event)
+                    .map_err(|e| format!("journal d'impact {i} : {e:?}"))?;
+            }
+            let mut pool: [Option<RadialImpact<256>>; 8] = std::array::from_fn(|_| None);
+            let impacts = prepared_water::Prepared::<256>::build(
+                &impacts_journal,
+                &mut pool,
+                prepared_water::Context {
+                    frame: FrameId(0),
+                    cell: 0,
+                    medium: scene.medium,
+                    domain: scene.domain,
+                },
+            )
+            .map_err(|e| format!("préparation impacts : {e:?}"))?;
+            let pressure =
+                bound_pressure::Prepared::from_journal(context, &spectrum, &journal, time, &mut slots)
+                    .map_err(|e| format!("pression à {age} s : {e:?}"))?;
+            let floor = mixed::slope_floor(&impacts, Some(&pressure), time);
+            if floor > BREAKING_SLOPE {
+                refused += 1;
+                first_refused.get_or_insert(age);
+            }
+            if floor > worst {
+                (worst, worst_age) = (floor, age);
+            }
+            if step % 8 == 0 {
+                println!(
+                    "ADMISSION_SCENE variante={label} age_s={age} nes={} plancher={floor:.6} impacts_seuls={:.6} pression={:.6} part_pi_sur_7={:.4}",
+                    impacts.field_count(),
+                    mixed::slope_floor(&impacts, None, time),
+                    pressure.slope_envelope(),
+                    floor / BREAKING_SLOPE
+                );
+            }
+        }
+        println!(
+            "ADMISSION_BILAN variante={label} instants=161 refus={refused} premier_refus_s={first_refused:?} pire_part={:.4} a_age_s={worst_age}",
+            worst / BREAKING_SLOPE
+        );
+    }
+    Ok(())
+}
+
 fn run() -> Result<(), String> {
     let args: Vec<_> = std::env::args().collect();
     let scene = Scene::new();
@@ -447,6 +537,9 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--lod-charge") {
         lod_charge(&mut frame);
         return Ok(());
+    }
+    if args.iter().any(|a| a == "--scene-admission") {
+        return scene_admission(&scene, recipe);
     }
     if args.iter().any(|a| a == "--verify") {
         std::fs::create_dir_all("captures/s212").map_err(|e| e.to_string())?;

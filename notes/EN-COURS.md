@@ -82,12 +82,15 @@ ADR-131 D1 avec les techniques absentes, sans réduire la scène pour passer.
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [ ] **P2** — lectures ciblées (profil radial, `mixed_compose`, `Timeline` multi-sources,
+- [x] **P2** — lectures ciblées (profil radial, `mixed_compose`, `Timeline` multi-sources,
   S222/S223) ; déclarer la scène (positions, naissances, trajectoires) et prédire son admission
   par le cœur avant de construire.
 - [ ] **P3** — impacts multiples : profils et centres en tableau au GPU, références CPU et
   composition du cœur à N impacts ; `--verify` vert.
 - [ ] **P4** — sillages multiples dans un journal : grille, bornes, `verify_lattice` sur la scène.
+  **Amendement P2 (23:27)** : aux instants refusés par le budget, séparer pente **réelle** et
+  **majorants** (A208) — maximum réel des perturbations sur l'union des domaines, contre le
+  plancher ; c'est le déclencheur écrit d'A255/A261.
 - [ ] **P5** — visibilité : emprise et disques contre le cône de vue, cuisson et préparation CPU
   sautées hors champ ; retour dans le champ comparé à un passage continu.
 - [ ] **P6** — coût : banc et cadence, scène mono et multi, visible et hors champ, alimentation
@@ -98,3 +101,19 @@ ADR-131 D1 avec les techniques absentes, sans réduire la scène pour passer.
 
 Base : S234 — grille du sillage 0,426 ms (960×540, secteur), cadence 384 Hz, 9 tests de l'hôte ;
 `code/` 413 réussis / 5 ignorés (S233, non modifié depuis).
+
+P2 : scène déclarée dans `scene.rs` (`WAKE_OFFSETS` 4/−26/34 m, `IMPACTS` huit positions,
+naissances 0 à 28 s par 4 s ; variante dense à 1 s). `wake(recipe)` = `wake_at(recipe, 0)`,
+identité et trajectoire S212 inchangées. `--scene-admission` : `mixed::slope_floor` sur trois
+sillages (journal commun) et impacts, tous les 0,25 s sur 40 s.
+**Premier essai faux, et instructif** : journal chargé des huit impacts dès 0 s → plancher
+1,133 (2,52 π/7) à 0 s, car `slope_max_at` rend le maximum de naissance **avant** la naissance
+(ADR-133, choix conservateur documenté). Un hôte inscrit un impact à sa naissance : journal
+reconstruit à chaque instant avec les seuls impacts nés.
+**Résultat** : scène **refusée sur 49 instants / 161**, premier refus 8 s (3e naissance),
+pire 1,251 π/7 à 28,25 s. À chaque naissance : pression 0,175–0,202 (39–45 %) + impact neuf
+0,213 (47 %) + anciens. Entre naissances, retour sous π/7 (0,78–1,07). Au-delà de 32 s : 0,73–
+0,86. Variante dense : 40 refus, premier à 3 s, pire 1,420 à 7 s. S222 (« huit impacts
+passent ») valait pour des impacts âgés, pas pour des naissances renouvelées.
+Décision : scène conservée (critère « sans réduire la scène pour passer ») ; rendu cosmétique
+qui annonce ; classification réelle/majorant en P4.

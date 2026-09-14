@@ -131,7 +131,44 @@ pub fn wake_recipe(radial: usize, angular: usize) -> gaussian_spectrum::Recipe {
         angular,
     }
 }
+/// S235 — scène représentative, **déclarée avant toute mesure** (EN-COURS S235).
+///
+/// Trois sillages d'un même journal et d'une même recette, espacés de 30 m (S222 « éloignés »,
+/// au-delà de la largeur de Kelvin à 3 m/s) ; le premier est le sillage S212. Huit impacts de même
+/// entrée que S203, nés toutes les 4 s — S222 : un impact neuf vaut 47,4 % de π/7, deux naissances
+/// simultanées ne passeraient pas. Positions choisies dans le champ de la caméra S201, disques de
+/// 52 m qui se recouvrent, comme une scène de jeu et non comme un cas séparable.
+pub const WAKE_OFFSETS: [f32; 3] = [4., -26., 34.];
+pub const IMPACTS: [([f32; 2], u64); 8] = [
+    ([0., 10.], 0),
+    ([-22., 26.], 4_000_000),
+    ([24., 32.], 8_000_000),
+    ([-6., 46.], 12_000_000),
+    ([34., 6.], 16_000_000),
+    ([-34., -2.], 20_000_000),
+    ([14., 50.], 24_000_000),
+    ([-2., -8.], 28_000_000),
+];
+/// Variante dense, publiée pour ce qu'elle refuse : les mêmes impacts nés à une seconde d'écart.
+pub const DENSE_SPACING_US: u64 = 1_000_000;
+
+/// Impact `i` de la scène : entrée S203, position et naissance déclarées, identité propre.
+pub fn scene_impact(scene: &Scene, i: usize, spacing_us: Option<u64>) -> WaveEvent {
+    let (position, birth) = IMPACTS[i];
+    let birth = spacing_us.map_or(birth, |s| s * i as u64);
+    let mut data = *scene.event.data();
+    data.id = 203 + i as u64;
+    data.birth = SimTime(BIRTH + birth);
+    data.position = [position[0], position[1], 0.];
+    WaveEvent::impact(data).expect("impact de scène S235")
+}
+
 pub fn wake(recipe: gaussian_spectrum::Recipe) -> Wake {
+    wake_at(recipe, 0)
+}
+
+/// Sillage `index` de la scène : même recette, même emprise, même trajectoire décalée en y.
+pub fn wake_at(recipe: gaussian_spectrum::Recipe, index: usize) -> Wake {
     let settings = bound_pressure::Settings {
         frame: FrameId(0),
         cell: 0,
@@ -144,9 +181,9 @@ pub fn wake(recipe: gaussian_spectrum::Recipe) -> Wake {
     };
     let metadata = Metadata {
         epoch: 1,
-        id: 212,
+        id: 212 + index as u64,
         cause: Cause {
-            entity: 212,
+            entity: 212 + index as u64,
             command: 1,
             emission: 0,
         },
@@ -158,7 +195,7 @@ pub fn wake(recipe: gaussian_spectrum::Recipe) -> Wake {
         velocity: [3., 0.],
         downward_force_n: 19_620.,
     }; 8];
-    Wake::build(metadata, SimTime(BIRTH), [-24., 4.], &legs).expect("sillage S212")
+    Wake::build(metadata, SimTime(BIRTH), [-24., WAKE_OFFSETS[index]], &legs).expect("sillage S212")
 }
 /// Pools du spectre cuit ; la vue demi-spectre les emprunte.
 pub struct Pools {
