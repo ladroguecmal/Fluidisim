@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-14 07:14 +02:00
+JETON            : occupé
+Battement        : 2026-09-14 21:01 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
-Session en cours : —
+Session en cours : S231 — pression f32 du candidat δ
 Dernière session : S230 — arrêt coopératif δ reçu, garantie murale I-05 ouverte
 Session suivante : S231 — J2 : construire et qualifier la pression f32
 Maillons        : 0

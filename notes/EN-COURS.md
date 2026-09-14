@@ -58,31 +58,23 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S230 — terminée
+Session : S231 — en cours
 Agent : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
-Entrée : « Continue », quatre copies à d6ff35d, master propre et jeton libre.
+Entrée : « Continue », quatre copies à88b98fe, master propre, jeton libre.
 
-**Objectif.** Construire l'arrêt de δ sous budget injecté dans le candidat réel, préserver un état réutilisable et annoncer la dégradation. Qualifier la portée de la garantie temporelle sans déclarer I-05 reçu par une simple horloge mesurée.
-**Critère d'arrêt.** Expiration exercée dans les phases coûteuses ; aucun état partiellement publié, reprise utilisable, pas d'allocation ; témoin non limité inchangé. Distinguer précision expérimentale f64 et contrat temporel, sans réduire δ général.
+**Objectif.** Construire et qualifier la pression f32 de δ sur le candidat réel, en comparant au témoin f64 avant modification. Conserver abandon atomique et absence d'allocation.
+**Critère d'arrêt.** Réception numérique (repos, projection, raffinement plat/coupé et continuation), comparaison du coût/stockage, limites et nouveaux bits explicites. Ne pas masquer le défaut spatial connu ni déclarer B3/I-05 reçus. Si f32 échoue, conserver la preuve et décider explicitement du contrat requis.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — contrat et chemin existants, preuves S199–S202, choix de l'arrêt et granularité.
-- [x] **P3** — construire le budget coopératif dans le candidat et ses sorties explicites.
-- [x] **P4** — réception sur horloge injectée, intégrité/reprise/allocations et coût réel ; preuve et limites.
-- [x] **P5** — rituel §6, file entière, priorité suivante, journal, jeton et copies synchronisées.
+- [>] **P2** — lectures ciblées, critères et référence f64 avant modification.
+- [ ] **P3** — construire la pression f32 et ses contrôles numériques sur le chemin réel.
+- [ ] **P4** — réception comparée, coûts, suite et preuve des limites.
+- [ ] **P5** — rituel §6, priorité comparée, journal, file, jeton et copies synchronisées.
 
 Étapes sous quinze minutes ; découpage déclaré si nécessaire.
 
 ### Notes de reprise
 
-Base S229 : 404 réussis, 5 ignorés. J2 prioritaire après lot V borné reçu ; A244 et S200-1 présents dans la file. Aucun test général répété à l'amorce.
-
-P2 : SPEC-004 exige dt avancé ou restant explicite. Contrat BUDGET-DELTA-S230 : contrôle coopératif au plus 64 éléments, réductions groupées de même ordre, copie préalable interruptible puis travail sur buffers échangés ; rollback O(1). Aucun pas partiel publié ; reprise depuis état précédent. I-05 complet et pression f64/I-08 restent distincts. Aucun ADR nouveau nécessaire pour appliquer le contrat existant.
-
-P3 : budget coopératif construit dans le chemin réel ; copies interruptibles, travail sur buffers échangés, rollback O(1), buffers extraits rendus avant tout refus. 204 points d’expiration reçus sur huit phases, état non nul intact puis reprise identique, aucune allocation. Réductions limitées à 64 cellules, mêmes bits que le chemin illimité sur 32×16 et plafonds 500/1/0/500. Sept tests runtime et huit unitaires passent. Reste mesure réelle et suite générale.
-
-P4 : 407 réussis, 5 ignorés ; sept tests runtime release reçus après ajout du contrôle de colonne vide. Filtre empreinte 0x0ad3f695685ca27a inchangée. Deux mesures delta_budget_cost : premier64×32/2ms max15,8501ms (cause inconnue, conservé), second2,0732ms ; aucun I-05 complet revendiqué. 204 expirations/huit phases, zéro allocation ; surcoût coopératif et état sans progression publiés dans BUDGET-DELTA-S230. Navigation active valide. Prochaine capacité proposée : pressionf32 J2 ; admission/marges/hôte restent à construire avant intégration.
-
-P5 : rituel terminé, A244 partielle précisée, file entière relue, deux porteurs distincts pressionf32 et admission/budget. Suite S231 pressionf32, maillons0, jeton libre ; synchroniser les trois copies propres après commit. Aucun test général supplémentaire après documentation.
+Base :407 tests réussis,5 ignorés. S230 reçoit l'arrêt coopératif, pas I-05 complet. Empreinte filtre f64 :0x0ad3f695685ca27a, ordre plat1,947, lisse0,898, marche0,895. Aucun nouveau test général à l'amorce.
