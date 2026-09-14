@@ -205,8 +205,8 @@ fn failed_calculation_restores_all_published_state_and_can_recover() {
 fn allocation_accounting_matches_requested_typed_storage() {
     let (v, arena) = build(32, 16, 0.25, 9.81);
     let (n, k) = (v.domain().nx, v.domain().nz);
-    // Quatre tableaux f32 par famille de faces, fond+surface, fraction ; six f64 par cellule.
-    let bytes = (4 * ((n + 1) * k + n * (k + 1)) + 2 * n + n * k) * 4 + 6 * n * k * 8;
+    // Quatre tableaux f32 par famille de faces, fond+surface, fraction ; six f32 par cellule.
+    let bytes = (4 * ((n + 1) * k + n * (k + 1)) + 2 * n + n * k) * 4 + 6 * n * k * 4;
     assert_eq!(arena.stats().persistent_bytes, bytes);
     assert_eq!(arena.stats().persistent_calls, 1);
     let mut arena = Arena {
@@ -280,7 +280,7 @@ fn prepared() -> Volume {
     v.set_surface(&(0..8).map(|i| v.domain().z0() + 0.02 * (i as f32 * 0.3).sin()).collect::<Vec<_>>()).unwrap();
     arena.seal(); v.step(0.002, 100, &Jobs).unwrap(); v
 }
-fn bits(v: &Volume) -> (Vec<u32>, Vec<u32>, Vec<u64>) {
+fn bits(v: &Volume) -> (Vec<u32>, Vec<u32>, Vec<u32>) {
     (v.velocity_u().iter().map(|x| x.to_bits()).collect(),
      v.velocity_w().iter().map(|x| x.to_bits()).collect(),
      v.pressure().iter().map(|x| x.to_bits()).collect())

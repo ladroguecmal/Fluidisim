@@ -248,3 +248,53 @@ fn caps_declare_what_is_not_supported() {
     assert_eq!(c.stability_cfl_max,None);
     assert_eq!(c.latency_frames, 0);
 }
+
+#[test]
+fn true_pressure_residual_is_received_against_independent_f64_rows_s231() {
+    for n in [16, 32, 64, 128] {
+        let (mut v, _) = build(n, n/2, 8./n as f32, 9.81);
+        let eta: Vec<_> = (0..n).map(|i| 4.+0.01*(std::f32::consts::TAU*(i as f32+0.5)/n as f32).sin()).collect();
+        v.set_surface(&eta).unwrap();
+        let r = v.step(0.002, 20000, &Jobs).unwrap();
+        assert!(!r.degraded, "n={n}, {r:?}");
+        // Oracle du système linéaire : lignes recomposées en f64 à partir de la géométrie et
+        // de l'entrée physique, sans appel à apply/dot/lid ni lecture du résidu CG.
+        let (mut residual2, mut rhs2) = (0f64, 0f64);
+        let dx = v.domain.dx as f64;
+        for k in 0..n/2 { for i in 0..n {
+            let c = k*n+i;
+            if v.frac[c] == 0. { continue; }
+            let p = v.p[c] as f64;
+            let mut ap = 0.;
+            for (neighbor, opening) in [
+                (i.checked_sub(1).map(|j| k*n+j), v.open_u[k*(n+1)+i]),
+                ((i+1<n).then_some(k*n+i+1), v.open_u[k*(n+1)+i+1]),
+                (k.checked_sub(1).map(|j| j*n+i), v.open_w[k*n+i]),
+                ((k+1<n/2).then_some((k+1)*n+i), v.open_w[(k+1)*n+i]),
+            ] {
+                if let Some(j) = neighbor { if v.frac[j] > 0. { ap += opening as f64*(p-v.p[j] as f64); } }
+            }
+            let mut rhs = 0.;
+            if k+1 == n/2 {
+                let a = v.open_w[(k+1)*n+i] as f64;
+                ap += 2.*a*p;
+                rhs = 2.*a*1025.*(9.81f32 as f64)*(eta[i]-4.) as f64;
+            }
+            ap /= dx*dx; rhs /= dx*dx;
+            residual2 += (rhs-ap)*(rhs-ap); rhs2 += rhs*rhs;
+        }}
+        let actual = (residual2/rhs2).sqrt();
+        assert!(actual <= 1e-6, "n={n} oracle={actual:e} report={:e}",r.residual);
+        println!("S231 n={n} vrai_residu_f64={actual:e} rapport_f32={:e}", r.residual);
+    }
+}
+
+#[test]
+fn underflowing_nonzero_rhs_is_not_reported_as_rest_s231() {
+    let (mut v, _) = build(8,4,1.,9.81);
+    v.rho = 1e-30;
+    v.set_surface(&[4.01;8]).unwrap();
+    assert_eq!(v.step(0.002,100,&Jobs),Err(Error::NotFinite));
+    assert!(v.pressure().iter().all(|p| p.to_bits()==0));
+    assert!(v.velocity_w().iter().all(|p| p.to_bits()==0));
+}

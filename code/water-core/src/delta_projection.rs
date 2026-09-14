@@ -12,8 +12,8 @@
 //! déferlement, ni référentiel accéléré. Le filtre spatial S199 échoue au fond coupé :
 //! ce candidat n'est pas encore éligible à B3.
 //!
-//! S200 : pas sans allocation et refus numériques atomiques reçus. La pression reste
-//! expérimentale en f64 (I-08 non reçu) et la limite d'itérations n'est pas le budget
+//! S200 : pas sans allocation et refus numériques atomiques reçus. S231 : pression et
+//! opérateur f32, résidu réel contrôlé et corrections bornées. La limite d'itérations n'est pas le budget
 //! temporel I-05. S230 ajoute `step_budgeted`, arrêt coopératif atomique ; la garantie murale
 //! complète reste non reçue. Voir `docs/validation/BUDGET-DELTA-S230.md`.
 //!
@@ -129,14 +129,14 @@ pub struct Volume {
     w: Vec<f32>,
     us: Vec<f32>,
     ws: Vec<f32>,
-    p: Vec<f64>,
-    rhs: Vec<f64>,
-    res: Vec<f64>,
-    dir: Vec<f64>,
-    tmp: Vec<f64>,
+    p: Vec<f32>,
+    rhs: Vec<f32>,
+    res: Vec<f32>,
+    dir: Vec<f32>,
+    tmp: Vec<f32>,
     saved_u: Vec<f32>,
     saved_w: Vec<f32>,
-    saved_p: Vec<f64>,
+    saved_p: Vec<f32>,
     last_cost_ms: Option<f32>,
 }
 
@@ -186,7 +186,7 @@ impl Volume {
             .and_then(|n| nx.checked_mul(2).and_then(|x| n.checked_add(x)))
             .ok_or(Error::Domain)?;
         let bytes = floats.checked_mul(core::mem::size_of::<f32>())
-            .and_then(|n| c.checked_mul(6 * core::mem::size_of::<f64>()).and_then(|p| n.checked_add(p)))
+            .and_then(|n| c.checked_mul(6 * core::mem::size_of::<f32>()).and_then(|p| n.checked_add(p)))
             .ok_or(Error::Domain)?;
         if !(domain.z0().is_finite() && (nx as f32 * domain.dx).is_finite()) {
             return Err(Error::Domain);
@@ -211,11 +211,11 @@ impl Volume {
             w: vec![0.; nx * (nz + 1)],
             us: vec![0.; (nx + 1) * nz],
             ws: vec![0.; nx * (nz + 1)],
-            p: vec![0.0f64; nx * nz],
-            rhs: vec![0.0f64; nx * nz],
-            res: vec![0.0f64; nx * nz],
-            dir: vec![0.0f64; nx * nz],
-            tmp: vec![0.0f64; nx * nz],
+            p: vec![0.0f32; nx * nz],
+            rhs: vec![0.0f32; nx * nz],
+            res: vec![0.0f32; nx * nz],
+            dir: vec![0.0f32; nx * nz],
+            tmp: vec![0.0f32; nx * nz],
             saved_u: vec![0.; nu],
             saved_w: vec![0.; nw],
             saved_p: vec![0.; c],
@@ -345,8 +345,8 @@ impl Volume {
 
     /// Pression dynamique imposée au couvercle de la colonne `i`.
     #[inline]
-    fn lid(&self, i: usize) -> f64 {
-        self.rho as f64 * self.g_eff as f64 * (self.eta[i] - self.domain.z0()) as f64
+    fn lid(&self, i: usize) -> f32 {
+        self.rho * self.g_eff * (self.eta[i] - self.domain.z0())
     }
 
     pub fn velocity_u(&self) -> &[f32] {
@@ -355,7 +355,7 @@ impl Volume {
     pub fn velocity_w(&self) -> &[f32] {
         &self.w
     }
-    pub fn pressure(&self) -> &[f64] {
+    pub fn pressure(&self) -> &[f32] {
         &self.p
     }
     pub fn fluid_fraction(&self) -> &[f32] {
@@ -405,7 +405,7 @@ impl Volume {
     }
 
     /// Divergence pondérée par les ouvertures, dans `out`. Les mailles solides rendent zéro.
-    fn divergence(&self, u: &[f32], w: &[f32], out: &mut [f64], ctl: &mut Control, phase: Phase) -> Result<(), Error> {
+    fn divergence(&self, u: &[f32], w: &[f32], out: &mut [f32], ctl: &mut Control, phase: Phase) -> Result<(), Error> {
         ctl.check(phase)?;
         let (nx, nz, dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
         for i in 0..nx {
@@ -416,12 +416,12 @@ impl Volume {
                     out[c] = 0.;
                     continue;
                 }
-                let a = |o: f32, v: f32| o as f64 * v as f64;
+                let a = |o: f32, v: f32| o * v;
                 let fl = a(self.open_u[self.fu(i, k)], u[self.fu(i, k)]);
                 let fr = a(self.open_u[self.fu(i + 1, k)], u[self.fu(i + 1, k)]);
                 let fb = a(self.open_w[self.fw(i, k)], w[self.fw(i, k)]);
                 let ft = a(self.open_w[self.fw(i, k + 1)], w[self.fw(i, k + 1)]);
-                out[c] = (fr - fl + ft - fb) / dx as f64;
+                out[c] = (fr - fl + ft - fb) / dx;
             }
         }
         Ok(())
@@ -430,10 +430,10 @@ impl Volume {
     /// `L p`, avec `L = −∇·∇` pondéré par les ouvertures et **Dirichlet homogène** au
     /// couvercle. La valeur imposée du couvercle vit dans le second membre, pas ici :
     /// c'est ce qui garde l'opérateur symétrique, donc le gradient conjugué valide.
-    fn apply(&self, p: &[f64], out: &mut [f64], ctl: &mut Control) -> Result<(), Error> {
+    fn apply(&self, p: &[f32], out: &mut [f32], ctl: &mut Control) -> Result<(), Error> {
         ctl.check(Phase::Pressure)?;
         let (nx, nz, dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
-        let inv = 1. / (dx as f64 * dx as f64);
+        let inv = 1. / (dx * dx);
         for i in 0..nx {
             for k in 0..nz {
                 ctl.poll(Phase::Pressure)?;
@@ -442,13 +442,13 @@ impl Volume {
                     out[c] = 0.;
                     continue;
                 }
-                let mut acc = 0.0f64;
+                let mut acc = 0.0f32;
                 {
                     let mut face = |af: f32, n: Option<usize>, dirichlet: bool| {
                         if af == 0. {
                             return;
                         }
-                        let a = af as f64;
+                        let a = af;
                         match n {
                             Some(j) if self.frac[j] > 0. => acc += a * (p[c] - p[j]),
                             // Face ouverte sur du solide : flux nul, rien à ajouter.
@@ -476,25 +476,41 @@ impl Volume {
     /// Produit scalaire sur les mailles fluides. **I-03** : toute accumulation flottante du
     /// système passe par `parallel_reduce_ordered_f64` (SPEC-004 §8.2), qui fusionne dans
     /// l'ordre des indices et non dans l'ordre d'arrivée.
-    fn dot(&self, a: &[f64], b: &[f64], jobs: &dyn JobSystem, ctl: &mut Control) -> Result<f64, Error> {
+    fn dot(&self, a: &[f32], b: &[f32], jobs: &dyn JobSystem, ctl: &mut Control) -> Result<f32, Error> {
         ctl.check(Phase::Pressure)?;
+        // L'interface historique transporte exactement les f32 en f64. Produits, sommes de
+        // groupes ET fusion sont arrondis en f32 ; aucune accumulation double cachée.
         let reduce = |start: usize, end: usize| {
-            let mut acc = 0.;
+            let mut acc = 0f32;
             for c in start..end { if self.frac[c] > 0. { acc += a[c] * b[c]; } }
-            acc
+            acc as f64
         };
+        let merge = |x: f64, y: f64| (x as f32 + y as f32) as f64;
         if !ctl.limited() {
-            return Ok(jobs.parallel_reduce_ordered_f64(self.domain.cells(), 64, &reduce, &|x,y| x+y, 0.));
+            return Ok(jobs.parallel_reduce_ordered_f64(self.domain.cells(), 64, &reduce, &merge, 0.) as f32);
         }
-        // Mêmes groupes de 64 et même fusion, mais jamais un appel hôte sur tout le domaine.
         let mut acc = 0.;
         for start in (0..self.domain.cells()).step_by(64) {
             ctl.check(Phase::Pressure)?;
             let n = (self.domain.cells() - start).min(64);
-            acc = jobs.parallel_reduce_ordered_f64(n, 64, &|s,e| reduce(start+s,start+e), &|x,y| x+y, acc);
+            acc = jobs.parallel_reduce_ordered_f64(n, 64, &|s,e| reduce(start+s,start+e), &merge, acc);
         }
         ctl.check(Phase::Pressure)?;
-        Ok(acc)
+        Ok(acc as f32)
+    }
+
+    /// Une norme non représentable ne doit jamais faire passer un second membre non nul
+    /// pour le repos. Le domaine numérique extrême est refusé, pas silencieusement annulé.
+    fn norm2(&self, a: &[f32], jobs: &dyn JobSystem, ctl: &mut Control) -> Result<f32, Error> {
+        let n = self.dot(a, a, jobs, ctl)?;
+        if !n.is_finite() { return Err(Error::NotFinite); }
+        if n == 0. {
+            for (x, fraction) in a.iter().zip(&self.frac) {
+                ctl.poll(Phase::Pressure)?;
+                if *fraction > 0. && *x != 0. { return Err(Error::NotFinite); }
+            }
+        }
+        Ok(n)
     }
 
     /// Advection centrée d'ordre deux sur la grille décalée, de `u,w` vers `us,ws`.
@@ -556,12 +572,12 @@ impl Volume {
     fn project(&mut self, dt: f32, max_iters: u32, jobs: &dyn JobSystem, ctl: &mut Control) -> Result<Report, Error> {
         ctl.check(Phase::Rhs)?;
         let (nx, nz, dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
-        let inv = 1. / (dx as f64 * dx as f64);
+        let inv = 1. / (dx * dx);
         let mut rhs = core::mem::take(&mut self.rhs);
         let result = self.divergence(&self.us, &self.ws, &mut rhs, ctl, Phase::Rhs);
         self.rhs = rhs;
         result?;
-        let scale = -self.rho as f64 / dt as f64;
+        let scale = -self.rho / dt;
         for i in 0..nx {
             for k in 0..nz {
                 ctl.poll(Phase::Rhs)?;
@@ -575,7 +591,7 @@ impl Volume {
                 if k + 1 == nz {
                     let a = self.open_w[self.fw(i, k + 1)];
                     if a > 0. {
-                        b += 2. * a as f64 * self.lid(i) * inv;
+                        b += 2. * a * self.lid(i) * inv;
                     }
                 }
                 self.rhs[c] = b;
@@ -586,42 +602,63 @@ impl Volume {
         for p in &mut self.p { ctl.poll(Phase::Pressure)?; *p = 0.; }
         budget::copy(&self.rhs, &mut self.res, ctl, Phase::Pressure)?;
         budget::copy(&self.res, &mut self.dir, ctl, Phase::Pressure)?;
-        let b2 = self.dot(&self.rhs, &self.rhs, jobs, ctl)?;
+        let b2 = self.norm2(&self.rhs, jobs, ctl)?;
         let mut rr = b2;
         let mut it = 0;
-        let tol = 1e-12_f64;
-        // Au repos, `b` est exactement nul : aucune itération, et la correction est nulle.
-        while b2 > 0. && rr > tol * b2 && it < max_iters {
+        let tol = 1e-12_f32;
+        // À convergence récurrente, vérifier b-Ap puis redémarrer depuis le vrai résidu.
+        // Le plafond porte sur toutes les itérations, corrections comprises.
+        let mut previous_actual = f32::INFINITY;
+        let actual_rr = loop {
+            let before_iterations = it;
+            // Au repos, `b` est exactement nul : aucune itération, et la correction est nulle.
+            while b2 > 0. && rr > tol * b2 && it < max_iters {
+                let mut tmp = core::mem::take(&mut self.tmp);
+                let result = self.apply(&self.dir, &mut tmp, ctl);
+                self.tmp = tmp;
+                result?;
+                let dq = self.dot(&self.dir, &self.tmp, jobs, ctl)?;
+                if !(dq > 0.) {
+                    break;
+                }
+                let alpha = rr / dq;
+                for c in 0..self.domain.cells() {
+                    ctl.poll(Phase::Pressure)?;
+                    if self.frac[c] > 0. {
+                        self.p[c] += alpha * self.dir[c];
+                        self.res[c] -= alpha * self.tmp[c];
+                    }
+                }
+                let rn = self.norm2(&self.res, jobs, ctl)?;
+                let beta = rn / rr;
+                for c in 0..self.domain.cells() {
+                    ctl.poll(Phase::Pressure)?;
+                    if self.frac[c] > 0. {
+                        self.dir[c] = self.res[c] + beta * self.dir[c];
+                    }
+                }
+                rr = rn;
+                it += 1;
+            }
             let mut tmp = core::mem::take(&mut self.tmp);
-            let result = self.apply(&self.dir, &mut tmp, ctl);
+            let result = self.apply(&self.p, &mut tmp, ctl);
             self.tmp = tmp;
             result?;
-            let dq = self.dot(&self.dir, &self.tmp, jobs, ctl)?;
-            if !(dq > 0.) {
-                break;
-            }
-            let alpha = rr / dq;
             for c in 0..self.domain.cells() {
                 ctl.poll(Phase::Pressure)?;
-                if self.frac[c] > 0. {
-                    self.p[c] += alpha * self.dir[c];
-                    self.res[c] -= alpha * self.tmp[c];
-                }
+                self.res[c] = self.rhs[c] - self.tmp[c];
             }
-            let rn = self.dot(&self.res, &self.res, jobs, ctl)?;
-            let beta = rn / rr;
-            for c in 0..self.domain.cells() {
-                ctl.poll(Phase::Pressure)?;
-                if self.frac[c] > 0. {
-                    self.dir[c] = self.res[c] + beta * self.dir[c];
-                }
+            let actual = self.norm2(&self.res, jobs, ctl)?;
+            if actual <= tol * b2 || it >= max_iters || it == before_iterations || actual >= previous_actual {
+                break actual;
             }
-            rr = rn;
-            it += 1;
-        }
+            previous_actual = actual;
+            rr = actual;
+            budget::copy(&self.res, &mut self.dir, ctl, Phase::Pressure)?;
+        };
         // Correction : `u = u* − (dt/ρ)·∂p/∂x`, demi-maille au couvercle.
         ctl.check(Phase::Correct)?;
-        let k1 = (dt / self.rho) as f64;
+        let k1 = (dt / self.rho) as f32;
         budget::copy(&self.us, &mut self.u, ctl, Phase::Correct)?;
         budget::copy(&self.ws, &mut self.w, ctl, Phase::Correct)?;
         for i in 1..nx {
@@ -633,7 +670,7 @@ impl Volume {
                 }
                 let (l, r) = (self.c(i - 1, k), self.c(i, k));
                 if self.frac[l] > 0. && self.frac[r] > 0. {
-                    self.u[f] -= (k1 * (self.p[r] - self.p[l]) / dx as f64) as f32;
+                    self.u[f] -= (k1 * (self.p[r] - self.p[l]) / dx) as f32;
                 }
             }
         }
@@ -651,28 +688,28 @@ impl Volume {
                 if k < nz {
                     let above = self.c(i, k);
                     if self.frac[above] > 0. {
-                        self.w[f] -= (k1 * (self.p[above] - self.p[below]) / dx as f64) as f32;
+                        self.w[f] -= (k1 * (self.p[above] - self.p[below]) / dx) as f32;
                     }
                 } else {
                     // Couvercle : la pression imposée est à une demi-maille.
-                    self.w[f] -= (k1 * (self.lid(i) - self.p[below]) / (0.5 * dx as f64)) as f32;
+                    self.w[f] -= (k1 * (self.lid(i) - self.p[below]) / (0.5 * dx)) as f32;
                 }
             }
         }
-        let residual = if b2 > 0. { (rr / b2).sqrt() } else { 0. };
+        let residual = if b2 > 0. { (actual_rr / b2).sqrt() } else { 0. };
         let mut tmp = core::mem::take(&mut self.tmp);
         let result = self.divergence(&self.u, &self.w, &mut tmp, ctl, Phase::Diagnostics);
         self.tmp = tmp;
         result?;
-        let mut dmax = 0f64;
+        let mut dmax = 0f32;
         for v in &self.tmp { ctl.poll(Phase::Diagnostics)?; dmax = dmax.max(v.abs()); }
-        let mut umax = 0f64;
-        for v in self.u.iter().chain(&self.w) { ctl.poll(Phase::Diagnostics)?; umax = umax.max((*v as f64).abs()); }
+        let mut umax = 0f32;
+        for v in self.u.iter().chain(&self.w) { ctl.poll(Phase::Diagnostics)?; umax = umax.max((*v as f32).abs()); }
         Ok(Report {
             iterations: it,
-            degraded: b2 > 0. && rr > tol * b2,
-            residual,
-            divergence: if umax > 0. { dmax * dx as f64 / umax } else { 0. },
+            degraded: b2 > 0. && actual_rr > tol * b2,
+            residual: residual as f64,
+            divergence: (if umax > 0. { dmax * dx / umax } else { 0. }) as f64,
         })
     }
 
