@@ -83,13 +83,17 @@ tolérance pour obtenir un gain, et reporter le lot vers la technique suivante.
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [ ] **P2** — lectures ciblées (ADR-129/131/132, HOTE-GPU-S212) ; calculer `Σ|a|k²` et
+- [x] **P2** — lectures ciblées (ADR-129/131/132, HOTE-GPU-S212) ; calculer `Σ|a|k²` et
   `Σ|a|k³` réels des trois couches sur la fixture ; charge réductible par pose ; choisir la
   forme (rangées seules, ou bandes de colonnes cousues) et déclarer le protocole.
-- [ ] **P3** — planificateur CPU du maillage (rangées et bandes), sans allocation par image,
-  index cousus sans jonction en T ; tests unitaires de couverture et de couture.
-- [ ] **P4** — shader et passe consomment le plan ; `--verify` inchangé aux sommets ; nouvelle
-  vérification aux intérieurs et aux coutures contre le cœur, LOD contre grille 2 px.
+  **Amendement P2 (22:25)** : la forme retenue n'est ni l'une ni l'autre — voir notes.
+- [ ] **P3** — grille locale du sillage, côté CPU : pas choisi par la borne bicubique,
+  arrondi au 1/16 m inférieur, capacité fixe et annonce si la borne exige plus fin ; test d'une
+  reconstruction Hermite bicubique de référence (CPU) sous sa borne, sur ondes planes.
+- [ ] **P4** — passe compute des nœuds `(η, ηx, ηy, ηxy)` et reconstruction bicubique dans
+  `water()` ; chemin direct conservé par option ; `--verify` inchangé ; nouveaux contrôles aux
+  centres et milieux d'arêtes des mailles, grille contre somme directe GPU et contre le cœur ;
+  horodatage de la passe compute compté dans le coût d'eau.
 - [ ] **P5** — coût : `BENCH`, cadence fixe et balayée, avec et sans LOD ; document de
   validation, en-tête ADR-131 D3.
 - [ ] **P6** — rituel §6, file, feuille de route, jeton ; copies à synchroniser.
@@ -101,3 +105,20 @@ P1 : script `grid_geom.py` (bloc-notes de session) reproduit `ocean_vertex` sans
 Pose S201 : h>λ_min/2 sur 7,5 % des sommets de l'emprise, travail Nyquist/plein 0,978 ;
 pose 30 m / tangage −0,5 : 60 % dans l'emprise, 0 % sous-échantillonné. Histogramme des pas
 (0,25 m) : 75 463 sommets sous 0,25 m sur 111 715 dans l'emprise.
+
+P2 (`--lod-charge`, `viewer/src/lod.rs`, 3 tests) : provenance du 3 mm = résidu d'intersection
+de l'image S201 (IMAGE-B-S201), repris par `verify` ; critère d'interpolation linéaire
+`½·M·R²`. Hessiennes (Σ|a|k²) : **B 0,349 constant**, sillage 0,067→0,164 (16 s), impact
+0,19→0,03 ; somme 0,54–0,65 → pas isotrope 0,136–0,149 m (B seul 0,185).
+Charge idéale du maillage sous ce critère : S212 0,649 ; balayage 0,752 / 0,578 ; **haute 30 m
+0,997** ; rasante 2 m 0,359 ; hors emprise 0,807. Rangées seules : 0,695 / 0,777 / 0,641 /
+0,993 / 0,433 / 0,823. **Décision** : la densité du maillage est dictée par B, la couche bon
+marché (32 composantes), tandis que le coût vient du sillage (4 096 modes par sommet). Alléger
+le maillage retire ≤35 % en pose S212 et rien en vue haute ; **découpler la densité
+d'évaluation de chaque couche** vise directement la loi `sommets × nœuds`. Sillage : borne
+Hermite bicubique `h⁴/384·(2Σ|a|k⁴ + h/4·Σ|a|k⁵)` ≤ 3 mm → pas 1,617 (1 s), 1,404 (3 s),
+1,284 (8 s), **1,228 (16 s)**, 1,235 (24 s), 1,233 (39 s) ; 9 116 nœuds au pire sur l'emprise
+128×104 m, contre ≈111 700 sommets évalués (pose S212), et 183 825 nœuds en linéaire.
+Le LOD de maillage par rangées reste une option mesurée, non construite (au rituel : file).
+Technique rattachée : LOD spatial *de couche* (densité selon le contenu) sur une grille locale
+sans transformée — la ligne « espace » d'ADR-131 D2 reste absente (pas de FFT).

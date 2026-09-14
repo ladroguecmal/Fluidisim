@@ -1,4 +1,5 @@
 mod gpu;
+mod lod;
 mod scene;
 use scene::{Camera, FrameData, Scene, WakeInput};
 use water_core::{
@@ -302,6 +303,119 @@ impl ApplicationHandler for App<'_> {
         }
     }
 }
+/// S234 P2 — charge du maillage que le contenu exige, avant toute construction de LOD.
+///
+/// Majorants de hessienne des trois couches publiées, pas isotrope sous la tolérance S201, puis
+/// pour plusieurs poses : sommets de la grille 2 px, charge idéale (chaque cellule agrandie
+/// jusqu'au critère, jamais rétrécie) et charge d'un LOD par rangées seules.
+fn lod_charge(frame: &mut FrameData<'_>) {
+    let (w, h) = (960u32, 540u32);
+    let (nx, ny) = (w.div_ceil(2) + 1, h.div_ceil(2) + 1);
+    for age in [1., 3., 8., 16., 24., 39.] {
+        frame.update(age, age, true);
+        let b = lod::background(&frame.components);
+        let k = if frame.wake_active { lod::wake(&frame.wake) } else { Default::default() };
+        let i = if frame.active {
+            lod::impact(&frame.profile, frame.table.step())
+        } else {
+            Some(Default::default())
+        };
+        let Some(i) = i else {
+            println!("LOD_BORNE age={age} impact=pente_non_nulle_au_centre");
+            continue;
+        };
+        let all = b.hessian + k.hessian + i.hessian;
+        if frame.wake_active {
+            let (m4, m5) = lod::wake_smooth(&frame.wake);
+            let step = lod::bicubic_step(m4, m5);
+            let nodes = |s: f32| {
+                let n = |i: usize| ((scene::WAKE_MAX[i] - scene::WAKE_MIN[i]) / s).ceil() as usize + 1;
+                n(0) * n(1)
+            };
+            println!(
+                "LOD_SILLAGE age={age} m4={m4:.5} m5={m5:.5} pas_bicubique_m={step:.3} noeuds_emprise={} | pas_lineaire_m={:.3} noeuds={}",
+                nodes(step), lod::isotropic_step(k.hessian), nodes(lod::isotropic_step(k.hessian))
+            );
+        }
+        println!(
+            "LOD_BORNE age={age} hessienne B={:.5} sillage={:.5} impact={:.5} somme={:.5} | troisieme B={:.5} sillage={:.5} impact={:.5} | pas_isotrope_m B_seul={:.3} somme={:.3}",
+            b.hessian, k.hessian, i.hessian, all, b.third, k.third, i.third,
+            lod::isotropic_step(b.hessian), lod::isotropic_step(all)
+        );
+    }
+    frame.update(8., 8., true);
+    let b = lod::background(&frame.components).hessian;
+    let wake = lod::wake(&frame.wake).hessian;
+    let impact = lod::impact(&frame.profile, frame.table.step()).map_or(f32::NAN, |x| x.hessian);
+    let poses: [(&str, [f32; 3], f32, f32); 6] = [
+        ("S212", [0., -18., 7.], 0., -(7.0f32 / 53.).atan()),
+        ("balayage200", [0., -18., 7.], 0.8, -0.15 + 0.25 * 2.2f32.sin()),
+        ("balayage400", [0., -18., 7.], 1.6, -0.15 + 0.25 * 4.4f32.sin()),
+        ("haute30m", [0., -18., 30.], 0., -0.5),
+        ("rasante2m", [0., -18., 2.], 0., -0.05),
+        ("hors_emprise", [300., -300., 12.], 0.5, -0.2),
+    ];
+    for (name, eye, yaw, pitch) in poses {
+        let camera = Camera { eye, yaw, pitch };
+        let [f, r, u] = camera.vectors();
+        let p = lod::Projection {
+            eye,
+            forward: f,
+            right: r,
+            up: u,
+            tan_half: 25f32.to_radians().tan(),
+            aspect: w as f32 / h as f32,
+        };
+        let horizon = p.horizon();
+        let point = |ix: u32, iy: u32| {
+            let x = (ix as f32 / (nx - 1) as f32 * 2. - 1.) * 1.18;
+            let y = -1.18 + (horizon + 1.18) * iy as f32 / (ny - 1) as f32;
+            p.ground(x, y)
+        };
+        let in_wake = |q: [f32; 2]| scene::admits_wake([q[0] + eye[0], q[1] + eye[1]]);
+        let in_impact = |q: [f32; 2]| (q[0] + eye[0]).hypot(q[1] + eye[1] - 10.) <= scene::RADIUS;
+        let (mut cells, mut wake_cells) = (0usize, 0usize);
+        let (mut ideal_global, mut ideal_local, mut ideal_wake_local) = (0f64, 0f64, 0f64);
+        let mut rows_global = 0f64;
+        let m_global = b + wake + impact;
+        for iy in 0..ny - 1 {
+            let mut row_hl = 0f32;
+            let mut row_hr = f32::INFINITY;
+            for ix in 0..nx - 1 {
+                let q = point(ix, iy);
+                let a = point(ix, iy + 1);
+                let c = point(ix + 1, iy);
+                let hr = (a[0] - q[0]).hypot(a[1] - q[1]);
+                let hl = (c[0] - q[0]).hypot(c[1] - q[1]);
+                row_hl = row_hl.max(hl);
+                row_hr = row_hr.min(hr);
+                let local = b
+                    + if in_wake(q) { wake } else { 0. }
+                    + if in_impact(q) { impact } else { 0. };
+                let ratio = |m: f32| ((hr * hr + hl * hl) * m / (8. * lod::TOLERANCE_M)).min(1.) as f64;
+                cells += 1;
+                ideal_global += ratio(m_global);
+                ideal_local += ratio(local);
+                if in_wake(q) {
+                    wake_cells += 1;
+                    ideal_wake_local += ratio(local);
+                }
+            }
+            // Rangées seules : les colonnes restent celles de la grille ; la rangée peut s'étirer
+            // jusqu'à ce que la plus large cellule de la rangée atteigne le critère.
+            let room = 8. * lod::TOLERANCE_M / m_global - row_hl * row_hl;
+            let stretch = if room > 0. { (room.sqrt() / row_hr).max(1.) } else { 1. };
+            rows_global += 1. / stretch as f64;
+        }
+        println!(
+            "LOD_CHARGE pose={name} cellules={cells} dans_emprise={wake_cells} | ideale_M_global={:.0} ({:.3}) ideale_M_local={:.0} ({:.3}) emprise_M_local={:.0} ({:.3}) | rangees_seules_M_global={:.0} rangees sur {} ({:.3})",
+            ideal_global, ideal_global / cells as f64, ideal_local, ideal_local / cells as f64,
+            ideal_wake_local, ideal_wake_local / wake_cells.max(1) as f64,
+            rows_global, ny - 1, rows_global / (ny - 1) as f64
+        );
+    }
+}
+
 fn run() -> Result<(), String> {
     let args: Vec<_> = std::env::args().collect();
     let scene = Scene::new();
@@ -328,6 +442,10 @@ fn run() -> Result<(), String> {
     let timeline = Timeline::build(input.context, &spectrum, &journal, &mut nodes, &mut modes)
         .map_err(|e| format!("levier temporel : {e:?}"))?;
     let mut frame = FrameData::new(&scene.background, table, input, timeline, recipe);
+    if args.iter().any(|a| a == "--lod-charge") {
+        lod_charge(&mut frame);
+        return Ok(());
+    }
     if args.iter().any(|a| a == "--verify") {
         std::fs::create_dir_all("captures/s212").map_err(|e| e.to_string())?;
         let instance = instance();
