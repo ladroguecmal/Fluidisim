@@ -105,8 +105,11 @@ I-05 complet non reçu : retards réels observés, admission/marges encore absen
 Non admissible B3. **Sur le chemin** : A244 /
 S200-1 (API temps encore f32, respect temporel I-05). **Pression f32 reçue S231** sur les
 domaines éprouvés, résidu réel contrôlé, stockage réduit sans gain de vitesse reçu ;
-[preuve](validation/PRESSION-F32-S231.md). Restent S199-2 (flux des faces coupées), surface libre
-mobile (couvercle imposé aujourd'hui), passage à la 3D, couplage de l'écart à B+W. Part d'un
+[preuve](validation/PRESSION-F32-S231.md). **S232 : débit ouvert reçu** sur trois fonds lisses,
+ordres1,947/1,957/1,966 ; triangles fluides perdus corrigés. L'ancien≈0,90 mesurait une somme
+sans ouvertures ; [preuve et limites](validation/FLUX-COUPES-S232.md).
+Restent ordre local/stabilité aux géométries nouvelles, surface libre mobile (couvercle imposé
+aujourd'hui), passage à la 3D, couplage de l'écart à B+W. Part d'un
 impact que W ne porte pas nommée en S203 (énergie hors ondes, cavité, gerbe).
 
 *Bancs* : **B3** (famille de δ) quand un candidat atteint ses critères ou qu'un second existe ;

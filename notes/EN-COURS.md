@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S232 — en cours
+Session : S232 — terminée
 Agent : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
 Entrée : « continue », quatre copies à4a48c74, master propre, jeton libre.
 
@@ -71,7 +71,7 @@ Entrée : « continue », quatre copies à4a48c74, master propre, jeton libre.
 - [x] **P2** — lectures ciblées, bilan discret et reproduction indépendante du défaut.
 - [x] **P3** — correction consommée par le pas, tests ciblés et contrôle spatial.
 - [x] **P4** — réception complète et limites dans un document de preuve.
-- [>] **P5** — rituel §6, file et priorité comparée, jeton, synchronisation des copies.
+- [x] **P5** — rituel §6, file et priorité comparée, jeton ; synchronisation des copies après commit.
 
 ### Notes de reprise
 

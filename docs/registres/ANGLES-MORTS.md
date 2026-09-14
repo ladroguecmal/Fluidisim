@@ -3401,3 +3401,11 @@ oracle indépendant, continuation, refus et zéro allocation reçus. Stockage r�
 aucun gain de vitesse. [PRESSION-F32-S231](../validation/PRESSION-F32-S231.md).
 I-05 reste ouvert ; I-08 global aussi, puisque l'API temporelle transporte encore du f32.
 Les domaines non éprouvés ne bénéficient pas automatiquement de cette réception.
+
+**Suivi A244 / S199-2 — S232, 2026-09-14.** Le défaut spatial annoncé sur le débit venait
+de l'absence de pondération par ouvertures dans le banc : contre-épreuve sans modifier le
+solveur, ordre≈1,95 retrouvé. Une incohérence géométrique distincte est corrigée : SUB8
+supprimait des triangles fluides tout en gardant leurs faces ouvertes. Intégrale du profil
+linéaire et bilan du pas reçus sur triangle et miroir. La portée reste celle de
+[FLUX-COUPES-S232](../validation/FLUX-COUPES-S232.md) : ordre local, cellules extrêmes et
+discontinuités non reçus. I-05/I-08 temporel inchangés ; ne pas prolonger un faux diagnostic.

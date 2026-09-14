@@ -11905,3 +11905,40 @@ relus, aucun ADR réécrit ni leçon forcée. Maillons0 : pression f32 consommé
 fausse convergence reproduite puis corrigée. Jeton libre ; après commit, avance rapide des
 trois copies propres, sans suppression incertaine. Le dépassement mural de P2 est consigné
 dans EN-COURS, sans le masquer comme conformité de procédure.
+
+## S232 — 2026-09-14 — Mesurer le débit ouvert, conserver les triangles fluides
+
+**Entrée.** « continue », quatre copies propres à4a48c74, jeton libre. Codex, GPT-6.
+Plan1cdb4a4, diagnostic458d379, correction4f3eacd, réception181ec00.
+
+**Résultat.** L'ordre≈0,90 hérité de S199 venait d'une somme des vitesses sur faces entières.
+En pondérant par l'ouverture, ordre≈1,95 sans changement du solveur : aucune justification
+pour reconstruire son opérateur sur ce seul chiffre. Un défaut distinct est reproduit :
+SUB8 supprime un triangle fluide d'aire2,38e-4 tout en laissant ses faces ouvertes.
+L'intégrale du profil linéaire remplace l'échantillonnage ; la cellule participe maintenant
+au pas de pression et ses flux projetés s'équilibrent. Même contrôle sur son miroir.
+
+**Preuves.** [FLUX-COUPES-S232](../docs/validation/FLUX-COUPES-S232.md) : régression rouge
+avant correction, aire indépendante et bilan de quatre flux, partitions géométriques,
+douze tests unitaires δ. Filtre final1,947/1,957/1,966, hash0xc5ab1eadb094d058 ; critère1,8
+et rejeu désormais assertés. **411 tests réussis, 5 ignorés**, dont sept runtime δ : budget,
+refus, reprise et zéro allocation. Navigation active reçue ; aucun changement de stockage.
+
+**Limites.** Le triplet est une auto-convergence d'une fonctionnelle, pas une référence
+manufacturée ; la « marche » tanh est lisse. Ordre local, stabilité des petites cellules,
+fond discontinu, surface mobile, 3D et scénarios B3 non reçus. Les bits de certains champs
+changent quand des cellules redeviennent fluides. Aucun gain de coût, I-05 ou I-08 global
+revendiqué. Aucun ADR modifié ; rectification datée du reçu historique S199.
+
+**Suite comparée.** Après trois sessions J2, **S233 : construire une première évolution de
+surface consommant les flux**, avec domaine et oracle déclarés et traitement conforme du temps.
+C'est une capacité physique absente, contrairement à une nouvelle campagne sur le débit
+maintenant reçu. J1-bis reste utile pour le coût visible, mais ne débloque aucun phénomène
+volumétrique ; extensions V différables après restauration reçue. δ général, 3D, B2,
+bathymétrie, seconde cible et autres travaux gardent leurs déclencheurs dans la file relue.
+Pas de réduction d'ambition ni arbitrage utilisateur nécessaire.
+
+**Rituel.** Trajectoire/file mises à jour en remplacement, index et A244 actualisés. Pas de
+nouvelle règle de méthode : distinguer instrument et modèle était déjà prescrit et a suffi.
+Maillons0 : correction d'intégrité reproduite, consommée et testée dans le pas réel.
+Jeton libre ; après commit, avance rapide des trois copies propres, sans suppression incertaine.

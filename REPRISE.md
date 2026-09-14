@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-14 21:52 +02:00
+JETON            : libre
+Battement        : 2026-09-14 21:53 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
-Session en cours : S232 — flux des faces coupées
-Dernière session : S231 — pression f32 reçue, vrai résidu contrôlé
-Session suivante : S232 — J2 : flux des faces coupées et précision spatiale
+Session en cours : aucune
+Dernière session : S232 — débit ouvert reçu, triangles fluides conservés
+Session suivante : S233 — J2 : première surface évolutive consommant les flux
 Maillons        : 0
 
 ```
@@ -75,8 +75,8 @@ Ne pas relire le journal, les leçons ou tous les ADR intégralement à chaque r
 
 ## 4. Où en est le projet
 
-État à S231 : B/W et un afficheur existent ; δ MAC x-z calcule sa pression en f32 et abandonne proprement,
-mais reste non admissible B3/I-05. V : plans orientés, débits bornés et restauration locale reçus.
+État à S232 : B/W et un afficheur existent ; δ MAC x-z reçoit son débit ouvert et conserve les petites
+cellules testées, sans scénario B3 ni I-05 complet. V : plans orientés, débits bornés et restauration locale reçus.
 Les réceptions et limites courantes sont dans la feuille de route. Le nombre de tests ne mesure
 pas la couverture des intentions, et une exécution locale ne reçoit pas le multiplateforme.
 
