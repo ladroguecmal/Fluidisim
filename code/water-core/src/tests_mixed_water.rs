@@ -1246,6 +1246,107 @@ fn union_floor_certificate_bounds_the_real_slope_at_every_threshold() {
 }
 
 #[test]
+fn union_query_adds_only_the_perturbations_that_cover_each_point() {
+    fixture(|b, impacts, pressure, impact| {
+        let time = SimTime(1_500_000);
+        let bound = BoundBackground::new(b, FrameId(7), 9);
+        // Disque de l'impact : 16 m autour de l'origine ; emprise de la pression : [-8 ; 12]².
+        let cases = [
+            ([1.0, 1.0], true, true),
+            ([-12.0, 0.0], true, false),
+            ([11.875, 11.875], false, true),
+            ([20.0, 20.0], false, false),
+        ];
+        let points: Vec<_> = cases.iter().map(|(p, _, _)| world(p[0] as f64, p[1] as f64)).collect();
+        let mut scratch = vec![WaterSample::default(); points.len()];
+        let mut output = scratch.clone();
+        let mut pool = [FloorCell::default(); 256];
+        let floor = sample_world_batch_union(
+            &bound, impacts, Some(pressure), time, &points, 10.0, &mut pool, &mut scratch, &mut output,
+        )
+        .unwrap();
+        assert!(floor.certified);
+        for (k, ((p, in_disc, in_emprise), point)) in cases.iter().zip(&points).enumerate() {
+            assert!(admits_union(&bound, impacts, Some(pressure), *point));
+            assert_eq!(impact.admits(FrameId(7), 9, *p), *in_disc);
+            assert_eq!(pressure.admits_local(*p), *in_emprise);
+            // Somme à la main, dans l'ordre de la requête et **au point local qu'elle emploie**
+            // (conversion monde → local quantifiée, S214) : B, impact couvrant, pression couvrante.
+            let local = b.local_point(*point).unwrap();
+            let flat = [local[0], local[1]];
+            let mut eta = b.eval_local(local, time).unwrap().eta;
+            if *in_disc {
+                eta += impact.sample(FrameId(7), 9, flat, time).unwrap().eta;
+            }
+            if *in_emprise {
+                eta += pressure.sample_local(flat).unwrap().eta;
+            }
+            assert_eq!(output[k].eta.to_bits(), eta.to_bits(), "point {p:?}");
+            // L'intersection refuse tout point qu'une seule emprise ne couvre pas.
+            let mut s1 = [WaterSample::default(); 1];
+            let mut o1 = s1;
+            let inter = sample_world_batch(&bound, impacts, Some(pressure), time, &[*point], 10.0, &mut s1, &mut o1);
+            assert_eq!(inter.is_ok(), *in_disc && *in_emprise, "point {p:?} : {inter:?}");
+        }
+    });
+}
+
+#[test]
+fn union_query_refuses_exactly_where_its_floor_is_not_certified() {
+    fixture(|b, impacts, pressure, impact| {
+        let time = SimTime(1_500_000);
+        let bound = BoundBackground::new(b, FrameId(7), 9);
+        // Pente réelle des perturbations sur l'union : impact dans son disque, pression dans son emprise.
+        let mut real = 0.0f32;
+        for j in 0..=280 {
+            for i in 0..=280 {
+                let q = [-18.0 + i as f32 * 0.125, -18.0 + j as f32 * 0.125];
+                let mut s = [0.0f32; 2];
+                if let Ok(w) = impact.sample(FrameId(7), 9, q, time) {
+                    s[0] += w.slope[0];
+                    s[1] += w.slope[1];
+                }
+                if pressure.admits_local(q) {
+                    let w = pressure.sample_local(q).unwrap();
+                    s[0] += w.slope[0];
+                    s[1] += w.slope[1];
+                }
+                real = real.max((s[0] * s[0] + s[1] * s[1]).sqrt());
+            }
+        }
+        let plain = impact.slope_max_at(time) + pressure.slope_envelope();
+        assert!(plain > real && real > 0.0);
+        let points = [world(1.0, 1.0), world(-12.0, 0.0)];
+        let mut pool = vec![FloorCell::default(); 8192];
+        let (mut certified, mut refused, mut locals) = (0, 0, 0);
+        for k in 0..=24 {
+            let rung = real * 0.9 + (plain * 1.01 - real * 0.9) * k as f32 / 24.0;
+            let announced = slope_floor_union(impacts, Some(pressure), time, rung, &mut pool);
+            locals += announced.local_calls;
+            let mut scratch = [WaterSample::default(); 2];
+            let mut output = scratch;
+            let got = sample_world_batch_union(
+                &bound, impacts, Some(pressure), time, &points, rung, &mut pool, &mut scratch, &mut output,
+            );
+            if announced.certified {
+                certified += 1;
+                assert!(announced.bound >= real && announced.bound <= rung, "{announced:?} réelle {real}");
+                assert_eq!(got, Ok(announced), "seuil {rung}");
+            } else {
+                refused += 1;
+                assert!(announced.bound > rung);
+                assert!(
+                    matches!(got, Err(Error::Slope) | Err(Error::SlopeEnvelope)),
+                    "seuil {rung} : {got:?}"
+                );
+            }
+        }
+        assert!(certified > 0 && refused > 0, "échelle sans les deux issues");
+        assert!(locals > 0, "la pression locale n'a jamais été sollicitée");
+    });
+}
+
+#[test]
 fn union_floor_gives_up_when_the_pool_is_full() {
     overlapping_impacts(|impacts, _, time, real| {
         let mut pool = [FloorCell::default(); FLOOR_INITIAL_SPLIT * FLOOR_INITIAL_SPLIT];

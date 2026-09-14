@@ -93,7 +93,7 @@ seuil changé, aucune scène réduite.
 - [x] **P4a** — cœur : `admits_union`, `slope_floor_union` (séparation, pool hôte, pression
   locale ADR-137 sur cellules critiques), tests de la borne (≥ réelle, contre-exemple du trou
   d'ADR-138 sur l'union, pool épuisé, chemin rapide).
-- [ ] **P4b** — cœur : `sample_world_batch_union` ; tests (zéro hors emprise contre somme à la
+- [x] **P4b** — cœur : `sample_world_batch_union` ; tests (zéro hors emprise contre somme à la
   main, intersection inchangée, deux sens d'ADR-128 au seuil) ; suite complète.
 - [ ] **P5** — réception : série S235 admise par le cœur, marges réelles, coût du plancher,
   suite complète du cœur.
@@ -141,3 +141,14 @@ refus sans cellule. Chemin rapide identique au bit à `slope_floor` (un impact).
 comparaison non déclarée à `max_slope`. Les trois sites du fichier réécrits sous la forme
 `budget > max_slope` et inscrits dans `SITES_CONNUS` (11 sites). Suite complète du cœur :
 **417 réussis, 5 ignorés**.
+
+P4b : deux tests de la requête sur le montage `fixture` (B, un impact N64 de 16 m, pression
+d'emprise [−8 ; 12]²). (1) Quatre points — disque et emprise, disque seul, emprise seule, aucun :
+hauteur de l'union **au bit** d'une somme à la main des seules perturbations couvrantes ; la requête
+intersection sert le premier et refuse les trois autres. Premier passage en échec **du test** :
+point (11,9 ; 11,9) non représentable au 1/2048 m, somme à la main au point brut au lieu du point
+local quantifié (piège S214) ; corrigé en sommant au point local et en prenant 11,875.
+(2) Échelle de 25 seuils de 0,9·réelle à 1,01·somme : plancher certifié ⟹ requête `Ok` et
+`UnionFloor` rendu identique à l'annonce, réelle ≤ plancher ≤ seuil ; non certifié ⟹ `Slope` ou
+`SlopeEnvelope` ; les deux issues présentes, **pression locale sollicitée**. Suite complète du
+cœur : **419 réussis, 5 ignorés** ; hôte construit.
