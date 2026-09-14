@@ -68,8 +68,8 @@ Entrée : « Continue », quatre copies à88b98fe, master propre, jeton libre.
 ### Plan
 
 - [x] **P1** — amorce, jeton et plan seuls.
-- [>] **P2** — lectures ciblées, critères et référence f64 avant modification.
-- [ ] **P3** — construire la pression f32 et ses contrôles numériques sur le chemin réel.
+- [x] **P2** — lectures ciblées, critères et référence f64 avant modification.
+- [>] **P3** — construire la pression f32 et ses contrôles numériques sur le chemin réel.
 - [ ] **P4** — réception comparée, coûts, suite et preuve des limites.
 - [ ] **P5** — rituel §6, priorité comparée, journal, file, jeton et copies synchronisées.
 
@@ -78,3 +78,5 @@ Entrée : « Continue », quatre copies à88b98fe, master propre, jeton libre.
 ### Notes de reprise
 
 Base :407 tests réussis,5 ignorés. S230 reçoit l'arrêt coopératif, pas I-05 complet. Empreinte filtre f64 :0x0ad3f695685ca27a, ordre plat1,947, lisse0,898, marche0,895. Aucun nouveau test général à l'amorce.
+
+P2 : référence f64 exécutée avant modification, code/target/s231-f64.txt (dix cas et champs complets) ; protocole PRESSION-F32-S231. Stockage32×16=44032octets,128×64=692224octets. Divergence premier pas f64 entre2,27e-6 et8,07e-6 ; continuation100pas reçue. Horloge de clôture21:33, décalage mural depuis amorce21:01 : étape trop longue au regard du quart d’heure, prochaines modifications découpées si nécessaire. Aucun changement numérique encore fait.
