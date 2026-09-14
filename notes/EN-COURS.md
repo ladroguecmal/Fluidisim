@@ -95,7 +95,7 @@ seuil changé, aucune scène réduite.
   d'ADR-138 sur l'union, pool épuisé, chemin rapide).
 - [x] **P4b** — cœur : `sample_world_batch_union` ; tests (zéro hors emprise contre somme à la
   main, intersection inchangée, deux sens d'ADR-128 au seuil) ; suite complète.
-- [ ] **P5** — réception : série S235 admise par le cœur, marges réelles, coût du plancher,
+- [x] **P5** — réception : série S235 admise par le cœur, marges réelles, coût du plancher,
   suite complète du cœur.
 - [ ] **P6** — rituel §6, file, feuille de route, jeton ; copies à synchroniser.
 
@@ -152,3 +152,10 @@ local quantifié (piège S214) ; corrigé en sommant au point local et en prenan
 `UnionFloor` rendu identique à l'annonce, réelle ≤ plancher ≤ seuil ; non certifié ⟹ `Slope` ou
 `SlopeEnvelope` ; les deux issues présentes, **pression locale sollicitée**. Suite complète du
 cœur : **419 réussis, 5 ignorés** ; hôte construit.
+
+P5 (`--multi --union-coeur`, log `union_s236.log`, secteur 00:26–00:34) : **161 / 161 planchers
+certifiés, 0 requête refusée** sur 6 988 sondes ; pire plancher 0,9995 π/7 ; ≤128 cellules ; 355
+appels locaux ; plancher médiane 0,001 ms, max **12,0 ms** ; requête 6 988 points médiane
+**1 421 ms**, max 1 640 ms (≈0,2 ms/point : pression 4 096 modes sur CPU, pas le mode union) ;
+**écart à `FrameData::references` : η < 1e-9 m, pente 3e-8**. Document :
+[ADMISSION-UNION-S236](../docs/validation/ADMISSION-UNION-S236.md).

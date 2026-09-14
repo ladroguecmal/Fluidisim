@@ -836,6 +836,117 @@ fn bounds_union(scene: &Scene, recipe: water_core::gaussian_spectrum::Recipe) ->
     Ok(())
 }
 
+/// S236 P5 — **réception par le cœur** de la scène S235 en mode union (ADR-142).
+///
+/// À chaque quart de seconde : plancher `slope_floor_union` à π/7 (certifié ou non, cellules,
+/// appels locaux, durée), puis requête `sample_world_batch_union` sur les 6 988 sondes de l'hôte,
+/// comparée point par point à la somme de référence de l'image (`FrameData::references`, qui somme
+/// B, impacts couvrants et sillage couvrant au même point local).
+fn union_reception(scene: &Scene, recipe: water_core::gaussian_spectrum::Recipe, frame: &mut FrameData<'_>) -> Result<(), String> {
+    use water_core::{
+        bound_pressure,
+        prepared_water::{self, mixed, BoundBackground},
+        radial_impact::RadialImpact,
+        wave_journal::{self, Cause},
+        FrameId, SimTime, WaterSample, WorldPos,
+    };
+    let wakes: Vec<_> = (0..scene::WAKE_OFFSETS.len()).map(|i| scene::wake_at(recipe, i)).collect();
+    let mut records = [None; 3];
+    let mut journal = Journal::new(1, &mut records);
+    for w in &wakes {
+        journal.admit_authenticated(w.source()).map_err(|e| format!("{e:?}"))?;
+    }
+    let mut pools = scene::Pools::new(recipe);
+    let spectrum = pools.spectrum(recipe);
+    let context = wakes[0].source().context();
+    let mut slots = vec![Slot::default(); spectrum.nodes().len()];
+    let mut cells = vec![mixed::FloorCell::default(); 65_536];
+    frame.lod = false;
+    frame.cull = false;
+    frame.camera = Camera::default();
+    let eye = frame.camera.eye;
+    let probes = gpu::probes(eye);
+    let points: Vec<WorldPos> = probes
+        .iter()
+        .map(|q| WorldPos::from_metres((q[0] + eye[0]) as f64, (q[1] + eye[1]) as f64, 0.))
+        .collect();
+    let mut scratch = vec![WaterSample::default(); points.len()];
+    let mut output = scratch.clone();
+    let bound = BoundBackground::new(&scene.background, FrameId(0), 0);
+    let (mut certified, mut refused_queries, mut worst_bound, mut worst_eta, mut worst_slope) = (0usize, 0usize, 0f32, 0f32, 0f32);
+    let (mut floor_ms, mut query_ms, mut cells_max, mut locals_total) = (Vec::new(), Vec::new(), 0usize, 0usize);
+    for step in 0..=160u32 {
+        let age = step as f64 * 0.25;
+        let time = SimTime(scene::BIRTH + (age * 1e6) as u64);
+        let mut impact_records: [Option<wave_journal::Record>; 8] = std::array::from_fn(|_| None);
+        let mut impacts_journal = wave_journal::Journal::new(1, &mut impact_records);
+        for i in 0..scene::IMPACTS.len() {
+            let event = scene::scene_impact(scene, i, None);
+            if event.data().birth.0 > time.0 {
+                continue;
+            }
+            let cause = Cause { entity: 203 + i as u64, command: 1, emission: 0 };
+            impacts_journal.confirm(1, cause, event).map_err(|e| format!("{e:?}"))?;
+        }
+        let mut pool: [Option<RadialImpact<256>>; 8] = std::array::from_fn(|_| None);
+        let impacts = prepared_water::Prepared::<256>::build(
+            &impacts_journal,
+            &mut pool,
+            prepared_water::Context { frame: FrameId(0), cell: 0, medium: scene.medium, domain: scene.domain },
+        )
+        .map_err(|e| format!("{e:?}"))?;
+        let pressure = bound_pressure::Prepared::from_journal(context, &spectrum, &journal, time, &mut slots)
+            .map_err(|e| format!("{e:?}"))?;
+        let start = Instant::now();
+        let floor = mixed::slope_floor_union(&impacts, Some(&pressure), time, BREAKING_SLOPE, &mut cells);
+        floor_ms.push(start.elapsed().as_secs_f64() * 1e3);
+        certified += floor.certified as usize;
+        worst_bound = worst_bound.max(floor.bound);
+        cells_max = cells_max.max(floor.cells);
+        locals_total += floor.local_calls;
+        let start = Instant::now();
+        let result = mixed::sample_world_batch_union(
+            &bound, &impacts, Some(&pressure), time, &points, BREAKING_SLOPE, &mut cells, &mut scratch, &mut output,
+        );
+        query_ms.push(start.elapsed().as_secs_f64() * 1e3);
+        match result {
+            Ok(f) if f == floor => {}
+            Ok(f) => return Err(format!("annonce et requête divergent à {age} s : {floor:?} / {f:?}")),
+            Err(e) => {
+                refused_queries += 1;
+                println!("UNION_REFUS age_s={age} erreur={e:?} plancher={floor:?}");
+                continue;
+            }
+        }
+        frame.update(age, age, true);
+        let hand = frame.references(&probes)?;
+        for (s, h) in output.iter().zip(&hand) {
+            worst_eta = worst_eta.max((s.eta - h[0]).abs());
+            let slope = [-s.normal[0] / s.normal[2], -s.normal[1] / s.normal[2]];
+            worst_slope = worst_slope.max((slope[0] - h[1]).abs()).max((slope[1] - h[2]).abs());
+        }
+        if step % 8 == 0 || floor.cells > 0 && step % 4 == 0 {
+            println!(
+                "UNION_COEUR age_s={age} nes={} plancher={:.6} part={:.4} certifie={} cellules={} appels_locaux={} plancher_ms={:.2} requete_ms={:.2}",
+                impacts.field_count(), floor.bound, floor.bound / BREAKING_SLOPE, floor.certified, floor.cells, floor.local_calls,
+                floor_ms.last().unwrap(), query_ms.last().unwrap()
+            );
+        }
+    }
+    let q = |v: &mut Vec<f64>| {
+        v.sort_by(f64::total_cmp);
+        (v[v.len() / 2], v[v.len() - 1])
+    };
+    let (f50, fmax) = q(&mut floor_ms);
+    let (r50, rmax) = q(&mut query_ms);
+    println!(
+        "UNION_BILAN instants=161 certifies={certified} requetes_refusees={refused_queries} pire_plancher_pi7={:.4} cellules_max={cells_max} appels_locaux_total={locals_total} plancher_ms median={f50:.3} max={fmax:.3} requete_6988_points_ms median={r50:.3} max={rmax:.3} ecart_image_eta_m={worst_eta:.9} ecart_image_pente={worst_slope:.9}",
+        worst_bound / BREAKING_SLOPE
+    );
+    frame.lod = true;
+    Ok(())
+}
+
 /// Plancher de pente du cœur à un instant de la scène, et ses deux parts.
 struct Admission {
     age: f64,
@@ -1198,6 +1309,9 @@ fn run() -> Result<(), String> {
     }
     if args.iter().any(|a| a == "--bornes-union") {
         return bounds_union(&scene, recipe);
+    }
+    if multi && args.iter().any(|a| a == "--union-coeur") {
+        return union_reception(&scene, recipe, &mut frame);
     }
     if multi && args.iter().any(|a| a == "--retour") {
         return verify_return(&mut frame);
