@@ -93,7 +93,7 @@ tolérance pour obtenir un gain, et reporter le lot vers la technique suivante.
 - [x] **P4a** — passe compute des nœuds `(η, ηx, ηy, ηxy)` et reconstruction bicubique dans
   `water()` ; chemin direct conservé par option `--no-lod` ; `--verify` inchangé et vert ;
   horodatage de la passe compute compté dans le coût d'eau.
-- [ ] **P4b** — contrôles aux centres et milieux d'arêtes des mailles : grille contre somme
+- [x] **P4b** — contrôles aux centres et milieux d'arêtes des mailles : grille contre somme
   directe GPU (isole la reconstruction) et contre le cœur (3 mm) ; saut à travers les arêtes de
   maille, LOD contre direct.
 - [ ] **P5** — coût : `BENCH`, cadence fixe et balayée, avec et sans LOD ; document de
@@ -141,3 +141,12 @@ BatteryStatus 1, 68 %) : grille 64×128 à 960×540 **0,457 ms dont cuisson 0,39
 1,3125–1,375 m, âges 3–5 s) ; direct 6,923 ms — plus lent que S225 (4,20). Témoin S233 extrait
 hors dépôt (`viewer-s233`, chemins absolus) pour trancher entre état machine et shader.
 Recette fine 128×256 grille : 1,782 ms dont cuisson 1,724.
+
+P4b (`Gpu::verify_lattice`, âges 1/4/8/16/24/39) : centres et milieux d'arêtes (16 482 à
+28 512 points). **Grille − direct GPU : 0,680 / 0,588 / 0,498 / 0,439 / 0,260 / 0,191 mm**,
+bornes 2,600 / 2,581 / 2,687 / 2,614 / 2,548 / 2,567 mm, rapports 0,26 → 0,07. Grille −
+cœur : mêmes valeurs à 1 µm. Pentes ≤1,83e-4 à ces points ; le maximum de l'erreur de pente
+d'une Hermite cubique est vers t≈0,21/0,79, pas au centre : `VERIFY` (sondes irrégulières)
+voit jusqu'à 1,14e-3 (3 s). **Saut à travers les arêtes** (10 839 à 18 812 paires, ±1 mm),
+grille moins direct : η ≤6 µm, pentes ≤1,9e-5, pour une variation propre du champ ≈0,5 mm
+sur 2 mm — continuité C¹ reçue au bruit f32. Pas 1,5625 → 1,1875 m, 83×68 → 109×89 nœuds.

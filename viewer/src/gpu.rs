@@ -637,6 +637,93 @@ impl Gpu {
         }
         Ok(())
     }
+    /// S234 — la grille du sillage là où sa reconstruction est la plus éloignée des nœuds.
+    ///
+    /// Trois mesures, chacune contre ce qui l'isole :
+    /// 1. **centres et milieux d'arêtes** des mailles, grille contre somme directe GPU : B et
+    ///    l'impact sont identiques dans les deux passages, l'écart est donc la reconstruction
+    ///    seule, confrontée à `Lattice::error_bound` ;
+    /// 2. les mêmes points, grille contre le **cœur**, sous la tolérance de 3 mm ;
+    /// 3. **saut à travers les arêtes** : paires à ±1 mm de chaque arête intérieure, qui tombent
+    ///    dans deux mailles différentes ; le saut de la grille moins celui de la somme directe
+    ///    retire la variation propre du champ et ne laisse que la discontinuité.
+    pub fn verify_lattice(&mut self, frame: &mut FrameData<'_>) -> Result<(), String> {
+        use crate::scene::{WAKE_MAX, WAKE_MIN};
+        const EPS: f32 = 0.001;
+        let eye = frame.camera.eye;
+        let l = frame.lattice;
+        let (s, min) = (l.step, [WAKE_MIN[0] - eye[0], WAKE_MIN[1] - eye[1]]);
+        let max = [WAKE_MAX[0] - eye[0], WAKE_MAX[1] - eye[1]];
+        let inside = |p: [f32; 2]| (0..2).all(|i| p[i] >= min[i] && p[i] <= max[i]);
+        let mut interior = Vec::new();
+        let mut seams = Vec::new();
+        for j in 0..l.ny - 1 {
+            for i in 0..l.nx - 1 {
+                let at = |a: f32, b: f32| [min[0] + a * s, min[1] + b * s];
+                let (x, y) = (i as f32, j as f32);
+                for p in [at(x + 0.5, y + 0.5), at(x + 0.5, y), at(x, y + 0.5)] {
+                    if inside(p) {
+                        interior.push(p);
+                    }
+                }
+                let (vx, hy) = (at(x, y + 0.5), at(x + 0.5, y));
+                if i > 0 && inside([vx[0] + EPS, vx[1]]) {
+                    seams.extend([[vx[0] - EPS, vx[1]], [vx[0] + EPS, vx[1]]]);
+                }
+                if j > 0 && inside([hy[0], hy[1] + EPS]) {
+                    seams.extend([[hy[0], hy[1] - EPS], [hy[0], hy[1] + EPS]]);
+                }
+            }
+        }
+        let lod = frame.lod;
+        frame.lod = true;
+        self.upload(frame);
+        if self.baked.is_none() {
+            frame.lod = lod;
+            return Err("verify_lattice : sillage inactif, aucune grille".into());
+        }
+        let grid = self.evaluate(&interior)?;
+        let grid_seams = self.evaluate(&seams)?;
+        frame.lod = false;
+        self.upload(frame);
+        let direct = self.evaluate(&interior)?;
+        let direct_seams = self.evaluate(&seams)?;
+        frame.lod = lod;
+        self.upload(frame);
+        let mut reconstruction = [0f32; 3];
+        for (a, b) in grid.iter().zip(&direct) {
+            for k in 0..3 {
+                reconstruction[k] = reconstruction[k].max((a[k] - b[k]).abs());
+            }
+        }
+        let references = frame.references(&interior)?;
+        let mut core = [0f32; 3];
+        for (a, r) in grid.iter().zip(&references) {
+            for k in 0..3 {
+                core[k] = core[k].max((a[k] - r[k]).abs());
+            }
+        }
+        let (mut jump, mut field_jump) = ([0f32; 3], 0f32);
+        for (g, d) in grid_seams.chunks_exact(2).zip(direct_seams.chunks_exact(2)) {
+            field_jump = field_jump.max((d[1][0] - d[0][0]).abs());
+            for k in 0..3 {
+                jump[k] = jump[k].max(((g[1][k] - g[0][k]) - (d[1][k] - d[0][k])).abs());
+            }
+        }
+        println!(
+            "LOD_INTERIEUR age={} pas_m={} noeuds={}x{}={} borne_m={:.6} points={} | grille-direct max_eta_m={:.6} max_pentes=[{:.6}, {:.6}] rapport_borne={:.4} | grille-coeur max_eta_m={:.6} max_pentes=[{:.6}, {:.6}] | saut_aretes paires={} max_eta_m={:.6} max_pentes=[{:.6}, {:.6}] (variation du champ sur 2 mm {:.6})",
+            frame.age, l.step, l.nx, l.ny, l.nodes(), l.error_bound, interior.len(),
+            reconstruction[0], reconstruction[1], reconstruction[2], reconstruction[0] / l.error_bound,
+            core[0], core[1], core[2], seams.len() / 2, jump[0], jump[1], jump[2], field_jump
+        );
+        if reconstruction[0] > l.error_bound + 1e-5 {
+            return Err(format!("reconstruction {} au-delà de sa borne {}", reconstruction[0], l.error_bound));
+        }
+        if core[0] > crate::lod::TOLERANCE_M {
+            return Err(format!("grille contre cœur hors tolérance 3 mm : {}", core[0]));
+        }
+        Ok(())
+    }
     /// Hauteur et pentes GPU aux points relatifs à la caméra, par la fonction `water` du shader —
     /// la même que les sommets. S234 : la grille du sillage est cuite dans le même encodeur.
     pub fn evaluate(&self, points: &[[f32; 2]]) -> Result<Vec<[f32; 3]>, String> {

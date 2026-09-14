@@ -175,6 +175,7 @@ impl Lattice {
 /// Reconstruction Hermite bicubique d'une maille : coins `(η, ηx, ηy, ηxy)` dans l'ordre
 /// `[(0,0), (1,0), (0,1), (1,1)]`, coordonnées locales `t ∈ [0,1]²`. Rend `(η, ηx, ηy)`.
 /// **Mêmes opérations que `wake_lattice` de `water.wgsl`** ; sert de référence CPU aux tests.
+#[cfg_attr(not(test), allow(dead_code))]
 pub fn hermite(corners: &[[f32; 4]; 4], step: f32, t: [f32; 2]) -> [f32; 3] {
     let basis = |t: f32| {
         let (t2, t3) = (t * t, t * t * t);

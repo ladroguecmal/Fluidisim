@@ -475,6 +475,11 @@ fn run() -> Result<(), String> {
         }
         frame.lod = true;
         frame.camera = Camera::default();
+        // S234 : intérieurs des mailles, contre la somme directe et contre le cœur, et coutures.
+        for age in [1., 4., 8., 16., 24., 39.] {
+            frame.update(age, age, true);
+            g.verify_lattice(&mut frame)?;
+        }
         for enabled in [true, false] {
             frame.update(8., 8., enabled);
             g.upload(&frame);
