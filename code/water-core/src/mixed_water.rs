@@ -4,6 +4,13 @@ use crate::{bound_pressure, composition, SimTime, WaterSample, WorldPos};
 #[path = "mixed_differential.rs"]
 mod differential;
 pub use differential::{differential_world_batch, DifferentialSample};
+// S236, ADR-142 : mode union, ajouté à côté du mode intersection.
+#[path = "mixed_union.rs"]
+mod union;
+pub use union::{
+    admits_union, sample_world_batch_union, slope_floor_union, FloorCell, UnionFloor, FLOOR_INITIAL_SPLIT,
+    FLOOR_LOCAL_HALF, FLOOR_MIN_HALF,
+};
 
 /// S205, ADR-128 : `slope` et `budget` sont ceux des **perturbations** ; B n'y entre pas.
 fn check_slope(slope: [f32; 2], budget: f32, max_slope: f32) -> Result<(), Error> {

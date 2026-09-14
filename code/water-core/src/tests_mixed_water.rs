@@ -1045,3 +1045,214 @@ fn a_shared_cause_is_checked_on_both_layers_before_either_is_touched() {
     assert!(w.records().any(|r| r.cause == cause));
     assert!(pj.published().any(|s| s.metadata().cause == cause));
 }
+
+// ---- S236, ADR-142 : mode union ------------------------------------------------------------
+
+/// Impact de l'entrée S203 (hôte J1), N256, R 52 m, A 56 s ; `energy` multiplie son énergie.
+fn s203_impact(id: u64, position: [f32; 2], birth_us: u64, energy: f32) -> WaveEvent {
+    let medium = s203_context().medium;
+    let (energy_j, wavelength_m) = crate::impact_generator::impact_from_entry(
+        &crate::impact_generator::Entry {
+            half_width_m: 1.0,
+            speed_ms: 8.0,
+            transferred_fraction: 0.005,
+        },
+        &medium,
+    )
+    .unwrap();
+    WaveEvent::impact(Impact {
+        id,
+        frame: FrameId(7),
+        cell: 9,
+        birth: SimTime(birth_us),
+        ttl_us: 56_000_000,
+        position: [position[0], position[1], 0.0],
+        energy_j: energy_j * energy,
+        wavelength_m,
+        direction_turns: 0.0,
+        anisotropy: 0.0,
+        displaced_l: 0.0,
+        material: 0,
+        origin: Origin::Server,
+        above_surface: true,
+    })
+    .unwrap()
+}
+fn s203_context() -> prepared_water::Context {
+    prepared_water::Context {
+        frame: FrameId(7),
+        cell: 9,
+        medium: Medium {
+            gravity: 9.81,
+            density: 1025.0,
+            depth: 20.0,
+            max_slope: crate::impact_field::BREAKING_SLOPE,
+        },
+        domain: Domain {
+            radius: 52.0,
+            age_us: 56_000_000,
+        },
+    }
+}
+/// Plus grande pente composée **sur l'union** : chaque champ ne contribue que dans son disque.
+/// Grille grossière, puis raffinement autour des huit meilleurs points. Un maximum échantillonné
+/// minore le vrai : une borne qui le dépasse n'est pas prouvée par là, mais une borne qui ne le
+/// dépasse pas est fausse.
+fn union_peak<const N: usize>(fields: &[RadialImpact<N>], time: SimTime, lo: [f32; 2], hi: [f32; 2], step: f32) -> f32 {
+    let at = |q: [f32; 2]| {
+        let mut s = [0.0f32; 2];
+        for f in fields {
+            if let Ok(w) = f.sample(FrameId(7), 9, q, time) {
+                s[0] += w.slope[0];
+                s[1] += w.slope[1];
+            }
+        }
+        (s[0] * s[0] + s[1] * s[1]).sqrt()
+    };
+    let (nx, ny) = (((hi[0] - lo[0]) / step) as usize + 1, ((hi[1] - lo[1]) / step) as usize + 1);
+    let mut coarse: Vec<(f32, [f32; 2])> = (0..ny)
+        .flat_map(|j| (0..nx).map(move |i| [lo[0] + i as f32 * step, lo[1] + j as f32 * step]))
+        .map(|q| (at(q), q))
+        .collect();
+    coarse.sort_by(|a, b| b.0.total_cmp(&a.0));
+    let mut best = coarse[0].0;
+    for &(_, c) in coarse.iter().take(8) {
+        for j in -25..=25 {
+            for i in -25..=25 {
+                best = best.max(at([c[0] + i as f32 * step / 25.0, c[1] + j as f32 * step / 25.0]));
+            }
+        }
+    }
+    best
+}
+
+#[test]
+fn union_floor_fast_path_is_the_plain_sum_in_bits() {
+    fixture(|_, impacts, pressure, _| {
+        let time = SimTime(1_500_000);
+        let mut pool = [FloorCell::default(); 64];
+        let f = slope_floor_union(impacts, Some(pressure), time, 10.0, &mut pool);
+        // Un impact : `slope_floor` est la somme d'origine, dans le même ordre.
+        assert_eq!(f.bound.to_bits(), slope_floor(impacts, Some(pressure), time).to_bits());
+        assert!(f.certified);
+        assert_eq!((f.cells, f.local_calls), (0, 0));
+    });
+}
+
+#[test]
+fn adr138_sweep_misses_the_union_and_the_union_floor_does_not() {
+    // Ancre plus énergique en (0, 0) ; deux impacts confondus à 100 m, nés au même instant :
+    // hors du disque de l'ancre, là où le balayage d'ADR-138 ne regarde pas.
+    let t0 = 12_000_000;
+    let events = [
+        s203_impact(1, [0.0, 0.0], t0, 1.3),
+        s203_impact(2, [100.0, 0.0], t0, 1.0),
+        s203_impact(3, [100.0, 0.0], t0, 1.0),
+    ];
+    let mut records = [None; 3];
+    let mut journal = Journal::new(0, &mut records);
+    for (k, e) in events.iter().enumerate() {
+        let cause = Cause { entity: 1 + k as u64, command: 1, emission: 0 };
+        journal.confirm(0, cause, *e).unwrap();
+    }
+    let ctx = s203_context();
+    let mut pool = [const { None }; 3];
+    let impacts = Prepared::<256>::build(&journal, &mut pool, ctx).unwrap();
+    let time = SimTime(t0);
+    let single = RadialImpact::<256>::new(events[1], ctx.medium, ctx.domain).unwrap();
+    let anchor = RadialImpact::<256>::new(events[0], ctx.medium, ctx.domain).unwrap();
+    assert!(anchor.slope_max_at(time) > single.slope_max_at(time), "l'ancre doit être le premier impact");
+    // Deux champs identiques et confondus : les pentes s'ajoutent colinéairement, pas radial fin.
+    let mut single_peak = 0.0f32;
+    for k in 0..=6000 {
+        if let Ok(w) = single.sample(FrameId(7), 9, [100.0 + k as f32 * 0.0005, 0.0], time) {
+            single_peak = single_peak.max((w.slope[0] * w.slope[0] + w.slope[1] * w.slope[1]).sqrt());
+        }
+    }
+    let real = 2.0 * single_peak;
+    let joint = slope_floor_joint(&impacts, None, time, JOINT_SLOPE_SAMPLES);
+    assert!(real > joint, "le trou d'ADR-138 sur l'union : réelle {real} ≤ plancher {joint}");
+    let mut cells = vec![FloorCell::default(); 4096];
+    let low = slope_floor_union(&impacts, None, time, 0.99 * real, &mut cells);
+    assert!(!low.certified && low.bound > 0.99 * real, "{low:?}");
+    let pair = 2.0 * single.slope_max_at(time);
+    let high = slope_floor_union(&impacts, None, time, 1.05 * pair, &mut cells);
+    assert!(high.certified && high.bound >= real && high.bound <= 1.05 * pair, "{high:?} réelle {real}");
+}
+
+/// Quatre impacts N64 qui se recouvrent, deux nés à l'instant : une échelle de seuils autour de la
+/// pente réelle. Certifié ⟹ réelle ≤ plancher ≤ seuil ; non certifié ⟹ plancher > seuil.
+fn overlapping_impacts(check: impl FnOnce(&Prepared<'_, '_, 64>, &[RadialImpact<64>], SimTime, f32)) {
+    let base = |id: u64, position: [f32; 2], birth: u64| {
+        WaveEvent::impact(Impact {
+            id,
+            frame: FrameId(7),
+            cell: 9,
+            birth: SimTime(birth),
+            ttl_us: 4_000_000,
+            position: [position[0], position[1], 0.0],
+            energy_j: 0.01,
+            wavelength_m: 4.0,
+            direction_turns: 0.0,
+            anisotropy: 0.0,
+            displaced_l: 0.0,
+            material: 0,
+            origin: Origin::Server,
+            above_surface: true,
+        })
+        .unwrap()
+    };
+    let events = [
+        base(1, [0.0, 0.0], 1_000_000),
+        base(2, [6.0, 3.0], 500_000),
+        base(3, [-8.0, 10.0], 0),
+        base(4, [20.0, -5.0], 1_000_000),
+    ];
+    let mut records = [None; 4];
+    let mut journal = Journal::new(0, &mut records);
+    for (k, e) in events.iter().enumerate() {
+        journal.confirm(0, Cause { entity: 1 + k as u64, command: 1, emission: 0 }, *e).unwrap();
+    }
+    let ctx = context();
+    let mut pool = [const { None }; 4];
+    let impacts = Prepared::<64>::build(&journal, &mut pool, ctx).unwrap();
+    let fields: Vec<_> = events.iter().map(|e| RadialImpact::<64>::new(*e, ctx.medium, ctx.domain).unwrap()).collect();
+    let time = SimTime(1_000_000);
+    let real = union_peak(&fields, time, [-24.0, -21.0], [36.0, 26.0], 0.25);
+    check(&impacts, &fields, time, real);
+}
+
+#[test]
+fn union_floor_certificate_bounds_the_real_slope_at_every_threshold() {
+    overlapping_impacts(|impacts, fields, time, real| {
+        let plain: f32 = fields.iter().map(|f| f.slope_max_at(time)).sum();
+        assert!(real > 0.0 && plain > real);
+        let mut pool = vec![FloorCell::default(); 4096];
+        let mut outcomes = Vec::new();
+        for rung in [0.9 * real, 0.98 * real, 1.02 * real, 1.1 * real, 1.3 * real, 2.0 * real, 3.0 * real, plain] {
+            let f = slope_floor_union(impacts, None, time, rung, &mut pool);
+            if f.certified {
+                assert!(f.bound >= real && f.bound <= rung, "seuil {rung} : {f:?}, réelle {real}");
+            } else {
+                assert!(f.bound > rung, "seuil {rung} : {f:?}");
+            }
+            outcomes.push((f.certified, f.cells));
+        }
+        assert!(!outcomes[0].0, "sous la pente réelle rien ne se certifie");
+        assert!(outcomes.last().unwrap().0, "à la somme d'origine, tout se certifie");
+        // Au moins un certificat obtenu par séparation, et non par le chemin rapide.
+        assert!(outcomes.iter().any(|&(c, cells)| c && cells > 0), "{outcomes:?}");
+    });
+}
+
+#[test]
+fn union_floor_gives_up_when_the_pool_is_full() {
+    overlapping_impacts(|impacts, _, time, real| {
+        let mut pool = [FloorCell::default(); FLOOR_INITIAL_SPLIT * FLOOR_INITIAL_SPLIT];
+        let f = slope_floor_union(impacts, None, time, real, &mut pool);
+        assert!(!f.certified && f.bound >= real, "{f:?}, réelle {real}");
+        let mut none: [FloorCell; 0] = [];
+        let g = slope_floor_union(impacts, None, time, real, &mut none);
+        assert!(!g.certified && g.bound > real && g.cells == 0, "{g:?}");
+    });
+}

@@ -137,7 +137,7 @@ fn every_field_places_its_limit_at_stokes_steepness_s143() {
 /// S205, ADR-128 : les trois budgets s'appellent `budget` et ne somment plus que les
 /// **perturbations**. Le terme `steepness_B·π` — une borne L1 de B, non convertie, qu'I-18
 /// interdisait (A245) — n'est plus comparé nulle part ; il reste publié dans `steepness`.
-const SITES_CONNUS: [(&str, &str); 8] = [
+const SITES_CONNUS: [(&str, &str); 11] = [
     ("impact_field.rs", "slope/SLOPE_L1_RATIO>medium.max_slope"),
     ("radial_impact.rs", "slope/SLOPE_L1_RATIO>medium.max_slope"),
     ("composition.rs", "budget>max_slope"),
@@ -149,6 +149,15 @@ const SITES_CONNUS: [(&str, &str); 8] = [
     ("composition.rs", "reelle>max_slope"),
     ("mixed_water.rs", "reelle>max_slope"),
     ("bound_pressure.rs", "reelle>max_slope"),
+    // S236, ADR-142 : plancher certifié du mode union. `budget` n'y somme que des majorants de
+    // pente réelle déjà convertis (`slope_max_at`, `slope_max_beyond`, `slope_envelope`, borne
+    // locale ADR-137). Chemin rapide, sélection des cellules critiques (ne refuse rien), et arrêt
+    // de certification. Le refus lui-même passe par `check_slope` de `mixed_water.rs`.
+    // La garde extrait le motif après la dernière parenthèse ouvrante : `!(budget > max_slope)`
+    // s'inscrit donc `budget>max_slope)`.
+    ("mixed_union.rs", "budget>max_slope)"),
+    ("mixed_union.rs", "budget>max_slope&&half<=FLOOR_LOCAL_HALF"),
+    ("mixed_union.rs", "budget>max_slope)"),
 ];
 
 /// Seconde garde : **ce que le crate contient**. Elle ne juge aucun calcul — elle constate

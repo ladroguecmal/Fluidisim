@@ -90,7 +90,7 @@ seuil changé, aucune scène réduite.
   plancher 2D par séparation (pression globale, puis nulle hors emprise du sillage) ; bornes contre
   la pente réelle S235 ; contre-exemple du trou d'ADR-138 sur l'union.
 - [x] **P3** — décision et ADR-142 si P2 conclut ; sinon bascule déclarée.
-- [ ] **P4a** — cœur : `admits_union`, `slope_floor_union` (séparation, pool hôte, pression
+- [x] **P4a** — cœur : `admits_union`, `slope_floor_union` (séparation, pool hôte, pression
   locale ADR-137 sur cellules critiques), tests de la borne (≥ réelle, contre-exemple du trou
   d'ADR-138 sur l'union, pool épuisé, chemin rapide).
 - [ ] **P4b** — cœur : `sample_world_batch_union` ; tests (zéro hors emprise contre somme à la
@@ -123,3 +123,21 @@ Contre-exemple mal construit : ancre (0,0) neuve, deux impacts d'1 s confondus �
 0,1225 < plancher ADR-138 0,2539 (globaux 0,2126 / 0,2032 / 0,2032, bornes lâches à 1 s). Le trou
 de l'union demande deux impacts **nés au même instant** que l'ancre, ancre plus énergique — à
 construire en test du cœur (P4).
+
+P3 : ADR-142 (mode union ajouté, plancher certifié par séparation, pression locale ADR-137 sur
+cellules critiques ≤1 m, arrêt à 1 cm ou pool plein, annonce = refus au même `max_slope`).
+P4a : `code/water-core/src/mixed_union.rs` (rattaché à `mixed_water` comme `mixed_differential`),
+`admits_union`, `slope_floor_union`, `sample_world_batch_union`, `FloorCell`, `UnionFloor`,
+constantes `FLOOR_LOCAL_HALF` 1 m / `FLOOR_MIN_HALF` 1 cm / `FLOOR_INITIAL_SPLIT` 8. Quatre tests
+dans `tests_mixed_water.rs` : **trou d'ADR-138 sur l'union reproduit** — ancre ×1,3 d'énergie en
+(0,0), paire confondue à 100 m née au même instant : pente réelle **0,4252**, plancher ADR-138
+**0,2837** ; plancher union à 0,99·réelle non certifié (0,4252, 144 cellules), à 1,05·paire
+certifié (0,4252, 64 cellules). Échelle de seuils sur quatre impacts N64 recouvrants (réelle
+0,00118, somme 0,00461, maximum de G 0,00225) : certifié ⟹ réelle ≤ plancher ≤ seuil ; un
+certificat par séparation exigé (seuils 2 et 3 × réelle ajoutés après un premier passage où seul
+le chemin rapide certifiait). Pool de 64 cellules : non certifié, borne ≥ réelle ; pool vide :
+refus sans cellule. Chemin rapide identique au bit à `slope_floor` (un impact).
+**Garde de contrat S143 échouée, puis satisfaite** : la sélection des cellules critiques était une
+comparaison non déclarée à `max_slope`. Les trois sites du fichier réécrits sous la forme
+`budget > max_slope` et inscrits dans `SITES_CONNUS` (11 sites). Suite complète du cœur :
+**417 réussis, 5 ignorés**.
