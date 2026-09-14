@@ -9,8 +9,8 @@
 //! advection. Le bâtir ne parie donc sur aucune, et **n'élimine aucune**.
 //!
 //! Il ne traite **aucun** des quatre scénarios de B3 — ni coque mobile, ni impact, ni
-//! déferlement, ni référentiel accéléré. Le filtre spatial S199 échoue au fond coupé :
-//! ce candidat n'est pas encore éligible à B3.
+//! déferlement, ni référentiel accéléré. S232 corrige la mesure du débit ouvert et reçoit
+//! son filtre spatial ; les scénarios de B3 et l'ordre local restent à recevoir.
 //!
 //! S200 : pas sans allocation et refus numériques atomiques reçus. S231 : pression et
 //! opérateur f32, résidu réel contrôlé et corrections bornées. La limite d'itérations n'est pas le budget
@@ -259,17 +259,8 @@ impl Volume {
             let (a, b) = (be[i], be[i + 1]);
             for k in 0..nz {
                 let top = (k + 1) as f32 * dx;
-                // Fraction fluide de la maille : moyenne de la hauteur d'eau sur la largeur,
-                // par sous-échantillonnage déterministe du segment linéaire.
-                const SUB: usize = 8;
-                let mut acc = 0.;
-                for q in 0..SUB {
-                    let t = (q as f32 + 0.5) / SUB as f32;
-                    let bz = a + t * (b - a);
-                    acc += ((top - bz) / dx).clamp(0., 1.);
-                }
                 let c = self.c(i, k);
-                self.frac[c] = acc / SUB as f32;
+                self.frac[c] = Self::cut_fraction(a, b, top, dx);
             }
         }
         // Face verticale à `x = i·dx` : le fond y vaut `be[i]`, sans maximum ni bascule.
@@ -311,6 +302,21 @@ impl Volume {
                 };
             }
         }
+    }
+
+    /// Intégrale de clamp((top-b(t))/dx, 0, 1), b linéaire. Rectangle plein puis
+    /// trapèze coupé ; aucun échantillonnage ne peut supprimer un triangle étroit.
+    fn cut_fraction(a: f32, b: f32, top: f32, dx: f32) -> f32 {
+        let (low, high) = (a.min(b), a.max(b));
+        if low >= top { return 0.; }
+        if high <= top - dx { return 1.; }
+        if low == high { return ((top - low) / dx).clamp(0., 1.); }
+        let span = high - low;
+        let full = ((top - dx - low) / span).clamp(0., 1.);
+        let wet = ((top - low) / span).clamp(0., 1.);
+        let h0 = ((top - low) / dx).clamp(0., 1.);
+        let h1 = ((top - high) / dx).clamp(0., 1.);
+        (full + (wet - full) * (0.5 * (h0 + h1))).clamp(0., 1.)
     }
 
     pub fn caps(&self) -> Caps {

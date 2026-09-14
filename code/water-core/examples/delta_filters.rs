@@ -78,7 +78,7 @@ fn bottom_at(shape: Shape, x: f32) -> f32 {
         Shape::Flat => 0.5,
         // Lisse, mais le decoupage change avec dx.
         Shape::Smooth => 0.4 + 0.6 * (-(d * d)).exp(),
-        // Lisse plus une marche : le cas que B3 aura.
+        // Transition tanh lisse, pas une marche discontinue (portée rectifiée S232).
         Shape::Stepped => {
             0.4 + 0.6 * (-(d * d)).exp() + 0.125 * (1.0 + (2.0 * (x - 6.0)).tanh())
         }
@@ -132,8 +132,8 @@ fn flux_through_middle(shape: Shape, cells_x: usize) -> (f64, f64, u32, bool) {
         .collect();
     v.set_surface(&eta).unwrap();
     let r = v.step(DT, 20_000, &jobs).unwrap();
-    // Débit horizontal au travers du plan médian : fonctionnelle lisse (A238), et non un
-    // maximum de résidu — S196 a payé cette erreur-là.
+    // S232 : débit ouvert par unité de profondeur, et non somme de vitesses sur faces
+    // entières. Géométrie recomposée depuis l'entrée, indépendamment de cut().
     let i = nx / 2;
     let mut q = 0.0f64;
     for k in 0..nz {
@@ -146,14 +146,14 @@ fn flux_through_middle(shape: Shape, cells_x: usize) -> (f64, f64, u32, bool) {
 
 fn main() {
     let mut h = Hasher64::new();
-    println!("S199 — filtres d'entree du premier candidat delta (ADR-038 §4)");
+    println!("S232 — filtres delta, debit ouvert corrige (ADR-038 §4)");
     println!("domaine physique {LX} x {LZ} m, rho={RHO}, g={G}, dt={DT}, eta = z0 + {A}·sin(2πx/L)");
 
     // ---- filtre 1 : rappel de ce que les tests unitaires reçoivent, en bits.
     println!("\n-- filtre 1 : equilibrage");
     println!("  lac au repos sur fond coupe, 1000 pas : vitesse exactement nulle **en bits**");
     println!("  idem a g = 1,62 / 9,81 / 24,79 : exact dans les trois cas");
-    println!("  (recu par les tests unitaires du module ; voir tests_volume.rs)");
+    println!("  (recu par les tests unitaires du module ; voir tests_delta_projection.rs)");
 
     // ---- filtre 2 : ordre en espace, trois fonds, pour **localiser** le defaut.
     println!("
@@ -200,10 +200,14 @@ fn main() {
         println!("  fond {} : {v}", shape.label());
     }
 
-    // ---- determinisme : deux constructions identiques rendent les mêmes bits.
-    println!("\n-- determinisme (I-03)");
+    // Le seuil visé par S199 est 1,8 ; 1,5 n'est que son seuil d'élimination.
+    assert!(verdicts.iter().all(|(_, order)| order.map_or(false, |o| o >= 1.8)),
+        "regression du debit ouvert sur le domaine recu S232");
+    // Deux constructions identiques, réception locale uniquement ; I-03 n'impose pas δ.
+    println!("\n-- repetabilite locale");
     let a = flux_through_middle(Shape::Stepped, 64).0;
     let b = flux_through_middle(Shape::Stepped, 64).0;
+    assert_eq!(a.to_bits(), b.to_bits());
     println!(
         "  deux executions du meme montage : {} (bits {:#018x} contre {:#018x})",
         if a.to_bits() == b.to_bits() { "identiques" } else { "DIFFERENTES" },
@@ -216,4 +220,3 @@ fn main() {
         h.finish()
     );
 }
-

@@ -69,8 +69,8 @@ Entrée : « continue », quatre copies à4a48c74, master propre, jeton libre.
 
 - [x] **P1** — amorce, jeton et plan seuls.
 - [x] **P2** — lectures ciblées, bilan discret et reproduction indépendante du défaut.
-- [>] **P3** — correction consommée par le pas, tests ciblés et contrôle spatial.
-- [ ] **P4** — réception complète et limites dans un document de preuve.
+- [x] **P3** — correction consommée par le pas, tests ciblés et contrôle spatial.
+- [>] **P4** — réception complète et limites dans un document de preuve.
 - [ ] **P5** — rituel §6, file et priorité comparée, jeton, synchronisation des copies.
 
 ### Notes de reprise
@@ -80,3 +80,7 @@ Base :409 tests réussis,5 ignorés ; pression f32 reçue S231. Flux coupés enc
 P2 : débit pondéré seul restaure les ordres1,947/1,955/1,981 sans changer le noyau.
 Triangle fluide d'aire2,380947407e-4 perdu par SUB8 ; régression rouge volontairement
 committée avant correction P3. Preuve/critères dans FLUX-COUPES-S232.
+
+P3 : intégrale géométrique f32 rectangle/trapèze remplace SUB8. Deux nouvelles régressions
+passent, dont triangle miroir puis bilan réel après projection. Douze tests δ unitaires verts.
+Filtre corrigé final :1,947/1,957/1,966 ; empreinte0xc5ab1eadb094d058.

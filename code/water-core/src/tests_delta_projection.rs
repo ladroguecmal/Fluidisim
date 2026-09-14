@@ -330,3 +330,22 @@ fn thin_cut_wedges_remain_fluid_and_project_their_open_flux_s232() {
         }}
     }
 }
+
+#[test]
+fn cut_fraction_integrates_clipped_linear_profiles_s232() {
+    // Aires géométriques sur [0,1]x[0,1] : plein, vide, rectangle, trapèze,
+    // triangle, puis segment traversant les deux hauteurs de la cellule.
+    for (a,b,area) in [(0.,0.,1.),(1.,2.,0.),(0.25,0.25,0.75),
+        (0.25,0.75,0.5),(0.5,1.5,0.125),(0.,2.,0.25)] {
+        for (l,r) in [(a,b),(b,a)] {
+            assert_eq!(Volume::cut_fraction(l,r,1.,1.),area);
+        }
+    }
+    // Même aire coupée en deux colonnes : partition additive du trapèze.
+    for (a,b) in [(0.2,1.7),(0.7,0.3),(1.4,0.999)] {
+        let whole = Volume::cut_fraction(a,b,1.,1.);
+        let middle = 0.5*(a+b);
+        let split = 0.5*(Volume::cut_fraction(a,middle,1.,1.)+Volume::cut_fraction(middle,b,1.,1.));
+        assert!((whole-split).abs() <= 16.*f32::EPSILON*whole);
+    }
+}
