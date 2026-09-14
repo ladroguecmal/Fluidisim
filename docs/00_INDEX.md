@@ -28,6 +28,7 @@
 - [Candidat δ](validation/CANDIDAT-DELTA-S199.md).
 - [Contrats δ](validation/CONTRATS-DELTA-S200.md).
 - [Arrêt coopératif sous budget de δ](validation/BUDGET-DELTA-S230.md).
+- [Pression f32 de δ : précision, résidu réel et coût](validation/PRESSION-F32-S231.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).
