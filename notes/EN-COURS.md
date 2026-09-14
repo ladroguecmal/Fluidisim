@@ -68,8 +68,8 @@ Entrée : « Continue », après S228 ; quatre copies à c2e9a56, master propre,
 ### Plan
 
 - [x] **P1** — amorce, jeton et plan seuls.
-- [>] **P2** — lectures prescrites puis contrat de restauration et réutilisation des mécanismes existants.
-- [ ] **P3** — construire sauvegarde/restauration de V et refus atomiques.
+- [x] **P2** — lectures prescrites puis contrat de restauration et réutilisation des mécanismes existants.
+- [>] **P3** — construire sauvegarde/restauration de V et refus atomiques.
 - [ ] **P4** — recevoir la continuation et les données invalides ; publier la preuve.
 - [ ] **P5** — rituel §6, file entière, priorité suivante, journal, jeton et synchronisation.
 
@@ -78,3 +78,5 @@ Chaque étape reste sous quinze minutes ; découpage déclaré si nécessaire.
 ### Notes de reprise
 
 Base S228 : 398 tests réussis, 5 ignorés ; A266 corrigée dans le domaine reçu. Aucun nouveau test général à l'amorce. Aucun travail dans une nouvelle copie.
+
+P2 : ADR-140 précise ADR-022 : écarts à la base auteur, restes non nuls, empreinte de toute la géométrie et contexte de reprise. Mécanisme FNV existant réutilisé, sans garantie cryptographique ; aucun asset ni champ δ écrit. Base immutable empruntée, reconstruction totale des sorties depuis la base après validation. Priorité V bornée justifiée en S228, ensuite J2.
