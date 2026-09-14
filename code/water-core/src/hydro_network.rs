@@ -31,6 +31,9 @@ use crate::SimTime;
 #[path = "hydro_geometry.rs"]
 pub mod geometry;
 
+#[path = "hydro_snapshot.rs"]
+pub mod snapshot;
+
 /// Pas de la couche V — 100 ms, 10 Hz (ADR-010 §4, I-10). Aligné sur `T_sim`.
 pub const STEP_US: u64 = 100_000;
 
