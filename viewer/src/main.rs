@@ -47,6 +47,9 @@ struct App<'a> {
     /// décomposition.
     cadence: bool,
     sweep: bool,
+    /// S235 : pose hors champ (caméra à 300 m, dos à la scène), pour mesurer ce que la visibilité
+    /// retire.
+    away: bool,
     interval: Vec<f64>,
     cpu: Vec<f64>,
     acquire: Vec<f64>,
@@ -91,7 +94,13 @@ impl App<'_> {
             self.frame.camera.yaw = (self.frames as f32) * 0.004;
             self.frame.camera.pitch = -0.15 + 0.25 * ((self.frames as f32) * 0.011).sin();
         }
+        if self.away {
+            self.frame.camera = away_camera();
+        }
         let cpu_start = Instant::now();
+        if let Some(g) = &self.gpu {
+            self.frame.viewport = Some((g.width as f32 / g.height as f32, g.nx, g.ny));
+        }
         self.frame
             .update(self.seconds, self.seconds - self.birth, self.enabled);
         let Some(g) = self.gpu.as_mut() else {
@@ -626,6 +635,93 @@ fn classify_admission(
     Ok(())
 }
 
+/// S235 — pose hors champ : 300 m derrière la scène, dos tourné.
+fn away_camera() -> Camera {
+    Camera {
+        eye: [0., -300., 12.],
+        yaw: std::f32::consts::PI,
+        pitch: -0.2,
+    }
+}
+
+/// S235 P5 — **retour dans le champ** : un passage continu sans visibilité, puis le même passage
+/// avec visibilité et caméra détournée sur [11 s, 13,5 s[. Aux images qui suivent le retour,
+/// coefficients publiés du sillage, plan de grille, profils, activités et valeurs GPU aux sondes
+/// doivent être **identiques au bit**. Le repli du levier temporel ne dépend que de l'instant
+/// (`pressure_timeline::fold` : incrémental seulement quand la suite d'additions est celle d'un
+/// repli complet) ; cet essai le vérifie au lieu de le supposer.
+fn verify_return(frame: &mut FrameData<'_>) -> Result<(), String> {
+    let instance = instance();
+    let mut g = pollster::block_on(gpu::Gpu::new(
+        &instance,
+        None,
+        960,
+        540,
+        frame.profile.len(),
+        scene::WAKE_CAPACITY,
+    ))?;
+    frame.lod = true;
+    frame.viewport = Some((960. / 540., g.nx, g.ny));
+    let ages: Vec<f64> = (0..=240).map(|i| 10. + i as f64 / 60.).collect();
+    let hidden = |age: f64| (11.0..13.5).contains(&age);
+    let probes = gpu::probes(Camera::default().eye);
+    let bits = |v: &[[f32; 4]]| v.iter().flat_map(|r| r.map(f32::to_bits)).collect::<Vec<_>>();
+    type Snapshot = (Vec<u32>, crate::lod::Lattice, Vec<(u32, u32)>, Vec<bool>, Vec<[u32; 3]>);
+    let snapshot = |frame: &mut FrameData<'_>, g: &mut gpu::Gpu| -> Result<Snapshot, String> {
+        g.upload(frame);
+        let values = g.evaluate(&probes)?;
+        Ok((
+            bits(&frame.wake),
+            frame.lattice,
+            frame.profile.iter().map(|p| (p.0.to_bits(), p.1.to_bits())).collect(),
+            frame.impacts.iter().map(|s| s.active).collect(),
+            values.iter().map(|v| v.map(f32::to_bits)).collect(),
+        ))
+    };
+    frame.cull = false;
+    frame.camera = Camera::default();
+    let mut reference = Vec::new();
+    for &age in &ages {
+        frame.update(age, age, true);
+        if age >= 13.5 {
+            reference.push(snapshot(frame, &mut g)?);
+        }
+    }
+    frame.cull = true;
+    let (mut hidden_frames, mut culled_wake, mut culled_impacts, mut compared, mut differing) = (0, 0, 0, 0, 0);
+    let mut first_back = None;
+    for &age in &ages {
+        frame.camera = if hidden(age) { away_camera() } else { Camera::default() };
+        frame.update(age, age, true);
+        if hidden(age) {
+            hidden_frames += 1;
+            culled_wake += frame.culled_wake as usize;
+            culled_impacts = culled_impacts.max(frame.culled_impacts);
+        }
+        if age >= 13.5 {
+            let current = snapshot(frame, &mut g)?;
+            let want = &reference[compared];
+            let same = current.0 == want.0
+                && current.1 == want.1
+                && current.2 == want.2
+                && current.3 == want.3
+                && current.4 == want.4;
+            first_back.get_or_insert((age, same, frame.culled_wake, frame.culled_impacts));
+            compared += 1;
+            differing += (!same) as usize;
+        }
+    }
+    frame.cull = false;
+    println!(
+        "RETOUR images_cachees={hidden_frames} sillage_retire={culled_wake} impacts_retires_max={culled_impacts} images_comparees={compared} differentes={differing} premiere_image_revue={first_back:?} sondes={}",
+        probes.len()
+    );
+    if differing > 0 {
+        return Err(format!("retour dans le champ : {differing} images diffèrent du passage continu"));
+    }
+    Ok(())
+}
+
 /// S235 — vérification de la scène multi-sources : les contrôles de S211–S234, rejoués sur huit
 /// impacts et trois sillages, sur les deux chemins du sillage.
 ///
@@ -722,6 +818,9 @@ fn run() -> Result<(), String> {
     }
     if args.iter().any(|a| a == "--scene-admission") {
         return scene_admission(&scene, recipe);
+    }
+    if multi && args.iter().any(|a| a == "--retour") {
+        return verify_return(&mut frame);
     }
     if multi && args.iter().any(|a| a == "--admission-reelle") {
         return classify_admission(&scene, recipe, &mut frame);
@@ -945,10 +1044,13 @@ fn run() -> Result<(), String> {
         g.benchmark(&mut fine_frame, 3.)?;
         return Ok(());
     }
+    // S235 : la fenêtre voit par sa grille ; `--no-cull` rend toutes les sources à chaque image.
+    frame.cull = !args.iter().any(|a| a == "--no-cull");
     let e = EventLoop::new().map_err(|e| e.to_string())?;
     e.set_control_flow(ControlFlow::Poll);
     let mut app = App {
         frame,
+        away: args.iter().any(|a| a == "--away"),
         window: None,
         surface: None,
         gpu: None,

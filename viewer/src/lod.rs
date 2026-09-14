@@ -240,9 +240,159 @@ impl Projection {
     }
 }
 
+/// S235 — **visibilité** : contour, sur le plan d'eau, de l'emprise de la grille projetée.
+///
+/// Les sommets ne se déplacent qu'en hauteur : une source ne contribue à l'image que si un sommet
+/// tombe dans son domaine horizontal. L'emprise est l'image continue et injective du rectangle
+/// écran ; son bord est l'image du bord du rectangle, échantillonné ici **à chaque sommet de bord**
+/// avec les opérations de `ocean_vertex`. Rend le contour et sa plus longue arête (publiée).
+pub fn footprint(p: &Projection, nx: u32, ny: u32) -> (Vec<[f32; 2]>, f32) {
+    let horizon = p.horizon();
+    let at = |ix: u32, iy: u32| {
+        let x = (ix as f32 / (nx - 1) as f32 * 2. - 1.) * 1.18;
+        let y = -1.18 + (horizon + 1.18) * (iy as f32 / (ny - 1) as f32);
+        p.ground(x, y)
+    };
+    let mut poly = Vec::with_capacity(2 * (nx + ny) as usize);
+    poly.extend((0..nx).map(|i| at(i, 0)));
+    poly.extend((1..ny).map(|j| at(nx - 1, j)));
+    poly.extend((0..nx - 1).rev().map(|i| at(i, ny - 1)));
+    poly.extend((1..ny - 1).rev().map(|j| at(0, j)));
+    let mut chord = 0f32;
+    for k in 0..poly.len() {
+        let (a, b) = (poly[k], poly[(k + 1) % poly.len()]);
+        chord = chord.max((b[0] - a[0]).hypot(b[1] - a[1]));
+    }
+    (poly, chord)
+}
+
+fn inside_polygon(poly: &[[f32; 2]], q: [f32; 2]) -> bool {
+    let mut inside = false;
+    for k in 0..poly.len() {
+        let (a, b) = (poly[k], poly[(k + 1) % poly.len()]);
+        if (a[1] > q[1]) != (b[1] > q[1]) && q[0] < a[0] + (q[1] - a[1]) / (b[1] - a[1]) * (b[0] - a[0]) {
+            inside = !inside;
+        }
+    }
+    inside
+}
+
+fn segment_hits_rect(a: [f32; 2], b: [f32; 2], min: [f32; 2], max: [f32; 2]) -> bool {
+    // Liang–Barsky : intervalle du paramètre dans chaque bande.
+    let (mut t0, mut t1) = (0f32, 1f32);
+    for i in 0..2 {
+        let d = b[i] - a[i];
+        if d == 0. {
+            if a[i] < min[i] || a[i] > max[i] {
+                return false;
+            }
+            continue;
+        }
+        let (mut u, mut v) = ((min[i] - a[i]) / d, (max[i] - a[i]) / d);
+        if u > v {
+            std::mem::swap(&mut u, &mut v);
+        }
+        t0 = t0.max(u);
+        t1 = t1.min(v);
+        if t0 > t1 {
+            return false;
+        }
+    }
+    true
+}
+
+/// Le rectangle `[min, max]` touche-t-il l'emprise ?
+///
+/// **Marge par arête.** Sans la borne de distance, rangées et colonnes de la grille se projettent
+/// en segments droits (projection centrale d'une droite) : les arêtes du contour sont exactes.
+/// La borne de 1500 m brise ce seul cas en un coude entre deux échantillons ; chaque arête est
+/// donc élargie de sa propre longueur, qui majore l'écart du coude à la corde. Les arêtes
+/// proches font quelques centimètres, celles de l'horizon quelques centaines de mètres : le test
+/// reste conservateur partout sans gonfler le premier plan.
+pub fn touches_rect(poly: &[[f32; 2]], min: [f32; 2], max: [f32; 2]) -> bool {
+    let corner_inside = [[min[0], min[1]], [max[0], min[1]], [min[0], max[1]], [max[0], max[1]]]
+        .iter()
+        .any(|c| inside_polygon(poly, *c));
+    corner_inside
+        || (0..poly.len()).any(|k| {
+            let (a, b) = (poly[k], poly[(k + 1) % poly.len()]);
+            let m = (b[0] - a[0]).hypot(b[1] - a[1]);
+            segment_hits_rect(a, b, [min[0] - m, min[1] - m], [max[0] + m, max[1] + m])
+        })
+}
+
+/// Le disque de centre `c` et de rayon `radius` touche-t-il l'emprise ? Même marge par arête.
+pub fn touches_disc(poly: &[[f32; 2]], c: [f32; 2], radius: f32) -> bool {
+    inside_polygon(poly, c)
+        || (0..poly.len()).any(|k| {
+            let (a, b) = (poly[k], poly[(k + 1) % poly.len()]);
+            let (dx, dy) = (b[0] - a[0], b[1] - a[1]);
+            let len2 = dx * dx + dy * dy;
+            let t = if len2 > 0. { (((c[0] - a[0]) * dx + (c[1] - a[1]) * dy) / len2).clamp(0., 1.) } else { 0. };
+            (a[0] + t * dx - c[0]).hypot(a[1] + t * dy - c[1]) <= radius + len2.sqrt()
+        })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn polygon_tests_cover_inside_outside_and_crossing() {
+        // Contour finement échantillonné (arêtes de 1) : la marge par arête reste d'une unité.
+        let mut square = Vec::new();
+        for i in 0..10 {
+            square.push([i as f32, 0.]);
+        }
+        for i in 0..10 {
+            square.push([10., i as f32]);
+        }
+        for i in (1..=10).rev() {
+            square.push([i as f32, 10.]);
+        }
+        for i in (1..=10).rev() {
+            square.push([0., i as f32]);
+        }
+        assert!(touches_rect(&square, [2., 2.], [3., 3.])); // rectangle intérieur
+        assert!(touches_rect(&square, [-5., -5.], [20., 20.])); // emprise intérieure
+        assert!(touches_rect(&square, [9.5, -3.], [9.6, 20.])); // traversée sans sommet dedans
+        assert!(!touches_rect(&square, [12., 12.], [13., 13.]));
+        assert!(touches_rect(&square, [10.5, 10.5], [13., 13.])); // dans la marge d'une arête
+        assert!(touches_disc(&square, [5., 5.], 1.));
+        assert!(touches_disc(&square, [5., -2.], 1.5));
+        assert!(touches_disc(&square, [5., 5.], 100.));
+        assert!(!touches_disc(&square, [15., 15.], 5.));
+    }
+
+    #[test]
+    fn footprint_of_the_s201_camera_sees_ahead_not_behind() {
+        let (sy, cy) = 0f32.sin_cos();
+        let pitch = -(7.0f32 / 53.).atan();
+        let (sp, cp) = pitch.sin_cos();
+        let p = Projection {
+            eye: [0., -18., 7.],
+            forward: [sy * cp, cy * cp, sp],
+            right: [cy, -sy, 0.],
+            up: [-sy * sp, -cy * sp, cp],
+            tan_half: 25f32.to_radians().tan(),
+            aspect: 16. / 9.,
+        };
+        let (poly, longest) = footprint(&p, 481, 271);
+        assert!(longest > 1. && poly.len() == 2 * (481 + 271) - 4);
+        // Relatif à la caméra : l'impact S203 (0, 10) est à (0, 28) devant ; derrière, (0, −300).
+        assert!(touches_disc(&poly, [0., 28.], 0.5));
+        assert!(!touches_disc(&poly, [0., -300.], 52.));
+        assert!(touches_rect(&poly, [-64., -30.], [64., 74.]));
+        // Tout sommet de la grille est dans l'emprise : le contour contient l'intérieur.
+        let horizon = p.horizon();
+        for iy in (0..271).step_by(27) {
+            for ix in (0..481).step_by(48) {
+                let x = (ix as f32 / 480. * 2. - 1.) * 1.18;
+                let y = -1.18 + (horizon + 1.18) * (iy as f32 / 270.);
+                assert!(touches_disc(&poly, p.ground(x, y), 0.), "sommet {ix},{iy}");
+            }
+        }
+    }
 
     #[test]
     fn plane_wave_bound_is_a_k_squared() {

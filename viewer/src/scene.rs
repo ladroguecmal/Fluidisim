@@ -613,6 +613,15 @@ pub struct FrameData<'a> {
     pub lod: bool,
     pub lattice: crate::lod::Lattice,
     lattice_announced: bool,
+    /// S235 : visibilité. Vrai : une source dont le domaine ne touche pas l'emprise de la grille
+    /// n'est ni préparée ni cuite ni évaluée. Faux par défaut — les vérifications interrogent des
+    /// sondes hors de l'emprise et doivent voir toutes les sources.
+    pub cull: bool,
+    /// Format et grille de l'image `(largeur/hauteur, nx, ny)`, nécessaires à l'emprise.
+    pub viewport: Option<(f32, u32, u32)>,
+    /// Ce que la visibilité a retiré à cet instant : sillage, impacts nés mais invisibles.
+    pub culled_wake: bool,
+    pub culled_impacts: usize,
 }
 impl<'a> FrameData<'a> {
     pub fn new(
@@ -648,6 +657,10 @@ impl<'a> FrameData<'a> {
             lod: true,
             lattice: crate::lod::Lattice::plan(0., 0., WAKE_MIN, WAKE_MAX, crate::lod::LATTICE_CAPACITY),
             lattice_announced: false,
+            cull: false,
+            viewport: None,
+            culled_wake: false,
+            culled_impacts: 0,
         }
     }
     pub fn update(&mut self, seconds: f64, age: f64, enabled: bool) {
@@ -661,11 +674,33 @@ impl<'a> FrameData<'a> {
                 &mut self.components,
             )
             .expect("caméra dans le domaine B");
+        // S235 : emprise de la grille sur l'eau, si la visibilité est demandée.
+        let footprint = self.viewport.filter(|_| self.cull).map(|(aspect, nx, ny)| {
+            let [forward, right, up] = self.camera.vectors();
+            let p = crate::lod::Projection {
+                eye,
+                forward,
+                right,
+                up,
+                tan_half: (50.0f32.to_radians() / 2.).tan(),
+                aspect,
+            };
+            crate::lod::footprint(&p, nx, ny).0
+        });
         // S235 : chaque impact à son âge ; un seul impact né à 0 retrouve le calcul S211–S234.
         let len = self.table.len();
         self.active = false;
+        self.culled_impacts = 0;
         for (m, slot) in self.impacts.iter_mut().enumerate() {
             let local = slot.local_us(age).filter(|&us| enabled && us as f64 <= HORIZON * 1e6);
+            let c = slot.center();
+            let seen = footprint
+                .as_ref()
+                .map_or(true, |poly| crate::lod::touches_disc(poly, [c[0] - eye[0], c[1] - eye[1]], RADIUS));
+            if local.is_some() && !seen {
+                self.culled_impacts += 1;
+            }
+            let local = local.filter(|_| seen);
             slot.active = local.is_some();
             if let Some(us) = local {
                 self.table
@@ -674,7 +709,17 @@ impl<'a> FrameData<'a> {
                 self.active = true;
             }
         }
+        let wake_seen = footprint.as_ref().map_or(true, |poly| {
+            crate::lod::touches_rect(
+                poly,
+                [WAKE_MIN[0] - eye[0], WAKE_MIN[1] - eye[1]],
+                [WAKE_MAX[0] - eye[0], WAKE_MAX[1] - eye[1]],
+            )
+        });
         let wake_time = wake_time(age).filter(|_| enabled);
+        self.culled_wake = wake_time.is_some() && !wake_seen;
+        // Hors champ : ni repli du levier temporel, ni plan de grille, ni cuisson (S235).
+        let wake_time = wake_time.filter(|_| wake_seen);
         self.wake_active = wake_time.is_some();
         // ADR-132 : une annonce, une seule, au premier instant hors domaine. Le sillage reste
         // affiché — le chemin est cosmétique (ADR-129 §3) et rien ne le refuse (A214).
@@ -711,6 +756,9 @@ impl<'a> FrameData<'a> {
                 }
             }
             self.wake_cpu_ms = start.elapsed().as_secs_f64() * 1000.;
+        } else {
+            // Sillage éteint ou hors champ : aucun travail, et pas de mesure périmée.
+            self.wake_cpu_ms = 0.;
         }
     }
     /// Référence CPU par point relatif à la caméra : B `eval`, impact direct, sillage `sample_batch`.

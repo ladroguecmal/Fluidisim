@@ -91,7 +91,7 @@ ADR-131 D1 avec les techniques absentes, sans réduire la scène pour passer.
   **Amendement P2 (23:27)** : aux instants refusés par le budget, séparer pente **réelle** et
   **majorants** (A208) — maximum réel des perturbations sur l'union des domaines, contre le
   plancher ; c'est le déclencheur écrit d'A255/A261.
-- [ ] **P5** — visibilité : emprise et disques contre le cône de vue, cuisson et préparation CPU
+- [x] **P5** — visibilité : emprise et disques contre le cône de vue, cuisson et préparation CPU
   sautées hors champ ; retour dans le champ comparé à un passage continu.
 - [ ] **P6** — coût : banc et cadence, scène mono et multi, visible et hors champ, alimentation
   publiée ; document de validation.
@@ -149,3 +149,17 @@ pression **0,175–0,202** (S222 : réelle ≈0,070 pour trois sillages) + impac
 **Déclencheur A255/A261 atteint** : un usage représentatif échoue à l'admission par le seul
 pessimisme des bornes. Limite : maximum échantillonné (≤ vrai maximum) ; marge ×2,06 contre
 une sous-estimation de quelques pour cent au pas de 2 cm.
+
+P5 : `lod::footprint` (contour de l'emprise de la grille, sommets de bord aux opérations de
+`ocean_vertex`), `touches_rect` / `touches_disc` à **marge par arête** — rangées et colonnes
+se projettent en segments droits ; seul le coude de la borne 1500 m s'écarte de la corde,
+majoré par la longueur de l'arête. Première version à marge globale écartée avant usage : la
+plus longue arête (horizon) aurait gonflé tout le premier plan. Deux tests (polygone :
+intérieur, extérieur, traversée, marge ; caméra S201 : devant vu, 300 m derrière non vu,
+sommets intérieurs contenus). `FrameData::cull` (faux par défaut : les vérifications voient
+tout), `viewport`, `culled_wake`, `culled_impacts` ; hors champ : ni repli du levier, ni plan
+de grille, ni cuisson, ni profil. Fenêtre : visibilité active, `--no-cull`, `--away` (caméra
+(0, −300, 12), dos à la scène). **Retour** (`--multi --retour`, 960×540, 10→14 s à 60 Hz,
+caché sur [11 ; 13,5[ s, fin de tronçon à 12 s incluse) : 150 images cachées, sillage retiré
+150 fois, jusqu'à 4 impacts retirés ; **31 images comparées, 0 différente au bit**
+(coefficients, plan, profils, activités, 6 988 valeurs GPU) ; première image revue identique.
