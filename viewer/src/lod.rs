@@ -114,6 +114,94 @@ pub fn bicubic_step(m4: f32, m5: f32) -> f32 {
     lo
 }
 
+/// Nœuds de la grille du sillage réservés une fois (I-06). Choix de mémoire, pas de physique :
+/// il autorise un pas d'environ 0,9 m sur l'emprise S212, et un dépassement est annoncé.
+pub const LATTICE_CAPACITY: usize = 16_384;
+
+/// Grille locale du sillage pour un instant : pas, dimensions et erreur garantie.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Lattice {
+    /// Pas retenu (m), multiple de 1/16 m pour que la grille ne bouge pas à chaque image.
+    pub step: f32,
+    pub nx: u32,
+    pub ny: u32,
+    /// Pas que la borne autorisait avant arrondi et capacité.
+    pub bound_step: f32,
+    /// Majorant de l'erreur de reconstruction au pas retenu (m).
+    pub error_bound: f32,
+    /// Vrai si la capacité a imposé un pas plus grand que la borne : l'erreur publiée dépasse
+    /// alors la tolérance, et l'hôte l'annonce.
+    pub clamped: bool,
+}
+
+impl Lattice {
+    /// Grille couvrant `[min, max]` au pas de la borne bicubique, dans `capacity` nœuds.
+    pub fn plan(m4: f32, m5: f32, min: [f32; 2], max: [f32; 2], capacity: usize) -> Self {
+        let bound_step = bicubic_step(m4, m5);
+        let extent = [max[0] - min[0], max[1] - min[1]];
+        let dims = |s: f32| {
+            let n = |i: usize| ((extent[i] / s).ceil() as u32).max(1) + 1;
+            (n(0), n(1))
+        };
+        // Un champ nul n'impose aucun pas : la plus grosse maille qui couvre l'emprise suffit.
+        let mut step = if bound_step.is_finite() {
+            ((bound_step * 16.).floor() / 16.).max(1. / 16.)
+        } else {
+            extent[0].max(extent[1])
+        };
+        let mut clamped = false;
+        while {
+            let (nx, ny) = dims(step);
+            nx as usize * ny as usize > capacity
+        } {
+            step += 1. / 16.;
+            clamped = true;
+        }
+        let (nx, ny) = dims(step);
+        Self {
+            step,
+            nx,
+            ny,
+            bound_step,
+            error_bound: bicubic_error(step, m4, m5),
+            clamped,
+        }
+    }
+    pub fn nodes(&self) -> usize {
+        self.nx as usize * self.ny as usize
+    }
+}
+
+/// Reconstruction Hermite bicubique d'une maille : coins `(η, ηx, ηy, ηxy)` dans l'ordre
+/// `[(0,0), (1,0), (0,1), (1,1)]`, coordonnées locales `t ∈ [0,1]²`. Rend `(η, ηx, ηy)`.
+/// **Mêmes opérations que `wake_lattice` de `water.wgsl`** ; sert de référence CPU aux tests.
+pub fn hermite(corners: &[[f32; 4]; 4], step: f32, t: [f32; 2]) -> [f32; 3] {
+    let basis = |t: f32| {
+        let (t2, t3) = (t * t, t * t * t);
+        (
+            [2. * t3 - 3. * t2 + 1., -2. * t3 + 3. * t2],
+            [t3 - 2. * t2 + t, t3 - t2],
+            [6. * t2 - 6. * t, -6. * t2 + 6. * t],
+            [3. * t2 - 4. * t + 1., 3. * t2 - 2. * t],
+        )
+    };
+    let (vx, dx, vx1, dx1) = basis(t[0]);
+    let (vy, dy, vy1, dy1) = basis(t[1]);
+    let mut out = [0f32; 3];
+    for j in 0..2 {
+        for i in 0..2 {
+            let c = corners[j * 2 + i];
+            let (f, fx, fy, fxy) = (c[0], c[1] * step, c[2] * step, c[3] * step * step);
+            out[0] += vx[i] * vy[j] * f + dx[i] * vy[j] * fx + vx[i] * dy[j] * fy + dx[i] * dy[j] * fxy;
+            out[1] += vx1[i] * vy[j] * f + dx1[i] * vy[j] * fx + vx1[i] * dy[j] * fy + dx1[i] * dy[j] * fxy;
+            out[2] += vx[i] * vy1[j] * f + dx[i] * vy1[j] * fx + vx[i] * dy1[j] * fy + dx[i] * dy1[j] * fxy;
+        }
+    }
+    out[1] /= step;
+    out[2] /= step;
+    out
+}
+
 /// Pas isotrope maximal d'une cellule sous la tolérance : `(2h²)/4 · M/2 ≤ tol`.
 pub fn isotropic_step(hessian: f32) -> f32 {
     if hessian <= 0. {
@@ -178,6 +266,96 @@ mod tests {
         assert!((b.hessian - 2.).abs() < 1e-4, "{b:?}");
         assert!(b.third.abs() < 1e-3, "{b:?}");
         assert!(impact(&[(0., 1.), (1., 1.)], 1.).is_none());
+    }
+
+    /// Suite pseudo-aléatoire déterministe, sans dépendance.
+    fn lcg(state: &mut u64) -> f32 {
+        *state = state.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+        (*state >> 40) as f32 / (1u64 << 24) as f32
+    }
+
+    #[test]
+    fn hermite_is_exact_on_bicubic_polynomials() {
+        // f = x³y² − 2xy³ + y, cubique en chaque variable : la reconstruction est exacte.
+        let f = |x: f32, y: f32| {
+            [
+                x * x * x * y * y - 2. * x * y * y * y + y,
+                3. * x * x * y * y - 2. * y * y * y,
+                2. * x * x * x * y - 6. * x * y * y + 1.,
+                6. * x * x * y - 6. * y * y,
+            ]
+        };
+        let (h, x0, y0) = (0.75f32, -0.5f32, 0.25f32);
+        let corners = [f(x0, y0), f(x0 + h, y0), f(x0, y0 + h), f(x0 + h, y0 + h)];
+        for t in [[0.5, 0.5], [0.1, 0.9], [1., 0.], [0.3, 0.7]] {
+            let got = hermite(&corners, h, t);
+            let want = f(x0 + t[0] * h, y0 + t[1] * h);
+            for k in 0..3 {
+                assert!((got[k] - want[k]).abs() < 2e-5, "t={t:?} k={k} {got:?} {want:?}");
+            }
+        }
+    }
+
+    #[test]
+    fn hermite_error_on_plane_waves_stays_under_its_bound() {
+        let mut s = 7u64;
+        // Soixante-quatre ondes planes d'amplitude et de direction quelconques, |k| ≤ 3 rad/m :
+        // la bande de la recette du sillage (cutoff 3).
+        let modes: Vec<[f32; 4]> = (0..64)
+            .map(|_| {
+                let k = 3. * lcg(&mut s);
+                let theta = 6.283185 * lcg(&mut s);
+                [0.02 * lcg(&mut s) - 0.01, 0.02 * lcg(&mut s) - 0.01, k * theta.cos(), k * theta.sin()]
+            })
+            .collect();
+        let field = |x: f64, y: f64| {
+            let mut v = [0f64; 4];
+            for m in &modes {
+                let (a, b, kx, ky) = (m[0] as f64, m[1] as f64, m[2] as f64, m[3] as f64);
+                let phase = kx * x + ky * y;
+                let (sn, co) = phase.sin_cos();
+                v[0] += a * co - b * sn;
+                v[1] += -(a * sn + b * co) * kx;
+                v[2] += -(a * sn + b * co) * ky;
+                v[3] += -(a * co - b * sn) * kx * ky;
+            }
+            v
+        };
+        let (m4, m5) = wake_smooth(&modes);
+        for h in [0.25f32, bicubic_step(m4, m5), 2.] {
+            let bound = bicubic_error(h, m4, m5);
+            let mut worst = 0f64;
+            for cell in 0..40 {
+                let (x0, y0) = (7.3 * cell as f64, -3.1 * cell as f64);
+                let hd = h as f64;
+                let c = |i: f64, j: f64| field(x0 + i * hd, y0 + j * hd).map(|v| v as f32);
+                let corners = [c(0., 0.), c(1., 0.), c(0., 1.), c(1., 1.)];
+                for p in 0..25 {
+                    let t = [(p % 5) as f32 / 4., (p / 5) as f32 / 4.];
+                    let got = hermite(&corners, h, t)[0] as f64;
+                    let want = field(x0 + t[0] as f64 * hd, y0 + t[1] as f64 * hd)[0];
+                    worst = worst.max((got - want).abs());
+                }
+            }
+            assert!(worst <= bound as f64 + 1e-6, "h={h} pire={worst} borne={bound}");
+        }
+        assert!(bicubic_error(bicubic_step(m4, m5), m4, m5) <= TOLERANCE_M * 1.0001);
+    }
+
+    #[test]
+    fn lattice_covers_the_footprint_on_a_sixteenth_grid() {
+        let (min, max) = ([-64., -48.], [64., 56.]);
+        let l = Lattice::plan(0.21296, 0.26535, min, max, LATTICE_CAPACITY);
+        assert!(!l.clamped);
+        assert_eq!((l.step * 16.).fract(), 0.);
+        assert!(l.step <= l.bound_step && l.error_bound <= TOLERANCE_M);
+        assert!((l.nx - 1) as f32 * l.step >= 128. && (l.ny - 1) as f32 * l.step >= 104.);
+        // Capacité insuffisante : pas élargi, erreur publiée au-delà de la tolérance.
+        let small = Lattice::plan(0.21296, 0.26535, min, max, 1_000);
+        assert!(small.clamped && small.nodes() <= 1_000 && small.error_bound > TOLERANCE_M);
+        // Champ nul : une seule maille.
+        let empty = Lattice::plan(0., 0., min, max, LATTICE_CAPACITY);
+        assert_eq!((empty.nx, empty.ny, empty.error_bound), (2, 2, 0.));
     }
 
     #[test]

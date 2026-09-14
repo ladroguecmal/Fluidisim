@@ -87,7 +87,7 @@ tolérance pour obtenir un gain, et reporter le lot vers la technique suivante.
   `Σ|a|k³` réels des trois couches sur la fixture ; charge réductible par pose ; choisir la
   forme (rangées seules, ou bandes de colonnes cousues) et déclarer le protocole.
   **Amendement P2 (22:25)** : la forme retenue n'est ni l'une ni l'autre — voir notes.
-- [ ] **P3** — grille locale du sillage, côté CPU : pas choisi par la borne bicubique,
+- [x] **P3** — grille locale du sillage, côté CPU : pas choisi par la borne bicubique,
   arrondi au 1/16 m inférieur, capacité fixe et annonce si la borne exige plus fin ; test d'une
   reconstruction Hermite bicubique de référence (CPU) sous sa borne, sur ondes planes.
 - [ ] **P4** — passe compute des nœuds `(η, ηx, ηy, ηxy)` et reconstruction bicubique dans
@@ -122,3 +122,9 @@ Hermite bicubique `h⁴/384·(2Σ|a|k⁴ + h/4·Σ|a|k⁵)` ≤ 3 mm → pas 1,6
 Le LOD de maillage par rangées reste une option mesurée, non construite (au rituel : file).
 Technique rattachée : LOD spatial *de couche* (densité selon le contenu) sur une grille locale
 sans transformée — la ligne « espace » d'ADR-131 D2 reste absente (pas de FFT).
+
+P3 : `Lattice::plan` (pas au 1/16 m inférieur, capacité 16 384 nœuds, `clamped` et erreur
+publiée), `hermite` de référence CPU. Six tests `lod` verts. Exactitude sur polynôme bicubique
+(2e-5). Soixante-quatre ondes planes |k|≤3 : pire/borne = 0,117 (h 0,25), **0,118 au pas de
+la borne**, 0,061 (h 2) — la borne tient, marge ≈8,5× ; une constante fausse d'un facteur 9
+ferait échouer l'essai. Pas S212 au pire (16 s) : 1,228 → 1,1875 m, 109×89 = 9 701 nœuds.
