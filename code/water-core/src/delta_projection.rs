@@ -39,6 +39,11 @@
 //! donc portante, et non décorative.
 use crate::host::{AllocError, HostServices, JobSystem, MonotonicClock};
 
+#[path = "delta_budget.rs"]
+mod budget;
+pub use budget::{BudgetReport, Phase};
+use budget::Control;
+
 /// Domaine local, cellules carrées. `z₀ = nz·dx` est le couvercle.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Domain {
@@ -82,6 +87,10 @@ pub enum Error {
     NotFinite,
     /// Longueur de tableau fournie incorrecte.
     Shape,
+    /// Expiration coopérative interne ; step_budgeted la traduit en temps restant explicite.
+    Budget,
+    /// L'horloge injectée a reculé pendant le pas.
+    Clock,
 }
 
 /// Ce qu'un pas rend à l'appelant, sans qu'il ait à deviner.
@@ -394,10 +403,12 @@ impl Volume {
     }
 
     /// Divergence pondérée par les ouvertures, dans `out`. Les mailles solides rendent zéro.
-    fn divergence(&self, u: &[f32], w: &[f32], out: &mut [f64]) {
+    fn divergence(&self, u: &[f32], w: &[f32], out: &mut [f64], ctl: &mut Control, phase: Phase) -> Result<(), Error> {
+        ctl.check(phase)?;
         let (nx, nz, dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
         for i in 0..nx {
             for k in 0..nz {
+                ctl.poll(phase)?;
                 let c = self.c(i, k);
                 if self.frac[c] == 0. {
                     out[c] = 0.;
@@ -411,16 +422,19 @@ impl Volume {
                 out[c] = (fr - fl + ft - fb) / dx as f64;
             }
         }
+        Ok(())
     }
 
     /// `L p`, avec `L = −∇·∇` pondéré par les ouvertures et **Dirichlet homogène** au
     /// couvercle. La valeur imposée du couvercle vit dans le second membre, pas ici :
     /// c'est ce qui garde l'opérateur symétrique, donc le gradient conjugué valide.
-    fn apply(&self, p: &[f64], out: &mut [f64]) {
+    fn apply(&self, p: &[f64], out: &mut [f64], ctl: &mut Control) -> Result<(), Error> {
+        ctl.check(Phase::Pressure)?;
         let (nx, nz, dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
         let inv = 1. / (dx as f64 * dx as f64);
         for i in 0..nx {
             for k in 0..nz {
+                ctl.poll(Phase::Pressure)?;
                 let c = self.c(i, k);
                 if self.frac[c] == 0. {
                     out[c] = 0.;
@@ -454,40 +468,45 @@ impl Volume {
                 out[c] = acc * inv;
             }
         }
+        Ok(())
     }
 
     /// Produit scalaire sur les mailles fluides. **I-03** : toute accumulation flottante du
     /// système passe par `parallel_reduce_ordered_f64` (SPEC-004 §8.2), qui fusionne dans
     /// l'ordre des indices et non dans l'ordre d'arrivée.
-    fn dot(&self, a: &[f64], b: &[f64], jobs: &dyn JobSystem) -> f64 {
-        let f = &self.frac;
-        jobs.parallel_reduce_ordered_f64(
-            self.domain.cells(),
-            64,
-            &|s, e| {
-                let mut acc = 0.;
-                for c in s..e {
-                    if f[c] > 0. {
-                        acc += a[c] * b[c];
-                    }
-                }
-                acc
-            },
-            &|x, y| x + y,
-            0.,
-        )
+    fn dot(&self, a: &[f64], b: &[f64], jobs: &dyn JobSystem, ctl: &mut Control) -> Result<f64, Error> {
+        ctl.check(Phase::Pressure)?;
+        let reduce = |start: usize, end: usize| {
+            let mut acc = 0.;
+            for c in start..end { if self.frac[c] > 0. { acc += a[c] * b[c]; } }
+            acc
+        };
+        if !ctl.limited() {
+            return Ok(jobs.parallel_reduce_ordered_f64(self.domain.cells(), 64, &reduce, &|x,y| x+y, 0.));
+        }
+        // Mêmes groupes de 64 et même fusion, mais jamais un appel hôte sur tout le domaine.
+        let mut acc = 0.;
+        for start in (0..self.domain.cells()).step_by(64) {
+            ctl.check(Phase::Pressure)?;
+            let n = (self.domain.cells() - start).min(64);
+            acc = jobs.parallel_reduce_ordered_f64(n, 64, &|s,e| reduce(start+s,start+e), &|x,y| x+y, acc);
+        }
+        ctl.check(Phase::Pressure)?;
+        Ok(acc)
     }
 
     /// Advection centrée d'ordre deux sur la grille décalée, de `u,w` vers `us,ws`.
     /// Aucune stabilité n'est revendiquée : le schéma est centré, et c'est son **ordre** qui
     /// est en cause dans le filtre 2, pas sa plage de `dt`.
-    fn advect(&mut self, dt: f32) {
+    fn advect(&mut self, dt: f32, ctl: &mut Control) -> Result<(), Error> {
+        ctl.check(Phase::Advect)?;
         let (nx, nz, dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
         let h = 0.5 / dx;
-        self.us.copy_from_slice(&self.u);
-        self.ws.copy_from_slice(&self.w);
+        budget::copy(&self.u, &mut self.us, ctl, Phase::Advect)?;
+        budget::copy(&self.w, &mut self.ws, ctl, Phase::Advect)?;
         for i in 1..nx {
             for k in 0..nz {
+                ctl.poll(Phase::Advect)?;
                 let f = self.fu(i, k);
                 if self.open_u[f] == 0. {
                     continue;
@@ -508,6 +527,7 @@ impl Volume {
         }
         for i in 0..nx {
             for k in 1..nz {
+                ctl.poll(Phase::Advect)?;
                 let f = self.fw(i, k);
                 if self.open_w[f] == 0. {
                     continue;
@@ -525,24 +545,29 @@ impl Volume {
                 self.ws[f] = wc - dt * (uc * wx + wc * wz);
             }
         }
+        Ok(())
     }
 
     /// Projection : résout `L p = −(ρ/dt)·div(u*)` plus le couvercle, puis corrige.
     /// `max_iters` **est** la variable de dégradation exigée par ADR-007 §2.
-    fn project(&mut self, dt: f32, max_iters: u32, jobs: &dyn JobSystem) -> Report {
+    fn project(&mut self, dt: f32, max_iters: u32, jobs: &dyn JobSystem, ctl: &mut Control) -> Result<Report, Error> {
+        ctl.check(Phase::Rhs)?;
         let (nx, nz, dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
         let inv = 1. / (dx as f64 * dx as f64);
         let mut rhs = core::mem::take(&mut self.rhs);
-        self.divergence(&self.us, &self.ws, &mut rhs);
+        let result = self.divergence(&self.us, &self.ws, &mut rhs, ctl, Phase::Rhs);
+        self.rhs = rhs;
+        result?;
         let scale = -self.rho as f64 / dt as f64;
         for i in 0..nx {
             for k in 0..nz {
+                ctl.poll(Phase::Rhs)?;
                 let c = self.c(i, k);
                 if self.frac[c] == 0. {
-                    rhs[c] = 0.;
+                    self.rhs[c] = 0.;
                     continue;
                 }
-                let mut b = scale * rhs[c];
+                let mut b = scale * self.rhs[c];
                 // La valeur imposée au couvercle entre ici, et nulle part ailleurs.
                 if k + 1 == nz {
                     let a = self.open_w[self.fw(i, k + 1)];
@@ -550,38 +575,40 @@ impl Volume {
                         b += 2. * a as f64 * self.lid(i) * inv;
                     }
                 }
-                rhs[c] = b;
+                self.rhs[c] = b;
             }
         }
-        self.rhs = rhs;
         // Gradient conjugué, départ `p = 0` : le résidu initial **est** le second membre.
-        self.p.iter_mut().for_each(|v| *v = 0.);
-        self.res.copy_from_slice(&self.rhs);
-        self.dir.copy_from_slice(&self.res);
-        let b2 = self.dot(&self.rhs, &self.rhs, jobs);
+        ctl.check(Phase::Pressure)?;
+        for p in &mut self.p { ctl.poll(Phase::Pressure)?; *p = 0.; }
+        budget::copy(&self.rhs, &mut self.res, ctl, Phase::Pressure)?;
+        budget::copy(&self.res, &mut self.dir, ctl, Phase::Pressure)?;
+        let b2 = self.dot(&self.rhs, &self.rhs, jobs, ctl)?;
         let mut rr = b2;
         let mut it = 0;
         let tol = 1e-12_f64;
         // Au repos, `b` est exactement nul : aucune itération, et la correction est nulle.
         while b2 > 0. && rr > tol * b2 && it < max_iters {
             let mut tmp = core::mem::take(&mut self.tmp);
-            self.apply(&self.dir, &mut tmp);
-            let dq = self.dot(&self.dir, &tmp, jobs);
+            let result = self.apply(&self.dir, &mut tmp, ctl);
+            self.tmp = tmp;
+            result?;
+            let dq = self.dot(&self.dir, &self.tmp, jobs, ctl)?;
             if !(dq > 0.) {
-                self.tmp = tmp;
                 break;
             }
             let alpha = rr / dq;
             for c in 0..self.domain.cells() {
+                ctl.poll(Phase::Pressure)?;
                 if self.frac[c] > 0. {
                     self.p[c] += alpha * self.dir[c];
-                    self.res[c] -= alpha * tmp[c];
+                    self.res[c] -= alpha * self.tmp[c];
                 }
             }
-            self.tmp = tmp;
-            let rn = self.dot(&self.res, &self.res, jobs);
+            let rn = self.dot(&self.res, &self.res, jobs, ctl)?;
             let beta = rn / rr;
             for c in 0..self.domain.cells() {
+                ctl.poll(Phase::Pressure)?;
                 if self.frac[c] > 0. {
                     self.dir[c] = self.res[c] + beta * self.dir[c];
                 }
@@ -590,11 +617,13 @@ impl Volume {
             it += 1;
         }
         // Correction : `u = u* − (dt/ρ)·∂p/∂x`, demi-maille au couvercle.
+        ctl.check(Phase::Correct)?;
         let k1 = (dt / self.rho) as f64;
-        self.u.copy_from_slice(&self.us);
-        self.w.copy_from_slice(&self.ws);
+        budget::copy(&self.us, &mut self.u, ctl, Phase::Correct)?;
+        budget::copy(&self.ws, &mut self.w, ctl, Phase::Correct)?;
         for i in 1..nx {
             for k in 0..nz {
+                ctl.poll(Phase::Correct)?;
                 let f = self.fu(i, k);
                 if self.open_u[f] == 0. {
                     continue;
@@ -607,6 +636,7 @@ impl Volume {
         }
         for i in 0..nx {
             for k in 1..=nz {
+                ctl.poll(Phase::Correct)?;
                 let f = self.fw(i, k);
                 if self.open_w[f] == 0. {
                     continue;
@@ -628,16 +658,19 @@ impl Volume {
         }
         let residual = if b2 > 0. { (rr / b2).sqrt() } else { 0. };
         let mut tmp = core::mem::take(&mut self.tmp);
-        self.divergence(&self.u, &self.w, &mut tmp);
-        let dmax = tmp.iter().fold(0f64, |m, v| m.max(v.abs()));
+        let result = self.divergence(&self.u, &self.w, &mut tmp, ctl, Phase::Diagnostics);
         self.tmp = tmp;
-        let umax = self.u.iter().chain(&self.w).fold(0f64, |m, v| m.max((*v as f64).abs()));
-        Report {
+        result?;
+        let mut dmax = 0f64;
+        for v in &self.tmp { ctl.poll(Phase::Diagnostics)?; dmax = dmax.max(v.abs()); }
+        let mut umax = 0f64;
+        for v in self.u.iter().chain(&self.w) { ctl.poll(Phase::Diagnostics)?; umax = umax.max((*v as f64).abs()); }
+        Ok(Report {
             iterations: it,
             degraded: b2 > 0. && rr > tol * b2,
             residual,
             divergence: if umax > 0. { dmax * dx as f64 / umax } else { 0. },
-        }
+        })
     }
 
     /// Un pas à plafond d'itérations, sans allocation. Un `Err` numérique conserve
@@ -646,26 +679,63 @@ impl Volume {
     /// À zéro, advection et diagnostics restent exécutés ; `degraded` annonce
     /// la non-convergence, sans garantie sur le coût de ces phases.
     pub fn step(&mut self, dt: f32, max_iters: u32, jobs: &dyn JobSystem) -> Result<Report, Error> {
+        self.run(dt, max_iters, jobs, &mut Control::unlimited())
+    }
+
+    fn swap_state(&mut self) {
+        core::mem::swap(&mut self.u, &mut self.saved_u);
+        core::mem::swap(&mut self.w, &mut self.saved_w);
+        core::mem::swap(&mut self.p, &mut self.saved_p);
+    }
+
+    fn run(&mut self, dt: f32, max_iters: u32, jobs: &dyn JobSystem, ctl: &mut Control) -> Result<Report, Error> {
         self.last_cost_ms = None;
-        if !dt.is_finite() || dt <= 0. {
-            return Err(Error::NotFinite);
+        if !dt.is_finite() || dt <= 0. { return Err(Error::NotFinite); }
+        ctl.check(Phase::Prepare)?;
+        // Avant échange, les champs publiés restent intacts même si une copie est interrompue.
+        budget::copy(&self.u, &mut self.saved_u, ctl, Phase::Prepare)?;
+        budget::copy(&self.w, &mut self.saved_w, ctl, Phase::Prepare)?;
+        budget::copy(&self.p, &mut self.saved_p, ctl, Phase::Prepare)?;
+        self.swap_state();
+        let result = (|| {
+            self.advect(dt, ctl)?;
+            let r = self.project(dt, max_iters, jobs, ctl)?;
+            ctl.check(Phase::Validate)?;
+            for v in self.u.iter().chain(&self.w) {
+                ctl.poll(Phase::Validate)?;
+                if !v.is_finite() { return Err(Error::NotFinite); }
+            }
+            for v in self.p.iter().chain(&self.rhs).chain(&self.res).chain(&self.dir).chain(&self.tmp) {
+                ctl.poll(Phase::Validate)?;
+                if !v.is_finite() { return Err(Error::NotFinite); }
+            }
+            if !r.residual.is_finite() || !r.divergence.is_finite() { return Err(Error::NotFinite); }
+            ctl.check(Phase::Publish)?;
+            Ok(r)
+        })();
+        if result.is_err() { self.swap_state(); }
+        result
+    }
+
+    /// Budget coopératif en ms, contrôlé par tranches de 64 éléments au plus. L'expiration
+    /// conserve u/w/p et annonce dt entier restant. Le prochain appel recommence le pas.
+    /// L'hôte doit borner horloge/réductions ; aucune préemption ni borne de retard OS implicite.
+    /// Le coût d'un abandon n'est jamais publié comme coût d'un bloc avancé dans Caps.
+    pub fn step_budgeted(&mut self, dt: f32, max_iters: u32, budget_ms: f32,
+        jobs: &dyn JobSystem, clock: &dyn MonotonicClock) -> Result<BudgetReport, Error> {
+        self.last_cost_ms = None;
+        let mut ctl = Control::new(clock, budget_ms)?;
+        match self.run(dt, max_iters, jobs, &mut ctl) {
+            Ok(report) => {
+                let elapsed_ns = ctl.elapsed();
+                self.last_cost_ms = (elapsed_ns > 0).then_some(elapsed_ns as f32 / 1_000_000.);
+                Ok(BudgetReport { advanced_dt: dt, remaining_dt: 0., elapsed_ns,
+                    stopped_at: None, report: Some(report) })
+            }
+            Err(Error::Budget) => Ok(BudgetReport { advanced_dt: 0., remaining_dt: dt,
+                elapsed_ns: ctl.elapsed(), stopped_at: Some(ctl.phase), report: None }),
+            Err(e) => Err(e),
         }
-        self.saved_u.copy_from_slice(&self.u);
-        self.saved_w.copy_from_slice(&self.w);
-        self.saved_p.copy_from_slice(&self.p);
-        self.advect(dt);
-        let r = self.project(dt, max_iters, jobs);
-        if self.u.iter().chain(&self.w).any(|v| !v.is_finite())
-            || self.p.iter().chain(&self.rhs).chain(&self.res).chain(&self.dir)
-                .chain(&self.tmp).any(|v| !v.is_finite())
-            || !r.residual.is_finite() || !r.divergence.is_finite()
-        {
-            self.u.copy_from_slice(&self.saved_u);
-            self.w.copy_from_slice(&self.saved_w);
-            self.p.copy_from_slice(&self.saved_p);
-            return Err(Error::NotFinite);
-        }
-        Ok(r)
     }
 
     /// Pas complet chronométré : sauvegarde, advection, pression, diagnostic et

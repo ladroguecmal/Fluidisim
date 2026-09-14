@@ -69,8 +69,8 @@ Entrée : « Continue », quatre copies à d6ff35d, master propre et jeton libre
 
 - [x] **P1** — amorce, jeton et plan seuls.
 - [x] **P2** — contrat et chemin existants, preuves S199–S202, choix de l'arrêt et granularité.
-- [>] **P3** — construire le budget coopératif dans le candidat et ses sorties explicites.
-- [ ] **P4** — réception sur horloge injectée, intégrité/reprise/allocations et coût réel ; preuve et limites.
+- [x] **P3** — construire le budget coopératif dans le candidat et ses sorties explicites.
+- [>] **P4** — réception sur horloge injectée, intégrité/reprise/allocations et coût réel ; preuve et limites.
 - [ ] **P5** — rituel §6, file entière, priorité suivante, journal, jeton et copies synchronisées.
 
 Étapes sous quinze minutes ; découpage déclaré si nécessaire.
@@ -80,3 +80,5 @@ Entrée : « Continue », quatre copies à d6ff35d, master propre et jeton libre
 Base S229 : 404 réussis, 5 ignorés. J2 prioritaire après lot V borné reçu ; A244 et S200-1 présents dans la file. Aucun test général répété à l'amorce.
 
 P2 : SPEC-004 exige dt avancé ou restant explicite. Contrat BUDGET-DELTA-S230 : contrôle coopératif au plus 64 éléments, réductions groupées de même ordre, copie préalable interruptible puis travail sur buffers échangés ; rollback O(1). Aucun pas partiel publié ; reprise depuis état précédent. I-05 complet et pression f64/I-08 restent distincts. Aucun ADR nouveau nécessaire pour appliquer le contrat existant.
+
+P3 : budget coopératif construit dans le chemin réel ; copies interruptibles, travail sur buffers échangés, rollback O(1), buffers extraits rendus avant tout refus. 204 points d’expiration reçus sur huit phases, état non nul intact puis reprise identique, aucune allocation. Réductions limitées à 64 cellules, mêmes bits que le chemin illimité sur 32×16 et plafonds 500/1/0/500. Sept tests runtime et huit unitaires passent. Reste mesure réelle et suite générale.
