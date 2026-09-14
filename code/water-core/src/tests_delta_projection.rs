@@ -391,4 +391,12 @@ fn linear_surface_matches_standing_wave_and_preserves_rest_s233() {
         assert!(rest.surface().iter().all(|v|*v==4.));
         assert!(rest.velocity_u().iter().chain(rest.velocity_w()).all(|v|v.to_bits()==0));
     }
+    rest.g_eff = -1.;
+    assert_eq!(rest.step_surface_linear(2000,100,1_000_000,&Jobs,&StillClock),Err(Error::Domain));
+    rest.g_eff = 9.81;
+    // Une partie sèche du couvercle sort des hypothèses de la surface linéarisée.
+    let top=rest.fw(0,rest.domain.nz);
+    rest.open_w[top]=0.5;
+    assert_eq!(rest.step_surface_linear(2000,100,1_000_000,&Jobs,&StillClock),Err(Error::Domain));
+    assert!(rest.surface().iter().all(|v|*v==4.));
 }

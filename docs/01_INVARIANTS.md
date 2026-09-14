@@ -68,6 +68,11 @@ l'état reste entier ; ses intermédiaires locaux de géométrie, projection et 
 `f64`, afin de ne pas réduire la précision des volumes entiers à celle de f32. Cette exception
 ne change ni le domaine local ni I-03 et ne s'étend pas aux autres couches.*
 
+*Précision S233 ([ADR-141](adr/ADR-141-surface-linearisee-et-coefficients-temporels.md)) :
+le pas local δ à durée entière peut construire en f64 ses coefficients temporels dimensionnés
+(ρ/dt, dt/ρ, dt/dx), arrondis en f32 avant les calculs de champs. Aucune durée ni horloge
+en f32 autorisée, aucune accumulation de champs en f64.*
+
 **I-09 — On interpole des paramètres, jamais des réalisations.** Deux champs stochastiques ne se
 mélangent pas ; on mélange les paramètres qui les engendrent.
 → ADR-004

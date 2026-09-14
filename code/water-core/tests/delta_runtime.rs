@@ -409,5 +409,11 @@ fn evolving_surface_is_atomic_at_every_checkpoint_and_allocation_free_s233() {
     assert_eq!(bits(&v),before); assert_eq!(surface_bits(&v),eta_before);
     let r=v.step_surface_linear(2000,100,0,&Jobs,&DeadlineClock::new(usize::MAX)).unwrap();
     assert_eq!(r.remaining_us,2000); assert_eq!(surface_bits(&v),eta_before);
+    // Défaut numérique après entrée valide : rollback des champs et du reste de hauteur.
+    let huge = vec![f32::MAX;v.surface().len()];
+    v.set_surface(&huge).unwrap(); let huge_bits=surface_bits(&v);
+    let (r,allocs)=measured(||v.step_surface_linear(2000,100,1000,&Jobs,&DeadlineClock::new(usize::MAX)));
+    assert_eq!(r,Err(Error::NotFinite)); assert_eq!(allocs,0);
+    assert_eq!(bits(&v),before); assert_eq!(surface_bits(&v),huge_bits);
     println!("S233: {} expirations, surface incluse, zero allocation et reprise identique",clock.calls.get()-1);
 }

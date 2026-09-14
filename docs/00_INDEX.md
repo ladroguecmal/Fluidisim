@@ -30,6 +30,7 @@
 - [Arrêt coopératif sous budget de δ](validation/BUDGET-DELTA-S230.md).
 - [Pression f32 de δ : précision, résidu réel et coût](validation/PRESSION-F32-S231.md).
 - [Flux ouverts et triangles fluides de δ](validation/FLUX-COUPES-S232.md).
+- [Première surface évolutive linéarisée de δ](validation/SURFACE-LINEARISEE-S233.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).
@@ -186,6 +187,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-138](adr/ADR-138-le-budget-de-pente-tient-compte-de-la-position-relative.md) | Le budget de pente tient compte de la position relative des impacts |
 | [ADR-139](adr/ADR-139-volume-et-plan-oriente-des-contenants.md) | Le plan orienté se déduit du volume de la géométrie du contenant |
 | [ADR-140](adr/ADR-140-restauration-du-graphe-V.md) | Restaurer les écarts de V et ses restes de débit |
+| [ADR-141](adr/ADR-141-surface-linearisee-et-coefficients-temporels.md) | Surface linéarisée et coefficients temporels de δ |
 
 ## Travail et historique
 

@@ -70,8 +70,8 @@ Entrée : « continue », quatre copies propres à46851ce, jeton libre.
 - [x] **P1** — amorce, jeton, plan seuls.
 - [x] **P2** — lectures ciblées, modèle/temps, critères et référence déclarés.
 - [x] **P3** — construire le chemin évolutif et les refus atomiques.
-- [>] **P4** — recevoir dynamique, budget, allocations et suite ; preuve des limites.
-- [ ] **P5** — rituel §6, file, priorité comparée, jeton et copies synchronisées.
+- [x] **P4** — recevoir dynamique, budget, allocations et suite ; preuve des limites.
+- [>] **P5** — rituel §6, file, priorité comparée, jeton et copies synchronisées.
 
 ### Notes de reprise
 
@@ -87,3 +87,8 @@ sous plafond global inchangé. Sans compensation de hauteur, l'erreur lunaire au
 en raffinant (0,597% à64/1ms). Avec compensation consommée par la pression : erreurs fines
 0,0659% Terre et0,0173% Lune ; dérive moyenne≤4,47e-8m. Test onde/rest reçu.
 Huit tests runtime reçus AVANT compensation, à rejouer ; 211 expirations déjà testées.
+
+P4 : suite413 réussis/5 ignorés, huit runtime après compensation reçus. Deux tests S233
+renforcés sur refus puis rejoués ;213 expirations, zéro allocation, reprise identique.
+Coût64 : médianes2,8638 puis6,2104ms, pics3,8652 puis8,9980ms ; pas de borne reçue.
+Stockage+12nx octets. Filtre S232 inchangé. Navigation active sans erreur.
