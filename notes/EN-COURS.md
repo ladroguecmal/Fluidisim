@@ -68,11 +68,14 @@ Entrée : « continue », quatre copies propres à46851ce, jeton libre.
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [>] **P2** — lectures ciblées, modèle/temps, critères et référence déclarés.
-- [ ] **P3** — construire le chemin évolutif et les refus atomiques.
+- [x] **P2** — lectures ciblées, modèle/temps, critères et référence déclarés.
+- [>] **P3** — construire le chemin évolutif et les refus atomiques.
 - [ ] **P4** — recevoir dynamique, budget, allocations et suite ; preuve des limites.
 - [ ] **P5** — rituel §6, file, priorité comparée, jeton et copies synchronisées.
 
 ### Notes de reprise
 
 Base :411 tests réussis,5 ignorés ; S232 reçoit le débit ouvert, pas la dynamique de surface.
+
+P2 : ADR-141 précise coefficients temporels f64 vers f32, jamais dt f32 dans le nouveau
+chemin. Mode linéaire explicite, protocole onde stationnaire dans SURFACE-LINEARISEE-S233.
