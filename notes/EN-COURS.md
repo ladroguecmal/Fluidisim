@@ -87,7 +87,7 @@ ADR-131 D1 avec les techniques absentes, sans réduire la scène pour passer.
   par le cœur avant de construire.
 - [x] **P3** — impacts multiples : profils et centres en tableau au GPU, références CPU et
   composition du cœur à N impacts ; `--verify` vert.
-- [ ] **P4** — sillages multiples dans un journal : grille, bornes, `verify_lattice` sur la scène.
+- [x] **P4** — sillages multiples dans un journal : grille, bornes, `verify_lattice` sur la scène.
   **Amendement P2 (23:27)** : aux instants refusés par le budget, séparer pente **réelle** et
   **majorants** (A208) — maximum réel des perturbations sur l'union des domaines, contre le
   plancher ; c'est le déclencheur écrit d'A255/A261.
@@ -132,3 +132,20 @@ Bancs multi (secteur, non encore alternés avec un témoin) : 960×540 grille **
 0,459 à 29 s** (mono 0,427) ; direct 4,40 / 4,28 (mono 4,32 / 4,29). CPU sillage **3,12 ms à
 3 s** (forçage de trois sillages ; mono 1,3), 0,45 ms à 29 s ; un pic isolé 53 ms au premier
 banc 640×360 (mise en régime probable, non attribué).
+
+P4 (`--multi --admission-reelle`, log `admission_s235.log`, secteur) : `admission_series`
+extraite, bilans P2 retrouvés à l'identique (49 refus, 1,2510 à 28,25 s ; dense 40, 1,4199 à
+7 s). Pente réelle des perturbations : B à amplitude nulle, sillage en somme directe, balayage
+GPU 0,25 m sur [−86, 86]×[−60, 102] m (447 161 points), raffinement 0,02 m (16×625).
+**Les 49 refus sont des refus de majorant seul, 0 de pente réelle.** Pente réelle max aux
+instants refusés : **0,2154** (48,0 % de π/7, 24 s) ; marge minimale π/7 / réelle **×2,058** ;
+plancher / réelle de **2,13 à 8,16**. Aux naissances, réelle 0,2127–0,2154 au centre de
+l'impact neuf ≈ son maximum de naissance (0,2126, exact à la naissance, S139) : les autres
+sources n'y ajoutent rien de mesurable. Oscillation de la réelle entre 0,07 et 0,21 d'un
+quart de seconde à l'autre (phase de l'anneau neuf). Témoins admis (10 / 18,5 / 32 / 39 s) :
+réelle 0,056–0,106, plancher/réelle 3,7–6,8. Décomposition du plancher aux naissances :
+pression **0,175–0,202** (S222 : réelle ≈0,070 pour trois sillages) + impacts 0,28–0,37
+(neuf 0,213 + majorants des anciens, que l'inégalité de position d'ADR-138 ne retire pas).
+**Déclencheur A255/A261 atteint** : un usage représentatif échoue à l'admission par le seul
+pessimisme des bornes. Limite : maximum échantillonné (≤ vrai maximum) ; marge ×2,06 contre
+une sous-estimation de quelques pour cent au pas de 2 cm.

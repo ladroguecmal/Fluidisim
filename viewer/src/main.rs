@@ -423,6 +423,48 @@ fn lod_charge(frame: &mut FrameData<'_>) {
 /// impacts et le journal commun des trois sillages, tous les quarts de seconde sur le contexte du
 /// sillage. Le plancher est indépendant du point : `floor ≤ π/7` ⟺ aucun refus de pente.
 fn scene_admission(scene: &Scene, recipe: water_core::gaussian_spectrum::Recipe) -> Result<(), String> {
+    for (label, spacing) in [("scene", None), ("dense", Some(scene::DENSE_SPACING_US))] {
+        let series = admission_series(scene, recipe, spacing)?;
+        let (mut worst, mut worst_age, mut refused, mut first_refused) = (0f32, 0f64, 0usize, None);
+        for (step, a) in series.iter().enumerate() {
+            if a.floor > BREAKING_SLOPE {
+                refused += 1;
+                first_refused.get_or_insert(a.age);
+            }
+            if a.floor > worst {
+                (worst, worst_age) = (a.floor, a.age);
+            }
+            if step % 8 == 0 {
+                println!(
+                    "ADMISSION_SCENE variante={label} age_s={} nes={} plancher={:.6} impacts_seuls={:.6} pression={:.6} part_pi_sur_7={:.4}",
+                    a.age, a.born, a.floor, a.impacts, a.pressure, a.floor / BREAKING_SLOPE
+                );
+            }
+        }
+        println!(
+            "ADMISSION_BILAN variante={label} instants={} refus={refused} premier_refus_s={first_refused:?} pire_part={:.4} a_age_s={worst_age}",
+            series.len(),
+            worst / BREAKING_SLOPE
+        );
+    }
+    Ok(())
+}
+
+/// Plancher de pente du cœur à un instant de la scène, et ses deux parts.
+struct Admission {
+    age: f64,
+    born: usize,
+    floor: f32,
+    impacts: f32,
+    pressure: f32,
+}
+
+/// Série du budget conjoint tous les 0,25 s sur 40 s (voir `scene_admission`).
+fn admission_series(
+    scene: &Scene,
+    recipe: water_core::gaussian_spectrum::Recipe,
+    spacing: Option<u64>,
+) -> Result<Vec<Admission>, String> {
     use water_core::{
         bound_pressure,
         prepared_water::{self, mixed},
@@ -442,8 +484,8 @@ fn scene_admission(scene: &Scene, recipe: water_core::gaussian_spectrum::Recipe)
     let spectrum = pools.spectrum(recipe);
     let context = wakes[0].source().context();
     let mut slots = vec![Slot::default(); spectrum.nodes().len()];
-    for (label, spacing) in [("scene", None), ("dense", Some(scene::DENSE_SPACING_US))] {
-        let (mut worst, mut worst_age, mut refused, mut first_refused) = (0f32, 0f64, 0usize, None);
+    let mut series = Vec::with_capacity(161);
+    {
         for step in 0..=160u32 {
             let age = step as f64 * 0.25;
             let time = SimTime(scene::BIRTH + (age * 1e6) as u64);
@@ -481,29 +523,106 @@ fn scene_admission(scene: &Scene, recipe: water_core::gaussian_spectrum::Recipe)
             let pressure =
                 bound_pressure::Prepared::from_journal(context, &spectrum, &journal, time, &mut slots)
                     .map_err(|e| format!("pression à {age} s : {e:?}"))?;
-            let floor = mixed::slope_floor(&impacts, Some(&pressure), time);
-            if floor > BREAKING_SLOPE {
-                refused += 1;
-                first_refused.get_or_insert(age);
-            }
-            if floor > worst {
-                (worst, worst_age) = (floor, age);
-            }
-            if step % 8 == 0 {
-                println!(
-                    "ADMISSION_SCENE variante={label} age_s={age} nes={} plancher={floor:.6} impacts_seuls={:.6} pression={:.6} part_pi_sur_7={:.4}",
-                    impacts.field_count(),
-                    mixed::slope_floor(&impacts, None, time),
-                    pressure.slope_envelope(),
-                    floor / BREAKING_SLOPE
-                );
+            series.push(Admission {
+                age,
+                born: impacts.field_count(),
+                floor: mixed::slope_floor(&impacts, Some(&pressure), time),
+                impacts: mixed::slope_floor(&impacts, None, time),
+                pressure: pressure.slope_envelope(),
+            });
+        }
+    }
+    Ok(series)
+}
+
+/// S235 P4 — aux instants refusés, **pente réelle** des perturbations contre **plancher** (A208).
+///
+/// Perturbations seules : B est retiré (amplitudes nulles), le sillage passe par la somme directe
+/// (`lod = false`, écart au cœur ≤ 2·10⁻⁴ en pente, S234). Balayage GPU à 0,25 m sur la boîte qui
+/// contient l'emprise du sillage et les huit disques, puis raffinement à 0,02 m sur ±0,24 m
+/// autour des seize meilleurs points. Témoins : quatre instants admis.
+fn classify_admission(
+    scene: &Scene,
+    recipe: water_core::gaussian_spectrum::Recipe,
+    frame: &mut FrameData<'_>,
+) -> Result<(), String> {
+    let series = admission_series(scene, recipe, None)?;
+    let instance = instance();
+    let mut g = pollster::block_on(gpu::Gpu::new(
+        &instance,
+        None,
+        640,
+        360,
+        frame.profile.len(),
+        scene::WAKE_CAPACITY,
+    ))?;
+    frame.lod = false;
+    frame.camera = Camera::default();
+    let eye = frame.camera.eye;
+    let (min, max) = ([-86f32, -60.], [86f32, 102.]);
+    let coarse: Vec<[f32; 2]> = {
+        let (nx, ny) = (((max[0] - min[0]) / 0.25) as usize + 1, ((max[1] - min[1]) / 0.25) as usize + 1);
+        (0..ny)
+            .flat_map(|j| (0..nx).map(move |i| [min[0] + i as f32 * 0.25, min[1] + j as f32 * 0.25]))
+            .map(|p| [p[0] - eye[0], p[1] - eye[1]])
+            .collect()
+    };
+    let controls = [10., 18.5, 32., 39.];
+    let (mut refused, mut by_envelope, mut by_slope) = (0usize, 0usize, 0usize);
+    let mut worst_ratio = f32::INFINITY;
+    for a in &series {
+        let is_refused = a.floor > BREAKING_SLOPE;
+        if !is_refused && !controls.contains(&a.age) {
+            continue;
+        }
+        frame.update(a.age, a.age, true);
+        for c in frame.components.iter_mut() {
+            c[0] = 0.;
+        }
+        g.upload(frame);
+        let values = g.evaluate(&coarse)?;
+        let mut order: Vec<usize> = (0..values.len()).collect();
+        let norm = |v: &[f32; 3]| v[1].hypot(v[2]);
+        order.sort_by(|&x, &y| norm(&values[y]).total_cmp(&norm(&values[x])));
+        let mut fine = Vec::with_capacity(16 * 625);
+        for &k in order.iter().take(16) {
+            let c = coarse[k];
+            for j in -12..=12 {
+                for i in -12..=12 {
+                    fine.push([c[0] + i as f32 * 0.02, c[1] + j as f32 * 0.02]);
+                }
             }
         }
+        let refined = g.evaluate(&fine)?;
+        let (mut real, mut at) = (norm(&values[order[0]]), coarse[order[0]]);
+        for (p, v) in fine.iter().zip(&refined) {
+            if norm(v) > real {
+                (real, at) = (norm(v), *p);
+            }
+        }
+        let verdict = if !is_refused {
+            "admis"
+        } else if real > BREAKING_SLOPE {
+            by_slope += 1;
+            "refus_pente_reelle"
+        } else {
+            by_envelope += 1;
+            "refus_majorant_seul"
+        };
+        if is_refused {
+            refused += 1;
+            worst_ratio = worst_ratio.min(BREAKING_SLOPE / real);
+        }
         println!(
-            "ADMISSION_BILAN variante={label} instants=161 refus={refused} premier_refus_s={first_refused:?} pire_part={:.4} a_age_s={worst_age}",
-            worst / BREAKING_SLOPE
+            "PENTE_REELLE age_s={} impacts_nes={} plancher={:.6} pente_reelle_max={real:.6} part_reelle_pi_sur_7={:.4} plancher_sur_reelle={:.3} au_point_monde=[{:.2}, {:.2}] verdict={verdict}",
+            a.age, a.born, a.floor, real / BREAKING_SLOPE, a.floor / real, at[0] + eye[0], at[1] + eye[1]
         );
     }
+    println!(
+        "PENTE_REELLE_BILAN refus={refused} dont_majorant_seul={by_envelope} dont_pente_reelle={by_slope} marge_min_reelle_pi_sur_7_sur_pente={worst_ratio:.3} balayage_points={} raffinement=16x625",
+        coarse.len()
+    );
+    frame.lod = true;
     Ok(())
 }
 
@@ -603,6 +722,9 @@ fn run() -> Result<(), String> {
     }
     if args.iter().any(|a| a == "--scene-admission") {
         return scene_admission(&scene, recipe);
+    }
+    if multi && args.iter().any(|a| a == "--admission-reelle") {
+        return classify_admission(&scene, recipe, &mut frame);
     }
     if multi && args.iter().any(|a| a == "--verify") {
         return verify_multi(&mut frame);
