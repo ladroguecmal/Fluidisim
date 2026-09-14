@@ -58,68 +58,23 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S228 — terminée
+Session : S229 — en cours
 Agent : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
-Entrée : « Continue », après S227. Copie principale et trois copies propres à a86bd43,
-lignée B archivée. Jeton libre ; maillons 0. Suite déclarée : A266, puis V restaurable.
+Entrée : « Continue », après S228 ; quatre copies à c2e9a56, master propre, jeton libre.
 
-**Objectif.** Construire une relation volume/plan orienté correcte pour V, compatible avec les
-contenants non prismatiques, et la consommer dans le pas réel. Recevoir prisme, cale, extrêmes
-et changements de direction contre des références indépendantes. Ne pas réduire l'ambition.
-
-**Critère d'arrêt.** Le test A266 passe sans être ignoré ; la position de la surface préserve le
-volume géométrique dans une précision explicitée, y compris près des fonds et plafonds. Une
-géométrie insuffisante est refusée explicitement. Le chemin vertical ancien reste reçu dans son
-domaine. Les refus restent atomiques ; pas d'allocation ajoutée au pas. La restauration V est le
-lot suivant, sauf dépendance technique indispensable découverte ici.
+**Objectif.** Sauvegarder puis restaurer V avec ses nœuds, ses restes et l'identité de sa configuration géométrique ; recevoir la continuation dans le chemin réel.
+**Critère d'arrêt.** Une simulation interrompue puis restaurée reprend à l'identique ; une configuration incompatible ou une sauvegarde invalide est refusée sans mutation. Portée et exclusions explicites. Comparer ensuite la priorité de J2 aux reliquats de V.
 
 ### Plan
 
-- [x] **P1** — amorce, état réel, jeton et plan seuls.
-- [x] **P2** — lecture ciblée et choix du contrat géométrique ; ADR remplaçant la disposition incompatible d'ADR-010, oracle et limites déclarés.
-- [x] **P3** — construire le calcul géométrique orienté, sans allocation au pas ; tests indépendants des volumes et plans.
-- [x] **P4** — brancher le contrat dans V ; activer la régression A266, préserver l'atomicité et les domaines compatibles.
-- [x] **P5** — réception complète, coût et limites du chemin consommé ; publication concise de la preuve.
-- [x] **P6** — rituel §6 : journal, file, angles/leçons utiles, trajectoire, index, jeton libre et synchronisation des copies.
+- [x] **P1** — amorce, jeton et plan seuls.
+- [>] **P2** — lectures prescrites puis contrat de restauration et réutilisation des mécanismes existants.
+- [ ] **P3** — construire sauvegarde/restauration de V et refus atomiques.
+- [ ] **P4** — recevoir la continuation et les données invalides ; publier la preuve.
+- [ ] **P5** — rituel §6, file entière, priorité suivante, journal, jeton et synchronisation.
 
-Chaque étape reste sous quinze minutes ; découpage déclaré ici si nécessaire.
+Chaque étape reste sous quinze minutes ; découpage déclaré si nécessaire.
 
 ### Notes de reprise
 
-S227 a isolé deux erreurs : table horizontale insuffisante pour les formes inclinées ; hauteur
-verticale consommée comme distance normale. Sous pente 0,3, le prisme à mi-remplissage fuit de
-506 ml à un hublot central situé à 1,01 m au lieu de zéro. Le test ignoré porte A266 dans son nom.
-Base de validation S227 : 387 réussis, 6 ignorés ; quatre tests d'inventaire passent. Pas de
-nouvelle suite générale lancée à l'amorce : la base vient d'être vérifiée et les copies sont identiques.
-
-P2 : ADR-139 acté, partition tétraédrique sans recouvrement, capacité géométrique entière ;
-inversion du volume coupé, anciennes tables +Z seulement. I-08 amendé explicitement pour les
-intermédiaires f64 de V, sans dérogation au déterminisme ; SPEC-001 dérive les fractions et
-SPEC-005 corrige la portée de son test d'étanchéité. Oracle boîte par intégrales séparées, cale
-par sections linéaires indépendantes ; pas de dépendance ajoutée.
-
-P3 : hydro_network::geometry construit. Six tests passent : boîte (10 directions), cale (7
-pentes), forme en L, 24 permutations de sommets, invalides/recouvrements, dalle fine à 3 km.
-Erreurs maximales des oracles imprimées : boîte 3e-9 ml, cale 1e-9 ml (arrondies). Un volume
-2^53+1 ml dans un cube de 3 km est refusé Resolution, au lieu de convertir silencieusement la
-consigne entière. Le domaine de précision générale reste à qualifier au-delà des cas reçus.
-
-P4 : Shapes::from_volumes et surface_plane, utilisés par les deux extrémités du pas ; tables
-historiques +Z seulement. A266 activée et passée ; 26 tests V/geometry debug passent. Hublot
-latéral 1736 ml (ancien 1829, faux décalage corrigé), seuils C16 400007/1599989 µm ; pente
-16,6990°. C12 727,4 s et chaîne S224 inchangés. Cale à 1 m³ : hublot central 0,96 m sec,
-0,94 m mouillé. Receveur orienté : 38 ml contre l'oracle. Refus Orientation, Capacity et
-Resolution tardif sans mutation des nœuds/restes. Prochain : compteur d'allocations et coût.
-
-P5 : suite release hors réseau 398 réussis, 5 ignorés ; A266 est active. Compteur positif puis
-zéro allocation sur plans/pas/refus. Reçu VOLUME-ORIENTE-S228 : domaine et coût complet publiés,
-64 nœuds/64 arêtes en anneau 812,6 µs médiane, 1366 p95, 1807,4 max observé, aucune garantie
-I-05. Deux pentes supplémentaires corrigent un branchement ambigu de l'oracle de cale, pas du
-calcul de production. Navigation active vérifiée. Seul le libellé de nombre de séries du banc
-a été précisé après mesure ; calcul chronométré inchangé. A269 à consigner au rituel.
-
-P6 : reprise à chaud le 2026-09-14 après interruption pendant la clôture. Diff relu et complété,
-aucun travail concurrent ; code Rust de P5 inchangé, validation 398/5 conservée. Journal et
-file plurielle relus ; A266 corrigée, A269 consignée ; trajectoire, index et indicateur actualisés.
-Jeton libre. S229 : état V restaurable ; priorité comparée à J2 au journal. Après ce commit,
-avance rapide des trois copies propres sur master, sans suppression de copie incertaine.
+Base S228 : 398 tests réussis, 5 ignorés ; A266 corrigée dans le domaine reçu. Aucun nouveau test général à l'amorce. Aucun travail dans une nouvelle copie.

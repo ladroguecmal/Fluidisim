@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-14 06:40 +02:00
+JETON            : occupé
+Battement        : 2026-09-14 06:44 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
-Session en cours : —
+Session en cours : S229 — état V restaurable
 Dernière session : S228 — volume et plan orienté construits ; A266 corrigée
 Session suivante : S229 — état V restaurable, nœuds/restes et identité des géométries
 Maillons        : 0
