@@ -70,8 +70,8 @@ Entrée : « continue », quatre copies à4a48c74, master propre, jeton libre.
 - [x] **P1** — amorce, jeton et plan seuls.
 - [x] **P2** — lectures ciblées, bilan discret et reproduction indépendante du défaut.
 - [x] **P3** — correction consommée par le pas, tests ciblés et contrôle spatial.
-- [>] **P4** — réception complète et limites dans un document de preuve.
-- [ ] **P5** — rituel §6, file et priorité comparée, jeton, synchronisation des copies.
+- [x] **P4** — réception complète et limites dans un document de preuve.
+- [>] **P5** — rituel §6, file et priorité comparée, jeton, synchronisation des copies.
 
 ### Notes de reprise
 
@@ -84,3 +84,6 @@ committée avant correction P3. Preuve/critères dans FLUX-COUPES-S232.
 P3 : intégrale géométrique f32 rectangle/trapèze remplace SUB8. Deux nouvelles régressions
 passent, dont triangle miroir puis bilan réel après projection. Douze tests δ unitaires verts.
 Filtre corrigé final :1,947/1,957/1,966 ; empreinte0xc5ab1eadb094d058.
+
+P4 :411 tests réussis,5 ignorés ; filtre exécuté avec assertions1,8/rejeu. Réception dans
+FLUX-COUPES-S232 ; mesure historique rectifiée, pas de revendication d'ordre local.

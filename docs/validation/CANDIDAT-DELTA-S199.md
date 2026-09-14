@@ -210,3 +210,12 @@ traitement du f64 et du budget temporel sans les déclarer conformes par défaut
 **S199-2 : reconstruire les flux sur faces partiellement ouvertes**, contrôler leur
 intégrale et refaire le triplet fond plat/lisse/marche avant surface libre mobile.
 Ce second lot reste nommé dans la file ; il ne disparaît pas derrière les contrats.
+
+**Rectification S232 — 2026-09-14.** Le débit pondéré par les ouvertures retrouve un ordre
+1,95–1,98 sans modifier le solveur : l'ancien ordre≈0,90 ne recevait pas cette grandeur.
+Le décentrage supposé ne se déduit donc pas de ce chiffre. Un défaut distinct, suppression
+de triangles fluides par sous-échantillonnage, est reproduit puis corrigé dans la géométrie
+consommée par le pas. Ordres finaux1,947/1,957/1,966 ;
+[FLUX-COUPES-S232](FLUX-COUPES-S232.md). La forme dite « marche » est une tanh lisse et le
+triplet est une auto-convergence, pas une référence manufacturée indépendante. Le filtre
+de débit ouvert est reçu sur ces trois fonds ; ni ordre local ni scénarios B3 reçus.
