@@ -14,7 +14,8 @@
 //!
 //! S200 : pas sans allocation et refus numériques atomiques reçus. La pression reste
 //! expérimentale en f64 (I-08 non reçu) et la limite d'itérations n'est pas le budget
-//! temporel I-05. Voir `docs/validation/CONTRATS-DELTA-S200.md`.
+//! temporel I-05. S230 ajoute `step_budgeted`, arrêt coopératif atomique ; la garantie murale
+//! complète reste non reçue. Voir `docs/validation/BUDGET-DELTA-S230.md`.
 //!
 //! # L'équilibrage, gagné par construction
 //!
@@ -65,7 +66,8 @@ impl Domain {
 /// `None` indique une borne non reçue ; aucune plage de stabilité n'est inventée.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Caps {
-    /// Coût du dernier `step_measured` réussi, en ms, pour le domaine entier.
+    /// Coût du dernier `step_measured` réussi ou du dernier pas budgété complet, en ms.
+    /// Le pas budgété mesure jusqu'au contrôle de publication, hors retour O(1).
     /// S202 : un domaine = un bloc de banc ; pas de moyenne entre blocs fictifs.
     /// `None` avant mesure, après modification des entrées, pas non mesuré ou refus.
     pub cost_per_block_ms: Option<f32>,
@@ -526,6 +528,7 @@ impl Volume {
             }
         }
         for i in 0..nx {
+            ctl.poll(Phase::Advect)?;
             for k in 1..nz {
                 ctl.poll(Phase::Advect)?;
                 let f = self.fw(i, k);
