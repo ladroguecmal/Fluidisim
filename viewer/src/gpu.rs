@@ -12,6 +12,15 @@ pub struct Gpu {
     compute: wgpu::ComputePipeline,
     bind: wgpu::BindGroup,
     probe_layout: wgpu::BindGroupLayout,
+    /// S234 : grille locale du sillage — cuisson compute, lecture au rendu et à la vérification.
+    bake: wgpu::ComputePipeline,
+    #[allow(dead_code)]
+    lattice: wgpu::Buffer,
+    lattice_read: wgpu::BindGroup,
+    lattice_write: wgpu::BindGroup,
+    /// Dimensions de la grille à cuire pour l'image courante ; `None` : chemin direct ou sillage
+    /// inactif, aucune cuisson.
+    baked: Option<(u32, u32)>,
     uniform: wgpu::Buffer,
     waves: wgpu::Buffer,
     profile: wgpu::Buffer,
@@ -127,7 +136,7 @@ impl Gpu {
         let uniform = buffer(
             &device,
             "camera",
-            128,
+            144,
             wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         );
         let waves = buffer(
@@ -202,14 +211,59 @@ impl Gpu {
                 count: None,
             }),
         });
+        let lattice = buffer(
+            &device,
+            "W wake lattice",
+            crate::lod::LATTICE_CAPACITY as u64 * 16,
+            wgpu::BufferUsages::STORAGE,
+        );
+        let storage_layout = |label, stages, read_only| {
+            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                label: Some(label),
+                entries: &[wgpu::BindGroupLayoutEntry {
+                    binding: 0,
+                    visibility: stages,
+                    ty: wgpu::BindingType::Buffer {
+                        ty: wgpu::BufferBindingType::Storage { read_only },
+                        has_dynamic_offset: false,
+                        min_binding_size: None,
+                    },
+                    count: None,
+                }],
+            })
+        };
+        let lattice_read_layout = storage_layout(
+            "lattice read",
+            wgpu::ShaderStages::VERTEX_FRAGMENT | wgpu::ShaderStages::COMPUTE,
+            true,
+        );
+        let lattice_write_layout =
+            storage_layout("lattice write", wgpu::ShaderStages::COMPUTE, false);
+        let lattice_group = |layout: &wgpu::BindGroupLayout| {
+            device.create_bind_group(&wgpu::BindGroupDescriptor {
+                label: None,
+                layout,
+                entries: &[wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: lattice.as_entire_binding(),
+                }],
+            })
+        };
+        let lattice_read = lattice_group(&lattice_read_layout);
+        let lattice_write = lattice_group(&lattice_write_layout);
         let render_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: None,
-            bind_group_layouts: &[Some(&layout)],
+            bind_group_layouts: &[Some(&layout), None, Some(&lattice_read_layout)],
             immediate_size: 0,
         });
         let compute_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: None,
-            bind_group_layouts: &[Some(&layout), Some(&probe_layout)],
+            bind_group_layouts: &[Some(&layout), Some(&probe_layout), Some(&lattice_read_layout)],
+            immediate_size: 0,
+        });
+        let bake_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+            label: None,
+            bind_group_layouts: &[Some(&layout), None, None, Some(&lattice_write_layout)],
             immediate_size: 0,
         });
         let shader = device.create_shader_module(wgpu::include_wgsl!("water.wgsl"));
@@ -259,6 +313,14 @@ impl Gpu {
             compilation_options: Default::default(),
             cache: None,
         });
+        let bake = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
+            label: Some("wake lattice bake"),
+            layout: Some(&bake_layout),
+            module: &shader,
+            entry_point: Some("bake"),
+            compilation_options: Default::default(),
+            cache: None,
+        });
         let query = if feature.is_empty() {
             None
         } else {
@@ -266,9 +328,10 @@ impl Gpu {
                 // S225 : quatre horodatages — eau en 0/1, ciel en 2/3. La trame complète va donc
                 // du début du ciel à la fin de l'eau, et ce que S211–S213 excluaient devient
                 // mesurable au lieu d'être seulement annoncé.
+                // S234 : cuisson de la grille du sillage en 4/5, comptée dans le coût d'eau.
                 label: Some("frame GPU durations"),
                 ty: wgpu::QueryType::Timestamp,
-                count: 4,
+                count: 6,
             }))
         };
         let query_resolve = buffer(
@@ -280,7 +343,7 @@ impl Gpu {
         let query_read = buffer(
             &device,
             "timestamps read",
-            32,
+            48,
             wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_DST,
         );
         let (nx, ny, indices) = Self::grid(&device, width, height);
@@ -295,6 +358,11 @@ impl Gpu {
             compute,
             bind,
             probe_layout,
+            bake,
+            lattice,
+            lattice_read,
+            lattice_write,
+            baked: None,
             uniform,
             waves,
             profile,
@@ -345,6 +413,8 @@ impl Gpu {
     }
     pub fn upload(&mut self, frame: &FrameData<'_>) {
         self.bytes.clear();
+        let lattice = (frame.lod && frame.wake_active).then_some(frame.lattice);
+        self.baked = lattice.map(|l| (l.nx, l.ny));
         for v in frame.camera.params(
             self.width as f32 / self.height as f32,
             self.nx,
@@ -353,6 +423,7 @@ impl Gpu {
             frame.active,
             frame.wake.len(),
             frame.wake_active,
+            lattice,
         ) {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
@@ -382,8 +453,31 @@ impl Gpu {
             self.queue.write_buffer(&self.wake, 0, &self.bytes);
         }
     }
+    /// S234 : cuisson de la grille du sillage, avant toute lecture de `lattice` dans l'encodeur.
+    fn encode_bake(&self, encoder: &mut wgpu::CommandEncoder, measure: bool) {
+        let Some((nx, ny)) = self.baked else {
+            return;
+        };
+        let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
+            label: Some("wake lattice bake"),
+            timestamp_writes: if measure {
+                self.query.as_ref().map(|q| wgpu::ComputePassTimestampWrites {
+                    query_set: q,
+                    beginning_of_pass_write_index: Some(4),
+                    end_of_pass_write_index: Some(5),
+                })
+            } else {
+                None
+            },
+        });
+        pass.set_pipeline(&self.bake);
+        pass.set_bind_group(0, &self.bind, &[]);
+        pass.set_bind_group(3, &self.lattice_write, &[]);
+        pass.dispatch_workgroups(nx.div_ceil(8), ny.div_ceil(8), 1);
+    }
     pub fn draw(&self, view: &wgpu::TextureView, measure: bool) {
         let mut encoder = self.device.create_command_encoder(&Default::default());
+        self.encode_bake(&mut encoder, measure);
         {
             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("sky"),
@@ -419,6 +513,8 @@ impl Gpu {
             });
             pass.set_pipeline(&self.sky);
             pass.set_bind_group(0, &self.bind, &[]);
+            // Mise en page partagée avec l'eau : le groupe de la grille doit être posé.
+            pass.set_bind_group(2, &self.lattice_read, &[]);
             pass.draw(0..3, 0..1);
         }
         {
@@ -456,13 +552,14 @@ impl Gpu {
             });
             pass.set_pipeline(&self.ocean);
             pass.set_bind_group(0, &self.bind, &[]);
+            pass.set_bind_group(2, &self.lattice_read, &[]);
             pass.set_index_buffer(self.indices.slice(..), wgpu::IndexFormat::Uint32);
             pass.draw_indexed(0..(self.nx - 1) * (self.ny - 1) * 6, 0, 0..1);
         }
         if measure {
             if let Some(q) = &self.query {
-                encoder.resolve_query_set(q, 0..4, &self.query_resolve, 0);
-                encoder.copy_buffer_to_buffer(&self.query_resolve, 0, &self.query_read, 0, 32);
+                encoder.resolve_query_set(q, 0..6, &self.query_resolve, 0);
+                encoder.copy_buffer_to_buffer(&self.query_resolve, 0, &self.query_read, 0, 48);
             }
         }
         self.queue.submit([encoder.finish()]);
@@ -486,39 +583,63 @@ impl Gpu {
         b.unmap();
         Ok(data)
     }
-    pub fn gpu_ms(&self) -> Result<Option<f64>, String> {
-        Ok(self.gpu_breakdown()?.map(|(water, _)| water))
-    }
     /// S225 : durée de la passe d'eau **et** de la trame complète — du début du ciel à la fin de
     /// l'eau —, en millisecondes.
     ///
     /// **Lire ces horodatages sérialise.** `read` attend la fin des travaux GPU ; appelée à chaque
     /// image, elle détruit le recouvrement CPU/GPU et donc la cadence qu'on prétendrait mesurer.
     /// C'est pourquoi la cadence et la décomposition se mesurent en **deux passages distincts**.
-    pub fn gpu_breakdown(&self) -> Result<Option<(f64, f64)>, String> {
+    ///
+    /// S234 : rend `(eau, trame, cuisson)`. Quand la grille du sillage est cuite, **l'eau inclut
+    /// la cuisson** et la trame commence avec elle ; sinon la cuisson vaut zéro.
+    pub fn gpu_breakdown(&self) -> Result<Option<(f64, f64, f64)>, String> {
         if self.query.is_none() {
             return Ok(None);
         }
         let b = self.read(&self.query_read)?;
         let at = |i: usize| u64::from_le_bytes(b[i * 8..i * 8 + 8].try_into().unwrap());
         let period = self.queue.get_timestamp_period() as f64 / 1e6;
+        let span = |a: u64, z: u64, what: &str| {
+            z.checked_sub(a)
+                .filter(|&t| t > 0)
+                .map(|t| t as f64 * period)
+                .ok_or(format!("horodatage {what} nul ou inversé"))
+        };
         let (water_a, water_z, sky_a) = (at(0), at(1), at(2));
-        let water = water_z
-            .checked_sub(water_a)
-            .filter(|&t| t > 0)
-            .ok_or("horodatage GPU nul ou inversé")? as f64
-            * period;
-        // La trame va du début du ciel à la fin de l'eau : les deux passes sont soumises dans cet
-        // ordre dans le même encodeur.
-        let frame = water_z
-            .checked_sub(sky_a)
-            .filter(|&t| t > 0)
-            .ok_or("horodatage de trame nul ou inversé")? as f64
-            * period;
-        Ok(Some((water, frame)))
+        let pass = span(water_a, water_z, "GPU")?;
+        // La trame va du début de la première passe à la fin de l'eau : cuisson, ciel et eau
+        // sont soumis dans cet ordre dans le même encodeur.
+        let (bake, first) = match self.baked {
+            Some(_) => (span(at(4), at(5), "de cuisson")?, at(4)),
+            None => (0., sky_a),
+        };
+        let frame = span(first, water_z, "de trame")?;
+        Ok(Some((pass + bake, frame, bake)))
     }
     pub fn verify(&self, frame: &mut FrameData<'_>) -> Result<(), String> {
         let points = probes(frame.camera.eye);
+        let values = self.evaluate(&points)?;
+        let mut max = [0.0f32; 3];
+        let mut squares = 0.0f64;
+        let references = frame.references(&points)?;
+        for (expected, actual) in references.iter().zip(&values) {
+            for k in 0..3 {
+                let d = (actual[k] - expected[k]).abs();
+                max[k] = max[k].max(d);
+                if k == 0 {
+                    squares += (d as f64).powi(2);
+                }
+            }
+        }
+        println!("VERIFY age={} t_us={} impact={} wake={} lod={} points={} max_eta_m={:.9} rms_eta_m={:.9} max_slopes={:?}",frame.age,frame.time.0,frame.active,frame.wake_active,self.baked.is_some(),points.len(),max[0],(squares/points.len() as f64).sqrt(),&max[1..]);
+        if max[0] > 0.003 {
+            return Err(format!("hauteur GPU hors tolérance 3 mm : {}", max[0]));
+        }
+        Ok(())
+    }
+    /// Hauteur et pentes GPU aux points relatifs à la caméra, par la fonction `water` du shader —
+    /// la même que les sommets. S234 : la grille du sillage est cuite dans le même encodeur.
+    pub fn evaluate(&self, points: &[[f32; 2]]) -> Result<Vec<[f32; 3]>, String> {
         let data = floats(points.iter().flat_map(|p| [p[0], p[1], 0., 0.]));
         let size = data.len() as u64;
         let src = self
@@ -555,37 +676,29 @@ impl Gpu {
             ],
         });
         let mut encoder = self.device.create_command_encoder(&Default::default());
+        self.encode_bake(&mut encoder, false);
         {
             let mut pass = encoder.begin_compute_pass(&Default::default());
             pass.set_pipeline(&self.compute);
             pass.set_bind_group(0, &self.bind, &[]);
             pass.set_bind_group(1, &bind, &[]);
+            pass.set_bind_group(2, &self.lattice_read, &[]);
             pass.dispatch_workgroups((points.len() as u32).div_ceil(64), 1, 1);
         }
         encoder.copy_buffer_to_buffer(&dst, 0, &read, 0, size);
         self.queue.submit([encoder.finish()]);
         let data = self.read(&read)?;
-        let mut max = [0.0f32; 3];
-        let mut squares = 0.0f64;
-        let references = frame.references(&points)?;
-        for (expected, row) in references.iter().zip(data.chunks_exact(16)) {
-            for k in 0..3 {
-                let actual = f32::from_le_bytes(row[4 * k..4 * k + 4].try_into().unwrap());
-                if !actual.is_finite() {
-                    return Err("GPU non fini".into());
+        data.chunks_exact(16)
+            .map(|row| {
+                let v: [f32; 3] =
+                    core::array::from_fn(|k| f32::from_le_bytes(row[4 * k..4 * k + 4].try_into().unwrap()));
+                if v.iter().all(|x| x.is_finite()) {
+                    Ok(v)
+                } else {
+                    Err("GPU non fini".to_string())
                 }
-                let d = (actual - expected[k]).abs();
-                max[k] = max[k].max(d);
-                if k == 0 {
-                    squares += (d as f64).powi(2);
-                }
-            }
-        }
-        println!("VERIFY age={} t_us={} impact={} wake={} points={} max_eta_m={:.9} rms_eta_m={:.9} max_slopes={:?}",frame.age,frame.time.0,frame.active,frame.wake_active,points.len(),max[0],(squares/points.len() as f64).sqrt(),&max[1..]);
-        if max[0] > 0.003 {
-            return Err(format!("hauteur GPU hors tolérance 3 mm : {}", max[0]));
-        }
-        Ok(())
+            })
+            .collect()
     }
     pub fn target(&self) -> wgpu::Texture {
         self.device.create_texture(&wgpu::TextureDescriptor {
@@ -658,7 +771,9 @@ impl Gpu {
         let view = target.create_view(&Default::default());
         let mut cpu = Vec::new();
         let mut gpu = Vec::new();
+        let mut bakes = Vec::new();
         let mut wake_cpu = Vec::new();
+        let mut steps = (f32::INFINITY, 0f32);
         for i in 0..130 {
             let start = Instant::now();
             frame.update(3. + i as f64 / 60., 3. + i as f64 / 60., true);
@@ -668,7 +783,14 @@ impl Gpu {
             self.upload(frame);
             self.draw(&view, true);
             let cpu_ms = start.elapsed().as_secs_f64() * 1000.;
-            let gpu_ms = self.gpu_ms()?;
+            if self.baked.is_some() {
+                steps = (steps.0.min(frame.lattice.step), steps.1.max(frame.lattice.step));
+            }
+            let breakdown = self.gpu_breakdown()?;
+            if let (Some((_, _, b)), true) = (breakdown, i >= 10) {
+                bakes.push(b);
+            }
+            let gpu_ms = breakdown.map(|(w, _, _)| w);
             if gpu_ms.is_none() {
                 self.device
                     .poll(wgpu::PollType::wait_indefinitely())
@@ -683,11 +805,12 @@ impl Gpu {
         }
         cpu.sort_by(f64::total_cmp);
         gpu.sort_by(f64::total_cmp);
+        bakes.sort_by(f64::total_cmp);
         wake_cpu.sort_by(f64::total_cmp);
-        println!("BENCH {}x{} grid={}x{} wake_components={} samples=120 CPU_prepare_upload_submit_ms median={:.6} max={:.6}",self.width,self.height,self.nx,self.ny,frame.wake.len(),cpu[60],cpu[119]);
+        println!("BENCH {}x{} grid={}x{} wake_components={} lod={} pas_grille_m={:?} samples=120 CPU_prepare_upload_submit_ms median={:.6} max={:.6}",self.width,self.height,self.nx,self.ny,frame.wake.len(),frame.lod,steps,cpu[60],cpu[119]);
         println!("CPU_wake_prepare_publish_ms median={:.6} max={:.6} (inclus ci-dessus)",wake_cpu[60],wake_cpu[119]);
         if !gpu.is_empty() {
-            println!("GPU_water_ms median={:.6} p95={:.6} max={:.6} (sky, upload, readback, presentation excluded)",gpu[60],gpu[114],gpu[119]);
+            println!("GPU_water_ms median={:.6} p95={:.6} max={:.6} dont_cuisson_grille median={:.6} max={:.6} (sky, upload, readback, presentation excluded)",gpu[60],gpu[114],gpu[119],bakes[60],bakes[119]);
         } else {
             println!("GPU_water_ms indisponible");
         }

@@ -90,10 +90,12 @@ tolérance pour obtenir un gain, et reporter le lot vers la technique suivante.
 - [x] **P3** — grille locale du sillage, côté CPU : pas choisi par la borne bicubique,
   arrondi au 1/16 m inférieur, capacité fixe et annonce si la borne exige plus fin ; test d'une
   reconstruction Hermite bicubique de référence (CPU) sous sa borne, sur ondes planes.
-- [ ] **P4** — passe compute des nœuds `(η, ηx, ηy, ηxy)` et reconstruction bicubique dans
-  `water()` ; chemin direct conservé par option ; `--verify` inchangé ; nouveaux contrôles aux
-  centres et milieux d'arêtes des mailles, grille contre somme directe GPU et contre le cœur ;
+- [x] **P4a** — passe compute des nœuds `(η, ηx, ηy, ηxy)` et reconstruction bicubique dans
+  `water()` ; chemin direct conservé par option `--no-lod` ; `--verify` inchangé et vert ;
   horodatage de la passe compute compté dans le coût d'eau.
+- [ ] **P4b** — contrôles aux centres et milieux d'arêtes des mailles : grille contre somme
+  directe GPU (isole la reconstruction) et contre le cœur (3 mm) ; saut à travers les arêtes de
+  maille, LOD contre direct.
 - [ ] **P5** — coût : `BENCH`, cadence fixe et balayée, avec et sans LOD ; document de
   validation, en-tête ADR-131 D3.
 - [ ] **P6** — rituel §6, file, feuille de route, jeton ; copies à synchroniser.
@@ -128,3 +130,14 @@ publiée), `hermite` de référence CPU. Six tests `lod` verts. Exactitude sur p
 (2e-5). Soixante-quatre ondes planes |k|≤3 : pire/borne = 0,117 (h 0,25), **0,118 au pas de
 la borne**, 0,061 (h 2) — la borne tient, marge ≈8,5× ; une constante fausse d'un facteur 9
 ferait échouer l'essai. Pas S212 au pire (16 s) : 1,228 → 1,1875 m, 109×89 = 9 701 nœuds.
+
+P4a : `bake` (compute 8×8, groupe 3 en écriture) + `wake_lattice` (groupe 2 en lecture) ; somme
+directe d'origine intacte sous `lattice.w = 0` ; horodatages 4/5 = cuisson, comptée dans
+`GPU_water_ms`. Défaut rencontré : le ciel partage la mise en page → groupe 2 à poser aussi
+(panique de validation wgpu, corrigée). `--verify` vert sur les deux chemins, 13 contrôles
+chacun : **grille max η 0,400 mm (3 s), 0,320 (16 s)**, pentes ≤1,14e-3 ; **direct max η
+0,089 mm**, pentes ≤1,4e-4 (valeurs S225 retrouvées). Premier BENCH (sur **batterie**,
+BatteryStatus 1, 68 %) : grille 64×128 à 960×540 **0,457 ms dont cuisson 0,394** (pas
+1,3125–1,375 m, âges 3–5 s) ; direct 6,923 ms — plus lent que S225 (4,20). Témoin S233 extrait
+hors dépôt (`viewer-s233`, chemins absolus) pour trancher entre état machine et shader.
+Recette fine 128×256 grille : 1,782 ms dont cuisson 1,724.

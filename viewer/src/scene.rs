@@ -533,6 +533,11 @@ pub struct FrameData<'a> {
     pub honest_radius: f32,
     pub honest_duration: f32,
     announced: bool,
+    /// S234 : LOD spatial de couche. Vrai : le sillage est reconstruit depuis sa grille locale ;
+    /// faux : somme directe par sommet (chemin S212–S225, conservé comme témoin).
+    pub lod: bool,
+    pub lattice: crate::lod::Lattice,
+    lattice_announced: bool,
 }
 impl<'a> FrameData<'a> {
     pub fn new(
@@ -562,6 +567,9 @@ impl<'a> FrameData<'a> {
             honest_radius: wake_honest_radius(recipe),
             honest_duration: wake_honest_duration(recipe, 9.81),
             announced: false,
+            lod: true,
+            lattice: crate::lod::Lattice::plan(0., 0., WAKE_MIN, WAKE_MAX, crate::lod::LATTICE_CAPACITY),
+            lattice_announced: false,
         }
     }
     pub fn update(&mut self, seconds: f64, age: f64, enabled: bool) {
@@ -598,6 +606,25 @@ impl<'a> FrameData<'a> {
             self.timeline
                 .render_components(&self.wake_input.context, t, [eye[0], eye[1]], &mut self.wake)
                 .expect("coefficients du sillage");
+            if self.lod {
+                // S234 : le pas suit la borne de l'instant ; son coût CPU est compté ici.
+                let (m4, m5) = crate::lod::wake_smooth(&self.wake);
+                self.lattice = crate::lod::Lattice::plan(
+                    m4,
+                    m5,
+                    WAKE_MIN,
+                    WAKE_MAX,
+                    crate::lod::LATTICE_CAPACITY,
+                );
+                if self.lattice.clamped && !self.lattice_announced {
+                    self.lattice_announced = true;
+                    println!(
+                        "LOD_CAPACITE age={age:.2}s pas_borne_m={:.4} pas_retenu_m={:.4} erreur_borne_m={:.6} > tolerance {} m",
+                        self.lattice.bound_step, self.lattice.step, self.lattice.error_bound,
+                        crate::lod::TOLERANCE_M
+                    );
+                }
+            }
             self.wake_cpu_ms = start.elapsed().as_secs_f64() * 1000.;
         }
     }
@@ -694,8 +721,10 @@ impl Camera {
         active: bool,
         wake_count: usize,
         wake_active: bool,
-    ) -> [f32; 32] {
+        lattice: Option<crate::lod::Lattice>,
+    ) -> [f32; 36] {
         let [f, r, u] = self.vectors();
+        let l = lattice.map_or([0.; 4], |l| [l.step, l.nx as f32, l.ny as f32, 1.]);
         [
             self.eye[0],
             self.eye[1],
@@ -729,6 +758,10 @@ impl Camera {
             if wake_active { 1. } else { 0. },
             0.,
             0.,
+            l[0],
+            l[1],
+            l[2],
+            l[3],
         ]
     }
 }

@@ -113,7 +113,7 @@ impl App<'_> {
                 g.draw(&output.texture.create_view(&Default::default()), measuring);
                 if measuring {
                     match g.gpu_breakdown() {
-                        Ok(Some((w, f))) => {
+                        Ok(Some((w, f, _))) => {
                             self.water.push(w);
                             self.whole.push(f);
                         }
@@ -442,6 +442,8 @@ fn run() -> Result<(), String> {
     let timeline = Timeline::build(input.context, &spectrum, &journal, &mut nodes, &mut modes)
         .map_err(|e| format!("levier temporel : {e:?}"))?;
     let mut frame = FrameData::new(&scene.background, table, input, timeline, recipe);
+    // S234 : grille locale du sillage par défaut ; `--no-lod` rend le chemin direct S212–S225.
+    frame.lod = !args.iter().any(|a| a == "--no-lod");
     if args.iter().any(|a| a == "--lod-charge") {
         lod_charge(&mut frame);
         return Ok(());
@@ -457,15 +459,21 @@ fn run() -> Result<(), String> {
             frame.profile.len(),
             scene::WAKE_CAPACITY,
         ))?;
-        for age in [0., 1., 3., 4., 6., 8., 16., 24., 39., 40.01, 56., 56.01] {
-            frame.update(age, age, true);
+        // S234 : les mêmes contrôles sur les deux chemins du sillage, grille puis direct.
+        for lod in [true, false] {
+            frame.lod = lod;
+            frame.camera = Camera::default();
+            for age in [0., 1., 3., 4., 6., 8., 16., 24., 39., 40.01, 56., 56.01] {
+                frame.update(age, age, true);
+                g.upload(&frame);
+                g.verify(&mut frame)?;
+            }
+            frame.camera.eye = [125., -330., 12.];
+            frame.update(1_000_000., 3., true);
             g.upload(&frame);
             g.verify(&mut frame)?;
         }
-        frame.camera.eye = [125., -330., 12.];
-        frame.update(1_000_000., 3., true);
-        g.upload(&frame);
-        g.verify(&mut frame)?;
+        frame.lod = true;
         frame.camera = Camera::default();
         for enabled in [true, false] {
             frame.update(8., 8., enabled);
@@ -616,9 +624,14 @@ fn run() -> Result<(), String> {
                 );
             }
         }
-        g.benchmark(&mut frame)?;
-        g.resize(960, 540);
-        g.benchmark(&mut frame)?;
+        for lod in [true, false] {
+            frame.lod = lod;
+            g.resize(640, 360);
+            g.benchmark(&mut frame)?;
+            g.resize(960, 540);
+            g.benchmark(&mut frame)?;
+        }
+        frame.lod = true;
         let mut fine_storage = vec![[0.; 2]; storage.len()];
         let fine_table = scene.impact.bake_table(scene.step, &mut fine_storage).unwrap();
         let mut fine_nodes = vec![NodeState::default(); fine.count()];
