@@ -2,14 +2,15 @@
 
 ## File active
 
-**État relu en S229, clôture 2026-09-14.** Porteur des travaux internes : la session du dépôt.
+**État relu en S230, clôture 2026-09-14.** Porteur des travaux internes : la session du dépôt.
 Trajectoire : [FEUILLE-DE-ROUTE](../FEUILLE-DE-ROUTE.md). Priorité et protocole d'arrêt :
 [BILAN-GLOBAL-S227](BILAN-GLOBAL-S227.md). Remplacer les états touchés ; ne plus empiler ici des
 suivis de session. Les preuves et l'histoire restent dans le journal et Git.
 
 | travail | état et preuve | déclencheur / prochain résultat utile |
 |---|---|---|
-| **S200-1 / A244 / budget δ** | S200 : pas sans allocation, refus atomiques ; S202 : coût mesuré, pression f64 expérimentale et budget temporel non reçus | **Prochain lot S230 — J2** : interruption sous budget injecté, état réutilisable et dégradation déclarée ; qualification de précision |
+| **S200-1 / A244 / précision δ** | Pression f64 expérimentale ; I-08 non reçu. Arrêt coopératif construit S230, sans changer les bits du filtre S199 | **Prochain lot S231 — J2** : construire/qualifier la pression f32 sur le candidat réel ; comparer précision et coût au témoin f64, refus/budget conservés. Si insuffisante, arbitrage technique explicite par ADR, aucune exception implicite |
+| **A244 / admission et budget δ** | [S230](../validation/BUDGET-DELTA-S230.md) : arrêt atomique, dt restant explicite, zéro allocation testé ; maximum observé15,8501ms sous2ms au premier passage, cause inconnue. I-05 complet non reçu | Avant intégration de domaines : admission des charges viables, dégradation/fréquence explicite, marge et profil de l’hôte. Un bloc trop coûteux ne progresse pas par répétition d’abandons ; isoler le pic avant de l’attribuer au système ou au noyau |
 | **État V restaurable / intégration** | **Noyau reçu S229** : écarts auteur et restes, identité/révision et empreinte des géométries, C19-V local ; [réception](../validation/RESTAURATION-V-S229.md), ADR-140 | À l’intégration d’un hôte autoritaire : assemblage B/W/V, transport/stockage durable et autorité ; à l’évolution du graphe : migration et identité des nœuds dynamiques. Aucun prolongement générique du codec avant J2 |
 | **Géométrie V / A269 / cuisson** | A266 corrigée sur les polyèdres reçus ; résidu f64 insuffisant à `2^53+1 ml` dans un cube de 3 km, refus `Resolution` ; approximation des frontières courbes et correspondance aux assets non reçues | Nouveau contenant ou taille hors du domaine de [S228](../validation/VOLUME-ORIENTE-S228.md) : oracle, précision et coût du pas réel ; qualifier la cuisson. Aucun préalable générique à la restauration |
 | **V restant / A17 / A264** | `liquid_id`, pluie/exposition, absorption, pompes, pression fermée non construits ; A264 concerne le plancher en µm des anciennes tables ; nouvelle géométrie sans cet arrondi, vidange à qualifier | Extension V selon les usages ; test de bilan par liquide et échelle. Articulation V↔δ à J4 |

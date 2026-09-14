@@ -98,8 +98,11 @@ mesuré sur la scène) ; **B7** partiel (budget sur la machine locale, pas encor
 (I-12), éponge vers B+W (ADR-005) — sur des cas bornés : cavité et gerbe d'impact, proche-coque.
 Un domaine borné est une **étape** du δ général, jamais un produit à part (ADR-127 D3).
 
-*État au 2026-09-13* : candidat MAC x-z en bibliothèque (S199), sans allocation dans le pas et
-à refus atomiques (S200), coût du pas mesuré (S202). Non admissible B3. **Sur le chemin** : A244 /
+*État au 2026-09-14* : candidat MAC x-z en bibliothèque (S199), sans allocation dans le pas et
+à refus atomiques (S200), coût du pas mesuré (S202). **S230 : arrêt coopératif atomique et
+temps restant explicite**, reprise reçue ; [budget δ](validation/BUDGET-DELTA-S230.md).
+I-05 complet non reçu : retards réels observés, admission/marges encore absentes.
+Non admissible B3. **Sur le chemin** : A244 /
 S200-1 (précision f64, respect temporel I-05), S199-2 (flux des faces coupées), surface libre
 mobile (couvercle imposé aujourd'hui), passage à la 3D, couplage de l'écart à B+W. Part d'un
 impact que W ne porte pas nommée en S203 (énergie hors ondes, cavité, gerbe).

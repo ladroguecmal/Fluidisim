@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-14 07:12 +02:00
+JETON            : libre
+Battement        : 2026-09-14 07:14 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
-Session en cours : S230 — J2, arrêt sous budget
-Dernière session : S229 — restauration V reçue, continuation C19-V locale
-Session suivante : S230 — J2 : arrêt de δ sous budget injecté et état réutilisable
+Session en cours : —
+Dernière session : S230 — arrêt coopératif δ reçu, garantie murale I-05 ouverte
+Session suivante : S231 — J2 : construire et qualifier la pression f32
 Maillons        : 0
 
 ```
@@ -75,8 +75,8 @@ Ne pas relire le journal, les leçons ou tous les ADR intégralement à chaque r
 
 ## 4. Où en est le projet
 
-État des capacités à S229 : B/W et un afficheur interactif existent ; δ est un candidat MAC x-z
-non admissible à B3 ; V dispose de plans orientés, débits bornés et restauration reçue localement.
+État à S230 : B/W et un afficheur existent ; δ MAC x-z peut abandonner un pas proprement,
+mais reste non admissible B3/I-05. V : plans orientés, débits bornés et restauration locale reçus.
 Les réceptions et limites courantes sont dans la feuille de route. Le nombre de tests ne mesure
 pas la couverture des intentions, et une exécution locale ne reçoit pas le multiplateforme.
 

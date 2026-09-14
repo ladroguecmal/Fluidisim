@@ -3384,3 +3384,12 @@ est construite et consommée dans C19-V local, sans campagne géométrique suppl
 La priorité revient maintenant à J2/A244 (budget δ), comparaison portée au journal et à la file.
 A269 reste ouverte sur son domaine ; ni les angles de pilotage ni I-03 multiplateforme ne sont
 clos par cette seule livraison.
+
+**Suivi A244 — S230, 2026-09-14 : arrêt coopératif reçu, I-05 complet toujours ouvert.**
+Le candidat reçoit une enveloppe en ms, contrôle ses phases par tranches et restitue u/w/p
+par échange O(1) si elle expire. 204 points d'expiration testés, temps restant explicite,
+reprise identique et zéro allocation. Les appels de réduction sont bornés à64 cellules.
+Premier passage64×32/2ms : maximum15,8501ms ; second2,0732ms. Cause du premier pic non
+identifiée ; sa non-répétition ne le réfute pas. Admission de blocs/charge viable, marges et
+qualification de l'hôte restent dues avant I-05 ; pression f32 reste le prochain lot I-08.
+La file donne les déclencheurs, [BUDGET-DELTA-S230](../validation/BUDGET-DELTA-S230.md) les preuves.

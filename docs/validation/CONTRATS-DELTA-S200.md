@@ -81,3 +81,10 @@ resserrées. **S200-1 : préciser/recevoir la précision de pression et le budge
 avant toute admission runtime. **S199-2 : reconstruire les flux ouverts** reste
 la prochaine avancée physique du noyau. Les deux objets restent dans la file,
 la première réception ne doit pas être présentée comme la clôture globale d'A244.
+
+## Suivi daté S230 — 2026-09-14
+
+`step_budgeted` construit l'arrêt coopératif et rapporte dt restant ; les buffers préalloués
+permettent maintenant un abandon par échange O(1), sans copie de retour arrière. État conservé,
+reprise et absence d'allocation reçus ; filtre S199 inchangé. [BUDGET-DELTA-S230](BUDGET-DELTA-S230.md)
+publie les dépassements observés : I-05 complet et I-08/f32 restent non reçus, A244 partielle.

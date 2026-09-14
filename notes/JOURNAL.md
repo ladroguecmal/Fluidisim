@@ -11835,3 +11835,42 @@ Aucun arbitrage utilisateur requis ni réduction d'ambition.
 remplacement, file relue. Maillons **0** : persistance consommée par une continuation réelle
 avec témoin discriminant. Jeton libre ; après ce commit, avance rapide des trois copies propres
 sur master, sans suppression de copie dont l'inactivité n'est pas prouvée.
+
+## S230 — 2026-09-14 — δ abandonne un pas sans publier un état partiel
+
+**Entrée.** « Continue », priorité J2 après V restaurable. Codex, GPT-6 ; quatre copies à
+d6ff35d, master propre, jeton libre. Plan 9cd109f, contrat b1d7e00, construction d34d59d,
+réception 4c9f3e3. Aucune autre branche avancée constatée ; pas de nouvelle copie.
+
+**Capacité reçue.** Le consommateur de `Volume::step_budgeted` peut imposer une enveloppe de
+calcul, recevoir zéro temps avancé/dt entier restant et relancer depuis les champs précédents.
+Huit phases contrôlées, tranches et appels de réduction bornés ; anciens buffers préalloués
+échangés pour abandon O(1), aucune copie de domaine après expiration. Aucune sérialisation δ.
+Les plafonds d'itérations et chemins de banc restent disponibles ; pas de décision de famille.
+
+**Preuves.** [BUDGET-DELTA-S230](../docs/validation/BUDGET-DELTA-S230.md) : 204 points d'expiration
+sur état non nul, invariance bit à bit puis continuation identique. Domaines8×4 et32×16,
+réductions ≤64cellules, plafonds500/1/0/500 ; erreurs temporelles/numériques et zéro allocation
+avec témoin positif. **407 tests réussis, 5 ignorés** ; filtre physique 0x0ad3f695685ca27a inchangé.
+Après ajout du contrôle de colonne vide, sept tests runtime release et filtre reçus ; aucune
+modification numérique. Navigation active valide, avertissements préexistants uniquement.
+
+**Limite mesurée conservée.** Deux passages de coût :64×32 sous2ms, médiane2,0010ms et
+maximum15,8501ms au premier ; médiane2,0008ms et maximum2,0732ms au second. Cause du pic
+inconnue, aucune attribution OS gratuite. Contrôle coopératif reçu, **garantie murale I-05
+non reçue** ; appel d'hôte, tranche et suspension doivent être qualifiés. La mesure externe
+inclut le retour ; le rapport interne s'arrête au dernier contrôle. Aucun dépassement effacé,
+aucun budget utilisateur changé. Un bloc qui abandonne toujours n'avance pas.
+
+**Suite comparée.** **S231 : pression f32 du candidat**, autre obstacle d'intégration A244/I-08
+exécutable sans approfondir la micro-mesure du temps. Construire puis comparer au témoin f64,
+refus et budget conservés ; une exception éventuelle exige un ADR technique explicite.
+L'admission de charge viable et les marges de l'hôte restent dans la file pour l'intégration,
+avec le profilage du pic avant toute attribution. Faces coupées, surface mobile/3D, J1-bis,
+B2, bathymétrie, V/J4 et seconde cible gardent leurs déclencheurs. Une correction spatiale ne
+remplace pas le contrat de précision ; aucune réduction d'ambition.
+
+**Rituel.** File entière relue, trajectoire/état remplacés et index complété ; A244 actualisée,
+aucun ADR ni leçon artificiels. Maillons 0 : capacité d'abandon consommée dans le pas réel,
+preuves d'intégrité et de reprise, distinctes d'I-05 complet. Jeton libre ; après commit,
+synchroniser les trois copies propres en avance rapide, sans suppression incertaine.

@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S230 — en cours
+Session : S230 — terminée
 Agent : Codex, GPT-6 (fichiers, git, cargo et Python disponibles)
 Entrée : « Continue », quatre copies à d6ff35d, master propre et jeton libre.
 
@@ -71,7 +71,7 @@ Entrée : « Continue », quatre copies à d6ff35d, master propre et jeton libre
 - [x] **P2** — contrat et chemin existants, preuves S199–S202, choix de l'arrêt et granularité.
 - [x] **P3** — construire le budget coopératif dans le candidat et ses sorties explicites.
 - [x] **P4** — réception sur horloge injectée, intégrité/reprise/allocations et coût réel ; preuve et limites.
-- [>] **P5** — rituel §6, file entière, priorité suivante, journal, jeton et copies synchronisées.
+- [x] **P5** — rituel §6, file entière, priorité suivante, journal, jeton et copies synchronisées.
 
 Étapes sous quinze minutes ; découpage déclaré si nécessaire.
 
@@ -84,3 +84,5 @@ P2 : SPEC-004 exige dt avancé ou restant explicite. Contrat BUDGET-DELTA-S230 :
 P3 : budget coopératif construit dans le chemin réel ; copies interruptibles, travail sur buffers échangés, rollback O(1), buffers extraits rendus avant tout refus. 204 points d’expiration reçus sur huit phases, état non nul intact puis reprise identique, aucune allocation. Réductions limitées à 64 cellules, mêmes bits que le chemin illimité sur 32×16 et plafonds 500/1/0/500. Sept tests runtime et huit unitaires passent. Reste mesure réelle et suite générale.
 
 P4 : 407 réussis, 5 ignorés ; sept tests runtime release reçus après ajout du contrôle de colonne vide. Filtre empreinte 0x0ad3f695685ca27a inchangée. Deux mesures delta_budget_cost : premier64×32/2ms max15,8501ms (cause inconnue, conservé), second2,0732ms ; aucun I-05 complet revendiqué. 204 expirations/huit phases, zéro allocation ; surcoût coopératif et état sans progression publiés dans BUDGET-DELTA-S230. Navigation active valide. Prochaine capacité proposée : pressionf32 J2 ; admission/marges/hôte restent à construire avant intégration.
+
+P5 : rituel terminé, A244 partielle précisée, file entière relue, deux porteurs distincts pressionf32 et admission/budget. Suite S231 pressionf32, maillons0, jeton libre ; synchroniser les trois copies propres après commit. Aucun test général supplémentaire après documentation.
