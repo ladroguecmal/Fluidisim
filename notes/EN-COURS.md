@@ -91,7 +91,7 @@ décision, écrit tel quel.
 - [x] **P1** — amorce, jeton, plan seuls.
 - [x] **P2** — étude sourcée : architecture de Niagara Fluids, solveur de pression de Pyro, 2D contre
   3D, cuisson en volumes épars ; chaque affirmation avec URL et statut.
-- [ ] **P3** — confrontation à nos nombres mesurés : ADR-001, pression de δ (A273/A275), coût de δ
+- [x] **P3** — confrontation à nos nombres mesurés : ADR-001, pression de δ (A273/A275), coût de δ
   contre ADR-125 et ADR-131, volumes bornés de J2. Aucune campagne nouvelle.
 - [ ] **P4** — `docs/COMPARABLES-EXTERNES.md`, file active (déclencheurs, dont la préparation CPU du
   sillage remise en file), index.
@@ -107,6 +107,17 @@ couteux passe par la **cuisson** en volume epars ; (3) l'eau peu profonde d'Epic
 hauteur** bon marche pour grandes surfaces — meme partage que B/W contre delta.
 Non trouve (donc inconnu, pas absent) : methode du solveur, valeur par defaut des iterations,
 precision de la grille, cout par image chiffre, toute mesure d'erreur physique.
+
+P3 : confrontation faite **sans campagne nouvelle** — tous les chiffres viennent de S230 (dt = 1/60 s :
+0,0842 / 0,6822 / **5,5125 ms** a 128 / 512 / 2 048 mailles) et du releve `delta_precision` de S239
+(dt = 2 ms : 0,107 / 0,602 / 4,234 / **35,51 ms** jusqu'a 8 192). Loi : quadrupler les mailles
+multiplie le temps par ~8, coherent avec O(N) x O(racine N) du gradient conjugue et avec les
+iterations mesurees (28/58/112/219/417).
+**Trouvaille de priorite** : ADR-125 donne 2 ms a toute l'eau ; a 2 048 mailles delta seul vaut
+**2,8 fois** ce budget, et a 8 192 une image en demande ~296 ms. Donc **a la taille ou A275 mord,
+le cout est deja deux a trois ordres de grandeur au-dessus** : un lot qui ne corrigerait que la
+precision a 32 768 mailles ne debloquerait rien. L'ordre de la file est a renverser.
+Cout a 32 768 mailles : **non mesure** (417 iterations mesurees, c'est tout).
 
 ---
 
