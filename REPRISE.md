@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-15 18:22 +02:00
+JETON            : libre
+Battement        : 2026-09-15 19:26 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy et GPU local disponibles)
-Session en cours : S239 — A273 : tolérance physique de la pression δ aux grandes tailles
-Dernière session : S238 — la pression f32 de δ s'arrête à sa précision représentable (ADR-143)
-Session suivante : à déterminer en fin de S239
+Session en cours : aucune
+Dernière session : S239 — la tolérance physique de S199 devient une condition d'acceptation (ADR-144)
+Session suivante : S240 — J1-bis : espace, LOD et visibilité intégrés au rendu, coût aux 2 ms
 Maillons        : 0
 
 ```
@@ -75,11 +75,12 @@ Ne pas relire le journal, les leçons ou tous les ADR intégralement à chaque r
 
 ## 4. Où en est le projet
 
-État à S238 : B/W et un afficheur existent ; scène multi-sources dessinée, visibilité au bit, composée
+État à S239 : B/W et un afficheur existent ; scène multi-sources dessinée, visibilité au bit, composée
 et admise par le cœur (ADR-142). δ MAC x-z possède une **surface géométriquement mobile** reçue contre
 l'onde stationnaire HOS d'ordre 3 (surface graphe, sans 3D, cavité, scénario B3 ni I-05 complet) ; sa
-pression f32 s'arrête à sa précision représentable (ADR-143), tolérance physique non garantie aux
-grandes tailles (A273). V : plans orientés et restauration locale reçus.
+pression f32 s'arrête à sa précision représentable (ADR-143) et **tient la tolérance physique de S199
+ou se déclare dégradée** (ADR-144) — tenue jusqu'à 8 192 mailles, refusée à 32 768 (A275), plancher
+des lignes à fantôme de surface non borné (A274). V : plans orientés et restauration locale reçus.
 Les réceptions et limites courantes sont dans la feuille de route. Le nombre de tests ne mesure
 pas la couverture des intentions, et une exécution locale ne reçoit pas le multiplateforme.
 

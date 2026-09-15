@@ -69,3 +69,12 @@ solution : dégradé par les deux arrêts.
 
 Retirer les deux certificats d'arrêt rend exactement le chemin S231–S237 ; les pas au plancher
 redeviennent des relances jusqu'au plafond.
+
+## Note datée — 2026-09-15, S239
+
+Le §3 exigeait la tolérance physique de S199 **au plancher seulement**, et sur toutes les mailles
+mouillées. [ADR-144](ADR-144-la-tolerance-physique-est-une-condition-d-acceptation.md) l'étend à tout
+chemin d'acceptation et la restreint aux **lignes franches** — celles sans face fantôme de surface —,
+parce que le résidu d'une ligne à fantôme plafonne à un ulp de sa propre magnitude
+([mesure](../validation/TOLERANCE-PRESSION-S239.md) §3). Le reste d'ADR-143 est inchangé : le
+certificat d'arrondi `ω ≤ γ₈` et la détection de cycle restent les deux arrêts au plancher.

@@ -5247,3 +5247,31 @@ grandeur scalaire qui se répète (le résidu) ne dit pas la période de l'état
 avant de promettre « au bit » : un certificat qui arrête plus tôt change aussi des pas que l'ancien
 critère aurait fini par accepter — ici par un tirage d'arrondi sous 10⁻⁶. Voir PRESSION-PLANCHER-S238
 §3–4, ADR-143 ; même famille que L316 : le nombre vient de ce qu'on doit distinguer.
+
+## L318 — Un seuil d'acceptation et une tolérance physique de normes différentes ne se bornent pas l'un l'autre
+
+*(S239)* Le gradient conjugué de δ arrêtait sur un résidu **relatif en norme 2** (`ρ ≤ 10⁻⁶`) et le
+candidat déclarait une tolérance en **norme maximale normalisée** (`D = max|div u|·dx/max|u| ≤ 10⁻⁵`).
+Rien ne les reliait : `D = ρ·θ·Λ` exactement, et le critère d'arrêt ne borne que `ρ`. Mesuré de 128 à
+32 768 mailles, `Λ` — la forme du second membre — **double à chaque raffinement**, et le produit
+`θ·Λ` croît d'environ 30 % : la **taille seule** faisait franchir la tolérance, sur des pas que tout
+le reste annonçait reçus.
+
+Trois choses généralisent.
+
+1. **Décomposer avant de mesurer.** Une identité discrète déjà vérifiée (`div u = r/scale`) a réduit
+   l'écart à trois nombres sans dimension, dont deux étaient mesurables en une campagne. La campagne
+   a alors répondu à une question posée, pas à une curiosité.
+2. **Un seuil peut porter, dans son propre tableau de réception, la mention qui en limite la portée.**
+   S199 avait écrit « configuration unitaire testée ; **pas borne universelle** » en face de son
+   `< 10⁻⁵`, et S237 avait desserré une de ses propres assertions à 10⁻⁴ sans dire pourquoi. Trois
+   sessions ont traité ce nombre comme une garantie. **Relire la colonne de portée avant de faire
+   d'un seuil une condition.**
+3. **Toutes les lignes d'un système ne disent pas la même chose.** Une ligne à fluide fantôme est une
+   condition de bord de raideur `1/θ`, pas une conservation : son résidu plafonne à **un ulp de sa
+   propre magnitude** — mesuré ici en puissances de deux exactes — pendant que les lignes franches
+   descendent de deux ordres de grandeur. Appliquer une tolérance physique à la maximale sur toutes
+   les lignes revient à mesurer le conditionnement du bord, pas la qualité de la projection.
+
+Voir TOLERANCE-PRESSION-S239 §1.2 et §3, ADR-144. Famille de L316 et L317 : le nombre vient de ce
+qu'on doit distinguer, et sa portée doit être écrite avec lui.

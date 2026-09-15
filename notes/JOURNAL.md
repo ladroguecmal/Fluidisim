@@ -12244,3 +12244,69 @@ gardent leurs déclencheurs. Aucune ambition réduite ni arbitrage utilisateur n
 active (précision δ, J2, A273), index. Invariants relus : I-03 (arrêts déterministes, bits rejoués), I-06
 (passes sans allocation, tests d'exécution verts), I-14 (`γ₈` dérivé, 10⁻⁵ de S199). Maillons 0 : pas au
 plancher accepté, consommé par la trajectoire mobile à 16 384 mailles, reçu contre HOS et f64.
+
+## S239 — 2026-09-15 — Le seuil qui garantissait quelque chose ne le garantissait que d'une norme
+
+**Entrée.** « Reprends le projet », master propre à `e8cfc6f`, trois copies au même commit, jeton libre
+(battement 09:31, horloge 18:19), secteur ; suite 429/9. Claude Code, Opus 5. Plan `4e7694f`, protocole
+`733f47a`, loi `8a454a9`, règle `ccce741`, réception `f17f7a2`.
+
+**Capacité reçue.** La tolérance physique de S199 est désormais une **condition d'acceptation** de la
+projection (ADR-144), et non un diagnostic publié après coup : `accepté ⟺ (ρ ≤ 10⁻⁶ ou plancher
+d'ADR-143) et D_franches ≤ 10⁻⁵`. Un consommateur peut lire `degraded = false` comme « la projection
+tient la tolérance déclarée » — ce qui était **faux** jusqu'ici. Consommateur : `delta_precision`,
+`delta_filters` et la trajectoire mobile de S237, tous rejoués ; preuve
+[TOLERANCE-PRESSION-S239](../docs/validation/TOLERANCE-PRESSION-S239.md).
+
+**Décomposition avant campagne.** De l'identité `div u = r/scale` (S238), `D = ρ·θ·Λ` exactement :
+`ρ` le résidu relatif que le critère premier borne, `θ = max|r|/‖r‖₂` la concentration, `Λ` la forme
+du second membre. Le critère premier ne borne que `ρ`. La campagne n'avait donc que deux nombres à
+mesurer, pas une curiosité à explorer.
+
+**Loi mesurée** (§2, 128 à 32 768 mailles, deux fonds). **`Λ` double à chaque raffinement** — 17,8 /
+33,8 / 69,3 / 154,7 / 362 : le second membre vit à l'échelle de la maille, pas de l'écoulement. `θ`
+décroît plus lentement que `N^(−1/2)` — 0,314 → 0,0437. Leur produit croît d'environ 30 % par
+raffinement : **la taille seule fait franchir la tolérance**.
+
+**Ce que la mesure a corrigé dans le plan.** La règle du §1.4, appliquée à toutes les mailles
+mouillées, a fait **refuser le premier pas** du cas de topologie mobile de S237. Diagnostic : `ρ`
+descend de 8,1·10⁻⁷ à 8,5·10⁻⁹ pendant que `D` plafonne à 1,5·10⁻⁵, et les cinq pires lignes sont les
+mailles de **surface**, diagonale ≈ 500 (`1/θ_surface`), résidus **exactement** 2⁻⁵, 2⁻⁶, 2⁻⁷ sur des
+lignes de magnitude ≈ 2¹⁸ — un ulp de leur propre ligne. Les lignes **franches** du même pas passent
+de 7,5·10⁻⁵ à 4,5·10⁻⁷. D'où l'amendement : l'acceptation porte sur les lignes franches. Deux
+corroborations jamais rapprochées : S199 avait écrit « **pas borne universelle** » en face de son
+`< 10⁻⁵`, et S237 avait desserré une de ses propres assertions à 10⁻⁴ sans dire pourquoi.
+
+**Réception.** 128×64 bosse : 1,021·10⁻⁵ → **5,84·10⁻⁶ pour une itération de plus** (348 contre 347).
+256×128 : 420 itérations, plancher d'ADR-143, `D` = 1,335·10⁻⁵, **déclaré dégradé** — trois itérations
+de plus pour un refus honnête. `delta_filters` : le fond plat, déjà sous la tolérance, est **identique
+au dernier chiffre publié** (219 itérations) ; les deux fonds coupés à 128 poursuivent, ordres
+1,947/1,957/1,959 ≥ 1,8, empreinte `0xc5ab1eadb094d058` → **`0xfb12b2092df4ee6d`**, et ces deux cas en
+sont la cause entière. Trajectoire mobile 5 cm conservée : 0,850/0,552/**0,252 %** et 2,44/1,41/**0,71 %**,
+**258,4 ms médian à 128 colonnes contre 256** (+0,9 %), pire pas 592 itérations contre 526. Suite
+**431 réussis, 11 ignorés**.
+
+**Coût et limites.** Techniques présentes : Jacobi, f32, certificats d'ADR-143, une correction et une
+divergence de plus par relance qui atteint le critère premier ; absentes : tout préconditionneur plus
+fort, tout résidu en précision double, le GPU. Domaine : une machine sur secteur, 2D, un `dt`, une
+période. **Impasse** : mesurer en abaissant le seuil *dès le départ* place le solveur dans un régime
+où le résidu récurrent ne réclame jamais la convergence — aucune relance, donc le certificat
+d'arrondi, qui n'y vit qu'aux relances, n'est jamais consulté ; un cas a consommé 20 000 itérations
+sans verdict et la mesure a été abandonnée. La règle n'a pas ce défaut : elle atteint d'abord le
+critère premier.
+
+**Suite comparée.** Troisième session consécutive sur la pression de δ, et A273 est close. A275 — au-delà
+de 32 768 mailles, f32 ne tient pas la tolérance — est le **prérequis du passage à la 3D**, pas un
+blocage d'aujourd'hui ; A274 — le plancher des lignes à fantôme — attend une géométrie nouvelle. La
+recommandation encore non consommée du dernier bilan (BILAN-GLOBAL-S227 §5, ordre 4) est **J1-bis :
+espace, LOD et visibilité intégrés au rendu, coût complet confronté aux 2 ms**. **S240 : J1-bis**,
+angles rasants et interaction représentative, avec I-06 de la pile graphique. V, B2, bathymétrie et
+seconde cible gardent leurs déclencheurs. Aucune ambition réduite, aucun arbitrage utilisateur requis.
+
+**Rituel.** A273 close, A274 et A275 ouvertes ; L318 ; ADR-144, note datée sur ADR-143 ; feuille de
+route J2, file active (précision δ, J2, faces coupées, A274, A275), index. Invariants relus : I-03
+(arrêt déterministe, rejeu local identique en bits dans `delta_filters`), I-06 (aucun tampon nouveau —
+la correction et la divergence de la boucle réutilisent `u`/`w`/`tmp`, libres pendant `project`
+puisque `run` met les champs publiés à l'abri dans `saved_*`), I-14 (aucun nombre nouveau : 10⁻⁶ de
+S231, 10⁻⁵ de S199, `γ₈` d'ADR-143). Maillons 0 : l'acceptation garantit désormais la tolérance, elle
+est consommée par les trois campagnes et la trajectoire mobile, et la preuve est publiée.

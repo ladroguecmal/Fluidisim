@@ -137,9 +137,14 @@ décroissants en raffinant ; le mode linéaire n'en produit que 10⁻⁵.
 [Preuve](validation/SURFACE-MOBILE-S237.md). **S238 : la pression f32 s'arrête à sa précision
 représentable** (ADR-143) — erreur inverse sous la borne d'arrondi de la ligne ou état revenu au bit, pas
 reçu seulement à la divergence de S199 ; 5 cm **reçu à 128 colonnes** (0,25 % / 0,71 %), vitesse à
-5,5·10⁻⁸ de la solution f64 ; [preuve](validation/PRESSION-PLANCHER-S238.md). Restent : surface non graphe
-(déferlement), mouillage du fond, bords ouverts, tolérance physique non garantie par le critère premier
-aux grandes tailles (A273), passage à la 3D, cavité et couplage de
+5,5·10⁻⁸ de la solution f64 ; [preuve](validation/PRESSION-PLANCHER-S238.md).
+**S239 : la tolérance physique de S199 devient une condition d'acceptation** (ADR-144), sur les lignes
+**franches** — sans fantôme de surface. Tenue jusqu'à 8 192 mailles pour **une itération de plus**
+(348 contre 347, divergence 1,02·10⁻⁵ → 5,84·10⁻⁶) ; **refusée explicitement à 32 768 mailles**, où le
+plancher d'ADR-143 arrête le solveur à 1,34·10⁻⁵ et le pas est déclaré dégradé. Réception S237/S238
+conservée pour +0,9 % de coût médian ; [preuve](validation/TOLERANCE-PRESSION-S239.md). Restent :
+surface non graphe (déferlement), mouillage du fond, bords ouverts, plancher des lignes à fantôme
+(A274), grandes tailles en f32 (A275, prérequis de la 3D), cavité et couplage de
 l'écart à B+W. Part d'un impact que W ne porte pas nommée en S203 (énergie hors ondes, cavité, gerbe).
 
 *Bancs* : **B3** (famille de δ) quand un candidat atteint ses critères ou qu'un second existe ;

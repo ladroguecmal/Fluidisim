@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S239 — en cours
+Session : S239 — terminée
 Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy et GPU local disponibles)
 Entrée : « Reprends le projet », master propre à e8cfc6f, trois copies au même commit, jeton
 libre (battement 09:31, horloge 18:19), secteur.
@@ -106,7 +106,7 @@ ces tailles, et alors requalification datée à provenance, jamais un seuil choi
   2⁻⁵, 2⁻⁶, 2⁻⁷) ; exiger 10⁻⁵ d'elle refuserait des pas que la réception HOS de S237 valide à
   0,25 %. Les lignes franches, elles, descendent de 7,5·10⁻⁵ à 4,5·10⁻⁷ (voir notes).
 - [x] **P5** — réception : S237 5 cm à 128 colonnes, empreintes, `delta_precision`, coût ; ADR.
-- [ ] **P6** — rituel §6, file, feuille de route, jeton ; fermeture des trois copies.
+- [x] **P6** — rituel §6, file, feuille de route, jeton ; fermeture des trois copies.
 
 ### Notes de reprise
 
