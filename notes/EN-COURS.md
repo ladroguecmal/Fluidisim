@@ -93,9 +93,9 @@ avec le chiffre et la cause. Aucun seuil inventé, aucun banc modifié pour obte
   protocole écrit avant mesure, avec ce qui serait reçu et ce qui serait une requalification.
 - [x] **P3** — instrument : allocateur compteur global du binaire de l'hôte, marquage par phase,
   sans dépendance nouvelle ; contrôle qu'il ne déplace pas `VERIFY` ni `BENCH`.
-- [ ] **P4** — mesure : allocations par image en régime, taille et attribution, scène S235 à
+- [x] **P4** — mesure : allocations par image en régime, taille et attribution, scène S235 à
   960×540, dans le champ et hors champ.
-- [ ] **P5** — ce qui est à nous : supprimé ou justifié, puis re-mesuré ; verdict.
+- [x] **P5** — ce qui est à nous : supprimé ou justifié, puis re-mesuré ; verdict.
 - [ ] **P6** — rituel §6, file, feuille de route, jeton.
 
 ### Notes de reprise
@@ -109,6 +109,15 @@ la preparation du sillage. Attribution prevue **par phase**, pas par site d'appe
 d'appels demanderait une dependance et deplacerait la mesure) — limite declaree.
 A verifier en P3 : les tampons de millisecondes du banc grandissent pendant la mesure et faussent
 donc leur propre banc ; les reserver.
+
+P4/P5 : 134 allocations et 30 541 octets par image, **mediane = p95 = maximum** sur 590 images et
+trois executions ; une seule a nous (12 032 o = le `Vec` de `lod::footprint`, 2.(481+271) points).
+CPU 4,02 ms median pour 16,3 ms max sans que le compte bouge d'une unite : **l'allocation n'est pas
+la cause de la gigue d'A265**. Hors champ : 104 / 28 471 o, la notre reste. Apres correction (tampon
+garde) : update **0 / 0**, image **133 / 18 509 o** ; VERIFY 0,368476 mm, RETOUR 0 difference au bit,
+tests viewer 12. Cout de l'instrument : au plus 0,16 ms de CPU median, du meme ordre que la
+dispersion entre deux executions instrumentees (0,12 ms) — non separable du bruit, et dit tel quel.
+ADR-145 et amendement date sous I-06.
 
 P3 : `viewer/src/counting.rs` (allocateur compteur global, aucune dependance nouvelle), bornes de
 phase dans `redraw` aux memes points que les millisecondes de S225, tampons du banc reserves a

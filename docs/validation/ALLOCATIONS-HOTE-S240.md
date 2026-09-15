@@ -137,3 +137,70 @@ exécutions instrumentées (0,12 ms) : la mesure ne le sépare pas du bruit, et 
 donc pas le chiffrer plus finement. Le GPU et la physique, eux, ne bougent pas — `VERIFY` rend la
 valeur exacte de S235. **Les nombres d'allocations, eux, sont exacts et non bruités** : ce sont des
 compteurs, pas des durées.
+
+## 3. Ce qui est à nous : supprimé, puis re-mesuré
+
+**La seule allocation qui nous appartienne était le contour de l'emprise** (`lod::footprint`) :
+`Vec::with_capacity(2·(n_x + n_y))` à chaque image, soit 2·(481 + 271) = 1 504 points de huit
+octets = **12 032 octets**, exactement la valeur mesurée. Elle est construite à chaque image parce
+que la caméra bouge, et jetée à la fin de la même image.
+
+**Correction** : `footprint_into` remplit un tampon **fourni par l'appelant** et gardé par
+`FrameData` d'une image à l'autre. Le premier contour d'un format lui donne sa capacité ; aucun
+suivant ne demande de mémoire, et un format plus petit ne laisse pas de queue. C'est l'idiome de
+pools de I-06, avec le **format** pour profil.
+
+| phase | avant | après |
+|---|---:|---:|
+| `update` — à nous | 1 allocation, 12 032 o | **0 allocation, 0 octet** |
+| **image entière** | 134, 30 541 o | **133, 18 509 o** |
+
+Les 12 032 octets disparaissent exactement, et rien d'autre ne bouge.
+
+**Contrôles, mêmes commandes qu'avant la correction.**
+
+| contrôle | résultat |
+|---|---|
+| `--multi --verify`, 23 âges | `VERIFY` **0,368476 mm** à 12 s avec 4 impacts — valeur de S235 |
+| `--multi --retour` | 150 images cachées, 31 comparées, **0 différente au bit** — réception S235 |
+| `--multi --cadence` | CPU médian **4,0367 ms**, dans la dispersion des trois exécutions d'avant |
+| tests de `viewer/` | **12 réussis** (11 avant, plus la réutilisation du tampon) |
+
+Le test ajouté, `a_kept_footprint_buffer_gives_the_same_contour_s240`, compare le contour du tampon
+gardé à celui d'un `Vec` neuf **au bit**, sur trois formats enchaînés dont un plus petit, et vérifie
+que la capacité ne bouge plus ensuite.
+
+## 4. Verdict, et ce qu'il requalifie
+
+**I-06 est tenue par le code du projet dans la boucle d'image de l'hôte** : zéro allocation par
+image en régime, mesuré, sur 590 images et dans deux poses de caméra.
+
+**Elle ne l'est pas par la pile graphique, et elle ne peut pas l'être** : wgpu alloue **133 fois et
+18 509 octets par image**, et ce code n'est pas le nôtre. Ces allocations sont **parfaitement
+constantes** — médiane, p95 et maximum égaux, sur trois exécutions — donc elles ne produisent aucune
+gigue et ne menacent aucun budget par variance. C'est un **fait mesuré**, pas une tolérance accordée,
+et il est désormais chiffré au lieu d'être inconnu.
+
+D'où [ADR-145](../adr/ADR-145-i-06-pour-l-hote-graphique.md) : pour l'hôte GPU, I-06 se lit sur le
+code du projet ; les allocations des dépendances verrouillées en S210/S211 sont **comptées et
+publiées à chaque mesure de coût**, comme ADR-131 D3 l'exige déjà des techniques.
+
+### 4.1 Coût (ADR-131)
+
+- **Techniques présentes** : allocateur compteur global sans dépendance ; relevés aux bornes de phase
+  déjà chiffrées par S225 ; tampons de relevé réservés avant la boucle ; tampon d'emprise gardé.
+- **Techniques absentes** : pile d'appels par allocation (attribution au site exact) ; compteur par
+  fil ; suivi de la mémoire réellement engagée par le système sous les demandes.
+- **Domaine** : scène S235, 960×540, AMD Ryzen AI 7 350 / RTX 5070 Laptop, DX12, Windows, release,
+  secteur ; wgpu 30.0.1, winit 0.30.13, pollster 1.0.1 (S210/S211). **Une seule machine.**
+
+### 4.2 Ce qui n'est pas reçu
+
+- **L'attribution au site d'appel** dans la pile : les 133 allocations sont rangées par phase, pas
+  nommées. Une phase qui se mettrait à allouer davantage se resserre par bissection.
+- **La cause de la gigue** : disculper l'allocation ne la nomme pas. **A265 reste ouverte**, et ce
+  document lui retire une hypothèse.
+- **Un autre format, une autre machine, un autre pilote.** Le nombre 133 appartient à cette version
+  de wgpu sur ce backend ; il est une référence à revérifier, pas une constante.
+- **Les allocations hors boucle d'image** : démarrage, redimensionnement, changement de format. Le
+  premier contour d'un format alloue une fois, par construction.

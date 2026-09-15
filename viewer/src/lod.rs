@@ -247,13 +247,23 @@ impl Projection {
 /// écran ; son bord est l'image du bord du rectangle, échantillonné ici **à chaque sommet de bord**
 /// avec les opérations de `ocean_vertex`. Rend le contour et sa plus longue arête (publiée).
 pub fn footprint(p: &Projection, nx: u32, ny: u32) -> (Vec<[f32; 2]>, f32) {
+    let mut poly = Vec::new();
+    let chord = footprint_into(p, nx, ny, &mut poly);
+    (poly, chord)
+}
+
+/// S240, I-06 — la même emprise dans un tampon **fourni par l'appelant**. Il garde sa capacité
+/// d'une image à l'autre : le premier contour d'un format l'agrandit, les suivants n'allouent
+/// plus rien. Rend la plus longue corde entre deux échantillons de bord.
+pub fn footprint_into(p: &Projection, nx: u32, ny: u32, poly: &mut Vec<[f32; 2]>) -> f32 {
     let horizon = p.horizon();
     let at = |ix: u32, iy: u32| {
         let x = (ix as f32 / (nx - 1) as f32 * 2. - 1.) * 1.18;
         let y = -1.18 + (horizon + 1.18) * (iy as f32 / (ny - 1) as f32);
         p.ground(x, y)
     };
-    let mut poly = Vec::with_capacity(2 * (nx + ny) as usize);
+    poly.clear();
+    poly.reserve(2 * (nx + ny) as usize);
     poly.extend((0..nx).map(|i| at(i, 0)));
     poly.extend((1..ny).map(|j| at(nx - 1, j)));
     poly.extend((0..nx - 1).rev().map(|i| at(i, ny - 1)));
@@ -263,7 +273,7 @@ pub fn footprint(p: &Projection, nx: u32, ny: u32) -> (Vec<[f32; 2]>, f32) {
         let (a, b) = (poly[k], poly[(k + 1) % poly.len()]);
         chord = chord.max((b[0] - a[0]).hypot(b[1] - a[1]));
     }
-    (poly, chord)
+    chord
 }
 
 fn inside_polygon(poly: &[[f32; 2]], q: [f32; 2]) -> bool {
@@ -362,6 +372,37 @@ mod tests {
         assert!(touches_disc(&square, [5., -2.], 1.5));
         assert!(touches_disc(&square, [5., 5.], 100.));
         assert!(!touches_disc(&square, [15., 15.], 5.));
+    }
+
+    /// S240, I-06 — le tampon gardé rend **exactement** le même contour, format après format, et
+    /// il n'alloue plus une fois sa capacité prise. Un format plus petit ne laisse pas de queue.
+    #[test]
+    fn a_kept_footprint_buffer_gives_the_same_contour_s240() {
+        let pitch = -(7.0f32 / 53.).atan();
+        let (sp, cp) = pitch.sin_cos();
+        let p = Projection {
+            eye: [0., -18., 7.],
+            forward: [0., cp, sp],
+            right: [1., 0., 0.],
+            up: [0., -sp, cp],
+            tan_half: 25f32.to_radians().tan(),
+            aspect: 16. / 9.,
+        };
+        let mut kept = Vec::new();
+        for (nx, ny) in [(481u32, 271u32), (321, 181), (481, 271)] {
+            let (fresh, chord) = footprint(&p, nx, ny);
+            let kept_chord = footprint_into(&p, nx, ny, &mut kept);
+            assert_eq!(kept.len(), fresh.len(), "{nx}x{ny}");
+            assert_eq!(kept_chord.to_bits(), chord.to_bits(), "{nx}x{ny}");
+            for (a, b) in kept.iter().zip(&fresh) {
+                assert_eq!(a[0].to_bits(), b[0].to_bits());
+                assert_eq!(a[1].to_bits(), b[1].to_bits());
+            }
+        }
+        // La capacité prise au plus grand format sert au plus petit sans nouvelle demande.
+        let before = kept.capacity();
+        footprint_into(&p, 321, 181, &mut kept);
+        assert_eq!(kept.capacity(), before);
     }
 
     #[test]

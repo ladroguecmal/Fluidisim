@@ -54,6 +54,13 @@ d'instantanés viennent de pools dimensionnés par profil au démarrage. Le batt
 jamais de la mémoire. *(Ce qu'un profil a le droit de déclarer est fixé par **I-16**.)*
 → ADR-006
 
+*Amendement S240 ([ADR-145](adr/ADR-145-i-06-pour-l-hote-graphique.md)) : pour l'hôte graphique
+`viewer/`, I-06 se lit sur le **code du projet** — sa boucle d'image n'alloue rien en régime, et
+c'est mesuré par un allocateur compteur. Les allocations des dépendances verrouillées en S210/S211
+sont **comptées et publiées** avec chaque mesure de coût (133 par image et 18 509 octets au
+2026-09-15, constantes), non interdites : ce code n'est pas le nôtre. Cette lecture ne s'étend à
+aucune autre couche ; pour le cœur, I-06 garde sa forme stricte.*
+
 **I-07 — Tout domaine appartient à un référentiel.** Il reçoit `g_eff` par injection. Une constante
 `−9,81·Z` écrite en dur dans un solveur est un défaut bloquant.
 → ADR-002

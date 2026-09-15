@@ -622,6 +622,9 @@ pub struct FrameData<'a> {
     /// Ce que la visibilité a retiré à cet instant : sillage, impacts nés mais invisibles.
     pub culled_wake: bool,
     pub culled_impacts: usize,
+    /// S240, I-06 : contour de l'emprise, gardé d'une image à l'autre. Le premier contour d'un
+    /// format donne sa capacité au tampon ; aucune image suivante n'alloue.
+    footprint: Vec<[f32; 2]>,
 }
 impl<'a> FrameData<'a> {
     pub fn new(
@@ -661,6 +664,7 @@ impl<'a> FrameData<'a> {
             viewport: None,
             culled_wake: false,
             culled_impacts: 0,
+            footprint: Vec::new(),
         }
     }
     pub fn update(&mut self, seconds: f64, age: f64, enabled: bool) {
@@ -675,7 +679,9 @@ impl<'a> FrameData<'a> {
             )
             .expect("caméra dans le domaine B");
         // S235 : emprise de la grille sur l'eau, si la visibilité est demandée.
-        let footprint = self.viewport.filter(|_| self.cull).map(|(aspect, nx, ny)| {
+        // S240 : dans le tampon gardé — le contour ne coûte plus une allocation par image.
+        let mut framed = false;
+        if let Some((aspect, nx, ny)) = self.viewport.filter(|_| self.cull) {
             let [forward, right, up] = self.camera.vectors();
             let p = crate::lod::Projection {
                 eye,
@@ -685,8 +691,9 @@ impl<'a> FrameData<'a> {
                 tan_half: (50.0f32.to_radians() / 2.).tan(),
                 aspect,
             };
-            crate::lod::footprint(&p, nx, ny).0
-        });
+            crate::lod::footprint_into(&p, nx, ny, &mut self.footprint);
+            framed = true;
+        }
         // S235 : chaque impact à son âge ; un seul impact né à 0 retrouve le calcul S211–S234.
         let len = self.table.len();
         self.active = false;
@@ -694,9 +701,8 @@ impl<'a> FrameData<'a> {
         for (m, slot) in self.impacts.iter_mut().enumerate() {
             let local = slot.local_us(age).filter(|&us| enabled && us as f64 <= HORIZON * 1e6);
             let c = slot.center();
-            let seen = footprint
-                .as_ref()
-                .map_or(true, |poly| crate::lod::touches_disc(poly, [c[0] - eye[0], c[1] - eye[1]], RADIUS));
+            let seen = !framed
+                || crate::lod::touches_disc(&self.footprint, [c[0] - eye[0], c[1] - eye[1]], RADIUS);
             if local.is_some() && !seen {
                 self.culled_impacts += 1;
             }
@@ -709,13 +715,12 @@ impl<'a> FrameData<'a> {
                 self.active = true;
             }
         }
-        let wake_seen = footprint.as_ref().map_or(true, |poly| {
-            crate::lod::touches_rect(
-                poly,
+        let wake_seen = !framed
+            || crate::lod::touches_rect(
+                &self.footprint,
                 [WAKE_MIN[0] - eye[0], WAKE_MIN[1] - eye[1]],
                 [WAKE_MAX[0] - eye[0], WAKE_MAX[1] - eye[1]],
-            )
-        });
+            );
         let wake_time = wake_time(age).filter(|_| enabled);
         self.culled_wake = wake_time.is_some() && !wake_seen;
         // Hors champ : ni repli du levier temporel, ni plan de grille, ni cuisson (S235).
