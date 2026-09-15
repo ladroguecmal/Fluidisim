@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-15 00:37 +02:00
-Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python et GPU local disponibles)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-15 07:29 +02:00
+Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy et GPU local disponibles)
+Session en cours : S237 — J2 : surface géométriquement mobile dans le candidat δ
 Dernière session : S236 — composition sur l'union ; scène S235 admise par le cœur
 Session suivante : S237 — J2 : surface géométriquement mobile dans le candidat δ
 Maillons        : 0

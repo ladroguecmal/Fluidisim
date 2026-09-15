@@ -58,104 +58,50 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S236 — terminée
-Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python et GPU local disponibles)
-Entrée : « Continue », master propre à 5744c8d, trois copies au même commit, jeton libre,
-secteur. Base du cœur : 413 réussis, 5 ignorés.
+Session : S237 — en cours
+Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy et GPU local disponibles)
+Entrée : « Continue », master propre à f5f78bf, trois copies au même commit, jeton libre,
+secteur. Cœur : 419 réussis, 5 ignorés.
 
-**Objectif.** Que le **cœur** puisse composer et admettre la scène représentative S235.
-**Ce que la lecture a changé avant le plan.** (1) `mixed::admits` n'accepte un point que dans le
-domaine de **tous** les impacts : sur huit disques éloignés, l'intersection est presque vide, et la
-scène est refusée par le domaine avant toute pente. L'image, elle, rend « hors emprise, B seul »
-(ADR-126 règle 4). (2) Le balayage d'ADR-138 ne couvre que le disque de l'ancre : sûr pour
-l'intersection, **faux pour l'union** — deux impacts récents hors de portée de l'ancre y
-échapperaient. Donc un budget servi sur l'union demande d'abord une borne valide partout, avant
-d'être plus serrée.
-**Thèse à éprouver, calculée avant construction.** Sur l'union des domaines, un plancher
-**bidimensionnel** — maximum sur des cellules du plan de `Σ F_i(distance minimale)` +
-pression, raffiné par séparation — reste une borne sûre sans constante de Lipschitz (termes
-décroissants) et peut admettre la scène. Si la pression globale suffit à la faire refuser malgré
-une somme d'impacts exacte, le lot bascule vers la localisation de la pression (A261), sans rien
-construire d'autre.
-**Critères.** Borne ≥ pente réelle sur la scène et sur un contre-exemple construit ; mode
-intersection **identique au bit** ; mode union : perturbation nulle hors de son emprise ; garantie
-dans les deux sens d'ADR-128 conservée dans chaque mode ; coût d'annonce publié.
-**Arrêt.** Scène S235 admise par le cœur et reçue, ou constat chiffré de ce qui manque. Aucun
-seuil changé, aucune scène réduite.
+**Objectif.** Première surface **géométriquement mobile** dans le candidat δ MAC x-z : la frontière
+à pression imposée se trouve à la hauteur réelle `η(x)` et non plus au couvercle fixe `z₀` ; les
+mailles entrent et sortent du fluide ; l'advection quadratique est présente. Reçue contre une
+référence **non linéaire indépendante**.
+**Ce que la lecture fixe avant le plan.** Mode S233 : Dirichlet `p_dyn = ρg(η−z₀)` au couvercle
+`z₀ = nz·dx`, facteur de demi-maille 2 dans l'opérateur, η transporté par flux de colonnes jusqu'à
+`z₀`, advection retirée. Le dépôt possède un véhicule potentiel **non linéaire d'ordre 3** reçu
+contre Stokes (S193, `examples/support/nl_surface.rs`, ADR-122) : périodique de longueur `2L`,
+condition initiale paire, il donne l'onde stationnaire d'amplitude finie d'un bassin à murs.
+**Thèse.** Fonction hauteur sur la grille MAC ; condition de Dirichlet par **fluide fantôme**
+(Gibou) à la distance `θ·dx` de la surface, verticale et horizontale — opérateur symétrique, CG
+conservé ; flux de colonne intégré jusqu'à la hauteur mouillée de chaque face ; vitesses
+extrapolées dans la bande d'air ; niveau de référence au repos distinct du sommet du domaine, pour
+un repos exact. À petite amplitude, le mode mobile doit rejoindre S233 ; à amplitude finie, il doit
+produire l'harmonique `2k` que le mode linéaire ne peut pas produire.
+**Critères, déclarés avant construction.** Repos exact au bit à un niveau intérieur ; opérateur
+symétrique au bit ; volume conservé à l'arrondi ; petite amplitude à ≤1 % du mode linéaire S233 ;
+amplitude finie : profil contre HOS M=3 sur une période, erreur décroissante en raffinant et
+harmonique `2k` captée, le mode linéaire servant de témoin (harmonique nulle) ; tolérances de banc
+écrites en P2 avec leur motif, jamais ajustées après mesure. Refus atomiques : surface à moins
+d'une maille du fond ou du sommet, garde de pas, non-convergence ; zéro allocation.
+**Arrêt.** Mode mobile construit et reçu, ou constat chiffré de ce qui manque. Aucune ambition
+réduite ; déferlement, mouillage du fond, air, cavité et 3D restent hors lot et nommés.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [x] **P2** — diagnostic sur la série S235 : plancher actuel ; ADR-138 étendu à l'union ;
-  plancher 2D par séparation (pression globale, puis nulle hors emprise du sillage) ; bornes contre
-  la pente réelle S235 ; contre-exemple du trou d'ADR-138 sur l'union.
-- [x] **P3** — décision et ADR-142 si P2 conclut ; sinon bascule déclarée.
-- [x] **P4a** — cœur : `admits_union`, `slope_floor_union` (séparation, pool hôte, pression
-  locale ADR-137 sur cellules critiques), tests de la borne (≥ réelle, contre-exemple du trou
-  d'ADR-138 sur l'union, pool épuisé, chemin rapide).
-- [x] **P4b** — cœur : `sample_world_batch_union` ; tests (zéro hors emprise contre somme à la
-  main, intersection inchangée, deux sens d'ADR-128 au seuil) ; suite complète.
-- [x] **P5** — réception : série S235 admise par le cœur, marges réelles, coût du plancher,
-  suite complète du cœur.
-- [x] **P6** — rituel §6, file, feuille de route, jeton ; copies à synchroniser.
+- [ ] **P2** — lectures ciblées (ADR-122, SURFACE-LIBRE-NL-S193, API `nl_surface`, ADR-141, tests
+  δ surface) ; protocole écrit : modèle discret, gardes, domaine d'amplitude, tolérances et motifs.
+- [ ] **P3** — référence : onde stationnaire HOS M=3 (bassin 8×4 m, ka 0,01/0,1/0,2), séries
+  `η(x,t)` aux centres de colonnes ; recoupement sympy de l'ordre deux à petite amplitude.
+- [ ] **P4a** — cœur : géométrie mobile (ensemble fluide, `θ`, opérateur, second membre et
+  correction à Dirichlet mobile) ; tests repos exact et symétrie.
+- [ ] **P4b** — cœur : extrapolation, flux mouillé, advection, `step_surface_mobile` atomique ;
+  tests petite amplitude contre S233, volume, changement de topologie, refus, allocation.
+- [ ] **P5** — réception : banc MAC contre HOS, trois résolutions, deux amplitudes, harmonique,
+  témoin linéaire, coût ; document de validation.
+- [ ] **P6** — rituel §6, file, feuille de route, jeton ; copies à synchroniser.
 
 ### Notes de reprise
 
-Base : S235 — 49 refus / 161 instants, tous par majorant ; pente réelle ≤0,2154 ; plancher aux
-naissances = pression 0,175–0,202 + impacts 0,28–0,37. `mixed_water.rs` : `admits` (intersection,
-l. 158), `slope_floor_joint` (ancre, 8 cellules sur le rayon de l'ancre, l. 246).
-
-P2 (`--bornes-union`, logs `bornes_s236.log` puis `bornes_s236b.log`, CPU, viewer seul) :
-champs reconstruits comme `Prepared::build` (écart mono 0). Refus sur 161 instants et pire/π/7 :
-**actuel 49 (1,2510)** ; ADR-138 étendu à l'union 40 (1,1904) — plus serré que le cœur car il
-annule les termes au-delà de leur domaine, que `slope_floor_joint` ajoute ; **séparation 2D,
-pression globale : 32 (1,1528)**, 64–244 cellules, ≤2,7 ms ; pression nulle hors emprise du
-sillage : identique (tous les impacts sont dans l'emprise) ; **valeur atteinte par G : 31
-(1,1515)** → même une somme d'impacts exacte en position refuse : les termes eux-mêmes sont trop
-larges (pression 0,19 contre ≈0,07 réelle ; impacts anciens ≈0,11 au centre du neuf).
-**Certification** (séparation arrêtée dès que la plus grande cellule ≤ π/7 ; sur cellule ≤1 m de
-demi-côté au-dessus du seuil, pression = min(globale, ADR-137 locale)) : **32 / 32 instants
-certifiés**, majorants finaux 0,9835–0,9994 π/7, 92–128 cellules, 3–15 appels locaux, **3,0–
-13,4 ms**. Donc scène S235 admissible aux 161 instants : 129 par séparation à pression globale,
-32 avec pression locale sur cellules critiques. Réserve : ADR-137 = réception numérique, pas
-certificat f32 (**A258** entre dans le lot).
-Contre-exemple mal construit : ancre (0,0) neuve, deux impacts d'1 s confondus à 100 m → réelle
-0,1225 < plancher ADR-138 0,2539 (globaux 0,2126 / 0,2032 / 0,2032, bornes lâches à 1 s). Le trou
-de l'union demande deux impacts **nés au même instant** que l'ancre, ancre plus énergique — à
-construire en test du cœur (P4).
-
-P3 : ADR-142 (mode union ajouté, plancher certifié par séparation, pression locale ADR-137 sur
-cellules critiques ≤1 m, arrêt à 1 cm ou pool plein, annonce = refus au même `max_slope`).
-P4a : `code/water-core/src/mixed_union.rs` (rattaché à `mixed_water` comme `mixed_differential`),
-`admits_union`, `slope_floor_union`, `sample_world_batch_union`, `FloorCell`, `UnionFloor`,
-constantes `FLOOR_LOCAL_HALF` 1 m / `FLOOR_MIN_HALF` 1 cm / `FLOOR_INITIAL_SPLIT` 8. Quatre tests
-dans `tests_mixed_water.rs` : **trou d'ADR-138 sur l'union reproduit** — ancre ×1,3 d'énergie en
-(0,0), paire confondue à 100 m née au même instant : pente réelle **0,4252**, plancher ADR-138
-**0,2837** ; plancher union à 0,99·réelle non certifié (0,4252, 144 cellules), à 1,05·paire
-certifié (0,4252, 64 cellules). Échelle de seuils sur quatre impacts N64 recouvrants (réelle
-0,00118, somme 0,00461, maximum de G 0,00225) : certifié ⟹ réelle ≤ plancher ≤ seuil ; un
-certificat par séparation exigé (seuils 2 et 3 × réelle ajoutés après un premier passage où seul
-le chemin rapide certifiait). Pool de 64 cellules : non certifié, borne ≥ réelle ; pool vide :
-refus sans cellule. Chemin rapide identique au bit à `slope_floor` (un impact).
-**Garde de contrat S143 échouée, puis satisfaite** : la sélection des cellules critiques était une
-comparaison non déclarée à `max_slope`. Les trois sites du fichier réécrits sous la forme
-`budget > max_slope` et inscrits dans `SITES_CONNUS` (11 sites). Suite complète du cœur :
-**417 réussis, 5 ignorés**.
-
-P4b : deux tests de la requête sur le montage `fixture` (B, un impact N64 de 16 m, pression
-d'emprise [−8 ; 12]²). (1) Quatre points — disque et emprise, disque seul, emprise seule, aucun :
-hauteur de l'union **au bit** d'une somme à la main des seules perturbations couvrantes ; la requête
-intersection sert le premier et refuse les trois autres. Premier passage en échec **du test** :
-point (11,9 ; 11,9) non représentable au 1/2048 m, somme à la main au point brut au lieu du point
-local quantifié (piège S214) ; corrigé en sommant au point local et en prenant 11,875.
-(2) Échelle de 25 seuils de 0,9·réelle à 1,01·somme : plancher certifié ⟹ requête `Ok` et
-`UnionFloor` rendu identique à l'annonce, réelle ≤ plancher ≤ seuil ; non certifié ⟹ `Slope` ou
-`SlopeEnvelope` ; les deux issues présentes, **pression locale sollicitée**. Suite complète du
-cœur : **419 réussis, 5 ignorés** ; hôte construit.
-
-P5 (`--multi --union-coeur`, log `union_s236.log`, secteur 00:26–00:34) : **161 / 161 planchers
-certifiés, 0 requête refusée** sur 6 988 sondes ; pire plancher 0,9995 π/7 ; ≤128 cellules ; 355
-appels locaux ; plancher médiane 0,001 ms, max **12,0 ms** ; requête 6 988 points médiane
-**1 421 ms**, max 1 640 ms (≈0,2 ms/point : pression 4 096 modes sur CPU, pas le mode union) ;
-**écart à `FrameData::references` : η < 1e-9 m, pente 3e-8**. Document :
-[ADMISSION-UNION-S236](../docs/validation/ADMISSION-UNION-S236.md).
+Base : S236 — cœur 419/5 ; S233 mode linéaire (erreurs fines 0,066 % Terre / 0,017 % Lune).
