@@ -88,8 +88,11 @@ pas. Aucun seuil de banc modifié.
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [ ] **P2** — lectures (`project`, S231 test f64, S199 §5) ; protocole écrit ; borne `(n+1)ε`
+- [x] **P2** — lectures (`project`, S231 test f64, S199 §5) ; protocole écrit ; borne `(n+1)ε`
   dérivée pour l'opérateur δ (termes par ligne, second membre).
+  **Amendement P2** : `ω` devient diagnostic, pas seuil ; l'acceptation à stagnation se fait sur le
+  critère physique **déjà déclaré** de S199 (divergence ≤ 10⁻⁵), équivalent discret du résidu en
+  norme maximale — aucun nombre nouveau (voir notes).
 - [ ] **P3** — mesure du plancher : erreur inverse et résidu relatif minimal contre la taille
   (16 à 256 colonnes, deux seconds membres), outil de diagnostic dans le cœur.
 - [ ] **P4** — construction : erreur inverse composante par composante, détection de stagnation,
@@ -101,3 +104,11 @@ pas. Aucun seuil de banc modifié.
 
 Base : S237 — refus au pas 397, résidu 1,0492·10⁻⁶ figé 4 000/16 000/64 000 itérations,
 divergence 1,45·10⁻⁷, 16 384 mailles ; `Report` construit littéralement en un seul endroit.
+
+P2 : protocole `docs/validation/PRESSION-PLANCHER-S238.md` §1. Pourquoi l'amendement : un seuil
+sur `ω` exigeait une constante `n` d'opérations par ligne et un facteur de marge, deux nombres à
+fixer — alors que S199 a déclaré avant construction la tolérance physique de la projection, et que
+`div u = r/scale` (car `scale·k1 = −1`) en fait une norme maximale du résidu. Détection de stagnation
+par **non-décroissance stricte** du vrai résidu d'une relance à l'autre : aucun facteur. Le seuil
+10⁻⁶ reste premier pour garder les bits. Estimation d'avant mesure : un résidu au critère S199
+porté par le mode le plus lent donne `δu/u ≲ 10⁻⁵·(L/dx)/π² ≈ 1,3·10⁻⁴` à 128 colonnes.
