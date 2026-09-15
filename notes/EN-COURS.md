@@ -58,49 +58,59 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S238 — terminée
+Session : S239 — en cours
 Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy et GPU local disponibles)
-Entrée : « Continue », master propre à 17ca164, trois copies au même commit, jeton libre,
-secteur. Cœur : 425 réussis, 5 ignorés.
+Entrée : « Reprends le projet », master propre à e8cfc6f, trois copies au même commit, jeton
+libre (battement 09:31, horloge 18:19), secteur.
 
-**Objectif.** A272 : que la pression f32 de δ converge **à la précision que f32 peut affirmer**
-sur des domaines au-delà des 8 192 mailles de S231, sans relâcher ce qu'elle garantit.
-**Ce que la lecture fixe.** Le critère d'arrêt `‖b−Ap‖/‖b‖ ≤ 10⁻⁶` est hérité de S199 (candidat
-f64) ; S231 l'a tenu en f32 jusqu'à 128×64 avec des résidus déjà à 8,7·10⁻⁷. La tolérance
-**physique** déclarée en S199 porte sur la divergence projetée (`≤ 10⁻⁵`). Un résidu relatif est
-borné inférieurement par `κ·ε` : il croît avec la taille, alors que l'**erreur inverse
-composante par composante** (Oettli–Prager) `ω = max_i |r_i| / (|A||p| + |b|)_i` est atteignable
-à quelques `ε` quel que soit le conditionnement, et l'erreur d'évaluation de `r_i` en virgule
-flottante est bornée par `(n_i + 1)·ε·(|A||p| + |b|)_i` (Higham).
-**Thèse.** Un résidu indiscernable de l'arrondi de son propre calcul est la convergence f32 :
-l'accepter quand le vrai résidu **stagne**, et seulement alors, rend les cas S231–S237 au bit et
-reçoit le cas refusé de S237 ; une stagnation au-dessus de l'arrondi reste dégradée.
-**Critères, déclarés avant construction.** (1) Loi du plancher mesurée : résidu relatif minimal
-et `ω` en fonction de la taille. (2) Cas convergés selon l'ancien critère **identiques au bit**
-(empreinte S232, tests S231/S233/S237). (3) Cas S237 5 cm / 128 colonnes reçu, avec critères 5 et
-6 de S237 inchangés (profil ≤ 2 %, `b₂` ≤ 20 %). (4) Système sans solution (Neumann pur à second
-membre de moyenne non nulle) : **toujours dégradé**. (5) Solution acceptée au plancher contre la
-solution f64 du même système assemblé indépendamment (S231) : écart publié ; divergence ≤ 10⁻⁵
-(S199). (6) Coût : itérations gaspillées par la stagnation mesurées avant et après.
-**Arrêt.** Critère construit, ADR, cas reçu ; ou constat chiffré que l'erreur inverse ne suffit
-pas. Aucun seuil de banc modifié.
+**Objectif.** A273 : que la pression de δ **tienne la tolérance physique qu'elle a déclarée**
+(divergence projetée ≤ 10⁻⁵, S199 §5 critère 4) aux tailles qu'elle atteint désormais — ou qu'une
+requalification datée, à provenance physique, la remplace.
+**Ce que la lecture fixe.** Deux quantités de normes différentes. Le critère premier d'arrêt est
+un résidu **relatif en norme 2** : `‖b−Ap‖₂/‖b‖₂ ≤ 10⁻⁶`. La tolérance de S199 est une
+**norme maximale normalisée** du champ corrigé : `max|div u|·dx / max|u| ≤ 10⁻⁵`. L'identité
+`div u = r/scale` (S238 P4, écart mesuré 7·10⁻⁸, car `scale·k1 = −1`) les relie :
+`divergence = max|r|·dx / (|scale|·max|u|)`. Une borne sur `‖r‖₂` ne borne `max|r|` qu'au pire
+facteur près, et le rapport `‖b‖₂·dx/max|u|` dépend de la taille : **aucune valeur du critère
+premier ne garantit la tolérance physique**. Mesuré en S238 : 1,02·10⁻⁵ à 128×64 (bosse de
+`delta_precision`, domaine reçu par S231) et 1,58·10⁻⁵ à 256×128, sur des pas **convergés**.
+**Thèse.** Une tolérance déclarée avant construction est une **condition d'acceptation**, pas un
+diagnostic publié après coup. La boucle poursuit tant que la tolérance n'est pas tenue ; un pas
+qui ne peut pas la tenir — plafond ou plancher d'ADR-143 — est **dégradé**, et le déclare. Aucun
+nombre nouveau : 10⁻⁵ est celui de S199, 10⁻⁶ reste premier. La divergence exacte du champ
+corrigé se calcule dans la boucle avec les tampons existants (`u`/`w` libres avant la correction
+finale), donc sans allocation et sans estimateur.
+**Critères, déclarés avant construction.** (1) Loi mesurée : divergence contre taille à résidu
+relatif tenu, et itérations supplémentaires nécessaires pour atteindre 10⁻⁵ (famille S231 de 16 à
+256 colonnes ; bosse de `delta_precision`). (2) **Tout cas aujourd'hui accepté dont la divergence
+est déjà ≤ 10⁻⁵ reste identique au bit** (empreinte S232, tests S231/S233/S237, plancher S238).
+(3) Les deux cas d'A273 tiennent 10⁻⁵ ou sont **dégradés** : aucun pas accepté au-dessus de la
+tolérance. (4) Réception S237 5 cm / 128 colonnes conservée (profil ≤ 2 %, `b₂` ≤ 20 %) et
+plancher d'ADR-143 conservé. (5) Système sans solution : toujours dégradé. (6) Coût (ADR-131) :
+itérations et millisecondes par pas avant/après, techniques présentes/absentes et domaine.
+**Arrêt.** Règle construite, ADR, cas reçus ; ou constat chiffré que f32 ne peut pas tenir 10⁻⁵ à
+ces tailles, et alors requalification datée à provenance, jamais un seuil choisi après coup.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [x] **P2** — lectures (`project`, S231 test f64, S199 §5) ; protocole écrit ; borne `(n+1)ε`
-  dérivée pour l'opérateur δ (termes par ligne, second membre).
-  **Amendement P2** : `ω` devient diagnostic, pas seuil ; l'acceptation à stagnation se fait sur le
-  critère physique **déjà déclaré** de S199 (divergence ≤ 10⁻⁵), équivalent discret du résidu en
-  norme maximale — aucun nombre nouveau (voir notes).
-- [x] **P3** — mesure du plancher : erreur inverse et résidu relatif minimal contre la taille
-  (16 à 256 colonnes, deux seconds membres), outil de diagnostic dans le cœur.
-- [x] **P4** — construction : erreur inverse composante par composante, détection de stagnation,
-  arrêt au plancher, champ de rapport ; tests (bits anciens, système sans solution, f64).
-- [x] **P5** — réception : S237 5 cm à 128 colonnes, empreintes, `delta_precision`, coût ; ADR.
-- [x] **P6** — rituel §6, file, feuille de route, jeton ; copies à synchroniser.
+- [ ] **P2** — lectures ciblées (`project`, `delta_precision`, S199 §5, S231) ; protocole écrit
+  avant mesure : ce que la tolérance mesure, pourquoi le critère premier ne la borne pas.
+- [ ] **P3** — mesure de la loi : divergence contre taille à résidu tenu, itérations
+  supplémentaires pour 10⁻⁵, et divergence atteignable au plancher f32.
+- [ ] **P4** — construction : la tolérance devient condition d'acceptation dans la boucle ;
+  tests (bits des cas conformes, cas d'A273, système sans solution).
+- [ ] **P5** — réception : S237 5 cm à 128 colonnes, empreintes, `delta_precision`, coût ; ADR.
+- [ ] **P6** — rituel §6, file, feuille de route, jeton ; fermeture des trois copies.
 
 ### Notes de reprise
+
+(S239 — vide à l'ouverture. Les notes de S238 sont conservées ci-dessous jusqu'au premier
+relevé de S239, puis remplacées.)
+
+---
+
+Notes de S238, conservées pour référence immédiate :
 
 Base : S237 — refus au pas 397, résidu 1,0492·10⁻⁶ figé 4 000/16 000/64 000 itérations,
 divergence 1,45·10⁻⁷, 16 384 mailles ; `Report` construit littéralement en un seul endroit.

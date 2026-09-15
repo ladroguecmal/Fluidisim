@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-15 09:31 +02:00
+JETON            : occupé
+Battement        : 2026-09-15 18:22 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy et GPU local disponibles)
-Session en cours : aucune
+Session en cours : S239 — A273 : tolérance physique de la pression δ aux grandes tailles
 Dernière session : S238 — la pression f32 de δ s'arrête à sa précision représentable (ADR-143)
-Session suivante : S239 — A273 : tolérance physique de la pression δ aux grandes tailles
+Session suivante : à déterminer en fin de S239
 Maillons        : 0
 
 ```
