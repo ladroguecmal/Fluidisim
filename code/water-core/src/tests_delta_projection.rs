@@ -906,3 +906,44 @@ fn mobile_projection_keeps_rest_exact_at_any_level_s237() {
         assert!(v.pressure().iter().chain(v.velocity_u()).chain(v.velocity_w()).all(|x| x.to_bits() == 0), "niveau {rest}");
     }
 }
+
+/// S239 P3 (A273) — loi de la tolérance physique contre la taille, **avant** toute règle.
+/// Pour chaque grille et chaque fond : au point d'arrêt, `ρ = ‖r‖₂/‖b‖₂`, `θ = max|r|/‖r‖₂`,
+/// `D = max|div u|·dx/max|u|` et `Λ = D/(ρ·θ)` ; balayage du critère premier pour compter les
+/// itérations qui séparent la convergence déclarée de `D ≤ 10⁻⁵`. Plafond 20 000 comme le banc.
+#[test]
+#[ignore = "mesure S239, lancée explicitement (plusieurs minutes)"]
+fn tolerance_law_against_size_s239() {
+    for nx in [16usize, 32, 64, 128, 256] {
+        let nz = nx / 2;
+        let dx = 8. / nx as f32;
+        for cut in [false, true] {
+            let ground: Vec<f32> = (0..nx).map(|i| if cut {
+                let d = ((i as f32 + 0.5) * dx - 3.) / 1.2;
+                0.4 + 0.6 * (-d * d).exp()
+            } else { 0.5 }).collect();
+            let eta: Vec<f32> = (0..nx)
+                .map(|i| 4. + 0.01 * (std::f32::consts::TAU * (i as f32 + 0.5) / nx as f32).sin())
+                .collect();
+            for target in [1e-6f64, 3e-7, 1e-7, 3e-8] {
+                let mut v = mobile_volume(nx, nz, dx, &ground);
+                v.set_surface(&eta).unwrap();
+                PRESSURE_TOL_OVERRIDE.with(|c| c.set((target * target) as f32));
+                TOLERANCE_TRACE_ON.with(|c| c.set(true));
+                TOLERANCE_TRACE.with(|t| t.borrow_mut().clear());
+                let r = v.step(0.002, 20_000, &Jobs).unwrap();
+                TOLERANCE_TRACE_ON.with(|c| c.set(false));
+                PRESSURE_TOL_OVERRIDE.with(|c| c.set(0.));
+                let trace = TOLERANCE_TRACE.with(|t| t.borrow().clone());
+                let (_, rho, theta, d) = trace.last().copied().unwrap_or((0, 0., 0., 0.));
+                let lambda = if rho > 0. && theta > 0. { d / (rho * theta) } else { 0. };
+                println!(
+                    "TOLERANCE_S239 nx={nx} mailles={} fond={} cible={target:.0e} it={} rho={rho:.4e} theta={theta:.4e} lambda={lambda:.4e} D={d:.4e} relances={} degrade={} residu={:.4e} divergence_rapport={:.4e} plancher={}",
+                    nx * nz, if cut { "bosse" } else { "plat" }, r.iterations, trace.len(),
+                    r.degraded, r.residual, r.divergence, r.floor
+                );
+                if (r.divergence <= 1e-5 && !r.degraded) || r.floor || r.iterations >= 20_000 { break; }
+            }
+        }
+    }
+}

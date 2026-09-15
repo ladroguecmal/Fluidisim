@@ -60,6 +60,14 @@ thread_local! {
     // S238 P5 : le certificat d'arrondi devance le cycle partout où il a été mesuré ; les tests le
     // retirent pour éprouver la détection de cycle seule.
     pub(crate) static ROUNDOFF_CERTIFICATE_OFF: core::cell::Cell<bool> = const { core::cell::Cell::new(false) };
+    // S239 P3 (A273) : trace de la tolerance physique — iterations, residu relatif,
+    // concentration du residu max|r|/||r||2, divergence projetee du champ corrige.
+    pub(crate) static TOLERANCE_TRACE_ON: core::cell::Cell<bool> = const { core::cell::Cell::new(false) };
+    pub(crate) static TOLERANCE_TRACE: core::cell::RefCell<Vec<(u32, f64, f64, f64)>> =
+        const { core::cell::RefCell::new(Vec::new()) };
+    // S239 P3 : abaissement du critere premier, pour mesurer combien d'iterations separent la
+    // convergence declaree de la tolerance physique. Zero = aucun remplacement.
+    pub(crate) static PRESSURE_TOL_OVERRIDE: core::cell::Cell<f32> = const { core::cell::Cell::new(0.) };
 }
 
 /// Domaine local, cellules carrées. `z₀ = nz·dx` est le couvercle.
@@ -760,6 +768,8 @@ impl Volume {
         let mut rz = if jacobi { self.dot_prec(&self.res, jobs, ctl)? } else { b2 };
         let mut it = 0;
         let tol = 1e-12_f32;
+        #[cfg(test)]
+        let tol = { let o = PRESSURE_TOL_OVERRIDE.with(|c| c.get()); if o > 0. { o } else { tol } };
         // À convergence récurrente, vérifier b-Ap puis redémarrer depuis le vrai résidu.
         // Le plafond porte sur toutes les itérations, corrections comprises.
         // S233 : une hausse isolée du résidu arrondi n'est pas une preuve de stagnation.
@@ -827,6 +837,15 @@ impl Volume {
                 let relative = if b2 > 0. { ((actual / b2) as f64).sqrt() } else { 0. };
                 PRESSURE_TRACE.with(|t| t.borrow_mut().push((it, relative, omega)));
             }
+            // S239 P3 (A273) : la tolerance physique du champ corrige, a chaque vrai residu.
+            #[cfg(test)]
+            if TOLERANCE_TRACE_ON.with(|c| c.get()) {
+                let theta = if actual > 0. { (self.residual_max() as f64) / (actual as f64).sqrt() } else { 0. };
+                let relative = if b2 > 0. { ((actual / b2) as f64).sqrt() } else { 0. };
+                self.correct_into_uw(k1, ctl, Phase::Pressure)?;
+                let d = self.divergence_metric(ctl, Phase::Pressure)?;
+                TOLERANCE_TRACE.with(|t| t.borrow_mut().push((it, relative, theta, d)));
+            }
             if actual <= tol * b2 || it >= max_iters || it == before_iterations {
                 break actual;
             }
@@ -861,15 +880,41 @@ impl Volume {
             }
         };
         // Correction : `u = u* − (dt/ρ)·∂p/∂x`, demi-maille au couvercle.
-        ctl.check(Phase::Correct)?;
-        budget::copy(&self.us, &mut self.u, ctl, Phase::Correct)?;
-        budget::copy(&self.ws, &mut self.w, ctl, Phase::Correct)?;
-        if jacobi {
-            self.correct_mobile(k1, ctl)?;
-        } else {
+        self.correct_into_uw(k1, ctl, Phase::Correct)?;
+        let residual = if b2 > 0. { (actual_rr / b2).sqrt() } else { 0. };
+        let divergence = self.divergence_metric(ctl, Phase::Diagnostics)?;
+        // S238, ADR-143 : à cycle certifié, la pression est au plancher de f32 ; le pas est reçu si la
+        // tolérance physique de S199 est tenue, dégradé sinon. Sans cycle, rien ne change.
+        let floor = floor_stop && divergence <= PROJECTION_DIVERGENCE_TOLERANCE;
+        // `res` porte encore le vrai résidu du `p` publié : correction et diagnostic de divergence ne
+        // touchent ni `p`, ni `rhs`, ni `res`.
+        let backward_error = self.backward_error(ctl)? as f64;
+        Ok(Report {
+            iterations: it,
+            degraded: b2 > 0. && actual_rr > tol * b2 && !floor,
+            residual: residual as f64,
+            divergence,
+            floor: floor_stop,
+            backward_error,
+        })
+    }
+
+    /// Correction du champ prédit **dans les tampons de travail** `u`/`w` (mode fixe ou mobile).
+    /// Ces deux tampons sont libres pendant `project` : `run` et les pas de surface ont mis les
+    /// champs publiés à l'abri dans `saved_*` avant l'appel, et c'est eux que le contrat `Err`
+    /// restaure. S239 : source unique de la correction, appelée par la queue de `project` et par
+    /// le calcul de la tolérance physique dans la boucle.
+    fn correct_into_uw(&mut self, k1: f32, ctl: &mut Control, phase: Phase) -> Result<(), Error> {
+        ctl.check(phase)?;
+        let (nx, nz, dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
+        budget::copy(&self.us, &mut self.u, ctl, phase)?;
+        budget::copy(&self.ws, &mut self.w, ctl, phase)?;
+        if self.mobile {
+            return self.correct_mobile(k1, ctl);
+        }
         for i in 1..nx {
             for k in 0..nz {
-                ctl.poll(Phase::Correct)?;
+                ctl.poll(phase)?;
                 let f = self.fu(i, k);
                 if self.open_u[f] == 0. {
                     continue;
@@ -882,7 +927,7 @@ impl Volume {
         }
         for i in 0..nx {
             for k in 1..=nz {
-                ctl.poll(Phase::Correct)?;
+                ctl.poll(phase)?;
                 let f = self.fw(i, k);
                 if self.open_w[f] == 0. {
                     continue;
@@ -902,36 +947,44 @@ impl Volume {
                 }
             }
         }
-        }
-        let residual = if b2 > 0. { (actual_rr / b2).sqrt() } else { 0. };
+        Ok(())
+    }
+
+    /// `D = max|div u|·dx / max|u|` sur le champ corrigé présent dans `u`/`w` : la tolérance
+    /// **physique** déclarée avant construction par S199 §5 critère 4. Consomme `tmp`, libre dès
+    /// que le vrai résidu en a été tiré. Source unique : rapport de fin et boucle l'appellent.
+    fn divergence_metric(&mut self, ctl: &mut Control, phase: Phase) -> Result<f64, Error> {
         let mut tmp = core::mem::take(&mut self.tmp);
-        let result = self.divergence(&self.u, &self.w, &mut tmp, ctl, Phase::Diagnostics);
+        let result = self.divergence(&self.u, &self.w, &mut tmp, ctl, phase);
         self.tmp = tmp;
         result?;
+        let mobile = self.mobile;
         let mut dmax = 0f32;
         for (c, v) in self.tmp.iter().enumerate() {
-            ctl.poll(Phase::Diagnostics)?;
+            ctl.poll(phase)?;
             // S237 : les mailles d'air portent des vitesses extrapolées, pas une contrainte.
-            if jacobi && !self.wet_cell(c) { continue; }
+            if mobile && !self.wet_cell(c) { continue; }
             dmax = dmax.max(v.abs());
         }
         let mut umax = 0f32;
-        for v in self.u.iter().chain(&self.w) { ctl.poll(Phase::Diagnostics)?; umax = umax.max((*v as f32).abs()); }
-        let divergence = (if umax > 0. { dmax * dx / umax } else { 0. }) as f64;
-        // S238, ADR-143 : à cycle certifié, la pression est au plancher de f32 ; le pas est reçu si la
-        // tolérance physique de S199 est tenue, dégradé sinon. Sans cycle, rien ne change.
-        let floor = floor_stop && divergence <= PROJECTION_DIVERGENCE_TOLERANCE;
-        // `res` porte encore le vrai résidu du `p` publié : correction et diagnostic de divergence ne
-        // touchent ni `p`, ni `rhs`, ni `res`.
-        let backward_error = self.backward_error(ctl)? as f64;
-        Ok(Report {
-            iterations: it,
-            degraded: b2 > 0. && actual_rr > tol * b2 && !floor,
-            residual: residual as f64,
-            divergence,
-            floor: floor_stop,
-            backward_error,
-        })
+        for v in self.u.iter().chain(&self.w) { ctl.poll(phase)?; umax = umax.max(v.abs()); }
+        Ok((if umax > 0. { dmax * self.domain.dx / umax } else { 0. }) as f64)
+    }
+
+    /// S239 P3 : norme maximale du vrai résidu sur les **lignes du système**, pour la
+    /// concentration `θ = max|r| / ‖r‖₂` de TOLERANCE-PRESSION-S239 §1.2.
+    #[cfg(test)]
+    fn residual_max(&self) -> f32 {
+        let (nx, nz) = (self.domain.nx, self.domain.nz);
+        let mut worst = 0f32;
+        for i in 0..nx {
+            for k in 0..nz {
+                let c = self.c(i, k);
+                let row = if self.mobile { self.wet(i, k) } else { self.frac[c] > 0. };
+                if row { worst = worst.max(self.res[c].abs()); }
+            }
+        }
+        worst
     }
 
     /// Un pas à plafond d'itérations, sans allocation. Un `Err` numérique conserve

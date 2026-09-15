@@ -105,8 +105,28 @@ ces tailles, et alors requalification datée à provenance, jamais un seuil choi
 
 ### Notes de reprise
 
-(S239 — vide à l'ouverture. Les notes de S238 sont conservées ci-dessous jusqu'au premier
-relevé de S239, puis remplacées.)
+P2 : protocole `docs/validation/TOLERANCE-PRESSION-S239.md`. Decomposition exacte
+`D = rho.theta.Lambda` a partir de `div u = r/scale` : le critere premier ne borne que `rho`.
+
+P3 : instrument = `correct_into_uw` + `divergence_metric` (sources uniques, appelees par la queue
+de `project` et par la boucle), trace `TOLERANCE_TRACE`, remplacement de seuil `PRESSURE_TOL_OVERRIDE`
+(tests seulement). `divergence_metric` rend exactement la divergence du rapport (colonnes identiques).
+**Loi** : `Lambda` double a chaque raffinement (17,8 / 33,8 / 69,3 / 154,7 / 362) donc second membre a
+l'echelle de la maille ; `theta` decroit plus lentement que `N^-1/2` (0,314 -> 0,0437) ; leur produit
+croit d'environ 30 % par raffinement. Deux cas d'A273 confirmes : 128x64 bosse `D` = 1,021e-5,
+256x128 plat 1,578e-5 et bosse 1,691e-5.
+**Resserrement** : 128x64 bosse a cible 3e-7 -> `D` = 2,99e-6, **370 iterations contre 347 (+6,6 %)**,
+tolerance tenue. **256x128 plat a cible 3e-7 -> plancher d'ADR-143 atteint** a `rho` = 7,74e-7,
+`D` = 1,093e-5, **degrade** : f32 ne peut pas tenir 1e-5 a 32 768 mailles avec cet operateur et ce
+second membre. Le manque est de 9 %.
+**Consequence pour la regle** : la tolerance devient condition d'acceptation ; jusqu'a 8 192 mailles
+elle est tenue pour ~7 % d'iterations en plus ; a 32 768 le pas devient degrade au lieu d'etre
+annonce recu au-dessus de la tolerance. 32 768 mailles n'a jamais ete recu (S231 : 8 192 ; S238 :
+16 384 en mode mobile, ou `D` valait 1,45e-7 — la reception S237/S238 n'est donc pas touchee).
+Remede non explore, a mettre en file : residu recalcule en f64 (le plancher vient de l'evaluation
+f32 de `r = b - Ap`), ou preconditionneur plus fort.
+Empreinte S232 `delta_filters` `0xc5ab1eadb094d058` : a rejouer en P5, un cas y depasse peut-etre
+la tolerance (le 128 bosse la depasse).
 
 ---
 

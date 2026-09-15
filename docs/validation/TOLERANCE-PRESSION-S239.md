@@ -86,3 +86,64 @@ Aucun nombre nouveau : `10⁻⁶` est celui de S231, `10⁻⁵` celui de S199.
 Règle construite, ADR, cas reçus. **Ou** constat chiffré que f32 ne peut pas tenir `10⁻⁵` à ces
 tailles — et alors une requalification datée de la tolérance, à provenance physique, jamais un
 seuil relevé après coup pour obtenir du vert.
+
+## 2. La loi, mesurée avant la règle
+
+Test ignoré `tolerance_law_against_size_s239`. Un pas depuis le repos, `dt = 2 ms`, domaine 8 × 4 m,
+surface `4 + 0,01·sin`, deux fonds : plat (`0,5`) et en bosse (`0,4 + 0,6·e^{−d²}`, celui de
+`delta_precision`). Plafond 20 000 itérations, celui du banc. `ρ`, `θ` et `Λ` sont relevés à la
+relance qui arrête le solveur ; `D` calculée par le même code que le rapport, et identique à lui.
+
+**Au critère premier actuel (`ρ ≤ 10⁻⁶`)** :
+
+| grille | mailles | fond | itérations | `ρ` | `θ` | `Λ` | `D` |
+|---|---:|---|---:|---:|---:|---:|---:|
+| 16×8 | 128 | plat | 28 | 6,84·10⁻⁷ | 0,314 | 17,8 | 3,82·10⁻⁶ |
+| 16×8 | 128 | bosse | 52 | 5,33·10⁻⁷ | 0,299 | 17,3 | 2,76·10⁻⁶ |
+| 32×16 | 512 | plat | 58 | 4,96·10⁻⁷ | 0,143 | 33,8 | 2,40·10⁻⁶ |
+| 32×16 | 512 | bosse | 95 | 6,35·10⁻⁷ | 0,179 | 33,3 | 3,79·10⁻⁶ |
+| 64×32 | 2 048 | plat | 112 | 7,88·10⁻⁷ | 0,0936 | 69,3 | 5,12·10⁻⁶ |
+| 64×32 | 2 048 | bosse | 179 | 8,70·10⁻⁷ | 0,1388 | 68,8 | 8,30·10⁻⁶ |
+| 128×64 | 8 192 | plat | 219 | 7,16·10⁻⁷ | 0,0728 | 154,7 | 8,07·10⁻⁶ |
+| 128×64 | 8 192 | bosse | 347 | 8,01·10⁻⁷ | 0,0829 | 153,8 | **1,021·10⁻⁵** |
+| 256×128 | 32 768 | plat | 417 | 9,97·10⁻⁷ | 0,0437 | 362,0 | **1,578·10⁻⁵** |
+| 256×128 | 32 768 | bosse | 671 | 9,50·10⁻⁷ | 0,0494 | 360,2 | **1,691·10⁻⁵** |
+
+**Ce que la décomposition rend lisible.**
+
+1. **`Λ` double à chaque raffinement** — 17,8 / 33,8 / 69,3 / 154,7 / 362,0, soit `Λ ∝ n_x`. Le §1.2
+   annonçait `Λ` constant pour un second membre **lisse à l'échelle physique** : il ne l'est pas. Un
+   `Λ ∝ n_x` signifie `‖div u*‖₂/√N ∝ max|u|/dx` — la divergence prédite vit **à l'échelle de la
+   maille**, pas à celle de l'écoulement. C'est attendu d'un champ obtenu en un pas depuis le repos,
+   dont la divergence est portée par la couche de surface et le fond coupé, et non réparti.
+2. **`θ` décroît plus lentement que `N^(−1/2)`** — 0,314 / 0,143 / 0,0936 / 0,0728 / 0,0437, soit des
+   rapports 0,46 / 0,65 / 0,78 / 0,60 par raffinement, quand un résidu étalé donnerait 0,50 et un
+   résidu concentré 1,00. Le résidu du gradient conjugué **n'est ni étalé ni ponctuel**.
+3. **Leur produit croît** : `θ·Λ` = 5,6 / 4,8 / 6,5 / 11,3 / 15,8 (plat). À `ρ` fixé, `D` croît donc
+   d'environ 30 % par raffinement. **La taille seule fait franchir la tolérance**, et aucune valeur du
+   critère premier ne l'en empêche : c'est A273, mesurée et non plus constatée.
+4. Le fond en bosse aggrave `θ` sans toucher `Λ` : il concentre le résidu, il ne change pas la forme
+   du second membre.
+
+**En resserrant le critère premier** (remplacement de seuil réservé aux tests) :
+
+| grille | fond | cible | itérations | `ρ` | `D` | issue |
+|---|---|---:|---:|---:|---:|---|
+| 128×64 | bosse | 10⁻⁶ | 347 | 8,01·10⁻⁷ | 1,021·10⁻⁵ | au-dessus de la tolérance |
+| 128×64 | bosse | 3·10⁻⁷ | **370** | 2,75·10⁻⁷ | **2,99·10⁻⁶** | tenue, **+6,6 % d'itérations** |
+| 256×128 | plat | 10⁻⁶ | 417 | 9,97·10⁻⁷ | 1,578·10⁻⁵ | au-dessus de la tolérance |
+| 256×128 | plat | 3·10⁻⁷ | 448 | 7,74·10⁻⁷ | **1,093·10⁻⁵** | **plancher d'ADR-143**, dégradé |
+
+**Le résultat qui tranche.** À 8 192 mailles, la tolérance de S199 est **tenue pour 7 % d'itérations
+en plus**. À 32 768 mailles, elle ne l'est **pas** : le certificat d'arrondi d'ADR-143 arrête le
+solveur à `ρ = 7,7·10⁻⁷`, `D = 1,09·10⁻⁵`, et aucune itération supplémentaire ne peut abaisser
+`max|r|`, qui est alors indiscernable de l'arrondi de son propre calcul. **f32 manque la tolérance
+de 9 % à 32 768 mailles** avec cet opérateur et ce second membre. 32 768 mailles n'a jamais été reçu
+(S231 : 8 192 ; S238 : 16 384 en mode mobile, où `D` valait 1,45·10⁻⁷).
+
+**Impasse de l'instrument, à ne pas reproduire.** Abaisser le seuil *dès le départ* place le solveur
+dans un régime où le résidu **récurrent** ne réclame jamais la convergence : la boucle interne ne
+ressort pas, aucune relance n'a lieu, et **le certificat d'arrondi — qui ne vit qu'au point de
+relance — n'est jamais consulté**. Le cas 256×128 en bosse a ainsi consommé le plafond de 20 000
+itérations sans verdict, et la mesure a été abandonnée. La règle du §1.4 n'a pas ce défaut : elle
+atteint d'abord le critère premier, et c'est **là**, à la relance, que le certificat est consulté.
