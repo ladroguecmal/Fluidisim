@@ -39,6 +39,7 @@
 - [Plancher de la pression f32 de δ : arrêt certifié et acceptation à la tolérance S199](validation/PRESSION-PLANCHER-S238.md).
 - [Tolérance physique de la pression de δ : loi contre la taille, lignes franches et lignes à fantôme](validation/TOLERANCE-PRESSION-S239.md).
 - [Allocations par image de l'hôte GPU : I-06 mesurée, et un suspect de gigue disculpé](validation/ALLOCATIONS-HOTE-S240.md).
+- [Préparation CPU du sillage : la loi contre les tronçons, et le poste dominant](validation/PREPARATION-SILLAGE-S242.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).

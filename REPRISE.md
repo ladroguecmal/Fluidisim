@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-15 20:10 +02:00
+JETON            : libre
+Battement        : 2026-09-15 20:29 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web disponibles)
-Session en cours : S242 — J1-bis : la préparation CPU du sillage, poste dominant du budget
-Dernière session : S241 — Niagara Fluids lu comme comparable ; l'ordre des obstacles de la 3D renversé
-Session suivante : à déterminer en fin de S242
-Maillons        : 1
+Session en cours : aucune
+Dernière session : S242 — la préparation du sillage ne croît plus avec l'histoire du journal
+Session suivante : S243 — le parallélisme CPU (SPEC-004), prérequis partagé du sillage et de δ
+Maillons        : 0
 
 ```
 
@@ -77,8 +77,10 @@ Ne pas relire le journal, les leçons ou tous les ADR intégralement à chaque r
 
 État à S240 : B/W et un afficheur existent ; scène multi-sources dessinée, visibilité au bit, composée
 et admise par le cœur (ADR-142) ; **la boucle d'image de l'hôte n'alloue rien** pour le code du projet,
-la pile verrouillée 133 fois par image, constantes (ADR-145). Le poste dominant du budget de l'hôte est désormais
-la **préparation CPU du sillage** (3,17 ms médian contre 0,44 ms de GPU eau). Côté δ, le coût mesuré
+la pile verrouillée 133 fois par image, constantes (ADR-145). Le poste dominant du budget de l'hôte est
+`ModalPressure::sample` dans la préparation du sillage — **87 %** de ses 3,1 ms, contre 0,44 ms de
+GPU eau (S242) ; la part qui croissait avec les tronçons achevés est supprimée, au bit. Le projet
+n'a **aucun fil d'exécution**. Côté δ, le coût mesuré
 dépasse le profil de deux à trois ordres de grandeur dès 2 048 mailles, **aucune technique de coût
 n'ayant été tentée** (A276, [comparables](docs/COMPARABLES-EXTERNES.md)). δ MAC x-z possède une **surface géométriquement mobile** reçue contre
 l'onde stationnaire HOS d'ordre 3 (surface graphe, sans 3D, cavité, scénario B3 ni I-05 complet) ; sa

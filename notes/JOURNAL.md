@@ -12447,3 +12447,67 @@ devant A275, qui se remesurera après lui. V, B2, bathymétrie et angles rasants
 ouverte, J1-bis reporté), feuille de route, index, `COMPARABLES-EXTERNES` créé. Invariants relus :
 **I-14** (aucune valeur externe n'est devenue une provenance) et le §5 de REPRISE (aucun fait externe
 transformé en hypothèse acquise). Maillons 1.
+
+## S242 — 2026-09-15 — Ce n'était pas 2 ms à gagner, c'était un terme qui grandissait
+
+**Entrée.** « Continue », master propre à `39a2af8`, une seule copie, jeton libre, secteur,
+**Maillons 1**. Claude Code, Opus 5. Plan `fe10656`, protocole et banc `0b89042`, mesure `e2a7774`,
+construction et réception `a6e44f1`.
+
+**Capacité reçue.** La préparation CPU du sillage **ne dépend plus du nombre de tronçons achevés**,
+c'est-à-dire de l'histoire du journal. Consommateur : le chemin d'image de l'hôte, rejoué
+(`--verify`, `--retour`, `--cadence`) ; preuve
+[PREPARATION-SILLAGE-S242](../docs/validation/PREPARATION-SILLAGE-S242.md), **six empreintes des
+4 096 coefficients publiés identiques** avant et après, sur quatre exécutions.
+
+**La thèse déclarée était fausse dans sa grandeur, et la mesure l'a dit avant toute construction.**
+Le plan visait les 98 304 tests par image que coûtait la sélection des tronçons. Mesuré après le
+forçage, où **aucun** tronçon n'est actif et où tout ce tri est donc perdu : **3,7 µs par tronçon**,
+soit 0,0595 ms entre 8 et 24 segments — **2 %** des 3,17 ms. Le protocole §1.5 avait prévu ce cas.
+
+**Ce que la même mesure a désigné.** Par différence entre deux fenêtres à segments égaux : coût fixe
+par nœud **76 ns** ; coût d'un tronçon **actif** **0,87 ms** sur 4 096 nœuds, soit 211 ns par nœud.
+**Le poste est `ModalPressure::sample` : 2,60 ms sur 2,97, soit 87 %** de la préparation en forçage —
+cinq à sept `sin_cos` déterministes par nœud et par tronçon actif.
+
+**Une impasse qu'il faut avoir payée une fois.** `Complex::phase(negative(p))` semble être le conjugué
+de `Complex::phase(p)`, donc gratuit. Il ne l'est pas **au bit** : `sin_cos` reconstruit l'angle par
+quadrant depuis l'entier `2³⁰ − W`, pas par soustraction flottante, et à l'origine le zéro signé
+diffère. Même chose pour « pendant le forçage, la rotation libre est l'identité ». **Réduire les
+`sin_cos` change des bits publiés** : c'est un lot avec son relevé (A277), pas une simplification.
+
+**Ce qui a été construit, et un témoin qui est tombé du travail.** La sélection est hissée : part
+repliée pour tous les nœuds, puis chaque tronçon **actif** — et lui seul — parcourt les nœuds ; mêmes
+termes, même accumulateur, même ordre. Une **seconde** variante avait été écrite : trier sur la
+rangée 0 en gardant l'imbrication. Elle ne gagne rien — la ligne est déjà contiguë, ce n'est pas la
+lecture qui coûte mais la boucle — et c'est ce qui l'a rendue utile : **sémantiquement neutre, elle
+mesure +2,6 à +7,7 %** en fenêtre de forçage. Le vrai changement y mesurait +0,5 à +2,4 % : **plus
+petit que le témoin, donc non attribuable**, et le document ne l'attribue pas.
+
+**Réception.** Après forçage, la médiane **croissait de 19 % entre 8 et 24 segments** (0,3114 →
+0,3709 ms) ; elle tient désormais entre **0,293 et 0,308 ms sans aucune tendance** sur trois
+exécutions — **−19 %** à 24 segments. `VERIFY` **0,368476 mm**, `RETOUR` **0 image différente** sur
+31, suite `code/` **431 réussis, 0 échec, 12 ignorés**, allocations de l'hôte inchangées (`update` 0,
+image 133 / 18 509 o). Hôte : CPU 3,9877 ms médian contre 4,0367 en S240 — dans le bruit, comme
+attendu puisque la scène est en forçage.
+
+**Ce qui est réellement gagné.** Pas une constante : **un terme de croissance**. Au tarif mesuré,
+une partie qui aurait accumulé 200 tronçons payait **0,74 ms par image** — plus du tiers du budget de
+toute l'eau — pour des termes qui ne contribuent à rien. Elle paie zéro.
+
+**Non fait.** Le poste dominant reste entier. Un seul nombre de nœuds, une recette, une machine, un
+`dt`. La fenêtre de forçage de ce banc est trop bruitée pour y trancher quelques pour cent.
+
+**Suite.** La technique qui attaque `sample` est le **parallélisme CPU**, et ce projet n'a **aucun
+fil d'exécution** : `JobSystem` n'expose qu'une réduction ordonnée, et la seule implémentation est
+séquentielle. C'est un prérequis **partagé** — il sert la préparation du sillage *et* le coût de δ
+(A276). **S243 : le parallélisme CPU**, interface SPEC-004, ordonnancement déterministe (la boucle
+des nœuds n'a aucune réduction : chaque nœud écrit sa case), premier consommateur `render_components`.
+**A277** — réduire les `sin_cos` de `sample`, qui change des bits — garde son déclencheur. δ, V, B2,
+bathymétrie et angles rasants gardent les leurs.
+
+**Rituel.** L321 ; aucun ADR — rien n'a été décidé, le changement est au bit ; file active (J1-bis,
+**A277** ouverte, parallélisme nommé), feuille de route, index. Invariants relus : **I-03** (six
+empreintes identiques, `--retour` à 0 différence) et **I-06** (`update` toujours à zéro allocation).
+**Maillons 0** : la préparation cesse de croître avec l'histoire du journal, le chemin d'image la
+consomme, la preuve est publiée.

@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S242 — en cours
+Session : S242 — terminée
 Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web)
 Entrée : « Continue », master propre à `39a2af8`, une seule copie, jeton libre, secteur.
 **Maillons 1** : cette session doit faire avancer une capacité.
@@ -97,7 +97,7 @@ modifié, aucune ambition touchée, aucun ADR attendu.
 - [x] **P4** — construction : sélection des segments actifs hissée hors de la boucle des nœuds ;
   tests d'identité au bit.
 - [x] **P5** — réception : `--verify`, `--retour`, cadence avant/après, loi contre les tronçons, coût.
-- [ ] **P6** — rituel §6, file, feuille de route, jeton.
+- [x] **P6** — rituel §6, file, feuille de route, jeton.
 
 ### Notes de reprise
 

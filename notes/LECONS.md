@@ -5331,3 +5331,31 @@ Et une règle de tenue, corollaire de la 1 : **ce qu'un fournisseur publie est u
 mesure de ce projet.** Chaque ligne de `docs/COMPARABLES-EXTERNES.md` porte son URL et son statut —
 documenté, déduit, non trouvé — et aucun nombre lu ailleurs n'entre ici comme seuil (I-14, REPRISE §2).
 Parente de L318 : la portée d'un nombre s'écrit avec lui.
+
+## L321 — Le meilleur témoin du bruit d'un banc est un changement sémantiquement neutre
+
+*(S242)* Deux restructurations de la même boucle ont été écrites : l'une change ce que la machine
+fait, l'autre non. La seconde — trier sur la rangée 0 en gardant l'imbrication d'origine — s'est
+révélée sans gain, et c'est ce qui l'a rendue précieuse : **sémantiquement neutre, elle a mesuré
++2,6 à +7,7 %** sur la fenêtre de forçage du banc. Le vrai changement y mesurait +0,5 à +2,4 %. Sans
+ce témoin, on aurait publié « le changement coûte 2 % en forçage » — une phrase fausse, et du mauvais
+côté.
+
+Trois choses généralisent.
+
+1. **Un banc ne dit pas son propre bruit ; il faut le lui faire dire.** Répéter la même exécution
+   mesure une partie de la dispersion ; **rejouer une variante qui ne peut rien changer** la mesure
+   entièrement, arrondi du compilateur et placement mémoire compris. Une variante écartée n'est donc
+   pas du travail perdu : c'est l'étalon.
+2. **Ne pas attribuer un écart plus petit que le témoin.** La règle se dit en une ligne et elle
+   coûte une exécution.
+3. **Un coût qui croît avec l'histoire n'est pas une constante à gagner.** Ici, la préparation payait
+   3,7 µs par tronçon **achevé** et par image — invisible à 24 tronçons, 0,74 ms à 200, et sans
+   borne. Le supprimer ne fait gagner presque rien aujourd'hui et change la forme du coût pour
+   toujours. **Chercher les termes qui grandissent avant les constantes qui pèsent** : les seconds se
+   voient sur un banc, les premiers seulement dans une partie longue que personne ne joue en mesurant.
+
+Et une mise en garde de même famille que L318 : le raccourci « `phase(−p)` est le conjugué de
+`phase(p)` » est vrai **en valeur** et faux **au bit** — l'angle est reconstruit par quadrant depuis
+l'entier, et le zéro signé diffère à l'origine. Une identité mathématique n'est pas une identité
+flottante ; la vérifier coûte moins cher que d'expliquer un hash qui bouge.
