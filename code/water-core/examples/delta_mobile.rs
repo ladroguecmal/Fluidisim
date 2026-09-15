@@ -164,6 +164,9 @@ struct Run {
     wet_min: usize,
     wet_max: usize,
     iterations_max: u32,
+    /// Plus petit `θ` des faces fantômes rencontré (mode mobile) : au-dessus de `SURFACE_THETA_MIN`,
+    /// la borne n'a jamais agi et la sensibilité à sa valeur est nulle par construction.
+    theta_min: f64,
     step_ms_median: f64,
     step_ms_max: f64,
     bytes: usize,
@@ -209,6 +212,7 @@ fn candidate(mode: Mode, nx: usize, a: f64, dt_us: u64) -> Result<Run, String> {
         wet_min: usize::MAX,
         wet_max: 0,
         iterations_max: 0,
+        theta_min: f64::INFINITY,
         step_ms_median: 0.,
         step_ms_max: 0.,
         bytes: arena.stats().persistent_bytes,
@@ -231,6 +235,25 @@ fn candidate(mode: Mode, nx: usize, a: f64, dt_us: u64) -> Result<Run, String> {
             let wet = v.wet_cells();
             run.wet_min = run.wet_min.min(wet);
             run.wet_max = run.wet_max.max(wet);
+            // Mêmes définitions que `ghost_up` et `ghost_side`, fond plat.
+            let s = v.surface();
+            let zc = |k: usize| (k as f64 + 0.5) * dx;
+            for i in 0..nx {
+                let e = s[i] as f64;
+                let top = ((e / dx) - 0.5).ceil() as usize - 1;
+                run.theta_min = run.theta_min.min((e - zc(top)) / dx);
+                for j in [i.wrapping_sub(1), i + 1] {
+                    if j >= nx {
+                        continue;
+                    }
+                    let n = s[j] as f64;
+                    for k in 0..=top {
+                        if zc(k) >= n {
+                            run.theta_min = run.theta_min.min((e - zc(k)) / (e - n));
+                        }
+                    }
+                }
+            }
         }
         reference.step(dt).map_err(|e| format!("HOS {e}"))?;
         let (mut b2, mut b2h) = (0f64, 0f64);
@@ -260,9 +283,9 @@ fn compare(modes: &[Mode], grids: &[usize], amplitudes: &[f64], dt_us: u64) {
                 let label = if mode == Mode::Mobile { "mobile" } else { "lineaire" };
                 match candidate(mode, nx, a, dt_us) {
                     Ok(r) => println!(
-                        "CANDIDAT mode={label} a={a} nx={nx} dt_us={dt_us} profil_sur_a={:.5} b2_ecart={:.4e} b2_ref={:.4e} b2_relatif={:.4} b2_candidat={:.4e} derive_volume_m={:.3e} mailles_fluides={}..{} iterations_max={} pas_ms median={:.3} max={:.3} octets={}",
+                        "CANDIDAT mode={label} a={a} nx={nx} dt_us={dt_us} profil_sur_a={:.5} b2_ecart={:.4e} b2_ref={:.4e} b2_relatif={:.4} b2_candidat={:.4e} derive_volume_m={:.3e} mailles_fluides={}..{} theta_min={:.4e} iterations_max={} pas_ms median={:.3} max={:.3} octets={}",
                         r.profile, r.b2_error, r.b2_ref, r.b2_error / r.b2_ref, r.b2_max, r.volume_drift,
-                        r.wet_min, r.wet_max, r.iterations_max, r.step_ms_median, r.step_ms_max, r.bytes
+                        r.wet_min, r.wet_max, r.theta_min, r.iterations_max, r.step_ms_median, r.step_ms_max, r.bytes
                     ),
                     Err(e) => println!("CANDIDAT mode={label} a={a} nx={nx} dt_us={dt_us} REFUS {e}"),
                 }
@@ -271,14 +294,91 @@ fn compare(modes: &[Mode], grids: &[usize], amplitudes: &[f64], dt_us: u64) {
     }
 }
 
+/// Critère 4 : mobile contre linéaire S233 sur la même grille, `a = 1 mm`, une période.
+fn small_amplitude(nx: usize, a: f64, dt_us: u64) -> Result<f64, String> {
+    let dx = L / nx as f64;
+    let jobs = host_impl::SequentialJobs;
+    let sink = host_impl::StderrSink;
+    let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 26);
+    let mut build = |nz: usize| {
+        Volume::configure(
+            &mut HostServices { alloc: &mut arena, jobs: &jobs, sink: &sink },
+            Domain { nx, nz, dx: dx as f32 },
+            1025.,
+            G as f32,
+            &vec![0.; nx],
+        )
+        .map_err(|e| format!("{e:?}"))
+    };
+    let mut mobile = build((2.25 / dx).round() as usize)?;
+    let mut linear = build((H / dx).round() as usize)?;
+    let eta: Vec<f32> = (0..nx).map(|i| (H + a * (k() * (i as f64 + 0.5) * dx).cos()) as f32).collect();
+    mobile.set_free_surface(&eta, H as f32).map_err(|e| format!("{e:?}"))?;
+    linear.set_surface(&eta).map_err(|e| format!("{e:?}"))?;
+    let clock = Clock(Instant::now());
+    let mut worst = 0f64;
+    for n in 1..=(period() / (dt_us as f64 * 1e-6)).round() as usize {
+        mobile.step_surface_mobile(dt_us, 4000, 60_000_000, &jobs, &clock).map_err(|e| format!("mobile {n} {e:?}"))?;
+        linear.step_surface_linear(dt_us, 4000, 60_000_000, &jobs, &clock).map_err(|e| format!("linéaire {n} {e:?}"))?;
+        for (m, l) in mobile.surface().iter().zip(linear.surface()) {
+            worst = worst.max((*m as f64 - *l as f64).abs() / a);
+        }
+    }
+    Ok(worst)
+}
+
+/// Diagnostic d'un refus `Convergence` : avance jusqu'au pas qui précède, puis rejoue ce pas
+/// (atomique) sous plusieurs plafonds d'itérations.
+fn diagnose(nx: usize, a: f64, failing: usize) {
+    let dx = L / nx as f64;
+    let jobs = host_impl::SequentialJobs;
+    let sink = host_impl::StderrSink;
+    let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 26);
+    let mut v = Volume::configure(
+        &mut HostServices { alloc: &mut arena, jobs: &jobs, sink: &sink },
+        Domain { nx, nz: (2.25 / dx).round() as usize, dx: dx as f32 },
+        1025.,
+        G as f32,
+        &vec![0.; nx],
+    )
+    .expect("configuration");
+    let eta: Vec<f32> = (0..nx).map(|i| (H + a * (k() * (i as f64 + 0.5) * dx).cos()) as f32).collect();
+    v.set_free_surface(&eta, H as f32).expect("surface");
+    let clock = Clock(Instant::now());
+    for n in 1..failing {
+        v.step_surface_mobile(1000, 4000, 60_000_000, &jobs, &clock).unwrap_or_else(|e| panic!("pas {n} : {e:?}"));
+    }
+    for cap in [4000u32, 16000, 64000] {
+        let start = Instant::now();
+        let r = v.step_surface_mobile(1000, cap, 600_000_000, &jobs, &clock);
+        println!(
+            "DIAGNOSTIC nx={nx} a={a} pas={failing} plafond={cap} resultat={:?} ms={:.1}",
+            r.map(|s| s.report),
+            start.elapsed().as_secs_f64() * 1e3
+        );
+        if r.is_ok() {
+            break;
+        }
+    }
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
+    if args.get(1).map(String::as_str) == Some("diagnostic") {
+        return diagnose(128, 0.05, 397);
+    }
+    if args.get(1).map(String::as_str) == Some("sensibilite") {
+        println!("SENSIBILITE theta_min={}", water_core::delta_projection::SURFACE_THETA_MIN);
+        return compare(&[Mode::Mobile], &[32, 128], &[0.05], 1000);
+    }
     match args.get(1).map(String::as_str) {
         Some("oracle") => oracle(),
         Some("essai") => compare(&[Mode::Mobile], &[32], &[0.05], 1000),
+        Some("petite") => println!("PETITE_AMPLITUDE a=0.001 nx=64 dt_us=1000 ecart_mobile_lineaire_sur_a={:?}", small_amplitude(64, 0.001, 1000)),
         Some("reception") => {
+            println!("PETITE_AMPLITUDE a=0.001 nx=64 dt_us=1000 ecart_mobile_lineaire_sur_a={:?}", small_amplitude(64, 0.001, 1000));
             compare(&[Mode::Mobile, Mode::Linear], &[32, 64, 128], &[0.05, 0.10], 1000);
-            compare(&[Mode::Mobile, Mode::Linear], &[64], &[0.01], 1000);
+            compare(&[Mode::Mobile], &[64], &[0.01], 1000);
         }
         _ => eprintln!("usage : delta_mobile oracle | essai | reception"),
     }

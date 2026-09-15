@@ -98,7 +98,7 @@ réduite ; déferlement, mouillage du fond, air, cavité et 3D restent hors lot 
   correction à Dirichlet mobile) ; tests repos exact et symétrie.
 - [x] **P4b** — cœur : extrapolation, flux mouillé, advection, `step_surface_mobile` atomique ;
   tests petite amplitude contre S233, volume, changement de topologie, refus, allocation.
-- [ ] **P5** — réception : banc MAC contre HOS, trois résolutions, deux amplitudes, harmonique,
+- [x] **P5** — réception : banc MAC contre HOS, trois résolutions, deux amplitudes, harmonique,
   témoin linéaire, coût ; document de validation.
 - [ ] **P6** — rituel §6, file, feuille de route, jeton ; copies à synchroniser.
 
@@ -152,3 +152,16 @@ identique, cinq refus d'entrée, horloge reculante. **Impasse** : champ à diver
 main pour le refus d'après pas → second membre d'arrondi, pression f32 plafonnée à **3,3·10⁻⁶** de
 résidu relatif, CG simple (vérifié en forçant M = I) comme préconditionné, à 1 ms comme à 1 µs →
 `Convergence` avant la garde. Suite du cœur **425 réussis, 5 ignorés** ; empreinte S232 inchangée.
+
+P5 (`reception_s237.log`, 07:56–08:14, secteur) : critère 4 **0,167 %** ; 5 cm : 0,850/2,44 %
+(32), 0,550/1,41 % (64), **refus `Convergence` pas 397 à 128** ; 10 cm : 1,714/1,71 → 0,592/0,98 →
+**0,230/0,43 %** ; 1 cm nx64 0,190/1,61 % ; témoin linéaire `b₂` ≤ 1,7·10⁻⁵ de la référence, profil
+7,7 % / 16,2 %. Coût mobile 4,6 / 33 / 260 ms (143/273/525 it), linéaire 1,4 / 11 / 83 ms.
+Diagnostic (`delta_mobile diagnostic`) : résidu **1,0492·10⁻⁶** figé à 4 000/16 000/64 000
+itérations, divergence 1,45·10⁻⁷, 16 384 mailles, surface plate au quart de période → plancher f32
+de S231 (reçu jusqu'à 8 192 mailles, 8,75·10⁻⁷) → A272, contrat inchangé. Sensibilité `θ_min = 10⁻²`
+(temporaire) : 1,147/3,29 % à nx32 contre 0,850/2,44 %, même refus au pas 397 → cause écartée,
+`10⁻³` conservé. **Impasse coûteuse** : remplacement PowerShell `Get-Content -Raw | Set-Content
+-Encoding utf8` sur une source UTF-8 → accents doublement encodés ; fichier restauré par `git
+restore` (aucune modification non committée), changement refait par l'outil d'édition.
+Instrumentation `TEMP` retirée ; `src/` identique au commit P4b.
