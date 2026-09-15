@@ -110,3 +110,50 @@ d'ADR-143/144. La décomposition est donc juste, et ce qu'elle n'explique pas, e
 ADR-146 garantit le déterminisme **inconditionnellement**. Ce n'est donc pas le nombre d'itérations
 qu'il faut attaquer en premier — il le faudra, et c'est la multigrille —, mais le coût de chaque
 itération, qui se divise sans changer un bit.
+
+## 3. Le prix d'un appel parallèle — et la route qu'il referme
+
+La thèse du §1.3 supposait que la primitive de S243 pouvait servir ces passes. **Avant de la
+construire, on mesure ce qu'un appel coûte à vide** : `prix_d_un_appel_parallele_s244`, remplissage
+trivial, release, médiane de 41 relevés.
+
+| éléments | 1 fil | 2 fils | 4 fils | 8 fils |
+|---:|---:|---:|---:|---:|
+| 2 048 | 1,60 µs | **314,7 µs** | 518,8 µs | 947,9 µs |
+| 16 384 | 11,70 µs | 312,3 µs | 546,9 µs | 883,2 µs |
+| 262 144 | 190,4 µs | 392,6 µs | 576,4 µs | 987,9 µs |
+
+Le coût **ne dépend presque pas du travail** : c'est celui de créer et joindre les fils, environ
+**125 µs par fil** sur cette machine.
+
+**Conséquence, et elle est nette.** Les passes de δ valent **21,7 µs** (`apply`), **5,5 µs** (axpy) et
+**3,8 µs** (`dir`) à 2 048 mailles. Un appel à deux fils coûte **314 µs** : quatorze fois la pass
+qu'il découperait. **La primitive de S243 ne peut pas servir la boucle de δ** — non parce qu'elle
+serait mauvaise, mais parce qu'elle crée ses fils à chaque appel, et que cette boucle appelle 114
+fois par pas des passes de quelques microsecondes.
+
+Le modèle rend compte des deux lots : pour le sillage (S243), le travail d'un appel valait 3 270 µs,
+donc `3270/8 + 950 ≈ 1 360 µs` contre 1 243 µs mesurés. Pour δ, il vaut 21,7 µs, et aucun découpage
+ne rattrape 125 µs de fil.
+
+> **Note corrective sur S243, datée du 2026-09-15.** [PARALLELISME-S243](PARALLELISME-S243.md) §3.3 et
+> [ADR-146](../adr/ADR-146-l-ecriture-disjointe-est-inconditionnellement-deterministe.md) chiffrent un
+> fil à **≈ 67 µs**, déduit d'une **différence** entre deux fenêtres du banc du sillage. La mesure
+> directe ci-dessus, à travail trivial, donne **≈ 125 µs**. C'est ce second chiffre qui fait foi : il
+> est mesuré, l'autre était inféré. Rien d'autre ne change dans S243 — le seuil au-delà duquel le
+> parallélisme paie s'en trouve seulement relevé, et sa conclusion (« le chemin d'image reste à un
+> fil ») en sort renforcée.
+
+### 3.1 Ce que cela laisse
+
+La décomposition du §2 dit ce que chaque technique restante achèterait, à 2 048 mailles :
+
+| technique | ce qu'elle attaque | plafond de gain |
+|---|---|---|
+| **vivier persistant de fils** (A278) | les 3,53 ms d'écritures disjointes, **67 %** | ×3 sur ces passes si la répartition coûte des microsecondes et non 125 µs |
+| **multigrille / préconditionneur fort** | les **114 itérations**, qui croissent en `O(√N)` | le facteur le plus grand, et le seul qui s'améliore avec la taille |
+| **GPU** | les deux à la fois | hors du domaine de ce lot |
+
+**Aucune ne se fait sans décision** : la première demande `unsafe` dans l'hôte (A278), la deuxième
+est une construction numérique à part entière avec ses propres critères de réception, la troisième
+un portage. Ce lot les chiffre ; il n'en tranche aucune.

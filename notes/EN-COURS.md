@@ -98,7 +98,11 @@ déclencheur.
 - [x] **P2** — protocole écrit ; instrument de décomposition des passes de `project`.
 - [x] **P3** — mesure avant toute modification : coût par pass, itérations, et vérification que
   leur produit rend le pas mesuré.
-- [ ] **P4** — construction : ce que la mesure désigne ; identité au bit à tout nombre de fils.
+- [x] **P4** — construction : ce que la mesure désigne ; identité au bit à tout nombre de fils.
+  **Amendement P4, par la mesure** : la mesure désigne le parallélisme *et le referme aussitôt*. Un
+  appel parallèle coûte **≈ 125 µs par fil** — mesuré à vide, indépendamment du travail — quand les
+  passes de δ valent 21,7 / 5,5 / 3,8 µs. La primitive de S243 ne peut pas servir cette boucle. Ce
+  qui reste à portée dans la session est le coût **propre** d'`apply`, 47 % du pas.
 - [ ] **P5** — réception : `delta_filters`, `delta_precision`, suite, coût contre les fils.
 - [ ] **P6** — rituel §6, file, feuille de route, jeton.
 
@@ -117,6 +121,16 @@ decomposition est juste et ce qu'elle n'explique pas, elle le borne (relances, a
 diagnostics, certificats).
 Ce n'est donc pas le compte d'iterations qu'il faut attaquer en premier (ce sera la multigrille)
 mais le cout de chaque iteration, qui se divise **sans changer un bit**.
+
+P4 : **la route du parallelisme est refermee par la mesure.** Prix d'un appel a vide :
+2 048 elements -> 1,60 us a un fil, **314,7 a deux**, 518,8 a quatre, 947,9 a huit ; et le cout ne
+depend presque pas du travail (a 262 144 elements : 190,4 / 392,6 / 576,4 / 987,9). Donc
+**~125 us par fil**. Les passes de delta valent 21,7 / 5,5 / 3,8 us : un appel a deux fils coute
+quatorze fois la pass qu'il decouperait.
+Le modele rend compte des deux lots : sillage 3 270/8 + 950 = 1 360 us contre 1 243 mesures.
+**Correction datee de S243** : le « 67 us par fil » y etait **infere** d'une difference entre deux
+fenetres ; la mesure directe donne **125 us**. C'est elle qui fait foi. La conclusion de S243 en
+sort renforcee, pas affaiblie.
 
 ---
 

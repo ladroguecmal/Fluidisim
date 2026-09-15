@@ -295,3 +295,44 @@ mod tests {
         assert_eq!(g2, 0.0, "grain 2 : (1 + 1e16) + (−1e16 + 1)");
     }
 }
+
+#[cfg(test)]
+mod cout_des_fils {
+    use super::*;
+    use std::time::Instant;
+
+    /// S244 — **prix d'un appel parallèle**, isolé de tout travail utile. La question qui décide du
+    /// lot : une pass de δ vaut 21,7 µs à 2 048 mailles ; si créer les fils coûte davantage, la
+    /// primitive de S243 ne peut pas servir une boucle aussi fine.
+    #[test]
+    #[ignore = "mesure S244, lancée explicitement ; à lancer en release"]
+    fn prix_d_un_appel_parallele_s244() {
+        let median = |mut v: Vec<f64>| {
+            v.sort_by(f64::total_cmp);
+            v[v.len() / 2]
+        };
+        for n in [2_048usize, 16_384, 262_144] {
+            let mut out = vec![0f32; n];
+            for workers in [1u32, 2, 4, 8] {
+                let jobs = ScopedJobs::with_workers(workers);
+                let grain = (n / workers.max(1) as usize).max(1);
+                // Travail volontairement trivial : ce qu'on mesure est l'appel, pas le calcul.
+                let fill = |offset: usize, slice: &mut [f32]| {
+                    for (i, c) in slice.iter_mut().enumerate() {
+                        *c = (offset + i) as f32;
+                    }
+                };
+                let mut us = Vec::new();
+                for _ in 0..41 {
+                    let start = Instant::now();
+                    jobs.parallel_fill_f32(&mut out, grain, &fill);
+                    us.push(start.elapsed().as_secs_f64() * 1e6);
+                }
+                println!(
+                    "PRIX_APPEL_S244 elements={n} fils={workers} median_us={:.2}",
+                    median(us)
+                );
+            }
+        }
+    }
+}
