@@ -95,7 +95,7 @@ déclencheur.
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [ ] **P2** — protocole écrit ; instrument de décomposition des passes de `project`.
+- [x] **P2** — protocole écrit ; instrument de décomposition des passes de `project`.
 - [ ] **P3** — mesure avant toute modification : coût par pass, itérations, et vérification que
   leur produit rend le pas mesuré.
 - [ ] **P4** — construction : ce que la mesure désigne ; identité au bit à tout nombre de fils.
@@ -104,7 +104,10 @@ déclencheur.
 
 ### Notes de reprise
 
-(S244 — vide à l'ouverture.)
+P2 : protocole `docs/validation/COUT-DELTA-S244.md` + instrument
+`delta_step_decomposition_s244` (essai ignore, a lancer **en release**). Il mesure chaque pass
+isolement puis **verifie que leur somme rend le pas** — c'est le controle qui empeche d'attribuer
+un cout a la pass qu'on avait envie d'accuser.
 
 ---
 

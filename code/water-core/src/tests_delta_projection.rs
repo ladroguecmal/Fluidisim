@@ -1065,3 +1065,109 @@ fn a273_at_32768_cells_is_declared_degraded_s239() {
     assert!(r.divergence_plain > PROJECTION_DIVERGENCE_TOLERANCE, "{r:?}");
     assert!(r.degraded, "un pas au-dessus de la tolérance ne doit plus être annoncé reçu : {r:?}");
 }
+
+/// S244 P3 (A276) — décomposition du pas de δ : coût de chaque pass, isolément, puis contrôle que
+/// leur somme rend le pas mesuré. Poser des horloges dans la boucle déplacerait ce qu'on mesure.
+/// Domaine de S230 : 8×4 m, fond plat 0,4 m, `dt = 1/60 s`, `eta = z0 + 0,02·sin`.
+#[test]
+#[ignore = "mesure S244, lancée explicitement ; à lancer en release"]
+fn delta_step_decomposition_s244() {
+    use std::time::Instant;
+    let stats = |mut v: Vec<f64>| {
+        v.sort_by(f64::total_cmp);
+        v[v.len() / 2]
+    };
+    for nx in [16usize, 32, 64] {
+        let (nz, dx) = (nx / 2, 8. / nx as f32);
+        let mut v = mobile_volume(nx, nz, dx, &vec![0.4; nx]);
+        let z0 = v.domain().z0();
+        let eta: Vec<f32> = (0..nx)
+            .map(|i| z0 + 0.02 * (std::f32::consts::TAU * (i as f32 + 0.5) / nx as f32).sin())
+            .collect();
+        v.set_surface(&eta).unwrap();
+        let cells = nx * nz;
+        // Un pas complet d'abord : il remplit les tampons et donne le compte d'itérations.
+        let report = v.step(1. / 60., 512, &Jobs).unwrap();
+        let mut step_ms = Vec::new();
+        for _ in 0..21 {
+            let mut w = mobile_volume(nx, nz, dx, &vec![0.4; nx]);
+            w.set_surface(&eta).unwrap();
+            let start = Instant::now();
+            let r = w.step(1. / 60., 512, &Jobs).unwrap();
+            step_ms.push(start.elapsed().as_secs_f64() * 1e3);
+            assert_eq!(r, report, "le pas doit être déterministe");
+        }
+        let step = stats(step_ms);
+        // Chaque pass, isolément, sur les tampons que le pas vient de laisser.
+        let reps = (2_000_000 / cells).max(64);
+        let mut ctl = Control::unlimited();
+        let mut apply_ms = Vec::new();
+        for _ in 0..21 {
+            let start = Instant::now();
+            for _ in 0..reps {
+                let mut tmp = core::mem::take(&mut v.tmp);
+                v.apply(&v.dir, &mut tmp, &mut ctl).unwrap();
+                v.tmp = tmp;
+            }
+            apply_ms.push(start.elapsed().as_secs_f64() * 1e3 / reps as f64);
+        }
+        let mut dot_ms = Vec::new();
+        for _ in 0..21 {
+            let start = Instant::now();
+            for _ in 0..reps {
+                core::hint::black_box(v.dot(&v.dir, &v.tmp, &Jobs, &mut ctl).unwrap());
+            }
+            dot_ms.push(start.elapsed().as_secs_f64() * 1e3 / reps as f64);
+        }
+        let mut norm_ms = Vec::new();
+        for _ in 0..21 {
+            let start = Instant::now();
+            for _ in 0..reps {
+                core::hint::black_box(v.norm2(&v.res, &Jobs, &mut ctl).unwrap());
+            }
+            norm_ms.push(start.elapsed().as_secs_f64() * 1e3 / reps as f64);
+        }
+        // Les deux axpy, écrites comme la boucle du gradient conjugué les écrit.
+        let mut axpy_ms = Vec::new();
+        for _ in 0..21 {
+            let start = Instant::now();
+            for _ in 0..reps {
+                let alpha = 1.000_001f32;
+                for c in 0..cells {
+                    if v.frac[c] > 0. {
+                        v.p[c] += alpha * v.dir[c];
+                        v.res[c] -= alpha * v.tmp[c];
+                    }
+                }
+            }
+            axpy_ms.push(start.elapsed().as_secs_f64() * 1e3 / reps as f64);
+        }
+        let mut dir_ms = Vec::new();
+        for _ in 0..21 {
+            let start = Instant::now();
+            for _ in 0..reps {
+                let beta = 0.999_999f32;
+                for c in 0..cells {
+                    if v.frac[c] > 0. {
+                        v.dir[c] = v.res[c] + beta * v.dir[c];
+                    }
+                }
+            }
+            dir_ms.push(start.elapsed().as_secs_f64() * 1e3 / reps as f64);
+        }
+        let (a, d, n, x, g) = (
+            stats(apply_ms), stats(dot_ms), stats(norm_ms), stats(axpy_ms), stats(dir_ms),
+        );
+        let it = report.iterations as f64;
+        let predicted = it * (a + d + x + n + g);
+        println!(
+            "DECOMPOSITION_S244 nx={nx} mailles={cells} iterations={} pas_mesure_ms={step:.4} \
+apply={a:.5} dot={d:.5} axpy={x:.5} norm2={n:.5} dir={g:.5} \
+| ecritures={:.4} reductions={:.4} predit_ms={predicted:.4} rapport={:.3}",
+            report.iterations,
+            it * (a + x + g),
+            it * (d + n),
+            predicted / step
+        );
+    }
+}
