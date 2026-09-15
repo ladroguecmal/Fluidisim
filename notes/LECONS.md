@@ -5275,3 +5275,30 @@ Trois choses généralisent.
 
 Voir TOLERANCE-PRESSION-S239 §1.2 et §3, ADR-144. Famille de L316 et L317 : le nombre vient de ce
 qu'on doit distinguer, et sa portée doit être écrite avec lui.
+
+## L319 — Un invariant jamais mesuré sur une couche n'y est ni tenu ni violé : il est inconnu
+
+*(S240)* I-06 — « aucune allocation à l'exécution » — était reçue pour le cœur par un allocateur
+compteur, et **n'avait jamais été mesurée pour l'hôte graphique**. Quinze sessions de rendu l'ont
+citée comme un reliquat sans jamais la compter. Un allocateur compteur de quatre-vingts lignes, sans
+dépendance nouvelle, a rendu le verdict en une exécution : **134 allocations et 30 541 octets par
+image**, dont **une seule à nous** — 12 032 octets, 39 % des octets de l'image, un `Vec` de contour
+construit et jeté à chaque image.
+
+Deux choses généralisent.
+
+1. **Ce qui n'est pas compté n'est pas tenu.** Tant qu'un invariant n'a pas d'instrument sur une
+   couche, l'écrire dans la liste n'y change rien. L'instrument coûte moins cher que le débat : ici,
+   une session, et il reste dans le binaire. Le corollaire vaut aussi dans l'autre sens — la mesure
+   a montré que **rien d'autre** que ce `Vec` n'était à nous, et que la boucle d'événements de winit
+   n'alloue rien du tout : l'inquiétude diffuse était mal placée.
+2. **La constance d'une grandeur informe souvent mieux que sa valeur.** Le protocole nommait
+   l'allocation comme suspect direct de la gigue CPU — quatre fois la médiane au maximum. Médiane,
+   p95 et maximum du compte d'allocations se sont révélés **égaux**, à l'octet près, sur 590 images
+   et trois exécutions : une image lente alloue exactement comme une image rapide. **Le suspect est
+   disculpé par sa constance, pas par sa valeur**, et A265 perd une hypothèse au lieu de la garder
+   en réserve. Une mesure qui ne trouve rien à corriger reste un résultat, à condition qu'elle ait
+   été capable de trouver.
+
+Voir ALLOCATIONS-HOTE-S240, ADR-145, amendement daté sous I-06. Parent de L318 : la portée d'une
+règle s'écrit avec elle, et une couche qu'elle n'a jamais visitée n'est pas une couche conforme.

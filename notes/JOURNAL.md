@@ -12310,3 +12310,74 @@ la correction et la divergence de la boucle réutilisent `u`/`w`/`tmp`, libres p
 puisque `run` met les champs publiés à l'abri dans `saved_*`), I-14 (aucun nombre nouveau : 10⁻⁶ de
 S231, 10⁻⁵ de S199, `γ₈` d'ADR-143). Maillons 0 : l'acceptation garantit désormais la tolérance, elle
 est consommée par les trois campagnes et la trajectoire mobile, et la preuve est publiée.
+
+## S240 — 2026-09-15 — Ce qui n'était pas compté n'était pas tenu, et le suspect était innocent
+
+**Entrée.** « Continue », master propre à `45d24a5`, une seule copie, jeton libre, secteur. Claude
+Code, Opus 5. Plan `61c55db`, protocole `37c65c2`, instrument `f2967cc`, mesure `ddd3131`, correction
+et verdict `db0b10c`.
+
+**Choix du lot, et ce qui a été constaté avant de choisir.** La recommandation encore non consommée
+du bilan S227 est J1-bis, ordre 4. Ses quatre reliquats sont les angles rasants, l'interaction
+manuelle, la seconde cible et **I-06 de la pile graphique** ; les deux du milieu demandent une
+personne et une machine. Avant de partir sur les angles rasants, j'ai lu le code : **la grille locale
+du sillage a pour emprise le domaine du sillage, pas la caméra** (`WAKE_MIN/MAX`), donc l'hypothèse
+« un angle rasant sature la capacité de la grille » est fausse. L'hôte a aussi été construit et lancé
+ici (RTX 5070 Laptop, DX12, `--smoke` 120 images) avant de promettre une mesure.
+
+**Capacité reçue.** **I-06 est tenue par le code du projet dans la boucle d'image de l'hôte** : zéro
+allocation par image en régime, mesuré sur 590 images et deux poses. Consommateur : toute mesure de
+coût de J1-bis, qui n'a plus à porter l'inconnue « et les allocations ? » ; preuve
+[ALLOCATIONS-HOTE-S240](../docs/validation/ALLOCATIONS-HOTE-S240.md), décision
+[ADR-145](../docs/adr/ADR-145-i-06-pour-l-hote-graphique.md), amendement daté sous I-06.
+
+**L'instrument.** Un allocateur compteur global enveloppant `std::alloc::System`, **aucune dépendance
+nouvelle**, relevé aux bornes de phase **déjà chiffrées en millisecondes par S225** — de sorte que
+les allocations se lisent en face des durées. Attribution par phase et non par site d'appel : une
+pile d'appels demanderait une dépendance et déplacerait la mesure ; limite déclarée avant de mesurer.
+Les tampons de relevé du banc ont été réservés — un `Vec` qui grandit pendant un banc de cadence
+alloue dans la région qu'il mesure.
+
+**Mesure.** 134 allocations et 30 541 octets par image, **médiane = p95 = maximum**, à l'octet près,
+sur 590 images et trois exécutions. Une seule est à nous : le contour de l'emprise de la visibilité,
+`Vec::with_capacity(2·(481+271))` = **12 032 octets**, 39 % des octets de l'image, construit et jeté
+à chaque image. winit n'alloue **rien** entre deux images. Hors champ, la visibilité de S235 retire
+30 allocations sur 134 — mais pas la nôtre, puisque le contour est justement ce qui décide de la
+visibilité.
+
+**Le suspect est innocent.** Le protocole nommait l'allocation comme cause directe de la gigue : CPU
+4,02 ms médian pour **16,3 ms au maximum**, GPU immobile. Le compte d'allocations d'une image lente
+est **exactement** celui d'une image rapide. **A265 perd une hypothèse** sans être close ; la cause
+est ailleurs — ordonnancement, défaut de page sur de la mémoire déjà demandée, ou pilote.
+
+**Correction et contrôles.** `footprint_into` remplit un tampon gardé par `FrameData` : le premier
+contour d'un format lui donne sa capacité, aucun suivant ne demande de mémoire. `update` passe à
+**0 allocation**, l'image à **133 et 18 509 octets** — les 12 032 disparaissent exactement. `VERIFY`
+rend **0,368476 mm** à 12 s avec quatre impacts, la valeur de S235 ; `--retour` rend **0 image
+différente au bit** sur 31 comparées ; CPU médian 4,0367 ms, dans la dispersion d'avant ; tests de
+`viewer/` **12 réussis**, dont la comparaison au bit du tampon gardé sur trois formats enchaînés.
+
+**Coût et limites.** L'instrument coûte **au plus 0,16 ms de CPU médian**, du même ordre que la
+dispersion entre deux exécutions instrumentées (0,12 ms) : la mesure ne l'en sépare pas, et le
+document le dit ainsi au lieu de le chiffrer plus finement. Les comptes, eux, sont exacts — ce sont
+des compteurs, pas des durées. Une seule machine, un seul format, une seule version de wgpu : **133
+est une référence datée, pas une constante**. Site d'appel dans la pile non nommé, mémoire réellement
+engagée par le système non suivie.
+
+**Ce que la mesure oriente, contre une conclusion antérieure.** S225 concluait que « les quatre
+techniques restantes de J1-bis sont du côté GPU ». Depuis le LOD de S234, ce n'est plus vrai : à
+960×540 sur la scène S235, **le GPU eau vaut 0,44 ms et la seule préparation CPU du sillage 3,17 ms
+de médiane pour 13,2 ms de maximum** — soit, à elle seule, **1,6 fois le budget eau de 2 ms**
+(ADR-125), et l'essentiel de la gigue. Les deux techniques absentes qui la visent sont nommées dans
+la feuille de route : **LOD temporel** de la préparation et **parallélisme CPU**.
+
+**Suite.** **S241 : J1-bis — la préparation CPU du sillage**, là où le budget se perd désormais. Les
+angles rasants soutenus gardent leur déclencheur ; l'interaction manuelle et la seconde cible restent
+hors de portée d'une session (REPRISE §5). δ, V, B2 et bathymétrie gardent les leurs. Aucune ambition
+réduite, aucun arbitrage utilisateur requis.
+
+**Rituel.** L319 ; ADR-145 et amendement daté sous I-06 ; feuille de route J1-bis, file active
+(J1-bis, A265), index. Invariants relus : **I-06** (l'objet du lot, amendé pour cette couche seule),
+I-03 (`--retour` rend 0 image différente au bit, et le test du tampon compare au bit). Maillons 0 :
+la boucle d'image de l'hôte n'alloue plus rien à nous, les bancs de J1-bis la consomment, et les
+nombres sont publiés.

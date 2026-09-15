@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-15 19:33 +02:00
+JETON            : libre
+Battement        : 2026-09-15 19:49 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy et GPU local disponibles)
-Session en cours : S240 — J1-bis : I-06 de la pile graphique, allocations par image de l'hôte
-Dernière session : S239 — la tolérance physique de S199 devient une condition d'acceptation (ADR-144)
-Session suivante : à déterminer en fin de S240
+Session en cours : aucune
+Dernière session : S240 — I-06 mesurée pour l'hôte graphique, boucle d'image sans allocation (ADR-145)
+Session suivante : S241 — J1-bis : la préparation CPU du sillage, poste dominant du budget
 Maillons        : 0
 
 ```
@@ -75,8 +75,10 @@ Ne pas relire le journal, les leçons ou tous les ADR intégralement à chaque r
 
 ## 4. Où en est le projet
 
-État à S239 : B/W et un afficheur existent ; scène multi-sources dessinée, visibilité au bit, composée
-et admise par le cœur (ADR-142). δ MAC x-z possède une **surface géométriquement mobile** reçue contre
+État à S240 : B/W et un afficheur existent ; scène multi-sources dessinée, visibilité au bit, composée
+et admise par le cœur (ADR-142) ; **la boucle d'image de l'hôte n'alloue rien** pour le code du projet,
+la pile verrouillée 133 fois par image, constantes (ADR-145). Le poste dominant du budget est désormais
+la **préparation CPU du sillage** (3,17 ms médian contre 0,44 ms de GPU eau). δ MAC x-z possède une **surface géométriquement mobile** reçue contre
 l'onde stationnaire HOS d'ordre 3 (surface graphe, sans 3D, cavité, scénario B3 ni I-05 complet) ; sa
 pression f32 s'arrête à sa précision représentable (ADR-143) et **tient la tolérance physique de S199
 ou se déclare dégradée** (ADR-144) — tenue jusqu'à 8 192 mailles, refusée à 32 768 (A275), plancher

@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S240 — en cours
+Session : S240 — terminée
 Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy et GPU local disponibles)
 Entrée : « Continue », master propre à `45d24a5`, une seule copie, jeton libre, secteur.
 Hôte GPU vérifié sur cette machine : RTX 5070 Laptop, DX12, `--smoke` 120 images, code 0.
@@ -96,7 +96,7 @@ avec le chiffre et la cause. Aucun seuil inventé, aucun banc modifié pour obte
 - [x] **P4** — mesure : allocations par image en régime, taille et attribution, scène S235 à
   960×540, dans le champ et hors champ.
 - [x] **P5** — ce qui est à nous : supprimé ou justifié, puis re-mesuré ; verdict.
-- [ ] **P6** — rituel §6, file, feuille de route, jeton.
+- [x] **P6** — rituel §6, file, feuille de route, jeton.
 
 ### Notes de reprise
 

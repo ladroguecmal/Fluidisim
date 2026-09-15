@@ -93,14 +93,16 @@ l'échec d'optimisations prises isolément. La liste est ouverte.
 | **LOD temporel** — cadence de mise à jour selon distance, vitesse, régime | absente | erreur de phase, I-09 |
 | **visibilité** — frustum, occlusion, hors écran | **présente pour sillage et impacts** (S235) : emprise de la grille sur l'eau, marge par arête ; hors champ 0,448 → 0,062 ms GPU, 1,59 → 0,67 ms CPU ; +0,05 ms CPU dans le champ. Occlusion et composantes de B absentes | **retour au bit** vérifié (31 images, fin de tronçon incluse) |
 | **mutualisation** — nœuds partagés par sources de même recette, passe/grille communes B/W | **présente pour les sillages d'un même journal** (cœur, S222 ; hôte S235 : trois sillages, 4 096 modes, +0,01–0,03 ms GPU) ; table de Bessel partagée par les impacts de même entrée (S235) ; passe commune B/W absente | superposition dans son domaine (ADR-123) ; budget de pente : **admis sur l'union sous plancher certifié** (S236, ADR-142) — refusé par majorants en S235 |
-| **parallélisme CPU / LOD temporel de la préparation** | absents ; préparation du sillage 3,1 ms pendant le forçage de trois sillages, un fil (S235) | écart au chemin séquentiel, au bit si possible ; I-09 |
+| **parallélisme CPU / LOD temporel de la préparation** | absents ; préparation du sillage 3,1 ms pendant le forçage de trois sillages, un fil (S235). **S240 : c'est désormais le poste dominant** — 3,17 ms de médiane et 13,2 ms de maximum contre 0,44 ms de GPU eau, soit 1,6 fois le budget eau à elle seule | écart au chemin séquentiel, au bit si possible ; I-09 |
 
 **Chaque mesure de coût publie** techniques présentes, techniques absentes et domaine de validité
 (scène, recette, sources, formats, instants, machine, grandeur mesurée) — ADR-131 D3.
 
 **Travaux nécessaires de J1, indépendants du coût** (ADR-131 D6) : A251 et composition faites
-S214, A254 close S223, cadence complète faite S225. Restent l'interaction manuelle représentative,
-angles rasants et poses de caméra, allocations de la pile graphique (I-06), seconde cible (B7).
+S214, A254 close S223, cadence complète faite S225. **Allocations de la pile graphique faites S240**
+(ADR-145) : boucle d'image à **zéro allocation** pour le code du projet, pile verrouillée à **133
+allocations et 18 509 octets par image, constantes** ; [preuve](validation/ALLOCATIONS-HOTE-S240.md).
+Restent l'interaction manuelle représentative, angles rasants et poses de caméra, seconde cible (B7).
 Composition de la scène représentative par le cœur : faite S236 (mode union, ADR-142). Le choix du
 mode par un hôte autoritaire reste à trancher avec lui (A271).
 

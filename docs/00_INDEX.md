@@ -37,6 +37,7 @@
 - [Surface géométriquement mobile de δ contre l'onde stationnaire HOS](validation/SURFACE-MOBILE-S237.md).
 - [Plancher de la pression f32 de δ : arrêt certifié et acceptation à la tolérance S199](validation/PRESSION-PLANCHER-S238.md).
 - [Tolérance physique de la pression de δ : loi contre la taille, lignes franches et lignes à fantôme](validation/TOLERANCE-PRESSION-S239.md).
+- [Allocations par image de l'hôte GPU : I-06 mesurée, et un suspect de gigue disculpé](validation/ALLOCATIONS-HOTE-S240.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).
@@ -197,6 +198,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-142](adr/ADR-142-composition-sur-l-union-des-emprises.md) | Composition mixte sur l'union des emprises, sous plancher certifié |
 | [ADR-143](adr/ADR-143-la-pression-f32-converge-a-sa-precision-representable.md) | La pression f32 de δ s'arrête à sa précision représentable, acceptée à la tolérance physique S199 |
 | [ADR-144](adr/ADR-144-la-tolerance-physique-est-une-condition-d-acceptation.md) | La tolérance physique de la projection est une condition d'acceptation, sur les lignes franches |
+| [ADR-145](adr/ADR-145-i-06-pour-l-hote-graphique.md) | I-06 pour l'hôte graphique : tenue par notre code, comptée et publiée pour la pile |
 
 ## Travail et historique
 
