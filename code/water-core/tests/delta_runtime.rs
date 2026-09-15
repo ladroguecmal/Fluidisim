@@ -418,3 +418,50 @@ fn evolving_surface_is_atomic_at_every_checkpoint_and_allocation_free_s233() {
     assert_eq!(bits(&v),before); assert_eq!(surface_bits(&v),huge_bits);
     println!("S233: {} expirations, surface incluse, zero allocation et reprise identique",clock.calls.get()-1);
 }
+
+/// S237 : bassin 2×3 m, surface mobile ondulée, déjà avancée d'un pas.
+fn prepared_mobile() -> Volume {
+    let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+    let mut v = Volume::configure(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs },
+        Domain { nx: 8, nz: 12, dx: 0.25 }, 1025., 9.81, &[0.; 8]).unwrap();
+    let eta: Vec<f32> = (0..8).map(|i| 2.0 + 0.2 * (std::f32::consts::PI * (i as f32 + 0.5) / 8.).cos()).collect();
+    v.set_free_surface(&eta, 2.0).unwrap();
+    arena.seal();
+    v.step_surface_mobile(1000, 500, 1000, &Jobs, &DeadlineClock::new(usize::MAX)).unwrap();
+    v
+}
+
+#[test]
+fn mobile_surface_is_atomic_at_every_checkpoint_and_allocation_free_s237() {
+    let mut reference = prepared_mobile();
+    let before = bits(&reference); let eta_before = surface_bits(&reference);
+    let clock = DeadlineClock::new(usize::MAX);
+    let (r, allocs) = measured(|| reference.step_surface_mobile(1000, 500, 1000, &Jobs, &clock));
+    assert_eq!(allocs, 0); let report = r.unwrap();
+    let after = bits(&reference); let eta_after = surface_bits(&reference);
+    assert_ne!(eta_before, eta_after);
+    let (_, positive) = measured(|| std::hint::black_box(vec![0u8; 8])); assert!(positive > 0);
+    for cutoff in 1..clock.calls.get() {
+        let mut v = prepared_mobile();
+        let (r, allocs) = measured(|| v.step_surface_mobile(1000, 500, 1000, &Jobs, &DeadlineClock::new(cutoff)));
+        assert_eq!(allocs, 0); let r = r.unwrap();
+        assert_eq!((r.advanced_us, r.remaining_us), (0, 1000)); assert!(r.report.is_none());
+        assert_eq!(bits(&v), before); assert_eq!(surface_bits(&v), eta_before);
+        let (r, allocs) = measured(|| v.step_surface_mobile(1000, 500, 1000, &Jobs, &DeadlineClock::new(usize::MAX)));
+        assert_eq!(allocs, 0); assert_eq!(r.unwrap(), report);
+        assert_eq!(bits(&v), after); assert_eq!(surface_bits(&v), eta_after);
+    }
+    for (duration, iterations, budget, error) in [(0, 500, 1000, Error::NotFinite),
+        (1u64 << 54, 500, 1000, Error::NotFinite), (1_000_000, 500, 1000, Error::Domain),
+        (1000, 0, 1000, Error::Convergence), (1000, 500, u64::MAX, Error::NotFinite)] {
+        let mut v = prepared_mobile();
+        let (r, allocs) = measured(|| v.step_surface_mobile(duration, iterations, budget, &Jobs, &DeadlineClock::new(usize::MAX)));
+        assert_eq!(r, Err(error)); assert_eq!(allocs, 0);
+        assert_eq!(bits(&v), before); assert_eq!(surface_bits(&v), eta_before);
+    }
+    let mut v = prepared_mobile();
+    let backward = DeadlineClock { backward: true, ..DeadlineClock::new(clock.calls.get() - 1) };
+    assert_eq!(v.step_surface_mobile(1000, 500, 1000, &Jobs, &backward), Err(Error::Clock));
+    assert_eq!(bits(&v), before); assert_eq!(surface_bits(&v), eta_before);
+    println!("S237: {} expirations, surface mobile incluse, zero allocation et reprise identique", clock.calls.get() - 1);
+}

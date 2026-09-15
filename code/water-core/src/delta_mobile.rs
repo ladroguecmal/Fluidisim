@@ -5,9 +5,8 @@
 //! La condition `p = 0` à la surface est imposée par **fluide fantôme** : entre une maille fluide et
 //! une maille d'air, l'interface est à `θ·dx` du centre fluide, et l'opérateur reçoit `a/θ` sur sa
 //! diagonale — ses termes hors diagonale ne changent pas, il reste symétrique.
-#[cfg_attr(not(test), allow(unused_imports))]
-use super::{budget, Control, Error, Phase, Volume};
-use crate::host::JobSystem;
+use super::{budget, Control, Error, Phase, SurfaceReport, Volume};
+use crate::host::{JobSystem, MonotonicClock};
 
 /// Borne inférieure de `θ` (fraction de maille entre un centre fluide et la surface).
 /// **Paramètre de conditionnement, pas seuil physique** (SURFACE-MOBILE-S237 §1.1) : il n'agit que
@@ -250,6 +249,174 @@ impl Volume {
         self.eta_roundoff.fill(0.);
         self.last_cost_ms = None;
         Ok(())
+    }
+
+    /// Garde de géométrie (SURFACE-MOBILE-S237 §1.2) : surface à au moins deux mailles au-dessus
+    /// du fond coupé de sa colonne, et à au moins une maille sous le sommet du domaine.
+    fn surface_in_bounds(&self, ctl: &mut Control, phase: Phase) -> Result<bool, Error> {
+        let (nx, nz, dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
+        let edge = |i: usize| {
+            if i == 0 {
+                self.bottom[0]
+            } else if i == nx {
+                self.bottom[nx - 1]
+            } else {
+                0.5 * (self.bottom[i - 1] + self.bottom[i])
+            }
+        };
+        let top = (nz - 1) as f32 * dx;
+        for i in 0..nx {
+            ctl.poll(phase)?;
+            let floor = edge(i).max(edge(i + 1)) + 2. * dx;
+            if !(self.eta[i] >= floor && self.eta[i] <= top) {
+                return Ok(false);
+            }
+        }
+        Ok(true)
+    }
+
+    /// Extrapolation constante verticale au-dessus de la dernière face corrigée de chaque colonne
+    /// de faces, dans l'ordre des indices.
+    fn extrapolate_mobile(&mut self, ctl: &mut Control) -> Result<(), Error> {
+        let (nx, nz) = (self.domain.nx, self.domain.nz);
+        for i in 1..nx {
+            let mut last: Option<f32> = None;
+            for k in 0..nz {
+                ctl.poll(Phase::Correct)?;
+                let f = self.fu(i, k);
+                let solved = self.open_u[f] > 0.
+                    && self.frac[self.c(i - 1, k)] > 0.
+                    && self.frac[self.c(i, k)] > 0.
+                    && (self.wet(i - 1, k) || self.wet(i, k));
+                if solved {
+                    last = Some(self.u[f]);
+                } else if let Some(v) = last {
+                    self.u[f] = v;
+                }
+            }
+        }
+        for i in 0..nx {
+            let mut last: Option<f32> = None;
+            for k in 1..=nz {
+                ctl.poll(Phase::Correct)?;
+                let f = self.fw(i, k);
+                if self.open_w[f] > 0. && self.wet(i, k - 1) {
+                    last = Some(self.w[f]);
+                } else if let Some(v) = last {
+                    self.w[f] = v;
+                }
+            }
+        }
+        Ok(())
+    }
+
+    /// `η_i ← η_i − (dt/dx)(Q_{i+1} − Q_i)`, débit intégré jusqu'à la hauteur mouillée de la face,
+    /// somme compensée f32 de S233.
+    fn transport_mobile(&mut self, transport: f32, ctl: &mut Control) -> Result<(), Error> {
+        let (nx, nz, dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
+        // Chaque débit de face est calculé avant la mise à jour des deux colonnes qu'il sépare :
+        // tous lisent `η^n`.
+        let mut left = 0f32;
+        for i in 0..nx {
+            let mut right = 0f32;
+            if i + 1 < nx {
+                let surface = 0.5 * (self.eta[i] + self.eta[i + 1]);
+                for k in 0..nz {
+                    ctl.poll(Phase::Correct)?;
+                    let wet = ((surface - k as f32 * dx) / dx).clamp(0., 1.);
+                    if wet == 0. {
+                        break;
+                    }
+                    let face = self.fu(i + 1, k);
+                    right += self.open_u[face] * self.u[face] * dx * wet;
+                }
+            }
+            let increment = -transport * (right - left) - self.eta_roundoff[i];
+            let height = self.eta[i] + increment;
+            self.eta_roundoff[i] = (height - self.eta[i]) - increment;
+            self.eta[i] = height;
+            left = right;
+        }
+        Ok(())
+    }
+
+    /// **Pas à surface géométriquement mobile** (SURFACE-MOBILE-S237). Advection quadratique,
+    /// projection à Dirichlet fantôme sur `η^n`, extrapolation, puis `η^{n+1}` par débits mouillés.
+    /// Durée et budget en microsecondes entières ; seuls des coefficients arrondis en f32 atteignent
+    /// les champs (ADR-141). Refus atomiques : `Domain` (gardes de géométrie avant ou après le pas),
+    /// `Convergence`, `NotFinite` ; expiration = zéro avancée. u/w/p/η et reste d'arrondi restaurés.
+    pub fn step_surface_mobile(&mut self, duration_us: u64, max_iters: u32, budget_us: u64,
+        jobs: &dyn JobSystem, clock: &dyn MonotonicClock) -> Result<SurfaceReport, Error> {
+        self.last_cost_ms = None;
+        let limit = budget_us.checked_mul(1000).ok_or(Error::NotFinite)?;
+        if duration_us == 0 || duration_us > (1u64 << 53) { return Err(Error::NotFinite); }
+        let dt = duration_us as f64 * 1e-6;
+        let dx = self.domain.dx;
+        if self.g_eff <= 0. || dt * dt * self.g_eff as f64 / dx as f64 > 1. { return Err(Error::Domain); }
+        let scale = (-self.rho as f64 / dt) as f32;
+        let correction = (dt / self.rho as f64) as f32;
+        let transport = (dt / dx as f64) as f32;
+        let advection = dt as f32;
+        if !scale.is_finite() || !correction.is_finite() || correction == 0.
+            || !transport.is_finite() || transport == 0. || !(advection > 0.) {
+            return Err(Error::NotFinite);
+        }
+        let mut ctl = Control::from_ns(clock, limit);
+        let mut swapped = false;
+        let result = (|| {
+            ctl.check(Phase::Prepare)?;
+            if !self.surface_in_bounds(&mut ctl, Phase::Prepare)? { return Err(Error::Domain); }
+            budget::copy(&self.u, &mut self.saved_u, &mut ctl, Phase::Prepare)?;
+            budget::copy(&self.w, &mut self.saved_w, &mut ctl, Phase::Prepare)?;
+            budget::copy(&self.p, &mut self.saved_p, &mut ctl, Phase::Prepare)?;
+            budget::copy(&self.eta, &mut self.saved_eta, &mut ctl, Phase::Prepare)?;
+            budget::copy(&self.eta_roundoff, &mut self.saved_eta_roundoff, &mut ctl, Phase::Prepare)?;
+            self.swap_state();
+            core::mem::swap(&mut self.eta, &mut self.saved_eta);
+            core::mem::swap(&mut self.eta_roundoff, &mut self.saved_eta_roundoff);
+            swapped = true;
+            self.advect(advection, &mut ctl)?;
+            self.mobile = true;
+            let projected = self.project(scale, correction, max_iters, jobs, &mut ctl);
+            self.mobile = false;
+            let report = projected?;
+            if report.degraded { return Err(Error::Convergence); }
+            self.extrapolate_mobile(&mut ctl)?;
+            self.transport_mobile(transport, &mut ctl)?;
+            ctl.check(Phase::Validate)?;
+            for value in self.u.iter().chain(&self.w).chain(&self.p).chain(&self.eta)
+                .chain(&self.eta_roundoff).chain(&self.us).chain(&self.ws)
+                .chain(&self.rhs).chain(&self.res).chain(&self.dir).chain(&self.tmp) {
+                ctl.poll(Phase::Validate)?;
+                if !value.is_finite() { return Err(Error::NotFinite); }
+            }
+            if !report.residual.is_finite() || !report.divergence.is_finite() { return Err(Error::NotFinite); }
+            if !self.surface_in_bounds(&mut ctl, Phase::Validate)? { return Err(Error::Domain); }
+            ctl.check(Phase::Publish)?;
+            Ok(report)
+        })();
+        self.mobile = false;
+        if result.is_err() && swapped {
+            self.swap_state();
+            core::mem::swap(&mut self.eta, &mut self.saved_eta);
+            core::mem::swap(&mut self.eta_roundoff, &mut self.saved_eta_roundoff);
+        }
+        match result {
+            Ok(report) => {
+                let elapsed_ns = ctl.elapsed();
+                self.last_cost_ms = (elapsed_ns > 0).then_some(elapsed_ns as f32 / 1_000_000.);
+                Ok(SurfaceReport { advanced_us: duration_us, remaining_us: 0, elapsed_ns,
+                    stopped_at: None, report: Some(report) })
+            }
+            Err(Error::Budget) => Ok(SurfaceReport { advanced_us: 0, remaining_us: duration_us,
+                elapsed_ns: ctl.elapsed(), stopped_at: Some(ctl.phase), report: None }),
+            Err(error) => Err(error),
+        }
+    }
+
+    /// Nombre de mailles fluides du mode mobile (diagnostic de changement de topologie).
+    pub fn wet_cells(&self) -> usize {
+        (0..self.domain.cells()).filter(|c| self.wet_cell(*c)).count()
     }
 
     /// Projection seule du mode mobile, pour les réceptions de l'opérateur (tests).

@@ -456,6 +456,111 @@ fn mobile_operator_is_symmetric_with_side_and_top_ghosts_s237() {
 }
 
 #[test]
+fn mobile_step_keeps_rest_conserves_volume_and_changes_topology_s237() {
+    // Repos exact sur plusieurs pas, fond bosselé, niveau non aligné sur les faces.
+    let (nx, nz, dx) = (16usize, 20usize, 0.125f32);
+    let floor = bottom(nx, dx);
+    let mut rest = mobile_volume(nx, nz, dx, &floor);
+    rest.set_free_surface(&vec![1.9; nx], 1.9).unwrap();
+    for _ in 0..50 {
+        rest.step_surface_mobile(1000, 200, 1_000_000, &Jobs, &StillClock).unwrap();
+        assert!(rest.surface().iter().all(|h| h.to_bits() == 1.9f32.to_bits()));
+        assert!(rest.velocity_u().iter().chain(rest.velocity_w()).all(|x| x.to_bits() == 0));
+    }
+    // Onde d'amplitude finie, fond plat : volume à l'arrondi, mailles qui entrent et sortent.
+    let mut v = mobile_volume(nx, nz, dx, &vec![0.; nx]);
+    let wave: Vec<f32> = (0..nx).map(|i| 2.0 + 0.1 * (std::f32::consts::PI * (i as f32 + 0.5) / nx as f32).cos()).collect();
+    v.set_free_surface(&wave, 2.0).unwrap();
+    let volume0: f64 = v.surface().iter().map(|h| *h as f64).sum();
+    let (mut wet_min, mut wet_max) = (usize::MAX, 0);
+    for step in 0..400 {
+        let r = v.step_surface_mobile(1000, 2000, 1_000_000, &Jobs, &StillClock)
+            .unwrap_or_else(|e| panic!("pas {step} : {e:?}"));
+        assert_eq!(r.advanced_us, 1000);
+        assert!(!v.mobile, "le mode mobile ne doit pas rester armé après un pas");
+        let wet = v.wet_cells();
+        (wet_min, wet_max) = (wet_min.min(wet), wet_max.max(wet));
+    }
+    let drift = (v.surface().iter().map(|h| *h as f64).sum::<f64>() - volume0).abs() / nx as f64;
+    assert!(drift < 64. * f32::EPSILON as f64 * 2., "dérive de volume {drift:e}");
+    assert!(wet_max > wet_min, "aucun changement de topologie : {wet_min}..{wet_max}");
+    assert!(v.surface()[0] < 2.05, "la crête initiale doit être redescendue en un quart de période");
+}
+
+#[test]
+fn mobile_small_amplitude_follows_the_linear_mode_s237() {
+    // Même bassin 2×2 m, amplitude 1 mm : l'écart non linéaire vaut ≈0,15 % de a (P3).
+    let (nx, dx) = (16usize, 0.125f32);
+    let a = 0.001f32;
+    let wave: Vec<f32> = (0..nx).map(|i| 2.0 + a * (std::f32::consts::PI * (i as f32 + 0.5) / nx as f32).cos()).collect();
+    let mut mobile = mobile_volume(nx, 18, dx, &vec![0.; nx]);
+    mobile.set_free_surface(&wave, 2.0).unwrap();
+    let mut linear = mobile_volume(nx, 16, dx, &vec![0.; nx]);
+    linear.set_surface(&wave).unwrap();
+    let mut worst = 0f32;
+    for _ in 0..800 {
+        mobile.step_surface_mobile(1000, 2000, 1_000_000, &Jobs, &StillClock).unwrap();
+        linear.step_surface_linear(1000, 2000, 1_000_000, &Jobs, &StillClock).unwrap();
+        for (m, l) in mobile.surface().iter().zip(linear.surface()) {
+            worst = worst.max((m - l).abs() / a);
+        }
+    }
+    assert!(worst < 0.01, "écart mobile − linéaire {worst} de a");
+}
+
+#[test]
+fn mobile_step_refuses_geometry_out_of_bounds_atomically_s237() {
+    let (nx, nz, dx) = (8usize, 12usize, 0.25f32);
+    let mut v = mobile_volume(nx, nz, dx, &vec![0.; nx]);
+    let snapshot = |v: &Volume| -> Vec<u32> {
+        v.u.iter().chain(&v.w).chain(&v.p).chain(&v.eta).chain(&v.eta_roundoff).map(|x| x.to_bits()).collect()
+    };
+    // Trop près du sommet (au-dessus de (nz−1)·dx) puis du fond (moins de deux mailles).
+    for level in [2.76f32, 0.49] {
+        let mut eta = vec![1.5; nx];
+        eta[3] = level;
+        v.set_free_surface(&eta, 1.5).unwrap();
+        let before = snapshot(&v);
+        assert_eq!(v.step_surface_mobile(1000, 200, 1_000_000, &Jobs, &StillClock), Err(Error::Domain));
+        assert_eq!(snapshot(&v), before);
+        assert!(!v.mobile);
+    }
+    // Après le pas, sur une dynamique réelle : onde stationnaire dont la crête initiale touche presque
+    // le sommet admis ; au demi-cycle, la crête opposée le dépasse (l'harmonique d'ordre deux est
+    // positive aux deux murs). La garde d'après pas doit refuser, état intact. Un champ à divergence
+    // nulle construit à la main ne convenait pas : son second membre n'est que de l'arrondi, et la
+    // pression f32 y plafonnait à un résidu relatif 3,3e-6 (notes S237 P4b).
+    let (wx, wz, wdx) = (16usize, 24usize, 0.125f32);
+    let mut wave_volume = mobile_volume(wx, wz, wdx, &vec![0.; wx]);
+    let top = (wz - 1) as f32 * wdx;
+    let crest: Vec<f32> = (0..wx).map(|i| top - 0.05 + 0.05 * (std::f32::consts::PI * (i as f32 + 0.5) / wx as f32).cos()).collect();
+    wave_volume.set_free_surface(&crest, top - 0.05).unwrap();
+    let mut refused = None;
+    for step in 0..1600 {
+        let before = snapshot(&wave_volume);
+        match wave_volume.step_surface_mobile(1000, 2000, 1_000_000, &Jobs, &StillClock) {
+            Ok(_) => {}
+            Err(e) => { refused = Some((step, e)); assert_eq!(snapshot(&wave_volume), before); break; }
+        }
+    }
+    let (step, error) = refused.expect("la crête devait dépasser le sommet admis");
+    assert_eq!(error, Error::Domain, "pas {step}");
+    assert!(wave_volume.surface().iter().all(|h| *h <= top), "l'état publié reste dans les bornes");
+    assert!(step > 400, "le dépassement vient de la dynamique, pas de l'état initial : pas {step}");
+    // Pression non convergée et gravité nulle : refus, état intact, mode désarmé.
+    let wave: Vec<f32> = (0..nx).map(|i| 1.5 + 0.2 * (i as f32).sin()).collect();
+    v.set_free_surface(&wave, 1.5).unwrap();
+    v.set_velocity(&vec![0.; v.u.len()], &vec![0.; v.w.len()]).unwrap();
+    let before = snapshot(&v);
+    assert_eq!(v.step_surface_mobile(1000, 1, 1_000_000, &Jobs, &StillClock), Err(Error::Convergence));
+    assert_eq!(snapshot(&v), before);
+    v.g_eff = 0.;
+    assert_eq!(v.step_surface_mobile(1000, 200, 1_000_000, &Jobs, &StillClock), Err(Error::Domain));
+    assert_eq!(snapshot(&v), before);
+    assert!(!v.mobile);
+}
+
+#[test]
 fn mobile_projection_keeps_rest_exact_at_any_level_s237() {
     let (nx, nz, dx) = (16usize, 16usize, 0.15625f32);
     let floor = bottom(nx, dx);

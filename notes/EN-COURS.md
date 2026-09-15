@@ -96,7 +96,7 @@ réduite ; déferlement, mouillage du fond, air, cavité et 3D restent hors lot 
   `η(x,t)` aux centres de colonnes ; recoupement sympy de l'ordre deux à petite amplitude.
 - [x] **P4a** — cœur : géométrie mobile (ensemble fluide, `θ`, opérateur, second membre et
   correction à Dirichlet mobile) ; tests repos exact et symétrie.
-- [ ] **P4b** — cœur : extrapolation, flux mouillé, advection, `step_surface_mobile` atomique ;
+- [x] **P4b** — cœur : extrapolation, flux mouillé, advection, `step_surface_mobile` atomique ;
   tests petite amplitude contre S233, volume, changement de topologie, refus, allocation.
 - [ ] **P5** — réception : banc MAC contre HOS, trois résolutions, deux amplitudes, harmonique,
   témoin linéaire, coût ; document de validation.
@@ -136,3 +136,19 @@ et diagonale du préconditionneur au bit, surface ondulée 2×3 m à fantômes l
 amplitude portée à 0,5, exigence inchangée) ; projection d'un champ quelconque convergée,
 divergence < 1e-4 ; **repos exact au bit** à 2,0 / 2,013 / 1,9 m sur fond bosselé, zéro itération.
 Non-régression : 26 tests δ, 8 d'exécution, **empreinte S232 `0xc5ab1eadb094d058` inchangée**.
+
+P4b : **protocole corrigé avant mesure** — critère 4 porté de a = 1 cm à **1 mm** (l'harmonique
+physique vaut 1,5 % de a à 1 cm, P3) ; coefficient d'advection `dt` construit en f64 puis arrondi,
+écrit dans le document. `step_surface_mobile` (gardes avant/après, sauvegarde, advection,
+projection mobile, `extrapolate_mobile`, `transport_mobile`, validation), `surface_in_bounds`,
+`wet_cells`. **Premier essai** (exemple `essai`, nx32, a = 5 cm, une période contre HOS) : profil
+**0,85 % de a**, `b₂` 3,705 mm contre 3,673 mm (**2,4 %**), dérive de volume 3,7·10⁻⁹ m, mailles
+fluides 1021..1029, ≤143 itérations, 4,5 ms/pas. Tests : repos exact 50 pas (1,9 m, fond bosselé) ;
+onde 10 cm nx16 400 pas, volume à l'arrondi, topologie changeante ; mobile − linéaire à 1 mm sur
+800 pas nx16 **< 1 %** ; refus sommet/fond avant pas, **refus d'après pas sur dynamique réelle**
+(crête au sommet admis moins rien, dépassement au demi-cycle, pas > 400), `Convergence`, g = 0,
+état au bit, mode désarmé ; exécution : **580 points d'expiration**, zéro allocation, reprise
+identique, cinq refus d'entrée, horloge reculante. **Impasse** : champ à divergence nulle écrit à la
+main pour le refus d'après pas → second membre d'arrondi, pression f32 plafonnée à **3,3·10⁻⁶** de
+résidu relatif, CG simple (vérifié en forçant M = I) comme préconditionné, à 1 ms comme à 1 µs →
+`Convergence` avant la garde. Suite du cœur **425 réussis, 5 ignorés** ; empreinte S232 inchangée.

@@ -3,9 +3,23 @@
 //!
 //! `cargo run -p water-core --release --offline --example delta_mobile -- oracle`
 #[path = "support/nl_surface.rs"]
+#[allow(dead_code)]
 mod nl;
+#[path = "../../water-harness/src/host_impl.rs"]
+#[allow(dead_code)]
+mod host_impl;
 use nl::{NlSurface, C};
 use std::f64::consts::PI;
+use std::time::Instant;
+use water_core::delta_projection::{Domain, Volume};
+use water_core::host::{HostServices, MonotonicClock};
+
+struct Clock(Instant);
+impl MonotonicClock for Clock {
+    fn now_ns(&self) -> u64 {
+        self.0.elapsed().as_nanos().min(u64::MAX as u128) as u64
+    }
+}
 
 /// Bassin à murs de longueur `L`, profondeur `H` : mode `cos(kx)`, `k = π/L`, `kh = π`.
 const L: f64 = 2.;
@@ -131,10 +145,141 @@ fn oracle() {
     }
 }
 
+/// Mode de surface du candidat comparé.
+#[derive(Clone, Copy, PartialEq)]
+enum Mode {
+    Mobile,
+    Linear,
+}
+
+/// Une trajectoire du candidat sur une période, comparée pas à pas au véhicule HOS.
+struct Run {
+    /// `max|η − η_HOS|/a` sur tous les points et tous les pas.
+    profile: f64,
+    /// `max|b₂ − b₂,HOS|` et `max|b₂,HOS|`, `max|b₂|` du candidat.
+    b2_error: f64,
+    b2_ref: f64,
+    b2_max: f64,
+    volume_drift: f64,
+    wet_min: usize,
+    wet_max: usize,
+    iterations_max: u32,
+    step_ms_median: f64,
+    step_ms_max: f64,
+    bytes: usize,
+}
+
+fn candidate(mode: Mode, nx: usize, a: f64, dt_us: u64) -> Result<Run, String> {
+    let dx = L / nx as f64;
+    let jobs = host_impl::SequentialJobs;
+    let sink = host_impl::StderrSink;
+    let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 26);
+    // Mobile : domaine jusqu'à 2,25 m, repos à 2 m. Linéaire : couvercle S233 au repos, z₀ = h.
+    let nz = match mode {
+        Mode::Mobile => (2.25 / dx).round() as usize,
+        Mode::Linear => (H / dx).round() as usize,
+    };
+    let mut v = Volume::configure(
+        &mut HostServices { alloc: &mut arena, jobs: &jobs, sink: &sink },
+        Domain { nx, nz, dx: dx as f32 },
+        1025.,
+        G as f32,
+        &vec![0.; nx],
+    )
+    .map_err(|e| format!("configuration {e:?}"))?;
+    let xc = |i: usize| (i as f64 + 0.5) * dx;
+    let eta: Vec<f32> = (0..nx).map(|i| (H + a * (k() * xc(i)).cos()) as f32).collect();
+    match mode {
+        Mode::Mobile => v.set_free_surface(&eta, H as f32),
+        Mode::Linear => v.set_surface(&eta),
+    }
+    .map_err(|e| format!("surface {e:?}"))?;
+    use water_core::host::Allocator;
+    arena.seal();
+    let dt = dt_us as f64 * 1e-6;
+    let steps = (period() / dt).round() as usize;
+    let mut reference = hos(a, REF_BAND, REF_LEVELS, 3);
+    let volume0: f64 = v.surface().iter().map(|h| *h as f64).sum();
+    let mut run = Run {
+        profile: 0.,
+        b2_error: 0.,
+        b2_ref: 0.,
+        b2_max: 0.,
+        volume_drift: 0.,
+        wet_min: usize::MAX,
+        wet_max: 0,
+        iterations_max: 0,
+        step_ms_median: 0.,
+        step_ms_max: 0.,
+        bytes: arena.stats().persistent_bytes,
+    };
+    let mut times = Vec::with_capacity(steps);
+    for n in 1..=steps {
+        let clock = Clock(Instant::now());
+        let start = Instant::now();
+        let report = match mode {
+            Mode::Mobile => v.step_surface_mobile(dt_us, 4000, 60_000_000, &jobs, &clock),
+            Mode::Linear => v.step_surface_linear(dt_us, 4000, 60_000_000, &jobs, &clock),
+        }
+        .map_err(|e| format!("pas {n} : {e:?}"))?;
+        times.push(start.elapsed().as_secs_f64() * 1e3);
+        if report.advanced_us != dt_us {
+            return Err(format!("pas {n} non avancé : {:?}", report.stopped_at));
+        }
+        run.iterations_max = run.iterations_max.max(report.report.map_or(0, |r| r.iterations));
+        if mode == Mode::Mobile {
+            let wet = v.wet_cells();
+            run.wet_min = run.wet_min.min(wet);
+            run.wet_max = run.wet_max.max(wet);
+        }
+        reference.step(dt).map_err(|e| format!("HOS {e}"))?;
+        let (mut b2, mut b2h) = (0f64, 0f64);
+        for (i, h) in v.surface().iter().enumerate() {
+            let x = xc(i);
+            let mac = *h as f64 - H;
+            let hosv = hos_eta(&reference, x);
+            run.profile = run.profile.max((mac - hosv).abs() / a);
+            b2 += 2. / L * mac * (2. * k() * x).cos() * dx;
+            b2h += 2. / L * hosv * (2. * k() * x).cos() * dx;
+        }
+        run.b2_error = run.b2_error.max((b2 - b2h).abs());
+        run.b2_ref = run.b2_ref.max(b2h.abs());
+        run.b2_max = run.b2_max.max(b2.abs());
+    }
+    run.volume_drift = (v.surface().iter().map(|h| *h as f64).sum::<f64>() - volume0).abs() / nx as f64;
+    times.sort_by(f64::total_cmp);
+    run.step_ms_median = times[times.len() / 2];
+    run.step_ms_max = times[times.len() - 1];
+    Ok(run)
+}
+
+fn compare(modes: &[Mode], grids: &[usize], amplitudes: &[f64], dt_us: u64) {
+    for &a in amplitudes {
+        for &mode in modes {
+            for &nx in grids {
+                let label = if mode == Mode::Mobile { "mobile" } else { "lineaire" };
+                match candidate(mode, nx, a, dt_us) {
+                    Ok(r) => println!(
+                        "CANDIDAT mode={label} a={a} nx={nx} dt_us={dt_us} profil_sur_a={:.5} b2_ecart={:.4e} b2_ref={:.4e} b2_relatif={:.4} b2_candidat={:.4e} derive_volume_m={:.3e} mailles_fluides={}..{} iterations_max={} pas_ms median={:.3} max={:.3} octets={}",
+                        r.profile, r.b2_error, r.b2_ref, r.b2_error / r.b2_ref, r.b2_max, r.volume_drift,
+                        r.wet_min, r.wet_max, r.iterations_max, r.step_ms_median, r.step_ms_max, r.bytes
+                    ),
+                    Err(e) => println!("CANDIDAT mode={label} a={a} nx={nx} dt_us={dt_us} REFUS {e}"),
+                }
+            }
+        }
+    }
+}
+
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     match args.get(1).map(String::as_str) {
         Some("oracle") => oracle(),
-        _ => eprintln!("usage : delta_mobile oracle"),
+        Some("essai") => compare(&[Mode::Mobile], &[32], &[0.05], 1000),
+        Some("reception") => {
+            compare(&[Mode::Mobile, Mode::Linear], &[32, 64, 128], &[0.05, 0.10], 1000);
+            compare(&[Mode::Mobile, Mode::Linear], &[64], &[0.01], 1000);
+        }
+        _ => eprintln!("usage : delta_mobile oracle | essai | reception"),
     }
 }

@@ -86,3 +86,15 @@ Grilles `nx = 32 / 64 / 128` (`nz` jusqu'à `z = 2,25 m`), durée **une période
    `max|b₂,HOS|` — il ne peut produire l'harmonique.
 
 Un critère manqué est publié tel quel ; aucune tolérance n'est modifiée après mesure.
+
+**Correction du protocole avant toute mesure (P4b, 2026-09-15).** Le critère 4 plaçait la
+comparaison au mode linéaire à `a = 0,01 m` en supposant l'effet non linéaire négligeable. L'ordre
+deux calculé en P3 le contredit : `max|b₂| = 1,478·a²`, soit **1,5 % de `a`** à `a = 0,01 m` — un
+écart physique que le mode mobile *doit* produire et que le mode linéaire ne peut pas produire. Le
+critère 4 aurait échoué pour une raison juste. Il est porté à **`a = 0,001 m`** (effet non linéaire
+0,15 % de `a`), tolérance **1 %** inchangée ; `a = 0,01 m` rejoint les amplitudes comparées au
+véhicule HOS (critères 5 et 6). Aucune mesure du candidat n'avait eu lieu.
+
+**Coefficient d'advection.** L'advection existante multiplie par `dt` ; le mode mobile le lui passe
+comme coefficient construit en f64 depuis la durée entière puis arrondi en f32, au même titre que
+`ρ/dt`, `dt/ρ` et `dt/dx` (ADR-141) : aucune durée ni horloge n'est portée en f32.
