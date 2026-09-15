@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S238 — en cours
+Session : S238 — terminée
 Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy et GPU local disponibles)
 Entrée : « Continue », master propre à 17ca164, trois copies au même commit, jeton libre,
 secteur. Cœur : 425 réussis, 5 ignorés.
@@ -98,7 +98,7 @@ pas. Aucun seuil de banc modifié.
 - [x] **P4** — construction : erreur inverse composante par composante, détection de stagnation,
   arrêt au plancher, champ de rapport ; tests (bits anciens, système sans solution, f64).
 - [x] **P5** — réception : S237 5 cm à 128 colonnes, empreintes, `delta_precision`, coût ; ADR.
-- [ ] **P6** — rituel §6, file, feuille de route, jeton ; copies à synchroniser.
+- [x] **P6** — rituel §6, file, feuille de route, jeton ; copies à synchroniser.
 
 ### Notes de reprise
 

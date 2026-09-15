@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-15 09:27 +02:00
+JETON            : libre
+Battement        : 2026-09-15 09:31 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy et GPU local disponibles)
-Session en cours : S238 — A272 : pression δ au-delà de 8 192 mailles
-Dernière session : S237 — surface géométriquement mobile de δ reçue contre l'onde HOS
-Session suivante : S238 — A272 : pression δ au-delà de 8 192 mailles
+Session en cours : aucune
+Dernière session : S238 — la pression f32 de δ s'arrête à sa précision représentable (ADR-143)
+Session suivante : S239 — A273 : tolérance physique de la pression δ aux grandes tailles
 Maillons        : 0
 
 ```
@@ -75,10 +75,11 @@ Ne pas relire le journal, les leçons ou tous les ADR intégralement à chaque r
 
 ## 4. Où en est le projet
 
-État à S237 : B/W et un afficheur existent ; scène multi-sources dessinée, visibilité au bit, composée
+État à S238 : B/W et un afficheur existent ; scène multi-sources dessinée, visibilité au bit, composée
 et admise par le cœur (ADR-142). δ MAC x-z possède une **surface géométriquement mobile** reçue contre
-l'onde stationnaire HOS d'ordre 3 (surface graphe, sans 3D, cavité, scénario B3 ni I-05 complet ;
-pression f32 limitée au-delà de 8 192 mailles, A272). V : plans orientés et restauration locale reçus.
+l'onde stationnaire HOS d'ordre 3 (surface graphe, sans 3D, cavité, scénario B3 ni I-05 complet) ; sa
+pression f32 s'arrête à sa précision représentable (ADR-143), tolérance physique non garantie aux
+grandes tailles (A273). V : plans orientés et restauration locale reçus.
 Les réceptions et limites courantes sont dans la feuille de route. Le nombre de tests ne mesure
 pas la couverture des intentions, et une exécution locale ne reçoit pas le multiplateforme.
 

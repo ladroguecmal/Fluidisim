@@ -12190,3 +12190,57 @@ déclencheurs. Aucune ambition réduite ni arbitrage utilisateur nécessaire.
 index. Invariants relus : I-06 (tampon réservé à la configuration, zéro allocation reçue), I-08 (durée
 entière, coefficients arrondis), I-03 (réductions ordonnées). Maillons 0 : surface mobile consommée par le
 pas, reçue contre un oracle non linéaire indépendant.
+
+## S238 — 2026-09-15 — La pression f32 s'arrête là où f32 ne peut plus rien dire
+
+**Entrée.** « Continue », master propre à `17ca164`, trois copies au même commit, jeton libre, secteur ;
+cœur 425/5. Claude Code, Opus 5. Plan `cf3297d`, protocole `3bf0c43`, loi du plancher `845b8a7`, cycle
+`c779a9b`, réception `944bb65`.
+
+**Capacité reçue.** La pression f32 de δ **accepte un pas au plancher de sa précision** au lieu de refuser
+après son plafond (ADR-143) : critère premier 10⁻⁶ inchangé ; arrêt si l'erreur inverse composante par
+composante est sous la borne d'arrondi de la ligne (`ω ≤ γ₈`, dérivée pour quatre faces) ou si l'état
+revient au bit (Brent, mémoire constante) ; réception à la seule condition de la divergence déclarée par
+S199 (10⁻⁵). Consommateur : la trajectoire de la surface mobile au-delà de 8 192 mailles, et toute grille
+plus grande.
+
+**Mesure avant règle** ([PRESSION-PLANCHER-S238](../docs/validation/PRESSION-PLANCHER-S238.md)). Famille
+S231 : converge jusqu'à 256×128. Pas refusé de S237 : **`ω` = 1 `u`**, résidu semblant alterner entre deux
+valeurs. `ω` n'est pas un seuil d'acceptation (4,7·10⁻⁴ sur des pas convergés, 10⁻¹⁶ sur un système sans
+solution) ; la non-décroissance stricte non plus (S233).
+
+**Deux constructions écartées par la mesure.** (1) Mémoire de deux relances : l'état parcourait une
+**période de 420 relances**. (2) Brent seul : certifie, mais **7 386 itérations** dans le banc et pas 404
+refusé sous 16 000 — longueur de cycle non bornée, alors que `ω` restait à 0,9–1,3 `u`. D'où le certificat
+par borne (L317).
+
+**Réception.** 5 cm à 32/64/128 colonnes : profil 0,85/0,55/**0,25 %**, harmonique 2,44/1,41/**0,71 %**,
+sous 2 % et 20 %, décroissants ; 12/39/38 pas au plancher, `ω` 2,2–7,8 `u`, divergence ≤ 1,5·10⁻⁷, pire pas
+**526 itérations** (S237 : refus à 64 000). Contre f64 du même système : pression 3·10⁻⁵, **vitesse
+5,5·10⁻⁸** (estimation d'avant mesure 1,3·10⁻⁴). Système sans solution : dégradé par les deux arrêts.
+Identité `div u = r/scale` à 7·10⁻⁸. Empreinte S232 au bit, `delta_precision` sans arrêt au plancher,
+suite **429 réussis, 9 ignorés**.
+
+**Ce qui a été trouvé.** (1) **Promesse d'avant construction non tenue** : « cas S237 au bit » valait pour
+un arrêt sur stagnation ; le certificat coupe une ou deux itérations plus tôt 12 et 39 pas à 32/64 colonnes
+— chiffres de réception inchangés, volume 3,7·10⁻⁹ → 1,5·10⁻⁸ m, publié. (2) Le résidu relatif des pas reçus
+monte à 3·10⁻⁶ : le pas garantit `ω ≤ γ₈` et la divergence, plus 10⁻⁶. (3) **A273** : des pas convergés au
+critère premier dépassent la divergence de S199 — 1,02·10⁻⁵ à 128×64 sur la bosse, dans le domaine de
+S231, 1,58·10⁻⁵ à 256×128.
+
+**Coût et limites.** 256 ms par pas médian à 128 colonnes, comme S237 ; aucune technique de coût. Opérateur
+2D seulement (`γ₁₀` en 3D à dériver) ; une forme de second membre au-delà de 16 384 mailles ; certificat
+jamais mis en défaut par un cycle au-dessus de `γ₈`. **Impasse** : message de commit par `Out-File` →
+marque d'ordre d'octets en tête, réécrit par heredoc.
+
+**Suite comparée.** Deuxième session consécutive sur la pression δ, première sur A273. A273 est révélé par
+mesure, porte sur une tolérance déclarée avant construction, et grandit avec la taille : la 3D et la cavité
+(J2) le rencontreraient d'emblée. **S239 : A273 — tolérance physique de la pression δ**, loi
+divergence/taille puis arrêt qui la tient ou requalification datée. Avant une troisième session sur la
+pression : vérifier que la suite débloque encore la 3D. V, B2, bathymétrie, CPU de J1-bis et seconde cible
+gardent leurs déclencheurs. Aucune ambition réduite ni arbitrage utilisateur nécessaire.
+
+**Rituel.** A272 fermée sur le domaine mesuré, A273 ouverte ; L317 ; ADR-143 ; feuille de route J2, file
+active (précision δ, J2, A273), index. Invariants relus : I-03 (arrêts déterministes, bits rejoués), I-06
+(passes sans allocation, tests d'exécution verts), I-14 (`γ₈` dérivé, 10⁻⁵ de S199). Maillons 0 : pas au
+plancher accepté, consommé par la trajectoire mobile à 16 384 mailles, reçu contre HOS et f64.

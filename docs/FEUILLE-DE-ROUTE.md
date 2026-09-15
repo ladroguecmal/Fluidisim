@@ -133,10 +133,13 @@ entière et compensation f32, onde stationnaire reçue, abandon atomique hauteur
 fantôme (opérateur symétrique au bit), mailles qui entrent et sortent du fluide, advection
 quadratique, pas atomique. Reçue contre l'**onde stationnaire d'amplitude finie** du véhicule HOS
 d'ordre 3 : à 10 cm (`ka = 0,16`), profil **0,23 %** et harmonique `2k` à **0,43 %** à 128 colonnes,
-décroissants en raffinant ; le mode linéaire n'en produit que 10⁻⁵. À 5 cm, refus au plus fin maillage :
-plancher de la pression f32 au-delà du domaine S231 (**A272**).
-[Preuve](validation/SURFACE-MOBILE-S237.md). Restent : surface non graphe (déferlement), mouillage du
-fond, bords ouverts, pression f32 à grande taille (A272), passage à la 3D, cavité et couplage de
+décroissants en raffinant ; le mode linéaire n'en produit que 10⁻⁵.
+[Preuve](validation/SURFACE-MOBILE-S237.md). **S238 : la pression f32 s'arrête à sa précision
+représentable** (ADR-143) — erreur inverse sous la borne d'arrondi de la ligne ou état revenu au bit, pas
+reçu seulement à la divergence de S199 ; 5 cm **reçu à 128 colonnes** (0,25 % / 0,71 %), vitesse à
+5,5·10⁻⁸ de la solution f64 ; [preuve](validation/PRESSION-PLANCHER-S238.md). Restent : surface non graphe
+(déferlement), mouillage du fond, bords ouverts, tolérance physique non garantie par le critère premier
+aux grandes tailles (A273), passage à la 3D, cavité et couplage de
 l'écart à B+W. Part d'un impact que W ne porte pas nommée en S203 (énergie hors ondes, cavité, gerbe).
 
 *Bancs* : **B3** (famille de δ) quand un candidat atteint ses critères ou qu'un second existe ;

@@ -3462,7 +3462,7 @@ pas pour une scène dont les naissances se renouvellent. Voir
 le CPU (préparation du sillage 3,12 ms, 204 Hz) et hors forçage 415 Hz ; hors champ 727 Hz. Le
 recouvrement à GPU chargé n'est toujours pas expliqué, et aucune décision n'en dépend.
 
-- **A272** *(sévérité 2, S237 ; ouverte)* — **Au-delà du domaine reçu par S231, la pression f32 de δ
+- **A272** *(sévérité 2, S237 ; fermée S238 par ADR-143 sur le domaine mesuré, voir suivi)* — **Au-delà du domaine reçu par S231, la pression f32 de δ
   plafonne au-dessus de son propre seuil, et le pas refuse.** Onde stationnaire de 5 cm, grille
   128×144 (16 384 mailles fluides), quart de période, surface plate : résidu relatif figé à
   **1,0492·10⁻⁶** pour un seuil de 10⁻⁶, à 4 000, 16 000 et 64 000 itérations ; divergence après
@@ -3497,3 +3497,28 @@ seulement près des impacts forts. A261 — aucune enveloppe de modules ne voit 
 paquet — reste vraie partout ailleurs ; une scène où la pression seule sature n'y gagnerait rien.
 Sévérité d'A255 ramenée à 2 pour J1. **A258 entre dans l'admission** : ADR-137 est une réception
 numérique, pas un certificat f32, et le plancher en hérite sur les cellules critiques.
+
+**Suivi A272 — S238, 2026-09-15 : fermée sur le domaine mesuré, par ADR-143.** Au refus, l'erreur inverse
+composante par composante valait **une unité d'arrondi** et l'état de pression parcourait un cycle exact
+(période 420 dans un montage, plus de 16 000 itérations dans le banc) : aucun nombre d'itérations n'avait
+d'issue. La pression s'arrête désormais quand son vrai résidu est indiscernable de l'arrondi de son propre
+calcul (`ω ≤ γ₈`, dérivé de la ligne à quatre faces) ou quand l'état revient au bit, et le pas n'est reçu
+que si la divergence tient la tolérance déclarée par S199 (10⁻⁵). Onde de 5 cm **reçue à 128 colonnes**
+(profil 0,25 %, harmonique 0,71 %, pire pas 526 itérations) ; contre la solution f64 du même système,
+vitesse à 5,5·10⁻⁸. Prix publié : les trajectoires S237 à 32 et 64 colonnes changent de bits (pas
+arrêtés une ou deux itérations plus tôt), chiffres de réception inchangés. **Limites** : opérateur 2D
+seulement (en 3D, `γ₁₀` à dériver avec l'opérateur) ; une forme de second membre au-delà de 16 384
+mailles ; résidu relatif des pas reçus jusqu'à 3·10⁻⁶. Voir L317,
+[PRESSION-PLANCHER-S238](../validation/PRESSION-PLANCHER-S238.md).
+
+- **A273** *(sévérité 2, S238 ; ouverte)* — **Le critère d'arrêt premier de la pression δ ne garantit pas
+  la tolérance physique de la projection.** Des pas **convergés** selon le résidu relatif 10⁻⁶ rendent une
+  divergence mise à l'échelle de S199 de **1,02·10⁻⁵ à 128×64 sur la bosse** (`delta_precision`, dans le
+  domaine reçu par S231) et **1,58·10⁻⁵ à 256×128** (famille S231), au-dessus des 10⁻⁵ déclarés avant
+  construction. S231 n'appliquait ce critère qu'à 32×16 ; aucun banc ne l'a vérifié depuis aux tailles
+  supérieures. La divergence croît avec la taille à résidu relatif constant : par l'identité
+  `div u = r/scale`, c'est une norme maximale du résidu, qu'une norme euclidienne relative ne borne pas.
+  Gravité 2 : toute grille plus grande, la 3D d'abord, s'éloignera de la tolérance sans que le rapport le
+  dise. **À faire** : mesurer la loi divergence/taille à résidu relatif fixé, puis soit un arrêt qui tient
+  la tolérance physique (en gardant le plancher d'ADR-143), soit une requalification datée de la tolérance
+  avec provenance — jamais un seuil déplacé pour faire passer les cas. Voir PRESSION-PLANCHER-S238 §4.4.

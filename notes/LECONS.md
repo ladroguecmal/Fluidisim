@@ -5230,3 +5230,20 @@ de l'écart que la physique met entre eux, et le calcul de cet écart précède 
 n'est pas une amplitude : c'est un rapport, ici `ka·(1,48/k)`, qu'il faut évaluer. Même famille que
 L283 : la charge et la tolérance se dérivent de ce qui doit être distingué, jamais d'une intuition
 d'échelle. Voir SURFACE-MOBILE-S237 §1 (correction datée).
+
+## L317 — Un plancher d'arrondi se certifie par une borne, pas par la répétition
+
+*(S238)* Au pas que la pression f32 refusait, le résidu semblait **alterner entre deux valeurs**. Une
+détection de cycle à deux relances l'aurait certifié dans un montage ; au pas visé, l'état parcourait
+une période de **420 relances**, et dans le banc, sous un autre ordre de réduction, il fallait
+**7 386 itérations** puis plus de 16 000 avant le retour au bit. La répétition existait, exacte et
+déterministe ; sa longueur n'était bornée par rien. Ce qui était constant, en revanche, était l'erreur
+inverse composante par composante : **0,9 à 1,3 unité d'arrondi** à chaque pas au plancher.
+
+Ce qui généralise : **« l'itération ne peut plus rien gagner » se prouve en comparant le résidu à la
+borne d'arrondi de son propre calcul** (`γ_n`, dérivée des opérations de la ligne), pas en attendant
+que l'état revienne — le retour prouve la même chose, à un coût que personne ne peut promettre. Une
+grandeur scalaire qui se répète (le résidu) ne dit pas la période de l'état. Et le prix est à écrire
+avant de promettre « au bit » : un certificat qui arrête plus tôt change aussi des pas que l'ancien
+critère aurait fini par accepter — ici par un tirage d'arrondi sous 10⁻⁶. Voir PRESSION-PLANCHER-S238
+§3–4, ADR-143 ; même famille que L316 : le nombre vient de ce qu'on doit distinguer.
