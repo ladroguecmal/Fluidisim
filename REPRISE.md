@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-15 19:26 +02:00
+JETON            : occupé
+Battement        : 2026-09-15 19:33 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy et GPU local disponibles)
-Session en cours : aucune
+Session en cours : S240 — J1-bis : I-06 de la pile graphique, allocations par image de l'hôte
 Dernière session : S239 — la tolérance physique de S199 devient une condition d'acceptation (ADR-144)
-Session suivante : S240 — J1-bis : espace, LOD et visibilité intégrés au rendu, coût aux 2 ms
+Session suivante : à déterminer en fin de S240
 Maillons        : 0
 
 ```

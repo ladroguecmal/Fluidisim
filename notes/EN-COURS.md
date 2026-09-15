@@ -58,103 +58,59 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S239 — terminée
+Session : S240 — en cours
 Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy et GPU local disponibles)
-Entrée : « Reprends le projet », master propre à e8cfc6f, trois copies au même commit, jeton
-libre (battement 09:31, horloge 18:19), secteur.
+Entrée : « Continue », master propre à `45d24a5`, une seule copie, jeton libre, secteur.
+Hôte GPU vérifié sur cette machine : RTX 5070 Laptop, DX12, `--smoke` 120 images, code 0.
 
-**Objectif.** A273 : que la pression de δ **tienne la tolérance physique qu'elle a déclarée**
-(divergence projetée ≤ 10⁻⁵, S199 §5 critère 4) aux tailles qu'elle atteint désormais — ou qu'une
-requalification datée, à provenance physique, la remplace.
-**Ce que la lecture fixe.** Deux quantités de normes différentes. Le critère premier d'arrêt est
-un résidu **relatif en norme 2** : `‖b−Ap‖₂/‖b‖₂ ≤ 10⁻⁶`. La tolérance de S199 est une
-**norme maximale normalisée** du champ corrigé : `max|div u|·dx / max|u| ≤ 10⁻⁵`. L'identité
-`div u = r/scale` (S238 P4, écart mesuré 7·10⁻⁸, car `scale·k1 = −1`) les relie :
-`divergence = max|r|·dx / (|scale|·max|u|)`. Une borne sur `‖r‖₂` ne borne `max|r|` qu'au pire
-facteur près, et le rapport `‖b‖₂·dx/max|u|` dépend de la taille : **aucune valeur du critère
-premier ne garantit la tolérance physique**. Mesuré en S238 : 1,02·10⁻⁵ à 128×64 (bosse de
-`delta_precision`, domaine reçu par S231) et 1,58·10⁻⁵ à 256×128, sur des pas **convergés**.
-**Thèse.** Une tolérance déclarée avant construction est une **condition d'acceptation**, pas un
-diagnostic publié après coup. La boucle poursuit tant que la tolérance n'est pas tenue ; un pas
-qui ne peut pas la tenir — plafond ou plancher d'ADR-143 — est **dégradé**, et le déclare. Aucun
-nombre nouveau : 10⁻⁵ est celui de S199, 10⁻⁶ reste premier. La divergence exacte du champ
-corrigé se calcule dans la boucle avec les tampons existants (`u`/`w` libres avant la correction
-finale), donc sans allocation et sans estimateur.
-**Critères, déclarés avant construction.** (1) Loi mesurée : divergence contre taille à résidu
-relatif tenu, et itérations supplémentaires nécessaires pour atteindre 10⁻⁵ (famille S231 de 16 à
-256 colonnes ; bosse de `delta_precision`). (2) **Tout cas aujourd'hui accepté dont la divergence
-est déjà ≤ 10⁻⁵ reste identique au bit** (empreinte S232, tests S231/S233/S237, plancher S238).
-(3) Les deux cas d'A273 tiennent 10⁻⁵ ou sont **dégradés** : aucun pas accepté au-dessus de la
-tolérance. (4) Réception S237 5 cm / 128 colonnes conservée (profil ≤ 2 %, `b₂` ≤ 20 %) et
-plancher d'ADR-143 conservé. (5) Système sans solution : toujours dégradé. (6) Coût (ADR-131) :
-itérations et millisecondes par pas avant/après, techniques présentes/absentes et domaine.
-**Arrêt.** Règle construite, ADR, cas reçus ; ou constat chiffré que f32 ne peut pas tenir 10⁻⁵ à
-ces tailles, et alors requalification datée à provenance, jamais un seuil choisi après coup.
+**Objectif.** **I-06 pour la pile graphique** : que les allocations par image de l'hôte soient
+**mesurées** — et donc que l'invariant soit tenu, ou que sa portée soit requalifiée avec provenance
+pour cette couche, comme ADR-139 l'a fait pour I-08 et V.
+**Ce que la lecture fixe.** I-06 dit « aucune allocation à l'exécution » et le cœur la reçoit par
+allocateur compteur (`Arena`, refus après `seal`). Pour l'hôte, elle n'a **jamais été mesurée** :
+[CADENCE-HOTE-S225](docs/validation/CADENCE-HOTE-S225.md) §Suite l'écrit noir sur blanc (« les
+allocations de la pile graphique, I-06, toujours non reçues ») et la feuille de route la garde dans
+les travaux nécessaires de J1 (ADR-131 D6). Le budget de 2 ms (ADR-125) et **A265** — le recouvrement
+CPU/GPU varie avec la charge sans que la mesure l'explique — donnent le consommateur : une allocation
+par image est un suspect direct de gigue.
+**Thèse.** Ce qui n'est pas compté n'est pas tenu. Un allocateur compteur global dans le binaire de
+l'hôte, sans dépendance nouvelle, sépare **ce qui est à nous** de **ce que la pile impose**. Le
+premier se supprime ou se justifie ; le second se chiffre, et décide si I-06 vaut pour cette couche.
+**Critères, déclarés avant construction.** (1) Allocations par image en régime — nombre et octets —,
+les dix premières images écartées comme le banc le fait déjà. (2) **Attribution** par phase :
+préparation CPU du sillage, planification de la grille, encodage et soumission GPU, acquisition de
+la surface, boucle d'événements. (3) Séparation à nous / à la pile, par site nommé. (4) **La mesure
+ne déplace pas les chiffres publiés** : `VERIFY` à 3 mm et `BENCH` GPU rejoués avec et sans
+l'instrument, écart publié. (5) Ce qui est à nous est supprimé, ou justifié par écrit ; re-mesure.
+(6) Coût (ADR-131) : techniques présentes, absentes, domaine.
+**Arrêt.** I-06 reçue pour l'hôte, ou **requalification datée** de sa portée pour la pile graphique,
+avec le chiffre et la cause. Aucun seuil inventé, aucun banc modifié pour obtenir du vert.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [x] **P2** — lectures ciblées (`project`, `delta_precision`, S199 §5, S231) ; protocole écrit
-  avant mesure : ce que la tolérance mesure, pourquoi le critère premier ne la borne pas.
-- [ ] **P3** — mesure de la loi : divergence contre taille à résidu tenu, itérations
-  supplémentaires pour 10⁻⁵, et divergence atteignable au plancher f32.
-- [x] **P4** — construction : la tolérance devient condition d'acceptation dans la boucle ;
-  tests (bits des cas conformes, cas d'A273, système sans solution).
-  **Amendement P4, par la mesure** : l'acceptation porte sur les lignes **franches** — celles dont
-  aucune face ne porte un fantôme de surface. Une ligne à fantôme est une condition de Dirichlet de
-  raideur `1/θ` dont le résidu plafonne à **un ulp de la magnitude de sa propre ligne** (mesuré :
-  2⁻⁵, 2⁻⁶, 2⁻⁷) ; exiger 10⁻⁵ d'elle refuserait des pas que la réception HOS de S237 valide à
-  0,25 %. Les lignes franches, elles, descendent de 7,5·10⁻⁵ à 4,5·10⁻⁷ (voir notes).
-- [x] **P5** — réception : S237 5 cm à 128 colonnes, empreintes, `delta_precision`, coût ; ADR.
-- [x] **P6** — rituel §6, file, feuille de route, jeton ; fermeture des trois copies.
+- [ ] **P2** — lectures ciblées (boucle d'image de l'hôte, bancs S225/S235, I-06 et ADR-006) ;
+  protocole écrit avant mesure, avec ce qui serait reçu et ce qui serait une requalification.
+- [ ] **P3** — instrument : allocateur compteur global du binaire de l'hôte, marquage par phase,
+  sans dépendance nouvelle ; contrôle qu'il ne déplace pas `VERIFY` ni `BENCH`.
+- [ ] **P4** — mesure : allocations par image en régime, taille et attribution, scène S235 à
+  960×540, dans le champ et hors champ.
+- [ ] **P5** — ce qui est à nous : supprimé ou justifié, puis re-mesuré ; verdict.
+- [ ] **P6** — rituel §6, file, feuille de route, jeton.
 
 ### Notes de reprise
 
-P2 : protocole `docs/validation/TOLERANCE-PRESSION-S239.md`. Decomposition exacte
-`D = rho.theta.Lambda` a partir de `div u = r/scale` : le critere premier ne borne que `rho`.
+(S240 — vide à l'ouverture.)
 
-P3 : instrument = `correct_into_uw` + `divergence_metric` (sources uniques, appelees par la queue
-de `project` et par la boucle), trace `TOLERANCE_TRACE`, remplacement de seuil `PRESSURE_TOL_OVERRIDE`
-(tests seulement). `divergence_metric` rend exactement la divergence du rapport (colonnes identiques).
-**Loi** : `Lambda` double a chaque raffinement (17,8 / 33,8 / 69,3 / 154,7 / 362) donc second membre a
-l'echelle de la maille ; `theta` decroit plus lentement que `N^-1/2` (0,314 -> 0,0437) ; leur produit
-croit d'environ 30 % par raffinement. Deux cas d'A273 confirmes : 128x64 bosse `D` = 1,021e-5,
-256x128 plat 1,578e-5 et bosse 1,691e-5.
-**Resserrement** : 128x64 bosse a cible 3e-7 -> `D` = 2,99e-6, **370 iterations contre 347 (+6,6 %)**,
-tolerance tenue. **256x128 plat a cible 3e-7 -> plancher d'ADR-143 atteint** a `rho` = 7,74e-7,
-`D` = 1,093e-5, **degrade** : f32 ne peut pas tenir 1e-5 a 32 768 mailles avec cet operateur et ce
-second membre. Le manque est de 9 %.
-**Consequence pour la regle** : la tolerance devient condition d'acceptation ; jusqu'a 8 192 mailles
-elle est tenue pour ~7 % d'iterations en plus ; a 32 768 le pas devient degrade au lieu d'etre
-annonce recu au-dessus de la tolerance. 32 768 mailles n'a jamais ete recu (S231 : 8 192 ; S238 :
-16 384 en mode mobile, ou `D` valait 1,45e-7 — la reception S237/S238 n'est donc pas touchee).
-Remede non explore, a mettre en file : residu recalcule en f64 (le plancher vient de l'evaluation
-f32 de `r = b - Ap`), ou preconditionneur plus fort.
-Empreinte S232 `delta_filters` `0xc5ab1eadb094d058` : a rejouer en P5, un cas y depasse peut-etre
-la tolerance (le 128 bosse la depasse).
+---
 
-P5 : suite **431 reussis, 0 echec, 11 ignores** (S238 : 429/9). delta_filters : plat 128 identique
-au dernier chiffre (219 iterations), lisse 347->348, tanh 330->348, ordres 1,947/1,957/1,959,
-**empreinte 0xc5ab1eadb094d058 -> 0xfb12b2092df4ee6d**. delta_precision : 128 bosse 347->348,
-divergence 1,021e-5 -> 5,842e-6. delta_mobile plancher : 0,850/0,552/0,252 % et 2,44/1,41/0,71 %,
-plancher 13/33/34 pas, divergence <= 1,502e-7, iterations max 142/297/592, **258,4 ms median a 128
-contre 256 en S238 (+0,9 %)**. 256x128 : 420 iterations, plancher, D = 1,335e-5, **degrade**.
-ADR-144 ecrit.
+Notes de S239, conservées pour référence immédiate :
 
-P4 : regle construite ; `Projected { all, plain }`, `Report.divergence_plain`, cible resserree
-`physical_target = actual.(TOL/D_franches)^2` (aucun facteur choisi : `D` est proportionnelle a
-`max|r|` par l'identite, et l'acceptation reste la valeur exacte a la relance suivante).
-**Le premier jet, tolerance sur toutes les lignes mouillees, a casse
-`mobile_step_keeps_rest_conserves_volume_and_changes_topology_s237` au pas 0.** Diagnostic
-(`a273_mobile_first_steps_s239`) : rho descend de 8,1e-7 a 8,5e-9 tandis que `D` stagne a 1,5e-5 ;
-les cinq pires lignes sont les mailles de **surface** (`haut_mouille=false`), theta_surface 0,21-0,30,
-preconditionneur 2e-3 donc diagonale ~500, et leurs residus valent **exactement** 3,125e-2 / 1,5625e-2 /
-7,8125e-3 = 2^-5, 2^-6, 2^-7, soit un ulp d'une ligne de magnitude ~2^18. Restreint aux lignes
-franches : 7,50e-5 -> 7,09e-6 -> 2,16e-6 -> ... -> 4,46e-7, decroissance nette. D'ou l'amendement.
-Cout de l'amendement sur ce cas : acceptation a 69 iterations au lieu de 61 (+13 %).
-S237 avait deja desserre une de ses propres assertions a 1e-4 (`..._symmetric_..._s237`) sans dire
-pourquoi ; S199 avait ecrit dans son propre tableau que 1e-5 etait « configuration unitaire testee,
-pas borne universelle ». A273 partait donc d'une premisse a moitie vraie.
+P2 : protocole `docs/validation/TOLERANCE-PRESSION-S239.md`. `D = rho.theta.Lambda`.
+P3 : `Lambda` double a chaque raffinement, `theta` decroit plus lentement que N^-1/2.
+P4 : acceptation sur les lignes **franches** ; les lignes a fantome plafonnent a un ulp de leur
+propre magnitude. P5 : 348 contre 347 iterations a 8 192 mailles ; degrade a 32 768 ;
+empreinte delta_filters 0xfb12b2092df4ee6d ; suite 431/11.
 
 ---
 
