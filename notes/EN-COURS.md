@@ -90,7 +90,7 @@ réduite ; déferlement, mouillage du fond, air, cavité et 3D restent hors lot 
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [ ] **P2** — lectures ciblées (ADR-122, SURFACE-LIBRE-NL-S193, API `nl_surface`, ADR-141, tests
+- [x] **P2** — lectures ciblées (ADR-122, SURFACE-LIBRE-NL-S193, API `nl_surface`, ADR-141, tests
   δ surface) ; protocole écrit : modèle discret, gardes, domaine d'amplitude, tolérances et motifs.
 - [ ] **P3** — référence : onde stationnaire HOS M=3 (bassin 8×4 m, ka 0,01/0,1/0,2), séries
   `η(x,t)` aux centres de colonnes ; recoupement sympy de l'ordre deux à petite amplitude.
@@ -105,3 +105,10 @@ réduite ; déferlement, mouillage du fond, air, cavité et 3D restent hors lot 
 ### Notes de reprise
 
 Base : S236 — cœur 419/5 ; S233 mode linéaire (erreurs fines 0,066 % Terre / 0,017 % Lune).
+
+P2 : protocole dans `docs/validation/SURFACE-MOBILE-S237.md` §1. Choix motivés : bassin `L = h = 2 m`
+(`kh = π`) plutôt que 8×4 m du plan — à 8×4 m (`kh = π/2`, λ = 16 m) Ursell `U = 4a` n'admet que
+`a ≲ 0,025 m` dans le domaine d'ADR-122, harmonique ≈ 3·10⁻⁵ m, invisible sur la grille ; à 2×2 m,
+`U = 2a`, `a = 0,10 m` → `U = 0,2`, harmonique de l'ordre du cm. Grilles 32/64/128 (32 mailles par
+λ au plus fin), `nz` jusqu'à 2,25 m. `θ_min = 10⁻³` avec préconditionnement diagonal du CG mobile.
+Coût estimé au plus fin : ≈18 000 mailles, une période ≈1,6 s à 1 ms.
