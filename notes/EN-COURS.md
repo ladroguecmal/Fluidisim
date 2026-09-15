@@ -97,7 +97,7 @@ pas. Aucun seuil de banc modifié.
   (16 à 256 colonnes, deux seconds membres), outil de diagnostic dans le cœur.
 - [x] **P4** — construction : erreur inverse composante par composante, détection de stagnation,
   arrêt au plancher, champ de rapport ; tests (bits anciens, système sans solution, f64).
-- [ ] **P5** — réception : S237 5 cm à 128 colonnes, empreintes, `delta_precision`, coût ; ADR.
+- [x] **P5** — réception : S237 5 cm à 128 colonnes, empreintes, `delta_precision`, coût ; ADR.
 - [ ] **P6** — rituel §6, file, feuille de route, jeton ; copies à synchroniser.
 
 ### Notes de reprise
@@ -134,3 +134,17 @@ reçu, déterministe au bit ; **Neumann incohérent** (couvercle fermé, face de
 cycle à 280 itérations, résidu 1,0, divergence 1,0 → **dégradé**, et **ω = 9,5·10⁻¹⁷** (dérive du
 noyau qui gonfle `|A||p|`) — deuxième preuve qu'ω ne peut pas être seuil ; identité `div u =
 r/scale` : écart 0,18 pour un second membre de 2,48·10⁶, rapport **7,2·10⁻⁸** ≤ 64 ε.
+
+P5 : **deux constructions écartées par la mesure**. (a) Mémoire de deux relances : le pas 397 cycle
+sur **420 relances** (482 états, retour de 62) → Brent. (b) Brent seul : dans le banc, 7 386 itérations au
+pas 397, pas 404 refusé sous 16 000 ; ω = 0,9–1,3 u à chaque pas. **Règle finale** : `ω ≤ γ₈ = 8u/(1−8u)`
+(ligne à quatre faces γ₇ + représentation u) **ou** retour au bit (Brent), acceptation ssi divergence ≤ 1e-5.
+Réception (secteur) : 32/64/128 profil 0,850/0,550/**0,252 %**, b₂ 2,44/1,41/**0,71 %** ; au plancher 12/39/38
+pas, ω 2,2–7,8 u, résidu relatif jusqu'à **3,0e-6**, divergence ≤ 1,5e-7 ; pire pas 526 itérations ; 256 ms
+médian à 128. **Bits de la trajectoire S237 à 32/64 changés** (b₂ au 5e chiffre, volume 3,7e-9 → 1,5e-8) :
+promesse §1.2.1 non tenue, publiée ; tests et empreinte S232 `delta_filters` au bit. f64 : 521 contre 789
+itérations, p 3,0e-5, **u 5,5e-8** (estimation 1,3e-4). Incohérent : dégradé (42 it, ω 2,2e-8). Test du
+repli Brent avec commutateur de test : 9 relances/51 it reçu, incohérent 280 it dégradé. Suite 429/9.
+A273 à ouvrir : divergence 1,58e-5 sur un pas convergé à 256×128 (famille S231), **et 1,02e-5 à
+128×64 bosse dans `delta_precision`** (domaine S231, critère S199 appliqué là-bas à 32×16 seulement) ;
+`delta_precision` : dix cas convergés, aucun au plancher, résidus 4,96–8,70e-7 comme S231. L317 écrite.

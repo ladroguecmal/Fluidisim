@@ -164,6 +164,9 @@ struct Run {
     wet_min: usize,
     wet_max: usize,
     iterations_max: u32,
+    /// S238 : pas acceptés au plancher de la pression (cycle certifié, ADR-143), et leur pire divergence.
+    cycles: usize,
+    cycle_divergence: f64,
     /// Plus petit `θ` des faces fantômes rencontré (mode mobile) : au-dessus de `SURFACE_THETA_MIN`,
     /// la borne n'a jamais agi et la sensibilité à sa valeur est nulle par construction.
     theta_min: f64,
@@ -173,6 +176,11 @@ struct Run {
 }
 
 fn candidate(mode: Mode, nx: usize, a: f64, dt_us: u64) -> Result<Run, String> {
+    candidate_capped(mode, nx, a, dt_us, 4000)
+}
+
+/// S238 : même trajectoire sous un plafond d'itérations choisi par l'appelant (S237 : 4 000).
+fn candidate_capped(mode: Mode, nx: usize, a: f64, dt_us: u64, cap: u32) -> Result<Run, String> {
     let dx = L / nx as f64;
     let jobs = host_impl::SequentialJobs;
     let sink = host_impl::StderrSink;
@@ -212,6 +220,8 @@ fn candidate(mode: Mode, nx: usize, a: f64, dt_us: u64) -> Result<Run, String> {
         wet_min: usize::MAX,
         wet_max: 0,
         iterations_max: 0,
+        cycles: 0,
+        cycle_divergence: 0.,
         theta_min: f64::INFINITY,
         step_ms_median: 0.,
         step_ms_max: 0.,
@@ -222,8 +232,8 @@ fn candidate(mode: Mode, nx: usize, a: f64, dt_us: u64) -> Result<Run, String> {
         let clock = Clock(Instant::now());
         let start = Instant::now();
         let report = match mode {
-            Mode::Mobile => v.step_surface_mobile(dt_us, 4000, 60_000_000, &jobs, &clock),
-            Mode::Linear => v.step_surface_linear(dt_us, 4000, 60_000_000, &jobs, &clock),
+            Mode::Mobile => v.step_surface_mobile(dt_us, cap, 600_000_000, &jobs, &clock),
+            Mode::Linear => v.step_surface_linear(dt_us, cap, 600_000_000, &jobs, &clock),
         }
         .map_err(|e| format!("pas {n} : {e:?}"))?;
         times.push(start.elapsed().as_secs_f64() * 1e3);
@@ -231,6 +241,11 @@ fn candidate(mode: Mode, nx: usize, a: f64, dt_us: u64) -> Result<Run, String> {
             return Err(format!("pas {n} non avancé : {:?}", report.stopped_at));
         }
         run.iterations_max = run.iterations_max.max(report.report.map_or(0, |r| r.iterations));
+        if let Some(r) = report.report.filter(|r| r.floor) {
+            run.cycles += 1;
+            run.cycle_divergence = run.cycle_divergence.max(r.divergence);
+            println!("  PLANCHER pas={n} iterations={} residu={:.4e} divergence={:.3e} omega={:.3e}", r.iterations, r.residual, r.divergence, r.backward_error);
+        }
         if mode == Mode::Mobile {
             let wet = v.wet_cells();
             run.wet_min = run.wet_min.min(wet);
@@ -283,9 +298,9 @@ fn compare(modes: &[Mode], grids: &[usize], amplitudes: &[f64], dt_us: u64) {
                 let label = if mode == Mode::Mobile { "mobile" } else { "lineaire" };
                 match candidate(mode, nx, a, dt_us) {
                     Ok(r) => println!(
-                        "CANDIDAT mode={label} a={a} nx={nx} dt_us={dt_us} profil_sur_a={:.5} b2_ecart={:.4e} b2_ref={:.4e} b2_relatif={:.4} b2_candidat={:.4e} derive_volume_m={:.3e} mailles_fluides={}..{} theta_min={:.4e} iterations_max={} pas_ms median={:.3} max={:.3} octets={}",
+                        "CANDIDAT mode={label} a={a} nx={nx} dt_us={dt_us} profil_sur_a={:.5} b2_ecart={:.4e} b2_ref={:.4e} b2_relatif={:.4} b2_candidat={:.4e} derive_volume_m={:.3e} mailles_fluides={}..{} theta_min={:.4e} iterations_max={} pas_au_plancher={} divergence_plancher_max={:.3e} pas_ms median={:.3} max={:.3} octets={}",
                         r.profile, r.b2_error, r.b2_ref, r.b2_error / r.b2_ref, r.b2_max, r.volume_drift,
-                        r.wet_min, r.wet_max, r.theta_min, r.iterations_max, r.step_ms_median, r.step_ms_max, r.bytes
+                        r.wet_min, r.wet_max, r.theta_min, r.iterations_max, r.cycles, r.cycle_divergence, r.step_ms_median, r.step_ms_max, r.bytes
                     ),
                     Err(e) => println!("CANDIDAT mode={label} a={a} nx={nx} dt_us={dt_us} REFUS {e}"),
                 }
@@ -364,6 +379,23 @@ fn diagnose(nx: usize, a: f64, failing: usize) {
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
+    if args.get(1).map(String::as_str) == Some("plancher") {
+        // S238 : le cas refusé de S237 et ses deux voisins, qui doivent redonner les chiffres S237.
+        return compare(&[Mode::Mobile], &[32, 64, 128], &[0.05], 1000);
+    }
+    if args.get(1).map(String::as_str) == Some("plancher16000") {
+        // S238 : sous plafond 4 000, la certification du cycle au pas 397 n'aboutit pas (7 386
+        // itérations nécessaires) ; même trajectoire à 128 colonnes sous plafond 16 000.
+        let label = "mobile";
+        match candidate_capped(Mode::Mobile, 128, 0.05, 1000, 16_000) {
+            Ok(r) => println!(
+                "CANDIDAT mode={label} a=0.05 nx=128 plafond=16000 profil_sur_a={:.5} b2_relatif={:.4} b2_candidat={:.4e} derive_volume_m={:.3e} iterations_max={} pas_au_plancher={} divergence_plancher_max={:.3e} pas_ms median={:.3} max={:.3}",
+                r.profile, r.b2_error / r.b2_ref, r.b2_max, r.volume_drift, r.iterations_max, r.cycles, r.cycle_divergence, r.step_ms_median, r.step_ms_max
+            ),
+            Err(e) => println!("CANDIDAT mode={label} a=0.05 nx=128 plafond=16000 REFUS {e}"),
+        }
+        return;
+    }
     if args.get(1).map(String::as_str) == Some("diagnostic") {
         return diagnose(128, 0.05, 397);
     }

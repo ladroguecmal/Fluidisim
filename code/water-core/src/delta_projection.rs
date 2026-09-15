@@ -55,6 +55,11 @@ pub use mobile::SURFACE_THETA_MIN;
 thread_local! {
     pub(crate) static PRESSURE_TRACE: core::cell::RefCell<Vec<(u32, f64, f64)>> =
         const { core::cell::RefCell::new(Vec::new()) };
+    pub(crate) static PRESSURE_FINGERPRINTS: core::cell::RefCell<Vec<u64>> =
+        const { core::cell::RefCell::new(Vec::new()) };
+    // S238 P5 : le certificat d'arrondi devance le cycle partout où il a été mesuré ; les tests le
+    // retirent pour éprouver la détection de cycle seule.
+    pub(crate) static ROUNDOFF_CERTIFICATE_OFF: core::cell::Cell<bool> = const { core::cell::Cell::new(false) };
 }
 
 /// Domaine local, cellules carrées. `z₀ = nz·dx` est le couvercle.
@@ -130,9 +135,10 @@ pub struct Report {
     pub residual: f64,
     /// `max |div u|·dx / max|u|` après projection ; `0` si le champ est au repos.
     pub divergence: f64,
-    /// S238 : le gradient conjugué est revenu **au bit** à un état de pression déjà visité à une
-    /// relance antérieure — suite périodique, aucune itération ne peut plus progresser.
-    pub cycle: bool,
+    /// S238, ADR-143 : arrêt **au plancher** de f32 — état de pression revenu au bit (cycle certifié)
+    /// ou vrai résidu indiscernable de l'arrondi de son calcul (`ω ≤ γ₈`). Aucune itération ne peut
+    /// plus progresser ; le pas n'est reçu que si la tolérance de divergence de S199 est tenue.
+    pub floor: bool,
     /// S238 : erreur inverse composante par composante `max_i |r_i|/(|b| + |A||p|)_i` du résultat.
     /// Diagnostic (PRESSION-PLANCHER-S238 §2), jamais seuil.
     pub backward_error: f64,
@@ -141,6 +147,17 @@ pub struct Report {
 /// S238, ADR-143 : tolérance **physique** de la projection, déclarée par S199 §5 (critère 4) avant
 /// toute construction : `max|div u|·dx/max|u|`. Elle ne décide qu'à cycle certifié.
 pub const PROJECTION_DIVERGENCE_TOLERANCE: f64 = 1e-5;
+
+/// S238, ADR-143 : erreur inverse composante par composante en deçà de laquelle le vrai résidu est
+/// indiscernable de l'arrondi de son propre calcul. Modèle standard de la virgule flottante (Higham,
+/// *Accuracy and Stability*, §3.1–3.4), `u = 2⁻²⁴` en f32 : une ligne à `m = 4` faces évalue chaque
+/// terme `a·(p_c − p_j)` avec `γ₂`, les somme avec `γ_{m−1}`, multiplie par `1/dx²` et soustrait de `b`,
+/// soit `γ_{m+3}` ; la représentation f32 de la solution ajoute `u`. `γ_{m+4} = γ₈ = 8u/(1 − 8u)`.
+/// Critère d'**arrêt** seulement : jamais d'acceptation sans la tolérance de divergence.
+pub const ROUNDOFF_BACKWARD_ERROR: f32 = {
+    let u = 1. / 16_777_216.;
+    8. * u / (1. - 8. * u)
+};
 
 /// Empreinte 64 bits (FNV-1a) d'un champ f32, sur ses bits exacts.
 fn fingerprint(values: &[f32], ctl: &mut Control) -> Result<u64, Error> {
@@ -549,14 +566,15 @@ impl Volume {
     }
 
     /// S238 : erreur inverse composante par composante (Oettli–Prager) du vrai résidu `res`,
-    /// `max_i |r_i| / (|b| + |A||p|)_i` sur les lignes du système. Diagnostic, pas seuil
-    /// (PRESSION-PLANCHER-S238 §1.1). Doit être appelée quand `res = rhs − A·p`.
-    pub(crate) fn backward_error(&self) -> f32 {
+    /// `max_i |r_i| / (|b| + |A||p|)_i` sur les lignes du système. Certificat d'arrêt au plancher
+    /// (ADR-143), jamais critère d'acceptation. Doit être appelée quand `res = rhs − A·p`.
+    fn backward_error(&self, ctl: &mut Control) -> Result<f32, Error> {
         let (nx, nz, dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
         let inv = 1. / (dx * dx);
         let mut worst = 0f32;
         for i in 0..nx {
             for k in 0..nz {
+                ctl.poll(Phase::Pressure)?;
                 let c = self.c(i, k);
                 let row = if self.mobile { self.wet(i, k) } else { self.frac[c] > 0. };
                 if !row {
@@ -595,7 +613,7 @@ impl Volume {
                 }
             }
         }
-        worst
+        Ok(worst)
     }
 
     /// Produit scalaire sur les mailles fluides. **I-03** : toute accumulation flottante du
@@ -748,8 +766,13 @@ impl Volume {
         // Continuer sous le plafond global ; arrêt si CG ne peut faire aucune itération.
         // S238 : un retour **au bit** de `p` à une relance antérieure en est une — la relance est
         // une fonction de `p` seul, la suite est périodique et le plafond ne peut qu'être atteint.
-        let mut cycle = false;
-        let mut visited: [Option<u64>; 2] = [None, None];
+        // Détection de Brent : empreinte de référence renouvelée aux puissances de deux, mémoire
+        // constante, toute période détectée (mesurée à 420 relances au cas S237).
+        // S238 (mesure, PRESSION-PLANCHER-S238 §3) : un cycle exact peut être très long (7 386
+        // itérations au pas 397 du banc S237, plus de 16 000 au pas 404) ; le vrai résidu y est déjà
+        // indiscernable de son arrondi. L'erreur inverse est donc aussi un certificat d'arrêt.
+        let mut floor_stop = false;
+        let (mut checkpoint, mut power, mut since): (Option<u64>, u32, u32) = (None, 1, 0);
         let actual_rr = loop {
             let before_iterations = it;
             // Au repos, `b` est exactement nul : aucune itération, et la correction est nulle.
@@ -800,19 +823,34 @@ impl Volume {
             let actual = self.norm2(&self.res, jobs, ctl)?;
             #[cfg(test)]
             {
-                let omega = self.backward_error() as f64;
+                let omega = self.backward_error(&mut Control::unlimited()).unwrap_or(f32::NAN) as f64;
                 let relative = if b2 > 0. { ((actual / b2) as f64).sqrt() } else { 0. };
                 PRESSURE_TRACE.with(|t| t.borrow_mut().push((it, relative, omega)));
             }
             if actual <= tol * b2 || it >= max_iters || it == before_iterations {
                 break actual;
             }
-            let state = fingerprint(&self.p, ctl)?;
-            if visited.contains(&Some(state)) {
-                cycle = true;
+            #[cfg(test)]
+            let certify = !ROUNDOFF_CERTIFICATE_OFF.with(|c| c.get());
+            #[cfg(not(test))]
+            let certify = true;
+            if certify && self.backward_error(ctl)? <= ROUNDOFF_BACKWARD_ERROR {
+                floor_stop = true;
                 break actual;
             }
-            visited = [Some(state), visited[0]];
+            let state = fingerprint(&self.p, ctl)?;
+            #[cfg(test)]
+            PRESSURE_FINGERPRINTS.with(|t| t.borrow_mut().push(state));
+            if checkpoint == Some(state) {
+                floor_stop = true;
+                break actual;
+            }
+            since += 1;
+            if since == power {
+                checkpoint = Some(state);
+                power = power.saturating_mul(2);
+                since = 0;
+            }
             rr = actual;
             if jacobi {
                 self.precondition_into_dir(0., ctl)?;
@@ -882,16 +920,16 @@ impl Volume {
         let divergence = (if umax > 0. { dmax * dx / umax } else { 0. }) as f64;
         // S238, ADR-143 : à cycle certifié, la pression est au plancher de f32 ; le pas est reçu si la
         // tolérance physique de S199 est tenue, dégradé sinon. Sans cycle, rien ne change.
-        let floor = cycle && divergence <= PROJECTION_DIVERGENCE_TOLERANCE;
+        let floor = floor_stop && divergence <= PROJECTION_DIVERGENCE_TOLERANCE;
         // `res` porte encore le vrai résidu du `p` publié : correction et diagnostic de divergence ne
         // touchent ni `p`, ni `rhs`, ni `res`.
-        let backward_error = self.backward_error() as f64;
+        let backward_error = self.backward_error(ctl)? as f64;
         Ok(Report {
             iterations: it,
             degraded: b2 > 0. && actual_rr > tol * b2 && !floor,
             residual: residual as f64,
             divergence,
-            cycle,
+            floor: floor_stop,
             backward_error,
         })
     }

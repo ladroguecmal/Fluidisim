@@ -582,7 +582,7 @@ fn pressure_cycle_is_certified_and_accepted_only_at_physical_tolerance_s238() {
     let r = v.project_mobile_for_test(0.001, 2000, &Jobs).unwrap();
     let restarts = PRESSURE_TRACE.with(|t| t.borrow().len());
     println!("S238 cycle : {r:?} relances={restarts}");
-    assert!(r.cycle, "cycle attendu : {r:?}");
+    assert!(r.floor, "arrêt au plancher attendu : {r:?}");
     assert!(!r.degraded && r.divergence <= PROJECTION_DIVERGENCE_TOLERANCE, "{r:?}");
     assert!(r.residual > 1e-6, "le critère de résidu n'est pas tenu : c'est bien l'arrêt au plancher");
     assert!(r.iterations < 2000, "arrêt avant le plafond : {r:?}");
@@ -590,6 +590,41 @@ fn pressure_cycle_is_certified_and_accepted_only_at_physical_tolerance_s238() {
     let mut again = build();
     assert_eq!(again.project_mobile_for_test(0.001, 2000, &Jobs).unwrap(), r);
     assert!(v.p.iter().zip(&again.p).all(|(a, b)| a.to_bits() == b.to_bits()));
+}
+
+#[test]
+fn exact_pressure_cycle_alone_stops_and_is_judged_by_divergence_s238() {
+    // Chemin de repli d'ADR-143 : sans le certificat d'arrondi, seul le retour au bit de l'état
+    // arrête le gradient conjugué. Le montage du cycle doit être certifié par Brent et reçu ; le
+    // système sans solution doit rester dégradé.
+    let (nx, nz, dx) = (8usize, 12usize, 0.25f32);
+    let mut v = mobile_volume(nx, nz, dx, &vec![0.; nx]);
+    v.set_free_surface(&vec![2.75; nx], 2.75).unwrap();
+    let psi = |i: usize, k: usize| -0.5 * (std::f32::consts::PI * (i as f32 * dx) / 2.).sin() * (k as f32 * dx);
+    let mut u = vec![0f32; v.u.len()];
+    let mut w = vec![0f32; v.w.len()];
+    for k in 0..nz { for i in 0..=nx { u[v.fu(i, k)] = (psi(i, k + 1) - psi(i, k)) / dx; } }
+    for k in 0..=nz { for i in 0..nx { w[v.fw(i, k)] = -(psi(i + 1, k) - psi(i, k)) / dx; } }
+    v.set_velocity(&u, &w).unwrap();
+    ROUNDOFF_CERTIFICATE_OFF.with(|c| c.set(true));
+    PRESSURE_FINGERPRINTS.with(|t| t.borrow_mut().clear());
+    let r = v.project_mobile_for_test(0.001, 20_000, &Jobs);
+    let prints = PRESSURE_FINGERPRINTS.with(|t| t.borrow().clone());
+    let (nx2, nz2) = (8usize, 4usize);
+    let mut n = mobile_volume(nx2, nz2, 1.0, &vec![0.; nx2]);
+    for i in 0..nx2 { let f = n.fw(i, nz2); n.open_w[f] = 0.; }
+    for k in 0..nz2 { let f = n.fu(nx2, k); n.open_u[f] = 1.; n.u[f] = 0.5; }
+    let bad = n.step(0.002, 20_000, &Jobs);
+    ROUNDOFF_CERTIFICATE_OFF.with(|c| c.set(false));
+    let r = r.unwrap();
+    let bad = bad.unwrap();
+    let last = *prints.last().unwrap();
+    let first_seen = prints.iter().position(|p| *p == last).unwrap();
+    println!("S238 cycle seul : {r:?} relances={} retour de la relance {} à la relance {} | incohérent : {bad:?}",
+        prints.len(), first_seen, prints.len() - 1);
+    assert!(r.floor && !r.degraded && r.residual > 1e-6, "{r:?}");
+    assert!(first_seen < prints.len() - 1, "l'arrêt doit être un retour au bit");
+    assert!(bad.degraded && bad.divergence > PROJECTION_DIVERGENCE_TOLERANCE, "{bad:?}");
 }
 
 #[test]
@@ -639,6 +674,169 @@ fn projected_divergence_equals_residual_over_scale_s238() {
     v.mobile = false;
     println!("S238 identité : écart max {gap:e}, second membre max {peak:e}, rapport {:e}", gap / peak);
     assert!(gap <= 64. * f32::EPSILON * peak, "écart {gap} pour un second membre {peak}");
+}
+
+/// S238 P5 — diagnostic : au pas 397 du cas S237 128 colonnes, les empreintes de `p` reviennent-elles ?
+#[test]
+#[ignore = "diagnostic S238, lancé explicitement (≈2 min)"]
+fn pressure_state_history_at_the_floor_s238() {
+    let (nx, a) = (128usize, 0.05f32);
+    let dx = 2. / nx as f32;
+    let nz = (2.25 / dx).round() as usize;
+    let mut v = mobile_volume(nx, nz, dx, &vec![0.; nx]);
+    let eta: Vec<f32> = (0..nx).map(|i| 2. + a * (std::f32::consts::PI * (i as f32 + 0.5) / nx as f32).cos()).collect();
+    v.set_free_surface(&eta, 2.).unwrap();
+    for step in 1..397 {
+        v.step_surface_mobile(1000, 4000, 60_000_000, &Jobs, &StillClock).unwrap_or_else(|e| panic!("pas {step} {e:?}"));
+    }
+    let dt = 0.001f32;
+    let mut ctl = Control::unlimited();
+    v.advect(dt, &mut ctl).unwrap();
+    v.mobile = true;
+    PRESSURE_TRACE.with(|t| t.borrow_mut().clear());
+    PRESSURE_FINGERPRINTS.with(|t| t.borrow_mut().clear());
+    let report = v.project(-1025. / dt, dt / 1025., 4000, &Jobs, &mut ctl).unwrap();
+    v.mobile = false;
+    let prints = PRESSURE_FINGERPRINTS.with(|t| t.borrow().clone());
+    let trace = PRESSURE_TRACE.with(|t| t.borrow().clone());
+    let mut first_return = None;
+    for (n, h) in prints.iter().enumerate() {
+        if let Some(m) = prints[..n].iter().rposition(|x| x == h) { first_return = Some((m, n, n - m)); break; }
+    }
+    let distinct = { let mut s = prints.clone(); s.sort(); s.dedup(); s.len() };
+    let min_rel = trace.iter().map(|x| x.1).fold(f64::INFINITY, f64::min);
+    let best_at = trace.iter().position(|x| x.1 == min_rel);
+    println!("S238 historique : {report:?} relances={} empreintes_distinctes={distinct} premier_retour={first_return:?} residu_min={min_rel:.6e} atteint_a_la_relance={best_at:?}", prints.len());
+    let tail: Vec<String> = trace.iter().rev().take(8).rev().map(|(it, rel, _)| format!("{it}:{rel:.6e}")).collect();
+    println!("  fin : {}", tail.join(" "));
+}
+
+/// S238 P5 — critère 5 : la pression acceptée au plancher f32 contre la solution f64 du **même**
+/// système, réassemblé indépendamment depuis la géométrie mobile (méthode S231), au pas 397 du cas
+/// S237 5 cm / 128 colonnes.
+#[test]
+#[ignore = "réception S238, lancée explicitement (≈2 min)"]
+fn floor_pressure_matches_independent_f64_solve_s238() {
+    let (nx, a) = (128usize, 0.05f32);
+    let dx = 2. / nx as f32;
+    let nz = (2.25 / dx).round() as usize;
+    let mut v = mobile_volume(nx, nz, dx, &vec![0.; nx]);
+    let eta: Vec<f32> = (0..nx).map(|i| 2. + a * (std::f32::consts::PI * (i as f32 + 0.5) / nx as f32).cos()).collect();
+    v.set_free_surface(&eta, 2.).unwrap();
+    for step in 1..397 {
+        v.step_surface_mobile(1000, 4000, 60_000_000, &Jobs, &StillClock).unwrap_or_else(|e| panic!("pas {step} {e:?}"));
+    }
+    // Pas 397, décomposé : advection, puis projection mobile f32.
+    let dt = 0.001f32;
+    let mut ctl = Control::unlimited();
+    v.advect(dt, &mut ctl).unwrap();
+    let (us, ws): (Vec<f64>, Vec<f64>) = (v.us.iter().map(|x| *x as f64).collect(), v.ws.iter().map(|x| *x as f64).collect());
+    v.mobile = true;
+    let report = v.project(-1025. / dt, dt / 1025., 4000, &Jobs, &mut ctl).unwrap();
+    // Assemblage f64 indépendant : mêmes ouvertures et même classification fluide, arithmétique f64.
+    let (dx64, rho, g) = (dx as f64, 1025f64, 9.81f32 as f64);
+    let inv = 1. / (dx64 * dx64);
+    let scale = -rho / dt as f64;
+    let k1 = dt as f64 / rho;
+    let theta_min = SURFACE_THETA_MIN as f64;
+    let zc = |k: usize| (k as f64 + 0.5) * dx64;
+    let e = |i: usize| v.eta[i] as f64;
+    let rest = v.rest as f64;
+    let up_ghost = |i: usize, k: usize| {
+        let th = ((e(i) - zc(k)) / dx64).max(theta_min);
+        (1. / th, rho * g * ((e(i) - rest) - v.eta_roundoff[i] as f64))
+    };
+    let side_ghost = |i: usize, k: usize, j: usize| {
+        let th = ((e(i) - zc(k)) / (e(i) - e(j))).max(theta_min);
+        (1. / th, rho * g * (zc(k) - rest))
+    };
+    let cells = nx * nz;
+    let wet: Vec<bool> = (0..cells).map(|c| v.wet_cell(c)).collect();
+    let apply = |p: &[f64]| -> Vec<f64> {
+        let mut out = vec![0.; cells];
+        for i in 0..nx { for k in 0..nz {
+            let c = v.c(i, k);
+            if !wet[c] { continue; }
+            let mut acc = 0.;
+            for (af, j) in [(v.open_u[v.fu(i, k)], i.checked_sub(1)), (v.open_u[v.fu(i + 1, k)], (i + 1 < nx).then_some(i + 1))] {
+                let Some(j) = j else { continue };
+                let n = v.c(j, k);
+                if af == 0. || v.frac[n] == 0. { continue; }
+                acc += if wet[n] { af as f64 * (p[c] - p[n]) } else { af as f64 * p[c] * side_ghost(i, k, j).0 };
+            }
+            let down = v.open_w[v.fw(i, k)];
+            if down > 0. && k > 0 && v.frac[v.c(i, k - 1)] > 0. { acc += down as f64 * (p[c] - p[v.c(i, k - 1)]); }
+            let up = v.open_w[v.fw(i, k + 1)];
+            if up > 0. {
+                acc += if k + 1 < nz && wet[v.c(i, k + 1)] { up as f64 * (p[c] - p[v.c(i, k + 1)]) } else { up as f64 * p[c] * up_ghost(i, k).0 };
+            }
+            out[c] = acc * inv;
+        }}
+        out
+    };
+    let mut b = vec![0f64; cells];
+    for i in 0..nx { for k in 0..nz {
+        let c = v.c(i, k);
+        if !wet[c] { continue; }
+        let div = (v.open_u[v.fu(i + 1, k)] as f64 * us[v.fu(i + 1, k)] - v.open_u[v.fu(i, k)] as f64 * us[v.fu(i, k)]
+            + v.open_w[v.fw(i, k + 1)] as f64 * ws[v.fw(i, k + 1)] - v.open_w[v.fw(i, k)] as f64 * ws[v.fw(i, k)]) / dx64;
+        let mut bc = scale * div;
+        for (af, j) in [(v.open_u[v.fu(i, k)], i.checked_sub(1)), (v.open_u[v.fu(i + 1, k)], (i + 1 < nx).then_some(i + 1))] {
+            let Some(j) = j else { continue };
+            let n = v.c(j, k);
+            if af == 0. || v.frac[n] == 0. || wet[n] { continue; }
+            let (it, value) = side_ghost(i, k, j);
+            bc += af as f64 * value * it * inv;
+        }
+        let up = v.open_w[v.fw(i, k + 1)];
+        if up > 0. && !(k + 1 < nz && wet[v.c(i, k + 1)]) {
+            let (it, value) = up_ghost(i, k);
+            bc += up as f64 * value * it * inv;
+        }
+        b[c] = bc;
+    }}
+    // Gradient conjugué f64 jusqu'à 1e-13 de résidu relatif.
+    let dot = |x: &[f64], y: &[f64]| x.iter().zip(y).map(|(a, b)| a * b).sum::<f64>();
+    let mut p = vec![0f64; cells];
+    let mut r = b.clone();
+    let mut d = r.clone();
+    let b2 = dot(&b, &b);
+    let mut rr = b2;
+    let mut its = 0;
+    while rr > 1e-26 * b2 && its < 20_000 {
+        let q = apply(&d);
+        let alpha = rr / dot(&d, &q);
+        for c in 0..cells { p[c] += alpha * d[c]; r[c] -= alpha * q[c]; }
+        let rn = dot(&r, &r);
+        for c in 0..cells { d[c] = r[c] + rn / rr * d[c]; }
+        rr = rn;
+        its += 1;
+    }
+    let true_r: f64 = { let ap = apply(&p); ap.iter().zip(&b).map(|(x, y)| (y - x) * (y - x)).sum::<f64>().sqrt() / b2.sqrt() };
+    // Écarts de pression et de vitesse corrigée (faces entre deux mailles fluides et faces fantômes).
+    let (mut dp, mut pmax) = (0f64, 0f64);
+    for c in 0..cells { if wet[c] { dp = dp.max((v.p[c] as f64 - p[c]).abs()); pmax = pmax.max(p[c].abs()); } }
+    let (mut du, mut umax) = (0f64, 0f64);
+    for i in 1..nx { for k in 0..nz {
+        let f = v.fu(i, k);
+        let (l, rgt) = (v.c(i - 1, k), v.c(i, k));
+        if v.open_u[f] == 0. || v.frac[l] == 0. || v.frac[rgt] == 0. || !(wet[l] || wet[rgt]) { continue; }
+        let grad = match (wet[l], wet[rgt]) {
+            (true, true) => (p[rgt] - p[l]) / dx64,
+            (true, false) => { let (it, val) = side_ghost(i - 1, k, i); (val - p[l]) * it / dx64 }
+            _ => { let (it, val) = side_ghost(i, k, i - 1); (p[rgt] - val) * it / dx64 }
+        };
+        let u64v = us[f] - k1 * grad;
+        du = du.max((v.u[f] as f64 - u64v).abs());
+        umax = umax.max(u64v.abs());
+    }}
+    v.mobile = false;
+    println!(
+        "S238 f64 : rapport f32 {report:?} | CG f64 {its} itérations, résidu relatif {true_r:.3e} | pression max|Δp|/max|p| = {:.3e} (max|p| {pmax:.4e} Pa) | vitesse u max|Δu|/max|u| = {:.3e} (max|u| {umax:.4e})",
+        dp / pmax, du / umax
+    );
+    assert!(report.floor && !report.degraded, "{report:?}");
+    assert!(true_r < 1e-11);
 }
 
 /// S238 P3 — loi du plancher, famille S231 : 8×4 m, surface `4 + 0,01·sin`, un pas depuis le repos,
