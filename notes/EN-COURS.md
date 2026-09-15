@@ -93,7 +93,7 @@ décision, écrit tel quel.
   3D, cuisson en volumes épars ; chaque affirmation avec URL et statut.
 - [x] **P3** — confrontation à nos nombres mesurés : ADR-001, pression de δ (A273/A275), coût de δ
   contre ADR-125 et ADR-131, volumes bornés de J2. Aucune campagne nouvelle.
-- [ ] **P4** — `docs/COMPARABLES-EXTERNES.md`, file active (déclencheurs, dont la préparation CPU du
+- [x] **P4** — `docs/COMPARABLES-EXTERNES.md`, file active (déclencheurs, dont la préparation CPU du
   sillage remise en file), index.
 - [ ] **P5** — rituel §6, jeton.
 
