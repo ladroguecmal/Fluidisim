@@ -62,3 +62,61 @@ Deux fenêtres, parce qu'elles n'exercent pas le même chemin :
 La sélection hissée, reçue au bit et chiffrée. **Ou** constat mesuré que la pente contre le nombre de
 segments est négligeable — auquel cas la boucle interne n'est pas le poste, la mesure désigne le vrai,
 et la session l'écrit sans rien construire.
+
+## 2. La mesure, avant construction — et ce qu'elle réfute
+
+`examples/sillage_troncons.rs`, release, un fil, 4 096 nœuds, 120 images par ligne.
+
+| sillages | segments | fenêtre | actifs | médiane | p95 | maximum |
+|---:|---:|---|---:|---:|---:|---:|
+| 1 | 8 | forçage | 1 | 1,1990 ms | 1,4236 | 1,8061 |
+| 1 | 8 | après forçage | **0** | **0,3114 ms** | 0,3766 | 0,9246 |
+| 2 | 16 | forçage | 2 | 2,1004 ms | 2,5288 | 4,7211 |
+| 2 | 16 | après forçage | **0** | **0,3367 ms** | 0,4026 | 1,0135 |
+| 3 | 24 | forçage | 3 | 2,9679 ms | 3,3752 | 6,8566 |
+| 3 | 24 | après forçage | **0** | **0,3709 ms** | 0,4653 | 1,3856 |
+
+La médiane de trois sillages en forçage — **2,9679 ms** — rejoint les 3,17 ms que l'hôte mesure
+(S240), le reste étant la planification du LOD, hors de ce banc.
+
+### 2.1 La thèse du §1.2 est réfutée dans sa grandeur
+
+Après le forçage, **aucun** segment n'est actif : tout ce que la boucle interne fait alors est
+perdu. Son coût s'y lit directement, et il vaut **0,0595 ms entre 8 et 24 segments**, soit
+**3,7 µs par segment inutile** — environ **2 % des 3,17 ms** de l'hôte. Hisser la sélection ne rend
+pas deux millisecondes ; le protocole §1.5 avait prévu ce cas, et c'est celui-là.
+
+### 2.2 Ce que la même mesure désigne, elle
+
+Par différence entre les deux fenêtres, à segments égaux :
+
+| grandeur | valeur mesurée |
+|---|---:|
+| coût fixe par nœud (aucun segment actif, 8 segments) | 0,3114 ms / 4 096 = **76 ns** |
+| coût d'**un segment actif**, tous nœuds | (1,1990 − 0,3114) = **0,8876 ms** |
+| idem, à trois segments actifs | (2,9679 − 0,3709) / 3 = **0,8657 ms** |
+| par nœud et par segment actif | ≈ **211 ns** |
+
+**Le poste est `ModalPressure::sample`** : 2,60 ms sur 2,97, soit **87 %** de la préparation pendant
+le forçage. Chaque appel enchaîne cinq à sept `sin_cos` déterministes — deux dans `sample`, une à
+deux dans chacune des deux `integral`, une pour la rotation libre —, et il y en a 4 096 × 3 par image.
+
+### 2.3 Une impasse, à ne pas réexplorer sans la payer
+
+`Complex::phase(negative(p))` **semble** être le conjugué de `Complex::phase(p)`, donc gratuit. Il ne
+l'est pas **au bit** : `sin_cos` reconstruit l'angle par quadrant, et pour `−q` l'argument du
+polynôme est recalculé depuis l'entier `2³⁰ − W`, pas obtenu par soustraction flottante de celui de
+`q` ; les deux diffèrent d'une unité dans le dernier rang. À `q = 0` s'ajoute le **zéro signé** :
+le conjugué rend `−0,0` là où `sin_cos(0)` rend `+0,0`. Même remarque pour le raccourci « pendant le
+forçage, la rotation libre est l'identité » : elle l'est en valeur, pas en bits, pour la même raison
+de zéro signé. **Réduire le nombre de `sin_cos` est possible, mais cela change des bits publiés** :
+c'est un lot avec son propre relevé avant/après, pas une simplification gratuite.
+
+### 2.4 Ce qui reste exact et gratuit, et pourquoi il vaut quand même d'être fait
+
+La sélection hissée ne rend pas 2 ms, mais elle change la **forme** du coût : aujourd'hui, la
+préparation par image croît avec le nombre de tronçons **achevés**, c'est-à-dire avec l'histoire du
+journal. Un jeu qui accumule des sillages paie **3,7 µs par tronçon mort et par image**, pour
+toujours. À 200 tronçons — une partie ordinaire —, c'est **0,74 ms par image**, plus du tiers du
+budget de toute l'eau, pour des termes qui ne contribuent à rien. Ce n'est pas une constante gagnée,
+c'est un terme de croissance supprimé.

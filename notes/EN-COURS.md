@@ -93,7 +93,7 @@ modifié, aucune ambition touchée, aucun ADR attendu.
 
 - [x] **P1** — amorce, jeton, plan seuls.
 - [ ] **P2** — protocole écrit ; instrument de décomposition de la préparation par image.
-- [ ] **P3** — mesure avant toute modification : où va le temps, et combien de segments sont actifs.
+- [x] **P3** — mesure avant toute modification : où va le temps, et combien de segments sont actifs.
 - [ ] **P4** — construction : sélection des segments actifs hissée hors de la boucle des nœuds ;
   tests d'identité au bit.
 - [ ] **P5** — réception : `--verify`, `--retour`, cadence avant/après, loi contre les tronçons, coût.
@@ -101,7 +101,21 @@ modifié, aucune ambition touchée, aucun ADR attendu.
 
 ### Notes de reprise
 
-(S242 — vide à l'ouverture.)
+P2 : protocole `docs/validation/PREPARATION-SILLAGE-S242.md` + banc `examples/sillage_troncons.rs`,
+qui fait varier les troncons au lieu d'instrumenter l'interieur de la fonction.
+
+P3 : **la these du §1.2 est refutee dans sa grandeur.** Apres forcage (aucun segment actif) :
+0,3114 / 0,3367 / 0,3709 ms a 8 / 16 / 24 segments — la boucle interne inutile vaut **3,7 us par
+segment**, soit 0,0595 ms entre 8 et 24, environ **2 %** des 3,17 ms de l'hote.
+**Le poste est `ModalPressure::sample`** : cout fixe par noeud 76 ns ; cout d'un segment actif
+**0,87 ms** sur 4 096 noeuds, soit 211 ns par noeud et par segment ; 2,60 ms sur 2,97 = **87 %**.
+**Impasse payante a connaitre** : `Complex::phase(negative(p))` n'est PAS le conjugue au bit —
+`sin_cos` reconstruit l'angle par quadrant depuis l'entier `2^30 - W`, pas par soustraction
+flottante, et a q = 0 le zero signe differe. Meme chose pour « la rotation libre est l'identite
+pendant le forcage ». Reduire les sin_cos **change des bits publies** : lot separe, avec relevé.
+**Ce qui reste exact et gratuit** : hisser la selection supprime un terme qui croit avec les
+troncons **acheves** — 3,7 us par troncon mort et par image, 0,74 ms a 200 troncons. Terme de
+croissance supprime, pas constante gagnee.
 
 ---
 
