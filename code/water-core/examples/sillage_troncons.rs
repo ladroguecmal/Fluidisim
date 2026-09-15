@@ -9,6 +9,8 @@
 //! 19 620 N, départs (−24, y) avec y ∈ {4, −26, 34}, contexte 40 s, caméra S201 (0, −18).
 //!
 //! `cargo run -p water-core --release --example sillage_troncons`
+#[path = "../../water-harness/src/host_impl.rs"]
+mod host_impl;
 use std::{hint::black_box, time::Instant};
 use water_core::{
     bound_pressure::Settings,
@@ -93,22 +95,26 @@ fn active(time: SimTime, wakes: usize) -> usize {
 }
 
 fn main() {
+    // S243 : `sillage_troncons [fils]` — le nombre de fils du système de tâches. Défaut 1, qui rend
+    // exactement le chemin de S242. Le résultat n'en dépend pas ; seule la vitesse en dépend.
+    let workers: u32 = std::env::args().nth(1).and_then(|a| a.parse().ok()).unwrap_or(1);
+    let jobs = host_impl::ScopedJobs::with_workers(workers);
     println!("# S242 — préparation du sillage contre le nombre de tronçons");
     println!();
     println!("Techniques présentes : repli des tronçons achevés, modes préconstruits, publication");
-    println!("rebasée à la caméra. Techniques absentes : parallélisme (un fil), SIMD explicite, LOD");
-    println!("temporel, mutualisation entre journaux.");
+    println!("rebasée à la caméra ; **{workers} fil(s)** (S243, écriture disjointe). Techniques");
+    println!("absentes : SIMD explicite, LOD temporel, mutualisation entre journaux.");
     println!("Domaine : fixture S212/S235, recette 64×128 (4 096 nœuds), 60 images/s simulées,");
     println!("release, un fil, machine locale ; ni GPU, ni transfert, ni LOD spatial.");
     println!();
     println!("| sillages | segments | fenêtre | actifs | images | médiane (ms) | p95 (ms) | max (ms) | empreinte |");
     println!("|---:|---:|---|---:|---:|---:|---:|---:|---|");
     for wakes in 1..=3usize {
-        measure(wakes);
+        measure(wakes, &jobs);
     }
 }
 
-fn measure(wakes: usize) {
+fn measure(wakes: usize, jobs: &dyn water_core::host::JobSystem) {
     let r = recipe();
     let sources: Vec<Wake> = (0..wakes).map(wake).collect();
     let mut records = [None; 3];
@@ -131,16 +137,16 @@ fn measure(wakes: usize) {
 
     // Chauffe séparée (A195).
     for i in 0..60 {
-        timeline.render_components(&context, frame(1.0, i), ORIGIN, &mut out).unwrap();
+        timeline.render_components(&context, frame(1.0, i), ORIGIN, &mut out, jobs).unwrap();
     }
     for (name, age0) in [("forçage", 3.0), ("après forçage", 24.0)] {
         let mut ms = Vec::new();
-        timeline.render_components(&context, frame(age0, 9), ORIGIN, &mut out).unwrap();
+        timeline.render_components(&context, frame(age0, 9), ORIGIN, &mut out, jobs).unwrap();
         let mut hash = 0u64;
         for i in 10..130u64 {
             let t = frame(age0, i);
             let start = Instant::now();
-            timeline.render_components(&context, t, ORIGIN, &mut out).unwrap();
+            timeline.render_components(&context, t, ORIGIN, &mut out, jobs).unwrap();
             ms.push(start.elapsed().as_secs_f64() * 1e3);
             black_box(&out);
             hash ^= fingerprint(&out).rotate_left((i % 64) as u32);

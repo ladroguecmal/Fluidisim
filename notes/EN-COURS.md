@@ -107,7 +107,7 @@ déclencheur — et le plan le dit plutôt que de le laisser deviner.
   disjointe, la forme retenue et les formes écartées.
 - [x] **P3** — la primitive dans `JobSystem` + `SequentialJobs` (référence) + pool réel dans
   `host_impl` (`std::thread::scope`, sans dépendance) ; assertion du harnais.
-- [ ] **P4** — premier consommateur : `render_components`, chemin rapide parallèle et verdict
+- [x] **P4** — premier consommateur : `render_components`, chemin rapide parallèle et verdict
   séquentiel ; identité au bit.
 - [ ] **P5** — réception : empreintes à 1/2/4/8 fils, banc S242, hôte, coût.
 - [ ] **P6** — rituel §6, ADR, file, feuille de route, jeton.
@@ -129,6 +129,21 @@ consomme en parallele aujourd'hui.
 Assertions du harnais vertes : identite **au bit** sur 6 nombres de fils x 7 grains (1 a 20 000),
 plus le defaut du trait ; et chaque tranche ecrite une fois et une seule sur 5 003 elements.
 Prix connu de cette forme : creation des fils a chaque appel — a mesurer en P5.
+
+P4 : `render_components` prend `jobs` ; chemin rapide par `parallel_fill_f32` sur
+`out.as_flattened_mut()`, accumulateur dans les deux premiers f32 du quadruplet (memes f32 que
+`current`, donc memes bits) ; `render_sequential` conserve la boucle d'origine comme **reference de
+bits et seul porteur du verdict**. Appelants mis a jour : 3 bancs, les essais, l'hote. Attention :
+`Prepared::render_components` est une **autre** methode, a 4 arguments — deux corrections.
+**Deux defauts attrapes par les criteres (4) et (5), et corriges :** (a) `ScopedJobs` construisait un
+`Vec` de tranches par appel -> **50 allocations par image** dans `update`, ce qu'ADR-145 interdit ;
+remplace par une portion contigue par fil, multiple du grain, sans tampon. (b) Lancer des fils quand
+aucun troncon ne force faisait **monter** 0,30 ms a 0,76 ms : le grain encode le travail par element
+et seul l'appelant le connait — grain = total sans forcage, donc une tranche et aucun fil.
+**Le blocage reste entier et il est nomme** : creer les fils par appel coute ~67 us piece **et
+alloue**. Un vivier persistant partageant du `&mut` emprunte n'existe pas en Rust **sur** sans
+`unsafe` (c'est pourquoi rayon en contient) : `std::thread::scope` est la seule voie sure. Donc le
+chemin d'image reste **a un fil**, et le parallelisme sert les bancs hors ligne.
 
 ---
 

@@ -5,6 +5,8 @@
 //! coefficients `[A, B, kx, ky]` rebasés à la caméra S201 (0, −18).
 //!
 //! `cargo run -p water-core --release --example wake_timeline_cost`
+#[path = "../../water-harness/src/host_impl.rs"]
+mod host_impl;
 use std::{hint::black_box, mem::size_of, time::Instant};
 use water_core::{
     bound_pressure::{Prepared, Settings},
@@ -117,17 +119,17 @@ fn measure(radial: usize, angular: usize) {
 
     // Chauffe séparée (A195).
     for i in 0..60 {
-        timeline.render_components(&context, frame(1.0, i), ORIGIN, &mut out).unwrap();
+        timeline.render_components(&context, frame(1.0, i), ORIGIN, &mut out, &host_impl::SequentialJobs).unwrap();
     }
     for (name, age0) in [("fenêtre S212, 3,17–5,15 s, forçage", 3.0), ("après forçage, 24,17–26,15 s", 24.0)] {
         // Même fenêtre que le banc S212 : images 10 à 129.
         let mut lever = Vec::new();
         let mut prepared = Vec::new();
-        timeline.render_components(&context, frame(age0, 9), ORIGIN, &mut out).unwrap();
+        timeline.render_components(&context, frame(age0, 9), ORIGIN, &mut out, &host_impl::SequentialJobs).unwrap();
         for i in 10..130 {
             let t = frame(age0, i);
             let start = Instant::now();
-            timeline.render_components(&context, t, ORIGIN, &mut out).unwrap();
+            timeline.render_components(&context, t, ORIGIN, &mut out, &host_impl::SequentialJobs).unwrap();
             lever.push(start.elapsed().as_secs_f64() * 1e3);
             black_box(&out);
             let start = Instant::now();
@@ -147,7 +149,7 @@ fn measure(radial: usize, angular: usize) {
     let mut ordinary = Vec::new();
     let mut crossing = Vec::new();
     let mut last = frame(0.0, 0);
-    timeline.render_components(&context, last, ORIGIN, &mut out).unwrap();
+    timeline.render_components(&context, last, ORIGIN, &mut out, &host_impl::SequentialJobs).unwrap();
     for i in 1..=2400u64 {
         let t = frame(0.0, i);
         let crosses = (1..=8u64).any(|j| {
@@ -155,7 +157,7 @@ fn measure(radial: usize, angular: usize) {
             last.0 < end && end <= t.0
         });
         let start = Instant::now();
-        timeline.render_components(&context, t, ORIGIN, &mut out).unwrap();
+        timeline.render_components(&context, t, ORIGIN, &mut out, &host_impl::SequentialJobs).unwrap();
         let ms = start.elapsed().as_secs_f64() * 1e3;
         if crosses { crossing.push(ms) } else { ordinary.push(ms) }
         last = t;
@@ -170,17 +172,17 @@ fn measure(radial: usize, angular: usize) {
     // Retour arrière (relance R) : repli complet refait.
     let mut jumps = Vec::new();
     for _ in 0..5 {
-        timeline.render_components(&context, frame(39.0, 0), ORIGIN, &mut out).unwrap();
+        timeline.render_components(&context, frame(39.0, 0), ORIGIN, &mut out, &host_impl::SequentialJobs).unwrap();
         let start = Instant::now();
-        timeline.render_components(&context, frame(3.0, 0), ORIGIN, &mut out).unwrap();
+        timeline.render_components(&context, frame(3.0, 0), ORIGIN, &mut out, &host_impl::SequentialJobs).unwrap();
         jumps.push(start.elapsed().as_secs_f64() * 1e3);
-        timeline.render_components(&context, frame(39.0, 0), ORIGIN, &mut out).unwrap();
+        timeline.render_components(&context, frame(39.0, 0), ORIGIN, &mut out, &host_impl::SequentialJobs).unwrap();
     }
     let mut forward = Vec::new();
     for _ in 0..5 {
-        timeline.render_components(&context, frame(0.5, 0), ORIGIN, &mut out).unwrap();
+        timeline.render_components(&context, frame(0.5, 0), ORIGIN, &mut out, &host_impl::SequentialJobs).unwrap();
         let start = Instant::now();
-        timeline.render_components(&context, frame(39.0, 0), ORIGIN, &mut out).unwrap();
+        timeline.render_components(&context, frame(39.0, 0), ORIGIN, &mut out, &host_impl::SequentialJobs).unwrap();
         forward.push(start.elapsed().as_secs_f64() * 1e3);
     }
     let (m, _, x) = stats(jumps);

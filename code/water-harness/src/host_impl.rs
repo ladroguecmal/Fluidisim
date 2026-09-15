@@ -152,17 +152,19 @@ impl JobSystem for ScopedJobs {
         }
         // Les tranches sont disjointes : `chunks_mut` le prouve au compilateur, et le découpage
         // ne change aucun résultat (chaque élément est écrit une fois, depuis des lectures seules).
-        let mut chunks: Vec<(usize, &mut [f32])> = out
-            .chunks_mut(g)
-            .enumerate()
-            .map(|(k, slice)| (k * g, slice))
-            .collect();
-        let per_worker = chunks.len().div_ceil(self.workers as usize);
+        // Aucun tampon intermédiaire : chaque fil reçoit une **portion contiguë**, multiple du
+        // grain, qu'il parcourt lui-même par tranches de `g`.
+        let slices = out.len().div_ceil(g);
+        let span = slices.div_ceil(self.workers as usize).max(1) * g;
         std::thread::scope(|scope| {
-            for share in chunks.chunks_mut(per_worker) {
+            for (w, share) in out.chunks_mut(span).enumerate() {
+                let base = w * span;
                 scope.spawn(move || {
-                    for (offset, slice) in share.iter_mut() {
-                        fill(*offset, slice);
+                    let mut start = 0usize;
+                    while start < share.len() {
+                        let end = (start + g).min(share.len());
+                        fill(base + start, &mut share[start..end]);
+                        start = end;
                     }
                 });
             }

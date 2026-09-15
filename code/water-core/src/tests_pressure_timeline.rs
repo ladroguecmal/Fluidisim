@@ -12,6 +12,25 @@ use crate::{
 
 const START: u64 = 5_000_000;
 
+/// S243 — système de tâches séquentiel des essais. Il **n'implémente pas** `parallel_fill_f32` :
+/// c'est le défaut du trait qui sert, c'est-à-dire la référence de bits de SPEC-004 §8.2.
+struct Seq;
+impl crate::host::JobSystem for Seq {
+    fn worker_count(&self) -> u32 {
+        1
+    }
+    fn parallel_reduce_ordered_f64(
+        &self,
+        _: usize,
+        _: usize,
+        _: &dyn Fn(usize, usize) -> f64,
+        _: &dyn Fn(f64, f64) -> f64,
+        init: f64,
+    ) -> f64 {
+        init
+    }
+}
+
 fn settings(start: u64) -> Settings {
     Settings {
         frame: FrameId(3),
@@ -157,7 +176,7 @@ fn matches_prepared(radial: usize, angular: usize) -> f64 {
             .render_components(&context, time, origin, &mut expected)
             .unwrap();
         timeline
-            .render_components(&context, time, origin, &mut actual)
+            .render_components(&context, time, origin, &mut actual, &Seq)
             .unwrap();
         for (e, a) in expected.iter().zip(&actual) {
             assert_eq!([e[2], e[3]], [a[2], a[3]]);
@@ -196,11 +215,11 @@ fn incremental_fold_equals_full_fold_bitwise_s213() {
     let (mut a, mut b) = (vec![[0.0f32; 4]; count], vec![[0.0f32; 4]; count]);
     for ms in (0..=19_000).step_by(250) {
         stepped
-            .render_components(&context, SimTime(START + ms * 1000), [2.0, 1.0], &mut a)
+            .render_components(&context, SimTime(START + ms * 1000), [2.0, 1.0], &mut a, &Seq)
             .unwrap();
     }
     let last = SimTime(START + 19_000_000);
-    direct.render_components(&context, last, [2.0, 1.0], &mut b).unwrap();
+    direct.render_components(&context, last, [2.0, 1.0], &mut b, &Seq).unwrap();
     assert_eq!(bits(&a), bits(&b));
 }
 
@@ -245,22 +264,22 @@ fn refusals_leave_output_and_state_usable_s213() {
     let mut out = vec![[7.0f32; 4]; count + 1];
     let before = bits(&out);
     let t = SimTime(START + 4_000_000);
-    assert_eq!(timeline.render_components(&wrong, t, [0.0; 2], &mut out), Err(Error::Context));
+    assert_eq!(timeline.render_components(&wrong, t, [0.0; 2], &mut out, &Seq), Err(Error::Context));
     for bad in [SimTime(START - 1), SimTime(START + 20_000_001)] {
-        assert_eq!(timeline.render_components(&context, bad, [0.0; 2], &mut out), Err(Error::Time));
+        assert_eq!(timeline.render_components(&context, bad, [0.0; 2], &mut out, &Seq), Err(Error::Time));
     }
     assert_eq!(
-        timeline.render_components(&context, t, [0.0; 2], &mut out[..count - 1]),
+        timeline.render_components(&context, t, [0.0; 2], &mut out[..count - 1], &Seq),
         Err(Error::Preparation(PrepareError::Capacity))
     );
     for origin in [[f32::NAN, 0.0], [0.0, 4096.0]] {
         assert!(matches!(
-            timeline.render_components(&context, t, origin, &mut out),
+            timeline.render_components(&context, t, origin, &mut out, &Seq),
             Err(Error::Preparation(_))
         ));
     }
     assert_eq!(bits(&out), before);
-    timeline.render_components(&context, t, [0.0; 2], &mut out).unwrap();
+    timeline.render_components(&context, t, [0.0; 2], &mut out, &Seq).unwrap();
     assert_eq!(out[count], [7.0; 4]);
     assert!(out[..count].iter().any(|c| c[0] != 7.0));
 }

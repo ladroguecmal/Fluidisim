@@ -625,6 +625,11 @@ pub struct FrameData<'a> {
     /// S240, I-06 : contour de l'emprise, gardé d'une image à l'autre. Le premier contour d'un
     /// format donne sa capacité au tampon ; aucune image suivante n'alloue.
     footprint: Vec<[f32; 2]>,
+    /// S243 : système de tâches de l'hôte. Écriture disjointe seulement ; le résultat n'en dépend
+    /// pas (ADR-146), seule la vitesse en dépend. **Un fil sur le chemin d'image** : la création de
+    /// fils par appel coûte 67 µs pièce et **alloue**, ce qu'ADR-145 interdit à 60 Hz. Le
+    /// parallélisme attend un vivier persistant, qui demande `unsafe` dans l'hôte — une décision.
+    pub jobs: host_impl::ScopedJobs,
 }
 impl<'a> FrameData<'a> {
     pub fn new(
@@ -665,6 +670,7 @@ impl<'a> FrameData<'a> {
             culled_wake: false,
             culled_impacts: 0,
             footprint: Vec::new(),
+            jobs: host_impl::ScopedJobs::with_workers(1),
         }
     }
     pub fn update(&mut self, seconds: f64, age: f64, enabled: bool) {
@@ -739,7 +745,7 @@ impl<'a> FrameData<'a> {
             let start = Instant::now();
             // S213 : plus de préparation modale par image — repli temporel (ADR-131, J1-bis).
             self.timeline
-                .render_components(&self.wake_input.context, t, [eye[0], eye[1]], &mut self.wake)
+                .render_components(&self.wake_input.context, t, [eye[0], eye[1]], &mut self.wake, &self.jobs)
                 .expect("coefficients du sillage");
             if self.lod {
                 // S234 : le pas suit la borne de l'instant ; son coût CPU est compté ici.

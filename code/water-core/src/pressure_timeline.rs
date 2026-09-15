@@ -12,6 +12,7 @@
 use crate::{
     bound_pressure::{same_recipe, Context, Error},
     gaussian_spectrum::HalfSpectrum,
+    host::JobSystem,
     modal_pressure::{self, Complex, Error as ModalError, ModalPressure},
     pressure_journal::Journal,
     spectral_pressure::PrepareError,
@@ -50,6 +51,17 @@ pub struct Timeline<'a> {
 /// Ensemble replié décrit par un instant : `{ j : fin_j ≤ instant }`. `None` : à refaire.
 #[derive(Clone, Copy)]
 struct FoldSet(Option<SimTime>);
+
+/// S243 — grain du remplissage parallèle, en **nœuds**, quand au moins un tronçon force. C'est une
+/// donnée de **coût** : pour une écriture disjointe, le résultat n'en dépend pas (SPEC-004 §8.2,
+/// ADR-146) ; seule la vitesse en dépend, et elle est fixée par l'appelant, jamais dérivée de la
+/// machine (ADR-029 §3).
+///
+/// **Le grain encode le travail par élément, et seul l'appelant le connaît.** Mesuré en S243 : un
+/// nœud coûte 76 ns sans tronçon actif et 211 ns de plus par tronçon actif, tandis qu'un fil coûte
+/// environ 67 µs à créer et joindre. Sans tronçon actif, la préparation entière vaut 0,30 ms : y
+/// lancer des fils la fait **monter** à 0,76 ms. On ne découpe donc que lorsqu'il y a du forçage.
+const RENDER_GRAIN_NODES: usize = 256;
 
 impl<'a> Timeline<'a> {
     /// Mémoire d'hôte : un état par nœud, un mode par nœud et par tronçon publié.
@@ -203,6 +215,7 @@ impl<'a> Timeline<'a> {
         time: SimTime,
         origin: [f32; 2],
         out: &mut [[f32; 4]],
+        jobs: &dyn JobSystem,
     ) -> Result<(), Error> {
         if !self.context.matches(context) {
             return Err(Error::Context);
@@ -225,22 +238,97 @@ impl<'a> Timeline<'a> {
             return Err(calc(ModalError::Domain));
         }
         self.fold(time)?;
+        let count = self.nodes.len();
+        // S243 : **chemin rapide**, écritures disjointes (SPEC-004 §8.2, ADR-146). Chaque nœud
+        // écrit son propre quadruplet depuis des entrées en lecture seule ; aucune accumulation ne
+        // passe d'une tâche à l'autre, donc le résultat ne dépend ni du grain, ni du nombre de
+        // fils, ni de l'ordre. L'accumulateur d'un nœud vit dans les deux premiers `f32` de son
+        // quadruplet : ce sont les mêmes `f32` que `current`, donc les mêmes bits.
+        {
+            let nodes: &[NodeState] = self.nodes;
+            let modes: &[Option<ModalPressure>] = self.modes;
+            let (segments, reference) = (self.segments, self.reference);
+            // Aucun tronçon en forçage : le travail par nœud tombe d'un facteur dix, et découper
+            // coûterait plus que calculer. Un grain égal au total donne une seule tranche, donc
+            // aucun fil — et exactement les mêmes bits.
+            let forcing = (0..segments).any(|j| {
+                let row = modes[j].as_ref().expect("mode construit");
+                row.birth() < time && time < row.forcing_end()
+            });
+            let grain = if forcing { RENDER_GRAIN_NODES } else { count.max(1) };
+            jobs.parallel_fill_f32(
+                out[..count].as_flattened_mut(),
+                4 * grain,
+                &|offset, slice| {
+                    let first = offset / 4;
+                    // La part repliée.
+                    for (i, cell) in slice.chunks_mut(4).enumerate() {
+                        let state = &nodes[first + i];
+                        let theta =
+                            modal_pressure::phase(state.frequency, time.0 - reference.0, 1_000_000);
+                        let rot = Complex::phase(theta);
+                        let e = state.folded_eta.scale(rot.re).add(state.folded_u.scale(rot.im));
+                        (cell[0], cell[1]) = (e.re, e.im);
+                    }
+                    // S242 : un tronçon actif à la fois, `j` croissant, tri sur la rangée 0.
+                    for j in 0..segments {
+                        let row = modes[j].as_ref().expect("mode construit");
+                        if !(row.birth() < time && time < row.forcing_end()) {
+                            continue;
+                        }
+                        for (i, cell) in slice.chunks_mut(4).enumerate() {
+                            let mode =
+                                modes[(first + i) * segments + j].as_ref().expect("mode construit");
+                            // Un refus ne se propage pas d'une tâche : il devient un non-fini, et
+                            // c'est la boucle séquentielle qui rendra le verdict exact.
+                            let add = match mode.sample(time) {
+                                Ok(r) => r.eta,
+                                Err(_) => Complex { re: f32::NAN, im: f32::NAN },
+                            };
+                            let acc = Complex { re: cell[0], im: cell[1] }.add(add);
+                            (cell[0], cell[1]) = (acc.re, acc.im);
+                        }
+                    }
+                    // La publication, rebasée à la caméra.
+                    for (i, cell) in slice.chunks_mut(4).enumerate() {
+                        let state = &nodes[first + i];
+                        let (sn, c) = PhaseQ32::from_distance(state.turns[0], origin[0])
+                            .wrapping_add(PhaseQ32::from_distance(state.turns[1], origin[1]))
+                            .sin_cos();
+                        let r = Complex { re: cell[0], im: cell[1] };
+                        cell[0] = state.weight * (r.re * c - r.im * sn);
+                        cell[1] = state.weight * (r.re * sn + r.im * c);
+                        cell[2] = state.k[0];
+                        cell[3] = state.k[1];
+                    }
+                },
+            );
+        }
+        if out[..count].iter().any(|c| !c[0].is_finite() || !c[1].is_finite()) {
+            // Chemin lent : il rend le **verdict** — variant et rang du premier nœud fautif —
+            // exactement comme avant S243. Le tampon de sortie, lui, a déjà été écrit.
+            return self.render_sequential(time, origin, out);
+        }
+        Ok(())
+    }
+
+    /// La boucle séquentielle d'origine (S213, hissée en S242). Elle reste la **référence de bits**
+    /// et la seule qui rende un variant d'erreur : le chemin rapide s'y replie à la moindre sortie
+    /// non finie. `fold` a déjà été appliqué par l'appelant.
+    fn render_sequential(
+        &mut self,
+        time: SimTime,
+        origin: [f32; 2],
+        out: &mut [[f32; 4]],
+    ) -> Result<(), Error> {
         let (nodes, modes, segments, reference) =
             (&mut *self.nodes, &*self.modes, self.segments, self.reference);
-        // Tronçons en cours : nés et non achevés à `time` (les futurs rendent zéro).
-        // S242 : la part repliée d'abord, puis **un tronçon à la fois**. Naissance et fin ne
-        // dépendent que du segment — `fold` ne lit déjà que la rangée 0 pour les fins —, donc le
-        // tri se fait **une fois par image** et la boucle des nœuds n'est parcourue que pour les
-        // tronçons qui contribuent. Les mêmes termes sont ajoutés au même accumulateur dans le
-        // même ordre, `j` croissant : le résultat est identique **au bit**, et le coût cesse de
-        // croître avec les tronçons achevés — c'est-à-dire avec l'histoire du journal.
         for state in nodes.iter_mut() {
             let theta = modal_pressure::phase(state.frequency, time.0 - reference.0, 1_000_000);
             let rot = Complex::phase(theta);
             state.current = state.folded_eta.scale(rot.re).add(state.folded_u.scale(rot.im));
         }
         for j in 0..segments {
-            // Rangée 0 : `modes[0 · segments + j]`, naissance et fin communes à tous les nœuds.
             let row = modes[j].as_ref().expect("mode construit");
             if !(row.birth() < time && time < row.forcing_end()) {
                 continue;
@@ -250,8 +338,6 @@ impl<'a> Timeline<'a> {
                 state.current = state.current.add(mode.sample(time).map_err(calc)?.eta);
             }
         }
-        // Le verdict de finitude est celui d'avant ; seul l'instant où il est rendu change, et il
-        // ne porte aucun indice de nœud. `out` n'est écrit qu'après, donc intact à tout refus.
         for state in nodes.iter() {
             if !state.current.re.is_finite() || !state.current.im.is_finite() {
                 return Err(calc(ModalError::NonFinite));
