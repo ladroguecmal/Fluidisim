@@ -1046,3 +1046,22 @@ fn ghost_rows_floor_the_divergence_while_plain_rows_hold_s239() {
     }
     v.mobile = false;
 }
+
+/// S239, ADR-144 — à 32 768 mailles, f32 ne peut pas tenir la tolérance : le certificat d'arrondi
+/// arrête le solveur au-dessus d'elle, et le pas est **déclaré dégradé** au lieu d'être annoncé reçu.
+#[test]
+#[ignore = "réception S239, lancée explicitement (lente en debug)"]
+fn a273_at_32768_cells_is_declared_degraded_s239() {
+    let (nx, nz) = (256usize, 128usize);
+    let dx = 8. / nx as f32;
+    let mut v = mobile_volume(nx, nz, dx, &vec![0.5; nx]);
+    let eta: Vec<f32> = (0..nx)
+        .map(|i| 4. + 0.01 * (std::f32::consts::TAU * (i as f32 + 0.5) / nx as f32).sin())
+        .collect();
+    v.set_surface(&eta).unwrap();
+    let r = v.step(0.002, 20_000, &Jobs).unwrap();
+    println!("A273_32768 {r:?}");
+    assert!(r.floor, "l'arrêt doit être celui d'ADR-143 : {r:?}");
+    assert!(r.divergence_plain > PROJECTION_DIVERGENCE_TOLERANCE, "{r:?}");
+    assert!(r.degraded, "un pas au-dessus de la tolérance ne doit plus être annoncé reçu : {r:?}");
+}

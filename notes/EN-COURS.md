@@ -105,7 +105,7 @@ ces tailles, et alors requalification datée à provenance, jamais un seuil choi
   raideur `1/θ` dont le résidu plafonne à **un ulp de la magnitude de sa propre ligne** (mesuré :
   2⁻⁵, 2⁻⁶, 2⁻⁷) ; exiger 10⁻⁵ d'elle refuserait des pas que la réception HOS de S237 valide à
   0,25 %. Les lignes franches, elles, descendent de 7,5·10⁻⁵ à 4,5·10⁻⁷ (voir notes).
-- [ ] **P5** — réception : S237 5 cm à 128 colonnes, empreintes, `delta_precision`, coût ; ADR.
+- [x] **P5** — réception : S237 5 cm à 128 colonnes, empreintes, `delta_precision`, coût ; ADR.
 - [ ] **P6** — rituel §6, file, feuille de route, jeton ; fermeture des trois copies.
 
 ### Notes de reprise
@@ -132,6 +132,14 @@ Remede non explore, a mettre en file : residu recalcule en f64 (le plancher vien
 f32 de `r = b - Ap`), ou preconditionneur plus fort.
 Empreinte S232 `delta_filters` `0xc5ab1eadb094d058` : a rejouer en P5, un cas y depasse peut-etre
 la tolerance (le 128 bosse la depasse).
+
+P5 : suite **431 reussis, 0 echec, 11 ignores** (S238 : 429/9). delta_filters : plat 128 identique
+au dernier chiffre (219 iterations), lisse 347->348, tanh 330->348, ordres 1,947/1,957/1,959,
+**empreinte 0xc5ab1eadb094d058 -> 0xfb12b2092df4ee6d**. delta_precision : 128 bosse 347->348,
+divergence 1,021e-5 -> 5,842e-6. delta_mobile plancher : 0,850/0,552/0,252 % et 2,44/1,41/0,71 %,
+plancher 13/33/34 pas, divergence <= 1,502e-7, iterations max 142/297/592, **258,4 ms median a 128
+contre 256 en S238 (+0,9 %)**. 256x128 : 420 iterations, plancher, D = 1,335e-5, **degrade**.
+ADR-144 ecrit.
 
 P4 : regle construite ; `Projected { all, plain }`, `Report.divergence_plain`, cible resserree
 `physical_target = actual.(TOL/D_franches)^2` (aucun facteur choisi : `D` est proportionnelle a

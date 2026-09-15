@@ -147,3 +147,126 @@ ressort pas, aucune relance n'a lieu, et **le certificat d'arrondi — qui ne vi
 relance — n'est jamais consulté**. Le cas 256×128 en bosse a ainsi consommé le plafond de 20 000
 itérations sans verdict, et la mesure a été abandonnée. La règle du §1.4 n'a pas ce défaut : elle
 atteint d'abord le critère premier, et c'est **là**, à la relance, que le certificat est consulté.
+
+## 3. La règle, après mesure — et pourquoi elle ne porte pas sur toutes les lignes
+
+Le §1.4 proposait la tolérance comme condition d'acceptation sur **toutes** les mailles mouillées.
+Construite ainsi, elle a fait refuser au **premier pas** le cas de topologie mobile de S237
+(`mobile_step_keeps_rest_conserves_volume_and_changes_topology_s237`, 16×20, onde de 10 cm). Le
+diagnostic est écrit ici parce qu'il décide la règle.
+
+**Ce que la mesure montre** (test ignoré `a273_mobile_first_steps_s239`, pas 0) :
+
+| relance | `ρ` | `θ` | `D` toutes lignes | `D` lignes franches |
+|---:|---:|---:|---:|---:|
+| 61 | 8,12·10⁻⁷ | 0,192 | 7,50·10⁻⁵ | 7,50·10⁻⁵ |
+| 69 | 1,25·10⁻⁷ | 0,649 | 6,00·10⁻⁵ | **7,09·10⁻⁶** |
+| 76 | 2,12·10⁻⁸ | 0,239 | 1,53·10⁻⁵ | 2,16·10⁻⁶ |
+| 81 | 1,12·10⁻⁸ | 0,450 | 1,54·10⁻⁵ | 7,44·10⁻⁷ |
+| 83 | 8,51·10⁻⁹ | 0,595 | 1,51·10⁻⁵ | **4,46·10⁻⁷** |
+
+`ρ` descend de deux ordres de grandeur ; `D` **plafonne à 1,5·10⁻⁵** et n'y bouge plus. Les cinq
+pires lignes, au refus :
+
+| ligne | `(i,k)` | `|r|` | `θ_surface` | voisin du haut mouillé | préconditionneur |
+|---|---|---:|---:|---|---:|
+| 258 | (2,16) | **3,1250·10⁻²** = 2⁻⁵ | 0,206 | non | 1,99·10⁻³ |
+| 256 | (0,16) | **1,5625·10⁻²** = 2⁻⁶ | 0,296 | non | 2,91·10⁻³ |
+| 257 | (1,16) | **1,5625·10⁻²** = 2⁻⁶ | 0,266 | non | 2,31·10⁻³ |
+| 237 | (13,14) | 7,8125·10⁻³ = 2⁻⁷ | 0,794 | non | 3,67·10⁻³ |
+| 249 | (9,15) | 7,8125·10⁻³ = 2⁻⁷ | 0,268 | non | 2,32·10⁻³ |
+
+Ce sont **exactement les mailles de surface** — la face haute donne sur un fantôme —, leur diagonale
+vaut environ 500 (`1/θ_surface`), et leurs résidus sont des **puissances de deux exactes** : un ulp
+d'une ligne de magnitude ≈ 2¹⁸. Le résidu y est au plancher de f32, comme ADR-143 le décrit ; aucune
+itération ne l'abaisse. Les lignes **franches** du même pas, elles, descendent de 7,5·10⁻⁵ à
+4,5·10⁻⁷ : la conservation, là où elle est énoncée, converge.
+
+**Deux corroborations écrites avant S239, jamais rapprochées.** S199 a inscrit dans son propre tableau
+de réception, en face du `< 10⁻⁵`, « configuration unitaire testée ; diagnostic pondéré par
+ouvertures, **pas borne universelle** ». Et S237 a desserré à 10⁻⁴ l'assertion de divergence de son
+essai de projection mobile (`mobile_operator_is_symmetric_with_side_and_top_ghosts_s237`) sans dire
+pourquoi. A273 partait donc d'une prémisse à moitié vraie : le nombre **est** franchi, mais il n'avait
+jamais été une borne universelle.
+
+### Règle finale ([ADR-144](../adr/ADR-144-la-tolerance-physique-est-une-condition-d-acceptation.md))
+
+1. `accepté ⟺ b = 0`, ou `(ρ ≤ 10⁻⁶ ou plancher certifié)` **et** `D_franches ≤ 10⁻⁵`.
+2. **Ligne franche** : maille mouillée dont aucune face ouverte ne donne sur un fantôme de surface.
+   Sans fantôme — couvercle fixe —, `D_franches = D`, et la règle est celle du §1.4 sans réserve.
+3. Critère premier atteint, tolérance non tenue → la boucle **poursuit**, cible
+   `‖r‖₂² ← ‖r‖₂²·(10⁻⁵/D_franches)²`. Aucun facteur choisi : `D` est proportionnelle à `max|r|` par
+   l'identité, et l'acceptation reste la valeur **exacte** à la relance suivante.
+4. Plafond ou plancher atteint sans la tolérance → **dégradé**, déclaré.
+5. `Report.divergence` garde exactement son sens ; `Report.divergence_plain` porte la décision.
+
+## 4. Réception — 2026-09-15, une machine sur secteur
+
+### 4.1 Les deux cas d'A273
+
+| cas | avant S239 | après S239 |
+|---|---|---|
+| 128×64, fond en bosse, 8 192 mailles | 347 itérations, `D` = **1,021·10⁻⁵**, annoncé **reçu** | **348** itérations, `D` = **5,84·10⁻⁶**, reçu |
+| 256×128, fond plat, 32 768 mailles | 417 itérations, `D` = **1,578·10⁻⁵**, annoncé **reçu** | **420** itérations, plancher d'ADR-143, `D` = 1,335·10⁻⁵, **dégradé** |
+
+Test `physical_tolerance_is_required_for_acceptance_s239` (le premier cas, exécuté par la suite) et
+réception ignorée `a273_at_32768_cells_is_declared_degraded_s239` (le second). Aucun pas n'est plus
+annoncé reçu au-dessus de la tolérance. **Le coût de la correction est d'une itération ; le coût du
+refus, de trois.**
+
+### 4.2 Au bit — ce qui bouge et ce qui ne bouge pas
+
+`delta_filters`, campagne S232, comparée à [FLUX-COUPES-S232](FLUX-COUPES-S232.md) :
+
+| fond | `Q₁₂₈` S232 | `Q₁₂₈` S239 | itérations | ordre |
+|---|---|---|---|---|
+| plat | 2,296743171·10⁻⁴ | **2,296743171·10⁻⁴** | 219 → **219** | 1,947 → 1,947 |
+| lisse | 2,260028664·10⁻⁴ | 2,260028660·10⁻⁴ | 347 → **348** | 1,957 → 1,957 |
+| transition tanh | 2,257532700·10⁻⁴ | 2,257539558·10⁻⁴ | 330 → **348** | 1,966 → 1,959 |
+
+Le fond plat — dont `D` valait 8,07·10⁻⁶, sous la tolérance — est **identique jusqu'au dernier
+chiffre publié**, itérations comprises. Les deux fonds coupés, dont `D` la dépassait, poursuivent et
+changent au neuvième chiffre. Verdict d'ADR-038 §4 conservé : ordres 1,95 / 1,96 / 1,96 ≥ 1,8,
+résidus de Richardson 0,025 / 0,024 / 0,024 %, rejeu local identique en bits.
+**Empreinte : `0xc5ab1eadb094d058` → `0xfb12b2092df4ee6d`**, et ces deux cas en sont la cause entière.
+
+`delta_precision` : dix cas, aucun dégradé ; les huit dont `D` était sous la tolérance gardent leurs
+itérations (28, 52, 58, 69, 95, 95, 112, 179, 219) ; le dixième — 128 sur fond en bosse — passe de
+347 à 348 et sa divergence de 1,021·10⁻⁵ à 5,842·10⁻⁶.
+
+### 4.3 La réception de S237 et S238 est conservée
+
+`delta_mobile plancher` : 5 cm, une période, pas de 1 ms, plafond 4 000.
+
+| colonnes | profil `/a` | harmonique `2k` | pas au plancher | divergence max au plancher | itérations max | ms médian |
+|---:|---:|---:|---:|---:|---:|---:|
+| 32 | **0,850 %** | **2,44 %** | 13 | 1,454·10⁻⁷ | 142 | 4,67 |
+| 64 | **0,552 %** | **1,41 %** | 33 | 1,502·10⁻⁷ | 297 | 34,7 |
+| 128 | **0,252 %** | **0,71 %** | 34 | 1,498·10⁻⁷ | 592 | **258,4** |
+
+Sous 2 % et 20 %, décroissants — les tolérances de S237 sont inchangées, et S238 publiait
+0,850 / 0,550 / 0,252 % et 2,44 / 1,41 / 0,71 %. Dérive de volume 7,45·10⁻⁹ / 1,86·10⁻⁹ /
+2,79·10⁻⁹ m. **Le mode mobile n'est pas dégradé par la règle** : ses lignes franches tiennent la
+tolérance, et ce sont elles qui décident.
+
+### 4.4 Coût (ADR-131)
+
+- **Techniques présentes** : préconditionnement diagonal, f32, certificat d'arrondi et détection de
+  cycle d'ADR-143, une correction et une divergence supplémentaires par relance qui atteint le
+  critère premier, cible resserrée déduite de la mesure.
+- **Techniques absentes** : tout préconditionneur plus fort (multigrille, factorisation incomplète),
+  tout résidu recalculé en précision double, toute exploitation du GPU.
+- **Domaine mesuré** : une machine sur secteur, 2D, 128 à 32 768 mailles, une période, un `dt`.
+- **Chiffres** : 258,4 ms par pas médian à 128 colonnes contre **256 ms** en S238, soit **+0,9 %** ;
+  pire pas 592 itérations contre 526, soit **+12,5 %** ; +1 itération sur 348 pour le cas d'A273
+  reçu ; +3 sur 420 pour le cas refusé. Aucun budget n'est confronté ici.
+
+### 4.5 Ce qui n'est pas reçu
+
+- **Les lignes à fantôme de surface.** Leur divergence plafonne — 1,5·10⁻⁵ mesuré sur un pas, jusqu'à
+  7,5·10⁻⁵ avant la règle — et rien ici ne la borne. Le plancher mesuré vaut pour **une** géométrie ;
+  sa loi en fonction de `θ_surface` et de la taille reste à établir.
+- **Au-delà de 32 768 mailles en 2D**, et **la 3D** : l'opérateur à six faces demande `γ₁₀`, et le mur
+  mesuré ici y sera rencontré d'emblée. Le remède candidat — résidu recalculé en précision double, ou
+  préconditionneur plus fort — n'est pas éprouvé.
+- Un seul `dt`, une seule famille de second membre au-delà de 16 384 mailles, une seule machine.
