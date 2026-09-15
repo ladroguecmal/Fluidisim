@@ -41,6 +41,7 @@
 - [Allocations par image de l'hôte GPU : I-06 mesurée, et un suspect de gigue disculpé](validation/ALLOCATIONS-HOTE-S240.md).
 - [Préparation CPU du sillage : la loi contre les tronçons, et le poste dominant](validation/PREPARATION-SILLAGE-S242.md).
 - [Parallélisme déterministe : la primitive d'écriture disjointe et son prix](validation/PARALLELISME-S243.md).
+- [Coût d'un pas de δ, décomposé : où va le temps et quelle technique l'attaque](validation/COUT-DELTA-S244.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).

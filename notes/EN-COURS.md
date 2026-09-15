@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S244 — en cours
+Session : S244 — terminée
 Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web)
 Entrée : « continue », master propre à `fa99085`, une seule copie, jeton libre, secteur, Maillons 0.
 
@@ -104,7 +104,7 @@ déclencheur.
   passes de δ valent 21,7 / 5,5 / 3,8 µs. La primitive de S243 ne peut pas servir cette boucle. Ce
   qui reste à portée dans la session est le coût **propre** d'`apply`, 47 % du pas.
 - [x] **P5** — réception : `delta_filters`, `delta_precision`, suite, coût contre les fils.
-- [ ] **P6** — rituel §6, file, feuille de route, jeton.
+- [x] **P6** — rituel §6, file, feuille de route, jeton.
 
 ### Notes de reprise
 

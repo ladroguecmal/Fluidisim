@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-15 23:53 +02:00
+JETON            : libre
+Battement        : 2026-09-16 00:03 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web disponibles)
-Session en cours : S244 — A276 : le premier lot de coût de δ
-Dernière session : S243 — le parallélisme déterministe existe (ADR-146) ; le chemin d'image attend
-Session suivante : à déterminer en fin de S244
-Maillons        : 0
+Session en cours : aucune
+Dernière session : S244 — la carte du coût de δ ; le parallélisme fermé pour sa boucle
+Session suivante : S245 — la multigrille pour la pression de δ, préalable mesuré de la 3D
+Maillons        : 1
 
 ```
 
@@ -75,15 +75,17 @@ Ne pas relire le journal, les leçons ou tous les ADR intégralement à chaque r
 
 ## 4. Où en est le projet
 
-État à S243 : B/W et un afficheur existent ; scène multi-sources dessinée, visibilité au bit, composée
+État à S244 : B/W et un afficheur existent ; scène multi-sources dessinée, visibilité au bit, composée
 et admise par le cœur (ADR-142) ; **la boucle d'image de l'hôte n'alloue rien** pour le code du projet,
 la pile verrouillée 133 fois par image, constantes (ADR-145). Le poste dominant du budget de l'hôte est
 `ModalPressure::sample` dans la préparation du sillage — **87 %** de ses 3,1 ms, contre 0,44 ms de
 GPU eau (S242). Le système a désormais un **parallélisme déterministe** (ADR-146), qui vaut **×2,6**
 sur ce poste **hors ligne** ; le chemin d'image reste à un fil tant qu'un vivier persistant n'existe
-pas, ce qui demanderait `unsafe` dans l'hôte (A278). Côté δ, le coût mesuré
-dépasse le profil de deux à trois ordres de grandeur dès 2 048 mailles, **aucune technique de coût
-n'ayant été tentée** (A276, [comparables](docs/COMPARABLES-EXTERNES.md)). δ MAC x-z possède une **surface géométriquement mobile** reçue contre
+pas, ce qui demanderait `unsafe` dans l'hôte (A278). Côté δ, **la carte du coût est faite** (S244) : écritures
+disjointes 67 à 73 % du pas, réductions 12-13 %, itérations doublant par raffinement, et
+**286,2 ms par pas à 32 768 mailles** — 143 fois le budget. Le parallélisme est **fermé** pour cette
+boucle (125 µs par fil contre 21,7 de pass) ; **la multigrille est le seul levier dont le gain croît
+avec la taille** (A276, [carte](docs/validation/COUT-DELTA-S244.md)). δ MAC x-z possède une **surface géométriquement mobile** reçue contre
 l'onde stationnaire HOS d'ordre 3 (surface graphe, sans 3D, cavité, scénario B3 ni I-05 complet) ; sa
 pression f32 s'arrête à sa précision représentable (ADR-143) et **tient la tolérance physique de S199
 ou se déclare dégradée** (ADR-144) — tenue jusqu'à 8 192 mailles, refusée à 32 768 (A275), plancher

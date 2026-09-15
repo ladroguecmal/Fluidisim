@@ -151,7 +151,11 @@ l'écart à B+W. **S241 : l'ordre des obstacles du passage à la 3D est renvers�
 δ seul coûte 5,5125 ms par image contre les 2 ms qu'ADR-125 donne à toute l'eau, et ≈ 296 ms par
 image à 8 192 mailles ; le **coût** passe donc devant la précision (A276 avant A275), et aucune
 technique de coût n'a encore été tentée sur δ (ADR-131).
-[Confrontation](COMPARABLES-EXTERNES.md) §3. Part d'un impact que W ne porte pas nommée en S203 (énergie hors ondes, cavité, gerbe).
+[Confrontation](COMPARABLES-EXTERNES.md) §3. **S244 : la carte du coût est faite** — écritures
+disjointes 67 à 73 % du pas, réductions 12-13 %, itérations doublant par raffinement ; **286,2 ms
+par pas à 32 768 mailles**. Le parallélisme est fermé pour cette boucle (125 µs par fil contre
+21,7 de pass) : **la multigrille est le seul levier dont le gain croît avec la taille** ;
+[carte](validation/COUT-DELTA-S244.md). Part d'un impact que W ne porte pas nommée en S203 (énergie hors ondes, cavité, gerbe).
 
 *Bancs* : **B3** (famille de δ) quand un candidat atteint ses critères ou qu'un second existe ;
 **B4** (régime perturbatif, volets restants) sur les cas livrés ; **B5** (blocs épars) quand

@@ -5390,3 +5390,33 @@ Trois choses généralisent.
 
 Voir PARALLELISME-S243, ADR-146. Famille de L321 : ce qu'on ne peut pas voir échouer, on ne l'a pas
 mesuré.
+
+## L323 — Mesurer le prix d'un outil avant de construire avec lui, et ne jamais confondre inféré et mesuré
+
+*(S244)* Le lot devait paralléliser les passes de δ avec la primitive construite en S243. Avant
+d'écrire le moindre refactor, une mesure de dix minutes a chiffré **ce qu'un appel parallèle coûte à
+vide** : ≈ **125 µs par fil**, presque indépendamment du travail. Les passes visées valent **21,7 µs**
+(`apply`), 5,5 (axpy), 3,8 (`dir`). Un appel à deux fils coûte **quatorze fois** la pass qu'il
+découperait. La route était fermée — et elle l'a été avant, pas après.
+
+Trois choses généralisent.
+
+1. **Le prix d'un outil se mesure séparément de son usage.** Un banc « avec et sans » aurait montré
+   un ralentissement sans dire pourquoi, et aurait laissé croire à un réglage à trouver. Mesurer
+   l'outil **à vide**, sur une charge triviale, sépare son coût fixe de tout le reste — et rend la
+   conclusion transférable : le même chiffre explique *aussi* pourquoi le lot précédent, lui,
+   gagnait (3 270 µs de travail contre 950 de fils).
+2. **Un chiffre inféré d'une différence n'est pas un chiffre mesuré.** S243 avait écrit « ≈ 67 µs par
+   fil », déduit de l'écart entre deux fenêtres d'un banc chargé. La mesure directe donne **125 µs**.
+   L'inférence n'était pas absurde, elle était contaminée par tout ce que la différence contenait
+   d'autre. **Quand un nombre commence à servir de règle, il faut aller le mesurer pour lui-même** —
+   et le corriger par note datée là où il a été publié, sans réécrire ce qui reste vrai.
+3. **Annuler ce que la mesure ne soutient pas.** L'ordre de parcours d'`apply` était manifestement à
+   contresens de la mémoire ; l'échanger est exact au bit ; il ne gagne **rien**, à aucune des cinq
+   tailles. Il a donc été annulé et le résultat publié. Un changement gardé « parce qu'il devrait
+   aider » est une dette : la prochaine session le lira comme une optimisation reçue.
+
+Et un corollaire sur ce que vaut une session : **celle-ci n'a gagné aucun facteur**. Elle a rendu la
+carte — où va le temps (écritures 67–73 %, réductions 12–13 %, itérations doublant par raffinement),
+ce que chaque technique restante achèterait, et laquelle est fermée. Une carte fausse coûte des
+sessions ; une carte mesurée en économise. Voir COUT-DELTA-S244, famille de L321 et L322.

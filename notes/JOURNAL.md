@@ -12581,3 +12581,70 @@ index. Invariants relus : **I-03** (six empreintes identiques à cinq nombres de
 l'invariant même du lot) et **I-06** (`update` toujours à zéro allocation, après l'avoir cassé et
 réparé). Maillons 0 : la primitive existe, un consommateur réel la consomme, la preuve est publiée —
 et ce qu'elle n'atteint pas encore est écrit plutôt que passé sous silence.
+
+## S244 — 2026-09-16 — La carte du coût de δ, et la route qu'un chiffre a refermée
+
+**Entrée.** « continue », master propre à `fa99085`, une seule copie, jeton libre, secteur,
+Maillons 0. Claude Code, Opus 5. Plan `ece02f8`, protocole et instrument `67b8df1`, décomposition
+`7e0a118`, prix de l'outil `ed97bbc`, résultat négatif `791233d`.
+
+**Aucun facteur gagné, et c'est le résultat.** Cette session rend la **carte** du coût de δ : où va le
+temps, ce que chaque technique restante achèterait, et laquelle est fermée. Preuve
+[COUT-DELTA-S244](../docs/validation/COUT-DELTA-S244.md).
+
+**La décomposition, avec son contrôle de somme.** Chaque pass mesurée isolément, puis confrontée au
+pas : le prédit rend **79 à 89 %** du pas mesuré, stablement, aux cinq tailles — le reste étant les
+relances, l'advection, les diagnostics et les certificats. La décomposition est donc juste, et ce
+qu'elle n'explique pas, elle le borne.
+
+| mailles | itérations | pas | écritures disjointes | réductions |
+|---:|---:|---:|---:|---:|
+| 128 | 30 | 0,089 ms | 69 % | 13 % |
+| 2 048 | 114 | 5,256 ms | **67 %** (dont `apply` 47 %) | 12 % |
+| 32 768 | 425 | **286,2 ms** | **73 %** | 13 % |
+
+**Le coût à 32 768 mailles était non mesuré** — S239 et la file le disaient. Il vaut **286 ms par
+pas pour une image de 16,7 ms** : δ seul est **143 fois** les 2 ms qu'ADR-125 donne à toute l'eau.
+
+**La thèse tenait, et un chiffre l'a refermée.** Les écritures disjointes dominent : c'est bien elles
+qu'il fallait paralléliser, et S243 venait d'en fournir la primitive. **Avant d'écrire le refactor**,
+dix minutes ont chiffré ce qu'un appel parallèle coûte **à vide** : ≈ **125 µs par fil**, presque
+indépendamment du travail. Les passes valent 21,7 / 5,5 / 3,8 µs. Un appel à deux fils coûte
+**quatorze fois** la pass qu'il découperait. La primitive de S243 ne peut pas servir cette boucle —
+non qu'elle soit mauvaise, mais parce qu'elle crée ses fils à chaque appel, et que δ appelle 114 fois
+par pas des passes de quelques microsecondes. Le modèle rend compte des deux lots : pour le sillage,
+`3 270/8 + 950 ≈ 1 360 µs` contre 1 243 mesurés.
+
+**Correction datée de S243.** Son « ≈ 67 µs par fil » était **inféré** d'une différence entre deux
+fenêtres d'un banc chargé ; la mesure directe donne **125 µs**, et c'est elle qui fait foi. La
+conclusion de S243 — le chemin d'image reste à un fil — en sort **renforcée**. Note portée dans
+COUT-DELTA-S244 §3 ; PARALLELISME-S243 et ADR-146 gardent leur texte, l'un renvoyant à l'autre.
+
+**Ce qui a été tenté et annulé.** `apply` parcourt ses mailles avec `i` à l'extérieur alors que
+`c = k·nx + i` : la boucle interne saute une rangée à chaque maille. L'échange est **exact au bit** et
+ne gagne **rien**, à aucune des cinq tailles — 0,34149 contre 0,34170 ms à 32 768. **Annulé.** Les
+branches par face tiennent le processeur, pas la distance entre deux lectures ; c'est aussi pourquoi
+la vectorisation automatique n'opère pas. Un changement gardé « parce qu'il devrait aider » serait
+une dette : la session suivante le lirait comme une optimisation reçue.
+
+**Ce que la carte désigne.** Ce qui grandit n'est pas le coût d'une itération — stable en structure à
+toutes les tailles — mais **leur nombre** : 30, 61, 114, 220, 425, un doublement par raffinement.
+**La seule technique dont le gain augmente avec la taille est la multigrille** (ou un préconditionneur
+équivalent), et c'est donc elle qui commande le passage à la 3D. Le vivier persistant (A278)
+achèterait au plus ×3 sur 70 % du pas, et sert désormais **deux** consommateurs — le chemin d'image
+et δ — mais demande `unsafe` dans l'hôte.
+
+**Non fait.** Aucune construction. Une machine, un `dt`, un fond plat, un plafond d'itérations. Les
+pas aux grandes tailles sont bruités (36,6 et 41,7 ms au même point à 8 192 mailles, quand `apply` y
+est stable à 0,3 % près) : ce sont les **passes** qui font foi, pas le pas.
+
+**Suite.** **Maillons passe à 1** : aucune capacité reçue. **S245 : la multigrille pour la pression de
+δ** — le seul levier dont le gain croît avec la taille, et le préalable mesuré du passage à la 3D. Sa
+réception ne portera **pas** sur les bits, qui changeront, mais sur les critères d'acceptation
+d'ADR-144 (résidu premier et tolérance physique) et sur le compte d'itérations. A278, A277, A275,
+angles rasants, V, B2 et bathymétrie gardent leurs déclencheurs.
+
+**Rituel.** L323 ; aucun ADR — rien n'a été décidé ni construit ; file active (A276 cartographiée,
+A278 renforcée, multigrille nommée), feuille de route, index. Invariants relus : **I-05** (le budget
+coopératif est un état partagé, et c'est pourquoi on ne le distribue pas) et **I-03** (l'échange de
+boucles était exact au bit ; il a été annulé pour absence de gain, pas pour risque). Maillons 1.
