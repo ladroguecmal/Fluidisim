@@ -58,110 +58,46 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S237 — terminée
+Session : S238 — en cours
 Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy et GPU local disponibles)
-Entrée : « Continue », master propre à f5f78bf, trois copies au même commit, jeton libre,
-secteur. Cœur : 419 réussis, 5 ignorés.
+Entrée : « Continue », master propre à 17ca164, trois copies au même commit, jeton libre,
+secteur. Cœur : 425 réussis, 5 ignorés.
 
-**Objectif.** Première surface **géométriquement mobile** dans le candidat δ MAC x-z : la frontière
-à pression imposée se trouve à la hauteur réelle `η(x)` et non plus au couvercle fixe `z₀` ; les
-mailles entrent et sortent du fluide ; l'advection quadratique est présente. Reçue contre une
-référence **non linéaire indépendante**.
-**Ce que la lecture fixe avant le plan.** Mode S233 : Dirichlet `p_dyn = ρg(η−z₀)` au couvercle
-`z₀ = nz·dx`, facteur de demi-maille 2 dans l'opérateur, η transporté par flux de colonnes jusqu'à
-`z₀`, advection retirée. Le dépôt possède un véhicule potentiel **non linéaire d'ordre 3** reçu
-contre Stokes (S193, `examples/support/nl_surface.rs`, ADR-122) : périodique de longueur `2L`,
-condition initiale paire, il donne l'onde stationnaire d'amplitude finie d'un bassin à murs.
-**Thèse.** Fonction hauteur sur la grille MAC ; condition de Dirichlet par **fluide fantôme**
-(Gibou) à la distance `θ·dx` de la surface, verticale et horizontale — opérateur symétrique, CG
-conservé ; flux de colonne intégré jusqu'à la hauteur mouillée de chaque face ; vitesses
-extrapolées dans la bande d'air ; niveau de référence au repos distinct du sommet du domaine, pour
-un repos exact. À petite amplitude, le mode mobile doit rejoindre S233 ; à amplitude finie, il doit
-produire l'harmonique `2k` que le mode linéaire ne peut pas produire.
-**Critères, déclarés avant construction.** Repos exact au bit à un niveau intérieur ; opérateur
-symétrique au bit ; volume conservé à l'arrondi ; petite amplitude à ≤1 % du mode linéaire S233 ;
-amplitude finie : profil contre HOS M=3 sur une période, erreur décroissante en raffinant et
-harmonique `2k` captée, le mode linéaire servant de témoin (harmonique nulle) ; tolérances de banc
-écrites en P2 avec leur motif, jamais ajustées après mesure. Refus atomiques : surface à moins
-d'une maille du fond ou du sommet, garde de pas, non-convergence ; zéro allocation.
-**Arrêt.** Mode mobile construit et reçu, ou constat chiffré de ce qui manque. Aucune ambition
-réduite ; déferlement, mouillage du fond, air, cavité et 3D restent hors lot et nommés.
+**Objectif.** A272 : que la pression f32 de δ converge **à la précision que f32 peut affirmer**
+sur des domaines au-delà des 8 192 mailles de S231, sans relâcher ce qu'elle garantit.
+**Ce que la lecture fixe.** Le critère d'arrêt `‖b−Ap‖/‖b‖ ≤ 10⁻⁶` est hérité de S199 (candidat
+f64) ; S231 l'a tenu en f32 jusqu'à 128×64 avec des résidus déjà à 8,7·10⁻⁷. La tolérance
+**physique** déclarée en S199 porte sur la divergence projetée (`≤ 10⁻⁵`). Un résidu relatif est
+borné inférieurement par `κ·ε` : il croît avec la taille, alors que l'**erreur inverse
+composante par composante** (Oettli–Prager) `ω = max_i |r_i| / (|A||p| + |b|)_i` est atteignable
+à quelques `ε` quel que soit le conditionnement, et l'erreur d'évaluation de `r_i` en virgule
+flottante est bornée par `(n_i + 1)·ε·(|A||p| + |b|)_i` (Higham).
+**Thèse.** Un résidu indiscernable de l'arrondi de son propre calcul est la convergence f32 :
+l'accepter quand le vrai résidu **stagne**, et seulement alors, rend les cas S231–S237 au bit et
+reçoit le cas refusé de S237 ; une stagnation au-dessus de l'arrondi reste dégradée.
+**Critères, déclarés avant construction.** (1) Loi du plancher mesurée : résidu relatif minimal
+et `ω` en fonction de la taille. (2) Cas convergés selon l'ancien critère **identiques au bit**
+(empreinte S232, tests S231/S233/S237). (3) Cas S237 5 cm / 128 colonnes reçu, avec critères 5 et
+6 de S237 inchangés (profil ≤ 2 %, `b₂` ≤ 20 %). (4) Système sans solution (Neumann pur à second
+membre de moyenne non nulle) : **toujours dégradé**. (5) Solution acceptée au plancher contre la
+solution f64 du même système assemblé indépendamment (S231) : écart publié ; divergence ≤ 10⁻⁵
+(S199). (6) Coût : itérations gaspillées par la stagnation mesurées avant et après.
+**Arrêt.** Critère construit, ADR, cas reçu ; ou constat chiffré que l'erreur inverse ne suffit
+pas. Aucun seuil de banc modifié.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [x] **P2** — lectures ciblées (ADR-122, SURFACE-LIBRE-NL-S193, API `nl_surface`, ADR-141, tests
-  δ surface) ; protocole écrit : modèle discret, gardes, domaine d'amplitude, tolérances et motifs.
-- [x] **P3** — référence : onde stationnaire HOS M=3 (bassin 8×4 m, ka 0,01/0,1/0,2), séries
-  `η(x,t)` aux centres de colonnes ; recoupement sympy de l'ordre deux à petite amplitude.
-- [x] **P4a** — cœur : géométrie mobile (ensemble fluide, `θ`, opérateur, second membre et
-  correction à Dirichlet mobile) ; tests repos exact et symétrie.
-- [x] **P4b** — cœur : extrapolation, flux mouillé, advection, `step_surface_mobile` atomique ;
-  tests petite amplitude contre S233, volume, changement de topologie, refus, allocation.
-- [x] **P5** — réception : banc MAC contre HOS, trois résolutions, deux amplitudes, harmonique,
-  témoin linéaire, coût ; document de validation.
-- [x] **P6** — rituel §6, file, feuille de route, jeton ; copies à synchroniser.
+- [ ] **P2** — lectures (`project`, S231 test f64, S199 §5) ; protocole écrit ; borne `(n+1)ε`
+  dérivée pour l'opérateur δ (termes par ligne, second membre).
+- [ ] **P3** — mesure du plancher : erreur inverse et résidu relatif minimal contre la taille
+  (16 à 256 colonnes, deux seconds membres), outil de diagnostic dans le cœur.
+- [ ] **P4** — construction : erreur inverse composante par composante, détection de stagnation,
+  arrêt au plancher, champ de rapport ; tests (bits anciens, système sans solution, f64).
+- [ ] **P5** — réception : S237 5 cm à 128 colonnes, empreintes, `delta_precision`, coût ; ADR.
+- [ ] **P6** — rituel §6, file, feuille de route, jeton ; copies à synchroniser.
 
 ### Notes de reprise
 
-Base : S236 — cœur 419/5 ; S233 mode linéaire (erreurs fines 0,066 % Terre / 0,017 % Lune).
-
-P2 : protocole dans `docs/validation/SURFACE-MOBILE-S237.md` §1. Choix motivés : bassin `L = h = 2 m`
-(`kh = π`) plutôt que 8×4 m du plan — à 8×4 m (`kh = π/2`, λ = 16 m) Ursell `U = 4a` n'admet que
-`a ≲ 0,025 m` dans le domaine d'ADR-122, harmonique ≈ 3·10⁻⁵ m, invisible sur la grille ; à 2×2 m,
-`U = 2a`, `a = 0,10 m` → `U = 0,2`, harmonique de l'ordre du cm. Grilles 32/64/128 (32 mailles par
-λ au plus fin), `nz` jusqu'à 2,25 m. `θ_min = 10⁻³` avec préconditionnement diagonal du CG mobile.
-Coût estimé au plus fin : ≈18 000 mailles, une période ≈1,6 s à 1 ms.
-
-P3 (`examples/delta_mobile.rs oracle`) : ordre deux depuis le repos dérivé par sympy (script
-`standing2.py`, bloc-notes) puis écrit en forme fermée dans l'exemple : `B₂'' + Ω²B₂ = σ₂D₂ + K₂'`,
-`B₂(0) = B₂'(0) = 0` ; `ω = 3,918171`, `T = 1,603601 s`, `Ω = 5,5515` (harmonique libre),
-`B₂ = −0,7913 cos Ωt + 0,3986 cos 2ωt + 0,3927` (constante `k/4`), max|B₂| = 1,4780 sur une période
-→ `b₂` max 0,148 mm / 3,69 mm / 14,78 mm à a = 1/5/10 cm. HOS M=3, Q16 : **K64** écart relatif
-0,31 % dès a = 1 cm — plancher du symbole discret (4,8·10⁻³, A242/L277) ; **K256** : 0,034 % /
-0,823 % / 3,283 % à a = 1/5/10 cm, rapport 3,99 entre 10 et 5 cm = `(ka)²` exact → termes d'ordre
-quatre absents de l'analytique, pas défaut du véhicule. M=2 : 0,025 / 0,757 / 3,078 %. Précision
-propre (a = 10 cm, K256) : Q32 1,0·10⁻⁸ a, K512 5,3·10⁻⁵ a, dt 0,5 ms 1,6·10⁻¹¹ a. Référence
-retenue : **M=3, Q16, K256, dt 1 ms** (`REF_BAND`, `REF_LEVELS`). Volume ≤ 2·10⁻¹⁹.
-
-P4a : `src/delta_mobile.rs` (sous-module de `delta_projection`) — `wet`, `ghost_up`,
-`ghost_side`, `apply_mobile`, `rhs_mobile` (second membre + inverse de diagonale en une passe),
-`precondition_into_dir`, `dot_prec`, `correct_mobile`, `set_free_surface(eta, rest)`,
-`SURFACE_THETA_MIN = 1e-3`. Champs `rest`, `mobile`, `prec` (+4·nx·nz octets ; test de
-comptabilité passé de six à sept f32 par maille). `project` : branches `jacobi` pour second
-membre, CG préconditionné, correction et diagnostic (mailles fluides seules) ; chemin non mobile
-écrit pour rester au bit (`alpha = rz/dq` avec `rz ≡ rr`). Tests : **symétrie `A_ij = A_ji` au bit**
-et diagonale du préconditionneur au bit, surface ondulée 2×3 m à fantômes latéraux et verticaux
-(premier essai avec amplitude 0,3 : deux faces latérales seulement, sous l'exigence de quatre —
-amplitude portée à 0,5, exigence inchangée) ; projection d'un champ quelconque convergée,
-divergence < 1e-4 ; **repos exact au bit** à 2,0 / 2,013 / 1,9 m sur fond bosselé, zéro itération.
-Non-régression : 26 tests δ, 8 d'exécution, **empreinte S232 `0xc5ab1eadb094d058` inchangée**.
-
-P4b : **protocole corrigé avant mesure** — critère 4 porté de a = 1 cm à **1 mm** (l'harmonique
-physique vaut 1,5 % de a à 1 cm, P3) ; coefficient d'advection `dt` construit en f64 puis arrondi,
-écrit dans le document. `step_surface_mobile` (gardes avant/après, sauvegarde, advection,
-projection mobile, `extrapolate_mobile`, `transport_mobile`, validation), `surface_in_bounds`,
-`wet_cells`. **Premier essai** (exemple `essai`, nx32, a = 5 cm, une période contre HOS) : profil
-**0,85 % de a**, `b₂` 3,705 mm contre 3,673 mm (**2,4 %**), dérive de volume 3,7·10⁻⁹ m, mailles
-fluides 1021..1029, ≤143 itérations, 4,5 ms/pas. Tests : repos exact 50 pas (1,9 m, fond bosselé) ;
-onde 10 cm nx16 400 pas, volume à l'arrondi, topologie changeante ; mobile − linéaire à 1 mm sur
-800 pas nx16 **< 1 %** ; refus sommet/fond avant pas, **refus d'après pas sur dynamique réelle**
-(crête au sommet admis moins rien, dépassement au demi-cycle, pas > 400), `Convergence`, g = 0,
-état au bit, mode désarmé ; exécution : **580 points d'expiration**, zéro allocation, reprise
-identique, cinq refus d'entrée, horloge reculante. **Impasse** : champ à divergence nulle écrit à la
-main pour le refus d'après pas → second membre d'arrondi, pression f32 plafonnée à **3,3·10⁻⁶** de
-résidu relatif, CG simple (vérifié en forçant M = I) comme préconditionné, à 1 ms comme à 1 µs →
-`Convergence` avant la garde. Suite du cœur **425 réussis, 5 ignorés** ; empreinte S232 inchangée.
-
-P5 (`reception_s237.log`, 07:56–08:14, secteur) : critère 4 **0,167 %** ; 5 cm : 0,850/2,44 %
-(32), 0,550/1,41 % (64), **refus `Convergence` pas 397 à 128** ; 10 cm : 1,714/1,71 → 0,592/0,98 →
-**0,230/0,43 %** ; 1 cm nx64 0,190/1,61 % ; témoin linéaire `b₂` ≤ 1,7·10⁻⁵ de la référence, profil
-7,7 % / 16,2 %. Coût mobile 4,6 / 33 / 260 ms (143/273/525 it), linéaire 1,4 / 11 / 83 ms.
-Diagnostic (`delta_mobile diagnostic`) : résidu **1,0492·10⁻⁶** figé à 4 000/16 000/64 000
-itérations, divergence 1,45·10⁻⁷, 16 384 mailles, surface plate au quart de période → plancher f32
-de S231 (reçu jusqu'à 8 192 mailles, 8,75·10⁻⁷) → A272, contrat inchangé. Sensibilité `θ_min = 10⁻²`
-(temporaire) : 1,147/3,29 % à nx32 contre 0,850/2,44 %, même refus au pas 397 → cause écartée,
-`10⁻³` conservé. **Impasse coûteuse** : remplacement PowerShell `Get-Content -Raw | Set-Content
--Encoding utf8` sur une source UTF-8 → accents doublement encodés ; fichier restauré par `git
-restore` (aucune modification non committée), changement refait par l'outil d'édition.
-Instrumentation `TEMP` retirée ; `src/` identique au commit P4b.
+Base : S237 — refus au pas 397, résidu 1,0492·10⁻⁶ figé 4 000/16 000/64 000 itérations,
+divergence 1,45·10⁻⁷, 16 384 mailles ; `Report` construit littéralement en un seul endroit.

@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-15 08:29 +02:00
+JETON            : occupé
+Battement        : 2026-09-15 08:33 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy et GPU local disponibles)
-Session en cours : aucune
+Session en cours : S238 — A272 : pression δ au-delà de 8 192 mailles
 Dernière session : S237 — surface géométriquement mobile de δ reçue contre l'onde HOS
 Session suivante : S238 — A272 : pression δ au-delà de 8 192 mailles
 Maillons        : 0
