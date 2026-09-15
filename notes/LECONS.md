@@ -5215,3 +5215,18 @@ changer le domaine servi, même par ajout d'un mode, rouvre chaque preuve qui en
 première ligne de code. Le geste qui a suffi ici : chercher, pour chaque borne réemployée, le point du
 nouveau domaine qu'elle ne regarde pas, et construire l'essai qui s'y place. Voir L310, ADR-138 note
 S236, ADR-142.
+
+## L316 — Avant de fixer une tolérance d'accord entre deux modèles, calculer l'écart physique qui les sépare
+
+*(S237)* Le protocole de la surface mobile demandait qu'à `a = 1 cm` le mode mobile reste à 1 % du
+mode linéaire, « la petite amplitude étant linéaire ». L'ordre deux, calculé une heure plus tard pour
+l'oracle, donnait une harmonique de **1,5 % de `a`** à cette amplitude : un écart que le mode mobile
+*doit* produire et que le mode linéaire ne peut pas produire. Le critère aurait échoué pour une raison
+juste — ou, pire, un candidat qui l'aurait tenu aurait été suspect. Corrigé avant toute mesure,
+à `a = 1 mm` (0,15 %) : mesuré 0,167 %.
+
+Ce qui généralise : **une tolérance d'accord entre deux modèles différents doit être fixée au-dessus
+de l'écart que la physique met entre eux, et le calcul de cet écart précède le chiffre.** « Petit »
+n'est pas une amplitude : c'est un rapport, ici `ka·(1,48/k)`, qu'il faut évaluer. Même famille que
+L283 : la charge et la tolérance se dérivent de ce qui doit être distingué, jamais d'une intuition
+d'échelle. Voir SURFACE-MOBILE-S237 §1 (correction datée).

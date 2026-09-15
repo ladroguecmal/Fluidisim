@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S237 — en cours
+Session : S237 — terminée
 Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy et GPU local disponibles)
 Entrée : « Continue », master propre à f5f78bf, trois copies au même commit, jeton libre,
 secteur. Cœur : 419 réussis, 5 ignorés.
@@ -100,7 +100,7 @@ réduite ; déferlement, mouillage du fond, air, cavité et 3D restent hors lot 
   tests petite amplitude contre S233, volume, changement de topologie, refus, allocation.
 - [x] **P5** — réception : banc MAC contre HOS, trois résolutions, deux amplitudes, harmonique,
   témoin linéaire, coût ; document de validation.
-- [ ] **P6** — rituel §6, file, feuille de route, jeton ; copies à synchroniser.
+- [x] **P6** — rituel §6, file, feuille de route, jeton ; copies à synchroniser.
 
 ### Notes de reprise
 

@@ -12138,3 +12138,55 @@ file active (admission, coût de la requête, A258, CPU, J2 → S237), index. In
 (seuls des majorants de pente réelle comparés à `max_slope`), I-06 (pool hôte), I-04 inchangé.
 Maillons 0 : composition et admission de la scène par le cœur, consommées par la requête, reçues contre
 la pente réelle et l'image.
+
+## S237 — 2026-09-15 — La surface de δ se déplace, et l'oracle d'ordre trois la reconnaît
+
+**Entrée.** « Continue », master propre à `f5f78bf`, trois copies au même commit, jeton libre, secteur ;
+cœur 419/5. Claude Code, Opus 5. Plan `69e531e`, protocole `0820146`, oracle `d912529`, opérateur
+`f472ccb`, pas `68e0f6e`, réception `9b05c17`.
+
+**Capacité reçue.** Le candidat δ MAC x-z possède une **surface géométriquement mobile** :
+fonction hauteur, condition `p = 0` imposée à la hauteur réelle par fluide fantôme — opérateur
+**symétrique au bit**, CG préconditionné par la diagonale —, mailles qui entrent et sortent du fluide,
+advection quadratique, débits intégrés à la hauteur mouillée, niveau de référence fourni (repos exact
+au bit à tout niveau), pas atomique sous le contrat temporel d'ADR-141 (note datée). Consommateur :
+la prochaine brique δ (3D, cavité) et tout banc B3/B4 non linéaire.
+
+**Oracle, reçu avant le candidat.** Onde stationnaire d'amplitude finie, bassin 2×2 m (`kh = π`, choisi
+pour tenir dans le domaine d'Ursell d'ADR-122 à des amplitudes visibles). Ordre deux depuis le repos
+dérivé par sympy, écrit en forme fermée ; véhicule HOS d'ordre 3 de S193 : à `K = 64`, plancher 0,31 %
+du **symbole discret** (A242/L277) ; à `K = 256`, 0,034 / 0,82 / 3,28 % à 1 / 5 / 10 cm, rapport
+**3,99 = (ka)²** — l'ordre quatre absent de l'analytique. Précision propre 5·10⁻⁵ `a`.
+
+**Réception** ([SURFACE-MOBILE-S237](../docs/validation/SURFACE-MOBILE-S237.md)). Critère 4, mobile −
+linéaire à 1 mm : **0,167 %** (ordre deux : 0,15 %). **10 cm : profil 1,71 → 0,59 → 0,23 %, harmonique
+1,71 → 0,98 → 0,43 %** à 32/64/128 colonnes, sous 2 % et 20 %. 5 cm : 0,85/2,44 et 0,55/1,41 %, **refus
+`Convergence` à 128 colonnes** au quart de période. Témoin linéaire : harmonique ≤ 1,7·10⁻⁵ de la
+référence, profil faux de 7,7 % et 16,2 % — l'effet non linéaire lui-même. Volume ≤ 7,5·10⁻⁹ m.
+Six tests du cœur et un d'exécution (580 expirations, zéro allocation) : suite **425 réussis, 5
+ignorés** ; empreinte S232 inchangée ; chemins S199–S233 au bit.
+
+**Ce qui a été trouvé.** (1) **Le protocole était faux avant mesure** : « petite amplitude » à 1 cm
+porte déjà une harmonique de 1,5 % de `a` ; corrigé à 1 mm, daté (L316). (2) Le refus de 5 cm à 128
+colonnes : résidu **1,0492·10⁻⁶** figé jusqu'à 64 000 itérations, divergence 1,45·10⁻⁷, surface plate —
+plancher de la pression f32 **au-delà des 8 192 mailles reçues par S231**, écarté de `θ_min` par
+contre-épreuve (**A272**). (3) Un champ à divergence nulle écrit pour éprouver la garde d'après pas n'a
+produit qu'un second membre d'arrondi et un refus en amont ; garde reçue sur dynamique réelle. (4) `θ_min
+= 10⁻²` dégrade la précision d'un tiers ; `10⁻³` conservé.
+
+**Coût et limites.** 4,6 / 33 / 260 ms par pas à 32/64/128 colonnes, ≈3 fois le mode linéaire ; aucune
+technique de coût. Surface graphe, fond sec, bords ouverts, air, 3D, cavité et couplage B/W non reçus ;
+une période ; advection centrée ; oracle potentiel. **Impasse** : remplacement PowerShell sur une source
+UTF-8 → accents corrompus, restauré par Git.
+
+**Suite comparée.** Cinquième session J2 au total, deuxième consécutive après les trois J1-bis. Les quatre
+priorités du bilan S227 sont servies et il ne demande pas de nouvel audit. A272 est révélé par mesure et
+bloque toute grille plus grande, 3D comprise ; ce n'est pas un approfondissement différable. **S238 : A272
+— pression δ au-delà de 8 192 mailles**, loi du plancher et remède reçu sans relâcher le seuil, puis
+rejouer 5 cm à 128 colonnes. V, B2, bathymétrie, CPU de J1-bis et seconde cible gardent leurs
+déclencheurs. Aucune ambition réduite ni arbitrage utilisateur nécessaire.
+
+**Rituel.** A272 ; L316 ; note datée d'ADR-141 ; feuille de route J2, file active (J2, A272, précision δ),
+index. Invariants relus : I-06 (tampon réservé à la configuration, zéro allocation reçue), I-08 (durée
+entière, coefficients arrondis), I-03 (réductions ordonnées). Maillons 0 : surface mobile consommée par le
+pas, reçue contre un oracle non linéaire indépendant.

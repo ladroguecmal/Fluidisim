@@ -116,7 +116,7 @@ mesuré sur la scène) ; **B7** partiel (budget sur la machine locale, pas encor
 (I-12), éponge vers B+W (ADR-005) — sur des cas bornés : cavité et gerbe d'impact, proche-coque.
 Un domaine borné est une **étape** du δ général, jamais un produit à part (ADR-127 D3).
 
-*État au 2026-09-14* : candidat MAC x-z en bibliothèque (S199), sans allocation dans le pas et
+*État au 2026-09-15* : candidat MAC x-z en bibliothèque (S199), sans allocation dans le pas et
 à refus atomiques (S200), coût du pas mesuré (S202). **S230 : arrêt coopératif atomique et
 temps restant explicite**, reprise reçue ; [budget δ](validation/BUDGET-DELTA-S230.md).
 I-05 complet non reçu : retards réels observés, admission/marges encore absentes.
@@ -128,10 +128,16 @@ ordres1,947/1,957/1,966 ; triangles fluides perdus corrigés. L'ancien≈0,90 me
 sans ouvertures ; [preuve et limites](validation/FLUX-COUPES-S232.md).
 **S233 : hauteur évolutive linéarisée**, consommée par pression/flux du pas suivant ; durée
 entière et compensation f32, onde stationnaire reçue, abandon atomique hauteur comprise.
-[Preuve](validation/SURFACE-LINEARISEE-S233.md), ADR-141. Géométrie encore fixe ; restent
-ordre local/stabilité aux géométries nouvelles, surface géométriquement mobile, passage à
-la 3D et couplage de l'écart à B+W. Part d'un
-impact que W ne porte pas nommée en S203 (énergie hors ondes, cavité, gerbe).
+[Preuve](validation/SURFACE-LINEARISEE-S233.md), ADR-141.
+**S237 (2026-09-15) : surface géométriquement mobile** — fonction hauteur, Dirichlet par fluide
+fantôme (opérateur symétrique au bit), mailles qui entrent et sortent du fluide, advection
+quadratique, pas atomique. Reçue contre l'**onde stationnaire d'amplitude finie** du véhicule HOS
+d'ordre 3 : à 10 cm (`ka = 0,16`), profil **0,23 %** et harmonique `2k` à **0,43 %** à 128 colonnes,
+décroissants en raffinant ; le mode linéaire n'en produit que 10⁻⁵. À 5 cm, refus au plus fin maillage :
+plancher de la pression f32 au-delà du domaine S231 (**A272**).
+[Preuve](validation/SURFACE-MOBILE-S237.md). Restent : surface non graphe (déferlement), mouillage du
+fond, bords ouverts, pression f32 à grande taille (A272), passage à la 3D, cavité et couplage de
+l'écart à B+W. Part d'un impact que W ne porte pas nommée en S203 (énergie hors ondes, cavité, gerbe).
 
 *Bancs* : **B3** (famille de δ) quand un candidat atteint ses critères ou qu'un second existe ;
 **B4** (régime perturbatif, volets restants) sur les cas livrés ; **B5** (blocs épars) quand

@@ -22,3 +22,13 @@ Le mode évolutif ne publie aucun temps avancé si son pas échoue : u/w/p/η so
 ensemble, y compris sur expiration ou pression non convergée. Il ne transforme pas une
 pression dégradée en déplacement de masse reçu. Contrôle coopératif conservé ; I-05 complet
 n'est pas acquis par ce contrat. Aucune sérialisation δ, aucune autorité gameplay.
+
+## Note datée du 2026-09-15 (S237) — un mode géométriquement mobile suit le même contrat
+
+`step_surface_mobile` ajoute la surface **géométriquement mobile** (fonction hauteur, fluide fantôme,
+advection quadratique, niveau de référence fourni par `set_free_surface`) sans rien retirer à ce mode.
+Il applique ce contrat temporel tel quel : durée et budget en microsecondes entières, coefficients
+`ρ/dt`, `dt/ρ`, `dt/dx` **et `dt` pour l'advection** construits en f64 puis arrondis en f32, refus
+atomiques de u/w/p/η et du reste d'arrondi. La phrase « pas une réception de frontières
+géométriquement mobiles » reste vraie de *ce* mode ; le mode mobile est reçu à part, avec ses limites
+(surface graphe, pas de mouillage du fond), dans [SURFACE-MOBILE-S237](../validation/SURFACE-MOBILE-S237.md).

@@ -3462,6 +3462,22 @@ pas pour une scène dont les naissances se renouvellent. Voir
 le CPU (préparation du sillage 3,12 ms, 204 Hz) et hors forçage 415 Hz ; hors champ 727 Hz. Le
 recouvrement à GPU chargé n'est toujours pas expliqué, et aucune décision n'en dépend.
 
+- **A272** *(sévérité 2, S237 ; ouverte)* — **Au-delà du domaine reçu par S231, la pression f32 de δ
+  plafonne au-dessus de son propre seuil, et le pas refuse.** Onde stationnaire de 5 cm, grille
+  128×144 (16 384 mailles fluides), quart de période, surface plate : résidu relatif figé à
+  **1,0492·10⁻⁶** pour un seuil de 10⁻⁶, à 4 000, 16 000 et 64 000 itérations ; divergence après
+  correction 1,45·10⁻⁷, physiquement excellente. S231 n'avait reçu que jusqu'à 8 192 mailles, avec des
+  résidus déjà à 8,75·10⁻⁷, et l'écrivait. Le même pas refuse à `θ_min = 10⁻²` : la géométrie mobile n'est
+  pas en cause ; le mode linéaire converge sur ce banc à 128 colonnes (nz = 128), mais aucune loi du
+  plancher en fonction de la taille n'est établie. Gravité 2 : toute grille plus grande — la 3D d'abord —
+  refusera des pas sporadiques, et **dix itérations ou dix mille ne changent rien**, puisque le solveur
+  stagne ; le coût d'un pas refusé est celui du plafond entier (4 s ici). **À faire** : mesurer le
+  plancher en fonction du nombre de mailles et de la structure du second membre ; choisir un remède reçu
+  — critère d'arrêt fondé sur une grandeur physique (divergence, débit) plutôt que sur le résidu
+  relatif seul, résidu compensé, détection de stagnation qui refuse tôt, ou solveur mieux conditionné —
+  sans relâcher le seuil pour faire passer le banc. Voir
+  [SURFACE-MOBILE-S237](../validation/SURFACE-MOBILE-S237.md) §6, PRESSION-F32-S231.
+
 - **A271** *(sévérité 2, S236 ; corrigée par ADR-142 pour qui emploie le mode union)* — **La requête
   composée du cœur et l'image ne décrivaient pas la même eau.** Depuis ADR-126 (S203), l'image rend
   « hors emprise, B seul » ; la requête mixte d'ADR-080 refuse tout point qu'une seule emprise ne couvre
