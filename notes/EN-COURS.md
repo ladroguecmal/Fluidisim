@@ -98,8 +98,13 @@ ces tailles, et alors requalification datée à provenance, jamais un seuil choi
   avant mesure : ce que la tolérance mesure, pourquoi le critère premier ne la borne pas.
 - [ ] **P3** — mesure de la loi : divergence contre taille à résidu tenu, itérations
   supplémentaires pour 10⁻⁵, et divergence atteignable au plancher f32.
-- [ ] **P4** — construction : la tolérance devient condition d'acceptation dans la boucle ;
+- [x] **P4** — construction : la tolérance devient condition d'acceptation dans la boucle ;
   tests (bits des cas conformes, cas d'A273, système sans solution).
+  **Amendement P4, par la mesure** : l'acceptation porte sur les lignes **franches** — celles dont
+  aucune face ne porte un fantôme de surface. Une ligne à fantôme est une condition de Dirichlet de
+  raideur `1/θ` dont le résidu plafonne à **un ulp de la magnitude de sa propre ligne** (mesuré :
+  2⁻⁵, 2⁻⁶, 2⁻⁷) ; exiger 10⁻⁵ d'elle refuserait des pas que la réception HOS de S237 valide à
+  0,25 %. Les lignes franches, elles, descendent de 7,5·10⁻⁵ à 4,5·10⁻⁷ (voir notes).
 - [ ] **P5** — réception : S237 5 cm à 128 colonnes, empreintes, `delta_precision`, coût ; ADR.
 - [ ] **P6** — rituel §6, file, feuille de route, jeton ; fermeture des trois copies.
 
@@ -127,6 +132,21 @@ Remede non explore, a mettre en file : residu recalcule en f64 (le plancher vien
 f32 de `r = b - Ap`), ou preconditionneur plus fort.
 Empreinte S232 `delta_filters` `0xc5ab1eadb094d058` : a rejouer en P5, un cas y depasse peut-etre
 la tolerance (le 128 bosse la depasse).
+
+P4 : regle construite ; `Projected { all, plain }`, `Report.divergence_plain`, cible resserree
+`physical_target = actual.(TOL/D_franches)^2` (aucun facteur choisi : `D` est proportionnelle a
+`max|r|` par l'identite, et l'acceptation reste la valeur exacte a la relance suivante).
+**Le premier jet, tolerance sur toutes les lignes mouillees, a casse
+`mobile_step_keeps_rest_conserves_volume_and_changes_topology_s237` au pas 0.** Diagnostic
+(`a273_mobile_first_steps_s239`) : rho descend de 8,1e-7 a 8,5e-9 tandis que `D` stagne a 1,5e-5 ;
+les cinq pires lignes sont les mailles de **surface** (`haut_mouille=false`), theta_surface 0,21-0,30,
+preconditionneur 2e-3 donc diagonale ~500, et leurs residus valent **exactement** 3,125e-2 / 1,5625e-2 /
+7,8125e-3 = 2^-5, 2^-6, 2^-7, soit un ulp d'une ligne de magnitude ~2^18. Restreint aux lignes
+franches : 7,50e-5 -> 7,09e-6 -> 2,16e-6 -> ... -> 4,46e-7, decroissance nette. D'ou l'amendement.
+Cout de l'amendement sur ce cas : acceptation a 69 iterations au lieu de 61 (+13 %).
+S237 avait deja desserre une de ses propres assertions a 1e-4 (`..._symmetric_..._s237`) sans dire
+pourquoi ; S199 avait ecrit dans son propre tableau que 1e-5 etait « configuration unitaire testee,
+pas borne universelle ». A273 partait donc d'une premisse a moitie vraie.
 
 ---
 

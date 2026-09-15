@@ -68,7 +68,14 @@ thread_local! {
     // S239 P3 : abaissement du critere premier, pour mesurer combien d'iterations separent la
     // convergence declaree de la tolerance physique. Zero = aucun remplacement.
     pub(crate) static PRESSURE_TOL_OVERRIDE: core::cell::Cell<f32> = const { core::cell::Cell::new(0.) };
+    pub(crate) static TOLERANCE_TRACE_PLAIN: core::cell::RefCell<Vec<f64>> =
+        const { core::cell::RefCell::new(Vec::new()) };
 }
+
+/// S239 : la divergence projetée, sur toutes les lignes mouillées et sur les seules lignes
+/// **franches** — celles dont aucune face ne porte un fantôme de surface.
+#[derive(Clone, Copy, Debug)]
+struct Projected { all: f64, plain: f64 }
 
 /// Domaine local, cellules carrées. `z₀ = nz·dx` est le couvercle.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -150,6 +157,11 @@ pub struct Report {
     /// S238 : erreur inverse composante par composante `max_i |r_i|/(|b| + |A||p|)_i` du résultat.
     /// Diagnostic (PRESSION-PLANCHER-S238 §2), jamais seuil.
     pub backward_error: f64,
+    /// S239, ADR-144 : la même divergence, restreinte aux lignes **franches** — celles dont aucune
+    /// face ne porte un fantôme de surface. C'est **elle** qui décide l'acceptation : une ligne à
+    /// fantôme est une condition de Dirichlet de raideur `1/θ`, dont le résidu a son propre
+    /// plancher f32 (TOLERANCE-PRESSION-S239 §3). Sans fantôme, elle vaut `divergence`.
+    pub divergence_plain: f64,
 }
 
 /// S238, ADR-143 : tolérance **physique** de la projection, déclarée par S199 §5 (critère 4) avant
@@ -782,11 +794,14 @@ impl Volume {
         // itérations au pas 397 du banc S237, plus de 16 000 au pas 404) ; le vrai résidu y est déjà
         // indiscernable de son arrondi. L'erreur inverse est donc aussi un certificat d'arrêt.
         let mut floor_stop = false;
+        // S239 (ADR-144) : cible resserree sur ‖r‖² quand le critere premier est atteint sans
+        // que la tolerance physique de S199 le soit. `INFINITY` = aucune contrainte de plus.
+        let mut physical_target = f32::INFINITY;
         let (mut checkpoint, mut power, mut since): (Option<u64>, u32, u32) = (None, 1, 0);
         let actual_rr = loop {
             let before_iterations = it;
             // Au repos, `b` est exactement nul : aucune itération, et la correction est nulle.
-            while b2 > 0. && rr > tol * b2 && it < max_iters {
+            while b2 > 0. && (rr > tol * b2 || rr > physical_target) && it < max_iters {
                 let mut tmp = core::mem::take(&mut self.tmp);
                 let result = self.apply(&self.dir, &mut tmp, ctl);
                 self.tmp = tmp;
@@ -844,9 +859,30 @@ impl Volume {
                 let relative = if b2 > 0. { ((actual / b2) as f64).sqrt() } else { 0. };
                 self.correct_into_uw(k1, ctl, Phase::Pressure)?;
                 let d = self.divergence_metric(ctl, Phase::Pressure)?;
-                TOLERANCE_TRACE.with(|t| t.borrow_mut().push((it, relative, theta, d)));
+                TOLERANCE_TRACE.with(|t| t.borrow_mut().push((it, relative, theta, d.all)));
+                TOLERANCE_TRACE_PLAIN.with(|t| t.borrow_mut().push(d.plain));
             }
-            if actual <= tol * b2 || it >= max_iters || it == before_iterations {
+            let exhausted = it >= max_iters || it == before_iterations;
+            if actual <= tol * b2 {
+                if exhausted {
+                    break actual;
+                }
+                // S239, ADR-144 : le critere premier est atteint. C'est la tolerance **physique**
+                // declaree avant construction par S199 qui decide de l'acceptation ; tant qu'elle
+                // n'est pas tenue, la boucle poursuit. Les cas qui la tiennent deja s'arretent
+                // exactement ou ils s'arretaient, et gardent leurs bits.
+                self.correct_into_uw(k1, ctl, Phase::Pressure)?;
+                let reached = self.divergence_metric(ctl, Phase::Pressure)?.plain;
+                if reached <= PROJECTION_DIVERGENCE_TOLERANCE {
+                    break actual;
+                }
+                // La cible se deduit de la mesure, sans facteur choisi : `D` est proportionnelle a
+                // `max|r|` par l'identite `div u = r/scale`, donc reduire `D` du rapport voulu
+                // demande de reduire `‖r‖₂` du meme rapport a concentration egale. L'acceptation,
+                // elle, reste la valeur **exacte** de `D` a la relance suivante.
+                let ratio = (PROJECTION_DIVERGENCE_TOLERANCE / reached) as f32;
+                physical_target = actual * ratio * ratio;
+            } else if exhausted {
                 break actual;
             }
             #[cfg(test)]
@@ -882,20 +918,24 @@ impl Volume {
         // Correction : `u = u* − (dt/ρ)·∂p/∂x`, demi-maille au couvercle.
         self.correct_into_uw(k1, ctl, Phase::Correct)?;
         let residual = if b2 > 0. { (actual_rr / b2).sqrt() } else { 0. };
-        let divergence = self.divergence_metric(ctl, Phase::Diagnostics)?;
-        // S238, ADR-143 : à cycle certifié, la pression est au plancher de f32 ; le pas est reçu si la
-        // tolérance physique de S199 est tenue, dégradé sinon. Sans cycle, rien ne change.
-        let floor = floor_stop && divergence <= PROJECTION_DIVERGENCE_TOLERANCE;
+        let projected = self.divergence_metric(ctl, Phase::Diagnostics)?;
+        let divergence = projected.all;
+        // S239, ADR-144 : la tolérance physique de S199 est nécessaire dans **tout** chemin
+        // d'acceptation. ADR-143 l'exigeait déjà au plancher ; le critère premier ne l'exigeait pas,
+        // et des pas convergés la dépassaient (A273). Un pas qui ne peut pas la tenir est dégradé.
+        let tolerance_held = projected.plain <= PROJECTION_DIVERGENCE_TOLERANCE;
+        let accepted = (actual_rr <= tol * b2 || floor_stop) && tolerance_held;
         // `res` porte encore le vrai résidu du `p` publié : correction et diagnostic de divergence ne
         // touchent ni `p`, ni `rhs`, ni `res`.
         let backward_error = self.backward_error(ctl)? as f64;
         Ok(Report {
             iterations: it,
-            degraded: b2 > 0. && actual_rr > tol * b2 && !floor,
+            degraded: b2 > 0. && !accepted,
             residual: residual as f64,
             divergence,
             floor: floor_stop,
             backward_error,
+            divergence_plain: projected.plain,
         })
     }
 
@@ -953,22 +993,39 @@ impl Volume {
     /// `D = max|div u|·dx / max|u|` sur le champ corrigé présent dans `u`/`w` : la tolérance
     /// **physique** déclarée avant construction par S199 §5 critère 4. Consomme `tmp`, libre dès
     /// que le vrai résidu en a été tiré. Source unique : rapport de fin et boucle l'appellent.
-    fn divergence_metric(&mut self, ctl: &mut Control, phase: Phase) -> Result<f64, Error> {
+    fn divergence_metric(&mut self, ctl: &mut Control, phase: Phase) -> Result<Projected, Error> {
         let mut tmp = core::mem::take(&mut self.tmp);
         let result = self.divergence(&self.u, &self.w, &mut tmp, ctl, phase);
         self.tmp = tmp;
         result?;
-        let mobile = self.mobile;
-        let mut dmax = 0f32;
+        let (mobile, nx) = (self.mobile, self.domain.nx);
+        let (mut dmax, mut plain_max) = (0f32, 0f32);
         for (c, v) in self.tmp.iter().enumerate() {
             ctl.poll(phase)?;
             // S237 : les mailles d'air portent des vitesses extrapolées, pas une contrainte.
             if mobile && !self.wet_cell(c) { continue; }
             dmax = dmax.max(v.abs());
+            // S239 : une ligne à face fantôme est une condition de Dirichlet de raideur `1/θ`, pas
+            // une conservation ; son résidu a son propre plancher f32. Mesurées à part.
+            if !mobile || !self.has_ghost_face(c % nx, c / nx) { plain_max = plain_max.max(v.abs()); }
         }
         let mut umax = 0f32;
         for v in self.u.iter().chain(&self.w) { ctl.poll(phase)?; umax = umax.max(v.abs()); }
-        Ok((if umax > 0. { dmax * self.domain.dx / umax } else { 0. }) as f64)
+        let ratio = if umax > 0. { self.domain.dx / umax } else { 0. };
+        Ok(Projected { all: (dmax * ratio) as f64, plain: (plain_max * ratio) as f64 })
+    }
+
+    /// S239 : la maille mouillée touche-t-elle un fantôme de surface (voisin non mouillé qui n'est
+    /// pas du solide) ? Sa ligne porte alors un coefficient en `1/θ`, borné par `SURFACE_THETA_MIN`.
+    fn has_ghost_face(&self, i: usize, k: usize) -> bool {
+        let (nx, nz) = (self.domain.nx, self.domain.nz);
+        let ghost = |x: usize, z: usize, face: f32| {
+            face > 0. && !self.wet(x, z) && self.frac[self.c(x, z)] > 0.
+        };
+        (i > 0 && ghost(i - 1, k, self.open_u[self.fu(i, k)]))
+            || (i + 1 < nx && ghost(i + 1, k, self.open_u[self.fu(i + 1, k)]))
+            || (k + 1 < nz && ghost(i, k + 1, self.open_w[self.fw(i, k + 1)]))
+            || (k + 1 == nz && self.open_w[self.fw(i, k + 1)] > 0.)
     }
 
     /// S239 P3 : norme maximale du vrai résidu sur les **lignes du système**, pour la

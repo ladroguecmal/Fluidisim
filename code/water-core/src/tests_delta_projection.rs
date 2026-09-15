@@ -947,3 +947,102 @@ fn tolerance_law_against_size_s239() {
         }
     }
 }
+
+/// S239 P4 — diagnostic du refus apparu au premier pas mobile de `..._changes_topology_s237`.
+#[test]
+#[ignore = "mesure S239"]
+fn a273_mobile_first_steps_s239() {
+    let (nx, nz, dx) = (16usize, 20usize, 0.125f32);
+    let mut v = mobile_volume(nx, nz, dx, &vec![0.; nx]);
+    let wave: Vec<f32> = (0..nx).map(|i| 2.0 + 0.1 * (std::f32::consts::PI * (i as f32 + 0.5) / nx as f32).cos()).collect();
+    v.set_free_surface(&wave, 2.0).unwrap();
+    for step in 0..6 {
+        TOLERANCE_TRACE_ON.with(|c| c.set(true));
+        TOLERANCE_TRACE.with(|t| t.borrow_mut().clear());
+        TOLERANCE_TRACE_PLAIN.with(|t| t.borrow_mut().clear());
+        let r = v.step_surface_mobile(1000, 2000, 1_000_000, &Jobs, &StillClock);
+        TOLERANCE_TRACE_ON.with(|c| c.set(false));
+        let trace = TOLERANCE_TRACE.with(|t| t.borrow().clone());
+        let plain = TOLERANCE_TRACE_PLAIN.with(|t| t.borrow().clone());
+        let umax = v.velocity_u().iter().chain(v.velocity_w()).fold(0f32, |m, x| m.max(x.abs()));
+        println!("A273_MOBILE pas={step} umax={umax:.4e} resultat={:?}", r.as_ref().map(|s| s.report));
+        for (n, (it, rho, theta, d)) in trace.iter().enumerate().take(8) {
+            println!("   it={it} rho={rho:.4e} theta={theta:.4e} D={d:.4e} D_franches={:.4e}", plain[n]);
+        }
+        if r.is_err() {
+            // Ou vit le residu qui ne descend plus ? `res` porte encore le vrai residu publie.
+            let mut rows: Vec<(usize, f32)> = (0..nx * nz)
+                .filter(|c| v.wet_cell(*c))
+                .map(|c| (c, v.res[c].abs()))
+                .collect();
+            rows.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
+            for (c, value) in rows.iter().take(5) {
+                let (i, k) = (c % nx, c / nx);
+                let surface_theta = (v.surface()[i] - (k as f32 + 0.5) * dx) / dx;
+                let up_wet = k + 1 < nz && v.wet(i, k + 1);
+                println!("   ligne c={c} (i={i},k={k}) |r|={value:.4e} theta_surface={surface_theta:.4e} haut_mouille={up_wet} eta={:.5} prec={:.4e}", v.surface()[i], v.prec[*c]);
+            }
+            break;
+        }
+    }
+}
+
+/// S239, ADR-144 — la tolérance physique de S199 est une **condition d'acceptation**, pas un
+/// diagnostic : le pas 128×64 sur fond en bosse atteignait le critère premier avec `D` au-dessus
+/// de 10⁻⁵ (A273) ; la boucle poursuit désormais jusqu'à la tenir.
+#[test]
+fn physical_tolerance_is_required_for_acceptance_s239() {
+    let (nx, nz) = (128usize, 64usize);
+    let dx = 8. / nx as f32;
+    let ground: Vec<f32> = (0..nx).map(|i| {
+        let d = ((i as f32 + 0.5) * dx - 3.) / 1.2;
+        0.4 + 0.6 * (-d * d).exp()
+    }).collect();
+    let mut v = mobile_volume(nx, nz, dx, &ground);
+    let eta: Vec<f32> = (0..nx)
+        .map(|i| 4. + 0.01 * (std::f32::consts::TAU * (i as f32 + 0.5) / nx as f32).sin())
+        .collect();
+    v.set_surface(&eta).unwrap();
+    TOLERANCE_TRACE_ON.with(|c| c.set(true));
+    TOLERANCE_TRACE.with(|t| t.borrow_mut().clear());
+    let r = v.step(0.002, 20_000, &Jobs).unwrap();
+    TOLERANCE_TRACE_ON.with(|c| c.set(false));
+    let trace = TOLERANCE_TRACE.with(|t| t.borrow().clone());
+    // L'ancien point d'arrêt : le critère premier est atteint, la tolérance ne l'est pas.
+    let old_stop = trace.iter().find(|(_, rho, _, _)| *rho <= 1e-6).expect("un arrêt au critère premier");
+    assert!(old_stop.3 > PROJECTION_DIVERGENCE_TOLERANCE,
+        "le cas doit reproduire A273 : D = {:e} au premier arrêt", old_stop.3);
+    // Le nouveau : reçu, et la tolérance tenue. Sans fantôme, `divergence_plain` vaut `divergence`.
+    assert!(!r.degraded, "{r:?}");
+    assert!(r.divergence_plain <= PROJECTION_DIVERGENCE_TOLERANCE, "{r:?}");
+    assert_eq!(r.divergence_plain.to_bits(), r.divergence.to_bits(), "aucune ligne à fantôme ici");
+    assert!(r.iterations > old_stop.0, "le pas doit avoir poursuivi : {} ≤ {}", r.iterations, old_stop.0);
+}
+
+/// S239 — en mode mobile, `max|div u|` est porté par les lignes à **fantôme de surface**, dont le
+/// résidu est à un ulp de la magnitude de leur propre ligne (raideur `1/θ`). Les lignes franches,
+/// elles, tiennent la tolérance. C'est pourquoi l'acceptation porte sur elles.
+#[test]
+fn ghost_rows_floor_the_divergence_while_plain_rows_hold_s239() {
+    let (nx, nz, dx) = (16usize, 20usize, 0.125f32);
+    let mut v = mobile_volume(nx, nz, dx, &vec![0.; nx]);
+    let wave: Vec<f32> = (0..nx)
+        .map(|i| 2.0 + 0.1 * (std::f32::consts::PI * (i as f32 + 0.5) / nx as f32).cos())
+        .collect();
+    v.set_free_surface(&wave, 2.0).unwrap();
+    let step = v.step_surface_mobile(1000, 2000, 1_000_000, &Jobs, &StillClock).unwrap();
+    let r = step.report.expect("un pas avancé rend son rapport");
+    assert!(!r.degraded, "{r:?}");
+    assert!(r.divergence_plain <= PROJECTION_DIVERGENCE_TOLERANCE, "lignes franches : {r:?}");
+    assert!(r.divergence > r.divergence_plain, "les fantômes doivent dominer : {r:?}");
+    // Et les lignes à fantôme sont exactement les mailles de surface de chaque colonne.
+    v.mobile = true;
+    for i in 0..nx {
+        for k in 0..nz {
+            if !v.wet(i, k) { continue; }
+            let top = k + 1 == nz || !v.wet(i, k + 1);
+            assert_eq!(v.has_ghost_face(i, k), top, "maille ({i},{k})");
+        }
+    }
+    v.mobile = false;
+}
