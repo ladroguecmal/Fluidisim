@@ -157,3 +157,64 @@ La décomposition du §2 dit ce que chaque technique restante achèterait, à 2 
 **Aucune ne se fait sans décision** : la première demande `unsafe` dans l'hôte (A278), la deuxième
 est une construction numérique à part entière avec ses propres critères de réception, la troisième
 un portage. Ce lot les chiffre ; il n'en tranche aucune.
+
+## 4. La décomposition étendue, et le coût à 32 768 mailles
+
+Le même instrument, aux cinq tailles. [TOLERANCE-PRESSION-S239](TOLERANCE-PRESSION-S239.md) §4.5 et
+la file laissaient le coût à 32 768 mailles **non mesuré** ; il l'est ici.
+
+| mailles | itérations | pas mesuré | `apply` | écritures | réductions | part des écritures |
+|---:|---:|---:|---:|---:|---:|---:|
+| 128 | 30 | 0,089 ms | 0,00141 | 0,061 | 0,012 | 69 % |
+| 512 | 61 | 0,699 ms | 0,00528 | 0,465 | 0,091 | 67 % |
+| 2 048 | 114 | 5,256 ms | 0,02172 | 3,531 | 0,637 | 67 % |
+| 8 192 | 220 | ≈ 37–42 ms | 0,08947 | 27,75 | 4,79 | ≈ 70 % |
+| 32 768 | 425 | **286,2 ms** | 0,34149 | 208,5 | 37,4 | **73 %** |
+
+**La structure du coût est stable** : les écritures disjointes valent 67 à 73 % du pas à toutes les
+tailles, les réductions 12 à 13 %. Ce qui grandit, c'est le **nombre d'itérations** — 30, 61, 114,
+220, 425 — soit un doublement par raffinement, `O(√N)`, exactement la loi de S239.
+
+**À 32 768 mailles, un pas coûte 286 ms pour une image de 16,7 ms** : δ seul est **143 fois** le
+budget que ADR-125 donne à toute l'eau. Les mesures de pas aux grandes tailles sont bruitées (36,6 et
+41,7 ms au même point pour 8 192 mailles, alors qu'`apply` y est stable à 0,3 % près) : ce sont les
+**passes** qui font foi ici, pas le pas.
+
+## 5. Ce qui a été tenté et n'a rien donné
+
+`apply` parcourt ses mailles avec `i` à l'extérieur, alors que `c = k·nx + i` : la boucle interne
+saute d'une rangée à chaque maille. Échanger les deux boucles est **exact au bit** — aucune maille ne
+lit la sortie d'une autre, et l'ordre d'accumulation dans une maille ne change pas.
+
+| mailles | `apply`, ordre d'origine | `apply`, boucles échangées |
+|---:|---:|---:|
+| 2 048 | 0,02172 ms | 0,02138 ms |
+| 8 192 | 0,08947 ms | 0,08924 ms |
+| 32 768 | 0,34149 ms | 0,34170 ms |
+
+**Rien, à aucune taille** — et l'écart est sous le témoin de bruit de L321. L'échange a donc été
+**annulé** : ce projet ne garde pas un changement que la mesure ne soutient pas. L'explication tient
+en une ligne : le travail par maille est branchu — quatre faces, chacune avec son ouverture et son
+voisin à tester — et ce sont ces branches qui tiennent le processeur, pas la distance entre deux
+lectures. C'est aussi pourquoi la vectorisation automatique n'opère pas ici.
+
+## 6. Ce que ce lot conclut
+
+1. **La décomposition est établie et stable** : écritures 67–73 %, réductions 12–13 %, le reste hors
+   boucle ; le compte d'itérations double à chaque raffinement.
+2. **Le parallélisme de S243 ne peut pas servir cette boucle** : 125 µs par fil contre 21,7 µs de
+   pass. Il faudrait un **vivier persistant** (A278), dont la répartition coûterait des
+   microsecondes — et qui demande `unsafe` dans l'hôte.
+3. **La seule technique qui attaque le terme qui grandit est la multigrille** (ou un préconditionneur
+   équivalent) : elle vise les 425 itérations, pas le coût de chacune. C'est le seul levier dont le
+   gain **augmente** avec la taille, et c'est donc lui qui commande le passage à la 3D.
+4. **Aucun facteur n'a été gagné dans cette session**, et il faut le dire ainsi. Ce qui a été gagné
+   est la carte : où va le temps, ce que chaque technique achèterait, et laquelle est fermée.
+
+### Coût de la mesure (ADR-131)
+
+- **Techniques présentes** : aucune de coût — Jacobi diagonal et f32, comme avant.
+- **Techniques absentes** : GPU, parallélisme (fermé pour cette boucle par le §3), multigrille,
+  factorisation incomplète, itérations fixes, cuisson, SIMD explicite.
+- **Domaine** : 8 × 4 m, fond plat, `dt = 1/60 s`, plafond 512, release, un fil, une machine ;
+  128 à 32 768 mailles.

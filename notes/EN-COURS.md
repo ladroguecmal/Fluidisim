@@ -103,7 +103,7 @@ déclencheur.
   appel parallèle coûte **≈ 125 µs par fil** — mesuré à vide, indépendamment du travail — quand les
   passes de δ valent 21,7 / 5,5 / 3,8 µs. La primitive de S243 ne peut pas servir cette boucle. Ce
   qui reste à portée dans la session est le coût **propre** d'`apply`, 47 % du pas.
-- [ ] **P5** — réception : `delta_filters`, `delta_precision`, suite, coût contre les fils.
+- [x] **P5** — réception : `delta_filters`, `delta_precision`, suite, coût contre les fils.
 - [ ] **P6** — rituel §6, file, feuille de route, jeton.
 
 ### Notes de reprise
@@ -131,6 +131,20 @@ Le modele rend compte des deux lots : sillage 3 270/8 + 950 = 1 360 us contre 1 
 **Correction datee de S243** : le « 67 us par fil » y etait **infere** d'une difference entre deux
 fenetres ; la mesure directe donne **125 us**. C'est elle qui fait foi. La conclusion de S243 en
 sort renforcee, pas affaiblie.
+
+P5 : **rien n'a ete gagne, et c'est le resultat.** Seule piste restee a portee : l'ordre de parcours
+d'`apply` (`i` a l'exterieur alors que `c = k.nx + i`). Echange exact au bit, mesure a trois tailles :
+2 048 -> 0,02172 contre 0,02138 ; 8 192 -> 0,08947 contre 0,08924 ; 32 768 -> 0,34149 contre 0,34170.
+**Rien, a aucune taille**, sous le temoin de bruit de L321 -> **echange annule**. Explication : le
+travail par maille est branchu (quatre faces, ouverture et voisin a tester), ce sont les branches qui
+tiennent le processeur, pas la distance entre deux lectures ; c'est aussi pourquoi la vectorisation
+automatique n'opere pas.
+**Decomposition etendue** : ecritures 67-73 % du pas a toutes les tailles, reductions 12-13 %,
+iterations 30/61/114/220/425 (doublement par raffinement, O(racine N)).
+**Cout a 32 768 mailles, que S239 et la file laissaient non mesure : 286,2 ms par pas** — soit
+**143 fois** les 2 ms d'ADR-125 pour une image. Les pas aux grandes tailles sont bruites (36,6 et
+41,7 ms au meme point a 8 192) : ce sont les **passes** qui font foi, pas le pas.
+Suite delta : 24 reussis, 8 ignores.
 
 ---
 

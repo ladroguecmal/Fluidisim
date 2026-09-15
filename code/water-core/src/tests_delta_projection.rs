@@ -1077,7 +1077,7 @@ fn delta_step_decomposition_s244() {
         v.sort_by(f64::total_cmp);
         v[v.len() / 2]
     };
-    for nx in [16usize, 32, 64] {
+    for nx in [16usize, 32, 64, 128, 256] {
         let (nz, dx) = (nx / 2, 8. / nx as f32);
         let mut v = mobile_volume(nx, nz, dx, &vec![0.4; nx]);
         let z0 = v.domain().z0();
