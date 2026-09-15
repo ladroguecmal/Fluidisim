@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-15 20:03 +02:00
+JETON            : occupé
+Battement        : 2026-09-15 20:10 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web disponibles)
-Session en cours : aucune
+Session en cours : S242 — J1-bis : la préparation CPU du sillage, poste dominant du budget
 Dernière session : S241 — Niagara Fluids lu comme comparable ; l'ordre des obstacles de la 3D renversé
-Session suivante : S242 — J1-bis : la préparation CPU du sillage, poste dominant du budget
+Session suivante : à déterminer en fin de S242
 Maillons        : 1
 
 ```

@@ -58,66 +58,59 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S241 — terminée
-Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et **accès web**)
-Entrée : « Continue, j'ai découvert un projet nommé Niagara Pyro, cela peut être intéressant à
-étudier. » Master propre à `dc0a236`, une seule copie, jeton libre, secteur.
+Session : S242 — en cours
+Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web)
+Entrée : « Continue », master propre à `39a2af8`, une seule copie, jeton libre, secteur.
+**Maillons 1** : cette session doit faire avancer une capacité.
 
-**Objectif.** Étudier **Niagara Fluids** d'Unreal Engine — dont *Pyro*, son solveur de gaz 3D — comme
-**comparable externe**, et en tirer ce qui s'applique à ce projet : ce qu'il corrobore, ce qu'il
-n'autorise pas, et quel lot il désigne. La demande de l'utilisateur prime sur la suite automatique
-(REPRISE §6.7) : la préparation CPU du sillage, prévue en S241, repart en file avec son déclencheur.
-**Ce que la lecture fixe, et la règle qui gouverne ce lot.** Une documentation d'éditeur est une
-**affirmation de fournisseur**, pas une mesure de ce projet. REPRISE §2 interdit de transformer un
-fait externe inconnu en hypothèse acquise, I-14 exige une provenance pour toute valeur, et ADR-028
-rappelle qu'il n'y a pas d'autres équipes : Epic n'est pas un interlocuteur, c'est une publication.
-**Aucun nombre lu chez un éditeur n'entre dans ce dépôt comme seuil.** Chaque affirmation portera son
-URL et son statut : documenté, déduit, ou non trouvé.
-**Thèse.** Un comparable ne se juge pas sur ce qu'il fait mieux, mais sur **les questions qu'il ne
-pose pas**. Si un moteur qui expédie du fluide temps réel ne demande jamais la convergence de sa
-pression, cela ne dit pas que notre critère est faux — cela situe la classe de fidélité que δ vise,
-et cela dit ce que coûtera d'y arriver.
-**Critères, déclarés avant l'étude.** (1) Toute affirmation externe porte sa source et son statut.
-(2) Confrontation **à nos propres nombres déjà mesurés** — architecture ADR-001, pression de δ
-(S238/S239), coût (S235/S240), volumes bornés de J2 — sans nouvelle campagne. (3) Ce qui est
-corroboré, ce qui est contredit et ce qui reste indécidable sont **séparés**. (4) Sortie : un
-document de comparables **durable** (pas un par session), des points de file datés avec déclencheur,
-et l'index. (5) Aucun ADR, aucun seuil, aucune ambition modifiée : ADR-127 n'est pas rouvert.
-**Arrêt.** Le document écrit et la file à jour ; ou constat que le comparable ne change aucune
-décision, écrit tel quel.
+**Objectif.** Faire baisser la **préparation CPU du sillage**, poste dominant du budget de l'hôte
+depuis le LOD de S234 : **3,17 ms de médiane et 13,2 ms de maximum** par image, contre **0,44 ms** de
+GPU eau (S240), et 2 ms pour toute l'eau (ADR-125). Sans changer un seul bit publié.
+**Ce que la lecture fixe.** `Timeline::render_components` fait, à chaque image et pour chacun des
+**4 096 nœuds**, une boucle sur les **24 segments** du journal (trois sillages de huit tronçons),
+testant `mode.birth() < time && time < mode.forcing_end()` — soit **98 304 tests par image**. Or
+`fold` dit déjà, en commentaire et dans son code, que **naissance et durée sont les mêmes pour tous
+les nœuds** : il ne lit que la rangée 0 pour les fins. L'ensemble des segments actifs ne dépend donc
+**que du temps**, jamais du nœud. Les huit tronçons d'un sillage durent 2 s chacun : à tout instant
+**au plus un segment par sillage est en forçage**, et après 16 s **aucun**.
+**Thèse.** Un test dont le résultat est le même pour les 4 096 nœuds se calcule **une fois par
+image**, pas 4 096 fois. Hisser cette sélection hors de la boucle des nœuds ne change **aucune
+opération flottante** : les mêmes termes sont additionnés dans le même ordre. Le gain est donc
+gratuit au bit, et il croît avec le nombre de tronçons — c'est-à-dire avec la scène.
+**Critères, déclarés avant construction.** (1) **Décomposition mesurée avant toute modification** :
+où vont les 3,17 ms — repli, boucle des nœuds, boucle interne des segments, boucle de sortie — et
+combien de segments sont actifs. (2) **Au bit** : `--multi --verify` rend 0,368476 mm, `--multi
+--retour` rend 0 image différente, et les coefficients publiés du sillage sont comparés au bit avant
+et après. (3) **Coût publié** : CPU sillage médian, p95 et maximum, avant et après, même banc ;
+allocations de `update` toujours à **zéro** (S240). (4) **Loi contre le nombre de tronçons** :
+mesurée à un sillage (8 segments) et à trois (24), avant et après — la revendication porte sur la
+croissance, pas sur un point. (5) Coût (ADR-131) : techniques présentes, absentes, domaine.
+**Arrêt.** La sélection hissée, reçue au bit et chiffrée ; **ou** constat mesuré que la boucle interne
+n'est pas où va le temps — et alors la mesure désigne le vrai poste, et la session le dit. Aucun seuil
+modifié, aucune ambition touchée, aucun ADR attendu.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [x] **P2** — étude sourcée : architecture de Niagara Fluids, solveur de pression de Pyro, 2D contre
-  3D, cuisson en volumes épars ; chaque affirmation avec URL et statut.
-- [x] **P3** — confrontation à nos nombres mesurés : ADR-001, pression de δ (A273/A275), coût de δ
-  contre ADR-125 et ADR-131, volumes bornés de J2. Aucune campagne nouvelle.
-- [x] **P4** — `docs/COMPARABLES-EXTERNES.md`, file active (déclencheurs, dont la préparation CPU du
-  sillage remise en file), index.
-- [x] **P5** — rituel §6, jeton.
+- [ ] **P2** — protocole écrit ; instrument de décomposition de la préparation par image.
+- [ ] **P3** — mesure avant toute modification : où va le temps, et combien de segments sont actifs.
+- [ ] **P4** — construction : sélection des segments actifs hissée hors de la boucle des nœuds ;
+  tests d'identité au bit.
+- [ ] **P5** — réception : `--verify`, `--retour`, cadence avant/après, loi contre les tronçons, coût.
+- [ ] **P6** — rituel §6, file, feuille de route, jeton.
 
 ### Notes de reprise
 
-P2 : `docs/COMPARABLES-EXTERNES.md` — porteur **durable**, un comparable par section datee, jamais un
-document par session. Trois trouvailles qui portent : (1) chez Epic, la pression se regle par un
-**nombre d'iterations et un facteur de relaxation**, et **aucun critere de convergence n'est expose** ;
-(2) les gabarits **2D sont pour les jeux, les 3D pour les cinematiques**, et le temps reel d'un gaz 3D
-couteux passe par la **cuisson** en volume epars ; (3) l'eau peu profonde d'Epic est un **champ de
-hauteur** bon marche pour grandes surfaces — meme partage que B/W contre delta.
-Non trouve (donc inconnu, pas absent) : methode du solveur, valeur par defaut des iterations,
-precision de la grille, cout par image chiffre, toute mesure d'erreur physique.
+(S242 — vide à l'ouverture.)
 
-P3 : confrontation faite **sans campagne nouvelle** — tous les chiffres viennent de S230 (dt = 1/60 s :
-0,0842 / 0,6822 / **5,5125 ms** a 128 / 512 / 2 048 mailles) et du releve `delta_precision` de S239
-(dt = 2 ms : 0,107 / 0,602 / 4,234 / **35,51 ms** jusqu'a 8 192). Loi : quadrupler les mailles
-multiplie le temps par ~8, coherent avec O(N) x O(racine N) du gradient conjugue et avec les
-iterations mesurees (28/58/112/219/417).
-**Trouvaille de priorite** : ADR-125 donne 2 ms a toute l'eau ; a 2 048 mailles delta seul vaut
-**2,8 fois** ce budget, et a 8 192 une image en demande ~296 ms. Donc **a la taille ou A275 mord,
-le cout est deja deux a trois ordres de grandeur au-dessus** : un lot qui ne corrigerait que la
-precision a 32 768 mailles ne debloquerait rien. L'ordre de la file est a renverser.
-Cout a 32 768 mailles : **non mesure** (417 iterations mesurees, c'est tout).
+---
+
+Notes de S241, conservées pour référence immédiate :
+
+`docs/COMPARABLES-EXTERNES.md`. Chez Epic : pression reglee par un nombre d'iterations et un facteur
+de relaxation, **aucun critere de convergence expose** ; 2D pour les jeux, 3D pour les cinematiques ;
+cuisson en volume epars pour le temps reel. Confrontation : a 2 048 mailles delta seul vaut 2,8 fois
+les 2 ms d'ADR-125 ; **le cout passe devant la precision** (A276 avant A275). L320.
 
 ---
 
