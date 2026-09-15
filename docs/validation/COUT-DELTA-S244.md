@@ -73,3 +73,40 @@ milliseconde ; seul le chemin sans budget se parallélise.
 
 La décomposition publiée et la technique qu'elle désigne appliquée et reçue. **Ou** la décomposition
 publiée seule, si elle désigne un lot qui dépasse la session — nommé, avec son déclencheur.
+
+## 2. La décomposition, mesurée avant construction
+
+`delta_step_decomposition_s244`, release, un fil, domaine de S230, médiane de 21 relevés.
+
+| grille | mailles | itérations | pas mesuré | `apply` | axpy | `dir` | `dot` | `norm2` |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| 16×8 | 128 | 30 | 0,0891 ms | 0,00141 | 0,00038 | 0,00024 | 0,00019 | 0,00019 |
+| 32×16 | 512 | 61 | 0,6994 ms | 0,00528 | 0,00141 | 0,00093 | 0,00074 | 0,00074 |
+| 64×32 | 2 048 | 114 | **5,2560 ms** | **0,02172** | 0,00550 | 0,00375 | 0,00274 | 0,00284 |
+
+*(millisecondes par appel de la pass)*
+
+### 2.1 Le contrôle de somme passe
+
+| grille | écritures × itérations | réductions × itérations | prédit | mesuré | rapport |
+|---|---:|---:|---:|---:|---:|
+| 128 | 0,0612 ms | 0,0115 ms | 0,0726 | 0,0891 | **0,815** |
+| 512 | 0,4652 ms | 0,0908 ms | 0,5560 | 0,6994 | **0,795** |
+| 2 048 | **3,5308 ms** | 0,6367 ms | 4,1675 | 5,2560 | **0,793** |
+
+Le prédit rend **79 à 82 %** du pas, et le rapport est **stable sur trois tailles** — le reste est
+hors de la boucle : relances du gradient conjugué, advection, diagnostic de divergence, certificats
+d'ADR-143/144. La décomposition est donc juste, et ce qu'elle n'explique pas, elle le borne.
+
+### 2.2 Ce que la mesure désigne
+
+À 2 048 mailles, sur les 5,256 ms d'un pas :
+
+- **les écritures disjointes valent 3,53 ms — 67 %**, dont **`apply` seule 2,48 ms, soit 47 %** ;
+- les réductions valent 0,64 ms — **12 %** ;
+- le reste, hors boucle, 1,09 ms — 21 %.
+
+**La thèse du §1.3 tient** : le pas est dominé par des passes à écriture disjointe, celles dont
+ADR-146 garantit le déterminisme **inconditionnellement**. Ce n'est donc pas le nombre d'itérations
+qu'il faut attaquer en premier — il le faudra, et c'est la multigrille —, mais le coût de chaque
+itération, qui se divise sans changer un bit.

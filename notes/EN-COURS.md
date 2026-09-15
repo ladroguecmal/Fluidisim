@@ -96,7 +96,7 @@ déclencheur.
 
 - [x] **P1** — amorce, jeton, plan seuls.
 - [x] **P2** — protocole écrit ; instrument de décomposition des passes de `project`.
-- [ ] **P3** — mesure avant toute modification : coût par pass, itérations, et vérification que
+- [x] **P3** — mesure avant toute modification : coût par pass, itérations, et vérification que
   leur produit rend le pas mesuré.
 - [ ] **P4** — construction : ce que la mesure désigne ; identité au bit à tout nombre de fils.
 - [ ] **P5** — réception : `delta_filters`, `delta_precision`, suite, coût contre les fils.
@@ -108,6 +108,15 @@ P2 : protocole `docs/validation/COUT-DELTA-S244.md` + instrument
 `delta_step_decomposition_s244` (essai ignore, a lancer **en release**). Il mesure chaque pass
 isolement puis **verifie que leur somme rend le pas** — c'est le controle qui empeche d'attribuer
 un cout a la pass qu'on avait envie d'accuser.
+
+P3 : **la these tient.** A 2 048 mailles, pas mesure 5,2560 ms, 114 iterations :
+`apply` 0,02172 ms/appel -> **2,48 ms, 47 % du pas** ; axpy 0,00550 -> 0,63 ; dir 0,00375 -> 0,43.
+**Ecritures disjointes = 3,53 ms, 67 %.** Reductions 0,64 ms, **12 %**. Reste hors boucle 1,09, 21 %.
+Controle de somme : predit/mesure = 0,815 / 0,795 / 0,793 aux trois tailles — **stable**, donc la
+decomposition est juste et ce qu'elle n'explique pas, elle le borne (relances, advection,
+diagnostics, certificats).
+Ce n'est donc pas le compte d'iterations qu'il faut attaquer en premier (ce sera la multigrille)
+mais le cout de chaque iteration, qui se divise **sans changer un bit**.
 
 ---
 
