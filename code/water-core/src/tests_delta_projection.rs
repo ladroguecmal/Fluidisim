@@ -560,6 +560,87 @@ fn mobile_step_refuses_geometry_out_of_bounds_atomically_s237() {
     assert!(!v.mobile);
 }
 
+#[test]
+fn pressure_cycle_is_certified_and_accepted_only_at_physical_tolerance_s238() {
+    // Le montage qu'S237 P4b a dû abandonner : champ à divergence discrète nulle, second membre
+    // d'arrondi, pression f32 plafonnée à 3,3e-6 de résidu relatif. Le cycle doit être certifié tôt,
+    // et le pas reçu puisque la divergence projetée est au plancher.
+    let (nx, nz, dx) = (8usize, 12usize, 0.25f32);
+    let build = || {
+        let mut v = mobile_volume(nx, nz, dx, &vec![0.; nx]);
+        v.set_free_surface(&vec![2.75; nx], 2.75).unwrap();
+        let psi = |i: usize, k: usize| -0.5 * (std::f32::consts::PI * (i as f32 * dx) / 2.).sin() * (k as f32 * dx);
+        let mut u = vec![0f32; v.u.len()];
+        let mut w = vec![0f32; v.w.len()];
+        for k in 0..nz { for i in 0..=nx { u[v.fu(i, k)] = (psi(i, k + 1) - psi(i, k)) / dx; } }
+        for k in 0..=nz { for i in 0..nx { w[v.fw(i, k)] = -(psi(i + 1, k) - psi(i, k)) / dx; } }
+        v.set_velocity(&u, &w).unwrap();
+        v
+    };
+    let mut v = build();
+    PRESSURE_TRACE.with(|t| t.borrow_mut().clear());
+    let r = v.project_mobile_for_test(0.001, 2000, &Jobs).unwrap();
+    let restarts = PRESSURE_TRACE.with(|t| t.borrow().len());
+    println!("S238 cycle : {r:?} relances={restarts}");
+    assert!(r.cycle, "cycle attendu : {r:?}");
+    assert!(!r.degraded && r.divergence <= PROJECTION_DIVERGENCE_TOLERANCE, "{r:?}");
+    assert!(r.residual > 1e-6, "le critère de résidu n'est pas tenu : c'est bien l'arrêt au plancher");
+    assert!(r.iterations < 2000, "arrêt avant le plafond : {r:?}");
+    // Déterminisme : le même montage rend le même rapport et les mêmes bits.
+    let mut again = build();
+    assert_eq!(again.project_mobile_for_test(0.001, 2000, &Jobs).unwrap(), r);
+    assert!(v.p.iter().zip(&again.p).all(|(a, b)| a.to_bits() == b.to_bits()));
+}
+
+#[test]
+fn inconsistent_neumann_system_stays_degraded_s238() {
+    // Couvercle fermé (Neumann pur) et une face de mur ouverte portant un débit : la somme du second
+    // membre n'est pas nulle, le système n'a pas de solution. Ni le plafond ni un cycle ne doivent
+    // en faire un pas reçu.
+    let (nx, nz, dx) = (8usize, 4usize, 1.0f32);
+    let mut v = mobile_volume(nx, nz, dx, &vec![0.; nx]);
+    for i in 0..nx { let f = v.fw(i, nz); v.open_w[f] = 0.; }
+    for k in 0..nz { let f = v.fu(nx, k); v.open_u[f] = 1.; v.u[f] = 0.5; }
+    let r = v.step(0.002, 2000, &Jobs).unwrap();
+    println!("S238 Neumann incohérent : {r:?}");
+    assert!(r.degraded, "{r:?}");
+    assert!(r.divergence > PROJECTION_DIVERGENCE_TOLERANCE, "{r:?}");
+}
+
+#[test]
+fn projected_divergence_equals_residual_over_scale_s238() {
+    // Identité discrète sur laquelle ADR-143 fonde l'acceptation : dans toute maille fluide,
+    // `div u = (b − Ap)/scale` après correction, à l'arrondi près.
+    let (nx, nz, dx) = (8usize, 12usize, 0.25f32);
+    let mut v = mobile_volume(nx, nz, dx, &vec![0.; nx]);
+    let eta: Vec<f32> = (0..nx).map(|i| {
+        let x = (i as f32 + 0.5) * dx;
+        2.0 + 0.5 * (std::f32::consts::PI * x / 2.).cos() + 0.1 * (3. * x).sin()
+    }).collect();
+    v.set_free_surface(&eta, 2.0).unwrap();
+    let u: Vec<f32> = (0..v.u.len()).map(|f| 0.1 * ((f * 7 % 13) as f32 / 13. - 0.5)).collect();
+    let w: Vec<f32> = (0..v.w.len()).map(|f| 0.1 * ((f * 5 % 11) as f32 / 11. - 0.5)).collect();
+    v.set_velocity(&u, &w).unwrap();
+    let dt = 0.002f32;
+    // Peu d'itérations : le résidu est loin de zéro, l'identité doit tenir quand même.
+    let r = v.project_mobile_for_test(dt, 3, &Jobs).unwrap();
+    assert!(r.degraded);
+    let scale = -1025. / dt;
+    let mut ctl = Control::unlimited();
+    let mut div = vec![0f32; nx * nz];
+    v.divergence(&v.u, &v.w, &mut div, &mut ctl, Phase::Diagnostics).unwrap();
+    // `res` est le vrai résidu du `p` publié ; le mode reste lisible pour le masque fluide.
+    v.mobile = true;
+    let (mut gap, mut peak) = (0f32, 0f32);
+    for c in (0..nx * nz).filter(|c| v.wet_cell(*c)) {
+        gap = gap.max((div[c] * scale - v.res[c]).abs());
+        peak = peak.max(v.rhs[c].abs());
+    }
+    v.mobile = false;
+    println!("S238 identité : écart max {gap:e}, second membre max {peak:e}, rapport {:e}", gap / peak);
+    assert!(gap <= 64. * f32::EPSILON * peak, "écart {gap} pour un second membre {peak}");
+}
+
 /// S238 P3 — loi du plancher, famille S231 : 8×4 m, surface `4 + 0,01·sin`, un pas depuis le repos,
 /// fond plat 0,5 m, plafond large. Rend les traces de vrai résidu relatif et d'erreur inverse.
 #[test]

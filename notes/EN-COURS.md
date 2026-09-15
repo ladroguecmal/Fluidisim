@@ -95,7 +95,7 @@ pas. Aucun seuil de banc modifié.
   norme maximale — aucun nombre nouveau (voir notes).
 - [x] **P3** — mesure du plancher : erreur inverse et résidu relatif minimal contre la taille
   (16 à 256 colonnes, deux seconds membres), outil de diagnostic dans le cœur.
-- [ ] **P4** — construction : erreur inverse composante par composante, détection de stagnation,
+- [x] **P4** — construction : erreur inverse composante par composante, détection de stagnation,
   arrêt au plancher, champ de rapport ; tests (bits anciens, système sans solution, f64).
 - [ ] **P5** — réception : S237 5 cm à 128 colonnes, empreintes, `delta_precision`, coût ; ADR.
 - [ ] **P6** — rituel §6, file, feuille de route, jeton ; copies à synchroniser.
@@ -124,3 +124,13 @@ antérieure** (empreinte 64 bits, deux relances), puis acceptation ssi divergenc
 Inquiétude à tenir en P5 : à 256×128 famille S231, divergence 1,58·10⁻⁵ > 10⁻⁵ sur un pas **convergé** —
 ne change rien à la règle (critère S199 appliqué au cycle seulement) mais montre que le critère S199
 n'est pas tenu partout par le chemin existant ; à publier, pas à corriger ici.
+
+P4 : `Report.cycle`, `Report.backward_error`, `PROJECTION_DIVERGENCE_TOLERANCE = 1e-5` (S199 §5),
+empreinte FNV-1a 64 bits de `p` aux deux dernières relances ; arrêt sur retour au bit ; `degraded =
+résidu > tol && !(cycle && divergence ≤ 1e-5)`. Suite **428 réussis, 7 ignorés** (2 mesures S238
+ignorées), empreinte S232 inchangée **avant** les tests nouveaux. Tests : cycle réel (montage S237
+P4b) certifié en **9 relances / 51 itérations**, résidu 1,128·10⁻⁶, divergence 5,2·10⁻⁸, ω 2,6·10⁻⁸,
+reçu, déterministe au bit ; **Neumann incohérent** (couvercle fermé, face de mur ouverte à 0,5 m/s) :
+cycle à 280 itérations, résidu 1,0, divergence 1,0 → **dégradé**, et **ω = 9,5·10⁻¹⁷** (dérive du
+noyau qui gonfle `|A||p|`) — deuxième preuve qu'ω ne peut pas être seuil ; identité `div u =
+r/scale` : écart 0,18 pour un second membre de 2,48·10⁶, rapport **7,2·10⁻⁸** ≤ 64 ε.

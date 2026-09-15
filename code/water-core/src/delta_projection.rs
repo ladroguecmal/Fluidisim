@@ -130,6 +130,29 @@ pub struct Report {
     pub residual: f64,
     /// `max |div u|·dx / max|u|` après projection ; `0` si le champ est au repos.
     pub divergence: f64,
+    /// S238 : le gradient conjugué est revenu **au bit** à un état de pression déjà visité à une
+    /// relance antérieure — suite périodique, aucune itération ne peut plus progresser.
+    pub cycle: bool,
+    /// S238 : erreur inverse composante par composante `max_i |r_i|/(|b| + |A||p|)_i` du résultat.
+    /// Diagnostic (PRESSION-PLANCHER-S238 §2), jamais seuil.
+    pub backward_error: f64,
+}
+
+/// S238, ADR-143 : tolérance **physique** de la projection, déclarée par S199 §5 (critère 4) avant
+/// toute construction : `max|div u|·dx/max|u|`. Elle ne décide qu'à cycle certifié.
+pub const PROJECTION_DIVERGENCE_TOLERANCE: f64 = 1e-5;
+
+/// Empreinte 64 bits (FNV-1a) d'un champ f32, sur ses bits exacts.
+fn fingerprint(values: &[f32], ctl: &mut Control) -> Result<u64, Error> {
+    let mut h = 0xcbf2_9ce4_8422_2325u64;
+    for v in values {
+        ctl.poll(Phase::Pressure)?;
+        for byte in v.to_bits().to_le_bytes() {
+            h ^= byte as u64;
+            h = h.wrapping_mul(0x0100_0000_01b3);
+        }
+    }
+    Ok(h)
 }
 
 /// Le candidat. Stockage réservé auprès de l'hôte et Vec construits avant `seal()`.
@@ -528,7 +551,6 @@ impl Volume {
     /// S238 : erreur inverse composante par composante (Oettli–Prager) du vrai résidu `res`,
     /// `max_i |r_i| / (|b| + |A||p|)_i` sur les lignes du système. Diagnostic, pas seuil
     /// (PRESSION-PLANCHER-S238 §1.1). Doit être appelée quand `res = rhs − A·p`.
-    #[cfg_attr(not(test), allow(dead_code))]
     pub(crate) fn backward_error(&self) -> f32 {
         let (nx, nz, dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
         let inv = 1. / (dx * dx);
@@ -724,6 +746,10 @@ impl Volume {
         // Le plafond porte sur toutes les itérations, corrections comprises.
         // S233 : une hausse isolée du résidu arrondi n'est pas une preuve de stagnation.
         // Continuer sous le plafond global ; arrêt si CG ne peut faire aucune itération.
+        // S238 : un retour **au bit** de `p` à une relance antérieure en est une — la relance est
+        // une fonction de `p` seul, la suite est périodique et le plafond ne peut qu'être atteint.
+        let mut cycle = false;
+        let mut visited: [Option<u64>; 2] = [None, None];
         let actual_rr = loop {
             let before_iterations = it;
             // Au repos, `b` est exactement nul : aucune itération, et la correction est nulle.
@@ -781,6 +807,12 @@ impl Volume {
             if actual <= tol * b2 || it >= max_iters || it == before_iterations {
                 break actual;
             }
+            let state = fingerprint(&self.p, ctl)?;
+            if visited.contains(&Some(state)) {
+                cycle = true;
+                break actual;
+            }
+            visited = [Some(state), visited[0]];
             rr = actual;
             if jacobi {
                 self.precondition_into_dir(0., ctl)?;
@@ -847,11 +879,20 @@ impl Volume {
         }
         let mut umax = 0f32;
         for v in self.u.iter().chain(&self.w) { ctl.poll(Phase::Diagnostics)?; umax = umax.max((*v as f32).abs()); }
+        let divergence = (if umax > 0. { dmax * dx / umax } else { 0. }) as f64;
+        // S238, ADR-143 : à cycle certifié, la pression est au plancher de f32 ; le pas est reçu si la
+        // tolérance physique de S199 est tenue, dégradé sinon. Sans cycle, rien ne change.
+        let floor = cycle && divergence <= PROJECTION_DIVERGENCE_TOLERANCE;
+        // `res` porte encore le vrai résidu du `p` publié : correction et diagnostic de divergence ne
+        // touchent ni `p`, ni `rhs`, ni `res`.
+        let backward_error = self.backward_error() as f64;
         Ok(Report {
             iterations: it,
-            degraded: b2 > 0. && actual_rr > tol * b2,
+            degraded: b2 > 0. && actual_rr > tol * b2 && !floor,
             residual: residual as f64,
-            divergence: (if umax > 0. { dmax * dx / umax } else { 0. }) as f64,
+            divergence,
+            cycle,
+            backward_error,
         })
     }
 
