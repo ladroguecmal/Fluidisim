@@ -94,7 +94,7 @@ ces tailles, et alors requalification datée à provenance, jamais un seuil choi
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [ ] **P2** — lectures ciblées (`project`, `delta_precision`, S199 §5, S231) ; protocole écrit
+- [x] **P2** — lectures ciblées (`project`, `delta_precision`, S199 §5, S231) ; protocole écrit
   avant mesure : ce que la tolérance mesure, pourquoi le critère premier ne la borne pas.
 - [ ] **P3** — mesure de la loi : divergence contre taille à résidu tenu, itérations
   supplémentaires pour 10⁻⁵, et divergence atteignable au plancher f32.
