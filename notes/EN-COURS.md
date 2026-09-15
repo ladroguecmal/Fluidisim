@@ -89,7 +89,7 @@ décision, écrit tel quel.
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [ ] **P2** — étude sourcée : architecture de Niagara Fluids, solveur de pression de Pyro, 2D contre
+- [x] **P2** — étude sourcée : architecture de Niagara Fluids, solveur de pression de Pyro, 2D contre
   3D, cuisson en volumes épars ; chaque affirmation avec URL et statut.
 - [ ] **P3** — confrontation à nos nombres mesurés : ADR-001, pression de δ (A273/A275), coût de δ
   contre ADR-125 et ADR-131, volumes bornés de J2. Aucune campagne nouvelle.
@@ -99,7 +99,14 @@ décision, écrit tel quel.
 
 ### Notes de reprise
 
-(S241 — vide à l'ouverture.)
+P2 : `docs/COMPARABLES-EXTERNES.md` — porteur **durable**, un comparable par section datee, jamais un
+document par session. Trois trouvailles qui portent : (1) chez Epic, la pression se regle par un
+**nombre d'iterations et un facteur de relaxation**, et **aucun critere de convergence n'est expose** ;
+(2) les gabarits **2D sont pour les jeux, les 3D pour les cinematiques**, et le temps reel d'un gaz 3D
+couteux passe par la **cuisson** en volume epars ; (3) l'eau peu profonde d'Epic est un **champ de
+hauteur** bon marche pour grandes surfaces — meme partage que B/W contre delta.
+Non trouve (donc inconnu, pas absent) : methode du solveur, valeur par defaut des iterations,
+precision de la grille, cout par image chiffre, toute mesure d'erreur physique.
 
 ---
 
