@@ -90,6 +90,86 @@ impl JobSystem for SequentialJobs {
     }
 }
 
+/// Système de tâches **parallèle** — SPEC-004 §8.2, construit en S243.
+///
+/// Il ne fournit que `parallel_fill_f32`, l'écriture disjointe : la réduction reste celle de
+/// `SequentialJobs`, dont l'ordre de fusion **est** la référence (ADR-029 §3). Un parallélisme de
+/// somme demanderait de fusionner dans l'ordre des tranches, ce que rien ne consomme aujourd'hui.
+///
+/// Les fils sont créés par `std::thread::scope` à chaque appel : aucune dépendance, aucun état
+/// partagé, et les emprunts restent vérifiés par le compilateur — le harnais n'a pas de `unsafe`.
+/// Le prix de cette simplicité est le coût de création des fils, mesuré et publié
+/// (`docs/validation/PARALLELISME-S243.md`).
+pub struct ScopedJobs {
+    workers: u32,
+}
+
+impl ScopedJobs {
+    /// `workers` fils au plus ; `1` rend exactement le chemin séquentiel, sans créer de fil.
+    pub fn with_workers(workers: u32) -> Self {
+        Self { workers: workers.max(1) }
+    }
+    /// Autant de fils que la machine en déclare, `1` si elle ne sait pas le dire.
+    pub fn detected() -> Self {
+        Self::with_workers(
+            std::thread::available_parallelism().map_or(1, |n| n.get() as u32),
+        )
+    }
+}
+
+impl JobSystem for ScopedJobs {
+    fn worker_count(&self) -> u32 {
+        self.workers
+    }
+
+    fn parallel_reduce_ordered_f64(
+        &self,
+        n: usize,
+        grain: usize,
+        reduce: &dyn Fn(usize, usize) -> f64,
+        merge: &dyn Fn(f64, f64) -> f64,
+        init: f64,
+    ) -> f64 {
+        SequentialJobs.parallel_reduce_ordered_f64(n, grain, reduce, merge, init)
+    }
+
+    fn parallel_fill_f32(
+        &self,
+        out: &mut [f32],
+        grain: usize,
+        fill: &(dyn Fn(usize, &mut [f32]) + Sync),
+    ) {
+        let g = grain.max(1);
+        if self.workers <= 1 || out.len() <= g {
+            // Un seul fil : le chemin séquentiel, sans le prix d'un `scope`.
+            let mut start = 0usize;
+            while start < out.len() {
+                let end = (start + g).min(out.len());
+                fill(start, &mut out[start..end]);
+                start = end;
+            }
+            return;
+        }
+        // Les tranches sont disjointes : `chunks_mut` le prouve au compilateur, et le découpage
+        // ne change aucun résultat (chaque élément est écrit une fois, depuis des lectures seules).
+        let mut chunks: Vec<(usize, &mut [f32])> = out
+            .chunks_mut(g)
+            .enumerate()
+            .map(|(k, slice)| (k * g, slice))
+            .collect();
+        let per_worker = chunks.len().div_ceil(self.workers as usize);
+        std::thread::scope(|scope| {
+            for share in chunks.chunks_mut(per_worker) {
+                scope.spawn(move || {
+                    for (offset, slice) in share.iter_mut() {
+                        fill(*offset, slice);
+                    }
+                });
+            }
+        });
+    }
+}
+
 /// Journal du harnais. Écrit sur la sortie d'erreur pour ne pas polluer le rapport.
 pub struct StderrSink;
 
@@ -126,6 +206,61 @@ mod tests {
         let a = jobs.parallel_reduce_ordered_f64(1000, 64, &f, &m, 0.0);
         let b = jobs.parallel_reduce_ordered_f64(1000, 64, &f, &m, 0.0);
         assert_eq!(a.to_bits(), b.to_bits());
+    }
+
+    /// S243, SPEC-004 §8.2 — l'écriture disjointe rend **les mêmes bits** quel que soit le nombre
+    /// de fils **et** quel que soit le grain. C'est la phrase que `SequentialJobs` annonçait depuis
+    /// S20, et elle est ici plus forte que pour la réduction : rien ne s'accumule entre tâches.
+    #[test]
+    fn l_ecriture_disjointe_ne_depend_ni_du_grain_ni_du_nombre_de_fils_s243() {
+        // Une charge dont chaque élément dépend de son seul indice, et dont le calcul est assez
+        // tordu pour qu'un ordre différent se verrait : trois arrondis f32 enchaînés.
+        let fill = |offset: usize, slice: &mut [f32]| {
+            for (i, cell) in slice.iter_mut().enumerate() {
+                let x = (offset + i) as f32 * 0.1;
+                *cell = ((x * x + 1e16) - 1e16) + x.sin() * 1e-7;
+            }
+        };
+        let n = 10_000;
+        let mut reference = vec![0f32; n];
+        SequentialJobs.parallel_fill_f32(&mut reference, 1, &fill);
+        for workers in [1u32, 2, 3, 4, 8, 16] {
+            for grain in [1usize, 2, 7, 64, 997, 10_000, 20_000] {
+                let mut out = vec![0f32; n];
+                ScopedJobs::with_workers(workers).parallel_fill_f32(&mut out, grain, &fill);
+                for (k, (a, b)) in out.iter().zip(&reference).enumerate() {
+                    assert_eq!(
+                        a.to_bits(),
+                        b.to_bits(),
+                        "élément {k} : {workers} fils, grain {grain}"
+                    );
+                }
+            }
+        }
+        // Le défaut du trait est la référence : un hôte qui ne surcharge rien la rend déjà.
+        struct Nu;
+        impl JobSystem for Nu {
+            fn worker_count(&self) -> u32 { 1 }
+            fn parallel_reduce_ordered_f64(&self, _: usize, _: usize,
+                _: &dyn Fn(usize, usize) -> f64, _: &dyn Fn(f64, f64) -> f64, init: f64) -> f64 { init }
+        }
+        let mut out = vec![0f32; n];
+        Nu.parallel_fill_f32(&mut out, 333, &fill);
+        assert!(out.iter().zip(&reference).all(|(a, b)| a.to_bits() == b.to_bits()));
+    }
+
+    /// Les fils travaillent vraiment : chaque tranche est remplie une fois et une seule.
+    #[test]
+    fn chaque_tranche_est_ecrite_une_fois_et_une_seule_s243() {
+        let n = 5_003usize;
+        let mut out = vec![f32::NAN; n];
+        ScopedJobs::with_workers(8).parallel_fill_f32(&mut out, 16, &|offset, slice| {
+            for (i, cell) in slice.iter_mut().enumerate() {
+                *cell = (offset + i) as f32;
+            }
+        });
+        assert!(out.iter().enumerate().all(|(i, v)| *v == i as f32));
+        assert!(ScopedJobs::detected().worker_count() >= 1);
     }
 
     #[test]

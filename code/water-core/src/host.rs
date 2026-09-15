@@ -70,6 +70,34 @@ pub trait JobSystem {
         merge: &dyn Fn(f64, f64) -> f64,
         init: f64,
     ) -> f64;
+
+    /// `parallel_for` de SPEC-004 §8.2 — **réservé aux écritures disjointes**. Découpe `out` en
+    /// tranches de `grain` éléments et remplit chacune par `fill`, qui reçoit l'indice de son
+    /// premier élément et la tranche elle-même. Aucune tranche n'est partagée.
+    ///
+    /// **La garantie est ici plus forte que celle de la réduction.** Pour une somme, ADR-029 §3 a dû
+    /// inscrire `grain` dans le contrat : l'addition flottante n'est pas associative. Ici, aucune
+    /// accumulation ne passe d'une tâche à l'autre — chaque élément de sortie est écrit une fois,
+    /// depuis des entrées en lecture seule —, donc le résultat ne dépend **ni du grain, ni de
+    /// `worker_count`, ni de l'ordre d'exécution**. Voir `docs/validation/PARALLELISME-S243.md`.
+    ///
+    /// L'implémentation par défaut **est la référence séquentielle** : un hôte parallèle la
+    /// remplace, et le harnais vérifie qu'il rend les mêmes bits.
+    fn parallel_fill_f32(
+        &self,
+        out: &mut [f32],
+        grain: usize,
+        fill: &(dyn Fn(usize, &mut [f32]) + Sync),
+    ) {
+        let g = grain.max(1);
+        let n = out.len();
+        let mut start = 0usize;
+        while start < n {
+            let end = (start + g).min(n);
+            fill(start, &mut out[start..end]);
+            start = end;
+        }
+    }
 }
 
 /// Agrégat des services d'hôte — SPEC-004 §8.

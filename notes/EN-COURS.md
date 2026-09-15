@@ -105,7 +105,7 @@ déclencheur — et le plan le dit plutôt que de le laisser deviner.
 - [x] **P1** — amorce, jeton, plan seuls.
 - [x] **P2** — protocole écrit : ce que SPEC-004 spécifie déjà, la dissymétrie réduction/écriture
   disjointe, la forme retenue et les formes écartées.
-- [ ] **P3** — la primitive dans `JobSystem` + `SequentialJobs` (référence) + pool réel dans
+- [x] **P3** — la primitive dans `JobSystem` + `SequentialJobs` (référence) + pool réel dans
   `host_impl` (`std::thread::scope`, sans dépendance) ; assertion du harnais.
 - [ ] **P4** — premier consommateur : `render_components`, chemin rapide parallèle et verdict
   séquentiel ; identité au bit.
@@ -120,6 +120,15 @@ objet-sure, sans generique, sans allocation dans le coeur, sans unsafe dans le c
 decoupe par chunks_mut. Quatre formes ecartees et pourquoi (generique non objet-sur ; tableau de
 taches = allocation par image ; cellules atomiques = change le type publie ; fils dans le coeur =
 contredit ADR-020). Erreurs : chemin rapide parallele, **verdict sequentiel rejoue**.
+
+P3 : `JobSystem::parallel_fill_f32` avec **implementation par defaut = la reference sequentielle**
+(donc aucun implementeur existant ne casse). `ScopedJobs` dans `host_impl` : `std::thread::scope` +
+`chunks_mut`, sans dependance et sans unsafe ; a 1 fil il rend le chemin sequentiel **sans creer de
+fil**. Reduction non parallelisee : son ordre de fusion est la reference (ADR-029 §3) et rien ne la
+consomme en parallele aujourd'hui.
+Assertions du harnais vertes : identite **au bit** sur 6 nombres de fils x 7 grains (1 a 20 000),
+plus le defaut du trait ; et chaque tranche ecrite une fois et une seule sur 5 003 elements.
+Prix connu de cette forme : creation des fils a chaque appel — a mesurer en P5.
 
 ---
 
