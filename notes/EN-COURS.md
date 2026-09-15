@@ -92,7 +92,7 @@ réduite ; déferlement, mouillage du fond, air, cavité et 3D restent hors lot 
 - [x] **P1** — amorce, jeton, plan seuls.
 - [x] **P2** — lectures ciblées (ADR-122, SURFACE-LIBRE-NL-S193, API `nl_surface`, ADR-141, tests
   δ surface) ; protocole écrit : modèle discret, gardes, domaine d'amplitude, tolérances et motifs.
-- [ ] **P3** — référence : onde stationnaire HOS M=3 (bassin 8×4 m, ka 0,01/0,1/0,2), séries
+- [x] **P3** — référence : onde stationnaire HOS M=3 (bassin 8×4 m, ka 0,01/0,1/0,2), séries
   `η(x,t)` aux centres de colonnes ; recoupement sympy de l'ordre deux à petite amplitude.
 - [ ] **P4a** — cœur : géométrie mobile (ensemble fluide, `θ`, opérateur, second membre et
   correction à Dirichlet mobile) ; tests repos exact et symétrie.
@@ -112,3 +112,14 @@ P2 : protocole dans `docs/validation/SURFACE-MOBILE-S237.md` §1. Choix motivés
 `U = 2a`, `a = 0,10 m` → `U = 0,2`, harmonique de l'ordre du cm. Grilles 32/64/128 (32 mailles par
 λ au plus fin), `nz` jusqu'à 2,25 m. `θ_min = 10⁻³` avec préconditionnement diagonal du CG mobile.
 Coût estimé au plus fin : ≈18 000 mailles, une période ≈1,6 s à 1 ms.
+
+P3 (`examples/delta_mobile.rs oracle`) : ordre deux depuis le repos dérivé par sympy (script
+`standing2.py`, bloc-notes) puis écrit en forme fermée dans l'exemple : `B₂'' + Ω²B₂ = σ₂D₂ + K₂'`,
+`B₂(0) = B₂'(0) = 0` ; `ω = 3,918171`, `T = 1,603601 s`, `Ω = 5,5515` (harmonique libre),
+`B₂ = −0,7913 cos Ωt + 0,3986 cos 2ωt + 0,3927` (constante `k/4`), max|B₂| = 1,4780 sur une période
+→ `b₂` max 0,148 mm / 3,69 mm / 14,78 mm à a = 1/5/10 cm. HOS M=3, Q16 : **K64** écart relatif
+0,31 % dès a = 1 cm — plancher du symbole discret (4,8·10⁻³, A242/L277) ; **K256** : 0,034 % /
+0,823 % / 3,283 % à a = 1/5/10 cm, rapport 3,99 entre 10 et 5 cm = `(ka)²` exact → termes d'ordre
+quatre absents de l'analytique, pas défaut du véhicule. M=2 : 0,025 / 0,757 / 3,078 %. Précision
+propre (a = 10 cm, K256) : Q32 1,0·10⁻⁸ a, K512 5,3·10⁻⁵ a, dt 0,5 ms 1,6·10⁻¹¹ a. Référence
+retenue : **M=3, Q16, K256, dt 1 ms** (`REF_BAND`, `REF_LEVELS`). Volume ≤ 2·10⁻¹⁹.
