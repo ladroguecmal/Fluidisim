@@ -400,3 +400,70 @@ fn linear_surface_matches_standing_wave_and_preserves_rest_s233() {
     assert_eq!(rest.step_surface_linear(2000,100,1_000_000,&Jobs,&StillClock),Err(Error::Domain));
     assert!(rest.surface().iter().all(|v|*v==4.));
 }
+
+// ---- S237 : surface géométriquement mobile ---------------------------------------------------
+
+fn mobile_volume(nx: usize, nz: usize, dx: f32, bottom: &[f32]) -> Volume {
+    let mut arena = Arena { stats: AllocStats::default(), sealed: false };
+    Volume::configure(&mut HostServices { alloc: &mut arena, jobs: &Jobs, sink: &Jobs },
+        Domain { nx, nz, dx }, 1025., 9.81, bottom).unwrap()
+}
+
+#[test]
+fn mobile_operator_is_symmetric_with_side_and_top_ghosts_s237() {
+    // Bassin 2 × 3 m, surface ondulée qui traverse plusieurs mailles d'une colonne à l'autre.
+    let (nx, nz, dx) = (8usize, 12usize, 0.25f32);
+    let mut v = mobile_volume(nx, nz, dx, &vec![0.; nx]);
+    let eta: Vec<f32> = (0..nx).map(|i| {
+        let x = (i as f32 + 0.5) * dx;
+        2.0 + 0.5 * (std::f32::consts::PI * x / 2.).cos() + 0.1 * (3. * x).sin()
+    }).collect();
+    v.set_free_surface(&eta, 2.0).unwrap();
+    v.mobile = true;
+    let mut ctl = Control::unlimited();
+    v.rhs.fill(0.);
+    v.rhs_mobile(-1025. / 0.002, &mut ctl).unwrap();
+    let cells = nx * nz;
+    let wet: Vec<usize> = (0..cells).filter(|c| v.wet_cell(*c)).collect();
+    let side_ghosts = wet.iter().filter(|&&c| {
+        let (i, k) = (c % nx, c / nx);
+        (i > 0 && !v.wet(i - 1, k)) || (i + 1 < nx && !v.wet(i + 1, k))
+    }).count();
+    assert!(side_ghosts >= 4, "l'essai doit exercer des faces fantômes horizontales : {side_ghosts}");
+    let mut columns = vec![vec![0f32; cells]; cells];
+    for &j in &wet {
+        let mut e = vec![0f32; cells];
+        e[j] = 1.;
+        v.apply(&e, &mut columns[j], &mut ctl).unwrap();
+    }
+    for &i in &wet {
+        for &j in &wet {
+            assert_eq!(columns[j][i].to_bits(), columns[i][j].to_bits(), "A[{i}][{j}] ≠ A[{j}][{i}]");
+        }
+        assert_eq!(v.prec[i].to_bits(), (1. / columns[i][i]).to_bits(), "diagonale du préconditionneur, maille {i}");
+        assert!(columns[i][i] > 0.);
+    }
+    for c in (0..cells).filter(|c| !v.wet_cell(*c)) {
+        assert_eq!((v.rhs[c], v.prec[c]), (0., 0.));
+    }
+    v.mobile = false;
+    // Projection d'un champ quelconque sur cette surface : converge, divergence nulle au fluide.
+    let u: Vec<f32> = (0..v.u.len()).map(|f| 0.1 * ((f * 7 % 13) as f32 / 13. - 0.5)).collect();
+    let w: Vec<f32> = (0..v.w.len()).map(|f| 0.1 * ((f * 5 % 11) as f32 / 11. - 0.5)).collect();
+    v.set_velocity(&u, &w).unwrap();
+    let r = v.project_mobile_for_test(0.002, 500, &Jobs).unwrap();
+    assert!(!r.degraded && r.divergence < 1e-4, "{r:?}");
+}
+
+#[test]
+fn mobile_projection_keeps_rest_exact_at_any_level_s237() {
+    let (nx, nz, dx) = (16usize, 16usize, 0.15625f32);
+    let floor = bottom(nx, dx);
+    for rest in [2.0f32, 2.013, 1.9] {
+        let mut v = mobile_volume(nx, nz, dx, &floor);
+        v.set_free_surface(&vec![rest; nx], rest).unwrap();
+        let r = v.project_mobile_for_test(0.002, 200, &Jobs).unwrap();
+        assert_eq!(r.iterations, 0, "niveau {rest}");
+        assert!(v.pressure().iter().chain(v.velocity_u()).chain(v.velocity_w()).all(|x| x.to_bits() == 0), "niveau {rest}");
+    }
+}

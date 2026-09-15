@@ -44,6 +44,10 @@ use crate::host::{AllocError, HostServices, JobSystem, MonotonicClock};
 mod budget;
 pub use budget::{BudgetReport, Phase};
 use budget::Control;
+// S237 : surface géométriquement mobile (fonction hauteur, fluide fantôme). Voir SURFACE-MOBILE-S237.
+#[path = "delta_mobile.rs"]
+mod mobile;
+pub use mobile::SURFACE_THETA_MIN;
 
 /// Domaine local, cellules carrées. `z₀ = nz·dx` est le couvercle.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -153,6 +157,13 @@ pub struct Volume {
     eta_roundoff: Vec<f32>,
     saved_eta_roundoff: Vec<f32>,
     last_cost_ms: Option<f32>,
+    /// S237 : niveau de référence de la pression hydrostatique du mode mobile. `z₀` par défaut.
+    rest: f32,
+    /// S237 : vrai pendant un pas mobile — opérateur, second membre et correction lisent alors
+    /// la surface réelle ; faux, les chemins S199–S233 sont exécutés tels quels.
+    mobile: bool,
+    /// S237 : inverse de la diagonale de l'opérateur mobile (préconditionneur de Jacobi).
+    prec: Vec<f32>,
 }
 
 impl Volume {
@@ -201,7 +212,7 @@ impl Volume {
             .and_then(|n| nx.checked_mul(5).and_then(|x| n.checked_add(x)))
             .ok_or(Error::Domain)?;
         let bytes = floats.checked_mul(core::mem::size_of::<f32>())
-            .and_then(|n| c.checked_mul(6 * core::mem::size_of::<f32>()).and_then(|p| n.checked_add(p)))
+            .and_then(|n| c.checked_mul(7 * core::mem::size_of::<f32>()).and_then(|p| n.checked_add(p)))
             .ok_or(Error::Domain)?;
         if !(domain.z0().is_finite() && (nx as f32 * domain.dx).is_finite()) {
             return Err(Error::Domain);
@@ -238,6 +249,9 @@ impl Volume {
             eta_roundoff: vec![0.; nx],
             saved_eta_roundoff: vec![0.; nx],
             last_cost_ms: None,
+            rest: domain.z0(),
+            mobile: false,
+            prec: vec![0.0f32; nx * nz],
         };
         v.cut();
         v.seal_isolated();
@@ -458,6 +472,9 @@ impl Volume {
     /// couvercle. La valeur imposée du couvercle vit dans le second membre, pas ici :
     /// c'est ce qui garde l'opérateur symétrique, donc le gradient conjugué valide.
     fn apply(&self, p: &[f32], out: &mut [f32], ctl: &mut Control) -> Result<(), Error> {
+        if self.mobile {
+            return self.apply_mobile(p, out, ctl);
+        }
         ctl.check(Phase::Pressure)?;
         let (nx, nz, dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
         let inv = 1. / (dx * dx);
@@ -604,6 +621,11 @@ impl Volume {
         let result = self.divergence(&self.us, &self.ws, &mut rhs, ctl, Phase::Rhs);
         self.rhs = rhs;
         result?;
+        // S237 : le mode mobile assemble son second membre et son préconditionneur à part.
+        let jacobi = self.mobile;
+        if jacobi {
+            self.rhs_mobile(scale, ctl)?;
+        } else {
         for i in 0..nx {
             for k in 0..nz {
                 ctl.poll(Phase::Rhs)?;
@@ -623,13 +645,20 @@ impl Volume {
                 self.rhs[c] = b;
             }
         }
+        }
         // Gradient conjugué, départ `p = 0` : le résidu initial **est** le second membre.
         ctl.check(Phase::Pressure)?;
         for p in &mut self.p { ctl.poll(Phase::Pressure)?; *p = 0.; }
         budget::copy(&self.rhs, &mut self.res, ctl, Phase::Pressure)?;
-        budget::copy(&self.res, &mut self.dir, ctl, Phase::Pressure)?;
+        if jacobi {
+            self.precondition_into_dir(0., ctl)?;
+        } else {
+            budget::copy(&self.res, &mut self.dir, ctl, Phase::Pressure)?;
+        }
         let b2 = self.norm2(&self.rhs, jobs, ctl)?;
         let mut rr = b2;
+        // Produit `r·M⁻¹r` du préconditionneur ; sans lui, c'est exactement `rr`.
+        let mut rz = if jacobi { self.dot_prec(&self.res, jobs, ctl)? } else { b2 };
         let mut it = 0;
         let tol = 1e-12_f32;
         // À convergence récurrente, vérifier b-Ap puis redémarrer depuis le vrai résidu.
@@ -648,7 +677,7 @@ impl Volume {
                 if !(dq > 0.) {
                     break;
                 }
-                let alpha = rr / dq;
+                let alpha = rz / dq;
                 for c in 0..self.domain.cells() {
                     ctl.poll(Phase::Pressure)?;
                     if self.frac[c] > 0. {
@@ -657,12 +686,20 @@ impl Volume {
                     }
                 }
                 let rn = self.norm2(&self.res, jobs, ctl)?;
-                let beta = rn / rr;
-                for c in 0..self.domain.cells() {
-                    ctl.poll(Phase::Pressure)?;
-                    if self.frac[c] > 0. {
-                        self.dir[c] = self.res[c] + beta * self.dir[c];
+                if jacobi {
+                    let zn = self.dot_prec(&self.res, jobs, ctl)?;
+                    let beta = zn / rz;
+                    self.precondition_into_dir(beta, ctl)?;
+                    rz = zn;
+                } else {
+                    let beta = rn / rr;
+                    for c in 0..self.domain.cells() {
+                        ctl.poll(Phase::Pressure)?;
+                        if self.frac[c] > 0. {
+                            self.dir[c] = self.res[c] + beta * self.dir[c];
+                        }
                     }
+                    rz = rn;
                 }
                 rr = rn;
                 it += 1;
@@ -680,12 +717,21 @@ impl Volume {
                 break actual;
             }
             rr = actual;
-            budget::copy(&self.res, &mut self.dir, ctl, Phase::Pressure)?;
+            if jacobi {
+                self.precondition_into_dir(0., ctl)?;
+                rz = self.dot_prec(&self.res, jobs, ctl)?;
+            } else {
+                budget::copy(&self.res, &mut self.dir, ctl, Phase::Pressure)?;
+                rz = actual;
+            }
         };
         // Correction : `u = u* − (dt/ρ)·∂p/∂x`, demi-maille au couvercle.
         ctl.check(Phase::Correct)?;
         budget::copy(&self.us, &mut self.u, ctl, Phase::Correct)?;
         budget::copy(&self.ws, &mut self.w, ctl, Phase::Correct)?;
+        if jacobi {
+            self.correct_mobile(k1, ctl)?;
+        } else {
         for i in 1..nx {
             for k in 0..nz {
                 ctl.poll(Phase::Correct)?;
@@ -721,13 +767,19 @@ impl Volume {
                 }
             }
         }
+        }
         let residual = if b2 > 0. { (actual_rr / b2).sqrt() } else { 0. };
         let mut tmp = core::mem::take(&mut self.tmp);
         let result = self.divergence(&self.u, &self.w, &mut tmp, ctl, Phase::Diagnostics);
         self.tmp = tmp;
         result?;
         let mut dmax = 0f32;
-        for v in &self.tmp { ctl.poll(Phase::Diagnostics)?; dmax = dmax.max(v.abs()); }
+        for (c, v) in self.tmp.iter().enumerate() {
+            ctl.poll(Phase::Diagnostics)?;
+            // S237 : les mailles d'air portent des vitesses extrapolées, pas une contrainte.
+            if jacobi && !self.wet_cell(c) { continue; }
+            dmax = dmax.max(v.abs());
+        }
         let mut umax = 0f32;
         for v in self.u.iter().chain(&self.w) { ctl.poll(Phase::Diagnostics)?; umax = umax.max((*v as f32).abs()); }
         Ok(Report {

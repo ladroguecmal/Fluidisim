@@ -205,8 +205,9 @@ fn failed_calculation_restores_all_published_state_and_can_recover() {
 fn allocation_accounting_matches_requested_typed_storage() {
     let (v, arena) = build(32, 16, 0.25, 9.81);
     let (n, k) = (v.domain().nx, v.domain().nz);
-    // Quatre tableaux f32 par famille de faces, fond+surface, fraction ; six f32 par cellule.
-    let bytes = (4 * ((n + 1) * k + n * (k + 1)) + 5 * n + n * k) * 4 + 6 * n * k * 4;
+    // Quatre tableaux f32 par famille de faces, fond+surface, fraction ; sept f32 par cellule
+    // depuis S237 (préconditionneur du mode mobile).
+    let bytes = (4 * ((n + 1) * k + n * (k + 1)) + 5 * n + n * k) * 4 + 7 * n * k * 4;
     assert_eq!(arena.stats().persistent_bytes, bytes);
     assert_eq!(arena.stats().persistent_calls, 1);
     let mut arena = Arena {

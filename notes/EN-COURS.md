@@ -94,7 +94,7 @@ réduite ; déferlement, mouillage du fond, air, cavité et 3D restent hors lot 
   δ surface) ; protocole écrit : modèle discret, gardes, domaine d'amplitude, tolérances et motifs.
 - [x] **P3** — référence : onde stationnaire HOS M=3 (bassin 8×4 m, ka 0,01/0,1/0,2), séries
   `η(x,t)` aux centres de colonnes ; recoupement sympy de l'ordre deux à petite amplitude.
-- [ ] **P4a** — cœur : géométrie mobile (ensemble fluide, `θ`, opérateur, second membre et
+- [x] **P4a** — cœur : géométrie mobile (ensemble fluide, `θ`, opérateur, second membre et
   correction à Dirichlet mobile) ; tests repos exact et symétrie.
 - [ ] **P4b** — cœur : extrapolation, flux mouillé, advection, `step_surface_mobile` atomique ;
   tests petite amplitude contre S233, volume, changement de topologie, refus, allocation.
@@ -123,3 +123,16 @@ P3 (`examples/delta_mobile.rs oracle`) : ordre deux depuis le repos dérivé par
 quatre absents de l'analytique, pas défaut du véhicule. M=2 : 0,025 / 0,757 / 3,078 %. Précision
 propre (a = 10 cm, K256) : Q32 1,0·10⁻⁸ a, K512 5,3·10⁻⁵ a, dt 0,5 ms 1,6·10⁻¹¹ a. Référence
 retenue : **M=3, Q16, K256, dt 1 ms** (`REF_BAND`, `REF_LEVELS`). Volume ≤ 2·10⁻¹⁹.
+
+P4a : `src/delta_mobile.rs` (sous-module de `delta_projection`) — `wet`, `ghost_up`,
+`ghost_side`, `apply_mobile`, `rhs_mobile` (second membre + inverse de diagonale en une passe),
+`precondition_into_dir`, `dot_prec`, `correct_mobile`, `set_free_surface(eta, rest)`,
+`SURFACE_THETA_MIN = 1e-3`. Champs `rest`, `mobile`, `prec` (+4·nx·nz octets ; test de
+comptabilité passé de six à sept f32 par maille). `project` : branches `jacobi` pour second
+membre, CG préconditionné, correction et diagnostic (mailles fluides seules) ; chemin non mobile
+écrit pour rester au bit (`alpha = rz/dq` avec `rz ≡ rr`). Tests : **symétrie `A_ij = A_ji` au bit**
+et diagonale du préconditionneur au bit, surface ondulée 2×3 m à fantômes latéraux et verticaux
+(premier essai avec amplitude 0,3 : deux faces latérales seulement, sous l'exigence de quatre —
+amplitude portée à 0,5, exigence inchangée) ; projection d'un champ quelconque convergée,
+divergence < 1e-4 ; **repos exact au bit** à 2,0 / 2,013 / 1,9 m sur fond bosselé, zéro itération.
+Non-régression : 26 tests δ, 8 d'exécution, **empreinte S232 `0xc5ab1eadb094d058` inchangée**.
