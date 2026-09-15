@@ -89,7 +89,7 @@ avec le chiffre et la cause. Aucun seuil inventé, aucun banc modifié pour obte
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [ ] **P2** — lectures ciblées (boucle d'image de l'hôte, bancs S225/S235, I-06 et ADR-006) ;
+- [x] **P2** — lectures ciblées (boucle d'image de l'hôte, bancs S225/S235, I-06 et ADR-006) ;
   protocole écrit avant mesure, avec ce qui serait reçu et ce qui serait une requalification.
 - [ ] **P3** — instrument : allocateur compteur global du binaire de l'hôte, marquage par phase,
   sans dépendance nouvelle ; contrôle qu'il ne déplace pas `VERIFY` ni `BENCH`.
@@ -100,7 +100,15 @@ avec le chiffre et la cause. Aucun seuil inventé, aucun banc modifié pour obte
 
 ### Notes de reprise
 
-(S240 — vide à l'ouverture.)
+P2 : protocole `docs/validation/ALLOCATIONS-HOTE-S240.md`. **Base avant instrument** (`--multi
+--cadence`, 960x540, secteur, ce jour) : intervalle 4,7062 / 5,8529 / **16,4724** ms ; CPU
+3,9828 / 4,8242 / **15,7814** ms ; sillage 3,1185 / **13,5879** ; transfert 0,2209 / 1,2159 ;
+acquisition 0,0237 / 0,1035 ; presentation 0,5771 / 2,2853 ; GPU eau 0,4399 / 0,4552.
+**Le maximum vaut quatre fois la mediane et le GPU ne bouge pas** : la gigue est CPU, surtout dans
+la preparation du sillage. Attribution prevue **par phase**, pas par site d'appel (une pile
+d'appels demanderait une dependance et deplacerait la mesure) — limite declaree.
+A verifier en P3 : les tampons de millisecondes du banc grandissent pendant la mesure et faussent
+donc leur propre banc ; les reserver.
 
 ---
 
