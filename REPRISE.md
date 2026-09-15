@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-15 20:29 +02:00
+JETON            : occupé
+Battement        : 2026-09-15 20:36 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web disponibles)
-Session en cours : aucune
+Session en cours : S243 — le parallélisme déterministe : la primitive de SPEC-004 §8.2
 Dernière session : S242 — la préparation du sillage ne croît plus avec l'histoire du journal
-Session suivante : S243 — le parallélisme CPU (SPEC-004), prérequis partagé du sillage et de δ
+Session suivante : à déterminer en fin de S243
 Maillons        : 0
 
 ```

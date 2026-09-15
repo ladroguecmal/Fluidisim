@@ -58,75 +58,73 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S242 — terminée
+Session : S243 — en cours
 Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web)
-Entrée : « Continue », master propre à `39a2af8`, une seule copie, jeton libre, secteur.
-**Maillons 1** : cette session doit faire avancer une capacité.
+Entrée : « continue », master propre à `bbc57bd`, une seule copie, jeton libre, secteur, Maillons 0.
 
-**Objectif.** Faire baisser la **préparation CPU du sillage**, poste dominant du budget de l'hôte
-depuis le LOD de S234 : **3,17 ms de médiane et 13,2 ms de maximum** par image, contre **0,44 ms** de
-GPU eau (S240), et 2 ms pour toute l'eau (ADR-125). Sans changer un seul bit publié.
-**Ce que la lecture fixe.** `Timeline::render_components` fait, à chaque image et pour chacun des
-**4 096 nœuds**, une boucle sur les **24 segments** du journal (trois sillages de huit tronçons),
-testant `mode.birth() < time && time < mode.forcing_end()` — soit **98 304 tests par image**. Or
-`fold` dit déjà, en commentaire et dans son code, que **naissance et durée sont les mêmes pour tous
-les nœuds** : il ne lit que la rangée 0 pour les fins. L'ensemble des segments actifs ne dépend donc
-**que du temps**, jamais du nœud. Les huit tronçons d'un sillage durent 2 s chacun : à tout instant
-**au plus un segment par sillage est en forçage**, et après 16 s **aucun**.
-**Thèse.** Un test dont le résultat est le même pour les 4 096 nœuds se calcule **une fois par
-image**, pas 4 096 fois. Hisser cette sélection hors de la boucle des nœuds ne change **aucune
-opération flottante** : les mêmes termes sont additionnés dans le même ordre. Le gain est donc
-gratuit au bit, et il croît avec le nombre de tronçons — c'est-à-dire avec la scène.
-**Critères, déclarés avant construction.** (1) **Décomposition mesurée avant toute modification** :
-où vont les 3,17 ms — repli, boucle des nœuds, boucle interne des segments, boucle de sortie — et
-combien de segments sont actifs. (2) **Au bit** : `--multi --verify` rend 0,368476 mm, `--multi
---retour` rend 0 image différente, et les coefficients publiés du sillage sont comparés au bit avant
-et après. (3) **Coût publié** : CPU sillage médian, p95 et maximum, avant et après, même banc ;
-allocations de `update` toujours à **zéro** (S240). (4) **Loi contre le nombre de tronçons** :
-mesurée à un sillage (8 segments) et à trois (24), avant et après — la revendication porte sur la
-croissance, pas sur un point. (5) Coût (ADR-131) : techniques présentes, absentes, domaine.
-**Arrêt.** La sélection hissée, reçue au bit et chiffrée ; **ou** constat mesuré que la boucle interne
-n'est pas où va le temps — et alors la mesure désigne le vrai poste, et la session le dit. Aucun seuil
-modifié, aucune ambition touchée, aucun ADR attendu.
+**Objectif.** Donner au système un **parallélisme CPU déterministe**, et le faire consommer par le
+poste dominant du budget de l'hôte. Prérequis **partagé** : il sert la préparation du sillage
+(87 % dans `ModalPressure::sample`, S242) et le coût de δ (A276).
+**Ce que la lecture établit — et ce n'est pas un changement d'interface.** SPEC-004 §8.2 **spécifie
+déjà** `parallel_for`, « réservé aux écritures disjointes », à côté de `parallel_reduce_ordered`.
+Seul le `trait JobSystem` de Rust ne l'a jamais porté, et `SequentialJobs` écrit noir sur blanc :
+« le jour où une version parallèle existera, l'assertion *changer `worker_count` change la vitesse,
+jamais le résultat* se vérifiera contre celle-ci ». Cette session rend cette phrase vraie.
+**Contraintes constatées dans le code.** `water-core` est en `#![forbid(unsafe_code)]` : le cœur ne
+peut pas découper une tranche mutable entre fils par pointeur. `state.current` n'est **qu'un
+temporaire** de `render_components` (vérifié : aucun autre usage) — la boucle des nœuds est donc une
+**application pure** de données en lecture seule vers `out[n]`. `rustc 1.97` offre
+`as_flattened_mut`, qui donne `&mut [f32]` depuis `&mut [[f32; 4]]` **sans `unsafe`**.
+**Thèse, et la dissymétrie qui la fonde.** Pour une **réduction**, ADR-029 §3 a dû inscrire `grain`
+dans le contrat : l'addition flottante n'est pas associative, donc le découpage change la somme.
+Pour une **écriture disjointe**, il n'y a aucune accumulation d'une tâche à l'autre : chaque élément
+de sortie est écrit par exactement une tâche, depuis des entrées en lecture seule. Le résultat est
+donc indépendant du grain, du nombre de fils **et** de l'ordre — une garantie **plus forte** que
+celle de la réduction, et c'est elle qu'il faut écrire, pas la recopier.
+**Forme retenue, déclarée avant d'être écrite.** `fn parallel_fill_f32(&self, out: &mut [f32],
+grain: usize, fill: &(dyn Fn(usize, &mut [f32]) + Sync))` : objet-sûr (aucun générique), sans
+allocation dans le cœur, sur le **seul type de tampon flottant que le système publie**. L'hôte
+découpe par `chunks_mut` et exécute ; le cœur ne crée aucun fil.
+**Erreurs.** `sample` peut échouer. Le chemin parallèle est un **chemin rapide** : à la moindre
+sortie non finie, la boucle **séquentielle est rejouée** et c'est elle qui rend le verdict. Le
+variant d'erreur et son rang sont donc ceux d'avant, exactement.
+**Critères, déclarés avant construction.** (1) `SequentialJobs` reste la **référence** ; la sortie
+parallèle lui est identique **au bit** à 1, 2, 4 et 8 fils, et à plusieurs grains. (2) Assertion du
+harnais, exécutable : à `n` et `grain` égaux, le résultat ne dépend pas de `worker_count` — pour la
+nouvelle primitive **et** pour la réduction de S20, qui garde son cas. (3) Consommateur : les six
+empreintes du banc S242 et `--multi --verify` / `--multi --retour` de l'hôte, inchangés. (4) Coût
+publié contre le nombre de fils, et **le coût du chemin à un fil ne doit pas monter**. (5) Aucune
+allocation ajoutée au chemin d'image (ADR-145). (6) ADR : la primitive et son argument de
+déterminisme sont une décision.
+**Arrêt.** Primitive, pool, assertion et premier consommateur reçus ; **ou**, si le lot dépasse la
+session, la primitive et son assertion reçues seules, le consommateur déclaré en file avec son
+déclencheur — et le plan le dit plutôt que de le laisser deviner.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [ ] **P2** — protocole écrit ; instrument de décomposition de la préparation par image.
-- [x] **P3** — mesure avant toute modification : où va le temps, et combien de segments sont actifs.
-- [x] **P4** — construction : sélection des segments actifs hissée hors de la boucle des nœuds ;
-  tests d'identité au bit.
-- [x] **P5** — réception : `--verify`, `--retour`, cadence avant/après, loi contre les tronçons, coût.
-- [x] **P6** — rituel §6, file, feuille de route, jeton.
+- [ ] **P2** — protocole écrit : ce que SPEC-004 spécifie déjà, la dissymétrie réduction/écriture
+  disjointe, la forme retenue et les formes écartées.
+- [ ] **P3** — la primitive dans `JobSystem` + `SequentialJobs` (référence) + pool réel dans
+  `host_impl` (`std::thread::scope`, sans dépendance) ; assertion du harnais.
+- [ ] **P4** — premier consommateur : `render_components`, chemin rapide parallèle et verdict
+  séquentiel ; identité au bit.
+- [ ] **P5** — réception : empreintes à 1/2/4/8 fils, banc S242, hôte, coût.
+- [ ] **P6** — rituel §6, ADR, file, feuille de route, jeton.
 
 ### Notes de reprise
 
-P2 : protocole `docs/validation/PREPARATION-SILLAGE-S242.md` + banc `examples/sillage_troncons.rs`,
-qui fait varier les troncons au lieu d'instrumenter l'interieur de la fonction.
+(S243 — vide à l'ouverture.)
 
-P3 : **la these du §1.2 est refutee dans sa grandeur.** Apres forcage (aucun segment actif) :
-0,3114 / 0,3367 / 0,3709 ms a 8 / 16 / 24 segments — la boucle interne inutile vaut **3,7 us par
-segment**, soit 0,0595 ms entre 8 et 24, environ **2 %** des 3,17 ms de l'hote.
-**Le poste est `ModalPressure::sample`** : cout fixe par noeud 76 ns ; cout d'un segment actif
-**0,87 ms** sur 4 096 noeuds, soit 211 ns par noeud et par segment ; 2,60 ms sur 2,97 = **87 %**.
-**Impasse payante a connaitre** : `Complex::phase(negative(p))` n'est PAS le conjugue au bit —
-`sin_cos` reconstruit l'angle par quadrant depuis l'entier `2^30 - W`, pas par soustraction
-flottante, et a q = 0 le zero signe differe. Meme chose pour « la rotation libre est l'identite
-pendant le forcage ». Reduire les sin_cos **change des bits publies** : lot separe, avec relevé.
-**Ce qui reste exact et gratuit** : hisser la selection supprime un terme qui croit avec les
-troncons **acheves** — 3,7 us par troncon mort et par image, 0,74 ms a 200 troncons. Terme de
-croissance supprime, pas constante gagnee.
+---
 
-P4/P5 : selection hissee (part repliee d'abord, puis un troncon actif a la fois). **Variante ecartee
-par la mesure** : trier sur la rangee 0 en gardant l'imbrication — ne gagne rien, la ligne
-`modes[n*segments+j]` est deja contigue, ce n'est pas la lecture qui coute mais la boucle. Elle a
-servi de **temoin de bruit** : semantiquement neutre, elle mesure +2,6 a +7,7 % en fenetre de
-forcage, donc l'ecart de +0,5 a +2,4 % du vrai changement n'y est **pas mesurable**.
-Apres forcage : avant 0,3114 / 0,3367 / 0,3709 (monotone, +19 %) ; apres 0,293-0,308 **sans
-tendance** sur trois executions — a 24 segments, **-19 %**.
-**Six empreintes identiques** avant/apres sur quatre executions. VERIFY 0,368476 mm, RETOUR 0
-differente, suite **431 reussis / 12 ignores**, allocations update 0 et image 133 / 18 509 o.
-Hote : CPU 3,9877 ms median (S240 : 4,0367), sillage 3,1110 (3,1707) — bruit, comme attendu.
+Notes de S242, conservées pour référence immédiate :
+
+Poste dominant : `ModalPressure::sample`, 0,87 ms par troncon actif sur 4 096 noeuds, **87 %** de la
+preparation ; cout fixe par noeud 76 ns. Six empreintes du banc `sillage_troncons` :
+`0x95a8239f6f9cc139`, `0x0af49e8f4c2aa21c`, `0xe14cee491a007edc`, `0x24b5f8e1f47300d0`,
+`0x393d0b9d526daf84`, `0xdf150d01e0afe270`. Temoin de bruit : une variante neutre mesure +2,6 a
++7,7 % en fenetre de forcage. Impasse : `phase(-p)` n'est pas le conjugue **au bit** (A277).
 
 ---
 
