@@ -109,7 +109,7 @@ déclencheur — et le plan le dit plutôt que de le laisser deviner.
   `host_impl` (`std::thread::scope`, sans dépendance) ; assertion du harnais.
 - [x] **P4** — premier consommateur : `render_components`, chemin rapide parallèle et verdict
   séquentiel ; identité au bit.
-- [ ] **P5** — réception : empreintes à 1/2/4/8 fils, banc S242, hôte, coût.
+- [x] **P5** — réception : empreintes à 1/2/4/8 fils, banc S242, hôte, coût.
 - [ ] **P6** — rituel §6, ADR, file, feuille de route, jeton.
 
 ### Notes de reprise
@@ -144,6 +144,14 @@ et seul l'appelant le connait — grain = total sans forcage, donc une tranche e
 alloue**. Un vivier persistant partageant du `&mut` emprunte n'existe pas en Rust **sur** sans
 `unsafe` (c'est pourquoi rayon en contient) : `std::thread::scope` est la seule voie sure. Donc le
 chemin d'image reste **a un fil**, et le parallelisme sert les bancs hors ligne.
+
+P5 : empreintes identiques a 1/2/4/8/16 fils **et** identiques a S242 ; VERIFY 0,368476 mm ;
+RETOUR 0 differente ; suite **433 reussis / 12 ignores** (431 en S242, +2 assertions).
+Cout sur le poste dominant : 3,2719 (1 fil) -> 2,0001 (2) -> 1,2871 (4) -> **1,2432 (8)** ->
+1,7592 (16) ms. **x2,63 a huit fils** ; seize sont plus lents que huit.
+Apres forcage : 0,2973 / 0,2975 / 0,2985 / 0,2954 / 0,3443 — plat, la regression est eteinte.
+Hote a un fil : CPU 4,0581 ms (S242 : 3,9877), sillage 3,1947 (3,1110) — **sous le temoin de bruit**
+de L321. Allocations update 0, image 133 / 18 509.
 
 ---
 
