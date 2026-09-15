@@ -58,100 +58,64 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S243 — terminée
+Session : S244 — en cours
 Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web)
-Entrée : « continue », master propre à `bbc57bd`, une seule copie, jeton libre, secteur, Maillons 0.
+Entrée : « continue », master propre à `fa99085`, une seule copie, jeton libre, secteur, Maillons 0.
 
-**Objectif.** Donner au système un **parallélisme CPU déterministe**, et le faire consommer par le
-poste dominant du budget de l'hôte. Prérequis **partagé** : il sert la préparation du sillage
-(87 % dans `ModalPressure::sample`, S242) et le coût de δ (A276).
-**Ce que la lecture établit — et ce n'est pas un changement d'interface.** SPEC-004 §8.2 **spécifie
-déjà** `parallel_for`, « réservé aux écritures disjointes », à côté de `parallel_reduce_ordered`.
-Seul le `trait JobSystem` de Rust ne l'a jamais porté, et `SequentialJobs` écrit noir sur blanc :
-« le jour où une version parallèle existera, l'assertion *changer `worker_count` change la vitesse,
-jamais le résultat* se vérifiera contre celle-ci ». Cette session rend cette phrase vraie.
-**Contraintes constatées dans le code.** `water-core` est en `#![forbid(unsafe_code)]` : le cœur ne
-peut pas découper une tranche mutable entre fils par pointeur. `state.current` n'est **qu'un
-temporaire** de `render_components` (vérifié : aucun autre usage) — la boucle des nœuds est donc une
-**application pure** de données en lecture seule vers `out[n]`. `rustc 1.97` offre
-`as_flattened_mut`, qui donne `&mut [f32]` depuis `&mut [[f32; 4]]` **sans `unsafe`**.
-**Thèse, et la dissymétrie qui la fonde.** Pour une **réduction**, ADR-029 §3 a dû inscrire `grain`
-dans le contrat : l'addition flottante n'est pas associative, donc le découpage change la somme.
-Pour une **écriture disjointe**, il n'y a aucune accumulation d'une tâche à l'autre : chaque élément
-de sortie est écrit par exactement une tâche, depuis des entrées en lecture seule. Le résultat est
-donc indépendant du grain, du nombre de fils **et** de l'ordre — une garantie **plus forte** que
-celle de la réduction, et c'est elle qu'il faut écrire, pas la recopier.
-**Forme retenue, déclarée avant d'être écrite.** `fn parallel_fill_f32(&self, out: &mut [f32],
-grain: usize, fill: &(dyn Fn(usize, &mut [f32]) + Sync))` : objet-sûr (aucun générique), sans
-allocation dans le cœur, sur le **seul type de tampon flottant que le système publie**. L'hôte
-découpe par `chunks_mut` et exécute ; le cœur ne crée aucun fil.
-**Erreurs.** `sample` peut échouer. Le chemin parallèle est un **chemin rapide** : à la moindre
-sortie non finie, la boucle **séquentielle est rejouée** et c'est elle qui rend le verdict. Le
-variant d'erreur et son rang sont donc ceux d'avant, exactement.
-**Critères, déclarés avant construction.** (1) `SequentialJobs` reste la **référence** ; la sortie
-parallèle lui est identique **au bit** à 1, 2, 4 et 8 fils, et à plusieurs grains. (2) Assertion du
-harnais, exécutable : à `n` et `grain` égaux, le résultat ne dépend pas de `worker_count` — pour la
-nouvelle primitive **et** pour la réduction de S20, qui garde son cas. (3) Consommateur : les six
-empreintes du banc S242 et `--multi --verify` / `--multi --retour` de l'hôte, inchangés. (4) Coût
-publié contre le nombre de fils, et **le coût du chemin à un fil ne doit pas monter**. (5) Aucune
-allocation ajoutée au chemin d'image (ADR-145). (6) ADR : la primitive et son argument de
-déterminisme sont une décision.
-**Arrêt.** Primitive, pool, assertion et premier consommateur reçus ; **ou**, si le lot dépasse la
-session, la primitive et son assertion reçues seules, le consommateur déclaré en file avec son
-déclencheur — et le plan le dit plutôt que de le laisser deviner.
+**Objectif.** **A276** : commencer à réduire le coût de δ, qui dépasse le profil de deux à trois
+ordres de grandeur. Mesuré, nos propres bancs : **5,5125 ms par pas à 2 048 mailles** (S230, un pas
+= une image) contre **2 ms pour toute l'eau** (ADR-125) — δ seul vaut 2,8 fois le budget entier.
+**Ce que la lecture fixe.** Aucune technique de coût n'a jamais été appliquée à δ : présentes —
+Jacobi diagonal, f32 ; absentes — GPU, parallélisme, multigrille, factorisation incomplète,
+itérations fixes, cuisson (ADR-131). Une itération du gradient conjugué fait environ **trois passes
+d'écriture** en O(N) — `apply`, l'axpy `p`/`res`, la mise à jour de `dir` — et **deux réductions**,
+qui passent déjà par `parallel_reduce_ordered_f64` mais sur un hôte séquentiel. Le compte
+d'itérations croît en `O(√N)` (28/58/112/219/417 mesurés en S239).
+**Ce que S243 met à disposition, et ce qu'il ne met pas.** `parallel_fill_f32` existe, sa garantie de
+bits est **inconditionnelle** (ADR-146), et les bancs de δ sont **hors ligne** : ni la latence ni
+l'allocation n'y mordent, contrairement au chemin d'image. Le budget coopératif (I-05) est un état
+partagé qu'on ne parallélise pas — mais `poll` et `budget::copy` **traitent déjà le cas sans budget
+à part**, et c'est la voie déjà tracée.
+**Thèse — et elle est réfutable.** Les passes d'écriture disjointe de δ dominent son pas, et les
+paralléliser sur le chemin sans budget le réduit **sans changer un bit** (les réductions, seules
+sensibles à l'ordre, restent séquentielles). **Si la mesure dit que le temps est ailleurs — dans les
+réductions, dans le nombre d'itérations —, alors la technique à appliquer n'est pas celle-là**, et la
+session le dira au lieu de forcer la thèse. S242 a déjà vécu ce cas.
+**Critères, déclarés avant construction.** (1) **Décomposition mesurée avant toute modification** :
+coût par pass (`apply`, axpy, `dir`, réductions) et compte d'itérations ; leur produit doit rendre le
+pas mesuré, sinon la décomposition est fausse et on le dit. (2) **Au bit** : empreinte `delta_filters`
+`0xfb12b2092df4ee6d`, `delta_precision` et la suite complète inchangés — à **tout** nombre de fils.
+(3) Coût publié contre le nombre de fils, sur les grilles de S230. (4) **Le chemin coopératif et le
+chemin à un fil ne doivent pas être ralentis** ; aucune allocation ajoutée. (5) Coût (ADR-131) :
+techniques présentes, absentes, domaine — et le facteur qui reste à trouver, écrit en clair.
+**Arrêt.** La décomposition publiée et la technique qu'elle désigne appliquée et reçue ; **ou** la
+décomposition publiée seule si elle désigne un lot qui dépasse la session — nommé, avec son
+déclencheur.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [x] **P2** — protocole écrit : ce que SPEC-004 spécifie déjà, la dissymétrie réduction/écriture
-  disjointe, la forme retenue et les formes écartées.
-- [x] **P3** — la primitive dans `JobSystem` + `SequentialJobs` (référence) + pool réel dans
-  `host_impl` (`std::thread::scope`, sans dépendance) ; assertion du harnais.
-- [x] **P4** — premier consommateur : `render_components`, chemin rapide parallèle et verdict
-  séquentiel ; identité au bit.
-- [x] **P5** — réception : empreintes à 1/2/4/8 fils, banc S242, hôte, coût.
-- [x] **P6** — rituel §6, ADR, file, feuille de route, jeton.
+- [ ] **P2** — protocole écrit ; instrument de décomposition des passes de `project`.
+- [ ] **P3** — mesure avant toute modification : coût par pass, itérations, et vérification que
+  leur produit rend le pas mesuré.
+- [ ] **P4** — construction : ce que la mesure désigne ; identité au bit à tout nombre de fils.
+- [ ] **P5** — réception : `delta_filters`, `delta_precision`, suite, coût contre les fils.
+- [ ] **P6** — rituel §6, file, feuille de route, jeton.
 
 ### Notes de reprise
 
-P2 : protocole `docs/validation/PARALLELISME-S243.md`. Forme retenue
-`parallel_fill_f32(&self, out: &mut [f32], grain, fill: &(dyn Fn(usize, &mut [f32]) + Sync))` :
-objet-sure, sans generique, sans allocation dans le coeur, sans unsafe dans le coeur — l'**hote**
-decoupe par chunks_mut. Quatre formes ecartees et pourquoi (generique non objet-sur ; tableau de
-taches = allocation par image ; cellules atomiques = change le type publie ; fils dans le coeur =
-contredit ADR-020). Erreurs : chemin rapide parallele, **verdict sequentiel rejoue**.
+(S244 — vide à l'ouverture.)
 
-P3 : `JobSystem::parallel_fill_f32` avec **implementation par defaut = la reference sequentielle**
-(donc aucun implementeur existant ne casse). `ScopedJobs` dans `host_impl` : `std::thread::scope` +
-`chunks_mut`, sans dependance et sans unsafe ; a 1 fil il rend le chemin sequentiel **sans creer de
-fil**. Reduction non parallelisee : son ordre de fusion est la reference (ADR-029 §3) et rien ne la
-consomme en parallele aujourd'hui.
-Assertions du harnais vertes : identite **au bit** sur 6 nombres de fils x 7 grains (1 a 20 000),
-plus le defaut du trait ; et chaque tranche ecrite une fois et une seule sur 5 003 elements.
-Prix connu de cette forme : creation des fils a chaque appel — a mesurer en P5.
+---
 
-P4 : `render_components` prend `jobs` ; chemin rapide par `parallel_fill_f32` sur
-`out.as_flattened_mut()`, accumulateur dans les deux premiers f32 du quadruplet (memes f32 que
-`current`, donc memes bits) ; `render_sequential` conserve la boucle d'origine comme **reference de
-bits et seul porteur du verdict**. Appelants mis a jour : 3 bancs, les essais, l'hote. Attention :
-`Prepared::render_components` est une **autre** methode, a 4 arguments — deux corrections.
-**Deux defauts attrapes par les criteres (4) et (5), et corriges :** (a) `ScopedJobs` construisait un
-`Vec` de tranches par appel -> **50 allocations par image** dans `update`, ce qu'ADR-145 interdit ;
-remplace par une portion contigue par fil, multiple du grain, sans tampon. (b) Lancer des fils quand
-aucun troncon ne force faisait **monter** 0,30 ms a 0,76 ms : le grain encode le travail par element
-et seul l'appelant le connait — grain = total sans forcage, donc une tranche et aucun fil.
-**Le blocage reste entier et il est nomme** : creer les fils par appel coute ~67 us piece **et
-alloue**. Un vivier persistant partageant du `&mut` emprunte n'existe pas en Rust **sur** sans
-`unsafe` (c'est pourquoi rayon en contient) : `std::thread::scope` est la seule voie sure. Donc le
-chemin d'image reste **a un fil**, et le parallelisme sert les bancs hors ligne.
+Notes de S243, conservées pour référence immédiate :
 
-P5 : empreintes identiques a 1/2/4/8/16 fils **et** identiques a S242 ; VERIFY 0,368476 mm ;
-RETOUR 0 differente ; suite **433 reussis / 12 ignores** (431 en S242, +2 assertions).
-Cout sur le poste dominant : 3,2719 (1 fil) -> 2,0001 (2) -> 1,2871 (4) -> **1,2432 (8)** ->
-1,7592 (16) ms. **x2,63 a huit fils** ; seize sont plus lents que huit.
-Apres forcage : 0,2973 / 0,2975 / 0,2985 / 0,2954 / 0,3443 — plat, la regression est eteinte.
-Hote a un fil : CPU 4,0581 ms (S242 : 3,9877), sillage 3,1947 (3,1110) — **sous le temoin de bruit**
-de L321. Allocations update 0, image 133 / 18 509.
+`parallel_fill_f32(out: &mut [f32], grain, fill: &(dyn Fn(usize, &mut [f32]) + Sync))`, defaut du
+trait = reference sequentielle ; `ScopedJobs` dans le harnais (thread::scope, portion contigue par
+fil, aucun tampon). Garantie **inconditionnelle** : ni grain, ni fils, ni ordre (ADR-146).
+x2,63 a huit fils sur la preparation du sillage ; **16 fils sont plus lents que 8**.
+Un fil coute ~67 us a creer **et alloue** : le chemin d'image reste a un fil (A278).
+Le grain encode le travail par element et seul l'appelant le connait.
 
 ---
 

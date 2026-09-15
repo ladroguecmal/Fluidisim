@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-15 23:49 +02:00
+JETON            : occupé
+Battement        : 2026-09-15 23:53 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web disponibles)
-Session en cours : aucune
+Session en cours : S244 — A276 : le premier lot de coût de δ
 Dernière session : S243 — le parallélisme déterministe existe (ADR-146) ; le chemin d'image attend
-Session suivante : S244 — A276 : le premier lot de coût de δ, sur la combinaison des techniques
+Session suivante : à déterminer en fin de S244
 Maillons        : 0
 
 ```
