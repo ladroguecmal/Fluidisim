@@ -5302,3 +5302,32 @@ Deux choses généralisent.
 
 Voir ALLOCATIONS-HOTE-S240, ADR-145, amendement daté sous I-06. Parent de L318 : la portée d'une
 règle s'écrit avec elle, et une couche qu'elle n'a jamais visitée n'est pas une couche conforme.
+
+## L320 — Ordonner les obstacles avant d'en lever un, et lire un comparable sur les questions qu'il ne pose pas
+
+*(S241)* La file portait A275 — « f32 ne tient plus la tolérance à 32 768 mailles » — comme prérequis
+du passage à la 3D. Confrontés à nos propres mesures de coût, déjà publiées et jamais rapprochées de
+celle-là : **à 2 048 mailles, δ seul vaut 2,8 fois les 2 ms qu'ADR-125 donne à toute l'eau**, et à
+8 192 mailles une image en demande ≈ 296 ms. À la taille où A275 mord, le coût est **deux à trois
+ordres de grandeur** au-dessus du budget. Un lot qui n'aurait corrigé que la précision n'aurait rien
+débloqué.
+
+Deux choses généralisent.
+
+1. **Un obstacle mesuré ne devient un prérequis qu'après comparaison aux autres obstacles du même
+   chemin.** Les deux chiffres étaient dans le dépôt depuis des sessions ; aucun ne manquait. Ce qui
+   manquait était le rapprochement — et il ne coûte pas une campagne, il coûte de mettre deux
+   tableaux côte à côte. **Avant d'écrire « prérequis » dans une file, vérifier ce qui bloque
+   *avant*.**
+2. **Un comparable externe s'exploite sur ce qu'il ne fait pas.** Un moteur du commerce règle sa
+   pression par un nombre d'itérations et un facteur de relaxation, et n'expose **aucun critère de
+   convergence** : il ne pose pas la question à laquelle deux de nos sessions viennent de répondre.
+   Cela ne dit pas que notre critère est faux — cela dit que **notre classe de fidélité est un choix**,
+   payé en coût, et que les itérations fixes sont le levier bon marché que nos propres ADR interdisent
+   aujourd'hui. Un comparable qui ne mesure pas son erreur ne peut rien nous apprendre sur la
+   précision ; il nous apprend beaucoup sur les compromis que l'on peut acheter.
+
+Et une règle de tenue, corollaire de la 1 : **ce qu'un fournisseur publie est une affirmation, pas une
+mesure de ce projet.** Chaque ligne de `docs/COMPARABLES-EXTERNES.md` porte son URL et son statut —
+documenté, déduit, non trouvé — et aucun nombre lu ailleurs n'entre ici comme seuil (I-14, REPRISE §2).
+Parente de L318 : la portée d'un nombre s'écrit avec lui.

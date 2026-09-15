@@ -146,8 +146,12 @@ reçu seulement à la divergence de S199 ; 5 cm **reçu à 128 colonnes** (0,25 
 plancher d'ADR-143 arrête le solveur à 1,34·10⁻⁵ et le pas est déclaré dégradé. Réception S237/S238
 conservée pour +0,9 % de coût médian ; [preuve](validation/TOLERANCE-PRESSION-S239.md). Restent :
 surface non graphe (déferlement), mouillage du fond, bords ouverts, plancher des lignes à fantôme
-(A274), grandes tailles en f32 (A275, prérequis de la 3D), cavité et couplage de
-l'écart à B+W. Part d'un impact que W ne porte pas nommée en S203 (énergie hors ondes, cavité, gerbe).
+(A274), grandes tailles en f32 (A275), cavité et couplage de
+l'écart à B+W. **S241 : l'ordre des obstacles du passage à la 3D est renversé** — à 2 048 mailles
+δ seul coûte 5,5125 ms par image contre les 2 ms qu'ADR-125 donne à toute l'eau, et ≈ 296 ms par
+image à 8 192 mailles ; le **coût** passe donc devant la précision (A276 avant A275), et aucune
+technique de coût n'a encore été tentée sur δ (ADR-131).
+[Confrontation](COMPARABLES-EXTERNES.md) §3. Part d'un impact que W ne porte pas nommée en S203 (énergie hors ondes, cavité, gerbe).
 
 *Bancs* : **B3** (famille de δ) quand un candidat atteint ses critères ou qu'un second existe ;
 **B4** (régime perturbatif, volets restants) sur les cas livrés ; **B5** (blocs épars) quand

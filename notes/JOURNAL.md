@@ -12381,3 +12381,69 @@ réduite, aucun arbitrage utilisateur requis.
 I-03 (`--retour` rend 0 image différente au bit, et le test du tampon compare au bit). Maillons 0 :
 la boucle d'image de l'hôte n'alloue plus rien à nous, les bancs de J1-bis la consomment, et les
 nombres sont publiés.
+
+## S241 — 2026-09-15 — Le mur n'était pas celui que la file désignait
+
+**Entrée.** « Continue, j'ai découvert un projet nommé Niagara Pyro, cela peut être intéressant à
+étudier. » Master propre à `dc0a236`, une seule copie, jeton libre, secteur, **accès web disponible**.
+Claude Code, Opus 5. Plan `5b40431`, étude `2428ea5`, confrontation `b8cd648`, file `59ea89f`.
+
+**Ce que la demande a déplacé.** La suite désignée par S240 — la préparation CPU du sillage — repart
+en file avec son déclencheur, lot prêt : la demande de l'utilisateur prime (REPRISE §6.7).
+
+**La règle posée avant de lire quoi que ce soit.** Une documentation d'éditeur est une **affirmation
+de fournisseur**, pas une mesure de ce projet. REPRISE §2, I-14 et ADR-028 s'appliquent : Epic n'est
+pas un interlocuteur, c'est une publication. Chaque ligne de
+[COMPARABLES-EXTERNES](../docs/COMPARABLES-EXTERNES.md) porte son URL et son statut — **documenté,
+déduit, non trouvé** —, et **aucun nombre lu ailleurs n'entre ici comme seuil**. Le fichier est un
+porteur **durable** : un comparable par section datée, jamais un document par session (L137).
+
+**Ce que Niagara Fluids fait, documenté.** Gabarits **2D pour les jeux, 3D pour les cinématiques** ;
+la grille 3D coûte, et le temps réel d'un gaz 3D coûteux passe par la **cuisson** en texture de volume
+épars ; la pression se règle par un **nombre d'itérations** et un **facteur de relaxation**, et
+**aucun critère de convergence n'est exposé** ; l'eau des grandes surfaces est un **champ de hauteur**.
+Non trouvé, donc inconnu et écrit tel quel : la méthode du solveur, les valeurs par défaut, la
+précision de la grille, un coût par image chiffré, et **toute mesure d'erreur physique**.
+
+**Trois confrontations, et une qui renverse un ordre.**
+
+1. **L'architecture a un témoin indépendant.** Champ de hauteur bon marché partout, grille chère
+   réservée à des volumes bornés : c'est le partage de ADR-001 entre B/W et δ, atteint sans lien.
+   Corroboration, pas preuve ; ADR-001 était acté.
+2. **La question qu'ils ne posent pas.** Deux de nos sessions viennent de construire une acceptation
+   sur un résidu **et** une tolérance physique (ADR-143, ADR-144) ; eux comptent des itérations. Cela
+   ne rend pas notre critère faux — δ est reçu contre un oracle HOS à **0,252 %**, et leur
+   documentation ne confronte leur simulation à rien. Cela situe notre classe de fidélité comme un
+   **choix payé en coût**, et nomme le levier bon marché qu'ADR-144 interdit aujourd'hui.
+3. **L'ordre des obstacles était faux.** Nos propres chiffres, déjà publiés et jamais rapprochés :
+   **5,5125 ms par pas à 2 048 mailles** (S230, un pas = une image) contre **2 ms par image pour toute
+   l'eau** (ADR-125) — soit **2,8 fois le budget pour δ seul** — et **35,51 ms** à 8 192 mailles pour
+   2 ms simulées, soit ≈ 296 ms par image. La loi est régulière : quadrupler les mailles multiplie le
+   temps par ≈ 8, ce qu'on attend d'un gradient conjugué et que confirment les itérations mesurées.
+   **À la taille où A275 mord, le coût est déjà deux à trois ordres de grandeur au-dessus du budget.**
+   Un lot qui n'aurait corrigé que la précision n'aurait rien débloqué.
+
+**Ce que ces chiffres ne disent pas.** δ n'a reçu **aucune** technique de coût : présentes — Jacobi
+diagonal, f32 ; absentes — GPU, parallélisme, multigrille, factorisation incomplète, itérations fixes,
+cuisson. ADR-131 : un dépassement qualifie cette implémentation, jamais la fonctionnalité, et il
+s'éprouve sur la **combinaison**, dont aucune pièce n'a été tentée.
+
+**Ce que le comparable n'autorise pas.** Aucune réduction d'ambition — « Epic réserve la 3D aux
+cinématiques » n'est pas un argument, ADR-127 exige une décision de l'utilisateur. Aucun nombre
+importé. Aucune conclusion sur leur fidélité, qu'ils ne mesurent pas.
+
+**Non fait, et assumé.** Aucun code, aucune mesure nouvelle : la confrontation n'utilise que des
+chiffres déjà publiés, comme le plan l'avait déclaré. Le coût à 32 768 mailles reste **non mesuré**.
+Aucune source d'Epic n'a été lue au-delà de sa documentation publique — ni code, ni essai.
+
+**Suite.** **Maillons passe à 1** : cette session n'a reçu **aucune capacité**. Elle a produit une
+connaissance et une correction de priorité, ce que la règle compte exactement pour ce que c'est.
+**S242 : J1-bis — la préparation CPU du sillage**, la désignation de S240 rendue à sa place : 3,17 ms
+de médiane et 13,2 ms de maximum contre 0,44 ms de GPU eau, instrument de S240 déjà en place. **A276**
+— le premier lot de coût de δ, sur la combinaison des techniques — garde son déclencheur et passe
+devant A275, qui se remesurera après lui. V, B2, bathymétrie et angles rasants gardent les leurs.
+
+**Rituel.** L320 ; aucun ADR — rien n'a été décidé ici ; file active (A275 réordonnée, **A276**
+ouverte, J1-bis reporté), feuille de route, index, `COMPARABLES-EXTERNES` créé. Invariants relus :
+**I-14** (aucune valeur externe n'est devenue une provenance) et le §5 de REPRISE (aucun fait externe
+transformé en hypothèse acquise). Maillons 1.

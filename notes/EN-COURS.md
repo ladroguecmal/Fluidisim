@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S241 — en cours
+Session : S241 — terminée
 Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et **accès web**)
 Entrée : « Continue, j'ai découvert un projet nommé Niagara Pyro, cela peut être intéressant à
 étudier. » Master propre à `dc0a236`, une seule copie, jeton libre, secteur.
@@ -95,7 +95,7 @@ décision, écrit tel quel.
   contre ADR-125 et ADR-131, volumes bornés de J2. Aucune campagne nouvelle.
 - [x] **P4** — `docs/COMPARABLES-EXTERNES.md`, file active (déclencheurs, dont la préparation CPU du
   sillage remise en file), index.
-- [ ] **P5** — rituel §6, jeton.
+- [x] **P5** — rituel §6, jeton.
 
 ### Notes de reprise
 

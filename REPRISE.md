@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-15 19:57 +02:00
+JETON            : libre
+Battement        : 2026-09-15 20:03 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web disponibles)
-Session en cours : S241 — Niagara Fluids comme comparable externe (demande utilisateur)
-Dernière session : S240 — I-06 mesurée pour l'hôte graphique, boucle d'image sans allocation (ADR-145)
-Session suivante : à déterminer en fin de S241
-Maillons        : 0
+Session en cours : aucune
+Dernière session : S241 — Niagara Fluids lu comme comparable ; l'ordre des obstacles de la 3D renversé
+Session suivante : S242 — J1-bis : la préparation CPU du sillage, poste dominant du budget
+Maillons        : 1
 
 ```
 
@@ -77,8 +77,10 @@ Ne pas relire le journal, les leçons ou tous les ADR intégralement à chaque r
 
 État à S240 : B/W et un afficheur existent ; scène multi-sources dessinée, visibilité au bit, composée
 et admise par le cœur (ADR-142) ; **la boucle d'image de l'hôte n'alloue rien** pour le code du projet,
-la pile verrouillée 133 fois par image, constantes (ADR-145). Le poste dominant du budget est désormais
-la **préparation CPU du sillage** (3,17 ms médian contre 0,44 ms de GPU eau). δ MAC x-z possède une **surface géométriquement mobile** reçue contre
+la pile verrouillée 133 fois par image, constantes (ADR-145). Le poste dominant du budget de l'hôte est désormais
+la **préparation CPU du sillage** (3,17 ms médian contre 0,44 ms de GPU eau). Côté δ, le coût mesuré
+dépasse le profil de deux à trois ordres de grandeur dès 2 048 mailles, **aucune technique de coût
+n'ayant été tentée** (A276, [comparables](docs/COMPARABLES-EXTERNES.md)). δ MAC x-z possède une **surface géométriquement mobile** reçue contre
 l'onde stationnaire HOS d'ordre 3 (surface graphe, sans 3D, cavité, scénario B3 ni I-05 complet) ; sa
 pression f32 s'arrête à sa précision représentable (ADR-143) et **tient la tolérance physique de S199
 ou se déclare dégradée** (ADR-144) — tenue jusqu'à 8 192 mailles, refusée à 32 768 (A275), plancher
