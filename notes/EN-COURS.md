@@ -103,7 +103,7 @@ déclencheur — et le plan le dit plutôt que de le laisser deviner.
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [ ] **P2** — protocole écrit : ce que SPEC-004 spécifie déjà, la dissymétrie réduction/écriture
+- [x] **P2** — protocole écrit : ce que SPEC-004 spécifie déjà, la dissymétrie réduction/écriture
   disjointe, la forme retenue et les formes écartées.
 - [ ] **P3** — la primitive dans `JobSystem` + `SequentialJobs` (référence) + pool réel dans
   `host_impl` (`std::thread::scope`, sans dépendance) ; assertion du harnais.
@@ -114,7 +114,12 @@ déclencheur — et le plan le dit plutôt que de le laisser deviner.
 
 ### Notes de reprise
 
-(S243 — vide à l'ouverture.)
+P2 : protocole `docs/validation/PARALLELISME-S243.md`. Forme retenue
+`parallel_fill_f32(&self, out: &mut [f32], grain, fill: &(dyn Fn(usize, &mut [f32]) + Sync))` :
+objet-sure, sans generique, sans allocation dans le coeur, sans unsafe dans le coeur — l'**hote**
+decoupe par chunks_mut. Quatre formes ecartees et pourquoi (generique non objet-sur ; tableau de
+taches = allocation par image ; cellules atomiques = change le type publie ; fils dans le coeur =
+contredit ADR-020). Erreurs : chemin rapide parallele, **verdict sequentiel rejoue**.
 
 ---
 
