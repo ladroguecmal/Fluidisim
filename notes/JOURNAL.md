@@ -12511,3 +12511,73 @@ bathymétrie et angles rasants gardent les leurs.
 empreintes identiques, `--retour` à 0 différence) et **I-06** (`update` toujours à zéro allocation).
 **Maillons 0** : la préparation cesse de croître avec l'histoire du journal, le chemin d'image la
 consomme, la preuve est publiée.
+
+## S243 — 2026-09-15 — La moitié qui manquait au contrat, et la porte qu'elle n'ouvre pas encore
+
+**Entrée.** « continue », master propre à `bbc57bd`, une seule copie, jeton libre, secteur,
+Maillons 0. Claude Code, Opus 5. Plan `c85116b`, protocole `cca55ed`, primitive `2f45a4b`,
+consommateur `7065780`, réception `2965bbf`.
+
+**Capacité reçue.** Le système a un **parallélisme déterministe** : `parallel_fill_f32`, la seconde
+primitive que SPEC-004 §8.2 spécifiait depuis l'origine et que personne n'avait écrite. Consommateur :
+`Timeline::render_components`, exercé par le banc `sillage_troncons` et par l'hôte ; preuve
+[PARALLELISME-S243](../docs/validation/PARALLELISME-S243.md), décision
+[ADR-146](../docs/adr/ADR-146-l-ecriture-disjointe-est-inconditionnellement-deterministe.md).
+**×2,63 à huit fils** sur le poste dominant : 3,2719 ms deviennent 1,2432.
+
+**Ce n'était pas un changement d'interface.** SPEC-004 §8.2 énonce deux primitives ; seule la
+réduction existait. Et `SequentialJobs` portait depuis S20 la phrase à rendre vraie : *le jour où une
+version parallèle existera, l'assertion « changer `worker_count` change la vitesse, jamais le
+résultat » se vérifiera contre celle-ci.* Elle est désormais un test.
+
+**La dissymétrie, qui est le fond de l'affaire.** Pour une **réduction**, ADR-029 §3 a dû inscrire
+`grain` dans le contrat : l'addition flottante n'est pas associative, donc deux découpages donnent
+deux sommes, et la garantie s'énonce *à `n` et `grain` égaux*. Pour une **écriture disjointe**, rien
+ne s'accumule d'une tâche à l'autre — chaque élément est écrit une fois, depuis des lectures seules —
+donc le résultat ne dépend **ni du grain, ni du nombre de fils, ni de l'ordre**. Garantie
+**inconditionnelle**, donc plus forte. Elle se démontre ; la recopier de sa voisine aurait imposé une
+contrainte inutile, ou promis faux.
+
+**Ce que les contraintes du langage ont dicté.** `water-core` est en `#![forbid(unsafe_code)]` : le
+cœur ne peut pas découper une tranche mutable entre fils. C'est donc **l'hôte** qui découpe
+(`chunks_mut`) et exécute (`std::thread::scope`), sans dépendance et sans `unsafe` non plus. Le cœur
+publie sa vue plate par `as_flattened_mut`, et l'accumulateur d'un nœud vit dans les deux premiers
+`f32` de son quadruplet — les mêmes `f32` que l'ancien champ `current`, donc les mêmes bits.
+
+**Deux défauts attrapés par les critères déclarés, et c'est l'enseignement du lot.** Le protocole
+exigeait, avant tout code, que le chemin à un fil ne soit pas ralenti et qu'aucune allocation ne soit
+ajoutée au chemin d'image. (1) L'hôte construisait un tampon de tranches par appel : `update` passait
+de **0 à 50 allocations par image**, effaçant ce que S240 venait de recevoir. (2) Lancer des fils là
+où il n'y avait que 0,30 ms de travail **faisait monter** ce travail à 0,76 ms. Le banc principal,
+lui, allait très bien. Corrigés : portion contiguë par fil sans tampon ; et **le grain encode le
+travail par élément, que seul l'appelant connaît** — 76 ns par nœud à vide, 211 ns de plus par
+tronçon actif, contre ≈ 67 µs pour créer un fil.
+
+**Réception.** Six empreintes identiques à **1, 2, 4, 8 et 16 fils** et identiques à celles de S242 ;
+`VERIFY` **0,368476 mm** ; `RETOUR` **0 image différente** ; l'oracle de chemin indépendant
+`timeline_matches_prepared_across_instants_and_jumps_s213` vert ; suite **433 réussis, 0 échec,
+12 ignorés**. Après forçage, le coût reste plat à tout nombre de fils : la régression est éteinte.
+
+**Ce qui n'est pas gagné, et il faut le dire net.** **Le chemin d'image reste à un fil.** Créer les
+fils par appel coûte ≈ 67 µs pièce **et alloue**, ce qu'ADR-145 interdit à 60 Hz. Un vivier
+persistant supprimerait les deux — mais partager une tranche `&mut` empruntée avec des fils qui
+survivent à l'appel **n'existe pas en Rust sûr** : `std::thread::scope` est la seule voie sans
+`unsafe`, et elle rejoint avant de rendre la main. Le parallélisme sert donc aujourd'hui **les bancs
+hors ligne**. Sur l'hôte, CPU 4,0581 ms contre 3,9877 en S242 — sous le témoin de bruit de L321.
+
+**Non fait.** Un seul consommateur. La réduction reste séquentielle. Une machine, un système, 1 à
+16 fils. δ a `jobs` en main mais ses boucles chaudes interrogent un budget coopératif (I-05) à chaque
+poll : parallèliser un compteur partagé est un autre problème.
+
+**Suite.** **A278** — autoriser `unsafe` dans l'hôte pour un vivier persistant — est une **décision**,
+pas un réglage, et elle n'est pas prise ici. Mais elle n'est pas le chemin le plus court : le coût de
+δ (**A276**) se mesure sur des **bancs**, où le parallélisme fonctionne déjà, et δ dépasse le profil
+de deux à trois ordres de grandeur dès 2 048 mailles. **S244 : A276, le premier lot de coût de δ**,
+sur la combinaison des techniques (ADR-131), en commençant par ses passes à écritures disjointes.
+A277, A278, angles rasants, V, B2 et bathymétrie gardent leurs déclencheurs.
+
+**Rituel.** L322 ; ADR-146 ; file active (J1-bis, **A278** ouverte, A276 outillée), feuille de route,
+index. Invariants relus : **I-03** (six empreintes identiques à cinq nombres de fils — c'est
+l'invariant même du lot) et **I-06** (`update` toujours à zéro allocation, après l'avoir cassé et
+réparé). Maillons 0 : la primitive existe, un consommateur réel la consomme, la preuve est publiée —
+et ce qu'elle n'atteint pas encore est écrit plutôt que passé sous silence.

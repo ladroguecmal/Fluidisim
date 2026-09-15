@@ -40,6 +40,7 @@
 - [Tolérance physique de la pression de δ : loi contre la taille, lignes franches et lignes à fantôme](validation/TOLERANCE-PRESSION-S239.md).
 - [Allocations par image de l'hôte GPU : I-06 mesurée, et un suspect de gigue disculpé](validation/ALLOCATIONS-HOTE-S240.md).
 - [Préparation CPU du sillage : la loi contre les tronçons, et le poste dominant](validation/PREPARATION-SILLAGE-S242.md).
+- [Parallélisme déterministe : la primitive d'écriture disjointe et son prix](validation/PARALLELISME-S243.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).
@@ -201,6 +202,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-143](adr/ADR-143-la-pression-f32-converge-a-sa-precision-representable.md) | La pression f32 de δ s'arrête à sa précision représentable, acceptée à la tolérance physique S199 |
 | [ADR-144](adr/ADR-144-la-tolerance-physique-est-une-condition-d-acceptation.md) | La tolérance physique de la projection est une condition d'acceptation, sur les lignes franches |
 | [ADR-145](adr/ADR-145-i-06-pour-l-hote-graphique.md) | I-06 pour l'hôte graphique : tenue par notre code, comptée et publiée pour la pile |
+| [ADR-146](adr/ADR-146-l-ecriture-disjointe-est-inconditionnellement-deterministe.md) | L'écriture disjointe est inconditionnellement déterministe, et c'est elle qu'on parallélise |
 
 ## Travail et historique
 

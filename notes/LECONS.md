@@ -5359,3 +5359,34 @@ Et une mise en garde de même famille que L318 : le raccourci « `phase(−p)` e
 `phase(p)` » est vrai **en valeur** et faux **au bit** — l'angle est reconstruit par quadrant depuis
 l'entier, et le zéro signé diffère à l'origine. Une identité mathématique n'est pas une identité
 flottante ; la vérifier coûte moins cher que d'expliquer un hash qui bouge.
+
+## L322 — Un critère de réception qui ne peut pas mordre ne sert à rien ; ceux-là ont mordu deux fois
+
+*(S243)* Le protocole du lot exigeait, avant toute écriture de code, que **le chemin à un fil ne soit
+pas ralenti** (4) et qu'**aucune allocation ne soit ajoutée au chemin d'image** (5). Les deux ont
+attrapé un défaut que la mesure « le parallélisme va-t-il plus vite ? » aurait laissé passer :
+
+1. l'hôte parallèle construisait un tampon de tranches à chaque appel — `update` passait de **0 à 50
+   allocations par image**, effaçant ce que S240 venait de recevoir ;
+2. lancer des fils là où il n'y avait que 0,30 ms de travail faisait **monter** ce travail à 0,76 ms.
+   Le banc principal, lui, allait bien : le gain de ×2,6 sur la fenêtre chargée aurait masqué la
+   perte sur la fenêtre légère.
+
+Trois choses généralisent.
+
+1. **Écrire les critères qui peuvent faire échouer, pas ceux qui vont réussir.** Un critère qui ne
+   peut que confirmer la thèse ne mesure rien. Ceux-ci portaient sur ce que le changement risquait
+   d'abîmer ailleurs — et c'est exactement là qu'il a mordu.
+2. **Un paramètre de découpage encode le travail par élément, et seul l'appelant le connaît.** Le
+   remède au second défaut n'est pas un seuil réglé après coup mais la conséquence d'un rapport
+   mesuré : 76 ns par nœud sans travail, 211 ns de plus par tronçon actif, contre ≈ 67 µs pour créer
+   un fil. Découper sans regarder son propre travail est un ralentissement, pas une optimisation.
+3. **Une garantie de déterminisme se démontre, elle ne se recopie pas de sa voisine.** Pour une
+   somme, le découpage change le résultat — l'addition flottante n'est pas associative — et le
+   contrat doit fixer le grain. Pour une écriture disjointe, rien ne s'accumule entre tâches : la
+   garantie est **inconditionnelle**, et plus forte. Deux primitives voisines, deux énoncés
+   différents ; les confondre aurait fait porter au projet une contrainte inutile, ou pire, une
+   promesse fausse.
+
+Voir PARALLELISME-S243, ADR-146. Famille de L321 : ce qu'on ne peut pas voir échouer, on ne l'a pas
+mesuré.

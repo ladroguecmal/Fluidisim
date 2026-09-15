@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S243 — en cours
+Session : S243 — terminée
 Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web)
 Entrée : « continue », master propre à `bbc57bd`, une seule copie, jeton libre, secteur, Maillons 0.
 
@@ -110,7 +110,7 @@ déclencheur — et le plan le dit plutôt que de le laisser deviner.
 - [x] **P4** — premier consommateur : `render_components`, chemin rapide parallèle et verdict
   séquentiel ; identité au bit.
 - [x] **P5** — réception : empreintes à 1/2/4/8 fils, banc S242, hôte, coût.
-- [ ] **P6** — rituel §6, ADR, file, feuille de route, jeton.
+- [x] **P6** — rituel §6, ADR, file, feuille de route, jeton.
 
 ### Notes de reprise
 
