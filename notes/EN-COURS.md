@@ -94,9 +94,9 @@ modifié, aucune ambition touchée, aucun ADR attendu.
 - [x] **P1** — amorce, jeton, plan seuls.
 - [ ] **P2** — protocole écrit ; instrument de décomposition de la préparation par image.
 - [x] **P3** — mesure avant toute modification : où va le temps, et combien de segments sont actifs.
-- [ ] **P4** — construction : sélection des segments actifs hissée hors de la boucle des nœuds ;
+- [x] **P4** — construction : sélection des segments actifs hissée hors de la boucle des nœuds ;
   tests d'identité au bit.
-- [ ] **P5** — réception : `--verify`, `--retour`, cadence avant/après, loi contre les tronçons, coût.
+- [x] **P5** — réception : `--verify`, `--retour`, cadence avant/après, loi contre les tronçons, coût.
 - [ ] **P6** — rituel §6, file, feuille de route, jeton.
 
 ### Notes de reprise
@@ -116,6 +116,17 @@ pendant le forcage ». Reduire les sin_cos **change des bits publies** : lot sep
 **Ce qui reste exact et gratuit** : hisser la selection supprime un terme qui croit avec les
 troncons **acheves** — 3,7 us par troncon mort et par image, 0,74 ms a 200 troncons. Terme de
 croissance supprime, pas constante gagnee.
+
+P4/P5 : selection hissee (part repliee d'abord, puis un troncon actif a la fois). **Variante ecartee
+par la mesure** : trier sur la rangee 0 en gardant l'imbrication — ne gagne rien, la ligne
+`modes[n*segments+j]` est deja contigue, ce n'est pas la lecture qui coute mais la boucle. Elle a
+servi de **temoin de bruit** : semantiquement neutre, elle mesure +2,6 a +7,7 % en fenetre de
+forcage, donc l'ecart de +0,5 a +2,4 % du vrai changement n'y est **pas mesurable**.
+Apres forcage : avant 0,3114 / 0,3367 / 0,3709 (monotone, +19 %) ; apres 0,293-0,308 **sans
+tendance** sur trois executions — a 24 segments, **-19 %**.
+**Six empreintes identiques** avant/apres sur quatre executions. VERIFY 0,368476 mm, RETOUR 0
+differente, suite **431 reussis / 12 ignores**, allocations update 0 et image 133 / 18 509 o.
+Hote : CPU 3,9877 ms median (S240 : 4,0367), sillage 3,1110 (3,1707) — bruit, comme attendu.
 
 ---
 

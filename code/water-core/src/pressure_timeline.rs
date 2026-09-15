@@ -228,20 +228,34 @@ impl<'a> Timeline<'a> {
         let (nodes, modes, segments, reference) =
             (&mut *self.nodes, &*self.modes, self.segments, self.reference);
         // Tronçons en cours : nés et non achevés à `time` (les futurs rendent zéro).
-        for (n, state) in nodes.iter_mut().enumerate() {
+        // S242 : la part repliée d'abord, puis **un tronçon à la fois**. Naissance et fin ne
+        // dépendent que du segment — `fold` ne lit déjà que la rangée 0 pour les fins —, donc le
+        // tri se fait **une fois par image** et la boucle des nœuds n'est parcourue que pour les
+        // tronçons qui contribuent. Les mêmes termes sont ajoutés au même accumulateur dans le
+        // même ordre, `j` croissant : le résultat est identique **au bit**, et le coût cesse de
+        // croître avec les tronçons achevés — c'est-à-dire avec l'histoire du journal.
+        for state in nodes.iter_mut() {
             let theta = modal_pressure::phase(state.frequency, time.0 - reference.0, 1_000_000);
             let rot = Complex::phase(theta);
-            let mut eta = state.folded_eta.scale(rot.re).add(state.folded_u.scale(rot.im));
-            for j in 0..segments {
-                let mode = modes[n * segments + j].as_ref().expect("mode construit");
-                if mode.birth() < time && time < mode.forcing_end() {
-                    eta = eta.add(mode.sample(time).map_err(calc)?.eta);
-                }
+            state.current = state.folded_eta.scale(rot.re).add(state.folded_u.scale(rot.im));
+        }
+        for j in 0..segments {
+            // Rangée 0 : `modes[0 · segments + j]`, naissance et fin communes à tous les nœuds.
+            let row = modes[j].as_ref().expect("mode construit");
+            if !(row.birth() < time && time < row.forcing_end()) {
+                continue;
             }
-            if !eta.re.is_finite() || !eta.im.is_finite() {
+            for (n, state) in nodes.iter_mut().enumerate() {
+                let mode = modes[n * segments + j].as_ref().expect("mode construit");
+                state.current = state.current.add(mode.sample(time).map_err(calc)?.eta);
+            }
+        }
+        // Le verdict de finitude est celui d'avant ; seul l'instant où il est rendu change, et il
+        // ne porte aucun indice de nœud. `out` n'est écrit qu'après, donc intact à tout refus.
+        for state in nodes.iter() {
+            if !state.current.re.is_finite() || !state.current.im.is_finite() {
                 return Err(calc(ModalError::NonFinite));
             }
-            state.current = eta;
         }
         for (state, dst) in nodes.iter().zip(out.iter_mut()) {
             let (sn, c) = PhaseQ32::from_distance(state.turns[0], origin[0])

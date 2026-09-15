@@ -120,3 +120,85 @@ journal. Un jeu qui accumule des sillages paie **3,7 µs par tronçon mort et pa
 toujours. À 200 tronçons — une partie ordinaire —, c'est **0,74 ms par image**, plus du tiers du
 budget de toute l'eau, pour des termes qui ne contribuent à rien. Ce n'est pas une constante gagnée,
 c'est un terme de croissance supprimé.
+
+## 3. La construction
+
+La sélection des tronçons est **hissée hors de la boucle des nœuds** : la part repliée est posée
+d'abord pour tous les nœuds, puis chaque tronçon **actif** — et lui seul — parcourt les nœuds. Les
+mêmes termes sont ajoutés au même accumulateur dans le même ordre, `j` croissant ; aucune opération
+flottante ne change.
+
+Deux points de contrat, écrits parce qu'ils se voient :
+
+- **Le verdict de finitude est celui d'avant**, seul l'instant où il est rendu change. L'erreur ne
+  porte aucun indice de nœud, et `out` n'est écrit qu'après : il reste intact à tout refus, comme
+  l'exige `refusals_leave_output_and_state_usable_s213`.
+- Une variante a été construite puis **écartée par la mesure** : trier sur la rangée 0 en gardant
+  l'imbrication d'origine. Elle ne gagne rien — la ligne `modes[n·segments + j]` est déjà contiguë,
+  et ce n'est pas la lecture qui coûte, c'est la boucle. Elle a servi de **témoin** (§4.2).
+
+## 4. Réception
+
+### 4.1 Au bit
+
+Les **six empreintes** des 4 096 coefficients publiés, sur les deux fenêtres et les trois tailles de
+journal, sont identiques avant et après, et sur les trois exécutions :
+`0x95a8239f6f9cc139`, `0x0af49e8f4c2aa21c`, `0xe14cee491a007edc`, `0x24b5f8e1f47300d0`,
+`0x393d0b9d526daf84`, `0xdf150d01e0afe270`.
+
+| contrôle | résultat |
+|---|---|
+| `--multi --verify`, 23 âges | **0,368476 mm** à 12 s avec 4 impacts — valeur de S235 |
+| `--multi --retour` | 150 images cachées, 31 comparées, **0 différente au bit** |
+| suite `code/` complète | **431 réussis, 0 échec, 12 ignorés** |
+| chemin indépendant | `timeline_matches_prepared_across_instants_and_jumps_s213` passe — c'est lui qui aurait vu une sélection fausse |
+| allocations de l'hôte | `update` **0**, image 133 / 18 509 o — inchangé (ADR-145) |
+
+### 4.2 Coût, et ce que le témoin permet d'affirmer
+
+**Après le forçage — aucun tronçon actif, tout le travail de tri était perdu :**
+
+| segments | avant | après (trois exécutions) |
+|---:|---:|---|
+| 8 | 0,3114 ms | 0,3070 / 0,3022 / 0,2931 |
+| 16 | 0,3367 ms | 0,2960 / 0,2972 / 0,3077 |
+| 24 | **0,3709 ms** | **0,2979 / 0,3000 / 0,2986** |
+
+Avant, la médiane **croissait de 19 % entre 8 et 24 segments**, régulièrement. Après, elle tient
+entre 0,293 et 0,308 ms **sans aucune tendance** : le terme de croissance a disparu, et à 24 segments
+le coût tombe de **19 %**.
+
+**Pendant le forçage**, médianes après : 1,21 / 2,11 / 3,04 ms contre 1,199 / 2,100 / 2,968 avant,
+soit **+0,5 à +2,4 %**. Ce n'est pas un écart mesurable : la variante écartée du §3, **sémantiquement
+neutre**, a rendu 1,2579 / 2,2630 / 3,0462 sur le même banc, soit **+2,6 à +7,7 %** sur la même base.
+Le bruit d'exécution de cette fenêtre dépasse donc l'écart qu'on aurait voulu attribuer au
+changement, et ce document ne le lui attribue pas.
+
+**Sur l'hôte** (`--multi --cadence`, scène S235 en forçage, donc la fenêtre neutre) : CPU médian
+**3,9877 ms** contre 4,0367 en S240, sillage **3,1110** contre 3,1707 — dans le bruit, comme attendu.
+
+### 4.3 Ce qui est réellement gagné
+
+Pas une constante : **un terme de croissance**. La préparation ne dépend plus du nombre de tronçons
+**achevés**, c'est-à-dire de l'histoire du journal. Au tarif mesuré avant — **3,7 µs par tronçon mort
+et par image** —, une partie ordinaire qui aurait accumulé 200 tronçons payait **0,74 ms par image**,
+plus du tiers du budget de toute l'eau (ADR-125), pour des termes qui ne contribuent à rien. Elle
+paie désormais **zéro**.
+
+### 4.4 Coût de la mesure (ADR-131)
+
+- **Techniques présentes** : repli des tronçons achevés (S213), modes préconstruits, publication
+  rebasée, **sélection hissée** (S242).
+- **Techniques absentes** : parallélisme CPU — ce projet n'a **aucun** fil d'exécution, `JobSystem`
+  n'expose qu'une réduction ordonnée —, SIMD explicite, LOD temporel, mutualisation entre journaux,
+  réduction du nombre de `sin_cos` (§2.3 : elle change des bits).
+- **Domaine** : fixture S212/S235, recette 64×128 (4 096 nœuds), 60 images/s simulées, release, un
+  fil, une machine ; ni GPU, ni transfert, ni LOD spatial.
+
+### 4.5 Ce qui n'est pas reçu
+
+- **Le poste dominant reste entier.** `ModalPressure::sample` vaut toujours 0,87 ms par tronçon actif
+  et par image, 87 % de la préparation en forçage. Rien ici ne l'entame.
+- Un seul nombre de nœuds (4 096), une seule recette, une seule machine, un seul `dt`.
+- La fenêtre de forçage est trop bruitée sur ce banc pour y décider d'un écart de quelques pour cent :
+  un banc qui voudrait trancher là devra d'abord réduire son propre bruit.
