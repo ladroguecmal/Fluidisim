@@ -58,71 +58,56 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S240 — terminée
-Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy et GPU local disponibles)
-Entrée : « Continue », master propre à `45d24a5`, une seule copie, jeton libre, secteur.
-Hôte GPU vérifié sur cette machine : RTX 5070 Laptop, DX12, `--smoke` 120 images, code 0.
+Session : S241 — en cours
+Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et **accès web**)
+Entrée : « Continue, j'ai découvert un projet nommé Niagara Pyro, cela peut être intéressant à
+étudier. » Master propre à `dc0a236`, une seule copie, jeton libre, secteur.
 
-**Objectif.** **I-06 pour la pile graphique** : que les allocations par image de l'hôte soient
-**mesurées** — et donc que l'invariant soit tenu, ou que sa portée soit requalifiée avec provenance
-pour cette couche, comme ADR-139 l'a fait pour I-08 et V.
-**Ce que la lecture fixe.** I-06 dit « aucune allocation à l'exécution » et le cœur la reçoit par
-allocateur compteur (`Arena`, refus après `seal`). Pour l'hôte, elle n'a **jamais été mesurée** :
-[CADENCE-HOTE-S225](docs/validation/CADENCE-HOTE-S225.md) §Suite l'écrit noir sur blanc (« les
-allocations de la pile graphique, I-06, toujours non reçues ») et la feuille de route la garde dans
-les travaux nécessaires de J1 (ADR-131 D6). Le budget de 2 ms (ADR-125) et **A265** — le recouvrement
-CPU/GPU varie avec la charge sans que la mesure l'explique — donnent le consommateur : une allocation
-par image est un suspect direct de gigue.
-**Thèse.** Ce qui n'est pas compté n'est pas tenu. Un allocateur compteur global dans le binaire de
-l'hôte, sans dépendance nouvelle, sépare **ce qui est à nous** de **ce que la pile impose**. Le
-premier se supprime ou se justifie ; le second se chiffre, et décide si I-06 vaut pour cette couche.
-**Critères, déclarés avant construction.** (1) Allocations par image en régime — nombre et octets —,
-les dix premières images écartées comme le banc le fait déjà. (2) **Attribution** par phase :
-préparation CPU du sillage, planification de la grille, encodage et soumission GPU, acquisition de
-la surface, boucle d'événements. (3) Séparation à nous / à la pile, par site nommé. (4) **La mesure
-ne déplace pas les chiffres publiés** : `VERIFY` à 3 mm et `BENCH` GPU rejoués avec et sans
-l'instrument, écart publié. (5) Ce qui est à nous est supprimé, ou justifié par écrit ; re-mesure.
-(6) Coût (ADR-131) : techniques présentes, absentes, domaine.
-**Arrêt.** I-06 reçue pour l'hôte, ou **requalification datée** de sa portée pour la pile graphique,
-avec le chiffre et la cause. Aucun seuil inventé, aucun banc modifié pour obtenir du vert.
+**Objectif.** Étudier **Niagara Fluids** d'Unreal Engine — dont *Pyro*, son solveur de gaz 3D — comme
+**comparable externe**, et en tirer ce qui s'applique à ce projet : ce qu'il corrobore, ce qu'il
+n'autorise pas, et quel lot il désigne. La demande de l'utilisateur prime sur la suite automatique
+(REPRISE §6.7) : la préparation CPU du sillage, prévue en S241, repart en file avec son déclencheur.
+**Ce que la lecture fixe, et la règle qui gouverne ce lot.** Une documentation d'éditeur est une
+**affirmation de fournisseur**, pas une mesure de ce projet. REPRISE §2 interdit de transformer un
+fait externe inconnu en hypothèse acquise, I-14 exige une provenance pour toute valeur, et ADR-028
+rappelle qu'il n'y a pas d'autres équipes : Epic n'est pas un interlocuteur, c'est une publication.
+**Aucun nombre lu chez un éditeur n'entre dans ce dépôt comme seuil.** Chaque affirmation portera son
+URL et son statut : documenté, déduit, ou non trouvé.
+**Thèse.** Un comparable ne se juge pas sur ce qu'il fait mieux, mais sur **les questions qu'il ne
+pose pas**. Si un moteur qui expédie du fluide temps réel ne demande jamais la convergence de sa
+pression, cela ne dit pas que notre critère est faux — cela situe la classe de fidélité que δ vise,
+et cela dit ce que coûtera d'y arriver.
+**Critères, déclarés avant l'étude.** (1) Toute affirmation externe porte sa source et son statut.
+(2) Confrontation **à nos propres nombres déjà mesurés** — architecture ADR-001, pression de δ
+(S238/S239), coût (S235/S240), volumes bornés de J2 — sans nouvelle campagne. (3) Ce qui est
+corroboré, ce qui est contredit et ce qui reste indécidable sont **séparés**. (4) Sortie : un
+document de comparables **durable** (pas un par session), des points de file datés avec déclencheur,
+et l'index. (5) Aucun ADR, aucun seuil, aucune ambition modifiée : ADR-127 n'est pas rouvert.
+**Arrêt.** Le document écrit et la file à jour ; ou constat que le comparable ne change aucune
+décision, écrit tel quel.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [x] **P2** — lectures ciblées (boucle d'image de l'hôte, bancs S225/S235, I-06 et ADR-006) ;
-  protocole écrit avant mesure, avec ce qui serait reçu et ce qui serait une requalification.
-- [x] **P3** — instrument : allocateur compteur global du binaire de l'hôte, marquage par phase,
-  sans dépendance nouvelle ; contrôle qu'il ne déplace pas `VERIFY` ni `BENCH`.
-- [x] **P4** — mesure : allocations par image en régime, taille et attribution, scène S235 à
-  960×540, dans le champ et hors champ.
-- [x] **P5** — ce qui est à nous : supprimé ou justifié, puis re-mesuré ; verdict.
-- [x] **P6** — rituel §6, file, feuille de route, jeton.
+- [ ] **P2** — étude sourcée : architecture de Niagara Fluids, solveur de pression de Pyro, 2D contre
+  3D, cuisson en volumes épars ; chaque affirmation avec URL et statut.
+- [ ] **P3** — confrontation à nos nombres mesurés : ADR-001, pression de δ (A273/A275), coût de δ
+  contre ADR-125 et ADR-131, volumes bornés de J2. Aucune campagne nouvelle.
+- [ ] **P4** — `docs/COMPARABLES-EXTERNES.md`, file active (déclencheurs, dont la préparation CPU du
+  sillage remise en file), index.
+- [ ] **P5** — rituel §6, jeton.
 
 ### Notes de reprise
 
-P2 : protocole `docs/validation/ALLOCATIONS-HOTE-S240.md`. **Base avant instrument** (`--multi
---cadence`, 960x540, secteur, ce jour) : intervalle 4,7062 / 5,8529 / **16,4724** ms ; CPU
-3,9828 / 4,8242 / **15,7814** ms ; sillage 3,1185 / **13,5879** ; transfert 0,2209 / 1,2159 ;
-acquisition 0,0237 / 0,1035 ; presentation 0,5771 / 2,2853 ; GPU eau 0,4399 / 0,4552.
-**Le maximum vaut quatre fois la mediane et le GPU ne bouge pas** : la gigue est CPU, surtout dans
-la preparation du sillage. Attribution prevue **par phase**, pas par site d'appel (une pile
-d'appels demanderait une dependance et deplacerait la mesure) — limite declaree.
-A verifier en P3 : les tampons de millisecondes du banc grandissent pendant la mesure et faussent
-donc leur propre banc ; les reserver.
+(S241 — vide à l'ouverture.)
 
-P4/P5 : 134 allocations et 30 541 octets par image, **mediane = p95 = maximum** sur 590 images et
-trois executions ; une seule a nous (12 032 o = le `Vec` de `lod::footprint`, 2.(481+271) points).
-CPU 4,02 ms median pour 16,3 ms max sans que le compte bouge d'une unite : **l'allocation n'est pas
-la cause de la gigue d'A265**. Hors champ : 104 / 28 471 o, la notre reste. Apres correction (tampon
-garde) : update **0 / 0**, image **133 / 18 509 o** ; VERIFY 0,368476 mm, RETOUR 0 difference au bit,
-tests viewer 12. Cout de l'instrument : au plus 0,16 ms de CPU median, du meme ordre que la
-dispersion entre deux executions instrumentees (0,12 ms) — non separable du bruit, et dit tel quel.
-ADR-145 et amendement date sous I-06.
+---
 
-P3 : `viewer/src/counting.rs` (allocateur compteur global, aucune dependance nouvelle), bornes de
-phase dans `redraw` aux memes points que les millisecondes de S225, tampons du banc reserves a
-800 images. `--multi --verify` : **0,368 mm a 12 s, 4 impacts** — valeur exacte de S235, l'instrument
-ne deplace pas la physique.
+Notes de S240, conservées pour référence immédiate :
+
+134 allocations et 30 541 octets par image avant correction, mediane = p95 = maximum ; une seule a
+nous (12 032 o, le `Vec` de `lod::footprint`). Apres correction : update 0, image 133 / 18 509 o.
+L'allocation n'est pas la cause de la gigue d'A265. ADR-145, amendement date sous I-06.
 
 ---
 

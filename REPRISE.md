@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-15 19:49 +02:00
-Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy et GPU local disponibles)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-15 19:57 +02:00
+Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web disponibles)
+Session en cours : S241 — Niagara Fluids comme comparable externe (demande utilisateur)
 Dernière session : S240 — I-06 mesurée pour l'hôte graphique, boucle d'image sans allocation (ADR-145)
-Session suivante : S241 — J1-bis : la préparation CPU du sillage, poste dominant du budget
+Session suivante : à déterminer en fin de S241
 Maillons        : 0
 
 ```
