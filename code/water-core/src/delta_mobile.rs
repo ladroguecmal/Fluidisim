@@ -49,6 +49,16 @@ impl Volume {
         (1. / theta, self.rho * self.g_eff * (zc - self.rest))
     }
 
+    /// `1/θ` seul, pour le diagnostic d'erreur inverse (S238).
+    #[cfg_attr(not(test), allow(dead_code))]
+    pub(super) fn ghost_up_inv(&self, i: usize, k: usize) -> f32 {
+        self.ghost_up(i, k).0
+    }
+    #[cfg_attr(not(test), allow(dead_code))]
+    pub(super) fn ghost_side_inv(&self, i: usize, k: usize, j: usize) -> f32 {
+        self.ghost_side(i, k, j).0
+    }
+
     /// `L p` du mode mobile : Neumann au fond et aux murs, Dirichlet fantôme à la surface. Les
     /// mailles d'air et solides rendent zéro.
     pub(super) fn apply_mobile(&self, p: &[f32], out: &mut [f32], ctl: &mut Control) -> Result<(), Error> {

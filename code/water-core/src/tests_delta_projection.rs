@@ -560,6 +560,61 @@ fn mobile_step_refuses_geometry_out_of_bounds_atomically_s237() {
     assert!(!v.mobile);
 }
 
+/// S238 P3 — loi du plancher, famille S231 : 8×4 m, surface `4 + 0,01·sin`, un pas depuis le repos,
+/// fond plat 0,5 m, plafond large. Rend les traces de vrai résidu relatif et d'erreur inverse.
+#[test]
+#[ignore = "mesure S238, lancée explicitement"]
+fn pressure_floor_law_s231_family_s238() {
+    for nx in [16usize, 32, 64, 128, 256] {
+        let nz = nx / 2;
+        let dx = 8. / nx as f32;
+        let mut v = mobile_volume(nx, nz, dx, &vec![0.5; nx]);
+        let eta: Vec<f32> = (0..nx).map(|i| 4. + 0.01 * (std::f32::consts::TAU * (i as f32 + 0.5) / nx as f32).sin()).collect();
+        v.set_surface(&eta).unwrap();
+        PRESSURE_TRACE.with(|t| t.borrow_mut().clear());
+        let r = v.step(0.002, 20_000, &Jobs).unwrap();
+        let trace = PRESSURE_TRACE.with(|t| t.borrow().clone());
+        let (min_rel, at) = trace.iter().fold((f64::INFINITY, 0usize), |(m, a), (_, rel, _)| if *rel < m { (*rel, a + 1) } else { (m, a + 1) });
+        let first_under = trace.iter().position(|(_, rel, _)| *rel <= 1e-6);
+        let last = trace.last().copied().unwrap();
+        println!(
+            "PLANCHER_S231 nx={nx} mailles={} relances={} residu_min={min_rel:.4e} (relance {at}) premier_sous_1e-6={first_under:?} dernier: it={} rel={:.4e} omega={:.3e} | rapport it={} degrade={} residu={:.4e} divergence={:.3e}",
+            nx * nz, trace.len(), last.0, last.1, last.2, r.iterations, r.degraded, r.residual, r.divergence
+        );
+        let head: Vec<String> = trace.iter().take(6).map(|(it, rel, om)| format!("{it}:{rel:.3e}/{om:.2e}")).collect();
+        println!("  TRACE nx={nx} {}", head.join(" "));
+    }
+}
+
+/// S238 P3 — le cas refusé de S237, et ses voisins : onde stationnaire 5 cm, bassin 2×2 m, quart de
+/// période, trois résolutions.
+#[test]
+#[ignore = "mesure S238, lancée explicitement (plusieurs minutes)"]
+fn pressure_floor_law_mobile_quarter_period_s238() {
+    for nx in [32usize, 64, 128] {
+        let dx = 2. / nx as f32;
+        let nz = (2.25 / dx).round() as usize;
+        let mut v = mobile_volume(nx, nz, dx, &vec![0.; nx]);
+        let eta: Vec<f32> = (0..nx).map(|i| 2. + 0.05 * (std::f32::consts::PI * (i as f32 + 0.5) / nx as f32).cos()).collect();
+        v.set_free_surface(&eta, 2.).unwrap();
+        let (mut worst_rel, mut worst_omega, mut worst_step) = (0f64, 0f64, 0usize);
+        for step in 1..=400usize {
+            PRESSURE_TRACE.with(|t| t.borrow_mut().clear());
+            let result = v.step_surface_mobile(1000, 4000, 60_000_000, &Jobs, &StillClock);
+            let trace = PRESSURE_TRACE.with(|t| t.borrow().clone());
+            let last = trace.last().copied().unwrap_or((0, 0., 0.));
+            if last.1 > worst_rel { (worst_rel, worst_omega, worst_step) = (last.1, last.2, step); }
+            if result.is_err() {
+                let tail: Vec<String> = trace.iter().rev().take(6).rev().map(|(it, rel, om)| format!("{it}:{rel:.4e}/{om:.2e}")).collect();
+                let min = trace.iter().map(|x| x.1).fold(f64::INFINITY, f64::min);
+                println!("PLANCHER_MOBILE nx={nx} pas={step} REFUS {result:?} relances={} residu_min={min:.4e} fin: {}", trace.len(), tail.join(" "));
+                break;
+            }
+        }
+        println!("PLANCHER_MOBILE nx={nx} pire_residu_final={worst_rel:.4e} omega={worst_omega:.3e} au_pas={worst_step} mailles={}", nx * nz);
+    }
+}
+
 #[test]
 fn mobile_projection_keeps_rest_exact_at_any_level_s237() {
     let (nx, nz, dx) = (16usize, 16usize, 0.15625f32);

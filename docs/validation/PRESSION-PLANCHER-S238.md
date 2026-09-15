@@ -55,3 +55,50 @@ le résidu relatif de la pression stagne au-dessus de son seuil et le pas refuse
    `δu/u ≲ div·L/(π²·u)` pour un résidu porté par le mode le plus lent.
 6. **Identité** `div u = r/scale` vérifiée au bit près de l'arrondi sur les mailles fluides.
 7. **Coût** : itérations consommées par le cas S237 avant (64 000 sans issue) et après.
+
+## 2. Loi du plancher, mesurée avant la règle
+
+Tests ignorés `pressure_floor_law_s231_family_s238` et `pressure_floor_law_mobile_quarter_period_s238`,
+trace (test seulement) du vrai résidu à chaque relance et de l'erreur inverse `ω`.
+
+**Famille S231** (8×4 m, surface `4 + 0,01·sin`, un pas depuis le repos) :
+
+| grille | mailles | relances | résidu relatif final | `ω` final | divergence S199 |
+|---|---:|---:|---:|---:|---:|
+| 16×8 | 128 | 1 | 6,84·10⁻⁷ | 8,6·10⁻⁷ | 3,8·10⁻⁶ |
+| 32×16 | 512 | 2 | 4,96·10⁻⁷ | 7,5·10⁻⁷ | 2,4·10⁻⁶ |
+| 64×32 | 2 048 | 2 | 7,88·10⁻⁷ | 1,3·10⁻⁶ | 5,1·10⁻⁶ |
+| 128×64 | 8 192 | 2 | 7,16·10⁻⁷ | 7,1·10⁻⁷ | 8,1·10⁻⁶ |
+| 256×128 | 32 768 | 2 | 9,97·10⁻⁷ | 6,6·10⁻⁷ | **1,58·10⁻⁵** |
+
+Cette famille **converge jusqu'à 32 768 mailles** : la taille seule ne fait pas le refus. Mais la
+divergence mise à l'échelle de S199 **croît** avec la taille et dépasse 10⁻⁵ à 256×128 alors que le
+résidu relatif passe — les deux critères ne mesurent pas la même chose (§3).
+
+**Cas mobile S237** (5 cm, quart de période) : à 32 et 64 colonnes, pire résidu final 9,997·10⁻⁷ et
+9,990·10⁻⁷, **`ω` = 8,2·10⁻⁵ et 4,7·10⁻⁴** ; à 128 colonnes, pas 397 : **3 481 relances d'une itération
+chacune**, le vrai résidu **alterne exactement** entre 1,0610·10⁻⁶ et 1,0630·10⁻⁶ — un cycle de période
+deux — et **`ω` = 5,5·10⁻⁸ à 6,2·10⁻⁸, soit une unité d'arrondi `u`**.
+
+Deux conclusions.
+
+1. **Au refus, la pression est la meilleure solution que f32 représente.** Une erreur inverse d'un `u`
+   ne laisse rien à gagner : la relance produit une itération, l'arrondi ramène l'état, et le cycle est
+   **déterministe**. Continuer jusqu'au plafond n'a jamais eu d'issue.
+2. **`ω` n'est pas un critère d'arrêt** : aux pas qui convergent selon le critère actuel, elle vaut
+   jusqu'à 4,7·10⁻⁴ — le gradient conjugué minimise l'énergie de l'erreur, pas l'erreur composante par
+   composante. Un seuil sur `ω` aurait refusé des pas que tout le reste accepte. Elle reste diagnostic.
+
+## 3. Règle retenue, après mesure
+
+La non-décroissance stricte du §1.2 est **écartée** : S233 a déjà établi qu'une hausse isolée du vrai
+résidu arrondi précède une convergence, et couper là changerait les bits reçus. La mesure fournit un
+signe sans nombre et sans ambiguïté :
+
+- **Cycle certifié** : à une relance, le champ de pression `p` est **identique au bit** à celui d'une
+  relance précédente (empreinte de 64 bits des deux dernières relances). La relance est une fonction
+  déterministe de `p` seul (`res = b − Ap`, `dir = res`) : un état revenu est une suite périodique, que
+  le plafond aurait parcourue sans converger. **S'arrêter là ne change aucun pas qui convergeait.**
+- **À cycle certifié**, le pas est accepté si et seulement si le critère physique de S199 est tenu
+  (divergence ≤ 10⁻⁵) ; sinon dégradé. Plafond sans cycle : dégradé, inchangé.
+- Le rapport publie `ω` et l'arrêt sur cycle.

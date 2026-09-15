@@ -93,7 +93,7 @@ pas. Aucun seuil de banc modifié.
   **Amendement P2** : `ω` devient diagnostic, pas seuil ; l'acceptation à stagnation se fait sur le
   critère physique **déjà déclaré** de S199 (divergence ≤ 10⁻⁵), équivalent discret du résidu en
   norme maximale — aucun nombre nouveau (voir notes).
-- [ ] **P3** — mesure du plancher : erreur inverse et résidu relatif minimal contre la taille
+- [x] **P3** — mesure du plancher : erreur inverse et résidu relatif minimal contre la taille
   (16 à 256 colonnes, deux seconds membres), outil de diagnostic dans le cœur.
 - [ ] **P4** — construction : erreur inverse composante par composante, détection de stagnation,
   arrêt au plancher, champ de rapport ; tests (bits anciens, système sans solution, f64).
@@ -112,3 +112,15 @@ fixer — alors que S199 a déclaré avant construction la tolérance physique d
 par **non-décroissance stricte** du vrai résidu d'une relance à l'autre : aucun facteur. Le seuil
 10⁻⁶ reste premier pour garder les bits. Estimation d'avant mesure : un résidu au critère S199
 porté par le mode le plus lent donne `δu/u ≲ 10⁻⁵·(L/dx)/π² ≈ 1,3·10⁻⁴` à 128 colonnes.
+
+P3 : trace `PRESSURE_TRACE` (cfg(test)) + `backward_error()` (Oettli–Prager, modes linéaire et
+mobile). Famille S231 : converge jusqu'à **256×128** (rel. 9,97·10⁻⁷), ω 6,6·10⁻⁷–1,3·10⁻⁶, mais
+divergence S199 **1,58·10⁻⁵ à 256** (dépasse 10⁻⁵ alors que le résidu passe). Mobile 5 cm quart de
+période : 32/64 colonnes convergés, ω **8,2·10⁻⁵ / 4,7·10⁻⁴** ; 128 : **3 481 relances d'une itération,
+résidu alternant exactement 1,0610/1,0630·10⁻⁶, ω = 5,5–6,2·10⁻⁸ = 1 u**. Décisions : (1) ω ne peut
+pas être seuil (4,7·10⁻⁴ sur des pas convergés) ; (2) non-décroissance stricte écartée (S233 : hausse
+isolée précède convergence) ; (3) **cycle certifié par identité au bit de `p` à une relance
+antérieure** (empreinte 64 bits, deux relances), puis acceptation ssi divergence S199 ≤ 10⁻⁵.
+Inquiétude à tenir en P5 : à 256×128 famille S231, divergence 1,58·10⁻⁵ > 10⁻⁵ sur un pas **convergé** —
+ne change rien à la règle (critère S199 appliqué au cycle seulement) mais montre que le critère S199
+n'est pas tenu partout par le chemin existant ; à publier, pas à corriger ici.

@@ -49,6 +49,14 @@ use budget::Control;
 mod mobile;
 pub use mobile::SURFACE_THETA_MIN;
 
+// S238 P3 : trace de mesure du plancher (tests seulement) — à chaque vrai résidu recalculé :
+// itérations, résidu relatif, erreur inverse composante par composante.
+#[cfg(test)]
+thread_local! {
+    pub(crate) static PRESSURE_TRACE: core::cell::RefCell<Vec<(u32, f64, f64)>> =
+        const { core::cell::RefCell::new(Vec::new()) };
+}
+
 /// Domaine local, cellules carrées. `z₀ = nz·dx` est le couvercle.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Domain {
@@ -517,6 +525,57 @@ impl Volume {
         Ok(())
     }
 
+    /// S238 : erreur inverse composante par composante (Oettli–Prager) du vrai résidu `res`,
+    /// `max_i |r_i| / (|b| + |A||p|)_i` sur les lignes du système. Diagnostic, pas seuil
+    /// (PRESSION-PLANCHER-S238 §1.1). Doit être appelée quand `res = rhs − A·p`.
+    #[cfg_attr(not(test), allow(dead_code))]
+    pub(crate) fn backward_error(&self) -> f32 {
+        let (nx, nz, dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
+        let inv = 1. / (dx * dx);
+        let mut worst = 0f32;
+        for i in 0..nx {
+            for k in 0..nz {
+                let c = self.c(i, k);
+                let row = if self.mobile { self.wet(i, k) } else { self.frac[c] > 0. };
+                if !row {
+                    continue;
+                }
+                let pc = self.p[c].abs();
+                let mut acc = 0f32;
+                let mut face = |a: f32, j: Option<usize>, dirichlet: Option<f32>| {
+                    if a == 0. {
+                        return;
+                    }
+                    match j {
+                        Some(j) if (if self.mobile { self.wet_cell(j) } else { self.frac[j] > 0. }) => acc += a * (pc + self.p[j].abs()),
+                        Some(j) if self.frac[j] == 0. => {}
+                        _ => if let Some(it) = dirichlet { acc += a * pc * it },
+                    }
+                };
+                let left = (i > 0).then(|| self.c(i - 1, k));
+                let right = (i + 1 < nx).then(|| self.c(i + 1, k));
+                let down = (k > 0).then(|| self.c(i, k - 1));
+                let up = (k + 1 < nz).then(|| self.c(i, k + 1));
+                if self.mobile {
+                    face(self.open_u[self.fu(i, k)], left, left.map(|_| self.ghost_side_inv(i, k, i.wrapping_sub(1))));
+                    face(self.open_u[self.fu(i + 1, k)], right, right.map(|_| self.ghost_side_inv(i, k, i + 1)));
+                    face(self.open_w[self.fw(i, k)], down, None);
+                    face(self.open_w[self.fw(i, k + 1)], up, Some(self.ghost_up_inv(i, k)));
+                } else {
+                    face(self.open_u[self.fu(i, k)], left, None);
+                    face(self.open_u[self.fu(i + 1, k)], right, None);
+                    face(self.open_w[self.fw(i, k)], down, None);
+                    face(self.open_w[self.fw(i, k + 1)], up, if up.is_none() { Some(2.) } else { None });
+                }
+                let scale = self.rhs[c].abs() + acc * inv;
+                if scale > 0. {
+                    worst = worst.max(self.res[c].abs() / scale);
+                }
+            }
+        }
+        worst
+    }
+
     /// Produit scalaire sur les mailles fluides. **I-03** : toute accumulation flottante du
     /// système passe par `parallel_reduce_ordered_f64` (SPEC-004 §8.2), qui fusionne dans
     /// l'ordre des indices et non dans l'ordre d'arrivée.
@@ -713,6 +772,12 @@ impl Volume {
                 self.res[c] = self.rhs[c] - self.tmp[c];
             }
             let actual = self.norm2(&self.res, jobs, ctl)?;
+            #[cfg(test)]
+            {
+                let omega = self.backward_error() as f64;
+                let relative = if b2 > 0. { ((actual / b2) as f64).sqrt() } else { 0. };
+                PRESSURE_TRACE.with(|t| t.borrow_mut().push((it, relative, omega)));
+            }
             if actual <= tol * b2 || it >= max_iters || it == before_iterations {
                 break actual;
             }
