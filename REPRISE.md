@@ -75,7 +75,7 @@ Ne pas relire le journal, les leçons ou tous les ADR intégralement à chaque r
 
 ## 4. Où en est le projet
 
-État à S240 : B/W et un afficheur existent ; scène multi-sources dessinée, visibilité au bit, composée
+État à S243 : B/W et un afficheur existent ; scène multi-sources dessinée, visibilité au bit, composée
 et admise par le cœur (ADR-142) ; **la boucle d'image de l'hôte n'alloue rien** pour le code du projet,
 la pile verrouillée 133 fois par image, constantes (ADR-145). Le poste dominant du budget de l'hôte est
 `ModalPressure::sample` dans la préparation du sillage — **87 %** de ses 3,1 ms, contre 0,44 ms de
