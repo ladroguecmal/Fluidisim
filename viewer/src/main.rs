@@ -1,6 +1,12 @@
+mod counting;
 mod gpu;
 mod lod;
 mod scene;
+
+// S240 : I-06 pour la pile graphique. Le compteur enveloppe l'allocateur systeme et ne
+// change ni le chemin, ni les tampons, ni les dependances verrouillees en S210/S211.
+#[global_allocator]
+static COUNTING: counting::Counting = counting::Counting;
 use scene::{Camera, FrameData, Scene, WakeInput};
 use water_core::{
     impact_field::BREAKING_SLOPE,
@@ -16,6 +22,9 @@ use winit::{
     keyboard::{KeyCode, PhysicalKey},
     window::{Window, WindowId},
 };
+
+/// S240 : images du banc de cadence, pour reserver les tampons de relevé une fois.
+const BENCH_FRAMES: usize = 800;
 
 fn instance() -> wgpu::Instance {
     let mut descriptor = wgpu::InstanceDescriptor::new_without_display_handle();
@@ -59,8 +68,24 @@ struct App<'a> {
     water: Vec<f64>,
     whole: Vec<f64>,
     last_present: Option<Instant>,
+    /// S240 : allocations par image, aux memes bornes que les millisecondes de S225.
+    phases: Vec<counting::Phase>,
+    /// Compteurs a la fin de l'image precedente, pour ce qui alloue **hors** de `redraw`.
+    last_mark: Option<counting::Mark>,
     error: Option<String>,
 }
+
+/// S240 : indices des phases relevees, dans l'ordre de la boucle d'image.
+const PHASE_UPDATE: usize = 0;
+const PHASE_UPLOAD: usize = 1;
+const PHASE_ACQUIRE: usize = 2;
+const PHASE_DRAW: usize = 3;
+const PHASE_PRESENT: usize = 4;
+const PHASE_RESTE: usize = 5;
+const PHASE_HORS: usize = 6;
+const PHASE_IMAGE: usize = 7;
+const PHASE_NAMES: [&str; 8] =
+    ["update", "transfert", "acquisition", "encodage", "presentation", "reste_redraw", "hors_redraw", "image"];
 
 /// Médiane, p95 et maximum d'un relevé, après tri. Les dix premières images sont écartées : elles
 /// portent la montée en fréquence du GPU et l'allocation des tampons de la chaîne d'échange.
@@ -98,11 +123,15 @@ impl App<'_> {
             self.frame.camera = away_camera();
         }
         let cpu_start = Instant::now();
+        // S240 : mêmes bornes que les millisecondes de S225, pour lire les deux en face.
+        let m_entry = counting::mark();
         if let Some(g) = &self.gpu {
             self.frame.viewport = Some((g.width as f32 / g.height as f32, g.nx, g.ny));
         }
+        let m_update_start = counting::mark();
         self.frame
             .update(self.seconds, self.seconds - self.birth, self.enabled);
+        let a_update = counting::mark().since(m_update_start);
         let Some(g) = self.gpu.as_mut() else {
             return;
         };
@@ -111,15 +140,21 @@ impl App<'_> {
             return;
         }
         let upload_start = Instant::now();
+        let m_upload = counting::mark();
         g.upload(&self.frame);
+        let a_upload = counting::mark().since(m_upload);
         let upload_ms = upload_start.elapsed().as_secs_f64() * 1000.;
         let acquire_start = Instant::now();
+        let m_acquire = counting::mark();
         let acquired = self.surface.as_ref().unwrap().get_current_texture();
+        let a_acquire = counting::mark().since(m_acquire);
         let acquire_ms = acquire_start.elapsed().as_secs_f64() * 1000.;
         match acquired {
             wgpu::CurrentSurfaceTexture::Success(output)
             | wgpu::CurrentSurfaceTexture::Suboptimal(output) => {
+                let m_draw = counting::mark();
                 g.draw(&output.texture.create_view(&Default::default()), measuring);
+                let a_draw = counting::mark().since(m_draw);
                 if measuring {
                     match g.gpu_breakdown() {
                         Ok(Some((w, f, _))) => {
@@ -135,7 +170,9 @@ impl App<'_> {
                 }
                 let cpu_ms = cpu_start.elapsed().as_secs_f64() * 1000.;
                 let present_start = Instant::now();
+                let m_present = counting::mark();
                 g.queue.present(output);
+                let a_present = counting::mark().since(m_present);
                 let present_ms = present_start.elapsed().as_secs_f64() * 1000.;
                 if self.cadence && self.frames >= 10 && !measuring {
                     if let Some(p) = self.last_present {
@@ -146,6 +183,31 @@ impl App<'_> {
                     self.present.push(present_ms);
                     self.upload.push(upload_ms);
                     self.wake.push(self.frame.wake_cpu_ms);
+                    // S240 : la même image, en allocations. `reste_redraw` est ce que la boucle
+                    // fait hors des cinq phases ; `hors_redraw` ce que winit fait entre deux images.
+                    let m_end = counting::mark();
+                    let frame_total = m_end.since(m_entry);
+                    let named = counting::Mark {
+                        allocs: a_update.allocs + a_upload.allocs + a_acquire.allocs
+                            + a_draw.allocs + a_present.allocs,
+                        bytes: a_update.bytes + a_upload.bytes + a_acquire.bytes
+                            + a_draw.bytes + a_present.bytes,
+                        frees: 0,
+                    };
+                    self.phases[PHASE_UPDATE].push(a_update);
+                    self.phases[PHASE_UPLOAD].push(a_upload);
+                    self.phases[PHASE_ACQUIRE].push(a_acquire);
+                    self.phases[PHASE_DRAW].push(a_draw);
+                    self.phases[PHASE_PRESENT].push(a_present);
+                    self.phases[PHASE_RESTE].push(counting::Mark {
+                        allocs: frame_total.allocs.saturating_sub(named.allocs),
+                        bytes: frame_total.bytes.saturating_sub(named.bytes),
+                        frees: 0,
+                    });
+                    self.phases[PHASE_HORS]
+                        .push(m_entry.since(self.last_mark.unwrap_or(m_entry)));
+                    self.phases[PHASE_IMAGE].push(frame_total);
+                    self.last_mark = Some(m_end);
                 }
                 self.last_present = Some(present_start);
             }
@@ -180,6 +242,16 @@ impl App<'_> {
             let (w50, _, wmax) = quantiles(&mut self.water);
             let (f50, _, fmax) = quantiles(&mut self.whole);
             println!("DECOMPOSITION_serialisee images={} GPU_eau_ms median={w50:.4} max={wmax:.4} | GPU_trame_ms median={f50:.4} max={fmax:.4} | part_eau={:.4}", self.water.len(), w50 / f50);
+            // S240 : I-06 pour la pile graphique — allocations par image, mêmes bornes.
+            for phase in self.phases.iter_mut() {
+                let n = phase.allocs.len();
+                let (n50, n95, nmax) = quantiles(&mut phase.allocs);
+                let (b50, _, bmax) = quantiles(&mut phase.bytes);
+                println!(
+                    "ALLOCATIONS phase={} images={n} allocations median={n50:.0} p95={n95:.0} max={nmax:.0} | octets median={b50:.0} max={bmax:.0}",
+                    phase.name
+                );
+            }
             e.exit();
         }
     }
@@ -1564,15 +1636,19 @@ fn run() -> Result<(), String> {
         smoke: args.iter().any(|a| a == "--smoke"),
         cadence: args.iter().any(|a| a == "--cadence"),
         sweep: args.iter().any(|a| a == "--sweep"),
-        interval: Vec::new(),
-        cpu: Vec::new(),
-        acquire: Vec::new(),
-        present: Vec::new(),
-        upload: Vec::new(),
-        wake: Vec::new(),
-        water: Vec::new(),
-        whole: Vec::new(),
+        // S240 : reserves avant la boucle. Un `Vec` qui grandit pendant un banc de cadence
+        // alloue dans la region qu'il mesure.
+        interval: Vec::with_capacity(BENCH_FRAMES),
+        cpu: Vec::with_capacity(BENCH_FRAMES),
+        acquire: Vec::with_capacity(BENCH_FRAMES),
+        present: Vec::with_capacity(BENCH_FRAMES),
+        upload: Vec::with_capacity(BENCH_FRAMES),
+        wake: Vec::with_capacity(BENCH_FRAMES),
+        water: Vec::with_capacity(BENCH_FRAMES),
+        whole: Vec::with_capacity(BENCH_FRAMES),
         last_present: None,
+        phases: PHASE_NAMES.iter().map(|n| counting::Phase::new(n, BENCH_FRAMES)).collect(),
+        last_mark: None,
         error: None,
     };
     e.run_app(&mut app).map_err(|e| e.to_string())?;

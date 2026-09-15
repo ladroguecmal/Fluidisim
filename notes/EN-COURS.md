@@ -91,7 +91,7 @@ avec le chiffre et la cause. Aucun seuil inventé, aucun banc modifié pour obte
 - [x] **P1** — amorce, jeton, plan seuls.
 - [x] **P2** — lectures ciblées (boucle d'image de l'hôte, bancs S225/S235, I-06 et ADR-006) ;
   protocole écrit avant mesure, avec ce qui serait reçu et ce qui serait une requalification.
-- [ ] **P3** — instrument : allocateur compteur global du binaire de l'hôte, marquage par phase,
+- [x] **P3** — instrument : allocateur compteur global du binaire de l'hôte, marquage par phase,
   sans dépendance nouvelle ; contrôle qu'il ne déplace pas `VERIFY` ni `BENCH`.
 - [ ] **P4** — mesure : allocations par image en régime, taille et attribution, scène S235 à
   960×540, dans le champ et hors champ.
@@ -109,6 +109,11 @@ la preparation du sillage. Attribution prevue **par phase**, pas par site d'appe
 d'appels demanderait une dependance et deplacerait la mesure) — limite declaree.
 A verifier en P3 : les tampons de millisecondes du banc grandissent pendant la mesure et faussent
 donc leur propre banc ; les reserver.
+
+P3 : `viewer/src/counting.rs` (allocateur compteur global, aucune dependance nouvelle), bornes de
+phase dans `redraw` aux memes points que les millisecondes de S225, tampons du banc reserves a
+800 images. `--multi --verify` : **0,368 mm a 12 s, 4 impacts** — valeur exacte de S235, l'instrument
+ne deplace pas la physique.
 
 ---
 
