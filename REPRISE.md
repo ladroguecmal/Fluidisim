@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-16 08:24 +02:00
+JETON            : occupé
+Battement        : 2026-09-16 08:27 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web disponibles)
-Session en cours : aucune
+Session en cours : S247 — J1-bis : les angles rasants soutenus
 Dernière session : S246 — bilinéaire annulée ; un amortissement faux corrigé, le repli 18 % moins cher
-Session suivante : S247 — J1-bis : les angles rasants soutenus
+Session suivante : à déterminer en fin de S247
 Maillons        : 0
 
 ```

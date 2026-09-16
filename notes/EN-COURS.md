@@ -58,79 +58,68 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S246 — terminée
+Session : S247 — en cours
 Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web)
-Entrée : « Continue », master propre à `b5abb80`, une seule copie, jeton libre, secteur, Maillons 0.
+Entrée : « Continue », master propre à `e7a23e3`, une seule copie, jeton libre, secteur, Maillons 0.
 
-**Objectif.** **A280** : donner à la multigrille de δ une **prolongation bilinéaire** et la
-restriction qui en est la **transposée exacte**, pour que son taux par cycle rejoigne ce que la
-théorie lui promet — et qu'elle devienne aussi un levier de **vitesse**, pas seulement le repli de
-précision d'ADR-147.
-**Ce que la mesure de S245 désigne, et pourquoi c'est elle qu'on suit.** La contre-épreuve avait
-écarté les deux autres suspects : approfondir la hiérarchie et alléger le lissage **aggravent** —
-282 à 300 itérations, plates mais hautes. Un compte plat dit que le cycle fonctionne ; plat **et
-haut** dit que son taux est mauvais. Ni le niveau grossier ni le lisseur : le **transfert**, la
-prolongation étant aujourd'hui constante par morceaux.
-**Ce que la géométrie impose.** La grille est **centrée sur les mailles** : le centre d'une maille
-fine est à un quart de l'espacement grossier du centre de sa mère. La prolongation bilinéaire y a
-donc les poids **(3/4, 1/4)** par direction, soit 9/16, 3/16, 3/16, 1/16 en deux dimensions. Aux
-bords, le voisin grossier manquant reporte son poids sur la mère : l'opérateur reste linéaire, et
-c'est sa **transposée exacte** qui devra servir de restriction — y compris ce report.
-**Ce qui est déjà en place pour l'accueillir.** L'essai d'adjonction et l'essai de symétrie de S245
-existent : ils n'ont pas à être inventés, seulement resserrés. La symétrie du cycle ne tient que si
-`R = Pᵀ` ; avec une prolongation non triviale, c'est la propriété la plus facile à casser sans s'en
-apercevoir, et l'essai est ce qui l'interdit.
-**La question ouverte, déclarée comme telle.** L'opérateur grossier est **re-discrétisé**, pas
-construit par Galerkin. Le facteur constant qui accorde `R A_c⁻¹ P` à `¼ Pᵀ A_h P` valait 1/4 pour
-l'injection ; avec une prolongation bilinéaire, **il n'est pas évident**, et rien ici ne prétend le
-deviner. Il sera **mesuré** : un facteur faux ne casse pas la symétrie — elle n'en dépend pas — mais
-il casse la réduction du résidu, et l'essai de S245 le verra.
-**Critères de réception, déclarés avant construction.** (1) Adjonction **exacte** de `R` et `P`,
-report de bord compris. (2) Symétrie et positivité du cycle, conservées. (3) **Taux de réduction par
-cycle** mesuré, avant et après — c'est la revendication. (4) **Compte d'itérations et coût par pas**
-aux cinq tailles de S244, sans et avec. (5) Acceptation d'ADR-144 inchangée, et **32 768 mailles
-toujours reçu** (A275 ne se rouvre pas). (6) Aux tailles qui passent sans repli, **rien ne change au
-bit** : empreinte `delta_filters` `0xfb12b2092df4ee6d`, dix cas de `delta_precision`.
-**Arrêt.** Prolongation bilinéaire reçue et le gain chiffré ; **ou** constat mesuré qu'elle ne
-suffit pas — et alors le document dit ce que le taux par cycle vaut désormais et ce qui le plafonne
-encore, sans garder un changement que la mesure ne soutient pas (L323).
+**Objectif.** Savoir ce que l'hôte tient **à incidence rasante soutenue** — en coût et en
+échantillonnage —, et le dire. C'est le dernier reliquat de J1-bis qu'une session puisse traiter
+seule : l'interaction manuelle demande une personne, la seconde cible une autre machine (REPRISE §5).
+[CADENCE-HOTE-S225](docs/validation/CADENCE-HOTE-S225.md) l'écrit depuis S225 parmi ce qu'elle ne
+couvre pas ; aucune mesure ne l'a fait depuis.
+**Ce que la lecture fixe.** S234 a mesuré la **charge de maillage** de la pose rasante
+(`[0, −18, 2]`, tangage −0,05) : **95,9 %** de l'écran dans l'emprise contre 86,2 % à la pose S212,
+et une charge idéale de 0,359. Mais elle n'a **jamais** été rendue : ni coût par image, ni qualité.
+Deux choses changent avec l'incidence, et une non :
+- **le coût** — presque tout l'écran est de l'eau, et la visibilité de S235 n'y retire rien ;
+- **l'échantillonnage** — à l'horizon, un sommet couvre des dizaines de mètres d'eau ; S234 notait
+  déjà que **7,5 %** des sommets de l'emprise sous-échantillonnent `λ_min` à la pose S212 ;
+- **la grille locale du sillage**, elle, ne change pas : son emprise est le domaine du sillage, pas
+  la caméra (constaté en S241).
+**Thèse, et elle est réfutable.** L'incidence rasante ne casse pas le coût — le nombre de sommets est
+fixé par la grille, pas par la pose — mais elle **dégrade l'échantillonnage** dans une proportion que
+personne n'a chiffrée. Si la mesure dit le contraire — que le coût explose, ou que l'échantillonnage
+tient —, la session le dira au lieu de forcer la thèse.
+**Ce que la mesure doit séparer.** `λ_min = 2π/coupure = 2,094 m` pour le sillage. Le fond `B` a sa
+propre coupure, que ce lot ne mesure pas : c'est une **limite déclarée**, pas un oubli.
+**Critères de réception, déclarés avant construction.** (1) **Coût à incidence rasante soutenue** :
+CPU, GPU et intervalle, sur le même banc de cadence que S240 et S242, contre la pose de référence.
+(2) **Échantillonnage** : distribution de l'écart entre sommets voisins dans l'emprise, et **part des
+sommets sous Nyquist** — mesurée d'abord à la pose S212, où elle doit **retrouver les 7,5 % de
+S234**, faute de quoi l'instrument est faux avant d'avoir servi. (3) Allocations de `update`
+**toujours nulles** (ADR-145). (4) Aucune tolérance modifiée, aucun seuil inventé : la session
+**mesure**, et ne corrige que si la mesure désigne un défaut clair et borné.
+**Arrêt.** Le coût et l'échantillonnage à incidence rasante publiés, avec ce qui tient et ce qui ne
+tient pas. **Ou**, si la mesure désigne un défaut dont la correction dépasse la session, ce défaut
+chiffré et mis en file avec son déclencheur.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [x] **P2** — protocole écrit ; instrument du **taux par cycle**, mesuré avant toute modification.
-- [x] **P3** — prolongation bilinéaire et sa transposée exacte ; adjonction et symétrie éprouvées.
-- [x] **P4** — mesure : taux par cycle, itérations et coût aux cinq tailles, sans et avec.
-- [x] **P5** — décision et réception : garder ou annuler, ADR-144, empreintes, suite.
-- [x] **P6** — rituel §6, file, feuille de route, jeton.
+- [ ] **P2** — protocole écrit ; pose rasante soutenue ajoutée au banc.
+- [ ] **P3** — instrument d'échantillonnage, **étalonné sur la pose S212** contre les 7,5 % de S234.
+- [ ] **P4** — mesure : coût et échantillonnage à incidence rasante, contre la pose de référence.
+- [ ] **P5** — ce qui tient, ce qui ne tient pas ; correction seulement si la mesure la désigne.
+- [ ] **P6** — rituel §6, file, feuille de route, jeton.
 
 ### Notes de reprise
 
-P2 : protocole docs/validation/PROLONGATION-S246.md + instrument the_cycle_reduction_rate_s246
-(multigrille employee **seule** comme solveur : le compte d iterations melange le cycle et le
-gradient conjugue, le taux par cycle ne melange rien).
-**Base mesuree** : taux asymptotique **0,620 / 0,630 / 0,725** a 2 048 / 8 192 / 32 768 mailles,
-la ou ce stencil devrait donner 0,1 a 0,3.
-**Le profil dit plus que le nombre** : premiers cycles excellents (0,06 puis 0,19), puis degradation
-jusqu a l asymptote — signature d une composante que le cycle ne reduit pas. Prolongation constante
-par morceaux = suspect designe par S245 ; **traitement des bords = second suspect**, que cette
-mesure ne separe pas encore du premier.
+(S247 - vide a l ouverture.)
 
-P3/P4/P5, executes ensemble parce que la mesure a refute la these a P4 et que P5 est devenu une
-annulation. **La prolongation bilineaire ne gagne rien** : 0,648 / 0,642 / 0,652 contre 0,637 /
-0,635 / 0,674 pour l injection — dans le bruit, et l ecart change de signe. **Annulee** (L323).
-**Geometrie ecartee aussi** : sans aucune coupe, le taux est le meme.
-**Ce que la recherche a trouve a la place** : l amortissement du lisseur portait 2/3 **avec une
-provenance inventee** (  se derive  ). C est l optimum a UNE dimension. En 2D le minimax donne
-**4/5** pour un facteur 3/5. Corrige, avec sa derivation.
-Gain mesure : deuxieme cycle a 32 768 mailles 0,187 -> **0,113** ; asymptote 0,798 -> **0,674** ;
-iterations forcees 99/252/220/167/134 -> **94/177/158/120/106** ; **pas reel a 32 768 : 1 006 ->
-828 ms, divergence 8,512e-6 -> 7,265e-6**. A275 reste fermee, avec plus de marge et moins cher.
-Reception : suite **437 / 16**, empreinte delta_filters **0xfb12b2092df4ee6d** inchangee, dix cas de
-delta_precision identiques.
-**Quatre suspects elimines** (niveau grossier, lissage, prolongation, geometrie) ; reste les
-**bords** — Neumann sur trois cotes, Dirichlet sur le quatrieme, operateur grossier re-discretise
-et non Galerkin.
+---
+
+Notes de S246, conservees pour reference immediate :
+
+Prolongation bilineaire construite puis **annulee** : 0,648 / 0,642 / 0,652 contre 0,637 / 0,635 /
+0,674 pour l injection — dans le bruit, ecart changeant de signe.
+Geometrie des mailles coupees **ecartee** : sans coupe, meme taux.
+**Trouvaille** : l amortissement du lisseur portait 2/3 avec une provenance inventee ; c est
+l optimum a UNE dimension. En 2D le minimax donne **4/5** (facteur 3/5). Corrige.
+Gain : asymptote 0,798 -> 0,674 ; iterations forcees 99/252/220/167/134 -> 94/177/158/120/106 ;
+**pas reel a 32 768 mailles 1 006 -> 828 ms, divergence 8,512e-6 -> 7,265e-6**. A275 reste fermee.
+Reste : taux 0,63-0,67 pour 0,1-0,3 attendus ; dernier suspect = les **bords** et l operateur
+grossier re-discretise plutot que Galerkin (A281, declencheur = la 3D).
+Empreinte delta_filters **0xfb12b2092df4ee6d** ; suite 437 / 16.
 
 ---
 
