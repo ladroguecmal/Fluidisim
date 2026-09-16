@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-16 18:05 +02:00
+JETON            : occupé
+Battement        : 2026-09-16 18:08 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo, Python, accès web ; GPU DX12 vérifié)
-Session en cours : aucune
+Session en cours : S251 — démarrage couplé plat
 Dernière session : S250 — raccordement volumique B/W→δ reçu sous surface imposée (ADR-149)
 Session suivante : S251 — A283 : recevoir le démarrage couplé plat, oracle de projection indépendant
 Maillons        : 0

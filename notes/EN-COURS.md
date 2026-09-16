@@ -58,42 +58,31 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S250 — terminée
-Agent : Codex GPT-6 ; fichiers, git, cargo, Python et GPU local disponibles.
-Entrée : « Continue ». Master propre f2dd759, une seule copie, archive B conservée.
+Session : S251 — en cours
+Agent : Codex GPT-6 ; fichiers, git, cargo et Python disponibles.
+Entrée : « continue ». Master propre 693ec55, une seule copie, archive B conservée.
 
-Objectif : premier raccordement volumique B/W→δ sur le candidat MAC x-z existant.
-Le code confirme que les fournisseurs différentiels ne sont pas consommés par Volume.
-Lot borné : géométrie et surface imposées, advection perturbative avec termes croisés,
-source continue -S et éponge de vitesse avant projection ; durée/budget entiers,
-refus atomiques et aucune allocation. La surface mobile nécessite ses résidus de bord :
-ne pas lui greffer un résidu volumique en prétendant recevoir le problème complet.
+Objectif : recevoir le démarrage B/W→δ sous couvercle plat (A283), sans relever
+la tolérance S199 ni effacer la source continue. Consommateur : step_perturbation.
+Le code confirme le refus transmis par S250 ; comparaison indépendante de projection
+f64 avant choix du correctif f32. Distinguer précision de pression, annulation de
+vitesse et critère ; conserver les champs et seuils des cas déjà reçus.
 
-Réception avant code : fond nul retrouve le pas existant à l'arrondi ; force manufacturée
-avec signe connu ; advection croisée contre dérivée analytique ; fournisseur réel B et W
-planaires traversant Volume ; source contractée après somme ; refus non planaires et
-non finis atomiques ; expiration/reprise ; amortissement décroissant, projection reçue.
-Référence indépendante sur les accélérations, puis source dense contre source échantillonnée
-identique (pas de décimation ni de seuil B4 réinventé). Aucun taux de réflexion promis.
-Arrêt : API consommée par le pas MAC et exemple reproductible, tests et limites transmis.
+Réception : cas réels 16×8 et 32×16, vitesse contre oracle, divergence ≤1e-5,
+durée entière et rollback, aucune allocation ; témoin sans remède reproduit le défaut.
+Arrêt : démarrage et trajectoire bornée reçus, suite et empreinte historique vérifiées,
+limites transmises. Aucun couplage mobile ou rendu ajouté à ce lot.
 
 ### Plan
 
 - [x] **P1** — amorce, lectures et plan seuls.
-- [x] **P2** — ADR/protocole, contrat des faces et limites de la coupe 2D.
-- [x] **P3** — pas perturbatif atomique, source et éponge, tests ciblés.
-- [x] **P4** — exemple B/W réel, contre-épreuves, suite de tests et mesure.
-- [x] **P5** — rituel §6 : file, trajectoire, preuves, journal, jeton.
+- [>] **P2** — reproduire, construire l'oracle indépendant et isoler le défaut.
+- [ ] **P3** — correctif f32 et contrat, contre-épreuves ciblées.
+- [ ] **P4** — réception du consommateur, coût, suite et non-régression.
+- [ ] **P5** — rituel §6 : preuves, file, trajectoire, journal et jeton.
 
 ### Notes de reprise
 
-Les champs BackgroundSample sont 3D. Une coupe de l'impact radial n'est pas un fond 2D :
-sur y=0, uy peut être nul mais d(uy)/dy ne l'est pas. Refuser les échantillons non planaires.
-SPEC-004 §6.1 et ADR-114 imposent -S continu, pas l'annulation du pas numérique du fond.
-L'équilibre δ=0 n'est exact que si S=0 ; un fond linéaire porte normalement un résidu
-quadratique non nul. Ce résidu doit engendrer une correction, pas être effacé.
-
-Réception et chiffres dans RACCORDEMENT-DELTA-S250. 444 tests réussis / 16 ignorés,
-empreinte delta_filters conservée. A283 nouveau : démarrage couplé plat refusé à
-16×8 et 32×16 ; cas --flat conservé avec assertion d'atomicité. S251 doit comparer
-la projection à un oracle indépendant avant les résidus de surface mobile.
+S250 conservait --flat comme refus attendu. La pression initiale s'arrête au plancher ;
+le repli multigrille ne reçoit pas D. Les termes croisés, la source et l'éponge sont
+déjà construits. Ne pas les réinventer ; ne pas confondre ce lot et B4 global.
