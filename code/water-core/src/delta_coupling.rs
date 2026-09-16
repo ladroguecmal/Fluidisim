@@ -39,6 +39,21 @@ impl Sponge {
     }
 }
 
+// S252 (A284) : trace de test du pas couplé — étape, itérations, plancher, dégradé, divergence,
+// durée murale en ns. `None` = trace éteinte. Absente du chemin de production.
+#[cfg(test)]
+thread_local! {
+    pub(crate) static COUPLED_TRACE: core::cell::RefCell<Option<Vec<(&'static str, u32, bool, bool, f64, u128)>>> =
+        const { core::cell::RefCell::new(None) };
+}
+#[cfg(test)]
+fn trace(label: &'static str, r: Option<&super::Report>, start: std::time::Instant) {
+    COUPLED_TRACE.with(|t| if let Some(t) = t.borrow_mut().as_mut() {
+        let r = r.copied().unwrap_or_default();
+        t.push((label, r.iterations, r.floor, r.degraded, r.divergence, start.elapsed().as_nanos()));
+    });
+}
+
 fn validate_sample(s: &BackgroundSample, rho: f32) -> Result<(), Error> {
     s.momentum_residual(rho, 0.).map_err(|_| Error::NotFinite)?;
     if s.u[1] != 0. || s.du_dt[1] != 0. || s.grad_eta[1] != 0.
@@ -151,15 +166,23 @@ impl Volume {
             budget::copy(&self.w,&mut self.saved_w,&mut ctl,Phase::Prepare)?;
             budget::copy(&self.p,&mut self.saved_p,&mut ctl,Phase::Prepare)?;
             self.swap_state(); swapped = true;
+            #[cfg(test)] let start = std::time::Instant::now();
             self.coupled_predict(bg,dt,sponge,&mut ctl)?;
+            #[cfg(test)] trace("prediction", None, start);
+            #[cfg(test)] let start = std::time::Instant::now();
             let mut report = self.project(scale,correction,max_iters,false,jobs,&mut ctl)?;
+            #[cfg(test)] trace("ordinaire", Some(&report), start);
             let mut iterations=report.iterations;
             if report.degraded && !self.levels.is_empty() {
+                #[cfg(test)] let start = std::time::Instant::now();
                 report = self.project(scale,correction,max_iters,true,jobs,&mut ctl)?;
+                #[cfg(test)] trace("repli", Some(&report), start);
                 iterations=iterations.saturating_add(report.iterations);
             }
             if report.degraded && report.floor {
+                #[cfg(test)] let start = std::time::Instant::now();
                 report=self.refine_coupled_pressure(scale,correction,max_iters,jobs,&mut ctl)?;
+                #[cfg(test)] trace("affinage", Some(&report), start);
                 iterations=iterations.saturating_add(report.iterations);
             }
             report.iterations=iterations;

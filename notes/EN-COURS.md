@@ -84,7 +84,7 @@ au-dessus du plan moyen en production, 3D, rendu, optimisation d'A284.
 ### Plan
 
 - [x] **P1** — amorce, lectures et plan seuls.
-- [ ] **P2** — A284 : itérations et temps par projection, 32×16 plat, test diagnostic.
+- [x] **P2** — A284 : itérations et temps par projection, 32×16 plat, test diagnostic.
 - [ ] **P3** — ADR-151 et protocole de réception, avant code.
 - [ ] **P4** — fournisseur analytique de test (onde stationnaire linéaire, prolongement).
 - [ ] **P5** — cœur : géométrie totale, valeurs fantômes du fond, tampons comptés.
@@ -105,3 +105,12 @@ flux du fond (W(b)=0) supposé : sinon frontière du total, hors lot. B refuse z
 une convention de l'hôte, éprouvée ici par le seul fournisseur de test.
 Transport : garder la somme S237 au bit, ajouter la bande à part (identité a).
 Démarrage plat mobile : risque A283 (petit champ) ; ADR-150 ne couvre que le couvercle.
+P2 (A284), test ignoré `flat_start_cost_attribution_s252`, release, 32×16 plat, 20 pas :
+ordinaire 80–82 it / 0,84–1,36 ms, au plancher, D 1,55e-4→1,06e-5 (reçu dès le pas 17) ;
+**repli multigrille 500–501 it / 37,7–42,9 ms** (94 % du pas), refusé pas 0–6 ;
+affinage 86–92 it / 0,9–1,3 ms. Vrais résidus du repli : 0,616 à it 18, puis ×0,6 par
+relance de ~20 it, 26 relances. Cause : β du GC multigrille = ‖r₊‖²/⟨r,z⟩ au lieu de
+⟨r₊,z₊⟩/⟨r,z⟩ (`project`, branche multigrid_on, depuis S245 P5 `6dc0bfa`) : la direction
+croît d'environ 4/dx² par itération et le pas s'arrête sur dq non fini. **Expérience non
+committée** β correct : repli 9 it / 0,75 ms, vrai résidu 3,8e-6 ; pas 0 = 2,6 ms (41),
+pas 7 = 1,7 ms. S245 (« la multigrille ne gagne pas de vitesse ») a mesuré ce GC fautif.

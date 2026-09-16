@@ -144,19 +144,27 @@ fn refusals_and_expiration_are_atomic_s250(){
 }
 
 fn real_case(nx:usize)->(Volume,Vec<BackgroundSample>,Vec<BackgroundSample>) {
+    let v=Volume::configure(&mut HostServices{alloc:&mut Arena,jobs:&Jobs,sink:&Jobs},
+        Domain{nx,nz:nx/2,dx:8./nx as f32},1025.,9.81,&vec![0.;nx]).unwrap();
+    let (u,w)=real_fields(&v,SimTime(1_000_000));
+    (v,u,w)
+}
+
+/// B et W du banc `delta_coupling` (S250) à l'instant `t`, sommés avant contraction.
+fn real_fields(v:&Volume,t:SimTime)->(Vec<BackgroundSample>,Vec<BackgroundSample>) {
     use crate::{Background,SeaState,WorldPos,modal_pressure::Segment,spectral_pressure::{self,Node,Slot}};
+    let nx=v.domain.nx;
     let mut host=HostServices{alloc:&mut Arena,jobs:&Jobs,sink:&Jobs};
-    let v=Volume::configure(&mut host,Domain{nx,nz:nx/2,dx:8./nx as f32},1025.,9.81,&vec![0.;nx]).unwrap();
     let b=Background::configure(&mut host,SeaState{hs:0.1,tp:4.,theta_turns:0.,components:1,graine:7},WorldPos::default()).unwrap();
     let nodes=[Node{k:[0.7,0.],transform:1.,weight:0.5},Node{k:[1.2,0.],transform:1.,weight:0.5}];
     let path=[Segment{birth:SimTime(0),duration_us:2_000_000,origin:[0.;2],velocity:[0.5,0.],pressure_pa:80.}];
-    let mut slots=[Slot::default();2];let t=SimTime(1_000_000);
+    let mut slots=[Slot::default();2];
     let field=spectral_pressure::prepare(&nodes,&path,9.81,1025.,t,SimTime(2_000_000),[-16.;2],[16.;2],&mut slots).unwrap();
     let sample=|p|{let mut s=b.differential_local(p,t,1025.).unwrap();s.add(&field.differential(p).unwrap().water);s};
     let (mut u,mut w)=fields(&v);let dx=v.domain.dx;
     for k in 0..nx/2 {for i in 0..=nx {u[v.fu(i,k)]=sample([i as f32*dx,0.,(k as f32+0.5)*dx-4.]);}}
     for k in 0..=nx/2 {for i in 0..nx {w[v.fw(i,k)]=sample([(i as f32+0.5)*dx,0.,k as f32*dx-4.]);}}
-    (v,u,w)
+    (u,w)
 }
 
 /// Oracle de banc : assemblage par arêtes, CG f64 ; aucun appel à apply/project du candidat.
@@ -279,4 +287,36 @@ fn incremental_projection_does_not_reapply_imposed_pressure_s251(){
         .fold(0f32,|m,(a,b)|m.max((a-b).abs()));
     assert!(change<1e-8,"couvercle appliqué deux fois : {change}");
     assert_eq!(v.eta,old.2);assert!(!v.homogeneous_lid);
+}
+
+/// S252, A284 : où vont les itérations du démarrage plat 32×16 sur la trajectoire du banc
+/// `delta_coupling --flat --fine` — prédiction, projection ordinaire, repli, affinage.
+/// Diagnostic, aucune assertion de coût : `cargo test --release -p water-core -- --ignored
+/// flat_start_cost_attribution_s252 --nocapture`.
+#[test]
+#[ignore]
+fn flat_start_cost_attribution_s252(){
+    let (mut v,_,_)=real_case(32);
+    let sponge=Sponge{width_m:1.,rate_per_s:2.};
+    COUPLED_TRACE.with(|t|*t.borrow_mut()=Some(Vec::new()));
+    for step in 0..20u64 {
+        let t=SimTime(1_000_000+step*1000);
+        let (u,w)=real_fields(&v,t);
+        let mut bg=input(&v,&u,&w);bg.time=t;
+        super::super::PRESSURE_TRACE.with(|t|t.borrow_mut().clear());
+        let start=std::time::Instant::now();
+        let r=v.step_perturbation(t,1000,2000,1_000_000,&bg,sponge,&Jobs,&Clock).unwrap().report.unwrap();
+        let total=start.elapsed().as_nanos();
+        if step==0 || step==7 {
+            // Chaque vrai résidu recalculé : (itérations cumulées de la projection, résidu relatif,
+            // erreur inverse) — les relances de la boucle d'acceptation ADR-144.
+            let restarts=super::super::PRESSURE_TRACE.with(|t|t.borrow().clone());
+            println!("A284 pas={step} relances={} {:?}",restarts.len(),restarts);
+        }
+        let trace=COUPLED_TRACE.with(|t|t.borrow_mut().as_mut().map(core::mem::take)).unwrap();
+        let parts:Vec<String>=trace.iter().map(|(l,it,floor,deg,div,ns)|
+            format!("{l}:it={it},plancher={floor},degrade={deg},D={div:.3e},ms={:.3}",*ns as f64/1e6)).collect();
+        println!("A284 pas={step} total_ms={:.3} iterations={} affinages={} | {}",total as f64/1e6,r.iterations,r.refinements,parts.join(" | "));
+    }
+    COUPLED_TRACE.with(|t|*t.borrow_mut()=None);
 }
