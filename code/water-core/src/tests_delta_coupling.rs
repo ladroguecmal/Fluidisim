@@ -645,3 +645,91 @@ fn coupled_mobile_first_step_is_received_by_refinement_s253(){
     assert_eq!((late.u.clone(),late.w.clone(),late.p.clone(),late.eta.clone()),before);
     assert!(!late.homogeneous_ghost&&!late.surface_coupled&&!late.mobile);
 }
+
+/// S254 (ADR-154) — le prolongement borné de l'oracle avant usage, au-dessus du plan moyen :
+/// continuité en `z = 0`, divergence nulle, dérivées publiées contre différences finies du champ
+/// publié, et résidu `S` recalculé en f64, d'ordre deux quand `z` suit l'amplitude.
+#[test]
+fn standing_bounded_extension_controls_s254(){
+    let eps=f32::EPSILON as f64;
+    let rho=1025.;
+    let close=|got:f32,want:f64,what:&str|{
+        let tol=4.*eps*want.abs()+1e-9;
+        assert!((got as f64-want).abs()<=tol,"{what} : {got} contre {want}");
+    };
+    for a in [0.05,0.1] {
+        let wave=standing::StandingWave{a,k:std::f64::consts::PI/2.,h:2.,g:9.81,rho};
+        for t in [0.,0.31,0.77,1.13] {
+            for x in [0.1,0.55,1.3,1.9] {
+                // 1. Continuité : les formules bornées en z = 0 rendent le fond analytique.
+                let (s0,f0)=(wave.sample(x,0.,t),wave.bounded_fields(x,0.,t));
+                for i in [0,2] {
+                    close(s0.u[i],f0.u[i],"U(0)");
+                    close(s0.du_dt[i],f0.du_dt[i],"U_t(0)");
+                    close(s0.grad_p_dyn[i],f0.grad_p[i],"grad P(0)");
+                }
+                close(s0.p_dyn,f0.p,"P(0)");
+                for z in [1e-4,0.02,0.08,0.15] {
+                    let s=wave.sample_bounded(x,z,t);
+                    let f=wave.bounded_fields(x,z,t);
+                    // 2. Divergence nulle à l'arrondi.
+                    let div=s.grad_u[0][0]+s.grad_u[2][2];
+                    assert!((div as f64).abs()<=4.*eps*(s.grad_u[0][0] as f64).abs()+1e-12,"div {div}");
+                    // 3. Dérivées contre différences finies centrées du champ publié.
+                    let h=1e-4;
+                    let fx=|dx:f64,dz:f64,dt:f64|wave.bounded_fields(x+dx,z+dz,t+dt);
+                    let (xp,xm,zp,zm,tp,tm)=(fx(h,0.,0.),fx(-h,0.,0.),fx(0.,h,0.),fx(0.,-h,0.),fx(0.,0.,h),fx(0.,0.,-h));
+                    let d=|p:f64,m:f64|(p-m)/(2.*h);
+                    let trunc=|scale:f64|1e-6*scale.abs()+1e-9;
+                    for i in [0,2] {
+                        let (ux,uz,ut)=(d(xp.u[i],xm.u[i]),d(zp.u[i],zm.u[i]),d(tp.u[i],tm.u[i]));
+                        assert!((f.grad_u[i][0]-ux).abs()<=trunc(ux),"dx u{i} {} contre {ux}",f.grad_u[i][0]);
+                        assert!((f.grad_u[i][2]-uz).abs()<=trunc(uz),"dz u{i} {} contre {uz}",f.grad_u[i][2]);
+                        assert!((f.du_dt[i]-ut).abs()<=trunc(ut),"dt u{i} {} contre {ut}",f.du_dt[i]);
+                        close(s.u[i],f.u[i],"u f32");
+                        close(s.du_dt[i],f.du_dt[i],"u_t f32");
+                        for j in [0,2] {close(s.grad_u[i][j],f.grad_u[i][j],"grad u f32");}
+                        // Laplacien : différences secondes, pas plus grand pour la troncature.
+                        let hl=1e-3;
+                        let g=|dx:f64,dz:f64|wave.bounded_fields(x+dx,z+dz,t).u[i];
+                        let lap=(g(hl,0.)+g(-hl,0.)+g(0.,hl)+g(0.,-hl)-4.*g(0.,0.))/(hl*hl);
+                        assert!((f.laplacian[i]-lap).abs()<=1e-5*lap.abs()+1e-6,"lap u{i} {} contre {lap}",f.laplacian[i]);
+                        close(s.laplacian_u[i],f.laplacian[i],"lap f32");
+                    }
+                    let (px,pz)=(d(xp.p,xm.p),d(zp.p,zm.p));
+                    assert!((f.grad_p[0]-px).abs()<=trunc(px),"dxP {} contre {px}",f.grad_p[0]);
+                    assert!((f.grad_p[2]-pz).abs()<=trunc(pz),"dzP {} contre {pz}",f.grad_p[2]);
+                    close(s.p_dyn,f.p,"P f32");
+                    // 5. Résidu contracté publié contre sa recomposition f64.
+                    let r=s.momentum_residual(rho as f32,0.).unwrap();
+                    for i in [0,2] {
+                        let want=f.du_dt[i]+f.u[0]*f.grad_u[i][0]+f.u[2]*f.grad_u[i][2]+f.grad_p[i]/rho;
+                        let tol=1e-5*want.abs()+16.*eps*f.du_dt[i].abs();
+                        assert!((r[i] as f64-want).abs()<=tol,"S{i} {} contre {want}",r[i]);
+                    }
+                }
+            }
+        }
+    }
+    // 5 bis. Ordre deux : `z = s·a` sous la crête, `S/a²` stable entre 5 et 10 cm, à la dérive du
+    // facteur `T + kz` près. À `z` fixe, le résidu linéaire serait d'ordre un.
+    let (small,large)=(standing::StandingWave{a:0.05,k:std::f64::consts::PI/2.,h:2.,g:9.81,rho},
+        standing::StandingWave{a:0.1,k:std::f64::consts::PI/2.,h:2.,g:9.81,rho});
+    let residual=|w:&standing::StandingWave,x:f64,s:f64,t:f64|{
+        let f=w.bounded_fields(x,s*w.a,t);
+        [0,2].map(|i|f.du_dt[i]+f.u[0]*f.grad_u[i][0]+f.u[2]*f.grad_u[i][2]+f.grad_p[i]/rho)
+    };
+    let mut compared=0;
+    for t in [0.,0.31,0.77] {for x in [0.1,0.55,1.3] {for s in [0.3,0.8,1.] {
+        let (r1,r2)=(residual(&small,x,s,t),residual(&large,x,s,t));
+        for i in 0..2 {
+            if r2[i].abs()>1e-3 {
+                let ratio=r2[i]/(4.*r1[i]);
+                println!("S254 ordre_deux x={x} s={s} t={t} axe={i} rapport={ratio:.4}");
+                assert!((0.75..=1.3).contains(&ratio),"S/a2 : rapport {ratio} (x={x} s={s} t={t})");
+                compared+=1;
+            }
+        }
+    }}}
+    assert!(compared>=20,"trop peu de résidus comparés : {compared}");
+}

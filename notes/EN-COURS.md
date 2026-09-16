@@ -93,7 +93,7 @@ en regard. Ensuite fournisseur B de production au-dessus du plan moyen. Hors lot
 - [x] **P3** — hôte : mode `--revue` à poses et âges fixes, captures avec empreinte, PNG ; revue R1
   envoyée à l'utilisateur avec les références demandées, consignée en attente.
 - [x] **P4** — ADR-154 et protocole de réception d'A286, avant code.
-- [ ] **P5** — oracle : prolongement du mode stationnaire selon la règle, contrôles
+- [x] **P5** — oracle : prolongement du mode stationnaire selon la règle, contrôles
   (continuité, divergence, dérivées, `S`).
 - [ ] **P6** — banc couplé S253 avec ce prolongement, 32/64/128 × 5/10 cm : réception ou refus publié.
 - [ ] **P7** — cœur : fournisseur B au-dessus du plan moyen selon la règle, essais contre la
@@ -107,3 +107,9 @@ P3 : `--multi --revue` (viewer/src/main.rs, `revue_images`) — sept PPM 1280×7
 identiques sur deux exécutions ; journal `viewer/captures/s254/revue.log`. Constat personnel, non
 envoyé comme verdict pour ne pas orienter : mer lisse et vitreuse (B n'a rien sous 3,5 m),
 sillages et impacts presque invisibles une fois ombrés, pas d'écume à force 5.
+
+P5 : `StandingWave::sample_bounded` / `bounded_fields` (règle d'ADR-154, profondeur finie :
+`W = −q(T+kz)…`, `P = ρga(1+kTz)…`). Essai `standing_bounded_extension_controls_s254` vert :
+continuité en z = 0 à 4 ulp, divergence à l'arrondi, dérivées et laplacien contre différences
+finies (1e-6 et 1e-5 relatifs), `S` publié contre f64 ; ordre deux à `z = s·a` : rapport
+`S(10 cm)/4S(5 cm)` entre 1,000 et 1,115.

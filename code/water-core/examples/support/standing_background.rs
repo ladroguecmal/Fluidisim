@@ -4,6 +4,19 @@
 //! `examples/delta_mobile.rs` et les essais du cœur ; `BackgroundSample` vient du module parent.
 use super::BackgroundSample;
 
+/// Champs du fond en f64 (S254), mêmes conventions que `BackgroundSample`.
+#[derive(Clone, Copy, Debug)]
+pub struct Fields {
+    pub eta: f64,
+    pub grad_eta: [f64; 3],
+    pub u: [f64; 3],
+    pub du_dt: [f64; 3],
+    pub grad_u: [[f64; 3]; 3],
+    pub p: f64,
+    pub grad_p: [f64; 3],
+    pub laplacian: [f64; 3],
+}
+
 #[derive(Clone, Copy, Debug)]
 pub struct StandingWave {
     /// Amplitude, m.
@@ -45,6 +58,51 @@ impl StandingWave {
             p_dyn: (rho * a * g * c * cx * ct) as f32,
             grad_p_dyn: [(-rho * a * g * k * c * sx * ct) as f32, 0., (rho * a * g * k * s * cx * ct) as f32],
             laplacian_u: [0.; 3],
+        }
+    }
+
+    /// S254 (ADR-154) : fond **prolongé par la règle bornée** au-dessus du plan moyen — `U`
+    /// constante, `W` fermée par continuité, `P` de Taylor d'ordre un —, le fond analytique au-dessous.
+    /// Arrondi en f32 champ par champ, comme `sample`.
+    pub fn sample_bounded(&self, x: f64, z: f64, t: f64) -> BackgroundSample {
+        if z <= 0. {
+            return self.sample(x, z, t);
+        }
+        let f = self.bounded_fields(x, z, t);
+        let c = |v: [f64; 3]| v.map(|x| x as f32);
+        BackgroundSample {
+            eta: f.eta as f32,
+            grad_eta: c(f.grad_eta),
+            u: c(f.u),
+            du_dt: c(f.du_dt),
+            grad_u: [c(f.grad_u[0]), [0.; 3], c(f.grad_u[2])],
+            p_dyn: f.p as f32,
+            grad_p_dyn: c(f.grad_p),
+            laplacian_u: c(f.laplacian),
+        }
+    }
+
+    /// Les formules de la règle bornée, en f64, pour tout `z` : en `z = 0`, elles rendent le fond
+    /// analytique (`C = 1`, `S = tanh kh`). Avec `T = tanh kh` : `U = q sin kx sin ωt`,
+    /// `W = −q(T + kz) cos kx sin ωt`, `P = ρga(1 + kTz) cos kx cos ωt`, et leurs dérivées exactes.
+    pub fn bounded_fields(&self, x: f64, z: f64, t: f64) -> Fields {
+        let (a, k, h, g, rho) = (self.a, self.k, self.h, self.g, self.rho);
+        let w = self.omega();
+        let tk = (k * h).tanh();
+        let (m, mp) = (tk + k * z, 1. + k * tk * z);
+        let (sx, cx) = ((k * x).sin(), (k * x).cos());
+        let (st, ct) = ((w * t).sin(), (w * t).cos());
+        let q = a * g * k / w;
+        let u = [q * sx * st, 0., -q * m * cx * st];
+        Fields {
+            eta: a * cx * ct,
+            grad_eta: [-a * k * sx * ct, 0., 0.],
+            u,
+            du_dt: [a * g * k * sx * ct, 0., -a * g * k * m * cx * ct],
+            grad_u: [[q * k * cx * st, 0., 0.], [0.; 3], [q * k * m * sx * st, 0., -q * k * cx * st]],
+            p: rho * g * a * mp * cx * ct,
+            grad_p: [-rho * g * a * k * mp * sx * ct, 0., rho * g * a * k * tk * cx * ct],
+            laplacian: [-k * k * u[0], 0., -k * k * u[2]],
         }
     }
 
