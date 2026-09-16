@@ -78,10 +78,10 @@ route (qui porte la trajectoire, L137) : la liste pointe, elle ne recopie pas le
 
 ### Plan
 
-- [>] **P1** — amorce, jeton et plan seuls.
-- [ ] **P2** — inventaire des sources : architecture globale, zones ouvertes, ADR-001, SPEC-002,
+- [x] **P1** — amorce, jeton et plan seuls.
+- [x] **P2** — inventaire des sources : architecture globale, zones ouvertes, ADR-001, SPEC-002,
   cas canoniques, bancs, invariants ; squelette de la liste par domaine.
-- [ ] **P3** — états : validé / partiel / absent, point par point, contre feuille de route, file
+- [x] **P3** — états : validé / partiel / absent, point par point, contre feuille de route, file
   active et preuves ; compte par section.
 - [ ] **P4** — contrôle de couverture (sources, cas, bancs, invariants), rôle écrit dans la liste,
   METHODE et index.
@@ -89,3 +89,10 @@ route (qui porte la trajectoire, L137) : la liste pointe, elle ne recopie pas le
 
 ### Notes de reprise
 
+P2 et P3 faits ensemble (amendement déclaré ici : le squelette sans états n'avait pas de valeur
+propre). Sources lues : architecture globale en entier ; titres des zones ouvertes, SPEC-002, 004,
+005 et 006, cas canoniques, bancs, invariants ; ADR-001 §2. Code sondé : aucune dépendance au cœur ;
+aucun code pour marée, courants, bathymétrie, écume, bulles, glace, audio, sous-marin,
+`WaterSystem`, grille de régions. 119 points : 3 validés (1.2, 5.1, 10.7), 46 partiels, 70 absents,
+recomptés par script. Couverture : changement de solveur (zones ouvertes §19) manquait, ajouté en
+4.20 ; B2, B4, I-04, I-09, I-13 et I-18 rattachés à des points existants.
