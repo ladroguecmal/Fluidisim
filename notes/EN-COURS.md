@@ -103,7 +103,7 @@ branchement déclaré en file avec son déclencheur — dit dans le plan, pas la
 
 - [x] **P1** — amorce, jeton, plan seuls.
 - [x] **P2** — protocole écrit ; note corrective datée sur S244 ; relevé de référence des itérations.
-- [ ] **P3** — hiérarchie allouée dans `configure` et opérateurs de transfert, avec leurs essais.
+- [x] **P3** — hiérarchie allouée dans `configure` et opérateurs de transfert, avec leurs essais.
 - [ ] **P4** — cycle en V et lissage ; **symétrie testée** avant tout branchement.
 - [ ] **P5** — branchement comme préconditionneur ; itérations et coût aux cinq tailles.
 - [ ] **P6** — réception ADR-144, empreintes, suite ; rituel §6, ADR, file, jeton.
@@ -114,6 +114,17 @@ P2 : protocole `docs/validation/MULTIGRILLE-S245.md` ; note corrective datee por
 COUT-DELTA-S244 §6 (« Jacobi diagonal present » etait faux du chemin mesure).
 Reference avant modification, chemin fixe, gradient conjugue **nu** : iterations
 **30 / 61 / 114 / 220 / 425**, pas 0,089 / 0,699 / 5,256 / ~37-42 / **286,2** ms.
+
+P3 : `code/water-core/src/delta_multigrid.rs` — `Level`, `level_count`, `hierarchy_floats`
+(comptage I-06 **avant** allocation), `apply_level`, `diagonal`, `coarsen_into`, `restrict`,
+`prolong_add`, `smooth`. Hierarchie construite dans `configure` **apres `cut()`**, la geometrie y
+etant figee une fois pour toutes. Regle d'arret : paire et au moins 8 -> 64x32 donne **3** niveaux
+(32x16, 16x8, 8x4), 16x8 en donne 1, une dimension impaire en donne 0.
+Trois essais verts : (1) `apply_level` rend **les memes bits** que `Volume::apply` sur la grille
+fine, fond plat et fond coupe — c'est ce qui interdit aux deux ecritures de diverger (L137) ;
+(2) restriction et prolongation **adjointes a un facteur quatre pres**, ce qui rendra le cycle
+symetrique ; (3) hierarchie, dimensions, `inv` double au carre, diagonale positive sur mouille et
+nulle sur sec.
 
 ---
 

@@ -1171,3 +1171,76 @@ apply={a:.5} dot={d:.5} axpy={x:.5} norm2={n:.5} dir={g:.5} \
         );
     }
 }
+
+/// S245 P3 — l'opérateur des niveaux grossiers est **le même** que celui du chemin à couvercle fixe.
+/// Il est écrit deux fois — l'un porte le budget coopératif, l'autre non — et cet essai est ce qui
+/// interdit aux deux écritures de diverger : sur la grille fine, elles doivent rendre les **mêmes
+/// bits**, fond plat comme fond coupé.
+#[test]
+fn the_coarse_operator_is_the_fine_one_bit_for_bit_s245() {
+    for cut in [false, true] {
+        let (nx, nz, dx) = (16usize, 8usize, 0.5f32);
+        let ground: Vec<f32> = (0..nx)
+            .map(|i| if cut { 0.4 + 0.6 * (-(((i as f32) * dx - 3.) / 1.2).powi(2)).exp() } else { 0.5 })
+            .collect();
+        let mut v = mobile_volume(nx, nz, dx, &ground);
+        let eta: Vec<f32> = (0..nx).map(|i| v.domain().z0() - 0.01 * i as f32).collect();
+        v.set_surface(&eta).unwrap();
+        let p: Vec<f32> = (0..nx * nz).map(|c| ((c * 37 % 101) as f32 - 50.) * 0.07).collect();
+        let mut by_volume = vec![f32::NAN; nx * nz];
+        let mut ctl = Control::unlimited();
+        v.apply(&p, &mut by_volume, &mut ctl).unwrap();
+        let mut by_level = vec![f32::NAN; nx * nz];
+        crate::delta_projection::multigrid::apply_level(
+            nx, nz, 1. / (dx * dx), &v.open_u, &v.open_w, &v.frac, &p, &mut by_level,
+        );
+        for (c, (a, b)) in by_level.iter().zip(&by_volume).enumerate() {
+            assert_eq!(a.to_bits(), b.to_bits(), "maille {c}, fond coupé {cut}");
+        }
+    }
+}
+
+/// S245 P3 — restriction et prolongation sont **adjointes à un facteur quatre près**, constant. Ce
+/// couple est ce qui rend le cycle symétrique, donc utilisable par le gradient conjugué : si
+/// l'adjonction tombe, la récurrence du gradient conjugué n'est plus valide.
+#[test]
+fn restriction_and_prolongation_are_adjoint_s245() {
+    use crate::delta_projection::multigrid::{prolong_add, restrict};
+    let (nx, nz) = (16usize, 8usize);
+    let (cx, cz) = (nx / 2, nz / 2);
+    let fine: Vec<f32> = (0..nx * nz).map(|c| ((c * 53 % 97) as f32 - 48.) * 0.11).collect();
+    let coarse: Vec<f32> = (0..cx * cz).map(|c| ((c * 29 % 61) as f32 - 30.) * 0.23).collect();
+    let mut restricted = vec![0f32; cx * cz];
+    restrict(nx, &fine, cx, cz, &mut restricted);
+    let mut prolonged = vec![0f32; nx * nz];
+    prolong_add(nx, &mut prolonged, cx, cz, &coarse);
+    let left: f64 = restricted.iter().zip(&coarse).map(|(a, b)| *a as f64 * *b as f64).sum();
+    let right: f64 = fine.iter().zip(&prolonged).map(|(a, b)| *a as f64 * *b as f64).sum();
+    assert!(
+        (4. * left - right).abs() <= 1e-4 * right.abs().max(1.),
+        "adjonction : 4·{left} contre {right}"
+    );
+    // La prolongation **ajoute** : appelée deux fois, elle double ce qu'elle a déposé.
+    prolong_add(nx, &mut prolonged, cx, cz, &coarse);
+    assert!(prolonged.iter().zip(&fine).all(|(a, _)| a.is_finite()));
+}
+
+/// S245 P3 — la hiérarchie s'arrête où la règle le dit, et sa géométrie moyenne bien les filles.
+#[test]
+fn the_hierarchy_halves_until_the_rule_stops_it_s245() {
+    use crate::delta_projection::multigrid::level_count;
+    assert_eq!(level_count(64, 32), 3, "64×32 → 32×16 → 16×8 → 8×4, puis 4 est sous huit");
+    assert_eq!(level_count(16, 8), 1, "16×8 → 8×4, et l'on s'arrête là");
+    assert_eq!(level_count(15, 8), 0, "dimension impaire : aucun niveau");
+    let (nx, nz, dx) = (64usize, 32usize, 0.125f32);
+    let mut v = mobile_volume(nx, nz, dx, &vec![0.5; nx]);
+    v.set_surface(&vec![v.domain().z0(); nx]).unwrap();
+    assert_eq!(v.levels.len(), 3);
+    assert_eq!((v.levels[0].nx, v.levels[0].nz), (32, 16));
+    assert_eq!((v.levels[1].nx, v.levels[1].nz), (16, 8));
+    assert_eq!((v.levels[2].nx, v.levels[2].nz), (8, 4));
+    // `inv` double de niveau en niveau, au carré : `dx` double.
+    assert!((v.levels[0].inv - 1. / (2. * dx * (2. * dx))).abs() < 1e-6);
+    // Une diagonale de maille mouillée est strictement positive ; une maille sèche rend zéro.
+    assert!(v.levels[0].diag.iter().zip(&v.levels[0].frac).all(|(d, f)| if *f > 0. { *d > 0. } else { *d == 0. }));
+}

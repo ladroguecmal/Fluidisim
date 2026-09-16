@@ -47,6 +47,9 @@ use budget::Control;
 // S237 : surface géométriquement mobile (fonction hauteur, fluide fantôme). Voir SURFACE-MOBILE-S237.
 #[path = "delta_mobile.rs"]
 mod mobile;
+// S245 : hiérarchie multigrille, préconditionneur du chemin à couvercle fixe (MULTIGRILLE-S245).
+#[path = "delta_multigrid.rs"]
+mod multigrid;
 pub use mobile::SURFACE_THETA_MIN;
 
 // S238 P3 : trace de mesure du plancher (tests seulement) — à chaque vrai résidu recalculé :
@@ -230,6 +233,9 @@ pub struct Volume {
     /// S237 : vrai pendant un pas mobile — opérateur, second membre et correction lisent alors
     /// la surface réelle ; faux, les chemins S199–S233 sont exécutés tels quels.
     mobile: bool,
+    /// S245 : niveaux grossiers du préconditionneur multigrille, du plus fin au plus grossier.
+    /// Vide quand la grille ne se divise pas ; la géométrie y est figée par `cut()`.
+    levels: Vec<multigrid::Level>,
     /// S237 : inverse de la diagonale de l'opérateur mobile (préconditionneur de Jacobi).
     prec: Vec<f32>,
 }
@@ -279,6 +285,10 @@ impl Volume {
             .and_then(|n| n.checked_add(c))
             .and_then(|n| nx.checked_mul(5).and_then(|x| n.checked_add(x)))
             .ok_or(Error::Domain)?;
+        // S245 : la hiérarchie multigrille entre dans le même comptage, avant toute allocation.
+        let floats = floats
+            .checked_add(multigrid::hierarchy_floats(nx, nz))
+            .ok_or(Error::Domain)?;
         let bytes = floats.checked_mul(core::mem::size_of::<f32>())
             .and_then(|n| c.checked_mul(7 * core::mem::size_of::<f32>()).and_then(|p| n.checked_add(p)))
             .ok_or(Error::Domain)?;
@@ -320,13 +330,55 @@ impl Volume {
             rest: domain.z0(),
             mobile: false,
             prec: vec![0.0f32; nx * nz],
+            levels: Vec::new(),
         };
         v.cut();
         v.seal_isolated();
+        // S245 : la géométrie est figée par `cut` ; la hiérarchie s'en déduit une fois pour toutes.
+        v.build_hierarchy();
         if v.frac.iter().all(|f| *f == 0.) {
             return Err(Error::Domain);
         }
         Ok(v)
+    }
+
+    /// S245 — construit les niveaux grossiers depuis la géométrie que `cut` vient de figer. Chaque
+    /// niveau est moyenné depuis celui du dessus, et sa diagonale calculée dans la foulée. Rien
+    /// n'est alloué ailleurs qu'ici : après `seal`, plus une maille (I-06).
+    fn build_hierarchy(&mut self) {
+        let (mut nx, mut nz, mut dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
+        let count = multigrid::level_count(nx, nz);
+        self.levels.reserve_exact(count);
+        for _ in 0..count {
+            let (cx, cz) = (nx / 2, nz / 2);
+            let cdx = dx * 2.;
+            let mut level = multigrid::Level {
+                nx: cx,
+                nz: cz,
+                inv: 1. / (cdx * cdx),
+                open_u: vec![0.; (cx + 1) * cz],
+                open_w: vec![0.; cx * (cz + 1)],
+                frac: vec![0.; cx * cz],
+                diag: vec![0.; cx * cz],
+                x: vec![0.; cx * cz],
+                r: vec![0.; cx * cz],
+                t: vec![0.; cx * cz],
+            };
+            match self.levels.last() {
+                Some(prev) => multigrid::coarsen_into(
+                    prev.nx, prev.nz, &prev.open_u, &prev.open_w, &prev.frac, &mut level,
+                ),
+                None => multigrid::coarsen_into(
+                    nx, nz, &self.open_u, &self.open_w, &self.frac, &mut level,
+                ),
+            }
+            multigrid::diagonal(
+                level.nx, level.nz, level.inv,
+                &level.open_u, &level.open_w, &level.frac, &mut level.diag,
+            );
+            self.levels.push(level);
+            (nx, nz, dx) = (cx, cz, cdx);
+        }
     }
 
     /// Hauteur du fond **aux arêtes** de colonnes. Le fond fourni est échantillonné aux
