@@ -282,7 +282,15 @@ impl Volume {
             swapped = true;
             self.coupled_predict(bg,dt,sponge,&mut ctl)?;
             self.mobile = true;
-            let projected = self.project(scale,correction,max_iters,false,jobs,&mut ctl);
+            let mut projected = self.project(scale,correction,max_iters,false,jobs,&mut ctl);
+            // S253, ADR-153 : refusé au plancher, le pas reçoit une fois l'affinage d'ADR-150,
+            // valeurs fantômes homogènes ; `iterations` compte les deux projections.
+            if let Ok(first) = projected {
+                if first.degraded && first.floor {
+                    projected = self.refine_divergence(scale,correction,max_iters,false,jobs,&mut ctl)
+                        .map(|mut r| {r.iterations = r.iterations.saturating_add(first.iterations); r});
+                }
+            }
             self.mobile = false;
             let report = projected?;
             if report.degraded {return Err(Error::Convergence);}
@@ -307,6 +315,7 @@ impl Volume {
         })();
         self.mobile = false;
         self.surface_coupled = false;
+        self.homogeneous_ghost = false;
         if result.is_err() && swapped {
             self.swap_state();
             core::mem::swap(&mut self.eta,&mut self.saved_eta);

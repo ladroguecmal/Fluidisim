@@ -241,6 +241,8 @@ pub struct Volume {
     /// S251 : pression principale conservée pendant l'affinage de vitesse, ADR-150.
     pressure_base: Vec<f32>,
     homogeneous_lid: bool,
+    /// S253, ADR-153 : affinage en mode mobile — valeurs fantômes nulles, `θ` inchangés.
+    homogeneous_ghost: bool,
     /// S253, ADR-152 : pas perturbatif mobile en cours — la géométrie lit `surface_total`.
     surface_coupled: bool,
     /// S253 : surface totale `ζ = η' + ζ_fond` du pas couplé, par colonne.
@@ -353,6 +355,7 @@ impl Volume {
             saved_p: vec![0.; c],
             pressure_base: vec![0.; c],
             homogeneous_lid: false,
+            homogeneous_ghost: false,
             surface_coupled: false,
             surface_total: vec![0.; nx],
             ghost_bg_up: vec![0.; nx],
@@ -1342,9 +1345,12 @@ impl Volume {
         budget::copy(&self.p, &mut self.pressure_base, ctl, Phase::Prepare)?;
         budget::copy(&self.u, &mut self.us, ctl, Phase::Prepare)?;
         budget::copy(&self.w, &mut self.ws, ctl, Phase::Prepare)?;
+        // S253, ADR-153 : en mode mobile, les valeurs fantômes jouent le rôle du couvercle.
         self.homogeneous_lid = true;
+        self.homogeneous_ghost = true;
         let result = self.project(scale, correction, max_iters, multigrid, jobs, ctl);
         self.homogeneous_lid = false; // y compris Err(Budget/Clock), avant toute propagation
+        self.homogeneous_ghost = false;
         let mut report = result?;
         for (p, base) in self.p.iter_mut().zip(&self.pressure_base) {
             ctl.poll(Phase::Correct)?;

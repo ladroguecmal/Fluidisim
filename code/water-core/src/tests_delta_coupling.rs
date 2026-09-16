@@ -603,3 +603,45 @@ fn coupled_mobile_first_step_refusal_diagnosis_s253(){
         println!("S253_DIAG   vrais_residus={} premiers={head:?} derniers={tail:?}",trace.len());
     }
 }
+
+/// S253, ADR-153 — **premier pas couplé mobile à 128 colonnes, 5 cm** : sans affinage, la projection
+/// s'arrête au plancher au-dessus de la tolérance (témoin) ; par l'API, le pas est reçu par un
+/// affinage à valeurs fantômes homogènes. Une expiration tardive laisse tout intact. Release.
+#[test]
+#[cfg_attr(debug_assertions, ignore = "128 colonnes : release")]
+fn coupled_mobile_first_step_is_received_by_refinement_s253(){
+    let wave=standing::StandingWave{a:0.05,k:std::f64::consts::PI/2.,h:2.,g:9.81,rho:1025.};
+    let nx=128;
+    let build=||standing_case(nx,&wave,&vec![2.;nx]);
+    let probe=build();
+    let (u,w)=standing_faces(&probe,&wave,0.);
+    let bg=BackgroundFaces{domain:probe.domain,time:SimTime(0),density:1025.,gravity:9.81,u:&u,w:&w};
+    let mut witness=build();
+    let mut ctl=Control::unlimited();
+    witness.prepare_surface_background(&bg,&mut ctl).unwrap();
+    witness.coupled_predict(&bg,0.001,Sponge::default(),&mut ctl).unwrap();
+    witness.mobile=true;
+    let r0=witness.project(-1_025_000.,(0.001f64/1025.) as f32,4000,false,&Jobs,&mut ctl).unwrap();
+    assert!(r0.degraded&&r0.floor,"témoin : refusé au plancher attendu {r0:?}");
+    struct Counter(std::cell::Cell<u64>,u64);
+    impl MonotonicClock for Counter {fn now_ns(&self)->u64 {
+        let n=self.0.get();self.0.set(n+1);if n>=self.1 {1_000_000_000} else {0}
+    }}
+    let mut v=build();
+    let count=Counter(std::cell::Cell::new(0),u64::MAX);
+    let r=v.step_perturbation_mobile(SimTime(0),1000,4000,1_000_000,&bg,Sponge::default(),&Jobs,&count).unwrap();
+    let report=r.report.unwrap();
+    println!("S253_128 temoin={r0:?}\nS253_128 pas={report:?}");
+    assert_eq!(r.advanced_us,1000);
+    assert_eq!(report.refinements,1);
+    assert!(!report.degraded&&report.divergence_plain<=super::super::PROJECTION_DIVERGENCE_TOLERANCE,"{report:?}");
+    assert!(!v.homogeneous_ghost&&!v.surface_coupled&&!v.mobile);
+    let calls=count.0.get();
+    let mut late=build();
+    let before=(late.u.clone(),late.w.clone(),late.p.clone(),late.eta.clone());
+    let r=late.step_perturbation_mobile(SimTime(0),1000,4000,1_000_000,&bg,Sponge::default(),&Jobs,
+        &Counter(std::cell::Cell::new(0),calls*9/10)).unwrap();
+    assert_eq!(r.advanced_us,0);
+    assert_eq!((late.u.clone(),late.w.clone(),late.p.clone(),late.eta.clone()),before);
+    assert!(!late.homogeneous_ghost&&!late.surface_coupled&&!late.mobile);
+}

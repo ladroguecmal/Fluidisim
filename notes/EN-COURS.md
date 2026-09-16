@@ -90,7 +90,7 @@ z > 0), multigrille/affinage du mode mobile, 3D, rendu, ordre d'ADR-147.
 - [x] **P5** — cœur : pas perturbatif mobile, transport de η' et bande, atomicité.
 - [x] **P6** — essais : identité au bit, refus, expiration, allocations, témoin sans résidus.
 - [x] **P7** — banc HOS couplé 32/64/128, 5 et 10 cm : réception ou refus publié.
-- [ ] **P7b** — ADR-153 : affinage de divergence au plancher étendu au pas couplé mobile
+- [x] **P7b** — ADR-153 : affinage de divergence au plancher étendu au pas couplé mobile
   (valeurs fantômes homogènes) ; essai au premier pas à 128 colonnes, témoin refusé.
 - [ ] **P7c** — réception complète 64/128 aux deux amplitudes, coût séparé sans concurrence.
 - [ ] **P8** — suite, empreinte, coût et preuve.
@@ -137,3 +137,8 @@ au pas couplé mobile est une décision bornée, déclarée ici avant tout code.
 n'est pas touché (aucun refus observé). Critères de P7b : sans affinage, le premier pas à
 128/5 cm reste refusé ; avec, reçu, `refinements = 1`, D_franche ≤ 1e-5, mode homogène éteint à
 toute sortie. P7c : critères 3 et 4 du protocole inchangés.
+
+P7b : homogeneous_ghost (valeurs fantômes nulles) posé par refine_divergence avec homogeneous_lid ;
+step_perturbation_mobile affine si dégradé au plancher. Essai 128/5 cm (release) : témoin refusé
+(690 it, D_franche 1,53e-5), pas reçu (1 145 it, D 6,67e-8), expiration tardive intacte. Tests δ
+58/12 ignorés, exécution 12, S237 essai inchangé. ADR-153 écrit.

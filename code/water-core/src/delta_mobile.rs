@@ -42,6 +42,7 @@ impl Volume {
     #[inline]
     fn ghost_up(&self, i: usize, k: usize) -> (f32, f32) {
         let theta = ((self.height(i) - self.zc(k)) / self.domain.dx).max(SURFACE_THETA_MIN);
+        if self.homogeneous_ghost { return (1. / theta, 0.); } // S253, ADR-153 : affinage
         let mut value = self.rho * self.g_eff * ((self.eta[i] - self.rest) - self.eta_roundoff[i]);
         // S253 (ADR-152) : `η` porte alors η' ; le fond ajoute `ρg·ζ_fond − P_fond(Γ)`.
         if self.surface_coupled { value += self.ghost_bg_up[i]; }
@@ -55,6 +56,7 @@ impl Volume {
     fn ghost_side(&self, i: usize, k: usize, j: usize) -> (f32, f32) {
         let zc = self.zc(k);
         let theta = ((self.height(i) - zc) / (self.height(i) - self.height(j))).max(SURFACE_THETA_MIN);
+        if self.homogeneous_ghost { return (1. / theta, 0.); } // S253, ADR-153 : affinage
         let mut value = self.rho * self.g_eff * (zc - self.rest);
         // S253 (ADR-152) : moins la pression du fond à l'interface, portée par la face u partagée.
         if self.surface_coupled { value += self.ghost_bg_side[self.fu(i.max(j), k)]; }
