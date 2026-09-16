@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S255 — en cours
+Session : S255 — terminée
 Agent : Claude Opus 5, Claude Code ; fichiers, git, cargo, Python et GPU local disponibles.
 Entrée (2026-09-16 22:05), demande de l'utilisateur **avant son premier retour visuel** : « un .md
 qui est une to do list avec tous les éléments que le projet fini doit avoir et pouvoir faire ;
@@ -85,7 +85,7 @@ route (qui porte la trajectoire, L137) : la liste pointe, elle ne recopie pas le
   active et preuves ; compte par section.
 - [x] **P4** — contrôle de couverture (sources, cas, bancs, invariants), rôle écrit dans la liste,
   METHODE et index.
-- [ ] **P5** — rituel §6 : journal, jeton.
+- [x] **P5** — rituel §6 : journal, jeton.
 
 ### Notes de reprise
 

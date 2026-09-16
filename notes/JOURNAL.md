@@ -13180,3 +13180,30 @@ actualisées, ligne de revue ajoutée ; feuille de route J1 et J2 ; notes datée
 index ; jeton. Invariants relus : I-06 (fournisseur sans collection ; allocation non mesurée),
 I-08 (f32, formules f64 seulement dans les essais), I-12 (naissance à zéro inchangée), I-14
 (tolérances S237/S253 inchangées, règle citée). Aucune copie ni distant touché.
+
+## S255 — La liste du projet fini
+
+**2026-09-16, Claude Opus 5.** Entrée : demande de l'utilisateur, avant son premier retour visuel.
+Il veut un .md en forme de liste de tâches, avec tout ce que le projet fini doit avoir et savoir
+faire ; je valide ou non chaque point, et il demandera de temps en temps de la remplir. Master
+propre 97129a4, copie unique. Plan `08d522f`, liste `b3c539d`, liens `a6e0c5a`.
+
+**Fait.** [LISTE-PROJET-FINI](../docs/LISTE-PROJET-FINI.md) : **119 points** en treize sections,
+tirés de l'ambition complète et non de l'état construit. Sources : architecture globale, zones
+ouvertes, couches d'ADR-001, invariants, SPEC-002 à 006, 23 cas, 11 bancs. États, recomptés par
+script : **3 validés** (cœur sans dépendance, vidange de V par C12, aucun état δ sérialisé),
+**46 partiels**, **70 absents**. « Validé » exige une preuve sur le périmètre final du point : un
+banc isolé, un véhicule d'essai ou une scène unique ne suffisent pas. Sections sans aucun point
+construit : phénomènes secondaires (écume, spray, bulles, air, glace, traversabilité, audio). La
+couverture a été contrôlée contre les sources ; le changement de solveur manquait et a été ajouté.
+
+**Rôle.** La liste coche et pointe. La trajectoire reste dans la feuille de route, et les preuves
+dans les documents liés (L137). Elle est reliée à l'index, à METHODE et à la feuille de route.
+
+**Limites.** Les états viennent de la feuille de route, de la file active et d'un sondage du code,
+pas d'une réexécution. Pour C18, l'exécution sur le système reste à relire. Le décompte ne mesure
+pas l'avancement.
+
+**Maillons 1** : aucune capacité reçue, travail documentaire demandé. **Suite** inchangée : R1 dès
+réception des références, sinon bords ouverts du pas couplé.
+
