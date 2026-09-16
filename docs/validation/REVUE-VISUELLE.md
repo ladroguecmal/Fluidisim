@@ -66,6 +66,57 @@ tel quel, et c'est la réception qu'on réexamine d'abord.
 
 ## 5. Registre des revues
 
-| revue | date | images (empreintes) | références | verdict résumé | classe et suite |
+| revue | date | images | références | verdict résumé | classe et suite |
 |---|---|---|---|---|---|
-| — | — | — | — | — | — |
+| **R1** | 2026-09-16 | sept rendus J1, §6 | demandées, §6.3 | **en attente** | — |
+
+## 6. R1 — la scène J1 telle qu'elle est, S254
+
+```
+cd viewer
+cargo run --release --offline --locked -- --multi --revue
+python ../outils/apercu_ppm.py captures/s254/<image>.ppm
+```
+
+Deux exécutions rendent les mêmes empreintes. GPU NVIDIA RTX 5070 Laptop, DX12, 1280×720, champ
+vertical 50°, grille projetée à deux pixels, filtre spectral et grille du sillage actifs, visibilité
+active.
+
+### 6.1 Ce qui est rendu
+
+- **B** : mer JONSWAP V1 de S201 — `Hs` 1,5 m, `Tp` 6 s, **32 composantes**, bande 0,5 à 4 `fp`,
+  donc **aucune onde plus courte que 3,5 m**. Linéaire : crêtes et creux symétriques.
+- **W** : trois sillages d'un journal commun (source de pression 19 620 N, σ 2 m, 3 m/s pendant
+  16 s depuis x = −24 m) et huit impacts nés toutes les 4 s (S235).
+- **Absents** : δ, V, écume, gerbes, cavités, ondes capillaires, réfraction, sous-surface.
+- **Habillage de banc** : ciel uniforme, soleil, couleur de l'eau, brouillard d'horizon.
+
+### 6.2 Images
+
+| image | œil (m) | lacet / tangage (rad) | âge | contenu | empreinte |
+|---|---|---|---:|---|---|
+| `r1_reference_12s` | 0, −18, 7 | 0 / −0,131 | 12 s | B + W, 4 impacts, sillages | `0x7829238e42056201` |
+| `r1_reference_fond_seul_12s` | 0, −18, 7 | 0 / −0,131 | 12 s | B seul | `0x275081ad983db7c9` |
+| `r1_haute_12s` | 0, −40, 30 | 0 / −0,55 | 12 s | B + W | `0xe48879f40a422831` |
+| `r1_plongeante_12s` | 0, 0, 90 | 0 / −1,2 | 12 s | B + W | `0x47815f87fba2073f` |
+| `r1_rasante_12s` | 0, −18, 2 | 0 / −0,05 | 12 s | B + W | `0xdc2ef3e2cf2bb9de` |
+| `r1_impact_proche_5s` | 0, −8, 3 | 0 / −0,3 | 5 s | B + W, 2 impacts | `0x1aa56f756745eff8` |
+| `r1_large_horizon_29s` | 0, −18, 25 | 0,6 / −0,12 | 29 s | B + W, hors domaine honnête du sillage | `0xa329a85c503a2db3` |
+
+La carte `captures/s248/mer_perturbation.png` (S248, `0x348c9e100ab10c7f`) accompagne R1 : ce
+n'est pas un rendu, c'est la hauteur de W seule, vue de dessus, pour montrer où sont sillages et
+impacts.
+
+### 6.3 Questions posées et références demandées
+
+Questions : échelle perçue (mer, lac, piscine ?) ; premier défaut qui saute aux yeux ; sillages et
+impacts visibles ou non, et le seraient-ils en vrai à cette distance ; ce qui manque à l'horizon.
+
+Références, avec leurs conditions si connues :
+
+1. mer ouverte, **force 4 à 5** (vent ≈ 8–10 m/s, creux ≈ 1,5 m), vue depuis un pont à **2–7 m**,
+   vers l'horizon ;
+2. la même mer vue de **25–30 m** (passerelle, falaise) ;
+3. **drone à la verticale**, 50–100 m, d'un petit bateau lent (**≈ 3 m/s, 6 nœuds**) et de son sillage ;
+4. **objet tombant** dans l'eau libre, vu de 3–8 m : les anneaux, puis la gerbe ;
+5. **vidéos** de 10–20 s des cas 1 et 3, pour le mouvement.

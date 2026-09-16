@@ -1575,6 +1575,56 @@ fn verify_multi(frame: &mut FrameData<'_>) -> Result<(), String> {
     Ok(())
 }
 
+/// S254 — **revue visuelle** (REVUE-VISUELLE.md) : ce que voit la fenêtre, à poses et âges fixes,
+/// pour que l'utilisateur juge les rendus contre des références réelles. Même chemin que la
+/// fenêtre — grille du sillage, filtre spectral, visibilité — et PPM locaux avec empreinte FNV
+/// (ADR-124), jamais publiés. Ciel, soleil, couleur et brouillard restent de l'habillage de banc.
+fn revue_images(frame: &mut FrameData<'_>) -> Result<(), String> {
+    const DIR: &str = "captures/s254";
+    std::fs::create_dir_all(DIR).map_err(|e| e.to_string())?;
+    let (width, height) = (1280u32, 720u32);
+    let instance = instance();
+    let mut g = pollster::block_on(gpu::Gpu::new(&instance, None, width, height,
+        frame.profile.len(), scene::WAKE_CAPACITY))?;
+    frame.lod = true;
+    frame.cull = true;
+    frame.viewport = Some((width as f32 / height as f32, g.nx, g.ny));
+    // (nom, caméra, âge de scène, perturbations visibles)
+    let poses: [(&str, Camera, f64, bool); 7] = [
+        ("r1_reference_12s", Camera::default(), 12., true),
+        ("r1_reference_fond_seul_12s", Camera::default(), 12., false),
+        ("r1_haute_12s", Camera { eye: [0., -40., 30.], yaw: 0., pitch: -0.55 }, 12., true),
+        ("r1_plongeante_12s", Camera { eye: [0., 0., 90.], yaw: 0., pitch: -1.2 }, 12., true),
+        ("r1_rasante_12s", grazing_camera(), 12., true),
+        ("r1_impact_proche_5s", Camera { eye: [0., -8., 3.], yaw: 0., pitch: -0.3 }, 5., true),
+        ("r1_large_horizon_29s", Camera { eye: [0., -18., 25.], yaw: 0.6, pitch: -0.12 }, 29., true),
+    ];
+    for (name, camera, age, enabled) in poses {
+        frame.camera = camera;
+        frame.update(age, age, enabled);
+        g.upload(frame);
+        let target = g.target();
+        g.draw(&target.create_view(&Default::default()), false);
+        let path = format!("{DIR}/{name}.ppm");
+        g.capture(&target, &path)?;
+        let bytes = std::fs::read(&path).map_err(|e| e.to_string())?;
+        let header = format!("P6
+{width} {height}
+255
+").len();
+        let hash = bytes[header..]
+            .iter()
+            .fold(0xcbf2_9ce4_8422_2325u64, |h, b| (h ^ *b as u64).wrapping_mul(0x100_0000_01b3));
+        let c = &frame.camera;
+        println!(
+            "REVUE_S254 image={name}.ppm {width}x{height} oeil=[{},{},{}] lacet={} tangage={} champ_vertical=50deg age_s={age} perturbations={enabled} sillage_actif={} impacts_actifs={} filtre_spectral={} empreinte=0x{hash:016x}",
+            c.eye[0], c.eye[1], c.eye[2], c.yaw, c.pitch, frame.wake_active,
+            frame.impacts.iter().filter(|s| s.active).count(), frame.spectral,
+        );
+    }
+    Ok(())
+}
+
 /// S249 : même entrée de shader que le rendu, y compris les voisins projetés.
 fn spectral_verify(frame: &mut FrameData<'_>) -> Result<(), String> {
     let instance = instance();
@@ -1747,6 +1797,9 @@ fn run() -> Result<(), String> {
     if args.iter().any(|a| a == "--verify") { frame.spectral = false; }
     if args.iter().any(|a| a == "--topologie") {
         return topologie_images(&mut frame);
+    }
+    if multi && args.iter().any(|a| a == "--revue") {
+        return revue_images(&mut frame);
     }
     if args.iter().any(|a| a == "--lod-charge") {
         lod_charge(&mut frame);

@@ -71,6 +71,7 @@ déclarée dans `scene.rs` : trois sillages d'un journal commun et huit impacts 
 | `--start=N` | ouvre la fenêtre à N secondes de scène |
 | `--away` | caméra hors champ (0, −300, 12), dos à la scène |
 | `--no-cull` | fenêtre sans visibilité (toutes les sources préparées à chaque image) |
+| `--multi --revue` | S254 : sept rendus 1280×720 à poses et âges fixes, avec empreinte, dans `captures/s254/` ([revue visuelle](../docs/validation/REVUE-VISUELLE.md)) |
 
 La fenêtre ne prépare que ce que la grille voit : emprise de la grille projetée sur l'eau, contour
 exact aux sommets de bord, marge par arête. Les vérifications gardent la visibilité coupée, leurs

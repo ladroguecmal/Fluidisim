@@ -90,7 +90,7 @@ en regard. Ensuite fournisseur B de production au-dessus du plan moyen. Hors lot
 - [x] **P1** — amorce, lectures, jeton et plan seuls.
 - [x] **P2** — protocole de revue visuelle (document de validation), rôle dans REPRISE §2,
   ligne de METHODE, index.
-- [ ] **P3** — hôte : mode `--revue` à poses et âges fixes, captures avec empreinte, PNG ; revue R1
+- [x] **P3** — hôte : mode `--revue` à poses et âges fixes, captures avec empreinte, PNG ; revue R1
   envoyée à l'utilisateur avec les références demandées, consignée en attente.
 - [ ] **P4** — ADR-154 et protocole de réception d'A286, avant code.
 - [ ] **P5** — oracle : prolongement du mode stationnaire selon la règle, contrôles
@@ -103,3 +103,7 @@ en regard. Ensuite fournisseur B de production au-dessus du plan moyen. Hors lot
 
 ### Notes de reprise
 
+P3 : `--multi --revue` (viewer/src/main.rs, `revue_images`) — sept PPM 1280×720, empreintes
+identiques sur deux exécutions ; journal `viewer/captures/s254/revue.log`. Constat personnel, non
+envoyé comme verdict pour ne pas orienter : mer lisse et vitreuse (B n'a rien sous 3,5 m),
+sillages et impacts presque invisibles une fois ombrés, pas d'écume à force 5.
