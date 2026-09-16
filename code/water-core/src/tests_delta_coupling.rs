@@ -85,6 +85,7 @@ fn sponge_is_exact_exponential_and_preserves_interior_s250(){
     assert_eq!(s.factor(4.,8.,0.2),1.);
     assert!((s.factor(0.,8.,0.2)-(-0.8f32).exp()).abs()<1e-7);
     assert_eq!(s.factor(1.,8.,0.2),s.factor(7.,8.,0.2));
+    assert!((s.factor(1.,8.,0.2)-(-0.2f32).exp()).abs()<1e-7);
     let mut v=volume();let (u,w)=fields(&v);let bg=input(&v,&u,&w);
     // vertical shear w(x), independent of z: solenoidal, zero self-advection.
     for k in 0..=8 {for i in 0..16 {let f=v.fw(i,k);v.w[f]=(i as f32*0.2).sin();}}
@@ -93,6 +94,26 @@ fn sponge_is_exact_exponential_and_preserves_interior_s250(){
     assert!(!r.degraded);
     let after:f64=v.u.iter().chain(&v.w).map(|x|(*x as f64).powi(2)).sum();
     assert!(after<before,"{before} -> {after}");
+}
+
+#[test]
+fn context_shape_sponge_and_overflow_refuse_s250(){
+    let mut v=volume();let (u,w)=fields(&v);
+    let mut bg=input(&v,&u,&w);
+    bg.density=1000.;assert_eq!(run(&mut v,&bg,Sponge::default()),Err(Error::BackgroundContext));
+    bg.density=1025.;bg.gravity=1.;assert_eq!(run(&mut v,&bg,Sponge::default()),Err(Error::BackgroundContext));
+    bg.gravity=9.81;bg.u=&u[1..];assert_eq!(run(&mut v,&bg,Sponge::default()),Err(Error::Shape));
+    bg.u=&u;
+    for s in [Sponge{width_m:0.,rate_per_s:1.},Sponge{width_m:5.,rate_per_s:1.},
+        Sponge{width_m:1.,rate_per_s:f32::NAN}] {
+        assert_eq!(run(&mut v,&bg,s),Err(Error::Domain));
+    }
+    for (t,dt,budget) in [(0,0,1000),(u64::MAX,1,1000),(0,1,u64::MAX),(0,(1<<53)+1,1000)] {
+        assert_eq!(v.step_perturbation(SimTime(t),dt,2000,budget,&bg,Sponge::default(),&Jobs,&Clock),Err(Error::NotFinite));
+    }
+    v.rest-=0.5;
+    assert_eq!(run(&mut v,&bg,Sponge::default()),Err(Error::BackgroundContext));
+    assert!(v.u.iter().chain(&v.w).chain(&v.p).all(|x|*x==0.));
 }
 
 #[test]
