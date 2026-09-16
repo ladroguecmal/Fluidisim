@@ -400,6 +400,126 @@ fn topologie_images(frame: &mut FrameData<'_>) -> Result<(), String> {
         topologie::DIR
     );
     sea_topology(frame)?;
+    for (nom, eye, yaw, pitch) in [
+        ("reference", [0f32, -18., 7.], 0f32, -(7.0f32 / 53.).atan()),
+        ("rasante", [0f32, -18., 2.], 0f32, -0.05f32),
+    ] {
+        lod_mesh(frame, nom, eye, yaw, pitch)?;
+    }
+    Ok(())
+}
+
+/// S248 P4 — **le maillage du LOD**, deux cartes par pose.
+///
+/// `maillage_ecran` est ce que le joueur voit, repeint par l'ecart entre sommets voisins : chaque
+/// pixel rouge est une onde que l'image ne peut pas porter. `maillage_monde` montre **ou les
+/// sommets tombent** sur l'eau, vu de dessus, autour de la camera.
+///
+/// Le seul seuil trace est `λ_min/2`, qui vient de la recette. Les extrema imprimes doivent
+/// retrouver ceux de S247 — 2,589 m a la pose de reference, 8,243 m a la rasante —, faute de quoi
+/// la carte est fausse et on le sait avant de la regarder.
+fn lod_mesh(
+    frame: &mut FrameData<'_>,
+    nom: &str,
+    eye: [f32; 3],
+    yaw: f32,
+    pitch: f32,
+) -> Result<(), String> {
+    let (w, h) = (960u32, 540u32);
+    let (nx, ny) = (w / 2 + 1, h / 2 + 1);
+    let camera = Camera { eye, yaw, pitch };
+    let [forward, right, up] = camera.vectors();
+    let p = lod::Projection {
+        eye,
+        forward,
+        right,
+        up,
+        tan_half: 25f32.to_radians().tan(),
+        aspect: w as f32 / h as f32,
+    };
+    let horizon = p.horizon();
+    let point = |ix: u32, iy: u32| {
+        let x = (ix as f32 / (nx - 1) as f32 * 2. - 1.) * 1.18;
+        let y = -1.18 + (horizon + 1.18) * iy as f32 / (ny - 1) as f32;
+        p.ground(x, y)
+    };
+    let lambda_min = std::f32::consts::TAU / scene::wake_recipe(64, 128).cutoff;
+    let nyquist = 0.5 * lambda_min;
+    // Premier passage : l'ecart de chaque maille, et le pire, qui fixe la rampe.
+    let (iw, ih) = ((nx - 1) as usize, (ny - 1) as usize);
+    let mut spacing = vec![0f32; iw * ih];
+    let mut positions = vec![[0f32; 2]; iw * ih];
+    // Deux maximums, et ils ne mesurent pas la meme chose. **Dans l'emprise du sillage**, c'est
+    // celui de S247, et il doit le retrouver. **Sur toute l'eau visible**, il monte jusqu'a
+    // l'horizon, ou le lambda_min du sillage n'a plus cours — `B` y a sa propre coupure. C'est donc
+    // le premier qui sature la rampe : au-dela, le seuil trace n'est pas le bon etalon.
+    let (mut worst, mut worst_total) = (0f32, 0f32);
+    let mut in_wake_cells = 0usize;
+    for iy in 0..ih {
+        for ix in 0..iw {
+            let q = point(ix as u32, iy as u32);
+            let a = point(ix as u32, iy as u32 + 1);
+            let c = point(ix as u32 + 1, iy as u32);
+            let d = (a[0] - q[0]).hypot(a[1] - q[1]).max((c[0] - q[0]).hypot(c[1] - q[1]));
+            spacing[iy * iw + ix] = d;
+            positions[iy * iw + ix] = q;
+            worst_total = worst_total.max(d);
+            if scene::admits_wake([q[0] + eye[0], q[1] + eye[1]]) {
+                in_wake_cells += 1;
+                worst = worst.max(d);
+            }
+        }
+    }
+    // Carte ecran : la premiere ligne de l'image est l'horizon, comme a l'ecran.
+    let mut rgb = Vec::with_capacity(iw * ih * 3);
+    for iy in (0..ih).rev() {
+        for ix in 0..iw {
+            rgb.extend(topologie::ramp_spacing(spacing[iy * iw + ix], nyquist, worst));
+        }
+    }
+    let hash = topologie::write_ppm(&format!("maillage_ecran_{nom}.ppm"), iw, ih, &rgb)
+        .map_err(|e| e.to_string())?;
+    let under = spacing
+        .iter()
+        .zip(&positions)
+        .filter(|(d, q)| **d > nyquist && scene::admits_wake([q[0] + eye[0], q[1] + eye[1]]))
+        .count();
+    println!(
+        "MAILLAGE_S248 image=maillage_ecran_{nom}.ppm {iw}x{ih} nyquist_m={nyquist:.4} pire_ecart_emprise_m={worst:.3} pire_ecart_total_m={worst_total:.1} sous_nyquist_emprise={:.4} empreinte=0x{hash:016x}",
+        under as f64 / in_wake_cells.max(1) as f64
+    );
+    // Carte monde : vue de dessus, 300 m de cote autour de la camera, un sommet par point.
+    const DEMI_COTE_M: f32 = 150.;
+    const COTE_PX: usize = 600;
+    let mut monde = vec![topologie::HORS; COTE_PX * COTE_PX];
+    let mut vus = vec![0f32; COTE_PX * COTE_PX];
+    for (d, q) in spacing.iter().zip(&positions) {
+        let u = (q[0] + DEMI_COTE_M) / (2. * DEMI_COTE_M) * COTE_PX as f32;
+        let v = (DEMI_COTE_M - q[1]) / (2. * DEMI_COTE_M) * COTE_PX as f32;
+        if !(0. ..COTE_PX as f32).contains(&u) || !(0. ..COTE_PX as f32).contains(&v) {
+            continue;
+        }
+        let k = v as usize * COTE_PX + u as usize;
+        // Un pixel peut recevoir plusieurs sommets pres de la camera : on garde le pire ecart,
+        // pour qu'une zone saine ne masque jamais une zone qui ne l'est pas.
+        if *d >= vus[k] {
+            vus[k] = *d;
+            monde[k] = topologie::ramp_spacing(*d, nyquist, worst);
+        }
+    }
+    let mut rgb_monde = Vec::with_capacity(COTE_PX * COTE_PX * 3);
+    for c in &monde {
+        rgb_monde.extend(c);
+    }
+    let hash_monde =
+        topologie::write_ppm(&format!("maillage_monde_{nom}.ppm"), COTE_PX, COTE_PX, &rgb_monde)
+            .map_err(|e| e.to_string())?;
+    let couverts = monde.iter().filter(|c| **c != topologie::HORS).count();
+    println!(
+        "MAILLAGE_S248 image=maillage_monde_{nom}.ppm {COTE_PX}x{COTE_PX} demi_cote_m={DEMI_COTE_M} \
+pixels_atteints={:.4} empreinte=0x{hash_monde:016x}",
+        couverts as f64 / monde.len() as f64
+    );
     Ok(())
 }
 

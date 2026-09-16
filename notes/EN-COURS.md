@@ -93,8 +93,8 @@ jamais dans `redraw`. (4) Aucune publication, aucune page : PPM local sous `capt
 - [x] **P1** — amorce, jeton, plan seuls.
 - [x] **P2** — mode de banc `--topologie` : ossature, chemins, rampes de couleur documentées.
 - [x] **P3** — carte de la **topologie de la mer** : hauteur composée, vue de dessus.
-- [ ] **P4** — cartes du **maillage** : où tombent les sommets, et l'écart vu depuis l'écran.
-- [ ] **P5** — réception : extrema contre S247, empreintes rejouées, description écrite.
+- [x] **P4** — cartes du **maillage** : où tombent les sommets, et l'écart vu depuis l'écran.
+- [x] **P5** — réception : extrema contre S247, empreintes rejouées, description écrite.
 - [ ] **P6** — rituel §6, file, feuille de route, jeton.
 
 ### Notes de reprise
@@ -116,6 +116,18 @@ propres images.
 `FrameData::background_only` rend B seul **par le meme chemin** que `references` (conversion
 monde vers local de S214, partagee par les trois couches), pour que la soustraction soit
 exacte et non approchee.
+
+P4/P5 : quatre cartes de maillage, deux par pose. **L etalon a mordu** : le premier jet annoncait
+567,9 et 1 228,8 m la ou S247 publie 2,589 et 8,243. La carte ne mentait pas, elle mesurait **autre
+chose** — S247 compte dans l emprise du sillage, la carte comptait jusqu a l horizon. Les deux
+quantites separees, l etalon passe **exactement** : 2,589 / 8,243 m et 7,54 % / 7,59 %.
+Fait neuf que S247 n avait pas releve : sur **toute l eau visible**, le pire ecart monte a
+**567,9 m** (reference) et **1 228,8 m** (rasante).
+Ce que les cartes montrent et que les nombres ne disaient pas : la degradation n est **pas
+repartie** — l ecran est vert partout sauf une **bande etroite a l horizon** ; et la carte monde
+montre les rangees de sommets **se separer** en traits distincts, avec du noir entre elles.
+Six empreintes reproduites a l identique sur deux executions (I-03). Les images ne sont **pas**
+versionnees : .gitignore exclut captures/, seules les empreintes comptent.
 
 ---
 
