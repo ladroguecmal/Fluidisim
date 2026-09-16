@@ -1347,3 +1347,53 @@ fn what_the_multigrid_buys_s245() {
         let _ = probe.step(1. / 60., 20_000, &Jobs);
     }
 }
+
+/// S246 P2 (A280) — **taux de réduction par cycle**, la seule grandeur qui décide de ce lot. Le
+/// compte d'itérations mélange le cycle et le gradient conjugué ; ici la multigrille est employée
+/// **seule**, comme solveur : `x ← x + M⁻¹(b − A x)`, et l'on relève le rapport de deux résidus
+/// successifs. Un bon cycle pour ce stencil donne 0,1 à 0,3 ; un mauvais s'approche de 1.
+#[test]
+#[ignore = "mesure S246, lancée explicitement ; à lancer en release"]
+fn the_cycle_reduction_rate_s246() {
+    for (nx, nz) in [(64usize, 32usize), (128, 64), (256, 128)] {
+        let dx = 8. / nx as f32;
+        let mut v = mobile_volume(nx, nz, dx, &vec![0.4; nx]);
+        v.set_surface(&vec![v.domain().z0(); nx]).unwrap();
+        let cells = nx * nz;
+        let inv = 1. / (dx * dx);
+        // Second membre quelconque, nul sur le sec — c'est la forme que le solveur reçoit.
+        let b: Vec<f32> = (0..cells)
+            .map(|c| if v.frac[c] > 0. { ((c * 131 % 307) as f32 - 153.) * 0.013 } else { 0. })
+            .collect();
+        let mut x = vec![0f32; cells];
+        let mut ax = vec![0f32; cells];
+        let mut r = b.clone();
+        let norm = |u: &[f32]| -> f64 { u.iter().map(|w| (*w as f64).powi(2)).sum::<f64>().sqrt() };
+        let mut ctl = Control::unlimited();
+        let mut rates = Vec::new();
+        let mut previous = norm(&r);
+        for _ in 0..12 {
+            v.v_cycle(&r, &mut ctl).unwrap();
+            for c in 0..cells {
+                x[c] += v.prec[c];
+            }
+            crate::delta_projection::multigrid::apply_level(
+                nx, nz, inv, &v.open_u, &v.open_w, &v.frac, &x, &mut ax,
+            );
+            for c in 0..cells {
+                r[c] = b[c] - ax[c];
+            }
+            let now = norm(&r);
+            rates.push(now / previous.max(1e-300));
+            previous = now;
+        }
+        let tail = &rates[rates.len() - 5..];
+        let asymptotic: f64 = tail.iter().sum::<f64>() / tail.len() as f64;
+        let head: Vec<String> = rates.iter().take(4).map(|x| format!("{x:.4}")).collect();
+        println!(
+            "TAUX_CYCLE_S246 nx={nx} mailles={cells} niveaux={} premiers={} asymptotique={asymptotic:.4}",
+            v.levels.len(),
+            head.join(" ")
+        );
+    }
+}

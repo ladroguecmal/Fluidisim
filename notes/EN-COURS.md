@@ -98,7 +98,7 @@ encore, sans garder un changement que la mesure ne soutient pas (L323).
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [ ] **P2** — protocole écrit ; instrument du **taux par cycle**, mesuré avant toute modification.
+- [x] **P2** — protocole écrit ; instrument du **taux par cycle**, mesuré avant toute modification.
 - [ ] **P3** — prolongation bilinéaire et sa transposée exacte ; adjonction et symétrie éprouvées.
 - [ ] **P4** — mesure : taux par cycle, itérations et coût aux cinq tailles, sans et avec.
 - [ ] **P5** — décision et réception : garder ou annuler, ADR-144, empreintes, suite.
@@ -106,7 +106,15 @@ encore, sans garder un changement que la mesure ne soutient pas (L323).
 
 ### Notes de reprise
 
-(S246 - vide a l ouverture.)
+P2 : protocole docs/validation/PROLONGATION-S246.md + instrument the_cycle_reduction_rate_s246
+(multigrille employee **seule** comme solveur : le compte d iterations melange le cycle et le
+gradient conjugue, le taux par cycle ne melange rien).
+**Base mesuree** : taux asymptotique **0,620 / 0,630 / 0,725** a 2 048 / 8 192 / 32 768 mailles,
+la ou ce stencil devrait donner 0,1 a 0,3.
+**Le profil dit plus que le nombre** : premiers cycles excellents (0,06 puis 0,19), puis degradation
+jusqu a l asymptote — signature d une composante que le cycle ne reduit pas. Prolongation constante
+par morceaux = suspect designe par S245 ; **traitement des bords = second suspect**, que cette
+mesure ne separe pas encore du premier.
 
 ---
 
