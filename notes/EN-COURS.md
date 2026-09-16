@@ -87,7 +87,7 @@ poses envoyés à l'utilisateur.
 - [x] **P3** — mesure : `mss` de la recette cuite (32 composantes) et du spectre continu coupé à
   `4, 8, 16, 24, 32 fp` ; verdict confirmé ou non.
 - [x] **P4** — ADR-155 et protocole de réception du remède (si confirmé).
-- [ ] **P5** — cœur : cuisson de la queue spectrale, même densité absolue, essais contre l'analytique.
+- [x] **P5** — cœur : cuisson de la queue spectrale, même densité absolue, essais contre l'analytique.
 - [ ] **P6** — hôte : queue en pentes par pixel, filtre d'empreinte, référence CPU.
 - [ ] **P7** — réception GPU/CPU, coût, rendus R2 aux poses R1, envoi à l'utilisateur.
 - [ ] **P8** — rituel §6 : liste du projet fini (2.1, 8.9, 8.10), registre, journal, jeton.
@@ -98,3 +98,8 @@ P3 : `examples/rugosite_b.rs`. mss cuite 0,00753, continue 0,00752 (accord indé
 → 0,0115/0,0155/0,0179/0,0195/0,0229. Cox–Munk 0,0437–0,0459, seuil 0,0199 : **confirmé**. La queue
 JONSWAP seule plafonne à 52 % de l'observé : le remède d'ADR-155 est un premier pas, le modèle de
 spectre court (équilibre f⁻⁴, capillaires) reste à nommer comme manque.
+
+P5 : `background_spectrum::bake_tail` et `cells` (boucle de `bake` factorisée, empreinte figée
+0x26695af7314e21db inchangée). Essai `spectral_tail_continues_band_density_s256` : variance de queue
+4,50506e-4 contre 4,50506e-4 f64 ; mss bande+queue 0,01956 contre 0,01953 ; continuité à 4 fp
+0,8220 contre 0,8237 ; refus et empreintes. Tests du spectre 7/7.

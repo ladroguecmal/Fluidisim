@@ -139,3 +139,70 @@ fn spectral_transport_s149() {
     for i in [16,56,63] {let mut bad=bytes;bad[i]^=1;assert!(matches!(decode(&bad),Err(TransportError::Conformance)));}
     for n in [32,64,128,256] {for gamma in [1.,3.3,7.] {let mut r=recipe();r.sea.components=n;r.gamma=gamma;r.sea.theta_turns=-0.0;let c=bake(r).unwrap();assert_eq!(decode(&c.encode()).unwrap().encode(),c.encode());}}
 }
+
+/// S256, ADR-155 — queue spectrale : densité absolue, rugosité, continuité à `4 fp`, refus et
+/// empreinte, contre une intégration f64 indépendante de la cuisson (protocole QUEUE-SPECTRALE-S256).
+#[test]
+fn spectral_tail_continues_band_density_s256() {
+    use crate::background_spectrum::{bake, bake_tail, Error, Recipe};
+    fn q(x: f64, gamma: f64) -> f64 {
+        let sigma = if x <= 1.0 { 0.07 } else { 0.09 };
+        let r = (-(x - 1.0).powi(2) / (2.0 * sigma * sigma)).exp();
+        x.powi(-5) * (-1.25 / x.powi(4)).exp() * gamma.powf(r)
+    }
+    fn integral(lo: f64, hi: f64, p: i32, gamma: f64) -> f64 {
+        if lo < 1.0 && hi > 1.0 { return integral(lo, 1.0, p, gamma) + integral(1.0, hi, p, gamma); }
+        let n = 20_000;
+        let h = (hi - lo) / n as f64;
+        (0..=n).map(|i| {
+            let x = lo + i as f64 * h;
+            let w = if i == 0 || i == n { 1.0 } else if i % 2 == 1 { 4.0 } else { 2.0 };
+            w * x.powi(p) * q(x, gamma)
+        }).sum::<f64>() * h / 3.0
+    }
+    let recipe = Recipe {
+        sea: SeaState { hs: 1.5, tp: 6.0, theta_turns: 0.12, components: 32, graine: 201 },
+        gravity: 9.81, gamma: 3.3, min_ratio: 0.5, max_ratio: 4.0, spread_turns: 0.25,
+    };
+    let band = bake(recipe).unwrap();
+    let tail = bake_tail(recipe, 32.0, 64).unwrap();
+    let (hs, tp, g, gamma) = (1.5f64, 6.0f64, 9.81f64, 3.3f64);
+    let tau = std::f64::consts::TAU;
+    let var = |c: &[crate::Component]| c.iter().map(|c| 0.5 * (c.amplitude as f64).powi(2)).sum::<f64>();
+    let mss = |c: &[crate::Component]| c.iter()
+        .map(|c| 0.5 * (c.amplitude as f64 * c.k_turns_per_m as f64 * tau).powi(2)).sum::<f64>();
+    // 1. Densité absolue.
+    let expected = hs * hs / 16.0 * integral(4.0, 32.0, 0, gamma) / integral(0.5, 4.0, 0, gamma);
+    let got = var(tail.components());
+    println!("S256 queue variance={got:.6e} attendue={expected:.6e} ecart={:.4}", got / expected - 1.0);
+    assert!((got / expected - 1.0).abs() <= 0.01, "variance de queue {got} contre {expected}");
+    // 2. Rugosité de la bande et de la queue ensemble.
+    let fp = 1.0 / tp;
+    let m4 = hs * hs / 16.0 * fp.powi(4) * integral(0.5, 32.0, 4, gamma) / integral(0.5, 4.0, 0, gamma);
+    let continuous = tau.powi(4) * m4 / (g * g);
+    let total = mss(band.components()) + mss(tail.components());
+    println!("S256 mss bande={:.5} bande+queue={total:.5} continue={continuous:.5}", mss(band.components()));
+    assert!((total / continuous - 1.0).abs() <= 0.02, "mss {total} contre {continuous}");
+    // 3. Continuité de la densité par ln f de part et d'autre de 4 fp.
+    let (last, first) = (band.components()[31], tail.components()[0]);
+    let x_of = |c: crate::Component| (c.k_turns_per_m as f64 * tau * g).sqrt() / tau * tp;
+    let (dm, dt) = ((8.0f64).ln() / 32.0, (8.0f64).ln() / 64.0);
+    let measured = (0.5 * (first.amplitude as f64).powi(2) / dt) / (0.5 * (last.amplitude as f64).powi(2) / dm);
+    let (xm, xt) = (x_of(last), x_of(first));
+    let continuous_ratio = (xt * q(xt, gamma)) / (xm * q(xm, gamma));
+    println!("S256 continuite mesure={measured:.4} continue={continuous_ratio:.4}");
+    assert!((measured / continuous_ratio - 1.0).abs() <= 0.05);
+    // Rangées par k croissant, phases disjointes de la bande.
+    assert!(tail.components().windows(2).all(|w| w[0].k_turns_per_m < w[1].k_turns_per_m));
+    assert!(tail.components()[0].k_turns_per_m > band.components()[31].k_turns_per_m);
+    // 4. Refus.
+    assert_eq!(bake_tail(recipe, f32::NAN, 64).err(), Some(Error::Band));
+    assert_eq!(bake_tail(recipe, 4.0, 64).err(), Some(Error::Band));
+    assert_eq!(bake_tail(recipe, 65.0, 64).err(), Some(Error::Band));
+    assert_eq!(bake_tail(recipe, 32.0, 15).err(), Some(Error::Components));
+    assert_eq!(bake_tail(recipe, 32.0, 257).err(), Some(Error::Components));
+    // 5. Reproductibilité, bande inchangée.
+    assert_eq!(bake_tail(recipe, 32.0, 64).unwrap().hash(), tail.hash());
+    assert_ne!(tail.hash(), band.hash());
+    assert_eq!(bake(recipe).unwrap().hash(), band.hash());
+}

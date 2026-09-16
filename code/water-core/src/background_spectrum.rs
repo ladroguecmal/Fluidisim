@@ -89,6 +89,86 @@ fn integral(lo: f32, hi: f32, lg: f32, p: u32, n: usize) -> f32 {
     sum * h / 3.0
 }
 
+/// Cellules logarithmiques de `[lo, hi]·fp` : poids intégrés, composantes sans amplitude, somme des
+/// poids. `index0` décale les indices de phase (S256 : queue disjointe de la bande).
+#[allow(clippy::too_many_arguments)]
+fn cells(r: &Recipe, lg: f32, lo: f32, hi: f32, n: usize, index0: u64,
+    out: &mut [Component], weights: &mut [f32]) -> Result<f32, Error> {
+    let sea = r.sea;
+    let (start, width) = (ln(lo), ln(hi) - ln(lo));
+    let (mut sum, mut lower) = (0.0, lo);
+    for (i, weight) in weights[..n].iter_mut().enumerate() {
+        let upper = if i + 1 == n { hi }
+            else { exp(start + width * ((i + 1) as f32 / n as f32)) };
+        if upper <= lower { return Err(Error::NotRepresentable); }
+        *weight = integral(lower, upper, lg, 0, 64);
+        let x = (lower * upper).sqrt();
+        let hz = x / sea.tp;
+        let omega = core::f32::consts::TAU * hz;
+        let k = (omega * omega / r.gravity) / core::f32::consts::TAU;
+        // Aucune saturation implicite de la fréquence Q32 ni du produit spatial local.
+        if !hz.is_finite() || hz <= 0.0 || hz as f64 * 4294967296.0 >= u64::MAX as f64
+            || !k.is_normal() || !(k * 8192.0).is_finite() || !weight.is_finite() || *weight <= 0.0 {
+            return Err(Error::NotRepresentable);
+        }
+        let freq = crate::phase::freq_hz_to_q32(hz as f64);
+        if freq == 0 { return Err(Error::NotRepresentable); }
+        let angle = sea.theta_turns + r.spread_turns * ((i as f32 + 0.5) / n as f32 - 0.5);
+        let phase = PhaseQ32::from_distance(1.0, angle);
+        let (sn, cs) = phase.sin_cos();
+        let norm = (sn * sn + cs * cs).sqrt();
+        out[i] = Component { amplitude: 0.0, k_turns_per_m: k,
+            dir: [cs / norm, sn / norm], freq_q32: freq, phase0: phase_initiale(sea.graine, index0 + i as u64) };
+        sum += *weight;
+        lower = upper;
+    }
+    Ok(sum)
+}
+
+/// S256, ADR-155 — **queue** `[max_ratio, tail_ratio]·fp` du même spectre, à la **densité absolue**
+/// de la bande cuite par `bake` : `amplitude = Hs·√(poids/Σ poids de la bande · 1/8)`, sans
+/// renormalisation. Composantes rangées par `k` croissant, indices de phase décalés de `2³²`.
+/// Queue de rendu : `4 < tail_ratio ≤ 64`, 16 à 256 composantes. Diagnostics : variance et
+/// moment d'ordre deux de la queue rapportés à ceux de la bande, continus.
+pub fn bake_tail(r: Recipe, tail_ratio: f32, count: usize) -> Result<Cooked, Error> {
+    let band = bake(r)?;
+    if !tail_ratio.is_finite() || tail_ratio <= r.max_ratio || tail_ratio > 64.0 { return Err(Error::Band); }
+    if !(16..=MAX_COMPONENTS).contains(&count) { return Err(Error::Components); }
+    let lg = ln(r.gamma);
+    let mut scratch = [Component { amplitude: 0.0, k_turns_per_m: 0.0, dir: [0.0; 2], freq_q32: 0,
+        phase0: PhaseQ32(0) }; MAX_COMPONENTS];
+    let mut weights = [0.0; MAX_COMPONENTS];
+    let sum = cells(&r, lg, r.min_ratio, r.max_ratio, r.sea.components, 0, &mut scratch, &mut weights)?;
+    let mut tail = Recipe { min_ratio: r.max_ratio, max_ratio: tail_ratio, ..r };
+    tail.sea.components = count;
+    let mut out = Cooked { recipe: tail, components: scratch, diagnostics: Diagnostics {
+        retained_m0: 0.0, retained_m2: 0.0 }, hash: 0 };
+    let mut tail_weights = [0.0; MAX_COMPONENTS];
+    cells(&r, lg, r.max_ratio, tail_ratio, count, 1 << 32, &mut out.components, &mut tail_weights)?;
+    for (c, weight) in out.components[..count].iter_mut().zip(tail_weights) {
+        c.amplitude = r.sea.hs * ((weight / sum) * 0.125).sqrt();
+        if !c.amplitude.is_finite() { return Err(Error::NotRepresentable); }
+    }
+    for c in out.components[count..].iter_mut() {
+        *c = Component { amplitude: 0.0, k_turns_per_m: 0.0, dir: [0.0; 2], freq_q32: 0, phase0: PhaseQ32(0) };
+    }
+    let band0 = integral(r.min_ratio, r.max_ratio, lg, 0, 4096);
+    let band2 = integral(r.min_ratio, r.max_ratio, lg, 2, 4096);
+    out.diagnostics = Diagnostics { retained_m0: integral(r.max_ratio, tail_ratio, lg, 0, 4096) / band0,
+        retained_m2: integral(r.max_ratio, tail_ratio, lg, 2, 4096) / band2 };
+    let mut h = Hasher64::new();
+    h.write_u32(VERSION);
+    h.write_u64(band.hash());
+    h.write_f32(tail_ratio);
+    h.write_u32(count as u32);
+    for c in out.components() {
+        for v in [c.amplitude, c.k_turns_per_m, c.dir[0], c.dir[1]] { h.write_f32(v); }
+        h.write_u64(c.freq_q32); h.write_u32(c.phase0.0);
+    }
+    out.hash = h.finish();
+    Ok(out)
+}
+
 /// Profil V1 : gamma1..7, N32..256 et bande dans [0.5,4] contenant fp.
 /// Ces bornes délimitent la cuisson reçue, pas les mers autorisées du jeu.
 /// Les refus ne mutent aucun pool ni allocateur ; le résultat entier est publié sur succès.
@@ -112,34 +192,8 @@ pub fn bake(r: Recipe) -> Result<Cooked, Error> {
         amplitude: 0.0, k_turns_per_m: 0.0, dir: [0.0; 2], freq_q32: 0, phase0: PhaseQ32(0),
     }; MAX_COMPONENTS], diagnostics: Diagnostics { retained_m0: 0.0, retained_m2: 0.0 }, hash: 0 };
     let lg = ln(r.gamma);
-    let (start, width) = (ln(r.min_ratio), ln(r.max_ratio) - ln(r.min_ratio));
     let mut weights = [0.0; MAX_COMPONENTS];
-    let (mut sum, mut lower) = (0.0, r.min_ratio);
-    for (i, weight) in weights[..sea.components].iter_mut().enumerate() {
-        let upper = if i + 1 == sea.components { r.max_ratio }
-            else { exp(start + width * ((i + 1) as f32 / sea.components as f32)) };
-        if upper <= lower { return Err(Error::NotRepresentable); }
-        *weight = integral(lower, upper, lg, 0, 64);
-        let x = (lower * upper).sqrt();
-        let hz = x / sea.tp;
-        let omega = core::f32::consts::TAU * hz;
-        let k = (omega * omega / r.gravity) / core::f32::consts::TAU;
-        // Aucune saturation implicite de la fréquence Q32 ni du produit spatial local.
-        if !hz.is_finite() || hz <= 0.0 || hz as f64 * 4294967296.0 >= u64::MAX as f64
-            || !k.is_normal() || !(k * 8192.0).is_finite() || !weight.is_finite() || *weight <= 0.0 {
-            return Err(Error::NotRepresentable);
-        }
-        let freq = crate::phase::freq_hz_to_q32(hz as f64);
-        if freq == 0 { return Err(Error::NotRepresentable); }
-        let angle = sea.theta_turns + r.spread_turns * ((i as f32 + 0.5) / sea.components as f32 - 0.5);
-        let phase = PhaseQ32::from_distance(1.0, angle);
-        let (sn, cs) = phase.sin_cos();
-        let norm = (sn * sn + cs * cs).sqrt();
-        out.components[i] = Component { amplitude: 0.0, k_turns_per_m: k,
-            dir: [cs / norm, sn / norm], freq_q32: freq, phase0: phase_initiale(sea.graine, i as u64) };
-        sum += *weight;
-        lower = upper;
-    }
+    let sum = cells(&r, lg, r.min_ratio, r.max_ratio, sea.components, 0, &mut out.components, &mut weights)?;
     let (mut amplitude_sum, mut velocity_sum, mut slope_sum) = (0.0, 0.0, 0.0);
     for (c, weight) in out.components[..sea.components].iter_mut().zip(weights) {
         c.amplitude = sea.hs * ((weight / sum) * 0.125).sqrt();
