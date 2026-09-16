@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S258 — en cours
+Session : S258 — terminée
 Agent : Claude Opus 5, Claude Code ; fichiers, git, cargo, Python et GPU local disponibles.
 Entrée (2026-09-16 23:03) : « fais attention, il reste une tâche en cours ». Constat : dépôt propre,
 jeton libre, aucune étape `[>]`, aucun processus ni tâche de fond de la session (les `python.exe`
@@ -72,7 +72,7 @@ Arrêt : état de C18 publié ligne par ligne contre CAS-CANONIQUES §C18, liste
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan.
-- [ ] **P2** — C18 exécuté et lu ; liste 13.2 corrigée ; rituel (journal, jeton).
+- [x] **P2** — C18 exécuté et lu ; liste 13.2 corrigée ; rituel (journal, jeton).
 
 ### Notes de reprise
 

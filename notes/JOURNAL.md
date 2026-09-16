@@ -13281,3 +13281,21 @@ bords ouverts du pas couplé gardent leur déclencheur dans la file.
 déplacement/normales ajoutés ; liste du projet fini 2.2 et 8.2 ; jeton. Invariants relus : I-13
 (le LOD de vue reste un choix de rendu), I-14 (critère dérivé de la géométrie de projection, sans
 constante nouvelle). Aucun ADR, aucun code.
+
+## S258 — La tâche laissée ouverte : C18 vérifié sur le système
+
+**2026-09-16, Claude Opus 5.** Entrée : « fais attention, il reste une tâche en cours ». Constat :
+dépôt propre, aucune étape interrompue, aucun processus de la session. Seule tâche ouverte : la
+liste du projet fini notait « C18 à relire » (13.2), et je l'avais annoncé à l'utilisateur. Plan
+seul, puis vérification.
+
+**Fait.** `water-harness check scenarios/C18-invariants.toml` : `OK`, empreinte `0x85c8bc610f551d11`
+(identique à S178), allocation refusée après scellement comptée à 1, 13,8 ms. Lu contre
+CAS-CANONIQUES §C18 : **4 lignes tenues sur 7**. Les lignes non exécutées sont le budget par
+domaine, l'hôte serveur (vide par construction, S30), les forces avec et sans δ, `W_rep` entre
+profils, et les capacités lues d'un profil. L'empreinte n'est comparée que sur une machine. Liste
+13.2 corrigée : C18 partiel, lignes nommées.
+
+**Maillons 2** : aucune capacité reçue. Justification : deux sessions de revue et une de
+vérification, à la demande de l'utilisateur. La prochaine session construit : S259, mer
+multimodale dans B, puis revue R3.

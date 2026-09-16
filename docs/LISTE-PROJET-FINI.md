@@ -23,7 +23,7 @@ coche et on pointe, sans recopier (L137).
 Un point n'est jamais validé sur un banc isolé, un véhicule d'essai ou une seule scène quand son
 énoncé vise le système. Un point partiel ne dit rien de la difficulté de ce qui reste.
 
-**État au S257, 2026-09-16** (remplissage partiel, points 2.1, 2.2, 8.2, 8.9 et 8.10). Voir le décompte en
+**État au S258, 2026-09-16** (remplissage partiel, points 2.1, 2.2, 8.2, 8.9, 8.10 et 13.2). Voir le décompte en
 fin de document.
 
 ---
@@ -264,7 +264,12 @@ fin de document.
 - [ ] **13.1 Harnais de validation** (SPEC-003) — *partiel* : étages H1 et H3, scénarios C02 et C18.
 - [ ] **13.2 Les 23 cas canoniques passent sur le système** — *partiel* : sur le système, C02 (B),
   C12 (V) et la branche V de C19. Sur véhicules d'essai : C01, C03, C04, C06 (partiel), C08, C10
-  (statique), C22, C23. Non exécutés : C05, C07, C09, C11, C13 à C17, C20, C21 ; C18 à relire.
+  (statique), C22, C23. Non exécutés : C05, C07, C09, C11, C13 à C17, C20, C21. **C18 partiel**
+  (vérifié S258) : le harnais tient 4 lignes sur 7 — empreinte de B en local (I-03, sans seconde
+  cible), allocation refusée après scellement (I-06), plus reproductibilité et indépendance au
+  chemin. Non exécutées : budget par domaine (I-05), hôte serveur sans δ ni rendu (échoue par
+  construction tant qu'il n'existe pas), forces avec et sans δ (I-04), `W_rep` entre deux profils
+  (I-15), capacités lues d'un profil (I-16).
 - [ ] **13.3 Les onze bancs rendent leur verdict** (B1–B11) — *partiel* : B1, B2, B4 et B7 partiels ;
   les autres attendent leurs composants.
 
