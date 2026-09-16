@@ -56,3 +56,7 @@ Pas de is_smooth_at permissif, de décimation ou de cadence introduits. B+W, gra
 de pression et Laplacien visqueux restent àconstruire avant de prétendre fournir toute
 la source SPEC-004. I-02/03/06/07/08/09 restent inchangés. Réception :
 [FOURNISSEUR-B-S177](../validation/FOURNISSEUR-B-S177.md).
+
+**Note S254, 2026-09-16.** `differential_local` refuse toujours `z > 0`. Une entrée distincte,
+`differential_local_extended` ([ADR-154](ADR-154-prolongement-borne-du-fond.md)), rend au bit ce
+fournisseur pour `z ≤ 0`, et le prolongement borné au-dessus du plan moyen.

@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-16 21:42 +02:00
+JETON            : libre
+Battement        : 2026-09-16 22:04 +02:00
 Agent            : Claude Opus 5, Claude Code (fichiers, git, cargo, Python, GPU local, accès web)
-Session en cours : S254 — revue visuelle ouverte avec l'utilisateur superviseur ; A286 prolongement du fond
-Dernière session : S253 — surface mobile couplée B/W→δ reçue contre HOS M=3 (ADR-152/153, fond linéaire analytique)
-Session suivante : à fixer au rituel de S254
+Session en cours : aucune
+Dernière session : S254 — revue visuelle ouverte (R1 en attente) ; fond B prolongé au-dessus du plan moyen (ADR-154)
+Session suivante : S255 — R1 si les références de l'utilisateur sont arrivées ; sinon bords ouverts du pas couplé (relaxation de η', éponge)
 Maillons        : 0
 
 ```
@@ -88,7 +88,7 @@ disjointes 67 à 73 % du pas, réductions 12-13 %, itérations doublant par raff
 **286,2 ms par pas à 32 768 mailles** — 143 fois le budget. Le parallélisme est **fermé** pour cette
 boucle (125 µs par fil contre 21,7 de pass) ; **la multigrille est le seul levier dont le gain croît
 avec la taille** (A276, [carte](docs/validation/COUT-DELTA-S244.md)). δ MAC x-z possède une **surface géométriquement mobile** reçue contre
-l'onde stationnaire HOS d'ordre 3 (surface graphe, sans 3D, cavité, scénario B3 ni I-05 complet), **couplée depuis S253 à un fond B/W linéaire** (ADR-152/153 ; B réel au-dessus du plan moyen : A286) ; sa
+l'onde stationnaire HOS d'ordre 3 (surface graphe, sans 3D, cavité, scénario B3 ni I-05 complet), **couplée depuis S253 à un fond B/W linéaire** (ADR-152/153), **B de production prolongé au-dessus du plan moyen depuis S254** (ADR-154 ; W : A286) ; sa
 pression f32 s'arrête à sa précision représentable (ADR-143) et **tient la tolérance physique de S199
 ou se déclare dégradée** (ADR-144) — tenue jusqu'à 8 192 mailles, et **à 32 768** par le repli multigrille (ADR-147) suivi, depuis S252, d'un affinage de divergence (ADR-151 ; β du gradient multigrille corrigé, A285) ; plancher
 des lignes à fantôme de surface non borné (A274). V : plans orientés et restauration locale reçus.

@@ -3596,3 +3596,11 @@ La réception S253 ne vaut donc que pour ce fond d'oracle : la vraie mer B/W n'e
 Déclencheur : S254, avant tout domaine couplé sous B réel. Choisir un prolongement borné et
 incompressible (par exemple `U` constant et `W` fermé par continuité), et le recevoir contre
 l'oracle S253. [Preuve](../validation/SURFACE-COUPLEE-S253.md).
+
+*S254, 2026-09-16 — partielle.* **B prolongé** par la règle d'ADR-154 (vitesse horizontale
+constante, `W` par continuité, `P` de Taylor d'ordre un), reçu contre l'oracle S253 : à 128
+colonnes, 0,168 % / 0,58 % à 5 cm et 0,244 % / 0,66 % à 10 cm, décroissants. Le fournisseur de
+production est identique au bit sous le plan moyen, et son intégration dans le pas couplé est
+reçue. **Restent** : les couches W au-dessus du plan moyen, et la précision sous une mer large bande
+réelle, qui attend les frontières du total et les bords ouverts.
+[Preuve](../validation/PROLONGEMENT-FOND-S254.md).

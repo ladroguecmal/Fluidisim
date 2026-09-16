@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S254 — en cours
+Session : S254 — terminée
 Agent : Claude Opus 5, Claude Code ; fichiers, git, cargo, Python et GPU local disponibles.
 Entrée (2026-09-16 21:39) : l'utilisateur reprend le projet **comme superviseur des rendus
 visuels** ; il enverra, à la demande, des références réelles et aidera à comprendre la réalité et
@@ -99,7 +99,7 @@ en regard. Ensuite fournisseur B de production au-dessus du plan moyen. Hors lot
 - [x] **P7** — cœur : fournisseur B au-dessus du plan moyen selon la règle, essais contre la
   référence et contrats de refus.
 - [x] **P8** — suite, empreinte, preuve.
-- [ ] **P9** — rituel §6 : file, trajectoire, journal et jeton.
+- [x] **P9** — rituel §6 : file, trajectoire, journal et jeton.
 
 ### Notes de reprise
 

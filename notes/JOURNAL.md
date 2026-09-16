@@ -13122,3 +13122,61 @@ index, notes datées ADR-149 et ADR-152, L329, jeton. Invariants relus : I-05 (b
 atomiques, affinage compris), I-06 (zéro allocation testée), I-08 (f32), I-12 (naissance à zéro,
 démarrage reçu), I-14 (tolérances S237/S199 inchangées, oracle cité). Aucun worktree ni distant
 touché.
+
+## S254 — Revue visuelle ouverte ; le fond prolongé au-dessus du plan moyen
+
+**2026-09-16, Claude Opus 5.** Entrée : l'utilisateur reprend le projet **comme superviseur des
+rendus visuels**, et fournira à la demande des références réelles et son regard sur la perception
+humaine ; « continue ». Master propre d9c6a35, copie unique, archive B conservée. Plan `b9ed890`,
+protocole de revue `aa6333e`, R1 `a7ce249`, ADR-154 et protocole `ee84050`, oracle `a92cbce`,
+fournisseur `da599e6`, réception `0b39fe6`.
+
+**Revue visuelle ouverte.** Jusqu'ici, aucune réception perceptive n'était possible.
+[REVUE-VISUELLE](../docs/validation/REVUE-VISUELLE.md) fixe ce qu'une revue établit et ce qu'elle
+n'établit pas, ce qui est envoyé et ce qui revient. Chaque verdict est classé : physique fausse,
+physique juste mais perçue fausse, habillage, hors capacité, artefact. Un verdict déclenche une
+mesure et ne la remplace pas. Hôte : `--multi --revue`, sept rendus 1280×720 à poses et âges
+fixes, empreintes reproduites. **R1 envoyée, en attente** : questions d'échelle, de premier
+défaut, de visibilité des sillages et d'horizon, et cinq références demandées (force 4–5 à 2–7 m
+et à 25–30 m, drone sur un bateau à 3 m/s, objet tombant, vidéos). Constat personnel, non soumis
+pour ne pas orienter : mer vitreuse (B n'a rien sous 3,5 m), sillages et impacts presque
+invisibles une fois ombrés.
+
+**Capacité reçue, maillons 0.** Un domaine δ couplé peut désormais consommer **B de production
+sous les crêtes**. Ce qui le permet : `Background::differential_local_extended`, avec ses
+variantes monde et lot. Le chemin : `BackgroundFaces` puis `step_perturbation_mobile`. La preuve :
+banc HOS et essai d'intégration. Règle d'ADR-154 : vitesse horizontale constante au-dessus du plan
+moyen, `W` fermée par continuité, `P` de Taylor d'ordre un, dérivées de ce champ. Elle est
+incompressible, sans amplification, et son résidu est d'ordre deux. Oracle S253 rejoué avec ce
+prolongement, à 128 colonnes : 5 cm **0,168 % / 0,58 %**, 10 cm **0,244 % / 0,66 %**, décroissants
+de 32 à 128. Le fond analytique faisait 0,162 / 0,34 et 0,213 / 0,53 : la règle coûte un facteur
+1,2 à 2 sur l'harmonique `2k`, non attribué par mesure. Sous le plan moyen, le fournisseur reste
+**identique au bit** ; `differential_local` refuse toujours `z > 0`.
+
+**Preuves.** Contrôles de l'oracle (continuité, divergence, différences finies, `S`, ordre deux),
+essais du fournisseur (bit, refus, lot atomique, divergence, différences finies, règle f64) et
+intégration : 50 pas reçus, 590 faces mouillées au-dessus du plan moyen consommées. Suite
+**463 / 18 ignorés / 0** ; afficheur 16 / 1 / 0. [Preuve](../docs/validation/PROLONGEMENT-FOND-S254.md).
+
+**Deux incidents, publiés.** (1) Le premier essai du fournisseur contrôlait `du_dt` par différence
+avant à `t = 0`, dont la troncature (0,025) dépasse la tolérance : défaut d'instrument. Il passe
+désormais par une différence centrée, tolérance inchangée. (2) Sous Windows, la suite complète ne
+lie pas `delta_mobile.exe` tant que le banc tourne (LNK1104). Il faut lancer la suite avant ou après
+un banc, jamais pendant.
+
+**Limites.** Couches W (impacts, pression) non prolongées. Précision sous B réel non reçue :
+l'intégration tourne dans un bassin à murs, et `u'` y vaut 6,6·10⁻² m/s aux murs contre 6,1·10⁻³ à
+l'intérieur. Mer large bande non éprouvée contre un oracle multimode. Coût non mesuré.
+
+**Suite.** Dès que les références de l'utilisateur arrivent, la revue R1 passe en tête : c'est la
+demande présente, et la seule voie vers une réception perceptive. Sinon, S255 prend les **bords
+ouverts** du pas couplé (relaxation de `η'`, éponge) puis les frontières du total. C'est la sixième
+session du raccordement, toujours sur le chemin de J2 et de B4 : sans bords ouverts, aucun domaine
+n'est plongé dans une mer qui le traverse. Le prolongement des couches W suit le premier domaine
+d'impact ou de sillage couplé. Aucun arbitrage utilisateur hors R1.
+
+**Rituel.** File active relue ; A286 partielle ; lignes J2, A50, A282 et B4 perception
+actualisées, ligne de revue ajoutée ; feuille de route J1 et J2 ; notes datées ADR-113 et ADR-152 ;
+index ; jeton. Invariants relus : I-06 (fournisseur sans collection ; allocation non mesurée),
+I-08 (f32, formules f64 seulement dans les essais), I-12 (naissance à zéro inchangée), I-14
+(tolérances S237/S253 inchangées, règle citée). Aucune copie ni distant touché.

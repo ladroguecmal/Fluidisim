@@ -60,3 +60,7 @@ domaine :
 **Note S253, 2026-09-16.** L'exclusion de l'affinage en mode mobile (en-tête et dernière liste) est
 levée pour le pas couplé par [ADR-153](ADR-153-affinage-en-mode-mobile-couple.md), après un refus
 au premier pas à 128 colonnes. Le pas S237 total reste sans affinage.
+
+**Note S254, 2026-09-16.** Le « prolongement de B en production » de la liste des limites est levé
+pour B par [ADR-154](ADR-154-prolongement-borne-du-fond.md) : règle bornée, reçue contre l'oracle
+S253. Les couches W au-dessus du plan moyen restent hors domaine.

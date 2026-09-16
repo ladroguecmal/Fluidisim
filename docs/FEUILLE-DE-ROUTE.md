@@ -110,6 +110,9 @@ images S248** : la dégradation n'est pas répartie mais concentrée dans une **
 l'horizon**, et sur toute l'eau visible le pire écart monte à **1 228,8 m** à la pose rasante ;
 [images](validation/IMAGES-S248.md). Restent l'interaction manuelle représentative et la seconde
 cible (B7).
+**Revue perceptive ouverte S254** : l'utilisateur supervise les rendus. Il fournit les références
+réelles, et ses verdicts sont consignés selon [REVUE-VISUELLE](validation/REVUE-VISUELLE.md). R1 :
+sept rendus de la scène J1, en attente de références.
 Composition de la scène représentative par le cœur : faite S236 (mode union, ADR-142). Le choix du
 mode par un hôte autoritaire reste à trancher avec lui (A271).
 
@@ -188,6 +191,12 @@ colonnes : 5 cm 0,162 % / 0,34 %, 10 cm 0,213 % / 0,53 %, mieux que le solveur t
 comparable (265–277 ms). [Preuve](validation/SURFACE-COUPLEE-S253.md). Restent le prolongement
 de B réel au-dessus du plan moyen (A286), les bords ouverts, les frontières du total, le
 raccordement au rendu et B4 global.
+**S254 : le fond B de production se prolonge au-dessus du plan moyen** (ADR-154 : vitesse
+horizontale constante, `W` par continuité, `P` de Taylor d'ordre un). Il est identique au bit
+au-dessous et reçu contre l'oracle S253 : à 128 colonnes, 0,168 % / 0,58 % à 5 cm et 0,244 % /
+0,66 % à 10 cm, décroissants. Le pas couplé le consomme (50 pas, faces des crêtes comprises).
+[Preuve](validation/PROLONGEMENT-FOND-S254.md). Restent les couches W au-dessus du plan moyen,
+les bords ouverts et les frontières du total.
 
 *Bancs* : **B3** (famille de δ) quand un candidat atteint ses critères ou qu'un second existe ;
 **B4** (régime perturbatif, volets restants) sur les cas livrés ; **B5** (blocs épars) quand
