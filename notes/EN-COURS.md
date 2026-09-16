@@ -76,11 +76,17 @@ consigné, réponse écrite, prochain lot recommandé dans la file.
 
 ### Plan
 
-- [>] **P1** — amorce, jeton et plan seuls.
-- [ ] **P2** — verdict R2 consigné et classé, faits calculés ; réponse à la question (parallaxe du
+- [x] **P1** — amorce, jeton et plan seuls.
+- [x] **P2** — verdict R2 consigné et classé, faits calculés ; réponse à la question (parallaxe du
   déplacement contre empreinte du pixel, ce que le dépôt prévoyait) dans REVUE-VISUELLE.
 - [ ] **P3** — rituel §6 : file (houle longue, crêtes non linéaires, LOD déplacement/normales),
   liste du projet fini, journal, jeton.
 
 ### Notes de reprise
 
+P2 : R2 classé par construction (mer de vent PM ≈ 8,4 m/s, rien au-delà de 12 s, λp 56 m contre
+225 m pour une houle de 12 s, cambrure 0,027, un éventail, aucun déplacement horizontal — grep vide
+dans le cœur —, fond uniforme, pas d'écume). Parallaxe `h·sin2θ/(2Hα)` : 1,2–3,4 px en plongeante à
+90 m, 3–10 px en haute, 6–16 px en référence/rasante, < 0,1 px pour la queue. Ordre recommandé :
+B multimodal, crêtes non linéaires, écume, levée bathymétrique (J5). Deux heredocs bash imbriqués
+échouent à l'analyse sur ce poste : écrire les scripts dans le scratchpad.

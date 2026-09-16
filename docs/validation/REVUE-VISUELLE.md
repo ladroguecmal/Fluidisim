@@ -158,11 +158,94 @@ la hauteur) : `mss` 0,0437 à 0,0459. Borne basse 0,0397, seuil du critère **0,
   raide en pente ; les modèles d'équilibre en `f⁻⁴` et les capillaires y contribuent. Prolonger la
   bande rend la mer **2,6 fois plus rugueuse** (coupure à `32 fp`), mais pas encore aussi rugueuse
   que la mer réelle.
-| **R2** | 2026-09-16 | sept rendus aux poses de R1, queue spectrale d'ADR-155 ([empreintes](QUEUE-SPECTRALE-S256.md) §3) | — | **en attente** | question : la mer paraît-elle encore un lac ? les stries des ondes courtes se voient-elles ? |
+| **R2** | 2026-09-16 | sept rendus aux poses de R1, queue spectrale d'ADR-155 ([empreintes](QUEUE-SPECTRALE-S256.md) §3) | — | **« Le résultat se raffine, mais le rendu paraît un grand lac soumis à beaucoup de vent ; la haute mer est plus déchaînée, chaotique, et la houle se forme vers les terres »** (22:45) | **physique juste mais incomplète**, établie par construction (§8) : mer de vent locale seule, sans houle longue, crêtes linéaires, fond uniforme ; écume hors capacité |
 
 **Suite de R1 (S256).** Le remède physique est construit : c'est la queue du même spectre, en
 pentes par pixel ([ADR-155](../adr/ADR-155-queue-spectrale-en-pentes-par-pixel.md)). La `mss` passe
 de 0,0075 à 0,0195. R2 est envoyée à l'utilisateur. Les deux manques restent nommés : la queue
 JONSWAP n'atteint que 52 % de la rugosité observée, et la direction des composantes est liée à leur
 fréquence.
+
+## 8. R2 — « un grand lac soumis à beaucoup de vent »
+
+**Reçu le 2026-09-16 à 22:45**, sans référence jointe. Verdict complet : le résultat se raffine,
+mais la topologie d'un océan dépend de plusieurs paramètres ; le rendu paraît un grand lac soumis à
+beaucoup de vent ; la haute mer semble plus déchaînée, de manière chaotique, et la houle se forme
+petit à petit vers les terres.
+
+**Ce qui se calcule, sans campagne.** Le verdict décrit exactement ce que B contient.
+
+| fait | valeur | conséquence perçue |
+|---|---|---|
+| B est **une seule mer de vent**, JONSWAP unimodal (ADR-100 §1 le dit : « pas une description universelle des houles croisées ») | `Hs` 1,5 m, `Tp` 6 s | — |
+| cette mer est **pleinement développée à environ 8,4 m/s** (Pierson–Moskowitz, SPEC-001 §1 sexies : `ωp = 0,877 g/U` donne `Tp` 6,1 s) | vent seul, sans histoire | une mer « de vent local », celle d'un grand lac ou d'une côte abritée |
+| **aucune énergie au-delà de `2 Tp`** : la bande commence à `0,5 fp` | rien au-dessus de 12 s | **pas de houle longue** ; une houle de 12 s mesure 225 m, 4 fois la longueur d'onde dominante rendue (56 m) |
+| cambrure des vagues dominantes `Hs/λp` | 0,027 | mer jeune et courte, sans le grand balancement de la houle |
+| directions : un seul éventail de ±45°, lié au rang de fréquence (A287) | un système | aucune mer croisée, d'où l'aspect ordonné au lieu de « chaotique » |
+| crêtes : somme linéaire de hauteurs, **aucun déplacement horizontal** dans le cœur ni dans l'hôte | crêtes et creux symétriques | pas de crêtes aiguës ni de creux plats |
+| fond **profond et uniforme** (liste 2.7) | pas de bathymétrie | la houle ne peut ni se lever ni se réfracter à l'approche des terres |
+| écume et moutons absents (liste 7.1) | — | pas de « mer déchaînée » à force 5 |
+
+**Classement.** Physique juste mais incomplète, **établie par construction** : ces absences sont
+lisibles dans la recette et le code, et aucune mesure ne pourrait les démentir. Aucune référence
+n'ayant été reçue, l'**ampleur** du « chaotique » perçu n'est pas mesurée. Ce qui se mesurera au
+premier lot : l'énergie par système (vent, houle) et leurs directions, contre une mer de référence
+déclarée. Liste du projet fini : 2.2 (houle), 2.7 et 3.6 (bathymétrie, levée, réfraction), 7.1
+(écume), A287 (directions).
+
+**Ordre recommandé, par ce que chaque manque change à l'image.** (1) **Mer multimodale dans B** :
+houle longue plus mer de vent, directions propres à chaque système et indépendantes de la
+fréquence. Cela traite aussi les stries d'A287. (2) **Crêtes non linéaires** : déplacement
+horizontal, ou ordre deux de Stokes, dont la référence existe hors runtime (SPEC-001 §1 ter).
+(3) **Écume et moutons** (ADR-014). (4) **Levée de la houle sur la bathymétrie** : elle demande le
+fournisseur de bathymétrie (SPEC-004 §8.3) et relève de J5.
+
+## 9. Question de l'utilisateur : une surface plane avec normales, vue de dessus
+
+**Question (S257).** Avait-on pensé à une surface lisse, avec effet de normales, déplacement ou une
+autre technique, quand on regarde la mer de dessus, le rayon perpendiculaire à l'eau ? Une surface
+plane devrait alors suffire.
+
+**Ce que le dépôt avait prévu.** ADR-004 §4 (S03) prévoyait un **déplacement de Gerstner** pour les
+crêtes et un **cache de tuile** de déplacement pour le rendu. §6.2 retenait une **tuile FFT pour le
+détail haute fréquence** et une somme de Gerstner pour les composantes longues. Rien de cela n'est
+construit. S234 a mesuré le LOD du **maillage** : il retire au plus 35 %, et **rien en vue haute**
+(L313), parce que la grille projetée garde un pas écran constant et que le coût venait du sillage.
+ADR-155 (S256) applique déjà l'idée aux ondes courtes : **normales seules, sans déplacement**.
+
+**Le critère physique.** Sous un rayon qui fait l'angle `θ` avec la verticale, un déplacement
+vertical `h` se projette sur l'image avec un décalage d'environ `h·sin θ / (d·α)` pixels. Ici `d`
+est la distance et `α` l'angle d'un pixel : 1,21·10⁻³ rad en 1280×720 et 50° de champ. À hauteur
+d'œil `H`, cela vaut `h·sin 2θ / (2H·α)`. À la verticale exacte, `θ = 0` : **le déplacement est
+invisible, et une surface plane à normales rend la même image**. L'intuition est juste là.
+
+Aux poses de R1/R2, avec `h = σ = Hs/4 = 0,375 m` :
+
+| pose | `θ` | décalage pour `σ` | pour 2σ | queue (3 mm) |
+|---|---:|---:|---:|---:|
+| plongeante, 90 m, centre | 21° | 1,2 px | 2,3 px | 0,01 px |
+| plongeante, bord | 46° | 1,7 px | 3,4 px | 0,01 px |
+| haute, 30 m | 40–70° | 3,3 à 5,1 px | 6,6 à 10,2 px | 0,04 px |
+| référence, 7 m, à 54 m | 82° | 5,7 px | 11,4 px | 0,05 px |
+| rasante, 2 m, à 40 m | 87° | 7,8 px | 15,6 px | 0,06 px |
+
+- **Ondes courtes** : moins d'un dixième de pixel partout. Les normales suffisent, et c'est ce que
+  fait ADR-155.
+- **Grandes vagues vues de haut** : le décalage maximal vaut `σ/(2Hα)`, sous un demi-pixel dès
+  `H` ≈ 300 m pour cette mer, et sous 2 pixels à 90 m. Une surface plane à normales y est
+  indiscernable ou presque, ce qui intéresse les vues d'avion et la grande échelle (J5).
+- **Vues de jeu** (2 à 30 m) : 3 à 15 pixels, plus les silhouettes et les occultations près de
+  l'horizon. Là, le déplacement est nécessaire.
+
+**Deux réserves.** (1) Le **déplacement horizontal** des crêtes (Gerstner, Stokes) change le dessin
+des crêtes même vu de dessus : un plan à normales doit l'intégrer à ses normales, ou il le perd.
+(2) Le décalage ci-dessus est **statique** ; une vague qui avance produit un décalage mouvant, que
+l'œil perçoit peut-être sous le pixel. Seul le verdict de l'utilisateur le dira.
+
+**Décision.** C'est un **LOD de rendu dépendant de la vue** : déplacement là où son décalage dépasse
+un seuil en pixels, normales seules ailleurs, raccord continu entre les deux. Il entre dans l'espace
+d'optimisation de J1-bis (ADR-131). Il n'est **pas prioritaire pour le coût aujourd'hui** : à
+1280×720, le GPU eau (1,8 ms) va surtout à la cuisson de la grille du sillage (1,25 ms). Il le
+deviendra avec l'altitude et la grande échelle. Le seuil de décalage se fixera avec l'utilisateur :
+c'est une question de perception.
 
