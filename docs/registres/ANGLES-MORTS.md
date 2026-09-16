@@ -3617,3 +3617,9 @@ l'utilisateur sur R2, ou le prochain travail sur B. Remède attendu : une loi d'
 directionnel dépendant de la fréquence, et un modèle de spectre court choisi et reçu contre
 Cox–Munk. Pas un coefficient forcé. [Mesure](../validation/REVUE-VISUELLE.md) §7,
 [réception](../validation/QUEUE-SPECTRALE-S256.md).
+
+*S259, 2026-09-16 — partielle.* **Directions traitées** : la loi `cos^2s` de Mitsuyasu (s_max de
+Goda) et un tirage de Weyl indépendant du rang (ADR-156). Sur la mer de vent, le Spearman rang/direction
+passe de 1,000 à 0,012, et les stries disparaissent de R3. Pour la scène `--houle` seulement : la
+scène par défaut garde la fixture V1 au bit. **Reste** : la rugosité, à 52 % de Cox–Munk au mieux.
+[Réception](../validation/MER-MULTIMODALE-S259.md).

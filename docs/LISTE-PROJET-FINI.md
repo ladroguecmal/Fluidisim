@@ -23,7 +23,7 @@ coche et on pointe, sans recopier (L137).
 Un point n'est jamais validé sur un banc isolé, un véhicule d'essai ou une seule scène quand son
 énoncé vise le système. Un point partiel ne dit rien de la difficulté de ce qui reste.
 
-**État au S258, 2026-09-16** (remplissage partiel, points 2.1, 2.2, 8.2, 8.9, 8.10 et 13.2). Voir le décompte en
+**État au S259, 2026-09-16** (remplissage partiel, points 2.1, 2.2, 8.2, 8.9, 8.10 et 13.2). Voir le décompte en
 fin de document.
 
 ---
@@ -54,10 +54,12 @@ fin de document.
 
 - [ ] **2.1 Mer et océan : état de mer spectral déterministe, sans état par cellule** — *partiel* :
   JONSWAP cuit et reproductible (ADR-100/101), 32 composantes, phases GPU ; queue jusqu'à 5,5 cm
-  rendue en pentes (S256). Manquent la rugosité observée (`mss` 0,0195 contre 0,044, A287), une loi
-  d'étalement directionnel, B1 complet et plusieurs régions.
-- [ ] **2.2 Houles longues, mers croisées, marée, niveau moyen variable** — *absent* : B est une mer de
-  vent unimodale, sans énergie au-delà de 12 s ; verdict R2 « grand lac soumis au vent » (S257).
+  rendue en pentes (S256), étalement directionnel `cos^2s` (S259, scène `--houle`). Manquent la
+  rugosité observée (`mss` 0,0195 contre 0,044, A287), B1 complet et plusieurs régions.
+- [ ] **2.2 Houles longues, mers croisées, marée, niveau moyen variable** — *partiel* : mer à plusieurs
+  systèmes avec étalement `cos^2s` (ADR-156, S259), houle de 225 m dans la scène déclarée `--houle`,
+  verdict R3 attendu. Manquent la marée, le niveau moyen variable, des houles issues d'une météo et
+  l'adoption par défaut.
 - [ ] **2.3 Lacs** : niveau moyen, apports, courants faibles — *absent*.
 - [ ] **2.4 Rivières** : débit macroscopique qui contraint les perturbations locales — *absent*.
 - [ ] **2.5 Canaux** — *absent*.
@@ -280,7 +282,7 @@ fin de document.
 | section | points | validés | partiels | absents |
 |---|---:|---:|---:|---:|
 | 1. Socle | 8 | 1 | 4 | 3 |
-| 2. Grandes masses (B) | 9 | 0 | 2 | 7 |
+| 2. Grandes masses (B) | 9 | 0 | 3 | 6 |
 | 3. Ondes (W) | 9 | 0 | 4 | 5 |
 | 4. Volumique (δ) | 20 | 0 | 7 | 13 |
 | 5. Volumes finis (V) | 12 | 1 | 3 | 8 |
@@ -292,7 +294,7 @@ fin de document.
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 3 | 0 | 3 | 0 |
-| **total** | **119** | **3** | **47** | **69** |
+| **total** | **119** | **3** | **48** | **68** |
 
 Trois points validés sur 119. Cela ne mesure pas l'avancement du travail. Beaucoup de points
 partiels portent l'essentiel de leur difficulté, et un point validé peut être petit.

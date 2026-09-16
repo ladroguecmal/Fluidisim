@@ -117,8 +117,13 @@ réelles, et ses verdicts sont consignés selon [REVUE-VISUELLE](validation/REVU
 **S256 : premier verdict, « la mer est trop lisse »**, confirmé par mesure (`mss` de B 0,0075
 contre 0,044 observés). La queue du même spectre est rendue en pentes par pixel (ADR-155) : `mss`
 0,0195, GPU eau 1,82 ms à 1280×720 (+0,38 ms), réceptions B/W inchangées au bit.
-[Réception](validation/QUEUE-SPECTRALE-S256.md). R2 est en attente de verdict. Rugosité encore à
-52 % de l'observé, stries directionnelles : A287.
+[Réception](validation/QUEUE-SPECTRALE-S256.md). Rugosité encore à 52 % de l'observé (A287).
+**S257 : verdict R2, « un grand lac soumis au vent »**, classé par construction : mer de vent seule,
+sans houle longue. **S259 : mer multimodale construite** (ADR-156) : houle longue de 225 m et mer de
+vent, étalement `cos^2s` de Mitsuyasu, directions indépendantes du rang. Le spectre est identique au
+bit à chaque système, le GPU s'accorde au cœur à 0,379 mm, pour +0,03 à 0,07 ms. Variante déclarée
+`--houle`, scène par défaut inchangée au bit ; [réception](validation/MER-MULTIMODALE-S259.md). R3
+est en attente de verdict.
 Composition de la scène représentative par le cœur : faite S236 (mode union, ADR-142). Le choix du
 mode par un hôte autoritaire reste à trancher avec lui (A271).
 

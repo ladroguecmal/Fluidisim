@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S259 — en cours
+Session : S259 — terminée
 Agent : Claude Opus 5, Claude Code ; fichiers, git, cargo, Python et GPU local disponibles.
 Entrée (2026-09-16 23:06) : « continue ». Master propre fdc0f1c, copie unique, maillons 2 : cette
 session doit livrer une capacité. Lot recommandé en S257 d'après le verdict R2 (« grand lac soumis
@@ -84,7 +84,7 @@ scène par défaut identique (R2 rejoué au bit, `--tail-verify` inchangé) ; co
   assemblage de systèmes ; essais.
 - [x] **P4** — hôte : nombre de composantes de B variable, scène `--houle`, vérification CPU/GPU.
 - [x] **P5** — réception : hauteurs, scène par défaut au bit, coût, rendus R3 envoyés.
-- [ ] **P6** — rituel §6 : liste du projet fini (2.2), A287, file, journal, jeton.
+- [x] **P6** — rituel §6 : liste du projet fini (2.2), A287, file, journal, jeton.
 
 ### Notes de reprise
 

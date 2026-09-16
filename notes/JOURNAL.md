@@ -13299,3 +13299,40 @@ profils, et les capacités lues d'un profil. L'empreinte n'est comparée que sur
 **Maillons 2** : aucune capacité reçue. Justification : deux sessions de revue et une de
 vérification, à la demande de l'utilisateur. La prochaine session construit : S259, mer
 multimodale dans B, puis revue R3.
+
+## S259 — Une mer à plusieurs systèmes : houle longue, mer de vent, étalement directionnel
+
+**2026-09-16, Claude Opus 5.** Entrée : « continue ». Master propre fdc0f1c, maillons 2. Plan
+`e6f1185`, références et ADR-156 `90d2698`, cœur `27368ba`, hôte `498e078`, réception et R3 `5809943`.
+
+**Capacité reçue, maillons 0.** Ce qui devient possible : B peut réunir **plusieurs systèmes de
+vagues**, chacun avec son spectre et sa **loi d'étalement directionnel**. Le chemin :
+`bake_directional` et `assemble`, puis `Background::from_spectrum`, puis l'hôte, scène `--houle`
+(mer de vent S201 et houle de 12 s, 225 m, à 43°). La preuve est
+[MER-MULTIMODALE-S259](../docs/validation/MER-MULTIMODALE-S259.md) :
+- spectre de chaque système identique au bit ;
+- inverse de `cos^2s` contre `s/(s+1)` à 10⁻⁵ près ;
+- Spearman rang/direction 0,012, contre 1,000 pour la fixture ;
+- `Hs` 2,5 m exact ;
+- GPU contre cœur à 0,379 mm, pour +0,03 à 0,07 ms de GPU.
+
+**Aucune migration silencieuse** : l'empreinte V1, les huit essais du spectre, R2 (sept empreintes)
+et `--tail-verify` sont identiques. Suite **465 / 18 / 0**, afficheur 16 / 1 / 0.
+
+**Incidents.** L'exponentielle sans libm du cœur (`decay`) n'accepte que 0..=32 : premier passage en
+dépassement, densité désormais coupée au-delà de `e⁻³²`. Le registre de la revue avait la ligne R2
+hors de son tableau : elle y est replacée, avec R3.
+
+**Limites.** Houle et mer de vent sont une **fixture déclarée**, non calibrée. L'étalement est gelé
+au-delà de la bande pour la queue, par convention non reçue. Rugosité toujours à 52 % de
+l'observé. Les maxima GPU de `--houle` (2,15 et 2,63 ms) ne sont pas attribués. Crêtes linéaires, pas
+d'écume, pas de levée sur la bathymétrie.
+
+**Suite.** Verdict R3 de l'utilisateur. S'il juge la mer « haute mer », l'adoption par défaut devient
+une décision explicite, avec des réceptions à rejouer. Sinon, correction de la fixture. Ensuite :
+crêtes non linéaires, puis écume. Bords ouverts du pas couplé : déclencheur inchangé.
+
+**Rituel.** A287 partielle ; file active (mer multimodale, A287, revue) ; feuille de route J1 ; liste
+du projet fini 2.1 et 2.2 (partiel) ; index ; jeton. Invariants relus : I-03 (cuissons
+reproductibles, empreintes nouvelles seulement pour la variante), I-09 (systèmes paramétrés, aucune
+réalisation interpolée), I-14 (Mitsuyasu, Goda et Longuet-Higgins cités dans SPEC-001 §1 septies).
