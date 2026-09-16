@@ -96,7 +96,7 @@ chiffré et mis en file avec son déclencheur.
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [ ] **P2** — protocole écrit ; pose rasante soutenue ajoutée au banc.
+- [x] **P2** — protocole écrit ; pose rasante soutenue ajoutée au banc.
 - [ ] **P3** — instrument d'échantillonnage, **étalonné sur la pose S212** contre les 7,5 % de S234.
 - [ ] **P4** — mesure : coût et échantillonnage à incidence rasante, contre la pose de référence.
 - [ ] **P5** — ce qui tient, ce qui ne tient pas ; correction seulement si la mesure la désigne.
@@ -104,7 +104,11 @@ chiffré et mis en file avec son déclencheur.
 
 ### Notes de reprise
 
-(S247 - vide a l ouverture.)
+P2 : protocole docs/validation/RASANT-S247.md ; drapeau --rasant ajoute a l hote (pose de S234,
+oeil a 2 m, tangage -0,05, tenue image apres image ; la ligne CADENCE l annonce  rasante ).
+Ordre impose par le protocole : l instrument d echantillonnage est **etalonne** sur la pose de
+reference, ou il doit retrouver les **7,5 %** de S234, **avant** de servir a incidence rasante.
+lambda_min = 2 pi / coupure = **2,094 m** pour le sillage ; la coupure de B n est pas mesuree ici.
 
 ---
 
