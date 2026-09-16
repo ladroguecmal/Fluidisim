@@ -68,7 +68,7 @@ tel quel, et c'est la réception qu'on réexamine d'abord.
 
 | revue | date | images | références | verdict résumé | classe et suite |
 |---|---|---|---|---|---|
-| **R1** | 2026-09-16 | sept rendus J1, §6 | demandées, §6.3 | **en attente** | — |
+| **R1** | 2026-09-16 | sept rendus J1, §6 | demandées, §6.3 ; aucune reçue au premier verdict | **« La mer est trop lisse, on dirait un lac »** (22:13) | provisoire : **physique juste mais incomplète**, spectre de B coupé à `4 fp` ; confirmation par la `mss` contre Cox–Munk (§7) |
 
 ## 6. R1 — la scène J1 telle qu'elle est, S254
 
@@ -120,3 +120,18 @@ Références, avec leurs conditions si connues :
 3. **drone à la verticale**, 50–100 m, d'un petit bateau lent (**≈ 3 m/s, 6 nœuds**) et de son sillage ;
 4. **objet tombant** dans l'eau libre, vu de 3–8 m : les anneaux, puis la gerbe ;
 5. **vidéos** de 10–20 s des cas 1 et 3, pour le mouvement.
+
+## 7. R1 — premier verdict : « la mer est trop lisse, on dirait un lac »
+
+**Reçu le 2026-09-16 à 22:13**, sans référence jointe ; il porte sur l'ensemble des rendus.
+
+**Hypothèse, écrite avant mesure.** B s'arrête à `4 fp` (`λ` ≥ 3,5 m) : aucune rugosité plus
+courte ne module la lumière, et la surface paraît vitreuse comme un plan d'eau abrité. Classe
+provisoire : physique juste mais incomplète. L'habillage (ciel uniforme, soleil fixe) y contribue
+peut-être aussi, mais il ne se corrige pas avant la mesure.
+
+**Mesure et critère** (SPEC-001 §1 sexies). Calculer la `mss` de la recette R1 (32 composantes
+cuites) et celle du même spectre coupé à `4, 8, 16, 24, 32 fp`. La comparer à Cox–Munk au vent
+minimal soutenant `Hs = 1,5 m`. **Défaut confirmé** si la `mss` de B est inférieure à la moitié de
+la borne basse de Cox–Munk à ce vent. Sinon, le verdict se reporte sur l'habillage, et on le dit.
+

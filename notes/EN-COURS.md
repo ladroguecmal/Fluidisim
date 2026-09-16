@@ -81,8 +81,8 @@ poses envoyés à l'utilisateur.
 
 ### Plan
 
-- [>] **P1** — amorce, jeton et plan seuls.
-- [ ] **P2** — verdict consigné au registre R1, classement provisoire, protocole de mesure ;
+- [x] **P1** — amorce, jeton et plan seuls.
+- [x] **P2** — verdict consigné au registre R1, classement provisoire, protocole de mesure ;
   formules Cox–Munk et Pierson–Moskowitz citées dans SPEC-001 (I-14).
 - [ ] **P3** — mesure : `mss` de la recette cuite (32 composantes) et du spectre continu coupé à
   `4, 8, 16, 24, 32 fp` ; verdict confirmé ou non.

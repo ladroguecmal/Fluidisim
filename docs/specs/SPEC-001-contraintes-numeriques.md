@@ -150,6 +150,23 @@ trains y croît en temps au lieu d'être borné. Mesuré : `Δ` de `2,470` à `0
 
 Ce complément n'ajoute ni seuil de bascule ni modèle de production.
 
+## 1 sexies. Rugosité observée de la mer — S256, référence de revue visuelle
+
+**Pente quadratique moyenne mesurée** (Cox & Munk, 1954, reflets du soleil, surface propre) :
+`mss = σx² + σy² = 0,003 + 5,12·10⁻³·W ± 0,004`, avec `W` le vent en m/s à 12,5 m, valable
+environ de 1 à 14 m/s. Cette `mss` est **optique** : elle contient toutes les échelles, capillaires
+comprises. Source : C. Cox et W. Munk, *Measurement of the roughness of the sea surface from
+photographs of the sun's glitter*, JOSA 44(11), 838–850, 1954.
+
+**Vent minimal d'un `Hs` donné.** Pour une mer pleinement développée (Pierson & Moskowitz, JGR
+69(24), 5181–5190, 1964 ; `α = 8,1·10⁻³`, `β = 0,74`, vent à 19,5 m), `m0 = αU⁴/(4βg²)`, d'où
+`Hs = 4√m0 = 2√(α/β)·U²/g ≈ 0,21·U²/g`. Une mer limitée par le fetch atteint le même `Hs` avec un
+vent **plus fort**. Ce vent est donc une **borne basse** : `U ≥ √(Hs·g/0,21)`.
+
+**Pente d'un spectre coupé** (§1 bis) : `mss = (2π)⁴m4/g²` en Airy profond, et `m4` croît comme
+`ln(b)` pour une queue en `f⁻⁵`. Une bande `[a fp, b fp]` sous-estime donc la `mss` observée par
+construction. La comparaison à Cox–Munk dit **de combien**, pas quelle coupure est juste.
+
 ## 2. Stabilité et coût d'un solveur volumétrique
 
 ### 2.1 CFL
