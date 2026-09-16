@@ -83,16 +83,23 @@ au-dessus du plan moyen en production, 3D, rendu, optimisation d'A284.
 
 ### Plan
 
+**Amendement après P2 (2026-09-16), avant tout travail qui en dépend.** P2 a trouvé un
+défaut du cœur : le β du gradient conjugué multigrille (A285). Il fausse le coût du repli,
+A284 et la mesure S245 sur laquelle ADR-147 a fondé l'ordre « repli, pas ordinaire ».
+Corriger d'abord ; la surface mobile couplée (anciens P3–P9) passe à **S253**, dérivation
+conservée ci-dessous. Réception A285 : un test reproduit le défaut avant correction —
+premier vrai résidu du chemin multigrille au-dessus du plancher atteint par le chemin
+ordinaire sur le même système —, et passe après ; portes d'acceptation ADR-143/144
+inchangées ; S245 re-mesurée aux cinq tailles, repli à 32 768 mailles, démarrage plat ;
+suite, empreinte `delta_filters`, `delta_precision`. Aucune décision d'ordre dans ce lot :
+un changement d'ADR-147 se décide sur la mesure publiée, au lot suivant.
+
 - [x] **P1** — amorce, lectures et plan seuls.
 - [x] **P2** — A284 : itérations et temps par projection, 32×16 plat, test diagnostic.
-- [ ] **P3** — ADR-151 et protocole de réception, avant code.
-- [ ] **P4** — fournisseur analytique de test (onde stationnaire linéaire, prolongement).
-- [ ] **P5** — cœur : géométrie totale, valeurs fantômes du fond, tampons comptés.
-- [ ] **P6** — cœur : pas perturbatif mobile, transport de η' et bande du fond, atomicité.
-- [ ] **P7** — tests : identité au bit, repos, expiration, allocations, témoin.
-- [ ] **P8** — banc HOS couplé 32/64/128, 5 et 10 cm : réception ou refus publié.
-- [ ] **P9** — suite, empreinte, coût et preuve.
-- [ ] **P10** — rituel §6 : file, trajectoire, journal et jeton.
+- [ ] **P3** — A285 : test qui reproduit le défaut, correction de β, tests multigrille.
+- [ ] **P4** — re-mesures S245 (cinq tailles), 32 768 mailles, démarrage plat ; suite, empreinte.
+- [ ] **P5** — preuve, notes datées ADR-147/S245/S246/S251, angles morts, file.
+- [ ] **P6** — rituel §6 : trajectoire, journal et jeton ; S253 = surface mobile couplée.
 
 ### Notes de reprise
 
