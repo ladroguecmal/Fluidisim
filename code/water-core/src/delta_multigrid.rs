@@ -6,10 +6,19 @@
 //! préconditionneur **symétrique défini positif**, et c'est pourquoi la recette est contrainte :
 //! lissage diagonal, restriction transposée de la prolongation, autant de lissages avant qu'après.
 
-/// Facteur d'amortissement du lissage de Jacobi. **Il se dérive** : pour le stencil à cinq points,
-/// `2/3` minimise le facteur de lissage des modes de haute fréquence, qu'il ramène à `1/3`. Ce n'est
-/// pas un réglage, et le changer changerait la vitesse de convergence, jamais la solution.
-pub(super) const SMOOTH_DAMPING: f32 = 2. / 3.;
+/// Facteur d amortissement du lissage de Jacobi, **derive et non regle**.
+///
+/// Pour le stencil a cinq points, un balayage de Jacobi amorti multiplie le mode (tx, tz) par
+/// 1 - (w/2)(2 - cos tx - cos tz). Le facteur de lissage est le maximum de sa valeur absolue sur les
+/// modes de **haute frequence** — au moins un angle au-dela de pi/2 —, dont les deux extremes sont
+/// (pi/2, 0), qui donne 1 - w/2, et (pi, pi), qui donne 1 - 2w. Les egaler donne **w = 4/5**, pour
+/// un facteur de lissage de **3/5**.
+///
+/// **Correction datee du 2026-09-16 (S246).** Ce fichier portait 2/3 en le disant derive. C est
+/// l optimum a **une** dimension ; en deux dimensions il laisse un facteur de lissage de 2/3 au lieu
+/// de 3/5. La provenance etait fausse, pas le principe. Mesure de la correction dans
+/// docs/validation/PROLONGATION-S246.md.
+pub(super) const SMOOTH_DAMPING: f32 = 4. / 5.;
 
 /// Lissages avant et après chaque niveau, et sur le plus grossier. **Données de coût**, au même
 /// titre que le grain d'une tâche (ADR-029 §3) : elles changent la vitesse de convergence et les

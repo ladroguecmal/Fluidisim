@@ -99,9 +99,9 @@ encore, sans garder un changement que la mesure ne soutient pas (L323).
 
 - [x] **P1** — amorce, jeton, plan seuls.
 - [x] **P2** — protocole écrit ; instrument du **taux par cycle**, mesuré avant toute modification.
-- [ ] **P3** — prolongation bilinéaire et sa transposée exacte ; adjonction et symétrie éprouvées.
-- [ ] **P4** — mesure : taux par cycle, itérations et coût aux cinq tailles, sans et avec.
-- [ ] **P5** — décision et réception : garder ou annuler, ADR-144, empreintes, suite.
+- [x] **P3** — prolongation bilinéaire et sa transposée exacte ; adjonction et symétrie éprouvées.
+- [x] **P4** — mesure : taux par cycle, itérations et coût aux cinq tailles, sans et avec.
+- [x] **P5** — décision et réception : garder ou annuler, ADR-144, empreintes, suite.
 - [ ] **P6** — rituel §6, file, feuille de route, jeton.
 
 ### Notes de reprise
@@ -115,6 +115,22 @@ la ou ce stencil devrait donner 0,1 a 0,3.
 jusqu a l asymptote — signature d une composante que le cycle ne reduit pas. Prolongation constante
 par morceaux = suspect designe par S245 ; **traitement des bords = second suspect**, que cette
 mesure ne separe pas encore du premier.
+
+P3/P4/P5, executes ensemble parce que la mesure a refute la these a P4 et que P5 est devenu une
+annulation. **La prolongation bilineaire ne gagne rien** : 0,648 / 0,642 / 0,652 contre 0,637 /
+0,635 / 0,674 pour l injection — dans le bruit, et l ecart change de signe. **Annulee** (L323).
+**Geometrie ecartee aussi** : sans aucune coupe, le taux est le meme.
+**Ce que la recherche a trouve a la place** : l amortissement du lisseur portait 2/3 **avec une
+provenance inventee** (  se derive  ). C est l optimum a UNE dimension. En 2D le minimax donne
+**4/5** pour un facteur 3/5. Corrige, avec sa derivation.
+Gain mesure : deuxieme cycle a 32 768 mailles 0,187 -> **0,113** ; asymptote 0,798 -> **0,674** ;
+iterations forcees 99/252/220/167/134 -> **94/177/158/120/106** ; **pas reel a 32 768 : 1 006 ->
+828 ms, divergence 8,512e-6 -> 7,265e-6**. A275 reste fermee, avec plus de marge et moins cher.
+Reception : suite **437 / 16**, empreinte delta_filters **0xfb12b2092df4ee6d** inchangee, dix cas de
+delta_precision identiques.
+**Quatre suspects elimines** (niveau grossier, lissage, prolongation, geometrie) ; reste les
+**bords** — Neumann sur trois cotes, Dirichlet sur le quatrieme, operateur grossier re-discretise
+et non Galerkin.
 
 ---
 

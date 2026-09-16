@@ -1355,9 +1355,10 @@ fn what_the_multigrid_buys_s245() {
 #[test]
 #[ignore = "mesure S246, lancée explicitement ; à lancer en release"]
 fn the_cycle_reduction_rate_s246() {
+    for (label, floor) in [("fond coupe", 0.4f32), ("sans coupe", 0.0)] {
     for (nx, nz) in [(64usize, 32usize), (128, 64), (256, 128)] {
         let dx = 8. / nx as f32;
-        let mut v = mobile_volume(nx, nz, dx, &vec![0.4; nx]);
+        let mut v = mobile_volume(nx, nz, dx, &vec![floor; nx]);
         v.set_surface(&vec![v.domain().z0(); nx]).unwrap();
         let cells = nx * nz;
         let inv = 1. / (dx * dx);
@@ -1391,9 +1392,10 @@ fn the_cycle_reduction_rate_s246() {
         let asymptotic: f64 = tail.iter().sum::<f64>() / tail.len() as f64;
         let head: Vec<String> = rates.iter().take(4).map(|x| format!("{x:.4}")).collect();
         println!(
-            "TAUX_CYCLE_S246 nx={nx} mailles={cells} niveaux={} premiers={} asymptotique={asymptotic:.4}",
+            "TAUX_CYCLE_S246 {label} nx={nx} mailles={cells} niveaux={} premiers={} asymptotique={asymptotic:.4}",
             v.levels.len(),
             head.join(" ")
         );
+    }
     }
 }
