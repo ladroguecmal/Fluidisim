@@ -5453,3 +5453,34 @@ Et un corollaire de tenue : le branchement qui en sort — **repli et non rempla
 rien là où l'ancien chemin suffit, et son verdict reste celui d'ADR-144, inchangé. Une technique qui
 ne paie que dans un régime s'installe dans ce régime, pas partout. Famille de L321 et L323 : ce qu'on
 ne mesure pas, on ne peut ni le gagner ni le perdre sciemment.
+
+## L325 — Une provenance ne voyage pas : ce qui est dérivé ailleurs n'est pas dérivé ici
+
+*(S246)* Le lisseur de la multigrille portait un facteur `2/3` accompagné de sa justification :
+« il se dérive — il minimise le facteur de lissage du stencil à cinq points ». La phrase avait la
+forme d'une provenance, elle citait le bon stencil, et elle était **fausse** : `2/3` est l'optimum à
+**une** dimension. En deux dimensions, le minimax des modes de haute fréquence donne `4/5`, pour un
+facteur de lissage de `3/5` au lieu de `2/3`.
+
+Elle avait été écrite trois sessions plus tôt, dans le même dépôt, par le même dispositif qui exige
+qu'aucune valeur n'entre sans provenance (I-14). Elle a passé une relecture, un ADR et une réception.
+Ce qui l'a trouvée n'est pas une relecture de plus : c'est d'avoir **cherché ailleurs**, éliminé
+quatre suspects par la mesure, et fini par revenir sur le seul nombre que personne ne soupçonnait.
+
+Trois choses généralisent.
+
+1. **Une provenance ne voyage pas entre dimensions, géométries ou régimes.** Un résultat classique
+   reste vrai dans le cadre où il a été établi. Quand on le transporte, la dérivation doit être
+   **refaite dans le nouveau cadre**, pas citée. Le symptôme est toujours le même : une justification
+   correcte dans sa phrase et inapplicable à son usage.
+2. **Une provenance fausse est plus dangereuse qu'un nombre nu.** Un nombre sans justification
+   attire la vérification ; un nombre avec une justification plausible l'écarte. `2/3` a survécu
+   précisément parce qu'il *paraissait* dérivé.
+3. **Éliminer des suspects est un résultat, et c'est ce qui finit par désigner le vrai.** Ce lot a
+   écarté par la mesure le niveau grossier, le lissage, l'ordre de la prolongation et la géométrie
+   des mailles coupées. Aucun de ces quatre n'a rien rapporté — et c'est en n'ayant plus où chercher
+   qu'on relit ce qui semblait acquis.
+
+Corollaire de tenue, de la famille de L323 : la prolongation bilinéaire construite pour ce lot **ne
+gagnait rien** et a été **annulée**. Un opérateur plus coûteux gardé « parce qu'il est meilleur en
+théorie » est une dette, que la session suivante lirait comme une amélioration reçue.

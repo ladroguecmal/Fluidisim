@@ -12713,3 +12713,67 @@ fermée**, A276 mesurée, A280 ouverte), feuille de route, index. Invariants rel
 hiérarchie est comptée avant d'être allouée, et l'essai le recalcule à part) et **I-03** (les tailles
 qui passaient gardent leurs bits ; l'opérateur grossier et l'opérateur fin coïncident au bit).
 Maillons 0 : 32 768 mailles est accepté, le pas le consomme, la preuve est publiée.
+
+## S246 — 2026-09-16 — La thèse était fausse, et le coupable était un nombre que personne ne soupçonnait
+
+**Entrée.** « Continue », master propre à `b5abb80`, une seule copie, jeton libre, secteur,
+Maillons 0. Claude Code, Opus 5. Plan `a33da3d`, protocole et base `e4bfe4b`, construction, mesure et
+annulation `39df8aa`.
+
+**La thèse déclarée est réfutée.** A280 visait la **prolongation bilinéaire** : c'était le suspect
+que la contre-épreuve de S245 désignait pour expliquer le mauvais taux par cycle. Construite comme le
+protocole le demandait — poids (3/4, 1/4), report de bord, **source unique** pour que prolongation et
+restriction restent transposées —, elle **ne gagne rien** : 0,648 / 0,642 / 0,652 contre 0,637 /
+0,635 / 0,674 pour l'injection. Dans le bruit, et l'écart change de signe. **Annulée** (L323).
+
+**Un cinquième suspect écarté au passage.** Le taux mesuré **sans aucune coupe du fond** est le même
+qu'avec — 0,71 / 0,56 / 0,63 contre 0,65 / 0,64 / 0,67. La géométrie des mailles coupées n'y est pour
+rien non plus.
+
+**Ce que la recherche a trouvé à la place, et c'est l'apport du lot.** N'ayant plus où chercher, j'ai
+relu le seul nombre que personne ne soupçonnait : l'amortissement du lisseur. Il portait `2/3` **avec
+sa justification** — « il se dérive, il minimise le facteur de lissage du stencil à cinq points ».
+La phrase avait la forme d'une provenance, citait le bon stencil, et **était fausse** : `2/3` est
+l'optimum à **une** dimension. En deux dimensions, un balayage de Jacobi amorti multiplie le mode
+`(θx, θz)` par `1 − (ω/2)(2 − cos θx − cos θz)` ; égaler les deux extrêmes de haute fréquence —
+`1 − ω/2` et `1 − 2ω` — donne **ω = 4/5**, pour un facteur de lissage de **3/5** au lieu de `2/3`.
+
+Je l'avais écrite en S245, dans ce dépôt, sous un invariant qui exige qu'aucune valeur n'entre sans
+provenance (I-14). Elle a passé une relecture, un ADR et une réception. **Une provenance fausse est
+plus dangereuse qu'un nombre nu** : le second attire la vérification, le premier l'écarte.
+
+**Ce que la correction rend, mesuré.** Deuxième cycle à 32 768 mailles **0,187 → 0,113** ; taux
+asymptotique **0,798 → 0,674** ; itérations forcées 99 / 252 / 220 / 167 / 134 → **94 / 177 / 158 /
+120 / 106** ; et sur le chemin réel, à 32 768 mailles, **1 006 → 828 ms** avec une divergence de
+**8,512·10⁻⁶ → 7,265·10⁻⁶**. **A275 reste fermée, avec plus de marge et pour moins cher.**
+
+**Réception.** Suite **437 réussis, 0 échec, 16 ignorés** ; empreinte `delta_filters`
+**`0xfb12b2092df4ee6d` inchangée** ; dix cas de `delta_precision` identiques ; symétrie et positivité
+du cycle conservées ; opérateur grossier et opérateur fin toujours **au bit**. Aux tailles qui
+passent sans repli, rien ne change : le repli ne s'y déclenche pas, donc l'amortissement n'entre dans
+aucun bit publié.
+
+**Ce qui reste, et ce que deux sessions ont éliminé.** Le taux asymptotique tient à **0,63–0,67**, là
+où ce stencil devrait donner 0,1 à 0,3. Cinq suspects ont été écartés par la mesure — niveau le plus
+grossier, quantité de lissage, ordre de la prolongation, géométrie des mailles coupées — et le
+cinquième, l'amortissement, était **fautif et corrigé**. Reste le dernier debout, que ce lot **ne
+nomme pas** : les **bords**, avec un opérateur grossier **re-discrétisé** et non construit par
+Galerkin ; la différence entre les deux se voit surtout là où les coefficients varient.
+
+**Non fait.** Le coût de δ reste entier. Une machine, un pas de temps, deux fonds. Le mode mobile n'a
+toujours pas la multigrille.
+
+**Suite.** Troisième session consécutive sur le solveur de δ, et **METHODE demande de comparer avant
+la suivante**. Le plafond du taux (**A281**) est un approfondissement dont le gain est incertain et
+dont le déclencheur naturel est le passage à la 3D ; la file porte, elle, une capacité mesurable et
+en attente depuis S240 : **les angles rasants soutenus** de J1-bis, seul reliquat de cette ligne
+qu'une session puisse traiter seule. **S247 : J1-bis, angles rasants soutenus.** A281, A278, A277,
+A274, V, B2 et bathymétrie gardent leurs déclencheurs.
+
+**Rituel.** L325 ; aucun ADR — ADR-147 n'est pas touché, seul un de ses paramètres est corrigé ;
+correction datée dans `delta_multigrid.rs` et dans PROLONGATION-S246 ; file active (**A280 close**,
+**A281 ouverte**), feuille de route, index. Invariants relus : **I-14** — c'est lui que la session a
+vu manquer chez elle-même, et la leçon porte son nom — et **I-03** (empreintes inchangées, opérateurs
+au bit). **Maillons 0**, et la justification est écrite pour qu'on puisse la contester : la thèse du
+lot a échoué, mais une **correction d'intégrité** a été reproduite et testée, et elle a un effet aval
+mesuré — le repli d'ADR-147 est 18 % moins cher et garde plus de marge.

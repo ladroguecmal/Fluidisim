@@ -157,7 +157,10 @@ par pas à 32 768 mailles**. Le parallélisme est fermé pour cette boucle (125 
 21,7 de pass) : **la multigrille est le seul levier dont le gain croît avec la taille** ;
 [carte](validation/COUT-DELTA-S244.md). **S245 : elle est construite** — elle ne gagne pas de
 vitesse, un cycle coûtant cinq produits fins par itération, mais elle **ferme A275** en précision et
-est branchée en repli ; [mesure](validation/MULTIGRILLE-S245.md). Le coût reste entier. Part d'un impact que W ne porte pas nommée en S203 (énergie hors ondes, cavité, gerbe).
+est branchée en repli ; [mesure](validation/MULTIGRILLE-S245.md). Le coût reste entier. **S246 : la
+prolongation bilinéaire n'apporte rien et est annulée ; l'amortissement du lisseur était faux** — `2/3`
+donné comme dérivé est l'optimum à une dimension, `4/5` est celui à deux — et le repli passe de 1 006
+à 828 ms ; [mesure](validation/PROLONGATION-S246.md). Le plafond du taux reste ouvert (A281). Part d'un impact que W ne porte pas nommée en S203 (énergie hors ondes, cavité, gerbe).
 
 *Bancs* : **B3** (famille de δ) quand un candidat atteint ses critères ou qu'un second existe ;
 **B4** (régime perturbatif, volets restants) sur les cas livrés ; **B5** (blocs épars) quand

@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S246 — en cours
+Session : S246 — terminée
 Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web)
 Entrée : « Continue », master propre à `b5abb80`, une seule copie, jeton libre, secteur, Maillons 0.
 
@@ -102,7 +102,7 @@ encore, sans garder un changement que la mesure ne soutient pas (L323).
 - [x] **P3** — prolongation bilinéaire et sa transposée exacte ; adjonction et symétrie éprouvées.
 - [x] **P4** — mesure : taux par cycle, itérations et coût aux cinq tailles, sans et avec.
 - [x] **P5** — décision et réception : garder ou annuler, ADR-144, empreintes, suite.
-- [ ] **P6** — rituel §6, file, feuille de route, jeton.
+- [x] **P6** — rituel §6, file, feuille de route, jeton.
 
 ### Notes de reprise
 
