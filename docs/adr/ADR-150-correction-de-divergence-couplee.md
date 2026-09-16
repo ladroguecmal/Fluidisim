@@ -26,3 +26,10 @@ même à l'expiration ; eta et ses restes ne sont pas modifiés.
 
 [Diagnostic et réception](../validation/DEMARRAGE-PLAT-S251.md). Pas de réception
 universelle de la pression, de la surface mobile couplée ni du budget I-05.
+
+**Note S252, 2026-09-16.** La fonction d'affinage est partagée avec le pas à couvercle fixe par
+[ADR-151](ADR-151-affinage-au-pas-fixe-et-travail-compte.md). Le pas couplé garde `q` sans
+multigrille, et ses tests S251 passent. Ses bancs changent pourtant, parce que le repli
+multigrille qui précède l'affinage est corrigé (A285) : 32×16 plat passe de 43,6 à 2,5 ms de
+médiane, et 16×8 plat de 7 à 5 affinages sur vingt pas.
+[Mesures](../validation/MULTIGRILLE-BETA-S252.md).

@@ -1,5 +1,11 @@
 # Une multigrille pour préconditionner la pression de δ — S245, 2026-09-16
 
+> **Note datée S252, 2026-09-16.** Le gradient conjugué multigrille mesuré ici employait un β
+> fautif (A285). Les comptes et coûts « avec » de ce document, la conclusion « la multigrille ne
+> gagne pas de vitesse » et l'explication d'A275 par « moins d'itérations » sont invalides. La
+> symétrie du cycle, l'opérateur grossier et la comptabilité mémoire restent reçus.
+> [Re-mesure](MULTIGRILLE-BETA-S252.md), [ADR-151](../adr/ADR-151-affinage-au-pas-fixe-et-travail-compte.md).
+
 Suite directe de [COUT-DELTA-S244](COUT-DELTA-S244.md), qui a désigné le levier : le coût d'une
 itération est **stable en structure** à toutes les tailles — écritures disjointes 67 à 73 % du pas,
 réductions 12 à 13 % —, et c'est le **nombre d'itérations** qui double à chaque raffinement :

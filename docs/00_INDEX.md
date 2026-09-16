@@ -49,6 +49,7 @@
 - [Coupure spectrale de l'image B/sillage : réception, coût et limites](validation/COUPURE-S249.md).
 - [Premier raccordement volumique B/W→δ et démarrage plat refusé](validation/RACCORDEMENT-DELTA-S250.md).
 - [Démarrage couplé plat : oracle f64, affinage de divergence, coût et attribution par pas](validation/DEMARRAGE-PLAT-S251.md).
+- [Multigrille : le β du gradient conjugué, le coût du démarrage plat et 32 768 mailles](validation/MULTIGRILLE-BETA-S252.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).
@@ -215,6 +216,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-148](adr/ADR-148-filtrage-spectral-image.md) | Filtrer les amplitudes de l'image selon le pas projeté |
 | [ADR-149](adr/ADR-149-premier-raccordement-volumique.md) | Premier raccordement volumique B/W→δ à surface imposée |
 | [ADR-150](adr/ADR-150-correction-de-divergence-couplee.md) | Corriger le défaut de divergence sur la vitesse couplée, une fois, au plancher |
+| [ADR-151](adr/ADR-151-affinage-au-pas-fixe-et-travail-compte.md) | L'affinage de divergence vaut aussi pour le pas à couvercle fixe ; le rapport compte tout le travail |
 
 ## Travail et historique
 

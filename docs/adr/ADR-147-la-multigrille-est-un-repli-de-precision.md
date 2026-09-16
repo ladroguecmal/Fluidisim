@@ -63,3 +63,13 @@ Construite et mesurée, elle donne deux résultats opposés.
 
 Retirer le repli — une condition dans `run` — rend exactement le chemin de S244, au bit, et rouvre
 A275. La hiérarchie resterait construite et testée, sans consommateur.
+
+**Correction factuelle S252, 2026-09-16.** Le gradient conjugué multigrille mesuré ici avait un β
+fautif (`‖r_{n+1}‖²/⟨r_n, z_n⟩`, A285). Le constat 1 (« en vitesse, elle perd ») et les comptes
+d'itérations sont donc invalides. Corrigée, la multigrille converge en 6 à 8 itérations et est
+plus rapide dès 512 mailles, 2,9 fois à 32 768. Le constat 2 est mal expliqué : la tolérance
+tenait grâce aux relances du gradient fautif, pas parce qu'il faisait moins d'itérations.
+Corrigée, elle s'arrête au plancher à 32 768 mailles (`D = 1,585·10⁻⁵`) ; le pas y est reçu par
+l'affinage d'[ADR-151](ADR-151-affinage-au-pas-fixe-et-travail-compte.md). La décision 1 reste
+appliquée tant qu'un nouvel ADR ne l'a pas remplacée ; sa prémisse de vitesse est réfutée.
+[Mesures](../validation/MULTIGRILLE-BETA-S252.md).

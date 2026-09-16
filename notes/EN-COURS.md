@@ -100,7 +100,7 @@ un changement d'ADR-147 se décide sur la mesure publiée, au lot suivant.
 - [x] **P4** — re-mesures S245 (cinq tailles), 32 768 mailles, démarrage plat ; empreinte.
 - [x] **P4b** — ADR-151 : affinage de divergence ADR-150 étendu au pas à couvercle fixe
   refusé au plancher (A275 sinon rouverte) ; test à 32 768 mailles, suite complète.
-- [ ] **P5** — preuve, notes datées ADR-147/S245/S246/S251, angles morts, file.
+- [x] **P5** — preuve, notes datées ADR-147/S245/S246/S251, angles morts, file.
 - [ ] **P6** — rituel §6 : trajectoire, journal et jeton ; S253 = surface mobile couplée.
 
 ### Notes de reprise

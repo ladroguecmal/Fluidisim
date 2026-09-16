@@ -1,5 +1,11 @@
 # La prolongation de la multigrille de δ — S246, 2026-09-16
 
+> **Note datée S252, 2026-09-16.** Les taux par cycle de ce document emploient le cycle comme
+> itération stationnaire : le défaut de β du gradient conjugué (A285) ne les touche pas.
+> En revanche, les « itérations forcées » (94/177/158/120/106), le « pas forcé » (579 ms) et le
+> « pas réel » (828 ms) ont été mesurés avec ce gradient fautif, et sont invalides.
+> [Re-mesure](MULTIGRILLE-BETA-S252.md).
+
 Traite **A280**, ouverte par [MULTIGRILLE-S245](MULTIGRILLE-S245.md) §5. La multigrille y a fermé
 A275 en précision, mais **ne gagne pas de vitesse** : un cycle coûte cinq produits fins par
 itération, et le taux de réduction par cycle est trop faible pour l'amortir.

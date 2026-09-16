@@ -112,3 +112,7 @@ ADR-150. Absentes : tout départ non nul — chaque projection, repli et affinag
 compris, repart de p=0 (`project`), sans la pression du pas précédent ni celle
 de la projection ordinaire ; parallélisme (fermé pour cette boucle, S244).
 Domaine : 2D x-z, deux tailles, B/W du banc S250. Suivi : A284.
+
+*Note datée S252, 2026-09-16.* A284 est attribuée : 94 % du pas plat 32×16 venaient du repli
+multigrille, dont le gradient conjugué avait un β fautif (A285). Corrigé, ce pas coûte
+2,53 ms de médiane au lieu de 43,6. [Mesures](MULTIGRILLE-BETA-S252.md).

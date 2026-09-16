@@ -167,15 +167,19 @@ vitesse, un cycle coûtant cinq produits fins par itération, mais elle **ferme 
 est branchée en repli ; [mesure](validation/MULTIGRILLE-S245.md). Le coût reste entier. **S246 : la
 prolongation bilinéaire n'apporte rien et est annulée ; l'amortissement du lisseur était faux** — `2/3`
 donné comme dérivé est l'optimum à une dimension, `4/5` est celui à deux — et le repli passe de 1 006
-à 828 ms ; [mesure](validation/PROLONGATION-S246.md). Le plafond du taux reste ouvert (A281). Part d'un impact que W ne porte pas nommée en S203 (énergie hors ondes, cavité, gerbe).
+à 828 ms ; [mesure](validation/PROLONGATION-S246.md). Le plafond du taux reste ouvert (A281). **S252 : ces comptes et coûts multigrille étaient faux** —
+le gradient conjugué préconditionné avait un β fautif (A285). Corrigée, la multigrille converge en 6 à 8
+itérations et bat le gradient nu dès 512 mailles (2,9 fois à 32 768 mailles, 137 contre 392 ms) ; le
+pas à 32 768 mailles est reçu par l'affinage de divergence d'ADR-151. L'ordre d'ADR-147 est à reprendre ;
+[re-mesure](validation/MULTIGRILLE-BETA-S252.md). Part d'un impact que W ne porte pas nommée en S203 (énergie hors ondes, cavité, gerbe).
 
 **S250 : premier raccordement volumique B/W→δ** consommé par le pas MAC à surface
 imposée : -S continu après somme, advection croisée, éponge quadratique, budget atomique
 et zéro allocation. Vingt pas reçus à 16×8 ; [preuve](validation/RACCORDEMENT-DELTA-S250.md), ADR-149.
 **S251 : démarrage plat reçu** — δ=0, v=0, B/W réels, 16×8 et 32×16, contre une projection
 f64 indépendante (vitesse ≤2,2·10⁻⁶ relatif), par un affinage unique de divergence au
-plancher (ADR-150) ; vingt pas, reprise au bit, zéro allocation. Coût **×40** à 32×16
-contre la hauteur imposée, hors affinage, non attribué (A284) ;
+plancher (ADR-150) ; vingt pas, reprise au bit, zéro allocation. Coût ×40 à 32×16 attribué
+en S252 au gradient conjugué multigrille fautif (A285) : 2,53 ms de médiane une fois corrigé ;
 [preuve](validation/DEMARRAGE-PLAT-S251.md). Restent résidus de surface mobile et
 frontières du total ; ni raccordement au rendu ni B4 global reçus.
 

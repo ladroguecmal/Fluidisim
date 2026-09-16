@@ -3565,3 +3565,24 @@ Déclencheur : avant tout banc de coût du raccordement ou extension de taille, 
 les itérations par projection ; puis éprouver les techniques absentes (ADR-131).
 Ne pas relever la tolérance ni réduire le plafond pour abaisser le coût. Distinct
 d'A276 (loi de taille) : ici la taille est fixe. [Mesure](../validation/DEMARRAGE-PLAT-S251.md).
+
+**A284 — suivi S252, 2026-09-16 (sévérité 2, close).** Attribuée par une trace de test autour de
+chaque projection du pas couplé. Le repli multigrille faisait **94 %** du pas plat 32×16 :
+500 itérations et ~39 ms. La projection ordinaire (~81 itérations) et l'affinage (~90)
+coûtaient chacun ~1 ms. La cause est un défaut, A285, et non le régime au plancher. Corrigé,
+le pas plat coûte 2,53 ms de médiane contre 1,15 sous hauteur imposée ; l'écart restant
+tient au repli et à l'affinage. [Mesures](../validation/MULTIGRILLE-BETA-S252.md).
+
+**A285 — S252, 2026-09-16 (sévérité 2, close le jour même).** Le gradient conjugué préconditionné
+par la multigrille formait `β = ‖r_{n+1}‖²/⟨r_n, z_n⟩` avant le cycle, depuis S245 P5
+(`6dc0bfa`), alors que le commentaire du code donnait la bonne formule. Symptôme : premier vrai
+résidu relatif 0,616 quand la récurrence s'arrête, 25 relances, 500 itérations. Le défaut est
+resté invisible pendant sept sessions, pour trois raisons. Les portes d'acceptation recalculent
+le vrai résidu, donc aucun résultat faux n'a été publié. Les relances faisaient progresser le
+calcul malgré tout. Et S245 a interprété un compte « plat et haut » comme un défaut de
+transfert. Portée : les comptes et coûts « avec » de S245/S246 et la prémisse de vitesse
+d'ADR-147 étaient faux, et l'explication d'A275 aussi. Corrigé et reproduit par un essai qui
+échouait avant. À 32 768 mailles, le pas corrigé serait redevenu refusé : ADR-151 le reçoit
+par affinage. **Leçon** : un préconditionneur n'est éprouvé qu'avec le solveur qui l'emploie.
+L'essai de symétrie du cycle passait ; aucun essai ne confrontait la récurrence au vrai résidu.
+[Preuve](../validation/MULTIGRILLE-BETA-S252.md).
