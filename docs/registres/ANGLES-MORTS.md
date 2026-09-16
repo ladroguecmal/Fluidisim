@@ -3532,3 +3532,14 @@ Le mouvement et les reflets ne sont pas reçus perceptivement ; aucune absence g
 d’alias n’est revendiquée. Déclencheur : prochaine extension de J1 ou critère de réflexion.
 Le coût GPU augmente de 0,76–0,85 ms en régime ; premier passage à 2,26 ms. Optimisation
 de cuisson si ce poste devient prioritaire. [Preuve](../validation/COUPURE-S249.md).
+
+
+**A283 — S250, 2026-09-16 (sévérité 2, ouverte).** Le premier raccordement B/W réel
+au MAC refuse le démarrage à perturbation et hauteur imposée nulles, à seulement
+16×8 et 32×16. La projection atteint son plancher mais D vaut 1,42·10⁻⁴ / 8,06·10⁻⁵,
+au-dessus de 10⁻⁵. Ajouter une hauteur imposée de 1 cm permet vingt pas : ce n'est
+pas une correction du défaut. Les champs publiés restent intacts au refus.
+Source proche d'un gradient et normalisation par la petite vitesse projetée : suspects
+à départager par une projection f64 indépendante. A275 résolvait une autre famille
+de second membre ; sa fermeture ne couvre pas ce cas. Déclencheur S251, avant extension
+du couplage. Ne pas relever un seuil ni effacer S. [Preuve](../validation/RACCORDEMENT-DELTA-S250.md).

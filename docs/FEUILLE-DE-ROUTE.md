@@ -125,7 +125,7 @@ mesuré sur la scène) ; **B7** partiel (budget sur la machine locale, pas encor
 (I-12), éponge vers B+W (ADR-005) — sur des cas bornés : cavité et gerbe d'impact, proche-coque.
 Un domaine borné est une **étape** du δ général, jamais un produit à part (ADR-127 D3).
 
-*État au 2026-09-15* : candidat MAC x-z en bibliothèque (S199), sans allocation dans le pas et
+*État au 2026-09-16* : candidat MAC x-z en bibliothèque (S199), sans allocation dans le pas et
 à refus atomiques (S200), coût du pas mesuré (S202). **S230 : arrêt coopératif atomique et
 temps restant explicite**, reprise reçue ; [budget δ](validation/BUDGET-DELTA-S230.md).
 I-05 complet non reçu : retards réels observés, admission/marges encore absentes.
@@ -168,6 +168,12 @@ est branchée en repli ; [mesure](validation/MULTIGRILLE-S245.md). Le coût rest
 prolongation bilinéaire n'apporte rien et est annulée ; l'amortissement du lisseur était faux** — `2/3`
 donné comme dérivé est l'optimum à une dimension, `4/5` est celui à deux — et le repli passe de 1 006
 à 828 ms ; [mesure](validation/PROLONGATION-S246.md). Le plafond du taux reste ouvert (A281). Part d'un impact que W ne porte pas nommée en S203 (énergie hors ondes, cavité, gerbe).
+
+**S250 : premier raccordement volumique B/W→δ** consommé par le pas MAC à surface
+imposée : -S continu après somme, advection croisée, éponge quadratique, budget atomique
+et zéro allocation. Vingt pas reçus à 16×8 ; **démarrage plat refusé A283**, prochain lot
+avant les résidus de surface mobile et les frontières du total. Ni raccordement au rendu
+ni B4 global reçus ; [preuve](validation/RACCORDEMENT-DELTA-S250.md), ADR-149.
 
 *Bancs* : **B3** (famille de δ) quand un candidat atteint ses critères ou qu'un second existe ;
 **B4** (régime perturbatif, volets restants) sur les cas livrés ; **B5** (blocs épars) quand

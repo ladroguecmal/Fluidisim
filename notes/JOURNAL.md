@@ -12942,3 +12942,42 @@ corrigés sur les lignes touchées, A282 actualisée avec sévérité 2 et limit
 README, journal, plan et jeton synchronisés. I-03, I-06, I-08, I-09 et I-13 relus : cœur
 inchangé, allocations mesurées, amplitudes du même champ, rendu sans autorité. Aucune
 copie isolée ouverte ; aucun distant modifié.
+
+## S250 — Premier raccordement volumique B/W→δ ; démarrage plat refusé
+
+**2026-09-16, Codex GPT-6.** Entrée « Continue », master propre f2dd759, copie unique,
+archive B conservée. Plan `7ed21ad`, décision `87cfd41`, pas `6d791b3`, réception
+`79e32a0`. Suite choisie par S249 : coupler les fournisseurs existants au candidat MAC.
+
+**Capacité reçue, maillons 0.** `Volume::step_perturbation` consomme les échantillons
+différentiels B/W : source continue -S après somme, deux advections croisées, éponge
+quadratique puis projection. API du candidat, pas simple composition finale dans un
+banc. Durée/budget entiers, aucune allocation, publication atomique. Vingt pas avec
+B et pression W réels reçus sous une hauteur perturbative imposée de 1 cm.
+ADR-149 borne ce premier lot à la géométrie fixe et aux bords de perturbation.
+
+**Preuves.** Six tests unitaires et un test d'allocations ajoutés ; suite complète
+**444 réussis / 16 ignorés**, zéro échec. Empreinte historique **0xfb12b2092df4ee6d**
+conservée. Banc réel : D maximal 5,787·10⁻⁶ ; retirer S change effectivement la vitesse.
+Sommer les résidus séparément perd jusqu'à 1,520·10⁻³ m/s² de termes croisés.
+Sur secteur, médianes préparation/pas 0,1833/0,1747 ms, maximum du pas 0,2743 ms,
+20 pas, premier inclus. [Protocole, commandes et limites](../docs/validation/RACCORDEMENT-DELTA-S250.md).
+
+**Défaut trouvé, non escamoté.** À hauteur perturbative nulle et v=0, le pas refuse
+la projection à 16×8 et 32×16, D=1,42·10⁻⁴ / 8,06·10⁻⁵ au plancher. A283, sévérité 2.
+Cas `--flat` conservés, état intact vérifié. Une hauteur imposée qui permet de passer
+ne corrige pas ce défaut. Source gradient, annulation et normalisation : suspects,
+pas cause démontrée. Aucune tolérance changée. Attribution erronée du profil cubique
+à ADR-046 dans ADR-149 : note factuelle datée ; le code emploie le profil quadratique.
+
+**Non-fait et suite S251.** Recevoir le démarrage plat par comparaison à une projection
+f64 indépendante avant d'étendre ce raccordement. Puis résidus de surface et frontières
+du total avant couplage mobile. Ni B4 global, ni transduction vers W_local, ni réflexion
+B2, ni intégration au rendu, ni budget I-05 global reçus. Les coupes radiales 3D sont
+refusées explicitement. A276/A281, V, bathymétrie et multiplateforme restent à la file,
+avec leurs déclencheurs ; pas d'arbitrage externe ni réduction d'ambition.
+
+**Rituel.** File active relue entièrement ; trajectoire, index, A283, plan et jeton
+actualisés. I-01/02/04/05/06/07/08/11/12/14 relus : échantillons transitoires d'un
+instant, champs f32, coefficients ADR-141, éponge paramétrée de banc, aucune autorité
+ou sérialisation ajoutée. Aucun worktree créé ni distant modifié ; archive conservée.

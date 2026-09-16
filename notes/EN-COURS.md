@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S250 — en cours
+Session : S250 — terminée
 Agent : Codex GPT-6 ; fichiers, git, cargo, Python et GPU local disponibles.
 Entrée : « Continue ». Master propre f2dd759, une seule copie, archive B conservée.
 
@@ -83,7 +83,7 @@ Arrêt : API consommée par le pas MAC et exemple reproductible, tests et limite
 - [x] **P2** — ADR/protocole, contrat des faces et limites de la coupe 2D.
 - [x] **P3** — pas perturbatif atomique, source et éponge, tests ciblés.
 - [x] **P4** — exemple B/W réel, contre-épreuves, suite de tests et mesure.
-- [>] **P5** — rituel §6 : file, trajectoire, preuves, journal, jeton.
+- [x] **P5** — rituel §6 : file, trajectoire, preuves, journal, jeton.
 
 ### Notes de reprise
 
@@ -92,3 +92,8 @@ sur y=0, uy peut être nul mais d(uy)/dy ne l'est pas. Refuser les échantillons
 SPEC-004 §6.1 et ADR-114 imposent -S continu, pas l'annulation du pas numérique du fond.
 L'équilibre δ=0 n'est exact que si S=0 ; un fond linéaire porte normalement un résidu
 quadratique non nul. Ce résidu doit engendrer une correction, pas être effacé.
+
+Réception et chiffres dans RACCORDEMENT-DELTA-S250. 444 tests réussis / 16 ignorés,
+empreinte delta_filters conservée. A283 nouveau : démarrage couplé plat refusé à
+16×8 et 32×16 ; cas --flat conservé avec assertion d'atomicité. S251 doit comparer
+la projection à un oracle indépendant avant les résidus de surface mobile.

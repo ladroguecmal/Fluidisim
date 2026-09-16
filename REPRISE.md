@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-16 18:04 +02:00
+JETON            : libre
+Battement        : 2026-09-16 18:05 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo, Python, accès web ; GPU DX12 vérifié)
-Session en cours : S250 — raccordement B/W au δ 2D
-Dernière session : S249 — coupure lointaine B/sillage reçue dans l’hôte (ADR-148)
-Session suivante : S250 — J2 : raccorder B/W au δ 2D, source d’écart et éponge
+Session en cours : aucune
+Dernière session : S250 — raccordement volumique B/W→δ reçu sous surface imposée (ADR-149)
+Session suivante : S251 — A283 : recevoir le démarrage couplé plat, oracle de projection indépendant
 Maillons        : 0
 
 ```
