@@ -38,7 +38,7 @@ fn main() {
     let mut u=vec![BackgroundSample::default();v.velocity_u().len()];
     let mut w=vec![BackgroundSample::default();v.velocity_w().len()];
     let mut no_source_u=u.clone();let mut no_source_w=w.clone();
-    let mut max_cross=0f32;let mut max_div=0f64;
+    let mut max_cross=0f32;let mut max_div=0f64;let mut refinements=0;
     let mut samples=Vec::with_capacity(20);let mut preparation=Vec::with_capacity(20);
     arena.seal();
     for step in 0..20 {
@@ -65,17 +65,13 @@ fn main() {
         let start=Instant::now();
         let result=v.step_perturbation(time,1000,2000,1_000_000,&bg,
             Sponge{width_m:1.,rate_per_s:2.},&jobs,&Clock(Instant::now()));
-        if flat {
-            assert_eq!(result,Err(water_core::delta_projection::Error::Convergence));
-            assert!(v.velocity_u().iter().chain(v.velocity_w()).chain(v.pressure()).all(|x|*x==0.));
-            assert_eq!(v.surface(),eta);
-            println!("S250 flat nx={nx} : refus Convergence atomique reproduit, non recu.");
-            return;
-        }
         let report=result.unwrap();
         samples.push(start.elapsed().as_secs_f64()*1000.);
         assert_eq!(report.advanced_us,1000);
         max_div=max_div.max(report.report.unwrap().divergence);
+        refinements+=report.report.unwrap().refinements;
+        assert_eq!(v.surface(),eta);
+        if flat && step==0 {assert_eq!(report.report.unwrap().refinements,1);}
         if step==0 {
             no_source_u.copy_from_slice(&u);no_source_w.copy_from_slice(&w);
             for s in no_source_u.iter_mut().chain(&mut no_source_w) {
@@ -95,7 +91,7 @@ fn main() {
     }
     assert!(max_cross>1e-5,"la contraction séparée doit perdre les termes croisés");
     samples.sort_by(f64::total_cmp);preparation.sort_by(f64::total_cmp);
-    println!("S250 nx={nx} nz={} steps=20 dt_us=1000 B=1 W=2 CPU sequentiel release",domain.nz);
+    println!("S251 nx={nx} nz={} flat={flat} steps=20 dt_us=1000 B=1 W=2 refinements={refinements} CPU sequentiel release",domain.nz);
     println!("cross_acceleration_max={max_cross:e} divergence_max={max_div:e}");
     println!("step_median_ms={:.6} step_max_ms={:.6} prepare_median_ms={:.6}",samples[10],samples[19],preparation[10]);
     println!("Surface imposee, bords de perturbation ; ni B4 global, ni I-05, ni raccordement mobile.");
