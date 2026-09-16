@@ -275,7 +275,7 @@ impl Volume {
 
     /// Garde de géométrie (SURFACE-MOBILE-S237 §1.2) : surface à au moins deux mailles au-dessus
     /// du fond coupé de sa colonne, et à au moins une maille sous le sommet du domaine.
-    fn surface_in_bounds(&self, ctl: &mut Control, phase: Phase) -> Result<bool, Error> {
+    pub(super) fn surface_in_bounds(&self, ctl: &mut Control, phase: Phase) -> Result<bool, Error> {
         let (nx, nz, dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
         let edge = |i: usize| {
             if i == 0 {
@@ -299,7 +299,7 @@ impl Volume {
 
     /// Extrapolation constante verticale au-dessus de la dernière face corrigée de chaque colonne
     /// de faces, dans l'ordre des indices.
-    fn extrapolate_mobile(&mut self, ctl: &mut Control) -> Result<(), Error> {
+    pub(super) fn extrapolate_mobile(&mut self, ctl: &mut Control) -> Result<(), Error> {
         let (nx, nz) = (self.domain.nx, self.domain.nz);
         for i in 1..nx {
             let mut last: Option<f32> = None;

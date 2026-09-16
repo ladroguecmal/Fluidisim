@@ -87,7 +87,7 @@ z > 0), multigrille/affinage du mode mobile, 3D, rendu, ordre d'ADR-147.
 - [x] **P2** — ADR-152 et protocole de réception, avant code.
 - [x] **P3** — fournisseur analytique de test partagé (exemple et essais) et ses contrôles.
 - [x] **P4** — cœur : hauteur totale, valeurs fantômes du fond, tampons comptés ; S237 au bit.
-- [ ] **P5** — cœur : pas perturbatif mobile, transport de η' et bande, atomicité.
+- [x] **P5** — cœur : pas perturbatif mobile, transport de η' et bande, atomicité.
 - [ ] **P6** — essais : identité au bit, refus, expiration, allocations, témoin sans résidus.
 - [ ] **P7** — banc HOS couplé 32/64/128, 5 et 10 cm : réception ou refus publié.
 - [ ] **P8** — suite, empreinte, coût et preuve.
@@ -107,3 +107,6 @@ P4 : `height(i)` (η ou ζ totale), fantômes + `ghost_bg_up`/`ghost_bg_side` en
 `prepare_surface_background` ; +(nu + 2·nx) f32 comptés, essai de comptabilité mis à jour.
 Essai fantômes contre P analytique à l'interface : 32 colonnes vertes, 9 latéraux, borne de
 Taylor 1,35 Pa. Tests δ 53/11 ignorés, exécution 11. `delta_mobile essai` = S237 (0,850 % / 2,44 %).
+
+P5 : step_perturbation_mobile et transport_coupled ; surface_in_bounds et extrapolate_mobile
+passent en pub(super). Essai critère 1 (fond nul) : 50 pas identiques au bit à S237, rapport compris.

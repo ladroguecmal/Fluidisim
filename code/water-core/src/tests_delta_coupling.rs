@@ -440,3 +440,27 @@ fn background_ghost_values_match_interface_pressure_s253(){
     assert!(sides>=4,"l'essai doit exercer des fantômes latéraux : {sides}");
     println!("S253 fantomes : borne_taylor={taylor:e} Pa, lateraux={sides}");
 }
+
+fn same_bits(a:&[f32],b:&[f32])->bool {a.len()==b.len()&&a.iter().zip(b).all(|(x,y)|x.to_bits()==y.to_bits())}
+
+/// S253 (ADR-152, critère 1) — fond nul : le pas perturbatif mobile rend le pas S237 **au bit**,
+/// champs, hauteur, restes et rapport, sur cinquante pas d'une onde stationnaire de 5 cm.
+#[test]
+fn zero_background_mobile_step_is_s237_to_the_bit_s253(){
+    let nx=32;let dx=2./nx as f64;let k=std::f64::consts::PI/2.;
+    let eta:Vec<f32>=(0..nx).map(|i|(2.+0.05*(k*(i as f64+0.5)*dx).cos()) as f32).collect();
+    let wave=standing::StandingWave{a:0.,k,h:2.,g:9.81,rho:1025.};
+    let mut total=standing_case(nx,&wave,&eta);
+    let mut coupled=standing_case(nx,&wave,&eta);
+    let (u,w)=fields(&coupled);
+    for n in 0..50u64 {
+        let t=SimTime(n*1000);
+        let bg=BackgroundFaces{domain:coupled.domain,time:t,density:1025.,gravity:9.81,u:&u,w:&w};
+        let a=total.step_surface_mobile(1000,4000,1_000_000,&Jobs,&Clock).unwrap();
+        let b=coupled.step_perturbation_mobile(t,1000,4000,1_000_000,&bg,Sponge::default(),&Jobs,&Clock).unwrap();
+        assert_eq!(a.report,b.report,"rapport au pas {n}");
+        assert!(same_bits(&total.u,&coupled.u)&&same_bits(&total.w,&coupled.w)&&same_bits(&total.p,&coupled.p),"champs au pas {n}");
+        assert!(same_bits(&total.eta,&coupled.eta)&&same_bits(&total.eta_roundoff,&coupled.eta_roundoff),"hauteur au pas {n}");
+        assert!(!coupled.surface_coupled&&!coupled.mobile);
+    }
+}
