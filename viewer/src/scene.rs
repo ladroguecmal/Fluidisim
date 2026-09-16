@@ -33,6 +33,8 @@ pub const WAKE_CAPACITY: usize = 16_384;
 /// S256, ADR-155 : queue spectrale de B rendue en pentes par pixel, `[4, 32]·fp`, 64 composantes.
 pub const TAIL_RATIO: f32 = 32.;
 pub const TAIL_COMPONENTS: usize = 64;
+/// S259, ADR-156 : capacité de B côté hôte — 32 composantes (S201) ou 64 (`--houle`).
+pub const B_CAPACITY: usize = 64;
 pub struct Scene {
     pub background: Background,
     /// S256 : même recette que `background`, prolongée ; jamais évaluée en hauteur.
@@ -45,7 +47,10 @@ pub struct Scene {
     pub domain: Domain,
 }
 impl Scene {
-    pub fn new() -> Self {
+    /// S259 : `houle` = scène déclarée d'ADR-156 §6 — mer de vent S201 à étalement cos^2s
+    /// (`s_max` 10) et houle longue (`Hs` 2 m, `Tp` 12 s, γ 7, `[0,7 ; 1,6] fp`, `s_max` 75), queue
+    /// directionnelle. Sans `houle`, la scène S201 au bit.
+    pub fn build(houle: bool) -> Self {
         // Scène S201/S203/S205, pas une nouvelle calibration.
         let recipe = Recipe {
             sea: SeaState {
@@ -61,9 +66,28 @@ impl Scene {
             max_ratio: 4.,
             spread_turns: 0.25,
         };
-        let cooked = background_spectrum::bake(recipe).expect("recette S201");
-        let tail_cooked = background_spectrum::bake_tail(recipe, TAIL_RATIO, TAIL_COMPONENTS)
-            .expect("queue S256");
+        let (cooked, tail_cooked) = if houle {
+            let swell = Recipe {
+                sea: SeaState { hs: 2., tp: 12., theta_turns: 0., components: 32, graine: 202 },
+                gravity: 9.81,
+                gamma: 7.,
+                min_ratio: 0.7,
+                max_ratio: 1.6,
+                spread_turns: 0.,
+            };
+            let wind = background_spectrum::bake_directional(recipe, 10.).expect("vent S259");
+            let swell = background_spectrum::bake_directional(swell, 75.).expect("houle S259");
+            (
+                background_spectrum::assemble(&[&wind, &swell]).expect("mer S259"),
+                background_spectrum::bake_tail_directional(recipe, 10., TAIL_RATIO, TAIL_COMPONENTS)
+                    .expect("queue S259"),
+            )
+        } else {
+            (
+                background_spectrum::bake(recipe).expect("recette S201"),
+                background_spectrum::bake_tail(recipe, TAIL_RATIO, TAIL_COMPONENTS).expect("queue S256"),
+            )
+        };
         let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 22);
         let background = Background::from_spectrum(
             &mut HostServices {
@@ -609,7 +633,7 @@ pub struct FrameData<'a> {
     /// S235 : profils concaténés, `table.len()` couples par impact, dans l'ordre de `impacts`.
     pub profile: Vec<(f32, f32)>,
     pub impacts: Vec<ImpactSlot>,
-    pub components: [[f32; 4]; 32],
+    pub components: [[f32; 4]; B_CAPACITY],
     /// S256, ADR-155 : queue spectrale `[a, kx, ky, phase]` rebasée à la caméra ; `None` = sans queue.
     pub tail_background: Option<&'a Background>,
     pub tail: [[f32; 4]; TAIL_COMPONENTS],
@@ -671,7 +695,7 @@ impl<'a> FrameData<'a> {
             table,
             profile,
             impacts,
-            components: [[0.; 4]; 32],
+            components: [[0.; 4]; B_CAPACITY],
             tail_background: None,
             tail: [[0.; 4]; TAIL_COMPONENTS],
             camera: Camera::default(),
@@ -948,6 +972,7 @@ impl Camera {
         wake_count: usize,
         wake_active: bool,
         lattice: Option<crate::lod::Lattice>,
+        b_count: usize,
     ) -> [f32; 36] {
         let [f, r, u] = self.vectors();
         let l = lattice.map_or([0.; 4], |l| [l.step, l.nx as f32, l.ny as f32, 1.]);
@@ -974,7 +999,7 @@ impl Camera {
             0.,
             RADIUS,
             step,
-            32.,
+            b_count as f32,
             nx as f32,
             ny as f32,
             impact_count as f32,

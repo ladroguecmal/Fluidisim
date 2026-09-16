@@ -82,7 +82,7 @@ scène par défaut identique (R2 rejoué au bit, `--tail-verify` inchangé) ; co
   MER-MULTIMODALE-S259, avant code.
 - [x] **P3** — cœur : loi d'étalement et son inverse, `bake_directional`, queue directionnelle,
   assemblage de systèmes ; essais.
-- [ ] **P4** — hôte : nombre de composantes de B variable, scène `--houle`, vérification CPU/GPU.
+- [x] **P4** — hôte : nombre de composantes de B variable, scène `--houle`, vérification CPU/GPU.
 - [ ] **P5** — réception : hauteurs, scène par défaut au bit, coût, rendus R3 envoyés.
 - [ ] **P6** — rituel §6 : liste du projet fini (2.2), A287, file, journal, jeton.
 
@@ -94,3 +94,8 @@ dépassement). Essai `multimodal_sea_and_directional_spreading_s259` : E[cos] 0,
 0,98684 contre 0,23077/0,5/0,90909/0,98684 ; Spearman 0,012 (fixture 1,000, borne 0,530) ; largeur
 0,063 tour au pic (7 comp.) contre 0,155 au-delà de 2 fp (11) ; m0 0,390625 exact, Hs 2,5 m. Spectre et
 queue au bit ; empreinte V1 et essais du spectre 8/8.
+
+P4 : `Scene::build(houle)`, `B_CAPACITY` 64, nombre de composantes passé au shader (était 32 en dur),
+`--houle`, `--b-verify`, `--revue=r3`. `--multi --houle --b-verify` : 64 composantes, max η 0,379 mm
+(âges 3/12/29) ; défaut 32 composantes, 0,368 mm. R2 rejoué : sept empreintes identiques ;
+`--tail-verify` ligne identique à S256.

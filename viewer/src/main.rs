@@ -1582,7 +1582,7 @@ fn verify_multi(frame: &mut FrameData<'_>) -> Result<(), String> {
 /// S256 : `tag` = `r1` (S254, `captures/s254`, à reproduire avec `--no-tail`) ou `r2` (queue
 /// spectrale, `captures/s256`) — mêmes poses et âges.
 fn revue_images(frame: &mut FrameData<'_>, tag: &str) -> Result<(), String> {
-    let dir = if tag == "r1" { "captures/s254" } else { "captures/s256" };
+    let dir = match tag { "r1" => "captures/s254", "r2" => "captures/s256", _ => "captures/s259" };
     std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
     let (width, height) = (1280u32, 720u32);
     let instance = instance();
@@ -1805,7 +1805,8 @@ fn spectral_verify(frame: &mut FrameData<'_>) -> Result<(), String> {
 
 fn run() -> Result<(), String> {
     let args: Vec<_> = std::env::args().collect();
-    let scene = Scene::new();
+    // S259, ADR-156 : `--houle` — mer de vent et houle longue, étalement cos^2s (scène déclarée).
+    let scene = Scene::build(args.iter().any(|a| a == "--houle"));
     let mut storage = vec![[0.; 2]; 256 * scene.impact.table_len(scene.step).unwrap()];
     let table = scene.impact.bake_table(scene.step, &mut storage).unwrap();
     // S212 : sillage prescrit admis au journal de pression du cœur, préparé à chaque image.
@@ -1873,6 +1874,28 @@ fn run() -> Result<(), String> {
     }
     if multi && args.iter().any(|a| a == "--revue=r2") {
         return revue_images(&mut frame, "r2");
+    }
+    if multi && args.iter().any(|a| a == "--revue=r3") {
+        return revue_images(&mut frame, "r3");
+    }
+    // S259 (MER-MULTIMODALE-S259 critère 8) : hauteurs GPU contre cœur sur la scène courante, champ
+    // complet, visibilité coupée, tolérance historique de `verify` (3 mm).
+    if args.iter().any(|a| a == "--b-verify") {
+        let instance = instance();
+        let mut g = pollster::block_on(gpu::Gpu::new(&instance, None, 640, 360,
+            frame.profile.len(), scene::WAKE_CAPACITY))?;
+        frame.spectral = false;
+        frame.cull = false;
+        println!("B_VERIFY composantes={}", frame.background.component_count());
+        for pose in 0..2 {
+            frame.camera = if pose == 0 { Camera::default() } else { grazing_camera() };
+            for age in [3., 12., 29.] {
+                frame.update(age, age, true);
+                g.upload(&frame);
+                g.verify(&mut frame)?;
+            }
+        }
+        return Ok(());
     }
     if args.iter().any(|a| a == "--tail-verify") {
         return tail_verify(&mut frame);

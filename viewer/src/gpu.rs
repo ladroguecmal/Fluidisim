@@ -146,7 +146,7 @@ impl Gpu {
         let waves = buffer(
             &device,
             "B phases",
-            32 * 16,
+            crate::scene::B_CAPACITY as u64 * 16,
             wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
         );
         let tail = buffer(
@@ -453,6 +453,7 @@ impl Gpu {
             frame.wake.len(),
             frame.wake_active,
             lattice,
+            frame.background.component_count(),
         ) {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
