@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S252 — en cours
+Session : S252 — terminée
 Agent : Claude Opus 5, Claude Code ; fichiers, git, cargo et Python disponibles.
 Entrée : « continue ». Master propre 97868aa, une seule copie, archive B conservée.
 Troisième session du raccordement B/W→δ : justifiée au journal S251 (chemin de J2).
@@ -101,7 +101,7 @@ un changement d'ADR-147 se décide sur la mesure publiée, au lot suivant.
 - [x] **P4b** — ADR-151 : affinage de divergence ADR-150 étendu au pas à couvercle fixe
   refusé au plancher (A275 sinon rouverte) ; test à 32 768 mailles, suite complète.
 - [x] **P5** — preuve, notes datées ADR-147/S245/S246/S251, angles morts, file.
-- [ ] **P6** — rituel §6 : trajectoire, journal et jeton ; S253 = surface mobile couplée.
+- [x] **P6** — rituel §6 : trajectoire, journal et jeton ; S253 = surface mobile couplée.
 
 ### Notes de reprise
 

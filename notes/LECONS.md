@@ -5538,3 +5538,29 @@ Trois choses généralisent.
 
 Famille de L326 : ce qui n'a pas d'étalon n'a pas de valeur mesurée — et l'étalon vaut aussi pour ce
 qu'on regarde.
+
+## L328 — Un composant numérique s'éprouve dans le solveur qui l'emploie, contre le vrai résidu
+
+*(S252)* Le cycle multigrille de S245 avait ses essais : symétrie au bit, opérateur grossier contre
+opérateur fin, réduction par cycle. Tous passaient, et à juste titre. Le défaut était ailleurs, dans
+les trois lignes du gradient conjugué qui l'emploie : β y était formé avec la mauvaise quantité.
+Sept sessions ont mesuré ce solveur. Elles en ont tiré une conclusion de coût (« la multigrille ne
+gagne pas de vitesse ») et une explication de précision (A275 tenue par « moins d'itérations »),
+puis ont construit sur les deux : ADR-147, S246, A281.
+
+Trois choses généralisent.
+
+1. **L'essai d'un composant ne reçoit pas son assemblage.** L'essai qui manquait tenait en une
+   ligne : à l'arrêt de la récurrence, comparer le résidu qu'elle croit avoir au vrai résidu
+   recalculé. Toute méthode à récurrence (gradient conjugué, somme compensée, accumulation) offre
+   ce contrôle gratuit.
+2. **Une porte qui recalcule la vérité protège le résultat et cache le défaut.** Aucun pas faux n'a
+   été publié, et c'est pour cela que rien n'a alerté : le défaut ne se voyait que dans le coût.
+   Un coût anormal est un symptôme à attribuer, pas une propriété du régime. S251 l'avait d'abord
+   rattaché au plancher.
+3. **Un succès accidentel trouve toujours son explication après coup.** Les relances du gradient
+   fautif faisaient un raffinement itératif involontaire. Corriger le défaut a fait perdre la
+   tolérance à 32 768 mailles, et prouvé que l'explication publiée était fausse. Avant de
+   revendiquer une cause, se demander ce qui changerait si elle l'était.
+
+Famille de L322 (un critère qui mord) et de L326 (étalonner avant d'employer).

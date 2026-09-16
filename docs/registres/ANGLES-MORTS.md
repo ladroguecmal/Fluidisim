@@ -3584,5 +3584,5 @@ transfert. Portée : les comptes et coûts « avec » de S245/S246 et la prémis
 d'ADR-147 étaient faux, et l'explication d'A275 aussi. Corrigé et reproduit par un essai qui
 échouait avant. À 32 768 mailles, le pas corrigé serait redevenu refusé : ADR-151 le reçoit
 par affinage. **Leçon** : un préconditionneur n'est éprouvé qu'avec le solveur qui l'emploie.
-L'essai de symétrie du cycle passait ; aucun essai ne confrontait la récurrence au vrai résidu.
+L'essai de symétrie du cycle passait ; aucun essai ne confrontait la récurrence au vrai résidu. L328.
 [Preuve](../validation/MULTIGRILLE-BETA-S252.md).

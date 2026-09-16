@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-16 20:38 +02:00
+JETON            : libre
+Battement        : 2026-09-16 20:43 +02:00
 Agent            : Claude Opus 5, Claude Code (fichiers, git, cargo, Python, accès web)
-Session en cours : S252 — A284 attribué ; A285, β du gradient conjugué multigrille corrigé
-Dernière session : S251 — démarrage couplé plat reçu (ADR-150) ; coût ×40 ouvert (A284)
-Session suivante : S252 — A50 : résidus de surface et frontières du total avant couplage mobile ; attribuer A284 en première étape
+Session en cours : aucune
+Dernière session : S252 — β du gradient conjugué multigrille corrigé (A285) ; 32 768 mailles reçues par affinage (ADR-151)
+Session suivante : S253 — surface mobile couplée B/W→δ contre HOS M=3 (dérivation au journal S252)
 Maillons        : 0
 
 ```
@@ -89,7 +89,7 @@ boucle (125 µs par fil contre 21,7 de pass) ; **la multigrille est le seul levi
 avec la taille** (A276, [carte](docs/validation/COUT-DELTA-S244.md)). δ MAC x-z possède une **surface géométriquement mobile** reçue contre
 l'onde stationnaire HOS d'ordre 3 (surface graphe, sans 3D, cavité, scénario B3 ni I-05 complet) ; sa
 pression f32 s'arrête à sa précision représentable (ADR-143) et **tient la tolérance physique de S199
-ou se déclare dégradée** (ADR-144) — tenue jusqu'à 8 192 mailles, et **à 32 768 depuis S245** par un repli multigrille (ADR-147) ; plancher
+ou se déclare dégradée** (ADR-144) — tenue jusqu'à 8 192 mailles, et **à 32 768** par le repli multigrille (ADR-147) suivi, depuis S252, d'un affinage de divergence (ADR-151 ; β du gradient multigrille corrigé, A285) ; plancher
 des lignes à fantôme de surface non borné (A274). V : plans orientés et restauration locale reçus.
 Les réceptions et limites courantes sont dans la feuille de route. Le nombre de tests ne mesure
 pas la couverture des intentions, et une exécution locale ne reçoit pas le multiplateforme.

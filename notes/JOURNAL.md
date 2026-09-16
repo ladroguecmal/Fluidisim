@@ -13020,3 +13020,59 @@ Recommandation BILAN-S227 portée (A266 close S228 ; J2 suivi selon §5). Aucun 
 note datée S250, plan et jeton. I-05/06/08/12/14 relus : budget mural partagé et refus
 atomique, zéro allocation testé, champs f32 et oracle f64 en test seulement, coût de création signalé (A284),
 aucune valeur physique nouvelle. Aucun worktree ni distant touché.
+
+## S252 — Le β du gradient conjugué multigrille ; la surface couplée reportée
+
+**2026-09-16, Claude Opus 5.** Entrée « continue », master propre 97868aa, copie unique, archive
+B conservée. Plan `e4b023a`, attribution `7c5c5a3`, plan amendé `ba7d11e`, correction `577ec29`,
+re-mesure `f261dd5`, ADR-151 `002feb3`, preuve `cce58ba`.
+
+**Plan amendé en cours de session, avant le travail qui en dépendait.** Déclaré : A284 puis la
+surface mobile couplée. En attribuant A284, P2 a trouvé un défaut du cœur, A285, qui faussait
+S245, S246 et la prémisse d'ADR-147. Correction prioritaire ; la surface couplée passe à S253.
+
+**Capacité reçue, maillons 0.** Correction d'intégrité reproduite puis testée. Le gradient
+conjugué multigrille formait `β = ‖r₊‖²/⟨r,z⟩` avant le cycle, depuis S245. Corrigé, il converge
+en 6 à 8 itérations aux cinq tailles, au lieu de 94 à 177. Consommateurs : le repli de `run` et
+celui du pas couplé. Le démarrage plat 32×16 passe de 43,6 à 2,53 ms de médiane (A284 close).
+À 32 768 mailles, le gradient corrigé s'arrête au plancher avec D = 1,585·10⁻⁵ : A275 se
+rouvrait. **ADR-151** étend l'affinage d'ADR-150 au pas à couvercle fixe refusé au plancher, et
+fait compter au rapport les itérations de toutes les projections. Pas reçu : 441 itérations,
+392 ms, D = 3,56·10⁻⁸ (880 ms avant). Forcée dès le départ, la multigrille reçoit ce pas en 137 ms.
+
+**Preuves.** L'essai `multigrid_conjugate_gradient_keeps_its_recursion_s252` échouait avant
+(premier vrai résidu 0,616 contre 1,07·10⁻⁵) et passe après. L'essai de réception à 32 768
+mailles tourne en release, avec témoin refusé. Mesures avant/après sur la même machine, secteur
+99 % : `delta_precision` identique hors temps, empreinte 0xfb12b2092df4ee6d, imposés couplés
+identiques au bit. Suite **451 / 17 ignorés / 0**. Deux essais ajustés au compte cumulé, motif
+écrit. [Preuve](../docs/validation/MULTIGRILLE-BETA-S252.md) ; notes datées ADR-147, ADR-150,
+S245, S246, S251 ; L328.
+
+**Limites.** Les comptes et coûts multigrille de S245 et S246 sont invalides, pas leurs taux
+stationnaires. L'ordre « ordinaire, puis repli » d'ADR-147 reste appliqué alors que sa prémisse
+est réfutée : la multigrille gagne dès 512 mailles. Le mode mobile n'a ni multigrille ni affinage.
+
+**Dérivation pour S253, surface mobile couplée, pas encore dans un fichier.** Garder `eta` =
+repos + η' (perturbation, née à zéro) et une géométrie mouillée totale ζ = η' + ζ_fond, avec
+ζ_fond lu dans `eta` de tout échantillon. Valeur fantôme : p'(Γ) = ρg(z_Γ − repos) − P_fond(Γ).
+En vertical, prendre P_fond et ∂zP à la face w au-dessus de la maille ; en latéral, P_fond et
+∂xP à la face u. Cinématique : pour un fond **linéaire** (ζ_t = W(0)) prolongé de façon
+incompressible, R_s = ∂x∫₀^ζ U dz exactement, donc η'^{n+1} = η' − (dt/dx)Δ[Q_v(ζ) + bande] avec
+bande = Σ ouverture·U_face·dx·(mouillé_k(ζ) − mouillé_k(repos)). Pas besoin de ζ_t ni
+d'échantillon de colonne. Garder la somme S237 au bit et ajouter la bande à part, pour l'identité
+à fond nul. B refuse z > 0 (ADR-113) : fournisseur de test prolongé par Taylor d'ordre un,
+champ et dérivées cohérents. Oracle : onde stationnaire S237 (L = h = 2 m) depuis le repos,
+fond = ordre un de profondeur finie, comparaison à HOS M=3 (profil, b₂). Témoin sans résidus.
+Démarrage plat mobile : risque A283, ADR-150 ne couvrant pas les lignes à fantôme.
+
+**Suite et arbitrages.** Recommandation BILAN-S227 portée (J2 suivi selon §5). Quatrième session
+du raccordement B/W→δ en comptant S253 : la surface couplée reste le chemin de J2 et de B4, et
+aucune autre capacité absente de la file n'est débloquée plus tôt. Le lot de coût δ (ordre
+d'ADR-147) a son déclencheur : avant toute mesure de coût δ ≥ 2 048 mailles ou le passage à la
+3D. Aucun arbitrage utilisateur, aucune réduction.
+
+**Rituel.** File active relue ; A284 close, A285 ouverte et close, A276, A281, J2 et A50 mis à
+jour ; feuille de route, index, L328, jeton. Invariants relus : I-05 (l'affinage consomme le même
+budget mural, refus atomique), I-06 (même fonction d'affinage, zéro allocation testée en S251,
+tampon préalloué), I-08 (f32), I-14 (aucune valeur nouvelle, seuils S199 inchangés). Aucun
+worktree ni distant touché.
