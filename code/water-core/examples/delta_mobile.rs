@@ -156,6 +156,12 @@ enum Mode {
     Linear,
     /// S253 : pas perturbatif mobile, fond = ordre un analytique, δ né à zéro.
     Coupled,
+    /// S254 (ADR-154) : même pas, fond prolongé par la règle bornée au-dessus du plan moyen.
+    CoupledBounded,
+}
+
+fn coupled(mode: Mode) -> bool {
+    matches!(mode, Mode::Coupled | Mode::CoupledBounded)
 }
 
 /// Une trajectoire du candidat sur une période, comparée pas à pas au véhicule HOS.
@@ -193,7 +199,7 @@ fn candidate_capped(mode: Mode, nx: usize, a: f64, dt_us: u64, cap: u32) -> Resu
     let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 26);
     // Mobile : domaine jusqu'à 2,25 m, repos à 2 m. Linéaire : couvercle S233 au repos, z₀ = h.
     let nz = match mode {
-        Mode::Mobile | Mode::Coupled => (2.25 / dx).round() as usize,
+        Mode::Mobile | Mode::Coupled | Mode::CoupledBounded => (2.25 / dx).round() as usize,
         Mode::Linear => (H / dx).round() as usize,
     };
     let mut v = Volume::configure(
@@ -210,7 +216,7 @@ fn candidate_capped(mode: Mode, nx: usize, a: f64, dt_us: u64, cap: u32) -> Resu
         Mode::Mobile => v.set_free_surface(&eta, H as f32),
         Mode::Linear => v.set_surface(&eta),
         // S253 : la perturbation naît à zéro, le fond porte l'onde.
-        Mode::Coupled => v.set_free_surface(&vec![H as f32; nx], H as f32),
+        Mode::Coupled | Mode::CoupledBounded => v.set_free_surface(&vec![H as f32; nx], H as f32),
     }
     .map_err(|e| format!("surface {e:?}"))?;
     let background = wave(a);
@@ -246,16 +252,19 @@ fn candidate_capped(mode: Mode, nx: usize, a: f64, dt_us: u64, cap: u32) -> Resu
     let mut times = Vec::with_capacity(steps);
     for n in 1..=steps {
         // S253 : échantillons du fond à `t_{n−1}`, préparés hors du chronomètre (ADR-149).
-        if mode == Mode::Coupled {
+        if coupled(mode) {
             let t_prev = (n - 1) as f64 * dt;
+            let sample = |x: f64, z: f64| {
+                if mode == Mode::CoupledBounded { background.sample_bounded(x, z, t_prev) } else { background.sample(x, z, t_prev) }
+            };
             for kk in 0..nz {
                 for i in 0..=nx {
-                    bg_u[kk * (nx + 1) + i] = background.sample(i as f64 * dx, (kk as f64 + 0.5) * dx - H, t_prev);
+                    bg_u[kk * (nx + 1) + i] = sample(i as f64 * dx, (kk as f64 + 0.5) * dx - H);
                 }
             }
             for kk in 0..=nz {
                 for i in 0..nx {
-                    bg_w[kk * nx + i] = background.sample((i as f64 + 0.5) * dx, kk as f64 * dx - H, t_prev);
+                    bg_w[kk * nx + i] = sample((i as f64 + 0.5) * dx, kk as f64 * dx - H);
                 }
             }
         }
@@ -264,7 +273,7 @@ fn candidate_capped(mode: Mode, nx: usize, a: f64, dt_us: u64, cap: u32) -> Resu
         let report = match mode {
             Mode::Mobile => v.step_surface_mobile(dt_us, cap, 600_000_000, &jobs, &clock),
             Mode::Linear => v.step_surface_linear(dt_us, cap, 600_000_000, &jobs, &clock),
-            Mode::Coupled => {
+            Mode::Coupled | Mode::CoupledBounded => {
                 let time = SimTime((n as u64 - 1) * dt_us);
                 let bg = BackgroundFaces { domain: v.domain(), time, density: 1025., gravity: G as f32, u: &bg_u, w: &bg_w };
                 v.step_perturbation_mobile(time, dt_us, cap, 600_000_000, &bg, Sponge::default(), &jobs, &clock)
@@ -279,7 +288,7 @@ fn candidate_capped(mode: Mode, nx: usize, a: f64, dt_us: u64, cap: u32) -> Resu
             .enumerate()
             .map(|(i, h)| {
                 let base = *h as f64;
-                if mode == Mode::Coupled { base + a * (k() * xc(i)).cos() * (omega() * t_now).cos() } else { base }
+                if coupled(mode) { base + a * (k() * xc(i)).cos() * (omega() * t_now).cos() } else { base }
             })
             .collect();
         times.push(start.elapsed().as_secs_f64() * 1e3);
@@ -349,6 +358,7 @@ fn compare(modes: &[Mode], grids: &[usize], amplitudes: &[f64], dt_us: u64) {
                     Mode::Mobile => "mobile",
                     Mode::Linear => "lineaire",
                     Mode::Coupled => "couple",
+                    Mode::CoupledBounded => "couple_borne",
                 };
                 match candidate(mode, nx, a, dt_us) {
                     Ok(r) => println!(
@@ -466,7 +476,11 @@ fn main() {
         // S253 : un cas à la fois (`couple_cas <mode> <a> <nx>`), pour répartir la réception sur
         // plusieurs processus ; résultats identiques, un calcul par processus.
         Some("couple_cas") => {
-            let mode = if args.get(2).map(String::as_str) == Some("mobile") { Mode::Mobile } else { Mode::Coupled };
+            let mode = match args.get(2).map(String::as_str) {
+                Some("mobile") => Mode::Mobile,
+                Some("borne") => Mode::CoupledBounded,
+                _ => Mode::Coupled,
+            };
             let a: f64 = args.get(3).and_then(|s| s.parse().ok()).expect("amplitude");
             let nx: usize = args.get(4).and_then(|s| s.parse().ok()).expect("colonnes");
             compare(&[mode], &[nx], &[a], 1000)

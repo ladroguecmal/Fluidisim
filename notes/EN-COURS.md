@@ -95,8 +95,8 @@ en regard. Ensuite fournisseur B de production au-dessus du plan moyen. Hors lot
 - [x] **P4** — ADR-154 et protocole de réception d'A286, avant code.
 - [x] **P5** — oracle : prolongement du mode stationnaire selon la règle, contrôles
   (continuité, divergence, dérivées, `S`).
-- [ ] **P6** — banc couplé S253 avec ce prolongement, 32/64/128 × 5/10 cm : réception ou refus publié.
-- [ ] **P7** — cœur : fournisseur B au-dessus du plan moyen selon la règle, essais contre la
+- [>] **P6** — banc couplé S253 avec ce prolongement, 32/64/128 × 5/10 cm : réception ou refus publié.
+- [x] **P7** — cœur : fournisseur B au-dessus du plan moyen selon la règle, essais contre la
   référence et contrats de refus.
 - [ ] **P8** — suite, empreinte, preuve.
 - [ ] **P9** — rituel §6 : file, trajectoire, journal et jeton.
@@ -113,3 +113,17 @@ P5 : `StandingWave::sample_bounded` / `bounded_fields` (règle d'ADR-154, profon
 continuité en z = 0 à 4 ulp, divergence à l'arrondi, dérivées et laplacien contre différences
 finies (1e-6 et 1e-5 relatifs), `S` publié contre f64 ; ordre deux à `z = s·a` : rapport
 `S(10 cm)/4S(5 cm)` entre 1,000 et 1,115.
+
+P6 lancé avant P7 (six processus, 21:52, secteur 99 %), P7 fait pendant le calcul ; P6 reste `[>]`.
+Premiers résultats (profil / b₂ contre HOS), borné contre analytique S253 : 5 cm 32 → 0,964 % /
+3,47 % (1,214 / 1,62) ; 64 → 0,380 / 1,19 (0,276 / 0,54) ; 10 cm 32 → 1,007 / 3,05 (0,908 / 1,51) ;
+64 → 0,485 / 1,43 (0,379 / 0,69). b₂ environ deux fois moins bon, dans la tolérance.
+
+P7 : `differential_local_extended`, `differential_extended`, `differential_batch_extended`
+(background_differential.rs). Essais : au bit sous le plan moyen (−0,0 compris) et refus
+inchangés, lot atomique ; au-dessus, divergence ≤ 16 ulp, gradients, `du_dt` et laplacien contre
+différences finies, accord avec la règle f64. **Premier jet de l'essai fautif** : différence
+temporelle avant à t = 0 (troncature 0,025 contre tolérance 5e-3) ; remplacée par une différence
+centrée à t ≥ 1 ms, tolérance inchangée. Intégration : B de production (Hs 0,3, Tp 4, une
+composante), 50 pas couplés mobiles reçus, 590 faces mouillées au-dessus du plan moyen consommées ;
+`u'` max 6,6e-2 m/s près des murs contre 6,1e-3 à l'intérieur (U 0,29) : les murs, pas la règle.

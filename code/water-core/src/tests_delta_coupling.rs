@@ -733,3 +733,49 @@ fn standing_bounded_extension_controls_s254(){
     }}}
     assert!(compared>=20,"trop peu de résidus comparés : {compared}");
 }
+
+/// S254 (ADR-154, protocole §1.3) — **intégration** : `BackgroundFaces` rempli par le fournisseur B de
+/// production prolongé, faces au-dessus du plan moyen comprises, consommé par des pas couplés mobiles
+/// depuis le repos. Aucune précision n'est revendiquée sous B réel : bassin à murs, `W(fond) ≠ 0`.
+#[test]
+fn production_background_extended_feeds_coupled_mobile_steps_s254(){
+    use crate::{background::{Background,SeaState},types::WorldPos};
+    let sea=SeaState{hs:0.3,tp:4.,theta_turns:0.,components:1,graine:254};
+    let b=Background::configure(&mut HostServices{alloc:&mut Arena,jobs:&Jobs,sink:&Jobs},sea,
+        WorldPos::from_units(0,0,0)).unwrap();
+    let nx=32;let dx=2./nx as f32;
+    let mut v=Volume::configure(&mut HostServices{alloc:&mut Arena,jobs:&Jobs,sink:&Jobs},
+        Domain{nx,nz:(2.25/dx).round() as usize,dx},1025.,b.gravity(),&vec![0.;nx]).unwrap();
+    v.set_free_surface(&vec![2.;nx],2.).unwrap();
+    let (mut u,mut w)=fields(&v);
+    let (nz,rest)=(v.domain.nz,v.rest);
+    let mut above_wet=0usize;
+    for n in 0..50u64 {
+        let t=SimTime(n*1000);
+        for k in 0..nz {for i in 0..=nx {
+            u[v.fu(i,k)]=b.differential_local_extended([i as f32*dx,0.,(k as f32+0.5)*dx-rest],t,1025.).unwrap();
+        }}
+        for k in 0..=nz {for i in 0..nx {
+            w[v.fw(i,k)]=b.differential_local_extended([(i as f32+0.5)*dx,0.,k as f32*dx-rest],t,1025.).unwrap();
+        }}
+        for k in 0..nz {for i in 0..=nx {
+            let z=(k as f32+0.5)*dx-rest;
+            if z>0.&&z<u[v.fu(i,k)].eta {above_wet+=1;}
+        }}
+        let bg=BackgroundFaces{domain:v.domain,time:t,density:1025.,gravity:b.gravity(),u:&u,w:&w};
+        let r=v.step_perturbation_mobile(t,1000,4000,1_000_000_000,&bg,Sponge::default(),&Jobs,&Clock)
+            .unwrap_or_else(|e|panic!("pas {n} : {e:?}"));
+        assert_eq!(r.advanced_us,1000);
+    }
+    // Où vit la perturbation : les murs imposent `v·n = −U·n`, qu'une onde progressive ne satisfait pas.
+    let (mut wall,mut inner)=(0f32,0f32);
+    for k in 0..nz {for i in 0..=nx {
+        let x=v.u[v.fu(i,k)].abs();
+        if i<4||i>nx-4 {wall=wall.max(x)} else {inner=inner.max(x)}
+    }}
+    println!("S254 integration faces_mouillees_au_dessus_du_plan_moyen={above_wet} u_prime_max_murs={wall:.3e} u_prime_max_interieur={inner:.3e} U_amplitude={:.3e}",
+        u.iter().fold(0f32,|m,s|m.max(s.u[0].abs())));
+    assert!(above_wet>0,"aucune face mouillée au-dessus du plan moyen : le prolongement n'est pas consommé");
+    assert!(v.u.iter().chain(&v.w).chain(&v.p).chain(&v.eta).all(|x|x.is_finite()));
+    assert!(b.differential_local([0.,0.,0.03],SimTime(0),1025.).is_err(),"ADR-113 refuse toujours z > 0");
+}

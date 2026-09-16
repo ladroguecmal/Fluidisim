@@ -146,6 +146,113 @@ impl Background {
         self.differential_parameters(rho)?;
         self.differential_local_checked(local, t, rho)
     }
+    /// S254, ADR-154 : B **prolongé au-dessus du plan moyen** pour le pas couplé mobile. Pour
+    /// `z ≤ 0`, identique au bit à `differential_local`. Pour `z > 0`, règle bornée par mode :
+    /// vitesse horizontale constante, `W` fermée par continuité, `P` de Taylor d'ordre un. Au-dessus
+    /// de la surface, valeurs finies sans sens physique. Mêmes refus, sans allocation.
+    pub fn differential_local_extended(
+        &self,
+        local: [f32; 3],
+        t: SimTime,
+        rho: f32,
+    ) -> Result<BackgroundSample, DifferentialError> {
+        self.differential_parameters(rho)?;
+        self.differential_local_selected(local, t, rho, true)
+    }
+    /// S254, ADR-154 : variante monde de `differential_local_extended`.
+    pub fn differential_extended(
+        &self,
+        point: WorldPos,
+        t: SimTime,
+        rho: f32,
+    ) -> Result<BackgroundSample, DifferentialError> {
+        let local = point
+            .to_local(self.anchor)
+            .ok_or(DifferentialError::Domain)?;
+        self.differential_local_extended(local, t, rho)
+    }
+    /// S254, ADR-154 : lot prolongé ; mêmes règles de publication que `differential_batch`.
+    pub fn differential_batch_extended(
+        &self,
+        points: &[WorldPos],
+        t: SimTime,
+        rho: f32,
+        output: &mut [BackgroundSample],
+        scratch: &mut [BackgroundSample],
+    ) -> Result<(), DifferentialError> {
+        if output.len() != points.len() || scratch.len() < points.len() {
+            return Err(DifferentialError::Capacity);
+        }
+        self.differential_parameters(rho)?;
+        for (point, out) in points.iter().zip(scratch.iter_mut()) {
+            let local = point
+                .to_local(self.anchor)
+                .ok_or(DifferentialError::Domain)?;
+            *out = self.differential_local_selected(local, t, rho, true)?;
+        }
+        output.copy_from_slice(&scratch[..points.len()]);
+        Ok(())
+    }
+    fn differential_local_selected(
+        &self,
+        local: [f32; 3],
+        t: SimTime,
+        rho: f32,
+        extended: bool,
+    ) -> Result<BackgroundSample, DifferentialError> {
+        if extended && admits_local(local) && local[2] > 0.0 {
+            return self.differential_local_above(local, t, rho);
+        }
+        self.differential_local_checked(local, t, rho)
+    }
+    /// ADR-154 §2, `m = 1 + kz`, formules d'ADR-113 à `E = 1`.
+    fn differential_local_above(
+        &self,
+        local: [f32; 3],
+        t: SimTime,
+        rho: f32,
+    ) -> Result<BackgroundSample, DifferentialError> {
+        let mut s = BackgroundSample::default();
+        for c in &self.components {
+            let phase = phase_spatiale(c, [local[0], local[1]]).wrapping_add(PhaseQ32(
+                c.phase0
+                    .0
+                    .wrapping_sub(PhaseQ32::from_time(c.freq_q32, t).0),
+            ));
+            let sn = phase.sin();
+            let cs = phase.cos();
+            let omega = (c.freq_q32 as f64 / 4_294_967_296.0 * core::f64::consts::TAU) as f32;
+            let k = c.k_turns_per_m * core::f32::consts::TAU;
+            let m = 1.0 + k * local[2];
+            let a = c.amplitude * omega;
+            let pressure_gradient = rho * self.gravity * c.amplitude * k;
+            // Aucune courbure en z : Δ = −k²|d|² sur chaque composante.
+            let lap = -(k * k) * (c.dir[0] * c.dir[0] + c.dir[1] * c.dir[1]);
+            s.eta += c.amplitude * sn;
+            let slope = c.amplitude * k * cs;
+            for i in 0..2 {
+                s.grad_eta[i] += slope * c.dir[i];
+                s.u[i] += a * sn * c.dir[i];
+                s.du_dt[i] -= a * omega * cs * c.dir[i];
+                s.grad_p_dyn[i] += pressure_gradient * m * cs * c.dir[i];
+                s.laplacian_u[i] += lap * (a * sn * c.dir[i]);
+                for j in 0..2 {
+                    s.grad_u[i][j] += a * k * cs * c.dir[i] * c.dir[j];
+                }
+                s.grad_u[2][i] += a * k * m * sn * c.dir[i];
+            }
+            s.u[2] -= a * m * cs;
+            s.du_dt[2] -= a * omega * m * sn;
+            s.grad_u[2][2] -= a * k * cs;
+            s.p_dyn += rho * self.gravity * c.amplitude * m * sn;
+            s.grad_p_dyn[2] += pressure_gradient * sn;
+            s.laplacian_u[2] += lap * (-a * m * cs);
+        }
+        if !s.finite() {
+            return Err(DifferentialError::NonFinite);
+        }
+        Ok(s)
+    }
     fn differential_local_checked(
         &self,
         local: [f32; 3],
@@ -259,6 +366,126 @@ mod tests {
     }
     fn close(a: f32, b: f64, tol: f64) {
         assert!((a as f64 - b).abs() <= tol, "{a} vs {b}, tol {tol}");
+    }
+    /// S254, ADR-154 §4 — sous le plan moyen et au plan moyen, le fournisseur prolongé rend
+    /// `differential_local` au bit ; au-dessus, `differential_local` refuse toujours.
+    #[test]
+    fn extended_is_bitwise_below_and_refusals_unchanged_s254() {
+        let b = field();
+        for time in [0u64, 125000, 777777, 3_000_000] {
+            for x in [[0.25f32, -0.125], [-17.5, 3.0], [1024.0, -2047.5]] {
+                for z in [-0.0f32, 0.0, -1e-6, -1.0, -37.25, -4095.0] {
+                    let p = [x[0], x[1], z];
+                    let t = SimTime(time);
+                    assert_eq!(
+                        b.differential_local(p, t, 1025.0).map(|s| format!("{s:?}")),
+                        b.differential_local_extended(p, t, 1025.0).map(|s| format!("{s:?}"))
+                    );
+                }
+                let above = [x[0], x[1], 0.5];
+                assert_eq!(b.differential_local(above, SimTime(time), 1025.0), Err(DifferentialError::Domain));
+                assert!(b.differential_local_extended(above, SimTime(time), 1025.0).is_ok());
+            }
+        }
+        assert_eq!(b.differential_local_extended([0.0, 0.0, 4096.0], SimTime(0), 1025.0), Err(DifferentialError::Domain));
+        assert_eq!(b.differential_local_extended([5000.0, 0.0, 1.0], SimTime(0), 1025.0), Err(DifferentialError::Domain));
+        assert_eq!(b.differential_local_extended([0.0, 0.0, f32::NAN], SimTime(0), 1025.0), Err(DifferentialError::Domain));
+        assert_eq!(b.differential_local_extended([0.0, 0.0, 1.0], SimTime(0), -1.0), Err(DifferentialError::Density));
+        // Lot atomique : un point refusé laisse la sortie intacte.
+        let sentinel = BackgroundSample { eta: 42.0, ..Default::default() };
+        let mut output = [sentinel; 3];
+        let mut scratch = [sentinel; 3];
+        let points = [
+            WorldPos::from_units(0, 0, 0),
+            WorldPos::from_metres(1.0, 2.0, 0.75),
+            WorldPos::from_metres(0.0, 0.0, 5000.0),
+        ];
+        assert_eq!(
+            b.differential_batch_extended(&points, SimTime(0), 1025.0, &mut output, &mut scratch),
+            Err(DifferentialError::Domain)
+        );
+        assert_eq!(output, [sentinel; 3]);
+        assert!(b.differential_batch_extended(&points[..2], SimTime(0), 1025.0, &mut output[..2], &mut scratch).is_ok());
+        assert_eq!(output[1], b.differential_extended(points[1], SimTime(0), 1025.0).unwrap());
+    }
+
+    /// S254, ADR-154 §2 — au-dessus du plan moyen, deux composantes non alignées : divergence
+    /// `Σ Ak cosθ(|d|²−1)` à l'arrondi, dérivées publiées contre différences finies du champ publié,
+    /// et accord avec les formules de la règle calculées en f64 depuis la phase du plan moyen.
+    #[test]
+    fn extended_above_is_incompressible_consistent_and_follows_rule_s254() {
+        let b = field();
+        let rho = 1025.0f32;
+        // Instants ≥ 1 ms : la dérivée temporelle se contrôle par différence centrée.
+        for time in [1000u64, 125000, 640000] {
+            let t = SimTime(time);
+            for x in [[0.25f32, -0.125, 0.3], [-3.5, 2.0, 0.05], [7.0, -1.0, 1.2]] {
+                let s = b.differential_local_extended(x, t, rho).unwrap();
+                let div = s.grad_u[0][0] + s.grad_u[1][1] + s.grad_u[2][2];
+                let scale: f32 = s.grad_u.iter().flatten().map(|v| v.abs()).sum();
+                assert!(div.abs() <= 16.0 * f32::EPSILON * scale, "div {div} (échelle {scale})");
+                let h = 0.01f32;
+                for j in 0..3 {
+                    let (mut l, mut r) = (x, x);
+                    l[j] -= h;
+                    r[j] += h;
+                    let (l, r) = (
+                        b.differential_local_extended(l, t, rho).unwrap(),
+                        b.differential_local_extended(r, t, rho).unwrap(),
+                    );
+                    let d = |p: f32, m: f32| (p as f64 - m as f64) / (2.0 * h as f64);
+                    close(s.grad_p_dyn[j], d(r.p_dyn, l.p_dyn), 0.05);
+                    for i in 0..3 {
+                        close(s.grad_u[i][j], d(r.u[i], l.u[i]), 2e-4);
+                    }
+                }
+                let (before, after) = (
+                    b.differential_local_extended(x, SimTime(time - 1000), rho).unwrap(),
+                    b.differential_local_extended(x, SimTime(time + 1000), rho).unwrap(),
+                );
+                let span = 0.002;
+                for i in 0..3 {
+                    close(s.du_dt[i], (after.u[i] as f64 - before.u[i] as f64) / span, 5e-3);
+                }
+                // Laplacien : divergence des gradients publiés.
+                let mut lap = [0.0f64; 3];
+                for j in 0..3 {
+                    let (mut l, mut r) = (x, x);
+                    l[j] -= h;
+                    r[j] += h;
+                    let (l, r) = (
+                        b.differential_local_extended(l, t, rho).unwrap(),
+                        b.differential_local_extended(r, t, rho).unwrap(),
+                    );
+                    for i in 0..3 {
+                        lap[i] += (r.grad_u[i][j] as f64 - l.grad_u[i][j] as f64) / (2.0 * h as f64);
+                    }
+                }
+                for i in 0..3 {
+                    close(s.laplacian_u[i], lap[i], 4e-4);
+                }
+                // Règle f64, composante par composante, depuis la phase lue au plan moyen.
+                let mut want = [0.0f64; 3];
+                let mut want_p = 0.0f64;
+                for c in &b.components {
+                    let one = Background { components: vec![*c], anchor: b.anchor, gravity: b.gravity };
+                    let base = one.differential_local([x[0], x[1], 0.0], t, rho).unwrap();
+                    let sn = base.eta as f64 / c.amplitude as f64;
+                    let omega = c.freq_q32 as f64 / 4_294_967_296.0 * core::f64::consts::TAU;
+                    let k = c.k_turns_per_m as f64 * core::f64::consts::TAU;
+                    let cs = base.grad_eta[0] as f64 / (c.amplitude as f64 * k * c.dir[0] as f64);
+                    let (a, m) = (c.amplitude as f64 * omega, 1.0 + k * x[2] as f64);
+                    want[0] += a * sn * c.dir[0] as f64;
+                    want[1] += a * sn * c.dir[1] as f64;
+                    want[2] -= a * m * cs;
+                    want_p += rho as f64 * b.gravity as f64 * c.amplitude as f64 * m * sn;
+                }
+                for i in 0..3 {
+                    close(s.u[i], want[i], 1e-5);
+                }
+                close(s.p_dyn, want_p, 2e-2);
+            }
+        }
     }
     #[test]
     fn new_gradient_overflow_keeps_entire_batch_s178() {
