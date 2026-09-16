@@ -158,4 +158,11 @@ la hauteur) : `mss` 0,0437 à 0,0459. Borne basse 0,0397, seuil du critère **0,
   raide en pente ; les modèles d'équilibre en `f⁻⁴` et les capillaires y contribuent. Prolonger la
   bande rend la mer **2,6 fois plus rugueuse** (coupure à `32 fp`), mais pas encore aussi rugueuse
   que la mer réelle.
+| **R2** | 2026-09-16 | sept rendus aux poses de R1, queue spectrale d'ADR-155 ([empreintes](QUEUE-SPECTRALE-S256.md) §3) | — | **en attente** | question : la mer paraît-elle encore un lac ? les stries des ondes courtes se voient-elles ? |
+
+**Suite de R1 (S256).** Le remède physique est construit : c'est la queue du même spectre, en
+pentes par pixel ([ADR-155](../adr/ADR-155-queue-spectrale-en-pentes-par-pixel.md)). La `mss` passe
+de 0,0075 à 0,0195. R2 est envoyée à l'utilisateur. Les deux manques restent nommés : la queue
+JONSWAP n'atteint que 52 % de la rugosité observée, et la direction des composantes est liée à leur
+fréquence.
 

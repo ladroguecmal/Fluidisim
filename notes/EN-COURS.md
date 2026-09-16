@@ -89,7 +89,7 @@ poses envoyés à l'utilisateur.
 - [x] **P4** — ADR-155 et protocole de réception du remède (si confirmé).
 - [x] **P5** — cœur : cuisson de la queue spectrale, même densité absolue, essais contre l'analytique.
 - [x] **P6** — hôte : queue en pentes par pixel, filtre d'empreinte, référence CPU.
-- [ ] **P7** — réception GPU/CPU, coût, rendus R2 aux poses R1, envoi à l'utilisateur.
+- [x] **P7** — réception GPU/CPU, coût, rendus R2 aux poses R1, envoi à l'utilisateur.
 - [ ] **P8** — rituel §6 : liste du projet fini (2.1, 8.9, 8.10), registre, journal, jeton.
 
 ### Notes de reprise
@@ -111,3 +111,7 @@ l'ancien binaire en mode fenêtre, bloqué 10 min, fermé ; désormais binaire l
 compilation réussit. `--tail-verify` : pire écart 1,21e-4 (tolérance 2e-4), pente de référence max
 0,343, k 1,85 à 110,8 rad/m. Critère 7 faux au protocole (π/k_max au lieu de π/k_min) et première
 exécution sans effet (k_max lu avant update) : note datée, critère corrigé, tenu.
+
+P7 : coût +0,18 ms (960×540) et +0,38 ms (1280×720), GPU eau ≤ 1,82 ms ; spectral-verify identique
+à S249 ; R1 rejoué au bit avec --no-tail ; R2 empreintes reproduites. Stries dues à la direction liée au
+rang (fixture ADR-100), soumises à l'utilisateur comme constat.
