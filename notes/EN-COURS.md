@@ -92,7 +92,7 @@ z > 0), multigrille/affinage du mode mobile, 3D, rendu, ordre d'ADR-147.
 - [x] **P7** — banc HOS couplé 32/64/128, 5 et 10 cm : réception ou refus publié.
 - [x] **P7b** — ADR-153 : affinage de divergence au plancher étendu au pas couplé mobile
   (valeurs fantômes homogènes) ; essai au premier pas à 128 colonnes, témoin refusé.
-- [ ] **P7c** — réception complète 64/128 aux deux amplitudes, coût séparé sans concurrence.
+- [x] **P7c** — réception complète 64/128 aux deux amplitudes, coût séparé sans concurrence.
 - [ ] **P8** — suite, empreinte, coût et preuve.
 - [ ] **P9** — rituel §6 : file, trajectoire, journal et jeton.
 
@@ -142,3 +142,9 @@ P7b : homogeneous_ghost (valeurs fantômes nulles) posé par refine_divergence a
 step_perturbation_mobile affine si dégradé au plancher. Essai 128/5 cm (release) : témoin refusé
 (690 it, D_franche 1,53e-5), pas reçu (1 145 it, D 6,67e-8), expiration tardive intacte. Tests δ
 58/12 ignorés, exécution 12, S237 essai inchangé. ADR-153 écrit.
+
+P7c : réception (3 processus parallèles, précision seule) — profil / b₂ contre HOS : 10 cm 64 →
+0,379 % / 0,69 % ; 5 cm 128 → 0,162 / 0,34 ; 10 cm 128 → 0,213 / 0,53. Critères 3 et 4 tenus,
+décroissants. Volume ≤1,3e-8 m ; pas au plancher 116 (5 cm/128) et 27 (10 cm/128), tous reçus.
+Coût propre, séquentiel, 200 pas, 128/5 cm, secteur 99 % : total 259,6 / 261,8 ms médiane
+(max 349 / 377) ; couplé 264,8 / 277,4 (max 690 / 671, premier pas affiné), hors échantillons.
