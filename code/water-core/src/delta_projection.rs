@@ -71,6 +71,10 @@ thread_local! {
     // S239 P3 : abaissement du critere premier, pour mesurer combien d'iterations separent la
     // convergence declaree de la tolerance physique. Zero = aucun remplacement.
     pub(crate) static PRESSURE_TOL_OVERRIDE: core::cell::Cell<f32> = const { core::cell::Cell::new(0.) };
+    // S245 : le préconditionneur multigrille est **construit et prouvé, mais pas allumé** — mesuré,
+    // il ne paie pas encore (MULTIGRILLE-S245 §3). Les essais l'allument pour le mesurer ; le chemin
+    // de production reste exactement celui de S244, au bit.
+    pub(crate) static MULTIGRID_ON: core::cell::Cell<bool> = const { core::cell::Cell::new(false) };
     pub(crate) static TOLERANCE_TRACE_PLAIN: core::cell::RefCell<Vec<f64>> =
         const { core::cell::RefCell::new(Vec::new()) };
 }
@@ -340,6 +344,28 @@ impl Volume {
             return Err(Error::Domain);
         }
         Ok(v)
+    }
+
+    /// S245 — un cycle en V, puis `dir ← z + β·dir` et le produit `⟨r, z⟩` que le gradient
+    /// conjugué préconditionné consomme. Même forme que le chemin Jacobi du mode mobile.
+    fn multigrid_into_dir(
+        &mut self,
+        beta: f32,
+        jobs: &dyn JobSystem,
+        ctl: &mut Control,
+    ) -> Result<f32, Error> {
+        let res = core::mem::take(&mut self.res);
+        let cycle = self.v_cycle(&res, ctl);
+        self.res = res;
+        cycle?;
+        let rz = self.dot(&self.res, &self.prec, jobs, ctl)?;
+        for c in 0..self.domain.cells() {
+            ctl.poll(Phase::Pressure)?;
+            if self.frac[c] > 0. {
+                self.dir[c] = self.prec[c] + beta * self.dir[c];
+            }
+        }
+        Ok(rz)
     }
 
     /// S245 — **cycle en V** : rend `z = M⁻¹ r` dans `self.prec`, en se servant de `self.tmp` comme
@@ -927,7 +953,7 @@ impl Volume {
 
     /// Projection : résout `L p = −(ρ/dt)·div(u*)` plus le couvercle, puis corrige.
     /// `max_iters` **est** la variable de dégradation exigée par ADR-007 §2.
-    fn project(&mut self, scale: f32, k1: f32, max_iters: u32, jobs: &dyn JobSystem, ctl: &mut Control) -> Result<Report, Error> {
+    fn project(&mut self, scale: f32, k1: f32, max_iters: u32, multigrid: bool, jobs: &dyn JobSystem, ctl: &mut Control) -> Result<Report, Error> {
         ctl.check(Phase::Rhs)?;
         let (nx, nz, dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
         let inv = 1. / (dx * dx);
@@ -937,6 +963,14 @@ impl Volume {
         result?;
         // S237 : le mode mobile assemble son second membre et son préconditionneur à part.
         let jacobi = self.mobile;
+        // S245 : multigrille sur le chemin à couvercle fixe, quand la grille se divise. Un
+        // préconditionneur ne change que les directions de recherche ; l'acceptation reste celle
+        // d'ADR-144, appliquée au même vrai résidu recalculé.
+        #[cfg(test)]
+        let forced = MULTIGRID_ON.with(|c| c.get());
+        #[cfg(not(test))]
+        let forced = false;
+        let multigrid_on = (multigrid || forced) && !self.mobile && !self.levels.is_empty();
         if jacobi {
             self.rhs_mobile(scale, ctl)?;
         } else {
@@ -964,15 +998,22 @@ impl Volume {
         ctl.check(Phase::Pressure)?;
         for p in &mut self.p { ctl.poll(Phase::Pressure)?; *p = 0.; }
         budget::copy(&self.rhs, &mut self.res, ctl, Phase::Pressure)?;
+        let mut seeded = None;
         if jacobi {
             self.precondition_into_dir(0., ctl)?;
+        } else if multigrid_on {
+            seeded = Some(self.multigrid_into_dir(0., jobs, ctl)?);
         } else {
             budget::copy(&self.res, &mut self.dir, ctl, Phase::Pressure)?;
         }
         let b2 = self.norm2(&self.rhs, jobs, ctl)?;
         let mut rr = b2;
         // Produit `r·M⁻¹r` du préconditionneur ; sans lui, c'est exactement `rr`.
-        let mut rz = if jacobi { self.dot_prec(&self.res, jobs, ctl)? } else { b2 };
+        let mut rz = if jacobi {
+            self.dot_prec(&self.res, jobs, ctl)?
+        } else {
+            seeded.unwrap_or(b2)
+        };
         let mut it = 0;
         let tol = 1e-12_f32;
         #[cfg(test)]
@@ -1019,6 +1060,10 @@ impl Volume {
                     let beta = zn / rz;
                     self.precondition_into_dir(beta, ctl)?;
                     rz = zn;
+                } else if multigrid_on {
+                    // `β = ⟨r_{n+1}, z_{n+1}⟩ / ⟨r_n, z_n⟩` : le cycle est appliqué d'abord, et
+                    // c'est lui qui fournit le produit.
+                    rz = self.multigrid_into_dir(rn / rz, jobs, ctl)?;
                 } else {
                     let beta = rn / rr;
                     for c in 0..self.domain.cells() {
@@ -1105,6 +1150,8 @@ impl Volume {
             if jacobi {
                 self.precondition_into_dir(0., ctl)?;
                 rz = self.dot_prec(&self.res, jobs, ctl)?;
+            } else if multigrid_on {
+                rz = self.multigrid_into_dir(0., jobs, ctl)?;
             } else {
                 budget::copy(&self.res, &mut self.dir, ctl, Phase::Pressure)?;
                 rz = actual;
@@ -1265,7 +1312,16 @@ impl Volume {
         self.swap_state();
         let result = (|| {
             self.advect(dt, ctl)?;
-            let r = self.project(-self.rho / dt, dt / self.rho, max_iters, jobs, ctl)?;
+            // S245 : chemin ordinaire d'abord. **S'il est refusé**, et seulement alors, le même
+            // pas est rejoué avec le préconditionneur multigrille : à 32 768 mailles il fait passer
+            // la divergence de 1,34·10⁻⁵ — refusée par ADR-144 — à 8,5·10⁻⁶, parce qu'il converge
+            // en 134 itérations au lieu de 425 et accumule donc moins d'arrondi. Il coûte trois
+            // fois plus cher : on ne le paie que là où l'autre échoue.
+            let mut r = self.project(-self.rho / dt, dt / self.rho, max_iters, false, jobs, ctl)?;
+            if r.degraded && !self.mobile && !self.levels.is_empty() {
+                r = self.project(-self.rho / dt, dt / self.rho, max_iters, true, jobs, ctl)?;
+            }
+            let r = r;
             ctl.check(Phase::Validate)?;
             for v in self.u.iter().chain(&self.w) {
                 ctl.poll(Phase::Validate)?;
@@ -1343,7 +1399,7 @@ impl Volume {
             // des termes quadratiques en réutilisant l'advection du mode imposé.
             budget::copy(&self.u,&mut self.us,&mut ctl,Phase::Advect)?;
             budget::copy(&self.w,&mut self.ws,&mut ctl,Phase::Advect)?;
-            let report = self.project(scale,correction,max_iters,jobs,&mut ctl)?;
+            let report = self.project(scale,correction,max_iters,false,jobs,&mut ctl)?;
             if report.degraded { return Err(Error::Convergence); }
             ctl.check(Phase::Correct)?;
             let mut left = 0f32; // mur latéral ; même flux partagé par les deux colonnes.

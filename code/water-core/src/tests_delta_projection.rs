@@ -695,7 +695,7 @@ fn pressure_state_history_at_the_floor_s238() {
     v.mobile = true;
     PRESSURE_TRACE.with(|t| t.borrow_mut().clear());
     PRESSURE_FINGERPRINTS.with(|t| t.borrow_mut().clear());
-    let report = v.project(-1025. / dt, dt / 1025., 4000, &Jobs, &mut ctl).unwrap();
+    let report = v.project(-1025. / dt, dt / 1025., 4000, false, &Jobs, &mut ctl).unwrap();
     v.mobile = false;
     let prints = PRESSURE_FINGERPRINTS.with(|t| t.borrow().clone());
     let trace = PRESSURE_TRACE.with(|t| t.borrow().clone());
@@ -732,7 +732,7 @@ fn floor_pressure_matches_independent_f64_solve_s238() {
     v.advect(dt, &mut ctl).unwrap();
     let (us, ws): (Vec<f64>, Vec<f64>) = (v.us.iter().map(|x| *x as f64).collect(), v.ws.iter().map(|x| *x as f64).collect());
     v.mobile = true;
-    let report = v.project(-1025. / dt, dt / 1025., 4000, &Jobs, &mut ctl).unwrap();
+    let report = v.project(-1025. / dt, dt / 1025., 4000, false, &Jobs, &mut ctl).unwrap();
     // Assemblage f64 indépendant : mêmes ouvertures et même classification fluide, arithmétique f64.
     let (dx64, rho, g) = (dx as f64, 1025f64, 9.81f32 as f64);
     let inv = 1. / (dx64 * dx64);
@@ -1297,5 +1297,53 @@ fn the_v_cycle_is_symmetric_and_positive_s245() {
             let after: f64 = x.iter().zip(&ax).map(|(r, a)| (*r as f64 - *a as f64).powi(2)).sum::<f64>().sqrt();
             assert!(after < 0.9 * before, "un cycle doit réduire : {before} → {after}");
         }
+    }
+}
+
+/// S245 P5 — **ce que le préconditionneur multigrille achète, et ce qu'il coûte.** Le même pas que
+/// S244, une fois sans et une fois avec, aux cinq tailles. C'est cette mesure qui décide s'il est
+/// allumé — il ne l'est pas, et le tableau dit pourquoi.
+#[test]
+#[ignore = "mesure S245, lancée explicitement ; à lancer en release"]
+fn what_the_multigrid_buys_s245() {
+    use std::time::Instant;
+    let median = |mut v: Vec<f64>| {
+        v.sort_by(f64::total_cmp);
+        v[v.len() / 2]
+    };
+    for nx in [16usize, 32, 64, 128, 256] {
+        let (nz, dx) = (nx / 2, 8. / nx as f32);
+        let ground = vec![0.4f32; nx];
+        let mut probe = mobile_volume(nx, nz, dx, &ground);
+        let z0 = probe.domain().z0();
+        let eta: Vec<f32> = (0..nx)
+            .map(|i| z0 + 0.02 * (std::f32::consts::TAU * (i as f32 + 0.5) / nx as f32).sin())
+            .collect();
+        let mut line = format!("MULTIGRILLE_S245 nx={nx} mailles={} niveaux={}", nx * nz, probe.levels.len());
+        for on in [false, true] {
+            MULTIGRID_ON.with(|c| c.set(on));
+            let mut ms = Vec::new();
+            let mut iterations = 0;
+            let mut divergence = 0.;
+            let mut degraded = false;
+            for _ in 0..7 {
+                let mut v = mobile_volume(nx, nz, dx, &ground);
+                v.set_surface(&eta).unwrap();
+                let start = Instant::now();
+                let r = v.step(1. / 60., 20_000, &Jobs).unwrap();
+                ms.push(start.elapsed().as_secs_f64() * 1e3);
+                // À 32 768 mailles, le pas est **dégradé** depuis S239 : f32 n'y tient pas la
+                // tolérance d'ADR-144. On le relève, on ne l'exige pas.
+                (iterations, divergence, degraded) = (r.iterations, r.divergence, r.degraded);
+            }
+            let label = if on { "avec" } else { "sans" };
+            line.push_str(&format!(
+                " | {label} iterations={iterations} pas_ms={:.4} divergence={divergence:.3e} degrade={degraded}",
+                median(ms)
+            ));
+        }
+        MULTIGRID_ON.with(|c| c.set(false));
+        println!("{line}");
+        let _ = probe.step(1. / 60., 20_000, &Jobs);
     }
 }

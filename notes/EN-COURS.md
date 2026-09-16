@@ -105,7 +105,7 @@ branchement déclaré en file avec son déclencheur — dit dans le plan, pas la
 - [x] **P2** — protocole écrit ; note corrective datée sur S244 ; relevé de référence des itérations.
 - [x] **P3** — hiérarchie allouée dans `configure` et opérateurs de transfert, avec leurs essais.
 - [x] **P4** — cycle en V et lissage ; **symétrie testée** avant tout branchement.
-- [ ] **P5** — branchement comme préconditionneur ; itérations et coût aux cinq tailles.
+- [x] **P5** — branchement comme préconditionneur ; itérations et coût aux cinq tailles.
 - [ ] **P6** — réception ADR-144, empreintes, suite ; rituel §6, ADR, file, jeton.
 
 ### Notes de reprise
@@ -133,6 +133,17 @@ mode mobile, `tmp` a deja ete consomme par le produit qui precede) — donc **au
 Lissages : 2 avant, 2 apres, 8 au plus grossier — donnees de **cout**, comme le grain d'ADR-029 §3.
 **Symetrie et positivite verifiees**, fond plat et fond coupe, 32x16 et 64x32 ; et un cycle reduit
 le residu de plus de 10 %. C'etait la porte a franchir avant tout branchement.
+
+P5 : **le resultat n'est pas celui qui etait cherche, et il est meilleur.**
+Vitesse : iterations 99/252/220/167/134 contre 30/61/114/220/425, mais le cycle coute cinq produits
+fins par iteration -> perdant partout en temps. Contre-epreuve (hierarchie plus profonde, cycle
+allege) : **pire**, 282/260/292/284/300 — plat mais haut, donc mauvais taux par cycle, donc le
+suspect est le **transfert** (prolongation constante par morceaux). Suite : prolongation bilineaire.
+**Precision : a 32 768 mailles le pas passe de REFUSE a RECU.** Divergence 1,339e-5 -> **8,512e-6**,
+parce que 134 iterations accumulent moins d arrondi que 425. **A275 levee.**
+Branchement : **repli**, pas remplacement. Aux tailles qui passaient : rien ne change au bit
+(empreinte delta_filters **0xfb12b2092df4ee6d** inchangee, dix cas de delta_precision identiques).
+A 32 768 : recu pour 1 006 ms au lieu de 319 refusees. Suite **437 reussis / 15 ignores**.
 
 ---
 

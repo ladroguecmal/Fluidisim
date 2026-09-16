@@ -387,7 +387,7 @@ impl Volume {
             swapped = true;
             self.advect(advection, &mut ctl)?;
             self.mobile = true;
-            let projected = self.project(scale, correction, max_iters, jobs, &mut ctl);
+            let projected = self.project(scale, correction, max_iters, false, jobs, &mut ctl);
             self.mobile = false;
             let report = projected?;
             if report.degraded { return Err(Error::Convergence); }
@@ -436,7 +436,7 @@ impl Volume {
         budget::copy(&self.u, &mut self.us, &mut ctl, Phase::Advect)?;
         budget::copy(&self.w, &mut self.ws, &mut ctl, Phase::Advect)?;
         self.mobile = true;
-        let result = self.project(-self.rho / dt, dt / self.rho, max_iters, jobs, &mut ctl);
+        let result = self.project(-self.rho / dt, dt / self.rho, max_iters, false, jobs, &mut ctl);
         self.mobile = false;
         result
     }
