@@ -72,25 +72,6 @@ fn extra(s: &BackgroundSample, axis: usize, v: [f32; 2], dv: [f32; 2], rho: f32)
 }
 
 impl Volume {
-    /// ADR-150 : une correction à l'échelle du défaut de vitesse, sans reconstruire
-    /// celle-ci depuis la pression totale arrondie. Le couvercle de q est homogène.
-    fn refine_coupled_pressure(&mut self, scale:f32, correction:f32, max_iters:u32,
-        jobs:&dyn JobSystem, ctl:&mut Control)->Result<super::Report,Error> {
-        budget::copy(&self.p,&mut self.pressure_base,ctl,Phase::Prepare)?;
-        budget::copy(&self.u,&mut self.us,ctl,Phase::Prepare)?;
-        budget::copy(&self.w,&mut self.ws,ctl,Phase::Prepare)?;
-        self.homogeneous_lid=true;
-        let result=self.project(scale,correction,max_iters,false,jobs,ctl);
-        self.homogeneous_lid=false; // y compris Err(Budget/Clock), avant toute propagation
-        let mut report=result?;
-        for (p,base) in self.p.iter_mut().zip(&self.pressure_base) {
-            ctl.poll(Phase::Correct)?;
-            *p+=base;
-        }
-        report.refinements=1;
-        Ok(report)
-    }
-
     fn coupled_predict(&mut self, bg: &BackgroundFaces<'_>, dt: f64, sponge: Sponge,
         ctl: &mut Control) -> Result<(), Error> {
         self.advect(dt as f32, ctl)?;
@@ -181,7 +162,7 @@ impl Volume {
             }
             if report.degraded && report.floor {
                 #[cfg(test)] let start = std::time::Instant::now();
-                report=self.refine_coupled_pressure(scale,correction,max_iters,jobs,&mut ctl)?;
+                report=self.refine_divergence(scale,correction,max_iters,false,jobs,&mut ctl)?;
                 #[cfg(test)] trace("affinage", Some(&report), start);
                 iterations=iterations.saturating_add(report.iterations);
             }

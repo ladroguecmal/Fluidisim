@@ -205,7 +205,9 @@ fn global_allocator_sees_counterexample_but_no_step_allocations() {
         let (r, allocs) = measured(|| v.step(0.002, limit, &Jobs));
         assert_eq!(allocs, 0, "limite {limit}");
         let r = r.unwrap();
-        assert!(r.iterations <= limit);
+        // S252 (ADR-151) : le plafond vaut par projection, et `iterations` compte tout le pas —
+        // au plus l'ordinaire, son repli multigrille et un affinage. Jusqu'à S251, la dernière seule.
+        assert!(r.iterations <= 3 * limit, "limite {limit} : {r:?}");
         if limit == 1 || limit == 0 {
             assert!(r.degraded);
         }

@@ -281,7 +281,7 @@ fn incremental_projection_does_not_reapply_imposed_pressure_s251(){
     for i in 0..16 {v.eta[i]+=0.01*(i as f32*0.2).cos();}
     v.step(0.001,2000,&Jobs).unwrap();
     let old=(v.u.clone(),v.w.clone(),v.eta.clone());
-    let r=v.refine_coupled_pressure(-1_025_000.,(0.001f64/1025.) as f32,2000,&Jobs,&mut Control::unlimited()).unwrap();
+    let r=v.refine_divergence(-1_025_000.,(0.001f64/1025.) as f32,2000,false,&Jobs,&mut Control::unlimited()).unwrap();
     assert!(!r.degraded);
     let change=v.u.iter().chain(&v.w).zip(old.0.iter().chain(&old.1))
         .fold(0f32,|m,(a,b)|m.max((a-b).abs()));

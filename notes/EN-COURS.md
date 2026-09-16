@@ -98,7 +98,7 @@ un changement d'ADR-147 se décide sur la mesure publiée, au lot suivant.
 - [x] **P2** — A284 : itérations et temps par projection, 32×16 plat, test diagnostic.
 - [x] **P3** — A285 : test qui reproduit le défaut, correction de β, tests multigrille.
 - [x] **P4** — re-mesures S245 (cinq tailles), 32 768 mailles, démarrage plat ; empreinte.
-- [ ] **P4b** — ADR-151 : affinage de divergence ADR-150 étendu au pas à couvercle fixe
+- [x] **P4b** — ADR-151 : affinage de divergence ADR-150 étendu au pas à couvercle fixe
   refusé au plancher (A275 sinon rouverte) ; test à 32 768 mailles, suite complète.
 - [ ] **P5** — preuve, notes datées ADR-147/S245/S246/S251, angles morts, file.
 - [ ] **P6** — rituel §6 : trajectoire, journal et jeton ; S253 = surface mobile couplée.
@@ -138,3 +138,13 @@ L'acceptation A275 tenait aux relances du GC fautif (raffinement itératif accid
 affinage ADR-150 (q multigrille, couvercle homogène) → 8 it, 46,1 ms, D=3,56e-8 reçu.
 À 32 768 le GC multigrille (8 it ≈ 46 ms) bat l'ordinaire (425 it ≈ 250 ms) : ordre
 d'ADR-147 à reprendre au lot suivant, sur mesure publiée — pas dans P4b.
+P4b : `refine_divergence` partagée (coupling : multigrid=false, au bit) ; `run` l'appelle si
+dégradé au plancher après repli ; `iterations` cumulées (plafond par projection, comme
+ADR-150). Deux tests ajustés au compte réel (`a_tight_budget…` : 2 = ordinaire + repli ;
+`global_allocator…` : ≤ 3·limite). `largest_grid_is_received_by_refinement_s252` (release) :
+témoin multigrille seule refusé (8 it, D 1,585e-5), pas reçu (441 it, 385 ms, D 3,56e-8).
+Suite release **451 / 17 ignorés / 0**. delta_precision identique hors temps, empreinte
+inchangée. Table S245 finale (sans | avec, it/ms) : 128 30/0,087 | 6/0,142 ; 512 61/0,677 |
+7/0,602 ; 2 048 114/5,04 | 7/2,44 ; 8 192 220/37,2 | 8/15,0 ; 32 768 441/392 reçu | 24/137 reçu.
+Bancs couplés : 32×16 plat médiane 2,53 ms (max 3,51), 16×8 plat 0,279 (5 affinages),
+imposés inchangés au bit (D max 9,6369e-6 / 5,7869e-6). Secteur 99 % avant et après.

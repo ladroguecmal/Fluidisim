@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-16 20:31 +02:00
+Battement        : 2026-09-16 20:38 +02:00
 Agent            : Claude Opus 5, Claude Code (fichiers, git, cargo, Python, accès web)
 Session en cours : S252 — A284 attribué ; A285, β du gradient conjugué multigrille corrigé
 Dernière session : S251 — démarrage couplé plat reçu (ADR-150) ; coût ×40 ouvert (A284)

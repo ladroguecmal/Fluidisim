@@ -196,7 +196,10 @@ fn a_tight_budget_degrades_and_says_so() {
     let eta: Vec<f32> = (0..32).map(|i| z0 + 0.02 * (i as f32 * 0.3).sin()).collect();
     v.set_surface(&eta).unwrap();
     let tight = v.step(0.002, 1, &jobs).unwrap();
-    assert!(tight.degraded && tight.iterations == 1);
+    // S252 (ADR-151) : le plafond vaut **par projection** et `iterations` compte tout le pas — ici
+    // la projection ordinaire refusée puis son repli multigrille (32×16 a deux niveaux), une
+    // itération chacune ; aucun affinage, faute de plancher. Jusqu'à S251 : la dernière seule.
+    assert!(tight.degraded && tight.iterations == 2 && tight.refinements == 0, "{tight:?}");
     let (mut w, _) = build(32, 16, 0.25, 9.81);
     w.set_surface(&eta).unwrap();
     let wide = w.step(0.002, 500, &jobs).unwrap();
@@ -1400,32 +1403,35 @@ fn the_cycle_reduction_rate_s246() {
     }
 }
 
-/// S252 (A285) — **32 768 mailles après correction du β multigrille.** Le repli converge en huit
-/// itérations mais s'arrête au plancher avec `D = 1,585·10⁻⁵`, refusé ; l'ancien gradient conjugué
-/// fautif y était reçu. Diagnostic : rapport complet du pas, puis **un** affinage de divergence sur
-/// la vitesse publiée (même construction qu'ADR-150, couvercle homogène), sans rien publier de plus.
+/// S252 (A285, ADR-151) — **32 768 mailles, reçu par l'affinage après correction du β
+/// multigrille.** Le repli corrigé converge en huit itérations mais s'arrête au plancher avec
+/// `D = 1,585·10⁻⁵` ; le pas doit alors recevoir un affinage de divergence, et tenir la tolérance
+/// physique de S199. Témoin : la même projection sans affinage reste refusée. Release seulement.
 #[test]
-#[ignore = "diagnostic S252, release"]
-fn largest_grid_after_multigrid_fix_s252() {
+#[cfg_attr(debug_assertions, ignore = "32 768 mailles : release")]
+fn largest_grid_is_received_by_refinement_s252() {
     let (nx, nz) = (256usize, 128usize);
     let dx = 8. / nx as f32;
-    let mut v = mobile_volume(nx, nz, dx, &vec![0.4; nx]);
-    let z0 = v.domain().z0();
-    let eta: Vec<f32> = (0..nx)
-        .map(|i| z0 + 0.02 * (std::f32::consts::TAU * (i as f32 + 0.5) / nx as f32).sin())
-        .collect();
-    v.set_surface(&eta).unwrap();
+    let build = || {
+        let mut v = mobile_volume(nx, nz, dx, &vec![0.4; nx]);
+        let z0 = v.domain().z0();
+        let eta: Vec<f32> = (0..nx)
+            .map(|i| z0 + 0.02 * (std::f32::consts::TAU * (i as f32 + 0.5) / nx as f32).sin())
+            .collect();
+        v.set_surface(&eta).unwrap();
+        v
+    };
     let dt = 1. / 60.;
+    let mut witness = build();
+    let mut ctl = Control::unlimited();
+    let r0 = witness.project(-witness.rho / dt, dt / witness.rho, 20_000, true, &Jobs, &mut ctl).unwrap();
+    assert!(r0.degraded && r0.floor, "témoin : la multigrille seule doit rester refusée au plancher {r0:?}");
+    let mut v = build();
     let start = std::time::Instant::now();
     let r = v.step(dt, 20_000, &Jobs).unwrap();
-    println!("S252_32768 pas={r:?} ms={:.1}", start.elapsed().as_secs_f64() * 1e3);
-    let base = v.p.clone();
-    v.us.copy_from_slice(&v.u);
-    v.ws.copy_from_slice(&v.w);
-    v.homogeneous_lid = true;
-    let start = std::time::Instant::now();
-    let q = v.project(-v.rho / dt, dt / v.rho, 20_000, true, &Jobs, &mut Control::unlimited());
-    v.homogeneous_lid = false;
-    println!("S252_32768 affinage={q:?} ms={:.1}", start.elapsed().as_secs_f64() * 1e3);
-    for (p, b) in v.p.iter_mut().zip(&base) { *p += b; }
+    println!("S252_32768 temoin={r0:?}
+S252_32768 pas={r:?} ms={:.1}", start.elapsed().as_secs_f64() * 1e3);
+    assert_eq!(r.refinements, 1);
+    assert!(!r.degraded && r.divergence_plain <= PROJECTION_DIVERGENCE_TOLERANCE as f64, "{r:?}");
+    assert!(!v.homogeneous_lid);
 }

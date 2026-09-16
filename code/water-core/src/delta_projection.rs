@@ -1318,6 +1318,27 @@ impl Volume {
         self.run(dt, max_iters, jobs, &mut Control::unlimited())
     }
 
+    /// ADR-150 : une correction à l'échelle du défaut de vitesse, sans reconstruire
+    /// celle-ci depuis la pression totale arrondie. Le couvercle de q est homogène.
+    /// S252, ADR-151 : partagée par le pas couplé (`multigrid = false`, inchangé au bit) et par
+    /// le pas à couvercle fixe (`run`), qui la résout avec le préconditionneur du repli refusé.
+    fn refine_divergence(&mut self, scale: f32, correction: f32, max_iters: u32, multigrid: bool,
+        jobs: &dyn JobSystem, ctl: &mut Control) -> Result<Report, Error> {
+        budget::copy(&self.p, &mut self.pressure_base, ctl, Phase::Prepare)?;
+        budget::copy(&self.u, &mut self.us, ctl, Phase::Prepare)?;
+        budget::copy(&self.w, &mut self.ws, ctl, Phase::Prepare)?;
+        self.homogeneous_lid = true;
+        let result = self.project(scale, correction, max_iters, multigrid, jobs, ctl);
+        self.homogeneous_lid = false; // y compris Err(Budget/Clock), avant toute propagation
+        let mut report = result?;
+        for (p, base) in self.p.iter_mut().zip(&self.pressure_base) {
+            ctl.poll(Phase::Correct)?;
+            *p += base;
+        }
+        report.refinements = 1;
+        Ok(report)
+    }
+
     fn swap_state(&mut self) {
         core::mem::swap(&mut self.u, &mut self.saved_u);
         core::mem::swap(&mut self.w, &mut self.saved_w);
@@ -1341,9 +1362,23 @@ impl Volume {
             // en 134 itérations au lieu de 425 et accumule donc moins d'arrondi. Il coûte trois
             // fois plus cher : on ne le paie que là où l'autre échoue.
             let mut r = self.project(-self.rho / dt, dt / self.rho, max_iters, false, jobs, ctl)?;
+            let mut iterations = r.iterations;
+            let mut multigrid = false;
             if r.degraded && !self.mobile && !self.levels.is_empty() {
                 r = self.project(-self.rho / dt, dt / self.rho, max_iters, true, jobs, ctl)?;
+                iterations = iterations.saturating_add(r.iterations);
+                multigrid = true;
             }
+            // S252, ADR-151 : refusé **au plancher** après le repli, le pas reçoit l'affinage de
+            // divergence d'ADR-150 — une fois. Sans lui, corriger le β multigrille (A285) rouvrait
+            // A275 à 32 768 mailles. Les pas déjà reçus n'y passent pas et gardent leurs bits.
+            if r.degraded && r.floor && !self.mobile {
+                r = self.refine_divergence(-self.rho / dt, dt / self.rho, max_iters, multigrid, jobs, ctl)?;
+                iterations = iterations.saturating_add(r.iterations);
+            }
+            // S252 : `iterations` compte le travail de toutes les projections du pas, comme le pas
+            // couplé depuis S251 ; il ne rendait que celui de la dernière.
+            r.iterations = iterations;
             let r = r;
             ctl.check(Phase::Validate)?;
             for v in self.u.iter().chain(&self.w) {
