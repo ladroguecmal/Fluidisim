@@ -58,76 +58,34 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S254 — terminée
+Session : S255 — en cours
 Agent : Claude Opus 5, Claude Code ; fichiers, git, cargo, Python et GPU local disponibles.
-Entrée (2026-09-16 21:39) : l'utilisateur reprend le projet **comme superviseur des rendus
-visuels** ; il enverra, à la demande, des références réelles et aidera à comprendre la réalité et
-la perception humaine. « Tu vas continuer de travailler. » Master propre d9c6a35, une seule
-copie, archive B conservée, jeton libre.
+Entrée (2026-09-16 22:05), demande de l'utilisateur **avant son premier retour visuel** : « un .md
+qui est une to do list avec tous les éléments que le projet fini doit avoir et pouvoir faire ;
+cette liste, tu valideras ou non les points, et de temps en temps je te demanderai de la remplir ».
+Master propre 97129a4, copie unique, jeton libre. La demande prime sur la suite prévue (bords
+ouverts) ; R1 reste en attente de l'utilisateur.
 
-Deux objectifs, dans cet ordre.
+Objectif : `docs/LISTE-PROJET-FINI.md`, liste exhaustive des capacités du projet **fini**
+(ambition complète, ADR-127), tirée des sources et non du seul état construit. Chaque point porte un
+état **validé / partiel / absent**, avec sa preuve ou ce qui manque. « Validé » exige une réception
+publiée sur le périmètre final du point, pas un banc isolé.
 
-**A. Ouvrir la revue visuelle.** Aucune réception perceptive n'a jamais été possible (COUPURE-S249,
-B4 perception, A282) : il manquait un observateur humain et des références. Critère : protocole
-écrit (ce qui est envoyé, ce qui revient, comment un verdict se consigne sans devenir une
-réception physique), rendus reproductibles à poses et âges publiés avec empreinte, envoyés à
-l'utilisateur avec la liste précise des références demandées. Arrêt : revue R1 envoyée et
-consignée « en attente ». Aucun réglage visuel avant retour des références.
-
-**B. A286 — prolongement du fond au-dessus du plan moyen**, suite de S253 (cinquième session du
-raccordement, chemin de J2/B4, justifiée S253). Règle candidate : vitesse horizontale constante
-au-dessus du plan moyen, `W(z) = W(0) − z·(∂xU + ∂yV)(0)` (incompressible exactement), pression
-de Taylor d'ordre un en z, **toutes les dérivées calculées analytiquement sur ce même champ**
-(dérivées secondes des modes à z = 0), `S` sur ses propres champs. Réception écrite avant code
-(ADR et protocole) : continuité au bit à z = 0, divergence nulle à l'arrondi, dérivées contre
-différences finies, puis banc couplé S253 avec ce prolongement à la place du prolongement
-analytique — critères S253 (profil ≤2 %, `b₂` ≤20 % à 128 colonnes, décroissants), chiffres S253
-en regard. Ensuite fournisseur B de production au-dessus du plan moyen. Hors lot : couches W
-(impact, pression) au-dessus du plan moyen si le temps manque, bords ouverts, frontières du total.
+Critère : chaque section des intentions d'origine (architecture globale, zones ouvertes), chaque
+couche d'ADR-001, chaque phénomène de SPEC-002, chaque cas canonique et chaque banc trouvent au
+moins un point. Aucun point n'est validé sans lien vers sa preuve. Rôle défini face à la feuille de
+route (qui porte la trajectoire, L137) : la liste pointe, elle ne recopie pas les états détaillés.
 
 ### Plan
 
-- [x] **P1** — amorce, lectures, jeton et plan seuls.
-- [x] **P2** — protocole de revue visuelle (document de validation), rôle dans REPRISE §2,
-  ligne de METHODE, index.
-- [x] **P3** — hôte : mode `--revue` à poses et âges fixes, captures avec empreinte, PNG ; revue R1
-  envoyée à l'utilisateur avec les références demandées, consignée en attente.
-- [x] **P4** — ADR-154 et protocole de réception d'A286, avant code.
-- [x] **P5** — oracle : prolongement du mode stationnaire selon la règle, contrôles
-  (continuité, divergence, dérivées, `S`).
-- [x] **P6** — banc couplé S253 avec ce prolongement, 32/64/128 × 5/10 cm : réception ou refus publié.
-- [x] **P7** — cœur : fournisseur B au-dessus du plan moyen selon la règle, essais contre la
-  référence et contrats de refus.
-- [x] **P8** — suite, empreinte, preuve.
-- [x] **P9** — rituel §6 : file, trajectoire, journal et jeton.
+- [>] **P1** — amorce, jeton et plan seuls.
+- [ ] **P2** — inventaire des sources : architecture globale, zones ouvertes, ADR-001, SPEC-002,
+  cas canoniques, bancs, invariants ; squelette de la liste par domaine.
+- [ ] **P3** — états : validé / partiel / absent, point par point, contre feuille de route, file
+  active et preuves ; compte par section.
+- [ ] **P4** — contrôle de couverture (sources, cas, bancs, invariants), rôle écrit dans la liste,
+  METHODE et index.
+- [ ] **P5** — rituel §6 : journal, jeton.
 
 ### Notes de reprise
 
-P3 : `--multi --revue` (viewer/src/main.rs, `revue_images`) — sept PPM 1280×720, empreintes
-identiques sur deux exécutions ; journal `viewer/captures/s254/revue.log`. Constat personnel, non
-envoyé comme verdict pour ne pas orienter : mer lisse et vitreuse (B n'a rien sous 3,5 m),
-sillages et impacts presque invisibles une fois ombrés, pas d'écume à force 5.
-
-P5 : `StandingWave::sample_bounded` / `bounded_fields` (règle d'ADR-154, profondeur finie :
-`W = −q(T+kz)…`, `P = ρga(1+kTz)…`). Essai `standing_bounded_extension_controls_s254` vert :
-continuité en z = 0 à 4 ulp, divergence à l'arrondi, dérivées et laplacien contre différences
-finies (1e-6 et 1e-5 relatifs), `S` publié contre f64 ; ordre deux à `z = s·a` : rapport
-`S(10 cm)/4S(5 cm)` entre 1,000 et 1,115.
-
-P6 lancé avant P7 (six processus, 21:52, secteur 99 %), P7 fait pendant le calcul ; P6 reste `[>]`.
-Premiers résultats (profil / b₂ contre HOS), borné contre analytique S253 : 5 cm 32 → 0,964 % /
-3,47 % (1,214 / 1,62) ; 64 → 0,380 / 1,19 (0,276 / 0,54) ; 10 cm 32 → 1,007 / 3,05 (0,908 / 1,51) ;
-64 → 0,485 / 1,43 (0,379 / 0,69). b₂ environ deux fois moins bon, dans la tolérance.
-
-P7 : `differential_local_extended`, `differential_extended`, `differential_batch_extended`
-(background_differential.rs). Essais : au bit sous le plan moyen (−0,0 compris) et refus
-inchangés, lot atomique ; au-dessus, divergence ≤ 16 ulp, gradients, `du_dt` et laplacien contre
-différences finies, accord avec la règle f64. **Premier jet de l'essai fautif** : différence
-temporelle avant à t = 0 (troncature 0,025 contre tolérance 5e-3) ; remplacée par une différence
-centrée à t ≥ 1 ms, tolérance inchangée. Intégration : B de production (Hs 0,3, Tp 4, une
-composante), 50 pas couplés mobiles reçus, 590 faces mouillées au-dessus du plan moyen consommées ;
-`u'` max 6,6e-2 m/s près des murs contre 6,1e-3 à l'intérieur (U 0,29) : les murs, pas la règle.
-
-P6 fini (22:01) : 128 colonnes, 5 cm 0,168 % / 0,58 % ; 10 cm 0,244 % / 0,66 % — critères tenus,
-décroissants. P8 : première suite bloquée (LNK1104, `delta_mobile.exe` verrouillé par le banc en
-cours) ; relancée après : 463 / 18 ignorés / 0. Tests afficheur 16 / 1 ignoré / 0.
