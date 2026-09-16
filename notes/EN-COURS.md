@@ -58,42 +58,37 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S249 — terminée
-Agent : Codex, GPT-6 (fichiers, git, cargo, Python, accès web ; GPU DX12 vérifié)
-Entrée : « Reprends le projet », puis « Continue ». Master propre à 12bd90f, une seule
-copie ; branche B archivée conservée. Jeton pris le 2026-09-16 à 17:23 +02:00.
+Session : S250 — en cours
+Agent : Codex GPT-6 ; fichiers, git, cargo, Python et GPU local disponibles.
+Entrée : « Continue ». Master propre f2dd759, une seule copie, archive B conservée.
 
-Objectif : A282, filtrage spectral cosmétique selon le pas projeté, consommé par l'afficheur.
-Priorité : après deux maillons d'instrumentation, construire la capacité désormais spécifiée.
-La multigrille A281 reste un approfondissement au gain incertain ; V et δ gardent leurs
-lots et déclencheurs. Aucun changement d'autorité, de recette répliquée ou de seuil physique.
+Objectif : premier raccordement volumique B/W→δ sur le candidat MAC x-z existant.
+Le code confirme que les fournisseurs différentiels ne sont pas consommés par Volume.
+Lot borné : géométrie et surface imposées, advection perturbative avec termes croisés,
+source continue -S et éponge de vitesse avant projection ; durée/budget entiers,
+refus atomiques et aucune allocation. La surface mobile nécessite ses résidus de bord :
+ne pas lui greffer un résidu volumique en prétendant recevoir le problème complet.
 
-Réception : poids continus dans [0,1], nuls à Nyquist et au-delà ; coefficients proches
-inchangés ; GPU comparé à une somme CPU filtrée indépendante sous les 3 mm de S201,
-écart volontaire au cœur publié séparément ; poses référence/rasante/haute et deux formats,
-retour de caméra, coût avec/sans et allocations. Les impacts tabulés n'ont pas de modes
-exposés : leur filtrage est hors de ce premier lot B/sillage et sera porté explicitement en file.
-Arrêt : chemin activé dans l'hôte, critères éprouvés, limites et coûts transmis.
+Réception avant code : fond nul retrouve le pas existant à l'arrondi ; force manufacturée
+avec signe connu ; advection croisée contre dérivée analytique ; fournisseur réel B et W
+planaires traversant Volume ; source contractée après somme ; refus non planaires et
+non finis atomiques ; expiration/reprise ; amortissement décroissant, projection reçue.
+Référence indépendante sur les accélérations, puis source dense contre source échantillonnée
+identique (pas de décimation ni de seuil B4 réinventé). Aucun taux de réflexion promis.
+Arrêt : API consommée par le pas MAC et exemple reproductible, tests et limites transmis.
 
 ### Plan
 
-- [x] **P1** — amorce, lectures ciblées, jeton et plan seuls.
-- [x] **P2** — décision et protocole : empreinte de projection, poids et bandes du sillage.
-- [x] **P3** — filtre CPU/GPU et intégration au rendu, tests du contrat.
-- [x] **P4** — réception GPU, comparaison au cœur et au témoin, coût et allocations.
-- [x] **P5** — rituel §6 : preuves, file active, trajectoire, journal et jeton.
+- [x] **P1** — amorce, lectures et plan seuls.
+- [>] **P2** — ADR/protocole, contrat des faces et limites de la coupe 2D.
+- [ ] **P3** — pas perturbatif atomique, source et éponge, tests ciblés.
+- [ ] **P4** — exemple B/W réel, contre-épreuves, suite de tests et mesure.
+- [ ] **P5** — rituel §6 : file, trajectoire, preuves, journal, jeton.
 
 ### Notes de reprise
 
-A282 touche l'image seulement (ADR-130). La grille locale S234 contient une réalisation
-sommée : on ne peut donc pas lui retirer un mode après coup. Prévoir des bandes modales
-séparées dès sa cuisson, à phases identiques ; la caméra pondère les amplitudes des bandes.
-Le fond (32 modes) se filtre directement. La recette et ses domaines ADR-132 restent intacts.
-P3 : huit bandes + grille complète réservées, filtre B/sillage activé par défaut.
-Tests hôte : 16 réussis, 1 mesure ignorée. Construction release hors ligne réussie.
-Premier passage GPU du protocole : 36 cas passent, retour caméra au bit ; détail à P4.
-
-P4 : réception finale 36 cas, erreur hauteur 0,339985 mm ; retour au bit et 8 modes
-isolés reçus. 437/16 cœur, 16/1 hôte. GPU régime 1,217–1,333 ms contre 0,461–0,486 ;
-premier passage jusqu’à 2,259 ms, publié. update=0 allocation, pile=133 / 18 509 octets.
-Preuves et limites dans COUPURE-S249 ; journaux locaux viewer/captures/s249.
+Les champs BackgroundSample sont 3D. Une coupe de l'impact radial n'est pas un fond 2D :
+sur y=0, uy peut être nul mais d(uy)/dy ne l'est pas. Refuser les échantillons non planaires.
+SPEC-004 §6.1 et ADR-114 imposent -S continu, pas l'annulation du pas numérique du fond.
+L'équilibre δ=0 n'est exact que si S=0 ; un fond linéaire porte normalement un résidu
+quadratique non nul. Ce résidu doit engendrer une correction, pas être effacé.
