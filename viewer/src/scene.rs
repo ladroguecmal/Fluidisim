@@ -30,8 +30,13 @@ pub const WAKE_SPAN_US: u64 = 40_000_000;
 pub const WAKE_MIN: [f32; 2] = [-64., -48.];
 pub const WAKE_MAX: [f32; 2] = [64., 56.];
 pub const WAKE_CAPACITY: usize = 16_384;
+/// S256, ADR-155 : queue spectrale de B rendue en pentes par pixel, `[4, 32]·fp`, 64 composantes.
+pub const TAIL_RATIO: f32 = 32.;
+pub const TAIL_COMPONENTS: usize = 64;
 pub struct Scene {
     pub background: Background,
+    /// S256 : même recette que `background`, prolongée ; jamais évaluée en hauteur.
+    pub tail: Background,
     pub impact: RadialImpact<256>,
     pub step: f32,
     /// S214 : de quoi reconstruire l'impact **par le cœur**, depuis un journal d'événements.
@@ -57,6 +62,8 @@ impl Scene {
             spread_turns: 0.25,
         };
         let cooked = background_spectrum::bake(recipe).expect("recette S201");
+        let tail_cooked = background_spectrum::bake_tail(recipe, TAIL_RATIO, TAIL_COMPONENTS)
+            .expect("queue S256");
         let mut alloc = host_impl::ArenaAllocator::with_capacity(1 << 22);
         let background = Background::from_spectrum(
             &mut HostServices {
@@ -65,6 +72,16 @@ impl Scene {
                 sink: &host_impl::StderrSink,
             },
             &cooked,
+            WorldPos::from_units(0, 0, 0),
+        )
+        .unwrap();
+        let tail = Background::from_spectrum(
+            &mut HostServices {
+                alloc: &mut alloc,
+                jobs: &host_impl::SequentialJobs,
+                sink: &host_impl::StderrSink,
+            },
+            &tail_cooked,
             WorldPos::from_units(0, 0, 0),
         )
         .unwrap();
@@ -111,6 +128,7 @@ impl Scene {
         .unwrap();
         Self {
             background,
+            tail,
             impact,
             step: wavelength_m / 16.,
             event,
@@ -592,6 +610,9 @@ pub struct FrameData<'a> {
     pub profile: Vec<(f32, f32)>,
     pub impacts: Vec<ImpactSlot>,
     pub components: [[f32; 4]; 32],
+    /// S256, ADR-155 : queue spectrale `[a, kx, ky, phase]` rebasée à la caméra ; `None` = sans queue.
+    pub tail_background: Option<&'a Background>,
+    pub tail: [[f32; 4]; TAIL_COMPONENTS],
     pub camera: Camera,
     pub active: bool,
     pub time: SimTime,
@@ -651,6 +672,8 @@ impl<'a> FrameData<'a> {
             profile,
             impacts,
             components: [[0.; 4]; 32],
+            tail_background: None,
+            tail: [[0.; 4]; TAIL_COMPONENTS],
             camera: Camera::default(),
             active: true,
             time: SimTime(BIRTH),
@@ -688,6 +711,14 @@ impl<'a> FrameData<'a> {
                 &mut self.components,
             )
             .expect("caméra dans le domaine B");
+        if let Some(tail) = self.tail_background {
+            tail.render_components(
+                WorldPos::from_metres(eye[0] as f64, eye[1] as f64, 0.),
+                self.time,
+                &mut self.tail,
+            )
+            .expect("caméra dans le domaine de la queue");
+        }
         // S235 : emprise de la grille sur l'eau, si la visibilité est demandée.
         // S240 : dans le tampon gardé — le contour ne coûte plus une allocation par image.
         let mut framed = false;
@@ -805,6 +836,28 @@ impl<'a> FrameData<'a> {
     /// référence portait jusqu'à 18 µm de hauteur d'écart avec la composition du cœur, qui sert
     /// les trois couches au même point (`eval_local`). Le point du réseau est le seul que
     /// l'interface publique de B sache servir ; c'est donc lui qui est retenu pour tous.
+    /// S256 — référence CPU f64 de la pente de queue en `q` (relatif à la caméra), pour une empreinte
+    /// `h` : mêmes composantes que le GPU, poids d'ADR-148 recalculé en f64.
+    pub fn tail_reference(&self, q: [f32; 2], h: f32) -> [f64; 2] {
+        let mut s = [0f64; 2];
+        if self.tail_background.is_none() {
+            return s;
+        }
+        for c in &self.tail {
+            let (kx, ky) = (c[1] as f64, c[2] as f64);
+            let k = (kx * kx + ky * ky).sqrt();
+            let t = (2.0 * k * h as f64 / std::f64::consts::PI - 1.0).clamp(0.0, 1.0);
+            let w = 1.0 - t * t * (3.0 - 2.0 * t);
+            if w == 0.0 {
+                break;
+            }
+            let phase = kx * q[0] as f64 + ky * q[1] as f64 + c[3] as f64;
+            let slope = w * c[0] as f64 * phase.cos();
+            s[0] += slope * kx;
+            s[1] += slope * ky;
+        }
+        s
+    }
     pub fn references(&mut self, q: &[[f32; 2]]) -> Result<Vec<[f32; 3]>, String> {
         let eye = self.camera.eye;
         let anchors: Vec<WorldPos> = q

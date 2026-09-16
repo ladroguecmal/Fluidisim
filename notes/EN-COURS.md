@@ -88,7 +88,7 @@ poses envoyés à l'utilisateur.
   `4, 8, 16, 24, 32 fp` ; verdict confirmé ou non.
 - [x] **P4** — ADR-155 et protocole de réception du remède (si confirmé).
 - [x] **P5** — cœur : cuisson de la queue spectrale, même densité absolue, essais contre l'analytique.
-- [ ] **P6** — hôte : queue en pentes par pixel, filtre d'empreinte, référence CPU.
+- [x] **P6** — hôte : queue en pentes par pixel, filtre d'empreinte, référence CPU.
 - [ ] **P7** — réception GPU/CPU, coût, rendus R2 aux poses R1, envoi à l'utilisateur.
 - [ ] **P8** — rituel §6 : liste du projet fini (2.1, 8.9, 8.10), registre, journal, jeton.
 
@@ -103,3 +103,11 @@ P5 : `background_spectrum::bake_tail` et `cells` (boucle de `bake` factorisée, 
 0x26695af7314e21db inchangée). Essai `spectral_tail_continues_band_density_s256` : variance de queue
 4,50506e-4 contre 4,50506e-4 f64 ; mss bande+queue 0,01956 contre 0,01953 ; continuité à 4 fp
 0,8220 contre 0,8237 ; refus et empreintes. Tests du spectre 7/7.
+
+P6 : hôte — `Scene::tail` (bake_tail 32 fp, 64 composantes), `FrameData::tail_background/tail`,
+binding 5, `tail_slope` au fragment avec empreinte `dpdx/dpdy`, `--no-tail`, `--tail-verify`,
+`--tail-bench`, `--revue=r2`. Incident : une compilation échouée (Camera non Copy) a laissé lancer
+l'ancien binaire en mode fenêtre, bloqué 10 min, fermé ; désormais binaire lancé seulement si la
+compilation réussit. `--tail-verify` : pire écart 1,21e-4 (tolérance 2e-4), pente de référence max
+0,343, k 1,85 à 110,8 rad/m. Critère 7 faux au protocole (π/k_max au lieu de π/k_min) et première
+exécution sans effet (k_max lu avant update) : note datée, critère corrigé, tenu.

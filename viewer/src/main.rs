@@ -1579,9 +1579,11 @@ fn verify_multi(frame: &mut FrameData<'_>) -> Result<(), String> {
 /// pour que l'utilisateur juge les rendus contre des références réelles. Même chemin que la
 /// fenêtre — grille du sillage, filtre spectral, visibilité — et PPM locaux avec empreinte FNV
 /// (ADR-124), jamais publiés. Ciel, soleil, couleur et brouillard restent de l'habillage de banc.
-fn revue_images(frame: &mut FrameData<'_>) -> Result<(), String> {
-    const DIR: &str = "captures/s254";
-    std::fs::create_dir_all(DIR).map_err(|e| e.to_string())?;
+/// S256 : `tag` = `r1` (S254, `captures/s254`, à reproduire avec `--no-tail`) ou `r2` (queue
+/// spectrale, `captures/s256`) — mêmes poses et âges.
+fn revue_images(frame: &mut FrameData<'_>, tag: &str) -> Result<(), String> {
+    let dir = if tag == "r1" { "captures/s254" } else { "captures/s256" };
+    std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
     let (width, height) = (1280u32, 720u32);
     let instance = instance();
     let mut g = pollster::block_on(gpu::Gpu::new(&instance, None, width, height,
@@ -1600,12 +1602,13 @@ fn revue_images(frame: &mut FrameData<'_>) -> Result<(), String> {
         ("r1_large_horizon_29s", Camera { eye: [0., -18., 25.], yaw: 0.6, pitch: -0.12 }, 29., true),
     ];
     for (name, camera, age, enabled) in poses {
+        let name = name.replacen("r1", tag, 1);
         frame.camera = camera;
         frame.update(age, age, enabled);
         g.upload(frame);
         let target = g.target();
         g.draw(&target.create_view(&Default::default()), false);
-        let path = format!("{DIR}/{name}.ppm");
+        let path = format!("{dir}/{name}.ppm");
         g.capture(&target, &path)?;
         let bytes = std::fs::read(&path).map_err(|e| e.to_string())?;
         let header = format!("P6
@@ -1617,10 +1620,73 @@ fn revue_images(frame: &mut FrameData<'_>) -> Result<(), String> {
             .fold(0xcbf2_9ce4_8422_2325u64, |h, b| (h ^ *b as u64).wrapping_mul(0x100_0000_01b3));
         let c = &frame.camera;
         println!(
-            "REVUE_S254 image={name}.ppm {width}x{height} oeil=[{},{},{}] lacet={} tangage={} champ_vertical=50deg age_s={age} perturbations={enabled} sillage_actif={} impacts_actifs={} filtre_spectral={} empreinte=0x{hash:016x}",
+            "REVUE image={name}.ppm {width}x{height} oeil=[{},{},{}] lacet={} tangage={} champ_vertical=50deg age_s={age} perturbations={enabled} sillage_actif={} impacts_actifs={} filtre_spectral={} queue={} empreinte=0x{hash:016x}",
             c.eye[0], c.eye[1], c.eye[2], c.yaw, c.pitch, frame.wake_active,
-            frame.impacts.iter().filter(|s| s.active).count(), frame.spectral,
+            frame.impacts.iter().filter(|s| s.active).count(), frame.spectral, frame.tail_background.is_some(),
         );
+    }
+    Ok(())
+}
+
+/// S256 — réception de la queue (QUEUE-SPECTRALE-S256, critères 6 et 7) : pentes GPU contre la
+/// référence CPU f64 aux sondes, pour plusieurs empreintes, deux poses et deux âges ; puis filtre
+/// nul au-delà de `π/k_max` et poids unité à empreinte nulle.
+fn tail_verify(frame: &mut FrameData<'_>) -> Result<(), String> {
+    if frame.tail_background.is_none() {
+        return Err("--tail-verify sans queue".into());
+    }
+    let instance = instance();
+    let g = pollster::block_on(gpu::Gpu::new(&instance, None, 640, 360,
+        frame.profile.len(), scene::WAKE_CAPACITY))?;
+    let mut g = g;
+    let mut k_max = 0f32;
+    let mut k_min_seen = 0f32;
+    let mut worst = 0f64;
+    let mut peak = 0f64;
+    for pose in 0..2 {
+        for age in [3., 12.] {
+            frame.camera = if pose == 0 { Camera::default() } else { grazing_camera() };
+            frame.update(age, age, true);
+            g.upload(frame);
+            // Après `update` : les composantes de queue sont celles de cet instant.
+            k_max = frame.tail.iter().map(|c| (c[1] * c[1] + c[2] * c[2]).sqrt()).fold(0f32, f32::max);
+            if !(k_max > 0.) {
+                return Err("queue vide après update".into());
+            }
+            let mut probes = Vec::new();
+            for h in [0f32, 0.005, 0.02, 0.05, 0.1] {
+                for p in gpu::probes(frame.camera.eye).iter().step_by(7) {
+                    probes.push([p[0] - frame.camera.eye[0], p[1] - frame.camera.eye[1], h, 2.]);
+                }
+            }
+            let values = g.evaluate_spectral(&probes)?;
+            for (p, v) in probes.iter().zip(&values) {
+                let r = frame.tail_reference([p[0], p[1]], p[2]);
+                for i in 0..2 {
+                    worst = worst.max((v[i + 1] as f64 - r[i]).abs());
+                    peak = peak.max(r[i].abs());
+                }
+            }
+            // Critère 7 corrigé (note datée du protocole) : tout s'éteint au-delà de π/k_min ; la
+            // seule composante k_max s'éteint au-delà de π/k_max.
+            let k_min = frame.tail.iter().map(|c| (c[1] * c[1] + c[2] * c[2]).sqrt()).fold(f32::INFINITY, f32::min);
+            let beyond = [[1.0f32, 2.0, std::f32::consts::PI / k_min * 1.001, 2.]];
+            let v = g.evaluate_spectral(&beyond)?;
+            if v[0][1] != 0. || v[0][2] != 0. {
+                return Err(format!("queue non nulle au-delà de π/k_min : {:?}", v[0]));
+            }
+            let h = std::f32::consts::PI / k_max * 1.001;
+            let t = (2.0 * k_max * h / std::f32::consts::PI - 1.0).clamp(0.0, 1.0);
+            if 1.0 - t * t * (3.0 - 2.0 * t) != 0.0 {
+                return Err("poids de k_max non nul au-delà de π/k_max".into());
+            }
+            k_min_seen = k_min;
+        }
+    }
+    let _ = &mut g;
+    println!("TAIL_VERIFY k_min={k_min_seen:.4} k_max={k_max:.4} pire_ecart_pente={worst:.3e} pente_reference_max={peak:.4e} nul_au_dela_de_pi_sur_kmin=oui");
+    if worst > 2e-4 {
+        return Err(format!("pente de queue GPU hors tolérance 2e-4 : {worst}"));
     }
     Ok(())
 }
@@ -1769,6 +1835,10 @@ fn run() -> Result<(), String> {
         .map_err(|e| format!("levier temporel : {e:?}"))?;
     let impacts = scene::scene_impacts(&scene, if multi { scene::IMPACTS.len() } else { 1 });
     let mut frame = FrameData::new(&scene.background, table, input, timeline, recipe, impacts);
+    // S256, ADR-155 : queue spectrale en pentes par pixel, active par défaut ; `--no-tail` pour R1.
+    if !args.iter().any(|a| a == "--no-tail") {
+        frame.tail_background = Some(&scene.tail);
+    }
     // S234 : grille locale du sillage par défaut ; `--no-lod` rend le chemin direct S212–S225.
     frame.lod = !args.iter().any(|a| a == "--no-lod");
     frame.spectral = !args.iter().any(|a| a == "--no-spectral");
@@ -1799,7 +1869,33 @@ fn run() -> Result<(), String> {
         return topologie_images(&mut frame);
     }
     if multi && args.iter().any(|a| a == "--revue") {
-        return revue_images(&mut frame);
+        return revue_images(&mut frame, "r1");
+    }
+    if multi && args.iter().any(|a| a == "--revue=r2") {
+        return revue_images(&mut frame, "r2");
+    }
+    if args.iter().any(|a| a == "--tail-verify") {
+        return tail_verify(&mut frame);
+    }
+    if args.iter().any(|a| a == "--tail-bench") {
+        let instance = instance();
+        let mut g = pollster::block_on(gpu::Gpu::new(&instance, None, 960, 540,
+            frame.profile.len(), scene::WAKE_CAPACITY))?;
+        let tail = frame.tail_background;
+        frame.cull = true;
+        for (w, h) in [(960u32, 540u32), (1280, 720)] {
+            g.resize(w, h);
+            frame.viewport = Some((w as f32 / h as f32, g.nx, g.ny));
+            for (name, camera) in [("reference", Camera::default()), ("rasante", grazing_camera())] {
+                frame.camera = camera;
+                for on in [false, true] {
+                    frame.tail_background = if on { tail } else { None };
+                    println!("TAIL_BENCH {w}x{h} pose={name} queue={on}");
+                    g.benchmark(&mut frame, 12.)?;
+                }
+            }
+        }
+        return Ok(());
     }
     if args.iter().any(|a| a == "--lod-charge") {
         lod_charge(&mut frame);

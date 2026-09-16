@@ -17,6 +17,8 @@ struct Params {
 // S235 : un impact par ligne — centre relatif à la caméra, actif (1/0). `p.impact.x` : longueur
 // d'un profil ; `p.info.w` : nombre d'impacts.
 @group(0) @binding(4) var<storage, read> impacts: array<vec4<f32>>;
+// S256, ADR-155 : queue spectrale de B `[a, kx, ky, phase]`, k croissant ; `p.spectral.z` lignes.
+@group(0) @binding(5) var<storage, read> tail: array<vec4<f32>>;
 @group(2) @binding(0) var<storage, read> lattice: array<vec4<f32>>;
 @group(3) @binding(0) var<storage, read_write> lattice_out: array<vec4<f32>>;
 
@@ -32,6 +34,18 @@ fn spectral_band(k: f32) -> u32 {
     return b;
 }
 
+// S256 — pentes de la queue spectrale en `q`, pour une empreinte `h` (m) ; poids d'ADR-148, arrêt à
+// la première composante de poids nul (k croissant). Jamais de hauteur.
+fn tail_slope(q: vec2<f32>, h: f32) -> vec2<f32> {
+    var s = vec2<f32>(0.0);
+    for (var i = 0u; i < u32(p.spectral.z); i++) {
+        let c = tail[i];
+        let w = spectral_weight(length(c.yz), h);
+        if (w == 0.0) { break; }
+        s += w*c.x*cos(dot(c.yz, q) + c.w)*c.yz;
+    }
+    return s;
+}
 // Somme modale du sillage : hauteur, deux pentes et dérivée croisée. Sans elle, la grille ne
 // reçoit pas la reconstruction bicubique dont lod.rs publie la borne.
 fn wake_direct(q: vec2<f32>) -> vec4<f32> {
@@ -158,6 +172,8 @@ fn water(q: vec2<f32>, spacing: f32) -> vec3<f32> {
 fn verify(@builtin(global_invocation_id) id: vec3<u32>) {
     if (id.x < arrayLength(&probes)) {
         let probe = probes[id.x];
+        // S256 : sonde de queue (w = 2) — pentes de queue seules, empreinte imposée.
+        if (probe.w > 1.5) { results[id.x] = vec4<f32>(0.0, tail_slope(probe.xy, probe.z), probe.z); return; }
         var q = probe.xy; var h = probe.z;
         if (probe.w > 0.5) { q = grid_point(probe.xy); h = grid_spacing(probe.xy, q); }
         results[id.x] = vec4<f32>(water(q, h), h);
@@ -203,7 +219,9 @@ fn sky(ray: vec3<f32>) -> vec3<f32> {
         + vec3<f32>(1.0,0.84,0.6)*pow(max(dot(ray,sun),0.0),512.0);
 }
 @fragment fn ocean_fragment(v: Vertex) -> @location(0) vec4<f32> {
-    let n = normalize(vec3<f32>(-v.slope,1.0));
+    // S256 : empreinte du pixel sur l'eau, puis pentes de la queue spectrale (normales seulement).
+    let footprint = max(length(dpdx(v.local.xy)), length(dpdy(v.local.xy)));
+    let n = normalize(vec3<f32>(-(v.slope + tail_slope(v.local.xy, footprint)),1.0));
     let ray = normalize(v.local);
     let fresnel = 0.02+0.98*pow(1.0-max(dot(-ray,n),0.0),5.0);
     let sun = normalize(vec3<f32>(-0.4,0.3,0.8));

@@ -25,6 +25,14 @@ Recette R1 (`Hs` 1,5 m, `Tp` 6 s, γ 3,3, bande `[0,5 ; 4]`, 32 composantes), qu
    référence CPU f64, prise sur les mêmes composantes rebasées à la caméra et le même poids, à
    2·10⁻⁴ près (pente sans unité).
 7. **Filtre** : pour `h_px` ≥ `π/k_max`, la pente de queue est nulle ; pour `h_px` → 0, le poids vaut 1.
+
+   **Correction du critère, datée du 2026-09-16 (P6), après sa première exécution.** Le poids
+   d'ADR-148 s'annule pour `k·h ≥ π`. Une empreinte `π/k_max` n'éteint donc que la composante la plus
+   courte ; toutes s'éteignent pour `h ≥ π/k_min`. Le critère écrit était faux, et l'exécution l'a
+   montré : pentes de 0,02 à `1,001·π/k_max`. Critère corrigé : pentes nulles à `1,001·π/k_min`, et
+   composante `k_max` de poids nul à `1,001·π/k_max`, vérifiée sur la référence CPU. Aucune
+   tolérance déplacée. La première exécution avait aussi lu `k_max` avant la mise à jour des
+   composantes (`k_max = 0`), donc sans rien contrôler ; c'est corrigé.
 8. **Réceptions existantes intactes** : `--verify` et `--multi --spectral-verify` rendent les mêmes
    écarts, puisque la queue ne touche ni la hauteur ni les pentes géométriques.
 9. **Coût** (ADR-131) : GPU eau à 960×540 et 1280×720, poses de référence et rasante, avec et sans

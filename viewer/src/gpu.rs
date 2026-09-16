@@ -23,6 +23,8 @@ pub struct Gpu {
     baked: Option<(u32, u32)>,
     uniform: wgpu::Buffer,
     waves: wgpu::Buffer,
+    /// S256, ADR-155 : queue spectrale de B, lue par le fragment seulement.
+    tail: wgpu::Buffer,
     profile: wgpu::Buffer,
     wake: wgpu::Buffer,
     /// S235 : centres et activité des impacts, `IMPACT_CAPACITY` lignes.
@@ -147,6 +149,12 @@ impl Gpu {
             32 * 16,
             wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
         );
+        let tail = buffer(
+            &device,
+            "B spectral tail",
+            crate::scene::TAIL_COMPONENTS as u64 * 16,
+            wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
+        );
         let profile = buffer(
             &device,
             "W radial profile",
@@ -183,6 +191,7 @@ impl Gpu {
                 binding(2, wgpu::BufferBindingType::Storage { read_only: true }),
                 binding(3, wgpu::BufferBindingType::Storage { read_only: true }),
                 binding(4, wgpu::BufferBindingType::Storage { read_only: true }),
+                binding(5, wgpu::BufferBindingType::Storage { read_only: true }),
             ],
         });
         let bind = device.create_bind_group(&wgpu::BindGroupDescriptor {
@@ -208,6 +217,10 @@ impl Gpu {
                 wgpu::BindGroupEntry {
                     binding: 4,
                     resource: impacts.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 5,
+                    resource: tail.as_entire_binding(),
                 },
             ],
         });
@@ -378,6 +391,7 @@ impl Gpu {
             baked: None,
             uniform,
             waves,
+            tail,
             profile,
             wake,
             impacts,
@@ -442,7 +456,8 @@ impl Gpu {
         ) {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
-        for v in [if frame.spectral { 1. } else { 0. }, frame.spectral_max, 0., 0.] {
+        let tail = if frame.tail_background.is_some() { frame.tail.len() as f32 } else { 0. };
+        for v in [if frame.spectral { 1. } else { 0. }, frame.spectral_max, tail, 0.] {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
         self.queue.write_buffer(&self.uniform, 0, &self.bytes);
@@ -463,6 +478,15 @@ impl Gpu {
             }
         }
         self.queue.write_buffer(&self.waves, 0, &self.bytes);
+        if frame.tail_background.is_some() {
+            self.bytes.clear();
+            for row in &frame.tail {
+                for v in row {
+                    self.bytes.extend_from_slice(&v.to_le_bytes());
+                }
+            }
+            self.queue.write_buffer(&self.tail, 0, &self.bytes);
+        }
         if frame.active {
             self.bytes.clear();
             for &(a, b) in &frame.profile {
@@ -932,7 +956,7 @@ impl Gpu {
         gpu.sort_by(f64::total_cmp);
         bakes.sort_by(f64::total_cmp);
         wake_cpu.sort_by(f64::total_cmp);
-        println!("BENCH_SPECTRAL actif={} allocations_update_max={update_allocs}", frame.spectral);
+        println!("BENCH_SPECTRAL actif={} queue={} allocations_update_max={update_allocs}", frame.spectral, frame.tail_background.is_some());
         if update_allocs != 0 { return Err("allocation dans update du banc".into()); }
         println!("BENCH {}x{} grid={}x{} wake_components={} lod={} age_s={age0} pas_grille_m={:?} samples=120 CPU_prepare_upload_submit_ms median={:.6} max={:.6}",self.width,self.height,self.nx,self.ny,frame.wake.len(),frame.lod,steps,cpu[60],cpu[119]);
         println!("CPU_wake_prepare_publish_ms median={:.6} max={:.6} (inclus ci-dessus)",wake_cpu[60],wake_cpu[119]);
