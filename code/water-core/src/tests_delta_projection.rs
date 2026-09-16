@@ -1244,3 +1244,58 @@ fn the_hierarchy_halves_until_the_rule_stops_it_s245() {
     // Une diagonale de maille mouillée est strictement positive ; une maille sèche rend zéro.
     assert!(v.levels[0].diag.iter().zip(&v.levels[0].frac).all(|(d, f)| if *f > 0. { *d > 0. } else { *d == 0. }));
 }
+
+/// S245 P4 — **le cycle en V est symétrique et défini positif.** C'est la condition de validité du
+/// gradient conjugué préconditionné : sans elle sa récurrence ne tient plus, et le symptôme — une
+/// convergence erratique — se confondrait avec un mauvais réglage. On la vérifie, on ne la suppose
+/// pas. Fond plat et fond coupé, deux tailles.
+#[test]
+fn the_v_cycle_is_symmetric_and_positive_s245() {
+    for cut in [false, true] {
+        for (nx, nz) in [(32usize, 16usize), (64, 32)] {
+            let dx = 8. / nx as f32;
+            let ground: Vec<f32> = (0..nx)
+                .map(|i| if cut {
+                    let d = ((i as f32 + 0.5) * dx - 3.) / 1.2;
+                    0.4 + 0.6 * (-d * d).exp()
+                } else { 0.5 })
+                .collect();
+            let mut v = mobile_volume(nx, nz, dx, &ground);
+            v.set_surface(&vec![v.domain().z0(); nx]).unwrap();
+            let cells = nx * nz;
+            let make = |seed: usize| -> Vec<f32> {
+                (0..cells)
+                    .map(|c| if v.frac[c] > 0. { ((c * seed % 211) as f32 - 105.) * 0.019 } else { 0. })
+                    .collect()
+            };
+            let (x, y) = (make(41), make(97));
+            let mut ctl = Control::unlimited();
+            v.v_cycle(&x, &mut ctl).unwrap();
+            let zx = v.prec.clone();
+            v.v_cycle(&y, &mut ctl).unwrap();
+            let zy = v.prec.clone();
+            let dot = |a: &[f32], b: &[f32]| -> f64 {
+                a.iter().zip(b).map(|(p, q)| *p as f64 * *q as f64).sum()
+            };
+            let (left, right) = (dot(&zx, &y), dot(&x, &zy));
+            let scale = left.abs().max(right.abs()).max(1e-12);
+            assert!(
+                (left - right).abs() <= 1e-4 * scale,
+                "symétrie {nx}×{nz}, fond coupé {cut} : {left} contre {right}"
+            );
+            assert!(
+                dot(&x, &zx) > 0.,
+                "positivité {nx}×{nz}, fond coupé {cut} : {}",
+                dot(&x, &zx)
+            );
+            // Le cycle doit **réduire** le résidu : c'est ce qu'on lui demande, et c'est mesurable.
+            let mut ax = vec![0f32; cells];
+            crate::delta_projection::multigrid::apply_level(
+                nx, nz, 1. / (dx * dx), &v.open_u, &v.open_w, &v.frac, &zx, &mut ax,
+            );
+            let before: f64 = x.iter().map(|r| (*r as f64).powi(2)).sum::<f64>().sqrt();
+            let after: f64 = x.iter().zip(&ax).map(|(r, a)| (*r as f64 - *a as f64).powi(2)).sum::<f64>().sqrt();
+            assert!(after < 0.9 * before, "un cycle doit réduire : {before} → {after}");
+        }
+    }
+}

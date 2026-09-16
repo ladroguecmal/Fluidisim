@@ -11,6 +11,13 @@
 /// pas un réglage, et le changer changerait la vitesse de convergence, jamais la solution.
 pub(super) const SMOOTH_DAMPING: f32 = 2. / 3.;
 
+/// Lissages avant et après chaque niveau, et sur le plus grossier. **Données de coût**, au même
+/// titre que le grain d'une tâche (ADR-029 §3) : elles changent la vitesse de convergence et les
+/// bits que le gradient conjugué parcourt, jamais le test d'acceptation d'ADR-144.
+pub(super) const PRE_SWEEPS: usize = 2;
+pub(super) const POST_SWEEPS: usize = 2;
+pub(super) const COARSE_SWEEPS: usize = 8;
+
 /// Un niveau grossier : sa géométrie, sa diagonale et ses trois tampons de travail.
 pub(super) struct Level {
     pub nx: usize,

@@ -342,6 +342,149 @@ impl Volume {
         Ok(v)
     }
 
+    /// S245 — **cycle en V** : rend `z = M⁻¹ r` dans `self.prec`, en se servant de `self.tmp` comme
+    /// résidu de la grille fine. Les deux tampons sont libres à cet instant : `prec` ne sert qu'au
+    /// mode mobile, et `tmp` a déjà été consommé par le produit qui précède.
+    ///
+    /// **Pourquoi cette forme et pas une autre.** Le gradient conjugué n'est valide qu'avec un
+    /// préconditionneur symétrique. Trois choses le garantissent ici, et aucune n'est décorative :
+    /// le lisseur est **diagonal** (donc son propre adjoint), la restriction est la **transposée**
+    /// de la prolongation à un facteur constant près, et il y a **autant de lissages après
+    /// qu'avant**. Un essai le vérifie numériquement au lieu de le supposer.
+    fn v_cycle(&mut self, r: &[f32], ctl: &mut Control) -> Result<(), Error> {
+        let (nx, nz, dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
+        let inv = 1. / (dx * dx);
+        let cells = nx * nz;
+        ctl.check(Phase::Pressure)?;
+        // Grille fine : partir de zéro et pré-lisser.
+        for c in 0..cells {
+            self.prec[c] = 0.;
+        }
+        let mut z = core::mem::take(&mut self.prec);
+        let mut tmp = core::mem::take(&mut self.tmp);
+        for _ in 0..multigrid::PRE_SWEEPS {
+            multigrid::apply_level(nx, nz, inv, &self.open_u, &self.open_w, &self.frac, &z, &mut tmp);
+            for c in 0..cells {
+                let d = self.diag_fine(c, inv);
+                if d > 0. {
+                    z[c] += multigrid::SMOOTH_DAMPING * (r[c] - tmp[c]) / d;
+                }
+            }
+        }
+        if let Some(first) = self.levels.first_mut() {
+            // Résidu fin, puis restriction vers le premier niveau grossier.
+            multigrid::apply_level(nx, nz, inv, &self.open_u, &self.open_w, &self.frac, &z, &mut tmp);
+            for c in 0..cells {
+                tmp[c] = r[c] - tmp[c];
+            }
+            let (cx, cz) = (first.nx, first.nz);
+            multigrid::restrict(nx, &tmp, cx, cz, &mut first.r);
+            self.coarse_cycle(ctl)?;
+            let first = &self.levels[0];
+            multigrid::prolong_add(nx, &mut z, first.nx, first.nz, &first.x);
+        }
+        for _ in 0..multigrid::POST_SWEEPS {
+            multigrid::apply_level(nx, nz, inv, &self.open_u, &self.open_w, &self.frac, &z, &mut tmp);
+            for c in 0..cells {
+                let d = self.diag_fine(c, inv);
+                if d > 0. {
+                    z[c] += multigrid::SMOOTH_DAMPING * (r[c] - tmp[c]) / d;
+                }
+            }
+        }
+        self.prec = z;
+        self.tmp = tmp;
+        ctl.poll(Phase::Pressure)
+    }
+
+    /// Descente puis remontée sur les niveaux grossiers. Écrite en deux boucles plutôt qu'en
+    /// récursion : les emprunts de deux niveaux voisins y restent lisibles.
+    fn coarse_cycle(&mut self, ctl: &mut Control) -> Result<(), Error> {
+        let last = self.levels.len() - 1;
+        for l in 0..=last {
+            ctl.poll(Phase::Pressure)?;
+            let sweeps = if l == last { multigrid::COARSE_SWEEPS } else { multigrid::PRE_SWEEPS };
+            {
+                let level = &mut self.levels[l];
+                for c in 0..level.cells() {
+                    level.x[c] = 0.;
+                }
+                for _ in 0..sweeps {
+                    let mut t = core::mem::take(&mut level.t);
+                    multigrid::smooth(
+                        level.nx, level.nz, level.inv, &level.open_u, &level.open_w,
+                        &level.frac, &level.diag, &level.r, &mut level.x, &mut t,
+                    );
+                    level.t = t;
+                }
+            }
+            if l < last {
+                let (head, tail) = self.levels.split_at_mut(l + 1);
+                let level = &mut head[l];
+                let next = &mut tail[0];
+                let mut t = core::mem::take(&mut level.t);
+                multigrid::apply_level(
+                    level.nx, level.nz, level.inv, &level.open_u, &level.open_w,
+                    &level.frac, &level.x, &mut t,
+                );
+                for c in 0..level.cells() {
+                    t[c] = level.r[c] - t[c];
+                }
+                multigrid::restrict(level.nx, &t, next.nx, next.nz, &mut next.r);
+                level.t = t;
+            }
+        }
+        for l in (0..last).rev() {
+            ctl.poll(Phase::Pressure)?;
+            {
+                let (head, tail) = self.levels.split_at_mut(l + 1);
+                let level = &mut head[l];
+                let next = &tail[0];
+                multigrid::prolong_add(level.nx, &mut level.x, next.nx, next.nz, &next.x);
+            }
+            let level = &mut self.levels[l];
+            for _ in 0..multigrid::POST_SWEEPS {
+                let mut t = core::mem::take(&mut level.t);
+                multigrid::smooth(
+                    level.nx, level.nz, level.inv, &level.open_u, &level.open_w,
+                    &level.frac, &level.diag, &level.r, &mut level.x, &mut t,
+                );
+                level.t = t;
+            }
+        }
+        Ok(())
+    }
+
+    /// Diagonale de l'opérateur fin en une maille, dans l'ordre de sommation d'`apply`.
+    fn diag_fine(&self, c: usize, inv: f32) -> f32 {
+        let (nx, nz) = (self.domain.nx, self.domain.nz);
+        if self.frac[c] == 0. {
+            return 0.;
+        }
+        let (i, k) = (c % nx, c / nx);
+        let mut acc = 0.0f32;
+        let mut face = |af: f32, n: Option<usize>, dirichlet: bool| {
+            if af == 0. {
+                return;
+            }
+            match n {
+                Some(j) if self.frac[j] > 0. => acc += af,
+                Some(_) => {}
+                None if dirichlet => acc += 2. * af,
+                None => {}
+            }
+        };
+        let left = (i > 0).then(|| c - 1);
+        let right = (i + 1 < nx).then(|| c + 1);
+        let down = (k > 0).then(|| c - nx);
+        let up = (k + 1 < nz).then(|| c + nx);
+        face(self.open_u[self.fu(i, k)], left, false);
+        face(self.open_u[self.fu(i + 1, k)], right, false);
+        face(self.open_w[self.fw(i, k)], down, false);
+        face(self.open_w[self.fw(i, k + 1)], up, true);
+        acc * inv
+    }
+
     /// S245 — construit les niveaux grossiers depuis la géométrie que `cut` vient de figer. Chaque
     /// niveau est moyenné depuis celui du dessus, et sa diagonale calculée dans la foulée. Rien
     /// n'est alloué ailleurs qu'ici : après `seal`, plus une maille (I-06).

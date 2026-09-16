@@ -104,7 +104,7 @@ branchement déclaré en file avec son déclencheur — dit dans le plan, pas la
 - [x] **P1** — amorce, jeton, plan seuls.
 - [x] **P2** — protocole écrit ; note corrective datée sur S244 ; relevé de référence des itérations.
 - [x] **P3** — hiérarchie allouée dans `configure` et opérateurs de transfert, avec leurs essais.
-- [ ] **P4** — cycle en V et lissage ; **symétrie testée** avant tout branchement.
+- [x] **P4** — cycle en V et lissage ; **symétrie testée** avant tout branchement.
 - [ ] **P5** — branchement comme préconditionneur ; itérations et coût aux cinq tailles.
 - [ ] **P6** — réception ADR-144, empreintes, suite ; rituel §6, ADR, file, jeton.
 
@@ -125,6 +125,14 @@ fine, fond plat et fond coupe — c'est ce qui interdit aux deux ecritures de di
 (2) restriction et prolongation **adjointes a un facteur quatre pres**, ce qui rendra le cycle
 symetrique ; (3) hierarchie, dimensions, `inv` double au carre, diagonale positive sur mouille et
 nulle sur sec.
+
+P4 : cycle en V ecrit en **deux boucles** (descente, remontee) plutot qu'en recursion — les emprunts
+de deux niveaux voisins y restent lisibles (`split_at_mut`). Il rend `z` dans **`self.prec`** et se
+sert de **`self.tmp`** comme residu fin : les deux sont libres a cet instant (`prec` ne sert qu'au
+mode mobile, `tmp` a deja ete consomme par le produit qui precede) — donc **aucune allocation**.
+Lissages : 2 avant, 2 apres, 8 au plus grossier — donnees de **cout**, comme le grain d'ADR-029 §3.
+**Symetrie et positivite verifiees**, fond plat et fond coupe, 32x16 et 64x32 ; et un cycle reduit
+le residu de plus de 10 %. C'etait la porte a franchir avant tout branchement.
 
 ---
 
