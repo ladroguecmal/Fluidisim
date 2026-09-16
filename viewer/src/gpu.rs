@@ -895,10 +895,14 @@ impl Gpu {
         let mut bakes = Vec::new();
         let mut wake_cpu = Vec::new();
         let mut steps = (f32::INFINITY, 0f32);
+        let mut update_allocs = 0;
         for i in 0..130 {
             let start = Instant::now();
+            let mark = crate::counting::mark();
             frame.update(age0 + i as f64 / 60., age0 + i as f64 / 60., true);
+            let allocs = crate::counting::mark().since(mark).allocs;
             if i >= 10 {
+                update_allocs = update_allocs.max(allocs);
                 wake_cpu.push(frame.wake_cpu_ms);
             }
             self.upload(frame);
@@ -928,6 +932,8 @@ impl Gpu {
         gpu.sort_by(f64::total_cmp);
         bakes.sort_by(f64::total_cmp);
         wake_cpu.sort_by(f64::total_cmp);
+        println!("BENCH_SPECTRAL actif={} allocations_update_max={update_allocs}", frame.spectral);
+        if update_allocs != 0 { return Err("allocation dans update du banc".into()); }
         println!("BENCH {}x{} grid={}x{} wake_components={} lod={} age_s={age0} pas_grille_m={:?} samples=120 CPU_prepare_upload_submit_ms median={:.6} max={:.6}",self.width,self.height,self.nx,self.ny,frame.wake.len(),frame.lod,steps,cpu[60],cpu[119]);
         println!("CPU_wake_prepare_publish_ms median={:.6} max={:.6} (inclus ci-dessus)",wake_cpu[60],wake_cpu[119]);
         if !gpu.is_empty() {

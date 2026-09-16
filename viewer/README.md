@@ -2,9 +2,9 @@
 
 Application locale séparée du cœur. Mer JONSWAP S201, impact S203/S205, sillage prescrit S212,
 caméra interactive. Les résultats GPU servent uniquement à l'image ; les requêtes de jeu restent
-dans `water-core`. **J1 reste partiel** : le sillage est exact, mais l'implémentation actuelle de
-son chemin d'image dépasse le budget eau ([HOTE-GPU-S212](../docs/validation/HOTE-GPU-S212.md)) ;
-l'espace d'optimisation est nommé dans ADR-131 et la feuille de route (J1-bis).
+dans `water-core`. **J1 reste partiel** : la préparation CPU dépasse encore le budget global.
+Le rendu filtre désormais B et le sillage selon le pas projeté (S249, ADR-148) ; la
+[feuille de route](../docs/FEUILLE-DE-ROUTE.md) porte les capacités et limites courantes.
 
 ## Lancer depuis la racine du dépôt
 
@@ -49,6 +49,16 @@ cargo test --release --offline --locked --manifest-path viewer/Cargo.toml
 comme témoin. `--lod-charge` publie les bornes de courbure des trois couches et la charge de
 maillage qu'elles exigent par pose (S234), sans GPU.
 
+**Filtrage lointain (S249).** Activé par défaut pour B et le sillage. `--no-spectral`
+retrouve le champ complet ; `--multi --spectral-verify` reçoit le champ filtré sur trois
+poses et deux formats, avec écart volontaire au champ complet publié séparément.
+`--multi --spectral-bench` mesure avec/sans filtre aux mêmes âges et deux poses.
+`--verify` conserve explicitement le champ complet et ses anciens critères.
+`--rasant --multi --cadence` mesure le rendu à incidence rasante ; ajouter `--no-spectral`
+pour son témoin. Les impacts restent non filtrés. Les pentes de réflexion sont les
+pentes modales filtrées, sans dérivée du filtre de caméra : voir
+[ADR-148](../docs/adr/ADR-148-filtrage-spectral-image.md).
+
 **Scène multi-sources (S235).** `--multi` remplace le sillage et l'impact uniques par la scène
 déclarée dans `scene.rs` : trois sillages d'un journal commun et huit impacts nés toutes les 4 s.
 
@@ -80,8 +90,8 @@ La lecture GPU du banc attend le résultat ; ce mode ne mesure pas la cadence in
 Si le GPU ne fournit pas d'horodatage, la valeur est annoncée indisponible.
 
 Les buffers de données et le profil sont réutilisés ; les ressources de maillage et profondeur
-sont recréées au redimensionnement. L'absence d'allocation de la pile graphique complète
-n'est pas reçue : cet afficheur est un hôte de validation, pas le moteur final.
+sont recréées au redimensionnement. La boucle du projet n'alloue rien en régime (ADR-145) ;
+les allocations de la pile verrouillée sont comptées séparément par `--cadence`.
 
 ## Données et portée
 

@@ -142,7 +142,8 @@ fn water(q: vec2<f32>, spacing: f32) -> vec3<f32> {
         } else {
             for (var i = 0u; i < u32(p.wake_info.x); i++) {
                 let c = wake[i];
-                let a = spectral_weight(band_upper(spectral_band(length(c.zw))), h);
+                var a = 1.0;
+                if (h > 0.0) { a = spectral_weight(band_upper(spectral_band(length(c.zw))), h); }
                 if (a == 0.0) { continue; }
                 let phase = dot(c.zw, q);
                 let s = sin(phase);

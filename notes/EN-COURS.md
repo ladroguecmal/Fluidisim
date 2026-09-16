@@ -80,8 +80,8 @@ Arrêt : chemin activé dans l'hôte, critères éprouvés, limites et coûts tr
 - [x] **P1** — amorce, lectures ciblées, jeton et plan seuls.
 - [x] **P2** — décision et protocole : empreinte de projection, poids et bandes du sillage.
 - [x] **P3** — filtre CPU/GPU et intégration au rendu, tests du contrat.
-- [>] **P4** — réception GPU, comparaison au cœur et au témoin, coût et allocations.
-- [ ] **P5** — rituel §6 : preuves, file active, trajectoire, journal et jeton.
+- [x] **P4** — réception GPU, comparaison au cœur et au témoin, coût et allocations.
+- [>] **P5** — rituel §6 : preuves, file active, trajectoire, journal et jeton.
 
 ### Notes de reprise
 
@@ -92,3 +92,8 @@ Le fond (32 modes) se filtre directement. La recette et ses domaines ADR-132 res
 P3 : huit bandes + grille complète réservées, filtre B/sillage activé par défaut.
 Tests hôte : 16 réussis, 1 mesure ignorée. Construction release hors ligne réussie.
 Premier passage GPU du protocole : 36 cas passent, retour caméra au bit ; détail à P4.
+
+P4 : réception finale 36 cas, erreur hauteur 0,339985 mm ; retour au bit et 8 modes
+isolés reçus. 437/16 cœur, 16/1 hôte. GPU régime 1,217–1,333 ms contre 0,461–0,486 ;
+premier passage jusqu’à 2,259 ms, publié. update=0 allocation, pile=133 / 18 509 octets.
+Preuves et limites dans COUPURE-S249 ; journaux locaux viewer/captures/s249.

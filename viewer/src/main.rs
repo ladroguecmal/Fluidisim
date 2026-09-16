@@ -1636,7 +1636,12 @@ fn spectral_verify(frame: &mut FrameData<'_>) -> Result<(), String> {
                     let values = g.evaluate_spectral(&probes)?;
                     let mut err = [0f32; 3];
                     for (a, b) in values.iter().zip(&expected) {
-                        for k in 0..3 { err[k] = err[k].max((a[k] - b[k]).abs()); }
+                        for k in 0..3 {
+                            if !a[k].is_finite() || !b[k].is_finite() {
+                                return Err("valeur non finie dans la réception spectrale".into());
+                            }
+                            err[k] = err[k].max((a[k] - b[k]).abs());
+                        }
                     }
                     println!("SPECTRAL pose={name} format={width}x{height} age={age} grille={use_lattice} points={} affectes={affected} modes_rejetes={rejected} retire_max_m={removed:.7} erreur={err:?}", points.len());
                     if err[0] > lod::TOLERANCE_M { return Err(format!("filtre hors 3 mm : {err:?}")); }
@@ -1654,6 +1659,30 @@ fn spectral_verify(frame: &mut FrameData<'_>) -> Result<(), String> {
         }
     }
     assert!(largest_removed > lod::TOLERANCE_M, "le banc doit exposer la coupure");
+    // Contre-épreuve isolée : un mode de chaque bande, à phase nulle. Le GPU doit
+    // rendre le poids et couper exactement au-delà de Nyquist, sans oracle de scène.
+    frame.camera = Camera::default();
+    frame.lod = false;
+    frame.components.fill([0.; 4]);
+    for slot in &mut frame.impacts { slot.active = false; }
+    frame.active = false;
+    frame.wake_active = true;
+    for band in 0..spectral::BANDS {
+        let k = spectral::upper(band, frame.spectral_max) * 0.75;
+        frame.wake.fill([0.; 4]);
+        frame.wake[0] = [1., 0., k, 0.];
+        let hs = [0., std::f32::consts::PI/k*0.6, std::f32::consts::PI/k*1.001];
+        let probes: Vec<_> = hs.iter().map(|h| [0., 0., *h, 0.]).collect();
+        g.upload(frame);
+        let values = g.evaluate_spectral(&probes)?;
+        for (v, h) in values.iter().zip(hs) {
+            let expected = spectral::weight(spectral::upper(band, frame.spectral_max), h);
+            assert!((v[0] - expected).abs() < 8.*f32::EPSILON);
+        }
+        assert_eq!(values[0][0], 1.);
+        assert_eq!(values[2][0], 0.);
+    }
+    println!("SPECTRAL_MODES bandes=8 conservation_proche=true rejet_nyquist=true");
     println!("SPECTRAL_RETOUR bit_identique=true retire_max_m={largest_removed}");
     Ok(())
 }
@@ -1693,6 +1722,24 @@ fn run() -> Result<(), String> {
     // S234 : grille locale du sillage par défaut ; `--no-lod` rend le chemin direct S212–S225.
     frame.lod = !args.iter().any(|a| a == "--no-lod");
     frame.spectral = !args.iter().any(|a| a == "--no-spectral");
+    if args.iter().any(|a| a == "--spectral-bench") {
+        let instance = instance();
+        let mut g = pollster::block_on(gpu::Gpu::new(&instance, None, 960, 540,
+            frame.profile.len(), scene::WAKE_CAPACITY))?;
+        frame.cull = true;
+        frame.viewport = Some((960./540., g.nx, g.ny));
+        for (name, camera) in [("reference", Camera::default()), ("rasante", grazing_camera())] {
+            frame.camera = camera;
+            for age in [3., 12.] {
+                for enabled in [false, true] {
+                    frame.spectral = enabled;
+                    println!("SPECTRAL_BENCH pose={name} actif={enabled}");
+                    g.benchmark(&mut frame, age)?;
+                }
+            }
+        }
+        return Ok(());
+    }
     if args.iter().any(|a| a == "--spectral-verify") {
         return spectral_verify(&mut frame);
     }
