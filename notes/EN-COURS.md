@@ -58,34 +58,50 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S251 — terminée
-Agent : Codex GPT-6 ; fichiers, git, cargo et Python disponibles. P5 : Claude Opus 5.
-Entrée : « continue ». Master propre 693ec55, une seule copie, archive B conservée.
+Session : S252 — en cours
+Agent : Claude Opus 5, Claude Code ; fichiers, git, cargo et Python disponibles.
+Entrée : « continue ». Master propre 97868aa, une seule copie, archive B conservée.
+Troisième session du raccordement B/W→δ : justifiée au journal S251 (chemin de J2).
 
-Objectif : recevoir le démarrage B/W→δ sous couvercle plat (A283), sans relever
-la tolérance S199 ni effacer la source continue. Consommateur : step_perturbation.
-Le code confirme le refus transmis par S250 ; comparaison indépendante de projection
-f64 avant choix du correctif f32. Distinguer précision de pression, annulation de
-vitesse et critère ; conserver les champs et seuils des cas déjà reçus.
+Objectif. (1) A284 : attribuer les itérations du démarrage plat 32×16 par projection
+(ordinaire, repli, affinage) ; diagnostic seul, aucune optimisation dans ce lot.
+(2) A50/J2 : premier couplage B/W→δ à **surface géométriquement mobile**. `eta` porte
+la hauteur perturbative η' ; la géométrie mouillée est celle de la surface totale
+ζ = η' + ζ_fond ; la valeur fantôme vaut ρg(z_Γ − repos) − P_fond(Γ) ; la cinématique
+ajoute le débit du fond entre le plan moyen et ζ (identité exacte si le fond est
+linéaire, ζ_fond,t = W_fond(0)). Consommateur : nouveau pas perturbatif mobile.
 
-Réception : cas réels 16×8 et 32×16, vitesse contre oracle, divergence ≤1e-5,
-durée entière et rollback, aucune allocation ; témoin sans remède reproduit le défaut.
-Arrêt : démarrage et trajectoire bornée reçus, suite et empreinte historique vérifiées,
-limites transmises. Aucun couplage mobile ou rendu ajouté à ce lot.
+Réception, écrite avant code. a) fond nul : identité au bit avec step_surface_mobile
+sur une trajectoire ; b) repos exact ; c) onde stationnaire S237 (L=h=2 m) depuis le
+repos, fond = ordre un analytique, δ né à zéro, contre HOS M=3 : profil ≤2 % de a à 128
+colonnes et décroissant 32→128 (a = 5 et 10 cm), b₂ ≤20 % du maximum HOS à 128 et
+décroissant ; chiffres S237 du solveur total en regard ; d) témoin sans résidus de
+surface : b₂ hors tolérance ; e) expiration/refus atomiques, zéro allocation, suite et
+empreinte. Un critère manqué est publié tel quel ; aucune tolérance déplacée.
+Hors lot : frontières du total (fond B profond sur fond fini), prolongement de B
+au-dessus du plan moyen en production, 3D, rendu, optimisation d'A284.
 
 ### Plan
 
 - [x] **P1** — amorce, lectures et plan seuls.
-- [x] **P2** — reproduire, construire l'oracle indépendant et isoler le défaut.
-- [x] **P3** — correctif f32 et contrat, contre-épreuves ciblées.
-- [x] **P4** — réception du consommateur, coût, suite et non-régression.
-- [x] **P5** — rituel §6 : preuves, file, trajectoire, journal et jeton.
+- [ ] **P2** — A284 : itérations et temps par projection, 32×16 plat, test diagnostic.
+- [ ] **P3** — ADR-151 et protocole de réception, avant code.
+- [ ] **P4** — fournisseur analytique de test (onde stationnaire linéaire, prolongement).
+- [ ] **P5** — cœur : géométrie totale, valeurs fantômes du fond, tampons comptés.
+- [ ] **P6** — cœur : pas perturbatif mobile, transport de η' et bande du fond, atomicité.
+- [ ] **P7** — tests : identité au bit, repos, expiration, allocations, témoin.
+- [ ] **P8** — banc HOS couplé 32/64/128, 5 et 10 cm : réception ou refus publié.
+- [ ] **P9** — suite, empreinte, coût et preuve.
+- [ ] **P10** — rituel §6 : file, trajectoire, journal et jeton.
 
 ### Notes de reprise
 
-S250 conservait --flat comme refus attendu. La pression initiale s'arrête au plancher ;
-le repli multigrille ne reçoit pas D. Les termes croisés, la source et l'éponge sont
-déjà construits. Ne pas les réinventer ; ne pas confondre ce lot et B4 global.
-Clôture : Codex coupé en P5, arbre propre ; reprise à chaud par Claude Opus 5, suite
-rejouée 449/16/0. Témoin 32×16 imposé mesuré (1,09 ms) : le ×40 du plat accompagne les
-projections au plancher, hors affinage, non attribué — A284. Trace par pas retirée du banc.
+Dérivation (pas encore dans un fichier). Fond linéaire : ζ_t = W(0) et, pour un
+prolongement incompressible, R_s = ζ_t + U(ζ)ζ_x − W(ζ) = ∂x∫₀^ζ U dz exactement.
+Donc η'_t = −∂x[∫_fond^ζ v dz + ∫₀^ζ U dz] : ni ζ_t ni échantillon de colonne requis ;
+ζ_fond se lit dans `eta` de tout échantillon (indépendant de z). Fond du domaine sans
+flux du fond (W(b)=0) supposé : sinon frontière du total, hors lot. B refuse z>0
+(ADR-113) : le prolongement de Taylor d'ordre un (champ et dérivées cohérents) est
+une convention de l'hôte, éprouvée ici par le seul fournisseur de test.
+Transport : garder la somme S237 au bit, ajouter la bande à part (identité a).
+Démarrage plat mobile : risque A283 (petit champ) ; ADR-150 ne couvre que le couvercle.

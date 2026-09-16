@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-16 20:06 +02:00
-Agent            : Claude Opus 5, Claude Code (fichiers, git, cargo, Python) — clôture de S251 ouverte par Codex GPT-6
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-16 20:18 +02:00
+Agent            : Claude Opus 5, Claude Code (fichiers, git, cargo, Python, accès web)
+Session en cours : S252 — A284 attribué, puis surface mobile couplée B/W→δ
 Dernière session : S251 — démarrage couplé plat reçu (ADR-150) ; coût ×40 ouvert (A284)
 Session suivante : S252 — A50 : résidus de surface et frontières du total avant couplage mobile ; attribuer A284 en première étape
 Maillons        : 0
