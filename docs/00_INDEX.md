@@ -1,6 +1,6 @@
 # Index de la connaissance projet
 
-[Reprise](../REPRISE.md) · [Feuille de route](FEUILLE-DE-ROUTE.md) · [File active](registres/QUESTIONS-OUVERTES.md#file-active)
+[Reprise](../REPRISE.md) · [Feuille de route](FEUILLE-DE-ROUTE.md) · [File active](registres/QUESTIONS-OUVERTES.md#file-active) · [Liste du projet fini](LISTE-PROJET-FINI.md)
 
 ## Socle et état courant
 

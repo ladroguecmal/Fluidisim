@@ -64,6 +64,7 @@ ADR les arbitrent. Les rôles des couches et les invariants ne se réduisent pas
 | décision d'architecture | nouvel ADR ; note datée pour correction factuelle |
 | preuve détaillée utile à une décision | document de validation, réutilisable |
 | capacité présente et limite | FEUILLE-DE-ROUTE, état remplacé et daté |
+| ce que le projet fini doit avoir, coché | LISTE-PROJET-FINI, remplie à la demande de l'utilisateur ; pointe, ne recopie pas |
 | travail à faire, motif et déclencheur | file active de QUESTIONS-OUVERTES |
 | histoire et résultat de session | JOURNAL, une entrée concise |
 | navigation | index, liens plutôt que récits copiés |

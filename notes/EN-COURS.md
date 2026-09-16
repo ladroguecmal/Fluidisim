@@ -83,7 +83,7 @@ route (qui porte la trajectoire, L137) : la liste pointe, elle ne recopie pas le
   cas canoniques, bancs, invariants ; squelette de la liste par domaine.
 - [x] **P3** — états : validé / partiel / absent, point par point, contre feuille de route, file
   active et preuves ; compte par section.
-- [ ] **P4** — contrôle de couverture (sources, cas, bancs, invariants), rôle écrit dans la liste,
+- [x] **P4** — contrôle de couverture (sources, cas, bancs, invariants), rôle écrit dans la liste,
   METHODE et index.
 - [ ] **P5** — rituel §6 : journal, jeton.
 

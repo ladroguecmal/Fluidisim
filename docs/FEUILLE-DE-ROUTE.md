@@ -6,7 +6,9 @@
 **Ce document est le seul qui porte la trajectoire.** REPRISE, l'index et la file active y
 renvoient ; ils ne la recopient pas (L137). Il se met à jour au rituel de fin quand une session
 change l'état d'un jalon. Chaque état est **daté** (A185). La décision vit dans ADR-127 ; ce
-document en tient l'application.
+document en tient l'application. La [liste du projet fini](LISTE-PROJET-FINI.md) énumère ce que
+l'ambition complète contient, point par point, et coche ce qui est validé ; elle se remplit à la
+demande de l'utilisateur.
 
 ## 1. Ce qui est visé, et ne se négocie pas en cours de route
 
