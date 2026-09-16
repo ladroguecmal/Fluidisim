@@ -83,7 +83,7 @@ scène par défaut identique (R2 rejoué au bit, `--tail-verify` inchangé) ; co
 - [x] **P3** — cœur : loi d'étalement et son inverse, `bake_directional`, queue directionnelle,
   assemblage de systèmes ; essais.
 - [x] **P4** — hôte : nombre de composantes de B variable, scène `--houle`, vérification CPU/GPU.
-- [ ] **P5** — réception : hauteurs, scène par défaut au bit, coût, rendus R3 envoyés.
+- [x] **P5** — réception : hauteurs, scène par défaut au bit, coût, rendus R3 envoyés.
 - [ ] **P6** — rituel §6 : liste du projet fini (2.2), A287, file, journal, jeton.
 
 ### Notes de reprise
@@ -99,3 +99,7 @@ P4 : `Scene::build(houle)`, `B_CAPACITY` 64, nombre de composantes passé au sha
 `--houle`, `--b-verify`, `--revue=r3`. `--multi --houle --b-verify` : 64 composantes, max η 0,379 mm
 (âges 3/12/29) ; défaut 32 composantes, 0,368 mm. R2 rejoué : sept empreintes identiques ;
 `--tail-verify` ligne identique à S256.
+
+P5 : coût 1280×720 (secteur 99 %) défaut 1,771/1,833 ms, houle 1,844/1,867 ms (max 2,15/2,63 non
+attribués). R3 rendue deux fois, empreintes identiques, envoyée. Plus de stries, mer croisée ; houle
+peu lisible depuis 7 m.
