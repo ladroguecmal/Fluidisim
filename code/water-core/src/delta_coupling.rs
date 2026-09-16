@@ -54,6 +54,18 @@ fn trace(label: &'static str, r: Option<&super::Report>, start: std::time::Insta
     });
 }
 
+// S253 (ADR-152, critère 5) : témoin **sans résidus de surface** — pression du fond linéarisée à
+// l'interface (`ρg·ζ_fond`) et bande éteinte, géométrie totale conservée. Essais seulement.
+#[cfg(test)]
+thread_local! {
+    pub(crate) static SURFACE_RESIDUALS_OFF: core::cell::Cell<bool> = const { core::cell::Cell::new(false) };
+}
+#[cfg(test)]
+fn surface_residuals_on() -> bool { !SURFACE_RESIDUALS_OFF.with(|c| c.get()) }
+#[cfg(not(test))]
+#[inline]
+fn surface_residuals_on() -> bool { true }
+
 fn validate_sample(s: &BackgroundSample, rho: f32) -> Result<(), Error> {
     s.momentum_residual(rho, 0.).map_err(|_| Error::NotFinite)?;
     if s.u[1] != 0. || s.du_dt[1] != 0. || s.grad_eta[1] != 0.
@@ -110,6 +122,16 @@ impl Volume {
                 let s = &bg.u[f];
                 let (l, r) = (i - 1, i);
                 self.ghost_bg_side[f] = match (self.wet(l, k), self.wet(r, k)) {
+                    // Témoin : pression du fond linéarisée en surface, `ρg·ζ_fond(x_Γ)`, sans les
+                    // termes d'élévation — la partie d'ordre un reste, seuls les résidus s'éteignent.
+                    (true, false) if !surface_residuals_on() => {
+                        let theta = ((self.height(l) - zc) / (self.height(l) - self.height(r))).max(min);
+                        -(rg * (s.eta + (theta - 0.5) * dx * s.grad_eta[0]))
+                    }
+                    (false, true) if !surface_residuals_on() => {
+                        let theta = ((self.height(r) - zc) / (self.height(r) - self.height(l))).max(min);
+                        -(rg * (s.eta - (theta - 0.5) * dx * s.grad_eta[0]))
+                    }
                     (true, false) => {
                         let theta = ((self.height(l) - zc) / (self.height(l) - self.height(r))).max(min);
                         -(s.p_dyn + (theta - 0.5) * dx * s.grad_p_dyn[0])
@@ -121,6 +143,10 @@ impl Volume {
                     _ => 0.,
                 };
             }
+        }
+        if !surface_residuals_on() {
+            // `ρg·ζ_fond − ρg·ζ_fond` : le fantôme vertical linéarisé n'a plus rien du fond.
+            self.ghost_bg_up.fill(0.);
         }
         Ok(())
     }
@@ -186,7 +212,7 @@ impl Volume {
                     let face = self.fu(i + 1, k);
                     right += self.open_u[face] * self.u[face] * dx * wet;
                 }
-                for k in 0..nz {
+                for k in 0..if surface_residuals_on() { nz } else { 0 } {
                     ctl.poll(Phase::Correct)?;
                     let wet = ((surface - k as f32 * dx) / dx).clamp(0., 1.);
                     let calm = ((self.rest - k as f32 * dx) / dx).clamp(0., 1.);

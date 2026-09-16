@@ -53,6 +53,25 @@ impl StandingWave {
         -self.a * self.omega() * (self.k * x).cos() * (self.omega() * t).sin()
     }
 
+    /// Ordre deux depuis le repos, dérivé en S237 P3 (script sympy, notes de session) :
+    /// `B₂'' + Ω²B₂ = σ₂D₂ + K₂'`, `σ₂ = 2k·tanh 2kh`, `Ω² = gσ₂`, `B₂(0) = B₂'(0) = 0`, avec
+    /// `K₂ = −gk²·sin 2ωt/(2ω)` et `D₂ = gk(gk·sin²ωt + ω²cos²ωt·sinh 2kh)/(4ω²cosh²kh)`.
+    /// Rend `B₂(t)` : `b₂ = a²·B₂`, coefficient de `cos 2kx`. Déplacé ici de `delta_mobile.rs` en S253.
+    pub fn second_order_b2(&self, t: f64) -> f64 {
+        let (k, h, g, w) = (self.k, self.h, self.g, self.omega());
+        let sigma2 = 2. * k * (2. * k * h).tanh();
+        let big2 = g * sigma2;
+        let c2 = (k * h).cosh().powi(2);
+        let s2h = (2. * k * h).sinh();
+        let d0 = g * k * (g * k / 2. + w * w * s2h / 2.) / (4. * w * w * c2);
+        let dc = g * k * (-g * k / 2. + w * w * s2h / 2.) / (4. * w * w * c2);
+        let f0 = sigma2 * d0;
+        let f2 = sigma2 * dc - g * k * k;
+        let p0 = f0 / big2;
+        let p2 = f2 / (big2 - 4. * w * w);
+        p0 + p2 * (2. * w * t).cos() - (p0 + p2) * (big2.sqrt() * t).cos()
+    }
+
     /// Advection du fond `(U·∇)U`, en f64, pour contrôler le résidu contracté.
     pub fn advection(&self, x: f64, z: f64, t: f64) -> [f64; 2] {
         let (a, k, h, g) = (self.a, self.k, self.h, self.g);

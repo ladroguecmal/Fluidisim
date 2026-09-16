@@ -42,6 +42,15 @@ réduit donc au terme `(U·∇)U`, comparé à son expression.
    de test, géométrie totale conservée) sont comparés à l'ordre deux fermé de S237
    (`b₂ = a²·B₂(t)`). Le premier reste ≤ 20 % de `max|a²B₂|`, le second le dépasse.
 
+**Correction du témoin, datée du 2026-09-16 (P6), après sa première exécution et avant toute
+mesure des critères 3 et 4.** Le premier témoin mettait à zéro toute la correction du fond sur
+les fantômes latéraux. Il retirait ainsi `−P_fond(Γ)` en entier, y compris sa partie d'**ordre
+un** `ρg·ζ_fond`, et cassait la dynamique linéaire. Il divergeait (0,70 m/s dès le pas 100, refus
+`Domain` au pas 1145), ce qui ne mesure pas les résidus de surface. Dans le témoin corrigé, la
+pression du fond à l'interface est **linéarisée** en `ρg·ζ_fond(x_Γ)` (Taylor en x compris) et la
+bande est éteinte. Seuls les termes d'élévation d'ordre deux disparaissent. Tolérance inchangée.
+Le pas couplé, lui, rendait déjà `b₂` à 2,17 % de l'ordre deux sur cette première exécution.
+
 Chiffres de S237 pour le **solveur total** (profil / `b₂`) : 10 cm 1,714/1,71 % (32),
 0,592/0,98 (64), 0,230/0,43 (128) ; 5 cm 0,850/2,44 (32), 0,550/1,41 (64), 0,252/0,71 (128,
 S238). Publiés en regard, ils ne servent pas de critères.

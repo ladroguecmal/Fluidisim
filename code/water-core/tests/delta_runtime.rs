@@ -186,6 +186,42 @@ fn velocity_refinement_has_no_runtime_allocation_s251() {
     assert_eq!(arena.stats().refused_after_seal,0);
 }
 
+use water_core::background::BackgroundSample;
+#[path = "../examples/support/standing_background.rs"]
+#[allow(dead_code)]
+mod standing;
+
+/// S253 (ADR-152, critère 2) — le pas perturbatif mobile n'alloue rien, sur un pas complet comme
+/// sur une expiration, les échantillons du fond étant préparés par l'hôte avant le scellement.
+#[test]
+fn coupled_mobile_step_has_no_runtime_allocation_s253() {
+    use water_core::{delta_projection::{BackgroundFaces,Sponge},SimTime};
+    struct Frozen;
+    impl MonotonicClock for Frozen {fn now_ns(&self)->u64 {0}}
+    let wave=standing::StandingWave{a:0.05,k:std::f64::consts::PI/2.,h:2.,g:9.81,rho:1025.};
+    let (nx,dx)=(32usize,2./32.);
+    let mut arena=Arena{stats:AllocStats::default(),sealed:false};
+    let domain=Domain{nx,nz:36,dx:dx as f32};
+    let mut v=Volume::configure(&mut HostServices{alloc:&mut arena,jobs:&Jobs,sink:&Jobs},
+        domain,1025.,9.81,&vec![0.;nx]).unwrap();
+    v.set_free_surface(&vec![2.;nx],2.).unwrap();
+    let mut u=vec![BackgroundSample::default();v.velocity_u().len()];
+    let mut w=vec![BackgroundSample::default();v.velocity_w().len()];
+    for k in 0..36 {for i in 0..=nx {u[k*(nx+1)+i]=wave.sample(i as f64*dx,(k as f64+0.5)*dx-2.,0.2);}}
+    for k in 0..=36 {for i in 0..nx {w[k*nx+i]=wave.sample((i as f64+0.5)*dx,k as f64*dx-2.,0.2);}}
+    let bg=BackgroundFaces{domain,time:SimTime(200_000),density:1025.,gravity:9.81,u:&u,w:&w};
+    arena.seal();
+    let (r,allocations)=measured(||v.step_perturbation_mobile(SimTime(200_000),1000,4000,1_000_000,
+        &bg,Sponge::default(),&Jobs,&Frozen));
+    assert_eq!(r.unwrap().advanced_us,1000);
+    assert_eq!(allocations,0);
+    let (r,allocations)=measured(||v.step_perturbation_mobile(SimTime(200_000),1000,4000,0,
+        &bg,Sponge::default(),&Jobs,&Frozen));
+    assert_eq!(r.unwrap().advanced_us,0);
+    assert_eq!(allocations,0);
+    assert_eq!(arena.stats().refused_after_seal,0);
+}
+
 #[test]
 fn global_allocator_sees_counterexample_but_no_step_allocations() {
     let (_, count) = measured(|| {

@@ -88,7 +88,7 @@ z > 0), multigrille/affinage du mode mobile, 3D, rendu, ordre d'ADR-147.
 - [x] **P3** — fournisseur analytique de test partagé (exemple et essais) et ses contrôles.
 - [x] **P4** — cœur : hauteur totale, valeurs fantômes du fond, tampons comptés ; S237 au bit.
 - [x] **P5** — cœur : pas perturbatif mobile, transport de η' et bande, atomicité.
-- [ ] **P6** — essais : identité au bit, refus, expiration, allocations, témoin sans résidus.
+- [x] **P6** — essais : identité au bit, refus, expiration, allocations, témoin sans résidus.
 - [ ] **P7** — banc HOS couplé 32/64/128, 5 et 10 cm : réception ou refus publié.
 - [ ] **P8** — suite, empreinte, coût et preuve.
 - [ ] **P9** — rituel §6 : file, trajectoire, journal et jeton.
@@ -110,3 +110,10 @@ Taylor 1,35 Pa. Tests δ 53/11 ignorés, exécution 11. `delta_mobile essai` = S
 
 P5 : step_perturbation_mobile et transport_coupled ; surface_in_bounds et extrapolate_mobile
 passent en pub(super). Essai critère 1 (fond nul) : 50 pas identiques au bit à S237, rapport compris.
+
+P6 : essais refus (contexte, forme, non planaire, eta de colonne, garde) et expiration (5 coupures),
+allocation nulle (pas et expiration). Témoin critère 5 : premier témoin fautif (éteignait −P_fond
+latéral en entier, ordre un) — divergence 0,70 m/s au pas 100, refus Domain au pas 1145 ; corrigé
+(pression du fond linéarisée ρg·ζ_fond(x_Γ), bande éteinte), note datée au protocole. Résultat :
+couplé b₂ à 2,17 % de l'ordre deux, témoin 99,56 % (aucune harmonique : S volumique est un gradient).
+Tests δ 57/11 ignorés, exécution 12.

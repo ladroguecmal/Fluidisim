@@ -464,3 +464,111 @@ fn zero_background_mobile_step_is_s237_to_the_bit_s253(){
         assert!(!coupled.surface_coupled&&!coupled.mobile);
     }
 }
+
+/// Une période de l'onde stationnaire S237 par le pas couplé, fond = ordre un : écart maximal de `b₂`
+/// à l'ordre deux fermé, relatif à son maximum, et nombre de pas avancés.
+fn coupled_b2_error(nx:usize,a:f64)->(f64,usize) {
+    let wave=standing::StandingWave{a,k:std::f64::consts::PI/2.,h:2.,g:9.81,rho:1025.};
+    let mut v=standing_case(nx,&wave,&vec![2.;nx]);
+    let dx=2./nx as f64;
+    let steps=(2.*std::f64::consts::PI/wave.omega()/1e-3).round() as usize;
+    let (mut worst,mut peak)=(0f64,0f64);
+    for n in 0..steps {
+        let t=n as f64*1e-3;
+        let (u,w)=standing_faces(&v,&wave,t);
+        let bg=BackgroundFaces{domain:v.domain,time:SimTime(n as u64*1000),density:1025.,gravity:9.81,u:&u,w:&w};
+        match v.step_perturbation_mobile(bg.time,1000,4000,1_000_000,&bg,Sponge::default(),&Jobs,&Clock) {
+            Ok(r) => assert_eq!(r.advanced_us,1000),
+            Err(e) => {println!("S253 refus nx={nx} a={a} pas={n} {e:?}");return (f64::INFINITY,n);}
+        }
+        let t1=t+1e-3;
+        let mut b2=0.;
+        for i in 0..nx {
+            let x=(i as f64+0.5)*dx;
+            let total=(v.eta[i] as f64-2.)+a*(wave.k*x).cos()*(wave.omega()*t1).cos();
+            b2+=2./2.*total*(2.*wave.k*x).cos()*dx;
+        }
+        let reference=a*a*wave.second_order_b2(t1);
+        worst=worst.max((b2-reference).abs());
+        peak=peak.max(reference.abs());
+    }
+    (worst/peak,steps)
+}
+
+/// S253 (ADR-152, critère 5) — **témoin discriminant**. Même montage, une période, 32 colonnes,
+/// 5 cm : le pas couplé tient `b₂` à 20 % de l'ordre deux fermé ; sans résidus de surface, non.
+#[test]
+#[cfg_attr(debug_assertions, ignore = "une période : release")]
+fn surface_residuals_carry_the_second_harmonic_s253(){
+    let (with,steps)=coupled_b2_error(32,0.05);
+    SURFACE_RESIDUALS_OFF.with(|c|c.set(true));
+    let (without,_)=coupled_b2_error(32,0.05);
+    SURFACE_RESIDUALS_OFF.with(|c|c.set(false));
+    println!("S253 temoin nx=32 a=0.05 pas={steps} b2_avec={with:.4} b2_sans={without:.4}");
+    assert!(with<=0.20,"couplé : b₂ à {with} de l'ordre deux");
+    assert!(without>0.20,"témoin sans résidus : b₂ à {without}, non discriminant");
+}
+
+/// S253 (critère 2) — refus sans rien modifier : contexte, forme, non-planarité, `eta` du fond
+/// incohérent dans une colonne, surface totale hors gardes. Le mode couplé reste éteint.
+#[test]
+fn coupled_mobile_refusals_are_atomic_s253(){
+    let wave=standing::StandingWave{a:0.05,k:std::f64::consts::PI/2.,h:2.,g:9.81,rho:1025.};
+    let nx=32;
+    let mut v=standing_case(nx,&wave,&vec![2.;nx]);
+    let (u,w)=standing_faces(&v,&wave,0.2);
+    let snapshot=|v:&Volume|(v.u.clone(),v.w.clone(),v.p.clone(),v.eta.clone(),v.eta_roundoff.clone());
+    let before=snapshot(&v);
+    let run=|v:&mut Volume,u:&[BackgroundSample],w:&[BackgroundSample],density:f32|{
+        let bg=BackgroundFaces{domain:v.domain,time:SimTime(0),density,gravity:9.81,u,w};
+        v.step_perturbation_mobile(SimTime(0),1000,4000,1_000_000,&bg,Sponge::default(),&Jobs,&Clock)
+    };
+    assert_eq!(run(&mut v,&u,&w,1000.),Err(Error::BackgroundContext));
+    assert_eq!(run(&mut v,&u[1..],&w,1025.),Err(Error::Shape));
+    let mut bad=u.clone();bad[40].grad_u[1][0]=0.1;
+    assert_eq!(run(&mut v,&bad,&w,1025.),Err(Error::NonPlanar));
+    let mut bad=w.clone();bad[v.fw(5,7)].eta+=1e-3;
+    assert_eq!(run(&mut v,&u,&bad,1025.),Err(Error::BackgroundContext));
+    let mut high=w.clone();
+    for i in 0..nx {for k in 0..=v.domain.nz {high[v.fw(i,k)].eta=0.3;}}
+    assert_eq!(run(&mut v,&u,&high,1025.),Err(Error::Domain));
+    assert_eq!(snapshot(&v),before);
+    assert!(!v.surface_coupled&&!v.mobile);
+    assert!(run(&mut v,&u,&w,1025.).is_ok());
+}
+
+/// S253 (critère 2) — expiration à plusieurs points du pas : aucune avancée, état intact, mode
+/// couplé éteint ; la reprise rend le pas de référence au bit.
+#[test]
+fn coupled_mobile_expiration_restores_and_resumes_s253(){
+    struct Counter(std::cell::Cell<u64>,u64);
+    impl MonotonicClock for Counter {fn now_ns(&self)->u64 {
+        let n=self.0.get();self.0.set(n+1);if n>=self.1 {1_000_000} else {0}
+    }}
+    let wave=standing::StandingWave{a:0.05,k:std::f64::consts::PI/2.,h:2.,g:9.81,rho:1025.};
+    let nx=32;
+    let build=||{
+        let mut v=standing_case(nx,&wave,&vec![2.;nx]);
+        let (u,w)=standing_faces(&v,&wave,0.);
+        let bg=BackgroundFaces{domain:v.domain,time:SimTime(0),density:1025.,gravity:9.81,u:&u,w:&w};
+        v.step_perturbation_mobile(SimTime(0),1000,4000,1_000_000,&bg,Sponge::default(),&Jobs,&Clock).unwrap();
+        v
+    };
+    let (u,w)=standing_faces(&build(),&wave,1e-3);
+    let mut reference=build();
+    let count=Counter(std::cell::Cell::new(0),u64::MAX);
+    let bg=BackgroundFaces{domain:reference.domain,time:SimTime(1000),density:1025.,gravity:9.81,u:&u,w:&w};
+    reference.step_perturbation_mobile(SimTime(1000),1000,4000,1000,&bg,Sponge::default(),&Jobs,&count).unwrap();
+    let calls=count.0.get();
+    for cutoff in [1,calls/5,calls/2,calls*4/5,calls-3] {
+        let mut v=build();
+        let before=(v.u.clone(),v.w.clone(),v.p.clone(),v.eta.clone(),v.eta_roundoff.clone());
+        let r=v.step_perturbation_mobile(SimTime(1000),1000,4000,1000,&bg,Sponge::default(),&Jobs,
+            &Counter(std::cell::Cell::new(0),cutoff)).unwrap();
+        assert_eq!(r.advanced_us,0,"coupure {cutoff}");
+        assert_eq!((v.u.clone(),v.w.clone(),v.p.clone(),v.eta.clone(),v.eta_roundoff.clone()),before);
+        assert!(!v.surface_coupled&&!v.mobile);
+        v.step_perturbation_mobile(SimTime(1000),1000,4000,1000,&bg,Sponge::default(),&Jobs,&Clock).unwrap();
+        assert!(same_bits(&v.u,&reference.u)&&same_bits(&v.p,&reference.p)&&same_bits(&v.eta,&reference.eta));
+    }
+}
