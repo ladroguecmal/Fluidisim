@@ -98,8 +98,8 @@ chiffré et mis en file avec son déclencheur.
 - [x] **P1** — amorce, jeton, plan seuls.
 - [x] **P2** — protocole écrit ; pose rasante soutenue ajoutée au banc.
 - [x] **P3** — instrument d'échantillonnage, **étalonné sur la pose S212** contre les 7,5 % de S234.
-- [ ] **P4** — mesure : coût et échantillonnage à incidence rasante, contre la pose de référence.
-- [ ] **P5** — ce qui tient, ce qui ne tient pas ; correction seulement si la mesure la désigne.
+- [x] **P4** — mesure : coût et échantillonnage à incidence rasante, contre la pose de référence.
+- [x] **P5** — ce qui tient, ce qui ne tient pas ; correction seulement si la mesure la désigne.
 - [ ] **P6** — rituel §6, file, feuille de route, jeton.
 
 ### Notes de reprise
@@ -114,6 +114,18 @@ P3 : instrument ajoute a --lod-charge (ligne NYQUIST_S247), qui compte dans l em
 sommets dont l ecart au voisin depasse lambda_min/2 = 1,047 m.
 **Etalonnage passe** : pose S212 -> **7,54 %**, quand S234 publiait 7,5 %. L instrument reproduit un
 chiffre ecrit deux sessions avant lui.
+
+P4/P5 : **le cout tient, l echantillonnage non — et pas comme attendu.**
+Cout : GPU eau **0,4397 ms identique** aux deux poses, CPU 3,9021 contre 4,0563, intervalle 4,5826
+contre 4,7729, allocations 0. La these est confirmee : le nombre de sommets est fixe par la grille.
+Echantillonnage : **ce n est pas la part qui bouge, c est la profondeur**. 7,59 % sous Nyquist a
+incidence rasante contre 7,54 % a la reference — mais **pire ecart 8,243 m contre 2,589**, soit pres
+de **quatre longueurs d onde** sautees entre deux echantillons. Pose haute : 0,01 %, pire 1,050 m.
+**Et le chiffre dit pourquoi densifier ne sert a rien** : 8,2 m au loin, ce sont les **deux pixels**
+de la grille projetee — a cette distance une onde de 2 m est plus petite qu un pixel.
+Remede specifie, pas construit : couper les modes par la distance ; au plus loin de la pose rasante,
+les modes sous **~16 m** ne sont pas resolubles. Lot separe : il change les bits, et sa reception
+demande de repenser ce que VERIFY compare (un champ coupe **doit** s ecarter du coeur au loin).
 
 ---
 
