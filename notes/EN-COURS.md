@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S257 — en cours
+Session : S257 — terminée
 Agent : Claude Opus 5, Claude Code ; fichiers, git, cargo, Python et GPU local disponibles.
 Entrée (2026-09-16 22:45), verdict R2 de l'utilisateur : « le résultat se raffine, mais la
 topologie d'un océan fluctue selon plusieurs paramètres ; le rendu paraît un grand lac soumis à
@@ -79,7 +79,7 @@ consigné, réponse écrite, prochain lot recommandé dans la file.
 - [x] **P1** — amorce, jeton et plan seuls.
 - [x] **P2** — verdict R2 consigné et classé, faits calculés ; réponse à la question (parallaxe du
   déplacement contre empreinte du pixel, ce que le dépôt prévoyait) dans REVUE-VISUELLE.
-- [ ] **P3** — rituel §6 : file (houle longue, crêtes non linéaires, LOD déplacement/normales),
+- [x] **P3** — rituel §6 : file (houle longue, crêtes non linéaires, LOD déplacement/normales),
   liste du projet fini, journal, jeton.
 
 ### Notes de reprise

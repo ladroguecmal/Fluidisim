@@ -13247,3 +13247,37 @@ les bords ouverts du pas couplé. Liste du projet fini : 2.1 et 8.10 mis à jour
 fini, index (ADR-155, preuve), jeton. Invariants relus : I-13 (la queue ne pilote rien, rendu
 seulement), I-14 (Cox–Munk et Pierson–Moskowitz cités), I-06 (tableau de queue fixe, `update` sans
 allocation au banc), I-03 (cuisson reproductible, empreinte de la bande inchangée).
+
+## S257 — « Un grand lac soumis au vent » : classé par construction ; la surface plane vue de dessus
+
+**2026-09-16, Claude Opus 5.** Entrée : verdict R2 de l'utilisateur et une question. Le résultat se
+raffine, mais le rendu paraît un grand lac sous un vent fort ; la haute mer est plus chaotique, et
+la houle se forme vers les terres. Avait-on pensé à une surface plane à normales vue de dessus ?
+Master propre d6a4253. Plan `726ff43`, classement et réponse `dc17d88`.
+
+**Verdict classé sans campagne**, parce qu'il se calcule ([REVUE-VISUELLE](../docs/validation/REVUE-VISUELLE.md)
+§8). B est **une seule mer de vent**, pleinement développée à environ 8,4 m/s : `Tp` 6 s, `λp` 56 m,
+cambrure 0,027, rien au-delà de 12 s. Il n'y a ni houle longue (225 m à 12 s), ni mer croisée, ni
+déplacement horizontal des crêtes (absent du code), ni bathymétrie, ni écume. Ce que l'utilisateur
+décrit est exactement une mer de vent locale : physique juste mais incomplète. L'ampleur du
+« chaotique » n'est pas mesurée, faute de référence.
+
+**Réponse à la question** (§9). Le dépôt l'avait envisagé : ADR-004 prévoyait tuiles de
+déplacement et FFT haute fréquence, S234 avait mesuré qu'alléger le maillage ne gagne rien en vue
+haute, et ADR-155 rend déjà les ondes courtes en normales seules. Critère chiffré : un déplacement
+vertical `h` se voit avec un décalage de `h·sin2θ/(2Hα)` pixels, nul à la verticale exacte. Pour
+cette mer, cela donne 1,2 à 3,4 px à 90 m d'altitude, 3 à 16 px aux vues de jeu, et moins de 0,1 px
+pour la queue. Une surface plane à normales suffit donc de haut, pas aux vues de jeu. Deux réserves :
+le déplacement horizontal doit passer dans les normales, et le décalage mouvant reste à juger à
+l'œil. C'est un LOD dépendant de la vue, non prioritaire pour le coût aujourd'hui (le GPU va
+surtout à la cuisson du sillage).
+
+**Maillons 1** : aucune capacité reçue ; classement et réponse. **Suite** : S258, mer multimodale dans
+B (houle longue + mer de vent, directions par système, ce qui traite aussi les stries d'A287),
+réception par système, revue R3. Puis crêtes non linéaires, écume, levée bathymétrique (J5). Les
+bords ouverts du pas couplé gardent leur déclencheur dans la file.
+
+**Rituel.** File : revue R1–R2 actualisée ; mer multimodale, crêtes non linéaires et LOD
+déplacement/normales ajoutés ; liste du projet fini 2.2 et 8.2 ; jeton. Invariants relus : I-13
+(le LOD de vue reste un choix de rendu), I-14 (critère dérivé de la géométrie de projection, sans
+constante nouvelle). Aucun ADR, aucun code.

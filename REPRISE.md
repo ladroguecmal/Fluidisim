@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-16 22:46 +02:00
+JETON            : libre
+Battement        : 2026-09-16 22:52 +02:00
 Agent            : Claude Opus 5, Claude Code (fichiers, git, cargo, Python, GPU local, accès web)
-Session en cours : S257 — verdict R2 et question de l'utilisateur (surface plane et normales vue de dessus)
-Dernière session : S256 — verdict R1 « trop lisse » mesuré (mss 0,0075 contre 0,044) ; queue spectrale en pentes par pixel (ADR-155), R2 envoyée
-Session suivante : à fixer au rituel de S257
-Maillons        : 0
+Session en cours : aucune
+Dernière session : S257 — verdict R2 « grand lac soumis au vent » classé par construction ; critère de parallaxe pour la surface plane à normales
+Session suivante : S258 — mer multimodale dans B (houle longue + mer de vent, directions par système), réception par système, revue R3
+Maillons        : 1
 
 ```
 

@@ -23,7 +23,7 @@ coche et on pointe, sans recopier (L137).
 Un point n'est jamais validé sur un banc isolé, un véhicule d'essai ou une seule scène quand son
 énoncé vise le système. Un point partiel ne dit rien de la difficulté de ce qui reste.
 
-**État au S256, 2026-09-16** (remplissage partiel, points 2.1, 8.9 et 8.10). Voir le décompte en
+**État au S257, 2026-09-16** (remplissage partiel, points 2.1, 2.2, 8.2, 8.9 et 8.10). Voir le décompte en
 fin de document.
 
 ---
@@ -56,7 +56,8 @@ fin de document.
   JONSWAP cuit et reproductible (ADR-100/101), 32 composantes, phases GPU ; queue jusqu'à 5,5 cm
   rendue en pentes (S256). Manquent la rugosité observée (`mss` 0,0195 contre 0,044, A287), une loi
   d'étalement directionnel, B1 complet et plusieurs régions.
-- [ ] **2.2 Houles longues, marée, niveau moyen variable** — *absent*.
+- [ ] **2.2 Houles longues, mers croisées, marée, niveau moyen variable** — *absent* : B est une mer de
+  vent unimodale, sans énergie au-delà de 12 s ; verdict R2 « grand lac soumis au vent » (S257).
 - [ ] **2.3 Lacs** : niveau moyen, apports, courants faibles — *absent*.
 - [ ] **2.4 Rivières** : débit macroscopique qui contraint les perturbations locales — *absent*.
 - [ ] **2.5 Canaux** — *absent*.
@@ -176,8 +177,8 @@ fin de document.
 
 - [ ] **8.1 Rendu temps réel de la surface sur GPU** — *partiel* : hôte séparé B + impacts +
   sillages (ADR-130, S211–S249), habillage de banc ; le rendu ne pilote pas la physique (I-13). Manque l'intégration au moteur du jeu.
-- [ ] **8.2 LOD de la géométrie de surface** — *partiel* : grille projetée à pas écran. LOD du
-  maillage absent.
+- [ ] **8.2 LOD de la géométrie de surface** — *partiel* : grille projetée à pas écran. Manquent le LOD
+  du maillage et le choix déplacement ou normales selon la vue (critère de parallaxe chiffré S257).
 - [ ] **8.3 LOD par source** : grille du sillage, visibilité, filtre spectral — *partiel* (S234,
   S235, S249). Manquent le filtre des impacts, le LOD spectral et le LOD temporel.
 - [ ] **8.4 Écume, spray, gouttes, bulles rendus, chacun avec son LOD** — *absent*.
