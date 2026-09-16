@@ -13207,3 +13207,43 @@ pas l'avancement.
 **Maillons 1** : aucune capacité reçue, travail documentaire demandé. **Suite** inchangée : R1 dès
 réception des références, sinon bords ouverts du pas couplé.
 
+## S256 — « La mer est trop lisse, on dirait un lac » : mesuré, puis corrigé en physique
+
+**2026-09-16, Claude Opus 5.** Entrée : premier verdict de l'utilisateur sur R1. Master propre
+029cfd5, copie unique. Plan `fbd4324`, verdict et références `bcb2a25`, mesure `cb614b6`, ADR-155
+`deec6da`, cœur `85bc3f9`, hôte `fd7dbd5`, réception et R2 `65c7d12`.
+
+**Verdict confirmé par mesure, avant tout changement.** Critère écrit avant de mesurer. La pente
+quadratique moyenne de B (recette J1, bande `[0,5 ; 4] fp`) vaut **0,0075** ; Cox & Munk (1954), au
+vent minimal qui soutient `Hs` 1,5 m selon Pierson–Moskowitz, donnent **0,044**. La mer rendue est
+5,8 fois moins rugueuse que la vraie. Classe : physique juste mais incomplète (spectre coupé à
+3,5 m). Formules citées dans SPEC-001 §1 sexies. Inattendu : même prolongée jusqu'aux capillaires, la
+queue JONSWAP ne donne que 52 % de l'observé.
+
+**Capacité reçue, maillons 0.** Le rendu porte la **rugosité de la queue du même spectre** : c'est ce
+qui devient possible. Le chemin : `background_spectrum::bake_tail`, `[4 ; 32] fp`, 64 composantes à
+densité absolue, puis le fragment de l'hôte, en pentes par pixel filtrées par l'empreinte. La
+preuve : ADR-155 et [QUEUE-SPECTRALE-S256](../docs/validation/QUEUE-SPECTRALE-S256.md). `mss` 0,0195
+(contre 0,01953 attendu), GPU contre CPU 1,2·10⁻⁴ (tolérance 2·10⁻⁴), coût +0,38 ms à 1280×720
+(GPU eau 1,82 ms). La hauteur et les requêtes ne changent pas : `--spectral-verify` est identique à
+S249, et R1 se rejoue au bit avec `--no-tail`. Suite **464 / 18 / 0**, afficheur 16 / 1 / 0.
+
+**Trois incidents, publiés.** (1) Une compilation échouée a laissé lancer l'ancien binaire en mode
+fenêtre, bloqué dix minutes, puis fermé. Désormais, l'exécutable n'est lancé que si la compilation
+réussit. (2) Le critère 7 du protocole était faux (`π/k_max` au lieu de `π/k_min`) : note datée,
+tolérance inchangée. (3) Sa première exécution lisait `k_max` avant la mise à jour des composantes :
+elle ne contrôlait rien, c'est corrigé.
+
+**Limites.** Rugosité à 52 % de l'observé au mieux. Stries parallèles, parce que la direction d'une
+composante suit son rang de fréquence (fixture d'ADR-100) : A287. Pas de capillaires, pas de queue
+pour les perturbations W, pas d'écume à `Hs` 1,5 m (ADR-014).
+
+**Suite.** R2 est envoyée. Le verdict de l'utilisateur tranche entre poursuivre sur B (A287 :
+étalement directionnel, spectre court) ou passer à un autre défaut perçu. Sans retour, S257 reprend
+les bords ouverts du pas couplé. Liste du projet fini : 2.1 et 8.10 mis à jour, 8.9 passe de absent
+à partiel.
+
+**Rituel.** A287 ouverte ; file active (revue R1–R2, A287), feuille de route J1, liste du projet
+fini, index (ADR-155, preuve), jeton. Invariants relus : I-13 (la queue ne pilote rien, rendu
+seulement), I-14 (Cox–Munk et Pierson–Moskowitz cités), I-06 (tableau de queue fixe, `update` sans
+allocation au banc), I-03 (cuisson reproductible, empreinte de la bande inchangée).

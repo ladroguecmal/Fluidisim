@@ -113,8 +113,12 @@ l'horizon**, et sur toute l'eau visible le pire écart monte à **1 228,8 m** à
 [images](validation/IMAGES-S248.md). Restent l'interaction manuelle représentative et la seconde
 cible (B7).
 **Revue perceptive ouverte S254** : l'utilisateur supervise les rendus. Il fournit les références
-réelles, et ses verdicts sont consignés selon [REVUE-VISUELLE](validation/REVUE-VISUELLE.md). R1 :
-sept rendus de la scène J1, en attente de références.
+réelles, et ses verdicts sont consignés selon [REVUE-VISUELLE](validation/REVUE-VISUELLE.md).
+**S256 : premier verdict, « la mer est trop lisse »**, confirmé par mesure (`mss` de B 0,0075
+contre 0,044 observés). La queue du même spectre est rendue en pentes par pixel (ADR-155) : `mss`
+0,0195, GPU eau 1,82 ms à 1280×720 (+0,38 ms), réceptions B/W inchangées au bit.
+[Réception](validation/QUEUE-SPECTRALE-S256.md). R2 est en attente de verdict. Rugosité encore à
+52 % de l'observé, stries directionnelles : A287.
 Composition de la scène représentative par le cœur : faite S236 (mode union, ADR-142). Le choix du
 mode par un hôte autoritaire reste à trancher avec lui (A271).
 

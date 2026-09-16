@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S256 — en cours
+Session : S256 — terminée
 Agent : Claude Opus 5, Claude Code ; fichiers, git, cargo, Python et GPU local disponibles.
 Entrée (2026-09-16 22:13) : premier verdict de l'utilisateur sur R1 — « la mer est trop lisse, on
 dirait un lac ». Master propre 029cfd5, copie unique, jeton libre, maillons 1. R1 passe devant la
@@ -90,7 +90,7 @@ poses envoyés à l'utilisateur.
 - [x] **P5** — cœur : cuisson de la queue spectrale, même densité absolue, essais contre l'analytique.
 - [x] **P6** — hôte : queue en pentes par pixel, filtre d'empreinte, référence CPU.
 - [x] **P7** — réception GPU/CPU, coût, rendus R2 aux poses R1, envoi à l'utilisateur.
-- [ ] **P8** — rituel §6 : liste du projet fini (2.1, 8.9, 8.10), registre, journal, jeton.
+- [x] **P8** — rituel §6 : liste du projet fini (2.1, 8.9, 8.10), registre, journal, jeton.
 
 ### Notes de reprise
 

@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-16 22:15 +02:00
+JETON            : libre
+Battement        : 2026-09-16 22:39 +02:00
 Agent            : Claude Opus 5, Claude Code (fichiers, git, cargo, Python, GPU local, accès web)
-Session en cours : S256 — revue R1 : « la mer est trop lisse, on dirait un lac »
-Dernière session : S255 — liste du projet fini (119 points : 3 validés, 46 partiels, 70 absents)
-Session suivante : à fixer au rituel de S256
-Maillons        : 1
+Session en cours : aucune
+Dernière session : S256 — verdict R1 « trop lisse » mesuré (mss 0,0075 contre 0,044) ; queue spectrale en pentes par pixel (ADR-155), R2 envoyée
+Session suivante : S257 — verdict R2 de l'utilisateur s'il arrive (A287 si confirmé) ; sinon bords ouverts du pas couplé
+Maillons        : 0
 
 ```
 

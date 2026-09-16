@@ -3604,3 +3604,16 @@ production est identique au bit sous le plan moyen, et son intégration dans le 
 reçue. **Restent** : les couches W au-dessus du plan moyen, et la précision sous une mer large bande
 réelle, qui attend les frontières du total et les bords ouverts.
 [Preuve](../validation/PROLONGEMENT-FOND-S254.md).
+
+**A287 — S256, 2026-09-16 (sévérité 2, ouverte).** **La rugosité de B est incomplète, et ses directions
+sont liées à la fréquence.** Trouvé par la revue visuelle R1 (« la mer est trop lisse, on dirait un
+lac »), confirmé par mesure : la `mss` de la recette J1 vaut 0,0075, contre 0,044 selon Cox–Munk au
+vent minimal de `Hs` 1,5 m. La queue du même spectre en pentes par pixel (ADR-155) la porte à 0,0195.
+Deux causes restent. (1) La forme JONSWAP en `f⁻⁵` plafonne à 52 % de la rugosité observée, même
+jusqu'à la limite gravité-capillarité : le spectre des ondes courtes n'est pas modélisé. (2) La
+cuisson donne à chaque composante une direction qui suit son rang, donc sa fréquence : la queue
+dessine des stries parallèles (R2). Ce n'est pas une loi d'étalement. Déclencheur : le verdict de
+l'utilisateur sur R2, ou le prochain travail sur B. Remède attendu : une loi d'étalement
+directionnel dépendant de la fréquence, et un modèle de spectre court choisi et reçu contre
+Cox–Munk. Pas un coefficient forcé. [Mesure](../validation/REVUE-VISUELLE.md) §7,
+[réception](../validation/QUEUE-SPECTRALE-S256.md).

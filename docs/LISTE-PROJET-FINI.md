@@ -23,7 +23,8 @@ coche et on pointe, sans recopier (L137).
 Un point n'est jamais validé sur un banc isolé, un véhicule d'essai ou une seule scène quand son
 énoncé vise le système. Un point partiel ne dit rien de la difficulté de ce qui reste.
 
-**État au S255, 2026-09-16.** Voir le décompte en fin de document.
+**État au S256, 2026-09-16** (remplissage partiel, points 2.1, 8.9 et 8.10). Voir le décompte en
+fin de document.
 
 ---
 
@@ -52,8 +53,9 @@ Un point n'est jamais validé sur un banc isolé, un véhicule d'essai ou une se
 ## 2. Grandes masses d'eau et fond (B)
 
 - [ ] **2.1 Mer et océan : état de mer spectral déterministe, sans état par cellule** — *partiel* :
-  JONSWAP cuit et reproductible (ADR-100/101), 32 composantes, phases GPU. Manquent les ondes plus
-  courtes que 3,5 m, B1 complet et plusieurs régions.
+  JONSWAP cuit et reproductible (ADR-100/101), 32 composantes, phases GPU ; queue jusqu'à 5,5 cm
+  rendue en pentes (S256). Manquent la rugosité observée (`mss` 0,0195 contre 0,044, A287), une loi
+  d'étalement directionnel, B1 complet et plusieurs régions.
 - [ ] **2.2 Houles longues, marée, niveau moyen variable** — *absent*.
 - [ ] **2.3 Lacs** : niveau moyen, apports, courants faibles — *absent*.
 - [ ] **2.4 Rivières** : débit macroscopique qui contraint les perturbations locales — *absent*.
@@ -184,9 +186,12 @@ Un point n'est jamais validé sur un banc isolé, un véhicule d'essai ou une se
 - [ ] **8.7 Rendu de δ raccordé à B+W sans rupture visible** — *absent*.
 - [ ] **8.8 Lointain et horizon sans artefact** — *partiel* : coupure spectrale B/sillage (S249) ;
   bande d'horizon mesurée (S247, S248). Pas de certificat d'absence d'alias.
-- [ ] **8.9 Détails artificiels bon marché** (micro-vagues, ondes courtes) ajoutés au rendu — *absent*.
+- [ ] **8.9 Détails artificiels bon marché** (micro-vagues, ondes courtes) ajoutés au rendu — *partiel* :
+  queue du spectre de B en pentes par pixel, filtrée par l'empreinte, +0,38 ms GPU (ADR-155, S256).
+  Manquent les capillaires, la queue des perturbations W et le LOD de la queue.
 - [ ] **8.10 Crédibilité perçue validée par un regard humain** — *partiel* : protocole de revue
-  ([REVUE-VISUELLE](validation/REVUE-VISUELLE.md)) ; R1 envoyée, en attente.
+  ([REVUE-VISUELLE](validation/REVUE-VISUELLE.md)). Premier verdict (R1, « trop lisse ») mesuré et
+  traité ; R2 en attente.
 
 ## 9. Activation, prédiction, budget et dégradation
 
@@ -275,13 +280,13 @@ Un point n'est jamais validé sur un banc isolé, un véhicule d'essai ou une se
 | 5. Volumes finis (V) | 12 | 1 | 3 | 8 |
 | 6. Solides | 8 | 0 | 3 | 5 |
 | 7. Secondaires | 8 | 0 | 0 | 8 |
-| 8. Rendu | 10 | 0 | 5 | 5 |
+| 8. Rendu | 10 | 0 | 6 | 4 |
 | 9. Activation et budget | 13 | 0 | 5 | 8 |
 | 10. Multijoueur | 9 | 1 | 7 | 1 |
 | 11. Grande échelle | 5 | 0 | 2 | 3 |
 | 12. Outillage | 5 | 0 | 1 | 4 |
 | 13. Validation | 3 | 0 | 3 | 0 |
-| **total** | **119** | **3** | **46** | **70** |
+| **total** | **119** | **3** | **47** | **69** |
 
 Trois points validés sur 119. Cela ne mesure pas l'avancement du travail. Beaucoup de points
 partiels portent l'essentiel de leur difficulté, et un point validé peut être petit.
