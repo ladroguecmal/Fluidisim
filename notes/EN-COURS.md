@@ -90,6 +90,9 @@ z > 0), multigrille/affinage du mode mobile, 3D, rendu, ordre d'ADR-147.
 - [x] **P5** — cœur : pas perturbatif mobile, transport de η' et bande, atomicité.
 - [x] **P6** — essais : identité au bit, refus, expiration, allocations, témoin sans résidus.
 - [x] **P7** — banc HOS couplé 32/64/128, 5 et 10 cm : réception ou refus publié.
+- [ ] **P7b** — ADR-153 : affinage de divergence au plancher étendu au pas couplé mobile
+  (valeurs fantômes homogènes) ; essai au premier pas à 128 colonnes, témoin refusé.
+- [ ] **P7c** — réception complète 64/128 aux deux amplitudes, coût séparé sans concurrence.
 - [ ] **P8** — suite, empreinte, coût et preuve.
 - [ ] **P9** — rituel §6 : file, trajectoire, journal et jeton.
 
@@ -127,3 +130,10 @@ trois processus (précision indépendante de la concurrence ; coût à mesurer �
 1,53e-5, vitesse corrigée max 1,1e-4 m/s (A283 en mode mobile) ; 64/10 cm reçu en contrôle
 illimité (D_franche 8,1e-6) mais refusé sous budget (réductions découpées) : marge. Total S237
 refait identique à 32/64 (0,850/2,44 ; 0,552/1,41).
+
+**Amendement avant P7b.** Le protocole prévoyait de s'arrêter au diagnostic. Le remède est
+une technique déjà reçue deux fois (ADR-150 couvercle couplé, ADR-151 couvercle fixe) : l'étendre
+au pas couplé mobile est une décision bornée, déclarée ici avant tout code. Le pas S237 total
+n'est pas touché (aucun refus observé). Critères de P7b : sans affinage, le premier pas à
+128/5 cm reste refusé ; avec, reçu, `refinements = 1`, D_franche ≤ 1e-5, mode homogène éteint à
+toute sortie. P7c : critères 3 et 4 du protocole inchangés.
