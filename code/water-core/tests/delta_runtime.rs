@@ -255,8 +255,10 @@ fn allocation_accounting_matches_requested_typed_storage() {
     let (v, arena) = build(32, 16, 0.25, 9.81);
     let (n, k) = (v.domain().nx, v.domain().nz);
     // Quatre tableaux f32 par famille de faces, fond+surface, fraction ; huit f32 par cellule
-    // depuis S251 (pression principale pendant l'affinage de vitesse).
-    let bytes = (4 * ((n + 1) * k + n * (k + 1)) + 5 * n + n * k) * 4 + 8 * n * k * 4;
+    // depuis S251 (pression principale pendant l'affinage de vitesse). S253 : un tableau de plus
+    // sur les faces u (fantôme latéral du fond), sept au lieu de cinq par colonne (surface totale,
+    // fantôme vertical du fond).
+    let bytes = (4 * ((n + 1) * k + n * (k + 1)) + (n + 1) * k + 7 * n + n * k) * 4 + 8 * n * k * 4;
     // S245 : la hiérarchie multigrille. Le compte est **refait ici**, indépendamment du cœur : un
     // essai de comptabilité qui appellerait la même fonction que le code ne vérifierait rien.
     // Division par deux tant que les deux dimensions sont paires et au moins huit ; par niveau,

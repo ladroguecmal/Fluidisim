@@ -72,6 +72,59 @@ fn extra(s: &BackgroundSample, axis: usize, v: [f32; 2], dv: [f32; 2], rho: f32)
 }
 
 impl Volume {
+    /// ADR-152 : géométrie totale `ζ = η' + ζ_fond` et valeurs fantômes du fond, depuis les
+    /// échantillons du pas. `ζ_fond` est le champ `eta` des faces w de la colonne, identique au bit
+    /// sur toute la colonne. Allume `surface_coupled` ; l'appelant l'éteint sur tout chemin de sortie.
+    fn prepare_surface_background(&mut self, bg: &BackgroundFaces<'_>, ctl: &mut Control) -> Result<(), Error> {
+        let (nx, nz, dx) = (self.domain.nx, self.domain.nz, self.domain.dx);
+        for i in 0..nx {
+            let zeta = bg.w[self.fw(i, 0)].eta;
+            for k in 1..=nz {
+                ctl.poll(Phase::Prepare)?;
+                if bg.w[self.fw(i, k)].eta.to_bits() != zeta.to_bits() {
+                    return Err(Error::BackgroundContext);
+                }
+            }
+            self.surface_total[i] = self.eta[i] + zeta;
+        }
+        self.surface_coupled = true;
+        let rg = self.rho * self.g_eff;
+        // Fantôme vertical : maille mouillée la plus haute, face w au-dessus d'elle.
+        for i in 0..nx {
+            ctl.poll(Phase::Prepare)?;
+            self.ghost_bg_up[i] = 0.;
+            if let Some(k) = (0..nz).rev().find(|&k| self.wet(i, k)) {
+                let s = &bg.w[self.fw(i, k + 1)];
+                let dz = self.surface_total[i] - (k + 1) as f32 * dx;
+                self.ghost_bg_up[i] = rg * s.eta - (s.p_dyn + dz * s.grad_p_dyn[2]);
+            }
+        }
+        // Fantôme latéral : face u entre une maille mouillée et une maille d'air de même rangée ;
+        // `θ` exactement comme `ghost_side`, interface à `(θ − ½)·dx` de la face, côté air.
+        let min = super::mobile::SURFACE_THETA_MIN;
+        for k in 0..nz {
+            let zc = (k as f32 + 0.5) * dx;
+            for i in 1..nx {
+                ctl.poll(Phase::Prepare)?;
+                let f = self.fu(i, k);
+                let s = &bg.u[f];
+                let (l, r) = (i - 1, i);
+                self.ghost_bg_side[f] = match (self.wet(l, k), self.wet(r, k)) {
+                    (true, false) => {
+                        let theta = ((self.height(l) - zc) / (self.height(l) - self.height(r))).max(min);
+                        -(s.p_dyn + (theta - 0.5) * dx * s.grad_p_dyn[0])
+                    }
+                    (false, true) => {
+                        let theta = ((self.height(r) - zc) / (self.height(r) - self.height(l))).max(min);
+                        -(s.p_dyn - (theta - 0.5) * dx * s.grad_p_dyn[0])
+                    }
+                    _ => 0.,
+                };
+            }
+        }
+        Ok(())
+    }
+
     fn coupled_predict(&mut self, bg: &BackgroundFaces<'_>, dt: f64, sponge: Sponge,
         ctl: &mut Control) -> Result<(), Error> {
         self.advect(dt as f32, ctl)?;

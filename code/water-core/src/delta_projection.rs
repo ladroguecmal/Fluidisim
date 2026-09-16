@@ -241,6 +241,14 @@ pub struct Volume {
     /// S251 : pression principale conservée pendant l'affinage de vitesse, ADR-150.
     pressure_base: Vec<f32>,
     homogeneous_lid: bool,
+    /// S253, ADR-152 : pas perturbatif mobile en cours — la géométrie lit `surface_total`.
+    surface_coupled: bool,
+    /// S253 : surface totale `ζ = η' + ζ_fond` du pas couplé, par colonne.
+    surface_total: Vec<f32>,
+    /// S253 : `ρg·ζ_fond − P_fond(Γ)` du fantôme vertical de chaque colonne.
+    ghost_bg_up: Vec<f32>,
+    /// S253 : `−P_fond(Γ)` du fantôme latéral porté par chaque face u.
+    ghost_bg_side: Vec<f32>,
     saved_eta: Vec<f32>,
     eta_roundoff: Vec<f32>,
     saved_eta_roundoff: Vec<f32>,
@@ -298,9 +306,12 @@ impl Volume {
         let c = nx.checked_mul(nz).ok_or(Error::Domain)?;
         let nu = nx.checked_add(1).and_then(|n| n.checked_mul(nz)).ok_or(Error::Domain)?;
         let nw = nz.checked_add(1).and_then(|n| n.checked_mul(nx)).ok_or(Error::Domain)?;
+        // S253 (ADR-152) : une face u de plus (fantôme latéral du fond), deux colonnes de plus
+        // (surface totale, fantôme vertical du fond).
         let floats = nu.checked_add(nw).and_then(|n| n.checked_mul(4))
+            .and_then(|n| n.checked_add(nu))
             .and_then(|n| n.checked_add(c))
-            .and_then(|n| nx.checked_mul(5).and_then(|x| n.checked_add(x)))
+            .and_then(|n| nx.checked_mul(7).and_then(|x| n.checked_add(x)))
             .ok_or(Error::Domain)?;
         // S245 : la hiérarchie multigrille entre dans le même comptage, avant toute allocation.
         let floats = floats
@@ -342,6 +353,10 @@ impl Volume {
             saved_p: vec![0.; c],
             pressure_base: vec![0.; c],
             homogeneous_lid: false,
+            surface_coupled: false,
+            surface_total: vec![0.; nx],
+            ghost_bg_up: vec![0.; nx],
+            ghost_bg_side: vec![0.; nu],
             saved_eta: vec![domain.z0(); nx],
             eta_roundoff: vec![0.; nx],
             saved_eta_roundoff: vec![0.; nx],

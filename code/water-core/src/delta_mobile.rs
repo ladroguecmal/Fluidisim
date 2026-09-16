@@ -19,10 +19,17 @@ impl Volume {
         (k as f32 + 0.5) * self.domain.dx
     }
 
+    /// Hauteur géométrique de la colonne : `η`, ou la surface totale `ζ = η' + ζ_fond` pendant le
+    /// pas perturbatif mobile (S253, ADR-152).
+    #[inline]
+    pub(super) fn height(&self, i: usize) -> f32 {
+        if self.surface_coupled { self.surface_total[i] } else { self.eta[i] }
+    }
+
     /// Maille fluide du mode mobile : du fond coupé, et centre sous la surface de sa colonne.
     #[inline]
     pub(super) fn wet(&self, i: usize, k: usize) -> bool {
-        self.frac[self.c(i, k)] > 0. && self.zc(k) < self.eta[i]
+        self.frac[self.c(i, k)] > 0. && self.zc(k) < self.height(i)
     }
 
     #[inline]
@@ -34,8 +41,10 @@ impl Volume {
     /// Face verticale vers l'air au-dessus de `(i, k)` : `1/θ` et pression dynamique à `z = η_i`.
     #[inline]
     fn ghost_up(&self, i: usize, k: usize) -> (f32, f32) {
-        let theta = ((self.eta[i] - self.zc(k)) / self.domain.dx).max(SURFACE_THETA_MIN);
-        let value = self.rho * self.g_eff * ((self.eta[i] - self.rest) - self.eta_roundoff[i]);
+        let theta = ((self.height(i) - self.zc(k)) / self.domain.dx).max(SURFACE_THETA_MIN);
+        let mut value = self.rho * self.g_eff * ((self.eta[i] - self.rest) - self.eta_roundoff[i]);
+        // S253 (ADR-152) : `η` porte alors η' ; le fond ajoute `ρg·ζ_fond − P_fond(Γ)`.
+        if self.surface_coupled { value += self.ghost_bg_up[i]; }
         (1. / theta, value)
     }
 
@@ -45,8 +54,11 @@ impl Volume {
     #[inline]
     fn ghost_side(&self, i: usize, k: usize, j: usize) -> (f32, f32) {
         let zc = self.zc(k);
-        let theta = ((self.eta[i] - zc) / (self.eta[i] - self.eta[j])).max(SURFACE_THETA_MIN);
-        (1. / theta, self.rho * self.g_eff * (zc - self.rest))
+        let theta = ((self.height(i) - zc) / (self.height(i) - self.height(j))).max(SURFACE_THETA_MIN);
+        let mut value = self.rho * self.g_eff * (zc - self.rest);
+        // S253 (ADR-152) : moins la pression du fond à l'interface, portée par la face u partagée.
+        if self.surface_coupled { value += self.ghost_bg_side[self.fu(i.max(j), k)]; }
+        (1. / theta, value)
     }
 
     /// `1/θ` seul, pour le diagnostic d'erreur inverse (S238).
@@ -278,7 +290,7 @@ impl Volume {
         for i in 0..nx {
             ctl.poll(phase)?;
             let floor = edge(i).max(edge(i + 1)) + 2. * dx;
-            if !(self.eta[i] >= floor && self.eta[i] <= top) {
+            if !(self.height(i) >= floor && self.height(i) <= top) {
                 return Ok(false);
             }
         }

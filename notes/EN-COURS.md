@@ -86,7 +86,7 @@ z > 0), multigrille/affinage du mode mobile, 3D, rendu, ordre d'ADR-147.
 - [x] **P1** — amorce, lectures et plan seuls.
 - [x] **P2** — ADR-152 et protocole de réception, avant code.
 - [x] **P3** — fournisseur analytique de test partagé (exemple et essais) et ses contrôles.
-- [ ] **P4** — cœur : hauteur totale, valeurs fantômes du fond, tampons comptés ; S237 au bit.
+- [x] **P4** — cœur : hauteur totale, valeurs fantômes du fond, tampons comptés ; S237 au bit.
 - [ ] **P5** — cœur : pas perturbatif mobile, transport de η' et bande, atomicité.
 - [ ] **P6** — essais : identité au bit, refus, expiration, allocations, témoin sans résidus.
 - [ ] **P7** — banc HOS couplé 32/64/128, 5 et 10 cm : réception ou refus publié.
@@ -103,3 +103,7 @@ du mode de profondeur finie pour l'oracle. Lectures géométriques de `eta` : to
 `delta_mobile.rs` (wet, ghost_up, ghost_side, surface_in_bounds, transport) ; `lid` et le
 transport linéaire lisent `eta` hors mode mobile. Identité a) : somme S237 au bit, bande ajoutée
 à part ; ajout des valeurs du fond seulement en mode couplé.
+P4 : `height(i)` (η ou ζ totale), fantômes + `ghost_bg_up`/`ghost_bg_side` en mode couplé,
+`prepare_surface_background` ; +(nu + 2·nx) f32 comptés, essai de comptabilité mis à jour.
+Essai fantômes contre P analytique à l'interface : 32 colonnes vertes, 9 latéraux, borne de
+Taylor 1,35 Pa. Tests δ 53/11 ignorés, exécution 11. `delta_mobile essai` = S237 (0,850 % / 2,44 %).

@@ -379,3 +379,64 @@ fn standing_background_is_incompressible_linear_and_kinematic_s253(){
         }
     }
 }
+
+/// Volume du banc S237 (L = h = 2 m, domaine jusqu'à 2,25 m, repos à 2 m) et échantillons du fond
+/// aux faces MAC, `z` compté depuis le repos.
+fn standing_case(nx:usize,wave:&standing::StandingWave,eta:&[f32])->Volume {
+    let dx=2./nx as f32;
+    let mut v=Volume::configure(&mut HostServices{alloc:&mut Arena,jobs:&Jobs,sink:&Jobs},
+        Domain{nx,nz:(2.25/dx).round() as usize,dx},wave.rho as f32,wave.g as f32,&vec![0.;nx]).unwrap();
+    v.set_free_surface(eta,wave.h as f32).unwrap();
+    v
+}
+fn standing_faces(v:&Volume,wave:&standing::StandingWave,t:f64)->(Vec<BackgroundSample>,Vec<BackgroundSample>) {
+    let (nx,nz,dx,rest)=(v.domain.nx,v.domain.nz,v.domain.dx as f64,v.rest as f64);
+    let (mut u,mut w)=fields(v);
+    for k in 0..nz {for i in 0..=nx {u[v.fu(i,k)]=wave.sample(i as f64*dx,(k as f64+0.5)*dx-rest,t);}}
+    for k in 0..=nz {for i in 0..nx {w[v.fw(i,k)]=wave.sample((i as f64+0.5)*dx,k as f64*dx-rest,t);}}
+    (u,w)
+}
+
+/// S253 (ADR-152) — valeurs fantômes du fond contre la pression analytique à l'interface. Le fantôme
+/// vertical vaut `ρg·ζ_fond − P(x_i, ζ_i)`, le latéral `−P(x_Γ, z_c)` ; l'écart tient au Taylor
+/// d'ordre un sur au plus une demi-maille, `(dx/2)²·|∂²P|/2`, plus l'arrondi f32.
+#[test]
+fn background_ghost_values_match_interface_pressure_s253(){
+    let wave=standing::StandingWave{a:0.1,k:std::f64::consts::PI/2.,h:2.,g:9.81,rho:1025.};
+    let nx=32;let dx=2./nx as f64;let t=0.37;
+    // η' non nul, pour que la géométrie totale diffère de ζ_fond et traverse des centres.
+    let eta:Vec<f32>=(0..nx).map(|i|(2.+0.08*(5.*wave.k*(i as f64+0.5)*dx).sin()) as f32).collect();
+    let mut v=standing_case(nx,&wave,&eta);
+    let (u,w)=standing_faces(&v,&wave,t);
+    let bg=BackgroundFaces{domain:v.domain,time:SimTime(0),density:1025.,gravity:9.81,u:&u,w:&w};
+    v.prepare_surface_background(&bg,&mut Control::unlimited()).unwrap();
+    assert!(v.surface_coupled);
+    let (rho,g,k)=(1025f64,9.81f64,wave.k);
+    let pmax=rho*g*wave.a;
+    // |∂²P| ≤ ρga·k²·C(z) en x comme en z, C croissant : majoré au sommet du domaine (0,25 m).
+    let c_top=(k*(0.25+wave.h)).cosh()/(k*wave.h).cosh();
+    let taylor=0.5*(0.5*dx).powi(2)*k*k*pmax*c_top;
+    let mut sides=0;
+    for i in 0..nx {
+        let x=(i as f64+0.5)*dx;
+        let zeta=v.surface_total[i] as f64;
+        let exact=rho*g*wave.sample(x,0.,t).eta as f64-wave.sample(x,zeta-2.,t).p_dyn as f64;
+        assert!((v.ghost_bg_up[i] as f64-exact).abs()<=taylor+1e-3,"colonne {i} : {} contre {exact}",v.ghost_bg_up[i]);
+        for kk in 0..v.domain.nz {
+            if i+1<nx && v.wet(i,kk)!=v.wet(i+1,kk) {
+                let (wet,air)=if v.wet(i,kk){(i,i+1)}else{(i+1,i)};
+                let zc=(kk as f64+0.5)*dx;
+                let (hw,ha)=(v.surface_total[wet] as f64,v.surface_total[air] as f64);
+                let theta=((hw-zc)/(hw-ha)).max(1e-3);
+                let xw=(wet as f64+0.5)*dx;
+                let xg=if air>wet {xw+theta*dx} else {xw-theta*dx};
+                let exact=-(wave.sample(xg,zc-2.,t).p_dyn as f64);
+                let got=v.ghost_bg_side[v.fu(i+1,kk)] as f64;
+                assert!((got-exact).abs()<=taylor+1e-3,"face ({},{kk}) : {got} contre {exact}",i+1);
+                sides+=1;
+            }
+        }
+    }
+    assert!(sides>=4,"l'essai doit exercer des fantômes latéraux : {sides}");
+    println!("S253 fantomes : borne_taylor={taylor:e} Pa, lateraux={sides}");
+}
