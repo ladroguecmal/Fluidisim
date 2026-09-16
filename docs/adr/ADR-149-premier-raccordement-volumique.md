@@ -53,3 +53,9 @@ après réception. Le taux de réflexion dépend des modes et des bords ; aucun 
 hérité du véhicule B-S27 n'est revendiqué ici. Cette éponge ne transporte pas η.
 
 Réception : [RACCORDEMENT-DELTA-S250](../validation/RACCORDEMENT-DELTA-S250.md).
+
+**Correction factuelle S250, 2026-09-16.** L'attribution du profil cubique à ADR-005/046
+ci-dessus est erronée : ADR-046 §8, point 4, indique un profil quadratique. Le code
+applique donc `σ=σ_max max(1-d/L,0)^2`. Aux bords, D reprend les extensions du MAC ;
+sur la face verticale du couvercle, sa dérivée verticale est unilatérale et la vitesse
+horizontale interpolée depuis la dernière rangée. Aucun ordre deux au bord n'est revendiqué.

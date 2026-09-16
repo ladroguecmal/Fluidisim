@@ -140,6 +140,28 @@ fn build(nx: usize, nz: usize, dx: f32, g: f32) -> (Volume, Arena) {
 }
 
 #[test]
+fn perturbation_step_has_no_runtime_allocation_s250() {
+    use water_core::{background::BackgroundSample, delta_projection::{BackgroundFaces,Sponge}, SimTime};
+    struct Frozen;
+    impl MonotonicClock for Frozen { fn now_ns(&self)->u64 {0} }
+    let (mut v,mut arena)=build(32,16,0.25,9.81);
+    let mut u=vec![BackgroundSample::default();v.velocity_u().len()];
+    let w=vec![BackgroundSample::default();v.velocity_w().len()];
+    for (i,s) in u.iter_mut().enumerate() {s.du_dt[0]=(i as f32*0.17).sin();}
+    let bg=BackgroundFaces{domain:v.domain(),time:SimTime(0),density:1025.,gravity:9.81,u:&u,w:&w};
+    arena.seal();
+    let (result,allocations)=measured(||v.step_perturbation(SimTime(0),1000,2000,1_000_000,
+        &bg,Sponge{width_m:1.,rate_per_s:2.},&Jobs,&Frozen));
+    assert_eq!(result.unwrap().advanced_us,1000);
+    assert_eq!(allocations,0);
+    assert_eq!(arena.stats().refused_after_seal,0);
+    let (result,allocations)=measured(||v.step_perturbation(SimTime(0),1000,2000,0,
+        &bg,Sponge::default(),&Jobs,&Frozen));
+    assert_eq!(result.unwrap().advanced_us,0);
+    assert_eq!(allocations,0);
+}
+
+#[test]
 fn global_allocator_sees_counterexample_but_no_step_allocations() {
     let (_, count) = measured(|| {
         let mut v = Vec::with_capacity(16);

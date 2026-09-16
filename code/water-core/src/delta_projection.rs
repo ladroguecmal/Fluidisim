@@ -50,6 +50,9 @@ mod mobile;
 // S245 : hiérarchie multigrille, préconditionneur du chemin à couvercle fixe (MULTIGRILLE-S245).
 #[path = "delta_multigrid.rs"]
 mod multigrid;
+#[path = "delta_coupling.rs"]
+mod coupling;
+pub use coupling::{BackgroundFaces, Sponge};
 pub use mobile::SURFACE_THETA_MIN;
 
 // S238 P3 : trace de mesure du plancher (tests seulement) — à chaque vrai résidu recalculé :
@@ -134,6 +137,10 @@ pub enum Error {
     Clock,
     /// Le mode évolutif refuse de transporter la surface avec une pression non convergée.
     Convergence,
+    /// Échantillons d'un autre domaine, instant, milieu ou mode de surface.
+    BackgroundContext,
+    /// Le fond fourni dépend de y ou porte une vitesse transverse : pas une coupe x-z.
+    NonPlanar,
 }
 
 /// Pas de surface linéarisée : durée exacte, zéro avancée sur expiration.
