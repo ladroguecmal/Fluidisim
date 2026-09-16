@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S253 — en cours
+Session : S253 — terminée
 Agent : Claude Opus 5, Claude Code ; fichiers, git, cargo et Python disponibles.
 Entrée : « continue ». Master propre 7e3e1d8, une seule copie, archive B conservée.
 Quatrième session du raccordement B/W→δ : justifiée au journal S252 (chemin de J2 et B4).
@@ -94,7 +94,7 @@ z > 0), multigrille/affinage du mode mobile, 3D, rendu, ordre d'ADR-147.
   (valeurs fantômes homogènes) ; essai au premier pas à 128 colonnes, témoin refusé.
 - [x] **P7c** — réception complète 64/128 aux deux amplitudes, coût séparé sans concurrence.
 - [x] **P8** — suite, empreinte, coût et preuve.
-- [ ] **P9** — rituel §6 : file, trajectoire, journal et jeton.
+- [x] **P9** — rituel §6 : file, trajectoire, journal et jeton.
 
 ### Notes de reprise
 

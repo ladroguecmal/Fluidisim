@@ -50,6 +50,7 @@
 - [Premier raccordement volumique B/W→δ et démarrage plat refusé](validation/RACCORDEMENT-DELTA-S250.md).
 - [Démarrage couplé plat : oracle f64, affinage de divergence, coût et attribution par pas](validation/DEMARRAGE-PLAT-S251.md).
 - [Multigrille : le β du gradient conjugué, le coût du démarrage plat et 32 768 mailles](validation/MULTIGRILLE-BETA-S252.md).
+- [Surface mobile couplée B/W→δ contre HOS : construction, témoin, affinage et réception](validation/SURFACE-COUPLEE-S253.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).
@@ -217,6 +218,8 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-149](adr/ADR-149-premier-raccordement-volumique.md) | Premier raccordement volumique B/W→δ à surface imposée |
 | [ADR-150](adr/ADR-150-correction-de-divergence-couplee.md) | Corriger le défaut de divergence sur la vitesse couplée, une fois, au plancher |
 | [ADR-151](adr/ADR-151-affinage-au-pas-fixe-et-travail-compte.md) | L'affinage de divergence vaut aussi pour le pas à couvercle fixe ; le rapport compte tout le travail |
+| [ADR-152](adr/ADR-152-surface-mobile-couplee.md) | Surface mobile couplée : géométrie totale, hauteur perturbative, bande du fond |
+| [ADR-153](adr/ADR-153-affinage-en-mode-mobile-couple.md) | Affiner la divergence au plancher dans le pas couplé mobile |
 
 ## Travail et historique
 

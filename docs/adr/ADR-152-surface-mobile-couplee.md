@@ -56,3 +56,7 @@ domaine :
 - la **relaxation de `η'`** vers zéro, la multigrille et l'affinage du mode mobile.
 
 [Protocole et réception](../validation/SURFACE-COUPLEE-S253.md).
+
+**Note S253, 2026-09-16.** L'exclusion de l'affinage en mode mobile (en-tête et dernière liste) est
+levée pour le pas couplé par [ADR-153](ADR-153-affinage-en-mode-mobile-couple.md), après un refus
+au premier pas à 128 colonnes. Le pas S237 total reste sans affinage.

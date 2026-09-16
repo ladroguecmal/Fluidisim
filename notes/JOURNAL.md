@@ -13076,3 +13076,49 @@ jour ; feuille de route, index, L328, jeton. Invariants relus : I-05 (l'affinage
 budget mural, refus atomique), I-06 (même fonction d'affinage, zéro allocation testée en S251,
 tampon préalloué), I-08 (f32), I-14 (aucune valeur nouvelle, seuils S199 inchangés). Aucun
 worktree ni distant touché.
+
+## S253 — La surface mobile couplée au fond B/W, reçue contre HOS
+
+**2026-09-16, Claude Opus 5.** Entrée « continue », master propre 7e3e1d8, copie unique, archive B
+conservée. Plan `57cfad3`, ADR-152 et protocole `0bbf607`, fond d'oracle `6f6a35a`, géométrie
+`e7d7ca6`, pas `373efe8`, essais `f3091e5`, banc `2df8b71`, plan amendé `d1d0847`, ADR-153
+`a9aa4b8`, réception `898b21f`, preuve `94787b1`.
+
+**Capacité reçue, maillons 0.** Un domaine δ **né à zéro** sous un fond B/W linéaire suit une surface
+géométriquement mobile : `Volume::step_perturbation_mobile` (ADR-152). `eta` porte `repos + η'` ;
+la géométrie est totale (`ζ = η' + ζ_fond`) ; les fantômes reçoivent `ρg(z_Γ − repos) − P_fond(Γ)` ;
+la cinématique ajoute la bande `∫₀^ζ U`, qui contient exactement le résidu cinématique d'un fond
+linéaire. Contre HOS M=3 (onde stationnaire S237, fond = ordre un analytique), à 128 colonnes :
+5 cm profil **0,162 %**, `b₂` **0,34 %** ; 10 cm **0,213 %**, **0,53 %**. Tout est décroissant de
+32 à 128, et meilleur que le solveur total, sauf deux cases. Coût à 128 colonnes : 265–277 ms de
+médiane, contre 260–262 ms pour le total.
+
+**Deux défauts trouvés en cours de lot, publiés.** (1) Le premier **témoin** éteignait une partie
+d'ordre un (`ρg·ζ_fond` des fantômes latéraux) : il divergeait, et « passait » donc le critère pour
+une mauvaise raison. Corrigé par une note datée avant les critères 3 et 4 : 99,56 % contre 2,17 %
+(L329). (2) **Refus au premier pas** à 64 et 128 colonnes : A283 en mode mobile, la petite vitesse
+initiale butant sur le plancher f32. Plan amendé, puis ADR-153 : affinage d'ADR-150 à valeurs
+fantômes homogènes. Premier pas à 128 colonnes reçu, `D = 6,7·10⁻⁸`.
+
+**Preuves.** Neuf essais : fond incompressible et linéaire, fantômes contre la pression analytique,
+identité au bit à fond nul avec S237, refus, expiration, allocation nulle, témoin, premier pas à
+128 colonnes, diagnostic. Suite **459 / 18 ignorés / 0**. `delta_precision` identique hors temps et
+octets alloués ; empreinte 0xfb12b2092df4ee6d ; banc S237 identique à 32 colonnes.
+[Preuve](../docs/validation/SURFACE-COUPLEE-S253.md).
+
+**Limites.** Fond d'oracle analytique : B refuse `z > 0` (ADR-113), et le prolongement de Taylor
+d'ordre un n'est pas incompressible (A286). Bassin à murs : pas de bords ouverts ni de relaxation
+de `η'`. Frontières du total absentes (`W(fond) ≠ 0`, coques). Pas de multigrille en mode mobile
+(A276), pas de 3D, pas d'I-05 mural. Le pas S237 total n'a pas l'affinage.
+
+**Suite.** S254 : A286, prolongement incompressible de B/W au-dessus du plan moyen, pour que le pas
+couplé consomme la vraie mer ; reçu contre l'oracle S253. Viendront ensuite les bords ouverts
+(relaxation de `η'`, éponge) et les frontières du total. Cinquième session du raccordement : c'est
+toujours le chemin de J2 (domaines pris dans le système) et de B4. Le lot de coût δ (ordre
+d'ADR-147, multigrille en mode mobile) garde son déclencheur. Aucun arbitrage utilisateur.
+
+**Rituel.** File active relue ; A286 ouverte ; J2, A50 et A276 actualisés ; feuille de route,
+index, notes datées ADR-149 et ADR-152, L329, jeton. Invariants relus : I-05 (budget et refus
+atomiques, affinage compris), I-06 (zéro allocation testée), I-08 (f32), I-12 (naissance à zéro,
+démarrage reçu), I-14 (tolérances S237/S199 inchangées, oracle cité). Aucun worktree ni distant
+touché.

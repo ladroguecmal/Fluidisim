@@ -59,3 +59,8 @@ ci-dessus est erronée : ADR-046 §8, point 4, indique un profil quadratique. Le
 applique donc `σ=σ_max max(1-d/L,0)^2`. Aux bords, D reprend les extensions du MAC ;
 sur la face verticale du couvercle, sa dérivée verticale est unilatérale et la vitesse
 horizontale interpolée depuis la dernière rangée. Aucun ordre deux au bord n'est revendiqué.
+
+**Note S253, 2026-09-16.** Les résidus de surface annoncés ci-dessus « avant couplage mobile » sont
+construits par [ADR-152](ADR-152-surface-mobile-couplee.md) : valeurs fantômes corrigées de la
+pression du fond et bande cinématique. Ils sont reçus sous un fond linéaire analytique. Les
+frontières du total restent à construire.

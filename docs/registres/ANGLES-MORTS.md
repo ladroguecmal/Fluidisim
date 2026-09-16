@@ -3586,3 +3586,13 @@ d'ADR-147 étaient faux, et l'explication d'A275 aussi. Corrigé et reproduit pa
 par affinage. **Leçon** : un préconditionneur n'est éprouvé qu'avec le solveur qui l'emploie.
 L'essai de symétrie du cycle passait ; aucun essai ne confrontait la récurrence au vrai résidu. L328.
 [Preuve](../validation/MULTIGRILLE-BETA-S252.md).
+
+**A286 — S253, 2026-09-16 (sévérité 2, ouverte).** Le pas couplé mobile (ADR-152) exige un fond
+prolongé au-dessus du plan moyen **de façon incompressible**, avec un `S` calculé sur ses propres
+champs. Le fournisseur B refuse `z > 0` (ADR-113). Le prolongement de Taylor d'ordre un n'est pas
+incompressible (`div = z·U_xz`). Le prolongement analytique `e^{kz}`, employé par l'oracle S253 pour
+un seul mode, amplifie les composantes courtes d'une mer large bande sous les crêtes des longues.
+La réception S253 ne vaut donc que pour ce fond d'oracle : la vraie mer B/W n'est pas raccordée.
+Déclencheur : S254, avant tout domaine couplé sous B réel. Choisir un prolongement borné et
+incompressible (par exemple `U` constant et `W` fermé par continuité), et le recevoir contre
+l'oracle S253. [Preuve](../validation/SURFACE-COUPLEE-S253.md).

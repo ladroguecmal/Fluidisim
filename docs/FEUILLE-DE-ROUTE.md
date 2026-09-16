@@ -180,8 +180,14 @@ et zéro allocation. Vingt pas reçus à 16×8 ; [preuve](validation/RACCORDEMEN
 f64 indépendante (vitesse ≤2,2·10⁻⁶ relatif), par un affinage unique de divergence au
 plancher (ADR-150) ; vingt pas, reprise au bit, zéro allocation. Coût ×40 à 32×16 attribué
 en S252 au gradient conjugué multigrille fautif (A285) : 2,53 ms de médiane une fois corrigé ;
-[preuve](validation/DEMARRAGE-PLAT-S251.md). Restent résidus de surface mobile et
-frontières du total ; ni raccordement au rendu ni B4 global reçus.
+[preuve](validation/DEMARRAGE-PLAT-S251.md).
+**S253 : surface mobile couplée reçue** — `step_perturbation_mobile` (ADR-152) : géométrie totale,
+fantômes corrigés de la pression du fond, bande cinématique ; affinage au plancher (ADR-153). Un
+domaine né à zéro sous un fond linéaire reconstruit la part non linéaire de HOS M=3. À 128
+colonnes : 5 cm 0,162 % / 0,34 %, 10 cm 0,213 % / 0,53 %, mieux que le solveur total ; coût
+comparable (265–277 ms). [Preuve](validation/SURFACE-COUPLEE-S253.md). Restent le prolongement
+de B réel au-dessus du plan moyen (A286), les bords ouverts, les frontières du total, le
+raccordement au rendu et B4 global.
 
 *Bancs* : **B3** (famille de δ) quand un candidat atteint ses critères ou qu'un second existe ;
 **B4** (régime perturbatif, volets restants) sur les cas livrés ; **B5** (blocs épars) quand

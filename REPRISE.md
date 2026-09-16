@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-16 21:30 +02:00
+JETON            : libre
+Battement        : 2026-09-16 21:34 +02:00
 Agent            : Claude Opus 5, Claude Code (fichiers, git, cargo, Python, accès web)
-Session en cours : S253 — surface mobile couplée B/W→δ contre HOS M=3
-Dernière session : S252 — β du gradient conjugué multigrille corrigé (A285) ; 32 768 mailles reçues par affinage (ADR-151)
-Session suivante : S253 — surface mobile couplée B/W→δ contre HOS M=3 (dérivation au journal S252)
+Session en cours : aucune
+Dernière session : S253 — surface mobile couplée B/W→δ reçue contre HOS M=3 (ADR-152/153, fond linéaire analytique)
+Session suivante : S254 — A286 : prolongement incompressible de B/W au-dessus du plan moyen, reçu contre l'oracle S253
 Maillons        : 0
 
 ```
@@ -87,7 +87,7 @@ disjointes 67 à 73 % du pas, réductions 12-13 %, itérations doublant par raff
 **286,2 ms par pas à 32 768 mailles** — 143 fois le budget. Le parallélisme est **fermé** pour cette
 boucle (125 µs par fil contre 21,7 de pass) ; **la multigrille est le seul levier dont le gain croît
 avec la taille** (A276, [carte](docs/validation/COUT-DELTA-S244.md)). δ MAC x-z possède une **surface géométriquement mobile** reçue contre
-l'onde stationnaire HOS d'ordre 3 (surface graphe, sans 3D, cavité, scénario B3 ni I-05 complet) ; sa
+l'onde stationnaire HOS d'ordre 3 (surface graphe, sans 3D, cavité, scénario B3 ni I-05 complet), **couplée depuis S253 à un fond B/W linéaire** (ADR-152/153 ; B réel au-dessus du plan moyen : A286) ; sa
 pression f32 s'arrête à sa précision représentable (ADR-143) et **tient la tolérance physique de S199
 ou se déclare dégradée** (ADR-144) — tenue jusqu'à 8 192 mailles, et **à 32 768** par le repli multigrille (ADR-147) suivi, depuis S252, d'un affinage de divergence (ADR-151 ; β du gradient multigrille corrigé, A285) ; plancher
 des lignes à fantôme de surface non borné (A274). V : plans orientés et restauration locale reçus.

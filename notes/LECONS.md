@@ -5564,3 +5564,19 @@ Trois choses généralisent.
    revendiquer une cause, se demander ce qui changerait si elle l'était.
 
 Famille de L322 (un critère qui mord) et de L326 (étalonner avant d'employer).
+
+## L329 — Un témoin s'éprouve à l'ordre qu'il prétend garder
+
+*(S253)* Le témoin « sans résidus de surface » devait éteindre les termes d'ordre deux. Il
+éteignait aussi `ρg·ζ_fond` sur les fantômes latéraux, un terme d'**ordre un**. Il a divergé, et
+une divergence donne un écart infini, supérieur à la tolérance de 20 % : le critère « passait »
+pour une raison fausse. Corrigé en conservant la pression linéarisée, il rend 99,56 % sans
+diverger.
+
+1. **Un témoin retire ce qu'il nomme, et rien d'autre.** Avant de mesurer, vérifier qu'il reste
+   exact à l'ordre inférieur, ici la dynamique linéaire. Sinon, il mesure autre chose que ce qu'il
+   annonce.
+2. **Un témoin qui échoue trop fort est aussi suspect qu'un candidat qui réussit trop bien.** Une
+   divergence n'est pas un écart mesuré : c'est le signe que l'instrument lui-même est faux.
+
+Famille de L322 (un critère qui mord pour la bonne raison) et de L328.
