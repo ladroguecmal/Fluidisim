@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-16 21:34 +02:00
-Agent            : Claude Opus 5, Claude Code (fichiers, git, cargo, Python, accès web)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-16 21:42 +02:00
+Agent            : Claude Opus 5, Claude Code (fichiers, git, cargo, Python, GPU local, accès web)
+Session en cours : S254 — revue visuelle ouverte avec l'utilisateur superviseur ; A286 prolongement du fond
 Dernière session : S253 — surface mobile couplée B/W→δ reçue contre HOS M=3 (ADR-152/153, fond linéaire analytique)
-Session suivante : S254 — A286 : prolongement incompressible de B/W au-dessus du plan moyen, reçu contre l'oracle S253
+Session suivante : à fixer au rituel de S254
 Maillons        : 0
 
 ```

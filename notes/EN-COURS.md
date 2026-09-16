@@ -58,96 +58,48 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S253 — terminée
-Agent : Claude Opus 5, Claude Code ; fichiers, git, cargo et Python disponibles.
-Entrée : « continue ». Master propre 7e3e1d8, une seule copie, archive B conservée.
-Quatrième session du raccordement B/W→δ : justifiée au journal S252 (chemin de J2 et B4).
+Session : S254 — en cours
+Agent : Claude Opus 5, Claude Code ; fichiers, git, cargo, Python et GPU local disponibles.
+Entrée (2026-09-16 21:39) : l'utilisateur reprend le projet **comme superviseur des rendus
+visuels** ; il enverra, à la demande, des références réelles et aidera à comprendre la réalité et
+la perception humaine. « Tu vas continuer de travailler. » Master propre d9c6a35, une seule
+copie, archive B conservée, jeton libre.
 
-Objectif (A50/J2) : premier couplage B/W→δ à **surface géométriquement mobile**, consommé par
-un nouveau pas `step_perturbation_mobile`. `eta` = repos + η' (née à zéro, I-12) ; géométrie
-mouillée totale ζ = η' + ζ_fond, ζ_fond lu dans `eta` des échantillons ; valeur fantôme
-p'(Γ) = ρg(z_Γ − repos) − P_fond(Γ), P_fond de la face voisine corrigé au premier ordre ;
-cinématique η'^{n+1} = η' − (dt/dx)Δ[Q_v(ζ) + bande], bande = flux de U entre le plan moyen
-et ζ. Exact pour un fond **linéaire** (ζ_t = W(0)), prolongé de façon incompressible au-dessus
-du plan moyen, sans flux au fond du domaine. Dérivation : journal S252.
+Deux objectifs, dans cet ordre.
 
-Réception, écrite avant code (détail au protocole P2). a) fond nul : identité au bit avec
-step_surface_mobile ; b) refus et expiration atomiques, zéro allocation ; c) onde stationnaire
-S237 (L = h = 2 m) depuis le repos, fond = ordre un de profondeur finie prolongé
-analytiquement, δ né à zéro, contre HOS M=3 : critères S237 — profil ≤2 % de a à 128 colonnes
-et décroissant 32→128, b₂ ≤20 % du maximum HOS à 128 et décroissant (a = 5 et 10 cm) ; S237
-total en regard ; d) témoin sans résidus de surface (commutateur de test) : b₂ hors 20 %
-contre l'ordre deux analytique. Critère manqué publié tel quel ; aucune tolérance déplacée.
-Hors lot : frontières du total (W(fond) ≠ 0), prolongement de B en production (ADR-113 refuse
-z > 0), multigrille/affinage du mode mobile, 3D, rendu, ordre d'ADR-147.
+**A. Ouvrir la revue visuelle.** Aucune réception perceptive n'a jamais été possible (COUPURE-S249,
+B4 perception, A282) : il manquait un observateur humain et des références. Critère : protocole
+écrit (ce qui est envoyé, ce qui revient, comment un verdict se consigne sans devenir une
+réception physique), rendus reproductibles à poses et âges publiés avec empreinte, envoyés à
+l'utilisateur avec la liste précise des références demandées. Arrêt : revue R1 envoyée et
+consignée « en attente ». Aucun réglage visuel avant retour des références.
+
+**B. A286 — prolongement du fond au-dessus du plan moyen**, suite de S253 (cinquième session du
+raccordement, chemin de J2/B4, justifiée S253). Règle candidate : vitesse horizontale constante
+au-dessus du plan moyen, `W(z) = W(0) − z·(∂xU + ∂yV)(0)` (incompressible exactement), pression
+de Taylor d'ordre un en z, **toutes les dérivées calculées analytiquement sur ce même champ**
+(dérivées secondes des modes à z = 0), `S` sur ses propres champs. Réception écrite avant code
+(ADR et protocole) : continuité au bit à z = 0, divergence nulle à l'arrondi, dérivées contre
+différences finies, puis banc couplé S253 avec ce prolongement à la place du prolongement
+analytique — critères S253 (profil ≤2 %, `b₂` ≤20 % à 128 colonnes, décroissants), chiffres S253
+en regard. Ensuite fournisseur B de production au-dessus du plan moyen. Hors lot : couches W
+(impact, pression) au-dessus du plan moyen si le temps manque, bords ouverts, frontières du total.
 
 ### Plan
 
-- [x] **P1** — amorce, lectures et plan seuls.
-- [x] **P2** — ADR-152 et protocole de réception, avant code.
-- [x] **P3** — fournisseur analytique de test partagé (exemple et essais) et ses contrôles.
-- [x] **P4** — cœur : hauteur totale, valeurs fantômes du fond, tampons comptés ; S237 au bit.
-- [x] **P5** — cœur : pas perturbatif mobile, transport de η' et bande, atomicité.
-- [x] **P6** — essais : identité au bit, refus, expiration, allocations, témoin sans résidus.
-- [x] **P7** — banc HOS couplé 32/64/128, 5 et 10 cm : réception ou refus publié.
-- [x] **P7b** — ADR-153 : affinage de divergence au plancher étendu au pas couplé mobile
-  (valeurs fantômes homogènes) ; essai au premier pas à 128 colonnes, témoin refusé.
-- [x] **P7c** — réception complète 64/128 aux deux amplitudes, coût séparé sans concurrence.
-- [x] **P8** — suite, empreinte, coût et preuve.
-- [x] **P9** — rituel §6 : file, trajectoire, journal et jeton.
+- [>] **P1** — amorce, lectures, jeton et plan seuls.
+- [ ] **P2** — protocole de revue visuelle (document de validation), rôle dans REPRISE §2,
+  ligne de METHODE, index.
+- [ ] **P3** — hôte : mode `--revue` à poses et âges fixes, captures avec empreinte, PNG ; revue R1
+  envoyée à l'utilisateur avec les références demandées, consignée en attente.
+- [ ] **P4** — ADR-154 et protocole de réception d'A286, avant code.
+- [ ] **P5** — oracle : prolongement du mode stationnaire selon la règle, contrôles
+  (continuité, divergence, dérivées, `S`).
+- [ ] **P6** — banc couplé S253 avec ce prolongement, 32/64/128 × 5/10 cm : réception ou refus publié.
+- [ ] **P7** — cœur : fournisseur B au-dessus du plan moyen selon la règle, essais contre la
+  référence et contrats de refus.
+- [ ] **P8** — suite, empreinte, preuve.
+- [ ] **P9** — rituel §6 : file, trajectoire, journal et jeton.
 
 ### Notes de reprise
 
-Chiffres S237 total mobile (profil / b₂) : 10 cm 1,714/1,71 % (32), 0,592/0,98 (64), 0,230/0,43
-(128) ; 5 cm 0,850/2,44 (32), 0,550/1,41 (64), 128 reçu S238 à 0,252/0,71. HOS : `examples/
-support/nl_surface.rs` ; ordre deux fermé `second_order_b2` dans `examples/delta_mobile.rs`.
-Prolongement de Taylor d'ordre un **non incompressible** (div = z·U_xz) : prolongement analytique
-du mode de profondeur finie pour l'oracle. Lectures géométriques de `eta` : toutes dans
-`delta_mobile.rs` (wet, ghost_up, ghost_side, surface_in_bounds, transport) ; `lid` et le
-transport linéaire lisent `eta` hors mode mobile. Identité a) : somme S237 au bit, bande ajoutée
-à part ; ajout des valeurs du fond seulement en mode couplé.
-P4 : `height(i)` (η ou ζ totale), fantômes + `ghost_bg_up`/`ghost_bg_side` en mode couplé,
-`prepare_surface_background` ; +(nu + 2·nx) f32 comptés, essai de comptabilité mis à jour.
-Essai fantômes contre P analytique à l'interface : 32 colonnes vertes, 9 latéraux, borne de
-Taylor 1,35 Pa. Tests δ 53/11 ignorés, exécution 11. `delta_mobile essai` = S237 (0,850 % / 2,44 %).
-
-P5 : step_perturbation_mobile et transport_coupled ; surface_in_bounds et extrapolate_mobile
-passent en pub(super). Essai critère 1 (fond nul) : 50 pas identiques au bit à S237, rapport compris.
-
-P6 : essais refus (contexte, forme, non planaire, eta de colonne, garde) et expiration (5 coupures),
-allocation nulle (pas et expiration). Témoin critère 5 : premier témoin fautif (éteignait −P_fond
-latéral en entier, ordre un) — divergence 0,70 m/s au pas 100, refus Domain au pas 1145 ; corrigé
-(pression du fond linéarisée ρg·ζ_fond(x_Γ), bande éteinte), note datée au protocole. Résultat :
-couplé b₂ à 2,17 % de l'ordre deux, témoin 99,56 % (aucune harmonique : S volumique est un gradient).
-Tests δ 57/11 ignorés, exécution 12.
-
-P7 : banc `delta_mobile couple` (mode Coupled, fond analytique partagé), `couple_cas <mode> <a> <nx>`,
-`DELTA_MOBILE_PAS` pour le coût. Premier lancement série arrêté (35 min) : cas couplés relancés en
-trois processus (précision indépendante de la concurrence ; coût à mesurer à part). Contre HOS
-(profil / b₂) : 5 cm 32 → 1,214 % / 1,62 % ; 64 → 0,276 / 0,54 ; 10 cm 32 → 0,908 / 1,51.
-**Refus `Convergence` au pas 1** : 10 cm/64, 5 cm/128, 10 cm/128. Test ignoré
-`coupled_mobile_first_step_refusal_diagnosis_s253` : 128/5 cm dégradé au plancher, D_franche
-1,53e-5, vitesse corrigée max 1,1e-4 m/s (A283 en mode mobile) ; 64/10 cm reçu en contrôle
-illimité (D_franche 8,1e-6) mais refusé sous budget (réductions découpées) : marge. Total S237
-refait identique à 32/64 (0,850/2,44 ; 0,552/1,41).
-
-**Amendement avant P7b.** Le protocole prévoyait de s'arrêter au diagnostic. Le remède est
-une technique déjà reçue deux fois (ADR-150 couvercle couplé, ADR-151 couvercle fixe) : l'étendre
-au pas couplé mobile est une décision bornée, déclarée ici avant tout code. Le pas S237 total
-n'est pas touché (aucun refus observé). Critères de P7b : sans affinage, le premier pas à
-128/5 cm reste refusé ; avec, reçu, `refinements = 1`, D_franche ≤ 1e-5, mode homogène éteint à
-toute sortie. P7c : critères 3 et 4 du protocole inchangés.
-
-P7b : homogeneous_ghost (valeurs fantômes nulles) posé par refine_divergence avec homogeneous_lid ;
-step_perturbation_mobile affine si dégradé au plancher. Essai 128/5 cm (release) : témoin refusé
-(690 it, D_franche 1,53e-5), pas reçu (1 145 it, D 6,67e-8), expiration tardive intacte. Tests δ
-58/12 ignorés, exécution 12, S237 essai inchangé. ADR-153 écrit.
-
-P7c : réception (3 processus parallèles, précision seule) — profil / b₂ contre HOS : 10 cm 64 →
-0,379 % / 0,69 % ; 5 cm 128 → 0,162 / 0,34 ; 10 cm 128 → 0,213 / 0,53. Critères 3 et 4 tenus,
-décroissants. Volume ≤1,3e-8 m ; pas au plancher 116 (5 cm/128) et 27 (10 cm/128), tous reçus.
-Coût propre, séquentiel, 200 pas, 128/5 cm, secteur 99 % : total 259,6 / 261,8 ms médiane
-(max 349 / 377) ; couplé 264,8 / 277,4 (max 690 / 671, premier pas affiné), hors échantillons.
-
-P8 : suite release 459 / 18 ignorés / 0 échec ; delta_precision identique hors temps et octets
-alloués (+4·(nu+2nx), attendu) ; empreinte 0xfb12b2092df4ee6d. Preuve SURFACE-COUPLEE-S253 §2–§6.
