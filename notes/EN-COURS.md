@@ -110,18 +110,12 @@ P3 : **mer.ppm** (768x624, emprise du sillage, age 12 s ou --verify compte quatr
 **mer_perturbation.ppm**. Le fond sature a **0,988644 m** et **noie tout** ; la perturbation W+delta
 vaut **0,149809 m**, soit **15,15 %** du fond. Separees, les couches d ADR-001 se lisent : trois
 sillages en V avec leur source, quatre anneaux d impact.
-Ajoute Aperçu PNG d'une image de banc PPM  Python standard, sans réseau, sans dépendance.
-
-ADR-124 autorise les images locales de banc « PPM et preview ». Les PPM que le dépôt écrit ne
-s'ouvrent pas dans la plupart des visionneuses ; cet outil en fait un PNG **à côté**, sans toucher
-à l'original et sans rien publier.
-
-    python outils/apercu_ppm.py captures/s248/mer.ppm [sortie.png]
-
-Il ne lit que du P6 binaire à 255 niveaux, le seul format que le dépôt écrit. — PNG a cote du PPM, Python standard, sans reseau ni dependance ;
-ADR-124 autorise  PPM et preview , et le depot n avait pas de quoi regarder ses propres images.
- rend B seul **par le meme chemin** que  (conversion monde
-vers local de S214), pour que la soustraction soit exacte et non approchee.
+Ajoute `outils/apercu_ppm.py` : un PNG a cote du PPM, Python standard, sans reseau ni
+dependance. ADR-124 autorise « PPM et preview », et le depot n avait pas de quoi regarder ses
+propres images.
+`FrameData::background_only` rend B seul **par le meme chemin** que `references` (conversion
+monde vers local de S214, partagee par les trois couches), pour que la soustraction soit
+exacte et non approchee.
 
 ---
 
