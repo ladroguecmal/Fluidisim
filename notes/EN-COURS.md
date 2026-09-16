@@ -95,10 +95,10 @@ en regard. Ensuite fournisseur B de production au-dessus du plan moyen. Hors lot
 - [x] **P4** — ADR-154 et protocole de réception d'A286, avant code.
 - [x] **P5** — oracle : prolongement du mode stationnaire selon la règle, contrôles
   (continuité, divergence, dérivées, `S`).
-- [>] **P6** — banc couplé S253 avec ce prolongement, 32/64/128 × 5/10 cm : réception ou refus publié.
+- [x] **P6** — banc couplé S253 avec ce prolongement, 32/64/128 × 5/10 cm : réception ou refus publié.
 - [x] **P7** — cœur : fournisseur B au-dessus du plan moyen selon la règle, essais contre la
   référence et contrats de refus.
-- [ ] **P8** — suite, empreinte, preuve.
+- [x] **P8** — suite, empreinte, preuve.
 - [ ] **P9** — rituel §6 : file, trajectoire, journal et jeton.
 
 ### Notes de reprise
@@ -127,3 +127,7 @@ temporelle avant à t = 0 (troncature 0,025 contre tolérance 5e-3) ; remplacée
 centrée à t ≥ 1 ms, tolérance inchangée. Intégration : B de production (Hs 0,3, Tp 4, une
 composante), 50 pas couplés mobiles reçus, 590 faces mouillées au-dessus du plan moyen consommées ;
 `u'` max 6,6e-2 m/s près des murs contre 6,1e-3 à l'intérieur (U 0,29) : les murs, pas la règle.
+
+P6 fini (22:01) : 128 colonnes, 5 cm 0,168 % / 0,58 % ; 10 cm 0,244 % / 0,66 % — critères tenus,
+décroissants. P8 : première suite bloquée (LNK1104, `delta_mobile.exe` verrouillé par le banc en
+cours) ; relancée après : 463 / 18 ignorés / 0. Tests afficheur 16 / 1 ignoré / 0.
