@@ -78,8 +78,8 @@ Arrêt : chemin activé dans l'hôte, critères éprouvés, limites et coûts tr
 ### Plan
 
 - [x] **P1** — amorce, lectures ciblées, jeton et plan seuls.
-- [>] **P2** — décision et protocole : empreinte de projection, poids et bandes du sillage.
-- [ ] **P3** — filtre CPU/GPU et intégration au rendu, tests du contrat.
+- [x] **P2** — décision et protocole : empreinte de projection, poids et bandes du sillage.
+- [>] **P3** — filtre CPU/GPU et intégration au rendu, tests du contrat.
 - [ ] **P4** — réception GPU, comparaison au cœur et au témoin, coût et allocations.
 - [ ] **P5** — rituel §6 : preuves, file active, trajectoire, journal et jeton.
 
