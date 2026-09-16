@@ -206,3 +206,108 @@ fn spectral_tail_continues_band_density_s256() {
     assert_ne!(tail.hash(), band.hash());
     assert_eq!(bake(recipe).unwrap().hash(), band.hash());
 }
+
+/// S259, ADR-156 — mer multimodale et étalement : spectre au bit, loi inverse contre `s/(s+1)`,
+/// décorrélation rang/direction, largeur selon la fréquence, assemblage et refus
+/// (protocole MER-MULTIMODALE-S259, critères 1 à 5).
+#[test]
+fn multimodal_sea_and_directional_spreading_s259() {
+    use crate::background_spectrum::{assemble, bake, bake_directional, bake_tail, bake_tail_directional,
+        spread_offset_turns, Error, Recipe};
+    let wind = Recipe {
+        sea: SeaState { hs: 1.5, tp: 6.0, theta_turns: 0.12, components: 32, graine: 201 },
+        gravity: 9.81, gamma: 3.3, min_ratio: 0.5, max_ratio: 4.0, spread_turns: 0.25,
+    };
+    let swell = Recipe {
+        sea: SeaState { hs: 2.0, tp: 12.0, theta_turns: 0.0, components: 32, graine: 202 },
+        gravity: 9.81, gamma: 7.0, min_ratio: 0.7, max_ratio: 1.6, spread_turns: 0.0,
+    };
+    // 1. Spectre au bit, seules les directions changent.
+    let (fan, spread) = (bake(wind).unwrap(), bake_directional(wind, 10.0).unwrap());
+    for (a, b) in fan.components().iter().zip(spread.components()) {
+        assert_eq!(a.amplitude.to_bits(), b.amplitude.to_bits());
+        assert_eq!(a.k_turns_per_m.to_bits(), b.k_turns_per_m.to_bits());
+        assert_eq!(a.freq_q32, b.freq_q32);
+        assert_eq!(a.phase0, b.phase0);
+        assert!(((b.dir[0] * b.dir[0] + b.dir[1] * b.dir[1]) - 1.0).abs() <= 4.0 * f32::EPSILON);
+    }
+    let (tail_fan, tail) = (bake_tail(wind, 32.0, 64).unwrap(), bake_tail_directional(wind, 10.0, 32.0, 64).unwrap());
+    for (a, b) in tail_fan.components().iter().zip(tail.components()) {
+        assert_eq!(a.amplitude.to_bits(), b.amplitude.to_bits());
+        assert_eq!(a.k_turns_per_m.to_bits(), b.k_turns_per_m.to_bits());
+    }
+    assert_ne!(fan.hash(), spread.hash());
+    // 2. Loi inverse : E[cos Δθ] = s/(s+1).
+    for s in [0.3f32, 1.0, 10.0, 75.0] {
+        let n = 4096;
+        let mean = (0..n).map(|j| {
+            let turns = spread_offset_turns(s, (j as f32 + 0.5) / n as f32);
+            assert!(turns > -0.5 - 1e-6 && turns <= 0.5 + 1e-6);
+            (turns as f64 * std::f64::consts::TAU).cos()
+        }).sum::<f64>() / n as f64;
+        let expected = s as f64 / (s as f64 + 1.0);
+        println!("S259 loi s={s} E[cos]={mean:.5} attendu={expected:.5}");
+        assert!((mean / expected - 1.0).abs() <= 0.01, "s={s} : {mean} contre {expected}");
+    }
+    // 3. Décorrélation rang / direction (Spearman), mer de vent.
+    let offset = |c: &crate::Component, theta: f32| {
+        let angle = (c.dir[1] as f64).atan2(c.dir[0] as f64) / std::f64::consts::TAU;
+        let mut d = angle - theta as f64;
+        d -= d.round();
+        d
+    };
+    let ranks = |v: &[f64]| {
+        let mut idx: Vec<usize> = (0..v.len()).collect();
+        idx.sort_by(|&a, &b| v[a].total_cmp(&v[b]));
+        let mut r = vec![0.0; v.len()];
+        for (rank, &i) in idx.iter().enumerate() { r[i] = rank as f64; }
+        r
+    };
+    let offsets: Vec<f64> = spread.components().iter().map(|c| offset(c, 0.12)).collect();
+    let (rx, ry) = ((0..32).map(|i| i as f64).collect::<Vec<_>>(), ranks(&offsets));
+    let mean = 15.5;
+    let (mut num, mut dx, mut dy) = (0.0, 0.0, 0.0);
+    for i in 0..32 { num += (rx[i] - mean) * (ry[i] - mean); dx += (rx[i] - mean).powi(2); dy += (ry[i] - mean).powi(2); }
+    let rho = num / (dx * dy).sqrt();
+    let fan_offsets: Vec<f64> = fan.components().iter().map(|c| offset(c, 0.12)).collect();
+    let fan_rho = {
+        let ry = ranks(&fan_offsets);
+        let (mut n2, mut d2) = (0.0, 0.0);
+        for i in 0..32 { n2 += (rx[i] - mean) * (ry[i] - mean); d2 += (ry[i] - mean).powi(2); }
+        n2 / (dx * d2).sqrt()
+    };
+    println!("S259 spearman loi={rho:.3} fixture={fan_rho:.3} borne={:.3}", 3.0 / 32f64.sqrt());
+    assert!(rho.abs() <= 3.0 / 32f64.sqrt());
+    assert!(fan_rho > 0.99);
+    // 4. Largeur selon la fréquence : plus étroite au pic qu'au-delà de 2 fp.
+    let x_of = |c: &crate::Component| c.freq_q32 as f64 / 4_294_967_296.0 * 6.0;
+    let width = |lo: f64, hi: f64| {
+        let v: Vec<f64> = spread.components().iter().filter(|c| (lo..hi).contains(&x_of(c)))
+            .map(|c| offset(c, 0.12).abs()).collect();
+        (v.iter().sum::<f64>() / v.len() as f64, v.len())
+    };
+    let (peak, far) = (width(0.8, 1.25), width(2.0, 4.1));
+    println!("S259 largeur pic={:.4} tour ({} comp.) au-dela_2fp={:.4} tour ({} comp.)", peak.0, peak.1, far.0, far.1);
+    assert!(peak.0 < far.0);
+    // 5. Assemblage.
+    let swell_c = bake_directional(swell, 75.0).unwrap();
+    let sea = assemble(&[&spread, &swell_c]).unwrap();
+    assert_eq!(sea.components().len(), 64);
+    let m0: f64 = sea.components().iter().map(|c| 0.5 * (c.amplitude as f64).powi(2)).sum();
+    let expected = (1.5f64 * 1.5 + 2.0 * 2.0) / 16.0;
+    println!("S259 assemblage m0={m0:.6} attendu={expected:.6} Hs={:.4}", 4.0 * m0.sqrt());
+    assert!((m0 / expected - 1.0).abs() <= 1e-5);
+    assert_eq!(&sea.components()[..32].iter().map(|c| c.phase0).collect::<Vec<_>>(),
+        &spread.components().iter().map(|c| c.phase0).collect::<Vec<_>>());
+    assert!(sea.components()[32..].iter().zip(swell_c.components()).any(|(a, b)| a.phase0 != b.phase0));
+    assert!((0..32).all(|i| sea.components()[i].phase0 != sea.components()[32 + i].phase0));
+    assert_eq!(assemble(&[]).err(), Some(Error::Components));
+    let mut other = swell;
+    other.gravity = 9.8;
+    assert_eq!(assemble(&[&spread, &bake_directional(other, 75.0).unwrap()]).err(), Some(Error::Gravity));
+    let big = Recipe { sea: SeaState { components: 200, ..wind.sea }, ..wind };
+    let big = bake(big).unwrap();
+    assert_eq!(assemble(&[&big, &swell_c, &spread]).err(), Some(Error::Components));
+    assert_eq!(bake_directional(wind, 0.0).err(), Some(Error::Direction));
+    assert_eq!(bake_directional(wind, f32::NAN).err(), Some(Error::Direction));
+}

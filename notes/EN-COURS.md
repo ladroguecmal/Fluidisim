@@ -80,7 +80,7 @@ scène par défaut identique (R2 rejoué au bit, `--tail-verify` inchangé) ; co
 - [x] **P1** — amorce, jeton et plan seuls.
 - [x] **P2** — SPEC-001 §1 septies (Mitsuyasu, Goda, moment `s/(s+1)`), ADR-156, protocole
   MER-MULTIMODALE-S259, avant code.
-- [ ] **P3** — cœur : loi d'étalement et son inverse, `bake_directional`, queue directionnelle,
+- [x] **P3** — cœur : loi d'étalement et son inverse, `bake_directional`, queue directionnelle,
   assemblage de systèmes ; essais.
 - [ ] **P4** — hôte : nombre de composantes de B variable, scène `--houle`, vérification CPU/GPU.
 - [ ] **P5** — réception : hauteurs, scène par défaut au bit, coût, rendus R3 envoyés.
@@ -88,3 +88,9 @@ scène par défaut identique (R2 rejoué au bit, `--tail-verify` inchangé) ; co
 
 ### Notes de reprise
 
+P3 : `bake_directional`, `bake_tail_directional`, `assemble`, `spread_offset_turns` (table de répartition
+1 024 trapèzes, densité coupée au-delà de exp(−32) — `decay` n'accepte que 0..=32, premier jet en
+dépassement). Essai `multimodal_sea_and_directional_spreading_s259` : E[cos] 0,23078/0,50000/0,90910/
+0,98684 contre 0,23077/0,5/0,90909/0,98684 ; Spearman 0,012 (fixture 1,000, borne 0,530) ; largeur
+0,063 tour au pic (7 comp.) contre 0,155 au-delà de 2 fp (11) ; m0 0,390625 exact, Hs 2,5 m. Spectre et
+queue au bit ; empreinte V1 et essais du spectre 8/8.

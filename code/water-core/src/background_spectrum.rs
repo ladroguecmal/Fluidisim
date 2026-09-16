@@ -89,10 +89,55 @@ fn integral(lo: f32, hi: f32, lg: f32, p: u32, n: usize) -> f32 {
     sum * h / 3.0
 }
 
+/// Répartition des directions dans une cuisson. `Fan` : fixture V1 (direction liée au rang).
+/// `Spread` : ADR-156, `s_max` de Goda, `s` gelé au-delà de `edge·fp`.
+#[derive(Clone, Copy, Debug)]
+enum Directions { Fan, Spread { s_max: f32, edge: f32 } }
+
+/// `s(f/fp)` de Mitsuyasu (SPEC-001 §1 septies), gelé au-delà du bord de bande `edge`.
+fn spreading_s(s_max: f32, x: f32, edge: f32) -> f32 {
+    if x <= 1.0 { s_max * exp(5.0 * ln(x)) } else { s_max * exp(-2.5 * ln(x.min(edge))) }
+}
+
+/// Suite de Weyl `frac(½ + i·φ⁻¹)`, équirépartie et non monotone en `i`.
+fn weyl(i: usize) -> f32 {
+    let v = (0.5f64 + i as f64 * 0.618_033_988_749_894_9).fract();
+    v as f32
+}
+
+/// S259 — inverse de la répartition de `D ∝ cos^2s(Δθ/2)`, en **tours** dans `]−½, ½]`, pour
+/// `u ∈ ]0, 1[`. Symétrie : `φ = |Δθ|/2 ∈ [0, π/2]`, répartition cumulée de `cos^2s φ` par
+/// trapèzes sur 1 024 pas, recherche puis interpolation linéaire. f32, sans libm, sans allocation.
+pub(crate) fn spread_offset_turns(s: f32, u: f32) -> f32 {
+    const M: usize = 1024;
+    let mut g = [0.0f32; M + 1];
+    let step = 0.25 / M as f32; // φ en tours, de 0 à ¼
+    let density = |j: usize| {
+        let (_, c) = PhaseQ32::from_distance(1.0, j as f32 * step).sin_cos();
+        // `decay` tient pour 0..=32 ; au-delà, la densité relative vaut moins de 1,3·10⁻¹⁴.
+        let y = if c <= 0.0 { f32::INFINITY } else { -2.0 * s * ln(c) };
+        if y > 32.0 { 0.0 } else { crate::gaussian_spectrum::decay(y.max(0.0)) }
+    };
+    let mut previous = density(0);
+    for j in 1..=M {
+        let current = density(j);
+        g[j] = g[j - 1] + 0.5 * (previous + current);
+        previous = current;
+    }
+    let target = (2.0 * u - 1.0).abs() * g[M];
+    let mut j = 0;
+    while j + 1 < M && g[j + 1] < target { j += 1; }
+    let span = g[j + 1] - g[j];
+    let t = if span > 0.0 { ((target - g[j]) / span).clamp(0.0, 1.0) } else { 0.0 };
+    let phi = (j as f32 + t) * step;
+    // Δθ = 2φ, en tours ; signe de u − ½.
+    if u < 0.5 { -2.0 * phi } else { 2.0 * phi }
+}
+
 /// Cellules logarithmiques de `[lo, hi]·fp` : poids intégrés, composantes sans amplitude, somme des
 /// poids. `index0` décale les indices de phase (S256 : queue disjointe de la bande).
 #[allow(clippy::too_many_arguments)]
-fn cells(r: &Recipe, lg: f32, lo: f32, hi: f32, n: usize, index0: u64,
+fn cells(r: &Recipe, lg: f32, lo: f32, hi: f32, n: usize, index0: u64, dirs: Directions,
     out: &mut [Component], weights: &mut [f32]) -> Result<f32, Error> {
     let sea = r.sea;
     let (start, width) = (ln(lo), ln(hi) - ln(lo));
@@ -113,7 +158,15 @@ fn cells(r: &Recipe, lg: f32, lo: f32, hi: f32, n: usize, index0: u64,
         }
         let freq = crate::phase::freq_hz_to_q32(hz as f64);
         if freq == 0 { return Err(Error::NotRepresentable); }
-        let angle = sea.theta_turns + r.spread_turns * ((i as f32 + 0.5) / n as f32 - 0.5);
+        let angle = match dirs {
+            Directions::Fan => sea.theta_turns + r.spread_turns * ((i as f32 + 0.5) / n as f32 - 0.5),
+            // S259, ADR-156 : loi cos^2s de Mitsuyasu, tirage de Weyl indépendant du rang.
+            Directions::Spread { s_max, edge } => {
+                let s = spreading_s(s_max, x, edge);
+                let u = weyl(i);
+                sea.theta_turns + spread_offset_turns(s, u)
+            }
+        };
         let phase = PhaseQ32::from_distance(1.0, angle);
         let (sn, cs) = phase.sin_cos();
         let norm = (sn * sn + cs * cs).sqrt();
@@ -131,6 +184,17 @@ fn cells(r: &Recipe, lg: f32, lo: f32, hi: f32, n: usize, index0: u64,
 /// Queue de rendu : `4 < tail_ratio ≤ 64`, 16 à 256 composantes. Diagnostics : variance et
 /// moment d'ordre deux de la queue rapportés à ceux de la bande, continus.
 pub fn bake_tail(r: Recipe, tail_ratio: f32, count: usize) -> Result<Cooked, Error> {
+    bake_tail_inner(r, tail_ratio, count, Directions::Fan)
+}
+
+/// S259, ADR-156 — queue de `bake_tail` (amplitudes au bit), directions selon la loi, `s` gelé à sa
+/// valeur au bord de la bande représentée.
+pub fn bake_tail_directional(r: Recipe, s_max: f32, tail_ratio: f32, count: usize) -> Result<Cooked, Error> {
+    if !s_max.is_finite() || s_max <= 0.0 || s_max > 1000.0 { return Err(Error::Direction); }
+    bake_tail_inner(r, tail_ratio, count, Directions::Spread { s_max, edge: r.max_ratio })
+}
+
+fn bake_tail_inner(r: Recipe, tail_ratio: f32, count: usize, dirs: Directions) -> Result<Cooked, Error> {
     let band = bake(r)?;
     if !tail_ratio.is_finite() || tail_ratio <= r.max_ratio || tail_ratio > 64.0 { return Err(Error::Band); }
     if !(16..=MAX_COMPONENTS).contains(&count) { return Err(Error::Components); }
@@ -138,13 +202,13 @@ pub fn bake_tail(r: Recipe, tail_ratio: f32, count: usize) -> Result<Cooked, Err
     let mut scratch = [Component { amplitude: 0.0, k_turns_per_m: 0.0, dir: [0.0; 2], freq_q32: 0,
         phase0: PhaseQ32(0) }; MAX_COMPONENTS];
     let mut weights = [0.0; MAX_COMPONENTS];
-    let sum = cells(&r, lg, r.min_ratio, r.max_ratio, r.sea.components, 0, &mut scratch, &mut weights)?;
+    let sum = cells(&r, lg, r.min_ratio, r.max_ratio, r.sea.components, 0, Directions::Fan, &mut scratch, &mut weights)?;
     let mut tail = Recipe { min_ratio: r.max_ratio, max_ratio: tail_ratio, ..r };
     tail.sea.components = count;
     let mut out = Cooked { recipe: tail, components: scratch, diagnostics: Diagnostics {
         retained_m0: 0.0, retained_m2: 0.0 }, hash: 0 };
     let mut tail_weights = [0.0; MAX_COMPONENTS];
-    cells(&r, lg, r.max_ratio, tail_ratio, count, 1 << 32, &mut out.components, &mut tail_weights)?;
+    cells(&r, lg, r.max_ratio, tail_ratio, count, 1 << 32, dirs, &mut out.components, &mut tail_weights)?;
     for (c, weight) in out.components[..count].iter_mut().zip(tail_weights) {
         c.amplitude = r.sea.hs * ((weight / sum) * 0.125).sqrt();
         if !c.amplitude.is_finite() { return Err(Error::NotRepresentable); }
@@ -159,6 +223,7 @@ pub fn bake_tail(r: Recipe, tail_ratio: f32, count: usize) -> Result<Cooked, Err
     let mut h = Hasher64::new();
     h.write_u32(VERSION);
     h.write_u64(band.hash());
+    if let Directions::Spread { s_max, .. } = dirs { h.write_u32(0x5350_5244); h.write_f32(s_max); }
     h.write_f32(tail_ratio);
     h.write_u32(count as u32);
     for c in out.components() {
@@ -169,10 +234,55 @@ pub fn bake_tail(r: Recipe, tail_ratio: f32, count: usize) -> Result<Cooked, Err
     Ok(out)
 }
 
+/// S259, ADR-156 — **mer à plusieurs systèmes** : concaténation de cuissons de même gravité, au plus
+/// 256 composantes. Les phases du système `k` sont retirées sur les indices `k·2⁴⁰ + i` de sa graine :
+/// le premier système garde les siennes. Amplitudes, `k`, fréquences et directions inchangées.
+/// La recette publiée est celle du premier système, avec le nombre total de composantes.
+pub fn assemble(systems: &[&Cooked]) -> Result<Cooked, Error> {
+    let first = systems.first().ok_or(Error::Components)?;
+    let total: usize = systems.iter().map(|s| s.components().len()).sum();
+    if total > MAX_COMPONENTS { return Err(Error::Components); }
+    let gravity = first.recipe.gravity;
+    if systems.iter().any(|s| s.recipe.gravity.to_bits() != gravity.to_bits()) { return Err(Error::Gravity); }
+    let mut recipe = first.recipe;
+    recipe.sea.components = total;
+    let mut out = Cooked { recipe, components: [Component { amplitude: 0.0, k_turns_per_m: 0.0,
+        dir: [0.0; 2], freq_q32: 0, phase0: PhaseQ32(0) }; MAX_COMPONENTS],
+        diagnostics: first.diagnostics, hash: 0 };
+    let mut h = Hasher64::new();
+    h.write_u32(VERSION);
+    h.write_u32(0x4d55_4c54);
+    let mut at = 0;
+    for (k, system) in systems.iter().enumerate() {
+        h.write_u64(system.hash());
+        for (i, c) in system.components().iter().enumerate() {
+            let mut c = *c;
+            c.phase0 = phase_initiale(system.recipe.sea.graine, ((k as u64) << 40) + i as u64);
+            h.write_u32(c.phase0.0);
+            out.components[at] = c;
+            at += 1;
+        }
+    }
+    out.hash = h.finish();
+    Ok(out)
+}
+
 /// Profil V1 : gamma1..7, N32..256 et bande dans [0.5,4] contenant fp.
 /// Ces bornes délimitent la cuisson reçue, pas les mers autorisées du jeu.
 /// Les refus ne mutent aucun pool ni allocateur ; le résultat entier est publié sur succès.
 pub fn bake(r: Recipe) -> Result<Cooked, Error> {
+    bake_inner(r, Directions::Fan)
+}
+
+/// S259, ADR-156 — même cuisson que `bake` (amplitudes, `k`, fréquences au bit), directions selon
+/// la loi cos^2s de Mitsuyasu autour de `theta_turns`, `s_max` déclaré (10 vent, 25 ou 75 houle).
+/// `spread_turns` est ignoré.
+pub fn bake_directional(r: Recipe, s_max: f32) -> Result<Cooked, Error> {
+    if !s_max.is_finite() || s_max <= 0.0 || s_max > 1000.0 { return Err(Error::Direction); }
+    bake_inner(r, Directions::Spread { s_max, edge: r.max_ratio })
+}
+
+fn bake_inner(r: Recipe, dirs: Directions) -> Result<Cooked, Error> {
     let sea = r.sea;
     if !sea.hs.is_finite() || sea.hs < 0.0 || !sea.tp.is_finite() || sea.tp <= 0.0 {
         return Err(Error::SeaState);
@@ -193,7 +303,7 @@ pub fn bake(r: Recipe) -> Result<Cooked, Error> {
     }; MAX_COMPONENTS], diagnostics: Diagnostics { retained_m0: 0.0, retained_m2: 0.0 }, hash: 0 };
     let lg = ln(r.gamma);
     let mut weights = [0.0; MAX_COMPONENTS];
-    let sum = cells(&r, lg, r.min_ratio, r.max_ratio, sea.components, 0, &mut out.components, &mut weights)?;
+    let sum = cells(&r, lg, r.min_ratio, r.max_ratio, sea.components, 0, dirs, &mut out.components, &mut weights)?;
     let (mut amplitude_sum, mut velocity_sum, mut slope_sum) = (0.0, 0.0, 0.0);
     for (c, weight) in out.components[..sea.components].iter_mut().zip(weights) {
         c.amplitude = sea.hs * ((weight / sum) * 0.125).sqrt();
@@ -212,6 +322,7 @@ pub fn bake(r: Recipe) -> Result<Cooked, Error> {
         retained_m2: integral(r.min_ratio, r.max_ratio, lg, 2, 4096) / total2 };
     let mut h = Hasher64::new();
     h.write_u32(VERSION);
+    if let Directions::Spread { s_max, .. } = dirs { h.write_u32(0x5350_5244); h.write_f32(s_max); }
     h.write_u32(sea.components as u32);
     h.write_u64(sea.graine);
     for v in [sea.hs, sea.tp, sea.theta_turns, r.gravity, r.gamma, r.min_ratio, r.max_ratio, r.spread_turns,
