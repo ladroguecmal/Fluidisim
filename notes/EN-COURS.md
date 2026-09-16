@@ -84,7 +84,7 @@ poses envoyés à l'utilisateur.
 - [x] **P1** — amorce, jeton et plan seuls.
 - [x] **P2** — verdict consigné au registre R1, classement provisoire, protocole de mesure ;
   formules Cox–Munk et Pierson–Moskowitz citées dans SPEC-001 (I-14).
-- [ ] **P3** — mesure : `mss` de la recette cuite (32 composantes) et du spectre continu coupé à
+- [x] **P3** — mesure : `mss` de la recette cuite (32 composantes) et du spectre continu coupé à
   `4, 8, 16, 24, 32 fp` ; verdict confirmé ou non.
 - [ ] **P4** — ADR-155 et protocole de réception du remède (si confirmé).
 - [ ] **P5** — cœur : cuisson de la queue spectrale, même densité absolue, essais contre l'analytique.
@@ -94,3 +94,7 @@ poses envoyés à l'utilisateur.
 
 ### Notes de reprise
 
+P3 : `examples/rugosite_b.rs`. mss cuite 0,00753, continue 0,00752 (accord indépendant) ; 8/16/24/32/57 fp
+→ 0,0115/0,0155/0,0179/0,0195/0,0229. Cox–Munk 0,0437–0,0459, seuil 0,0199 : **confirmé**. La queue
+JONSWAP seule plafonne à 52 % de l'observé : le remède d'ADR-155 est un premier pas, le modèle de
+spectre court (équilibre f⁻⁴, capillaires) reste à nommer comme manque.

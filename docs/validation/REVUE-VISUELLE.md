@@ -68,7 +68,7 @@ tel quel, et c'est la réception qu'on réexamine d'abord.
 
 | revue | date | images | références | verdict résumé | classe et suite |
 |---|---|---|---|---|---|
-| **R1** | 2026-09-16 | sept rendus J1, §6 | demandées, §6.3 ; aucune reçue au premier verdict | **« La mer est trop lisse, on dirait un lac »** (22:13) | provisoire : **physique juste mais incomplète**, spectre de B coupé à `4 fp` ; confirmation par la `mss` contre Cox–Munk (§7) |
+| **R1** | 2026-09-16 | sept rendus J1, §6 | demandées, §6.3 ; aucune reçue au premier verdict | **« La mer est trop lisse, on dirait un lac »** (22:13) | **confirmé par mesure** : physique juste mais incomplète — `mss` de B 0,0075 contre 0,044 observés (Cox–Munk), spectre coupé à `4 fp` (§7) |
 
 ## 6. R1 — la scène J1 telle qu'elle est, S254
 
@@ -134,4 +134,28 @@ peut-être aussi, mais il ne se corrige pas avant la mesure.
 cuites) et celle du même spectre coupé à `4, 8, 16, 24, 32 fp`. La comparer à Cox–Munk au vent
 minimal soutenant `Hs = 1,5 m`. **Défaut confirmé** si la `mss` de B est inférieure à la moitié de
 la borne basse de Cox–Munk à ce vent. Sinon, le verdict se reporte sur l'habillage, et on le dit.
+
+**Résultat** (`cargo run --release -p water-core --example rugosite_b`, 2026-09-16) :
+
+| spectre de B | `λ` minimale | `mss` |
+|---|---:|---:|
+| recette R1 cuite, 32 composantes, `[0,5 ; 4] fp` | 3,51 m | **0,00753** |
+| même spectre continu, coupé à `4 fp` (contrôle indépendant) | 3,51 m | 0,00752 |
+| coupé à `8 fp` | 0,88 m | 0,01152 |
+| coupé à `16 fp` | 0,22 m | 0,01553 |
+| coupé à `24 fp` | 9,8 cm | 0,01787 |
+| coupé à `32 fp` | 5,5 cm | 0,01953 |
+| coupé à `57 fp` (limite gravité-capillarité) | 1,7 cm | 0,02287 |
+
+Cox–Munk au vent minimal de `Hs = 1,5 m` (`U` = 8,37 m/s à 19,5 m ; 7,95 m/s pour tenir compte de
+la hauteur) : `mss` 0,0437 à 0,0459. Borne basse 0,0397, seuil du critère **0,0199**.
+
+- **Défaut confirmé** : 0,0075 < 0,0199. La mer rendue a une pente quadratique moyenne **5,8 fois
+  plus faible** que la mer réelle de même `Hs`. Classe confirmée : **physique juste mais
+  incomplète** (spectre coupé), liste du projet fini 2.1 et 8.9.
+- **Constat qui n'était pas attendu** : prolonger la même queue JONSWAP en `f⁻⁵` jusqu'à la limite
+  gravité-capillarité ne donne que **0,0229**, soit 52 % de l'observé. La queue réelle est plus
+  raide en pente ; les modèles d'équilibre en `f⁻⁴` et les capillaires y contribuent. Prolonger la
+  bande rend la mer **2,6 fois plus rugueuse** (coupure à `32 fp`), mais pas encore aussi rugueuse
+  que la mer réelle.
 
