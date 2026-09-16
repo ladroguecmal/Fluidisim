@@ -53,6 +53,7 @@
 - [Multigrille : le β du gradient conjugué, le coût du démarrage plat et 32 768 mailles](validation/MULTIGRILLE-BETA-S252.md).
 - [Surface mobile couplée B/W→δ contre HOS : construction, témoin, affinage et réception](validation/SURFACE-COUPLEE-S253.md).
 - [Prolongement du fond au-dessus du plan moyen : règle bornée, oracle et fournisseur B](validation/PROLONGEMENT-FOND-S254.md).
+- [Queue spectrale de B en pentes par pixel : rugosité, filtre et coût](validation/QUEUE-SPECTRALE-S256.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).
@@ -223,6 +224,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-152](adr/ADR-152-surface-mobile-couplee.md) | Surface mobile couplée : géométrie totale, hauteur perturbative, bande du fond |
 | [ADR-153](adr/ADR-153-affinage-en-mode-mobile-couple.md) | Affiner la divergence au plancher dans le pas couplé mobile |
 | [ADR-154](adr/ADR-154-prolongement-borne-du-fond.md) | Prolonger le fond au-dessus du plan moyen : vitesse horizontale constante, par mode |
+| [ADR-155](adr/ADR-155-queue-spectrale-en-pentes-par-pixel.md) | La queue du spectre de B se rend en pentes par pixel |
 
 ## Travail et historique
 

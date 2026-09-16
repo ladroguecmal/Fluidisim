@@ -86,7 +86,7 @@ poses envoyés à l'utilisateur.
   formules Cox–Munk et Pierson–Moskowitz citées dans SPEC-001 (I-14).
 - [x] **P3** — mesure : `mss` de la recette cuite (32 composantes) et du spectre continu coupé à
   `4, 8, 16, 24, 32 fp` ; verdict confirmé ou non.
-- [ ] **P4** — ADR-155 et protocole de réception du remède (si confirmé).
+- [x] **P4** — ADR-155 et protocole de réception du remède (si confirmé).
 - [ ] **P5** — cœur : cuisson de la queue spectrale, même densité absolue, essais contre l'analytique.
 - [ ] **P6** — hôte : queue en pentes par pixel, filtre d'empreinte, référence CPU.
 - [ ] **P7** — réception GPU/CPU, coût, rendus R2 aux poses R1, envoi à l'utilisateur.
