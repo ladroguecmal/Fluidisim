@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-16 18:20 +02:00
-Agent            : Codex, GPT-6 (fichiers, git, cargo, Python, accès web ; GPU DX12 vérifié)
-Session en cours : S251 — démarrage couplé plat
-Dernière session : S250 — raccordement volumique B/W→δ reçu sous surface imposée (ADR-149)
-Session suivante : S251 — A283 : recevoir le démarrage couplé plat, oracle de projection indépendant
+JETON            : libre
+Battement        : 2026-09-16 20:06 +02:00
+Agent            : Claude Opus 5, Claude Code (fichiers, git, cargo, Python) — clôture de S251 ouverte par Codex GPT-6
+Session en cours : aucune
+Dernière session : S251 — démarrage couplé plat reçu (ADR-150) ; coût ×40 ouvert (A284)
+Session suivante : S252 — A50 : résidus de surface et frontières du total avant couplage mobile ; attribuer A284 en première étape
 Maillons        : 0
 
 ```

@@ -12981,3 +12981,42 @@ avec leurs déclencheurs ; pas d'arbitrage externe ni réduction d'ambition.
 actualisés. I-01/02/04/05/06/07/08/11/12/14 relus : échantillons transitoires d'un
 instant, champs f32, coefficients ADR-141, éponge paramétrée de banc, aucune autorité
 ou sérialisation ajoutée. Aucun worktree créé ni distant modifié ; archive conservée.
+
+## S251 — Démarrage couplé plat reçu ; son coût ne l'est pas
+
+**2026-09-16, Codex GPT-6 (P1–P4), clôture Claude Opus 5 (P5).** Entrée « continue »,
+master propre 693ec55, copie unique, archive B conservée. Plan `ab8d198`, diagnostic
+`fd2b57c`, correctif `9e3b01e`, réception `ddf7606`. Codex interrompu pendant P5, arbre
+propre : **reprise à chaud, étape complétée**, rien à annuler. Fil de Codex transmis
+par l'utilisateur.
+
+**Capacité reçue, maillons 0.** Un domaine δ **né à zéro** (I-12) avance sous B/W réels :
+`Volume::step_perturbation` accepte désormais le démarrage plat qu'il refusait (A283).
+Cause isolée par une projection f64 indépendante : ~98 % de la vitesse prédite est
+retranchée, l'erreur f32 de la soustraction domine le reste. ADR-150 : **un** affinage
+de divergence sur la vitesse corrigée, seulement au plancher refusé ; tolérance S199,
+source S et plafonds inchangés. Consommé par l'API publique et le banc `--flat`.
+
+**Preuves.** Cinq tests (oracle, API, reprise au bit à cinq coupures, couvercle non
+réappliqué, zéro allocation). Vitesse contre oracle 9,8·10⁻⁷ / 2,1·10⁻⁶ relatif,
+D ≤5,8·10⁻⁸ ; vingt pas, D max 9,93·10⁻⁶. Suite **449 / 16 ignorés / 0**, rejouée à la
+clôture ; empreinte 0xfb12b2092df4ee6d. [Preuve](../docs/validation/DEMARRAGE-PLAT-S251.md).
++4·nx·nz octets par volume.
+
+**Défaut trouvé à la clôture, A284.** Témoin 32×16 sous hauteur imposée, jamais mesuré :
+1,09 ms, 69–73 itérations. Plat : 43–44 ms, 581–672 itérations sur 17 pas — **les pas
+non affinés coûtent autant**, ce n'est pas ADR-150. Trace temporaire retirée. Toutes
+les projections repartent de p=0 ; répartition ordinaire/repli non mesurée. Une
+affirmation erronée (hiérarchie vide à 16×8, en fait un niveau) corrigée avant commit.
+
+**Non-fait et suite.** Résidus de surface et frontières du total avant couplage mobile
+(A50) ; A284 à attribuer d'abord, une étape, puisque le banc du lot suivant passe par ce
+régime. Troisième session du raccordement : comparée à la file — c'est le chemin de J2
+vers δ couplé mobile et B4, aucune autre capacité absente n'est débloquée plus tôt ;
+V, bathymétrie, A282, A276/A281 et multiplateforme gardent leurs déclencheurs.
+Recommandation BILAN-S227 portée (A266 close S228 ; J2 suivi selon §5). Aucun arbitrage.
+
+**Rituel.** File active relue entière ; A283 close, A284 ouverte, feuille de route, index,
+note datée S250, plan et jeton. I-05/06/08/12/14 relus : budget mural partagé et refus
+atomique, zéro allocation testé, champs f32 et oracle f64 en test seulement, coût de création signalé (A284),
+aucune valeur physique nouvelle. Aucun worktree ni distant touché.

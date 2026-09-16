@@ -58,8 +58,8 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S251 — en cours
-Agent : Codex GPT-6 ; fichiers, git, cargo et Python disponibles.
+Session : S251 — terminée
+Agent : Codex GPT-6 ; fichiers, git, cargo et Python disponibles. P5 : Claude Opus 5.
 Entrée : « continue ». Master propre 693ec55, une seule copie, archive B conservée.
 
 Objectif : recevoir le démarrage B/W→δ sous couvercle plat (A283), sans relever
@@ -79,10 +79,13 @@ limites transmises. Aucun couplage mobile ou rendu ajouté à ce lot.
 - [x] **P2** — reproduire, construire l'oracle indépendant et isoler le défaut.
 - [x] **P3** — correctif f32 et contrat, contre-épreuves ciblées.
 - [x] **P4** — réception du consommateur, coût, suite et non-régression.
-- [>] **P5** — rituel §6 : preuves, file, trajectoire, journal et jeton.
+- [x] **P5** — rituel §6 : preuves, file, trajectoire, journal et jeton.
 
 ### Notes de reprise
 
 S250 conservait --flat comme refus attendu. La pression initiale s'arrête au plancher ;
 le repli multigrille ne reçoit pas D. Les termes croisés, la source et l'éponge sont
 déjà construits. Ne pas les réinventer ; ne pas confondre ce lot et B4 global.
+Clôture : Codex coupé en P5, arbre propre ; reprise à chaud par Claude Opus 5, suite
+rejouée 449/16/0. Témoin 32×16 imposé mesuré (1,09 ms) : le ×40 du plat accompagne les
+projections au plancher, hors affinage, non attribué — A284. Trace par pas retirée du banc.

@@ -50,6 +50,11 @@ La proximité d'une source gradient et la normalisation par la petite vitesse
 projetée sont des suspects, pas une cause isolée. Comparer à une projection f64
 indépendante avant de modifier le solveur ou son critère. Ce démarrage reste non reçu.
 
+*Note datée S251, 2026-09-16.* Depuis `9e3b01e`/`ddf7606` (ADR-150), `--flat` ne reproduit
+plus ce refus : le banc poursuit vingt pas. Le refus d'origine reste reproduit par
+`diagnose_flat_projection_s251`, projection sans affinage ; voir
+[DEMARRAGE-PLAT-S251](DEMARRAGE-PLAT-S251.md).
+
 ### Reproduction
 
 ```powershell

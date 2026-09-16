@@ -81,3 +81,34 @@ inchangée **0xfb12b2092df4ee6d**, ordres 1,947/1,957/1,959. Le nominal S250 ne 
 aucun affinage et conserve ses mesures numériques. A283 fermée sur les deux cas
 et trajectoires reçus ; pas de garantie universelle au plancher ni de couplage mobile.
 Le pas garde le droit de refuser après l'unique correction, sans temps avancé.
+
+## Témoin de coût et attribution par pas — clôture S251
+
+Reprise à chaud par Claude Opus 5 après interruption de P5, 2026-09-16, même poste,
+secteur (état batterie 2, 99 %). Suite rejouée sur `ddf7606` : **449 / 16 / 0**.
+Le témoin manquant du tableau précédent — 32×16 **sous hauteur imposée** — a été
+mesuré, puis une trace temporaire par pas (retirée, banc livré inchangé) :
+
+| cas | pas | itérations | affinage | plancher | pas (ms) |
+|---|---|---|---|---|---|
+| 32×16 imposé | 0–19 | 69–73 | 0 | non | 1,06–1,76 (médiane 1,09) |
+| 32×16 plat | 0–6 | 667–672 | 1 | oui | 42,8–47,7 |
+| 32×16 plat | 7–16 | 581–583 | 0 | oui | 41,0–46,0 |
+| 32×16 plat | 17–19 | 82 | 0 | oui | 1,2–2,1 |
+| 16×8 plat | 0–6 | 328–329 | 1 | non | 5,3–6,7 |
+| 16×8 plat | 7–19 | 40 | 0 | oui | 0,18–0,36 |
+
+Deux médianes indépendantes 32×16 plat : 44,1 et 42,7 ms, contre 1,09 imposé.
+**Le surcoût ×40 n'est pas celui de l'affinage** : les pas 7 à 16, non affinés,
+coûtent autant. Il accompagne l'arrêt au plancher d'un petit champ projeté, sans
+s'y réduire : les pas 17–19, eux aussi au plancher, reviennent à 82 itérations
+sans qu'on sache pourquoi. La répartition des ~580 itérations
+entre projection ordinaire et repli multigrille n'est **pas** mesurée ; les pas 7–16
+sont reçus avec D de 4,6 à 9,9·10⁻⁶, sous la tolérance mais sans marge large.
+À 16×8 (un niveau grossier 8×4), le même régime ne coûte que 40 itérations par pas.
+
+Techniques présentes : CG séquentiel, repli multigrille ADR-147, affinage unique
+ADR-150. Absentes : tout départ non nul — chaque projection, repli et affinage
+compris, repart de p=0 (`project`), sans la pression du pas précédent ni celle
+de la projection ordinaire ; parallélisme (fermé pour cette boucle, S244).
+Domaine : 2D x-z, deux tailles, B/W du banc S250. Suivi : A284.

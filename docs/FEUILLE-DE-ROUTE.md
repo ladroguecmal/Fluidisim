@@ -171,9 +171,13 @@ donné comme dérivé est l'optimum à une dimension, `4/5` est celui à deux �
 
 **S250 : premier raccordement volumique B/W→δ** consommé par le pas MAC à surface
 imposée : -S continu après somme, advection croisée, éponge quadratique, budget atomique
-et zéro allocation. Vingt pas reçus à 16×8 ; **démarrage plat refusé A283**, prochain lot
-avant les résidus de surface mobile et les frontières du total. Ni raccordement au rendu
-ni B4 global reçus ; [preuve](validation/RACCORDEMENT-DELTA-S250.md), ADR-149.
+et zéro allocation. Vingt pas reçus à 16×8 ; [preuve](validation/RACCORDEMENT-DELTA-S250.md), ADR-149.
+**S251 : démarrage plat reçu** — δ=0, v=0, B/W réels, 16×8 et 32×16, contre une projection
+f64 indépendante (vitesse ≤2,2·10⁻⁶ relatif), par un affinage unique de divergence au
+plancher (ADR-150) ; vingt pas, reprise au bit, zéro allocation. Coût **×40** à 32×16
+contre la hauteur imposée, hors affinage, non attribué (A284) ;
+[preuve](validation/DEMARRAGE-PLAT-S251.md). Restent résidus de surface mobile et
+frontières du total ; ni raccordement au rendu ni B4 global reçus.
 
 *Bancs* : **B3** (famille de δ) quand un candidat atteint ses critères ou qu'un second existe ;
 **B4** (régime perturbatif, volets restants) sur les cas livrés ; **B5** (blocs épars) quand

@@ -3543,3 +3543,25 @@ Source proche d'un gradient et normalisation par la petite vitesse projetée : s
 à départager par une projection f64 indépendante. A275 résolvait une autre famille
 de second membre ; sa fermeture ne couvre pas ce cas. Déclencheur S251, avant extension
 du couplage. Ne pas relever un seuil ni effacer S. [Preuve](../validation/RACCORDEMENT-DELTA-S250.md).
+
+
+**A283 — suivi S251, 2026-09-16 (sévérité 2, close).** Cause isolée par une projection
+f64 indépendante : la projection retranche ~98 % de la vitesse prédite, et l'erreur
+absolue de cette soustraction f32 domine la petite vitesse restante. ADR-150 ajoute
+**un** affinage de divergence sur la vitesse corrigée, déclenché seulement au plancher
+refusé. Reçu à 16×8 et 32×16 contre l'oracle (vitesse ≤2,15·10⁻⁶ relatif, D ≤5,8·10⁻⁸),
+trajectoires de vingt pas, reprise au bit, zéro allocation ; tolérance et S inchangées.
+Limites : deux tailles, pas de garantie qu'un seul affinage suffise à toute entrée,
+surface mobile non couplée. [Preuve](../validation/DEMARRAGE-PLAT-S251.md).
+
+**A284 — S251, 2026-09-16 (sévérité 2, ouverte).** Le démarrage plat reçu coûte **×40**
+à taille égale : à 32×16, médiane 43–44 ms contre 1,09 ms sous hauteur imposée.
+Dix-sept pas sur vingt font 581 à 672 itérations contre 69 à 73. Les pas 7–16, **non
+affinés**, coûtent autant que les affinés : ce n'est pas le prix d'ADR-150. Les pas
+17–19, toujours au plancher, reviennent à 82 itérations sans explication. Répartition
+entre projection ordinaire et repli multigrille non mesurée ; toutes repartent de p=0.
+Or un domaine perturbatif **naît** à δ=0 (I-12) : ce régime est celui de chaque création.
+Déclencheur : avant tout banc de coût du raccordement ou extension de taille, attribuer
+les itérations par projection ; puis éprouver les techniques absentes (ADR-131).
+Ne pas relever la tolérance ni réduire le plafond pour abaisser le coût. Distinct
+d'A276 (loi de taille) : ici la taille est fixe. [Mesure](../validation/DEMARRAGE-PLAT-S251.md).
