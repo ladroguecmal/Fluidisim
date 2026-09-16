@@ -363,9 +363,13 @@ impl Volume {
 
     /// S245 — un cycle en V, puis `dir ← z + β·dir` et le produit `⟨r, z⟩` que le gradient
     /// conjugué préconditionné consomme. Même forme que le chemin Jacobi du mode mobile.
+    /// `z = M⁻¹r`, puis `dir ← z + β·dir` avec `β = ⟨r, z⟩ / previous_rz` ; rend `⟨r, z⟩`.
+    /// `previous_rz = 0` : départ ou relance, `dir ← z`. S252 (A285) : de S245 à S251, `β` recevait
+    /// `‖r‖²/⟨r_n, z_n⟩`, calculé avant le cycle — la direction croissait d'environ `4/dx²` par
+    /// itération jusqu'à `⟨d, Ad⟩` non fini, et la boucle s'arrêtait loin de sa récurrence.
     fn multigrid_into_dir(
         &mut self,
-        beta: f32,
+        previous_rz: f32,
         jobs: &dyn JobSystem,
         ctl: &mut Control,
     ) -> Result<f32, Error> {
@@ -374,6 +378,7 @@ impl Volume {
         self.res = res;
         cycle?;
         let rz = self.dot(&self.res, &self.prec, jobs, ctl)?;
+        let beta = if previous_rz == 0. { 0. } else { rz / previous_rz };
         for c in 0..self.domain.cells() {
             ctl.poll(Phase::Pressure)?;
             if self.frac[c] > 0. {
@@ -1078,8 +1083,9 @@ impl Volume {
                     rz = zn;
                 } else if multigrid_on {
                     // `β = ⟨r_{n+1}, z_{n+1}⟩ / ⟨r_n, z_n⟩` : le cycle est appliqué d'abord, et
-                    // c'est lui qui fournit le produit.
-                    rz = self.multigrid_into_dir(rn / rz, jobs, ctl)?;
+                    // c'est lui qui fournit le produit. S252 (A285) : on lui passe `⟨r_n, z_n⟩`,
+                    // et c'est lui qui forme `β` — jamais `‖r_{n+1}‖²`.
+                    rz = self.multigrid_into_dir(rz, jobs, ctl)?;
                 } else {
                     let beta = rn / rr;
                     for c in 0..self.domain.cells() {

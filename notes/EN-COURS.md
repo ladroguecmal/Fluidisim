@@ -96,7 +96,7 @@ un changement d'ADR-147 se décide sur la mesure publiée, au lot suivant.
 
 - [x] **P1** — amorce, lectures et plan seuls.
 - [x] **P2** — A284 : itérations et temps par projection, 32×16 plat, test diagnostic.
-- [ ] **P3** — A285 : test qui reproduit le défaut, correction de β, tests multigrille.
+- [x] **P3** — A285 : test qui reproduit le défaut, correction de β, tests multigrille.
 - [ ] **P4** — re-mesures S245 (cinq tailles), 32 768 mailles, démarrage plat ; suite, empreinte.
 - [ ] **P5** — preuve, notes datées ADR-147/S245/S246/S251, angles morts, file.
 - [ ] **P6** — rituel §6 : trajectoire, journal et jeton ; S253 = surface mobile couplée.
@@ -121,3 +121,7 @@ relance de ~20 it, 26 relances. Cause : β du GC multigrille = ‖r₊‖²/⟨r
 croît d'environ 4/dx² par itération et le pas s'arrête sur dq non fini. **Expérience non
 committée** β correct : repli 9 it / 0,75 ms, vrai résidu 3,8e-6 ; pas 0 = 2,6 ms (41),
 pas 7 = 1,7 ms. S245 (« la multigrille ne gagne pas de vitesse ») a mesuré ce GC fautif.
+P3 : `multigrid_conjugate_gradient_keeps_its_recursion_s252` échoue avant (premier vrai
+résidu 0,616 à it 18, 514 it, 25 relances ; plancher ordinaire 1,0735e-5 à 80 it) et passe
+après (9 it, 4,03e-6, une relance). `multigrid_into_dir` reçoit ⟨r_n,z_n⟩ et forme β après
+le cycle. Tests δ release : 50 réussis, 11 ignorés.

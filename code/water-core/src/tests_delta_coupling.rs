@@ -320,3 +320,27 @@ fn flat_start_cost_attribution_s252(){
     }
     COUPLED_TRACE.with(|t|*t.borrow_mut()=None);
 }
+
+/// S252, A285 : le gradient conjugué préconditionné par la multigrille doit rester un gradient
+/// conjugué. Sa récurrence est exacte à l'arrondi près ; son premier vrai résidu ne peut donc pas
+/// être au-dessus du plancher que le chemin ordinaire atteint **sur le même système**. Avant
+/// correction : 0,616 contre 1,04·10⁻⁵ — β employait ‖r₊‖² au lieu de ⟨r₊, z₊⟩.
+#[test]
+fn multigrid_conjugate_gradient_keeps_its_recursion_s252(){
+    let (mut v,u,w)=real_case(32);let bg=input(&v,&u,&w);
+    assert!(!v.levels.is_empty());
+    v.coupled_predict(&bg,0.001,Sponge{width_m:1.,rate_per_s:2.},&mut Control::unlimited()).unwrap();
+    let (us,ws)=(v.us.clone(),v.ws.clone());
+    let (scale,k1)=(-1_025_000f32,(0.001f64/1025.) as f32);
+    let trace=|| super::super::PRESSURE_TRACE.with(|t|t.borrow().clone());
+    super::super::PRESSURE_TRACE.with(|t|t.borrow_mut().clear());
+    let ordinary=v.project(scale,k1,2000,false,&Jobs,&mut Control::unlimited()).unwrap();
+    let floor=trace().last().unwrap().1;
+    assert_eq!((v.us.clone(),v.ws.clone()),(us,ws),"la projection ne touche pas au prédicteur");
+    super::super::PRESSURE_TRACE.with(|t|t.borrow_mut().clear());
+    let multigrid=v.project(scale,k1,2000,true,&Jobs,&mut Control::unlimited()).unwrap();
+    let first=trace()[0];
+    println!("A285 ordinaire={ordinary:?} plancher={floor:e}
+A285 multigrille={multigrid:?} premier_vrai_residu={first:?} relances={}",trace().len());
+    assert!(first.1<=floor,"premier vrai résidu multigrille {} au-dessus du plancher ordinaire {floor}",first.1);
+}
