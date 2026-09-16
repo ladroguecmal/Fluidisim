@@ -58,93 +58,48 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S252 — terminée
+Session : S253 — en cours
 Agent : Claude Opus 5, Claude Code ; fichiers, git, cargo et Python disponibles.
-Entrée : « continue ». Master propre 97868aa, une seule copie, archive B conservée.
-Troisième session du raccordement B/W→δ : justifiée au journal S251 (chemin de J2).
+Entrée : « continue ». Master propre 7e3e1d8, une seule copie, archive B conservée.
+Quatrième session du raccordement B/W→δ : justifiée au journal S252 (chemin de J2 et B4).
 
-Objectif. (1) A284 : attribuer les itérations du démarrage plat 32×16 par projection
-(ordinaire, repli, affinage) ; diagnostic seul, aucune optimisation dans ce lot.
-(2) A50/J2 : premier couplage B/W→δ à **surface géométriquement mobile**. `eta` porte
-la hauteur perturbative η' ; la géométrie mouillée est celle de la surface totale
-ζ = η' + ζ_fond ; la valeur fantôme vaut ρg(z_Γ − repos) − P_fond(Γ) ; la cinématique
-ajoute le débit du fond entre le plan moyen et ζ (identité exacte si le fond est
-linéaire, ζ_fond,t = W_fond(0)). Consommateur : nouveau pas perturbatif mobile.
+Objectif (A50/J2) : premier couplage B/W→δ à **surface géométriquement mobile**, consommé par
+un nouveau pas `step_perturbation_mobile`. `eta` = repos + η' (née à zéro, I-12) ; géométrie
+mouillée totale ζ = η' + ζ_fond, ζ_fond lu dans `eta` des échantillons ; valeur fantôme
+p'(Γ) = ρg(z_Γ − repos) − P_fond(Γ), P_fond de la face voisine corrigé au premier ordre ;
+cinématique η'^{n+1} = η' − (dt/dx)Δ[Q_v(ζ) + bande], bande = flux de U entre le plan moyen
+et ζ. Exact pour un fond **linéaire** (ζ_t = W(0)), prolongé de façon incompressible au-dessus
+du plan moyen, sans flux au fond du domaine. Dérivation : journal S252.
 
-Réception, écrite avant code. a) fond nul : identité au bit avec step_surface_mobile
-sur une trajectoire ; b) repos exact ; c) onde stationnaire S237 (L=h=2 m) depuis le
-repos, fond = ordre un analytique, δ né à zéro, contre HOS M=3 : profil ≤2 % de a à 128
-colonnes et décroissant 32→128 (a = 5 et 10 cm), b₂ ≤20 % du maximum HOS à 128 et
-décroissant ; chiffres S237 du solveur total en regard ; d) témoin sans résidus de
-surface : b₂ hors tolérance ; e) expiration/refus atomiques, zéro allocation, suite et
-empreinte. Un critère manqué est publié tel quel ; aucune tolérance déplacée.
-Hors lot : frontières du total (fond B profond sur fond fini), prolongement de B
-au-dessus du plan moyen en production, 3D, rendu, optimisation d'A284.
+Réception, écrite avant code (détail au protocole P2). a) fond nul : identité au bit avec
+step_surface_mobile ; b) refus et expiration atomiques, zéro allocation ; c) onde stationnaire
+S237 (L = h = 2 m) depuis le repos, fond = ordre un de profondeur finie prolongé
+analytiquement, δ né à zéro, contre HOS M=3 : critères S237 — profil ≤2 % de a à 128 colonnes
+et décroissant 32→128, b₂ ≤20 % du maximum HOS à 128 et décroissant (a = 5 et 10 cm) ; S237
+total en regard ; d) témoin sans résidus de surface (commutateur de test) : b₂ hors 20 %
+contre l'ordre deux analytique. Critère manqué publié tel quel ; aucune tolérance déplacée.
+Hors lot : frontières du total (W(fond) ≠ 0), prolongement de B en production (ADR-113 refuse
+z > 0), multigrille/affinage du mode mobile, 3D, rendu, ordre d'ADR-147.
 
 ### Plan
 
-**Amendement après P2 (2026-09-16), avant tout travail qui en dépend.** P2 a trouvé un
-défaut du cœur : le β du gradient conjugué multigrille (A285). Il fausse le coût du repli,
-A284 et la mesure S245 sur laquelle ADR-147 a fondé l'ordre « repli, pas ordinaire ».
-Corriger d'abord ; la surface mobile couplée (anciens P3–P9) passe à **S253**, dérivation
-conservée ci-dessous. Réception A285 : un test reproduit le défaut avant correction —
-premier vrai résidu du chemin multigrille au-dessus du plancher atteint par le chemin
-ordinaire sur le même système —, et passe après ; portes d'acceptation ADR-143/144
-inchangées ; S245 re-mesurée aux cinq tailles, repli à 32 768 mailles, démarrage plat ;
-suite, empreinte `delta_filters`, `delta_precision`. Aucune décision d'ordre dans ce lot :
-un changement d'ADR-147 se décide sur la mesure publiée, au lot suivant.
-
 - [x] **P1** — amorce, lectures et plan seuls.
-- [x] **P2** — A284 : itérations et temps par projection, 32×16 plat, test diagnostic.
-- [x] **P3** — A285 : test qui reproduit le défaut, correction de β, tests multigrille.
-- [x] **P4** — re-mesures S245 (cinq tailles), 32 768 mailles, démarrage plat ; empreinte.
-- [x] **P4b** — ADR-151 : affinage de divergence ADR-150 étendu au pas à couvercle fixe
-  refusé au plancher (A275 sinon rouverte) ; test à 32 768 mailles, suite complète.
-- [x] **P5** — preuve, notes datées ADR-147/S245/S246/S251, angles morts, file.
-- [x] **P6** — rituel §6 : trajectoire, journal et jeton ; S253 = surface mobile couplée.
+- [ ] **P2** — ADR-152 et protocole de réception, avant code.
+- [ ] **P3** — fournisseur analytique de test partagé (exemple et essais) et ses contrôles.
+- [ ] **P4** — cœur : hauteur totale, valeurs fantômes du fond, tampons comptés ; S237 au bit.
+- [ ] **P5** — cœur : pas perturbatif mobile, transport de η' et bande, atomicité.
+- [ ] **P6** — essais : identité au bit, refus, expiration, allocations, témoin sans résidus.
+- [ ] **P7** — banc HOS couplé 32/64/128, 5 et 10 cm : réception ou refus publié.
+- [ ] **P8** — suite, empreinte, coût et preuve.
+- [ ] **P9** — rituel §6 : file, trajectoire, journal et jeton.
 
 ### Notes de reprise
 
-Dérivation (pas encore dans un fichier). Fond linéaire : ζ_t = W(0) et, pour un
-prolongement incompressible, R_s = ζ_t + U(ζ)ζ_x − W(ζ) = ∂x∫₀^ζ U dz exactement.
-Donc η'_t = −∂x[∫_fond^ζ v dz + ∫₀^ζ U dz] : ni ζ_t ni échantillon de colonne requis ;
-ζ_fond se lit dans `eta` de tout échantillon (indépendant de z). Fond du domaine sans
-flux du fond (W(b)=0) supposé : sinon frontière du total, hors lot. B refuse z>0
-(ADR-113) : le prolongement de Taylor d'ordre un (champ et dérivées cohérents) est
-une convention de l'hôte, éprouvée ici par le seul fournisseur de test.
-Transport : garder la somme S237 au bit, ajouter la bande à part (identité a).
-Démarrage plat mobile : risque A283 (petit champ) ; ADR-150 ne couvre que le couvercle.
-P2 (A284), test ignoré `flat_start_cost_attribution_s252`, release, 32×16 plat, 20 pas :
-ordinaire 80–82 it / 0,84–1,36 ms, au plancher, D 1,55e-4→1,06e-5 (reçu dès le pas 17) ;
-**repli multigrille 500–501 it / 37,7–42,9 ms** (94 % du pas), refusé pas 0–6 ;
-affinage 86–92 it / 0,9–1,3 ms. Vrais résidus du repli : 0,616 à it 18, puis ×0,6 par
-relance de ~20 it, 26 relances. Cause : β du GC multigrille = ‖r₊‖²/⟨r,z⟩ au lieu de
-⟨r₊,z₊⟩/⟨r,z⟩ (`project`, branche multigrid_on, depuis S245 P5 `6dc0bfa`) : la direction
-croît d'environ 4/dx² par itération et le pas s'arrête sur dq non fini. **Expérience non
-committée** β correct : repli 9 it / 0,75 ms, vrai résidu 3,8e-6 ; pas 0 = 2,6 ms (41),
-pas 7 = 1,7 ms. S245 (« la multigrille ne gagne pas de vitesse ») a mesuré ce GC fautif.
-P3 : `multigrid_conjugate_gradient_keeps_its_recursion_s252` échoue avant (premier vrai
-résidu 0,616 à it 18, 514 it, 25 relances ; plancher ordinaire 1,0735e-5 à 80 it) et passe
-après (9 it, 4,03e-6, une relance). `multigrid_into_dir` reçoit ⟨r_n,z_n⟩ et forme β après
-le cycle. Tests δ release : 50 réussis, 11 ignorés.
-**Amendement P4 (avant P4b).** Re-mesures avant/après sur la même machine, secteur 99 %.
-`delta_precision` : champs et CASE identiques hors temps ; empreinte `delta_filters`
-0xfb12b2092df4ee6d inchangée. S245 « avec » (it / ms) avant → après : 128 : 94/2,12 → 6/0,157 ;
-512 : 177/13,8 → 7/0,913 ; 2 048 : 158/50,1 → 7/3,34 ; 8 192 : 120/159 → 8/12,5 ;
-32 768 : 106/595 D=7,27e-6 reçu → **8/88,9 D=1,585e-5 refusé**. « sans » (ordinaire puis repli)
-32 768 : 880 ms reçu → 340 ms refusé. Plat 32×16 : médiane 43,6 → 2,13 ms, max 48,2 → 4,57.
-L'acceptation A275 tenait aux relances du GC fautif (raffinement itératif accidentel), pas
-à « moins d'itérations » (S245). Test ignoré `largest_grid_after_multigrid_fix_s252` : un
-affinage ADR-150 (q multigrille, couvercle homogène) → 8 it, 46,1 ms, D=3,56e-8 reçu.
-À 32 768 le GC multigrille (8 it ≈ 46 ms) bat l'ordinaire (425 it ≈ 250 ms) : ordre
-d'ADR-147 à reprendre au lot suivant, sur mesure publiée — pas dans P4b.
-P4b : `refine_divergence` partagée (coupling : multigrid=false, au bit) ; `run` l'appelle si
-dégradé au plancher après repli ; `iterations` cumulées (plafond par projection, comme
-ADR-150). Deux tests ajustés au compte réel (`a_tight_budget…` : 2 = ordinaire + repli ;
-`global_allocator…` : ≤ 3·limite). `largest_grid_is_received_by_refinement_s252` (release) :
-témoin multigrille seule refusé (8 it, D 1,585e-5), pas reçu (441 it, 385 ms, D 3,56e-8).
-Suite release **451 / 17 ignorés / 0**. delta_precision identique hors temps, empreinte
-inchangée. Table S245 finale (sans | avec, it/ms) : 128 30/0,087 | 6/0,142 ; 512 61/0,677 |
-7/0,602 ; 2 048 114/5,04 | 7/2,44 ; 8 192 220/37,2 | 8/15,0 ; 32 768 441/392 reçu | 24/137 reçu.
-Bancs couplés : 32×16 plat médiane 2,53 ms (max 3,51), 16×8 plat 0,279 (5 affinages),
-imposés inchangés au bit (D max 9,6369e-6 / 5,7869e-6). Secteur 99 % avant et après.
+Chiffres S237 total mobile (profil / b₂) : 10 cm 1,714/1,71 % (32), 0,592/0,98 (64), 0,230/0,43
+(128) ; 5 cm 0,850/2,44 (32), 0,550/1,41 (64), 128 reçu S238 à 0,252/0,71. HOS : `examples/
+support/nl_surface.rs` ; ordre deux fermé `second_order_b2` dans `examples/delta_mobile.rs`.
+Prolongement de Taylor d'ordre un **non incompressible** (div = z·U_xz) : prolongement analytique
+du mode de profondeur finie pour l'oracle. Lectures géométriques de `eta` : toutes dans
+`delta_mobile.rs` (wet, ghost_up, ghost_side, surface_in_bounds, transport) ; `lid` et le
+transport linéaire lisent `eta` hors mode mobile. Identité a) : somme S237 au bit, bande ajoutée
+à part ; ajout des valeurs du fond seulement en mode couplé.

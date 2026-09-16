@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-16 20:43 +02:00
+JETON            : occupé
+Battement        : 2026-09-16 20:49 +02:00
 Agent            : Claude Opus 5, Claude Code (fichiers, git, cargo, Python, accès web)
-Session en cours : aucune
+Session en cours : S253 — surface mobile couplée B/W→δ contre HOS M=3
 Dernière session : S252 — β du gradient conjugué multigrille corrigé (A285) ; 32 768 mailles reçues par affinage (ADR-151)
 Session suivante : S253 — surface mobile couplée B/W→δ contre HOS M=3 (dérivation au journal S252)
 Maillons        : 0
