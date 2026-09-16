@@ -54,7 +54,8 @@ Images de banc locales autorisées (ADR-124) ; pas de page HTML ni d'artefact pu
 Autonomie technique déléguée par l'utilisateur (S71). Français, concis, factuel ; le fond va dans
 les fichiers. **Il n'y a pas d'autres équipes** : les développeurs observent, les décisions
 internes nous appartiennent (ADR-028). Ne pas transformer un fait externe inconnu en hypothèse
-acquise. La méthode de choix du lot et de validation vit dans [METHODE](notes/METHODE.md).
+acquise. **Depuis S254, l'utilisateur supervise les rendus visuels** : lui demander des références
+réelles quand un rendu doit être jugé, selon [REVUE-VISUELLE](docs/validation/REVUE-VISUELLE.md). La méthode de choix du lot et de validation vit dans [METHODE](notes/METHODE.md).
 
 Plan avant travail dans [EN-COURS](notes/EN-COURS.md), committé seul ; une étape par commit
 `S<n> P<k> — …`, moins d'un quart d'heure par étape. Déclarer un découpage si nécessaire.

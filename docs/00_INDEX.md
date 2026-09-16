@@ -47,6 +47,7 @@
 - [Angles rasants : le coût tient, l'échantillonnage du champ lointain non](validation/RASANT-S247.md).
 - [Topologie de la mer et maillage du LOD, en images de banc](validation/IMAGES-S248.md).
 - [Coupure spectrale de l'image B/sillage : réception, coût et limites](validation/COUPURE-S249.md).
+- [Revue visuelle : l'utilisateur superviseur des rendus, protocole et registre des verdicts](validation/REVUE-VISUELLE.md).
 - [Premier raccordement volumique B/W→δ et démarrage plat refusé](validation/RACCORDEMENT-DELTA-S250.md).
 - [Démarrage couplé plat : oracle f64, affinage de divergence, coût et attribution par pas](validation/DEMARRAGE-PLAT-S251.md).
 - [Multigrille : le β du gradient conjugué, le coût du démarrage plat et 32 768 mailles](validation/MULTIGRILLE-BETA-S252.md).

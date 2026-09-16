@@ -87,8 +87,8 @@ en regard. Ensuite fournisseur B de production au-dessus du plan moyen. Hors lot
 
 ### Plan
 
-- [>] **P1** — amorce, lectures, jeton et plan seuls.
-- [ ] **P2** — protocole de revue visuelle (document de validation), rôle dans REPRISE §2,
+- [x] **P1** — amorce, lectures, jeton et plan seuls.
+- [x] **P2** — protocole de revue visuelle (document de validation), rôle dans REPRISE §2,
   ligne de METHODE, index.
 - [ ] **P3** — hôte : mode `--revue` à poses et âges fixes, captures avec empreinte, PNG ; revue R1
   envoyée à l'utilisateur avec les références demandées, consignée en attente.

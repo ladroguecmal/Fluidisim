@@ -26,6 +26,7 @@ Une grande amélioration locale peut ne plus être prioritaire une fois son usag
 | Propriété numérique ou modèle nouveau | référence indépendante ou identité justifiée ; raffinement des paramètres qui peuvent biaiser le verdict |
 | Optimisation | même charge utile, même qualité, coût du chemin consommé ; techniques présentes/absentes et domaine (ADR-131) |
 | Intégration | scénario traversant les composants réels, avec refus et reprise si le contrat l'exige |
+| Rendu jugé à l'œil | revue de l'utilisateur contre références réelles ([REVUE-VISUELLE](../docs/validation/REVUE-VISUELLE.md)) ; un verdict déclenche une mesure, il n'en tient pas lieu |
 | Documentation/procédure | liens, cohérence des états actifs, possibilité réelle d'exécuter la consigne |
 
 Chercher d'abord si la réponse se **calcule** avant de lancer une campagne. Distinguer le modèle,
