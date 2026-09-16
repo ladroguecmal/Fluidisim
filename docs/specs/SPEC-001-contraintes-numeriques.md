@@ -167,6 +167,27 @@ vent **plus fort**. Ce vent est donc une **borne basse** : `U ≥ √(Hs·g/0,21
 `ln(b)` pour une queue en `f⁻⁵`. Une bande `[a fp, b fp]` sous-estime donc la `mss` observée par
 construction. La comparaison à Cox–Munk dit **de combien**, pas quelle coupure est juste.
 
+## 1 septies. Étalement directionnel d'une mer — S259, ADR-156
+
+**Forme** (Longuet-Higgins et al., 1963 ; Mitsuyasu et al., 1975) : pour une fréquence `f`, la
+densité des directions autour de la direction moyenne `θm` est
+`D(θ) ∝ cos^{2s}((θ − θm)/2)`, `θ − θm ∈ ]−π, π]`.
+
+**Paramètre selon la fréquence** (Mitsuyasu et al., *Observations of the directional spectrum of
+ocean waves using a cloverleaf buoy*, JPO 5, 750–760, 1975) : `s = s_max·(f/fp)^5` pour `f ≤ fp`,
+`s = s_max·(f/fp)^-2,5` pour `f > fp`. L'étalement est donc le plus étroit au pic.
+
+**Valeurs de `s_max`** (Goda et Suzuki, 1975 ; Goda, *Random Seas and Design of Maritime Structures*,
+§2.3) : **10** pour une mer de vent, **25** pour une houle proche de sa zone de génération, **75**
+pour une houle qui a parcouru une longue distance.
+
+**Moment de contrôle.** Avec `φ = (θ − θm)/2` et l'intégrale de Wallis,
+`E[cos(θ − θm)] = 2·∫cos^{2s+2}φ / ∫cos^{2s}φ − 1 = s/(s + 1)`.
+C'est la référence analytique de l'inverse numérique de `D`.
+
+**Domaine.** L'ajustement de Mitsuyasu est observé autour du pic, pas dans la queue lointaine :
+au-delà de la bande représentée, une extrapolation est une convention, et elle se déclare.
+
 ## 2. Stabilité et coût d'un solveur volumétrique
 
 ### 2.1 CFL

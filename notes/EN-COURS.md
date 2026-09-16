@@ -77,8 +77,8 @@ scène par défaut identique (R2 rejoué au bit, `--tail-verify` inchangé) ; co
 
 ### Plan
 
-- [>] **P1** — amorce, jeton et plan seuls.
-- [ ] **P2** — SPEC-001 §1 septies (Mitsuyasu, Goda, moment `s/(s+1)`), ADR-156, protocole
+- [x] **P1** — amorce, jeton et plan seuls.
+- [x] **P2** — SPEC-001 §1 septies (Mitsuyasu, Goda, moment `s/(s+1)`), ADR-156, protocole
   MER-MULTIMODALE-S259, avant code.
 - [ ] **P3** — cœur : loi d'étalement et son inverse, `bake_directional`, queue directionnelle,
   assemblage de systèmes ; essais.
