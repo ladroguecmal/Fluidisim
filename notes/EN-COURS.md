@@ -80,8 +80,8 @@ Arrêt : API consommée par le pas MAC et exemple reproductible, tests et limite
 ### Plan
 
 - [x] **P1** — amorce, lectures et plan seuls.
-- [>] **P2** — ADR/protocole, contrat des faces et limites de la coupe 2D.
-- [ ] **P3** — pas perturbatif atomique, source et éponge, tests ciblés.
+- [x] **P2** — ADR/protocole, contrat des faces et limites de la coupe 2D.
+- [>] **P3** — pas perturbatif atomique, source et éponge, tests ciblés.
 - [ ] **P4** — exemple B/W réel, contre-épreuves, suite de tests et mesure.
 - [ ] **P5** — rituel §6 : file, trajectoire, preuves, journal, jeton.
 
