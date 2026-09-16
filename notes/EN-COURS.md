@@ -79,8 +79,8 @@ Arrêt : chemin activé dans l'hôte, critères éprouvés, limites et coûts tr
 
 - [x] **P1** — amorce, lectures ciblées, jeton et plan seuls.
 - [x] **P2** — décision et protocole : empreinte de projection, poids et bandes du sillage.
-- [>] **P3** — filtre CPU/GPU et intégration au rendu, tests du contrat.
-- [ ] **P4** — réception GPU, comparaison au cœur et au témoin, coût et allocations.
+- [x] **P3** — filtre CPU/GPU et intégration au rendu, tests du contrat.
+- [>] **P4** — réception GPU, comparaison au cœur et au témoin, coût et allocations.
 - [ ] **P5** — rituel §6 : preuves, file active, trajectoire, journal et jeton.
 
 ### Notes de reprise
@@ -89,3 +89,6 @@ A282 touche l'image seulement (ADR-130). La grille locale S234 contient une réa
 sommée : on ne peut donc pas lui retirer un mode après coup. Prévoir des bandes modales
 séparées dès sa cuisson, à phases identiques ; la caméra pondère les amplitudes des bandes.
 Le fond (32 modes) se filtre directement. La recette et ses domaines ADR-132 restent intacts.
+P3 : huit bandes + grille complète réservées, filtre B/sillage activé par défaut.
+Tests hôte : 16 réussis, 1 mesure ignorée. Construction release hors ligne réussie.
+Premier passage GPU du protocole : 36 cas passent, retour caméra au bit ; détail à P4.

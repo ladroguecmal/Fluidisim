@@ -6,6 +6,7 @@ struct Params {
     eye: vec4<f32>, forward: vec4<f32>, right: vec4<f32>, up: vec4<f32>,
     impact: vec4<f32>, info: vec4<f32>, wake_rect: vec4<f32>, wake_info: vec4<f32>,
     lattice: vec4<f32>, // pas (m), nx, ny, 1 = grille / 0 = somme directe par sommet
+    spectral: vec4<f32>, // activé, k_max de la recette ; huit bandes ADR-148
 }
 @group(0) @binding(0) var<uniform> p: Params;
 @group(0) @binding(1) var<storage, read> waves: array<vec4<f32>>;
@@ -18,6 +19,18 @@ struct Params {
 @group(0) @binding(4) var<storage, read> impacts: array<vec4<f32>>;
 @group(2) @binding(0) var<storage, read> lattice: array<vec4<f32>>;
 @group(3) @binding(0) var<storage, read_write> lattice_out: array<vec4<f32>>;
+
+fn spectral_weight(k: f32, h: f32) -> f32 {
+    let t = clamp(2.0*k*h/3.141592653589793 - 1.0, 0.0, 1.0);
+    return 1.0 - t*t*(3.0 - 2.0*t);
+}
+fn band_upper(b: u32) -> f32 { return p.spectral.y / f32(1u << b); }
+fn spectral_band(k: f32) -> u32 {
+    var b = 0u;
+    var upper = p.spectral.y;
+    while (b < 7u && k <= upper*0.5) { b++; upper *= 0.5; }
+    return b;
+}
 
 // Somme modale du sillage : hauteur, deux pentes et dérivée croisée. Sans elle, la grille ne
 // reçoit pas la reconstruction bicubique dont lod.rs publie la borne.
@@ -39,10 +52,26 @@ fn bake(@builtin(global_invocation_id) id: vec3<u32>) {
     let nx = u32(p.lattice.y); let ny = u32(p.lattice.z);
     if (id.x >= nx || id.y >= ny) { return; }
     let q = p.wake_rect.xy + vec2<f32>(f32(id.x), f32(id.y))*p.lattice.x;
-    lattice_out[id.y*nx + id.x] = wake_direct(q);
+    let index = id.y*nx + id.x;
+    if (p.spectral.x < 0.5) { lattice_out[index] = wake_direct(q); return; }
+    var bands: array<vec4<f32>, 8>;
+    var total = vec4<f32>(0.0);
+    for (var i = 0u; i < u32(p.wake_info.x); i++) {
+        let c = wake[i];
+        let phase = dot(c.zw, q);
+        let s = sin(phase); let co = cos(phase);
+        let e = c.x*co - c.y*s;
+        let d = -(c.x*s + c.y*co);
+        let v = vec4<f32>(e, d*c.zw, -e*c.z*c.w);
+        let b = spectral_band(length(c.zw));
+        bands[b] += v;
+        total += v;
+    }
+    lattice_out[index] = total;
+    for (var b = 0u; b < 8u; b++) { lattice_out[(b+1u)*nx*ny + index] = bands[b]; }
 }
 // Mêmes opérations que `lod::hermite`.
-fn wake_lattice(q: vec2<f32>) -> vec3<f32> {
+fn wake_lattice(q: vec2<f32>, band: u32) -> vec3<f32> {
     let s = p.lattice.x; let nx = u32(p.lattice.y); let ny = u32(p.lattice.z);
     let u = (q - p.wake_rect.xy)/s;
     let i = min(u32(floor(u.x)), nx - 2u);
@@ -60,7 +89,7 @@ fn wake_lattice(q: vec2<f32>) -> vec3<f32> {
     var out = vec3<f32>(0.0);
     for (var b = 0u; b < 2u; b++) {
         for (var a = 0u; a < 2u; a++) {
-            let c = lattice[(j+b)*nx + i + a];
+            let c = lattice[band*nx*ny + (j+b)*nx + i + a];
             let f = c.x; let fx = c.y*s; let fy = c.z*s; let fxy = c.w*s*s;
             out.x += vx[a]*vy[b]*f + dx[a]*vy[b]*fx + vx[a]*dy[b]*fy + dx[a]*dy[b]*fxy;
             out.y += vx1[a]*vy[b]*f + dx1[a]*vy[b]*fx + vx1[a]*dy[b]*fy + dx1[a]*dy[b]*fxy;
@@ -71,12 +100,14 @@ fn wake_lattice(q: vec2<f32>) -> vec3<f32> {
 }
 
 // Hauteur et deux pentes. Une seule fonction pour sommets et réception compute.
-fn water(q: vec2<f32>) -> vec3<f32> {
+fn water(q: vec2<f32>, spacing: f32) -> vec3<f32> {
+    let h = select(0.0, spacing, p.spectral.x > 0.5);
     var v = vec3<f32>(0.0);
     for (var i = 0u; i < u32(p.info.x); i++) {
         let c = waves[i];
         let phase = dot(c.yz, q) + c.w;
-        v += vec3<f32>(c.x * sin(phase), c.x * cos(phase) * c.yz);
+        let a = c.x * spectral_weight(length(c.yz), h);
+        v += vec3<f32>(a * sin(phase), a * cos(phase) * c.yz);
     }
     for (var m = 0u; m < u32(p.info.w); m++) {
         let c = impacts[m];
@@ -100,14 +131,23 @@ fn water(q: vec2<f32>) -> vec3<f32> {
     // Même emprise que le cœur ; hors emprise le sillage ne contribue pas (couture publiée).
     if (p.wake_info.y > 0.5 && all(q >= p.wake_rect.xy) && all(q <= p.wake_rect.zw)) {
         if (p.lattice.w > 0.5) {
-            v += wake_lattice(q);
+            if (spectral_weight(p.spectral.y, h) == 1.0) {
+                v += wake_lattice(q, 0u);
+            } else {
+                for (var b = 0u; b < 8u; b++) {
+                    let a = spectral_weight(band_upper(b), h);
+                    if (a > 0.0) { v += a*wake_lattice(q, b+1u); }
+                }
+            }
         } else {
             for (var i = 0u; i < u32(p.wake_info.x); i++) {
                 let c = wake[i];
+                let a = spectral_weight(band_upper(spectral_band(length(c.zw))), h);
+                if (a == 0.0) { continue; }
                 let phase = dot(c.zw, q);
                 let s = sin(phase);
                 let co = cos(phase);
-                v += vec3<f32>(c.x*co - c.y*s, -(c.x*s + c.y*co)*c.zw);
+                v += a*vec3<f32>(c.x*co - c.y*s, -(c.x*s + c.y*co)*c.zw);
             }
         }
     }
@@ -115,18 +155,40 @@ fn water(q: vec2<f32>) -> vec3<f32> {
 }
 @compute @workgroup_size(64)
 fn verify(@builtin(global_invocation_id) id: vec3<u32>) {
-    if (id.x < arrayLength(&probes)) { results[id.x] = vec4<f32>(water(probes[id.x].xy), 1.0); }
+    if (id.x < arrayLength(&probes)) {
+        let probe = probes[id.x];
+        var q = probe.xy; var h = probe.z;
+        if (probe.w > 0.5) { q = grid_point(probe.xy); h = grid_spacing(probe.xy, q); }
+        results[id.x] = vec4<f32>(water(q, h), h);
+    }
 }
 struct Vertex { @builtin(position) clip: vec4<f32>, @location(0) local: vec3<f32>, @location(1) slope: vec2<f32> }
-@vertex fn ocean_vertex(@builtin(vertex_index) id: u32) -> Vertex {
+fn grid_point(index: vec2<f32>) -> vec2<f32> {
     let nx = u32(p.info.y); let ny = u32(p.info.z);
-    let x = (f32(id % nx)/f32(nx-1u)*2-1)*1.18;
+    let x = (index.x/f32(nx-1u)*2-1)*1.18;
     let horizon = clamp(-p.forward.z/(p.up.z*p.forward.w), -0.95, 1.2);
-    let y = mix(-1.18, horizon-0.003, f32(id/nx)/f32(ny-1u));
+    let y = -1.18 + (horizon-0.003+1.18)*index.y/f32(ny-1u);
     let ray = p.forward.xyz + p.right.xyz*x*p.forward.w*p.right.w + p.up.xyz*y*p.forward.w;
     let distance = min(p.eye.z/max(-ray.z,0.00001),1500.0);
-    let q = ray.xy*distance;
-    let w = water(q);
+    return ray.xy*distance;
+}
+fn grid_spacing(index: vec2<f32>, q: vec2<f32>) -> f32 {
+    var h = 0.0;
+    for (var y = -1; y <= 1; y++) {
+        for (var x = -1; x <= 1; x++) {
+            let neighbor = clamp(index + vec2<f32>(f32(x), f32(y)), vec2<f32>(0.0), p.info.yz-vec2<f32>(1.0));
+            h = max(h, length(grid_point(neighbor) - q));
+        }
+    }
+    return h;
+}
+@vertex fn ocean_vertex(@builtin(vertex_index) id: u32) -> Vertex {
+    let nx = u32(p.info.y);
+    let index = vec2<f32>(f32(id % nx), f32(id / nx));
+    let q = grid_point(index);
+    var h = 0.0;
+    if (p.spectral.x > 0.5) { h = grid_spacing(index, q); }
+    let w = water(q, h);
     let local = vec3<f32>(q,w.x-p.eye.z);
     let depth = max(dot(local,p.forward.xyz),0.01);
     var o: Vertex;

@@ -2,6 +2,7 @@ mod counting;
 mod gpu;
 mod topologie;
 mod lod;
+mod spectral;
 mod scene;
 
 // S240 : I-06 pour la pile graphique. Le compteur enveloppe l'allocateur systeme et ne
@@ -1574,6 +1575,89 @@ fn verify_multi(frame: &mut FrameData<'_>) -> Result<(), String> {
     Ok(())
 }
 
+/// S249 : même entrée de shader que le rendu, y compris les voisins projetés.
+fn spectral_verify(frame: &mut FrameData<'_>) -> Result<(), String> {
+    let instance = instance();
+    let mut g = pollster::block_on(gpu::Gpu::new(&instance, None, 640, 360,
+        frame.profile.len(), scene::WAKE_CAPACITY))?;
+    let mut largest_removed = 0f32;
+    for (width, height) in [(640, 360), (960, 540)] {
+        g.resize(width, height);
+        for (name, camera) in [("reference", Camera::default()), ("rasante", grazing_camera()),
+            ("haute", Camera { eye: [0., -18., 30.], yaw: 0., pitch: -0.7 })] {
+            frame.camera = camera;
+            let [forward, right, up] = frame.camera.vectors();
+            let p = lod::Projection { eye: frame.camera.eye, forward, right, up,
+                tan_half: (50f32.to_radians()/2.).tan(), aspect: width as f32/height as f32 };
+            let mut probes = Vec::new();
+            let mut points = Vec::new();
+            let mut spacings = Vec::new();
+            for j in (0..g.ny).step_by(3).chain(std::iter::once(g.ny - 1)) {
+                for i in (0..g.nx).step_by((g.nx as usize / 8).max(1)) {
+                    probes.push([i as f32, j as f32, 0., 1.]);
+                    points.push(p.grid_point(i as f32, j as f32, g.nx, g.ny));
+                    spacings.push(p.spacing(i as f32, j as f32, g.nx, g.ny));
+                }
+            }
+            for age in [3., 12., 16.] {
+                frame.lod = true;
+                frame.spectral = true;
+                frame.update(age, age, true);
+                let refs = frame.references(&points)?;
+                let mut expected = Vec::new();
+                let mut removed = 0f32;
+                let mut rejected = 0usize;
+                let mut affected = 0usize;
+                for ((q, h), full) in points.iter().zip(&spacings).zip(&refs) {
+                    let world = [q[0] + frame.camera.eye[0], q[1] + frame.camera.eye[1]];
+                    let inside = frame.wake_active && (0..2).all(|i|
+                        world[i] >= scene::WAKE_MIN[i] && world[i] <= scene::WAKE_MAX[i]);
+                    let wake = if inside { frame.wake.as_slice() } else { &[] };
+                    let filtered = spectral::modal(&frame.components, wake, *q, *h, frame.spectral_max);
+                    let unfiltered = spectral::modal(&frame.components, wake, *q, 0., frame.spectral_max);
+                    let delta = filtered[0] - unfiltered[0];
+                    removed = removed.max(delta.abs());
+                    affected += usize::from(delta != 0.);
+                    for c in wake {
+                        let k = c[2].hypot(c[3]);
+                        if k * h >= std::f32::consts::PI {
+                            rejected += 1;
+                            assert_eq!(spectral::weight(spectral::upper(spectral::band(k,
+                                frame.spectral_max), frame.spectral_max), *h), 0.);
+                        }
+                    }
+                    expected.push(std::array::from_fn::<_, 3, _>(|i| full[i] + filtered[i] - unfiltered[i]));
+                }
+                largest_removed = largest_removed.max(removed);
+                let mut first = None;
+                for use_lattice in [true, false] {
+                    frame.lod = use_lattice;
+                    g.upload(frame);
+                    let values = g.evaluate_spectral(&probes)?;
+                    let mut err = [0f32; 3];
+                    for (a, b) in values.iter().zip(&expected) {
+                        for k in 0..3 { err[k] = err[k].max((a[k] - b[k]).abs()); }
+                    }
+                    println!("SPECTRAL pose={name} format={width}x{height} age={age} grille={use_lattice} points={} affectes={affected} modes_rejetes={rejected} retire_max_m={removed:.7} erreur={err:?}", points.len());
+                    if err[0] > lod::TOLERANCE_M { return Err(format!("filtre hors 3 mm : {err:?}")); }
+                    if use_lattice { first = Some(values); }
+                }
+                frame.lod = true;
+                let saved = std::mem::replace(&mut frame.camera, away_camera());
+                frame.update(age, age, true); g.upload(frame);
+                frame.camera = saved; frame.update(age, age, true); g.upload(frame);
+                let returned = g.evaluate_spectral(&probes)?;
+                for (a, b) in first.unwrap().iter().zip(&returned) {
+                    for k in 0..3 { assert_eq!(a[k].to_bits(), b[k].to_bits(), "retour caméra"); }
+                }
+            }
+        }
+    }
+    assert!(largest_removed > lod::TOLERANCE_M, "le banc doit exposer la coupure");
+    println!("SPECTRAL_RETOUR bit_identique=true retire_max_m={largest_removed}");
+    Ok(())
+}
+
 fn run() -> Result<(), String> {
     let args: Vec<_> = std::env::args().collect();
     let scene = Scene::new();
@@ -1608,6 +1692,12 @@ fn run() -> Result<(), String> {
     let mut frame = FrameData::new(&scene.background, table, input, timeline, recipe, impacts);
     // S234 : grille locale du sillage par défaut ; `--no-lod` rend le chemin direct S212–S225.
     frame.lod = !args.iter().any(|a| a == "--no-lod");
+    frame.spectral = !args.iter().any(|a| a == "--no-spectral");
+    if args.iter().any(|a| a == "--spectral-verify") {
+        return spectral_verify(&mut frame);
+    }
+    // Les réceptions historiques comparent le champ complet au cœur.
+    if args.iter().any(|a| a == "--verify") { frame.spectral = false; }
     if args.iter().any(|a| a == "--topologie") {
         return topologie_images(&mut frame);
     }

@@ -611,6 +611,8 @@ pub struct FrameData<'a> {
     /// S234 : LOD spatial de couche. Vrai : le sillage est reconstruit depuis sa grille locale ;
     /// faux : somme directe par sommet (chemin S212–S225, conservé comme témoin).
     pub lod: bool,
+    pub spectral: bool,
+    pub spectral_max: f32,
     pub lattice: crate::lod::Lattice,
     lattice_announced: bool,
     /// S235 : visibilité. Vrai : une source dont le domaine ne touche pas l'emprise de la grille
@@ -663,6 +665,8 @@ impl<'a> FrameData<'a> {
             honest_duration: wake_honest_duration(recipe, 9.81),
             announced: false,
             lod: true,
+            spectral: true,
+            spectral_max: recipe.cutoff,
             lattice: crate::lod::Lattice::plan(0., 0., WAKE_MIN, WAKE_MAX, crate::lod::LATTICE_CAPACITY),
             lattice_announced: false,
             cull: false,

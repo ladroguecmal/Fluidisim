@@ -224,6 +224,23 @@ pub struct Projection {
 }
 
 impl Projection {
+    pub fn grid_point(&self, ix: f32, iy: f32, nx: u32, ny: u32) -> [f32; 2] {
+        self.ground((ix / (nx - 1) as f32 * 2. - 1.) * 1.18,
+            -1.18 + (self.horizon() + 1.18) * iy / (ny - 1) as f32)
+    }
+    /// Plus longue arête locale, diagonales comprises (ADR-148).
+    pub fn spacing(&self, ix: f32, iy: f32, nx: u32, ny: u32) -> f32 {
+        let q = self.grid_point(ix, iy, nx, ny);
+        let mut h = 0f32;
+        for y in -1..=1 {
+            for x in -1..=1 {
+                let r = self.grid_point((ix + x as f32).clamp(0., (nx - 1) as f32),
+                    (iy + y as f32).clamp(0., (ny - 1) as f32), nx, ny);
+                h = h.max((q[0] - r[0]).hypot(q[1] - r[1]));
+            }
+        }
+        h
+    }
     /// Ordonnée écran de la dernière rangée, comme `ocean_vertex`.
     pub fn horizon(&self) -> f32 {
         (-self.forward[2] / (self.up[2] * self.tan_half)).clamp(-0.95, 1.2) - 0.003

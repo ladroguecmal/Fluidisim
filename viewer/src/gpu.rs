@@ -138,7 +138,7 @@ impl Gpu {
         let uniform = buffer(
             &device,
             "camera",
-            144,
+            160,
             wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         );
         let waves = buffer(
@@ -227,7 +227,7 @@ impl Gpu {
         let lattice = buffer(
             &device,
             "W wake lattice",
-            crate::lod::LATTICE_CAPACITY as u64 * 16,
+            crate::lod::LATTICE_CAPACITY as u64 * 16 * (crate::spectral::BANDS as u64 + 1),
             wgpu::BufferUsages::STORAGE,
         );
         let storage_layout = |label, stages, read_only| {
@@ -440,6 +440,9 @@ impl Gpu {
             frame.wake_active,
             lattice,
         ) {
+            self.bytes.extend_from_slice(&v.to_le_bytes());
+        }
+        for v in [if frame.spectral { 1. } else { 0. }, frame.spectral_max, 0., 0.] {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
         self.queue.write_buffer(&self.uniform, 0, &self.bytes);
@@ -752,7 +755,11 @@ impl Gpu {
     /// Hauteur et pentes GPU aux points relatifs à la caméra, par la fonction `water` du shader —
     /// la même que les sommets. S234 : la grille du sillage est cuite dans le même encodeur.
     pub fn evaluate(&self, points: &[[f32; 2]]) -> Result<Vec<[f32; 3]>, String> {
-        let data = floats(points.iter().flat_map(|p| [p[0], p[1], 0., 0.]));
+        let probes: Vec<_> = points.iter().map(|p| [p[0], p[1], 0., 0.]).collect();
+        self.evaluate_spectral(&probes)
+    }
+    pub fn evaluate_spectral(&self, points: &[[f32; 4]]) -> Result<Vec<[f32; 3]>, String> {
+        let data = floats(points.iter().flatten().copied());
         let size = data.len() as u64;
         let src = self
             .device

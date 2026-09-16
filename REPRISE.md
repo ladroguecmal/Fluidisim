@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-16 17:27 +02:00
+Battement        : 2026-09-16 17:33 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo et accès web disponibles ; GPU non vérifié)
 Session en cours : S249 — A282 : couper les modes par la distance
 Dernière session : S248 — la mer et son maillage mis en images de banc (ADR-124)
