@@ -92,7 +92,7 @@ en regard. Ensuite fournisseur B de production au-dessus du plan moyen. Hors lot
   ligne de METHODE, index.
 - [x] **P3** — hôte : mode `--revue` à poses et âges fixes, captures avec empreinte, PNG ; revue R1
   envoyée à l'utilisateur avec les références demandées, consignée en attente.
-- [ ] **P4** — ADR-154 et protocole de réception d'A286, avant code.
+- [x] **P4** — ADR-154 et protocole de réception d'A286, avant code.
 - [ ] **P5** — oracle : prolongement du mode stationnaire selon la règle, contrôles
   (continuité, divergence, dérivées, `S`).
 - [ ] **P6** — banc couplé S253 avec ce prolongement, 32/64/128 × 5/10 cm : réception ou refus publié.
