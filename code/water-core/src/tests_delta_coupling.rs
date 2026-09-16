@@ -572,3 +572,34 @@ fn coupled_mobile_expiration_restores_and_resumes_s253(){
         assert!(same_bits(&v.u,&reference.u)&&same_bits(&v.p,&reference.p)&&same_bits(&v.eta,&reference.eta));
     }
 }
+
+/// S253 — diagnostic du refus `Convergence` au premier pas couplé mobile (64 colonnes à 10 cm,
+/// 128 colonnes à 5 et 10 cm) : mêmes étapes que le pas, rapport de projection complet, échelles
+/// du prédicteur et des valeurs fantômes, vrais résidus successifs. Aucune assertion.
+#[test]
+#[ignore = "diagnostic S253, release"]
+fn coupled_mobile_first_step_refusal_diagnosis_s253(){
+    for (nx,a) in [(32usize,0.10f64),(64,0.05),(64,0.10),(128,0.05)] {
+        let wave=standing::StandingWave{a,k:std::f64::consts::PI/2.,h:2.,g:9.81,rho:1025.};
+        let mut v=standing_case(nx,&wave,&vec![2.;nx]);
+        let (u,w)=standing_faces(&v,&wave,0.);
+        let bg=BackgroundFaces{domain:v.domain,time:SimTime(0),density:1025.,gravity:9.81,u:&u,w:&w};
+        let mut ctl=Control::unlimited();
+        v.prepare_surface_background(&bg,&mut ctl).unwrap();
+        v.coupled_predict(&bg,0.001,Sponge::default(),&mut ctl).unwrap();
+        let predicted=v.us.iter().chain(&v.ws).fold(0f32,|m,x|m.max(x.abs()));
+        let ghost_up=v.ghost_bg_up.iter().fold(0f32,|m,x|m.max(x.abs()));
+        let ghost_side=v.ghost_bg_side.iter().fold(0f32,|m,x|m.max(x.abs()));
+        super::super::PRESSURE_TRACE.with(|t|t.borrow_mut().clear());
+        v.mobile=true;
+        let r=v.project(-1_025_000.,(0.001f64/1025.) as f32,4000,false,&Jobs,&mut ctl);
+        v.mobile=false;v.surface_coupled=false;
+        let corrected=v.u.iter().chain(&v.w).fold(0f32,|m,x|m.max(x.abs()));
+        let trace=super::super::PRESSURE_TRACE.with(|t|t.borrow().clone());
+        println!("S253_DIAG nx={nx} a={a} predit_max={predicted:e} fantome_haut_max={ghost_up:e} fantome_lateral_max={ghost_side:e} corrige_max={corrected:e}");
+        println!("S253_DIAG   rapport={r:?}");
+        let head:Vec<_>=trace.iter().take(6).collect();
+        let tail:Vec<_>=trace.iter().rev().take(3).collect();
+        println!("S253_DIAG   vrais_residus={} premiers={head:?} derniers={tail:?}",trace.len());
+    }
+}

@@ -89,7 +89,7 @@ z > 0), multigrille/affinage du mode mobile, 3D, rendu, ordre d'ADR-147.
 - [x] **P4** — cœur : hauteur totale, valeurs fantômes du fond, tampons comptés ; S237 au bit.
 - [x] **P5** — cœur : pas perturbatif mobile, transport de η' et bande, atomicité.
 - [x] **P6** — essais : identité au bit, refus, expiration, allocations, témoin sans résidus.
-- [ ] **P7** — banc HOS couplé 32/64/128, 5 et 10 cm : réception ou refus publié.
+- [x] **P7** — banc HOS couplé 32/64/128, 5 et 10 cm : réception ou refus publié.
 - [ ] **P8** — suite, empreinte, coût et preuve.
 - [ ] **P9** — rituel §6 : file, trajectoire, journal et jeton.
 
@@ -117,3 +117,13 @@ latéral en entier, ordre un) — divergence 0,70 m/s au pas 100, refus Domain a
 (pression du fond linéarisée ρg·ζ_fond(x_Γ), bande éteinte), note datée au protocole. Résultat :
 couplé b₂ à 2,17 % de l'ordre deux, témoin 99,56 % (aucune harmonique : S volumique est un gradient).
 Tests δ 57/11 ignorés, exécution 12.
+
+P7 : banc `delta_mobile couple` (mode Coupled, fond analytique partagé), `couple_cas <mode> <a> <nx>`,
+`DELTA_MOBILE_PAS` pour le coût. Premier lancement série arrêté (35 min) : cas couplés relancés en
+trois processus (précision indépendante de la concurrence ; coût à mesurer à part). Contre HOS
+(profil / b₂) : 5 cm 32 → 1,214 % / 1,62 % ; 64 → 0,276 / 0,54 ; 10 cm 32 → 0,908 / 1,51.
+**Refus `Convergence` au pas 1** : 10 cm/64, 5 cm/128, 10 cm/128. Test ignoré
+`coupled_mobile_first_step_refusal_diagnosis_s253` : 128/5 cm dégradé au plancher, D_franche
+1,53e-5, vitesse corrigée max 1,1e-4 m/s (A283 en mode mobile) ; 64/10 cm reçu en contrôle
+illimité (D_franche 8,1e-6) mais refusé sous budget (réductions découpées) : marge. Total S237
+refait identique à 32/64 (0,850/2,44 ; 0,552/1,41).

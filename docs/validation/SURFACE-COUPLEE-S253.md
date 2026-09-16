@@ -61,3 +61,43 @@ Un critère manqué est publié tel quel ; aucune tolérance n'est modifiée apr
 
 Pas couplé construit, critères 1 à 5 mesurés et publiés, coût médian à 128 colonnes relevé avec
 techniques présentes et absentes. Si l'oracle refuse, s'arrêter au diagnostic et le publier.
+
+## 2. Ce qui a été construit
+
+API : `Volume::step_perturbation_mobile(time, durée_us, plafond, budget_us, &BackgroundFaces,
+Sponge, jobs, horloge)`. `eta` porte `repos + η'` ; `set_free_surface(&[repos; nx], repos)` fait
+naître un domaine à zéro.
+
+- `delta_mobile.rs` : `height(i)` rend `η` hors du pas couplé et `ζ = η' + ζ_fond` pendant le
+  pas. Mouillage, `θ` et gardes la lisent. Les fantômes vertical et latéral ajoutent leur terme
+  du fond seulement en mode couplé ; le chemin S237 est identique au bit (`delta_mobile essai` :
+  0,850 % / 2,44 %, comme S237).
+- `delta_coupling.rs` : `prepare_surface_background` construit la géométrie totale, vérifie que
+  `eta` est identique au bit sur chaque colonne w et calcule les valeurs du fond aux fantômes.
+  `transport_coupled` calcule le débit S237 sur `ζ`, avec la bande en somme séparée.
+  `step_perturbation_mobile` enchaîne gardes, sauvegarde, prédiction couplée (ADR-149),
+  projection mobile, extrapolation, transport, validation, garde et publication.
+- Mémoire : `nu + 2·nx` flottants de plus par volume (fantôme latéral par face u, surface totale
+  et fantôme vertical par colonne), comptés avant allocation ; l'essai de comptabilité les
+  recompte indépendamment.
+- Fond de l'oracle : `examples/support/standing_background.rs`, partagé par le banc et les
+  essais, avec l'ordre deux fermé de S237 (déplacé, arithmétique identique).
+
+## 3. Essais
+
+| essai | résultat |
+|---|---|
+| fond incompressible, linéaire, `ζ_t = W(0)`, `S = (U·∇)U`, sous et au-dessus du plan moyen | tenu à l'arrondi f32 |
+| fantômes du fond contre `P` analytique à l'interface, 32 colonnes, 9 latéraux | sous la borne de Taylor `½(dx/2)²k²ρgaC` (1,79 Pa) |
+| critère 1 : fond nul, 50 pas | **identique au bit** à `step_surface_mobile`, rapport compris |
+| critère 2 : contexte, forme, non-planarité, `eta` incohérent, garde | refus, état intact, mode éteint |
+| critère 2 : expiration à cinq points, reprise | aucune avancée, état intact, reprise au bit |
+| critère 2 : allocations (pas complet et expiration) | **zéro** |
+| critère 5 : `b₂` contre l'ordre deux fermé, 32 colonnes, 5 cm, une période | couplé **2,17 %** ; témoin **99,56 %** |
+
+Le témoin sans résidus de surface ne produit pratiquement aucune harmonique `2k`. C'est cohérent
+avec la physique du cas. La source volumique `(U·∇)U = ∇(|U|²/2)` d'un fond potentiel est un
+gradient : la pression l'absorbe, et elle n'agit que par la valeur de `|U|²/2` à la surface. Or,
+pour l'onde stationnaire à `kh = π`, cette valeur est presque uniforme en x, à
+`1 − tanh²kh ≈ 0,75 %` près. L'harmonique vient donc des termes d'élévation de la surface,
+précisément ceux que le témoin éteint. Le premier témoin, fautif, est décrit au §1.2.

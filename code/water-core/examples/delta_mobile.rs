@@ -2,13 +2,22 @@
 //! finie. Voir `docs/validation/SURFACE-MOBILE-S237.md`.
 //!
 //! `cargo run -p water-core --release --offline --example delta_mobile -- oracle`
+//!
+//! S253 : `-- couple` compare aussi le pas perturbatif mobile (ADR-152), fond = ordre un analytique,
+//! δ né à zéro, au même véhicule HOS. Voir `docs/validation/SURFACE-COUPLEE-S253.md`.
 #[path = "support/nl_surface.rs"]
 #[allow(dead_code)]
 mod nl;
 #[path = "../../water-harness/src/host_impl.rs"]
 #[allow(dead_code)]
 mod host_impl;
+#[path = "support/standing_background.rs"]
+#[allow(dead_code)]
+mod standing;
 use nl::{NlSurface, C};
+use water_core::background::BackgroundSample;
+use water_core::delta_projection::{BackgroundFaces, Sponge};
+use water_core::SimTime;
 use std::f64::consts::PI;
 use std::time::Instant;
 use water_core::delta_projection::{Domain, Volume};
@@ -42,20 +51,15 @@ fn period() -> f64 {
 /// Ordre deux depuis le repos, dérivé en S237 P3 (script sympy, notes de session) :
 /// `B₂'' + Ω²B₂ = σ₂D₂ + K₂'`, `σ₂ = 2k·tanh 2kh`, `Ω² = gσ₂`, `B₂(0) = B₂'(0) = 0`, avec
 /// `K₂ = −gk²·sin 2ωt/(2ω)` et `D₂ = gk(gk·sin²ωt + ω²cos²ωt·sinh 2kh)/(4ω²cosh²kh)`.
-/// Rend `B₂(t)` : `b₂ = a²·B₂`, coefficient de `cos 2kx`.
+/// Rend `B₂(t)` : `b₂ = a²·B₂`, coefficient de `cos 2kx`. S253 : la formule, à l'identique, vit
+/// dans `support/standing_background.rs`, source unique pour ce banc et les essais du cœur.
 fn second_order_b2(t: f64) -> f64 {
-    let (k, h, g, w) = (k(), H, G, omega());
-    let sigma2 = 2. * k * (2. * k * h).tanh();
-    let big2 = g * sigma2;
-    let c2 = (k * h).cosh().powi(2);
-    let s2h = (2. * k * h).sinh();
-    let d0 = g * k * (g * k / 2. + w * w * s2h / 2.) / (4. * w * w * c2);
-    let dc = g * k * (-g * k / 2. + w * w * s2h / 2.) / (4. * w * w * c2);
-    let f0 = sigma2 * d0;
-    let f2 = sigma2 * dc - g * k * k;
-    let p0 = f0 / big2;
-    let p2 = f2 / (big2 - 4. * w * w);
-    p0 + p2 * (2. * w * t).cos() - (p0 + p2) * (big2.sqrt() * t).cos()
+    wave(1.).second_order_b2(t)
+}
+
+/// S253 : fond linéaire de l'oracle couplé, mêmes `L`, `h`, `g` que ce banc.
+fn wave(a: f64) -> standing::StandingWave {
+    standing::StandingWave { a, k: k(), h: H, g: G, rho: 1025. }
 }
 
 /// Véhicule HOS de S193 sur la période `2L`, condition initiale paire `η̂₁ = a/2`, `ψ = 0`.
@@ -150,6 +154,8 @@ fn oracle() {
 enum Mode {
     Mobile,
     Linear,
+    /// S253 : pas perturbatif mobile, fond = ordre un analytique, δ né à zéro.
+    Coupled,
 }
 
 /// Une trajectoire du candidat sur une période, comparée pas à pas au véhicule HOS.
@@ -187,7 +193,7 @@ fn candidate_capped(mode: Mode, nx: usize, a: f64, dt_us: u64, cap: u32) -> Resu
     let mut arena = host_impl::ArenaAllocator::with_capacity(1 << 26);
     // Mobile : domaine jusqu'à 2,25 m, repos à 2 m. Linéaire : couvercle S233 au repos, z₀ = h.
     let nz = match mode {
-        Mode::Mobile => (2.25 / dx).round() as usize,
+        Mode::Mobile | Mode::Coupled => (2.25 / dx).round() as usize,
         Mode::Linear => (H / dx).round() as usize,
     };
     let mut v = Volume::configure(
@@ -203,12 +209,22 @@ fn candidate_capped(mode: Mode, nx: usize, a: f64, dt_us: u64, cap: u32) -> Resu
     match mode {
         Mode::Mobile => v.set_free_surface(&eta, H as f32),
         Mode::Linear => v.set_surface(&eta),
+        // S253 : la perturbation naît à zéro, le fond porte l'onde.
+        Mode::Coupled => v.set_free_surface(&vec![H as f32; nx], H as f32),
     }
     .map_err(|e| format!("surface {e:?}"))?;
+    let background = wave(a);
+    let mut bg_u = vec![BackgroundSample::default(); v.velocity_u().len()];
+    let mut bg_w = vec![BackgroundSample::default(); v.velocity_w().len()];
     use water_core::host::Allocator;
     arena.seal();
     let dt = dt_us as f64 * 1e-6;
-    let steps = (period() / dt).round() as usize;
+    // S253 : `DELTA_MOBILE_PAS` écourte la trajectoire pour une mesure de coût seule (précision non
+    // publiée alors) ; par défaut, une période.
+    let steps = std::env::var("DELTA_MOBILE_PAS")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or((period() / dt).round() as usize);
     let mut reference = hos(a, REF_BAND, REF_LEVELS, 3);
     let volume0: f64 = v.surface().iter().map(|h| *h as f64).sum();
     let mut run = Run {
@@ -229,13 +245,43 @@ fn candidate_capped(mode: Mode, nx: usize, a: f64, dt_us: u64, cap: u32) -> Resu
     };
     let mut times = Vec::with_capacity(steps);
     for n in 1..=steps {
+        // S253 : échantillons du fond à `t_{n−1}`, préparés hors du chronomètre (ADR-149).
+        if mode == Mode::Coupled {
+            let t_prev = (n - 1) as f64 * dt;
+            for kk in 0..nz {
+                for i in 0..=nx {
+                    bg_u[kk * (nx + 1) + i] = background.sample(i as f64 * dx, (kk as f64 + 0.5) * dx - H, t_prev);
+                }
+            }
+            for kk in 0..=nz {
+                for i in 0..nx {
+                    bg_w[kk * nx + i] = background.sample((i as f64 + 0.5) * dx, kk as f64 * dx - H, t_prev);
+                }
+            }
+        }
         let clock = Clock(Instant::now());
         let start = Instant::now();
         let report = match mode {
             Mode::Mobile => v.step_surface_mobile(dt_us, cap, 600_000_000, &jobs, &clock),
             Mode::Linear => v.step_surface_linear(dt_us, cap, 600_000_000, &jobs, &clock),
+            Mode::Coupled => {
+                let time = SimTime((n as u64 - 1) * dt_us);
+                let bg = BackgroundFaces { domain: v.domain(), time, density: 1025., gravity: G as f32, u: &bg_u, w: &bg_w };
+                v.step_perturbation_mobile(time, dt_us, cap, 600_000_000, &bg, Sponge::default(), &jobs, &clock)
+            }
         }
         .map_err(|e| format!("pas {n} : {e:?}"))?;
+        // Hauteurs géométriques : `η` seule, ou `η' + ζ_fond(t_n)` en mode couplé.
+        let t_now = n as f64 * dt;
+        let heights: Vec<f64> = v
+            .surface()
+            .iter()
+            .enumerate()
+            .map(|(i, h)| {
+                let base = *h as f64;
+                if mode == Mode::Coupled { base + a * (k() * xc(i)).cos() * (omega() * t_now).cos() } else { base }
+            })
+            .collect();
         times.push(start.elapsed().as_secs_f64() * 1e3);
         if report.advanced_us != dt_us {
             return Err(format!("pas {n} non avancé : {:?}", report.stopped_at));
@@ -246,22 +292,26 @@ fn candidate_capped(mode: Mode, nx: usize, a: f64, dt_us: u64, cap: u32) -> Resu
             run.cycle_divergence = run.cycle_divergence.max(r.divergence);
             println!("  PLANCHER pas={n} iterations={} residu={:.4e} divergence={:.3e} omega={:.3e}", r.iterations, r.residual, r.divergence, r.backward_error);
         }
-        if mode == Mode::Mobile {
-            let wet = v.wet_cells();
+        if mode != Mode::Linear {
+            let wet = if mode == Mode::Mobile {
+                v.wet_cells()
+            } else {
+                heights.iter().map(|h| ((h / dx) - 0.5).ceil() as usize).sum()
+            };
             run.wet_min = run.wet_min.min(wet);
             run.wet_max = run.wet_max.max(wet);
             // Mêmes définitions que `ghost_up` et `ghost_side`, fond plat.
-            let s = v.surface();
+            let s = &heights;
             let zc = |k: usize| (k as f64 + 0.5) * dx;
             for i in 0..nx {
-                let e = s[i] as f64;
+                let e = s[i];
                 let top = ((e / dx) - 0.5).ceil() as usize - 1;
                 run.theta_min = run.theta_min.min((e - zc(top)) / dx);
                 for j in [i.wrapping_sub(1), i + 1] {
                     if j >= nx {
                         continue;
                     }
-                    let n = s[j] as f64;
+                    let n = s[j];
                     for k in 0..=top {
                         if zc(k) >= n {
                             run.theta_min = run.theta_min.min((e - zc(k)) / (e - n));
@@ -272,9 +322,9 @@ fn candidate_capped(mode: Mode, nx: usize, a: f64, dt_us: u64, cap: u32) -> Resu
         }
         reference.step(dt).map_err(|e| format!("HOS {e}"))?;
         let (mut b2, mut b2h) = (0f64, 0f64);
-        for (i, h) in v.surface().iter().enumerate() {
+        for (i, h) in heights.iter().enumerate() {
             let x = xc(i);
-            let mac = *h as f64 - H;
+            let mac = *h - H;
             let hosv = hos_eta(&reference, x);
             run.profile = run.profile.max((mac - hosv).abs() / a);
             b2 += 2. / L * mac * (2. * k() * x).cos() * dx;
@@ -295,7 +345,11 @@ fn compare(modes: &[Mode], grids: &[usize], amplitudes: &[f64], dt_us: u64) {
     for &a in amplitudes {
         for &mode in modes {
             for &nx in grids {
-                let label = if mode == Mode::Mobile { "mobile" } else { "lineaire" };
+                let label = match mode {
+                    Mode::Mobile => "mobile",
+                    Mode::Linear => "lineaire",
+                    Mode::Coupled => "couple",
+                };
                 match candidate(mode, nx, a, dt_us) {
                     Ok(r) => println!(
                         "CANDIDAT mode={label} a={a} nx={nx} dt_us={dt_us} profil_sur_a={:.5} b2_ecart={:.4e} b2_ref={:.4e} b2_relatif={:.4} b2_candidat={:.4e} derive_volume_m={:.3e} mailles_fluides={}..{} theta_min={:.4e} iterations_max={} pas_au_plancher={} divergence_plancher_max={:.3e} pas_ms median={:.3} max={:.3} octets={}",
@@ -406,12 +460,23 @@ fn main() {
     match args.get(1).map(String::as_str) {
         Some("oracle") => oracle(),
         Some("essai") => compare(&[Mode::Mobile], &[32], &[0.05], 1000),
+        // S253 : solveur total et pas couplé côte à côte, mêmes grilles et amplitudes que S237.
+        Some("couple") => compare(&[Mode::Mobile, Mode::Coupled], &[32, 64, 128], &[0.05, 0.10], 1000),
+        Some("couple_essai") => compare(&[Mode::Coupled], &[32], &[0.05], 1000),
+        // S253 : un cas à la fois (`couple_cas <mode> <a> <nx>`), pour répartir la réception sur
+        // plusieurs processus ; résultats identiques, un calcul par processus.
+        Some("couple_cas") => {
+            let mode = if args.get(2).map(String::as_str) == Some("mobile") { Mode::Mobile } else { Mode::Coupled };
+            let a: f64 = args.get(3).and_then(|s| s.parse().ok()).expect("amplitude");
+            let nx: usize = args.get(4).and_then(|s| s.parse().ok()).expect("colonnes");
+            compare(&[mode], &[nx], &[a], 1000)
+        }
         Some("petite") => println!("PETITE_AMPLITUDE a=0.001 nx=64 dt_us=1000 ecart_mobile_lineaire_sur_a={:?}", small_amplitude(64, 0.001, 1000)),
         Some("reception") => {
             println!("PETITE_AMPLITUDE a=0.001 nx=64 dt_us=1000 ecart_mobile_lineaire_sur_a={:?}", small_amplitude(64, 0.001, 1000));
             compare(&[Mode::Mobile, Mode::Linear], &[32, 64, 128], &[0.05, 0.10], 1000);
             compare(&[Mode::Mobile], &[64], &[0.01], 1000);
         }
-        _ => eprintln!("usage : delta_mobile oracle | essai | reception"),
+        _ => eprintln!("usage : delta_mobile oracle | essai | reception | couple | couple_essai"),
     }
 }
