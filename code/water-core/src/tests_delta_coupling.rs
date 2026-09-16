@@ -344,3 +344,38 @@ fn multigrid_conjugate_gradient_keeps_its_recursion_s252(){
 A285 multigrille={multigrid:?} premier_vrai_residu={first:?} relances={}",trace().len());
     assert!(first.1<=floor,"premier vrai résidu multigrille {} au-dessus du plancher ordinaire {floor}",first.1);
 }
+
+#[path = "../examples/support/standing_background.rs"]
+#[allow(dead_code)]
+mod standing;
+
+/// S253 (ADR-152) — le fond de l'oracle couplé avant usage : incompressible, linéaire (`U_t + ∇P/ρ = 0`)
+/// et à cinématique linéarisée (`ζ_t = W(0)`), sous **et au-dessus** du plan moyen ; le résidu
+/// contracté se réduit à `(U·∇)U`. Arrondis f32 seulement.
+#[test]
+fn standing_background_is_incompressible_linear_and_kinematic_s253(){
+    let wave=standing::StandingWave{a:0.1,k:std::f64::consts::PI/2.,h:2.,g:9.81,rho:1025.};
+    let eps=f32::EPSILON;
+    for t in [0.,0.31,0.77,1.13] {
+        for x in [0.1,0.55,1.3,1.9] {
+            for z in [-1.9,-0.7,-0.05,0.,0.08,0.15] {
+                let s=wave.sample(x,z,t);
+                let div=s.grad_u[0][0]+s.grad_u[2][2];
+                assert!(div.abs()<=4.*eps*s.grad_u[0][0].abs(),"div {div} en x={x} z={z} t={t}");
+                for (axis,scale) in [(0,s.du_dt[0].abs()),(2,s.du_dt[2].abs())] {
+                    let linear=s.du_dt[axis]+s.grad_p_dyn[axis]/1025.;
+                    assert!(linear.abs()<=4.*eps*scale+f32::MIN_POSITIVE,"quantité de mouvement linéaire {linear}");
+                }
+                let r=s.momentum_residual(1025.,0.).unwrap();
+                let adv=wave.advection(x,z,t);
+                for (axis,i) in [(0,0),(2,1)] {
+                    let bound=1e-5*adv[i].abs()+8.*(eps*s.du_dt[axis].abs()) as f64;
+                    assert!((r[axis] as f64-adv[i]).abs()<=bound,"S {} contre {}",r[axis],adv[i]);
+                }
+            }
+            let rate=wave.eta_rate(x,t);
+            let w0=wave.sample(x,0.,t).u[2] as f64;
+            assert!((w0-rate).abs()<=1e-6*rate.abs().max(1e-6),"ζ_t {rate} contre W(0) {w0}");
+        }
+    }
+}

@@ -85,7 +85,7 @@ z > 0), multigrille/affinage du mode mobile, 3D, rendu, ordre d'ADR-147.
 
 - [x] **P1** — amorce, lectures et plan seuls.
 - [x] **P2** — ADR-152 et protocole de réception, avant code.
-- [ ] **P3** — fournisseur analytique de test partagé (exemple et essais) et ses contrôles.
+- [x] **P3** — fournisseur analytique de test partagé (exemple et essais) et ses contrôles.
 - [ ] **P4** — cœur : hauteur totale, valeurs fantômes du fond, tampons comptés ; S237 au bit.
 - [ ] **P5** — cœur : pas perturbatif mobile, transport de η' et bande, atomicité.
 - [ ] **P6** — essais : identité au bit, refus, expiration, allocations, témoin sans résidus.
