@@ -97,7 +97,7 @@ chiffré et mis en file avec son déclencheur.
 
 - [x] **P1** — amorce, jeton, plan seuls.
 - [x] **P2** — protocole écrit ; pose rasante soutenue ajoutée au banc.
-- [ ] **P3** — instrument d'échantillonnage, **étalonné sur la pose S212** contre les 7,5 % de S234.
+- [x] **P3** — instrument d'échantillonnage, **étalonné sur la pose S212** contre les 7,5 % de S234.
 - [ ] **P4** — mesure : coût et échantillonnage à incidence rasante, contre la pose de référence.
 - [ ] **P5** — ce qui tient, ce qui ne tient pas ; correction seulement si la mesure la désigne.
 - [ ] **P6** — rituel §6, file, feuille de route, jeton.
@@ -109,6 +109,11 @@ oeil a 2 m, tangage -0,05, tenue image apres image ; la ligne CADENCE l annonce 
 Ordre impose par le protocole : l instrument d echantillonnage est **etalonne** sur la pose de
 reference, ou il doit retrouver les **7,5 %** de S234, **avant** de servir a incidence rasante.
 lambda_min = 2 pi / coupure = **2,094 m** pour le sillage ; la coupure de B n est pas mesuree ici.
+
+P3 : instrument ajoute a --lod-charge (ligne NYQUIST_S247), qui compte dans l emprise du sillage les
+sommets dont l ecart au voisin depasse lambda_min/2 = 1,047 m.
+**Etalonnage passe** : pose S212 -> **7,54 %**, quand S234 publiait 7,5 %. L instrument reproduit un
+chiffre ecrit deux sessions avant lui.
 
 ---
 

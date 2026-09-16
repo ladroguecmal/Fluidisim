@@ -463,6 +463,12 @@ fn lod_charge(frame: &mut FrameData<'_>) {
         };
         let in_wake = |q: [f32; 2]| scene::admits_wake([q[0] + eye[0], q[1] + eye[1]]);
         let in_impact = |q: [f32; 2]| (q[0] + eye[0]).hypot(q[1] + eye[1] - 10.) <= scene::RADIUS;
+        // S247 : Nyquist. Un champ de plus courte longueur d onde lambda est sous-echantillonne
+        // des que deux sommets voisins sont distants de plus de lambda/2. On le compte **dans
+        // l emprise du sillage**, la ou ce lambda a un sens.
+        let lambda_min = std::f32::consts::TAU / scene::wake_recipe(64, 128).cutoff;
+        let nyquist = 0.5 * lambda_min;
+        let (mut under, mut worst) = (0usize, 0f32);
         let (mut cells, mut wake_cells) = (0usize, 0usize);
         let (mut ideal_global, mut ideal_local, mut ideal_wake_local) = (0f64, 0f64, 0f64);
         let mut rows_global = 0f64;
@@ -488,6 +494,11 @@ fn lod_charge(frame: &mut FrameData<'_>) {
                 if in_wake(q) {
                     wake_cells += 1;
                     ideal_wake_local += ratio(local);
+                    let spacing = hr.max(hl);
+                    worst = worst.max(spacing);
+                    if spacing > nyquist {
+                        under += 1;
+                    }
                 }
             }
             // Rangées seules : les colonnes restent celles de la grille ; la rangée peut s'étirer
@@ -496,6 +507,10 @@ fn lod_charge(frame: &mut FrameData<'_>) {
             let stretch = if room > 0. { (room.sqrt() / row_hr).max(1.) } else { 1. };
             rows_global += 1. / stretch as f64;
         }
+        println!(
+            "NYQUIST_S247 pose={name} lambda_min_m={lambda_min:.4} nyquist_m={nyquist:.4} dans_emprise={wake_cells} sous_nyquist={under} ({:.4}) pire_ecart_m={worst:.3}",
+            if wake_cells > 0 { under as f64 / wake_cells as f64 } else { 0. }
+        );
         println!(
             "LOD_CHARGE pose={name} cellules={cells} dans_emprise={wake_cells} | ideale_M_global={:.0} ({:.3}) ideale_M_local={:.0} ({:.3}) emprise_M_local={:.0} ({:.3}) | rangees_seules_M_global={:.0} rangees sur {} ({:.3})",
             ideal_global, ideal_global / cells as f64, ideal_local, ideal_local / cells as f64,
