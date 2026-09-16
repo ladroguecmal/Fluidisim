@@ -94,6 +94,7 @@ naître un domaine à zéro.
 | critère 2 : expiration à cinq points, reprise | aucune avancée, état intact, reprise au bit |
 | critère 2 : allocations (pas complet et expiration) | **zéro** |
 | critère 5 : `b₂` contre l'ordre deux fermé, 32 colonnes, 5 cm, une période | couplé **2,17 %** ; témoin **99,56 %** |
+| ADR-153 : premier pas couplé à 128 colonnes, 5 cm | témoin sans affinage refusé au plancher (`D_franche` 1,53·10⁻⁵) ; pas reçu, `D` 6,67·10⁻⁸, 1 145 itérations ; expiration tardive intacte |
 
 Le témoin sans résidus de surface ne produit pratiquement aucune harmonique `2k`. C'est cohérent
 avec la physique du cas. La source volumique `(U·∇)U = ∇(|U|²/2)` d'un fond potentiel est un
@@ -101,3 +102,79 @@ gradient : la pression l'absorbe, et elle n'agit que par la valeur de `|U|²/2` 
 pour l'onde stationnaire à `kh = π`, cette valeur est presque uniforme en x, à
 `1 − tanh²kh ≈ 0,75 %` près. L'harmonique vient donc des termes d'élévation de la surface,
 précisément ceux que le témoin éteint. Le premier témoin, fautif, est décrit au §1.2.
+
+## 4. Réception contre l'oracle
+
+`delta_mobile couple`, une période, pas de 1 ms, secteur 99 % avant et après. Le passage en
+série (solveur total, puis couplé) a été arrêté après deux cas, car il aurait duré environ 35
+minutes. Les cas couplés ont été relancés en trois processus par `couple_cas` : la précision ne
+dépend pas de la concurrence, et le coût est mesuré à part (§5). Le solveur total a été refait
+à 5 cm : 0,850 % / 2,44 % à 32 colonnes, comme S237 ; 0,552 % / 1,41 % à 64 colonnes, contre
+0,550 % publié. Les autres chiffres du total sont ceux publiés par S237 et S238.
+
+**Premier passage : refus.** 64 colonnes à 10 cm, et 128 colonnes aux deux amplitudes,
+refusaient au premier pas (`Convergence`). Diagnostic (`coupled_mobile_first_step_refusal_
+diagnosis_s253`) : à 128 colonnes et 5 cm, le pas est au plancher avec `D_franche = 1,53·10⁻⁵`,
+pour une vitesse corrigée maximale de 1,1·10⁻⁴ m/s ; à 64 colonnes et 10 cm, il est reçu sous
+contrôle illimité (8,1·10⁻⁶) mais refusé sous budget. C'est le mécanisme d'A283 en mode mobile.
+Plan amendé, puis [ADR-153](../adr/ADR-153-affinage-en-mode-mobile-couple.md) ; les cas
+refusés ont été rejoués.
+
+| a | nx | profil couplé | `b₂` couplé | profil total | `b₂` total |
+|---:|---:|---:|---:|---:|---:|
+| 5 cm | 32 | 1,214 % | 1,62 % | 0,850 % | 2,44 % |
+| 5 cm | 64 | 0,276 % | 0,54 % | 0,552 % | 1,41 % |
+| 5 cm | **128** | **0,162 %** | **0,34 %** | 0,252 % | 0,71 % |
+| 10 cm | 32 | 0,908 % | 1,51 % | 1,714 % | 1,71 % |
+| 10 cm | 64 | 0,379 % | 0,69 % | 0,592 % | 0,98 % |
+| 10 cm | **128** | **0,213 %** | **0,53 %** | 0,230 % | 0,43 % |
+
+- **Critères 3 et 4 tenus** aux deux amplitudes : profil ≤ 2 % et `b₂` ≤ 20 % à 128 colonnes,
+  décroissants de 32 à 128.
+- Le pas couplé fait **mieux que le solveur total** partout, sauf deux cases : le profil à
+  5 cm / 32 colonnes et `b₂` à 10 cm / 128 colonnes. Le fond linéaire étant exact, l'erreur
+  restante ne porte que sur la part non linéaire.
+- Volume perturbatif : dérive ≤ 1,3·10⁻⁸ m. Pas au plancher, tous reçus : 183 (5 cm / 32),
+  116 (5 cm / 128), 27 (10 cm / 128). Mailles fluides de la géométrie totale : 16 356 à 16 415 à
+  128 colonnes, comme le total.
+
+## 5. Coût (ADR-131)
+
+Mesure séquentielle, sans autre charge, 200 pas depuis le repos à 128 colonnes et 5 cm, premier
+passage inclus (`DELTA_MOBILE_PAS=200`), secteur 99 % avant et après, deux passages chacun.
+
+| pas | médiane (ms) | maximum (ms) |
+|---|---|---|
+| total S237 | 259,6 ; 261,8 | 349 ; 377 |
+| couplé ADR-152/153 | 264,8 ; 277,4 | 690 ; 671 (premier pas, affiné) |
+
+Le couplage ajoute quelques pour cent au pas, hors préparation des échantillons, qui revient à
+l'hôte. Les deux restent environ 130 fois au-dessus des 2 ms d'eau d'ADR-125, à 16 384 mailles.
+
+- **Présentes** : gradient conjugué préconditionné par Jacobi (mode mobile), affinage unique au
+  plancher, f32, un fil.
+- **Absentes** : multigrille en mode mobile (ADR-147 point 5), départ non nul, parallélisme, GPU,
+  échantillonnage décimé du fond (SPEC-004 §6.2).
+- **Domaine** : 2D x-z, bassin à murs L = h = 2 m, fond linéaire d'un mode de profondeur finie
+  prolongé analytiquement, une période, 32 à 128 colonnes, 5 et 10 cm.
+
+## 6. Limites de réception
+
+- **Fond de production non raccordé** : B refuse `z > 0` (ADR-113), et le prolongement de Taylor
+  d'ordre un n'est pas incompressible. Il faut un prolongement incompressible, avec son `S`,
+  reçu contre cet oracle (A286).
+- **Frontières du total** non construites : `W(fond) ≠ 0` (B profond sur un fond fini), coques
+  et parois mobiles.
+- **Bords ouverts** : bassin à murs seulement. `η'` n'a ni relaxation ni éponge, et le domaine
+  n'est pas éprouvé plongé dans une mer qui le traverse.
+- Pas de 3D, pas de surface non graphe (déferlement), pas de seconde cible (A98), pas de
+  réception I-05 murale ; le pas S237 total n'a pas l'affinage.
+
+## Reproduction
+
+```powershell
+cargo test --release --offline --manifest-path code/Cargo.toml
+cargo test --release --offline --manifest-path code/Cargo.toml -p water-core --lib s253 -- --nocapture
+cargo run --release --offline --manifest-path code/Cargo.toml -p water-core --example delta_mobile -- couple
+cargo run --release --offline --manifest-path code/Cargo.toml -p water-core --example delta_mobile -- couple_cas couple 0.05 128
+```

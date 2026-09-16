@@ -93,7 +93,7 @@ z > 0), multigrille/affinage du mode mobile, 3D, rendu, ordre d'ADR-147.
 - [x] **P7b** — ADR-153 : affinage de divergence au plancher étendu au pas couplé mobile
   (valeurs fantômes homogènes) ; essai au premier pas à 128 colonnes, témoin refusé.
 - [x] **P7c** — réception complète 64/128 aux deux amplitudes, coût séparé sans concurrence.
-- [ ] **P8** — suite, empreinte, coût et preuve.
+- [x] **P8** — suite, empreinte, coût et preuve.
 - [ ] **P9** — rituel §6 : file, trajectoire, journal et jeton.
 
 ### Notes de reprise
@@ -148,3 +148,6 @@ P7c : réception (3 processus parallèles, précision seule) — profil / b₂ c
 décroissants. Volume ≤1,3e-8 m ; pas au plancher 116 (5 cm/128) et 27 (10 cm/128), tous reçus.
 Coût propre, séquentiel, 200 pas, 128/5 cm, secteur 99 % : total 259,6 / 261,8 ms médiane
 (max 349 / 377) ; couplé 264,8 / 277,4 (max 690 / 671, premier pas affiné), hors échantillons.
+
+P8 : suite release 459 / 18 ignorés / 0 échec ; delta_precision identique hors temps et octets
+alloués (+4·(nu+2nx), attendu) ; empreinte 0xfb12b2092df4ee6d. Preuve SURFACE-COUPLEE-S253 §2–§6.
