@@ -58,25 +58,33 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S258 — terminée
+Session : S259 — en cours
 Agent : Claude Opus 5, Claude Code ; fichiers, git, cargo, Python et GPU local disponibles.
-Entrée (2026-09-16 23:03) : « fais attention, il reste une tâche en cours ». Constat : dépôt propre,
-jeton libre, aucune étape `[>]`, aucun processus ni tâche de fond de la session (les `python.exe`
-actifs sont le serveur MCP Blender). Seule tâche laissée ouverte par moi : la liste du projet fini
-(S255) marque « C18 à relire » au point 13.2, annoncé à l'utilisateur comme restant à vérifier.
-La mer multimodale, recommandée en S257, passe à S259.
+Entrée (2026-09-16 23:06) : « continue ». Master propre fdc0f1c, copie unique, maillons 2 : cette
+session doit livrer une capacité. Lot recommandé en S257 d'après le verdict R2 (« grand lac soumis
+au vent ») et A287 (stries : direction liée au rang de fréquence).
 
-Objectif : exécuter C18 sur le système, lire ce que le harnais affirme réellement, corriger 13.2.
-Arrêt : état de C18 publié ligne par ligne contre CAS-CANONIQUES §C18, liste corrigée.
+Objectif : B **multimodal** — plusieurs systèmes (houle longue + mer de vent), chacun avec sa
+bande, son pic et une **loi d'étalement directionnel** (cos^2s, s selon f/fp, Mitsuyasu ;
+s_max de Goda), directions tirées **indépendamment du rang de fréquence**. Queue d'ADR-155 selon la
+même loi. **Aucune migration silencieuse** : `bake` V1, son empreinte figée et la scène par défaut
+restent au bit ; la scène multimodale est une variante déclarée (`--houle`) de l'afficheur.
+
+Réception écrite avant code (ADR-156, protocole) : amplitudes, `k` et fréquences identiques au bit
+à `bake` par système ; `E[cos θ] = s/(s+1)` pour l'inverse de la loi ; décorrélation rang/direction
+bornée par 3/√N ; `Hs` total = √Σ Hs² ; hauteurs GPU contre cœur ≤ 3 mm sur la scène `--houle` ;
+scène par défaut identique (R2 rejoué au bit, `--tail-verify` inchangé) ; coût GPU ; rendus R3.
 
 ### Plan
 
-- [x] **P1** — amorce, jeton, plan.
-- [x] **P2** — C18 exécuté et lu ; liste 13.2 corrigée ; rituel (journal, jeton).
+- [>] **P1** — amorce, jeton et plan seuls.
+- [ ] **P2** — SPEC-001 §1 septies (Mitsuyasu, Goda, moment `s/(s+1)`), ADR-156, protocole
+  MER-MULTIMODALE-S259, avant code.
+- [ ] **P3** — cœur : loi d'étalement et son inverse, `bake_directional`, queue directionnelle,
+  assemblage de systèmes ; essais.
+- [ ] **P4** — hôte : nombre de composantes de B variable, scène `--houle`, vérification CPU/GPU.
+- [ ] **P5** — réception : hauteurs, scène par défaut au bit, coût, rendus R3 envoyés.
+- [ ] **P6** — rituel §6 : liste du projet fini (2.2), A287, file, journal, jeton.
 
 ### Notes de reprise
 
-P1 : `water-harness check scenarios/C18-invariants.toml` → `OK hash=0x85c8bc610f551d11
-composantes=32 alloc_post_seal=1 13.8 ms`, identique à l'historique (S178). Le harnais exécute
-quatre assertions : reproductibilité intra-exécution, indépendance au chemin d'interrogation,
-allocation refusée après scellement, empreinte déclarée de B.
