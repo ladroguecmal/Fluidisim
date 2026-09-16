@@ -5511,3 +5511,30 @@ Trois choses généralisent.
 
 Famille de L323 et L325 : ce qui n'a pas d'étalon n'a pas de valeur mesurée, et ce qu'on ne relève
 pas ne peut pas surprendre.
+
+## L327 — Une image de banc est un instrument : on l'étalonne, et son désaccord est une mesure
+
+*(S248)* Les cartes du maillage devaient retrouver, avant qu'on les regarde, les extrema que S247
+avait publiés. Le premier jet annonçait **567,9 m** et **1 228,8 m** là où S247 publie **2,589** et
+**8,243**. Il aurait été facile de conclure « la carte est fausse » — elle ne l'était pas. Elle
+mesurait **autre chose** : S247 comptait dans l'emprise du sillage, la carte comptait jusqu'à
+l'horizon. Une fois les deux quantités séparées, l'étalon passe exactement, **et le désaccord est
+devenu un résultat** : sur toute l'eau visible, l'écart entre sommets monte à plus d'un kilomètre,
+ce que personne n'avait relevé.
+
+Trois choses généralisent.
+
+1. **Une image produite par un programme est un instrument, pas une illustration.** Elle se soumet
+   aux mêmes exigences : une empreinte reproductible, un domaine écrit, et un étalon passé **avant**
+   usage. Sans cela elle ne prouve rien, et elle est d'autant plus dangereuse qu'elle convainc.
+2. **Quand un instrument neuf contredit une mesure ancienne, la première hypothèse n'est pas qu'il
+   se trompe : c'est qu'il ne mesure pas la même chose.** Chercher la différence de définition avant
+   de chercher le bogue est plus rapide, et c'est souvent là que se trouve le fait nouveau.
+3. **Une carte montre la forme qu'un nombre cache.** « 7,59 % des sommets sous Nyquist » et « une
+   bande étroite à l'horizon, le reste sain » sont le même nombre et deux conclusions différentes —
+   la seconde dit *où couper*, la première ne le dit pas. De même, séparer les couches d'ADR-001
+   dans deux images a rendu lisible en un coup d'œil ce que l'architecture affirme depuis S01 : `B`
+   partout et lisse, `W` et `δ` locaux et structurés.
+
+Famille de L326 : ce qui n'a pas d'étalon n'a pas de valeur mesurée — et l'étalon vaut aussi pour ce
+qu'on regarde.

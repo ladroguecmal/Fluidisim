@@ -12830,3 +12830,69 @@ active (J1-bis : angles rasants faits, **A282 ouverte**), feuille de route, inde
 **I-06** (`update` reste à zéro allocation à la pose la plus chargée) et **I-09** — on interpole des
 paramètres, jamais des réalisations, et c'est précisément ce que la coupure par la distance devra
 respecter quand elle sera construite. Maillons 1.
+
+## S248 — 2026-09-16 — La mer et son maillage, vus plutôt que décrits
+
+**Entrée.** « Continue, avant réalise une mission intermédiaire qui met en avant la topologie de la
+mer, le mesh du lod. » Master propre à `3338804`, une seule copie, jeton libre, secteur, Maillons 1.
+Claude Code, Opus 5. **Demande explicite de l'utilisateur**, qui prime sur la suite automatique
+(REPRISE §6.7) : A282 repart en file, lot prêt, déclencheur conservé. Plan `0ebab41`, ossature
+`fd2652c`, mer `ae303eb`, réparation `ade7bcc`, maillage et réception `588a2b0`.
+
+**Ce qui a été fait.** Six images locales de banc sous `captures/s248/`, ce qu'ADR-124 autorise
+explicitement depuis S201 — **PPM local, aucune publication, aucune page**. Les images ne sont pas
+versionnées : `.gitignore` exclut `captures/`, parce que le dépôt ne contient que de la connaissance.
+**Seules leurs empreintes le sont**, et elles suffisent à refaire l'expérience. Preuve
+[IMAGES-S248](../docs/validation/IMAGES-S248.md).
+
+**La mer, et pourquoi il a fallu deux images.** La première ne montre presque rien, et c'est le
+résultat : le fond sature la rampe à **0,988644 m** et noie tout ; on ne voit que la houle longue en
+bandes. La perturbation vaut **0,149809 m**, soit **15,15 %**. Séparées, les couches d'ADR-001 se
+lisent d'un coup d'œil — trois sillages en V avec leur source, quatre anneaux d'impact. C'est
+l'argument de la décomposition, rendu visible : `B` partout et lisse, `W` et `δ` locaux et structurés.
+`background_only` rend `B` seul **par le même chemin** que `references`, pour que la soustraction
+soit exacte et non approchée.
+
+**L'étalon a mordu, et c'était son rôle.** Le protocole exigeait que les cartes retrouvent les
+extrema de S247 **avant qu'on les regarde**. Le premier jet annonçait **567,9 m** et **1 228,8 m** là
+où S247 publie 2,589 et 8,243. La carte ne mentait pas : elle mesurait **autre chose** — S247 compte
+dans l'emprise du sillage, la carte comptait jusqu'à l'horizon. Les deux quantités séparées, l'étalon
+passe **exactement** : 2,589 / 8,243 m et 7,54 % / 7,59 %. **Et le désaccord est devenu un résultat** :
+sur toute l'eau visible, l'écart entre sommets monte à **567,9 m** à la pose de référence et
+**1 228,8 m** à la rasante, ce que S247 n'avait pas relevé.
+
+**Ce que les cartes montrent et que les nombres ne disaient pas.** La dégradation n'est **pas
+répartie** : l'écran est vert partout sauf une **bande étroite à l'horizon**, qui vire au jaune puis
+au rouge sur quelques pour cent de la hauteur d'image — les 7,59 % sont exactement cette bande. Un
+histogramme donnait le même chiffre sans dire qu'il est concentré. Et la carte monde montre les
+rangées de sommets **se séparer** en traits distincts avec du noir entre elles : des mètres d'eau
+qu'aucun sommet n'échantillonne. À 150 m, **2,4 %** des pixels portent un sommet à incidence rasante,
+contre 5,5 % à la pose de référence.
+
+**Ce que cela instruit pour A282.** Une spécification **visible** : couper dans la bande d'horizon et
+là seulement — le reste est sain, et une coupure uniforme y retirerait de l'onde pour rien ; suivre
+une transition continue, puisque l'écart croît par rangées régulières ; et accepter que `VERIFY`
+attende désormais un **écart** dans la bande rouge, pas son absence.
+
+**Un outil, parce qu'il manquait.** `outils/apercu_ppm.py` écrit un PNG à côté du PPM — Python
+standard, sans réseau ni dépendance. ADR-124 autorise « PPM et preview », et le dépôt n'avait pas de
+quoi regarder ses propres images.
+
+**Non fait.** Aucune capture de l'afficheur : ces cartes sont géométriques, pas des images rendues.
+La coupure de `B` n'est pas mesurée. Un format, un âge, deux poses. Le maillage local du sillage
+n'est pas représenté — il ne dépend pas de la caméra, et ces images portent sur ce qui en dépend.
+
+**Une maladresse, consignée.** Deux notes de reprise ont été avalées par une substitution du shell
+— des accents graves dans une chaîne passée à `bash` — et réparées au commit suivant. Écrire les
+textes par fichier plutôt que par ligne de commande évite la classe entière.
+
+**Suite.** **Maillons passe à 2** : cette session **instrumente et donne à voir**, elle ne reçoit
+aucune capacité nouvelle. À deux maillons, REPRISE demande un lot qui fasse avancer une capacité, et
+la file en porte un, prêt et désormais spécifié visuellement : **S249 : A282 — couper les modes par
+la distance**. A281, A278, A277, A274, V, B2 et bathymétrie gardent leurs déclencheurs.
+
+**Rituel.** L327 ; aucun ADR — aucune décision, aucune règle changée ; file active (J1-bis, A282
+enrichie de sa spécification visible), feuille de route, index, `outils/apercu_ppm.py` référencé.
+Invariants relus : **I-03** (six empreintes reproduites à l'identique sur deux exécutions) et le
+§11.3 de SPEC-005 que `.gitignore` applique — rien de dérivé, rien de binaire dans le dépôt.
+Maillons 2.

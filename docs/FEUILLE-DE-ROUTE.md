@@ -104,8 +104,11 @@ S214, A254 close S223, cadence complète faite S225. **Allocations de la pile gr
 allocations et 18 509 octets par image, constantes** ; [preuve](validation/ALLOCATIONS-HOTE-S240.md).
 **Angles rasants soutenus faits S247** : le coût tient à toutes les poses mesurées — GPU eau
 identique à la quatrième décimale —, mais l'échantillonnage du champ lointain non : même part sous
-Nyquist, **pire écart 8,243 m contre 2,589** ; [mesure](validation/RASANT-S247.md). Restent
-l'interaction manuelle représentative et la seconde cible (B7).
+Nyquist, **pire écart 8,243 m contre 2,589** ; [mesure](validation/RASANT-S247.md). **Mis en
+images S248** : la dégradation n'est pas répartie mais concentrée dans une **bande étroite à
+l'horizon**, et sur toute l'eau visible le pire écart monte à **1 228,8 m** à la pose rasante ;
+[images](validation/IMAGES-S248.md). Restent l'interaction manuelle représentative et la seconde
+cible (B7).
 Composition de la scène représentative par le cœur : faite S236 (mode union, ADR-142). Le choix du
 mode par un hôte autoritaire reste à trancher avec lui (A271).
 

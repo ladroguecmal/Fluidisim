@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-16 08:35 +02:00
+JETON            : libre
+Battement        : 2026-09-16 09:00 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web disponibles)
-Session en cours : S248 — mettre en image la topologie de la mer et le maillage du LOD
-Dernière session : S247 — angles rasants : le coût tient, l'échantillonnage lointain non
-Session suivante : à déterminer en fin de S248 (A282 repart en file)
-Maillons        : 1
+Session en cours : aucune
+Dernière session : S248 — la mer et son maillage mis en images de banc (ADR-124)
+Session suivante : S249 — A282 : couper les modes par la distance
+Maillons        : 2
 
 ```
 
@@ -75,7 +75,7 @@ Ne pas relire le journal, les leçons ou tous les ADR intégralement à chaque r
 
 ## 4. Où en est le projet
 
-État à S247 : B/W et un afficheur existent ; scène multi-sources dessinée, visibilité au bit, composée
+État à S248 : B/W et un afficheur existent ; scène multi-sources dessinée, visibilité au bit, composée
 et admise par le cœur (ADR-142) ; **la boucle d'image de l'hôte n'alloue rien** pour le code du projet,
 la pile verrouillée 133 fois par image, constantes (ADR-145). Le poste dominant du budget de l'hôte est
 `ModalPressure::sample` dans la préparation du sillage — **87 %** de ses 3,1 ms, contre 0,44 ms de

@@ -45,6 +45,7 @@
 - [Multigrille de la pression de δ : un repli de précision, et pourquoi pas de vitesse](validation/MULTIGRILLE-S245.md).
 - [Prolongation de la multigrille : cinq suspects écartés, un amortissement corrigé](validation/PROLONGATION-S246.md).
 - [Angles rasants : le coût tient, l'échantillonnage du champ lointain non](validation/RASANT-S247.md).
+- [Topologie de la mer et maillage du LOD, en images de banc](validation/IMAGES-S248.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).
@@ -215,4 +216,5 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 
 Les anciens récits de cet index restent dans Git à `dfd1507`. Refonte S227 : ne plus y ajouter
 les comptes rendus déjà présents au journal. L’inventaire se recalcule avec
-`python outils/etat_projet.py`.
+`python outils/etat_projet.py`. Les images locales de banc (ADR-124) se regardent avec
+`python outils/apercu_ppm.py <image.ppm>`, qui écrit un PNG à côté du PPM.

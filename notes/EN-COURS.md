@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S248 — en cours
+Session : S248 — terminée
 Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web)
 Entrée : « Continue, avant réalise une mission intermédiaire qui met en avant la topologie de la mer,
 le mesh du lod. » Master propre à `3338804`, une seule copie, jeton libre, secteur, Maillons 1.
@@ -95,7 +95,7 @@ jamais dans `redraw`. (4) Aucune publication, aucune page : PPM local sous `capt
 - [x] **P3** — carte de la **topologie de la mer** : hauteur composée, vue de dessus.
 - [x] **P4** — cartes du **maillage** : où tombent les sommets, et l'écart vu depuis l'écran.
 - [x] **P5** — réception : extrema contre S247, empreintes rejouées, description écrite.
-- [ ] **P6** — rituel §6, file, feuille de route, jeton.
+- [x] **P6** — rituel §6, file, feuille de route, jeton.
 
 ### Notes de reprise
 
