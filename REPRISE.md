@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-16 22:39 +02:00
+JETON            : occupé
+Battement        : 2026-09-16 22:46 +02:00
 Agent            : Claude Opus 5, Claude Code (fichiers, git, cargo, Python, GPU local, accès web)
-Session en cours : aucune
+Session en cours : S257 — verdict R2 et question de l'utilisateur (surface plane et normales vue de dessus)
 Dernière session : S256 — verdict R1 « trop lisse » mesuré (mss 0,0075 contre 0,044) ; queue spectrale en pentes par pixel (ADR-155), R2 envoyée
-Session suivante : S257 — verdict R2 de l'utilisateur s'il arrive (A287 si confirmé) ; sinon bords ouverts du pas couplé
+Session suivante : à fixer au rituel de S257
 Maillons        : 0
 
 ```

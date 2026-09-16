@@ -58,60 +58,29 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S256 — terminée
+Session : S257 — en cours
 Agent : Claude Opus 5, Claude Code ; fichiers, git, cargo, Python et GPU local disponibles.
-Entrée (2026-09-16 22:13) : premier verdict de l'utilisateur sur R1 — « la mer est trop lisse, on
-dirait un lac ». Master propre 029cfd5, copie unique, jeton libre, maillons 1. R1 passe devant la
-suite automatique (S254).
+Entrée (2026-09-16 22:45), verdict R2 de l'utilisateur : « le résultat se raffine, mais la
+topologie d'un océan fluctue selon plusieurs paramètres ; le rendu paraît un grand lac soumis à
+beaucoup de vent ; la haute mer semble plus déchaînée, de manière chaotique, et la houle se forme
+petit à petit vers les terres ». Et une question : « avait-on réfléchi à une surface lisse avec
+effet de normales, déplacement ou autre technologie quand on regarde la mer de dessus, le rayon de
+vision perpendiculaire à l'eau, puisqu'une surface plane devrait suffire ? ». Master propre
+d6a4253, jeton libre.
 
-Protocole (REVUE-VISUELLE §4) : consigner, classer, **confirmer par une mesure** avant de toucher
-à B. Hypothèse à éprouver : la recette de B s'arrête à `4 fp` (aucune onde sous 3,5 m) ; la pente
-quadratique moyenne `mss = (2π)⁴m4/g²` exige une coupure (SPEC-001 §1 bis), et la nôtre serait
-bien en dessous de la mer réelle. Référence indépendante : Cox & Munk (1954), `mss ≈ 0,003 +
-5,12·10⁻³·U` (±0,004) ; vent minimal soutenant `Hs = 1,5 m` par Pierson–Moskowitz (mer pleinement
-développée, `Hs ≈ 0,21 U²/g`). **Critère écrit avant mesure** : défaut confirmé si la `mss` de B est
-inférieure à la moitié de la borne basse de Cox–Munk à ce vent minimal. Sinon, l'attribution se
-tourne vers l'habillage (lumière, ciel) et on le dit.
-
-Si confirmé : ADR et remède physique, pas un réglage — la **queue du même spectre** (au-delà de
-`4 fp`, même densité absolue) rendue en **pentes par pixel** (normales seulement, hauteur et
-requêtes de jeu inchangées), filtrée par l'empreinte du pixel comme ADR-148. Réception : queue
-contre l'intégrale analytique, GPU contre référence CPU, coût GPU eau mesuré, rendus R2 aux mêmes
-poses envoyés à l'utilisateur.
+Objectif : consigner et classer R2 par ce qui se **calcule** (contenu du spectre, cambrure,
+absence de houle, fond uniforme, crêtes linéaires), sans campagne ; répondre à la question depuis
+le dépôt (ADR-004, S234/L313, ADR-155) et par un critère chiffré de parallaxe aux poses R1/R2.
+Pas de code dans cette session : le prochain lot se choisit sur ce classement. Arrêt : verdict
+consigné, réponse écrite, prochain lot recommandé dans la file.
 
 ### Plan
 
-- [x] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — verdict consigné au registre R1, classement provisoire, protocole de mesure ;
-  formules Cox–Munk et Pierson–Moskowitz citées dans SPEC-001 (I-14).
-- [x] **P3** — mesure : `mss` de la recette cuite (32 composantes) et du spectre continu coupé à
-  `4, 8, 16, 24, 32 fp` ; verdict confirmé ou non.
-- [x] **P4** — ADR-155 et protocole de réception du remède (si confirmé).
-- [x] **P5** — cœur : cuisson de la queue spectrale, même densité absolue, essais contre l'analytique.
-- [x] **P6** — hôte : queue en pentes par pixel, filtre d'empreinte, référence CPU.
-- [x] **P7** — réception GPU/CPU, coût, rendus R2 aux poses R1, envoi à l'utilisateur.
-- [x] **P8** — rituel §6 : liste du projet fini (2.1, 8.9, 8.10), registre, journal, jeton.
+- [>] **P1** — amorce, jeton et plan seuls.
+- [ ] **P2** — verdict R2 consigné et classé, faits calculés ; réponse à la question (parallaxe du
+  déplacement contre empreinte du pixel, ce que le dépôt prévoyait) dans REVUE-VISUELLE.
+- [ ] **P3** — rituel §6 : file (houle longue, crêtes non linéaires, LOD déplacement/normales),
+  liste du projet fini, journal, jeton.
 
 ### Notes de reprise
 
-P3 : `examples/rugosite_b.rs`. mss cuite 0,00753, continue 0,00752 (accord indépendant) ; 8/16/24/32/57 fp
-→ 0,0115/0,0155/0,0179/0,0195/0,0229. Cox–Munk 0,0437–0,0459, seuil 0,0199 : **confirmé**. La queue
-JONSWAP seule plafonne à 52 % de l'observé : le remède d'ADR-155 est un premier pas, le modèle de
-spectre court (équilibre f⁻⁴, capillaires) reste à nommer comme manque.
-
-P5 : `background_spectrum::bake_tail` et `cells` (boucle de `bake` factorisée, empreinte figée
-0x26695af7314e21db inchangée). Essai `spectral_tail_continues_band_density_s256` : variance de queue
-4,50506e-4 contre 4,50506e-4 f64 ; mss bande+queue 0,01956 contre 0,01953 ; continuité à 4 fp
-0,8220 contre 0,8237 ; refus et empreintes. Tests du spectre 7/7.
-
-P6 : hôte — `Scene::tail` (bake_tail 32 fp, 64 composantes), `FrameData::tail_background/tail`,
-binding 5, `tail_slope` au fragment avec empreinte `dpdx/dpdy`, `--no-tail`, `--tail-verify`,
-`--tail-bench`, `--revue=r2`. Incident : une compilation échouée (Camera non Copy) a laissé lancer
-l'ancien binaire en mode fenêtre, bloqué 10 min, fermé ; désormais binaire lancé seulement si la
-compilation réussit. `--tail-verify` : pire écart 1,21e-4 (tolérance 2e-4), pente de référence max
-0,343, k 1,85 à 110,8 rad/m. Critère 7 faux au protocole (π/k_max au lieu de π/k_min) et première
-exécution sans effet (k_max lu avant update) : note datée, critère corrigé, tenu.
-
-P7 : coût +0,18 ms (960×540) et +0,38 ms (1280×720), GPU eau ≤ 1,82 ms ; spectral-verify identique
-à S249 ; R1 rejoué au bit avec --no-tail ; R2 empreintes reproduites. Stries dues à la direction liée au
-rang (fixture ADR-100), soumises à l'utilisateur comme constat.
