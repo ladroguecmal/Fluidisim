@@ -142,3 +142,83 @@ fn refusals_and_expiration_are_atomic_s250(){
     let mut clean=volume();run(&mut clean,&bg,Sponge::default()).unwrap();
     assert_eq!(v.u,clean.u);assert_eq!(v.w,clean.w);assert_eq!(v.p,clean.p);
 }
+
+fn real_case(nx:usize)->(Volume,Vec<BackgroundSample>,Vec<BackgroundSample>) {
+    use crate::{Background,SeaState,WorldPos,modal_pressure::Segment,spectral_pressure::{self,Node,Slot}};
+    let mut host=HostServices{alloc:&mut Arena,jobs:&Jobs,sink:&Jobs};
+    let v=Volume::configure(&mut host,Domain{nx,nz:nx/2,dx:8./nx as f32},1025.,9.81,&vec![0.;nx]).unwrap();
+    let b=Background::configure(&mut host,SeaState{hs:0.1,tp:4.,theta_turns:0.,components:1,graine:7},WorldPos::default()).unwrap();
+    let nodes=[Node{k:[0.7,0.],transform:1.,weight:0.5},Node{k:[1.2,0.],transform:1.,weight:0.5}];
+    let path=[Segment{birth:SimTime(0),duration_us:2_000_000,origin:[0.;2],velocity:[0.5,0.],pressure_pa:80.}];
+    let mut slots=[Slot::default();2];let t=SimTime(1_000_000);
+    let field=spectral_pressure::prepare(&nodes,&path,9.81,1025.,t,SimTime(2_000_000),[-16.;2],[16.;2],&mut slots).unwrap();
+    let sample=|p|{let mut s=b.differential_local(p,t,1025.).unwrap();s.add(&field.differential(p).unwrap().water);s};
+    let (mut u,mut w)=fields(&v);let dx=v.domain.dx;
+    for k in 0..nx/2 {for i in 0..=nx {u[v.fu(i,k)]=sample([i as f32*dx,0.,(k as f32+0.5)*dx-4.]);}}
+    for k in 0..=nx/2 {for i in 0..nx {w[v.fw(i,k)]=sample([(i as f32+0.5)*dx,0.,k as f32*dx-4.]);}}
+    (v,u,w)
+}
+
+/// Oracle de banc : assemblage par arêtes, CG f64 ; aucun appel à apply/project du candidat.
+fn flat_oracle(v:&Volume)->(Vec<f64>,Vec<f64>,Vec<f64>) {
+    let (nx,nz,dx)=(v.domain.nx,v.domain.nz,v.domain.dx as f64);
+    let n=nx*nz;let c=|i:usize,k:usize|k*nx+i;
+    let mut edges=Vec::new();
+    for k in 0..nz {for i in 0..nx {
+        if i+1<nx {edges.push((c(i,k),c(i+1,k)));}
+        if k+1<nz {edges.push((c(i,k),c(i,k+1)));}
+    }}
+    let apply=|p:&[f64]| {
+        let mut a=vec![0.;n];
+        for &(i,j) in &edges {let d=(p[i]-p[j])/(dx*dx);a[i]+=d;a[j]-=d;}
+        for i in 0..nx {a[c(i,nz-1)]+=2.*p[c(i,nz-1)]/(dx*dx);}
+        a
+    };
+    let mut b=vec![0.;n];
+    for k in 0..nz {for i in 0..nx {
+        b[c(i,k)]=-1025./0.001/dx*(v.us[v.fu(i+1,k)] as f64-v.us[v.fu(i,k)] as f64
+            +v.ws[v.fw(i,k+1)] as f64-v.ws[v.fw(i,k)] as f64);
+    }}
+    let dot=|x:&[f64],y:&[f64]|x.iter().zip(y).map(|(a,b)|a*b).sum::<f64>();
+    let mut p=vec![0.;n];let mut r=b.clone();let mut d=r.clone();let b2=dot(&b,&b);let mut rr=b2;
+    for _ in 0..4*n {
+        if rr<1e-26*b2 {break;}
+        let q=apply(&d);let alpha=rr/dot(&d,&q);
+        for i in 0..n {p[i]+=alpha*d[i];r[i]-=alpha*q[i];}
+        let next=dot(&r,&r);for i in 0..n {d[i]=r[i]+next/rr*d[i];}rr=next;
+    }
+    let residual=apply(&p).iter().zip(&b).map(|(a,b)|(a-b).powi(2)).sum::<f64>();
+    assert!(residual<1e-22*b2);
+    let mut u:Vec<f64>=v.us.iter().map(|x|*x as f64).collect();
+    let mut w:Vec<f64>=v.ws.iter().map(|x|*x as f64).collect();
+    for k in 0..nz {for i in 1..nx {u[v.fu(i,k)]-=0.001/1025./dx*(p[c(i,k)]-p[c(i-1,k)]);}}
+    for k in 1..=nz {for i in 0..nx {
+        let grad=if k==nz {-2.*p[c(i,k-1)]} else {p[c(i,k)]-p[c(i,k-1)]};
+        w[v.fw(i,k)]-=0.001/1025./dx*grad;
+    }}
+    (p,u,w)
+}
+
+#[test]
+fn diagnose_flat_projection_s251(){
+    for nx in [16,32] {
+        let (mut v,u,w)=real_case(nx);let bg=input(&v,&u,&w);
+        v.coupled_predict(&bg,0.001,Sponge{width_m:1.,rate_per_s:2.},&mut Control::unlimited()).unwrap();
+        let (_,u64,w64)=flat_oracle(&v);
+        let norm=u64.iter().chain(&w64).fold(0f64,|m,x|m.max(x.abs()));
+        let predicted=v.us.iter().chain(&v.ws).fold(0f32,|m,x|m.max(x.abs()));
+        let error=|v:&Volume|v.u.iter().chain(&v.w).zip(u64.iter().chain(&w64))
+            .fold(0f64,|m,(a,b)|m.max((*a as f64-b).abs()))/norm;
+        let mut r=v.project(-1_025_000.,(0.001f64/1025.) as f32,2000,true,&Jobs,&mut Control::unlimited()).unwrap();
+        assert!(r.degraded);
+        println!("S251 nx={nx} before={r:?} pred={predicted:e} oracle_vmax={norm:e} velocity_error={:e}",error(&v));
+        for pass in 1..=3 {
+            v.us.copy_from_slice(&v.u);v.ws.copy_from_slice(&v.w);
+            r=v.project(-1_025_000.,(0.001f64/1025.) as f32,2000,false,&Jobs,&mut Control::unlimited()).unwrap();
+            println!("S251 nx={nx} correction={pass} {r:?} velocity_error={:e}",error(&v));
+            if !r.degraded {break;}
+        }
+        assert!(!r.degraded);
+        assert!(error(&v)<1e-4);
+    }
+}

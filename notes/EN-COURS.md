@@ -76,8 +76,8 @@ limites transmises. Aucun couplage mobile ou rendu ajouté à ce lot.
 ### Plan
 
 - [x] **P1** — amorce, lectures et plan seuls.
-- [>] **P2** — reproduire, construire l'oracle indépendant et isoler le défaut.
-- [ ] **P3** — correctif f32 et contrat, contre-épreuves ciblées.
+- [x] **P2** — reproduire, construire l'oracle indépendant et isoler le défaut.
+- [>] **P3** — correctif f32 et contrat, contre-épreuves ciblées.
 - [ ] **P4** — réception du consommateur, coût, suite et non-régression.
 - [ ] **P5** — rituel §6 : preuves, file, trajectoire, journal et jeton.
 
