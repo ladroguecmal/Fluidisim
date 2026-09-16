@@ -58,92 +58,71 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S245 — terminée
+Session : S246 — en cours
 Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web)
-Entrée : « Continue », master propre à `feb1dd9`, une seule copie, jeton libre, secteur, Maillons 1.
+Entrée : « Continue », master propre à `b5abb80`, une seule copie, jeton libre, secteur, Maillons 0.
 
-**Objectif.** Attaquer le **nombre d'itérations** de la pression de δ par une **multigrille
-géométrique employée comme préconditionneur** du gradient conjugué, sur le chemin à **couvercle
-fixe**. S244 l'a désignée : le coût d'une itération est stable en structure à toutes les tailles,
-c'est leur nombre qui double à chaque raffinement — 30, 61, 114, 220, 425 —, et la multigrille est le
-**seul levier dont le gain croît avec la taille**.
-**Ce que la lecture corrige.** `jacobi = self.mobile` : le chemin à couvercle fixe — celui que S230
-et S244 mesurent — n'a **aucun** préconditionneur ; `dir = res`. L'en-tête ADR-131 de
-COUT-DELTA-S244 annonce « Jacobi diagonal » : c'est vrai du mode mobile, faux du mode mesuré. **Note
-corrective datée à porter en P2.** Et Jacobi n'y servirait à rien : sur une grille uniforme la
-diagonale est constante, donc un préconditionnement scalaire, sans effet sur le gradient conjugué.
-**Ce qui rend ce lot sûr.** Un préconditionneur **ne peut pas rendre la réponse fausse** : il change
-les directions de recherche, jamais le test d'acceptation. Le résidu premier (10⁻⁶) et la tolérance
-physique (ADR-144) restent les mêmes portes. Le pire cas de ce lot est donc « ça ne gagne rien, et
-c'est mesuré », jamais « ça donne un résultat faux ».
-**Ce que la méthode exige en retour.** Le gradient conjugué **n'est valide qu'avec un
-préconditionneur symétrique défini positif**. La recette retenue l'assure par construction : lissage
-de **Jacobi amorti** (diagonal, donc symétrique), **restriction R = Pᵀ** avec prolongation bilinéaire,
-et **autant de lissages avant qu'après**. La symétrie ne sera pas supposée : elle sera **testée**
-numériquement, `⟨M⁻¹x, y⟩ = ⟨x, M⁻¹y⟩`.
-**Décisions déclarées avant construction.** (1) Hiérarchie par division par deux, arrêtée dès qu'une
-dimension est impaire ou tombe sous quatre. (2) Opérateur grossier **re-discrétisé** avec `dx·2^l` et
-ouvertures moyennées — approximation assumée pour les mailles coupées, licite puisqu'il ne s'agit que
-d'un préconditionneur. (3) Lissage **Jacobi amorti à ω = 2/3**, valeur qui **se dérive** (elle
-minimise le facteur de lissage des modes hautes fréquences du stencil à cinq points), non un réglage.
-(4) **Chemin mobile inchangé** : il garde son Jacobi diagonal. (5) Tous les tampons alloués dans
-`configure`, avant `seal` (I-06).
-**Critères de réception, déclarés avant construction.** (1) Symétrie et positivité du
-préconditionneur, testées. (2) **Compte d'itérations** aux cinq tailles de S244, et la **loi de
-croissance** qui en sort — c'est la revendication, pas un point. (3) **Coût par pas** mesuré : une
-itération coûte plus cher, c'est le produit qui décide. (4) Acceptation d'ADR-144 inchangée :
-`delta_precision` dix cas non dégradés, `delta_filters` ordres ≥ 1,8, réception mobile S237/S238
-intacte. (5) **Les bits du chemin fixe changeront** : nouvelle empreinte `delta_filters` publiée avec
-son explication, ancienne conservée. (6) Aucune allocation après `seal`.
-**Arrêt.** Multigrille construite, symétrie prouvée, itérations et coût mesurés, acceptation
-conservée. **Ou**, si le lot dépasse la session, la hiérarchie et le cycle validés seuls, le
-branchement déclaré en file avec son déclencheur — dit dans le plan, pas laissé à deviner.
+**Objectif.** **A280** : donner à la multigrille de δ une **prolongation bilinéaire** et la
+restriction qui en est la **transposée exacte**, pour que son taux par cycle rejoigne ce que la
+théorie lui promet — et qu'elle devienne aussi un levier de **vitesse**, pas seulement le repli de
+précision d'ADR-147.
+**Ce que la mesure de S245 désigne, et pourquoi c'est elle qu'on suit.** La contre-épreuve avait
+écarté les deux autres suspects : approfondir la hiérarchie et alléger le lissage **aggravent** —
+282 à 300 itérations, plates mais hautes. Un compte plat dit que le cycle fonctionne ; plat **et
+haut** dit que son taux est mauvais. Ni le niveau grossier ni le lisseur : le **transfert**, la
+prolongation étant aujourd'hui constante par morceaux.
+**Ce que la géométrie impose.** La grille est **centrée sur les mailles** : le centre d'une maille
+fine est à un quart de l'espacement grossier du centre de sa mère. La prolongation bilinéaire y a
+donc les poids **(3/4, 1/4)** par direction, soit 9/16, 3/16, 3/16, 1/16 en deux dimensions. Aux
+bords, le voisin grossier manquant reporte son poids sur la mère : l'opérateur reste linéaire, et
+c'est sa **transposée exacte** qui devra servir de restriction — y compris ce report.
+**Ce qui est déjà en place pour l'accueillir.** L'essai d'adjonction et l'essai de symétrie de S245
+existent : ils n'ont pas à être inventés, seulement resserrés. La symétrie du cycle ne tient que si
+`R = Pᵀ` ; avec une prolongation non triviale, c'est la propriété la plus facile à casser sans s'en
+apercevoir, et l'essai est ce qui l'interdit.
+**La question ouverte, déclarée comme telle.** L'opérateur grossier est **re-discrétisé**, pas
+construit par Galerkin. Le facteur constant qui accorde `R A_c⁻¹ P` à `¼ Pᵀ A_h P` valait 1/4 pour
+l'injection ; avec une prolongation bilinéaire, **il n'est pas évident**, et rien ici ne prétend le
+deviner. Il sera **mesuré** : un facteur faux ne casse pas la symétrie — elle n'en dépend pas — mais
+il casse la réduction du résidu, et l'essai de S245 le verra.
+**Critères de réception, déclarés avant construction.** (1) Adjonction **exacte** de `R` et `P`,
+report de bord compris. (2) Symétrie et positivité du cycle, conservées. (3) **Taux de réduction par
+cycle** mesuré, avant et après — c'est la revendication. (4) **Compte d'itérations et coût par pas**
+aux cinq tailles de S244, sans et avec. (5) Acceptation d'ADR-144 inchangée, et **32 768 mailles
+toujours reçu** (A275 ne se rouvre pas). (6) Aux tailles qui passent sans repli, **rien ne change au
+bit** : empreinte `delta_filters` `0xfb12b2092df4ee6d`, dix cas de `delta_precision`.
+**Arrêt.** Prolongation bilinéaire reçue et le gain chiffré ; **ou** constat mesuré qu'elle ne
+suffit pas — et alors le document dit ce que le taux par cycle vaut désormais et ce qui le plafonne
+encore, sans garder un changement que la mesure ne soutient pas (L323).
 
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [x] **P2** — protocole écrit ; note corrective datée sur S244 ; relevé de référence des itérations.
-- [x] **P3** — hiérarchie allouée dans `configure` et opérateurs de transfert, avec leurs essais.
-- [x] **P4** — cycle en V et lissage ; **symétrie testée** avant tout branchement.
-- [x] **P5** — branchement comme préconditionneur ; itérations et coût aux cinq tailles.
-- [x] **P6** — réception ADR-144, empreintes, suite ; rituel §6, ADR, file, jeton.
+- [ ] **P2** — protocole écrit ; instrument du **taux par cycle**, mesuré avant toute modification.
+- [ ] **P3** — prolongation bilinéaire et sa transposée exacte ; adjonction et symétrie éprouvées.
+- [ ] **P4** — mesure : taux par cycle, itérations et coût aux cinq tailles, sans et avec.
+- [ ] **P5** — décision et réception : garder ou annuler, ADR-144, empreintes, suite.
+- [ ] **P6** — rituel §6, file, feuille de route, jeton.
 
 ### Notes de reprise
 
-P2 : protocole `docs/validation/MULTIGRILLE-S245.md` ; note corrective datee portee dans
-COUT-DELTA-S244 §6 (« Jacobi diagonal present » etait faux du chemin mesure).
-Reference avant modification, chemin fixe, gradient conjugue **nu** : iterations
-**30 / 61 / 114 / 220 / 425**, pas 0,089 / 0,699 / 5,256 / ~37-42 / **286,2** ms.
+(S246 - vide a l ouverture.)
 
-P3 : `code/water-core/src/delta_multigrid.rs` — `Level`, `level_count`, `hierarchy_floats`
-(comptage I-06 **avant** allocation), `apply_level`, `diagonal`, `coarsen_into`, `restrict`,
-`prolong_add`, `smooth`. Hierarchie construite dans `configure` **apres `cut()`**, la geometrie y
-etant figee une fois pour toutes. Regle d'arret : paire et au moins 8 -> 64x32 donne **3** niveaux
-(32x16, 16x8, 8x4), 16x8 en donne 1, une dimension impaire en donne 0.
-Trois essais verts : (1) `apply_level` rend **les memes bits** que `Volume::apply` sur la grille
-fine, fond plat et fond coupe — c'est ce qui interdit aux deux ecritures de diverger (L137) ;
-(2) restriction et prolongation **adjointes a un facteur quatre pres**, ce qui rendra le cycle
-symetrique ; (3) hierarchie, dimensions, `inv` double au carre, diagonale positive sur mouille et
-nulle sur sec.
+---
 
-P4 : cycle en V ecrit en **deux boucles** (descente, remontee) plutot qu'en recursion — les emprunts
-de deux niveaux voisins y restent lisibles (`split_at_mut`). Il rend `z` dans **`self.prec`** et se
-sert de **`self.tmp`** comme residu fin : les deux sont libres a cet instant (`prec` ne sert qu'au
-mode mobile, `tmp` a deja ete consomme par le produit qui precede) — donc **aucune allocation**.
-Lissages : 2 avant, 2 apres, 8 au plus grossier — donnees de **cout**, comme le grain d'ADR-029 §3.
-**Symetrie et positivite verifiees**, fond plat et fond coupe, 32x16 et 64x32 ; et un cycle reduit
-le residu de plus de 10 %. C'etait la porte a franchir avant tout branchement.
+Notes de S245, conservees pour reference immediate :
 
-P5 : **le resultat n'est pas celui qui etait cherche, et il est meilleur.**
-Vitesse : iterations 99/252/220/167/134 contre 30/61/114/220/425, mais le cycle coute cinq produits
-fins par iteration -> perdant partout en temps. Contre-epreuve (hierarchie plus profonde, cycle
-allege) : **pire**, 282/260/292/284/300 — plat mais haut, donc mauvais taux par cycle, donc le
-suspect est le **transfert** (prolongation constante par morceaux). Suite : prolongation bilineaire.
-**Precision : a 32 768 mailles le pas passe de REFUSE a RECU.** Divergence 1,339e-5 -> **8,512e-6**,
-parce que 134 iterations accumulent moins d arrondi que 425. **A275 levee.**
-Branchement : **repli**, pas remplacement. Aux tailles qui passaient : rien ne change au bit
-(empreinte delta_filters **0xfb12b2092df4ee6d** inchangee, dix cas de delta_precision identiques).
-A 32 768 : recu pour 1 006 ms au lieu de 319 refusees. Suite **437 reussis / 15 ignores**.
+Multigrille construite : hierarchie (division par deux tant que pair et >= 8), operateur
+re-discretise, Jacobi amorti 2/3, cycle V(2,2) avec 8 lissages au plus grossier.
+**Branchee en repli** : le pas ordinaire d abord, rejoue avec la multigrille seulement s il a
+ete refuse (ADR-147).
+Iterations forcees : 99 / 252 / 220 / 167 / **134** contre 30 / 61 / 114 / 220 / 425.
+Pas : 1,94 / 18,07 / 65,40 / 203,5 / 729 ms contre 0,088 / 0,630 / 4,55 / 32,7 / 319.
+**A 32 768 mailles : divergence 1,339e-5 refusee -> 8,512e-6 recue. A275 fermee.**
+Contre-epreuve : hierarchie plus profonde et cycle allege = **pire** (282-300, plat mais haut),
+donc le suspect est le **transfert**.
+Empreinte delta_filters **0xfb12b2092df4ee6d** inchangee ; suite 437 / 15.
+Le cycle rend sa correction dans le tampon prec et se sert de tmp comme residu fin.
 
 ---
 

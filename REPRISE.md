@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-16 08:02 +02:00
+JETON            : occupé
+Battement        : 2026-09-16 08:06 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web disponibles)
-Session en cours : aucune
+Session en cours : S246 — A280 : prolongation bilinéaire de la multigrille
 Dernière session : S245 — la multigrille ferme A275 ; δ accepte 32 768 mailles (ADR-147)
-Session suivante : S246 — A280 : prolongation bilinéaire, pour que la multigrille gagne aussi du temps
+Session suivante : à déterminer en fin de S246
 Maillons        : 0
 
 ```
