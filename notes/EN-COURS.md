@@ -58,41 +58,39 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S255 — terminée
+Session : S256 — en cours
 Agent : Claude Opus 5, Claude Code ; fichiers, git, cargo, Python et GPU local disponibles.
-Entrée (2026-09-16 22:05), demande de l'utilisateur **avant son premier retour visuel** : « un .md
-qui est une to do list avec tous les éléments que le projet fini doit avoir et pouvoir faire ;
-cette liste, tu valideras ou non les points, et de temps en temps je te demanderai de la remplir ».
-Master propre 97129a4, copie unique, jeton libre. La demande prime sur la suite prévue (bords
-ouverts) ; R1 reste en attente de l'utilisateur.
+Entrée (2026-09-16 22:13) : premier verdict de l'utilisateur sur R1 — « la mer est trop lisse, on
+dirait un lac ». Master propre 029cfd5, copie unique, jeton libre, maillons 1. R1 passe devant la
+suite automatique (S254).
 
-Objectif : `docs/LISTE-PROJET-FINI.md`, liste exhaustive des capacités du projet **fini**
-(ambition complète, ADR-127), tirée des sources et non du seul état construit. Chaque point porte un
-état **validé / partiel / absent**, avec sa preuve ou ce qui manque. « Validé » exige une réception
-publiée sur le périmètre final du point, pas un banc isolé.
+Protocole (REVUE-VISUELLE §4) : consigner, classer, **confirmer par une mesure** avant de toucher
+à B. Hypothèse à éprouver : la recette de B s'arrête à `4 fp` (aucune onde sous 3,5 m) ; la pente
+quadratique moyenne `mss = (2π)⁴m4/g²` exige une coupure (SPEC-001 §1 bis), et la nôtre serait
+bien en dessous de la mer réelle. Référence indépendante : Cox & Munk (1954), `mss ≈ 0,003 +
+5,12·10⁻³·U` (±0,004) ; vent minimal soutenant `Hs = 1,5 m` par Pierson–Moskowitz (mer pleinement
+développée, `Hs ≈ 0,21 U²/g`). **Critère écrit avant mesure** : défaut confirmé si la `mss` de B est
+inférieure à la moitié de la borne basse de Cox–Munk à ce vent minimal. Sinon, l'attribution se
+tourne vers l'habillage (lumière, ciel) et on le dit.
 
-Critère : chaque section des intentions d'origine (architecture globale, zones ouvertes), chaque
-couche d'ADR-001, chaque phénomène de SPEC-002, chaque cas canonique et chaque banc trouvent au
-moins un point. Aucun point n'est validé sans lien vers sa preuve. Rôle défini face à la feuille de
-route (qui porte la trajectoire, L137) : la liste pointe, elle ne recopie pas les états détaillés.
+Si confirmé : ADR et remède physique, pas un réglage — la **queue du même spectre** (au-delà de
+`4 fp`, même densité absolue) rendue en **pentes par pixel** (normales seulement, hauteur et
+requêtes de jeu inchangées), filtrée par l'empreinte du pixel comme ADR-148. Réception : queue
+contre l'intégrale analytique, GPU contre référence CPU, coût GPU eau mesuré, rendus R2 aux mêmes
+poses envoyés à l'utilisateur.
 
 ### Plan
 
-- [x] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — inventaire des sources : architecture globale, zones ouvertes, ADR-001, SPEC-002,
-  cas canoniques, bancs, invariants ; squelette de la liste par domaine.
-- [x] **P3** — états : validé / partiel / absent, point par point, contre feuille de route, file
-  active et preuves ; compte par section.
-- [x] **P4** — contrôle de couverture (sources, cas, bancs, invariants), rôle écrit dans la liste,
-  METHODE et index.
-- [x] **P5** — rituel §6 : journal, jeton.
+- [>] **P1** — amorce, jeton et plan seuls.
+- [ ] **P2** — verdict consigné au registre R1, classement provisoire, protocole de mesure ;
+  formules Cox–Munk et Pierson–Moskowitz citées dans SPEC-001 (I-14).
+- [ ] **P3** — mesure : `mss` de la recette cuite (32 composantes) et du spectre continu coupé à
+  `4, 8, 16, 24, 32 fp` ; verdict confirmé ou non.
+- [ ] **P4** — ADR-155 et protocole de réception du remède (si confirmé).
+- [ ] **P5** — cœur : cuisson de la queue spectrale, même densité absolue, essais contre l'analytique.
+- [ ] **P6** — hôte : queue en pentes par pixel, filtre d'empreinte, référence CPU.
+- [ ] **P7** — réception GPU/CPU, coût, rendus R2 aux poses R1, envoi à l'utilisateur.
+- [ ] **P8** — rituel §6 : liste du projet fini (2.1, 8.9, 8.10), registre, journal, jeton.
 
 ### Notes de reprise
 
-P2 et P3 faits ensemble (amendement déclaré ici : le squelette sans états n'avait pas de valeur
-propre). Sources lues : architecture globale en entier ; titres des zones ouvertes, SPEC-002, 004,
-005 et 006, cas canoniques, bancs, invariants ; ADR-001 §2. Code sondé : aucune dépendance au cœur ;
-aucun code pour marée, courants, bathymétrie, écume, bulles, glace, audio, sous-marin,
-`WaterSystem`, grille de régions. 119 points : 3 validés (1.2, 5.1, 10.7), 46 partiels, 70 absents,
-recomptés par script. Couverture : changement de solveur (zones ouvertes §19) manquait, ajouté en
-4.20 ; B2, B4, I-04, I-09, I-13 et I-18 rattachés à des points existants.

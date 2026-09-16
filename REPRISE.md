@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-16 22:11 +02:00
+JETON            : occupé
+Battement        : 2026-09-16 22:15 +02:00
 Agent            : Claude Opus 5, Claude Code (fichiers, git, cargo, Python, GPU local, accès web)
-Session en cours : aucune
+Session en cours : S256 — revue R1 : « la mer est trop lisse, on dirait un lac »
 Dernière session : S255 — liste du projet fini (119 points : 3 validés, 46 partiels, 70 absents)
-Session suivante : S256 — R1 si les références de l'utilisateur sont arrivées ; sinon bords ouverts du pas couplé (relaxation de η', éponge)
+Session suivante : à fixer au rituel de S256
 Maillons        : 1
 
 ```
