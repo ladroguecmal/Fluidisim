@@ -395,8 +395,89 @@ impl ApplicationHandler for App<'_> {
 /// S248 — images locales de banc : la topologie de la mer et le maillage du LOD (ADR-124).
 /// Aucune publication : des PPM sous , chacun avec son empreinte.
 fn topologie_images(frame: &mut FrameData<'_>) -> Result<(), String> {
-    println!("S248 — images locales de banc, aucune publication (ADR-124). Repertoire {}", topologie::DIR);
-    let _ = frame;
+    println!(
+        "S248 — images locales de banc, aucune publication (ADR-124). Repertoire {}",
+        topologie::DIR
+    );
+    sea_topology(frame)?;
+    Ok(())
+}
+
+/// S248 P3 — **la topologie de la mer**, vue de dessus, sur l'emprise du sillage. Hauteur composee
+/// par la reference CPU du projet : `B`, les trois sillages et les huit impacts au meme point, par
+/// le meme chemin que celui qui sert les verifications (S214).
+fn sea_topology(frame: &mut FrameData<'_>) -> Result<(), String> {
+    // Six pixels par metre sur l'emprise du sillage : 128 x 104 m.
+    const PPM_PAR_METRE: usize = 6;
+    let (min, max) = (scene::WAKE_MIN, scene::WAKE_MAX);
+    let w = ((max[0] - min[0]) as usize) * PPM_PAR_METRE;
+    let h = ((max[1] - min[1]) as usize) * PPM_PAR_METRE;
+    // L'age de la scene : celui ou `--verify` compte quatre impacts vivants, donc un instant deja
+    // publie plutot qu'un instant choisi pour la photo.
+    let age = 12.0f64;
+    frame.camera = Camera { eye: [0., -18., 7.], yaw: 0., pitch: -(7.0f32 / 53.).atan() };
+    frame.viewport = None;
+    frame.cull = false;
+    frame.update(age, age, true);
+    let eye = frame.camera.eye;
+    let mut eta = vec![0f32; w * h];
+    let mut row = Vec::with_capacity(w);
+    for j in 0..h {
+        row.clear();
+        // Ligne du haut de l'image = grand `y` : l'image se lit comme une carte.
+        let y = max[1] - (j as f32 + 0.5) / PPM_PAR_METRE as f32;
+        for i in 0..w {
+            let x = min[0] + (i as f32 + 0.5) / PPM_PAR_METRE as f32;
+            row.push([x - eye[0], y - eye[1]]);
+        }
+        for (i, v) in frame.references(&row)?.iter().enumerate() {
+            eta[j * w + i] = v[0];
+        }
+    }
+    // Le fond seul, par le meme chemin : ce qui reste est `W + \u03b4`, la part que la scene ajoute.
+    let mut fond = vec![0f32; w * h];
+    for j in 0..h {
+        row.clear();
+        let y = max[1] - (j as f32 + 0.5) / PPM_PAR_METRE as f32;
+        for i in 0..w {
+            let x = min[0] + (i as f32 + 0.5) / PPM_PAR_METRE as f32;
+            row.push([x - eye[0], y - eye[1]]);
+        }
+        for (i, v) in frame.background_only(&row)?.iter().enumerate() {
+            fond[j * w + i] = *v;
+        }
+    }
+    let mean = eta.iter().map(|v| *v as f64).sum::<f64>() / eta.len() as f64;
+    let scale = eta
+        .iter()
+        .fold(0f32, |m, v| m.max((*v as f64 - mean).abs() as f32))
+        .max(1e-4);
+    let mut rgb = Vec::with_capacity(w * h * 3);
+    for value in &eta {
+        rgb.extend(topologie::ramp_height(*value - mean as f32, scale));
+    }
+    let hash = topologie::write_ppm("mer.ppm", w, h, &rgb).map_err(|e| e.to_string())?;
+    // Seconde image : la perturbation seule, avec sa **propre** amplitude saturante. Elle est un
+    // ordre de grandeur sous celle du fond, et c'est precisement ce que la premiere image ne montre
+    // pas — les couches d'ADR-001 ne se lisent qu'une fois separees.
+    let perturbation: Vec<f32> = eta.iter().zip(&fond).map(|(a, b)| a - b).collect();
+    let scale_p = perturbation.iter().fold(0f32, |m, v| m.max(v.abs())).max(1e-4);
+    let mut rgb_p = Vec::with_capacity(w * h * 3);
+    for value in &perturbation {
+        rgb_p.extend(topologie::ramp_height(*value, scale_p));
+    }
+    let hash_p =
+        topologie::write_ppm("mer_perturbation.ppm", w, h, &rgb_p).map_err(|e| e.to_string())?;
+    println!(
+        "TOPOLOGIE_S248 image=mer_perturbation.ppm {w}x{h} couches=W+delta \
+amplitude_saturante_m={scale_p:.6} part_du_fond={:.4} empreinte=0x{hash_p:016x}",
+        scale_p / scale
+    );
+    println!(
+        "TOPOLOGIE_S248 image=mer.ppm {w}x{h} emprise=[{},{}]x[{},{}] m age_s={age} \
+niveau_moyen_m={mean:.6} amplitude_saturante_m={scale:.6} empreinte=0x{hash:016x}",
+        min[0], max[0], min[1], max[1]
+    );
     Ok(())
 }
 

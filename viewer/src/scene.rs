@@ -772,6 +772,27 @@ impl<'a> FrameData<'a> {
             self.wake_cpu_ms = 0.;
         }
     }
+    /// S248 — **le fond seul**, au même point et par le même chemin que `references`. Il sert à
+    /// séparer les couches d'ADR-001 dans une image de banc : `B` partout, `W` et `δ` par-dessus.
+    /// Aucune autre route : la conversion monde → local est celle de S214, partagée par les trois.
+    pub fn background_only(&self, q: &[[f32; 2]]) -> Result<Vec<f32>, String> {
+        let eye = self.camera.eye;
+        let mut out = Vec::with_capacity(q.len());
+        for point in q {
+            let anchor = WorldPos::from_metres(
+                (point[0] + eye[0]) as f64,
+                (point[1] + eye[1]) as f64,
+                0.,
+            );
+            let b = self
+                .background
+                .eval(anchor, self.time)
+                .ok_or_else(|| format!("B hors domaine en {anchor:?}"))?;
+            out.push(b.eta);
+        }
+        Ok(out)
+    }
+
     /// Référence CPU par point relatif à la caméra : B `eval`, impact direct, sillage `sample_batch`.
     ///
     /// **S214 : une seule conversion monde → local, partagée par les trois couches.** Jusqu'ici
