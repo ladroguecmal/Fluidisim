@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : libre
-Battement        : 2026-09-16 22:52 +02:00
+Battement        : 2026-09-16 22:48 +02:00
 Agent            : Claude Opus 5, Claude Code (fichiers, git, cargo, Python, GPU local, accès web)
 Session en cours : aucune
 Dernière session : S257 — verdict R2 « grand lac soumis au vent » classé par construction ; critère de parallaxe pour la surface plane à normales
