@@ -91,7 +91,7 @@ jamais dans `redraw`. (4) Aucune publication, aucune page : PPM local sous `capt
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [ ] **P2** — mode de banc `--topologie` : ossature, chemins, rampes de couleur documentées.
+- [x] **P2** — mode de banc `--topologie` : ossature, chemins, rampes de couleur documentées.
 - [ ] **P3** — carte de la **topologie de la mer** : hauteur composée, vue de dessus.
 - [ ] **P4** — cartes du **maillage** : où tombent les sommets, et l'écart vu depuis l'écran.
 - [ ] **P5** — réception : extrema contre S247, empreintes rejouées, description écrite.
@@ -99,7 +99,12 @@ jamais dans `redraw`. (4) Aucune publication, aucune page : PPM local sous `capt
 
 ### Notes de reprise
 
-(S248 - vide a l ouverture.)
+P2 : viewer/src/topologie.rs — ecriture PPM avec empreinte FNV (convention S201), deux rampes
+documentees, gris de fond. Mode de banc --topologie cable dans l hote.
+**Rampe de hauteur** : signee, creux sombres, niveau moyen bleu clair, cretes blanches ; l amplitude
+qui sature est imprimee avec l image, jamais devinee.
+**Rampe d ecart** : rupture **franche** au seuil de Nyquist — verts dessous, jaune puis rouge
+dessus. C est la rupture qui se lit : chaque pixel rouge est une onde que l image ne peut pas porter.
 
 ---
 

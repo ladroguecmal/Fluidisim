@@ -1,5 +1,6 @@
 mod counting;
 mod gpu;
+mod topologie;
 mod lod;
 mod scene;
 
@@ -391,6 +392,14 @@ impl ApplicationHandler for App<'_> {
         }
     }
 }
+/// S248 — images locales de banc : la topologie de la mer et le maillage du LOD (ADR-124).
+/// Aucune publication : des PPM sous , chacun avec son empreinte.
+fn topologie_images(frame: &mut FrameData<'_>) -> Result<(), String> {
+    println!("S248 — images locales de banc, aucune publication (ADR-124). Repertoire {}", topologie::DIR);
+    let _ = frame;
+    Ok(())
+}
+
 /// S234 P2 — charge du maillage que le contenu exige, avant toute construction de LOD.
 ///
 /// Majorants de hessienne des trois couches publiées, pas isotrope sous la tolérance S201, puis
@@ -1398,6 +1407,9 @@ fn run() -> Result<(), String> {
     let mut frame = FrameData::new(&scene.background, table, input, timeline, recipe, impacts);
     // S234 : grille locale du sillage par défaut ; `--no-lod` rend le chemin direct S212–S225.
     frame.lod = !args.iter().any(|a| a == "--no-lod");
+    if args.iter().any(|a| a == "--topologie") {
+        return topologie_images(&mut frame);
+    }
     if args.iter().any(|a| a == "--lod-charge") {
         lod_charge(&mut frame);
         return Ok(());
