@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S245 — en cours
+Session : S245 — terminée
 Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web)
 Entrée : « Continue », master propre à `feb1dd9`, une seule copie, jeton libre, secteur, Maillons 1.
 
@@ -106,7 +106,7 @@ branchement déclaré en file avec son déclencheur — dit dans le plan, pas la
 - [x] **P3** — hiérarchie allouée dans `configure` et opérateurs de transfert, avec leurs essais.
 - [x] **P4** — cycle en V et lissage ; **symétrie testée** avant tout branchement.
 - [x] **P5** — branchement comme préconditionneur ; itérations et coût aux cinq tailles.
-- [ ] **P6** — réception ADR-144, empreintes, suite ; rituel §6, ADR, file, jeton.
+- [x] **P6** — réception ADR-144, empreintes, suite ; rituel §6, ADR, file, jeton.
 
 ### Notes de reprise
 

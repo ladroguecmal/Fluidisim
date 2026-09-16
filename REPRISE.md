@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-16 07:27 +02:00
+JETON            : libre
+Battement        : 2026-09-16 08:02 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web disponibles)
-Session en cours : S245 — la multigrille pour la pression de δ
-Dernière session : S244 — la carte du coût de δ ; le parallélisme fermé pour sa boucle
-Session suivante : à déterminer en fin de S245
-Maillons        : 1
+Session en cours : aucune
+Dernière session : S245 — la multigrille ferme A275 ; δ accepte 32 768 mailles (ADR-147)
+Session suivante : S246 — A280 : prolongation bilinéaire, pour que la multigrille gagne aussi du temps
+Maillons        : 0
 
 ```
 
@@ -75,7 +75,7 @@ Ne pas relire le journal, les leçons ou tous les ADR intégralement à chaque r
 
 ## 4. Où en est le projet
 
-État à S244 : B/W et un afficheur existent ; scène multi-sources dessinée, visibilité au bit, composée
+État à S245 : B/W et un afficheur existent ; scène multi-sources dessinée, visibilité au bit, composée
 et admise par le cœur (ADR-142) ; **la boucle d'image de l'hôte n'alloue rien** pour le code du projet,
 la pile verrouillée 133 fois par image, constantes (ADR-145). Le poste dominant du budget de l'hôte est
 `ModalPressure::sample` dans la préparation du sillage — **87 %** de ses 3,1 ms, contre 0,44 ms de
@@ -88,7 +88,7 @@ boucle (125 µs par fil contre 21,7 de pass) ; **la multigrille est le seul levi
 avec la taille** (A276, [carte](docs/validation/COUT-DELTA-S244.md)). δ MAC x-z possède une **surface géométriquement mobile** reçue contre
 l'onde stationnaire HOS d'ordre 3 (surface graphe, sans 3D, cavité, scénario B3 ni I-05 complet) ; sa
 pression f32 s'arrête à sa précision représentable (ADR-143) et **tient la tolérance physique de S199
-ou se déclare dégradée** (ADR-144) — tenue jusqu'à 8 192 mailles, refusée à 32 768 (A275), plancher
+ou se déclare dégradée** (ADR-144) — tenue jusqu'à 8 192 mailles, et **à 32 768 depuis S245** par un repli multigrille (ADR-147) ; plancher
 des lignes à fantôme de surface non borné (A274). V : plans orientés et restauration locale reçus.
 Les réceptions et limites courantes sont dans la feuille de route. Le nombre de tests ne mesure
 pas la couverture des intentions, et une exécution locale ne reçoit pas le multiplateforme.

@@ -42,6 +42,7 @@
 - [Préparation CPU du sillage : la loi contre les tronçons, et le poste dominant](validation/PREPARATION-SILLAGE-S242.md).
 - [Parallélisme déterministe : la primitive d'écriture disjointe et son prix](validation/PARALLELISME-S243.md).
 - [Coût d'un pas de δ, décomposé : où va le temps et quelle technique l'attaque](validation/COUT-DELTA-S244.md).
+- [Multigrille de la pression de δ : un repli de précision, et pourquoi pas de vitesse](validation/MULTIGRILLE-S245.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).
@@ -204,6 +205,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-144](adr/ADR-144-la-tolerance-physique-est-une-condition-d-acceptation.md) | La tolérance physique de la projection est une condition d'acceptation, sur les lignes franches |
 | [ADR-145](adr/ADR-145-i-06-pour-l-hote-graphique.md) | I-06 pour l'hôte graphique : tenue par notre code, comptée et publiée pour la pile |
 | [ADR-146](adr/ADR-146-l-ecriture-disjointe-est-inconditionnellement-deterministe.md) | L'écriture disjointe est inconditionnellement déterministe, et c'est elle qu'on parallélise |
+| [ADR-147](adr/ADR-147-la-multigrille-est-un-repli-de-precision.md) | La multigrille est un repli de précision, pas le solveur ordinaire |
 
 ## Travail et historique
 

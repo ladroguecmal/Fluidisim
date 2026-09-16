@@ -12648,3 +12648,68 @@ angles rasants, V, B2 et bathymétrie gardent leurs déclencheurs.
 A278 renforcée, multigrille nommée), feuille de route, index. Invariants relus : **I-05** (le budget
 coopératif est un état partagé, et c'est pourquoi on ne le distribue pas) et **I-03** (l'échange de
 boucles était exact au bit ; il a été annulé pour absence de gain, pas pour risque). Maillons 1.
+
+## S245 — 2026-09-16 — La multigrille a raté sa cible et fermé une autre anomalie
+
+**Entrée.** « Continue », master propre à `feb1dd9`, une seule copie, jeton libre, secteur,
+Maillons 1. Claude Code, Opus 5. Plan `21cee50`, protocole `b93d173`, hiérarchie `6b81b87`, cycle et
+symétrie `b97ee5f`, branchement et réception `6dc0bfa`.
+
+**Capacité reçue.** **δ accepte 32 768 mailles**, ce qu'il refusait depuis S239. Consommateur : le
+pas lui-même, qui rejoue avec la multigrille **s'il a été refusé** ; preuve
+[MULTIGRILLE-S245](../docs/validation/MULTIGRILLE-S245.md), décision
+[ADR-147](../docs/adr/ADR-147-la-multigrille-est-un-repli-de-precision.md). **A275 est fermée.**
+
+**Ce que la lecture a corrigé au passage.** `jacobi = self.mobile` : le chemin à couvercle fixe —
+celui que S230 et S244 mesurent — n'a **aucun** préconditionneur. L'en-tête ADR-131 de S244 annonçait
+« Jacobi diagonal » ; note corrective datée portée dans ce document. Les mesures restent exactes.
+
+**La cible visée, et manquée.** S244 avait désigné la multigrille comme le seul levier dont le gain
+croît avec la taille. Construite, elle fait tomber les itérations de **425 à 134** à 32 768 mailles —
+mais un cycle coûte **cinq produits fins par itération**, et le pas passe de 319 à 729 ms. Aux
+petites tailles c'est pire encore : la hiérarchie n'a qu'un ou deux niveaux et les itérations
+**triplent**. **En vitesse, la multigrille perd partout.**
+
+**La contre-épreuve, faite avant de conclure.** Hiérarchie plus profonde, cycle allégé : **pire** —
+282 / 260 / 292 / 284 / 300 itérations, plates mais hautes. Un compte plat est la signature d'une
+multigrille qui fonctionne ; plat **et haut** dit que le taux par cycle est mauvais. Ce n'est donc ni
+le niveau grossier ni le lisseur : c'est le **transfert**, la prolongation étant constante par
+morceaux. Sans cette mesure, la suite aurait été cherchée au mauvais endroit.
+
+**La cible atteinte, qui n'était pas la sienne.** Le banc relevait aussi la divergence et le drapeau
+`degraded`. À 32 768 mailles : **1,339·10⁻⁵ refusé devient 8,512·10⁻⁶ reçu**. A275 disait que f32 ne
+tenait pas la tolérance à cette taille ; la cause n'était pas la taille, c'était **l'arrondi accumulé
+sur 425 itérations**. En en demandant 134, le solveur en accumule moins, et le **même** test sur le
+**même** vrai résidu recalculé passe. **Aucune tolérance n'a été relâchée.**
+
+**D'où le branchement : un repli, pas un remplacement.** Le pas ordinaire d'abord ; s'il est refusé,
+et seulement alors, rejoué avec la multigrille. Aux tailles qui passaient déjà, **rien ne change, au
+bit** — 30 / 61 / 114 / 220 itérations, mêmes résidus, mêmes divergences, empreinte `delta_filters`
+**`0xfb12b2092df4ee6d` inchangée**, dix cas de `delta_precision` identiques. À 32 768 mailles, reçu
+pour 1 006 ms au lieu de 319 refusées.
+
+**Ce qui garde la construction.** L'opérateur d'un niveau grossier rend **les mêmes bits** que celui
+du chemin fin sur la grille fine — l'opérateur est écrit deux fois et cet essai interdit aux deux
+écritures de diverger (L137). Restriction et prolongation sont **adjointes**. Le cycle est
+**symétrique et défini positif**, vérifié et non supposé : sans cela la récurrence du gradient
+conjugué ne tient plus, et le symptôme se confondrait avec un mauvais réglage. Suite complète
+**437 réussis, 0 échec, 15 ignorés**. L'essai de comptabilité d'allocation **recalcule** la
+hiérarchie indépendamment du cœur — un essai de comptabilité qui appellerait la même fonction que le
+code ne vérifierait rien.
+
+**Ce qui n'est pas gagné.** **Le coût de δ reste entier** : 143 fois le budget d'ADR-125 à 32 768
+mailles. Ce lot n'a pas gagné de vitesse et ne prétend pas le contraire. Le repli coûte un pas
+perdu ; aucun critère ne prédit le refus avant de résoudre. Le mode mobile n'a pas la multigrille.
+Une machine, un pas de temps, un fond plat au banc de coût.
+
+**Suite.** **S246 : la prolongation bilinéaire** avec sa restriction transposée — c'est elle que la
+contre-épreuve désigne, et les essais d'adjonction et de symétrie sont déjà écrits pour l'accueillir.
+Si elle amène le taux par cycle où la théorie le place, la multigrille deviendra aussi un levier de
+vitesse, et c'est le seul dont le gain croisse avec la taille. A277, A278, A274, angles rasants, V,
+B2 et bathymétrie gardent leurs déclencheurs.
+
+**Rituel.** L324 ; ADR-147 ; note corrective datée sur COUT-DELTA-S244 ; file active (**A275
+fermée**, A276 mesurée, A280 ouverte), feuille de route, index. Invariants relus : **I-06** (la
+hiérarchie est comptée avant d'être allouée, et l'essai le recalcule à part) et **I-03** (les tailles
+qui passaient gardent leurs bits ; l'opérateur grossier et l'opérateur fin coïncident au bit).
+Maillons 0 : 32 768 mailles est accepté, le pas le consomme, la preuve est publiée.

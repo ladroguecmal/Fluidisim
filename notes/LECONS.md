@@ -5420,3 +5420,36 @@ Et un corollaire sur ce que vaut une session : **celle-ci n'a gagné aucun facte
 carte — où va le temps (écritures 67–73 %, réductions 12–13 %, itérations doublant par raffinement),
 ce que chaque technique restante achèterait, et laquelle est fermée. Une carte fausse coûte des
 sessions ; une carte mesurée en économise. Voir COUT-DELTA-S244, famille de L321 et L322.
+
+## L324 — Mesurer plus large que sa cible : un lot qui rate la sienne peut en atteindre une autre
+
+*(S245)* Le lot visait la **vitesse** : la multigrille devait faire tomber les 425 itérations de la
+pression à 32 768 mailles, et avec elles les 286 ms du pas. Elle les a fait tomber à 134 — et le pas
+est passé à 729 ms, parce qu'un cycle coûte cinq produits fins par itération. **Cible manquée.**
+
+Le banc relevait aussi, sans que ce fût le sujet, la **divergence** et le drapeau `degraded` de
+chaque pas. C'est là que le vrai résultat était : 1,339·10⁻⁵ **refusé** devient 8,512·10⁻⁶ **reçu**.
+A275 — « f32 ne tient pas la tolérance à cette taille » — tombe, et sa cause apparaît du même coup :
+ce n'était pas la taille, c'était **l'arrondi accumulé sur 425 itérations**. Moins d'itérations, moins
+d'arrondi, et le test passe sans qu'on y touche.
+
+Trois choses généralisent.
+
+1. **Relever plus que la grandeur visée.** Le coût d'ajouter deux colonnes à un banc est nul ; le
+   coût de ne pas les avoir est une découverte manquée. Ici, la colonne qui a tout décidé —
+   `degraded` — n'était même pas dans le protocole : elle y était parce que le banc de la session
+   précédente la portait déjà.
+2. **Une technique a plusieurs effets, et l'on n'en cherche souvent qu'un.** Un solveur qui converge
+   en moins d'itérations est plus rapide *et* plus précis. Le second effet ne se voit que si on le
+   mesure, et il peut valoir plus que le premier — ici il ferme une anomalie ouverte depuis six
+   sessions.
+3. **Une contre-épreuve avant de conclure, même quand la conclusion arrange.** Avant d'écrire « la
+   multigrille ne paie pas en vitesse », une variante — hiérarchie plus profonde, cycle allégé — a
+   été mesurée : **pire**, avec un compte d'itérations plat mais haut. Ce profil accuse le transfert
+   et disculpe le niveau grossier et le lisseur. Sans cette mesure, la suite du lot aurait été
+   cherchée au mauvais endroit.
+
+Et un corollaire de tenue : le branchement qui en sort — **repli et non remplacement** — ne coûte
+rien là où l'ancien chemin suffit, et son verdict reste celui d'ADR-144, inchangé. Une technique qui
+ne paie que dans un régime s'installe dans ce régime, pas partout. Famille de L321 et L323 : ce qu'on
+ne mesure pas, on ne peut ni le gagner ni le perdre sciemment.
