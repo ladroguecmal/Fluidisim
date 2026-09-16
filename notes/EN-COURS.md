@@ -102,7 +102,7 @@ branchement déclaré en file avec son déclencheur — dit dans le plan, pas la
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [ ] **P2** — protocole écrit ; note corrective datée sur S244 ; relevé de référence des itérations.
+- [x] **P2** — protocole écrit ; note corrective datée sur S244 ; relevé de référence des itérations.
 - [ ] **P3** — hiérarchie allouée dans `configure` et opérateurs de transfert, avec leurs essais.
 - [ ] **P4** — cycle en V et lissage ; **symétrie testée** avant tout branchement.
 - [ ] **P5** — branchement comme préconditionneur ; itérations et coût aux cinq tailles.
@@ -110,7 +110,10 @@ branchement déclaré en file avec son déclencheur — dit dans le plan, pas la
 
 ### Notes de reprise
 
-(S245 — vide à l'ouverture.)
+P2 : protocole `docs/validation/MULTIGRILLE-S245.md` ; note corrective datee portee dans
+COUT-DELTA-S244 §6 (« Jacobi diagonal present » etait faux du chemin mesure).
+Reference avant modification, chemin fixe, gradient conjugue **nu** : iterations
+**30 / 61 / 114 / 220 / 425**, pas 0,089 / 0,699 / 5,256 / ~37-42 / **286,2** ms.
 
 ---
 

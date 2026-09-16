@@ -213,7 +213,14 @@ lectures. C'est aussi pourquoi la vectorisation automatique n'opère pas ici.
 
 ### Coût de la mesure (ADR-131)
 
-- **Techniques présentes** : aucune de coût — Jacobi diagonal et f32, comme avant.
+- **Techniques présentes** : aucune de coût — f32, comme avant.
+
+> **Note corrective, 2026-09-16 (S245).** Cette ligne annonçait « Jacobi diagonal » parmi les
+> techniques présentes. **C'est faux du chemin mesuré** : `project` pose `jacobi = self.mobile`, donc
+> le préconditionnement diagonal n'existe que pour le mode à surface mobile. Tout ce que ce document
+> mesure — décomposition, itérations, coût — porte sur le chemin à **couvercle fixe**, qui fait
+> `dir = res` : un gradient conjugué **nu**. Les mesures restent exactes ; seule cette ligne était
+> fausse. Voir [MULTIGRILLE-S245](MULTIGRILLE-S245.md) §1.1.
 - **Techniques absentes** : GPU, parallélisme (fermé pour cette boucle par le §3), multigrille,
   factorisation incomplète, itérations fixes, cuisson, SIMD explicite.
 - **Domaine** : 8 × 4 m, fond plat, `dt = 1/60 s`, plafond 512, release, un fil, une machine ;
