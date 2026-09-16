@@ -58,74 +58,59 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S247 — terminée
+Session : S248 — en cours
 Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web)
-Entrée : « Continue », master propre à `e7a23e3`, une seule copie, jeton libre, secteur, Maillons 0.
+Entrée : « Continue, avant réalise une mission intermédiaire qui met en avant la topologie de la mer,
+le mesh du lod. » Master propre à `3338804`, une seule copie, jeton libre, secteur, Maillons 1.
+**Demande explicite de l'utilisateur** : elle prime sur la suite automatique (REPRISE §6.7). A282 —
+couper les modes par la distance — repart en file, lot prêt, déclencheur conservé.
 
-**Objectif.** Savoir ce que l'hôte tient **à incidence rasante soutenue** — en coût et en
-échantillonnage —, et le dire. C'est le dernier reliquat de J1-bis qu'une session puisse traiter
-seule : l'interaction manuelle demande une personne, la seconde cible une autre machine (REPRISE §5).
-[CADENCE-HOTE-S225](docs/validation/CADENCE-HOTE-S225.md) l'écrit depuis S225 parmi ce qu'elle ne
-couvre pas ; aucune mesure ne l'a fait depuis.
-**Ce que la lecture fixe.** S234 a mesuré la **charge de maillage** de la pose rasante
-(`[0, −18, 2]`, tangage −0,05) : **95,9 %** de l'écran dans l'emprise contre 86,2 % à la pose S212,
-et une charge idéale de 0,359. Mais elle n'a **jamais** été rendue : ni coût par image, ni qualité.
-Deux choses changent avec l'incidence, et une non :
-- **le coût** — presque tout l'écran est de l'eau, et la visibilité de S235 n'y retire rien ;
-- **l'échantillonnage** — à l'horizon, un sommet couvre des dizaines de mètres d'eau ; S234 notait
-  déjà que **7,5 %** des sommets de l'emprise sous-échantillonnent `λ_min` à la pose S212 ;
-- **la grille locale du sillage**, elle, ne change pas : son emprise est le domaine du sillage, pas
-  la caméra (constaté en S241).
-**Thèse, et elle est réfutable.** L'incidence rasante ne casse pas le coût — le nombre de sommets est
-fixé par la grille, pas par la pose — mais elle **dégrade l'échantillonnage** dans une proportion que
-personne n'a chiffrée. Si la mesure dit le contraire — que le coût explose, ou que l'échantillonnage
-tient —, la session le dira au lieu de forcer la thèse.
-**Ce que la mesure doit séparer.** `λ_min = 2π/coupure = 2,094 m` pour le sillage. Le fond `B` a sa
-propre coupure, que ce lot ne mesure pas : c'est une **limite déclarée**, pas un oubli.
-**Critères de réception, déclarés avant construction.** (1) **Coût à incidence rasante soutenue** :
-CPU, GPU et intervalle, sur le même banc de cadence que S240 et S242, contre la pose de référence.
-(2) **Échantillonnage** : distribution de l'écart entre sommets voisins dans l'emprise, et **part des
-sommets sous Nyquist** — mesurée d'abord à la pose S212, où elle doit **retrouver les 7,5 % de
-S234**, faute de quoi l'instrument est faux avant d'avoir servi. (3) Allocations de `update`
-**toujours nulles** (ADR-145). (4) Aucune tolérance modifiée, aucun seuil inventé : la session
-**mesure**, et ne corrige que si la mesure désigne un défaut clair et borné.
-**Arrêt.** Le coût et l'échantillonnage à incidence rasante publiés, avec ce qui tient et ce qui ne
-tient pas. **Ou**, si la mesure désigne un défaut dont la correction dépasse la session, ce défaut
-chiffré et mis en file avec son déclencheur.
+**Objectif.** Rendre **visibles** deux choses que le dépôt ne connaît jusqu'ici que par des nombres :
+la **topologie de la mer** telle que la scène la compose, et le **maillage du LOD** tel qu'il tombe
+sur l'eau. Des images locales de banc, ce qu'[ADR-124](docs/adr/ADR-124-image-budget-et-effets-bornes.md)
+autorise explicitement depuis S201 — **PPM local, aucune publication, aucune page**.
+**Pourquoi maintenant, et pourquoi ce n'est pas de la décoration.** S247 vient de mesurer que
+l'écart entre deux sommets voisins atteint **8,243 m** à incidence rasante, contre 2,589 m à la pose
+de référence, quand `λ_min` vaut 2,094 m. Ce sont des nombres ; personne n'a **vu** où ils tombent.
+Une image du maillage projeté le montre d'un coup d'œil, et la même image sert à instruire A282 —
+c'est elle qui dira **où** couper.
+**Thèse.** Les chiffres de S247 ont une forme, et cette forme est lisible : le maillage ne se dégrade
+pas uniformément, il s'étire par bandes vers l'horizon. Une carte le montrera là où un histogramme ne
+le dirait pas.
+**Ce qui rend ces images des preuves et non des illustrations.** Chacune porte son **empreinte FNV**,
+comme toute image de banc depuis S201, et **les extrema qu'elles affichent doivent retrouver ceux que
+S247 a publiés** — 2,589 m et 8,243 m. Une carte qui ne les retrouve pas est fausse, et on le saura
+avant de la regarder.
+**Critères de réception, déclarés avant construction.** (1) Les cartes d'écart retrouvent les extrema
+de S247 aux deux poses. (2) Empreintes reproduites à l'identique sur deux exécutions (I-03).
+(3) Aucune allocation ajoutée au chemin d'image de l'hôte : ce travail vit dans un mode de banc,
+jamais dans `redraw`. (4) Aucune publication, aucune page : PPM local sous `captures/s248/`.
+(5) Aucun seuil inventé — le seul tracé est `λ_min/2`, qui vient de la recette.
+**Arrêt.** Les images écrites, leurs empreintes publiées, et ce qu'elles montrent décrit en mots.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [x] **P2** — protocole écrit ; pose rasante soutenue ajoutée au banc.
-- [x] **P3** — instrument d'échantillonnage, **étalonné sur la pose S212** contre les 7,5 % de S234.
-- [x] **P4** — mesure : coût et échantillonnage à incidence rasante, contre la pose de référence.
-- [x] **P5** — ce qui tient, ce qui ne tient pas ; correction seulement si la mesure la désigne.
-- [x] **P6** — rituel §6, file, feuille de route, jeton.
+- [ ] **P2** — mode de banc `--topologie` : ossature, chemins, rampes de couleur documentées.
+- [ ] **P3** — carte de la **topologie de la mer** : hauteur composée, vue de dessus.
+- [ ] **P4** — cartes du **maillage** : où tombent les sommets, et l'écart vu depuis l'écran.
+- [ ] **P5** — réception : extrema contre S247, empreintes rejouées, description écrite.
+- [ ] **P6** — rituel §6, file, feuille de route, jeton.
 
 ### Notes de reprise
 
-P2 : protocole docs/validation/RASANT-S247.md ; drapeau --rasant ajoute a l hote (pose de S234,
-oeil a 2 m, tangage -0,05, tenue image apres image ; la ligne CADENCE l annonce  rasante ).
-Ordre impose par le protocole : l instrument d echantillonnage est **etalonne** sur la pose de
-reference, ou il doit retrouver les **7,5 %** de S234, **avant** de servir a incidence rasante.
-lambda_min = 2 pi / coupure = **2,094 m** pour le sillage ; la coupure de B n est pas mesuree ici.
+(S248 - vide a l ouverture.)
 
-P3 : instrument ajoute a --lod-charge (ligne NYQUIST_S247), qui compte dans l emprise du sillage les
-sommets dont l ecart au voisin depasse lambda_min/2 = 1,047 m.
-**Etalonnage passe** : pose S212 -> **7,54 %**, quand S234 publiait 7,5 %. L instrument reproduit un
-chiffre ecrit deux sessions avant lui.
+---
 
-P4/P5 : **le cout tient, l echantillonnage non — et pas comme attendu.**
-Cout : GPU eau **0,4397 ms identique** aux deux poses, CPU 3,9021 contre 4,0563, intervalle 4,5826
-contre 4,7729, allocations 0. La these est confirmee : le nombre de sommets est fixe par la grille.
-Echantillonnage : **ce n est pas la part qui bouge, c est la profondeur**. 7,59 % sous Nyquist a
-incidence rasante contre 7,54 % a la reference — mais **pire ecart 8,243 m contre 2,589**, soit pres
-de **quatre longueurs d onde** sautees entre deux echantillons. Pose haute : 0,01 %, pire 1,050 m.
-**Et le chiffre dit pourquoi densifier ne sert a rien** : 8,2 m au loin, ce sont les **deux pixels**
-de la grille projetee — a cette distance une onde de 2 m est plus petite qu un pixel.
-Remede specifie, pas construit : couper les modes par la distance ; au plus loin de la pose rasante,
-les modes sous **~16 m** ne sont pas resolubles. Lot separe : il change les bits, et sa reception
-demande de repenser ce que VERIFY compare (un champ coupe **doit** s ecarter du coeur au loin).
+Notes de S247, conservees pour reference immediate :
+
+Instrument d echantillonnage etalonne : pose de reference **7,54 %** contre 7,5 % publies par S234.
+Cout a incidence rasante : **GPU eau 0,4397 ms identique**, CPU 3,9021 contre 4,0563, allocations 0.
+Echantillonnage : **7,59 % contre 7,54 %** sous Nyquist, mais **pire ecart 8,243 m contre 2,589**.
+Pose haute : 0,01 %, pire 1,050 m. lambda_min = 2,094 m, Nyquist = 1,047 m.
+8,2 m au loin = les **deux pixels** de la grille projetee : densifier ne sert a rien, il faut
+**couper les modes par la distance** (A282) ; sous ~16 m non resolubles a la pose rasante.
 
 ---
 
