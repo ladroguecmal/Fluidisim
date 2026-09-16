@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-16 22:48 +02:00
+JETON            : occupé
+Battement        : 2026-09-16 23:05 +02:00
 Agent            : Claude Opus 5, Claude Code (fichiers, git, cargo, Python, GPU local, accès web)
-Session en cours : aucune
+Session en cours : S258 — tâche laissée ouverte : vérifier C18 sur le système (liste 13.2)
 Dernière session : S257 — verdict R2 « grand lac soumis au vent » classé par construction ; critère de parallaxe pour la surface plane à normales
-Session suivante : S258 — mer multimodale dans B (houle longue + mer de vent, directions par système), réception par système, revue R3
+Session suivante : à fixer au rituel de S258
 Maillons        : 1
 
 ```

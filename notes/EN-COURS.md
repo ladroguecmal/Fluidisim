@@ -58,35 +58,25 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S257 — terminée
+Session : S258 — en cours
 Agent : Claude Opus 5, Claude Code ; fichiers, git, cargo, Python et GPU local disponibles.
-Entrée (2026-09-16 22:45), verdict R2 de l'utilisateur : « le résultat se raffine, mais la
-topologie d'un océan fluctue selon plusieurs paramètres ; le rendu paraît un grand lac soumis à
-beaucoup de vent ; la haute mer semble plus déchaînée, de manière chaotique, et la houle se forme
-petit à petit vers les terres ». Et une question : « avait-on réfléchi à une surface lisse avec
-effet de normales, déplacement ou autre technologie quand on regarde la mer de dessus, le rayon de
-vision perpendiculaire à l'eau, puisqu'une surface plane devrait suffire ? ». Master propre
-d6a4253, jeton libre.
+Entrée (2026-09-16 23:03) : « fais attention, il reste une tâche en cours ». Constat : dépôt propre,
+jeton libre, aucune étape `[>]`, aucun processus ni tâche de fond de la session (les `python.exe`
+actifs sont le serveur MCP Blender). Seule tâche laissée ouverte par moi : la liste du projet fini
+(S255) marque « C18 à relire » au point 13.2, annoncé à l'utilisateur comme restant à vérifier.
+La mer multimodale, recommandée en S257, passe à S259.
 
-Objectif : consigner et classer R2 par ce qui se **calcule** (contenu du spectre, cambrure,
-absence de houle, fond uniforme, crêtes linéaires), sans campagne ; répondre à la question depuis
-le dépôt (ADR-004, S234/L313, ADR-155) et par un critère chiffré de parallaxe aux poses R1/R2.
-Pas de code dans cette session : le prochain lot se choisit sur ce classement. Arrêt : verdict
-consigné, réponse écrite, prochain lot recommandé dans la file.
+Objectif : exécuter C18 sur le système, lire ce que le harnais affirme réellement, corriger 13.2.
+Arrêt : état de C18 publié ligne par ligne contre CAS-CANONIQUES §C18, liste corrigée.
 
 ### Plan
 
-- [x] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — verdict R2 consigné et classé, faits calculés ; réponse à la question (parallaxe du
-  déplacement contre empreinte du pixel, ce que le dépôt prévoyait) dans REVUE-VISUELLE.
-- [x] **P3** — rituel §6 : file (houle longue, crêtes non linéaires, LOD déplacement/normales),
-  liste du projet fini, journal, jeton.
+- [x] **P1** — amorce, jeton, plan.
+- [ ] **P2** — C18 exécuté et lu ; liste 13.2 corrigée ; rituel (journal, jeton).
 
 ### Notes de reprise
 
-P2 : R2 classé par construction (mer de vent PM ≈ 8,4 m/s, rien au-delà de 12 s, λp 56 m contre
-225 m pour une houle de 12 s, cambrure 0,027, un éventail, aucun déplacement horizontal — grep vide
-dans le cœur —, fond uniforme, pas d'écume). Parallaxe `h·sin2θ/(2Hα)` : 1,2–3,4 px en plongeante à
-90 m, 3–10 px en haute, 6–16 px en référence/rasante, < 0,1 px pour la queue. Ordre recommandé :
-B multimodal, crêtes non linéaires, écume, levée bathymétrique (J5). Deux heredocs bash imbriqués
-échouent à l'analyse sur ce poste : écrire les scripts dans le scratchpad.
+P1 : `water-harness check scenarios/C18-invariants.toml` → `OK hash=0x85c8bc610f551d11
+composantes=32 alloc_post_seal=1 13.8 ms`, identique à l'historique (S178). Le harnais exécute
+quatre assertions : reproductibilité intra-exécution, indépendance au chemin d'interrogation,
+allocation refusée après scellement, empreinte déclarée de B.
