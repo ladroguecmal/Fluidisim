@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S247 — en cours
+Session : S247 — terminée
 Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web)
 Entrée : « Continue », master propre à `e7a23e3`, une seule copie, jeton libre, secteur, Maillons 0.
 
@@ -100,7 +100,7 @@ chiffré et mis en file avec son déclencheur.
 - [x] **P3** — instrument d'échantillonnage, **étalonné sur la pose S212** contre les 7,5 % de S234.
 - [x] **P4** — mesure : coût et échantillonnage à incidence rasante, contre la pose de référence.
 - [x] **P5** — ce qui tient, ce qui ne tient pas ; correction seulement si la mesure la désigne.
-- [ ] **P6** — rituel §6, file, feuille de route, jeton.
+- [x] **P6** — rituel §6, file, feuille de route, jeton.
 
 ### Notes de reprise
 

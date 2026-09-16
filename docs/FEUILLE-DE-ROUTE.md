@@ -102,7 +102,10 @@ l'échec d'optimisations prises isolément. La liste est ouverte.
 S214, A254 close S223, cadence complète faite S225. **Allocations de la pile graphique faites S240**
 (ADR-145) : boucle d'image à **zéro allocation** pour le code du projet, pile verrouillée à **133
 allocations et 18 509 octets par image, constantes** ; [preuve](validation/ALLOCATIONS-HOTE-S240.md).
-Restent l'interaction manuelle représentative, angles rasants et poses de caméra, seconde cible (B7).
+**Angles rasants soutenus faits S247** : le coût tient à toutes les poses mesurées — GPU eau
+identique à la quatrième décimale —, mais l'échantillonnage du champ lointain non : même part sous
+Nyquist, **pire écart 8,243 m contre 2,589** ; [mesure](validation/RASANT-S247.md). Restent
+l'interaction manuelle représentative et la seconde cible (B7).
 Composition de la scène représentative par le cœur : faite S236 (mode union, ADR-142). Le choix du
 mode par un hôte autoritaire reste à trancher avec lui (A271).
 

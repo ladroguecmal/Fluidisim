@@ -44,6 +44,7 @@
 - [Coût d'un pas de δ, décomposé : où va le temps et quelle technique l'attaque](validation/COUT-DELTA-S244.md).
 - [Multigrille de la pression de δ : un repli de précision, et pourquoi pas de vitesse](validation/MULTIGRILLE-S245.md).
 - [Prolongation de la multigrille : cinq suspects écartés, un amortissement corrigé](validation/PROLONGATION-S246.md).
+- [Angles rasants : le coût tient, l'échantillonnage du champ lointain non](validation/RASANT-S247.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).

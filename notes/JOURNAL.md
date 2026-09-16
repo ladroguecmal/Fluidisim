@@ -12777,3 +12777,56 @@ vu manquer chez elle-même, et la leçon porte son nom — et **I-03** (empreint
 au bit). **Maillons 0**, et la justification est écrite pour qu'on puisse la contester : la thèse du
 lot a échoué, mais une **correction d'intégrité** a été reproduite et testée, et elle a un effet aval
 mesuré — le repli d'ADR-147 est 18 % moins cher et garde plus de marge.
+
+## S247 — 2026-09-16 — Le coût tient, l'échantillonnage non, et pas comme on l'attendait
+
+**Entrée.** « Continue », master propre à `e7a23e3`, une seule copie, jeton libre, secteur,
+Maillons 0. Claude Code, Opus 5. Plan `cc88c7d`, protocole et pose `39f1502`, instrument étalonné
+`7e308d6`, mesure et verdict `1f94e70`.
+
+**Le reliquat traité.** Les **angles rasants soutenus** étaient inscrits depuis
+[S225](../docs/validation/CADENCE-HOTE-S225.md) parmi ce que les mesures de l'hôte ne couvraient pas,
+et c'était le dernier reliquat de J1-bis qu'une session puisse traiter seule : l'interaction manuelle
+demande une personne, la seconde cible une autre machine (REPRISE §5). Preuve
+[RASANT-S247](../docs/validation/RASANT-S247.md).
+
+**L'étalon, passé avant la mesure.** Le protocole exigeait que l'instrument d'échantillonnage soit
+d'abord passé à la pose de référence, où il devait retrouver les **7,5 %** publiés par S234. Il a
+rendu **7,54 %**. Un instrument neuf qui annonce un chiffre neuf n'est pas une mesure ; l'ordre
+— étalonner, puis employer — n'a rien coûté et rend défendable tout ce qui suit.
+
+**Le coût tient, et la thèse est confirmée.** GPU eau **0,4397 ms, identique à la quatrième décimale**
+entre la pose de référence et la pose rasante ; CPU médian 3,9021 contre 4,0563 ; intervalle 4,5826
+contre 4,7729 ; allocations de `update` toujours nulles. Le nombre de sommets est fixé par la grille,
+pas par la pose. La visibilité de S235 ne gagne rien à incidence rasante — 95,9 % de l'écran est de
+l'eau — mais elle n'y perd rien non plus.
+
+**L'échantillonnage ne tient pas, et ce n'est pas la part qui bouge, c'est la profondeur.** La
+fraction de sommets sous Nyquist est celle de la pose de référence — **7,59 % contre 7,54 %** — mais
+le **pire écart triple, de 2,589 à 8,243 m** : près de **quatre longueurs d'onde** sautées entre deux
+échantillons, là où la référence en saute une demi. Un banc qui n'aurait relevé que la part aurait
+conclu « rien ne change ». La pose haute, elle, est propre : 0,01 % et 1,050 m.
+
+**Et le chiffre élimine le mauvais remède.** 8,2 m au loin, ce sont exactement les **deux pixels** de
+la grille projetée : à cette distance, une onde de 2 m est **plus petite qu'un pixel**. Densifier le
+maillage dépenserait des sommets pour dessiner ce que l'écran ne peut pas montrer. Le remède est
+celui que la feuille de route nomme déjà — **couper les modes par la distance** — et cette mesure en
+donne la **spécification chiffrée** : au plus loin de la pose rasante, les modes sous **≈ 16 m** ne
+sont pas résolubles.
+
+**Non fait, et assumé.** La coupure n'est pas construite : elle change le champ publié, donc les
+bits, et sa réception demande de repenser ce que `VERIFY` compare — un champ coupé par la distance
+**doit** s'écarter du cœur au loin, et l'écart mesuré aujourd'hui deviendrait le résultat attendu
+plutôt que le défaut. La coupure du fond `B` n'est pas mesurée. Aucune image n'est jugée : la mesure
+est géométrique. Un format, une machine, une scène.
+
+**Suite.** **Maillons passe à 1** : cette session **qualifie** un chemin reçu, elle n'en reçoit pas
+de nouveau. **S248 : A282 — la coupure des modes par la distance**, le seul lot de J1-bis qui ait
+désormais un défaut mesuré et une spécification chiffrée derrière lui. A281, A278, A277, A274, V, B2
+et bathymétrie gardent leurs déclencheurs.
+
+**Rituel.** L326 ; aucun ADR — rien n'a été décidé ni construit, seule une mesure a été faite ; file
+active (J1-bis : angles rasants faits, **A282 ouverte**), feuille de route, index. Invariants relus :
+**I-06** (`update` reste à zéro allocation à la pose la plus chargée) et **I-09** — on interpole des
+paramètres, jamais des réalisations, et c'est précisément ce que la coupure par la distance devra
+respecter quand elle sera construite. Maillons 1.

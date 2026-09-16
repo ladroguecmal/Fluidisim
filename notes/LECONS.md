@@ -5484,3 +5484,30 @@ Trois choses généralisent.
 Corollaire de tenue, de la famille de L323 : la prolongation bilinéaire construite pour ce lot **ne
 gagnait rien** et a été **annulée**. Un opérateur plus coûteux gardé « parce qu'il est meilleur en
 théorie » est une dette, que la session suivante lirait comme une amélioration reçue.
+
+## L326 — Étalonner un instrument sur un chiffre déjà publié, avant de s'en servir
+
+*(S247)* Le protocole du lot exigeait, **avant toute mesure nouvelle**, que l'instrument
+d'échantillonnage soit passé à la pose de référence, où il devait retrouver les **7,5 %** publiés par
+S234 deux sessions plus tôt. Il a rendu **7,54 %**. L'ordre — étalonner, puis employer — n'a rien
+coûté, et il a rendu tout ce qui suit défendable : un instrument neuf qui annonce un chiffre neuf
+n'est pas une mesure, c'est une affirmation.
+
+Trois choses généralisent.
+
+1. **Un dépôt qui publie ses chiffres se fournit ses propres étalons.** La valeur de S234 n'avait pas
+   été conservée pour cela ; elle a servi de témoin parce qu'elle était écrite avec son domaine. Un
+   chiffre publié sans son domaine n'aurait rien étalonné du tout.
+2. **Une part peut ne pas bouger pendant que sa queue triple.** À incidence rasante, la fraction de
+   sommets sous Nyquist est celle de la pose de référence — 7,59 % contre 7,54 % — mais le **pire
+   écart passe de 2,589 à 8,243 m**. Un banc qui n'aurait relevé que la part aurait conclu « rien ne
+   change ». **Relever une part et un extrême coûte la même boucle** ; n'en relever qu'un est un
+   choix, et il faut le faire exprès.
+3. **Un chiffre bien posé élimine aussi le mauvais remède.** 8,2 m au loin, ce sont exactement les
+   deux pixels de la grille projetée : à cette distance, une onde de 2 m est **plus petite qu'un
+   pixel**. Densifier le maillage — le réflexe — dépenserait des sommets pour dessiner ce que l'écran
+   ne peut pas montrer. La mesure ne dit donc pas seulement qu'il y a un défaut : elle dit **par
+   quelle voie il ne se corrige pas**, ce qui vaut souvent davantage.
+
+Famille de L323 et L325 : ce qui n'a pas d'étalon n'a pas de valeur mesurée, et ce qu'on ne relève
+pas ne peut pas surprendre.
