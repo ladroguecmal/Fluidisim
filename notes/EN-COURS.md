@@ -58,226 +58,34 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S248 — terminée
-Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web)
-Entrée : « Continue, avant réalise une mission intermédiaire qui met en avant la topologie de la mer,
-le mesh du lod. » Master propre à `3338804`, une seule copie, jeton libre, secteur, Maillons 1.
-**Demande explicite de l'utilisateur** : elle prime sur la suite automatique (REPRISE §6.7). A282 —
-couper les modes par la distance — repart en file, lot prêt, déclencheur conservé.
+Session : S249 — en cours
+Agent : Codex, GPT-6 (fichiers, git, cargo, accès web ; GPU à vérifier)
+Entrée : « Reprends le projet », puis « Continue ». Master propre à 12bd90f, une seule
+copie ; branche B archivée conservée. Jeton pris le 2026-09-16 à 17:23 +02:00.
 
-**Objectif.** Rendre **visibles** deux choses que le dépôt ne connaît jusqu'ici que par des nombres :
-la **topologie de la mer** telle que la scène la compose, et le **maillage du LOD** tel qu'il tombe
-sur l'eau. Des images locales de banc, ce qu'[ADR-124](docs/adr/ADR-124-image-budget-et-effets-bornes.md)
-autorise explicitement depuis S201 — **PPM local, aucune publication, aucune page**.
-**Pourquoi maintenant, et pourquoi ce n'est pas de la décoration.** S247 vient de mesurer que
-l'écart entre deux sommets voisins atteint **8,243 m** à incidence rasante, contre 2,589 m à la pose
-de référence, quand `λ_min` vaut 2,094 m. Ce sont des nombres ; personne n'a **vu** où ils tombent.
-Une image du maillage projeté le montre d'un coup d'œil, et la même image sert à instruire A282 —
-c'est elle qui dira **où** couper.
-**Thèse.** Les chiffres de S247 ont une forme, et cette forme est lisible : le maillage ne se dégrade
-pas uniformément, il s'étire par bandes vers l'horizon. Une carte le montrera là où un histogramme ne
-le dirait pas.
-**Ce qui rend ces images des preuves et non des illustrations.** Chacune porte son **empreinte FNV**,
-comme toute image de banc depuis S201, et **les extrema qu'elles affichent doivent retrouver ceux que
-S247 a publiés** — 2,589 m et 8,243 m. Une carte qui ne les retrouve pas est fausse, et on le saura
-avant de la regarder.
-**Critères de réception, déclarés avant construction.** (1) Les cartes d'écart retrouvent les extrema
-de S247 aux deux poses. (2) Empreintes reproduites à l'identique sur deux exécutions (I-03).
-(3) Aucune allocation ajoutée au chemin d'image de l'hôte : ce travail vit dans un mode de banc,
-jamais dans `redraw`. (4) Aucune publication, aucune page : PPM local sous `captures/s248/`.
-(5) Aucun seuil inventé — le seul tracé est `λ_min/2`, qui vient de la recette.
-**Arrêt.** Les images écrites, leurs empreintes publiées, et ce qu'elles montrent décrit en mots.
+Objectif : A282, filtrage spectral cosmétique selon le pas projeté, consommé par l'afficheur.
+Priorité : après deux maillons d'instrumentation, construire la capacité désormais spécifiée.
+La multigrille A281 reste un approfondissement au gain incertain ; V et δ gardent leurs
+lots et déclencheurs. Aucun changement d'autorité, de recette répliquée ou de seuil physique.
+
+Réception : poids continus dans [0,1], nuls à Nyquist et au-delà ; coefficients proches
+inchangés ; GPU comparé à une somme CPU filtrée indépendante sous les 3 mm de S201,
+écart volontaire au cœur publié séparément ; poses référence/rasante/haute et deux formats,
+retour de caméra, coût avec/sans et allocations. Les impacts tabulés n'ont pas de modes
+exposés : leur filtrage est hors de ce premier lot B/sillage et sera porté explicitement en file.
+Arrêt : chemin activé dans l'hôte, critères éprouvés, limites et coûts transmis.
 
 ### Plan
 
-- [x] **P1** — amorce, jeton, plan seuls.
-- [x] **P2** — mode de banc `--topologie` : ossature, chemins, rampes de couleur documentées.
-- [x] **P3** — carte de la **topologie de la mer** : hauteur composée, vue de dessus.
-- [x] **P4** — cartes du **maillage** : où tombent les sommets, et l'écart vu depuis l'écran.
-- [x] **P5** — réception : extrema contre S247, empreintes rejouées, description écrite.
-- [x] **P6** — rituel §6, file, feuille de route, jeton.
+- [x] **P1** — amorce, lectures ciblées, jeton et plan seuls.
+- [>] **P2** — décision et protocole : empreinte de projection, poids et bandes du sillage.
+- [ ] **P3** — filtre CPU/GPU et intégration au rendu, tests du contrat.
+- [ ] **P4** — réception GPU, comparaison au cœur et au témoin, coût et allocations.
+- [ ] **P5** — rituel §6 : preuves, file active, trajectoire, journal et jeton.
 
 ### Notes de reprise
 
-P2 : viewer/src/topologie.rs — ecriture PPM avec empreinte FNV (convention S201), deux rampes
-documentees, gris de fond. Mode de banc --topologie cable dans l hote.
-**Rampe de hauteur** : signee, creux sombres, niveau moyen bleu clair, cretes blanches ; l amplitude
-qui sature est imprimee avec l image, jamais devinee.
-**Rampe d ecart** : rupture **franche** au seuil de Nyquist — verts dessous, jaune puis rouge
-dessus. C est la rupture qui se lit : chaque pixel rouge est une onde que l image ne peut pas porter.
-
-P3 : **mer.ppm** (768x624, emprise du sillage, age 12 s ou --verify compte quatre impacts) et
-**mer_perturbation.ppm**. Le fond sature a **0,988644 m** et **noie tout** ; la perturbation W+delta
-vaut **0,149809 m**, soit **15,15 %** du fond. Separees, les couches d ADR-001 se lisent : trois
-sillages en V avec leur source, quatre anneaux d impact.
-Ajoute `outils/apercu_ppm.py` : un PNG a cote du PPM, Python standard, sans reseau ni
-dependance. ADR-124 autorise « PPM et preview », et le depot n avait pas de quoi regarder ses
-propres images.
-`FrameData::background_only` rend B seul **par le meme chemin** que `references` (conversion
-monde vers local de S214, partagee par les trois couches), pour que la soustraction soit
-exacte et non approchee.
-
-P4/P5 : quatre cartes de maillage, deux par pose. **L etalon a mordu** : le premier jet annoncait
-567,9 et 1 228,8 m la ou S247 publie 2,589 et 8,243. La carte ne mentait pas, elle mesurait **autre
-chose** — S247 compte dans l emprise du sillage, la carte comptait jusqu a l horizon. Les deux
-quantites separees, l etalon passe **exactement** : 2,589 / 8,243 m et 7,54 % / 7,59 %.
-Fait neuf que S247 n avait pas releve : sur **toute l eau visible**, le pire ecart monte a
-**567,9 m** (reference) et **1 228,8 m** (rasante).
-Ce que les cartes montrent et que les nombres ne disaient pas : la degradation n est **pas
-repartie** — l ecran est vert partout sauf une **bande etroite a l horizon** ; et la carte monde
-montre les rangees de sommets **se separer** en traits distincts, avec du noir entre elles.
-Six empreintes reproduites a l identique sur deux executions (I-03). Les images ne sont **pas**
-versionnees : .gitignore exclut captures/, seules les empreintes comptent.
-
----
-
-Notes de S247, conservees pour reference immediate :
-
-Instrument d echantillonnage etalonne : pose de reference **7,54 %** contre 7,5 % publies par S234.
-Cout a incidence rasante : **GPU eau 0,4397 ms identique**, CPU 3,9021 contre 4,0563, allocations 0.
-Echantillonnage : **7,59 % contre 7,54 %** sous Nyquist, mais **pire ecart 8,243 m contre 2,589**.
-Pose haute : 0,01 %, pire 1,050 m. lambda_min = 2,094 m, Nyquist = 1,047 m.
-8,2 m au loin = les **deux pixels** de la grille projetee : densifier ne sert a rien, il faut
-**couper les modes par la distance** (A282) ; sous ~16 m non resolubles a la pose rasante.
-
----
-
-Notes de S246, conservees pour reference immediate :
-
-Prolongation bilineaire construite puis **annulee** : 0,648 / 0,642 / 0,652 contre 0,637 / 0,635 /
-0,674 pour l injection — dans le bruit, ecart changeant de signe.
-Geometrie des mailles coupees **ecartee** : sans coupe, meme taux.
-**Trouvaille** : l amortissement du lisseur portait 2/3 avec une provenance inventee ; c est
-l optimum a UNE dimension. En 2D le minimax donne **4/5** (facteur 3/5). Corrige.
-Gain : asymptote 0,798 -> 0,674 ; iterations forcees 99/252/220/167/134 -> 94/177/158/120/106 ;
-**pas reel a 32 768 mailles 1 006 -> 828 ms, divergence 8,512e-6 -> 7,265e-6**. A275 reste fermee.
-Reste : taux 0,63-0,67 pour 0,1-0,3 attendus ; dernier suspect = les **bords** et l operateur
-grossier re-discretise plutot que Galerkin (A281, declencheur = la 3D).
-Empreinte delta_filters **0xfb12b2092df4ee6d** ; suite 437 / 16.
-
----
-
-Notes de S245, conservees pour reference immediate :
-
-Multigrille construite : hierarchie (division par deux tant que pair et >= 8), operateur
-re-discretise, Jacobi amorti 2/3, cycle V(2,2) avec 8 lissages au plus grossier.
-**Branchee en repli** : le pas ordinaire d abord, rejoue avec la multigrille seulement s il a
-ete refuse (ADR-147).
-Iterations forcees : 99 / 252 / 220 / 167 / **134** contre 30 / 61 / 114 / 220 / 425.
-Pas : 1,94 / 18,07 / 65,40 / 203,5 / 729 ms contre 0,088 / 0,630 / 4,55 / 32,7 / 319.
-**A 32 768 mailles : divergence 1,339e-5 refusee -> 8,512e-6 recue. A275 fermee.**
-Contre-epreuve : hierarchie plus profonde et cycle allege = **pire** (282-300, plat mais haut),
-donc le suspect est le **transfert**.
-Empreinte delta_filters **0xfb12b2092df4ee6d** inchangee ; suite 437 / 15.
-Le cycle rend sa correction dans le tampon prec et se sert de tmp comme residu fin.
-
----
-
-Notes de S244, conservées pour référence immédiate :
-
-Decomposition : ecritures disjointes **67-73 %** du pas a toutes les tailles (dont `apply` 47 %),
-reductions 12-13 %, reste hors boucle. Iterations **30 / 61 / 114 / 220 / 425** a 128 / 512 / 2 048 /
-8 192 / 32 768 mailles. Pas mesure : 0,089 / 0,699 / 5,256 / ~37-42 / **286,2 ms**.
-Prix d'un appel parallele : **~125 us par fil**, presque independant du travail -> parallelisme
-**ferme** pour cette boucle (passes de 21,7 / 5,5 / 3,8 us).
-Echange des boucles d'`apply` : exact au bit, **aucun gain a aucune taille**, annule.
-Les pas aux grandes tailles sont bruites ; ce sont les **passes** qui font foi.
-
----
-
-Notes de S243, conservées pour référence immédiate :
-
-`parallel_fill_f32(out: &mut [f32], grain, fill: &(dyn Fn(usize, &mut [f32]) + Sync))`, defaut du
-trait = reference sequentielle ; `ScopedJobs` dans le harnais (thread::scope, portion contigue par
-fil, aucun tampon). Garantie **inconditionnelle** : ni grain, ni fils, ni ordre (ADR-146).
-x2,63 a huit fils sur la preparation du sillage ; **16 fils sont plus lents que 8**.
-Un fil coute ~67 us a creer **et alloue** : le chemin d'image reste a un fil (A278).
-Le grain encode le travail par element et seul l'appelant le connait.
-
----
-
-Notes de S242, conservées pour référence immédiate :
-
-Poste dominant : `ModalPressure::sample`, 0,87 ms par troncon actif sur 4 096 noeuds, **87 %** de la
-preparation ; cout fixe par noeud 76 ns. Six empreintes du banc `sillage_troncons` :
-`0x95a8239f6f9cc139`, `0x0af49e8f4c2aa21c`, `0xe14cee491a007edc`, `0x24b5f8e1f47300d0`,
-`0x393d0b9d526daf84`, `0xdf150d01e0afe270`. Temoin de bruit : une variante neutre mesure +2,6 a
-+7,7 % en fenetre de forcage. Impasse : `phase(-p)` n'est pas le conjugue **au bit** (A277).
-
----
-
-Notes de S241, conservées pour référence immédiate :
-
-`docs/COMPARABLES-EXTERNES.md`. Chez Epic : pression reglee par un nombre d'iterations et un facteur
-de relaxation, **aucun critere de convergence expose** ; 2D pour les jeux, 3D pour les cinematiques ;
-cuisson en volume epars pour le temps reel. Confrontation : a 2 048 mailles delta seul vaut 2,8 fois
-les 2 ms d'ADR-125 ; **le cout passe devant la precision** (A276 avant A275). L320.
-
----
-
-Notes de S240, conservées pour référence immédiate :
-
-134 allocations et 30 541 octets par image avant correction, mediane = p95 = maximum ; une seule a
-nous (12 032 o, le `Vec` de `lod::footprint`). Apres correction : update 0, image 133 / 18 509 o.
-L'allocation n'est pas la cause de la gigue d'A265. ADR-145, amendement date sous I-06.
-
----
-
-Notes de S239, conservées pour référence immédiate :
-
-P2 : protocole `docs/validation/TOLERANCE-PRESSION-S239.md`. `D = rho.theta.Lambda`.
-P3 : `Lambda` double a chaque raffinement, `theta` decroit plus lentement que N^-1/2.
-P4 : acceptation sur les lignes **franches** ; les lignes a fantome plafonnent a un ulp de leur
-propre magnitude. P5 : 348 contre 347 iterations a 8 192 mailles ; degrade a 32 768 ;
-empreinte delta_filters 0xfb12b2092df4ee6d ; suite 431/11.
-
----
-
-Notes de S238, conservées pour référence immédiate :
-
-Base : S237 — refus au pas 397, résidu 1,0492·10⁻⁶ figé 4 000/16 000/64 000 itérations,
-divergence 1,45·10⁻⁷, 16 384 mailles ; `Report` construit littéralement en un seul endroit.
-
-P2 : protocole `docs/validation/PRESSION-PLANCHER-S238.md` §1. Pourquoi l'amendement : un seuil
-sur `ω` exigeait une constante `n` d'opérations par ligne et un facteur de marge, deux nombres à
-fixer — alors que S199 a déclaré avant construction la tolérance physique de la projection, et que
-`div u = r/scale` (car `scale·k1 = −1`) en fait une norme maximale du résidu. Détection de stagnation
-par **non-décroissance stricte** du vrai résidu d'une relance à l'autre : aucun facteur. Le seuil
-10⁻⁶ reste premier pour garder les bits. Estimation d'avant mesure : un résidu au critère S199
-porté par le mode le plus lent donne `δu/u ≲ 10⁻⁵·(L/dx)/π² ≈ 1,3·10⁻⁴` à 128 colonnes.
-
-P3 : trace `PRESSURE_TRACE` (cfg(test)) + `backward_error()` (Oettli–Prager, modes linéaire et
-mobile). Famille S231 : converge jusqu'à **256×128** (rel. 9,97·10⁻⁷), ω 6,6·10⁻⁷–1,3·10⁻⁶, mais
-divergence S199 **1,58·10⁻⁵ à 256** (dépasse 10⁻⁵ alors que le résidu passe). Mobile 5 cm quart de
-période : 32/64 colonnes convergés, ω **8,2·10⁻⁵ / 4,7·10⁻⁴** ; 128 : **3 481 relances d'une itération,
-résidu alternant exactement 1,0610/1,0630·10⁻⁶, ω = 5,5–6,2·10⁻⁸ = 1 u**. Décisions : (1) ω ne peut
-pas être seuil (4,7·10⁻⁴ sur des pas convergés) ; (2) non-décroissance stricte écartée (S233 : hausse
-isolée précède convergence) ; (3) **cycle certifié par identité au bit de `p` à une relance
-antérieure** (empreinte 64 bits, deux relances), puis acceptation ssi divergence S199 ≤ 10⁻⁵.
-Inquiétude à tenir en P5 : à 256×128 famille S231, divergence 1,58·10⁻⁵ > 10⁻⁵ sur un pas **convergé** —
-ne change rien à la règle (critère S199 appliqué au cycle seulement) mais montre que le critère S199
-n'est pas tenu partout par le chemin existant ; à publier, pas à corriger ici.
-
-P4 : `Report.cycle`, `Report.backward_error`, `PROJECTION_DIVERGENCE_TOLERANCE = 1e-5` (S199 §5),
-empreinte FNV-1a 64 bits de `p` aux deux dernières relances ; arrêt sur retour au bit ; `degraded =
-résidu > tol && !(cycle && divergence ≤ 1e-5)`. Suite **428 réussis, 7 ignorés** (2 mesures S238
-ignorées), empreinte S232 inchangée **avant** les tests nouveaux. Tests : cycle réel (montage S237
-P4b) certifié en **9 relances / 51 itérations**, résidu 1,128·10⁻⁶, divergence 5,2·10⁻⁸, ω 2,6·10⁻⁸,
-reçu, déterministe au bit ; **Neumann incohérent** (couvercle fermé, face de mur ouverte à 0,5 m/s) :
-cycle à 280 itérations, résidu 1,0, divergence 1,0 → **dégradé**, et **ω = 9,5·10⁻¹⁷** (dérive du
-noyau qui gonfle `|A||p|`) — deuxième preuve qu'ω ne peut pas être seuil ; identité `div u =
-r/scale` : écart 0,18 pour un second membre de 2,48·10⁶, rapport **7,2·10⁻⁸** ≤ 64 ε.
-
-P5 : **deux constructions écartées par la mesure**. (a) Mémoire de deux relances : le pas 397 cycle
-sur **420 relances** (482 états, retour de 62) → Brent. (b) Brent seul : dans le banc, 7 386 itérations au
-pas 397, pas 404 refusé sous 16 000 ; ω = 0,9–1,3 u à chaque pas. **Règle finale** : `ω ≤ γ₈ = 8u/(1−8u)`
-(ligne à quatre faces γ₇ + représentation u) **ou** retour au bit (Brent), acceptation ssi divergence ≤ 1e-5.
-Réception (secteur) : 32/64/128 profil 0,850/0,550/**0,252 %**, b₂ 2,44/1,41/**0,71 %** ; au plancher 12/39/38
-pas, ω 2,2–7,8 u, résidu relatif jusqu'à **3,0e-6**, divergence ≤ 1,5e-7 ; pire pas 526 itérations ; 256 ms
-médian à 128. **Bits de la trajectoire S237 à 32/64 changés** (b₂ au 5e chiffre, volume 3,7e-9 → 1,5e-8) :
-promesse §1.2.1 non tenue, publiée ; tests et empreinte S232 `delta_filters` au bit. f64 : 521 contre 789
-itérations, p 3,0e-5, **u 5,5e-8** (estimation 1,3e-4). Incohérent : dégradé (42 it, ω 2,2e-8). Test du
-repli Brent avec commutateur de test : 9 relances/51 it reçu, incohérent 280 it dégradé. Suite 429/9.
-A273 à ouvrir : divergence 1,58e-5 sur un pas convergé à 256×128 (famille S231), **et 1,02e-5 à
-128×64 bosse dans `delta_precision`** (domaine S231, critère S199 appliqué là-bas à 32×16 seulement) ;
-`delta_precision` : dix cas convergés, aucun au plancher, résidus 4,96–8,70e-7 comme S231. L317 écrite.
+A282 touche l'image seulement (ADR-130). La grille locale S234 contient une réalisation
+sommée : on ne peut donc pas lui retirer un mode après coup. Prévoir des bandes modales
+séparées dès sa cuisson, à phases identiques ; la caméra pondère les amplitudes des bandes.
+Le fond (32 modes) se filtre directement. La recette et ses domaines ADR-132 restent intacts.

@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-16 09:00 +02:00
-Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web disponibles)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-16 17:23 +02:00
+Agent            : Codex, GPT-6 (fichiers, git, cargo et accès web disponibles ; GPU non vérifié)
+Session en cours : S249 — A282 : couper les modes par la distance
 Dernière session : S248 — la mer et son maillage mis en images de banc (ADR-124)
 Session suivante : S249 — A282 : couper les modes par la distance
 Maillons        : 2
