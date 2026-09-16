@@ -97,7 +97,9 @@ un changement d'ADR-147 se décide sur la mesure publiée, au lot suivant.
 - [x] **P1** — amorce, lectures et plan seuls.
 - [x] **P2** — A284 : itérations et temps par projection, 32×16 plat, test diagnostic.
 - [x] **P3** — A285 : test qui reproduit le défaut, correction de β, tests multigrille.
-- [ ] **P4** — re-mesures S245 (cinq tailles), 32 768 mailles, démarrage plat ; suite, empreinte.
+- [x] **P4** — re-mesures S245 (cinq tailles), 32 768 mailles, démarrage plat ; empreinte.
+- [ ] **P4b** — ADR-151 : affinage de divergence ADR-150 étendu au pas à couvercle fixe
+  refusé au plancher (A275 sinon rouverte) ; test à 32 768 mailles, suite complète.
 - [ ] **P5** — preuve, notes datées ADR-147/S245/S246/S251, angles morts, file.
 - [ ] **P6** — rituel §6 : trajectoire, journal et jeton ; S253 = surface mobile couplée.
 
@@ -125,3 +127,14 @@ P3 : `multigrid_conjugate_gradient_keeps_its_recursion_s252` échoue avant (prem
 résidu 0,616 à it 18, 514 it, 25 relances ; plancher ordinaire 1,0735e-5 à 80 it) et passe
 après (9 it, 4,03e-6, une relance). `multigrid_into_dir` reçoit ⟨r_n,z_n⟩ et forme β après
 le cycle. Tests δ release : 50 réussis, 11 ignorés.
+**Amendement P4 (avant P4b).** Re-mesures avant/après sur la même machine, secteur 99 %.
+`delta_precision` : champs et CASE identiques hors temps ; empreinte `delta_filters`
+0xfb12b2092df4ee6d inchangée. S245 « avec » (it / ms) avant → après : 128 : 94/2,12 → 6/0,157 ;
+512 : 177/13,8 → 7/0,913 ; 2 048 : 158/50,1 → 7/3,34 ; 8 192 : 120/159 → 8/12,5 ;
+32 768 : 106/595 D=7,27e-6 reçu → **8/88,9 D=1,585e-5 refusé**. « sans » (ordinaire puis repli)
+32 768 : 880 ms reçu → 340 ms refusé. Plat 32×16 : médiane 43,6 → 2,13 ms, max 48,2 → 4,57.
+L'acceptation A275 tenait aux relances du GC fautif (raffinement itératif accidentel), pas
+à « moins d'itérations » (S245). Test ignoré `largest_grid_after_multigrid_fix_s252` : un
+affinage ADR-150 (q multigrille, couvercle homogène) → 8 it, 46,1 ms, D=3,56e-8 reçu.
+À 32 768 le GC multigrille (8 it ≈ 46 ms) bat l'ordinaire (425 it ≈ 250 ms) : ordre
+d'ADR-147 à reprendre au lot suivant, sur mesure publiée — pas dans P4b.

@@ -1399,3 +1399,33 @@ fn the_cycle_reduction_rate_s246() {
     }
     }
 }
+
+/// S252 (A285) — **32 768 mailles après correction du β multigrille.** Le repli converge en huit
+/// itérations mais s'arrête au plancher avec `D = 1,585·10⁻⁵`, refusé ; l'ancien gradient conjugué
+/// fautif y était reçu. Diagnostic : rapport complet du pas, puis **un** affinage de divergence sur
+/// la vitesse publiée (même construction qu'ADR-150, couvercle homogène), sans rien publier de plus.
+#[test]
+#[ignore = "diagnostic S252, release"]
+fn largest_grid_after_multigrid_fix_s252() {
+    let (nx, nz) = (256usize, 128usize);
+    let dx = 8. / nx as f32;
+    let mut v = mobile_volume(nx, nz, dx, &vec![0.4; nx]);
+    let z0 = v.domain().z0();
+    let eta: Vec<f32> = (0..nx)
+        .map(|i| z0 + 0.02 * (std::f32::consts::TAU * (i as f32 + 0.5) / nx as f32).sin())
+        .collect();
+    v.set_surface(&eta).unwrap();
+    let dt = 1. / 60.;
+    let start = std::time::Instant::now();
+    let r = v.step(dt, 20_000, &Jobs).unwrap();
+    println!("S252_32768 pas={r:?} ms={:.1}", start.elapsed().as_secs_f64() * 1e3);
+    let base = v.p.clone();
+    v.us.copy_from_slice(&v.u);
+    v.ws.copy_from_slice(&v.w);
+    v.homogeneous_lid = true;
+    let start = std::time::Instant::now();
+    let q = v.project(-v.rho / dt, dt / v.rho, 20_000, true, &Jobs, &mut Control::unlimited());
+    v.homogeneous_lid = false;
+    println!("S252_32768 affinage={q:?} ms={:.1}", start.elapsed().as_secs_f64() * 1e3);
+    for (p, b) in v.p.iter_mut().zip(&base) { *p += b; }
+}
