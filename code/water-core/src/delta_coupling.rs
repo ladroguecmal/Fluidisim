@@ -57,6 +57,25 @@ fn extra(s: &BackgroundSample, axis: usize, v: [f32; 2], dv: [f32; 2], rho: f32)
 }
 
 impl Volume {
+    /// ADR-150 : une correction à l'échelle du défaut de vitesse, sans reconstruire
+    /// celle-ci depuis la pression totale arrondie. Le couvercle de q est homogène.
+    fn refine_coupled_pressure(&mut self, scale:f32, correction:f32, max_iters:u32,
+        jobs:&dyn JobSystem, ctl:&mut Control)->Result<super::Report,Error> {
+        budget::copy(&self.p,&mut self.pressure_base,ctl,Phase::Prepare)?;
+        budget::copy(&self.u,&mut self.us,ctl,Phase::Prepare)?;
+        budget::copy(&self.w,&mut self.ws,ctl,Phase::Prepare)?;
+        self.homogeneous_lid=true;
+        let result=self.project(scale,correction,max_iters,false,jobs,ctl);
+        self.homogeneous_lid=false; // y compris Err(Budget/Clock), avant toute propagation
+        let mut report=result?;
+        for (p,base) in self.p.iter_mut().zip(&self.pressure_base) {
+            ctl.poll(Phase::Correct)?;
+            *p+=base;
+        }
+        report.refinements=1;
+        Ok(report)
+    }
+
     fn coupled_predict(&mut self, bg: &BackgroundFaces<'_>, dt: f64, sponge: Sponge,
         ctl: &mut Control) -> Result<(), Error> {
         self.advect(dt as f32, ctl)?;
@@ -134,9 +153,16 @@ impl Volume {
             self.swap_state(); swapped = true;
             self.coupled_predict(bg,dt,sponge,&mut ctl)?;
             let mut report = self.project(scale,correction,max_iters,false,jobs,&mut ctl)?;
+            let mut iterations=report.iterations;
             if report.degraded && !self.levels.is_empty() {
                 report = self.project(scale,correction,max_iters,true,jobs,&mut ctl)?;
+                iterations=iterations.saturating_add(report.iterations);
             }
+            if report.degraded && report.floor {
+                report=self.refine_coupled_pressure(scale,correction,max_iters,jobs,&mut ctl)?;
+                iterations=iterations.saturating_add(report.iterations);
+            }
+            report.iterations=iterations;
             if report.degraded {return Err(Error::Convergence);}
             for v in self.u.iter().chain(&self.w).chain(&self.p).chain(&self.us).chain(&self.ws) {
                 ctl.poll(Phase::Validate)?;

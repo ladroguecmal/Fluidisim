@@ -222,3 +222,61 @@ fn diagnose_flat_projection_s251(){
         assert!(error(&v)<1e-4);
     }
 }
+
+#[test]
+fn flat_coupled_step_received_against_oracle_s251(){
+    for nx in [16,32] {
+        let (mut v,u,w)=real_case(nx);let mut bg=input(&v,&u,&w);bg.time=SimTime(1_000_000);
+        let sponge=Sponge{width_m:1.,rate_per_s:2.};
+        v.coupled_predict(&bg,0.001,sponge,&mut Control::unlimited()).unwrap();
+        let (p64,u64,w64)=flat_oracle(&v);
+        let r=v.step_perturbation(bg.time,1000,2000,1_000_000,&bg,sponge,&Jobs,&Clock).unwrap().report.unwrap();
+        assert_eq!(r.refinements,1);assert!(!r.degraded && r.divergence<=1e-5);
+        let norm=u64.iter().chain(&w64).fold(0f64,|m,x|m.max(x.abs()));
+        let error=v.u.iter().chain(&v.w).zip(u64.iter().chain(&w64))
+            .fold(0f64,|m,(a,b)|m.max((*a as f64-b).abs()))/norm;
+        let pn=p64.iter().fold(0f64,|m,x|m.max(x.abs()));
+        let pe=v.p.iter().zip(&p64).fold(0f64,|m,(a,b)|m.max((*a as f64-b).abs()))/pn;
+        println!("S251 received nx={nx} {r:?} error_velocity={error:e} error_pressure={pe:e}");
+        assert!(error<1e-4 && pe<1e-4);
+    }
+}
+
+#[test]
+fn refinement_restores_lid_and_state_on_expiration_s251(){
+    struct Counter(std::cell::Cell<u64>,u64);
+    impl MonotonicClock for Counter {fn now_ns(&self)->u64 {
+        let n=self.0.get();self.0.set(n+1);if n>=self.1 {1_000_000} else {0}
+    }}
+    let (mut reference,u,w)=real_case(16);let bg=input(&reference,&u,&w);
+    let sponge=Sponge{width_m:1.,rate_per_s:2.};
+    let count=Counter(std::cell::Cell::new(0),u64::MAX);
+    let r=reference.step_perturbation(bg.time,1000,2000,1000,&bg,sponge,&Jobs,&count).unwrap();
+    assert_eq!(r.report.unwrap().refinements,1);
+    let calls=count.0.get();
+    for cutoff in [calls/4,calls/2,calls*3/4,calls-10,calls-2] {
+        let (mut v,_,_)=real_case(16);
+        let r=v.step_perturbation(bg.time,1000,2000,1000,&bg,sponge,&Jobs,
+            &Counter(std::cell::Cell::new(0),cutoff)).unwrap();
+        assert_eq!(r.advanced_us,0);
+        assert!(!v.homogeneous_lid);
+        assert!(v.u.iter().chain(&v.w).chain(&v.p).all(|x|*x==0.));
+        assert!(v.eta.iter().all(|x|*x==4.));
+        v.step_perturbation(bg.time,1000,2000,1000,&bg,sponge,&Jobs,&Clock).unwrap();
+        assert_eq!(v.u,reference.u);assert_eq!(v.w,reference.w);assert_eq!(v.p,reference.p);
+    }
+}
+
+#[test]
+fn incremental_projection_does_not_reapply_imposed_pressure_s251(){
+    let mut v=volume();
+    for i in 0..16 {v.eta[i]+=0.01*(i as f32*0.2).cos();}
+    v.step(0.001,2000,&Jobs).unwrap();
+    let old=(v.u.clone(),v.w.clone(),v.eta.clone());
+    let r=v.refine_coupled_pressure(-1_025_000.,(0.001f64/1025.) as f32,2000,&Jobs,&mut Control::unlimited()).unwrap();
+    assert!(!r.degraded);
+    let change=v.u.iter().chain(&v.w).zip(old.0.iter().chain(&old.1))
+        .fold(0f32,|m,(a,b)|m.max((a-b).abs()));
+    assert!(change<1e-8,"couvercle appliqué deux fois : {change}");
+    assert_eq!(v.eta,old.2);assert!(!v.homogeneous_lid);
+}

@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-16 18:12 +02:00
+Battement        : 2026-09-16 18:16 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo, Python, accès web ; GPU DX12 vérifié)
 Session en cours : S251 — démarrage couplé plat
 Dernière session : S250 — raccordement volumique B/W→δ reçu sous surface imposée (ADR-149)

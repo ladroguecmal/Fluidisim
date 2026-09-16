@@ -162,6 +162,31 @@ fn perturbation_step_has_no_runtime_allocation_s250() {
 }
 
 #[test]
+fn velocity_refinement_has_no_runtime_allocation_s251() {
+    use water_core::{background::BackgroundSample,delta_projection::{BackgroundFaces,Sponge},SimTime};
+    struct Frozen;
+    impl MonotonicClock for Frozen {fn now_ns(&self)->u64 {0}}
+    let mut arena=Arena{stats:AllocStats::default(),sealed:false};
+    let domain=Domain{nx:16,nz:8,dx:0.5};
+    let mut v=Volume::configure(&mut HostServices{alloc:&mut arena,jobs:&Jobs,sink:&Jobs},
+        domain,1025.,9.81,&[0.;16]).unwrap();
+    let u=vec![BackgroundSample::default();v.velocity_u().len()];
+    let mut w=vec![BackgroundSample::default();v.velocity_w().len()];
+    // Gradient vertical presque entièrement annulé par pression ; l'éponge laisse un
+    // petit champ solénoïdal. Contre-épreuve du chemin d'affinage, sans fournisseur caché.
+    for k in 0..=8 {for i in 0..16 {w[k*16+i].du_dt[2]=0.014*(2.*(k as f32*0.5-4.)).exp();}}
+    let bg=BackgroundFaces{domain,time:SimTime(0),density:1025.,gravity:9.81,u:&u,w:&w};
+    arena.seal();
+    let (r,allocations)=measured(||v.step_perturbation(SimTime(0),1000,2000,1_000_000,
+        &bg,Sponge{width_m:1.,rate_per_s:2.},&Jobs,&Frozen));
+    let report=r.unwrap().report.unwrap();
+    assert_eq!(report.refinements,1,"{report:?}");
+    assert!(!report.degraded && report.divergence<=1e-5);
+    assert_eq!(allocations,0);
+    assert_eq!(arena.stats().refused_after_seal,0);
+}
+
+#[test]
 fn global_allocator_sees_counterexample_but_no_step_allocations() {
     let (_, count) = measured(|| {
         let mut v = Vec::with_capacity(16);
@@ -227,9 +252,9 @@ fn failed_calculation_restores_all_published_state_and_can_recover() {
 fn allocation_accounting_matches_requested_typed_storage() {
     let (v, arena) = build(32, 16, 0.25, 9.81);
     let (n, k) = (v.domain().nx, v.domain().nz);
-    // Quatre tableaux f32 par famille de faces, fond+surface, fraction ; sept f32 par cellule
-    // depuis S237 (préconditionneur du mode mobile).
-    let bytes = (4 * ((n + 1) * k + n * (k + 1)) + 5 * n + n * k) * 4 + 7 * n * k * 4;
+    // Quatre tableaux f32 par famille de faces, fond+surface, fraction ; huit f32 par cellule
+    // depuis S251 (pression principale pendant l'affinage de vitesse).
+    let bytes = (4 * ((n + 1) * k + n * (k + 1)) + 5 * n + n * k) * 4 + 8 * n * k * 4;
     // S245 : la hiérarchie multigrille. Le compte est **refait ici**, indépendamment du cœur : un
     // essai de comptabilité qui appellerait la même fonction que le code ne vérifierait rien.
     // Division par deux tant que les deux dimensions sont paires et au moins huit ; par niveau,

@@ -156,6 +156,9 @@ pub struct SurfaceReport {
 /// Ce qu'un pas rend à l'appelant, sans qu'il ait à deviner.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Report {
+    /// S251 : affinages de divergence sur la vitesse (0 ou 1, pas couplé seulement).
+    /// residual/floor/backward_error décrivent alors le dernier système incrémental.
+    pub refinements: u32,
     /// Itérations de pression réellement faites.
     pub iterations: u32,
     /// `true` si le solveur n'a pas convergé, notamment au plafond d'itérations.
@@ -235,6 +238,9 @@ pub struct Volume {
     saved_u: Vec<f32>,
     saved_w: Vec<f32>,
     saved_p: Vec<f32>,
+    /// S251 : pression principale conservée pendant l'affinage de vitesse, ADR-150.
+    pressure_base: Vec<f32>,
+    homogeneous_lid: bool,
     saved_eta: Vec<f32>,
     eta_roundoff: Vec<f32>,
     saved_eta_roundoff: Vec<f32>,
@@ -301,7 +307,7 @@ impl Volume {
             .checked_add(multigrid::hierarchy_floats(nx, nz))
             .ok_or(Error::Domain)?;
         let bytes = floats.checked_mul(core::mem::size_of::<f32>())
-            .and_then(|n| c.checked_mul(7 * core::mem::size_of::<f32>()).and_then(|p| n.checked_add(p)))
+            .and_then(|n| c.checked_mul(8 * core::mem::size_of::<f32>()).and_then(|p| n.checked_add(p)))
             .ok_or(Error::Domain)?;
         if !(domain.z0().is_finite() && (nx as f32 * domain.dx).is_finite()) {
             return Err(Error::Domain);
@@ -334,6 +340,8 @@ impl Volume {
             saved_u: vec![0.; nu],
             saved_w: vec![0.; nw],
             saved_p: vec![0.; c],
+            pressure_base: vec![0.; c],
+            homogeneous_lid: false,
             saved_eta: vec![domain.z0(); nx],
             eta_roundoff: vec![0.; nx],
             saved_eta_roundoff: vec![0.; nx],
@@ -681,6 +689,7 @@ impl Volume {
     /// Pression dynamique imposée au couvercle de la colonne `i`.
     #[inline]
     fn lid(&self, i: usize) -> f32 {
+        if self.homogeneous_lid { return 0.; }
         self.rho * self.g_eff * ((self.eta[i] - self.domain.z0()) - self.eta_roundoff[i])
     }
 
@@ -1178,6 +1187,7 @@ impl Volume {
         // touchent ni `p`, ni `rhs`, ni `res`.
         let backward_error = self.backward_error(ctl)? as f64;
         Ok(Report {
+            refinements: 0,
             iterations: it,
             degraded: b2 > 0. && !accepted,
             residual: residual as f64,
