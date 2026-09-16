@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-16 17:40 +02:00
-Agent            : Codex, GPT-6 (fichiers, git, cargo et accès web disponibles ; GPU non vérifié)
-Session en cours : S249 — A282 : couper les modes par la distance
-Dernière session : S248 — la mer et son maillage mis en images de banc (ADR-124)
-Session suivante : S249 — A282 : couper les modes par la distance
-Maillons        : 2
+JETON            : libre
+Battement        : 2026-09-16 17:44 +02:00
+Agent            : Codex, GPT-6 (fichiers, git, cargo, Python, accès web ; GPU DX12 vérifié)
+Session en cours : aucune
+Dernière session : S249 — coupure lointaine B/sillage reçue dans l’hôte (ADR-148)
+Session suivante : S250 — J2 : raccorder B/W au δ 2D, source d’écart et éponge
+Maillons        : 0
 
 ```
 
@@ -75,7 +75,8 @@ Ne pas relire le journal, les leçons ou tous les ADR intégralement à chaque r
 
 ## 4. Où en est le projet
 
-État à S248 : B/W et un afficheur existent ; scène multi-sources dessinée, visibilité au bit, composée
+État à S249 : B/W et un afficheur existent ; **filtre lointain B/sillage intégré** (ADR-148,
+[réception et limites](docs/validation/COUPURE-S249.md), impacts non filtrés) ; scène multi-sources dessinée, visibilité au bit, composée
 et admise par le cœur (ADR-142) ; **la boucle d'image de l'hôte n'alloue rien** pour le code du projet,
 la pile verrouillée 133 fois par image, constantes (ADR-145). Le poste dominant du budget de l'hôte est
 `ModalPressure::sample` dans la préparation du sillage — **87 %** de ses 3,1 ms, contre 0,44 ms de
@@ -159,5 +160,4 @@ L'état des branches, copies et remotes se **constate** avec Git. Aucun distant 
 S227 : la création ou publication distante reste une action d'infrastructure à autoriser.
 Le jeton versionné ne verrouille pas plusieurs copies atomiquement ; garder les vérifications
 Git de l'amorce. A215 reste ouverte. Les mémoires privées ne constituent jamais une passation.
-
 

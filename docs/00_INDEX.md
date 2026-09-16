@@ -46,6 +46,7 @@
 - [Prolongation de la multigrille : cinq suspects écartés, un amortissement corrigé](validation/PROLONGATION-S246.md).
 - [Angles rasants : le coût tient, l'échantillonnage du champ lointain non](validation/RASANT-S247.md).
 - [Topologie de la mer et maillage du LOD, en images de banc](validation/IMAGES-S248.md).
+- [Coupure spectrale de l'image B/sillage : réception, coût et limites](validation/COUPURE-S249.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).
@@ -209,6 +210,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-145](adr/ADR-145-i-06-pour-l-hote-graphique.md) | I-06 pour l'hôte graphique : tenue par notre code, comptée et publiée pour la pile |
 | [ADR-146](adr/ADR-146-l-ecriture-disjointe-est-inconditionnellement-deterministe.md) | L'écriture disjointe est inconditionnellement déterministe, et c'est elle qu'on parallélise |
 | [ADR-147](adr/ADR-147-la-multigrille-est-un-repli-de-precision.md) | La multigrille est un repli de précision, pas le solveur ordinaire |
+| [ADR-148](adr/ADR-148-filtrage-spectral-image.md) | Filtrer les amplitudes de l'image selon le pas projeté |
 
 ## Travail et historique
 

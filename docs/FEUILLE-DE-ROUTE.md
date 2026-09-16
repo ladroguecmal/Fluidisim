@@ -67,8 +67,8 @@ l'image. Voir [ADMISSION-UNION-S236](validation/ADMISSION-UNION-S236.md).
 forçage de trois sillages ; somme CPU+GPU 4,5 ms alors, 2,1–2,6 ms hors forçage (ADR-125 ne fixe pas
 la répartition). (2) **Requête** : ≈0,2 ms par point (pression 4 096 modes sur CPU) et plancher
 jusqu'à 12 ms quand la pression locale intervient — hors du chemin d'image, borne de ce qu'un
-consommateur gameplay peut demander. Restent aussi angles rasants, interaction représentative,
-allocations de la pile graphique et seconde cible.
+consommateur gameplay peut demander. Restent l'interaction représentative et la seconde cible ;
+angles rasants mesurés S247, allocations reçues S240 et filtrage B/sillage reçu S249 ci-dessous.
 
 A261 reste vraie hors des cellules critiques ; A258 porte désormais sur une borne employée à
 l'admission ; A263 suit la constante Bessel. Les déclencheurs de reprise vivent uniquement dans la
@@ -82,14 +82,15 @@ objectif éprouvé sur la combinaison** des techniques ci-dessous, sur des scèn
 sans présumer qu'elle réussira ou échouera. Aucune demande de réduction d'ambition ne se fonde sur
 l'échec d'optimisations prises isolément. La liste est ouverte.
 
-| technique | état au 2026-09-14 | publie avec elle |
+| technique | état (mises à jour datées) | publie avec elle |
 |---|---|---|
 | phases repliées de B au GPU | **présente** (S211) | écart GPU/cœur |
 | table de Bessel d'un impact (ADR-129) | **présente** (S208, S211) | écart au champ direct, pas λ/16 |
 | **temps** — sillage : tronçons achevés repliés, modes préconstruits | **présente** (S213) : 1,26 ms forçage / 0,36 ms après à 4 096 nœuds, un fil ; 6e-8 du chemin préparé | écart au chemin préparé, pic aux bornes (2,12 ms), retour arrière (3,10 ms) |
 | **espace** — grille locale et transformée | **grille locale présente** (S234, évaluation directe des modes aux nœuds) ; **transformée absente** | quadrature d'image, coutures et période |
-| **LOD spatial** — densité, emprise selon distance et écran | **présent pour le sillage** (S234) : densité d'évaluation selon sa borne bicubique, indépendante du maillage ; 0,426 ms contre 4,24. **LOD du maillage absent** (≤35 % mesurés, rien en vue haute : B dicte la densité) | borne et erreur aux intérieurs, coutures entre mailles (≤6 µm), rapport au témoin ; Nyquist par distance non construit (≈2 % du travail) |
+| **LOD spatial** — densité, emprise selon distance et écran | **présent pour le sillage** (S234) : densité d'évaluation selon sa borne bicubique, indépendante du maillage ; 0,426 ms contre 4,24. **LOD du maillage absent** (≤35 % mesurés, rien en vue haute : B dicte la densité) | borne et erreur aux intérieurs, coutures entre mailles (≤6 µm), rapport au témoin ; coupure des amplitudes selon Nyquist ajoutée S249, ligne distincte ci-dessous |
 | **LOD spectral** — nœuds par source selon distance et visibilité | absente | écart à la recette pleine, durée et rayon honnêtes (ADR-107, **ADR-132** : les deux lois se recalculent depuis la recette réduite) |
+| **Filtrage spectral de l'image** — amplitudes selon le pas projeté | **B et sillage présents S249** (ADR-148), huit bandes du même champ, aucune décimation de quadrature. Impacts absents. GPU 1,22–1,33 ms en régime, contre 0,46–0,49 ; premier passage à 2,26 ms | erreur numérique ≤0,340 mm, écart volontaire au champ complet séparé ; rayon/durée ADR-132 inchangés ; normales sans dérivée du filtre, perception non reçue ; [preuve](validation/COUPURE-S249.md) |
 | **LOD temporel** — cadence de mise à jour selon distance, vitesse, régime | absente | erreur de phase, I-09 |
 | **visibilité** — frustum, occlusion, hors écran | **présente pour sillage et impacts** (S235) : emprise de la grille sur l'eau, marge par arête ; hors champ 0,448 → 0,062 ms GPU, 1,59 → 0,67 ms CPU ; +0,05 ms CPU dans le champ. Occlusion et composantes de B absentes | **retour au bit** vérifié (31 images, fin de tronçon incluse) |
 | **mutualisation** — nœuds partagés par sources de même recette, passe/grille communes B/W | **présente pour les sillages d'un même journal** (cœur, S222 ; hôte S235 : trois sillages, 4 096 modes, +0,01–0,03 ms GPU) ; table de Bessel partagée par les impacts de même entrée (S235) ; passe commune B/W absente | superposition dans son domaine (ADR-123) ; budget de pente : **admis sur l'union sous plancher certifié** (S236, ADR-142) — refusé par majorants en S235 |

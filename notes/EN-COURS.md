@@ -58,8 +58,8 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S249 — en cours
-Agent : Codex, GPT-6 (fichiers, git, cargo, accès web ; GPU à vérifier)
+Session : S249 — terminée
+Agent : Codex, GPT-6 (fichiers, git, cargo, Python, accès web ; GPU DX12 vérifié)
 Entrée : « Reprends le projet », puis « Continue ». Master propre à 12bd90f, une seule
 copie ; branche B archivée conservée. Jeton pris le 2026-09-16 à 17:23 +02:00.
 
@@ -81,7 +81,7 @@ Arrêt : chemin activé dans l'hôte, critères éprouvés, limites et coûts tr
 - [x] **P2** — décision et protocole : empreinte de projection, poids et bandes du sillage.
 - [x] **P3** — filtre CPU/GPU et intégration au rendu, tests du contrat.
 - [x] **P4** — réception GPU, comparaison au cœur et au témoin, coût et allocations.
-- [>] **P5** — rituel §6 : preuves, file active, trajectoire, journal et jeton.
+- [x] **P5** — rituel §6 : preuves, file active, trajectoire, journal et jeton.
 
 ### Notes de reprise
 

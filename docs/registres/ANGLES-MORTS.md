@@ -3522,3 +3522,13 @@ mailles ; résidu relatif des pas reçus jusqu'à 3·10⁻⁶. Voir L317,
   dise. **À faire** : mesurer la loi divergence/taille à résidu relatif fixé, puis soit un arrêt qui tient
   la tolérance physique (en gardant le plancher d'ADR-143), soit une requalification datée de la tolérance
   avec provenance — jamais un seuil déplacé pour faire passer les cas. Voir PRESSION-PLANCHER-S238 §4.4.
+
+
+**A282 — suivi S249, 2026-09-16 (sévérité 2, partielle).** La coupure lointaine est
+construite et reçue pour B et le sillage, consommée par défaut par le rendu (ADR-148).
+Les impacts tabulés restent non filtrés. Les normales de réflexion omettent la dérivée
+spatiale du filtre de caméra, et les huit bandes atténuent parfois des modes résolubles.
+Le mouvement et les reflets ne sont pas reçus perceptivement ; aucune absence globale
+d’alias n’est revendiquée. Déclencheur : prochaine extension de J1 ou critère de réflexion.
+Le coût GPU augmente de 0,76–0,85 ms en régime ; premier passage à 2,26 ms. Optimisation
+de cuisson si ce poste devient prioritaire. [Preuve](../validation/COUPURE-S249.md).

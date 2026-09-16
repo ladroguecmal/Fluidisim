@@ -12896,3 +12896,49 @@ enrichie de sa spécification visible), feuille de route, index, `outils/apercu_
 Invariants relus : **I-03** (six empreintes reproduites à l'identique sur deux exécutions) et le
 §11.3 de SPEC-005 que `.gitignore` applique — rien de dérivé, rien de binaire dans le dépôt.
 Maillons 2.
+
+
+## S249 — 2026-09-16 — Couper les modes lointains dans l’image consommée
+
+**Entrée.** « Reprends le projet », puis « Continue ». Master propre à `12bd90f`, une
+seule copie ; lignée B archivée conservée. Codex GPT-6. Deux maillons d’instrumentation :
+A282 choisie avant A281 (approfondissement incertain) et les extensions V encore absentes,
+car son défaut, son consommateur et sa mesure étaient déjà identifiés. Plan `70d300e`,
+décision `64cddf7`, construction `1e694a2`, réception `c589f54`.
+
+**Capacité reçue.** L’afficheur retire désormais progressivement les modes de B et du
+sillage que le maillage lointain ne résout pas. Chemin consommateur : rendu GPU par défaut,
+bandes séparées à la cuisson, amplitudes pondérées selon les voisins projetés (ADR-148).
+La recette autoritaire, ses phases et son domaine restent intacts. `--no-spectral` conserve
+le témoin ; `--spectral-verify` sépare erreur numérique et quantité volontairement retirée.
+
+**Preuves.** 36 cas, trois poses, deux formats, trois âges, direct/grille : hauteur
+**≤0,340 mm pour 3 mm**, retour de caméra au bit. Huit modes isolés GPU : conservation
+proche et zéro au-delà de Nyquist. Réception historique sans filtre passée (46 contrôles,
+six intérieurs/coutures). Cœur/harnais **437 réussis / 16 ignorés**, hôte **16 / 1**.
+Preuves, commandes et limites : [COUPURE-S249](../docs/validation/COUPURE-S249.md).
+
+**Prix réel.** En régime : GPU **1,22–1,33 ms** contre **0,46–0,49**, environ 0,8 ms
+pour la qualité ; mémoire GPU +2 Mio. Premier passage jusqu’à **2,26 ms**, non effacé,
+cause non attribuée. CPU toujours ≈4 ms : le budget global n’est pas reçu. Zéro allocation
+dans `update`, pile constante **133 / 18 509 octets**. Premiers coûts relevés pendant la
+suite du cœur écartés ; comparaison finale hors écran, âges identiques, secteur avant/après.
+
+**Limites et non-fait.** Impacts non filtrés ; pentes cosmétiques sans dérivée spatiale
+du filtre ; pas de réception perceptive en mouvement ni seconde cible. La transition
+commence avant Nyquist et les diagonales sont prises en compte : elle dépasse la bande
+rouge de S248. Aucun certificat global d’absence d’alias. A282 reste partielle, déclencheur
+de ses reliquats : prochaine extension J1. Le filtrage ne réduit pas les nœuds de quadrature.
+
+**Suite.** Maillons **0** : capacité intégrée et reçue, pas seulement un banc. **S250 :
+raccorder B/W au candidat δ 2D, source d’écart et éponge**, prochain consommateur absent
+des fournisseurs différentiels déjà construits (A50). Priorité à cette articulation plutôt
+qu’à une quatrième session d’image ou à la seule vitesse des bandes ; A276/A281 restent
+préalables mesurés de la 3D, A244 reste requis pour intégrer les domaines sous budget.
+V, B2, bathymétrie et multiplateforme gardent leurs déclencheurs ; aucun arbitrage externe.
+
+**Rituel.** ADR-148, preuve et index ; file active relue entièrement, états A280/A275 périmés
+corrigés sur les lignes touchées, A282 actualisée avec sévérité 2 et limites. Trajectoire,
+README, journal, plan et jeton synchronisés. I-03, I-06, I-08, I-09 et I-13 relus : cœur
+inchangé, allocations mesurées, amplitudes du même champ, rendu sans autorité. Aucune
+copie isolée ouverte ; aucun distant modifié.
