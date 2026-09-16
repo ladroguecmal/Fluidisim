@@ -58,93 +58,71 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S244 — terminée
+Session : S245 — en cours
 Agent : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web)
-Entrée : « continue », master propre à `fa99085`, une seule copie, jeton libre, secteur, Maillons 0.
+Entrée : « Continue », master propre à `feb1dd9`, une seule copie, jeton libre, secteur, Maillons 1.
 
-**Objectif.** **A276** : commencer à réduire le coût de δ, qui dépasse le profil de deux à trois
-ordres de grandeur. Mesuré, nos propres bancs : **5,5125 ms par pas à 2 048 mailles** (S230, un pas
-= une image) contre **2 ms pour toute l'eau** (ADR-125) — δ seul vaut 2,8 fois le budget entier.
-**Ce que la lecture fixe.** Aucune technique de coût n'a jamais été appliquée à δ : présentes —
-Jacobi diagonal, f32 ; absentes — GPU, parallélisme, multigrille, factorisation incomplète,
-itérations fixes, cuisson (ADR-131). Une itération du gradient conjugué fait environ **trois passes
-d'écriture** en O(N) — `apply`, l'axpy `p`/`res`, la mise à jour de `dir` — et **deux réductions**,
-qui passent déjà par `parallel_reduce_ordered_f64` mais sur un hôte séquentiel. Le compte
-d'itérations croît en `O(√N)` (28/58/112/219/417 mesurés en S239).
-**Ce que S243 met à disposition, et ce qu'il ne met pas.** `parallel_fill_f32` existe, sa garantie de
-bits est **inconditionnelle** (ADR-146), et les bancs de δ sont **hors ligne** : ni la latence ni
-l'allocation n'y mordent, contrairement au chemin d'image. Le budget coopératif (I-05) est un état
-partagé qu'on ne parallélise pas — mais `poll` et `budget::copy` **traitent déjà le cas sans budget
-à part**, et c'est la voie déjà tracée.
-**Thèse — et elle est réfutable.** Les passes d'écriture disjointe de δ dominent son pas, et les
-paralléliser sur le chemin sans budget le réduit **sans changer un bit** (les réductions, seules
-sensibles à l'ordre, restent séquentielles). **Si la mesure dit que le temps est ailleurs — dans les
-réductions, dans le nombre d'itérations —, alors la technique à appliquer n'est pas celle-là**, et la
-session le dira au lieu de forcer la thèse. S242 a déjà vécu ce cas.
-**Critères, déclarés avant construction.** (1) **Décomposition mesurée avant toute modification** :
-coût par pass (`apply`, axpy, `dir`, réductions) et compte d'itérations ; leur produit doit rendre le
-pas mesuré, sinon la décomposition est fausse et on le dit. (2) **Au bit** : empreinte `delta_filters`
-`0xfb12b2092df4ee6d`, `delta_precision` et la suite complète inchangés — à **tout** nombre de fils.
-(3) Coût publié contre le nombre de fils, sur les grilles de S230. (4) **Le chemin coopératif et le
-chemin à un fil ne doivent pas être ralentis** ; aucune allocation ajoutée. (5) Coût (ADR-131) :
-techniques présentes, absentes, domaine — et le facteur qui reste à trouver, écrit en clair.
-**Arrêt.** La décomposition publiée et la technique qu'elle désigne appliquée et reçue ; **ou** la
-décomposition publiée seule si elle désigne un lot qui dépasse la session — nommé, avec son
-déclencheur.
+**Objectif.** Attaquer le **nombre d'itérations** de la pression de δ par une **multigrille
+géométrique employée comme préconditionneur** du gradient conjugué, sur le chemin à **couvercle
+fixe**. S244 l'a désignée : le coût d'une itération est stable en structure à toutes les tailles,
+c'est leur nombre qui double à chaque raffinement — 30, 61, 114, 220, 425 —, et la multigrille est le
+**seul levier dont le gain croît avec la taille**.
+**Ce que la lecture corrige.** `jacobi = self.mobile` : le chemin à couvercle fixe — celui que S230
+et S244 mesurent — n'a **aucun** préconditionneur ; `dir = res`. L'en-tête ADR-131 de
+COUT-DELTA-S244 annonce « Jacobi diagonal » : c'est vrai du mode mobile, faux du mode mesuré. **Note
+corrective datée à porter en P2.** Et Jacobi n'y servirait à rien : sur une grille uniforme la
+diagonale est constante, donc un préconditionnement scalaire, sans effet sur le gradient conjugué.
+**Ce qui rend ce lot sûr.** Un préconditionneur **ne peut pas rendre la réponse fausse** : il change
+les directions de recherche, jamais le test d'acceptation. Le résidu premier (10⁻⁶) et la tolérance
+physique (ADR-144) restent les mêmes portes. Le pire cas de ce lot est donc « ça ne gagne rien, et
+c'est mesuré », jamais « ça donne un résultat faux ».
+**Ce que la méthode exige en retour.** Le gradient conjugué **n'est valide qu'avec un
+préconditionneur symétrique défini positif**. La recette retenue l'assure par construction : lissage
+de **Jacobi amorti** (diagonal, donc symétrique), **restriction R = Pᵀ** avec prolongation bilinéaire,
+et **autant de lissages avant qu'après**. La symétrie ne sera pas supposée : elle sera **testée**
+numériquement, `⟨M⁻¹x, y⟩ = ⟨x, M⁻¹y⟩`.
+**Décisions déclarées avant construction.** (1) Hiérarchie par division par deux, arrêtée dès qu'une
+dimension est impaire ou tombe sous quatre. (2) Opérateur grossier **re-discrétisé** avec `dx·2^l` et
+ouvertures moyennées — approximation assumée pour les mailles coupées, licite puisqu'il ne s'agit que
+d'un préconditionneur. (3) Lissage **Jacobi amorti à ω = 2/3**, valeur qui **se dérive** (elle
+minimise le facteur de lissage des modes hautes fréquences du stencil à cinq points), non un réglage.
+(4) **Chemin mobile inchangé** : il garde son Jacobi diagonal. (5) Tous les tampons alloués dans
+`configure`, avant `seal` (I-06).
+**Critères de réception, déclarés avant construction.** (1) Symétrie et positivité du
+préconditionneur, testées. (2) **Compte d'itérations** aux cinq tailles de S244, et la **loi de
+croissance** qui en sort — c'est la revendication, pas un point. (3) **Coût par pas** mesuré : une
+itération coûte plus cher, c'est le produit qui décide. (4) Acceptation d'ADR-144 inchangée :
+`delta_precision` dix cas non dégradés, `delta_filters` ordres ≥ 1,8, réception mobile S237/S238
+intacte. (5) **Les bits du chemin fixe changeront** : nouvelle empreinte `delta_filters` publiée avec
+son explication, ancienne conservée. (6) Aucune allocation après `seal`.
+**Arrêt.** Multigrille construite, symétrie prouvée, itérations et coût mesurés, acceptation
+conservée. **Ou**, si le lot dépasse la session, la hiérarchie et le cycle validés seuls, le
+branchement déclaré en file avec son déclencheur — dit dans le plan, pas laissé à deviner.
 
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [x] **P2** — protocole écrit ; instrument de décomposition des passes de `project`.
-- [x] **P3** — mesure avant toute modification : coût par pass, itérations, et vérification que
-  leur produit rend le pas mesuré.
-- [x] **P4** — construction : ce que la mesure désigne ; identité au bit à tout nombre de fils.
-  **Amendement P4, par la mesure** : la mesure désigne le parallélisme *et le referme aussitôt*. Un
-  appel parallèle coûte **≈ 125 µs par fil** — mesuré à vide, indépendamment du travail — quand les
-  passes de δ valent 21,7 / 5,5 / 3,8 µs. La primitive de S243 ne peut pas servir cette boucle. Ce
-  qui reste à portée dans la session est le coût **propre** d'`apply`, 47 % du pas.
-- [x] **P5** — réception : `delta_filters`, `delta_precision`, suite, coût contre les fils.
-- [x] **P6** — rituel §6, file, feuille de route, jeton.
+- [ ] **P2** — protocole écrit ; note corrective datée sur S244 ; relevé de référence des itérations.
+- [ ] **P3** — hiérarchie allouée dans `configure` et opérateurs de transfert, avec leurs essais.
+- [ ] **P4** — cycle en V et lissage ; **symétrie testée** avant tout branchement.
+- [ ] **P5** — branchement comme préconditionneur ; itérations et coût aux cinq tailles.
+- [ ] **P6** — réception ADR-144, empreintes, suite ; rituel §6, ADR, file, jeton.
 
 ### Notes de reprise
 
-P2 : protocole `docs/validation/COUT-DELTA-S244.md` + instrument
-`delta_step_decomposition_s244` (essai ignore, a lancer **en release**). Il mesure chaque pass
-isolement puis **verifie que leur somme rend le pas** — c'est le controle qui empeche d'attribuer
-un cout a la pass qu'on avait envie d'accuser.
+(S245 — vide à l'ouverture.)
 
-P3 : **la these tient.** A 2 048 mailles, pas mesure 5,2560 ms, 114 iterations :
-`apply` 0,02172 ms/appel -> **2,48 ms, 47 % du pas** ; axpy 0,00550 -> 0,63 ; dir 0,00375 -> 0,43.
-**Ecritures disjointes = 3,53 ms, 67 %.** Reductions 0,64 ms, **12 %**. Reste hors boucle 1,09, 21 %.
-Controle de somme : predit/mesure = 0,815 / 0,795 / 0,793 aux trois tailles — **stable**, donc la
-decomposition est juste et ce qu'elle n'explique pas, elle le borne (relances, advection,
-diagnostics, certificats).
-Ce n'est donc pas le compte d'iterations qu'il faut attaquer en premier (ce sera la multigrille)
-mais le cout de chaque iteration, qui se divise **sans changer un bit**.
+---
 
-P4 : **la route du parallelisme est refermee par la mesure.** Prix d'un appel a vide :
-2 048 elements -> 1,60 us a un fil, **314,7 a deux**, 518,8 a quatre, 947,9 a huit ; et le cout ne
-depend presque pas du travail (a 262 144 elements : 190,4 / 392,6 / 576,4 / 987,9). Donc
-**~125 us par fil**. Les passes de delta valent 21,7 / 5,5 / 3,8 us : un appel a deux fils coute
-quatorze fois la pass qu'il decouperait.
-Le modele rend compte des deux lots : sillage 3 270/8 + 950 = 1 360 us contre 1 243 mesures.
-**Correction datee de S243** : le « 67 us par fil » y etait **infere** d'une difference entre deux
-fenetres ; la mesure directe donne **125 us**. C'est elle qui fait foi. La conclusion de S243 en
-sort renforcee, pas affaiblie.
+Notes de S244, conservées pour référence immédiate :
 
-P5 : **rien n'a ete gagne, et c'est le resultat.** Seule piste restee a portee : l'ordre de parcours
-d'`apply` (`i` a l'exterieur alors que `c = k.nx + i`). Echange exact au bit, mesure a trois tailles :
-2 048 -> 0,02172 contre 0,02138 ; 8 192 -> 0,08947 contre 0,08924 ; 32 768 -> 0,34149 contre 0,34170.
-**Rien, a aucune taille**, sous le temoin de bruit de L321 -> **echange annule**. Explication : le
-travail par maille est branchu (quatre faces, ouverture et voisin a tester), ce sont les branches qui
-tiennent le processeur, pas la distance entre deux lectures ; c'est aussi pourquoi la vectorisation
-automatique n'opere pas.
-**Decomposition etendue** : ecritures 67-73 % du pas a toutes les tailles, reductions 12-13 %,
-iterations 30/61/114/220/425 (doublement par raffinement, O(racine N)).
-**Cout a 32 768 mailles, que S239 et la file laissaient non mesure : 286,2 ms par pas** — soit
-**143 fois** les 2 ms d'ADR-125 pour une image. Les pas aux grandes tailles sont bruites (36,6 et
-41,7 ms au meme point a 8 192) : ce sont les **passes** qui font foi, pas le pas.
-Suite delta : 24 reussis, 8 ignores.
+Decomposition : ecritures disjointes **67-73 %** du pas a toutes les tailles (dont `apply` 47 %),
+reductions 12-13 %, reste hors boucle. Iterations **30 / 61 / 114 / 220 / 425** a 128 / 512 / 2 048 /
+8 192 / 32 768 mailles. Pas mesure : 0,089 / 0,699 / 5,256 / ~37-42 / **286,2 ms**.
+Prix d'un appel parallele : **~125 us par fil**, presque independant du travail -> parallelisme
+**ferme** pour cette boucle (passes de 21,7 / 5,5 / 3,8 us).
+Echange des boucles d'`apply` : exact au bit, **aucun gain a aucune taille**, annule.
+Les pas aux grandes tailles sont bruites ; ce sont les **passes** qui font foi.
 
 ---
 

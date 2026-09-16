@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-16 00:03 +02:00
+JETON            : occupé
+Battement        : 2026-09-16 07:27 +02:00
 Agent            : Claude Code, Opus 5 (fichiers, git, cargo, Python/numpy/sympy, GPU local et accès web disponibles)
-Session en cours : aucune
+Session en cours : S245 — la multigrille pour la pression de δ
 Dernière session : S244 — la carte du coût de δ ; le parallélisme fermé pour sa boucle
-Session suivante : S245 — la multigrille pour la pression de δ, préalable mesuré de la 3D
+Session suivante : à déterminer en fin de S245
 Maillons        : 1
 
 ```
