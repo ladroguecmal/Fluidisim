@@ -94,6 +94,11 @@ fn integral(lo: f32, hi: f32, lg: f32, p: u32, n: usize) -> f32 {
 #[derive(Clone, Copy, Debug)]
 enum Directions { Fan, Spread { s_max: f32, edge: f32 } }
 
+/// Loi des poids de cellule. `Shape` : forme JONSWAP intégrée (§1 bis). `Equilibrium` : S260,
+/// ADR-157, `q(b)·b⁴·x⁻⁴` continué depuis le bord de bande, `level = q(b)·b⁴`.
+#[derive(Clone, Copy, Debug)]
+enum Weights { Shape, Equilibrium { level: f32 } }
+
 /// `s(f/fp)` de Mitsuyasu (SPEC-001 §1 septies), gelé au-delà du bord de bande `edge`.
 fn spreading_s(s_max: f32, x: f32, edge: f32) -> f32 {
     if x <= 1.0 { s_max * exp(5.0 * ln(x)) } else { s_max * exp(-2.5 * ln(x.min(edge))) }
@@ -139,6 +144,12 @@ pub(crate) fn spread_offset_turns(s: f32, u: f32) -> f32 {
 #[allow(clippy::too_many_arguments)]
 fn cells(r: &Recipe, lg: f32, lo: f32, hi: f32, n: usize, index0: u64, dirs: Directions,
     out: &mut [Component], weights: &mut [f32]) -> Result<f32, Error> {
+    cells_with(r, lg, lo, hi, n, index0, dirs, Weights::Shape, out, weights)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn cells_with(r: &Recipe, lg: f32, lo: f32, hi: f32, n: usize, index0: u64, dirs: Directions,
+    law: Weights, out: &mut [Component], weights: &mut [f32]) -> Result<f32, Error> {
     let sea = r.sea;
     let (start, width) = (ln(lo), ln(hi) - ln(lo));
     let (mut sum, mut lower) = (0.0, lo);
@@ -146,7 +157,12 @@ fn cells(r: &Recipe, lg: f32, lo: f32, hi: f32, n: usize, index0: u64, dirs: Dir
         let upper = if i + 1 == n { hi }
             else { exp(start + width * ((i + 1) as f32 / n as f32)) };
         if upper <= lower { return Err(Error::NotRepresentable); }
-        *weight = integral(lower, upper, lg, 0, 64);
+        *weight = match law {
+            Weights::Shape => integral(lower, upper, lg, 0, 64),
+            Weights::Equilibrium { level } => {
+                level * (1.0 / (lower * lower * lower) - 1.0 / (upper * upper * upper)) / 3.0
+            }
+        };
         let x = (lower * upper).sqrt();
         let hz = x / sea.tp;
         let omega = core::f32::consts::TAU * hz;
@@ -194,7 +210,21 @@ pub fn bake_tail_directional(r: Recipe, s_max: f32, tail_ratio: f32, count: usiz
     bake_tail_inner(r, tail_ratio, count, Directions::Spread { s_max, edge: r.max_ratio })
 }
 
+/// S260, ADR-157 — queue **d'équilibre** : densité continuée en `f⁻⁴` depuis `max_ratio·fp` (Toba,
+/// Phillips ; SPEC-001 §1 octies), niveau absolu de la bande, directions d'ADR-156. Poids analytiques.
+/// Diagnostics : variance et moment d'ordre deux de la queue rapportés à ceux de la bande.
+pub fn bake_tail_equilibrium(r: Recipe, s_max: f32, tail_ratio: f32, count: usize) -> Result<Cooked, Error> {
+    if !s_max.is_finite() || s_max <= 0.0 || s_max > 1000.0 { return Err(Error::Direction); }
+    let level = shape(r.max_ratio, ln(r.gamma)) * r.max_ratio.powi(4);
+    bake_tail_law(r, tail_ratio, count, Directions::Spread { s_max, edge: r.max_ratio },
+        Weights::Equilibrium { level })
+}
+
 fn bake_tail_inner(r: Recipe, tail_ratio: f32, count: usize, dirs: Directions) -> Result<Cooked, Error> {
+    bake_tail_law(r, tail_ratio, count, dirs, Weights::Shape)
+}
+
+fn bake_tail_law(r: Recipe, tail_ratio: f32, count: usize, dirs: Directions, law: Weights) -> Result<Cooked, Error> {
     let band = bake(r)?;
     if !tail_ratio.is_finite() || tail_ratio <= r.max_ratio || tail_ratio > 64.0 { return Err(Error::Band); }
     if !(16..=MAX_COMPONENTS).contains(&count) { return Err(Error::Components); }
@@ -208,7 +238,7 @@ fn bake_tail_inner(r: Recipe, tail_ratio: f32, count: usize, dirs: Directions) -
     let mut out = Cooked { recipe: tail, components: scratch, diagnostics: Diagnostics {
         retained_m0: 0.0, retained_m2: 0.0 }, hash: 0 };
     let mut tail_weights = [0.0; MAX_COMPONENTS];
-    cells(&r, lg, r.max_ratio, tail_ratio, count, 1 << 32, dirs, &mut out.components, &mut tail_weights)?;
+    cells_with(&r, lg, r.max_ratio, tail_ratio, count, 1 << 32, dirs, law, &mut out.components, &mut tail_weights)?;
     for (c, weight) in out.components[..count].iter_mut().zip(tail_weights) {
         c.amplitude = r.sea.hs * ((weight / sum) * 0.125).sqrt();
         if !c.amplitude.is_finite() { return Err(Error::NotRepresentable); }
@@ -218,12 +248,20 @@ fn bake_tail_inner(r: Recipe, tail_ratio: f32, count: usize, dirs: Directions) -
     }
     let band0 = integral(r.min_ratio, r.max_ratio, lg, 0, 4096);
     let band2 = integral(r.min_ratio, r.max_ratio, lg, 2, 4096);
-    out.diagnostics = Diagnostics { retained_m0: integral(r.max_ratio, tail_ratio, lg, 0, 4096) / band0,
-        retained_m2: integral(r.max_ratio, tail_ratio, lg, 2, 4096) / band2 };
+    out.diagnostics = match law {
+        Weights::Shape => Diagnostics { retained_m0: integral(r.max_ratio, tail_ratio, lg, 0, 4096) / band0,
+            retained_m2: integral(r.max_ratio, tail_ratio, lg, 2, 4096) / band2 },
+        Weights::Equilibrium { level } => {
+            let (b, q) = (r.max_ratio, tail_ratio);
+            Diagnostics { retained_m0: level * (1.0 / (b * b * b) - 1.0 / (q * q * q)) / 3.0 / band0,
+                retained_m2: level * (1.0 / b - 1.0 / q) / band2 }
+        }
+    };
     let mut h = Hasher64::new();
     h.write_u32(VERSION);
     h.write_u64(band.hash());
     if let Directions::Spread { s_max, .. } = dirs { h.write_u32(0x5350_5244); h.write_f32(s_max); }
+    if let Weights::Equilibrium { level } = law { h.write_u32(0x4551_5549); h.write_f32(level); }
     h.write_f32(tail_ratio);
     h.write_u32(count as u32);
     for c in out.components() {

@@ -84,7 +84,7 @@ second ordre, niveau de la queue — **avant** d'en construire un. Critères éc
 - [x] **P3** — instrument : statistiques des pentes et de l'élévation du champ rendu (linéaire),
   et des candidats (CWM, second ordre) ; verdict confirmé ou non.
 - [x] **P4** — ADR du remède choisi sur ces chiffres, et protocole de réception.
-- [ ] **P5** — cœur et hôte du remède, vérification CPU/GPU.
+- [>] **P5** — cœur et hôte du remède, vérification CPU/GPU.
 - [ ] **P6** — réception : statistiques, coût, rendus R4 envoyés.
 - [ ] **P7** — rituel §6.
 
@@ -95,3 +95,7 @@ Candidats calculés : CWM seul c40 0,057 ; second ordre par composante nul ; **f
 **f⁻⁴ + CWM : c40 0,208, c22 0,072, c04 0,208** (dans les incertitudes de Cox–Munk), sans ajustement ;
 modulation M = 2 : c40 0,39 (ajusté, non retenu) ; M ≥ 10 : replis. Non reproduits : c03, λ3,
 anisotropie u/c (0,96 contre 1,37). Choix pour P4 : queue d'équilibre f⁻⁴ + CWM.
+
+P5 (cœur) : `bake_tail_equilibrium`, `cells_with`/`Weights` (poids analytiques q(b)·b⁴·(x₁⁻³ − x₂⁻³)/3).
+Essai `equilibrium_tail_continues_band_in_f_minus_four_s260` : variance 5,98185e-4 contre 5,98186e-4 ;
+mss vent + queue 0,04781 contre 0,04779 ; continuité 0,8349 contre 0,8369 ; spectre 9/9.

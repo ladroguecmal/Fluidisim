@@ -311,3 +311,73 @@ fn multimodal_sea_and_directional_spreading_s259() {
     assert_eq!(bake_directional(wind, 0.0).err(), Some(Error::Direction));
     assert_eq!(bake_directional(wind, f32::NAN).err(), Some(Error::Direction));
 }
+
+/// S260, ADR-157 — queue d'équilibre en f⁻⁴ : densité absolue, rugosité, continuité à 4 fp,
+/// refus et empreinte, contre une intégration f64 indépendante (VAGUES-POINTUES-S260, critères 1 à 4).
+#[test]
+fn equilibrium_tail_continues_band_in_f_minus_four_s260() {
+    use crate::background_spectrum::{bake, bake_directional, bake_tail_directional, bake_tail_equilibrium, Error, Recipe};
+    fn q(x: f64, gamma: f64) -> f64 {
+        let sigma = if x <= 1.0 { 0.07 } else { 0.09 };
+        let r = (-(x - 1.0).powi(2) / (2.0 * sigma * sigma)).exp();
+        x.powi(-5) * (-1.25 / x.powi(4)).exp() * gamma.powf(r)
+    }
+    fn integral(lo: f64, hi: f64, p: i32, gamma: f64) -> f64 {
+        if lo < 1.0 && hi > 1.0 { return integral(lo, 1.0, p, gamma) + integral(1.0, hi, p, gamma); }
+        let n = 20_000;
+        let h = (hi - lo) / n as f64;
+        (0..=n).map(|i| {
+            let x = lo + i as f64 * h;
+            let w = if i == 0 || i == n { 1.0 } else if i % 2 == 1 { 4.0 } else { 2.0 };
+            w * x.powi(p) * q(x, gamma)
+        }).sum::<f64>() * h / 3.0
+    }
+    let wind = Recipe {
+        sea: SeaState { hs: 1.5, tp: 6.0, theta_turns: 0.12, components: 32, graine: 201 },
+        gravity: 9.81, gamma: 3.3, min_ratio: 0.5, max_ratio: 4.0, spread_turns: 0.25,
+    };
+    let (hs, tp, g, gamma) = (1.5f64, 6.0f64, 9.81f64, 3.3f64);
+    let tau = std::f64::consts::TAU;
+    let tail = bake_tail_equilibrium(wind, 10.0, 32.0, 64).unwrap();
+    let band = bake_directional(wind, 10.0).unwrap();
+    let norm = integral(0.5, 4.0, 0, gamma);
+    let level = q(4.0, gamma) * 4f64.powi(4);
+    // 1. Densité absolue.
+    let expected = hs * hs / 16.0 * level * (4f64.powi(-3) - 32f64.powi(-3)) / 3.0 / norm;
+    let got: f64 = tail.components().iter().map(|c| 0.5 * (c.amplitude as f64).powi(2)).sum();
+    println!("S260 queue_equilibre variance={got:.6e} attendue={expected:.6e}");
+    assert!((got / expected - 1.0).abs() <= 0.01);
+    // 2. Rugosité bande + queue contre le continu (f⁻⁴ au-delà de 4 fp).
+    let fp = 1.0 / tp;
+    let m4_band = hs * hs / 16.0 * fp.powi(4) * integral(0.5, 4.0, 4, gamma) / norm;
+    let m4_tail = hs * hs / 16.0 * fp.powi(4) * level * (32.0 - 4.0) / norm;
+    let continuous = tau.powi(4) * (m4_band + m4_tail) / (g * g);
+    let mss = |c: &[crate::Component]| c.iter()
+        .map(|c| 0.5 * (c.amplitude as f64 * c.k_turns_per_m as f64 * tau).powi(2)).sum::<f64>();
+    let total = mss(band.components()) + mss(tail.components());
+    println!("S260 mss bande+queue_equilibre={total:.5} continue={continuous:.5}");
+    assert!((total / continuous - 1.0).abs() <= 0.02);
+    // 3. Continuité de la densité par ln f à 4 fp.
+    let (last, first) = (band.components()[31], tail.components()[0]);
+    let x_of = |c: crate::Component| (c.k_turns_per_m as f64 * tau * g).sqrt() / tau * tp;
+    let (dm, dt) = ((8.0f64).ln() / 32.0, (8.0f64).ln() / 64.0);
+    let measured = (0.5 * (first.amplitude as f64).powi(2) / dt) / (0.5 * (last.amplitude as f64).powi(2) / dm);
+    let (xm, xt) = (x_of(last), x_of(first));
+    let continuous_ratio = (xt * level * xt.powi(-4)) / (xm * q(xm, gamma));
+    println!("S260 continuite mesure={measured:.4} continue={continuous_ratio:.4}");
+    assert!((measured / continuous_ratio - 1.0).abs() <= 0.05);
+    // Amplitudes plus grandes que la queue JONSWAP au-delà de 4 fp, directions identiques.
+    let jonswap = bake_tail_directional(wind, 10.0, 32.0, 64).unwrap();
+    for (a, b) in jonswap.components().iter().zip(tail.components()) {
+        assert!(b.amplitude >= a.amplitude);
+        assert_eq!(a.dir, b.dir);
+        assert_eq!(a.k_turns_per_m.to_bits(), b.k_turns_per_m.to_bits());
+    }
+    // 4. Refus et empreintes.
+    assert_eq!(bake_tail_equilibrium(wind, 10.0, 4.0, 64).err(), Some(Error::Band));
+    assert_eq!(bake_tail_equilibrium(wind, 10.0, 32.0, 15).err(), Some(Error::Components));
+    assert_eq!(bake_tail_equilibrium(wind, 0.0, 32.0, 64).err(), Some(Error::Direction));
+    assert_eq!(bake_tail_equilibrium(wind, 10.0, 32.0, 64).unwrap().hash(), tail.hash());
+    assert_ne!(tail.hash(), jonswap.hash());
+    assert_eq!(bake(wind).unwrap().hash(), bake(wind).unwrap().hash());
+}
