@@ -80,7 +80,7 @@ les scènes restent au bit.
 - [x] **P2** — verdict R5 consigné ; ADR-160 (vent de scène) et protocole, avant code.
 - [x] **P3** — hôte : recette de vent, queue coupée à la `mss` de Cox–Munk ; instrument statistique
   par vent (`mss`, pointe, replis) ; scènes existantes au bit.
-- [ ] **P4** — rendus de calibration R6 (trois vents × poses) envoyés, consignés.
+- [x] **P4** — rendus de calibration R6 (trois vents × poses) envoyés, consignés.
 - [ ] **P5** — rituel §6.
 
 ### Notes de reprise
@@ -92,3 +92,6 @@ capillaire 21 fp) 0,0182/0,0184 ; 5 m/s 50 lignes 0,0290/0,0286 ; 8,37 m/s 64 li
 c04 0,139/0,234/0,364, 0 repli. Sans vent : R2 et scène complète identiques au code S262 final (empreintes
 `captures/s262/revue-s262-final.txt`). `--cwm-verify --vent=5` pente 2,05e-4, `--cwm-query-verify --vent=5` 0,29 mm ;
 `--vent=3` pente 1,26e-4 ; 0 repli.
+
+P4 : R6 rendue (3 vents × 7 poses, `captures/s263/revue.log`), neuf images envoyées (rasante, référence, haute).
+Suite 470/18/0, afficheur 16/1/0.
