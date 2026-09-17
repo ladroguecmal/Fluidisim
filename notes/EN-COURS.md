@@ -69,9 +69,9 @@ contre R7 ; préserver le chemin historique et les requêtes. Pas de nouveau ré
 ### Plan
 
 - [x] **P1** — amorce, jeton, plan seuls.
-- [>] **P2** — consigner R7 accepté ; choisir et contractualiser une optimisation mesurable
+- [x] **P2** — consigner R7 accepté ; choisir et contractualiser une optimisation mesurable
   de l'éclairage (pré-calcul du ciel de banc), critères d'erreur et de coût avant construction.
-- [ ] **P3** — implémenter et tester le pré-calcul réutilisé sur le chemin de l'hôte.
+- [>] **P3** — implémenter et tester le pré-calcul réutilisé sur le chemin de l'hôte.
 - [ ] **P4** — vérifier images, coût, invariance et tests ; retenir ou rejeter selon les critères.
 - [ ] **P5** — rituel §6, capacités, limites, file entière, journal et jeton.
 
@@ -80,3 +80,5 @@ contre R7 ; préserver le chemin historique et les requêtes. Pas de nouveau ré
 S265 : eau GPU 2,49–2,71 ms en 3×3 dont cuisson du sillage 1,06–1,11 ms ; ciel procédural
 réévalué neuf fois par fragment. Aspect accepté ne reçoit ni coût ni convergence de la quadrature.
 Le lot J2 bords ouverts reste utile, mais rendre le visuel accepté moins cher est la suite explicite.
+
+P2 : R7 accepté consigné ; ADR-162 et critères CIEL-CACHE-S266 écrits avant code.

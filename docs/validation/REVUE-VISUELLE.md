@@ -461,3 +461,11 @@ Ciel, soleil et couleur : habillage. Le témoin R6 est identique au bit au rendu
 Question : les zones entre les pics paraissent-elles suffisamment lisses, ou reste-t-il un excès
 de petites bosses ? La fermeture gaussienne est approchée ; écart 3×3/5×5 publié, coût eau 2,49–2,71 ms
 contre 1,80–1,83 ms, budget 2 ms non tenu. Pas d'adoption par défaut ni de verdict physique déduit de l'image.
+
+### Verdict R7 — reçu S266, 2026-09-17
+
+« Très bien continue », après comparaison avant/après à 5 m/s. **Aspect filtré accepté** dans
+la vue montrée ; poursuivre la réduction du coût en conservant cet aspect. Cela ne reçoit
+ni les vues non montrées, ni l'animation, ni le budget, ni la BRDF physique complète, et ne
+vaut pas sélection explicite d'un vent représentatif. Lot suivant : ciel de banc précalculé,
+ADR-162, contrôlé contre la version R7 acceptée.
