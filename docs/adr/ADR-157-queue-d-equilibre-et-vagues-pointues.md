@@ -40,3 +40,8 @@ incertitudes. CWM seul, ou le second ordre par composante, ne suffisent pas.
 - L'**alignement des ondes courtes** sur le vent (`σu²/σc²` 1,37 observé, 0,96 ici) : l'étalement
   gelé de la queue est trop large.
 - Écume, micro-déferlement, capillaires, et modulation par les rafales.
+
+**Note S260, 2026-09-17.** Le point 4 annonçait un écart au jeu « d'un ordre `k·a²` ». L'ordre est
+juste, mais l'amplitude mesurée atteint **0,365 m**, pour un déplacement horizontal de 1,75 m dû
+surtout à la houle ([réception](../validation/VAGUES-POINTUES-S260.md) §3). Une requête de jeu sous
+`--vagues` n'est donc pas cohérente avec l'image tant qu'A288 est ouverte.

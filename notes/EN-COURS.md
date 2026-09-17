@@ -85,7 +85,7 @@ second ordre, niveau de la queue — **avant** d'en construire un. Critères éc
   et des candidats (CWM, second ordre) ; verdict confirmé ou non.
 - [x] **P4** — ADR du remède choisi sur ces chiffres, et protocole de réception.
 - [x] **P5** — cœur et hôte du remède, vérification CPU/GPU.
-- [ ] **P6** — réception : statistiques, coût, rendus R4 envoyés.
+- [x] **P6** — réception : statistiques, coût, rendus R4 envoyés.
 - [ ] **P7** — rituel §6.
 
 ### Notes de reprise
@@ -106,3 +106,7 @@ sommets déplacés de D_B, fragment J⁻ᵀ, sondes w=3/w=4, `cwm_reference`, `-
 det min 0,400, 0 repli ; **déplacement max 1,75 m, écart vertical au jeu 0,365 m** (ADR-157 annonçait
 « ordre k·a² » : l'ordre est juste, mais l'amplitude vient de la houle, à publier et A288). R2 et R3
 identiques au bit ; `--tail-verify` et `--b-verify --houle` identiques.
+
+P6 : coût `--vagues` 2,153/2,178 ms contre `--houle` 1,867/1,924 (dépassement de 2 ms, boucle de bande
+doublée par sommet) ; R4 rendue deux fois, empreintes identiques, envoyée ; suite 466/18/0, afficheur
+16/1/0. Note datée ADR-157 (écart au jeu 0,365 m).
