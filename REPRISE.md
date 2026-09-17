@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-17 07:01 +02:00
+JETON            : libre
+Battement        : 2026-09-17 07:17 +02:00
 Agent            : Claude Opus 5, Claude Code (fichiers, git, cargo, Python, GPU local, accès web)
-Session en cours : S260 — verdict R3 : « trop lisse, trop de petites bosses, pas assez de mini pics, rien n'est uniforme »
-Dernière session : S259 — mer multimodale (houle longue + mer de vent, étalement cos^2s, ADR-156), scène --houle, R3 envoyée
-Session suivante : à fixer au rituel de S260
+Session en cours : aucune
+Dernière session : S260 — verdict R3 mesuré (pentes gaussiennes) ; queue d'équilibre f⁻⁴ + CWM (ADR-157), --vagues, R4 envoyée ; A288
+Session suivante : S261 — verdict R4 ; sinon fusion des boucles de bande (coût 2,15 ms) et anisotropie de la queue
 Maillons        : 0
 
 ```

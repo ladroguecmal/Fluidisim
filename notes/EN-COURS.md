@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S260 — en cours
+Session : S260 — terminée
 Agent : Claude Opus 5, Claude Code ; fichiers, git, cargo, Python et GPU local disponibles.
 Entrée (2026-09-17 07:00), verdict R3 de l'utilisateur avec **deux références photographiques** :
 « la haute mer reste trop lisse, il y a trop de petites bosses et pas assez de mini pics » ; « de
@@ -86,7 +86,7 @@ second ordre, niveau de la queue — **avant** d'en construire un. Critères éc
 - [x] **P4** — ADR du remède choisi sur ces chiffres, et protocole de réception.
 - [x] **P5** — cœur et hôte du remède, vérification CPU/GPU.
 - [x] **P6** — réception : statistiques, coût, rendus R4 envoyés.
-- [ ] **P7** — rituel §6.
+- [x] **P7** — rituel §6.
 
 ### Notes de reprise
 

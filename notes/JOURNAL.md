@@ -13336,3 +13336,44 @@ crêtes non linéaires, puis écume. Bords ouverts du pas couplé : déclencheur
 du projet fini 2.1 et 2.2 (partiel) ; index ; jeton. Invariants relus : I-03 (cuissons
 reproductibles, empreintes nouvelles seulement pour la variante), I-09 (systèmes paramétrés, aucune
 réalisation interpolée), I-14 (Mitsuyasu, Goda et Longuet-Higgins cités dans SPEC-001 §1 septies).
+
+## S260 — « Pas assez de mini pics » : pentes gaussiennes mesurées, queue d'équilibre et vagues pointues
+
+**2026-09-17, Claude Opus 5.** Entrée : verdict R3 et **deux premières références photographiques** —
+« trop lisse, trop de petites bosses, pas assez de mini pics ; pics moyens et petits, rien n'est
+uniforme ». Master propre 1b16986. Plan `797ff14`, verdict et Cox–Munk `baa10fe`, mesure `2309b4c`,
+ADR-157 `fe862ce`, cœur `d3eb5f7`, hôte `3caea81`, réception et R4 à la suite.
+
+**Mesuré avant de corriger.** Verdict traduit en statistiques de Cox & Munk (Gram-Charlier) et en
+asymétrie du second ordre, critères écrits avant mesure, 10⁶ points. Le rendu a des **pentes
+gaussiennes** (`c40` −0,026 contre 0,40) et des crêtes symétriques (`λ3` 0,000 contre ≈ 0,16).
+Hypothèses confirmées. **Le remède a été choisi par le calcul** parmi sept candidats, sans en
+construire aucun :
+- CWM seul : `c40` 0,06 ;
+- harmoniques par composante : effet nul ;
+- queue en `f⁻⁴` seule : `mss` 0,048 ;
+- **`f⁻⁴` + CWM : `mss` 0,0495, et `c40`, `c22`, `c04` à 0,21, 0,07 et 0,21, dans les incertitudes,
+  sans ajustement** ;
+- modulation `M` ajustée : écartée ; au-delà de 10, replis.
+
+**Capacité reçue, maillons 0.** Le rendu porte une mer **à pentes non gaussiennes et crêtes
+resserrées** : queue d'équilibre du cœur (`bake_tail_equilibrium`), puis hôte `--vagues` (sommets
+déplacés de `D_B`, normales par `J⁻ᵀ`). Preuve :
+[VAGUES-POINTUES-S260](../docs/validation/VAGUES-POINTUES-S260.md) — queue contre f64 à 10⁻⁶, GPU contre
+CPU 1,6 µm et 4,15·10⁻⁴, aucun repli, R2 et R3 identiques au bit. Suite **466 / 18 / 0**, afficheur
+16 / 1 / 0.
+
+**Limites, publiées.** (1) **Écart au jeu de 0,365 m** sous `--vagues` : l'ADR annonçait un ordre `k·a²`,
+l'amplitude vient de la houle (note datée, **A288**). (2) **GPU eau 2,15–2,18 ms** à 1280×720 :
+dépassement de l'implémentation, la bande étant parcourue deux fois par sommet. (3) Pas
+d'anisotropie des ondes courtes, pas d'asymétrie des pentes ni de l'élévation. (4) Le ciel et la
+couleur (habillage) pèsent probablement dans l'écart avec la référence A.
+
+**Suite.** Verdict R4. Selon lui : habillage (ciel et couleur, étiquetés), fusion des boucles
+(coût), anisotropie de la queue, requête eulérienne CWM (A288) avant tout usage de jeu. Les bords
+ouverts du pas couplé gardent leur déclencheur.
+
+**Rituel.** A287 actualisée, A288 ouverte ; file active (revue, A287, crêtes/A288) ; feuille de
+route J1 ; liste 2.1 ; index (ADR-157, preuve) ; jeton. Invariants relus : I-13 (CWM rendu seulement,
+requêtes inchangées), I-14 (Toba, Phillips, Donelan et al., Nouguier et al. et Cox–Munk cités ;
+aucun coefficient ajusté), I-03 (cuissons reproductibles, scènes antérieures au bit).

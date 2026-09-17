@@ -122,7 +122,12 @@ contre 0,044 observés). La queue du même spectre est rendue en pentes par pixe
 sans houle longue. **S259 : mer multimodale construite** (ADR-156) : houle longue de 225 m et mer de
 vent, étalement `cos^2s` de Mitsuyasu, directions indépendantes du rang. Le spectre est identique au
 bit à chaque système, le GPU s'accorde au cœur à 0,379 mm, pour +0,03 à 0,07 ms. Variante déclarée
-`--houle`, scène par défaut inchangée au bit ; [réception](validation/MER-MULTIMODALE-S259.md). R3
+`--houle`, scène par défaut inchangée au bit ; [réception](validation/MER-MULTIMODALE-S259.md).
+**S260 : verdict R3 avec deux références** (« trop de petites bosses, pas assez de mini pics »). La
+mesure confirme des pentes gaussiennes. Remède choisi par le calcul : **queue d'équilibre en `f⁻⁴` +
+vagues pointues de Lagrange** (ADR-157), sans ajustement : `mss` 0,0495, pointe des pentes dans les
+incertitudes de Cox–Munk. Accord GPU/CPU ; GPU eau 2,15 ms à 1280×720, dépassement qualifiant
+l'implémentation ; écart au jeu 0,365 m (A288). [Réception](validation/VAGUES-POINTUES-S260.md). R4
 est en attente de verdict.
 Composition de la scène représentative par le cœur : faite S236 (mode union, ADR-142). Le choix du
 mode par un hôte autoritaire reste à trancher avec lui (A271).

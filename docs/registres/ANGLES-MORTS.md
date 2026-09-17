@@ -3623,3 +3623,17 @@ Goda) et un tirage de Weyl indépendant du rang (ADR-156). Sur la mer de vent, l
 passe de 1,000 à 0,012, et les stries disparaissent de R3. Pour la scène `--houle` seulement : la
 scène par défaut garde la fixture V1 au bit. **Reste** : la rugosité, à 52 % de Cox–Munk au mieux.
 [Réception](../validation/MER-MULTIMODALE-S259.md).
+
+*S260, 2026-09-17 — rugosité atteinte sous `--vagues`.* La queue d'équilibre en `f⁻⁴` (ADR-157) porte
+la `mss` à 0,0495, contre 0,0437 observé. Avec CWM, `c40`, `c22` et `c04` tombent dans les
+incertitudes de Cox–Munk, sans ajustement. **Restent** : l'alignement des ondes courtes sur le vent
+(`σu²/σc²` 0,96 contre 1,37, étalement gelé trop large), l'asymétrie des pentes (`c03` −0,22) et
+l'asymétrie de l'élévation (`λ3`). [Mesure](../validation/REVUE-VISUELLE.md) §10.
+
+**A288 — S260, 2026-09-17 (sévérité 2, ouverte).** **Sous `--vagues`, la surface rendue n'est pas celle
+que le jeu interroge.** CWM déplace les sommets de `D_B` jusqu'à 1,75 m, et l'écart vertical avec
+la requête eulérienne linéaire atteint 0,365 m aux sondes. Les couches W, elles, restent évaluées
+au point de Lagrange. Un objet flottant posé par la requête serait visiblement décalé de la
+vague. Déclencheur : avant tout consommateur de jeu sous `--vagues`, ou son adoption par défaut.
+Remède attendu : une requête eulérienne CWM (inversion de `x = α + D(α)` par point fixe, bornée), et
+W composé dans la même géométrie. [Réception](../validation/VAGUES-POINTUES-S260.md) §3.
