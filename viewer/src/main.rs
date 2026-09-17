@@ -1582,7 +1582,7 @@ fn verify_multi(frame: &mut FrameData<'_>) -> Result<(), String> {
 /// S256 : `tag` = `r1` (S254, `captures/s254`, à reproduire avec `--no-tail`) ou `r2` (queue
 /// spectrale, `captures/s256`) — mêmes poses et âges.
 fn revue_images(frame: &mut FrameData<'_>, tag: &str) -> Result<(), String> {
-    let dir = match tag { "r1" => "captures/s254", "r2" => "captures/s256", "r3" => "captures/s259", _ => "captures/s260" };
+    let dir = match tag { "r1" => "captures/s254", "r2" => "captures/s256", "r3" => "captures/s259", "r4" => "captures/s260", _ => "captures/s261" };
     std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
     let (width, height) = (1280u32, 720u32);
     let instance = instance();
@@ -1843,6 +1843,7 @@ fn run() -> Result<(), String> {
         frame.tail_background = Some(&scene.tail);
     }
     frame.cwm = vagues;
+    frame.clear_sky = args.iter().any(|a| a == "--ciel-clair");
     // S234 : grille locale du sillage par défaut ; `--no-lod` rend le chemin direct S212–S225.
     frame.lod = !args.iter().any(|a| a == "--no-lod");
     frame.spectral = !args.iter().any(|a| a == "--no-spectral");
@@ -1883,6 +1884,11 @@ fn run() -> Result<(), String> {
     }
     if multi && args.iter().any(|a| a == "--revue=r4") {
         return revue_images(&mut frame, "r4");
+    }
+    if let Some(tag) = args.iter().find_map(|a| a.strip_prefix("--revue=r5")) {
+        if multi {
+            return revue_images(&mut frame, &format!("r5{tag}"));
+        }
     }
     // S260 (VAGUES-POINTUES-S260, critères 5, 6 et 8) : CWM GPU contre référence CPU f64.
     if args.iter().any(|a| a == "--cwm-verify") {

@@ -665,6 +665,8 @@ pub struct FrameData<'a> {
     pub spectral: bool,
     /// S260, ADR-157 : vagues pointues de Lagrange (CWM) — sommets déplacés, normales par jacobien.
     pub cwm: bool,
+    /// S261 : habillage « ciel clair » d'après la référence A (sans physique) ; faux = brume S211.
+    pub clear_sky: bool,
     pub spectral_max: f32,
     pub lattice: crate::lod::Lattice,
     lattice_announced: bool,
@@ -722,6 +724,7 @@ impl<'a> FrameData<'a> {
             lod: true,
             spectral: true,
             cwm: false,
+            clear_sky: false,
             spectral_max: recipe.cutoff,
             lattice: crate::lod::Lattice::plan(0., 0., WAKE_MIN, WAKE_MAX, crate::lod::LATTICE_CAPACITY),
             lattice_announced: false,

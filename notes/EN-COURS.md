@@ -82,7 +82,7 @@ l'instrument S260 avant construction ; tout ajustement contre Cox–Munk sera d�
 
 - [x] **P1** — amorce, jeton et plan seuls.
 - [x] **P2** — verdict R4 et demande d'habillage consignés et classés.
-- [ ] **P3** — habillage « ciel clair » (hôte, sélectionnable), scènes brumeuses au bit, aperçu envoyé.
+- [x] **P3** — habillage « ciel clair » (hôte, sélectionnable), scènes brumeuses au bit, aperçu envoyé.
 - [ ] **P4** — mesure : `mss`, pointe et intermittence de la rugosité des candidats (modulation par
   échelles, coupure), critère écrit avant.
 - [ ] **P5** — ADR et protocole du remède retenu.
@@ -92,3 +92,8 @@ l'instrument S260 avant construction ; tout ajustement contre Cox–Munk sera d�
 
 ### Notes de reprise
 
+P3 : habillage « ciel clair » (`--ciel-clair`, `eye.w`) : ciel dégradé horizon (0,694 ; 0,838 ; 0,930) → zénith
+(0,015 ; 0,15 ; 0,60) linéaire, nuages en bruit de valeur 4 octaves (plan 1,2 km, effacés sous 3°), eau
+(0,004 ; 0,06 ; 0,17), brume 6 km, reflet solaire ×1,2. Premier jet : colonnes de nuages à l'horizon
+(plan projeté dégénéré) et ciel pâle, corrigés. R4 rejoué au bit (brume par défaut). Aperçu r5a
+(`captures/s261/r5a.txt`). Artefact révélé par l'air clair : ligne à la fin de la grille (1 500 m).

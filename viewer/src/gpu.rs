@@ -443,7 +443,7 @@ impl Gpu {
         self.bytes.clear();
         let lattice = (frame.lod && frame.wake_active).then_some(frame.lattice);
         self.baked = lattice.map(|l| (l.nx, l.ny));
-        for v in frame.camera.params(
+        let mut params = frame.camera.params(
             self.width as f32 / self.height as f32,
             self.nx,
             self.ny,
@@ -454,7 +454,10 @@ impl Gpu {
             frame.wake_active,
             lattice,
             frame.background.component_count(),
-        ) {
+        );
+        // S261 : habillage dans `eye.w` (0 brume S211, 1 ciel clair), sans effet physique.
+        params[3] = if frame.clear_sky { 1. } else { 0. };
+        for v in params {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
         let tail = if frame.tail_background.is_some() { frame.tail.len() as f32 } else { 0. };

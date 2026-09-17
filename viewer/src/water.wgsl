@@ -268,8 +268,41 @@ fn grid_spacing(index: vec2<f32>, q: vec2<f32>) -> f32 {
     o.local = local; o.slope = w.yz;
     return o;
 }
+// S261 — HABILLAGE DE BANC, sans physique (REVUE-VISUELLE §4). `p.eye.w` : 0 = brume S211,
+// 1 = « ciel clair » d'après la référence A de l'utilisateur (couleurs relevées sur la photo,
+// converties en linéaire). Rien de ce bloc n'entre dans une réception physique.
+const CLEAR_HORIZON = vec3<f32>(0.694, 0.838, 0.930);
+const CLEAR_ZENITH = vec3<f32>(0.015, 0.150, 0.600);
+fn hash2(q: vec2<f32>) -> f32 {
+    let h = dot(q, vec2<f32>(127.1, 311.7));
+    return fract(sin(h)*43758.5453);
+}
+fn value_noise(q: vec2<f32>) -> f32 {
+    let i = floor(q); let f = fract(q);
+    let u = f*f*(3.0 - 2.0*f);
+    let a = hash2(i); let b = hash2(i + vec2<f32>(1.0, 0.0));
+    let c = hash2(i + vec2<f32>(0.0, 1.0)); let d = hash2(i + vec2<f32>(1.0, 1.0));
+    return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+}
+fn clouds(ray: vec3<f32>) -> f32 {
+    if (ray.z <= 0.0) { return 0.0; }
+    // Plan de nuages à 1,2 km ; quatre octaves ; couverture faible, basse sur l'horizon, bords doux.
+    // Sous 3° d'élévation, le plan projeté dégénère : les nuages s'effacent dans la brume d'horizon.
+    let fade = smoothstep(0.05, 0.12, ray.z)*(1.0 - smoothstep(0.30, 0.55, ray.z));
+    if (fade <= 0.0) { return 0.0; }
+    let q = ray.xy/ray.z*1.3;
+    let n = 0.50*value_noise(q) + 0.25*value_noise(q*2.03 + 17.0) + 0.15*value_noise(q*4.11 + 41.0)
+        + 0.10*value_noise(q*8.17 + 83.0);
+    return smoothstep(0.52, 0.80, n)*fade;
+}
 fn sky(ray: vec3<f32>) -> vec3<f32> {
     let sun = normalize(vec3<f32>(-0.4,0.3,0.8));
+    if (p.eye.w > 0.5) {
+        let t = pow(clamp(ray.z, 0.0, 1.0), 0.35);
+        var c = mix(CLEAR_HORIZON, CLEAR_ZENITH, t);
+        c = mix(c, vec3<f32>(0.92, 0.93, 0.95), clouds(ray));
+        return c + vec3<f32>(1.0,0.95,0.85)*(pow(max(dot(ray,sun),0.0),1024.0)*4.0 + pow(max(dot(ray,sun),0.0),32.0)*0.15);
+    }
     return mix(vec3<f32>(0.66,0.78,0.84),vec3<f32>(0.18,0.39,0.65),clamp(ray.z,0.0,1.0))
         + vec3<f32>(1.0,0.84,0.6)*pow(max(dot(ray,sun),0.0),512.0);
 }
@@ -291,6 +324,12 @@ fn sky(ray: vec3<f32>) -> vec3<f32> {
     let sun = normalize(vec3<f32>(-0.4,0.3,0.8));
     let reflection = reflect(ray,n);
     let glint = pow(max(dot(reflection,sun),0.0),180.0);
+    if (p.eye.w > 0.5) {
+        // Habillage « ciel clair » : eau bleu profond (photo B), air clair, reflet du soleil plus franc.
+        let body = vec3<f32>(0.004,0.060,0.170)*(0.6+0.4*max(dot(n,sun),0.0));
+        let clear = mix(body,sky(reflection),fresnel)+vec3<f32>(1.0,0.95,0.85)*glint*1.2;
+        return vec4<f32>(mix(clear,CLEAR_HORIZON,1-exp(-length(v.local)/6000.0)),1.0);
+    }
     let base = vec3<f32>(0.012,0.105,0.13)*(0.65+0.35*max(dot(n,sun),0.0));
     let color = mix(base,sky(reflection),fresnel)+vec3<f32>(1.0,0.9,0.7)*glint*0.65;
     return vec4<f32>(mix(color,vec3<f32>(0.66,0.78,0.84),1-exp(-length(v.local)/500.0)),1.0);
