@@ -76,8 +76,8 @@ les scènes restent au bit.
 
 ### Plan
 
-- [>] **P1** — amorce, jeton et plan seuls.
-- [ ] **P2** — verdict R5 consigné ; ADR-160 (vent de scène) et protocole, avant code.
+- [x] **P1** — amorce, jeton et plan seuls.
+- [x] **P2** — verdict R5 consigné ; ADR-160 (vent de scène) et protocole, avant code.
 - [ ] **P3** — hôte : recette de vent, queue coupée à la `mss` de Cox–Munk ; instrument statistique
   par vent (`mss`, pointe, replis) ; scènes existantes au bit.
 - [ ] **P4** — rendus de calibration R6 (trois vents × poses) envoyés, consignés.

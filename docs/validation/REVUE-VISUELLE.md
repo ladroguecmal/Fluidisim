@@ -72,7 +72,7 @@ tel quel, et c'est la réception qu'on réexamine d'abord.
 | **R2** | 2026-09-16 | sept rendus aux poses de R1, queue spectrale d'ADR-155 ([empreintes](QUEUE-SPECTRALE-S256.md) §3) | — | **« Le résultat se raffine, mais le rendu paraît un grand lac soumis à beaucoup de vent ; la haute mer est plus déchaînée, chaotique, et la houle se forme vers les terres »** (22:45) | **physique juste mais incomplète**, établie par construction (§8) : mer de vent locale seule, sans houle longue, crêtes linéaires, fond uniforme ; écume hors capacité |
 | **R3** | 2026-09-16 | sept rendus aux poses de R1, scène `--houle` : mer de vent + houle longue, étalement cos^2s (ADR-156, [empreintes](MER-MULTIMODALE-S259.md) §3) | **deux photographies** (§10), conditions inconnues | **« La haute mer reste trop lisse ; trop de petites bosses, pas assez de mini pics ; pics moyens et petits pics combinés, rien n'est uniforme »** (2026-09-17 07:00) | provisoire : rugosité insuffisante (A287), pentes gaussiennes, crêtes symétriques ; mesure au §10 |
 | **R4** | 2026-09-17 | sept rendus aux poses de R1, scène `--vagues` : queue d'équilibre f⁻⁴ et CWM (ADR-157, [empreintes](VAGUES-POINTUES-S260.md) §3) | références A et B de R3 | **« Change le ciel et la couleur comme sur ma photo ; la mer a l'air trop rugueuse, la surface entre les pics est plutôt lisse, mais il y a beaucoup de petites vaguelettes »** (07:25) | habillage demandé (ciel, couleur) ; rugosité : trop forte et trop uniforme, à mesurer (§11) |
-| **R5** | 2026-09-17 | sept rendus aux poses de R1, `--vagues --modulation --ciel-clair` : habillage de la référence A, rugosité ajustée à Cox–Munk (ADR-158, [empreintes](RUGOSITE-S261.md) §3) | références A et B | **en attente** | questions : ciel et couleur justes ? encore trop rugueuse ? le grain proche gêne-t-il ? la ligne d'horizon se voit-elle ? |
+| **R5** | 2026-09-17 | sept rendus aux poses de R1, `--vagues --modulation --ciel-clair` : habillage de la référence A, rugosité ajustée à Cox–Munk (ADR-158, [empreintes](RUGOSITE-S261.md) §3) | références A et B | **« Trop rugueuse, trop de petits pics ; je ne connais pas le niveau de vent »** (08:09, après les réparations S262) | rugosité conforme à Cox–Munk **à 8,4 m/s** : le vent de la scène est en cause, vent de la référence inconnu ; calibration perceptive par le vent (§12) |
 
 ## 6. R1 — la scène J1 telle qu'elle est, S254
 
@@ -387,3 +387,22 @@ Aucun repli. Tous les candidats en `b_Q` 32 sont hors de ±0,004 en `mss`.
   la transition vers une rugosité de BRDF traiterait (Bruneton, Neyret et Holzschuch, 2010). Aucun des
   deux n'est construit dans ce lot : ils sont nommés.
 - `M` = 2 et `b_Q` = 28 sont des **ajustements déclarés** contre Cox–Munk (critère ci-dessus).
+
+## 12. R5 — « trop rugueuse, trop de petits pics » ; vent inconnu
+
+**Reçu le 2026-09-17 à 08:09.** Ciel et couleur non contestés.
+
+**Classement.** La rugosité rendue est celle que Cox–Munk mesure **à 8,4 m/s**, le vent de la mer de
+la scène (S261). Le verdict ne contredit donc pas la physique de la rugosité : il dit que la mer de
+la référence est **moins ventée** que la scène. Rien, dans une mer pleinement développée, ne se
+règle indépendamment du vent : `Hs`, `Tp`, longueur d'onde et `mss` en découlent (SPEC-001 §1
+sexies). Le vent de la référence étant inconnu, **il se choisit à l'œil**, parmi des mers conformes
+aux observations à leur propre vent. C'est une calibration perceptive d'un paramètre physique, et
+non un réglage de rugosité.
+
+| vent `U` (m/s) | `Hs` (m) | `Tp` (s) | `λp` (m) | `mss` Cox–Munk |
+|---:|---:|---:|---:|---:|
+| 3 | 0,19 | 2,19 | 7,5 | 0,018 |
+| 5 | 0,54 | 3,65 | 20,8 | 0,029 |
+| 8,4 (scène) | 1,50 | 6,11 | 58 | 0,046 |
+
