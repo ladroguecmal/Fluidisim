@@ -127,8 +127,12 @@ bit à chaque système, le GPU s'accorde au cœur à 0,379 mm, pour +0,03 à 0,0
 mesure confirme des pentes gaussiennes. Remède choisi par le calcul : **queue d'équilibre en `f⁻⁴` +
 vagues pointues de Lagrange** (ADR-157), sans ajustement : `mss` 0,0495, pointe des pentes dans les
 incertitudes de Cox–Munk. Accord GPU/CPU ; GPU eau 2,15 ms à 1280×720, dépassement qualifiant
-l'implémentation ; écart au jeu 0,365 m (A288). [Réception](validation/VAGUES-POINTUES-S260.md). R4
-est en attente de verdict.
+l'implémentation ; écart au jeu 0,365 m (A288). [Réception](validation/VAGUES-POINTUES-S260.md).
+**S261 : verdict R4.** L'utilisateur demande le ciel et la couleur de sa photo : fait en habillage
+sélectionnable `--ciel-clair`, brume au bit. Il juge la mer « trop rugueuse, lisse entre les pics ».
+Mesuré, puis corrigé par un ajustement déclaré à Cox–Munk (ADR-158) : coupure 28 fp, modulation par
+la bande, `mss` 0,0435. Cox–Munk borne la modulation. GPU eau 2,24–2,26 ms ;
+[réception](validation/RUGOSITE-S261.md). R5 est en attente de verdict.
 Composition de la scène représentative par le cœur : faite S236 (mode union, ADR-142). Le choix du
 mode par un hôte autoritaire reste à trancher avec lui (A271).
 

@@ -3637,3 +3637,10 @@ au point de Lagrange. Un objet flottant posé par la requête serait visiblement
 vague. Déclencheur : avant tout consommateur de jeu sous `--vagues`, ou son adoption par défaut.
 Remède attendu : une requête eulérienne CWM (inversion de `x = α + D(α)` par point fixe, bornée), et
 W composé dans la même géométrie. [Réception](../validation/VAGUES-POINTUES-S260.md) §3.
+
+*S261, 2026-09-17.* La rugosité est **ajustée à Cox–Munk** (ADR-158, `--modulation`) : coupure à 28 fp et
+modulation par la bande `M` = 2. `mss` 0,0435 ; `c40`, `c22`, `c04` à 0,353, 0,129 et 0,351. **Constat
+nouveau** : Cox–Munk borne la modulation, et une surface franchement lisse entre les pics (verdict
+R4) n'est pas compatible avec l'observation à 8 m/s. Restent donc, en plus de l'anisotropie et des
+asymétries : le **vent de la scène** comme paramètre, et la **transition des ondes non résolues
+vers la BRDF** contre le grain proche (Bruneton et al., 2010).

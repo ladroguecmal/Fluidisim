@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S261 — en cours
+Session : S261 — terminée
 Agent : Claude Opus 5, Claude Code ; fichiers, git, cargo, Python et GPU local disponibles.
 Entrée (2026-09-17 07:25) : « Change le ciel et la couleur comme sur ma photo, puis je trouve que la
 mer a l'air trop rugueuse, la surface entre pics est plutôt lisse, mais il y a beaucoup de petites
@@ -88,7 +88,7 @@ l'instrument S260 avant construction ; tout ajustement contre Cox–Munk sera d�
 - [x] **P5** — ADR et protocole du remède retenu.
 - [x] **P6** — construction cœur/hôte, vérification CPU/GPU.
 - [x] **P7** — réception : statistiques, coût, rendus R5 envoyés.
-- [ ] **P8** — rituel §6.
+- [x] **P8** — rituel §6.
 
 ### Notes de reprise
 

@@ -13377,3 +13377,43 @@ ouverts du pas couplé gardent leur déclencheur.
 route J1 ; liste 2.1 ; index (ADR-157, preuve) ; jeton. Invariants relus : I-13 (CWM rendu seulement,
 requêtes inchangées), I-14 (Toba, Phillips, Donelan et al., Nouguier et al. et Cox–Munk cités ;
 aucun coefficient ajusté), I-03 (cuissons reproductibles, scènes antérieures au bit).
+
+## S261 — Ciel de la référence ; rugosité ajustée à Cox–Munk, et ce que Cox–Munk interdit
+
+**2026-09-17, Claude Opus 5.** Entrée : « change le ciel et la couleur comme sur ma photo ; la mer a
+l'air trop rugueuse, la surface entre les pics est plutôt lisse, mais il y a beaucoup de petites
+vaguelettes ». Master propre a69259f. Plan `83e52ac`, verdict `4bd7923`, habillage `c44f66b`, critère
+`5459d66`, mesure et ADR-158 `f8b49a8`, construction `1a8f849`, réception et R5 à la suite.
+
+**Habillage.** « Ciel clair », d'après la référence A : ciel bleu profond dégradé, nuages blancs
+procéduraux, eau bleu profond, air clair. Sélectionnable (`--ciel-clair`), étiqueté habillage, sans
+physique ; la brume reste le défaut, et R2 à R4 se rejouent au bit. Premier jet corrigé : colonnes
+de nuages à l'horizon, ciel trop pâle. Aperçu envoyé avant la suite. Coût : jusqu'à +0,11 ms (nuages
+dans les reflets).
+
+**Rugosité, mesurée avant d'agir.** Critère écrit avant mesure, 18 candidats. Retenu : coupure de la
+queue à 28 fp et modulation des ondes courtes par la bande, `M` = 2 — **ajustements déclarés** contre
+Cox–Munk. Résultat : `mss` 0,0435 (contre 0,0437) ; `c40`, `c22`, `c04` à 0,353, 0,129 et 0,351 ; score
+de 1,31 à 0,15. **Constat qui compte** : Cox–Munk borne la modulation. À `M` = 2, 0,3 % de la surface
+seulement devient « lisse », et une surface franchement lisse entre les pics dépasserait la pointe
+observée à 8 m/s. Le verdict s'expliquerait sans contredire l'observation par un **vent plus faible**
+(Cox–Munk à 4 m/s : `mss` 0,023) ou par le **grain** des ondes proches de la résolution (transition
+vers la BRDF). Les deux sont nommés, aucun n'est construit.
+
+**Capacité reçue, maillons 0.** Le rendu porte une mer dont la rugosité et la pointe des pentes sont
+**calées sur les valeurs centrales de Cox–Munk**, sous l'habillage demandé. Le chemin : `--vagues
+--modulation --ciel-clair`. La preuve : [RUGOSITE-S261](../docs/validation/RUGOSITE-S261.md) — GPU contre
+CPU 2,82·10⁻⁴, aucun repli, 60 lignes de queue comptées analytiquement, scènes antérieures au bit.
+Suite **466 / 18 / 0**, afficheur 16 / 1 / 0.
+
+**Limites.** GPU eau 2,24–2,26 ms, au-dessus du budget (dépassement de l'implémentation). Grain proche.
+Ligne d'horizon à la fin de la grille, révélée par l'air clair. A288 ouverte (écart au jeu 0,365 m).
+
+**Suite.** Verdict R5. Selon lui : vent de la scène comme paramètre (`Hs`, `Tp`, rugosité liés à `W`),
+transition vers la BRDF, fin de grille à l'horizon, fusion des boucles (coût), A288 avant tout usage
+de jeu.
+
+**Rituel.** A287 actualisée ; file active (revue, A287) ; feuille de route J1 ; liste 2.1 ; index
+(ADR-158, preuve) ; jeton. Invariants relus : I-13 (habillage et modulation au rendu seulement), I-14
+(ajustements déclarés contre Cox–Munk, critère écrit avant mesure ; couleurs d'habillage relevées
+sur la référence, hors physique).

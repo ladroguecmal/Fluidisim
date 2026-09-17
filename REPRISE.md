@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-17 07:26 +02:00
+JETON            : libre
+Battement        : 2026-09-17 07:38 +02:00
 Agent            : Claude Opus 5, Claude Code (fichiers, git, cargo, Python, GPU local, accès web)
-Session en cours : S261 — ciel et couleur de la référence A (habillage) ; verdict R4 « trop rugueuse, lisse entre les pics, beaucoup de vaguelettes »
-Dernière session : S260 — verdict R3 mesuré (pentes gaussiennes) ; queue d'équilibre f⁻⁴ + CWM (ADR-157), --vagues, R4 envoyée ; A288
-Session suivante : à fixer au rituel de S261
+Session en cours : aucune
+Dernière session : S261 — habillage ciel clair (référence A) ; rugosité ajustée à Cox–Munk (ADR-158) ; R5 envoyée
+Session suivante : S262 — verdict R5 ; sinon vent de la scène comme paramètre, ou transition vers la BRDF (grain proche)
 Maillons        : 0
 
 ```
