@@ -288,3 +288,36 @@ Les mêmes grandeurs sont ensuite calculées pour deux remèdes candidats, sans 
 modèle de vagues pointues de Lagrange (CWM, déplacement horizontal de chaque composante), et les
 harmoniques liées du second ordre de chaque composante.
 
+**Résultat** (`cargo run --release -p water-core --example statistiques_surface`, 2026-09-17 ; 10⁶
+points sur 4 km × 4 km × 1 h ; axes du vent de la mer de vent). Cox–Munk pour `W` = 7,95 m/s :
+`mss` 0,0437, `σu²` 0,0251, `σc²` 0,0183, `c21` −0,058, `c03` −0,222, `c40` 0,40 ± 0,23, `c22`
+0,12 ± 0,06, `c04` 0,23 ± 0,41. Second ordre : `3·k_m·σ` = 0,156.
+
+| modèle, même réalisation | `mss` | `σu²/σc²` | `c40` | `c22` | `c04` | `c03` | `λ3` |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| **rendu actuel** (linéaire) | 0,0198 | 1,08 | −0,026 | −0,007 | −0,022 | 0,002 | 0,000 |
+| CWM (déplacement de Lagrange) | 0,0200 | 1,08 | 0,057 | 0,023 | 0,073 | 0,002 | 0,003 |
+| harmoniques liées, par composante | 0,0198 | 1,08 | −0,026 | −0,007 | −0,023 | 0,002 | 0,002 |
+| queue d'équilibre en `f⁻⁴` | **0,0483** | 0,96 | −0,040 | −0,009 | −0,028 | 0,001 | 0,000 |
+| **queue en `f⁻⁴` + CWM** | **0,0495** | 0,96 | **0,208** | **0,072** | **0,208** | 0,001 | 0,003 |
+| `f⁻⁴` + CWM + modulation `M` = 2 (ajustée) | 0,0496 | 0,96 | 0,390 | 0,137 | 0,408 | 0,001 | 0,003 |
+| `f⁻⁴` + CWM + modulation `M` ≥ 10 | — | — | — | — | — | — | **replis** |
+| Cox–Munk | 0,0437 | 1,37 | 0,40 | 0,12 | 0,23 | −0,222 | ≈ 0,16 |
+
+- **Hypothèses 2 et 3 confirmées** : `c40` −0,026 < 0,20, `c22` −0,007 < 0,06, `|λ3|` 0,0001 <
+  0,078. Le rendu actuel a des pentes gaussiennes et des crêtes symétriques.
+- **Chacun des deux remèdes candidats échoue seul.** CWM ne donne qu'un septième de la pointe observée.
+  Les harmoniques prises composante par composante ne donnent rien : l'asymétrie du second ordre
+  vient des interactions entre composantes, et non de chaque composante seule.
+- **Constat principal, sans ajustement.** Prolonger la queue par l'**intervalle d'équilibre en
+  `f⁻⁴`** (Toba, Phillips) plutôt qu'en `f⁻⁵` porte la rugosité à **0,048**, contre 0,044 observé (au
+  bord haut de l'incertitude). **Avec CWM**, les trois coefficients de pointe tombent dans les
+  incertitudes de Cox–Munk (0,21 ; 0,07 ; 0,21). Aucun paramètre n'est ajusté : CWM est la
+  cinématique de Lagrange à l'ordre un (λ = 1), et l'intervalle d'équilibre est une loi publiée.
+- **Ce qu'aucun candidat ne reproduit** : l'**asymétrie des pentes** (`c03` −0,22 : pentes plus
+  raides sous le vent, effet du vent), l'**asymétrie de l'élévation** (`λ3`, interactions du second
+  ordre entre composantes), et l'**alignement des ondes courtes sur le vent** (1,37 observé, 0,96
+  ici, parce que l'étalement gelé de la queue est presque isotrope).
+- Une modulation des ondes courtes par les longues atteint la pointe centrale pour `M` ≈ 2, mais
+  c'est un **ajustement**. Au-delà de `M` ≈ 10, la surface se replie. Elle n'est pas retenue sans
+  source indépendante.
