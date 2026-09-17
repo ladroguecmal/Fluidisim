@@ -58,49 +58,20 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S266 — terminée
-Agent : Codex, GPT-6 ; fichiers, git, cargo, Python, GPU local et accès web.
-Entrée : « Très bien continue », après l'avant/après R7. Aspect filtré accepté ; poursuivre
-la réduction du coût en conservant cet aspect. Master propre c4f9bb9, copie unique, jeton libre.
-
-Objectif : réduire le coût de la variante de reflets consommée par l'image, à qualité vérifiée
-contre R7 ; préserver le chemin historique et les requêtes. Pas de nouveau réglage de vent.
+Session : S267 — en cours
+Agent : Codex, GPT-6 ; fichiers, git, cargo, Python et GPU local.
+Entrée : « continue ». Copie unique master propre c476631, jeton libre.
+Objectif : réduire le coût de cuisson GPU du sillage en préservant le rendu accepté et I-09.
 
 ### Plan
 
-- [x] **P1** — amorce, jeton, plan seuls.
-- [x] **P2** — consigner R7 accepté ; choisir et contractualiser une optimisation mesurable
-  de l'éclairage (pré-calcul du ciel de banc), critères d'erreur et de coût avant construction.
-- [x] **P3** — implémenter et tester le pré-calcul réutilisé sur le chemin de l'hôte.
-- [x] **P4** — vérifier images, coût, invariance et tests ; retenir ou rejeter selon les critères.
-- [x] **P5** — optimisation algébrique : sommes suffixes de covariance, témoin conservé,
-  tests et réception aux critères écrits dans CIEL-CACHE-S266.
-- [x] **P6** — rituel §6, capacités, limites, file entière, journal et jeton.
+- [x] **P1** — amorce, jeton et plan seuls.
+- [>] **P2** — lectures, diagnostic du calcul du sillage et contrat de réception avant code ; comparer avec J2.
+- [ ] **P3** — construire une optimisation bornée avec témoin conservé et vérifications ciblées.
+- [ ] **P4** — recevoir précision, images et coût ; retenir ou rejeter sur les critères déclarés.
+- [ ] **P5** — rituel §6, file entière, journal, index et jeton.
 
 ### Notes de reprise
 
-S265 : eau GPU 2,49–2,71 ms en 3×3 dont cuisson du sillage 1,06–1,11 ms ; ciel procédural
-réévalué neuf fois par fragment. Aspect accepté ne reçoit ni coût ni convergence de la quadrature.
-Le lot J2 bords ouverts reste utile, mais rendre le visuel accepté moins cher est la suite explicite.
-
-P2 : R7 accepté consigné ; ADR-162 et critères CIEL-CACHE-S266 écrits avant code.
-
-P3 : cache cubique 512² RGBA16Float, cuisson GPU et réutilisation/invalidation construits.
-Tests hôte 18/1/0. 8 501 directions par ciel ; cycle clair/brume/clair identique,
-aucune recuisson caméra/temps. Cuisson 0,056 ms mesurée, 12 Mio. Images P4 en cours.
-
-P4 : 512² rejeté en précision (maximum RGB 22 > 16, MAE ≤0,074). Essai 1024² prévu par
-ADR-162. Premier coût 512² NON RECEVABLE : capture GPU concurrente encore active ; à refaire
-après fin des captures. Ne pas employer ce passage comme preuve de gain.
-
-P4 : cache rejeté 512/1024 (maximum RGB 22/19 >16 ; gain1024 <5 % contre 10 requis).
-Code cache retiré, expérience conservée à e60b8fa. P5 déclaré avant construction.
-
-P5 intermédiaire : sommes suffixes précises (1 niveau RGB max), gain référence 14,8 %,
-rasante 8,2 % encore sous 10 requis. Spécialiser aussi les boucles 3×3 à bornes constantes,
-sans changer les nœuds, poids ou ordre, puis rejouer images/coût avant rétention.
-
-P5 : variante reçue (ADR-163), 19/1/0 ; 7 témoins au bit, images max1/255.
-GPU 2,259/2,239 ms contre 2,737/2,494 : gain17,48/10,20 %. Budget2 ms non tenu.
-
-P6 : rituel terminé, maillons0 ; suite cuisson du sillage, jeton libre.
+S266 : GPU eau 2,24–2,26 ms dont sillage 1,06–1,08 ms. Ne pas réduire la cadence
+sans preuve d'erreur et I-09. Aspect R7 accepté, optimisation doit le préserver.

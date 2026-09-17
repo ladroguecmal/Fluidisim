@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-18 00:09 +02:00
+JETON            : occupé
+Battement        : 2026-09-18 00:25 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo, Python, GPU local, accès web)
-Session en cours : aucune
+Session en cours : S267
 Dernière session : S266 — R7 accepté, reflets optimisés (ADR-163), 2,24–2,26 ms GPU ; cache ciel rejeté
 Session suivante : S267 — coût de cuisson GPU du sillage (1,06–1,08 ms), avec erreur et I-09 reçues
 Maillons        : 0
