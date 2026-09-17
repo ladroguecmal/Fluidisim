@@ -3649,3 +3649,9 @@ vers la BRDF** contre le grain proche (Bruneton et al., 2010).
 Newton (ADR-159). Contre l'image GPU, sur 5 592 sondes, la hauteur est à 0,30 mm de la surface
 rendue, contre 0,365 m pour la requête linéaire ; aucun refus, au plus 3 itérations. Les couches W
 se composent au point de Lagrange. [Preuve](../validation/DEFAUTS-S262.md) §3.
+
+*S263, 2026-09-17.* **Le vent est un paramètre de scène** (ADR-160) : Pierson–Moskowitz pour la mer de vent,
+coupure de la queue à la `mss` de Cox–Munk au même vent. La rugosité est donc conforme à l'observation à
+3, 5 et 8,37 m/s. **Constat nouveau** : la pointe `c40` décroît avec le vent (0,12 à 3 m/s), sous la
+borne de Cox–Munk à faible vent, parce que `M` = 2 est un ajustement à 8 m/s. Le vent de la scène
+représentative attend le choix de l'utilisateur (R6). Suite 470 / 18 / 0.

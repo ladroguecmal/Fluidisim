@@ -23,7 +23,7 @@ coche et on pointe, sans recopier (L137).
 Un point n'est jamais validé sur un banc isolé, un véhicule d'essai ou une seule scène quand son
 énoncé vise le système. Un point partiel ne dit rien de la difficulté de ce qui reste.
 
-**État au S262, 2026-09-17** (remplissage partiel, points 2.1, 2.2, 8.2, 8.8, 8.9, 8.10, 9.11, 10.9 et 13.2). Voir le décompte en
+**État au S263, 2026-09-17** (remplissage partiel, points 2.1, 2.2, 8.2, 8.8, 8.9, 8.10, 9.11, 10.9 et 13.2). Voir le décompte en
 fin de document.
 
 ---
@@ -56,7 +56,8 @@ fin de document.
   JONSWAP cuit et reproductible (ADR-100/101), 32 composantes, phases GPU ; queue jusqu'à 5,5 cm
   rendue en pentes (S256), étalement directionnel `cos^2s` (S259), queue d'équilibre et vagues
   pointues CWM : rugosité et pointe des pentes dans les mesures de Cox–Munk (S260, `--vagues`),
-  ajustées à leurs valeurs centrales (S261, `--modulation`).
+  ajustées à leurs valeurs centrales (S261, `--modulation`) ; vent de scène, rugosité conforme à
+  Cox–Munk à chaque vent (S263, `--vent`).
   Manquent l'anisotropie et l'asymétrie des pentes, la cohérence avec les requêtes (A288), B1
   complet et plusieurs régions.
 - [ ] **2.2 Houles longues, mers croisées, marée, niveau moyen variable** — *partiel* : mer à plusieurs

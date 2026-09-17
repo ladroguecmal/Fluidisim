@@ -13461,3 +13461,34 @@ comme paramètre, transition vers la BRDF contre le grain proche.
 et 10.9 ; index (ADR-159, preuve) ; jeton. Invariants relus : I-06 (requête sans collection, boucle
 d'image inchangée), I-13 (requête du cœur, image sans autorité), I-03 (phases entières de B dans la
 requête ; images changées d'un arrondi, empreintes nouvelles expliquées).
+
+## S263 — « Trop rugueuse, vent inconnu » : le vent devient un paramètre de scène
+
+**2026-09-17, Claude Opus 5.** Entrée : verdict R5, « trop rugueuse, trop de petits pics, je ne connais
+pas le niveau de vent ». Master propre 7a88546. Plan `caacf56`, ADR-160 `1a18310`, construction
+`211aef6`, calibration R6 à la suite.
+
+**Classement.** La rugosité rendue était celle de Cox–Munk **à 8,4 m/s**, le vent de la mer de la
+scène (S261). Le verdict ne contredit pas la physique : la mer attendue est moins ventée. Dans une mer
+pleinement développée, `Hs`, `Tp` et `mss` découlent du vent : rien ne se règle à part.
+
+**Capacité reçue, maillons 0.** La scène se construit **pour un vent donné** : mer de vent de
+Pierson–Moskowitz, queue d'équilibre coupée à la `mss` de Cox–Munk au même vent et à la limite
+capillaire, houle, modulation et CWM inchangés. Le chemin : `--vent=U` ; fonctions du cœur partagées
+par l'hôte et l'instrument. La preuve : [VENT-S263](../docs/validation/VENT-S263.md) — `mss` rendue
+0,0184, 0,0295 et 0,0457 contre 0,0184, 0,0286 et 0,0459 à 3, 5 et 8,37 m/s ; aucun repli ; requête
+de jeu à 0,29 mm de l'image sous 5 m/s ; sans `--vent`, rendus identiques au bit à S262.
+
+**Constats.** `c40` décroît avec le vent (0,12 à 3 m/s, sous la borne de Cox–Munk) : `M` = 2 est un
+ajustement à 8 m/s. À 8,37 m/s, la limite de cuisson (32 fp) arrête la queue à 2,8 % sous Cox–Munk.
+
+**Calibration perceptive R6** envoyée : même scène à 3, 5 et 8,37 m/s, trois poses. L'utilisateur, qui
+ne connaît pas le vent de sa référence, choisit à l'œil. Le vent choisi deviendra celui de la scène
+représentative, et c'est un fait de revue.
+
+**Suite.** Choix du vent (R6). Puis, selon le verdict : transition des ondes non résolues vers la
+BRDF (grain, « petits pics » restants), dépendance de `M` au vent, anisotropie des ondes courtes.
+
+**Rituel.** A287 actualisée ; file active (revue, A287) ; feuille de route J1 ; liste 2.1 ; index
+(ADR-160, preuve) ; jeton. Invariants relus : I-14 (Pierson–Moskowitz et Cox–Munk cités ; vent choisi
+par revue, déclaré), I-03 (scènes sans vent au bit).

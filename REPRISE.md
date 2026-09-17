@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-17 08:10 +02:00
+JETON            : libre
+Battement        : 2026-09-17 08:22 +02:00
 Agent            : Claude Opus 5, Claude Code (fichiers, git, cargo, Python, GPU local, accès web)
-Session en cours : S263 — verdict R5 « trop rugueuse, trop de petits pics, vent inconnu » : le vent devient un paramètre de scène, calibré à l'œil
-Dernière session : S262 — défauts réparés : horizon, coût GPU (1,54–1,60 ms en 960×540, 1,98–2,01 en 1280×720), A288 close (ADR-159)
-Session suivante : à fixer au rituel de S263
+Session en cours : aucune
+Dernière session : S263 — vent de scène (ADR-160) : Pierson–Moskowitz + queue coupée à Cox–Munk ; calibration R6 envoyée (3, 5, 8,37 m/s)
+Session suivante : S264 — choix du vent (R6) par l'utilisateur ; puis transition vers la BRDF ou dépendance de M au vent selon le verdict
 Maillons        : 0
 
 ```

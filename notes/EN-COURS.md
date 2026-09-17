@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S263 — en cours
+Session : S263 — terminée
 Agent : Claude Opus 5, Claude Code ; fichiers, git, cargo, Python et GPU local disponibles.
 Entrée (2026-09-17 08:09), verdict R5 : « trop rugueuse, trop de petits pics, je ne connais pas le
 niveau de vent ». Master propre 7a88546, jeton libre, maillons 0.
@@ -81,7 +81,7 @@ les scènes restent au bit.
 - [x] **P3** — hôte : recette de vent, queue coupée à la `mss` de Cox–Munk ; instrument statistique
   par vent (`mss`, pointe, replis) ; scènes existantes au bit.
 - [x] **P4** — rendus de calibration R6 (trois vents × poses) envoyés, consignés.
-- [ ] **P5** — rituel §6.
+- [x] **P5** — rituel §6.
 
 ### Notes de reprise
 
