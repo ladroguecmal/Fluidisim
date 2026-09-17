@@ -57,6 +57,7 @@
 - [Mer multimodale et étalement directionnel : houle longue, mer de vent, R3](validation/MER-MULTIMODALE-S259.md).
 - [Queue d'équilibre et vagues pointues (CWM) : statistiques de Cox–Munk, R4](validation/VAGUES-POINTUES-S260.md).
 - [Rugosité ajustée à Cox–Munk, habillage ciel clair, R5](validation/RUGOSITE-S261.md).
+- [Défauts restants réparés : horizon, coût GPU, requête de jeu sous CWM](validation/DEFAUTS-S262.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).
@@ -231,6 +232,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-156](adr/ADR-156-mer-multimodale-et-etalement.md) | Une mer à plusieurs systèmes, chacun avec sa loi d'étalement directionnel |
 | [ADR-157](adr/ADR-157-queue-d-equilibre-et-vagues-pointues.md) | Queue d'équilibre en f⁻⁴ et vagues pointues de Lagrange |
 | [ADR-158](adr/ADR-158-rugosite-ajustee-a-cox-munk.md) | Rugosité ajustée à Cox–Munk : coupure de la queue et modulation par la bande |
+| [ADR-159](adr/ADR-159-requete-de-jeu-sous-cwm.md) | La requête de jeu suit la surface rendue sous CWM |
 
 ## Travail et historique
 

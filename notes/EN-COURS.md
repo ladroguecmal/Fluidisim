@@ -84,7 +84,7 @@ Défauts restants, publiés en S260–S261, dans l'ordre de traitement :
   brume au bit (R2–R4, `--spectral-verify`), rendu clair vérifié.
 - [x] **P3** — coût : décomposition mesurée, fusion des boucles de bande par sommet, invariants de
   la queue précalculés ; accord CPU/GPU ; coût.
-- [ ] **P4** — ADR et protocole de la requête eulérienne CWM (A288).
+- [x] **P4** — ADR et protocole de la requête eulérienne CWM (A288).
 - [ ] **P5** — cœur : requête, convergence, refus ; essais.
 - [ ] **P6** — hôte : requête contre surface rendue ; écart publié.
 - [ ] **P7** — rituel §6.
