@@ -8,13 +8,13 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : occupé
-Battement        : 2026-09-17 23:47 +02:00
+JETON            : libre
+Battement        : 2026-09-17 23:50 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo, Python, GPU local, accès web)
-Session en cours : S265 — zones lisses entre les pics
-Dernière session : S264 — reprise vérifiée ; calibration R6 disponible, choix demandé
-Session suivante : S265 — verdict R6 ; puis lot BRDF ou modulation selon le défaut confirmé
-Maillons        : 1
+Session en cours : aucune
+Dernière session : S265 — reflets filtrés en variante (ADR-161), R7 à juger, coût au-dessus de 2 ms
+Session suivante : S266 — verdict R7 ; si accepté, réduire coût et erreur de quadrature des reflets
+Maillons        : 0
 
 ```
 

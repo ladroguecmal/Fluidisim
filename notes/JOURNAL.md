@@ -13515,3 +13515,38 @@ aucune capacité ni angle mort nouveau, feuille de route inchangée. Maillons **
 Prochaine session : recueillir le verdict R6 puis choisir le lot de construction qu'il justifie ;
 δ, V, B2, bathymétrie et multiplateforme conservent leurs déclencheurs dans la file active.
 Jeton libéré ; aucune copie isolée à fermer.
+
+## S265 — Lisser le détail des reflets entre les pics
+
+**2026-09-17, Codex GPT-6.** Verdict R6 : surface trop rugueuse entre pics moyens et petits ;
+aucun choix de vent. Master propre 34dcf7d, copie unique. Plan bf87e5e, décision 648ac05,
+construction 61c917f, réception aa2b1a6.
+
+**Capacité reçue, maillons 0 :** l'hôte peut filtrer les reflets des petites ondes sans supprimer
+leur variance de pente du modèle d'éclairage. Chemin consommateur : fenêtre et captures sous
+`--vagues --reflets-filtres`, fermeture gaussienne ADR-161, spectre et géométrie inchangés.
+Preuve : [REFLETS-S265](../docs/validation/REFLETS-S265.md), covariance contre phases intégrées et
+échantillons transformés, 15 000 sondes GPU aux trois vents (pente ≤9,32e-5, covariance ≤7,43e-7,
+aucun repli), sept témoins R6 à 5 m/s identiques au bit. Requête CWM 0,288 mm, zéro refus.
+Tests hôte **18 réussis / 1 ignoré / 0 échec**. Cœur inchangé, pas de suite complète cœur rejouée.
+
+**R7** : avant/après à 5 m/s, vent témoin uniquement. Le contraste fin (RMS laplacien d'un
+rectangle d'eau fixé) baisse de 61 % en référence et 66 % en rasante ; ce n'est pas une mesure
+de rugosité physique ni un verdict utilisateur. Images R7 disponibles dans `viewer/captures/s265`.
+
+**Limites :** fermeture au premier ordre sous CWM, sans masquage microfacette ni réception
+radiométrique ; variance de la bande géométrique non transférée. Quadrature 3×3/5×5 différente,
+notamment en vue haute. GPU eau **2,49–2,71 ms** contre 1,80–1,83, RTX 5070 Laptop DX12, secteur,
+budget 2 ms non tenu ; `update` sans allocation. Variante optionnelle, aucun défaut historique
+réglé silencieusement. Le visuel reste à juger, le mouvement/scintillement non reçu.
+
+**Suite :** verdict R7 ; s'il convient, intégration analytique/précalculée pour diminuer coût et
+erreur de quadrature ; sinon mesurer le détail résolu avec une référence réelle. Aucun
+approfondissement automatique de M. Les bords ouverts J2 restent le lot indépendant comparé
+au fil visuel ; celui-ci était explicitement demandé dans cette session.
+
+**Rituel :** A287 actualisée, file active entière relue, J1-bis, SPEC-001 §1 nonies, index et
+registre de revue actualisés. I-03 : témoin inchangé localement, pas de réception multiplateforme ;
+I-06 : buffers réutilisés et `update` mesuré ; I-13 : éclairage sans autorité ; I-14 : fermeture,
+quadrature et largeur à calibrer déclarées. δ, V, B2, bathymétrie et seconde cible gardent leurs
+déclencheurs. Jeton libre, aucune copie isolée à fermer.

@@ -108,4 +108,3 @@ La pose à 29 s reste hors de l'horizon honnête du sillage (limite historique 1
 **Réception :** capacité de filtrage des reflets intégrée et numériquement contrôlée dans son
 approximation. R7 soumise à l'utilisateur ; ni acceptation visuelle, ni BRDF complète, ni budget
 reçus. Aucun vent représentatif adopté.
-

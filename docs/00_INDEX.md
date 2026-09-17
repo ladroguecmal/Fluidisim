@@ -59,6 +59,7 @@
 - [Rugosité ajustée à Cox–Munk, habillage ciel clair, R5](validation/RUGOSITE-S261.md).
 - [Défauts restants réparés : horizon, coût GPU, requête de jeu sous CWM](validation/DEFAUTS-S262.md).
 - [Le vent comme paramètre de scène : Pierson–Moskowitz, Cox–Munk, calibration R6](validation/VENT-S263.md).
+- [Reflets de la queue non résolue, comparaison R7 et coût](validation/REFLETS-S265.md).
 - [Bilan B4](validation/BILAN-B4-S176.md).
 - [Angles morts](registres/ANGLES-MORTS.md).
 - [Dossier de décisions et faits externes](DOSSIER-REUNIONS.md).
@@ -235,6 +236,7 @@ pas les arbitrages ultérieurs explicites (notamment ADR-027 et REPRISE §5).
 | [ADR-158](adr/ADR-158-rugosite-ajustee-a-cox-munk.md) | Rugosité ajustée à Cox–Munk : coupure de la queue et modulation par la bande |
 | [ADR-159](adr/ADR-159-requete-de-jeu-sous-cwm.md) | La requête de jeu suit la surface rendue sous CWM |
 | [ADR-160](adr/ADR-160-vent-parametre-de-scene.md) | Le vent est un paramètre de la scène, calibré à l'œil |
+| [ADR-161](adr/ADR-161-reflets-de-la-queue-non-resolue.md) | Filtrer les reflets de la queue non résolue |
 
 ## Travail et historique
 

@@ -143,7 +143,11 @@ la bande, `mss` 0,0435. Cox–Munk borne la modulation. GPU eau 2,24–2,26 ms ;
 **S263 : verdict R5**, « trop rugueuse, vent inconnu ». La rugosité était celle de Cox–Munk à 8,4 m/s :
 **le vent devient un paramètre de scène** (ADR-160), avec la mer de vent de Pierson–Moskowitz et une
 queue coupée à Cox–Munk au même vent, conforme à 3, 5 et 8,37 m/s. Scènes sans vent au bit ;
-[réception](validation/VENT-S263.md). La calibration R6 attend le choix de l'utilisateur.
+[réception](validation/VENT-S263.md). R6 a reçu en S265 un verdict sur les zones entre les pics, sans choix de vent.
+**S265 : reflets filtrés en variante** `--reflets-filtres` (ADR-161), covariance manquante de la
+queue intégrée à l'éclairage. Contrôle CPU/GPU reçu, géométrie inchangée, témoin R6 au bit ;
+[preuve](validation/REFLETS-S265.md). R7 attend le verdict. Approximation gaussienne, quadrature
+3×3 non convergée partout ; **2,49–2,71 ms GPU**, budget non tenu. Pas d'adoption par défaut.
 Composition de la scène représentative par le cœur : faite S236 (mode union, ADR-142). Le choix du
 mode par un hôte autoritaire reste à trancher avec lui (A271).
 

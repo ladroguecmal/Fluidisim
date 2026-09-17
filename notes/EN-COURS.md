@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S265 — en cours
+Session : S265 — terminée
 Agent : Codex, GPT-6 ; fichiers, git, cargo, Python, accès web ; GPU à vérifier.
 Entrée : verdict R6, « la surface a l'air trop rugueuse, entre les pic moyen et pic même plus petit
 la surface doit etre plus lisse ». Aucun choix de vent explicite. Master propre 34dcf7d, copie unique.
@@ -74,7 +74,7 @@ Comparaison à vent fixé pour isoler le changement ; aucun vent représentatif 
   remède et les critères avant code (ADR si décision nouvelle).
 - [x] **P3** — construire le remède borné dans l'hôte avec ses contrôles numériques ciblés.
 - [x] **P4** — recevoir le chemin GPU, comparer avant/après aux mêmes poses, fournir R7.
-- [>] **P5** — rituel §6 : preuves, file, feuille de route, journal, jeton.
+- [x] **P5** — rituel §6 : preuves, file, feuille de route, journal, jeton.
 
 ### Notes de reprise
 
@@ -93,3 +93,6 @@ P4 : campagne locale lancée (3 vents, témoin puis quadratures 3/5) dans `viewe
 P4 : 15 000 sondes GPU reçues aux trois vents ; 7 témoins identiques au bit à R6 ; 21 images R7.
 Query CWM 0,288 mm / 0 refus. Hôte 18/1/0. Reflets ordre3 : 2,49–2,71 ms GPU contre 1,80–1,83,
 secteur 99 % début/fin ; budget non tenu. Écart 3/5 non nul, publié dans REFLETS-S265 ; reste optionnel.
+
+P5 : rituel terminé, maillons 0 pour le filtrage consommé par l’image et reçu numériquement.
+R7 reste en attente de verdict perceptif ; jeton libre.

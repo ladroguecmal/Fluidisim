@@ -3655,3 +3655,12 @@ coupure de la queue à la `mss` de Cox–Munk au même vent. La rugosité est do
 3, 5 et 8,37 m/s. **Constat nouveau** : la pointe `c40` décroît avec le vent (0,12 à 3 m/s), sous la
 borne de Cox–Munk à faible vent, parce que `M` = 2 est un ajustement à 8 m/s. Le vent de la scène
 représentative attend le choix de l'utilisateur (R6). Suite 470 / 18 / 0.
+
+*S265, 2026-09-17 — A287 partielle, sévérité 2 conservée.* Verdict R6 : zones entre pics moyens
+et petits trop rugueuses, aucun vent choisi. ADR-161 construit une transition de la queue filtrée
+vers une covariance de pentes dans l'éclairage ; 15 000 sondes GPU reçues, témoin R6 au bit.
+R7 en attente. Fermeture gaussienne au premier ordre sous CWM, pas de masquage microfacette,
+variance perdue de la bande géométrique non transférée. Quadrature 3×3/5×5 encore différente,
+surtout vue haute (P99 RGB 25/255), budget eau dépassé à 2,49–2,71 ms en 3×3. Réception temporelle
+absente. Déclencheur : verdict R7 ; si aspect accepté, intégrer/précalculer l'éclairage pour réduire
+coût et erreur de quadrature avant adoption. [Preuve](../validation/REFLETS-S265.md).

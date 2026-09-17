@@ -221,6 +221,32 @@ crêtes se resserrent et les creux s'étalent. Le jacobien vaut `J = I + ∂D`, 
 `∂D_ij = −Σ a·k·d_i·d_j·sin ψ`. Les pentes eulériennes valent `J⁻ᵀ·∇αη`, et une statistique
 eulérienne se pondère par `det J`. Un repli (`det J ≤ 0`) marque la limite du modèle.
 
+## 1 nonies. Fermeture du reflet de la queue — S265, ADR-161
+
+Pour une onde de pente `a k cos(phi)`, une phase uniforme donne `E[cos]=0` et
+`E[cos²]=1/2`, donc la covariance `C_i = a² k kᵀ/2`. Avec un poids d'amplitude `w_i`,
+la part résolue vaut `w_i² C_i` ; la part statistique complémentaire vaut `(1-w_i²) C_i`.
+Cette décomposition conserve les seconds moments des ondes linéaires indépendantes.
+La modulation d'amplitude multiplie les deux parts par son carré ; un changement linéaire
+local `A = J⁻ᵀ` transporte la covariance par `A C Aᵀ`.
+
+La transformée d'un filtre gaussien isotrope d'écart type `h` donne `exp(-(kh)²/2)`.
+ADR-161 la multiplie par le poids Nyquist d'ADR-148. **Largeur d'un pixel : choix numérique
+à calibrer par R7 / REFLETS-S265**, pas une constante de l'eau. Les fluctuations non résolues
+sont fermées par une gaussienne : approximation, particulièrement pour la pointe de CWM.
+
+Quadrature de N(0,1), moments vérifiés sur GPU :
+- ordre 3 : nœuds `0, ±sqrt(3)`, poids `2/3, 1/6, 1/6` ;
+- ordre 5 : nœud `0`, poids `8/15` ; nœuds `±sqrt(5-sqrt(10))`, poids
+  `(7+2sqrt(10))/60` ; nœuds `±sqrt(5+sqrt(10))`, poids `(7-2sqrt(10))/60`.
+
+Le produit tensoriel 2D et Cholesky donnent les pentes de covariance C. Il intègre exactement
+les polynômes jusqu'au degré 5 par axe à l'ordre 3, pas un ciel arbitraire.
+Le principe de transition géométrie/normales/réflectance vient de
+[Bruneton, Neyret, Holzschuch, 2010](https://doi.org/10.1111/j.1467-8659.2009.01618.x) ;
+la fermeture simplifiée et l'habillage de banc de ce lot ne sont pas leur BRDF complète.
+Voir [réception et limites](../validation/REFLETS-S265.md).
+
 ## 2. Stabilité et coût d'un solveur volumétrique
 
 ### 2.1 CFL
