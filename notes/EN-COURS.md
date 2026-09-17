@@ -70,9 +70,9 @@ Comparaison à vent fixé pour isoler le changement ; aucun vent représentatif 
 ### Plan
 
 - [x] **P1** — amorce et plan seuls.
-- [>] **P2** — consigner le verdict ; examiner queue, modulation et réflexion ; définir le
+- [x] **P2** — consigner le verdict ; examiner queue, modulation et réflexion ; définir le
   remède et les critères avant code (ADR si décision nouvelle).
-- [ ] **P3** — construire le remède borné dans l'hôte avec ses contrôles numériques ciblés.
+- [>] **P3** — construire le remède borné dans l'hôte avec ses contrôles numériques ciblés.
 - [ ] **P4** — recevoir le chemin GPU, comparer avant/après aux mêmes poses, fournir R7.
 - [ ] **P5** — rituel §6 : preuves, file, feuille de route, journal, jeton.
 
@@ -81,3 +81,6 @@ Comparaison à vent fixé pour isoler le changement ; aucun vent représentatif 
 Le travail visuel est explicitement demandé. Les bords ouverts J2 restent un lot de capacité
 indépendant ; cette session vise une correction consommée par l'image, pas une nouvelle calibration
 indéfinie. Si les preuves infirment le remède, publier ce résultat et replanifier avant construction.
+
+P2 : miroir par pixel après coupure de pente confirmé dans le shader ; ADR-161 et protocole
+REFLETS-S265 écrits. Fermeture gaussienne de seconds moments, limites CWM déclarées.

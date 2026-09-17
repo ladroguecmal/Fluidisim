@@ -434,3 +434,12 @@ Question : quel vent se rapproche de la mer recherchée, et quel défaut reste v
 Sans ce retour, aucun vent représentatif n'est adopté. Le lot suivant dépend du défaut :
 transition vers la BRDF si le grain reste gênant ; modulation selon le vent si la répartition
 entre pics et zones lisses reste en cause. Ce sont des pistes à mesurer, pas des diagnostics reçus.
+
+### Verdict R6 — reçu S265, 2026-09-17
+
+« la surface a l'air trop rugueuse, entre les pic moyen et pic même plus petit la surface doit etre plus lisse ».
+Le retour précise la répartition locale du détail ; **aucun vent choisi**. Hypothèse à éprouver :
+reflets insuffisamment filtrés de la queue proche de la résolution, avant de retoucher sa modulation
+physique. Le shader retire de la variance sans la transférer à l'éclairage. Lot ADR-161 : fermeture
+statistique du reflet ; le témoin 5 m/s sert uniquement à isoler le changement. Les références
+photographiques antérieures ne sont pas présentes dans cette copie ; leur description reste au registre.
