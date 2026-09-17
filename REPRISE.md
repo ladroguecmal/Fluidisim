@@ -8,12 +8,12 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-17 07:38 +02:00
+JETON            : occupé
+Battement        : 2026-09-17 07:45 +02:00
 Agent            : Claude Opus 5, Claude Code (fichiers, git, cargo, Python, GPU local, accès web)
-Session en cours : aucune
+Session en cours : S262 — réparer les défauts restants : ligne d'horizon, coût GPU > 2 ms, écart au jeu (A288)
 Dernière session : S261 — habillage ciel clair (référence A) ; rugosité ajustée à Cox–Munk (ADR-158) ; R5 envoyée
-Session suivante : S262 — verdict R5 ; sinon vent de la scène comme paramètre, ou transition vers la BRDF (grain proche)
+Session suivante : à fixer au rituel de S262
 Maillons        : 0
 
 ```

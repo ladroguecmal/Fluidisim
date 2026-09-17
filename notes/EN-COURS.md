@@ -58,53 +58,36 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S261 — terminée
+Session : S262 — en cours
 Agent : Claude Opus 5, Claude Code ; fichiers, git, cargo, Python et GPU local disponibles.
-Entrée (2026-09-17 07:25) : « Change le ciel et la couleur comme sur ma photo, puis je trouve que la
-mer a l'air trop rugueuse, la surface entre pics est plutôt lisse, mais il y a beaucoup de petites
-vaguelettes. » Master propre a69259f, jeton libre, maillons 0.
+Entrée (2026-09-17 07:44) : « Répare d'abord les défauts restants avant de peaufiner le visuel. »
+Master propre 1e89da7, jeton libre, maillons 0. Le verdict R5 attend ; les finitions (vent de la
+scène, transition vers la BRDF) passent après.
 
-Deux demandes, dans l'ordre donné.
+Défauts restants, publiés en S260–S261, dans l'ordre de traitement :
 
-**A. Habillage « ciel clair » de la référence A** : ciel bleu profond dégradé vers un horizon pâle,
-nuages blancs, eau bleu saturé, air clair. Réglage de l'hôte sans physique, **étiqueté comme
-habillage** (REVUE-VISUELLE §4), sélectionnable : l'habillage brumeux reste disponible pour rejouer
-R1–R4 au bit. Aperçu envoyé dès qu'il existe.
-
-**B. Verdict R4 sur la rugosité.** Consigner, classer, mesurer, puis corriger. Hypothèses : (1) `mss`
-13 % au-dessus de Cox–Munk (0,0495 contre 0,0437) ; (2) rugosité fine **uniforme dans l'espace**,
-alors que l'observation décrit des facettes lisses entre les pics et des vaguelettes groupées :
-c'est la modulation des ondes courtes par les plus longues, que Cox–Munk mesure par la pointe `c40`
-(0,40, contre 0,21 construit) ; (3) grain des ondes proches de la résolution. Remèdes évalués par
-l'instrument S260 avant construction ; tout ajustement contre Cox–Munk sera déclaré comme tel.
+1. **Ligne d'horizon** : la grille projetée s'arrête à 1 500 m, ce que l'air clair révèle. Critère :
+   sous `--ciel-clair`, grille prolongée jusqu'à l'horizon géométrique `√(2·R·h)`, R = 6 371 km,
+   raccord à la couleur d'horizon ; sous la brume, grille et projection CPU **au bit** (1 500 m).
+2. **Coût** : GPU eau 2,24–2,26 ms sous `--vagues --modulation --ciel-clair` en 1280×720, pour 2 ms
+   (ADR-125). Critère : décomposer (cuisson du sillage, sommets, fragments, ciel) ; supprimer le
+   travail dupliqué **sans changer l'image au-delà de l'arrondi** ; accord CPU/GPU conservé ; coût
+   publié avec les techniques présentes et absentes (ADR-131). Si 2 ms ne sont pas atteints, le dire.
+3. **A288, écart au jeu** : la surface rendue sous CWM s'écarte jusqu'à 0,365 m de la requête de
+   jeu. Critère : requête eulérienne CWM dans le cœur (inversion de `x = α + D(α)`), dont l'élévation
+   égale celle de la surface rendue à 1 mm près, avec convergence bornée et refus explicite.
 
 ### Plan
 
-- [x] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — verdict R4 et demande d'habillage consignés et classés.
-- [x] **P3** — habillage « ciel clair » (hôte, sélectionnable), scènes brumeuses au bit, aperçu envoyé.
-- [x] **P4** — mesure : `mss`, pointe et intermittence de la rugosité des candidats (modulation par
-  échelles, coupure), critère écrit avant.
-- [x] **P5** — ADR et protocole du remède retenu.
-- [x] **P6** — construction cœur/hôte, vérification CPU/GPU.
-- [x] **P7** — réception : statistiques, coût, rendus R5 envoyés.
-- [x] **P8** — rituel §6.
+- [>] **P1** — amorce, jeton et plan seuls.
+- [ ] **P2** — ligne d'horizon : distance lointaine en uniforme et dans `lod::Projection`, raccord ;
+  brume au bit (R2–R4, `--spectral-verify`), rendu clair vérifié.
+- [ ] **P3** — coût : décomposition mesurée, fusion des boucles de bande par sommet, invariants de
+  la queue précalculés ; accord CPU/GPU ; coût.
+- [ ] **P4** — ADR et protocole de la requête eulérienne CWM (A288).
+- [ ] **P5** — cœur : requête, convergence, refus ; essais.
+- [ ] **P6** — hôte : requête contre surface rendue ; écart publié.
+- [ ] **P7** — rituel §6.
 
 ### Notes de reprise
 
-P3 : habillage « ciel clair » (`--ciel-clair`, `eye.w`) : ciel dégradé horizon (0,694 ; 0,838 ; 0,930) → zénith
-(0,015 ; 0,15 ; 0,60) linéaire, nuages en bruit de valeur 4 octaves (plan 1,2 km, effacés sous 3°), eau
-(0,004 ; 0,06 ; 0,17), brume 6 km, reflet solaire ×1,2. Premier jet : colonnes de nuages à l'horizon
-(plan projeté dégénéré) et ciel pâle, corrigés. R4 rejoué au bit (brume par défaut). Aperçu r5a
-(`captures/s261/r5a.txt`). Artefact révélé par l'air clair : ligne à la fin de la grille (1 500 m).
-
-P4 : `examples/modulation_rugosite.rs`. Retenu bQ 28, bande, M 2 (mss 0,0435 ; c40 0,353 ; score 0,150) ;
-cascade M 1,5 proche (0,169). Surface « lisse » 0,3 % seulement : Cox–Munk borne la modulation ; vent plus
-faible ou transition BRDF nommés. P5 : ADR-158 et protocole RUGOSITE-S261.
-
-P6 : `--modulation` (queue 60 lignes ≤ 28 fp, M 2 dans `up.w`, ε de bande en varying), `cwm_reference` coupée et
-modulée. `--cwm-verify --modulation` : pente 2,82e-4, det min 0,337, 0 repli, pente max 0,751 ; sans modulation,
-ligne S260 identique. Compte analytique : centres 4·8^((i+½)/64) ≤ 28 ⇒ i ≤ 59 ⇒ 60. R2, R3, R4 identiques au bit.
-
-P7 : coût 1280×720 --vagues 2,182/2,262 ; +ciel clair 2,296/2,275 ; +modulation 2,244/2,259 ms (max isolé 4,73
-non attribué). R5 rendue deux fois, empreintes identiques, envoyée. Suite 466/18/0, afficheur 16/1/0.
