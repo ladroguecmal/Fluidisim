@@ -83,7 +83,7 @@ l'instrument S260 avant construction ; tout ajustement contre Cox–Munk sera d�
 - [x] **P1** — amorce, jeton et plan seuls.
 - [x] **P2** — verdict R4 et demande d'habillage consignés et classés.
 - [x] **P3** — habillage « ciel clair » (hôte, sélectionnable), scènes brumeuses au bit, aperçu envoyé.
-- [ ] **P4** — mesure : `mss`, pointe et intermittence de la rugosité des candidats (modulation par
+- [>] **P4** — mesure : `mss`, pointe et intermittence de la rugosité des candidats (modulation par
   échelles, coupure), critère écrit avant.
 - [ ] **P5** — ADR et protocole du remède retenu.
 - [ ] **P6** — construction cœur/hôte, vérification CPU/GPU.

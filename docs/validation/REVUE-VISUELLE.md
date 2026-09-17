@@ -345,3 +345,17 @@ beaucoup de petites vaguelettes. Hypothèses, écrites avant mesure :
 Classe provisoire : physique incomplète (modulation absente) et possible artefact numérique
 (grain). Mesure au §11 suite, avant toute correction.
 
+**Critère de choix, écrit avant la mesure (S261).** Candidats, tous avec la queue d'équilibre et CWM
+d'ADR-157 :
+- coupure de la queue `b_Q` (32 ou 28) ;
+- modulation de l'énergie des ondes courtes, soit par la bande seule, soit **en cascade** : chaque
+  composante de la queue est modulée par toutes celles au moins quatre fois plus longues, rapport
+  de séparation d'échelles déclaré et non ajusté ;
+- intensité `M`.
+
+On retient le candidat sans repli dont la `mss` tient dans ±0,004 de Cox–Munk, et dont les écarts
+de `c40`, `c22` et `c04` à leurs valeurs centrales, rapportés à leurs incertitudes, ont la plus
+petite somme des carrés. `M` et `b_Q` sont alors des **ajustements déclarés** contre Cox–Munk, et non
+des lois. Indicateur de l'image : part de la surface où l'énergie des vaguelettes de moins de 50 cm
+tombe sous la moitié de sa moyenne, c'est-à-dire la « surface lisse entre les pics ».
+
