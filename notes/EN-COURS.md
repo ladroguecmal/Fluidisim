@@ -86,7 +86,7 @@ Défauts restants, publiés en S260–S261, dans l'ordre de traitement :
   la queue précalculés ; accord CPU/GPU ; coût.
 - [x] **P4** — ADR et protocole de la requête eulérienne CWM (A288).
 - [x] **P5** — cœur : requête, convergence, refus ; essais.
-- [ ] **P6** — hôte : requête contre surface rendue ; écart publié.
+- [x] **P6** — hôte : requête contre surface rendue ; écart publié.
 - [ ] **P7** — rituel §6.
 
 ### Notes de reprise
@@ -111,3 +111,6 @@ P5 : `background_cwm.rs` (`cwm_query_local`, `cwm_query`, `CwmSample`, `CwmError
 tolérance max(0,1 mm ; 8 ulp(|x|)). Essais : Gerstner α 3,7e-5 m, η 4,8e-6, ≤ 2 itérations ; mer de la scène
 10⁴ points α 1,86e-4 m, η 3,8e-5 m, ≤ 3 itérations, requête linéaire à 0,267 m ; repli 41 refus / 259 acceptés ;
 domaine et NaN refusés.
+
+P6 : `--cwm-query-verify` : 5 592 sondes, 0 refus, ≤ 3 itérations, α 3,93e-4 m, hauteur requête/rendu 3,0e-4 m,
+linéaire 0,3651 m. Suite 469/18/0, afficheur 16/1/0.

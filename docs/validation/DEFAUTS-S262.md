@@ -85,3 +85,29 @@ Contrat : [ADR-159](../adr/ADR-159-requete-de-jeu-sous-cwm.md).
    composée avec W au point rendu `α`, redonne `q` et `h` à 3 mm près, tolérance de `verify`.
    L'écart au jeu passe de 0,365 m à moins de 3 mm.
 5. Aucune allocation ; les requêtes linéaires existantes restent inchangées au bit.
+
+### Construction
+
+- **Cœur** : `background_cwm.rs`, qui fournit `Background::cwm_query_local`, `cwm_query`, `CwmSample`
+  et `CwmError`. Newton depuis `x − D_B(x)` ; arrêt au résidu `max(0,1 mm ; 8 ulp)`, note datée
+  d'ADR-159. Refus : `Domain`, `Fold`, `Convergence`, `NonFinite`.
+- **Hôte** : `--cwm-query-verify`. Sondes `q` ; déplacement et hauteur du GPU au même point ; requête
+  du cœur en `x = q + D` ; W composé en `α` par `references`.
+
+### Résultats
+
+| critère | résultat |
+|---|---|
+| 1. onde de Gerstner seule, 200 points | `α` à **3,7·10⁻⁵ m**, `η` à 4,8·10⁻⁶ m, au plus 2 itérations — **tenu** |
+| 2. mer de la scène, 10⁴ points de Lagrange | `α` à **1,9·10⁻⁴ m**, `η` à **3,8·10⁻⁵ m**, au plus 3 itérations ; la requête linéaire s'en écarte de 0,267 m — **tenu** |
+| 3. refus | onde repliée (`a·k` = 2,09) : 41 refus `Fold` sur 300, 259 acceptés ; hors domaine et NaN refusés — **tenu** |
+| 4. contre l'image GPU, 5 592 sondes, 2 poses × 2 âges | **aucun refus**, au plus 3 itérations ; `α` à **0,39 mm** de `q` ; hauteur de la requête contre surface rendue **0,30 mm**, contre **0,365 m** pour la requête linéaire — **tenu** |
+| 5. allocations, requêtes existantes | aucune collection dans la requête ; `eval`, `differential_local` et essais antérieurs inchangés |
+
+**A288 est close** : sous `--vagues`, un consommateur de jeu qui appelle `cwm_query` et compose W en
+`α` obtient la surface affichée à 0,3 mm près, au lieu de 36 cm. Suite du dépôt **469 / 18 / 0**,
+afficheur 16 / 1 / 0.
+
+**Limite.** Au loin, l'image filtre des modes de B (ADR-148) que la requête garde ; l'écart y est
+celui du filtre, et non celui de CWM. La requête n'est branchée à aucun consommateur de jeu réel :
+il n'en existe pas encore.

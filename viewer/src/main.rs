@@ -1905,6 +1905,56 @@ fn run() -> Result<(), String> {
             return revue_images(&mut frame, &format!("r6{tag}"));
         }
     }
+    // S262 (DEFAUTS-S262 §3, critère 4, ADR-159) : la requête de jeu CWM du cœur contre la surface
+    // réellement rendue — sommet GPU en q + D_B(q), hauteur GPU water(q). Écart linéaire en regard.
+    if args.iter().any(|a| a == "--cwm-query-verify") {
+        if !frame.cwm {
+            return Err("--cwm-query-verify demande --vagues".into());
+        }
+        let instance = instance();
+        let g = pollster::block_on(gpu::Gpu::new(&instance, None, 640, 360,
+            frame.profile.len(), scene::WAKE_CAPACITY))?;
+        let mut g = g;
+        let (mut worst_alpha, mut worst_h, mut worst_linear, mut refused, mut n, mut max_it) = (0f64, 0f64, 0f64, 0usize, 0usize, 0u32);
+        for pose in 0..2 {
+            frame.camera = if pose == 0 { Camera::default() } else { grazing_camera() };
+            for age in [3., 12.] {
+                frame.update(age, age, true);
+                g.upload(&frame);
+                let eye = frame.camera.eye;
+                let q: Vec<[f32; 2]> = gpu::probes(eye).iter().step_by(5).map(|p| [p[0] - eye[0], p[1] - eye[1]]).collect();
+                let disp = g.evaluate_spectral(&q.iter().map(|p| [p[0], p[1], 0., 3.]).collect::<Vec<_>>())?;
+                let height = g.evaluate_spectral(&q.iter().map(|p| [p[0], p[1], 0., 0.]).collect::<Vec<_>>())?;
+                let x: Vec<[f32; 2]> = q.iter().zip(&disp).map(|(p, d)| [p[0] + d[0], p[1] + d[1]]).collect();
+                let mut alpha = Vec::with_capacity(x.len());
+                let mut kept = Vec::with_capacity(x.len());
+                for (i, xi) in x.iter().enumerate() {
+                    let world = water_core::types::WorldPos::from_metres((xi[0] + eye[0]) as f64, (xi[1] + eye[1]) as f64, 0.);
+                    match scene.background.cwm_query(world, frame.time) {
+                        Ok(s) => {
+                            max_it = max_it.max(s.iterations);
+                            alpha.push([s.alpha[0] - eye[0], s.alpha[1] - eye[1]]);
+                            kept.push(i);
+                        }
+                        Err(_) => refused += 1,
+                    }
+                }
+                let at_alpha = frame.references(&alpha)?;
+                let at_x = frame.references(&x)?;
+                for (j, &i) in kept.iter().enumerate() {
+                    n += 1;
+                    worst_alpha = worst_alpha.max(((alpha[j][0] - q[i][0]) as f64).hypot((alpha[j][1] - q[i][1]) as f64));
+                    worst_h = worst_h.max((at_alpha[j][0] as f64 - height[i][0] as f64).abs());
+                    worst_linear = worst_linear.max((at_x[i][0] as f64 - height[i][0] as f64).abs());
+                }
+            }
+        }
+        println!("CWM_QUERY_VERIFY points={n} refus={refused} iterations_max={max_it} ecart_alpha_m={worst_alpha:.3e} ecart_hauteur_requete_cwm_m={worst_h:.3e} ecart_hauteur_requete_lineaire_m={worst_linear:.4}");
+        if worst_alpha > 0.003 || worst_h > 0.003 || refused > 0 {
+            return Err(format!("requête CWM hors tolérance : alpha {worst_alpha}, hauteur {worst_h}, refus {refused}"));
+        }
+        return Ok(());
+    }
     // S260 (VAGUES-POINTUES-S260, critères 5, 6 et 8) : CWM GPU contre référence CPU f64.
     if args.iter().any(|a| a == "--cwm-verify") {
         if !frame.cwm {
