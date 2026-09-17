@@ -58,40 +58,21 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S263 — terminée
-Agent : Claude Opus 5, Claude Code ; fichiers, git, cargo, Python et GPU local disponibles.
-Entrée (2026-09-17 08:09), verdict R5 : « trop rugueuse, trop de petits pics, je ne connais pas le
-niveau de vent ». Master propre 7a88546, jeton libre, maillons 0.
+Session : S264 — en cours
+Agent : Codex, GPT-6 ; fichiers, git, cargo et Python disponibles.
+Entrée : « reprends le projet ». Master propre afcf927 ; une seule copie de travail ;
+branche historique B conservée ; jeton libre à l'ouverture.
 
-Constat S261 : Cox–Munk borne la rugosité **à un vent donné**, et la scène est une mer pleinement
-développée à environ 8,4 m/s. Tout ce qui fait « trop rugueux » dépend du vent : `Hs` et `Tp` par
-Pierson–Moskowitz, `mss` par Cox–Munk (SPEC-001 §1 sexies). Le vent de la référence est inconnu.
-
-Objectif : **le vent devient un paramètre de la scène** (`--vent=U`), dont se déduisent la mer de vent
-(`Hs = 0,21·U²/g`, `ωp = 0,877·g/U`) et la coupure de la queue. Celle-ci est choisie pour que la `mss`
-totale égale Cox–Munk au même vent, sans jamais dépasser la limite gravité-capillarité (1,7 cm).
-Houle, modulation `M` = 2 et CWM sont inchangés. **Calibration perceptive** : l'utilisateur choisit
-parmi des rendus à 3, 5 et 8,4 m/s, tous conformes à Cox–Munk à leur vent. Sans `--vent`, toutes
-les scènes restent au bit.
+Objectif : reprendre la file active, vérifier les acquis S263 et présenter la calibration R6
+pour recueillir le choix visuel dont dépend le prochain lot. Ne pas inventer ce verdict.
 
 ### Plan
 
-- [x] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — verdict R5 consigné ; ADR-160 (vent de scène) et protocole, avant code.
-- [x] **P3** — hôte : recette de vent, queue coupée à la `mss` de Cox–Munk ; instrument statistique
-  par vent (`mss`, pointe, replis) ; scènes existantes au bit.
-- [x] **P4** — rendus de calibration R6 (trois vents × poses) envoyés, consignés.
-- [x] **P5** — rituel §6.
+- [x] **P1** — amorce Git, prise du jeton et plan seuls.
+- [>] **P2** — lecture à froid, contrôle des preuves et des rendus R6, vérifications ciblées ;
+  présenter les choix de vent et consigner le prochain lot selon la réponse disponible.
+- [ ] **P3** — rituel de fin §6, file active relue, passation et jeton libéré.
 
 ### Notes de reprise
 
-P3 : cœur `fully_developed_wind_sea`, `cox_munk_mss`, `capillary_ratio`, `tail_count_for_mss` (essai s263) ; hôte
-`Scene::build(houle, vagues, wind)`, `--vent=U`, `wind_report`. Queue gardée / mss / Cox–Munk : 3 m/s 43 lignes (coupure
-capillaire 21 fp) 0,0182/0,0184 ; 5 m/s 50 lignes 0,0290/0,0286 ; 8,37 m/s 64 lignes (limite de cuisson 32 fp)
-0,0446/0,0459. Instrument `vent_rugosite` : mss rendue 0,0184/0,0295/0,0457, c40 0,124/0,234/0,359, c22 0,046/0,081/0,122,
-c04 0,139/0,234/0,364, 0 repli. Sans vent : R2 et scène complète identiques au code S262 final (empreintes
-`captures/s262/revue-s262-final.txt`). `--cwm-verify --vent=5` pente 2,05e-4, `--cwm-query-verify --vent=5` 0,29 mm ;
-`--vent=3` pente 1,26e-4 ; 0 repli.
-
-P4 : R6 rendue (3 vents × 7 poses, `captures/s263/revue.log`), neuf images envoyées (rasante, référence, haute).
-Suite 470/18/0, afficheur 16/1/0.
+Le choix R6 est explicitement attendu depuis S263. Aucun changement du rendu avant ce verdict.

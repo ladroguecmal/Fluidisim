@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-17 08:22 +02:00
-Agent            : Claude Opus 5, Claude Code (fichiers, git, cargo, Python, GPU local, accès web)
-Session en cours : aucune
+JETON            : occupé
+Battement        : 2026-09-17 23:06 +02:00
+Agent            : Codex, GPT-6 (fichiers, git, cargo, Python ; GPU à vérifier)
+Session en cours : S264 — reprise et calibration R6
 Dernière session : S263 — vent de scène (ADR-160) : Pierson–Moskowitz + queue coupée à Cox–Munk ; calibration R6 envoyée (3, 5, 8,37 m/s)
 Session suivante : S264 — choix du vent (R6) par l'utilisateur ; puis transition vers la BRDF ou dépendance de M au vent selon le verdict
 Maillons        : 0
