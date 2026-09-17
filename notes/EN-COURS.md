@@ -83,9 +83,9 @@ l'instrument S260 avant construction ; tout ajustement contre Cox–Munk sera d�
 - [x] **P1** — amorce, jeton et plan seuls.
 - [x] **P2** — verdict R4 et demande d'habillage consignés et classés.
 - [x] **P3** — habillage « ciel clair » (hôte, sélectionnable), scènes brumeuses au bit, aperçu envoyé.
-- [>] **P4** — mesure : `mss`, pointe et intermittence de la rugosité des candidats (modulation par
+- [x] **P4** — mesure : `mss`, pointe et intermittence de la rugosité des candidats (modulation par
   échelles, coupure), critère écrit avant.
-- [ ] **P5** — ADR et protocole du remède retenu.
+- [x] **P5** — ADR et protocole du remède retenu.
 - [ ] **P6** — construction cœur/hôte, vérification CPU/GPU.
 - [ ] **P7** — réception : statistiques, coût, rendus R5 envoyés.
 - [ ] **P8** — rituel §6.
@@ -97,3 +97,7 @@ P3 : habillage « ciel clair » (`--ciel-clair`, `eye.w`) : ciel dégradé horiz
 (0,004 ; 0,06 ; 0,17), brume 6 km, reflet solaire ×1,2. Premier jet : colonnes de nuages à l'horizon
 (plan projeté dégénéré) et ciel pâle, corrigés. R4 rejoué au bit (brume par défaut). Aperçu r5a
 (`captures/s261/r5a.txt`). Artefact révélé par l'air clair : ligne à la fin de la grille (1 500 m).
+
+P4 : `examples/modulation_rugosite.rs`. Retenu bQ 28, bande, M 2 (mss 0,0435 ; c40 0,353 ; score 0,150) ;
+cascade M 1,5 proche (0,169). Surface « lisse » 0,3 % seulement : Cox–Munk borne la modulation ; vent plus
+faible ou transition BRDF nommés. P5 : ADR-158 et protocole RUGOSITE-S261.

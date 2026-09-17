@@ -359,3 +359,30 @@ petite somme des carrés. `M` et `b_Q` sont alors des **ajustements déclarés**
 des lois. Indicateur de l'image : part de la surface où l'énergie des vaguelettes de moins de 50 cm
 tombe sous la moitié de sa moyenne, c'est-à-dire la « surface lisse entre les pics ».
 
+**Résultat** (`cargo run --release -p water-core --example modulation_rugosite`, journal
+`code/target/s261-modulation.log`, 10⁶ points). Cox–Munk : `mss` 0,0437, `c40` 0,40, `c22` 0,12,
+`c04` 0,23.
+
+| candidat (queue f⁻⁴ + CWM) | `mss` | `c40` | `c22` | `c04` | score | surface « lisse » |
+|---|---:|---:|---:|---:|---:|---:|
+| `b_Q` 32, sans modulation (R4) | 0,0493 | 0,213 | 0,072 | 0,205 | 1,31 | 0,0 % |
+| `b_Q` 28, sans modulation | 0,0434 | 0,178 | 0,067 | 0,170 | 1,75 | 0,0 % |
+| **`b_Q` 28, bande, `M` = 2 — retenu** | **0,0435** | **0,353** | **0,129** | **0,351** | **0,150** | 0,3 % |
+| `b_Q` 28, cascade, `M` = 1,5 | 0,0435 | 0,375 | 0,134 | 0,360 | 0,169 | 0,3 % |
+| `b_Q` 28, bande, `M` = 3 | 0,0435 | 0,510 | 0,181 | 0,498 | 1,70 | 3,6 % |
+| `b_Q` 28, cascade, `M` = 3 | 0,0436 | 0,727 | 0,250 | 0,677 | 7,94 | 9,7 % |
+
+Aucun repli. Tous les candidats en `b_Q` 32 sont hors de ±0,004 en `mss`.
+
+- **Hypothèse 1 confirmée** : la coupure à 32 fp donne 13 % de rugosité en trop. À 28 fp, 0,0435.
+- **Hypothèse 2 confirmée, mais bornée par l'observation.** La modulation rapproche la pointe de
+  Cox–Munk : le score passe de 1,75 à 0,15 avec `M` = 2. Mais **Cox–Munk n'autorise qu'une modulation
+  modérée** : au-delà de `M` ≈ 2, la pointe dépasse l'observé. À `M` = 2, la surface où les vaguelettes
+  tombent sous la moitié de leur énergie reste de 0,3 %. **Une mer franchement lisse entre les pics
+  n'est pas compatible avec Cox–Munk à ce vent.**
+- **Ce qui l'expliquerait sans contredire l'observation** : un **vent plus faible**. La scène est
+  une mer de vent pleinement développée à environ 8 m/s ; à 4 m/s, Cox–Munk donne une `mss` de
+  0,023, soit moitié moins. Ou le **grain** des ondes proches de la résolution (hypothèse 3), que
+  la transition vers une rugosité de BRDF traiterait (Bruneton, Neyret et Holzschuch, 2010). Aucun des
+  deux n'est construit dans ce lot : ils sont nommés.
+- `M` = 2 et `b_Q` = 28 sont des **ajustements déclarés** contre Cox–Munk (critère ci-dessus).
