@@ -13492,3 +13492,26 @@ BRDF (grain, « petits pics » restants), dépendance de `M` au vent, anisotropi
 **Rituel.** A287 actualisée ; file active (revue, A287) ; feuille de route J1 ; liste 2.1 ; index
 (ADR-160, preuve) ; jeton. Invariants relus : I-14 (Pierson–Moskowitz et Cox–Munk cités ; vent choisi
 par revue, déclaré), I-03 (scènes sans vent au bit).
+
+## S264 — Reprise vérifiée, calibration R6 disponible
+
+**2026-09-17, Codex GPT-6.** Entrée : « reprends le projet ». Master propre afcf927,
+une seule copie de travail, branche historique B conservée, jeton libre. Plan 1d8538b,
+vérifications et protocole R6 7c6dcf7.
+
+**Vérifié :** les 21 empreintes des PPM S263 correspondent au journal local, les neuf aperçus PNG
+ont exactement les mêmes pixels. Test ciblé `cargo test -p water-core s263` : **1 réussi, 0 échec**.
+Commandes, pose, couches et limites des images de référence consignées dans REVUE-VISUELLE §13.
+Pas de changement du code, pas de nouvelle exécution GPU ni de réception multiplateforme.
+Les suites complètes restent celles consignées en S263, sans être revendiquées comme rejouées.
+
+**Choix demandé :** vent de 3, 5 ou 8,37 m/s ; aucun verdict nouveau reçu pendant la reprise.
+La poursuite du visuel dépend de ce choix selon ADR-160 ; ni BRDF ni modulation supplémentaire
+construites. Face à ce fil visuel prolongé, les bords ouverts du couplage B/W→δ (J2) restent un
+lot de capacité distinct et utile ; aucune campagne visuelle supplémentaire engagée en attente.
+
+**Rituel :** toute la file active relue, revue R6 actualisée, invariants I-03/I-13/I-14 relus ;
+aucune capacité ni angle mort nouveau, feuille de route inchangée. Maillons **1**.
+Prochaine session : recueillir le verdict R6 puis choisir le lot de construction qu'il justifie ;
+δ, V, B2, bathymétrie et multiplateforme conservent leurs déclencheurs dans la file active.
+Jeton libéré ; aucune copie isolée à fermer.
