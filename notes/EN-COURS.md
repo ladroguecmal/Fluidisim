@@ -58,59 +58,30 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S262 — terminée
+Session : S263 — en cours
 Agent : Claude Opus 5, Claude Code ; fichiers, git, cargo, Python et GPU local disponibles.
-Entrée (2026-09-17 07:44) : « Répare d'abord les défauts restants avant de peaufiner le visuel. »
-Master propre 1e89da7, jeton libre, maillons 0. Le verdict R5 attend ; les finitions (vent de la
-scène, transition vers la BRDF) passent après.
+Entrée (2026-09-17 08:09), verdict R5 : « trop rugueuse, trop de petits pics, je ne connais pas le
+niveau de vent ». Master propre 7a88546, jeton libre, maillons 0.
 
-Défauts restants, publiés en S260–S261, dans l'ordre de traitement :
+Constat S261 : Cox–Munk borne la rugosité **à un vent donné**, et la scène est une mer pleinement
+développée à environ 8,4 m/s. Tout ce qui fait « trop rugueux » dépend du vent : `Hs` et `Tp` par
+Pierson–Moskowitz, `mss` par Cox–Munk (SPEC-001 §1 sexies). Le vent de la référence est inconnu.
 
-1. **Ligne d'horizon** : la grille projetée s'arrête à 1 500 m, ce que l'air clair révèle. Critère :
-   sous `--ciel-clair`, grille prolongée jusqu'à l'horizon géométrique `√(2·R·h)`, R = 6 371 km,
-   raccord à la couleur d'horizon ; sous la brume, grille et projection CPU **au bit** (1 500 m).
-2. **Coût** : GPU eau 2,24–2,26 ms sous `--vagues --modulation --ciel-clair` en 1280×720, pour 2 ms
-   (ADR-125). Critère : décomposer (cuisson du sillage, sommets, fragments, ciel) ; supprimer le
-   travail dupliqué **sans changer l'image au-delà de l'arrondi** ; accord CPU/GPU conservé ; coût
-   publié avec les techniques présentes et absentes (ADR-131). Si 2 ms ne sont pas atteints, le dire.
-3. **A288, écart au jeu** : la surface rendue sous CWM s'écarte jusqu'à 0,365 m de la requête de
-   jeu. Critère : requête eulérienne CWM dans le cœur (inversion de `x = α + D(α)`), dont l'élévation
-   égale celle de la surface rendue à 1 mm près, avec convergence bornée et refus explicite.
+Objectif : **le vent devient un paramètre de la scène** (`--vent=U`), dont se déduisent la mer de vent
+(`Hs = 0,21·U²/g`, `ωp = 0,877·g/U`) et la coupure de la queue. Celle-ci est choisie pour que la `mss`
+totale égale Cox–Munk au même vent, sans jamais dépasser la limite gravité-capillarité (1,7 cm).
+Houle, modulation `M` = 2 et CWM sont inchangés. **Calibration perceptive** : l'utilisateur choisit
+parmi des rendus à 3, 5 et 8,4 m/s, tous conformes à Cox–Munk à leur vent. Sans `--vent`, toutes
+les scènes restent au bit.
 
 ### Plan
 
 - [>] **P1** — amorce, jeton et plan seuls.
-- [x] **P2** — ligne d'horizon : distance lointaine en uniforme et dans `lod::Projection`, raccord ;
-  brume au bit (R2–R4, `--spectral-verify`), rendu clair vérifié.
-- [x] **P3** — coût : décomposition mesurée, fusion des boucles de bande par sommet, invariants de
-  la queue précalculés ; accord CPU/GPU ; coût.
-- [x] **P4** — ADR et protocole de la requête eulérienne CWM (A288).
-- [x] **P5** — cœur : requête, convergence, refus ; essais.
-- [x] **P6** — hôte : requête contre surface rendue ; écart publié.
-- [x] **P7** — rituel §6.
+- [ ] **P2** — verdict R5 consigné ; ADR-160 (vent de scène) et protocole, avant code.
+- [ ] **P3** — hôte : recette de vent, queue coupée à la `mss` de Cox–Munk ; instrument statistique
+  par vent (`mss`, pointe, replis) ; scènes existantes au bit.
+- [ ] **P4** — rendus de calibration R6 (trois vents × poses) envoyés, consignés.
+- [ ] **P5** — rituel §6.
 
 ### Notes de reprise
 
-P2 : `Projection::far`, `FrameData::far_distance` (brume 1 500 ; ciel clair √(2·6 371 km·h), 9,44 km à 7 m),
-uniforme `impact.y`, raccord à la couleur d'horizon sur le dernier tiers. R2, R3, R4 et `--spectral-verify`
-identiques au bit ; afficheur 16/1/0. Rendu clair : tirets de fin de grille disparus. **Incident** : le rendu
-de contrôle `--revue=r5` a réécrit `captures/s261` (images R5 de S261, non versionnées ; reproductibles au
-commit 1e89da7, empreintes publiées) ; nouveaux rendus sous `--revue=r6` → `captures/s262`.
-
-P3 (coût) : décomposition 1280×720 référence avant : total 2,284, cuisson 1,272, queue par pixel ≈ 0,49, CWM
-sommets + queue f⁻⁴ ≈ 0,33, nuages ≈ 0,05 ms. Faits : (a) bande de chaque mode de sillage précalculée par l'hôte
-(seconde moitié du tampon, `spectral::band`, même `sqrt`) ; (b) `k` et direction unitaire de la queue
-précalculés ; (c) sommet CWM à une seule boucle de bande (`band_cwm` rend hauteur et pente, `perturbations`) ;
-(d) total de la grille = somme des 8 bandes ; (e) nuages à 2 octaves dans les reflets (habillage). Après :
-1280×720 1,985–2,005 (référence), 1,978–1,988 (rasante) ; 960×540 1,54–1,60 ms ; cuisson 1,06–1,10.
-Images : R2 0–3 octets sur 2,76 M (±1) après (a)–(c) ; scène complète 9–27 octets (≤ 8 niveaux, reflets) ;
-arrondi. `--spectral-verify` : chemin grille à la 7e décimale, reste au bit ; `--tail-verify`, `--cwm-verify`
-identiques ; `--multi --verify` 46 contrôles, max η 0,368 mm, LOD intérieur ≤ 0,39 mm (borne 2,5–3), coutures 4 µm.
-
-P5 : `background_cwm.rs` (`cwm_query_local`, `cwm_query`, `CwmSample`, `CwmError`), Newton depuis x − D(x),
-tolérance max(0,1 mm ; 8 ulp(|x|)). Essais : Gerstner α 3,7e-5 m, η 4,8e-6, ≤ 2 itérations ; mer de la scène
-10⁴ points α 1,86e-4 m, η 3,8e-5 m, ≤ 3 itérations, requête linéaire à 0,267 m ; repli 41 refus / 259 acceptés ;
-domaine et NaN refusés.
-
-P6 : `--cwm-query-verify` : 5 592 sondes, 0 refus, ≤ 3 itérations, α 3,93e-4 m, hauteur requête/rendu 3,0e-4 m,
-linéaire 0,3651 m. Suite 469/18/0, afficheur 16/1/0.
