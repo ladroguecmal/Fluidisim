@@ -133,6 +133,12 @@ sélectionnable `--ciel-clair`, brume au bit. Il juge la mer « trop rugueuse, l
 Mesuré, puis corrigé par un ajustement déclaré à Cox–Munk (ADR-158) : coupure 28 fp, modulation par
 la bande, `mss` 0,0435. Cox–Munk borne la modulation. GPU eau 2,24–2,26 ms ;
 [réception](validation/RUGOSITE-S261.md). R5 est en attente de verdict.
+**S262 : défauts réparés avant le visuel**, à la demande de l'utilisateur
+([preuve](validation/DEFAUTS-S262.md)) :
+- **horizon** : grille jusqu'à l'horizon géométrique sous le ciel clair ;
+- **coût** : précalculs et travail dupliqué supprimés, GPU eau 1,54–1,60 ms en 960×540 et 1,98–2,01 ms
+  en 1280×720 (avant 2,28 ms), image changée d'un arrondi seulement ;
+- **A288 close** : requête de jeu CWM à 0,30 mm de l'image, contre 0,365 m (ADR-159).
 Composition de la scène représentative par le cœur : faite S236 (mode union, ADR-142). Le choix du
 mode par un hôte autoritaire reste à trancher avec lui (A271).
 

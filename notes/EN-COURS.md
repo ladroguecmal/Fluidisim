@@ -58,7 +58,7 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S262 — en cours
+Session : S262 — terminée
 Agent : Claude Opus 5, Claude Code ; fichiers, git, cargo, Python et GPU local disponibles.
 Entrée (2026-09-17 07:44) : « Répare d'abord les défauts restants avant de peaufiner le visuel. »
 Master propre 1e89da7, jeton libre, maillons 0. Le verdict R5 attend ; les finitions (vent de la
@@ -87,7 +87,7 @@ Défauts restants, publiés en S260–S261, dans l'ordre de traitement :
 - [x] **P4** — ADR et protocole de la requête eulérienne CWM (A288).
 - [x] **P5** — cœur : requête, convergence, refus ; essais.
 - [x] **P6** — hôte : requête contre surface rendue ; écart publié.
-- [ ] **P7** — rituel §6.
+- [x] **P7** — rituel §6.
 
 ### Notes de reprise
 

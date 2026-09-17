@@ -23,7 +23,7 @@ coche et on pointe, sans recopier (L137).
 Un point n'est jamais validé sur un banc isolé, un véhicule d'essai ou une seule scène quand son
 énoncé vise le système. Un point partiel ne dit rien de la difficulté de ce qui reste.
 
-**État au S261, 2026-09-17** (remplissage partiel, points 2.1, 2.2, 8.2, 8.9, 8.10 et 13.2). Voir le décompte en
+**État au S262, 2026-09-17** (remplissage partiel, points 2.1, 2.2, 8.2, 8.8, 8.9, 8.10, 9.11, 10.9 et 13.2). Voir le décompte en
 fin de document.
 
 ---
@@ -191,7 +191,8 @@ fin de document.
 - [ ] **8.6 Vue sous-marine et passage de la surface** (ADR-019, B11) — *absent*.
 - [ ] **8.7 Rendu de δ raccordé à B+W sans rupture visible** — *absent*.
 - [ ] **8.8 Lointain et horizon sans artefact** — *partiel* : coupure spectrale B/sillage (S249) ;
-  bande d'horizon mesurée (S247, S248). Pas de certificat d'absence d'alias.
+  bande d'horizon mesurée (S247, S248) ; fin de grille à l'horizon géométrique sous le ciel clair
+  (S262). Pas de certificat d'absence d'alias.
 - [ ] **8.9 Détails artificiels bon marché** (micro-vagues, ondes courtes) ajoutés au rendu — *partiel* :
   queue du spectre de B en pentes par pixel, filtrée par l'empreinte, +0,38 ms GPU (ADR-155, S256).
   Manquent les capillaires, la queue des perturbations W et le LOD de la queue.
@@ -219,7 +220,9 @@ fin de document.
   lointaines, fréquence, effets — *absent*.
 - [ ] **9.10 Profils de qualité, adaptation au matériel et à la charge** (I-16) — *absent*.
 - [ ] **9.11 60 images/s avec 2 ms pour l'eau sur une scène représentative** (ADR-125) — *partiel* :
-  GPU eau 0,43 ms ; préparation CPU du sillage 3,1 ms pendant le forçage ; δ hors budget.
+  GPU eau de la scène la plus riche (houle, vagues pointues, modulation, ciel clair) 1,54–1,60 ms en
+  960×540 et 1,98–2,01 ms en 1280×720 (S262) ; préparation CPU du sillage 3,1 ms pendant le forçage ;
+  δ hors budget.
 - [ ] **9.12 Aucune allocation à l'exécution** (I-06) — *partiel* : pas de δ et boucle d'image de
   l'hôte reçus (S200, S240). Système entier non éprouvé.
 - [ ] **9.13 Dépassement critique temporaire** sans retard global perceptible — *absent*.
@@ -242,7 +245,8 @@ fin de document.
 - [ ] **10.8 Chemin poussé de SPEC-006** : bus `WaveEvent`, instantanés immuables, âge publié,
   anneaux sans allocation — *partiel* : `WaveEvent` existe. Bus et canaux manquent.
 - [ ] **10.9 Requêtes de jeu** : hauteur, vitesse, pente en un point, dans le budget —
-  *partiel* : requête mixte composée (S236), environ 0,2 ms par point, plancher jusqu'à 12 ms.
+  *partiel* : requête mixte composée (S236), environ 0,2 ms par point, plancher jusqu'à 12 ms ;
+  requête CWM cohérente avec l'image à 0,3 mm (S262, ADR-159), branchée à aucun consommateur.
 
 ## 11. Grande échelle et très grands événements
 

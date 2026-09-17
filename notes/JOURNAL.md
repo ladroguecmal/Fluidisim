@@ -13417,3 +13417,47 @@ de jeu.
 (ADR-158, preuve) ; jeton. Invariants relus : I-13 (habillage et modulation au rendu seulement), I-14
 (ajustements déclarés contre Cox–Munk, critère écrit avant mesure ; couleurs d'habillage relevées
 sur la référence, hors physique).
+
+## S262 — Défauts réparés avant le visuel : horizon, coût GPU, requête de jeu sous CWM
+
+**2026-09-17, Claude Opus 5.** Entrée : « répare d'abord les défauts restants avant de peaufiner le
+visuel ». Master propre 1e89da7. Plan `648d74e`, horizon `2734a11`, coût `4c31ddc`, ADR-159 `45ff37e`,
+cœur `7b19e4c`, réception A288 à la suite. Verdict R5 toujours attendu.
+
+**Horizon.** La grille projetée s'arrêtait à 1 500 m, et l'air clair le montrait. La distance
+lointaine est devenue un paramètre : 1 500 m sous la brume, au bit (R2 à R4 et `--spectral-verify`
+identiques) ; horizon géométrique `√(2·R·h)` sous le ciel clair (9,4 km à 7 m), avec raccord à la
+couleur d'horizon.
+
+**Coût.** Décomposé avant d'agir : la cuisson de la grille du sillage pesait 1,27 ms sur 2,28, la
+queue par pixel 0,49. Réparations sans changement d'image au-delà de l'arrondi :
+- bande de chaque mode de sillage et invariants de la queue précalculés par l'hôte ;
+- une seule boucle de bande par sommet CWM ;
+- total de la grille pris comme somme de ses bandes ;
+- nuages des reflets à deux octaves (habillage).
+
+Résultat : **1,54–1,60 ms en 960×540, 1,98–2,01 ms en 1280×720** (avant 2,28), cuisson 1,06–1,10 ms.
+Les images changent de 0 à 27 octets sur 2,76 millions, au plus 8 niveaux sur des reflets. Les
+vérifications CPU/GPU sont identiques, ou changent à la 7e décimale sur le chemin par grille ; en
+multi-sources, hauteurs à 0,368 mm comme en S235.
+
+**Capacité reçue, maillons 0.** Un consommateur de jeu peut désormais interroger **la surface
+affichée sous CWM** : `Background::cwm_query` inverse le déplacement par Newton (ADR-159), et W se
+compose au point de Lagrange. Preuve : [DEFAUTS-S262](../docs/validation/DEFAUTS-S262.md) — mer de la
+scène `η` à 3,8·10⁻⁵ m, au plus 3 itérations, replis refusés. **Contre l'image GPU : 0,30 mm, contre
+0,365 m** pour la requête linéaire. A288 close. Suite **469 / 18 / 0**, afficheur 16 / 1 / 0.
+
+**Incident.** Un rendu de contrôle a réécrit les images locales de R5 (non versionnées, reproductibles
+au commit 1e89da7). Chaque revue a désormais son dossier.
+
+**Limites.** 1280×720 reste à la limite des 2 ms, et le LOD temporel de la cuisson (1,07 ms) est la
+technique absente la plus rentable. La requête CWM n'est branchée à aucun consommateur réel. Au loin,
+l'écart image/requête est celui du filtre d'ADR-148.
+
+**Suite.** Verdict R5 de l'utilisateur, puis les finitions visuelles demandées : vent de la scène
+comme paramètre, transition vers la BRDF contre le grain proche.
+
+**Rituel.** A288 close ; file active (crêtes et coût, revue) ; feuille de route J1 ; liste 8.8, 9.11
+et 10.9 ; index (ADR-159, preuve) ; jeton. Invariants relus : I-06 (requête sans collection, boucle
+d'image inchangée), I-13 (requête du cœur, image sans autorité), I-03 (phases entières de B dans la
+requête ; images changées d'un arrondi, empreintes nouvelles expliquées).

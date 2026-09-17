@@ -3644,3 +3644,8 @@ nouveau** : Cox–Munk borne la modulation, et une surface franchement lisse ent
 R4) n'est pas compatible avec l'observation à 8 m/s. Restent donc, en plus de l'anisotropie et des
 asymétries : le **vent de la scène** comme paramètre, et la **transition des ondes non résolues
 vers la BRDF** contre le grain proche (Bruneton et al., 2010).
+
+*S262, 2026-09-17 — **A288 close**.* `Background::cwm_query` inverse le déplacement de Lagrange par
+Newton (ADR-159). Contre l'image GPU, sur 5 592 sondes, la hauteur est à 0,30 mm de la surface
+rendue, contre 0,365 m pour la requête linéaire ; aucun refus, au plus 3 itérations. Les couches W
+se composent au point de Lagrange. [Preuve](../validation/DEFAUTS-S262.md) §3.
