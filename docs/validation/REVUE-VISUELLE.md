@@ -443,3 +443,21 @@ reflets insuffisamment filtrés de la queue proche de la résolution, avant de r
 physique. Le shader retire de la variance sans la transférer à l'éclairage. Lot ADR-161 : fermeture
 statistique du reflet ; le témoin 5 m/s sert uniquement à isoler le changement. Les références
 photographiques antérieures ne sont pas présentes dans cette copie ; leur description reste au registre.
+
+## 14. R7 — reflets filtrés à vent identique
+
+**S265, 2026-09-17, verdict attendu.** Comparaison R6 à 5 m/s et variante `--reflets-filtres`,
+ordre 3 ; vent médian pris comme témoin, sans choix attribué à l'utilisateur. Formes géométriques,
+modulation M=2 et habillage identiques. La queue proche de la résolution passe vers une moyenne
+statistique du reflet (ADR-161). Image référence `r7_filtre3_reference_12s.png`, empreinte
+`0xec4a559bf5ca0287` ; rasante `r7_filtre3_rasante_12s.png`, `0xe68252f14891aca9`.
+Dossier `viewer/captures/s265`, commandes et limites dans [REFLETS-S265](REFLETS-S265.md).
+
+Référence : œil `[0,-18,7]` m, lacet 0, tangage -0,13131544 rad ; rasante :
+`[0,-18,2]`, lacet 0, tangage -0,05 rad. Âge 12 s, champ vertical 50°, 1280×720,
+B + impacts et sillages W, sans δ/V/écume. Grille du sillage, filtre spectral et visibilité actifs.
+Ciel, soleil et couleur : habillage. Le témoin R6 est identique au bit au rendu historique actuel.
+
+Question : les zones entre les pics paraissent-elles suffisamment lisses, ou reste-t-il un excès
+de petites bosses ? La fermeture gaussienne est approchée ; écart 3×3/5×5 publié, coût eau 2,49–2,71 ms
+contre 1,80–1,83 ms, budget 2 ms non tenu. Pas d'adoption par défaut ni de verdict physique déduit de l'image.

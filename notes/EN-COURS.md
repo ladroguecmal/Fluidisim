@@ -73,8 +73,8 @@ Comparaison à vent fixé pour isoler le changement ; aucun vent représentatif 
 - [x] **P2** — consigner le verdict ; examiner queue, modulation et réflexion ; définir le
   remède et les critères avant code (ADR si décision nouvelle).
 - [x] **P3** — construire le remède borné dans l'hôte avec ses contrôles numériques ciblés.
-- [>] **P4** — recevoir le chemin GPU, comparer avant/après aux mêmes poses, fournir R7.
-- [ ] **P5** — rituel §6 : preuves, file, feuille de route, journal, jeton.
+- [x] **P4** — recevoir le chemin GPU, comparer avant/après aux mêmes poses, fournir R7.
+- [>] **P5** — rituel §6 : preuves, file, feuille de route, journal, jeton.
 
 ### Notes de reprise
 
@@ -89,3 +89,7 @@ P3 : variante `--reflets-filtres`, covariance transférée, quadrature 3/5, orac
 construits. Tests hôte 18 réussis / 1 ignoré / 0 échec. Premier contrôle 5 m/s : pente 5,307e-5,
 covariance 2,154e-7, déterminant min 0,530496. Matériel RTX 5070 Laptop DX12 confirmé.
 P4 : campagne locale lancée (3 vents, témoin puis quadratures 3/5) dans `viewer/captures/s265`.
+
+P4 : 15 000 sondes GPU reçues aux trois vents ; 7 témoins identiques au bit à R6 ; 21 images R7.
+Query CWM 0,288 mm / 0 refus. Hôte 18/1/0. Reflets ordre3 : 2,49–2,71 ms GPU contre 1,80–1,83,
+secteur 99 % début/fin ; budget non tenu. Écart 3/5 non nul, publié dans REFLETS-S265 ; reste optionnel.
