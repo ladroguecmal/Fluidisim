@@ -8,10 +8,10 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 ## Jeton de session
 
 ```
-JETON            : libre
-Battement        : 2026-09-17 23:09 +02:00
+JETON            : occupé
+Battement        : 2026-09-17 23:36 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo, Python ; GPU à vérifier)
-Session en cours : aucune
+Session en cours : S265 — zones lisses entre les pics
 Dernière session : S264 — reprise vérifiée ; calibration R6 disponible, choix demandé
 Session suivante : S265 — verdict R6 ; puis lot BRDF ou modulation selon le défaut confirmé
 Maillons        : 1

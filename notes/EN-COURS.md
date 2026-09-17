@@ -58,27 +58,26 @@ dépôt** — la lecture complète (`REPRISE.md`) ne sert qu'au démarrage à fr
 
 ## Session en cours
 
-Session : S264 — terminée
-Agent : Codex, GPT-6 ; fichiers, git, cargo et Python disponibles.
-Entrée : « reprends le projet ». Master propre afcf927 ; une seule copie de travail ;
-branche historique B conservée ; jeton libre à l'ouverture.
+Session : S265 — en cours
+Agent : Codex, GPT-6 ; fichiers, git, cargo, Python, accès web ; GPU à vérifier.
+Entrée : verdict R6, « la surface a l'air trop rugueuse, entre les pic moyen et pic même plus petit
+la surface doit etre plus lisse ». Aucun choix de vent explicite. Master propre 34dcf7d, copie unique.
 
-Objectif : reprendre la file active, vérifier les acquis S263 et présenter la calibration R6
-pour recueillir le choix visuel dont dépend le prochain lot. Ne pas inventer ce verdict.
+Objectif : identifier et traiter la rugosité entre les crêtes sur le chemin de rendu,
+sans assimiler le retour à un choix de vent ou déformer sans preuve le spectre physique.
+Comparaison à vent fixé pour isoler le changement ; aucun vent représentatif adopté par défaut.
 
 ### Plan
 
-- [x] **P1** — amorce Git, prise du jeton et plan seuls.
-- [x] **P2** — lecture à froid, contrôle des preuves et des rendus R6, vérifications ciblées ;
-  présenter les choix de vent et consigner le prochain lot selon la réponse disponible.
-- [x] **P3** — rituel de fin §6, file active relue, passation et jeton libéré.
+- [x] **P1** — amorce et plan seuls.
+- [>] **P2** — consigner le verdict ; examiner queue, modulation et réflexion ; définir le
+  remède et les critères avant code (ADR si décision nouvelle).
+- [ ] **P3** — construire le remède borné dans l'hôte avec ses contrôles numériques ciblés.
+- [ ] **P4** — recevoir le chemin GPU, comparer avant/après aux mêmes poses, fournir R7.
+- [ ] **P5** — rituel §6 : preuves, file, feuille de route, journal, jeton.
 
 ### Notes de reprise
 
-Le choix R6 est explicitement attendu depuis S263. Aucun changement du rendu avant ce verdict.
-
-P2 : 21 empreintes PPM conformes, 9 aperçus PNG identiques aux pixels des PPM ; test S263
-1 réussi, 0 échec. Métadonnées et commandes R6 ajoutées à REVUE-VISUELLE §13.
-Aucun changement de code ; aucune nouvelle réception GPU ou multiplateforme.
-
-P3 : rituel terminé ; verdict R6 encore attendu, jeton libre. Aucun vent adopté par défaut.
+Le travail visuel est explicitement demandé. Les bords ouverts J2 restent un lot de capacité
+indépendant ; cette session vise une correction consommée par l'image, pas une nouvelle calibration
+indéfinie. Si les preuves infirment le remède, publier ce résultat et replanifier avant construction.
