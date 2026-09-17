@@ -84,7 +84,7 @@ second ordre, niveau de la queue — **avant** d'en construire un. Critères éc
 - [x] **P3** — instrument : statistiques des pentes et de l'élévation du champ rendu (linéaire),
   et des candidats (CWM, second ordre) ; verdict confirmé ou non.
 - [x] **P4** — ADR du remède choisi sur ces chiffres, et protocole de réception.
-- [>] **P5** — cœur et hôte du remède, vérification CPU/GPU.
+- [x] **P5** — cœur et hôte du remède, vérification CPU/GPU.
 - [ ] **P6** — réception : statistiques, coût, rendus R4 envoyés.
 - [ ] **P7** — rituel §6.
 
@@ -99,3 +99,10 @@ anisotropie u/c (0,96 contre 1,37). Choix pour P4 : queue d'équilibre f⁻⁴ +
 P5 (cœur) : `bake_tail_equilibrium`, `cells_with`/`Weights` (poids analytiques q(b)·b⁴·(x₁⁻³ − x₂⁻³)/3).
 Essai `equilibrium_tail_continues_band_in_f_minus_four_s260` : variance 5,98185e-4 contre 5,98186e-4 ;
 mss vent + queue 0,04781 contre 0,04779 ; continuité 0,8349 contre 0,8369 ; spectre 9/9.
+
+P5 (hôte) : `--vagues` (recette houle, queue f⁻⁴, `frame.cwm`), `band_cwm`/`tail_cwm`/`euler_slope` au shader,
+sommets déplacés de D_B, fragment J⁻ᵀ, sondes w=3/w=4, `cwm_reference`, `--cwm-verify`, `--revue=r4`.
+`--cwm-verify` : 22 368 sondes, déplacement 1,59e-6 m, pente 4,15e-4 (tol. 5e-4), pente max 0,697,
+det min 0,400, 0 repli ; **déplacement max 1,75 m, écart vertical au jeu 0,365 m** (ADR-157 annonçait
+« ordre k·a² » : l'ordre est juste, mais l'amplitude vient de la houle, à publier et A288). R2 et R3
+identiques au bit ; `--tail-verify` et `--b-verify --houle` identiques.

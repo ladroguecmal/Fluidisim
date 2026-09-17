@@ -1582,7 +1582,7 @@ fn verify_multi(frame: &mut FrameData<'_>) -> Result<(), String> {
 /// S256 : `tag` = `r1` (S254, `captures/s254`, à reproduire avec `--no-tail`) ou `r2` (queue
 /// spectrale, `captures/s256`) — mêmes poses et âges.
 fn revue_images(frame: &mut FrameData<'_>, tag: &str) -> Result<(), String> {
-    let dir = match tag { "r1" => "captures/s254", "r2" => "captures/s256", _ => "captures/s259" };
+    let dir = match tag { "r1" => "captures/s254", "r2" => "captures/s256", "r3" => "captures/s259", _ => "captures/s260" };
     std::fs::create_dir_all(dir).map_err(|e| e.to_string())?;
     let (width, height) = (1280u32, 720u32);
     let instance = instance();
@@ -1806,7 +1806,9 @@ fn spectral_verify(frame: &mut FrameData<'_>) -> Result<(), String> {
 fn run() -> Result<(), String> {
     let args: Vec<_> = std::env::args().collect();
     // S259, ADR-156 : `--houle` — mer de vent et houle longue, étalement cos^2s (scène déclarée).
-    let scene = Scene::build(args.iter().any(|a| a == "--houle"));
+    // S260, ADR-157 : `--vagues` — recette `--houle`, queue d'équilibre f⁻⁴ et CWM.
+    let vagues = args.iter().any(|a| a == "--vagues");
+    let scene = Scene::build(vagues || args.iter().any(|a| a == "--houle"), vagues);
     let mut storage = vec![[0.; 2]; 256 * scene.impact.table_len(scene.step).unwrap()];
     let table = scene.impact.bake_table(scene.step, &mut storage).unwrap();
     // S212 : sillage prescrit admis au journal de pression du cœur, préparé à chaque image.
@@ -1840,6 +1842,7 @@ fn run() -> Result<(), String> {
     if !args.iter().any(|a| a == "--no-tail") {
         frame.tail_background = Some(&scene.tail);
     }
+    frame.cwm = vagues;
     // S234 : grille locale du sillage par défaut ; `--no-lod` rend le chemin direct S212–S225.
     frame.lod = !args.iter().any(|a| a == "--no-lod");
     frame.spectral = !args.iter().any(|a| a == "--no-spectral");
@@ -1877,6 +1880,60 @@ fn run() -> Result<(), String> {
     }
     if multi && args.iter().any(|a| a == "--revue=r3") {
         return revue_images(&mut frame, "r3");
+    }
+    if multi && args.iter().any(|a| a == "--revue=r4") {
+        return revue_images(&mut frame, "r4");
+    }
+    // S260 (VAGUES-POINTUES-S260, critères 5, 6 et 8) : CWM GPU contre référence CPU f64.
+    if args.iter().any(|a| a == "--cwm-verify") {
+        if !frame.cwm {
+            return Err("--cwm-verify demande --vagues".into());
+        }
+        let instance = instance();
+        let g = pollster::block_on(gpu::Gpu::new(&instance, None, 640, 360,
+            frame.profile.len(), scene::WAKE_CAPACITY))?;
+        let mut g = g;
+        let (mut worst_d, mut worst_s, mut folds, mut min_det) = (0f64, 0f64, 0usize, f64::INFINITY);
+        let (mut max_d, mut gap, mut peak_s, mut probes_n) = (0f64, 0f64, 0f64, 0usize);
+        for pose in 0..2 {
+            frame.camera = if pose == 0 { Camera::default() } else { grazing_camera() };
+            for age in [3., 12.] {
+                frame.update(age, age, true);
+                g.upload(&frame);
+                let eye = frame.camera.eye;
+                let mut probes = Vec::new();
+                for h in [0f32, 0.02, 0.1, 0.5] {
+                    for pt in gpu::probes(eye).iter().step_by(5) {
+                        probes.push([pt[0] - eye[0], pt[1] - eye[1], h]);
+                    }
+                }
+                let with = |w: f32| probes.iter().map(|p| [p[0], p[1], p[2], w]).collect::<Vec<_>>();
+                let disp = g.evaluate_spectral(&with(3.))?;
+                let slope = g.evaluate_spectral(&with(4.))?;
+                for ((p, dv), sv) in probes.iter().zip(&disp).zip(&slope) {
+                    let (d, _, e, det, eta) = frame.cwm_reference([p[0], p[1]], p[2]);
+                    probes_n += 1;
+                    worst_d = worst_d.max((dv[0] as f64 - d[0]).abs()).max((dv[1] as f64 - d[1]).abs());
+                    worst_s = worst_s.max((sv[1] as f64 - e[0]).abs()).max((sv[2] as f64 - e[1]).abs());
+                    peak_s = peak_s.max(e[0].abs()).max(e[1].abs());
+                    min_det = min_det.min(det);
+                    if det < 0.1 {
+                        folds += 1;
+                    }
+                    if p[2] == 0. {
+                        // Écart au jeu : surface rendue en q + D (hauteur η(q)) contre requête linéaire en q + D.
+                        max_d = max_d.max((d[0] * d[0] + d[1] * d[1]).sqrt());
+                        let (_, _, _, _, eta_x) = frame.cwm_reference([p[0] + d[0] as f32, p[1] + d[1] as f32], 0.);
+                        gap = gap.max((eta - eta_x).abs());
+                    }
+                }
+            }
+        }
+        println!("CWM_VERIFY sondes={probes_n} pire_ecart_deplacement_m={worst_d:.3e} pire_ecart_pente={worst_s:.3e} pente_max={peak_s:.4} det_min={min_det:.4} replis={folds} deplacement_max_m={max_d:.4} ecart_vertical_max_au_jeu_m={gap:.4}");
+        if worst_d > 0.003 || worst_s > 5e-4 || folds > 0 {
+            return Err(format!("CWM hors tolérance : deplacement {worst_d}, pente {worst_s}, replis {folds}"));
+        }
+        return Ok(());
     }
     // S259 (MER-MULTIMODALE-S259 critère 8) : hauteurs GPU contre cœur sur la scène courante, champ
     // complet, visibilité coupée, tolérance historique de `verify` (3 mm).

@@ -50,7 +50,8 @@ impl Scene {
     /// S259 : `houle` = scène déclarée d'ADR-156 §6 — mer de vent S201 à étalement cos^2s
     /// (`s_max` 10) et houle longue (`Hs` 2 m, `Tp` 12 s, γ 7, `[0,7 ; 1,6] fp`, `s_max` 75), queue
     /// directionnelle. Sans `houle`, la scène S201 au bit.
-    pub fn build(houle: bool) -> Self {
+    /// S260, ADR-157 : `vagues` (avec `houle`) — queue d'équilibre en f⁻⁴ à la place de la queue JONSWAP.
+    pub fn build(houle: bool, vagues: bool) -> Self {
         // Scène S201/S203/S205, pas une nouvelle calibration.
         let recipe = Recipe {
             sea: SeaState {
@@ -79,8 +80,13 @@ impl Scene {
             let swell = background_spectrum::bake_directional(swell, 75.).expect("houle S259");
             (
                 background_spectrum::assemble(&[&wind, &swell]).expect("mer S259"),
-                background_spectrum::bake_tail_directional(recipe, 10., TAIL_RATIO, TAIL_COMPONENTS)
-                    .expect("queue S259"),
+                if vagues {
+                    background_spectrum::bake_tail_equilibrium(recipe, 10., TAIL_RATIO, TAIL_COMPONENTS)
+                        .expect("queue S260")
+                } else {
+                    background_spectrum::bake_tail_directional(recipe, 10., TAIL_RATIO, TAIL_COMPONENTS)
+                        .expect("queue S259")
+                },
             )
         } else {
             (
@@ -657,6 +663,8 @@ pub struct FrameData<'a> {
     /// faux : somme directe par sommet (chemin S212–S225, conservé comme témoin).
     pub lod: bool,
     pub spectral: bool,
+    /// S260, ADR-157 : vagues pointues de Lagrange (CWM) — sommets déplacés, normales par jacobien.
+    pub cwm: bool,
     pub spectral_max: f32,
     pub lattice: crate::lod::Lattice,
     lattice_announced: bool,
@@ -713,6 +721,7 @@ impl<'a> FrameData<'a> {
             announced: false,
             lod: true,
             spectral: true,
+            cwm: false,
             spectral_max: recipe.cutoff,
             lattice: crate::lod::Lattice::plan(0., 0., WAKE_MIN, WAKE_MAX, crate::lod::LATTICE_CAPACITY),
             lattice_announced: false,
@@ -862,6 +871,59 @@ impl<'a> FrameData<'a> {
     /// l'interface publique de B sache servir ; c'est donc lui qui est retenu pour tous.
     /// S256 — référence CPU f64 de la pente de queue en `q` (relatif à la caméra), pour une empreinte
     /// `h` : mêmes composantes que le GPU, poids d'ADR-148 recalculé en f64.
+    /// S260 — référence CPU f64 de CWM en `q` (Lagrange, relatif à la caméra), empreinte `h` pour la
+    /// bande (ADR-148) et la queue (ADR-155) : déplacement de la bande `D_B`, pente de Lagrange,
+    /// pente eulérienne `J⁻ᵀ·∇η` (bande + queue, sans W), déterminant du jacobien, élévation de la bande.
+    pub fn cwm_reference(&self, q: [f32; 2], h: f32) -> ([f64; 2], [f64; 2], [f64; 2], f64, f64) {
+        let weight = |k: f64| {
+            let t = (2.0 * k * h as f64 / std::f64::consts::PI - 1.0).clamp(0.0, 1.0);
+            1.0 - t * t * (3.0 - 2.0 * t)
+        };
+        let (mut d, mut s, mut g, mut eta) = ([0f64; 2], [0f64; 2], [0f64; 3], 0f64);
+        let count = self.background.component_count();
+        for c in &self.components[..count] {
+            let (kx, ky) = (c[1] as f64, c[2] as f64);
+            let k = (kx * kx + ky * ky).sqrt();
+            if k == 0.0 {
+                continue;
+            }
+            let a = c[0] as f64 * weight(k);
+            let phase = kx * q[0] as f64 + ky * q[1] as f64 + c[3] as f64;
+            let (sn, cs) = phase.sin_cos();
+            let (ux, uy) = (kx / k, ky / k);
+            eta += a * sn;
+            d[0] += a * cs * ux;
+            d[1] += a * cs * uy;
+            s[0] += a * cs * kx;
+            s[1] += a * cs * ky;
+            g[0] -= a * k * sn * ux * ux;
+            g[1] -= a * k * sn * ux * uy;
+            g[2] -= a * k * sn * uy * uy;
+        }
+        if self.tail_background.is_some() {
+            for c in &self.tail {
+                let (kx, ky) = (c[1] as f64, c[2] as f64);
+                let k = (kx * kx + ky * ky).sqrt();
+                let w = weight(k);
+                if w == 0.0 {
+                    break;
+                }
+                let a = w * c[0] as f64;
+                let phase = kx * q[0] as f64 + ky * q[1] as f64 + c[3] as f64;
+                let (sn, cs) = phase.sin_cos();
+                let (ux, uy) = (kx / k, ky / k);
+                s[0] += a * cs * kx;
+                s[1] += a * cs * ky;
+                g[0] -= a * k * sn * ux * ux;
+                g[1] -= a * k * sn * ux * uy;
+                g[2] -= a * k * sn * uy * uy;
+            }
+        }
+        let (jxx, jxy, jyy) = (1.0 + g[0], g[1], 1.0 + g[2]);
+        let det = jxx * jyy - jxy * jxy;
+        let e = [(jyy * s[0] - jxy * s[1]) / det, (-jxy * s[0] + jxx * s[1]) / det];
+        (d, s, e, det, eta)
+    }
     pub fn tail_reference(&self, q: [f32; 2], h: f32) -> [f64; 2] {
         let mut s = [0f64; 2];
         if self.tail_background.is_none() {

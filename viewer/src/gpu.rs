@@ -458,7 +458,7 @@ impl Gpu {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
         let tail = if frame.tail_background.is_some() { frame.tail.len() as f32 } else { 0. };
-        for v in [if frame.spectral { 1. } else { 0. }, frame.spectral_max, tail, 0.] {
+        for v in [if frame.spectral { 1. } else { 0. }, frame.spectral_max, tail, if frame.cwm { 1. } else { 0. }] {
             self.bytes.extend_from_slice(&v.to_le_bytes());
         }
         self.queue.write_buffer(&self.uniform, 0, &self.bytes);
