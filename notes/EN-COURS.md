@@ -69,10 +69,14 @@ pour recueillir le choix visuel dont dépend le prochain lot. Ne pas inventer ce
 ### Plan
 
 - [x] **P1** — amorce Git, prise du jeton et plan seuls.
-- [>] **P2** — lecture à froid, contrôle des preuves et des rendus R6, vérifications ciblées ;
+- [x] **P2** — lecture à froid, contrôle des preuves et des rendus R6, vérifications ciblées ;
   présenter les choix de vent et consigner le prochain lot selon la réponse disponible.
-- [ ] **P3** — rituel de fin §6, file active relue, passation et jeton libéré.
+- [>] **P3** — rituel de fin §6, file active relue, passation et jeton libéré.
 
 ### Notes de reprise
 
 Le choix R6 est explicitement attendu depuis S263. Aucun changement du rendu avant ce verdict.
+
+P2 : 21 empreintes PPM conformes, 9 aperçus PNG identiques aux pixels des PPM ; test S263
+1 réussi, 0 échec. Métadonnées et commandes R6 ajoutées à REVUE-VISUELLE §13.
+Aucun changement de code ; aucune nouvelle réception GPU ou multiplateforme.

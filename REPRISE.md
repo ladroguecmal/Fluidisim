@@ -9,7 +9,7 @@ successifs : l'histoire vit dans [JOURNAL](notes/JOURNAL.md), les preuves dans l
 
 ```
 JETON            : occupé
-Battement        : 2026-09-17 23:06 +02:00
+Battement        : 2026-09-17 23:08 +02:00
 Agent            : Codex, GPT-6 (fichiers, git, cargo, Python ; GPU à vérifier)
 Session en cours : S264 — reprise et calibration R6
 Dernière session : S263 — vent de scène (ADR-160) : Pierson–Moskowitz + queue coupée à Cox–Munk ; calibration R6 envoyée (3, 5, 8,37 m/s)

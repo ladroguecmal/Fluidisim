@@ -407,3 +407,30 @@ non un réglage de rugosité.
 | 5 | 0,54 | 3,65 | 20,8 | 0,029 |
 | 8,4 (scène) | 1,50 | 6,11 | 58 | 0,046 |
 
+
+## 13. R6 — calibration du vent, reprise S264
+
+**2026-09-17 : choix encore attendu.** Les rendus S263 sont conservés ; S264 retrouve les
+21 PPM, vérifie leurs empreintes contre `viewer/captures/s263/revue.log` et vérifie que les
+neuf PNG ont exactement les pixels des PPM correspondants. Aucun nouveau rendu GPU réalisé.
+Le test `wind_sea_and_tail_cut_follow_observations_s263` passe sur cette reprise.
+
+Images de référence présentées : `viewer/captures/s263/r6_v{3,5,8}_reference_12s.png`.
+Empreintes respectives : `0x62bc4ad4f5af9a8f`, `0x0f178a2e5a4fcb7d`, `0x049094cca0ce54f5`.
+Pose commune : œil `[0, -18, 7]` m, lacet 0, tangage `-atan(7/53)`, champ vertical 50°,
+âge 12 s, définition 1280 × 720. B avec houle, mer de vent et queue ; impacts et sillages W ;
+δ et V absents. Filtre spectral, grille du sillage, CWM et modulation actifs.
+Ciel clair, couleur et éclairage sont de l'habillage de banc ; aucune écume construite.
+
+Reproduction depuis `viewer/`, sur le code S263 (211aef6, inchangé en S264) :
+
+```text
+cargo run --release -- --multi --vagues --modulation --ciel-clair --vent=3 --revue=r6_v3
+cargo run --release -- --multi --vagues --modulation --ciel-clair --vent=5 --revue=r6_v5
+cargo run --release -- --multi --vagues --modulation --ciel-clair --vent=8.37 --revue=r6_v8
+```
+
+Question : quel vent se rapproche de la mer recherchée, et quel défaut reste visible ?
+Sans ce retour, aucun vent représentatif n'est adopté. Le lot suivant dépend du défaut :
+transition vers la BRDF si le grain reste gênant ; modulation selon le vent si la répartition
+entre pics et zones lisses reste en cause. Ce sont des pistes à mesurer, pas des diagnostics reçus.
