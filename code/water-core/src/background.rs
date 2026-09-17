@@ -23,6 +23,10 @@ use crate::types::{SimTime, WaterSample, WorldPos};
 
 #[path = "background_differential.rs"]
 mod differential;
+// S262, ADR-159 : requête de jeu sous CWM (inversion du déplacement de Lagrange).
+#[path = "background_cwm.rs"]
+mod cwm;
+pub use cwm::{CwmError, CwmSample, CWM_MAX_ITERATIONS, CWM_TOLERANCE_M};
 pub use differential::{BackgroundSample, DifferentialError};
 pub(crate) use differential::attenuation;
 

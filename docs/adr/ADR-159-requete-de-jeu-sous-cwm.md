@@ -24,3 +24,8 @@ Une requête de jeu en `x` rendait `η_B(x) + W(x)`, jusqu'à 0,365 m plus haut 
    Au loin, l'image filtre des modes que la requête garde, et l'écart y est celui d'ADR-148. La
    queue ne porte que des pentes : elle n'entre pas dans les hauteurs.
 5. **Réception** : [DEFAUTS-S262](../validation/DEFAUTS-S262.md) §3, écrit avant le code.
+
+**Note S262, 2026-09-17.** Le seuil d'arrêt du point 2 est `max(0,1 mm ; 8·ulp(|x|))`. À quelques
+kilomètres de l'ancre, le pas de représentation f32 de la coordonnée dépasse 0,1 mm, et le seuil fixe
+ne serait jamais atteint. Mesuré à moins de 200 m de l'ancre : 0,19 mm sur `α` et 0,04 mm sur `η`.
+

@@ -85,7 +85,7 @@ Défauts restants, publiés en S260–S261, dans l'ordre de traitement :
 - [x] **P3** — coût : décomposition mesurée, fusion des boucles de bande par sommet, invariants de
   la queue précalculés ; accord CPU/GPU ; coût.
 - [x] **P4** — ADR et protocole de la requête eulérienne CWM (A288).
-- [ ] **P5** — cœur : requête, convergence, refus ; essais.
+- [x] **P5** — cœur : requête, convergence, refus ; essais.
 - [ ] **P6** — hôte : requête contre surface rendue ; écart publié.
 - [ ] **P7** — rituel §6.
 
@@ -106,3 +106,8 @@ précalculés ; (c) sommet CWM à une seule boucle de bande (`band_cwm` rend hau
 Images : R2 0–3 octets sur 2,76 M (±1) après (a)–(c) ; scène complète 9–27 octets (≤ 8 niveaux, reflets) ;
 arrondi. `--spectral-verify` : chemin grille à la 7e décimale, reste au bit ; `--tail-verify`, `--cwm-verify`
 identiques ; `--multi --verify` 46 contrôles, max η 0,368 mm, LOD intérieur ≤ 0,39 mm (borne 2,5–3), coutures 4 µm.
+
+P5 : `background_cwm.rs` (`cwm_query_local`, `cwm_query`, `CwmSample`, `CwmError`), Newton depuis x − D(x),
+tolérance max(0,1 mm ; 8 ulp(|x|)). Essais : Gerstner α 3,7e-5 m, η 4,8e-6, ≤ 2 itérations ; mer de la scène
+10⁴ points α 1,86e-4 m, η 3,8e-5 m, ≤ 3 itérations, requête linéaire à 0,267 m ; repli 41 refus / 259 acceptés ;
+domaine et NaN refusés.
